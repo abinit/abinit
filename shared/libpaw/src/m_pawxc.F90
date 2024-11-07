@@ -345,12 +345,13 @@ subroutine pawxc_size_dvxc_local()
    if (ixc==1.or.ixc==7.or.ixc==8.or.ixc==9.or.ixc==10.or.ixc==13.or. &
 &      ixc==21.or.ixc==22) then
      ndvxc_=min(nspden,2)+1
-   else if ((ixc>=2.and.ixc<=6).or.(ixc>=31.and.ixc<=35).or.ixc==50) then
+   else if ((ixc>=2.and.ixc<=6).or.(ixc>=31.and.ixc<=35).or.&
+&   (ixc==50.or.ixc==51.or.ixc==60)) then
      ndvxc_=1
    else if (ixc==12.or.ixc==24) then
      ndvxc_=8
    else if (ixc==11.or.ixc==12.or.ixc==14.or.ixc==15.or. &
-&           ixc==23.or.ixc==41.or.ixc==42.or.ixc==1402000.or.ixc==60) then
+&           ixc==23.or.ixc==41.or.ixc==42.or.ixc==1402000) then
      ndvxc_=15
    else if (ixc<0) then
      if (libxc_functionals_has_kxc() then

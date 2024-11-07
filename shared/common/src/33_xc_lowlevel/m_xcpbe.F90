@@ -5188,22 +5188,28 @@ end subroutine xcpbe
 !!  vxci(npts,nspden)=input xc potential
 !!
 !! SOURCE
-subroutine xckdt16(dvxcdgr,exci,tsxci,grho2_updn,ixc,npts,nspden,rhor,rspts,el_temp,vxci)
-!Arguments ------------------------------------
+subroutine xckdt16(dvxcdgr,exci,tsxci,grho2_updn,ixc,npts,nspden,order,&
+&                  rhor,rspts,el_temp,vxci,&
+&                  dvxci) ! optional arguments
 !scalars
- integer,intent(in) :: ixc,npts,nspden
+ integer,intent(in) :: ixc,npts,nspden,order
 !arrays
  real(dp),intent(in) :: grho2_updn(npts,2*nspden-1)
  real(dp),intent(in) :: rhor(npts),rspts(npts),el_temp
  real(dp),intent(out) :: dvxcdgr(npts,3),exci(npts),tsxci(npts),vxci(npts,nspden)
+ real(dp),intent(out),optional :: dvxci(npts)
 !Local variables-------------------------------
 !scalars
- integer :: ipt
+ integer :: ipt,i
  real(dp) :: tfac,rs,rho,tempf,tred
  real(dp) :: grho,degauss
  real(dp) :: fxclda,tsxclda,vxclda,einxclda
- real(dp) :: fx, v1x, v2x, einx, tsx
- real(dp) :: fc, v1c, v2c, einc, tsc
+ real(dp) :: fx,v1x,v2x,einx,tsx
+ real(dp) :: fc,v1c,v2c,einc,tsc
+ real(dp) :: drho
+!character(len=500) :: message
+!arrays
+ real(dp) :: vxctmp(5)
 
 ! *************************************************************************
 
@@ -5236,6 +5242,38 @@ subroutine xckdt16(dvxcdgr,exci,tsxci,grho2_updn,ixc,npts,nspden,rhor,rspts,el_t
    dvxcdgr(ipt,1)=zero          !dvxcdgr(ipt,3)*4.d0 ! d(exc*rho)/d|gradRho_up|*1/|gradRho_up|
    dvxcdgr(ipt,2)=zero          !dvxcdgr(ipt,1)      ! d(exc*rho)/d|gradRho_dn|*1/|gradRho_dn|
  enddo
+!for order==2, use numerical derivative
+ if(order==2) then
+!  Loop over grid points
+   do ipt=1,npts
+     drho=0.01_dp*rhor(ipt)
+     do i=1,5
+       rho=rhor(ipt)+drho*dble(i-3)
+       rs=(0.75_dp/pi/rho)**(1._dp/3._dp) ! density
+       tempf=tfac*rho**(2._dp/3._dp) !(3._dp*pi**2*rho)**(2._dp/3._dp)/2._dp
+       tred=el_temp/tempf
+       if(ixc.eq.60) then
+         call fex_kdt16(rho,grho,5,fx,v1x,v2x,einx,tsx,degauss)
+         call fec_kdt16(rho,grho,1,fc,v1c,v2c,einc,tsc,degauss)
+       end if
+       vxctmp(i)=v1x+v1c
+     enddo
+     dvxci(ipt)=vxctmp(1)-8._dp*vxctmp(2)+8._dp*vxctmp(4)-vxctmp(5)
+     dvxci(ipt)=dvxci(ipt)/(12._dp*drho)
+!    In case something went wrong, set dvxc to zero.
+     if( dvxci(ipt)/=dvxci(ipt) ) then
+       dvxci(ipt)=0._dp
+!       write(message, '(a,2d12.5)' )&
+!&      'dvxc = NaN: rs,tred=',rs,tred
+!       ABI_WARNING(message)
+     elseif(dvxci(ipt)>huge(1._dp)) then
+       dvxci(ipt)=0._dp
+!       write(message, '(a,2d12.5)' )&
+!&      'dvxc = Inf: rs,tred=',rs,tred
+!       ABI_WARNING(message)
+     endif
+   enddo
+ endif
 end subroutine xckdt16
 !!***
 

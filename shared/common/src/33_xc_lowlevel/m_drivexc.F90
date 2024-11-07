@@ -189,17 +189,11 @@ subroutine echo_xc_name (ixc)
      message = 'LDA at finite T Ichimaru-Iyetomy-Tanaka - ixc=50'
      citation = 'Ichimaru S., Iyetomi H., Tanaka S., Phys. Rep. 149, 91-205 (1987)' ! [[cite:Ichimaru1987]]
    case (51)
-     message = 'TLDA: Karasiev-Sjostrom-Dufty-Trickey - ixc=51'
+     message = 'TLDA: corrKSDT Karasiev-Sjostrom-Dufty-Trickey - ixc=51'
      citation = 'V.V. Karasiev, T. Sjostrom, J. Dufty, and S.B. Trickey, PRL 112, 076403 (2014)' ! [[cite:Karasiev2014]]
 !      GGA
    case (60)
-     message = 'TGGA: Karasiev, PBE-parameters - ixc=60'
-     citation = 'V.V. Karasiev, J.W. Dufty, and S.B. Trickey, PRL 120(7), 076401 (2018)' ! [[cite:Karasiev2018]]
-   case (61)
-     message = 'TGGA: Karasiev, PBEsol-parameters - ixc=61'
-     citation = 'V.V. Karasiev, J.W. Dufty, and S.B. Trickey, PRL 120(7), 076401 (2018)' ! [[cite:Karasiev2018]]
-   case (62)
-     message = 'TGGA: Karasiev, PBEmol-parameters - ixc=62'
+     message = 'TGGA: KDT16 Karasiev-Dufty-Trickey - ixc=60'
      citation = 'V.V. Karasiev, J.W. Dufty, and S.B. Trickey, PRL 120(7), 076401 (2018)' ! [[cite:Karasiev2018]]
    case default
      write(message,'(a,i0)')" echo_xc_name does not know how to handle ixc = ",ixc
@@ -526,7 +520,8 @@ subroutine size_dvxc(ixc,order,nspden,&
      if (ixc==1.or.ixc==7.or.ixc==8.or.ixc==9.or.ixc==10.or.ixc==13.or. &
 &        ixc==21.or.ixc==22) then
        ndvxc=min(nspden,2)+1
-     else if ((ixc>=2.and.ixc<=6).or.(ixc>=31.and.ixc<=35).or.ixc==50.or.ixc==51) then
+     else if ((ixc>=2.and.ixc<=6).or.(ixc>=31.and.ixc<=35).or.&
+&        (ixc==50.or.ixc==51.or.ixc==60)) then
        ndvxc=1
      else if (ixc==12.or.ixc==24) then
        ndvxc=8
@@ -1473,13 +1468,7 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
    if (order**2 <= 1) then
      call xcksdt(exc,tsxc,npts,order,rhotot,rspts,el_temp,vxcrho(:,1))
    else
-     if(ndvxc /= 1 )then
-       write(message,'(3a,i0,a,i0)')&
-&       'Wrong value of ndvxc:',ch10,&
-&       'ixc=',ixc,'ndvxc=',ndvxc
-       ABI_BUG(message)
-     end if
-     call xcksdt(exc,tsxc,npts,order,rhotot,rspts,el_temp,vxcrho(:,1),dvxc)
+     call xcksdt(exc,tsxc,npts,order,rhotot,rspts,el_temp,vxcrho(:,1),dvxc=dvxc)
    end if
 
 !>>>>> Karasiev-Dufty-Trickey TGGA (KDT16)
@@ -1490,7 +1479,13 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
 &     'ixc=',ixc,'ndvxcdgr=',nvxcgrho
      ABI_BUG(message)
    end if
-   call xckdt16(vxcgrho,exc,tsxc,grho2_updn,ixc,npts,nspden,rhotot,rspts,el_temp,vxcrho)
+   if (order**2 <= 1) then
+     call xckdt16(vxcgrho,exc,tsxc,grho2_updn,ixc,npts,nspden,order,&
+&     rhotot,rspts,el_temp,vxcrho)
+   else
+     call xckdt16(vxcgrho,exc,tsxc,grho2_updn,ixc,npts,nspden,order,&
+&     rhotot,rspts,el_temp,vxcrho,dvxci=dvxc)
+   end if
 
 !>>>>> GGA counterpart of the B3LYP functional
  else if(ixc==1402000) then
