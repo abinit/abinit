@@ -89,6 +89,7 @@ program optic
  integer :: nonlin_comp(27) = 0, linel_comp(27) = 0, nonlin2_comp(27) = 0
  integer :: lin_comp(9) = [11, 22 ,33, 12, 13, 21, 23, 31, 32]
  integer :: prtlincompmatrixelements=0, nband_sum = -1
+ integer :: contrib_decompo ! VT contribution to SHG to decompose per band
  real(dp) :: domega, eff
  real(dp) :: broadening,maxomega,scissor,tolerance
  real(dp) :: tcpu,tcpui,twall,twalli
@@ -126,7 +127,7 @@ program optic
  ! Input file
  namelist /FILES/ ddkfile_1, ddkfile_2, ddkfile_3, wfkfile
  namelist /PARAMETERS/ broadening, domega, maxomega, scissor, tolerance, do_antiresonant, do_temperature, &
-                       do_decompo, w_decompo, autoparal, max_ncpus, prtlincompmatrixelements, nband_sum ! VT bands decomposition
+                       do_decompo, w_decompo, contrib_decompo, autoparal, max_ncpus, prtlincompmatrixelements, nband_sum ! VT bands decomposition
  namelist /COMPUTATIONS/ num_lin_comp, lin_comp, num_nonlin_comp, nonlin_comp, &
           num_linel_comp, linel_comp, num_nonlin2_comp, nonlin2_comp
  namelist /TEMPERATURE/ epfile
@@ -204,10 +205,11 @@ program optic
    scissor = 0.0_dp ! no scissor by default
    tolerance = 1e-3_dp ! Ha
    prtlincompmatrixelements = 0 ! print the sum elements for external analysis
-   do_antiresonant = .TRUE. ! do use antiresonant approximation (only resonant transitions in the calculation)
+   do_antiresonant = .FALSE. ! do not use antiresonant approximation (consider anti-resonant transitions in the calculation)
    do_temperature = .FALSE.
    do_decompo = .FALSE. ! do NOT perform the bands decomposition, VT
    w_decompo  = 2.0_dp  ! Ha, random default value, VT
+   contrib_decompo = 0  ! consider all contributions (inter2w, inter1w,...), VT
 
    ! Read input file
    read(finunt,nml=FILES)
@@ -377,6 +379,7 @@ program optic
  call xmpi_bcast(do_antiresonant, master, comm, ierr)
  call xmpi_bcast(do_decompo, master, comm, ierr) ! VT bands decomposition 
  call xmpi_bcast(w_decompo, master, comm, ierr)  ! VT bands decomposition 
+ call xmpi_bcast(contrib_decompo, master, comm, ierr)  ! VT bands decomposition 
  call xmpi_bcast(do_ep_renorm, master, comm, ierr)
  call xmpi_bcast(ep_ntemp, master, comm, ierr)
  call xmpi_bcast(filnam_out, master, comm, ierr)
@@ -512,7 +515,7 @@ program optic
    end if
    ! VT bands decomposition
    if (do_decompo) then
-     write(std_out,'(a)') ' Will perform the bands decomposition (only available for nlinopt!) '
+     write(std_out,'(a)') ' Will perform the bands decomposition (only available for nlinopt and in the antiresonant approximation!) '
    else
      write(std_out,'(a)') ' Will not perform the bands decomposition '
    end if
@@ -744,7 +747,7 @@ program optic
 
    call nlinopt(ii, itemp, nband_sum, cryst, ks_ebands, pmat, &
                 nlin1, nlin2, nlin3, nomega, domega, scissor, broadening, tolerance, w_decompo, & ! VT bands decomposition
-                tmp_radix, do_decompo, do_antiresonant, optic_ncid, comm)
+                tmp_radix, contrib_decompo, do_decompo, do_antiresonant, optic_ncid, comm)
  end do
 
  ! linear electro-optic susceptibility for semiconductors

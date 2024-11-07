@@ -608,7 +608,7 @@ end subroutine linopt
 !! SOURCE
 
 subroutine nlinopt(icomp, itemp, nband_sum, cryst, ks_ebands, pmat, &
-                   v1, v2, v3, nmesh, de, sc, brod, tol, w_decompo, fnam, do_decompo, do_antiresonant, &
+                   v1, v2, v3, nmesh, de, sc, brod, tol, w_decompo, fnam, contrib_decompo, do_decompo, do_antiresonant, &
                    ncid, comm)
 
 !Arguments ------------------------------------
@@ -621,6 +621,7 @@ real(dp), intent(in) :: de, sc, brod, tol
 character(len=*), intent(in) :: fnam
 logical, intent(in) :: do_decompo ! .TRUE. to perform the bands decomposition, VT
 real(dp), intent(in) :: w_decompo ! energy in eV for bands decompo, VT
+integer, intent(in) :: contrib_decompo ! 0=all, 12=inter2w, 22=intra2w, 11=inter1w, 21=intra1w, 1=intra1wS, 2=2bands, VT
 logical, intent(in) :: do_antiresonant ! .FALSE. to include the AR terms, VT
 
 !Local variables -------------------------
@@ -819,21 +820,33 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
  end if ! if .not.do_antiresonant
  ! Addition VT bands decomposition
  if (do_decompo) then
-   ABI_MALLOC(inter2w_bands,      (nband_sum,nband_sum,nband_sum)) ! (l,m,n)
-   ABI_MALLOC(inter2w_bands_ik,   (nband_sum,nband_sum,nband_sum)) ! (l,m,n)
-   ABI_MALLOC(inter1w_bands,      (nband_sum,nband_sum,nband_sum)) ! (l,m,n)
-   ABI_MALLOC(inter1w_bands_ik,   (nband_sum,nband_sum,nband_sum)) ! (l,m,n)
-   ABI_MALLOC(intra2w_bands,      (nband_sum,nband_sum,nband_sum)) ! (l,m,n)
-   ABI_MALLOC(intra2w_bands_ik,   (nband_sum,nband_sum,nband_sum)) ! (l,m,n)
-   ABI_MALLOC(intra1w_bands,      (nband_sum,nband_sum,nband_sum)) ! (l,m,n)
-   ABI_MALLOC(intra1w_bands_ik,   (nband_sum,nband_sum,nband_sum)) ! (l,m,n)
-   ABI_MALLOC(intra1wS_bands,     (nband_sum,nband_sum,nband_sum)) ! (l,m,n)
-   ABI_MALLOC(intra1wS_bands_ik,  (nband_sum,nband_sum,nband_sum)) ! (l,m,n)
-   ! Addition VT 2bands interactions decomposition
-   ABI_MALLOC(intra2w_2bands,     (nband_sum,nband_sum))           ! (m,n)
-   ABI_MALLOC(intra2w_2bands_ik,  (nband_sum,nband_sum))           ! (m,n)
-   ABI_MALLOC(intra1wS_2bands,    (nband_sum,nband_sum))           ! (m,n)
-   ABI_MALLOC(intra1wS_2bands_ik, (nband_sum,nband_sum))           ! (m,n)
+   if (contrib_decompo==0 .or. contrib_decompo==12) then
+     ABI_MALLOC(inter2w_bands,      (nband_sum,nband_sum,nband_sum)) ! (l,m,n)
+     ABI_MALLOC(inter2w_bands_ik,   (nband_sum,nband_sum,nband_sum)) ! (l,m,n)
+   end if
+   if (contrib_decompo==0 .or. contrib_decompo==11) then
+     ABI_MALLOC(inter1w_bands,      (nband_sum,nband_sum,nband_sum)) ! (l,m,n)
+     ABI_MALLOC(inter1w_bands_ik,   (nband_sum,nband_sum,nband_sum)) ! (l,m,n)
+   end if
+   if (contrib_decompo==0 .or. contrib_decompo==22) then
+     ABI_MALLOC(intra2w_bands,      (nband_sum,nband_sum,nband_sum)) ! (l,m,n)
+     ABI_MALLOC(intra2w_bands_ik,   (nband_sum,nband_sum,nband_sum)) ! (l,m,n)
+   end if
+   if (contrib_decompo==0 .or. contrib_decompo==21) then
+     ABI_MALLOC(intra1w_bands,      (nband_sum,nband_sum,nband_sum)) ! (l,m,n)
+     ABI_MALLOC(intra1w_bands_ik,   (nband_sum,nband_sum,nband_sum)) ! (l,m,n)
+   end if
+   if (contrib_decompo==0 .or. contrib_decompo==1) then
+     ABI_MALLOC(intra1wS_bands,     (nband_sum,nband_sum,nband_sum)) ! (l,m,n)
+     ABI_MALLOC(intra1wS_bands_ik,  (nband_sum,nband_sum,nband_sum)) ! (l,m,n)
+   end if
+   if (contrib_decompo==0 .or. contrib_decompo==2) then
+     ! Addition VT 2bands interactions decomposition
+     ABI_MALLOC(intra2w_2bands,     (nband_sum,nband_sum))           ! (m,n)
+     ABI_MALLOC(intra2w_2bands_ik,  (nband_sum,nband_sum))           ! (m,n)
+     ABI_MALLOC(intra1wS_2bands,    (nband_sum,nband_sum))           ! (m,n)
+     ABI_MALLOC(intra1wS_2bands_ik, (nband_sum,nband_sum))           ! (m,n)
+   end if
  end if ! do_decompo
 
  !generate the symmetrizing tensor
@@ -872,21 +885,33 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
  end if ! if .not.do_antiresonant
  ! Addition VT bands decomposition
  if (do_decompo) then
-   inter2w_bands(:,:,:)           = zero
-   inter2w_bands_ik(:,:,:)        = zero
-   inter1w_bands(:,:,:)           = zero
-   inter1w_bands_ik(:,:,:)        = zero
-   intra2w_bands(:,:,:)           = zero
-   intra2w_bands_ik(:,:,:)        = zero
-   intra1w_bands(:,:,:)           = zero
-   intra1w_bands_ik(:,:,:)        = zero
-   intra1wS_bands(:,:,:)          = zero
-   intra1wS_bands_ik(:,:,:)       = zero
-   ! Addition VT 2bands interactions decomposition
-   intra2w_2bands(:,:)            = zero
-   intra2w_2bands_ik(:,:)         = zero
-   intra1wS_2bands(:,:)           = zero
-   intra1wS_2bands_ik(:,:)        = zero
+   if (contrib_decompo==0 .or. contrib_decompo==12) then
+     inter2w_bands(:,:,:)           = zero
+     inter2w_bands_ik(:,:,:)        = zero
+   end if
+   if (contrib_decompo==0 .or. contrib_decompo==11) then
+     inter1w_bands(:,:,:)           = zero
+     inter1w_bands_ik(:,:,:)        = zero
+   end if
+   if (contrib_decompo==0 .or. contrib_decompo==22) then
+     intra2w_bands(:,:,:)           = zero
+     intra2w_bands_ik(:,:,:)        = zero
+   end if
+   if (contrib_decompo==0 .or. contrib_decompo==21) then
+     intra1w_bands(:,:,:)           = zero
+     intra1w_bands_ik(:,:,:)        = zero
+   end if
+   if (contrib_decompo==0 .or. contrib_decompo==1) then
+     intra1wS_bands(:,:,:)          = zero
+     intra1wS_bands_ik(:,:,:)       = zero
+   end if
+   if (contrib_decompo==0 .or. contrib_decompo==2) then
+     ! Addition VT 2bands interactions decomposition
+     intra2w_2bands(:,:)            = zero
+     intra2w_2bands_ik(:,:)         = zero
+     intra1wS_2bands(:,:)           = zero
+     intra1wS_2bands_ik(:,:)        = zero
+   end if
  end if ! do_decompo
 
  my_emin=HUGE(zero)
@@ -1036,8 +1061,10 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
              end if ! if .not.do_antiresonant
              ! Addition VT 2bands interactions decomposition
              if (do_decompo) then
-               intra2w_2bands_ik(istm, istn)  = b231
-               intra1wS_2bands_ik(istm, istn) = b331
+               if (contrib_decompo==0 .or. contrib_decompo==2) then
+                 intra2w_2bands_ik(istm, istn)  = b231
+                 intra1wS_2bands_ik(istm, istn) = b331
+               end if
              end if ! do_decompo
 
              b11=zero
@@ -1173,11 +1200,21 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
                end if ! if .not.do_antiresonant
                ! Addition VT bands decomposition
                if (do_decompo) then
-                 inter2w_bands_ik(istl, istm, istn)  = -2._dp*b111
-                 inter1w_bands_ik(istl, istm, istn)  = b121+b131
-                 intra2w_bands_ik(istl, istm, istn)  = 2._dp*b241
-                 intra1w_bands_ik(istl, istm, istn)  = -b211+b221
-                 intra1wS_bands_ik(istl, istm, istn) = b311
+                 if (contrib_decompo==0 .or. contrib_decompo==12) then
+                   inter2w_bands_ik(istl, istm, istn)  = -2._dp*b111
+                 end if
+                 if (contrib_decompo==0 .or. contrib_decompo==11) then
+                   inter1w_bands_ik(istl, istm, istn)  = b121+b131
+                 end if
+                 if (contrib_decompo==0 .or. contrib_decompo==22) then
+                   intra2w_bands_ik(istl, istm, istn)  = 2._dp*b241
+                 end if
+                 if (contrib_decompo==0 .or. contrib_decompo==21) then
+                   intra1w_bands_ik(istl, istm, istn)  = -b211+b221
+                 end if
+                 if (contrib_decompo==0 .or. contrib_decompo==1) then
+                   intra1wS_bands_ik(istl, istm, istn) = b311
+                 end if
                end if ! do_decompo
              end do ! istl
 
@@ -1335,11 +1372,21 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
                end if ! .not.do_antiresonant
                ! Addition VT bands decomposition
                if (do_decompo) then
-                 inter2w_bands_ik(istl, istm, istn)  = 2._dp*b112 
-                 inter1w_bands_ik(istl, istm, istn)  = -b122+b132
-                 intra2w_bands_ik(istl, istm, istn)  = 2._dp*b242
-                 intra1w_bands_ik(istl, istm, istn)  = -b212+b222
-                 intra1wS_bands_ik(istl, istm, istn) = b312
+                 if (contrib_decompo==0 .or. contrib_decompo==12) then
+                   inter2w_bands_ik(istl, istm, istn)  = 2._dp*b112 
+                 end if
+                 if (contrib_decompo==0 .or. contrib_decompo==11) then
+                   inter1w_bands_ik(istl, istm, istn)  = -b122+b132
+                 end if
+                 if (contrib_decompo==0 .or. contrib_decompo==22) then
+                   intra2w_bands_ik(istl, istm, istn)  = 2._dp*b242
+                 end if
+                 if (contrib_decompo==0 .or. contrib_decompo==21) then
+                   intra1w_bands_ik(istl, istm, istn)  = -b212+b222
+                 end if
+                 if (contrib_decompo==0 .or. contrib_decompo==1) then
+                   intra1wS_bands_ik(istl, istm, istn) = b312
+                 end if
                end if ! do_decompo
              end do ! istl
 
@@ -1460,11 +1507,21 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
                end if ! .not.do_antiresonant
                ! Addition VT bands decomposition
                if (do_decompo) then
-                 inter2w_bands_ik(istl, istm, istn)  = 2._dp*b113
-                 inter1w_bands_ik(istl, istm, istn)  = b123-b133
-                 intra2w_bands_ik(istl, istm, istn)  = 2._dp*b243
-                 intra1w_bands_ik(istl, istm, istn)  = -b213+b223
-                 intra1wS_bands_ik(istl, istm, istn) = b313
+                 if (contrib_decompo==0 .or. contrib_decompo==12) then
+                   inter2w_bands_ik(istl, istm, istn)  = 2._dp*b113
+                 end if
+                 if (contrib_decompo==0 .or. contrib_decompo==11) then
+                   inter1w_bands_ik(istl, istm, istn)  = b123-b133
+                 end if
+                 if (contrib_decompo==0 .or. contrib_decompo==22) then
+                   intra2w_bands_ik(istl, istm, istn)  = 2._dp*b243
+                 end if
+                 if (contrib_decompo==0 .or. contrib_decompo==21) then
+                   intra1w_bands_ik(istl, istm, istn)  = -b213+b223
+                 end if
+                 if (contrib_decompo==0 .or. contrib_decompo==1) then
+                   intra1wS_bands_ik(istl, istm, istn) = b313
+                 end if
                end if ! do_decompo
              end do ! istl
 
@@ -1483,14 +1540,26 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
              end if ! .not.do_antiresonant
              ! Addition VT bands decomposition
              if (do_decompo) then
-               inter2w_bands_ik(:, istm, istn)  = inter2w_bands_ik(:, istm, istn)*zi*(1._dp/wnm)*const_esu
-               inter1w_bands_ik(:, istm, istn)  = inter1w_bands_ik(:, istm, istn)*zi*(1._dp/wnm)*const_esu
-               intra2w_bands_ik(:, istm, istn)  = intra2w_bands_ik(:, istm, istn)*zi*(1._dp/(wnm**3))*const_esu 
-               intra1w_bands_ik(:, istm, istn)  = intra1w_bands_ik(:, istm, istn)*zi*(1._dp/(wnm**3))*const_esu 
-               intra1wS_bands_ik(:, istm, istn) = intra1wS_bands_ik(:, istm, istn)*zi*(1._dp/(wmn**3))*const_esu*0.5_dp 
-               ! Addition VT 2bands interactions decomposition
-               intra2w_2bands_ik(istm, istn)  = intra2w_2bands_ik(istm, istn)*zi*(1._dp/(wnm**3))*const_esu 
-               intra1wS_2bands_ik(istm, istn) = -intra1wS_2bands_ik(istm, istn)*zi*(1._dp/(wmn**3))*const_esu*0.5_dp 
+               if (contrib_decompo==0 .or. contrib_decompo==12) then
+                 inter2w_bands_ik(:, istm, istn)  = inter2w_bands_ik(:, istm, istn)*zi*(1._dp/wnm)*const_esu
+               end if
+               if (contrib_decompo==0 .or. contrib_decompo==11) then
+                 inter1w_bands_ik(:, istm, istn)  = inter1w_bands_ik(:, istm, istn)*zi*(1._dp/wnm)*const_esu
+               end if
+               if (contrib_decompo==0 .or. contrib_decompo==22) then
+                 intra2w_bands_ik(:, istm, istn)  = intra2w_bands_ik(:, istm, istn)*zi*(1._dp/(wnm**3))*const_esu 
+               end if
+               if (contrib_decompo==0 .or. contrib_decompo==21) then
+                 intra1w_bands_ik(:, istm, istn)  = intra1w_bands_ik(:, istm, istn)*zi*(1._dp/(wnm**3))*const_esu 
+               end if
+               if (contrib_decompo==0 .or. contrib_decompo==1) then
+                 intra1wS_bands_ik(:, istm, istn) = intra1wS_bands_ik(:, istm, istn)*zi*(1._dp/(wmn**3))*const_esu*0.5_dp 
+               end if
+               if (contrib_decompo==0 .or. contrib_decompo==2) then
+                 ! Addition VT 2bands interactions decomposition
+                 intra2w_2bands_ik(istm, istn)  = intra2w_2bands_ik(istm, istn)*zi*(1._dp/(wnm**3))*const_esu 
+                 intra1wS_2bands_ik(istm, istn) = -intra1wS_2bands_ik(istm, istn)*zi*(1._dp/(wmn**3))*const_esu*0.5_dp 
+               end if
              end if ! do_decompo
 
              ! calculate over the desired energy mesh and sum over k-points
@@ -1514,14 +1583,26 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
                  iw_real = (w_decompo*ev2ha)/de + 1
                  iw_tgt = idnint(iw_real)
                  if (iw==iw_tgt) then ! need to restrict to one frequency due to memory issues
-                   inter2w_bands(:, istm, istn)  = inter2w_bands(:,istm,istn)+(ks_ebands%wtk(ik)*(inter2w_bands_ik(:, istm, istn)/(wmn-2._dp*w)))
-                   inter1w_bands(:, istm, istn)  = inter1w_bands(:,istm,istn)+(ks_ebands%wtk(ik)*(inter1w_bands_ik(:, istm, istn)/(wmn-w)))
-                   intra2w_bands(:, istm, istn)  = intra2w_bands(:,istm,istn)+(ks_ebands%wtk(ik)*(intra2w_bands_ik(:, istm, istn)/(wmn-2._dp*w))) 
-                   intra1w_bands(:, istm, istn)  = intra1w_bands(:,istm,istn)+(ks_ebands%wtk(ik)*((intra1w_bands_ik(:, istm, istn))/(wmn-w)))
-                   intra1wS_bands(:, istm, istn) = intra1wS_bands(:,istm,istn)+(ks_ebands%wtk(ik)*((intra1wS_bands_ik(:, istm, istn))/(wmn-w)))
-                   ! Addition VT 2bands interaction decomposition
-                   intra2w_2bands(istm, istn)  = intra2w_2bands(istm,istn)+(ks_ebands%wtk(ik)*(intra2w_2bands_ik(istm, istn)/(wmn-2._dp*w))) 
-                   intra1wS_2bands(istm, istn) = intra1wS_2bands(istm,istn)+(ks_ebands%wtk(ik)*((intra1wS_2bands_ik(istm, istn))/(wmn-w)))
+                   if (contrib_decompo==0 .or. contrib_decompo==12) then
+                     inter2w_bands(:, istm, istn)  = inter2w_bands(:,istm,istn)+(ks_ebands%wtk(ik)*(inter2w_bands_ik(:, istm, istn)/(wmn-2._dp*w)))
+                   end if
+                   if (contrib_decompo==0 .or. contrib_decompo==11) then
+                     inter1w_bands(:, istm, istn)  = inter1w_bands(:,istm,istn)+(ks_ebands%wtk(ik)*(inter1w_bands_ik(:, istm, istn)/(wmn-w)))
+                   end if
+                   if (contrib_decompo==0 .or. contrib_decompo==22) then
+                     intra2w_bands(:, istm, istn)  = intra2w_bands(:,istm,istn)+(ks_ebands%wtk(ik)*(intra2w_bands_ik(:, istm, istn)/(wmn-2._dp*w))) 
+                   end if
+                   if (contrib_decompo==0 .or. contrib_decompo==21) then
+                     intra1w_bands(:, istm, istn)  = intra1w_bands(:,istm,istn)+(ks_ebands%wtk(ik)*((intra1w_bands_ik(:, istm, istn))/(wmn-w)))
+                   end if
+                   if (contrib_decompo==0 .or. contrib_decompo==1) then
+                     intra1wS_bands(:, istm, istn) = intra1wS_bands(:,istm,istn)+(ks_ebands%wtk(ik)*((intra1wS_bands_ik(:, istm, istn))/(wmn-w)))
+                   end if
+                   if (contrib_decompo==0 .or. contrib_decompo==2) then
+                     ! Addition VT 2bands interaction decomposition
+                     intra2w_2bands(istm, istn)  = intra2w_2bands(istm,istn)+(ks_ebands%wtk(ik)*(intra2w_2bands_ik(istm, istn)/(wmn-2._dp*w))) 
+                     intra1wS_2bands(istm, istn) = intra1wS_2bands(istm,istn)+(ks_ebands%wtk(ik)*((intra1wS_2bands_ik(istm, istn))/(wmn-w)))
+                   end if
                  end if ! Chosen frequency for bands decomposition
                end if ! do_decompo
              end do ! iw
@@ -1549,14 +1630,26 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
  end if ! .not.do_antiresonant
  ! Addition VT bands decomposition
  if (do_decompo) then
-   call xmpi_sum(inter2w_bands,comm,ierr)
-   call xmpi_sum(inter1w_bands,comm,ierr)
-   call xmpi_sum(intra2w_bands,comm,ierr)
-   call xmpi_sum(intra1w_bands,comm,ierr)
-   call xmpi_sum(intra1wS_bands,comm,ierr)
-   ! Addition VT 2bands interactions decomposition
-   call xmpi_sum(intra2w_2bands,comm,ierr)
-   call xmpi_sum(intra1wS_2bands,comm,ierr)
+   if (contrib_decompo==0 .or. contrib_decompo==12) then
+     call xmpi_sum(inter2w_bands,comm,ierr)
+   end if
+   if (contrib_decompo==0 .or. contrib_decompo==11) then
+     call xmpi_sum(inter1w_bands,comm,ierr)
+   end if
+   if (contrib_decompo==0 .or. contrib_decompo==22) then
+     call xmpi_sum(intra2w_bands,comm,ierr)
+   end if
+   if (contrib_decompo==0 .or. contrib_decompo==21) then
+     call xmpi_sum(intra1w_bands,comm,ierr)
+   end if
+   if (contrib_decompo==0 .or. contrib_decompo==1) then
+     call xmpi_sum(intra1wS_bands,comm,ierr)
+   end if
+   if (contrib_decompo==0 .or. contrib_decompo==2) then
+     ! Addition VT 2bands interactions decomposition
+     call xmpi_sum(intra2w_2bands,comm,ierr)
+     call xmpi_sum(intra1wS_2bands,comm,ierr)
+   end if
  end if ! do_decompo
 
  if (my_rank == master) then
@@ -1623,27 +1716,39 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
    end if
    ! Addition VT bands decomposition
    if (do_decompo) then
-     if (open_file(fnam8,msg,newunit=fout8,action='WRITE',form='FORMATTED') /= 0) then
-       ABI_ERROR(msg)
+     if (contrib_decompo==0 .or. contrib_decompo==12) then
+       if (open_file(fnam8,msg,newunit=fout8,action='WRITE',form='FORMATTED') /= 0) then
+         ABI_ERROR(msg)
+       end if
      end if
-     if (open_file(fnam9,msg,newunit=fout9,action='WRITE',form='FORMATTED') /= 0) then
-       ABI_ERROR(msg)
+     if (contrib_decompo==0 .or. contrib_decompo==11) then
+       if (open_file(fnam9,msg,newunit=fout9,action='WRITE',form='FORMATTED') /= 0) then
+         ABI_ERROR(msg)
+       end if
      end if
-     if (open_file(fnam10,msg,newunit=fout10,action='WRITE',form='FORMATTED') /= 0) then
-       ABI_ERROR(msg)
+     if (contrib_decompo==0 .or. contrib_decompo==22) then
+       if (open_file(fnam10,msg,newunit=fout10,action='WRITE',form='FORMATTED') /= 0) then
+         ABI_ERROR(msg)
+       end if
      end if
-     if (open_file(fnam11,msg,newunit=fout11,action='WRITE',form='FORMATTED') /= 0) then
-       ABI_ERROR(msg)
+     if (contrib_decompo==0 .or. contrib_decompo==21) then
+       if (open_file(fnam11,msg,newunit=fout11,action='WRITE',form='FORMATTED') /= 0) then
+         ABI_ERROR(msg)
+       end if
      end if
-     if (open_file(fnam12,msg,newunit=fout12,action='WRITE',form='FORMATTED') /= 0) then
-       ABI_ERROR(msg)
+     if (contrib_decompo==0 .or. contrib_decompo==1) then
+       if (open_file(fnam12,msg,newunit=fout12,action='WRITE',form='FORMATTED') /= 0) then
+         ABI_ERROR(msg)
+       end if
      end if
-     ! Addition VT 2bands interactions decomposition
-     if (open_file(fnam13,msg,newunit=fout13,action='WRITE',form='FORMATTED') /= 0) then
-       ABI_ERROR(msg)
-     end if
-     if (open_file(fnam14,msg,newunit=fout14,action='WRITE',form='FORMATTED') /= 0) then
-       ABI_ERROR(msg)
+     if (contrib_decompo==0 .or. contrib_decompo==2) then
+       ! Addition VT 2bands interactions decomposition
+       if (open_file(fnam13,msg,newunit=fout13,action='WRITE',form='FORMATTED') /= 0) then
+         ABI_ERROR(msg)
+       end if
+       if (open_file(fnam14,msg,newunit=fout14,action='WRITE',form='FORMATTED') /= 0) then
+         ABI_ERROR(msg)
+       end if
      end if
    end if ! do_decompo
 
@@ -1712,76 +1817,88 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
    write(fout7, '(a)')' # '
    ! Addition VT bands decomposition
    if (do_decompo) then
-     write(fout8, '(a,3i3)') ' #calculated the component:',v1,v2,v3
-     write(fout8, '(a,es16.6)') ' #tolerance:',tol
-     write(fout8, '(a,es16.6,a)') ' #broadening:',brod,'Ha'
-     write(fout8, '(a,es16.6,a)') ' #scissors shift:',sc,'Ha'
-     write(fout8, '(a,es16.6,a)') ' #energy decompo input:',w_decompo,'eV'
-     write(fout8, '(a,es16.6,a,es16.6,a)') ' #energy window:',(emax-emin)*ha2ev,'eV',(emax-emin),'Ha'
-     write(fout8, '(a)')' # Energy(eV)  n valence   m conduction   l both   Re Inter2w             Im Inter2w'
-     write(fout8, '(a)')' # eV                                              *10^-12 m/V SI units   *10^-12 m/V SI units '
-     write(fout8, '(a)')' # '
+     if (contrib_decompo==0 .or. contrib_decompo==12) then
+       write(fout8, '(a,3i3)') ' #calculated the component:',v1,v2,v3
+       write(fout8, '(a,es16.6)') ' #tolerance:',tol
+       write(fout8, '(a,es16.6,a)') ' #broadening:',brod,'Ha'
+       write(fout8, '(a,es16.6,a)') ' #scissors shift:',sc,'Ha'
+       write(fout8, '(a,es16.6,a)') ' #energy decompo input:',w_decompo,'eV'
+       write(fout8, '(a,es16.6,a,es16.6,a)') ' #energy window:',(emax-emin)*ha2ev,'eV',(emax-emin),'Ha'
+       write(fout8, '(a)')' # Energy(eV)  n valence   m conduction   l both   Re Inter2w             Im Inter2w'
+       write(fout8, '(a)')' # eV                                              *10^-12 m/V SI units   *10^-12 m/V SI units '
+       write(fout8, '(a)')' # '
+     end if
   
-     write(fout9, '(a,3i3)') ' #calculated the component:',v1,v2,v3
-     write(fout9, '(a,es16.6)') ' #tolerance:',tol
-     write(fout9, '(a,es16.6,a)') ' #broadening:',brod,'Ha'
-     write(fout9, '(a,es16.6,a)') ' #scissors shift:',sc,'Ha'
-     write(fout9, '(a,es16.6,a)') ' #energy decompo input:',w_decompo,'eV'
-     write(fout9, '(a,es16.6,a,es16.6,a)') ' #energy window:',(emax-emin)*ha2ev,'eV',(emax-emin),'Ha'
-     write(fout9, '(a)')' # Energy(eV)  n valence   m conduction   l both   Re Inter1w             Im Inter1w'
-     write(fout9, '(a)')' # eV                                              *10^-12 m/V SI units   *10^-12 m/V SI units '
-     write(fout9, '(a)')' # '
+     if (contrib_decompo==0 .or. contrib_decompo==11) then
+       write(fout9, '(a,3i3)') ' #calculated the component:',v1,v2,v3
+       write(fout9, '(a,es16.6)') ' #tolerance:',tol
+       write(fout9, '(a,es16.6,a)') ' #broadening:',brod,'Ha'
+       write(fout9, '(a,es16.6,a)') ' #scissors shift:',sc,'Ha'
+       write(fout9, '(a,es16.6,a)') ' #energy decompo input:',w_decompo,'eV'
+       write(fout9, '(a,es16.6,a,es16.6,a)') ' #energy window:',(emax-emin)*ha2ev,'eV',(emax-emin),'Ha'
+       write(fout9, '(a)')' # Energy(eV)  n valence   m conduction   l both   Re Inter1w             Im Inter1w'
+       write(fout9, '(a)')' # eV                                              *10^-12 m/V SI units   *10^-12 m/V SI units '
+       write(fout9, '(a)')' # '
+     end if
   
-     write(fout10, '(a,3i3)') ' #calculated the component:',v1,v2,v3
-     write(fout10, '(a,es16.6)') ' #tolerance:',tol
-     write(fout10, '(a,es16.6,a)') ' #broadening:',brod,'Ha'
-     write(fout10, '(a,es16.6,a)') ' #scissors shift:',sc,'Ha'
-     write(fout10, '(a,es16.6,a)') ' #energy decompo input:',w_decompo,'eV'
-     write(fout10, '(a,es16.6,a,es16.6,a)') ' #energy window:',(emax-emin)*ha2ev,'eV',(emax-emin),'Ha'
-     write(fout10, '(a)')' # Energy(eV)  n valence   m conduction   l both   Re Intra2w             Im Intra2w'
-     write(fout10, '(a)')' # eV                                              *10^-12 m/V SI units   *10^-12 m/V SI units '
-     write(fout10, '(a)')' # '
+     if (contrib_decompo==0 .or. contrib_decompo==22) then
+       write(fout10, '(a,3i3)') ' #calculated the component:',v1,v2,v3
+       write(fout10, '(a,es16.6)') ' #tolerance:',tol
+       write(fout10, '(a,es16.6,a)') ' #broadening:',brod,'Ha'
+       write(fout10, '(a,es16.6,a)') ' #scissors shift:',sc,'Ha'
+       write(fout10, '(a,es16.6,a)') ' #energy decompo input:',w_decompo,'eV'
+       write(fout10, '(a,es16.6,a,es16.6,a)') ' #energy window:',(emax-emin)*ha2ev,'eV',(emax-emin),'Ha'
+       write(fout10, '(a)')' # Energy(eV)  n valence   m conduction   l both   Re Intra2w             Im Intra2w'
+       write(fout10, '(a)')' # eV                                              *10^-12 m/V SI units   *10^-12 m/V SI units '
+       write(fout10, '(a)')' # '
+     end if
   
-     write(fout11, '(a,3i3)') ' #calculated the component:',v1,v2,v3
-     write(fout11, '(a,es16.6)') ' #tolerance:',tol
-     write(fout11, '(a,es16.6,a)') ' #broadening:',brod,'Ha'
-     write(fout11, '(a,es16.6,a)') ' #scissors shift:',sc,'Ha'
-     write(fout11, '(a,es16.6,a)') ' #energy decompo input:',w_decompo,'eV'
-     write(fout11, '(a,es16.6,a,es16.6,a)') ' #energy window:',(emax-emin)*ha2ev,'eV',(emax-emin),'Ha'
-     write(fout11, '(a)')' # Energy(eV)  n valence   m conduction   l both   Re Intra1w             Im Intra1w'
-     write(fout11, '(a)')' # eV                                              *10^-12 m/V SI units   *10^-12 m/V SI units '
-     write(fout11, '(a)')' # '
+     if (contrib_decompo==0 .or. contrib_decompo==21) then
+       write(fout11, '(a,3i3)') ' #calculated the component:',v1,v2,v3
+       write(fout11, '(a,es16.6)') ' #tolerance:',tol
+       write(fout11, '(a,es16.6,a)') ' #broadening:',brod,'Ha'
+       write(fout11, '(a,es16.6,a)') ' #scissors shift:',sc,'Ha'
+       write(fout11, '(a,es16.6,a)') ' #energy decompo input:',w_decompo,'eV'
+       write(fout11, '(a,es16.6,a,es16.6,a)') ' #energy window:',(emax-emin)*ha2ev,'eV',(emax-emin),'Ha'
+       write(fout11, '(a)')' # Energy(eV)  n valence   m conduction   l both   Re Intra1w             Im Intra1w'
+       write(fout11, '(a)')' # eV                                              *10^-12 m/V SI units   *10^-12 m/V SI units '
+       write(fout11, '(a)')' # '
+     end if
   
-     write(fout12, '(a,3i3)') ' #calculated the component:',v1,v2,v3
-     write(fout12, '(a,es16.6)') ' #tolerance:',tol
-     write(fout12, '(a,es16.6,a)') ' #broadening:',brod,'Ha'
-     write(fout12, '(a,es16.6,a)') ' #scissors shift:',sc,'Ha'
-     write(fout12, '(a,es16.6,a)') ' #energy decompo input:',w_decompo,'eV'
-     write(fout12, '(a,es16.6,a,es16.6,a)') ' #energy window:',(emax-emin)*ha2ev,'eV',(emax-emin),'Ha'
-     write(fout12, '(a)')' # Energy(eV)  n valence   m conduction   l both   Re Intra1wS            Im Intra1wS'
-     write(fout12, '(a)')' # eV                                              *10^-12 m/V SI units   *10^-12 m/V SI units '
-     write(fout12, '(a)')' # '
+     if (contrib_decompo==0 .or. contrib_decompo==1) then
+       write(fout12, '(a,3i3)') ' #calculated the component:',v1,v2,v3
+       write(fout12, '(a,es16.6)') ' #tolerance:',tol
+       write(fout12, '(a,es16.6,a)') ' #broadening:',brod,'Ha'
+       write(fout12, '(a,es16.6,a)') ' #scissors shift:',sc,'Ha'
+       write(fout12, '(a,es16.6,a)') ' #energy decompo input:',w_decompo,'eV'
+       write(fout12, '(a,es16.6,a,es16.6,a)') ' #energy window:',(emax-emin)*ha2ev,'eV',(emax-emin),'Ha'
+       write(fout12, '(a)')' # Energy(eV)  n valence   m conduction   l both   Re Intra1wS            Im Intra1wS'
+       write(fout12, '(a)')' # eV                                              *10^-12 m/V SI units   *10^-12 m/V SI units '
+       write(fout12, '(a)')' # '
+     end if
 
-     ! Addition VT 2bands interactions decomposition
-     write(fout13, '(a,3i3)') ' #calculated the component:',v1,v2,v3
-     write(fout13, '(a,es16.6)') ' #tolerance:',tol
-     write(fout13, '(a,es16.6,a)') ' #broadening:',brod,'Ha'
-     write(fout13, '(a,es16.6,a)') ' #scissors shift:',sc,'Ha'
-     write(fout13, '(a,es16.6,a)') ' #energy decompo input:',w_decompo,'eV'
-     write(fout13, '(a,es16.6,a,es16.6,a)') ' #energy window:',(emax-emin)*ha2ev,'eV',(emax-emin),'Ha'
-     write(fout13, '(a)')' # Energy(eV)  n valence   m conduction   Re Intra2w             Im Intra2w'
-     write(fout13, '(a)')' # eV                                     *10^-12 m/V SI units   *10^-12 m/V SI units '
-     write(fout13, '(a)')' # '
+     if (contrib_decompo==0 .or. contrib_decompo==2) then
+       ! Addition VT 2bands interactions decomposition
+       write(fout13, '(a,3i3)') ' #calculated the component:',v1,v2,v3
+       write(fout13, '(a,es16.6)') ' #tolerance:',tol
+       write(fout13, '(a,es16.6,a)') ' #broadening:',brod,'Ha'
+       write(fout13, '(a,es16.6,a)') ' #scissors shift:',sc,'Ha'
+       write(fout13, '(a,es16.6,a)') ' #energy decompo input:',w_decompo,'eV'
+       write(fout13, '(a,es16.6,a,es16.6,a)') ' #energy window:',(emax-emin)*ha2ev,'eV',(emax-emin),'Ha'
+       write(fout13, '(a)')' # Energy(eV)  n valence   m conduction   Re Intra2w             Im Intra2w'
+       write(fout13, '(a)')' # eV                                     *10^-12 m/V SI units   *10^-12 m/V SI units '
+       write(fout13, '(a)')' # '
 
-     write(fout14, '(a,3i3)') ' #calculated the component:',v1,v2,v3
-     write(fout14, '(a,es16.6)') ' #tolerance:',tol
-     write(fout14, '(a,es16.6,a)') ' #broadening:',brod,'Ha'
-     write(fout14, '(a,es16.6,a)') ' #scissors shift:',sc,'Ha'
-     write(fout14, '(a,es16.6,a)') ' #energy decompo input:',w_decompo,'eV'
-     write(fout14, '(a,es16.6,a,es16.6,a)') ' #energy window:',(emax-emin)*ha2ev,'eV',(emax-emin),'Ha'
-     write(fout14, '(a)')' # Energy(eV)  n valence   m conduction   Re Intra2w             Im Intra2w'
-     write(fout14, '(a)')' # eV                                     *10^-12 m/V SI units   *10^-12 m/V SI units '
-     write(fout14, '(a)')' # '
+       write(fout14, '(a,3i3)') ' #calculated the component:',v1,v2,v3
+       write(fout14, '(a,es16.6)') ' #tolerance:',tol
+       write(fout14, '(a,es16.6,a)') ' #broadening:',brod,'Ha'
+       write(fout14, '(a,es16.6,a)') ' #scissors shift:',sc,'Ha'
+       write(fout14, '(a,es16.6,a)') ' #energy decompo input:',w_decompo,'eV'
+       write(fout14, '(a,es16.6,a,es16.6,a)') ' #energy window:',(emax-emin)*ha2ev,'eV',(emax-emin),'Ha'
+       write(fout14, '(a)')' # Energy(eV)  n valence   m conduction   Re Intra2w             Im Intra2w'
+       write(fout14, '(a)')' # eV                                     *10^-12 m/V SI units   *10^-12 m/V SI units '
+       write(fout14, '(a)')' # '
+     end if
    end if ! (do_decompo)
 
    totim=zero              
@@ -1866,35 +1983,47 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
            do istm=1,nband_sum
              do istl=1,nband_sum
   
-               write(fout8,'(f15.6,3i15,2es16.6)') ene,istn,istm,istl,                            &
-               dble(inter2w_bands(istl,istm,istn)) *4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-12),    &
-               aimag(inter2w_bands(istl,istm,istn))*4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-12)
+               if (contrib_decompo==0 .or. contrib_decompo==12) then
+                 write(fout8,'(f15.6,3i15,2es16.6)') ene,istn,istm,istl,                            &
+                 dble(inter2w_bands(istl,istm,istn)) *4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-12),    &
+                 aimag(inter2w_bands(istl,istm,istn))*4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-12)
+               end if
   
-               write(fout9,'(f15.6,3i15,2es16.6)') ene,istn,istm,istl,                            &
-               dble(inter1w_bands(istl,istm,istn)) *4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-12),    &
-               aimag(inter1w_bands(istl,istm,istn))*4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-12)
+               if (contrib_decompo==0 .or. contrib_decompo==11) then
+                 write(fout9,'(f15.6,3i15,2es16.6)') ene,istn,istm,istl,                            &
+                 dble(inter1w_bands(istl,istm,istn)) *4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-12),    &
+                 aimag(inter1w_bands(istl,istm,istn))*4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-12)
+               end if
   
-               write(fout10,'(f15.6,3i15,2es16.6)') ene,istn,istm,istl,                            &
-               dble(intra2w_bands(istl,istm,istn)) *4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-12),     &
-               aimag(intra2w_bands(istl,istm,istn))*4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-12)
+               if (contrib_decompo==0 .or. contrib_decompo==22) then
+                 write(fout10,'(f15.6,3i15,2es16.6)') ene,istn,istm,istl,                            &
+                 dble(intra2w_bands(istl,istm,istn)) *4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-12),     &
+                 aimag(intra2w_bands(istl,istm,istn))*4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-12)
+               end if
   
-               write(fout11,'(f15.6,3i15,2es16.6)') ene,istn,istm,istl,                            &
-               dble(intra1w_bands(istl,istm,istn)) *4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-12),     &
-               aimag(intra1w_bands(istl,istm,istn))*4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-12)
+               if (contrib_decompo==0 .or. contrib_decompo==21) then
+                 write(fout11,'(f15.6,3i15,2es16.6)') ene,istn,istm,istl,                            &
+                 dble(intra1w_bands(istl,istm,istn)) *4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-12),     &
+                 aimag(intra1w_bands(istl,istm,istn))*4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-12)
+               end if
   
-               write(fout12,'(f15.6,3i15,2es16.6)') ene,istn,istm,istl,                            &
-               dble(intra1wS_bands(istl,istm,istn)) *4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-12),    &
-               aimag(intra1wS_bands(istl,istm,istn))*4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-12)
+               if (contrib_decompo==0 .or. contrib_decompo==1) then
+                 write(fout12,'(f15.6,3i15,2es16.6)') ene,istn,istm,istl,                            &
+                 dble(intra1wS_bands(istl,istm,istn)) *4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-12),    &
+                 aimag(intra1wS_bands(istl,istm,istn))*4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-12)
+               end if
   
              end do ! istl
-             ! Addition VT 2bands interactions decomposition
-             write(fout13,'(f15.6,2i15,2es16.6)') ene,istn,istm,                            &
-             dble(intra2w_2bands(istm,istn)) *4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-12),    &
-             aimag(intra2w_2bands(istm,istn))*4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-12)
+             if (contrib_decompo==0 .or. contrib_decompo==2) then
+               ! Addition VT 2bands interactions decomposition
+               write(fout13,'(f15.6,2i15,2es16.6)') ene,istn,istm,                            &
+               dble(intra2w_2bands(istm,istn)) *4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-12),    &
+               aimag(intra2w_2bands(istm,istn))*4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-12)
 
-             write(fout14,'(f15.6,2i15,2es16.6)') ene,istn,istm,                            &
-             dble(intra1wS_2bands(istm,istn)) *4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-12),   &
-             aimag(intra1wS_2bands(istm,istn))*4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-12)
+               write(fout14,'(f15.6,2i15,2es16.6)') ene,istn,istm,                            &
+               dble(intra1wS_2bands(istm,istn)) *4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-12),   &
+               aimag(intra1wS_2bands(istm,istn))*4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-12)
+             end if
 
            end do ! istm  
          end do ! istn
@@ -1912,14 +2041,26 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
    close(fout7)
    ! Addition VT bands decomposition
    if (do_decompo) then
-     close(fout8)
-     close(fout9)
-     close(fout10)
-     close(fout11)
-     close(fout12)
-     ! Addition VT 2bands interactions decomposition
-     close(fout13)
-     close(fout14)
+     if (contrib_decompo==0 .or. contrib_decompo==12) then
+       close(fout8)
+     end if
+     if (contrib_decompo==0 .or. contrib_decompo==11) then
+       close(fout9)
+     end if
+     if (contrib_decompo==0 .or. contrib_decompo==22) then
+       close(fout10)
+     end if
+     if (contrib_decompo==0 .or. contrib_decompo==21) then
+       close(fout11)
+     end if
+     if (contrib_decompo==0 .or. contrib_decompo==1) then
+       close(fout12)
+     end if
+     if (contrib_decompo==0 .or. contrib_decompo==2) then
+       ! Addition VT 2bands interactions decomposition
+       close(fout13)
+       close(fout14)
+     end if
    end if ! (do_decompo)
 
    ! print information
@@ -1963,21 +2104,33 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
  end if ! .not.do_antiresonant
  ! Addition VT bands decomposition
  if (do_decompo) then
-   ABI_FREE(inter2w_bands)
-   ABI_FREE(inter2w_bands_ik)
-   ABI_FREE(inter1w_bands)
-   ABI_FREE(inter1w_bands_ik)
-   ABI_FREE(intra2w_bands)
-   ABI_FREE(intra2w_bands_ik)
-   ABI_FREE(intra1w_bands)
-   ABI_FREE(intra1w_bands_ik)
-   ABI_FREE(intra1wS_bands)
-   ABI_FREE(intra1wS_bands_ik)
-   ! Addition VT 2bands interactions decomposition
-   ABI_FREE(intra2w_2bands)
-   ABI_FREE(intra2w_2bands_ik)
-   ABI_FREE(intra1wS_2bands)
-   ABI_FREE(intra1wS_2bands_ik)
+   if (contrib_decompo==0 .or. contrib_decompo==12) then
+     ABI_FREE(inter2w_bands)
+     ABI_FREE(inter2w_bands_ik)
+   end if
+   if (contrib_decompo==0 .or. contrib_decompo==11) then
+     ABI_FREE(inter1w_bands)
+     ABI_FREE(inter1w_bands_ik)
+   end if
+   if (contrib_decompo==0 .or. contrib_decompo==22) then
+     ABI_FREE(intra2w_bands)
+     ABI_FREE(intra2w_bands_ik)
+   end if
+   if (contrib_decompo==0 .or. contrib_decompo==21) then
+     ABI_FREE(intra1w_bands)
+     ABI_FREE(intra1w_bands_ik)
+   end if
+   if (contrib_decompo==0 .or. contrib_decompo==1) then
+     ABI_FREE(intra1wS_bands)
+     ABI_FREE(intra1wS_bands_ik)
+   end if
+   if (contrib_decompo==0 .or. contrib_decompo==2) then
+     ! Addition VT 2bands interactions decomposition
+     ABI_FREE(intra2w_2bands)
+     ABI_FREE(intra2w_2bands_ik)
+     ABI_FREE(intra1wS_2bands)
+     ABI_FREE(intra1wS_2bands_ik)
+   end if
  end if ! (do_decompo)
 
 end subroutine nlinopt
