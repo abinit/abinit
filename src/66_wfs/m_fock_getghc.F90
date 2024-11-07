@@ -542,8 +542,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
    qeq0=(qvec_j(1)**2+qvec_j(2)**2+qvec_j(3)**2<1.d-15)
 
    ! Get the Coulomb interaction in reciprocal space
-   call bare_vqg(qvec_j,fockcommon%gsqcut,gs_ham%gmet,fockcommon%usepaw,fockcommon%hyb_mixing,&
-&   fockcommon%hyb_mixing_sr,fockcommon%hyb_range_fock,nfftf,fockbz%nkpt_bz,ngfftf,gs_ham%ucvol,vqg)
+   call bare_vqg(qvec_j,fockcommon,gs_ham%gmet,nfftf,fockbz%nkpt_bz,ngfftf,gs_ham%ucvol,vqg)
 #ifdef HAVE_OPENMP_OFFLOAD
    !$OMP TARGET UPDATE TO(vqg) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
