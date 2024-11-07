@@ -1,6 +1,6 @@
 
-.Version 10.3.1.3 of ABINIT, released Nov 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.Version 10.1.1.1 of ABINIT, released Nov 2024.
+.(sequential version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -15,9 +15,9 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Thu  7 Nov 2024.
-- ( at 08h37 )
+- ( at 20h41 )
   
-- input  file    -> t20.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_serial/blanchet_ftxc/tests/TestBot_MPI1/v10_t20/t20.abi
 - output file    -> t20.abo
 - root for input  files -> t20i
 - root for output files -> t20o
@@ -59,10 +59,10 @@ _ WF disk file :      0.019 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file
--  max_nthreads =    1
+-  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
             acell      3.0000000000E+00  3.0000000000E+00  3.0000000000E+00 Bohr
@@ -70,7 +70,7 @@ _ WF disk file :      0.019 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
       chksymbreak           0
            dipdip           0
              ecut      1.00000000E+01 Hartree
--          fftalg         312
+-          fftalg         512
               ixc1         51
               ixc2         60
            jdtset        1    2
@@ -133,7 +133,7 @@ P           mkmem           1
 
 ================================================================================
 == DATASET  1 ==================================================================
--   mpi_nproc: 1, omp_nthreads: 1 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -167,8 +167,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/blancheta/git/abinit/build/../tests//Psps_for_tests/H.psp8
-- pspatm: opening atomic psp file    /home/blancheta/git/abinit/build/../tests//Psps_for_tests/H.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/blanchet_ftxc/tests/Psps_for_tests/H.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/blanchet_ftxc/tests/Psps_for_tests/H.psp8
 - H     ONCVPSP  r_core=  1.01  0.71
 -  1.00000   1.00000    161003                znucl, zion, pspdat
     8   11    1    4       300   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -195,10 +195,10 @@ tolerances: {toldfe: 1.00E-10, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1 -0.89987825579868    -8.999E-01 7.220E-04 1.117E-02
+ ETOT  1 -0.89987825579869    -8.999E-01 7.220E-04 1.117E-02
  ETOT  2 -0.89987927760319    -1.022E-06 1.235E-06 4.384E-05
- ETOT  3 -0.89987929327819    -1.568E-08 9.531E-08 1.625E-07
- ETOT  4 -0.89987929337385    -9.565E-11 6.359E-10 3.845E-11
+ ETOT  3 -0.89987929327819    -1.567E-08 9.531E-08 1.625E-07
+ ETOT  4 -0.89987929337385    -9.566E-11 6.359E-10 3.845E-11
  ETOT  5 -0.89987929337385    -6.328E-15 1.053E-11 1.164E-13
 
  At SCF step    5, etot is converged : 
@@ -244,7 +244,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   36.480E-14; max=  10.528E-12
+ Mean square residual over all n,k,spin=   36.481E-14; max=  10.528E-12
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -279,36 +279,36 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  6.65703767204570E-01
-hartree             :  1.19379087174083E-02
-xc                  : -3.21507621763502E-01
+kinetic             :  6.65703767204574E-01
+hartree             :  1.19379087174084E-02
+xc                  : -3.21507621763504E-01
 Ewald energy        : -4.72882913246778E-01
 psp_core            :  1.34075496566468E-02
-local_psp           : -1.48072893307897E-01
-non_local_psp       : -5.16696111290509E-02
-internal            : -3.03083813868603E-01
-'-kT*entropy'       : -5.96795479505251E-01
+local_psp           : -1.48072893307898E-01
+non_local_psp       : -5.16696111290512E-02
+internal            : -3.03083813868601E-01
+'-kT*entropy'       : -5.96795479505253E-01
 total_energy        : -8.99879293373854E-01
 total_energy_eV     : -2.44869608796615E+01
-band_energy         :  1.01354909819662E-01
+band_energy         :  1.01354909819663E-01
 ...
 
 
 --- !EntropyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total entropy
-noninteracting      :  2.00766641196274E+00
+noninteracting      :  2.00766641196275E+00
 xc                  : -1.23137633343843E-01
-total_entropy       :  1.88452877861890E+00
+total_entropy       :  1.88452877861891E+00
 ...
 
 
 --- !FTXCEnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total xc energy in Hartree
-internal_xc         : -3.21507621763502E-01
-'-kT*entropy_xc'    :  3.89954156022159E-02
-free_xc             : -2.82512206161286E-01
+internal_xc         : -3.21507621763504E-01
+'-kT*entropy_xc'    :  3.89954156022161E-02
+free_xc             : -2.82512206161288E-01
 ...
 
 
@@ -324,7 +324,7 @@ free_xc             : -2.82512206161286E-01
 
 ================================================================================
 == DATASET  2 ==================================================================
--   mpi_nproc: 1, omp_nthreads: 1 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -358,8 +358,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/blancheta/git/abinit/build/../tests//Psps_for_tests/H.psp8
-- pspatm: opening atomic psp file    /home/blancheta/git/abinit/build/../tests//Psps_for_tests/H.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/blanchet_ftxc/tests/Psps_for_tests/H.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/blanchet_ftxc/tests/Psps_for_tests/H.psp8
 - H     ONCVPSP  r_core=  1.01  0.71
 -  1.00000   1.00000    161003                znucl, zion, pspdat
     8   11    1    4       300   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -385,15 +385,15 @@ tolerances: {toldfe: 1.00E-10, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1 -0.89812213198565    -8.981E-01 1.000E-03 1.698E-01
- ETOT  2 -0.89813833950578    -1.621E-05 1.710E-06 7.149E-04
+ ETOT  1 -0.89812213198567    -8.981E-01 1.000E-03 1.698E-01
+ ETOT  2 -0.89813833950579    -1.621E-05 1.710E-06 7.149E-04
  ETOT  3 -0.89813859166851    -2.522E-07 3.115E-06 6.990E-06
  ETOT  4 -0.89813859625619    -4.588E-09 1.521E-08 3.653E-08
  ETOT  5 -0.89813859628265    -2.646E-11 3.710E-09 1.121E-11
- ETOT  6 -0.89813859628266    -2.665E-15 1.652E-11 8.752E-16
+ ETOT  6 -0.89813859628266    -2.554E-15 1.652E-11 8.752E-16
 
  At SCF step    6, etot is converged : 
-  for the second time, diff in etot=  2.665E-15 < toldfe=  1.000E-10
+  for the second time, diff in etot=  2.554E-15 < toldfe=  1.000E-10
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -4.26292475E-03  sigma(3 2)=  0.00000000E+00
@@ -411,7 +411,7 @@ lattice_vectors:
 lattice_lengths: [   3.00000,    3.00000,    3.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7000000E+01
-convergence: {deltae: -2.665E-15, res2:  8.752E-16, residm:  1.652E-11, diffor: null, }
+convergence: {deltae: -2.554E-15, res2:  8.752E-16, residm:  1.652E-11, diffor: null, }
 etotal    :  -8.98138596E-01
 entropy   :   0.00000000E+00
 fermie    :  -1.36033834E-01
@@ -481,7 +481,7 @@ internal            : -3.09762403874327E-01
 '-kT*entropy'       : -5.88376192408330E-01
 total_energy        : -8.98138596282657E-01
 total_energy_eV     : -2.44395941029290E+01
-band_energy         :  9.75596757027442E-02
+band_energy         :  9.75596757027425E-02
 ...
 
 
@@ -526,7 +526,7 @@ free_xc             : -2.80719058922945E-01
            etotal2    -8.9813859628E-01
             fcart1    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart2    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
--          fftalg         312
+-          fftalg         512
               ixc1         51
               ixc2         60
            jdtset        1    2
@@ -592,10 +592,70 @@ P           mkmem           1
 
 ================================================================================
 
+- Total cpu        time (s,m,h):          0.8        0.01      0.000
+- Total wall clock time (s,m,h):          0.8        0.01      0.000
+-
+- For major independent code sections, cpu and wall times (sec),
+-  as well as % of the time and number of calls for node 0
+-
+-<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
+- cpu_time =            0.8, wall_time =            0.8
+-
+- routine                                    cpu     %          wall   %        number of calls Gflops    Speedup Efficacity
+-                                                                                (-1=no count)
+- timing timab                              0.124  15.9         0.124  15.1              9      -1.00        1.00       1.00
+- pspini                                    0.112  14.4         0.113  13.8              2      -1.00        0.99       0.99
+- fourwf%(pot)                              0.076   9.7         0.120  14.6           1534      -1.00        0.63       0.63
+- stress                                    0.069   8.8         0.069   8.4              2      -1.00        1.00       1.00
+- ewald2 (+vdw_dftd)                        0.069   8.8         0.069   8.4              2      -1.00        0.99       0.99
+- ewald                                     0.060   7.7         0.059   7.2              2      -1.00        1.01       1.01
+- get_dtsets_pspheads                       0.043   5.5         0.043   5.2              1      -1.00        0.99       0.99
+- vtowfk(ssdiag)                            0.040   5.1         0.038   4.6             -1      -1.00        1.05       1.05
+- abinit(after driver)                      0.019   2.5         0.019   2.3              1      -1.00        1.02       1.02
+- nonlop(apply)                             0.015   2.0         0.020   2.4           1534      -1.00        0.77       0.77
+- getghc(/=fourXX,nonlop,fock_XX)           0.015   1.9         0.013   1.6             -1      -1.00        1.14       1.14
+- abinit(chkinp,chkvars)                    0.015   1.9         0.015   1.8              1      -1.00        0.98       0.98
+- abinit(outvars)                           0.014   1.8         0.014   1.7              1      -1.00        1.01       1.01
+- projbd                                    0.014   1.8         0.007   0.9           2168      -1.00        1.98       1.98
+- xc:pot/=fourdp                            0.012   1.5         0.014   1.7             13      -1.00        0.84       0.84
+- fourdp                                    0.005   0.7         0.005   0.6            113      -1.00        1.07       1.07
+- fourwf%(den)                              0.005   0.7         0.008   1.0            220      -1.00        0.63       0.63
+- newkpt(excl. rwwf   )                     0.004   0.5         0.005   0.6             -1      -1.00        0.78       0.78
+- others (141)                              0.011   1.5         0.008   1.0             -1      -1.00        1.41       1.41
+-<END_TIMER>
+-
+- subtotal                                  0.720  92.6         0.763  93.0                                  0.94       0.94
 
-- Timing analysis has been suppressed with timopt=0
+- For major independent code sections, cpu and wall times (sec),
+- as well as % of the total time and number of calls 
 
+-<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
+- cpu_time =           0.8, wall_time =           0.8
+-
+- routine                                    cpu     %          wall   %        number of calls Gflops    Speedup Efficacity
+-                                                                                (-1=no count)
+- timing timab                              0.124  15.9         0.124  15.1              9      -1.00        1.00       1.00
+- pspini                                    0.112  14.4         0.113  13.8              2      -1.00        0.99       0.99
+- fourwf%(pot)                              0.076   9.7         0.120  14.6           1534      -1.00        0.63       0.63
+- stress                                    0.069   8.8         0.069   8.4              2      -1.00        1.00       1.00
+- ewald2 (+vdw_dftd)                        0.069   8.8         0.069   8.4              2      -1.00        0.99       0.99
+- ewald                                     0.060   7.7         0.059   7.2              2      -1.00        1.01       1.01
+- get_dtsets_pspheads                       0.043   5.5         0.043   5.2              1      -1.00        0.99       0.99
+- vtowfk(ssdiag)                            0.040   5.1         0.038   4.6             -1      -1.00        1.05       1.05
+- abinit(after driver)                      0.019   2.5         0.019   2.3              1      -1.00        1.02       1.02
+- nonlop(apply)                             0.015   2.0         0.020   2.4           1534      -1.00        0.77       0.77
+- getghc(/=fourXX,nonlop,fock_XX)           0.015   1.9         0.013   1.6             -1      -1.00        1.14       1.14
+- abinit(chkinp,chkvars)                    0.015   1.9         0.015   1.8              1      -1.00        0.98       0.98
+- abinit(outvars)                           0.014   1.8         0.014   1.7              1      -1.00        1.01       1.01
+- projbd                                    0.014   1.8         0.007   0.9           2168      -1.00        1.98       1.98
+- xc:pot/=fourdp                            0.012   1.5         0.014   1.7             13      -1.00        0.84       0.84
+- fourdp                                    0.005   0.7         0.005   0.6            113      -1.00        1.07       1.07
+- fourwf%(den)                              0.005   0.7         0.008   1.0            220      -1.00        0.63       0.63
+- newkpt(excl. rwwf   )                     0.004   0.5         0.005   0.6             -1      -1.00        0.78       0.78
+- others (141)                              0.011   1.5         0.008   1.0             -1      -1.00        1.41       1.41
+-<END_TIMER>
 
+- subtotal                                  0.720  92.6         0.763  93.0                                  0.94       0.94
 
 ================================================================================
 
@@ -684,10 +744,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          0.4  wall=          0.4
+- Proc.   0 individual time (sec): cpu=          0.8  wall=          0.8
 
 ================================================================================
 
  Calculation completed.
-.Delivered   2 WARNINGs and   8 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          0.4  wall=          0.4
+.Delivered   3 WARNINGs and   6 COMMENTs to log file.
++Overall time at end (sec) : cpu=          0.8  wall=          0.8
