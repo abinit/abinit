@@ -7,7 +7,7 @@
 !!  of Coulomb interactions in the PAW approach.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2024 K. Haule 
+!! Copyright (C) 2024 K. Haule
 !! These routines were translated from embedded DMFT.
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
@@ -32,7 +32,7 @@ MODULE m_paw_yukawa
 
  private
 
- public :: compute_slater   
+ public :: compute_slater
  public :: get_lambda
 
 CONTAINS  !========================================================================================
@@ -45,14 +45,14 @@ CONTAINS  !=====================================================================
 !! FUNCTION
 !!
 !! Compute Slater integrals for a screened Yukawa potential v(r,r') = exp(-lambda*(r-r'))/(epsilon*(r-r'))
-!! This is eq. 36 in the supplementary of Physical review letters, Haule, K. (2015), 115(19), 196403 
+!! This is eq. 36 in the supplementary of Physical review letters, Haule, K. (2015), 115(19), 196403
 !!
 !! INPUTS
-!!  lpawu = angular momentum 
+!!  lpawu = angular momentum
 !!  pawrad <type(pawrad_type)>=paw radial mesh and related data:
 !!     %mesh_size=Dimension of radial mesh
 !!     %rad(mesh_size)=The coordinates of all the points of the radial mesh
-!!  proj2 = u(r)**2 where u(r) is the atomic orbital multiplied by r  
+!!  proj2 = u(r)**2 where u(r) is the atomic orbital multiplied by r
 !!  meshsz = size of the radial mesh
 !!  lambda, eps = parameters of the Yukawa potential
 !!
@@ -62,7 +62,7 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
  subroutine compute_slater(lpawu,pawrad,proj2,meshsz,lambda,eps,fk)
- 
+
  use m_pawrad, only : pawrad_type,simp_gen
  use m_bessel2, only : bessel_iv,bessel_kv
 
@@ -78,50 +78,50 @@ CONTAINS  !=====================================================================
  real(dp), allocatable :: u_inside(:),u_outside(:),y1(:),y2(:)
  !************************************************************************
 
- mesh_type  = pawrad%mesh_type 
+ mesh_type  = pawrad%mesh_type
  r_for_intg = pawrad%rad(meshsz)
- ABI_MALLOC(u_inside,(meshsz)) 
- ABI_MALLOC(u_outside,(meshsz)) 
+ ABI_MALLOC(u_inside,(meshsz))
+ ABI_MALLOC(u_outside,(meshsz))
 
  if (lambda == zero) then
    do k=0,2*lpawu+1,2
      u_inside(1) = zero
      do ir=2,meshsz
        if (ir == 2) then
-         ! Use a trapezoidal rule 
+         ! Use a trapezoidal rule
          u_inside(ir) = half * (proj2(1)*(pawrad%rad(1)**k)+proj2(2)*(pawrad%rad(2)**k)) * &
                  & (pawrad%rad(2)-pawrad%rad(1))
-       else if (ir == 3 .and. mesh_type == 3) then 
+       else if (ir == 3 .and. mesh_type == 3) then
          ! simp_gen doesn't handle this case, so we use a trapezoidal rule instead
          u_inside(ir) = u_inside(2) + half*(proj2(2)*(pawrad%rad(2)**k)+proj2(3)*(pawrad%rad(3)**k))* &
                  & (pawrad%rad(3)-pawrad%rad(2))
-       else 
-         ! Use Simpson rule when enough points are available 
+       else
+         ! Use Simpson rule when enough points are available
          call simp_gen(u_inside(ir),proj2(1:ir)*(pawrad%rad(1:ir)**k),pawrad,r_for_intg=pawrad%rad(ir))
-       end if ! ir=2 
+       end if ! ir=2
      end do ! ir
      u_outside(1) = zero
      u_outside(2:meshsz) = two * u_inside(2:meshsz) * proj2(2:meshsz) / (pawrad%rad(2:meshsz)**(k+1))
-     call simp_gen(fk(k/2+1),u_outside(:),pawrad,r_for_intg=r_for_intg) 
+     call simp_gen(fk(k/2+1),u_outside(:),pawrad,r_for_intg=r_for_intg)
    end do ! k
 
  else
- 
-   ABI_MALLOC(y1,(meshsz)) 
+
+   ABI_MALLOC(y1,(meshsz))
    ABI_MALLOC(y2,(meshsz))
- 
+
    do k=0,2*lpawu+1,2
-    
+
      y0 = zero
      if (k == 0) y0 = lambda * sqrt(two/pi)
-     y1(1) = y0 
+     y1(1) = y0
      u_inside(1) = zero
-     
+
      do ir=2,meshsz
-     
+
        call bessel_iv(half+dble(k),lambda*pawrad%rad(ir),zero,y1(ir),dum)
        y1(ir) = y1(ir) / sqrt(pawrad%rad(ir))
-       
+
        if (ir == 2) then
          ! Use a trapezoidal rule
          u_inside(ir) = half * (proj2(1)*y1(1)+proj2(2)*y1(2)) * &
@@ -134,26 +134,26 @@ CONTAINS  !=====================================================================
          ! Use Simpson rule when enough points are available
          call simp_gen(u_inside(ir),proj2(1:ir)*y1(1:ir),pawrad,r_for_intg=pawrad%rad(ir))
        end if ! ir
-       
+
        call bessel_kv(half+dble(k),lambda*pawrad%rad(ir),zero,y2(ir),dum)
        y2(ir) = y2(ir) / sqrt(pawrad%rad(ir))
      end do ! ir
-     
+
      u_outside(1) = zero
      u_outside(2:meshsz) = two * (two*dble(k)+one)*u_inside(2:meshsz)*proj2(2:meshsz)*y2(2:meshsz)
      call simp_gen(fk(k/2+1),u_outside(:),pawrad,r_for_intg=r_for_intg)
-     
+
    end do ! k
-   
+
    ABI_FREE(y1)
    ABI_FREE(y2)
-   
+
  end if ! lambda
 
  fk(1:lpawu+1) = fk(1:lpawu+1) / eps
 
- ABI_FREE(u_inside) 
- ABI_FREE(u_outside) 
+ ABI_FREE(u_inside)
+ ABI_FREE(u_outside)
 
  end subroutine compute_slater
 !!***
@@ -166,7 +166,7 @@ CONTAINS  !=====================================================================
 !!
 !! FUNCTION
 !!
-!! Conversion from U,J,f4/f2,f6/f2 parametrization of Slater integrals 
+!! Conversion from U,J,f4/f2,f6/f2 parametrization of Slater integrals
 !! to lambda,epsilon parametrization, with lambda and epsilon the parameters
 !! of the screened Yukawa potential v(r,r') = exp(-lambda*(r-r'))/(epsilon*(r-r')).
 !!
@@ -176,13 +176,13 @@ CONTAINS  !=====================================================================
 !! CAREFUL: For l>=2 we lose information since we have more input parameters than output
 !!          parameters. In this case, a compromise has to be made, and you will no longer
 !!          have the exact same Slater integrals as before.
-!!         
+!!
 !! INPUTS
-!!  lpawu = angular momentum 
+!!  lpawu = angular momentum
 !!  pawrad <type(pawrad_type)>=paw radial mesh and related data:
 !!     %mesh_size=Dimension of radial mesh
 !!     %rad(mesh_size)=The coordinates of all the points of the radial mesh
-!!  proj2 = u(r)**2 where u(r) is the atomic orbital multiplied by r  
+!!  proj2 = u(r)**2 where u(r) is the atomic orbital multiplied by r
 !!  meshsz = size of the radial mesh
 !!  upawu,jpawu = parameters for Slater integrals
 !!
@@ -192,7 +192,7 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
  subroutine get_lambda(lpawu,pawrad,proj2,meshsz,upawu,jpawu,lambda,eps)
- 
+
  use m_brentq, only : brentq
  use m_hybrd, only : hybrd
 
@@ -209,7 +209,7 @@ CONTAINS  !=====================================================================
  real(dp) :: r(3),qtf(2),wa1(2),wa2(2),wa3(2),wa4(2)
  character(len=500) :: message
  !************************************************************************
- 
+
  ! Find suitable upper bound for brentq routine
  upbound = five
  do i=1,10
@@ -217,7 +217,7 @@ CONTAINS  !=====================================================================
    call compute_slater(lpawu,pawrad,proj2(:),meshsz,upbound,one,fkk(:))
    if (fkk(1) < upawu) exit
    upbound = two * upbound
- 
+
  end do ! i
 
  if (fkk(1) > upawu) ABI_ERROR("Could not find a suitable lambda in get_lambda subroutine")
@@ -228,36 +228,36 @@ CONTAINS  !=====================================================================
  if (ierr == 0) ABI_ERROR("The brentq method did not converge in the get_lambda subroutine")
 
  ! Initial values for lambda and epsilon
- lmb_eps(1) = lmb_temp 
+ lmb_eps(1) = lmb_temp
  lmb_eps(2) = one
 
  if (lpawu > 0) then
- 
+
    ! Default values from scipy
-   epsfcn = epsilon(one) ; fac = dble(100.) 
+   epsfcn = epsilon(one) ; fac = dble(100.)
    ldfjac = n ; lr = n * (n+1) / 2
    maxfev = 200 * (n+1) ; ml = n - 1 ; mode = 1
-   mu = n - 1 ; n = 2 ; nprint = 0 
+   mu = n - 1 ; n = 2 ; nprint = 0
    xtol = dble(1.49012e-8)
 
    ! Now find lambda and epsilon
    call hybrd(get_coulomb_uj,2,lmb_eps(:),fvec(:),xtol,maxfev,ml,mu,epsfcn,diag(:),mode, &
             & fac,nprint,info,nfev,fjac(:,:),ldfjac,r(:),lr,qtf(:),wa1(:),wa2(:),wa3(:),wa4(:))
-  
+
    if (info /= 1) then
      write(message,*) "Error in hybrd, info is equal to",info
      ABI_ERROR(message)
    end if
- 
+
  end if ! lpawu > 0
 
- lambda = lmb_eps(1) 
+ lambda = lmb_eps(1)
  eps    = lmb_eps(2)
 
  contains
 
  subroutine get_coulomb_u(lmb,uu)
- 
+
 !Arguments ------------------------------------
  real(dp), intent(in) :: lmb
  real(dp), intent(out) :: uu
@@ -267,7 +267,7 @@ CONTAINS  !=====================================================================
 
  call compute_slater(lpawu,pawrad,proj2(:),meshsz,lmb,one,fk(:))
  uu = fk(1) - upawu
- 
+
  end subroutine get_coulomb_u
 
  subroutine get_coulomb_uj(n,lmb_eps,uj,iflag)
@@ -284,33 +284,33 @@ CONTAINS  !=====================================================================
 
  ABI_UNUSED(iflag)
 
- lmb = lmb_eps(1) 
+ lmb = lmb_eps(1)
  eps = lmb_eps(2)
  call compute_slater(lpawu,pawrad,proj2(:),meshsz,lmb,eps,fk(:))
  uj(1) = fk(1) - upawu
 
  if (lpawu == 1) then
-   j2 = fk(2) * fifth 
+   j2 = fk(2) * fifth
    jh = j2
  else if (lpawu == 2) then
-   f4of2  = dble(0.625) 
+   f4of2  = dble(0.625)
    factor = (one+f4of2) / dble(14)
-   j2 = fk(2) 
+   j2 = fk(2)
    j4 = fk(3) / f4of2
    jh = (j2+j4) * factor * half
  else if (lpawu == 3) then
-   f4of2  = dble(0.6681) 
-   f6of2  = dble(0.4943) 
+   f4of2  = dble(0.6681)
+   f6of2  = dble(0.4943)
    factor = (dble(286.)+dble(195.)*f4of2+dble(250.)*f6of2) / dble(6435.)
-   j2 = fk(2)  
-   j4 = fk(3) / f4of2 
-   j6 = fk(4) / f6of2 
+   j2 = fk(2)
+   j4 = fk(3) / f4of2
+   j6 = fk(4) / f6of2
    jh = (j2+j4+j6) * factor * third
  else
    write(message,'(a,i0,2a)') ' lpawu=',lpawu,ch10,' lpawu not equal to 0, 1, 2 or 3 is not allowed'
    ABI_ERROR(message)
  end if ! lpawu
-         
+
  uj(2) = jh - jpawu
 
  end subroutine get_coulomb_uj

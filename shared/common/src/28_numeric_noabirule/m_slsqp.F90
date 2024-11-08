@@ -328,7 +328,7 @@ CONTAINS  !=====================================================================
        alpha, f0, gs, h1, h2, h3, h4, t, t0, tol, &
        iexact, incons, ireset, itermx, line, &
        n1, n2, n3)
- 
+
       END SUBROUTINE slsqp
 
       SUBROUTINE slsqpb (m, meq, la, n, x, xl, xu, f, c, g, a, acc,  &
@@ -649,7 +649,7 @@ CONTAINS  !=====================================================================
 
 !C   END OF SLSQPB
 
-  330 continue 
+  330 continue
       END SUBROUTINE slsqpb
 
 
@@ -999,8 +999,8 @@ CONTAINS  !=====================================================================
 
 !C  END OF SUBROUTINE LSEI
 
-   75 CONTINUE                              
-   
+   75 CONTINUE
+
       END SUBROUTINE lsei
 
       SUBROUTINE lsi(e,f,g,h,LE,me,lg,mg,n,x,xnorm,w,jw,mode)
@@ -1082,8 +1082,8 @@ CONTAINS  !=====================================================================
 
 !C  END OF SUBROUTINE LSI
 
-   50 CONTINUE                                   
-   
+   50 CONTINUE
+
       END SUBROUTINE lsi
 
       SUBROUTINE ldp(g,mg,m,n,h,x,xnorm,w,INDEX,mode)
@@ -1147,7 +1147,7 @@ CONTAINS  !=====================================================================
    10     CONTINUE
           iw=iw+1
           w(iw)=h(j)
-   20 CONTINUE    
+   20 CONTINUE
       IF=iw+1
       DO 30 i=1,n
           iw=iw+1
@@ -1186,8 +1186,8 @@ CONTAINS  !=====================================================================
 
 !C  END OF SUBROUTINE LDP
 
-   50 CONTINUE                        
-   
+   50 CONTINUE
+
       END SUBROUTINE ldp
 
 
@@ -1390,8 +1390,8 @@ CONTAINS  !=====================================================================
 
 !C END OF SUBROUTINE NNLS
 
-  290 CONTINUE                               
-  
+  290 CONTINUE
+
       END SUBROUTINE nnls
 
       SUBROUTINE hfti(a,mda,m,n,b,mdb,nb,tau,krank,rnorm,h,g,ip)
@@ -1619,8 +1619,8 @@ CONTAINS  !=====================================================================
               i4=i4+ice
    60         CONTINUE
    70     CONTINUE
-   80     CONTINUE                                    
-   
+   80     CONTINUE
+
       END SUBROUTINE h12
 
       SUBROUTINE ldl (n,a,z,sigma,w)
@@ -2113,7 +2113,7 @@ CONTAINS  !=====================================================================
          dnrm2_  = ZERO
          GO TO 300
 
-   10 next = 30 
+   10 next = 30
       sum = ZERO
       nn = n * incx
 !C                       BEGIN MAIN LOOP
@@ -2123,7 +2123,7 @@ CONTAINS  !=====================================================================
       IF( next .EQ. 70) GO TO 70
       IF( next .EQ. 110) GO TO 110
    30 IF( ABS(dx(i)) .GT. cutlo) GO TO 85
-      next = 50 
+      next = 50
       xmax = ZERO
 
 !C                        PHASE 1.  SUM IS ZERO
@@ -2133,13 +2133,13 @@ CONTAINS  !=====================================================================
 
 !C                        PREPARE FOR PHASE 2.
 
-      next = 70 
+      next = 70
       GO TO 105
 
 !C                        PREPARE FOR PHASE 4.
 
   100 i = j
-      next = 110 
+      next = 110
       sum = (sum / dx(i)) / dx(i)
   105 xmax = ABS(dx(i))
       GO TO 115
@@ -2310,7 +2310,7 @@ CONTAINS  !=====================================================================
          end if
       end do
       end subroutine bound
-      
+
 !----------------------------------------------------------------------
 
 END MODULE m_slsqp

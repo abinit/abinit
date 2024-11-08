@@ -7,7 +7,7 @@
 !!
 !! COPYRIGHT
 !! Copyright (C) 2020 Kristjan Haule
-!! These routines were translated from embedded DMFT. 
+!! These routines were translated from embedded DMFT.
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -51,19 +51,19 @@ CONTAINS  !=====================================================================
 !!  lpawu = angular momentum for correlated species
 !!  pawtab <type(pawtab_type)>=paw tabulated starting data
 !!  pawrad <type(pawrad_type)>=paw radial mesh and related data
-!!  occ(2*lpawu+1,2*lpawu+1) = occupation matrix (summed over spins) in 
-!!    the real spherical harmonics basis, with the convention 
+!!  occ(2*lpawu+1,2*lpawu+1) = occupation matrix (summed over spins) in
+!!    the real spherical harmonics basis, with the convention
 !!    occ(i,j) = <c_j^dagger c_i>
 !!
 !! OUTPUT
-!!  vdc(2*lpawu+1,2*lpawu+1) = double counting potential 
+!!  vdc(2*lpawu+1,2*lpawu+1) = double counting potential
 !!  edc = double counting energy
 !!  edcdc = integral of Vdc(r)*rho_loc(r)
 !!
 !! SOURCE
 
  subroutine compute_exactDC(lpawu,pawtab,pawrad,occ,vdc,edc,edcdc)
- 
+
  use m_pawtab, only : pawtab_type
  use m_pawrad, only : pawrad_type,simp_gen
  use m_paw_sphharm, only : ylmc
@@ -85,48 +85,48 @@ CONTAINS  !=====================================================================
  !************************************************************************
 
  ! VERY IMPORTANT: This routine assumes that we work in the real spherical harmonic case.
- ! If you want to generalize that to the complex case for some reason, the formulas 
+ ! If you want to generalize that to the complex case for some reason, the formulas
  ! below are not valid, so you would need to add some complex conjugates.
 
  ln = 13  ! Size of angular mesh, same as eDMFT
  meshsz = size(pawtab%proj2(:)) ! Size of radial mesh
  ndim = 2*lpawu + 1
- 
- ABI_MALLOC(exc,(ln+1,2*ln+1,meshsz)) 
+
+ ABI_MALLOC(exc,(ln+1,2*ln+1,meshsz))
  ABI_MALLOC(exci,(meshsz))
- ABI_MALLOC(phis,(2*ln+1)) 
+ ABI_MALLOC(phis,(2*ln+1))
  ABI_MALLOC(rho_angle,(ln+1,2*ln+1))
- ABI_MALLOC(thetas,(ln+1)) 
+ ABI_MALLOC(thetas,(ln+1))
  ABI_MALLOC(tweights,(ln+1))
  ABI_MALLOC(vxc,(ln+1,2*ln+1,meshsz))
- ABI_MALLOC(vxci,(meshsz,ndim,ndim)) 
- ABI_MALLOC(ylm,(ln+1,2*ln+1,ndim)) 
+ ABI_MALLOC(vxci,(meshsz,ndim,ndim))
+ ABI_MALLOC(ylm,(ln+1,2*ln+1,ndim))
 
  vdc(:,:) = czero
  edc = zero
- 
+
  ! Hartree contribution
- 
+
  do l=1,ndim
    do j=1,ndim
      do k=1,ndim
        do i=1,ndim
          ! In the complex case, you should use conjg(pawtab%vee(i,k,j,l))
-         vdc(i,j) = vdc(i,j) + pawtab%vee(i,k,j,l)*occ(k,l) 
+         vdc(i,j) = vdc(i,j) + pawtab%vee(i,k,j,l)*occ(k,l)
          edc = edc + pawtab%vee(i,k,j,l)*dble(occ(i,j)*occ(k,l))
        end do ! i
      end do ! k
    end do ! j
- end do ! l 
+ end do ! l
 
  edc = half * edc
- 
+
  ! XC contribution
 
- ! Prepare angular mesh 
- call tfpoint(thetas(:),phis(:),tweights(:),ln) 
+ ! Prepare angular mesh
+ call tfpoint(thetas(:),phis(:),tweights(:),ln)
 
- ! Compute the real spherical harmonics on the angular mesh 
+ ! Compute the real spherical harmonics on the angular mesh
  do m=0,lpawu
    mm = m + lpawu + 1
    minusm = - m + lpawu + 1
@@ -135,42 +135,42 @@ CONTAINS  !=====================================================================
      do i=1,ln+1
        theta = thetas(i)
        ! The definition of theta and phi is swapped in ylmc
-       kcart(1) = cos(phi) * sin(theta) 
-       kcart(2) = sin(phi) * sin(theta) 
+       kcart(1) = cos(phi) * sin(theta)
+       kcart(2) = sin(phi) * sin(theta)
        kcart(3) = cos(theta)
        ylm_c = ylmc(lpawu,m,kcart(:))
        ! Convert complex harmonics to real harmonics
-       if (m == 0) then 
+       if (m == 0) then
          ylm(i,j,mm) = dble(ylm_c)
-       else 
-         ylm(i,j,mm) = (-one)**m * sqrt2 * dble(ylm_c) 
+       else
+         ylm(i,j,mm) = (-one)**m * sqrt2 * dble(ylm_c)
          ylm(i,j,minusm) = (-one)**m * sqrt2 * aimag(ylm_c)
        end if ! m=0
      end do ! i
    end do ! j
  end do ! m
- 
+
  rho_angle(:,:) = zero
- 
+
  do m1=1,ndim
    do m=1,ndim
-     ! In the complex case, you should use ylm(:,:,m)*conjg(ylm(:,:,m1)) 
+     ! In the complex case, you should use ylm(:,:,m)*conjg(ylm(:,:,m1))
      rho_angle(:,:) = rho_angle(:,:) + dble(occ(m,m1))*ylm(:,:,m)*ylm(:,:,m1)
    end do ! m
  end do ! m1
-  
+
  do ir=1,meshsz
    do j=1,2*ln+1
      do i=1,ln+1
        rho = rho_angle(i,j) * pawtab%proj2(ir) / (max(pawrad%rad(ir),epsilon(one))**2)
-       rs1 = (four_pi * rho / three)**(third) 
+       rs1 = (four_pi * rho / three)**(third)
        rs1s(1) = rs1
        call ExchangeLDA(exx(:),vxx(:),rs1s(:),pawtab%lambda,1)
        exc(i,j,ir) = exx(1) * half / pawtab%eps ! convert from Rydberg to Hartree
        vxc(i,j,ir) = vxx(1) * half / pawtab%eps
        rs1s(1) = one / (max(rs1,epsilon(one)))
        call CorrLDA_2(ecc(:),vcc(:),rs1s(:),pawtab%lambda,pawtab%eps,1)
-       exc(i,j,ir) = exc(i,j,ir) + ecc(1)*half 
+       exc(i,j,ir) = exc(i,j,ir) + ecc(1)*half
        vxc(i,j,ir) = vxc(i,j,ir) + vcc(1)*half
      end do ! i
    end do ! j
@@ -179,7 +179,7 @@ CONTAINS  !=====================================================================
  exci(:) = zero
 
  ! Integrals over theta and phi
- 
+
  do m1=1,ndim
    do m=1,ndim
      do ir=1,meshsz
@@ -192,7 +192,7 @@ CONTAINS  !=====================================================================
          sexc = sexc + two_pi*sum(ylm(:,j,m)*ylm(:,j,m1)*tweights(:)* &
               & exc(:,j,ir))*dble(occ(m,m1))/dble(2*ln+1)
        end do ! j
-       vxci(ir,m,m1) = svxc 
+       vxci(ir,m,m1) = svxc
        exci(ir) = exci(ir) + sexc
      end do ! ir
    end do ! m
@@ -207,20 +207,20 @@ CONTAINS  !=====================================================================
  do m1=1,ndim
    do m=1,ndim
      call simp_gen(vxcf,vxci(:,m,m1)*pawtab%proj2(:),pawrad,r_for_intg=pawrad%rad(meshsz))
-     vdc(m,m1) = vdc(m,m1) + cmplx(vxcf,zero,kind=dp) 
+     vdc(m,m1) = vdc(m,m1) + cmplx(vxcf,zero,kind=dp)
      edcdc = edcdc + dble(vdc(m,m1)*occ(m,m1))
    end do ! m
  end do ! m1
 
- ABI_FREE(exc) 
+ ABI_FREE(exc)
  ABI_FREE(exci)
- ABI_FREE(phis) 
+ ABI_FREE(phis)
  ABI_FREE(rho_angle)
- ABI_FREE(thetas) 
+ ABI_FREE(thetas)
  ABI_FREE(tweights)
  ABI_FREE(vxc)
- ABI_FREE(vxci) 
- ABI_FREE(ylm) 
+ ABI_FREE(vxci)
+ ABI_FREE(ylm)
 
  end subroutine compute_exactDC
 !!***
@@ -519,4 +519,4 @@ end subroutine EcVc_reduce_di_2
 
 END MODULE m_paw_exactDC
 !!***
-                                
+

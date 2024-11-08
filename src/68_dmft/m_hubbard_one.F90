@@ -81,7 +81,7 @@ subroutine hubbard_one(cryst_struc,green,hu,paw_dmft,pawprtvol,hdc,weiss)
 & diag_matlu,init_matlu,destroy_matlu,rotate_matlu,copy_matlu,slm2ylm_matlu
  use m_hu, only : destroy_vee,hu_type,init_vee,rotatevee_hu,vee_type
  use m_datafordmft, only : compute_levels
- 
+
  implicit none
 
 !Arguments ------------------------------------
@@ -249,11 +249,11 @@ subroutine hubbard_one(cryst_struc,green,hu,paw_dmft,pawprtvol,hdc,weiss)
 !  Use rotation matrix to rotate interaction
  ABI_MALLOC(vee_rotated,(natom))
  call init_vee(paw_dmft,vee_rotated)
- if(useylm==1) then 
+ if(useylm==1) then
    call rotatevee_hu(hu,paw_dmft,pawprtvol,eigvectmatlu,4,udens_atoms,vee_rotated)
  else
    call rotatevee_hu(hu,paw_dmft,pawprtvol,eigvectmatlu,1,udens_atoms,vee_rotated)
- endif 
+ endif
  call destroy_vee(paw_dmft,vee_rotated)
  ABI_FREE(vee_rotated)
 !write(std_out,*)"udens after rotatevee", udens_atoms(1)%value

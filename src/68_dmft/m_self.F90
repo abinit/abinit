@@ -24,7 +24,7 @@ MODULE m_self
  use defs_basis
  use m_errors
  use m_abicore
- 
+
  use m_paw_dmft, only : mpi_distrib_dmft_type,paw_dmft_type
  use m_matlu, only : matlu_type,print_matlu
  use m_oper, only : oper_type
@@ -56,22 +56,22 @@ MODULE m_self
 !! SOURCE
 
  type, public :: self_type ! for each atom
- 
+
   integer :: dmft_nwli
-  ! Linear index of the last imaginary frequency 
+  ! Linear index of the last imaginary frequency
 
   integer :: dmft_nwlo
   ! Number of imaginary frequencies
-  
+
   integer :: has_moments
   ! =1 if the high-frequency moments are computed
-  
+
   integer :: iself_cv
   ! Integer for convergence of self-energy
-  
+
   integer :: nmoments
-  ! Number of high-frequency moments which will be computed 
-  
+  ! Number of high-frequency moments which will be computed
+
   integer :: nw
   ! Number of frequencies (equal to dmft_nwlo only if w_type="imag")
 
@@ -86,13 +86,13 @@ MODULE m_self
 
   type(oper_type) :: hdc
   ! Operator for double counting
-  
+
   type(oper_type), allocatable :: moments(:)
   ! High-frequency moments
-  
+
   type(oper_type), allocatable :: oper(:)
   ! Operator for self-energy, for each frequency
-  
+
   real(dp), ABI_CONTIGUOUS pointer :: omega(:) => null()
   ! Value of frequencies
 
@@ -123,7 +123,7 @@ CONTAINS  !=====================================================================
 !!             3  Allocate quantities in both the KS and local basis.
 !!  wtype = "real" Self energy will be computed for real frequencies
 !!        = "imag" (default) Self energy will be computed for imaginary frequencies
-!!  opt_moments = 1 to allocate the high-frequency moments 
+!!  opt_moments = 1 to allocate the high-frequency moments
 !!
 !! OUTPUTS
 !!  self <type(self_type)>= variables related to self-energy
@@ -143,17 +143,17 @@ subroutine alloc_self(self,paw_dmft,opt_oper,wtype,opt_moments)
  integer :: i,ifreq,mkmem,optmoments,optoper,shift
 !************************************************************************
 
- optoper = 2 
+ optoper = 2
  self%w_type = "imag"
  self%nmoments = 0
  optmoments = 0
- 
+
  if (present(opt_oper)) optoper  = opt_oper
  if (present(wtype)) self%w_type = wtype
  if (present(opt_moments)) optmoments = opt_moments
- 
+
  self%has_moments = optmoments
- 
+
  if (self%w_type == "imag") then
    self%nw = paw_dmft%dmft_nwlo
    self%omega => paw_dmft%omega_lo(:)
@@ -174,7 +174,7 @@ subroutine alloc_self(self,paw_dmft,opt_oper,wtype,opt_moments)
  do ifreq=1,self%nw
    call init_oper(paw_dmft,self%oper(ifreq),opt_ksloc=optoper)
  end do ! ifreq
- 
+
  if (optmoments == 1) then
    self%nmoments = 4
    shift = self%distrib%shiftk
@@ -185,7 +185,7 @@ subroutine alloc_self(self,paw_dmft,opt_oper,wtype,opt_moments)
      call init_oper(paw_dmft,self%moments(i),nkpt=mkmem,shiftk=shift,opt_ksloc=3)
    end do ! i
  end if ! optmoments
- 
+
  !if (paw_dmft%dmft_solv == 4) then
  !  ABI_MALLOC(self%qmc_shift,(paw_dmft%natom))
  !  ABI_MALLOC(self%qmc_xmu,(paw_dmft%natom))
@@ -278,13 +278,13 @@ subroutine destroy_self(self)
  end if
 
  call destroy_oper(self%hdc)
- 
+
  if (allocated(self%moments)) then
    do i=1,self%nmoments
      call destroy_oper(self%moments(i))
    end do ! i
    ABI_FREE(self%moments)
- end if 
+ end if
  !if (allocated(self%qmc_shift)) ABI_FREE(self%qmc_shift)
  !if (allocated(self%qmc_xmu)) ABI_FREE(self%qmc_xmu)
  self%distrib => null()
@@ -337,7 +337,7 @@ subroutine print_self(self,prtdc,paw_dmft,prtopt)
  if (prtdc == "print_dc") then
    write(message,'(2a)') ch10,"  == The double counting hamiltonian is  == "
    call wrtout(std_out,message,'COLL')
-   call print_matlu(self%hdc%matlu(:),paw_dmft%natom,prtopt) 
+   call print_matlu(self%hdc%matlu(:),paw_dmft%natom,prtopt)
  end if ! prtdc
 
 end subroutine print_self
@@ -386,8 +386,8 @@ subroutine dc_self(charge_loc,hdc,hu,paw_dmft,pawtab,occ_matlu)
  complex(dpc), allocatable :: occ(:,:),vdc(:,:)
 ! *********************************************************************
 
- dmft_dc = paw_dmft%dmft_dc 
- nspinor = paw_dmft%nspinor 
+ dmft_dc = paw_dmft%dmft_dc
+ nspinor = paw_dmft%nspinor
  nsppol  = paw_dmft%nsppol
 
  amf  = (dmft_dc == 2 .or. dmft_dc == 6) ! AMF double counting
@@ -400,21 +400,21 @@ subroutine dc_self(charge_loc,hdc,hu,paw_dmft,pawtab,occ_matlu)
    write(message,'(a,i4,i4,2x,e20.10)') " AMF Double counting is under test for SOC"
    ABI_WARNING(message)
  end if
- 
+
  do iatom=1,paw_dmft%natom
    lpawu = paw_dmft%lpawu(iatom)
    if (lpawu == -1) cycle
    hdc(iatom)%mat(:,:,:) = czero
    ntot   = charge_loc(nsppol+1,iatom)
-   ndim   = 2*lpawu + 1 
-   itypat = paw_dmft%typat(iatom) 
-   upawu  = hu(itypat)%upawu 
+   ndim   = 2*lpawu + 1
+   itypat = paw_dmft%typat(iatom)
+   upawu  = hu(itypat)%upawu
    jpawu  = hu(itypat)%jpawu
    if (dmft_dc == 4) jpawu = zero
 
    if (dmft_dc == 8) then
      ABI_MALLOC(occ,(ndim,ndim))
-     ABI_MALLOC(vdc,(ndim,ndim))     
+     ABI_MALLOC(vdc,(ndim,ndim))
      occ(:,:) = czero
      do isppol=1,nsppol
        do ispinor=1,nspinor
@@ -443,7 +443,7 @@ subroutine dc_self(charge_loc,hdc,hu,paw_dmft,pawtab,occ_matlu)
    else
      if (nmdc) then ! Non-magnetic DC
        if (fll) dc = upawu*(ntot-half) - half*jpawu*(ntot-one)
-       if (amf) dc = upawu*ntot*half + (upawu-jpawu)*ntot*half*dble(2*lpawu)/dble(2*lpawu+1) 
+       if (amf) dc = upawu*ntot*half + (upawu-jpawu)*ntot*half*dble(2*lpawu)/dble(2*lpawu+1)
        if (dmft_dc == 7) dc = upawu*(dble(paw_dmft%dmft_nominal(iatom))-half) - &
          & half*jpawu*(dble(paw_dmft%dmft_nominal(iatom))-one)
      end if ! nmdc
@@ -452,7 +452,7 @@ subroutine dc_self(charge_loc,hdc,hu,paw_dmft,pawtab,occ_matlu)
        if (.not. nmdc) then ! Magnetic DC
          if (fll) dc = upawu*(ntot-half) - jpawu*(charge_loc(isppol,iatom)-half)
          if (amf) dc = upawu*charge_loc(min(3-isppol,nsppol),iatom) + &
-              & (upawu-jpawu)*charge_loc(isppol,iatom)*dble(2*lpawu)/dble(2*lpawu+1) 
+              & (upawu-jpawu)*charge_loc(isppol,iatom)*dble(2*lpawu)/dble(2*lpawu+1)
        end if ! not nmdc
        do im=1,ndim
          hdc(iatom)%mat(im,im,isppol) = dc
@@ -460,7 +460,7 @@ subroutine dc_self(charge_loc,hdc,hu,paw_dmft,pawtab,occ_matlu)
      end do ! isppol
    end if ! dc=8
  end do ! iatom
- 
+
 end subroutine dc_self
 !!***
 
@@ -501,7 +501,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
  use m_oper, only : destroy_oper,gather_oper,init_oper
  use m_pawtab, only : pawtab_type
  use m_xmpi, only : xmpi_bcast
-  
+
 !Arguments ------------------------------------
 !type
  type(self_type), intent(inout) :: self
@@ -534,25 +534,25 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
  type(oper_type), allocatable :: selfrotmatlu(:)
 ! *********************************************************************
 
- natom   = paw_dmft%natom 
+ natom   = paw_dmft%natom
  nspinor = paw_dmft%nspinor
- nsppol  = paw_dmft%nsppol 
+ nsppol  = paw_dmft%nsppol
  !mbandc = paw_dmft%mbandc
  !nkpt = paw_dmft%nkpt
 
  dmft_test = paw_dmft%dmft_test
 
 ! Initialise spaceComm, myproc, and nproc
- istep = 0 
- iter  = 0 
- istep_imp = 0 
- istepiter = 0 
- iter_imp  = 0 
+ istep = 0
+ iter  = 0
+ istep_imp = 0
+ istepiter = 0
+ iter_imp  = 0
  optmaxent = 0
- optrw = 0 
+ optrw = 0
  readimagonly = 0
 
- if (present(opt_rw)) optrw = opt_rw 
+ if (present(opt_rw)) optrw = opt_rw
  if (present(opt_maxent)) optmaxent = opt_maxent
 
  if (present(opt_imagonly)) then
@@ -577,14 +577,14 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
  end if !use_fixed_self
 
  if (paw_dmft%dmft_rslf <= 0 .and. optrw == 1) optrw = 0
- 
- iexist2   = 1 
- iexit     = 0 
- ioerr     = 0 
- lexist    = .true. 
+
+ iexist2   = 1
+ iexit     = 0
+ ioerr     = 0
+ lexist    = .true.
  master    = 0
- myproc    = paw_dmft%myproc 
- spacecomm = paw_dmft%spacecomm 
+ myproc    = paw_dmft%myproc
+ spacecomm = paw_dmft%spacecomm
  !nproc = paw_dmft%nproc
 
 ! write(std_out,*) "myproc,master",myproc,master
@@ -608,7 +608,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
 !   - For the Tentative rotation of the self-energy file (begin diag)
  if (optrw == 2 .and. optmaxent > 0) then
    ABI_MALLOC(unitselfrot,(2*paw_dmft%maxlpawu+1,nspinor,nsppol,natom)) ! 7 is the max ndim possible
-   ABI_MALLOC(level_diag,(natom)) 
+   ABI_MALLOC(level_diag,(natom))
    ABI_MALLOC(selfrotmatlu,(self%nw))
    call init_oper(paw_dmft,energy_level,opt_ksloc=2)
    call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu(:),level_diag(:))
@@ -689,7 +689,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
      call wrtout(std_out,message,'COLL')
      call print_matlu(opt_selflimit(:),natom,1,compl=1)
    end if ! optrw=1
-   
+
  end if ! optmaxent > 0
 !   - For the Tentative rotation of the self-energy file (end diag)
 
@@ -748,7 +748,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
            !unitselffunc_arr(iall)=300+iall-1
        unitselffunc_arr(iall) = get_unit()
        ABI_CHECK(unitselffunc_arr(iall) > 0, "Cannot find free IO unit!")
-       
+
        !- For the Tentative rotation of the self-energy file (create file)
        if (optrw == 2 .and. optmaxent > 0) then
          iflavor = 0
@@ -826,7 +826,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
 !      ===========================
 !      == Check Header
 !      ===========================
-       
+
        if (optrw == 2) then
 
          write(message,'(3a,5i5,2x,e25.17e3)') "# natom,nsppol,nspinor,ndim,nw,fermilevel",ch10,&
@@ -898,10 +898,10 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
 
            if (nspinor == 1) then
              string_format = '(2x,393(e25.17e3,2x))'
-           else 
+           else
              string_format = '(2x,393(e18.10e3,2x))'
-           end if 
-             
+           end if
+
            write(message,string_format) self%omega(ifreq),&
                & ((((dble(self%oper(ifreq)%matlu(iatom)%mat(im+(ispinor-1)*ndim,im1+(ispinor1-1)*ndim,isppol)),&
                & aimag(self%oper(ifreq)%matlu(iatom)%mat(im+(ispinor-1)*ndim,im1+(ispinor1-1)*ndim,isppol)),&
@@ -1006,7 +1006,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
          if (self%has_moments == 1) then
            do i=1,self%nmoments
              write(tag_is,'(i1)') i
-             write(message,'(a,2x,500(e25.17e3,2x))') "#moments_"//trim(tag_is),& 
+             write(message,'(a,2x,500(e25.17e3,2x))') "#moments_"//trim(tag_is),&
                 & ((self%moments(i)%matlu(iatom)%mat(im,im1,isppol),im=1,nspinor*ndim),im1=1,nspinor*ndim)
              call wrtout(unitselffunc_arr(iall),message,'COLL')
              call wrtout(unitselffunc_arr2(iall),message,'COLL')
@@ -1023,7 +1023,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
 !              write(std_out,*)" HDC IOERR>",ioerr
              !endif
          self%hdc%matlu(iatom)%mat(:,:,isppol) = cmplx(s_r(:,:),s_i(:,:),kind=dp)
-         
+
          if (self%has_moments == 1) then
            do i=1,self%nmoments
              read(unitselffunc_arr(iall),*,iostat=ioerr) &
@@ -1044,11 +1044,11 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
      ABI_FREE(s_r)
      ABI_FREE(s_i)
    end do ! iatom
-   
+
    ABI_FREE(unitselffunc_arr)
    ABI_SFREE(unitselffunc_arr2)
  end if ! optrw==1 or 2 and myproc==master
- 
+
 !  ===========================
 !  == Error messages
 !  ===========================
@@ -1112,7 +1112,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
      end do ! ifreq
      if (self%has_moments == 1) then
        call copy_matlu(self%oper(1)%matlu(:),self%moments(1)%matlu(:),natom)
-     end if 
+     end if
    else ! test read successfull
 !   call xmpi_barrier(spacecomm)
 !! lignes 924-928 semblent inutiles puisque la valeur de paw_dmft%fermie creee
@@ -1131,7 +1131,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
        ncount = ncount + ndim**2
      end do ! iatom
      ncount = ncount * (nspinor**2) * (self%nw+self%nmoments+1) * nsppol
-     
+
 !    ===========================
 !     bcast to other proc
 !    ===========================
@@ -1142,7 +1142,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
      if (myproc == master) then
 
 !      == Send read data to all process
-       paw_dmft%fermie = fermie_read 
+       paw_dmft%fermie = fermie_read
        icount = 0
 !      Self energy-----------
        do ifreq=1,self%nw
@@ -1260,7 +1260,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
              do im1=1,ndim
                do im=1,ndim
                  icount = icount + 1
-                 self%moments(i)%matlu(iatom)%mat(im,im1,isppol) = buffer(icount) 
+                 self%moments(i)%matlu(iatom)%mat(im,im1,isppol) = buffer(icount)
                end do ! im
              end do ! im1
            end do ! isppol
@@ -1271,21 +1271,21 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
      ABI_FREE(buffer)
    end if  ! test read successful
  end if  ! optrw==1
- 
+
  if (optmaxent > 0 .and. optrw == 1 .and. iexist2 == 1 .and. ioerr == 0 .and. readimagonly == 1) then
- 
+
    write(message,'(4x,2a)') " Rotate Back self in the original basis"
    call wrtout(std_out,message,'COLL')
-  
+
    ! Kramers Kronig
    !-----------------------------
 
    call kramerskronig_self(self,opt_selflimit(:),opt_hdc(:),paw_dmft,paw_dmft%filapp)
-   
+
    call xmpi_matlu(eigvectmatlu(:),natom,spacecomm,master=master,option=2)
-      
-   call copy_matlu(opt_hdc(:),self%hdc%matlu(:),natom)   
-     
+
+   call copy_matlu(opt_hdc(:),self%hdc%matlu(:),natom)
+
    ! Rotate back self
    !-----------------------------
 
@@ -1305,29 +1305,29 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
      call print_matlu(self%oper(ifreq)%matlu(:),natom,1,compl=1)
    end do ! ifreq
  end if ! rotate back self-energy
- 
+
 ! call xmpi_barrier(spacecomm)
            !write(std_out,*) "9"
 !   - For the Tentative rotation of the self-energy file (begin destroy)
  if (optmaxent > 0 .and. (optrw == 1 .or. optrw == 2)) then
- 
+
    if (optrw == 2) then
      call destroy_oper(energy_level)
      call destroy_matlu(level_diag(:),natom)
      do ifreq=1,self%nw
        call destroy_oper(selfrotmatlu(ifreq))
      end do ! ifreq
-     ABI_FREE(level_diag) 
-     ABI_FREE(selfrotmatlu) 
+     ABI_FREE(level_diag)
+     ABI_FREE(selfrotmatlu)
      ABI_FREE(unitselfrot) ! 7 is the max ndim possible
    end if ! optrw=2
 
    call destroy_matlu(eigvectmatlu(:),natom)
    ABI_FREE(eigvectmatlu)
  end if ! optmaxent > 0
-!   - For the Tentative rotation of the self-energy file (end destroy) 
- 
- 
+!   - For the Tentative rotation of the self-energy file (end destroy)
+
+
 !   call flush_unit(std_out)
 !   ABI_ERROR("Aboring now")
  if (optrw == 0) then
@@ -1392,7 +1392,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
      do i=2,self%nmoments
        call zero_matlu(self%moments(i)%matlu(:),natom)
      end do ! i
-   end if 
+   end if
 
  end if ! use_fixed_self
 
@@ -1432,26 +1432,26 @@ subroutine new_self(self,self_new,paw_dmft)
 ! *********************************************************************
 
  alpha   = paw_dmft%dmft_mxsf
- natom   = paw_dmft%natom 
- nspinor = paw_dmft%nspinor 
- nsppol  = paw_dmft%nsppol 
+ natom   = paw_dmft%natom
+ nspinor = paw_dmft%nspinor
+ nsppol  = paw_dmft%nsppol
 
  !if(opt_mix==1) then
  !endif
- diff_self = zero 
- sum_self = zero 
+ diff_self = zero
+ sum_self = zero
  icount = 0
  do ifreq=1,self%nw
    do iatom=1,natom
      lpawu = paw_dmft%lpawu(iatom)
      if (lpawu == -1) cycle
      self%oper(ifreq)%matlu(iatom)%mat(:,:,:) = (one-alpha)*self%oper(ifreq)%matlu(iatom)%mat(:,:,:) + &
-       & alpha*self_new%oper(ifreq)%matlu(iatom)%mat(:,:,:)  
+       & alpha*self_new%oper(ifreq)%matlu(iatom)%mat(:,:,:)
 !  warning: self_new is the recent self-energy, which is mixed with self
 !  to give self= mixed self energy. self_new is deallocated just after.
    end do ! iatom
  end do ! ifreq
- 
+
  do iatom=1,natom
    lpawu = paw_dmft%lpawu(iatom)
    if (lpawu == -1) cycle
@@ -1468,7 +1468,7 @@ subroutine new_self(self,self_new,paw_dmft)
      end do ! im1
    end do ! isppol
  end do ! iatom
- 
+
  if (self%has_moments == 1) then
    do i=1,self%nmoments
      do iatom=1,natom
@@ -1477,11 +1477,11 @@ subroutine new_self(self,self_new,paw_dmft)
        self%moments(i)%matlu(iatom)%mat(:,:,:) = (one-alpha)*self%moments(i)%matlu(iatom)%mat(:,:,:) + &
              & alpha*self_new%moments(i)%matlu(iatom)%mat(:,:,:)
      end do ! iatom
-   end do ! i 
+   end do ! i
  end if ! moments
- 
- diff_self = diff_self / dble(icount) 
- 
+
+ diff_self = diff_self / dble(icount)
+
  write(message,'(8x,a,e12.5)') "DMFT Loop: Precision on self-energy is",diff_self
  call wrtout(std_out,message,'COLL')
  if (diff_self < paw_dmft%dmft_fermi_prec .and. sum_self > tol6 .and. paw_dmft%idmftloop >= 2) then
@@ -1606,7 +1606,7 @@ end subroutine new_self
 subroutine kramerskronig_self(self,selflimit,selfhdc,paw_dmft,filapp)
 
  use m_oper, only : gather_oper
- 
+
 !Arguments ------------------------------------
  type(self_type), intent(inout) :: self
  type(matlu_type), intent(in) :: selfhdc(self%hdc%natom),selflimit(self%hdc%natom)
@@ -1619,12 +1619,12 @@ subroutine kramerskronig_self(self,selflimit,selfhdc,paw_dmft,filapp)
 ! *********************************************************************
 
  !delta = 0.0000000
- 
+
  myproc  = paw_dmft%myproc
- natom   = self%hdc%natom 
+ natom   = self%hdc%natom
  nspinor = self%hdc%nspinor
- nsppol  = self%hdc%nsppol 
-  
+ nsppol  = self%hdc%nsppol
+
  !ABI_MALLOC(selftemp_imag,(self%nw))
 
  write(message,'(2a,i4)') ch10,'  ------ Limit of real part of Self'
@@ -1642,7 +1642,7 @@ subroutine kramerskronig_self(self,selflimit,selfhdc,paw_dmft,filapp)
 ! call copy_matlu(selfhdc,self%hdc%matlu,natom)
      !!write(6,*) "selfhdc   kramerskronig",selfhdc(1)%mat(1,1,1,1,1)
      !write(6,*) "selfr%hdc kramerskronig",self%hdc%matlu(1)%mat(1,1,1,1,1)
-     
+
  do ifreq=1,self%nw
    if (self%distrib%procf(ifreq) /= myproc) cycle
    do jfreq=1,self%nw-1
@@ -1661,20 +1661,20 @@ subroutine kramerskronig_self(self,selflimit,selfhdc,paw_dmft,filapp)
      self%oper(ifreq)%matlu(iatom)%mat(:,:,:) = cmplx(dble(self%oper(ifreq)%matlu(iatom)%mat(:,:,:))/pi,&
          & aimag(self%oper(ifreq)%matlu(iatom)%mat(:,:,:)),kind=dp)
      self%oper(ifreq)%matlu(iatom)%mat(:,:,:) = self%oper(ifreq)%matlu(iatom)%mat(:,:,:) + &
-             & cmplx(dble(selflimit(iatom)%mat(:,:,:)),zero,kind=dp) 
+             & cmplx(dble(selflimit(iatom)%mat(:,:,:)),zero,kind=dp)
      ! write(6,*) "TWO FACTOR IS PUT BECAUSE OF MAXENT CODE ??"
      !self%oper(ifreq)%matlu(iatom)%mat(:,:,:) = self%oper(ifreq)%matlu(iatom)%mat(:,:,:) * half
       !                       & aimag(self%oper(ifreq)%matlu(iatom)%mat(:,:,:)),kind=dp) * half
    end do ! iatom
  end do ! ifreq
- 
+
  call gather_oper(self%oper(:),self%distrib,paw_dmft,opt_ksloc=2)
- 
+
  if (myproc == 0) then
- 
+
    open(unit=67,file=trim(filapp)//"_DFTDMFT_Self_realaxis_from_maxent_and_kramerskronig.dat",status='unknown',form='formatted')
    rewind(67)
- 
+
    do iatom=1,natom
      lpawu = selfhdc(iatom)%lpawu
      if (lpawu == -1) cycle
@@ -1689,18 +1689,18 @@ subroutine kramerskronig_self(self,selflimit,selfhdc,paw_dmft,filapp)
                    & dble(self%oper(ifreq)%matlu(iatom)%mat(im+(ispinor-1)*ndim,im1+(ispinor1-1)*ndim,isppol)), &
                    & aimag(self%oper(ifreq)%matlu(iatom)%mat(im+(ispinor-1)*ndim,im1+(ispinor1-1)*ndim,isppol))
                end do ! ifreq
-               write(67,*) 
+               write(67,*)
              end do ! im1
            end do ! im
          end do ! ispinor1
        end do ! ispinor
      end do ! isppol
    end do ! iatom
-   
+
    close(67)
-   
+
  end if ! master node
-    
+
  !do iatom=1,natom
  !  lpawu = self%oper(1)%matlu(iatom)%lpawu
  !  if (lpawu == -1) cycle
@@ -1799,7 +1799,7 @@ subroutine kramerskronig_self(self,selflimit,selfhdc,paw_dmft,filapp)
 !       enddo
 !     enddo ! isppol
 ! end do ! iatom
- 
+
 end subroutine kramerskronig_self
 !!***
 
@@ -1841,15 +1841,15 @@ subroutine selfreal2imag_self(selfr,self,filapp,paw_dmft)
 
  !delta=0.0000000
  call initialize_self(selftempmatsub,paw_dmft)
- 
+
  myproc  = paw_dmft%myproc
- natom   = self%hdc%natom 
+ natom   = self%hdc%natom
  nspinor = self%hdc%nspinor
- nsppol  = self%hdc%nsppol 
+ nsppol  = self%hdc%nsppol
 !  Compute limit of Real Part and put in double counting energy.
 ! call copy_matlu(selfhdc,self%hdc%matlu,natom)
      !write(6,*) "self3",aimag(selfr%oper(489)%matlu(1)%mat(1,1,1,1,1))
-     
+
  do ifreq=1,self%nw
    if (self%distrib%procf(ifreq) /= myproc) cycle
    omega = cmplx(zero,self%omega(ifreq),kind=dp)
@@ -1864,9 +1864,9 @@ subroutine selfreal2imag_self(selfr,self,filapp,paw_dmft)
    end do ! jfreq
    call fac_matlu(selftempmatsub%oper(ifreq)%matlu(:),natom,cone/pi)
  end do ! ifreq
- 
+
  call gather_oper(selftempmatsub%oper(:),self%distrib,paw_dmft,opt_ksloc=2)
- 
+
  if (myproc == 0) then
    open(unit=672,file=trim(filapp)//"_DFTDMFT_Self_forcheck_imagaxis_from_realaxis.dat",status='unknown',form='formatted')
    do iatom=1,natom
@@ -1896,7 +1896,7 @@ subroutine selfreal2imag_self(selfr,self,filapp,paw_dmft)
    end do ! iatom
    close(672)
  end if ! master node
-  
+
  call destroy_self(selftempmatsub)
 
 end subroutine selfreal2imag_self

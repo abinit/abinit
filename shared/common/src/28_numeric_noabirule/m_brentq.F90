@@ -3,9 +3,9 @@
 !! m_brentq
 !!
 !! FUNCTION
-!! This module contains Brent's root-finding method. 
-!! This was translated from scipy. 
-!! Originally written by Charles Harris charles.harris@sdl.usu.edu 
+!! This module contains Brent's root-finding method.
+!! This was translated from scipy.
+!! Originally written by Charles Harris charles.harris@sdl.usu.edu
 !!
 !! COPYRIGHT
 !! Copyright (c) 2001-2002 Enthought, Inc. 2003-2024, SciPy Developers.
@@ -76,7 +76,7 @@ CONTAINS  !=====================================================================
 !! INPUTS
 !! f= subroutine corresponding to the function for which the optimization is to be done, of the form subroutine f(x,fx)
 !! xa,xb= interval on which to perform the optimization
-!! xtol,rtol=tolerance criterion, the output root x0 will satisfy the criterion 
+!! xtol,rtol=tolerance criterion, the output root x0 will satisfy the criterion
 !!           abs(x-x0) < xtol + rtol * x0 with x the true root, default value on scipy are
 !!           2e-12 and 4*machine_precision respectively
 !! iter= maximum number of iterations, default value on scipy is 100
@@ -89,7 +89,7 @@ CONTAINS  !=====================================================================
 
 subroutine brentq(f,xa,xb,xtol,rtol,iter,xcur,ierr)
 
-! Written by Charles Harris charles.harris@sdl.usu.edu 
+! Written by Charles Harris charles.harris@sdl.usu.edu
 
 !Arguments ------------------------------------
   interface
@@ -112,25 +112,25 @@ subroutine brentq(f,xa,xb,xtol,rtol,iter,xcur,ierr)
   xpre = xa
   xcur = xb
   xblk = zero
-  fblk = zero 
-  spre = zero 
-  scur = zero 
+  fblk = zero
+  spre = zero
+  scur = zero
   ierr = 0
- 
-! the tolerance is 2*delta 
+
+! the tolerance is 2*delta
   call f(xpre,fpre)
   call f(xcur,fcur)
- 
+
   if (fpre == zero) then
     ierr = 1
     xcur = xpre
-    return 
+    return
   end if
 
   if (fcur == zero) then
     ierr = 1
     return
-  end if 
+  end if
 
   if (sign(one,fpre) == sign(one,fcur)) then
     msg = 'Sign error in brentq'
@@ -138,7 +138,7 @@ subroutine brentq(f,xa,xb,xtol,rtol,iter,xcur,ierr)
   end if
 
   do i=1,iter
- 
+
     if ((fpre /= zero) .and. (fcur /= zero) .and. (sign(one,fpre) /= sign(one,fcur))) then
       xblk = xpre
       fblk = fpre
@@ -158,32 +158,32 @@ subroutine brentq(f,xa,xb,xtol,rtol,iter,xcur,ierr)
     delta = (xtol+rtol*abs(xcur)) * half
     sbis = (xblk - xcur) * half
     if ((fcur == zero) .or. (abs(sbis) < delta)) then
-      ierr = 1 
-      return 
+      ierr = 1
+      return
     end if
 
     if ((abs(spre) > delta) .and. (abs(fcur) < abs(fpre))) then
       if (xpre == xblk) then
-        ! interpolate 
+        ! interpolate
         stry = -fcur * (xcur-xpre) / (fcur-fpre)
-      else 
-        ! extrapolate 
+      else
+        ! extrapolate
         dpre = (fpre-fcur) / (xpre-xcur)
         dblk = (fblk-fcur) / (xblk-xcur)
         stry = -fcur * (fblk*dblk-fpre*dpre) / (dblk*dpre*(fblk-fpre))
       end if
 
       if (two*abs(stry) < min(abs(spre),three*abs(sbis)-delta)) then
-        ! good short step 
+        ! good short step
         spre = scur
         scur = stry
-      else 
-        ! bisect 
+      else
+        ! bisect
         spre = sbis
         scur = sbis
       end if
-    else 
-      ! bisect 
+    else
+      ! bisect
       spre = sbis
       scur = sbis
     end if
@@ -193,7 +193,7 @@ subroutine brentq(f,xa,xb,xtol,rtol,iter,xcur,ierr)
 
     if (abs(scur) > delta) then
       xcur = xcur + scur
-    else 
+    else
       if (sbis > zero) then
         xcur = xcur + delta
       else
@@ -201,10 +201,10 @@ subroutine brentq(f,xa,xb,xtol,rtol,iter,xcur,ierr)
       end if
     end if
 
-    call f(xcur,fcur) 
+    call f(xcur,fcur)
 
   end do ! i
- 
+
 end subroutine brentq
 !!***
 
