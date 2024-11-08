@@ -74,16 +74,16 @@ MODULE m_oper
   ! Is the operator allocated in the local basis ?
 !
   integer :: mbandc
-  ! Total number of correlated bands 
-  
+  ! Total number of correlated bands
+
   integer :: natom
-  ! Number of atoms 
-  
+  ! Number of atoms
+
   integer :: nkpt
   ! Number of k-point in the IBZ.
 !
   integer :: nspinor
-  ! Number of spinors 
+  ! Number of spinors
 !
   integer :: nsppol
   ! Number of spin polarizations
@@ -93,7 +93,7 @@ MODULE m_oper
 
   integer :: shiftk
   ! Shift to get the physical kpt index (when the operator is memory-parallelized over kpt)
-  
+
   !character(len=12) :: whichoper
   ! describe the type of operator computed (DFT, DMFT, KS..)
 
@@ -152,7 +152,7 @@ subroutine init_oper(paw_dmft,oper,nkpt,wtk,shiftk,opt_ksloc)
 !************************************************************************
 
  DBG_ENTER("COLL")
- 
+
  optksloc = 3
  if (present(opt_ksloc)) optksloc = opt_ksloc
 
@@ -160,19 +160,19 @@ subroutine init_oper(paw_dmft,oper,nkpt,wtk,shiftk,opt_ksloc)
     ! FIXME: empty line!
  !endif
 
- oper%has_operks    = 0 
+ oper%has_operks    = 0
  oper%has_opermatlu = 0
 
 ! ===================
 !  Integers
 ! ===================
- oper%mbandc  = paw_dmft%mbandc 
+ oper%mbandc  = paw_dmft%mbandc
  oper%natom   = paw_dmft%natom
- oper%nspinor = paw_dmft%nspinor 
- oper%nsppol  = paw_dmft%nsppol 
+ oper%nspinor = paw_dmft%nspinor
+ oper%nsppol  = paw_dmft%nsppol
  oper%paral   = 0
  oper%shiftk  = 0
- 
+
  if (present(shiftk)) oper%shiftk = shiftk
 
  oper%nkpt = paw_dmft%nkpt
@@ -186,16 +186,16 @@ subroutine init_oper(paw_dmft,oper,nkpt,wtk,shiftk,opt_ksloc)
  else
    oper%wtk => paw_dmft%wtk(:)
  end if ! present(wtk)
- 
+
 ! ===================
 !  KS variables
 ! ===================
  if (optksloc == 1 .or. optksloc == 3) then
-   
+
    ABI_MALLOC(oper%ks,(oper%mbandc,oper%mbandc,oper%nkpt,oper%nsppol))
-   oper%has_operks  = 1 
+   oper%has_operks  = 1
    oper%ks(:,:,:,:) = czero
-   
+
  end if ! optksloc=1 or optksloc=3
 
 ! ===================
@@ -237,29 +237,29 @@ subroutine destroy_oper(oper)
 !! *********************************************************************
 
  DBG_ENTER("COLL")
- 
+
  if (oper%has_opermatlu == 1) then
    call destroy_matlu(oper%matlu(:),oper%natom)
  else
    message = " Operator is not defined to be used in destroy_oper"
    ABI_ERROR(message)
  end if ! has_opermatlu=1
- 
+
  if (allocated(oper%matlu)) then
    ABI_FREE(oper%matlu)
    oper%has_opermatlu = 0
  end if
- 
+
  if (allocated(oper%ks)) then
    ABI_FREE(oper%ks)
    oper%has_operks = 0
  end if
- 
+
  oper%wtk => null()
 !  no deallocation for wtk: wtk is an explicit pointer
 
  DBG_EXIT("COLL")
- 
+
 end subroutine destroy_oper
 !!***
 
@@ -289,16 +289,16 @@ subroutine copy_oper(oper1,oper2)
 ! *********************************************************************
 
  DBG_ENTER("COLL")
-  
- if (oper1%has_opermatlu == 1 .and. oper2%has_opermatlu == 1) then 
+
+ if (oper1%has_opermatlu == 1 .and. oper2%has_opermatlu == 1) then
    call copy_matlu(oper1%matlu(:),oper2%matlu(:),oper1%natom)
- end if 
+ end if
 
  if (oper1%has_operks == 1 .and. oper2%has_operks == 1) &
     & oper2%ks(:,:,:,:) = oper1%ks(:,:,:,:)
 
  DBG_EXIT("COLL")
- 
+
 end subroutine copy_oper
 !!***
 
@@ -334,25 +334,25 @@ subroutine print_oper(oper,option,paw_dmft,prtopt)
  integer :: ib,ib1,iband1,iband2,ikpt,isppol,mbandc,nkpt,nkptr
  character(len=2000) :: message
  logical  :: ximag
- real(dp) :: maximag 
+ real(dp) :: maximag
 ! *********************************************************************
 
  DBG_ENTER("COLL")
- 
+
  if (oper%has_opermatlu == 1) then
    write(message,'(2a)') ch10,'   = In the atomic basis'
    call wrtout(std_out,message,'COLL')
    call print_matlu(oper%matlu(:),oper%natom,prtopt)
  end if ! has_opermatlu=1
- 
+
  if (oper%has_operks == 1) then
    write(message,'(2a)') ch10,'   = In the KS basis'
    call wrtout(std_out,message,'COLL')
 
 !todo_ba complete print_out
-   mbandc  = oper%mbandc 
-   iband1  = 1 
-   iband2  = mbandc 
+   mbandc  = oper%mbandc
+   iband1  = 1
+   iband2  = mbandc
    maximag = zero
    nkpt    = oper%nkpt
    ximag   = .false.
@@ -361,7 +361,7 @@ subroutine print_oper(oper,option,paw_dmft,prtopt)
 !     if( (paw_dmft%eigen_dft(1,1,ib)-paw_dmft%fermie).le.0.3) iband2=ib
 !   enddo
 
-   if (abs(prtopt) >= 3 .and. ((option < 5) .or. (option > 8))) then 
+   if (abs(prtopt) >= 3 .and. ((option < 5) .or. (option > 8))) then
 !     write(message,'(x,a,a,i4,2x,a)') ch10,'  -KS states'
 !     call wrtout(std_out,message,'COLL')
      nkptr = min(nkpt,4)
@@ -406,7 +406,7 @@ subroutine print_oper(oper,option,paw_dmft,prtopt)
            end if ! prtopt>=20
            do ib1=1,mbandc
              if (abs(aimag(oper%ks(ib1,ib,ikpt,isppol))) > max(tol10,maximag)) then
-               ximag   = .true. 
+               ximag   = .true.
                maximag = aimag(oper%ks(ib1,ib,ikpt,isppol))
              end if
            end do ! ib1
@@ -430,7 +430,7 @@ subroutine print_oper(oper,option,paw_dmft,prtopt)
 !     call wrtout(std_out,message,'COLL')
 
  DBG_EXIT("COLL")
- 
+
 end subroutine print_oper
 !!***
 
@@ -471,7 +471,7 @@ subroutine inverse_oper(oper,option,procb,iproc)
 ! *********************************************************************
 
  DBG_ENTER("COLL")
- 
+
  paral = 0
  if (present(procb) .and. present(iproc) .and. oper%paral == 0) paral = 1
 
@@ -483,14 +483,14 @@ subroutine inverse_oper(oper,option,procb,iproc)
 
  if (option == 2 .or. option == 3) then
    call inverse_matlu(oper%matlu(:),oper%natom)
- end if 
- 
+ end if
+
  if (option == 1 .or. option == 3) then
    do isppol=1,oper%nsppol
      do ikpt=1,oper%nkpt
        if (paral == 1) then
          if (procb(ikpt) /= iproc) cycle
-       end if 
+       end if
 !          write(std_out,*) "isppol,ikpt",isppol,ikpt,m
 !          write(std_out,*) "isppol,ikpt",matrix
          !call matcginv_dpc(matrix,oper%mbandc,oper%mbandc)
@@ -500,7 +500,7 @@ subroutine inverse_oper(oper,option,procb,iproc)
  end if ! option
 
  DBG_EXIT("COLL")
- 
+
 end subroutine inverse_oper
 !!***
 
@@ -547,20 +547,20 @@ subroutine downfold_oper(oper,paw_dmft,procb,iproc,option,op_ks_diag)
 ! *********************************************************************
 
  DBG_ENTER("COLL")
-   
+
  if (oper%has_opermatlu == 0) then
    message = " Operator is not defined to be used in downfold_oper"
    ABI_ERROR(message)
  end if
- 
- mbandc   = oper%mbandc 
+
+ mbandc   = oper%mbandc
  nspinor  = oper%nspinor
  ndim_max = nspinor * (2*paw_dmft%maxlpawu+1)
- paral    = 0 
+ paral    = 0
  shift    = oper%shiftk
- 
+
  if (present(procb) .and. present(iproc) .and. oper%paral == 0) paral = 1
- 
+
  opt = 1
  if (present(option)) opt = option
 
@@ -574,22 +574,22 @@ subroutine downfold_oper(oper,paw_dmft,procb,iproc,option,op_ks_diag)
    ABI_MALLOC(mat_temp3,(ndim,ndim))
    do isppol=1,oper%nsppol
      do ikpt=1,oper%nkpt ! index of kpt on the current CPU
-        
+
        if (paral == 1) then
          if (procb(ikpt) /= iproc) cycle
-       end if 
-       
+       end if
+
        ik = ikpt + shift ! true kpt index (needed for chipsi)
-        
-       if (opt == 1 .or. opt == 3) then       
-              
-         if (opt == 1) then     
-                            
+
+       if (opt == 1 .or. opt == 3) then
+
+         if (opt == 1) then
+
            call abi_xgemm("n","n",ndim,mbandc,mbandc,cone,paw_dmft%chipsi(:,:,ik,isppol,iatom),&
                         & ndim_max,oper%ks(:,:,ikpt,isppol),mbandc,czero,mat_temp(:,:),ndim)
-                    
+
          else if (opt == 3) then
-         
+
            do ib=1,mbandc
              if (present(op_ks_diag)) then
                mat_temp(:,ib) = paw_dmft%chipsi(1:ndim,ib,ik,isppol,iatom) * op_ks_diag(ib,ikpt,isppol)
@@ -597,32 +597,32 @@ subroutine downfold_oper(oper,paw_dmft,procb,iproc,option,op_ks_diag)
                mat_temp(:,ib) = paw_dmft%chipsi(1:ndim,ib,ik,isppol,iatom) * oper%ks(ib,ib,ikpt,isppol)
              end if ! present(op_ks_diag)
            end do ! ib
-                  
+
          end if ! opt=1 or 3
-                
+
          call abi_xgemm("n","c",ndim,ndim,mbandc,cone,mat_temp(:,:),ndim,&
                       & paw_dmft%chipsi(:,:,ik,isppol,iatom),ndim_max,czero,mat_temp2(:,:),ndim)
-       
+
        else if (opt == 2) then
-        
+
          call abi_xgemm("n","c",ndim,ndim,mbandc,cone,paw_dmft%chipsi(:,:,ik,isppol,iatom),&
                       & ndim_max,paw_dmft%chipsi(:,:,ik,isppol,iatom),ndim_max,czero,mat_temp2(:,:),ndim)
-                  
+
        else if (opt == 4) then
-       
+
          call abi_xgemm("n","c",ndim,ndim,mbandc,cone,paw_dmft%chipsi(:,:,ik,isppol,iatom),&
                       & ndim_max,paw_dmft%chipsi(:,:,ik,isppol,iatom),ndim_max,czero,mat_temp3(:,:),ndim)
-                  
+
          call abi_xgemm("n","n",ndim,ndim,ndim,cone,mat_temp3(:,:),ndim,&
                       & mat_temp3(:,:),ndim,czero,mat_temp2(:,:),ndim)
-       
+
        end if ! opt
-                   
+
        oper%matlu(iatom)%mat(:,:,isppol) = oper%matlu(iatom)%mat(:,:,isppol) + mat_temp2(:,:)*oper%wtk(ik)
-       
+
      end do ! ikpt
    end do ! isppol
-   ABI_FREE(mat_temp) 
+   ABI_FREE(mat_temp)
    ABI_FREE(mat_temp2)
    ABI_FREE(mat_temp3)
  end do ! iatom
@@ -668,7 +668,7 @@ subroutine downfold_oper(oper,paw_dmft,procb,iproc,option,op_ks_diag)
  !  endif
  ! enddo ! ikpt
  !enddo ! isppol
- 
+
  DBG_EXIT("COLL")
 
 end subroutine downfold_oper
@@ -693,7 +693,7 @@ end subroutine downfold_oper
 
 subroutine upfold_oper(oper,paw_dmft,procb,iproc)
 
- use m_paw_dmft, only : paw_dmft_type 
+ use m_paw_dmft, only : paw_dmft_type
  use m_abi_linalg, only : abi_xgemm
 
 !Arguments ------------------------------------
@@ -714,53 +714,53 @@ subroutine upfold_oper(oper,paw_dmft,procb,iproc)
 !   write(6,*) procb2(1),procb2(16)
 
  DBG_ENTER("COLL")
- 
+
  !if ((oper%has_opermatlu == 0) .or. (oper%has_operks == 0)) then
  !  message = " Operator is not defined to be used in upfold_oper"
  !  ABI_ERROR(message)
  !end if
- 
- mbandc   = paw_dmft%mbandc 
- nspinor  = paw_dmft%nspinor 
- ndim_max = nspinor * (2*paw_dmft%maxlpawu+1) 
+
+ mbandc   = paw_dmft%mbandc
+ nspinor  = paw_dmft%nspinor
+ ndim_max = nspinor * (2*paw_dmft%maxlpawu+1)
  paral    = 0
  shift    = oper%shiftk
- 
+
  if (present(procb) .and. present(iproc) .and. oper%paral == 0) paral = 1
- 
+
  oper%ks(:,:,:,:) = czero
- 
- ABI_MALLOC(mat_temp,(mbandc,ndim_max)) 
+
+ ABI_MALLOC(mat_temp,(mbandc,ndim_max))
  ABI_MALLOC(mat_temp2,(mbandc,mbandc))
- 
+
  do iatom=1,oper%natom
    lpawu = oper%matlu(iatom)%lpawu
    if (lpawu == -1) cycle
    ndim = (2*lpawu+1) * nspinor
    do isppol=1,oper%nsppol
      do ikpt=1,oper%nkpt ! index of kpt on the current CPU
-     
+
        if (paral == 1) then
          if (procb(ikpt) /= iproc) cycle
-       end if 
-       
+       end if
+
        ik = ikpt + shift ! true kpt index (needed for chipsi)
-     
+
        call abi_xgemm("c","n",mbandc,ndim,ndim,cone,paw_dmft%chipsi(:,:,ik,isppol,iatom),&
                     & ndim_max,oper%matlu(iatom)%mat(:,:,isppol),ndim,czero,mat_temp(:,1:ndim),mbandc)
-               
+
        call abi_xgemm("n","n",mbandc,mbandc,ndim,cone,mat_temp(:,1:ndim),mbandc,&
                     & paw_dmft%chipsi(:,:,ik,isppol,iatom),ndim_max,czero,mat_temp2(:,:),mbandc)
-                
+
        oper%ks(:,:,ikpt,isppol) = oper%ks(:,:,ikpt,isppol) + mat_temp2(:,:)
-       
+
      end do ! ikpt
    end do ! isppol
  end do ! iatom
- 
- ABI_FREE(mat_temp) 
+
+ ABI_FREE(mat_temp)
  ABI_FREE(mat_temp2)
- 
+
 !do isppol=1,nsppol
  !  do ikpt=1,nkpt
  !   if ((paral==1.and.(procb2(ikpt)==iproc)).or.(paral==0)) then
@@ -850,9 +850,9 @@ subroutine identity_oper(oper,option)
    message = " Options in identity_oper are not coherent with definitions of this operator"
    ABI_ERROR(message)
  end if
-  
+
  if (option == 1 .or. option == 3) then
- 
+
    oper%ks(:,:,:,:) = czero
    do isppol=1,oper%nsppol
      do ikpt=1,oper%nkpt
@@ -861,17 +861,17 @@ subroutine identity_oper(oper,option)
        end do ! ib
      end do ! ikpt
    end do ! isppol
-   
+
  end if ! option=1 or 3
-   
+
  if (option == 2 .or. option == 3) then
-   natom = oper%natom 
+   natom = oper%natom
    call zero_matlu(oper%matlu(:),natom)
    call identity_matlu(oper%matlu(:),natom)
  end if ! option=2 or 3
 
  DBG_EXIT("COLL")
- 
+
 end subroutine identity_oper
 !!***
 
@@ -908,12 +908,12 @@ subroutine diff_oper(char1,char2,occup1,occup2,option,toldiff)
 ! *********************************************************************
 
  DBG_ENTER("COLL")
- 
+
  if (occup1%has_opermatlu == 0 .or. occup2%has_opermatlu == 0) then
    message = " Operators are not defined to be used in diff_oper"
    ABI_ERROR(message)
  end if
- 
+
  if (occup1%nkpt /= occup2%nkpt) then
    write(message,'(a,2x,2i9)')' Operators are not equal',occup1%nkpt,occup2%nkpt
    ABI_ERROR(message)
@@ -938,7 +938,7 @@ subroutine diff_oper(char1,char2,occup1,occup2,option,toldiff)
 ! call abi_abort('COLL')
 
  DBG_EXIT("COLL")
- 
+
 end subroutine diff_oper
 !!***
 
@@ -979,13 +979,13 @@ subroutine trace_oper(oper,trace_ks,trace_loc,opt_ksloc,trace_ks_cmplx)
 ! *********************************************************************
 
  DBG_ENTER("COLL")
- 
+
  if (((opt_ksloc == 1 .or. opt_ksloc == 3) .and. (oper%has_operks == 0)) .or. &
    & ((opt_ksloc == 2 .or. opt_ksloc == 3) .and. (oper%has_opermatlu == 0))) then
    message = " Options in trace_oper are not coherent with definitions of this operator"
    ABI_ERROR(message)
  end if
- 
+
  if (opt_ksloc == 1 .or. opt_ksloc == 3) then
    trace = czero
    !temp1=zero
@@ -1002,13 +1002,13 @@ subroutine trace_oper(oper,trace_ks,trace_loc,opt_ksloc,trace_ks_cmplx)
    trace_ks = dble(trace)
 !   write(std_out,*) "temp1",temp1
  end if ! opt_ksloc
- 
+
  if (opt_ksloc == 2 .or. opt_ksloc == 3) then
    call trace_matlu(oper%matlu(:),oper%natom,trace_loc(:,:))
  end if
 
  DBG_EXIT("COLL")
- 
+
 end subroutine trace_oper
 !!***
 
@@ -1024,7 +1024,7 @@ end subroutine trace_oper
 !!  opt_ksloc = 1 : in KS space
 !!            = 2 : in local space
 !!  opt_diag = 1 if oper1 and oper2 are diagonal in KS space, 0 otherwise (default)
-!!                
+!!
 !! OUTPUT
 !!  oper3 <type(oper_type)>= matrix product of oper1 and oper2
 !!
@@ -1046,11 +1046,11 @@ subroutine prod_oper(oper1,oper2,oper3,opt_ksloc,opt_diag)
 ! *********************************************************************
 
  DBG_ENTER("COLL")
- 
+
  if (opt_ksloc == 2 .and. oper1%has_opermatlu == 1 .and. &
    & oper2%has_opermatlu == 1 .and. oper3%has_opermatlu == 1) then
-   call prod_matlu(oper1%matlu(:),oper2%matlu(:),oper3%matlu(:),oper1%natom) 
- end if 
+   call prod_matlu(oper1%matlu(:),oper2%matlu(:),oper3%matlu(:),oper1%natom)
+ end if
 
  if (opt_ksloc == 1 .and. oper1%has_operks == 1 .and. &
     & oper2%has_operks == 1 .and. oper3%has_operks == 1) then
@@ -1058,7 +1058,7 @@ subroutine prod_oper(oper1,oper2,oper3,opt_ksloc,opt_diag)
    diag   = .false.
    if (present(opt_diag)) then
      if (opt_diag == 1) diag = .true.
-   end if 
+   end if
    do isppol=1,oper1%nsppol
      do ikpt=1,oper1%nkpt
        if (diag) then
@@ -1067,12 +1067,12 @@ subroutine prod_oper(oper1,oper2,oper3,opt_ksloc,opt_diag)
          end do ! ib
        else
          call abi_xgemm("n","n",mbandc,mbandc,mbandc,cone,oper1%ks(:,:,ikpt,isppol),mbandc,&
-                      & oper2%ks(:,:,ikpt,isppol),mbandc,czero,oper3%ks(:,:,ikpt,isppol),mbandc) 
+                      & oper2%ks(:,:,ikpt,isppol),mbandc,czero,oper3%ks(:,:,ikpt,isppol),mbandc)
          end if ! diag
        end do ! ikpt
      end do ! isppol
  end if ! opt_ksloc=1
- 
+
  DBG_EXIT("COLL")
  
 end subroutine prod_oper
@@ -1087,7 +1087,7 @@ end subroutine prod_oper
 !!
 !! INPUTS
 !!  oper1,oper2 <type(oper_type)>= operator
-!!                
+!!
 !! OUTPUT
 !!  trace = Tr(op1*op2)
 !!
@@ -1106,17 +1106,17 @@ subroutine trace_prod_oper(oper1,oper2,trace)
  if (oper1%shiftk /= oper2%shiftk) then
    message = "Inconsistency in trace_prod_oper: oper1%shiftk should be equal to oper2%shiftk"
    ABI_ERROR(message)
- end if 
- 
+ end if
+
  trace = czero
- 
+
  do isppol=1,oper1%nsppol
    do ikpt=1,oper1%nkpt
      trace = trace + sum(oper1%ks(:,:,ikpt,isppol)*transpose(oper2%ks(:,:,ikpt,isppol)))*&
        & oper1%wtk(ikpt+oper1%shiftk)
    end do ! ikpt
  end do ! isppol
- 
+
  if (oper1%nsppol == 1 .and. oper1%nspinor == 1) trace = trace * two
 
 end subroutine trace_prod_oper
@@ -1128,8 +1128,8 @@ end subroutine trace_prod_oper
 !!
 !! FUNCTION
 !!  Gather the contributions from all CPUs, for a frequency-dependent
-!!  operator, and for both levels of parallelization (kpt and then frequency, 
-!!  and frequency only).  
+!!  operator, and for both levels of parallelization (kpt and then frequency,
+!!  and frequency only).
 !!
 !! INPUTS
 !!  oper <type(oper_type)>= operator for each frequency
@@ -1137,16 +1137,16 @@ end subroutine trace_prod_oper
 !!  paw_dmft  <type(paw_dmft_type)>= paw+dmft related data
 !!  opt_ksloc = 1 : gather the KS operator on the kpt and frequency communicator
 !!              2 : gather the local operator (the exact behavior can be defined via opt_commkpt)
-!!  master = if present, only gather on the master node 
+!!  master = if present, only gather on the master node
 !!  opt_diag = 1 if the operator is diagonal in KS space, 0 (default) otherwise
 !!  opt_commkpt (only meaningful for the local quantity)
-!!              = 0 (default) : frequency-only parallelization 
-!!                              -> xmpi_allgatherv on the whole communicator 
-!!              = 1 : kpt and then frequency parallelization (CAREFUL: here, frequencies 
+!!              = 0 (default) : frequency-only parallelization
+!!                              -> xmpi_allgatherv on the whole communicator
+!!              = 1 : kpt and then frequency parallelization (CAREFUL: here, frequencies
 !!                     are not distributed in the same way as the frequency-only parallelization scheme)
-!!                    -> xmpi_sum on the kpt-communicator, and then xmpi_allgatherv 
+!!                    -> xmpi_sum on the kpt-communicator, and then xmpi_allgatherv
 !!                      on the frequency communicator (useful after a downfold for instance)
-!!                
+!!
 !! OUTPUT
 !!
 !! SOURCE
@@ -1155,7 +1155,7 @@ subroutine gather_oper(oper,distrib,paw_dmft,opt_ksloc,master,opt_diag,opt_commk
 
  use m_paw_dmft, only : mpi_distrib_dmft_type,paw_dmft_type
  use m_xmpi, only : xmpi_allgatherv,xmpi_gatherv,xmpi_sum,xmpi_sum_master
- 
+
 !Arguments ------------------------------------
  type(mpi_distrib_dmft_type), target, intent(in) :: distrib
  type(oper_type), intent(inout) :: oper(distrib%nw)
@@ -1169,7 +1169,7 @@ subroutine gather_oper(oper,distrib,paw_dmft,opt_ksloc,master,opt_diag,opt_commk
  integer, allocatable :: displs(:),recvcounts(:)
  complex(dpc), allocatable :: buffer(:),buffer_tot(:)
 ! *********************************************************************
- 
+
  comm    = paw_dmft%spacecomm
  mbandc  = paw_dmft%mbandc
  myproc  = paw_dmft%myproc
@@ -1178,25 +1178,25 @@ subroutine gather_oper(oper,distrib,paw_dmft,opt_ksloc,master,opt_diag,opt_commk
  nproc   = paw_dmft%nproc
  nspinor = paw_dmft%nspinor
  nsppol  = paw_dmft%nsppol
- nw      = distrib%nw   
+ nw      = distrib%nw
 
  nproc_kpt  = min(nkpt,nproc)
- 
+
  optcommkpt = 0
  if (present(opt_commkpt)) optcommkpt = opt_commkpt
- 
+
  if (opt_ksloc == 1) then
-  
+
    nproc_freq = max(1,nproc/nkpt)
 
    ABI_MALLOC(recvcounts,(nproc))
    ABI_MALLOC(displs,(nproc))
- 
+
    diag = .false.
    if (present(opt_diag)) then
      if (opt_diag == 1) diag = .true.
-   end if 
-   
+   end if
+
    irank2 = 1
    do irank=0,nproc_kpt-1
      do irank1=0,nproc_freq-1
@@ -1212,14 +1212,14 @@ subroutine gather_oper(oper,distrib,paw_dmft,opt_ksloc,master,opt_diag,opt_commk
    do irank=2,nproc
      displs(irank) = displs(irank-1) + recvcounts(irank-1)
    end do ! irank
-   
+
    ABI_MALLOC(buffer,(recvcounts(myproc+1)))
    ABI_MALLOC(buffer_tot,(displs(nproc)+recvcounts(nproc)))
-   
+
    do isppol=1,nsppol
-   
-     ibuf = 0         
-     do ikpt=1,nkpt   
+
+     ibuf = 0
+     do ikpt=1,nkpt
        if (distrib%procb(ikpt) /= distrib%me_kpt) cycle
        do ifreq=1,nw
          if (distrib%proct(ifreq) /= distrib%me_freq) cycle
@@ -1236,13 +1236,13 @@ subroutine gather_oper(oper,distrib,paw_dmft,opt_ksloc,master,opt_diag,opt_commk
          end do ! ib1
        end do ! ifreq
      end do ! ikpt
-     
+
      if (present(master)) then
        call xmpi_gatherv(buffer(:),recvcounts(myproc+1),buffer_tot(:),recvcounts(:),displs(:),master,comm,ierr)
      else
        call xmpi_allgatherv(buffer(:),recvcounts(myproc+1),buffer_tot(:),recvcounts(:),displs(:),comm,ierr)
      end if  ! present(master)
-     
+
      do ikpt=1,nkpt
        do ifreq=1,nw
          do ib1=1,mbandc
@@ -1258,32 +1258,32 @@ subroutine gather_oper(oper,distrib,paw_dmft,opt_ksloc,master,opt_diag,opt_commk
          end do ! ib1
        end do ! ifreq
      end do ! ikpt
-     
-   end do ! isppol   
-  
+
+   end do ! isppol
+
  else if (opt_ksloc == 2) then
- 
+
    nproc_freq = nproc / nkpt
 
    if (optcommkpt == 1) then
-     myproc2 = distrib%me_freq 
+     myproc2 = distrib%me_freq
      nproc2  = nproc_freq + 1
    else
      myproc2 = myproc
      nproc2  = nproc
    end if
-   
+
    ABI_MALLOC(recvcounts,(nproc2))
    ABI_MALLOC(displs,(nproc2))
- 
+
    siz_buf = 0
-   
+
    do iatom=1,natom
      lpawu = paw_dmft%lpawu(iatom)
      if (lpawu == -1) cycle
      siz_buf = siz_buf + (2*lpawu+1)**2
    end do ! iatom
-   
+
    siz_buf = siz_buf * (nspinor**2) * nsppol
    if (optcommkpt == 1) then
      recvcounts(:) = siz_buf * distrib%nw_mem_kptparal(:)
@@ -1300,16 +1300,16 @@ subroutine gather_oper(oper,distrib,paw_dmft,opt_ksloc,master,opt_diag,opt_commk
        siz_buf = siz_buf * distrib%nw_mem_kptparal(mod(paw_dmft%myproc,nproc_freq)+1)
      else
        siz_buf = siz_buf * nw
-     end if 
+     end if
    else
-     siz_buf = recvcounts(myproc2+1)  
-   end if 
- 
+     siz_buf = recvcounts(myproc2+1)
+   end if
+
    ABI_MALLOC(buffer,(siz_buf))
    ABI_MALLOC(buffer_tot,(recvcounts(nproc2)+displs(nproc2)))
-  
+
    buffer(:) = czero
- 
+
    ibuf = 0
    do ifreq=1,nw
      if (optcommkpt == 1) then
@@ -1331,7 +1331,7 @@ subroutine gather_oper(oper,distrib,paw_dmft,opt_ksloc,master,opt_diag,opt_commk
        end do ! isppol
      end do ! iatom
    end do ! ifreq
-   
+
    if (optcommkpt == 1) comm = distrib%comm_freq
    if (present(master)) then
      if (optcommkpt == 1) then
@@ -1341,10 +1341,10 @@ subroutine gather_oper(oper,distrib,paw_dmft,opt_ksloc,master,opt_diag,opt_commk
    else
      if (optcommkpt == 1) then
        call xmpi_sum(buffer(:),distrib%comm_kpt,ierr)
-     end if 
+     end if
      call xmpi_allgatherv(buffer(:),recvcounts(myproc2+1),buffer_tot(:),recvcounts(:),displs(:),comm,ierr)
    end if  ! present(master)
-   
+
    ibuf = 0
    do ifreq=1,nw
      do iatom=1,natom
@@ -1361,9 +1361,9 @@ subroutine gather_oper(oper,distrib,paw_dmft,opt_ksloc,master,opt_diag,opt_commk
        end do ! isppol
      end do ! iatom
    end do ! ifreq
-   
+
  end if ! opt_ksloc
- 
+
  ABI_FREE(recvcounts)
  ABI_FREE(displs)
  ABI_FREE(buffer)
@@ -1381,10 +1381,10 @@ end subroutine gather_oper
 !!  and a xmpi_allgatherv on the kpt-communicator
 !!
 !! INPUTS
-!!  oper <type(oper_type)>= operator 
+!!  oper <type(oper_type)>= operator
 !!  distrib <type(mpi_distrib_dmft_type)> = mpi related data
 !!  opt_diag = 1 if the operator is diagonal in KS space, 0 (default) otherwise
-!!                
+!!
 !! OUTPUT
 !!
 !! SOURCE
@@ -1393,7 +1393,7 @@ subroutine gather_oper_ks(oper,distrib,paw_dmft,opt_diag)
 
  use m_paw_dmft, only : mpi_distrib_dmft_type,paw_dmft_type
  use m_xmpi, only : xmpi_allgatherv,xmpi_sum
- 
+
 !Arguments ------------------------------------
  type(oper_type), intent(inout) :: oper
  type(mpi_distrib_dmft_type), intent(in) :: distrib
@@ -1412,39 +1412,39 @@ subroutine gather_oper_ks(oper,distrib,paw_dmft,opt_diag)
  nkpt   = paw_dmft%nkpt
  nproc  = paw_dmft%nproc
  nsppol = paw_dmft%nsppol
- nw     = distrib%nw 
+ nw     = distrib%nw
 
- nproc_freq = nproc / nkpt 
+ nproc_freq = nproc / nkpt
 
  diag = .false.
  if (present(opt_diag)) then
    if (opt_diag == 1) diag = .true.
- end if 
- 
+ end if
+
  ABI_MALLOC(recvcounts,(nproc))
  ABI_MALLOC(displs,(nproc))
 
  recvcounts(:) = mbandc * distrib%nkpt_mem(:)
  if (.not. diag) recvcounts(:) = recvcounts(:) * mbandc
- 
+
  displs(1) = 0
  do irank=2,nproc
    displs(irank) = displs(irank-1) + recvcounts(irank-1)
  end do ! irank
- 
+
  siz_buf = recvcounts(me_kpt+1)
  if (siz_buf == 0) then
    siz_buf = mbandc
    if (nproc_freq <= 1) siz_buf = siz_buf * distrib%nkpt_mem(mod(paw_dmft%myproc,min(nkpt,nproc))+1)
-   if (.not. diag) siz_buf = siz_buf * mbandc 
- end if 
+   if (.not. diag) siz_buf = siz_buf * mbandc
+ end if
  ABI_MALLOC(buffer,(siz_buf))
  ABI_MALLOC(buffer_tot,(recvcounts(nproc)+displs(nproc)))
 
  do isppol=1,nsppol
 
    buffer(:) = czero
-  
+
    ibuf = 0
    do ikpt=1,nkpt
      if (distrib%procb(ikpt) /= me_kpt) cycle
@@ -1460,12 +1460,12 @@ subroutine gather_oper_ks(oper,distrib,paw_dmft,opt_diag)
        end if ! diag
      end do ! ib1
    end do ! ikpt
-   
+
    call xmpi_sum(buffer(:),distrib%comm_freq,ierr)
-   
+
    call xmpi_allgatherv(buffer(:),recvcounts(me_kpt+1),&
       & buffer_tot(:),recvcounts(:),displs(:),distrib%comm_kpt,ierr)
-        
+
    ibuf = 0
    do ikpt=1,nkpt
      do ib1=1,mbandc
@@ -1480,9 +1480,9 @@ subroutine gather_oper_ks(oper,distrib,paw_dmft,opt_diag)
        end if ! diag
      end do ! ib
    end do ! ikpt
-           
+
  end do ! isppol
- 
+
  ABI_FREE(buffer)
  ABI_FREE(buffer_tot)
  ABI_FREE(recvcounts)

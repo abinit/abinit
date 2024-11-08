@@ -1183,7 +1183,7 @@ if (dtset%prt_lorbmag==1) then
       ! and limit at high frequency)
        call rw_self(self,paw_dmft,prtopt=5,opt_rw=1,opt_stop=1)
 
-       if (opt_moments == 1) then 
+       if (opt_moments == 1) then
          opt_selflimit => self%oper(self%nw)%matlu(:)
        else
          opt_selflimit => self%moments(1)%matlu(:)

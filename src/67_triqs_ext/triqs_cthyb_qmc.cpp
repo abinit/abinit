@@ -29,18 +29,18 @@ using triqs::operators::c;
 using triqs::operators::c_dag;
 using triqs::operators::n;
 
-void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool off_diag, bool move_shift, bool move_double, 
-                     bool measure_density_matrix, bool time_invariance, bool use_norm_as_weight,               
+void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool off_diag, bool move_shift, bool move_double,
+                     bool measure_density_matrix, bool time_invariance, bool use_norm_as_weight,
                      int loc_n_min, int loc_n_max, int seed_a, int seed_b, int num_orbitals, int n_tau,
                      int n_l, int n_cycles, int cycle_length, int ntherm, int ntherm2, int det_init_size,
-                     int det_n_operations_before_check, int ntau_delta, int nbins_histo, int rank, 
-                     int nspinor, int iatom, int ilam, double beta, double move_global_prob, double imag_threshold,                 
+                     int det_n_operations_before_check, int ntau_delta, int nbins_histo, int rank,
+                     int nspinor, int iatom, int ilam, double beta, double move_global_prob, double imag_threshold,
                      double det_precision_warning, double det_precision_error, double det_singular_threshold,
                      double lam, complex<double> *ftau, complex<double> *gtau,
                      complex<double> *gl, complex<double> *udens, complex<double> *vee,
                      complex<double> *levels, complex<double> *moments_self_1,
                      complex<double> *moments_self_2, double *Eu, double *occ) {
-    
+
     cout.setf(ios::fixed);
 
     int verbo = 1;
@@ -50,13 +50,13 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool off_diag, bool move_sh
     auto comm = MPI_COMM_WORLD;
     int size;
     MPI_Comm_size(comm,&size);
-    
-    // Print information about the Solver Parameters 
+
+    // Print information about the Solver Parameters
     if (rank == 0 && verbo > 0) {
 
       int therm_tmp = ntherm;
       if (exists("configs.h5")) therm_tmp = ntherm2;
-        
+
       cout << endl <<"   == Key Input Parameters for the TRIQS CTHYB solver ==" << endl << endl;
       cout << setw(27) << left << "   Beta                  = " << beta << endl;
       cout << setw(27) << left << "   Nflavor               = " << num_orbitals << endl;
@@ -86,11 +86,11 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool off_diag, bool move_sh
       cout << setw(27) << left << "   Nbins histo           = " << nbins_histo << endl;
 
       //for (int o = 0; o < num_orbitals; ++o)
-      //  std::cout << setw(12) << left << "   e- level["<< o+1 <<"] = " << setprecision(17) << epsi[o] << endl; 
-    
+      //  std::cout << setw(12) << left << "   e- level["<< o+1 <<"] = " << setprecision(17) << epsi[o] << endl;
+
        // std::cout << endl;
        // std::cout << setw(13) << left  << "   U(i,j) = "  <<endl<< endl<<"\t";
-    
+
         //for(int o = 0; o < num_orbitals; ++o){
         //    for(int oo = 0; oo < num_orbitals; ++oo)
         //    std::cout <<  setprecision(17) << fixed <<umat_ij[o+oo*num_orbitals] << "\t"; //ed != cste => vecteur a parcourir ensuite
@@ -100,13 +100,13 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool off_diag, bool move_sh
 
     // Hamiltonian definition
     many_body_operator_generic<triqs::utility::real_or_complex> H;
-    many_body_operator_generic<triqs::utility::real_or_complex> Hint; 
+    many_body_operator_generic<triqs::utility::real_or_complex> Hint;
 
     double levels_tmp [num_orbitals*num_orbitals] = {0};
-    
+
     // Init Hamiltonian Basic terms
     if (!rot_inv) {
-      if (rank == 0 && verbo > 0) std::cout << endl << "   == Density-Density Terms Included ==	" << endl << endl; 
+      if (rank == 0 && verbo > 0) std::cout << endl << "   == Density-Density Terms Included ==	" << endl << endl;
       H = init_Hamiltonian(levels,num_orbitals,udens,off_diag,nspinor,lam);
       Hint = init_Hamiltonian(levels_tmp,num_orbitals,udens,off_diag,nspinor,double(1));
     }
@@ -114,7 +114,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool off_diag, bool move_sh
       if (rank == 0 && verbo > 0) std::cout << "   == Rotationally Invariant Terms Included ==	" << endl << endl;
       H = init_fullHamiltonian(levels,num_orbitals,vee,off_diag,nspinor,lam);
       Hint = init_Hamiltonian(levels_tmp,num_orbitals,vee,off_diag,nspinor,double(1));
-    }// else if(rank==0 && verbo>0) std::cout <<endl<<"   == Density-Density Terms Not Included ==	"<<endl<<endl;  
+    }// else if(rank==0 && verbo>0) std::cout <<endl<<"   == Density-Density Terms Not Included ==	"<<endl<<endl;
 
     int nblocks = num_orbitals;
     int siz_block = 1;
@@ -130,7 +130,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool off_diag, bool move_sh
     vector<string> labels(nblocks);
     vector<pair<string,long>> gf_struct;
     if (off_diag) {
-      if (nspinor == 2) 
+      if (nspinor == 2)
         labels[0] = "tot";
       else {
         labels[0] = "up";
@@ -149,10 +149,10 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool off_diag, bool move_sh
     // Construct CTQMC solver with mesh parameters
     solver_core solver({beta,gf_struct,(n_tau-1)/2,n_tau,n_l,true,ntau_delta});
     if (rank == 0 && verbo > 0) cout << "   == Solver Core Initialized ==" << endl << endl;
-    
+
     for (int iblock = 0; iblock < nblocks; ++iblock) {
       for (int tau = 0; tau < ntau_delta; ++tau) {
-        for (int o = 0; o < siz_block; ++o) {  
+        for (int o = 0; o < siz_block; ++o) {
           int iflavor = iblock;
           if (off_diag) iflavor = o + iblock*ndim;
           for (int oo = 0; oo < siz_block; ++oo) {
@@ -170,7 +170,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool off_diag, bool move_sh
     if (rank == 0 && verbo > 0) cout << "   == Solver Parametrization ==	" << endl << endl;
     auto paramCTQMC = solve_parameters_t(H,n_cycles);
 
-    many_body_operator_generic<triqs::utility::real_or_complex> hloc0; 
+    many_body_operator_generic<triqs::utility::real_or_complex> hloc0;
     paramCTQMC.h_loc0 = hloc0;
     paramCTQMC.max_time = -1;
     paramCTQMC.random_name = "";
@@ -178,7 +178,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool off_diag, bool move_sh
     paramCTQMC.length_cycle = cycle_length;
     paramCTQMC.n_warmup_cycles = ntherm;
     paramCTQMC.time_invariance = time_invariance;
-    if (exists(config_fname)) {    
+    if (exists(config_fname)) {
       if (rank == 0) cout << "   == Reading previous configuration == " << endl;
       paramCTQMC.n_warmup_cycles = ntherm2;
       vector<int> sendcounts(size);
@@ -302,13 +302,13 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool off_diag, bool move_sh
 
     paramCTQMC.move_global.insert({to_string(0),ind_map});
     paramCTQMC.measure_G_l = leg_measure;
-  
+
     if (rank == 0 && verbo > 0) cout <<"   == Starting Solver [node "<< rank <<"] ==" << endl << endl;
     //Solve!
     solver.solve(paramCTQMC);
-  
+
     if (rank == 0 && verbo > 0) cout <<"   == Reporting ==" << endl << endl;
- 
+
     if (rank == 0 && verbo > 0) cout <<"   == Writing final configuration ==      " << endl << endl;
     // Write all final configurations
     auto config = solver.get_configuration();
@@ -319,7 +319,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool off_diag, bool move_sh
     vector<int> inner_index_list(length);
     vector<int> is_dagger_list(length);
     int count = 0;
-    for (auto const &o : config) { 
+    for (auto const &o : config) {
       uint64_t tau = floor_div(o.first,tau_0);   // trick to get the value of the integer representing the time_pt
       auto op = o.second;
       int block_index = op.block_index;
@@ -346,21 +346,21 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool off_diag, bool move_sh
     MPI_Gatherv(&is_dagger_list[0],length,MPI_INTEGER,&is_dagger_list_tot[0],&recvcounts[0],displs,MPI_INTEGER,0,comm);
 
     if (rank == 0) {
-    
+
       h5::file configs_hfile("configs.h5",'w');   // very important to open in write mode, so that previous configs are erased
       h5::group gr = configs_hfile;
-      
+
       h5_write(gr,"ncpus",size);
       h5_write(gr,"size",recvcounts);
       h5_write(gr,"tau",tau_list_tot);
       h5_write(gr,"block",block_index_list_tot);
       h5_write(gr,"inner",inner_index_list_tot);
       h5_write(gr,"dagger",is_dagger_list_tot);
-      
+
       configs_hfile.close();
     }
 
-    // Write all histograms 
+    // Write all histograms
     if (!verif_histo) {
 
       auto histo = solver.get_performance_analysis();
@@ -428,7 +428,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool off_diag, bool move_sh
     }
 
     if (rank == 0 && verbo > 0) cout << "Gl reported" << endl;
-   
+
     if (measure_density_matrix) {
 
       auto h_loc_diag = solver.h_loc_diagonalization();
@@ -575,6 +575,6 @@ void build_dlr(int wdlr_size,int *ndlr,double *wdlr,double lam,double eps) {
   auto omega = cppdlr::build_dlr_rf(lam,eps);
   *ndlr = omega.size();
   if (*ndlr > wdlr_size) return;
-  for (int i = 0; i < (*ndlr); ++i) wdlr[i] = omega[i]; 
+  for (int i = 0; i < (*ndlr); ++i) wdlr[i] = omega[i];
 }
 

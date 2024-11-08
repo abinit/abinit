@@ -1032,12 +1032,12 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  call init_sc_dmft(dtset,psps%mpsang,paw_dmft,gprimd(:,:),kg(:,:),mpi_enreg,npwarr(:),occ(:),pawang, &
                 & pawrad(:),pawtab(:),rprimd(:,:),ucvol,dtfil%unpaw,use_sc_dmft,xred(:,:),ylm(:,:))
  if (paw_dmft%use_dmft == 1) then
-   if (paw_dmft%myproc == 0) then 
+   if (paw_dmft%myproc == 0) then
      call readocc_dmft(paw_dmft,dtfil%filnam_ds(3),dtfil%filnam_ds(4))
-   end if 
-   call xmpi_bcast(paw_dmft%occnd(:,:,:,:,:),0,paw_dmft%spacecomm,ierr) 
+   end if
+   call xmpi_bcast(paw_dmft%occnd(:,:,:,:,:),0,paw_dmft%spacecomm,ierr)
    call print_sc_dmft(paw_dmft,dtset%pawprtvol)
- end if 
+ end if
 
 !###########################################################
 !### 11. Initialize (eventually) electron-positron data and

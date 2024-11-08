@@ -21,23 +21,23 @@ MODULE TRIQS_CTQMC
 ! =====================================================================
 !
 ! Ctqmc_triqs_run(Boolean args, int args, real args, pointer array args)
-! 
+!
 ! =====================================================================
 
- 
+
      SUBROUTINE Ctqmc_triqs_run(rot_inv,leg_measure,off_diag,move_shift,move_double,measure_density_matrix,time_invariance, &
                               & use_norm_as_weight,loc_n_min,loc_n_max,seed_a,seed_b,nflavor,ntau,nl,ncycle,cycle_length, &
                               & ntherm,ntherm2,det_init_size,det_n_operations_before_check,ntau_delta,nbins_histo, &
                               & rank,nspinor,iatom,ilam,beta,move_global_prob,imag_threshold,det_precision_warning, &
-                              & det_precision_error,det_singular_threshold,lam,ftau,gtau,gl,udens,vee,levels,moments_self_1, & 
+                              & det_precision_error,det_singular_threshold,lam,ftau,gtau,gl,udens,vee,levels,moments_self_1, &
                               & moments_self_2,Eu,occ) bind(c)
-     
+
       use iso_c_binding
 
       LOGICAL(Kind=1), VALUE, INTENT(IN) :: rot_inv,leg_measure,off_diag,move_shift,move_double
-      
+
       LOGICAL(Kind=1), VALUE, INTENT(IN) :: measure_density_matrix,time_invariance,use_norm_as_weight
-      
+
       INTEGER, VALUE, INTENT(IN) :: loc_n_min,loc_n_max,seed_a,seed_b,nflavor,ntau,nl,ncycle,cycle_length,ntherm,ntherm2
 
       INTEGER, VALUE, INTENT(IN) :: det_init_size,det_n_operations_before_check,ntau_delta,nbins_histo,rank,nspinor,iatom,ilam
@@ -47,10 +47,10 @@ MODULE TRIQS_CTQMC
       REAL(Kind=8), VALUE, INTENT(IN) :: det_singular_threshold,lam
 
       TYPE(C_PTR), VALUE, INTENT(IN) :: ftau,gtau,gl,udens,vee,levels,moments_self_1,moments_self_2,Eu,occ
- 
+
     end subroutine Ctqmc_triqs_run
 
-    subroutine build_dlr(wdlr_size,ndlr,wdlr,lam,eps) bind(c) 
+    subroutine build_dlr(wdlr_size,ndlr,wdlr,lam,eps) bind(c)
 
       use iso_c_binding
 

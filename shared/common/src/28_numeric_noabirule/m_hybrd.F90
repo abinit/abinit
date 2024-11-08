@@ -3,7 +3,7 @@
 !! m_hybrd
 !!
 !! FUNCTION
-!! This module contains a modified Powell method for root-finding. 
+!! This module contains a modified Powell method for root-finding.
 !! This was taken from https://www.netlib.org/minpack/.
 !!
 !! COPYRIGHT
@@ -86,7 +86,7 @@ CONTAINS  !=====================================================================
       double precision xtol,epsfcn,factor
       double precision x(n),fvec(n),diag(n),fjac(ldfjac,n),r(lr), &
      &                 qtf(n),wa1(n),wa2(n),wa3(n),wa4(n)
-      interface 
+      interface
         subroutine fcn(n,x,fvec,iflag)
           integer, intent(in) :: n,iflag
           double precision, intent(in) :: x(n)
@@ -269,7 +269,7 @@ CONTAINS  !=====================================================================
 !c
 !c     check the input parameters for errors.
 !c
-      if (n .le. 0 .or. xtol .lt. zero .or. maxfev .le. 0  & 
+      if (n .le. 0 .or. xtol .lt. zero .or. maxfev .le. 0  &
      &    .or. ml .lt. 0 .or. mu .lt. 0 .or. factor .le. zero &
      &    .or. ldfjac .lt. n .or. lr .lt. (n*(n + 1))/2) go to 300
       if (mode .ne. 2) go to 20
@@ -624,7 +624,7 @@ CONTAINS  !=====================================================================
 !c     data minmag(1),minmag(2) / "000400000000, "000000000000 /
 !c     data maxmag(1),maxmag(2) / "377777777777, "377777777777 /
 !c
-!c     Machine constants for the PDP-11. 
+!c     Machine constants for the PDP-11.
 !c
 !c     data mcheps(1),mcheps(2) /   9472,      0 /
 !c     data mcheps(3),mcheps(4) /      0,      0 /
@@ -840,7 +840,7 @@ CONTAINS  !=====================================================================
       integer n,ldfjac,iflag,ml,mu
       double precision epsfcn
       double precision x(n),fvec(n),fjac(ldfjac,n),wa1(n),wa2(n)
-      interface 
+      interface
         subroutine fcn(n,x,fvec,iflag)
           integer, intent(in) :: n,iflag
           double precision, intent(in) :: x(n)
