@@ -104,7 +104,7 @@ contains
 
 subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_cprj,mcg,&
                      & mpi_enreg,my_nspinor,occ,paw_dmft,paw_ij,pawtab,usecprj,nbandkss)
-  
+
 !Arguments ------------------------------------
  integer, intent(in) :: mband_cprj,mcg,my_nspinor,usecprj
  integer, optional, intent(in) :: nbandkss
@@ -115,7 +115,7 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
  type(paw_dmft_type), intent(inout) :: paw_dmft
  integer, intent(in) :: dimcprj(paw_dmft%natom)
  real(dp), intent(in) :: occ(paw_dmft%mband*paw_dmft%nkpt*paw_dmft%nsppol)
- real(dp), target, intent(in) :: eigen(paw_dmft%mband*paw_dmft%nkpt*paw_dmft%nsppol) 
+ real(dp), target, intent(in) :: eigen(paw_dmft%mband*paw_dmft%nkpt*paw_dmft%nsppol)
  real(dp), intent(in) :: cg(2,mcg)
  type(paw_ij_type), intent(in) :: paw_ij(paw_dmft%natom)
 ! type(pawcprj_type) :: cprj(cryst_struc%natom,my_nspinor*mband*mkmem*nsppol)
@@ -147,12 +147,12 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
  mkmem   = paw_dmft%mkmem
  natom   = paw_dmft%natom
  nkpt    = paw_dmft%nkpt
- nspinor = paw_dmft%nspinor 
+ nspinor = paw_dmft%nspinor
  nsppol  = paw_dmft%nsppol
- nsppol_mem = sum(mpi_enreg%my_isppoltab(1:nsppol)) 
+ nsppol_mem = sum(mpi_enreg%my_isppoltab(1:nsppol))
  pawprtvol  = dtset%pawprtvol
  prt_wan    = (paw_dmft%dmft_prtwan == 1)
- 
+
  if (abs(pawprtvol) >= 3) then
    write(message,*) " number of k-points used is nkpt=nkpt ",nkpt
    call wrtout(std_out,message,'COLL')
@@ -171,7 +171,7 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
    write(message,*) "  my_nspinor=/dtset%nspinor, datafordmft not working in this case",my_nspinor,nspinor
    ABI_ERROR(message)
  end if
- 
+
 
 !do ib=1,my_nspinor*mband_cprj*mkmem*nsppol*usecprj
 !write(std_out,'(a,i6,3e16.7)') "cprj",ib,cprj(1,ib)%cp(1,19),cprj(1,ib)%cp(2,19),cprj(1,ib)%cp(1,19)**2+cprj(1,ib)%cp(2,19)**2
@@ -180,20 +180,20 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
 !----------------------------------- MPI-------------------------------------
 
 ! Init parallelism
- paral_kgb = mpi_enreg%paral_kgb 
+ paral_kgb = mpi_enreg%paral_kgb
  comm_kpt  = mpi_enreg%comm_cell
  if (paral_kgb == 1) comm_kpt = mpi_enreg%comm_kpt
- comm_band = mpi_enreg%comm_band 
+ comm_band = mpi_enreg%comm_band
  me_kpt  = mpi_enreg%me_kpt
  me_band = mpi_enreg%me_band
  nproc_band  = mpi_enreg%nproc_band
  nproc_spkpt = mpi_enreg%nproc_spkpt
- 
+
  if (nproc_band /= (mband/mband_cprj)) then
    message = "Inconsistency in datafordmft: nproc_band should be equal to mband/mband_cprj"
    ABI_ERROR(message)
- end if 
- 
+ end if
+
  iorder_cprj = 0
  ABI_CHECK(dtset%mkmem/=0,"mkmem=0 not supported anymore!")
 !todo_ab: extract cprj from file unpaw in the following..
@@ -201,7 +201,7 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
 
 !----------------------------------- MPI-------------------------------------
 
- nbandi = paw_dmft%dmftbandi 
+ nbandi = paw_dmft%dmftbandi
  nbandf = paw_dmft%dmftbandf
  t2g    = (paw_dmft%dmft_t2g == 1)
  x2my2d = (paw_dmft%dmft_x2my2d == 1)
@@ -232,7 +232,7 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
    write(message,'(2a)') ch10,'---------------------------------------------------------------'
    call wrtout(std_out,message,'COLL')
  end if ! abs(pawprtvol)>=3
- 
+
  if (dtset%nstep == 0 .and. dtset%nbandkss == 0) then
    message = 'nstep should be greater than 1'
    ABI_BUG(message)
@@ -240,9 +240,9 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
 
 !********************* Max Values for U terms.
  maxlpawu    = paw_dmft%maxlpawu
- maxmeshsize = paw_dmft%maxmeshsize 
+ maxmeshsize = paw_dmft%maxmeshsize
  maxnproju   = paw_dmft%maxnproju
- 
+
 !*****************   in forlb.eig
  if (paw_dmft%myproc == 0 .and. abs(pawprtvol) >= 3) then
    if (open_file('forlb.eig',message,newunit=unt,form='formatted',status='unknown') /= 0) ABI_ERROR(message)
@@ -306,11 +306,11 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
 
  call pawcprj_alloc(cwaveprj(:,:),0,dimcprj(:))
 !write(std_out,*) "after alloc cprj"
- 
+
  ABI_MALLOC(cwprj,(maxnproju,2*maxlpawu+1))
  ABI_MALLOC(psi_tmp,(maxmeshsize))
- 
- siz_buf = 0 
+
+ siz_buf = 0
  siz_buf_psi = 0
  do iatom=1,natom
    lpawu = paw_dmft%lpawu(iatom)
@@ -321,24 +321,24 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
    siz_buf_psi = siz_buf_psi + ndim*paw_dmft%radgrid(itypat)%mesh_size
  end do ! iatom
  siz_buf = siz_buf * mbandc * nspinor * mkmem * nsppol_mem
- siz_buf_psi = siz_buf_psi * mbandc * nspinor * mkmem * nsppol_mem  
-   
+ siz_buf_psi = siz_buf_psi * mbandc * nspinor * mkmem * nsppol_mem
+
  ABI_MALLOC(recvcounts,(nproc_spkpt))
  ABI_MALLOC(displs,(nproc_spkpt))
  call xmpi_allgather(siz_buf,recvcounts(:),comm_kpt,ierr)
-  
+
  displs(1) = 0
  do irank=2,nproc_spkpt
    displs(irank) = displs(irank-1) + recvcounts(irank-1)
  end do ! irank
-   
+
  ABI_MALLOC(buf_chipsi,(siz_buf))
  ABI_MALLOC(buf_chipsi_tot,(recvcounts(nproc_spkpt)+displs(nproc_spkpt)))
  if (prt_wan) then
    ABI_MALLOC(paw_dmft%buf_psi,(siz_buf_psi))
- end if 
+ end if
 
- icprj = 0 
+ icprj = 0
  icg = 0
  ibuf_psi = 0
  ibuf_chipsi = 0
@@ -346,23 +346,23 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
  buf_chipsi(:) = czero
 
  do isppol=1,nsppol
- 
+
    if (mpi_enreg%my_isppoltab(isppol) == 0) cycle
    ik = 0
- 
+
    do ikpt=1,nkpt
-   
+
      nband_k = dtset%nband(ikpt+(isppol-1)*nkpt)
      if (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me_kpt)) cycle
 
      nband_k_cprj = nband_k / nproc_band
-     npw = paw_dmft%npwarr(ikpt) 
-     icgb = icg 
-     ik = ik + 1 
-     ibandc = 0 
+     npw = paw_dmft%npwarr(ikpt)
+     icgb = icg
+     ik = ik + 1
+     ibandc = 0
 !    LOOP OVER BANDS
      ib = 0
-     
+
      do iband=1,nband_k
 
        ! Parallelization: treat only some bands
@@ -372,22 +372,22 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
        else
          if (mpi_enreg%proc_distrb(ikpt,iband,isppol) /= me_kpt) verif = .false.
        end if
-     
+
        if (verif) ib = ib + 1
-       
+
        if (paw_dmft%band_in(iband)) then
          ibandc = ibandc + 1
        else
          icgb = icgb + npw*nspinor
          cycle
-       end if  
+       end if
 
        if (verif) then
          call pawcprj_get(cryst_struc%atindx1(:),cwaveprj(:,:),cprj(:,:),natom,ib,icprj,ikpt,&
                        & iorder_cprj,isppol,mband_cprj,dtset%mkmem,natom,1,nband_k_cprj,&
                        & my_nspinor,nsppol,paw_dmft%unpaw,mpicomm=mpi_enreg%comm_kpt,&
                        & proc_distrb=mpi_enreg%proc_distrb(:,:,:))
-       end if 
+       end if
 
        do ispinor=1,my_nspinor
          do iatom=1,natom
@@ -402,7 +402,7 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
            siz_wan = paw_dmft%radgrid(itypat)%mesh_size
            siz_paw = min(siz_wan,paw_dmft%int_meshsz(itypat))
            rint = paw_dmft%radgrid(itypat)%rad(siz_proj)
-         
+
            if (verif) then
              lmn_size = pawtab(itypat)%lmn_size
              do ilmn=1,lmn_size
@@ -416,36 +416,36 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
                else if (t2g) then
                  if (im == 3 .or. im == 5) cycle
                  if (im == 4) im = 3
-               end if 
+               end if
                iproj = pawtab(itypat)%indlmn(3,ilmn)
                cwprj(iproj,im) = cmplx(cwaveprj(iatom,ispinor)%cp(1,ilmn), &
-                                     & cwaveprj(iatom,ispinor)%cp(2,ilmn),kind=dp) 
+                                     & cwaveprj(iatom,ispinor)%cp(2,ilmn),kind=dp)
              end do ! ilmn
            end if ! verif
-           
+
            do im=1,ndim
-             
+
              ibuf_chipsi = ibuf_chipsi + 1
-             
+
              if (use_full_chipsi) then
-             
+
                do ir=1,siz_wan
-               
+
                  tmp = sum(paw_dmft%dpro(1:npw,iatom,ik) * paw_dmft%bessel(1:npw,ir,itypat,ik) * &
                          & cmplx(cg(1,icgb+1:icgb+npw),cg(2,icgb+1:icgb+npw),kind=dp) * &
                          & paw_dmft%ylm(1:npw,im,lpawu+1,ik))
-               
+
                  if (ir <= siz_proj) psi_tmp(ir) = tmp * pawtab(itypat)%proj(ir)
                  if (prt_wan) paw_dmft%buf_psi(ibuf_psi+ir) = tmp
-               
+
                end do ! ir
-             
+
                call simp_gen(re,dble(psi_tmp(1:siz_proj)),paw_dmft%radgrid(itypat),r_for_intg=rint)
                call simp_gen(ima,aimag(psi_tmp(1:siz_proj)),paw_dmft%radgrid(itypat),r_for_intg=rint)
-             
+
                buf_chipsi(ibuf_chipsi) = cmplx(re,ima,kind=dp)
-             
-               if (verif) then 
+
+               if (verif) then
                  do iproj=1,nproju
                    buf_chipsi(ibuf_chipsi) = buf_chipsi(ibuf_chipsi) + &
                                            & cwprj(iproj,im)*paw_dmft%phimtphi_int(iproj,itypat)
@@ -453,26 +453,26 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
                      & cwprj(iproj,im)*paw_dmft%phimtphi(1:siz_paw,iproj,itypat)
                  end do ! iproj
                end if ! verif
-               
+
              else
-             
+
                if (verif) then
                  do iproj=1,nproju
                    buf_chipsi(ibuf_chipsi) = buf_chipsi(ibuf_chipsi) + &
                                            & cwprj(iproj,im)*paw_dmft%phi_int(iproj,itypat)
                  end do ! iproj
                end if ! verif
-             
+
              end if ! use_full_chipsi
-             
-             ibuf_psi = ibuf_psi + siz_wan               
-             
+
+             ibuf_psi = ibuf_psi + siz_wan
+
            end do ! im
          end do ! iatom
          icgb = icgb + npw
        end do ! ispinor
      end do ! iband
-     
+
      icprj = icprj + nband_k_cprj*nspinor
      icg = icg + nband_k*npw*nspinor
    end do ! ikpt
@@ -508,22 +508,22 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
  call xmpi_barrier(comm_kpt)
  if (paral_kgb == 1 .and. nproc_band > 1) then
    ! Build sum over band processors
-   call xmpi_sum(buf_chipsi(:),comm_band,ierr) 
- end if 
+   call xmpi_sum(buf_chipsi(:),comm_band,ierr)
+ end if
  call xmpi_allgatherv(buf_chipsi(:),siz_buf,buf_chipsi_tot(:),recvcounts(:),displs(:),comm_kpt,ierr)
- 
+
  ABI_FREE(displs)
  ABI_FREE(recvcounts)
  ABI_FREE(buf_chipsi)
- 
+
  ibuf_chipsi = 0
  do irank=0,nproc_spkpt-1
    do isppol=1,nsppol
      do ikpt=1,nkpt
-       
+
        nband_k = dtset%nband(ikpt+(isppol-1)*nkpt)
        if (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,irank)) cycle
-       
+
        do ibandc=1,mbandc
          do ispinor=1,nspinor
            do iatom=1,natom
@@ -537,15 +537,15 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
            end do ! iatom
          end do ! ispinor
        end do ! ibandc
-       
+
      end do ! ikpt
    end do ! isppol
  end do ! irank
- 
+
  call xmpi_barrier(comm_kpt)
- 
+
  ABI_FREE(buf_chipsi_tot)
- 
+
 !do isppol=1,nsppol
 !do ikpt=1,nkpt
 !do ibandc=1,paw_dmft%mbandc
@@ -574,7 +574,7 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
 ! Only if the complete BZ is sampled (ie paw_dmft%kspectralfunc=0)
 !==========================================================================
  if (paw_dmft%dmft_kspectralfunc == 0) then
- 
+
    call init_oper(paw_dmft,loc_norm_check,opt_ksloc=2)
    call chipsi_check(paw_dmft,dft_occup,loc_norm_check)
 !==========================================================================
@@ -632,7 +632,7 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
        ndim = 2*lpawu + 1
        do idijeff=1,nsploop
          if (nsploop <= 2) then
-           isppol = idijeff 
+           isppol = idijeff
          else if (nsploop == 4) then
            ispinor  = spinor_idxs(1,idijeff)
            ispinor1 = spinor_idxs(2,idijeff)
@@ -687,7 +687,7 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
      call chipsi_renormalization(paw_dmft,opt=opt_renorm)
      if (paw_dmft%myproc == 0) then
        call chipsi_print(paw_dmft,pawtab(:))
-     end if 
+     end if
    end if ! proc=me
  end if
 
@@ -715,7 +715,7 @@ subroutine chipsi_check(paw_dmft,xocc_check,xnorm_check)
 
 !Arguments ------------------------------------
  type(paw_dmft_type), intent(in) :: paw_dmft
- type(oper_type), intent(inout) :: xnorm_check,xocc_check 
+ type(oper_type), intent(inout) :: xnorm_check,xocc_check
 !Local variables ------------------------------------
  real(dp), allocatable :: occ_dft(:,:,:)
 ! *********************************************************************
@@ -731,22 +731,22 @@ subroutine chipsi_check(paw_dmft,xocc_check,xnorm_check)
        if (paw_dmft%band_in(iband)) then
          ibandc = ibandc + 1
          occ_dft(ibandc,ikpt,isppol) = occ(iband+band_index)
-       end if 
+       end if
      end do ! iband
      band_index = band_index + nband_k
    end do ! ikpt
  end do ! isppol
-  
+
  if (nsppol == 1 .and. my_nspinor == 1) occ_dft(:,:,:) = occ_dft(:,:,:) * half
 
  call downfold_oper(xnorm_check,paw_dmft,procb=paw_dmft%distrib%procb(:),iproc=paw_dmft%distrib%me_kpt,option=2)
  call xmpi_matlu(xnorm_check%matlu(:),natom,paw_dmft%distrib%comm_kpt)
  call downfold_oper(xocc_check,paw_dmft,procb=paw_dmft%distrib%procb(:), &
-                  & iproc=paw_dmft%distrib%me_kpt,option=3,op_ks_diag=occ_dft(:,:,:)) 
+                  & iproc=paw_dmft%distrib%me_kpt,option=3,op_ks_diag=occ_dft(:,:,:))
  call xmpi_matlu(xocc_check%matlu(:),natom,paw_dmft%distrib%comm_kpt)
 
  ABI_FREE(occ_dft)
- 
+
  end subroutine chipsi_check
 !DBG_EXIT("COLL")
 !!***
@@ -874,7 +874,7 @@ subroutine chipsi_print(paw_dmft,pawtab)
 !Arguments ------------------------------------
  type(oper_type), intent(in) :: hdc
  type(paw_dmft_type), intent(in) :: paw_dmft
- type(oper_type), intent(inout) :: energy_level 
+ type(oper_type), intent(inout) :: energy_level
  logical, optional, intent(out) :: nondiag
 !Local variables ------------------------------
  integer :: iatom,im,isppol,lpawu,natom,ndim
@@ -884,7 +884,7 @@ subroutine chipsi_print(paw_dmft,pawtab)
 
  natom = paw_dmft%natom
  if (present(nondiag)) nondiag = .false.
- 
+
 !======================================================================
 !Compute atomic levels from projection of \epsilon_{nks} and symmetrize
 !======================================================================
@@ -912,7 +912,7 @@ subroutine chipsi_print(paw_dmft,pawtab)
  call sym_matlu(energy_level%matlu(:),paw_dmft)
  if (present(nondiag)) then
    call checkdiag_matlu(energy_level%matlu(:),natom,tol7,nondiag)
- end if 
+ end if
 
  write(tag,'(f13.5)') paw_dmft%fermie
  write(message,'(a,2x,2a)') ch10," == Print Energy levels for Fermi Level= ",adjustl(tag)
@@ -938,8 +938,8 @@ subroutine chipsi_print(paw_dmft,pawtab)
 !!          and for each individual atom
 !!
 !! OUTPUT
-!!  paw_dmft%chipsi((2*maxlpawu+1)*nspinor,mbandc,nkpt,nsppol,natom): 
-!!                    orthonormalized projections <Chi|Psi> 
+!!  paw_dmft%chipsi((2*maxlpawu+1)*nspinor,mbandc,nkpt,nsppol,natom):
+!!                    orthonormalized projections <Chi|Psi>
 !!
 !! NOTES
 !!
@@ -955,7 +955,7 @@ subroutine chipsi_renormalization(paw_dmft,opt)
  real(dp) :: pawprtvol
  type(oper_type) :: norm,oper_temp
  character(len=500) :: message
- real(dp), allocatable :: wtk_tmp(:) 
+ real(dp), allocatable :: wtk_tmp(:)
 ! real(dp),allocatable :: e0pde(:,:,:),omegame0i(:)
 !************************************************************************
 
@@ -1028,7 +1028,7 @@ subroutine chipsi_renormalization(paw_dmft,opt)
  end if ! option
 
  ! Gather contribution from each CPU
- call chipsi_gather(paw_dmft) 
+ call chipsi_gather(paw_dmft)
 
 !== Change back repr for norm
 
@@ -1161,7 +1161,7 @@ subroutine normalizechipsi(nkpt,paw_dmft,jkpt)
    call xmpi_matlu(norm1%matlu(:),natom,paw_dmft%distrib%comm_kpt)
    if (nkpt > 1) then
      call sym_matlu(norm1%matlu(:),paw_dmft)
-   end if 
+   end if
 
    if (pawprtvol > 2) then
      write(message,'(2a)') ch10,'  - Print norm with current chipsi '
@@ -1224,7 +1224,7 @@ subroutine normalizechipsi(nkpt,paw_dmft,jkpt)
        !        norm1%matlu(iatom)%mat(im,im1,isppol)=czero
        !      end if
        !    end do
-       ! end do 
+       ! end do
        !end if
 
 !        == Apply O^{-0.5} on chipsi
@@ -1236,7 +1236,7 @@ subroutine normalizechipsi(nkpt,paw_dmft,jkpt)
        end do ! ikpt
      end do ! isppol
 
-     
+
        !       ABI_MALLOC(wan,(nsppol,nspinor,ndim))
 !        write(std_out,*) mbandc,nsppol,nspinor,ndim
 !        write(std_out,*)  paw_dmft%psichi(1,1,1,1,1,1)
@@ -1296,7 +1296,7 @@ subroutine normalizechipsi(nkpt,paw_dmft,jkpt)
 
    if (nkpt > 1) then
      call sym_matlu(norm1%matlu(:),paw_dmft)
-   end if 
+   end if
 
    if (pawprtvol > 2) then
      write(message,'(2a)') ch10,'  - Print norm with new chipsi '
@@ -1388,7 +1388,7 @@ subroutine normalizechipsi(nkpt,paw_dmft,jkpt)
      do itot=1,dimoverlap
        write(std_out,'(100e9.3)') (largeoverlap(itot,itot1),itot1=1,dimoverlap)
      end do
-     
+
      call abi_xgemm("n","n",dimoverlap,mbandc,dimoverlap,cone,largeoverlap(:,:),dimoverlap,&
                   & chipsivect(:,:),dimoverlap,czero,mat_tmp(:,:),dimoverlap)
 
@@ -1417,8 +1417,8 @@ subroutine normalizechipsi(nkpt,paw_dmft,jkpt)
         ! enddo ! iatom
       ! enddo ! ib
 
-    
-!    Calculation of overlap (check) 
+
+!    Calculation of overlap (check)
      call abi_xgemm("n","c",dimoverlap,dimoverlap,mbandc,cone,mat_tmp(:,:),dimoverlap,&
                   & mat_tmp(:,:),dimoverlap,czero,largeoverlap(:,:),dimoverlap)
 
@@ -1789,7 +1789,7 @@ subroutine compute_wannier(paw_dmft,mpi_enreg)
  ! No need to broadcast on every CPU
  if (mpi_enreg%paral_kgb == 1 .and. mpi_enreg%nproc_band > 1) then
    call xmpi_sum_master(paw_dmft%wannier(:,:,:),0,mpi_enreg%comm_band,ierr)
- end if 
+ end if
  call xmpi_sum_master(paw_dmft%wannier(:,:,:),0,mpi_enreg%comm_kpt,ierr)
 
  ABI_FREE(paw_dmft%buf_psi)
