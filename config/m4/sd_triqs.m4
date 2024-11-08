@@ -57,10 +57,13 @@ AC_DEFUN([SD_TRIQS_INIT], [
   done
 
   # Set reasonable defaults if not provided
-  test -z "${sd_triqs_libs_def}" && sd_triqs_libs_def="-ltriqs -lcthyb_c"
+  test -z "${sd_triqs_libs_def}" && sd_triqs_libs_def="-lcppdlr_c -lh5_c -lnda_c -ltriqs -ltriqs_cthyb_c"
   test -z "${sd_triqs_policy}" && sd_triqs_policy="fail"
   test -z "${sd_triqs_status}" && sd_triqs_status="optional"
   test -z "${sd_triqs_enable_def}" && sd_triqs_enable_def="no"
+  test -z "${sd_triqs_cxxflags_def}" && sd_triqs_cxxflags_def="-std=c++20"
+  test -z "${sd_triqs_fcflags_def}" && sd_triqs_fcflags_def="-lstdc++"
+
   case "${sd_triqs_status}" in
     implicit|required)
       sd_triqs_enable_def="yes"
