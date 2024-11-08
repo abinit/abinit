@@ -26,7 +26,7 @@ module m_rot_cg
   use m_abi_linalg, only : abi_xgemm
   use m_abicore
   use m_errors
-  use m_xmpi  
+  use m_xmpi
 
   implicit none
 
@@ -206,16 +206,16 @@ subroutine rot_cg(occ_nd,cwavef,npw,nband,blocksize,nspinor,first_bandc,nbandc,o
 !! Compute the corresponding wave functions if nothing wrong happened
   ! $c^{rot}_{n,k}(g) =  \sum_{n'} [\bar{f_{n',n}} * c_{n',k}(g)]$
 
-  if (dmft_test == 0) occ_nd_cpx(:,:) = conjg(occ_nd_cpx(:,:))  
-  
+  if (dmft_test == 0) occ_nd_cpx(:,:) = conjg(occ_nd_cpx(:,:))
+
   do ispinor=1,nspinor
     mat_tmp(:,:) = cmplx(cwavef(1,1:npw,first_bandc:first_bandc+nbandc-1,ispinor), &
                        & cwavef(2,1:npw,first_bandc:first_bandc+nbandc-1,ispinor),kind=dp)
-    call abi_xgemm("n","n",npw,nbandc,nbandc,cone,mat_tmp(:,:),npw, & 
+    call abi_xgemm("n","n",npw,nbandc,nbandc,cone,mat_tmp(:,:),npw, &
                  & occ_nd_cpx(:,:),nbandc,czero,mat_tmp2(:,:),npw)
     cwavef(1,1:npw,first_bandc:first_bandc+nbandc-1,ispinor) = dble(mat_tmp2(:,:))
     cwavef(2,1:npw,first_bandc:first_bandc+nbandc-1,ispinor) = aimag(mat_tmp2(:,:))
-  end do ! ispinor 
+  end do ! ispinor
 
   !do ig=1,npw
   !  cwavef_rot_g(:,:) = czero
@@ -233,9 +233,9 @@ subroutine rot_cg(occ_nd,cwavef,npw,nband,blocksize,nspinor,first_bandc,nbandc,o
   ABI_FREE(mat_tmp2)
   ABI_FREE(occ_diag_red)
   ABI_FREE(occ_nd_cpx)
- 
+
   DBG_EXIT("COLL")
-    
+
  end subroutine rot_cg
 !!***
 
