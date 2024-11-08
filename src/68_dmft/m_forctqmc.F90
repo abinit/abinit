@@ -37,6 +37,7 @@ MODULE m_forctqmc
  
  use m_crystal, only : crystal_t
  use m_datafordmft, only : compute_levels,hybridization_asymptotic_coefficient
+ use m_fstrings, only : int2char4
  use m_green, only : compute_moments_loc,copy_green,destroy_green,green_type, &
     & init_green,int_fct,occup_green_tau,print_green,printocc_green
  use m_hide_lapack, only : xginv
@@ -50,6 +51,7 @@ MODULE m_forctqmc
  use m_oper, only : destroy_oper,gather_oper,identity_oper,init_oper,inverse_oper,oper_type
  use m_paw_correlations, only : calc_vee
  use m_paw_dmft, only : paw_dmft_type
+ use m_paw_exactDC, only : grule
  use m_paw_numeric, only : jbessel => paw_jbessel
  use m_pawang, only : pawang_type
  use m_self, only : self_type
@@ -357,7 +359,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 ! =================================================================
      call init_oper(paw_dmft,level_diag,opt_ksloc=2)
      
-     ! Diagonalise atomic levels (opt_real is necessary, because
+     ! Diagonalize atomic levels (opt_real is necessary, because
      ! rotation must be real in order for the occupations and Green's
      ! function to be real)
      ! ---------------------------------------------------------------
@@ -1856,7 +1858,7 @@ end if !nspinor
  do ifreq=1,nwlo
    if (weiss%distrib%procf(ifreq) /= myproc) cycle
    if (triqs) then
-     shift(ifreq) = cmplx(zero,paw_dmft%omega_lo(ifreq),kind=dp)
+     shift(:) = cmplx(zero,paw_dmft%omega_lo(ifreq),kind=dp)
      call add_matlu(weiss%oper(ifreq)%matlu(:),energy_level%matlu(:),matlu1(:),natom,1)
      call copy_matlu(matlu1(:),weiss%oper(ifreq)%matlu(:),natom)
      call shift_matlu(weiss%oper(ifreq)%matlu(:),natom,shift(:))
@@ -3293,6 +3295,9 @@ end subroutine ctqmc_calltriqs
 
 subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
 
+#if defined HAVE_TRIQS_v3_4
+ use TRIQS_CTQMC
+#endif 
  use ISO_C_BINDING
 
 !Arguments ------------------------------------
@@ -3370,8 +3375,10 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
    ABI_MALLOC(wdlr_tmp,(wdlr_size))
    ndlr_ptr = C_LOC(ndlr)
    wdlr_ptr = C_LOC(wdlr_tmp)
+#if defined HAVE_TRIQS_v3_4
    call build_dlr(wdlr_size,ndlr_ptr,wdlr_ptr,paw_dmft%dmftctqmc_triqs_lambda, &
                 & paw_dmft%dmftctqmc_triqs_epsilon)
+#endif
    if (ndlr > wdlr_size) then
      write(message,'(a,i4,2a)') "You have more than ",wdlr_size," DLR frequencies.", &
                     & " Something is wrong here."
@@ -3840,10 +3847,10 @@ subroutine jac_lsq_g(gl,jac)
 
 !Arguments ------------------------------------
  real(dp), intent(in) :: gl(:)
- real(dp), intent(inout) :: jac(:)  ! need dimension ndlr+1 for the SLSQP routine 
+ real(dp), intent(inout) :: jac(:)  
 !Local variables ------------------------------
 
- jac = zero
+ jac(:) = zero
  do itau=1,ntau
    jac(1:ndlr) = jac(1:ndlr) + (sum(gl(:)*Adlr(:,itau))-bdlr(itau))*Adlr(:,itau)
  end do
@@ -3871,7 +3878,7 @@ subroutine jac_con_moments(gl,jac_con)
 
 !Arguments ------------------------------------
  real(dp), intent(in) :: gl(:)
- real(dp), intent(inout) :: jac_con(:,:)  ! need dimension ndlr+1 for the SLSQP routine
+ real(dp), intent(inout) :: jac_con(:,:)  
 !Local variables ------------------------------
 
  ABI_UNUSED(gl(:))
@@ -4014,7 +4021,7 @@ subroutine fit_dlr(m,n,fun,con,jac,jac_con,x)
  
  maxiter = 10000
  meq = m   ! all constraints are equality constraints here
- la = m
+ la  = m
  x(:)  = zero
  xl(:) = zero
  xu(:) = zero
@@ -4028,7 +4035,7 @@ subroutine fit_dlr(m,n,fun,con,jac,jac_con,x)
  acc = tol8  ! best not to overconverge the result, in order to avoid overfitting 
  iter = maxiter
  mode = 0
- n1 = n+1
+ n1 = n + 1
  mineq = m - meq + 2*n1
  l_w = (3*n1+m)*(n1+1) + (n1-meq+1)*(mineq+2) + 2*mineq &   ! as recommended  
       & +(n1+mineq)*(n1-meq) + 2*meq + n1 + n1*n/2 + 2*m + 3*n + 3*n1 + 1               
