@@ -1074,7 +1074,7 @@ subroutine prod_oper(oper1,oper2,oper3,opt_ksloc,opt_diag)
  end if ! opt_ksloc=1
 
  DBG_EXIT("COLL")
- 
+
 end subroutine prod_oper
 !!***
 
