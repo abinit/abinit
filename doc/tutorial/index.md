@@ -1407,6 +1407,8 @@ interaction, elastic response, Raman coefficients, piezoelectricity ...)**
 
   * [The tutorial on building Lattice wannier function](lattice_wannier) presents how to use anaddb to build the lattice Wannier functions (LWF).
 
+  * [The tutorial on quadrupoles](lw_quad) describes how to compute dynamical quadrupoles from DFPT.
+
 **Electron-phonon interaction has been the subject of major efforts in the last years. Three tutorials are already available to present the new implementations.**
 
   * [The introductive tutorial on the electron-phonon interaction](eph_intro) presents the electron-phonon driver
