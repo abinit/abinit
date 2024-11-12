@@ -86,7 +86,7 @@ contains
 !!
 !! SOURCE
  subroutine gemm_nonlop(atindx1,choice,cpopt,cprjin,dimenl1,dimenl2,dimekbq,dimffnlin,dimffnlout,&
-&                 enl,enlout,ffnlin,ffnlout,gmet,gprimd,idir,indlmn,istwf_k,&
+&                 enl,enl_ndat,enlout,ffnlin,ffnlout,gmet,gprimd,idir,indlmn,istwf_k,&
 &                 kgin,kgout,kpgin,kpgout,kptin,kptout,lambda,lmnmax,matblk,mgfft,&
 &                 mpi_enreg,natom,nattyp,ndat,ngfft,nkpgin,nkpgout,nloalg,&
 &                 nnlout,npwin,npwout,nspinor,nspinortot,ntypat,only_SO,paw_opt,&
@@ -107,7 +107,7 @@ contains
   !arrays
   integer,intent(in),target :: atindx1(natom),indlmn(6,lmnmax,ntypat),kgin(3,npwin)
   integer,intent(in),target :: kgout(3,npwout),nattyp(ntypat),ngfft(18),nloalg(3),typat(natom)
-  real(dp),intent(in),target :: enl(dimenl1,dimenl2,nspinortot**2,dimekbq)
+  real(dp),intent(in),target :: enl(:,:,:,:),enl_ndat(:,:,:,:,:)
   real(dp),intent(in),target :: ffnlin(npwin,dimffnlin,lmnmax,ntypat)
   real(dp),intent(in),target :: ffnlout(npwout,dimffnlout,lmnmax,ntypat),gmet(3,3)
   real(dp),intent(in) :: gprimd(3,3),kptin(3),kptout(3)
@@ -127,7 +127,7 @@ contains
   integer :: nnlout_test
   integer :: iatm, ndgxdt, ndgxdtfac, nd2gxdt, nd2gxdtfac, optder, itypat, ilmn
   integer :: cplex_dgxdt(9), cplex_d2gxdt(18)
-  logical :: local_vectproj
+  logical :: local_vectproj,use_enl_ndat
   real(dp) :: d2gxdt_dum_in(1,1,1,1,1), d2gxdt_dum_out(1,1,1,1,1),d2gxdt_dum_out2(1,1,1,1,1)
   real(dp), allocatable :: sij_typ(:)
   real(dp), ABI_CONTIGUOUS pointer :: projections(:,:,:)
@@ -147,7 +147,7 @@ contains
   integer, ABI_CONTIGUOUS pointer :: atindx1_(:),indlmn_(:,:,:),nattyp_(:)
   real(dp),pointer :: ffnlin_(:,:,:,:),ffnlout_(:,:,:,:)
   real(dp),pointer :: ph3din_(:,:,:),ph3dout_(:,:,:)
-  real(dp),pointer :: enl_(:,:,:,:)
+  real(dp),pointer :: enl_(:,:,:,:),enl_ndat_(:,:,:,:,:)
   real(dp), ABI_CONTIGUOUS pointer :: sij_(:,:)
   real(dp), ABI_CONTIGUOUS pointer :: kpgin_(:,:),kpgout_(:,:)
 
@@ -196,6 +196,7 @@ contains
   cplex_enl=1;if (paw_opt>0) cplex_enl=2*dimenl1/(lmnmax*(lmnmax+1)) ! is enl complex?
   cplex_fac=max(cplex,dimekbq)
   if ((nspinortot==2.or.cplex_enl==2).and.paw_opt>0.and.choice/=7) cplex_fac=2 ! is vnl_projections complex?
+  use_enl_ndat=.false. ; if (size(enl_ndat)>0) use_enl_ndat=.true.
 
   ! Processing one atom : set pointers to atom-specific arrays (for opernlc)
   if(iatom_only > 0) then
@@ -224,7 +225,22 @@ contains
         sij_(:,1)=sij(:,1)
       end if
     end if
-    if (size(enl)>0) then
+    if (size(enl_ndat)>0) then
+      ABI_MALLOC(enl_ndat_,(size(enl_ndat,1),1,nspinor**2,ndat,size(enl_ndat,5)))
+      do idat=1,ndat
+        do ii=1,size(enl_ndat,5)
+          do ispden=1,nspinor**2
+            if (dimenl2==natom .and. usepaw==1) then
+              enl_ndat_(:,1,ispden,idat,ii)=enl_ndat(:,iatom_only,ispden,idat,ii)
+            else if (dimenl2==ntypat) then
+              enl_ndat_(:,1,ispden,idat,ii)=enl_ndat(:,itypat,ispden,idat,ii)
+            else
+              enl_ndat_(:,1,ispden,idat,ii)=enl_ndat(:,1,ispden,idat,ii)
+            end if
+          end do
+        end do
+      end do
+    else if (size(enl)>0) then
       ABI_MALLOC(enl_,(size(enl,1),1,nspinor**2,size(enl,4)))
       do ii=1,size(enl,4)
         do ispden=1,nspinor**2
@@ -251,10 +267,50 @@ contains
     ffnlin_     => ffnlin
     ffnlout_    => ffnlout
     enl_        => enl
+    enl_ndat_   => enl_ndat
     sij_        => sij
     indlmn_     => indlmn
     ph3din_     => ph3din
     ph3dout_    => ph3dout
+  end if
+
+  ! The number of projectors used for computation may vary among
+  ! nonlop calls, from computing on all atoms to a select one for
+  ! some perturbations.
+  ! In such cases, projs arrays must be recomputed
+  nprojs=0
+  do itypat=1,ntypat_
+    nprojs = nprojs + count(indlmn_(3,:,itypat)>0)*nattyp_(itypat)
+  end do
+
+  if(nprojs == 0) then
+    ! TODO check if this is correct
+    if (iatom_only>0) then
+      ABI_FREE(atindx1_)
+      ABI_FREE(nattyp_)
+      ABI_FREE(ph3din_)
+      ABI_FREE(ph3dout_)
+      ABI_FREE(ffnlin_)
+      ABI_FREE(ffnlout_)
+      if(use_enl_ndat) then
+        ABI_FREE(enl_ndat_)
+      else
+        ABI_FREE(enl_)
+      end if
+      ABI_FREE(indlmn_)
+      if (size(sij) > 1) then
+        ABI_FREE(sij_)
+      end if
+    end if
+    if(signs == 1) then
+      enlout=zero
+      return
+    end if
+    if(signs == 2) then
+      vectout = zero
+      if(paw_opt>0) svectout = vectin
+      return
+    end if
   end if
 
   !Eventually re-compute (k+G) vectors (and related data)
@@ -283,15 +339,6 @@ contains
     kpgout_ => kpgout
   end if
 
-  ! The number of projectors used for computation may vary among
-  ! nonlop calls, from computing on all atoms to a select one for
-  ! some perturbations.
-  ! In such cases, projs arrays must be recomputed
-  nprojs=0
-  do itypat=1,ntypat_
-    nprojs = nprojs + count(indlmn_(3,:,itypat)>0)*nattyp_(itypat)
-  end do
-
   ! If vectproj is provided, use it for further calculations, use allocated array otherwise
   local_vectproj=.false.
   if(PRESENT(vectproj)) then
@@ -299,19 +346,6 @@ contains
   end if
   if (local_vectproj) projections => vectproj
 
-
-  if(nprojs == 0) then
-    ! TODO check if this is correct
-    if(signs == 1) then
-      enlout=zero
-      return
-    end if
-    if(signs == 2) then
-      vectout = zero
-      if(paw_opt>0) svectout = vectin
-      return
-    end if
-  end if
 
   if(signs == 1) then
     enlout=zero
@@ -432,8 +466,10 @@ contains
 
   ! Working buffers for storing 2nd-derivative
   if (nd2gxdt>0) then
-    ABI_MALLOC(d2projections,(cplex, nd2gxdt*nprojs,nspinor*ndat))
-    d2projections(:,:,:) = zero
+    ABI_MALLOC(d2projections,(cplex, nd2gxdt*nprojs, nspinor*ndat))
+    if(cpopt < 4) then
+      d2projections(:,:,:) = zero
+    end if
   else
     ABI_MALLOC(d2projections,(1, 1, ndat))
   end if
@@ -563,20 +599,40 @@ contains
         id2end = d2shift+nattyp_(itypat)*nlmn*ngrads2
 
         do idat = 1,ndat
-          call opernlc_ylm(atindx1_,cplex,cplex_dgxdt,cplex_d2gxdt,&
-&         cplex_enl,cplex_fac,&
-&         dprojections(:, idbeg:idend, 1+nspinor*(idat-1):nspinor*idat),&
-&         vnl_dprojections(:, idfbeg:idfend, 1+nspinor*(idat-1):nspinor*idat),&
-&         s_dprojections(:, idfbeg:idfend, 1+nspinor*(idat-1):nspinor*idat),&
-&         d2projections(:, id2beg:id2end, 1+nspinor*(idat-1):nspinor*idat),&
-&         d2gxdt_dum_out,d2gxdt_dum_out2,&
-&         dimenl1,dimenl2_,dimekbq,enl_,&
-&         projections(:, ibeg:iend, 1+nspinor*(idat-1):nspinor*idat),&
-&         vnl_projections(:, ibeg:iend,1+nspinor*(idat-1):nspinor*idat),&
-&         s_projections(:, ibeg:iend,1+nspinor*(idat-1):nspinor*idat),&
-&         iatm,indlmn_(:,:,itypat),itypat,lambda(idat),mpi_enreg,natom_,&
-&         ndgxdt,ndgxdtfac,nd2gxdt,nd2gxdtfac,&
-&         nattyp_(itypat),nlmn,nspinor,nspinortot,optder,paw_opt,sij_typ)
+          if(use_enl_ndat) enl_ => enl_ndat_(:,:,:,idat,:)
+          !FIXME This if exists so compilers won't implicitly copy arrays
+          !      Copies are unavoidable with nspinor==2
+          if(nspinor==1) then
+            call opernlc_ylm(atindx1_,cplex,cplex_dgxdt,cplex_d2gxdt,&
+            &         cplex_enl,cplex_fac,&
+            &         dprojections    (:, idbeg:idend,   idat),&
+            &         vnl_dprojections(:, idfbeg:idfend, idat),&
+            &         s_dprojections  (:, idfbeg:idfend, idat),&
+            &         d2projections   (:, id2beg:id2end, idat),&
+            &         d2gxdt_dum_out,d2gxdt_dum_out2,&
+            &         dimenl1,dimenl2_,dimekbq,enl_,&
+            &         projections    (:, ibeg:iend, idat),&
+            &         vnl_projections(:, ibeg:iend, idat),&
+            &         s_projections  (:, ibeg:iend, idat),&
+            &         iatm,indlmn_(:,:,itypat),itypat,lambda(idat),mpi_enreg,natom_,&
+            &         ndgxdt,ndgxdtfac,nd2gxdt,nd2gxdtfac,&
+            &         nattyp_(itypat),nlmn,nspinor,nspinortot,optder,paw_opt,sij_typ)
+          else
+            call opernlc_ylm(atindx1_,cplex,cplex_dgxdt,cplex_d2gxdt,&
+            &         cplex_enl,cplex_fac,&
+            &         dprojections(:, idbeg:idend, 1+nspinor*(idat-1):nspinor*idat),&
+            &         vnl_dprojections(:, idfbeg:idfend, 1+nspinor*(idat-1):nspinor*idat),&
+            &         s_dprojections(:, idfbeg:idfend, 1+nspinor*(idat-1):nspinor*idat),&
+            &         d2projections(:, id2beg:id2end, 1+nspinor*(idat-1):nspinor*idat),&
+            &         d2gxdt_dum_out,d2gxdt_dum_out2,&
+            &         dimenl1,dimenl2_,dimekbq,enl_,&
+            &         projections(:, ibeg:iend, 1+nspinor*(idat-1):nspinor*idat),&
+            &         vnl_projections(:, ibeg:iend,1+nspinor*(idat-1):nspinor*idat),&
+            &         s_projections(:, ibeg:iend,1+nspinor*(idat-1):nspinor*idat),&
+            &         iatm,indlmn_(:,:,itypat),itypat,lambda(idat),mpi_enreg,natom_,&
+            &         ndgxdt,ndgxdtfac,nd2gxdt,nd2gxdtfac,&
+            &         nattyp_(itypat),nlmn,nspinor,nspinortot,optder,paw_opt,sij_typ)
+          end if
         end do
 
         shift = shift + nattyp_(itypat)*nlmn
@@ -610,7 +666,7 @@ contains
 
     ! opernld
     if(signs==1) then
-      if(choice==2 .or. choice==3 .or. choice==23 .or. choice==4 .or. choice==54 .or. choice==55 .or. choice==6) then
+      if(choice==1 .or. choice==2 .or. choice==3 .or. choice==23 .or. choice==4 .or. choice==54 .or. choice==55 .or. choice==6) then
         call opernld_ylm_allwf(choice,cplex,cplex_fac,ddkk,&
         &       dprojections,vnl_dprojections,s_dprojections,d2projections,&
         &       enlk,enlout,fnlk,projections,vnl_projections,s_projections,&
@@ -852,7 +908,11 @@ contains
     ABI_FREE(ph3dout_)
     ABI_FREE(ffnlin_)
     ABI_FREE(ffnlout_)
-    ABI_FREE(enl_)
+    if(use_enl_ndat) then
+      ABI_FREE(enl_ndat_)
+    else
+      ABI_FREE(enl_)
+    end if
     ABI_FREE(indlmn_)
     if (size(sij) > 1) then
       ABI_FREE(sij_)

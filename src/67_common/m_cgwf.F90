@@ -40,6 +40,7 @@ module m_cgwf
  use m_nonlop,      only : nonlop
  use m_paw_overlap,   only : smatrix_k_paw
  use m_cgprj,         only : getcprj
+ use m_gemm_nonlop_projectors, only : gemm_nonlop_use_gemm
 
  implicit none
 
@@ -175,7 +176,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
  integer :: ikpt2,ikpt2f,ikptf,iline,iproc,ipw,ispinor,istwf_k,isubh,isubo,itrs
  integer :: job,mcg_q,me_distrb,natom,ncpgr,nblock,nproc_distrb,npw_k2
  integer :: optekin,paw_opt,signs,shiftbd,sij_opt,spaceComm_distrb
- integer :: useoverlap,wfopta10
+ integer :: useoverlap,wfopta10,gpu_option_save
  real(dp) :: chc,costh,deltae,deold,dhc,dhd,diff,dotgg,dotgp,doti,dotr
  real(dp) :: dphase_aux2,e0,e0_old,e1,e1_old,eval,gamma
  real(dp) :: lam0,lamold,root,sinth,sintn,swap,tan2th,theta,thetam
@@ -225,6 +226,10 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
  nproc_distrb=xmpi_comm_size(spaceComm_distrb)
  me_distrb=mpi_enreg%me_kpt
  me_g0 = mpi_enreg%me_g0
+ gpu_option_save=gs_hamk%gpu_option
+ !Using cgwf with ndat=1 in getghc calls isn't beneficial in most cases, hence we disable GPU here
+ gs_hamk%gpu_option=ABI_GPU_DISABLED
+ if(gpu_option_save==ABI_GPU_OPENMP) gemm_nonlop_use_gemm=.false.
 
 !if PAW, one has to solve a generalized eigenproblem (H|Psi>=Lambda.S|Psi>)
 !else,   one has to solve a classical eigenproblem   (H|Psi>=Lambda.|Psi>)
@@ -1310,6 +1315,9 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
    ABI_FREE(ikptf_recv)
    ABI_FREE(cprj_band_srt)
  end if
+
+ gs_hamk%gpu_option=gpu_option_save
+ if(gpu_option_save==ABI_GPU_OPENMP) gemm_nonlop_use_gemm=.true.
 
 ! Do not delete this line, needed to run with open MP
  write(unit=message,fmt=*) resid(1)

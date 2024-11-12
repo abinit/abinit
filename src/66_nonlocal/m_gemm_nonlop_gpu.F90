@@ -709,8 +709,12 @@ module m_gemm_nonlop_gpu
   ! this may not be the best location to have this sync
   call gpu_device_synchronize()
 
-  if (gpu_allocated(temp_realvec_gpu)) then
-    ABI_FREE_CUDA(temp_realvec_gpu)
+  if (cplex /= 2) then
+    if ( (cpopt < 2) .or. &
+      &  (paw_opt == 3 .or. paw_opt == 4) .or. &
+      &  (paw_opt == 0 .or. paw_opt == 1 .or. paw_opt == 4)) then
+      ABI_FREE_CUDA(temp_realvec_gpu)
+    end if
   end if
 
   ABI_FREE_CUDA( enl_gpu )

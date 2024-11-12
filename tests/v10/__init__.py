@@ -10,7 +10,6 @@ keywords = [
 
 #: List of input files
 inp_files = [
-    # Fake test t01.abi, to initiate the tests/v10 directory . SHOULD BE REPLACED BY THE TEST OF A REAL NEW DEVELOPMENT.
     "t01.abi" ,  # test post treatment of an increase of symmetry due to geometry optimization
     "t02.abi" ,  # check Wyckoff positions of trigonal groups 143-167
     "t03.abi" ,  # same as v10[04] but with norm-conserving pseudos (with DFTI)
@@ -26,6 +25,7 @@ inp_files = [
     "t16.abi" ,  # same as v10[10] but with NC pseudos, istwfk>1 (with DFTI)
     "t17.abi" ,  # same as v10[10], with istwfk>1 (without DFTI).
     "t18.abi" ,  # same as v10[10] but with NC pseudos, istwfk>1 (without DFTI)
+    "t19.abi" ,  # compare cprj_in_memory=1 with cprj_in_memory=0 for cell optimization.
     "t40.abi" ,  # test orbmag calculation when using spatial symmetries for GS nuclear dipole 
     "t81.abi" ,  # Short MD to test restart on next test
     "t82.abi" ,  # Test restart of MD from the HIST of previous test using restartxf -1
