@@ -321,15 +321,15 @@ xred
 #%% nprocs_to_test = 128, 256, 512, 1024, 2048
 #%% max_nprocs = 2048
 #%% [NCPU_128]
-#%% files_to_test = t06_MPI128.out, tolnlines=   0,   tolabs=  0.0,      tolrel= 0.0
+#%% files_to_test = t06_MPI128.out, tolnlines = 0.0e+00,   tolabs = 0.0e+00,      tolrel = 0.0e+00
 #%% [NCPU_256]
-#%% files_to_test = t06_MPI256.out, tolnlines=   0,   tolabs=  0.0,      tolrel= 0.0
+#%% files_to_test = t06_MPI256.out, tolnlines = 0.0e+00,   tolabs = 0.0e+00,      tolrel = 0.0e+00
 #%% [NCPU_512]
-#%% files_to_test = t06_MPI512.out, tolnlines=   0,   tolabs=  0.0,      tolrel= 0.0
+#%% files_to_test = t06_MPI512.out, tolnlines = 0.0e+00,   tolabs = 0.0e+00,      tolrel = 0.0e+00
 #%% [NCPU_1024]
-#%% files_to_test = t06_MPI1024.out, tolnlines=   0,   tolabs=  0.0,      tolrel= 0.0
+#%% files_to_test = t06_MPI1024.out, tolnlines = 0.0e+00,   tolabs = 0.0e+00,      tolrel = 0.0e+00
 #%% [NCPU_2048]
-#%% files_to_test = t06_MPI1024.out, tolnlines=   0,   tolabs=  0.0,      tolrel= 0.0
+#%% files_to_test = t06_MPI1024.out, tolnlines = 0.0e+00,   tolabs = 0.0e+00,      tolrel = 0.0e+00
 #%% [extra_info]
 #%% keywords = PAW,HPC
 #%% authors = M. Torrent

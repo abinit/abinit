@@ -47,7 +47,7 @@
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t32.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
+#%%   t32.abo, tolnlines = 0.0e+00, tolabs = 0.0e+00, tolrel = 0.0e+00
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

@@ -62,7 +62,7 @@ prteig 0
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   tnuc_3.abo, tolnlines=  3, tolabs=  6.000e-10, tolrel=  3.000e-10
+#%%   tnuc_3.abo, tolnlines = 3.0e+00, tolabs = 6.0e-10, tolrel = 3.0e-10
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

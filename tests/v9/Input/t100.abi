@@ -65,7 +65,7 @@
 #%% test_chain = t100.abi, t101.abi
 #%% [files]
 #%% files_to_test =
-#%%   t100.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options = -easy
+#%%   t100.abo, tolnlines = 0.0e+00, tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options = -easy
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

@@ -54,7 +54,7 @@ ngkpt        1 1 1
 #%% pre_commands = 
 #%% [files]
 #%% files_to_test = 
-#%%   t90.abo, tolnlines = 0, tolabs = 1.0E-7, tolrel = 5.0E-4
+#%%   t90.abo, tolnlines = 0.0e+00, tolabs = 0.0e+00, tolrel = 0.0e+00
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]

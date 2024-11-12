@@ -33,8 +33,8 @@ bound_penalty = 1.001  # Penalty on the Goal Function (GF_new/GF_init) can't be 
 #%% exclude_builders = .*_nag_7.[01]_.* 
 #%% [files]
 #%% files_to_test =
-#%%   tmulti_l_7_1.abo, tolnlines = 1, tolabs = 1.0e-6, tolrel = 1.0e-6, fld_options = -medium;
-#%%   tmulti_l_7_1_coeffs.xml, tolnlines = 15, tolabs = 8.0, tolrel = 1.0e-4, fld_options = -medium;
+#%%   tmulti_l_7_1.abo, tolnlines = 1.0e+00, tolabs = 1.0e-06, tolrel = 1.0e-06, fld_options = -medium;
+#%%   tmulti_l_7_1_coeffs.xml, tolnlines = 1.5e+01, tolabs = 8.0e+00, tolrel = 1.0e-04, fld_options = -medium;
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]

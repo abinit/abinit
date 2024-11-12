@@ -86,7 +86,7 @@ pseudos          "Pseudodojo_paw_pw_standard/La.xml, Pseudodojo_paw_pw_standard/
 #%% nprocs_to_test = 4
 #%% [NCPU_4]
 #%% files_to_test =
-#%%    tw90_5_MPI4.abo, tolnlines=5, tolabs=7.00e-05, tolrel=1.10e+00, fld_options=-medium
+#%%    tw90_5_MPI4.abo, tolnlines = 5.0e+00, tolabs = 7.0e-05, tolrel = 1.1e+00, fld_options=-medium
 #%% [extra_info]
 #%% authors = O. Gingras
 #%% keywords = PAW

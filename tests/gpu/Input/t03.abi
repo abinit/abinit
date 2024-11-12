@@ -117,7 +117,7 @@ prtden 0  prteig 0  prtwf 0
 #%% exclude_builders = eos_nvhpc_23.9_elpa
 #%% [files]
 #%% files_to_test = 
-#%%   t03.abo, tolnlines = 64, tolabs = 7.0e-4, tolrel = 8.5e-2
+#%%   t03.abo, tolnlines = 6.4e+01, tolabs = 7.0e-04, tolrel = 8.5e-02
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

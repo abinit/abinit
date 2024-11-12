@@ -17,7 +17,7 @@ t57o_DS6_POT4
 #%% exclude_builders = eos_nvhpc_*
 #%% [files]
 #%% files_to_test =
-#%%   t59.stdout, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
+#%%   t59.stdout, tolnlines = 0.0e+00, tolabs = 0.0e+00, tolrel = 0.0e+00
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [shell]

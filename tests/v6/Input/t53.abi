@@ -35,7 +35,7 @@
 #%% input_gkk = t52.ddb.out
 #%% [files]
 #%% files_to_test = 
-#%%   t53.abo, tolnlines = 1, tolabs = 4.0e-5, tolrel = 2.0e-7
+#%%   t53.abo, tolnlines = 1.0e+00, tolabs = 4.0e-05, tolrel = 2.0e-07
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

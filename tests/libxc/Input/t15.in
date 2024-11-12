@@ -12,7 +12,7 @@ t14o_DS10_SCR
 #%% test_chain = t14.in, t15.in, t16.in
 #%% [files]
 #%% files_to_test = 
-#%%   t15.out, tolnlines=0,   tolabs=0.0, tolrel=0.0
+#%%   t15.out, tolnlines = 0.0e+00,   tolabs = 0.0e+00, tolrel = 0.0e+00
 #%% [shell]
 #%%   ww_cp t15o_SCR t16i_SCR
 #%% [paral_info]

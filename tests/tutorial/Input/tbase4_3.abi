@@ -73,7 +73,7 @@ ecutsm  0.5
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%   tbase4_3.abo, tolnlines=  0, tolabs=  2.116e-07, tolrel=  4.549e-03, fld_options = -easy
+#%%   tbase4_3.abo, tolnlines = 0.0e+00, tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options = -easy
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

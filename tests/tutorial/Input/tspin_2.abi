@@ -59,7 +59,7 @@ nshiftk  1
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   tspin_2.abo, tolnlines = 60, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options=-medium
+#%%   tspin_2.abo, tolnlines = 6.0e+01, tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options=-medium
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

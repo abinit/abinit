@@ -49,7 +49,7 @@
 #%% nprocs_to_test = 4
 #%% max_nprocs = 4
 #%% [NCPU_4]
-#%% files_to_test = t29_MPI4.abo, tolnlines=   35,   tolabs=  1.1e-5,      tolrel= 2.0e-2
+#%% files_to_test = t29_MPI4.abo, tolnlines = 3.5e+01,   tolabs = 1.1e-05,      tolrel = 2.0e-02
 #%% [extra_info]
 #%% keywords = PAW
 #%% authors = M. Giantomassi

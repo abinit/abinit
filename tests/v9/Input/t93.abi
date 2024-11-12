@@ -47,7 +47,7 @@ znucl 26
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%   t93.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0e-0 , fld_options= -ridiculous;
+#%%   t93.abo, tolnlines = 0.0e+00, tolabs = 0.0e+00, tolrel = 0.0e+00 , fld_options= -ridiculous;
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]

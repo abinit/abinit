@@ -69,7 +69,7 @@ dmatpawu
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   tdftu_4.abo, tolnlines=  1, tolabs=  1.010e-04, tolrel=  4.000e-04, fld_options = -easy  
+#%%   tdftu_4.abo, tolnlines = 1.0e+00, tolabs = 1.0e-04, tolrel = 4.0e-04, fld_options = -easy  
 #%% output_file = "tdftu_4.abo"
 #%% [paral_info]
 #%% max_nprocs = 1

@@ -109,7 +109,7 @@
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t43.abo, tolnlines=   26,   tolabs=  1.1e+1,      tolrel= 0.01852, fld_options = -easy
+#%%   t43.abo, tolnlines = 2.6e+01,   tolabs = 1.1e+01,      tolrel = 1.9e-02, fld_options = -easy
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

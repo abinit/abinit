@@ -73,7 +73,7 @@ rfphon      1          # Do phonon response
 #%% test_chain = t37.abi, t38.abi, t39.abi, t40.abi
 #%% [files]
 #%% files_to_test = 
-#%%   t37.abo, tolnlines = 4, tolabs = 1.1e-3, tolrel = 2.0e-4, fld_options = -medium
+#%%   t37.abo, tolnlines = 4.0e+00, tolabs = 1.1e-03, tolrel = 2.0e-04, fld_options = -medium
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

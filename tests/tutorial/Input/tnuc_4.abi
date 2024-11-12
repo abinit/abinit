@@ -77,7 +77,7 @@ pseudos="Ne.xml"
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   tnuc_4.abo, tolnlines=  65, tolabs=  1.1e-5, tolrel= 1.01e0
+#%%   tnuc_4.abo, tolnlines = 6.5e+01, tolabs = 1.1e-05, tolrel = 1.0e+00
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

@@ -79,7 +79,7 @@ ecutsigx3   8.0      # Dimension of the G sum in Sigma_x.
 #%% exclude_builders = eos_nvhpc_23.9_elpa
 #%% [files]
 #%% files_to_test =
-#%%   t06.abo, tolnlines = 12, tolabs = 1.1e-3, tolrel = 3.0e-3, fld_options = -medium
+#%%   t06.abo, tolnlines = 1.2e+01, tolabs = 1.1e-03, tolrel = 3.0e-03, fld_options = -medium
 #%% [paral_info]
 #%% max_nprocs = 12
 #%% [extra_info]

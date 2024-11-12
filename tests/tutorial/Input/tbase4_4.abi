@@ -57,7 +57,7 @@ tsmear 0.04
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%    tbase4_4.abo, tolnlines=  7, tolabs=  2.008e-10, tolrel=  4.000e-06
+#%%    tbase4_4.abo, tolnlines = 7.0e+00, tolabs = 2.0e-10, tolrel = 4.0e-06
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

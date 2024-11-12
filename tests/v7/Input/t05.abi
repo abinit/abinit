@@ -97,7 +97,7 @@ rprim
 #%% exclude_builders = eos_gnu_13.2_serial
 #%% [files]
 #%% files_to_test = 
-#%%   t05.abo,      tolnlines = 58, tolabs = 1.1e+1, tolrel = 1.1e+0, fld_options = -easy
+#%%   t05.abo,      tolnlines = 5.8e+01, tolabs = 1.1e+01, tolrel = 1.1e+00, fld_options = -easy
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

@@ -13,7 +13,7 @@ teph_tdep_legacy_1o_DS3_EIGR2D
 #%% test_chain =  teph_tdep_legacy_1.abi, teph_tdep_legacy_5.abi
 #%% [files]
 #%% files_to_test = 
-#%%   teph_tdep_legacy_5o_EIGR2D, tolnlines=  4000, tolabs=  1.000e-04, tolrel=  1.000e+02, fld_options=-medium
+#%%   teph_tdep_legacy_5o_EIGR2D, tolnlines = 4.0e+03, tolabs = 1.0e-04, tolrel = 1.0e+02, fld_options=-medium
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

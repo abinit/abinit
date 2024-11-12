@@ -64,7 +64,7 @@ nsym 0
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   teph_tdep_legacy_2.abo,  tolnlines= 20, tolabs=  5.000e-05, tolrel=  5.000e-04, fld_options=-medium
+#%%   teph_tdep_legacy_2.abo,  tolnlines = 2.0e+01, tolabs = 5.0e-05, tolrel = 5.0e-04, fld_options=-medium
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

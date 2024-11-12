@@ -75,7 +75,7 @@ qph1l
 #%% input_gkk = teph_legacy_3o_GKK.bin
 #%% [files]
 #%% files_to_test = 
-#%%   teph_legacy_6.abo, tolnlines= 21, tolabs=  3.000e-01, tolrel=  3.000e-02
+#%%   teph_legacy_6.abo, tolnlines = 2.1e+01, tolabs = 3.0e-01, tolrel = 3.0e-02
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

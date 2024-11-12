@@ -86,7 +86,7 @@ nband 8
 #%% exclude_builders = eos_nvhpc_*, eos_gnu_13.2_serial
 #%% [files]
 #%% files_to_test =
-#%%   teph4mob_6.abo, tolnlines= 350, tolabs=  220, tolrel=  1.500e-02
+#%%   teph4mob_6.abo, tolnlines = 3.5e+02, tolabs = 2.2e+02, tolrel = 1.5e-02
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

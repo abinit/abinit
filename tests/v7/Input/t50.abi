@@ -92,7 +92,7 @@
 #%%  ww_cp t50o_DS1_WFK t51o_DS99_WFK;
 #%% [files]
 #%% files_to_test = 
-#%%   t50.abo, tolnlines = 10, tolabs = 1.1e-3, tolrel = 2.0e-4, fld_options = -medium
+#%%   t50.abo, tolnlines = 1.0e+01, tolabs = 1.1e-03, tolrel = 2.0e-04, fld_options = -medium
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

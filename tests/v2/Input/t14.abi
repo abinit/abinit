@@ -11,7 +11,7 @@ t14.ddb.5.0.25.in
 #%% test_chain = t14.abi, t15.abi
 #%% [files]
 #%% files_to_test = 
-#%%   t14.ddb.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%%   t14.ddb.out, tolnlines = 0.0e+00, tolabs = 0.0e+00, tolrel = 0.0e+00
 #%% extra_inputs = t14.ddb.gamma.in.gz, t14.ddb.0.0.25.in.gz, t14.ddb.5.0.25.in.gz
 #%% [paral_info]
 #%% max_nprocs = 1

@@ -76,9 +76,9 @@ prteig 0
 #%% max_nprocs = 10
 #%% nprocs_to_test = 4, 10
 #%% [NCPU_4]
-#%% files_to_test = t02_MPI4.abo,  tolnlines = 40, tolabs = 0.11, tolrel = 7.0e-2
+#%% files_to_test = t02_MPI4.abo,  tolnlines = 4.0e+01, tolabs = 1.1e-01, tolrel = 7.0e-02
 #%% [NCPU_10]
-#%% files_to_test = t02_MPI10.abo, tolnlines = 40, tolabs = 0.11, tolrel = 7.0e-2
+#%% files_to_test = t02_MPI10.abo, tolnlines = 4.0e+01, tolabs = 1.1e-01, tolrel = 7.0e-02
 #%% [extra_info]
 #%% authors = T. Rangel, M. Torrent
 #%% keywords =  PAW, WVL

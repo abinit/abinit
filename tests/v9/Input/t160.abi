@@ -9,7 +9,7 @@ BTO.DDB
 #%% test_chain = t160.abi, t161.abi
 #%% [files]
 #%% files_to_test =
-#%%   t160.stdout, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
+#%%   t160.stdout, tolnlines = 0.0e+00, tolabs = 0.0e+00, tolrel = 0.0e+00
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [shell]
