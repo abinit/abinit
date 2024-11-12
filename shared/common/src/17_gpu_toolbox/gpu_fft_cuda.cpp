@@ -15,8 +15,8 @@
 #include<assert.h>
 #include<gpu_fft.h>
 
-cufftHandle plan_fft;
-static cudaStream_t stream_compute;
+cufftHandle plan_fft[2];
+static cudaStream_t stream_compute[2];
 
 //! utility function to select eigen type
 static cufftType select_cufft_type(const int fftType_int)
@@ -70,7 +70,7 @@ static cufftType select_cufft_type(const int fftType_int)
 /*=========================================================================*/
 
 extern "C"
-void gpu_fft_plan_many_cpp(int *rank, int **n, int **inembed,
+void gpu_fft_plan_many_cpp(int *fft_plan_id, int *rank, int **n, int **inembed,
                        int *istride, int *idist, int **onembed, int *ostride,
                        int *odist, int *fft_type, int *batch){
 
@@ -80,7 +80,7 @@ void gpu_fft_plan_many_cpp(int *rank, int **n, int **inembed,
 
   cufftType type = select_cufft_type(*fft_type);
   CUDA_API_CHECK(cufftPlanMany(
-        &plan_fft,
+        &plan_fft[*fft_plan_id],
         *rank,
         *n,
         *inembed,
@@ -91,8 +91,8 @@ void gpu_fft_plan_many_cpp(int *rank, int **n, int **inembed,
         *odist,
         type,
         *batch));
-  CUDA_API_CHECK( cudaStreamCreate(&stream_compute) );
-  CUDA_API_CHECK( cufftSetStream(plan_fft,stream_compute) );
+  CUDA_API_CHECK( cudaStreamCreate(&stream_compute[*fft_plan_id]) );
+  CUDA_API_CHECK( cufftSetStream(plan_fft[*fft_plan_id],stream_compute[*fft_plan_id]) );
 }
 
 
@@ -105,9 +105,9 @@ void gpu_fft_plan_many_cpp(int *rank, int **n, int **inembed,
  */
 /*=========================================================================*/
 
-extern "C" void gpu_fft_stream_synchronize_cpp()
+extern "C" void gpu_fft_stream_synchronize_cpp(int *fft_plan_id)
 {
-  CUDA_API_CHECK( cudaStreamSynchronize(stream_compute) );
+  CUDA_API_CHECK( cudaStreamSynchronize(stream_compute[*fft_plan_id]) );
 }
 
 
@@ -121,8 +121,9 @@ extern "C" void gpu_fft_stream_synchronize_cpp()
 /*=========================================================================*/
 
 extern "C"
-void gpu_fft_plan_destroy_cpp(void){
-  CUDA_API_CHECK(cufftDestroy(plan_fft));
+void gpu_fft_plan_destroy_cpp(int *fft_plan_id){
+  CUDA_API_CHECK(cufftDestroy(plan_fft[*fft_plan_id]));
+  CUDA_API_CHECK(cudaStreamDestroy(stream_compute[*fft_plan_id]) );
 }
 
 
@@ -144,9 +145,9 @@ void gpu_fft_plan_destroy_cpp(void){
 /*=========================================================================*/
 
 extern "C"
-void gpu_fft_exec_z2z_cpp(void **idata, void **odata, int *direction){
+void gpu_fft_exec_z2z_cpp(int *fft_plan_id, void **idata, void **odata, int *direction){
 
-  CUDA_API_CHECK(cufftExecZ2Z(plan_fft, (cufftDoubleComplex*) (*idata),
+  CUDA_API_CHECK(cufftExecZ2Z(plan_fft[*fft_plan_id], (cufftDoubleComplex*) (*idata),
                  (cufftDoubleComplex*) (*odata), *direction));
 }
 
@@ -169,8 +170,8 @@ void gpu_fft_exec_z2z_cpp(void **idata, void **odata, int *direction){
 /*=========================================================================*/
 
 extern "C"
-void gpu_fft_exec_c2c_cpp(void **idata, void **odata, int *direction){
-  CUDA_API_CHECK(cufftExecC2C(plan_fft, (cufftComplex*) *idata,
+void gpu_fft_exec_c2c_cpp(int *fft_plan_id, void **idata, void **odata, int *direction){
+  CUDA_API_CHECK(cufftExecC2C(plan_fft[*fft_plan_id], (cufftComplex*) *idata,
                  (cufftComplex*) *odata, *direction));
 }
 

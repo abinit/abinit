@@ -759,6 +759,11 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 & nucdipmom=nucdipmom,gpu_option=gpu_option)
  rmet = MATMUL(TRANSPOSE(rprimd),rprimd)
 
+ if (usexg==1) then
+   call xg_nonlop_update_weight(xg_nonlop,gs_hamk%ucvol)
+   if (xg_nonlop%paw) call xg_nonlop_make_Dij(xg_nonlop,paw_ij,nsppol,gs_hamk%atindx)
+ end if
+
 !need to reorder cprj=<p_lmn|Cnk> (from unsorted to atom-sorted)
  if (psps%usepaw==1.and.usecprj_local==1) then
    call pawcprj_reorder(cprj,gs_hamk%atindx)
@@ -785,9 +790,9 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
    call gs_hamk%load_spin(isppol,with_nonlocal=.true.)
    if (usefock_loc) fockcommon%isppol=isppol
 
-  if (usexg==1) then
-    if (xg_nonlop%paw) call xg_nonlop_make_Dij(xg_nonlop,paw_ij,isppol,gs_hamk%atindx)
-  end if
+   if (usexg==1) then
+     if (xg_nonlop%paw) call xg_nonlop_set_Dij_spin(xg_nonlop,isppol)
+   end if
 
 !  Loop over k points
    ikg=0
@@ -1195,19 +1200,19 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
              ndat=mpi_enreg%bandpp
              if (gs_hamk%usepaw==0) cwaveprj_idat => cwaveprj
              ABI_MALLOC(ghc_dum,(0,0))
+             fockcommon%ieigen=(iblock-1)*blocksize+1
+             fockcommon%iband=(iblock-1)*blocksize+1
+             if (gs_hamk%usepaw==1) then
+               cwaveprj_idat => cwaveprj(:,1+blocksize*(my_nspinor-1):blocksize*my_nspinor)
+             end if
+             call fock_getghc(cwavef(:,1+blocksize*npw_k*(my_nspinor-1):blocksize*npw_k*my_nspinor),cwaveprj_idat,&
+&             ghc_dum,gs_hamk,mpi_enreg,blocksize)
              do iblocksize=1,blocksize
-               fockcommon%ieigen=(iblock-1)*blocksize+iblocksize
-               fockcommon%iband=(iblock-1)*blocksize+iblocksize
-               if (gs_hamk%usepaw==1) then
-                 cwaveprj_idat => cwaveprj(:,(iblocksize-1)*my_nspinor+1:iblocksize*my_nspinor)
-               end if
-               call fock_getghc(cwavef(:,1+(iblocksize-1)*npw_k*my_nspinor:iblocksize*npw_k*my_nspinor),cwaveprj_idat,&
-&               ghc_dum,gs_hamk,mpi_enreg)
                if (fockcommon%optstr) then
-                 fockcommon%stress(:)=fockcommon%stress(:)+weight(iblocksize)*fockcommon%stress_ikpt(:,fockcommon%ieigen)
+                 fockcommon%stress(:)=fockcommon%stress(:)+weight(iblocksize)*fockcommon%stress_ikpt(:,fockcommon%ieigen+iblocksize-1)
                end if
                if (fockcommon%optfor) then
-                 fockcommon%forces(:,:)=fockcommon%forces(:,:)+weight(iblocksize)*fockcommon%forces_ikpt(:,:,fockcommon%ieigen)
+                 fockcommon%forces(:,:)=fockcommon%forces(:,:)+weight(iblocksize)*fockcommon%forces_ikpt(:,:,fockcommon%ieigen+iblocksize-1)
                end if
              end do
              ABI_FREE(ghc_dum)
@@ -1296,13 +1301,13 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 
    end do ! End k point loop
 
-   if (usexg==1) then
-     if (xg_nonlop%paw) call xg_nonlop_destroy_Dij(xg_nonlop)
-   end if
-
  end do ! End loop over spins
 
  call timab(928,1,tsec)
+
+ if (usexg==1) then
+   if (xg_nonlop%paw) call xg_nonlop_destroy_Dij(xg_nonlop)
+ end if
 
 !Stress is equal to dE/d_strain * (1/ucvol)
  npsstr(:)=npsstr(:)/gs_hamk%ucvol

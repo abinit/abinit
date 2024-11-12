@@ -245,6 +245,7 @@ ABI_TOPICS = [
     "Phonons",
     "PhononBands",
     "PhononWidth",
+    "Polaron",
     "PortabilityNonRegression",
     "positron",
     "printing",
