@@ -105,7 +105,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
  integer :: iband_cprj,ider,idir,idir1,ier,ii,ind,ipw,ifft,itypat,izero,jband,jbg,jcg,jkg
  integer :: jkpt,my_jsppol,jstwfk,lmn2_size,mgfftf,mpw,n1,n2,n3,n4,n5,n6
  integer :: n1f,n2f,n3f,n4f,n5f,n6f,natom,nband_k,ndij,nfft,nfftf,nfftotf,nhat12_grdim,nnlout
- integer :: npw,npwj,nspden_fock,nspinor,paw_opt,signs,tim_nonlop
+ integer :: npw,npwj,nspden_fock,nspinor,nkpg,paw_opt,signs,tim_nonlop
  integer, save :: ncount=0
  logical :: need_ghc,qeq0
  real(dp),parameter :: weight1=one
@@ -117,7 +117,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
  integer,pointer :: gboundf(:,:),kg_occ(:,:),gbound_kp(:,:)
  real(dp) :: enlout_dum(1),dotr(6),fockstr(6),for1(3),qphon(3),qvec_j(3),tsec(2),gsc_dum(2,0),rhodum(2,1)
  real(dp) :: rhodum0(0,1,1),str(3,3)
- real(dp), allocatable :: dummytab(:,:),dijhat(:,:,:,:),dijhat_tmp(:,:),ffnl_kp_dum(:,:,:,:)
+ real(dp), allocatable :: dummytab(:,:),dijhat(:,:,:,:),dijhat_tmp(:,:),ffnl_kp_dum(:,:,:,:), kpg_kp(:,:)
  real(dp), allocatable :: gvnlxc(:,:),ghc1(:,:),ghc2(:,:),grnhat12(:,:,:,:),grnhat_12(:,:,:,:,:),forikpt(:,:)
  real(dp), allocatable :: rho12(:,:,:),rhog_munu(:,:),rhor_munu(:,:),vlocpsi_r(:)
  real(dp), allocatable :: vfock(:),psilocal(:,:,:),vectin_dum(:,:),vqg(:),forout(:,:),strout(:,:)
@@ -288,8 +288,13 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
    if (fockcommon%usepaw==1) then
      ABI_MALLOC(vectin_dum,(2,npwj*nspinor))
      vectin_dum=zero
-     ABI_MALLOC(ffnl_kp_dum,(npwj,0,gs_ham%lmnmax,gs_ham%ntypat))
-     call gs_ham%load_kprime(ffnl_kp=ffnl_kp_dum)
+     ABI_MALLOC(ffnl_kp_dum,(npwj,1,gs_ham%lmnmax,gs_ham%ntypat))
+     nkpg=size(gs_ham%kpg_k,2)
+     ABI_MALLOC(kpg_kp,(npwj,nkpg))
+     if (nkpg>0) then
+       call mkkpg(gs_ham%kg_kp,kpg_kp,gs_ham%kpt_kp,nkpg,npwj)
+     end if
+     call gs_ham%load_kprime(ffnl_kp=ffnl_kp_dum,kpg_kp=kpg_kp)
    end if
 
 ! ======================================
@@ -584,6 +589,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
    if (fockcommon%usepaw==1) then
      ABI_FREE(vectin_dum)
      ABI_FREE(ffnl_kp_dum)
+     ABI_FREE(kpg_kp)
    end if
    if (associated(gs_ham%ph3d_kp)) then
      ABI_FREE(gs_ham%ph3d_kp)
