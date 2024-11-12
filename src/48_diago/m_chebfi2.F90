@@ -470,7 +470,6 @@ end function chebfi_memInfo
 !!            A is typically the Hamiltonian H, and B the overlap operator S
 !!  getBm1X= pointer to the function giving B^-1|X>
 !!           B is typically the overlap operator S
-!!  pcond= pointer to the function used to apply the preconditioning
 !!
 !! OUTPUT
 !!
@@ -482,7 +481,7 @@ end function chebfi_memInfo
 !!
 !! SOURCE
 
-subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,occ,residu,nspinor)
+subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,eigen,occ,residu,nspinor)
 
  implicit none
 
@@ -493,7 +492,6 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,occ,residu,nspinor)
  type(xgBlock_t), intent(inout) :: eigen
  type(xgBlock_t), intent(in)    :: occ
  type(xgBlock_t), intent(inout) :: residu
- type(xgBlock_t), intent(in)    :: pcond
  interface
    subroutine getAX_BX(X,AX,BX)
      use m_xg, only : xgBlock_t
@@ -723,8 +721,6 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,occ,residu,nspinor)
  else
    call xgBlock_colwiseCymax(chebfi%AX%self,chebfi%eigenvalues,chebfi%X,chebfi%AX%self)
  end if
-
- call xgBlock_apply_diag(chebfi%AX%self,pcond,nspinor)
 
  call xgBlock_colwiseNorm2(chebfi%AX%self, residu)
  call timab(tim_residu, 2, tsec)

@@ -491,15 +491,15 @@ module m_lobpcg2_cprj
         end if
         call timab(tim_ax_nl,2,tsec)
 
-        ! Apply preconditioner
-        call timab(tim_pcond,1,tsec)
-        call xgBlock_apply_diag(lobpcg%W,pcond,nspinor)
-        call timab(tim_pcond,2,tsec)
-
         ! Compute residu norm here !
         call timab(tim_maxres,1,tsec)
         call xgBlock_colwiseNorm2(lobpcg%W,residuBlock)
         call timab(tim_maxres,2,tsec)
+
+        ! Apply preconditioner
+        call timab(tim_pcond,1,tsec)
+        call xgBlock_apply_diag(lobpcg%W,pcond,nspinor)
+        call timab(tim_pcond,2,tsec)
 
         call timab(tim_nbdbuf,1,tsec)
         if (nbdbuf>=0) then
@@ -637,14 +637,14 @@ module m_lobpcg2_cprj
           call xgBlock_yxmax(lobpcg%W,eigenvaluesN,lobpcg%X)
         end if
         call timab(tim_ax_nl,2,tsec)
-        ! Apply preconditioner
-        call timab(tim_pcond,1,tsec)
-        call xgBlock_apply_diag(lobpcg%W,pcond,nspinor)
-        call timab(tim_pcond,2,tsec)
         ! Recompute residu norm here !
         call timab(tim_maxres,1,tsec)
         call xgBlock_colwiseNorm2(lobpcg%W,residuBlock)
         call timab(tim_maxres,2,tsec)
+        ! Apply preconditioner
+        call timab(tim_pcond,1,tsec)
+        call xgBlock_apply_diag(lobpcg%W,pcond,nspinor)
+        call timab(tim_pcond,2,tsec)
 
         call timab(tim_nbdbuf,1,tsec)
         if (nbdbuf>=0) then

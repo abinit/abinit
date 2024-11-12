@@ -103,12 +103,6 @@ module m_chebfiwf
  integer, save :: l_useria
  integer, save :: l_block_sliced
 
-#if defined HAVE_GPU && defined HAVE_YAKL
- real(kind=c_double), ABI_CONTIGUOUS pointer, save :: pcon(:)
-#else
- real(dp),            allocatable,            save :: pcon(:)
-#endif
-
  type(mpi_type),pointer,save :: l_mpi_enreg
  type(gs_hamiltonian_type),pointer,save :: l_gs_hamk
 
@@ -266,7 +260,7 @@ subroutine chebfiwf2(cg,dtset,eig,occ,enl_out,gs_hamk,kinpw,mpi_enreg,&
  integer :: me_g0,me_g0_fft
  real(dp) :: localmem
  type(chebfi_t) :: chebfi
- type(xgBlock_t) :: xgx0,xgeigen,xgocc,xgresidu,precond
+ type(xgBlock_t) :: xgx0,xgeigen,xgocc,xgresidu
  ! arrays
  real(dp) :: tsec(2),chebfiMem(2)
  real(dp), allocatable :: l_gvnlxc(:,:),occ_tmp(:)
@@ -275,10 +269,6 @@ subroutine chebfiwf2(cg,dtset,eig,occ,enl_out,gs_hamk,kinpw,mpi_enreg,&
  integer,parameter :: choice=1, paw_opt=0, signs=1
  real(dp) :: gsc_dummy(1,1)
  type(pawcprj_type) :: cprj_dum(gs_hamk%natom,1)
-
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
- integer(kind=c_size_t) :: pcon_size_bytes
-#endif
 
 ! *********************************************************************
 
@@ -354,28 +344,6 @@ subroutine chebfiwf2(cg,dtset,eig,occ,enl_out,gs_hamk,kinpw,mpi_enreg,&
  call xgBlock_map(xgx0,cg,space,l_npw*l_nspinor,nband,comm=l_mpi_enreg%comm_bandspinorfft,me_g0=me_g0,&
    & gpu_option=dtset%gpu_option)
 
- !For preconditionning
- if(dtset%gpu_option==ABI_GPU_KOKKOS) then
-#if defined HAVE_GPU && defined HAVE_YAKL
-   ABI_MALLOC_MANAGED(pcon, (/npw/))
-#endif
- else
-   ABI_MALLOC(pcon,(npw))
- end if
-
- !For preconditionning
- call build_pcon(pcon,kinpw,npw)
-
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
- if(l_gs_hamk%gpu_option==ABI_GPU_KOKKOS) then
-   ! upload pcon to device / gpu
-   pcon_size_bytes = npw * dp
-   call gpu_data_prefetch_async(C_LOC(pcon), pcon_size_bytes)
- end if
-#endif
-
- call xgBlock_map_1d(precond,pcon,SPACE_R,npw,gpu_option=dtset%gpu_option)
-
  call xgBlock_map_1d(xgeigen,eig,SPACE_R,nband,gpu_option=dtset%gpu_option)
 
  call xgBlock_map_1d(xgresidu,resid,SPACE_R,nband,gpu_option=dtset%gpu_option)
@@ -404,20 +372,11 @@ subroutine chebfiwf2(cg,dtset,eig,occ,enl_out,gs_hamk,kinpw,mpi_enreg,&
 !################    RUUUUUUUN    #####################################
 !######################################################################
 
- call chebfi_run(chebfi,xgx0,getghc_gsc1,getBm1X,precond,xgeigen,xgocc,xgresidu,nspinor)
+ call chebfi_run(chebfi,xgx0,getghc_gsc1,getBm1X,xgeigen,xgocc,xgresidu,nspinor)
 
  if (allocated(occ_tmp)) then
    ABI_FREE(occ_tmp)
  end if
-!Free preconditionning since not needed anymore
- if(dtset%gpu_option==ABI_GPU_KOKKOS) then
-#if defined HAVE_GPU && defined HAVE_YAKL
-   ABI_FREE_MANAGED(pcon)
-#endif
- else
-   ABI_FREE(pcon)
- end if
-
 
  if ( .not. l_paw ) then
    call timab(tim_nonlop,1,tsec)
@@ -601,41 +560,6 @@ subroutine getBm1X(X,Bm1X)
 
 end subroutine getBm1X
 !!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_chebfiwf/build_pcon
-!! NAME
-!! build_pcon
-!!
-!! FUNCTION
-!! This routine build the array containing the preconditionning
-!!
-!! SOURCE
-
-subroutine build_pcon(pcon,kinpw,npw)
-
-  implicit none
-
-  integer,intent(in) :: npw
-  real(dp),intent(in) :: kinpw(:)
-  real(dp),intent(out) :: pcon(:)
-
-  integer :: ipw
-
-  !$omp parallel do schedule(static), shared(pcon,kinpw)
-  do ipw=1,npw
-    if(kinpw(ipw)>huge(0.0_dp)*1.d-11) then
-      pcon(ipw)=0.d0
-    else
-      pcon(ipw) = (27+kinpw(ipw)*(18+kinpw(ipw)*(12+8*kinpw(ipw)))) &
-&     / (27+kinpw(ipw)*(18+kinpw(ipw)*(12+8*kinpw(ipw))) + 16*kinpw(ipw)**4)
-    end if
-  end do
-
-end subroutine build_pcon
-
-!----------------------------------------------------------------------
 
 end module m_chebfiwf
 !!***
