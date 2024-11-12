@@ -48,6 +48,7 @@ module m_outscfcv
  use m_crystal,          only : crystal_init, crystal_t, prt_cif
  use m_results_gs,       only : results_gs_type, results_gs_ncwrite
  use m_ioarr,            only : ioarr, fftdatar_write
+ use m_matlu,            only : matlu_type
  use m_nucprop,          only : calc_efg,calc_fc
  use m_outwant,          only : outwant
  use m_pawang,           only : pawang_type
@@ -244,7 +245,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  integer :: bantot,fform,collect,timrev, accessfil,coordn
  integer :: ii,ierr,ifft,ikpt,ispden,isppol,itypat, me_fft,n1,n2,n3
  integer :: ifgd, iatom, iatom_tot,nradint, me,my_natom_tmp
- integer :: occopt, prtnabla, pawprtden, ncid, ncerr
+ integer :: occopt, opt_moments, prtnabla, pawprtden, ncid, ncerr
  integer :: iband,nocc,comm,comm_fft,tmp_unt,nfft_tot, my_comm_atom, opt_imagonly
  integer :: indsym(4,dtset%nsym,dtset%natom)
  real(dp) :: norm,occ_norm,unocc_norm, rate_dum,rate_dum2, yp1, ypn, dr
@@ -280,8 +281,9 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  type(epjdos_t) :: dos
  type(plowannier_type) :: wan
  type(self_type) :: selfr
- type(self_type) :: self
+ type(self_type), target :: self
  type(green_type) :: greenr
+ type(matlu_type), pointer :: opt_selflimit(:) => null()
 
 ! *************************************************************************
 
@@ -1126,7 +1128,7 @@ if (dtset%prt_lorbmag==1) then
 &   ' == Start computation of Projected Local Orbitals Wannier functions == ',dtset%nbandkss
    call wrtout(units, msg)
 
-!  ==  compute psichi
+!  ==  compute chipsi
 
    call init_plowannier(dtset%plowan_bandf,dtset%plowan_bandi,dtset%plowan_compute,&
 &   dtset%plowan_iatom,dtset%plowan_it,dtset%plowan_lcalc,dtset%plowan_natom,&
@@ -1148,19 +1150,16 @@ if (dtset%prt_lorbmag==1) then
    ! Use DMFT to compute wannier function for cRPA calculation.
    if(dtset%usedmft==1) then
      write(msg,'(2a,i3)') ch10,&
-&     '  Warning: Psichi are renormalized in datafordmft because nbandkss is used',dtset%nbandkss
+&     '  Warning: Chipsi are renormalized in datafordmft because nbandkss is used',dtset%nbandkss
      call wrtout(std_out, msg)
-     call init_dmft(dmatpawu,dtset,e_fermie,dtfil%fnameabo_app,&
-&     dtfil%filnam_ds(3),dtset%nspinor,paw_dmft,pawtab,psps,dtset%typat)
+     call init_dmft(crystal,dmatpawu(:,:,:,:),dtset,e_fermie,dtfil%filnam_ds(3),dtfil%fnameabo_app,paw_dmft)
      call print_dmft(paw_dmft,dtset%pawprtvol)
 
-!    ==  compute psichi
-     call init_oper(paw_dmft,dft_occup)
+!    ==  compute chipsi
+     call init_oper(paw_dmft,dft_occup,opt_ksloc=2)
 
-     call datafordmft(crystal,cprj,dimcprj,dtset,eigen,e_fermie &
-&     ,dft_occup,dtset%mband,dtset%mband,dtset%mkmem,mpi_enreg,&
-&     dtset%nkpt,dtset%nspinor,dtset%nsppol,occ,&
-&     paw_dmft,paw_ij,pawang,pawtab,psps,usecprj,dtfil%unpaw,dtset%nbandkss)
+     call datafordmft(cg(:,:),cprj(:,:),crystal,dft_occup,dimcprj,dtset,eigen(:),dtset%mband,mcg,&
+                    & mpi_enreg,dtset%nspinor,occ(:),paw_dmft,paw_ij,pawtab(:),usecprj,dtset%nbandkss)
 
      opt_imagonly=0
      if(paw_dmft%dmft_solv>=5) opt_imagonly=1
@@ -1171,8 +1170,11 @@ if (dtset%prt_lorbmag==1) then
       ! Initialize self on real axis
        call initialize_self(selfr,paw_dmft,wtype='real')
 
-      ! Initialize self on  imag axis
-       call initialize_self(self,paw_dmft)
+       opt_moments = 0
+       if (paw_dmft%dmft_solv == 6 .or. paw_dmft%dmft_solv == 7) opt_moments = 1
+
+      ! Initialize self on imag axis
+       call initialize_self(self,paw_dmft,opt_moments=opt_moments)
 
       ! Initialize green on real axis
        call init_green(greenr,paw_dmft,opt_oper_ksloc=3,wtype='real')
@@ -1181,12 +1183,18 @@ if (dtset%prt_lorbmag==1) then
       ! and limit at high frequency)
        call rw_self(self,paw_dmft,prtopt=5,opt_rw=1,opt_stop=1)
 
+       if (opt_moments == 1) then
+         opt_selflimit => self%oper(self%nw)%matlu(:)
+       else
+         opt_selflimit => self%moments(1)%matlu(:)
+       end if ! moments
+
       ! Read self energy on real axis obtained from Maxent
        call rw_self(selfr,paw_dmft,prtopt=5,opt_rw=1,opt_imagonly=opt_imagonly, &
-     & opt_selflimit=self%oper(self%nw)%matlu,opt_hdc=self%hdc%matlu,pawang=pawang,cryst_struc=crystal)
+         & opt_selflimit=opt_selflimit(:),opt_hdc=self%hdc%matlu(:),opt_maxent=1)
 
       ! Check: from self on real axis, recompute self on Imaginary axis.
-       call selfreal2imag_self(selfr,self,paw_dmft%filapp)
+       call selfreal2imag_self(selfr,self,paw_dmft%filapp,paw_dmft)
 
       !  paw_dmft%fermie=hdr%fermie ! for tests
        write(std_out,*) "    Fermi level is",paw_dmft%fermie
@@ -1196,19 +1204,16 @@ if (dtset%prt_lorbmag==1) then
        ! For the DFT BS: use opt_self=0 and fermie=fermie_dft
 
       ! Compute green  function on real axis
-       call compute_green(crystal,greenr,paw_dmft,pawang,1,selfr,&
-&       opt_self=1,opt_nonxsum=0)
+       call compute_green(greenr,paw_dmft,1,selfr,opt_self=1,opt_nonxsum=0)
 
       !write(6,*) "compute green done"
        if(me==master) then
          if(dtset%kptopt<0) then
            ! k-resolved Spectral function
-           call print_green("from_realaxisself",greenr,5,paw_dmft,&
-&           pawprtvol=3,opt_wt=1)
+           call print_green("from_realaxisself",greenr,5,paw_dmft,opt_wt=1)
          else
            ! DOS Calculation
-           call print_green("from_realaxisself",greenr,4,paw_dmft,&
-&           pawprtvol=3,opt_wt=1)
+           call print_green("from_realaxisself",greenr,4,paw_dmft,opt_wt=1)
          endif
         !write(6,*) "print green done"
        endif

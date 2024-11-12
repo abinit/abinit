@@ -687,7 +687,8 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
       call wrtout(ab_out,message,"COLL")
       call pawpuxinit(dt%dmatpuopt,dt%exchmix,dt%f4of2_sla,dt%f6of2_sla,&
 &        is_dfpt,jpawu,dt%lexexch,dt%lpawu,dt%nspinor,dt%ntypat,dt%optdcmagpawu,pawang,dt%pawprtvol,&
-&        pawrad,pawtab,upawu,dt%usedmft,dt%useexexch,dt%usepawu)
+&        pawrad,pawtab,upawu,dt%usedmft,dt%useexexch,dt%usepawu,&
+&        dmft_proj=dt%dmft_proj,dmft_dc=dt%dmft_dc)
       ABI_FREE(upawu)
       ABI_FREE(jpawu)
     end if
