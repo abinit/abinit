@@ -634,7 +634,7 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,eigen,occ,residu,nspinor)
  nline_max = cheb_oracle1(mineig_global, lambda_minus, lambda_plus, 1D-16, 40)
  nline = MIN(nline_max,chebfi%nline)
  if (chebfi%oracle>0) then
-   call chebfi_set_nline_from_residu(chebfi,lambda_minus,lambda_plus,occ,DivResults%self,nspinor,nline_max,nline)
+   call chebfi_set_nline_from_residu(chebfi,lambda_minus,lambda_plus,occ,DivResults%self,nline_max,nline)
  end if
  nline_bands(:) = nline
 
@@ -1146,11 +1146,11 @@ end function cheb_poly1
 !!
 !! SOURCE
 
-subroutine chebfi_set_nline_from_residu(chebfi,lambda_minus,lambda_plus,occ,DivResults,nspinor,nline_max,nline)
+subroutine chebfi_set_nline_from_residu(chebfi,lambda_minus,lambda_plus,occ,DivResults,nline_max,nline)
 
  implicit none
 
- integer,intent(in) :: nspinor,nline_max
+ integer,intent(in) :: nline_max
  integer,intent(out) :: nline
  type(chebfi_t), intent(inout) :: chebfi
  type(xgBlock_t), intent(in)    :: occ
@@ -1173,7 +1173,7 @@ subroutine chebfi_set_nline_from_residu(chebfi,lambda_minus,lambda_plus,occ,DivR
  ! X_next = S|Psi>
  call xgBlock_copy(chebfi%xBXColsRows,chebfi%X_next)
  ! X_next = - eig * S|Psi>
- call xgBlock_ymax(chebfi%X_next,DivResults,0,1,nspinor)
+ call xgBlock_ymax(chebfi%X_next,DivResults,0,1)
  ! X_next = H|Psi> - eig * S|Psi>
  call xgBlock_add(chebfi%X_next,chebfi%xAXColsRows)
  ! resid = |X_next|^2
