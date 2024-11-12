@@ -1341,7 +1341,7 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
    !call wrtout(std_out,message,'COLL')
    !call flush(std_out)
    if (paw_dmft%lchipsiortho == 1 .or. optself == 1) then
-     call downfold_oper(green%oper(ifreq),paw_dmft,procb=green%distrib%procb(:),iproc=me_kpt,option=option)
+     call downfold_oper(green%oper(ifreq),paw_dmft,procb=green%distrib%procb(:),iproc=me_kpt,option=option,gpu_option=gpu_option)
     !if(ifreq==1) then
     !  write(std_out,*) "4411",green_temp%matlu(1)%mat(4,4,1,1,1)
     !  write(std_out,*) "4512",green_temp%matlu(1)%mat(4,5,1,1,2)
