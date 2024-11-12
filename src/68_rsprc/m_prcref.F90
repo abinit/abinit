@@ -191,7 +191,7 @@ subroutine prcref(atindx,dielar,dielinv,&
 &  istep,kg_diel,kxc,&
 &  mgfft,moved_atm_inside,mpi_enreg,my_natom,&
 &  nattyp,nfft,nfftprc,ngfft,ngfftprc,nkxc,npawmix,npwdiel,ntypat,n1xccc,&
-&  optreal,optres,pawrhoij,pawtab,ph1d,psps,rhog,rhoijrespc,rhor,rprimd,&
+&  optreal,optres,pawrhoij,pawtab,ph1d,precon,psps,rhog,rhoijrespc,rhor,rprimd,&
 &  susmat,vhartr,vpsp,vresid,vrespc,vxc,wvl,wvl_den,xred,rcpaw,extfpmd)
 
 !Arguments-------------------------------
@@ -206,7 +206,7 @@ subroutine prcref(atindx,dielar,dielinv,&
  type(wvl_denspot_type), intent(inout) :: wvl_den
  type(rcpaw_type),intent(inout),pointer :: rcpaw
  type(extfpmd_type),intent(inout),pointer :: extfpmd
- type(precon_object) :: precon
+ type(precon_object), intent(inout) :: precon
 
 !arrays
  integer,intent(in) :: atindx(dtset%natom),ffttomix(nfft*(1-nfftprc/nfft))
@@ -852,9 +852,9 @@ end subroutine prcref
 &  istep,kg_diel,kxc,&
 &  mgfft,moved_atm_inside,mpi_enreg,my_natom,&
 &  nattyp,nfft,nfftprc,ngfft,ngfftprc,nkxc,npawmix,npwdiel,ntypat,n1xccc,&
-&  optreal,optres,pawrhoij,ph1d,psps,rhog, rhoijrespc,rhor,rprimd,&
+&  optreal,optres,pawrhoij,ph1d,precon,psps,rhog, rhoijrespc,rhor,rprimd,&
 &  susmat,vhartr,vpsp,vresid,vrespc,vxc,xred,&
-&  etotal,pawtab,wvl, precon)
+&  etotal,pawtab,wvl)
 
 !Arguments-------------------------------
 !variables used for tfvw
@@ -867,7 +867,7 @@ end subroutine prcref
  type(dataset_type),intent(in) :: dtset
  type(pseudopotential_type),intent(in) :: psps
  type(wvl_data), intent(inout) :: wvl
- type(precon_object) :: precon
+ type(precon_object), intent(inout) :: precon
 
 !arrays
  integer,intent(in) :: atindx(dtset%natom),ffttomix(nfft*(1-nfftprc/nfft))

@@ -378,7 +378,7 @@ contains
     !!  vec_g (2, :) = Vector (in G-space) to which the model chi0 operator is applied (in place).
     !!
     !! SOURCE
-    subroutine apply_chi0(this, mpi_enreg, ngfft, ispden, vec_g)
+    subroutine apply_chi0(this, mpi_enreg, ngfft, ispden, g_vectors, vec_g)
 
         !Arguments ------------------------------------
         class(precon_object), intent(in) :: this
@@ -387,6 +387,7 @@ contains
         integer, intent(in) :: ispden
         !arrays
         integer, intent(in) :: ngfft(:)
+        integer, intent(in) :: g_vectors(:, :)
         real(dp), intent(inout) :: vec_g(2, this%nfft)
        
         !Local variables-------------------------------
