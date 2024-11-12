@@ -32,6 +32,7 @@ module m_scfcv_core
  use m_wffile
  use m_rec
  use m_abi_mixing
+ use m_precon
  use m_errors
  use m_efield
  use mod_prc_memory
@@ -364,6 +365,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  type(xcdata_type) :: xcdata
  type(energies_type) :: energies
  type(abi_mixing_object) :: mix,mix_mgga
+ type(precon_object) :: precon
  logical,parameter :: VERBOSE=.FALSE.
  logical :: dummy_nhatgr
  logical :: finite_efield_flag=.false.
@@ -860,6 +862,9 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
    ABI_MALLOC(dtn_pc,(0,0))
    ABI_MALLOC(grhf,(0,0))
  end if ! iscf>0
+
+! Initializing precon-object for chi0 based preconditioning
+ call precon%init(dtset, gprimd, rprimd, ucvol, cg, eigen, fermie, irrzon, kg, npwarr, phnons)
 
 ! Here initialize the datastructure constrained_dft, for constrained DFT calculations
 ! as well as penalty function constrained magnetization
@@ -1864,13 +1869,16 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
        endif
      endif
 
+!    Updating precon-object for chi0-based preconditioning
+     call precon%update(dtset, mpi_enreg)
+
      ABI_NVTX_START_RANGE(NVTX_SCFCV_NEWRHO)
      call newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,&
 &     dtset,etotal,fcart,pawfgr%fintocoa,&
 &     gmet,grhf,gsqcut,initialized,ispmix,istep_mix,kg_diel,kxc,&
 &     mgfftf,mix,pawfgr%coatofin,moved_atm_inside,mpi_enreg,my_natom,nattyp,nfftf,&
 &     nfftmix,nfftmix_per_nfft,ngfftf,ngfftmix,nkxc,npawmix,npwdiel,nvresid,psps%ntypat,&
-&     n1xccc,pawrhoij,pawtab,ph1df,psps,rhog,rhor,&
+&     n1xccc,pawrhoij,pawtab,ph1df,precon,psps,rhog,rhor,&
 &     rprimd,susmat,psps%usepaw,vtrial,wvl%descr,wvl%den,xred,rcpaw,extfpmd,&
 &     mix_mgga=mix_mgga,taug=taug,taur=taur,tauresid=nvtauresid)
      ABI_NVTX_END_RANGE()
@@ -2121,6 +2129,9 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 !    Precondition the residual and forces, then determine the new vtrial
 !    (Warning: the (H)xc potential may have been subtracted from vtrial)
 
+!    Updating precon-object for chi0-based preconditioning
+     call precon%update(dtset, mpi_enreg)
+
      call newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
 &     dtn_pc,dtset,etotal,fcart,pawfgr%fintocoa,&
 &     gmet,grhf,gsqcut,initialized,ispmix,&
@@ -2128,7 +2139,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 &     moved_atm_inside,mpi_enreg,my_natom,nattyp,nfftf,nfftmix,&
 &     ngfftf,ngfftmix,nkxc,npawmix,npwdiel,&
 &     nstep,psps%ntypat,n1xccc,&
-&     pawrhoij,ph1df,psps,rhor,rprimd,susmat,psps%usepaw,&
+&     pawrhoij,ph1df,precon,psps,rhor,rprimd,susmat,psps%usepaw,&
 &     vhartr,vnew_mean,vpsp,nvresid,vres_mean,vtrial,vxc,xred,&
 &     nfftf,pawtab,rhog,wvl,&
 &     mix_mgga=mix_mgga,vtau=vxctau,vtauresid=nvtauresid)
@@ -2466,6 +2477,9 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  ABI_FREE(nvtauresid)
  ABI_FREE(intgden)
  ABI_FREE(intgden0)
+
+!Deallocate precon-object 
+ call precon%free()
 
  if(allocated(vectornd)) then
     ABI_FREE(vectornd)
