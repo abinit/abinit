@@ -39,7 +39,7 @@ module m_getghc
  use m_fock,        only : fock_common_type, fock_get_getghc_call
  use m_fock_getghc, only : fock_getghc, fock_ACE_getghc
  use m_nonlop,      only : nonlop
- use m_gemm_nonlop, only : gemm_nonlop_use_gemm
+ use m_gemm_nonlop_projectors, only : gemm_nonlop_use_gemm
  use m_fft,         only : fourwf
  use m_getghc_ompgpu,  only : getghc_ompgpu
 
@@ -1839,6 +1839,7 @@ end subroutine getghc_mGGA
 !!  mcprj=second dimension of the cprj array
 !!  mgsc=second dimension of the gsc array
 !!  mpi_enreg=information about MPI parallelization
+!!  ndat=number of bands to compute in parallel
 !!  natom=number of atoms in unit cell.
 !!  nband= if positive: number of bands at this k point for that spin polarization
 !!         if negative: abs(nband) is the index of the only band to be computed
@@ -1858,30 +1859,30 @@ end subroutine getghc_mGGA
 !! SOURCE
 
 subroutine getgsc(cg,cprj,gs_ham,gsc,ibg,icg,igsc,ikpt,isppol,&
-&                 mcg,mcprj,mgsc,mpi_enreg,natom,nband,npw_k,nspinor,select_k)
+&                 mcg,mcprj,mgsc,mpi_enreg,ndat,natom,nband,npw_k,nspinor,select_k)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ibg,icg,igsc,ikpt,isppol,mcg,mcprj
- integer,intent(in) :: mgsc,natom,nband,npw_k,nspinor
+ integer,intent(in) :: mgsc,natom,nband,npw_k,nspinor,ndat
 !TODO : may be needed to distribute cprj over band procs
 ! integer,intent(in) :: mband_mem
  integer,intent(in),optional :: select_k
  type(MPI_type),intent(in) :: mpi_enreg
  type(gs_hamiltonian_type),intent(inout),target :: gs_ham
 !arrays
- real(dp),intent(in) :: cg(2,mcg)
- real(dp),intent(out) :: gsc(2,mgsc)
+ real(dp),intent(in),  target :: cg(2,mcg)
+ real(dp),intent(out), target :: gsc(2,mgsc)
  type(pawcprj_type),intent(in) :: cprj(natom,mcprj)
 
 !Local variables-------------------------------
 !scalars
  integer :: choice,cpopt,dimenl1,dimenl2,iband,iband1,iband2,index_cg,index_cprj
- integer :: index_gsc,me,my_nspinor,paw_opt,select_k_,signs,tim_nonlop,useylm
+ integer :: index_gsc,me,my_nspinor,my_ndat,paw_opt,select_k_,signs,tim_nonlop,useylm
  !character(len=500) :: msg
 !arrays
- real(dp) :: enlout_dum(1),tsec(2)
- real(dp),allocatable :: cwavef(:,:),scwavef(:,:)
+ real(dp) :: enlout_dum(ndat),tsec(2)
+ real(dp), ABI_CONTIGUOUS pointer :: cwavef(:,:),scwavef(:,:)
  type(pawcprj_type),allocatable :: cwaveprj(:,:)
 
 ! *********************************************************************
@@ -1890,6 +1891,7 @@ subroutine getgsc(cg,cprj,gs_ham,gsc,ibg,icg,igsc,ikpt,isppol,&
 
 !Compatibility tests
  my_nspinor=max(1,nspinor/mpi_enreg%nproc_spinor)
+ my_ndat=ndat; if(nband<1) my_ndat=1
  if(gs_ham%usepaw==0) then
    ABI_BUG('Only compatible with PAW (usepaw=1) !')
  end if
@@ -1900,13 +1902,17 @@ subroutine getgsc(cg,cprj,gs_ham,gsc,ibg,icg,igsc,ikpt,isppol,&
 !Keep track of total time spent in getgsc:
  call timab(565,1,tsec)
 
- gsc = zero
+ if(gs_ham%gpu_option==ABI_GPU_DISABLED) then
+   gsc = zero
+ else  if(gs_ham%gpu_option==ABI_GPU_DISABLED) then
+#ifdef HAVE_OPENMP_OFFLOAD
+   call gpu_set_to_zero(gsc,int(2,c_size_t)*mgsc)
+#endif
+ end if
 
 !Prepare some data
- ABI_MALLOC(cwavef,(2,npw_k*my_nspinor))
- ABI_MALLOC(scwavef,(2,npw_k*my_nspinor))
  if (gs_ham%usecprj==1) then
-   ABI_MALLOC(cwaveprj,(natom,my_nspinor))
+   ABI_MALLOC(cwaveprj,(natom,my_nspinor*my_ndat))
    call pawcprj_alloc(cwaveprj,0,gs_ham%dimcprj)
  else
    ABI_MALLOC(cwaveprj,(0,0))
@@ -1928,7 +1934,7 @@ subroutine getgsc(cg,cprj,gs_ham,gsc,ibg,icg,igsc,ikpt,isppol,&
    index_gsc =index_gsc +(iband1-1)*npw_k*my_nspinor
  end if
 
- do iband=iband1,iband2
+ do iband=iband1,iband2,my_ndat
 
    if (mpi_enreg%proc_distrb(ikpt,iband,isppol)/=me.and.nband>0) then
 ! No longer needed 28/03/2020 to parallelize memory
@@ -1941,26 +1947,24 @@ subroutine getgsc(cg,cprj,gs_ham,gsc,ibg,icg,igsc,ikpt,isppol,&
    end if
 
 !  Retrieve WF at (n,k)
-   cwavef(:,1:npw_k*my_nspinor)=cg(:,1+index_cg:npw_k*my_nspinor+index_cg)
+   cwavef(1:2,1:npw_k*my_nspinor*my_ndat)  => cg(:,1+index_cg:npw_k*my_nspinor*my_ndat+index_cg)
+   scwavef(1:2,1:npw_k*my_nspinor*my_ndat) => gsc(:,1+index_gsc:npw_k*my_nspinor*my_ndat+index_gsc)
    if (gs_ham%usecprj==1) then
-     call pawcprj_copy(cprj(:,1+index_cprj:my_nspinor+index_cprj),cwaveprj)
+     call pawcprj_copy(cprj(:,1+index_cprj:my_nspinor*my_ndat+index_cprj),cwaveprj)
    end if
 
 !  Compute <g|S|Cnk>
-   call nonlop(choice,cpopt,cwaveprj,enlout_dum,gs_ham,0,(/zero/),mpi_enreg,1,1,paw_opt,&
+   call nonlop(choice,cpopt,cwaveprj,enlout_dum,gs_ham,0,(/zero/),mpi_enreg,my_ndat,1,paw_opt,&
 &   signs,scwavef,tim_nonlop,cwavef,cwavef,select_k=select_k_)
 
-   gsc(:,1+index_gsc:npw_k*my_nspinor+index_gsc)=scwavef(:,1:npw_k*my_nspinor)
 
 !  End of loop over bands
-   index_cprj=index_cprj+my_nspinor
-   index_cg=index_cg+npw_k*my_nspinor
-   index_gsc=index_gsc+npw_k*my_nspinor
+   index_cprj=index_cprj+my_nspinor*my_ndat
+   index_cg=index_cg+npw_k*my_nspinor*my_ndat
+   index_gsc=index_gsc+npw_k*my_nspinor*my_ndat
  end do
 
 !Memory deallocation
- ABI_FREE(cwavef)
- ABI_FREE(scwavef)
  if (gs_ham%usecprj==1) then
    call pawcprj_free(cwaveprj)
  end if
@@ -2056,7 +2060,7 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lamb
 
 !Local variables-------------------------------
 !scalars
- integer :: firstelt, firstprj, lastelt, lastprj,usegvnlxc
+ integer :: firstelt, firstprj, lastelt, lastprj,usegvnlxc,usegsc
  integer :: nthreads
  integer :: ithread
  integer :: chunk
@@ -2078,7 +2082,7 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lamb
  ! Disabling multithreading for GPU variants (getghc_ompgpu is not thread-safe for now)
  !$omp parallel default (none) &
  !$omp& private(ithread,nthreads,chunk,firstband,lastband,residuchunk,firstelt,lastelt), &
- !$omp& private(firstprj,lastprj,usegvnlxc,fftw3_use_lib_threads_sav), &
+ !$omp& private(firstprj,lastprj,usegvnlxc,usegsc,fftw3_use_lib_threads_sav), &
  !$omp& shared(cwavef,ghc,gsc, gvnlxc,spacedim,spacedim_prj,ndat,kg_fft_k,kg_fft_kp,gs_ham,cwaveprj,mpi_enreg), &
  !$omp& shared(gemm_nonlop_use_gemm), &
  !$omp& firstprivate(cpopt,lambda,prtvol,sij_opt,tim_getghc,type_calc,select_k_default) &
@@ -2118,6 +2122,8 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lamb
  end if
  usegvnlxc=1
  if (size(gvnlxc)<=1) usegvnlxc=0
+ usegsc=0
+ if (gs_ham%usepaw==1.and.sij_opt==1) usegsc=1
 
  if ( lastband /= 0 ) then
    firstelt = (firstband-1)*spacedim+1
@@ -2128,13 +2134,13 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lamb
    if ( present(kg_fft_k) ) then
      if (present(kg_fft_kp)) then
        call getghc(cpopt,cwavef(:,firstelt:lastelt),cwaveprj(:,firstprj:lastprj),&
-&      ghc(:,firstelt:lastelt),gsc(:,firstelt:lastelt*gs_ham%usepaw),&
+&      ghc(:,firstelt:lastelt),gsc(:,firstelt:lastelt*usegsc),&
 &      gs_ham,gvnlxc(:,firstelt:lastelt*usegvnlxc),lambda, mpi_enreg,lastband-firstband+1,&
 &      prtvol,sij_opt,tim_getghc,type_calc,&
 &      select_k=select_k_default,kg_fft_k=kg_fft_k,kg_fft_kp=kg_fft_kp)
      else
        call getghc(cpopt,cwavef(:,firstelt:lastelt),cwaveprj(:,firstprj:lastprj),&
-&      ghc(:,firstelt:lastelt),gsc(:,firstelt:lastelt*gs_ham%usepaw),&
+&      ghc(:,firstelt:lastelt),gsc(:,firstelt:lastelt*usegsc),&
 &      gs_ham,gvnlxc(:,firstelt:lastelt*usegvnlxc),lambda, mpi_enreg,lastband-firstband+1,&
 &      prtvol,sij_opt,tim_getghc,type_calc,&
 &      select_k=select_k_default,kg_fft_k=kg_fft_k)
@@ -2142,13 +2148,13 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lamb
    else
      if (present(kg_fft_kp)) then
        call getghc(cpopt,cwavef(:,firstelt:lastelt),cwaveprj(:,firstprj:lastprj),&
-&      ghc(:,firstelt:lastelt),gsc(:,firstelt:lastelt*gs_ham%usepaw),&
+&      ghc(:,firstelt:lastelt),gsc(:,firstelt:lastelt*usegsc),&
 &      gs_ham,gvnlxc(:,firstelt:lastelt*usegvnlxc),lambda, mpi_enreg,lastband-firstband+1,&
 &      prtvol,sij_opt,tim_getghc,type_calc,&
 &      select_k=select_k_default,kg_fft_kp=kg_fft_kp)
      else
        call getghc(cpopt,cwavef(:,firstelt:lastelt),cwaveprj(:,firstprj:lastprj),&
-&      ghc(:,firstelt:lastelt),gsc(:,firstelt:lastelt*gs_ham%usepaw),&
+&      ghc(:,firstelt:lastelt),gsc(:,firstelt:lastelt*usegsc),&
 &      gs_ham,gvnlxc(:,firstelt:lastelt*usegvnlxc),lambda, mpi_enreg,lastband-firstband+1,&
 &      prtvol,sij_opt,tim_getghc,type_calc,&
 &      select_K=select_k_default)
