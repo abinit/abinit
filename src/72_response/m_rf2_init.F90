@@ -270,7 +270,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
        idir_cprj=0;if (dudkprj(1,1)%ncpgr/=3) idir_cprj=idir1
        call getcprj(choice_cprj,cpopt_cprj,ddk_read,cprj_dudk,gs_hamkq%ffnl_k,idir_cprj,&
 &       gs_hamkq%indlmn,gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kpg_k,gs_hamkq%kpt_k,&
-&       gs_hamkq%lmnmax,gs_hamkq%mgfft,mpi_enreg,gs_hamkq%natom,gs_hamkq%nattyp,gs_hamkq%ngfft,&
+&       gs_hamkq%lmnmax,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%natom,gs_hamkq%nattyp,gs_hamkq%ngfft,&
 &       gs_hamkq%nloalg,gs_hamkq%npw_k,gs_hamkq%nspinor,gs_hamkq%ntypat,gs_hamkq%phkxred,&
 &       gs_hamkq%ph1d,gs_hamkq%ph3d_k,gs_hamkq%ucvol,gs_hamkq%useylm)
      end if
