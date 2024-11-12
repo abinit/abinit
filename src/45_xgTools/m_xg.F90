@@ -3218,7 +3218,7 @@ contains
     type(xgBlock_t), intent(in   ) :: da
     integer, intent(in) :: shift,nblocks,nspinor
 
-    integer :: iblock,ispinor,ncols_nospin,irow,nrows
+    integer :: iblock,ispinor,ncols_nospin,irow,nrows,fact
     double precision :: tsec(2)
 
     call timab(tim_ymax,1,tsec)
@@ -3240,21 +3240,21 @@ contains
       ABI_ERROR("shift+xgBlockA%cols > da%rows")
     end if
 
+    fact = 1 ; if (xgBlockA%space==SPACE_CR) fact = 2
+
     if (space(da)==SPACE_R) then
       select case(xgBlockA%space)
-      case (SPACE_R)
+      case (SPACE_R,SPACE_CR)
         !$omp parallel do collapse(3) shared(da,xgBlockA) private(irow,iblock,ispinor)
         do iblock = 1, ncols_nospin
           do ispinor = 1, nspinor
-            do irow = 1, nrows
+            do irow = 1, fact*nrows
               xgBlockA%vecR(irow,nspinor*(iblock-1)+ispinor) = - da%vecR(iblock+shift,1) &
                & * xgBlockA%vecR(irow,nspinor*(iblock-1)+ispinor)
             end do
           end do
         end do
         !$omp end parallel do
-      case (SPACE_CR)
-        ABI_ERROR("Not implemented")
       case (SPACE_C)
         !$omp parallel do collapse(3) shared(da,xgBlockA) private(irow,iblock,ispinor)
         do iblock = 1, ncols_nospin
