@@ -58,7 +58,7 @@ jobs:
 
       #- name: Add landing page
       #  run: |
-      #      mv site/index.html site/mkdocs_index.html 
+      #      mv site/index.html site/mkdocs_index.html
       #      mv docs/* site/
 
       - name: Configure GitHub Pages # No idea if that actually does anything...
