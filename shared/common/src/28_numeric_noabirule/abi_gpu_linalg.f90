@@ -740,6 +740,96 @@ end subroutine gpu_xsygvd_bufferSize
 
 #endif
 
+!------------------------------------------------------------------------------
+!                         gpu_set_to_zero
+!------------------------------------------------------------------------------
+!!****f* m_abi_gpu_linalg/gpu_set_to_zero
+!! NAME
+!!  gpu_set_to_zero
+!!
+!! FUNCTION
+!!  Set array content to zero
+!!
+!! INPUTS
+!!  size = size of array
+!!
+!! OUTPUT
+!!  array  = array to be set to zero
+!!
+!! SOURCE
+subroutine gpu_set_to_zero(array, sizea)
+ use, intrinsic :: iso_c_binding
+ integer(c_size_t),intent(in)  :: sizea
+ real(dp),target,intent(out) :: array(sizea)
+
+! *********************************************************************
+
+#if defined HAVE_OPENMP_OFFLOAD
+ integer(c_size_t)  :: i
+
+#if defined HAVE_GPU_CUDA
+ !$OMP TARGET DATA USE_DEVICE_PTR(array)
+ call gpu_memset(c_loc(array), 0, sizea*dp)
+ !$OMP END TARGET DATA
+#elif defined HAVE_GPU_HIP
+ !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(i) MAP(to:array)
+ do i=1,sizea
+   array(i)=zero
+ end do
+#endif
+
+#endif
+
+end subroutine gpu_set_to_zero
+!!***
+
+!------------------------------------------------------------------------------
+!                         gpu_copy
+!------------------------------------------------------------------------------
+!!****f* m_abi_gpu_linalg/gpu_copy
+!! NAME
+!!  gpu_copy
+!!
+!! FUNCTION
+!!  Copy array content on GPU to another
+!!
+!! INPUTS
+!!  src  = array to be copied
+!!  size = size of src and dest
+!!
+!! OUTPUT
+!!  dest = array to be set
+!!
+!! SOURCE
+subroutine gpu_copy(dest, src, sizea)
+ use, intrinsic :: iso_c_binding
+ integer(c_size_t),intent(in)  :: sizea
+ real(dp),target,intent(in)  :: src(sizea)
+ real(dp),target,intent(out) :: dest(sizea)
+
+! *********************************************************************
+
+#if defined HAVE_OPENMP_OFFLOAD
+ integer(c_size_t)  :: i
+
+#if defined HAVE_GPU_CUDA
+ !$OMP TARGET DATA USE_DEVICE_PTR(dest,src)
+ call copy_gpu_to_gpu(c_loc(dest), c_loc(src), sizea*dp)
+ !$OMP END TARGET DATA
+#elif defined HAVE_GPU_HIP
+ !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(i) MAP(to:src,dest)
+ do i=1,sizea
+   dest(i)=src(i)
+ end do
+#endif
+
+#else
+ ! Make testfarm happy
+ ABI_UNUSED((/src,dest/))
+#endif
+
+end subroutine gpu_copy
+!!***
 
 !------------------------------------------------------------------------------
 !                         abi_gpu_xgemm

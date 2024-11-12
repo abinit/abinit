@@ -69,6 +69,7 @@ module m_afterscfloop
  use m_wvl_rho,          only : wvl_mkrho
  use m_wvl_psi,          only : wvl_psitohpsi, wvl_tail_corrections
  use m_fourier_interpol, only : transgrid
+ use m_xg_nonlop,        only : xg_nonlop_t
 
 #ifdef HAVE_BIGDFT
  use m_abi2big
@@ -285,7 +286,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 & psps,pwind,pwind_alloc,pwnsfac,res2,resid,residm,results_gs,&
 & rhog,rhor,rprimd,stress_needed,strscondft,strsxc,strten,symrec,synlgr,taug,&
 & taur,tollist,usecprj,vhartr,vpsp,vtrial,vxc,vxctau,vxcavg,wvl,&
-& xccc3d,xcctau3d,xred,ylm,ylmgr,qvpotzero,conv_retcode)
+& xccc3d,xcctau3d,xred,ylm,ylmgr,qvpotzero,conv_retcode,xg_nonlop)
 
 !Arguments ------------------------------------
 !scalars
@@ -310,6 +311,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  type(results_gs_type),intent(inout) :: results_gs
  type(wvl_data),intent(inout) :: wvl
  type(fock_type),pointer, intent(inout) :: fock
+ type(xg_nonlop_t), intent(inout) :: xg_nonlop
 !arrays
  integer,intent(in) :: atindx(dtset%natom),atindx1(dtset%natom)
  integer,intent(in) :: indsym(4,dtset%nsym,dtset%natom)
@@ -951,7 +953,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 &   npwarr,dtset%ntypat,nvresid,occ,optfor,optres,&
 &   paw_ij,pawang,pawfgr,pawfgrtab,pawrad,pawrhoij,pawtab,ph1d,ph1df,&
 &   psps,rhog,rhor,rprimd,stress_needed,strscondft,strsxc,strten,symrec,synlgr,&
-&   ucvol,usecprj,vhartr,vpsp,vxc,vxctau,wvl,xccc3d,xcctau3d,xred,ylm,ylmgr,qvpotzero)
+&   ucvol,usecprj,vhartr,vpsp,vxc,vxctau,wvl,xccc3d,xcctau3d,xred,ylm,ylmgr,qvpotzero,xg_nonlop)
  end if
 
  ! Init values with MAGIC_UNDEF if not computed.

@@ -49,7 +49,7 @@ module m_chebfiwf
  use m_prep_kgb,    only : prep_getghc, prep_nonlop
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free
  use m_getghc,      only : multithreaded_getghc
- use m_gemm_nonlop, only : gemm_nonlop_use_gemm
+ use m_gemm_nonlop_projectors , only : gemm_nonlop_use_gemm
 
  use m_xg
  use m_xgTransposer
@@ -194,7 +194,7 @@ subroutine chebfiwf2_blocksize(gs_hamk,ndat,npw,nband,nspinor,paral_kgb,gpu_opti
      write(std_out,*) "Memory requirements of chebfiwf per MPI task (OpenMP GPU)"
      write(std_out,*) "---------------------------------------------------------"
      write(std_out,*) "Static buffers, computed once and permanently on card :"
-     write(std_out,'(A,F10.3,1x,A)') "   gemm_nonlop_ompgpu (make_gemm_nonlop) : ",  real(nonlop_smem,dp)/(1024*1024), "MiB"
+     write(std_out,'(A,F10.3,1x,A)') "   gemm_nonlop_ompgpu (projectors)       : ",  real(nonlop_smem,dp)/(1024*1024), "MiB"
      write(std_out,'(A,F10.3,1x,A)') "   invovl_ompgpu (mkinvovl)              : ",  real(invovl_smem,dp)/(1024*1024), "MiB"
      write(std_out,'(A,F10.3,1x,A)') "   chebfi2                               : ",          chebfiMem(1)/(1024*1024), "MiB"
      write(std_out,*) "Work buffers, temporary, bandpp sized  :"

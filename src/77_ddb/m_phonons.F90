@@ -3596,7 +3596,7 @@ subroutine test_phrotation(ifc, cryst, qptopt, ngqpt, comm)
 !scalars
  integer,parameter :: nqshft1 = 1, master = 0
  integer :: nqibz, iq_bz, iq_ibz, nqbz, ii, natom, natom3, ierr
- integer :: isym, itimrev, ierr_freq, ierr_eigvec, prtvol, qtimrev
+ integer :: isym, itimrev, ierr_freq, ierr_eigvec, prtvol
  real(dp), parameter ::  tol_phfreq_meV = tol3, tol_eigvec = tol6
  real(dp) :: maxerr_phfreq, err_phfreq, maxerr_eigvec ! err_eigvec
  logical :: isirr_q
@@ -3623,7 +3623,6 @@ subroutine test_phrotation(ifc, cryst, qptopt, ngqpt, comm)
  ! Create a regular grid
  in_qptrlatt = 0; in_qptrlatt(1, 1) = ngqpt(1); in_qptrlatt(2, 2) = ngqpt(2); in_qptrlatt(3, 3) = ngqpt(3)
  qshift = zero
- qtimrev = kpts_timrev_from_kptopt(qptopt)
 
  call kpts_ibz_from_kptrlatt(cryst, in_qptrlatt, qptopt, nqshft1, qshift, &
                              nqibz, qibz, wtq_ibz, nqbz, qbz, new_kptrlatt=new_qptrlatt, bz2ibz=bz2ibz)
@@ -3642,7 +3641,7 @@ subroutine test_phrotation(ifc, cryst, qptopt, ngqpt, comm)
 
  qrank = krank_from_kptrlatt(nqibz, qibz, in_qptrlatt, compute_invrank=.False.)
 
- if (kpts_map("symrec", qtimrev, cryst, qrank, nqbz, qbz, bz2ibz_listkk) /= 0) then
+ if (kpts_map("symrec", qptopt, cryst, qrank, nqbz, qbz, bz2ibz_listkk) /= 0) then
    write(msg, '(3a)' ) "Error mapping BZ to IBZ",ch10,"The q-point could not be generated from a symmetrical one"
    ABI_ERROR(msg)
  end if

@@ -19,6 +19,9 @@
 
 #include "abi_common.h"
 
+! nvtx related macro definition
+#include "nvtx_macros.h"
+
 module m_dfpt_loopert
 
  use defs_basis
@@ -89,6 +92,10 @@ module m_dfpt_loopert
  use m_mklocl,     only : dfpt_vlocal, vlocalstr
  use m_cgprj,      only : ctocprj
  use m_symkpt,     only : symkpt
+
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+ use m_nvtx_data
+#endif
 
  implicit none
 
@@ -678,6 +685,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 
 !Loop on perturbations
 !==========================================================================
+ ABI_NVTX_START_RANGE(NVTX_DFPT_LOOP)
  do icase=1,ipert_cnt
 
 !  %%%% Parallelization over perturbations %%%%%
@@ -711,6 +719,20 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    idir = pert_calc(2,icase)
    istr=idir
    pertcase = pert_calc(3,icase)
+
+   if(ipert <= dtset%natom) then
+     ABI_NVTX_START_RANGE(NVTX_DFPT_LOOP_PHONON)
+   end if
+   if(ipert == dtset%natom+1) then
+     ABI_NVTX_START_RANGE(NVTX_DFPT_LOOP_DDK)
+   end if
+   if(ipert == dtset%natom+2) then
+     ABI_NVTX_START_RANGE(NVTX_DFPT_LOOP_EFELD)
+   end if
+   if(ipert == dtset%natom+3 .or. ipert == dtset%natom+4) then
+     ABI_NVTX_START_RANGE(NVTX_DFPT_LOOP_STRAIN)
+   end if
+
 
 !  Init MPI communicator
    spaceComm=mpi_enreg%comm_cell
@@ -2201,6 +2223,10 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      end if
    end if
 
+   if(ipert <= dtset%natom+4) then
+     ABI_NVTX_END_RANGE()
+   end if
+
 !Release the temporary arrays (for k, k+q and 1st-order)
    ABI_FREE(cg)
    ABI_FREE(cgq)
@@ -2297,6 +2323,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    call timab(146,2,tsec)
    if(iexit/=0) exit
  end do ! End loop on perturbations
+ ABI_NVTX_END_RANGE()
  ABI_FREE(zeff)
 
 !%%%% Parallelization over perturbations %%%%%

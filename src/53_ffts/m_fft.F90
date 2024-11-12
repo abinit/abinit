@@ -20,6 +20,9 @@
 
 #include "abi_common.h"
 
+! nvtx related macro definition
+#include "nvtx_macros.h"
+
 MODULE m_fft
 
  use defs_basis
