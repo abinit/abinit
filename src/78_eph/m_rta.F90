@@ -351,7 +351,7 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, 
 
 !Local variables ------------------------------
  integer,parameter :: sppoldbl1 = 1, master = 0
- integer :: ierr, spin, nprocs, my_rank, timrev, ik_ibz, ib, irta, itemp, ndat, nsppol, idat, mband, ikpt
+ integer :: ierr, spin, nprocs, my_rank, ik_ibz, ib, irta, itemp, ndat, nsppol, idat, mband, ikpt
  real(dp) :: cpu, wall, gflops
  character(len=500) :: msg
  character(len=fnlen) :: wfk_fname_dense
@@ -578,12 +578,11 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, 
    tmp_ebands = ebands_downsample(new%ebands, cryst, kptrlatt, 1, [zero, zero, zero])
 
    ! Map the points of the downsampled bands to dense ebands
-   timrev = kpts_timrev_from_kptopt(ebands%kptopt)
    ABI_MALLOC(indkk, (6, tmp_ebands%nkpt))
 
    krank = krank_from_kptrlatt(new%ebands%nkpt, new%ebands%kptns, new%ebands%kptrlatt, compute_invrank=.False.)
 
-   if (kpts_map("symrec", timrev, cryst, krank, tmp_ebands%nkpt, tmp_ebands%kptns, indkk) /= 0) then
+   if (kpts_map("symrec", ebands%kptopt, cryst, krank, tmp_ebands%nkpt, tmp_ebands%kptns, indkk) /= 0) then
      write(msg, '(3a)' ) &
        "Error while downsampling ebands in the transport driver",ch10, &
        "The k-point could not be generated from a symmetrical one."

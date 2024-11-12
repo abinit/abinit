@@ -646,12 +646,12 @@ end subroutine kpts_pack_in_stars
 !!
 !! SOURCE
 
-integer function kpts_map(mode, timrev, cryst, krank, nkpt2, kpt2, map, qpt, dksqmax_tol) result(ierr)
+integer function kpts_map(mode, kptopt, cryst, krank, nkpt2, kpt2, map, qpt, dksqmax_tol) result(ierr)
 
 !Arguments ------------------------------------
 !scalars
  character(len=*),intent(in) :: mode
- integer,intent(in) :: timrev, nkpt2
+ integer,intent(in) :: kptopt, nkpt2
  class(crystal_t),intent(in) :: cryst
  class(krank_t),intent(inout) :: krank
  real(dp),optional,intent(in) :: dksqmax_tol
@@ -663,19 +663,28 @@ integer function kpts_map(mode, timrev, cryst, krank, nkpt2, kpt2, map, qpt, dks
 !Local variables-------------------------------
 !scalars
  real(dp) :: dksqmax, my_tol
+ integer :: timrev, nsym
 !arrays
  real(dp) :: my_qpt(3)
 
 ! *************************************************************************
 
  my_qpt = zero; if (present(qpt)) my_qpt = qpt
+ timrev = kpts_timrev_from_kptopt(kptopt)
+ ! if no spatial symm. set nsym to 1 to suppress the use of spatial symm.
+ ! the first symm. is always the identity
+ if(kptopt==2 .or. kptopt==3) then
+   nsym = 1
+ else
+  nsym = cryst%nsym
+ end if
 
  select case (mode)
  case("symrel")
    ! Note symrel and use_symrec = .False.
    ! These are the conventions for the symmetrization of the wavefunctions used in cgtk_rotate.
    call krank%get_mapping(nkpt2, kpt2, dksqmax, cryst%gmet, map, &
-                          cryst%nsym, cryst%symafm, cryst%symrel, timrev, use_symrec=.False., qpt=my_qpt)
+                          nsym, cryst%symafm, cryst%symrel, timrev, use_symrec=.False., qpt=my_qpt)
 
  case("symrec")
    ! Note symrec and use_symrec = .True.
