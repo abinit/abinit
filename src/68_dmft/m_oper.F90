@@ -892,12 +892,12 @@ call nvtxStartRange("downfold_oper",20)
          else if(l_gpu_option == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
            !$OMP TARGET PARALLEL DO COLLAPSE(2) MAP(to:mat,mat_temp2) PRIVATE(im,im1)
-#endif
            do im=1,ndim
              do im1=1,ndim
                mat(im,im1,isppol) = mat(im,im1,isppol) + mat_temp2(im,im1)*wtk(ik)
              end do
            end do
+#endif
          end if
 
      end do ! ikpt
@@ -990,13 +990,15 @@ subroutine upfold_oper(oper,paw_dmft,procb,iproc,gpu_option)
  use m_abi_linalg, only : abi_xgemm
 
 !Arguments ------------------------------------
- type(oper_type), intent(inout)  :: oper
- type(paw_dmft_type), intent(in) :: paw_dmft
+ type(oper_type),target, intent(inout)  :: oper
+ type(paw_dmft_type),target, intent(in) :: paw_dmft
  integer, optional, intent(in)   :: iproc,gpu_option
  integer, optional, intent(in)   :: procb(oper%nkpt)
 !Local variables-------------------------------
- integer :: iatom,ik,ikpt,isppol,lpawu,mbandc,l_gpu_option
+ integer :: iatom,ik,ikpt,isppol,ib,ib1,lpawu,mbandc,l_gpu_option
  integer :: ndim,ndim_max,nspinor,paral,shift
+ complex(dpc), ABI_CONTIGUOUS pointer :: ks(:,:,:,:),mat(:,:,:),chipsi(:,:,:,:,:)
+ real(dp), ABI_CONTIGUOUS pointer :: wtk(:)
  complex(dpc), allocatable :: mat_temp(:,:),mat_temp2(:,:)
 ! *********************************************************************
 
@@ -1026,15 +1028,31 @@ subroutine upfold_oper(oper,paw_dmft,procb,iproc,gpu_option)
 
  if (present(procb) .and. present(iproc) .and. oper%paral == 0) paral = 1
 
- oper%ks(:,:,:,:) = czero
+ if(l_gpu_option==ABI_GPU_DISABLED) oper%ks(:,:,:,:) = czero
 
  ABI_MALLOC(mat_temp,(mbandc,ndim_max))
  ABI_MALLOC(mat_temp2,(mbandc,mbandc))
+ if(l_gpu_option == ABI_GPU_OPENMP) then
+   ks => oper%ks
+   chipsi => paw_dmft%chipsi
+
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET ENTER DATA MAP(alloc:ks,chipsi,mat_temp,mat_temp2) IF(l_gpu_option==ABI_GPU_OPENMP)
+   !$OMP TARGET UPDATE TO(chipsi) IF(l_gpu_option==ABI_GPU_OPENMP)
+   oper%ks(:,:,:,:) = czero
+   !$OMP TARGET UPDATE TO(ks) IF(l_gpu_option==ABI_GPU_OPENMP)
+#endif
+   !call gpu_set_to_zero_complex(oper%ks, int(oper%nsppol,c_size_t)*mbandc*mbandc*oper%nkpt)
+ end if
 
  do iatom=1,oper%natom
    lpawu = oper%matlu(iatom)%lpawu
    if (lpawu == -1) cycle
    ndim = (2*lpawu+1) * nspinor
+   mat => oper%matlu(iatom)%mat
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET ENTER DATA MAP(to:mat) IF(l_gpu_option==ABI_GPU_OPENMP)
+#endif
    do isppol=1,oper%nsppol
      do ikpt=1,oper%nkpt ! index of kpt on the current CPU
 
@@ -1044,18 +1062,42 @@ subroutine upfold_oper(oper,paw_dmft,procb,iproc,gpu_option)
 
        ik = ikpt + shift ! true kpt index (needed for chipsi)
 
-       call abi_xgemm("c","n",mbandc,ndim,ndim,cone,paw_dmft%chipsi(:,:,ik,isppol,iatom),&
-                    & ndim_max,oper%matlu(iatom)%mat(:,:,isppol),ndim,czero,mat_temp(:,1:ndim),mbandc)
+       if(l_gpu_option == ABI_GPU_DISABLED) then
+         call abi_xgemm("c","n",mbandc,ndim,ndim,cone,paw_dmft%chipsi(:,:,ik,isppol,iatom),&
+                      & ndim_max,oper%matlu(iatom)%mat(:,:,isppol),ndim,czero,mat_temp(:,1:ndim),mbandc)
 
-       call abi_xgemm("n","n",mbandc,mbandc,ndim,cone,mat_temp(:,1:ndim),mbandc,&
-                    & paw_dmft%chipsi(:,:,ik,isppol,iatom),ndim_max,czero,mat_temp2(:,:),mbandc)
+         call abi_xgemm("n","n",mbandc,mbandc,ndim,cone,mat_temp(:,1:ndim),mbandc,&
+                      & paw_dmft%chipsi(:,:,ik,isppol,iatom),ndim_max,czero,mat_temp2(:,:),mbandc)
 
-       oper%ks(:,:,ikpt,isppol) = oper%ks(:,:,ikpt,isppol) + mat_temp2(:,:)
+         oper%ks(:,:,ikpt,isppol) = oper%ks(:,:,ikpt,isppol) + mat_temp2(:,:)
+       else if(l_gpu_option == ABI_GPU_OPENMP) then
+         call abi_gpu_xgemm(2,"c","n",mbandc,ndim,ndim,cone,paw_dmft%chipsi(:,:,ik,isppol,iatom),&
+                      & ndim_max,oper%matlu(iatom)%mat(:,:,isppol),ndim,czero,mat_temp(:,1:ndim),mbandc)
+
+         call abi_gpu_xgemm(2,"n","n",mbandc,mbandc,ndim,cone,mat_temp(:,1:ndim),mbandc,&
+                      & paw_dmft%chipsi(:,:,ik,isppol,iatom),ndim_max,czero,mat_temp2(:,:),mbandc)
+
+#ifdef HAVE_OPENMP_OFFLOAD
+         !$OMP TARGET PARALLEL DO COLLAPSE(2) MAP(to:ks,mat_temp2) PRIVATE(ib,ib1)
+         do ib=1,mbandc
+           do ib1=1,mbandc
+             ks(ib,ib1,ikpt,isppol) = ks(ib,ib1,ikpt,isppol) + mat_temp2(ib,ib1)
+           end do
+         end do
+#endif
+       end if
 
      end do ! ikpt
    end do ! isppol
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET EXIT DATA MAP(delete:mat) IF(l_gpu_option==ABI_GPU_OPENMP)
+#endif
  end do ! iatom
 
+#ifdef HAVE_OPENMP_OFFLOAD
+ !$OMP TARGET UPDATE FROM(ks)
+ !$OMP TARGET EXIT DATA MAP(delete:ks,chipsi,wtk,mat_temp,mat_temp2) IF(l_gpu_option==ABI_GPU_OPENMP)
+#endif
  ABI_FREE(mat_temp)
  ABI_FREE(mat_temp2)
 
