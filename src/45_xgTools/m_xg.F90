@@ -3212,13 +3212,13 @@ contains
   !!
   !! NAME
   !! xgBlock_ymax
-  subroutine xgBlock_ymax(xgBlockA, da, shift, nblocks, nspinor)
+  subroutine xgBlock_ymax(xgBlockA, da, shift, nblocks)
 
     type(xgBlock_t), intent(inout) :: xgBlockA
     type(xgBlock_t), intent(in   ) :: da
-    integer, intent(in) :: shift,nblocks,nspinor
+    integer, intent(in) :: shift,nblocks
 
-    integer :: iblock,ispinor,ncols_nospin,irow,nrows,fact
+    integer :: iblock,ncols,irow,nrows,fact
     double precision :: tsec(2)
 
     call timab(tim_ymax,1,tsec)
@@ -3229,14 +3229,15 @@ contains
     call xgBlock_check_gpu_option(xgBlockA,da)
 
     nrows = xgBlockA%rows
-    ncols_nospin = xgBlockA%cols / nspinor
-    if ( da%rows /= nblocks*ncols_nospin ) then
-      ABI_ERROR("rows(da)/=nblocks*ncols_nospin")
+    ncols = xgBlockA%cols
+
+    if ( da%rows /= nblocks*ncols ) then
+      ABI_ERROR("rows(da)/=nblocks*ncols")
     end if
     if ( shift<0 ) then
       ABI_ERROR("shift<0")
     end if
-    if ( shift+ncols_nospin > da%rows ) then
+    if ( shift+ncols > da%rows ) then
       ABI_ERROR("shift+xgBlockA%cols > da%rows")
     end if
 
@@ -3245,24 +3246,20 @@ contains
     if (space(da)==SPACE_R) then
       select case(xgBlockA%space)
       case (SPACE_R,SPACE_CR)
-        !$omp parallel do collapse(3) shared(da,xgBlockA) private(irow,iblock,ispinor)
-        do iblock = 1, ncols_nospin
-          do ispinor = 1, nspinor
-            do irow = 1, fact*nrows
-              xgBlockA%vecR(irow,nspinor*(iblock-1)+ispinor) = - da%vecR(iblock+shift,1) &
-               & * xgBlockA%vecR(irow,nspinor*(iblock-1)+ispinor)
-            end do
+        !$omp parallel do collapse(2) shared(da,xgBlockA) private(irow,iblock)
+        do iblock = 1, ncols
+          do irow = 1, fact*nrows
+            xgBlockA%vecR(irow,iblock) = - da%vecR(iblock+shift,1) &
+             & * xgBlockA%vecR(irow,iblock)
           end do
         end do
         !$omp end parallel do
       case (SPACE_C)
-        !$omp parallel do collapse(3) shared(da,xgBlockA) private(irow,iblock,ispinor)
-        do iblock = 1, ncols_nospin
-          do ispinor = 1, nspinor
-            do irow = 1, nrows
-              xgBlockA%vecC(irow,nspinor*(iblock-1)+ispinor) = - da%vecR(iblock+shift,1) &
-               & * xgBlockA%vecC(irow,nspinor*(iblock-1)+ispinor)
-            end do
+        !$omp parallel do collapse(2) shared(da,xgBlockA) private(irow,iblock)
+        do iblock = 1, ncols
+          do irow = 1, nrows
+            xgBlockA%vecC(irow,iblock) = - da%vecR(iblock+shift,1) &
+             & * xgBlockA%vecC(irow,iblock)
           end do
         end do
         !$omp end parallel do
@@ -3271,13 +3268,11 @@ contains
       if (xgBlockA%space/=SPACE_C) then
         ABI_ERROR('If space(da)=SPACE_C, space(xgBlockA) has to be SPACE_C')
       end if
-      !$omp parallel do collapse(3) shared(da,xgBlockA) private(irow,iblock,ispinor)
-      do iblock = 1, ncols_nospin
-        do ispinor = 1, nspinor
-          do irow = 1, nrows
-            xgBlockA%vecC(irow,nspinor*(iblock-1)+ispinor) = - da%vecC(iblock+shift,1) &
-             & * xgBlockA%vecC(irow,nspinor*(iblock-1)+ispinor)
-          end do
+      !$omp parallel do collapse(2) shared(da,xgBlockA) private(irow,iblock)
+      do iblock = 1, ncols
+        do irow = 1, nrows
+          xgBlockA%vecC(irow,iblock) = - da%vecC(iblock+shift,1) &
+           & * xgBlockA%vecC(irow,iblock)
         end do
       end do
       !$omp end parallel do

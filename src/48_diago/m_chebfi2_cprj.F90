@@ -558,7 +558,7 @@ subroutine chebfi_run_cprj(chebfi,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspin
  nline_max = cheb_oracle1(mineig_global, lambda_minus, lambda_plus, 1D-16, 40)
  nline = MIN(nline_max,chebfi%nline)
  if (chebfi%oracle>0) then
-   call chebfi_set_nline_from_residu(chebfi,lambda_minus,lambda_plus,occ,DivResults%self,nspinor,nline_max,nline)
+   call chebfi_set_nline_from_residu(chebfi,lambda_minus,lambda_plus,occ,DivResults%self,nline_max,nline)
  end if
  nline_bands(:) = nline
 
@@ -1034,11 +1034,11 @@ end function cheb_poly1
 !!
 !! SOURCE
 
-subroutine chebfi_set_nline_from_residu(chebfi,lambda_minus,lambda_plus,occ,DivResults,nspinor,nline_max,nline)
+subroutine chebfi_set_nline_from_residu(chebfi,lambda_minus,lambda_plus,occ,DivResults,nline_max,nline)
 
  implicit none
 
- integer,intent(in) :: nspinor,nline_max
+ integer,intent(in) :: nline_max
  integer,intent(out) :: nline
  type(chebfi_t), intent(inout) :: chebfi
  type(xgBlock_t), intent(in)    :: occ
@@ -1063,7 +1063,7 @@ subroutine chebfi_set_nline_from_residu(chebfi,lambda_minus,lambda_plus,occ,DivR
    call xg_nonlop_getSX(chebfi%xg_nonlop,chebfi%X_next,chebfi%cprjX,chebfi%cprj_work%self,chebfi%proj_work%self)
  end if
  ! X_next = - eig * S|Psi>
- call xgBlock_ymax(chebfi%X_next,DivResults,0,1,nspinor)
+ call xgBlock_ymax(chebfi%X_next,DivResults,0,1)
  ! X_next = H|Psi> - eig * S|Psi>
  call xgBlock_add(chebfi%X_next,chebfi%xAXColsRows)
  ! resid = |X_next|^2
