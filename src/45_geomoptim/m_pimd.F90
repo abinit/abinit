@@ -495,7 +495,7 @@ function pimd_temperature(mass,vel)
  real(dp),intent(in) :: mass(:,:),vel(:,:,:)
 !Local variables-------------------------------
 !scalars
- integer :: iatom,idir,iimage,imass,natom,natom_mass,ndir,nimage,nmass
+ integer :: iatom,iimage,imass,natom,natom_mass,ndir,nimage,nmass
  real(dp) :: v2
  character(len=500) :: msg
 !arrays
