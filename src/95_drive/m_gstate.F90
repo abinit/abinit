@@ -39,9 +39,8 @@ module m_gstate
  use m_ddb
  use m_bandfft_kpt
  use m_invovl
- use m_gemm_nonlop
- use m_gemm_nonlop_gpu
- use m_gemm_nonlop_ompgpu
+ use m_gemm_nonlop_projectors
+ use m_xg_nonlop
  use m_wfk
  use m_nctk
  use m_hdr
@@ -323,6 +322,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  type(pawrhoij_type),pointer :: pawrhoij(:)
  type(coulomb_operator) :: kernel_dummy
  type(pawcprj_type),allocatable :: cprj(:,:)
+ type(xg_nonlop_t) :: xg_nonlop
 
 ! ***********************************************************************
 
@@ -433,32 +433,23 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    npwtot(:) = 0
  end if
 
- if((dtset%wfoptalg == 1 .or. dtset%wfoptalg == 111) .and. psps%usepaw == 1) then
+ if((dtset%wfoptalg == 1 .or. dtset%wfoptalg == 111) .and. psps%usepaw == 1 .and. dtset%cprj_in_memory==0) then
    call init_invovl(dtset%nkpt)
  end if
 
  ! Handling GEMM nonlop use
  ! Not enabled by default for CPU and CUDA implementations
- ! Enabled if using OpenMP GPU offload
+ ! Enabled if using OpenMP GPU offload (only implementation)
  gemm_nonlop_use_gemm = .false.
 
- ! OpenMP GPU offload case (GEMM nonlop used by default)
- if(dtset%gpu_option == ABI_GPU_OPENMP) then
-   gemm_nonlop_use_gemm = .true.
-   call init_gemm_nonlop_ompgpu(dtset%nkpt)
- else if(dtset%use_gemm_nonlop == 1) then
-   gemm_nonlop_use_gemm = .true.
-   ! CUDA & Kokkos case (same routine used)
-   if(dtset%gpu_option == ABI_GPU_LEGACY .or. dtset%gpu_option == ABI_GPU_KOKKOS) then
-     call init_gemm_nonlop(dtset%nkpt)
-     call init_gemm_nonlop_gpu(dtset%nkpt)
-   ! CPU case
-   else if(dtset%gpu_option == ABI_GPU_DISABLED) then
-     call init_gemm_nonlop(dtset%nkpt)
-   end if
- end if
  gemm_nonlop_is_distributed = .false.
  if(dtset%gpu_nl_distrib == 1) gemm_nonlop_is_distributed = .true.
+ if(dtset%gpu_nl_splitsize > 0) gemm_nonlop_nblocks = dtset%gpu_nl_splitsize
+
+ if(dtset%gpu_option == ABI_GPU_OPENMP .or. dtset%use_gemm_nonlop == 1) then
+   gemm_nonlop_use_gemm = .true.
+   call init_gemm_nonlop(dtset%gpu_option)
+ end if
 
 !Set up the Ylm for each k point
  if ( dtset%tfkinfunc /= 2) then
@@ -1057,10 +1048,26 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
 !###########################################################
 ! Initialisation of cprj
+
+ ! xg_nonlop available only for cprj_in_memory=1 and (LOBPCG or Chebfi)
+ ! cprj_in_memory=2 is used for Congugate Gradient
+ if (dtset%cprj_in_memory==1) then
+   if (dtset%useylm/=1) then
+     ABI_ERROR('xg_nonlop cannot be used with useylm/=1')
+   end if
+   call xg_nonlop_init(xg_nonlop,psps%indlmn,mpi_enreg%my_atmtab,my_natom,nattyp,dtset%mkmem,dtset%ntypat,&
+                     dtset%nspinor,ucvol,dtset%usepaw,dtset%xg_nonlop_option,&
+                     mpi_enreg%me_band,mpi_enreg%comm_band,mpi_enreg%comm_atom)
+   if (xg_nonlop%paw) then
+     call xg_nonlop_make_Sij(xg_nonlop,pawtab,inv_sij=dtset%wfoptalg==111)
+   else
+     call xg_nonlop_make_ekb(xg_nonlop,psps%ekb)
+   end if
+ end if
+
  usecprj=0; mcprj=0;mband_cprj=0
  compute_cprj=.false.
- ! PAW keeping cprj in memory : some cases are excluded for now...
- if (dtset%cprj_in_memory/=0) then
+ if (dtset%cprj_in_memory==2) then
    compute_cprj=.true.
    usecprj=1
  else
@@ -1368,7 +1375,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 &   nfftf,npwarr,occ,pawang,pawfgr,pawrad,pawrhoij,&
 &   pawtab,phnons,psps,pwind,pwind_alloc,pwnsfac,rec_set,&
 &   resid,results_gs,scf_history,fatvshift,&
-&   symrec,taug,taur,wvl,ylm,ylmgr,paw_dmft,wffnew,wffnow)
+&   symrec,taug,taur,wvl,ylm,ylmgr,paw_dmft,wffnew,wffnow,xg_nonlop)
 
    call dtfil_init_time(dtfil,0)
 
@@ -1640,6 +1647,14 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  ABI_FREE(taug)
  ABI_FREE(ab_xfh%xfhist)
  call pawfgr_destroy(pawfgr)
+ if (dtset%cprj_in_memory==1) then
+   !if (xg_nonlop%paw) then
+   !  call xg_nonlop_destroy_Sij(xg_nonlop)
+   !else
+   !  call xg_nonlop_destroy_ekb(xg_nonlop)
+   !end if
+   call xg_nonlop_destroy(xg_nonlop)
+ end if
 
  if(dtset%imgwfstor==0)then
    if(dtset%gpu_option == ABI_GPU_KOKKOS) then
@@ -1767,20 +1782,13 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    call bandfft_kpt_destroy_array(bandfft_kpt,mpi_enreg)
  end if
 
- if((dtset%wfoptalg == 1 .or. dtset%wfoptalg == 111)  .and. psps%usepaw == 1) then
+ if((dtset%wfoptalg == 1 .or. dtset%wfoptalg == 111)  .and. psps%usepaw == 1 .and. dtset%cprj_in_memory==0) then
    call destroy_invovl(dtset%nkpt,dtset%gpu_option)
  end if
 
 !Clean gemm_nonlop work spaces
  if(gemm_nonlop_use_gemm) then
-   if(dtset%gpu_option == ABI_GPU_OPENMP) then
-     call destroy_gemm_nonlop_ompgpu()
-   else if(dtset%gpu_option==ABI_GPU_LEGACY .or. dtset%gpu_option==ABI_GPU_KOKKOS) then
-     call destroy_gemm_nonlop_gpu(dtset%nkpt)
-     call destroy_gemm_nonlop(dtset%nkpt)
-   else if(dtset%gpu_option==ABI_GPU_DISABLED) then
-     call destroy_gemm_nonlop(dtset%nkpt)
-   end if
+   call destroy_gemm_nonlop(dtset%gpu_option)
    gemm_nonlop_use_gemm = .false.
  end if
 
