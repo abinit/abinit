@@ -493,15 +493,15 @@ module m_lobpcg2
         ! Compute AX-Lambda*BX
         call lobpcg_getResidu(lobpcg,eigenvaluesN)
 
-        ! Apply preconditioner
-        call timab(tim_pcond,1,tsec)
-        call xgBlock_apply_diag(lobpcg%W,pcond,nspinor)
-        call timab(tim_pcond,2,tsec)
-
         ! Compute residu norm here !
         call timab(tim_maxres,1,tsec)
         call xgBlock_colwiseNorm2(lobpcg%W,residuBlock)
         call timab(tim_maxres,2,tsec)
+
+        ! Apply preconditioner
+        call timab(tim_pcond,1,tsec)
+        call xgBlock_apply_diag(lobpcg%W,pcond,nspinor)
+        call timab(tim_pcond,2,tsec)
 
         call timab(tim_nbdbuf,1,tsec)
         if (nbdbuf>=0) then
@@ -614,14 +614,14 @@ module m_lobpcg2
       if ( compute_residu ) then
         ! Recompute AX-Lambda*BX for the last time
         call lobpcg_getResidu(lobpcg,eigenvaluesN)
-        ! Apply preconditioner
-        call timab(tim_pcond,1,tsec)
-        call xgBlock_apply_diag(lobpcg%W,pcond,nspinor)
-        call timab(tim_pcond,2,tsec)
         ! Recompute residu norm here !
         call timab(tim_maxres,1,tsec)
         call xgBlock_colwiseNorm2(lobpcg%W,residuBlock)
         call timab(tim_maxres,2,tsec)
+        ! Apply preconditioner
+        call timab(tim_pcond,1,tsec)
+        call xgBlock_apply_diag(lobpcg%W,pcond,nspinor)
+        call timab(tim_pcond,2,tsec)
 
         call timab(tim_nbdbuf,1,tsec)
         if(lobpcg%gpu_option==ABI_GPU_OPENMP) call xgBlock_copy_from_gpu(residuBlock)

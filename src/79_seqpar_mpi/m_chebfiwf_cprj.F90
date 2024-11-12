@@ -132,7 +132,7 @@ subroutine chebfiwf2_cprj(cg,dtset,eig,occ,enl_out,gs_hamk,kinpw,mpi_enreg,&
  type(xgBlock_t) :: xgocc
  type(xgBlock_t) :: xgresidu
  type(xgBlock_t) :: xgenl
- type(xgBlock_t) :: xg_precond,xg_kin
+ type(xgBlock_t) :: xg_kin
  type(chebfi_t) :: chebfi
 
  logical :: paw
@@ -143,8 +143,7 @@ subroutine chebfiwf2_cprj(cg,dtset,eig,occ,enl_out,gs_hamk,kinpw,mpi_enreg,&
  integer, parameter :: tim_chebfiwf2 = 2060
  double precision :: tsec(2)
 
- ! Important things for NC
- real(dp), allocatable :: pcon(:),kin(:),occ_tmp(:)
+ real(dp), allocatable :: kin(:),occ_tmp(:)
 
 ! *********************************************************************
 
@@ -181,10 +180,6 @@ subroutine chebfiwf2_cprj(cg,dtset,eig,occ,enl_out,gs_hamk,kinpw,mpi_enreg,&
  call build_kin(kin,gs_hamk%kinpw_k,gs_hamk%npw_fft_k)
  call xgBlock_map_1d(xg_kin,kin,SPACE_R,gs_hamk%npw_fft_k)
 
- !For preconditionning
- ABI_MALLOC(pcon,(npw))
- call build_pcon(pcon,kinpw,npw)
-
  ! Local variables for chebfi
  me_g0 = -1
  me_g0_fft = -1
@@ -197,8 +192,6 @@ subroutine chebfiwf2_cprj(cg,dtset,eig,occ,enl_out,gs_hamk,kinpw,mpi_enreg,&
    end if
  end if
  call xgBlock_map(xgx0,cg,space,npw*nspinor,nband,l_mpi_enreg%comm_band,me_g0=me_g0)
-
- call xgBlock_map_1d(xg_precond,pcon,SPACE_R,npw)
 
  call xgBlock_map_1d(xgeigen,eig,SPACE_R,nband)
 
@@ -227,13 +220,11 @@ subroutine chebfiwf2_cprj(cg,dtset,eig,occ,enl_out,gs_hamk,kinpw,mpi_enreg,&
 
 
  ! Run chebfi
- call chebfi_run_cprj(chebfi,xgx0,cprj_xgx0%self,xg_getghc,xg_kin,xg_precond,xgeigen,xgocc,xgresidu,xgenl,nspinor)
+ call chebfi_run_cprj(chebfi,xgx0,cprj_xgx0%self,xg_getghc,xg_kin,xgeigen,xgocc,xgresidu,xgenl,nspinor)
 
  if (allocated(occ_tmp)) then
    ABI_FREE(occ_tmp)
  end if
- ! Free preconditionning since not needed anymore
- ABI_FREE(pcon)
  ABI_FREE(kin)
 
 ! call xg_cprj_copy(cprj_cwavef_bands,cprj_contiguous,space_cprj,nband_cprj,cprj_xgx0,&
@@ -306,28 +297,6 @@ subroutine xg_getghc(X,AX)
 
 end subroutine xg_getghc
 !!***
-
-subroutine build_pcon(pcon,kinpw,npw)
-
-  implicit none
-
-  integer,intent(in) :: npw
-  real(dp),intent(in) :: kinpw(:)
-  real(dp),intent(out) :: pcon(:)
-
-  integer :: ipw
-
-  !$omp parallel do schedule(static), shared(pcon,kinpw)
-  do ipw=1,npw
-    if(kinpw(ipw)>huge(0.0_dp)*1.d-11) then
-      pcon(ipw)=0.d0
-    else
-      pcon(ipw) = (27+kinpw(ipw)*(18+kinpw(ipw)*(12+8*kinpw(ipw)))) &
-&     / (27+kinpw(ipw)*(18+kinpw(ipw)*(12+8*kinpw(ipw))) + 16*kinpw(ipw)**4)
-    end if
-  end do
-
-end subroutine build_pcon
 
 subroutine build_kin(kin,kinpw,npw)
 
