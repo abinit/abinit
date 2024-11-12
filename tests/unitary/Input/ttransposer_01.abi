@@ -7,13 +7,13 @@
 #%% nprocs_to_test = 1, 2, 4, 10
 #%% max_nprocs = 32
 #%% [NCPU_1]
-#%% files_to_test = ttransposer_01_MPI1.stdout, tolnlines=0, tolabs=0.0, tolrel=0.0
+#%% files_to_test = ttransposer_01_MPI1.stdout, tolnlines = 0.0e+00, tolabs = 0.0e+00, tolrel = 0.0e+00
 #%% [NCPU_2]
-#%% files_to_test = ttransposer_01_MPI2.stdout, tolnlines=0, tolabs=0.0, tolrel=0.0
+#%% files_to_test = ttransposer_01_MPI2.stdout, tolnlines = 0.0e+00, tolabs = 0.0e+00, tolrel = 0.0e+00
 #%% [NCPU_4]
-#%% files_to_test = ttransposer_01_MPI4.stdout, tolnlines=0, tolabs=0.0, tolrel=0.0
+#%% files_to_test = ttransposer_01_MPI4.stdout, tolnlines = 0.0e+00, tolabs = 0.0e+00, tolrel = 0.0e+00
 #%% [NCPU_10]
-#%% files_to_test = ttransposer_01_MPI10.stdout, tolnlines=0, tolabs=0.0, tolrel=0.0
+#%% files_to_test = ttransposer_01_MPI10.stdout, tolnlines = 0.0e+00, tolabs = 0.0e+00, tolrel = 0.0e+00
 #%% [extra_info]
 #%% authors = J. Bieder
 #%% description = Test the transposer for linear algebra to KGB parallelisation.

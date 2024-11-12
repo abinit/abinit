@@ -14,8 +14,8 @@ t59        # Root for the output name
 #%% test_chain = t58.abi, t59.abi
 #%% [files]
 #%% files_to_test = 
-#%%  t59.stdout,   tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00;
-#%%  t59_k2_b3_sppol2, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00
+#%%  t59.stdout,   tolnlines = 0.0e+00, tolabs = 0.0e+00, tolrel = 0.0e+00;
+#%%  t59_k2_b3_sppol2, tolnlines = 0.0e+00, tolabs = 0.0e+00, tolrel = 0.0e+00
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

@@ -82,11 +82,11 @@
 #%% nprocs_to_test = 1, 2, 4
 #%% max_nprocs = 4
 #%% [NCPU_1]
-#%% files_to_test = t60_MPI1.abo, tolnlines= 6, tolabs=  2.0e-5, tolrel= 3.0e-4
+#%% files_to_test = t60_MPI1.abo, tolnlines = 6.0e+00, tolabs = 2.0e-05, tolrel = 3.0e-04
 #%% [NCPU_2]
-#%% files_to_test = t60_MPI2.abo, tolnlines= 6, tolabs=  2.0e-5, tolrel= 3.0e-4
+#%% files_to_test = t60_MPI2.abo, tolnlines = 6.0e+00, tolabs = 2.0e-05, tolrel = 3.0e-04
 #%% [NCPU_4]
-#%% files_to_test = t60_MPI4.abo, tolnlines= 6, tolabs=  2.0e-5, tolrel= 3.0e-4
+#%% files_to_test = t60_MPI4.abo, tolnlines = 6.0e+00, tolabs = 2.0e-05, tolrel = 3.0e-04
 #%% [extra_info]
 #%% authors = S. Ponc\'e 
 #%% keywords = NC, DFPT, EPH_OLD

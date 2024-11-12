@@ -74,7 +74,7 @@ ntime 10
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%   tbase4_7.abo, tolnlines= 41, tolabs=1.001e-02, tolrel=0.03, fld_options=-easy
+#%%   tbase4_7.abo, tolnlines = 4.1e+01, tolabs = 1.0e-02, tolrel = 3.0e-02, fld_options=-easy
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

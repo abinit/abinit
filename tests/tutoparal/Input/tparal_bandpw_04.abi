@@ -162,7 +162,7 @@ timopt        -3  # Get timing information of the run in the *.abo (output) file
 #%% executable = abinit
 #%% [NCPU_64]
 #%% files_to_test = 
-#%%   tparal_bandpw_04_MPI64.abo, tolnlines = 170, tolabs = 1.1e-3, tolrel = 1.0e-2 
+#%%   tparal_bandpw_04_MPI64.abo, tolnlines = 1.7e+02, tolabs = 1.1e-03, tolrel = 1.0e-02 
 #%% [paral_info]
 #%% max_nprocs = 64
 #%% nprocs_to_test = 64

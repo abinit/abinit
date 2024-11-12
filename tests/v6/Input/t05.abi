@@ -18,7 +18,7 @@ t04o_POT
 #%% test_chain = t04.abi, t05.abi
 #%% [files]
 #%% files_to_test = 
-#%%   t05.stdout, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
+#%%   t05.stdout, tolnlines = 0.0e+00, tolabs = 0.0e+00, tolrel = 0.0e+00
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

@@ -44,7 +44,7 @@
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = t14.abo, tolnlines=   15,   tolabs=  1.5e-04,   tolrel=  1.00e-01
+#%% files_to_test = t14.abo, tolnlines = 1.5e+01,   tolabs = 1.5e-04,   tolrel = 1.0e-01
 #%% extra_inputs=t14o_DS2_w90.win
 #%% [shell]
 #%% [paral_info]

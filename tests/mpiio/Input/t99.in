@@ -93,7 +93,7 @@ jpawu2  0.0000 0.0  # values in Hartree
 #%% nprocs_to_test = 4
 #%% max_nprocs = 4
 #%% [NCPU_4]
-#%% files_to_test = t99_MPI4.out, tolnlines=11, tolabs=1.4e+0, tolrel=9.0e-3, fld_options=-medium
+#%% files_to_test = t99_MPI4.out, tolnlines = 1.1e+01, tolabs = 1.4e+00, tolrel = 9.0e-03, fld_options=-medium
 #%% [extra_info]
 #%% keywords = PAW, DMFT
 #%% authors = B. Amadon

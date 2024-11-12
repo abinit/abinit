@@ -75,7 +75,7 @@ mixesimgf -59.00 +80.0 -20.0    # Must be coherent with the occupation numbers
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%   t22.abo, tolnlines = 66, tolabs = 1.1e-3, tolrel = 3.0e-4, fld_options= -easy;
+#%%   t22.abo, tolnlines = 6.6e+01, tolabs = 1.1e-03, tolrel = 3.0e-04, fld_options= -easy;
 #%% [paral_info]
 #%% max_nprocs = 6
 #%% [extra_info]

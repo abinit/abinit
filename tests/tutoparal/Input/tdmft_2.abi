@@ -108,7 +108,7 @@ jpawu2      0.7583333333333333  0.0  0.0  eV  # Values of J
 #%% max_nprocs = 24
 #%% nprocs_to_test = 24
 #%% [NCPU_24]
-#%% files_to_test = tdmft_2_MPI24.abo,  tolnlines =1, tolabs =5.0e-07, tolrel = 2.0e-03, fld_options=-medium ;
+#%% files_to_test = tdmft_2_MPI24.abo,  tolnlines = 1.0e+00, tolabs = 5.0e-07, tolrel = 2.0e-03, fld_options=-medium ;
 #%% [extra_info]
 #%% authors = B. Amadon, O. Gingras
 #%% keywords = DMFT, CTQMC

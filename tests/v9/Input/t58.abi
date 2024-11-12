@@ -13,7 +13,7 @@ t57o_DS6_DDB
 #%% exclude_builders = eos_nvhpc_*
 #%% [files]
 #%% files_to_test =
-#%%   t58.stdout, tolnlines = 3, tolabs = 0.0, tolrel = 0.0
+#%%   t58.stdout, tolnlines = 3.0e+00, tolabs = 0.0e+00, tolrel = 0.0e+00
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [shell]

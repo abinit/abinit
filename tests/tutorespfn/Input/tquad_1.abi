@@ -99,7 +99,7 @@ diemac 9.0
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   tquad_1.abo, tolnlines= 12, tolabs=  3.e-04, tolrel=  5.00e-04, fld_options= -easy
+#%%   tquad_1.abo, tolnlines = 1.2e+01, tolabs = 3.0e+00.e-04, tolrel = 5.0e-04, fld_options= -easy
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

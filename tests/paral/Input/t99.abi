@@ -87,14 +87,14 @@ jpawu2  0.7583333333333333  0.0  0.0  eV
 #%% need_cpp_vars = HAVE_TRIQS_v1_4
 #%% [files]
 #%% files_to_test =
-#%%                  t01.abo,  tolnlines =2, tolabs =1.1e-06, tolrel = 2.0e-03, fld_options=-medium ;
+#%%                  t01.abo,  tolnlines = 2.0e+00, tolabs = 1.1e-06, tolrel = 2.0e-03, fld_options=-medium ;
 #%% [paral_info]
 #%% nprocs_to_test = 4
 #%% max_nprocs = 4
 #%% [NCPU_4]
 #%% files_to_test = 
-#%%   t99_MPI4.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
-#%%   t99_MPI4o_DS2_Legendre_coefficients.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium
+#%%   t99_MPI4.abo, tolnlines = 0.0e+00, tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options = -medium;
+#%%   t99_MPI4o_DS2_Legendre_coefficients.dat, tolnlines = 0.0e+00, tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options = -medium
 #%% [extra_info]
 #%% authors = B. Amadon, V. Planes
 #%% keywords = PAW, DMFT, CTQMC, TRIQS

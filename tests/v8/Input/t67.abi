@@ -55,7 +55,7 @@
 #%% test_chain = t67.abi,t68.abi,t69.abi,t70.abi
 #%% [files]
 #%% files_to_test =
-#%%   t67.abo, tolnlines = 4, tolabs = 0.002, tolrel = 0.002, fld_options=-easy
+#%%   t67.abo, tolnlines = 4.0e+00, tolabs = 2.0e-03, tolrel = 2.0e-03, fld_options=-easy
 #%% [shell]
 #%% post_commands = ww_mv t67o_WFK t68i_WFK
 #%% [paral_info]

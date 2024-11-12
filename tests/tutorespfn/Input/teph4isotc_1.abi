@@ -73,7 +73,7 @@ MgB2_eph4isotc/flow_mgb2_phonons/w1/t59/outdata/out_POT6.nc
 #%% [files]
 #%% use_git_submodule = MgB2_eph4isotc
 #%% files_to_test =
-#%%   teph4isotc_1.stdout, tolnlines= 0, tolabs=  0, tolrel=  0
+#%%   teph4isotc_1.stdout, tolnlines = 0.0e+00, tolabs = 0.0e+00, tolrel = 0.0e+00
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

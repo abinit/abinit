@@ -102,7 +102,7 @@ pseudos "O_without_nlcc.psp8, Si_without_nlcc.psp8"
 #%% test_chain =  tlw_8.abi
 #%% [files]
 #%% files_to_test = 
-#%%   tlw_8.abo, tolnlines= 12, tolabs=  3.e-04, tolrel=  5.00e-04, fld_options=-medium
+#%%   tlw_8.abo, tolnlines = 1.2e+01, tolabs = 3.0e+00.e-04, tolrel = 5.0e-04, fld_options=-medium
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
