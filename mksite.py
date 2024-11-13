@@ -50,6 +50,7 @@ def get_abinit_version():
             abinit_version = subprocess.run(['./config/scripts/git-version-gen', '.tarball-version'], stdout=subprocess.PIPE).stdout
 
     abinit_version = abinit_version.strip().lower()
+    print("Using abinit_version:", abinit_version)
     if abinit_version == "unknown":
         raise RuntimeError("Cannot detect Abinit version!")
 
