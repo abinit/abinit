@@ -137,6 +137,7 @@ optstress 0       # Stress tensor computation is not relevant here
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = scope_gnu_10.2_paral
 #%% need_cpp_vars = HAVE_BIGDFT
 #%% [files]
 #%% files_to_test =
@@ -155,4 +156,7 @@ optstress 0       # Stress tensor computation is not relevant here
 #%% description =
 #%%   Input for PARAL_GSWVL tutorial
 #%%   65-atom alkane chain of 65 atoms, parallel calculation
+#%%   WARNING : This test might not be functional anymore.
+#%%   It has not been tested since the final v10.3.0 of ABINIT due to unexplained failure 
+#%%   at the merge between v10.2.2 and previous commits in v10.3.0, both working.
 #%%<END TEST_INFO>

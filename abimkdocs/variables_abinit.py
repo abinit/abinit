@@ -11027,7 +11027,7 @@ Variable(
     text=r"""
 [[nbdbuf]] gives the number of bands, the highest in energy, that, among the
 [[nband]] bands, are to be considered as part of a buffer.
-A negative value (between -1 and -100) is interpreted as percentage of [[nband]] (added in v9). The value -101 is special (TO BE SPECIFIED ?)
+A negative value (between -1 and -100) is interpreted as percentage of [[nband]] (added in v9). The value -101 is special, as described below.
 
 
 !!! important
@@ -11077,6 +11077,14 @@ too low in some cases.
 
 Also, the number of active bands, in all cases, is imposed to be at least 1,
 irrespective of the value of [[nbdbuf]].
+
+With [[nbdbuf]] = -101, the bands in the buffer are automatically defined through their occupancies.
+The convergence criteria is normally $resid < tolwfr$, which means that the squared band residual should be lower than [[tolwfr]].
+With [[nbdbuf]] = -101, the convergence criteria becomes : $resid * occ < tolwfr$, where $occ$ is the band occupancy.
+In that case, bands with null occupation numbers are completely ignored and bands with partial band occupancies are converged according to a modified criteria, equal to $tolwfr/occ$.
+This functionality is still experimental and has not been tested on many systems yet.
+
+At last, we note that the convergence criteria for the diagonalization algorithm (see [[tolwfr_diago]]) is also affected by [[nbdbuf]].
 """,
 ),
 
@@ -24272,6 +24280,22 @@ This option is usefull only for tests and code comparisons. For magnetic computa
 it defines how the magnetism is treated in the double counting term in the PAW+U formalism.
 Abinit versions before 9.8 correspond to [[optdcmagpawu]]=1, without magnetism in the DC term,
 while [[optdcmagpawu]]=3 takes into account magnetism in the DC term, that is currently the default.
+""",
+),
+
+Variable(
+    abivarname="xg_nonlop_option",
+    varset="dev",
+    vartype="integer",
+    topics=['TuningSpeedMem_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="OPTION for XG_NONLOP routines",
+    added_in_version="10.2.2",
+    text=r"""
+When using [[cprj_in_memory]]=1 with [[wfoptalg]]==111, the non-local terms of the Hamiltonian (see [[cprj_in_memory]])
+can be computed in two different ways, corresponding to [[xg_nonlop_option]]=0 or 1.
+[[xg_nonlop_option]]=0 requires more memory than [[xg_nonlop_option]]=1, but much less MPI communications, so it is more efficient.
 """,
 ),
 
