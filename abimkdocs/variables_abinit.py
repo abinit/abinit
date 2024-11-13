@@ -704,7 +704,7 @@ Variable(
     mnemonics="Barostat MASS",
     added_in_version="before_v9",
     text=r"""
-bmass is the mass of the barostat when [[moldyn]] = "npt_martyna" or "nst_martyna" (corresponding to [[ionmov]] = 13).
+bmass is the mass of the barostat when [[moldyn]] = "npt_martyna", "nst_martyna" or "npt_langevin" (corresponding to [[ionmov]] = 13 and 16).
 """,
 ),
 
@@ -5104,7 +5104,7 @@ Variable(
     added_in_version="v10.2",
     text=r"""
 Gives the internal friction coefficient (atomic units) of the barostat for Langevin dynamics
-(when [[moldyn]] = "npt_langevin" ([[ionmov]] = 16) and [[optcell]] = 2).
+(when [[moldyn]] = "npt_langevin" ([[ionmov]] = 16 and [[optcell]] = 2).
 The mass of the barostat ([[bmass]]) must be given in addition.
 See [[cite:Quigley2004]] and [[cite:Quigley2005]] for additional information.
 """,
