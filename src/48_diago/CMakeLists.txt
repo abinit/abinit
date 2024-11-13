@@ -3,7 +3,9 @@
 #
 add_library(48_diago STATIC
   m_chebfi2.F90
+  m_chebfi2_cprj.F90
   m_lobpcg2.F90
+  m_lobpcg2_cprj.F90
   )
 
 set_target_properties(48_diago

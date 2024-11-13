@@ -60,6 +60,7 @@ module m_xg_nonlop
  integer, parameter :: tim_make_Sij   = 2107
  integer, parameter :: tim_make_ekb   = 2108
  integer, parameter :: tim_apply_diag = 2109
+ integer, parameter :: tim_init       = 2110
 
  ! Timers that depend on other xg_nonlop timers :
  integer, parameter :: tim_getXSX     = 2120
@@ -95,6 +96,7 @@ module m_xg_nonlop
  type,public :: xg_nonlop_t
 
    integer :: cplex
+   integer :: cplex_alldij
    integer :: cprjdim
    integer :: comm_atom
    integer :: comm_band
@@ -170,7 +172,10 @@ module m_xg_nonlop
   public :: xg_nonlop_destroy
   public :: xg_nonlop_make_ekb    ! non paw only
   public :: xg_nonlop_destroy_ekb ! non paw only
+  public :: xg_nonlop_update_weight
+  public :: xg_nonlop_init_cplex_alldij ! paw only
   public :: xg_nonlop_make_Dij    ! paw only
+  public :: xg_nonlop_set_Dij_spin! paw only
   public :: xg_nonlop_make_Sij    ! paw only
   public :: xg_nonlop_destroy_Dij ! paw only
   public :: xg_nonlop_destroy_Sij ! paw only
@@ -199,9 +204,9 @@ module m_xg_nonlop
 contains
 !!***
 
-!!****f* m_xg_nonlop/init_xg_nonlop
+!!****f* m_xg_nonlop/xg_nonlop_init
 !! NAME
-!! init_xg_nonlop
+!! xg_nonlop_init
 !!
 !! FUNCTION
 !! Initalization of the xg_nonlop_kpt array
@@ -229,8 +234,11 @@ contains
    integer,intent(in),target :: mpi_atmtab(:)
    integer,intent(in),target :: indlmn(:,:,:)
    integer,intent(in),target :: nattyp(:)
+   real(dp) :: tsec(2)
 
    integer :: itypat,cprjdim,nlmn,nlmn_max,natom,shift,nmpi
+
+   call timab(tim_init,1,tsec)
 
    xg_nonlop%mkmem=mkmem
    xg_nonlop%nspinor=nspinor
@@ -293,7 +301,78 @@ contains
   ABI_MALLOC(xg_nonlop%l_npw_k,(nmpi))
   ABI_MALLOC(xg_nonlop%l_shift_npw_k,(nmpi))
 
+  call timab(tim_init,2,tsec)
+
  end subroutine xg_nonlop_init
+!!***
+
+!!****f* m_xg_nonlop/xg_nonlop_update_weight
+!! NAME
+!! xg_nonlop_init
+!!
+!! FUNCTION
+!! Compute new weights with respect to ucvol
+!!
+!! INPUTS
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+ subroutine xg_nonlop_update_weight(xg_nonlop,ucvol)
+
+   type(xg_nonlop_t),intent(inout) :: xg_nonlop
+   real(dp),intent(in) :: ucvol
+
+   xg_nonlop%weight=four_pi/sqrt(ucvol)
+
+ end subroutine xg_nonlop_update_weight
+!!***
+
+!!****f* m_xg_nonlop/xg_nonlop_init_cplex_alldij
+!! NAME
+!! xg_nonlop_init_cplex_alldij
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+ subroutine xg_nonlop_init_cplex_alldij(xg_nonlop,paw_ij)
+
+   type(paw_ij_type),intent(in)    :: paw_ij(:)
+   type(xg_nonlop_t),intent(inout) :: xg_nonlop
+
+   logical :: paral_atom
+   integer :: iatom,iatom_tot,ierr
+   integer,allocatable :: l_cplex(:)
+   real(dp) :: tsec(2)
+
+   call timab(tim_init,1,tsec)
+
+   paral_atom=(xmpi_comm_size(xg_nonlop%comm_atom)>1)
+
+   ABI_MALLOC(l_cplex,(xg_nonlop%natom))
+   l_cplex=0
+   do iatom=1,xg_nonlop%my_natom ! loop over atoms treated by this proc
+     iatom_tot=iatom;if (paral_atom) iatom_tot=xg_nonlop%mpi_atmtab(iatom)
+     l_cplex(iatom_tot)=paw_ij(iatom)%cplex_dij
+   end do
+   call xmpi_sum(l_cplex,xg_nonlop%comm_atom,ierr)
+   xg_nonlop%cplex_alldij = 0
+   do iatom=1,xg_nonlop%natom ! loop over all atoms
+     if (xg_nonlop%cplex_alldij<l_cplex(iatom)) xg_nonlop%cplex_alldij=l_cplex(iatom)
+   end do
+   ABI_FREE(l_cplex)
+
+   call timab(tim_init,2,tsec)
+
+ end subroutine xg_nonlop_init_cplex_alldij
 !!***
 
  subroutine xg_nonlop_destroy(xg_nonlop)
@@ -377,18 +456,17 @@ contains
  end subroutine xg_nonlop_make_ekb
 !!***
 
- subroutine xg_nonlop_make_Dij(xg_nonlop,paw_ij,isppol,atindx)
+ subroutine xg_nonlop_make_Dij(xg_nonlop,paw_ij,nsppol,atindx)
 
   type(xg_nonlop_t),intent(inout) :: xg_nonlop
   type(paw_ij_type),intent(in)    :: paw_ij(:)
-  integer,intent(in)              :: isppol
+  integer,intent(in)              :: nsppol
   integer,intent(in)              :: atindx(:)
 
   logical :: paral_atom
-  integer :: iatom, iatom_tot, iatom_type, ierr, nlmn, nlmn_max, natom, nspinor, shift
+  integer :: isppol, iatom, iatom_tot, iatom_type, ierr, nlmn, nlmn_max, natom, nspinor, shift
   integer :: ilmn, jlmn, j0lmn, jjlmn, ijlmn
   integer :: cplex_alldij,cplex_dij,isp,isps,jsp,jsps,ijsp
-  integer,allocatable :: l_cplex(:)
   real(dp),pointer :: Dij_(:,:),Dij_all_(:,:)
   real(dp) :: tsec(2)
 
@@ -400,31 +478,13 @@ contains
     ABI_ERROR('Not implemented with paw=False.')
   end if
 
-  if (isppol/=1) then ! isppol must be 1 or 2 if nspinor==1, and must be 1 of nspinor==2
-    if (isppol/=2.or.xg_nonlop%nspinor/=1) then
-      ABI_ERROR('wrong isppol')
-    end if
-  end if
-
   nspinor  = xg_nonlop%nspinor
   natom    = xg_nonlop%natom
   nlmn_max = xg_nonlop%nlmn_max
 
   paral_atom=(xmpi_comm_size(xg_nonlop%comm_atom)>1)
 
-  ABI_MALLOC(l_cplex,(natom))
-  l_cplex=0
-  do iatom=1,xg_nonlop%my_natom ! loop over atoms treated by this proc
-    iatom_tot=iatom;if (paral_atom) iatom_tot=xg_nonlop%mpi_atmtab(iatom)
-    l_cplex(iatom_tot)=paw_ij(iatom)%cplex_dij
-  end do
-  call xmpi_sum(l_cplex,xg_nonlop%comm_atom,ierr)
-  cplex_alldij = 0
-  do iatom=1,natom ! loop over all atoms
-    if (cplex_alldij<l_cplex(iatom)) cplex_alldij=l_cplex(iatom)
-  end do
-  ABI_FREE(l_cplex)
-
+  cplex_alldij = xg_nonlop%cplex_alldij
   if (cplex_alldij==1) then
     xg_nonlop%space_Dij=SPACE_R
   else if (cplex_alldij==2) then
@@ -433,65 +493,69 @@ contains
     ABI_ERROR('Bad cplex_alldij')
   end if
 
-  call xg_init(xg_nonlop%Dij_all,xg_nonlop%space_Dij,nspinor*nlmn_max,nspinor*nlmn_max*natom,xmpi_comm_null)
+  call xg_init(xg_nonlop%Dij_all,xg_nonlop%space_Dij,nspinor*nlmn_max,nspinor*nlmn_max*natom*nsppol,xmpi_comm_null)
   ABI_MALLOC(xg_nonlop%Dij,(natom))
 
-  do iatom=1,natom ! loop over all atoms, even if paral atoms
-    nlmn=xg_nonlop%nlmn_natom(iatom)
-    shift=1+(iatom-1)*nspinor*nlmn_max
-    call xg_setBlock(xg_nonlop%Dij_all,xg_nonlop%Dij(iatom),nspinor*nlmn,nspinor*nlmn,fcol=shift)
-  end do
+  do isppol=1,nsppol
 
-  do iatom=1,xg_nonlop%my_natom ! loop over atoms treated by this proc
-    iatom_tot=iatom;if (paral_atom) iatom_tot=xg_nonlop%mpi_atmtab(iatom)
-    iatom_type = atindx(iatom_tot) ! convert iatom from input file to iatom ordered by type
-    nlmn=xg_nonlop%nlmn_natom(iatom_type)
-    cplex_dij=paw_ij(iatom)%cplex_dij
-    call xgBlock_reverseMap(xg_nonlop%Dij(iatom_type),Dij_)
-    do jsp=1,nspinor
-      jsps = (jsp-1)*nlmn
-      do jlmn=1,nlmn
-        j0lmn=jlmn*(jlmn-1)/2
-        jjlmn=j0lmn+jlmn
-        do isp=1,nspinor
-          isps = (isp-1)*nlmn
-          if (nspinor==1) then
-            ijsp = isppol
-          else
-            if (isp==jsp) then
-              ijsp = isp
-            else if (isp==1) then
-              ijsp = 3 ! up/down
+    do iatom=1,natom ! loop over all atoms, even if paral atoms
+      nlmn=xg_nonlop%nlmn_natom(iatom)
+      shift=1+(iatom-1)*nspinor*nlmn_max+(isppol-1)*natom*nspinor*nlmn_max
+      call xg_setBlock(xg_nonlop%Dij_all,xg_nonlop%Dij(iatom),nspinor*nlmn,nspinor*nlmn,fcol=shift)
+    end do
+
+    do iatom=1,xg_nonlop%my_natom ! loop over atoms treated by this proc
+      iatom_tot=iatom;if (paral_atom) iatom_tot=xg_nonlop%mpi_atmtab(iatom)
+      iatom_type = atindx(iatom_tot) ! convert iatom from input file to iatom ordered by type
+      nlmn=xg_nonlop%nlmn_natom(iatom_type)
+      cplex_dij=paw_ij(iatom)%cplex_dij
+      call xgBlock_reverseMap(xg_nonlop%Dij(iatom_type),Dij_)
+      do jsp=1,nspinor
+        jsps = (jsp-1)*nlmn
+        do jlmn=1,nlmn
+          j0lmn=jlmn*(jlmn-1)/2
+          jjlmn=j0lmn+jlmn
+          do isp=1,nspinor
+            isps = (isp-1)*nlmn
+            if (nspinor==1) then
+              ijsp = isppol
             else
-              ijsp = 4 ! down/up
+              if (isp==jsp) then
+                ijsp = isp
+              else if (isp==1) then
+                ijsp = 3 ! up/down
+              else
+                ijsp = 4 ! down/up
+              end if
             end if
-          end if
-          ! see m_hamiltonian:pawdij2ekb
-          if (cplex_dij==1) then
-            Dij_(cplex_alldij*(jlmn+isps-1)+1,jlmn+jsps) = paw_ij(iatom)%dij(jjlmn,ijsp)
-            if (cplex_alldij==2) Dij_(2*(jlmn+isps),jlmn+jsps) = zero
-          else
-            Dij_(2*(jlmn+isps-1)+1,jlmn+jsps) = paw_ij(iatom)%dij(2*jjlmn-1,ijsp)
-            Dij_(2*(jlmn+isps)    ,jlmn+jsps) = paw_ij(iatom)%dij(2*jjlmn  ,ijsp)
-          end if
-          do ilmn=1,jlmn-1
-            ! see m_hamiltonian:pawdij2ekb and opernlc_ylm
-            ijlmn=j0lmn+ilmn
+            ! see m_hamiltonian:pawdij2ekb
             if (cplex_dij==1) then
-              Dij_(cplex_alldij*(ilmn+isps-1)+1,jlmn+jsps) = paw_ij(iatom)%dij(ijlmn,ijsp)
-              if (cplex_alldij==2) Dij_(2*(ilmn+isps),jlmn+jsps) = zero
-              Dij_(cplex_alldij*(jlmn+jsps-1)+1,ilmn+isps) = paw_ij(iatom)%dij(ijlmn,ijsp)
-              if (cplex_alldij==2) Dij_(2*(jlmn+jsps),ilmn+isps) = zero
+              Dij_(cplex_alldij*(jlmn+isps-1)+1,jlmn+jsps) = paw_ij(iatom)%dij(jjlmn,ijsp)
+              if (cplex_alldij==2) Dij_(2*(jlmn+isps),jlmn+jsps) = zero
             else
-              Dij_(2*(ilmn+isps-1)+1,jlmn+jsps) = paw_ij(iatom)%dij(2*ijlmn-1,ijsp)
-              Dij_(2*(ilmn+isps)    ,jlmn+jsps) = paw_ij(iatom)%dij(2*ijlmn  ,ijsp)
-              Dij_(2*(jlmn+jsps-1)+1,ilmn+isps) = paw_ij(iatom)%dij(2*ijlmn-1,ijsp)
-              Dij_(2*(jlmn+jsps)    ,ilmn+isps) =-paw_ij(iatom)%dij(2*ijlmn  ,ijsp)
+              Dij_(2*(jlmn+isps-1)+1,jlmn+jsps) = paw_ij(iatom)%dij(2*jjlmn-1,ijsp)
+              Dij_(2*(jlmn+isps)    ,jlmn+jsps) = paw_ij(iatom)%dij(2*jjlmn  ,ijsp)
             end if
+            do ilmn=1,jlmn-1
+              ! see m_hamiltonian:pawdij2ekb and opernlc_ylm
+              ijlmn=j0lmn+ilmn
+              if (cplex_dij==1) then
+                Dij_(cplex_alldij*(ilmn+isps-1)+1,jlmn+jsps) = paw_ij(iatom)%dij(ijlmn,ijsp)
+                if (cplex_alldij==2) Dij_(2*(ilmn+isps),jlmn+jsps) = zero
+                Dij_(cplex_alldij*(jlmn+jsps-1)+1,ilmn+isps) = paw_ij(iatom)%dij(ijlmn,ijsp)
+                if (cplex_alldij==2) Dij_(2*(jlmn+jsps),ilmn+isps) = zero
+              else
+                Dij_(2*(ilmn+isps-1)+1,jlmn+jsps) = paw_ij(iatom)%dij(2*ijlmn-1,ijsp)
+                Dij_(2*(ilmn+isps)    ,jlmn+jsps) = paw_ij(iatom)%dij(2*ijlmn  ,ijsp)
+                Dij_(2*(jlmn+jsps-1)+1,ilmn+isps) = paw_ij(iatom)%dij(2*ijlmn-1,ijsp)
+                Dij_(2*(jlmn+jsps)    ,ilmn+isps) =-paw_ij(iatom)%dij(2*ijlmn  ,ijsp)
+              end if
+            end do
           end do
         end do
       end do
     end do
+
   end do
 
 ! Communication in case of distribution over atomic sites
@@ -503,6 +567,32 @@ contains
   call timab(tim_make_Dij,2,tsec)
 
  end subroutine xg_nonlop_make_Dij
+!!***
+
+ subroutine xg_nonlop_set_Dij_spin(xg_nonlop,isppol)
+
+  integer,intent(in) :: isppol
+  type(xg_nonlop_t),intent(inout) :: xg_nonlop
+
+  integer :: nlmn,iatom,shift,nlmn_max,nspinor,natom
+
+  nspinor  = xg_nonlop%nspinor
+  natom    = xg_nonlop%natom
+  nlmn_max = xg_nonlop%nlmn_max
+
+  if (isppol/=1) then ! isppol must be 1 or 2 if nspinor==1, and must be 1 of nspinor==2
+    if (isppol/=2.or.nspinor/=1) then
+      ABI_ERROR('wrong isppol')
+    end if
+  end if
+
+  do iatom=1,natom ! loop over all atoms, even if paral atoms
+    nlmn=xg_nonlop%nlmn_natom(iatom)
+    shift=1+(iatom-1)*nspinor*nlmn_max+(isppol-1)*natom*nspinor*nlmn_max
+    call xg_setBlock(xg_nonlop%Dij_all,xg_nonlop%Dij(iatom),nspinor*nlmn,nspinor*nlmn,fcol=shift)
+  end do
+
+ end subroutine xg_nonlop_set_Dij_spin
 !!***
 
  subroutine xg_nonlop_make_Sij(xg_nonlop,pawtab,inv_sij)
