@@ -2757,7 +2757,7 @@ ABINIT will rescale uniformly the
 tentative new primitive vectors to a value that leads at most to 90% of the
 maximal allowed [[dilatmx]] deviation from 1. It will do this three times (to
 prevent the geometry optimization algorithms to have taken a too large trial
-step), but afterwards will stop and exit. 
+step), but afterwards will stop and exit.
 
 Setting [[chkdilatmx]] == 0 allows one to
 book a larger planewave basis (if [[dilatmx]] is set to be bigger than 1), but will not rescale the tentative new primitive vectors
@@ -3767,9 +3767,9 @@ This input variable is important when performing relaxation of unit cell size
 and shape (non-zero [[optcell]]). Using a non-zero [[ecutsm]], the total
 energy curves as a function of [[ecut]], or [[acell]], can be smoothed,
 keeping consistency with the stress (and automatically including the Pulay
-stress). 
+stress).
 
-The recommended value is 0.5 Ha in such a case (non-zero [[optcell]]).. 
+The recommended value is 0.5 Ha in such a case (non-zero [[optcell]]).
 
 Actually, when [[optcell]]/=0,
 ABINIT requires [[ecutsm]] to be larger than zero. If you want to optimize
@@ -10107,7 +10107,7 @@ Variable(
     requires="[[useexexch]] == 1",
     added_in_version="before_v9",
     text=r"""
-Give for each species the value of the angular momentum 
+Give for each species the value of the angular momentum
 on which to apply the exact exchange correction.
 """,
 ),
@@ -11213,7 +11213,7 @@ Variable(
     text=r"""
 [[nbdbuf]] gives the number of bands, the highest in energy, that, among the
 [[nband]] bands, are to be considered as part of a buffer.
-A negative value (between -1 and -100) is interpreted as percentage of [[nband]] (added in v9). The value -101 is special (TO BE SPECIFIED ?)
+A negative value (between -1 and -100) is interpreted as percentage of [[nband]] (added in v9). The value -101 is special, as described below.
 
 
 !!! important
@@ -11263,6 +11263,14 @@ too low in some cases.
 
 Also, the number of active bands, in all cases, is imposed to be at least 1,
 irrespective of the value of [[nbdbuf]].
+
+With [[nbdbuf]] = -101, the bands in the buffer are automatically defined through their occupancies.
+The convergence criteria is normally $resid < tolwfr$, which means that the squared band residual should be lower than [[tolwfr]].
+With [[nbdbuf]] = -101, the convergence criteria becomes : $resid * occ < tolwfr$, where $occ$ is the band occupancy.
+In that case, bands with null occupation numbers are completely ignored and bands with partial band occupancies are converged according to a modified criteria, equal to $tolwfr/occ$.
+This functionality is still experimental and has not been tested on many systems yet.
+
+At last, we note that the convergence criteria for the diagonalization algorithm (see [[tolwfr_diago]]) is also affected by [[nbdbuf]].
 """,
 ),
 
@@ -12044,19 +12052,28 @@ Variable(
     vartype="integer",
     topics=['SCFControl_expert'],
     dimensions="scalar",
-    defaultval=4,
-    mnemonics="Number of LINE minimisations",
+    defaultval=ValueWithConditions({'[[wfoptalg]] == 1 or 11 ': 6, 'defaultval': 4}),
+    mnemonics="Number of LINE minimizations",
+    commentdefault="4 for conjugate-gradient-based algorithm, 6 for spectrum-filtering-based algorithms",
     added_in_version="before_v9",
     text=r"""
-Gives maximum number of line minimizations allowed in preconditioned conjugate
+For conjugate-gradient based algorithms (conjugate gradient or LOBPCG):
+
+[[nline]] gives the maximum number of line minimizations allowed in preconditioned conjugate
 gradient minimization for each band. The default, 4, is fine.
 Special cases, with degeneracies or near-degeneracies of levels at the Fermi
 energy may require a larger value of [[nline]] (5 or 6 ?). Line minimizations
 will be stopped anyway when improvement gets small (governed by [[tolrde]]).
-With the input variable [[nnsclo]], governs the convergence of the
-wavefunctions for fixed potential.
 Note that [[nline]] = 0 can be used to diagonalize the Hamiltonian matrix in the
 subspace spanned by the input wavefunctions.
+
+For algorithms using spectrum filtering (f.i. Chebyshev filtering, [[wfoptalg]]=1 or 111):
+
+[[nline]] gives the maximum degree of the Chebyshev polynomial used as filtering function.
+The default is 6 to ensure a good quality of the filtering.
+
+With the input variable [[nnsclo]], [[nline]] governs the convergence of the
+wavefunctions for fixed potential.
 """,
 ),
 
@@ -14025,8 +14042,8 @@ standard output file, search for "Orbital magnetic moment". This calculation req
 both the ground state and DDK wavefunctions (see [[rfddk]] or [[berryopt]]). The
 preferred way to use [[orbmag]] is at the end of a DFPT DDK calculation. Alternatively, it
 can be called in a ground state calculation if [[berryopt]] -2 has also been called,
-to generate discretized DDK wavefunctions. This latter method works only on a mesh of 
-kpoints, while the DFPT version works for both a mesh and for a single k point (as 
+to generate discretized DDK wavefunctions. This latter method works only on a mesh of
+kpoints, while the DFPT version works for both a mesh and for a single k point (as
 encountered in studying an atom or molecule in a box, or a pariticularly large unit cell).
 Note that convergence with kpt mesh is
 *much* faster using the DFPT approach, and the [[berryopt]] approach is not recommended
@@ -19633,7 +19650,7 @@ energy that are smaller than about 1.0d-12 of the total energy. To get
 accurate stresses may be quite demanding.
 
 When the geometry is optimized (relaxation of atomic positions or primitive
-vectors), the use of [[toldfe]] is to be avoided. The use of [[tolrff]] 
+vectors), the use of [[toldfe]] is to be avoided. The use of [[tolrff]]
 (or [[tolrff]]) is by far preferable, in order to have a handle on the geometry
 characteristics. When all forces vanish by symmetry (e.g. optimization of the
 lattice parameters of a high-symmetry crystal), then place [[toldfe]] to
@@ -24447,4 +24464,336 @@ while [[optdcmagpawu]]=3 takes into account magnetism in the DC term, that is cu
 """,
 ),
 
+Variable(
+    abivarname="xg_nonlop_option",
+    varset="dev",
+    vartype="integer",
+    topics=['TuningSpeedMem_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="OPTION for XG_NONLOP routines",
+    added_in_version="10.2.2",
+    text=r"""
+When using [[cprj_in_memory]]=1 with [[wfoptalg]]==111, the non-local terms of the Hamiltonian (see [[cprj_in_memory]])
+can be computed in two different ways, corresponding to [[xg_nonlop_option]]=0 or 1.
+[[xg_nonlop_option]]=0 requires more memory than [[xg_nonlop_option]]=1, but much less MPI communications, so it is more efficient.
+""",
+),
+
+Variable(
+    abivarname="getdrhodb",
+    varset="files",
+    vartype="integer",
+    topics=['ElPhonInt_useful'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="GET the DRHODB from...",
+    added_in_version="10.3.0",
+    text=r"""
+This variable can be used when performing GWPT calculations with [[optdriver]] = 17
+to read a DVDB file with the derivative of densities produced in a previous dataset.
+For example, one can concatenate a dataset in which an initial set of DFPT densities
+on a relatively coarse q-mesh is interpolated on a denser q-mesh using [[eph_task]] = 5 and [[eph_ngqpt_fine]].
+
+  * If [[getdrhodb]] == 0, no such use of previously computed output potential file is done.
+
+  * If [[getdrhodb]] is positive, its value gives the index of the dataset from which
+the output potential is to be used as input. However, if the first dataset is treated, -1
+is equivalent to 0, since no dataset has been computed in the same run.
+
+  * If [[getdrhodb]] is -1, the output potential of the previous dataset must be taken,
+which is a frequently occurring case.
+
+  * If [[getdrhodb]] is a negative number, it indicates the number of datasets to go
+backward to find the needed file. Going back beyond the first dataset is equivalent to using zero for the get variable.
+
+Note also that one can also use [[getdrhodb_filepath]] to specify the path of the file directly.
+""",
+),
+
+Variable(
+    abivarname="getdrhodb_filepath",
+    varset="files",
+    vartype="string",
+    topics=['multidtset_useful'],
+    dimensions="scalar",
+    defaultval=None,
+    mnemonics="GET the DRHODB file from FILEPATH",
+    added_in_version="10.3.0",
+    text=r"""
+Specify the path of the DVDB file with the first-order densities using a string instead of the dataset index.
+Alternative to [[getdrhodb]] and [[irddrhodb]]. The string must be enclosed between quotation marks:
+
+    getdrhodb_filepath "../outdata/out_DRHODB"
+""",
+),
+
+
+Variable(
+    abivarname="irddrhodb",
+    varset="files",
+    vartype="integer",
+    topics=['ElPhonInt_useful'],
+    dimensions="scalar",
+    mnemonics="Integer that governs the ReaDing of DRHODB file",
+    added_in_version="10.3.0",
+    text=r"""
+This variable can be used when performing GWPT calculations with [[optdriver]] = 17.
+Set to 1, an *input* DRHODB file will be read. See also [[getdrhodb]]
+""",
+),  
+    
+Variable(
+    abivarname="getvarpeq_filepath",
+    varset="eph",
+    vartype="string",
+    topics=['Polaron_basic'],
+    dimensions="scalar",
+    defaultval=None,
+    mnemonics="GET the VARPEQ.nc from FILEPATH",
+    requires="[[eph_task]] in [13, -13]",
+    added_in_version="10.1.4",
+    text=r"""
+This variable defines the path of the VARPEQ.nc file with the variational polaron
+equations optimization results.
+
+This variable can be used when [[eph_task]] == 13 i.e. when we solve the variational
+polaron equations.
+In this case, if [[eph_restart]] == 1, the code assumes we want to
+initialize the solution by restarting/interpolating from the solution available in
+the VARPEQ.nc file.
+
+If [[eph_task]] == -13, the variable is required to produce *.xsf files containing
+polaronic wavefunction and induced displacements that can be visualized with VESTA or Xcrysden.
+""",
+),
+
+Variable(
+    abivarname="getvarpeq",
+    varset="eph",
+    vartype="int",
+    topics=['Polaron_basic'],
+    dimensions="scalar",
+    defaultval=None,
+    mnemonics="GET the VARPEQ.nc from dataset",
+    requires="[[eph_task]] in [13, -13]",
+    added_in_version="10.1.4",
+    text=r"""
+This variable is similar in spirit to [[getvarpeq_filepath]] but uses the dataset index
+instead of the filepath.
+""",
+),
+
+Variable(
+    abivarname="varpeq_aseed",
+    varset="eph",
+    vartype="string",
+    topics=['Polaron_basic'],
+    dimensions="scalar",
+    defaultval="gau_energy",
+    mnemonics="VARiational Polaron EQuations: A_nk-coefficients SEED",
+    requires="[[eph_task]] == 13",
+    added_in_version="10.1.4",
+    text=r"""
+This variable specifies the type of initial seed for the electronic coefficients
+$A_{n\mathbf{k}}$, defining the charge localization in the variational polaron
+equations.
+
+Possible values:
+
+- "gaussian" --> Gaussian bassed on the electronic eigenergies
+  $\varepsilon_{n\mathbf{k}}$:
+
+    $$A_{n\mathbf{k}} \sim e^{-\frac{(\varepsilon_{n\mathbf{k}} - \mu)^2}{2\sigma^2}}.$$
+
+  The mean value $\mu$ and the standard deviation $\sigma$ are defined by the
+  [[varpeq_gau_params]] variable.
+
+- "random" --> Random initialization.
+
+- "even" --> Even contribution from each electronic state $\psi_n{\mathbf{k}}$.
+
+""",
+),
+
+
+Variable(
+    abivarname="varpeq_pkind",
+    varset="eph",
+    vartype="string",
+    topics=['Polaron_basic'],
+    dimensions="scalar",
+    defaultval="None",
+    mnemonics="VARiational Polaron EQuations: Polaron KIND",
+    requires="[[eph_task]] == 13",
+    added_in_version="10.1.4",
+    text=r"""
+This variable specifies the kind of polaron to be obtained within the variational
+polaron equations framework.
+
+Possible values:
+
+- "electron" --> electron polaron.
+
+- "hole" --> hole polaron.
+
+!!! important
+
+    The "electron"/"hole" option requires exclusively conduction/valence manifold
+    provided in the GSTORE.nc file required to setup the variational polaron
+    equations calculation.
+    Intermixing conduction and valence states will lead to erroneous results.
+
+!!! note
+
+    If the "hole" option is chosen, valence states are flipped, so one always
+    deals with the minimization problem, regardless of the polaron kind.
+
+    Also, the polaron binding and localized state energy $E_p$ and $\varepsilon$
+    are positive in case of a hole polaron, and negatie in case of an electron
+    polaron.
+""",
+),
+
+Variable(
+    abivarname="varpeq_interpolate",
+    varset="eph",
+    vartype="integer",
+    topics=['Polaron_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="VARiational Polaron EQuations: INTERPolation",
+    requires="[[eph_task]] == 13",
+    added_in_version="10.1.4",
+    text=r"""
+If non-zero, this variable activates the interpolation of the initial guess for
+the electronic vector in the variational polaron equations.
+In this case, the code reads a pre-existing VARPEQ.nc file and performs a linear
+interpolation of $A_{n\mathbf{k}}$ provided the metadata found in the netcdf file
+is compatible with the input file.
+
+With this feature, if a polaronic solution is obtained for a certain $\mathbf{k}$-grid,
+it can then be read and interpolated to be used as a starting point for different grids.
+This option is expected to lead the optimization proccess to the same polaronic configuration
+and accelarate the convergence.
+""",
+),
+
+
+Variable(
+    abivarname="varpeq_nstep",
+    varset="eph",
+    vartype="integer",
+    topics=['Polaron_basic'],
+    dimensions="scalar",
+    defaultval=50,
+    mnemonics="VARiational Polaron EQuations: Number of iteration STEPs",
+    requires="[[optdriver]] == 7 and [[eph_task]] == 13",
+    added_in_version="10.1.4",
+    text=r"""
+This variables sets the maximum number of iterations in the optimization of
+variational polaron equations.
+""",
+),
+
+
+Variable(
+    abivarname="varpeq_orth",
+    varset="eph",
+    vartype="integer",
+    topics=['Polaron_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="VARiational Polaron EQuations: ORTHogonalization",
+    requires="[[optdriver]] == 7 and [[eph_task]] == 13",
+    added_in_version="10.1.4",
+    text=r"""
+This variables controls orthogonalization to a previous solution.
+It is used for testing purpose only and likely will be removed in further releases.
+""",
+),
+
+Variable(
+    abivarname="varpeq_pc_nupdate",
+    varset="eph",
+    vartype="integer",
+    topics=['Polaron_basic'],
+    dimensions="scalar",
+    defaultval=30,
+    mnemonics="VARiational Polaron EQuations: PreConditioner N-th step UPDATE",
+    requires="[[optdriver]] == 7 and [[eph_task]] == 13",
+    added_in_version="10.1.4",
+    text=r"""
+This variables controls update of the preconditioner in the variational polaron equation optimization.
+It is used for testing purpose only and likely will be removed in further releases.
+""",
+),
+
+Variable(
+    abivarname="varpeq_tolgrs",
+    varset="eph",
+    vartype="real",
+    topics=['Polaron_basic'],
+    dimensions="scalar",
+    defaultval=1e-6,
+    mnemonics="VARiational Polaron EQuations: TOLerance on the Gradient ReSidual",
+    requires="[[eph_task]] == 13",
+    added_in_version="10.1.4",
+    text=r"""
+This variable sets a tolerance for the electronic gradient residual in the optimization
+of the varitional polaron equations.
+""",
+),
+
+Variable(
+    abivarname="varpeq_pc_factor",
+    varset="eph",
+    vartype="real",
+    topics=['Polaron_basic'],
+    dimensions="scalar",
+    defaultval=0.125,
+    mnemonics="VARiational Polaron EQuations: PreConditioner FACTOR",
+    requires="[[optdriver]] == 7 and [[eph_task]] == 13",
+    added_in_version="10.1.4",
+    text=r"""
+This variables controls the preconditioner in variational polaron equations optimization.
+It is used for testing purpose only and likely will be removed in further releases.
+""",
+),
+
+Variable(
+    abivarname="varpeq_gau_params",
+    varset="eph",
+    vartype="real",
+    topics=['Polaron_basic'],
+    dimensions="(2)",
+    defaultval=[0, 1],
+    mnemonics="VARiational Polaron EQuations: Gaussian PaRameters",
+    requires='[[eph_task]] == 13 and [[varpeq_aseed]] == "gaussian"',
+    added_in_version="10.1.4",
+    text=r"""
+If [[varpeq_aseed]] == "gaussian", this variable defines the mean value and the
+standard deviation [[varpeq_gau_params]](:) = $\mu$, $\sigma$ for the Gaussian function to
+be used as initial seed for the vector electronic coefficients.
+See [[varpeq_aseed]] for details.
+""",
+),
+
+
+Variable(
+    abivarname="varpeq_erange",
+    varset="eph",
+    vartype="real",
+    topics=['Polaron_basic'],
+    dimensions="(2)",
+    defaultval=[0, 0],
+    mnemonics="VARiational Polaron EQuations: Energy Range",
+    requires='[[eph_task]] == 13 and [[varpeq_aseed]] == "gaussian"',
+    added_in_version="10.1.4",
+    text=r"""
+This variables controls the energy window for the inital guess in the variational polaron
+equations optimizaiton.
+It is used for testing purpose only and likely will be removed in further releases.
+""",
+),
 ]

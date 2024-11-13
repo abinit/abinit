@@ -49,6 +49,9 @@ and finally regenerate the website with MkDocs.
 ## Getting started
 
 Make sure you are in the top-level ABINIT directory.
+
+Note that python version 3.6 is required. 
+
 To install the python packages required to build the website use:
 
 ```sh

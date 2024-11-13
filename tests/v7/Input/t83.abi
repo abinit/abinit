@@ -76,7 +76,7 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = eos_nvhpc_23.1_elpa, eos_nvhpc_23.9_elpa, eos_nvhpc_23.11_elpa
+#%% exclude_builders = eos_nvhpc_23.9_elpa
 #%% [shell] 
 #%% post_commands = 
 #%% [files]
