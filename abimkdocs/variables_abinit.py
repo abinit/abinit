@@ -8180,8 +8180,6 @@ No meaning for RF calculations.
   **Cell optimization:** No (Use [[optcell]] = 0 only)
   **Related variables:** time step [[dtion]], thermostat temperature [[mdtemp]],
 
-  * 27 --> TO BE DOCUMENTED
-
   * 28 --> Update atomic positions and unit cell parameters using the i-pi client-server protocol
    as described in [[cite:Kapil2019]].
    In this case, ABINIT (the client) sends total energies, forces and stress tensor to the server
