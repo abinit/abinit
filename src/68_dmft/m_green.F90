@@ -1005,12 +1005,12 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
  integer :: me_kpt,mkmem,myproc,natom,nband_k,nkpt,nmoments,nspinor,nsppol
  integer :: opt_quick_restart,option,optlog,optnonxsum,optnonxsum2,optself
  integer :: shift,shift_green,spacecomm,gpu_option
- real(dp) :: beta,correction,eigen,fac,fermilevel,temp,wtk
- complex(dpc) :: green_tmp,omega_current,trace_tmp
+ real(dp) :: beta,correction,eigen,fermilevel,temp,wtk
+ complex(dpc) :: green_tmp,trace_tmp
  character(len=500) :: message
  real(dp) :: tsec(2)
- real(dp), allocatable :: eig(:),rwork(:)
- complex(dpc), allocatable :: mat_tmp(:,:),omega_fac(:),work(:)
+ real(dp), allocatable :: eig(:),rwork(:),fac(:)
+ complex(dpc), allocatable :: mat_tmp(:,:),omega_fac(:),work(:),omega_current(:)
 ! integer, allocatable :: procb(:,:),proct(:,:)
 ! *********************************************************************
 
@@ -1075,8 +1075,6 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
    green%trace_log = zero
  end if ! optlog=1
 
-! Initialise for compiler
- omega_current = czero
  !icomp_chloc = 0
 
  option = 1
@@ -1137,15 +1135,31 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
    end do ! i
  end if ! w_type
 
+ ABI_MALLOC(omega_current,(green%nw))
+ ABI_MALLOC(fac,(green%nw))
+! Initialise for compiler
+ omega_current = czero
  shift = green%distrib%shiftk
  mkmem = green%distrib%nkpt_mem(green%distrib%me_kpt+1)
  shift_green = shift
  if (green%oper(1)%has_operks == 0) shift_green = 0
 
- do ifreq=1,green%nw
+
+
+
+
+
+
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 #ifdef HAVE_GPU_MARKERS
-   call nvtxStartRange("iter_ifreq",9)
+   call nvtxStartRange("ifreq_loop",9)
 #endif
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ do ifreq=1,green%nw
    !if(present(iii)) write(6,*) ch10,'ifreq  self', ifreq,self%oper(ifreq)%matlu(1)%mat(1,1,1,1,1)
 !   ====================================================
 !   First Upfold self-energy and double counting  Self_imp -> self(k)
@@ -1154,10 +1168,10 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
 !    write(6,*) "compute_green ifreq",ifreq, mod(ifreq-1,nproc)==myproc,proct(ifreq,myproc)==1
    if (green%distrib%proct(ifreq) /= green%distrib%me_freq) cycle
    if (green%w_type == "imag") then
-     omega_current = cmplx(zero,green%omega(ifreq),kind=dp)
-     fac = two * paw_dmft%wgt_wlo(ifreq) * temp
+     omega_current(ifreq) = cmplx(zero,green%omega(ifreq),kind=dp)
+     fac(ifreq) = two * paw_dmft%wgt_wlo(ifreq) * temp
    else if (green%w_type == "real") then
-     omega_current = cmplx(green%omega(ifreq),paw_dmft%temp,kind=dp)
+     omega_current(ifreq) = cmplx(green%omega(ifreq),paw_dmft%temp,kind=dp)
    end if ! green%w_type
 
    if (green%oper(ifreq)%has_operks == 0) then
@@ -1166,11 +1180,24 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
      green%oper(ifreq)%paral  = 1
      green%oper(ifreq)%shiftk = shift
    end if
+ end do ! ifreq
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-   if (optself == 0) then
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ if (optself == 0) then
+   do ifreq=1,green%nw
+     if (green%distrib%proct(ifreq) /= green%distrib%me_freq) cycle
      green%oper(ifreq)%ks(:,:,:,:) = czero
-   else
+   end do ! ifreq
+ else
+   do ifreq=1,green%nw
+     if (green%distrib%proct(ifreq) /= green%distrib%me_freq) cycle
      call add_matlu(self%hdc%matlu(:),self%oper(ifreq)%matlu(:),green%oper(ifreq)%matlu(:),natom,-1)
+   end do ! ifreq
 ! do iatom = 1 , natom
    !write(6,*) 'self matlu', ifreq, self%oper(ifreq)%matlu(1)%mat(1,1,1,1,1)
    !write(6,*) 'self hdc  ', ifreq, self%hdc%matlu(1)%mat(1,1,1,1,1)
@@ -1180,13 +1207,24 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
      !  call shift_matlu(self_minus_hdc_oper%matlu,paw_dmft%natom,cmplx(self%qmc_shift,0.d0,kind=dp),-1)
      !  call shift_matlu(self_minus_hdc_oper%matlu,paw_dmft%natom,cmplx(self%qmc_xmu,0.d0,kind=dp),-1)
      !endif
+   do ifreq=1,green%nw
+     if (green%distrib%proct(ifreq) /= green%distrib%me_freq) cycle
      call upfold_oper(green%oper(ifreq),paw_dmft,procb=green%distrib%procb(:),iproc=me_kpt,gpu_option=gpu_option)
-   end if ! optself
+   end do ! ifreq
+ end if ! optself
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ do ifreq=1,green%nw
+   if (green%distrib%proct(ifreq) /= green%distrib%me_freq) cycle
    do isppol=1,nsppol
      do ikpt=1,mkmem
        do ib=1,mbandc
-         green_tmp = omega_current + fermilevel - paw_dmft%eigen_dft(ib,ikpt+shift,isppol)
+         green_tmp = omega_current(ifreq) + fermilevel - paw_dmft%eigen_dft(ib,ikpt+shift,isppol)
          if (optself == 0) then
            green%oper(ifreq)%ks(ib,ib,ikpt+shift_green,isppol) = cone / green_tmp
          else
@@ -1196,6 +1234,10 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
        end do ! ib
      end do ! ikpt
    end do ! isppol
+ end do ! ifreq
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     ! do ib1 = 1 , paw_dmft%mbandc
     !   do ib = 1 , paw_dmft%mbandc
@@ -1251,15 +1293,29 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
 !       write(std_out,*) 'green1  ifreq         %ks(1,1,16,16)',ifreq,green%oper(ifreq)%ks(1,1,16,16)
 !     endif
 !       write(std_out,*) 'before inverse_oper'
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ do ifreq=1,green%nw
+   if (green%distrib%proct(ifreq) /= green%distrib%me_freq) cycle
    if (optself /= 0) then
      call inverse_oper(green%oper(ifreq),1,procb=green%distrib%procb(:),iproc=me_kpt)
    end if
+ end do ! ifreq
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     !if(ifreq==1) then
     !  write(std_out,*) "1188",green_temp%ks(1,1,8,8)
     !  write(std_out,*) "1189",green_temp%ks(1,1,8,9)
     !  write(std_out,*) "1198",green_temp%ks(1,1,9,8)
     !  write(std_out,*) "1199",green_temp%ks(1,1,9,9)
     !endif
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ do ifreq=1,green%nw
+   if (green%distrib%proct(ifreq) /= green%distrib%me_freq) cycle
    if (optlog == 1) then
      trace_tmp = czero
      do isppol=1,nsppol
@@ -1267,7 +1323,7 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
          wtk = green%oper(ifreq)%wtk(ikpt+shift)
          if (optself == 0) then
            do ib=1,mbandc
-             trace_tmp = trace_tmp + two*temp*wtk*log(green%oper(ifreq)%ks(ib,ib,ikpt+shift_green,isppol)*omega_current)
+             trace_tmp = trace_tmp + two*temp*wtk*log(green%oper(ifreq)%ks(ib,ib,ikpt+shift_green,isppol)*omega_current(ifreq))
            end do ! ib
          else
            ! Use Tr(log(G(iw))) + Tr(log(G(-iw))) = Tr(log(G(iw)G(iw)^H)) so that we can use the much faster zheev instead of
@@ -1276,16 +1332,25 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
                         & mbandc,green%oper(ifreq)%ks(:,:,ikpt+shift_green,isppol),mbandc,czero,mat_tmp(:,:),mbandc)
            call zheev("n","u",mbandc,mat_tmp(:,:),mbandc,eig(:),work(:),lwork,rwork(:),info)
            ! Do not use DOT_PRODUCT
-           trace_tmp = trace_tmp + sum(log(eig(:)*omega_current))*wtk*temp
+           trace_tmp = trace_tmp + sum(log(eig(:)*omega_current(ifreq)))*wtk*temp
          end if ! optself
        end do ! ikpt
      end do ! isppol
      if (nsppol == 1 .and. nspinor == 1) trace_tmp = trace_tmp * two
      green%trace_log = green%trace_log + dble(trace_tmp)
    end if ! optlog=1
+ end do ! ifreq
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
      !if(lintegrate) then
 !    accumulate integration
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ do ifreq=1,green%nw
+   if (green%distrib%proct(ifreq) /= green%distrib%me_freq) cycle
    if (green%w_type /= "real") then
 
 #ifdef HAVE_GPU_MARKERS
@@ -1313,18 +1378,21 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
      if (diag == 1) then
        do ib=1,mbandc
          green%occup%ks(ib,ib,1+shift:mkmem+shift,:) = green%occup%ks(ib,ib,1+shift:mkmem+shift,:) + &
-                 & fac*green%oper(ifreq)%ks(ib,ib,1+shift_green:mkmem+shift_green,:)
+                 & fac(ifreq)*green%oper(ifreq)%ks(ib,ib,1+shift_green:mkmem+shift_green,:)
        end do ! ib
      else
        green%occup%ks(:,:,1+shift:mkmem+shift,:) = green%occup%ks(:,:,1+shift:mkmem+shift,:) + &
-          & fac*green%oper(ifreq)%ks(:,:,1+shift_green:mkmem+shift_green,:)
+          & fac(ifreq)*green%oper(ifreq)%ks(:,:,1+shift_green:mkmem+shift_green,:)
      end if ! diag
 
 #ifdef HAVE_GPU_MARKERS
      call nvtxEndRange()
 #endif
    end if ! green%wtype
-
+ end do ! ifreq
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !        write(std_out,*) 'after inverse_oper'
 !      if(ikpt==1.and.is==1.and.ib==1.and.ib1==1) then
 !        write(6,*) 'occup(is,ikpt,ib,ib1)',ifreq,green%occup%ks(1,1,1,1),green_temp%ks(1,1,1,1)
@@ -1340,8 +1408,18 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
    !write(message,'(2a)') ch10,' loc'
    !call wrtout(std_out,message,'COLL')
    !call flush(std_out)
-   if (paw_dmft%lchipsiortho == 1 .or. optself == 1) then
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ if (paw_dmft%lchipsiortho == 1 .or. optself == 1) then
+   do ifreq=1,green%nw
+     if (green%distrib%proct(ifreq) /= green%distrib%me_freq) cycle
      call downfold_oper(green%oper(ifreq),paw_dmft,procb=green%distrib%procb(:),iproc=me_kpt,option=option,gpu_option=gpu_option)
+   end do ! ifreq
+ end if ! lchipsiortho=1
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     !if(ifreq==1) then
     !  write(std_out,*) "4411",green_temp%matlu(1)%mat(4,4,1,1,1)
     !  write(std_out,*) "4512",green_temp%matlu(1)%mat(4,5,1,1,2)
@@ -1356,21 +1434,41 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
 !       ! ok
 !     endif
 ! call flush(std_out)
-   end if ! lchipsiortho=1
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
      !call copy_matlu(green_temp%matlu,green%oper(ifreq)%matlu,natom)
 !     if(ifreq==1.and.ifreq==11) then
 !       write(std_out,*) ifreq,nproc,'after sym'
 !       call print_matlu(green%oper(ifreq)%matlu,green%oper(ifreq)%natom,2,-1,0)
 !       ! ok
 !     endif
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ do ifreq=1,green%nw
+   if (green%distrib%proct(ifreq) /= green%distrib%me_freq) cycle
    if (green%oper(ifreq)%has_operks == 0) then
      ABI_FREE(green%oper(ifreq)%ks)
    end if
+ end do ! ifreq
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! call flush(std_out)
 #ifdef HAVE_GPU_MARKERS
    call nvtxEndRange()
 #endif
- end do ! ifreq
+
+ ABI_FREE(omega_current)
+ ABI_FREE(fac)
+
+
+
+
+
+
+
 
  if (optlog == 1) then
 
