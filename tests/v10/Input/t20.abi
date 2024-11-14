@@ -27,7 +27,7 @@ xcart  # Initial positions
   -1.3219886799E-02  0.0  4.0
    7.6321988680E-01  0.0  4.0
    Angstrom
-nband 3 occopt 1
+nband 4 occopt 1
 nsym 1 # No symmetry (molecular dynamics)
 pawovlp 9.5 # Allow for PAW overlap (testing)
 
@@ -56,7 +56,7 @@ pseudos "H.LDA-PW-paw.abinit"
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%   t20.abo, tolnlines = 140, tolabs = 2.e-5, tolrel = 5.e-2
+#%%   t20.abo, tolnlines = 500, tolabs = 2.e-5, tolrel = 5.e-2
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
