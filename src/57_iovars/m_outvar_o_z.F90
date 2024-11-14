@@ -135,7 +135,6 @@ contains
  real(dp),allocatable :: dprarr(:,:),dprarr_images(:,:,:)
  real(dp),allocatable :: xangst(:,:),xcart(:,:),xred(:,:)
  real(dp),allocatable :: xangst_(:,:,:,:),xcart_(:,:,:,:)
- character(len=fnlen),allocatable :: strarr(:,:)
 
 ! *************************************************************************
 
@@ -145,7 +144,6 @@ contains
  ABI_MALLOC(dprarr,(marr,0:ndtset_alloc))
  ABI_MALLOC(dprarr_images,(marr,mxvals%nimage,0:ndtset_alloc))
  ABI_MALLOC(intarr,(marr,0:ndtset_alloc))
- ABI_MALLOC(strarr,(marr,0:ndtset_alloc))
  ABI_MALLOC(narrm,(0:ndtset_alloc))
  ABI_MALLOC(nimagem,(0:ndtset_alloc))
  ABI_MALLOC(prtimg,(mxvals%nimage,0:ndtset_alloc))
