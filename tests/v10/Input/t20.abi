@@ -4,8 +4,8 @@
 # =================================================================
 
 # MD parameters
-ionmov 16 # MD with Langevin thermostat
-# moldyn "nvt_langevin" or "npt_langevin" are equivalent to ionmov 16
+moldyn "nvt_langevin"
+# moldyn "nvt_langevin" is equivalent to ionmov 16
 ntime 5 # Number of (real) time steps
 dtion 10 # Time step
 pitransform 0 # Normal mode transformation

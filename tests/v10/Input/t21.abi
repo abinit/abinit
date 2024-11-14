@@ -4,8 +4,8 @@
 # =================================================================
 
 # MD parameters
-ionmov 16 # MD with Langevin thermostat
-# moldyn "nvt_langevin" or "npt_langevin" are equivalent to ionmov 16
+moldyn "npt_langevin"
+# moldyn "npt_langevin" is equivalent to ionmov 16
 optcell 2 # Optimize geometry
 bmass 1e5 # Mass of the barostat
 ntime 5 # Number of (real) time steps
