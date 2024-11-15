@@ -1870,10 +1870,10 @@ subroutine tildeAx(t,Ax,dAx,d2Ax)
  d2den = d2v*(b1+2._dp*b2*v+3._dp*b3*v**2+4._dp*b4*v**3) &
          +dv*dv*(2._dp*b2+2._dp*3._dp*b3*v+3._dp*4._dp*b4*v**2)
 ! derivatives w.r.t. y
- dfit = dnum/den - num/den**2*dden
- d2fit = d2num/den - dnum/den**2*dden &
-         - dnum/den**2*dden + 2._dp*num/den**3*dden*dden &
-         - num/den**2*d2den
+ dfit = dnum/den - (num/den)*(dden/den)
+ d2fit = d2num/den - (dnum/den)*(dden/den) &
+         - (dnum/den)*(dden/den) + 2._dp*(num/den)*(dden/den)*(dden/den) &
+         - (num/den)*(d2den/den)
 ! Ax, and derivatives w.r.t. t
  Ax = fit
  dAx = dfit * dydt
@@ -1983,10 +1983,10 @@ subroutine tildeBx(t,Bx,dBx,d2Bx)
          +8._dp*9._dp*b9*v**7+9._dp*10._dp*b10*v**8)
 
 ! derivatives w.r.t. y
- dfit = dnum/den - num/den**2*dden
- d2fit = d2num/den - dnum/den**2*dden &
-         - dnum/den**2*dden + 2._dp*num/den**3*dden*dden &
-         - num/den**2*d2den  
+ dfit = dnum/den - (num/den)*(dden/den)
+ d2fit = d2num/den - (dnum/den)*(dden/den) &
+         - (dnum/den)*(dden/den) + 2._dp*(num/den)*(dden/den)*(dden/den) &
+         - (num/den)*(d2den/den)
 
 ! Bx, and derivatives w.r.t. t
  Bx = fit
@@ -2093,8 +2093,8 @@ subroutine tildeBc(iflag,rs,t,Bc,dBcdrs,dBcdt)
    ddendt = ddendt * du
    !
    Bc = num/den
-   dBcdrs = dnumdrs/den - num*ddendrs/den**2
-   dBcdt = dnumdt/den - num*ddendt/den**2
+   dBcdrs = dnumdrs/den - (num/den)*ddendrs/den
+   dBcdt = dnumdt/den - (num/den)*ddendt/den
    !
  endif
 end subroutine tildeBc
