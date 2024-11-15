@@ -1,8 +1,8 @@
 
-.Version 9.11.2 of ANADDB 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ANADDB, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2022 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Jul 2023.
-- ( at 12h01 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h10 )
   
 
 ================================================================================
@@ -77,12 +77,12 @@
  imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
-         1         1    2.248400E+00    3.192045E-17    3.212395E-17
-         1         2    3.192045E-17    2.248400E+00   -3.171696E-17
-         1         3   -3.192045E-17   -3.192045E-17    2.248400E+00
-         2         1   -2.248400E+00   -3.192045E-17   -3.212395E-17
-         2         2   -3.192045E-17   -2.248400E+00    3.171696E-17
-         2         3    3.192045E-17    3.192045E-17   -2.248400E+00
+         1         1    2.248400E+00    1.083169E-17    1.079220E-17
+         1         2    1.083169E-17    2.248400E+00   -1.087118E-17
+         1         3   -1.083169E-17   -1.083169E-17    2.248400E+00
+         2         1   -2.248400E+00   -1.083169E-17   -1.079220E-17
+         2         2   -1.083169E-17   -2.248400E+00    1.087118E-17
+         2         3    1.083169E-17    1.083169E-17   -2.248400E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 
  Polarization in cartesian coordinates (a.u.):
@@ -118,18 +118,18 @@
  fmax =     2.020862512E-02
 
  Change of cartesian coordinates (delta_xcart):
-       1       0.131609680       0.131609460       0.131609290
-       2      -0.086255977      -0.086256193      -0.086256367
+       1       0.131608190       0.131607970       0.131607800
+       2      -0.086257469      -0.086257686      -0.086257860
 
  New cartesian coordinates (xcart_new):
    xcart
-     0.13160968000000D+00     0.13160946000000D+00     0.13160929000000D+00
-     0.25678767355000D+01     0.25678765195000D+01     0.25678763455000D+01
+     0.13160819000000D+00     0.13160797000000D+00     0.13160780000000D+00
+     0.25678752435000D+01     0.25678750265000D+01     0.25678748525000D+01
 
  New reduced coordinates (xred_new):
    xred
-     0.12396617299897D-01     0.12396658744697D-01     0.12396690770225D-01
-     0.24187525716086D+00     0.24187529785212D+00     0.24187533063119D+00
+     0.12396476952733D-01     0.12396518397533D-01     0.12396550423060D-01
+     0.24187511643693D+00     0.24187515731657D+00     0.24187519009564D+00
 
  Difference between the Hellmann-Feynman stresses
  and the stresses induced by the electric field
@@ -137,7 +137,7 @@
   diffsig(1) =      0.000250331     diffsig(4) =      0.000104344
   diffsig(2) =      0.000250331     diffsig(5) =      0.000104344
   diffsig(3) =      0.000250331     diffsig(6) =      0.000104344
- sigmax =     2.503312061E-04
+ sigmax =     2.503312060E-04
 
  Induced strain (delta_eta):
   delta_eta(1) =     -0.027412548     delta_eta(4) =      0.003036897
@@ -146,18 +146,18 @@
 
  New lattice constants (acell_new):
    acell
-    0.73126511818898D+01    0.73126511817701D+01    0.73126511818242D+01
+    0.73126511819286D+01    0.73126511818088D+01    0.73126511818629D+01
 
  New primitive vectors (rprim_new):
    rprim
-    0.22044886202406D-02    0.70710506298798D+00    0.70710506300456D+00
-    0.70710506299068D+00    0.22044886345992D-02    0.70710506300182D+00
-    0.70710506299899D+00    0.70710506299355D+00    0.22044886210424D-02
+    0.22044886195303D-02    0.70710506298799D+00    0.70710506300456D+00
+    0.70710506299068D+00    0.22044886338850D-02    0.70710506300182D+00
+    0.70710506299899D+00    0.70710506299355D+00    0.22044886203327D-02
 -
 - Proc.   0 individual time (sec): cpu=          0.0  wall=          0.0
 
 ================================================================================
 
-+Total cpu time      0.023  and wall time      0.034 sec
++Total cpu time      0.024  and wall time      0.024 sec
 
  anaddb : the run completed succesfully.

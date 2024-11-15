@@ -1,8 +1,8 @@
 
-.Version 9.11.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2022 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Jul 2023.
-- ( at 12h00 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h09 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v4_t36/t36.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v4_t36/t36.abi
 - output file    -> t36.abo
 - root for input  files -> t36i
 - root for output files -> t36o
@@ -42,10 +42,10 @@ _ WF disk file :      0.219 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -53,7 +53,7 @@ _ WF disk file :      0.219 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
               amu      1.80947900E+02
              ecut      5.00000000E+00 Hartree
            enunit           2
--          fftalg         312
+-          fftalg         512
             intxc           1
            istwfk        1
               ixc           2
@@ -137,8 +137,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.05999
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/73ta.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/73ta.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/73ta.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/73ta.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Ta,  from PRB58, 3641 (1998)
 - 73.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -182,11 +182,11 @@ tolerances: {toldfe: 1.00E-07, }
  ETOT  1  -4.4626256847033    -4.463E+00 1.465E-03 2.288E+01
  ETOT  2  -4.5013979704635    -3.877E-02 2.532E-03 3.948E-01
  ETOT  3  -4.5019632818092    -5.653E-04 3.941E-06 8.044E-02
- ETOT  4  -4.5019895149811    -2.623E-05 5.349E-08 1.067E-02
+ ETOT  4  -4.5019895149812    -2.623E-05 5.349E-08 1.067E-02
  ETOT  5  -4.5019921285413    -2.614E-06 2.841E-09 7.910E-04
  ETOT  6  -4.5019924156114    -2.871E-07 1.278E-10 1.202E-04
  ETOT  7  -4.5019924519519    -3.634E-08 2.850E-11 1.402E-05
- ETOT  8  -4.5019924545448    -2.593E-09 4.889E-12 4.718E-07
+ ETOT  8  -4.5019924545447    -2.593E-09 4.889E-12 4.718E-07
 
  At SCF step    8, etot is converged : 
   for the second time, diff in etot=  2.593E-09 < toldfe=  1.000E-07
@@ -231,7 +231,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   12.816E-13; max=  48.890E-13
+ Mean square residual over all n,k,spin=   12.808E-13; max=  48.890E-13
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -270,18 +270,18 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  3.32882130021257E+00
-hartree             :  1.15113710084796E+00
-xc                  : -1.15076621043752E+00
+kinetic             :  3.32882130017568E+00
+hartree             :  1.15113710083251E+00
+xc                  : -1.15076621043242E+00
 Ewald energy        : -3.13727021509388E+00
 psp_core            :  1.34126066262525E-01
-local_psp           : -3.59442045526665E+00
-non_local_psp       : -1.21687611593035E+00
-internal            : -4.48524852940534E+00
-'-kT*entropy'       : -1.67439251395002E-02
-total_energy        : -4.50199245454484E+00
-total_energy_eV     : -1.22505444815443E+02
-band_energy         : -6.79203570851005E-01
+local_psp           : -3.59442045523855E+00
+non_local_psp       : -1.21687611591103E+00
+internal            : -4.48524852940517E+00
+'-kT*entropy'       : -1.67439251395049E-02
+total_energy        : -4.50199245454468E+00
+total_energy_eV     : -1.22505444815439E+02
+band_energy         : -6.79203570841425E-01
 ...
 
 
@@ -305,7 +305,7 @@ band_energy         : -6.79203570851005E-01
            enunit           2
            etotal     -4.5019924545E+00
             fcart     -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
--          fftalg         312
+-          fftalg         512
             intxc           1
            istwfk        1
               ixc           2
@@ -328,7 +328,7 @@ P           mkmem           1
                        5.0000000000E-01 -5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01 -5.0000000000E-01
           spgroup         229
-           strten      3.0696159341E-04  3.0696159341E-04  3.0696159341E-04
+           strten      3.0696159342E-04  3.0696159342E-04  3.0696159342E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
                       -1 -1 -1   0  0  1   0  1  0       1  1  1   0  0 -1   0 -1  0
@@ -447,10 +447,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          2.3  wall=          2.4
+- Proc.   0 individual time (sec): cpu=          1.5  wall=          1.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.3  wall=          2.4
++Overall time at end (sec) : cpu=          1.5  wall=          1.5

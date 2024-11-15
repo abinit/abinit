@@ -7,7 +7,7 @@
 !!  Uses some functions from a previous implementation by MJV
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2010-2022 ABINIT group (HM,MJV)
+!!  Copyright (C) 2010-2024 ABINIT group (HM,MJV)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -105,7 +105,7 @@ type, public :: htetra_t
   ! volume of the tetrahedra
 
   real(dp) :: klatt(3, 3)
-  ! reciprocal of lattice vectors for full kpoint grid
+  ! reciprocal of equivalent supercell lattice vectors for full kpoint grid
 
   type(htetra_bucket),allocatable :: ibz(:)
   ! indexes of the tetrahedra for each k-point

@@ -1,8 +1,8 @@
 
-.Version 9.11.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2022 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Jul 2023.
-- ( at 12h00 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h09 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v4_t66/t66.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v4_t66/t66.abi
 - output file    -> t66.abo
 - root for input  files -> t66i
 - root for output files -> t66o
@@ -150,10 +150,10 @@ _ WF disk file :      0.494 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -172,7 +172,7 @@ _ WF disk file :      0.494 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
            diemix3     1.00000000E+00
            diemix4     8.50000000E-01
              ecut      4.00000000E+00 Hartree
--          fftalg         312
+-          fftalg         512
            getddk1          0
            getddk2          0
            getddk3          0
@@ -546,8 +546,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/13al.3.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/13al.3.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/13al.3.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/13al.3.hgh
 - Hartwigsen-Goedecker-Hutter psp for Al,  from PRB58, 3641 (1998)
 - 13.00000   3.00000     10605                znucl, zion, pspdat
     3    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -569,8 +569,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              1    0.692782
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/15p.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/15p.5.hgh
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/15p.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/15p.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for P,  from PRB58, 3641 (1998)
 - 15.00000   5.00000     10605                znucl, zion, pspdat
     3    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -908,8 +908,8 @@ force_length_stats: {min:   3.23990916E-03, max:   3.23990916E-03, mean:   3.239
  frms,max,avg= 1.8705624E-03 1.8705624E-03   3.414E-08  3.414E-08  3.414E-08 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      0.09618817926478     0.09618817926478     0.09618817926478
-    2     -0.09618817926478    -0.09618817926478    -0.09618817926478
+    1      0.09618817926479     0.09618817926479     0.09618817926479
+    2     -0.09618817926479    -0.09618817926479    -0.09618817926479
  frms,max,avg= 9.6188179E-02 9.6188179E-02   1.755E-06  1.755E-06  1.755E-06 e/A
  length scales= 10.300000000000 10.300000000000 10.300000000000 bohr
               =  5.450525248477  5.450525248477  5.450525248477 angstroms
@@ -947,7 +947,7 @@ force_length_stats: {min:   3.23990916E-03, max:   3.23990916E-03, mean:   3.239
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  3.13211792524187E+00
-hartree             :  9.99698955342342E-01
+hartree             :  9.99698955342341E-01
 xc                  : -2.40521231877652E+00
 Ewald energy        : -8.29751084050797E+00
 psp_core            : -2.77394478955847E-01
@@ -955,7 +955,7 @@ local_psp           : -3.93881554704141E+00
 non_local_psp       :  2.15562897399598E+00
 total_energy        : -8.63148733070156E+00
 total_energy_eV     : -2.34874715038447E+02
-band_energy         :  2.10965347892709E-01
+band_energy         :  2.10965347892708E-01
 ...
 
 
@@ -2706,23 +2706,23 @@ tolerances: {tolwfr: 1.00E-12, }
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 
--ETOT  1  -124.42308705074     -1.244E+02 2.226E-01 2.243E+03
+-ETOT  1  -124.42309242606     -1.244E+02 2.226E-01 2.243E+03
 
- ETOT  2  -131.33261275278     -6.910E+00 2.037E-02 6.419E+02
+ ETOT  2  -131.33261412652     -6.910E+00 2.037E-02 6.419E+02
 
- ETOT  3  -134.20755725354     -2.875E+00 2.020E-03 2.132E+00
+ ETOT  3  -134.20755698848     -2.875E+00 2.020E-03 2.132E+00
 
- ETOT  4  -134.21387058330     -6.313E-03 1.677E-05 7.030E-01
+ ETOT  4  -134.21387033635     -6.313E-03 1.677E-05 7.030E-01
 
- ETOT  5  -134.21707294850     -3.202E-03 1.396E-06 4.054E-03
+ ETOT  5  -134.21707269878     -3.202E-03 1.396E-06 4.054E-03
 
- ETOT  6  -134.21708946202     -1.651E-05 1.423E-08 3.116E-04
+ ETOT  6  -134.21708921232     -1.651E-05 1.423E-08 3.116E-04
 
- ETOT  7  -134.21709070442     -1.242E-06 8.224E-10 5.683E-06
+ ETOT  7  -134.21709045472     -1.242E-06 8.224E-10 5.683E-06
 
- ETOT  8  -134.21709072490     -2.048E-08 1.160E-11 4.494E-08
+ ETOT  8  -134.21709047520     -2.048E-08 1.160E-11 4.494E-08
 
- ETOT  9  -134.21709072509     -1.993E-10 9.946E-13 2.529E-10
+ ETOT  9  -134.21709047539     -1.991E-10 9.946E-13 2.529E-10
 
  At SCF step    9   max residual=  9.95E-13 < tolwfr=  1.00E-12 =>converged.
 -open ddk wf file :t66o_DS3_1WF7
@@ -2732,148 +2732,148 @@ tolerances: {tolwfr: 1.00E-12, }
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   29.303E-14; max=  99.456E-14
-   0.1250  0.1250  0.1250    1  8.93152E-13 kpt; spin; max resid(k); each band:
+ Mean square residual over all n,k,spin=   29.303E-14; max=  99.457E-14
+   0.1250  0.1250  0.1250    1  8.93149E-13 kpt; spin; max resid(k); each band:
   4.51E-13 8.93E-13 3.28E-13 2.69E-13
    0.3750  0.1250  0.1250    1  1.36156E-13 kpt; spin; max resid(k); each band:
   1.33E-13 1.36E-13 1.14E-13 6.93E-14
-  -0.3750  0.1250  0.1250    1  2.47223E-13 kpt; spin; max resid(k); each band:
+  -0.3750  0.1250  0.1250    1  2.47224E-13 kpt; spin; max resid(k); each band:
   2.47E-13 1.57E-13 1.40E-13 4.14E-14
-  -0.1250  0.1250  0.1250    1  9.94565E-13 kpt; spin; max resid(k); each band:
+  -0.1250  0.1250  0.1250    1  9.94566E-13 kpt; spin; max resid(k); each band:
   9.95E-13 2.09E-13 2.06E-13 6.11E-14
-   0.1250  0.3750  0.1250    1  9.63923E-13 kpt; spin; max resid(k); each band:
+   0.1250  0.3750  0.1250    1  9.63911E-13 kpt; spin; max resid(k); each band:
   6.74E-13 9.64E-13 9.54E-14 2.48E-13
-   0.3750  0.3750  0.1250    1  9.93890E-13 kpt; spin; max resid(k); each band:
+   0.3750  0.3750  0.1250    1  9.93889E-13 kpt; spin; max resid(k); each band:
   6.23E-13 9.94E-13 8.23E-14 2.47E-13
-  -0.3750  0.3750  0.1250    1  9.72082E-13 kpt; spin; max resid(k); each band:
+  -0.3750  0.3750  0.1250    1  9.72073E-13 kpt; spin; max resid(k); each band:
   1.89E-13 9.72E-13 1.44E-13 6.22E-14
-  -0.1250  0.3750  0.1250    1  1.95191E-13 kpt; spin; max resid(k); each band:
+  -0.1250  0.3750  0.1250    1  1.95190E-13 kpt; spin; max resid(k); each band:
   1.95E-13 1.77E-13 1.21E-13 1.51E-13
-   0.1250 -0.3750  0.1250    1  6.46662E-13 kpt; spin; max resid(k); each band:
+   0.1250 -0.3750  0.1250    1  6.46660E-13 kpt; spin; max resid(k); each band:
   6.47E-13 1.29E-13 1.15E-13 1.83E-13
    0.3750 -0.3750  0.1250    1  8.57269E-13 kpt; spin; max resid(k); each band:
   1.79E-13 8.57E-13 1.28E-13 6.75E-14
-  -0.3750 -0.3750  0.1250    1  8.52498E-13 kpt; spin; max resid(k); each band:
+  -0.3750 -0.3750  0.1250    1  8.52495E-13 kpt; spin; max resid(k); each band:
   6.92E-13 1.11E-13 8.52E-13 2.49E-13
-  -0.1250 -0.3750  0.1250    1  9.10796E-13 kpt; spin; max resid(k); each band:
+  -0.1250 -0.3750  0.1250    1  9.10792E-13 kpt; spin; max resid(k); each band:
   2.07E-13 9.11E-13 1.29E-13 1.43E-13
-   0.1250 -0.1250  0.1250    1  7.26293E-13 kpt; spin; max resid(k); each band:
+   0.1250 -0.1250  0.1250    1  7.26298E-13 kpt; spin; max resid(k); each band:
   7.26E-13 1.64E-13 1.25E-13 4.53E-13
    0.3750 -0.1250  0.1250    1  2.33847E-13 kpt; spin; max resid(k); each band:
   2.34E-13 1.60E-13 1.39E-13 8.24E-14
-  -0.3750 -0.1250  0.1250    1  2.31092E-13 kpt; spin; max resid(k); each band:
+  -0.3750 -0.1250  0.1250    1  2.31093E-13 kpt; spin; max resid(k); each band:
   2.31E-13 1.45E-13 1.40E-13 8.07E-14
-  -0.1250 -0.1250  0.1250    1  6.33018E-13 kpt; spin; max resid(k); each band:
+  -0.1250 -0.1250  0.1250    1  6.33019E-13 kpt; spin; max resid(k); each band:
   6.33E-13 1.33E-13 1.04E-13 4.92E-13
-   0.1250  0.1250  0.3750    1  9.35388E-13 kpt; spin; max resid(k); each band:
+   0.1250  0.1250  0.3750    1  9.35379E-13 kpt; spin; max resid(k); each band:
   5.82E-13 9.35E-13 9.12E-14 2.82E-13
-   0.3750  0.1250  0.3750    1  7.09180E-13 kpt; spin; max resid(k); each band:
+   0.3750  0.1250  0.3750    1  7.09184E-13 kpt; spin; max resid(k); each band:
   7.09E-13 7.57E-14 9.63E-14 2.28E-13
-  -0.3750  0.1250  0.3750    1  1.79720E-13 kpt; spin; max resid(k); each band:
+  -0.3750  0.1250  0.3750    1  1.79721E-13 kpt; spin; max resid(k); each band:
   1.80E-13 1.05E-13 1.34E-13 6.62E-14
-  -0.1250  0.1250  0.3750    1  1.83649E-13 kpt; spin; max resid(k); each band:
+  -0.1250  0.1250  0.3750    1  1.83650E-13 kpt; spin; max resid(k); each band:
   1.84E-13 1.58E-13 1.26E-13 1.60E-13
-   0.1250  0.3750  0.3750    1  2.14428E-13 kpt; spin; max resid(k); each band:
+   0.1250  0.3750  0.3750    1  2.14426E-13 kpt; spin; max resid(k); each band:
   2.14E-13 1.09E-13 1.13E-13 6.20E-14
-   0.3750  0.3750  0.3750    1  7.56191E-13 kpt; spin; max resid(k); each band:
+   0.3750  0.3750  0.3750    1  7.56188E-13 kpt; spin; max resid(k); each band:
   3.77E-13 7.56E-13 1.63E-13 2.18E-13
-  -0.3750  0.3750  0.3750    1  1.94741E-13 kpt; spin; max resid(k); each band:
+  -0.3750  0.3750  0.3750    1  1.94740E-13 kpt; spin; max resid(k); each band:
   1.95E-13 8.25E-14 1.33E-13 5.80E-14
-  -0.1250  0.3750  0.3750    1  2.25278E-13 kpt; spin; max resid(k); each band:
+  -0.1250  0.3750  0.3750    1  2.25277E-13 kpt; spin; max resid(k); each band:
   2.25E-13 1.74E-13 1.72E-13 4.41E-14
-   0.1250 -0.3750  0.3750    1  1.94937E-13 kpt; spin; max resid(k); each band:
+   0.1250 -0.3750  0.3750    1  1.94936E-13 kpt; spin; max resid(k); each band:
   1.95E-13 1.01E-13 1.06E-13 1.31E-13
-   0.3750 -0.3750  0.3750    1  8.07183E-13 kpt; spin; max resid(k); each band:
+   0.3750 -0.3750  0.3750    1  8.07184E-13 kpt; spin; max resid(k); each band:
   7.32E-13 8.07E-13 8.71E-14 1.62E-13
-  -0.3750 -0.3750  0.3750    1  7.95092E-13 kpt; spin; max resid(k); each band:
+  -0.3750 -0.3750  0.3750    1  7.95091E-13 kpt; spin; max resid(k); each band:
   6.28E-13 7.95E-13 7.67E-14 1.79E-13
-  -0.1250 -0.3750  0.3750    1  1.93324E-13 kpt; spin; max resid(k); each band:
+  -0.1250 -0.3750  0.3750    1  1.93323E-13 kpt; spin; max resid(k); each band:
   1.93E-13 9.83E-14 1.07E-13 1.31E-13
-   0.1250 -0.1250  0.3750    1  9.39659E-13 kpt; spin; max resid(k); each band:
+   0.1250 -0.1250  0.3750    1  9.39654E-13 kpt; spin; max resid(k); each band:
   2.12E-13 9.40E-13 1.31E-13 1.63E-13
-   0.3750 -0.1250  0.3750    1  8.68162E-13 kpt; spin; max resid(k); each band:
+   0.3750 -0.1250  0.3750    1  8.68155E-13 kpt; spin; max resid(k); each band:
   8.17E-13 1.35E-13 8.68E-13 2.37E-13
   -0.3750 -0.1250  0.3750    1  8.68078E-13 kpt; spin; max resid(k); each band:
   1.85E-13 8.68E-13 1.19E-13 7.22E-14
-  -0.1250 -0.1250  0.3750    1  5.80567E-13 kpt; spin; max resid(k); each band:
+  -0.1250 -0.1250  0.3750    1  5.80570E-13 kpt; spin; max resid(k); each band:
   5.81E-13 1.10E-13 1.08E-13 1.97E-13
-   0.1250  0.1250 -0.3750    1  5.80567E-13 kpt; spin; max resid(k); each band:
+   0.1250  0.1250 -0.3750    1  5.80570E-13 kpt; spin; max resid(k); each band:
   5.81E-13 1.10E-13 1.08E-13 1.97E-13
    0.3750  0.1250 -0.3750    1  8.68078E-13 kpt; spin; max resid(k); each band:
   1.85E-13 8.68E-13 1.19E-13 7.22E-14
-  -0.3750  0.1250 -0.3750    1  8.68162E-13 kpt; spin; max resid(k); each band:
+  -0.3750  0.1250 -0.3750    1  8.68155E-13 kpt; spin; max resid(k); each band:
   8.17E-13 1.35E-13 8.68E-13 2.37E-13
-  -0.1250  0.1250 -0.3750    1  9.39659E-13 kpt; spin; max resid(k); each band:
+  -0.1250  0.1250 -0.3750    1  9.39654E-13 kpt; spin; max resid(k); each band:
   2.12E-13 9.40E-13 1.31E-13 1.63E-13
-   0.1250  0.3750 -0.3750    1  1.93324E-13 kpt; spin; max resid(k); each band:
+   0.1250  0.3750 -0.3750    1  1.93323E-13 kpt; spin; max resid(k); each band:
   1.93E-13 9.83E-14 1.07E-13 1.31E-13
-   0.3750  0.3750 -0.3750    1  7.95092E-13 kpt; spin; max resid(k); each band:
+   0.3750  0.3750 -0.3750    1  7.95091E-13 kpt; spin; max resid(k); each band:
   6.28E-13 7.95E-13 7.67E-14 1.79E-13
-  -0.3750  0.3750 -0.3750    1  8.07183E-13 kpt; spin; max resid(k); each band:
+  -0.3750  0.3750 -0.3750    1  8.07184E-13 kpt; spin; max resid(k); each band:
   7.32E-13 8.07E-13 8.71E-14 1.62E-13
-  -0.1250  0.3750 -0.3750    1  1.94937E-13 kpt; spin; max resid(k); each band:
+  -0.1250  0.3750 -0.3750    1  1.94936E-13 kpt; spin; max resid(k); each band:
   1.95E-13 1.01E-13 1.06E-13 1.31E-13
-   0.1250 -0.3750 -0.3750    1  2.25278E-13 kpt; spin; max resid(k); each band:
+   0.1250 -0.3750 -0.3750    1  2.25277E-13 kpt; spin; max resid(k); each band:
   2.25E-13 1.74E-13 1.72E-13 4.41E-14
-   0.3750 -0.3750 -0.3750    1  1.94741E-13 kpt; spin; max resid(k); each band:
+   0.3750 -0.3750 -0.3750    1  1.94740E-13 kpt; spin; max resid(k); each band:
   1.95E-13 8.25E-14 1.33E-13 5.80E-14
-  -0.3750 -0.3750 -0.3750    1  7.56191E-13 kpt; spin; max resid(k); each band:
+  -0.3750 -0.3750 -0.3750    1  7.56188E-13 kpt; spin; max resid(k); each band:
   3.77E-13 7.56E-13 1.63E-13 2.18E-13
-  -0.1250 -0.3750 -0.3750    1  2.14428E-13 kpt; spin; max resid(k); each band:
+  -0.1250 -0.3750 -0.3750    1  2.14426E-13 kpt; spin; max resid(k); each band:
   2.14E-13 1.09E-13 1.13E-13 6.20E-14
-   0.1250 -0.1250 -0.3750    1  1.83649E-13 kpt; spin; max resid(k); each band:
+   0.1250 -0.1250 -0.3750    1  1.83650E-13 kpt; spin; max resid(k); each band:
   1.84E-13 1.58E-13 1.26E-13 1.60E-13
-   0.3750 -0.1250 -0.3750    1  1.79720E-13 kpt; spin; max resid(k); each band:
+   0.3750 -0.1250 -0.3750    1  1.79721E-13 kpt; spin; max resid(k); each band:
   1.80E-13 1.05E-13 1.34E-13 6.62E-14
-  -0.3750 -0.1250 -0.3750    1  7.09180E-13 kpt; spin; max resid(k); each band:
+  -0.3750 -0.1250 -0.3750    1  7.09184E-13 kpt; spin; max resid(k); each band:
   7.09E-13 7.57E-14 9.63E-14 2.28E-13
-  -0.1250 -0.1250 -0.3750    1  9.35388E-13 kpt; spin; max resid(k); each band:
+  -0.1250 -0.1250 -0.3750    1  9.35379E-13 kpt; spin; max resid(k); each band:
   5.82E-13 9.35E-13 9.12E-14 2.82E-13
-   0.1250  0.1250 -0.1250    1  6.33018E-13 kpt; spin; max resid(k); each band:
+   0.1250  0.1250 -0.1250    1  6.33019E-13 kpt; spin; max resid(k); each band:
   6.33E-13 1.33E-13 1.04E-13 4.92E-13
-   0.3750  0.1250 -0.1250    1  2.31092E-13 kpt; spin; max resid(k); each band:
+   0.3750  0.1250 -0.1250    1  2.31093E-13 kpt; spin; max resid(k); each band:
   2.31E-13 1.45E-13 1.40E-13 8.07E-14
   -0.3750  0.1250 -0.1250    1  2.33847E-13 kpt; spin; max resid(k); each band:
   2.34E-13 1.60E-13 1.39E-13 8.24E-14
-  -0.1250  0.1250 -0.1250    1  7.26293E-13 kpt; spin; max resid(k); each band:
+  -0.1250  0.1250 -0.1250    1  7.26298E-13 kpt; spin; max resid(k); each band:
   7.26E-13 1.64E-13 1.25E-13 4.53E-13
-   0.1250  0.3750 -0.1250    1  9.10796E-13 kpt; spin; max resid(k); each band:
+   0.1250  0.3750 -0.1250    1  9.10792E-13 kpt; spin; max resid(k); each band:
   2.07E-13 9.11E-13 1.29E-13 1.43E-13
-   0.3750  0.3750 -0.1250    1  8.52498E-13 kpt; spin; max resid(k); each band:
+   0.3750  0.3750 -0.1250    1  8.52495E-13 kpt; spin; max resid(k); each band:
   6.92E-13 1.11E-13 8.52E-13 2.49E-13
   -0.3750  0.3750 -0.1250    1  8.57269E-13 kpt; spin; max resid(k); each band:
   1.79E-13 8.57E-13 1.28E-13 6.75E-14
-  -0.1250  0.3750 -0.1250    1  6.46662E-13 kpt; spin; max resid(k); each band:
+  -0.1250  0.3750 -0.1250    1  6.46660E-13 kpt; spin; max resid(k); each band:
   6.47E-13 1.29E-13 1.15E-13 1.83E-13
-   0.1250 -0.3750 -0.1250    1  1.95191E-13 kpt; spin; max resid(k); each band:
+   0.1250 -0.3750 -0.1250    1  1.95190E-13 kpt; spin; max resid(k); each band:
   1.95E-13 1.77E-13 1.21E-13 1.51E-13
-   0.3750 -0.3750 -0.1250    1  9.72082E-13 kpt; spin; max resid(k); each band:
+   0.3750 -0.3750 -0.1250    1  9.72073E-13 kpt; spin; max resid(k); each band:
   1.89E-13 9.72E-13 1.44E-13 6.22E-14
-  -0.3750 -0.3750 -0.1250    1  9.93890E-13 kpt; spin; max resid(k); each band:
+  -0.3750 -0.3750 -0.1250    1  9.93889E-13 kpt; spin; max resid(k); each band:
   6.23E-13 9.94E-13 8.23E-14 2.47E-13
-  -0.1250 -0.3750 -0.1250    1  9.63923E-13 kpt; spin; max resid(k); each band:
+  -0.1250 -0.3750 -0.1250    1  9.63911E-13 kpt; spin; max resid(k); each band:
   6.74E-13 9.64E-13 9.54E-14 2.48E-13
-   0.1250 -0.1250 -0.1250    1  9.94565E-13 kpt; spin; max resid(k); each band:
+   0.1250 -0.1250 -0.1250    1  9.94566E-13 kpt; spin; max resid(k); each band:
   9.95E-13 2.09E-13 2.06E-13 6.11E-14
-   0.3750 -0.1250 -0.1250    1  2.47223E-13 kpt; spin; max resid(k); each band:
+   0.3750 -0.1250 -0.1250    1  2.47224E-13 kpt; spin; max resid(k); each band:
   2.47E-13 1.57E-13 1.40E-13 4.14E-14
   -0.3750 -0.1250 -0.1250    1  1.36156E-13 kpt; spin; max resid(k); each band:
   1.33E-13 1.36E-13 1.14E-13 6.93E-14
-  -0.1250 -0.1250 -0.1250    1  8.93152E-13 kpt; spin; max resid(k); each band:
+  -0.1250 -0.1250 -0.1250    1  8.93149E-13 kpt; spin; max resid(k); each band:
   4.51E-13 8.93E-13 3.28E-13 2.69E-13
 
  Seven components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
-     kin0=   3.52822695E+02 eigvalue=  -8.30584062E+01  local=  -3.24019604E+02
+     kin0=   3.52822693E+02 eigvalue=  -8.30584053E+01  local=  -3.24019602E+02
  4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
-    dotwf=  -2.68434184E+02  Hartree=   2.39367633E+01     xc=  -1.49743681E+01
+    dotwf=  -2.68434183E+02  Hartree=   2.39367636E+01     xc=  -1.49743682E+01
  7,8,9: eventually, occupation + non-local contributions
-    edocc=   0.00000000E+00     enl0=   1.79510013E+02   enl1=   0.00000000E+00
+    edocc=   0.00000000E+00     enl0=   1.79510012E+02   enl1=   0.00000000E+00
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
-   erelax=  -1.34217091E+02
+   erelax=  -1.34217090E+02
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.1342170907E+03 Ha. Also 2DEtotal=   -0.365223277629E+04 eV
-    (  non-var. 2DEtotal :   -1.3421709178E+02 Ha)
+ 2DEtotal=   -0.1342170905E+03 Ha. Also 2DEtotal=   -0.365223276950E+04 eV
+    (  non-var. 2DEtotal :   -1.3421709153E+02 Ha)
 
 --------------------------------------------------------------------------------
  Perturbation wavevector (in red.coord.)   0.000000  0.000000  0.000000
@@ -2896,21 +2896,21 @@ tolerances: {tolwfr: 1.00E-12, }
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 
--ETOT  1   2.2210728148816     -3.564E+00 7.215E-03 1.953E+02
+-ETOT  1   2.2210728094011     -3.564E+00 7.215E-03 1.953E+02
 
- ETOT  2   1.9244081333051     -2.967E-01 1.257E-03 1.218E+02
+ ETOT  2   1.9244081270702     -2.967E-01 1.257E-03 1.218E+02
 
- ETOT  3   1.3437694414709     -5.806E-01 2.612E-04 9.296E-01
+ ETOT  3   1.3437694415769     -5.806E-01 2.612E-04 9.296E-01
 
- ETOT  4   1.3396690077638     -4.100E-03 2.695E-06 2.213E-02
+ ETOT  4   1.3396690077650     -4.100E-03 2.695E-06 2.213E-02
 
- ETOT  5   1.3395828296749     -8.618E-05 4.985E-08 1.321E-04
+ ETOT  5   1.3395828296750     -8.618E-05 4.985E-08 1.321E-04
 
- ETOT  6   1.3395824746967     -3.550E-07 3.190E-10 7.782E-07
+ ETOT  6   1.3395824746968     -3.550E-07 3.190E-10 7.782E-07
 
  ETOT  7   1.3395824721468     -2.550E-09 1.757E-12 1.317E-08
 
- ETOT  8   1.3395824721064     -4.035E-11 6.618E-13 4.802E-10
+ ETOT  8   1.3395824721065     -4.035E-11 6.618E-13 4.802E-10
 
  At SCF step    8   max residual=  6.62E-13 < tolwfr=  1.00E-12 =>converged.
 -open ddk wf file :t66o_DS3_1WF7
@@ -2920,86 +2920,86 @@ tolerances: {tolwfr: 1.00E-12, }
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   30.144E-14; max=  66.181E-14
-   0.1250  0.1250  0.1250    1  6.61805E-13 kpt; spin; max resid(k); each band:
+ Mean square residual over all n,k,spin=   30.144E-14; max=  66.179E-14
+   0.1250  0.1250  0.1250    1  6.61789E-13 kpt; spin; max resid(k); each band:
   8.69E-14 3.02E-13 3.39E-13 6.62E-13
-   0.3750  0.1250  0.1250    1  3.87349E-13 kpt; spin; max resid(k); each band:
+   0.3750  0.1250  0.1250    1  3.87345E-13 kpt; spin; max resid(k); each band:
   2.98E-13 3.50E-13 2.79E-13 3.87E-13
-  -0.3750  0.1250  0.1250    1  5.38623E-13 kpt; spin; max resid(k); each band:
+  -0.3750  0.1250  0.1250    1  5.38615E-13 kpt; spin; max resid(k); each band:
   2.61E-13 5.39E-13 2.79E-13 4.43E-13
-  -0.1250  0.1250  0.1250    1  5.28940E-13 kpt; spin; max resid(k); each band:
+  -0.1250  0.1250  0.1250    1  5.28932E-13 kpt; spin; max resid(k); each band:
   3.21E-13 5.29E-13 4.17E-13 3.66E-13
-   0.1250  0.3750  0.1250    1  3.04179E-13 kpt; spin; max resid(k); each band:
+   0.1250  0.3750  0.1250    1  3.04175E-13 kpt; spin; max resid(k); each band:
   1.88E-13 2.65E-13 2.83E-13 3.04E-13
-   0.3750  0.3750  0.1250    1  3.64028E-13 kpt; spin; max resid(k); each band:
+   0.3750  0.3750  0.1250    1  3.64023E-13 kpt; spin; max resid(k); each band:
   1.80E-13 2.04E-13 3.39E-13 3.64E-13
-  -0.3750  0.3750  0.1250    1  3.91793E-13 kpt; spin; max resid(k); each band:
+  -0.3750  0.3750  0.1250    1  3.91789E-13 kpt; spin; max resid(k); each band:
   3.03E-13 3.92E-13 2.96E-13 2.43E-13
-  -0.1250  0.3750  0.1250    1  3.79057E-13 kpt; spin; max resid(k); each band:
+  -0.1250  0.3750  0.1250    1  3.79052E-13 kpt; spin; max resid(k); each band:
   2.96E-13 3.79E-13 3.12E-13 3.14E-13
-   0.1250 -0.3750  0.1250    1  2.91809E-13 kpt; spin; max resid(k); each band:
+   0.1250 -0.3750  0.1250    1  2.91804E-13 kpt; spin; max resid(k); each band:
   2.02E-13 2.34E-13 2.76E-13 2.92E-13
-   0.3750 -0.3750  0.1250    1  3.61922E-13 kpt; spin; max resid(k); each band:
+   0.3750 -0.3750  0.1250    1  3.61918E-13 kpt; spin; max resid(k); each band:
   3.62E-13 2.57E-13 2.27E-13 2.72E-13
-  -0.3750 -0.3750  0.1250    1  3.70305E-13 kpt; spin; max resid(k); each band:
+  -0.3750 -0.3750  0.1250    1  3.70300E-13 kpt; spin; max resid(k); each band:
   2.06E-13 2.12E-13 2.38E-13 3.70E-13
-  -0.1250 -0.3750  0.1250    1  3.63875E-13 kpt; spin; max resid(k); each band:
+  -0.1250 -0.3750  0.1250    1  3.63872E-13 kpt; spin; max resid(k); each band:
   3.64E-13 3.24E-13 3.18E-13 3.61E-13
-   0.1250 -0.1250  0.1250    1  3.46740E-13 kpt; spin; max resid(k); each band:
+   0.1250 -0.1250  0.1250    1  3.46734E-13 kpt; spin; max resid(k); each band:
   2.28E-13 2.49E-13 3.24E-13 3.47E-13
-   0.3750 -0.1250  0.1250    1  3.84571E-13 kpt; spin; max resid(k); each band:
+   0.3750 -0.1250  0.1250    1  3.84568E-13 kpt; spin; max resid(k); each band:
   3.03E-13 3.83E-13 2.82E-13 3.85E-13
-  -0.3750 -0.1250  0.1250    1  3.84571E-13 kpt; spin; max resid(k); each band:
+  -0.3750 -0.1250  0.1250    1  3.84568E-13 kpt; spin; max resid(k); each band:
   3.03E-13 3.83E-13 2.82E-13 3.85E-13
-  -0.1250 -0.1250  0.1250    1  3.46740E-13 kpt; spin; max resid(k); each band:
+  -0.1250 -0.1250  0.1250    1  3.46734E-13 kpt; spin; max resid(k); each band:
   2.28E-13 2.49E-13 3.24E-13 3.47E-13
-   0.1250  0.3750  0.3750    1  3.48034E-13 kpt; spin; max resid(k); each band:
+   0.1250  0.3750  0.3750    1  3.48028E-13 kpt; spin; max resid(k); each band:
   2.99E-13 2.37E-13 3.48E-13 2.85E-13
-   0.3750  0.3750  0.3750    1  5.22743E-13 kpt; spin; max resid(k); each band:
+   0.3750  0.3750  0.3750    1  5.22731E-13 kpt; spin; max resid(k); each band:
   1.06E-13 1.59E-13 2.48E-13 5.23E-13
-  -0.3750  0.3750  0.3750    1  3.29286E-13 kpt; spin; max resid(k); each band:
+  -0.3750  0.3750  0.3750    1  3.29283E-13 kpt; spin; max resid(k); each band:
   3.29E-13 2.32E-13 2.98E-13 2.87E-13
-  -0.1250  0.3750  0.3750    1  4.30658E-13 kpt; spin; max resid(k); each band:
+  -0.1250  0.3750  0.3750    1  4.30652E-13 kpt; spin; max resid(k); each band:
   2.74E-13 4.31E-13 2.79E-13 2.82E-13
-   0.1250 -0.3750  0.3750    1  3.29681E-13 kpt; spin; max resid(k); each band:
+   0.1250 -0.3750  0.3750    1  3.29678E-13 kpt; spin; max resid(k); each band:
   3.30E-13 3.01E-13 2.41E-13 1.89E-13
-   0.3750 -0.3750  0.3750    1  2.96058E-13 kpt; spin; max resid(k); each band:
+   0.3750 -0.3750  0.3750    1  2.96054E-13 kpt; spin; max resid(k); each band:
   1.99E-13 1.82E-13 2.22E-13 2.96E-13
-  -0.3750 -0.3750  0.3750    1  2.96058E-13 kpt; spin; max resid(k); each band:
+  -0.3750 -0.3750  0.3750    1  2.96054E-13 kpt; spin; max resid(k); each band:
   1.99E-13 1.82E-13 2.22E-13 2.96E-13
-  -0.1250 -0.3750  0.3750    1  3.29681E-13 kpt; spin; max resid(k); each band:
+  -0.1250 -0.3750  0.3750    1  3.29678E-13 kpt; spin; max resid(k); each band:
   3.30E-13 3.01E-13 2.41E-13 1.89E-13
-   0.1250 -0.1250  0.3750    1  3.63875E-13 kpt; spin; max resid(k); each band:
+   0.1250 -0.1250  0.3750    1  3.63872E-13 kpt; spin; max resid(k); each band:
   3.64E-13 3.24E-13 3.18E-13 3.61E-13
-   0.3750 -0.1250  0.3750    1  3.70305E-13 kpt; spin; max resid(k); each band:
+   0.3750 -0.1250  0.3750    1  3.70300E-13 kpt; spin; max resid(k); each band:
   2.06E-13 2.12E-13 2.38E-13 3.70E-13
-  -0.3750 -0.1250  0.3750    1  3.61922E-13 kpt; spin; max resid(k); each band:
+  -0.3750 -0.1250  0.3750    1  3.61918E-13 kpt; spin; max resid(k); each band:
   3.62E-13 2.57E-13 2.27E-13 2.72E-13
-  -0.1250 -0.1250  0.3750    1  2.91809E-13 kpt; spin; max resid(k); each band:
+  -0.1250 -0.1250  0.3750    1  2.91804E-13 kpt; spin; max resid(k); each band:
   2.02E-13 2.34E-13 2.76E-13 2.92E-13
-   0.1250 -0.3750 -0.3750    1  4.30658E-13 kpt; spin; max resid(k); each band:
+   0.1250 -0.3750 -0.3750    1  4.30652E-13 kpt; spin; max resid(k); each band:
   2.74E-13 4.31E-13 2.79E-13 2.82E-13
-   0.3750 -0.3750 -0.3750    1  3.29286E-13 kpt; spin; max resid(k); each band:
+   0.3750 -0.3750 -0.3750    1  3.29283E-13 kpt; spin; max resid(k); each band:
   3.29E-13 2.32E-13 2.98E-13 2.87E-13
-  -0.3750 -0.3750 -0.3750    1  5.22735E-13 kpt; spin; max resid(k); each band:
+  -0.3750 -0.3750 -0.3750    1  5.22728E-13 kpt; spin; max resid(k); each band:
   1.06E-13 1.59E-13 2.48E-13 5.23E-13
-  -0.1250 -0.3750 -0.3750    1  3.48034E-13 kpt; spin; max resid(k); each band:
+  -0.1250 -0.3750 -0.3750    1  3.48028E-13 kpt; spin; max resid(k); each band:
   2.99E-13 2.37E-13 3.48E-13 2.85E-13
-   0.1250 -0.1250 -0.3750    1  3.79057E-13 kpt; spin; max resid(k); each band:
+   0.1250 -0.1250 -0.3750    1  3.79052E-13 kpt; spin; max resid(k); each band:
   2.96E-13 3.79E-13 3.12E-13 3.14E-13
-   0.3750 -0.1250 -0.3750    1  3.91793E-13 kpt; spin; max resid(k); each band:
+   0.3750 -0.1250 -0.3750    1  3.91789E-13 kpt; spin; max resid(k); each band:
   3.03E-13 3.92E-13 2.96E-13 2.43E-13
-  -0.3750 -0.1250 -0.3750    1  3.64028E-13 kpt; spin; max resid(k); each band:
+  -0.3750 -0.1250 -0.3750    1  3.64023E-13 kpt; spin; max resid(k); each band:
   1.80E-13 2.04E-13 3.39E-13 3.64E-13
-  -0.1250 -0.1250 -0.3750    1  3.04179E-13 kpt; spin; max resid(k); each band:
+  -0.1250 -0.1250 -0.3750    1  3.04175E-13 kpt; spin; max resid(k); each band:
   1.88E-13 2.65E-13 2.83E-13 3.04E-13
-   0.1250 -0.1250 -0.1250    1  5.28940E-13 kpt; spin; max resid(k); each band:
+   0.1250 -0.1250 -0.1250    1  5.28932E-13 kpt; spin; max resid(k); each band:
   3.21E-13 5.29E-13 4.17E-13 3.66E-13
-   0.3750 -0.1250 -0.1250    1  5.38623E-13 kpt; spin; max resid(k); each band:
+   0.3750 -0.1250 -0.1250    1  5.38615E-13 kpt; spin; max resid(k); each band:
   2.61E-13 5.39E-13 2.79E-13 4.43E-13
-  -0.3750 -0.1250 -0.1250    1  3.87349E-13 kpt; spin; max resid(k); each band:
+  -0.3750 -0.1250 -0.1250    1  3.87345E-13 kpt; spin; max resid(k); each band:
   2.98E-13 3.50E-13 2.79E-13 3.87E-13
-  -0.1250 -0.1250 -0.1250    1  6.61809E-13 kpt; spin; max resid(k); each band:
+  -0.1250 -0.1250 -0.1250    1  6.61790E-13 kpt; spin; max resid(k); each band:
   8.69E-14 3.02E-13 3.39E-13 6.62E-13
 
  Seventeen components of 2nd-order total energy (hartree) are
@@ -3045,23 +3045,23 @@ tolerances: {tolwfr: 1.00E-12, }
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 
--ETOT  1   1.3554097295696     -3.178E+00 5.149E-03 1.884E+02
+-ETOT  1   1.3554097295946     -3.178E+00 5.149E-03 1.884E+02
 
- ETOT  2  0.81884901426904     -5.366E-01 8.202E-04 2.110E+01
+ ETOT  2  0.81884901351925     -5.366E-01 8.202E-04 2.110E+01
 
- ETOT  3  0.74102503280399     -7.782E-02 7.386E-05 4.757E-01
+ ETOT  3  0.74102503226897     -7.782E-02 7.386E-05 4.757E-01
 
- ETOT  4  0.73892837931167     -2.097E-03 1.330E-06 5.250E-03
+ ETOT  4  0.73892837926817     -2.097E-03 1.330E-06 5.250E-03
 
- ETOT  5  0.73890712506723     -2.125E-05 1.837E-08 9.841E-04
+ ETOT  5  0.73890712506393     -2.125E-05 1.837E-08 9.841E-04
 
- ETOT  6  0.73890262233372     -4.503E-06 2.176E-09 9.855E-06
+ ETOT  6  0.73890262233388     -4.503E-06 2.176E-09 9.855E-06
 
- ETOT  7  0.73890259011278     -3.222E-08 3.086E-11 7.738E-07
+ ETOT  7  0.73890259011286     -3.222E-08 3.086E-11 7.738E-07
 
- ETOT  8  0.73890258725048     -2.862E-09 2.116E-12 1.200E-08
+ ETOT  8  0.73890258725056     -2.862E-09 2.116E-12 1.200E-08
 
- ETOT  9  0.73890258721217     -3.831E-11 9.713E-13 8.348E-11
+ ETOT  9  0.73890258721227     -3.829E-11 9.713E-13 8.348E-11
 
  At SCF step    9   max residual=  9.71E-13 < tolwfr=  1.00E-12 =>converged.
 -open ddk wf file :t66o_DS3_1WF7
@@ -3072,27 +3072,27 @@ tolerances: {tolwfr: 1.00E-12, }
  ----iterations are completed or convergence reached----
 
  Mean square residual over all n,k,spin=   34.611E-14; max=  97.129E-14
-   0.1250  0.1250  0.1250    1  7.59407E-13 kpt; spin; max resid(k); each band:
+   0.1250  0.1250  0.1250    1  7.59403E-13 kpt; spin; max resid(k); each band:
   7.58E-13 2.39E-13 1.37E-13 7.59E-13
    0.3750  0.1250  0.1250    1  4.75458E-13 kpt; spin; max resid(k); each band:
   2.67E-13 4.75E-13 2.23E-13 1.67E-13
   -0.3750  0.1250  0.1250    1  4.82847E-13 kpt; spin; max resid(k); each band:
   2.58E-13 4.83E-13 2.28E-13 1.94E-13
-  -0.1250  0.1250  0.1250    1  9.50724E-13 kpt; spin; max resid(k); each band:
+  -0.1250  0.1250  0.1250    1  9.50723E-13 kpt; spin; max resid(k); each band:
   9.51E-13 3.64E-13 2.76E-13 1.61E-13
    0.1250  0.3750  0.1250    1  8.78822E-13 kpt; spin; max resid(k); each band:
   8.79E-13 8.63E-13 1.97E-13 2.80E-13
-   0.3750  0.3750  0.1250    1  2.76641E-13 kpt; spin; max resid(k); each band:
+   0.3750  0.3750  0.1250    1  2.76640E-13 kpt; spin; max resid(k); each band:
   2.13E-13 2.22E-13 1.76E-13 2.77E-13
-  -0.3750  0.3750  0.1250    1  3.69849E-13 kpt; spin; max resid(k); each band:
+  -0.3750  0.3750  0.1250    1  3.69848E-13 kpt; spin; max resid(k); each band:
   2.65E-13 3.70E-13 1.97E-13 1.78E-13
   -0.1250  0.3750  0.1250    1  2.44981E-13 kpt; spin; max resid(k); each band:
   2.45E-13 2.39E-13 2.27E-13 1.70E-13
-   0.1250 -0.3750  0.1250    1  9.50356E-13 kpt; spin; max resid(k); each band:
+   0.1250 -0.3750  0.1250    1  9.50355E-13 kpt; spin; max resid(k); each band:
   9.50E-13 8.94E-13 1.87E-13 2.63E-13
    0.3750 -0.3750  0.1250    1  8.67861E-13 kpt; spin; max resid(k); each band:
   3.14E-13 8.68E-13 2.95E-13 2.11E-13
-  -0.3750 -0.3750  0.1250    1  9.71286E-13 kpt; spin; max resid(k); each band:
+  -0.3750 -0.3750  0.1250    1  9.71285E-13 kpt; spin; max resid(k); each band:
   2.67E-13 9.71E-13 1.85E-13 2.50E-13
   -0.1250 -0.3750  0.1250    1  7.28787E-13 kpt; spin; max resid(k); each band:
   2.49E-13 7.29E-13 2.87E-13 1.96E-13
@@ -3104,53 +3104,53 @@ tolerances: {tolwfr: 1.00E-12, }
   2.89E-13 3.85E-13 1.84E-13 2.61E-13
   -0.1250 -0.1250  0.1250    1  8.43291E-13 kpt; spin; max resid(k); each band:
   8.43E-13 1.84E-13 2.14E-13 4.43E-13
-   0.1250  0.3750  0.3750    1  3.76251E-13 kpt; spin; max resid(k); each band:
+   0.1250  0.3750  0.3750    1  3.76250E-13 kpt; spin; max resid(k); each band:
   2.08E-13 1.19E-13 3.76E-13 1.55E-13
    0.3750  0.3750  0.3750    1  8.52985E-13 kpt; spin; max resid(k); each band:
   8.53E-13 1.66E-13 1.59E-13 4.02E-13
-  -0.3750  0.3750  0.3750    1  3.66216E-13 kpt; spin; max resid(k); each band:
+  -0.3750  0.3750  0.3750    1  3.66215E-13 kpt; spin; max resid(k); each band:
   2.75E-13 2.39E-13 3.66E-13 1.53E-13
-  -0.1250  0.3750  0.3750    1  3.41298E-13 kpt; spin; max resid(k); each band:
+  -0.1250  0.3750  0.3750    1  3.41297E-13 kpt; spin; max resid(k); each band:
   2.25E-13 3.41E-13 2.02E-13 1.55E-13
    0.1250 -0.3750  0.3750    1  2.41822E-13 kpt; spin; max resid(k); each band:
   2.42E-13 2.34E-13 1.22E-13 2.37E-13
-   0.3750 -0.3750  0.3750    1  9.61806E-13 kpt; spin; max resid(k); each band:
+   0.3750 -0.3750  0.3750    1  9.61805E-13 kpt; spin; max resid(k); each band:
   2.06E-13 9.62E-13 1.82E-13 2.53E-13
-  -0.3750 -0.3750  0.3750    1  9.61806E-13 kpt; spin; max resid(k); each band:
+  -0.3750 -0.3750  0.3750    1  9.61805E-13 kpt; spin; max resid(k); each band:
   2.06E-13 9.62E-13 1.82E-13 2.53E-13
   -0.1250 -0.3750  0.3750    1  2.41822E-13 kpt; spin; max resid(k); each band:
   2.42E-13 2.34E-13 1.22E-13 2.37E-13
    0.1250 -0.1250  0.3750    1  7.28787E-13 kpt; spin; max resid(k); each band:
   2.49E-13 7.29E-13 2.87E-13 1.96E-13
-   0.3750 -0.1250  0.3750    1  9.71286E-13 kpt; spin; max resid(k); each band:
+   0.3750 -0.1250  0.3750    1  9.71285E-13 kpt; spin; max resid(k); each band:
   2.67E-13 9.71E-13 1.85E-13 2.50E-13
   -0.3750 -0.1250  0.3750    1  8.67861E-13 kpt; spin; max resid(k); each band:
   3.14E-13 8.68E-13 2.95E-13 2.11E-13
-  -0.1250 -0.1250  0.3750    1  9.50356E-13 kpt; spin; max resid(k); each band:
+  -0.1250 -0.1250  0.3750    1  9.50355E-13 kpt; spin; max resid(k); each band:
   9.50E-13 8.94E-13 1.87E-13 2.63E-13
-   0.1250 -0.3750 -0.3750    1  3.41298E-13 kpt; spin; max resid(k); each band:
+   0.1250 -0.3750 -0.3750    1  3.41297E-13 kpt; spin; max resid(k); each band:
   2.25E-13 3.41E-13 2.02E-13 1.55E-13
-   0.3750 -0.3750 -0.3750    1  3.66216E-13 kpt; spin; max resid(k); each band:
+   0.3750 -0.3750 -0.3750    1  3.66215E-13 kpt; spin; max resid(k); each band:
   2.75E-13 2.39E-13 3.66E-13 1.53E-13
   -0.3750 -0.3750 -0.3750    1  8.52985E-13 kpt; spin; max resid(k); each band:
   8.53E-13 1.66E-13 1.59E-13 4.02E-13
-  -0.1250 -0.3750 -0.3750    1  3.76251E-13 kpt; spin; max resid(k); each band:
+  -0.1250 -0.3750 -0.3750    1  3.76250E-13 kpt; spin; max resid(k); each band:
   2.08E-13 1.19E-13 3.76E-13 1.55E-13
    0.1250 -0.1250 -0.3750    1  2.44981E-13 kpt; spin; max resid(k); each band:
   2.45E-13 2.39E-13 2.27E-13 1.70E-13
-   0.3750 -0.1250 -0.3750    1  3.69849E-13 kpt; spin; max resid(k); each band:
+   0.3750 -0.1250 -0.3750    1  3.69848E-13 kpt; spin; max resid(k); each band:
   2.65E-13 3.70E-13 1.97E-13 1.78E-13
-  -0.3750 -0.1250 -0.3750    1  2.76641E-13 kpt; spin; max resid(k); each band:
+  -0.3750 -0.1250 -0.3750    1  2.76640E-13 kpt; spin; max resid(k); each band:
   2.13E-13 2.22E-13 1.76E-13 2.77E-13
   -0.1250 -0.1250 -0.3750    1  8.78822E-13 kpt; spin; max resid(k); each band:
   8.79E-13 8.63E-13 1.97E-13 2.80E-13
-   0.1250 -0.1250 -0.1250    1  9.50724E-13 kpt; spin; max resid(k); each band:
+   0.1250 -0.1250 -0.1250    1  9.50723E-13 kpt; spin; max resid(k); each band:
   9.51E-13 3.64E-13 2.76E-13 1.61E-13
    0.3750 -0.1250 -0.1250    1  4.82847E-13 kpt; spin; max resid(k); each band:
   2.58E-13 4.83E-13 2.28E-13 1.94E-13
   -0.3750 -0.1250 -0.1250    1  4.75458E-13 kpt; spin; max resid(k); each band:
   2.67E-13 4.75E-13 2.23E-13 1.67E-13
-  -0.1250 -0.1250 -0.1250    1  7.59415E-13 kpt; spin; max resid(k); each band:
+  -0.1250 -0.1250 -0.1250    1  7.59405E-13 kpt; spin; max resid(k); each band:
   7.58E-13 2.39E-13 1.37E-13 7.59E-13
 
  Seventeen components of 2nd-order total energy (hartree) are
@@ -3184,26 +3184,26 @@ tolerances: {tolwfr: 1.00E-12, }
  by the effective charges is as follows :
     atom        electric field
  displacement     direction
-       1               1        0.000047        0.000000
-       1               2        0.000013        0.000000
-       1               3        0.000013        0.000000
-       2               1        0.000013        0.000000
-       2               2        0.000047        0.000000
-       2               3        0.000013        0.000000
-       3               1        0.000013        0.000000
-       3               2        0.000013        0.000000
-       3               3        0.000047        0.000000
+       1               1        0.000046        0.000000
+       1               2        0.000012        0.000000
+       1               3        0.000012        0.000000
+       2               1        0.000012        0.000000
+       2               2        0.000046        0.000000
+       2               3        0.000012        0.000000
+       3               1        0.000012        0.000000
+       3               2        0.000012        0.000000
+       3               3        0.000046        0.000000
 
  Effective charge tensors after 
  imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
-         1         1    2.379903E+00    1.305240E-01    1.305240E-01
-         1         2    1.305240E-01    2.379903E+00    1.305240E-01
-         1         3    1.305240E-01    1.305240E-01    2.379903E+00
-         2         1   -2.379903E+00   -1.305240E-01   -1.305240E-01
-         2         2   -1.305240E-01   -2.379903E+00   -1.305240E-01
-         2         3   -1.305240E-01   -1.305240E-01   -2.379903E+00
+         1         1    2.379903E+00    1.305254E-01    1.305254E-01
+         1         2    1.305254E-01    2.379903E+00    1.305254E-01
+         1         3    1.305254E-01    1.305254E-01    2.379903E+00
+         2         1   -2.379903E+00   -1.305254E-01   -1.305254E-01
+         2         2   -1.305254E-01   -2.379903E+00   -1.305254E-01
+         2         3   -1.305254E-01   -1.305254E-01   -2.379903E+00
  Now, the imaginary part of the dynamical matrix is zeroed
   
   Ewald part of the elastic tensor in cartesian coordinates
@@ -3456,29 +3456,29 @@ tolerances: {tolwfr: 1.00E-12, }
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
   
-   1    1   1    4        26.0510713833        -0.0000000000
+   1    1   1    4        26.0510720779        -0.0000000000
    1    1   1    5         0.0768724598         0.0000000000
    1    1   1    6         0.2534241755         0.0000000000
   
-   2    1   1    4        -0.3400389893        -0.0000000000
+   2    1   1    4        -0.3400976270        -0.0000000000
    2    1   1    5         0.1423349228         0.0000000000
    2    1   1    6         5.1099199065         0.0000000000
   
-   3    1   1    4        -0.3400944357        -0.0000000000
+   3    1   1    4        -0.3400356606        -0.0000000000
    3    1   1    5         0.1423349228         0.0000000000
    3    1   1    6         5.1099199065         0.0000000000
   
-   1    2   1    4        27.4862552517        -0.0000000000
-   1    2   1    5         1.0643092682         0.0000000000
+   1    2   1    4        27.4862534274        -0.0000000000
+   1    2   1    5         1.0643092683         0.0000000000
    1    2   1    6        -0.0159690618         0.0000000000
   
-   2    2   1    4         4.8956610000        -0.0000000000
+   2    2   1    4         4.8953484013        -0.0000000000
    2    2   1    5         0.6974307965         0.0000000000
-   2    2   1    6        -4.0617015229         0.0000000000
+   2    2   1    6        -4.0617015228         0.0000000000
   
-   3    2   1    4         4.8953849439        -0.0000000000
+   3    2   1    4         4.8956953354        -0.0000000000
    3    2   1    5         0.6974307965         0.0000000000
-   3    2   1    6        -4.0617015229         0.0000000000
+   3    2   1    6        -4.0617015228         0.0000000000
   
    1    4   1    4         0.0000000000         0.0000000000
    1    4   1    5         0.0000000000         0.0000000000
@@ -3520,41 +3520,41 @@ tolerances: {tolwfr: 1.00E-12, }
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
   
-   1    1   1    4       -29.9471102152         0.0000234648
+   1    1   1    4       -29.9471104671        -0.0000162279
    1    1   1    5         0.0082552172         0.0000000000
    1    1   1    6         0.1669714869         0.0000000000
   
-   2    1   1    4         1.1601830049         0.0000216276
+   2    1   1    4         1.1602566213        -0.0000151942
    2    1   1    5         0.0378232729         0.0000000000
    2    1   1    6        -2.2599950505         0.0000000000
   
-   3    1   1    4         1.1602501255        -0.0000280087
+   3    1   1    4         1.1601779705         0.0000194093
    3    1   1    5         0.0378232729         0.0000000000
    3    1   1    6        -2.2599950505         0.0000000000
   
-   1    2   1    4       -73.8554066323         0.0000671044
+   1    2   1    4       -73.8554055871        -0.0000467204
    1    2   1    5        -1.2828936063         0.0000000000
    1    2   1    6        -0.6426870441         0.0000000000
   
-   2    2   1    4        -5.7157159451         0.0000631635
+   2    2   1    4        -5.7154357753        -0.0000410203
    2    2   1    5        -1.0276911179         0.0000000000
    2    2   1    6        -0.4558316540         0.0000000000
   
-   3    2   1    4        -5.7154701411        -0.0001290994
+   3    2   1    4        -5.7157505381         0.0000876255
    3    2   1    5        -1.0276911179         0.0000000000
    3    2   1    6        -0.4558316540         0.0000000000
   
-   1    4   1    4      -134.2170917795        -0.0000020113
-   1    4   1    5        -0.5277346261         0.0000000000
-   1    4   1    6         1.8927856598         0.0000000000
+   1    4   1    4      -134.2170915299         0.0000013874
+   1    4   1    5        -0.5277348954         0.0000000000
+   1    4   1    6         1.8927860053         0.0000000000
   
-   2    4   1    4        43.7097320255        -0.0000027786
-   2    4   1    5         0.1574369952         0.0000000000
-   2    4   1    6        -2.1246215609         0.0000000000
+   2    4   1    4        43.7097321266         0.0000021378
+   2    4   1    5         0.1574373311         0.0000000000
+   2    4   1    6        -2.1246218399         0.0000000000
   
-   3    4   1    4        43.7097292832         0.0000047584
-   3    4   1    5         0.1574369952         0.0000000000
-   3    4   1    6        -2.1246215609         0.0000000000
+   3    4   1    4        43.7097290811        -0.0000035892
+   3    4   1    5         0.1574373311         0.0000000000
+   3    4   1    6        -2.1246218399         0.0000000000
   
    1    5   1    4         0.0000000000         0.0000000000
    1    5   1    5        -5.1064136480         0.0000000000
@@ -3587,77 +3587,77 @@ tolerances: {tolwfr: 1.00E-12, }
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
   
-   1    1   1    4        -3.8960388318         0.0000000000
-   1    1   2    4         0.8201479070         0.0000000000
-   1    1   3    4         0.8201479070         0.0000000000
+   1    1   1    4        -3.8960383892         0.0000000000
+   1    1   2    4         0.8201534329         0.0000000000
+   1    1   3    4         0.8201534329         0.0000000000
    1    1   1    5         0.4396864442         0.0000000000
    1    1   1    6         0.5041729816         0.0000000000
   
-   2    1   1    4         0.8201479070         0.0000000000
-   2    1   2    4        -3.8960388318         0.0000000000
-   2    1   3    4         0.8201479070         0.0000000000
+   2    1   1    4         0.8201534329         0.0000000000
+   2    1   2    4        -3.8960383892         0.0000000000
+   2    1   3    4         0.8201534329         0.0000000000
    2    1   1    5         0.5188949980         0.0000000000
    2    1   1    6        -0.0681129845         0.0000000000
   
-   3    1   1    4         0.8201479070         0.0000000000
-   3    1   2    4         0.8201479070         0.0000000000
-   3    1   3    4        -3.8960388318         0.0000000000
+   3    1   1    4         0.8201534329         0.0000000000
+   3    1   2    4         0.8201534329         0.0000000000
+   3    1   3    4        -3.8960383892         0.0000000000
    3    1   1    5         0.5188949995         0.0000000000
    3    1   1    6        -0.0681129845         0.0000000000
   
-   1    2   1    4       -46.3691513806         0.0000000000
-   1    2   2    4        -0.8200650291         0.0000000000
-   1    2   3    4        -0.8200650291         0.0000000000
-   1    2   1    5        -0.4396875120         0.0000000000
+   1    2   1    4       -46.3691521597         0.0000000000
+   1    2   2    4        -0.8200766503         0.0000000000
+   1    2   3    4        -0.8200766503         0.0000000000
+   1    2   1    5        -0.4396875119         0.0000000000
    1    2   1    6        -0.5041781853         0.0000000000
   
-   2    2   1    4        -0.8200650291         0.0000000000
-   2    2   2    4       -46.3691513806         0.0000000000
-   2    2   3    4        -0.8200650291         0.0000000000
+   2    2   1    4        -0.8200766503         0.0000000000
+   2    2   2    4       -46.3691521597         0.0000000000
+   2    2   3    4        -0.8200766503         0.0000000000
    2    2   1    5        -0.5188920847         0.0000000000
    2    2   1    6         0.0681272234         0.0000000000
   
-   3    2   1    4        -0.8200650291         0.0000000000
-   3    2   2    4        -0.8200650291         0.0000000000
-   3    2   3    4       -46.3691513806         0.0000000000
+   3    2   1    4        -0.8200766503         0.0000000000
+   3    2   2    4        -0.8200766503         0.0000000000
+   3    2   3    4       -46.3691521597         0.0000000000
    3    2   1    5        -0.5188920812         0.0000000000
    3    2   1    6         0.0681272238         0.0000000000
   
-   1    4   1    1        -3.8960388318         0.0000000000
-   1    4   2    1         0.8201479070         0.0000000000
-   1    4   3    1         0.8201479070         0.0000000000
-   1    4   1    2       -46.3691513806         0.0000000000
-   1    4   2    2        -0.8200650291         0.0000000000
-   1    4   3    2        -0.8200650291         0.0000000000
-   1    4   1    4      -134.2170917795         0.0000000000
-   1    4   2    4        43.7097301973         0.0000000000
-   1    4   3    4        43.7097301973         0.0000000000
-   1    4   1    5        -0.5277346261         0.0000000000
-   1    4   1    6         1.8927856598         0.0000000000
+   1    4   1    1        -3.8960383892         0.0000000000
+   1    4   2    1         0.8201534329         0.0000000000
+   1    4   3    1         0.8201534329         0.0000000000
+   1    4   1    2       -46.3691521597         0.0000000000
+   1    4   2    2        -0.8200766503         0.0000000000
+   1    4   3    2        -0.8200766503         0.0000000000
+   1    4   1    4      -134.2170915299         0.0000000000
+   1    4   2    4        43.7097300962         0.0000000000
+   1    4   3    4        43.7097300962         0.0000000000
+   1    4   1    5        -0.5277348954         0.0000000000
+   1    4   1    6         1.8927860053         0.0000000000
   
-   2    4   1    1         0.8201479070         0.0000000000
-   2    4   2    1        -3.8960388318         0.0000000000
-   2    4   3    1         0.8201479070         0.0000000000
-   2    4   1    2        -0.8200650291         0.0000000000
-   2    4   2    2       -46.3691513806         0.0000000000
-   2    4   3    2        -0.8200650291         0.0000000000
-   2    4   1    4        43.7097301973         0.0000000000
-   2    4   2    4      -134.2170917795         0.0000000000
-   2    4   3    4        43.7097301973         0.0000000000
-   2    4   1    5         0.1574369952         0.0000000000
-   2    4   1    6        -2.1246215609         0.0000000000
+   2    4   1    1         0.8201534329         0.0000000000
+   2    4   2    1        -3.8960383892         0.0000000000
+   2    4   3    1         0.8201534329         0.0000000000
+   2    4   1    2        -0.8200766503         0.0000000000
+   2    4   2    2       -46.3691521597         0.0000000000
+   2    4   3    2        -0.8200766503         0.0000000000
+   2    4   1    4        43.7097300962         0.0000000000
+   2    4   2    4      -134.2170915299         0.0000000000
+   2    4   3    4        43.7097300962         0.0000000000
+   2    4   1    5         0.1574373311         0.0000000000
+   2    4   1    6        -2.1246218399         0.0000000000
   
-   3    4   1    1         0.8201479070         0.0000000000
-   3    4   2    1         0.8201479070         0.0000000000
-   3    4   3    1        -3.8960388318         0.0000000000
-   3    4   1    2        -0.8200650291         0.0000000000
-   3    4   2    2        -0.8200650291         0.0000000000
-   3    4   3    2       -46.3691513806         0.0000000000
-   3    4   1    4        43.7097301973         0.0000000000
-   3    4   2    4        43.7097301973         0.0000000000
-   3    4   3    4      -134.2170917795         0.0000000000
-   3    4   1    5         0.1574369952         0.0000000000
-   3    4   1    6        -2.1246215609         0.0000000000
+   3    4   1    1         0.8201534329         0.0000000000
+   3    4   2    1         0.8201534329         0.0000000000
+   3    4   3    1        -3.8960383892         0.0000000000
+   3    4   1    2        -0.8200766503         0.0000000000
+   3    4   2    2        -0.8200766503         0.0000000000
+   3    4   3    2       -46.3691521597         0.0000000000
+   3    4   1    4        43.7097300962         0.0000000000
+   3    4   2    4        43.7097300962         0.0000000000
+   3    4   3    4      -134.2170915299         0.0000000000
+   3    4   1    5         0.1574373311         0.0000000000
+   3    4   1    6        -2.1246218399         0.0000000000
   
    1    5   1    5         1.3395817973         0.0000000000
    1    5   1    6        -0.0712791078         0.0000000000
@@ -3682,17 +3682,17 @@ tolerances: {tolwfr: 1.00E-12, }
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    4   1    4         6.4051599728        -0.0000000000
-   1    4   2    4         0.6237444850        -0.0000000000
-   1    4   3    4         0.6237444850        -0.0000000000
+   1    4   1    4         6.4051599642        -0.0000000000
+   1    4   2    4         0.6237444859        -0.0000000000
+   1    4   3    4         0.6237444859        -0.0000000000
   
-   2    4   1    4         0.6237444850        -0.0000000000
-   2    4   2    4         6.4051599728        -0.0000000000
-   2    4   3    4         0.6237444850        -0.0000000000
+   2    4   1    4         0.6237444859        -0.0000000000
+   2    4   2    4         6.4051599642        -0.0000000000
+   2    4   3    4         0.6237444859        -0.0000000000
   
-   3    4   1    4         0.6237444850        -0.0000000000
-   3    4   2    4         0.6237444850        -0.0000000000
-   3    4   3    4         6.4051599728        -0.0000000000
+   3    4   1    4         0.6237444859        -0.0000000000
+   3    4   2    4         0.6237444859        -0.0000000000
+   3    4   3    4         6.4051599642        -0.0000000000
   
   Effective charges, in cartesian coordinates,
   (from electric field response) 
@@ -3700,26 +3700,26 @@ tolerances: {tolwfr: 1.00E-12, }
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    1   1    4         2.3799029053         0.0000000000
-   2    1   1    4         0.1305239983         0.0000000000
-   3    1   1    4         0.1305239983         0.0000000000
-   1    2   1    4        -2.3799029053         0.0000000000
-   2    2   1    4        -0.1305239983         0.0000000000
-   3    2   1    4        -0.1305239983         0.0000000000
+   1    1   1    4         2.3799030025         0.0000000000
+   2    1   1    4         0.1305253628         0.0000000000
+   3    1   1    4         0.1305253628         0.0000000000
+   1    2   1    4        -2.3799030025         0.0000000000
+   2    2   1    4        -0.1305253628         0.0000000000
+   3    2   1    4        -0.1305253628         0.0000000000
   
-   1    1   2    4         0.1305239983         0.0000000000
-   2    1   2    4         2.3799029053         0.0000000000
-   3    1   2    4         0.1305239983         0.0000000000
-   1    2   2    4        -0.1305239983         0.0000000000
-   2    2   2    4        -2.3799029053         0.0000000000
-   3    2   2    4        -0.1305239983         0.0000000000
+   1    1   2    4         0.1305253628         0.0000000000
+   2    1   2    4         2.3799030025         0.0000000000
+   3    1   2    4         0.1305253628         0.0000000000
+   1    2   2    4        -0.1305253628         0.0000000000
+   2    2   2    4        -2.3799030025         0.0000000000
+   3    2   2    4        -0.1305253628         0.0000000000
   
-   1    1   3    4         0.1305239983         0.0000000000
-   2    1   3    4         0.1305239983         0.0000000000
-   3    1   3    4         2.3799029053         0.0000000000
-   1    2   3    4        -0.1305239983         0.0000000000
-   2    2   3    4        -0.1305239983         0.0000000000
-   3    2   3    4        -2.3799029053         0.0000000000
+   1    1   3    4         0.1305253628         0.0000000000
+   2    1   3    4         0.1305253628         0.0000000000
+   3    1   3    4         2.3799030025         0.0000000000
+   1    2   3    4        -0.1305253628         0.0000000000
+   2    2   3    4        -0.1305253628         0.0000000000
+   3    2   3    4        -2.3799030025         0.0000000000
   
   Rigid-atom elastic tensor , in cartesian coordinates,
      j1       j2             matrix element
@@ -3771,14 +3771,14 @@ tolerances: {tolwfr: 1.00E-12, }
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    4   1    5         0.0007659775         0.0000000000
-   1    4   1    6        -0.0117011763         0.0000000000
+   1    4   1    5         0.0007659794         0.0000000000
+   1    4   1    6        -0.0117011778         0.0000000000
   
-   2    4   1    5        -0.0010216507         0.0000000000
-   2    4   1    6        -0.0012196702         0.0000000000
+   2    4   1    5        -0.0010216504         0.0000000000
+   2    4   1    6        -0.0012196701         0.0000000000
   
-   3    4   1    5        -0.0010216507         0.0000000000
-   3    4   1    6        -0.0012196702         0.0000000000
+   3    4   1    5        -0.0010216504         0.0000000000
+   3    4   1    6        -0.0012196701         0.0000000000
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -3805,7 +3805,7 @@ tolerances: {tolwfr: 1.00E-12, }
                       -1.8705624258E-03 -1.8705624258E-03 -1.8705624258E-03
             fcart4     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         312
+-          fftalg         512
            getddk1          0
            getddk2          0
            getddk3          0
@@ -4227,10 +4227,10 @@ P          mk1mem4         64
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          4.9  wall=          5.0
+- Proc.   0 individual time (sec): cpu=          3.0  wall=          4.6
 
 ================================================================================
 
  Calculation completed.
 .Delivered  12 WARNINGs and  24 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          4.9  wall=          5.0
++Overall time at end (sec) : cpu=          3.0  wall=          4.6

@@ -1,8 +1,8 @@
 
-.Version 9.11.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2022 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Jul 2023.
-- ( at 11h58 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h08 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v1_t96/t96.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v1_t96/t96.abi
 - output file    -> t96.abo
 - root for input  files -> t96i
 - root for output files -> t96o
@@ -90,10 +90,10 @@ _ WF disk file :      0.240 Mbytes ; DEN or POT disk file :      0.084 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -111,7 +111,7 @@ _ WF disk file :      0.240 Mbytes ; DEN or POT disk file :      0.084 Mbytes.
              ecut2     2.00000000E+00 Hartree
              ecut3     3.00000000E+00 Hartree
              ecut4     3.00000000E+00 Hartree
--          fftalg         312
+-          fftalg         512
             intxc           1
            istwfk        9
            jdtset        1    2    3    4
@@ -215,11 +215,11 @@ P           mkmem           1
                        0  0 -1  -1  0  0   0 -1  0       0  1  0   1  0  0   0  0  1
                        0  0  1   0  1  0   1  0  0       1  0  0   0  0  1   0  1  0
            symrel2     1  0  0   0  1  0   0  0  1       0  1  0   0  0  1   1  0  0
-                       0  0  1   1  0  0   0  1  0       0  1  0   1  0  0   0  0  1
-                       0  0  1   0  1  0   1  0  0       1  0  0   0  0  1   0  1  0
+                       0  0  1   1  0  0   0  1  0       0  0  1   0  1  0   1  0  0
+                       1  0  0   0  0  1   0  1  0       0  1  0   1  0  0   0  0  1
                       -1  0  0   0 -1  0   0  0 -1       0 -1  0   0  0 -1  -1  0  0
-                       0  0 -1  -1  0  0   0 -1  0       0 -1  0  -1  0  0   0  0 -1
-                       0  0 -1   0 -1  0  -1  0  0      -1  0  0   0  0 -1   0 -1  0
+                       0  0 -1  -1  0  0   0 -1  0       0  0 -1   0 -1  0  -1  0  0
+                      -1  0  0   0  0 -1   0 -1  0       0 -1  0  -1  0  0   0  0 -1
            symrel3     1  0  0   0  1  0   0  0  1      -1 -1  0   1  0  0   0  0  1
                        0 -1  0  -1  0  0   0  0  1       0  1  0  -1 -1  0   0  0  1
                       -1  0  0   1  1  0   0  0  1       1  1  0   0 -1  0   0  0  1
@@ -326,9 +326,9 @@ P           mkmem           1
                       -1.3750857896E+00 -9.2410675952E-01  7.5777678667E+00
                        1.4878428244E+00 -7.2880584642E-01  7.5777678667E+00
                        1.4127526823E-16 -1.1744560179E-16  1.1067871238E+01
-                       1.1275703475E-01 -1.6529126059E+00  5.4126913334E+00
                        1.3750857896E+00  9.2410675952E-01  5.4126913334E+00
                       -1.4878428244E+00  7.2880584642E-01  5.4126913334E+00
+                       1.1275703475E-01 -1.6529126059E+00  5.4126913334E+00
                       -2.3774324014E-17  1.1744560179E-16  8.4178175616E+00
                       -6.1922008996E-18  1.4655646560E-17  1.9225879616E+00
            xangst3     2.8000518221E-16  4.8498320198E-16  4.5728316509E+00
@@ -406,9 +406,9 @@ P           mkmem           1
                       -2.5985355516E+00 -1.7463086930E+00  1.4319905967E+01
                        2.8116154668E+00 -1.3772434538E+00  1.4319905967E+01
                        2.6697156631E-16 -2.2194002290E-16  2.0915245515E+01
-                       2.1307991523E-01 -3.1235521468E+00  1.0228504262E+01
                        2.5985355516E+00  1.7463086930E+00  1.0228504262E+01
                       -2.8116154668E+00  1.3772434538E+00  1.0228504262E+01
+                       2.1307991523E-01 -3.1235521468E+00  1.0228504262E+01
                       -4.4926961381E-17  2.2194002290E-16  1.5907369828E+01
                       -1.1701563860E-17  2.7695158298E-17  3.6331647138E+00
             xcart3     5.2913311017E-16  9.1648543079E-16  8.6413994719E+00
@@ -486,9 +486,9 @@ P           mkmem           1
                        2.5000000000E-01  5.5600000000E-01  9.4400000000E-01
                        9.4400000000E-01  2.5000000000E-01  5.5600000000E-01
                        8.5200000000E-01  8.5200000000E-01  8.5200000000E-01
-                       4.4400000000E-01  5.6000000000E-02  7.5000000000E-01
                        7.5000000000E-01  4.4400000000E-01  5.6000000000E-02
                        5.6000000000E-02  7.5000000000E-01  4.4400000000E-01
+                       4.4400000000E-01  5.6000000000E-02  7.5000000000E-01
                        6.4800000000E-01  6.4800000000E-01  6.4800000000E-01
                        1.4800000000E-01  1.4800000000E-01  1.4800000000E-01
              xred3     1.3171435860E-32 -1.4274814397E-34  3.5200000000E-01
@@ -577,10 +577,10 @@ P           mkmem           1
 
  abinit : before driver, prtvol=-1, debugging mode => will skip acknowledgments
 -
-- Proc.   0 individual time (sec): cpu=          1.1  wall=          1.2
+- Proc.   0 individual time (sec): cpu=          0.7  wall=          0.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.1  wall=          1.2
++Overall time at end (sec) : cpu=          0.7  wall=          0.8

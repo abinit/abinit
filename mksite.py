@@ -4,6 +4,7 @@ from __future__ import print_function, division, unicode_literals, absolute_impo
 
 import sys
 import os
+import subprocess
 import warnings
 import mkdocs
 import mkdocs.__main__
@@ -13,6 +14,17 @@ if sys.version_info < (3, 6):
 
 if sys.version_info >= (3, 10):
     warnings.warn("Python >= 3.10 is not yet supported. Please use py <= 3.9 to build the Abinit documentation\n" * 20)
+
+def is_git_repo(path):
+    '''
+    Utility to check if current dir is the root of a git clone.
+    How ? just checking .git fold exist.
+    Do not require to have git installed
+    '''
+    # Check whether "path/.git" exists and is a directory
+    git_dir = os.path.join(path, ".git")
+    return os.path.isdir(git_dir)
+
 
 #if sys.mkdocs.__version__
 
@@ -25,6 +37,34 @@ sys.path.insert(0, os.path.join(pack_dir, "doc"))
 
 from abimkdocs.website import Website, HTMLValidator
 
+def get_abinit_version():
+    abinit_version = "Unknown"
+    if os.path.exists('.version'):
+        with open('.version','r') as f:
+            abinit_version = f.read()
+    elif os.path.exists('.tarball-version'):
+        with open('.tarball-version','r') as f:
+            abinit_version = f.read()
+    else:
+        print("[get_abinit_version] Can't find either .version or .tarball-version, will run git-version-gen")
+        # cross-check we are in a git repo
+        if is_git_repo(os.path.dirname(__file__)):
+            abinit_version = subprocess.run(['./config/scripts/git-version-gen', '.tarball-version'], stdout=subprocess.PIPE).stdout
+    return abinit_version
+
+def generate_mkdocs_yml():
+
+    abinit_version = get_abinit_version()
+
+    # Read yml template and replace abinit version
+    with open('mkdocs.yml.in', 'r') as mkdocs_yml_in :
+        yml_data = mkdocs_yml_in.read()
+
+    yml_data = yml_data.replace('ABINIT_VERSION', str(abinit_version))
+
+    # Write mkdocs.yml
+    with open('mkdocs.yml', 'w') as mkdocs_yml:
+        mkdocs_yml.write(yml_data)
 
 def prof_main(main):
     """
@@ -123,6 +163,9 @@ def main():
     verbose = 1 if "-v" in sys.argv or "--verbose" in sys.argv else 0
     strict = "-s" in sys.argv or "--strict" in sys.argv
 
+    # generate mkdocs.yml from mkdocs.yml.in
+    generate_mkdocs_yml()
+
     if "--no-colors" in sys.argv:
         from tests.pymods import termcolor
         termcolor.enable(False)
@@ -156,4 +199,3 @@ def main():
 
 if __name__ == '__main__':
     sys.exit(main())
-

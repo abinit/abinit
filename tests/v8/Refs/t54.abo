@@ -1,8 +1,8 @@
 
-.Version 9.11.2 of ANADDB 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ANADDB, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2022 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Jul 2023.
-- ( at 12h08 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h14 )
   
 
 ================================================================================
@@ -113,7 +113,7 @@
 
  Calculation of the interatomic forces 
 
--begin at tcpu      0.032  and twall      0.038 sec
+-begin at tcpu      0.033  and twall      0.033 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :      144
  greater than 80, so only write 20 of them
@@ -180,10 +180,10 @@
   3.0 -1.0 -2.0  1.0  0.0 -1.0  1.0  1.0  0.0 -1.0 -2.0  1.0
  Symmetry characters of vibration mode #   4
         degenerate with vibration mode #   5
-  2.0 -0.0  1.0 -0.0 -1.0 -0.0 -2.0  0.0 -1.0 -0.0  1.0  0.0
+  2.0  0.0  1.0  0.0 -1.0  0.0 -2.0  0.0 -1.0 -0.0  1.0 -0.0
  Symmetry characters of vibration mode #   6
         degenerate with vibration mode #   7
-  2.0  0.0 -1.0  0.0 -1.0  0.0  2.0  0.0 -1.0 -0.0 -1.0  0.0
+  2.0 -0.0 -1.0 -0.0 -1.0  0.0  2.0  0.0 -1.0 -0.0 -1.0  0.0
  Symmetry characters of vibration mode #   8
   1.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0
  Symmetry characters of vibration mode #   9
@@ -237,10 +237,10 @@
 -  0.000000E+00  0.000000E+00  0.000000E+00  4.559219E+02  4.559219E+02
 -  5.048500E+02  5.048500E+02  6.952030E+02  7.146489E+02
 -
-- Proc.   0 individual time (sec): cpu=         20.0  wall=         20.1
+- Proc.   0 individual time (sec): cpu=         22.5  wall=         22.5
 
 ================================================================================
 
-+Total cpu time     20.029  and wall time     20.099 sec
++Total cpu time     22.514  and wall time     22.520 sec
 
  anaddb : the run completed succesfully.

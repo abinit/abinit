@@ -7,7 +7,7 @@
 !! Main routine MULTIBINIT.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2022 ABINIT group (AM, hexu)
+!! Copyright (C) 1999-2024 ABINIT group (AM, hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -40,7 +40,6 @@
 module m_multibinit_driver
   use defs_basis
   use defs_abitypes
-  use m_build_info
   use m_xmpi
   use m_xomp
   use m_abicore
@@ -55,8 +54,9 @@ module m_multibinit_driver
   !use m_spin_model, only: spin_model_t
   use m_abihist
 
+  use m_build_info,         only: abinit_version
   use m_multibinit_manager, only: mb_manager_t
-  use m_multibinit_main2, only: multibinit_main2
+  use m_multibinit_main2,   only: multibinit_main2
 
   use m_mover_effpot, only : mover_effpot
 #if defined DEV_MS_SCALEUP

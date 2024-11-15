@@ -1,4 +1,4 @@
-## Copyright (C) 2019-2022 ABINIT group (Yann Pouillon)
+## Copyright (C) 2019-2024 ABINIT group (Yann Pouillon)
 
 #
 # Toolbox for Research on Interacting Quantum Systems (TRIQS)
@@ -135,6 +135,7 @@ AC_DEFUN([SD_TRIQS_INIT], [
         test ! -z "${TRIQS_CPPFLAGS}" && sd_triqs_cppflags="${TRIQS_CPPFLAGS}"
         test ! -z "${TRIQS_CFLAGS}" && sd_triqs_cflags="${TRIQS_CFLAGS}"
         test ! -z "${TRIQS_CXXFLAGS}" && sd_triqs_cxxflags="${TRIQS_CXXFLAGS}"
+        test ! -z "${TRIQS_FFLAGS}" && sd_triqs_fcflags="${TRIQS_FFLAGS}"
         test ! -z "${TRIQS_FCFLAGS}" && sd_triqs_fcflags="${TRIQS_FCFLAGS}"
         test ! -z "${TRIQS_LDFLAGS}" && sd_triqs_ldflags="${TRIQS_LDFLAGS}"
         test ! -z "${TRIQS_LIBS}" && sd_triqs_libs="${TRIQS_LIBS}"

@@ -1,8 +1,8 @@
 
-.Version 9.11.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2022 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Jul 2023.
-- ( at 12h00 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h09 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v3_t54/t54.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v3_t54/t54.abi
 - output file    -> t54.abo
 - root for input  files -> t54i
 - root for output files -> t54o
@@ -60,10 +60,10 @@ _ WF disk file :      0.239 Mbytes ; DEN or POT disk file :      0.249 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -76,7 +76,7 @@ _ WF disk file :      0.239 Mbytes ; DEN or POT disk file :      0.249 Mbytes.
            diemac      1.00000000E+00
            diemix      5.00000000E-01
              ecut      9.00000000E+00 Hartree
--          fftalg         312
+-          fftalg         512
            getden1          0
            getden2          1
            getwfk1          0
@@ -159,8 +159,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/2he.2.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/2he.2.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/2he.2.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/2he.2.hgh
 - Hartwigsen-Goedecker-Hutter psp for He,  from PRB58, 3641 (1998)
 -  2.00000   2.00000     10605                znucl, zion, pspdat
     3    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -178,8 +178,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/1h.1.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/1h.1.hgh
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/1h.1.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/1h.1.hgh
 - Hartwigsen-Goedecker-Hutter psp for H,  from PRB58, 3641 (1998)
 -  1.00000   1.00000     10605                znucl, zion, pspdat
     3    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -215,14 +215,14 @@ tolerances: {tolwfr: 1.00E-22, }
  ETOT  2  -2.4680861694896    -3.886E-03 8.117E-10 1.244E+01
  ETOT  3  -2.4688555102607    -7.693E-04 7.808E-06 9.101E-03
  ETOT  4  -2.4688640764615    -8.566E-06 2.871E-08 2.839E-04
- ETOT  5  -2.4688642017815    -1.253E-07 2.082E-10 2.122E-05
+ ETOT  5  -2.4688642017814    -1.253E-07 2.082E-10 2.122E-05
  ETOT  6  -2.4688642218789    -2.010E-08 1.094E-10 6.505E-07
  ETOT  7  -2.4688642225229    -6.440E-10 2.864E-12 4.091E-09
  ETOT  8  -2.4688642225262    -3.303E-12 2.043E-14 2.209E-10
- ETOT  9  -2.4688642225262    -8.749E-14 4.170E-16 9.201E-13
- ETOT 10  -2.4688642225263    -9.370E-14 5.117E-18 5.847E-15
- ETOT 11  -2.4688642225262     1.279E-13 4.150E-20 7.458E-17
- ETOT 12  -2.4688642225262    -1.865E-14 7.833E-23 1.032E-18
+ ETOT  9  -2.4688642225262    -8.615E-14 4.170E-16 9.201E-13
+ ETOT 10  -2.4688642225263    -9.681E-14 5.117E-18 5.847E-15
+ ETOT 11  -2.4688642225262     1.261E-13 4.150E-20 7.458E-17
+ ETOT 12  -2.4688642225262    -1.643E-14 7.833E-23 1.032E-18
 
  At SCF step   12   max residual=  7.83E-23 < tolwfr=  1.00E-22 =>converged.
 
@@ -242,7 +242,7 @@ lattice_vectors:
 lattice_lengths: [  12.00000,   10.00000,   10.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.2000000E+03
-convergence: {deltae: -1.865E-14, res2:  1.032E-18, residm:  7.833E-23, diffor: null, }
+convergence: {deltae: -1.643E-14, res2:  1.032E-18, residm:  7.833E-23, diffor: null, }
 etotal    :  -2.46886422E+00
 entropy   :   0.00000000E+00
 fermie    :  -8.41187493E-01
@@ -269,7 +269,7 @@ force_length_stats: {min:   3.78307541E-02, max:   3.78307541E-02, mean:   3.783
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   78.335E-24; max=  78.335E-24
+ Mean square residual over all n,k,spin=   78.334E-24; max=  78.334E-24
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.166666666667      0.000000000000      0.000000000000
@@ -284,12 +284,12 @@ force_length_stats: {min:   3.78307541E-02, max:   3.78307541E-02, mean:   3.783
  cartesian forces (hartree/bohr) at end:
     1      0.03783075413416    -0.00000000000000    -0.00000000000000
     2     -0.03783075413416    -0.00000000000000    -0.00000000000000
- frms,max,avg= 2.1841596E-02 3.7830754E-02  -4.075E-13  0.000E+00  0.000E+00 h/b
+ frms,max,avg= 2.1841596E-02 3.7830754E-02  -4.079E-13  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      1.94533542969630    -0.00000000000000    -0.00000000000000
-    2     -1.94533542969630    -0.00000000000000    -0.00000000000000
- frms,max,avg= 1.1231399E+00 1.9453354E+00  -2.096E-11  0.000E+00  0.000E+00 e/A
+    1      1.94533542969632    -0.00000000000000    -0.00000000000000
+    2     -1.94533542969632    -0.00000000000000    -0.00000000000000
+ frms,max,avg= 1.1231399E+00 1.9453354E+00  -2.098E-11  0.000E+00  0.000E+00 e/A
  length scales= 12.000000000000 10.000000000000 10.000000000000 bohr
               =  6.350126503080  5.291772085900  5.291772085900 angstroms
  prteigrs : about to open file t54o_DS1_EIG
@@ -572,7 +572,7 @@ force_length_stats: {min: null, max: null, mean: null, }
            etotal1    -2.4688642225E+00
             fcart1     3.7830754134E-02 -0.0000000000E+00 -0.0000000000E+00
                       -3.7830754134E-02 -0.0000000000E+00 -0.0000000000E+00
--          fftalg         312
+-          fftalg         512
            getden1          0
            getden2          1
            getwfk1          0
@@ -706,10 +706,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          1.0  wall=          1.1
+- Proc.   0 individual time (sec): cpu=          0.7  wall=          0.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered  17 WARNINGs and  13 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.0  wall=          1.1
++Overall time at end (sec) : cpu=          0.7  wall=          0.8

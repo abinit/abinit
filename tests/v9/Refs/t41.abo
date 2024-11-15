@@ -1,8 +1,8 @@
 
-.Version 9.11.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2022 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,16 +14,16 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Jul 2023.
-- ( at 12h10 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h15 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v9_t41/t41.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v9_t41/t41.abi
 - output file    -> t41.abo
 - root for input  files -> t41i
 - root for output files -> t41o
 
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Fe.xml
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Fe.xml
  DATASET    1 : space group Im -3 m (#229); Bravais cI (body-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
@@ -63,17 +63,19 @@ _ WF disk file :      2.158 Mbytes ; DEN or POT disk file :      0.053 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 = 10
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 = 10
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
             acell      4.8000000000E+00  4.8000000000E+00  4.8000000000E+00 Bohr
               amu      5.58470000E+01
              ecut      1.00000000E+01 Hartree
--          fftalg         312
+-          fftalg         512
+           getden1          0
+           getden2          1
            getwfk1          0
            getwfk2          1
              iscf1         17
@@ -146,12 +148,13 @@ P          mk1mem          64
             ngfft2         15      15      15
           ngfftdg          18      18      18
              nkpt          64
-            nline           6
+            nline1          6
+            nline2          8
              nqpt1          0
              nqpt2          1
            nspden           2
            nsppol           2
-            nstep1         12
+            nstep1         20
             nstep2          3
              nsym          48
            ntypat           1
@@ -400,8 +403,12 @@ P          mk1mem          64
                        1  0  0   0  0  1   0  1  0      -1  0  0   0  0 -1   0 -1  0
                        0  1  0  -1 -1 -1   1  0  0       0 -1  0   1  1  1  -1  0  0
                        0  0  1   1  0  0  -1 -1 -1       0  0 -1  -1  0  0   1  1  1
-           tolrde      1.00000000E-03
-           tolwfr      1.00000000E-12
+           tolrde1     5.00000000E-03
+           tolrde2     1.00000000E-05
+           tolvrs1     0.00000000E+00
+           tolvrs2     1.00000000E-05
+           tolwfr1     1.00000000E-18
+           tolwfr2     0.00000000E+00
             typat      1
            useylm           1
               wtk        0.01563    0.01563    0.01563    0.01563    0.01563    0.01563
@@ -458,9 +465,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.15090
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Fe.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Fe.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Fe.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Fe.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Fe.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Fe.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.11531574
@@ -487,33 +494,41 @@ _setup2: Arith. and geom. avg. npw (full set) are      83.656      83.612
 
 --- !BeginCycle
 iteration_state: {dtset: 1, }
-solver: {iscf: 17, nstep: 12, nline: 6, wfoptalg: 10, }
-tolerances: {tolwfr: 1.00E-12, }
+solver: {iscf: 17, nstep: 20, nline: 6, wfoptalg: 10, }
+tolerances: {tolwfr: 1.00E-18, }
 ...
 
      iter   Etot(hartree)     deltaE(h) residm    nres2    magn
- ETOT  1  -123.83670014058    -1.24E+02 1.60E+01 9.61E+01 1.391
- ETOT  2  -124.78428125491    -9.48E-01 1.81E-01 9.60E+01 2.187
- ETOT  3  -124.35369400364     4.31E-01 2.47E-01 5.84E-01 1.661
- ETOT  4  -124.34934979983     4.34E-03 1.78E-01 4.77E-01 1.678
- ETOT  5  -124.34845107810     8.99E-04 1.28E-01 3.44E-01 1.504
- ETOT  6  -124.34858171118    -1.31E-04 4.04E-04 2.38E-01 1.424
- ETOT  7  -124.34836910424     2.13E-04 4.09E-04 2.72E-02 1.268
- ETOT  8  -124.34830680077     6.23E-05 1.66E-05 4.88E-03 1.287
- ETOT  9  -124.34827295999     3.38E-05 6.83E-06 1.18E-03 1.299
- ETOT 10  -124.34827005592     2.90E-06 2.71E-06 1.04E-04 1.289
- ETOT 11  -124.34826953236     5.24E-07 1.77E-07 3.14E-05 1.289
- ETOT 12  -124.34826900253     5.30E-07 1.31E-07 2.99E-06 1.294
+ ETOT  1  -123.85179772267    -1.24E+02 1.61E+01 9.70E+01 1.337
+ ETOT  2  -124.78117903634    -9.29E-01 3.35E-02 9.59E+01 2.187
+ ETOT  3  -124.35458556441     4.27E-01 2.48E-01 6.22E-01 1.644
+ ETOT  4  -124.34945726929     5.13E-03 1.62E-01 5.01E-01 1.671
+ ETOT  5  -124.34835833632     1.10E-03 2.06E-02 3.06E-01 1.502
+ ETOT  6  -124.34855015760    -1.92E-04 2.98E-03 2.25E-01 1.424
+ ETOT  7  -124.34835898568     1.91E-04 3.83E-04 2.71E-02 1.274
+ ETOT  8  -124.34830272913     5.63E-05 1.44E-05 5.57E-03 1.291
+ ETOT  9  -124.34827252308     3.02E-05 5.59E-06 1.38E-03 1.300
+ ETOT 10  -124.34826997288     2.55E-06 3.33E-06 9.02E-05 1.289
+ ETOT 11  -124.34826954953     4.23E-07 1.45E-07 3.56E-05 1.289
+ ETOT 12  -124.34826855639     9.93E-07 2.25E-07 1.81E-05 1.296
+ ETOT 13  -124.34826924207    -6.86E-07 2.85E-08 3.07E-08 1.293
+ ETOT 14  -124.34826928352    -4.15E-08 2.62E-10 4.06E-08 1.293
+ ETOT 15  -124.34826926956     1.40E-08 2.04E-10 1.28E-08 1.293
+ ETOT 16  -124.34826926815     1.42E-09 3.89E-11 1.62E-10 1.293
+ ETOT 17  -124.34826926844    -2.96E-10 5.88E-13 8.54E-12 1.293
+ ETOT 18  -124.34826926830     1.42E-10 1.01E-14 1.11E-12 1.293
+ ETOT 19  -124.34826926822     7.81E-11 5.89E-16 1.22E-13 1.293
+ ETOT 20  -124.34826926821     9.75E-12 2.55E-16 3.78E-15 1.293
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  2.51618389E-03  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  2.51618389E-03  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  2.51618389E-03  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  2.51703996E-03  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  2.51703996E-03  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  2.51703996E-03  sigma(2 1)=  0.00000000E+00
 
 
  scprqt:  WARNING -
-  nstep=   12 was not enough SCF cycles to converge;
-  maximum residual=  1.314E-07 exceeds tolwfr=  1.000E-12
+  nstep=   20 was not enough SCF cycles to converge;
+  maximum residual=  2.546E-16 exceeds tolwfr=  1.000E-18
 
 
 --- !ResultsGS
@@ -526,15 +541,15 @@ lattice_vectors:
 lattice_lengths: [   4.15692,    4.15692,    4.15692, ]
 lattice_angles: [109.471, 109.471, 109.471, ] # degrees, (23, 13, 12)
 lattice_volume:   5.5296000E+01
-convergence: {deltae:  5.298E-07, res2:  2.994E-06, residm:  1.314E-07, diffor: null, }
+convergence: {deltae:  9.749E-12, res2:  3.782E-15, residm:  2.546E-16, diffor: null, }
 etotal    :  -1.24348269E+02
 entropy   :   0.00000000E+00
-fermie    :   5.33973286E-01
+fermie    :   5.33955515E-01
 cartesian_stress_tensor: # hartree/bohr^3
-- [  2.51618389E-03,   0.00000000E+00,   0.00000000E+00, ]
-- [  0.00000000E+00,   2.51618389E-03,   0.00000000E+00, ]
-- [  0.00000000E+00,   0.00000000E+00,   2.51618389E-03, ]
-pressure_GPa:  -7.4029E+01
+- [  2.51703996E-03,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   2.51703996E-03,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   2.51703996E-03, ]
+pressure_GPa:  -7.4054E+01
 xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00, Fe]
 cartesian_forces: # hartree/bohr
@@ -546,79 +561,79 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  ---------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
  Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.11532     8.199249     6.879158     15.078407     1.320091
+    1   2.11532     8.198592     6.879791     15.078383     1.318801
  ---------------------------------------------------------------------
-  Sum:              8.199249     6.879158     15.078407     1.320091
- Total magnetization (from the atomic spheres):             1.320091
- Total magnetization (exact up - dn):                       1.294224
+  Sum:              8.198592     6.879791     15.078383     1.318801
+ Total magnetization (from the atomic spheres):             1.318801
+ Total magnetization (exact up - dn):                       1.292940
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =      8.550651620198444
- Compensation charge over fine fft grid    =      8.550274778274467
+ Compensation charge over spherical meshes =      8.550629707745417
+ Compensation charge over fine fft grid    =      8.550228879350986
 
  ==== Results concerning PAW augmentation regions ====
 
  Total pseudopotential strength Dij (hartree):
  Atom #  1 - Spin component 1
-  -2.31369   0.22552   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+  -2.31365   0.22552   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
    0.22552   0.07097   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000  -1.69722   0.00000   0.00000   0.06034   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000  -1.69722   0.00000   0.00000   0.06034   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000  -1.69722   0.00000   0.00000   0.06034   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.06034   0.00000   0.00000   2.98707   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.06034   0.00000   0.00000   2.98707   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.06034   0.00000   0.00000   2.98707   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.11951   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.11951   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.12631   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.11951 ...
+   0.00000   0.00000  -1.69719   0.00000   0.00000   0.06032   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000  -1.69719   0.00000   0.00000   0.06032   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000  -1.69719   0.00000   0.00000   0.06032   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.06032   0.00000   0.00000   2.98709   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.06032   0.00000   0.00000   2.98709   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.06032   0.00000   0.00000   2.98709   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.11948   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.11948   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.12630   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.11948 ...
    ...  only 12  components have been written...
  Atom #  1 - Spin component 2
-  -2.26037   0.21744   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.21744   0.07234   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000  -1.64811   0.00000   0.00000   0.02393   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000  -1.64811   0.00000   0.00000   0.02393   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000  -1.64811   0.00000   0.00000   0.02393   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.02393   0.00000   0.00000   3.02473   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.02393   0.00000   0.00000   3.02473   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.02393   0.00000   0.00000   3.02473   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.08845   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.08845   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.08002   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.08845 ...
+  -2.26043   0.21745   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.21745   0.07234   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000  -1.64816   0.00000   0.00000   0.02397   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000  -1.64816   0.00000   0.00000   0.02397   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000  -1.64816   0.00000   0.00000   0.02397   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.02397   0.00000   0.00000   3.02468   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.02397   0.00000   0.00000   3.02468   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.02397   0.00000   0.00000   3.02468   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.08849   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.08849   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.08005   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.08849 ...
    ...  only 12  components have been written...
 
 
  Augmentation waves occupancies Rhoij:
  Atom #  1 - Spin component 1
    0.99586  -0.03741   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-  -0.03741   0.87614   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+  -0.03741   0.87615   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
    0.00000   0.00000   1.00500   0.00000   0.00000  -0.00552   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
    0.00000   0.00000   0.00000   1.00500   0.00000   0.00000  -0.00552   0.00000   0.00000   0.00000   0.00000   0.00000 ...
    0.00000   0.00000   0.00000   0.00000   1.00500   0.00000   0.00000  -0.00552   0.00000   0.00000   0.00000   0.00000 ...
    0.00000   0.00000  -0.00552   0.00000   0.00000   0.00764   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
    0.00000   0.00000   0.00000  -0.00552   0.00000   0.00000   0.00764   0.00000   0.00000   0.00000   0.00000   0.00000 ...
    0.00000   0.00000   0.00000   0.00000  -0.00552   0.00000   0.00000   0.00764   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.81900   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.81900   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.93492   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.81900 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.81879   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.81879   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.93490   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.81879 ...
    ...  only 12  components have been written...
  Atom #  1 - Spin component 2
-   0.99682  -0.02905   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-  -0.02905   0.90081   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   1.00507   0.00000   0.00000  -0.00436   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   1.00507   0.00000   0.00000  -0.00436   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   1.00507   0.00000   0.00000  -0.00436   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000  -0.00436   0.00000   0.00000   0.00816   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000  -0.00436   0.00000   0.00000   0.00816   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000  -0.00436   0.00000   0.00000   0.00816   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.63381   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.63381   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.48220   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.63381 ...
+   0.99682  -0.02906   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+  -0.02906   0.90076   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   1.00507   0.00000   0.00000  -0.00437   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   1.00507   0.00000   0.00000  -0.00437   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   1.00507   0.00000   0.00000  -0.00437   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000  -0.00437   0.00000   0.00000   0.00816   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000  -0.00437   0.00000   0.00000   0.00816   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000  -0.00437   0.00000   0.00000   0.00816   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.63394   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.63394   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.48235   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.63394 ...
    ...  only 12  components have been written...
 
 
@@ -626,7 +641,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   17.025E-09; max=  13.135E-08
+ Mean square residual over all n,k,spin=   33.222E-18; max=  25.455E-17
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -645,22 +660,22 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  length scales=  4.800000000000  4.800000000000  4.800000000000 bohr
               =  2.540050601232  2.540050601232  2.540050601232 angstroms
  prteigrs : about to open file t41o_DS1_EIG
- Fermi (or HOMO) energy (hartree) =   0.53397   Average Vxc (hartree)=  -0.53430
- Magnetization (Bohr magneton)=  1.29426655E+00
- Total spin up =  8.64713328E+00   Total spin down =  7.35286672E+00
+ Fermi (or HOMO) energy (hartree) =   0.53396   Average Vxc (hartree)=  -0.53430
+ Magnetization (Bohr magneton)=  1.29298214E+00
+ Total spin up =  8.64649107E+00   Total spin down =  7.35350893E+00
  Eigenvalues (hartree) for nkpt=  64  k points, SPIN UP:
  kpt#   1, nband= 12, wtk=  0.01563, kpt=  0.1250  0.1250  0.1250 (reduced coord)
-  -2.71931   -1.47666   -1.45287   -1.45287    0.29193    0.37279    0.37279    0.49627
-   0.49627    0.55630    1.25218    1.25218
+  -2.71927   -1.47662   -1.45283   -1.45283    0.29194    0.37283    0.37283    0.49630
+   0.49630    0.55634    1.25220    1.25220
       occupation numbers for kpt#   1
    1.00000    1.00000    1.00000    1.00000    1.00000    1.00000    1.00000    1.00000
-   1.00000    0.00080    0.00000    0.00000
+   1.00000    0.00077    0.00000    0.00000
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
  Eigenvalues (hartree) for nkpt=  64  k points, SPIN DOWN:
  kpt#   1, nband= 12, wtk=  0.01563, kpt=  0.1250  0.1250  0.1250 (reduced coord)
-  -2.66091   -1.42074   -1.39568   -1.39568    0.30099    0.40851    0.40851    0.55987
-   0.55987    0.59681    1.26656    1.26656
+  -2.66098   -1.42080   -1.39574   -1.39574    0.30096    0.40846    0.40846    0.55982
+   0.55982    0.59676    1.26653    1.26653
       occupation numbers for kpt#   1
    1.00000    1.00000    1.00000    1.00000    1.00000    1.00000    1.00000    0.00013
    0.00013    0.00000    0.00000    0.00000
@@ -670,44 +685,44 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  1.28691989290420E+01
-hartree             :  1.86228218408113E+01
-xc                  : -3.59602415262800E+00
+kinetic             :  1.28692117506085E+01
+hartree             :  1.86228243872031E+01
+xc                  : -3.59602985618661E+00
 Ewald energy        : -9.70462253202573E+01
-psp_core            :  8.99300246551397E+00
-local_psp           : -5.26757003548266E+01
-spherical_terms     : -1.15140323166821E+01
-internal            : -1.24346958909027E+02
-'-kT*entropy'       : -1.51118989484494E-03
-total_energy        : -1.24348470098921E+02
-total_energy_eV     : -3.38369395226549E+03
+psp_core            :  8.99300246551396E+00
+local_psp           : -5.26757319771043E+01
+spherical_terms     : -1.15138125174553E+01
+internal            : -1.24346761067678E+02
+'-kT*entropy'       : -1.50816510095117E-03
+total_energy        : -1.24348269232779E+02
+total_energy_eV     : -3.38368848641977E+03
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 1, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -1.07549722846734E+01
+band_energy         : -1.07550436536095E+01
 Ewald energy        : -9.70462253202573E+01
-psp_core            :  8.99300246551397E+00
-xc_dc               : -1.75261715475366E+01
-spherical_terms     : -8.01239112568375E+00
-internal            : -1.24346757812637E+02
-'-kT*entropy'       : -1.51118989484494E-03
-total_energy_dc     : -1.24348269002532E+02
-total_energy_dc_eV  : -3.38368848015444E+03
+psp_core            :  8.99300246551396E+00
+xc_dc               : -1.75261742160779E+01
+spherical_terms     : -8.01232037868180E+00
+internal            : -1.24346761103112E+02
+'-kT*entropy'       : -1.50816510095117E-03
+total_energy_dc     : -1.24348269268213E+02
+total_energy_dc_eV  : -3.38368848738400E+03
 ...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  2.51618389E-03  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  2.51618389E-03  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  2.51618389E-03  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  2.51703996E-03  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  2.51703996E-03  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  2.51703996E-03  sigma(2 1)=  0.00000000E+00
 
--Cartesian components of stress tensor (GPa)         [Pressure= -7.4029E+01 GPa]
-- sigma(1 1)=  7.40286734E+01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  7.40286734E+01  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  7.40286734E+01  sigma(2 1)=  0.00000000E+00
+-Cartesian components of stress tensor (GPa)         [Pressure= -7.4054E+01 GPa]
+- sigma(1 1)=  7.40538597E+01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  7.40538597E+01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  7.40538597E+01  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -723,6 +738,8 @@ meta: {optdriver: 1, rfphon: 1, }
 ...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
+
+ mkfilename : getden/=0, take file _DEN from output of DATASET   1.
 
  Exchange-correlation functional for the present dataset will be:
   GGA: Perdew-Burke-Ernzerhof functional - ixc=11
@@ -786,46 +803,46 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --- !BeginCycle
 iteration_state: {dtset: 2, }
-solver: {iscf: 7, nstep: 3, nline: 6, wfoptalg: 10, }
-tolerances: {tolwfr: 1.00E-12, }
+solver: {iscf: 7, nstep: 3, nline: 8, wfoptalg: 10, }
+tolerances: {tolvrs: 1.00E-05, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   326.06427804161      2.155E+02 8.214E-01 7.596E+05
- ETOT  2   19.636110363655     -3.064E+02 1.026E-01 4.819E+04
- ETOT  3   1.1725234872258     -1.846E+01 9.536E-03 7.447E+02
+-ETOT  1   325.80330676290      2.153E+02 8.075E-03 7.595E+05
+ ETOT  2   19.616264207331     -3.062E+02 5.807E-04 4.819E+04
+ ETOT  3   1.1588379513480     -1.846E+01 8.319E-05 7.476E+02
 
  scprqt:  WARNING -
   nstep=    3 was not enough SCF cycles to converge;
-  maximum residual=  9.536E-03 exceeds tolwfr=  1.000E-12
+  potential residual=  7.476E+02 exceeds tolvrs=  1.000E-05
 
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   13.024E-04; max=  95.357E-04
+ Mean square residual over all n,k,spin=   11.551E-06; max=  83.193E-06
 
  Fourteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
-     kin0=   3.41523506E+02 eigvalue=   1.43707858E+02  local=  -7.43341048E+01
+     kin0=   3.41438328E+02 eigvalue=   1.43729950E+02  local=  -7.43154061E+01
  4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
- loc psp =  -5.74371947E+02  Hartree=   8.85145043E+02     xc=  -1.92705409E+01
+ loc psp =  -5.74353386E+02  Hartree=   8.85132523E+02     xc=  -1.92698453E+01
  note that "loc psp" includes a xc core correction that could be resolved
  7,8,9: eventually, occupation + non-local contributions
-    edocc=   3.65319050E+02     enl0=  -3.24535150E+01   enl1=  -1.14462438E+03
- 10: eventually, PAW "on-site" Hxc contribution: epaw1=   1.03033400E-02
+    edocc=   3.65341389E+02     enl0=  -3.24420441E+01   enl1=  -1.14465463E+03
+ 10: eventually, PAW "on-site" Hxc contribution: epaw1=   1.05631335E-02
  1-10 gives the relaxation energy (to be shifted if some occ is /=2.0)
-   erelax=  -1.09348727E+02
+   erelax=  -1.09382553E+02
  11,12,13 Non-relaxation  contributions : frozen-wavefunctions and Ewald
- fr.local=   1.17784880E+03 fr.nonlo=  -1.11921817E+03  Ewald=   5.18906191E+01
+ fr.local=   1.17784264E+03 fr.nonlo=  -1.11919187E+03  Ewald=   5.18906191E+01
  14,15 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  16 Contribution from 1st-order change of wavefunctions overlap
- eovl1 =   7.39961037E+02
+ eovl1 =   7.39955405E+02
  Resulting in :
- 2DEtotal=    0.1172523487E+01 Ha. Also 2DEtotal=    0.319059866958E+02 eV
-    (2DErelax=   -1.0934872701E+02 Ha. 2DEnonrelax=    1.1052125049E+02 Ha)
-    (  non-var. 2DEtotal :   -9.0158753053E+00 Ha)
+ 2DEtotal=    0.1158837951E+01 Ha. Also 2DEtotal=    0.315335843257E+02 eV
+    (2DErelax=   -1.0938255293E+02 Ha. 2DEnonrelax=    1.1054139088E+02 Ha)
+    (  non-var. 2DEtotal :   -9.0072096714E+00 Ha)
 
 
 --------------------------------------------------------------------------------
@@ -846,46 +863,46 @@ tolerances: {tolwfr: 1.00E-12, }
 
 --- !BeginCycle
 iteration_state: {dtset: 2, }
-solver: {iscf: 7, nstep: 3, nline: 6, wfoptalg: 10, }
-tolerances: {tolwfr: 1.00E-12, }
+solver: {iscf: 7, nstep: 3, nline: 8, wfoptalg: 10, }
+tolerances: {tolvrs: 1.00E-05, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   3316.7597181783      3.227E+03 1.612E+00 1.424E+07
- ETOT  2   59.361600214884     -3.257E+03 4.868E-01 1.986E+05
- ETOT  3   7.6925567604392     -5.167E+01 1.484E-02 1.618E+03
+-ETOT  1   3315.9512824845      3.226E+03 1.300E-02 1.424E+07
+ ETOT  2   59.411015956515     -3.257E+03 6.541E-03 1.988E+05
+ ETOT  3   7.6803978746198     -5.173E+01 7.580E-05 1.615E+03
 
  scprqt:  WARNING -
   nstep=    3 was not enough SCF cycles to converge;
-  maximum residual=  1.484E-02 exceeds tolwfr=  1.000E-12
+  potential residual=  1.615E+03 exceeds tolvrs=  1.000E-05
 
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   16.050E-04; max=  14.840E-03
+ Mean square residual over all n,k,spin=   13.890E-06; max=  75.801E-06
 
  Fourteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
-     kin0=   3.63556837E+02 eigvalue=   1.38434184E+02  local=  -7.91964866E+01
+     kin0=   3.63556286E+02 eigvalue=   1.38433577E+02  local=  -7.91914422E+01
  4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
- loc psp =  -1.09013382E+03  Hartree=   1.41800307E+03     xc=  -2.57373591E+01
+ loc psp =  -1.09003611E+03  Hartree=   1.41794208E+03     xc=  -2.57333848E+01
  note that "loc psp" includes a xc core correction that could be resolved
  7,8,9: eventually, occupation + non-local contributions
-    edocc=   3.65947440E+02     enl0=  -2.93183306E+01   enl1=  -1.14358933E+03
- 10: eventually, PAW "on-site" Hxc contribution: epaw1=   1.56946734E-02
+    edocc=   3.65901500E+02     enl0=  -2.93197807E+01   enl1=  -1.14362438E+03
+ 10: eventually, PAW "on-site" Hxc contribution: epaw1=   1.56434803E-02
  1-10 gives the relaxation energy (to be shifted if some occ is /=2.0)
-   erelax=  -8.20180950E+01
+   erelax=  -8.20560176E+01
  11,12,13 Non-relaxation  contributions : frozen-wavefunctions and Ewald
- fr.local=   1.17784880E+03 fr.nonlo=  -1.70645397E+03  Ewald=   6.18315814E+02
+ fr.local=   1.17784264E+03 fr.nonlo=  -1.70642204E+03  Ewald=   6.18315814E+02
  14,15 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  16 Contribution from 1st-order change of wavefunctions overlap
- eovl1 =   1.02588239E+03
+ eovl1 =   1.02585621E+03
  Resulting in :
- 2DEtotal=    0.7692556760E+01 Ha. Also 2DEtotal=    0.209325114873E+03 eV
-    (2DErelax=   -8.2018095034E+01 Ha. 2DEnonrelax=    8.9710651794E+01 Ha)
-    (  non-var. 2DEtotal :   -1.2685276687E+00 Ha)
+ 2DEtotal=    0.7680397875E+01 Ha. Also 2DEtotal=    0.208994254764E+03 eV
+    (2DErelax=   -8.2056017605E+01 Ha. 2DEnonrelax=    8.9736415479E+01 Ha)
+    (  non-var. 2DEtotal :   -1.2376195637E+00 Ha)
 
 ================================================================================
 
@@ -899,17 +916,17 @@ tolerances: {tolwfr: 1.00E-12, }
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
   
-   1    1   1    1        -9.0158753053         0.0000000000
-   1    1   2    1         4.4369398594         0.0000000000
-   1    1   3    1         2.2894677230         0.0000000000
+   1    1   1    1        -9.0072096714         0.0000000000
+   1    1   2    1         4.4318284938         0.0000000000
+   1    1   3    1         2.2876905888         0.0000000000
   
-   2    1   1    1         4.4369398594         0.0000000000
-   2    1   2    1        -9.0158753053         0.0000000000
-   2    1   3    1         2.2894677230         0.0000000000
+   2    1   1    1         4.4318284938         0.0000000000
+   2    1   2    1        -9.0072096714         0.0000000000
+   2    1   3    1         2.2876905888         0.0000000000
   
-   3    1   1    1         2.2894677230         0.0000000000
-   3    1   2    1         2.2894677230         0.0000000000
-   3    1   3    1         4.2808976219        -0.0001063539
+   3    1   1    1         2.2876905888         0.0000000000
+   3    1   2    1         2.2876905888        -0.0000000000
+   3    1   3    1         4.3143943422         0.0002110179
   
   
   Dynamical matrix, in cartesian coordinates,
@@ -917,23 +934,23 @@ tolerances: {tolwfr: 1.00E-12, }
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    1   1    1        -0.0067726666        -0.0000046161
-   1    1   2    1         0.5771168805        -0.0000046161
-   1    1   3    1         0.0000000000         0.0000000000
+   1    1   1    1        -0.0050969684         0.0000091588
+   1    1   2    1         0.5781946186         0.0000091588
+   1    1   3    1         0.0000000000        -0.0000000000
   
-   2    1   1    1         0.5771168805        -0.0000046161
-   2    1   2    1        -0.0067726666        -0.0000046161
-   2    1   3    1         0.0000000000         0.0000000000
+   2    1   1    1         0.5781946186         0.0000091588
+   2    1   2    1        -0.0050969684         0.0000091588
+   2    1   3    1         0.0000000000        -0.0000000000
   
    3    1   1    1         0.0000000000         0.0000000000
    3    1   2    1         0.0000000000         0.0000000000
-   3    1   3    1        -0.3974770352         0.0000000000
+   3    1   3    1        -0.3971685050         0.0000000000
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.50000
  Phonon energies in Hartree :
-  -2.394889E-03 -1.975950E-03  2.366947E-03
+  -2.393662E-03 -1.975183E-03  2.372654E-03
  Phonon frequencies in cm-1    :
-- -5.256174E+02 -4.336710E+02  5.194848E+02
+- -5.253482E+02 -4.335026E+02  5.207373E+02
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -942,11 +959,13 @@ tolerances: {tolwfr: 1.00E-12, }
             acell      4.8000000000E+00  4.8000000000E+00  4.8000000000E+00 Bohr
               amu      5.58470000E+01
              ecut      1.00000000E+01 Hartree
-           etotal1    -1.2434826900E+02
-           etotal2     7.6925567604E+00
+           etotal1    -1.2434826927E+02
+           etotal2     7.6803978746E+00
             fcart1    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         312
+-          fftalg         512
+           getden1          0
+           getden2          1
            getwfk1          0
            getwfk2          1
              iscf1         17
@@ -1019,216 +1038,217 @@ P          mk1mem          64
             ngfft2         15      15      15
           ngfftdg          18      18      18
              nkpt          64
-            nline           6
+            nline1          6
+            nline2          8
              nqpt1          0
              nqpt2          1
            nspden           2
            nsppol           2
-            nstep1         12
+            nstep1         20
             nstep2          3
              nsym          48
            ntypat           1
               occ      1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  1.000000  1.000000  0.000795  0.000000  0.000000
+                       1.000000  1.000000  1.000000  0.000772  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  0.999975  0.999441  0.000000  0.000000  0.000000
+                       1.000000  0.999974  0.999428  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  1.000000  1.000000  0.000795  0.000000  0.000000
+                       1.000000  1.000000  1.000000  0.000772  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  1.000000  1.000000  0.999824  0.000000  0.000000
+                       1.000000  1.000000  1.000000  0.999819  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  0.999975  0.999441  0.000000  0.000000  0.000000
+                       1.000000  0.999974  0.999428  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  0.999975  0.999441  0.000000  0.000000  0.000000
+                       1.000000  0.999974  0.999428  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  1.000000  0.020702  0.000000  0.000000  0.000000
+                       1.000000  1.000000  0.020238  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  1.000000  0.020702  0.000000  0.000000  0.000000
+                       1.000000  1.000000  0.020238  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  1.000000  1.000000  0.000795  0.000000  0.000000
+                       1.000000  1.000000  1.000000  0.000772  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  1.000000  0.020702  0.000000  0.000000  0.000000
+                       1.000000  1.000000  0.020238  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  0.961940  0.961940  0.000000  0.000000  0.000000
+                       1.000000  0.961223  0.961223  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  1.000000  0.020702  0.000000  0.000000  0.000000
+                       1.000000  1.000000  0.020238  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  1.000000  1.000000  0.999824  0.000000  0.000000
+                       1.000000  1.000000  1.000000  0.999819  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  1.000000  0.020702  0.000000  0.000000  0.000000
+                       1.000000  1.000000  0.020238  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  1.000000  0.020702  0.000000  0.000000  0.000000
+                       1.000000  1.000000  0.020238  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  1.000000  1.000000  0.999824  0.000000  0.000000
+                       1.000000  1.000000  1.000000  0.999819  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  0.999975  0.999441  0.000000  0.000000  0.000000
+                       1.000000  0.999974  0.999428  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  0.999975  0.999441  0.000000  0.000000  0.000000
+                       1.000000  0.999974  0.999428  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  1.000000  0.020702  0.000000  0.000000  0.000000
+                       1.000000  1.000000  0.020238  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  1.000000  0.020702  0.000000  0.000000  0.000000
+                       1.000000  1.000000  0.020238  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  0.999975  0.999441  0.000000  0.000000  0.000000
+                       1.000000  0.999974  0.999428  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  0.961940  0.961940  0.000000  0.000000  0.000000
+                       1.000000  0.961223  0.961223  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       0.999883  0.999883  0.255294  0.000000  0.000000  0.000000
+                       0.999878  0.999878  0.252283  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  0.961940  0.961940  0.000000  0.000000  0.000000
+                       1.000000  0.961223  0.961223  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  1.000000  0.020702  0.000000  0.000000  0.000000
+                       1.000000  1.000000  0.020238  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       0.999883  0.999883  0.255293  0.000000  0.000000  0.000000
+                       0.999878  0.999878  0.252283  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       0.999883  0.999883  0.255293  0.000000  0.000000  0.000000
+                       0.999878  0.999878  0.252283  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  1.000000  0.020702  0.000000  0.000000  0.000000
+                       1.000000  1.000000  0.020238  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  1.000000  0.020702  0.000000  0.000000  0.000000
+                       1.000000  1.000000  0.020238  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  0.961940  0.961940  0.000000  0.000000  0.000000
+                       1.000000  0.961223  0.961223  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  1.000000  0.020702  0.000000  0.000000  0.000000
+                       1.000000  1.000000  0.020238  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  1.000000  1.000000  0.000795  0.000000  0.000000
+                       1.000000  1.000000  1.000000  0.000772  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  1.000000  1.000000  0.000795  0.000000  0.000000
+                       1.000000  1.000000  1.000000  0.000772  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  1.000000  0.020702  0.000000  0.000000  0.000000
+                       1.000000  1.000000  0.020238  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  0.961940  0.961940  0.000000  0.000000  0.000000
+                       1.000000  0.961223  0.961223  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  1.000000  0.020702  0.000000  0.000000  0.000000
+                       1.000000  1.000000  0.020238  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  1.000000  0.020702  0.000000  0.000000  0.000000
+                       1.000000  1.000000  0.020238  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       0.999883  0.999883  0.255293  0.000000  0.000000  0.000000
+                       0.999878  0.999878  0.252283  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       0.999883  0.999883  0.255293  0.000000  0.000000  0.000000
+                       0.999878  0.999878  0.252283  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  1.000000  0.020702  0.000000  0.000000  0.000000
+                       1.000000  1.000000  0.020238  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  0.961940  0.961940  0.000000  0.000000  0.000000
+                       1.000000  0.961223  0.961223  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       0.999883  0.999883  0.255294  0.000000  0.000000  0.000000
+                       0.999878  0.999878  0.252283  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  0.961940  0.961940  0.000000  0.000000  0.000000
+                       1.000000  0.961223  0.961223  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  0.999975  0.999441  0.000000  0.000000  0.000000
+                       1.000000  0.999974  0.999428  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  1.000000  0.020702  0.000000  0.000000  0.000000
+                       1.000000  1.000000  0.020238  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  1.000000  0.020702  0.000000  0.000000  0.000000
+                       1.000000  1.000000  0.020238  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  0.999975  0.999441  0.000000  0.000000  0.000000
+                       1.000000  0.999974  0.999428  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  0.999975  0.999441  0.000000  0.000000  0.000000
+                       1.000000  0.999974  0.999428  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  1.000000  1.000000  0.999824  0.000000  0.000000
+                       1.000000  1.000000  1.000000  0.999819  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  1.000000  0.020702  0.000000  0.000000  0.000000
+                       1.000000  1.000000  0.020238  0.000000  0.000000  0.000000
                        prtocc : prtvol=0, do not print more k-points.
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  1.000000  0.020702  0.000000  0.000000  0.000000
+                       1.000000  1.000000  0.020238  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  1.000000  1.000000  0.999824  0.000000  0.000000
+                       1.000000  1.000000  1.000000  0.999819  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  1.000000  0.020702  0.000000  0.000000  0.000000
+                       1.000000  1.000000  0.020238  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  0.961940  0.961940  0.000000  0.000000  0.000000
+                       1.000000  0.961223  0.961223  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  1.000000  0.020702  0.000000  0.000000  0.000000
+                       1.000000  1.000000  0.020238  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  1.000000  1.000000  0.000795  0.000000  0.000000
+                       1.000000  1.000000  1.000000  0.000772  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  1.000000  0.020702  0.000000  0.000000  0.000000
+                       1.000000  1.000000  0.020238  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  1.000000  0.020702  0.000000  0.000000  0.000000
+                       1.000000  1.000000  0.020238  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  0.999975  0.999441  0.000000  0.000000  0.000000
+                       1.000000  0.999974  0.999428  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  0.999975  0.999441  0.000000  0.000000  0.000000
+                       1.000000  0.999974  0.999428  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  1.000000  1.000000  0.999824  0.000000  0.000000
+                       1.000000  1.000000  1.000000  0.999819  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  1.000000  1.000000  0.000795  0.000000  0.000000
+                       1.000000  1.000000  1.000000  0.000772  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  0.999975  0.999441  0.000000  0.000000  0.000000
+                       1.000000  0.999974  0.999428  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  1.000000  1.000000  0.000795  0.000000  0.000000
+                       1.000000  1.000000  1.000000  0.000772  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  0.000125  0.000125  0.000000  0.000000  0.000000
-                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  0.000001  0.000000  0.000000  0.000000  0.000000
-                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  0.000125  0.000125  0.000000  0.000000  0.000000
-                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  1.000000  0.991498  0.000000  0.000000  0.000000
+                       1.000000  0.000127  0.000127  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
                        1.000000  0.000001  0.000000  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  0.000127  0.000127  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.991571  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
                        1.000000  0.000001  0.000000  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  0.684692  0.000000  0.000000  0.000000  0.000000
+                       1.000000  0.000001  0.000000  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  0.684693  0.000000  0.000000  0.000000  0.000000
+                       1.000000  0.686267  0.000000  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  0.000125  0.000125  0.000000  0.000000  0.000000
+                       1.000000  0.686267  0.000000  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  0.684692  0.000000  0.000000  0.000000  0.000000
+                       1.000000  0.000127  0.000127  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  0.686267  0.000000  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
                        1.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  0.684693  0.000000  0.000000  0.000000  0.000000
+                       1.000000  0.686267  0.000000  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  1.000000  0.991498  0.000000  0.000000  0.000000
+                       1.000000  1.000000  0.991571  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  0.684693  0.000000  0.000000  0.000000  0.000000
+                       1.000000  0.686267  0.000000  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  0.684693  0.000000  0.000000  0.000000  0.000000
+                       1.000000  0.686267  0.000000  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  1.000000  0.991498  0.000000  0.000000  0.000000
-                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  0.000001  0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  0.991571  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
                        1.000000  0.000001  0.000000  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  0.684692  0.000000  0.000000  0.000000  0.000000
+                       1.000000  0.000001  0.000000  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  0.684693  0.000000  0.000000  0.000000  0.000000
+                       1.000000  0.686267  0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  0.686267  0.000000  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
                        1.000000  0.000001  0.000000  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
                        1.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       0.016653  0.016653  0.000000  0.000000  0.000000  0.000000
+                       0.016890  0.016890  0.000000  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
                        1.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  0.684692  0.000000  0.000000  0.000000  0.000000
+                       1.000000  0.686267  0.000000  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       0.016653  0.016653  0.000000  0.000000  0.000000  0.000000
+                       0.016890  0.016890  0.000000  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       0.016653  0.016653  0.000000  0.000000  0.000000  0.000000
+                       0.016890  0.016890  0.000000  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  0.684692  0.000000  0.000000  0.000000  0.000000
+                       1.000000  0.686267  0.000000  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  0.684693  0.000000  0.000000  0.000000  0.000000
-                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  0.684692  0.000000  0.000000  0.000000  0.000000
-                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  0.000125  0.000125  0.000000  0.000000  0.000000
-                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  0.000125  0.000125  0.000000  0.000000  0.000000
-                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  0.684692  0.000000  0.000000  0.000000  0.000000
+                       1.000000  0.686267  0.000000  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
                        1.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  0.684693  0.000000  0.000000  0.000000  0.000000
+                       1.000000  0.686267  0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  0.000127  0.000127  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  0.000127  0.000127  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  0.686267  0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  0.686267  0.000000  0.000000  0.000000  0.000000
                        prtocc : prtvol=0, do not print more k-points.
            occopt           7
         optdriver1          0
@@ -1249,7 +1269,7 @@ P          mk1mem          64
            shiftk      5.00000000E-01  5.00000000E-01  5.00000000E-01
           spgroup         229
            spinat      0.0000000000E+00  0.0000000000E+00  4.0000000000E+00
-           strten1     2.5161838888E-03  2.5161838888E-03  2.5161838888E-03
+           strten1     2.5170399563E-03  2.5170399563E-03  2.5170399563E-03
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -1277,8 +1297,12 @@ P          mk1mem          64
                        1  0  0   0  0  1   0  1  0      -1  0  0   0  0 -1   0 -1  0
                        0  1  0  -1 -1 -1   1  0  0       0 -1  0   1  1  1  -1  0  0
                        0  0  1   1  0  0  -1 -1 -1       0  0 -1  -1  0  0   1  1  1
-           tolrde      1.00000000E-03
-           tolwfr      1.00000000E-12
+           tolrde1     5.00000000E-03
+           tolrde2     1.00000000E-05
+           tolvrs1     0.00000000E+00
+           tolvrs2     1.00000000E-05
+           tolwfr1     1.00000000E-18
+           tolwfr2     0.00000000E+00
             typat      1
            useylm           1
               wtk        0.01563    0.01563    0.01563    0.01563    0.01563    0.01563
@@ -1393,10 +1417,10 @@ P          mk1mem          64
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         22.9  wall=         23.0
+- Proc.   0 individual time (sec): cpu=         15.8  wall=         15.8
 
 ================================================================================
 
  Calculation completed.
-.Delivered  11 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         22.9  wall=         23.0
+.Delivered  12 WARNINGs and   4 COMMENTs to log file.
++Overall time at end (sec) : cpu=         15.8  wall=         15.8

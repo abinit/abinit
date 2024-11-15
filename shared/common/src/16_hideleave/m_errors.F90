@@ -6,7 +6,7 @@
 !!  This module contains low-level procedures to check assertions and handle errors.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2022 ABINIT group (MG,YP,NCJ,MT)
+!! Copyright (C) 2008-2024 ABINIT group (MG,YP,NCJ,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -37,6 +37,8 @@ MODULE m_errors
 #ifdef FC_INTEL
  use ifcore
 #endif
+
+ use iso_c_binding,     only : c_ptr, c_size_t, c_associated
 
  use m_io_tools,        only : flush_unit, lock_and_write, file_exists, num_opened_units, show_units, open_file
  use m_fstrings,        only : toupper, basename, indent, lstrip, atoi, strcat, itoa
@@ -76,9 +78,7 @@ include "fexcp.h"
  public :: abi_cabort            ! C-interoperable version.
 
  ! This flag activate the output of the backtrace in msg_hndl
- ! Unfortunately, gcc4.9 seems to crash inside this routine
- ! hence, for the time being, this optional feature has been disabled
- integer, save, private :: m_errors_show_backtrace = 0
+ integer, save, private :: m_errors_show_backtrace = 1
 
  interface assert_eq
    module procedure assert_eq2
@@ -104,6 +104,8 @@ include "fexcp.h"
    module procedure unused_logical
    module procedure unused_logical1B
    module procedure unused_ch
+   module procedure unused_c_ptr
+   module procedure unused_c_size_t
  end interface unused_var
 
 CONTAINS  !===========================================================
@@ -1116,6 +1118,79 @@ elemental subroutine unused_ch(var)
  dummy = var
 
 end subroutine unused_ch
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_errors/unused_c_ptr
+!! NAME
+!!  unused_c_ptr
+!!
+!! FUNCTION
+!!  Helper function used to silence compiler warnings due to unused variables.
+!!  Interfaced via the ABI_UNUSED macro.
+!!
+!! INPUTS
+!!  var=type(c_ptr) value
+!!
+!! OUTPUT
+!!  None
+!!
+!! SOURCE
+
+elemental subroutine unused_c_ptr(var)
+
+!Arguments ------------------------------------
+type(c_ptr), intent(IN) :: var
+
+!Local variables-------------------------------
+#ifdef FC_NAG
+logical :: dummy
+#else
+type(c_ptr) :: dummy
+#endif
+! *********************************************************************
+
+#ifdef FC_NAG
+if (.false.) dummy = c_associated(var)
+#else
+dummy = var
+#endif
+
+end subroutine unused_c_ptr
+!!***
+
+
+!----------------------------------------------------------------------
+
+!!****f* m_errors/unused_c_size_t
+!! NAME
+!!  unused_c_size_t
+!!
+!! FUNCTION
+!!  Helper function used to silence compiler warnings due to unused variables.
+!!  Interfaced via the ABI_UNUSED macro.
+!!
+!! INPUTS
+!!  var=type(c_size_t) value
+!!
+!! OUTPUT
+!!  None
+!!
+!! SOURCE
+
+elemental subroutine unused_c_size_t(var)
+
+!Arguments ------------------------------------
+integer(kind=c_size_t), intent(IN) :: var
+
+!Local variables-------------------------------
+integer(kind=c_size_t) :: dummy
+! *********************************************************************
+
+ dummy = var
+
+end subroutine unused_c_size_t
 !!***
 
 !----------------------------------------------------------------------

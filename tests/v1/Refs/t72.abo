@@ -1,8 +1,8 @@
 
-.Version 9.11.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2022 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Jul 2023.
-- ( at 11h58 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h08 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v1_t71-t72/t72.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v1_t71-t72/t72.abi
 - output file    -> t72.abo
 - root for input  files -> t71o
 - root for output files -> t72o
@@ -63,10 +63,10 @@ _ WF disk file :      0.266 Mbytes ; DEN or POT disk file :      0.051 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -75,7 +75,7 @@ _ WF disk file :      0.266 Mbytes ; DEN or POT disk file :      0.051 Mbytes.
            diecut      1.00000000E+00 Hartree
              ecut      3.50000000E+00 Hartree
            enunit           2
--          fftalg         312
+-          fftalg         512
             intxc           1
            iprcel          65
               kpt      1.00000000E+00  1.00000000E+00  2.00000000E+00
@@ -165,8 +165,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      3.500   => boxcut(ratio)=   2.16250
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/42mo.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/42mo.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/42mo.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/42mo.pspnc
 -  Troullier-Martins psp for element  Mo        Thu Oct 27 17:40:28 EDT 1994
 - 42.00000   6.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -260,7 +260,7 @@ tolerances: {toldff: 5.00E-05, }
     1     0.00000000000E+00    0.00000000000E+00   -1.35176918509E-02
     2     0.00000000000E+00    0.00000000000E+00    2.39386927135E-02
     3     0.00000000000E+00    0.00000000000E+00    2.02430359353E-01
-    4     0.00000000000E+00    0.00000000000E+00   -1.40075023724E-02
+    4     0.00000000000E+00    0.00000000000E+00   -1.40075023723E-02
     5     0.00000000000E+00    0.00000000000E+00   -1.98843857843E-01
  prteigrs : about to open file t72o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.08029   Average Vxc (hartree)=  -0.38134
@@ -410,7 +410,7 @@ tolerances: {toldff: 5.00E-05, }
     1     0.00000000000E+00    0.00000000000E+00   -1.29479363673E-02
     2     0.00000000000E+00    0.00000000000E+00    1.92895792175E-02
     3     0.00000000000E+00    0.00000000000E+00    1.99223006485E-01
-    4     0.00000000000E+00    0.00000000000E+00   -9.70566105616E-03
+    4     0.00000000000E+00    0.00000000000E+00   -9.70566105617E-03
     5     0.00000000000E+00    0.00000000000E+00   -1.95858988279E-01
  prteigrs : about to open file t72o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.06940   Average Vxc (hartree)=  -0.38208
@@ -460,10 +460,10 @@ tolerances: {toldff: 5.00E-05, }
  ETOT  6  -42.759979109510    -4.175E-06 5.923E-05 2.419E-04 9.513E-05 1.992E-01
 
  cartesian forces (ha/bohr); non-corrected avg=  0.00E+00  0.00E+00 -1.88E-06
-    1     0.00000000000E+00    0.00000000000E+00   -1.29228563795E-02
+    1     0.00000000000E+00    0.00000000000E+00   -1.29228563796E-02
     2     0.00000000000E+00    0.00000000000E+00    1.92809978374E-02
     3     0.00000000000E+00    0.00000000000E+00    1.99217640252E-01
-    4     0.00000000000E+00    0.00000000000E+00   -9.62166060032E-03
+    4     0.00000000000E+00    0.00000000000E+00   -9.62166060043E-03
     5     0.00000000000E+00    0.00000000000E+00   -1.95954121109E-01
  prteigrs : about to open file t72o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.06945   Average Vxc (hartree)=  -0.38206
@@ -513,7 +513,7 @@ tolerances: {toldff: 5.00E-05, }
     1     0.00000000000E+00    0.00000000000E+00   -1.29154910405E-02
     2     0.00000000000E+00    0.00000000000E+00    1.93024332201E-02
     3     0.00000000000E+00    0.00000000000E+00    1.99191575091E-01
-    4     0.00000000000E+00    0.00000000000E+00   -9.63605922575E-03
+    4     0.00000000000E+00    0.00000000000E+00   -9.63605922572E-03
     5     0.00000000000E+00    0.00000000000E+00   -1.95942458045E-01
  prteigrs : about to open file t72o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.06945   Average Vxc (hartree)=  -0.38206
@@ -696,19 +696,19 @@ force_length_stats: {min:   9.64744568E-03, max:   1.99192302E-01, mean:   8.740
     5      0.00000000000000     0.00000000000000    -3.19623033988360
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.00000000000000    -0.00000000000000    -0.01291389249815
-    2     -0.00000000000000    -0.00000000000000     0.01931092931779
-    3     -0.00000000000000    -0.00000000000000     0.19919230221993
+    1     -0.00000000000000    -0.00000000000000    -0.01291389249814
+    2     -0.00000000000000    -0.00000000000000     0.01931092931777
+    3     -0.00000000000000    -0.00000000000000     0.19919230221992
     4     -0.00000000000000    -0.00000000000000    -0.00964744568255
-    5     -0.00000000000000    -0.00000000000000    -0.19594189335702
+    5     -0.00000000000000    -0.00000000000000    -0.19594189335701
  frms,max,avg= 7.2435513E-02 1.9919230E-01   0.000E+00  0.000E+00 -7.426E-08 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.00000000000000    -0.00000000000000    -0.66405899609741
-    2     -0.00000000000000    -0.00000000000000     0.99300782767981
-    3     -0.00000000000000    -0.00000000000000    10.24287915215773
-    4     -0.00000000000000    -0.00000000000000    -0.49609156153142
-    5     -0.00000000000000    -0.00000000000000   -10.07573642220871
+    1     -0.00000000000000    -0.00000000000000    -0.66405899609683
+    2     -0.00000000000000    -0.00000000000000     0.99300782767906
+    3     -0.00000000000000    -0.00000000000000    10.24287915215757
+    4     -0.00000000000000    -0.00000000000000    -0.49609156153163
+    5     -0.00000000000000    -0.00000000000000   -10.07573642220816
  frms,max,avg= 3.7247835E+00 1.0242879E+01   0.000E+00  0.000E+00 -3.818E-06 e/A
  length scales=  6.040000000000  6.040000000000 24.160000000000 bohr
               =  3.196230339884  3.196230339884 12.784921359534 angstroms
@@ -764,17 +764,17 @@ force_length_stats: {min:   9.64744568E-03, max:   1.99192302E-01, mean:   8.740
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  1.64227029786924E+01
-hartree             :  3.74650241444564E+01
+hartree             :  3.74650241444567E+01
 xc                  : -2.07941815773563E+01
 Ewald energy        : -6.67573965170043E+00
 psp_core            :  1.51866811340446E+01
-local_psp           : -7.80844861380151E+01
-non_local_psp       : -6.27679223528704E+00
-internal            : -4.27567913451656E+01
-'-kT*entropy'       : -3.18906938674654E-03
-total_energy        : -4.27599804145523E+01
-total_energy_eV     : -1.16355824090647E+03
-band_energy         : -7.16117372293828E+00
+local_psp           : -7.80844861380154E+01
+non_local_psp       : -6.27679223528705E+00
+internal            : -4.27567913451654E+01
+'-kT*entropy'       : -3.18906938674698E-03
+total_energy        : -4.27599804145521E+01
+total_energy_eV     : -1.16355824090646E+03
+band_energy         : -7.16117372293839E+00
 ...
 
 
@@ -786,17 +786,17 @@ band_energy         : -7.16117372293828E+00
     4      -0.000000000000     -0.000000000000    113.600869565997
     5       0.000000000000      0.000000000000    206.810321827768
  nonlocal contribution to red. grads
-    1      -0.000000000000      0.000000000000     -0.037171676881
-    2       0.000000000000      0.000000000000      0.322735108251
-    3      -0.000000000000      0.000000000000      2.882890853555
+    1       0.000000000000      0.000000000000     -0.037171676882
+    2      -0.000000000000      0.000000000000      0.322735108251
+    3       0.000000000000      0.000000000000      2.882890853555
     4       0.000000000000      0.000000000000     -0.278325725376
-    5       0.000000000000      0.000000000000     -2.886986039119
+    5      -0.000000000000     -0.000000000000     -2.886986039119
  local psp contribution to red. grads
-    1      -0.000000000000     -0.000000000000     -0.066983215042
-    2       0.000000000000      0.000000000000    112.563206349099
-    3      -0.000000000000     -0.000000000000    198.120148121199
-    4       0.000000000000      0.000000000000   -113.074480544989
-    5      -0.000000000000     -0.000000000000   -197.544553292740
+    1      -0.000000000000     -0.000000000000     -0.066983215044
+    2       0.000000000000      0.000000000000    112.563206349097
+    3      -0.000000000000     -0.000000000000    198.120148121198
+    4       0.000000000000      0.000000000000   -113.074480544991
+    5      -0.000000000000     -0.000000000000   -197.544553292741
  core charge xc contribution to reduced grads
     1      -0.000000000000      0.000000000000     -0.047348812363
     2      -0.000000000000     -0.000000000000      0.051440166537
@@ -804,11 +804,11 @@ band_energy         : -7.16117372293828E+00
     4      -0.000000000000     -0.000000000000     -0.014566754211
     5       0.000000000000      0.000000000000     -1.644711994768
  residual contribution to red. grads
-    1       0.000000000000      0.000000000000     -0.000747775697
-    2       0.000000000000      0.000000000000     -0.000464916290
-    3       0.000000000000      0.000000000000      0.000399248514
-    4       0.000000000000      0.000000000000     -0.000412459699
-    5       0.000000000000      0.000000000000     -0.000112563603
+    1       0.000000000000      0.000000000000     -0.000747775695
+    2       0.000000000000      0.000000000000     -0.000464916289
+    3       0.000000000000      0.000000000000      0.000399248515
+    4       0.000000000000      0.000000000000     -0.000412459697
+    5       0.000000000000      0.000000000000     -0.000112563601
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  4.55704942E-04  sigma(3 2)=  0.00000000E+00
@@ -835,7 +835,7 @@ band_energy         : -7.16117372293828E+00
                       -0.0000000000E+00 -0.0000000000E+00  1.9919230222E-01
                       -0.0000000000E+00 -0.0000000000E+00 -9.6474456825E-03
                       -0.0000000000E+00 -0.0000000000E+00 -1.9594189336E-01
--          fftalg         312
+-          fftalg         512
             intxc           1
            iprcel          65
               kpt      1.00000000E+00  1.00000000E+00  2.00000000E+00
@@ -988,10 +988,10 @@ P           mkmem           3
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          2.3  wall=          2.4
+- Proc.   0 individual time (sec): cpu=          1.5  wall=          1.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.3  wall=          2.4
++Overall time at end (sec) : cpu=          1.5  wall=          1.5

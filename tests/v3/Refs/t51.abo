@@ -1,8 +1,8 @@
 
-.Version 9.11.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2022 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Jul 2023.
-- ( at 12h00 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h09 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v3_t51/t51.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v3_t51/t51.abi
 - output file    -> t51.abo
 - root for input  files -> t51i
 - root for output files -> t51o
@@ -42,10 +42,10 @@ _ WF disk file :      0.439 Mbytes ; DEN or POT disk file :      0.091 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -54,7 +54,7 @@ _ WF disk file :      0.439 Mbytes ; DEN or POT disk file :      0.091 Mbytes.
            diemac      1.00000000E+00
            diemix      5.00000000E-01
              ecut      1.80000000E+01 Hartree
--          fftalg         312
+-          fftalg         512
            getwfk          -1
               ixc          11
            jdtset        1
@@ -167,8 +167,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     18.000   => boxcut(ratio)=   2.00660
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/26fe.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/26fe.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/26fe.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/26fe.pspnc
 -  Troullier-Martins psp for element  Fe        Thu Oct 27 17:35:05 EDT 1994
 - 26.00000   8.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -299,18 +299,18 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  2.48226340860750E+01
-hartree             :  2.56514336374793E+00
-xc                  : -1.06249414669251E+01
+kinetic             :  2.48226340860734E+01
+hartree             :  2.56514336374757E+00
+xc                  : -1.06249414669249E+01
 Ewald energy        : -2.14723832182677E+01
 psp_core            :  6.22162169019801E+00
-local_psp           :  2.10770937856278E+00
-non_local_psp       : -2.84343044005888E+01
+local_psp           :  2.10770937856262E+00
+non_local_psp       : -2.84343044005868E+01
 internal            : -2.48145205671978E+01
-'-kT*entropy'       : -1.18043989515335E-02
+'-kT*entropy'       : -1.18043989515314E-02
 total_energy        : -2.48263249661493E+01
 total_energy_eV     : -6.75558658486991E+02
-band_energy         : -2.74809054385519E+00
+band_energy         : -2.74809054385505E+00
 ...
 
 
@@ -335,7 +335,7 @@ band_energy         : -2.74809054385519E+00
              ecut      1.80000000E+01 Hartree
            etotal1    -2.4826324966E+01
             fcart1    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
--          fftalg         312
+-          fftalg         512
            getwfk          -1
               ixc          11
            jdtset        1
@@ -506,10 +506,10 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          3.0  wall=          3.0
+- Proc.   0 individual time (sec): cpu=          1.3  wall=          1.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered  21 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.0  wall=          3.0
++Overall time at end (sec) : cpu=          1.3  wall=          1.3

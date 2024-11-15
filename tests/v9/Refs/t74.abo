@@ -1,8 +1,8 @@
 
-.Version 9.11.2 of ABINIT 
+.Version 10.1.2.3 of ABINIT, released Apr 2024.
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2022 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,18 +14,18 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Jul 2023.
-- ( at 12h11 )
+.Starting date : Tue 28 May 2024.
+- ( at 09h27 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v9_t74/t74.abi
+- input  file    -> /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/baguetl_cprj_in_memory/tests/TestBot_MPI1/v9_t74/t74.abi
 - output file    -> t74.abo
 - root for input  files -> t74i
 - root for output files -> t74o
 
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Al.xml
+-   /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/baguetl_cprj_in_memory/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Al.xml
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/As.LDA_PW-JTH_sp.xml
+-   /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/baguetl_cprj_in_memory/tests/Psps_for_tests/As.LDA_PW-JTH_sp.xml
  DATASET    1 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
@@ -165,7 +165,14 @@ _ WF disk file :      0.081 Mbytes ; DEN or POT disk file :      0.051 Mbytes.
  -outvars: echo values of preprocessed input variables --------
             acell      1.0640000000E+01  1.0640000000E+01  1.0640000000E+01 Bohr
               amu      2.69815390E+01  7.49215900E+01
-  cprj_update_lvl1          0
+   cprj_in_memory1          0
+   cprj_in_memory2          2
+   cprj_in_memory3          2
+   cprj_in_memory4          2
+   cprj_in_memory5          2
+   cprj_in_memory6          2
+   cprj_in_memory7          2
+  cprj_update_lvl1          3
   cprj_update_lvl2         -2
   cprj_update_lvl3         -1
   cprj_update_lvl4          1
@@ -275,9 +282,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=      7.000   => boxcut(ratio)=   2.01527
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Al.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Al.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Al.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/baguetl_cprj_in_memory/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Al.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/baguetl_cprj_in_memory/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Al.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/baguetl_cprj_in_memory/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Al.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.90363307
@@ -295,9 +302,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/As.LDA_PW-JTH_sp.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/As.LDA_PW-JTH_sp.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/As.LDA_PW-JTH_sp.xml
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/baguetl_cprj_in_memory/tests/Psps_for_tests/As.LDA_PW-JTH_sp.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/baguetl_cprj_in_memory/tests/Psps_for_tests/As.LDA_PW-JTH_sp.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/baguetl_cprj_in_memory/tests/Psps_for_tests/As.LDA_PW-JTH_sp.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 2.10391912
@@ -1924,7 +1931,14 @@ total_energy_dc_eV  : -2.34732797180949E+02
  -outvars: echo values of variables after computation  --------
             acell      1.0640000000E+01  1.0640000000E+01  1.0640000000E+01 Bohr
               amu      2.69815390E+01  7.49215900E+01
-  cprj_update_lvl1          0
+   cprj_in_memory1          0
+   cprj_in_memory2          2
+   cprj_in_memory3          2
+   cprj_in_memory4          2
+   cprj_in_memory5          2
+   cprj_in_memory6          2
+   cprj_in_memory7          2
+  cprj_update_lvl1          3
   cprj_update_lvl2         -2
   cprj_update_lvl3         -1
   cprj_update_lvl4          1
@@ -2107,10 +2121,10 @@ P           mkmem          16
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          5.3  wall=          5.5
+- Proc.   0 individual time (sec): cpu=          5.4  wall=          5.6
 
 ================================================================================
 
  Calculation completed.
 .Delivered  42 WARNINGs and   8 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          5.3  wall=          5.5
++Overall time at end (sec) : cpu=          5.4  wall=          5.6

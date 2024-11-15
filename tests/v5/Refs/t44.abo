@@ -1,8 +1,8 @@
 
-.Version 9.11.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2022 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Jul 2023.
-- ( at 12h02 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h10 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v5_t44/t44.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v5_t44/t44.abi
 - output file    -> t44.abo
 - root for input  files -> t44i
 - root for output files -> t44o
@@ -90,17 +90,17 @@ _ WF disk file :      0.130 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
             acell      1.0000000000E+01  1.0000000000E+01  1.0000000000E+01 Bohr
               amu      2.08980370E+02  2.08980370E+02
              ecut      8.00000000E+00 Hartree
--          fftalg         312
+-          fftalg         512
            istwfk        1
            jdtset        1    2    3    4
            kptopt           0
@@ -173,8 +173,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.04204
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi_halfso.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi_halfso.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/83bi_halfso.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/83bi_halfso.psphgh
 - HGH psp for Bismuth, from PRB58, 3641 (1998) paper - with spin-orbit reduced by a factor of 2 !!!
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -201,8 +201,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
   spin-orbit 2    0.129098
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -229,8 +229,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
   spin-orbit 2    0.258197
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   3  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -270,21 +270,21 @@ tolerances: {toldfe: 1.00E-07, }
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -5.5184965888688    -5.518E+00 1.159E-02 3.408E+00
- ETOT  2  -5.5232349882389    -4.738E-03 4.877E-08 1.128E+00
+ ETOT  2  -5.5232349882390    -4.738E-03 4.877E-08 1.128E+00
  ETOT  3  -5.5233120291675    -7.704E-05 8.092E-07 4.387E-01
  ETOT  4  -5.5233392488422    -2.722E-05 2.879E-08 9.964E-02
  ETOT  5  -5.5233488051824    -9.556E-06 1.146E-08 2.770E-03
  ETOT  6  -5.5233491341815    -3.290E-07 6.372E-10 5.480E-05
  ETOT  7  -5.5233491435718    -9.390E-09 3.749E-11 1.003E-06
- ETOT  8  -5.5233491437098    -1.380E-10 8.218E-13 1.914E-07
+ ETOT  8  -5.5233491437097    -1.380E-10 8.218E-13 1.914E-07
 
  At SCF step    8, etot is converged : 
   for the second time, diff in etot=  1.380E-10 < toldfe=  1.000E-07
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)= -4.13016459E-05  sigma(3 2)=  2.70416889E-10
-  sigma(2 2)= -4.13052769E-05  sigma(3 1)=  2.50077848E-09
-  sigma(3 3)= -4.13078410E-05  sigma(2 1)=  1.79505560E-10
+  sigma(1 1)= -4.13016459E-05  sigma(3 2)=  2.70416905E-10
+  sigma(2 2)= -4.13052769E-05  sigma(3 1)=  2.50077849E-09
+  sigma(3 3)= -4.13078410E-05  sigma(2 1)=  1.79505554E-10
 
 
 --- !ResultsGS
@@ -302,9 +302,9 @@ etotal    :  -5.52334914E+00
 entropy   :   0.00000000E+00
 fermie    :  -7.67590737E-02
 cartesian_stress_tensor: # hartree/bohr^3
-- [ -4.13016459E-05,   1.79505560E-10,   2.50077848E-09, ]
-- [  1.79505560E-10,  -4.13052769E-05,   2.70416889E-10, ]
-- [  2.50077848E-09,   2.70416889E-10,  -4.13078410E-05, ]
+- [ -4.13016459E-05,   1.79505554E-10,   2.50077849E-09, ]
+- [  1.79505554E-10,  -4.13052769E-05,   2.70416905E-10, ]
+- [  2.50077849E-09,   2.70416905E-10,  -4.13078410E-05, ]
 pressure_GPa:   1.2152E+00
 xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00, Bi]
@@ -321,11 +321,11 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   53.019E-14; max=  82.182E-14
+ Mean square residual over all n,k,spin=   53.019E-14; max=  82.176E-14
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
- rms dE/dt=  2.7822E-07; max dE/dt=  3.2092E-07; dE/dt below (all hartree)
-    1       0.000000320921      0.000000316874      0.000000169767
+ rms dE/dt=  2.7822E-07; max dE/dt=  3.2093E-07; dE/dt below (all hartree)
+    1       0.000000320926      0.000000316874      0.000000169770
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
@@ -350,30 +350,30 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  1.77794075015207E+00
-hartree             :  1.24876774759087E+00
-xc                  : -1.26133324687217E+00
+kinetic             :  1.77794075015213E+00
+hartree             :  1.24876774759094E+00
+xc                  : -1.26133324687220E+00
 Ewald energy        : -3.54662184935089E+00
 psp_core            :  1.73973577808835E-01
-local_psp           : -3.88456762190720E+00
-non_local_psp       : -1.35320555405208E-02
-internal            : -5.50537269811901E+00
-'-kT*entropy'       : -1.79764455907489E-02
-total_energy        : -5.52334914370976E+00
-total_energy_eV     : -1.50297973742289E+02
-band_energy         : -1.26619247851478E+00
+local_psp           : -3.88456762190734E+00
+non_local_psp       : -1.35320555404757E-02
+internal            : -5.50537269811900E+00
+'-kT*entropy'       : -1.79764455907488E-02
+total_energy        : -5.52334914370975E+00
+total_energy_eV     : -1.50297973742288E+02
+band_energy         : -1.26619247851476E+00
 ...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)= -4.13016459E-05  sigma(3 2)=  2.70416889E-10
-  sigma(2 2)= -4.13052769E-05  sigma(3 1)=  2.50077848E-09
-  sigma(3 3)= -4.13078410E-05  sigma(2 1)=  1.79505560E-10
+  sigma(1 1)= -4.13016459E-05  sigma(3 2)=  2.70416905E-10
+  sigma(2 2)= -4.13052769E-05  sigma(3 1)=  2.50077849E-09
+  sigma(3 3)= -4.13078410E-05  sigma(2 1)=  1.79505554E-10
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.2152E+00 GPa]
-- sigma(1 1)= -1.21513617E+00  sigma(3 2)=  7.95593820E-06
-- sigma(2 2)= -1.21524300E+00  sigma(3 1)=  7.35754306E-05
-- sigma(3 3)= -1.21531843E+00  sigma(2 1)=  5.28123501E-06
+- sigma(1 1)= -1.21513617E+00  sigma(3 2)=  7.95593869E-06
+- sigma(2 2)= -1.21524300E+00  sigma(3 1)=  7.35754310E-05
+- sigma(3 3)= -1.21531843E+00  sigma(2 1)=  5.28123485E-06
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -404,8 +404,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.04204
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi_halfso.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi_halfso.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/83bi_halfso.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/83bi_halfso.psphgh
 - HGH psp for Bismuth, from PRB58, 3641 (1998) paper - with spin-orbit reduced by a factor of 2 !!!
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -432,8 +432,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
   spin-orbit 2    0.129098
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -460,8 +460,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
   spin-orbit 2    0.258197
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   3  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -512,9 +512,9 @@ tolerances: {toldfe: 1.00E-07, }
   for the second time, diff in etot=  4.740E-09 < toldfe=  1.000E-07
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)= -4.73324439E-05  sigma(3 2)= -3.24781468E-09
-  sigma(2 2)= -4.73358298E-05  sigma(3 1)=  4.97109668E-09
-  sigma(3 3)= -4.73403063E-05  sigma(2 1)= -5.88756659E-10
+  sigma(1 1)= -4.73324439E-05  sigma(3 2)= -3.24781470E-09
+  sigma(2 2)= -4.73358298E-05  sigma(3 1)=  4.97109669E-09
+  sigma(3 3)= -4.73403063E-05  sigma(2 1)= -5.88756667E-10
 
 
 --- !ResultsGS
@@ -532,9 +532,9 @@ etotal    :  -5.47258138E+00
 entropy   :   0.00000000E+00
 fermie    :  -9.11130904E-02
 cartesian_stress_tensor: # hartree/bohr^3
-- [ -4.73324439E-05,  -5.88756659E-10,   4.97109668E-09, ]
-- [ -5.88756659E-10,  -4.73358298E-05,  -3.24781468E-09, ]
-- [  4.97109668E-09,  -3.24781468E-09,  -4.73403063E-05, ]
+- [ -4.73324439E-05,  -5.88756667E-10,   4.97109669E-09, ]
+- [ -5.88756667E-10,  -4.73358298E-05,  -3.24781470E-09, ]
+- [  4.97109669E-09,  -3.24781470E-09,  -4.73403063E-05, ]
 pressure_GPa:   1.3927E+00
 xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00, Bi]
@@ -555,7 +555,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  1.6551E-06; max dE/dt=  2.0449E-06; dE/dt below (all hartree)
-    1       0.000002044877      0.000001630665      0.000001173564
+    1       0.000002044878      0.000001630664      0.000001173563
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
@@ -580,30 +580,30 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 2, }
 comment             : Components of total free energy in Hartree
-kinetic             :  1.74312218542332E+00
-hartree             :  1.20997303493061E+00
-xc                  : -1.24951089205010E+00
+kinetic             :  1.74312218542338E+00
+hartree             :  1.20997303493071E+00
+xc                  : -1.24951089205015E+00
 Ewald energy        : -3.54662184935089E+00
 psp_core            :  1.73973577808835E-01
-local_psp           : -3.81019098691989E+00
-non_local_psp       :  2.69858718715555E-02
+local_psp           : -3.81019098692005E+00
+non_local_psp       :  2.69858718715934E-02
 internal            : -5.45226905828657E+00
-'-kT*entropy'       : -2.03123198081270E-02
+'-kT*entropy'       : -2.03123198081271E-02
 total_energy        : -5.47258137809470E+00
 total_energy_eV     : -1.48916512584423E+02
-band_energy         : -1.24819070401522E+00
+band_energy         : -1.24819070401528E+00
 ...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)= -4.73324439E-05  sigma(3 2)= -3.24781468E-09
-  sigma(2 2)= -4.73358298E-05  sigma(3 1)=  4.97109668E-09
-  sigma(3 3)= -4.73403063E-05  sigma(2 1)= -5.88756659E-10
+  sigma(1 1)= -4.73324439E-05  sigma(3 2)= -3.24781470E-09
+  sigma(2 2)= -4.73358298E-05  sigma(3 1)=  4.97109669E-09
+  sigma(3 3)= -4.73403063E-05  sigma(2 1)= -5.88756667E-10
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.3927E+00 GPa]
-- sigma(1 1)= -1.39256834E+00  sigma(3 2)= -9.55539907E-05
-- sigma(2 2)= -1.39266796E+00  sigma(3 1)=  1.46254689E-04
-- sigma(3 3)= -1.39279966E+00  sigma(2 1)= -1.73218160E-05
+- sigma(1 1)= -1.39256834E+00  sigma(3 2)= -9.55539914E-05
+- sigma(2 2)= -1.39266796E+00  sigma(3 1)=  1.46254690E-04
+- sigma(3 3)= -1.39279966E+00  sigma(2 1)= -1.73218163E-05
 
 ================================================================================
 == DATASET  3 ==================================================================
@@ -634,8 +634,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.04204
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi_halfso.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi_halfso.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/83bi_halfso.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/83bi_halfso.psphgh
 - HGH psp for Bismuth, from PRB58, 3641 (1998) paper - with spin-orbit reduced by a factor of 2 !!!
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -662,8 +662,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
   spin-orbit 2    0.129098
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -690,8 +690,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
   spin-orbit 2    0.258197
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   3  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -732,20 +732,20 @@ tolerances: {toldfe: 1.00E-07, }
  ETOT  1  -5.4427040265818    -5.443E+00 1.322E-02 3.598E+00
  ETOT  2  -5.4482937984595    -5.590E-03 2.115E-08 6.724E-01
  ETOT  3  -5.4483472103913    -5.341E-05 1.087E-07 2.432E-01
- ETOT  4  -5.4483673770953    -2.017E-05 1.488E-08 8.682E-02
- ETOT  5  -5.4483796758852    -1.230E-05 7.837E-09 1.311E-02
+ ETOT  4  -5.4483673770952    -2.017E-05 1.488E-08 8.682E-02
+ ETOT  5  -5.4483796758851    -1.230E-05 7.837E-09 1.311E-02
  ETOT  6  -5.4483818664355    -2.191E-06 2.400E-09 5.267E-04
  ETOT  7  -5.4483820137133    -1.473E-07 7.638E-10 2.498E-05
  ETOT  8  -5.4483820353701    -2.166E-08 9.273E-11 9.693E-07
- ETOT  9  -5.4483820356030    -2.330E-10 5.843E-13 9.613E-08
+ ETOT  9  -5.4483820356030    -2.329E-10 5.842E-13 9.613E-08
 
  At SCF step    9, etot is converged : 
-  for the second time, diff in etot=  2.330E-10 < toldfe=  1.000E-07
+  for the second time, diff in etot=  2.329E-10 < toldfe=  1.000E-07
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)= -5.24569881E-05  sigma(3 2)=  1.45274030E-10
-  sigma(2 2)= -5.24562650E-05  sigma(3 1)=  3.47939201E-10
-  sigma(3 3)= -5.24556045E-05  sigma(2 1)= -7.35510832E-11
+  sigma(1 1)= -5.24569881E-05  sigma(3 2)=  1.45274116E-10
+  sigma(2 2)= -5.24562650E-05  sigma(3 1)=  3.47939167E-10
+  sigma(3 3)= -5.24556045E-05  sigma(2 1)= -7.35509871E-11
 
 
 --- !ResultsGS
@@ -758,14 +758,14 @@ lattice_vectors:
 lattice_lengths: [  10.00000,   10.00000,   10.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.0000000E+03
-convergence: {deltae: -2.330E-10, res2:  9.613E-08, residm:  5.843E-13, diffor: null, }
+convergence: {deltae: -2.329E-10, res2:  9.613E-08, residm:  5.842E-13, diffor: null, }
 etotal    :  -5.44838204E+00
 entropy   :   0.00000000E+00
 fermie    :  -9.76241435E-02
 cartesian_stress_tensor: # hartree/bohr^3
-- [ -5.24569881E-05,  -7.35510832E-11,   3.47939201E-10, ]
-- [ -7.35510832E-11,  -5.24562650E-05,   1.45274030E-10, ]
-- [  3.47939201E-10,   1.45274030E-10,  -5.24556045E-05, ]
+- [ -5.24569881E-05,  -7.35509871E-11,   3.47939167E-10, ]
+- [ -7.35509871E-11,  -5.24562650E-05,   1.45274116E-10, ]
+- [  3.47939167E-10,   1.45274116E-10,  -5.24556045E-05, ]
 pressure_GPa:   1.5433E+00
 xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00, Bi]
@@ -782,18 +782,18 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   33.142E-14; max=  58.426E-14
+ Mean square residual over all n,k,spin=   33.142E-14; max=  58.425E-14
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  3.2619E-07; max dE/dt=  4.3197E-07; dE/dt below (all hartree)
-    1       0.000000232648      0.000000280144      0.000000431975
+    1       0.000000232650      0.000000280144      0.000000431972
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
 
  cartesian forces (hartree/bohr) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
- frms,max,avg= 0.0000000E+00 0.0000000E+00  -2.326E-08 -2.801E-08 -4.320E-08 h/b
+ frms,max,avg= 0.0000000E+00 0.0000000E+00  -2.327E-08 -2.801E-08 -4.320E-08 h/b
 
  cartesian forces (eV/Angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
@@ -811,30 +811,30 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 3, }
 comment             : Components of total free energy in Hartree
-kinetic             :  1.72079625829380E+00
-hartree             :  1.17882162782237E+00
-xc                  : -1.23957569510077E+00
+kinetic             :  1.72079625829369E+00
+hartree             :  1.17882162782223E+00
+xc                  : -1.23957569510072E+00
 Ewald energy        : -3.54662184935089E+00
 psp_core            :  1.73973577808835E-01
-local_psp           : -3.75081762780436E+00
-non_local_psp       :  4.88929579929251E-02
+local_psp           : -3.75081762780414E+00
+non_local_psp       :  4.88929579929104E-02
 internal            : -5.41453075033809E+00
 '-kT*entropy'       : -3.38512852649434E-02
-total_energy        : -5.44838203560304E+00
+total_energy        : -5.44838203560303E+00
 total_energy_eV     : -1.48258014986722E+02
-band_energy         : -1.23850299378524E+00
+band_energy         : -1.23850299378502E+00
 ...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)= -5.24569881E-05  sigma(3 2)=  1.45274030E-10
-  sigma(2 2)= -5.24562650E-05  sigma(3 1)=  3.47939201E-10
-  sigma(3 3)= -5.24556045E-05  sigma(2 1)= -7.35510832E-11
+  sigma(1 1)= -5.24569881E-05  sigma(3 2)=  1.45274116E-10
+  sigma(2 2)= -5.24562650E-05  sigma(3 1)=  3.47939167E-10
+  sigma(3 3)= -5.24556045E-05  sigma(2 1)= -7.35509871E-11
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.5433E+00 GPa]
-- sigma(1 1)= -1.54333761E+00  sigma(3 2)=  4.27410880E-06
-- sigma(2 2)= -1.54331634E+00  sigma(3 1)=  1.02367230E-05
-- sigma(3 3)= -1.54329691E+00  sigma(2 1)= -2.16394721E-06
+- sigma(1 1)= -1.54333761E+00  sigma(3 2)=  4.27411133E-06
+- sigma(2 2)= -1.54331634E+00  sigma(3 1)=  1.02367220E-05
+- sigma(3 3)= -1.54329691E+00  sigma(2 1)= -2.16394439E-06
 
 ================================================================================
 == DATASET  4 ==================================================================
@@ -865,8 +865,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.04204
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi_halfso.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi_halfso.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/83bi_halfso.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/83bi_halfso.psphgh
 - HGH psp for Bismuth, from PRB58, 3641 (1998) paper - with spin-orbit reduced by a factor of 2 !!!
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -893,8 +893,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
   spin-orbit 2    0.129098
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -921,8 +921,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
   spin-orbit 2    0.258197
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   3  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -973,9 +973,9 @@ tolerances: {toldfe: 1.00E-07, }
   for the second time, diff in etot=  4.740E-09 < toldfe=  1.000E-07
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)= -4.73324439E-05  sigma(3 2)= -3.24781477E-09
-  sigma(2 2)= -4.73358298E-05  sigma(3 1)=  4.97109672E-09
-  sigma(3 3)= -4.73403063E-05  sigma(2 1)= -5.88756687E-10
+  sigma(1 1)= -4.73324439E-05  sigma(3 2)= -3.24781464E-09
+  sigma(2 2)= -4.73358298E-05  sigma(3 1)=  4.97109668E-09
+  sigma(3 3)= -4.73403063E-05  sigma(2 1)= -5.88756646E-10
 
 
 --- !ResultsGS
@@ -993,9 +993,9 @@ etotal    :  -5.47258138E+00
 entropy   :   0.00000000E+00
 fermie    :  -9.11130904E-02
 cartesian_stress_tensor: # hartree/bohr^3
-- [ -4.73324439E-05,  -5.88756687E-10,   4.97109672E-09, ]
-- [ -5.88756687E-10,  -4.73358298E-05,  -3.24781477E-09, ]
-- [  4.97109672E-09,  -3.24781477E-09,  -4.73403063E-05, ]
+- [ -4.73324439E-05,  -5.88756646E-10,   4.97109668E-09, ]
+- [ -5.88756646E-10,  -4.73358298E-05,  -3.24781464E-09, ]
+- [  4.97109668E-09,  -3.24781464E-09,  -4.73403063E-05, ]
 pressure_GPa:   1.3927E+00
 xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00, Bi]
@@ -1016,7 +1016,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  1.6551E-06; max dE/dt=  2.0449E-06; dE/dt below (all hartree)
-    1       0.000002044877      0.000001630664      0.000001173563
+    1       0.000002044877      0.000001630666      0.000001173566
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
@@ -1041,30 +1041,30 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 4, }
 comment             : Components of total free energy in Hartree
-kinetic             :  1.74312218542303E+00
-hartree             :  1.20997303493033E+00
-xc                  : -1.24951089205001E+00
+kinetic             :  1.74312218542327E+00
+hartree             :  1.20997303493056E+00
+xc                  : -1.24951089205009E+00
 Ewald energy        : -3.54662184935089E+00
 psp_core            :  1.73973577808835E-01
-local_psp           : -3.81019098691938E+00
-non_local_psp       :  2.69858718715073E-02
-internal            : -5.45226905828658E+00
-'-kT*entropy'       : -2.03123198081269E-02
-total_energy        : -5.47258137809470E+00
+local_psp           : -3.81019098691981E+00
+non_local_psp       :  2.69858718715379E-02
+internal            : -5.45226905828660E+00
+'-kT*entropy'       : -2.03123198081273E-02
+total_energy        : -5.47258137809473E+00
 total_energy_eV     : -1.48916512584423E+02
 band_energy         : -1.24819070401527E+00
 ...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)= -4.73324439E-05  sigma(3 2)= -3.24781477E-09
-  sigma(2 2)= -4.73358298E-05  sigma(3 1)=  4.97109672E-09
-  sigma(3 3)= -4.73403063E-05  sigma(2 1)= -5.88756687E-10
+  sigma(1 1)= -4.73324439E-05  sigma(3 2)= -3.24781464E-09
+  sigma(2 2)= -4.73358298E-05  sigma(3 1)=  4.97109668E-09
+  sigma(3 3)= -4.73403063E-05  sigma(2 1)= -5.88756646E-10
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.3927E+00 GPa]
-- sigma(1 1)= -1.39256834E+00  sigma(3 2)= -9.55539933E-05
-- sigma(2 2)= -1.39266796E+00  sigma(3 1)=  1.46254690E-04
-- sigma(3 3)= -1.39279966E+00  sigma(2 1)= -1.73218168E-05
+- sigma(1 1)= -1.39256834E+00  sigma(3 2)= -9.55539895E-05
+- sigma(2 2)= -1.39266796E+00  sigma(3 1)=  1.46254689E-04
+- sigma(3 3)= -1.39279966E+00  sigma(2 1)= -1.73218157E-05
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -1081,7 +1081,7 @@ band_energy         : -1.24819070401527E+00
             fcart2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart4     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         312
+-          fftalg         512
            istwfk        1
            jdtset        1    2    3    4
            kptopt           0
@@ -1112,14 +1112,14 @@ P           mkmem           1
            occopt           7
            so_psp           2       2       0
           spgroup           1
-           strten1    -4.1301645871E-05 -4.1305276884E-05 -4.1307840950E-05
-                       2.7041688863E-10  2.5007784760E-09  1.7950555983E-10
+           strten1    -4.1301645871E-05 -4.1305276884E-05 -4.1307840951E-05
+                       2.7041690510E-10  2.5007784894E-09  1.7950555426E-10
            strten2    -4.7332443947E-05 -4.7335829797E-05 -4.7340306315E-05
-                      -3.2478146757E-09  4.9710966808E-09 -5.8875665925E-10
+                      -3.2478147014E-09  4.9710966930E-09 -5.8875666737E-10
            strten3    -5.2456988069E-05 -5.2456265015E-05 -5.2455604467E-05
-                       1.4527402986E-10  3.4793920147E-10 -7.3551083162E-11
-           strten4    -4.7332443946E-05 -4.7335829797E-05 -4.7340306314E-05
-                      -3.2478147668E-09  4.9710967182E-09 -5.8875668673E-10
+                       1.4527411593E-10  3.4793916706E-10 -7.3550987064E-11
+           strten4    -4.7332443947E-05 -4.7335829797E-05 -4.7340306314E-05
+                      -3.2478146374E-09  4.9710966806E-09 -5.8875664648E-10
            toldfe      1.00000000E-07 Hartree
            tsmear      2.00000000E-02 Hartree
             typat1     2
@@ -1223,10 +1223,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          3.7  wall=          3.8
+- Proc.   0 individual time (sec): cpu=          2.0  wall=          4.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered  37 WARNINGs and  25 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.7  wall=          3.8
++Overall time at end (sec) : cpu=          2.0  wall=          4.0

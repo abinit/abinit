@@ -1,8 +1,8 @@
 
-.Version 9.11.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2022 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Jul 2023.
-- ( at 12h03 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h11 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v6_t16/t16.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v6_t16/t16.abi
 - output file    -> t16.abo
 - root for input  files -> t16i
 - root for output files -> t16o
@@ -122,17 +122,17 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
             acell      1.0000000000E+00  1.0000000000E+00  1.0000000000E+00 Bohr
               amu      1.00794000E+00
              ecut      2.00000000E+00 Hartree
--          fftalg         312
+-          fftalg         512
            istwfk        2
            jdtset        1    2    3    4    5    6
            kptopt           0
@@ -325,8 +325,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
 -  Troullier-Martins psp for element  H         Thu Oct 27 17:28:54 EDT 1994
 -  1.00000   1.00000    940714                znucl, zion, pspdat
     1    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -707,12 +707,12 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 3, }
 comment             : Components of total free energy in Hartree
-kinetic             :  5.99884900021166E-02
-hartree             :  9.29447996138603E-03
+kinetic             :  5.99884900021170E-02
+hartree             :  9.29447996138611E-03
 xc                  : -2.12910938787740E-01
 Ewald energy        : -3.14760707859624E-01
 psp_core            :  4.66522553903205E-04
-local_psp           : -1.10515664041930E-01
+local_psp           : -1.10515664041931E-01
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -5.68437818171888E-01
 total_energy_eV     : -1.54679796708161E+01
@@ -844,12 +844,12 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 4, }
 comment             : Components of total free energy in Hartree
-kinetic             :  5.99884900021166E-02
-hartree             :  9.29447996138603E-03
+kinetic             :  5.99884900021170E-02
+hartree             :  9.29447996138611E-03
 xc                  : -2.12910938787740E-01
 Ewald energy        : -3.14760707859624E-01
 psp_core            :  4.66522553903205E-04
-local_psp           : -1.10515664041930E-01
+local_psp           : -1.10515664041931E-01
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -5.68437818171888E-01
 total_energy_eV     : -1.54679796708161E+01
@@ -988,7 +988,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 5, }
 comment             : Components of total free energy in Hartree
-kinetic             :  8.61739276701404E-02
+kinetic             :  8.61739276701403E-02
 hartree             :  1.65373171469331E-02
 xc                  : -1.70253182056212E-01
 Ewald energy        : -2.30226049880733E-01
@@ -1132,7 +1132,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 6, }
 comment             : Components of total free energy in Hartree
-kinetic             :  8.61739276701404E-02
+kinetic             :  8.61739276701403E-02
 hartree             :  1.65373171469331E-02
 xc                  : -1.70253182056212E-01
 Ewald energy        : -2.30226049880733E-01
@@ -1174,7 +1174,7 @@ band_energy         : -1.84002492450594E-01
             fcart4    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart5    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart6    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
--          fftalg         312
+-          fftalg         512
            istwfk        2
            jdtset        1    2    3    4    5    6
            kptopt           0
@@ -1418,10 +1418,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          0.6  wall=          0.8
+- Proc.   0 individual time (sec): cpu=          0.6  wall=          0.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered  10 WARNINGs and  27 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          0.6  wall=          0.8
++Overall time at end (sec) : cpu=          0.6  wall=          0.7

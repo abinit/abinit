@@ -9,7 +9,7 @@
 !!  Main entry point for client code that needs to read the DDB data.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2022 ABINIT group (MJV, XG, MT, MM, MVeithen, MG, PB, JCC, SP, GA)
+!! Copyright (C) 2011-2024 ABINIT group (MJV, XG, MT, MM, MVeithen, MG, PB, JCC, SP, GA, MMignolet)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -145,6 +145,7 @@ module m_ddb
   !      (4 => first-order derivatives of total energy)
   !      (5 => 2nd-order derivatives of eigenvalues)
   !      (33 => long wave third order derivatives of total energy)
+  !      (85 => Molecular Berry curvature, 2nd-order derivative)
 
   real(dp),allocatable :: amu(:)
   ! amu(ntypat)
@@ -192,6 +193,8 @@ module m_ddb
     procedure :: copy => ddb_copy
      ! Copy the object.
 
+    !procedure :: get_qptopt => ddb_get_qptopt
+
     procedure :: set_qpt => ddb_set_qpt
      ! Set the wavevector
 
@@ -237,6 +240,9 @@ module m_ddb
 
     procedure :: set_brav => ddb_set_brav
      ! Set the bravais lattice.
+
+    procedure :: set_typ => ddb_set_typ
+    ! Set the typ of one block
 
     procedure :: bcast => ddb_bcast
      ! Broadcast the object.
@@ -451,7 +457,7 @@ subroutine ddb_init(ddb, dtset, nblok, mpert, &
  logical,intent(in),optional :: with_d0E, with_d1E, with_d2E, with_d3E, with_d2eig
 
 !Local variables -------------------------------
- integer :: msize_, ii, ikpt, iblok
+ integer :: msize_, ii, ikpt
  logical :: with_d0E_, with_d1E_, with_d2E_, with_d3E_, with_d2eig_
 
 ! ************************************************************************
@@ -480,19 +486,18 @@ subroutine ddb_init(ddb, dtset, nblok, mpert, &
 
  ddb%qpt(:,:) = zero
  ddb%nrm(:,:) = one
- do iblok = 1,ddb%nblok
-   if (with_d0E_) then
-     ddb%typ(iblok) = BLKTYP_d0E_xx
-   else if (with_d1E_) then
-     ddb%typ(iblok) = BLKTYP_d1E_xx
-   else if (with_d2E_) then
-     ddb%typ(iblok) = BLKTYP_d2E_ns
-   else if (with_d3E_) then
-     ddb%typ(iblok) = BLKTYP_d3E_xx
-   else if (with_d2eig_) then
-     ddb%typ(iblok) = BLKTYP_d2eig_re
-   end if
- end do
+ if (with_d0E_) then
+   ddb%typ(:) = BLKTYP_d0E_xx
+ else if (with_d1E_) then
+   ddb%typ(:) = BLKTYP_d1E_xx
+ else if (with_d2E_) then
+   ddb%typ(:) = BLKTYP_d2E_ns
+ else if (with_d3E_) then
+   ddb%typ(:) = BLKTYP_d3E_xx
+ else if (with_d2eig_) then
+   ddb%typ(:) = BLKTYP_d2eig_re
+ end if
+
  ddb%flg(:,:) = 0
  ddb%amu(:) = dtset%amu_orig(:,1)
 
@@ -1174,7 +1179,7 @@ subroutine ddb_set_brav(ddb, brav)
 ! *************************************************************************
 
  ! Renormalize rprim to possibly satisfy the constraint abs(rprim(1,2))=half when abs(brav)/=1
- ! This section is needed to preserver the behaviour of the old implementation.
+ ! This section is needed to preserve the behaviour of the old implementation.
  if (abs(brav)/=1 .and. abs(abs(ddb%rprim(1,2))-half)>tol10) then
    if(abs(ddb%rprim(1,2))<tol6)then
      write(msg, '(a,i0,7a)' )&
@@ -1191,6 +1196,37 @@ subroutine ddb_set_brav(ddb, brav)
  end if
 
 end subroutine ddb_set_brav
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ddb/ddb_set_typ
+!! NAME
+!! ddb_set_typ
+!!
+!! FUNCTION
+!!  Set the blok typ for one block
+!!
+!! INPUTS
+!!  iblok: block index
+!!  typ: type of block
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine ddb_set_typ(ddb, iblok, typ)
+
+!Arguments -------------------------------
+!array
+ class(ddb_type),intent(inout) :: ddb
+!scalars
+ integer,intent(in) :: iblok,typ
+! *************************************************************************
+
+ ddb%typ(iblok) = typ
+
+end subroutine ddb_set_typ
 !!***
 
 !----------------------------------------------------------------------
@@ -1300,6 +1336,7 @@ end subroutine ddb_bcast
 !!   3 => third derivative of total energy
 !!   4 => first-order derivatives of total energy
 !!  33 => long wave third order derivatives of total energy
+!!  85 => molecular Berry curvature
 !! [rfqvec(4)] = 1=> d/dq (optional)
 !!
 !! OUTPUT
@@ -1345,7 +1382,7 @@ subroutine ddb_get_block(ddb, iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rfty
  else if (is_type_d1E(rftyp)) then
    nder=1
  else
-   write(msg, '(a,i0,a)')' rftyp is equal to ',rftyp,'. The only allowed values are 0, 1, 2, 3 or 4.'
+   write(msg, '(a,i0,a)')' rftyp is equal to ',rftyp,'. The only allowed values are 0, 1, 2, 3, 5, 6, 33 or 85.'
    ABI_BUG(msg)
  end if
 
@@ -1393,7 +1430,7 @@ subroutine ddb_get_block(ddb, iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rfty
  ! Build the perturbation table
  do ider=1,nder
    ! First the phonons
-   if(rfphon(ider)==1)then
+   if(rfphon(ider)==1)then ! what about the rfphon = 2 case ?
      do ipert=1,natom
        worki(ipert,ider)=1
      end do
@@ -1661,7 +1698,7 @@ subroutine ddb_read_block_txt(ddb,iblok,mband,mpert,msize,nkpt,nunit,&
 
  ! Read the block type and number of elements
  read(nunit,*)
- read(nunit, '(a32,12x,i8)' )name,nelmts
+ read(nunit, '(a32,12x,i12)' )name,nelmts
 
  ! TODO: Replace with STRING_d2E, etc.
  ! GA: Note that older versions used the expression '2rd' instead of '2nd'
@@ -1682,6 +1719,8 @@ subroutine ddb_read_block_txt(ddb,iblok,mband,mpert,msize,nkpt,nunit,&
    ddb%typ(iblok)=BLKTYP_d2eig_re
  else if(name==' 3rd derivatives (long wave)  - ')then
    ddb%typ(iblok)=BLKTYP_d3E_lw
+ else if(name==' 2nd derivatives (MBC)        - ')then
+   ddb%typ(iblok)=BLKTYP_d2E_mbc
  else
    write(msg,'(6a)')&
    'The following string appears in the DDB in place of',&
@@ -1732,7 +1771,7 @@ subroutine ddb_read_block_txt(ddb,iblok,mband,mpert,msize,nkpt,nunit,&
 
    ! Read every element
    do ii=1,nelmts
-     read(nunit,'(6i4,2d22.14)')idir1,ipert1,idir2,ipert2,idir3,ipert3,ar,ai
+     read(nunit,*)idir1,ipert1,idir2,ipert2,idir3,ipert3,ar,ai
      index=idir1+                     &
        3*((ipert1-1)+mpert*((idir2-1)+ &
        3*((ipert2-1)+mpert*((idir3-1)+3*(ipert3-1)))))
@@ -1773,7 +1812,7 @@ subroutine ddb_read_block_txt(ddb,iblok,mband,mpert,msize,nkpt,nunit,&
 
    ! Read every element
    do ii=1,nelmts
-     read(nunit,'(2i4,2d22.14)')idir1,ipert1,ar,ai
+     read(nunit,*)idir1,ipert1,ar,ai
      index=idir1 + 3*(ipert1 - 1)
      ddb%flg(index,iblok)=1
      ddb%val(1,index,iblok)=ar
@@ -1879,7 +1918,7 @@ subroutine ddb_read_d2eig(ddb, ddb_hdr, iblok_store, iblok_read, comm)
       ! Read the next block and store it
       call ddb%read_d2eig_txt(ddb_hdr%unddb, iblok_store)
 
-    else 
+    else
       write(msg, '(3a)' )&
       ! File has not beed open by ddb_hdr
       'Attempting to read from unopen file DDB.',ch10,&
@@ -2866,7 +2905,7 @@ subroutine ddb_merge_blocks(ddb1, ddb2, iblok1, iblok2)
   do ii=1,3
     ddb1%nrm(ii,iblok1) = ddb2%nrm(ii,iblok2)
   end do
-  
+
   if (is_type_d0E(blktyp)) then
      ! --------------
      ! Copy d0E block
@@ -3534,8 +3573,8 @@ integer function ddb_get_dielt_zeff(ddb, crystal, rftyp, chneut, selectz, dielt,
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: rftyp,chneut,selectz
  class(ddb_type),intent(inout) :: ddb
+ integer,intent(in) :: rftyp,chneut,selectz
  type(crystal_t),intent(in) :: crystal
 !arrays
  real(dp),intent(out) :: dielt(3,3),zeff(3,3,crystal%natom)
@@ -3543,13 +3582,15 @@ integer function ddb_get_dielt_zeff(ddb, crystal, rftyp, chneut, selectz, dielt,
 
 !Local variables -------------------------
 !scalars
- integer :: ii
+ integer :: ii, units(2)
  character(len=500) :: msg
 !arrays
  integer :: rfelfd(4),rfphon(4),rfstrs(4)
  real(dp) :: qphnrm(3),qphon(3,3), my_zeff_raw(3,3,crystal%natom)
 
 ! *********************************************************************
+
+ units = [std_out, ab_out]
 
  ! Look for the Gamma Block in the DDB
  qphon(:,1)=zero
@@ -3569,13 +3610,13 @@ integer function ddb_get_dielt_zeff(ddb, crystal, rftyp, chneut, selectz, dielt,
  if (iblok /= 0) then
    write(msg, '(2a,(80a),4a)' ) ch10,('=',ii=1,80),ch10,ch10,&
    ' Dielectric Tensor and Effective Charges ',ch10
-   call wrtout([std_out, ab_out], msg)
+   call wrtout(units, msg)
 
    ! Make the imaginary part of the Gamma block vanish
    write(msg, '(5a)'  ) ch10,&
    ' anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,',ch10,&
    '   and impose the ASR on the effective charges ',ch10
-   call wrtout([std_out, ab_out], msg)
+   call wrtout(units, msg)
 
    ! Extrac Zeff before enforcing sum rule.
    call dtech9(ddb%val, dielt, iblok, ddb%mpert, ddb%natom, ddb%nblok, my_zeff_raw, unit=dev_null)
@@ -3840,7 +3881,7 @@ end function ddb_get_dchidet
 !! INPUTS
 !!  ddb<type(ddb_type)>=Derivative database.
 !!  relaxat
-!!    0 => without relaxation of the atoms 
+!!    0 => without relaxation of the atoms
 !!    1 => with relaxation of the atoms
 !!  relaxstr
 !!    0 => without relaxed lattice constants
@@ -3902,7 +3943,7 @@ end function ddb_get_pel
 !! INPUTS
 !!  ddb<type(ddb_type)>=Derivative database.
 !!  relaxat
-!!    0 => without relaxation of the atoms 
+!!    0 => without relaxation of the atoms
 !!    1 => with relaxation of the atoms
 !!  relaxstr
 !!    0 => without relaxed lattice constants
@@ -3977,7 +4018,7 @@ end function ddb_get_gred
 !! INPUTS
 !!  ddb<type(ddb_type)>=Derivative database.
 !!  relaxat
-!!    0 => without relaxation of the atoms 
+!!    0 => without relaxation of the atoms
 !!    1 => with relaxation of the atoms
 !!  relaxstr
 !!    0 => without relaxed lattice constants
@@ -4163,7 +4204,7 @@ end function ddb_get_asrq0
 !!  iblock=the block index on which to act
 !!
 !! SIDE EFFECTS
-!!  ddb<type(ddb_type)>= 
+!!  ddb<type(ddb_type)>=
 !!
 !! OUTPUT
 !!
@@ -4206,7 +4247,7 @@ subroutine ddb_symmetrize_and_transform(ddb, crystal, iblok)
  ABI_MALLOC(symq,(4,2,nsym))
 
  !  Here complete the matrix by symmetrisation of the existing elements
- if (is_type_d2E(ddb%typ(iblok))) then
+ if (ddb%typ(iblok) == BLKTYP_d2E_ns .or. ddb%typ(iblok) == BLKTYP_d2E_st) then
 
    qpt(1)=ddb%qpt(1,iblok)/ddb%nrm(1,iblok)
    qpt(2)=ddb%qpt(2,iblok)/ddb%nrm(1,iblok)
@@ -4586,19 +4627,21 @@ subroutine ddb_write_block_txt(ddb,iblok,choice,mband,mpert,msize,nkpt,nunit,&
  ! Write the block type and number of elements
  write(nunit,*)' '
  if (ddb%typ(iblok) == BLKTYP_d0E_xx) then
-   write(nunit, '(a,i8)' )' Total energy                 - # elements :',nelmts
+   write(nunit, '(a,i12)' )' Total energy                 - # elements :',nelmts
  else if (ddb%typ(iblok)==BLKTYP_d2E_ns) then
-   write(nunit, '(a,i8)' )' 2nd derivatives (non-stat.)  - # elements :',nelmts
+   write(nunit, '(a,i12)' )' 2nd derivatives (non-stat.)  - # elements :',nelmts
  else if(ddb%typ(iblok)==BLKTYP_d2E_st) then
-   write(nunit, '(a,i8)' )' 2nd derivatives (stationary) - # elements :',nelmts
+   write(nunit, '(a,i12)' )' 2nd derivatives (stationary) - # elements :',nelmts
+ else if(ddb%typ(iblok)==BLKTYP_d2E_mbc) then
+   write(nunit, '(a,i12)' )' 2nd derivatives (MBC)        - # elements :',nelmts
  else if(ddb%typ(iblok)==BLKTYP_d3E_xx) then
-   write(nunit, '(a,i8)' )' 3rd derivatives              - # elements :',nelmts
+   write(nunit, '(a,i12)' )' 3rd derivatives              - # elements :',nelmts
  else if (ddb%typ(iblok) == BLKTYP_d1E_xx) then
-   write(nunit, '(a,i8)' )' 1st derivatives              - # elements :',nelmts
+   write(nunit, '(a,i12)' )' 1st derivatives              - # elements :',nelmts
  else if (ddb%typ(iblok) == BLKTYP_d2eig_re) then
-   write(nunit, '(a,i8)' )' 2nd eigenvalue derivatives   - # elements :',nelmts
+   write(nunit, '(a,i12)' )' 2nd eigenvalue derivatives   - # elements :',nelmts
  else if(ddb%typ(iblok)==BLKTYP_d3E_lw) then
-   write(nunit, '(a,i8)' )' 3rd derivatives (long wave)  - # elements :',nelmts
+   write(nunit, '(a,i12)' )' 3rd derivatives (long wave)  - # elements :',nelmts
  end if
 
  ! Write the 2nd derivative block
@@ -4645,7 +4688,7 @@ subroutine ddb_write_block_txt(ddb,iblok,choice,mband,mpert,msize,nkpt,nunit,&
                do idir1=1,3
                  ii=ii+1
                  if(ddb%flg(ii,iblok)==1)then
-                   write(nunit, '(6i4,2d22.14)' )&
+                   write(nunit, '(6i6,2d22.14)' )&
                     idir1,ipert1,idir2,ipert2,idir3,ipert3,ddb%val(1,ii,iblok),ddb%val(2,ii,iblok)
                  end if
                end do
@@ -4669,7 +4712,7 @@ subroutine ddb_write_block_txt(ddb,iblok,choice,mband,mpert,msize,nkpt,nunit,&
        do idir1 = 1, 3
          ii = ii + 1
          if (ddb%flg(ii,iblok) == 1) then
-           write(nunit,'(2i4,2d22.14)')idir1,ipert1,ddb%val(1,ii,iblok),ddb%val(2,ii,iblok)
+           write(nunit,'(2i6,2d22.14)')idir1,ipert1,ddb%val(1,ii,iblok),ddb%val(2,ii,iblok)
          end if
        end do
      end do
@@ -4743,14 +4786,14 @@ subroutine ddb_write(ddb, ddb_hdr, filename, with_psps, comm)
 
 ! ************************************************************************
 
-  call ddb_hdr%get_iomode(filename, 2, iomode, filename_)
+ call ddb_hdr%get_iomode(filename, 2, iomode, filename_)
 
-  if (iomode==IO_MODE_ETSF) then
-    call ddb%write_nc(ddb_hdr, filename_, comm=comm, with_psps=with_psps)
-  else if (iomode==IO_MODE_FORTRAN) then
-    call ddb%write_txt(ddb_hdr, filename_, with_psps=with_psps, comm=comm)
-    ddb_hdr%mpert = ddb%mpert  ! Text format doesnt know about mpert.
-  end if
+ if (iomode==IO_MODE_ETSF) then
+   call ddb%write_nc(ddb_hdr, filename_, comm=comm, with_psps=with_psps)
+ else if (iomode==IO_MODE_FORTRAN) then
+   call ddb%write_txt(ddb_hdr, filename_, with_psps=with_psps, comm=comm)
+   ddb_hdr%mpert = ddb%mpert  ! Text format doesnt know about mpert.
+ end if
 
 end subroutine ddb_write
 !!***
@@ -4846,7 +4889,7 @@ subroutine ddb_write_d2eig(ddb, ddb_hdr, iblok, comm)
 
     call ddb%write_d2eig_txt(ddb_hdr%unddb, iblok)
 
-  else 
+  else
     write(msg, '(3a)' )&
     ! File has not been opened by ddb_hdr
     'Attempting to write into unopen DDB file.',ch10,&
@@ -5233,7 +5276,7 @@ end subroutine ddb_write_nc
 !!
 !! FUNCTION
 !!  Read a DDB block containing 0th order derivatives of energy.
-!!  
+!!
 !!
 !! INPUTS
 !!  ncid=netcdf identifier of a file open in reading mode.
@@ -5283,7 +5326,7 @@ end subroutine ddb_read_d0E_nc
 !!
 !! FUNCTION
 !!  Read a DDB block containing 1st order derivatives of energy.
-!!  
+!!
 !!
 !! INPUTS
 !!  ncid=netcdf identifier of a file open in reading mode.
@@ -5457,7 +5500,7 @@ subroutine ddb_read_d3E_nc(ddb, ncid, iblok, iblok_d3E)
  NCF_CHECK(nf90_get_var(ncid_d3E, nctk_idname(ncid_d3E, 'matrix_values'), matrix_d3E, start=[1,1,1,1,1,1,1,iblok_d3E]))
  NCF_CHECK(nf90_get_var(ncid_d3E, nctk_idname(ncid_d3E, 'matrix_mask'), flg_d3E, start=[1,1,1,1,1,1,iblok_d3E]))
 
- 
+
  blktyp = ddb%typ(iblok) ! Save block type so it doesnt get overwritten.
 
  call ddb%set_d3matr(iblok, matrix_d3E, flg_d3E)
@@ -5835,7 +5878,7 @@ end subroutine ddb_get_d2eig
 !!
 !! OUTPUT
 !!
-!! NOTE   
+!! NOTE
 !!  Does not handle spin index. Also, sometimes, d2eig is available with flat index
 !! SOURCE
 
@@ -5890,8 +5933,8 @@ end subroutine ddb_set_d2eig
 !!  iblok=index of the block we are setting.
 !!  d2eig=the second-order derivative of eigenvalues.
 !!  flg=flag to indicate presence of a given element.
-!!  blktyp=block type 
-!!   5->real part 
+!!  blktyp=block type
+!!   5->real part
 !!   6->imaginary part (broadening)
 !!
 !! OUTPUT
@@ -6036,7 +6079,12 @@ subroutine ddb_to_dtset(comm, dtset, filename, psps)
  ABI_REMALLOC(dtset%spinat, (3,dtset%natom))
  dtset%spinat(:,:) = ddb_hdr%spinat(1:3,1:ddb_hdr%matom)
 
+#ifdef FC_LLVM
+ ! LLVM 16 doesn't recognize this macro here
+ ABI_REMALLOC(dtset%xred_orig, (3,dtset%natom,mxnimage) )
+#else
  ABI_REMALLOC(dtset%xred_orig, (3,dtset%natom,mxnimage))
+#endif
  dtset%xred_orig(:,:,1) = ddb_hdr%xred(1:3,1:ddb_hdr%matom)
 
  ABI_REMALLOC(dtset%ziontypat, (dtset%ntypat))
@@ -6051,7 +6099,7 @@ subroutine ddb_to_dtset(comm, dtset, filename, psps)
  ABI_REMALLOC(dtset%symafm,(dtset%nsym))
  dtset%symafm(:) = ddb_hdr%symafm(1:ddb_hdr%msym)
 
- ABI_REMALLOC(dtset%symrel, (3,3,dtset%nsym))
+ ABI_REMALLOC(dtset%symrel, (3,3,dtset%nsym) )
  dtset%symrel(:,:,:) = ddb_hdr%symrel(1:3,1:3,1:ddb_hdr%msym)
 
  ABI_REMALLOC(dtset%tnons,(3,dtset%nsym))
@@ -6192,7 +6240,6 @@ subroutine merge_ddb(nddb, filenames, outfile, dscrpt, chkopt)
    if (ddb_hdr%with_psps>0 .or. ddb_hdr%psps%usepaw > 0) then
      iddb_psps = iddb
    end if
-
  end do
 
  ddb%nsppol = nsppol
@@ -6217,8 +6264,8 @@ subroutine merge_ddb(nddb, filenames, outfile, dscrpt, chkopt)
 
  call ddb_hdr%free()  ! GA: why do I need this? Try to remove
  call ddb_hdr%open_read(filenames(1), comm, &
-                          matom=matom,mtypat=mtypat,mband=mband,mkpt=mkpt,&
-                          msym=msym,dimekb=dimekb,lmnmax=lmnmax,usepaw=usepaw)
+                        matom=matom,mtypat=mtypat,mband=mband,mkpt=mkpt,&
+                        msym=msym,dimekb=dimekb,lmnmax=lmnmax,usepaw=usepaw)
  call ddb_hdr%close()
  ddb_hdr%mpert = mpert
  ddb_hdr%msize = msize
@@ -6556,7 +6603,7 @@ subroutine dtqdrp(blkval,ddb_version,lwsym,mpert,natom,lwtens)
  d3cart(1,:,:,:,:,:,:) = reshape(blkval(1,:),shape = (/3,mpert,3,mpert,3,mpert/))
  d3cart(2,:,:,:,:,:,:) = reshape(blkval(2,:),shape = (/3,mpert,3,mpert,3,mpert/))
 
-!Define a factor to apply if DDB file has been created with the old version of 
+!Define a factor to apply if DDB file has been created with the old version of
 !the longwave driver.
  if (ddb_version <= cvrsio8) then
    fac=-two
@@ -6719,7 +6766,7 @@ subroutine dtqdrp(blkval,ddb_version,lwsym,mpert,natom,lwtens)
 !! %qpt(1<ii<9,nblok)=q vector of a phonon mode (ii=1,2,3)
 !! %typ(nblok)=1 or 2 depending on non-stationary or stationary block 3 for third order derivatives
 !! %val(2,3*mpert*3*mpert,nblok)= all the dynamical matrices
-!! gprim(3,3)=dimensionless primitive translations in reciprocal space
+!! gprimd(3,3)=dimensionlal primitive translations in reciprocal space
 !! indsym = mapping of atoms under symops
 !! mpert =maximum number of ipert
 !! natom=number of atoms in unit cell
@@ -6730,8 +6777,9 @@ subroutine dtqdrp(blkval,ddb_version,lwsym,mpert,natom,lwtens)
 !!   1 or -1 if non-stationary block
 !!   2 or -2 if stationary block
 !!   3 or -3 if third order derivatives
+!!   85      if molecular Berry curvature
 !!   positive if symmetries are used to set elements to zero whenever possible, negative to prevent this to happen.
-!! rprim(3,3)=dimensionless primitive translations in real space
+!! rprimd(3,3)=dimensional primitive translations in real space
 !! spqpt(3,nqpt)=set of special q points generated by the Monkhorst & Pack Method
 !! symrec(3,3,nsym)=3x3 matrices of the group symmetries (reciprocal space)
 !! symrel(3,3,nsym)=3x3 matrices of the group symmetries (real space)
@@ -6748,23 +6796,22 @@ subroutine dtqdrp(blkval,ddb_version,lwsym,mpert,natom,lwtens)
 !!
 !! NOTES
 !!   Time-reversal symmetry is always assumed
+!!   The time-reversal is correctly used for the MBC (Molecular Berry
+!!   curvature): G(-k)=G^*(k)
 !!
 !! SOURCE
 
-subroutine symdm9(ddb, dynmat, gprim, indsym, mpert, natom, nqpt, nsym, rfmeth,&
-                  rprim, spqpt, symrec, symrel, comm, qmissing)
+subroutine symdm9(ddb, dynmat, gprimd, indsym, mpert, natom, nqpt, nsym, rfmeth,&
+                  rprimd, spqpt, symrec, symrel, comm, qmissing)
 
 !Arguments -------------------------------
 !scalars
  type(ddb_type),intent(in) :: ddb
  integer,intent(in) :: mpert,natom,nqpt,nsym,rfmeth,comm
 !arrays
- !integer,intent(in) :: blkflg(3,mpert,3,mpert,nblok),blktyp(nblok)
  integer,intent(in) :: indsym(4,nsym,natom),symrec(3,3,nsym),symrel(3,3,nsym)
  integer,allocatable,optional,intent(out) :: qmissing(:)
- !real(dp),intent(in) :: blknrm(3,nblok),blkqpt(9,nblok)
- !real(dp),intent(in) :: blkval(2,3*mpert*3*mpert,nblok),gprim(3,3),rprim(3,3)
- real(dp),intent(in) :: gprim(3,3),rprim(3,3)
+ real(dp),intent(in) :: gprimd(3,3),rprimd(3,3)
  real(dp),intent(in) :: spqpt(3,nqpt)
  real(dp),intent(out) :: dynmat(2,3,natom,3,natom,nqpt)
 
@@ -6773,6 +6820,7 @@ subroutine symdm9(ddb, dynmat, gprim, indsym, mpert, natom, nqpt, nsym, rfmeth,&
  integer :: ia,ib,iblok,idir1,idir2,ii,ipert1,ipert2,iqpt,isym,jj,kk,ll
  integer :: mu,nu,q1,q2,nqmiss,nprocs,my_rank,ierr,index
  real(dp),parameter :: tol=2.d-8
+ real(dp) :: sign1, sign2
 !tolerance for equality of q points between those of the DDB and those of the sampling grid
  real(dp) :: arg1,arg2,im,re,sumi,sumr
  logical :: allow_qmiss
@@ -6872,31 +6920,26 @@ subroutine symdm9(ddb, dynmat, gprim, indsym, mpert, natom, nqpt, nsym, rfmeth,&
    end if
  end do ! iblok
 
-! Check if all the information relatives to the q points sampling are found in the DDB;
-! if not => stop message
+! Check if all the information relatives to the q points sampling are found in the DDB if not => stop message
  nqmiss = 0
  do iqpt=1,nqpt
    if (qtest(iqpt,1)==0) then
      nqmiss = nqmiss + 1
      qmiss_(nqmiss) = iqpt
-     write(msg, '(3a)' )&
-      ' symdm9: the bloks found in the DDB are characterized',ch10,&
-      '  by the following wavevectors :'
+     write(msg, '(3a)' )' symdm9: the bloks found in the DDB are characterized',ch10,'  by the following wavevectors :'
      call wrtout(std_out,msg)
      do iblok=1,ddb%nblok
        write(msg, '(a,4d20.12)')' ',ddb%qpt(1,iblok),ddb%qpt(2,iblok),ddb%qpt(3,iblok),ddb%nrm(1,iblok)
        call wrtout(std_out,msg)
      end do
-     write(msg, '(a,a,a,i0,a,a,a,3es16.6,a,a,a,a)' )&
-      'Information is missing in the DDB.',ch10,&
-      'The dynamical matrix number ',iqpt,' cannot be built,',ch10,&
-      'since no block with qpt:',spqpt(1:3,iqpt),ch10,&
-      'has been found.',ch10,&
-      'Action: add the required block in the DDB, or modify the q-mesh your input file.'
-     if (.not.allow_qmiss) then
+     write(msg, '(3a,i0,3a,3es16.6,3a)' )&
+       'Information is missing in the DDB file.',ch10,&
+       'The dynamical matrix with iqpt= ',iqpt,' cannot be built,',ch10,&
+       'since no block with qpt: ',spqpt(1:3,iqpt), ' has been found.',ch10,&
+       'Action: add the required block in the DDB, or modify the q-mesh your input file.'
+     if (.not. allow_qmiss) then
        ABI_ERROR(msg)
      else
-       !continue
        ABI_COMMENT(msg)
      end if
    end if
@@ -6913,37 +6956,27 @@ subroutine symdm9(ddb, dynmat, gprim, indsym, mpert, natom, nqpt, nsym, rfmeth,&
  do iqpt=1,nqpt
    if (mod(iqpt, nprocs) /= my_rank) cycle ! mpi-parallelism
 
-   q1=qtest(iqpt,1)
-   q2=qtest(iqpt,2)
+   q1=qtest(iqpt,1) ! iblok
+   q2=qtest(iqpt,2) ! isym
    ! Skip this q-point if don't have enough info and allow_qmiss
    if (allow_qmiss .and. q1==0) cycle
 
    ! Check if the symmetry accompagnied with time reversal : q <- -q
-   if (qtest(iqpt,3)==0) then
-     do ii=1,3
-       qq(ii)=ddb%qpt(ii,q1)/ddb%nrm(1,q1)
-       do jj=1,3
-         ss(ii,jj)=zero
-         do kk=1,3
-           do ll=1,3
-             ss(ii,jj)=ss(ii,jj)+rprim(ii,kk)*gprim(jj,ll)*symrel(kk,ll,q2)
-           end do
+   do ii=1,3
+     qq(ii)=ddb%qpt(ii,q1)/ddb%nrm(1,q1)
+   end do
+   if (qtest(iqpt,3)/=0) qq(:) = -qq(:)
+   !
+   do ii=1,3
+     do jj=1,3
+       ss(ii,jj)=zero
+       do kk=1,3
+         do ll=1,3
+           ss(ii,jj) = ss(ii,jj) + rprimd(ii,kk) * symrel(kk,ll,q2) * gprimd(jj,ll)
          end do
        end do
      end do
-   else
-     do ii=1,3
-       qq(ii)=-ddb%qpt(ii,q1)/ddb%nrm(1,q1)
-       do jj=1,3
-         ss(ii,jj)=zero
-         do kk=1,3
-           do ll=1,3
-             ss(ii,jj)=ss(ii,jj)+rprim(ii,kk)*gprim(jj,ll)*symrel(kk,ll,q2)
-           end do
-         end do
-       end do
-     end do
-   end if
+   end do
 
    ! Check whether all the information is contained in the DDB
    do ipert2=1,natom
@@ -6977,6 +7010,17 @@ subroutine symdm9(ddb, dynmat, gprim, indsym, mpert, natom, nqpt, nsym, rfmeth,&
      end do
    end do
 
+   ! determine sign of complex conjugation
+   ! If there is Time Reversal : D.M. <- Complex Conjugate D.M.
+   !                             MBC  <- Complex Conjugate MBC
+   if (qtest(iqpt,3)==0) then
+     sign1 = one
+     sign2 = one
+   else ! if timrev -> complex conjugate
+     sign1 = one
+     sign2 = -one
+   end if
+
    ! Calculation of the dynamical matrix of a symmetrical q point
    do ia=1,natom
      do ib=1,natom
@@ -6991,21 +7035,15 @@ subroutine symdm9(ddb, dynmat, gprim, indsym, mpert, natom, nqpt, nsym, rfmeth,&
            sumi=zero
            do ii=1,3
              do jj=1,3
-               ! If there is Time Reversal : D.M. <- Complex Conjugate D.M.
-               if (qtest(iqpt,3)==0) then
-                 sumr=sumr+ss(mu,ii)*ss(nu,jj)*ddd(1,ii,indsym(4,q2,ia),jj,indsym(4,q2,ib))
-                 sumi=sumi+ss(mu,ii)*ss(nu,jj)*ddd(2,ii,indsym(4,q2,ia),jj,indsym(4,q2,ib))
-               else
-                 sumr=sumr+ss(mu,ii)*ss(nu,jj)*ddd(1,ii,indsym(4,q2,ia),jj,indsym(4,q2,ib))
-                 sumi=sumi-ss(mu,ii)*ss(nu,jj)*ddd(2,ii,indsym(4,q2,ia),jj,indsym(4,q2,ib))
-               end if
+               sumr=sumr+ss(mu,ii)*ss(nu,jj)*ddd(1,ii,indsym(4,q2,ia),jj,indsym(4,q2,ib))
+               sumi=sumi+ss(mu,ii)*ss(nu,jj)*ddd(2,ii,indsym(4,q2,ia),jj,indsym(4,q2,ib))
              end do
            end do
 
            ! Dynmat -> Dynamical Matrix for the q point of the sampling
            ! write(std_out,*)' Sumr -> ',mu,nu,sumr; write(std_out,*)' Sumi -> ',mu,nu,sumi
-           dynmat(1,mu,ia,nu,ib,iqpt)=re*sumr-im*sumi
-           dynmat(2,mu,ia,nu,ib,iqpt)=re*sumi+im*sumr
+           dynmat(1,mu,ia,nu,ib,iqpt) = sign1*re*sumr - sign2*im*sumi
+           dynmat(2,mu,ia,nu,ib,iqpt) = sign2*re*sumi + sign1*im*sumr
          end do ! coordinates
        end do
 
@@ -7015,7 +7053,6 @@ subroutine symdm9(ddb, dynmat, gprim, indsym, mpert, natom, nqpt, nsym, rfmeth,&
 
  ABI_FREE(ddd)
  ABI_FREE(qtest)
-
 
  call xmpi_sum(dynmat, comm, ierr)
 

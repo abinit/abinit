@@ -1,4 +1,3 @@
-! CP modified
 !!****m* ABINIT/m_a2ftr
 !! NAME
 !! m_a2ftr
@@ -7,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!   Copyright (C) 2004-2022 ABINIT group (JPC, MJV, BXU)
+!!   Copyright (C) 2004-2024 ABINIT group (JPC, MJV, BXU)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -158,7 +157,8 @@ subroutine mka2f_tr(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,pair2red,elp
  real(dp),allocatable :: q00(:,:,:,:), q01(:,:,:,:),q11(:,:,:,:)
  real(dp),allocatable :: seebeck(:,:,:,:)!, rho_nm(:,:,:,:)
  real(dp),allocatable :: rho_T(:)
- real(dp),allocatable :: coskr(:,:), sinkr(:,:)
+ real(dp),allocatable :: coskr(:,:), sinkr(:,:), coskr_tmp(:), sinkr_tmp(:)
+ real(dp),allocatable :: gam_rpt(:,:,:)
 
 ! *********************************************************************
 !calculate a2f_tr for frequencies between 0 and omega_max
@@ -261,6 +261,9 @@ subroutine mka2f_tr(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,pair2red,elp
  elph_tr_ds%a2f_1d_tr = zero
  tmp_a2f_1d_tr = zero
 
+ ABI_MALLOC(gam_rpt,(2,3*natom*3*natom,nrpt))
+ ABI_MALLOC(coskr_tmp,(nrpt))
+ ABI_MALLOC(sinkr_tmp,(nrpt))
 
  do ie = 1, elph_ds%n_pair
    do ssp = 1,4
@@ -278,8 +281,10 @@ subroutine mka2f_tr(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,pair2red,elp
              gam_now(:,:) = elph_tr_ds%gamma_qpt_tr(:,itrtensor,:,isppol,iFSqpt)
            else
 !            Do FT from real-space gamma grid to 1 qpt.
-             call ftgam(ifc%wghatm,gam_now,elph_tr_ds%gamma_rpt_tr(:,itrtensor,:,isppol,:,ssp,ie),natom,1,nrpt,0,&
-&             coskr(iFSqpt,:), sinkr(iFSqpt,:))
+             gam_rpt(:,:,:)=elph_tr_ds%gamma_rpt_tr(:,itrtensor,:,isppol,:,ssp,ie)
+             coskr_tmp(:)=coskr(iFSqpt,:)
+             sinkr_tmp(:)=sinkr(iFSqpt,:)
+             call ftgam(ifc%wghatm,gam_now,gam_rpt,natom,1,nrpt,0,coskr_tmp, sinkr_tmp)
            end if
 
 !          Diagonalize gamma matrix at this qpoint (complex matrix).
@@ -381,6 +386,9 @@ subroutine mka2f_tr(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,pair2red,elp
  ! Likely this routine is never executed in parallel
  call xmpi_sum (tmp_a2f_1d_tr, xmpi_world, ierr)
 
+ ABI_FREE(gam_rpt)
+ ABI_FREE(coskr_tmp)
+ ABI_FREE(sinkr_tmp)
  ABI_FREE(coskr)
  ABI_FREE(sinkr)
 
@@ -1086,6 +1094,7 @@ subroutine mka2f_tr_lova(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,elph_tr
  real(dp),allocatable :: rho_T(:),tau_T(:)
  real(dp),allocatable :: coskr(:,:)
  real(dp),allocatable :: sinkr(:,:)
+!real(dp),allocatable :: gam_rpt(:,:,:)
 
 ! *********************************************************************
 
@@ -2238,12 +2247,10 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
 
 !BoltzTraP output files in SIESTA format
  if (elph_ds%prtbltztrp == 1) then
-   ! CP added
-   ! CP test to prevent use in case occopt = 9
+    !Prevent use in case occopt = 9
     if (Bst%occopt==9) then
        ABI_ERROR("Boltztrap outputting not possible with occopt = 9 at the moment")
     end if
-    ! End CP added
    call ebands_prtbltztrp_tau_out (tmp_eigenGS(elph_ds%minFSband:elph_ds%maxFSband,:,:),&
 &   elph_ds%tempermin,elph_ds%temperinc,ntemper,fermie, &
 &   elph_ds%elph_base_name,elph_ds%k_phon%new_kptirr,nband,elph_ds%nelect,new_nkptirr, &

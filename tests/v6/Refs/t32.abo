@@ -1,8 +1,8 @@
 
-.Version 9.10.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2022 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 20 Jul 2023.
-- ( at 09h44 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h11 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_quickfix-release/tests/TestBot_MPI1/v6_t32/t32.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v6_t32/t32.abi
 - output file    -> t32.abo
 - root for input  files -> t32i
 - root for output files -> t32o
@@ -90,10 +90,10 @@ _ WF disk file :      0.397 Mbytes ; DEN or POT disk file :      0.714 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -104,7 +104,7 @@ _ WF disk file :      0.397 Mbytes ; DEN or POT disk file :      0.714 Mbytes.
         bs_loband3          0       0
         bs_loband4          0       0
              ecut      2.50000000E+01 Hartree
--          fftalg         312
+-          fftalg         512
               ixc1         32
               ixc2         33
               ixc3         32
@@ -265,8 +265,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_quickfix-release/tests/Psps_for_tests/14si.Hamann_mod
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_quickfix-release/tests/Psps_for_tests/14si.Hamann_mod
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/14si.Hamann_mod
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/14si.Hamann_mod
 -   Si psp produced from Hamann's atompp on 14 Feb 1990 ( !! OLD, for tests only )
 - 14.00000   4.00000    900214                znucl, zion, pspdat
     5    3    2    0       770   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -304,8 +304,8 @@ tolerances: {tolwfr: 1.00E-28, }
  ETOT  4  -7.9357467002980    -1.028E-06 6.095E-09 1.638E-03
  ETOT  5  -7.9357468368992    -1.366E-07 8.986E-10 2.219E-06
  ETOT  6  -7.9357468372041    -3.049E-10 3.401E-12 5.132E-09
- ETOT  7  -7.9357468372047    -5.818E-13 1.941E-14 2.621E-11
- ETOT  8  -7.9357468372051    -4.370E-13 2.785E-16 1.657E-13
+ ETOT  7  -7.9357468372047    -5.960E-13 1.941E-14 2.621E-11
+ ETOT  8  -7.9357468372051    -3.926E-13 2.785E-16 1.657E-13
 
 Result for kinetic energy density :
 
@@ -331,7 +331,7 @@ lattice_vectors:
 lattice_lengths: [   7.25492,    7.25492,    7.25492, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7001139E+02
-convergence: {deltae: -4.370E-13, res2:  1.657E-13, residm:  2.785E-16, diffor: null, }
+convergence: {deltae: -3.926E-13, res2:  1.657E-13, residm:  2.785E-16, diffor: null, }
 etotal    :  -7.93574684E+00
 entropy   :   0.00000000E+00
 fermie    :  -1.45485544E-02
@@ -389,16 +389,16 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  3.07462468668379E+00
-hartree             :  5.59785891608618E-01
-xc                  : -2.40257177187821E+00
+kinetic             :  3.07462468668382E+00
+hartree             :  5.59785891608635E-01
+xc                  : -2.40257177187820E+00
 Ewald energy        : -8.40046478618609E+00
 psp_core            :  1.66947472379070E+00
-local_psp           : -2.22682703652063E+00
-non_local_psp       : -2.09768544703269E-01
-total_energy        : -7.93574683720510E+00
-total_energy_eV     : -2.15942653402969E+02
-band_energy         : -1.37817912200610E+00
+local_psp           : -2.22682703652066E+00
+non_local_psp       : -2.09768544703270E-01
+total_energy        : -7.93574683720507E+00
+total_energy_eV     : -2.15942653402968E+02
+band_energy         : -1.37817912200612E+00
 ...
 
 
@@ -436,8 +436,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_quickfix-release/tests/Psps_for_tests/14si.Hamann_mod
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_quickfix-release/tests/Psps_for_tests/14si.Hamann_mod
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/14si.Hamann_mod
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/14si.Hamann_mod
 -   Si psp produced from Hamann's atompp on 14 Feb 1990 ( !! OLD, for tests only )
 - 14.00000   4.00000    900214                znucl, zion, pspdat
     5    3    2    0       770   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -474,8 +474,8 @@ tolerances: {tolwfr: 1.00E-28, }
  ETOT  4  -7.9357467002982    -1.028E-06 6.095E-09 1.638E-03
  ETOT  5  -7.9357468368993    -1.366E-07 8.986E-10 2.219E-06
  ETOT  6  -7.9357468372040    -3.048E-10 3.401E-12 5.132E-09
- ETOT  7  -7.9357468372046    -6.093E-13 1.941E-14 2.621E-11
- ETOT  8  -7.9357468372049    -2.380E-13 2.785E-16 1.657E-13
+ ETOT  7  -7.9357468372046    -5.898E-13 1.941E-14 2.621E-11
+ ETOT  8  -7.9357468372049    -2.593E-13 2.785E-16 1.657E-13
 
 Result for kinetic energy density :
 
@@ -501,7 +501,7 @@ lattice_vectors:
 lattice_lengths: [   7.25492,    7.25492,    7.25492, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7001139E+02
-convergence: {deltae: -2.380E-13, res2:  1.657E-13, residm:  2.785E-16, diffor: null, }
+convergence: {deltae: -2.593E-13, res2:  1.657E-13, residm:  2.785E-16, diffor: null, }
 etotal    :  -7.93574684E+00
 entropy   :   0.00000000E+00
 fermie    :  -1.45485544E-02
@@ -559,16 +559,16 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 2, }
 comment             : Components of total free energy in Hartree
-kinetic             :  3.07462468668385E+00
-hartree             :  5.59785891608651E-01
-xc                  : -2.40257177187803E+00
+kinetic             :  3.07462468668382E+00
+hartree             :  5.59785891608639E-01
+xc                  : -2.40257177187802E+00
 Ewald energy        : -8.40046478618609E+00
 psp_core            :  1.66947472379070E+00
-local_psp           : -2.22682703652069E+00
+local_psp           : -2.22682703652065E+00
 non_local_psp       : -2.09768544703274E-01
-total_energy        : -7.93574683720489E+00
+total_energy        : -7.93574683720488E+00
 total_energy_eV     : -2.15942653402963E+02
-band_energy         : -1.37817912200614E+00
+band_energy         : -1.37817912200613E+00
 ...
 
 
@@ -606,8 +606,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_quickfix-release/tests/Psps_for_tests/14si.Hamann_mod
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_quickfix-release/tests/Psps_for_tests/14si.Hamann_mod
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/14si.Hamann_mod
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/14si.Hamann_mod
 -   Si psp produced from Hamann's atompp on 14 Feb 1990 ( !! OLD, for tests only )
 - 14.00000   4.00000    900214                znucl, zion, pspdat
     5    3    2    0       770   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -644,8 +644,8 @@ tolerances: {tolwfr: 1.00E-28, }
  ETOT  4  -7.9357467002980    -1.028E-06 6.095E-09 3.275E-03
  ETOT  5  -7.9357468368992    -1.366E-07 8.986E-10 4.438E-06
  ETOT  6  -7.9357468372041    -3.049E-10 3.401E-12 1.026E-08
- ETOT  7  -7.9357468372047    -5.853E-13 1.941E-14 5.241E-11
- ETOT  8  -7.9357468372051    -3.979E-13 2.785E-16 3.314E-13
+ ETOT  7  -7.9357468372047    -6.271E-13 1.941E-14 5.241E-11
+ ETOT  8  -7.9357468372051    -3.872E-13 2.785E-16 3.314E-13
 
 Result for kinetic energy density :
 
@@ -686,7 +686,7 @@ lattice_vectors:
 lattice_lengths: [   7.25492,    7.25492,    7.25492, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7001139E+02
-convergence: {deltae: -3.979E-13, res2:  3.314E-13, residm:  2.785E-16, diffor: null, }
+convergence: {deltae: -3.872E-13, res2:  3.314E-13, residm:  2.785E-16, diffor: null, }
 etotal    :  -7.93574684E+00
 entropy   :   0.00000000E+00
 fermie    :  -1.45485544E-02
@@ -715,7 +715,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   44.417E-18; max=  27.846E-17
+ Mean square residual over all n,k,spin=   44.418E-18; max=  27.847E-17
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -754,16 +754,16 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 3, }
 comment             : Components of total free energy in Hartree
-kinetic             :  3.07462468668381E+00
-hartree             :  5.59785891608633E-01
-xc                  : -2.40257177187820E+00
+kinetic             :  3.07462468668380E+00
+hartree             :  5.59785891608630E-01
+xc                  : -2.40257177187822E+00
 Ewald energy        : -8.40046478618609E+00
 psp_core            :  1.66947472379070E+00
-local_psp           : -2.22682703652066E+00
-non_local_psp       : -2.09768544703269E-01
-total_energy        : -7.93574683720507E+00
-total_energy_eV     : -2.15942653402968E+02
-band_energy         : -1.37817912200611E+00
+local_psp           : -2.22682703652064E+00
+non_local_psp       : -2.09768544703272E-01
+total_energy        : -7.93574683720509E+00
+total_energy_eV     : -2.15942653402969E+02
+band_energy         : -1.37817912200612E+00
 ...
 
 
@@ -801,8 +801,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_quickfix-release/tests/Psps_for_tests/14si.Hamann_mod
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_quickfix-release/tests/Psps_for_tests/14si.Hamann_mod
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/14si.Hamann_mod
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/14si.Hamann_mod
 -   Si psp produced from Hamann's atompp on 14 Feb 1990 ( !! OLD, for tests only )
 - 14.00000   4.00000    900214                znucl, zion, pspdat
     5    3    2    0       770   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -833,14 +833,14 @@ tolerances: {tolwfr: 1.00E-28, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -7.9030472114291    -7.903E+00 1.444E-02 7.503E+01
+ ETOT  1  -7.9030472114292    -7.903E+00 1.444E-02 7.503E+01
  ETOT  2  -7.9353960703721    -3.235E-02 2.184E-05 6.823E+00
  ETOT  3  -7.9357456723159    -3.496E-04 2.113E-06 2.699E-02
  ETOT  4  -7.9357467002982    -1.028E-06 6.095E-09 3.275E-03
  ETOT  5  -7.9357468368993    -1.366E-07 8.986E-10 4.438E-06
  ETOT  6  -7.9357468372040    -3.048E-10 3.401E-12 1.026E-08
- ETOT  7  -7.9357468372046    -5.933E-13 1.941E-14 5.241E-11
- ETOT  8  -7.9357468372049    -2.514E-13 2.785E-16 3.314E-13
+ ETOT  7  -7.9357468372046    -5.578E-13 1.941E-14 5.241E-11
+ ETOT  8  -7.9357468372049    -2.824E-13 2.785E-16 3.314E-13
 
 Result for kinetic energy density :
 
@@ -881,7 +881,7 @@ lattice_vectors:
 lattice_lengths: [   7.25492,    7.25492,    7.25492, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7001139E+02
-convergence: {deltae: -2.514E-13, res2:  3.314E-13, residm:  2.785E-16, diffor: null, }
+convergence: {deltae: -2.824E-13, res2:  3.314E-13, residm:  2.785E-16, diffor: null, }
 etotal    :  -7.93574684E+00
 entropy   :   0.00000000E+00
 fermie    :  -1.45485544E-02
@@ -950,12 +950,12 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 iteration_state     : {dtset: 4, }
 comment             : Components of total free energy in Hartree
 kinetic             :  3.07462468668382E+00
-hartree             :  5.59785891608642E-01
+hartree             :  5.59785891608638E-01
 xc                  : -2.40257177187801E+00
 Ewald energy        : -8.40046478618609E+00
 psp_core            :  1.66947472379070E+00
-local_psp           : -2.22682703652065E+00
-non_local_psp       : -2.09768544703275E-01
+local_psp           : -2.22682703652066E+00
+non_local_psp       : -2.09768544703270E-01
 total_energy        : -7.93574683720487E+00
 total_energy_eV     : -2.15942653402963E+02
 band_energy         : -1.37817912200613E+00
@@ -985,7 +985,7 @@ band_energy         : -1.37817912200613E+00
                       -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart4    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
--          fftalg         312
+-          fftalg         512
               ixc1         32
               ixc2         33
               ixc3         32
@@ -1189,10 +1189,10 @@ P           mkmem           2
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         17.2  wall=         17.3
+- Proc.   0 individual time (sec): cpu=          8.0  wall=          9.9
 
 ================================================================================
 
  Calculation completed.
-.Delivered  56 WARNINGs and  13 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         17.2  wall=         17.3
+.Delivered  60 WARNINGs and  13 COMMENTs to log file.
++Overall time at end (sec) : cpu=          8.0  wall=          9.9

@@ -5,6 +5,7 @@ ecut      25 # 35
 rmm_diis  1
 nband1    32
 tolvrs    1.0d-8
+vloc_rcut 100   # Large value --> no cutoff
 
 ###################################
 # Dataset 1: SCF run with useylm 0

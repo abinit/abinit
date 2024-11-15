@@ -1,8 +1,8 @@
 
-.Version 9.11.1 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.6.7 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2022 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 11 Jul 2023.
-- ( at 22h30 )
+.Starting date : Fri 27 Sep 2024.
+- ( at 11h13 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/TestBot_MPI4/mpiio_t51_MPI4/t51.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_cprj-in-memory-forces/tests/TestBot_MPI4/mpiio_t51_MPI4/t51.abi
 - output file    -> t51_MPI4.abo
 - root for input  files -> t51_MPI4i
 - root for output files -> t51_MPI4o
-
 
  DATASET    1 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -39,7 +38,6 @@ P This job should need less than                       1.732 Mbytes of memory.
 _ WF disk file :      0.225 Mbytes ; DEN or POT disk file :      0.024 Mbytes.
 ================================================================================
 
-
  DATASET    2 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  2 (RF).
@@ -56,7 +54,6 @@ P This job should need less than                       6.607 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      5.721 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 ================================================================================
-
 
  DATASET    3 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -79,10 +76,10 @@ _ WF disk file :      5.721 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -96,7 +93,9 @@ _ WF disk file :      5.721 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
      densfor_pred3          2
            diemac      1.20000000E+01
              ecut      1.50000000E+01 Hartree
--          fftalg         312
+-          fftalg1        401
+-          fftalg2        512
+-          fftalg3        512
            getwfk1          0
            getwfk2          1
            getwfk3          1
@@ -238,6 +237,9 @@ P          mk1mem3         32
              nkpt1         10
              nkpt2        128
              nkpt3        128
+    nblock_lobpcg1          6
+    nblock_lobpcg2          1
+    nblock_lobpcg3          1
 -          npband1          2
 -          npband2          1
 -          npband3          1
@@ -329,6 +331,7 @@ P          mk1mem3         32
            tolwfr1     1.00000000E-12
            tolwfr2     0.00000000E+00
            tolwfr3     0.00000000E+00
+     tolwfr_diago      1.00000000E-30
             typat      1  1
          wfoptalg1        114
          wfoptalg2          0
@@ -399,8 +402,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 1, }
          ecut(hartree)=     15.000   => boxcut(ratio)=   2.09226
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_cprj-in-memory-forces/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_cprj-in-memory-forces/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -515,15 +518,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  7.76133179029489E+00
-hartree             :  9.95514758345334E-01
+hartree             :  9.95514758345337E-01
 xc                  : -4.22349037222138E+00
 Ewald energy        : -1.23126812437528E+01
 psp_core            :  1.72763340807030E-01
-local_psp           : -5.74472891308205E+00
+local_psp           : -5.74472891308206E+00
 non_local_psp       :  1.35396885123581E+00
 total_energy        : -1.19973217883732E+01
 total_energy_eV     : -3.26463728475364E+02
-band_energy         :  7.27737709087510E-01
+band_energy         :  7.27737709087509E-01
 ...
 
 
@@ -623,24 +626,24 @@ tolerances: {toldfe: 1.00E-10, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   15.651997331283     -2.220E+02 1.252E+00 7.692E+03
- ETOT  2   5.9617972727096     -9.690E+00 2.844E-02 8.140E+01
- ETOT  3   5.8140503011097     -1.477E-01 8.992E-04 7.236E-01
- ETOT  4   5.8132394604322     -8.108E-04 1.779E-05 5.211E-03
- ETOT  5   5.8132338832927     -5.577E-06 5.383E-07 2.921E-05
- ETOT  6   5.8132338651443     -1.815E-08 8.489E-09 2.167E-06
- ETOT  7   5.8132338615240     -3.620E-09 3.998E-10 6.541E-07
- ETOT  8   5.8132338599118     -1.612E-09 5.972E-12 9.298E-11
- ETOT  9   5.8132338599113     -5.400E-13 2.711E-13 9.757E-14
- ETOT 10   5.8132338599109     -3.695E-13 3.335E-15 1.769E-16
+-ETOT  1   15.651997334909     -2.220E+02 1.252E+00 7.692E+03
+ ETOT  2   5.9617972727758     -9.690E+00 2.844E-02 8.140E+01
+ ETOT  3   5.8140503011078     -1.477E-01 8.992E-04 7.236E-01
+ ETOT  4   5.8132394604325     -8.108E-04 1.779E-05 5.211E-03
+ ETOT  5   5.8132338832931     -5.577E-06 5.383E-07 2.921E-05
+ ETOT  6   5.8132338651449     -1.815E-08 8.489E-09 2.167E-06
+ ETOT  7   5.8132338615239     -3.621E-09 3.998E-10 6.541E-07
+ ETOT  8   5.8132338599116     -1.612E-09 5.972E-12 9.298E-11
+ ETOT  9   5.8132338599114     -1.705E-13 2.711E-13 9.757E-14
+ ETOT 10   5.8132338599109     -5.400E-13 3.335E-15 1.769E-16
 
  At SCF step   10, etot is converged : 
-  for the second time, diff in etot=  3.695E-13 < toldfe=  1.000E-10
+  for the second time, diff in etot=  5.400E-13 < toldfe=  1.000E-10
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   96.024E-19; max=  33.353E-16
+ Mean square residual over all n,k,spin=   96.023E-19; max=  33.352E-16
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -887,16 +890,16 @@ tolerances: {toldfe: 1.00E-10, }
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   5.8132338599116     -2.318E+02 1.803E-16 1.009E-17
- ETOT  2   5.8132338599113     -3.411E-13 2.226E-18 3.648E-18
- ETOT  3   5.8132338599114      1.421E-13 1.230E-19 4.932E-19
+ ETOT  2   5.8132338599114     -1.990E-13 2.226E-18 3.648E-18
+ ETOT  3   5.8132338599115      5.684E-14 1.230E-19 4.932E-19
 
  At SCF step    3, etot is converged : 
-  for the second time, diff in etot=  1.421E-13 < toldfe=  1.000E-10
+  for the second time, diff in etot=  5.684E-14 < toldfe=  1.000E-10
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   27.538E-23; max=  12.303E-20
+ Mean square residual over all n,k,spin=   27.538E-23; max=  12.302E-20
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -1077,7 +1080,9 @@ tolerances: {toldfe: 1.00E-10, }
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         312
+-          fftalg1        401
+-          fftalg2        512
+-          fftalg3        512
            getwfk1          0
            getwfk2          1
            getwfk3          1
@@ -1219,6 +1224,9 @@ P          mk1mem3         32
              nkpt1         10
              nkpt2        128
              nkpt3        128
+    nblock_lobpcg1          6
+    nblock_lobpcg2          1
+    nblock_lobpcg3          1
 -          npband1          2
 -          npband2          1
 -          npband3          1
@@ -1316,6 +1324,7 @@ P          mk1mem3         32
            tolwfr1     1.00000000E-12
            tolwfr2     0.00000000E+00
            tolwfr3     0.00000000E+00
+     tolwfr_diago      1.00000000E-30
             typat      1  1
          wfoptalg1        114
          wfoptalg2          0
@@ -1441,10 +1450,10 @@ P          mk1mem3         32
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          5.8  wall=          5.9
+- Proc.   0 individual time (sec): cpu=          2.6  wall=          2.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         23.3  wall=         23.4
++Overall time at end (sec) : cpu=         10.5  wall=         10.6

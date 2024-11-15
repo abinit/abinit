@@ -1,0 +1,149 @@
+# Crystalline silicon. Calculation of the G0W0 corrections with the GWR code.
+# Similar to gwr/t01.abi but with nspinor 2 and SOC.
+#
+# Dataset 1: ground state calculation to get the density
+# Dataset 2: Direct diagonalization to produce the WFK file with empty states.
+# Dataset 3: one-shot G0W0 calculation in real-space and imaginary-time.
+# Dataset 4: RPA energy calculation within ACFDT
+
+ndtset      2
+#ndtset      4  # TODO
+timopt 1
+nspinor 2 nspden 4
+iomode 1
+istwfk *1
+
+# This to compute QP without symmetries for debugging purposes
+#nsym 1
+#kptopt 3
+#kptopt 2
+
+# inclvbk 2 with SOC not yet coded
+inclvkb 0
+prtsuscep 0
+
+####################
+# Dataset 1: SCF run
+####################
+nband1  12
+tolvrs1 1.e-8
+
+###########################################
+# Dataset 2: Direct diago with empty states
+###########################################
+optdriver2  6        # Activate GWR code
+gwr_task2 "HDIAGO"   # Direct diagonalization
+getden_filepath2 "t03o_DS1_DEN"
+nband2     80        # Number of (occ + empty) bands
+
+################################
+# Dataset 3: G0W0 with GWR code
+################################
+optdriver3  6        # Activate GWR code
+gwr_task3 "G0W0"     # One-shot calculation
+getden_filepath3 "t03o_DS1_DEN"
+getwfk_filepath3 "t03o_DS2_WFK"   # WFK file with empty states
+
+prtvol3 1            # Write additional stuff to abo file for testing purposes.
+                     # DO NOT USE this option for production runs!
+prtsuscep3 1         # Write TCHI file.
+                     # DO NOT USE this option for production runs unless you really need a TCHI file.
+
+gwr_ntau3   6        # Number of imaginary-time points
+#gwr_sigma_algo3 2    # Use supercell for Sigma
+
+gwr_boxcutmin3  1.1  # This should be subject to convergence studies
+#mixprec3    1        # Mixed precision FFT.
+
+nband3      60       # Bands to be used in the screening calculation
+ecuteps3    4        # Cut-off energy of the planewave set to represent the dielectric matrix.
+                     # It is important to adjust this parameter.
+ecutsigx3    4.0     # Dimension of the G sum in Sigma_x.
+                     # ecutsigx = ecut is usually a wise choice
+                     # (the dimension in Sigma_c is controlled by ecuteps)
+
+nkptgw3      2       # number of k-point where to calculate the GW correction
+kptgw3               # k-points in reduced coordinates
+   0.0    0.0    0.0
+   0.5    0.0    0.0
+
+bdgw3       # calculate GW corrections for bands from 4 to 5
+   4  5
+   4  5
+   4  5
+   4  5
+
+# Spectral function (very coarse grid to reduce txt file size)
+nfreqsp3 50
+freqspmax3 5 eV
+
+################################
+# Dataset 4: RPA energy
+################################
+optdriver4  6        # Activate GWR code
+gwr_task4 "RPA_ENERGY"     # Compute RPA energy
+getden4 1
+getwfk4 2 # WFK file with empty states
+gwr_ntau4   6
+gwr_boxcutmin4  1.1
+nband4      60
+ecuteps4    4
+
+
+# Definition of the k-point grid
+# IMPORTANT: GWR requires Gamma-centered k-meshes
+ngkpt   2 2 2
+#ngkpt   4 4 4
+nshiftk 1
+shiftk  0.0 0.0 0.0
+
+ecut 4.0          # Maximal kinetic energy cut-off, in Hartree
+
+# Definition of the SCF procedure
+nstep   20        # Maximal number of SCF cycles
+diemac  12.0      # Although this is not mandatory, it is worth to
+                  # precondition the SCF cycle. The model dielectric
+                  # function used as the standard preconditioner
+                  # is described in the "dielng" input variable section.
+                  # Here, we follow the prescription for bulk silicon.
+
+# Definition of the unit cell: fcc
+acell  3*10.26         # Experimental lattice constants in Bohr
+rprim  0.0  0.5  0.5   # FCC primitive vectors (to be scaled by acell)
+       0.5  0.0  0.5
+       0.5  0.5  0.0
+
+# Definition of the atom types
+ntypat  1
+znucl 14
+
+# Definition of the atoms
+natom  2
+typat  1 1
+xred
+      0.0  0.0  0.0
+      0.25 0.25 0.25
+
+pp_dirpath "$ABI_PSPDIR"
+pseudos "Si_r.psp8"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% exclude_builders = eos_nvhpc_23.1_elpa, eos_nvhpc_23.9_elpa, eos_nvhpc_23.11_elpa
+#%% [files]
+#%% files_to_test =
+#%%   t03.abo, tolnlines = 25, tolabs = 1.1e-3, tolrel = 3.0e-3, fld_options = -medium;
+####%%   t03o_DS3_SIGCIT, tolnlines=100, tolabs = 1.1e-3, tolrel = 3.0e-3, fld_options = -medium;
+####%%   t03o_DS3_SIGCIW, tolnlines=100, tolabs = 1.1e-3, tolrel = 3.0e-3, fld_options = -medium;
+####%%   t03o_DS3_SIGCIW, tolnlines=100, tolabs = 1.1e-3, tolrel = 3.0e-3, fld_options = -medium;
+#%% [paral_info]
+#%% max_nprocs = 12
+#%% [extra_info]
+#%% authors = M. Giantomassi
+#%% keywords = NC, GWR
+#%% description =
+#%%  Crystalline silicon
+#%%  Calculation of the GW corrections with GWR code.
+#%%  Similar to t01.abi but with nspinor 2 and SOC.
+#%%<END TEST_INFO>

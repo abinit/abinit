@@ -1,8 +1,8 @@
 
-.Version 9.11.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2022 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Jul 2023.
-- ( at 12h00 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h09 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v4_t20/t20.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v4_t20/t20.abi
 - output file    -> t20.abo
 - root for input  files -> t20i
 - root for output files -> t20o
@@ -58,10 +58,10 @@ _ WF disk file :      0.419 Mbytes ; DEN or POT disk file :      0.490 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -71,7 +71,7 @@ _ WF disk file :      0.419 Mbytes ; DEN or POT disk file :      0.490 Mbytes.
              ecut      4.00000000E+01 Hartree
            enunit1          0
            enunit2          1
--          fftalg         312
+-          fftalg         512
            getden1          0
            getden2         -1
              iscf1          7
@@ -184,8 +184,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     40.000   => boxcut(ratio)=   2.18583
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/20ca_sic.drh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/20ca_sic.drh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/20ca_sic.drh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/20ca_sic.drh
 - ++ EXPERIMENTAL ++ self-interaction-corrected psp for calcium (D. R. Hamann)
 - 20.00000   2.00000     40701                znucl, zion, pspdat
     8    2    2    4       313   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -199,8 +199,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              2   -0.493186
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/8o_sic.drh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/8o_sic.drh
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/8o_sic.drh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/8o_sic.drh
 - ++ EXPERIMENTAL ++ self-interaction-corrected psp for oxygen (D. R. Hamann)
 -  8.00000   6.00000     40701                znucl, zion, pspdat
     8    2    2    2       602   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -234,7 +234,7 @@ tolerances: {tolvrs: 1.00E-08, }
  ETOT  5  -21.647899000965    -1.386E-05 3.970E-04 1.155E-03
  ETOT  6  -21.647899146077    -1.451E-07 8.518E-06 1.511E-05
  ETOT  7  -21.647899147533    -1.456E-09 2.008E-05 2.051E-06
- ETOT  8  -21.647899147708    -1.746E-10 9.590E-07 2.683E-09
+ ETOT  8  -21.647899147708    -1.745E-10 9.590E-07 2.683E-09
 
  At SCF step    8       vres2   =  2.68E-09 < tolvrs=  1.00E-08 =>converged.
 
@@ -254,7 +254,7 @@ lattice_vectors:
 lattice_lengths: [   6.42760,    6.42760,    6.42760, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.8777236E+02
-convergence: {deltae: -1.746E-10, res2:  2.683E-09, residm:  9.590E-07, diffor: null, }
+convergence: {deltae: -1.745E-10, res2:  2.683E-09, residm:  9.590E-07, diffor: null, }
 etotal    :  -2.16478991E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.66926817E-01
@@ -315,16 +315,16 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  1.29373688688463E+01
-hartree             :  6.65183207696035E+00
-xc                  : -6.20693140903897E+00
+kinetic             :  1.29373688688469E+01
+hartree             :  6.65183207696081E+00
+xc                  : -6.20693140903906E+00
 Ewald energy        : -1.15262966007091E+01
 psp_core            :  7.50447296018542E-01
-local_psp           : -2.21857070742967E+01
+local_psp           : -2.21857070742976E+01
 non_local_psp       : -2.06861230548805E+00
 total_energy        : -2.16478991477076E+01
-total_energy_eV     : -5.89069293470839E+02
-band_energy         : -3.49995417454783E+00
+total_energy_eV     : -5.89069293470838E+02
+band_energy         : -3.49995417454810E+00
 ...
 
 
@@ -450,7 +450,7 @@ force_length_stats: {min: null, max: null, mean: null, }
            etotal1    -2.1647899148E+01
             fcart1    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
--          fftalg         312
+-          fftalg         512
            getden1          0
            getden2         -1
              iscf1          7
@@ -624,10 +624,10 @@ P           mkmem2          3
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          3.9  wall=          4.0
+- Proc.   0 individual time (sec): cpu=          2.9  wall=          3.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered   2 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.9  wall=          4.0
++Overall time at end (sec) : cpu=          2.9  wall=          3.0
