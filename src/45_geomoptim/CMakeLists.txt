@@ -37,7 +37,7 @@ add_library(45_geomoptim STATIC
   m_predict_steepest.F90
   m_predict_string.F90
   m_xfpack.F90
-  )
+)
 
 set_target_properties(45_geomoptim
   PROPERTIES
@@ -49,7 +49,7 @@ target_include_directories(45_geomoptim
   ${CMAKE_SOURCE_DIR}/shared/common/src/incs
   PUBLIC
   ${CMAKE_CURRENT_BINARY_DIR}/modules
-  )
+)
 
 target_compile_definitions(45_geomoptim
   PRIVATE
@@ -57,6 +57,7 @@ target_compile_definitions(45_geomoptim
 
 target_link_libraries(45_geomoptim
   PUBLIC
-  abinit::44_abitypes_defs)
+  abinit::44_abitypes_defs
+)
 
 add_library(abinit::45_geomoptim ALIAS 45_geomoptim)
