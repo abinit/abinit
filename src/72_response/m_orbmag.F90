@@ -60,7 +60,7 @@ module m_orbmag
   use m_pawfgrtab,        only : pawfgrtab_type
   use m_paw_ij,           only : paw_ij_type
   use m_pawrad,           only : nderiv_gen,pawrad_type,pawrad_deducer0,simp_gen,poisson
-  use m_paw_sphharm,      only : setsym_ylm,slxyzs,realgaunt
+  use m_paw_sphharm,      only : setsym_ylm,slxyzs,realgaunt,make_dyadic
   use m_pawtab,           only : pawtab_type
   use m_spacepar,         only : make_vectornd
   use m_time,             only : timab
@@ -1791,10 +1791,7 @@ end subroutine dterm_qij
 !! NOTES
 !! ZTG23 Eq. 43
 !! this term is A0.An = \frac{1}{2}(B x r).\alpha^2(m x r) which can be rewritten
-!! as \frac{\alpha^2}{2} [(B.m)r^2 - B.rr.m]
-!! the first term is bm1 below; the second term involves writing rr as a rank 2 cartesian
-!! tensor, which leads to the rank 0 and rank 2 spherical components below. (that is, write
-!! it as xx,xy,xz,... and write these terms in terms of their real spherical harmonic components)
+!! as \frac{\alpha^2}{2} [B.(1-\hat{r}\hat{r}).m]/r .
 !!
 !! SOURCE
 
@@ -1815,107 +1812,58 @@ subroutine dterm_BM(atindx,dterm,dtset,gntselect,gprimd,my_lmax,pawrad,pawtab,re
 
   !Local variables -------------------------
   !scalars
-  integer :: adir,gint,iat,iatom,ilm,ilmn,itypat,jlmn,jlm
-  integer :: klmn,klm,kln,lpmp,mesh_size,pwave_size
-  real(dp) :: a2,bm1,bm2,cfac,d00,d20,d22,dij,intg
+  integer :: adir,iat,iatom,itypat,gs1,gs2
+  integer :: klmn,klm,kln,mdir,mesh_size,ngnt,pwave_size
+  real(dp) :: a2,afact,intg
 
   !arrays
   complex(dpc) :: dij_cart(3),dij_red(3)
-  real(dp),allocatable :: ff(:)
+  real(dp),allocatable :: dyadic(:,:,:),ff(:),radint(:)
 
 !--------------------------------------------------------------------
 
   dterm%BM = czero
   a2 = FineStructureConstant2
-  d00 = sqrt(4.0*pi)/3.0
-  dij = sqrt(4.0*pi/15.0)
-  d20 = sqrt(16.0*pi/5.0)/6.0
-  d22 = sqrt(16.0*pi/15.0)/2.0
 
   do iat = 1, dtset%natom
+    if(.NOT. ANY(ABS(dtset%nucdipmom(:,iat))>tol8) ) cycle
+
     iatom = atindx(iat)
     itypat = dtset%typat(iat)
 
     mesh_size=pawtab(itypat)%mesh_size
     pwave_size=size(pawtab(itypat)%phiphj(:,1))
-    ABI_MALLOC(ff,(mesh_size))
-    do klmn=1, pawtab(itypat)%lmn2_size
-      klm  = pawtab(itypat)%indklmn(1,klmn)
-      kln  = pawtab(itypat)%indklmn(2,klmn)
-      ilmn = pawtab(itypat)%indklmn(7,klmn)
-      ilm  = pawtab(itypat)%indlmn(4,ilmn)
-      jlmn = pawtab(itypat)%indklmn(8,klmn)
-      jlm  = pawtab(itypat)%indlmn(4,jlmn)
 
-      ff=0
+    ! compute angular integrals of S_i (1-rr) S_j
+    gs1=size(gntselect,1)
+    gs2=size(gntselect,2)
+    ngnt=size(realgnt)
+    ABI_MALLOC(dyadic,(3,3,gs2))
+    call make_dyadic(one,one,dyadic,gntselect,gs1,gs2,gs2,ngnt,realgnt)
+
+    ! compute radial integrals of (ui*uj - tilde{ui}tilde{uj})/r
+    ABI_MALLOC(radint,(pawtab(itypat)%ij_size))
+    ABI_MALLOC(ff,(mesh_size))
+    do kln=1,pawtab(itypat)%ij_size 
       ff(2:pwave_size) = &
         & (pawtab(itypat)%phiphj(2:pwave_size,kln)-pawtab(itypat)%tphitphj(2:pwave_size,kln))/&
         & (pawrad(itypat)%rad(2:pwave_size))
       call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
       call simp_gen(intg,ff,pawrad(itypat))
+      radint(kln)=intg
+    end do
+    ABI_FREE(ff)
+    
+    do klmn=1, pawtab(itypat)%lmn2_size
+      klm  = pawtab(itypat)%indklmn(1,klmn)
+      kln  = pawtab(itypat)%indklmn(2,klmn)
 
-      do adir = 1, 3
-        if (ilm .EQ. jlm) then
-          bm1 = half*a2*intg*dtset%nucdipmom(adir,iat)
-        else
-          bm1 = zero
-        end if
-
-        bm2 = zero
-        ! xx, yy, zz cases all have the same contribution from S00
-        lpmp=1
-        gint = gntselect(lpmp,klm)
-        if (gint > 0) then
-          bm2=bm2+half*a2*dtset%nucdipmom(adir,iat)*d00*realgnt(gint)*intg
-        end if
-        ! all other contributions involve Gaunt integrals of S_{2m}
-        do lpmp = 5, 9
-          gint = gntselect(lpmp,klm)
-           if (gint > 0) then
-             cfac = half*a2*realgnt(gint)*intg
-             select case (lpmp)
-             case (5) ! S_{2,-2} contributes to xy term
-               select case (adir)
-               case (1)
-                 bm2=bm2+cfac*dtset%nucdipmom(2,iat)*dij
-               case (2)
-                 bm2=bm2+cfac*dtset%nucdipmom(1,iat)*dij
-               end select
-             case (6) ! S_{2,-1} contributes to yz term
-               select case (adir)
-               case (2)
-                 bm2=bm2+cfac*dtset%nucdipmom(3,iat)*dij
-               case (3)
-                 bm2=bm2+cfac*dtset%nucdipmom(2,iat)*dij
-               end select
-             case (7) ! S_{2,0} contributes to xx, yy, and zz terms
-               select case (adir)
-               case (1)
-                 bm2=bm2-cfac*dtset%nucdipmom(1,iat)*d20
-               case (2)
-                 bm2=bm2-cfac*dtset%nucdipmom(2,iat)*d20
-               case (3)
-                 bm2=bm2+cfac*dtset%nucdipmom(3,iat)*2.0*d20
-               end select
-             case (8) ! S_{2,+1} contributes to xz term
-               select case (adir)
-               case (1)
-                  bm2=bm2+cfac*dtset%nucdipmom(3,iat)*dij
-               case (3)
-                  bm2=bm2+cfac*dtset%nucdipmom(1,iat)*dij
-               end select
-             case (9) ! S_{2,2} contributes to xx, yy terms
-               select case (adir)
-               case (1)
-                 bm2=bm2+cfac*dtset%nucdipmom(1,iat)*d22
-               case (2)
-                 bm2=bm2-cfac*dtset%nucdipmom(2,iat)*d22
-               end select
-             end select
-           end if ! end check on nonzero gaunt integral
-        end do ! end loop over lp,mp
-
-        dij_cart(adir) = -CMPLX(bm1 - bm2,zero)
+      dij_cart=zero
+      do adir = 1, 3 ! B field direction
+        do mdir = 1, 3 ! mag dipole direction
+          afact=half*a2*radint(kln)*dyadic(adir,mdir,klm)*dtset%nucdipmom(mdir,iat)
+          dij_cart(adir)=dij_cart(adir)-CMPLX(afact,zero)
+        end do
       end do
 
       dij_red = MATMUL(TRANSPOSE(gprimd),dij_cart)
@@ -1926,14 +1874,15 @@ subroutine dterm_BM(atindx,dterm,dtset,gntselect,gprimd,my_lmax,pawrad,pawtab,re
       end if
 
     end do ! end loop over klmn
-    ABI_FREE(ff)
+
+    ABI_FREE(dyadic)
+    ABI_FREE(radint)
   end do ! end loop over iatom
 
   dterm%has_BM = 2
 
 end subroutine dterm_BM
 !!***
-
 
 !!****f* ABINIT/dterm_LR
 !! NAME
@@ -2746,6 +2695,7 @@ subroutine make_d(atindx,dterm,dtset,gprimd,paw_an,paw_ij,pawang,pawrad,pawtab,p
  call dterm_LR(atindx,dterm,dtset,gprimd,pawrad,pawtab)
 
  ! onsite <A_0.A_n> interaction between magnetic field and nuclear dipole  
+ !call dterm_BM(atindx,dterm,dtset,gntselect,gprimd,my_lmax,pawrad,pawtab,realgnt)
  call dterm_BM(atindx,dterm,dtset,gntselect,gprimd,my_lmax,pawrad,pawtab,realgnt)
 
  ! transfers paw_ij to dterm%aij because it's convenient
