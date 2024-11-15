@@ -371,6 +371,38 @@ class FortranFile(object):
 
         return fg
 
+def enclose(lines, magic, path):
+    try:
+        start = lines.index(magic)
+    except ValueError:
+        #print(lines)
+        raise ValueError(f"Cannot find {magic=} in {path}")
+
+    for i, l in enumerate(lines[start:]):
+        if l.strip().startswith(")"):
+            return start, i + start + 1
+
+    #print(lines)
+    raise ValueError(f"Cannot find closing `)` after {magic=} in {path}")
+
+def parse_amf(filepath):
+    """Parset the amf file."""
+    #
+    #EXTRA_DIST += \
+    #  md5.h \
+    #  xmalloc.h
+    if not os.path.exists(filepath):
+        return []
+
+    with open(filepath, "rt") as fh:
+        lines = fh.readlines()
+
+    head = "EXTRA_DIST +="
+    if not lines[0].startswith(head):
+        raise ValueError(f"In {filepath=}: {lines[0]=} should start with {head=}")
+
+    return [l.replace(r"\\", "").strip() for l in lines[1:]]
+
 
 class AbinitProject(NotebookWriter):
     """
@@ -1045,55 +1077,23 @@ class AbinitProject(NotebookWriter):
             #  ...
             #  )
 
-            #def enclose(lines, magic, path):
-            #    try:
-            #        start = lines.index(magic)
-            #    except ValueError:
-            #        #print(lines)
-            #        raise ValueError(f"Cannot find {magic=} in {path}")
+            cmakelist_path = os.path.join(dirpath, "CMakeLists.txt")
+            lines = [l.strip() for l in open(cmakelist_path).readlines()]
+            dirname = os.path.basename(dirpath)
+            magic = f"add_library({dirname} STATIC"
+            start, stop = enclose(lines, magic, cmakelist_path)
+            del lines[start+1:stop-1]
 
-            #    for i, l in enumerate(lines[start:]):
-            #        if l.strip().startswith(")"):
-            #            return start, i + start + 1
-
-            #    #print(lines)
-            #    raise ValueError(f"Cannot find closing `)` after {magic=} in {path}")
-
-            #def parse_amf(filepath):
-            #    r"""
-            #    EXTRA_DIST += \
-            #      md5.h \
-            #      xmalloc.h
-            #    """
-            #    if not os.path.exists(filepath):
-            #        return []
-
-            #    with open(filepath, "rt") as fh:
-            #        lines = fh.readlines()
-
-            #    head = "EXTRA_DIST +="
-            #    if not lines[0].startswith(head):
-            #        raise ValueError(f"In {filepath=}: {lines[0]=} should start with {head=}")
-
-            #    return [l.replace(r"\\", "").strip() for l in lines[1:]]
-
-            ## Get list of source files (F, C, C++)
-            #mod = load_mod(os.path.join(dirpath, "abinit.src"))
-            #extras = parse_amf(os.path.join(dirpath, "abinit.amf"))
-            #print(extras)
-
-            #cmakelist_path = os.path.join(dirpath, "CMakeLists.txt")
-            #lines = [l.strip() for l in open(cmakelist_path).readlines()]
-
-            #dirname = os.path.basename(dirpath)
-            #magic = f"add_library({dirname} STATIC"
-            #start, stop = enclose(lines, magic, cmakelist_path)
-            #del lines[start+1:stop-1]
-            #lines[start+1:start+1] = [(2*" " + s) for s in mod.sources]
-            #s = "\n".join(lines)
-            #print(s)
+            # Get list of source files (F, C, C++) from abinit.src
+            mod = load_mod(os.path.join(dirpath, "abinit.src"))
+            lines[start+1:start+1] = [(2*" " + s) for s in mod.sources]
+            s = "\n".join(lines)
+            print(s)
             ##with open(cmakelist_path, "wt") as fh:
             ##    fh.write(s)
+
+            #extras = parse_amf(os.path.join(dirpath, "abinit.amf"))
+            #print("extras:", extras)
 
             ## This section is optional!
             #magic = f"target_link_libraries({dirname}"
