@@ -6,7 +6,7 @@
 !!  Symmetry finder high-level API.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2000-2022 ABINIT group (XG, RC)
+!!  Copyright (C) 2000-2024 ABINIT group (XG, RC)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -63,7 +63,7 @@ contains
 !! INPUTS
 !! chrgat(natom) (optional)=target charge for each atom. Not always used, it depends on the value of constraint_kind
 !! invardir_red (optional)=reduced coordinates of an invariant direction (only acting with symrel - not tnons)
-!! invar_z (optional)= if 1, the z direction must stay invariant for all symrel applied ; 
+!! invar_z (optional)= if 1, the z direction must stay invariant for all symrel applied ;
 !!                     if 2, z must stay invariant and also there cannot be any associated tnons along z.
 !! gprimd(3,3)=dimensional primitive translations for reciprocal space
 !! msym=default maximal number of symmetries
@@ -143,6 +143,11 @@ contains
 !call flush(std_out)
 !ENDDEBUG
 
+ ABI_MALLOC(local_nucdipmom,(3,3,natom))
+ local_nucdipmom(:,:,:) = zero
+ if(present(nucdipmom)) then
+    local_nucdipmom(1:3,1,:) = nucdipmom(1:3,:)
+ end if
 !DEBUG
 ! if (prtvol>1) msg="remove me later"
 ! write(std_out,*)' symfind : enter'
@@ -157,6 +162,9 @@ contains
 ! write(std_out,*)'   typat   =',typat(iatom)
 ! write(std_out,*)'   spinat  =',spinat(:,iatom)
 ! write(std_out,*)'   xred    =',xred(:,iatom)
+! if (ANY(ABS(local_nucdipmom)>tol8)) then
+! write(std_out,*)'   nucdipmom = ',local_nucdipmom(:,1,iatom)
+! end if
 ! end do
 ! write(std_out,*)' '
 ! call flush(6)
@@ -179,7 +187,6 @@ contains
  ABI_MALLOC(chrgat_,(natom))
  ABI_MALLOC(chrgatcl,(natom))
  ABI_MALLOC(spinatcl,(3,natom))
- ABI_MALLOC(local_nucdipmom,(3,3,natom))
  ABI_MALLOC(nucdipmomcl,(3,natom))
 
  tolsym2=tolsym**2
@@ -189,10 +196,6 @@ contains
    chrgat_(:)=chrgat(:)
  endif
 
- local_nucdipmom(:,:,:) = zero
- if(present(nucdipmom)) then
-    local_nucdipmom(1:3,1,:) = nucdipmom(1:3,:)
- end if
  ! for each nuclear dipole we need a local right handed coord system, so we can
  ! test later for whether a symmetry operation preserves the circulation induced
  ! by the dipole
@@ -535,6 +538,7 @@ contains
 !        DEBUG
 !        write(std_out,'(a,i4,a,3f8.4,a,3f8.4,a,3f8.4)')&
 !&          ' Test iatom2=',iatom2,' at xred=',xred(:,iatom2),'. Is sent to',symxred2(:),' with symspinat2=',symspinat2(:)
+!        write(std_out,'(a,3f8.4)')' and nucdipmom2=',symnucdipmom2cart(:,1)
 !        ENDDEBUG
 
 !        Check whether there exists an atom of the same class at the
@@ -570,7 +574,7 @@ contains
            if( (diff(1)**2+diff(2)**2+diff(3)**2) > tolsym**2 )then
              found3=0
              cycle
-           endif  
+           endif
            ! Check the nucdipmom
            ! hand3 gives original circulation sense of nuclear dipole
            call acrossb(local_nucdipmom(1:3,2,iatom3),local_nucdipmom(1:3,3,iatom3),hand3)
@@ -580,6 +584,9 @@ contains
 
            diff(:)=hand3(:)-hand2(:)
            if( any(abs(diff)>tolsym) )found3=0
+
+           !diff(:)=symnucdipmom2cart(:,1) - local_nucdipmom(:,1,iatom3)
+           !if ( any(abs(diff)>tolsym) ) found3=0
 
            if(found3==1)exit
          end do ! End loop over iatom3
@@ -687,7 +694,7 @@ end subroutine symfind
 !! symfind_expert
 !!
 !! FUNCTION
-!! Symmetry finder, with an added layer of robustness compared to symfind, 
+!! Symmetry finder, with an added layer of robustness compared to symfind,
 !! and for which resymmetrization of atomic positions and tnons is needed..
 !! From the symmetries of the Bravais lattice (ptsymrel),
 !! select those that leave invariant the system, and generate
@@ -755,9 +762,9 @@ end subroutine symfind
  integer :: ierr,isym,use_inversion
  character(len=1000) :: msg
 !arrays
- integer,allocatable :: indsym(:,:,:),symrec(:,:,:) 
+ integer,allocatable :: indsym(:,:,:),symrec(:,:,:)
  real(dp),allocatable :: tnons_new(:,:)
- 
+
 
 !**************************************************************************
 
@@ -1259,6 +1266,25 @@ subroutine symbrav(bravais,msym,nsym,ptgroup,rprimd,symrel,tolsym,axis)
        'iholohedry=',iholohedry
        ABI_BUG(msg)
      end if
+!    Try to increase tolsym to find the Bravais lattice.
+     maxsym=max(192,msym)
+     ABI_MALLOC(ptsymrel,(3,3,maxsym))
+!DEBUG
+!    write(6,*)' symbrav : will call symlatt, 3*tolsym=',3*tolsym
+!ENDDEBUG
+     call symlatt(bravais,std_out,maxsym,nptsym,ptsymrel,rprimdtry,3*tolsym)
+     ABI_FREE(ptsymrel)
+     if(bravais(1)==iholohedry)then
+!      Succeeded
+       exit
+     else
+       write(msg, '(3a,3i3,2a,i3,2a,i3)' )&
+       'Could not succeed to determine the bravais lattice, even after considering a larger tolsym',ch10,&
+       'problem,iaxis,invariant=',problem,iaxis,invariant,ch10,&
+       'bravais(1)=',bravais(1),ch10,&
+       'iholohedry=',iholohedry
+       ABI_BUG(msg)
+     end if
    end if
 
    if(problem==1)then  ! One is left with the problem=1 case, basically iholohedry is lower than bravais(1)
@@ -1334,7 +1360,7 @@ subroutine symbrav(bravais,msym,nsym,ptgroup,rprimd,symrel,tolsym,axis)
        axis_trial(:)=hexa_axes(:,jaxis)
      end if
 !    DEBUG
-!    write(std_out,*)' symbrav : try jaxis=',jaxis
+!    write(std_out,*)' symbrav : ixaxis, trial jaxis=',iaxis,jaxis
 !    write(std_out,*)' axis_trial=',axis_trial
 !    ENDDEBUG
      invariant=1
@@ -1345,8 +1371,10 @@ subroutine symbrav(bravais,msym,nsym,ptgroup,rprimd,symrel,tolsym,axis)
      end do
      if(invariant==1)then
        iaxis=jaxis
-!      write(msg, '(2a,i3)' )ch10,' symbrav : found invariant axis, jaxis=',iaxis
+!DEBUG
+!      write(msg, '(2a,i3)' )ch10,' symbrav : found invariant axis, jaxis=',jaxis
 !      call wrtout(std_out,msg)
+!ENDDEBUG
        exit
      end if
    end do
@@ -1370,6 +1398,12 @@ subroutine symbrav(bravais,msym,nsym,ptgroup,rprimd,symrel,tolsym,axis)
 &   axis_red(2)*rprimdnow(:,2)+ &
 &   axis_red(3)*rprimdnow(:,3)
    norm=sum(axis_cart(:)**2)
+!DEBUG
+!  write(6,*)' axis_trial =',axis_trial
+!  write(6,*)' axis_red =',axis_red
+!  write(6,*)' axis_cart =',axis_cart
+!  write(6,*)' rprimdnow=',rprimdnow
+!ENDDEBUG
 !  Expand by a uniform, quite arbitrary, dilatation, along the invariant axis
 !  Note : make these dilatation different, according to ideform
 !  XG 20151221  : Still, the interplay between the size of the deformation and the tolsym is not easy to address.
@@ -1381,6 +1415,10 @@ subroutine symbrav(bravais,msym,nsym,ptgroup,rprimd,symrel,tolsym,axis)
      scprod=axis_cart(1)*rprimdnow(1,ii)+axis_cart(2)*rprimdnow(2,ii)+axis_cart(3)*rprimdnow(3,ii)
      rprimdtry(:,ii)=rprimdnow(:,ii)+ideform*(max(tol3,six*tolsym)-tol6)*scprod/norm*axis_cart(:)
    end do
+
+!DEBUG
+!  write(6,*)' rprimdtry=',rprimdtry
+!ENDDEBUG
 
  end do ! ideform
 
@@ -1489,7 +1527,7 @@ subroutine symspgr(bravais,labels,nsym,spgroup,symrel,tnons,tolsym)
  integer :: n_axes(31),n_axest(31),prime(5),test_direction(3),symrel_uni(3,3)
  integer :: uniaxis(3),uniaxis_try(3)
  integer,allocatable :: determinant(:),symrelconv(:,:,:),t_axes(:)
- real(dp) :: axes(3,3),rprimdconv(3,3),trialt(3),vect(3,3)
+ real(dp) :: axes(3,3),rprimdconv(3,3),vect(3,3)
  real(dp),allocatable :: shift(:,:),tnonsconv(:,:)
 
 !**************************************************************************
@@ -1527,6 +1565,7 @@ subroutine symspgr(bravais,labels,nsym,spgroup,symrel,tnons,tolsym)
  symrelconv(:,:,1:nsym)=symrel(:,:,1:nsym)
 !Note that the number of symmetry operations is still nsym
  call symrelrot(nsym,rprimdconv,axes,symrelconv,tolsym)
+
  call xred2xcart(nsym,rprimdconv,tnonsconv,tnons)
 !Gives the associated translation, with components in the
 !interval ]-0.5,0.5] .
@@ -1590,8 +1629,7 @@ subroutine symspgr(bravais,labels,nsym,spgroup,symrel,tnons,tolsym)
      '  symrelconv(:,1,isym)=',symrelconv(:,1,isym),ch10,&
      '  symrelconv(:,2,isym)=',symrelconv(:,2,isym),ch10,&
      '  symrelconv(:,3,isym)=',symrelconv(:,3,isym),ch10,&
-     '  tnonsconv(:,isym)=',tnonsconv(:,isym),ch10,&
-     '  trialt(:)=',trialt(:)
+     '  tnonsconv(:,isym)=',tnonsconv(:,isym)
      call wrtout(std_out,msg)
      write(msg, '(a,i4,2a)' )&
        'The space symmetry operation number',isym,ch10,'is not a (translated) root of unity'
@@ -1918,7 +1956,7 @@ subroutine symlatt(bravais,iout,msym,nptsym,ptsymrel,rprimd,tolsym)
 !**************************************************************************
 
 !DEBUG
-!write(std_out,'(a)') ' m_symfind%symlatt : enter '
+!write(std_out,'(a,es14.6)') ' m_symfind%symlatt : enter, tolsym= ',tolsym
 !call flush(std_out)
 !ENDDEBUG
 

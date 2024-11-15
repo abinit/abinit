@@ -7,7 +7,7 @@
 !! and also includes the computation of integrated atomic charge and magnetization, as well as Hirshfeld charges.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2022 ABINIT group (MT,ILuk,MVer,EB,SPr)
+!! Copyright (C) 1998-2024 ABINIT group (MT,ILuk,MVer,EB,SPr)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -805,7 +805,7 @@ end subroutine constrained_dft_free
  real(dp),intent(out) :: grcondft(:,:) ! 3,natom
  real(dp),intent(out) :: intgres(:,:) ! nspden,natom
  real(dp),intent(in) :: rhor(c_dft%nfftf,c_dft%nspden)
- real(dp),intent(out) :: strscondft(6) 
+ real(dp),intent(out) :: strscondft(6)
  real(dp),intent(inout) :: vresid(c_dft%nfftf,c_dft%nspden)
  real(dp),intent(in) :: xred(3,c_dft%natom)
 
@@ -843,9 +843,11 @@ end subroutine constrained_dft_free
  ABI_MALLOC(intgden,(nspden,natom))
  ABI_MALLOC(gr_intgden,(3,nspden,natom))
  ABI_MALLOC(strs_intgden,(6,nspden,natom))
+
  call calcdenmagsph(mpi_enreg,natom,nfftf,c_dft%ngfftf,nspden,ntypat,c_dft%ratsm,c_dft%ratsph,rhor,c_dft%rprimd,c_dft%typat,&
-&  xred,1,cplex1,intgden=intgden,gr_intgden=gr_intgden,rhomag=rhomag,strs_intgden=strs_intgden)
- call prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,std_out,1,c_dft%ratsm,c_dft%ratsph,rhomag,c_dft%typat)
+                    xred,1,cplex1,intgden=intgden,gr_intgden=gr_intgden,rhomag=rhomag,strs_intgden=strs_intgden)
+
+ call prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,[std_out],1,c_dft%ratsm,c_dft%ratsph,rhomag,c_dft%typat)
 
 !DEBUG
 !write(std_out,*) ' intgden(1:nspden,1:natom)=',intgden(1:nspden,1:natom)
@@ -881,7 +883,7 @@ end subroutine constrained_dft_free
    if( mod(conkind,10)==0 .and. nspden>1)intgres(2:nspden,iatom)=zero
  enddo
 !Print the potential residuals
- call prtdenmagsph(cplex1,intgres,natom,nspden,ntypat,std_out,11,c_dft%ratsm,c_dft%ratsph,rhomag,c_dft%typat)
+ call prtdenmagsph(cplex1,intgres,natom,nspden,ntypat,[std_out],11,c_dft%ratsm,c_dft%ratsph,rhomag,c_dft%typat)
  ABI_FREE(intgres_tmp)
 
 !Also exchanges the spin and atom indices to prepare the solution of the linear system of equation
@@ -1018,7 +1020,7 @@ end subroutine constrained_dft_free
            spinat_normed(:) = c_dft%spinat(:,iatom) / norm
            intgden_norm = sqrt(sum(intgden(2:nspden,iatom)**2))
            intgden_normed(:) = intgden(2:nspden,iatom)/intgden_norm
-           !Calculate the difference vector between the actual magnetization vectoro, times the scalar product between the 
+           !Calculate the difference vector between the actual magnetization vectoro, times the scalar product between the
            !directions of present magnetization and target one, and the target magnetization direction renormalized by the magnetization length.
            !See notes 12 October 2021
 !DEBUG First possibility
@@ -1028,7 +1030,7 @@ end subroutine constrained_dft_free
            scprod=sum(spinat_normed(:)*intgden_normed(:))
            intgden_delta(2:nspden,iatom)=intgden(2:nspden,iatom)*scprod-spinat_normed(1:3)*intgden_norm
 !ENDDEBUG
-           !Also projects the residual. There might be some misalignement of the intgden_delta with the correct space of allowed variations 
+           !Also projects the residual. There might be some misalignement of the intgden_delta with the correct space of allowed variations
            !(not exactly perpendicular to spinat_normed or intgden_normed, or even frankly not at all perpendicular),
            !but when close to fulfilling the constraint, this difference becomes negligible.
            !The present choice, couple with the above definition of intgden_delta aligns both.
@@ -1046,7 +1048,7 @@ end subroutine constrained_dft_free
 !ENDDEBUG
          else if(nspden==2)then
            !This case is ill-defined ... What follows is rather arbitrary.
-           !When the actual magnetization and the target magnetization have same sign, the intgden_delta is zero. 
+           !When the actual magnetization and the target magnetization have same sign, the intgden_delta is zero.
            ! Otherwise, intgres is set to the difference between the present intgden and the target
            intgden_delta(2,iatom)=zero
            if(c_dft%spinat(2,iatom)*intgden(2,iatom)<-tol10)intgden_delta(2,iatom)=c_dft%spinat(2,iatom)-intgden(2,iatom)
@@ -1087,7 +1089,7 @@ end subroutine constrained_dft_free
  coeffs_constr_dft=zero
 
 !With the delta of the integrated density and the atomic residual, compute the atomic correction to be applied to the potential
-!See the Eqs.(31), (33) and (34) of notes. 
+!See the Eqs.(31), (33) and (34) of notes.
  do iatom=1,natom
 
    !Computation of the correction in terms of density and magnetization coefficients.
@@ -1234,8 +1236,9 @@ subroutine mag_penalty(c_dft,mpi_enreg,rhor,nv_constr_dft_r,xred)
 
 !We need the integrated magnetic moments and the smoothing function
  call calcdenmagsph(mpi_enreg,natom,nfftf,c_dft%ngfftf,nspden,ntypat,&
-&  c_dft%ratsm,c_dft%ratsph,rhor,c_dft%rprimd,c_dft%typat,xred,1,cplex1,intgden=intgden,rhomag=rhomag)
- call prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,std_out,1,c_dft%ratsm,c_dft%ratsph,rhomag,c_dft%typat)
+                    c_dft%ratsm,c_dft%ratsph,rhor,c_dft%rprimd,c_dft%typat,xred,1,cplex1,intgden=intgden,rhomag=rhomag)
+
+ call prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,[std_out],1,c_dft%ratsm,c_dft%ratsph,rhomag,c_dft%typat)
 
 !Loop over atoms
 !-------------------------------------------
@@ -1382,8 +1385,9 @@ subroutine mag_penalty_e(magconon,magcon_lambda,mpi_enreg,natom,nfft,ngfft,nspde
 !We need the integrated magnetic moments
  cplex1=1
  call calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,rhor,rprimd,typat,xred,&
-& 1,cplex1,intgden=intgden,rhomag=rhomag)
- call prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,std_out,1,ratsm,ratsph,rhomag,typat)
+                    1,cplex1,intgden=intgden,rhomag=rhomag)
+
+ call prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,[std_out],1,ratsm,ratsph,rhomag,typat)
 
  Epen=0
  Econstr=0
@@ -1450,10 +1454,10 @@ subroutine mag_penalty_e(magconon,magcon_lambda,mpi_enreg,natom,nfft,ngfft,nspde
    end if
 
    write(msg, *) 'atom             constraining magnetic field'
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(std_out,msg)
    write(msg, '(I3,A2,E12.5,A2,E12.5,A2,E12.5)') &
    iatom,'  ',magcon_lambda*intmm(1),'  ',magcon_lambda*intmm(2),'  ',magcon_lambda*intmm(3)
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(std_out,msg)
 
 !  End loop over atoms
 !  -------------------------------------------
@@ -1461,13 +1465,13 @@ subroutine mag_penalty_e(magconon,magcon_lambda,mpi_enreg,natom,nfft,ngfft,nspde
 
 !Printing
  write(msg, '(A17,E10.3)' ) ' magcon_lambda    = ',magcon_lambda
- call wrtout(std_out,msg,'COLL')
+ call wrtout(std_out,msg)
  write(msg, '(A17,E12.5)' ) ' Lagrange penalty = ',Epen
- call wrtout(std_out,msg,'COLL')
+ call wrtout(std_out,msg)
  write(msg, '(A17,E12.5)' ) ' E_constraint     = ',Econstr
- call wrtout(std_out,msg,'COLL')
+ call wrtout(std_out,msg)
  write(msg, '(A17,E12.5)' ) ' lVp = ',lVp
- call wrtout(std_out,msg,'COLL')
+ call wrtout(std_out,msg)
 
  ABI_FREE(intgden)
 
@@ -1529,11 +1533,11 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
  real(dp),intent(in) :: ratsph(ntypat),rhor(cplex*nfft,nspden),rprimd(3,3)
  real(dp),intent(in) :: xred(3,natom)
  real(dp),intent(out),optional  :: dentot(nspden)
- real(dp),intent(out),optional  :: gr_intgden(3,nspden,natom)   
+ real(dp),intent(out),optional  :: gr_intgden(3,nspden,natom)
  real(dp),intent(out),optional  :: intgden(nspden,natom)
  real(dp),intent(out),optional  :: intgf2(natom,natom)
  real(dp),intent(out),optional  :: rhomag(2,nspden)
- real(dp),intent(out),optional  :: strs_intgden(6,nspden,natom)   
+ real(dp),intent(out),optional  :: strs_intgden(6,nspden,natom)
 !Local variables ------------------------------
 !scalars
  integer,parameter :: ndir=3,ishift=5
@@ -1749,13 +1753,13 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
 
 !      Then perform representation change, following Eq.(25) in Hamann2005
        do ii=1,3
-         strs_cartred(:,ii)=matmul(rprimd,strs(:,ii)) 
+         strs_cartred(:,ii)=matmul(rprimd,strs(:,ii))
        enddo
        do ii=1,3
          strs(ii,:)=matmul(rprimd,strs_cartred(ii,:))
        enddo
 
-!DEBUG 
+!DEBUG
 !      rprimd_mod=rprimd
 !      rprimd_mod(1,1)=rprimd(1,1)*(one+strain)
 !      do ii=1,3
@@ -1767,10 +1771,10 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
 !ENDDEBUG
 
        strs_intg(1,isp)=two*strs(1,1) ; strs_intg(2,isp)=two*strs(2,2) ; strs_intg(3,isp)=two*strs(3,3)
-       strs_intg(4,isp)=strs(2,3)+strs(3,2) 
-       strs_intg(5,isp)=strs(1,3)+strs(3,1) 
+       strs_intg(4,isp)=strs(2,3)+strs(3,2)
+       strs_intg(5,isp)=strs(1,3)+strs(3,1)
        strs_intg(6,isp)=strs(1,2)+strs(2,1)
-     enddo 
+     enddo
      strs_intg(:,:)=strs_intg(:,:)/dble(nfftot)
 !DEBUG
 !    strs_intg(:,:)=zero
@@ -1939,7 +1943,7 @@ end subroutine calcdenmagsph
 !!  natom=number of atoms in cell.
 !!  nspden=number of spin-density components
 !!  ntypat=number of atom types
-!!  nunit=number of the unit for printing
+!!  units=unit numbers for printing
 !!  option = if not larger than 10, then a density is input , if between 10 and 19 then a potential residual is input, if beyond, a torque is input..
 !!         When 1, 11, 21, the default printing is on (to unit nunit), if -1, 2, 3, 4, special printing options, if 0 no printing.
 !!  ratsm=smearing width for ratsph
@@ -1953,19 +1957,21 @@ end subroutine calcdenmagsph
 !!
 !! SOURCE
 
-subroutine prtdenmagsph(cplex,intgden,natom,nspden,ntypat,nunit,option,ratsm,ratsph,rhomag,typat,ziontypat)
+subroutine prtdenmagsph(cplex, intgden, natom, nspden, ntypat, units, option, ratsm, ratsph, rhomag, typat, ziontypat)
 
 !Arguments ---------------------------------------------
 !scalars
-integer,intent(in)        :: natom,nspden,ntypat,nunit
-real(dp),intent(in)       :: ratsm
-integer ,intent(in)       :: option
-integer, intent(in)       :: cplex
+integer,intent(in)  :: natom,nspden,ntypat
+integer,intent(in) :: units(:)
+real(dp),intent(in) :: ratsm
+integer ,intent(in) :: option
+integer, intent(in) :: cplex
 !arrays
 integer,intent(in)  :: typat(natom)
 real(dp),intent(in) :: intgden(nspden,natom)
 real(dp),intent(in) :: ratsph(ntypat),rhomag(2,nspden)
 real(dp),intent(in),optional :: ziontypat(ntypat)
+
 !Local variables ------------------------------
 !scalars
  integer :: iatom,ix
@@ -1977,9 +1983,7 @@ real(dp),intent(in),optional :: ziontypat(ntypat)
 
 ! *************************************************************************
 
-!DEBUG
-!write(ab_out,*)' prtdenmagsph : enter, rhomag(1,2)=',rhomag(1,2)
-!ENDDEBUG
+ !write(ab_out,*)' prtdenmagsph : enter, rhomag(1,2)=',rhomag(1,2)
 
  if(nspden==2)then
    rho_tot=rhomag(1,1) ; mag_coll=rhomag(1,2)
@@ -2011,10 +2015,10 @@ real(dp),intent(in),optional :: ziontypat(ntypat)
        if(option==11)msg1=ch10//' Integrated potential residual in atomic spheres:'
        if(option==21)msg1=ch10//' Gradient with respect to target (=torque)      :'
        write(msg, '(3a)' ) trim(msg1),ch10,' ------------------------------------------------'
-       call wrtout(nunit,msg,'COLL')
+       call wrtout(units,msg)
        if(ratsm>tol8)then
          write(msg, '(a,f8.4,a)' ) ' Radius=ratsph(iatom), smearing ratsm=',ratsm,'.'
-         call wrtout(nunit,msg,'COLL')
+         call wrtout(units,msg)
        endif
        if(option== 1)then
          msg=' Atom  Sphere_radius  Integrated_density'
@@ -2022,18 +2026,18 @@ real(dp),intent(in),optional :: ziontypat(ntypat)
        endif
        if(option==11)msg=' Atom  Sphere_radius  Integrated_potresid'
        if(option==21)msg=' Atom  Sphere_radius               Torque'
-       call wrtout(nunit,msg,'COLL')
+       call wrtout(units,msg)
        do iatom=1,natom
          write(msg, '(i5,f15.5,f20.8)' ) iatom,ratsph(typat(iatom)),intgden(1,iatom)
          if(option==21)then
-!          There is a change of sign to get the gradient wrt chrgat.
+           ! There is a change of sign to get the gradient wrt chrgat.
            write(msg, '(i5,f15.5,f20.8)' ) iatom,ratsph(typat(iatom)),-intgden(1,iatom)
-         endif 
+         endif
          !If option=1, print atomic charge
          if(option==1 .and. present(ziontypat))then
            write(msg, '(a,f20.8)' ) trim(msg),ziontypat(typat(iatom))-intgden(1,iatom)
          endif
-         call wrtout(nunit,msg,'COLL')
+         call wrtout(units,msg)
        end do
      endif
 
@@ -2043,13 +2047,13 @@ real(dp),intent(in),optional :: ziontypat(ntypat)
        if(option==11)msg1=ch10//' Integrated potential residual in atomic spheres (scalar + magnetic field):'
        if(option==21)msg1=ch10//' Gradient with respect to target (=torque)       (scalar + magnetic field):'
        write(msg, '(3a)' ) trim(msg1),ch10,' ---------------------------------------------------------------------'
-       call wrtout(nunit,msg,'COLL')
+       call wrtout(units,msg)
 
        if(option== 1 .and. nspden==2) msg1='. Diff(up-dn)=approximate z local magnetic moment.'
        if(option== 1 .and. nspden==4) msg1='. mag(i)=approximate local magnetic moment.'
        if(option==11 .or. option==21) msg1='.'
        write(msg, '(a,f8.4,a)' ) ' Radius=ratsph(iatom), smearing ratsm=',ratsm,trim(msg1)
-       call wrtout(nunit,msg,'COLL')
+       call wrtout(units,msg)
 
        if(option==1)then
          if(nspden==2) msg=' Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)'
@@ -2062,7 +2066,7 @@ real(dp),intent(in),optional :: ziontypat(ntypat)
          if(nspden==2) msg=' Atom    Radius       grchrg        T(z)      up torque  down torque'
          if(nspden==4) msg=' Atom    Radius       Torque          T(x)        T(y)        T(z)  '
        endif
-       call wrtout(nunit,msg,'COLL')
+       call wrtout(units,msg)
 
      endif
 
@@ -2074,9 +2078,10 @@ real(dp),intent(in),optional :: ziontypat(ntypat)
            write(msg,'(i5,f10.5,2f13.6,a,f12.6,a,f12.6)' ) iatom,ratsph(typat(iatom)),-intgden(1,iatom),intgden(2,iatom)
          endif
          write(msg,'(a,a,f12.6,a,f12.6)')trim(msg),'  ',(intgden(1,iatom)+intgden(2,iatom)),' ',(intgden(1,iatom)-intgden(2,iatom))
-         if(option==1 .and. present(ziontypat))&
-&          write(msg, '(a,f14.6)') trim(msg),ziontypat(typat(iatom))-(intgden(1,iatom)+intgden(2,iatom))
-         call wrtout(nunit,msg,'COLL')
+         if(option==1 .and. present(ziontypat)) then
+           write(msg, '(a,f14.6)') trim(msg),ziontypat(typat(iatom))-(intgden(1,iatom)+intgden(2,iatom))
+         end if
+         call wrtout(units,msg)
          ! Compute the sum of the magnetization
          sum_mag=sum_mag+intgden(1,iatom)-intgden(2,iatom)
          sum_rho_up=sum_rho_up+intgden(1,iatom)
@@ -2084,15 +2089,15 @@ real(dp),intent(in),optional :: ziontypat(ntypat)
          sum_rho_tot=sum_rho_tot+intgden(1,iatom)+intgden(2,iatom)
        end do
        write(msg, '(a)') ' ---------------------------------------------------------------------'
-       call wrtout(nunit,msg,'COLL')
+       call wrtout(units,msg)
        write(msg, '(a,2f13.6,a,f12.6,a,f12.6)') '  Sum:         ', sum_rho_up,sum_rho_dn,'  ',sum_rho_tot,' ',sum_mag
-       call wrtout(nunit,msg,'COLL')
+       call wrtout(units,msg)
 
        if(option==1)then
          write(msg, '(a,f14.6)') ' Total magnetization (from the atomic spheres):       ', sum_mag
-         call wrtout(nunit,msg,'COLL')
+         call wrtout(units,msg)
          write(msg, '(a,f14.6)') ' Total magnetization (exact up - dn):                 ', mag_coll
-         call wrtout(nunit,msg,'COLL')
+         call wrtout(units,msg)
        endif
 
      elseif(nspden==4) then
@@ -2105,20 +2110,20 @@ real(dp),intent(in),optional :: ziontypat(ntypat)
          endif
          if(option==1 .and. present(ziontypat))&
 &          write(msg, '(a,f14.6)') trim(msg),ziontypat(typat(iatom))-intgden(1,iatom)
-         call wrtout(nunit,msg,'COLL')
+         call wrtout(units,msg)
          ! Compute the sum of the magnetization in x, y and z directions
          sum_mag_x=sum_mag_x+intgden(2,iatom)
          sum_mag_y=sum_mag_y+intgden(3,iatom)
          sum_mag_z=sum_mag_z+intgden(4,iatom)
        end do
        write(msg, '(a)') ' ---------------------------------------------------------------------'
-       call wrtout(nunit,msg,'COLL')
+       call wrtout(units,msg)
 
        if(option==1)then
          write(msg, '(a,f12.6,f12.6,f12.6)') ' Total magnetization (spheres)   ', sum_mag_x,sum_mag_y,sum_mag_z
-         call wrtout(nunit,msg,'COLL')
+         call wrtout(units,msg)
          write(msg, '(a,f12.6,f12.6,f12.6)') ' Total magnetization (exact)     ', mag_x,mag_y,mag_z
-         call wrtout(nunit,msg,'COLL')
+         call wrtout(units,msg)
        endif
 
      end if
@@ -2126,7 +2131,7 @@ real(dp),intent(in),optional :: ziontypat(ntypat)
    elseif(option==-1) then
 
      write(msg, '(2a)') ch10,' ------------------------------------------------------------------------'
-     call wrtout(nunit,msg,'COLL')
+     call wrtout(units,msg)
 
      if(nspden==1) then
        write(msg, '(4a)' ) &
@@ -2137,32 +2142,32 @@ real(dp),intent(in),optional :: ziontypat(ntypat)
 &       ' Fermi level charge density n_f and magnetization m_f:',ch10,&
 &       ' ------------------------------------------------------------------------',ch10
      end if
-     call wrtout(nunit,msg,'COLL')
+     call wrtout(units,msg)
 
      if(cplex==1) then
        write(msg, '(a,f13.8)') '     n_f   = ',rho_tot
      else
        write(msg, '(a,f13.8,a,f13.8)') '  Re[n_f]= ', rho_tot,"   Im[n_f]= ",rho_tot_im
      end if
-     call wrtout(nunit,msg,'COLL')
+     call wrtout(units,msg)
      if(nspden==2) then
        if(cplex==1) then
          write(msg, '(a,f13.8)') '     m_f    = ', mag_coll
        else
          write(msg, '(a,f13.8,a,f13.8)') '  Re[m_f]= ', mag_coll,"   Im[m_f]= ",mag_coll_im
        end if
-       call wrtout(nunit,msg,'COLL')
+       call wrtout(units,msg)
      elseif (nspden==4) then
        write(msg, '(a,f13.8)') '     mx_f  = ',mag_x
-       call wrtout(nunit,msg,'COLL')
+       call wrtout(units,msg)
        write(msg, '(a,f13.8)') '     my_f  = ',mag_y
-       call wrtout(nunit,msg,'COLL')
+       call wrtout(units,msg)
        write(msg, '(a,f13.8)') '     mz_f  = ',mag_z
-       call wrtout(nunit,msg,'COLL')
+       call wrtout(units,msg)
      end if
 
      write(msg, '(3a)') ch10,' ------------------------------------------------------------------------',ch10
-     call wrtout(nunit,msg,'COLL')
+     call wrtout(units,msg)
 
 
    else if (option==2 .or. option==3 .or. option==4) then
@@ -2173,7 +2178,7 @@ real(dp),intent(in),optional :: ziontypat(ntypat)
      end if
 
      write(msg, '(2a)') ch10,' ------------------------------------------------------------------------'
-     call wrtout(nunit,msg,'COLL')
+     call wrtout(units,msg)
 
      if(nspden==1) then
        write(msg, '(4a)' ) &
@@ -2184,14 +2189,14 @@ real(dp),intent(in),optional :: ziontypat(ntypat)
 &       ' Integrals of the first order density n^(1) and magnetization m^(1):',ch10,&
 &       ' ------------------------------------------------------------------------',ch10
      end if
-     call wrtout(nunit,msg,'COLL')
+     call wrtout(units,msg)
 
      if(cplex==1) then
        write(msg, '(a,e16.8)') '     n^(1)    = ', rho_tot
      else
        write(msg, '(a,e16.8,a,e16.8)') '  Re[n^(1)] = ', rho_tot,"   Im[n^(1)] = ",rho_tot_im
      end if
-     call wrtout(nunit,msg,'COLL')
+     call wrtout(units,msg)
 
      if(nspden==2) then
 
@@ -2200,28 +2205,28 @@ real(dp),intent(in),optional :: ziontypat(ntypat)
        else
          write(msg, '(a,e16.8,a,e16.8)') '  Re[m^(1)] = ', mag_coll,"   Im[m^(1)] = ",mag_coll_im
        end if
-       call wrtout(nunit,msg,'COLL')
+       call wrtout(units,msg)
 
      elseif (nspden==4) then
        if(cplex==1) then
          write(msg, '(a,e16.8)') '     mx^(1)   = ', mag_x
-         call wrtout(nunit,msg,'COLL')
+         call wrtout(units,msg)
          write(msg, '(a,e16.8)') '     my^(1)   = ', mag_y
-         call wrtout(nunit,msg,'COLL')
+         call wrtout(units,msg)
          write(msg, '(a,e16.8)') '     mz^(1)   = ', mag_z
-         call wrtout(nunit,msg,'COLL')
+         call wrtout(units,msg)
        else
          write(msg, '(a,e16.8,a,e16.8)') '  Re[mx^(1)]= ',  mag_x, "   Im[mx^(1)]= ", mag_x_im
-         call wrtout(nunit,msg,'COLL')
+         call wrtout(units,msg)
          write(msg, '(a,e16.8,a,e16.8)') '  Re[my^(1)]= ',  mag_y, "   Im[my^(1)]= ", mag_y_im
-         call wrtout(nunit,msg,'COLL')
+         call wrtout(units,msg)
          write(msg, '(a,e16.8,a,e16.8)') '  Re[mz^(1)]= ',  mag_z, "   Im[mz^(1)]= ", mag_z_im
-         call wrtout(nunit,msg,'COLL')
+         call wrtout(units,msg)
        end if
      end if
 
      write(msg, '(3a)') ch10,' ------------------------------------------------------------------------',ch10
-     call wrtout(nunit,msg,'COLL')
+     call wrtout(units,msg)
 
    end if
 
@@ -2344,24 +2349,6 @@ subroutine printmagvtk(mpi_enreg,cplex,nspden,nfft,ngfft,rhor,rprimd,fname)
 
 
 ! *************************************************************************
-
- DBG_ENTER("COLL")
-
-! if (option/=1 .and. option/=2 ) then
-!   write(msg,'(3a,i0)')&
-!&   'The argument option should be 1 or 2,',ch10,&
-!&   'however, option=',option
-!   ABI_BUG(msg)
-! end if
-!
-! if (sizein<1) then
-!   write(msg,'(3a,i0)')&
-!&   'The argument sizein should be a positive number,',ch10,&
-!&   'however, sizein=',sizein
-!   ABI_ERROR(msg)
-! end if
-
- DBG_EXIT("COLL")
 
  fname_vtk=adjustl(adjustr(fname)//".vtk")
  fname_xyz=adjustl(adjustr(fname)//".xyz")

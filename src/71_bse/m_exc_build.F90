@@ -3,11 +3,11 @@
 !!  m_exc_build
 !!
 !! FUNCTION
-!!  Build BSE Hamiltonian in e-h reprensentation.
+!!  Build the BSE Hamiltonian in the e-h representation with MPI
 !!
 !! COPYRIGHT
 !!  Copyright (C) 1992-2009 EXC group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida)
-!!  Copyright (C) 2009-2022 ABINIT group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, M.Giantomassi)
+!!  Copyright (C) 2009-2024 ABINIT group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, M.Giantomassi)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -85,7 +85,7 @@ contains
 !!  Gsph_x<gsphere_t>=Info on the G-sphere used to describe wavefunctions and W (the largest one is actually stored).
 !!  Gsph_c<gsphere_t>=Info on the G-sphere used to describe the correlation part.
 !!  Vcp<vcoul_t>=The Coulomb interaction in reciprocal space. A cutoff can be used
-!!  W<screen_t>=Data type gathering info and data for W.
+!!  screen<screen_t>=Data type gathering info and data for W.
 !!  nfftot_osc=Total Number of FFT points used for the oscillator matrix elements.
 !!  ngfft_osc(18)=Info on the FFT algorithm used to calculate the oscillator matrix elements.
 !!  Psps<Pseudopotential_type>=Variables related to pseudopotentials
@@ -148,8 +148,8 @@ contains
 !!
 !! SOURCE
 
-subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,Hdr_bse,&
-&  nfftot_osc,ngfft_osc,Psps,Pawtab,Pawang,Paw_pwff,rhxtwg_q0,is_resonant,fname)
+subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,screen,Hdr_bse,&
+                           nfftot_osc,ngfft_osc,Psps,Pawtab,Pawang,Paw_pwff,rhxtwg_q0,is_resonant,fname)
 
 !Arguments ------------------------------------
 !scalars
@@ -157,7 +157,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
  character(len=*),intent(in) :: fname
  logical,intent(in) :: is_resonant
  type(excparam),intent(in) :: BSp
- type(screen_t),intent(inout) :: W
+ type(screen_t),intent(inout) :: screen
  type(kmesh_t),intent(in) :: Kmesh,Qmesh
  type(crystal_t),intent(in) :: Cryst
  type(vcoul_t),intent(in) :: Vcp
@@ -658,9 +658,9 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
          is_qeq0 = (normv(qbz,Cryst%gmet,'G')<GW_TOLQ0)
 
          ! Symmetrize em1(omega=0)
-         call screen_symmetrizer(W,iq_bz,Cryst,Gsph_c,Qmesh,Vcp)
-         !
-         ! * Set up table of |q_BZ+G|
+         call screen%rotate_iqbz(iq_bz, Cryst, Gsph_c, Qmesh, Vcp)
+
+         ! Set up table of |q_BZ+G|
          if (iq_ibz==1) then
            do ig=1,npweps
              isg = Gsph_c%rottb(ig,itim_q,isym_q)
@@ -681,7 +681,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
          end if
 
          ! =======================================
-         ! === Loop over the four band indeces ===
+         ! === Loop over the four band indices ===
          ! =======================================
          do ic=bidx(1,2),bidx(2,2) !do ic=BSp%lumo,BSp%nbnds
 
@@ -741,8 +741,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
                  dim_rtwg,rhxtwg_cpc)
 
                if (Wfd%usepaw==1) then ! Add PAW onsite contribution.
-                 call paw_rho_tw_g(npweps,dim_rtwg,nspinor,Cryst%natom,Cryst%ntypat,Cryst%typat,Cryst%xred,Gsph_c%gvec,&
-                  Cp_ckp,Cp_ck,Pwij_q,rhxtwg_cpc)
+                 call paw_rho_tw_g(cryst,Pwij_q,npweps,dim_rtwg,nspinor,Gsph_c%gvec, Cp_ckp,Cp_ck,rhxtwg_cpc)
                end if
              end if
 
@@ -766,20 +765,20 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
                end if
 
                ! MG TODO: a does not require a call to w0gemv
-               call screen_w0gemv(W,"C",npweps,nspinor,w_is_diagonal,cone_gw,czero_gw,aa_cpc,aa_ctccp)
-               call screen_w0gemv(W,"C",npweps,nspinor,w_is_diagonal,cone_gw,czero_gw,bb_cpc1,bb_ctccp1)
-               call screen_w0gemv(W,"C",npweps,nspinor,w_is_diagonal,cone_gw,czero_gw,bb_cpc2,bb_ctccp2)
+               call screen%w0gemv("C",npweps,nspinor,w_is_diagonal,cone_gw,czero_gw,aa_cpc,aa_ctccp)
+               call screen%w0gemv("C",npweps,nspinor,w_is_diagonal,cone_gw,czero_gw,bb_cpc1,bb_ctccp1)
+               call screen%w0gemv("C",npweps,nspinor,w_is_diagonal,cone_gw,czero_gw,bb_cpc2,bb_ctccp2)
 
                cc_cpc = vc_sqrt_qbz*rhxtwg_cpc
                cc_cpc(1) = czero
 
-               call screen_w0gemv(W,"C",npweps,nspinor,w_is_diagonal,cone_gw,czero_gw,cc_cpc,cc_ctccp)
+               call screen%w0gemv("C",npweps,nspinor,w_is_diagonal,cone_gw,czero_gw,cc_cpc,cc_ctccp)
              end if
 
              ! Prepare sum_GG' rho_c'c*(G) W_qbz(G,G') rho_v'v(G')
              ! First sum on G: sum_G rho_c'c(G) W_qbz*(G,G') (W_qbz conjugated)
              rhxtwg_cpc = rhxtwg_cpc * vc_sqrt_qbz
-             call screen_w0gemv(W,"C",npweps,nspinor,w_is_diagonal,cone_gw,czero_gw,rhxtwg_cpc,ctccp)
+             call screen%w0gemv("C",npweps,nspinor,w_is_diagonal,cone_gw,czero_gw,rhxtwg_cpc,ctccp)
 
              do iv=bidx(1,1),bidx(2,1)    !do iv=BSp%lomo,BSp%homo
                it = BSp%vcks2t(iv,ic,ik_bz,spin1); if (it==0) CYCLE ! ir-uv-cutoff
@@ -811,14 +810,14 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
 
                  if (is_resonant) then
                    itp = BSp%vcks2t(ivp,icp,ikp_bz,spin2)
-                 else ! have to exchange band indeces
+                 else ! have to exchange band indices
                    itp = BSp%vcks2t(icp,ivp,ikp_bz,spin2)
                  end if
 
                  if (itp==0) CYCLE ! ir-uv-cutoff
 
                  ! FIXME Temporary work around, when ikp_bz == ik it might happen that itp<it
-                 ! should rewrite the loops using contracted k-dependent indeces for bands
+                 ! should rewrite the loops using contracted k-dependent indices for bands
                  if (itp<it) CYCLE
 
                  ir = it + itp*(itp-1)/2
@@ -863,8 +862,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
                      dim_rtwg,rhxtwg_vpv)
 
                    if (Wfd%usepaw==1) then ! Add PAW onsite contribution.
-                     call paw_rho_tw_g(npweps,dim_rtwg,nspinor,Cryst%natom,Cryst%ntypat,Cryst%typat,Cryst%xred,&
-                       Gsph_c%gvec,Cp_vkp,Cp_vk,Pwij_q,rhxtwg_vpv)
+                     call paw_rho_tw_g(cryst,Pwij_q,npweps,dim_rtwg,nspinor,Gsph_c%gvec,Cp_vkp,Cp_vk,rhxtwg_vpv)
                    end if
                  end if
 
@@ -2063,8 +2061,8 @@ end subroutine exc_build_v
 !!  exc_build_ham
 !!
 !! FUNCTION
-!!  Calculate and write the excitonic Hamiltonian on an external binary file (Fortran file open
-!!  in random mode) for subsequent treatment in the Bethe-Salpeter code.
+!!  Calculate and write the excitonic Hamiltonian on an external binary file (Fortran binary file)
+!!  for subsequent treatment in the Bethe-Salpeter code.
 !!
 !! INPUTS
 !!  BSp<excparam>=The parameters for the Bethe-Salpeter calculation.
@@ -2077,7 +2075,7 @@ end subroutine exc_build_v
 !!  Gsph_x<gsphere_t>=Info on the G-sphere used to describe wavefunctions and W (the largest one is actually stored).
 !!  Gsph_c<gsphere_t>=Info on the G-sphere used to describe the correlation part.
 !!  Vcp<vcoul_t>=The Coulomb interaction in reciprocal space. A cutoff can be used
-!!  W<screen_t>=Data type gathering info and data for W.
+!!  screen<screen_t>=Data type gathering info and data for W.
 !!  nfftot_osc=Total Number of FFT points used for the oscillator matrix elements.
 !!  ngfft_osc(18)=Info on the FFT algorithm used to calculate the oscillator matrix elements.
 !!  Psps<Pseudopotential_type>=Variables related to pseudopotentials
@@ -2092,14 +2090,14 @@ end subroutine exc_build_v
 !! SOURCE
 
 subroutine exc_build_ham(BSp,BS_files,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,&
-& Wfd,W,Hdr_bse,nfftot_osc,ngfft_osc,Psps,Pawtab,Pawang,Paw_pwff)
+                         Wfd,screen,Hdr_bse,nfftot_osc,ngfft_osc,Psps,Pawtab,Pawang,Paw_pwff)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfftot_osc
  type(excparam),intent(in) :: BSp
  type(excfiles),intent(in) :: BS_files
- type(screen_t),intent(inout) :: W
+ type(screen_t),intent(inout) :: screen
  type(kmesh_t),intent(in) :: Kmesh,Qmesh
  type(crystal_t),intent(in) :: Cryst
  type(vcoul_t),intent(in) :: Vcp
@@ -2154,7 +2152,7 @@ subroutine exc_build_ham(BSp,BS_files,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,
  call wrtout(std_out," Calculating all matrix elements for q=0 to save CPU time")
 
  call wfd_all_mgq0(Wfd,Cryst,Qmesh,Gsph_x,Vcp,Psps,Pawtab,Paw_pwff,&
-&  Bsp%lomo_spin,Bsp%homo_spin,Bsp%humo_spin,nfftot_osc,ngfft_osc,Bsp%npweps,all_mgq0)
+                   Bsp%lomo_spin,Bsp%homo_spin,Bsp%humo_spin,nfftot_osc,ngfft_osc,Bsp%npweps,all_mgq0)
 
  ! ========================
  ! ==== Resonant Block ====
@@ -2162,7 +2160,7 @@ subroutine exc_build_ham(BSp,BS_files,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,
  if (do_resonant) then
    call timab(672,1,tsec)
    call exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,&
-&    Wfd,W,Hdr_bse,nfftot_osc,ngfft_osc,Psps,Pawtab,Pawang,Paw_pwff,all_mgq0,.TRUE.,BS_files%out_hreso)
+                        Wfd,screen,Hdr_bse,nfftot_osc,ngfft_osc,Psps,Pawtab,Pawang,Paw_pwff,all_mgq0,.TRUE.,BS_files%out_hreso)
    call timab(672,2,tsec)
  end if
 
@@ -2172,7 +2170,7 @@ subroutine exc_build_ham(BSp,BS_files,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,
  if (do_coupling.and.BSp%use_coupling>0) then
    call timab(673,1,tsec)
    call exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,&
-&    Wfd,W,Hdr_bse,nfftot_osc,ngfft_osc,Psps,Pawtab,Pawang,Paw_pwff,all_mgq0,.FALSE.,BS_files%out_hcoup)
+                        Wfd,screen,Hdr_bse,nfftot_osc,ngfft_osc,Psps,Pawtab,Pawang,Paw_pwff,all_mgq0,.FALSE.,BS_files%out_hcoup)
    call timab(673,2,tsec)
  end if
 
@@ -2384,8 +2382,7 @@ subroutine wfd_all_mgq0(Wfd,Cryst,Qmesh,Gsph_x,Vcp,&
 
          if (Wfd%usepaw==1) then
            ! Add PAW onsite contribution.
-           call paw_rho_tw_g(npweps,dim_rtwg1,Wfd%nspinor,Cryst%natom,Cryst%ntypat,Cryst%typat,Cryst%xred,Gsph_x%gvec,&
-             Cp1,Cp2,Pwij_q0,rhotwg1)
+           call paw_rho_tw_g(cryst,Pwij_q0,npweps,dim_rtwg1,Wfd%nspinor,Gsph_x%gvec,Cp1,Cp2,rhotwg1)
          end if
 
          ! If q=0 treat Exchange and Coulomb-term independently

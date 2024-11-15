@@ -38,6 +38,7 @@
  pp_dirpath "$ABI_PSPDIR"
  pseudos "6c_lda.paw"
 
+# This test is disabled on eos_nvhpc_23.1_elpa, because of erratic problems, either numerical or seg fault. However it passes correctly on eos_nvhpc_23.9_elpa !
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit

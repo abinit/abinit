@@ -1,8 +1,8 @@
 
-.Version 9.11.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2022 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Jul 2023.
-- ( at 12h02 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h10 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v5_t71/t71.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v5_t71/t71.abi
 - output file    -> t71.abo
 - root for input  files -> t71i
 - root for output files -> t71o
@@ -74,10 +74,10 @@ _ WF disk file :      3.322 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -89,7 +89,7 @@ _ WF disk file :      3.322 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
           ecuteps      3.00000000E+00 Hartree
          ecutsigx      3.00000000E+00 Hartree
           ecutwfn      1.20000000E+01 Hartree
--          fftalg         312
+-          fftalg         512
         freqremax1     0.00000000E+00 Hartree
         freqremax2     9.18733135E-01 Hartree
         freqremax3     0.00000000E+00 Hartree
@@ -291,8 +291,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     12.000   => boxcut(ratio)=   2.13033
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -328,9 +328,9 @@ tolerances: {tolwfr: 1.00E-10, }
  ETOT  3  -8.8741696717161    -7.136E-05 1.607E-05 5.744E-03
  ETOT  4  -8.8741707263132    -1.055E-06 9.814E-07 2.457E-05
  ETOT  5  -8.8741707320560    -5.743E-09 6.524E-08 1.327E-08
- ETOT  6  -8.8741707320573    -1.304E-12 4.185E-09 4.716E-11
- ETOT  7  -8.8741707320574    -9.237E-14 2.973E-10 4.917E-13
- ETOT  8  -8.8741707320575    -4.441E-14 9.859E-11 9.234E-16
+ ETOT  6  -8.8741707320573    -1.283E-12 4.185E-09 4.716E-11
+ ETOT  7  -8.8741707320574    -1.048E-13 2.973E-10 4.917E-13
+ ETOT  8  -8.8741707320575    -4.796E-14 9.859E-11 9.234E-16
 
  At SCF step    8   max residual=  9.86E-11 < tolwfr=  1.00E-10 =>converged.
 
@@ -350,7 +350,7 @@ lattice_vectors:
 lattice_lengths: [   7.22451,    7.22451,    7.22451, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.6663072E+02
-convergence: {deltae: -4.441E-14, res2:  9.234E-16, residm:  9.859E-11, diffor: null, }
+convergence: {deltae: -4.796E-14, res2:  9.234E-16, residm:  9.859E-11, diffor: null, }
 etotal    :  -8.87417073E+00
 entropy   :   0.00000000E+00
 fermie    :   2.17029936E-01
@@ -417,16 +417,16 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  3.03041979428515E+00
-hartree             :  5.40895715022569E-01
+kinetic             :  3.03041979428516E+00
+hartree             :  5.40895715022568E-01
 xc                  : -3.53997188834834E+00
 Ewald energy        : -8.43581958561899E+00
 psp_core            :  8.60437873155177E-02
-local_psp           : -2.43551034532150E+00
+local_psp           : -2.43551034532151E+00
 non_local_psp       :  1.87977179060811E+00
-total_energy        : -8.87417073205748E+00
+total_energy        : -8.87417073205747E+00
 total_energy_eV     : -2.41478466229193E+02
-band_energy         :  2.32173132893573E-01
+band_energy         :  2.32173132893571E-01
 ...
 
 
@@ -831,19 +831,19 @@ meta: {optdriver: 3, gwcalctyp: 2, }
    Upper and lower wings at the   16 th omega   0.0000   3.2716 [eV]
        1       2       3       4       5       6       7       8       9
       0.091   0.006  -0.006  -0.019   0.019   0.019  -0.019  -0.006   0.006
-     -0.000   0.006   0.006  -0.019  -0.019   0.019   0.019  -0.006  -0.006
+      0.000   0.006   0.006  -0.019  -0.019   0.019   0.019  -0.006  -0.006
        1       2       3       4       5       6       7       8       9
       0.091   0.006  -0.006  -0.019   0.019   0.019  -0.019  -0.006   0.006
-     -0.000  -0.006  -0.006   0.019   0.019  -0.019  -0.019   0.006   0.006
+      0.000  -0.006  -0.006   0.019   0.019  -0.019  -0.019   0.006   0.006
 
 
    Upper and lower wings at the   17 th omega   0.0000   8.4649 [eV]
        1       2       3       4       5       6       7       8       9
       0.238   0.009  -0.009  -0.026   0.026   0.026  -0.026  -0.009   0.009
-     -0.000   0.009   0.009  -0.026  -0.026   0.026   0.026  -0.009  -0.009
+      0.000   0.009   0.009  -0.026  -0.026   0.026   0.026  -0.009  -0.009
        1       2       3       4       5       6       7       8       9
       0.238   0.009  -0.009  -0.026   0.026   0.026  -0.026  -0.009   0.009
-     -0.000  -0.009  -0.009   0.026   0.026  -0.026  -0.026   0.009   0.009
+      0.000  -0.009  -0.009   0.026   0.026  -0.026  -0.026   0.009   0.009
 
 
    Upper and lower wings at the   18 th omega   0.0000  16.7088 [eV]
@@ -1518,7 +1518,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
     1 -15.942  -2.423   1.334  -1.763  -2.879  -1.763  -2.879  -2.491  -1.889
        -0.000  -2.423  -1.334  -1.763   2.879  -1.763   2.879  -2.491   1.889
 
-    2  -2.423 -13.921   0.000  -0.035  -0.000  -0.036  -0.000   0.022  -0.000
+    2  -2.423 -13.921   0.000  -0.035  -0.000  -0.036   0.000   0.022  -0.000
         2.423  -0.000  -3.137  -0.000   0.329  -0.000   0.327   0.000  -0.007
 
   chi0(G,G') at the    2 th omega   1.7857   0.0000 [eV]
@@ -1564,7 +1564,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
   chi0(G,G') at the    7 th omega  10.7143   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1   6.395   2.893   3.084   4.825  -5.068   4.825  -5.067   4.345  -3.100
-      -18.732  -6.226   3.002   1.218  -1.650   1.218  -1.651  -2.023  -7.267
+      -18.732  -6.225   3.002   1.218  -1.650   1.218  -1.651  -2.023  -7.267
 
     2  -6.226 -12.519   6.042   0.993  -0.651   0.993  -0.651  -1.085  -2.120
        -2.893 -11.071  -3.105  -0.647   0.407  -0.647   0.405  -0.497  -0.870
@@ -2662,7 +2662,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
        -0.000  -1.486   2.791  -3.064   2.759  -2.759   3.064  -2.791   1.486
 
     2  -1.486 -19.098  -0.000  -0.238  -0.000   0.796  -0.000  -0.273  -0.000
-        1.486  -0.000  -1.997  -0.000   0.000   0.000   0.226   0.000   0.000
+        1.486  -0.000  -1.997  -0.000   0.000   0.000   0.226  -0.000   0.000
 
   chi0(G,G') at the    2 th omega   1.7857   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
@@ -3009,7 +3009,7 @@ data: !SigmaeeData |
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         312
+-          fftalg         512
         freqremax1     0.00000000E+00 Hartree
         freqremax2     9.18733135E-01 Hartree
         freqremax3     0.00000000E+00 Hartree
@@ -3269,10 +3269,10 @@ P           mkmem          16
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         43.2  wall=         43.3
+- Proc.   0 individual time (sec): cpu=         21.4  wall=         21.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered   2 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         43.2  wall=         43.3
++Overall time at end (sec) : cpu=         21.4  wall=         21.5

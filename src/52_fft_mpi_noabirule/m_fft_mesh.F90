@@ -8,7 +8,7 @@
 !!  operations of the space group etc.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2022 ABINIT group (MG, XG, GMR, VO, LR, RWG, YMN, RS, TR, DC)
+!! Copyright (C) 2008-2024 ABINIT group (MG, XG, GMR, VO, LR, RWG, YMN, RS, TR, DC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -49,7 +49,7 @@ MODULE m_fft_mesh
  public :: cigfft              ! Calculate the FFT index of G-G0.
  public :: ig2gfft             ! Returns the component of a G in the FFT Box from its sequential index.
  public :: g2ifft              ! Returns the index of the G in the FFT box from its reduced coordinates.
- public :: get_gftt            ! Calculate the G"s in the FFT box from ngfft
+ public :: get_gfft            ! Calculate the G-vectors in the FFT box from ngfft.
  public :: calc_ceigr          ! e^{iG.r} on the FFT mesh (complex valued).
  public :: calc_eigr           ! e^{iG.r} on the FFT mesh (version for real array with RE,IM).
  public :: calc_ceikr          ! e^{ik.r} on the FFT mesh (complex valued).
@@ -58,6 +58,7 @@ MODULE m_fft_mesh
  public :: ctimes_eikr         ! Version for complex array
  public :: phase               ! Compute ph(ig)=$\exp(\pi\ i \ n/ngfft)$ for n=0,...,ngfft/2,-ngfft/2+1,...,-1
  public :: mkgrid_fft          ! Sets the grid of fft (or real space) points to be treated.
+ public :: supercell_fft
 
  interface calc_ceigr
    module procedure calc_ceigr_spc
@@ -1027,7 +1028,7 @@ end subroutine cigfft
 !!
 !! SOURCE
 
-elemental integer function ig2gfft(ig,ng) result (gc)
+elemental integer function ig2gfft(ig, ng) result (gc)
 
 !Arguments ------------------------------------
 !scalars
@@ -1106,9 +1107,9 @@ end function g2ifft
 
 !----------------------------------------------------------------------
 
-!!****f* m_fft_mesh/get_gftt
+!!****f* m_fft_mesh/get_gfft
 !! NAME
-!!  get_gftt
+!!  get_gfft
 !!
 !! FUNCTION
 !!  Returns the set of G-vectors in the FFT mesh and the maximal kinetic energy of k+G.
@@ -1124,7 +1125,7 @@ end function g2ifft
 !!
 !! SOURCE
 
-pure subroutine get_gftt(ngfft, kpt, gmet, gsq_max, gfft)
+pure subroutine get_gfft(ngfft, kpt, gmet, gsq_max, gfft)
 
 !Arguments ------------------------------------
 !scalars
@@ -1132,7 +1133,7 @@ pure subroutine get_gftt(ngfft, kpt, gmet, gsq_max, gfft)
 !arrays
  integer,intent(in) :: ngfft(18)
  integer,intent(out) :: gfft(3,ngfft(1)*ngfft(2)*ngfft(3))
- real(dp),intent(in) :: kpt(3),gmet(3,3)
+ real(dp),intent(in) :: kpt(3), gmet(3,3)
 
 !Local variables-------------------------------
 !scalars
@@ -1149,9 +1150,7 @@ pure subroutine get_gftt(ngfft, kpt, gmet, gsq_max, gfft)
      do i1=1,ngfft(1)
        g1 = ig2gfft(i1,ngfft(1))
        ifft = ifft+1
-       gfft(1,ifft) = g1
-       gfft(2,ifft) = g2
-       gfft(3,ifft) = g3
+       gfft(:,ifft) = [g1, g2, g3]
        dsq=gmet(1,1)*(kpt(1)+dble(i1))**2 &
         +gmet(2,2)*(kpt(2)+dble(i2))**2 &
         +gmet(3,3)*(kpt(3)+dble(i3))**2 &
@@ -1163,7 +1162,7 @@ pure subroutine get_gftt(ngfft, kpt, gmet, gsq_max, gfft)
    end do
  end do
 
-end subroutine get_gftt
+end subroutine get_gfft
 !!***
 
 !----------------------------------------------------------------------
@@ -1724,6 +1723,64 @@ subroutine mkgrid_fft(ffti3_local,fftn3_distrib,gridcart,nfft,ngfft,rprimd)
 
 end subroutine mkgrid_fft
 !!***
+
+!!****f* ABINIT/supercell_fft
+!! NAME
+!!  supercell_fft
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!  ncells(3)= Number of cells along the three reduced directions
+!!
+!! OUTPUT
+!! sc_nfft=The total number of points in the supercell.
+!! sc2uc(sc_fft): The image of the point in the small box.
+!! scred(3,sc_nfft): The reduced coordinates of the point in the supercell in terms of rprimd.
+!!
+!! SOURCE
+
+subroutine supercell_fft(ncells, ngfft, sc_nfft, sc_ngfft, sc2uc, scred)
+
+!Arguments ------------------------------------
+ integer,intent(in) :: ncells(3), ngfft(18)
+ integer,intent(out) :: sc_nfft, sc_ngfft(18)
+ integer,allocatable,intent(out) :: sc2uc(:)
+ real(dp),allocatable,intent(out) :: scred(:,:)
+
+!Local variables-------------------------------
+ integer :: irc, ir1, ir2, ir3, wp1, wp2, wp3, wp_idx
+! *************************************************************************
+
+ sc_ngfft = ngfft
+ sc_ngfft(1:3) = ncells(1:3) * ngfft(1:3)
+ sc_ngfft(4:6) = sc_ngfft(1:3)
+ !sc_ngfft(4) = 2*(sc_ngfft(1)/2)+1
+ !sc_ngfft(5) = 2*(sc_ngfft(2)/2)+1
+ !sc_ngfft(6) = sc_ngfft(3)
+ sc_nfft = product(sc_ngfft(1:3)) ! Total number of points in the supercell
+
+ ABI_MALLOC(sc2uc, (sc_nfft))
+ ABI_MALLOC(scred, (3, sc_nfft))
+
+ irc = 0
+ do ir3=0,sc_ngfft(3)-1 ! Loop over the points in the supercell.
+   do ir2=0,sc_ngfft(2)-1
+     do ir1=0,sc_ngfft(1)-1
+       irc = 1+irc
+       wp1=MODULO(ir1, ngfft(1)) ! The FFT index of the point wrapped into the unit cell.
+       wp2=MODULO(ir2, ngfft(2))
+       wp3=MODULO(ir3, ngfft(3))
+       wp_idx = 1 + wp1 + wp2*ngfft(1) + wp3*ngfft(1)*ngfft(2)
+       sc2uc(irc)  = wp_idx
+       scred(1,irc) = DBLE(ir1)/ngfft(1) ! Reduced coordinates in terms of the unit cell lattice vectors
+       scred(2,irc) = DBLE(ir2)/ngfft(2)
+       scred(3,irc) = DBLE(ir3)/ngfft(3)
+     end do
+   end do
+ end do
+
+end subroutine supercell_fft
 
 END MODULE m_fft_mesh
 !!***

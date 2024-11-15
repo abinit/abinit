@@ -1,4 +1,4 @@
-## Copyright (C) 2019-2022 ABINIT group (Yann Pouillon)
+## Copyright (C) 2019-2024 ABINIT group (Yann Pouillon)
 
 #
 # LibPAW Projector-Augmented Waves library
@@ -83,12 +83,13 @@ AC_DEFUN([SD_LIBPAW_INIT], [
   # Declare environment variables
   AC_ARG_VAR([LIBPAW_CPPFLAGS], [C preprocessing flags for LibPAW.])
   AC_ARG_VAR([LIBPAW_FCFLAGS], [Fortran flags for LibPAW.])
+  AC_ARG_VAR([LIBPAW_FFLAGS], [Fortran flags for LibPAW (better use LIBPAW_FCFLAGS).])
   AC_ARG_VAR([LIBPAW_LDFLAGS], [Linker flags for LibPAW.])
   AC_ARG_VAR([LIBPAW_LIBS], [Library flags for LibPAW.])
 
   # Detect use of environment variables
   if test "${sd_libpaw_enable}" = "yes" -o "${sd_libpaw_enable}" = "auto"; then
-    tmp_libpaw_vars="${LIBPAW_CPPFLAGS}${LIBPAW_FCFLAGS}${LIBPAW_LDFLAGS}${LIBPAW_LIBS}"
+    tmp_libpaw_vars="${LIBPAW_CPPFLAGS}${LIBPAW_FFLAGS}${LIBPAW_FCFLAGS}${LIBPAW_LDFLAGS}${LIBPAW_LIBS}"
     if test "${sd_libpaw_init}" = "def" -a ! -z "${tmp_libpaw_vars}"; then
       sd_libpaw_enable="yes"
       sd_libpaw_init="env"
@@ -126,6 +127,7 @@ AC_DEFUN([SD_LIBPAW_INIT], [
         sd_libpaw_ldflags="${sd_libpaw_ldflags_def}"
         sd_libpaw_libs="${sd_libpaw_libs_def}"
         test ! -z "${LIBPAW_CPPFLAGS}" && sd_libpaw_cppflags="${LIBPAW_CPPFLAGS}"
+        test ! -z "${LIBPAW_FFLAGS}" && sd_libpaw_fcflags="${LIBPAW_FFLAGS}"
         test ! -z "${LIBPAW_FCFLAGS}" && sd_libpaw_fcflags="${LIBPAW_FCFLAGS}"
         test ! -z "${LIBPAW_LDFLAGS}" && sd_libpaw_ldflags="${LIBPAW_LDFLAGS}"
         test ! -z "${LIBPAW_LIBS}" && sd_libpaw_libs="${LIBPAW_LIBS}"
@@ -339,7 +341,7 @@ AC_DEFUN([_SD_LIBPAW_CHECK_CONFIG], [
   fi
 
   # Environment variables conflict with --with-* options
-  tmp_libpaw_vars="${LIBPAW_CPPFLAGS}${LIBPAW_FCFLAGS}${LIBPAW_LDFLAGS}${LIBPAW_LIBS}"
+  tmp_libpaw_vars="${LIBPAW_CPPFLAGS}${LIBPAW_FFLAGS}${LIBPAW_FCFLAGS}${LIBPAW_LDFLAGS}${LIBPAW_LIBS}"
   tmp_libpaw_invalid="no"
   if test ! -z "${tmp_libpaw_vars}" -a ! -z "${with_libpaw}"; then
     case "${sd_libpaw_policy}" in

@@ -14,14 +14,15 @@
 !!  at Trinity College Dublin, headed by Dr. David O'Regan.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2022 ABINIT group (LMac)
+!!  Copyright (C) 1998-2024 ABINIT group (LMac)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!  For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
-!!  -d <n> = Command line argument: highest degree of intended polynomial fits
+!!  Executed as ./lruj *LRUJ.nc FILE1 FILE2 FILE3 ... [--d 5] [--help] [--version]
+!!  --d <n> = Command line argument: highest degree of intended polynomial fits
 !!  *DS*_LRUJ.nc files = gives data from perturbative Abinit calculations
 !!
 !! OUTPUT
@@ -47,14 +48,15 @@ program lruj
  use m_crystal
  use netcdf
  use m_nctk
+ use m_yaml
 
- use m_fstrings,    only : itoa, sjoin, ltoa
- use m_specialmsg,  only : specialmsg_getcount, herald
+ use m_fstrings,      only : itoa, sjoin, ltoa
+ use m_specialmsg,    only : specialmsg_getcount, herald
  use m_numeric_tools, only : polynomial_regression
- use m_sort,        only : sort_dp
- use m_common,      only : crystal_from_file
- use m_mpinfo,      only : destroy_mpi_enreg, initmpi_seq
- use m_paw_uj,      only : pawuj_ini,pawuj_free,pawuj_det, macro_uj_type
+ use m_sort,          only : sort_dp
+ use m_common,        only : crystal_from_file
+ use m_mpinfo,        only : destroy_mpi_enreg, initmpi_seq
+ use m_paw_uj,        only : pawuj_ini,pawuj_free,pawuj_det, macro_uj_type
 
  implicit none
 
@@ -65,10 +67,11 @@ program lruj
  integer                            :: nproc,my_rank,comm
  logical                            :: iam_master
 
- integer                            :: ncid,nnat,prtvol,nargs,nfiles,ndtpawuj,degarg
+ integer                            :: ncid,nnat,natom,prtvol,nargs,nfiles,ndtpawuj,degarg
  integer                            :: ndata,nspden,macro_uj,pawujat,dmatpuopt
  integer                            :: degree,mdegree,ii,ipert
  real(dp)                           :: diem,ph0phiint,signum,Ha2eV !diemix, diemixmag,
+ type(yamldoc_t)                    :: ydoc
  !type(crystal_t)                    :: cryst
 
 !arrays
@@ -116,9 +119,6 @@ program lruj
 
 !##########################################################################################################
 !######################################  Read command line options  #######################################
-
- !Syntax: ./lruj  FILE1 FILE2 FILE3 ... [-d 5]
- !i.e. list of netcdf files come first, followed by options
 
  !Count arguments and number of files (= #perturbations)
  nargs = command_argument_count()
@@ -176,6 +176,7 @@ program lruj
    ABI_CHECK_IEQ(ndtpawuj, 4, "Wrong ndtpawuj")
    NCF_CHECK(nctk_get_dim(ncid, "nspden", nspden))
    NCF_CHECK(nctk_get_dim(ncid, "nnat", nnat))
+   NCF_CHECK(nctk_get_dim(ncid, "natom", natom))
    NCF_CHECK(nf90_close(ncid))
  end do
 
@@ -375,17 +376,33 @@ program lruj
  ABI_MALLOC(hubpar,(mdegree))
  ABI_MALLOC(hubparerr,(mdegree))
 
+!Start to write information in YAML format to plot with AbiPY
+ydoc = yamldoc_open('LRUJ_Abipy_Plots') !, width=11, real_fmt='(3f8.3)')
+call ydoc%add_int("natom",natom)
+call ydoc%add_int("ndata",ndata)
+call ydoc%add_int("pawujat",pawujat)
+call ydoc%add_int("macro_uj",macro_uj)
+call ydoc%add_string("diem_token",diem_token)
+call ydoc%add_real("diem",diem)
+
  !For all regressions, call subroutine to calculate polynomial fit for chi0 and chi.
  do degree=1,mdegree
    ABI_MALLOC(chi0coeffs,(degree+1))
    ABI_MALLOC(chicoeffs,(degree+1))
-   call polynomial_regression(ndata,perts,occs0,degree,chi0coeffs,chi0err(degree))
-   call polynomial_regression(ndata,perts,occs,degree,chicoeffs,chierr(degree))
+   call polynomial_regression(degree,ndata,perts,occs0,chi0coeffs,chi0err(degree))
+   call polynomial_regression(degree,ndata,perts,occs,chicoeffs,chierr(degree))
+
+   !YAML doc information on regression coefficients
+   write(message, '(a,i0)' ) 'chi0_coefficients_degree',degree
+   call ydoc%add_real1d(message,chi0coeffs)
+   write(message, '(a,i0)' ) 'chi_coefficients_degree',degree
+   call ydoc%add_real1d(message,chicoeffs)
+
    chi0(degree)=chi0coeffs(2)/diem         !The derivative of all polynomial regressions
    chi(degree)=chicoeffs(2)                !at pert=0.0 is just the second coefficient.
    chi0err(degree)=chi0err(degree)/diem    !Chi0 error divided by diem also.
    hubpar(degree)=signum*(1.0d0/chi0(degree)-1.0d0/chi(degree))
-   hubparerr(degree)=sqrt(chi0err(degree)/chi0(degree)**2+chierr(degree)/chi(degree)**2)
+   hubparerr(degree)=sqrt((chi0err(degree)/chi0(degree)**2)**2+(chierr(degree)/chi(degree)**2)**2)
    ABI_FREE(chi0coeffs)
    ABI_FREE(chicoeffs)
  end do
@@ -399,6 +416,8 @@ program lruj
  call wrtout(std_out,message)
  write(message,'(4a)') &
      '**************************************  Linear Response ',parname,'  **************************************',ch10
+ call wrtout(std_out,message)
+ write(message, '(a,i4)' ) ' Total number of atoms: ',natom
  call wrtout(std_out,message)
  write(message, '(a,i4)' ) ' Index of perturbed atom: ',pawujat
  call wrtout(std_out,message)
@@ -417,7 +436,11 @@ program lruj
 '    ',trim(pertname),' [eV]     Unscreened      Screened',ch10,&
 ' --------------- -----------------------------'
  call wrtout(std_out,message)
- do ipert=0,nfiles
+ do ipert=1,nfiles
+   if ((perts(ipert)>0.0d0).and.(perts(ipert-1)<0.0d0)) then
+     write(message, fmt='(3f15.10)') perts(0),occs0(0),occs(0)
+     call wrtout(std_out,message)
+   end if
    write(message, fmt='(3f15.10)') perts(ipert),occs0(ipert),occs(ipert)
    call wrtout(std_out,message)
  end do
@@ -475,6 +498,8 @@ program lruj
 
  !Ending herald.
  write(std_out,*) ch10,'Linear Response UJ (LRUJ) program complete. Live long and prosper. ~LMac',ch10
+
+ call ydoc%write_and_free(std_out)
 
  ! Writes information on file about the memory before ending mpi module, if memory profiling is enabled
  call abinit_doctor("__lruj")

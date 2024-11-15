@@ -1,8 +1,8 @@
 
-.Version 9.11.2 of ANADDB 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ANADDB, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2022 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Jul 2023.
-- ( at 11h59 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h08 )
   
 
 ================================================================================
@@ -128,7 +128,7 @@
 
  Calculation of the interatomic forces 
 
--begin at tcpu      0.034  and twall      0.045 sec
+-begin at tcpu      0.031  and twall      0.037 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :       32
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -705,8 +705,8 @@
   1.00000                   0.54742                   0.45258
  Transformation to local coordinates 
  First  local vector :        0.000000       -0.707107       -0.707107
- Second local vector :        0.000000       -0.707107        0.707107
- Third  local vector :       -1.000000       -0.000000        0.000000
+ Second local vector :       -0.000000       -0.707107        0.707107
+ Third  local vector :       -1.000000        0.000000       -0.000000
   -0.02325  0.00584  0.00000  -0.02406  0.01091  0.00000   0.00080 -0.00507  0.00000
   -0.00584  0.01039  0.00000  -0.01091  0.01376  0.00000   0.00507 -0.00337  0.00000
    0.00000  0.00000  0.00379   0.00000  0.00000  0.00533   0.00000  0.00000 -0.00154
@@ -789,8 +789,8 @@
   1.00000                   0.54742                   0.45258
  Transformation to local coordinates 
  First  local vector :       -0.707107        0.000000        0.707107
- Second local vector :       -0.707107        0.000000       -0.707107
- Third  local vector :       -0.000000       -1.000000       -0.000000
+ Second local vector :       -0.707107       -0.000000       -0.707107
+ Third  local vector :        0.000000       -1.000000        0.000000
   -0.02325  0.00584  0.00000  -0.02406  0.01091  0.00000   0.00080 -0.00507  0.00000
   -0.00584  0.01039  0.00000  -0.01091  0.01376  0.00000   0.00507 -0.00337  0.00000
    0.00000  0.00000  0.00379   0.00000  0.00000  0.00533   0.00000  0.00000 -0.00154
@@ -1092,14 +1092,14 @@
  the characters are given for each symmetry operation (see the list in the log file).
  Symmetry characters of vibration mode #   1
        degenerate with vibration modes #   2 to    3
+  3.0  0.0  0.0  1.0  1.0  1.0  1.0  0.0 -0.0 -1.0  1.0  1.0  1.0 -0.0  0.0  1.0
+  1.0 -1.0  1.0  0.0  0.0  1.0 -1.0  1.0 -3.0 -0.0 -0.0 -1.0 -1.0 -1.0 -1.0 -0.0
+  0.0  1.0 -1.0 -1.0 -1.0  0.0 -0.0 -1.0 -1.0  1.0 -1.0 -0.0 -0.0 -1.0  1.0 -1.0
+ Symmetry characters of vibration mode #   4
+       degenerate with vibration modes #   5 to    6
   3.0 -0.0 -0.0  1.0  1.0  1.0  1.0 -0.0  0.0 -1.0  1.0  1.0  1.0  0.0 -0.0  1.0
   1.0 -1.0  1.0 -0.0 -0.0  1.0 -1.0  1.0 -3.0  0.0  0.0 -1.0 -1.0 -1.0 -1.0  0.0
  -0.0  1.0 -1.0 -1.0 -1.0 -0.0  0.0 -1.0 -1.0  1.0 -1.0  0.0  0.0 -1.0  1.0 -1.0
- Symmetry characters of vibration mode #   4
-       degenerate with vibration modes #   5 to    6
-  3.0 -0.0 -0.0  1.0  1.0  1.0  1.0 -0.0 -0.0 -1.0  1.0  1.0  1.0 -0.0 -0.0  1.0
-  1.0 -1.0  1.0 -0.0 -0.0  1.0 -1.0  1.0 -3.0  0.0  0.0 -1.0 -1.0 -1.0 -1.0  0.0
-  0.0  1.0 -1.0 -1.0 -1.0  0.0  0.0 -1.0 -1.0  1.0 -1.0  0.0  0.0 -1.0  1.0 -1.0
  Symmetry characters of vibration mode #   7
        degenerate with vibration modes #   8 to    9
   3.0 -0.0 -0.0 -1.0 -1.0 -1.0  1.0 -0.0  0.0  1.0 -1.0 -1.0  1.0  0.0 -0.0 -1.0
@@ -1112,9 +1112,9 @@
   0.0  1.0 -1.0 -1.0 -1.0  0.0 -0.0 -1.0 -1.0  1.0 -1.0 -0.0 -0.0 -1.0  1.0 -1.0
  Symmetry characters of vibration mode #  13
        degenerate with vibration modes #  14 to   15
-  3.0  0.0  0.0  1.0  1.0  1.0  1.0 -0.0  0.0 -1.0  1.0  1.0  1.0  0.0  0.0  1.0
-  1.0 -1.0  1.0  0.0 -0.0  1.0 -1.0  1.0 -3.0 -0.0 -0.0 -1.0 -1.0 -1.0 -1.0  0.0
- -0.0  1.0 -1.0 -1.0 -1.0 -0.0 -0.0 -1.0 -1.0  1.0 -1.0 -0.0  0.0 -1.0  1.0 -1.0
+  3.0  0.0  0.0  1.0  1.0  1.0  1.0  0.0 -0.0 -1.0  1.0  1.0  1.0 -0.0  0.0  1.0
+  1.0 -1.0  1.0  0.0  0.0  1.0 -1.0  1.0 -3.0 -0.0 -0.0 -1.0 -1.0 -1.0 -1.0 -0.0
+  0.0  1.0 -1.0 -1.0 -1.0  0.0 -0.0 -1.0 -1.0  1.0 -1.0 -0.0 -0.0 -1.0  1.0 -1.0
 
   Phonon wavevector (reduced coordinates) :  0.50000  0.00000  0.00000
  Phonon energies in Hartree :
@@ -1226,6 +1226,6 @@
 
 ================================================================================
 
-+Total cpu time      0.315  and wall time      0.337 sec
++Total cpu time      0.251  and wall time      0.256 sec
 
  anaddb : the run completed succesfully.

@@ -1,6 +1,6 @@
 # -*- Python -*-
 #
-# Copyright (C) 2005-2022 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2024 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -18,10 +18,13 @@ ABI_SRC_DEP = 2     # The file depends on other files
 
 # Source files
 sources = [
+ "m_alloc_hamilt_gpu.F90",
  "m_cgprj.F90",
  "m_contract.F90",
  "m_fock.F90",
- #"m_hubbard.F90",
+ "m_gemm_nonlop_ompgpu.F90",
+ "m_gemm_nonlop_gpu.F90",
+ "m_gemm_nonlop_projectors.F90",
  "m_gemm_nonlop.F90",
  "m_hamiltonian.F90",
  "m_metstr.F90",
@@ -33,12 +36,17 @@ sources = [
  "m_nonlop_ylm.F90",
  "m_opernl.F90",
  "m_vkbr.F90",
+ "m_opernla_gemm.F90",
  "m_opernla_ylm.F90",
  "m_opernla_ylm_mv.F90",
+ "m_opernlb_gemm.F90",
  "m_opernlb_ylm.F90",
  "m_opernlb_ylm_mv.F90",
  "m_opernlc_ylm.F90",
+ "m_opernlc_ylm_allwf_cpu.F90",
+ "m_opernlc_ylm_ompgpu.F90",
  "m_opernld_ylm.F90",
+ "m_opernld_ylm_allwf.F90",
 ]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
 # This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.

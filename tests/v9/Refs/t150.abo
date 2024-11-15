@@ -1,8 +1,8 @@
 
-.Version 9.11.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2022 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Jul 2023.
-- ( at 12h13 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h17 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v9_t150/t150.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v9_t150/t150.abi
 - output file    -> t150.abo
 - root for input  files -> t150i
 - root for output files -> t150o
@@ -394,17 +394,17 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
             acell      7.0000000000E+00  5.0000000000E+00  5.0000000000E+00 Bohr
               amu      1.00794000E+00
              ecut      2.00000000E+00 Hartree
--          fftalg         312
+-          fftalg         512
            iatsph6       1    2
            iatsph8       1    2
            istwfk        2    0    3
@@ -881,8 +881,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
 -  Troullier-Martins psp for element  H         Thu Oct 27 17:28:54 EDT 1994
 -  1.00000   1.00000    940714                znucl, zion, pspdat
     1    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1005,8 +1005,8 @@ local_psp           : -1.06572939908127E+00
 non_local_psp       :  0.00000000000000E+00
 internal            : -1.11928683159805E+00
 '-kT*entropy'       : -2.97830492836179E-15
-total_energy        : -1.11928683159806E+00
-total_energy_eV     : -3.04573436240579E+01
+total_energy        : -1.11928683159805E+00
+total_energy_eV     : -3.04573436240578E+01
 band_energy         : -7.62447321375306E-01
 ...
 
@@ -1164,8 +1164,8 @@ local_psp           : -1.06572939908127E+00
 non_local_psp       :  0.00000000000000E+00
 internal            : -1.11928683159805E+00
 '-kT*entropy'       : -2.97830492836179E-15
-total_energy        : -1.11928683159806E+00
-total_energy_eV     : -3.04573436240579E+01
+total_energy        : -1.11928683159805E+00
+total_energy_eV     : -3.04573436240578E+01
 band_energy         : -7.62447321375306E-01
 ...
 
@@ -1323,8 +1323,8 @@ local_psp           : -1.06572939908127E+00
 non_local_psp       :  0.00000000000000E+00
 internal            : -1.11928683159805E+00
 '-kT*entropy'       : -2.97830492836179E-15
-total_energy        : -1.11928683159806E+00
-total_energy_eV     : -3.04573436240579E+01
+total_energy        : -1.11928683159805E+00
+total_energy_eV     : -3.04573436240578E+01
 band_energy         : -7.62447321375306E-01
 ...
 
@@ -1482,8 +1482,8 @@ local_psp           : -1.06572939908127E+00
 non_local_psp       :  0.00000000000000E+00
 internal            : -1.11928683159805E+00
 '-kT*entropy'       : -2.97830492836179E-15
-total_energy        : -1.11928683159806E+00
-total_energy_eV     : -3.04573436240579E+01
+total_energy        : -1.11928683159805E+00
+total_energy_eV     : -3.04573436240578E+01
 band_energy         : -7.62447321375306E-01
 ...
 
@@ -1641,8 +1641,8 @@ local_psp           : -1.06572939908127E+00
 non_local_psp       :  0.00000000000000E+00
 internal            : -1.11928683159805E+00
 '-kT*entropy'       : -2.97830492836179E-15
-total_energy        : -1.11928683159806E+00
-total_energy_eV     : -3.04573436240579E+01
+total_energy        : -1.11928683159805E+00
+total_energy_eV     : -3.04573436240578E+01
 band_energy         : -7.62447321375306E-01
 ...
 
@@ -1800,8 +1800,8 @@ local_psp           : -1.06572939908127E+00
 non_local_psp       :  0.00000000000000E+00
 internal            : -1.11928683159805E+00
 '-kT*entropy'       : -2.97830492836179E-15
-total_energy        : -1.11928683159806E+00
-total_energy_eV     : -3.04573436240579E+01
+total_energy        : -1.11928683159805E+00
+total_energy_eV     : -3.04573436240578E+01
 band_energy         : -7.62447321375306E-01
 ...
 
@@ -1959,8 +1959,8 @@ local_psp           : -1.06572939908127E+00
 non_local_psp       :  0.00000000000000E+00
 internal            : -1.11928683159805E+00
 '-kT*entropy'       : -2.97830492836179E-15
-total_energy        : -1.11928683159806E+00
-total_energy_eV     : -3.04573436240579E+01
+total_energy        : -1.11928683159805E+00
+total_energy_eV     : -3.04573436240578E+01
 band_energy         : -7.62447321375306E-01
 ...
 
@@ -2118,8 +2118,8 @@ local_psp           : -1.06572939908127E+00
 non_local_psp       :  0.00000000000000E+00
 internal            : -1.11928683159805E+00
 '-kT*entropy'       : -2.97830492836179E-15
-total_energy        : -1.11928683159806E+00
-total_energy_eV     : -3.04573436240579E+01
+total_energy        : -1.11928683159805E+00
+total_energy_eV     : -3.04573436240578E+01
 band_energy         : -7.62447321375306E-01
 ...
 
@@ -2277,8 +2277,8 @@ local_psp           : -1.06572939908127E+00
 non_local_psp       :  0.00000000000000E+00
 internal            : -1.11928683159805E+00
 '-kT*entropy'       : -2.97830492836179E-15
-total_energy        : -1.11928683159806E+00
-total_energy_eV     : -3.04573436240579E+01
+total_energy        : -1.11928683159805E+00
+total_energy_eV     : -3.04573436240578E+01
 band_energy         : -7.62447321375306E-01
 ...
 
@@ -2436,8 +2436,8 @@ local_psp           : -1.06572939908127E+00
 non_local_psp       :  0.00000000000000E+00
 internal            : -1.11928683159805E+00
 '-kT*entropy'       : -2.97830492836179E-15
-total_energy        : -1.11928683159806E+00
-total_energy_eV     : -3.04573436240579E+01
+total_energy        : -1.11928683159805E+00
+total_energy_eV     : -3.04573436240578E+01
 band_energy         : -7.62447321375306E-01
 ...
 
@@ -2596,8 +2596,8 @@ local_psp           : -1.06572939908127E+00
 non_local_psp       :  0.00000000000000E+00
 internal            : -1.11928683159805E+00
 '-kT*entropy'       : -2.97830492836179E-15
-total_energy        : -1.11928683159806E+00
-total_energy_eV     : -3.04573436240579E+01
+total_energy        : -1.11928683159805E+00
+total_energy_eV     : -3.04573436240578E+01
 band_energy         : -7.62447321375306E-01
 ...
 
@@ -2769,8 +2769,8 @@ local_psp           : -1.06572939908127E+00
 non_local_psp       :  0.00000000000000E+00
 internal            : -1.11928683159805E+00
 '-kT*entropy'       : -2.97830492836179E-15
-total_energy        : -1.11928683159806E+00
-total_energy_eV     : -3.04573436240579E+01
+total_energy        : -1.11928683159805E+00
+total_energy_eV     : -3.04573436240578E+01
 band_energy         : -7.62447321375306E-01
 ...
 
@@ -2958,8 +2958,8 @@ local_psp           : -1.06572939908127E+00
 non_local_psp       :  0.00000000000000E+00
 internal            : -1.11928683159805E+00
 '-kT*entropy'       : -2.97830492836179E-15
-total_energy        : -1.11928683159806E+00
-total_energy_eV     : -3.04573436240579E+01
+total_energy        : -1.11928683159805E+00
+total_energy_eV     : -3.04573436240578E+01
 band_energy         : -7.62447321375306E-01
 ...
 
@@ -3119,8 +3119,8 @@ local_psp           : -1.06572939908127E+00
 non_local_psp       :  0.00000000000000E+00
 internal            : -1.11928683159805E+00
 '-kT*entropy'       : -2.97830492836179E-15
-total_energy        : -1.11928683159806E+00
-total_energy_eV     : -3.04573436240579E+01
+total_energy        : -1.11928683159805E+00
+total_energy_eV     : -3.04573436240578E+01
 band_energy         : -7.62447321375306E-01
 ...
 
@@ -3278,8 +3278,8 @@ local_psp           : -1.06572939908127E+00
 non_local_psp       :  0.00000000000000E+00
 internal            : -1.11928683159805E+00
 '-kT*entropy'       : -2.97830492836179E-15
-total_energy        : -1.11928683159806E+00
-total_energy_eV     : -3.04573436240579E+01
+total_energy        : -1.11928683159805E+00
+total_energy_eV     : -3.04573436240578E+01
 band_energy         : -7.62447321375306E-01
 ...
 
@@ -3437,8 +3437,8 @@ local_psp           : -1.06572939908127E+00
 non_local_psp       :  0.00000000000000E+00
 internal            : -1.11928683159805E+00
 '-kT*entropy'       : -2.97830492836179E-15
-total_energy        : -1.11928683159806E+00
-total_energy_eV     : -3.04573436240579E+01
+total_energy        : -1.11928683159805E+00
+total_energy_eV     : -3.04573436240578E+01
 band_energy         : -7.62447321375306E-01
 ...
 
@@ -3596,8 +3596,8 @@ local_psp           : -1.06572939908127E+00
 non_local_psp       :  0.00000000000000E+00
 internal            : -1.11928683159805E+00
 '-kT*entropy'       : -2.97830492836179E-15
-total_energy        : -1.11928683159806E+00
-total_energy_eV     : -3.04573436240579E+01
+total_energy        : -1.11928683159805E+00
+total_energy_eV     : -3.04573436240578E+01
 band_energy         : -7.62447321375306E-01
 ...
 
@@ -3755,8 +3755,8 @@ local_psp           : -1.06572939908127E+00
 non_local_psp       :  0.00000000000000E+00
 internal            : -1.11928683159805E+00
 '-kT*entropy'       : -2.97830492836179E-15
-total_energy        : -1.11928683159806E+00
-total_energy_eV     : -3.04573436240579E+01
+total_energy        : -1.11928683159805E+00
+total_energy_eV     : -3.04573436240578E+01
 band_energy         : -7.62447321375306E-01
 ...
 
@@ -3914,8 +3914,8 @@ local_psp           : -1.06572939908127E+00
 non_local_psp       :  0.00000000000000E+00
 internal            : -1.11928683159805E+00
 '-kT*entropy'       : -2.97830492836179E-15
-total_energy        : -1.11928683159806E+00
-total_energy_eV     : -3.04573436240579E+01
+total_energy        : -1.11928683159805E+00
+total_energy_eV     : -3.04573436240578E+01
 band_energy         : -7.62447321375306E-01
 ...
 
@@ -4073,8 +4073,8 @@ local_psp           : -1.06572939908127E+00
 non_local_psp       :  0.00000000000000E+00
 internal            : -1.11928683159805E+00
 '-kT*entropy'       : -2.97830492836179E-15
-total_energy        : -1.11928683159806E+00
-total_energy_eV     : -3.04573436240579E+01
+total_energy        : -1.11928683159805E+00
+total_energy_eV     : -3.04573436240578E+01
 band_energy         : -7.62447321375306E-01
 ...
 
@@ -4232,8 +4232,8 @@ local_psp           : -1.06572939908127E+00
 non_local_psp       :  0.00000000000000E+00
 internal            : -1.11928683159805E+00
 '-kT*entropy'       : -2.97830492836179E-15
-total_energy        : -1.11928683159806E+00
-total_energy_eV     : -3.04573436240579E+01
+total_energy        : -1.11928683159805E+00
+total_energy_eV     : -3.04573436240578E+01
 band_energy         : -7.62447321375306E-01
 ...
 
@@ -4392,8 +4392,8 @@ local_psp           : -1.06572939908127E+00
 non_local_psp       :  0.00000000000000E+00
 internal            : -1.11928683159805E+00
 '-kT*entropy'       : -2.97830492836179E-15
-total_energy        : -1.11928683159806E+00
-total_energy_eV     : -3.04573436240579E+01
+total_energy        : -1.11928683159805E+00
+total_energy_eV     : -3.04573436240578E+01
 band_energy         : -7.62447321375306E-01
 ...
 
@@ -4551,8 +4551,8 @@ local_psp           : -1.06572939908127E+00
 non_local_psp       :  0.00000000000000E+00
 internal            : -1.11928683159805E+00
 '-kT*entropy'       : -2.97830492836179E-15
-total_energy        : -1.11928683159806E+00
-total_energy_eV     : -3.04573436240579E+01
+total_energy        : -1.11928683159805E+00
+total_energy_eV     : -3.04573436240578E+01
 band_energy         : -7.62447321375306E-01
 ...
 
@@ -4643,7 +4643,7 @@ band_energy         : -7.62447321375306E-01
                        1.7986549325E-01 -0.0000000000E+00 -0.0000000000E+00
             fcart23   -1.7986549325E-01 -0.0000000000E+00 -0.0000000000E+00
                        1.7986549325E-01 -0.0000000000E+00 -0.0000000000E+00
--          fftalg         312
+-          fftalg         512
            iatsph6       1    2
            iatsph8       1    2
            istwfk        2    0    3
@@ -5171,10 +5171,10 @@ P           mkmem           3
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          5.1  wall=          5.2
+- Proc.   0 individual time (sec): cpu=          3.7  wall=          3.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered 161 WARNINGs and 120 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          5.1  wall=          5.2
++Overall time at end (sec) : cpu=          3.7  wall=          3.7

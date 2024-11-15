@@ -1,8 +1,8 @@
 
-.Version 9.11.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2022 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Jul 2023.
-- ( at 11h49 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h01 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/fast_t26/t26.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/fast_t26/t26.abi
 - output file    -> t26.abo
 - root for input  files -> t26i
 - root for output files -> t26o
@@ -42,10 +42,10 @@ _ WF disk file :      0.105 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -54,7 +54,7 @@ _ WF disk file :      0.105 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
            diemac      1.20000000E+01
              ecut      1.00000000E+01 Hartree
            enunit           2
--          fftalg         312
+-          fftalg         512
             intxc           1
               kpt      1.00000000E+00  1.00000000E+00  1.00000000E+00
                        1.00000000E+00  2.00000000E+00  2.00000000E+00
@@ -133,8 +133,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/70yb.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/70yb.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/70yb.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/70yb.pspnc
 -  Troullier-Martins psp for element  Yb        Thu Oct 27 17:54:17 EDT 1994
 - 70.00000  16.00000    940714                znucl, zion, pspdat
     1    1    3    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -183,11 +183,11 @@ tolerances: {tolwfr: 1.00E-16, }
  ETOT 13  -71.100605325201    -3.097E-09 2.976E-09 6.450E-10
  ETOT 14  -71.100605326139    -9.384E-10 1.502E-10 9.522E-11
  ETOT 15  -71.100605326423    -2.834E-10 2.749E-10 1.124E-10
- ETOT 16  -71.100605326508    -8.579E-11 1.364E-11 2.807E-11
- ETOT 17  -71.100605326534    -2.598E-11 2.503E-11 5.086E-11
- ETOT 18  -71.100605326542    -7.276E-12 1.256E-12 1.919E-11
+ ETOT 16  -71.100605326508    -8.586E-11 1.364E-11 2.807E-11
+ ETOT 17  -71.100605326534    -2.588E-11 2.503E-11 5.086E-11
+ ETOT 18  -71.100605326542    -7.319E-12 1.256E-12 1.919E-11
  ETOT 19  -71.100605326544    -2.487E-12 2.309E-12 1.620E-11
- ETOT 20  -71.100605326545    -1.165E-12 1.130E-13 8.690E-12
+ ETOT 20  -71.100605326545    -1.123E-12 1.130E-13 8.690E-12
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  1.44325020E-03  sigma(3 2)=  0.00000000E+00
@@ -210,7 +210,7 @@ lattice_vectors:
 lattice_lengths: [   7.32421,    7.32421,    7.32421, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7782270E+02
-convergence: {deltae: -1.165E-12, res2:  8.690E-12, residm:  1.130E-13, diffor: null, }
+convergence: {deltae: -1.123E-12, res2:  8.690E-12, residm:  1.130E-13, diffor: null, }
 etotal    :  -7.11006053E+01
 entropy   :   0.00000000E+00
 fermie    :   2.26996841E-02
@@ -271,14 +271,14 @@ iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  2.38490555429976E+01
 hartree             :  1.39086302755887E+01
-xc                  : -8.79817256308245E+00
-Ewald energy        : -5.66578823601630E+01
+xc                  : -8.79817256308247E+00
+Ewald energy        : -5.66578823601629E+01
 psp_core            :  7.05072510163841E+00
-local_psp           : -3.03673360327670E+01
+local_psp           : -3.03673360327671E+01
 non_local_psp       : -2.00856252907575E+01
 total_energy        : -7.11006053265453E+01
-total_energy_eV     : -1.93474586421899E+03
-band_energy         : -9.14758625357383E+00
+total_energy_eV     : -1.93474586421898E+03
+band_energy         : -9.14758625357387E+00
 ...
 
 
@@ -303,7 +303,7 @@ band_energy         : -9.14758625357383E+00
            enunit           2
            etotal     -7.1100605327E+01
             fcart     -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
--          fftalg         312
+-          fftalg         512
             intxc           1
               kpt      1.00000000E+00  1.00000000E+00  1.00000000E+00
                        1.00000000E+00  2.00000000E+00  2.00000000E+00
@@ -438,10 +438,10 @@ P           mkmem           2
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          1.3  wall=          1.3
+- Proc.   0 individual time (sec): cpu=          0.7  wall=          0.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered  21 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.3  wall=          1.3
++Overall time at end (sec) : cpu=          0.7  wall=          0.7

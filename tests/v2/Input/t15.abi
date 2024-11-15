@@ -68,7 +68,7 @@
 #%% max_nprocs = 4
 #%% [extra_info]
 #%% authors = Unknown
-#%% keywords = 
+#%% keywords = MINIMAL
 #%% description = 
 #%%   Analyze the DDB for quartz build in test 14.
 #%%   Compute the interatomic force constants, the phonon Density of States,

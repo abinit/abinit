@@ -12,7 +12,7 @@
 !!  Please use CtqmcoffdiagInterface
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder, B. Amadon, J. Denier)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder, B. Amadon, J. Denier)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -40,6 +40,7 @@ MODULE m_Ctqmcoffdiag
  USE m_Stat
  USE m_FFTHyb
  USE m_OurRng
+ use defs_basis
 #ifdef HAVE_MPI2
  USE mpi
 #endif
@@ -77,6 +78,7 @@ MODULE m_Ctqmcoffdiag
  public :: Ctqmcoffdiag_printCorrelation
  public :: Ctqmcoffdiag_printSpectra
  public :: Ctqmcoffdiag_destroy
+ public :: Ctqmcoffdiag_setMagmom
 
 !!***
 
@@ -88,7 +90,7 @@ MODULE m_Ctqmcoffdiag
 !!  This structured datatype contains the necessary data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -157,11 +159,17 @@ TYPE Ctqmcoffdiag
   INTEGER :: flavors
 ! number of flavors 
 
+  INTEGER :: nspinor
+! number of spinor
+
   INTEGER :: measurements
 !  The modulo used to measure the interaction energy and the number of electrons. Example : 2 means the measure is perform every two sweeps. 
 
   INTEGER :: samples
 ! nb of L points (dmftqmc_l)
+
+! INTEGER :: endDensity
+! second dimension of density allocatable array
 
   INTEGER(8) :: seed
 !
@@ -259,6 +267,21 @@ TYPE Ctqmcoffdiag
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: occup_histo_time
 ! nflavor
 
+  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: occupconfig
+! 2**nflavor
+
+  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: suscep
+! samples
+
+  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: chi
+! samples
+
+  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: chicharge
+! samples
+
+  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: ntot
+! occupation total, t2g, eg
+
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:  ) :: meas_fullemptylines
 ! opt_order,nflavor
 
@@ -300,7 +323,7 @@ CONTAINS
 !!  Allocate all the non optional variables
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -332,7 +355,7 @@ include 'mpif.h'
   INTEGER  , INTENT(IN   )                      :: ostream
   INTEGER  , INTENT(IN   )                      :: istream
   LOGICAL  , INTENT(IN   )                      :: bFile
-  DOUBLE PRECISION, DIMENSION(1:10), OPTIONAL, INTENT(IN) :: iBuffer
+  DOUBLE PRECISION, DIMENSION(1:11), OPTIONAL, INTENT(IN) :: iBuffer
   INTEGER  , OPTIONAL, INTENT(IN   )                      :: MY_COMM
 !Local variables ------------------------------
 #ifdef HAVE_MPI
@@ -344,7 +367,7 @@ include 'mpif.h'
 !  CHARACTER(LEN=5)                              :: Cpid
 !
 #endif
-  DOUBLE PRECISION, DIMENSION(1:10)             :: buffer
+  DOUBLE PRECISION, DIMENSION(1:11)             :: buffer
 
   op%ostream = ostream
   op%istream = istream
@@ -394,6 +417,7 @@ include 'mpif.h'
       READ(istream,*) buffer(7) !op%beta
       READ(istream,*) buffer(8) !U
       READ(istream,*) buffer(9) !iTech
+      READ(istream,*) buffer(11)!op%nspinor
       !READ(istream,*) buffer(9) !Wmax
 !#ifdef CTCtqmcoffdiag_ANALYSIS
       !READ(istream,*) buffer(10) !order
@@ -402,11 +426,11 @@ include 'mpif.h'
 
 #ifdef HAVE_MPI
     IF ( op%have_MPI .EQV. .TRUE. ) &
-      CALL MPI_Bcast(buffer, 10, MPI_DOUBLE_PRECISION, 0,    &
+      CALL MPI_Bcast(buffer, 11, MPI_DOUBLE_PRECISION, 0,    &
                    op%MY_COMM, ierr)
 #endif
   ELSE IF ( PRESENT(iBuffer) ) THEN
-    buffer(1:10) = iBuffer(1:10)
+    buffer(1:11) = iBuffer(1:11)
   ELSE
     CALL ERROR("Ctqmcoffdiag_init : No input parameters                    ")
   END IF
@@ -457,7 +481,7 @@ END SUBROUTINE Ctqmcoffdiag_init
 !!  set all parameters and operators
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -478,7 +502,7 @@ SUBROUTINE Ctqmcoffdiag_setParameters(op,buffer)
 
 !Arguments ------------------------------------
   TYPE(Ctqmcoffdiag), INTENT(INOUT)                         :: op
-  DOUBLE PRECISION, DIMENSION(1:10), INTENT(IN   ) :: buffer
+  DOUBLE PRECISION, DIMENSION(1:11), INTENT(IN   ) :: buffer
 
 
   op%thermalization = INT(buffer(3)) !op%thermalization
@@ -491,6 +515,7 @@ SUBROUTINE Ctqmcoffdiag_setParameters(op,buffer)
   op%beta           = buffer(7)      !op%beta
   op%U              = buffer(8)      !U
   op%opt_nondiag    = INT(buffer(10))
+  op%nspinor        = INT(buffer(11)) !op%nspinor
 !  op%mu             = buffer(9)      !op%mu
   !op%Wmax           = INT(buffer(9)) !Freq
 !#ifdef CTCtqmcoffdiag_ANALYSIS
@@ -521,7 +546,7 @@ END SUBROUTINE Ctqmcoffdiag_setParameters
 !!  set the number of sweeps
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -576,7 +601,7 @@ END SUBROUTINE Ctqmcoffdiag_setSweeps
 !!  initialize random number generator
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -625,7 +650,7 @@ END SUBROUTINE Ctqmcoffdiag_setSeed
 !!  Allocate all non option variables
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -665,10 +690,20 @@ SUBROUTINE Ctqmcoffdiag_allocateAll(op)
   op%measDE = 0.d0
 
   FREEIF(op%mu)
-  MALLOC(op%mu,(1:flavors) )
+#ifdef FC_LLVM
+  ! LLVM 16 doesn't recognize this macro here
+  MALLOC(op%mu, (1:flavors) )
+#else
+  MALLOC(op%mu, (1:flavors))
+#endif
   op%mu = 0.d0
   FREEIF(op%hybri_limit)
-  MALLOC(op%hybri_limit,(flavors,flavors) )
+#ifdef FC_LLVM
+  ! LLVM 16 doesn't recognize this macro here
+  MALLOC(op%hybri_limit, (flavors,flavors) )
+#else
+  MALLOC(op%hybri_limit, (flavors,flavors))
+#endif
   op%hybri_limit = czero
 END SUBROUTINE Ctqmcoffdiag_allocateAll
 !!***
@@ -682,7 +717,7 @@ END SUBROUTINE Ctqmcoffdiag_allocateAll
 !!  allocate all option variables 
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -729,6 +764,21 @@ SUBROUTINE Ctqmcoffdiag_allocateOpt(op)
     FREEIF(op%occup_histo_time)
     MALLOC(op%occup_histo_time,(1:op%flavors+1))
     op%occup_histo_time= 0.d0
+    FREEIF(op%occupconfig)
+    MALLOC(op%occupconfig,(1:2**op%flavors))
+    op%occupconfig= 0.d0
+    FREEIF(op%suscep)
+    MALLOC(op%suscep,(1:3,1:op%samples))
+    op%suscep= 0.d0
+    FREEIF(op%chi)
+    MALLOC(op%chi,(1:3,1:op%samples))
+    op%chi= 0.d0
+    FREEIF(op%chicharge)
+    MALLOC(op%chicharge,(1:3,1:op%samples))
+    op%chicharge= 0.d0
+    FREEIF(op%ntot)
+    MALLOC(op%ntot,(1:3))
+    op%ntot= 0.d0
   END IF
 
   IF ( op%opt_noise .EQ. 1 ) THEN
@@ -766,6 +816,9 @@ SUBROUTINE Ctqmcoffdiag_allocateOpt(op)
     i = CEILING(DBLE(op%thermalization+op%sweeps)/DBLE(op%measurements*op%opt_spectra))
     MALLOC(op%density,(1:op%flavors+1,1:i))
     op%density = 0.d0
+!   op%endDensity=i
+!ENDPROBLEM
+
   END IF
 !#endif
 END SUBROUTINE Ctqmcoffdiag_allocateOpt
@@ -840,7 +893,7 @@ END SUBROUTINE Ctqmcoffdiag_allocateOpt
 !!  Set Gow from input array
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -923,7 +976,7 @@ END SUBROUTINE Ctqmcoffdiag_setG0wTab
 !!  set the interaction matrix
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -963,7 +1016,7 @@ END SUBROUTINE Ctqmcoffdiag_setU
 !!  clear a ctqmc run
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1043,7 +1096,7 @@ END SUBROUTINE Ctqmcoffdiag_clear
 !!  reset a ctqmc simulation
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1102,7 +1155,7 @@ END SUBROUTINE Ctqmcoffdiag_reset
 !!  impose energy levels
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1143,7 +1196,7 @@ END SUBROUTINE Ctqmcoffdiag_setMu
 !!  use coefficient A such that F=-A/(iwn) given by DMFT code.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1182,7 +1235,7 @@ END SUBROUTINE Ctqmcoffdiag_sethybri_limit
 !!  Compute the hybridization function
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1683,7 +1736,7 @@ END SUBROUTINE Ctqmcoffdiag_computeF
 !!  set all options and run a simulation
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1725,6 +1778,7 @@ include 'mpif.h'
 !Local variables ------------------------------
 #ifdef HAVE_MPI
   INTEGER                            :: ierr
+  DOUBLE PRECISION                   :: rtime(1)
 #endif
 !#ifdef CTCtqmcoffdiag_MOVIE
   INTEGER                            :: ilatex
@@ -1810,8 +1864,8 @@ include 'mpif.h'
 
   estimatedTime = op%runTime
 #ifdef HAVE_MPI
-  CALL MPI_REDUCE(op%runTime, estimatedTime, 1, MPI_DOUBLE_PRECISION, MPI_MAX, &
-             0, op%MY_COMM, ierr)
+  CALL MPI_REDUCE([op%runTime], rtime, 1, MPI_DOUBLE_PRECISION, MPI_MAX, 0, op%MY_COMM, ierr)
+  estimatedTime=rtime(1)
 #endif
 
   IF ( op%rank .EQ. 0 ) THEN
@@ -1856,7 +1910,7 @@ END SUBROUTINE Ctqmcoffdiag_run
 !!  Definition the main loop of the CT-QMC
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1923,6 +1977,11 @@ SUBROUTINE Ctqmcoffdiag_loop(op,itotal,ilatex)
   sp1            = op%samples+1
   IF ( op%opt_histo .GT. 0 ) THEN
     op%occup_histo_time= 0.d0
+    op%occupconfig= 0.d0
+    op%suscep= 0.d0
+    op%chi= 0.d0
+    op%chicharge= 0.d0
+    op%ntot= 0.d0
   END IF
 
   old_percent    = 0
@@ -1941,7 +2000,11 @@ SUBROUTINE Ctqmcoffdiag_loop(op,itotal,ilatex)
   MALLOC(gtmp_old2,(1,1))
   gtmp_old2 = 0.d0
 
+!PROBLEM eos_gnu_13.2_mpich . %endDensity was introduced throughout
   endDensity = SIZE(op%density,2)
+! endDensity=op%endDensity
+!ENDPROBLEM
+
 
   IF ( op%opt_noise .GT. 0 ) THEN
     FREEIF(gtmp_new)
@@ -2015,7 +2078,8 @@ SUBROUTINE Ctqmcoffdiag_loop(op,itotal,ilatex)
 
     IF ( MOD(isweep,measurements) .EQ. 0 ) THEN
       IF ( op%opt_histo .GT. 0 ) THEN
-        CALL ImpurityOperator_occup_histo_time(op%Impurity,op%occup_histo_time)
+        CALL ImpurityOperator_occup_histo_time(op%Impurity,op%occup_histo_time,op%occupconfig,op%suscep,op%samples,op%chi,&
+& op%chicharge,op%ntot,op%opt_histo,op%nspinor)
       END IF
     ENDIF
 
@@ -2111,7 +2175,7 @@ END SUBROUTINE Ctqmcoffdiag_loop
 !!  Try to add or remove a segment and an anti-segment
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2549,7 +2613,7 @@ END SUBROUTINE Ctqmcoffdiag_tryAddRemove
 !!  try a global move (swap to flavors)
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2716,7 +2780,7 @@ END SUBROUTINE Ctqmcoffdiag_trySwap
 !!  with the correct weight.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2781,7 +2845,7 @@ END SUBROUTINE Ctqmcoffdiag_measN
 !!  measure all correlations in times for a flavor
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2867,7 +2931,7 @@ END SUBROUTINE Ctqmcoffdiag_measCorrelation
 !!  measure perturbation order
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2919,7 +2983,7 @@ END SUBROUTINE Ctqmcoffdiag_measPerturbation
 !!  reduce everything to get the result of the simulation
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder,F. Gendron)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2935,7 +2999,7 @@ END SUBROUTINE Ctqmcoffdiag_measPerturbation
 !!
 !! SOURCE
 
-SUBROUTINE Ctqmcoffdiag_getResult(op)
+SUBROUTINE Ctqmcoffdiag_getResult(op,Iatom,fname)
 
 
 #ifdef HAVE_MPI1
@@ -2943,11 +3007,16 @@ include 'mpif.h'
 #endif
 !Arguments ------------------------------------
   TYPE(Ctqmcoffdiag)  , INTENT(INOUT)                    :: op
+  INTEGER, INTENT(IN ) :: Iatom
+  character(len=fnlen), INTENT(INOUT) :: fname
 !Local variables ------------------------------
   INTEGER                                       :: iflavor
+!  INTEGER                                       :: iflavor1
+!  INTEGER                                       :: iflavor2
   INTEGER                                       :: flavors
   INTEGER                                       :: itau
   INTEGER                                       :: endDensity
+  character(len=2)                              :: atomnb
   DOUBLE PRECISION                              :: inv_flavors
   DOUBLE PRECISION                              :: a
   DOUBLE PRECISION                              :: b
@@ -2960,23 +3029,32 @@ include 'mpif.h'
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:)   :: freqs
   INTEGER, ALLOCATABLE, DIMENSION(:)   :: counts
   INTEGER, ALLOCATABLE, DIMENSION(:)   :: displs
-  INTEGER                                       :: sp1
+  INTEGER, ALLOCATABLE, DIMENSION(:)   :: occtot
+  INTEGER, ALLOCATABLE, DIMENSION(:)   :: spintot
+  INTEGER, ALLOCATABLE, DIMENSION(:,:)   :: occ
+  INTEGER                                       :: sp1,spinmax,spinmin,dspin,nelec,spin
   INTEGER                                       :: spAll
   INTEGER                                       :: last
   INTEGER                                       :: n1
-  INTEGER                                       :: n2
+  INTEGER                                       :: n2,n3,quotient,remainder,signe
   INTEGER                                       :: debut
   DOUBLE PRECISION                                       :: signvaluemeassum
 !  INTEGER                                       :: fin
 #ifdef HAVE_MPI
   INTEGER                                       :: ierr
+  DOUBLE PRECISION,              DIMENSION(1)   :: arr
 #endif
   INTEGER                                       :: sizeoper,nbprocs,myrank
-  DOUBLE PRECISION                              :: inv_size,sumh
+  DOUBLE PRECISION                              :: inv_size,sumh,sumtot
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: buffer 
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:,:) :: buffer2,buffer2s
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: fullempty
   TYPE(FFTHyb) :: FFTmrka
+
+#if defined HAVE_MPI && !defined HAVE_MPI2_INPLACE
+   DOUBLE PRECISION, ALLOCATABLE , DIMENSION(:)   :: buffer1_out,freqs_buf
+   DOUBLE PRECISION, ALLOCATABLE , DIMENSION(:,:) :: buffer2_out
+#endif
 
   IF ( .NOT. op%done ) &
     CALL ERROR("Ctqmcoffdiag_getResult : Simulation not run                ")
@@ -3124,6 +3202,11 @@ include 'mpif.h'
 
   IF ( op%opt_histo .GT. 0 ) THEN
     op%occup_histo_time(:) = op%occup_histo_time(:) / INT(op%sweeps/op%measurements)
+    op%occupconfig(:) = op%occupconfig(:) / INT(op%sweeps/op%measurements)
+    op%suscep(:,:) = op%suscep(:,:) / INT(op%sweeps/op%measurements)
+    op%chi(:,:) = op%chi(:,:) / INT(op%sweeps/op%measurements)
+    op%chicharge(:,:) = op%chicharge(:,:) / INT(op%sweeps/op%measurements)
+    op%ntot(:) = op%ntot(:) / INT(op%sweeps/op%measurements)
   END IF
 ! HISTO before MPI_SUM
 !  write(6,*) "=== Histogram of occupations for complete simulation 3 ====",INT(op%sweeps/op%measurements)
@@ -3145,13 +3228,22 @@ include 'mpif.h'
     FREEIF(freqs)
     MALLOC(freqs,(1:op%size*n1))
     freqs = 0.d0
-    freqs(n1*op%rank+1:n1*(op%rank+1)) = op%measNoise(1)%vec(1:n1) 
     counts(:) = n1
     displs(:) = (/ ( iflavor*n1, iflavor=0, op%size-1 ) /)
 #ifdef HAVE_MPI
+#if defined HAVE_MPI2_INPLACE
+    freqs(n1*op%rank+1:n1*(op%rank+1)) = op%measNoise(1)%vec(1:n1) 
     CALL MPI_ALLGATHERV(MPI_IN_PLACE, 0, MPI_DOUBLE_PRECISION, &
                         freqs, counts, displs, &
                         MPI_DOUBLE_PRECISION, op%MY_COMM, ierr)
+#else
+    MALLOC(freqs_buf,(n1))
+    freqs_buf(1:n2)=op%measNoise(2)%vec(1:n1)
+    CALL MPI_ALLGATHERV(freqs_buf, n1, MPI_DOUBLE_PRECISION, &
+                        freqs, counts, displs, &
+                        MPI_DOUBLE_PRECISION, op%MY_COMM, ierr)
+    FREE(freqs_buf)
+#endif
 #endif
     n1 = op%size*n1
     CALL Vector_setSize(op%measNoise(1),n1)
@@ -3160,13 +3252,22 @@ include 'mpif.h'
     FREE(freqs)
     MALLOC(freqs,(1:op%size*n2))
     freqs = 0.d0
-    freqs(n2*op%rank+1:n2*(op%rank+1)) = op%measNoise(2)%vec(1:n2) 
     counts(:) = n2
     displs(:) = (/ ( iflavor*n2, iflavor=0, op%size-1 ) /)
 #ifdef HAVE_MPI
-    CALL MPI_ALLGATHERV(MPI_IN_PLACE, 0, MPI_DATATYPE_NULL, &
+#if defined HAVE_MPI2_INPLACE
+    freqs(n2*op%rank+1:n2*(op%rank+1)) = op%measNoise(2)%vec(1:n2) 
+    CALL MPI_ALLGATHERV(MPI_IN_PLACE, 0, MPI_DOUBLE_PRECISION, &
                         freqs, counts, displs, &
                         MPI_DOUBLE_PRECISION, op%MY_COMM, ierr)
+#else
+    MALLOC(freqs_buf,(n2))
+    freqs_buf(1:n2)=op%measNoise(2)%vec(1:n2)
+    CALL MPI_ALLGATHERV(freqs_buf, n2, MPI_DOUBLE_PRECISION, &
+                        freqs, counts, displs, &
+                        MPI_DOUBLE_PRECISION, op%MY_COMM, ierr)
+    FREE(freqs_buf)
+#endif
 #endif
     n2 = op%size*n2
     CALL Vector_setSize(op%measNoise(2),n2)
@@ -3308,25 +3409,48 @@ include 'mpif.h'
 !#endif
 
 #ifdef HAVE_MPI
-   !write(6,*) "bufferbefore",buffer(1,1)
+#if defined HAVE_MPI2_INPLACE
     CALL MPI_ALLREDUCE(MPI_IN_PLACE, buffer, spAll*flavors, &
                      MPI_DOUBLE_PRECISION, MPI_SUM, op%MY_COMM, ierr)
-   !write(6,*) "bufferafter",buffer(1,1)
-   ! CALL MPI_ALLREDUCE(MPI_IN_PLACE, buffer2, sp1*flavors*flavors, &
-   !                  MPI_DOUBLE_PRECISION, MPI_SUM, op%MY_COMM, ierr)
-    CALL MPI_ALLREDUCE( buffer2, buffer2s, sizeoper*flavors*flavors, &
+#else
+    MALLOC(buffer2_out,(spAll,flavors))
+    CALL MPI_ALLREDUCE(buffer, buffer2_out, spAll*flavors, &
                      MPI_DOUBLE_PRECISION, MPI_SUM, op%MY_COMM, ierr)
-   !write(6,*) "justaftermpi",op%Greens%oper(1,1,1) ,buffer2s(1,1,1)
-    CALL MPI_ALLREDUCE(MPI_IN_PLACE, op%runTime, 1, MPI_DOUBLE_PRECISION, MPI_MAX, &
-             op%MY_COMM, ierr)
-    CALL MPI_ALLREDUCE(op%Greens%signvaluemeas, signvaluemeassum , 1, MPI_DOUBLE_PRECISION, MPI_SUM, &
-             op%MY_COMM, ierr)
+    buffer(1:spAll,1:flavors)=buffer2_out(1:spAll,1:flavors)
+    FREE(buffer2_out)
+#endif
+    CALL MPI_ALLREDUCE(buffer2, buffer2s, sizeoper*flavors*flavors, &
+                     MPI_DOUBLE_PRECISION, MPI_SUM, op%MY_COMM, ierr)
+    CALL MPI_ALLREDUCE([op%runtime], arr, 1, MPI_DOUBLE_PRECISION, MPI_MAX, op%MY_COMM, ierr)
+    op%runtime=arr(1)
+    CALL MPI_ALLREDUCE([op%Greens%signvaluemeas], arr, 1, MPI_DOUBLE_PRECISION, MPI_SUM, op%MY_COMM, ierr)
+    signvaluemeassum=arr(1)
+#if defined HAVE_MPI2_INPLACE
     IF ( op%opt_histo .GT. 0 ) THEN
-      CALL MPI_ALLREDUCE(MPI_IN_PLACE, op%occup_histo_time, flavors+1, MPI_DOUBLE_PRECISION, MPI_SUM, &
+      CALL MPI_ALLREDUCE(MPI_IN_PLACE,op%occup_histo_time, flavors+1, MPI_DOUBLE_PRECISION, MPI_SUM, &
              op%MY_COMM, ierr)
+      CALL MPI_ALLREDUCE(MPI_IN_PLACE, op%occupconfig, 2**flavors, MPI_DOUBLE_PRECISION, MPI_SUM, &
+               op%MY_COMM, ierr)
+      CALL MPI_ALLREDUCE(MPI_IN_PLACE, op%suscep, 3*op%samples, MPI_DOUBLE_PRECISION, MPI_SUM, &
+               op%MY_COMM, ierr)
+      CALL MPI_ALLREDUCE(MPI_IN_PLACE, op%chi, 3*op%samples, MPI_DOUBLE_PRECISION, MPI_SUM, &
+               op%MY_COMM, ierr)
+      CALL MPI_ALLREDUCE(MPI_IN_PLACE, op%chicharge, 3*op%samples, MPI_DOUBLE_PRECISION, MPI_SUM, &
+               op%MY_COMM, ierr)
+      CALL MPI_ALLREDUCE(MPI_IN_PLACE, op%ntot, 3, MPI_DOUBLE_PRECISION, MPI_SUM, &
+               op%MY_COMM, ierr)
     END IF
     CALL MPI_ALLREDUCE(MPI_IN_PLACE, sumh, 1, MPI_DOUBLE_PRECISION, MPI_SUM, &
+              op%MY_COMM, ierr)     
+#else
+      MALLOC(buffer1_out,(flavors+1))
+      CALL MPI_ALLREDUCE(op%occup_histo_time, buffer1_out, flavors+1, MPI_DOUBLE_PRECISION, MPI_SUM, &
              op%MY_COMM, ierr)
+      op%occup_histo_time(1:flavors+1) =buffer1_out(1:flavors+1)
+      FREE(buffer1_out)
+#endif
+    CALL MPI_ALLREDUCE([sumh], arr, 1, MPI_DOUBLE_PRECISION, MPI_SUM, op%MY_COMM, ierr)
+    sumh=arr(1)
     IF ( op%opt_order .GT. 0 ) THEN
       CALL MPI_ALLREDUCE(op%meas_fullemptylines, fullempty, 2*flavors, MPI_DOUBLE_PRECISION, MPI_SUM, &
                op%MY_COMM, ierr)
@@ -3405,7 +3529,11 @@ include 'mpif.h'
   FREE(fullempty)
 
   IF ( op%opt_spectra .GE. 1 ) THEN
+!PROBLEM eos_gnu_13.2_mpich . %endDensity was introduced throughout
     endDensity = SIZE(op%density,2)
+!   endDensity=op%endDensity
+!ENDPROBLEM
+
     IF ( op%density(1,endDensity) .EQ. -1.d0 ) &
       endDensity = endDensity - 1
     CALL FFTHyb_init(FFTmrka,endDensity,DBLE(op%thermalization)/DBLE(op%measurements*op%opt_spectra))
@@ -3441,7 +3569,130 @@ include 'mpif.h'
     enddo
        write(op%ostream,'(a,f10.4)') " all" , sumh
     write(op%ostream,*) "================================="
+
+    MALLOC(occ,(2**op%flavors,1:flavors))
+    MALLOC(occtot,(2**op%flavors))
+    MALLOC(spintot,(2**op%flavors))
+    do n1=1,2**op%flavors
+      ! Compute occupations of individual Orbitals
+      n3=n1-1
+      occtot(n1)=0
+      spintot(n1)=0
+      signe=1
+      do n2=1,op%flavors
+        remainder=modulo(n3,2)
+        quotient=(n3-remainder)/2
+        occ(n1,n2)=remainder
+        n3=quotient
+        occtot(n1)=occtot(n1)+occ(n1,n2)
+        if(n2>=7) signe =-1
+        !if(n2>=7) signe =0
+        spintot(n1)=spintot(n1)+occ(n1,n2)*signe
+      enddo
+      op%occupconfig(n1)=op%occupconfig(n1)/float(nbprocs)
+    enddo
+
+    write(op%ostream,*) "=== Histogram of occupations of configurations for complete simulation  ===="
+    sumh=0
+    if(op%flavors==14) then
+      do n1=1,2**op%flavors
+         write(op%ostream,'(i4,14i2,f20.2)')  n1, (occ(n1,n2),n2=1,op%flavors),op%occupconfig(n1)
+         sumh=sumh+op%occupconfig(n1)
+      enddo
+    else if(op%flavors==10) then
+      do n1=1,2**op%flavors
+         write(op%ostream,'(i4,10i2,f20.2)')  n1, (occ(n1,n2),n2=1,op%flavors),op%occupconfig(n1)
+         sumh=sumh+op%occupconfig(n1)
+      enddo
+    end if
+    write(op%ostream,'(a,f10.4)') " all" , sumh
+    
+    sumtot=0
+    do nelec=0,10
+      spinmin=modulo(nelec,2)
+      if(nelec<=5) spinmax=nelec
+      if(nelec>=6) spinmax=10-nelec
+      spinmax=6
+      dspin=1
+      write(op%ostream,*) "=== Histogram of occupations of configurations for total number of electrons",nelec
+      do spin=spinmin,spinmax,dspin
+        sumh=0
+        do n1=1,2**op%flavors
+          if(occtot(n1)==nelec.and.abs(spintot(n1))==spin) then
+            sumh=sumh+op%occupconfig(n1)
+            if(op%flavors==14) then
+              write(op%ostream,'(i8,14i2,a,i2,i3,f10.4)')  n1,(occ(n1,n2),n2=1,op%flavors),"  ",occtot(n1),spintot(n1),&
+& op%occupconfig(n1)
+            else if(op%flavors==10) then
+              write(op%ostream,'(i8,10i2,a,i2,i3,f10.4)')  n1,(occ(n1,n2),n2=1,op%flavors),"  ",occtot(n1),spintot(n1),&
+ op%occupconfig(n1)
+            end if
+          endif
+        enddo
+        write(op%ostream,'(a,i4,a,i4,a,f10.4)') " === Sum of weights for",nelec," electrons and spin",spin," is ",sumh
+        sumtot=sumtot+sumh
+      enddo
+    enddo
+    write(op%ostream,'(a,f10.4)') "Full sum is",sumtot
+
+   FREE(occ)
+    FREE(occtot)
+    FREE(spintot)
+  !END IF
+
+    !==============================
+    ! Write Susceptibilities
+    !==============================
+    if(Iatom .lt. 10) then
+       write(atomnb, '("0",i1)') Iatom
+    else
+       write(atomnb, '(i2)') Iatom
+    end if
+    ! Local Magnetic Susceptibility
+    if(op%opt_histo .gt. 1) then
+      ! Scalar
+      if(op%nspinor .eq. 1) then
+        open (unit=735,file=trim(fname)//'_LocalSpinSuscept_atom_'//atomnb//'.dat',status='unknown',form='formatted')
+        write(735,*) '#Tau Total t2g eg'
+        do n1=1,op%samples
+          op%suscep(:,n1)=op%suscep(:,n1)/float(nbprocs)/float(op%samples)
+          write(735,'(1x,f14.8,2x,f12.8,2x,f12.8,2x,f12.8)') (n1-1)*op%beta/op%samples,(op%suscep(n2,n1),n2=1,3)
+        enddo
+        !add tau=beta
+        write(735,'(1x,f14.8,2x,f12.8,2x,f12.8,2x,f12.8)') (op%samples)*op%beta/op%samples,(op%suscep(n2,1),n2=1,3)
+
+      else
+        ! SOC
+        open (unit=735,file=trim(fname)//'_LocalMagnSuscept_atom_'//atomnb//'.dat',status='unknown',form='formatted')
+        write(735,*) '#Tau Total Orbital Spin'
+        do n1=1,op%samples
+          op%chi(:,n1) = op%chi(:,n1)/float(nbprocs)/float(op%samples)
+          write(735,'(1x,f14.8,2x,f12.8,2x,f12.8,2x,f12.8)') (n1-1)*op%beta/op%samples,(op%chi(n2,n1),n2=1,3)
+        end do
+        !add tau=beta
+        write(735,'(1x,f14.8,2x,f12.8,2x,f12.8,2x,f12.8)') (op%samples)*op%beta/op%samples,(op%chi(n2,1),n2=1,3)
+      endif
+    close(unit=735)
+    endif
+
+    ! Local Charge Susceptiblity
+    if(op%opt_histo .gt. 2) then 
+      op%ntot(:) = op%ntot(:)/float(nbprocs)/float(op%samples)
+      open (unit=735,file=trim(fname)//'_LocalChargeSuscept_atom_'//atomnb//'.dat',status='unknown',form='formatted')
+      write(735,*) '#Tau Total <ntot>'
+      do n1=1,op%samples
+        op%chicharge(1,n1)=(op%chicharge(1,n1)/float(nbprocs)/float(op%samples))-(op%ntot(1)*op%ntot(1))
+        !op%chicharge(2,n1)=(op%chicharge(2,n1)/float(nbprocs)/float(op%samples))-(op%ntot(2)*op%ntot(2))
+        !op%chicharge(3,n1)=(op%chicharge(3,n1)/float(nbprocs)/float(op%samples))-(op%ntot(3)*op%ntot(3))
+        write(735,'(1x,f14.8,2x,f12.8,2x,f12.8,2x,f12.8)') (n1-1)*op%beta/op%samples,(op%chicharge(1,n1)),op%ntot(1)
+      enddo
+      !add tau=beta
+      write(735,'(1x,f14.8,2x,f12.8,2x,f12.8,2x,f12.8)') (op%samples)*op%beta/op%samples,(op%chicharge(1,1)),op%ntot(1)
+      close(unit=735)
+    endif
+
   END IF
+
 
 END SUBROUTINE Ctqmcoffdiag_getResult
 !!***
@@ -3454,7 +3705,7 @@ END SUBROUTINE Ctqmcoffdiag_getResult
 !!  optionnaly symmetrize the green functions
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -3521,7 +3772,7 @@ END SUBROUTINE Ctqmcoffdiag_symmetrizeGreen
 !!  Get the full green functions in time and/or frequency
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -3793,7 +4044,7 @@ END SUBROUTINE Ctqmcoffdiag_getGreen
 !!  get double occupation
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -3847,7 +4098,7 @@ END SUBROUTINE Ctqmcoffdiag_getD
 !!  get interaction energy and noise on it
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -3885,7 +4136,7 @@ END SUBROUTINE Ctqmcoffdiag_getE
 !!  print different functions computed during the simulation
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -3937,7 +4188,7 @@ END SUBROUTINE Ctqmcoffdiag_printAll
 !!  print ctqmc statistics
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -4092,7 +4343,7 @@ END SUBROUTINE Ctqmcoffdiag_printQMC
 !!  print green functions
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -4211,7 +4462,7 @@ END SUBROUTINE Ctqmcoffdiag_printGreen
 !!  print individual double occupancy
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -4267,7 +4518,7 @@ END SUBROUTINE Ctqmcoffdiag_printD
 !!  print energy and noise 
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -4322,7 +4573,7 @@ END SUBROUTINE Ctqmcoffdiag_printE
 !!  print perturbation order
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -4387,7 +4638,7 @@ END SUBROUTINE Ctqmcoffdiag_printPerturbation
 !!  print correlation fonctions
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -4461,7 +4712,7 @@ END SUBROUTINE Ctqmcoffdiag_printCorrelation
 !!  print fourier transform of time evolution of number of electrons
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -4508,7 +4759,10 @@ SUBROUTINE Ctqmcoffdiag_printSpectra(op, oFileIn)
   formatSpectra ='(1x,'//TRIM(ADJUSTL(a))//'ES22.14)'
   WRITE(oFile,*) "# freq[/hermalization] FFT"
 
+!PROBLEM eos_gnu_13.2_mpich . %endDensity was introduced throughout
   endDensity = SIZE(op%density,2)
+! endDensity=op%endDensity
+!ENDPROBLEM
   DO WHILE ( op%density(flavors+1,endDensity) .EQ. -1 )
     endDensity = endDensity -1
   END DO
@@ -4530,7 +4784,7 @@ END SUBROUTINE Ctqmcoffdiag_printSpectra
 !!  destroy and deallocate all variables
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -4573,6 +4827,11 @@ SUBROUTINE Ctqmcoffdiag_destroy(op)
   FREEIF(op%measN)
   IF ( op%opt_histo .GT. 0 ) THEN
     FREEIF(op%occup_histo_time)
+    FREEIF(op%suscep)
+    FREEIF(op%occupconfig)
+    FREEIF(op%chi)
+    FREEIF(op%chicharge)
+    FREEIF(op%ntot)
   END IF
   FREEIF(op%measDE)
   FREEIF(op%mu)
@@ -4596,6 +4855,7 @@ SUBROUTINE Ctqmcoffdiag_destroy(op)
   op%sweeps         = 0
   op%thermalization = 0
   op%flavors        = 0
+! op%endDensity     = 0
   op%samples        = 0
   op%beta           = 0.d0
 !  op%seg_added      = 0.d0
@@ -4612,6 +4872,61 @@ SUBROUTINE Ctqmcoffdiag_destroy(op)
   op%done = .FALSE.
   op%init = .FALSE.
 END SUBROUTINE Ctqmcoffdiag_destroy
+!!***
+
+!!****f* ABINIT/m_Ctqmcoffdiag/Ctqmcoffdiag_setMagmom
+!! NAME
+!!  Ctqmcoffdiag_setMagmom
+!!
+!! FUNCTION
+!!  set the Magnetic moment matrix for susceptibility
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2013-2024 ABINIT group (F. Gendron)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! PARENTS
+!!  Will be filled automatically by the parent script
+!!
+!! CHILDREN
+!!  Will be filled automatically by the parent script
+!!
+!! SOURCE
+
+SUBROUTINE Ctqmcoffdiag_setMagmom(op,Magmom_orb, Magmom_spin, Magmom_tot)
+
+!Arguments ------------------------------------
+  TYPE(Ctqmcoffdiag), INTENT(INOUT) ::op
+  DOUBLE PRECISION, DIMENSION(:,:), INTENT(IN) :: Magmom_orb
+  DOUBLE PRECISION, DIMENSION(:,:), INTENT(IN) :: Magmom_spin
+  DOUBLE PRECISION, DIMENSION(:,:), INTENT(IN) :: Magmom_tot
+!Local variables ------------------------------
+!  INTEGER :: iflavor1,iflavor2
+
+ ! do iflavor1=1,10
+ !   do iflavor2=1,10
+ !      if(iflavor1==iflavor2) THEN
+ !        write(6,*) iflavor1, iflavor2, Magmom(iflavor1,iflavor2)
+ !      end if
+ !   end do
+ ! end do
+
+  IF ( SIZE(Magmom_orb) .NE. op%flavors*op%flavors ) &
+    CALL ERROR("Ctqmcoffdiag_setU : Wrong Magnetic Moment matrix (size)        ")
+
+  CALL ImpurityOperator_setMagmommat(op%Impurity, Magmom_orb, Magmom_spin, Magmom_tot)
+
+END SUBROUTINE Ctqmcoffdiag_setMagmom
 !!***
 
 END MODULE m_Ctqmcoffdiag

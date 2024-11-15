@@ -1,8 +1,8 @@
 
-.Version 9.11.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2022 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Jul 2023.
-- ( at 12h02 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h10 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v5_t55/t55.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v5_t55/t55.abi
 - output file    -> t55.abo
 - root for input  files -> t55i
 - root for output files -> t55o
@@ -42,10 +42,10 @@ _ WF disk file :      0.788 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -53,7 +53,7 @@ _ WF disk file :      0.788 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
               amu      1.21753000E+02
            diemac      1.20000000E+01
              ecut      1.20000000E+01 Hartree
--          fftalg         312
+-          fftalg         512
            ionmov           2
               ixc          11
            jdtset        5
@@ -146,8 +146,8 @@ meta: {optdriver: 0, ionmov: 2, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/51Sb_pbe-q5
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/51Sb_pbe-q5
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/51Sb_pbe-q5
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/51Sb_pbe-q5
 - Goedecker pseudopotential for Sb
 - 51.00000   5.00000     70301                znucl, zion, pspdat
    10   11    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -192,7 +192,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     845.938     845.914
 
 ================================================================================
 
-=== [ionmov= 2] Broyden-Fletcher-Goldfard-Shanno method (forces)            
+=== [ionmov= 2] Broyden-Fletcher-Goldfarb-Shanno method (forces)            
 ================================================================================
 
 --- Iteration: (1/5) Internal Cycle: (1/1)
@@ -250,9 +250,9 @@ xred      :
 - [  2.3132E-01,   2.3132E-01,   2.3132E-01, Sb]
 - [ -2.3132E-01,  -2.3132E-01,  -2.3132E-01, Sb]
 cartesian_forces: # hartree/bohr
-- [  1.78656264E-06,   1.78656264E-06,   1.78656264E-06, ]
-- [ -1.78656264E-06,  -1.78656264E-06,  -1.78656264E-06, ]
-force_length_stats: {min:   3.09441726E-06, max:   3.09441726E-06, mean:   3.09441726E-06, }
+- [  1.78656262E-06,   1.78656262E-06,   1.78656262E-06, ]
+- [ -1.78656262E-06,  -1.78656262E-06,  -1.78656262E-06, ]
+force_length_stats: {min:   3.09441724E-06, max:   3.09441724E-06, mean:   3.09441724E-06, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -270,11 +270,11 @@ force_length_stats: {min:   3.09441726E-06, max:   3.09441726E-06, mean:   3.094
   2.31317819190000E-01  2.31317819190000E-01  2.31317819190000E-01
  -2.31317819190000E-01 -2.31317819190000E-01 -2.31317819190000E-01
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.78656E-06 1.78656E-06 (free atoms)
-  1.78656263990518E-06  1.78656263990518E-06  1.78656263990518E-06
- -1.78656263990518E-06 -1.78656263990518E-06 -1.78656263990518E-06
+  1.78656262442722E-06  1.78656262442722E-06  1.78656262442722E-06
+ -1.78656262442722E-06 -1.78656262442722E-06 -1.78656262442722E-06
  Gradient of E wrt nuclear positions in reduced coordinates (gred)
- -2.23029359370169E-05 -2.23029359370169E-05 -2.23029359370169E-05
-  2.23029359370169E-05  2.23029359370169E-05  2.23029359370169E-05
+ -2.23029357437944E-05 -2.23029357437944E-05 -2.23029357437944E-05
+  2.23029357437944E-05  2.23029357437944E-05  2.23029357437944E-05
  Total energy (etotal) [Ha]= -1.10751783418201E+01
 
  At Broyd/MD step   1, gradients are converged : 
@@ -297,14 +297,14 @@ force_length_stats: {min:   3.09441726E-06, max:   3.09441726E-06, mean:   3.094
     2     -1.52810785904495    -1.52810785904495    -1.52810785904495
 
  cartesian forces (hartree/bohr) at end:
-    1      0.00000178656264     0.00000178656264     0.00000178656264
-    2     -0.00000178656264    -0.00000178656264    -0.00000178656264
+    1      0.00000178656262     0.00000178656262     0.00000178656262
+    2     -0.00000178656262    -0.00000178656262    -0.00000178656262
  frms,max,avg= 1.7865626E-06 1.7865626E-06   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      0.00009186873697     0.00009186873697     0.00009186873697
-    2     -0.00009186873697    -0.00009186873697    -0.00009186873697
- frms,max,avg= 9.1868737E-05 9.1868737E-05   0.000E+00  0.000E+00  0.000E+00 e/A
+    1      0.00009186873617     0.00009186873617     0.00009186873617
+    2     -0.00009186873617    -0.00009186873617    -0.00009186873617
+ frms,max,avg= 9.1868736E-05 9.1868736E-05   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  1.015000000000  1.015000000000  1.015000000000 bohr
               =  0.537114866719  0.537114866719  0.537114866719 angstroms
  prteigrs : about to open file t55o_DS5_EIG
@@ -318,16 +318,16 @@ force_length_stats: {min:   3.09441726E-06, max:   3.09441726E-06, mean:   3.094
 --- !EnergyTerms
 iteration_state     : {dtset: 5, itime: 1, icycle: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  3.46937479637942E+00
-hartree             :  4.82395933460960E-01
-xc                  : -2.78610778777771E+00
+kinetic             :  3.46937479637945E+00
+hartree             :  4.82395933460988E-01
+xc                  : -2.78610778777773E+00
 Ewald energy        : -1.17901628127453E+01
 psp_core            :  1.71751906686254E+00
-local_psp           : -2.45569739570970E+00
-non_local_psp       :  2.87499857709622E-01
+local_psp           : -2.45569739570976E+00
+non_local_psp       :  2.87499857709650E-01
 total_energy        : -1.10751783418201E+01
 total_energy_eV     : -3.01370929177226E+02
-band_energy         : -1.35486510049508E+00
+band_energy         : -1.35486510049515E+00
 ...
 
 
@@ -350,9 +350,9 @@ band_energy         : -1.35486510049508E+00
            diemac      1.20000000E+01
              ecut      1.20000000E+01 Hartree
            etotal5    -1.1075178342E+01
-            fcart5     1.7865626399E-06  1.7865626399E-06  1.7865626399E-06
-                      -1.7865626399E-06 -1.7865626399E-06 -1.7865626399E-06
--          fftalg         312
+            fcart5     1.7865626244E-06  1.7865626244E-06  1.7865626244E-06
+                      -1.7865626244E-06 -1.7865626244E-06 -1.7865626244E-06
+-          fftalg         512
            ionmov           2
               ixc          11
            jdtset        5
@@ -496,10 +496,10 @@ P           mkmem          10
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          3.4  wall=          3.5
+- Proc.   0 individual time (sec): cpu=          1.5  wall=          1.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.4  wall=          3.5
++Overall time at end (sec) : cpu=          1.5  wall=          1.5

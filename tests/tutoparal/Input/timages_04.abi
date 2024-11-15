@@ -89,11 +89,11 @@ dynimage      0 10*1 0   # Keep first and last images fixed
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = max2_gnu_6.5_mpich, scope_gnu_12.2_mpich
+#%% exclude_builders = scope_gnu_12.2_mpich
 #%% [files]
 #%% [NCPU_10]
 #%% files_to_test = 
-#%%   timages_04_MPI10.abo, tolnlines = 0, tolabs = 0.0e-0, tolrel = 0.0e-0, fld_options = -easy;
+#%%   timages_04_MPI10.abo, tolnlines = 55, tolabs = 5.5e-3, tolrel = 9.3e-1, fld_options = -easy;
 #%% [paral_info]
 #%% nprocs_to_test = 10
 #%% max_nprocs = 10

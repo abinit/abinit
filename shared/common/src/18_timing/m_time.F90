@@ -7,7 +7,7 @@
 !! and functions to get cpu and wall time.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2022 ABINIT group (MG, XG, MT, TD)
+!! Copyright (C) 2009-2024 ABINIT group (MG, XG, MT, TD)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -68,7 +68,7 @@ module m_time
  !==================
 
  ! TIMER_SIZE determines the maximum number of "timing slots" available
- integer,public,parameter :: TIMER_SIZE=1999
+ integer,public,parameter :: TIMER_SIZE=2199
 
  ! timeopt is a flag which indicates the suppression or not of the timing.
  integer,private,save :: timopt=1

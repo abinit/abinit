@@ -8,7 +8,7 @@
 !!  involving delta functions. Different approaches are available.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2022 ABINIT group (MG, HM)
+!!  Copyright (C) 2008-2024 ABINIT group (MG, HM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -380,7 +380,7 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm, skip_mapping)
 
    krank = krank_from_kptrlatt(self%nibz, self%ibz, self%kptrlatt, compute_invrank=.False.)
 
-   if (kpts_map("symrel", self%timrev, cryst, krank, self%nq_k, self%lgk%ibz, indkk) /= 0) then
+   if (kpts_map("symrel", self%kptopt, cryst, krank, self%nq_k, self%lgk%ibz, indkk) /= 0) then
      ABI_ERROR("At least one of the points in IBZ(k) could not be generated from a symmetrical one.")
    end if
 
@@ -399,7 +399,7 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm, skip_mapping)
 
    krank = krank_from_kptrlatt(self%nibz, self%ibz, self%kptrlatt, compute_invrank=.False.)
 
-   if (kpts_map("symrel", self%timrev, cryst, krank, self%nq_k, self%lgk%ibz, indkk) /= 0) then
+   if (kpts_map("symrel", self%kptopt, cryst, krank, self%nq_k, self%lgk%ibz, indkk) /= 0) then
      ABI_ERROR("At least one of the points in IBZ(k) + q could not be generated from a symmetrical one.")
    end if
    call krank%free()

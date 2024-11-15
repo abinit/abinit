@@ -1,0 +1,23 @@
+teph_tdep_legacy_5o_EIGR2D
+Second derivatives of eigenvalues in text format.
+1
+teph_tdep_legacy_1o_DS3_EIGR2D
+
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = mrgddb
+#%% test_chain =  teph_tdep_legacy_1.abi, teph_tdep_legacy_5.abi
+#%% [files]
+#%% files_to_test = 
+#%%   teph_tdep_legacy_5o_EIGR2D, tolnlines=  4000, tolabs=  1.000e-04, tolrel=  1.000e+02, fld_options=-medium
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = G. Antonius
+#%% keywords = NC, DFPT, EPH_OLD
+#%% description =  Input file for mrgddb
+#%%<END TEST_INFO>

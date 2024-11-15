@@ -6,7 +6,7 @@
 !!  This module contains routines related to PAW on-site densities and on-site potentials.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2022 ABINIT group (FJ, MT)
+!! Copyright (C) 2018-2024 ABINIT group (FJ, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -255,8 +255,10 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
      ABI_BUG(msg)
    end if
    if (ipert>0.and.paw_an(1)%has_vxctau==1.and.usekden==1) then
-     msg='computation of vxctau not compatible with RF (ipert>0)!'
-     ABI_BUG(msg)
+      if (ipert .NE. natom+1) then
+        msg='computation of vxctau not compatible with RF (ipert>0)!'
+        ABI_BUG(msg)
+     end if
    end if
    if (ipert>0.and.paw_an(1)%has_vhartree==1) then
      msg='computation of vhartree not compatible with RF (ipert>0)!'

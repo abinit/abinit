@@ -1,8 +1,8 @@
 
-.Version 9.11.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2022 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Jul 2023.
-- ( at 12h02 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h10 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v5_t68/t68.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v5_t68/t68.abi
 - output file    -> t68.abo
 - root for input  files -> t68i
 - root for output files -> t68o
@@ -80,10 +80,10 @@ _ WF disk file :      0.363 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -99,7 +99,7 @@ _ WF disk file :      0.363 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
          ecutsigx      8.49477515E+00 Hartree
           ecutwfn      1.20000000E+01 Hartree
            enunit           2
--          fftalg         312
+-          fftalg         512
             fftgw          11
            getscr1          0
            getscr2          0
@@ -325,8 +325,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     12.000   => boxcut(ratio)=   2.18593
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
 -  Troullier-Martins psp for element  H         Thu Oct 27 17:28:54 EDT 1994
 -  1.00000   1.00000    940714                znucl, zion, pspdat
     1    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -361,7 +361,7 @@ tolerances: {tolwfr: 1.00E-10, }
  ETOT  3 -0.99425689320789    -1.846E-03 5.098E-04 2.793E-01
  ETOT  4 -0.99472882857671    -4.719E-04 2.238E-04 5.899E-03
  ETOT  5 -0.99473983945391    -1.101E-05 7.461E-06 4.690E-06
- ETOT  6 -0.99473984609258    -6.639E-09 2.281E-09 5.505E-08
+ ETOT  6 -0.99473984609259    -6.639E-09 2.281E-09 5.505E-08
  ETOT  7 -0.99473984623494    -1.424E-10 5.936E-11 8.565E-10
 
  At SCF step    7   max residual=  5.94E-11 < tolwfr=  1.00E-10 =>converged.
@@ -460,7 +460,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  7.44245224087440E-01
+kinetic             :  7.44245224087439E-01
 hartree             :  6.04161596136900E-02
 xc                  : -5.23849784372130E-01
 Ewald energy        : -6.89176350524443E-01
@@ -578,7 +578,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
        -0.000   0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.000   0.000
 
     2   0.000  -8.809  -3.130  -4.545  -4.545  -4.545  -4.545   0.000   0.000
-       -0.000   0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000
+       -0.000   0.000   0.000   0.000   0.000  -0.000  -0.000   0.000   0.000
 
   chi0(G,G') at the    2 th omega   0.0000  11.2422 [eV]
        1       2       3       4       5       6       7       8       9
@@ -668,7 +668,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
         0.000   0.000  -0.000   0.000   0.000  -0.000   0.000   0.000   0.000
 
     2   0.000  -8.175  -2.695  -3.796  -3.551  -4.069  -4.069   0.000   0.000
-       -0.000   0.000   0.000  -0.000   0.000   0.000   0.000   0.000   0.000
+       -0.000   0.000  -0.000  -0.000   0.000   0.000   0.000   0.000   0.000
 
   chi0(G,G') at the    2 th omega   0.0000  11.2422 [eV]
        1       2       3       4       5       6       7       8       9
@@ -708,7 +708,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 --------------------------------------------------------------------------------
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
-    1  -8.881   0.000   0.000  -0.000   0.000   0.000  -0.000  -2.176  -3.611
+    1  -8.881   0.000  -0.000  -0.000   0.000   0.000  -0.000  -2.176  -3.611
         0.000   0.000  -0.000  -0.000   0.000  -0.000   0.000   0.000  -0.000
 
     2   0.000  -3.158  -1.959  -2.439  -2.439  -2.519  -2.104   0.000  -0.000
@@ -716,7 +716,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 
   chi0(G,G') at the    2 th omega   0.0000  11.2422 [eV]
        1       2       3       4       5       6       7       8       9
-    1  -1.979   0.000   0.000  -0.000   0.000   0.000  -0.000  -0.529  -0.133
+    1  -1.979   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.529  -0.133
         0.000   0.000   0.000  -0.000   0.000  -0.000   0.000   0.000  -0.000
 
     2   0.000  -1.933   0.017  -0.747  -0.747  -0.680  -0.762   0.000  -0.000
@@ -730,7 +730,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 --------------------------------------------------------------------------------
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
-    1  -7.213   0.000  -0.000  -0.000   0.000   0.000  -0.000  -1.841  -2.993
+    1  -7.213   0.000   0.000  -0.000   0.000   0.000  -0.000  -1.841  -2.993
         0.000   0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000  -0.000
 
     2   0.000  -3.255  -1.630  -2.412  -2.412  -2.412  -2.412   0.000   0.000
@@ -994,7 +994,7 @@ data: !SigmaeeData |
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         312
+-          fftalg         512
             fftgw          11
            getscr1          0
            getscr2          0
@@ -1278,10 +1278,10 @@ P           mkmem           4
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          3.8  wall=          3.8
+- Proc.   0 individual time (sec): cpu=          2.2  wall=          2.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered   3 WARNINGs and  10 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.8  wall=          3.8
++Overall time at end (sec) : cpu=          2.2  wall=          2.2

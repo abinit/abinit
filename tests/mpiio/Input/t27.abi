@@ -29,6 +29,8 @@ prtvclmb 1
 
 ndtset 6
 
+bandpp 1
+
 # Dataset 1
 # Output the GS WFK with MPI-FFT.
 npband1 1 np_spkpt1 2 npfft1 2
@@ -74,6 +76,10 @@ kptrlatt 4 0 0 0 4 0 0 0 4
 nshiftk 4 
 shiftk 1/2 1/2 1/2 1/2 0.0 0.0 0.0 1/2 0.0 0.0 0.0 1/2
 tolwfr 1d-20
+# Added in v9.11:
+tolwfr_diago 1d-30
+# Default of tolwfr_diago is tolwfr (or, for LOBPCG only, 1d-20 if tolwfr is not defined)
+# To reproduce old behaviour : set stringent value of tolwfr_diago
 
 # Unit cell
 acell 3*7.0

@@ -10,6 +10,8 @@ ndtset      2
 #ndtset      4  # TODO
 timopt 1
 nspinor 2 nspden 4
+iomode 1
+istwfk *1
 
 # This to compute QP without symmetries for debugging purposes
 #nsym 1
@@ -128,6 +130,7 @@ pseudos "Si_r.psp8"
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = eos_nvhpc_23.9_elpa
 #%% [files]
 #%% files_to_test =
 #%%   t03.abo, tolnlines = 25, tolabs = 1.1e-3, tolrel = 3.0e-3, fld_options = -medium;

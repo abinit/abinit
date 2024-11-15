@@ -1,8 +1,8 @@
 
-.Version 9.11.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2022 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Jul 2023.
-- ( at 12h02 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h10 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v5_t72/t72.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v5_t72/t72.abi
 - output file    -> t72.abo
 - root for input  files -> t72i
 - root for output files -> t72o
@@ -92,10 +92,10 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -115,7 +115,7 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
           ecutwfn2     0.00000000E+00 Hartree
           ecutwfn3     5.00000000E+00 Hartree
           ecutwfn4     5.00000000E+00 Hartree
--          fftalg         312
+-          fftalg         512
            getden1          0
            getden2          1
            getden3          0
@@ -291,8 +291,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.18671
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/79au.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/79au.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/79au.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/79au.pspnc
 -  Troullier-Martins psp for element  Au        Thu Oct 27 17:58:22 EDT 1994
 - 79.00000  11.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -327,7 +327,7 @@ tolerances: {tolvrs: 1.00E-05, }
  ETOT  2  -35.356743429677    -1.309E-01 4.924E-04 1.190E+01
  ETOT  3  -35.377232499535    -2.049E-02 7.310E-05 1.547E+00
  ETOT  4  -35.380259444567    -3.027E-03 1.152E-05 3.816E-04
- ETOT  5  -35.380261423616    -1.979E-06 3.086E-08 6.426E-06
+ ETOT  5  -35.380261423617    -1.979E-06 3.086E-08 6.426E-06
 
  At SCF step    5       vres2   =  6.43E-06 < tolvrs=  1.00E-05 =>converged.
 
@@ -402,18 +402,18 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  1.41469383022008E+01
-hartree             :  1.06646351660453E+00
-xc                  : -1.23432192019900E+01
+kinetic             :  1.41469383021987E+01
+hartree             :  1.06646351660412E+00
+xc                  : -1.23432192019898E+01
 Ewald energy        : -3.59771926697647E+01
 psp_core            :  8.71835571388065E+00
-local_psp           : -2.17528135034928E+00
-non_local_psp       : -8.81413709308391E+00
+local_psp           : -2.17528135034933E+00
+non_local_psp       : -8.81413709308148E+00
 internal            : -3.53780727825019E+01
-'-kT*entropy'       : -2.18864111459451E-03
+'-kT*entropy'       : -2.18864111459440E-03
 total_energy        : -3.53802614236165E+01
 total_energy_eV     : -9.62745874665179E+02
-band_energy         : -1.81219497453689E+00
+band_energy         : -1.81219497453687E+00
 ...
 
 
@@ -614,7 +614,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
         0.000   0.000  -0.000   0.000   0.000   0.000   0.000  -0.000   0.000
 
     2  -0.000  -5.101   1.279   0.349  -0.528   0.349  -0.528   0.349  -0.528
-       -0.000   0.000   0.000  -0.000   0.000  -0.000   0.000   0.000  -0.000
+       -0.000  -0.000   0.000  -0.000   0.000  -0.000   0.000   0.000  -0.000
 
  For q-point:  0.000010 0.000020 0.000030
   dielectric constant =  14.6629
@@ -649,7 +649,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -32.000  -7.931 -17.189  -8.010  -5.622  -8.204  -5.815  -7.816  -5.429
-        0.000   0.000  -0.000   0.000  -0.000  -0.001   0.000  -0.000   0.000
+       -0.000   0.000  -0.000   0.000  -0.000  -0.001   0.000  -0.000   0.000
 
     2  -7.931 -14.467  -3.392   0.221  -2.186   0.155  -2.264   0.287  -2.108
        -0.000   0.000  -0.000  -0.001   0.000  -0.001  -0.000   0.000   0.000
@@ -671,10 +671,10 @@ meta: {optdriver: 3, gwcalctyp: 0, }
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -31.362  -5.592  -8.123  -8.124  -5.593  -8.123  -5.592  -5.593  -8.124
-        0.000   0.001  -0.001  -0.000   0.000  -0.001   0.001   0.000  -0.000
+       -0.000   0.001  -0.001  -0.000   0.000  -0.001   0.001   0.000  -0.000
 
     2  -5.592 -19.245   0.708   1.340  -1.021   1.341  -1.022   5.851  -4.214
-       -0.001   0.000  -0.000  -0.000  -0.877  -0.000   0.878   0.000  -0.000
+       -0.001  -0.000  -0.000  -0.000  -0.877  -0.000   0.878   0.000  -0.000
 
   chi0(G,G') at the    2 th omega   0.0000  29.8882 [eV]
        1       2       3       4       5       6       7       8       9
@@ -835,7 +835,7 @@ data: !SigmaeeData |
             fcart1    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart4     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         312
+-          fftalg         512
            getden1          0
            getden2          1
            getden3          0
@@ -1062,10 +1062,10 @@ P           mkmem           3
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          1.1  wall=          1.1
+- Proc.   0 individual time (sec): cpu=          0.8  wall=          0.9
 
 ================================================================================
 
  Calculation completed.
-.Delivered  12 WARNINGs and   7 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.1  wall=          1.1
+.Delivered   9 WARNINGs and   7 COMMENTs to log file.
++Overall time at end (sec) : cpu=          0.8  wall=          0.9

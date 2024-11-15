@@ -6,7 +6,7 @@
 !!  XC+PAW related operations
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (MT, FJ, TR, GJ, TD)
+!!  Copyright (C) 2013-2024 ABINIT group (MT, FJ, TR, GJ, TD)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2999,7 +2999,7 @@ end subroutine pawxc_dfpt
  real(dp) :: coeff,grho_tot,grho_up,fact
  character(len=500) :: msg
 !arrays
- real(dp) :: d2vxc(0,0)
+ real(dp) :: d2vxc(1,1)
  real(dp),allocatable :: dff(:),dnexcdn(:,:),dvxcdgr(:,:),dvxci(:,:)
  real(dp),allocatable :: grho2(:,:),grho_updn(:,:)
 

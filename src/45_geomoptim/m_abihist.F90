@@ -20,7 +20,7 @@
 !! * vel2hist
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2022 ABINIT group (XG, SE)
+!! Copyright (C) 2001-2024 ABINIT group (XG, SE)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -916,14 +916,15 @@ character(len= 500) :: msg
 &                     'on the previous history.(Relative difference)'
  call wrtout(std_out,msg,'COLL')
 
- x=hist_out%xred(1,1,hist_out%ihist)
- y=hist_in%xred(1,1,hist_in%ihist)
- maxdiff=2*abs(x-y)/(abs(x)+abs(y))
+ maxdiff = -1.0
  do kk=1,natom
    do jj=1,3
      x=hist_out%xred(jj,kk,hist_out%ihist)
      y=hist_in%xred(jj,kk,hist_in%ihist)
-     diff=2*abs(x-y)/(abs(x)+abs(y))
+     diff = zero
+     if (abs(x) > tol12 .and. abs(y) > tol12) then
+       diff=2*abs(x-y)/(abs(x)+abs(y))
+     end if 
      if (diff>maxdiff) maxdiff=diff
    end do
  end do
@@ -932,15 +933,15 @@ character(len= 500) :: msg
 
  if (maxdiff>tolerance) similar=0
 
-
- x=hist_out%rprimd(1,1,hist_out%ihist)
- y=hist_in%rprimd(1,1,hist_in%ihist)
- maxdiff=2*abs(x-y)/(abs(x)+abs(y))
+ maxdiff = -1.0
  do kk=1,3
    do jj=1,3
      x=hist_out%rprimd(jj,kk,hist_out%ihist)
      y=hist_in%rprimd(jj,kk,hist_in%ihist)
-     diff=2*abs(x-y)/(abs(x)+abs(y))
+     diff = zero
+     if (abs(x) > tol12 .and. abs(y) > tol12) then
+       diff=2*abs(x-y)/(abs(x)+abs(y))
+     end if 
      if (diff>maxdiff) maxdiff=diff
    end do
  end do
@@ -949,9 +950,7 @@ character(len= 500) :: msg
  if (maxdiff>tolerance) similar=0
 
 
- x=hist_out%acell(1,hist_out%ihist)
- y=hist_in%acell(1,hist_in%ihist)
- maxdiff=2*abs(x-y)/(abs(x)+abs(y))
+ maxdiff = -1.0
  do kk=1,3
    x=hist_out%acell(kk,hist_out%ihist)
    y=hist_in%acell(kk,hist_in%ihist)

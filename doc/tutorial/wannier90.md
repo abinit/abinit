@@ -1,5 +1,5 @@
 ---
-authors: T. Rangel, O. Gingras
+authors: T. Rangel, O. Gingras, X. He
 ---
 
 # Wannier90 postprocessor
@@ -42,14 +42,20 @@ requiring just two ingredients:
   localized orbitals $|g_{n}\rangle$ (See section D of [[cite:Souza2002a]])
 
 What ABINIT does is to take the Bloch functions from a ground state calculation
-and compute these two ingredients. Then, Wannier90 is executed. Wannier90 is
-included as a library in ABINIT and the process is automatic, so that in a
-single run you can do both the ground state calculation and the computation of MLWFs.
+and compute these two ingredients. The $A_{mn}$  and $M_{mn}$ matrices includes the k-points in the full Brillouin zone (FBZ) which requires one of the following:
 
-## 2. A first example: silicon
+1. the ground state self-consistent calculation done in the FBZ.
+2. a self-consistent calculation in the irreducible Brillouin zone (IBZ) followed by a non-self-consistent calculation in the FBZ. 
+3. using the crystal symmetry to generate the Bloch states of the FBZ from the Bloch states of th IBZ. 
 
-Before starting make sure that you compiled abinit enabling Wannier90.
-You may have to recompile the code with
+If option 1 or 2 is chosen, Wannier90 is executed during the Abinit run after the wavefunction is computed. Wannier90 is included as a library in ABINIT and the process is automatic, so that in a
+single run you can do both the ground state calculation  and the computation of MLWFs.  We call this single-run mode.  
+
+If option 3 is chosen,  we run ABINIT as  a post-processing to the wavefunctions which are already computed.  We call this post-processing mode.  This mode has the advantage that less computation of the wavefunction is needed. 
+
+In the tutorial below, we'll learn how to run ABINIT-Wannier90 with some examples.
+
+Before starting make sure that you compiled ABINIT enabling Wannier90. If not, you may have to recompile the code with
 
 ```
 configure --with-config-file=myconf.ac9
@@ -63,6 +69,8 @@ where *myconf.ac9* defines:
 with_wannier90="/usr/local"
 
 ```
+
+## 2. A first example: silicon  (single-run mode)
 
 Now we will compute a set of MLWFs for silicon.
 We are going to extract the Wannier functions corresponding to the four valence states of silicon.
@@ -179,9 +187,9 @@ You will obtain a table of the following form:
 
     If |AbiPy| is installed on your machine, you can use the |abiopen| script
     with the `wout` command and the `--expose` option to visualize the iterations
-
+    
         abiopen.py wannier90.wout --expose -sns
-
+    
     ![](wannier90_assets/abiopen_tw90_1o_DS2_w90.png)
 
 
@@ -208,13 +216,13 @@ to invoke vesta directly from the terminal:
     * It is important to set [[istwfk]] equal to 1 for every k-point avoiding using symmetries.
       The reason is that the formalism used to extract the MLWF assumes that you have a uniform grid of k-points.
       See section IV of [[cite:Marzari1997]].
-
+    
     * The number of Wannier functions to extract should be minor or equal to the number of bands.
       If _nband > nwan_ then the disentanglement routines will be called.
-
+    
     * The number of k-points should be equal to ngkpt(1)*ngkpt(2)*ngkpt(3).
       This is achieved by using the input variables [[kptopt]]= 3, [[ngkpt]] and [[nshiftk]]= 1.
-
+    
     * The prefix of all wannier90 files in this sample case is _wannier90_.
       Other possible prefixes are w90_ and **abo** __w90_ , where **abo** is the fourth line on your .file file.
       To setup the prefix, ABINIT will first look for a file named **abo**
@@ -342,6 +350,8 @@ gnuplot "tw90_4o_DS3_w90_band.gnu"
 ![](wannier90_assets/load_tw90_4o_DS3_w90_band.png)
 
 
+
+
 ## 6. A second example: La2CuO4
 
 As a next example, we will compute a single MLWF for the cuprate La2CuO4.
@@ -425,7 +435,7 @@ to be partially filled, at the Fermi level.
     that is partially filled, as expected.
     
     ![](wannier90_assets/LCO_fatbands.png) 
-
+    
     This block contains 17 bands, mostly formed by the hybridization of the 4 times 3 O-2p orbitals
     with the 5 Cu-3d orbitals. It includes band numbers 19 to 33.
 
@@ -493,3 +503,41 @@ The resulting Hamiltonian is written as the tw90_6o_DS3_w90_hr.dat file.
 It can be used for example using the TRIQS package to apply DMFT, thus correcting the
 DFT calculation to compute correctly the strong electronic correlations.
 We would then observe a Mott transition with respect to temperature.
+
+
+
+## 7. Run ABINIT-Wannier90 in post-processing mode with the example of GaAs
+
+Now we use ABINIT-Wannier90 in the post-processing mode to construct the Wannier functions for GaAs. 
+
+```
+cp ../tw90_7.abi .
+cp ../tw90_7o_DS2_w90.win .
+```
+
+In this mode, we can do the SCF calculation in the first dataset with the kpoints in IBZ. Then we  run post-processing in the second dataset, which reads the wavefunction generated in the first dataset,  use symmetry to get the wavefunction in FBZ, and compute the Wannier functions from that. The first dataset is just the usual SCF input. In the second dataset, there is:
+
+```
+ optdriver2 8
+ wfk_task2 "wannier"
+ getwfk2   -1   # Read WKF in the IBZ from first dataset.
+ prtwant2 2
+ w90iniprj2 2
+```
+
+where optdrive 8 means that it is a post-processing of the WFK file, and wfk_task wannier tells that the ABINIT-Wannier interface will be executed. The other options are the same as in the "single-run" mode.  And we also need to provide the Wannier90 ".win" input file, which is also the same as in the "single-run" mode. In this mode, we use the same kpoint options as the SCF run (first dataset) instead of specifying the options for generating the k-points for the FBZ, as the wavefunction for the FBZ is automatically generated. 
+
+After running the command:
+
+```
+abinit tw90_7.abi > tw90_7.log 2> tw90_7.err
+```
+
+ we get the usual output of the ABINIT-Wannier run, including the ".amn", ".mmn" files, and so on.
+
+
+
+
+
+
+## 

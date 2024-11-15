@@ -6,7 +6,7 @@
 !!  This module provides helper functions for MPI-IO operations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2022 ABINIT group (MG)
+!! Copyright (C) 2009-2024 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,6 +29,8 @@ MODULE m_mpiotk
 #if defined HAVE_MPI2 && defined HAVE_MPI_IO
  use mpi
 #endif
+
+ use iso_c_binding
 
  implicit none
 
@@ -226,7 +228,7 @@ subroutine mpiotk_read_fsuba_dp2D(fh,offset,sizes,subsizes,starts,bufsz,buffer,c
  integer(XMPI_OFFSET_KIND),intent(in) :: offset,chunk_bsize
 !arrays
  integer,intent(in) :: sizes(2),subsizes(2),starts(2)
- real(dp),intent(out) :: buffer(bufsz)
+ real(dp),intent(out),target :: buffer(bufsz)
 
 !Local variables ------------------------------
 !scalars
@@ -234,10 +236,12 @@ subroutine mpiotk_read_fsuba_dp2D(fh,offset,sizes,subsizes,starts,bufsz,buffer,c
  integer :: fsub_type,my_ncalls,icall,ncalls,subs_x
  integer(XMPI_OFFSET_KIND) :: my_offset,my_offpad
  !character(len=500) :: msg
+ type(c_ptr) :: cptr
 !arrays
  integer :: call_subsizes(2),call_starts(2)
  integer,allocatable :: my_basead(:),my_subsizes(:,:),my_starts(:,:)
  real(dp),allocatable :: dummy_buf(:,:)
+ real(dp),pointer :: buf_ptr(:)
 
 !************************************************************************
 
@@ -294,7 +298,8 @@ subroutine mpiotk_read_fsuba_dp2D(fh,offset,sizes,subsizes,starts,bufsz,buffer,c
    if (sc_mode==xmpio_collective) then
      ! Collective read
      if (icall <= my_ncalls) then
-       call MPI_FILE_READ_ALL(myfh, buffer(ptr), ncount, MPI_DOUBLE_COMPLEX, MPI_STATUS_IGNORE, mpierr)
+       cptr=c_loc(buffer(ptr)) ; call c_f_pointer(cptr,buf_ptr,[ncount])
+       call MPI_FILE_READ_ALL(myfh, buf_ptr, ncount, MPI_DOUBLE_COMPLEX, MPI_STATUS_IGNORE, mpierr)
      else
        ABI_MALLOC(dummy_buf,(2,subs_x))
        call MPI_FILE_READ_ALL(myfh, dummy_buf, ncount, MPI_DOUBLE_COMPLEX, MPI_STATUS_IGNORE, mpierr)
@@ -304,7 +309,8 @@ subroutine mpiotk_read_fsuba_dp2D(fh,offset,sizes,subsizes,starts,bufsz,buffer,c
 
    else
      ! Individual read.
-     call MPI_FILE_READ(myfh, buffer(ptr), ncount, MPI_DOUBLE_COMPLEX, MPI_STATUS_IGNORE, mpierr)
+     cptr=c_loc(buffer(ptr)) ; call c_f_pointer(cptr,buf_ptr,[ncount])
+     call MPI_FILE_READ(myfh, buf_ptr, ncount, MPI_DOUBLE_COMPLEX, MPI_STATUS_IGNORE, mpierr)
      ABI_CHECK_MPI(mpierr,"FILE_READ")
    end if
 
@@ -359,17 +365,19 @@ subroutine mpiotk_write_fsuba_dp2D(fh,offset,sizes,subsizes,starts,bufsz,buffer,
  integer(XMPI_OFFSET_KIND),intent(in) :: offset,chunk_bsize
 !arrays
  integer,intent(in) :: sizes(2),subsizes(2),starts(2)
- real(dp),intent(in) :: buffer(bufsz)
+ real(dp),intent(in),target :: buffer(bufsz)
 
 !Local variables ------------------------------
 !scalars
  integer :: mpierr,ptr,ncount,myfh
  integer :: fsub_type,my_ncalls,icall,ncalls,subs_x
  integer(XMPI_OFFSET_KIND) :: my_offset,my_offpad
+ type(c_ptr) :: cptr
  !character(len=500) :: msg
 !arrays
  integer :: call_subsizes(2),call_starts(2)
  integer,allocatable :: my_basead(:),my_subsizes(:,:),my_starts(:,:)
+real(dp),pointer :: buf_ptr(:)
 
 !************************************************************************
 
@@ -424,16 +432,19 @@ subroutine mpiotk_write_fsuba_dp2D(fh,offset,sizes,subsizes,starts,bufsz,buffer,
    if (sc_mode==xmpio_collective) then
      ! Collective write
      if (icall <= my_ncalls) then
-       call MPI_FILE_WRITE_ALL(myfh, buffer(ptr), ncount, MPI_DOUBLE_COMPLEX, MPI_STATUS_IGNORE, mpierr)
+       cptr=c_loc(buffer(ptr)) ; call c_f_pointer(cptr,buf_ptr,[ncount])
+       call MPI_FILE_WRITE_ALL(myfh, buf_ptr, ncount, MPI_DOUBLE_COMPLEX, MPI_STATUS_IGNORE, mpierr)
      else
        ! Re-write my first chunk of data.
-       call MPI_FILE_WRITE_ALL(myfh, buffer(1), ncount, MPI_DOUBLE_COMPLEX, MPI_STATUS_IGNORE, mpierr)
+       cptr=c_loc(buffer(1)) ; call c_f_pointer(cptr,buf_ptr,[ncount])
+       call MPI_FILE_WRITE_ALL(myfh, buf_ptr, ncount, MPI_DOUBLE_COMPLEX, MPI_STATUS_IGNORE, mpierr)
      end if
      ABI_CHECK_MPI(mpierr,"FILE_WRITE_ALL")
 
    else
      ! Individual write.
-     call MPI_FILE_WRITE(myfh, buffer(ptr), ncount, MPI_DOUBLE_COMPLEX, MPI_STATUS_IGNORE, mpierr)
+     cptr=c_loc(buffer(ptr)) ; call c_f_pointer(cptr,buf_ptr,[ncount])
+     call MPI_FILE_WRITE(myfh, buf_ptr, ncount, MPI_DOUBLE_COMPLEX, MPI_STATUS_IGNORE, mpierr)
      ABI_CHECK_MPI(mpierr,"FILE_WRITE")
    end if
 
@@ -490,7 +501,7 @@ subroutine mpiotk_read_fsuba_dpc3D(fh,offset,sizes,subsizes,starts,bufsz,cbuffer
  integer(XMPI_OFFSET_KIND),intent(in) :: offset,chunk_bsize
 !arrays
  integer,intent(in) :: sizes(3),subsizes(3),starts(3)
- complex(dpc),intent(out) :: cbuffer(bufsz)
+ complex(dpc),intent(out),target :: cbuffer(bufsz)
 
 !Local variables-------------------------------
 !scalars
@@ -499,10 +510,12 @@ subroutine mpiotk_read_fsuba_dpc3D(fh,offset,sizes,subsizes,starts,bufsz,cbuffer
  integer :: size_x,size_y,subs_x,subs_y,subs_xy,start_x,start_y,start_z,stop_z
  integer(XMPI_OFFSET_KIND) :: my_offset,my_offpad
  !character(len=500) :: msg
+ type(c_ptr) :: cptr
 !arrays
  integer :: call_subsizes(3),call_starts(3)
  integer,allocatable :: my_basead(:),my_subsizes(:,:),my_starts(:,:)
  complex(dpc),allocatable :: dummy_cbuf(:)
+ complex(dpc),pointer :: buf_ptr(:)
 
 !************************************************************************
 
@@ -614,7 +627,8 @@ subroutine mpiotk_read_fsuba_dpc3D(fh,offset,sizes,subsizes,starts,bufsz,cbuffer
    if (sc_mode==xmpio_collective) then
      ! Collective read
      if (icall <= my_ncalls) then
-       call MPI_FILE_READ_ALL(myfh, cbuffer(ptr), ncount, MPI_DOUBLE_COMPLEX, MPI_STATUS_IGNORE, mpierr)
+       cptr=c_loc(cbuffer(ptr)) ; call c_f_pointer(cptr,buf_ptr,[ncount])
+       call MPI_FILE_READ_ALL(myfh, buf_ptr, ncount, MPI_DOUBLE_COMPLEX, MPI_STATUS_IGNORE, mpierr)
      else
        ABI_MALLOC(dummy_cbuf,(subs_x))
        call MPI_FILE_READ_ALL(myfh, dummy_cbuf, ncount, MPI_DOUBLE_COMPLEX, MPI_STATUS_IGNORE, mpierr)
@@ -624,7 +638,8 @@ subroutine mpiotk_read_fsuba_dpc3D(fh,offset,sizes,subsizes,starts,bufsz,cbuffer
 
    else
      ! Individual read.
-     call MPI_FILE_READ(myfh, cbuffer(ptr), ncount, MPI_DOUBLE_COMPLEX, MPI_STATUS_IGNORE, mpierr)
+     cptr=c_loc(cbuffer(ptr)) ; call c_f_pointer(cptr,buf_ptr,[ncount])
+     call MPI_FILE_READ(myfh, buf_ptr, ncount, MPI_DOUBLE_COMPLEX, MPI_STATUS_IGNORE, mpierr)
      ABI_CHECK_MPI(mpierr,"FILE_READ")
    end if
 
@@ -679,7 +694,7 @@ subroutine mpiotk_read_fsuba_dpc4D(fh,offset,sizes,subsizes,starts,bufsz,cbuffer
  integer(XMPI_OFFSET_KIND),intent(in) :: offset,chunk_bsize
 !arrays
  integer,intent(in) :: sizes(4),subsizes(4),starts(4)
- complex(dpc),intent(out) :: cbuffer(bufsz)
+ complex(dpc),intent(out),target :: cbuffer(bufsz)
 
 !Local variables-------------------------------
 !scalars
@@ -688,10 +703,12 @@ subroutine mpiotk_read_fsuba_dpc4D(fh,offset,sizes,subsizes,starts,bufsz,cbuffer
  integer :: size_x,size_y,size_z,subs_x,subs_y,subs_z,subs_xyz,start_x,start_y,start_z,start_a,stop_a
  integer(XMPI_OFFSET_KIND) :: my_offset,my_offpad
  !character(len=500) :: msg
+ type(c_ptr) :: cptr
 !arrays
  integer :: call_subsizes(4),call_starts(4)
  integer,allocatable :: my_basead(:),my_subsizes(:,:),my_starts(:,:)
  complex(dpc),allocatable :: dummy_cbuf(:)
+ complex(dpc),pointer :: buf_ptr(:)
 
 !************************************************************************
 
@@ -809,7 +826,8 @@ subroutine mpiotk_read_fsuba_dpc4D(fh,offset,sizes,subsizes,starts,bufsz,cbuffer
    if (sc_mode==xmpio_collective) then
      ! Collective read
      if (icall <= my_ncalls) then
-       call MPI_FILE_READ_ALL(myfh, cbuffer(ptr), ncount, MPI_DOUBLE_COMPLEX, MPI_STATUS_IGNORE, mpierr)
+       cptr=c_loc(cbuffer(ptr)) ; call c_f_pointer(cptr,buf_ptr,[ncount])
+       call MPI_FILE_READ_ALL(myfh, cbuffer(ptr:), ncount, MPI_DOUBLE_COMPLEX, MPI_STATUS_IGNORE, mpierr)
      else
        ABI_MALLOC(dummy_cbuf,(subs_x))
        call MPI_FILE_READ_ALL(myfh, dummy_cbuf, ncount, MPI_DOUBLE_COMPLEX, MPI_STATUS_IGNORE, mpierr)
@@ -818,7 +836,8 @@ subroutine mpiotk_read_fsuba_dpc4D(fh,offset,sizes,subsizes,starts,bufsz,cbuffer
      ABI_CHECK_MPI(mpierr,"FILE_READ_ALL")
    else
      ! Individual read.
-     call MPI_FILE_READ(myfh, cbuffer(ptr), ncount, MPI_DOUBLE_COMPLEX, MPI_STATUS_IGNORE, mpierr)
+     cptr=c_loc(cbuffer(ptr)) ; call c_f_pointer(cptr,buf_ptr,[ncount])
+     call MPI_FILE_READ(myfh, buf_ptr, ncount, MPI_DOUBLE_COMPLEX, MPI_STATUS_IGNORE, mpierr)
      ABI_CHECK_MPI(mpierr,"FILE_READ")
    end if
 

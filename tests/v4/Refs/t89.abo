@@ -1,8 +1,8 @@
 
-.Version 9.11.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2022 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Jul 2023.
-- ( at 12h01 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h10 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v4_t89/t89.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v4_t89/t89.abi
 - output file    -> t89.abo
 - root for input  files -> t89i
 - root for output files -> t89o
@@ -58,17 +58,17 @@ _ WF disk file :      0.302 Mbytes ; DEN or POT disk file :      0.065 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
             acell      2.0000000000E+01  2.0000000000E+01  2.0000000000E+01 Bohr
               amu      1.96966540E+02
              ecut      3.00000000E+00 Hartree
--          fftalg         312
+-          fftalg         512
            getden1          0
            getden2         -1
              iscf1          7
@@ -171,8 +171,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.05208
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/79au.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/79au.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/79au.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/79au.pspnc
 -  Troullier-Martins psp for element  Au        Thu Oct 27 17:58:22 EDT 1994
 - 79.00000  11.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -210,7 +210,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  5  -32.993560064961    -5.453E-05 8.332E-04 2.133E+00
  ETOT  6  -32.993713780791    -1.537E-04 2.605E-04 3.849E-01
  ETOT  7  -32.993737625945    -2.385E-05 1.668E-05 1.462E-01
- ETOT  8  -32.993739424258    -1.798E-06 6.745E-06 3.931E-02
+ ETOT  8  -32.993739424259    -1.798E-06 6.745E-06 3.931E-02
  ETOT  9  -32.993739662564    -2.383E-07 1.634E-06 6.554E-03
  ETOT 10  -32.993739753095    -9.053E-08 4.766E-07 4.922E-04
 
@@ -290,18 +290,18 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  7.31640190299437E+00
-hartree             :  2.40548046804509E+01
-xc                  : -1.13310007778034E+01
+kinetic             :  7.31640190299526E+00
+hartree             :  2.40548046804534E+01
+xc                  : -1.13310007778038E+01
 Ewald energy        :  4.25496183779813E-01
 psp_core            :  5.28649525898789E-01
-local_psp           : -5.30903508684142E+01
-non_local_psp       : -8.77852682267156E-01
-internal            : -3.29738520353609E+01
-'-kT*entropy'       : -1.98877177345438E-02
-total_energy        : -3.29937397530954E+01
-total_energy_eV     : -8.97805317398422E+02
-band_energy         : -4.59257873481215E+00
+local_psp           : -5.30903508684168E+01
+non_local_psp       : -8.77852682267295E-01
+internal            : -3.29738520353607E+01
+'-kT*entropy'       : -1.98877177345490E-02
+total_energy        : -3.29937397530952E+01
+total_energy_eV     : -8.97805317398415E+02
+band_energy         : -4.59257873480950E+00
 ...
 
 
@@ -350,7 +350,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
 ================================================================================
  prteigrs : about to open file t89o_DS2_EIG
  Non-SCF case, kpt    1 (  0.00000  0.00000  0.00000), residuals and eigenvalues=
-  4.19E-13  5.43E-13  5.58E-13  1.19E-13  2.21E-13  6.17E-13  6.03E-13  4.96E-13
+  4.19E-13  5.43E-13  5.59E-13  1.19E-13  2.21E-13  6.17E-13  6.03E-13  4.96E-13
   5.59E-13  4.06E-10
  -8.9644E-01 -3.8414E-01 -3.8414E-01 -3.4564E-01 -2.4418E-01 -2.4162E-01
  -5.9950E-02 -5.9950E-02 -2.2465E-02  2.9278E-02
@@ -433,7 +433,7 @@ force_length_stats: {min: null, max: null, mean: null, }
              ecut      3.00000000E+00 Hartree
            etotal1    -3.2993739753E+01
             fcart1    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
--          fftalg         312
+-          fftalg         512
            getden1          0
            getden2         -1
              iscf1          7
@@ -592,10 +592,10 @@ P           mkmem           4
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          1.8  wall=          1.9
+- Proc.   0 individual time (sec): cpu=          1.2  wall=          1.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered  17 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.8  wall=          1.9
++Overall time at end (sec) : cpu=          1.2  wall=          1.3

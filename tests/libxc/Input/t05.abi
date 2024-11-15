@@ -1,7 +1,7 @@
 # Bi atom : reference test (very quick) for all LibXC functionals. nstep=1, nline=1.
 # Not accurate, only portability check.
 
-ndtset 43
+ndtset 42
 
 # (S)LDAs X + different correlations
 #ixc  -1002 ! Not portable from libxc v3 to v4
@@ -35,26 +35,26 @@ ixc21 -106136
 ixc22 -101131
 ixc23 -102131
 ixc24 -103131
-ixc25 -104131
-ixc26 -105131
+#ixc25 -104131 See test 35
+ixc25 -105131
 #ixc  -106131 already treated, see dataset 17
-ixc27 -107131
-ixc28 -108131
-ixc29 -109131
-ixc30 -110131
-ixc31 -111131
-ixc32 -112131
-ixc33 -113131
-ixc34 -114131
-ixc35 -115131
-ixc36 -116131
-ixc37 -117131
-ixc38 -118131
-ixc39 -119131
-ixc40 -120131
-ixc41 -121131
-ixc42 -122131
-ixc43 -123131
+ixc26 -107131
+ixc27 -108131
+ixc28 -109131
+ixc29 -110131
+ixc30 -111131
+ixc31 -112131
+ixc32 -113131
+ixc33 -114131
+ixc34 -115131
+ixc35 -116131
+ixc36 -117131
+ixc37 -118131
+ixc38 -119131
+ixc39 -120131
+ixc40 -121131
+ixc41 -122131
+ixc42 -123131
 
 #Common data
 acell 3*10

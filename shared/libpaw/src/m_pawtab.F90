@@ -8,7 +8,7 @@
 !!  pawtab_type variables define TABulated data for PAW (from pseudopotential)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2022 ABINIT group (MT)
+!! Copyright (C) 2013-2024 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -343,9 +343,8 @@ MODULE m_pawtab
    ! Ratio of Slater Integrals F6 and F4
 
   real(dp) :: jpawu
-   ! jpawu
    ! Value of J parameter for paw+u for a given type.
-  
+
    real(dp) :: lamb_shielding=0.0D0
    ! Lamb shielding used in NMR shielding calcs (see m_orbmag.F90)
 
@@ -365,7 +364,6 @@ MODULE m_pawtab
    ! Sigma parameter in gaussian shapefunction (shape_type=2)
 
   real(dp) :: upawu
-   ! upawu
    ! Value of U parameter for paw+u for a given type.
 
 !Objects
@@ -623,6 +621,7 @@ MODULE m_pawtab
  public :: pawtab_set_flags    ! Set the value of the internal flags
  public :: pawtab_print        ! Printout of the object.
  public :: pawtab_bcast        ! MPI broadcast the object
+!TODO: someone should implement a pawtab copy routine to get an independent identical copy of the object
 
  interface pawtab_nullify
    module procedure pawtab_nullify_0D

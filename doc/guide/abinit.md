@@ -1133,13 +1133,22 @@ correlation and local pseudopotential (see [[prtpot]]), the Hartree potential
 (see [[prtvha]]), the Hartree+XC potential (see [[prtvhxc]]), the local
 pseudopotential (see [[prtvpsp]]) or the XC potential (see [[prtvxc]]), These
 are defined on the real space grid in Hartree energy units. The underlying
-grid is as described above. If [[nspden]]=2, the different components are the
-spin-up potential and the spin-down potential. In the case [[nspden]]=4, the
-components correspond to the up-up potential, the down-down potential, the
-real part of the up-down potential, and the imaginary part of the up-down
-potential. Note that the Hartree potential is NOT spin-dependent, but in order
+grid is as described above. **cplex** is the
+number of complex components of the potential (**cplex**=1 for GS calculations -the
+density is real-, and **cplex**=1 or 2 for RF, depending on wether q=0 or not).
+If [[nspden]]=2, the different components are the
+spin-up potential and the spin-down potential. 
+
+In the case [[nspden]]=4, for the ground-state, and also for the RF with q=0, the
+components (all real) correspond to the up-up potential, the down-down potential, the
+real part of the up-down potential (also equal to the real part of the down-up potential), and the imaginary part of the up-down
+potential (also equal to minus the imaginary part of the up-down potential). Note that the Hartree potential is NOT spin-dependent, but in order
 to use the same format as for the other potential files, the spin-independent
 array is written twice, once for spin-up and one for spin-down.
+
+In the case [[nspden]]=4, for the response function case, and if q is non-zero (so, **cplex**=2),
+the components (all complex) corresponds to the up-up potential, the down-down potential,
+the up-down potential, and i times the down-up potential.
 
 <a id="wfkfile"></a>
 ###5.7 The wavefunction output file
@@ -1222,6 +1231,7 @@ information on such files:
   * [[prtgeo]] to print a file with a geometrical analysis (bond lengths and bond angles), that also contains an XMOL section
   * [[prt1dm]] to print a one-dimensional projection of potential and density, for the three axes.
 
+<a id="control-of-output-in-the-parallel-case"></a>
 ### 5.9 Control of output in the parallel case
   
 For massively parallel runs, one cannot afford to have some of the output

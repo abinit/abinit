@@ -7,7 +7,7 @@ release are NOT described here...
 NOTE that problems are presently (for about three years) most often reported on the issue manager of the internal ABINIT Gitlab .
 Still, the list of platforms and corresponding failing tests is maintained in the present document.
 
-The present release ABINITv9.10.3 is for production
+The present revision ABINITv10.2.4 is for bug fixes
 
 0. List of platforms
 1. Batteries of tests
@@ -16,44 +16,49 @@ The present release ABINITv9.10.3 is for production
 ================================================================
 0. Platforms
 
-For ABINITv9.10.3, list closed on 2023 07 11
+For ABINITv10.2.4, list closed on 2024 11 XX
 after installation and successful tests for the standard set of platforms,
 as mentioned on
 https://bbportal.abinit.org/#/status
 and
-https://wiki.abinit.org/doku.php?id=bb:builder
+https://abinit.github.io/abinit_web/builder.html
 Corresponding configuration files are to be found in doc/build/config-examples
 
-Supported compilers : gfortran, intel fortran, NAG.
+Supported compilers : gfortran, intel fortran, NAG, nvhpc. Temporarily NAG untested.
 The following compilers are either obsolete, or considered too unstable/buggy for ABINIT :
-IBM XLF, g95, pathscale, open64, PGI . This does not mean that ABINIT will not work,
+IBM XLF, g95, pathscale, open64, PGI . This does not mean that ABINIT will not work with these,
 but there is no check on the ABINIT testfarm that ABINIT runs correctly with these.
+The compiler nvhpc has been specifically added for tests of GPUs.
 
 Status, for the different versions of compilers that are supported (or might become soon).
 
-GNU Fortran compiler (presently tested : v6.5, v7.5, v8.2, v8.3, v9.2, v9.3, v10.2, v11.2)
+GNU Fortran compiler (presently tested : v8.5, v9.5, v10.2, v12.2, v13.2, v13.3)
 All are mostly OK
-gnu 8.2, 8.3, 9.1 + openmpi : the reading of WFK files using MPIIO is not correct for test mpiio#26
-all gnu : bigdft#14 is disactivated
-GNU 11.2 with MacPorts, and the new version of the fallbacks, had to disactivate v9#17, v9#19, tutorial#paw2_1, tutorial#paw2_2.
-GNU 8.2 on the Buda machine : had to disactivate libxc#71 .
+GNU 10.2 : tutoparal/teph_tdep_legacy_4 is disactivated, as well as tutorespfn/tlw#1-7
+GNU 12.2 : tutoparal/timages#04 is disactivated, as well as bigdft_paral#01,02,86, tutoparal/teph_tdep_legacy_4
+GNU 13.2 : bigdft#14, libxc#74 are disactivated on the reference bot eos_gnu_13.2_mpich 
+GNU 13.2 : tutorespfn/teph4mob#1-7 are disactivated on the reference bot eos_gnu_13.2_serial, 
+           as well as tutorespfn/trf2#1-7, v2#04,09, v3#92, v5#85-95, v6#72-76, v6#90-94, v67mbpt#51, v7#05, v8#41-44, v8#66-70, v8#97,
+           v9#50-56, v9#88-89, v9#112, wannier90#05
+GNU 13.2 : v7#90-94 is disactivated on the reference bots eos_gnu_13.2_mpich and serial
+GNU 13.2 : paral 78, 83, 84, 96, 101 are disactivated on the reference bot eos_gnu_13.2_mpich 
+GNU 13.2 with OpenMP : several atdep tests are disactivated (08,20,24,25,27,30,31,34,36)
+GNU 13.2 with OpenMP : several libxc tests are disactivated (34,35)
+GNU 13.2 with OpenMP : several tutorespfn/tlw tests are disactivated (4,5,6,7)
+GNU 13.2 with OpenMP : several v10#10-19 are disactivated, as well as v4#32-34 
 
-Intel ifort compiler (presently tested : 16.0, 17.0, 18.0, 19.0, 19.1, 21.4)
-Ifort 15.0 is mostly OK, except for one test paral#30 (on ubu). Paral KGB.
-Ifort 16.0 is mostly OK, except for one test paral#30 (on ubu). Paral KGB.
-Ifort 17.0 is mostly OK, except for bigdft#06, bigdft#07, v8#156.
-Ifort 18.0 and 19.0 are a bit problematic.
- - In "real" conditions (mrgscr and mrgdv), the ADVANCE='NO' specification for the write instruction does not work, but
-   it works in simple programs. Thus all tests (and their chain of tests) that rely on mrgscr and mrgdv have been disabled for this compiler.
-   Namely, v3#87-91, v67mbpt#37-39, v7#85-89, v8#41-44, v8#61-65
- - Also, the reading of WFK files using MPIIO is not correct, for tests mpiio#26 and 62.
- - Also, problem with electron-phonon test chain v8#15X.
-Ifort 19.0 has the same problems than Ifort 18.0 .
-Ifort 19.1 is mostly OK ! (Problems with Ifort 18.0 and 19.0 do not show up - Only remaining problem in DMFT, see test v6#45).
-Ifort 21.4 is mostly OK, except for one problem in DMFT, see test v6#45 
+Intel Ifort compiler (presently tested : 16.0, NOT CURRENTLY TESTED : 21.4-OneAPI)
+Ifort 16.0 is mostly OK, except for test paral#30 (Paral KGB), tutoparal/tgswvl#1, v4#32,33,34, and gpu_omp#03 , that are disactivated.
+! NOT TESTED Ifort 21.4 is mostly OK, except for one problem in DMFT, see test v6#45, like with Ifort 19.1.
 
-NAG Compiler
-Nag 7.1, mostly OK, except for test mpiio#28 ; v8#16,#23 ; v9#22,#81-87 ; paral#08,#32,#84 ; tmulti5#1,#2,#3 ; gw1#2,#3,#4,#5  (get the list by filtering over nag_)
+NAG Compiler (NOT TESTED CURRENTLY)
+Previously, NAG 7.1, mostly OK, except for test mpiio#28 ; v8#16,#23 ; v9#81-87 ; paral#32 ; tmulti5#1,#2,#3 6#1, l_6#1 and l_7#1; gw1#5  (get the list by filtering over nag_)
+
+nvhpc compiler (presently tested : 23.9)
+nvhpc 23.9 : OK, but there are many exceptions,
+  tutorespfn/teph4isotc#1-7, tutorespfn/teph4mob#1-7, tutorespfn/teph4mob#1-8, v7#83,85-89, unitary/tfftgw_02 and unitary/tfftgw_03, paral#78,79
+  also not with all tests gwr, with gpu#01-05, v8#41-44, v9#50-65
+
 
 =============================================================
 1. Batteries of tests
@@ -844,4 +849,4 @@ The value computed for
 has changed largely at the switch from 9.0.0 to 9.0.1 . Should be checked what is the correct value, (e.g. in sequential),
 and debug the situation...
 
-NOTE that problems are presently (since 2020) most often reported on the issue manager of Github .
+NOTE that problems are presently (since 2020) most often reported on the issue manager of Gitlab .

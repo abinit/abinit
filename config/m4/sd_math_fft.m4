@@ -1,4 +1,4 @@
-## Copyright (C) 2019-2022 ABINIT group (Yann Pouillon <devops@materialsevolution.es>)
+## Copyright (C) 2019-2024 ABINIT group (Yann Pouillon <devops@materialsevolution.es>)
 
 #
 # Multi-flavor Fast Fourier Transform support
@@ -94,8 +94,21 @@ AC_DEFUN([SD_FFT_DETECT], [
           sd_fft_ok="yes"
         fi
         ;;
-      fftw3)
+      fftw3|fftw3-threads|aocl|AOCL|nvpl)
+        if test "${sd_fft_flavor}" = "nvpl"; then
+          sd_fftw3_cppflags="${sd_fftw3_cppflags} -Mnvpl=fft"
+          sd_fftw3_cflags="${sd_fftw3_cflags} -Mnvpl=fft"
+          sd_fftw3_fcflags="${sd_fftw3_fcflags} -Mnvpl=fft"
+          sd_fftw3_ldflags="${sd_fftw3_ldflags} -Mnvpl=fft"
+          sd_fftw3_libs="${sd_fftw3_libs} -Mnvpl=fft"
+        fi
         SD_FFTW3_DETECT
+        if test "${sd_fft_flavor}" = "fftw3-threads" -a "${sd_fftw3_threads_ok}" != "yes"; then
+          AC_MSG_ERROR([invalid FFT configuration
+                  Selected FFT flavor is fftw3-threads but FFTW3 implementation
+                  does not provide multi-threading!
+                  Check your environment.])
+        fi
         if test "${sd_fftw3_ok}" = "yes"; then
           sd_fft_cppflags="${sd_fftw3_cppflags}"
           sd_fft_cflags="${sd_fftw3_cflags}"
@@ -107,22 +120,9 @@ AC_DEFUN([SD_FFT_DETECT], [
             AC_DEFINE([HAVE_FFTW3_MPI], 1,
               [Define to 1 if you have a MPI-enabled FFTW3 library.])
           fi
-        fi
-        ;;
-      fftw3-threads)
-        SD_FFTW3_DETECT
-        if test "${sd_fftw3_ok}" = "yes" -a "${sd_fftw3_threads_ok}" = "yes"; then
-          sd_fft_cppflags="${sd_fftw3_cppflags}"
-          sd_fft_cflags="${sd_fftw3_cflags}"
-          sd_fft_fcflags="${sd_fftw3_fcflags}"
-          sd_fft_ldflags="${sd_fftw3_ldflags}"
-          sd_fft_libs="${sd_fftw3_libs}"
-          sd_fft_ok="yes"
-          AC_DEFINE([HAVE_FFTW3_THREADS], 1,
-            [Define to 1 if you have a threads-enabled FFTW3 library.])
-          if test "${sd_mpi_ok}" = "yes" -a "${sd_fftw3_mpi_ok}" = "yes"; then
-            AC_DEFINE([HAVE_FFTW3_MPI], 1,
-              [Define to 1 if you have a MPI-enabled FFTW3 library.])
+          if test "${sd_fftw3_threads_ok}" = "yes" ; then
+            AC_DEFINE([HAVE_FFTW3_THREADS], 1,
+              [Define to 1 if you have a threads-enabled FFTW3 library.])
           fi
         fi
         ;;
@@ -315,7 +315,7 @@ AC_DEFUN([_SD_FFT_INIT_FLAVORS], [
   # Prepend FFTW3 if available
   if test "${sd_fftw3_init}" != "" -a "${sd_fftw3_enable}" != "no"; then
     if test "${tmp_linalg_has_mkl}" = ""; then
-      sd_fft_selected_flavors="fftw3-threads fftw3 ${sd_fft_selected_flavors}"
+      sd_fft_selected_flavors="fftw3-threads fftw3 aocl AOCL nvpl ${sd_fft_selected_flavors}"
     fi
   fi
 

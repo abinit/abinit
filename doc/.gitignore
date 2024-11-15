@@ -78,6 +78,7 @@ topics/GW.md
 topics/GWR.md
 topics/GWls.md
 topics/Hybrids.md
+topics/Install.md
 topics/k-points.md
 topics/LatticeModel.md
 topics/LatticeWannier.md
@@ -90,6 +91,7 @@ topics/MagMom.md
 topics/MolecularDynamics.md
 topics/Macroave.md
 topics/multidtset.md
+topics/NMR.md
 topics/nonlinear.md
 topics/Optic.md
 topics/Output.md
@@ -100,6 +102,7 @@ topics/Planewaves.md
 topics/Phonons.md
 topics/PhononBands.md
 topics/PhononWidth.md
+topics/Polaron.md
 topics/PortabilityNonRegression.md
 topics/positron.md
 topics/printing.md

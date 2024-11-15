@@ -6,7 +6,7 @@
 !! Sorting algorithms.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2022 ABINIT group (XG)
+!!  Copyright (C) 2008-2024 ABINIT group (XG, MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -36,6 +36,7 @@ module m_sort
  ! Helper functions to perform common operations.
  public :: sort_rpts     ! Sort list of real points by |r|
  public :: sort_rvals    ! Out-of-place sort of real values
+ public :: sort_gvecs    ! Sort list of g-vectors by norm
 
 CONTAINS  !====================================================================================================
 !!***
@@ -333,7 +334,7 @@ end subroutine sort_rpts
 !! OUTPUT
 !!  iperm(n) index of permutation giving the right ascending order:
 !!      the i-th element of the ordered list had index iperm(i) in in_vals.
-!!  [sorted_in_vals(n)]= list of sorted weigts.
+!!  [sorted_in_vals(n)]= list of sorted values.
 !!
 !! SOURCE
 
@@ -363,6 +364,104 @@ subroutine sort_rvals(n, in_vals, iperm, sorted_vals, tol)
  call sort_dp(n, sorted_vals, iperm, my_tol)
 
 end subroutine sort_rvals
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_sort/sort_gvecs
+!! NAME
+!!  sort_gvecs
+!!
+!! FUNCTION
+!!  Sort list of g-vectors (ascending order)
+!!  Input list is not modified.
+!!
+!! INPUTS
+!!  npw_k: dimension of the list
+!!  kpoint(3): K-point
+!!  gmet(3,3): metric matrix.
+!!  kg_k(3,npw_k): input weigts.
+!!  [tol]: tolerance for comparison
+!!
+!! OUTPUT
+!!  [out_gvec(3,npw_k)]: list of sorted g-vectors
+!!  [iperm(npw_k) index of permutation giving the right ascending order:
+!!      the i-th element of the ordered list had index iperm(i) in in_vals.
+!!
+!! SOURCE
+
+subroutine sort_gvecs(npw_k, kpoint, gmet, in_gvec, out_gvec, iperm, tol)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: npw_k, in_gvec(3,npw_k)
+ real(dp),intent(in) :: kpoint(3), gmet(3,3)
+ integer,allocatable,intent(out) :: out_gvec(:,:)
+ integer,allocatable,optional,intent(out) :: iperm(:)
+ real(dp),optional,intent(in) :: tol
+
+!Local variables-------------------------------
+!scalars
+ integer :: ig, ig_sort
+ real(dp) :: my_tol
+ integer,allocatable :: iperm__(:)
+ real(dp),allocatable :: kin_kg(:)
+
+!************************************************************************
+
+ my_tol = tol14; if (present(tol)) my_tol = tol
+
+ ABI_MALLOC(kin_kg, (npw_k))
+ ABI_MALLOC(iperm__, (npw_k))
+ iperm__ = [(ig, ig=1,npw_k)]
+ do ig=1,npw_k
+   kin_kg(ig) = half * normv(kpoint + in_gvec(:, ig), gmet, "G") ** 2
+ end do
+
+ call sort_dp(npw_k, kin_kg, iperm__, my_tol)
+ ABI_FREE(kin_kg)
+
+ ABI_MALLOC(out_gvec, (3, npw_k))
+ do ig=1,npw_k
+   ig_sort = iperm__(ig)
+   out_gvec(:,ig) = in_gvec(:,ig_sort)
+ end do
+
+ if (present(iperm)) then
+   ABI_MALLOC(iperm, (npw_k))
+   iperm = iperm__
+ end if
+ ABI_FREE(iperm__)
+
+contains
+function normv(xv, met, space) result(res)
+
+!Arguments ------------------------------------
+!scalars
+ real(dp) :: res
+ character(len=1),intent(in) :: space
+!arrays
+ real(dp),intent(in) :: met(3,3)
+ real(dp),intent(in) :: xv(3)
+
+! *************************************************************************
+
+ res =  ( xv(1)*met(1,1)*xv(1) + xv(2)*met(2,2)*xv(2) + xv(3)*met(3,3)*xv(3)  &
+&  +two*( xv(1)*met(1,2)*xv(2) + xv(1)*met(1,3)*xv(3) + xv(2)*met(2,3)*xv(3)) )
+
+ select case (space)
+ case ('r','R')
+   res=SQRT(res)
+ case ('g','G')
+   res=two_pi*SQRT(res)
+ case default
+   ABI_BUG('Wrong value for space')
+ end select
+
+end function normv
+!!***
+
+end subroutine sort_gvecs
 !!***
 
 end module m_sort

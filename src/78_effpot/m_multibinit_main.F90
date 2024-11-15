@@ -14,7 +14,7 @@
   !!
   !!
   !! COPYRIGHT
-  !! Copyright (C) 2001-2022 ABINIT group (hexu)
+  !! Copyright (C) 2001-2024 ABINIT group (hexu)
   !! This file is distributed under the terms of the
   !! GNU General Public License, see ~abinit/COPYING
   !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -30,11 +30,11 @@
 module m_multibinit_main2
   use defs_basis
   use defs_abitypes
-  use m_build_info
   use m_xmpi
   use m_xomp
   use m_abicore
   use m_errors
+  use m_build_info,         only: abinit_version, build_target
   use m_multibinit_manager, only: mb_manager_t
   
   implicit none
@@ -131,7 +131,7 @@ subroutine herald_multibinit(code_name,code_version,iout, lattmode)
 
 !GNU GPL license
  write(iout, '(a,/,a,a,a,/,a,/,a,/,a,/)' ) &
- '.Copyright (C) 1998-2022 ABINIT group . ',&
+ '.Copyright (C) 1998-2024 ABINIT group . ',&
  ' ',trim(code_name),' comes with ABSOLUTELY NO WARRANTY.',&
  ' It is free software, and you are welcome to redistribute it',&
  ' under certain conditions (GNU General Public License,',&

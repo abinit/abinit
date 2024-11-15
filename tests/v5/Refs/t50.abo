@@ -1,8 +1,8 @@
 
-.Version 9.11.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2022 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Jul 2023.
-- ( at 12h02 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h10 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v5_t50/t50.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v5_t50/t50.abi
 - output file    -> t50.abo
 - root for input  files -> t50i
 - root for output files -> t50o
@@ -74,10 +74,10 @@ _ WF disk file :      0.048 Mbytes ; DEN or POT disk file :      0.414 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -87,7 +87,7 @@ _ WF disk file :      0.048 Mbytes ; DEN or POT disk file :      0.414 Mbytes.
         bs_loband2          0       0
         bs_loband3          0       0
              ecut      1.00000000E+01 Hartree
--          fftalg         312
+-          fftalg         512
            istwfk        2
               ixc           7
            jdtset        1    2    3
@@ -188,8 +188,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/03li.pspfhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/03li.pspfhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/03li.pspfhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/03li.pspfhi
 - Li, fhi98PP: TM-type, LDA PedewWang, l = 2 local
 -  3.00000   3.00000      1023                znucl, zion, pspdat
     6    7    2    2       433   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -309,8 +309,8 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  3.72624023824678E+00
-hartree             :  1.92980762041174E+00
+kinetic             :  3.72624023824677E+00
+hartree             :  1.92980762041173E+00
 xc                  : -1.28130507584239E+00
 Ewald energy        : -1.27678386576628E+00
 psp_core            :  2.07923022610408E-03
@@ -375,11 +375,11 @@ tolerances: {toldfe: 1.00E-07, }
  ETOT  1  -5.5749830317503    -5.575E+00 3.321E-03 1.178E+03
  ETOT  2  -6.0264243341410    -4.514E-01 1.492E-05 1.502E+02
  ETOT  3  -6.0325047620121    -6.080E-03 7.950E-05 5.280E+01
- ETOT  4  -6.0356985084314    -3.194E-03 2.902E-05 8.364E+00
- ETOT  5  -6.0364792903288    -7.808E-04 1.313E-06 7.325E-01
- ETOT  6  -6.0365459450991    -6.665E-05 3.538E-07 1.158E-01
- ETOT  7  -6.0365577706142    -1.183E-05 1.951E-08 1.371E-02
- ETOT  8  -6.0365589863931    -1.216E-06 7.905E-10 2.926E-03
+ ETOT  4  -6.0356985084315    -3.194E-03 2.902E-05 8.364E+00
+ ETOT  5  -6.0364792903287    -7.808E-04 1.313E-06 7.325E-01
+ ETOT  6  -6.0365459450990    -6.665E-05 3.538E-07 1.158E-01
+ ETOT  7  -6.0365577706144    -1.183E-05 1.951E-08 1.371E-02
+ ETOT  8  -6.0365589863930    -1.216E-06 7.905E-10 2.926E-03
  ETOT  9  -6.0365591768050    -1.904E-07 5.593E-10 2.289E-04
  ETOT 10  -6.0365591889305    -1.213E-08 4.422E-11 7.842E-06
  ETOT 11  -6.0365591893879    -4.575E-10 6.755E-13 2.487E-07
@@ -480,16 +480,16 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 2, }
 comment             : Components of total free energy in Hartree
-kinetic             :  3.72813438246742E+00
-hartree             :  1.93194427610115E+00
-xc                  : -1.28977227888280E+00
+kinetic             :  3.72813438246749E+00
+hartree             :  1.93194427610122E+00
+xc                  : -1.28977227888281E+00
 Ewald energy        : -1.27678386576628E+00
 psp_core            :  2.07923022610408E-03
-local_psp           : -8.03386621243158E+00
-non_local_psp       : -1.09829472110195E+00
-total_energy        : -6.03655918938793E+00
-total_energy_eV     : -1.64263129296045E+02
-band_energy         : -3.23202764728567E+00
+local_psp           : -8.03386621243170E+00
+non_local_psp       : -1.09829472110196E+00
+total_energy        : -6.03655918938794E+00
+total_energy_eV     : -1.64263129296046E+02
+band_energy         : -3.23202764728559E+00
 ...
 
 
@@ -546,11 +546,11 @@ tolerances: {toldfe: 1.00E-07, }
  ETOT  1  -5.5749830317503    -5.575E+00 3.321E-03 1.178E+03
  ETOT  2  -6.0264243341410    -4.514E-01 1.492E-05 1.502E+02
  ETOT  3  -6.0325047620121    -6.080E-03 7.950E-05 5.280E+01
- ETOT  4  -6.0356985084314    -3.194E-03 2.902E-05 8.364E+00
- ETOT  5  -6.0364792903288    -7.808E-04 1.313E-06 7.325E-01
- ETOT  6  -6.0365459450991    -6.665E-05 3.538E-07 1.158E-01
- ETOT  7  -6.0365577706142    -1.183E-05 1.951E-08 1.371E-02
- ETOT  8  -6.0365589863931    -1.216E-06 7.905E-10 2.926E-03
+ ETOT  4  -6.0356985084315    -3.194E-03 2.902E-05 8.364E+00
+ ETOT  5  -6.0364792903287    -7.808E-04 1.313E-06 7.325E-01
+ ETOT  6  -6.0365459450990    -6.665E-05 3.538E-07 1.158E-01
+ ETOT  7  -6.0365577706144    -1.183E-05 1.951E-08 1.371E-02
+ ETOT  8  -6.0365589863930    -1.216E-06 7.905E-10 2.926E-03
  ETOT  9  -6.0365591768050    -1.904E-07 5.593E-10 2.289E-04
  ETOT 10  -6.0365591889305    -1.213E-08 4.422E-11 7.842E-06
  ETOT 11  -6.0365591893879    -4.575E-10 6.755E-13 2.487E-07
@@ -651,16 +651,16 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 3, }
 comment             : Components of total free energy in Hartree
-kinetic             :  3.72813438246742E+00
-hartree             :  1.93194427610115E+00
-xc                  : -1.28977227888280E+00
+kinetic             :  3.72813438246749E+00
+hartree             :  1.93194427610122E+00
+xc                  : -1.28977227888281E+00
 Ewald energy        : -1.27678386576628E+00
 psp_core            :  2.07923022610408E-03
-local_psp           : -8.03386621243158E+00
-non_local_psp       : -1.09829472110195E+00
-total_energy        : -6.03655918938793E+00
-total_energy_eV     : -1.64263129296045E+02
-band_energy         : -3.23202764728567E+00
+local_psp           : -8.03386621243170E+00
+non_local_psp       : -1.09829472110196E+00
+total_energy        : -6.03655918938794E+00
+total_energy_eV     : -1.64263129296046E+02
+band_energy         : -3.23202764728559E+00
 ...
 
 
@@ -690,7 +690,7 @@ band_energy         : -3.23202764728567E+00
             fcart1    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart2    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart3    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
--          fftalg         312
+-          fftalg         512
            istwfk        2
               ixc           7
            jdtset        1    2    3
@@ -855,10 +855,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          1.5  wall=          1.5
+- Proc.   0 individual time (sec): cpu=          1.1  wall=          2.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered  34 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.5  wall=          1.5
++Overall time at end (sec) : cpu=          1.1  wall=          2.0

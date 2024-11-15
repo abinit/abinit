@@ -7,7 +7,7 @@
 !!  properties (energy, occupations, eigenvalues..)
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2021-2022 ABINIT group (FB)
+!!  Copyright (C) 2021-2024 ABINIT group (FB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -142,10 +142,10 @@ subroutine rttddft_calc_density(dtset, mpi_enreg, psps, tdks)
    end if
 
    ! 3-Compute pawrhoij = \rho_{i,j} = \sum_{n,k}f_{n,k} \tilde{c}^{i,*}_{n,k} \tilde{c}^{j}_{n,k}
-   call pawmkrhoij(tdks%atindx,tdks%atindx1,tdks%cprj,tdks%dimcprj,dtset%istwfk,    &
-                 & dtset%kptopt,dtset%mband,tdks%mband_cprj,tdks%mcprj,dtset%mkmem, &
-                 & mpi_enreg,dtset%natom,dtset%nband,dtset%nkpt,dtset%nspinor,      &
-                 & dtset%nsppol,tdks%occ0,dtset%paral_kgb,tdks%paw_dmft,            &
+   call pawmkrhoij(tdks%atindx,tdks%atindx1,tdks%cprj,tdks%dimcprj,dtset%istwfk,       &
+                 & dtset%kptopt,dtset%mband,tdks%mband_cprj,tdks%mcprj,dtset%mkmem,    &
+                 & mpi_enreg,dtset%natom,dtset%nband,dtset%nkpt,dtset%nspden,          &
+                 & dtset%nspinor,dtset%nsppol,tdks%occ0,dtset%paral_kgb,tdks%paw_dmft, &
                  & pawrhoij_unsym,tdks%unpaw,dtset%usewvl,dtset%wtk)
 
    ! 4-Symetrize rhoij, compute nhat and add it to rhor
@@ -166,6 +166,7 @@ subroutine rttddft_calc_density(dtset, mpi_enreg, psps, tdks)
      call mkrho(tdks%cg,dtset,tdks%gprimd,tdks%irrzon,tdks%kg,tdks%mcg,mpi_enreg, &
               & tdks%npwarr,tdks%occ0,tdks%paw_dmft,tdks%phnons,rhowfg,rhowfr,     &
               & tdks%rprimd,tim_mkrho,tdks%ucvol,tdks%wvl%den,tdks%wvl%wfs,option=1)
+
      !FB: Useful?
      call transgrid(1,mpi_enreg,dtset%nspden,+1,1,1,dtset%paral_kgb,tdks%pawfgr, &
                   & rhowfg,tdks%taug,rhowfr,tdks%taur)

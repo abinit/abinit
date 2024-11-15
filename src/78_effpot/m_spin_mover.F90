@@ -19,7 +19,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2022 ABINIT group (hexu)
+!! Copyright (C) 2001-2024 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -650,7 +650,8 @@ contains
     type(hash_table_t),optional, intent(inout) :: energy_table
     if(present(displacement) .or. present(lwf) .or. present(strain)) then
        ABI_BUG("Monte Carlo only implemented for spin.")
-       call self%spin_mc%run_MC(self%rng, effpot, S_in, etot)
+    else
+       call self%spin_mc%run_MC(self%rng, effpot, S_in, etot, bfield=self%Htmp)
     end if
     call energy_table%put(self%label, etot)
   end subroutine spin_mover_t_run_one_step_MC

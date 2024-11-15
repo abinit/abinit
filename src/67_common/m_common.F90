@@ -1,4 +1,3 @@
-! CP modified
 !!****m* ABINIT/m_common
 !! NAME
 !!  m_common
@@ -8,7 +7,7 @@
 !!  Mainly printing routines.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, AF, GMR, LBoeri, MT)
+!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, AF, GMR, LBoeri, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -120,8 +119,8 @@ contains
 !!  etotal=total energy (hartree)
 !!  favg(3)=average of forces (ha/bohr)
 !!  fcart(3,natom)=cartesian forces (hartree/bohr)
-!!  fermie=fermi energy (Hartree) / for electrons thermalized in the conduction bands when occopt==9 ! CP modified
-!!  fermih=fermi energy (Hartree) for holes thermalized in the VB when occopt==9 ! CP added
+!!  fermie=fermi energy (Hartree) / for electrons thermalized in the conduction bands when occopt==9
+!!  fermih=fermi energy (Hartree) for holes thermalized in the VB when occopt==9
 !!  fname_eig=filename for printing of the eigenenergies
 !!  fock <type(fock_type)>=quantities for the fock operator (optional argument)
 !!  character(len=fnlen) :: filnam1=character strings giving input file name
@@ -168,7 +167,6 @@ contains
 !!
 !! SOURCE
 
-! CP modified: added fermih to the list of arguments
 subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 &  eigen,etotal,favg,fcart,fermie,fermih,fname_eig,filnam1,initGS,&
 &  iscf,istep,istep_fock_outer,istep_mix,kpt,maxfor,moved_atm_inside,mpi_enreg,&
@@ -183,7 +181,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
  integer,intent(in) :: moved_atm_inside,nkpt,nstep
  integer,intent(in) :: optres,prtfor,prtxml,response,usepaw
  integer,intent(out) :: quit,conv_retcode
- real(dp),intent(in) :: cpus,deltae,diffor,etotal,fermie,fermih,maxfor,res2,residm ! CP added fermih
+ real(dp),intent(in) :: cpus,deltae,diffor,etotal,fermie,fermih,maxfor,res2,residm
  real(dp),intent(in) :: vxcavg
  character(len=fnlen),intent(in) :: fname_eig,filnam1
  type(electronpositron_type),pointer,optional :: electronpositron
@@ -277,11 +275,12 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
      ABI_ERROR('toldff only allowed when prtfor=1!')
    end if
    ! If SCF calculations, one and only one of these can differ from zero
-   if(ttolwfr+ttoldff+ttoldfe+ttolvrs+ttolrff /= 1 .and. (iscf>0 .or. iscf==-3))then
-     write(message,'(6a,es14.6,a,es14.6,a,es14.6,a,es14.6,a,a,es14.6,a,a,a)' )&
+   if( (iscf>0 .or. iscf==-3) .and.(ttolwfr==1.and.ttoldff+ttoldfe+ttolvrs+ttolrff>1) &
+    .and. (ttolwfr==0.and.ttoldff+ttoldfe+ttolvrs+ttolrff/=1) ) then
+     write(message,'(6a,es14.6,a,es14.6,a,es14.6,a,a,es14.6,a,a,a)' )&
 &     'For the SCF case, one and only one of the input tolerance criteria ',ch10,&
-&     'tolwfr, toldff, tolrff, toldfe or tolvrs ','must differ from zero, while they are',ch10,&
-&     'tolwfr=',tolwfr,', toldff=',toldff,', tolrff=',tolrff,', toldfe=',toldfe,ch10,&
+&     'toldff, tolrff, toldfe or tolvrs ','must differ from zero, while they are',ch10,&
+&     'toldff=',toldff,', tolrff=',tolrff,', toldfe=',toldfe,ch10,&
 &     'and tolvrs=',tolvrs,' .',ch10,&
 &     'Action: change your input file and resubmit the job.'
      ABI_ERROR(message)
@@ -354,7 +353,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
      !call ydoc%write_and_free(std_out, newline=.False.)
      !end if
 
-     call wrtout(ab_out,message,'COLL')
+     call wrtout(ab_out,message)
    end if
 
  case (2)
@@ -458,7 +457,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
        end if
      end if
      !if (etot_yaml_doc%stream%length /= 0) call etot_yaml_doc%add_tabular_line('  '//message(6:))
-     call wrtout(ab_out,message,'COLL')
+     call wrtout(ab_out,message)
 
      if(mpi_enreg%paral_pert==1) then
        call wrtout(std_out,  message,'PERS')
@@ -470,7 +469,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 
    ! Print positions/forces every step if dtset%prtvol>=10 and iscf>0 or -3 and GS case
    if (dtset%prtvol>=10.and.(iscf>=0.or.iscf==-3).and.response==0.and.dtset%prtstm==0) then
-     call wrtout(ab_out," ",'COLL')
+     call wrtout(ab_out," ")
 
      ! Print up and down charge and magnetization
      if(tmagnet==1) then
@@ -519,7 +518,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 
    if(response==0)then
      write(message, '(a,1p,e15.7,a)'  ) ' scprqt: <Vxc>=',vxcavg,' hartree'
-     call wrtout(std_out,message,'COLL')
+     call wrtout(std_out,message)
    end if
 
    ! Check whether exiting was required by the user.
@@ -548,13 +547,13 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
      ! write(message,'(1x,a,e10.3,1x,a,e10.3,1x,l1,a)') &
      ! &      '[vdW-DF][DEBUG] deltae=',deltae,'vdw_df_threshold=',vdw_df_threshold, &
      ! &      (abs(deltae)<vdw_df_threshold),ch10
-     ! call wrtout(std_out,message,'COLL')
+     ! call wrtout(std_out,message)
 #if defined DEV_YP_VDWXC
      call xc_vdw_trigger( (abs(deltae)<vdw_df_threshold) )
 #endif
      ! Here treat the tolwfr criterion: if maximum residual is less than
      ! input tolwfr, stop steps (exit loop here)
-     if (ttolwfr == 1 .and. .not. noquit) then
+     if (ttolwfr == 1 .and. (ttolvrs+ttoldfe+ttoldff+ttolrff==0) .and. .not. noquit) then
        if (residm < tolwfr) then
          if (dtset%usewvl == 0) then
            write(message, '(a,a,i5,a,1p,e10.2,a,e10.2,a,a)' )ch10, &
@@ -590,12 +589,20 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
          use_dpfft = diffor < tol6
        end if
 
-       if(toldff_ok==2 .and. .not.noquit)then
-         write(message, '(a,a,i5,a,a,a,es11.3,a,es11.3)' ) ch10, &
-&         ' At SCF step',istep,', forces are converged : ',ch10,&
-&         '  for the second time, max diff in force=',diffor,' < toldff=',toldff
-         call wrtout([std_out, ab_out], message)
-         quit=1
+       if(toldff_ok>=2 .and..not.noquit)then
+         if (ttolwfr==0) then
+           write(message, '(a,a,i5,a,a,a,es11.3,a,es11.3)' ) ch10, &
+&           ' At SCF step',istep,', forces are converged : ',ch10,&
+&           '  for the second time, max diff in force=',diffor,' < toldff=',toldff
+           call wrtout([std_out, ab_out], message)
+           quit=1
+         else if (ttolwfr==1 .and. residm < tolwfr )then
+           write(message, '(a,a,i5,a,1p,e10.2,a,e10.2,a,a,a,es11.3,a,es11.3)' ) ch10, &
+&           ' At SCF step',istep,', max residual=',residm,' < tolwfr=',tolwfr,' AND forces are converged : ',ch10,&
+&           '  for the second time, max diff in force=',diffor,' < toldff=',toldff
+           call wrtout([std_out, ab_out], message)
+           quit=1
+        end if
        end if
      end if
 
@@ -614,13 +621,22 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
          tolrff_ok=0
          use_dpfft = diffor < tolrff * maxfor * five
        end if
-       if(tolrff_ok==2 .and. (.not.noquit))then
-         write(message, '(a,a,i5,a,a,a,es11.3,a,es11.3,a)' ) ch10, &
-         ' At SCF step',istep,', forces are sufficiently converged : ',ch10,&
-         '  for the second time, max diff in force=',diffor,&
-         ' is less than < tolrff=',tolrff, ' times max force'
-         call wrtout([std_out, ab_out], message)
-         quit=1
+       if(tolrff_ok>=2 .and. (.not.noquit))then
+         if (ttolwfr==0) then
+           write(message, '(a,a,i5,a,a,a,es11.3,a,es11.3,a)' ) ch10, &
+           ' At SCF step',istep,', forces are sufficiently converged : ',ch10,&
+           '  for the second time, max diff in force=',diffor,&
+           ' is less than < tolrff=',tolrff, ' times max force'
+           call wrtout([std_out, ab_out], message)
+           quit=1
+         else if (ttolwfr==1 .and. residm < tolwfr) then
+           write(message, '(a,a,i5,a,1p,e10.2,a,e10.2,a,a,a,es11.3,a,es11.3,a)' ) ch10, &
+           ' At SCF step',istep,', max residual=',residm,' < tolwfr=',tolwfr,' AND forces are sufficiently converged : ',ch10,&
+           '  for the second time, max diff in force=',diffor,&
+           ' is less than < tolrff=',tolrff, ' times max force'
+           call wrtout([std_out, ab_out], message)
+           quit=1
+         end if
        end if
      end if
 
@@ -635,18 +651,30 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
          toldfe_ok=0
          use_dpfft = abs(deltae) < tol8
        end if
-       if(toldfe_ok==2 .and. (.not.noquit))then
-         if(usefock==0 .or. nnsclohf<2)then
-           write(message, '(a,a,i5,a,a,a,es11.3,a,es11.3)' ) ch10, &
-            ' At SCF step',istep,', etot is converged : ',ch10,&
-            '  for the second time, diff in etot=',abs(deltae),' < toldfe=',toldfe
-         else
+       ! Fock : tolwfr not taken into account
+       if(usefock/=0.and.nnsclohf>=2) then
+         if (toldfe_ok==2 .and. (.not.noquit))then
            write(message, '(a,i3,a,i3,a,a,a,es11.3,a,es11.3)' ) &
             ' Outer loop step',istep_fock_outer,' - inner step',istep_mix,' - frozen Fock etot converged : ',ch10,&
             '  for the second time, diff in etot=',abs(deltae),' < toldfe=',toldfe
-         endif
-         call wrtout([std_out, ab_out], message)
-         quit=1
+           call wrtout([std_out, ab_out], message)
+           quit=1
+         end if
+       ! No Fock : take into account tolwfr if ttolwfr/=0
+       else if(toldfe_ok>=2 .and. (.not.noquit))then
+         if (ttolwfr==0) then
+           write(message, '(a,a,i5,a,a,a,es11.3,a,es11.3)' ) ch10, &
+            ' At SCF step',istep,', etot is converged : ',ch10,&
+            '  for the second time, diff in etot=',abs(deltae),' < toldfe=',toldfe
+           call wrtout([std_out, ab_out], message)
+           quit=1
+         else if (ttolwfr==1 .and. residm < tolwfr) then
+           write(message, '(a,a,i5,a,1p,e10.2,a,e10.2,a,a,a,es11.3,a,es11.3)' ) ch10, &
+            ' At SCF step',istep,', max residual=',residm,' < tolwfr=',tolwfr,' AND etot is converged : ',ch10,&
+            '  for the second time, diff in etot=',abs(deltae),' < toldfe=',toldfe
+           call wrtout([std_out, ab_out], message)
+           quit=1
+         end if
        end if
        if(usefock==1 .and. nnsclohf>1)then
          if(istep_mix==1 .and. (.not.noquit))then
@@ -676,7 +704,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 !      write(message,'(1x,a,e10.3,1x,a,e10.3,1x,l1,a)') &
 !      &      '[vdW-DF][DEBUG] deltae=',deltae,'vdw_df_threshold=',vdw_df_threshold, &
 !      &      (abs(deltae)<toldfe),ch10
-!      call wrtout(std_out,message,'COLL')
+!      call wrtout(std_out,message)
 #if defined DEV_YP_VDWXC
        ivdw = 0
        if ( toldfe > vdw_df_threshold ) then
@@ -692,18 +720,36 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
      ! Here treat the tolvrs criterion: if density/potential residual (squared)
      ! is less than input tolvrs, stop steps (exit loop here)
      if (ttolvrs==1 .and. .not. noquit) then
-       if (res2 < tolvrs) then
-         if (optres==0) then
-           write(message, '(a,a,i5,a,1p,e10.2,a,e10.2,a)' ) ch10,&
-            ' At SCF step',istep,'       vres2   =',res2,' < tolvrs=',tolvrs,' =>converged.'
+       if (ttolwfr==0) then
+         if (res2 < tolvrs) then
+           if (optres==0) then
+             write(message, '(a,a,i5,a,1p,e10.2,a,e10.2,a)' ) ch10,&
+              ' At SCF step',istep,'       vres2   =',res2,' < tolvrs=',tolvrs,' =>converged.'
+           else
+             write(message, '(a,a,i5,a,1p,e10.2,a,e10.2,a)' ) ch10,&
+              ' At SCF step',istep,'       nres2   =',res2,' < tolvrs=',tolvrs,' =>converged.'
+           end if
+           call wrtout([std_out, ab_out], message)
+           quit=1
          else
-           write(message, '(a,a,i5,a,1p,e10.2,a,e10.2,a)' ) ch10,&
-            ' At SCF step',istep,'       nres2   =',res2,' < tolvrs=',tolvrs,' =>converged.'
+           use_dpfft = res2 < tol5
          end if
-         call wrtout([std_out, ab_out], message)
-         quit=1
-       else
-         use_dpfft = res2 < tol5
+       else if (ttolwfr==1 .and. residm < tolwfr) then
+         if (res2 < tolvrs) then
+           if (optres==0) then
+             write(message, '(a,a,i5,a,1p,e10.2,a,e10.2,a,e10.2,a,e10.2,a)' ) ch10,&
+              ' At SCF step',istep,'  max residual=',residm,' < tolwfr=',tolwfr,' AND vres2   =',res2,&
+              & ' < tolvrs=',tolvrs,' =>converged.'
+           else
+             write(message, '(a,a,i5,a,1p,e10.2,a,e10.2,a,e10.2,a,e10.2,a)' ) ch10,&
+              ' At SCF step',istep,'  max residual=',residm,' < tolwfr=',tolwfr,' AND nres2   =',res2,&
+              & ' < tolvrs=',tolvrs,' =>converged.'
+           end if
+           call wrtout([std_out, ab_out], message)
+           quit=1
+         else
+           use_dpfft = res2 < tol5
+         end if
        end if
      end if
 
@@ -752,7 +798,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
        end if
        call wrtout([std_out, ab_out], message)
 
-       if (ttolwfr==1) then
+       if (ttolwfr==1 .and. residm > tolwfr) then
          if (dtset%usewvl == 0) then
            write(message, '(a,es11.3,a,es11.3,a)' ) &
            '  maximum residual=',residm,' exceeds tolwfr=',tolwfr,ch10
@@ -760,11 +806,11 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
            write(message2, '(a,es11.3,2a)' ) &
            '  maximum residual each band. tolwfr= ',tolwfr,ch10,&
            '  iband, isppol, individual band residuals (max over all k-points):'
-           call wrtout(std_out, message2,'COLL')
+           call wrtout(std_out, message2)
            do isppol = 1, dtset%nsppol
              do iband = 1, dtset%mband
                write(message3, '(2i6, es11.3)') iband, isppol, residm_band(iband,isppol)
-               call wrtout(std_out,message3,'COLL')
+               call wrtout(std_out,message3)
              end do
            end do
 
@@ -809,13 +855,29 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 
      if (prtxml == 1) then
        if (ttoldfe == 1) then
-         write(ab_xml_out, "(A)") ' stop-criterion="toldfe" />'
+         if (ttolwfr==0) then
+           write(ab_xml_out, "(A)") ' stop-criterion="toldfe" />'
+         else
+           write(ab_xml_out, "(A)") ' stop-criterion="toldfe+tolwfr" />'
+         end if
        else if (ttoldff == 1) then
-         write(ab_xml_out, "(A)") ' stop-criterion="toldff" />'
+         if (ttolwfr==0) then
+           write(ab_xml_out, "(A)") ' stop-criterion="toldff" />'
+         else
+           write(ab_xml_out, "(A)") ' stop-criterion="toldff+tolwfr" />'
+         end if
        else if (ttolrff == 1) then
-         write(ab_xml_out, "(A)") ' stop-criterion="tolrff" />'
+         if (ttolwfr==0) then
+             write(ab_xml_out, "(A)") ' stop-criterion="tolrff" />'
+         else
+             write(ab_xml_out, "(A)") ' stop-criterion="tolrff+tolwfr" />'
+         end if
        else if (ttolvrs == 1) then
-         write(ab_xml_out, "(A)") ' stop-criterion="tolvrs" />'
+         if (ttolwfr==0) then
+           write(ab_xml_out, "(A)") ' stop-criterion="tolvrs" />'
+         else
+           write(ab_xml_out, "(A)") ' stop-criterion="tolvrs+tolwfr" />'
+         end if
        else if (ttolwfr == 1) then
          write(ab_xml_out, "(A)") ' stop-criterion="tolwfr" />'
        else
@@ -1089,9 +1151,9 @@ end subroutine setup1
 !!   or, if option==5...7, zero-point motion correction to eigenvalues (averaged)
 !!  enunit=choice parameter: 0=>output in hartree; 1=>output in eV;
 !!   2=> output in both hartree and eV
-!!  fermie=fermi energy (Hartree)/ for electrons thermalized in the conduction bands when occopt==9 ! CP modified
-!!  fermih=fermi energy (Hartree) for holes thermalized in the VB when occopt==9 ! CP modified
-!!  fname_eig=filename for printing of the eigenenergies
+!!  fermie=fermi energy (Hartree) / for electrons thermalized in the conduction bands when occopt==9
+!!  fermih=fermi energy (Hartree) for holes thermalized in the VB when occopt==9
+!!  fname_eig=filename of printing the eigenenergies
 !!  iout=unit number for formatted output file
 !!  iscf=option for self-consistency
 !!  kptns(3,nkpt)=k points in reduced coordinates
@@ -1125,7 +1187,7 @@ subroutine prteigrs(eigen,enunit,fermie,fermih,fname_eig,iout,iscf,kptns,kptopt,
 !scalars
  integer,intent(in) :: enunit,iout,iscf,kptopt,mband,nbdbuf,nkpt,nnsclo_now,nsppol
  integer,intent(in) :: occopt,option,prteig,prtvol
- real(dp),intent(in) :: fermie,fermih,tolwfr,vxcavg ! CP added fermih
+ real(dp),intent(in) :: fermie,fermih,tolwfr,vxcavg
  character(len=*),intent(in) :: fname_eig
 !arrays
  integer,intent(in) :: nband(nkpt*nsppol)
@@ -1217,9 +1279,6 @@ subroutine prteigrs(eigen,enunit,fermie,fermih,fname_eig,iout,iscf,kptns,kptopt,
      end if
 
      if(iscf>=0 .and. (ienunit==0 .or. option==1))then
-       ! CP modified for occopt 9 case
-       !write(msg, '(3a,f10.5,3a,f10.5)' ) &
-       ! ' Fermi (or HOMO) energy (',trim(strunit2),') =',convrt*fermie,'   Average Vxc (',trim(strunit2),')=',convrt*vxcavg
        if (occopt == 9) then
           write(msg, '(3a,f10.5,a,f10.5,3a,f10.5)' ) &
           ' Fermi energy for thermalized electrons and holes (',trim(strunit2),') =',&
@@ -1228,7 +1287,6 @@ subroutine prteigrs(eigen,enunit,fermie,fermih,fname_eig,iout,iscf,kptns,kptopt,
           write(msg, '(3a,f10.5,3a,f10.5)' ) &
           ' Fermi (or HOMO) energy (',trim(strunit2),') =',convrt*fermie,'   Average Vxc (',trim(strunit2),')=',convrt*vxcavg
        end if
-       ! End CP modified
        call wrtout(iout,msg)
        if (prteig > 0) call wrtout(temp_unit,msg)
      end if
@@ -1237,9 +1295,9 @@ subroutine prteigrs(eigen,enunit,fermie,fermih,fname_eig,iout,iscf,kptns,kptopt,
      if(iscf>=0 .and. ienunit==0)then ! For historical reasons
        if(tmagnet==1)then
          write(msg, '(a,es16.8,a,a,es16.8,a,es16.8)' )&
-&         ' Magnetization (Bohr magneton)=',magnet,ch10,&
-&         ' Total spin up =',rhoup,'   Total spin down =',rhodn
-         call wrtout(iout,msg,'COLL')
+         ' Magnetization (Bohr magneton)=',magnet,ch10,&
+         ' Total spin up =',rhoup,'   Total spin down =',rhodn
+         call wrtout(iout,msg)
          if (prteig > 0) call wrtout(temp_unit,msg)
        end if
      end if
@@ -1273,11 +1331,11 @@ subroutine prteigrs(eigen,enunit,fermie,fermih,fname_eig,iout,iscf,kptns,kptopt,
          if(ikpt<=nkpt_eff)then
            write(msg, '(a,'//ikpt_fmt//',a,'//ibnd_fmt//',a,f9.5,a,3f8.4,a)' ) &
 &           ' kpt#',ikpt,', nband=',nband_k,', wtk=',wtk(ikpt)+tol10,', kpt=',kptns(1:3,ikpt)+tol10,' (reduced coord)'
-           call wrtout(iout,msg,'COLL')
+           call wrtout(iout,msg)
            if (prteig > 0) call wrtout(temp_unit,msg)
            do ii=0,(nband_k-1)/8
              write(msg, '(8(f10.5,1x))' ) (convrt*eigen(iband+band_index), iband=1+ii*8,min(nband_k,8+ii*8))
-             call wrtout(iout,msg,'COLL')
+             call wrtout(iout,msg)
              if (prteig > 0) call wrtout(temp_unit,msg)
            end do
            if(ienunit==0 .and. option==1 .and. occopt>=3 .and. occopt<=8)then
@@ -1360,7 +1418,11 @@ subroutine prteigrs(eigen,enunit,fermie,fermih,fname_eig,iout,iscf,kptns,kptopt,
        end if
 
        ! Don't include the buffer in the output.
-       residk=maxval(resid(band_index+1:band_index+nband_k-nbdbuf))
+       if (nbdbuf>0) then
+         residk=maxval(resid(band_index+1:band_index+nband_k-nbdbuf))
+       else
+         residk=maxval(resid(band_index+1:band_index+nband_k))
+       end if
        if (residk>tolwfr) then
          write(msg, '(1x,a,2i5,a,1p,e13.5)' ) &
           ' prteigrs : nnsclo,ikpt=',nnsclo_now,ikpt,' max resid (excl. the buffer)=',residk
@@ -1504,9 +1566,9 @@ subroutine prtene(dtset,energies,iout,usepaw)
        !!!XG20181025 Does not work (yet)...
        !!!if(abs(energies%e_nlpsp_vfock)>tol8)then
        !!!  write(msg, '(a,es21.14)' )'    Fock-type term  = ',energies%e_nlpsp_vfock
-       !!!  call wrtout(iout,msg,'COLL')
+       !!!  call wrtout(iout,msg)
        !!!  write(msg, '(a,es21.14)' ) '    -frozen Fock en.= ',-energies%e_fock0
-       !!!  call wrtout(iout,msg,'COLL')
+       !!!  call wrtout(iout,msg)
        !!!endif
      end if
      if (ANY(ABS(dtset%nucdipmom)>tol8)) then
@@ -1529,11 +1591,11 @@ subroutine prtene(dtset,energies,iout,usepaw)
        end if
        !write(msg, '(3a,es21.14,a)' ) &
        ! '    >>> ',EPName(ipositron),' E= ',etotal-energies%e0_electronpositron -energies%e_electronpositron,ch10
-       !call wrtout(iout,msg,'COLL')
+       !call wrtout(iout,msg)
        !write(msg, '(3a,es21.14,2a,es21.14)' ) &
        ! '    ',EPName(3-ipositron),' ener.= ',energies%e0_electronpositron,ch10,&
        ! '    EP interaction E= '             ,energies%e_electronpositron
-       !call wrtout(iout,msg,'COLL')
+       !call wrtout(iout,msg)
        if(ipositron == 1) then
         call edoc%add_real('positronic', etotal - energies%e0_electronpositron-energies%e_electronpositron)
         call edoc%add_real('electronic', energies%e0_electronpositron)
@@ -1557,7 +1619,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
      '  PAW contribution due to spin-orbit coupling cannot be evaluated',ch10,&
      '  without the knowledge of imaginary part of Rhoij atomic occupancies',ch10,&
      '  (computed only when pawcpxocc=2).'
-     call wrtout(iout,msg,'COLL')
+     call wrtout(iout,msg)
    end if
  end if
 !============= Printing of Etotal by double-counting scheme ===========
@@ -1576,7 +1638,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
      !  '    PspCore energy  = ',energies%e_corepsp-energies%e_corepspdc,ch10,&
      !  '    Dble-C XC-energy= ',-energies%e_hartree+energies%e_xc-energies%e_xcdc -energies%e_fock0 + &
      !  energies%e_hybcomp_E0-energies%e_hybcomp_v0
-     !call wrtout(iout,msg,'COLL')
+     !call wrtout(iout,msg)
      call dc_edoc%add_real(eneName, enevalue)
      call dc_edoc%add_real('psp_core', energies%e_corepsp-energies%e_corepspdc)
      call dc_edoc%add_real('xc_dc', -energies%e_hartree+energies%e_xc-energies%e_xcdc - energies%e_fock0 + &
@@ -1600,7 +1662,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
        !write(msg, '(a,es21.14,a,a,a,es21.14)' ) &
        ! '    >>>>> Internal E= ',etotaldc-eent,ch10,ch10,&
        ! '    -kT*entropy     = ',eent
-       !call wrtout(iout,msg,'COLL')
+       !call wrtout(iout,msg)
        call dc_edoc%add_real('internal', etotaldc-eent)
        call dc_edoc%add_real('-kT*entropy', eent)
      else
@@ -1613,11 +1675,11 @@ subroutine prtene(dtset,energies,iout,usepaw)
      !write(msg, '(a,es21.14,4a,es21.14,a)' ) &
      !  '    - EP dble-ct En.= ',-energies%edc_electronpositron,ch10,&
      !  '    >>> ',EPName(ipositron),' E= ',etotaldc-energies%e0_electronpositron -energies%e_electronpositron,ch10
-     !call wrtout(iout,msg,'COLL')
+     !call wrtout(iout,msg)
      !write(msg, '(3a,es21.14,2a,es21.14)' ) &
      ! '    ',EPName(3-ipositron),' ener.= ',energies%e0_electronpositron,ch10,&
      ! '    EP interaction E= '            ,energies%e_electronpositron
-     !call wrtout(iout,msg,'COLL')
+     !call wrtout(iout,msg)
      call dc_edoc%add_real('electron_positron_dc', -energies%edc_electronpositron)
      if(ipositron == 1) then
        call dc_edoc%add_real('positronic', etotaldc-energies%e0_electronpositron-energies%e_electronpositron)
@@ -1631,7 +1693,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
 
 
    write(msg, '(a,es21.14)' ) '    >>>> Etotal (DC)= ',etotaldc
-   !call wrtout(iout,msg,'COLL')
+   !call wrtout(iout,msg)
    call dc_edoc%add_real('total_energy_dc', etotaldc)
  end if
 
@@ -1644,7 +1706,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
 
  if ((optdc==0.or.optdc==2).and.(.not.directE_avail)) then
    !write(msg, '(a,a,es18.10)' ) ch10,' Band energy (Ha)= ',energies%e_eigenvalues
-   !call wrtout(iout,msg,'COLL')
+   !call wrtout(iout,msg)
    call edoc%add_real('band_energy', energies%e_eigenvalues)
  end if
 
@@ -1655,7 +1717,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
    if (optdc>=1) then
      !if (optdc==1) write(msg, '(a,a,es21.14)' ) ch10,'  >Total DC energy in eV        = ',etotaldc*Ha_eV
      !if (optdc==2) write(msg, '(a,es21.14)' ) '  >Total DC energy in eV        = ',etotaldc*Ha_eV
-     !call wrtout(iout,msg,'COLL')
+     !call wrtout(iout,msg)
      call dc_edoc%add_real('total_energy_dc_eV', etotaldc*Ha_eV)
    end if
  end if
@@ -1665,7 +1727,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
      ch10,' Calculation was performed for a charged system with PBC',&
      ch10,' You may consider including the monopole correction to the total energy',&
      ch10,' The correction is to be divided by the dielectric constant'
-   call wrtout(iout,msg,'COLL')
+   call wrtout(iout,msg)
    call edoc%add_real('monopole_correction', energies%e_monopole)
    call edoc%add_real('monopole_correction_eV', energies%e_monopole*Ha_eV)
  end if

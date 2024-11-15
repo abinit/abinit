@@ -1,8 +1,8 @@
 
-.Version 9.7.4 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2022 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  4 May 2022.
-- ( at 03h22 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h35 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/paral_t51_MPI10-t52_MPI10-t53_MPI10/t52.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI10/paral_t51_MPI10-t52_MPI10-t53_MPI10/t52.abi
 - output file    -> t52_MPI10.abo
 - root for input  files -> t52_MPI10i
 - root for output files -> t52_MPI10o
-
 
  DATASET    1 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
@@ -38,7 +37,6 @@ P This job should need less than                       2.509 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      3.283 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
 
  DATASET    2 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
@@ -60,10 +58,10 @@ _ WF disk file :      3.283 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -72,7 +70,7 @@ _ WF disk file :      3.283 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
            densty      1.20000000E+00
              ecut      1.00000000E+01 Hartree
            enunit           2
--          fftalg         312
+-          fftalg         512
              iscf          -2
            istatr         999
            jdtset        1    2
@@ -223,8 +221,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10256
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosGTH_pwteter/13al.pspgth
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosGTH_pwteter/13al.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/13al.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/13al.pspgth
 - Goedecker-Teter-Hutter  Tue May 28 09:24:05 EDT 1996
 - 13.00000   3.00000    960528                znucl, zion, pspdat
     2    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -463,7 +461,7 @@ force_length_stats: {min: null, max: null, mean: null, }
            densty      1.20000000E+00
              ecut      1.00000000E+01 Hartree
            enunit           2
--          fftalg         312
+-          fftalg         512
              iscf          -2
            istatr         999
            jdtset        1    2
@@ -581,8 +579,8 @@ P           mkmem          26
 
 ================================================================================
 
-- Total cpu        time (s,m,h):         16.7        0.28      0.005
-- Total wall clock time (s,m,h):         16.8        0.28      0.005
+- Total cpu        time (s,m,h):         16.3        0.27      0.005
+- Total wall clock time (s,m,h):         16.5        0.28      0.005
 -
 - For major independent code sections, cpu and wall times (sec),
 -  as well as % of the time and number of calls for node 0
@@ -590,37 +588,41 @@ P           mkmem          26
 -<BEGIN_TIMER mpi_nprocs = 10, omp_nthreads = 1, mpi_rank = 0>
 - cpu_time =            1.6, wall_time =            1.7
 -
-- routine                            cpu     %          wall     %      number of calls Gflops    Speedup Efficacity
--                                                                        (-1=no count)
-- fourwf%(pot)                      0.851   5.1         0.854   5.1           8520      -1.00        1.00       1.00
-- vtorho(MPI)                       0.166   1.0         0.166   1.0              2      -1.00        1.00       1.00
-- nonlop(apply)                     0.105   0.6         0.107   0.6           8520      -1.00        0.99       0.99
-- others (136)                      0.235   1.4         0.234   1.4             -1      -1.00        1.00       1.00
+- routine                                    cpu     %          wall   %        number of calls Gflops    Speedup Efficacity
+-                                                                                (-1=no count)
+- fourwf%(pot)                              0.697   4.3         0.698   4.2           8520      -1.00        1.00       1.00
+- get_dtsets_pspheads                       0.136   0.8         0.136   0.8              1      -1.00        1.00       1.00
+- vtorho(MPI)                               0.128   0.8         0.128   0.8              2      -1.00        1.00       1.00
+- nonlop(apply)                             0.108   0.7         0.109   0.7           8520      -1.00        0.99       0.99
+- others (156)                              0.272   1.7         0.293   1.8             -1      -1.00        0.93       0.93
 -<END_TIMER>
 -
-- subtotal                          1.357   8.1         1.361   8.1                                  1.00       1.00
+- subtotal                                  1.341   8.2         1.364   8.3                                  0.98       0.98
 
 - For major independent code sections, cpu and wall times (sec),
 - as well as % of the total time and number of calls 
 
 -<BEGIN_TIMER mpi_nprocs = 10, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =          16.7, wall_time =          16.8
+- cpu_time =          16.3, wall_time =          16.5
 -
-- routine                            cpu     %          wall     %      number of calls Gflops    Speedup Efficacity
--                                                                        (-1=no count)
-- fourwf%(pot)                      8.742  52.2         8.774  52.1          87909      -1.00        1.00       1.00
-- vtorho(MPI)                       1.323   7.9         1.326   7.9             20      -1.00        1.00       1.00
-- nonlop(apply)                     1.085   6.5         1.095   6.5          87909      -1.00        0.99       0.99
-- invars2                           0.686   4.1         0.687   4.1             20      -1.00        1.00       1.00
-- projbd                            0.527   3.1         0.532   3.2         126648      -1.00        0.99       0.99
-- getghc-other                      0.428   2.6         0.411   2.4            -10      -1.00        1.04       1.04
-- vtowfk(ssdiag)                    0.266   1.6         0.266   1.6            -10      -1.00        1.00       1.00
-- ewald                             0.192   1.1         0.192   1.1             20      -1.00        1.00       1.00
-- abinit(2)                         0.183   1.1         0.183   1.1             10      -1.00        1.00       1.00
-- others (130)                      0.103   0.6         0.104   0.6             -1      -1.00        1.00       1.00
+- routine                                    cpu     %          wall   %        number of calls Gflops    Speedup Efficacity
+-                                                                                (-1=no count)
+- fourwf%(pot)                              6.456  39.7         6.470  39.2          87909      -1.00        1.00       1.00
+- vtorho(MPI)                               1.991  12.2         1.991  12.1             20      -1.00        1.00       1.00
+- get_dtsets_pspheads                       1.202   7.4         1.202   7.3             10      -1.00        1.00       1.00
+- nonlop(apply)                             1.002   6.2         1.009   6.1          87909      -1.00        0.99       0.99
+- abinit(chkinp,chkvars)                    0.700   4.3         0.700   4.2             10      -1.00        1.00       1.00
+- getghc(/=fourXX,nonlop,fock_XX)           0.479   2.9         0.456   2.8            -10      -1.00        1.05       1.05
+- projbd                                    0.460   2.8         0.462   2.8         126648      -1.00        0.99       0.99
+- vtowfk(ssdiag)                            0.272   1.7         0.271   1.6            -10      -1.00        1.00       1.00
+- ewald                                     0.193   1.2         0.193   1.2             20      -1.00        1.00       1.00
+- fourdp                                    0.146   0.9         0.371   2.2             60      -1.00        0.39       0.39
+- abinit(outvars)                           0.093   0.6         0.093   0.6             10      -1.00        1.00       1.00
+- abinit(init,iofn1,herald)                 0.092   0.6         0.093   0.6             10      -1.00        0.99       0.99
+- others (148)                              0.118   0.7         0.118   0.7             -1      -1.00        1.00       1.00
 -<END_TIMER>
 
-- subtotal                         13.534  80.8        13.571  80.6                                  1.00       1.00
+- subtotal                                 13.202  81.2        13.428  81.4                                  0.98       0.98
 
 ================================================================================
 
@@ -710,4 +712,4 @@ P           mkmem          26
 
  Calculation completed.
 .Delivered   2 WARNINGs and   1 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         16.9  wall=         17.0
++Overall time at end (sec) : cpu=         16.4  wall=         16.7

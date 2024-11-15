@@ -1,4 +1,3 @@
-! CP modified
 !!****m* ABINIT/m_mlwfovlp_qp
 !! NAME
 !!  m_mlwfovlp_qp
@@ -7,7 +6,7 @@
 !!  Interpolate GW corrections with Wannier functions
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2022 ABINIT group (DRH)
+!!  Copyright (C) 2008-2024 ABINIT group (DRH)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -263,17 +262,11 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
    end do
  end do
 
- ! CP modified
-! call ebands_init(bantot_ibz,QP_bst,Dtset%nelect,doccde_ibz,eigen_ibz,istwfk_ibz,kibz,nband_ibz,&
-!  nkibz,npwarr_ibz,nsppol,Dtset%nspinor,Dtset%tphysel,Dtset%tsmear,Dtset%occopt,occfact_ibz,wtk_ibz,&
-!  dtset%cellcharge(1),dtset%kptopt,dtset%kptrlatt_orig,dtset%nshiftk_orig,dtset%shiftk_orig,&
-!  dtset%kptrlatt,dtset%nshiftk,dtset%shiftk)
  call ebands_init(bantot_ibz,QP_bst,Dtset%nelect,Dtset%ne_qFD,Dtset%nh_qFD,Dtset%ivalence,&
   doccde_ibz,eigen_ibz,istwfk_ibz,kibz,nband_ibz,&
   nkibz,npwarr_ibz,nsppol,Dtset%nspinor,Dtset%tphysel,Dtset%tsmear,Dtset%occopt,occfact_ibz,wtk_ibz,&
   dtset%cellcharge(1),dtset%kptopt,dtset%kptrlatt_orig,dtset%nshiftk_orig,dtset%shiftk_orig,&
   dtset%kptrlatt,dtset%nshiftk,dtset%shiftk)
- ! End CP modified
 
  ABI_FREE(kibz)
  ABI_FREE(wtk_ibz)

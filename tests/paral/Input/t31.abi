@@ -17,6 +17,10 @@ nband2 520
 
 #SCF cycle parameters
 tolvrs 1.d-3 nstep 1  nline 2
+# Added in v9.11:
+tolwfr_diago 1d-30
+# Default of tolwfr_diago is tolwfr (or, for LOBPCG only, 1d-20 if tolwfr is not defined)
+# To reproduce old behaviour : set stringent value of tolwfr_diago
 
 #K-points and sym
 occopt 3

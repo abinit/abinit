@@ -50,7 +50,6 @@ optforces 0
 optstress 0
 pawcpxocc 2
 usexcnhat 0
-pawxcdev 0
 paral_atom 0
 paral_kgb 0
 
@@ -78,12 +77,12 @@ pseudos="Ne.xml"
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   tnuc_4.abo, tolnlines=  62, tolabs=  1.1e-5, tolrel= 1.01e0
+#%%   tnuc_4.abo, tolnlines=  65, tolabs=  1.1e-5, tolrel= 1.01e0
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = J. Zwanziger
 #%% keywords = PAW
 #%% description = 
-#%% topics = DFPT
+#%% topics = NMR, DFPT
 #%%<END TEST_INFO>

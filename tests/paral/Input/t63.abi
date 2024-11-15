@@ -18,6 +18,10 @@ tolvrs1    1.0d-6
 rmm_diis2 -3
 npband2 2 bandpp2 16 npfft2 2
 tolvrs2    1.0d-10
+# Added in v9.11:
+tolwfr_diago 1d-30
+# Default of tolwfr_diago is tolwfr (or, for LOBPCG only, 1d-20 if tolwfr is not defined)
+# To reproduce old behaviour : set stringent value of tolwfr_diago
 getwfk2 -1
 
 #################### COMMON PART #########################

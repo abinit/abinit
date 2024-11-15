@@ -1,8 +1,8 @@
 
-.Version 9.7.4 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2022 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  4 May 2022.
-- ( at 03h31 )
+.Starting date : Wed 18 Sep 2024.
+- ( at 17h24 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/tutorespfn_teph4mob_1-teph4mob_2-teph4mob_3-teph4mob_4-teph4mob_5-teph4mob_6-teph4mob_7/teph4mob_4.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/TestBot_MPI1/tutorespfn_teph4mob_1-teph4mob_2-teph4mob_3-teph4mob_4-teph4mob_5-teph4mob_6-teph4mob_7/teph4mob_4.abi
 - output file    -> teph4mob_4.abo
 - root for input  files -> teph4mob_4i
 - root for output files -> teph4mob_4o
-
 
  DATASET    1 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
@@ -39,7 +38,6 @@ P This job should need less than                       1.530 Mbytes of memory.
 _ WF disk file :      0.076 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
 
-
  DATASET    2 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  2.
@@ -55,7 +53,6 @@ P This job should need less than                       6.089 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      3.985 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
-
 
  DATASET    3 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
@@ -77,10 +74,10 @@ _ WF disk file :     26.705 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -88,7 +85,7 @@ _ WF disk file :     26.705 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
               amu      2.69815390E+01  7.49215900E+01
            diemac      9.00000000E+00
              ecut      3.00000000E+00 Hartree
--          fftalg         312
+-          fftalg         512
            getden1          0
            getden2          1
            getden3          1
@@ -332,8 +329,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.05142
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/13al.981214.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/13al.981214.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Psps_for_tests/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Psps_for_tests/13al.981214.fhi
 - Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
 - 13.00000   3.00000    981214                znucl, zion, pspdat
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -345,8 +342,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              1    0.900554
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
 -  Troullier-Martins psp for element  As        Thu Oct 27 17:37:14 EDT 1994
 - 33.00000   5.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -376,17 +373,17 @@ tolerances: {tolvrs: 1.00E-18, }
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -9.7524358209150    -9.752E+00 1.922E-03 1.010E+00
  ETOT  2  -9.7569449951238    -4.509E-03 2.745E-06 5.186E-02
- ETOT  3  -9.7571805517757    -2.356E-04 1.290E-05 3.719E-03
+ ETOT  3  -9.7571805517692    -2.356E-04 1.290E-05 3.719E-03
  ETOT  4  -9.7571932315233    -1.268E-05 4.462E-07 7.340E-05
  ETOT  5  -9.7571933487539    -1.172E-07 7.043E-09 3.921E-07
  ETOT  6  -9.7571933493279    -5.740E-10 3.860E-11 9.004E-09
  ETOT  7  -9.7571933493411    -1.325E-11 1.121E-12 1.432E-10
- ETOT  8  -9.7571933493414    -2.878E-13 6.194E-14 3.951E-13
- ETOT  9  -9.7571933493414    -1.954E-14 4.608E-15 1.927E-15
- ETOT 10  -9.7571933493414     1.776E-15 6.158E-16 1.491E-18
- ETOT 11  -9.7571933493414     3.730E-14 4.134E-17 5.836E-21
+ ETOT  8  -9.7571933493414    -3.073E-13 6.194E-14 3.955E-13
+ ETOT  9  -9.7571933493414     1.421E-14 4.609E-15 1.948E-15
+ ETOT 10  -9.7571933493414    -8.882E-15 6.158E-16 1.490E-18
+ ETOT 11  -9.7571933493414     3.908E-14 4.134E-17 5.833E-21
 
- At SCF step   11       vres2   =  5.84E-21 < tolvrs=  1.00E-18 =>converged.
+ At SCF step   11       vres2   =  5.83E-21 < tolvrs=  1.00E-18 =>converged.
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  2.80097263E-04  sigma(3 2)=  0.00000000E+00
@@ -404,7 +401,7 @@ lattice_vectors:
 lattice_lengths: [   7.50240,    7.50240,    7.50240, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.9859750E+02
-convergence: {deltae:  3.730E-14, res2:  5.836E-21, residm:  4.134E-17, diffor: null, }
+convergence: {deltae:  3.908E-14, res2:  5.833E-21, residm:  4.134E-17, diffor: null, }
 etotal    :  -9.75719335E+00
 entropy   :   0.00000000E+00
 fermie    :   8.65978298E-02
@@ -465,16 +462,16 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  2.93664316618340E+00
-hartree             :  7.98938376773698E-01
+kinetic             :  2.93664316618341E+00
+hartree             :  7.98938376773701E-01
 xc                  : -3.93723883317501E+00
 Ewald energy        : -8.47989583509473E+00
 psp_core            :  7.65414498117480E-01
-local_psp           : -2.43103083154896E+00
-non_local_psp       :  5.89976109402721E-01
-total_energy        : -9.75719334934140E+00
+local_psp           : -2.43103083154897E+00
+non_local_psp       :  5.89976109402722E-01
+total_energy        : -9.75719334934139E+00
 total_energy_eV     : -2.65506733625168E+02
-band_energy         : -6.98719956322868E-01
+band_energy         : -6.98719956322886E-01
 ...
 
 
@@ -681,7 +678,7 @@ force_length_stats: {min: null, max: null, mean: null, }
            etotal1    -9.7571933493E+00
             fcart1    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
--          fftalg         312
+-          fftalg         512
            getden1          0
            getden2          1
            getden3          1
@@ -985,10 +982,10 @@ P           mkmem3       2769
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         54.8  wall=         55.0
+- Proc.   0 individual time (sec): cpu=         29.1  wall=         29.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered   5 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         54.8  wall=         55.0
++Overall time at end (sec) : cpu=         29.1  wall=         29.1

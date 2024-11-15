@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2022 ABINIT group (AM)
+!!  Copyright (C) 2008-2024 ABINIT group (AM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,7 +27,6 @@ module m_mover_effpot
  use m_dtset
  use m_dtfil
  use m_abimover
- use m_build_info
  use m_scf_history
  use defs_wvltypes
  use m_xmpi
@@ -41,6 +40,7 @@ module m_mover_effpot
 
  use defs_datatypes,          only : pseudopotential_type
  use defs_abitypes,           only : MPI_type
+ use m_build_info,   only : abinit_version
  use m_geometry,              only : xcart2xred, xred2xcart
  use m_multibinit_dataset,    only : multibinit_dtset_type
  use m_effective_potential,   only : effective_potential_type

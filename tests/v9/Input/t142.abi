@@ -67,7 +67,6 @@ optforces 0
 optstress 0
 pawcpxocc 2
 usexcnhat 0
-pawxcdev 0
 
 paral_atom 0
 paral_kgb 0
@@ -104,6 +103,6 @@ pseudos="P.xml, Al.xml"
 #%% authors = J. Zwanziger
 #%% keywords = PAW
 #%% description = Orbital magnetism with nsppol 2
-#%% topics = MagField
+#%% topics = NMR, MagField
 #%%<END TEST_INFO>
  

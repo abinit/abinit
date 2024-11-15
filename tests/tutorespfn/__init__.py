@@ -29,6 +29,7 @@ inp_files = [
 "teph_tdep_legacy_2.abi",
 "teph_tdep_legacy_3.abi",
 "teph_tdep_legacy_4.abi",
+"teph_tdep_legacy_5.abi",
 #
 "telast_1.abi",
 "telast_2.abi",

@@ -1,6 +1,6 @@
 # -*- Autoconf -*-
 #
-# Copyright (C) 2005-2022 ABINIT Group (Yann Pouillon, Marc Torrent)
+# Copyright (C) 2005-2024 ABINIT Group (Yann Pouillon, Marc Torrent)
 #
 # This file is part of the Steredeg software package. For license information,
 # please see the COPYING file in the top-level directory of the source
@@ -25,6 +25,7 @@ AC_DEFUN([_SD_LINALG_CHECK_LIBS], [
   sd_linalg_has_lapacke="unknown"
   sd_linalg_has_blacs="unknown"
   sd_linalg_has_scalapack="unknown"
+  sd_linalg_has_buggy_zdot="unknown"
   sd_linalg_has_elpa="unknown"
   sd_linalg_has_elpa_2013="unknown"
   sd_linalg_has_elpa_2014="unknown"
@@ -48,6 +49,9 @@ AC_DEFUN([_SD_LINALG_CHECK_LIBS], [
   # BLAS?
   _SD_LINALG_CHECK_BLAS
 
+  # Buggy dot/norm BLAS functions ?
+  _SD_LINALG_CHECK_BUGGY_ZDOT
+
   # BLAS extensions?
   _SD_LINALG_CHECK_BLAS_EXTS
 
@@ -56,6 +60,9 @@ AC_DEFUN([_SD_LINALG_CHECK_LIBS], [
 
   # openBLAS BLAS extensions?
   _SD_LINALG_CHECK_BLAS_OPENBLAS_EXTS
+
+  # NVPL BLAS/LAPACK extensions?
+  _SD_LINALG_CHECK_BLAS_LAPACK_NVPL_EXTS
 
   # LAPACK?
   if test "${sd_linalg_has_blas}" = "yes"; then
@@ -592,9 +599,15 @@ AC_DEFUN([_SD_LINALG_SET_VENDOR_FLAGS], [
       sd_linalg_vendor_blas_libs="-lacml -lacml_mv"
       ;;
 
-    aocl)
-      sd_linalg_vendor_provided="blas lapack blacs scalapack"
-      sd_linalg_vendor_blas_libs="-lblis -lflame"
+    aocl|AOCL)
+      sd_linalg_vendor_provided="blas lapack scalapack"
+      if test "${sd_openmp_enable}" = "yes"; then
+        sd_linalg_vendor_blas_libs="-lblis-mt"
+      else
+        sd_linalg_vendor_blas_libs="-lblis"
+      fi
+      sd_linalg_vendor_lapack_libs="-lflame"
+      sd_linalg_vendor_scalapack_libs="-lscalapack"
       ;;
 
     asl)
@@ -669,9 +682,9 @@ AC_DEFUN([_SD_LINALG_SET_VENDOR_FLAGS], [
           sd_linalg_vendor_cppflags="-I${MKLROOT}/include"
           sd_linalg_vendor_fcflags="-I${MKLROOT}/include"
           if test "${sd_mpi_enable}" = "yes"; then
-            sd_linalg_vendor_ldflags="-mkl=cluster"
+            sd_linalg_vendor_ldflags="-qmkl=cluster"
           else
-            sd_linalg_vendor_ldflags="-mkl"
+            sd_linalg_vendor_ldflags="-qmkl"
           fi
           ;;
         *)
@@ -687,6 +700,13 @@ AC_DEFUN([_SD_LINALG_SET_VENDOR_FLAGS], [
       sd_linalg_vendor_lapacke_libs="-llapacke"
       sd_linalg_vendor_blacs_libs="-lblacs -lblacsCinit -lblacsF77init"
       sd_linalg_vendor_scalapack_libs="-lscalapack"
+      ;;
+
+    nvpl)
+      sd_linalg_vendor_provided="blas lapack scalapack"
+      sd_linalg_vendor_blas_libs="-Mnvpl=blas"
+      sd_linalg_vendor_lapack_libs="-Mnvpl=lapack"
+      sd_linalg_vendor_scalapack_libs="-Mscalapack"
       ;;
 
     openblas)

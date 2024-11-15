@@ -1,4 +1,4 @@
-# bcc ion : test wannier90 interface with nsppol=2 and nspden=2
+# bcc iron : test wannier90 interface with nsppol=2 and nspden=2
 spinat
 0.00000000000000 0.00000000000000 4.00000000000000
 accuracy 2
@@ -34,7 +34,7 @@ rprim
 # 1.00000000000000 0.00000000000000 0.00000000000000
 # -0.33333333177848 0.94280904213179 0.00000000000000
 # -0.33333333441130 -0.47140452114185 0.81649658028510
-scalecart  
+scalecart
   1.01  1.0 0.99   # This is to break the symmetry, and improve portability
 #Definition of the atom types
 ntypat 1
@@ -66,8 +66,8 @@ shiftk
 #%% [extra_info]
 #%% authors = X. He
 #%% keywords = PAW, Wannier90
-#%% description = 
-#%%   Wannier function for bcc Fe. 
+#%% description =
+#%%   Wannier function for bcc Fe.
 #%%   To check whether wannier90 interface works properly with nsppol=2 and nspden=2.
 #%%   Small accuracy parameters, small k-mesh and large test tolerance are used.
 #%%<END TEST_INFO>

@@ -1,7 +1,7 @@
 /* abi_common.h */
 
 /*
- * Copyright (C) 2008-2022 ABINIT Group (MG)
+ * Copyright (C) 2008-2024 ABINIT Group (MG)
  *
  * This file is part of the ABINIT software package. For license information,
  * please see the COPYING file in the top-level directory of the ABINIT source
@@ -88,7 +88,8 @@
 #define ABI_CHECK(expr, msg) if (.not.(expr)) call assert(.FALSE., msg _FILE_LINE_ARGS_)
 
 /* Stop execution with message `msg` if the two integers int1 and int2 are not equal */
-#define ABI_CHECK_IEQ(int1, int2, msg) if (int1 /= int2) ABI_ERROR(sjoin(msg, ": ", itoa(int1), "vs", itoa(int2)))
+#define ABI_CHECK_IEQ(int1, int2, msg) if (int1 /= int2) ABI_ERROR(sjoin(msg, ": while it is", itoa(int1), "vs", itoa(int2)))
+#define ABI_CHECK_INEQ(int1, int2, msg) if (int1 == int2) ABI_ERROR(sjoin(msg, ": while it is", itoa(int1), "vs", itoa(int2)))
 #define ABI_CHECK_IEQ_IERR(int1, int2, msg, ierr) if (int1 /= int2) then NEWLINE ierr = ierr + 1; ABI_WARNING(sjoin(msg, itoa(int1), "vs", itoa(int2))) NEWLINE endif
 
 /* Stop execution with message `msg` if the two doubles double1 and double2 are not equal */
@@ -100,11 +101,17 @@
 /* Stop execution with message `msg` if int1 < int2 */
 #define ABI_CHECK_IGEQ(int1, int2, msg) if (int1 < int2) ABI_ERROR(sjoin(msg, ": ", itoa(int1), "vs", itoa(int2)))
 
+/* Stop execution with message `msg` if int1 <= int2 */
+#define ABI_CHECK_IGE(int1, int2, msg) if (int1 <= int2) ABI_ERROR(sjoin(msg, ": ", itoa(int1), "vs", itoa(int2)))
+
 /* Stop execution with message `msg` if double1 < double2 */
 #define ABI_CHECK_DGEQ(double1, double2, msg) if (double1 < double2) ABI_ERROR(sjoin(msg, ftoa(double1), "vs", ftoa(double2)))
 
+/* Stop execution with message `msg` if double1 <= double2 */
+#define ABI_CHECK_DGE(double1, double2, msg) if (double1 <= double2) ABI_ERROR(sjoin(msg, ftoa(double1), "vs", ftoa(double2)))
+
 /* Stop execution with message `msg` if int not in [start, stop] */
-#define ABI_CHECK_IRANGE(int, start, stop, msg) if (int < start .or. int > stop) ABI_ERROR(sjoin(msg, itoa(int), "not in [", itoa(start), itoa(stop), "]"))
+#define ABI_CHECK_IRANGE(int, start, stop, msg) if (int < start .or. int > stop) ABI_ERROR(sjoin(msg, itoa(int), "not in [", itoa(start), ", ", itoa(stop), "]"))
 
 #define ABI_CHECK_NOSTOP(expr, msg, ierr) \
    if (.not. (expr)) then NEWLINE ierr = ierr + 1; call msg_hndl(msg, "ERROR", "PERS", NOSTOP=.TRUE. _FILE_LINE_ARGS_) NEWLINE endif
@@ -204,6 +211,24 @@
 #  define ABI_MALLOC_TYPE_SCALAR(type,scalar)  allocate(type::scalar)
 
 #endif
+
+#define ABI_MALLOC_CUDA(array,size) call alloc_on_gpu(array,size)
+#define ABI_FREE_CUDA(array) call dealloc_on_gpu(array)
+
+/* these routine should only be use when HAVE_YAKL is defined.
+ * They provide acces to memory available in both host and device
+ * (cuda/hip/openacc) code. The final goal would be to always use managed memory
+ * when HAVE_GPU is defined */
+
+/* gator_allocate can have 2 or 3 args, here is a trick to define a macro
+ * that make sure gator_allocate have 2 or 3 arguments */
+
+#define ABI_MALLOC_MANAGED(array,size) call gator_allocate(array,size)
+#define ABI_MALLOC_MANAGED_BOUNDS(array,size,lbounds) call gator_allocate(array,size,lbounds)
+
+#define ABI_FREE_MANAGED(array) call gator_deallocate(array)
+#define ABI_SFREE_MANAGED(array) if (associated(array)) then NEWLINE ABI_FREE_MANAGED(array) NEWLINE endif
+
 
 /* Macros to allocate zero-initialized arrays. */
 #define ABI_CALLOC(ARR, SIZE) ABI_MALLOC(ARR, SIZE) NEWLINE ARR = zero
@@ -374,11 +399,6 @@ Use if statement instead of Fortran merge. See https://software.intel.com/en-us/
 #  define GWPC_CMPLX(re,im) CMPLX(re,im)
 #  define __slkmat_t slkmat_sp_t
 #endif
-
-
-/* Temporary hack to use GREENX library
-#define __HAVE_GREENX
-*/
 
 #endif
 /* _ABINIT_COMMON_H */

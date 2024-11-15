@@ -51,6 +51,30 @@ __author__ = "Matteo Giantomassi"
 
 _my_name = os.path.basename(__file__) + "-" + __version__
 
+ALL_BINARIES = [
+    "abinit",
+    "abitk",
+    "aim",
+    "anaddb",
+    "band2eps",
+    "conducti",
+    "cut3d",
+    "dummy_tests",
+    "fftprof",
+    "fold2Bloch",
+    "ioprof",
+    "lapackprof",
+    "macroave",
+    "mrgddb",
+    "mrgdv",
+    "mrggkk",
+    "mrgscr",
+    "multibinit",
+    "optic",
+    "atdep",
+    "testtransposer",
+    "lruj",
+]
 
 def str_examples():
     return """
@@ -121,15 +145,21 @@ def vararg_callback(option, opt_str, value, parser):
 def make_abinit(num_threads, touch_patterns=None):
     """
     Find the top-level directory of the build tree and issue `make -j num_threads`.
-
-    Returns: Exit status of the subprocess.
+    Return: Exit status of the subprocess.
     """
     top = find_top_build_tree(".", with_abinit=False)
 
     if touch_patterns:
         abenv.touch_srcfiles([s.strip() for s in touch_patterns.split(",") if s])
 
-    return os.system("cd %s && make -j%d" % (top, num_threads))
+    retcode = os.system("cd %s && make -j%d" % (top, num_threads))
+    if retcode == 0 and  platform.system() == "Darwin":
+        for binary in ALL_BINARIES:
+            cmd = f"codesign -v --force --deep {top}/src/98_main/{binary}"
+            cprint("Executing: %s" % cmd, "yellow")
+            os.system(cmd)
+
+    return retcode
 
 
 def parse_stats(stats):
@@ -166,7 +196,6 @@ def reload_test_suite(status_list):
 
 
 def main():
-
     usage = "usage: %prog [suite_args] [options]. Use [-h|--help] for help."
     version = "%prog " + str(__version__)
 
@@ -246,6 +275,13 @@ def main():
 
     parser.add_option("--etsf", action="store_true", default=False,
                        help="Validate netcdf files produced by the tests. Requires netcdf4")
+
+    parser.add_option("-Y","--yaml-simplified-diff", dest="yaml_simplified_diff", default=False, action="store_true",
+                      help="Will only perform a simplified diff when comparing .abo files (based only on YAML sections)")
+
+    parser.add_option("-T","--forced-tolerance", dest="forced_tolerance", type="string", default="default",
+                      help="[string] Force the use of fldiff comparison tool with the specified tolerance. "+
+                           "Possible values are: default (from test config), high(1.e-10), medium (1.e-8), easy (1.e-5), ridiculous (1.e-2)")
 
     parser.add_option("--touch", default="",
                       help=("Used in conjunction with `-m`."
@@ -493,9 +529,6 @@ def main():
             raise
             show_examples_and_exit(str(exc))
 
-    #test_suite.git_rename()
-    #return 1
-
     if not test_suite:
         cprint("No test fulfills the requirements specified by the user!", "red")
         return 99
@@ -513,8 +546,7 @@ def main():
     # Run the tested selected by the user.
     if omp_nthreads == 0:
         ncpus_used = mpi_nprocs * py_nprocs
-        msg = ("Running %s test(s) with MPI_procs: %s, py_nprocs: %s"
-               % (test_suite.full_length, mpi_nprocs, py_nprocs))
+        msg = ("Running %s test(s) with MPI_procs: %s, py_nprocs: %s" % (test_suite.full_length, mpi_nprocs, py_nprocs))
     else:
         ncpus_used = mpi_nprocs * omp_nthreads * py_nprocs
         msg = ("Running %s test(s) with MPI_nprocs: %s, OMP_nthreads: %s, py_nprocs: %s"
@@ -559,7 +591,9 @@ def main():
                                    sub_timeout=options.sub_timeout,
                                    pedantic=options.pedantic,
                                    abimem_check=options.abimem,
-                                   etsf_check=options.etsf)
+                                   etsf_check=options.etsf,
+                                   simplified_diff=options.yaml_simplified_diff,
+                                   forced_tolerance=options.forced_tolerance)
     if results is None: return 99
 
     if options.looponfail:
@@ -605,17 +639,6 @@ def main():
 
         if count == max_iterations:
             cprint("Reached max_iterations", "red")
-
-    # Threads do not play well with KeyBoardInterrupt
-    #except KeyboardInterrupt:
-    #    all_programs = ["abinit", "anaddb", "mrgscr", "mrgddb", "mrgdv", "mpirun", "mpiexec"]
-    #    cprint("Interrupt sent by user. Will try to `killall executables` where:")
-    #    print("executables:", str(all_programs))
-    #    answer = prompt("Do you want to kill'em all? [Y/n]")
-    #    if not answer.lower().strip() in ["n", "no"]:
-    #        for prog in all_programs:
-    #            os.system("killall %s" % prog)
-    #    return 66
 
     # Edit input files.
     if options.edit:

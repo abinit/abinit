@@ -7,7 +7,7 @@
 !!    optical conductivity, X spectroscopy, linear susceptibility, ...
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2022 ABINIT group (SM,VR,FJ,MT,NB,PGhosh)
+!! Copyright (C) 2018-2024 ABINIT group (SM,VR,FJ,MT,NB,PGhosh)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -414,7 +414,7 @@ CONTAINS  !=====================================================================
 &                    +(kpoint(2)+kg_k(2,ipw))*gprimd(3,2) &
 &                    +(kpoint(3)+kg_k(3,ipw))*gprimd(3,3)
        end do
-       kpg_k=two_pi*kpg_k
+       kpg_k(:,1:npw_k)=two_pi*kpg_k(:,1:npw_k)
        if (dtset%nspinor==2) kpg_k(1:3,npw_k+1:2*npw_k)=kpg_k(1:3,1:npw_k)
 
 !      Loops over bands
@@ -790,7 +790,7 @@ CONTAINS  !=====================================================================
 !!  Matrix elements = <Phi_core|Nabla|Phi_j>
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2022 ABINIT group (SM,MT,NB)
+!! Copyright (C) 2005-2024 ABINIT group (SM,MT,NB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1778,7 +1778,7 @@ CONTAINS  !=====================================================================
 !!        and Gvec_ij= Int[S_limi S_ljmj vec(r)/r dOmega] (Gaunt coefficients)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2021-2022 ABINIT group (NBrouwer,MT)
+!! Copyright (C) 2021-2024 ABINIT group (NBrouwer,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

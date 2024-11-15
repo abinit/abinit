@@ -325,7 +325,7 @@ structure can be constructed.
   
 We finish this "help for new user" with a brief explanation of the logic of ABINIT version releases.
 
-The full name of a version has three digits (for example, 8.8.3). The first
+The full name of a version has three digits (for example, 9.10.5). The first
 digit is the slowly varying one (in average, it is changed after two or three
 years). It indicates the major efforts and trends in that version. At the
 level of 1.x.y ABINIT (before 2000 !), the major effort was placed on the
@@ -344,9 +344,9 @@ with additional features. A [release notes document](/about/release-notes) is is
 additional capabilities, and other information with respect to modifications
 with the previous release. The odd second digits are used for internal
 management only, so-called "development versions" of ABINIT (for example
-8.9.0). Two versions differing by the last (third) digit have the same
+9.11.4). Two versions differing by the last (third) digit have the same
 capabilities, but the one with the largest last digit is more debugged than
-the other: version 8.8.3 is more debugged than 8.8.2, but no new features has
+the other: version 9.10.5 is more debugged than 9.10.3, but no new features has
 been added (so likely, no additional bug!).
 
 In order to start using ABINIT, please follow [[tutorial:index|this tutorial.]]
