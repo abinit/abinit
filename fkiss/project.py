@@ -386,19 +386,32 @@ def enclose(lines, magic, path):
     raise ValueError(f"Cannot find closing `)` after {magic=} in {path}")
 
 def parse_amf(filepath):
-    """Parset the amf file."""
-    #
-    #EXTRA_DIST += \
-    #  md5.h \
-    #  xmalloc.h
+    """Parse the amf file."""
     if not os.path.exists(filepath):
         return []
 
     with open(filepath, "rt") as fh:
         lines = fh.readlines()
 
+    # finc_list = \
+    #     xmpi_allgather.finc \
+	#     xmpi_land_lor.finc
+
+    extra_files = []
+    head = "finc_list ="
+    if lines[0].startswith(head):
+        lines.pop(0)
+        while True:
+            l = lines.pop(0).strip().replace(r"\\", "")
+            if not l: break
+            extra_files.append(l)
+
+    #EXTRA_DIST += \
+    #  md5.h \
+    #  xmalloc.h
+
     head = "EXTRA_DIST +="
-    if not lines[0].startswith(head):
+    if lines[0].startswith(head):
         raise ValueError(f"In {filepath=}: {lines[0]=} should start with {head=}")
 
     return [l.replace(r"\\", "").strip() for l in lines[1:]]
@@ -1078,7 +1091,7 @@ class AbinitProject(NotebookWriter):
             #  )
 
             cmakelist_path = os.path.join(dirpath, "CMakeLists.txt")
-            lines = [l.strip() for l in open(cmakelist_path).readlines()]
+            lines = [l.rstrip() for l in open(cmakelist_path).readlines()]
             dirname = os.path.basename(dirpath)
             magic = f"add_library({dirname} STATIC"
             start, stop = enclose(lines, magic, cmakelist_path)
