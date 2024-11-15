@@ -37,7 +37,7 @@ pawecutdg 20.0
 
 #SCF cycle
 nstep 25
-toldff 5.0d-06
+toldfe 1.0d-10
 
 #Gamma point only
 kptopt 1
