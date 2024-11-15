@@ -153,6 +153,7 @@ module m_abi_linalg
 
  interface abi_xgemm
     module procedure abi_zgemm_2d
+    module procedure abi_zgemm_2dd
     module procedure abi_d2zgemm
  end interface abi_xgemm
 
@@ -252,6 +253,7 @@ module m_abi_linalg
 
  public :: abi_zgemm
  public :: abi_zgemm_2d
+ public :: abi_zgemm_2dd
  public :: abi_zgemm_2r
  interface abi_zgemm  ! No x_cplx stuff here!
     module procedure abi_zgemm_2d

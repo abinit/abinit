@@ -348,7 +348,7 @@ end subroutine copy_matlu
 !!
 !! SOURCE
 
-subroutine copy_matlu_from_ndat(nmat1,nmat2,natom,ndat,idat,opt_diag,opt_non_diag,opt_re)
+subroutine copy_matlu_from_ndat(mat1,mat2,natom,ndat,idat,opt_diag,opt_non_diag,opt_re)
 
  use defs_basis
  implicit none
@@ -356,45 +356,47 @@ subroutine copy_matlu_from_ndat(nmat1,nmat2,natom,ndat,idat,opt_diag,opt_non_dia
 !Arguments ------------------------------------
 !type
  integer, intent(in) :: natom,ndat,idat
- type(matlu_type),intent(in) :: nmat1(natom)
- type(matlu_type),intent(inout) :: nmat2(natom) !vz_i
+ type(matlu_type),intent(in) :: mat1(natom)
+ type(matlu_type),intent(inout) :: mat2(natom) !vz_i
  integer, optional, intent(in) :: opt_diag,opt_non_diag,opt_re
 
 !Local variables-------------------------------
- integer :: iatom,isppol,im1,im2,tndim,nsppol
+ integer :: iatom,isppol,im1,im,ndim,nsppol,nspinor,lpawu
 ! *********************************************************************
 
- ABI_CHECK(nmat1(1)%nsppol==nmat2(1)%nsppol*ndat, "bad ndat value")
- nsppol=nmat2(1)%nsppol
- do isppol=1,nsppol
-   do iatom=1,natom
-     if(nmat1(iatom)%lpawu.ne.-1) then
-       tndim=(2*nmat1(iatom)%lpawu+1)
-       do im1=1,tndim
-         do im2=1,tndim
-           if(present(opt_diag)) then
-             nmat2(iatom)%mat(im1,im1,isppol)=nmat1(iatom)%mat(im1,im1,isppol+(idat-1)*nsppol)
-           else if(present(opt_non_diag)) then
-             if(im1/=im2) then
-               nmat2(iatom)%mat(im1,im2,isppol)=nmat1(iatom)%mat(im1,im2,isppol+(idat-1)*nsppol)
-             endif
-           else
-             nmat2(iatom)%mat(im1,im2,isppol)=nmat1(iatom)%mat(im1,im2,isppol+(idat-1)*nsppol)
-             if(present(opt_re)) nmat2(iatom)%mat(im1,im2,isppol)=&
-                         cmplx(real(nmat1(iatom)%mat(im1,im2,isppol+(idat-1)*nsppol)),0.d0,kind=dp)
-           endif
-         enddo
-       enddo
-     endif ! lpawu=-1
-   enddo ! iatom
- enddo ! isppol
-!   do iatom=1,natom
-!    lpawu=nmat1(iatom)%lpawu
-!    if(lpawu.ne.-1) then
-!     nmat2(iatom)%mat=nmat1(iatom)%mat
-!    endif
-!   enddo
+ ABI_CHECK(mat1(1)%nsppol==mat2(1)%nsppol*ndat, "bad ndat value")
+ nspinor = mat1(1)%nspinor
+ nsppol  = mat2(1)%nsppol
+ do iatom=1,natom
+   lpawu = mat1(iatom)%lpawu
+   if (lpawu == -1) cycle
+   ndim = (2*lpawu+1) * nspinor
 
+   if (present(opt_diag)) then
+     do isppol=1,nsppol
+       do im=1,ndim
+         mat2(iatom)%mat(im,im,isppol) = mat1(iatom)%mat(im,im,(isppol-1)*ndat+idat)
+       end do ! im
+     end do ! isppol
+   else if (present(opt_non_diag)) then
+     do isppol=1,nsppol
+       do im1=1,ndim
+         do im=1,ndim
+           if (im /= im1) mat2(iatom)%mat(im,im1,isppol) = mat1(iatom)%mat(im,im1,(isppol-1)*ndat+idat)
+         end do ! im
+       end do ! im1
+     end do ! isppol
+
+   else if (present(opt_re)) then
+     do isppol=1,nsppol
+       mat2(iatom)%mat(:,:,isppol) = cmplx(dble(mat1(iatom)%mat(:,:,(isppol-1)*ndat+idat)),zero,kind=dp)
+     end do ! isppol
+   else
+     do isppol=1,nsppol
+       mat2(iatom)%mat(:,:,isppol) = mat1(iatom)%mat(:,:,(isppol-1)*ndat+idat)
+     end do ! isppol
+   end if ! opt
+ enddo ! iatom
 
 end subroutine copy_matlu_from_ndat
 !!***
@@ -415,7 +417,7 @@ end subroutine copy_matlu_from_ndat
 !!
 !! SOURCE
 
-subroutine copy_matlu_to_ndat(nmat1,nmat2,natom,ndat,idat,opt_diag,opt_non_diag,opt_re)
+subroutine copy_matlu_to_ndat(mat1,mat2,natom,ndat,idat,opt_diag,opt_non_diag,opt_re)
 
  use defs_basis
  implicit none
@@ -423,45 +425,48 @@ subroutine copy_matlu_to_ndat(nmat1,nmat2,natom,ndat,idat,opt_diag,opt_non_diag,
 !Arguments ------------------------------------
 !type
  integer, intent(in) :: natom,ndat,idat
- type(matlu_type),intent(in) :: nmat1(natom)
- type(matlu_type),intent(inout) :: nmat2(natom) !vz_i
+ type(matlu_type),intent(in) :: mat1(natom)
+ type(matlu_type),intent(inout) :: mat2(natom) !vz_i
  integer, optional, intent(in) :: opt_diag,opt_non_diag,opt_re
 
 !Local variables-------------------------------
- integer :: iatom,isppol,im1,im2,tndim,nsppol
+ integer :: iatom,isppol,im1,im,ndim,nsppol,nspinor,lpawu
 ! *********************************************************************
 
- ABI_CHECK(nmat1(1)%nsppol*ndat==nmat2(1)%nsppol, "bad ndat value")
- nsppol=nmat1(1)%nsppol
- do isppol=1,nsppol
-   do iatom=1,natom
-     if(nmat1(iatom)%lpawu.ne.-1) then
-       tndim=(2*nmat1(iatom)%lpawu+1)
-       do im1=1,tndim
-         do im2=1,tndim
-           if(present(opt_diag)) then
-             nmat2(iatom)%mat(im1,im1,isppol+(idat-1)*nsppol)=nmat1(iatom)%mat(im1,im1,isppol)
-           else if(present(opt_non_diag)) then
-             if(im1/=im2) then
-               nmat2(iatom)%mat(im1,im2,isppol+(idat-1)*nsppol)=nmat1(iatom)%mat(im1,im2,isppol)
-             endif
-           else
-             nmat2(iatom)%mat(im1,im2,isppol+(idat-1)*nsppol)=nmat1(iatom)%mat(im1,im2,isppol)
-             if(present(opt_re)) nmat2(iatom)%mat(im1,im2,isppol+(idat-1)*nsppol)=&
-&                     cmplx(real(nmat1(iatom)%mat(im1,im2,isppol)),0.d0,kind=dp)
-           endif
-         enddo
-       enddo
-     endif ! lpawu=-1
-   enddo ! iatom
- enddo ! isppol
-!   do iatom=1,natom
-!    lpawu=nmat1(iatom)%lpawu
-!    if(lpawu.ne.-1) then
-!     nmat2(iatom)%mat=nmat1(iatom)%mat
-!    endif
-!   enddo
 
+ ABI_CHECK(mat1(1)%nsppol*ndat==mat2(1)%nsppol, "bad ndat value")
+ nspinor = mat1(1)%nspinor
+ nsppol  = mat1(1)%nsppol
+ do iatom=1,natom
+   lpawu = mat1(iatom)%lpawu
+   if (lpawu == -1) cycle
+   ndim = (2*lpawu+1) * nspinor
+
+   if (present(opt_diag)) then
+     do isppol=1,nsppol
+       do im=1,ndim
+         mat2(iatom)%mat(im,im,(isppol-1)*ndat+idat) = mat1(iatom)%mat(im,im,isppol)
+       end do ! im
+     end do ! isppol
+   else if (present(opt_non_diag)) then
+     do isppol=1,nsppol
+       do im1=1,ndim
+         do im=1,ndim
+           if (im /= im1) mat2(iatom)%mat(im,im1,(isppol-1)*ndat+idat) = mat1(iatom)%mat(im,im1,isppol)
+         end do ! im
+       end do ! im1
+     end do ! isppol
+
+   else if (present(opt_re)) then
+     do isppol=1,nsppol
+       mat2(iatom)%mat(:,:,(isppol-1)*ndat+idat) = cmplx(dble(mat1(iatom)%mat(:,:,isppol)),zero,kind=dp)
+     end do ! isppol
+   else
+     do isppol=1,nsppol
+       mat2(iatom)%mat(:,:,(isppol-1)*ndat+idat) = mat1(iatom)%mat(:,:,isppol)
+     end do ! isppol
+   end if ! opt
+ enddo ! iatom
 
 end subroutine copy_matlu_to_ndat
 !!***
