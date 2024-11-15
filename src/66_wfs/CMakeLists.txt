@@ -17,10 +17,11 @@ set(66_wfs_SRC
   m_rayleigh_ritz.F90
   m_rmm_diis.F90
   m_wfd.F90
-  )
+)
 
 add_library(66_wfs STATIC
-  ${66_wfs_SRC})
+  ${66_wfs_SRC}
+)
 
 set_target_properties(66_wfs
   PROPERTIES
@@ -51,7 +52,7 @@ target_link_libraries(66_wfs
   abinit::62_iowfdenpot
   abinit::62_cg_noabirule
   abinit::66_nonlocal
-  )
+)
 
 if(ABINIT_ENABLE_GPU_CUDA AND ABINIT_KOKKOS_WANTED)
   target_link_libraries(66_wfs
