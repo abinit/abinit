@@ -45,6 +45,7 @@ MODULE m_pawdij
 
  private
 
+
 !public procedures.
  public :: pawdij           ! Dij total
  public :: pawdijhartree    ! Dij Hartree
@@ -64,6 +65,7 @@ MODULE m_pawdij
  public :: symdij_all       ! Symmetrize all contributions to Dij
  public :: pawdij_gather    ! Perform a allgather operation on Dij
  public :: pawdij_print_dij ! Print out a Dij matrix
+ public :: make_zora_fncs   ! make ZORA terms
 !!***
 
 CONTAINS
@@ -2563,7 +2565,8 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
  character(len=500) :: msg
 !arrays
  integer, pointer :: indklmn(:,:)
- real(dp),allocatable :: dijso_rad(:),dv1dr(:),ff(:)
+ real(dp),allocatable :: dijso_rad(:),dv1dr(:)
+ real(dp),allocatable :: zk1(:),zk2(:),zintgd(:),zso_kernel(:)
 
 ! *************************************************************************
 
@@ -2612,44 +2615,30 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
 !----------- Allocations and initializations
 !------------------------------------------------------------------------
 
-!Eventually compute <Phi_i|1/r.dV/dr|Phi_j>*alpha2/2*Y_00 (for spin-orbit)
  LIBPAW_ALLOCATE(dv1dr,(mesh_size))
- LIBPAW_ALLOCATE(dijso_rad,(ij_size))
- LIBPAW_ALLOCATE(ff,(mesh_size))
- fact=one/sqrt(four_pi) ! Y_00
- if (pawxcdev/=0) then
-   if (nspden==1) then
-     ff(1:mesh_size)=vxc1(1:mesh_size,1,1)
-   else
-     ff(1:mesh_size)=half*(vxc1(1:mesh_size,1,1)+vxc1(1:mesh_size,1,2))
-   end if
- else
-   ff(1:mesh_size)=zero
-   if (nspden==1) then
-     do ipts=1,angl_size
-       ff(1:mesh_size)=ff(1:mesh_size) &
-&          +vxc1(1:mesh_size,ipts,1)*pawang%angwgth(ipts)
-     end do
-   else
-     do ipts=1,angl_size
-       ff(1:mesh_size)=ff(1:mesh_size) &
-&       +half*(vxc1(1:mesh_size,ipts,1)+vxc1(1:mesh_size,ipts,2)) &
-&       *pawang%angwgth(ipts)
-     end do
-   end if
-   ff(1:mesh_size)=sqrt(four_pi)*ff(1:mesh_size)
- end if
- ff(1:mesh_size)=fact*(ff(1:mesh_size)+vh1(1:mesh_size,1,1))
- call nderiv_gen(dv1dr,ff,pawrad)
- dv1dr(2:mesh_size)=HalfFineStruct2*(one/(one-ff(2:mesh_size)*half/InvFineStruct**2)**2) &
-& *dv1dr(2:mesh_size)/pawrad%rad(2:mesh_size)
- call pawrad_deducer0(dv1dr,mesh_size,pawrad)
- do kln=1,ij_size
-   ff(1:mesh_size)= dv1dr(1:mesh_size)*pawtab%phiphj(1:mesh_size,kln)
-   call simp_gen(dijso_rad(kln),ff,pawrad)
- end do
+ LIBPAW_ALLOCATE(zk1,(mesh_size))
+ LIBPAW_ALLOCATE(zk2,(mesh_size))
+ call make_zora_fncs(dv1dr,mesh_size,nspden,pawang,pawrad,pawxcdev,&
+    & vh1,vxc1,zk1,zk2)
+
+ LIBPAW_ALLOCATE(zso_kernel,(mesh_size))
+ zso_kernel(2:mesh_size) = HalfFineStruct2*zk2(2:mesh_size)*dv1dr(2:mesh_size)/&
+   pawrad%rad(2:mesh_size)
+ call pawrad_deducer0(zso_kernel,mesh_size,pawrad)
+ LIBPAW_DEALLOCATE(zk1)
+ LIBPAW_DEALLOCATE(zk2)
  LIBPAW_DEALLOCATE(dv1dr)
- LIBPAW_DEALLOCATE(ff)
+ 
+ LIBPAW_ALLOCATE(zintgd,(mesh_size))
+ LIBPAW_ALLOCATE(dijso_rad,(ij_size))
+ do kln=1,ij_size
+   zintgd = zso_kernel*pawtab%phiphj(1:mesh_size,kln)
+   call simp_gen(dijso_rad(kln),zintgd,pawrad)
+ end do
+
+ LIBPAW_DEALLOCATE(zso_kernel)
+ LIBPAW_DEALLOCATE(zintgd)
+
  dijso_rad(:)=spnorbscl*dijso_rad(:)
 
 !------------------------------------------------------------------------
@@ -5733,6 +5722,92 @@ end subroutine pawdij_print_dij
 !!***
 
 !----------------------------------------------------------------------
+
+!!****f* m_pawdij/make_zora_fncs
+!! NAME
+!! make_zora_fncs
+!!
+!! FUNCTION
+!! Compute necessary ZORA functions K(r), K^2(r), dV/dr
+!!
+!! INPUTS
+!!  mesh_size=radial mesh size
+!!  nspden=number of spin density components
+!!  pawang <type(pawang_type)>=paw angular mesh and related data
+!!  pawrad <type(pawrad_type)>=paw radial mesh and related data, for current atom
+!!  pawxcdev=Choice of XC development (0=no dev. (use of angular mesh) ; 1 or 2=dev. on moments)
+!!  vh1(qphase*mesh_size,v_size,nspden)=all-electron on-site Hartree potential for current atom
+!!                     only spherical moment is used
+!!  vxc1(qphase*mesh_size,v_size,nspden)=all-electron on-site XC potential for current atom
+!!                                given on a (r,theta,phi) grid (v_size=angl_size)
+!!                                or on (l,m) spherical moments (v_size=lm_size)
+!!
+!! OUTPUT
+!! dvi1dr(mesh_size)=radial derivative of v1
+!! zk1(mesh_size)=ZORA factor 1/(1-1/2 \alpha^2 v1)
+!! zk2(mesh_size)=zk1**2
+!!
+!! SOURCE
+
+subroutine make_zora_fncs(dv1dr,mesh_size,nspden,pawang,pawrad,pawxcdev,&
+    & vh1,vxc1,zk1,zk2)
+
+!Arguments ---------------------------------------------
+!scalars
+ integer,intent(in) :: mesh_size,nspden,pawxcdev
+ type(pawang_type),intent(in) :: pawang
+!arrays
+ real(dp),intent(in) :: vh1(:,:,:),vxc1(:,:,:)
+ real(dp),intent(out) :: dv1dr(mesh_size),zk1(mesh_size),zk2(mesh_size)
+ type(pawrad_type),intent(in) :: pawrad
+!Local variables ---------------------------------------
+!scalars
+ integer :: angl_size,ipts
+ real(dp), parameter :: HalfFineStruct2=half/InvFineStruct**2
+ real(dp) :: fact
+!arrays
+ real(dp),allocatable :: v1(:)
+
+! *************************************************************************
+
+ angl_size=pawang%angl_size
+
+ LIBPAW_ALLOCATE(v1,(mesh_size))
+ fact=one/sqrt(four_pi) ! Y_00
+ if (pawxcdev/=0) then
+   if (nspden==1) then
+     v1(1:mesh_size)=vxc1(1:mesh_size,1,1)
+   else
+     v1(1:mesh_size)=half*(vxc1(1:mesh_size,1,1)+vxc1(1:mesh_size,1,2))
+   end if
+ else
+   v1(1:mesh_size)=zero
+   if (nspden==1) then
+     do ipts=1,angl_size
+       v1(1:mesh_size)=v1(1:mesh_size) &
+&          +vxc1(1:mesh_size,ipts,1)*pawang%angwgth(ipts)
+     end do
+   else
+     do ipts=1,angl_size
+       v1(1:mesh_size)=v1(1:mesh_size) &
+&       +half*(vxc1(1:mesh_size,ipts,1)+vxc1(1:mesh_size,ipts,2)) &
+&       *pawang%angwgth(ipts)
+     end do
+   end if
+   v1(1:mesh_size)=sqrt(four_pi)*v1(1:mesh_size)
+ end if
+ v1(1:mesh_size)=fact*(v1(1:mesh_size)+vh1(1:mesh_size,1,1))
+ call nderiv_gen(dv1dr,v1,pawrad)
+
+ zk1 = one/(one - HalfFineStruct2*v1)
+ zk2 = zk1**2
+
+ LIBPAW_DEALLOCATE(v1)
+
+end subroutine make_zora_fncs
+
+!!***
+
 
 END MODULE m_pawdij
 !!***
