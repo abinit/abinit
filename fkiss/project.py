@@ -380,10 +380,9 @@ def enclose(lines, magic, path):
         raise ValueError(f"Cannot find {magic=} in {path=}")
 
     for i, l in enumerate(lines[start:]):
-        #if l.strip().startswith(")"):
         if l.endswith(")"):
             if len(l.strip()) > 1:
-                raise RuntimeError(f"Ending `)` should be placed on a separated line while got: {l=} in {path=}")
+                raise RuntimeError(f"Closing `)` should be placed on a separate line while got: {l=} in {path=}")
             return start, i + start + 1
 
     #print(lines)
@@ -1117,12 +1116,12 @@ class AbinitProject(NotebookWriter):
             start, stop = enclose(new_lines, magic, cmakelist_path)
             del new_lines[start+1:stop-1]
 
-            # Get list of source files (F, C, C++) from abinit.src.
+            # Get list of source files from abinit.src.
             mod = load_mod(os.path.join(dirpath, "abinit.src"))
-            new_lines[start+1:start+1] = [(2*" " + s) for s in mod.sources]
-
             extra_files = parse_amf(os.path.join(dirpath, "abinit.amf"))
             print("extra_files:", extra_files)
+            new_files = mod.sources + extra_files
+            new_lines[start+1:start+1] = [(2*" " + f) for f in new_files]
 
             ## This section is optional!
             #target_link_libraries(78_eph
@@ -1131,22 +1130,22 @@ class AbinitProject(NotebookWriter):
             #  abinit::16_hideleave
             #  ...
             #  )
-            magic = f"target_link_libraries({dirname}"
             try:
+                magic = f"target_link_libraries({dirname}"
                 start, stop = enclose(new_lines, magic, cmakelist_path)
                 #del new_lines[start+1:stop-1]
                 #new_lines[start+1:start+1] = mod.sources
                 #print("\n".join(new_lines))
 
             except ValueError:
-                print(f"{dirname=} does not export libraries!")
+                print(f"INFO: {dirname=} does not export libraries!")
                 pass
 
             ################################
             # Write new CMakeLists.txt file.
             ################################
             new_str = "\n".join(new_lines)
-            print(new_str)
+            #print(new_str)
             #with open(cmakelist_path, "wt") as fh:
             #    fh.write(new_str)
 
