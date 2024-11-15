@@ -26,7 +26,7 @@
  use m_errors
 
  use m_matlu, only : matlu_type
- use m_oper, only : destroy_oper,init_oper,oper_type
+ use m_oper, only : destroy_oper,init_oper,init_oper_ndat,copy_oper_from_ndat,copy_oper_to_ndat,oper_type
  use m_paw_dmft, only : mpi_distrib_dmft_type,paw_dmft_type
  use m_self, only : self_type
 
@@ -1011,6 +1011,7 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
  real(dp) :: tsec(2)
  real(dp), allocatable :: eig(:),rwork(:),fac(:)
  complex(dpc), allocatable :: mat_tmp(:,:),omega_fac(:),work(:),omega_current(:)
+ type(oper_type) :: green_oper_ndat
 ! integer, allocatable :: procb(:,:),proct(:,:)
 ! *********************************************************************
 
@@ -1144,7 +1145,9 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
  shift_green = shift
  if (green%oper(1)%has_operks == 0) shift_green = 0
 
-
+ if(green%oper(1)%has_opermatlu==0) optoper_ksloc=1
+ if(green%oper(1)%has_opermatlu==1) optoper_ksloc=3
+ call init_oper_ndat(paw_dmft,green_oper_ndat,green%nw,opt_ksloc=optoper_ksloc)
 
 
 
@@ -1207,10 +1210,18 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
      !  call shift_matlu(self_minus_hdc_oper%matlu,paw_dmft%natom,cmplx(self%qmc_shift,0.d0,kind=dp),-1)
      !  call shift_matlu(self_minus_hdc_oper%matlu,paw_dmft%natom,cmplx(self%qmc_xmu,0.d0,kind=dp),-1)
      !endif
+#if 0
    do ifreq=1,green%nw
      if (green%distrib%proct(ifreq) /= green%distrib%me_freq) cycle
+     print*,ifreq
      call upfold_oper(green%oper(ifreq),paw_dmft,procb=green%distrib%procb(:),iproc=me_kpt,gpu_option=gpu_option)
    end do ! ifreq
+#else
+   call copy_oper_to_ndat(green%oper,green_oper_ndat,green%nw)
+   call upfold_oper(green_oper_ndat,paw_dmft,procb=green%distrib%procb(:),iproc=me_kpt,gpu_option=gpu_option)
+   call copy_oper_from_ndat(green_oper_ndat,green%oper,green%nw)
+#endif
+   !ABI_BUG("toto")
  end if ! optself
  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1464,6 +1475,7 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
  ABI_FREE(fac)
 
 
+ call destroy_oper(green_oper_ndat)
 
 
 
