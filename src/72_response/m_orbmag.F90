@@ -56,6 +56,7 @@ module m_orbmag
   use m_paw_an,           only : paw_an_type
   use m_pawang,           only : pawang_type
   use m_pawcprj,          only : pawcprj_type, pawcprj_alloc, pawcprj_free,pawcprj_getdim, pawcprj_get, pawcprj_put
+  use m_pawdij,           only : pawv1
   use m_pawfgr,           only : pawfgr_type
   use m_pawfgrtab,        only : pawfgrtab_type
   use m_paw_ij,           only : paw_ij_type
@@ -2463,16 +2464,13 @@ subroutine dterm_ZA0(atindx,cplex_dij,dterm,dtset,paw_an,pawang,pawrad,pawtab,qp
 
   !Local variables -------------------------
   !scalars
-  integer :: angl_size,gint,iat,iatom,idij,idir,igf,ij_size,ipts,itypat
-  integer :: klmn,klmn1,klm,kln,lmn2_size,mesh_size,ndij
-  real(dp), parameter :: c1=sqrt(four_pi/five)
-  real(dp), parameter :: c2=one/sqrt(three)
-  real(dp), parameter :: c3=sqrt(four_pi)
+  integer :: gs1,gs2,iat,iatom,ij_size,itypat,kln,lmn2_size
+  integer :: mesh_size,ndij,ngnt
   real(dp), parameter :: HalfFineStruct2=half*FineStructureConstant2
   !arrays
   character(len=500) :: msg
-  real(dp) :: rgnt(9),svgt(6)
-  real(dp),allocatable :: dijsob1(:,:,:),dijsob1_rad(:),dv1dr(:),ff(:)
+  real(dp),allocatable :: dv1dr(:),dyadic(:,:,:)
+  real(dp),allocatable :: v1(:),zk1(:),za0_kernel(:),za0_rad(:,:)
 !--------------------------------------------------------------------
 
   dterm%ZA0 = czero
@@ -2490,57 +2488,54 @@ subroutine dterm_ZA0(atindx,cplex_dij,dterm,dtset,paw_an,pawang,pawrad,pawtab,qp
     ABI_BUG(msg)
   end if
 
-!!  do iat=1,dtset%natom
-!!    iatom=atindx(iat)
-!!    itypat=dtset%typat(iat)
-!!    lmn2_size=pawtab(itypat)%lmn2_size
-!!    ndij=dterm%ndij
-!!    ij_size=pawtab(itypat)%ij_size
-!!    mesh_size=pawtab(itypat)%mesh_size
-!!    angl_size=pawang%angl_size
-!!
-!!    if (size(paw_an(iatom)%vh1,1)/=qphase*mesh_size .or. &
-!!      & size(paw_an(iatom)%vh1,2)<1 .or. &
-!!      & size(paw_an(iatom)%vh1,3)<1) then
-!!      msg='invalid sizes for vh1!'
-!!      ABI_BUG(msg)
-!!    end if
-!!
-!!    ! get ZORA factors for this atom
-!!    ABI_ALLOCATE(dv1dr,(mesh_size))
-!!    ABI_ALLOCATE(zk1,(mesh_size))
-!!    ABI_ALLOCATE(zk2,(mesh_size))
-!!    call make_zora_fncs(dv1dr,mesh_size,dtset%nspden,pawang,pawrad(itypat),dtset%pawxcdev,&
-!!      & paw_an(iatom)%vh1,paw_an(iatom)%vxc1,zk1,zk2)
-!!
-!!    ! radial integrals
-!!    ! za0_rad(1,kln) = int ui K uj dr
-!!    ! za0_rad(2,kln) = 1/4 a^2 int ui K^2 V' r uj dr
-!!    ABI_ALLOCATE(za0_rad,(2,ij_size))
-!!    ABI_ALLOCATE(za0_kernel,(mesh_size))
-!!    do kln = 1, ij_size
-!!   
-!!      za0_kernel= pawtab(itypat)%phiphj(1:mesh_size,kln)*zk1(1:mesh_size)
-!!      call simp_gen(za0_rad(1,kln),za0_kernel,pawrad(itypat))
-!!      
-!!      za0_kernel= pawtab(itypat)%phiphj(1:mesh_size,kln)*zk2(1:mesh_size)*&
-!!        dv1dr(1:mesh_size)*pawrad(itypat)%rad(1:mesh_size)
-!!      call simp_gen(za0_rad(2,kln),za0_kernel,pawrad(itypat))
-!!      za0_rad(2,kln) = za0_rad(2,kln)*half*HalfFineStruct2
-!!    
-!!    end do
-!!    ABI_FREE(zk1)
-!!    ABI_FREE(zk2)
-!!    ABI_FREE(dv1dr)
-!!    ABI_FREE(za0_kernel)
-!!    
-!!    ! make (1-\hat{r}\hat{r}) dyadic integrals
-!!    gs1=size(pawang%gntselect,1)
-!!    gs2=size(pawang%gntselect,2)
-!!    ngnt=size(pawang%realgnt)
-!!    ABI_MALLOC(dyadic,(3,3,gs2))
-!!    call make_dyadic(one,one,dyadic,gntselect,gs1,gs2,gs2,ngnt,realgnt)
-!!
+  do iat=1,dtset%natom
+    iatom=atindx(iat)
+    itypat=dtset%typat(iat)
+    lmn2_size=pawtab(itypat)%lmn2_size
+    ndij=dterm%ndij
+    ij_size=pawtab(itypat)%ij_size
+    mesh_size=pawtab(itypat)%mesh_size
+    
+    ABI_MALLOC(v1,(mesh_size))
+    call pawv1(mesh_size,dtset%nspden,pawang,pawrad(itypat),&
+      & dtset%pawxcdev,v1,paw_an(iat)%vh1,paw_an(iat)%vxc1)
+    
+    ABI_MALLOC(dv1dr,(mesh_size))
+    call nderiv_gen(dv1dr,v1,pawrad(itypat))
+
+    ABI_MALLOC(zk1,(mesh_size))
+    zk1 = one/(one - HalfFineStruct2*v1)
+    ABI_FREE(v1)
+
+    ! radial integrals
+    ! za0_rad(1,kln) = int ui K uj dr
+    ! za0_rad(2,kln) = 1/4 a^2 int ui K^2 V' r uj dr
+    ABI_MALLOC(za0_rad,(2,ij_size))
+    ABI_MALLOC(za0_kernel,(mesh_size))
+    do kln = 1, ij_size
+   
+      za0_kernel= pawtab(itypat)%phiphj(1:mesh_size,kln)*zk1(1:mesh_size)
+      call simp_gen(za0_rad(1,kln),za0_kernel,pawrad(itypat))
+      
+      za0_kernel= pawtab(itypat)%phiphj(1:mesh_size,kln)*&
+        & zk1(1:mesh_size)*zk1(1:mesh_size)*&
+        & dv1dr(1:mesh_size)*pawrad(itypat)%rad(1:mesh_size)
+      call simp_gen(za0_rad(2,kln),za0_kernel,pawrad(itypat))
+      za0_rad(2,kln) = za0_rad(2,kln)*half*HalfFineStruct2
+    
+    end do
+    ABI_FREE(zk1)
+    ABI_FREE(dv1dr)
+    ABI_FREE(za0_kernel)
+    
+    ! make (1-\hat{r}\hat{r}) dyadic integrals
+    gs1=size(pawang%gntselect,1)
+    gs2=size(pawang%gntselect,2)
+    ngnt=size(pawang%realgnt)
+    ABI_MALLOC(dyadic,(3,3,gs2))
+    call make_dyadic(one,one,dyadic,pawang%gntselect,&
+      & gs1,gs2,gs2,ngnt,pawang%realgnt)
+
 !!    ABI_MALLOC(dijsob1,(3,cplex_dij*qphase*lmn2_size,ndij))
 !!    dijsob1=zero
 !!    klmn1=1
@@ -2561,10 +2556,10 @@ subroutine dterm_ZA0(atindx,cplex_dij,dterm,dtset,paw_an,pawang,pawrad,pawtab,qp
 !!      end do ! idij
 !!
 !!    end do ! klmn
-!!    ABI_FREE(za0_rad)
-!!    ABI_FREE(dyadic)
+    ABI_FREE(za0_rad)
+    ABI_FREE(dyadic)
 !!    ABI_FREE(dijsob1)
-!!  end do ! iat
+  end do ! iat
 !!
   dterm%has_ZA0 = 2
 
