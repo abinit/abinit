@@ -372,21 +372,21 @@ class FortranFile(object):
         return fg
 
 
-def enclose(lines, magic, path):
+def enclose(lines, magic_line, filepath):
     try:
-        start = lines.index(magic)
+        start = lines.index(magic_line)
     except ValueError:
         #print(lines)
-        raise ValueError(f"Cannot find {magic=} in {path=}")
+        raise ValueError(f"Cannot find {magic_line=} in {filepath=}")
 
     for i, l in enumerate(lines[start:]):
         if l.endswith(")"):
             if len(l.strip()) > 1:
-                raise RuntimeError(f"Closing `)` should be placed on a separate line while got: {l=} in {path=}")
+                raise RuntimeError(f"Closing `)` should be placed on a separate line while got: {l=} in {filepath=}")
             return start, i + start + 1
 
     #print(lines)
-    raise ValueError(f"Cannot find closing `)` after {magic=} in {path=}")
+    raise ValueError(f"Cannot find closing `)` after {magic_line=} in {filepath=}")
 
 
 def parse_extra_dist(filepath, varname):
@@ -432,15 +432,16 @@ def parse_amf(filepath):
     #  xmalloc.h
     extra_dist = parse_extra_dist(filepath, "EXTRA_DIST +=")
     extra_dist = [f for f in extra_dist if any(f.endswith(ext) for ext in (".h", ".c", ".f90", ".hpp", ".cpp"))]
-    print("extra_dist", extra_dist)
+    #print("extra_dist", extra_dist)
+    return extra_dist
 
     # finc_list = \
     #     xmpi_allgather.finc \
 	#     xmpi_land_lor.finc
-    finc_list = parse_extra_dist(filepath, "finc_list =")
-    print("finc_list", finc_list)
+    #finc_list = parse_extra_dist(filepath, "finc_list =")
+    #print("finc_list", finc_list)
 
-    return extra_dist + finc_list
+    #return extra_dist + finc_list
 
 
 class AbinitProject(NotebookWriter):
@@ -1098,11 +1099,12 @@ class AbinitProject(NotebookWriter):
                     fh.write(s)
 
             # TODO
+            #"""
             #########################
             # Integration with CMAKE
             #########################
 
-            # Read CMakeList.txt in new_lines.
+            # Read CMakeList.txt in new_lines. NB: use rstrip to maintain indentation.
             cmakelist_path = os.path.join(dirpath, "CMakeLists.txt")
             new_lines = [l.rstrip() for l in open(cmakelist_path).readlines()]
 
@@ -1110,7 +1112,7 @@ class AbinitProject(NotebookWriter):
             #  m_berry_curvature.F90
             #  m_cumulant.F90
             #  ...
-            #  )
+            #)
             dirname = os.path.basename(dirpath)
             magic = f"add_library({dirname} STATIC"
             start, stop = enclose(new_lines, magic, cmakelist_path)
@@ -1119,7 +1121,7 @@ class AbinitProject(NotebookWriter):
             # Get list of source files from abinit.src.
             mod = load_mod(os.path.join(dirpath, "abinit.src"))
             extra_files = parse_amf(os.path.join(dirpath, "abinit.amf"))
-            print("extra_files:", extra_files)
+            #print("extra_files:", extra_files)
             new_files = mod.sources + extra_files
             new_lines[start+1:start+1] = [(2*" " + f) for f in new_files]
 
@@ -1129,7 +1131,7 @@ class AbinitProject(NotebookWriter):
             #  abinit::10_defs
             #  abinit::16_hideleave
             #  ...
-            #  )
+            #)
             try:
                 magic = f"target_link_libraries({dirname}"
                 start, stop = enclose(new_lines, magic, cmakelist_path)
@@ -1148,6 +1150,7 @@ class AbinitProject(NotebookWriter):
             #print(new_str)
             #with open(cmakelist_path, "wt") as fh:
             #    fh.write(new_str)
+            #"""
 
     def touch_alldeps(self, verbose=0):
         """
