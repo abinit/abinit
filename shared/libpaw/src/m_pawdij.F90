@@ -65,7 +65,7 @@ MODULE m_pawdij
  public :: symdij_all       ! Symmetrize all contributions to Dij
  public :: pawdij_gather    ! Perform a allgather operation on Dij
  public :: pawdij_print_dij ! Print out a Dij matrix
- public :: make_zora_fncs   ! make ZORA terms
+ public :: pawv1            ! On-site V1 potential
 !!***
 
 CONTAINS
@@ -2565,8 +2565,8 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
  character(len=500) :: msg
 !arrays
  integer, pointer :: indklmn(:,:)
- real(dp),allocatable :: dijso_rad(:),dv1dr(:)
- real(dp),allocatable :: zk1(:),zk2(:),zintgd(:),zso_kernel(:)
+ real(dp),allocatable :: dijso_rad(:),dv1dr(:),v1(:)
+ real(dp),allocatable :: zk1(:),zintgd(:),zso_kernel(:)
 
 ! *************************************************************************
 
@@ -2615,18 +2615,21 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
 !----------- Allocations and initializations
 !------------------------------------------------------------------------
 
+ LIBPAW_ALLOCATE(v1,(mesh_size))
+ call pawv1(mesh_size,nspden,pawang,pawrad,pawxcdev,v1,vh1,vxc1)
+ 
  LIBPAW_ALLOCATE(dv1dr,(mesh_size))
+ call nderiv_gen(dv1dr,v1,pawrad)
+
  LIBPAW_ALLOCATE(zk1,(mesh_size))
- LIBPAW_ALLOCATE(zk2,(mesh_size))
- call make_zora_fncs(dv1dr,mesh_size,nspden,pawang,pawrad,pawxcdev,&
-    & vh1,vxc1,zk1,zk2)
+ zk1 = one/(one - HalfFineStruct2*v1)
+ LIBPAW_DEALLOCATE(v1)
 
  LIBPAW_ALLOCATE(zso_kernel,(mesh_size))
- zso_kernel(2:mesh_size) = HalfFineStruct2*zk2(2:mesh_size)*dv1dr(2:mesh_size)/&
-   pawrad%rad(2:mesh_size)
+ zso_kernel(2:mesh_size) = HalfFineStruct2*zk1(2:mesh_size)*zk1(2:mesh_size)*&
+   dv1dr(2:mesh_size)/pawrad%rad(2:mesh_size)
  call pawrad_deducer0(zso_kernel,mesh_size,pawrad)
  LIBPAW_DEALLOCATE(zk1)
- LIBPAW_DEALLOCATE(zk2)
  LIBPAW_DEALLOCATE(dv1dr)
  
  LIBPAW_ALLOCATE(zintgd,(mesh_size))
@@ -5723,12 +5726,12 @@ end subroutine pawdij_print_dij
 
 !----------------------------------------------------------------------
 
-!!****f* m_pawdij/make_zora_fncs
+!!****f* m_pawdij/pawv1
 !! NAME
-!! make_zora_fncs
+!! pawv1
 !!
 !! FUNCTION
-!! Compute necessary ZORA functions K(r), K^2(r), dV/dr
+!! On-site all-electron potential V1
 !!
 !! INPUTS
 !!  mesh_size=radial mesh size
@@ -5743,14 +5746,12 @@ end subroutine pawdij_print_dij
 !!                                or on (l,m) spherical moments (v_size=lm_size)
 !!
 !! OUTPUT
-!! dvi1dr(mesh_size)=radial derivative of v1
-!! zk1(mesh_size)=ZORA factor 1/(1-1/2 \alpha^2 v1)
-!! zk2(mesh_size)=zk1**2
+!! v1(mesh_size)=V1 on-site potential
 !!
 !! SOURCE
 
-subroutine make_zora_fncs(dv1dr,mesh_size,nspden,pawang,pawrad,pawxcdev,&
-    & vh1,vxc1,zk1,zk2)
+subroutine pawv1(mesh_size,nspden,pawang,pawrad,pawxcdev,&
+    & v1,vh1,vxc1)
 
 !Arguments ---------------------------------------------
 !scalars
@@ -5758,21 +5759,18 @@ subroutine make_zora_fncs(dv1dr,mesh_size,nspden,pawang,pawrad,pawxcdev,&
  type(pawang_type),intent(in) :: pawang
 !arrays
  real(dp),intent(in) :: vh1(:,:,:),vxc1(:,:,:)
- real(dp),intent(out) :: dv1dr(mesh_size),zk1(mesh_size),zk2(mesh_size)
+ real(dp),intent(out) :: v1(mesh_size)
  type(pawrad_type),intent(in) :: pawrad
 !Local variables ---------------------------------------
 !scalars
  integer :: angl_size,ipts
- real(dp), parameter :: HalfFineStruct2=half/InvFineStruct**2
  real(dp) :: fact
 !arrays
- real(dp),allocatable :: v1(:)
 
 ! *************************************************************************
 
  angl_size=pawang%angl_size
 
- LIBPAW_ALLOCATE(v1,(mesh_size))
  fact=one/sqrt(four_pi) ! Y_00
  if (pawxcdev/=0) then
    if (nspden==1) then
@@ -5797,14 +5795,8 @@ subroutine make_zora_fncs(dv1dr,mesh_size,nspden,pawang,pawrad,pawxcdev,&
    v1(1:mesh_size)=sqrt(four_pi)*v1(1:mesh_size)
  end if
  v1(1:mesh_size)=fact*(v1(1:mesh_size)+vh1(1:mesh_size,1,1))
- call nderiv_gen(dv1dr,v1,pawrad)
 
- zk1 = one/(one - HalfFineStruct2*v1)
- zk2 = zk1**2
-
- LIBPAW_DEALLOCATE(v1)
-
-end subroutine make_zora_fncs
+end subroutine pawv1
 
 !!***
 
