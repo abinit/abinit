@@ -66,6 +66,7 @@ target_link_libraries(66_nonlocal
   abinit::10_defs
   abinit::16_hideleave
   abinit::42_nlstrain
+  abinit::45_xgTools
   abinit::62_poisson
   abinit::65_paw
   )
