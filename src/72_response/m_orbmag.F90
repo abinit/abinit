@@ -2464,13 +2464,16 @@ subroutine dterm_ZA0(atindx,cplex_dij,dterm,dtset,paw_an,pawang,pawrad,pawtab,qp
 
   !Local variables -------------------------
   !scalars
-  integer :: gs1,gs2,iat,iatom,ij_size,itypat,kln,lmn2_size
-  integer :: mesh_size,ndij,ngnt
+  integer :: adir,gs1,gs2,iat,iatom,ij_size,ilm,itypat,jlm
+  integer :: klmn,klm,kln,lmn2_size,mesh_size,ndij,ngnt,sdir
+  real(dp) :: me_kbs,me_k2bs
+  complex(dpc) :: cme
   real(dp), parameter :: HalfFineStruct2=half*FineStructureConstant2
   !arrays
   character(len=500) :: msg
   real(dp),allocatable :: dv1dr(:),dyadic(:,:,:)
-  real(dp),allocatable :: v1(:),zk1(:),za0_kernel(:),za0_rad(:,:)
+  real(dp),allocatable :: v1(:),zk1(:)
+  real(dp),allocatable :: za0(:,:,:),za0_kernel(:),za0_rad(:,:)
 !--------------------------------------------------------------------
 
   dterm%ZA0 = czero
@@ -2536,29 +2539,46 @@ subroutine dterm_ZA0(atindx,cplex_dij,dterm,dtset,paw_an,pawang,pawrad,pawtab,qp
     call make_dyadic(one,one,dyadic,pawang%gntselect,&
       & gs1,gs2,gs2,ngnt,pawang%realgnt)
 
-!!    ABI_MALLOC(dijsob1,(3,cplex_dij*qphase*lmn2_size,ndij))
-!!    dijsob1=zero
-!!    klmn1=1
-!!    do klmn=1,lmn2_size
-!!      klm=pawtab(itypat)%indklmn(1,klmn);kln=pawtab(itypat)%indklmn(2,klmn)
-!!      ilm=pawtab(itypat)%indklmn(5,klmn);jlm=pawtab(itypat)%indklmn(6,klmn)
-!!
-!!      do adir = 1, 3 ! A0 direction (that is, B-field direction)
-!!        do sdir = 1, 3 ! S direction (spin angular momentum)
-!!          if ( (adir == sdir) .AND. (ilm == jlm) ) then
-!!            ! K B.S term za0_rad(1,kln)
-!!          end if
-!!          ! dyadic(adir,sdir,klm)*za0_rad(2,kln)
-!!          dterm%ZA0(iatom,klmn,idij,idir) = &
-!!            & CMPLX(dijsob1(idir,2*klmn-1,idij),&
-!!            &       dijsob1(idir,2*klmn,idij))
-!!        end do ! idir
-!!      end do ! idij
-!!
-!!    end do ! klmn
+    ABI_MALLOC(za0,(3,cplex_dij*qphase*lmn2_size,ndij))
+    za0=zero
+    do klmn=1,lmn2_size
+      klm=pawtab(itypat)%indklmn(1,klmn);kln=pawtab(itypat)%indklmn(2,klmn)
+      ilm=pawtab(itypat)%indklmn(5,klmn);jlm=pawtab(itypat)%indklmn(6,klmn)
+
+!!    Dij^SO is represented with 4 components:
+!!      dijso(:,:,1) contains Dij_SO^up-up
+!!      dijso(:,:,2) contains Dij_SO^dn-dn
+!!      dijso(:,:,3) contains Dij_SO^up-dn
+!!      dijso(:,:,4) contains Dij_SO^dn-up
+      do adir = 1, 3 ! A0 direction (that is, B-field direction)
+        do sdir = 1, 3 ! S direction (spin angular momentum)
+          me_kbs=zero
+          !if ( (adir == sdir) .AND. (ilm == jlm) ) me_kbs=za0_rad(1,kln)
+          me_k2bs=dyadic(adir,sdir,klm)*za0_rad(2,kln)
+          cme=CMPLX(me_kbs+me_k2bs,zero)
+          select case(sdir)
+          case(1)
+            dterm%ZA0(iatom,klmn,3,adir)=&
+              dterm%ZA0(iatom,klmn,3,adir)+half*cme
+            dterm%ZA0(iatom,klmn,4,adir)=&
+              dterm%ZA0(iatom,klmn,4,adir)+half*cme
+          case(2)
+            dterm%ZA0(iatom,klmn,3,adir)=&
+              dterm%ZA0(iatom,klmn,3,adir)+CMPLX(zero,-half)*cme
+            dterm%ZA0(iatom,klmn,4,adir)=&
+              dterm%ZA0(iatom,klmn,4,adir)+CMPLX(zero,half)*cme
+          case(3)
+            dterm%ZA0(iatom,klmn,1,adir)=&
+              dterm%ZA0(iatom,klmn,1,adir)+half*cme
+            dterm%ZA0(iatom,klmn,2,adir)=&
+              dterm%ZA0(iatom,klmn,2,adir)-half*cme
+          end select
+        end do
+      end do
+    end do
     ABI_FREE(za0_rad)
     ABI_FREE(dyadic)
-!!    ABI_FREE(dijsob1)
+    ABI_FREE(za0)
   end do ! iat
 !!
   dterm%has_ZA0 = 2
