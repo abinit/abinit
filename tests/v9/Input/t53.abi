@@ -54,7 +54,7 @@ znucl 6
 #%% exclude_builders = eos_nvhpc_*, eos_gnu_13.2_serial
 #%% [files]
 #%% files_to_test =
-#%%   t53.abo, tolnlines = 1.0e+01, tolabs = 1.1e-03, tolrel = 2.0e-02
+#%%   t53.abo, tolnlines = 10, tolabs = 1.1e-3, tolrel = 2.0e-2
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]

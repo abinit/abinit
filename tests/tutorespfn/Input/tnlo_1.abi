@@ -81,7 +81,7 @@ prteig 0
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   tnlo_1.abo, tolnlines = 1.0e+00, tolabs = 4.2e-06, tolrel = 8.0e-05, fld_options=-medium
+#%%   tnlo_1.abo, tolnlines=  1, tolabs=  4.192e-06, tolrel=  8.000e-05, fld_options=-medium
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

@@ -45,7 +45,7 @@
 #%% max_nprocs = 4
 #%% nprocs_to_test = 4
 #%% [NCPU_4]
-#%% files_to_test = tdfpt_01_MPI4.abo, tolnlines = 0.0e+00, tolabs = 0.0e+00, tolrel = 0.0e+00
+#%% files_to_test = tdfpt_01_MPI4.abo, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00
 #%% post_commands =
 #%%   ww_mv tdfpt_01_MPI4o_WFK tdfpt_02_MPI4i_WFK;
 #%% [extra_info]

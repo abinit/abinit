@@ -54,8 +54,8 @@
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t35.abo,      tolnlines = 1.2e+01, tolabs = 1.7e-02, tolrel = 1.0e+00, fld_options = -easy
-##%%   t35o_DOPPLER, tolnlines = 0.0e+00, tolabs = 0.0e+00., tolrel = 0.0e+00., fld_options = -easy
+#%%   t35.abo,      tolnlines = 12, tolabs = 1.7e-2, tolrel = 1.0, fld_options = -easy
+##%%   t35o_DOPPLER, tolnlines = 0, tolabs = 0., tolrel = 0., fld_options = -easy
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

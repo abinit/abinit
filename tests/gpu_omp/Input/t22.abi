@@ -72,7 +72,7 @@ rprim     -0.5  0.5  0.5
 #%%   ww_cp t22o_OUT.nc         t23o_OUT.nc         ; ww_cp t22o_OUT.nc         t24o_OUT.nc         ;
 #%% [files]
 #%% files_to_test =
-#%%   t22.abo, tolnlines = 5.1e+01, tolabs = 8.0e-02, tolrel = 2.0e-01, fld_options= -easy ;
+#%%   t22.abo, tolnlines = 51, tolabs = 8.0e-2, tolrel = 2.0e-1, fld_options= -easy ;
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

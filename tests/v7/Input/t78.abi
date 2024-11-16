@@ -160,7 +160,7 @@ plowan_compute3 1 # Activate the computation of Wannier functions
 #%% executable = abinit
 #%% need_cpp_vars = !HAVE_MPI_IO_DEFAULT, !HAVE_NETCDF_DEFAULT
 #%% [files]
-#%% files_to_test =   t78.abo, tolnlines = 1.7e+01,   tolabs = 1.5e-03,  tolrel = 2.0e-03, fld_options = -medium
+#%% files_to_test =   t78.abo, tolnlines=   17,   tolabs=  1.5e-3,  tolrel= 2.0e-3, fld_options = -medium
 #%% [paral_info]
 #%% max_nprocs = 8
 #%% [extra_info]

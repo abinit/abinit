@@ -12,7 +12,7 @@ t54o_DS5_EIGR2D
 #%% test_chain = t54.abi, t55.abi, t56.abi, t57.abi
 #%% [files]
 #%% files_to_test = 
-#%%    t56.ddb.out, tolnlines = 0.0e+00,   tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options = -ridiculous
+#%%    t56.ddb.out, tolnlines=    0,   tolabs=  0.0, tolrel= 0.0, fld_options = -ridiculous
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

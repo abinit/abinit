@@ -78,7 +78,7 @@ t65o_DS3_WFK
 #%% test_chain = t65.abi, t66.abi, t67.abi
 #%% [files]
 #%% files_to_test = 
-#%%   t67.stdout, tolnlines = 3.0e+00, tolabs = 1.1e-06, tolrel = 6.0e-07
+#%%   t67.stdout, tolnlines = 3, tolabs = 1.10e-06, tolrel = 6.000e-07
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

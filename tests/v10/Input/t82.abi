@@ -61,7 +61,7 @@ prtgsr 0
 #%%  test_chain = t81.abi, t82.abi
 #%% [files]
 #%% files_to_test = 
-#%%  t82.abo, tolnlines = 0.0e+00, tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options= -ridiculous;
+#%%  t82.abo, tolnlines = 0, tolabs = 0.0, tolrel= 0.0, fld_options= -ridiculous;
 #%% [paral_info]
 #%%  max_nprocs = 4
 #%% [extra_info]

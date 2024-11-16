@@ -30,11 +30,11 @@
 #%% need_cpp_vars = !HAVE_MPI_IO_DEFAULT
 #%% [files]
 #%% files_to_test =
-#%%   toptic_5_0001_0002_0003-ChiEOAbs.out, tolnlines = 1.6e+01, tolabs = 7.0e-04, tolrel = 7.0e-04, fld_options = -easy;
-#%%   toptic_5_0001_0002_0003-ChiEOIm.out,  tolnlines = 1.6e+01, tolabs = 7.0e-04, tolrel = 7.0e-04, fld_options = -easy;
-#%%   toptic_5_0001_0002_0003-ChiEORe.out,  tolnlines = 1.6e+01, tolabs = 7.0e-04, tolrel = 7.0e-04, fld_options = -easy;
-#%%   toptic_5_0001_0002_0003-ChiEOTotIm.out,  tolnlines = 1.6e+01, tolabs = 7.0e-04, tolrel = 7.0e-04, fld_options = -easy;
-#%%   toptic_5_0001_0002_0003-ChiEOTotRe.out,  tolnlines = 1.6e+01, tolabs = 7.0e-04, tolrel = 7.0e-04, fld_options = -easy;
+#%%   toptic_5_0001_0002_0003-ChiEOAbs.out, tolnlines= 16, tolabs=  7.000e-04, tolrel=  7.000e-04, fld_options = -easy;
+#%%   toptic_5_0001_0002_0003-ChiEOIm.out,  tolnlines= 16, tolabs=  7.000e-04, tolrel=  7.000e-04, fld_options = -easy;
+#%%   toptic_5_0001_0002_0003-ChiEORe.out,  tolnlines= 16, tolabs=  7.000e-04, tolrel=  7.000e-04, fld_options = -easy;
+#%%   toptic_5_0001_0002_0003-ChiEOTotIm.out,  tolnlines= 16, tolabs=  7.000e-04, tolrel=  7.000e-04, fld_options = -easy;
+#%%   toptic_5_0001_0002_0003-ChiEOTotRe.out,  tolnlines= 16, tolabs=  7.000e-04, tolrel=  7.000e-04, fld_options = -easy;
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

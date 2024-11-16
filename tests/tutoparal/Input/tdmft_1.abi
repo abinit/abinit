@@ -87,7 +87,7 @@ kptbounds2              # The four segments of the band structure are
 #%% max_nprocs = 24
 #%% nprocs_to_test = 24
 #%% [NCPU_24]
-#%% files_to_test = tdmft_1_MPI24.abo, tolnlines = 1.2e+01,   tolabs = 2.0e-03,  tolrel = 2.0e-03, fld_options = -medium
+#%% files_to_test = tdmft_1_MPI24.abo, tolnlines=   12,   tolabs=  2.0e-3,  tolrel= 2.0e-3, fld_options = -medium
 #%% [shell]
 #%% [extra_info]
 #%% keywords = LDA, FATBANDS

@@ -100,15 +100,15 @@ nband 8
 #%% exclude_builders = eos_nvhpc_*, eos_gnu_13.2_serial
 #%% [files]
 #%% files_to_test =
-#%%   teph4mob_7.abo, tolnlines = 5.7e+01, tolabs = 8.0e+01, tolrel = 5.0e-02;
-#%%   teph4mob_7o_DS1_SERTA_KAPPA, tolnlines = 5.0e+01, tolabs = 1.1e-02, tolrel = 5.0e-02, fld_options = -ridiculous;
-#%%   teph4mob_7o_DS1_MRTA_KAPPA, tolnlines = 5.0e+01, tolabs = 1.5e-02, tolrel = 5.0e-02, fld_options = -ridiculous;
-#%%   teph4mob_7o_DS1_SERTA_PI, tolnlines = 5.0e+01, tolabs = 1.1e-02, tolrel = 5.0e-02, fld_options = -ridiculous;
-#%%   teph4mob_7o_DS1_MRTA_PI, tolnlines = 5.0e+01, tolabs = 1.1e-02, tolrel = 5.0e-02, fld_options = -ridiculous;
-#%%   teph4mob_7o_DS1_SERTA_SBK, tolnlines = 5.0e+01, tolabs = 1.1e-02, tolrel = 5.0e-02, fld_options = -ridiculous;
-#%%   teph4mob_7o_DS1_MRTA_SBK, tolnlines = 5.0e+01, tolabs = 1.1e-02, tolrel = 5.0e-02, fld_options = -ridiculous;
-#%%   teph4mob_7o_DS1_SERTA_SIGMA, tolnlines = 5.0e+01, tolabs = 1.2e+04, tolrel = 5.0e-02, fld_options = -ridiculous;
-#%%   teph4mob_7o_DS1_MRTA_SIGMA, tolnlines = 5.0e+01, tolabs = 1.0e+02, tolrel = 5.0e-02, fld_options = -ridiculous;
+#%%   teph4mob_7.abo, tolnlines= 57, tolabs=  80, tolrel= 0.05;
+#%%   teph4mob_7o_DS1_SERTA_KAPPA, tolnlines= 50, tolabs= 1.1e-2, tolrel= 5.0e-2, fld_options = -ridiculous;
+#%%   teph4mob_7o_DS1_MRTA_KAPPA, tolnlines= 50, tolabs= 1.5e-2, tolrel= 5.0e-2, fld_options = -ridiculous;
+#%%   teph4mob_7o_DS1_SERTA_PI, tolnlines= 50, tolabs= 1.1e-2, tolrel= 5.0e-2, fld_options = -ridiculous;
+#%%   teph4mob_7o_DS1_MRTA_PI, tolnlines= 50, tolabs= 1.1e-2, tolrel= 5.0e-2, fld_options = -ridiculous;
+#%%   teph4mob_7o_DS1_SERTA_SBK, tolnlines= 50, tolabs= 1.1e-2, tolrel= 5.0e-2, fld_options = -ridiculous;
+#%%   teph4mob_7o_DS1_MRTA_SBK, tolnlines= 50, tolabs= 1.1e-2, tolrel= 5.0e-2, fld_options = -ridiculous;
+#%%   teph4mob_7o_DS1_SERTA_SIGMA, tolnlines= 50, tolabs= 1.2e+4, tolrel= 5.0e-2, fld_options = -ridiculous;
+#%%   teph4mob_7o_DS1_MRTA_SIGMA, tolnlines= 50, tolabs= 100, tolrel= 5.0e-2, fld_options = -ridiculous;
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

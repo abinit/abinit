@@ -74,7 +74,7 @@ pseudos "H.psp8"
 #%% exclude_builders = eos_nvhpc_23.9_elpa
 #%% [files]
 #%% files_to_test = 
-#%%   t11.abo, tolnlines = 1.5e+01, tolabs = 1.2e-09, tolrel = 1.0e+00
+#%%   t11.abo, tolnlines=  15, tolabs=  1.2e-09, tolrel= 1.0
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

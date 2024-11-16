@@ -211,7 +211,7 @@ occopt12 3
 #%% exclude_builders = eos_nvhpc_*
 #%% [files]
 #%% files_to_test =
-#%%   t60.abo, tolnlines = 8.0e+01, tolabs = 4.2e-01, tolrel = 4.2e-01
+#%%   t60.abo, tolnlines = 80, tolabs = 0.42, tolrel = 0.42
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]

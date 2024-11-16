@@ -145,11 +145,11 @@ optstress 0       # Stress tensor computation is not relevant here
 #%% max_nprocs = 64
 #%% nprocs_to_test = 24, 32, 48
 #%% [NCPU_24]
-#%% files_to_test = tgswvl_2_MPI24.abo, tolnlines = 0.0e+00, tolabs = 0.0e+00, tolrel = 0.0e+00
+#%% files_to_test = tgswvl_2_MPI24.abo, tolnlines =   0, tolabs =  0.0, tolrel= 0.0
 #%% [NCPU_32]
-#%% files_to_test = tgswvl_2_MPI32.abo, tolnlines = 0.0e+00, tolabs = 0.0e+00, tolrel = 0.0e+00
+#%% files_to_test = tgswvl_2_MPI32.abo, tolnlines =   0, tolabs =  0.0, tolrel= 0.0
 #%% [NCPU_48]
-#%% files_to_test = tgswvl_2_MPI48.abo, tolnlines = 0.0e+00, tolabs = 0.0e+00, tolrel = 0.0e+00
+#%% files_to_test = tgswvl_2_MPI48.abo, tolnlines =   0, tolabs =  0.0, tolrel= 0.0
 #%% [extra_info]
 #%% authors = D. Caliste
 #%% keywords = NC,WVL

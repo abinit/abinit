@@ -17,15 +17,15 @@
 
 # XG20191126 : the comparison of the omega.dat file has been suppressed, because on the new reference machine,
 # the results were not reproducible. Strange ... And to be clarified ...
-#   t37omega.dat, tolnlines = 2.0e+00, tolabs = 2.0e-05, tolrel = 1.0e+00, fld_options = -medium;
+#   t37omega.dat, tolnlines = 2, tolabs = 2e-5, tolrel = 1.01, fld_options = -medium;
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = atdep
 #%% md_hist = t37_
 #%% [files]
 #%% files_to_test = 
-#%%   t37.abo, tolnlines = 1.0e+00, tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options = -medium;
-#%%   t37thermo.dat, tolnlines = 0.0e+00, tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options = -medium;
+#%%   t37.abo, tolnlines = 1, tolabs = 0, tolrel = 0, fld_options = -medium;
+#%%   t37thermo.dat, tolnlines = 0, tolabs = 0, tolrel = 0, fld_options = -medium;
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]

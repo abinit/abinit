@@ -12,7 +12,7 @@ rprimd = 20, 0, 0, 0, 20, 0, 0, 0, 20,
 #%% [setup]
 #%% executable = fftprof
 #%% [files]
-#%% files_to_test = tfftsg_05.stdout, tolnlines = 0.0e+00, tolabs = 0.0e+00, tolrel = 0.0e+00
+#%% files_to_test = tfftsg_05.stdout, tolnlines=0, tolabs=0.0, tolrel=0.0
 #%% [paral_info]
 #%% max_nprocs = 5
 #%% [extra_info]

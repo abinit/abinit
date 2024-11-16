@@ -39,7 +39,7 @@ pseudos "H.psp8, Li.psp8"
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%   t75.abo, tolnlines = 5.0e+00, tolabs = 1.0e+00.e-06, tolrel = 1.0e+00.e-08, fld_options= -medium;
+#%%   t75.abo, tolnlines = 5, tolabs = 1.e-06, tolrel = 1.e-08, fld_options= -medium;
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

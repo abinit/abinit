@@ -22,7 +22,7 @@ t85o_DS9_POT2
 #%% test_chain = t85.abi, t86.abi, t87.abi, t88.abi, t89.abi
 #%% [files]
 #%% files_to_test = 
-#%%   t87.stdout, tolnlines = 0.0e+00, tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options=-medium
+#%%   t87.stdout, tolnlines=00, tolabs=6.000e-08, tolrel=4.000e-04, fld_options=-medium
 #%% [shell]
 #%% post_commands =
 #%%  ww_cp t88o_DS20_DVDB t89o_DS20_DVDB;

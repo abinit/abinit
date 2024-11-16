@@ -42,7 +42,7 @@
 #%% test_chain = tnlo_2.abi, tnlo_3.abi, tnlo_4.abi
 #%% [files]
 #%% files_to_test = 
-#%%   tnlo_4.abo, tolnlines = 0.0e+00, tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options=-easy
+#%%   tnlo_4.abo, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00, fld_options=-easy
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

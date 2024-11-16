@@ -58,7 +58,7 @@ enunit      1
 #%% test_chain = t23.abi, t24.abi
 #%% [files]
 #%% files_to_test = 
-#%%   t23.abo, tolnlines = 1.0e+01, tolabs = 2.0e-02, tolrel = 1.1e+00, fld_options = -easy
+#%%   t23.abo, tolnlines = 10, tolabs = 0.02, tolrel = 1.1, fld_options = -easy
 #%% [shell]
 #%% post_commands = 
 #%%   ww_cp t23o_WFK t24i_DS1_WFK;

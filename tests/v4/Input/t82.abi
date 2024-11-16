@@ -10,7 +10,7 @@ t81o_DS2_DDB
 #%% test_chain = t81.abi, t82.abi, t83.abi
 #%% [files]
 #%% files_to_test = 
-#%%   t82.ddb.out ,tolnlines = 0.0e+00, tolabs = 0.0e+00, tolrel = 0.0e+00
+#%%   t82.ddb.out ,tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
 #%% psp_files = 
 #%% [paral_info]
 #%% max_nprocs = 1

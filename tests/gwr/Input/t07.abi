@@ -50,14 +50,14 @@ pseudos "Li.psp8, F.upf"
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%   t07.abo, tolnlines = 1.0e+01, tolabs = 2.0e-02, tolrel = 5.0e-01;
-#%%   t07o_DS2_GridVectors.yaml, tolnlines = 0.0e+00, tolabs = 0.0e+00, tolrel = 0.0e+00;
-#%%   t07o_DS2_GridVectors.elements, tolnlines = 5.0e+00, tolabs = 1.0e-02, tolrel = 1.0e-02;
-#%%   t07o_DS2_EigenEnergies.yaml, tolnlines = 0.0e+00, tolabs = 0.0e+00, tolrel = 0.0e+00;
-#%%   t07o_DS2_EigenEnergies.elements, tolnlines = 5.0e+00, tolabs = 1.0e-02, tolrel = 1.0e-02;
-#%%   t07o_DS2_CoulombPotential.yaml, tolnlines = 0.0e+00, tolabs = 0.0e+00, tolrel = 0.0e+00;
-#%%   t07o_DS2_CoulombPotential.elements, tolnlines = 5.0e+01, tolabs = 2.0e-03, tolrel = 5.0e-02;
-#%%   t07o_DS2_CoulombVertex.yaml, tolnlines = 0.0e+00, tolabs = 0.0e+00, tolrel = 0.0e+00;
+#%%   t07.abo, tolnlines = 10, tolabs = 2.0e-2, tolrel = 5.0e-1;
+#%%   t07o_DS2_GridVectors.yaml, tolnlines = 0, tolabs = 2.0e-3, tolrel = 5.0e-2;
+#%%   t07o_DS2_GridVectors.elements, tolnlines = 5, tolabs = 1.0e-2, tolrel = 1.0e-2;
+#%%   t07o_DS2_EigenEnergies.yaml, tolnlines = 0, tolabs = 2.0e-3, tolrel = 5.0e-2;
+#%%   t07o_DS2_EigenEnergies.elements, tolnlines = 5, tolabs = 1.0e-2, tolrel = 1.0e-2;
+#%%   t07o_DS2_CoulombPotential.yaml, tolnlines = 0, tolabs = 2.0e-3, tolrel = 5.0e-2;
+#%%   t07o_DS2_CoulombPotential.elements, tolnlines = 50, tolabs = 2.0e-3, tolrel = 5.0e-2;
+#%%   t07o_DS2_CoulombVertex.yaml, tolnlines = 0, tolabs = 2.0e-3, tolrel = 5.0e-2;
 #%% [paral_info]
 #%% max_nprocs = 8
 #%% [extra_info]
