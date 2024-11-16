@@ -153,7 +153,7 @@ pseudos "Pseudodojo_paw_pw_standard/V.xml, Pseudodojo_paw_pw_standard/Sr.xml, Ps
 #%% test_chain = tucalc_crpa_4.abi
 #%% [files]
 #%% files_to_test = 
-#%%   tucalc_crpa_4.abo, tolnlines = 1.2e+01,   tolabs = 2.0e-03,  tolrel = 2.0e-03, fld_options = -medium
+#%%   tucalc_crpa_4.abo, tolnlines=   12,   tolabs=  2.0e-3,  tolrel= 2.0e-3, fld_options = -medium
 #%% [shell] 
 #%% [paral_info]
 #%% nprocs_to_test = 32

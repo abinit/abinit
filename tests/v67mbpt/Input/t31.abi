@@ -114,13 +114,13 @@ shiftk5            0.22 0.24 0.26
 #%% test_chain = t31.abi, t32.abi, t33.abi, t34.abi, t35.abi
 #%% [files]
 #%% files_to_test =
-#%%  t31.abo,               tolnlines = 2.0e+01 , tolabs = 1.1e-02, tolrel = 4.0e-02, fld_options =  -ridiculous;
-#%%  t31o_DS3_EXC_MDF    ,  tolnlines = 8.0e+02, tolabs = 5.0e-01, tolrel = 4.0e-02, fld_options =  -ridiculous;
-#%%  t31o_DS3_GW_NLF_MDF ,  tolnlines = 8.0e+02, tolabs = 1.1e-02, tolrel = 4.0e-02, fld_options =  -ridiculous;
-#%%  t31o_DS3_RPA_NLF_MDF,  tolnlines = 8.0e+02, tolabs = 1.1e-02, tolrel = 4.0e-02, fld_options =  -ridiculous;
-#%%  t31o_DS5_EXC_MDF    ,  tolnlines = 8.0e+02, tolabs = 1.1e-02, tolrel = 4.0e-02, fld_options =  -ridiculous;
-#%%  t31o_DS5_GW_NLF_MDF ,  tolnlines = 8.0e+02, tolabs = 1.1e-02, tolrel = 4.0e-02, fld_options =  -ridiculous;
-#%%  t31o_DS5_RPA_NLF_MDF,  tolnlines = 8.0e+02, tolabs = 1.1e-02, tolrel = 4.0e-02, fld_options =  -ridiculous;
+#%%  t31.abo,               tolnlines = 20 , tolabs = 1.1e-2, tolrel = 4.0e-2, fld_options =  -ridiculous;
+#%%  t31o_DS3_EXC_MDF    ,  tolnlines = 800, tolabs = 0.5, tolrel = 4.0e-2, fld_options =  -ridiculous;
+#%%  t31o_DS3_GW_NLF_MDF ,  tolnlines = 800, tolabs = 1.1e-2, tolrel = 4.0e-2, fld_options =  -ridiculous;
+#%%  t31o_DS3_RPA_NLF_MDF,  tolnlines = 800, tolabs = 1.1e-2, tolrel = 4.0e-2, fld_options =  -ridiculous;
+#%%  t31o_DS5_EXC_MDF    ,  tolnlines = 800, tolabs = 1.1e-2, tolrel = 4.0e-2, fld_options =  -ridiculous;
+#%%  t31o_DS5_GW_NLF_MDF ,  tolnlines = 800, tolabs = 1.1e-2, tolrel = 4.0e-2, fld_options =  -ridiculous;
+#%%  t31o_DS5_RPA_NLF_MDF,  tolnlines = 800, tolabs = 1.1e-2, tolrel = 4.0e-2, fld_options =  -ridiculous;
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [shell]

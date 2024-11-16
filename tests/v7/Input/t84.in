@@ -19,7 +19,7 @@ t83o_DS2_EIG.nc
 #%% test_chain = t83.in, t84.in
 #%% [files]
 #%% files_to_test = 
-#%%  t84.txt, tolnlines = 7.0e+00, tolabs = 1.1e-03, tolrel = 2.0e-04, fld_options = -medium
+#%%  t84.txt, tolnlines = 7, tolabs = 1.1e-3, tolrel = 2.0e-4, fld_options = -medium
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

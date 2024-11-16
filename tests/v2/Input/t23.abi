@@ -22,7 +22,7 @@ t23.ddb.Tiz.X.in
 #%% test_chain = t23.abi, t24.abi
 #%% [files]
 #%% files_to_test = 
-#%%   t23.ddb.out, tolnlines = 0.0e+00, tolabs = 0.0e+00, tolrel = 0.0e+00
+#%%   t23.ddb.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
 #%% extra_inputs = t23.ddb.Ba.G.in.gz, t23.ddb.Ti.G.in.gz, t23.ddb.O1.G.in.gz, t23.ddb.O2.G.in.gz, t23.ddb.Ef.G.in.gz, t23.ddb.Bax.X.in.gz, t23.ddb.Baz.X.in.gz, t23.ddb.O1x.X.in.gz, t23.ddb.O1y.X.in.gz, t23.ddb.O1z.X.in.gz, t23.ddb.O2x.X.in.gz, t23.ddb.O2z.X.in.gz, t23.ddb.Tix.X.in.gz, t23.ddb.Tiz.X.in.gz
 #%% [paral_info]
 #%% max_nprocs = 1

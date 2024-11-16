@@ -22,7 +22,7 @@ teph_legacy_1o_DS9_GKK3
 #%% test_chain =  teph_legacy_1.abi, teph_legacy_2.abi, teph_legacy_3.abi, teph_legacy_4.abi, teph_legacy_5.abi, teph_legacy_6.abi
 #%% [files]
 #%% files_to_test = 
-#%%   teph_legacy_3.stdout, tolnlines = 0.0e+00, tolabs = 0.0e+00, tolrel = 0.0e+00
+#%%   teph_legacy_3.stdout, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

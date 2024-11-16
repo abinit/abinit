@@ -26,9 +26,9 @@
 #%% test_chain = t56.abi, t57.abi 
 #%% [files]
 #%% files_to_test = 
-#%%   t57_0001_0001-linopt.out       , tolnlines = 0.0e+00,  tolabs = 0.0e+00, tolrel = 0.0e+00; 
-#%%   t57_0001_0002_0003-ChiTotRe.out, tolnlines = 8.4e+01, tolabs = 3.0e-03, tolrel = 2.0e-04; 
-#%%   t57_0001_0002_0003-ChiTotIm.out, tolnlines = 1.0e+02, tolabs = 1.5e-02, tolrel = 2.0e-03
+#%%   t57_0001_0001-linopt.out       , tolnlines = 0,  tolabs = 0.000e+00, tolrel = 0.000e+00; 
+#%%   t57_0001_0002_0003-ChiTotRe.out, tolnlines = 84, tolabs = 3.000e-03, tolrel = 2.000e-04; 
+#%%   t57_0001_0002_0003-ChiTotIm.out, tolnlines = 100, tolabs = 0.015, tolrel = 0.002
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

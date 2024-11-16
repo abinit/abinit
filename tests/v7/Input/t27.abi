@@ -77,9 +77,9 @@ upawu2  3.1333333333333333  0.0  0.0  eV
 f4of2_sla3  0.0  0.0  0.0 
 jpawu2  0.7583333333333333  0.0  0.0  eV
 
-## Case_150            tolnlines = 1.0e+01   tolabs = 2.0e+00.e-4       tolrel = 1.0e+00.e-6
+## Case_150            tolnlines=   10   tolabs=  2.e-4       tolrel= 1.e-6
 ##150 seq psp1=23v.paw psp2=38sr.paw psp3=8o.2.paw opt=-medium DS3AT=Gtau.dat
-##%%                  t27o_DS2_atom_01_Gtau_01.dat,  tolnlines = 0.0e+00, tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options=-medium
+##%%                  t27o_DS2_atom_01_Gtau_01.dat,  tolnlines =0, tolabs =0.0e-00, tolrel = 0.0e-00, fld_options=-medium
 
  pp_dirpath "$ABI_PSPDIR"
  pseudos "23v.paw, 38sr.paw, 8o.2.paw"
@@ -89,7 +89,7 @@ jpawu2  0.7583333333333333  0.0  0.0  eV
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%                  t27.abo,  tolnlines = 2.0e+00, tolabs = 1.1e-06, tolrel = 2.0e-03, fld_options=-medium ;
+#%%                  t27.abo,  tolnlines =2, tolabs =1.1e-06, tolrel = 2.0e-03, fld_options=-medium ;
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

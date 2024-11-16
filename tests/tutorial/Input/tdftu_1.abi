@@ -46,7 +46,7 @@ chksymbreak 0  # The k point grid is not symmetric, but the calculations being f
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   tdftu_1.abo, tolnlines = 4.0e+00, tolabs = 2.0e-06, tolrel = 2.0e-03, fld_options = -medium
+#%%   tdftu_1.abo, tolnlines=  4, tolabs=  2.000e-06, tolrel=  2.000e-03, fld_options = -medium
 #%% output_file = "tdftu_1.abo"
 #%% [paral_info]
 #%% max_nprocs = 1

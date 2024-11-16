@@ -17,8 +17,8 @@ ntime  = 50
 #%% system_xml = t10_sys.xml
 #%% [files]
 #%% files_to_test = 
-#%%   t11.abo, tolnlines = 0.0e+00, tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options = -easy;
-#%%   t11_sys.xml, tolnlines = 0.0e+00, tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options = -easy
+#%%   t11.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
+#%%   t11_sys.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

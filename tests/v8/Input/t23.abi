@@ -31,7 +31,7 @@ spin_write_traj = 0
 #%% exec_args = --F03
 #%% [files]
 #%% files_to_test = 
-#%%   t23.abo, tolnlines = 1.0e+00, tolabs = 2.0e+03, tolrel = 1.0e+00, fld_options = -medium;
+#%%   t23.abo, tolnlines = 1, tolabs = 2e3, tolrel = 1, fld_options = -medium;
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

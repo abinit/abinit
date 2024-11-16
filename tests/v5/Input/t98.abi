@@ -18,7 +18,7 @@ t96o_DS10_1WF3
 #%% test_chain = t96.abi, t97.abi, t98.abi, t99.abi
 #%% [files]
 #%% files_to_test = 
-#%%    t98.stdout, tolnlines = 0.0e+00, tolabs = 0.0e+00, tolrel = 0.0e+00
+#%%    t98.stdout, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

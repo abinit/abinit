@@ -10,14 +10,14 @@ t09o
 #%% test_chain = t09.abi, t10.abi
 #%% [files]
 #%% files_to_test = 
-#%%  t10.out,   tolnlines = 1.0e+01, tolabs = 1.3e-04, tolrel = 2.0e-04, fld_options = -easy;
-#%%  t10_Kth,   tolnlines = 5.0e+01, tolabs = 1.3e-04, tolrel = 2.0e-04, fld_options = -easy;
-#%%  t10_abs,   tolnlines = 5.0e+01, tolabs = 4.0e+04, tolrel = 3.2e-05, fld_options = -ridiculous;
-#%%  t10_sigX,  tolnlines = 1.0e+01, tolabs = 2.1e-10, tolrel = 1.0e-07, fld_options = -easy;
-#%%  t10_emisX, tolnlines = 5.0e+00, tolabs = 1.1e-07, tolrel = 1.9e-08, fld_options = -easy;
-#%%  t10_eps, tolnlines = 5.0e+01, tolabs = 1.1e-07, tolrel = 1.9e-08, fld_options = -easy;
-#%%  t10_Lij, tolnlines = 5.0e+01, tolabs = 1.1e-07, tolrel = 1.9e-08, fld_options = -ridiculous;
-#%%  t10_sig, tolnlines = 5.0e+01, tolabs = 1.1e-07, tolrel = 1.9e-08, fld_options = -easy;
+#%%  t10.out,   tolnlines =10, tolabs = 1.3e-04, tolrel = 2.0e-04, fld_options = -easy;
+#%%  t10_Kth,   tolnlines =50, tolabs = 1.3e-04, tolrel = 2.0e-04, fld_options = -easy;
+#%%  t10_abs,   tolnlines =50, tolabs = 4.0e+04, tolrel = 3.2e-05, fld_options = -ridiculous;
+#%%  t10_sigX,  tolnlines =10, tolabs = 2.1e-10, tolrel = 1.0e-07, fld_options = -easy;
+#%%  t10_emisX, tolnlines = 5, tolabs = 1.1e-07, tolrel = 1.9e-08, fld_options = -easy;
+#%%  t10_eps, tolnlines = 50, tolabs = 1.1e-07, tolrel = 1.9e-08, fld_options = -easy;
+#%%  t10_Lij, tolnlines = 50, tolabs = 1.1e-07, tolrel = 1.9e-08, fld_options = -ridiculous;
+#%%  t10_sig, tolnlines = 50, tolabs = 1.1e-07, tolrel = 1.9e-08, fld_options = -easy;
 #%% extra_inputs = 
 #%% psp_files = 
 #%% [paral_info]

@@ -27,7 +27,7 @@
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t183.abo , tolnlines = 1.0e+00, tolabs = 1.1e-05, tolrel = 1.1e-05
+#%%   t183.abo , tolnlines = 1, tolabs = 1.1e-5, tolrel = 1.1e-5
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [shell]

@@ -97,16 +97,16 @@ ndtset 3 jdtset 1 2 3
 #%% max_nprocs = 10
 #%% [NCPU_1]
 #%% files_to_test = 
-#%%   t95_MPI1.abo, tolnlines = 0.0e+00, tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options = -easy;
+#%%   t95_MPI1.abo, tolnlines = 0, tolabs = 0, tolrel = 0, fld_options = -easy;
 #%% [NCPU_2]
 #%% files_to_test = 
-#%%   t95_MPI2.abo, tolnlines = 0.0e+00, tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options = -easy;
+#%%   t95_MPI2.abo, tolnlines = 0, tolabs = 0, tolrel = 0, fld_options = -easy;
 #%% [NCPU_4]
 #%% files_to_test = 
-#%%   t95_MPI4.abo, tolnlines = 0.0e+00, tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options = -easy;
+#%%   t95_MPI4.abo, tolnlines = 0, tolabs = 0, tolrel = 0, fld_options = -easy;
 #%% [NCPU_10]
 #%% files_to_test = 
-#%%   t95_MPI10.abo, tolnlines = 3.0e+00, tolabs = 5.0e+00.e-2, tolrel = 2.0e-01, fld_options = -easy;
+#%%   t95_MPI10.abo, tolnlines = 3, tolabs = 5.e-2, tolrel = 0.2, fld_options = -easy;
 #%% [extra_info]
 #%% authors = A. MARTIN
 #%% keywords = PAW, DFPT, ELASTIC

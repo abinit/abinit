@@ -30,9 +30,9 @@
 #%% need_cpp_vars = !HAVE_MPI_IO_DEFAULT
 #%% [files]
 #%% files_to_test = 
-#%%   toptic_2_0001_0001-linopt.out,        tolnlines = 0.0e+00, tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options = -easy;
-#%%   toptic_2_0001_0002_0003-ChiTotRe.out, tolnlines = 1.6e+01, tolabs = 7.0e-04, tolrel = 7.0e-04, fld_options = -easy;
-#%%   toptic_2_0001_0002_0003-ChiTotIm.out, tolnlines = 1.6e+01, tolabs = 4.0e-04, tolrel = 2.0e-04, fld_options = -easy
+#%%   toptic_2_0001_0001-linopt.out,        tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00, fld_options = -easy;
+#%%   toptic_2_0001_0002_0003-ChiTotRe.out, tolnlines= 16, tolabs=  7.000e-04, tolrel=  7.000e-04, fld_options = -easy;
+#%%   toptic_2_0001_0002_0003-ChiTotIm.out, tolnlines= 16, tolabs=  4.000e-04, tolrel=  2.000e-04, fld_options = -easy
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

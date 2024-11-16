@@ -90,11 +90,11 @@ xred
 #%% nprocs_to_test = 32, 64, 128
 #%% max_nprocs = 128
 #%% [NCPU_32]
-#%% files_to_test = t02_MPI32.out, tolnlines = 0.0e+00,   tolabs = 0.0e+00,      tolrel = 0.0e+00
+#%% files_to_test = t02_MPI32.out, tolnlines=   0,   tolabs=  0.0,      tolrel= 0.0
 #%% [NCPU_64]
-#%% files_to_test = t02_MPI64.out, tolnlines = 0.0e+00,   tolabs = 0.0e+00,      tolrel = 0.0e+00
+#%% files_to_test = t02_MPI64.out, tolnlines=   0,   tolabs=  0.0,      tolrel= 0.0
 #%% [NCPU_128]
-#%% files_to_test = t02_MPI128.out, tolnlines = 0.0e+00,   tolabs = 0.0e+00,      tolrel = 0.0e+00
+#%% files_to_test = t02_MPI128.out, tolnlines=   0,   tolabs=  0.0,      tolrel= 0.0
 #%% [extra_info]
 #%% keywords = PAW,HPC
 #%% authors = M. Torrent

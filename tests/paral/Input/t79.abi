@@ -95,7 +95,7 @@ gw_qprange3 0        # Compute Fundamental and direct gap only
 #%% nprocs_to_test = 8
 #%% max_nprocs = 8
 #%% [NCPU_8]
-#%% files_to_test = t79_MPI8.abo, tolnlines = 2.5e+01, tolabs = 1.1e-03, tolrel = 6.0e-03, fld_options = -medium
+#%% files_to_test = t79_MPI8.abo, tolnlines = 25, tolabs = 1.1e-03, tolrel = 6.0e-03, fld_options = -medium
 #%% [extra_info]
 #%% authors = M. Giantomassi
 #%% keywords = NC, GWR

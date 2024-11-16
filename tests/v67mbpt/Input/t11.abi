@@ -172,18 +172,18 @@ bs_freq_mesh8      0 10.0 0.1 eV
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%  t11.abo,               tolnlines = 2.0e+01 , tolabs = 1.1e-02, tolrel = 4.0e-02, fld_options =  -ridiculous;
-#%%  t11o_DS4_EXC_MDF    ,  tolnlines = 8.0e+02, tolabs = 1.1e-02, tolrel = 4.0e-02, fld_options =  -ridiculous;
-#%%  t11o_DS4_GW_NLF_MDF ,  tolnlines = 8.0e+02, tolabs = 1.1e-02, tolrel = 4.0e-02, fld_options =  -ridiculous;
-#%%  t11o_DS4_RPA_NLF_MDF,  tolnlines = 8.0e+02, tolabs = 1.1e-02, tolrel = 4.0e-02, fld_options =  -ridiculous;
-#%%  t11o_DS5_EXC_MDF    ,  tolnlines = 8.0e+02, tolabs = 1.1e-02, tolrel = 4.0e-02, fld_options =  -ridiculous;
-#%%  t11o_DS5_GW_NLF_MDF ,  tolnlines = 8.0e+02, tolabs = 1.1e-02, tolrel = 4.0e-02, fld_options =  -ridiculous;
-#%%  t11o_DS5_RPA_NLF_MDF,  tolnlines = 8.0e+02, tolabs = 1.1e-02, tolrel = 4.0e-02, fld_options =  -ridiculous;
-#%%  t11o_DS6_EXC_MDF    ,  tolnlines = 8.0e+02, tolabs = 1.1e-02, tolrel = 4.0e-02, fld_options =  -ridiculous;
-#%%  t11o_DS6_GW_NLF_MDF ,  tolnlines = 8.0e+02, tolabs = 1.1e-02, tolrel = 4.0e-02, fld_options =  -ridiculous;
-#%%  t11o_DS6_RPA_NLF_MDF,  tolnlines = 8.0e+02, tolabs = 1.1e-02, tolrel = 4.0e-02, fld_options =  -ridiculous;
-#%%  t11o_DS7_EXC_MDF    ,  tolnlines = 8.0e+02, tolabs = 1.1e-02, tolrel = 4.0e-02, fld_options =  -ridiculous;
-#%%  t11o_DS8_EXC_MDF    ,  tolnlines = 8.0e+02, tolabs = 1.1e-02, tolrel = 4.0e-02, fld_options =  -ridiculous
+#%%  t11.abo,               tolnlines = 20 , tolabs = 1.1e-2, tolrel = 4.0e-2, fld_options =  -ridiculous;
+#%%  t11o_DS4_EXC_MDF    ,  tolnlines = 800, tolabs = 1.1e-2, tolrel = 4.0e-2, fld_options =  -ridiculous;
+#%%  t11o_DS4_GW_NLF_MDF ,  tolnlines = 800, tolabs = 1.1e-2, tolrel = 4.0e-2, fld_options =  -ridiculous;
+#%%  t11o_DS4_RPA_NLF_MDF,  tolnlines = 800, tolabs = 1.1e-2, tolrel = 4.0e-2, fld_options =  -ridiculous;
+#%%  t11o_DS5_EXC_MDF    ,  tolnlines = 800, tolabs = 1.1e-2, tolrel = 4.0e-2, fld_options =  -ridiculous;
+#%%  t11o_DS5_GW_NLF_MDF ,  tolnlines = 800, tolabs = 1.1e-2, tolrel = 4.0e-2, fld_options =  -ridiculous;
+#%%  t11o_DS5_RPA_NLF_MDF,  tolnlines = 800, tolabs = 1.1e-2, tolrel = 4.0e-2, fld_options =  -ridiculous;
+#%%  t11o_DS6_EXC_MDF    ,  tolnlines = 800, tolabs = 1.1e-2, tolrel = 4.0e-2, fld_options =  -ridiculous;
+#%%  t11o_DS6_GW_NLF_MDF ,  tolnlines = 800, tolabs = 1.1e-2, tolrel = 4.0e-2, fld_options =  -ridiculous;
+#%%  t11o_DS6_RPA_NLF_MDF,  tolnlines = 800, tolabs = 1.1e-2, tolrel = 4.0e-2, fld_options =  -ridiculous;
+#%%  t11o_DS7_EXC_MDF    ,  tolnlines = 800, tolabs = 1.1e-2, tolrel = 4.0e-2, fld_options =  -ridiculous;
+#%%  t11o_DS8_EXC_MDF    ,  tolnlines = 800, tolabs = 1.1e-2, tolrel = 4.0e-2, fld_options =  -ridiculous
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

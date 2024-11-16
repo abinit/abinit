@@ -219,7 +219,7 @@ xred
 #%% test_chain = t14.in, t15.in, t16.in
 #%% [files]
 #%% files_to_test = 
-#%%   t14.out, tolnlines = 0.0e+00,   tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options = -medium
+#%%   t14.out, tolnlines=    0,   tolabs=  0.0, tolrel= 0.0, fld_options = -medium
 #%% psp_files = 14si.bj_noNLCC.psp
 #%% [shell]
 #%%   ww_cp t14o_DS2_KSS t16i_KSS

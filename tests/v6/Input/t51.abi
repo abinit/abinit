@@ -16,7 +16,7 @@ t50o_DS9_DDB
 #%% test_chain = t50.abi, t51.abi, t52.abi, t53.abi
 #%% [files]
 #%% files_to_test = 
-#%%   t51.ddb.out,  tolnlines = 0.0e+00,   tolabs = 0.0e+00,         tolrel = 0.0e+00
+#%%   t51.ddb.out,  tolnlines=    0,   tolabs=  0.0,         tolrel= 0.0
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

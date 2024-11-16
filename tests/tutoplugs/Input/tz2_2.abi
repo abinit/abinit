@@ -89,7 +89,7 @@ ratsph?3 2.5 1.9 2.15
 #%% nprocs_to_test = 10
 #%% [NCPU_10]
 #%% files_to_test =
-#%%    tz2_2_MPI10.abo, tolnlines = 5.0e+00, tolabs = 7.0e-05, tolrel = 1.1e+00, fld_options=-medium
+#%%    tz2_2_MPI10.abo, tolnlines=5, tolabs=7.00e-05, tolrel=1.10e+00, fld_options=-medium
 #%% [extra_info]
 #%% authors = O. Gingras, V. Brousseau-Couture
 #%% keywords = wannier90, z2pack, fatbands

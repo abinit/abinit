@@ -17,7 +17,7 @@ t85o_DS9_DDB
 #%% test_chain = t85.abi, t86.abi, t87.abi, t88.abi, t89.abi
 #%% [files]
 #%% files_to_test = 
-#%%   t88o_DS20_DDB, tolnlines = 4.0e+00, tolabs = 6.0e-08, tolrel = 4.0e-04, fld_options=-medium
+#%%   t88o_DS20_DDB, tolnlines=4, tolabs=6.000e-08, tolrel=4.000e-04, fld_options=-medium
 #%% psp_files = Al-psval.psp8
 #%% [shell]
 #%% post_commands =

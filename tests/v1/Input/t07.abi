@@ -75,8 +75,8 @@
 #%% test_chain = t04.abi, t07.abi
 #%% no_check = yes
 #%% [files]
-# MG: this file is not tested ###%% t07.out, tolnlines = 0.0e+00, tolabs = 0.0e+00, tolrel = 0.0e+00
-#%% files_to_test = t07o_DOS, tolnlines = 0.0e+00, tolabs = 0.0e+00, tolrel = 0.0e+00
+# MG: this file is not tested ###%% t07.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% files_to_test = t07o_DOS, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

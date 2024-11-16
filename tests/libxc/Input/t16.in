@@ -63,7 +63,7 @@ xred
 #%% test_chain = t14.in, t15.in, t16.in
 #%% [files]
 #%% files_to_test = 
-#%%   t16.out, tolnlines = 1.0e+00,   tolabs = 1.1e-03,      tolrel = 3.0e-04, fld_options = -easy
+#%%   t16.out, tolnlines=    1,   tolabs=  1.1e-3,      tolrel= 3.0e-4, fld_options = -easy
 #%% psp_files = 14si.bj_noNLCC.psp 
 #%% [paral_info]
 #%% max_nprocs = 3

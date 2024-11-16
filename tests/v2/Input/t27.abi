@@ -15,7 +15,7 @@ t26o_DS13_DDB
 #%% test_chain = t26.abi t27.abi, t28.abi
 #%% [files]
 #%% files_to_test = 
-#%%   t27.ddb.out, tolnlines = 0.0e+00, tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options= -easy
+#%%   t27.ddb.out, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00, fld_options= -easy
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

@@ -14,7 +14,7 @@
 #%%   iw_cp si_with_quad_block_not_at_the_end_DDB t67.ddb.in
 #%% [files]
 #%% files_to_test =
-#%%   t67.abo, tolnlines = 1.0e+01, tolabs = 1.1e+00, tolrel = 1.2e-01;
+#%%   t67.abo, tolnlines = 10, tolabs = 1.1, tolrel = 1.2e-1;
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

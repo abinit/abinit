@@ -27,7 +27,7 @@ dtion =  30       # Delta Time for IONs (default 100 , one atomic time unit is 2
 #%% coeff_xml = tmulti_l_8_1.xml
 #%% [files]
 #%% files_to_test =
-#%%   tmulti_l_8_1.abo, tolnlines = 0.0e+00, tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options = -medium;
+#%%   tmulti_l_8_1.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options = -medium;
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]

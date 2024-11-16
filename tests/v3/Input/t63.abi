@@ -13,8 +13,8 @@ t63        # Root for the output name
 #%% test_chain = t62.abi, t63.abi, t64.abi
 #%% [files]
 #%% files_to_test = 
-#%%   t63_k1_b1, tolnlines = 0.0e+00, tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options = -medium 
-#%%##MG this was not tested by fldiff t63.stdout, tolnlines = 0.0e+00, tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options = -medium 
+#%%   t63_k1_b1, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options = -medium 
+#%%##MG this was not tested by fldiff t63.stdout, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options = -medium 
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

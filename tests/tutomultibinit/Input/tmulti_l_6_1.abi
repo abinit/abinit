@@ -37,7 +37,7 @@ sel_EFS = 0 1 1       # Select coefficient on the (E)nergy (F)orces and (S)tress
 #%% exclude_builders = .*_nag_7.[01]_.* 
 #%% [files]
 #%% files_to_test =
-#%%   tmulti_l_6_1.abo, tolnlines = 1.0e+01, tolabs = 1.0e-01, tolrel = 5.0e-01, fld_options = -easy;
+#%%   tmulti_l_6_1.abo, tolnlines = 10, tolabs = 0.1, tolrel = 0.5, fld_options = -easy;
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]
