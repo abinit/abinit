@@ -83,7 +83,7 @@ module m_orbmag
   ! these parameters name the various output terms                                             
   integer,parameter :: ibcc=1,ibvv1=2,ibvv2=3
   integer,parameter :: imcc=4,imvv1=5,imvv2=6
-  integer,parameter :: imnl=7,imlr=8,imbm=9,imsob1=10
+  integer,parameter :: imnl=7,imlr=8,imbm=9,imza0=10
   integer,parameter :: iomlmb=11
   integer,parameter :: nterms=11
 
@@ -105,7 +105,7 @@ module m_orbmag
     integer :: has_qij=0
     integer :: has_LR=0
     integer :: has_BM=0
-    integer :: has_SOB1=0
+    integer :: has_ZA0=0
 
     ! sum of \Delta A_ij
     ! typically will be just paw_ij
@@ -126,10 +126,9 @@ module m_orbmag
     ! BM(natom,lmn2max,ndij,3)
     complex(dpc),allocatable :: BM(:,:,:,:)
 
-    ! onsite SO B1
-    ! <phi|SO rxA|phi> - <tphi|SO rxA}|tphi>
-    ! SOB1(natom,lmn2max,ndij,3)
-    complex(dpc),allocatable :: SOB1(:,:,:,:)
+    ! onsite ZA0
+    ! ZA0(natom,lmn2max,ndij,3)
+    complex(dpc),allocatable :: ZA0(:,:,:,:)
 
   end type dterm_type
 
@@ -146,7 +145,7 @@ module m_orbmag
   private :: dterm_qij
   private :: dterm_LR
   private :: dterm_BM
-  private :: dterm_SOB1
+  private :: dterm_ZA0
   private :: tt_me
   private :: txt_me
   private :: local_fermie
@@ -563,12 +562,12 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mkmem_rbz,mp
        & nband_k,nl1_option,occ_k,pawtab,ucvol)
      orbmag_terms(:,:,isppol,:,imbm) = orbmag_terms(:,:,isppol,:,imbm) + m1_k
 
-     ! SOB1
-     if (dterm%has_SOB1 == 2) then
-       nl1_option = 3 ! SOB1
+     ! ZA0
+     if (dterm%has_ZA0 == 2) then
+       nl1_option = 3 ! ZA0
        call orbmag_nl1_k(atindx,cprj_k,dimlmn,dterm,dtset,ikpt,isppol,m1_k,mcprjk,mkmem_rbz,&
          & nband_k,nl1_option,occ_k,pawtab,ucvol)
-       orbmag_terms(:,:,isppol,:,imsob1) = orbmag_terms(:,:,isppol,:,imsob1) + m1_k
+       orbmag_terms(:,:,isppol,:,imza0) = orbmag_terms(:,:,isppol,:,imza0) + m1_k
      end if
 
      ABI_FREE(b1_k)
@@ -637,7 +636,7 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mkmem_rbz,mp
  !
  do iterm = 1, nterms
    if ((iterm.EQ.iomlmb)) cycle
-   if ((iterm.EQ.imsob1)) cycle
+   if ((iterm.EQ.imza0)) cycle
    do isppol = 1, dtset%nsppol
      do nn = 1, nband_k
        do icmplx = 1, 2
@@ -798,7 +797,7 @@ subroutine orbmag_nl1_k(atindx,cprj_k,dimlmn,dterm,dtset,ikpt,isppol,m1_k,mcprjk
      case(2)
        call tt_me(dterm%BM(:,:,:,adir),atindx,cwaveprj,dtset,cwaveprj,dterm%lmn2max,dterm%ndij,pawtab,tt)
      case(3)
-       call tt_me(dterm%SOB1(:,:,:,adir),atindx,cwaveprj,dtset,cwaveprj,dterm%lmn2max,dterm%ndij,pawtab,tt)
+       call tt_me(dterm%ZA0(:,:,:,adir),atindx,cwaveprj,dtset,cwaveprj,dterm%lmn2max,dterm%ndij,pawtab,tt)
      case default
        tt = czero
      end select
@@ -2098,7 +2097,7 @@ subroutine orbmag_output(dtset,orbmag_terms,orbmag_trace)
    write(message,'(a,3es16.8)') ' <A0.An> terms : ',(orbmag_trace(1,adir,imbm),adir=1,3)
    call wrtout(ab_out,message,'COLL')
    if (dtset%pawspnorb /= 0) then
-     write(message,'(a,3es16.8)') ' <SO B1> terms : ',(orbmag_trace(1,adir,imsob1),adir=1,3)
+     write(message,'(a,3es16.8)') ' <ZORA B1> terms : ',(orbmag_trace(1,adir,imza0),adir=1,3)
      call wrtout(ab_out,message,'COLL')
    end if
    write(message,'(a,3es16.8)') '    Lamb terms : ',(orbmag_trace(1,adir,iomlmb),adir=1,3)
@@ -2143,7 +2142,7 @@ subroutine orbmag_output(dtset,orbmag_terms,orbmag_trace)
        write(message,'(a,3es16.8)') ' <A0.An> terms : ',(orbmag_terms(1,iband,isppol,adir,imbm),adir=1,3)
        call wrtout(ab_out,message,'COLL')
        if (dtset%pawspnorb /= 0) then
-         write(message,'(a,3es16.8)') ' <SO B1> terms : ',(orbmag_terms(1,iband,isppol,adir,imsob1),adir=1,3)
+         write(message,'(a,3es16.8)') ' <ZORA B1> terms : ',(orbmag_terms(1,iband,isppol,adir,imza0),adir=1,3)
          call wrtout(ab_out,message,'COLL')
        end if
        write(message,'(a)')ch10
@@ -2232,10 +2231,10 @@ subroutine dterm_free(dterm)
   end if
   dterm%has_BM=0
 
-  if(allocated(dterm%SOB1)) then
-    ABI_FREE(dterm%SOB1)
+  if(allocated(dterm%ZA0)) then
+    ABI_FREE(dterm%ZA0)
   end if
-  dterm%has_SOB1=0
+  dterm%has_ZA0=0
 
 end subroutine dterm_free
 !!***
@@ -2320,14 +2319,14 @@ subroutine dterm_alloc(dterm,lmnmax,lmn2max,natom,ndij,pawspnorb)
   ABI_MALLOC(dterm%BM,(natom,lmn2max,ndij,3))
   dterm%has_BM=1
 
-  if(allocated(dterm%SOB1)) then
-    ABI_FREE(dterm%SOB1)
+  if(allocated(dterm%ZA0)) then
+    ABI_FREE(dterm%ZA0)
   end if
   if (pawspnorb /= 0) then
-    ABI_MALLOC(dterm%SOB1,(natom,lmn2max,ndij,3))
-    dterm%has_SOB1=1
+    ABI_MALLOC(dterm%ZA0,(natom,lmn2max,ndij,3))
+    dterm%has_ZA0=1
   else
-    dterm%has_SOB1=0
+    dterm%has_ZA0=0
   end if
   
 
@@ -2411,12 +2410,12 @@ end subroutine dterm_aij
 
 !!***
 
-!!****f* ABINIT/dterm_SOB1
+!!****f* ABINIT/dterm_ZA0
 !! NAME
-!! dterm_SOB1
+!! dterm_ZA0
 !!
 !! FUNCTION
-!! compute DIJ SO B1 if called for
+!! compute ZORA terms for A0 vector potential
 !!
 !! COPYRIGHT
 !! Copyright (C) 2003-2024 ABINIT  group
@@ -2447,7 +2446,7 @@ end subroutine dterm_aij
 !!
 !! SOURCE
 
-subroutine dterm_SOB1(atindx,cplex_dij,dterm,dtset,paw_an,pawang,pawrad,pawtab,qphase)
+subroutine dterm_ZA0(atindx,cplex_dij,dterm,dtset,paw_an,pawang,pawrad,pawtab,qphase)
 
   !Arguments ------------------------------------
   !scalars
@@ -2476,143 +2475,100 @@ subroutine dterm_SOB1(atindx,cplex_dij,dterm,dtset,paw_an,pawang,pawrad,pawtab,q
   real(dp),allocatable :: dijsob1(:,:,:),dijsob1_rad(:),dv1dr(:),ff(:)
 !--------------------------------------------------------------------
 
-  dterm%SOB1 = czero
+  dterm%ZA0 = czero
   !Check data consistency
   if (qphase/=1) then
-    msg='qphase=2 not yet available in Dij SO B1 '
+    msg='qphase=2 not yet available in Dij ZORA B1 '
     ABI_BUG(msg)
   end if
   if (cplex_dij/=2) then
-    msg='cplex_dij must be 2 for Dij SO B1 '
+    msg='cplex_dij must be 2 for Dij ZORA B1 '
     ABI_BUG(msg)
   end if
   if (dterm%ndij/=4) then
-    msg='ndij must be 4 for Dij SO B1 '
+    msg='ndij must be 4 for Dij ZORA B1 '
     ABI_BUG(msg)
   end if
-!  if (size(vxc1,1)/=qphase*mesh_size.or.size(vxc1,3)/=nspden.or.&
-! &   (size(vxc1,2)/=angl_size.and.pawxcdev==0).or.&
-! &   (size(vxc1,2)/=lm_size.and.pawxcdev/=0)) then
-!    msg='invalid sizes for vxc1!'
-!    ABI_BUG(msg)
-!  end if
 
-  do iat=1,dtset%natom
-    iatom=atindx(iat)
-    itypat=dtset%typat(iat)
-    lmn2_size=pawtab(itypat)%lmn2_size
-    ndij=dterm%ndij
-    ij_size=pawtab(itypat)%ij_size
-    mesh_size=pawtab(itypat)%mesh_size
-    angl_size=pawang%angl_size
+!!  do iat=1,dtset%natom
+!!    iatom=atindx(iat)
+!!    itypat=dtset%typat(iat)
+!!    lmn2_size=pawtab(itypat)%lmn2_size
+!!    ndij=dterm%ndij
+!!    ij_size=pawtab(itypat)%ij_size
+!!    mesh_size=pawtab(itypat)%mesh_size
+!!    angl_size=pawang%angl_size
+!!
+!!    if (size(paw_an(iatom)%vh1,1)/=qphase*mesh_size .or. &
+!!      & size(paw_an(iatom)%vh1,2)<1 .or. &
+!!      & size(paw_an(iatom)%vh1,3)<1) then
+!!      msg='invalid sizes for vh1!'
+!!      ABI_BUG(msg)
+!!    end if
+!!
+!!    ! get ZORA factors for this atom
+!!    ABI_ALLOCATE(dv1dr,(mesh_size))
+!!    ABI_ALLOCATE(zk1,(mesh_size))
+!!    ABI_ALLOCATE(zk2,(mesh_size))
+!!    call make_zora_fncs(dv1dr,mesh_size,dtset%nspden,pawang,pawrad(itypat),dtset%pawxcdev,&
+!!      & paw_an(iatom)%vh1,paw_an(iatom)%vxc1,zk1,zk2)
+!!
+!!    ! radial integrals
+!!    ! za0_rad(1,kln) = int ui K uj dr
+!!    ! za0_rad(2,kln) = 1/4 a^2 int ui K^2 V' r uj dr
+!!    ABI_ALLOCATE(za0_rad,(2,ij_size))
+!!    ABI_ALLOCATE(za0_kernel,(mesh_size))
+!!    do kln = 1, ij_size
+!!   
+!!      za0_kernel= pawtab(itypat)%phiphj(1:mesh_size,kln)*zk1(1:mesh_size)
+!!      call simp_gen(za0_rad(1,kln),za0_kernel,pawrad(itypat))
+!!      
+!!      za0_kernel= pawtab(itypat)%phiphj(1:mesh_size,kln)*zk2(1:mesh_size)*&
+!!        dv1dr(1:mesh_size)*pawrad(itypat)%rad(1:mesh_size)
+!!      call simp_gen(za0_rad(2,kln),za0_kernel,pawrad(itypat))
+!!      za0_rad(2,kln) = za0_rad(2,kln)*half*HalfFineStruct2
+!!    
+!!    end do
+!!    ABI_FREE(zk1)
+!!    ABI_FREE(zk2)
+!!    ABI_FREE(dv1dr)
+!!    ABI_FREE(za0_kernel)
+!!    
+!!    ! make (1-\hat{r}\hat{r}) dyadic integrals
+!!    gs1=size(pawang%gntselect,1)
+!!    gs2=size(pawang%gntselect,2)
+!!    ngnt=size(pawang%realgnt)
+!!    ABI_MALLOC(dyadic,(3,3,gs2))
+!!    call make_dyadic(one,one,dyadic,gntselect,gs1,gs2,gs2,ngnt,realgnt)
+!!
+!!    ABI_MALLOC(dijsob1,(3,cplex_dij*qphase*lmn2_size,ndij))
+!!    dijsob1=zero
+!!    klmn1=1
+!!    do klmn=1,lmn2_size
+!!      klm=pawtab(itypat)%indklmn(1,klmn);kln=pawtab(itypat)%indklmn(2,klmn)
+!!      ilm=pawtab(itypat)%indklmn(5,klmn);jlm=pawtab(itypat)%indklmn(6,klmn)
+!!
+!!      do adir = 1, 3 ! A0 direction (that is, B-field direction)
+!!        do sdir = 1, 3 ! S direction (spin angular momentum)
+!!          if ( (adir == sdir) .AND. (ilm == jlm) ) then
+!!            ! K B.S term za0_rad(1,kln)
+!!          end if
+!!          ! dyadic(adir,sdir,klm)*za0_rad(2,kln)
+!!          dterm%ZA0(iatom,klmn,idij,idir) = &
+!!            & CMPLX(dijsob1(idir,2*klmn-1,idij),&
+!!            &       dijsob1(idir,2*klmn,idij))
+!!        end do ! idir
+!!      end do ! idij
+!!
+!!    end do ! klmn
+!!    ABI_FREE(za0_rad)
+!!    ABI_FREE(dyadic)
+!!    ABI_FREE(dijsob1)
+!!  end do ! iat
+!!
+  dterm%has_ZA0 = 2
 
-    if (size(paw_an(iatom)%vh1,1)/=qphase*mesh_size .or. &
-      & size(paw_an(iatom)%vh1,2)<1 .or. &
-      & size(paw_an(iatom)%vh1,3)<1) then
-      msg='invalid sizes for vh1!'
-      ABI_BUG(msg)
-    end if
-
-    ! compute <Phi_i|r.dV/dr|Phi_j>*alpha2/4*Y_00 (for spin-orbit B1)
-    ABI_MALLOC(dv1dr,(mesh_size))
-    ABI_MALLOC(dijsob1_rad,(ij_size))
-    ABI_MALLOC(ff,(mesh_size))
-    !fact=one/sqrt(four_pi) ! Y_00 = 1/c3
-    ff(1:mesh_size)=zero
-    if (dtset%nspden==1) then
-      do ipts=1,angl_size
-        ff(1:mesh_size)=ff(1:mesh_size)+&
-          & paw_an(iatom)%vxc1(1:mesh_size,ipts,1)*pawang%angwgth(ipts)
-      end do
-    else
-      do ipts=1,angl_size
-        ff(1:mesh_size)=ff(1:mesh_size)+half*&
-          & (paw_an(iatom)%vxc1(1:mesh_size,ipts,1)+paw_an(iatom)%vxc1(1:mesh_size,ipts,2))*&
-          & pawang%angwgth(ipts)
-      end do
-    end if
-    ! ff(1:mesh_size)=c3*ff(1:mesh_size)
-    ff(1:mesh_size)=(c3*ff(1:mesh_size)+paw_an(iatom)%vh1(1:mesh_size,1,1))/c3
-    call nderiv_gen(dv1dr,ff,pawrad(itypat))
-    dv1dr(2:mesh_size)=half*HalfFineStruct2*&
-      & (one/(one-ff(2:mesh_size)*half/InvFineStruct**2)**2) &
-      & *dv1dr(2:mesh_size)*pawrad(itypat)%rad(2:mesh_size)
-    call pawrad_deducer0(dv1dr,mesh_size,pawrad(itypat))
-    do kln=1,ij_size
-      ff(1:mesh_size)= dv1dr(1:mesh_size)*pawtab(itypat)%phiphj(1:mesh_size,kln)
-      call simp_gen(dijsob1_rad(kln),ff,pawrad(itypat))
-    end do
-    ABI_FREE(dv1dr)
-    ABI_FREE(ff)
-    dijsob1_rad(:)=dtset%spnorbscl*dijsob1_rad(:)
-
-    ABI_MALLOC(dijsob1,(3,cplex_dij*qphase*lmn2_size,ndij))
-    dijsob1=zero
-    klmn1=1
-    do klmn=1,lmn2_size
-      klm=pawtab(itypat)%indklmn(1,klmn);kln=pawtab(itypat)%indklmn(2,klmn)
-!      s00=zero;s2m2=zero;s2m1=zero;s20=zero;s21=zero;s22=zero
-      rgnt=zero
-      do igf=1,9
-        gint=pawang%gntselect(igf,klm)
-        if (gint .NE. 0) rgnt(igf)=pawang%realgnt(gint)
-      end do
-      !rgnt(1)=s00 factor, rgnt(5)=s2m2 etc
-      ! svgt(1)=xx,svgt(2)=yy,svgt(3)=zz,svgt(4)=yz,svgt(5)=xz,svgt(6)=xy
-      ! (1-x2/r2)
-      svgt(1)=c3*rgnt(1)-(c1*c2*rgnt(9)+(c3*rgnt(1)-c1*rgnt(7))/three)
-      ! (1-y2/r2)
-      svgt(2)=c3*rgnt(1)-((c3*rgnt(1)-c1*rgnt(7))/three - c1*c2*rgnt(9))
-      ! (1-z2/r2)
-      svgt(3)=c3*rgnt(1)-(two*c1*rgnt(7)+c3*rgnt(1))/three
-      ! zy/r2
-      svgt(4)=c1*c2*rgnt(6)
-      ! zx/r2
-      svgt(5)=c1*c2*rgnt(8)
-      ! yx/r2
-      svgt(6)=c1*c2*rgnt(5)
-
-      svgt(:) = svgt(:)*half*dijsob1_rad(kln)
-
-      ! bx: sxx - syx - szx
-      dijsob1(1,klmn1,3)=dijsob1(1,klmn1,3)+svgt(1)
-      dijsob1(1,klmn1,4)=dijsob1(1,klmn1,4)+svgt(1)
-      dijsob1(1,klmn1+1,3)=dijsob1(1,klmn1+1,3)+svgt(6)
-      dijsob1(1,klmn1+1,4)=dijsob1(1,klmn1+1,4)-svgt(6)
-      dijsob1(1,klmn1,1)=dijsob1(1,klmn1,1)-svgt(5)
-      dijsob1(1,klmn1,2)=dijsob1(1,klmn1,2)+svgt(5)
-      ! by: syy - syx - szy
-      dijsob1(2,klmn1,3)=dijsob1(2,klmn1,3)-svgt(6)
-      dijsob1(2,klmn1,4)=dijsob1(2,klmn1,4)-svgt(6)
-      dijsob1(2,klmn1+1,3)=dijsob1(2,klmn1+1,3)-svgt(2)
-      dijsob1(2,klmn1+1,4)=dijsob1(2,klmn1+1,4)+svgt(2)
-      dijsob1(2,klmn1,1)=dijsob1(2,klmn1,1)-svgt(4)
-      dijsob1(2,klmn1,2)=dijsob1(2,klmn1,2)+svgt(4)
-      ! bz: szz - szy - szx
-      dijsob1(3,klmn1,3)=dijsob1(3,klmn1,3)-svgt(5)
-      dijsob1(3,klmn1,4)=dijsob1(3,klmn1,4)-svgt(5)
-      dijsob1(3,klmn1+1,3)=dijsob1(3,klmn1+1,3)+svgt(4)
-      dijsob1(3,klmn1+1,4)=dijsob1(3,klmn1+1,4)-svgt(4)
-      dijsob1(3,klmn1,1)=dijsob1(3,klmn1,1)+svgt(3)
-      dijsob1(3,klmn1,2)=dijsob1(3,klmn1,2)-svgt(3)
-      klmn1=klmn1+cplex_dij
-
-      do idij = 1, ndij
-        do idir = 1, 3
-          dterm%SOB1(iatom,klmn,idij,idir) = &
-            & CMPLX(dijsob1(idir,2*klmn-1,idij),&
-            &       dijsob1(idir,2*klmn,idij))
-        end do ! idir
-      end do ! idij
-
-    end do ! klmn
-    ABI_FREE(dijsob1_rad)
-    ABI_FREE(dijsob1)
-  end do ! iat
-
-  dterm%has_SOB1 = 2
-
-end subroutine dterm_SOB1
+end subroutine dterm_ZA0
 !!***
 
 !!****f* ABINIT/make_d
@@ -2701,9 +2657,9 @@ subroutine make_d(atindx,dterm,dtset,gprimd,paw_an,paw_ij,pawang,pawrad,pawtab,p
  ! transfers paw_ij to dterm%aij because it's convenient
  call dterm_aij(atindx,dterm,dtset,paw_ij,pawtab)
 
- ! generate dterm%SOB1 if necessary
+ ! generate dterm%ZA0 if necessary
  if (dtset%pawspnorb /= 0) then
-   call dterm_SOB1(atindx,paw_ij(1)%cplex_dij,dterm,dtset,paw_an,pawang,&
+   call dterm_ZA0(atindx,paw_ij(1)%cplex_dij,dterm,dtset,paw_an,pawang,&
      & pawrad,pawtab,paw_ij(1)%qphase)
  end if
 
@@ -2813,222 +2769,6 @@ subroutine local_fermie(dtset,eigen0,fermie,mpi_enreg,occ)
   call xmpi_max(fermie_proc,fermie,spaceComm,ierr)
 
 end subroutine local_fermie
-
 !!***
-
-! !!****f* ABINIT/make_dijsob1
-! !! NAME
-! !! make_dijsob1
-! !!
-! !! FUNCTION
-! !! Compute the spin-orbit contribution to the PAW
-! !! pseudopotential strength Dij to first order in B
-! !! for use in orbmag code
-! !! (for one atom only)
-! !!
-! !! INPUTS
-! !!  cplex_dij=2 if dij is COMPLEX (as in the spin-orbit case), 1 if dij is REAL
-! !!  qphase=2 if dij contains a exp(-i.q.r) phase (as in the q<>0 RF case), 1 if not
-! !!  ndij= number of spin components for Dij^SO
-! !!  nspden=number of spin density components
-! !!  paw_an <type(paw_an_type)>=paw arrays given on angular mesh, for current atom
-! !!  pawang <type(pawang_type)>=paw angular mesh and related data
-! !!  pawrad <type(pawrad_type)>=paw radial mesh and related data, for current atom
-! !!  pawtab <type(pawtab_type)>=paw tabulated starting data, for current atom
-! !!  pawxcdev=Choice of XC development (0=no dev. (use of angular mesh) ; 1 or 2=dev. on moments)
-! !!  vh1(qphase*mesh_size,v_size,nspden)=all-electron on-site Hartree potential for current atom
-! !!                     only spherical moment is used
-! !!  vxc1(qphase*mesh_size,v_size,nspden)=all-electron on-site XC potential for current atom
-! !!                                given on a (r,theta,phi) grid (v_size=angl_size)
-! !!                                or on (l,m) spherical moments (v_size=lm_size)
-! !!
-! !! OUTPUT
-! !!  dijsob1(3,cplex_dij*qphase*lmn2_size,ndij)= spin-orbit Dij terms to order B1, in Bfield direc idir
-! !!    Dij^SO is complex, so cplex_dij=2 must be 2:
-! !!      dij(2*i-1,:) contains the real part
-! !!      dij(2*i,:) contains the imaginary part
-! !!    Dij^SO is represented with 4 components:
-! !!      dijsob1(:,:,1) contains Dij_SO^up-up
-! !!      dijsob1(:,:,2) contains Dij_SO^dn-dn
-! !!      dijsob1(:,:,3) contains Dij_SO^up-dn
-! !!      dijsob1(:,:,4) contains Dij_SO^dn-up
-! !!    When a exp(-i.q.r) phase is included (qphase=2):
-! !!      dij(1:cplex_dij*lmn2_size,:)
-! !!          contains the real part of the phase, i.e. D_ij*cos(q.r)
-! !!      dij(cplex_dij*lmn2_size+1:2*cplex_dij*lmn2_size,:)
-! !!          contains the imaginary part of the phase, i.e. D_ij*sin(q.r)
-! !!
-! !! SOURCE
-
-! subroutine make_dijsob1(dijsob1,cplex_dij,iatom,itypat,qphase,ndij,nspden,&
-! &                   pawang,pawrad,pawtab,pawxcdev,spnorbscl,vh1,vxc1)
-
-! !Arguments ---------------------------------------------
-! !scalars
-!  integer,intent(in) :: cplex_dij,ndij,nspden,pawxcdev,qphase
-!  real(dp), intent(in) :: spnorbscl
-!  type(pawang_type),intent(in) :: pawang
-! !arrays
-!  real(dp),intent(out) :: dijsob1(:,:,:)
-!  real(dp),intent(in) :: vh1(:,:,:),vxc1(:,:,:)
-!  type(pawrad_type),intent(in) :: pawrad(ntypat)
-!  type(pawtab_type),intent(inout) :: pawtab(ntypat)
-! !Local variables ---------------------------------------
-! !scalars
-!  integer :: angl_size,gint
-!  integer :: ij_size,ipts,klm,klmn,klmn1,kln
-!  integer :: lm_size,lmn2_size,mesh_size,nsploop
-!  real(dp), parameter :: c1=sqrt(four_pi/five)
-!  real(dp), parameter :: c2=one/sqrt(three)
-!  real(dp), parameter :: c3=sqrt(four_pi)
-!  real(dp), parameter :: HalfFineStruct2=half/InvFineStruct**2
-!  real(dp) :: fact,s00,s2m2,s2m1,s20,s21,s22
-!  real(dp) :: sxx,syy,szz,szx,syx,szy
-!  character(len=500) :: msg
-! !arrays
-!  real(dp),allocatable :: dijso_rad(:),dv1dr(:),ff(:)
-
-! ! *************************************************************************
-
-! !Useful data
-!  lm_size=pawtab%lcut_size**2
-!  lmn2_size=pawtab%lmn2_size
-!  ij_size=pawtab%ij_size
-!  angl_size=pawang%angl_size
-!  mesh_size=pawtab%mesh_size
-!  nsploop=4
-
-! !Check data consistency
-!  if (qphase/=1) then
-!    msg='qphase=2 not yet available in pawdijso!'
-!    ABI_BUG(msg)
-!  end if
-!  if (cplex_dij/=2) then
-!    msg='cplex_dij must be 2 for spin-orbit coupling!'
-!    ABI_BUG(msg)
-!  end if
-!  if (ndij/=4) then
-!    msg='ndij must be 4 for spin-orbit coupling!'
-!    ABI_BUG(msg)
-!  end if
-!  ! if (pawang%use_ls_ylm==0) then
-!  !   msg='pawang%use_ls_ylm should be /=0!'
-!  !   ABI_BUG(msg)
-!  ! end if
-!  if (size(dijsob1,2)/=cplex_dij*qphase*lmn2_size.or.size(dijsob1,3)/=ndij) then
-!    msg='invalid sizes for DijSO B1!'
-!    ABI_BUG(msg)
-!  end if
-!  if (size(vh1,1)/=qphase*mesh_size.or.size(vh1,2)<1.or.size(vh1,3)<1) then
-!    msg='invalid sizes for vh1!'
-!    ABI_BUG(msg)
-!  end if
-!  if (size(vxc1,1)/=qphase*mesh_size.or.size(vxc1,3)/=nspden.or.&
-! &   (size(vxc1,2)/=angl_size.and.pawxcdev==0).or.&
-! &   (size(vxc1,2)/=lm_size.and.pawxcdev/=0)) then
-!    msg='invalid sizes for vxc1!'
-!    ABI_BUG(msg)
-!  end if
-
-! !------------------------------------------------------------------------
-! !----------- Allocations and initializations
-! !------------------------------------------------------------------------
-
-! !Eventually compute <Phi_i|r.dV/dr|Phi_j>*alpha2/4*Y_00 (for spin-orbit B1)
-!  ABI_MALLOC(dv1dr,(mesh_size))
-!  ABI_MALLOC(dijso_rad,(ij_size))
-!  ABI_MALLOC(ff,(mesh_size))
-!  fact=one/sqrt(four_pi) ! Y_00
-!  if (pawxcdev/=0) then
-!    if (nspden==1) then
-!      ff(1:mesh_size)=vxc1(1:mesh_size,1,1)
-!    else
-!      ff(1:mesh_size)=half*(vxc1(1:mesh_size,1,1)+vxc1(1:mesh_size,1,2))
-!    end if
-!  else
-!    ff(1:mesh_size)=zero
-!    if (nspden==1) then
-!      do ipts=1,angl_size
-!        ff(1:mesh_size)=ff(1:mesh_size) &
-! &          +vxc1(1:mesh_size,ipts,1)*pawang%angwgth(ipts)
-!      end do
-!    else
-!      do ipts=1,angl_size
-!        ff(1:mesh_size)=ff(1:mesh_size) &
-! &       +half*(vxc1(1:mesh_size,ipts,1)+vxc1(1:mesh_size,ipts,2)) &
-! &       *pawang%angwgth(ipts)
-!      end do
-!    end if
-!    ff(1:mesh_size)=sqrt(four_pi)*ff(1:mesh_size)
-!  end
-!  ff(1:mesh_size)=fact*(ff(1:mesh_size)+vh1(1:mesh_size,1,1))
-!  call nderiv_gen(dv1dr,ff,pawrad)
-!  dv1dr(2:mesh_size)=half*HalfFineStruct2*&
-!    & (one/(one-ff(2:mesh_size)*half/InvFineStruct**2)**2) &
-!    & *dv1dr(2:mesh_size)*pawrad%rad(2:mesh_size)
-!  call pawrad_deducer0(dv1dr,mesh_size,pawrad)
-!  do kln=1,ij_size
-!    ff(1:mesh_size)= dv1dr(1:mesh_size)*pawtab%phiphj(1:mesh_size,kln)
-!    call simp_gen(dijso_rad(kln),ff,pawrad)
-!  end do
-!  ABI_FREE(dv1dr)
-!  ABI_FREE(ff)
-!  dijso_rad(:)=spnorbscl*dijso_rad(:)
-
-! !  ------------------------------------------------------------------------
-! !  ----- Computation of Dij_so B1
-! !  ------------------------------------------------------------------------
-!  dijsob1(:,:,:) = zero
-!  klmn1=1
-!  do klmn=1,lmn2_size
-!    klm=pawtab%indklmn(1,klmn);kln=pawtab%indklmn(2,klmn)
-!    s00=zero;s2m2=zero;s2m1=zero;s20=zero;s21=zero;s22=zero
-!    gint = pawang%gntselect(1,klm);if (gint .NE. 0) s00 =pawang%realgnt(gint)
-!    gint = pawang%gntselect(5,klm);if (gint .NE. 0) s2m2=pawang%realgnt(gint)
-!    gint = pawang%gntselect(6,klm);if (gint .NE. 0) s2m1=pawang%realgnt(gint)
-!    gint = pawang%gntselect(7,klm);if (gint .NE. 0) s20 =pawang%realgnt(gint)
-!    gint = pawang%gntselect(8,klm);if (gint .NE. 0) s21 =pawang%realgnt(gint)
-!    gint = pawang%gntselect(9,klm);if (gint .NE. 0) s22 =pawang%realgnt(gint)
-!    ! (1-x2/r2)
-!    sxx=half*dijso_rad(kln)*(c3*s00-(c1*c2*s22+(c3*s00-c1*s20)/three))
-!    ! (1-y2/r2)
-!    syy=half*dijso_rad(kln)*(c3*s00-((c3*s00-c1*s20)/three - c1*c2*s22))
-!    ! (1-z2/r2)
-!    szz=half*dijso_rad(kln)*(c3*s00-(two*c1*s20+c3*s00)/three)
-!    ! yx/r2
-!    syx=half*dijso_rad(kln)*c1*c2*s2m2
-!    ! zx/r2
-!    szx=half*dijso_rad(kln)*c1*c2*s21
-!    ! zy/r2
-!    szy=half*dijso_rad(kln)*c1*c2*s2m1
-!    ! bx: sxx - syx - szx
-!    dijsob1(1,klmn1,3)=dijsob1(1,klmn1,3)+sxx
-!    dijsob1(1,klmn1,4)=dijsob1(1,klmn1,4)+sxx
-!    dijsob1(1,klmn1+1,3)=dijsob1(1,klmn1+1,3)+syx
-!    dijsob1(1,klmn1+1,4)=dijsob1(1,klmn1+1,4)-syx
-!    dijsob1(1,klmn1,1)=dijsob1(1,klmn1,1)-szx
-!    dijsob1(1,klmn1,2)=dijsob1(1,klmn1,2)+szx
-!    ! by: syy - syx - szy
-!    dijsob1(2,klmn1,3)=dijsob1(2,klmn1,3)-syx
-!    dijsob1(2,klmn1,4)=dijsob1(2,klmn1,4)-syx
-!    dijsob1(2,klmn1+1,3)=dijsob1(2,klmn1+1,3)-syy
-!    dijsob1(2,klmn1+1,4)=dijsob1(2,klmn1+1,4)+syy
-!    dijsob1(2,klmn1,1)=dijsob1(2,klmn1,1)-szy
-!    dijsob1(2,klmn1,2)=dijsob1(2,klmn1,2)+szy
-!    ! bz: szz - szy - szx
-!    dijsob1(3,klmn1,3)=dijsob1(3,klmn1,3)-szx
-!    dijsob1(3,klmn1,4)=dijsob1(3,klmn1,4)-szx
-!    dijsob1(3,klmn1+1,3)=dijsob1(3,klmn1+1,3)+szy
-!    dijsob1(3,klmn1+1,4)=dijsob1(3,klmn1+1,4)-szy
-!    dijsob1(3,klmn1,1)=dijsob1(3,klmn1,1)+szz
-!    dijsob1(3,klmn1,2)=dijsob1(3,klmn1,2)-szz
-!    klmn1=klmn1+cplex_dij
-!  end do
-
-!  ABI_FREE(dijso_rad)
-
-! end subroutine make_dijsob1
-! !!***
-
 
 end module m_orbmag
