@@ -301,7 +301,7 @@ subroutine init_oper_ndat(paw_dmft,oper,ndat,nkpt,wtk,shiftk,opt_ksloc)
 ! ===================
  if (optksloc == 1 .or. optksloc == 3) then
 
-   ABI_MALLOC(oper%ks,(oper%mbandc,oper%mbandc,oper%nkpt,oper%nsppol*ndat_))
+   ABI_MALLOC(oper%ks,(oper%mbandc,oper%mbandc*ndat_,oper%nkpt,oper%nsppol))
    oper%has_operks  = 1
    oper%ks(:,:,:,:) = czero
 
@@ -446,7 +446,9 @@ subroutine copy_oper_from_ndat(oper1,oper2,ndat)
 
    if(allocated(oper2(idat)%ks).and.allocated(oper1%ks)) then
      do isppol=1,oper1%nsppol
-       oper2(idat)%ks(:,:,:,isppol)=oper1%ks(:,:,:,idat+(isppol-1)*ndat)
+       do ikpt=1,oper1%nkpt
+         oper2(idat)%ks(:,:,ikpt,isppol)=oper1%ks(:,1+(idat-1)*oper1%mbandc:idat*oper1%mbandc,ikpt,isppol)
+       enddo
      enddo
    endif
  enddo
@@ -491,7 +493,9 @@ subroutine copy_oper_to_ndat(oper1,oper2,ndat)
 
    if(allocated(oper1(idat)%ks).and.allocated(oper2%ks)) then
      do isppol=1,oper2%nsppol
-       oper2%ks(:,:,:,idat+(isppol-1)*ndat)=oper1(idat)%ks(:,:,:,isppol)
+       do ikpt=1,oper2%nkpt
+         oper2%ks(:,1+(idat-1)*oper2%mbandc:idat*oper2%mbandc,ikpt,isppol)=oper1(idat)%ks(:,:,ikpt,isppol)
+       enddo
      enddo
    endif
  enddo
@@ -825,12 +829,12 @@ call nvtxStartRange("downfold_oper",20)
            if(l_gpu_option == ABI_GPU_DISABLED) then
              do idat=1,ndat
              call abi_xgemm("n","n",ndim,mbandc,mbandc,cone,paw_dmft%chipsi(:,:,ik,isppol,iatom),&
-             &    ndim_max,oper%ks(:,:,ikpt,idat+(isppol-1)*ndat),mbandc,czero,mat_temp(:,:,idat),ndim)
+             &    ndim_max,oper%ks(:,(idat-1)*mbandc+1:idat*mbandc,ikpt,isppol),mbandc,czero,mat_temp(:,:,idat),ndim)
              end do ! ndat
            else if(l_gpu_option == ABI_GPU_OPENMP) then
              do idat=1,ndat
              call abi_gpu_xgemm(2,"n","n",ndim,mbandc,mbandc,cone,chipsi(:,:,ik,isppol,iatom),&
-             &    ndim_max,ks(:,:,ikpt,idat+(isppol-1)*ndat),mbandc,czero,mat_temp(:,:,idat),ndim)
+             &    ndim_max,ks(:,(idat-1)*mbandc+1:idat*mbandc,ikpt,isppol),mbandc,czero,mat_temp(:,:,idat),ndim)
              end do ! ndat
            end if
 
@@ -843,7 +847,7 @@ call nvtxStartRange("downfold_oper",20)
                  if(l_gpu_option == ABI_GPU_OPENMP) ABI_BUG("toto")
                  mat_temp(:,ib,idat) = paw_dmft%chipsi(1:ndim,ib,ik,isppol,iatom) * op_ks_diag(ib,ikpt,isppol)
                else
-                 mat_temp(:,ib,idat) = paw_dmft%chipsi(1:ndim,ib,ik,isppol,iatom) * oper%ks(ib,ib,ikpt,idat+(isppol-1)*ndat)
+                 mat_temp(:,ib,idat) = paw_dmft%chipsi(1:ndim,ib,ik,isppol,iatom) * oper%ks(ib,ib+(idat-1)*mbandc,ikpt,isppol)
                end if ! present(op_ks_diag)
              end do ! ib
              end do ! ndat
@@ -866,7 +870,7 @@ call nvtxStartRange("downfold_oper",20)
                  !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(ib,im)
                  do ib=1,mbandc
                    do im=1,ndim
-                     mat_temp(im,ib,idat) = chipsi(im,ib,ik,isppol,iatom) * ks(ib,ib,ikpt,idat+(isppol-1)*ndat)
+                     mat_temp(im,ib,idat) = chipsi(im,ib,ik,isppol,iatom) * ks(ib,ib+(idat-1)*mbandc,ikpt,isppol)
                    end do
                  end do
                end do
@@ -1095,7 +1099,7 @@ subroutine upfold_oper(oper,paw_dmft,procb,iproc,gpu_option)
            call abi_xgemm("n","n",mbandc,mbandc,ndim,cone,mat_temp(:,:,idat),mbandc,&
                         & paw_dmft%chipsi(:,:,ik,isppol,iatom),ndim,czero,mat_temp2(:,:,idat),mbandc)
 
-           oper%ks(:,:,ikpt,idat+(isppol-1)*ndat) = oper%ks(:,:,ikpt,idat+(isppol-1)*ndat) + mat_temp2(:,:,idat)
+           oper%ks(:,(idat-1)*mbandc+1:idat*mbandc,ikpt,isppol) = oper%ks(:,(idat-1)*mbandc+1:idat*mbandc,ikpt,isppol) + mat_temp2(:,:,idat)
 
          end do ! idat
 
@@ -1114,7 +1118,7 @@ subroutine upfold_oper(oper,paw_dmft,procb,iproc,gpu_option)
            !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(ib,ib1)
            do ib=1,mbandc
              do ib1=1,mbandc
-               ks(ib,ib1,ikpt,idat+(isppol-1)*ndat) = ks(ib,ib1,ikpt,idat+(isppol-1)*ndat) + mat_temp2(ib,ib1,idat)
+               ks(ib,ib1+(idat-1)*mbandc,ikpt,isppol) = ks(ib,ib1+(idat-1)*mbandc,ikpt,isppol) + mat_temp2(ib,ib1,idat)
              end do
            end do
          end do ! idat
