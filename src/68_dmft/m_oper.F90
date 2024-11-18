@@ -827,15 +827,13 @@ call nvtxStartRange("downfold_oper",20)
          if (opt == 1) then
 
            if(l_gpu_option == ABI_GPU_DISABLED) then
-             do idat=1,ndat
-             call abi_xgemm("n","n",ndim,mbandc,mbandc,cone,paw_dmft%chipsi(:,:,ik,isppol,iatom),&
-             &    ndim_max,oper%ks(:,(idat-1)*mbandc+1:idat*mbandc,ikpt,isppol),mbandc,czero,mat_temp(:,:,idat),ndim)
-             end do ! ndat
+             call abi_zgemm_2dd("n","n",ndim,mbandc*ndat,mbandc,cone,paw_dmft%chipsi(:,:,ik,isppol,iatom),&
+             &    ndim_max,oper%ks(:,:,ikpt,isppol),mbandc,czero,mat_temp(:,:,:),ndim)
            else if(l_gpu_option == ABI_GPU_OPENMP) then
-             do idat=1,ndat
-             call abi_gpu_xgemm(2,"n","n",ndim,mbandc,mbandc,cone,chipsi(:,:,ik,isppol,iatom),&
-             &    ndim_max,ks(:,(idat-1)*mbandc+1:idat*mbandc,ikpt,isppol),mbandc,czero,mat_temp(:,:,idat),ndim)
-             end do ! ndat
+#ifdef HAVE_OPENMP_OFFLOAD
+             call abi_gpu_xgemm(2,"n","n",ndim,mbandc*ndat,mbandc,cone,chipsi(:,:,ik,isppol,iatom),&
+             &    ndim_max,ks(:,:,ikpt,isppol),mbandc,czero,mat_temp(:,:,:),ndim)
+#endif
            end if
 
          else if (opt == 3) then
