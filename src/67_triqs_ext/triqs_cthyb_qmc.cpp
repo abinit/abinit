@@ -70,9 +70,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
 
   // Hamiltonian definition
   many_body_operator H,Hint;
-
   complex<double> levels_tmp [num_orbitals*num_orbitals] = {0};
-
   int nblocks,siz_block;
 
   if (!orb_off_diag && !spin_off_diag) {

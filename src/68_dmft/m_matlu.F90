@@ -200,7 +200,6 @@ subroutine zero_matlu(matlu,natom,onlynondiag,maxoffdiag)
 
  nspinor = matlu(1)%nspinor
  nsppol  = matlu(1)%nsppol
-
  maxoffdiag_ = zero
 
  do iatom=1,natom

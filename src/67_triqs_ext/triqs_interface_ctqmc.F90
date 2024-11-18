@@ -24,7 +24,6 @@ MODULE TRIQS_CTQMC
 !
 ! =====================================================================
 
-
      SUBROUTINE Ctqmc_triqs_run(rot_inv,leg_measure,orb_off_diag,spin_off_diag,move_shift,move_double,measure_density_matrix,time_invariance, &
                               & use_norm_as_weight,loc_n_min,loc_n_max,seed_a,seed_b,nflavor,ntau,nl,ncycle,cycle_length, &
                               & ntherm,ntherm2,det_init_size,det_n_operations_before_check,ntau_delta,nbins_histo, &

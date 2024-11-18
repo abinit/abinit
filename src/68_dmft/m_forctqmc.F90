@@ -315,6 +315,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
      ABI_BUG(message)
    end if
 
+   ! Compute the moments of the hybridization
    call compute_moments_loc(green,self,energy_level,weiss,0)
 
  end if ! moments
