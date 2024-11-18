@@ -29,7 +29,6 @@ MODULE m_paw_correlations
  use m_dtset
  use m_linalg_interfaces
  use m_special_funcs
-
  use m_fstrings, only : int2char4
  use m_io_tools,    only : open_file
  use m_paw_dmft,    only : paw_dmft_type
@@ -285,6 +284,7 @@ CONTAINS  !=====================================================================
      if(pawtab(itypat)%lexexch==-1) pawtab(itypat)%useexexch=0
      if(pawtab(itypat)%lexexch/=-1) pawtab(itypat)%useexexch=useexexch
    end if
+
 !  Select only atoms with +U
    if(lcur/=-1) then
 
@@ -819,7 +819,6 @@ CONTAINS  !=====================================================================
      if (use_dmft > 0) then
 
        write(tag,'(i4)') itypat
-
        write(message,'(4a)') &
          & ch10,' =====  Build DMFT radial orbital for atom type ',trim(adjustl(tag)),' ========'
        call wrtout(std_out,message,"COLL")
@@ -881,7 +880,6 @@ CONTAINS  !=====================================================================
        if (dmft_dc == 8) then
 
          ABI_MALLOC(pawtab(itypat)%proj2,(meshsz))
-
          pawtab(itypat)%proj2(1:meshsz) = (pawtab(itypat)%proj(1:meshsz)/int1)**2
 
          ! Get correspondence U,J <-> lamb,eps

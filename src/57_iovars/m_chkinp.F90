@@ -762,7 +762,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 
    if(dt%dmft_solv==6.or.dt%dmft_solv==7) then
      call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_det_init_size',dt%dmftctqmc_triqs_det_init_size,1,iout)
-     call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_det_n_operations_before_check',dt%dmftctqmc_triqs_det_n_operations_before_check,1,iout)  
+     call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_det_n_operations_before_check',dt%dmftctqmc_triqs_det_n_operations_before_check,1,iout)
      call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_entropy',dt%dmftctqmc_triqs_entropy,2,(/0,1/),iout)
      call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_leg_measure',dt%dmftctqmc_triqs_leg_measure,2,(/0,1/),iout)
      call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_loc_n_min',dt%dmftctqmc_triqs_loc_n_min,0,iout)
@@ -790,9 +790,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      if (dt%dmftctqmc_triqs_entropy == 1 .and. dt%dmft_use_all_bands == 0) then
        write(msg,'(a)') 'You need to activate dmft_use_all_bands in order to activate dmftctqmc_triqs_entropy'
        ABI_ERROR(msg)
-     end if 
+     end if
      call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_nlambda',dt%dmft_nlambda,1,iout)
-   end if 
+   end if
 
 !  dosdeltae
    call chkdpr(0,0,cond_string,cond_values,ierr,'dosdeltae',dt%dosdeltae,1,0.0_dp,iout)
@@ -1978,7 +1978,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    end if
 
 !  nbdbuf
-!  At this stage, nbdbuf Must be greater or equal to 0, or take the special value -101. 
+!  At this stage, nbdbuf Must be greater or equal to 0, or take the special value -101.
 !  Note that other negative values are permitted in input, but immediately
 !  transformed to a fraction of the number of bands hence a positive number.
    call chkint_ge(0,0,cond_string,cond_values,ierr,'nbdbuf',dt%nbdbuf,-101,iout)
