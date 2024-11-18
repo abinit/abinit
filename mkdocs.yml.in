@@ -213,6 +213,7 @@ nav:
         - elastic: tutorial/elastic.md
         - nonlinear : tutorial/nlo.md
         - lattice_wannier : tutorial/lattice_wannier.md
+        - quadrupoles : tutorial/lw_quad.md
         - eph_intro : tutorial/eph_intro.md
         - eph for mobilities : tutorial/eph4mob.md
         - eph for zero-point renormalization : tutorial/eph4zpr.md

@@ -2,7 +2,7 @@
 #include "config.h"
 #endif
 
-#ifndef __TRIQS_CTHYB_QMC_H__ 
+#ifndef __TRIQS_CTHYB_QMC_H__
 #define __TRIQS_CTHYB_QMC_H__
 
 #include <iostream>
@@ -16,25 +16,30 @@ using triqs::operators::many_body_operator_generic; //ADDED Instead
 
 extern "C"{
 
-    void ctqmc_triqs_run( bool rot_inv, bool leg_measure, bool hist, bool wrt_files, bool tot_not,
-                          int n_orbitals, int n_freq, int n_tau, int n_l, int n_cycles_, int cycle_length, int ntherm, int verbo,int seed,  
-                          double beta_,
-                          double *epsi, double *umat_ij, double *umat_ijkl, std::complex<double> *delta_iw_ptr, std::complex<double> *g_iw_ptr, double *g_tau, double *gl,
-#if defined HAVE_TRIQS_v1_4
-                          MPI_Fint *MPI_world_ptr );
-#else
-			  int rank );
-#endif
-
+    void ctqmc_triqs_run( bool rot_inv, bool leg_measure, bool off_diag, bool move_shift, bool move_double,
+                          bool measure_density_matrix, bool time_invariance, bool use_norm_as_weight, int loc_n_min, int loc_n_max,
+                          int seed_a, int seed_b, int num_orbitals, int n_tau, int n_l, int n_cycles_, int cycle_length,
+                          int ntherm, int ntherm2, int det_init_size, int det_n_operations_before_check, int ntau_delta,
+                          int nbins_histo, int rank, int nspinor, int iatom, int ilam, double beta, double move_global_prob,
+                          double imag_threshold, double det_precision_warning, double det_precision_error,
+                          double det_singular_threshold, double lam, complex<double> *ftau, complex<double> *gtau,
+                          complex<double> *gl, complex<double> *udens, complex<double> *vee, complex<double> *levels,
+                          complex<double> *moments_self_1, complex<double> *moments_self_2, double *Eu, double *occ ) ;
+  //double *res ) ;
 //COMMENTED: Class name changed in TRIQS 1.4
 //    many_body_operator<double> init_Hamiltonian( double *eps, int nflavor, double *U );
 //    many_body_operator<double> init_fullHamiltonian( double *eps, int nflavor, double *U );
 //    many_body_operator<double> init_fullHamiltonianUpDown( double *eps, int nflavor, double *U );
 
 //ADDED Instead
-    many_body_operator_generic<double> init_Hamiltonian( double *eps, int nflavor, double *U );
-    many_body_operator_generic<double> init_fullHamiltonian( double *eps, int nflavor, double *U );
-    many_body_operator_generic<double> init_fullHamiltonianUpDown( double *eps, int nflavor, double *U );
+    many_body_operator_generic<triqs::utility::real_or_complex> init_Hamiltonian( complex<double> *eps, int nflavor,
+                                                                                  complex<double> *U, bool off_diag,
+						                                  int nspinor,double lambda );
+    many_body_operator_generic<triqs::utility::real_or_complex> init_fullHamiltonian( complex<double> *eps, int nflavor,
+										      complex<double> *U, bool off_diag,
+										      int nspinor,double lambda );
+    pair<int,int> convert_indexes(int iflavor, bool off_diag, int nspinor)
+    void build_dlr(int wdlr_size, int *ndlr, double *wdlr, double lam, double eps);
 }
 
 #endif
