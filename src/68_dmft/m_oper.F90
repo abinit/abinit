@@ -884,10 +884,17 @@ call nvtxStartRange("downfold_oper",20)
            &    paw_dmft%chipsi(:,:,ik,isppol,iatom),ndim_max,czero,mat_temp2(:,:,idat),ndim)
            end do ! ndat
          else if(l_gpu_option == ABI_GPU_OPENMP) then
+#if 0
            do idat=1,ndat
            call abi_gpu_xgemm(2,"n","c",ndim,ndim,mbandc,cone,mat_temp(:,:,idat),ndim,&
            &    paw_dmft%chipsi(:,:,ik,isppol,iatom),ndim_max,czero,mat_temp2(:,:,idat),ndim)
            end do ! ndat
+#else
+#ifdef HAVE_OPENMP_OFFLOAD
+           call abi_gpu_xgemm_strided(2,'n','c',ndim,ndim,mbandc,cone,mat_temp(:,:,:),ndim,ndim*mbandc,&
+           &    paw_dmft%chipsi(:,:,ik,isppol,iatom),ndim_max,0,czero,mat_temp2(:,:,:),ndim,ndim*ndim,ndat)
+#endif
+#endif
          end if
 
        else if (opt == 2) then
@@ -1106,10 +1113,15 @@ subroutine upfold_oper(oper,paw_dmft,procb,iproc,gpu_option)
          call abi_gpu_xgemm(2,"c","n",mbandc,ndat*ndim,ndim,cone,paw_dmft%chipsi(:,:,ik,isppol,iatom),&
                       & ndim,oper%matlu(iatom)%mat(:,:,(isppol-1)*ndat+1:isppol*ndat),ndim,czero,mat_temp(:,:,:),mbandc)
 
+#if 0
          do idat=1,ndat
            call abi_gpu_xgemm(2,"n","n",mbandc,mbandc,ndim,cone,mat_temp(:,:,idat),mbandc,&
            &    paw_dmft%chipsi(:,:,ik,isppol,iatom),ndim_max,  czero,mat_temp2(:,:,idat),mbandc)
          end do ! idat
+#else
+         call abi_gpu_xgemm_strided(2,'n','n',mbandc,mbandc,ndim,cone,mat_temp(:,:,:),mbandc,ndim*mbandc,&
+         &    paw_dmft%chipsi(:,:,ik,isppol,iatom),ndim_max,0,czero,mat_temp2(:,:,:),mbandc,mbandc*mbandc,ndat)
+#endif
 
          !$OMP TARGET TEAMS DISTRIBUTE MAP(to:ks,mat_temp2) PRIVATE(idat)
          do idat=1,ndat
