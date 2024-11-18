@@ -751,13 +751,13 @@ subroutine downfold_oper(oper,paw_dmft,procb,iproc,option,op_ks_diag,gpu_option)
  integer, optional, intent(in) :: procb(oper%nkpt)
  real(dp), optional, intent(in) :: op_ks_diag(oper%mbandc,oper%nkpt,oper%nsppol)
 !oper variables-------------------------------
- integer :: iatom,ib,ik,ikpt,isppol,im,im1,lpawu,mbandc,ndim
- integer :: ndim_max,nspinor,opt,paral,shift
+ integer :: iatom,ib,ik,ikpt,isppol,im,im1,idat,lpawu,mbandc,ndim
+ integer :: ndim_max,nspinor,ndat,opt,paral,shift
  integer :: l_gpu_option
  complex(dpc), ABI_CONTIGUOUS pointer :: ks(:,:,:,:),mat(:,:,:),chipsi(:,:,:,:,:)
  real(dp), ABI_CONTIGUOUS pointer :: wtk(:)
  character(len=500) :: message
- complex(dpc), allocatable :: mat_temp(:,:),mat_temp2(:,:),mat_temp3(:,:)
+ complex(dpc), allocatable :: mat_temp(:,:,:),mat_temp2(:,:,:),mat_temp3(:,:)
 ! *********************************************************************
 
 #ifdef HAVE_GPU_MARKERS
@@ -776,6 +776,7 @@ call nvtxStartRange("downfold_oper",20)
  ndim_max = nspinor * (2*paw_dmft%maxlpawu+1)
  paral    = 0
  shift    = oper%shiftk
+ ndat     = oper%ndat
  if(l_gpu_option==ABI_GPU_OPENMP) then
    ks => oper%ks
    wtk => oper%wtk
@@ -799,8 +800,8 @@ call nvtxStartRange("downfold_oper",20)
    if (lpawu == -1) cycle
    oper%matlu(iatom)%mat(:,:,:) = czero
    ndim = nspinor * (2*lpawu+1)
-   ABI_MALLOC(mat_temp,(ndim,mbandc))
-   ABI_MALLOC(mat_temp2,(ndim,ndim))
+   ABI_MALLOC(mat_temp,(ndim,mbandc,ndat))
+   ABI_MALLOC(mat_temp2,(ndim,ndim,ndat))
    ABI_MALLOC(mat_temp3,(ndim,ndim))
    mat => oper%matlu(iatom)%mat
 #ifdef HAVE_OPENMP_OFFLOAD
@@ -818,40 +819,55 @@ call nvtxStartRange("downfold_oper",20)
 
        if (opt == 1 .or. opt == 3) then
 
+
          if (opt == 1) then
 
            if(l_gpu_option == ABI_GPU_DISABLED) then
+             do idat=1,ndat
              call abi_xgemm("n","n",ndim,mbandc,mbandc,cone,paw_dmft%chipsi(:,:,ik,isppol,iatom),&
-             &    ndim_max,oper%ks(:,:,ikpt,isppol),mbandc,czero,mat_temp(:,:),ndim)
+             &    ndim_max,oper%ks(:,:,ikpt,idat+(isppol-1)*ndat),mbandc,czero,mat_temp(:,:,idat),ndim)
+             end do ! ndat
            else if(l_gpu_option == ABI_GPU_OPENMP) then
+             do idat=1,ndat
              call abi_gpu_xgemm(2,"n","n",ndim,mbandc,mbandc,cone,chipsi(:,:,ik,isppol,iatom),&
-             &    ndim_max,ks(:,:,ikpt,isppol),mbandc,czero,mat_temp(:,:),ndim)
+             &    ndim_max,ks(:,:,ikpt,idat+(isppol-1)*ndat),mbandc,czero,mat_temp(:,:,idat),ndim)
+             end do ! ndat
            end if
 
          else if (opt == 3) then
 
            if(l_gpu_option == ABI_GPU_DISABLED) then
+             do idat=1,ndat
              do ib=1,mbandc
                if (present(op_ks_diag)) then
-                 mat_temp(:,ib) = paw_dmft%chipsi(1:ndim,ib,ik,isppol,iatom) * op_ks_diag(ib,ikpt,isppol)
+                 if(l_gpu_option == ABI_GPU_OPENMP) ABI_BUG("toto")
+                 mat_temp(:,ib,idat) = paw_dmft%chipsi(1:ndim,ib,ik,isppol,iatom) * op_ks_diag(ib,ikpt,isppol)
                else
-                 mat_temp(:,ib) = paw_dmft%chipsi(1:ndim,ib,ik,isppol,iatom) * oper%ks(ib,ib,ikpt,isppol)
+                 mat_temp(:,ib,idat) = paw_dmft%chipsi(1:ndim,ib,ik,isppol,iatom) * oper%ks(ib,ib,ikpt,idat+(isppol-1)*ndat)
                end if ! present(op_ks_diag)
              end do ! ib
+             end do ! ndat
            else if(l_gpu_option == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
              if (present(op_ks_diag)) then
-               !$OMP TARGET PARALLEL DO COLLAPSE(2) MAP(to:chipsi,op_ks_diag,mat_temp) PRIVATE(ib,im)
-               do ib=1,mbandc
-                 do im=1,ndim
-                   mat_temp(im,ib) = chipsi(im,ib,ik,isppol,iatom) * op_ks_diag(ib,ikpt,isppol)
+               if(l_gpu_option == ABI_GPU_OPENMP) ABI_BUG("toto")
+               !$OMP TARGET TEAMS DISTRIBUTE MAP(to:chipsi,op_ks_diag,mat_temp) PRIVATE(idat)
+               do idat=1,ndat
+                 !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(ib,im)
+                 do ib=1,mbandc
+                   do im=1,ndim
+                     mat_temp(im,ib,idat) = chipsi(im,ib,ik,isppol,iatom) * op_ks_diag(ib,ikpt,isppol)
+                   end do
                  end do
                end do
              else
-               !$OMP TARGET PARALLEL DO COLLAPSE(2) MAP(to:chipsi,ks,mat_temp) PRIVATE(ib,im)
-               do ib=1,mbandc
-                 do im=1,ndim
-                   mat_temp(im,ib) = chipsi(im,ib,ik,isppol,iatom) * ks(ib,ib,ikpt,isppol)
+               !$OMP TARGET TEAMS DISTRIBUTE MAP(to:chipsi,ks,mat_temp) PRIVATE(idat)
+               do idat=1,ndat
+                 !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(ib,im)
+                 do ib=1,mbandc
+                   do im=1,ndim
+                     mat_temp(im,ib,idat) = chipsi(im,ib,ik,isppol,iatom) * ks(ib,ib,ikpt,idat+(isppol-1)*ndat)
+                   end do
                  end do
                end do
              end if ! present(op_ks_diag)
@@ -861,18 +877,22 @@ call nvtxStartRange("downfold_oper",20)
          end if ! opt=1 or 3
 
          if(l_gpu_option == ABI_GPU_DISABLED) then
-           call abi_xgemm("n","c",ndim,ndim,mbandc,cone,mat_temp(:,:),ndim,&
-           &    paw_dmft%chipsi(:,:,ik,isppol,iatom),ndim_max,czero,mat_temp2(:,:),ndim)
+           do idat=1,ndat
+           call abi_xgemm("n","c",ndim,ndim,mbandc,cone,mat_temp(:,:,idat),ndim,&
+           &    paw_dmft%chipsi(:,:,ik,isppol,iatom),ndim_max,czero,mat_temp2(:,:,idat),ndim)
+           end do ! ndat
          else if(l_gpu_option == ABI_GPU_OPENMP) then
-           call abi_gpu_xgemm(2,"n","c",ndim,ndim,mbandc,cone,mat_temp(:,:),ndim,&
-           &    paw_dmft%chipsi(:,:,ik,isppol,iatom),ndim_max,czero,mat_temp2(:,:),ndim)
+           do idat=1,ndat
+           call abi_gpu_xgemm(2,"n","c",ndim,ndim,mbandc,cone,mat_temp(:,:,idat),ndim,&
+           &    paw_dmft%chipsi(:,:,ik,isppol,iatom),ndim_max,czero,mat_temp2(:,:,idat),ndim)
+           end do ! ndat
          end if
 
        else if (opt == 2) then
 
          if(l_gpu_option == ABI_GPU_OPENMP) ABI_BUG("toto")
          call abi_xgemm("n","c",ndim,ndim,mbandc,cone,paw_dmft%chipsi(:,:,ik,isppol,iatom),&
-                      & ndim_max,paw_dmft%chipsi(:,:,ik,isppol,iatom),ndim_max,czero,mat_temp2(:,:),ndim)
+                      & ndim_max,paw_dmft%chipsi(:,:,ik,isppol,iatom),ndim_max,czero,mat_temp2(:,:,1),ndim)
 
        else if (opt == 4) then
 
@@ -881,18 +901,23 @@ call nvtxStartRange("downfold_oper",20)
                       & ndim_max,paw_dmft%chipsi(:,:,ik,isppol,iatom),ndim_max,czero,mat_temp3(:,:),ndim)
 
          call abi_xgemm("n","n",ndim,ndim,ndim,cone,mat_temp3(:,:),ndim,&
-                      & mat_temp3(:,:),ndim,czero,mat_temp2(:,:),ndim)
+                      & mat_temp3(:,:),ndim,czero,mat_temp2(:,:,1),ndim)
 
        end if ! opt
 
          if(l_gpu_option == ABI_GPU_DISABLED) then
-           oper%matlu(iatom)%mat(:,:,isppol) = oper%matlu(iatom)%mat(:,:,isppol) + mat_temp2(:,:)*oper%wtk(ik)
+           do idat=1,ndat
+           oper%matlu(iatom)%mat(:,:,idat+(isppol-1)*ndat) = oper%matlu(iatom)%mat(:,:,idat+(isppol-1)*ndat) + mat_temp2(:,:,idat)*oper%wtk(ik)
+           end do ! ndat
          else if(l_gpu_option == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-           !$OMP TARGET PARALLEL DO COLLAPSE(2) MAP(to:mat,mat_temp2) PRIVATE(im,im1)
-           do im=1,ndim
-             do im1=1,ndim
-               mat(im,im1,isppol) = mat(im,im1,isppol) + mat_temp2(im,im1)*wtk(ik)
+           !$OMP TARGET TEAMS DISTRIBUTE MAP(to:mat,mat_temp2) PRIVATE(idat)
+           do idat=1,ndat
+             !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(im,im1)
+             do im=1,ndim
+               do im1=1,ndim
+                 mat(im,im1,idat+(isppol-1)*ndat) = mat(im,im1,idat+(isppol-1)*ndat) + mat_temp2(im,im1,idat)*wtk(ik)
+               end do
              end do
            end do
 #endif
