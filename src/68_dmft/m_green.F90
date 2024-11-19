@@ -1147,7 +1147,6 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
 
  if(green%oper(1)%has_opermatlu==0) optoper_ksloc=1
  if(green%oper(1)%has_opermatlu==1) optoper_ksloc=3
- call init_oper_ndat(paw_dmft,green_oper_ndat,green%nw,opt_ksloc=optoper_ksloc)
 
 
 
@@ -1184,6 +1183,11 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
      green%oper(ifreq)%shiftk = shift
    end if
  end do ! ifreq
+ call init_oper_ndat(paw_dmft,green_oper_ndat,green%nw,nkpt=green%oper(1)%nkpt,opt_ksloc=optoper_ksloc)
+ if (green%oper(1)%has_operks == 0) then
+   green_oper_ndat%paral  = 1
+   green_oper_ndat%shiftk = shift
+ end if
  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
