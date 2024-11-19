@@ -240,9 +240,9 @@ subroutine destroy_oper(oper)
 
  if (oper%has_opermatlu == 1) then
    call destroy_matlu(oper%matlu(:),oper%natom)
- else
-   message = " Operator is not defined to be used in destroy_oper"
-   ABI_ERROR(message)
+ !else
+ !  message = " Operator is not defined to be used in destroy_oper"
+ !  ABI_ERROR(message)
  end if ! has_opermatlu=1
 
  if (allocated(oper%matlu)) then

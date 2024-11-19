@@ -228,7 +228,7 @@ subroutine zero_matlu(matlu,natom,onlynondiag,maxoffdiag)
                do im=1,ndim
                  if (im /= im1) then
                    if (abs(matlu(iatom)%mat(im+(ispinor-1)*ndim,im1+(ispinor1-1)*ndim,isppol)) > maxoffdiag_) &
-                       & maxoffdiag_ = abs(matlu(iatom)%mat(im+(ispinor-1)*ndim,im1+(ispinor1-1)*ndim,isppol))
+                      & maxoffdiag_ = abs(matlu(iatom)%mat(im+(ispinor-1)*ndim,im1+(ispinor1-1)*ndim,isppol))
                    matlu(iatom)%mat(im+(ispinor-1)*ndim,im1+(ispinor1-1)*ndim,isppol) = czero
                  end if
                end do ! im
@@ -2279,7 +2279,7 @@ end subroutine add_matlu
    write(message,'(3x,2a,e12.4,a,e12.4,6a)') ch10,&
     & ' Occupation matrix is non diagonal : the maximum off-diag part ',maxoffdiag,' is larger than',tol,ch10,&
     & "The corresponding non diagonal elements will be neglected in the Weiss/Hybridization functions",ch10,&
-    & "(Except if dmft_solv=8,9, or dmft_solv=6,7 and dmftctqmc_triqs_off_diag=true, &
+    & "(Except if dmft_solv=8,9, or dmft_solv=6,7 and dmftctqmc_triqs_orb_off_diag/spin_off_diag=true, &
     & where these elements are taken into account)",ch10,"This is an approximation."
    ABI_WARNING(message)
  else
