@@ -268,29 +268,29 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  if (paw_dmft%dmftctqmc_basis == 1) then
    if (nondiaglevels .or. useylm == 1) then
      opt_diag = 1
-     write(message,'(3a)') ch10, "   == Hamiltonian in local basis is non diagonal: diagonalize it",ch10
+     write(message,'(3a)') ch10,"   == Hamiltonian in local basis is non diagonal: diagonalize it",ch10
    else
      opt_diag = 0
-     write(message,'(5a)') ch10, "   == Hamiltonian in local basis is diagonal in the Slm basis ",ch10, &
+     write(message,'(5a)') ch10,"   == Hamiltonian in local basis is diagonal in the Slm basis ",ch10, &
         & "      CTQMC will use this basis",ch10
    end if ! nondiaglevels or useylm
  else if (paw_dmft%dmftctqmc_basis == 2) then
    if (nondiaglevels .or. useylm == 1) then
-     write(message,'(7a)') ch10, "   == Hamiltonian in local basis is non diagonal",ch10, &
+     write(message,'(7a)') ch10,"   == Hamiltonian in local basis is non diagonal",ch10, &
        & "   == According to dmftctqmc_basis: diagonalize density matrix",ch10, &
        & "   == Warning : Check that the Hamiltonian is diagonal !",ch10
      opt_diag = 2
    else
-     write(message,'(5a)') ch10, "   == Hamiltonian in local basis is diagonal in the Slm basis ",ch10, &
+     write(message,'(5a)') ch10,"   == Hamiltonian in local basis is diagonal in the Slm basis ",ch10, &
         & "      CTQMC will use this basis",ch10
      opt_diag = 0
    end if ! nondiaglevels or useylm or triqs
  else if (paw_dmft%dmftctqmc_basis == 0) then
    if (nondiaglevels) then
-     write(message,'(4a)') ch10, "   == Hamiltonian in local basis is non diagonal",ch10, &
+     write(message,'(4a)') ch10,"   == Hamiltonian in local basis is non diagonal",ch10, &
        & "   == According to dmftctqmc_basis: keep this non diagonal basis for the calculation"
    else
-     write(message,'(5a)') ch10, "   == Hamiltonian in local basis is diagonal in the Slm basis ",ch10, &
+     write(message,'(5a)') ch10,"   == Hamiltonian in local basis is diagonal in the Slm basis ",ch10, &
        & "      CTQMC will use this basis",ch10
    end if ! nondiaglevels
    opt_diag = 0
@@ -337,7 +337,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
    ! Print atomic energy levels in Ylm basis
    ! --------------------------------
    if (pawprtvol >= 3) then
-     write(message,'(2a)') ch10, " == Print Energy levels in Ylm basis"
+     write(message,'(2a)') ch10," == Print Energy levels in Ylm basis"
      call wrtout(std_out,message,'COLL')
      call print_matlu(energy_level%matlu(:),natom,1)
    end if ! pawprtvol>=3
@@ -419,7 +419,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
    ! Print density matrix before diagonalization
    ! -------------------------------------------
    if (pawprtvol >= 3) then
-     write(message,'(a,2x,a)') ch10,        " == Density Matrix before diagonalization ="
+     write(message,'(a,2x,a)') ch10," == Density Matrix before diagonalization ="
      call wrtout(std_out,message,'COLL')
      !MGNAG: This call is wrong if green has intent(out), now we use intent(inout)
      call print_matlu(green%occup%matlu(:),natom,1)
@@ -458,8 +458,8 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
    ABI_MALLOC(hu_for_s,(ntypat))
        ! Usefull to compute interaction energy for U=1 J=J/U when U=0.
    call copy_hu(ntypat,hu(:),hu_for_s(:))
-   f4of2_sla = -one
-   f6of2_sla = -one
+   f4of2_sla = - one
+   f6of2_sla = - one
    do itypat=1,ntypat
      ndim = 2*hu(itypat)%lpawu + 1
      ABI_MALLOC(vee,(ndim,ndim,ndim,ndim))
@@ -3420,13 +3420,13 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
  ! Gauss-Legendre grid), since we need it for the rest of the SCF calculation
  ntot = ngauss*(nlam-1) + 1
 
- if (paw_dmft%dmft_integral == 0) ntot = 1
+ if (paw_dmft%dmft_integral == 0 .or. paw_dmft%dmftctqmc_triqs_entropy == 0) ntot = 1
 
  ABI_MALLOC(lam_list,(ntot))
  lam_list(ntot) = one
 
  ! Prepare Gauss-Legendre quadrature for thermodynamic integration over U
- if (paw_dmft%dmft_integral == 1) then
+ if (paw_dmft%dmft_integral == 1 .and. paw_dmft%dmftctqmc_triqs_entropy == 1) then
 
    ABI_MALLOC(tweights,(ngauss))
    ABI_MALLOC(tpoints,(ngauss))
@@ -3544,7 +3544,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
                         & vee_ptr,levels_ptr,mself_1_ptr,mself_2_ptr,eu_ptr,occ_ptr)
 #endif
 
-     if (paw_dmft%dmft_integral == 1 .and. ilam < ntot) then
+     if (paw_dmft%dmft_integral == 1 .and. ilam < ntot .and. paw_dmft%dmftctqmc_triqs_entropy == 1) then
        i = mod(ilam,ngauss)
        if (i == 0) i = ngauss
        green%integral = green%integral + tweights(i)*eu*dx*half
@@ -3554,7 +3554,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
        call wrtout(std_out,message,'COLL')
      end if ! dmft_integral=1 and ilam<Ntot
 
-     if (paw_dmft%dmft_integral == 1 .and. ilam == ntot-1) then
+     if (paw_dmft%dmft_integral == 1 .and. ilam == ntot-1 .and. paw_dmft%dmftctqmc_triqs_entropy == 1) then
        write(tag,'(i4)') iatom
        write(tag2,'(f13.6)') green%integral
        write(message,*) "Integral of Eu/lambda for atom ",trim(adjustl(tag)),'is: ',trim(adjustl(tag2))
@@ -3658,7 +3658,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
      ABI_MALLOC(jbes,(nleg))
      do ifreq2=1,nwlo
        ifreq = nint((paw_dmft%omega_lo(ifreq2)/(paw_dmft%temp*pi)+one)*half)
-       xx = dble(2*ifreq-1)*pi / two
+       xx = dble(2*ifreq-1) * pi / two
        if (xx <= dble(100)) then
          call sbf8(nleg,xx,jbes(:))
        end if
@@ -3815,7 +3815,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
    end if ! leg_measure
 
    ABI_FREE(gtau)
-   ABI_FREE(gl)
+   ABI_SFREE(gl)
 
  end do ! iatom
 
@@ -4112,10 +4112,10 @@ subroutine fourier_inv(paw_dmft,nmoments,ntau,matlu_tau,oper_freq,moments)
  type(oper_type), intent(in) :: oper_freq(paw_dmft%dmft_nwlo),moments(nmoments)
  type(matlu_type), intent(inout) :: matlu_tau(paw_dmft%natom)
 !Local variables ------------------------------
- integer :: i,iatom,ifreq,im,im1,isppol,itau,lpawu
+ integer :: i,iatom,ifreq,im,im1,isppol,itau,j,lpawu
  integer :: myproc,natom,ndim,nspinor,nsppol,nwlo,tndim
- real(dp) :: beta,minusomegatau,tau
- complex(dpc) :: omega,sumterm
+ real(dp) :: beta,omegatau,tau
+ complex(dpc) :: fac,omega,sumterm
  complex(dpc), allocatable :: omega_fac(:)
 ! ************************************************************************
 
@@ -4133,10 +4133,6 @@ subroutine fourier_inv(paw_dmft,nmoments,ntau,matlu_tau,oper_freq,moments)
  do ifreq=1,int(nwlo*half)
    if (paw_dmft%distrib%procf(ifreq) /= myproc) cycle
    omega = cmplx(zero,paw_dmft%omega_lo(ifreq),kind=dp)
-   omega_fac(1) = - two * paw_dmft%temp / omega
-   do i=2,nmoments
-     omega_fac(i) = omega_fac(i-1) / omega
-   end do ! i
    do i=1,nmoments
      do iatom=1,natom
        lpawu = paw_dmft%lpawu(iatom)
@@ -4145,7 +4141,12 @@ subroutine fourier_inv(paw_dmft,nmoments,ntau,matlu_tau,oper_freq,moments)
        tndim = ndim * nspinor
        do itau=1,ntau
          tau = dble(itau-1) * beta / dble(ntau-1)
-         minusomegatau = mod(-paw_dmft%omega_lo(ifreq)*tau,two*pi)
+         omegatau = mod(paw_dmft%omega_lo(ifreq)*tau,two*pi)
+         fac = two * paw_dmft%temp * exp(-j_dpc*omegatau)
+         omega_fac(1) = - fac / omega
+         do j=2,nmoments
+           omega_fac(j) = omega_fac(j-1) / omega
+         end do
          if (ifreq == 1) then
            omega_fac(1) = omega_fac(1) - half
            omega_fac(2) = omega_fac(2) + tau/two - beta/four
@@ -4155,7 +4156,7 @@ subroutine fourier_inv(paw_dmft,nmoments,ntau,matlu_tau,oper_freq,moments)
            do im1=1,tndim
              do im=1,tndim
                sumterm = moments(i)%matlu(iatom)%mat(im,im1,isppol) * omega_fac(i)
-               if (i == 1) sumterm = sumterm + two*paw_dmft%temp* &
+               if (i == 1) sumterm = sumterm + fac* &
                   & oper_freq(ifreq)%matlu(iatom)%mat(im,im1,isppol)
                matlu_tau(iatom)%mat(im+(isppol-1)*ndim,im1+(isppol-1)*ndim,itau) = &
                  & matlu_tau(iatom)%mat(im+(isppol-1)*ndim,im1+(isppol-1)*ndim,itau) + sumterm

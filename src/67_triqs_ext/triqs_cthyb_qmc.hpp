@@ -6,10 +6,10 @@
 #define __TRIQS_CTHYB_QMC_H__
 
 #include <complex>
-#include <triqs/operators/many_body_operator.hpp>
+#include <triqs_cthyb/config.hpp>
 
 using namespace std;
-using triqs::operators::many_body_operator;
+using namespace triqs_cthyb;
 
 extern "C"{
 
@@ -23,11 +23,11 @@ extern "C"{
                           complex<double> *gl, complex<double> *udens, complex<double> *vee, complex<double> *levels,
                           complex<double> *moments_self_1, complex<double> *moments_self_2, double *Eu, double *occ ) ;
 
-    many_body_operator init_Hamiltonian( complex<double> *eps, int nflavor, complex<double> *U, bool orb_off_diag,
-                                         bool spin_off_diag, double lambda, std::vector<string> &labels );
+    many_body_op_t init_Hamiltonian( complex<double> *eps, int nflavor, complex<double> *U, bool orb_off_diag,
+                                     bool spin_off_diag, double lambda, std::vector<string> &labels );
 
-    many_body_operator init_fullHamiltonian( complex<double> *eps, int nflavor, complex<double> *U, bool orb_off_diag,
-                                             bool spin_off_diag, double lambda, std::vector<string> &labels );
+    many_body_op_t init_fullHamiltonian( complex<double> *eps, int nflavor, complex<double> *U, bool orb_off_diag,
+                                         bool spin_off_diag, double lambda, std::vector<string> &labels );
 
     pair<int,int> convert_indexes(int iflavor, bool off_diag, bool spin_off_diag, int ndim);
 

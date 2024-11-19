@@ -1294,7 +1294,9 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        call timab(48,1,tsec)
        call xmpi_sum(buffer1,mpi_enreg%comm_kpt,ierr)
 !      if(mpi_enreg%paral_kgb/=1.and.paw_dmft%use_dmft==1) then
-       if(paw_dmft%use_dmft==1) call xmpi_sum(eknk_nd(:,:,:,:,:),mpi_enreg%comm_kpt,ierr)
+       if(paw_dmft%use_dmft==1) then
+         call xmpi_sum(eknk_nd(:,:,:,:,:),mpi_enreg%comm_kpt,ierr)
+       end if
        call timab(48,2,tsec)
 
 !      Unpack eigen,resid,eknk,enlxnk,grnlnk in buffer1

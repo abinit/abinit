@@ -25,6 +25,7 @@ AC_DEFUN([SD_TRIQS_INIT], [
   sd_triqs_init="unknown"
   sd_triqs_ok="unknown"
   sd_triqs_api_version="unknown"
+  sd_triqs_complex="unknown"
 
   # Set adjustable parameters
   sd_triqs_options="$1"
@@ -71,7 +72,7 @@ AC_DEFUN([SD_TRIQS_INIT], [
   esac
 
   # Declare configure option
-  # TODO: make it switchable for the implicit case 
+  # TODO: make it switchable for the implicit case
   AC_ARG_WITH([triqs],
     [AS_HELP_STRING([--with-triqs],
       [Install prefix of the TRIQS library (e.g. /usr/local).])],
@@ -213,6 +214,12 @@ AC_DEFUN([SD_TRIQS_DETECT], [
           AC_MSG_ERROR([TRIQS API version ${sd_triqs_api_version} not implemented in the build system])
           ;;
       esac
+
+      if test "${sd_triqs_complex}" = "yes"; then
+        AC_DEFINE([HAVE_TRIQS_COMPLEX], 1,
+          [Define to 1 if you have the complex TRIQS version.])
+      fi
+
     else
       if test "${sd_triqs_status}" = "optional" -a \
               "${sd_triqs_init}" = "def"; then
@@ -257,7 +264,7 @@ AC_DEFUN([_SD_TRIQS_CHECK_USE], [
 
   # Check TRIQS C++ API
   AC_MSG_CHECKING([whether the TRIQS library works])
-  AC_LANG_PUSH([C++]) 
+  AC_LANG_PUSH([C++])
   AC_LINK_IFELSE([AC_LANG_PROGRAM(
     [[
 #     include <triqs_cthyb/solver_core.hpp>
@@ -269,6 +276,24 @@ AC_DEFUN([_SD_TRIQS_CHECK_USE], [
     ]])], [sd_triqs_ok="yes"; sd_triqs_api_version="3.4"], [sd_triqs_ok="no"])
   AC_LANG_POP([C++])
   AC_MSG_RESULT([${sd_triqs_ok}])
+
+  # Check if we have the complex version
+  if test "${sd_triqs_ok}" = "yes"; then
+    AC_MSG_CHECKING([whether the TRIQS library supports complex Hamiltonian])
+    AC_LANG_PUSH([C++])
+    AC_LINK_IFELSE([AC_LANG_PROGRAM(
+      [[
+#       include <triqs_cthyb/solver_core.hpp>
+#       include <complex>
+        using namespace triqs_cthyb;
+      ]],
+      [[
+        many_body_op_t H;
+        H += 1i;
+      ]])], [sd_triqs_complex="yes"], [sd_triqs_complex="no"])
+    AC_LANG_POP([C++])
+    AC_MSG_RESULT([${sd_triqs_complex}])
+  fi
 
   # Check old TRIQS C++ API
   if test "${sd_triqs_ok}" != "yes"; then
@@ -286,7 +311,7 @@ AC_DEFUN([_SD_TRIQS_CHECK_USE], [
       ]])], [sd_triqs_ok="yes"; sd_triqs_api_version="2.0"], [sd_triqs_ok="no"])
     AC_LANG_POP([C++])
     AC_MSG_RESULT([${sd_triqs_ok}])
-  fi 
+  fi
 
   # Check even older TRIQS C++ API
   if test "${sd_triqs_ok}" != "yes"; then

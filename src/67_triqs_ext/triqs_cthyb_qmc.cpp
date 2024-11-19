@@ -9,8 +9,6 @@
 #include <triqs_cthyb/solver_core.hpp>
 #include <triqs_cthyb_qmc.hpp>
 
-using namespace triqs_cthyb;
-
 void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spin_off_diag, bool move_shift, bool move_double,
                      bool measure_density_matrix, bool time_invariance, bool use_norm_as_weight,
                      int loc_n_min, int loc_n_max, int seed_a, int seed_b, int num_orbitals, int n_tau,
@@ -31,8 +29,8 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
   int size;
   MPI_Comm_size(comm,&size);
 
-  int therm_tmp = ntherm;
-  if (exists(config_fname)) therm_tmp = ntherm2;
+  int therm = ntherm;
+  if (exists(config_fname)) therm = ntherm2;
 
   // Print information about the Solver Parameters
   if (rank == 0 && verbo > 0) {
@@ -45,7 +43,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
     cout << setw(27) << left << "   Legendre measurement  = " << leg_measure << endl;
     cout << setw(27) << left << "   Ncycles               = " << n_cycles << endl;
     cout << setw(27) << left << "   Cycle length          = " << cycle_length << endl;
-    cout << setw(27) << left << "   Ntherm                = " << therm_tmp << endl;
+    cout << setw(27) << left << "   Ntherm                = " << therm << endl;
     cout << setw(27) << left << "   Seed                  = " << seed_a << " + " << seed_b << " * rank" << endl;
     cout << setw(27) << left << "   Orbital Off-Diag      = " << orb_off_diag << endl;
     cout << setw(27) << left << "   Spin Off-Diag         = " << spin_off_diag << endl;
@@ -69,7 +67,9 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
   }
 
   // Hamiltonian definition
-  many_body_operator H,Hint;
+  many_body_operator Hint;
+  many_body_op_t H;
+
   complex<double> levels_tmp [num_orbitals*num_orbitals] = {0};
   int nblocks,siz_block;
 
@@ -147,13 +147,13 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
   if (rank == 0 && verbo > 0) cout << "   == Solver Parametrization ==	" << endl << endl;
   auto paramCTQMC = solve_parameters_t(H,n_cycles);
 
-  many_body_operator hloc0;
+  many_body_op_t hloc0;
   paramCTQMC.h_loc0 = hloc0;
   paramCTQMC.max_time = -1;
   paramCTQMC.random_name = "";
   paramCTQMC.random_seed = seed_b * rank + seed_a;
   paramCTQMC.length_cycle = cycle_length;
-  paramCTQMC.n_warmup_cycles = therm_tmp;
+  paramCTQMC.n_warmup_cycles = therm;
   paramCTQMC.time_invariance = time_invariance;
 
   // Set initial configuration
@@ -236,7 +236,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
   mpi::mpi_broadcast(verif_histo,comm,0);
   paramCTQMC.performance_analysis = !verif_histo;
   if (verif_histo) {
-    if (rank == 0) cout << "   == Reading previous histogram == " << endl;
+    if (rank == 0 && verbo > 0) cout << "   == Reading previous histogram == " << endl;
     for (int i = 0; i < nblocks; ++i) {
       if (rank != 0) {
         paramCTQMC.hist_insert[labels[i]] = std::vector<double>(nbins_histo);
@@ -355,15 +355,15 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
         }
       }
     }
+  }
 
-    for (int iblock = 0; iblock < nblocks; ++iblock) {
-      for (int tau = 0; tau < n_tau; ++tau) {
-        for (int o = 0; o < siz_block; ++o) {
-          int iflavor = convert_indexes_back(iblock,o,orb_off_diag,spin_off_diag,ndim);
-          for (int oo = 0; oo < siz_block; ++oo) {
-            int iflavor1 = convert_indexes_back(iblock,oo,orb_off_diag,spin_off_diag,ndim);
-            gtau[tau+iflavor*n_tau+iflavor1*num_orbitals*n_tau] = (*solver.G_tau)[iblock].data()(tau,o,oo);
-          }
+  for (int iblock = 0; iblock < nblocks; ++iblock) {
+    for (int tau = 0; tau < n_tau; ++tau) {
+      for (int o = 0; o < siz_block; ++o) {
+        int iflavor = convert_indexes_back(iblock,o,orb_off_diag,spin_off_diag,ndim);
+        for (int oo = 0; oo < siz_block; ++oo) {
+          int iflavor1 = convert_indexes_back(iblock,oo,orb_off_diag,spin_off_diag,ndim);
+          gtau[tau+iflavor*n_tau+iflavor1*num_orbitals*n_tau] = (*solver.G_tau)[iblock].data()(tau,o,oo);
         }
       }
     }
@@ -373,7 +373,6 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
 
   // Report G(l)
   if (leg_measure) {
-
     for (int iblock = 0; iblock < nblocks; ++iblock) {
       for (int l = 0; l < n_l; ++l) {
         for (int o = 0; o < siz_block; ++o) {
@@ -425,7 +424,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
 
     if (!leg_measure) {   // Get moments of the self-energy
 
-      many_body_operator comm,comm2,Sinf_op,S1_op;
+      many_body_operator commut,commut2,Sinf_op,S1_op;
 
       auto Sinf_mat = matrix_t(siz_block,siz_block);
 
@@ -434,10 +433,10 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
           int iflavor = convert_indexes_back(iblock,o,orb_off_diag,spin_off_diag,ndim);
           for (int oo = 0; oo < siz_block; ++oo) {
             int iflavor1 = convert_indexes_back(iblock,oo,orb_off_diag,spin_off_diag,ndim);
-            comm = Hint*c(labels[iblock],o) - c(labels[iblock],o)*Hint;
-            Sinf_op = -comm*c_dag(labels[iblock],oo) - c_dag(labels[iblock],oo)*comm;
-            comm2 = c_dag(labels[iblock],oo)*Hint - Hint*c_dag(labels[iblock],oo);
-            S1_op = comm2*comm + comm*comm2;
+            commut = Hint*c(labels[iblock],o) - c(labels[iblock],o)*Hint;
+            Sinf_op = - commut*c_dag(labels[iblock],oo) - c_dag(labels[iblock],oo)*commut;
+            commut2 = c_dag(labels[iblock],oo)*Hint - Hint*c_dag(labels[iblock],oo);
+            S1_op = commut2*commut + commut*commut2;
             auto Sinf = trace_rho_op(rho,Sinf_op,h_loc_diag);
             auto S1 = trace_rho_op(rho,S1_op,h_loc_diag);
             moments_self_1[iflavor+iflavor1*num_orbitals] = Sinf;
@@ -464,43 +463,57 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
 /********************************************************/
 
 // Build density-density Hamiltonian
-many_body_operator init_Hamiltonian(complex<double> *eps, int nflavor, complex<double> *U,
-                                    bool orb_off_diag, bool spin_off_diag, double lambda,
-                                    std::vector<string> &labels) {
+many_body_op_t init_Hamiltonian(complex<double> *eps, int nflavor, complex<double> *U,
+                                bool orb_off_diag, bool spin_off_diag, double lambda,
+                                std::vector<string> &labels) {
 
-  many_body_operator H;
+  many_body_op_t H;
   int iblock,iblock1,o,oo;
 
   for (int i = 0; i < nflavor; ++i) {
     tie(iblock,o) = convert_indexes(i,orb_off_diag,spin_off_diag,nflavor/2);
     for (int j = 0; j < nflavor; ++j) {
       tie(iblock1,oo) = convert_indexes(j,orb_off_diag,spin_off_diag,nflavor/2);
+#if defined HAVE_TRIQS_COMPLEX
       H += 0.5 * lambda * U[i+j*nflavor] * n(labels[iblock],o) * n(labels[iblock1],oo);
       H += eps[i+j*nflavor] * c_dag(labels[iblock],o) * c(labels[iblock1],oo);
+#else
+      H += 0.5 * lambda * U[i+j*nflavor].real() * n(labels[iblock],o) * n(labels[iblock1],oo);
+      H += eps[i+j*nflavor].real() * c_dag(labels[iblock],o) * c(labels[iblock1],oo);
+#endif
     }
   }
   return H;
 }
 
 // Build full Hamiltonian
-many_body_operator init_fullHamiltonian(complex<double> *eps, int nflavor, complex<double> *U,
-                                        bool orb_off_diag, bool spin_off_diag, double lambda,
-                                        std::vector<string> &labels) {
+many_body_op_t init_fullHamiltonian(complex<double> *eps, int nflavor, complex<double> *U,
+                                    bool orb_off_diag, bool spin_off_diag, double lambda,
+                                    std::vector<string> &labels) {
 
-  many_body_operator H;
+  many_body_op_t H;
   int iblock,iblock1,iblock2,iblock3,o,oo,ooo,oooo;
 
   for (int i = 0; i < nflavor; ++i) {
     tie(iblock,o) = convert_indexes(i,orb_off_diag,spin_off_diag,nflavor/2);
     for (int j = 0; j < nflavor; ++j) {
       tie(iblock1,oo) = convert_indexes(j,orb_off_diag,spin_off_diag,nflavor/2);
+#if defined HAVE_TRIQS_COMPLEX
       H += eps[i+j*nflavor] * c_dag(labels[iblock],o) * c(labels[iblock1],oo);
+#else
+      H += eps[i+j*nflavor].real() * c_dag(labels[iblock],o) * c(labels[iblock1],oo);
+#endif
       for (int k = 0; k < nflavor; ++k) {
         tie(iblock2,ooo) = convert_indexes(k,orb_off_diag,spin_off_diag,nflavor/2);
         for (int l = 0; l < nflavor; ++l) {
           tie(iblock3,oooo) = convert_indexes(l,orb_off_diag,spin_off_diag,nflavor/2);
+#if defined HAVE_TRIQS_COMPLEX
           H += 0.5 * lambda * U[i+j*nflavor+k*nflavor*nflavor+l*nflavor*nflavor*nflavor] * c_dag(labels[iblock],o) *
                c_dag(labels[iblock1],oo) * c(labels[iblock3],oooo) * c(labels[iblock2],ooo);
+#else
+          H += 0.5 * lambda * U[i+j*nflavor+k*nflavor*nflavor+l*nflavor*nflavor*nflavor].real() * c_dag(labels[iblock],o) *
+               c_dag(labels[iblock1],oo) * c(labels[iblock3],oooo) * c(labels[iblock2],ooo);
+#endif
         }
       }
     }

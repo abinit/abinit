@@ -835,7 +835,7 @@ CONTAINS  !=====================================================================
          ABI_MALLOC(pawtab(itypat)%proj,(meshsz))
          pawtab(itypat)%proj(1:meshsz) = pawtab(itypat)%phi(1:meshsz,pawtab(itypat)%lnproju(dmft_proj(itypat)))
        else  ! read orbital from file
-         tmpfil = 'proj_'//adjustl(tag)
+         tmpfil = 'dmft_proj_'//adjustl(tag)
          write(message,*) "Using wavefunction from file ",tmpfil
          call wrtout(std_out,message,"COLL")
          inquire(file=trim(tmpfil),exist=lexist)

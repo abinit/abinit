@@ -1355,6 +1355,9 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
        call zero_matlu(self%oper(ifreq)%matlu(:),natom)
      end if ! dmft_rslf
    end do ! ifreq
+   if (paw_dmft%dmft_rslf == 0 .and. self%has_moments == 1) then
+     call copy_matlu(self%hdc%matlu(:),self%moments(1)%matlu(:),natom)
+   end if
  end if ! optrw=0
 
 ! write(std_out,*) "optrw,use_fixed_self,istep,iter,istep_imp,iter_imp"
