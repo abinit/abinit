@@ -2459,6 +2459,9 @@ contains
    end if
 
    !Apply ASR
+   !NOTE: If eta is finite the IFCs are no longer Hermitian, hence the standard ASR 
+   !introduces artifacts in the response functions. Better not to impose it.
+  
 !   if (omega(1) < tol12) then
 !     call asrw0(delta_asrw0,ifcmat,natom,0) 
 !     call asrw0(delta_asrw0_fm,ifcmat_fm,natom,0) 
@@ -3478,7 +3481,7 @@ subroutine phonon_green(amu,eigvec,eigvec_fm,eta_phongreen,ifc,ifc_fm,invmagsus,
 !scalars
  integer :: iat1,iat2,idir1,idir2,icol,ier,imode,info,irow,lwork,mpdim,pdim
  real(dp) :: mfac1, mfac2
- complex(dpc) :: cplx_eta
+ complex(dpc) :: cplx_eta, cplx_phononspec
 !arrays
  integer, allocatable :: ipiv(:)
  real(dp) :: dum(2,0) 
@@ -3544,10 +3547,12 @@ subroutine phonon_green(amu,eigvec,eigvec_fm,eta_phongreen,ifc,ifc_fm,invmagsus,
  phongreen=work1
 
 !Finally extract the spectral function from the trace
+! cplx_phononspec=cmplx(0.d0,0.d0,16)
  do irow= 1, pdim
-   mode_phonspec(irow)= -two*omega/pi * aimag(work1(irow,irow))
-!   mode_phonspec(irow)= -one/pi * aimag(two*cmplx(omega,eta_phongreen)*work1(irow,irow))
+   mode_phonspec(irow)= -two/pi * aimag(cmplx(omega,eta_phongreen,16)*phongreen(irow,irow))
+!   cplx_phononspec= cplx_phononspec + phongreen(irow,irow)
  end do
+!   phonspec=-two/pi * aimag(cmplx(omega,eta_phongreen,16)*cplx_phononspec)
  phonspec= sum(mode_phonspec(:))
 
 !Diagonalize the Dynamical matrix
@@ -3758,7 +3763,7 @@ subroutine phonon_green(amu,eigvec,eigvec_fm,eta_phongreen,ifc,ifc_fm,invmagsus,
 
 !Finally extract the generalized spectral function
  do irow= 1, mpdim
-   mode_magphonspec(irow)= -two*omega/pi * aimag(mass_magphongreen(irow,irow))
+   mode_magphonspec(irow)= -two/pi * aimag(cmplx(omega,eta_phongreen,16)*mass_magphongreen(irow,irow))
  end do
  magphonspec= sum(mode_magphonspec(:))
 
