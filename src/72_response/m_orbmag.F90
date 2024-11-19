@@ -156,6 +156,7 @@ module m_orbmag
   private :: orbmag_output
   private :: dterm_alloc
   private :: dterm_free
+  private :: rt_dkdr
 
 CONTAINS  !========================================================================================
 !!***
@@ -2466,12 +2467,12 @@ subroutine dterm_ZA0(atindx,cplex_dij,dterm,dtset,paw_an,pawang,pawrad,pawtab,qp
   !scalars
   integer :: adir,gs1,gs2,iat,iatom,ij_size,ilm,itypat,jlm
   integer :: klmn,klm,kln,lmn2_size,mesh_size,ndij,ngnt,sdir
-  real(dp) :: me_kbs,me_k2bs
+  real(dp) :: me_kbs,me_k2bs,rt
   complex(dpc) :: cme
   real(dp), parameter :: HalfFineStruct2=half*FineStructureConstant2
   !arrays
   character(len=500) :: msg
-  real(dp),allocatable :: dv1dr(:),dyadic(:,:,:)
+  real(dp),allocatable :: dv1dr(:),dyadic(:,:,:),rt_dkdr(:)
   real(dp),allocatable :: v1(:),zk1(:)
   real(dp),allocatable :: za0(:,:,:),za0_kernel(:),za0_rad(:,:)
 !--------------------------------------------------------------------
@@ -2498,6 +2499,8 @@ subroutine dterm_ZA0(atindx,cplex_dij,dterm,dtset,paw_an,pawang,pawrad,pawtab,qp
     ndij=dterm%ndij
     ij_size=pawtab(itypat)%ij_size
     mesh_size=pawtab(itypat)%mesh_size
+
+    rt=dtset%znucl(itypat)*FineStructureConstant2
     
     ABI_MALLOC(v1,(mesh_size))
     call pawv1(mesh_size,dtset%nspden,pawang,pawrad(itypat),&
@@ -2515,21 +2518,27 @@ subroutine dterm_ZA0(atindx,cplex_dij,dterm,dtset,paw_an,pawang,pawrad,pawtab,qp
     ! za0_rad(2,kln) = 1/4 a^2 int ui K^2 V' r uj dr
     ABI_MALLOC(za0_rad,(2,ij_size))
     ABI_MALLOC(za0_kernel,(mesh_size))
+    ABI_MALLOC(rt_dkdr,(mesh_size))
+    rt_dkdr = two*rt/(rt+two*pawrad(itypat)%rad(1:mesh_size))**2
+    rt_dkdr=rt_dkdr/four_pi
     do kln = 1, ij_size
    
       za0_kernel= pawtab(itypat)%phiphj(1:mesh_size,kln)*zk1(1:mesh_size)
       call simp_gen(za0_rad(1,kln),za0_kernel,pawrad(itypat))
       
-      za0_kernel= pawtab(itypat)%phiphj(1:mesh_size,kln)*&
-        & zk1(1:mesh_size)*zk1(1:mesh_size)*&
-        & dv1dr(1:mesh_size)*pawrad(itypat)%rad(1:mesh_size)
+!!      za0_kernel= pawtab(itypat)%phiphj(1:mesh_size,kln)*&
+!!        & zk1(1:mesh_size)*zk1(1:mesh_size)*&
+!!        & dv1dr(1:mesh_size)*pawrad(itypat)%rad(1:mesh_size)
+      za0_kernel= pawtab(itypat)%phiphj(1:mesh_size,kln)*rt_dkdr
       call simp_gen(za0_rad(2,kln),za0_kernel,pawrad(itypat))
-      za0_rad(2,kln) = za0_rad(2,kln)*half*HalfFineStruct2
+!!      za0_rad(2,kln) = za0_rad(2,kln)*half*HalfFineStruct2
+      za0_rad(2,kln) = za0_rad(2,kln)*half
     
     end do
     ABI_FREE(zk1)
     ABI_FREE(dv1dr)
     ABI_FREE(za0_kernel)
+    ABI_FREE(rt_dkdr)
     
     ! make (1-\hat{r}\hat{r}) dyadic integrals
     gs1=size(pawang%gntselect,1)
@@ -2785,5 +2794,71 @@ subroutine local_fermie(dtset,eigen0,fermie,mpi_enreg,occ)
 
 end subroutine local_fermie
 !!***
+
+!!****f* ABINIT/rt_dkdr
+!! NAME
+!! rt_dkdr
+!!
+!! FUNCTION
+!! model ZORA dK/dr using -Z/r potential
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2024 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!  mesh_size
+!!  rad(mesh_size)
+!!  z=atomic number
+!!
+!! OUTPUT
+!!  dkdr(mesh_size) 
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!!  this routine is parallelized over kpts only, not bands
+!!
+!! PARENTS
+!!      m_orbmag
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine rt_dkdr(dkdr,mesh_size,rad,z)
+
+  !Arguments ------------------------------------
+  !scalars
+  integer,intent(in) :: mesh_size
+  real(dp),intent(in) :: z
+
+  !arrays
+  real(dp),intent(in) :: rad(mesh_size)
+  real(dp), intent(out) :: dkdr(mesh_size)
+
+  !Local variables -------------------------
+  !scalars
+  integer :: ii
+  real(dp) :: rr,rt
+
+  !arrays
+
+!--------------------------------------------------------------------
+
+
+  rt=z*FineStructureConstant2
+  dkdr = two*rt/(rt+2*rad)**2
+  
+end subroutine rt_dkdr
+!!***
+
+
+
 
 end module m_orbmag
