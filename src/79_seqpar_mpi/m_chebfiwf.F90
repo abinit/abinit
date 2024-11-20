@@ -329,22 +329,22 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  end if
 
 !Memory info
-! if ( prtvol >= 3 ) then
-!   if (l_mpi_enreg%paral_kgb == 1) then
-!     total_spacedim = l_icplx*l_npw*l_nspinor
-!     call xmpi_sum(total_spacedim,l_mpi_enreg%comm_bandspinorfft,ierr)
-!   else
-!     total_spacedim = 0
-!   end if
-!   chebfiMem = chebfi_memInfo(nband,l_icplx*l_npw*l_nspinor,space,l_mpi_enreg%paral_kgb, &
-!&                             total_spacedim,l_mpi_enreg%bandpp) !blockdim
-!   localMem = (l_npw+2*l_npw*l_nspinor+2*nband)*kind(1.d0) !blockdim
-!   write(std_out,'(1x,A,F10.6,1x,A)') "Each MPI process calling chebfi should need around ", &
-!   (localMem+sum(chebfiMem))/1e9,"GB of peak memory as follows :"
-!   write(std_out,'(4x,A,F10.6,1x,A)') "Permanent memory in chebfiwf : ",(localMem)/1e9,"GB"
-!   write(std_out,'(4x,A,F10.6,1x,A)') "Permanent memory in m_chebfi : ",(chebfiMem(1))/1e9,"GB"
-!   write(std_out,'(4x,A,F10.6,1x,A)') "Temporary memory in m_chebfi : ",(chebfiMem(2))/1e9,"GB"
-! end if
+ if ( prtvol >= 3 ) then
+   if (l_mpi_enreg%paral_kgb == 1) then
+     total_spacedim = l_icplx*l_npw*l_nspinor
+     call xmpi_sum(total_spacedim,l_mpi_enreg%comm_bandspinorfft,ierr)
+   else
+     total_spacedim = 0
+   end if
+   chebfiMem = chebfi_memInfo(nband,l_icplx*l_npw*l_nspinor,space,l_mpi_enreg%paral_kgb, &
+&                             total_spacedim,l_mpi_enreg%bandpp) !blockdim
+   localMem = (l_npw+2*l_npw*l_nspinor+2*nband)*kind(1.d0) !blockdim
+   write(std_out,'(1x,A,F10.6,1x,A)') "Each MPI process calling chebfi should need around ", &
+   (localMem+sum(chebfiMem))/1e9,"GB of peak memory as follows :"
+   write(std_out,'(4x,A,F10.6,1x,A)') "Permanent memory in chebfiwf : ",(localMem)/1e9,"GB"
+   write(std_out,'(4x,A,F10.6,1x,A)') "Permanent memory in m_chebfi : ",(chebfiMem(1))/1e9,"GB"
+   write(std_out,'(4x,A,F10.6,1x,A)') "Temporary memory in m_chebfi : ",(chebfiMem(2))/1e9,"GB"
+ end if
 
 #ifdef HAVE_OPENMP_OFFLOAD
  !$OMP TARGET ENTER DATA MAP(to:cg,eig,resid) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
