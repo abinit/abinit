@@ -2028,8 +2028,8 @@ P          mk1mem12        64
          ecut(hartree)=      4.000   => boxcut(ratio)=   2.00513
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/testf_gcc47/mverstra_7.7.1-public/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/testf_gcc47/mverstra_7.7.1-public/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/testf_gcc47/mverstra_7.7.1-public/tests/Pspdir/PseudosTM_pwteter/22ti.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/testf_gcc47/mverstra_7.7.1-public/tests/Pspdir/PseudosTM_pwteter/22ti.pspnc
 -  Troullier-Martins psp for element  Ti        Thu Oct 27 17:33:40 EDT 1994
 - 22.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3718,8 +3718,8 @@ P newkpt: treating     10 bands with npw=      90 for ikpt=  13 by node    0
          ecut(hartree)=      4.000   => boxcut(ratio)=   1.79639
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/testf_gcc47/mverstra_7.7.1-public/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/testf_gcc47/mverstra_7.7.1-public/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/testf_gcc47/mverstra_7.7.1-public/tests/Pspdir/PseudosTM_pwteter/22ti.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/testf_gcc47/mverstra_7.7.1-public/tests/Pspdir/PseudosTM_pwteter/22ti.pspnc
 -  Troullier-Martins psp for element  Ti        Thu Oct 27 17:33:40 EDT 1994
 - 22.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5911,8 +5911,8 @@ P newkpt: treating     10 bands with npw=      91 for ikpt=  40 by node    0
          ecut(hartree)=      4.000   => boxcut(ratio)=   1.88166
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/testf_gcc47/mverstra_7.7.1-public/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/testf_gcc47/mverstra_7.7.1-public/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/testf_gcc47/mverstra_7.7.1-public/tests/Pspdir/PseudosTM_pwteter/22ti.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/testf_gcc47/mverstra_7.7.1-public/tests/Pspdir/PseudosTM_pwteter/22ti.pspnc
 -  Troullier-Martins psp for element  Ti        Thu Oct 27 17:33:40 EDT 1994
 - 22.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -7929,8 +7929,8 @@ P newkpt: treating     10 bands with npw=      91 for ikpt=  20 by node    0
          ecut(hartree)=      4.000   => boxcut(ratio)=   1.80076
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/testf_gcc47/mverstra_7.7.1-public/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/testf_gcc47/mverstra_7.7.1-public/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/testf_gcc47/mverstra_7.7.1-public/tests/Pspdir/PseudosTM_pwteter/22ti.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/testf_gcc47/mverstra_7.7.1-public/tests/Pspdir/PseudosTM_pwteter/22ti.pspnc
 -  Troullier-Martins psp for element  Ti        Thu Oct 27 17:33:40 EDT 1994
 - 22.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -10190,8 +10190,8 @@ P newkpt: treating     10 bands with npw=      91 for ikpt=  40 by node    0
          ecut(hartree)=      4.000   => boxcut(ratio)=   2.00513
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/testf_gcc47/mverstra_7.7.1-public/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/testf_gcc47/mverstra_7.7.1-public/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/testf_gcc47/mverstra_7.7.1-public/tests/Pspdir/PseudosTM_pwteter/22ti.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/testf_gcc47/mverstra_7.7.1-public/tests/Pspdir/PseudosTM_pwteter/22ti.pspnc
 -  Troullier-Martins psp for element  Ti        Thu Oct 27 17:33:40 EDT 1994
 - 22.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -14244,8 +14244,8 @@ P newkpt: treating     10 bands with npw=      84 for ikpt=  36 by node    0
          ecut(hartree)=      4.000   => boxcut(ratio)=   1.79639
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/testf_gcc47/mverstra_7.7.1-public/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/testf_gcc47/mverstra_7.7.1-public/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/testf_gcc47/mverstra_7.7.1-public/tests/Pspdir/PseudosTM_pwteter/22ti.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/testf_gcc47/mverstra_7.7.1-public/tests/Pspdir/PseudosTM_pwteter/22ti.pspnc
 -  Troullier-Martins psp for element  Ti        Thu Oct 27 17:33:40 EDT 1994
 - 22.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -16594,8 +16594,8 @@ P newkpt: treating     10 bands with npw=      95 for ikpt=  50 by node    0
          ecut(hartree)=      4.000   => boxcut(ratio)=   1.88166
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/testf_gcc47/mverstra_7.7.1-public/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/testf_gcc47/mverstra_7.7.1-public/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/testf_gcc47/mverstra_7.7.1-public/tests/Pspdir/PseudosTM_pwteter/22ti.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/testf_gcc47/mverstra_7.7.1-public/tests/Pspdir/PseudosTM_pwteter/22ti.pspnc
 -  Troullier-Martins psp for element  Ti        Thu Oct 27 17:33:40 EDT 1994
 - 22.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -18944,8 +18944,8 @@ P newkpt: treating     10 bands with npw=      95 for ikpt=  50 by node    0
          ecut(hartree)=      4.000   => boxcut(ratio)=   1.80076
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/testf_gcc47/mverstra_7.7.1-public/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/testf_gcc47/mverstra_7.7.1-public/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/testf_gcc47/mverstra_7.7.1-public/tests/Pspdir/PseudosTM_pwteter/22ti.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/testf_gcc47/mverstra_7.7.1-public/tests/Pspdir/PseudosTM_pwteter/22ti.pspnc
 -  Troullier-Martins psp for element  Ti        Thu Oct 27 17:33:40 EDT 1994
 - 22.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -21294,8 +21294,8 @@ P newkpt: treating     10 bands with npw=      95 for ikpt=  50 by node    0
          ecut(hartree)=      4.000   => boxcut(ratio)=   2.00513
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/testf_gcc47/mverstra_7.7.1-public/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/testf_gcc47/mverstra_7.7.1-public/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/testf_gcc47/mverstra_7.7.1-public/tests/Pspdir/PseudosTM_pwteter/22ti.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/testf_gcc47/mverstra_7.7.1-public/tests/Pspdir/PseudosTM_pwteter/22ti.pspnc
 -  Troullier-Martins psp for element  Ti        Thu Oct 27 17:33:40 EDT 1994
 - 22.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well

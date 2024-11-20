@@ -212,8 +212,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      4.000   => boxcut(ratio)=   2.15429
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /Users/gmatteo/git_repos/abinit_gwr/tests/Psps_for_tests/Si_r.psp8
-- pspatm: opening atomic psp file    /Users/gmatteo/git_repos/abinit_gwr/tests/Psps_for_tests/Si_r.psp8
+- pspini: atom type   1  psp file is /Users/gmatteo/git_repos/abinit_gwr/tests/Pspdir/Si_r.psp8
+- pspatm: opening atomic psp file    /Users/gmatteo/git_repos/abinit_gwr/tests/Pspdir/Si_r.psp8
 - Si    ONCVPSP  r_core=  1.60  1.72  1.92
 - 14.00000   4.00000    160518                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well

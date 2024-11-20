@@ -23,9 +23,9 @@
 - root for output files -> t66_MPI4o
 
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_cprj-in-memory-forces/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Si.xml
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_cprj-in-memory-forces/tests/Pspdir/Pseudodojo_paw_pw_standard/Si.xml
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_cprj-in-memory-forces/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_cprj-in-memory-forces/tests/Pspdir/Pseudodojo_paw_pw_standard/O.xml
  DATASET    1 : space group P3_2 2 1 (#154); Bravais hP (primitive hexag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
@@ -213,9 +213,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 1, }
          ecut(hartree)=     24.000   => boxcut(ratio)=   2.13111
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_cprj-in-memory-forces/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Si.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_cprj-in-memory-forces/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Si.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_cprj-in-memory-forces/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Si.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_cprj-in-memory-forces/tests/Pspdir/Pseudodojo_paw_pw_standard/Si.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_cprj-in-memory-forces/tests/Pspdir/Pseudodojo_paw_pw_standard/Si.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_cprj-in-memory-forces/tests/Pspdir/Pseudodojo_paw_pw_standard/Si.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.90944987
@@ -233,9 +233,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 1, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_cprj-in-memory-forces/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_cprj-in-memory-forces/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_cprj-in-memory-forces/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_cprj-in-memory-forces/tests/Pspdir/Pseudodojo_paw_pw_standard/O.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_cprj-in-memory-forces/tests/Pspdir/Pseudodojo_paw_pw_standard/O.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_cprj-in-memory-forces/tests/Pspdir/Pseudodojo_paw_pw_standard/O.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.41465230
