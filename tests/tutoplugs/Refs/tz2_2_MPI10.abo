@@ -131,9 +131,9 @@ ABI_PSPDIR  found in environment, with value /mnt/home/ogingras/Work/Gitlab/abin
 ABI_PSPDIR  found in environment, with value /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Pspdir
 -instrng: 105 lines of input have been read from file /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/BUILDS/develop_pyinv2/tests/Test_suite/tutoplugs_tz2_2_MPI4/tz2_2.abi
 
- For atom type 1, psp file is /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Pspdir/Pseudodojo_nc_fr_04_pbe_standard_psp8/Bi.psp8
- For atom type 2, psp file is /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Pspdir/Pseudodojo_nc_fr_04_pbe_standard_psp8/Te.psp8
- For atom type 3, psp file is /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Pspdir/Pseudodojo_nc_fr_04_pbe_standard_psp8/I.psp8
+ For atom type 1, psp file is /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Pspdir/Psdj_nc_fr_04_pbe_std_psp8/Bi.psp8
+ For atom type 2, psp file is /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Pspdir/Psdj_nc_fr_04_pbe_std_psp8/Te.psp8
+ For atom type 3, psp file is /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Pspdir/Psdj_nc_fr_04_pbe_std_psp8/I.psp8
   read the values zionpsp= 15.0 , pspcod=   8 , lmax=   2
   read the values zionpsp= 16.0 , pspcod=   8 , lmax=   2
   read the values zionpsp=  7.0 , pspcod=   8 , lmax=   2
@@ -1391,8 +1391,8 @@ message: |
 
  getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  30  30  48
          ecut(hartree)=     15.000   => boxcut(ratio)=   2.00045
-- pspini: atom type   1  psp file is /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Pspdir/Pseudodojo_nc_fr_04_pbe_standard_psp8/Bi.psp8
-- pspatm: opening atomic psp file    /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Pspdir/Pseudodojo_nc_fr_04_pbe_standard_psp8/Bi.psp8
+- pspini: atom type   1  psp file is /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Pspdir/Psdj_nc_fr_04_pbe_std_psp8/Bi.psp8
+- pspatm: opening atomic psp file    /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Pspdir/Psdj_nc_fr_04_pbe_std_psp8/Bi.psp8
 - Bi    ONCVPSP-3.3.0  r_core=   2.42776   2.51622   2.10397
 - 83.00000  15.00000    180423                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1410,8 +1410,8 @@ message: |
   spin-orbit 2    0.138319    0.038555   -0.001003
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Pspdir/Pseudodojo_nc_fr_04_pbe_standard_psp8/Te.psp8
-- pspatm: opening atomic psp file    /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Pspdir/Pseudodojo_nc_fr_04_pbe_standard_psp8/Te.psp8
+- pspini: atom type   2  psp file is /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Pspdir/Psdj_nc_fr_04_pbe_std_psp8/Te.psp8
+- pspatm: opening atomic psp file    /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Pspdir/Psdj_nc_fr_04_pbe_std_psp8/Te.psp8
 - Te    ONCVPSP-3.3.0  r_core=   2.26547   1.91704   1.80604
 - 52.00000  16.00000    180423                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1429,8 +1429,8 @@ message: |
   spin-orbit 2    0.050434    0.021904   -0.000336
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Pspdir/Pseudodojo_nc_fr_04_pbe_standard_psp8/I.psp8
-- pspatm: opening atomic psp file    /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Pspdir/Pseudodojo_nc_fr_04_pbe_standard_psp8/I.psp8
+- pspini: atom type   3  psp file is /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Pspdir/Psdj_nc_fr_04_pbe_std_psp8/I.psp8
+- pspatm: opening atomic psp file    /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Pspdir/Psdj_nc_fr_04_pbe_std_psp8/I.psp8
 - I     ONCVPSP-3.3.0  r_core=   2.02042   2.17032   2.27639
 - 53.00000   7.00000    180423                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
