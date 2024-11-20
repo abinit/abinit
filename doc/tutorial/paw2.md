@@ -733,13 +733,13 @@ The last step is to examine carefully the physical quantities obtained with our 
 Copy <span style="color:green">\$ABI_TESTS/tutorial/Input/tpaw2_2.abi</span> in your working directory.
 Edit it, activate the 7 datasets (ubcomment the 'ndtset 7` line),
  and use
- <span style="color:green">\$ABI_HOME/doc/tutorial/paw2_assets/Ni.GGA-PBE-paw.rrkj.xml</span> 
- PAW dataset obtained from <span style="color:green">Ni.atompaw.input2 file</span>.  
+ <span style="color:green">\$ABI_HOME/doc/tutorial/paw2_assets/Ni.PBE-paw.rrkj.xml</span> 
+ PAW dataset obtained from <span style="color:green">Ni.atompaw.input2 file</span>, with a minor change of name (suppression of the indication GGA)..  
 Run ABINIT (this may take a while...).
 
 {% dialog tests/tutorial/Input/tpaw2_2.abi %}
 
-{% dialog tutorial/paw2_assets/Ni.GGA-PBE-paw.rrkj.xml %}
+{% dialog tutorial/paw2_assets/Ni.PBE-paw.rrkj.xml %}
 
 ABINIT computes the converged ground state of ferromagnetic FCC Nickel for several volumes around equilibrium.
 Plot the `etotal` vs `acell` curve:
