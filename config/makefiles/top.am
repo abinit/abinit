@@ -1,6 +1,8 @@
 BUILT_SOURCES = $(top_srcdir)/.version
 $(top_srcdir)/.version:
-	echo $(VERSION) > $@-t && mv $@-t $@
+
+#This has been disabled, as trying to write in a directory without having the permissions.
+#echo $(VERSION) > $@-t && mv $@-t $@
 
 # Additional files to distribute
 EXTRA_DIST += \
