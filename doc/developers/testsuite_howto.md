@@ -171,7 +171,7 @@ pre_commands and post_commands
      (we cannot use relative paths as the python function os.curdir is not thread-safe).
 
      - i --> input directory
-     - p --> Psps_for_tests  
+     - p --> Pspdir
      - w --> Working directory (the directory where the test is executed)
         
      Example: *ww_mv foo bar* corresponds *mv workdir/foo wordir/bar* while
