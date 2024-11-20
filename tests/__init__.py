@@ -54,7 +54,7 @@ class AbinitEnvironment(object):
         self.home_dir, tail = os.path.split(self.tests_dir)
 
         self.src_dir = os.path.join(self.home_dir, "src")
-        self.psps_dir = os.path.join(self.tests_dir, "Psps_for_tests")
+        self.psps_dir = os.path.join(self.tests_dir, "Pspdir")
         self.fldiff_path = os.path.join(self.tests_dir, "Scripts", "fldiff.pl")
 
     def __str__(self):
