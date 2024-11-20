@@ -9045,10 +9045,12 @@ This means having [[usekden]] = 1.
 ==LibXC temperature-dependent functionals== (do not forget to add a minus sign, as discussed above)
 
 !!! warning
-    LibXC do not provide the xc entropy or xc internal energy yet.
+    LibXC does not provide the xc entropy or xc internal energy yet.
     In order to compute accurate equation of state data, prefer the use of native
     finite-temperature exchange-correlation free energy functionals
     [[ixc]]=51 or 60, which include these quantities.
+    Apart from total internal energy and total entropy, the other quantities are
+    correct (total free energy, density, stresses, forces, ...).
 
   Some of the following functionals do not provide Kxc (2nd derivative of Exc). If this is the case,
   a SCF mixing of the potential is automatically selected ([[iscf]]<10).
