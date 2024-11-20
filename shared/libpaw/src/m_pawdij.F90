@@ -2524,6 +2524,7 @@ end subroutine pawdijnd
 !!  vxc1(qphase*mesh_size,v_size,nspden)=all-electron on-site XC potential for current atom
 !!                                given on a (r,theta,phi) grid (v_size=angl_size)
 !!                                or on (l,m) spherical moments (v_size=lm_size)
+!!  znuc=optional input of nuclear charge
 !!
 !! OUTPUT
 !!  dijso(cplex_dij*qphase*lmn2_size,ndij)= spin-orbit Dij terms
@@ -2544,16 +2545,19 @@ end subroutine pawdijnd
 !! SOURCE
 
 subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
-&                   pawang,pawrad,pawtab,pawxcdev,spnorbscl,vh1,vxc1)
+&                   pawang,pawrad,pawtab,pawxcdev,spnorbscl,vh1,vxc1,&
+&                   nucdipmom,znuc)
 
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: cplex_dij,ndij,nspden,pawxcdev,qphase
  real(dp), intent(in) :: spnorbscl
+ real(dp),optional,intent(in) :: znuc
  type(pawang_type),intent(in) :: pawang
 !arrays
  real(dp),intent(out) :: dijso(:,:)
  real(dp),intent(in) :: vh1(:,:,:),vxc1(:,:,:)
+ real(dp),optional,intent(in) :: nucdipmom(3)
  type(pawrad_type),intent(in) :: pawrad
  type(pawtab_type),target,intent(in) :: pawtab
 !Local variables ---------------------------------------
