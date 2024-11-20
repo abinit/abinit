@@ -373,6 +373,10 @@ class FortranFile(object):
 
 
 def enclose(lines, magic_line, filepath):
+    """
+    Find magic_line in list of lines read from filepath.
+    Return: (start, stop)
+    """
     try:
         start = lines.index(magic_line)
     except ValueError:
@@ -1099,12 +1103,12 @@ class AbinitProject(NotebookWriter):
                     fh.write(s)
 
             # TODO
-            #"""
+            """
             #########################
             # Integration with CMAKE
             #########################
 
-            # Read CMakeList.txt in new_lines. NB: use rstrip to maintain indentation.
+            # Read CMakeList.txt in new_lines. NB: use rstrip to preserve indentation.
             cmakelist_path = os.path.join(dirpath, "CMakeLists.txt")
             new_lines = [l.rstrip() for l in open(cmakelist_path).readlines()]
 
@@ -1150,7 +1154,7 @@ class AbinitProject(NotebookWriter):
             #print(new_str)
             #with open(cmakelist_path, "wt") as fh:
             #    fh.write(new_str)
-            #"""
+            """
 
     def touch_alldeps(self, verbose=0):
         """
