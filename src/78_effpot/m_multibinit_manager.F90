@@ -188,7 +188,6 @@ contains
     self%input_path=input_path
 #ifndef FC_CRAY
     self%filenames(:)=filenames(:)
-#ifndef FC_CRAY
     call xmpi_bcast(self%filenames, master, comm, ierr)
     !TODO: remove params as argument. It is here because the params are read
     ! in the multibinit_main function. Once we use multibinit_main2, remove it.
