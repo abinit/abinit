@@ -23,7 +23,7 @@
 - root for output files -> tparal_bandpw_01_MPI1o
 
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Pseudodojo_paw_pw_standard/Au.xml
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_paw_pw_std/Au.xml
 
 --- !Autoparal
 # Autoparal section for GS calculations with paral_kgb 1
