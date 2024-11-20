@@ -23,11 +23,11 @@
 - root for output files -> tw90_5_MPI4o
 
 - inpspheads : Reading pseudopotential header in XML form from 
--   /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/La.xml
+-   /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Pspdir/Pseudodojo_paw_pw_standard/La.xml
 - inpspheads : Reading pseudopotential header in XML form from 
--   /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Cu.xml
+-   /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Pspdir/Pseudodojo_paw_pw_standard/Cu.xml
 - inpspheads : Reading pseudopotential header in XML form from 
--   /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
+-   /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Pspdir/Pseudodojo_paw_pw_standard/O.xml
 
  DATASET    1 : space group I4/m m m (#139); Bravais tI (body-center tetrag.)
 ================================================================================
@@ -474,9 +474,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     18.000   => boxcut(ratio)=   2.09757
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/La.xml
-- pspatm: opening atomic psp file    /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/La.xml
-- pspatm : Reading pseudopotential header in XML form from /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/La.xml
+- pspini: atom type   1  psp file is /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Pspdir/Pseudodojo_paw_pw_standard/La.xml
+- pspatm: opening atomic psp file    /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Pspdir/Pseudodojo_paw_pw_standard/La.xml
+- pspatm : Reading pseudopotential header in XML form from /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Pspdir/Pseudodojo_paw_pw_standard/La.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  8 (lmn_size= 32), orbitals=   0   0   1   1   2   2   3   3
  Spheres core radius: rc_sph= 2.51647158
@@ -494,9 +494,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Cu.xml
-- pspatm: opening atomic psp file    /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Cu.xml
-- pspatm : Reading pseudopotential header in XML form from /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Cu.xml
+- pspini: atom type   2  psp file is /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Pspdir/Pseudodojo_paw_pw_standard/Cu.xml
+- pspatm: opening atomic psp file    /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Pspdir/Pseudodojo_paw_pw_standard/Cu.xml
+- pspatm : Reading pseudopotential header in XML form from /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Pspdir/Pseudodojo_paw_pw_standard/Cu.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.02226371
@@ -514,9 +514,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
-- pspatm: opening atomic psp file    /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
-- pspatm : Reading pseudopotential header in XML form from /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
+- pspini: atom type   3  psp file is /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Pspdir/Pseudodojo_paw_pw_standard/O.xml
+- pspatm: opening atomic psp file    /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Pspdir/Pseudodojo_paw_pw_standard/O.xml
+- pspatm : Reading pseudopotential header in XML form from /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Pspdir/Pseudodojo_paw_pw_standard/O.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.41465230

@@ -157,8 +157,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     25.000   => boxcut(ratio)=   2.13391
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_nc_fr_04_pbe_standard_psp8/Ga.upf
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_nc_fr_04_pbe_standard_psp8/Ga.upf
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Pseudodojo_nc_fr_04_pbe_standard_psp8/Ga.upf
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Pseudodojo_nc_fr_04_pbe_standard_psp8/Ga.upf
 - Ga Generated using ONCVPSP code by D. R. Hamann
 - 31.00000  13.00000  180423                  znucl, zion, pspdat
 12 -101130 2 -1 1926                          pspcod,pspxc,lmax,lloc,mmax
@@ -174,8 +174,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
   spin-orbit 2    0.012877    0.008543   -0.000167
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_nc_fr_04_pbe_standard_psp8/As.upf
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_nc_fr_04_pbe_standard_psp8/As.upf
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Pseudodojo_nc_fr_04_pbe_standard_psp8/As.upf
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Pseudodojo_nc_fr_04_pbe_standard_psp8/As.upf
 - As Generated using ONCVPSP code by D. R. Hamann
 - 33.00000  15.00000  180423                  znucl, zion, pspdat
 12 -101130 2 -1 1358                          pspcod,pspxc,lmax,lloc,mmax
@@ -349,8 +349,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     25.000   => boxcut(ratio)=   2.13391
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_nc_fr_04_pbe_standard_psp8/Ga.upf
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_nc_fr_04_pbe_standard_psp8/Ga.upf
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Pseudodojo_nc_fr_04_pbe_standard_psp8/Ga.upf
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Pseudodojo_nc_fr_04_pbe_standard_psp8/Ga.upf
 - Ga Generated using ONCVPSP code by D. R. Hamann
 - 31.00000  13.00000  180423                  znucl, zion, pspdat
 12 -101130 2 -1 1926                          pspcod,pspxc,lmax,lloc,mmax
@@ -364,8 +364,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              2   -8.376928   -2.819938
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_nc_fr_04_pbe_standard_psp8/As.upf
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_nc_fr_04_pbe_standard_psp8/As.upf
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Pseudodojo_nc_fr_04_pbe_standard_psp8/As.upf
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Pseudodojo_nc_fr_04_pbe_standard_psp8/As.upf
 - As Generated using ONCVPSP code by D. R. Hamann
 - 33.00000  15.00000  180423                  znucl, zion, pspdat
 12 -101130 2 -1 1358                          pspcod,pspxc,lmax,lloc,mmax
