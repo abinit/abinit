@@ -443,15 +443,17 @@ subroutine copy_oper_from_ndat(oper1,oper2,ndat)
    if(oper1%has_opermatlu==1.and.oper2(idat)%has_opermatlu==1)  then
      call copy_matlu_from_ndat(oper1%matlu,oper2(idat)%matlu,oper1%natom,ndat,idat)
    endif
+ enddo
 
-   if(allocated(oper2(idat)%ks).and.allocated(oper1%ks)) then
-     do isppol=1,oper1%nsppol
-       do ikpt=1,oper1%nkpt
+ if(allocated(oper2(1)%ks).and.allocated(oper1%ks)) then
+   do isppol=1,oper1%nsppol
+     do ikpt=1,oper1%nkpt
+       do idat=1,ndat
          oper2(idat)%ks(:,:,ikpt,isppol)=oper1%ks(:,1+(idat-1)*oper1%mbandc:idat*oper1%mbandc,ikpt,isppol)
        enddo
      enddo
-   endif
- enddo
+   enddo
+ endif
 
  DBG_EXIT("COLL")
 end subroutine copy_oper_from_ndat
@@ -490,15 +492,17 @@ subroutine copy_oper_to_ndat(oper1,oper2,ndat)
    if(oper1(idat)%has_opermatlu==1.and.oper2%has_opermatlu==1)  then
      call copy_matlu_to_ndat(oper1(idat)%matlu,oper2%matlu,oper2%natom,ndat,idat)
    endif
+ enddo
 
-   if(allocated(oper1(idat)%ks).and.allocated(oper2%ks)) then
-     do isppol=1,oper2%nsppol
-       do ikpt=1,oper2%nkpt
+ if(allocated(oper1(1)%ks).and.allocated(oper2%ks)) then
+   do isppol=1,oper2%nsppol
+     do ikpt=1,oper2%nkpt
+       do idat=1,ndat
          oper2%ks(:,1+(idat-1)*oper2%mbandc:idat*oper2%mbandc,ikpt,isppol)=oper1(idat)%ks(:,:,ikpt,isppol)
        enddo
      enddo
-   endif
- enddo
+   enddo
+ endif
 
  DBG_EXIT("COLL")
 end subroutine copy_oper_to_ndat
