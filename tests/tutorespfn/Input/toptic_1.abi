@@ -78,7 +78,7 @@
 
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "Psdj_nc_sr_04_pw_largecore_psp8/Ga-low.psp8, Psdj_nc_sr_04_pw_largecore_psp8/As.psp8"
+ pseudos "Psdj_nc_sr_04_pw_lrgcore_psp8/Ga-low.psp8, Psdj_nc_sr_04_pw_lrgcore_psp8/As.psp8"
 
 ##############################################################
 # This section is used only for regression testing of ABINIT #
