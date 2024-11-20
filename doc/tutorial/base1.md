@@ -104,11 +104,11 @@ files, slightly different numerical results, or timing differences, e.g.:
 > - input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_serial/trunk_beauty/tests/TestBot_MPI1/tutorial_tbase1_1/tbase1_1.abi
 > - output file    -> tbase1_1.abo
 117,118c117,118
-< - pspini: atom type   1  psp file is /Users/gonze/_Research/ABINIT_git/beauty/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/H.psp8
-< - pspatm: opening atomic psp file    /Users/gonze/_Research/ABINIT_git/beauty/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/H.psp8
+< - pspini: atom type   1  psp file is /Users/gonze/_Research/ABINIT_git/beauty/tests/Pspdir/Pseudodojo_nc_sr_04_pw_standard_psp8/H.psp8
+< - pspatm: opening atomic psp file    /Users/gonze/_Research/ABINIT_git/beauty/tests/Pspdir/Pseudodojo_nc_sr_04_pw_standard_psp8/H.psp8
 ---
-> - pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_beauty/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/H.psp8
-> - pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_beauty/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/H.psp8
+> - pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_beauty/tests/Pspdir/Pseudodojo_nc_sr_04_pw_standard_psp8/H.psp8
+> - pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_beauty/tests/Pspdir/Pseudodojo_nc_sr_04_pw_standard_psp8/H.psp8
 216,217c216,217
 <     1     -1.38336201933863    -0.00000000000000    -0.00000000000000
 <     2      1.38336201933863    -0.00000000000000    -0.00000000000000
