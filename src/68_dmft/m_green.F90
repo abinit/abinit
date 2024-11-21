@@ -1002,7 +1002,7 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
 !Local variables-------------------------------
  !logical :: lintegrate
  logical :: oper_ndat_allocated
- integer :: band_index,diag,i,ib,ierr,ifreq,ikpt,info,isppol,lwork,mbandc,ifreq_beg,ifreq_end,idat
+ integer :: band_index,diag,i,ib,ib1,ierr,ifreq,ikpt,info,isppol,lwork,mbandc,ifreq_beg,ifreq_end,idat
  integer :: me_kpt,mkmem,myproc,natom,nband_k,nkpt,nmoments,nspinor,nsppol,ndat
  integer :: opt_quick_restart,option,optlog,optnonxsum,optnonxsum2,optself
  integer :: shift,shift_green,spacecomm,gpu_option,optoper_ksloc
@@ -1346,7 +1346,6 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
  if (optself /= 0) then
    call inverse_oper(green_oper_ndat,1,procb=green%distrib%procb(:),iproc=me_kpt)
  end if
- call copy_oper_from_ndat(green_oper_ndat,green%oper,ndat,green%nw,green%distrib%proct,green%distrib%me_freq)
 #endif
  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1361,6 +1360,8 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  if (optlog == 1) then
+   ABI_BUG("section not checked !")
+   call copy_oper_from_ndat(green_oper_ndat,green%oper,ndat,green%nw,green%distrib%proct,green%distrib%me_freq)
    do ifreq=1,green%nw
      if (green%distrib%proct(ifreq) /= green%distrib%me_freq) cycle
      trace_tmp = czero
@@ -1385,6 +1386,7 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
      if (nsppol == 1 .and. nspinor == 1) trace_tmp = trace_tmp * two
      green%trace_log = green%trace_log + dble(trace_tmp)
    end do ! ifreq
+   call copy_oper_to_ndat(green%oper,green_oper_ndat,ndat,green%nw,green%distrib%proct,green%distrib%me_freq)
  end if ! optlog=1
  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1399,6 +1401,7 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
 #ifdef HAVE_GPU_MARKERS
    call nvtxStartRange("add_int_fct",13)
 #endif
+#if 0
    do ifreq=1,green%nw
      if (green%distrib%proct(ifreq) /= green%distrib%me_freq) cycle
 
@@ -1432,6 +1435,28 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
      end if ! diag
 
    end do ! ifreq
+#else
+   do ifreq=ifreq_beg,ifreq_end
+
+     do isppol=1,nsppol
+       do ikpt=1,mkmem
+         do ib1=1,mbandc
+           idat=ifreq-(ifreq_end-ndat)
+           if (diag == 1) then
+             green%occup%ks(ib1,ib1,ikpt+shift,isppol) = green%occup%ks(ib1,ib1,ikpt+shift,isppol) + &
+                & fac(ifreq)*green_oper_ndat%ks(ib1,ib1+(idat-1)*mbandc,ikpt+shift_green,isppol)
+           else
+             do ib=1,mbandc
+               green%occup%ks(ib,ib1,ikpt+shift,isppol) = green%occup%ks(ib,ib1,ikpt+shift,isppol) + &
+                 & fac(ifreq)*green_oper_ndat%ks(ib,ib1+(idat-1)*mbandc,ikpt+shift_green,isppol)
+             end do ! ib
+           end if ! diag
+         end do ! ib1
+       end do ! ikpt
+     end do ! isppol
+
+   end do ! ifreq
+#endif
 #ifdef HAVE_GPU_MARKERS
    call nvtxEndRange()
 #endif
@@ -1464,7 +1489,6 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
      call downfold_oper(green%oper(ifreq),paw_dmft,procb=green%distrib%procb(:),iproc=me_kpt,option=option,gpu_option=gpu_option)
    end do ! ifreq
 #else
-   call copy_oper_to_ndat(green%oper,green_oper_ndat,ndat,green%nw,green%distrib%proct,green%distrib%me_freq)
    call downfold_oper(green_oper_ndat,paw_dmft,procb=green%distrib%procb(:),iproc=me_kpt,option=option,gpu_option=gpu_option)
    call copy_oper_from_ndat(green_oper_ndat,green%oper,ndat,green%nw,green%distrib%proct,green%distrib%me_freq)
 #endif
