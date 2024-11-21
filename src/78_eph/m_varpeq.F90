@@ -1751,7 +1751,7 @@ subroutine polstate_setup(self, ip, erange, a_src, load)
      ik_ibz = gqk%my_k2ibz(1, my_ik)
      do ib=1,gqk%nb
        eig = self%eig(ib, ik_ibz)
-       if (eig < erange) then
+       if (eig > erange) then
          self%my_a(ib, my_ik, ip) = zero
        endif
      enddo
