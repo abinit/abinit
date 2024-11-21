@@ -1662,9 +1662,7 @@ subroutine kramerskronig_self(self,selflimit,selfhdc,paw_dmft,filapp)
      lpawu = selfhdc(iatom)%lpawu
      if (lpawu == -1) cycle
      self%oper(ifreq)%matlu(iatom)%mat(:,:,:) = cmplx(dble(self%oper(ifreq)%matlu(iatom)%mat(:,:,:))/pi,&
-         & aimag(self%oper(ifreq)%matlu(iatom)%mat(:,:,:)),kind=dp)
-     self%oper(ifreq)%matlu(iatom)%mat(:,:,:) = self%oper(ifreq)%matlu(iatom)%mat(:,:,:) + &
-             & cmplx(dble(selflimit(iatom)%mat(:,:,:)),zero,kind=dp)
+         & aimag(self%oper(ifreq)%matlu(iatom)%mat(:,:,:)),kind=dp) + selflimit(iatom)%mat(:,:,:)
      ! write(6,*) "TWO FACTOR IS PUT BECAUSE OF MAXENT CODE ??"
      !self%oper(ifreq)%matlu(iatom)%mat(:,:,:) = self%oper(ifreq)%matlu(iatom)%mat(:,:,:) * half
       !                       & aimag(self%oper(ifreq)%matlu(iatom)%mat(:,:,:)),kind=dp) * half

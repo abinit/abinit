@@ -698,19 +698,18 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  real(dp), optional, intent(in) :: gprimd(3,3),rprimd(3,3),xred(3,dtset%natom)
  real(dp), optional, intent(in) :: ylm(dtset%mpw*dtset%mkmem,mpsang*mpsang)
 !Local variables ------------------------------------
- integer :: bdtot_index,dmft_solv,dmftbandi,dmftbandf,fac,grid_unt,i
- integer :: iatom,iatom1,iband,icb,ierr,ifreq,ig,ik,ikg,ikpt,im,im1
- integer :: indproj,ioerr,iproj,ir,irot,isppol,itypat,lpawu,lpawu1,maxlpawu
+ integer :: bdtot_index,dmft_solv,dmftbandi,dmftbandf,fac,i
+ integer :: iatom,iatom1,iband,icb,ierr,ig,ik,ikg,ikpt,im,im1
+ integer :: indproj,iproj,ir,irot,isppol,itypat,lpawu,lpawu1,maxlpawu
  integer :: mband,mbandc,mesh_size,mesh_type,mkmem,mpw,myproc,natom,nband_k,ndim
- integer :: ngrid,nkpt,nproc,nproju,npw,nspinor,nsppol
+ integer :: nkpt,nproc,nproju,npw,nspinor,nsppol
  integer :: nsym,ntypat,siz_paw,siz_proj,use_dmft
- logical :: lexist,t2g,use_full_chipsi,verif,x2my2d
- real(dp) :: bes,besp,lstep,norm,rad,rint,rstep,step,sumwtk
+ logical :: t2g,use_full_chipsi,verif,x2my2d
+ real(dp) :: bes,besp,lstep,norm,rad,rint,rstep,sumwtk
  integer, parameter :: mt2g(3) = (/1,2,4/)
  logical, allocatable :: lcycle(:),typcycle(:)
  real(dp), allocatable :: rmax(:),kpg(:,:),kpg_norm(:)
  character(len=500) :: message
- character(len=fnlen) :: tmpfil
 !************************************************************************
 
  mband   = dtset%mband
@@ -942,9 +941,9 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  paw_dmft%dmft_use_full_chipsi = dtset%dmft_use_full_chipsi
 
  ! for entropy (alternate external calculation)
- paw_dmft%ientropy =  0
- paw_dmft%u_for_s  =  4.1_dp
- paw_dmft%j_for_s  =  0.5_dp
+ paw_dmft%ientropy = 0
+ paw_dmft%u_for_s  = 4.1_dp
+ paw_dmft%j_for_s  = 0.5_dp
 
 !=======================
 !==  Choose solver
@@ -1115,58 +1114,6 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
      end if
    end do ! irot
  end do ! lpawu
-
-!==================
-! Real frequencies
-!==================
-
- if (dtset%iscf < 0 .and. dmft_solv >= 5 .and. dmft_solv <= 8) then
-   tmpfil = trim(paw_dmft%filapp)//'_spectralfunction_realfrequencygrid'
-   inquire(file=trim(tmpfil),exist=lexist)!,recl=nrecl)
-   grid_unt = 2000
-   if (.not. lexist) then
-     write(message,'(4x,a,i5,3a)') "File number",grid_unt," called ",trim(tmpfil)," does not exist"
-     call wrtout(std_out,message,'COLL')
-     message = "Cannot continue: the missing file coming from Maxent code is needed"
-     ABI_ERROR(message)
-   end if ! not lexist
-
-   if (myproc == 0) then
-#ifdef FC_NAG
-     open(unit=grid_unt,file=trim(tmpfil),status='unknown',form='formatted',recl=ABI_RECL)
-#else
-     open(unit=grid_unt,file=trim(tmpfil),status='unknown',form='formatted')
-#endif
-     rewind(grid_unt)
-     write(message,'(3a)') ch10,"  == Read grid frequency in file ",trim(tmpfil)
-     call wrtout(std_out,message,'COLL')
-     write(message,'(3a,i4)') 'opened file : ',trim(tmpfil),' unit ',grid_unt
-     call wrtout(std_out,message,'COLL')
-     read(grid_unt,*,iostat=ioerr) ngrid
-     ABI_MALLOC(paw_dmft%omega_r,(ngrid))
-     do ifreq=1,ngrid
-       read(grid_unt,*,iostat=ioerr) paw_dmft%omega_r(ifreq)
-     end do ! ifreq
-     close(grid_unt)
-   end if ! myproc=0
-   call xmpi_bcast(ioerr,0,xmpi_world,ierr)
-   if (ioerr /= 0) ABI_ERROR("Error when reading grid file")
-   call xmpi_bcast(ngrid,0,xmpi_world,ierr)
-   if (myproc /= 0) then
-     ABI_MALLOC(paw_dmft%omega_r,(ngrid))
-   end if
-   call xmpi_bcast(paw_dmft%omega_r(:),0,xmpi_world,ierr)
- else
-   ABI_MALLOC(paw_dmft%omega_r,(2*paw_dmft%dmft_nwr))
-   ! Set up real frequencies for spectral function in Hubbard one.
-   step = 0.00005_dp
-   paw_dmft%omega_r(2*paw_dmft%dmft_nwr) = pi * step * (two*dble(paw_dmft%dmft_nwr-1)+one)
-   do ifreq=1,2*paw_dmft%dmft_nwr-1
-     paw_dmft%omega_r(ifreq) = pi*step*(two*dble(ifreq-1)+one) - paw_dmft%omega_r(2*paw_dmft%dmft_nwr)
-  !  write(std_out,*) ifreq,paw_dmft%omega_r(ifreq)
-   end do ! ifreq
-
- end if ! iscf<0 and dmft_solv>=5 and dmft_solv<=8
 
 !=======================
 ! Imaginary frequencies
@@ -1390,7 +1337,6 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  ABI_FREE(lcycle)
 
  call init_paral_dmft(paw_dmft,paw_dmft%distrib,paw_dmft%dmft_nwlo)
- call init_paral_dmft(paw_dmft,paw_dmft%distrib_r,size(paw_dmft%omega_r(:)))
 
 end subroutine init_sc_dmft
 !!***
@@ -1435,8 +1381,11 @@ subroutine init_dmft(cryst_struc,dmatpawu,dtset,fermie_dft,fnamei,fnametmp_app,p
  character(len=fnlen), intent(in) :: fnamei,fnametmp_app
  real(dp), ABI_CONTIGUOUS target, intent(in) :: dmatpawu(:,:,:,:)
 !Local variables ------------------------------------
- integer :: iatom,irot,isym,nflavor,nsym
+ integer :: grid_unt,iatom,ierr,ifreq,ioerr,irot,isym,nflavor,ngrid,nsym
+ real(dp) :: step
+ logical :: lexist
  character(len=500) :: message
+ character(len=fnlen) :: tmpfil
 ! *********************************************************************
 
  if (dtset%ucrpa == 0) then
@@ -1479,6 +1428,60 @@ subroutine init_dmft(cryst_struc,dmatpawu,dtset,fermie_dft,fnamei,fnametmp_app,p
 
  paw_dmft%filapp   = fnametmp_app
  paw_dmft%filnamei = fnamei
+
+!==================
+! Real frequencies
+!==================
+
+ if (dtset%iscf < 0 .and. paw_dmft%dmft_solv >= 5 .and. paw_dmft%dmft_solv <= 8) then
+   tmpfil = trim(paw_dmft%filapp)//'_spectralfunction_realfrequencygrid'
+   inquire(file=trim(tmpfil),exist=lexist)!,recl=nrecl)
+   grid_unt = 2000
+   if (.not. lexist) then
+     write(message,'(4x,a,i5,3a)') "File number",grid_unt," called ",trim(tmpfil)," does not exist"
+     call wrtout(std_out,message,'COLL')
+     message = "Cannot continue: the missing file coming from Maxent code is needed"
+     ABI_ERROR(message)
+   end if ! not lexist
+
+   if (paw_dmft%myproc == 0) then
+#ifdef FC_NAG
+     open(unit=grid_unt,file=trim(tmpfil),status='unknown',form='formatted',recl=ABI_RECL)
+#else
+     open(unit=grid_unt,file=trim(tmpfil),status='unknown',form='formatted')
+#endif
+     rewind(grid_unt)
+     write(message,'(3a)') ch10,"  == Read grid frequency in file ",trim(tmpfil)
+     call wrtout(std_out,message,'COLL')
+     write(message,'(3a,i4)') 'opened file : ',trim(tmpfil),' unit ',grid_unt
+     call wrtout(std_out,message,'COLL')
+     read(grid_unt,*,iostat=ioerr) ngrid
+     ABI_MALLOC(paw_dmft%omega_r,(ngrid))
+     do ifreq=1,ngrid
+       read(grid_unt,*,iostat=ioerr) paw_dmft%omega_r(ifreq)
+     end do ! ifreq
+     close(grid_unt)
+   end if ! myproc=0
+   call xmpi_bcast(ioerr,0,xmpi_world,ierr)
+   if (ioerr /= 0) ABI_ERROR("Error when reading grid file")
+   call xmpi_bcast(ngrid,0,xmpi_world,ierr)
+   if (paw_dmft%myproc /= 0) then
+     ABI_MALLOC(paw_dmft%omega_r,(ngrid))
+   end if
+   call xmpi_bcast(paw_dmft%omega_r(:),0,xmpi_world,ierr)
+ else
+   ABI_MALLOC(paw_dmft%omega_r,(2*paw_dmft%dmft_nwr))
+   ! Set up real frequencies for spectral function in Hubbard one.
+   step = 0.00005_dp
+   paw_dmft%omega_r(2*paw_dmft%dmft_nwr) = pi * step * (two*dble(paw_dmft%dmft_nwr-1)+one)
+   do ifreq=1,2*paw_dmft%dmft_nwr-1
+     paw_dmft%omega_r(ifreq) = pi*step*(two*dble(ifreq-1)+one) - paw_dmft%omega_r(2*paw_dmft%dmft_nwr)
+  !  write(std_out,*) ifreq,paw_dmft%omega_r(ifreq)
+   end do ! ifreq
+
+ end if ! iscf<0 and dmft_solv>=5 and dmft_solv<=8
+
+ call init_paral_dmft(paw_dmft,paw_dmft%distrib_r,size(paw_dmft%omega_r(:)))
 
  !unit_e=2_dp
 
@@ -1938,6 +1941,7 @@ subroutine destroy_dmft(paw_dmft)
  paw_dmft%eigen => null()
  paw_dmft%fixed_self => null()
  paw_dmft%indsym => null()
+ call destroy_paral_dmft(paw_dmft%distrib_r)
 
 end subroutine destroy_dmft
 !!***
@@ -2009,7 +2013,6 @@ subroutine destroy_sc_dmft(paw_dmft)
  call destroy_sc_dmft_paralkgb(paw_dmft)
  if (paw_dmft%use_dmft == 1) then
    call destroy_paral_dmft(paw_dmft%distrib)
-   call destroy_paral_dmft(paw_dmft%distrib_r)
  end if
 
 end subroutine destroy_sc_dmft
