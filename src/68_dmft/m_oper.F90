@@ -697,7 +697,7 @@ subroutine inverse_oper(oper,option,procb,iproc)
  integer, optional, intent(in) :: iproc
  integer, optional, intent(in) :: procb(oper%nkpt)
 !Local variables-------------------------------
- integer :: ikpt,isppol,paral
+ integer :: ikpt,isppol,idat,paral
 !todo_ba: prb with gwpc here: necessary for matcginv but should be dpc
 ! *********************************************************************
 
@@ -725,10 +725,12 @@ subroutine inverse_oper(oper,option,procb,iproc)
        if (paral == 1) then
          if (procb(ikpt) /= iproc) cycle
        end if
+       do idat=1,oper%ndat
 !          write(std_out,*) "isppol,ikpt",isppol,ikpt,m
 !          write(std_out,*) "isppol,ikpt",matrix
          !call matcginv_dpc(matrix,oper%mbandc,oper%mbandc)
-       call xginv(oper%ks(:,:,ikpt,isppol),oper%mbandc)
+         call xginv(oper%ks(:,1+(idat-1)*oper%mbandc:idat*oper%mbandc,ikpt,isppol),oper%mbandc)
+       end do ! idat
      end do ! ikpt
    end do ! isppol
  end if ! option
