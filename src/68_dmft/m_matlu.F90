@@ -1189,25 +1189,40 @@ end subroutine diff_matlu
 !!
 !! SOURCE
 
-subroutine add_matlu(matlu1,matlu2,matlu3,natom,sign_matlu2)
+subroutine add_matlu(matlu1,matlu2,matlu3,natom,sign_matlu2,idat,ndat)
 
 !Arguments ------------------------------------
  integer, intent(in) :: natom,sign_matlu2
+ integer, optional,intent(in) :: idat,ndat
  type(matlu_type), intent(in) :: matlu1(natom),matlu2(natom)
  type(matlu_type), intent(inout) :: matlu3(natom) !vz_i
 !Local variables-------------------------------
- integer :: iatom,lpawu
+ integer :: iatom,lpawu,isppol
 ! *********************************************************************
 
- do iatom=1,natom
-   lpawu = matlu1(iatom)%lpawu
-   if (lpawu == -1) cycle
-   if (sign_matlu2 == 1) then
-     matlu3(iatom)%mat(:,:,:) = matlu1(iatom)%mat(:,:,:) + matlu2(iatom)%mat(:,:,:)
-   else if (sign_matlu2 == -1) then
-     matlu3(iatom)%mat(:,:,:) = matlu1(iatom)%mat(:,:,:) - matlu2(iatom)%mat(:,:,:)
-   end if
- end do ! iatom
+ if(present(idat) .and. present(ndat)) then
+   do iatom=1,natom
+     lpawu = matlu1(iatom)%lpawu
+     if (lpawu == -1) cycle
+     do isppol=1,matlu1(iatom)%nsppol
+     if (sign_matlu2 == 1) then
+       matlu3(iatom)%mat(:,:,(isppol-1)*ndat+idat) = matlu1(iatom)%mat(:,:,isppol) + matlu2(iatom)%mat(:,:,isppol)
+     else if (sign_matlu2 == -1) then
+       matlu3(iatom)%mat(:,:,(isppol-1)*ndat+idat) = matlu1(iatom)%mat(:,:,isppol) - matlu2(iatom)%mat(:,:,isppol)
+     end if
+     end do
+   end do ! iatom
+ else
+   do iatom=1,natom
+     lpawu = matlu1(iatom)%lpawu
+     if (lpawu == -1) cycle
+       if (sign_matlu2 == 1) then
+         matlu3(iatom)%mat(:,:,:) = matlu1(iatom)%mat(:,:,:) + matlu2(iatom)%mat(:,:,:)
+       else if (sign_matlu2 == -1) then
+         matlu3(iatom)%mat(:,:,:) = matlu1(iatom)%mat(:,:,:) - matlu2(iatom)%mat(:,:,:)
+       end if
+   end do ! iatom
+ end if
 
 end subroutine add_matlu
 !!***
