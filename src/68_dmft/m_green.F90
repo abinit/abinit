@@ -1002,7 +1002,7 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
 !Local variables-------------------------------
  !logical :: lintegrate
  logical :: oper_ndat_allocated
- integer :: band_index,diag,i,ib,ierr,ifreq,ikpt,info,isppol,lwork,mbandc,ifreq_beg,ifreq_end
+ integer :: band_index,diag,i,ib,ierr,ifreq,ikpt,info,isppol,lwork,mbandc,ifreq_beg,ifreq_end,idat
  integer :: me_kpt,mkmem,myproc,natom,nband_k,nkpt,nmoments,nspinor,nsppol,ndat
  integer :: opt_quick_restart,option,optlog,optnonxsum,optnonxsum2,optself
  integer :: shift,shift_green,spacecomm,gpu_option,optoper_ksloc
@@ -1231,7 +1231,6 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
    end do
    call upfold_oper(green_oper_ndat,paw_dmft,procb=green%distrib%procb(:),iproc=me_kpt,gpu_option=gpu_option)
  end if ! optself
- call copy_oper_from_ndat(green_oper_ndat,green%oper,ndat,green%nw,green%distrib%proct,green%distrib%me_freq)
 #endif
  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1240,6 +1239,7 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#if 0
  do ifreq=1,green%nw
    if (green%distrib%proct(ifreq) /= green%distrib%me_freq) cycle
    do isppol=1,nsppol
@@ -1256,6 +1256,25 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
      end do ! ikpt
    end do ! isppol
  end do ! ifreq
+#else
+ do ifreq=ifreq_beg,ifreq_end
+   do isppol=1,nsppol
+     do ikpt=1,mkmem
+       do ib=1,mbandc
+         idat=ifreq-(ifreq_end-ndat)
+         green_tmp = omega_current(ifreq) + fermilevel - paw_dmft%eigen_dft(ib,ikpt+shift,isppol)
+         if (optself == 0) then
+           green_oper_ndat%ks(ib,ib+(idat-1)*mbandc,ikpt+shift_green,isppol) = cone / green_tmp
+         else
+           green_oper_ndat%ks(ib,ib+(idat-1)*mbandc,ikpt+shift_green,isppol) = &
+             & green_oper_ndat%ks(ib,ib+(idat-1)*mbandc,ikpt+shift_green,isppol) + green_tmp
+         end if
+       end do ! ib
+     end do ! ikpt
+   end do ! isppol
+ end do ! ifreq
+ call copy_oper_from_ndat(green_oper_ndat,green%oper,ndat,green%nw,green%distrib%proct,green%distrib%me_freq)
+#endif
  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
