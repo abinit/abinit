@@ -2065,6 +2065,9 @@ subroutine write_vars_hist(ncid,hist,natom,has_nimage,iimg,itime,&
    ncerr = nf90_put_var(ncid,rprimd_id,hist%rprimd(:,:,hist%ihist),&
 &                       start = start3,count = count3)
    NCF_CHECK_MSG(ncerr," write variable rprimd")
+   ncerr = nf90_put_var(ncid,vel_cell_id,hist%vel_cell(:,:,hist%ihist),&
+&                       start = start3,count = count3)
+   NCF_CHECK_MSG(ncerr," write variable vel_cell")
  end if
 
 !acell

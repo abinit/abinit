@@ -7,7 +7,7 @@
 !! for conventional NVT molecular dynamics.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2024-2024 ABINIT group (A. Blanchet, R. Bejaud, F. Brieuc, G. Geneste)
+!!  Copyright (C) 2024-2024 ABINIT group (A. Blanchet)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -89,6 +89,7 @@ contains
     fcart(:,:)=hist%fcart(:,:,hist%ihist)
     strten(:) =hist%strten(:,hist%ihist)
     vel(:,:)  =hist%vel(:,:,hist%ihist)
+    vel_cell  =hist%vel_cell(:,:,hist%ihist)
     etotal    =hist%etot(hist%ihist)
     call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
     
@@ -118,6 +119,7 @@ contains
       call pimd_langevin_nvt(pimd_etotal,pimd_forces,itime,ab_mover%natom,pimd_param,&
       & 0,rprimd,pimd_stressin,1,pimd_vel,ucvol,pimd_xred,pimd_xred_next,pimd_xred_prev)
       rprimd_next=rprimd ! We do not change primitive vectors
+      vel_cell=zero      ! Cell velocities are set to zero
     elseif(pimd_param%optcell==2) then
       call pimd_langevin_npt(pimd_etotal,pimd_forces,itime,ab_mover%natom,pimd_param,&
       & 0,rprimd,rprimd_next,rprimd_prev,pimd_stressin,1,pimd_vel,vel_cell,ucvol,&
@@ -128,7 +130,7 @@ contains
     hist%ihist = abihist_findIndex(hist,+1)
     call var2hist(acell,hist,ab_mover%natom,rprimd_next,pimd_xred_next(:,:,1),zDEBUG)
     hist%vel(:,:,hist%ihist)=pimd_vel(:,:,1)
-    if(pimd_param%optcell==2) hist%vel_cell(:,:,hist%ihist)=vel_cell(:,:)
+    hist%vel_cell(:,:,hist%ihist)=vel_cell(:,:)
     hist%time(hist%ihist)=real(itime,kind=dp)*ab_mover%dtion
 
   end subroutine pred_langevin_pimd
