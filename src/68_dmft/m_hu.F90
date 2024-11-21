@@ -977,7 +977,7 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
      if (pawprtvol >= 3) then
        write(message,'(2a)') ch10," VEE ROTATED"
        call wrtout(std_out,message,'COLL')
-       call printvee_hu(tndim,vee_rotated(iatom)%mat(:,:,:,:),2,'diag1')
+       call printvee_hu(2*ndim,vee_rotated(iatom)%mat(:,:,:,:),2,'diag1')
        write(message,'(a)') ch10
        call wrtout(std_out,message,'COLL')
      end if ! pawprtvol>=3
