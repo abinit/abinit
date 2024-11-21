@@ -841,7 +841,7 @@ subroutine varpeq_ncwrite(self, dtset, dtfil)
    NCF_CHECK(ncerr)
    ! real
    ncerr = nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: &
-     "varpeq_tolgrs", "varpeq_erange" "e_frohl"], &
+     "varpeq_tolgrs", "varpeq_erange", "e_frohl"], &
      [self%tolgrs, self%erange, self%e_frohl])
    NCF_CHECK(ncerr)
 
@@ -1233,7 +1233,7 @@ subroutine varpeq_solve(self)
    do ip=1,self%nstates
      ! initialize A_nk at this state, orthogonalize to the previous ones
      ! and normalize
-     call polstate%setup(ip, a_src=self%a_spin(:,:,ip,spin), self%erange, load=self%ld_flag)
+     call polstate%setup(ip, self%erange, a_src=self%a_spin(:,:,ip,spin), load=self%ld_flag)
 
      do ii=1,self%nstep
        ! gather A, get B_qnu, get energies
@@ -1716,7 +1716,7 @@ end subroutine polstate_free
 !!
 !! SOURCE
 
-subroutine polstate_setup(self, ip, a_src, erange, load)
+subroutine polstate_setup(self, ip, erange, a_src, load)
 
 !Arguments ------------------------------------
  class(polstate_t), target, intent(inout) :: self
