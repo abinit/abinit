@@ -455,9 +455,14 @@ subroutine pimd_langevin_npt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,
 & stress_pimd,temperature1,temperature2,&
 & pimd_param%traj_unit,trotter,vel,ddh,xcart,xred)
 
+!Compute cartesian coordinates
+ do iimage=1,trotter
+   call xred2xcart(natom,rprimd_next,xcart_next(:,:,iimage),xred_next(:,:,iimage))
+ end do
+
  if (itimimage>1) then
 !  Estimation of ds/dt and ddh at t+dt
-   vel = (three*xred_next   - four*xred   + xred_prev)/(two * dtion)
+   vel = (three*xcart_next  - four*xcart  + xcart_prev )/(two * dtion)
    ddh = (three*rprimd_next - four*rprimd + rprimd_prev)/(two * dtion)
  end if
 

@@ -897,7 +897,7 @@ real(dp) :: k0(3)
 
 !    vel_cell(3,3)= velocities of cell parameters
 !    Not yet used here but compute it for consistency
-     vel_cell(:,:)=zero
+     vel_cell(:,:)=hist%vel_cell(:,:,hist%ihist)
      if (ab_mover%ionmov==13 .and. hist%mxhist >= 2) then
        if (itime_hist>2) then
          ihist_prev2 = abihist_findIndex(hist,-2)

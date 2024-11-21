@@ -1,5 +1,5 @@
 
-.Version 10.1.1.1 of ABINIT, released Nov 2024.
+.Version 10.3.3.1 of ABINIT, released Nov 2024.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2024 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 15 Nov 2024.
-- ( at 06h47 )
+.Starting date : Wed 20 Nov 2024.
+- ( at 23h47 )
   
 - input  file    -> t20.abi
 - output file    -> t20.abo
@@ -1356,10 +1356,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          2.1  wall=          2.2
+- Proc.   0 individual time (sec): cpu=          1.0  wall=          1.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered  10 WARNINGs and   8 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.1  wall=          2.2
++Overall time at end (sec) : cpu=          1.0  wall=          1.1
