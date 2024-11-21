@@ -343,6 +343,11 @@ module m_varpeq
    real(dp) :: e_frohl
    ! Long-range divergence correction of polaron binding energy
 
+   real(dp) :: erange = zero
+   ! Size of the window for A_nk initialization
+   ! 0 -> no filtering is needed
+   ! > 0 -> every A_nk component above erange is 0
+
    real(dp) :: tolgrs
    ! L^2 gradient norm tolerance
 
@@ -801,7 +806,7 @@ subroutine varpeq_ncwrite(self, dtset, dtfil)
    NCF_CHECK(ncerr)
    ! real
    ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: &
-     "varpeq_tolgrs", "e_frohl"])
+     "varpeq_tolgrs", "varpeq_erange", "e_frohl"])
    NCF_CHECK(ncerr)
 
    ! Define arrays with results
@@ -836,8 +841,8 @@ subroutine varpeq_ncwrite(self, dtset, dtfil)
    NCF_CHECK(ncerr)
    ! real
    ncerr = nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: &
-     "varpeq_tolgrs", "e_frohl"], &
-     [self%tolgrs, self%e_frohl])
+     "varpeq_tolgrs", "varpeq_erange" "e_frohl"], &
+     [self%tolgrs, self%erange, self%e_frohl])
    NCF_CHECK(ncerr)
 
    ! Arrays
@@ -1228,7 +1233,7 @@ subroutine varpeq_solve(self)
    do ip=1,self%nstates
      ! initialize A_nk at this state, orthogonalize to the previous ones
      ! and normalize
-     call polstate%setup(ip, a_src=self%a_spin(:,:,ip,spin), load=self%ld_flag)
+     call polstate%setup(ip, a_src=self%a_spin(:,:,ip,spin), self%erange, load=self%ld_flag)
 
      do ii=1,self%nstep
        ! gather A, get B_qnu, get energies
@@ -1387,6 +1392,7 @@ subroutine varpeq_init(self, gstore, dtset)
  self%frohl_ntheta = dtset%eph_frohl_ntheta
  ! real
  self%tolgrs = dtset%varpeq_tolgrs
+ self%erange = dtset%varpeq_erange
 
  ! Static arrays
  ! integer
@@ -1710,25 +1716,47 @@ end subroutine polstate_free
 !!
 !! SOURCE
 
-subroutine polstate_setup(self, ip, a_src, load)
+subroutine polstate_setup(self, ip, a_src, erange, load)
 
 !Arguments ------------------------------------
  class(polstate_t), target, intent(inout) :: self
  integer, intent(in) :: ip
+ real(dp), intent(in) :: erange
  logical, optional, intent(in) :: load
  complex(dp), optional, intent(in) :: a_src(self%gqk%nb, self%gqk%glob_nk)
 
 !Local variables-------------------------------
  real(dp) :: a_sqnorm
  !complex(dp) :: prod
+ class(gqk_t), pointer :: gqk
+ integer :: my_ik, ik_ibz, ib
+ real(dp) :: eig
 
 !----------------------------------------------------------------------
+
+ gqk => self%gqk
 
  if (present(load) .and. load) then
    ABI_CHECK(present(a_src), "polstate_setup: A_nk is expected but not provided")
    call self%load_a(a_src, ip)
  else
    call self%seed_a(self%aseed, ip)
+ endif
+
+ ! nulliffy all the elements outside the erange
+ ! FIXME: sync with gstore_erange
+ if (erange > 0) then
+
+   do my_ik=1,gqk%my_nk
+     ik_ibz = gqk%my_k2ibz(1, my_ik)
+     do ib=1,gqk%nb
+       eig = self%eig(ib, ik_ibz)
+       if (eig < erange) then
+         self%my_a(ib, my_ik, ip) = zero
+       endif
+     enddo
+   enddo
+
  endif
 
  ! Orthogonalize current states to the previous ones
