@@ -11728,9 +11728,9 @@ the image number 4:
 It is notably possible to specify the starting point and the end point of the
 path (of images), while specifying intermediate points.
 
-It usually happen that the images do not have the same symmetries and space
-group. ABINIT has not been designed to use different set of symmetries for
-different images. ABINIT will use the symmetry and space group of the image
+It usually happens that the images do not have the same symmetries and space
+groups. ABINIT has not been designed to use different sets of symmetries for
+different images. ABINIT will use the symmetry set and space group of the image
 number 2, that is expected to have a low number of symmetries. This might lead
 to erroneous calculations, in case some image has even less symmetry. By
 contrast, there is no problem if some other image has more symmetries than

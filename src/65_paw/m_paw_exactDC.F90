@@ -231,8 +231,8 @@ SUBROUTINE tfpoint(thetas,phis,tweights,ln)
   !************************************************!
   IMPLICIT NONE
   !
-  REAL*8, intent(out)  :: thetas(ln+1), phis(2*ln+1), tweights(ln+1)! spt(2,(ln+1)*(2*ln+1)),weight((ln+1)*(2*ln+1))
   INTEGER, intent(in)  :: ln
+  REAL*8, intent(out)  :: thetas(ln+1), phis(2*ln+1), tweights(ln+1)! spt(2,(ln+1)*(2*ln+1)),weight((ln+1)*(2*ln+1))
   !
   REAL*8 :: dsum
   REAL*8 :: fake_shift, phi, pi
@@ -322,9 +322,9 @@ END SUBROUTINE GRULE
 subroutine ExchangeLDA(Ex, Vx, rs_1, lambda, N)
   IMPLICIT NONE
   REAL*8, intent(in) :: lambda
+  INTEGER, intent(in):: N
   REAL*8, intent(in) :: rs_1(N)
   REAL*8, intent(out):: Ex(N), Vx(N)
-  INTEGER, intent(in):: N
   ! locals
   REAL*8 :: kf_rs, c0, pi
   REAL*8 :: xs(N), dEx(N)
@@ -352,9 +352,9 @@ SUBROUTINE fexchange(xs,ex,dex,N)
   !*  f(x) = 1-1/(6*x^2)-4/(3*x)*atan(2*x)+(1+1/(12*x^2))/(2*x^2)*log(1+4*x^2)
   !* df/dx = 2/(3*x^3) + 4/(3*x^2)*atan(2*x) - (1+6*x^2)/(6*x^5)*log(1+4*x^2)
   IMPLICIT NONE
+  INTEGER, intent(in):: N
   REAL*8, intent(in) :: xs(N)
   REAL*8, intent(out):: ex(N), dex(N)
-  INTEGER, intent(in):: N
   ! locals
   INTEGER :: i
   integer, volatile :: iCopy
