@@ -383,6 +383,7 @@ interface xmpi_allgatherv
   module procedure xmpi_allgatherv_dp6d
   module procedure xmpi_allgatherv_coeff2d
   module procedure xmpi_allgatherv_coeff2d_indx
+  module procedure xmpi_allgatherv_dc
 end interface xmpi_allgatherv
 
 !----------------------------------------------------------------------
@@ -521,6 +522,7 @@ interface xmpi_gatherv
   module procedure xmpi_gatherv_dp4d
   module procedure xmpi_gatherv_dp5d
   module procedure xmpi_gatherv_dp6d
+  module procedure xmpi_gatherv_dc
 end interface xmpi_gatherv
 
 !----------------------------------------------------------------------
