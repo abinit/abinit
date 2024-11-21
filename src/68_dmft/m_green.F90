@@ -1273,7 +1273,6 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
      end do ! ikpt
    end do ! isppol
  end do ! ifreq
- call copy_oper_from_ndat(green_oper_ndat,green%oper,ndat,green%nw,green%distrib%proct,green%distrib%me_freq)
 #endif
  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1336,12 +1335,19 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
- do ifreq=1,green%nw
-   if (green%distrib%proct(ifreq) /= green%distrib%me_freq) cycle
-   if (optself /= 0) then
+#if 0
+ if (optself /= 0) then
+   do ifreq=1,green%nw
+     if (green%distrib%proct(ifreq) /= green%distrib%me_freq) cycle
      call inverse_oper(green%oper(ifreq),1,procb=green%distrib%procb(:),iproc=me_kpt)
-   end if
- end do ! ifreq
+   end do ! ifreq
+ end if
+#else
+ if (optself /= 0) then
+   call inverse_oper(green_oper_ndat,1,procb=green%distrib%procb(:),iproc=me_kpt)
+ end if
+ call copy_oper_from_ndat(green_oper_ndat,green%oper,ndat,green%nw,green%distrib%proct,green%distrib%me_freq)
+#endif
  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
