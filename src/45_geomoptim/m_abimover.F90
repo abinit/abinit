@@ -83,6 +83,8 @@ integer  :: jellslab
 integer  :: natom
 ! Number of CONstraint EQuations
 integer  :: nconeq
+! Number of Degrees Of Freedom
+integer  :: ndof
 ! number of Shifts for the Qpoint Grid  (used for ionmov 26 and 27)
 integer  :: ph_nqshift
 ! Use by pred_isothermal only
@@ -443,6 +445,7 @@ type(abimover_specs),intent(out) :: specs
  ab_mover%goprecon    =dtset%goprecon
  ab_mover%jellslab    =dtset%jellslab
  ab_mover%natom       =dtset%natom
+ ab_mover%ndof        =3*dtset%natom
  ab_mover%nconeq      =dtset%nconeq
  ab_mover%nnos        =dtset%nnos
  ab_mover%nsym        =dtset%nsym
@@ -644,6 +647,8 @@ type(abimover_specs),intent(out) :: specs
    specs%method = 'Isokinetic ensemble molecular dynamics'
 !  Number of history
    specs%nhist = 3
+!  Number of degrees of freedom
+   ab_mover%ndof = 3*dtset%natom-4
 !  This is the initialization for ionmov==13
 !  -------------------------------------------
  case (13)

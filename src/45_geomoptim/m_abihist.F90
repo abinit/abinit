@@ -1012,11 +1012,11 @@ end subroutine abihist_compare_and_copy
 !! SOURCE
 
 subroutine write_md_hist(hist,filename,ifirst,itime,natom,nctime,ntypat,&
-&                        typat,amu,znucl,dtion,mdtemp)
+&                        ndof,typat,amu,znucl,dtion,mdtemp)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: ifirst,itime,natom,nctime,ntypat
+ integer,intent(in) :: ifirst,itime,natom,nctime,ntypat,ndof
  real(dp),intent(in) :: dtion
  character(len=*),intent(in) :: filename
 !arrays
@@ -1063,7 +1063,7 @@ subroutine write_md_hist(hist,filename,ifirst,itime,natom,nctime,ntypat,&
 
 !  Write variables that do not change
 !  (they are not read in a hist structure).
-   call write_csts_hist(ncid,dtion,imgmov,typat,znucl,amu,mdtemp)
+   call write_csts_hist(ncid,dtion,imgmov,typat,znucl,amu,mdtemp,ndof)
 
 !  Compute the itime for the hist file
    itime_file = 1
@@ -1143,12 +1143,12 @@ end subroutine write_md_hist
 !! SOURCE
 
 subroutine write_md_hist_img(hist,filename,ifirst,itime,natom,ntypat,&
-&                            typat,amu,znucl,dtion,&
+&                            ndof,typat,amu,znucl,dtion,&
 &                            nimage,imgmov,mdtemp,comm_img,imgtab) ! optional arguments
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: ifirst,itime,natom,ntypat
+ integer,intent(in) :: ifirst,itime,natom,ntypat,ndof
  integer,intent(in),optional :: nimage,imgmov,comm_img
  real(dp),intent(in) :: dtion
  character(len=*),intent(in) :: filename
@@ -1212,7 +1212,7 @@ subroutine write_md_hist_img(hist,filename,ifirst,itime,natom,ntypat,&
        call def_file_hist(ncid,natom,nimage_,ntypat,npsp,has_nimage)
 !      Write variables that do not change
 !      (they are not read in a hist structure).
-       call write_csts_hist(ncid,dtion,imgmov_,typat,znucl,amu,mdtemp)
+       call write_csts_hist(ncid,dtion,imgmov_,typat,znucl,amu,mdtemp,ndof)
      end if
 
 !    ##### itime>2 access: just open NetCDF file
@@ -1487,7 +1487,7 @@ subroutine def_file_hist(ncid,natom,nimage,ntypat,npsp,has_nimage)
  integer :: xcart_id,xred_id,fcart_id,gred_id,vel_id,vel_cell_id
  integer :: rprimd_id,acell_id,strten_id
  integer :: etotal_id,ekin_id,entropy_id,mdtime_id
- integer :: typat_id,znucl_id,amu_id,dtion_id,imgmov_id, two_id,mdtemp_id
+ integer :: typat_id,znucl_id,amu_id,dtion_id,ndof_id,imgmov_id, two_id,mdtemp_id
  !character(len=500) :: msg
 !arrays
  integer :: dim0(0),dim1(1),dim2(2),dim3(3),dim4(4)
@@ -1530,6 +1530,9 @@ subroutine def_file_hist(ncid,natom,nimage,ntypat,npsp,has_nimage)
  NCF_CHECK_MSG(ncerr," define dimension two")
 
 !2.Define the constant variables
+
+ call ab_define_var(ncid,dim0,ndof_id,NF90_INT,&
+&  "ndof","Number of Degrees Of Freedom","dimensionless" )
 
  dim1=(/natom_id/)
  call ab_define_var(ncid,dim1,typat_id,NF90_DOUBLE,&
@@ -1893,13 +1896,13 @@ end subroutine read_csts_hist
 !!
 !! SOURCE
 
-subroutine write_csts_hist(ncid,dtion,imgmov,typat,znucl,amu,mdtemp)
+subroutine write_csts_hist(ncid,dtion,imgmov,typat,znucl,amu,mdtemp,ndof)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ncid
  real(dp),intent(in) :: dtion
- integer,intent(in) :: imgmov
+ integer,intent(in) :: imgmov,ndof
 !arrays
  integer,intent(in) :: typat(:)
  real(dp),intent(in) :: amu(:),znucl(:), mdtemp(2)
@@ -1908,7 +1911,7 @@ subroutine write_csts_hist(ncid,dtion,imgmov,typat,znucl,amu,mdtemp)
 #if defined HAVE_NETCDF
 !scalars
  integer :: ncerr
- integer :: typat_id,znucl_id,amu_id,dtion_id, imgmov_id, mdtemp_id
+ integer :: typat_id,znucl_id,amu_id,dtion_id, imgmov_id, mdtemp_id, ndof_id
 #endif
 
 ! *************************************************************************
@@ -1928,6 +1931,9 @@ subroutine write_csts_hist(ncid,dtion,imgmov,typat,znucl,amu,mdtemp)
 
  ncerr = nf90_inq_varid(ncid, "dtion", dtion_id)
  NCF_CHECK_MSG(ncerr," get the id for dtion")
+
+ ncerr = nf90_inq_varid(ncid, "ndof", ndof_id)
+ NCF_CHECK_MSG(ncerr," get the id for ndof")
 
  if ( nf90_noerr == nf90_inq_varid(ncid, "imgmov", imgmov_id) ) then
    ncerr = nf90_put_var(ncid, imgmov_id, imgmov)
@@ -1949,6 +1955,9 @@ subroutine write_csts_hist(ncid,dtion,imgmov,typat,znucl,amu,mdtemp)
 
  ncerr = nf90_put_var(ncid, amu_id, amu)
  NCF_CHECK_MSG(ncerr," write variable amu")
+
+ ncerr = nf90_put_var(ncid, ndof_id, ndof)
+ NCF_CHECK_MSG(ncerr," write variable ndof")
 
  ncerr = nf90_put_var(ncid, dtion_id, dtion)
  NCF_CHECK_MSG(ncerr," write variable dtion")
