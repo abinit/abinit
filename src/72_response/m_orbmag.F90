@@ -2543,22 +2543,23 @@ subroutine dterm_ZA0(atindx,cplex_dij,dterm,dtset,paw_an,pawang,pawrad,pawtab,qp
       call paw_splint(mesh_size,pawrad(itypat)%rad(1:mesh_size),&
               pawtab(itypat)%phiphj(1:mesh_size,kln),ypp,nrt,rt_mesh,rt_kernel,ierr)
       rt_kernel = rt_kernel*two*rt/(rt+two*rt_mesh)**2
-      rt_kernel = rt_kernel/four_pi
+      rt_kernel = rt_kernel*rt_mesh/four_pi
       ABI_FREE(ypp)
 
       za0_kernel= pawtab(itypat)%phiphj(1:mesh_size,kln)*zk1(1:mesh_size)
       call simp_gen(za0_rad(1,kln),za0_kernel,pawrad(itypat))
       
-!!      za0_kernel= pawtab(itypat)%phiphj(1:mesh_size,kln)*&
-!!        & zk1(1:mesh_size)*zk1(1:mesh_size)*&
-!!        & dv1dr(1:mesh_size)*pawrad(itypat)%rad(1:mesh_size)
-      za0_kernel= pawtab(itypat)%phiphj(1:mesh_size,kln)*rt_dkdr
+      za0_kernel= pawtab(itypat)%phiphj(1:mesh_size,kln)*&
+        & zk1(1:mesh_size)*zk1(1:mesh_size)*&
+        & dv1dr(1:mesh_size)*pawrad(itypat)%rad(1:mesh_size)
+!!      za0_kernel= pawtab(itypat)%phiphj(1:mesh_size,kln)*rt_dkdr*&
+!!         pawrad(itypat)%rad(1:mesh_size)
       call simp_gen(za0_rad(2,kln),za0_kernel,pawrad(itypat))
 !!      call simp_gen(za0_rad(2,kln),rt_kernel,rt_mesh)
 !!      za0_rad(2,kln) = simpson(rt_mesh(2),rt_kernel)
 !!      za0_rad(2,kln) = za0_rad(2,kln)*half
-!!      za0_rad(2,kln) = za0_rad(2,kln)*half*HalfFineStruct2
-      za0_rad(2,kln) = za0_rad(2,kln)*half
+      za0_rad(2,kln) = za0_rad(2,kln)*half*HalfFineStruct2
+!!      za0_rad(2,kln) = za0_rad(2,kln)*half
    
       ABI_FREE(rt_kernel)
 
