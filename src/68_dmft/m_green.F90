@@ -1222,7 +1222,7 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
    end do ! ifreq
  end if ! optself
 #else
- call copy_oper_to_ndat(green%oper,green_oper_ndat,ndat,green%nw,green%distrib%proct,green%distrib%me_freq)
+ call copy_oper_to_ndat(green%oper,green_oper_ndat,ndat,green%nw,green%distrib%proct,green%distrib%me_freq,.false.)
  if (optself == 0) then
    green_oper_ndat%ks(:,:,:,:) = czero
  else
@@ -1361,7 +1361,7 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  if (optlog == 1) then
    ABI_BUG("section not checked !")
-   call copy_oper_from_ndat(green_oper_ndat,green%oper,ndat,green%nw,green%distrib%proct,green%distrib%me_freq)
+   call copy_oper_from_ndat(green_oper_ndat,green%oper,ndat,green%nw,green%distrib%proct,green%distrib%me_freq,.true.)
    do ifreq=1,green%nw
      if (green%distrib%proct(ifreq) /= green%distrib%me_freq) cycle
      trace_tmp = czero
@@ -1386,7 +1386,7 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
      if (nsppol == 1 .and. nspinor == 1) trace_tmp = trace_tmp * two
      green%trace_log = green%trace_log + dble(trace_tmp)
    end do ! ifreq
-   call copy_oper_to_ndat(green%oper,green_oper_ndat,ndat,green%nw,green%distrib%proct,green%distrib%me_freq)
+   call copy_oper_to_ndat(green%oper,green_oper_ndat,ndat,green%nw,green%distrib%proct,green%distrib%me_freq,.true.)
  end if ! optlog=1
  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1493,7 +1493,7 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
  if (paw_dmft%lchipsiortho == 1 .or. optself == 1) then
    call downfold_oper(green_oper_ndat,paw_dmft,procb=green%distrib%procb(:),iproc=me_kpt,option=option,gpu_option=gpu_option)
  end if ! lchipsiortho=1
- call copy_oper_from_ndat(green_oper_ndat,green%oper,ndat,green%nw,green%distrib%proct,green%distrib%me_freq)
+ call copy_oper_from_ndat(green_oper_ndat,green%oper,ndat,green%nw,green%distrib%proct,green%distrib%me_freq,green%oper(ifreq_beg)%has_operks /= 0)
 #endif
  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

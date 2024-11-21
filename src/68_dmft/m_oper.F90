@@ -422,7 +422,7 @@ end subroutine copy_oper
 !!
 !! SOURCE
 
-subroutine copy_oper_from_ndat(oper1,oper2,ndat,nw,proct,me_freq)
+subroutine copy_oper_from_ndat(oper1,oper2,ndat,nw,proct,me_freq,copy_ks)
 
  use defs_basis
  use m_matlu, only : copy_matlu_from_ndat
@@ -433,13 +433,15 @@ subroutine copy_oper_from_ndat(oper1,oper2,ndat,nw,proct,me_freq)
  type(oper_type),intent(in) :: oper1
  type(oper_type),intent(inout) :: oper2(nw) !vz_i
  integer,intent(in) :: nw,ndat,me_freq
+ logical,intent(in) :: copy_ks
  integer,intent(in) :: proct(nw)
 
 !oper variables-------------------------------
- integer ::  ib, ib1, ikpt, isppol, idat, iw
+ integer ::  ib, ib1, ikpt, isppol, idat, iw, mbandc
 ! *********************************************************************
  DBG_ENTER("COLL")
  ABI_CHECK(oper1%ndat==ndat, "Bad value for ndat!")
+ mbandc=oper1%mbandc
  idat=1
  do iw=1,nw
    if (proct(iw) /= me_freq) cycle
@@ -449,13 +451,13 @@ subroutine copy_oper_from_ndat(oper1,oper2,ndat,nw,proct,me_freq)
    endif
  enddo
 
- if(allocated(oper1%ks)) then
+ if(allocated(oper1%ks) .and. copy_ks) then
    idat=1
    do iw=1,nw
      if (proct(iw) /= me_freq) cycle
      do isppol=1,oper1%nsppol
        do ikpt=1,oper1%nkpt
-         oper2(iw)%ks(:,:,ikpt,isppol)=oper1%ks(:,1+(idat-1)*oper1%mbandc:idat*oper1%mbandc,ikpt,isppol)
+         oper2(iw)%ks(:,:,ikpt,isppol)=oper1%ks(:,1+(idat-1)*mbandc:idat*mbandc,ikpt,isppol)
        enddo
      enddo
      idat=idat+1
@@ -478,7 +480,7 @@ end subroutine copy_oper_from_ndat
 !!
 !! SOURCE
 
-subroutine copy_oper_to_ndat(oper1,oper2,ndat,nw,proct,me_freq)
+subroutine copy_oper_to_ndat(oper1,oper2,ndat,nw,proct,me_freq,copy_ks)
 
  use defs_basis
  use m_matlu, only : copy_matlu_to_ndat
@@ -489,6 +491,7 @@ subroutine copy_oper_to_ndat(oper1,oper2,ndat,nw,proct,me_freq)
  type(oper_type),intent(in) :: oper1(nw)
  type(oper_type),intent(inout) :: oper2 !vz_i
  integer,intent(in) :: nw,ndat,me_freq
+ logical,intent(in) :: copy_ks
  integer,intent(in) :: proct(nw)
 
 !oper variables-------------------------------
@@ -507,7 +510,7 @@ subroutine copy_oper_to_ndat(oper1,oper2,ndat,nw,proct,me_freq)
    endif
  enddo
 
- if(allocated(oper2%ks)) then
+ if(allocated(oper2%ks) .and. copy_ks) then
    ABI_CHECK(size(oper2%ks,dim=2) == mbandc*ndat, "well?")
    ABI_CHECK(size(oper2%ks,dim=1) == mbandc, "uh?")
    idat=1
