@@ -1335,9 +1335,9 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
- do ifreq=1,green%nw
-   if (green%distrib%proct(ifreq) /= green%distrib%me_freq) cycle
-   if (optlog == 1) then
+ if (optlog == 1) then
+   do ifreq=1,green%nw
+     if (green%distrib%proct(ifreq) /= green%distrib%me_freq) cycle
      trace_tmp = czero
      do isppol=1,nsppol
        do ikpt=1,mkmem
@@ -1359,8 +1359,8 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
      end do ! isppol
      if (nsppol == 1 .and. nspinor == 1) trace_tmp = trace_tmp * two
      green%trace_log = green%trace_log + dble(trace_tmp)
-   end if ! optlog=1
- end do ! ifreq
+   end do ! ifreq
+ end if ! optlog=1
  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
