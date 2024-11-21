@@ -1243,6 +1243,7 @@ subroutine gather_oper(oper,distrib,paw_dmft,opt_ksloc,master,opt_diag,opt_commk
        call xmpi_allgatherv(buffer(:),recvcounts(myproc+1),buffer_tot(:),recvcounts(:),displs(:),comm,ierr)
      end if  ! present(master)
 
+     ibuf = 0
      do ikpt=1,nkpt
        do ifreq=1,nw
          do ib1=1,mbandc
