@@ -1003,7 +1003,7 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
  !logical :: lintegrate
  logical :: oper_ndat_allocated
  integer :: band_index,diag,i,ib,ierr,ifreq,ikpt,info,isppol,lwork,mbandc
- integer :: me_kpt,mkmem,myproc,natom,nband_k,nkpt,nmoments,nspinor,nsppol
+ integer :: me_kpt,mkmem,myproc,natom,nband_k,nkpt,nmoments,nspinor,nsppol,ndat
  integer :: opt_quick_restart,option,optlog,optnonxsum,optnonxsum2,optself
  integer :: shift,shift_green,spacecomm,gpu_option,optoper_ksloc
  real(dp) :: beta,correction,eigen,fermilevel,temp,wtk
@@ -1141,6 +1141,7 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
  shift = green%distrib%shiftk
  mkmem = green%distrib%nkpt_mem(green%distrib%me_kpt+1)
  shift_green = shift
+ ndat = green%distrib%nw_mem_kptparal(green%distrib%me_freq+1)
  if (green%oper(1)%has_operks == 0) shift_green = 0
 
  if(green%oper(1)%has_opermatlu==0) optoper_ksloc=1
@@ -1186,7 +1187,7 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
      green%oper(ifreq)%shiftk = shift
    end if
    if(.not. oper_ndat_allocated) then
-     call init_oper_ndat(paw_dmft,green_oper_ndat,green%nw,nkpt=green%oper(ifreq)%nkpt,opt_ksloc=optoper_ksloc)
+     call init_oper_ndat(paw_dmft,green_oper_ndat,ndat,nkpt=green%oper(ifreq)%nkpt,opt_ksloc=optoper_ksloc)
      if (green%oper(ifreq)%has_operks == 0) then
        green_oper_ndat%paral  = 1
        green_oper_ndat%shiftk = shift
@@ -1226,9 +1227,9 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
      call upfold_oper(green%oper(ifreq),paw_dmft,procb=green%distrib%procb(:),iproc=me_kpt,gpu_option=gpu_option)
    end do ! ifreq
 #else
-   call copy_oper_to_ndat(green%oper,green_oper_ndat,green%nw,green%distrib%proct,green%distrib%me_freq)
+   call copy_oper_to_ndat(green%oper,green_oper_ndat,ndat,green%nw,green%distrib%proct,green%distrib%me_freq)
    call upfold_oper(green_oper_ndat,paw_dmft,procb=green%distrib%procb(:),iproc=me_kpt,gpu_option=gpu_option)
-   call copy_oper_from_ndat(green_oper_ndat,green%oper,green%nw,green%distrib%proct,green%distrib%me_freq)
+   call copy_oper_from_ndat(green_oper_ndat,green%oper,ndat,green%nw,green%distrib%proct,green%distrib%me_freq)
 #endif
    !ABI_BUG("toto")
  end if ! optself
@@ -1438,9 +1439,9 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
      call downfold_oper(green%oper(ifreq),paw_dmft,procb=green%distrib%procb(:),iproc=me_kpt,option=option,gpu_option=gpu_option)
    end do ! ifreq
 #else
-   call copy_oper_to_ndat(green%oper,green_oper_ndat,green%nw,green%distrib%proct,green%distrib%me_freq)
+   call copy_oper_to_ndat(green%oper,green_oper_ndat,ndat,green%nw,green%distrib%proct,green%distrib%me_freq)
    call downfold_oper(green_oper_ndat,paw_dmft,procb=green%distrib%procb(:),iproc=me_kpt,option=option,gpu_option=gpu_option)
-   call copy_oper_from_ndat(green_oper_ndat,green%oper,green%nw,green%distrib%proct,green%distrib%me_freq)
+   call copy_oper_from_ndat(green_oper_ndat,green%oper,ndat,green%nw,green%distrib%proct,green%distrib%me_freq)
 #endif
  end if ! lchipsiortho=1
  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
