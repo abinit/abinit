@@ -366,7 +366,7 @@ subroutine print_oper(oper,option,paw_dmft,prtopt)
 !     call wrtout(std_out,message,'COLL')
      nkptr = min(nkpt,4)
      do isppol=1,paw_dmft%nsppol
-       write(message,'(a,3x,a,x,i1)') ch10,"--isppol--",isppol
+       write(message,'(a,3x,a,1x,i1)') ch10,"--isppol--",isppol
        call wrtout(std_out,message,'COLL')
        write(message,'(2a)') ch10,&
          & "   - (in the following only the value for the first k-points are printed)"
