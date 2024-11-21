@@ -1301,7 +1301,7 @@ subroutine cumulant_kubo_transport(self, dtset, cryst)
 
 ! calculate Dyson Migdal Green's function as well, for comparison
          gdm_vals(:) = one / (self%wrmesh_b(:,ib_eph,my_ik,spin) &
-&              - self%e0vals(ib,my_ik,spin) - 0.5 * wr_step &
+&              - self%e0vals(ib_eph,my_ik,spin) - 0.5 * wr_step &
 &              - self%vals_wr(:, itemp, ib_eph, my_ik, my_spin))
 
          Tkelv = self%kTmesh(itemp) / kb_HaK; if (Tkelv < one) Tkelv = one
