@@ -1878,6 +1878,9 @@ subroutine tildeAx(t,Ax,dAx,d2Ax)
  Ax = fit
  dAx = dfit * dydt
  d2Ax = d2fit*dydt**2 + dfit*d2ydt2
+ if(Ax/=Ax) Ax=zero
+ if(dAx/=dAx) dAx=zero
+ if(d2Ax/=d2Ax) d2Ax=zero
 end subroutine tildeAx
 !!***
 
@@ -1992,6 +1995,9 @@ subroutine tildeBx(t,Bx,dBx,d2Bx)
  Bx = fit
  dBx = dfit * dydt
  d2Bx = d2fit*dydt**2 + dfit*d2ydt2
+ if(Bx/=Bx) Bx=zero
+ if(dBx/=dBx) dBx=zero
+ if(d2Bx/=d2Bx) d2Bx=zero
 end subroutine tildeBx
 !!***
 
@@ -2095,6 +2101,9 @@ subroutine tildeBc(iflag,rs,t,Bc,dBcdrs,dBcdt)
    Bc = num/den
    dBcdrs = dnumdrs/den - (num/den)*ddendrs/den
    dBcdt = dnumdt/den - (num/den)*ddendt/den
+   if(Bc/=Bc) Bc=zero
+   if(dBcdrs/=dBcdrs) dBcdrs=zero
+   if(dBcdt/=dBcdt) dBcdt=zero
    !
  endif
 end subroutine tildeBc
