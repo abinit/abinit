@@ -2599,6 +2599,63 @@ subroutine abi_gpu_work_resizeI(array,array_managed,current_dim,asked_dim)
 end subroutine abi_gpu_work_resizeI
 !!***
 
+!!****f* m_abi_gpu_linalg/abi_gpu_work_resizeRs
+!!
+!! NAME
+!! abi_gpu_work_resizeRs
+
+subroutine abi_gpu_work_resizeRs(array,array_managed,current_dim,asked_dim)
+
+  double precision, allocatable, intent(inout) :: array(:)
+  real(kind=c_double), ABI_CONTIGUOUS pointer, intent(inout) :: array_managed(:)
+  integer, intent(inout) :: current_dim
+  integer(c_size_t), intent(in   ) :: asked_dim
+
+! *************************************************************************
+
+  if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
+
+#if 0
+!#ifdef HAVE_YAKL
+    if ( current_dim < asked_dim  ) then
+      current_dim = asked_dim
+      if ( associated(array_managed) ) then
+        ABI_FREE_MANAGED(array_managed)
+      end if
+      !ABI_MALLOC_MANAGED(array_managed,(/asked_dim/))
+    end if
+#endif
+
+  else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
+
+#ifdef HAVE_OPENMP_OFFLOAD
+    if ( current_dim < asked_dim  ) then
+      current_dim = asked_dim
+      if ( allocated(array) ) then
+        !$OMP TARGET EXIT DATA MAP(release:array)
+        ABI_FREE(array)
+      end if
+      ABI_MALLOC(array,(asked_dim))
+      !$OMP TARGET ENTER DATA MAP(alloc:array)
+    end if
+#endif
+
+  else
+    ABI_BUG("Unhandled GPU mode !")
+  end if
+
+#ifndef HAVE_GPU
+  ! Unused if GPU code disabled
+  ABI_UNUSED(array)
+  ABI_UNUSED(array_managed)
+  ABI_UNUSED(current_dim)
+  ABI_UNUSED(asked_dim)
+#endif
+
+end subroutine abi_gpu_work_resizeRs
+!!***
+
+
 !!****f* m_abi_gpu_linalg/abi_gpu_work_resizeR
 !!
 !! NAME
@@ -2652,6 +2709,63 @@ subroutine abi_gpu_work_resizeR(array,array_managed,current_dim,asked_dim)
 
 end subroutine abi_gpu_work_resizeR
 !!***
+
+!!****f* m_abi_gpu_linalg/abi_gpu_work_resizeCs
+!!
+!! NAME
+!! abi_gpu_work_resizeCs
+
+subroutine abi_gpu_work_resizeCs(array,array_managed,current_dim,asked_dim)
+
+  complex(kind=8), allocatable, intent(inout) :: array(:)
+  complex(kind=c_double_complex), ABI_CONTIGUOUS pointer, intent(inout) :: array_managed(:)
+  integer, intent(inout)  :: current_dim
+  integer(c_size_t), intent(in   )  :: asked_dim
+
+! *************************************************************************
+
+  if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
+
+!#ifdef HAVE_YAKL
+#if 0
+    if ( current_dim < asked_dim  ) then
+      current_dim = asked_dim
+      if ( associated(array_managed) ) then
+        ABI_FREE_MANAGED(array_managed)
+      end if
+      !ABI_MALLOC_MANAGED(array_managed,(/asked_dim/))
+    end if
+#endif
+
+  else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
+
+#ifdef HAVE_OPENMP_OFFLOAD
+    if ( current_dim < asked_dim  ) then
+      current_dim = asked_dim
+      if ( allocated(array) ) then
+        !$OMP TARGET EXIT DATA MAP(release:array)
+        ABI_FREE(array)
+      end if
+      ABI_MALLOC(array,(asked_dim))
+      !$OMP TARGET ENTER DATA MAP(alloc:array)
+    end if
+#endif
+
+  else
+    ABI_BUG("Unhandled GPU mode !")
+  end if
+
+#ifndef HAVE_GPU
+  ! Unused if GPU code disabled
+  ABI_UNUSED(array)
+  ABI_UNUSED(array_managed)
+  ABI_UNUSED(asked_dim)
+  ABI_UNUSED(current_dim)
+#endif
+
+end subroutine abi_gpu_work_resizeCs
+!!***
+
 
 !!****f* m_abi_gpu_linalg/abi_gpu_work_resizeC
 !!
@@ -3636,6 +3750,117 @@ subroutine abi_gpu_xpotrf_2z(cplx, uplo, A_nrows, &
   end if
 
 end subroutine abi_gpu_xpotrf_2z
+!!***
+
+!------------------------------------------------------------------------------
+!                         abi_gpu_xginv
+!------------------------------------------------------------------------------
+!!****f* m_abi_gpu_linalg/abi_gpu_xginv
+!! NAME
+!!  abi_gpu_xginv
+!!
+!! FUNCTION
+!!  Compute the inverse of a given matrix on GPU
+!!  using LAPACK-equivalent getrf and getrs from cuSolver/hipSolver
+!!
+!! See cusolver documentation
+!! https://docs.nvidia.com/cuda/cusolver/index.html?highlight=getrf#cusolverdnxgetrf
+!!
+!! INPUTS
+!!  cplx  = 1 if real 2 if complex
+!!  A_nrows = matrix size
+!!  A = pointer to gpu memory location of matrix A
+!!  lda   = leading dimension of matrix A
+!!  W = pointer to gpu memory location of work matrix W, same size as A
+!!  devInfo  =
+!!
+!! SOURCE
+subroutine abi_gpu_xginv_cptr(cplx, A_nrows, &
+                   A, lda, W)
+
+  ! Arguments ------------------------------------
+  integer,         intent(in   ) :: cplx
+  integer,         intent(in   ) :: A_nrows
+  type(c_ptr),     intent(in) :: A
+  integer,         intent(in   ) :: lda
+  type(c_ptr),     intent(in) :: W
+
+  ! Local variables ------------------------------
+  integer(c_size_t)     :: bufferSize_host, bufferSize_device
+  integer               :: devInfo
+  type(c_ptr) :: gpu_ptr
+
+! *************************************************************************
+
+  if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
+    ABI_BUG("You requested to run on CPU to a GPU wrapper :/")
+  end if
+
+#ifdef HAVE_GPU
+
+  ! probe needed bufferSize
+  call gpu_xgetrf_buffersize(cplx, &
+                 A_nrows, &
+                 A, lda, &
+                 bufferSize_host, bufferSize_device)
+
+  select case(cplx)
+
+  case (1)
+    ! resize work array if needed and retrieve work pointer to use
+    if(abi_linalg_gpu_mode == ABI_GPU_LEGACY &
+          .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
+      call abi_gpu_work_resize(r_work,r_work_managed,r_work_len,bufferSize_device)
+      gpu_ptr = c_loc(r_work_managed)
+    else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_GET_MAPPED_PTR
+      call abi_gpu_work_resize(r_work,r_work_managed,r_work_len,bufferSize_device)
+      gpu_ptr = xomp_get_mapped_ptr(c_loc(r_work))
+#else
+      call abi_gpu_work_resizeCptr(gpu_work,gpu_work_len,INT(1,c_size_t)*bufferSize_device*dp)
+      gpu_ptr = gpu_work
+#endif
+    end if
+
+  case (2)
+    ! resize work array if needed and retrieve work pointer to use
+    if(abi_linalg_gpu_mode == ABI_GPU_LEGACY &
+          .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
+      call abi_gpu_work_resize(c_work,c_work_managed,c_work_len,bufferSize_device)
+      gpu_ptr = c_loc(c_work_managed)
+    else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_GET_MAPPED_PTR
+      call abi_gpu_work_resize(c_work,c_work_managed,c_work_len,bufferSize_device)
+      gpu_ptr = xomp_get_mapped_ptr(c_loc(c_work))
+#else
+      call abi_gpu_work_resizeCptr(gpu_work,gpu_work_len,INT(1,c_size_t)*bufferSize_device*dp)
+      gpu_ptr = gpu_work
+#endif
+    end if
+
+  end select
+
+  ! and compute (finally)
+  call gpu_xginv(cplx, &
+                 A_nrows, &
+                 A, lda, W, &
+                 bufferSize_host, gpu_ptr, bufferSize_device, devInfo)
+
+  if (abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
+    ! CUDA/HIP linalg calls are run asynchronously and OpenMP is unaware of them.
+    ! Therefore, we issue a stream sync here to avoid
+    !potential mistakes in calling context.
+    call gpu_linalg_stream_synchronize()
+  end if
+
+#else
+  ! Unused if GPU code disabled
+  ABI_UNUSED((/cplx,A_nrows,lda,devInfo/))
+  ABI_UNUSED((/bufferSize_device,bufferSize_host/))
+  ABI_UNUSED((/A,gpu_ptr,W/))
+#endif
+
+end subroutine abi_gpu_xginv_cptr
 !!***
 
 !!****f* m_abi_linalg/gpu_xorthonormalize

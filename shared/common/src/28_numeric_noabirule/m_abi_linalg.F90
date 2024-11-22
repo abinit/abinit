@@ -237,6 +237,10 @@ module m_abi_linalg
     module procedure abi_gpu_xpotrf_2z
  end interface abi_gpu_xpotrf
 
+ interface abi_gpu_xginv
+    module procedure abi_gpu_xginv_cptr
+ end interface abi_gpu_xginv
+
  interface abi_gpu_xcopy
     module procedure abi_gpu_xcopy_cptr
     module procedure abi_gpu_xcopy_d
@@ -248,7 +252,9 @@ module m_abi_linalg
  interface abi_gpu_work_resize
     module procedure abi_gpu_work_resizeI
     module procedure abi_gpu_work_resizeR
+    module procedure abi_gpu_work_resizeRs
     module procedure abi_gpu_work_resizeC
+    module procedure abi_gpu_work_resizeCs
  end interface abi_gpu_work_resize
 
  public :: abi_zgemm
@@ -431,6 +437,7 @@ module m_abi_linalg
  public :: abi_gpu_xhegvd
  public :: abi_gpu_xheevd
  public :: abi_gpu_xpotrf
+ public :: abi_gpu_xginv
 
  logical,external :: LSAME
 

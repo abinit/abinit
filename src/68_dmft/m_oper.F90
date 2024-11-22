@@ -700,9 +700,10 @@ subroutine inverse_oper(oper,option,procb,iproc,gpu_option)
  integer, optional, intent(in) :: iproc,gpu_option
  integer, optional, intent(in) :: procb(oper%nkpt)
 !Local variables-------------------------------
- integer :: ikpt,isppol,idat,paral
+ integer :: ikpt,isppol,idat,paral,ib,mbandc
  integer :: l_gpu_option
  complex(dpc), ABI_CONTIGUOUS pointer :: ks(:,:,:,:)
+ complex(dpc), allocatable :: work(:,:)
 !todo_ba: prb with gwpc here: necessary for matcginv but should be dpc
 ! *********************************************************************
 
@@ -714,6 +715,7 @@ subroutine inverse_oper(oper,option,procb,iproc,gpu_option)
  l_gpu_option=ABI_GPU_DISABLED; if(present(gpu_option)) l_gpu_option=gpu_option
  paral = 0
  ks => oper%ks
+ mbandc = oper%mbandc
  if (present(procb) .and. present(iproc) .and. oper%paral == 0) paral = 1
 
  !if (((option == 1 .or. option == 3) .and. (oper%has_operks == 0)) .or. &
@@ -742,11 +744,39 @@ subroutine inverse_oper(oper,option,procb,iproc,gpu_option)
            call xginv(oper%ks(:,1+(idat-1)*oper%mbandc:idat*oper%mbandc,ikpt,isppol),oper%mbandc)
          end do ! idat
        else if(l_gpu_option==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+#if 0
+         ABI_MALLOC(work, (mbandc,mbandc))
+         !$OMP TARGET ENTER DATA MAP(alloc:work)
          do idat=1,oper%ndat
-         !$OMP TARGET DATA USE_DEVICE_PTR(ks)
-         call gpu_xginv_strided_batched(2,oper%mbandc,oper%mbandc,ks(:,1+(idat-1)*oper%mbandc:idat*oper%mbandc,ikpt,isppol),oper%mbandc,oper%mbandc*oper%mbandc,oper%ndat)
-         !$OMP END TARGET DATA
+           call gpu_set_to_zero_complex(work, int(mbandc,c_size_t)*mbandc)
+           !$OMP TARGET PARALLEL DO MAP(to:work) PRIVATE(ib)
+           do ib=1,mbandc
+             work(ib,ib) = cone
+           end do
+           !$OMP TARGET DATA USE_DEVICE_PTR(ks,work)
+           call abi_gpu_xginv(2,mbandc,c_loc(ks(:,1+(idat-1)*mbandc:idat*mbandc,ikpt,isppol)),mbandc,c_loc(work))
+           !$OMP END TARGET DATA
          end do ! idat
+         !$OMP TARGET EXIT DATA MAP(delete:work)
+         ABI_FREE(work)
+#else
+         ABI_MALLOC(work, (mbandc,mbandc))
+         !$OMP TARGET ENTER DATA MAP(alloc:work)
+         do idat=1,oper%ndat
+           call gpu_set_to_zero_complex(work, int(mbandc,c_size_t)*mbandc)
+           !$OMP TARGET PARALLEL DO MAP(to:work) PRIVATE(ib)
+           do ib=1,mbandc
+             work(ib,ib) = cone
+           end do
+           !$OMP TARGET DATA USE_DEVICE_PTR(ks,work)
+           call gpu_xginv_old(2,mbandc,ks(:,1+(idat-1)*mbandc:idat*mbandc,ikpt,isppol),mbandc,work)
+           !$OMP END TARGET DATA
+         end do ! idat
+         !$OMP TARGET EXIT DATA MAP(delete:work)
+         ABI_FREE(work)
+#endif
+#endif
        end if
      end do ! ikpt
    end do ! isppol
