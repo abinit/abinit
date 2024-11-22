@@ -445,7 +445,6 @@ type(abimover_specs),intent(out) :: specs
  ab_mover%goprecon    =dtset%goprecon
  ab_mover%jellslab    =dtset%jellslab
  ab_mover%natom       =dtset%natom
- ab_mover%ndof        =3*dtset%natom
  ab_mover%nconeq      =dtset%nconeq
  ab_mover%nnos        =dtset%nnos
  ab_mover%nsym        =dtset%nsym
@@ -482,6 +481,11 @@ type(abimover_specs),intent(out) :: specs
  do iatom=1,natom
    ab_mover%amass(iatom)=amu_emass*amu_curr(dtset%typat(iatom))
  end do
+
+!Count the number of degrees of freedom, taking into account iatfix.
+!Ndof = 3N (when no atom is fixed). This value may be adjusted for
+!each algorithm below.
+ ab_mover%ndof=count(ab_mover%iatfix==0)
 
 !Filename for Hessian matrix (NOT IN DTSET)
  ab_mover%fnameabi_hes =>dtfil%fnameabi_hes
@@ -647,8 +651,11 @@ type(abimover_specs),intent(out) :: specs
    specs%method = 'Isokinetic ensemble molecular dynamics'
 !  Number of history
    specs%nhist = 3
-!  Number of degrees of freedom
-   ab_mover%ndof = 3*dtset%natom-4
+!  Number of degrees of freedom: 3N-4
+   ab_mover%ndof=ab_mover%ndof-1 ! Kinetic energy conservation
+!  Conservation of the total momentum for each dimension, in case
+!  no atom position is fixed for that dimension
+   ab_mover%ndof=ab_mover%ndof-count(sum(ab_mover%iatfix,dim=2)==0)
 !  This is the initialization for ionmov==13
 !  -------------------------------------------
  case (13)
@@ -693,7 +700,7 @@ type(abimover_specs),intent(out) :: specs
    specs%nhist = 2
 !  This is the initialization for ionmov==16
 !  ------------------------------------------
-case (16)
+ case (16)
 !  TEMPORARLY optcell is not allow
    specs%isVused=.TRUE.  ! Velocities are used
    specs%isFconv=.FALSE. ! Convergence is not used for MD
@@ -705,6 +712,12 @@ case (16)
    specs%method = 'Langevin molecular dynamics'
 !  Number of history
    specs%nhist = 3
+!  Number of degrees of freedom: 3N-constraints
+!  For now the pimd langevin algorithms do not support iatfix.
+   if(dtset%pitransform==1.or.dtset%pitransform==2.or.&
+&     dtset%pimd_constraint==1.or.dtset%optcell==2) then
+     ab_mover%ndof=ab_mover%ndof-3
+   end if
 !  This is the initialization for ionmov==20
 !  -------------------------------------------
  case (20)
