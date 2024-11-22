@@ -98,6 +98,8 @@ module m_abihist
     integer :: ihist = 0
 ! Maximun size of the historical records
     integer :: mxhist = 0
+! Number of Degrees of Freedom
+    integer :: ndof = 0
 ! Booleans to know if some arrays are changing
     logical :: isVused  ! If velocities are changing
     logical :: isARused ! If Acell and Rprimd are changing
@@ -194,6 +196,7 @@ subroutine abihist_init_0D(hist,natom,mxhist,isVused,isARused)
 !Initialize indexes
  hist%ihist=1
  hist%mxhist=mxhist
+ hist%ndof=3*natom
 
 !Initialize flags
  hist%isVused=isVUsed
@@ -1012,11 +1015,11 @@ end subroutine abihist_compare_and_copy
 !! SOURCE
 
 subroutine write_md_hist(hist,filename,ifirst,itime,natom,nctime,ntypat,&
-&                        ndof,typat,amu,znucl,dtion,mdtemp)
+&                        typat,amu,znucl,dtion,mdtemp)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: ifirst,itime,natom,nctime,ntypat,ndof
+ integer,intent(in) :: ifirst,itime,natom,nctime,ntypat
  real(dp),intent(in) :: dtion
  character(len=*),intent(in) :: filename
 !arrays
@@ -1063,7 +1066,7 @@ subroutine write_md_hist(hist,filename,ifirst,itime,natom,nctime,ntypat,&
 
 !  Write variables that do not change
 !  (they are not read in a hist structure).
-   call write_csts_hist(ncid,dtion,imgmov,typat,znucl,amu,mdtemp,ndof)
+   call write_csts_hist(ncid,dtion,imgmov,typat,znucl,amu,mdtemp,hist%ndof)
 
 !  Compute the itime for the hist file
    itime_file = 1
@@ -1143,12 +1146,12 @@ end subroutine write_md_hist
 !! SOURCE
 
 subroutine write_md_hist_img(hist,filename,ifirst,itime,natom,ntypat,&
-&                            ndof,typat,amu,znucl,dtion,&
+&                            typat,amu,znucl,dtion,&
 &                            nimage,imgmov,mdtemp,comm_img,imgtab) ! optional arguments
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: ifirst,itime,natom,ntypat,ndof
+ integer,intent(in) :: ifirst,itime,natom,ntypat
  integer,intent(in),optional :: nimage,imgmov,comm_img
  real(dp),intent(in) :: dtion
  character(len=*),intent(in) :: filename
@@ -1212,7 +1215,7 @@ subroutine write_md_hist_img(hist,filename,ifirst,itime,natom,ntypat,&
        call def_file_hist(ncid,natom,nimage_,ntypat,npsp,has_nimage)
 !      Write variables that do not change
 !      (they are not read in a hist structure).
-       call write_csts_hist(ncid,dtion,imgmov_,typat,znucl,amu,mdtemp,ndof)
+       call write_csts_hist(ncid,dtion,imgmov_,typat,znucl,amu,mdtemp,hist(1)%ndof)
      end if
 
 !    ##### itime>2 access: just open NetCDF file

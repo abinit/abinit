@@ -415,6 +415,17 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
  call pimd_init(dtset,pimd_param,is_master)
  dtion=one;if (is_pimd) dtion=pimd_param%dtion
 
+!Set Number of degrees Of Freedom for PIMD algorithms
+ if(use_hist) then
+   hist(:)%ndof=3*dtset%natom ! Init ndof to 3N (no iatfix for PIMD)
+   if(dtset%imgmov==9.or.dtset%imgmov==10) then
+     if(pimd_param%pitransform==1.or.pimd_param%pitransform==2.or.&
+&       pimd_param%constraint==1.or.pimd_param%optcell==2) then
+       hist(:)%ndof=hist(:)%ndof-3
+     end if
+   end if
+ end if
+
  call timab(1203,2,tsec)
 
 !-----------------------------------------------------------------------------------------
@@ -623,7 +634,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
    if (use_hist.and.mpi_enreg%me_cell==0) then
      ifirst=merge(0,1,itimimage>1)
      call write_md_hist_img(hist,hist_filename,ifirst,itimimage,dtset%natom,dtset%ntypat,&
-&     3*dtset%natom,dtset%typat,amu_img(:,1),dtset%znucl,dtion,&
+&     dtset%typat,amu_img(:,1),dtset%znucl,dtion,&
 &     nimage=dtset%nimage,imgmov=dtset%imgmov,mdtemp=dtset%mdtemp,comm_img=mpi_enreg%comm_img,&
 &     imgtab=mpi_enreg%my_imgtab)
    end if

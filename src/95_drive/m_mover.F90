@@ -466,6 +466,8 @@ real(dp) :: k0(3)
 
 !At beginning no error
  nerr_dilatmx = 0
+!Copy the number of degrees of freedom in hist structure
+ hist%ndof=ab_mover%ndof
 
  ABI_MALLOC(xred_prev,(3,scfcv_args%dtset%natom))
 
@@ -777,8 +779,7 @@ real(dp) :: k0(3)
      if (need_writeHIST.and.me==master) then
        ifirst=merge(0,1,(itime>1.or.icycle>1))
        call write_md_hist(hist,filename,ifirst,itime_hist,ab_mover%natom,scfcv_args%dtset%nctime,&
-&       ab_mover%ntypat,ab_mover%ndof,ab_mover%typat,amu_curr,ab_mover%znucl,ab_mover%dtion,&
-&       scfcv_args%dtset%mdtemp)
+&       ab_mover%ntypat,ab_mover%typat,amu_curr,ab_mover%znucl,ab_mover%dtion,scfcv_args%dtset%mdtemp)
      end if
 #endif
 
