@@ -321,7 +321,7 @@ subroutine init_hu(hu,paw_dmft,pawtab)
      end do ! ms1
    end do ! ms
 
-   if (t2g .and. dmft_test == 0) then
+   if (t2g .and. dmft_test == 1) then
      upawu = zero
      jpawu = zero
      do ms1=1,ndim
@@ -334,7 +334,7 @@ subroutine init_hu(hu,paw_dmft,pawtab)
      jpawu = upawu - jpawu/dble(2*lpawu*ndim)
      hu(itypat)%upawu = upawu
      hu(itypat)%jpawu = jpawu
-   end if ! t2g and dmft_test=0
+   end if ! t2g and dmft_test=1
 
    xij(tndim,tndim) = 0
    write(message,'(a,5x,a)') ch10,"-------- Interactions in the density matrix representation "
@@ -741,7 +741,7 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
        ABI_MALLOC(veeylm2,(tndim,tndim,tndim,tndim))
        ABI_MALLOC(veeslm,(ndim,ndim,ndim,ndim))
 !      Change basis from slm to ylm basis
-       if (dmft_test == 0) then
+       if (dmft_test == 1) then
          veeslm(:,:,:,:) = cmplx(dble(hu(itypat)%vee(:,:,:,:)),zero,kind=dp)
        else
          veeslm(:,:,:,:) = cmplx(real(hu(itypat)%vee(:,:,:,:)),zero,kind=sp)

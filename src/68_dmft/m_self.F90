@@ -512,7 +512,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
  type(matlu_type), optional, intent(inout) :: opt_selflimit(paw_dmft%natom)
  type(matlu_type), optional, intent(in) :: opt_hdc(paw_dmft%natom)
 !local variables-------------------------------
- integer :: dmft_test,i,iall,iatom,iatu,icount,ier,iexist2,iexit,iflavor,ifreq,im,im1,ioerr
+ integer :: i,iall,iatom,iatu,icount,ier,iexist2,iexit,iflavor,ifreq,im,im1,ioerr
  integer :: ispinor,ispinor1,isppol,istep,istep_imp,istepiter,iter,iter_imp,lpawu,master
  integer :: myproc,natom,natom_read,ncount,ndim,ndim_read,nrecl,nspinor,nspinor_read
  integer :: nsppol,nsppol_read,nw_read,optmaxent,optrw,readimagonly,spacecomm,unitrot
@@ -539,8 +539,6 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
  nsppol  = paw_dmft%nsppol
  !mbandc = paw_dmft%mbandc
  !nkpt = paw_dmft%nkpt
-
- dmft_test = paw_dmft%dmft_test
 
 ! Initialise spaceComm, myproc, and nproc
  istep = 0

@@ -3437,7 +3437,7 @@ subroutine newton(green,self,paw_dmft,x_input,x_precision,max_iter,&
 !  ========================================
 !  If zero is located between two values: apply newton method or dichotomy
 !  ========================================
-   if ((l_minus .and. l_plus) .or. dmft_test == 0) then
+   if ((l_minus .and. l_plus) .or. dmft_test == 1) then
 
 !    ==============================================
 !    Compute the function and derivatives for newton
@@ -3475,7 +3475,7 @@ subroutine newton(green,self,paw_dmft,x_input,x_precision,max_iter,&
 !    ==============================================
      xold = x_input
      if (option == 1) then
-       if (dmft_test == 0) then
+       if (dmft_test == 1) then
          if (Fxprime < 0) then
            x_input = x_input - sign(one,Fx)*step
          else
@@ -3491,7 +3491,7 @@ subroutine newton(green,self,paw_dmft,x_input,x_precision,max_iter,&
 !    If newton does not work well, use dichotomy.
 !    ==============================================
 
-     if (dmft_test == 0) then
+     if (dmft_test == 1) then
        if (Fx < 0) then
          l_minus = .true.
          x_minus = xold
@@ -3504,13 +3504,13 @@ subroutine newton(green,self,paw_dmft,x_input,x_precision,max_iter,&
 
      if ((x_input < x_minus .or. x_input > x_plus) .and. (l_minus .and. l_plus)) then
 
-       if (dmft_test == 1) then
+       if (dmft_test == 0) then
          call compute_nb_elec(green,self,paw_dmft,Fx,nb_elec_x,xold)
        end if
 
        write(message,'(a,3f12.6)') " ---",x_input,Fx+paw_dmft%nelectval,Fx
        call wrtout(std_out,message,'COLL')
-       if (dmft_test == 1) then
+       if (dmft_test == 0) then
          if (Fx > 0) then
            x_plus = xold
          else if (Fx < 0) then
@@ -3551,7 +3551,7 @@ subroutine newton(green,self,paw_dmft,x_input,x_precision,max_iter,&
    if (abs(Fx) < abs(Fxoptimum)) then
      Fxoptimum = Fx
      x_optimum = x_input
-     if (dmft_test == 0) x_optimum = xold
+     if (dmft_test == 1) x_optimum = xold
    end if ! abs(Fx)<abs(Fxoptimum)
 
 
@@ -3621,7 +3621,7 @@ subroutine function_and_deriv(green,self,paw_dmft,x_input,x_precision, &
 
    dmft_test = paw_dmft%dmft_test
 
-   if (dmft_test == 1) then
+   if (dmft_test == 0) then
 
 !  Choose deltax: for numeric evaluation of derivative
    !if(iter==1) then
@@ -3726,7 +3726,7 @@ subroutine compute_nb_elec(green,self,paw_dmft,Fx,nb_elec_x,fermie,Fxprime)
 
    dmft_test = paw_dmft%dmft_test
 
-   if (dmft_test == 1) then
+   if (dmft_test == 0) then
 
      paw_dmft%fermie = fermie
      call compute_green(green,paw_dmft,0,self,opt_self=1,opt_nonxsum=1,opt_nonxsum2=1)
