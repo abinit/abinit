@@ -233,7 +233,6 @@ subroutine destroy_oper(oper)
 !Arguments ------------------------------------
  type(oper_type), intent(inout) :: oper
 !Local variables-------------------------------
- character(len=500) :: message
 !! *********************************************************************
 
  DBG_ENTER("COLL")
