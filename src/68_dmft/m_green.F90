@@ -3298,7 +3298,7 @@ subroutine fermi_green(green,paw_dmft,self)
    write(message,'(a)') "Warning, check Fermi level"
    call wrtout(std_out,message,'COLL')
 !  call abi_abort('COLL')
-   write(message,'(2a,f13.6)') ch10,"  |---  Final  value for Fermi level (check)",paw_dmft%fermie
+   write(message,'(2a,f13.6)') ch10,"  |---  Final value for Fermi level (check)",paw_dmft%fermie
    call wrtout(std_out,message,'COLL')
  else if (ierr_hh == -123) then
    write(message,'(a,f13.6)') " Fermi level is set to",fermi_old
