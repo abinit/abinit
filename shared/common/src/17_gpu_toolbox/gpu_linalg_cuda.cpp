@@ -307,6 +307,107 @@ extern "C" void gpu_xgemm_strided_batched_(int* cplx, char *transA, char *transB
 //
 /*=========================================================================*/
 
+extern "C" void gpu_xgetrf_buffersize_(int* cplx,
+                           int *N,
+                           void **A_ptr, int *lda,
+                           size_t *bufferSize_host, size_t *bufferSize_device)
+{
+  cudaDataType type;
+  if(*cplx==1) type=CUDA_R_64F;
+  if(*cplx==2) type=CUDA_C_64F;
+  CUDA_API_CHECK( cusolverDnXgetrf_bufferSize(cusolverDn_handle,
+    NULL,
+    *N,
+    *N,
+    type,
+    (void*)A_ptr,
+    *lda,
+    type,
+    bufferSize_device,
+    bufferSize_host));
+}
+
+extern "C" void gpu_xginv_(int* cplx,
+                           int *N,
+                           void **A_ptr, int *lda, void **W_ptr,
+                           size_t *bufferSize_host,
+                           void **work_ptr, size_t *bufferSize_device,
+                           int *info)
+{
+  cudaDataType type;
+  if(*cplx==1) type=CUDA_R_64F;
+  if(*cplx==2) type=CUDA_C_64F;
+  int *devInfo;
+  void *bufferOnHost;
+  //Complex *matrix = (Complex*) malloc(*N * (*N) * sizeof(Complex));
+  //create_identity_matrix(*N, matrix);
+  int64_t *ipiv;
+  //cusolverDnSetAdvOptions(params, CUSOLVERDN_GETRF, CUSOLVER_ALG_0);
+  CUDA_API_CHECK( cudaMalloc( (void**) &ipiv,     *N*sizeof(int64_t)) );
+  CUDA_API_CHECK( cudaMalloc( (void**) &devInfo, 1*sizeof(int)) );
+  //CUDA_API_CHECK( cudaMemcpy(W_ptr, matrix, *N*(*N)*sizeof(cuDoubleComplex), cudaMemcpyDefault) );
+
+  bufferOnHost = malloc(*bufferSize_host);
+  CUDA_API_CHECK( cusolverDnXgetrf(cusolverDn_handle,
+    NULL,
+    *N,
+    *N,
+    type,
+    (void*)A_ptr,
+    *lda,
+    ipiv,
+    type,
+    work_ptr,
+    *bufferSize_device,
+    bufferOnHost,
+    *bufferSize_host,
+    devInfo ));
+  CUDA_API_CHECK( cudaMemcpy(info, devInfo, 1*sizeof(int), cudaMemcpyDefault) );
+  if (*info < 0) {
+    fprintf(stderr, "Xgetrf:  The %d-th argument of ZGETRF had an illegal value.", *info);
+    fflush(stderr);
+    abi_cabort();
+  } else if (*info > 0) {
+     fprintf(stderr, "Xgetrf: The matrix that has been passed in argument is probably either singular or nearly singular.\n\
+     U(i,i) in the P*L*U factorization is exactly zero for i = %d \n\
+     The factorization has been completed but the factor U is exactly singular.\n\
+     Division by zero will occur if it is used to solve a system of equations.", *info);
+     fflush(stderr);
+     abi_cabort();
+  } else { fprintf(stderr, "Xgetrf: OK");}
+  free(bufferOnHost);
+  cusolverDnXgetrs(
+    cusolverDn_handle,
+    NULL,
+    CUBLAS_OP_N,
+    *N,
+    *N,
+    type,
+    (void*)A_ptr,
+    *lda,
+    ipiv,
+    type,
+    W_ptr,
+    *lda,
+    devInfo );
+  CUDA_API_CHECK( cudaMemcpy(info, devInfo, 1*sizeof(int), cudaMemcpyDefault) );
+  if (*info < 0) {
+    fprintf(stderr, "Xgetrs: The %d-th argument of ZGETRS had an illegal value.", *info);
+    fflush(stderr);
+    abi_cabort();
+  } else if (*info > 0) {
+     fprintf(stderr, "Xgetrs: The matrix that has been passed in argument is probably either singular or nearly singular.\n\
+     U(i,i) in the P*L*U factorization is exactly zero for i = %d \n\
+     The factorization has been completed but the factor U is exactly singular.\n\
+     Division by zero will occur if it is used to solve a system of equations.", *info);
+     fflush(stderr);
+     abi_cabort();
+  }
+  CUDA_API_CHECK( cudaMemcpy(A_ptr, W_ptr, *N*(*N)*sizeof(cuDoubleComplex), cudaMemcpyDefault) );
+  CUDA_API_CHECK( cudaFree(ipiv) );
+  CUDA_API_CHECK( cudaFree(devInfo) );
+} // gpu_xginv
+
 typedef struct {
     double real;
     double imag;
@@ -327,32 +428,24 @@ void create_identity_matrix(int N, Complex *matrix) {
     }
 }
 
-extern "C" void gpu_xginv_strided_batched_(int* cplx,
-                           int *M, int *N,
-                           void **A_ptr, int *lda, int *strideA,
-                           int *batchCount)
+extern "C" void gpu_xginv_old_(int* cplx,
+                           int *N,
+                           void **A_ptr, int *lda, void **W_ptr)
 {
   int info;
   int *devInfo;
   size_t workspaceInBytesOnDevice,workspaceInBytesOnHost;
   void *bufferOnDevice, *bufferOnHost;
-  cusolverDnParams_t params;
-  cuDoubleComplex *A_array;
-  Complex *matrix = (Complex*) malloc(*N * (*N) * sizeof(Complex));
-  create_identity_matrix(*N, matrix);
-  CUDA_API_CHECK( cudaMalloc( (void**) &A_array, *N*(*N)*sizeof(cuDoubleComplex)) );
   int64_t *ipiv;
   //cusolverDnSetAdvOptions(params, CUSOLVERDN_GETRF, CUSOLVER_ALG_0);
-  CUDA_API_CHECK( cudaMalloc( (void**) &ipiv,     *M*sizeof(int64_t)) );
+  CUDA_API_CHECK( cudaMalloc( (void**) &ipiv,     *N*sizeof(int64_t)) );
   CUDA_API_CHECK( cudaMalloc( (void**) &devInfo, 1*sizeof(int)) );
-  CUDA_API_CHECK( cudaMemcpy(A_array, matrix, *N*(*N)*sizeof(cuDoubleComplex), cudaMemcpyDefault) );
 
   CUDA_API_CHECK( cusolverDnXgetrf_bufferSize(cusolverDn_handle,
     NULL,
-    *M,
+    *N,
     *N,
     CUDA_C_64F,
-    /*(void*)A_array,*/
     (void*)A_ptr,
     *lda,
     CUDA_C_64F,
@@ -362,7 +455,7 @@ extern "C" void gpu_xginv_strided_batched_(int* cplx,
   CUDA_API_CHECK( cudaMalloc( (void**) &bufferOnDevice, workspaceInBytesOnDevice) );
   CUDA_API_CHECK( cusolverDnXgetrf(cusolverDn_handle,
     NULL,
-    *M,
+    *N,
     *N,
     CUDA_C_64F,
     (void*)A_ptr,
@@ -400,7 +493,7 @@ extern "C" void gpu_xginv_strided_batched_(int* cplx,
     *lda,
     ipiv,
     CUDA_C_64F,
-    A_array,
+    W_ptr,
     *lda,
     devInfo );
   CUDA_API_CHECK( cudaMemcpy(&info, devInfo, 1*sizeof(int), cudaMemcpyDefault) );
@@ -416,11 +509,9 @@ extern "C" void gpu_xginv_strided_batched_(int* cplx,
      fflush(stderr);
      abi_cabort();
   }
-  CUDA_API_CHECK( cudaMemcpy(A_ptr, A_array, *N*(*N)*sizeof(cuDoubleComplex), cudaMemcpyDefault) );
-  CUDA_API_CHECK( cudaFree(A_array) );
+  CUDA_API_CHECK( cudaMemcpy(A_ptr, W_ptr, *N*(*N)*sizeof(cuDoubleComplex), cudaMemcpyDefault) );
   CUDA_API_CHECK( cudaFree(ipiv) );
   CUDA_API_CHECK( cudaFree(devInfo) );
-  free(matrix);
 	/*
   int *infoArray, *pivotArray, *info;
 	info = (int*) malloc(*batchCount*sizeof(int));
