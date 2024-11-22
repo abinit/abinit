@@ -272,6 +272,228 @@ extern "C" void gpu_xgemm_strided_batched_(int* cplx, char *transA, char *transB
                 (cuDoubleComplex *)(*C_ptr), *ldc, *strideC, *batchCount));
 } // gpu_xgemm_strided_batched
 
+
+/*=========================================================================*/
+// NAME
+//  gpu_xginv_strided_batched
+//
+// FUNCTION
+//  Compute a batched scalar-matrix-matrix product and return a scalar-matrix product on GPU.
+//  Meant to be used on non-contiguous matrixes with data is uniformly split in the same number of batches in each matrix.
+//  c = alpha * op(a) * op(b) + beta * c
+//
+// INPUTS
+//  cplx       = 1 if real 2 if complex
+//  transa     = from of op(a) to be used in the matrix multiplication
+//  transb     = from of op(b) to be used in the matrix multiplication
+//  m          = number of rows of the matrix op(a) and of the matrix c
+//  n          = number of rows of the matrix op(b) and the number of columns of the matrix c
+//  k          = number of columns of the matrix op(a) and the number of rows of the matrix op(b)
+//  alpha      = alpha scalar coefficient for matrix op(a)
+//  a_gpu      = pointer to gpu memory location of  matrix a
+//  lda        = first dimension of a
+//  strideC    = stride between each batch in matrix a
+//  b_gpu      = pointer to gpu memory location of  matrix b
+//  ldb        = first dimension of b
+//  strideC    = stride between each batch in matrix b
+//  beta       = beta scalar coefficient for matrix c
+//  c_gpu      = pointer to gpu memory location of  matrix c
+//  ldc        = first dimension of c
+//  strideC    = stride between each batch in matrix c
+//  batchCount = number of batches in any matrix
+//
+// OUTPUT
+//  c_gpu     = c_gpu matrix
+//
+/*=========================================================================*/
+
+typedef struct {
+    double real;
+    double imag;
+} Complex;
+
+void create_identity_matrix(int N, Complex *matrix) {
+    // Remplir la matrice avec des valeurs complexes
+    for (int i = 0; i < N; i++) {
+        for (int j = 0; j < N; j++) {
+            if (i == j) {
+                matrix[i * N + j].real = 1.0;  // Partie réelle de 1
+                matrix[i * N + j].imag = 0.0;  // Partie imaginaire de 0
+            } else {
+                matrix[i * N + j].real = 0.0;  // Partie réelle de 0
+                matrix[i * N + j].imag = 0.0;  // Partie imaginaire de 0
+            }
+        }
+    }
+}
+
+extern "C" void gpu_xginv_strided_batched_(int* cplx,
+                           int *M, int *N,
+                           void **A_ptr, int *lda, int *strideA,
+                           int *batchCount)
+{
+  int info;
+  int *devInfo;
+  size_t workspaceInBytesOnDevice,workspaceInBytesOnHost;
+  void *bufferOnDevice, *bufferOnHost;
+  cusolverDnParams_t params;
+  cuDoubleComplex *A_array;
+  Complex *matrix = (Complex*) malloc(*N * (*N) * sizeof(Complex));
+  create_identity_matrix(*N, matrix);
+  CUDA_API_CHECK( cudaMalloc( (void**) &A_array, *N*(*N)*sizeof(cuDoubleComplex)) );
+  int64_t *ipiv;
+  //cusolverDnSetAdvOptions(params, CUSOLVERDN_GETRF, CUSOLVER_ALG_0);
+  CUDA_API_CHECK( cudaMalloc( (void**) &ipiv,     *M*sizeof(int64_t)) );
+  CUDA_API_CHECK( cudaMalloc( (void**) &devInfo, 1*sizeof(int)) );
+  CUDA_API_CHECK( cudaMemcpy(A_array, matrix, *N*(*N)*sizeof(cuDoubleComplex), cudaMemcpyDefault) );
+
+  CUDA_API_CHECK( cusolverDnXgetrf_bufferSize(cusolverDn_handle,
+    NULL,
+    *M,
+    *N,
+    CUDA_C_64F,
+    /*(void*)A_array,*/
+    (void*)A_ptr,
+    *lda,
+    CUDA_C_64F,
+    &workspaceInBytesOnDevice,
+    &workspaceInBytesOnHost));
+  bufferOnHost = malloc(workspaceInBytesOnHost);
+  CUDA_API_CHECK( cudaMalloc( (void**) &bufferOnDevice, workspaceInBytesOnDevice) );
+  CUDA_API_CHECK( cusolverDnXgetrf(cusolverDn_handle,
+    NULL,
+    *M,
+    *N,
+    CUDA_C_64F,
+    (void*)A_ptr,
+    *lda,
+    ipiv,
+    CUDA_C_64F,
+    bufferOnDevice,
+    workspaceInBytesOnDevice,
+    bufferOnHost,
+    workspaceInBytesOnHost,
+    devInfo ));
+  CUDA_API_CHECK( cudaMemcpy(&info, devInfo, 1*sizeof(int), cudaMemcpyDefault) );
+  if (info < 0) {
+    fprintf(stderr, " The %d-th argument of ZGETRF had an illegal value.", info);
+    fflush(stderr);
+    abi_cabort();
+  } else if (info > 0) {
+     fprintf(stderr, "The matrix that has been passed in argument is probably either singular or nearly singular.\n\
+     U(i,i) in the P*L*U factorization is exactly zero for i = %d \n\
+     The factorization has been completed but the factor U is exactly singular.\n\
+     Division by zero will occur if it is used to solve a system of equations.", info);
+     fflush(stderr);
+     abi_cabort();
+  }
+  CUDA_API_CHECK( cudaFree(bufferOnDevice) );
+  free(bufferOnHost);
+  cusolverDnXgetrs(
+    cusolverDn_handle,
+    NULL,
+    CUBLAS_OP_N,
+    *N,
+    *N,
+    CUDA_C_64F,
+    (void*)A_ptr,
+    *lda,
+    ipiv,
+    CUDA_C_64F,
+    A_array,
+    *lda,
+    devInfo );
+  CUDA_API_CHECK( cudaMemcpy(&info, devInfo, 1*sizeof(int), cudaMemcpyDefault) );
+  if (info < 0) {
+    fprintf(stderr, " The %d-th argument of ZGETRF had an illegal value.", info);
+    fflush(stderr);
+    abi_cabort();
+  } else if (info > 0) {
+     fprintf(stderr, "The matrix that has been passed in argument is probably either singular or nearly singular.\n\
+     U(i,i) in the P*L*U factorization is exactly zero for i = %d \n\
+     The factorization has been completed but the factor U is exactly singular.\n\
+     Division by zero will occur if it is used to solve a system of equations.", info);
+     fflush(stderr);
+     abi_cabort();
+  }
+  CUDA_API_CHECK( cudaMemcpy(A_ptr, A_array, *N*(*N)*sizeof(cuDoubleComplex), cudaMemcpyDefault) );
+  CUDA_API_CHECK( cudaFree(A_array) );
+  CUDA_API_CHECK( cudaFree(ipiv) );
+  CUDA_API_CHECK( cudaFree(devInfo) );
+  free(matrix);
+	/*
+  int *infoArray, *pivotArray, *info;
+	info = (int*) malloc(*batchCount*sizeof(int));
+  CUDA_API_CHECK( cudaMalloc( (void**) &infoArray,  *batchCount*sizeof(int)) );
+  CUDA_API_CHECK( cudaMalloc( (void**) &pivotArray, *batchCount*sizeof(int)) );
+  cuDoubleComplex **A_array = (cuDoubleComplex**) malloc(*batchCount*sizeof(cuDoubleComplex*));
+  cuDoubleComplex **C_array = (cuDoubleComplex**) malloc(*batchCount*sizeof(cuDoubleComplex*));
+	int i;
+	for(i=0; i<*batchCount; ++i) {
+		fprintf(stderr, "5\n"); fflush(stderr);
+    A_array[i]=(cuDoubleComplex *)(A_ptr+i*(*strideA)) ;
+		CUDA_API_CHECK( cudaMalloc( (void**) &(C_array[i]), *strideA*sizeof(cuDoubleComplex)) );
+		fprintf(stderr, "56\n"); fflush(stderr);
+		toto((void**)&(A_ptr),"toto");
+		toto((void**)&(A_array[i]),"totoA");
+		toto((void**)&(C_array[i]),"totoC");
+	}
+	fprintf(stderr, "6\n"); fflush(stderr);
+
+  if(*cplx==1) {
+  *  CUDA_API_CHECK( cublasDgetrfBatched(cublas_handle,
+                *N,
+                A_array, *lda,
+                pivotArray, infoArray, *batchCount));
+    CUDA_API_CHECK( cublasDgetriBatched(cublas_handle,
+                *N,
+                (double *)(*A_ptr), *lda,
+                pivotArray,
+                (double *)(*A_ptr), *lda,
+                infoArray, *batchCount));
+  *
+  } else {
+    CUDA_API_CHECK( cublasZgetrfBatched(cublas_handle,
+                *N,
+                A_array, *lda,
+                pivotArray, infoArray, *batchCount));
+		CUDA_API_CHECK( cudaMemcpy(info, infoArray, *batchCount*sizeof(int), cudaMemcpyDefault) );
+		for(i=0; i<*batchCount; ++i) {
+			if(info[i]!=0){
+				fprintf(stderr, "ERROR: zgetrf on batch %d / %d : %d \n",i,*batchCount,info[i]);
+				fflush(stderr);
+				abi_cabort();
+			} else { fprintf(stderr, "OK: zgetrf on batch %d / %d : %d \n",i,*batchCount,info[i]);}
+		}
+    CUDA_API_CHECK( cublasZgetriBatched(cublas_handle,
+                *N,
+                A_array, *lda,
+                pivotArray,
+                C_array, *lda,
+                infoArray, *batchCount));
+		CUDA_API_CHECK( cudaMemcpy(info, infoArray, *batchCount*sizeof(int), cudaMemcpyDefault) );
+		for(i=0; i<*batchCount; ++i) {
+			if(info[i]!=0){
+				fprintf(stderr, "ERROR: zgetri on batch %d / %d : %d \n",i,*batchCount,info[i]);
+				fflush(stderr);
+				abi_cabort();
+			} else { fprintf(stderr, "OK: zgetri on batch %d / %d : %d \n",i,*batchCount,info[i]);}
+		}
+  }
+
+
+  CUDA_API_CHECK( cudaFree(infoArray) );
+  CUDA_API_CHECK( cudaFree(pivotArray) );
+	free(info);
+	for(i=0; i<*batchCount; ++i) {
+		CUDA_API_CHECK( cudaMemcpy(A_array[i], C_array[i], *strideA*sizeof(cuDoubleComplex), cudaMemcpyDefault) );
+		CUDA_API_CHECK( cudaFree(C_array[i]) );
+	}
+	free(A_array);
+	free(C_array);
+	*/
+} // gpu_xginv_strided_batched
+
 /*=========================================================================*/
 // NAME
 //  gpu_xsymm
