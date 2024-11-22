@@ -699,7 +699,7 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  real(dp), optional, intent(in) :: ylm(dtset%mpw*dtset%mkmem,mpsang*mpsang)
 !Local variables ------------------------------------
  integer :: bdtot_index,dmft_solv,dmftbandi,dmftbandf,fac,i
- integer :: iatom,iatom1,iband,icb,ierr,ig,ik,ikg,ikpt,im,im1
+ integer :: iatom,iatom1,iband,icb,ig,ik,ikg,ikpt,im,im1
  integer :: indproj,iproj,ir,irot,isppol,itypat,lpawu,lpawu1,maxlpawu
  integer :: mband,mbandc,mesh_size,mesh_type,mkmem,mpw,myproc,natom,nband_k,ndim
  integer :: nkpt,nproc,nproju,npw,nspinor,nsppol

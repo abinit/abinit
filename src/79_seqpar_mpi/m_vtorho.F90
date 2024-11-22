@@ -535,6 +535,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
    end if
    eknk(:)=zero;enlxnk(:)=zero
    if (optforces>0) grnlnk(:,:)=zero
+   if (paw_dmft%use_dmft==1) eknk_nd(:,:,:,:,:)=zero
  end if !usewvl==0
 
 !Initialize rhor if needed; store old rhor

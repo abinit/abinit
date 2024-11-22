@@ -3237,7 +3237,7 @@ subroutine fermi_green(green,paw_dmft,self)
  !type(MPI_type), intent(in) :: mpi_enreg
  type(self_type), intent(inout) :: self
 !Local variables-------------------------------
- integer :: ierr,ierr_hh,max_iter
+ integer :: ierr_hh,max_iter
  real(dp) :: f_precision,fermi_old,x_precision
 ! real(dp) :: hx
  character(len=13) :: tag

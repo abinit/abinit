@@ -113,7 +113,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  type(self_type), intent(inout) :: self
 !Local variables ------------------------------
  integer :: i,iatom,icomp,ierr,if1,if2,iflavor1,iflavor2,ifreq,im1,im2,ima,imb,ispa,ispb,ispinor
- integer :: ispinor1,ispinor2,isppol,itau,itypat,lpawu,myproc,natom,natom2,ndim,nflavor,nomega,nproc
+ integer :: ispinor1,ispinor2,isppol,itau,itypat,lpawu,myproc,natom,ndim,nflavor,nomega,nproc
  integer :: nspinor,nsppol,nsppol_imp,ntypat,nwlo,opt_diag,opt_fk,opt_log,opt_nondiag,opt_real
  integer :: opt_rot,option,rot_type_vee,testcode,testrot,tndim,unt,unt2,useylm
  integer, parameter :: optdb = 0
