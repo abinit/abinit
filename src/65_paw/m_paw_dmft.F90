@@ -799,12 +799,12 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
 
  paw_dmft%dmftcheck = dtset%dmftcheck
 
- write(message,'(2a,i3)') ch10,'-       ( number of procs used in dmft ) =',nproc
+ write(message,'(2a,i4)') ch10,'-       ( number of procs used in dmft ) = ',nproc
  call wrtout(std_out,message,'COLL')
  call wrtout(ab_out,message,'COLL')
- write(std_out_default,'(2a,i3)') ch10,'       ( current proc is        ) =',myproc
+ write(std_out_default,'(2a,i4)') ch10,'       ( current proc is        ) = ',myproc
   ! write(ab_out_default,'(2a,i3)') ch10,'       ( current proc is        ) =', myproc
- if (myproc == nproc-1) write(std_out_default,'(2a,i3)') ch10,'      ( last proc            ) =',myproc
+ if (myproc == nproc-1) write(std_out_default,'(2a,i4)') ch10,'      ( last proc            ) = ',myproc
   !   write(ab_out_default,'(2a,i3)') ch10,'       ( last proc            ) =', myproc
 
 !#ifdef HAVE_MPI
