@@ -227,7 +227,7 @@ subroutine abihist_init_0D(hist,natom,mxhist,isVused,isARused)
  hist%fcart(:,:,1)=zero
  hist%strten(:,1)=zero
  hist%vel(:,:,1)=zero
- hist%vel_cell(:,:,1)=zero
+ hist%vel_cell(:,:,:)=zero
 
 end subroutine abihist_init_0D
 !!***
