@@ -1344,7 +1344,7 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
  end if
 #else
  if (optself /= 0) then
-   call inverse_oper(green_oper_ndat,1,procb=green%distrib%procb(:),iproc=me_kpt)
+   call inverse_oper(green_oper_ndat,1,procb=green%distrib%procb(:),iproc=me_kpt,gpu_option=gpu_option)
  end if
 #endif
  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

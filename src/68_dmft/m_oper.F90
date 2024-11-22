@@ -689,18 +689,20 @@ end subroutine print_oper
 !!
 !! SOURCE
 
-subroutine inverse_oper(oper,option,procb,iproc)
+subroutine inverse_oper(oper,option,procb,iproc,gpu_option)
 
  use m_matlu, only : inverse_matlu
  use m_hide_lapack, only : xginv
 
 !Arguments ------------------------------------
  integer, intent(in) :: option
- type(oper_type), intent(inout) :: oper
- integer, optional, intent(in) :: iproc
+ type(oper_type), target, intent(inout) :: oper
+ integer, optional, intent(in) :: iproc,gpu_option
  integer, optional, intent(in) :: procb(oper%nkpt)
 !Local variables-------------------------------
  integer :: ikpt,isppol,idat,paral
+ integer :: l_gpu_option
+ complex(dpc), ABI_CONTIGUOUS pointer :: ks(:,:,:,:)
 !todo_ba: prb with gwpc here: necessary for matcginv but should be dpc
 ! *********************************************************************
 
@@ -709,7 +711,9 @@ subroutine inverse_oper(oper,option,procb,iproc)
 #endif
  DBG_ENTER("COLL")
 
+ l_gpu_option=ABI_GPU_DISABLED; if(present(gpu_option)) l_gpu_option=gpu_option
  paral = 0
+ ks => oper%ks
  if (present(procb) .and. present(iproc) .and. oper%paral == 0) paral = 1
 
  !if (((option == 1 .or. option == 3) .and. (oper%has_operks == 0)) .or. &
@@ -722,21 +726,32 @@ subroutine inverse_oper(oper,option,procb,iproc)
    call inverse_matlu(oper%matlu(:),oper%natom)
  end if
 
+ !$OMP TARGET ENTER DATA MAP(alloc:ks) IF(l_gpu_option==ABI_GPU_OPENMP)
+ !$OMP TARGET UPDATE TO(ks) IF(l_gpu_option==ABI_GPU_OPENMP)
  if (option == 1 .or. option == 3) then
    do isppol=1,oper%nsppol
      do ikpt=1,oper%nkpt
        if (paral == 1) then
          if (procb(ikpt) /= iproc) cycle
        end if
-       do idat=1,oper%ndat
-!          write(std_out,*) "isppol,ikpt",isppol,ikpt,m
-!          write(std_out,*) "isppol,ikpt",matrix
-         !call matcginv_dpc(matrix,oper%mbandc,oper%mbandc)
-         call xginv(oper%ks(:,1+(idat-1)*oper%mbandc:idat*oper%mbandc,ikpt,isppol),oper%mbandc)
-       end do ! idat
+       if(l_gpu_option==ABI_GPU_DISABLED) then
+         do idat=1,oper%ndat
+  !          write(std_out,*) "isppol,ikpt",isppol,ikpt,m
+  !          write(std_out,*) "isppol,ikpt",matrix
+           !call matcginv_dpc(matrix,oper%mbandc,oper%mbandc)
+           call xginv(oper%ks(:,1+(idat-1)*oper%mbandc:idat*oper%mbandc,ikpt,isppol),oper%mbandc)
+         end do ! idat
+       else if(l_gpu_option==ABI_GPU_OPENMP) then
+         do idat=1,oper%ndat
+         !$OMP TARGET DATA USE_DEVICE_PTR(ks)
+         call gpu_xginv_strided_batched(2,oper%mbandc,oper%mbandc,ks(:,1+(idat-1)*oper%mbandc:idat*oper%mbandc,ikpt,isppol),oper%mbandc,oper%mbandc*oper%mbandc,oper%ndat)
+         !$OMP END TARGET DATA
+         end do ! idat
+       end if
      end do ! ikpt
    end do ! isppol
  end if ! option
+ !$OMP TARGET EXIT DATA MAP(from:ks) IF(l_gpu_option==ABI_GPU_OPENMP)
 
 #ifdef HAVE_GPU_MARKERS
   call nvtxEndRange()
