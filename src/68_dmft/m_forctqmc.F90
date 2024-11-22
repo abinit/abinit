@@ -1918,10 +1918,12 @@ end if !nspinor
    call wrtout(std_out,message,'COLL')                  ! debug
    call print_matlu(green%oper(1)%matlu(:),natom,1)  ! debug
    !< HACK >
-   write(message,'(a,2x,a)') ch10,&  ! debug
-     & " == Print diagonalized weiss_for_rot function after rotation for small freq in the ctqmc basis"  ! debug
-   call wrtout(std_out,message,'COLL')  ! debug
-   call print_matlu(weiss_for_rot%oper(1)%matlu(:),natom,1)  ! debug
+   if (.not. triqs) then
+     write(message,'(a,2x,a)') ch10,&  ! debug
+       & " == Print diagonalized weiss_for_rot function after rotation for small freq in the ctqmc basis"  ! debug
+     call wrtout(std_out,message,'COLL')  ! debug
+     call print_matlu(weiss_for_rot%oper(1)%matlu(:),natom,1)  ! debug
+   end if
    !</ HACK >
    write(message,'(a,2x,a)') ch10,&  ! debug
      & " == Print weiss function for small freq in the original basis"  ! debug
@@ -2013,13 +2015,13 @@ end if !nspinor
  ABI_FREE(matlumag_tot)
  if (.not. triqs) then
    call destroy_green(weiss_for_rot)
- end if
 ! call destroy_green(gw_loc)
 ! call destroy_green(greendft)
 
 !  destroy limit of hybridization
- call destroy_matlu(hybri_coeff(:),paw_dmft%natom)
- ABI_FREE(hybri_coeff)
+   call destroy_matlu(hybri_coeff(:),paw_dmft%natom)
+   ABI_FREE(hybri_coeff)
+ end if
 
  call destroy_vee(paw_dmft,vee_rotated(:))
  ABI_FREE(vee_rotated)
@@ -3470,19 +3472,23 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
    ABI_CHECK((tag_at(1:1)/='#'),'Bug: string length too short!')
    tag_at = trim(tag_at)
 
-   open(unit=505,file="Hybridization_offdiag_iatom"//tag_at//".dat",status='unknown',form='formatted')
-   do itau=1,ntau_delta
-     write(505,'(2x,393(e18.10e3,2x))') beta*dble(itau-1)/dble(ntau_delta-1), &
-        & ((dble(ftau(iatom)%mat(im,im1,itau)),aimag(ftau(iatom)%mat(im,im1,itau)),im=1,nflavor),im1=1,nflavor)
-   end do ! itau
-   close(505)
+   if (myproc == 0) then
 
-   open(unit=505,file="Hybridization_diag_iatom"//tag_at//".dat",status='unknown',form='formatted')
-   do itau=1,ntau_delta
-     write(505,'(2x,393(e25.17e3,2x))') beta*dble(itau-1)/dble(ntau_delta-1), &
-        & (dble(ftau(iatom)%mat(im,im,itau)),im=1,nflavor)
-   end do ! itau
-   close(505)
+     open(unit=505,file="Hybridization_offdiag_iatom"//tag_at//".dat",status='unknown',form='formatted')
+     do itau=1,ntau_delta
+       write(505,'(2x,393(e18.10e3,2x))') beta*dble(itau-1)/dble(ntau_delta-1), &
+          & ((dble(ftau(iatom)%mat(im,im1,itau)),aimag(ftau(iatom)%mat(im,im1,itau)),im=1,nflavor),im1=1,nflavor)
+     end do ! itau
+     close(505)
+
+     open(unit=505,file="Hybridization_diag_iatom"//tag_at//".dat",status='unknown',form='formatted')
+     do itau=1,ntau_delta
+       write(505,'(2x,393(e25.17e3,2x))') beta*dble(itau-1)/dble(ntau_delta-1), &
+          & (dble(ftau(iatom)%mat(im,im,itau)),im=1,nflavor)
+     end do ! itau
+     close(505)
+
+   end if
 
    ABI_MALLOC(levels_ctqmc,(nflavor,nflavor))
    ABI_MALLOC(gtau,(ntau,nflavor,nflavor))
@@ -3565,19 +3571,23 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
 
    end do ! ilam
 
-   open(unit=505,file="Gtau_offdiag_iatom"//tag_at//".dat",status='unknown',form='formatted')
-   do itau=1,ntau
-     write(505,'(2x,393(e18.10e3,2x))') beta*dble(itau-1)/dble(ntau-1), &
-        & ((dble(gtau(itau,im,im1)),aimag(gtau(itau,im,im1)),im=1,nflavor),im1=1,nflavor)
-   end do ! itau
-   close(505)
+   if (myproc == 0) then
 
-   open(unit=505,file="Gtau_diag_iatom"//tag_at//".dat",status='unknown',form='formatted')
-   do itau=1,ntau
-     write(505,'(2x,393(e25.17e3,2x))') beta*dble(itau-1)/dble(ntau-1), &
-        & (dble(gtau(itau,im,im)),im=1,nflavor)
-   end do ! itau
-   close(505)
+     open(unit=505,file="Gtau_offdiag_iatom"//tag_at//".dat",status='unknown',form='formatted')
+     do itau=1,ntau
+       write(505,'(2x,393(e18.10e3,2x))') beta*dble(itau-1)/dble(ntau-1), &
+          & ((dble(gtau(itau,im,im1)),aimag(gtau(itau,im,im1)),im=1,nflavor),im1=1,nflavor)
+     end do ! itau
+     close(505)
+
+     open(unit=505,file="Gtau_diag_iatom"//tag_at//".dat",status='unknown',form='formatted')
+     do itau=1,ntau
+       write(505,'(2x,393(e25.17e3,2x))') beta*dble(itau-1)/dble(ntau-1), &
+          & (dble(gtau(itau,im,im)),im=1,nflavor)
+     end do ! itau
+     close(505)
+
+   end if
 
    ABI_FREE(levels_ctqmc)
 
@@ -3784,19 +3794,22 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
        end do ! isppol
      end do ! ifreq
 
-     open(unit=505,file="Gtau_offdiag_DLR_iatom"//tag_at//".dat",status='unknown',form='formatted')
-     do itau=1,ntau
-       write(505,'(2x,393(e18.10e3,2x))') beta*dble(itau-1)/dble(ntau-1), &
-          & ((dble(gtau_dlr(itau,im,im1)),aimag(gtau_dlr(itau,im,im1)),im=1,nflavor),im1=1,nflavor)
-     end do ! itau
-     close(505)
+     if (myproc == 0) then
 
-     open(unit=505,file="Gtau_diag_DLR_iatom"//tag_at//".dat",status='unknown',form='formatted')
-     do itau=1,ntau
-       write(505,'(2x,393(e25.17e3,2x))') beta*dble(itau-1)/dble(ntau-1), &
-          & (dble(gtau_dlr(itau,im,im)),im=1,nflavor)
-     end do ! itau
-     close(505)
+       open(unit=505,file="Gtau_offdiag_DLR_iatom"//tag_at//".dat",status='unknown',form='formatted')
+       do itau=1,ntau
+         write(505,'(2x,393(e18.10e3,2x))') beta*dble(itau-1)/dble(ntau-1), &
+            & ((dble(gtau_dlr(itau,im,im1)),aimag(gtau_dlr(itau,im,im1)),im=1,nflavor),im1=1,nflavor)
+       end do ! itau
+       close(505)
+
+       open(unit=505,file="Gtau_diag_DLR_iatom"//tag_at//".dat",status='unknown',form='formatted')
+       do itau=1,ntau
+         write(505,'(2x,393(e25.17e3,2x))') beta*dble(itau-1)/dble(ntau-1), &
+            & (dble(gtau_dlr(itau,im,im)),im=1,nflavor)
+       end do ! itau
+       close(505)
+     end if
 
      ABI_FREE(gl_dlr)
      ABI_FREE(gl_dlr_re)

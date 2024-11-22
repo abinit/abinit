@@ -1526,7 +1526,7 @@ CONTAINS  !=====================================================================
 !C   REORDER SOLUTION ACCORDING TO PREVIOUS COLUMN INTERCHANGES
 
   240     DO 249 j=ldiag,1,-1
-              IF(ip(j).EQ.j)          GOTO 250
+              IF(ip(j).EQ.j)          GOTO 249
               l=ip(j)
               tmp=b(l,jb)
               b(l,jb)=b(j,jb)
