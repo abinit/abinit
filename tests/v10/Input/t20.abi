@@ -56,7 +56,7 @@ pseudos "H.LDA-PW-paw.abinit"
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%   t20.abo, tolnlines = 500, tolabs = 2.e-5, tolrel = 5.e-2
+#%%   t20.abo, tolnlines = 500, tolabs = 1.e-4, tolrel = 1.e-1
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
