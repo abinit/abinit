@@ -173,9 +173,10 @@ type, public :: dataset_type
  integer :: dmftctqmc_triqs_nbins_histo
  integer :: dmftctqmc_triqs_nleg
  integer :: dmftctqmc_triqs_ntau_delta
- integer :: dmftctqmc_triqs_off_diag
+ integer :: dmftctqmc_triqs_orb_off_diag
  integer :: dmftctqmc_triqs_seed_a
  integer :: dmftctqmc_triqs_seed_b
+ integer :: dmftctqmc_triqs_spin_off_diag
  integer :: dmftctqmc_triqs_therm
  integer :: dmftctqmc_triqs_time_invariance
  integer :: dmftctqmc_triqs_use_norm_as_weight
@@ -1559,9 +1560,10 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%dmftctqmc_triqs_nbins_histo = dtin%dmftctqmc_triqs_nbins_histo
  dtout%dmftctqmc_triqs_nleg = dtin%dmftctqmc_triqs_nleg
  dtout%dmftctqmc_triqs_ntau_delta = dtin%dmftctqmc_triqs_ntau_delta
- dtout%dmftctqmc_triqs_off_diag = dtin%dmftctqmc_triqs_off_diag
+ dtout%dmftctqmc_triqs_orb_off_diag = dtin%dmftctqmc_triqs_orb_off_diag
  dtout%dmftctqmc_triqs_seed_a = dtin%dmftctqmc_triqs_seed_a
  dtout%dmftctqmc_triqs_seed_b = dtin%dmftctqmc_triqs_seed_b
+ dtout%dmftctqmc_triqs_spin_off_diag = dtin%dmftctqmc_triqs_spin_off_diag
  dtout%dmftctqmc_triqs_therm = dtin%dmftctqmc_triqs_therm
  dtout%dmftctqmc_triqs_time_invariance = dtin%dmftctqmc_triqs_time_invariance
  dtout%dmftctqmc_triqs_use_norm_as_weight = dtin%dmftctqmc_triqs_use_norm_as_weight
@@ -3438,8 +3440,8 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' dmftctqmc_triqs_leg_measure dmftctqmc_triqs_loc_n_min dmftctqmc_triqs_loc_n_max'
  list_vars=trim(list_vars)//' dmftctqmc_triqs_measure_density_matrix dmftctqmc_triqs_move_double'
  list_vars=trim(list_vars)//' dmftctqmc_triqs_move_global_prob dmftctqmc_triqs_move_shift dmftctqmc_triqs_nbins_histo'
- list_vars=trim(list_vars)//' dmftctqmc_triqs_nleg dmftctqmc_triqs_ntau_delta dmftctqmc_triqs_off_diag'
- list_vars=trim(list_vars)//' dmftctqmc_triqs_seed_a dmftctqmc_triqs_seed_b dmftctqmc_triqs_therm'
+ list_vars=trim(list_vars)//' dmftctqmc_triqs_nleg dmftctqmc_triqs_ntau_delta dmftctqmc_triqs_orb_off_diag'
+ list_vars=trim(list_vars)//' dmftctqmc_triqs_seed_a dmftctqmc_triqs_seed_b dmftctqmc_triqs_spin_off_diag dmftctqmc_triqs_therm'
  list_vars=trim(list_vars)//' dmftctqmc_triqs_time_invariance dmftctqmc_triqs_use_norm_as_weight dmftcheck'
  list_vars=trim(list_vars)//' dmftqmc_l dmftqmc_n dmftqmc_seed dmftqmc_therm dmft_charge_prec dmft_dc'
  list_vars=trim(list_vars)//' dmft_entropy dmft_fermi_step dmft_gaussorder dmft_integral'
