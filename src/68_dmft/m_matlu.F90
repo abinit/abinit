@@ -401,13 +401,13 @@ subroutine print_matlu(matlu,natom,prtopt,opt_diag,opt_ab_out,opt_exp,argout,com
 
    do isppol=1,nsppol
      if (nspinor == 1) then
-       write(message,'(a,10x,a,x,i1)') ch10,'-- polarization spin component',isppol
+       write(message,'(a,10x,a,1x,i1)') ch10,'-- polarization spin component',isppol
        call wrtout(arg_out,message,mode_paral)
      end if ! nspinor=1
      do ispinor=1,nspinor
        do ispinor1=1,nspinor
          if (nspinor == 2) then
-           write(message,'(a,10x,a,i1,x,i1)') ch10,'-- spin components ',ispinor,ispinor1
+           write(message,'(a,10x,a,i1,1x,i1)') ch10,'-- spin components ',ispinor,ispinor1
            call wrtout(arg_out,message,mode_paral)
          end if
          if (optdiag <= 0) then
