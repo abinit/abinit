@@ -580,7 +580,7 @@ Run `ATOMPAW`: the ghost state disappears!
 ## 7. Testing the "efficiency" of a PAW dataset
 
 Let's use again our <span style="color:green">Ni.atompaw.input1</span> file for Nickel (with all our modifications).  
-You get a file <span style="color:green">Ni.GGA-PBE-paw.xml</span> containing the PAW dataset designated for ABINIT.  
+You get a file <span style="color:green">Ni.GGA-PBE-paw.xml</span> containing the PAW dataset designed for ABINIT.
 
 To test the efficiency of the generated PAW dataset, we finally will use `ABINIT`!  
 You are about to run a DFT computation and determine the size of the **plane
@@ -734,7 +734,7 @@ Copy <span style="color:green">\$ABI_TESTS/tutorial/Input/tpaw2_2.abi</span> in 
 Edit it, activate the 7 datasets (ubcomment the 'ndtset 7` line),
  and use
  <span style="color:green">\$ABI_HOME/doc/tutorial/paw2_assets/Ni.PBE-paw.rrkj.xml</span> 
- PAW dataset obtained from <span style="color:green">Ni.atompaw.input2 file</span>, with a minor change of name (suppression of the indication GGA)..  
+ PAW dataset obtained from <span style="color:green">Ni.atompaw.input2 file</span>, with a minor change of name (suppression of the indication GGA).
 Run ABINIT (this may take a while...).
 
 {% dialog tests/tutorial/Input/tpaw2_2.abi %}
