@@ -34,7 +34,7 @@ randomseed=111111 # for testing purpose only
 #%% exec_args = --F03
 #%% [files]
 #%% files_to_test = 
-#%%   t81.abo, tolnlines = 0, tolabs = 1e-6, tolrel = 0.000001, fld_options = -medium;
+#%%   t81.abo, tolnlines = 0, tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options = -medium;
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

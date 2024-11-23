@@ -117,7 +117,7 @@ kptopt7   1
 #%% [files]
 #%% files_to_test =
 #%%   t57.abo, tolnlines = 180, tolabs = 1.1e-3, tolrel = 1.1;
-#%%   t57o_DS7_KERANGE, tolnlines = 0, tolabs = 1.1e-6, tolrel = 1.0e-4
+#%%   t57o_DS7_KERANGE, tolnlines = 0, tolabs = 0.0e+00, tolrel = 0.0e+00
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [shell]
