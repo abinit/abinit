@@ -2452,6 +2452,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%fock_icutcoul=3
    dtsets(idtset)%freqim_alpha=five
    dtsets(idtset)%friction=0.001_dp
+   dtsets(idtset)%frictionbar=0.001_dp
    dtsets(idtset)%frzfermi=0
    dtsets(idtset)%fxcartfactor=one ! Should be adjusted to the H2 conversion factor
 !  G
@@ -2459,6 +2460,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%ga_fitness =1
    dtsets(idtset)%ga_opt_percent =0.2_dp
    dtsets(idtset)%ga_rules(:) =1
+   dtsets(idtset)%geoopt = "none"
    dtsets(idtset)%goprecon =0
    dtsets(idtset)%goprecprm(:)=0
    dtsets(idtset)%gpu_devices=(/-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1/)
@@ -2581,6 +2583,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%mgfft = -1
    dtsets(idtset)%mgfftdg = -1
    dtsets(idtset)%mixesimgf(:)=zero
+   dtsets(idtset)%moldyn = "none"
    dtsets(idtset)%mpw = -1
    dtsets(idtset)%mqgrid=0
    dtsets(idtset)%mqgriddg=0

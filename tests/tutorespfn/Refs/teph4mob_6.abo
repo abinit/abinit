@@ -1,5 +1,5 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.Version 10.2.4.2 of ABINIT, released Nov 2024.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2024 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 18 Sep 2024.
-- ( at 17h24 )
+.Starting date : Tue 19 Nov 2024.
+- ( at 19h46 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/TestBot_MPI1/tutorespfn_teph4mob_1-teph4mob_2-teph4mob_3-teph4mob_4-teph4mob_5-teph4mob_6-teph4mob_7/teph4mob_6.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_EOF-10.2/tests/TestBot_MPI1/tutorespfn_teph4mob_1-teph4mob_2-teph4mob_3-teph4mob_4-teph4mob_5-teph4mob_6-teph4mob_7/teph4mob_6.abi
 - output file    -> teph4mob_6.abo
 - root for input  files -> teph4mob_6i
 - root for output files -> teph4mob_6o
@@ -532,8 +532,8 @@ meta: {optdriver: 7, eph_task: -4, }
 - Writing phonon DOS to netcdf file: teph4mob_6o_DS1_PHDOS.nc
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Psps_for_tests/13al.981214.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Psps_for_tests/13al.981214.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_EOF-10.2/tests/Psps_for_tests/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_EOF-10.2/tests/Psps_for_tests/13al.981214.fhi
 - Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
 - 13.00000   3.00000    981214                znucl, zion, pspdat
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -545,8 +545,8 @@ meta: {optdriver: 7, eph_task: -4, }
              1    0.900554
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_EOF-10.2/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_EOF-10.2/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
 -  Troullier-Martins psp for element  As        Thu Oct 27 17:37:14 EDT 1994
 - 33.00000   5.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -635,7 +635,7 @@ P Number of k-point in Sigma_nk treated by this proc: 3 of 3
  
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.521
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.573    0.000  36717.3    0.000
+   5   3.573    0.000  36716.3    0.000
 ============================================================================================
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.475
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -643,7 +643,7 @@ K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.475
 ============================================================================================
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:  123.0 [K], mu_e:    3.428
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.573    0.000   2822.5    0.000
+   5   3.573    0.000   2822.6    0.000
 ============================================================================================
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:  182.0 [K], mu_e:    3.379
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -1029,7 +1029,7 @@ P Number of k-point in Sigma_nk treated by this proc: 3 of 3
  
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.521
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.573    0.000  36717.3    0.000
+   5   3.573    0.000  36716.3    0.000
 ============================================================================================
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.475
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -1037,7 +1037,7 @@ K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.475
 ============================================================================================
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:  123.0 [K], mu_e:    3.428
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.573    0.000   2822.5    0.000
+   5   3.573    0.000   2822.6    0.000
 ============================================================================================
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:  182.0 [K], mu_e:    3.379
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -1423,7 +1423,7 @@ P Number of k-point in Sigma_nk treated by this proc: 3 of 3
  
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.521
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.573    0.000  36717.3    0.000
+   5   3.573    0.000  36716.3    0.000
 ============================================================================================
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.475
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -1431,7 +1431,7 @@ K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.475
 ============================================================================================
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:  123.0 [K], mu_e:    3.428
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.573    0.000   2822.5    0.000
+   5   3.573    0.000   2822.6    0.000
 ============================================================================================
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:  182.0 [K], mu_e:    3.379
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -1843,7 +1843,7 @@ K-point: [ 4.1667E-01,  4.1667E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.274
 ============================================================================================
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.521
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.573    0.000  36203.2    0.000
+   5   3.573    0.000  36202.1    0.000
 ============================================================================================
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.475
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -2304,7 +2304,7 @@ K-point: [ 4.5833E-01,  4.1667E-01,  0.0000E+00], T:  182.0 [K], mu_e:    3.379
 ============================================================================================
 K-point: [ 4.5833E-01,  4.1667E-01,  0.0000E+00], T:  241.0 [K], mu_e:    3.328
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.677    0.007     48.0    0.000
+   5   3.677    0.007     47.9    0.000
 ============================================================================================
 K-point: [ 4.5833E-01,  4.1667E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.274
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -2312,7 +2312,7 @@ K-point: [ 4.5833E-01,  4.1667E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.274
 ============================================================================================
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.521
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.573    0.000  36203.2    0.000
+   5   3.573    0.000  36202.1    0.000
 ============================================================================================
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.475
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -2773,7 +2773,7 @@ K-point: [ 4.5833E-01,  4.1667E-01,  0.0000E+00], T:  182.0 [K], mu_e:    3.379
 ============================================================================================
 K-point: [ 4.5833E-01,  4.1667E-01,  0.0000E+00], T:  241.0 [K], mu_e:    3.328
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.677    0.007     48.0    0.000
+   5   3.677    0.007     47.9    0.000
 ============================================================================================
 K-point: [ 4.5833E-01,  4.1667E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.274
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -2781,7 +2781,7 @@ K-point: [ 4.5833E-01,  4.1667E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.274
 ============================================================================================
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.521
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.573    0.000  36203.2    0.000
+   5   3.573    0.000  36202.1    0.000
 ============================================================================================
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.475
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -3246,10 +3246,10 @@ P           mkmem         413
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         62.2  wall=         62.3
+- Proc.   0 individual time (sec): cpu=         61.6  wall=         61.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered  13 WARNINGs and  20 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         62.2  wall=         62.3
++Overall time at end (sec) : cpu=         61.6  wall=         61.8
