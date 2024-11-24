@@ -28,6 +28,7 @@ module m_mover
  use m_abimover
  use m_abihist
  use m_dtset
+ use m_pimd
  use m_xmpi
  use m_nctk
  use m_dtfil
@@ -53,22 +54,8 @@ module m_mover
  use m_mkrho,              only : initro
  use m_pawfgr,             only : pawfgr_type, pawfgr_init, pawfgr_destroy
  use m_precpred_1geo,      only : precpred_1geo
- use m_pred_delocint,      only : pred_delocint
- use m_pred_bfgs,          only : pred_bfgs, pred_lbfgs
- use m_pred_fire,          only : pred_fire
- use m_pred_isokinetic,    only : pred_isokinetic
- use m_pred_diisrelax,     only : pred_diisrelax
- use m_pred_nose,          only : pred_nose
- use m_pred_srkhna14,      only : pred_srkna14
- use m_pred_isothermal,    only : pred_isothermal
- use m_pred_verlet,        only : pred_verlet
- use m_pred_velverlet,     only : pred_velverlet
- use m_pred_moldyn,        only : pred_moldyn
- use m_pred_langevin,      only : pred_langevin
- use m_pred_steepdesc,     only : pred_steepdesc
- use m_pred_simple,        only : pred_simple, prec_simple
- use m_pred_hmc,           only : pred_hmc
-!use m_generate_training_set, only : generate_training_set
+ use m_pred_simple,        only : prec_simple
+ !use m_generate_training_set, only : generate_training_set
  use m_wvl_wfsinp, only : wvl_wfsinp_reformat
  use m_wvl_rho,      only : wvl_mkrho
  use m_effective_potential_file, only : effective_potential_file_mapHistToRef
@@ -219,6 +206,7 @@ type(abiforstr) :: preconforstr ! Preconditioned forces and stress
 type(delocint) :: deloc
 type(pawfgr_type) :: pawfgr
 type(mttk_type) :: mttk_vars
+type(pimd_type) :: pimd_param
 integer :: itime,icycle,itime_hist,iexit=0,ifirst,ihist_prev,ihist_prev2,timelimit_exit,ncycle,nhisttot,kk,jj,me
 integer :: ntime,option,comm,mgfftf,nfftf
 integer :: nerr_dilatmx,my_quit,ierr,quitsum_request
@@ -233,7 +221,7 @@ real(dp) :: gr_avg,ecut_eff,ecutdg_eff,ucvol,boxcut,gsqcut_eff
 logical :: DEBUG=.FALSE., need_verbose=.TRUE.,need_writeHIST=.TRUE.
 logical :: need_scfcv_cycle = .TRUE., need_elec_eval = .FALSE.
 logical :: changed,useprtxfase
-logical :: skipcycle
+logical :: skipcycle,force_hist_copy=.FALSE.
 integer :: minIndex,ii,similar,conv_retcode
 integer :: iapp
 logical :: file_exists
@@ -327,6 +315,11 @@ real(dp) :: k0(3)
 !  If restartxf specifies to reconstruct the history
    if (hist_prev%mxhist>0.and.ab_mover%restartxf==-1)then
      ntime=ntime+hist_prev%mxhist
+   end if
+
+!  If non deterministic algorithm is used, forcing reading of input hist file
+   if (ab_mover%ionmov==16) then
+     force_hist_copy=.TRUE.
    end if
 
 !  If restartxf specifies to start from the lowest energy
@@ -469,6 +462,8 @@ real(dp) :: k0(3)
 
 !At beginning no error
  nerr_dilatmx = 0
+!Copy the number of degrees of freedom in hist structure
+ hist%ndof=ab_mover%ndof
 
  ABI_MALLOC(xred_prev,(3,scfcv_args%dtset%natom))
 
@@ -575,7 +570,7 @@ real(dp) :: k0(3)
 
      if(hist_prev%mxhist>0.and.ab_mover%restartxf==-1.and.hist_prev%ihist<=hist_prev%mxhist)then
 
-       call abihist_compare_and_copy(hist_prev,hist,ab_mover%natom,similar,tol8,specs%nhist==nhisttot)
+       call abihist_compare_and_copy(hist_prev,hist,ab_mover%natom,similar,tol8,specs%nhist==nhisttot,force_hist_copy)
        hist_prev%ihist=hist_prev%ihist+1
 
        if (hist_prev%ihist==hist_prev%mxhist) re_init_rho=.TRUE.
@@ -830,6 +825,10 @@ real(dp) :: k0(3)
 !    ###########################################################
 !    ### 16. => Precondition forces, stress and energy
 !    ### 17. => Call to each predictor
+!    Some MOLDYN algorithms require pimd_param to be initialized
+     if(scfcv_args%dtset%ionmov==16) then
+       call pimd_init(scfcv_args%dtset,pimd_param,me==master,force_imgmov=9)
+     end if
 
      call precpred_1geo(ab_mover,ab_xfh,amu_curr,deloc,&
 &     scfcv_args%dtset%chkdilatmx,&
@@ -838,8 +837,7 @@ real(dp) :: k0(3)
 &     hist,scfcv_args%dtset%hmctt,&
 &     icycle,iexit,itime,mttk_vars,&
 &     scfcv_args%dtset%nctime,ncycle,nerr_dilatmx,scfcv_args%dtset%npsp,ntime,&
-&     scfcv_args%dtset%rprimd_orig,skipcycle,&
-&     scfcv_args%dtset%usewvl)
+&     pimd_param,scfcv_args%dtset%rprimd_orig,skipcycle,scfcv_args%dtset%usewvl)
 
 !    Write MOLDYN netcdf and POSABIN files (done every dtset%nctime time step)
 !    This file is not created for multibinit run
@@ -895,7 +893,7 @@ real(dp) :: k0(3)
 
 !    vel_cell(3,3)= velocities of cell parameters
 !    Not yet used here but compute it for consistency
-     vel_cell(:,:)=zero
+     vel_cell(:,:)=hist%vel_cell(:,:,hist%ihist)
      if (ab_mover%ionmov==13 .and. hist%mxhist >= 2) then
        if (itime_hist>2) then
          ihist_prev2 = abihist_findIndex(hist,-2)

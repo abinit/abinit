@@ -1036,6 +1036,9 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  dprarr(1,:)=dtsets(:)%friction
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'friction','DPR',0)
 
+ dprarr(1,:)=dtsets(:)%frictionbar
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'frictionbar','DPR',0)
+
  intarr(1,:)=dtsets(:)%frzfermi
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'frzfermi','INT',0)
 
