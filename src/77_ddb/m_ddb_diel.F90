@@ -486,11 +486,8 @@ subroutine ddb_oscstr(displ,d2cart,fact_oscstr,oscstr,modez,iout,mpert,natom,phf
 !  Get the factors of the oscillator strength, and the mode effective charge for each mode
    do imode=1,3*natom
      usquare=zero
-     do idir1=1,3
-       do ipert1=1,natom
-         i1=idir1+(ipert1-1)*3
-         usquare=usquare+displ(1,i1,imode)*displ(1,i1,imode)+displ(2,i1,imode)*displ(2,i1,imode)
-       end do
+     do i1=1,3*natom
+       usquare=usquare+displ(1,i1,imode)*displ(1,i1,imode)+displ(2,i1,imode)*displ(2,i1,imode)
      end do
      do idir2=1,3
        fact_oscstr(:,idir2,imode)=zero
