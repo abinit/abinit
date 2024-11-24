@@ -86,11 +86,11 @@ files, slightly different numerical results, or timing differences, e.g.:
 
 ```diff
 2,3c2,3
-< .Version 9.4.1 of ABINIT 
-< .(MPI version, prepared for a x86_64_darwin18.7.0_gnu9.3 computer) 
+< .Version 9.4.1 of ABINIT
+< .(MPI version, prepared for a x86_64_darwin18.7.0_gnu9.3 computer)
 ---
-> .Version 9.3.3 of ABINIT 
-> .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+> .Version 9.3.3 of ABINIT
+> .(MPI version, prepared for a x86_64_linux_gnu9.3 computer)
 17,18c17,18
 < .Starting date : Mon 25 Jan 2021.
 < - ( at 21h07 )
@@ -141,7 +141,7 @@ Finally, it might also be that the default FFT algorithm differs from
 the one of the reference machine, in which case the line mentioning [[fftalg]]
 will differ (*fftalg* will not be 312). If you get something else, you should ask for help!
 
-You can have a very quick look at the beginning of the output file *tbase1_1.abo*. 
+You can have a very quick look at the beginning of the output file *tbase1_1.abo*.
 In this part of the output file, note the dot `.` or dash `-` that is inserted in the first column.
 This is not important for the user: it is used to post-process the output file using some automatic tool.
 As a rule, you should ignore symbols placed in the first column of the abinit output file.
@@ -223,10 +223,10 @@ You can find more information about messages in the log file in
 
         [1] <AbinitComment at m_dtfil.F90:1470>
             Output file: tbase1_1.abo already exists.
-    
+
         [2] <AbinitComment at m_dtfil.F90:1494>
             Renaming old: tbase1_1.abo to: tbase1_1.abo0001
-    
+
         [3] <AbinitWarning at m_ingeo.F90:887>
             The tolerance on symmetries =   1.000E-05 is bigger than 1.0e-8.
             In order to avoid spurious effects, the atomic coordinates have been
@@ -234,24 +234,24 @@ You can find more information about messages in the log file in
             So, do not be surprised by the fact that your input variables (xcart, xred, ...)
             do not correspond to the ones echoed by ABINIT, the latter being used to do the calculations.
             In order to avoid this symmetrization (e.g. for specific debugging/development), decrease tolsym to 1.0e-8 or lower.
-    
+
         [4] <AbinitComment at m_symfind.F90:999>
             The Bravais lattice determined only from the primitive
             vectors, bravais(1)=  7, is more symmetric
             than the real one, iholohedry=  4, obtained by taking into
             account the atomic positions. Start deforming the primitive vector set.
-    
+
         [5] <AbinitComment at m_memeval.F90:2397>
             Despite there is only a local part to pseudopotential(s),
             lmnmax and lnmax are set to 1.
-    
+
         [6] <AbinitComment at m_xgScalapack.F90:236>
             xgScalapack in auto mode
-    
+
         [7] <AbinitComment at m_memeval.F90:2397>
             Despite there is only a local part to pseudopotential(s),
             lmnmax and lnmax are set to 1.
-    
+
         [8] <AbinitWarning at m_drivexc.F90:711>
             Density went too small (lower than xc_denpos) at 38 points
             and was set to xc_denpos =   1.00E-14. Lowest was  -0.13E-13.
@@ -260,7 +260,7 @@ You can find more information about messages in the log file in
             Possible workarounds : increase ecut, or define the input variable densty,
             with a value larger than the guess for the decay length, or initialize your,
             density with a preliminary LDA or GGA-PBE if you are using a more exotic xc functional.
-    
+
         num_errors: 0, num_warnings: 2, num_comments: 6, completed: True
 
 Now open the *tbase1_1.abo* file. Alternatively, you might have a look at the reference file we provide below.
@@ -467,7 +467,7 @@ Run the code with *tbase1_2.abi* (this might take fifteen seconds or so on a PC 
 
 ```sh
 cp ../tbase1_2.abi .
-abinit tbase1_2.abi  >& log 
+abinit tbase1_2.abi  >& log
 ```
 
 Now examine the output file quickly (there are many
@@ -521,8 +521,8 @@ Note that *the number of SCF cycles drops from 6 to 5 when the wavefunctions are
 ## Computation of the interatomic distance (method 2)
 
 The other methodology is based on an automatic computation of the minimum.
-There are different algorithms to do that. See the input variable [[ionmov]], with values 2, 7, 15, and 22.
-In the present case, with only one degree of freedom to be optimized, the best choice is [[ionmov]] 22.
+There are different algorithms to do that. See the input variable [[geoopt]], with values "bfgs", "quenched", "fire", and "lbfgs".
+In the present case, with only one degree of freedom to be optimized, the best choice is [[geoopt]] "lbfgs".
 
 You have also to define the maximal number of time steps for this optimization.
 Set the input variable [[ntime]] to 10, it will be largely enough.
@@ -755,7 +755,7 @@ These are:
   of exchange-correlation functional is mandatory to produce a pseudopotential, and mixing different exchange-correlation
   functionals for pseudopotentials generation and ABINIT calculations is bad practice)
 
-We used 10 Ha as cut-off energy, a 10x10x10 Bohr^3 supercell, 
+We used 10 Ha as cut-off energy, a 10x10x10 Bohr^3 supercell,
 the LDA (=local-density approximation, as well as the local-spin-density approximation in the spin-polarized case) in the
 Perdew-Wang parametrization ([[ixc]]=-1012), and a LDA pseudopotential from the pseudodojo <http://www.pseudo-dojo.org/>,
 copied in the ABINIT directory $ABI_PSPDIR/Pseudodojo_nc_sr_04_pw_standard_psp8 . You might have a look at
