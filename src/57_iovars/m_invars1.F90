@@ -1556,12 +1556,12 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 ! if getxred or getxcart we need to import xred before entering ingeo.
 ! NB: xred/cart might be re-updated at runtime after running source dtset
 !   call intagm(dprarr,intarr,source_dtset,marr,3,string(1:lenstr),'getxred',tread,'INT')
-!   if (tread==1 .or. tread_geo==1) 
-!     source_dtset = 
+!   if (tread==1 .or. tread_geo==1)
+!     source_dtset =
 !     if (== -1) source_dtset = jdtset-1
 !   end if
 !   call intagm(dprarr,intarr,source_dtset,marr,3,string(1:lenstr),'getxcart',tread_geo,'INT')
-! 
+!
 
    ABI_MALLOC(chrgat,(natom))
    ABI_MALLOC(iatfix,(3,natom))
@@ -2307,7 +2307,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%chkparal=1
    dtsets(idtset)%chksymbreak=1
    dtsets(idtset)%chksymtnons=1
-   dtsets(idtset)%chneut=1      
+   dtsets(idtset)%chneut=1
    dtsets(idtset)%cineb_start=7
    dtsets(idtset)%corecs(:) = zero
    dtsets(idtset)%cprj_in_memory=0
@@ -2356,7 +2356,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmft_solv=5
    if(dtsets(idtset)%ucrpa>0.and.dtsets(idtset)%usedmft==1) dtsets(idtset)%dmft_solv=0
    dtsets(idtset)%dmft_t2g=0
-   dtsets(idtset)%dmft_test=1
+   dtsets(idtset)%dmft_test=0
    dtsets(idtset)%dmft_use_all_bands=0
    dtsets(idtset)%dmft_use_full_chipsi=0
    dtsets(idtset)%dmft_wanrad=-1.0_dp
@@ -2396,9 +2396,10 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmftctqmc_triqs_nbins_histo=100
    dtsets(idtset)%dmftctqmc_triqs_nleg=30
    dtsets(idtset)%dmftctqmc_triqs_ntau_delta=-1
-   dtsets(idtset)%dmftctqmc_triqs_off_diag=0
+   dtsets(idtset)%dmftctqmc_triqs_orb_off_diag=0
    dtsets(idtset)%dmftctqmc_triqs_seed_a=34788
    dtsets(idtset)%dmftctqmc_triqs_seed_b=928374
+   dtsets(idtset)%dmftctqmc_triqs_spin_off_diag=0
    dtsets(idtset)%dmftctqmc_triqs_therm=1000
    dtsets(idtset)%dmftctqmc_triqs_time_invariance=1
    dtsets(idtset)%dmftctqmc_triqs_use_norm_as_weight=0
