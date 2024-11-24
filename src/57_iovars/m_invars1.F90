@@ -1556,12 +1556,12 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 ! if getxred or getxcart we need to import xred before entering ingeo.
 ! NB: xred/cart might be re-updated at runtime after running source dtset
 !   call intagm(dprarr,intarr,source_dtset,marr,3,string(1:lenstr),'getxred',tread,'INT')
-!   if (tread==1 .or. tread_geo==1) 
-!     source_dtset = 
+!   if (tread==1 .or. tread_geo==1)
+!     source_dtset =
 !     if (== -1) source_dtset = jdtset-1
 !   end if
 !   call intagm(dprarr,intarr,source_dtset,marr,3,string(1:lenstr),'getxcart',tread_geo,'INT')
-! 
+!
 
    ABI_MALLOC(chrgat,(natom))
    ABI_MALLOC(iatfix,(3,natom))
@@ -2307,7 +2307,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%chkparal=1
    dtsets(idtset)%chksymbreak=1
    dtsets(idtset)%chksymtnons=1
-   dtsets(idtset)%chneut=1      
+   dtsets(idtset)%chneut=1
    dtsets(idtset)%cineb_start=7
    dtsets(idtset)%corecs(:) = zero
    dtsets(idtset)%cprj_in_memory=0
@@ -2356,7 +2356,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmft_solv=5
    if(dtsets(idtset)%ucrpa>0.and.dtsets(idtset)%usedmft==1) dtsets(idtset)%dmft_solv=0
    dtsets(idtset)%dmft_t2g=0
-   dtsets(idtset)%dmft_test=1
+   dtsets(idtset)%dmft_test=0
    dtsets(idtset)%dmft_use_all_bands=0
    dtsets(idtset)%dmft_use_full_chipsi=0
    dtsets(idtset)%dmft_wanrad=-1.0_dp
@@ -2396,9 +2396,10 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmftctqmc_triqs_nbins_histo=100
    dtsets(idtset)%dmftctqmc_triqs_nleg=30
    dtsets(idtset)%dmftctqmc_triqs_ntau_delta=-1
-   dtsets(idtset)%dmftctqmc_triqs_off_diag=0
+   dtsets(idtset)%dmftctqmc_triqs_orb_off_diag=0
    dtsets(idtset)%dmftctqmc_triqs_seed_a=34788
    dtsets(idtset)%dmftctqmc_triqs_seed_b=928374
+   dtsets(idtset)%dmftctqmc_triqs_spin_off_diag=0
    dtsets(idtset)%dmftctqmc_triqs_therm=1000
    dtsets(idtset)%dmftctqmc_triqs_time_invariance=1
    dtsets(idtset)%dmftctqmc_triqs_use_norm_as_weight=0
@@ -2452,6 +2453,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%fock_icutcoul=3
    dtsets(idtset)%freqim_alpha=five
    dtsets(idtset)%friction=0.001_dp
+   dtsets(idtset)%frictionbar=0.001_dp
    dtsets(idtset)%frzfermi=0
    dtsets(idtset)%fxcartfactor=one ! Should be adjusted to the H2 conversion factor
 !  G
@@ -2459,6 +2461,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%ga_fitness =1
    dtsets(idtset)%ga_opt_percent =0.2_dp
    dtsets(idtset)%ga_rules(:) =1
+   dtsets(idtset)%geoopt = "none"
    dtsets(idtset)%goprecon =0
    dtsets(idtset)%goprecprm(:)=0
    dtsets(idtset)%gpu_devices=(/-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1/)
@@ -2581,6 +2584,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%mgfft = -1
    dtsets(idtset)%mgfftdg = -1
    dtsets(idtset)%mixesimgf(:)=zero
+   dtsets(idtset)%moldyn = "none"
    dtsets(idtset)%mpw = -1
    dtsets(idtset)%mqgrid=0
    dtsets(idtset)%mqgriddg=0

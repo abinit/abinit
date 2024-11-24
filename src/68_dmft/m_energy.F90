@@ -962,12 +962,12 @@ subroutine compute_dftu_energy(energies_dmft,green,paw_dmft,pawtab,renorm)
      ! Initialize noccmmp
      do im1=1,ndim
        ims1 = im1
-       if (x2my2d .and. dmft_test == 0) ims1 = 5
-       if (t2g .and. dmft_test == 0) ims1 = mt2g(im1)
+       if (x2my2d .and. dmft_test == 1) ims1 = 5
+       if (t2g .and. dmft_test == 1) ims1 = mt2g(im1)
        do im=1,ndim
          ims = im
-         if (x2my2d .and. dmft_test == 0) ims = 5
-         if (t2g .and. dmft_test == 0) ims = mt2g(im)
+         if (x2my2d .and. dmft_test == 1) ims = 5
+         if (t2g .and. dmft_test == 1) ims = mt2g(im)
          ! Here, we take the transpose in order to match pawuenergy's conventions
          noccmmp(1,ims,ims1,idijeff) = &
            & dble(green%occup%matlu(iatom)%mat(im1+(ispinor-1)*ndim,im+(ispinor1-1)*ndim,isppol))

@@ -176,42 +176,78 @@ end subroutine init_matlu
 !! INPUTS
 !!  matlu <type(matlu_type)>= density matrix in the local orbital basis and related variables
 !!  natom = number of atoms
-!!  onlynondiag = if present, only set the off-diagonal elements to 0
+!!  onlynondiag = 1: set all the off-diagonal elements to 0
+!!              = 2: set the orbital off-diagonal elements to 0
+!!              = 3: set the spin off-diagonal elements to 0
+!!  maxoffdiag = maximal value of the off-diagonal elements
 !!
 !! OUTPUT
 !!  matlu <type(matlu_type)>= density matrix in the local orbital basis and related variables
 !!
 !! SOURCE
 
-subroutine zero_matlu(matlu,natom,onlynondiag)
+subroutine zero_matlu(matlu,natom,onlynondiag,maxoffdiag)
 
 !Arguments ------------------------------------
  integer, intent(in) :: natom
  type(matlu_type), intent(inout) :: matlu(natom)
  integer, optional, intent(in) :: onlynondiag
+ real(dp), optional, intent(out) :: maxoffdiag
 !Local variables-------------------------------
- integer :: iatom,im,im1,isppol,lpawu,ndim,nspinor,nsppol
+ integer :: iatom,im,im1,ispinor,ispinor1,isppol,lpawu,ndim,nspinor,nsppol,tndim
+ real(dp) :: maxoffdiag_
 !*********************************************************************
 
  nspinor = matlu(1)%nspinor
  nsppol  = matlu(1)%nsppol
+ maxoffdiag_ = zero
 
  do iatom=1,natom
    lpawu = matlu(iatom)%lpawu
    if (lpawu == -1) cycle
    if (present(onlynondiag)) then
-     ndim = nspinor * (2*lpawu+1)
-     do isppol=1,nsppol
-       do im1=1,ndim
-         do im=1,ndim
-           if (im /= im1) matlu(iatom)%mat(im,im1,isppol) = czero
-         end do ! im
-       end do ! im1
-     end do ! isppol
+     ndim  = 2*lpawu + 1
+     tndim = nspinor * ndim
+     if (onlynondiag == 1) then
+       do isppol=1,nsppol
+         do im1=1,tndim
+           do im=1,tndim
+             if (im /= im1) then
+               if (abs(matlu(iatom)%mat(im,im1,isppol)) > maxoffdiag_) &
+                 & maxoffdiag_ = abs(matlu(iatom)%mat(im,im1,isppol))
+               matlu(iatom)%mat(im,im1,isppol) = czero
+             end if
+           end do ! im
+         end do ! im1
+       end do ! isppol
+     else if (onlynondiag == 2) then
+       do isppol=1,nsppol
+         do ispinor1=1,nspinor
+           do im1=1,ndim
+             do ispinor=1,nspinor
+               do im=1,ndim
+                 if (im /= im1) then
+                   if (abs(matlu(iatom)%mat(im+(ispinor-1)*ndim,im1+(ispinor1-1)*ndim,isppol)) > maxoffdiag_) &
+                      & maxoffdiag_ = abs(matlu(iatom)%mat(im+(ispinor-1)*ndim,im1+(ispinor1-1)*ndim,isppol))
+                   matlu(iatom)%mat(im+(ispinor-1)*ndim,im1+(ispinor1-1)*ndim,isppol) = czero
+                 end if
+               end do ! im
+             end do ! ispinor
+           end do ! im1
+         end do ! ispinor1
+       end do ! isppol
+     else if (onlynondiag == 3 .and. nspinor == 2) then
+       maxoffdiag_ = maxval(abs(matlu(iatom)%mat(1:ndim,ndim+1:tndim,1)))
+       maxoffdiag_ = max(maxoffdiag_,maxval(abs(matlu(iatom)%mat(ndim+1:tndim,1:ndim,1))))
+       matlu(iatom)%mat(1:ndim,ndim+1:tndim,1) = czero
+       matlu(iatom)%mat(ndim+1:tndim,1:ndim,1) = czero
+     end if ! onlynondiag
    else
      matlu(iatom)%mat(:,:,:) = czero
    end if ! onlynondiag
  end do ! iatom
+
+ if (present(maxoffdiag)) maxoffdiag = maxoffdiag_
 
 end subroutine zero_matlu
 !!***
@@ -401,13 +437,13 @@ subroutine print_matlu(matlu,natom,prtopt,opt_diag,opt_ab_out,opt_exp,argout,com
 
    do isppol=1,nsppol
      if (nspinor == 1) then
-       write(message,'(a,10x,a,x,i1)') ch10,'-- polarization spin component',isppol
+       write(message,'(a,10x,a,1x,i1)') ch10,'-- polarization spin component',isppol
        call wrtout(arg_out,message,mode_paral)
      end if ! nspinor=1
      do ispinor=1,nspinor
        do ispinor1=1,nspinor
          if (nspinor == 2) then
-           write(message,'(a,10x,a,i1,x,i1)') ch10,'-- spin components ',ispinor,ispinor1
+           write(message,'(a,10x,a,i1,1x,i1)') ch10,'-- spin components ',ispinor,ispinor1
            call wrtout(arg_out,message,mode_paral)
          end if
          if (optdiag <= 0) then
@@ -2243,7 +2279,7 @@ end subroutine add_matlu
    write(message,'(3x,2a,e12.4,a,e12.4,6a)') ch10,&
     & ' Occupation matrix is non diagonal : the maximum off-diag part ',maxoffdiag,' is larger than',tol,ch10,&
     & "The corresponding non diagonal elements will be neglected in the Weiss/Hybridization functions",ch10,&
-    & "(Except if dmft_solv=8,9, or dmft_solv=6,7 and dmftctqmc_triqs_off_diag=true, &
+    & "(Except if dmft_solv=8,9, or dmft_solv=6,7 and dmftctqmc_triqs_orb_off_diag/spin_off_diag=true, &
     & where these elements are taken into account)",ch10,"This is an approximation."
    ABI_WARNING(message)
  else
