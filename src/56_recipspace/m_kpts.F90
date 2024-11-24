@@ -2771,11 +2771,9 @@ subroutine testkgrid(bravais,iout,kptrlatt,kptrlen,msym,nshiftk,nsym,prtkpt,rpri
      axes(:,1)=-axes(:,1)
    end if
 !  Prefer symmetry axes on the same side as the primitive axes
-   sca=axes(1,1)*r2d(1,1)+axes(2,1)*r2d(2,1)+axes(3,1)*r2d(3,1)
-   scb=axes(1,2)*r2d(1,2)+axes(2,2)*r2d(2,2)+axes(3,2)*r2d(3,2)
-   scc=axes(1,3)*rprimd(1,dirvacuum)&
-&   +axes(2,3)*rprimd(2,dirvacuum)&
-&   +axes(3,3)*rprimd(3,dirvacuum)
+   sca=DOT_PRODUCT(axes(:,1), r2d(:,1))
+   scb=DOT_PRODUCT(axes(:,2), r2d(:,2))
+   scc=DOT_PRODUCT(axes(:,3), rprimd(:,dirvacuum))
    if(sca<-tol8 .and. scb<-tol8)then
      axes(:,1)=-axes(:,1) ; sca=-sca
      axes(:,2)=-axes(:,2) ; scb=-scb
@@ -2790,8 +2788,8 @@ subroutine testkgrid(bravais,iout,kptrlatt,kptrlen,msym,nshiftk,nsym,prtkpt,rpri
 !  axes(:,2)=-axes(:,2) ; scb=-scb
 !  axes(:,3)=-axes(:,3) ; scc=-scc
 !  end if
-   length_axis1=sqrt(axes(1,1)**2+axes(2,1)**2+axes(3,1)**2)
-   length_axis2=sqrt(axes(1,2)**2+axes(2,2)**2+axes(3,2)**2)
+   length_axis1=NORM2(axes(:,1))
+   length_axis2=NORM2(axes(:,2))
 
 !  DEBUG
 !  write(std_out,*)' testkgrid: iholohedry, center =',iholohedry,center
@@ -2817,9 +2815,9 @@ subroutine testkgrid(bravais,iout,kptrlatt,kptrlen,msym,nshiftk,nsym,prtkpt,rpri
    do ii=1,3
      axes(:,ii)=rprimd(:,1)*matrix2(ii,1)+rprimd(:,2)*matrix2(ii,2)+rprimd(:,3)*matrix2(ii,3)
    end do
-   length_axis1=sqrt(axes(1,1)**2+axes(2,1)**2+axes(3,1)**2)
-   length_axis2=sqrt(axes(1,2)**2+axes(2,2)**2+axes(3,2)**2)
-   length_axis3=sqrt(axes(1,3)**2+axes(2,3)**2+axes(3,3)**2)
+   length_axis1 = NORM2(axes(:,1))
+   length_axis2 = NORM2(axes(:,2))
+   length_axis3 = NORM2(axes(:,3))
 !  DEBUG
 !  write(std_out,*)' testkgrid: axes=',axes(:,:)
 !  write(std_out,*)' length_axis=',length_axis1,length_axis2,length_axis3
