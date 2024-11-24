@@ -3,7 +3,7 @@
 # This file will optimize automatically the interatomic distance
 
 #Define the methodology to find the minimum
-ionmov  2              # Use the modified Broyden algorithm
+geoopt  "bfgs"         # Use the modified Broyden algorithm
 ntime   10             # Maximum number of Broyden "timesteps"
 tolmxf  5.0d-4         # Stopping criterion for the geometry optimization : when 
                        # the residual forces are less than tolmxf, the Broyden 

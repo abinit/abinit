@@ -173,9 +173,10 @@ type, public :: dataset_type
  integer :: dmftctqmc_triqs_nbins_histo
  integer :: dmftctqmc_triqs_nleg
  integer :: dmftctqmc_triqs_ntau_delta
- integer :: dmftctqmc_triqs_off_diag
+ integer :: dmftctqmc_triqs_orb_off_diag
  integer :: dmftctqmc_triqs_seed_a
  integer :: dmftctqmc_triqs_seed_b
+ integer :: dmftctqmc_triqs_spin_off_diag
  integer :: dmftctqmc_triqs_therm
  integer :: dmftctqmc_triqs_time_invariance
  integer :: dmftctqmc_triqs_use_norm_as_weight
@@ -852,6 +853,7 @@ type, public :: dataset_type
  real(dp) :: freqspmin = zero
  real(dp) :: freqspmax = zero
  real(dp) :: friction
+ real(dp) :: frictionbar
  real(dp) :: fxcartfactor
  real(dp) :: ga_opt_percent
  real(dp) :: gwencomp = 2.0_dp
@@ -1066,6 +1068,8 @@ type, public :: dataset_type
  character(len=fnlen) :: getabiwan_filepath = ABI_NOFILE
  character(len=fnlen) :: getgwan_filepath = ABI_NOFILE
  character(len=fnlen) :: write_files = ABI_NOFILE
+ character(len=fnlen) :: geoopt = ABI_NOFILE
+ character(len=fnlen) :: moldyn = ABI_NOFILE
 
  contains
 
@@ -1556,9 +1560,10 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%dmftctqmc_triqs_nbins_histo = dtin%dmftctqmc_triqs_nbins_histo
  dtout%dmftctqmc_triqs_nleg = dtin%dmftctqmc_triqs_nleg
  dtout%dmftctqmc_triqs_ntau_delta = dtin%dmftctqmc_triqs_ntau_delta
- dtout%dmftctqmc_triqs_off_diag = dtin%dmftctqmc_triqs_off_diag
+ dtout%dmftctqmc_triqs_orb_off_diag = dtin%dmftctqmc_triqs_orb_off_diag
  dtout%dmftctqmc_triqs_seed_a = dtin%dmftctqmc_triqs_seed_a
  dtout%dmftctqmc_triqs_seed_b = dtin%dmftctqmc_triqs_seed_b
+ dtout%dmftctqmc_triqs_spin_off_diag = dtin%dmftctqmc_triqs_spin_off_diag
  dtout%dmftctqmc_triqs_therm = dtin%dmftctqmc_triqs_therm
  dtout%dmftctqmc_triqs_time_invariance = dtin%dmftctqmc_triqs_time_invariance
  dtout%dmftctqmc_triqs_use_norm_as_weight = dtin%dmftctqmc_triqs_use_norm_as_weight
@@ -1663,6 +1668,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%ga_algor           = dtin%ga_algor
  dtout%ga_fitness         = dtin%ga_fitness
  dtout%ga_n_rules         = dtin%ga_n_rules
+ dtout%geoopt             = dtin%geoopt
  dtout%getbseig           = dtin%getbseig
  dtout%getbsreso          = dtin%getbsreso
  dtout%getbscoup          = dtin%getbscoup
@@ -1858,6 +1864,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%mkmem              = dtin%mkmem
  dtout%mkqmem             = dtin%mkqmem
  dtout%mk1mem             = dtin%mk1mem
+ dtout%moldyn             = dtin%moldyn
  dtout%mpw                = dtin%mpw
  dtout%mqgrid             = dtin%mqgrid
  dtout%mqgriddg           = dtin%mqgriddg
@@ -2226,6 +2233,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%fband              = dtin%fband
  dtout%focktoldfe         = dtin%focktoldfe
  dtout%friction           = dtin%friction
+ dtout%frictionbar        = dtin%frictionbar
  dtout%fxcartfactor       = dtin%fxcartfactor
  dtout%ga_opt_percent     = dtin%ga_opt_percent
  dtout%gwls_model_parameter = dtin%gwls_model_parameter
@@ -3432,8 +3440,8 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' dmftctqmc_triqs_leg_measure dmftctqmc_triqs_loc_n_min dmftctqmc_triqs_loc_n_max'
  list_vars=trim(list_vars)//' dmftctqmc_triqs_measure_density_matrix dmftctqmc_triqs_move_double'
  list_vars=trim(list_vars)//' dmftctqmc_triqs_move_global_prob dmftctqmc_triqs_move_shift dmftctqmc_triqs_nbins_histo'
- list_vars=trim(list_vars)//' dmftctqmc_triqs_nleg dmftctqmc_triqs_ntau_delta dmftctqmc_triqs_off_diag'
- list_vars=trim(list_vars)//' dmftctqmc_triqs_seed_a dmftctqmc_triqs_seed_b dmftctqmc_triqs_therm'
+ list_vars=trim(list_vars)//' dmftctqmc_triqs_nleg dmftctqmc_triqs_ntau_delta dmftctqmc_triqs_orb_off_diag'
+ list_vars=trim(list_vars)//' dmftctqmc_triqs_seed_a dmftctqmc_triqs_seed_b dmftctqmc_triqs_spin_off_diag dmftctqmc_triqs_therm'
  list_vars=trim(list_vars)//' dmftctqmc_triqs_time_invariance dmftctqmc_triqs_use_norm_as_weight dmftcheck'
  list_vars=trim(list_vars)//' dmftqmc_l dmftqmc_n dmftqmc_seed dmftqmc_therm dmft_charge_prec dmft_dc'
  list_vars=trim(list_vars)//' dmft_entropy dmft_fermi_step dmft_gaussorder dmft_integral'
@@ -3476,11 +3484,11 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' fit_tolGF fit_tolMSDE fit_tolMSDF fit_tolMSDFS fit_tolMSDS'
  list_vars=trim(list_vars)//' fockoptmix focktoldfe fockdownsampling fock_icutcoul'
  list_vars=trim(list_vars)//' freqim_alpha freqremax freqremin freqspmax'
- list_vars=trim(list_vars)//' freqspmin friction frzfermi fxcartfactor'
+ list_vars=trim(list_vars)//' freqspmin friction frictionbar frzfermi fxcartfactor'
  list_vars=trim(list_vars)//' f4of2_sla f6of2_sla'
 !G
  list_vars=trim(list_vars)//' ga_algor ga_fitness ga_n_rules ga_opt_percent ga_rules'
- list_vars=trim(list_vars)//' genafm getbscoup getbseig getbsreso getcell'
+ list_vars=trim(list_vars)//' genafm geoopt getbscoup getbseig getbsreso getcell'
  list_vars=trim(list_vars)//' getddb getddb_filepath getden_filepath getddk'
  list_vars=trim(list_vars)//' getdelfd getdkdk getdkde getden getkden getdvdb getdrhodb getdvdb_filepath getdrhodb_filepath'
  list_vars=trim(list_vars)//' getefmas getkerange_filepath getgam_eig2nkq'
@@ -3550,7 +3558,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' max_ncpus macro_uj maxestep maxnsym mdf_epsinf mdtemp mdwall'
  list_vars=trim(list_vars)//' magconon magcon_lambda mbpt_sciss'
  list_vars=trim(list_vars)//' mep_mxstep mep_solver mem_test mixalch mixprec mixesimgf'
- list_vars=trim(list_vars)//' mqgrid mqgriddg'
+ list_vars=trim(list_vars)//' moldyn mqgrid mqgriddg'
 !N
  list_vars=trim(list_vars)//' natcon natfix natfixx natfixy natfixz'
  list_vars=trim(list_vars)//' natom natrd natsph natsph_extra natvshift nband nbandkss nbandhf'

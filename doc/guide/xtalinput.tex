@@ -244,7 +244,7 @@ and {\tt spgaxor} as input variables to {\sc Abinit}.
 are positions in the unit cell that exhibit the point symmetry of the space group. If the point symmetry of the position is
 high enough, vectorial quantities, such as force, must vanish there. A typical example is AlAs, for which both the Al and As
 atoms lie on special positions. When you optimize the unit cell, the ions can't move and all forces vanish at them, regardless
-of the volume of the cell. To optimize such a cell in {\sc Abinit} you would use {\tt ionmov 2} and {\tt optcell 2}, but instead
+of the volume of the cell. To optimize such a cell in {\sc Abinit} you would use {\tt geoopt "bfgs"} and {\tt optcell 2}, but instead
 of {\tt toldff} as a convergence variable, use {\tt tolvrs}. {\tt toldff} refers to forces and will always be ``converged'' in this
 case, because all forces are zero.
 

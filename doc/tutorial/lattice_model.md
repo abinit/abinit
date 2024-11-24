@@ -48,7 +48,7 @@ The methodology followed in MULTIBINIT consists in making a Taylor expansion aro
 
 $$\displaystyle  E^{tot}(\boldsymbol{u},\boldsymbol{\eta}) =  E^{0} + [ E^{phonon}_{harm}(\boldsymbol{u})  + E^{elastic}_{harm}(\boldsymbol{\eta})  + E^{coupling}_{harm}(\boldsymbol{u},\boldsymbol{\eta})] + [E^{phonon}_{anharm}(\boldsymbol{u}) + E^{elastic}_{anharm}(\boldsymbol{\eta}) + E^{coupling}_{anharm}(\boldsymbol{u},\boldsymbol{\eta})] $$
 
-The first term $E^0$ is the energy of the RS, which has been fully relaxed (e.g. [[ionmov]]=2 and [[optcell]]=2) with very strict tolerance criterium ([[tolmxf]] < 1E-7) since we assume that all first energy derivatives are zero.  This $E^0$ energy has to be included in the global DDB file, by including the ground-state DDB when merging all partial DDBs with [[lesson:rf2| mrgddb]]. 
+The first term $E^0$ is the energy of the RS, which has been fully relaxed (e.g. [[geoopt]] "bfgs" and [[optcell]]=2) with very strict tolerance criterium ([[tolmxf]] < 1E-7) since we assume that all first energy derivatives are zero.  This $E^0$ energy has to be included in the global DDB file, by including the ground-state DDB when merging all partial DDBs with [[lesson:rf2| mrgddb]].
 
 Then, for the set of harmonic terms, the coefficients correspond to various second derivatives of the energy respect to atomic displacements and macroscopic strains. 
 They can be directly computed with ABINIT using DFPT ([[lesson:rf1| phonon response]], [[lesson:elastic|strain response]]) 

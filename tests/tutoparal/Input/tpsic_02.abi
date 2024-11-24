@@ -45,7 +45,7 @@ mixesimgf -59.00 +80.0 -20.0    # Must be coherent with the occupation numbers
 ###########################################################################
 
 # Optimization parameters
- ionmov 2
+ geoopt "bfgs"
  tolmxf 1.0d-5  # This criterion is irrelevant in the present status of the code.
 
 # SCF procedure
