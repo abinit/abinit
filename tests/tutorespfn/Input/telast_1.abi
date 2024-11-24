@@ -5,7 +5,7 @@
 
 # Set 1 : Internal coordinate optimization
 
-  ionmov1   2       # Use BFGS algorithm for structural optimization
+  geoopt1   "bfgs"  # Use BFGS algorithm for structural optimization
    ntime1   5       # Maximum number of optimization steps
   tolmxf1   1.0e-6  # Optimization is converged when maximum force 
                     # (Hartree/Bohr) is less than this maximum
@@ -19,7 +19,7 @@
  dilatmx2   1.05    # Maximum scaling allowed for lattice parameters
  getxred2   -1      # Start with relaxed coordinates from dataset 1
   getwfk2   -1      # Start with wave functions from dataset 1
-  ionmov2   2       # Use BFGS algorithm
+  geoopt2   "bfgs"  # Use BFGS algorithm
    ntime2   14      # Maximum number of optimization steps
  optcell2   2       # Fully optimize unit cell geometry, keeping symmetry
   tolmxf2   1.0e-6  # Convergence limit for forces as above

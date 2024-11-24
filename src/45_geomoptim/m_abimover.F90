@@ -83,6 +83,8 @@ integer  :: jellslab
 integer  :: natom
 ! Number of CONstraint EQuations
 integer  :: nconeq
+! Number of Degrees Of Freedom
+integer  :: ndof
 ! number of Shifts for the Qpoint Grid  (used for ionmov 26 and 27)
 integer  :: ph_nqshift
 ! Use by pred_isothermal only
@@ -480,6 +482,11 @@ type(abimover_specs),intent(out) :: specs
    ab_mover%amass(iatom)=amu_emass*amu_curr(dtset%typat(iatom))
  end do
 
+!Count the number of degrees of freedom, taking into account iatfix.
+!Ndof = 3N (when no atom is fixed). This value may be adjusted for
+!each algorithm below.
+ ab_mover%ndof=count(ab_mover%iatfix==0)
+
 !Filename for Hessian matrix (NOT IN DTSET)
  ab_mover%fnameabi_hes =>dtfil%fnameabi_hes
 !Filename for _HIST file
@@ -644,6 +651,11 @@ type(abimover_specs),intent(out) :: specs
    specs%method = 'Isokinetic ensemble molecular dynamics'
 !  Number of history
    specs%nhist = 3
+!  Number of degrees of freedom: 3N-4
+   ab_mover%ndof=ab_mover%ndof-1 ! Kinetic energy conservation
+!  Conservation of the total momentum for each dimension, in case
+!  no atom position is fixed for that dimension
+   ab_mover%ndof=ab_mover%ndof-count(sum(ab_mover%iatfix,dim=2)==0)
 !  This is the initialization for ionmov==13
 !  -------------------------------------------
  case (13)
@@ -676,7 +688,7 @@ type(abimover_specs),intent(out) :: specs
 
 !  This is the initialization for ionmov==15
 !  -------------------------------------------
-case (15)
+ case (15)
 !  Values use in XML Output
    specs%type4xml='FIRE'
    specs%isVused=.TRUE.  ! Velocities are used
@@ -686,6 +698,26 @@ case (15)
    specs%method = 'Fast inertial relaxation engine'
 !  Number of history
    specs%nhist = 2
+!  This is the initialization for ionmov==16
+!  ------------------------------------------
+ case (16)
+!  TEMPORARLY optcell is not allow
+   specs%isVused=.TRUE.  ! Velocities are used
+   specs%isFconv=.FALSE. ! Convergence is not used for MD
+   specs%ncycle=1
+!  Values use in XML Output
+   specs%type4xml='langevin'
+   specs%crit4xml='tolmxf'
+!  Name of specs%method
+   specs%method = 'Langevin molecular dynamics'
+!  Number of history
+   specs%nhist = 3
+!  Number of degrees of freedom: 3N-constraints
+!  For now the pimd langevin algorithms do not support iatfix.
+   if(dtset%pitransform==1.or.dtset%pitransform==2.or.&
+&     dtset%pimd_constraint==1.or.dtset%optcell==2) then
+     ab_mover%ndof=ab_mover%ndof-3
+   end if
 !  This is the initialization for ionmov==20
 !  -------------------------------------------
  case (20)
