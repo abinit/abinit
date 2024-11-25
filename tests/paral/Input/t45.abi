@@ -7,6 +7,11 @@ jdtset 2 3 4
 
 npband 4
 
+# LB-11/2024:
+# an error appears on eos for dataset 2 without the next line
+# dataset 2 is old version of lobpcg so not important
+np_slk 0
+
 wfoptalg1   0
 wfoptalg2  14
 wfoptalg3 114
