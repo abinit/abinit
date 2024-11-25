@@ -113,8 +113,8 @@
 #%% executable = abinit
 #%% test_chain = t25.abi
 #%% [files]
-#%% files_to_test = 
-#%%    t25.abo, tolnlines =0 , tolabs =1.0E-8, tolrel = 1.0E-8, fld_options = -easy;
+#%% files_to_test =
+#%%    t25.abo, tolnlines = 0 , tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options = -easy;
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

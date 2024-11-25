@@ -1,5 +1,5 @@
 # Test NOSE and LANGEVIN for 2 atoms of Ge in LDA
-# The initial temperature 1000K 
+# The initial temperature 1000K
 # will be set by random velocities
 # 10 MD steps with decreasing T to 500K
 # dtion = 200
@@ -10,7 +10,7 @@ ionmov1 0
 
 ionmov2     8          !8 is nose
 getwfk2     1
-noseinert2  100001     !nose thermostat inertia 
+noseinert2  100001     !nose thermostat inertia
                        !(Slightly different from default value)
 
 ionmov3     9          !9 is Langevin
@@ -70,13 +70,13 @@ xcart   2.000d0  4.000d0   4.000d0
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
-#%%   t87.abo, tolnlines = 0, tolabs = 6.000e-10, tolrel = 1.000e-09, fld_options =  -medium
+#%% files_to_test =
+#%%   t87.abo, tolnlines = 0, tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options =  -medium
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
-#%% keywords = 
+#%% keywords =
 #%% authors = J.Y. Raty
-#%% description = 
-#%%   Ge liquid. Test of Nose and Langevin dynamics. 2 atoms in a cell. Allows 10 time steps. 
+#%% description =
+#%%   Ge liquid. Test of Nose and Langevin dynamics. 2 atoms in a cell. Allows 10 time steps.
 #%%<END TEST_INFO>
