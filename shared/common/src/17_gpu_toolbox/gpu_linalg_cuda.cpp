@@ -512,27 +512,26 @@ extern "C" void gpu_xginv_old_(int* cplx,
   CUDA_API_CHECK( cudaMemcpy(A_ptr, W_ptr, *N*(*N)*sizeof(cuDoubleComplex), cudaMemcpyDefault) );
   CUDA_API_CHECK( cudaFree(ipiv) );
   CUDA_API_CHECK( cudaFree(devInfo) );
-	/*
+}
+
+
+extern "C" void gpu_xginv_strided_(int* cplx,
+                           int *N,
+                           void **A_ptr, int *lda, int *strideA,
+                           int *batchCount, void **W_ptr)
+{
   int *infoArray, *pivotArray, *info;
-	info = (int*) malloc(*batchCount*sizeof(int));
-  CUDA_API_CHECK( cudaMalloc( (void**) &infoArray,  *batchCount*sizeof(int)) );
-  CUDA_API_CHECK( cudaMalloc( (void**) &pivotArray, *batchCount*sizeof(int)) );
-  cuDoubleComplex **A_array = (cuDoubleComplex**) malloc(*batchCount*sizeof(cuDoubleComplex*));
-  cuDoubleComplex **C_array = (cuDoubleComplex**) malloc(*batchCount*sizeof(cuDoubleComplex*));
-	int i;
-	for(i=0; i<*batchCount; ++i) {
-		fprintf(stderr, "5\n"); fflush(stderr);
-    A_array[i]=(cuDoubleComplex *)(A_ptr+i*(*strideA)) ;
-		CUDA_API_CHECK( cudaMalloc( (void**) &(C_array[i]), *strideA*sizeof(cuDoubleComplex)) );
-		fprintf(stderr, "56\n"); fflush(stderr);
-		toto((void**)&(A_ptr),"toto");
-		toto((void**)&(A_array[i]),"totoA");
-		toto((void**)&(C_array[i]),"totoC");
-	}
-	fprintf(stderr, "6\n"); fflush(stderr);
+  int i;
+  cuDoubleComplex *cwork;
+  cuDoubleComplex **A_array, **C_array;
+  cuDoubleComplex **A_arrayd, **C_arrayd;
+
+  info = (int*) malloc(*batchCount*sizeof(int));
+  CUDA_API_CHECK( cudaMalloc( (void**) &infoArray, *batchCount *sizeof(int)) );
+  CUDA_API_CHECK( cudaMalloc( (void**) &pivotArray,*N * (*batchCount) *sizeof(int)) );
 
   if(*cplx==1) {
-  *  CUDA_API_CHECK( cublasDgetrfBatched(cublas_handle,
+  /*  CUDA_API_CHECK( cublasDgetrfBatched(cublas_handle,
                 *N,
                 A_array, *lda,
                 pivotArray, infoArray, *batchCount));
@@ -542,47 +541,81 @@ extern "C" void gpu_xginv_old_(int* cplx,
                 pivotArray,
                 (double *)(*A_ptr), *lda,
                 infoArray, *batchCount));
-  *
+  */
   } else {
+    //CUDA_API_CHECK( cudaMalloc( (void**) &cwork,      *N * (*N) *(*batchCount) *sizeof(cuDoubleComplex)));
+    A_array = (cuDoubleComplex**) malloc(*batchCount*sizeof(cuDoubleComplex*));
+    C_array = (cuDoubleComplex**) malloc(*batchCount*sizeof(cuDoubleComplex*));
+    for(i=0; i<*batchCount; ++i) {
+      A_array[i]=((cuDoubleComplex *)A_ptr)+i*(*strideA) ;
+      C_array[i]=((cuDoubleComplex *)W_ptr)+i*(*strideA) ;
+    }
+    CUDA_API_CHECK( cudaMalloc( (void**) &A_arrayd, *batchCount *sizeof(cuDoubleComplex*)) );
+    CUDA_API_CHECK( cudaMalloc( (void**) &C_arrayd, *batchCount *sizeof(cuDoubleComplex*)) );
+    CUDA_API_CHECK( cudaMemcpy(A_arrayd, A_array, *batchCount*sizeof(cuDoubleComplex*), cudaMemcpyDefault) );
+    CUDA_API_CHECK( cudaMemcpy(C_arrayd, C_array, *batchCount*sizeof(cuDoubleComplex*), cudaMemcpyDefault) );
     CUDA_API_CHECK( cublasZgetrfBatched(cublas_handle,
                 *N,
-                A_array, *lda,
+                A_arrayd, *lda,
                 pivotArray, infoArray, *batchCount));
-		CUDA_API_CHECK( cudaMemcpy(info, infoArray, *batchCount*sizeof(int), cudaMemcpyDefault) );
-		for(i=0; i<*batchCount; ++i) {
-			if(info[i]!=0){
-				fprintf(stderr, "ERROR: zgetrf on batch %d / %d : %d \n",i,*batchCount,info[i]);
-				fflush(stderr);
-				abi_cabort();
-			} else { fprintf(stderr, "OK: zgetrf on batch %d / %d : %d \n",i,*batchCount,info[i]);}
-		}
+    //gpu_linalg_stream_synchronize_();
+    CUDA_API_CHECK( cudaMemcpy(info, infoArray, *batchCount*sizeof(int), cudaMemcpyDefault) );
+
+    for(i=0; i<*batchCount; ++i) {
+      if (info[i] < 0) {
+        fprintf(stderr, " The %d-th argument of ZGETRF had an illegal value.", info[i]);
+        fflush(stderr);
+        abi_cabort();
+      } else if (info[i] > 0) {
+         fprintf(stderr,
+             "The matrix that has been passed in argument is probably either \
+             singular or nearly singular.\n\
+             U(i,i) in the P*L*U factorization is exactly zero for i = %d \n\
+             The factorization has been completed but the factor U is exactly singular.\n\
+             Division by zero will occur if it is used to solve a system of equations.", info[i]);
+         fflush(stderr);
+         abi_cabort();
+      }
+    }
+
+    CUDA_API_CHECK( cudaMemcpy(info, infoArray, *batchCount*sizeof(int), cudaMemcpyDefault) );
+
     CUDA_API_CHECK( cublasZgetriBatched(cublas_handle,
                 *N,
-                A_array, *lda,
+                A_arrayd, *lda,
                 pivotArray,
-                C_array, *lda,
+                C_arrayd, *lda,
                 infoArray, *batchCount));
-		CUDA_API_CHECK( cudaMemcpy(info, infoArray, *batchCount*sizeof(int), cudaMemcpyDefault) );
-		for(i=0; i<*batchCount; ++i) {
-			if(info[i]!=0){
-				fprintf(stderr, "ERROR: zgetri on batch %d / %d : %d \n",i,*batchCount,info[i]);
-				fflush(stderr);
-				abi_cabort();
-			} else { fprintf(stderr, "OK: zgetri on batch %d / %d : %d \n",i,*batchCount,info[i]);}
-		}
+    CUDA_API_CHECK( cudaMemcpy(info, infoArray, *batchCount*sizeof(int), cudaMemcpyDefault) );
+
+    for(i=0; i<*batchCount; ++i) {
+      if (info[i] < 0) {
+        fprintf(stderr, " The %d-th argument of ZGETRI had an illegal value.", info[i]);
+        fflush(stderr);
+        abi_cabort();
+      } else if (info[i] > 0) {
+         fprintf(stderr,
+             "The matrix that has been passed in argument is probably either singular \
+             or nearly singular.\n\
+             U(i,i) for i =%d is exactly zero; the matrix is singular and \
+             its inverse could not be computed. \n", info[i]);
+         fflush(stderr);
+         abi_cabort();
+      }
+    }
+    CUDA_API_CHECK( cudaMemcpy(A_ptr, W_ptr, *batchCount * (*N) * (*N) *sizeof(cuDoubleComplex), cudaMemcpyDefault) );
+    //CUDA_API_CHECK( cudaFree(cwork) );
+    CUDA_API_CHECK( cudaFree(A_arrayd) );
+    CUDA_API_CHECK( cudaFree(C_arrayd) );
+    free(A_array);
+    free(C_array);
   }
 
 
   CUDA_API_CHECK( cudaFree(infoArray) );
   CUDA_API_CHECK( cudaFree(pivotArray) );
-	free(info);
-	for(i=0; i<*batchCount; ++i) {
-		CUDA_API_CHECK( cudaMemcpy(A_array[i], C_array[i], *strideA*sizeof(cuDoubleComplex), cudaMemcpyDefault) );
-		CUDA_API_CHECK( cudaFree(C_array[i]) );
-	}
-	free(A_array);
-	free(C_array);
-	*/
+  free(info);
+
 } // gpu_xginv_strided_batched
 
 /*=========================================================================*/
