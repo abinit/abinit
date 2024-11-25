@@ -113,7 +113,6 @@ P           mkmem           8
              nkpt           8
             nline           8
 -          npband           4
-           np_slk           0
             nstep          15
              nsym           1
            ntypat           2
@@ -730,7 +729,6 @@ P           mkmem           8
              nkpt           8
             nline           8
 -          npband           4
-           np_slk           0
             nstep          15
              nsym           1
            ntypat           2
