@@ -17,10 +17,10 @@
 .Starting date : Wed 30 Oct 2024.
 - ( at 09h01 )
   
-- input  file    -> /tmp/abinit/chebfi-oracle_debug/Test_suite/v10_t20/t20.abi
-- output file    -> t20.abo
-- root for input  files -> t20i
-- root for output files -> t20o
+- input  file    -> /tmp/abinit/chebfi-oracle_debug/Test_suite/v10_t22/t22.abi
+- output file    -> t22.abo
+- root for input  files -> t22i
+- root for output files -> t22o
 
 - inpspheads : Reading pseudopotential header in XML form from 
 -   /cea/home/l2/baguetl/PROGRAM/abinit/chebfi-oracle/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/P.xml

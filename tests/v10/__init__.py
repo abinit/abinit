@@ -26,7 +26,7 @@ inp_files = [
     "t17.abi" ,  # same as v10[10], with istwfk>1 (without DFTI).
     "t18.abi" ,  # same as v10[10] but with NC pseudos, istwfk>1 (without DFTI)
     "t19.abi" ,  # compare cprj_in_memory=1 with cprj_in_memory=0 for cell optimization.
-    "t20.abi" ,  # test oracle and nbdbuf in chebfi (cprj_in_memory=0 and 1).
+    "t22.abi" ,  # test oracle and nbdbuf in chebfi (cprj_in_memory=0 and 1).
     "t40.abi" ,  # test orbmag calculation when using spatial symmetries for GS nuclear dipole 
     "t81.abi" ,  # Short MD to test restart on next test
     "t82.abi" ,  # Test restart of MD from the HIST of previous test using restartxf -1
