@@ -17,7 +17,7 @@ kptopt 0 nkpt 1
 nsym 1
 
 #Molecular Dynamics parameters
-ionmov 12 ntime 50
+moldyn "nvt_isokin" ntime 50
 dtion 100
 mdtemp 3000 3000
 tsmear 0.009500446
