@@ -1,5 +1,5 @@
 
-.Version 10.2.4.2 of ABINIT, released Nov 2024.
+.Version 10.3.3.2 of ABINIT, released Nov 2024.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2024 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 19 Nov 2024.
-- ( at 19h56 )
+.Starting date : Sun 24 Nov 2024.
+- ( at 07h33 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_EOF-10.2/tests/TestBot_MPI1/v9_t57-t58-t59-t60-t61/t61.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__mmignolet/tests/TestBot_MPI1/v9_t57-t58-t59-t60-t61/t61.abi
 - output file    -> t61.abo
 - root for input  files -> t61i
 - root for output files -> t61o
@@ -288,8 +288,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
          ecut(hartree)=     35.000   => boxcut(ratio)=   1.79502
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_EOF-10.2/tests/Psps_for_tests/03-Li.psp
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_EOF-10.2/tests/Psps_for_tests/03-Li.psp
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__mmignolet/tests/Psps_for_tests/03-Li.psp
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__mmignolet/tests/Psps_for_tests/03-Li.psp
 -  Troullier-Martins psp for element  Li        Thu Oct 27 17:29:06 EDT 1994
 -  3.00000   1.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -303,8 +303,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
              0    1.242797
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_EOF-10.2/tests/Psps_for_tests/09-F.psp
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_EOF-10.2/tests/Psps_for_tests/09-F.psp
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__mmignolet/tests/Psps_for_tests/09-F.psp
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__mmignolet/tests/Psps_for_tests/09-F.psp
 -  Troullier-Martins psp for element  F         Thu Oct 27 17:30:08 EDT 1994
 -  9.00000   7.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -713,8 +713,8 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:    7.219
 ============================================================================================
 K-point: [ 1.2500E-01,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:    7.219
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   3  -0.226    0.001    287.4    0.000
-   4  -0.226    0.001    287.4    0.000
+   3  -0.226    0.001    287.5    0.000
+   4  -0.226    0.001    287.5    0.000
 ============================================================================================
 K-point: [ 1.2500E-01,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:    7.219
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -1030,10 +1030,10 @@ P           mkmem3         29
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          6.7  wall=          6.8
+- Proc.   0 individual time (sec): cpu=          6.6  wall=          6.6
 
 ================================================================================
 
  Calculation completed.
 .Delivered   4 WARNINGs and  14 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          6.7  wall=          6.8
++Overall time at end (sec) : cpu=          6.6  wall=          6.6
