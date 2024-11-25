@@ -701,7 +701,7 @@ subroutine inverse_oper(oper,option,procb,iproc,gpu_option)
  integer, optional, intent(in) :: procb(oper%nkpt)
 !Local variables-------------------------------
  integer :: ikpt,isppol,idat,paral,ib,mbandc
- integer :: l_gpu_option
+ integer :: l_gpu_option,blk
  complex(dpc), ABI_CONTIGUOUS pointer :: ks(:,:,:,:)
  complex(dpc), allocatable :: work(:,:)
 !todo_ba: prb with gwpc here: necessary for matcginv but should be dpc
@@ -745,6 +745,7 @@ subroutine inverse_oper(oper,option,procb,iproc,gpu_option)
          end do ! idat
        else if(l_gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
+!NOTE Doesn't work
 #if 0
          ABI_MALLOC(work, (mbandc,mbandc))
          !$OMP TARGET ENTER DATA MAP(alloc:work)
@@ -760,10 +761,17 @@ subroutine inverse_oper(oper,option,procb,iproc,gpu_option)
          end do ! idat
          !$OMP TARGET EXIT DATA MAP(delete:work)
          ABI_FREE(work)
-#else
+#endif
+
+
+!NOTE Slow
+#if 0
          ABI_MALLOC(work, (mbandc,mbandc))
          !$OMP TARGET ENTER DATA MAP(alloc:work)
          do idat=1,oper%ndat
+#ifdef HAVE_GPU_MARKERS
+           call nvtxStartRange("idat",25)
+#endif
            call gpu_set_to_zero_complex(work, int(mbandc,c_size_t)*mbandc)
            !$OMP TARGET PARALLEL DO MAP(to:work) PRIVATE(ib)
            do ib=1,mbandc
@@ -772,10 +780,39 @@ subroutine inverse_oper(oper,option,procb,iproc,gpu_option)
            !$OMP TARGET DATA USE_DEVICE_PTR(ks,work)
            call gpu_xginv_old(2,mbandc,ks(:,1+(idat-1)*mbandc:idat*mbandc,ikpt,isppol),mbandc,work)
            !$OMP END TARGET DATA
+#ifdef HAVE_GPU_MARKERS
+           call nvtxEndRange()
+#endif
          end do ! idat
          !$OMP TARGET EXIT DATA MAP(delete:work)
          ABI_FREE(work)
 #endif
+
+
+#if 1
+#ifdef HAVE_GPU_MARKERS
+         call nvtxStartRange("gpu_xginv_strided",26)
+#endif
+         ABI_MALLOC(work, (mbandc,mbandc*oper%ndat))
+         !$OMP TARGET ENTER DATA MAP(alloc:work)
+         !do idat=1,oper%ndat,32
+           !blk=min(32,oper%ndat-idat+1)
+           !$OMP TARGET DATA USE_DEVICE_PTR(ks,work)
+           !call gpu_xginv_strided(2,mbandc,ks(:,1+(idat-1)*mbandc:idat*mbandc,ikpt,isppol),mbandc,mbandc*mbandc,1)
+           !call gpu_xginv_strided(2,mbandc,ks(:,1+(idat-1)*mbandc:(idat+blk-1)*mbandc,ikpt,isppol),mbandc,mbandc*mbandc,blk,work)
+           call gpu_xginv_strided(2,mbandc,ks(:,:,ikpt,isppol),mbandc,mbandc*mbandc,oper%ndat,work)
+           !$OMP END TARGET DATA
+         !end do ! idat
+         !$OMP TARGET EXIT DATA MAP(delete:work)
+         ABI_FREE(work)
+#ifdef HAVE_GPU_MARKERS
+         call nvtxEndRange()
+#endif
+#endif
+
+
+
+
 #endif
        end if
      end do ! ikpt
