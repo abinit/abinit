@@ -44,14 +44,14 @@ prtwf 0   prtden 0
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
-#%%   t57.abo, tolnlines = 0, tolabs = 3.280e-11, tolrel = 9.540e-13
+#%% files_to_test =
+#%%   t57.abo, tolnlines = 0, tolabs = 0.0e+00, tolrel = 0.0e+00
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = S. Caravati
-#%% keywords = 
-#%% description = 
+#%% keywords =
+#%% description =
 #%%   Jellium slab (50 jellium/ 50 vacuum) with Wigner-Seitz radius=4.
 #%%   Computation of the total energy
 #%%   The number of k points has been much reduced

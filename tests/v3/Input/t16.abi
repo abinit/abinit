@@ -65,19 +65,19 @@
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
-#%%   t16.abo, tolnlines = 0, tolabs = 1.100e-07, tolrel = 4.000e-04, fld_options = -medium
+#%% files_to_test =
+#%%   t16.abo, tolnlines = 0, tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options = -medium
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = Unknown
-#%% keywords = NC, DFPT 
-#%% description = 
+#%% keywords = NC, DFPT
+#%% description =
 #%%   Si crystal. GGA + non-linear XC core correction.
 #%%   Compute the interatomic force constant for the displacement of the second atom along (111).
 #%%   RF calculation of the 2DTE gives 7.51663417 Ha
 #%%   while finite differences gives: with delta(xred)=0.0001, 7.15663267 Ha.
 #%%   The agreement is quite good, and might likely be improved by combining finite differences.
-#%%   Also compute the ddk and electric field responses. The number of k points is much too small to 
+#%%   Also compute the ddk and electric field responses. The number of k points is much too small to
 #%%   obtain physical values, but are quite comparable to the result of test v2 #6
 #%%<END TEST_INFO>
