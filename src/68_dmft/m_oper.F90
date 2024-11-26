@@ -303,7 +303,7 @@ subroutine init_oper_ndat(paw_dmft,oper,ndat,nkpt,wtk,shiftk,opt_ksloc)
 
    ABI_MALLOC(oper%ks,(oper%mbandc,oper%mbandc*ndat_,oper%nkpt,oper%nsppol))
    oper%has_operks  = 1
-   oper%ks(:,:,:,:) = czero
+   !oper%ks(:,:,:,:) = czero
 
  end if ! optksloc=1 or optksloc=3
 
