@@ -2313,9 +2313,9 @@ subroutine atomden(MPI_enreg,natom,ntypat,typat,ngrid,r_vec_grid,rho,a,b,c,atom_
  master=0
 
 !initialise variables and vectors
- a_norm = sqrt(dot_product(a,a))
- b_norm = sqrt(dot_product(b,b))
- c_norm = sqrt(dot_product(c,c))
+ a_norm = norm2(a)
+ b_norm = norm2(b)
+ c_norm = norm2(c)
  center = (a+b+c)*half
  dp_dummy = dot_product(a,b)/(b_norm*b_norm)
  dp_vec_dummy = dp_dummy*b
@@ -2341,11 +2341,11 @@ subroutine atomden(MPI_enreg,natom,ntypat,typat,ngrid,r_vec_grid,rho,a,b,c,atom_
 !Should be most important for very oblique cells
  do itypat=1,ntypat
    R_sphere_max = atomrgrid(natomgr(itypat),itypat)
-   l_min(itypat) = -ceiling(R_sphere_max/sqrt(dot_product(delta_a,delta_a)))
+   l_min(itypat) = -ceiling(R_sphere_max/norm2(delta_a))
    l_max(itypat) = -l_min(itypat)
-   m_min(itypat) = -ceiling(R_sphere_max/sqrt(dot_product(delta_b,delta_b)))
+   m_min(itypat) = -ceiling(R_sphere_max/norm2(delta_b))
    m_max(itypat) = -m_min(itypat)
-   n_min(itypat) = -ceiling(R_sphere_max/sqrt(dot_product(delta_c,delta_c)))
+   n_min(itypat) = -ceiling(R_sphere_max/norm2(delta_c))
    n_max(itypat) = -n_min(itypat)
    ncells = (l_max(itypat)-l_min(itypat)+1) &
 &   *(m_max(itypat)-m_min(itypat)+1) &
@@ -2394,8 +2394,7 @@ subroutine atomden(MPI_enreg,natom,ntypat,typat,ngrid,r_vec_grid,rho,a,b,c,atom_
 &             + (atom_pos(2,iatom)+dble(m))*b &
 &             + (atom_pos(3,iatom)+dble(n))*c
              dp_vec_dummy = equiv_atom_pos(:,i,itypat)-center
-             equiv_atom_dist(i,itypat) = &
-&             sqrt(dot_product(dp_vec_dummy,dp_vec_dummy))
+             equiv_atom_dist(i,itypat) = norm2(dp_vec_dummy)
              i = i + 1
            end if
          end do
@@ -2520,7 +2519,7 @@ subroutine atomden(MPI_enreg,natom,ntypat,typat,ngrid,r_vec_grid,rho,a,b,c,atom_
      grid_index = 0
      do igrid=1,ngrid
        dp_vec_dummy(:) = r_vec_grid(:,igrid) - r_atom(:)
-       dp_dummy = sqrt(dot_product(dp_vec_dummy,dp_vec_dummy))
+       dp_dummy = norm2(dp_vec_dummy)
        if (dp_dummy <= r_max) then
          grid_distances(i) = dp_dummy
          grid_index(i) = igrid

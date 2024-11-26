@@ -751,10 +751,10 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      end if
    end if
 
-#if !defined HAVE_TRIQS
+#if !defined HAVE_TRIQS_v3_4
    if(dt%dmft_solv>=6.and.dt%dmft_solv<=7) then
      write(msg,'(3a)') &
-      & ' dmft_solv=6, or 7 is only relevant if the TRIQS library is linked',ch10,&
+      & ' dmft_solv=6, or 7 is only relevant if the TRIQS library v3.4>= is linked',ch10,&
       & ' Action: check compilation options'
      ABI_ERROR(msg)
    end if
@@ -771,7 +771,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_move_double',dt%dmftctqmc_triqs_move_double,2,(/0,1/),iout)
      call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_move_shift',dt%dmftctqmc_triqs_move_shift,2,(/0,1/),iout)
      call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_nbins_histo',dt%dmftctqmc_triqs_nbins_histo,1,iout)
-     call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_off_diag',dt%dmftctqmc_triqs_off_diag,2,(/0,1/),iout)
+     call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_orb_off_diag',dt%dmftctqmc_triqs_orb_off_diag,2,(/0,1/),iout)
+     call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_spin_off_diag',dt%dmftctqmc_triqs_spin_off_diag,2,(/0,1/),iout)
      call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_therm',dt%dmftctqmc_triqs_therm,0,iout)
      call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_time_invariance',dt%dmftctqmc_triqs_time_invariance,2,(/0,1/),iout)
      call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_use_norm_as_weight',dt%dmftctqmc_triqs_use_norm_as_weight,2,(/0,1/),iout)
@@ -1490,13 +1491,13 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 
    ! ionmov
    call chkint_eq(0,0,cond_string,cond_values,ierr,'ionmov',&
-     dt%ionmov,24, [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,20,21,22,23,24,25,26,28],iout)
+     dt%ionmov,25, [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,20,21,22,23,24,25,26,28],iout)
 
    ! When optcell/=0, ionmov must be 2, 3, 13, 22 or 25, 28 (except if imgmov>0)
    if(dt%optcell/=0)then
      if (dt%imgmov==0) then
        cond_string(1)='optcell' ; cond_values(1)=dt%optcell
-       call chkint_eq(1,1,cond_string,cond_values,ierr,'ionmov',dt%ionmov,7,[2,3,13,15,22,25,28],iout)
+       call chkint_eq(1,1,cond_string,cond_values,ierr,'ionmov',dt%ionmov,8,[2,3,13,15,16,22,25,28],iout)
      else
        cond_string(1)='optcell' ; cond_values(1)=dt%optcell
        call chkint_eq(1,1,cond_string,cond_values,ierr,'ionmov',dt%ionmov,1,(/0/),iout)

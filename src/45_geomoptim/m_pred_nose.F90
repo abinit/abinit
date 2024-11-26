@@ -256,9 +256,7 @@ subroutine pred_nose(ab_mover,hist,itime,ntime,zDEBUG,iexit)
  end if
 
  do kk=1,ab_mover%natom
-   do jj=1,3
-     fcart_m(jj,kk)=fcart(jj,kk)/ab_mover%amass(kk)
-   end do
+     fcart_m(:,kk)=fcart(:,kk)/ab_mover%amass(kk)
  end do
 
 !First step of velocity verlet algorithm

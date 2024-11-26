@@ -356,9 +356,7 @@ real(dp) :: xred(3,ab_mover%natom),strten(6)
 !  New atomic cartesian coordinates are obtained from vin, hessin
 !  and vout
 
-   do ii=1,ndim
-     vin(:)=vin(:)-hessin(:,ii)*vout(ii)
-   end do
+   vin(:) = vin(:) - matmul(hessin(:,:), vout(:))
 
 !Pulay mixing for vin
    nitpul=0

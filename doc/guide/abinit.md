@@ -300,11 +300,11 @@ The derivative database, produced by a response-function dataset, see [[help:res
 of the respfn help file.
 
   * **abo_DEN**
-filename of file containing density, in the case [[ionmov]]=0. See the keyword
+filename of file containing density, in the case of ions are fixed. See the keyword
 [[prtden]]. This file is unformatted, but can be read by cut3d.
 
   * **abo_TIMx_DEN**
-filenames of files containing density, in the case [[ionmov]]/=0. The value of
+filenames of files containing density, in the case of ions are not fixed. The value of
 "x" after " **TIM** " is described hereafter. See the keyword [[prtden]]. This
 file is unformatted, but can be read by cut3d.
 
@@ -313,7 +313,7 @@ filename of file containing Kohn-Sham potential See the keyword [[prtpot]].
 This file is unformatted, but can be read by cut3d.
 
   * **abo_TIMx_POT**
-filenames of files containing Kohn-Sham potential in the case [[ionmov]]/=0.
+filenames of files containing Kohn-Sham potential in the case of ions are not fixed.
 The value of "x" after "TIM" is described hereafter. See the keyword
 [[prtpot]]. This file is unformatted, but can be read by cut3d.
 
@@ -323,18 +323,20 @@ This file is formatted.
 
   * **abo_TIMx_DOS**
 filenames of files containing the density of states in the case [[prtdos]]=2
-and [[ionmov]]=1 or 2. The value of "x" after "TIM" is described hereafter.
+and [[geoopt]]="viscous" or "bfgs" (also corresponding to [[ionmov]]=1 or 2).
+The value of "x" after "TIM" is described hereafter.
 See also the keyword [[prtdos]]. This file is formatted.
 
   * **abo_GEO**
 filename of file containing the geometrical analysis (bond lengths and bond
-angles) in the case [[ionmov]]=0. See the keyword [[prtgeo]]. This file is
+angles) in the case of ions are fixed. See the keyword [[prtgeo]]. This file is
 formatted.
 
   * **abo_TIMx_GEO**
 filenames of files containing the geometrical analysis (bond lengths and bond
-angles) in the case [[ionmov]]=1 or 2. The value of "x" after "TIM" is
-described hereafter. See also the keyword [[prtgeo]]. This file is formatted.
+angles) in the case [[geoopt]]="viscous" or "bfgs" (also corresponding to [[ionmov]]=1 or 2).
+The value of "x" after "TIM" is described hereafter.
+See also the keyword [[prtgeo]]. This file is formatted.
 
   * **abo_KSS**
 filename of file containing output wavefunction coefficients, if
@@ -347,14 +349,14 @@ format than for **abo_WFK** is used, see the file
 A file containing the electronic eigenvalues, for subsequent plotting of band
 structure.
 
-When [[ionmov]]/=0, the **POT**, **DEN**, or **GEO** files are output each
+When ions are not fixed, the **POT**, **DEN**, or **GEO** files are output each
 time that a SCF cycle is finished. The " **x** " of **TIMx** aims at giving
 each of these files a different name. It is attributed as follows:
-\- case ionmov==1: there is an initialization phase, that takes 4 calls to
+\- case ionmov==1 or geoopt=="viscous": there is an initialization phase, that takes 4 calls to
 the SCF calculation. The value of x will be A, B, C, and D. Then, x will be 1,
 2, 3 ..., actually in agreement with the value of itime (see the keyword
 [[ntime]])
-\- other ionmov cases: the initialisation phase take only one SCF call. The
+\- other ionmov, geoopt or moldyn cases: the initialisation phase take only one SCF call. The
 value of x will be 0 for that call. Then, the value of x is 1, 2, 3... in
 agreement with the value of itime (see the keyword [[ntime]])
 
@@ -1352,7 +1354,7 @@ boxcut >= 2, and then one may try smaller values of [[ngfft]] if the results
 are not significantly altered. See the descriptions of these variables above.
 
 (5) If you are running calculations to relax or equilibrate structures, i.e.
-with [[ionmov]]=1 and possibly [[vis]]>0, then the quality of your molecular
+with [[geoopt]]="viscous" and possibly [[vis]]>0, then the quality of your molecular
 dynamics or relaxation will be affected by the parameters [[amu]], [[dtion]],
 [[vis]], [[ntime]], [[tolmxf]]. Clearly if you want a relaxed structure you
 must either run long enough or make repeated runs until the largest force in
@@ -1365,7 +1367,7 @@ consensus exists in the community that forces larger than about 0.1
 eV/Angstrom are really too large to consider the relaxation to be converged.
 It is best for the user to get experience with this in his/her own
 application.  
-The option [[ionmov]]=2, 3 or 7 are also available This uses the Broyden
+The option [[geoopt]]="bfgs" or quenched are also available This uses the Broyden
 (BFGS) scheme for structural optimization and is much more efficient than
 viscous damping for structural relaxation.
 
