@@ -3517,6 +3517,14 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      end do ! ipsp
    end if ! usepaw==0
 
+!  prevent the running if the spinat is not 0 0 0 when nspden=1 nsppol=1
+  if(any(abs(dt%spinat)>tol8).and.nspden==1.and.nsppol==1) then
+    write(msg, '(3a)')&
+      'A spinat/=0 is not allowed when nspden=1 and nsppol=1!',ch10,&
+      'Action: re-run with spinat zero '
+    ABI_ERROR_NOSTOP(msg,ierr)
+  end if
+
 !  spinat
 !  Not allowed with nspden=1 (PAW)
    !if(any(abs(dt%spinat)>tol8).and.nspden==1.and.usepaw==1) then
