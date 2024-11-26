@@ -2562,14 +2562,14 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
  type(pawtab_type),target,intent(in) :: pawtab
 !Local variables ---------------------------------------
 !scalars
- integer :: angl_size,idij,ij_size,ilm,ipts,ispden,jlm,klm,klmn,klmn1,kln
+ integer :: angl_size,idij,ii,ij_size,ilm,ipts,ispden,jlm,klm,klmn,klmn1,kln
  integer :: lm_size,lmn2_size,mesh_size,nsploop
  real(dp), parameter :: HalfFineStruct2=half/InvFineStruct**2
- real(dp) :: fact
+ real(dp) :: fact,rc,rr,rt
  character(len=500) :: msg
 !arrays
  integer, pointer :: indklmn(:,:)
- real(dp),allocatable :: dijso_rad(:),dv1dr(:),v1(:)
+ real(dp),allocatable :: dijso_rad(:),dkdr(:),dv1dr(:),rt_dkdr(:),v1(:)
  real(dp),allocatable :: zk1(:),zintgd(:),zso_kernel(:)
 
 ! *************************************************************************
@@ -2614,6 +2614,10 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
    msg='invalid sizes for vxc1!'
    LIBPAW_BUG(msg)
  end if
+ if (present(nucdipmom).AND. .NOT.present(znuc)) then
+   msg='Nuclear dipole present in pawdijso but not znuc, cannot make corrections'
+   LIBPAW_BUG(msg)
+ end if
 
 !------------------------------------------------------------------------
 !----------- Allocations and initializations
@@ -2629,12 +2633,31 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
  zk1 = one/(one - HalfFineStruct2*v1)
  LIBPAW_DEALLOCATE(v1)
 
- LIBPAW_ALLOCATE(zso_kernel,(mesh_size))
- zso_kernel(2:mesh_size) = HalfFineStruct2*zk1(2:mesh_size)*zk1(2:mesh_size)*&
-   dv1dr(2:mesh_size)/pawrad%rad(2:mesh_size)
- call pawrad_deducer0(zso_kernel,mesh_size,pawrad)
- LIBPAW_DEALLOCATE(zk1)
+ LIBPAW_ALLOCATE(dkdr,(mesh_size))
+ dkdr = HalfFineStruct2*zk1*zk1*dv1dr
  LIBPAW_DEALLOCATE(dv1dr)
+ LIBPAW_DEALLOCATE(zk1)
+
+ if(present(znuc)) then
+   LIBPAW_ALLOCATE(rt_dkdr,(mesh_size))
+   ! classical electron radius \alpha^2
+   rc=two*HalfFineStruct2
+   ! relevant ZORA length scale for Coulomb potential
+   rt=znuc*rc
+   rt_dkdr = two*rt/(rt+two*pawrad%rad(1:mesh_size))**2
+   ! replace dk/dr at short range with Coulomb potential dk/dr
+   do ii=1,mesh_size
+     rr=pawrad%rad(ii)
+     if (rr<rc) dkdr(ii)=rt_dkdr(ii)
+     if (rr>rc) exit
+   end do
+   LIBPAW_DEALLOCATE(rt_dkdr)
+ end if
+
+ LIBPAW_ALLOCATE(zso_kernel,(mesh_size))
+ zso_kernel(2:mesh_size) = dkdr(2:mesh_size)/pawrad%rad(2:mesh_size)
+ call pawrad_deducer0(zso_kernel,mesh_size,pawrad)
+ LIBPAW_DEALLOCATE(dkdr)
  
  LIBPAW_ALLOCATE(zintgd,(mesh_size))
  LIBPAW_ALLOCATE(dijso_rad,(ij_size))
