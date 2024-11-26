@@ -4192,12 +4192,31 @@ subroutine me_altcalc(amu,eigvec,lm_magsus,lm_zfield,phongreen_fm,magsus,natom,n
 ! end do
 
 !now do the calculation
- do i=1, ndim
+ do i= 1, ndim
 !   nm_zfield(i,1:3*natom)=matmul(conjg(zfield(i,1:3*natom)),eigdisp)
-    nm_zfield(i,1:3*natom)=matmul(zfield(i,1:3*natom),eigdisp)
+!   nm_zfield(i,1:3*natom)=matmul(zfield(i,1:3*natom),eigdisp)
+   do j= 1, 3*natom
+     nm_zfield(i,j)=cmplx(zero,zero,16)
+     do k= 1, 3*natom 
+       iat1= ceiling(k/three)
+       nm_zfield(i,j)= nm_zfield(i,j) + zfield(i,k)*mass(iat1)*eigdisp(k,j)
+     end do
+   end do
  end do
- nm_fmzeff_tr=matmul(transpose(conjg(eigdisp)),fmzeff_tr)
- nm_phongreen=matmul(transpose(conjg(eigdisp)),matmul(phongreen_fm,eigdisp))
+
+! nm_fmzeff_tr=matmul(transpose(conjg(eigdisp)),fmzeff_tr)
+ do j= 1, 3
+   do i= 1, 3*natom
+     nm_fmzeff_tr(i,j)=cmplx(zero,zero,16)
+     do k= 1, 3*natom
+       iat1= ceiling(k/three)
+       nm_fmzeff_tr(i,j)= nm_fmzeff_tr(i,j) + mass(iat1)*conjg(eigdisp(k,j))*fmzeff_tr(k,j)
+     end do
+   end do
+ end do 
+
+! nm_phongreen=matmul(transpose(conjg(eigdisp)),matmul(phongreen_fm,eigdisp))
+ nm_phongreen=matmul(transpose(conjg(eigdisp)),matmul(mass_phongreen,eigdisp))/mcell
  
  lm_zfield= matmul(nm_zfield(:,1:3*natom),matmul(nm_phongreen,nm_fmzeff_tr))
 
