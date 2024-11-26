@@ -994,7 +994,7 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
 
 !Arguments ------------------------------------
  type(green_type), intent(inout) :: green
- type(paw_dmft_type), intent(in) :: paw_dmft
+ type(paw_dmft_type), target, intent(in) :: paw_dmft
  !type(MPI_type), intent(in) :: mpi_enreg
  type(self_type), intent(inout) :: self
  integer, intent(in) :: prtopt
@@ -1012,7 +1012,9 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
  real(dp) :: tsec(2)
  real(dp), allocatable :: eig(:),rwork(:),fac(:)
  complex(dpc), allocatable :: mat_tmp(:,:),omega_fac(:),work(:),omega_current(:)
- type(oper_type) :: green_oper_ndat
+ type(oper_type), target :: green_oper_ndat
+ real(dp), ABI_CONTIGUOUS pointer :: eigen_dft(:,:,:)
+ complex(dpc), ABI_CONTIGUOUS pointer :: ks(:,:,:,:)
 ! integer, allocatable :: procb(:,:),proct(:,:)
 ! *********************************************************************
 
@@ -1257,22 +1259,59 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
    end do ! isppol
  end do ! ifreq
 #else
- do ifreq=ifreq_beg,ifreq_end
-   do isppol=1,nsppol
-     do ikpt=1,mkmem
-       do ib=1,mbandc
-         idat=ifreq-(ifreq_end-ndat)
-         green_tmp = omega_current(ifreq) + fermilevel - paw_dmft%eigen_dft(ib,ikpt+shift,isppol)
-         if (optself == 0) then
-           green_oper_ndat%ks(ib,ib+(idat-1)*mbandc,ikpt+shift_green,isppol) = cone / green_tmp
-         else
-           green_oper_ndat%ks(ib,ib+(idat-1)*mbandc,ikpt+shift_green,isppol) = &
-             & green_oper_ndat%ks(ib,ib+(idat-1)*mbandc,ikpt+shift_green,isppol) + green_tmp
-         end if
-       end do ! ib
-     end do ! ikpt
-   end do ! isppol
- end do ! ifreq
+ ks => green_oper_ndat%ks
+ eigen_dft => paw_dmft%eigen_dft
+ if(gpu_option==ABI_GPU_DISABLED) then
+   do ifreq=ifreq_beg,ifreq_end
+     do isppol=1,nsppol
+       do ikpt=1,mkmem
+         do ib=1,mbandc
+           idat=ifreq-(ifreq_end-ndat)
+           green_tmp = omega_current(ifreq) + fermilevel - eigen_dft(ib,ikpt+shift,isppol)
+           if (optself == 0) then
+             ks(ib,ib+(idat-1)*mbandc,ikpt+shift_green,isppol) = cone / green_tmp
+           else
+             ks(ib,ib+(idat-1)*mbandc,ikpt+shift_green,isppol) = &
+                 & ks(ib,ib+(idat-1)*mbandc,ikpt+shift_green,isppol) + green_tmp
+           end if
+         end do ! ib
+       end do ! ikpt
+     end do ! isppol
+   end do ! ifreq
+ else if(gpu_option==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+   if (optself == 0) then
+     !$OMP TARGET TEAMS DISTRIBUTE MAP(ks,eigen_dft) PRIVATE(ifreq,idat)
+     do ifreq=ifreq_beg,ifreq_end
+       idat=ifreq-(ifreq_end-ndat)
+       !$OMP PARALLEL DO COLLAPSE(3) PRIVATE(isppol,ikpt,ib,green_tmp)
+       do isppol=1,nsppol
+         do ikpt=1,mkmem
+           do ib=1,mbandc
+             green_tmp = omega_current(ifreq) + fermilevel - eigen_dft(ib,ikpt+shift,isppol)
+             ks(ib,ib+(idat-1)*mbandc,ikpt+shift_green,isppol) = cone / green_tmp
+           end do ! ib
+         end do ! ikpt
+       end do ! isppol
+     end do ! ifreq
+   else
+     !$OMP TARGET TEAMS DISTRIBUTE MAP(ks,eigen_dft) PRIVATE(ifreq,idat)
+     do ifreq=ifreq_beg,ifreq_end
+       idat=ifreq-(ifreq_end-ndat)
+       !$OMP PARALLEL DO COLLAPSE(3) PRIVATE(isppol,ikpt,ib,green_tmp)
+       do isppol=1,nsppol
+         do ikpt=1,mkmem
+           do ib=1,mbandc
+             green_tmp = omega_current(ifreq) + fermilevel - eigen_dft(ib,ikpt+shift,isppol)
+             ks(ib,ib+(idat-1)*mbandc,ikpt+shift_green,isppol) = &
+                 & ks(ib,ib+(idat-1)*mbandc,ikpt+shift_green,isppol) + green_tmp
+           end do ! ib
+         end do ! ikpt
+       end do ! isppol
+     end do ! ifreq
+   end if
+#endif
+ end if
 #endif
  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
