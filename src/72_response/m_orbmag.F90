@@ -2474,6 +2474,7 @@ subroutine dterm_ZA0(atindx,cplex_dij,dterm,dtset,paw_an,pawang,pawrad,pawtab,qp
   real(dp), parameter :: HalfFineStruct2=half*FineStructureConstant2
   !arrays
   character(len=500) :: msg
+  real(dp),allocatable :: dkdr(:),dkdr_split(:)
   real(dp),allocatable :: dv1dr(:),dyadic(:,:,:),rt_dkdr(:)
   real(dp),allocatable :: v1(:),zk1(:)
   real(dp),allocatable :: za0(:,:,:),za0_kernel(:),za0_rad(:,:)
@@ -2508,12 +2509,27 @@ subroutine dterm_ZA0(atindx,cplex_dij,dterm,dtset,paw_an,pawang,pawrad,pawtab,qp
     call pawv1(mesh_size,dtset%nspden,pawang,pawrad(itypat),&
       & dtset%pawxcdev,v1,paw_an(iat)%vh1,paw_an(iat)%vxc1)
     
+    ABI_MALLOC(rt_dkdr,(mesh_size))
+    rt=dtset%znucl(itypat)*FineStructureConstant2
+    rt_dkdr = two*rt/(rt+two*pawrad(itypat)%rad(1:mesh_size))**2
+    
     ABI_MALLOC(dv1dr,(mesh_size))
     call nderiv_gen(dv1dr,v1,pawrad(itypat))
 
     ABI_MALLOC(zk1,(mesh_size))
     zk1 = one/(one - HalfFineStruct2*v1)
-    ABI_FREE(v1)
+
+    ABI_MALLOC(dkdr,(mesh_size))
+    ABI_MALLOC(dkdr_split,(mesh_size))
+    dkdr = dv1dr*HalfFineStruct2*zk1*zk1
+
+    do ii=1,mesh_size
+      if(pawrad(itypat)%rad(ii)<FineStructureConstant2) then
+              dkdr_split(ii)=rt_dkdr(ii)
+      else
+              dkdr_split(ii)=dkdr(ii)
+      end if
+    end do
 
     ! radial integrals
     ! za0_rad(1,kln) = int ui K uj dr
@@ -2521,9 +2537,7 @@ subroutine dterm_ZA0(atindx,cplex_dij,dterm,dtset,paw_an,pawang,pawrad,pawtab,qp
     ABI_MALLOC(za0_rad,(2,ij_size))
     ABI_MALLOC(za0_kernel,(mesh_size))
     
-    ABI_MALLOC(rt_dkdr,(mesh_size))
 
-    rt=dtset%znucl(itypat)*FineStructureConstant2
     nrt = 10000
     rt_max = 1000.0*rt
     ABI_MALLOC(rt_mesh,(nrt))
@@ -2531,9 +2545,19 @@ subroutine dterm_ZA0(atindx,cplex_dij,dterm,dtset,paw_an,pawang,pawrad,pawtab,qp
       rt_mesh(ii) = (ii-1)*rt_max/(one*nrt)
     end do
 
-    rt_dkdr = two*rt/(rt+two*pawrad(itypat)%rad(1:mesh_size))**2
     !! rt_dkdr=rt_dkdr/four_pi
+
+    ! JWZ debug starts here
+    if (dtset%znucl(itypat) > 50.0) then
+            write(std_out,'(a)')' # JWZ debug r dkdr dKCdr dkdr_split '
+            do ii = 2, mesh_size
+              write(std_out,'(4es16.8)')pawrad(itypat)%rad(ii),&
+                      dkdr(ii),rt_dkdr(ii),dkdr_split(ii)
+            end do
+    end if
    
+    ABI_FREE(v1)
+
     do kln = 1, ij_size
   
       ABI_MALLOC(ypp,(mesh_size)) 
@@ -2565,6 +2589,8 @@ subroutine dterm_ZA0(atindx,cplex_dij,dterm,dtset,paw_an,pawang,pawrad,pawtab,qp
     end do
     ABI_FREE(zk1)
     ABI_FREE(dv1dr)
+    ABI_FREE(dkdr)
+    ABI_FREE(dkdr_split)
     ABI_FREE(za0_kernel)
     ABI_FREE(rt_dkdr)
     ABI_FREE(rt_mesh)
