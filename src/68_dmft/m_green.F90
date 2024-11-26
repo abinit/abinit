@@ -993,7 +993,7 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
  use m_xmpi, only : xmpi_sum
 
 !Arguments ------------------------------------
- type(green_type), intent(inout) :: green
+ type(green_type), target, intent(inout) :: green
  type(paw_dmft_type), target, intent(in) :: paw_dmft
  !type(MPI_type), intent(in) :: mpi_enreg
  type(self_type), intent(inout) :: self
@@ -1014,7 +1014,7 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
  complex(dpc), allocatable :: mat_tmp(:,:),omega_fac(:),work(:),omega_current(:)
  type(oper_type), target :: green_oper_ndat
  real(dp), ABI_CONTIGUOUS pointer :: eigen_dft(:,:,:)
- complex(dpc), ABI_CONTIGUOUS pointer :: ks(:,:,:,:)
+ complex(dpc), ABI_CONTIGUOUS pointer :: ks(:,:,:,:),occup_ks(:,:,:,:),moments_ks(:,:,:,:)
 ! integer, allocatable :: procb(:,:),proct(:,:)
 ! *********************************************************************
 
@@ -1475,26 +1475,67 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
 
    end do ! ifreq
 #else
-   do ifreq=ifreq_beg,ifreq_end
+   occup_ks    => green%occup%ks
+   ks          => green_oper_ndat%ks
+   if(gpu_option==ABI_GPU_DISABLED) then
+     do ifreq=ifreq_beg,ifreq_end
 
-     do isppol=1,nsppol
-       do ikpt=1,mkmem
-         do ib1=1,mbandc
-           idat=ifreq-(ifreq_end-ndat)
-           if (diag == 1) then
-             green%occup%ks(ib1,ib1,ikpt+shift,isppol) = green%occup%ks(ib1,ib1,ikpt+shift,isppol) + &
-                & fac(ifreq)*green_oper_ndat%ks(ib1,ib1+(idat-1)*mbandc,ikpt+shift_green,isppol)
-           else
-             do ib=1,mbandc
-               green%occup%ks(ib,ib1,ikpt+shift,isppol) = green%occup%ks(ib,ib1,ikpt+shift,isppol) + &
-                 & fac(ifreq)*green_oper_ndat%ks(ib,ib1+(idat-1)*mbandc,ikpt+shift_green,isppol)
-             end do ! ib
-           end if ! diag
-         end do ! ib1
-       end do ! ikpt
-     end do ! isppol
+       do isppol=1,nsppol
+         do ikpt=1,mkmem
+           do ib1=1,mbandc
+             idat=ifreq-(ifreq_end-ndat)
+             if (diag == 1) then
+               green%occup%ks(ib1,ib1,ikpt+shift,isppol) = green%occup%ks(ib1,ib1,ikpt+shift,isppol) + &
+                  & fac(ifreq)*green_oper_ndat%ks(ib1,ib1+(idat-1)*mbandc,ikpt+shift_green,isppol)
+             else
+               do ib=1,mbandc
+                 green%occup%ks(ib,ib1,ikpt+shift,isppol) = green%occup%ks(ib,ib1,ikpt+shift,isppol) + &
+                   & fac(ifreq)*green_oper_ndat%ks(ib,ib1+(idat-1)*mbandc,ikpt+shift_green,isppol)
+               end do ! ib
+             end if ! diag
+           end do ! ib1
+         end do ! ikpt
+       end do ! isppol
 
-   end do ! ifreq
+     end do ! ifreq
+
+   else if(gpu_option==ABI_GPU_OPENMP) then
+     if (diag == 1) then
+
+       !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) MAP(occup_ks,ks,fac) PRIVATE(isppol,ikpt)
+       do isppol=1,nsppol
+         do ikpt=1,mkmem
+           !$OMP PARALLEL DO PRIVATE(ib1,ifreq,idat)
+           do ib1=1,mbandc
+             do ifreq=ifreq_beg,ifreq_end
+               idat=ifreq-(ifreq_end-ndat)
+               occup_ks(ib1,ib1,ikpt+shift,isppol) = occup_ks(ib1,ib1,ikpt+shift,isppol) + &
+                 & fac(ifreq)*ks(ib1,ib1+(idat-1)*mbandc,ikpt+shift_green,isppol)
+             end do ! ifreq
+           end do ! ib1
+         end do ! ikpt
+       end do ! isppol
+
+     else
+
+       !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) MAP(occup_ks,ks,fac) PRIVATE(isppol,ikpt)
+       do isppol=1,nsppol
+         do ikpt=1,mkmem
+           !$OMP PARALLEL DO PRIVATE(ib,ib1,ifreq,idat)
+           do ib1=1,mbandc
+             do ifreq=ifreq_beg,ifreq_end
+               idat=ifreq-(ifreq_end-ndat)
+               do ib=1,mbandc
+                 occup_ks(ib,ib1,ikpt+shift,isppol) = occup_ks(ib,ib1,ikpt+shift,isppol) + &
+                   & fac(ifreq)*ks(ib,ib1+(idat-1)*mbandc,ikpt+shift_green,isppol)
+               end do ! ib
+             end do ! ib1
+           end do ! ikpt
+         end do ! isppol
+       end do ! ifreq
+
+     end if ! diag
+   end if
 #endif
 #ifdef HAVE_GPU_MARKERS
    call nvtxEndRange()
