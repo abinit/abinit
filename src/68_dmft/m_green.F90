@@ -1195,7 +1195,7 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
      green%oper(ifreq)%shiftk = shift
    end if
    if(.not. oper_ndat_allocated) then
-     call init_oper_ndat(paw_dmft,green_oper_ndat,ndat,nkpt=green%oper(ifreq)%nkpt,opt_ksloc=optoper_ksloc)
+     call init_oper_ndat(paw_dmft,green_oper_ndat,ndat,nkpt=green%oper(ifreq)%nkpt,opt_ksloc=optoper_ksloc,gpu_option=gpu_option)
      if (green%oper(ifreq)%has_operks == 0) then
        green_oper_ndat%paral  = 1
        green_oper_ndat%shiftk = shift
@@ -1281,7 +1281,7 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
  else if(gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
    if (optself == 0) then
-     !$OMP TARGET TEAMS DISTRIBUTE MAP(ks,eigen_dft) PRIVATE(ifreq,idat)
+     !$OMP TARGET TEAMS DISTRIBUTE MAP(to:ks,eigen_dft) PRIVATE(ifreq,idat)
      do ifreq=ifreq_beg,ifreq_end
        idat=ifreq-(ifreq_end-ndat)
        !$OMP PARALLEL DO COLLAPSE(3) PRIVATE(isppol,ikpt,ib,green_tmp)
@@ -1295,7 +1295,7 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
        end do ! isppol
      end do ! ifreq
    else
-     !$OMP TARGET TEAMS DISTRIBUTE MAP(ks,eigen_dft) PRIVATE(ifreq,idat)
+     !$OMP TARGET TEAMS DISTRIBUTE MAP(to:ks,eigen_dft) PRIVATE(ifreq,idat)
      do ifreq=ifreq_beg,ifreq_end
        idat=ifreq-(ifreq_end-ndat)
        !$OMP PARALLEL DO COLLAPSE(3) PRIVATE(isppol,ikpt,ib,green_tmp)
@@ -1502,7 +1502,7 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
    else if(gpu_option==ABI_GPU_OPENMP) then
      if (diag == 1) then
 
-       !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) MAP(occup_ks,ks,fac) PRIVATE(isppol,ikpt)
+       !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) MAP(tofrom:occup_ks) MAP(to:ks,fac) PRIVATE(isppol,ikpt)
        do isppol=1,nsppol
          do ikpt=1,mkmem
            !$OMP PARALLEL DO PRIVATE(ib1,ifreq,idat)
@@ -1518,7 +1518,7 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
 
      else
 
-       !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) MAP(occup_ks,ks,fac) PRIVATE(isppol,ikpt)
+       !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) MAP(tofrom:occup_ks) MAP(to:ks,fac) PRIVATE(isppol,ikpt)
        do isppol=1,nsppol
          do ikpt=1,mkmem
            !$OMP PARALLEL DO PRIVATE(ib,ib1,ifreq,idat)

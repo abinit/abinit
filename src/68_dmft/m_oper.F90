@@ -28,6 +28,7 @@ MODULE m_oper
  use defs_basis
  use m_abicore
  use m_errors
+ use m_xomp
  use m_abi_linalg
  use, intrinsic :: iso_c_binding, only: c_size_t, c_loc
 
@@ -243,31 +244,33 @@ end subroutine init_oper
 !!
 !! SOURCE
 
-subroutine init_oper_ndat(paw_dmft,oper,ndat,nkpt,wtk,shiftk,opt_ksloc)
+subroutine init_oper_ndat(paw_dmft,oper,ndat,nkpt,wtk,shiftk,opt_ksloc,gpu_option)
 
  use m_matlu, only : init_matlu
  use m_paw_dmft, only : paw_dmft_type
 
 !Arguments ------------------------------------
- integer, optional, intent(in) :: nkpt,opt_ksloc,shiftk
+ integer, optional, intent(in) :: nkpt,opt_ksloc,shiftk,gpu_option
  integer, intent(in) :: ndat
  type(paw_dmft_type), intent(in) :: paw_dmft
  type(oper_type), intent(inout) :: oper
  real(dp), target, optional :: wtk(paw_dmft%nkpt)
 !Local variables ------------------------------------
- integer :: optksloc,ndat_
+ integer :: optksloc,ndat_,l_gpu_option
 !************************************************************************
 
  DBG_ENTER("COLL")
 
  optksloc = 3
  if (present(opt_ksloc)) optksloc = opt_ksloc
+ l_gpu_option=ABI_GPU_DISABLED; if(present(gpu_option)) l_gpu_option=gpu_option
 
  !if(optksloc/=3) then
     ! FIXME: empty line!
  !endif
  ndat_=ndat;
 
+ oper%gpu_option    = l_gpu_option
  oper%has_operks    = 0
  oper%has_opermatlu = 0
 
@@ -303,7 +306,12 @@ subroutine init_oper_ndat(paw_dmft,oper,ndat,nkpt,wtk,shiftk,opt_ksloc)
 
    ABI_MALLOC(oper%ks,(oper%mbandc,oper%mbandc*ndat_,oper%nkpt,oper%nsppol))
    oper%has_operks  = 1
-   !oper%ks(:,:,:,:) = czero
+   !$OMP TARGET ENTER DATA MAP(alloc:oper%ks) IF(l_gpu_option==ABI_GPU_OPENMP)
+   if(gpu_option==ABI_GPU_OPENMP) then
+     call gpu_set_to_zero_complex(oper%ks, int(oper%nsppol,c_size_t)*ndat_*oper%mbandc*oper%mbandc*oper%nkpt)
+   else
+     oper%ks(:,:,:,:) = czero
+   end if
 
  end if ! optksloc=1 or optksloc=3
 
@@ -359,6 +367,7 @@ subroutine destroy_oper(oper)
  end if
 
  if (allocated(oper%ks)) then
+   !$OMP TARGET EXIT DATA MAP(delete:oper%ks) IF(oper%gpu_option==ABI_GPU_OPENMP)
    ABI_FREE(oper%ks)
    oper%has_operks = 0
  end if
@@ -452,6 +461,7 @@ subroutine copy_oper_from_ndat(oper1,oper2,ndat,nw,proct,me_freq,copy_ks)
  enddo
 
  if(allocated(oper1%ks) .and. copy_ks) then
+   !$OMP TARGET UPDATE FROM(oper1%ks) IF(oper1%gpu_option==ABI_GPU_OPENMP)
    idat=1
    do iw=1,nw
      if (proct(iw) /= me_freq) cycle
@@ -523,6 +533,7 @@ subroutine copy_oper_to_ndat(oper1,oper2,ndat,nw,proct,me_freq,copy_ks)
      enddo
      idat=idat+1
    enddo
+   !$OMP TARGET UPDATE TO(oper2%ks) IF(oper2%gpu_option==ABI_GPU_OPENMP)
  endif
 
  DBG_EXIT("COLL")
@@ -728,8 +739,8 @@ subroutine inverse_oper(oper,option,procb,iproc,gpu_option)
    call inverse_matlu(oper%matlu(:),oper%natom)
  end if
 
- !$OMP TARGET ENTER DATA MAP(alloc:ks) IF(l_gpu_option==ABI_GPU_OPENMP)
- !$OMP TARGET UPDATE TO(ks) IF(l_gpu_option==ABI_GPU_OPENMP)
+ !$OMP TARGET ENTER DATA MAP(alloc:ks) IF(l_gpu_option==ABI_GPU_OPENMP .and. oper%gpu_option/=ABI_GPU_OPENMP)
+ !$OMP TARGET UPDATE TO(ks) IF(l_gpu_option==ABI_GPU_OPENMP .and. oper%gpu_option/=ABI_GPU_OPENMP)
  if (option == 1 .or. option == 3) then
    do isppol=1,oper%nsppol
      do ikpt=1,oper%nkpt
@@ -818,7 +829,7 @@ subroutine inverse_oper(oper,option,procb,iproc,gpu_option)
      end do ! ikpt
    end do ! isppol
  end if ! option
- !$OMP TARGET EXIT DATA MAP(from:ks) IF(l_gpu_option==ABI_GPU_OPENMP)
+ !$OMP TARGET EXIT DATA MAP(from:ks) IF(l_gpu_option==ABI_GPU_OPENMP .and. oper%gpu_option/=ABI_GPU_OPENMP)
 
 #ifdef HAVE_GPU_MARKERS
   call nvtxEndRange()
@@ -895,8 +906,8 @@ call nvtxStartRange("downfold_oper",20)
    wtk => oper%wtk
    chipsi => paw_dmft%chipsi
 #ifdef HAVE_OPENMP_OFFLOAD
-   !$OMP TARGET ENTER DATA MAP(alloc:ks,chipsi,wtk)
-   !$OMP TARGET UPDATE TO(chipsi,ks,wtk)
+   !$OMP TARGET ENTER DATA MAP(to:chipsi,wtk)
+   !$OMP TARGET ENTER DATA MAP(to:ks) IF(oper%gpu_option/=ABI_GPU_OPENMP)
    if (present(op_ks_diag)) then
      !$OMP TARGET ENTER DATA MAP(to:op_ks_diag)
    end if
@@ -1053,7 +1064,8 @@ call nvtxStartRange("downfold_oper",20)
  end do ! iatom
 
 #ifdef HAVE_OPENMP_OFFLOAD
- !$OMP TARGET EXIT DATA MAP(delete:ks,chipsi,wtk) IF(l_gpu_option==ABI_GPU_OPENMP)
+ !$OMP TARGET EXIT DATA MAP(delete:ks) IF(l_gpu_option==ABI_GPU_OPENMP .and. oper%gpu_option/=ABI_GPU_OPENMP)
+ !$OMP TARGET EXIT DATA MAP(delete:chipsi,wtk) IF(l_gpu_option==ABI_GPU_OPENMP)
  if (present(op_ks_diag)) then
    !$OMP TARGET EXIT DATA MAP(delete:op_ks_diag) IF(l_gpu_option==ABI_GPU_OPENMP)
  end if
@@ -1178,7 +1190,8 @@ subroutine upfold_oper(oper,paw_dmft,procb,iproc,gpu_option)
    chipsi => paw_dmft%chipsi
 
 #ifdef HAVE_OPENMP_OFFLOAD
-   !$OMP TARGET ENTER DATA MAP(alloc:ks,chipsi,mat_temp2) IF(l_gpu_option==ABI_GPU_OPENMP)
+   !$OMP TARGET ENTER DATA MAP(alloc:ks) IF(l_gpu_option==ABI_GPU_OPENMP .and. oper%gpu_option/=ABI_GPU_OPENMP)
+   !$OMP TARGET ENTER DATA MAP(alloc:chipsi,mat_temp2) IF(l_gpu_option==ABI_GPU_OPENMP)
    !$OMP TARGET UPDATE TO(chipsi) IF(l_gpu_option==ABI_GPU_OPENMP)
    call gpu_set_to_zero_complex(ks, int(oper%nsppol,c_size_t)*ndat*mbandc*mbandc*oper%nkpt)
 #endif
@@ -1253,8 +1266,9 @@ subroutine upfold_oper(oper,paw_dmft,procb,iproc,gpu_option)
  end do ! iatom
 
 #ifdef HAVE_OPENMP_OFFLOAD
- !$OMP TARGET UPDATE FROM(ks)
- !$OMP TARGET EXIT DATA MAP(delete:ks,chipsi,wtk,mat_temp,mat_temp2) IF(l_gpu_option==ABI_GPU_OPENMP)
+ !$OMP TARGET UPDATE FROM(ks) IF(l_gpu_option==ABI_GPU_OPENMP .and. oper%gpu_option/=ABI_GPU_OPENMP)
+ !$OMP TARGET EXIT DATA MAP(delete:ks) IF(l_gpu_option==ABI_GPU_OPENMP .and. oper%gpu_option/=ABI_GPU_OPENMP)
+ !$OMP TARGET EXIT DATA MAP(delete:chipsi,wtk,mat_temp,mat_temp2) IF(l_gpu_option==ABI_GPU_OPENMP)
 #endif
  ABI_FREE(mat_temp2)
 
