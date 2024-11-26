@@ -64,15 +64,16 @@ cd $ABI_TESTS/tutoparal/Input/Work_paral_moldyn
 ## Performing molecular dynamics with ABINIT
 
 There are different algorithms to do molecular dynamics. See the input
-variable [[ionmov]], with values 1, 6, 7, 8, 9, 12, 13 and 14. [[dtion]]
+variable [[moldyn]], with values "nve_verlet", "nvt_isokin", "nvt_nose",
+"npt_martyna" and "nst_martyna". [[dtion]]
 controls the ion time step in atomic units of time (one atomic time unit is
 2.418884 x 10<sup>-17</sup> seconds, which is the value of Planck's constant in Ha.s).
 The default value is 100. You should try several values for [[dtion]] in order
 to establish the stable and efficient choice. For example this value should
 decrease at high pressure.
 
-Except for the isothermal/isenthalpic ([[ionmov]] 13) ensemble the input
-variable [[optcell]] must be 0 (default value).
+Except for the isothermal/isenthalpic ([[moldyn]] "nvt_nose" or "nvt_langevin")
+ensemble the input variable [[optcell]] must be 0 (default value).
 You have also to define the maximal number of timesteps of the molecular dynamics.
 
 Usually you can set the input variable [[ntime]] to a large value, 5000, since
@@ -80,13 +81,14 @@ there is no *end* to a molecular dynamics simulation. You can always stop or
 restart the calculation at your convenience by using the input variable [[restartxf]]=-1.
 
 The input file `tmoldyn_01.abi` is an example of a file that contains data for a
-molecular dynamics simulation using the isokinetic ensemble [[ionmov]]=12 for fcc aluminum.
+molecular dynamics simulation using the isokinetic ensemble [[moldyn]] "nvt_isokin"
+for fcc aluminum.
 
 {% dialog tests/tutoparal/Input/tmoldyn_01.abi %}
 
 Open the `tmoldyn_01.abi` file and look at it carefully. The unit cell is defined at
-the end. It is a 2x2x2 fcc supercell containing 32 atoms of Al. [[ionmov]] is
-set to 12 for the isokinetic ensemble, and since [[ntime]] is set to 50,
+the end. It is a 2x2x2 fcc supercell containing 32 atoms of Al. [[moldyn]] is
+set to "nvt_isokin" for the isokinetic ensemble, and since [[ntime]] is set to 50,
 ABINIT will carry on 50 time steps of molecular dynamics. The calculation will
 be performed for a temperature of 3000 K, see the key variable [[mdtemp]]. It
 gives the initial and final temperatures of the simulation (in Kelvin). The
