@@ -33,6 +33,8 @@ MODULE m_matlu
  use defs_basis
  use m_errors
  use m_abicore
+ use, intrinsic :: iso_c_binding, only: c_size_t, c_loc
+ use m_abi_linalg
 
  implicit none
 
@@ -144,16 +146,19 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine init_matlu(natom,nspinor,nsppol,lpawu_natom,matlu)
+subroutine init_matlu(natom,nspinor,nsppol,lpawu_natom,matlu,gpu_option)
 
 !Arguments ------------------------------------
  integer, intent(in) :: natom,nspinor,nsppol
  integer, intent(in) :: lpawu_natom(natom)
- type(matlu_type), intent(inout) :: matlu(natom)
+ integer, intent(in), optional :: gpu_option
+ type(matlu_type), target, intent(inout) :: matlu(natom)
 !Local variables ------------------------------------
- integer :: iatom,lpawu,ndim
+ integer :: iatom,lpawu,ndim,l_gpu_option
+ complex(dpc), ABI_CONTIGUOUS pointer :: mat(:,:,:)
 !************************************************************************
 
+ l_gpu_option=ABI_GPU_DISABLED; if(present(gpu_option)) l_gpu_option=gpu_option
 ! matlu%mband       = mband
 ! matlu%dmftbandf   = dmftbandf
 ! matlu%dmftbandi   = dmftbandi
@@ -165,10 +170,18 @@ subroutine init_matlu(natom,nspinor,nsppol,lpawu_natom,matlu)
    matlu(iatom)%lpawu   = lpawu
    matlu(iatom)%nspinor = nspinor
    matlu(iatom)%nsppol  = nsppol
+   matlu(iatom)%gpu_option  = l_gpu_option
    if (lpawu == -1) cycle
    ndim = (2*lpawu+1) * nspinor
    ABI_MALLOC(matlu(iatom)%mat,(ndim,ndim,nsppol))
-   matlu(iatom)%mat(:,:,:) = czero
+   if(l_gpu_option==ABI_GPU_DISABLED) then
+     matlu(iatom)%mat(:,:,:) = czero
+   else if(l_gpu_option==ABI_GPU_OPENMP) then
+     matlu(iatom)%mat(:,:,:) = czero
+     mat => matlu(iatom)%mat ! array of structs in OpenMP loosely supported
+     !$OMP TARGET ENTER DATA MAP(alloc:mat)
+     call gpu_set_to_zero_complex(matlu(iatom)%mat, int(nsppol,c_size_t)*ndim*ndim)
+   end if
 
  end do ! iatom
 
@@ -249,12 +262,17 @@ subroutine destroy_matlu(matlu,natom)
 
 !Arguments ------------------------------------
  integer, intent(in) :: natom
- type(matlu_type), intent(inout) :: matlu(natom)
+ type(matlu_type),target, intent(inout) :: matlu(natom)
 !Local variables-------------------------------
  integer :: iatom
+ complex(dpc), ABI_CONTIGUOUS pointer :: mat(:,:,:)
 ! *********************************************************************
 
  do iatom=1,natom
+   mat => matlu(iatom)%mat ! array of structs in OpenMP loosely supported
+   if(matlu(iatom)%gpu_option==ABI_GPU_OPENMP) then
+     !$OMP TARGET EXIT DATA MAP(delete:mat)
+   end if
    ABI_SFREE(matlu(iatom)%mat)
  end do ! iatom
 

@@ -1233,6 +1233,7 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
    else if(green_oper_ndat%gpu_option==ABI_GPU_OPENMP) then
      call gpu_set_to_zero_complex(green_oper_ndat%ks, int(nsppol,c_size_t)*ndat*mbandc*mbandc*mkmem)
    end if
+   call copy_oper_to_ndat(green%oper,green_oper_ndat,ndat,green%nw,green%distrib%proct,green%distrib%me_freq,.false.)
  else
    do ifreq=ifreq_beg,ifreq_end
      !call add_matlu(self%hdc%matlu(:),self%oper(ifreq)%matlu(:),green_oper_ndat%matlu(:),natom,-1,idat=ifreq-(ifreq_end-ndat),ndat=ndat)
