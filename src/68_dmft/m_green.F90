@@ -29,6 +29,8 @@
  use m_oper, only : destroy_oper,init_oper,init_oper_ndat,copy_oper_from_ndat,copy_oper_to_ndat,oper_type
  use m_paw_dmft, only : mpi_distrib_dmft_type,paw_dmft_type
  use m_self, only : self_type
+ use m_abi_linalg
+ use, intrinsic :: iso_c_binding, only: c_size_t
 
 #ifdef HAVE_GPU_MARKERS
  use m_nvtx
@@ -1226,7 +1228,11 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
 #else
  call copy_oper_to_ndat(green%oper,green_oper_ndat,ndat,green%nw,green%distrib%proct,green%distrib%me_freq,.false.)
  if (optself == 0) then
-   green_oper_ndat%ks(:,:,:,:) = czero
+   if(green_oper_ndat%gpu_option==ABI_GPU_DISABLED) then
+     green_oper_ndat%ks(:,:,:,:) = czero
+   else if(green_oper_ndat%gpu_option==ABI_GPU_OPENMP) then
+     call gpu_set_to_zero_complex(green_oper_ndat%ks, int(nsppol,c_size_t)*ndat*mbandc*mbandc*mkmem)
+   end if
  else
    do ifreq=ifreq_beg,ifreq_end
      call add_matlu(self%hdc%matlu(:),self%oper(ifreq)%matlu(:),green_oper_ndat%matlu(:),natom,-1,idat=ifreq-(ifreq_end-ndat),ndat=ndat)
