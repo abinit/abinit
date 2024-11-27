@@ -3311,7 +3311,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
  type(matlu_type), target, intent(in) :: udens(:)
  type(vee_type), target, intent(in) :: vee(:)
 !Local variables ------------------------------
- integer :: i,iatom,iflavor,iflavor1,ifreq,ifreq2,iilam,ilam,ileg,im,im1,isppol
+ integer :: i,iatom,iflavor,iflavor1,ifreq,iilam,ilam,ileg,im,im1,isppol
  integer :: itau,iw,l,lpawu,myproc,natom,ncon,ndim,nflavor,ngauss,nlam,nleg
  integer :: nmoments,nspinor,nsppol,ntau,ntau_delta,ntot,nwlo,p,tndim,wdlr_size
  integer, target :: ndlr
@@ -3666,8 +3666,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
 
      ABI_MALLOC(gl_tmp,(nleg,tndim,tndim,nsppol))
      ABI_MALLOC(jbes,(nleg))
-     do ifreq2=1,nwlo
-       ifreq = nint((paw_dmft%omega_lo(ifreq2)/(paw_dmft%temp*pi)+one)*half)
+     do ifreq=1,nwlo
        xx = dble(2*ifreq-1) * pi / two
        if (xx <= dble(100)) then
          call sbf8(nleg,xx,jbes(:))
@@ -3688,8 +3687,8 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
                else
                  gl_tmp(ileg,im,im1,isppol) = gl(ileg,iflavor,iflavor1)
                end if
-               green%oper(ifreq2)%matlu(iatom)%mat(im,im1,isppol) = &
-                 & green%oper(ifreq2)%matlu(iatom)%mat(im,im1,isppol) + &
+               green%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol) = &
+                 & green%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol) + &
                  & u_nl*gl_tmp(ileg,im,im1,isppol)
              end do ! ileg
            end do ! im
@@ -4143,7 +4142,7 @@ subroutine fourier_inv(paw_dmft,nmoments,ntau,matlu_tau,oper_freq,moments)
 
  ABI_MALLOC(omega_fac,(nmoments))
 
- do ifreq=1,int(nwlo*half)
+ do ifreq=1,nwlo
    if (paw_dmft%distrib%procf(ifreq) /= myproc) cycle
    omega = cmplx(zero,paw_dmft%omega_lo(ifreq),kind=dp)
    do i=1,nmoments
