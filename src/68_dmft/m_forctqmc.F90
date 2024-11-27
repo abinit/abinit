@@ -1742,7 +1742,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 !  the x,y and z axes when SOC is activated
 !
 ! =================================================================
- if (paw_dmft%nspinor .eq. 2) then
+ if (paw_dmft%nspinor .eq. 2 .and. (.not. triqs)) then ! not implemented in TRIQS
   ABI_MALLOC(matlumag,(natom))
   write(message,'(a,2x,a)') ch10,"== Magnetic moments from CT-QMC occupation matrix "
   call wrtout(std_out,message,'COLL')

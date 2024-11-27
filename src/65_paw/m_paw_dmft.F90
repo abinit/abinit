@@ -721,8 +721,8 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  nsym    = dtset%nsym
  ntypat  = dtset%ntypat
 
- ! In the case where no kpt is treated by the current CPU, dtset%mkmem is set
- ! to nkpt by convention in Abinit. We need to set it to its true value 0.
+ ! In the case where no kpt is treated by the current CPU (ie sum(isppoltab)=0),
+ ! dtset%mkmem is set to nkpt by convention in Abinit. We set it to its true value 0.
  if (sum(mpi_enreg%my_isppoltab(1:nsppol)) == 0) mkmem = 0
 
  dmftbandi = dtset%dmftbandi
@@ -1173,6 +1173,7 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  end if ! prtwan=1
 
  ! Now build radial grid by extending the PAW mesh up to max(rmax,size(proj))
+ ! The mesh inside the PAW sphere is still exactly the same.
  use_full_chipsi = (paw_dmft%dmft_use_full_chipsi == 1)
  paw_dmft%int_meshsz => pawrad(:)%int_meshsz
 
@@ -1209,6 +1210,8 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
        ABI_ERROR(message)
      end if
    end if ! prtwan=1
+   ! mesh_type > 3 cannot be extended outside the PAW sphere while keeping the
+   ! mesh inside the sphere unchanged.
    if ((mesh_size /= pawrad(itypat)%mesh_size) .and. mesh_type > 3) then
      message = "mesh_type > 3 is only compatible with dmft_proj=1 and dmft_prtwan=0"
      ABI_ERROR(message)
@@ -1226,11 +1229,13 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
    do iproj=1,nproju
      indproj = pawtab(itypat)%lnproju(iproj)
      if (use_full_chipsi) then
+       ! Precompute <Chi|Phi-Phi_tilde>
        paw_dmft%phimtphi(1:siz_paw,iproj,itypat) = pawtab(itypat)%phi(1:siz_paw,indproj)- &
                                                  & pawtab(itypat)%tphi(1:siz_paw,indproj)
        call simp_gen(paw_dmft%phimtphi_int(iproj,itypat),pawtab(itypat)%proj(1:siz_proj)* &
                    & paw_dmft%phimtphi(1:siz_proj,iproj,itypat),paw_dmft%radgrid(itypat),r_for_intg=rint)
      else
+       ! Precompute <Chi|Phi>
        call simp_gen(paw_dmft%phi_int(iproj,itypat),pawtab(itypat)%proj(1:siz_proj)* &
                    & pawtab(itypat)%phi(1:siz_proj,indproj),paw_dmft%radgrid(itypat),r_for_intg=rint)
      end if ! use_full_chipsi
