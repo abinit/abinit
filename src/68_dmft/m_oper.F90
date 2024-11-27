@@ -878,6 +878,7 @@ subroutine downfold_oper(oper,paw_dmft,procb,iproc,option,op_ks_diag,gpu_option)
  integer :: iatom,ib,ik,ikpt,isppol,im,im1,idat,lpawu,mbandc,ndim
  integer :: ndim_max,nspinor,ndat,opt,paral,shift
  integer :: l_gpu_option
+ complex(dpc) :: alpha
  complex(dpc), ABI_CONTIGUOUS pointer :: ks(:,:,:,:),mat(:,:,:),chipsi(:,:,:,:,:)
  real(dp), ABI_CONTIGUOUS pointer :: wtk(:)
  character(len=500) :: message
@@ -1040,15 +1041,11 @@ call nvtxStartRange("downfold_oper",20)
            end do ! ndat
          else if(l_gpu_option == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-           !$OMP TARGET TEAMS DISTRIBUTE MAP(to:mat,mat_temp2) PRIVATE(idat)
-           do idat=1,ndat
-             !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(im,im1)
-             do im=1,ndim
-               do im1=1,ndim
-                 mat(im,im1,idat+(isppol-1)*ndat) = mat(im,im1,idat+(isppol-1)*ndat) + mat_temp2(im,im1,idat)*wtk(ik)
-               end do
-             end do
-           end do
+           alpha = dcmplx(wtk(ik), 0.0_dp)
+           !$OMP TARGET DATA USE_DEVICE_PTR(mat,mat_temp2)
+           call abi_gpu_xaxpy(2, ndim*ndim*ndat, alpha, &
+           &    c_loc(mat_temp2), 1, c_loc(mat(:,:,1+(isppol-1)*ndat:isppol*ndat)), 1)
+           !$OMP END TARGET DATA
 #endif
          end if
 
