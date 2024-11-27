@@ -691,7 +691,6 @@ type, public :: dataset_type
  integer :: varpeq_nstep = 50
  integer :: varpeq_nstep_ort = 50
  integer :: varpeq_select = -1
- real(dp) :: varpeq_erange = zero
  real(dp) :: varpeq_tolgrs = tol6
  integer :: varpeq_trvec(3) = [0, 0, 0]
  real(dp) :: varpeq_gpr_energy(2) = [zero, one]
@@ -2131,7 +2130,6 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%varpeq_nstep       = dtin%varpeq_nstep
  dtout%varpeq_nstep_ort   = dtin%varpeq_nstep_ort
  dtout%varpeq_select      = dtin%varpeq_select
- dtout%varpeq_erange      = dtin%varpeq_erange
  dtout%varpeq_tolgrs      = dtin%varpeq_tolgrs
  dtout%varpeq_trvec       = dtin%varpeq_trvec
  dtout%varpeq_gpr_energy  = dtin%varpeq_gpr_energy
@@ -3667,7 +3665,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' use_oldchi'
 !V
  list_vars=trim(list_vars)//' vaclst vacnum vacuum vacwidth vcutgeo'
- list_vars=trim(list_vars)//' varpeq_avg_g varpeq_aseed varpeq_erange varpeq_gpr_energy'
+ list_vars=trim(list_vars)//' varpeq_avg_g varpeq_aseed varpeq_gpr_energy'
  list_vars=trim(list_vars)//' varpeq_gpr_length varpeq_interp varpeq_nstates'
  list_vars=trim(list_vars)//' varpeq_nstep varpeq_nstep_ort varpeq_select varpeq_pkind'
  list_vars=trim(list_vars)//' varpeq_tolgrs varpeq_translate varpeq_trvec'
