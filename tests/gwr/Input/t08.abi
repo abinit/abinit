@@ -43,7 +43,7 @@ getden2     1
 nband2     40         # Number of (occ + empty) bands
 ecuteps2   4
 
-pp_dirpath "$ABI_PSPDIR/Pseudodojo_paw_pw_standard"
+pp_dirpath "$ABI_PSPDIR/Psdj_paw_pw_std"
 pseudos "Li.xml, F.xml"
 
 #%%<BEGIN TEST_INFO>

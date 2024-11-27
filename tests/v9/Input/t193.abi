@@ -40,7 +40,7 @@
     3.8300288793    6.6338023023    0.0000000000
     0.0000000000    0.0000000000   12.5901434581
 
- pp_dirpath "$ABI_PSPDIR/Pseudodojo_nc_sr_04_pbe_standard_psp8"
+ pp_dirpath "$ABI_PSPDIR/Psdj_nc_sr_04_pbe_std_psp8"
  pseudos = "Zn-sp.psp8, Se-d.psp8"
 
 #%%<BEGIN TEST_INFO>

@@ -34,7 +34,7 @@ class xcopier(copier):
         # Default regexps for yaptu delimeters (what xyaptu tags are first converted to)
         # These must be in sync with what is output in self._x2y_translate
         _reExpression = re.compile('_:@([^:@]+)@:_')
-        _reOpen       = re.compile('\++yaptu ')
+        _reOpen       = re.compile(r'\++yaptu ')
         _reClose      = re.compile('--yaptu')
         _reClause     = re.compile('==yaptu ')
 
