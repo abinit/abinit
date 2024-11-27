@@ -23,11 +23,11 @@
 - root for output files -> tdmft_2_MPI24o
 
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT/scope_gnu_10.2_paral/gingras.ol_beauty/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
+-   /home/buildbot/ABINIT/scope_gnu_10.2_paral/gingras.ol_beauty/tests/Pspdir/Psdj_paw_pw_std/V.xml
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT/scope_gnu_10.2_paral/gingras.ol_beauty/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
+-   /home/buildbot/ABINIT/scope_gnu_10.2_paral/gingras.ol_beauty/tests/Pspdir/Psdj_paw_pw_std/Sr.xml
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT/scope_gnu_10.2_paral/gingras.ol_beauty/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
+-   /home/buildbot/ABINIT/scope_gnu_10.2_paral/gingras.ol_beauty/tests/Pspdir/Psdj_paw_pw_std/O.xml
 
  DATASET    1 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -282,9 +282,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.05246
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/gingras.ol_beauty/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/gingras.ol_beauty/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/scope_gnu_10.2_paral/gingras.ol_beauty/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/gingras.ol_beauty/tests/Pspdir/Psdj_paw_pw_std/V.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/gingras.ol_beauty/tests/Pspdir/Psdj_paw_pw_std/V.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/scope_gnu_10.2_paral/gingras.ol_beauty/tests/Pspdir/Psdj_paw_pw_std/V.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20000000
@@ -302,9 +302,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/gingras.ol_beauty/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/gingras.ol_beauty/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/scope_gnu_10.2_paral/gingras.ol_beauty/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/gingras.ol_beauty/tests/Pspdir/Psdj_paw_pw_std/Sr.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/gingras.ol_beauty/tests/Pspdir/Psdj_paw_pw_std/Sr.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/scope_gnu_10.2_paral/gingras.ol_beauty/tests/Pspdir/Psdj_paw_pw_std/Sr.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20669967
@@ -322,9 +322,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/gingras.ol_beauty/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/gingras.ol_beauty/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/scope_gnu_10.2_paral/gingras.ol_beauty/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
+- pspini: atom type   3  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/gingras.ol_beauty/tests/Pspdir/Psdj_paw_pw_std/O.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/gingras.ol_beauty/tests/Pspdir/Psdj_paw_pw_std/O.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/scope_gnu_10.2_paral/gingras.ol_beauty/tests/Pspdir/Psdj_paw_pw_std/O.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.41465230
