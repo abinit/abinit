@@ -88,7 +88,7 @@ pseudos="P.xml, Al.xml"
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = bob_gnu_13.2_openmp
+#%% need_cpp_vars = HAVE_FFTW3 or HAVE_DFTI
 #%% [files]
 #%% files_to_test = 
 #%%   t12.abo, tolnlines=  0, tolabs=  0, tolrel= 0, fld_options = -ridiculous

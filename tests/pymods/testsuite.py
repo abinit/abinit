@@ -1816,10 +1816,21 @@ pp_dirpath $ABI_PSPDIR
         # !HAVE_FOO --> HAVE_FOO should not be present.
         errors = []
         eapp = errors.append
+        or_token =  " or "
         for var in self.need_cpp_vars:
-            if not var.startswith("!") and var not in build_env.defined_cppvars:
+            if or_token in var:
+                # handle HAVE_FOO or HAVE_BAR syntax
+                var_list = [v.strip() for v in var.split(or_token)]
+                #print("in or_token with var_list:", var_list)
+                if not any(v in build_env.defined_cppvars for v in var_list):
+                    eapp("Build environment does not define any of the following CPP variables %s" % str(var_list))
+
+            elif not var.startswith("!") and var not in build_env.defined_cppvars:
+                # handle HAVE_FOO syntax
                 eapp("Build environment does not define the CPP variable %s" % var)
+
             elif var[1:] in build_env.defined_cppvars:
+                # handle !HAVE_FOO syntax
                 eapp("Build environment defines the CPP variable %s" % var[1:])
 
         # Remove this check to run the entire test suite in parallel
