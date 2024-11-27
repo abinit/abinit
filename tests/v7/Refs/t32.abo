@@ -230,8 +230,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Al.GGA-PBE-rpaw-2.00.abinit
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Al.GGA-PBE-rpaw-2.00.abinit
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Al.GGA-PBE-rpaw-2.00.abinit
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Al.GGA-PBE-rpaw-2.00.abinit
 - Paw atomic data for element Al - Generated with atompaw v4.0.0.10
 - 13.00000   3.00000  20141221                znucl, zion, pspdat
     7   11    1    0       473   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -254,8 +254,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/As.GGA-PBE-rpaw-2.10.abinit
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/As.GGA-PBE-rpaw-2.10.abinit
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/As.GGA-PBE-rpaw-2.10.abinit
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/As.GGA-PBE-rpaw-2.10.abinit
 - Paw atomic data for element As - Generated with atompaw v3.1.0.3
 - 33.00000   5.00000  20150317                znucl, zion, pspdat
     7   11    1    0      1074   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well

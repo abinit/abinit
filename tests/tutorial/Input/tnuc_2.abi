@@ -21,7 +21,7 @@ znucl 50 8 # atomic number of atoms, will be cross checked against pseudopotenti
            # here Tin (50) and Oxygen (8). Pseudopotentials must be listed in this order.
            # this order defines type 1 as tin, type 2 as oxygen
 pp_dirpath "$ABI_PSPDIR" # pseudopotential directory
-pseudos "Pseudodojo_paw_pbe_standard/Sn-sp.xml, Pseudodojo_paw_pbe_standard/O.xml"
+pseudos "Psdj_paw_pbe_std/Sn-sp.xml, Psdj_paw_pbe_std/O.xml"
 
 #Definition of the atoms
 natom 6 # 6 atoms in the unit cell 
