@@ -64,7 +64,6 @@ pseudos="P.psp8, Al.psp8"
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = eos_gnu_13.2_mpich
 #%% need_cpp_vars = HAVE_DFTI
 #%% [files]
 #%% files_to_test = 
