@@ -970,7 +970,7 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
 !=======================
 
  paw_dmft%dmft_log_freq = 1 ! use logarithmic frequencies.
- if (dmft_solv == 9) paw_dmft%dmft_log_freq = 0 ! do not use logarithmic frequencies.
+ if (dmft_solv == 6 .or. dmft_solv == 7 .or. dmft_solv == 9) paw_dmft%dmft_log_freq = 0 ! do not use logarithmic frequencies.
 
  paw_dmft%dmft_nwli = dtset%dmft_nwli
  paw_dmft%dmft_nwlo = dtset%dmft_nwli

@@ -1306,7 +1306,7 @@ subroutine compute_trace_log_loc(green,paw_dmft,trace,opt_inv)
  do ifreq=1,nwlo
    if (green%distrib%procf(ifreq) /= paw_dmft%myproc) cycle
    omega = cmplx(zero,paw_dmft%omega_lo(ifreq),kind=dp)
-   fac = paw_dmft%wgt_wlo(ifreq) * paw_dmft%temp
+   fac = paw_dmft%temp
    omega_fac(1) = - two * fac / omega
    do i=2,nmoments
      omega_fac(i) = omega_fac(i-1) / omega
