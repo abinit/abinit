@@ -321,7 +321,7 @@ subroutine init_oper_ndat(paw_dmft,oper,ndat,nkpt,wtk,shiftk,opt_ksloc,gpu_optio
  if (optksloc == 2 .or. optksloc == 3) then
    ABI_MALLOC(oper%matlu,(oper%natom))
    oper%has_opermatlu = 1
-   call init_matlu(oper%natom,oper%nspinor,oper%nsppol*ndat_,paw_dmft%lpawu(:),oper%matlu(:))
+   call init_matlu(oper%natom,oper%nspinor,oper%nsppol*ndat_,paw_dmft%lpawu(:),oper%matlu(:),gpu_option=l_gpu_option)
  end if ! optksloc=2 or optksloc=3
 
  DBG_EXIT("COLL")
@@ -439,18 +439,25 @@ subroutine copy_oper_from_ndat(oper1,oper2,ndat,nw,proct,me_freq,copy_ks)
 
 !Arguments ------------------------------------
 !type
- type(oper_type),intent(in) :: oper1
+ type(oper_type),target,intent(in) :: oper1
  type(oper_type),intent(inout) :: oper2(nw) !vz_i
  integer,intent(in) :: nw,ndat,me_freq
  logical,intent(in) :: copy_ks
  integer,intent(in) :: proct(nw)
 
 !oper variables-------------------------------
- integer ::  ib, ib1, ikpt, isppol, idat, iw, mbandc
+ integer ::  ib, ib1, ikpt, isppol, idat, iw, iatom, mbandc
+ complex(dpc), ABI_CONTIGUOUS pointer :: mat(:,:,:)
 ! *********************************************************************
  DBG_ENTER("COLL")
  ABI_CHECK(oper1%ndat==ndat, "Bad value for ndat!")
  mbandc=oper1%mbandc
+ if(oper1%has_opermatlu==1 .and. oper1%gpu_option==ABI_GPU_OPENMP) then
+   do iatom=1,oper1%natom
+     mat => oper1%matlu(iatom)%mat ! array of structs in OpenMP loosely supported
+     !$OMP TARGET UPDATE FROM(mat)
+   end do
+ end if
  idat=1
  do iw=1,nw
    if (proct(iw) /= me_freq) cycle
@@ -499,13 +506,14 @@ subroutine copy_oper_to_ndat(oper1,oper2,ndat,nw,proct,me_freq,copy_ks)
 !Arguments ------------------------------------
 !type
  type(oper_type),intent(in) :: oper1(nw)
- type(oper_type),intent(inout) :: oper2 !vz_i
+ type(oper_type),target,intent(inout) :: oper2 !vz_i
  integer,intent(in) :: nw,ndat,me_freq
  logical,intent(in) :: copy_ks
  integer,intent(in) :: proct(nw)
 
 !oper variables-------------------------------
- integer ::  ib, ib1, ikpt, isppol, idat, iw, mbandc
+ integer ::  ib, ib1, ikpt, isppol, idat, iw, iatom, mbandc
+ complex(dpc), ABI_CONTIGUOUS pointer :: mat(:,:,:)
 ! *********************************************************************
  DBG_ENTER("COLL")
  ABI_CHECK(oper2%ndat==ndat, "Bad value for ndat!")
@@ -519,6 +527,12 @@ subroutine copy_oper_to_ndat(oper1,oper2,ndat,nw,proct,me_freq,copy_ks)
      idat=idat+1
    endif
  enddo
+ if(oper2%has_opermatlu==1 .and. oper2%gpu_option==ABI_GPU_OPENMP) then
+   do iatom=1,oper2%natom
+     mat => oper2%matlu(iatom)%mat ! array of structs in OpenMP loosely supported
+     !$OMP TARGET UPDATE TO(mat)
+   end do
+ end if
 
  if(allocated(oper2%ks) .and. copy_ks) then
    ABI_CHECK(size(oper2%ks,dim=2) == mbandc*ndat, "well?")
@@ -712,9 +726,10 @@ subroutine inverse_oper(oper,option,procb,iproc,gpu_option)
  integer, optional, intent(in) :: procb(oper%nkpt)
 !Local variables-------------------------------
  integer :: ikpt,isppol,idat,paral,ib,mbandc
- integer :: l_gpu_option,blk
+ integer :: l_gpu_option,blk,iatom
  complex(dpc), ABI_CONTIGUOUS pointer :: ks(:,:,:,:)
  complex(dpc), allocatable :: work(:,:)
+ complex(dpc), ABI_CONTIGUOUS pointer :: mat(:,:,:)
 !todo_ba: prb with gwpc here: necessary for matcginv but should be dpc
 ! *********************************************************************
 
@@ -923,15 +938,19 @@ call nvtxStartRange("downfold_oper",20)
  do iatom=1,oper%natom
    lpawu = oper%matlu(iatom)%lpawu
    if (lpawu == -1) cycle
-   oper%matlu(iatom)%mat(:,:,:) = czero
+   mat => oper%matlu(iatom)%mat
    ndim = nspinor * (2*lpawu+1)
+   if(oper%gpu_option==ABI_GPU_DISABLED) then
+     mat(:,:,:) = czero
+   else if(oper%gpu_option==ABI_GPU_OPENMP) then
+     call gpu_set_to_zero_complex(mat, int(oper%nsppol,c_size_t)*ndat*ndim*ndim)
+   end if
    ABI_MALLOC(mat_temp,(ndim,mbandc,ndat))
    ABI_MALLOC(mat_temp2,(ndim,ndim,ndat))
    ABI_MALLOC(mat_temp3,(ndim,ndim))
-   mat => oper%matlu(iatom)%mat
 #ifdef HAVE_OPENMP_OFFLOAD
-   !$OMP TARGET ENTER DATA MAP(alloc:mat,mat_temp,mat_temp2,mat_temp3) IF(l_gpu_option==ABI_GPU_OPENMP)
-   !$OMP TARGET UPDATE TO(mat) IF(l_gpu_option==ABI_GPU_OPENMP)
+   !$OMP TARGET ENTER DATA MAP(alloc:mat_temp,mat_temp2,mat_temp3) IF(l_gpu_option==ABI_GPU_OPENMP)
+   !$OMP TARGET ENTER DATA MAP(to:mat) IF(l_gpu_option==ABI_GPU_OPENMP .and. oper%gpu_option/=ABI_GPU_OPENMP)
 #endif
    do isppol=1,oper%nsppol
      do ikpt=1,oper%nkpt ! index of kpt on the current CPU
@@ -1052,8 +1071,8 @@ call nvtxStartRange("downfold_oper",20)
      end do ! ikpt
    end do ! isppol
 #ifdef HAVE_OPENMP_OFFLOAD
-   !$OMP TARGET UPDATE FROM(mat) IF(l_gpu_option==ABI_GPU_OPENMP)
-   !$OMP TARGET EXIT DATA MAP(delete:mat,mat_temp,mat_temp2,mat_temp3) IF(l_gpu_option==ABI_GPU_OPENMP)
+   !$OMP TARGET EXIT DATA MAP(from:mat) IF(l_gpu_option==ABI_GPU_OPENMP .and. oper%gpu_option/=ABI_GPU_OPENMP)
+   !$OMP TARGET EXIT DATA MAP(delete:mat_temp,mat_temp2,mat_temp3) IF(l_gpu_option==ABI_GPU_OPENMP)
 #endif
    ABI_FREE(mat_temp)
    ABI_FREE(mat_temp2)
@@ -1201,7 +1220,7 @@ subroutine upfold_oper(oper,paw_dmft,procb,iproc,gpu_option)
    ABI_MALLOC(mat_temp,(mbandc,ndim,ndat))
    mat => oper%matlu(iatom)%mat
 #ifdef HAVE_OPENMP_OFFLOAD
-   !$OMP TARGET ENTER DATA MAP(to:mat) IF(l_gpu_option==ABI_GPU_OPENMP)
+   !$OMP TARGET ENTER DATA MAP(to:mat) IF(l_gpu_option==ABI_GPU_OPENMP .and. oper%gpu_option/=ABI_GPU_OPENMP)
    !$OMP TARGET ENTER DATA MAP(alloc:mat_temp) IF(l_gpu_option==ABI_GPU_OPENMP)
 #endif
    do isppol=1,oper%nsppol
@@ -1251,7 +1270,8 @@ subroutine upfold_oper(oper,paw_dmft,procb,iproc,gpu_option)
      end do ! ikpt
    end do ! isppol
 #ifdef HAVE_OPENMP_OFFLOAD
-   !$OMP TARGET EXIT DATA MAP(delete:mat,mat_temp) IF(l_gpu_option==ABI_GPU_OPENMP)
+   !$OMP TARGET EXIT DATA MAP(delete:mat_temp) IF(l_gpu_option==ABI_GPU_OPENMP)
+   !$OMP TARGET EXIT DATA MAP(delete:mat) IF(l_gpu_option==ABI_GPU_OPENMP .and. oper%gpu_option/=ABI_GPU_OPENMP)
 #endif
    ABI_FREE(mat_temp)
  end do ! iatom
