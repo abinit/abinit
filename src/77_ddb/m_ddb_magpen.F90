@@ -4110,7 +4110,6 @@ subroutine me_altcalc(amu,cplx_weta,eigvec,lm_magsus,lm_zfield,phongreen_fm,mags
 !arrays
  real(dp), allocatable :: mass(:)
  complex(dpc), allocatable :: me_altcalcspec(:,:)
- complex(dpc),allocatable :: mass_phongreen(:,:)
  complex(dpc) :: ri_zfield(ndim,3),ri_magsus(ndim,ndim)
  complex(dpc) :: eigdisp(3*natom,3*natom)
  complex(dpc) :: nm_zfield(ndim,3*natom)
@@ -4131,18 +4130,6 @@ subroutine me_altcalc(amu,cplx_weta,eigvec,lm_magsus,lm_zfield,phongreen_fm,mags
    mcell= mcell + amu(typat(iat1))
  end do
  mass(:)=sqrt(mcell/mass(:))
-! mass(:)=sqrt(mcell)/mass(:)
-
- ABI_MALLOC(mass_phongreen,(3*natom,3*natom))
- do icol= 1, 3*natom
-   iat2= ceiling(icol/three)
-   mfac2= sqrt(amu(typat(iat2))*amu_emass)
-   do irow= 1, 3*natom
-     iat1= ceiling(irow/three)
-     mfac1= sqrt(amu(typat(iat1))*amu_emass)
-     mass_phongreen(irow,icol)= mfac1*phongreen_fm(irow,icol)*mfac2
-   end do
- end do
 
 !Different formula on the sublattice space
  !Spin part
@@ -4161,15 +4148,11 @@ subroutine me_altcalc(amu,cplx_weta,eigvec,lm_magsus,lm_zfield,phongreen_fm,mags
          imode1= (iat1-1)*3 + idir1
          eigdisp(imode1,imode2)= &
        & cmplx(eigvec(1,idir1,iat1,idir2,iat2),eigvec(2,idir1,iat1,idir2,iat2),16)
+         write(70,*) imode1, imode2, phongreen_fm(imode1,imode2)
        end do
      end do
    end do
  end do
-
-!tmp change the phase of mode 21
-! do i=1, natom*3
-!   eigdisp(i,21)= (0.d0,1.d0)*eigdisp(i,21)
-! end do
 
 !enforce a circularly polarized pair of modes 20 and 21
 !B
@@ -4218,7 +4201,7 @@ subroutine me_altcalc(amu,cplx_weta,eigvec,lm_magsus,lm_zfield,phongreen_fm,mags
      nm_zfield(i,j)=cmplx(zero,zero,16)
      do k= 1, 3*natom 
        iat1= ceiling(k/three)
-       nm_zfield(i,j)= nm_zfield(i,j) + zfield(i,k)*mass(iat1)*conjg(eigdisp(k,j))
+       nm_zfield(i,j)= nm_zfield(i,j) + zfield(i,k)*mass(iat1)*eigdisp(k,j)
      end do
    end do
  end do
@@ -4229,38 +4212,22 @@ subroutine me_altcalc(amu,cplx_weta,eigvec,lm_magsus,lm_zfield,phongreen_fm,mags
      nm_fmzeff_tr(i,j)=cmplx(zero,zero,16)
      do k= 1, 3*natom
        iat1= ceiling(k/three)
-       nm_fmzeff_tr(i,j)= nm_fmzeff_tr(i,j) + mass(iat1)*eigdisp(k,i)*fmzeff_tr(k,j)
+       nm_fmzeff_tr(i,j)= nm_fmzeff_tr(i,j) + mass(iat1)*conjg(eigdisp(k,i))*fmzeff_tr(k,j)
      end do
    end do
  end do 
 
- !nm_phongreen=matmul(transpose(conjg(eigdisp)),matmul(phongreen_fm,eigdisp))
-! nm_phongreen=cmplx(zero,zero,16)
-! do i= 1, 3*natom
-!   iat1= ceiling(i/three)
-!   mfac1= sqrt(amu(typat(iat1))*amu_emass)
-!   do j= 1, 3*natom
-!     iat2= ceiling(j/three)
-!     mfac2= sqrt(amu(typat(iat2))*amu_emass)
-!     do k= 1, 3*natom
-!       nm_phongreen(i,j)= nm_phongreen(i,j) + &
-!   & one/(mfac1*mfac2)* &
-!   & (cplx_weta**2 - phfrq_fm(k)**2)
-!     end do
-!   end do
-! end do
-
+! nm_phongreen=matmul(transpose(conjg(eigdisp)),matmul(phongreen_fm,eigdisp))
 ! lm_zfield= matmul(nm_zfield(:,1:3*natom),matmul(nm_phongreen,nm_fmzeff_tr))
  do i= 1, ndim
    do j= 1, 3
      lm_zfield(i,j)=cmplx(zero,zero,16)
      do k= 1, 3*natom
-       iat1= ceiling(k/three)
-       lm_zfield(i,j)= lm_zfield(i,j) + nm_zfield(i,k)*nm_fmzeff_tr(k,j)/(mass(iat1)*cplx_weta**2 - phfrq_fm(k)**2)
+       lm_zfield(i,j)= lm_zfield(i,j) + nm_zfield(i,k)*nm_fmzeff_tr(k,j)/(cplx_weta**2 - phfrq_fm(k)**2)
      end do
    end do
  end do
- lm_zfield= lm_zfield / mcell
+ lm_zfield= lm_zfield / (mcell*amu_emass)
 
  !restrict only to a set of modes
 ! lm_zfield=cmplx(zero,zero,16)
@@ -4295,7 +4262,6 @@ subroutine me_altcalc(amu,cplx_weta,eigvec,lm_magsus,lm_zfield,phongreen_fm,mags
  ri_mmom= ri_mmom + matmul(ri_magsus,lm_zfield)
 
  ABI_FREE(mass)
- ABI_FREE(mass_phongreen)
 
  DBG_EXIT("COLL")
 
