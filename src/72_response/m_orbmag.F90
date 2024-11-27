@@ -53,7 +53,6 @@ module m_orbmag
   use m_mkffnl,           only : mkffnl
   use m_mpinfo,           only : proc_distrb_cycle,proc_distrb_nband
   use m_nonlop,           only : nonlop
-  use m_numeric_tools,    only : simpson
   use m_paw_an,           only : paw_an_type
   use m_pawang,           only : pawang_type
   use m_pawcprj,          only : pawcprj_type, pawcprj_alloc, pawcprj_free,pawcprj_getdim, pawcprj_get, pawcprj_put
@@ -61,7 +60,6 @@ module m_orbmag
   use m_pawfgr,           only : pawfgr_type
   use m_pawfgrtab,        only : pawfgrtab_type
   use m_paw_ij,           only : paw_ij_type
-  use m_paw_numeric,      only : paw_spline,paw_splint
   use m_pawrad,           only : nderiv_gen,pawrad_type,pawrad_deducer0,simp_gen,poisson
   use m_paw_sphharm,      only : setsym_ylm,slxyzs,realgaunt,make_dyadic
   use m_pawtab,           only : pawtab_type
@@ -2469,16 +2467,14 @@ subroutine dterm_ZA0(atindx,cplex_dij,dterm,dtset,paw_an,pawang,pawrad,pawtab,qp
   !scalars
   integer :: adir,gs1,gs2,iat,iatom,ierr,ii,ij_size,ilm,itypat,jlm
   integer :: klmn,klm,kln,lmn2_size,mesh_size,ndij,ngnt,nrt,sdir
-  real(dp) :: me_kbs,me_k2bs,rt,rt_max
+  real(dp) :: me_kbs,me_k2bs,rc,rt
   complex(dpc) :: cme
   real(dp), parameter :: HalfFineStruct2=half*FineStructureConstant2
   !arrays
   character(len=500) :: msg
-  real(dp),allocatable :: dkdr(:),dkdr_split(:)
-  real(dp),allocatable :: dv1dr(:),dyadic(:,:,:),rt_dkdr(:)
+  real(dp),allocatable :: dkdr(:),dv1dr(:),dyadic(:,:,:),rt_dkdr(:)
   real(dp),allocatable :: v1(:),zk1(:)
   real(dp),allocatable :: za0(:,:,:),za0_kernel(:),za0_rad(:,:)
-  real(dp),allocatable :: rt_kernel(:),rt_mesh(:),ypp(:)
 !--------------------------------------------------------------------
 
   dterm%ZA0 = czero
@@ -2508,92 +2504,51 @@ subroutine dterm_ZA0(atindx,cplex_dij,dterm,dtset,paw_an,pawang,pawrad,pawtab,qp
     ABI_MALLOC(v1,(mesh_size))
     call pawv1(mesh_size,dtset%nspden,pawang,pawrad(itypat),&
       & dtset%pawxcdev,v1,paw_an(iat)%vh1,paw_an(iat)%vxc1)
-    
-    ABI_MALLOC(rt_dkdr,(mesh_size))
-    rt=dtset%znucl(itypat)*FineStructureConstant2
-    rt_dkdr = two*rt/(rt+two*pawrad(itypat)%rad(1:mesh_size))**2
-    
     ABI_MALLOC(dv1dr,(mesh_size))
     call nderiv_gen(dv1dr,v1,pawrad(itypat))
+    
+    ABI_MALLOC(rt_dkdr,(mesh_size))
+    rc=FineStructureConstant2
+    rt=dtset%znucl(itypat)*rc
+    rt_dkdr = two*rt/(rt+two*pawrad(itypat)%rad(1:mesh_size))**2
 
     ABI_MALLOC(zk1,(mesh_size))
     zk1 = one/(one - HalfFineStruct2*v1)
 
     ABI_MALLOC(dkdr,(mesh_size))
-    ABI_MALLOC(dkdr_split,(mesh_size))
     dkdr = dv1dr*HalfFineStruct2*zk1*zk1
 
     do ii=1,mesh_size
-      if(pawrad(itypat)%rad(ii)<FineStructureConstant2) then
-              dkdr_split(ii)=rt_dkdr(ii)
+      if(pawrad(itypat)%rad(ii)<rc) then
+        dkdr(ii)=rt_dkdr(ii)
       else
-              dkdr_split(ii)=dkdr(ii)
+        exit
       end if
     end do
 
+    ABI_FREE(v1)
+    ABI_FREE(dv1dr)
+    ABI_FREE(rt_dkdr)
+
     ! radial integrals
     ! za0_rad(1,kln) = int ui K uj dr
-    ! za0_rad(2,kln) = 1/4 a^2 int ui K^2 V' r uj dr
+    ! za0_rad(2,kln) = 1/2 int ui K' r  uj dr
     ABI_MALLOC(za0_rad,(2,ij_size))
     ABI_MALLOC(za0_kernel,(mesh_size))
-    
-
-    nrt = 10000
-    rt_max = 1000.0*rt
-    ABI_MALLOC(rt_mesh,(nrt))
-    do ii = 1,nrt
-      rt_mesh(ii) = (ii-1)*rt_max/(one*nrt)
-    end do
-
-    !! rt_dkdr=rt_dkdr/four_pi
-
-    ! JWZ debug starts here
-    if (dtset%znucl(itypat) > 50.0) then
-            write(std_out,'(a)')' # JWZ debug r dkdr dKCdr dkdr_split '
-            do ii = 2, mesh_size
-              write(std_out,'(4es16.8)')pawrad(itypat)%rad(ii),&
-                      dkdr(ii),rt_dkdr(ii),dkdr_split(ii)
-            end do
-    end if
-   
-    ABI_FREE(v1)
 
     do kln = 1, ij_size
   
-      ABI_MALLOC(ypp,(mesh_size)) 
-      ABI_MALLOC(rt_kernel,(nrt))
-      call paw_spline(pawrad(itypat)%rad(1:mesh_size),&
-              pawtab(itypat)%phiphj(1:mesh_size,kln),mesh_size,zero,zero,ypp)
-      call paw_splint(mesh_size,pawrad(itypat)%rad(1:mesh_size),&
-              pawtab(itypat)%phiphj(1:mesh_size,kln),ypp,nrt,rt_mesh,rt_kernel,ierr)
-      rt_kernel = rt_kernel*two*rt/(rt+two*rt_mesh)**2
-      rt_kernel = rt_kernel*rt_mesh
-      ABI_FREE(ypp)
-
       za0_kernel= pawtab(itypat)%phiphj(1:mesh_size,kln)*zk1(1:mesh_size)
       call simp_gen(za0_rad(1,kln),za0_kernel,pawrad(itypat))
       
-      za0_kernel= pawtab(itypat)%phiphj(1:mesh_size,kln)*&
-        & zk1(1:mesh_size)*zk1(1:mesh_size)*&
-        & dv1dr(1:mesh_size)*pawrad(itypat)%rad(1:mesh_size)
-!!      za0_kernel= pawtab(itypat)%phiphj(1:mesh_size,kln)*rt_dkdr*&
-!!         pawrad(itypat)%rad(1:mesh_size)
+      za0_kernel= half*pawtab(itypat)%phiphj(1:mesh_size,kln)*&
+        & dkdr(1:mesh_size)*pawrad(itypat)%rad(1:mesh_size)
       call simp_gen(za0_rad(2,kln),za0_kernel,pawrad(itypat))
-!!      za0_rad(2,kln) = simpson(rt_mesh(2),rt_kernel)
-!!      za0_rad(2,kln) = za0_rad(2,kln)*half
-      za0_rad(2,kln) = za0_rad(2,kln)*half*HalfFineStruct2
-!!      za0_rad(2,kln) = za0_rad(2,kln)*half
-   
-      ABI_FREE(rt_kernel)
 
     end do
     ABI_FREE(zk1)
-    ABI_FREE(dv1dr)
     ABI_FREE(dkdr)
-    ABI_FREE(dkdr_split)
     ABI_FREE(za0_kernel)
-    ABI_FREE(rt_dkdr)
-    ABI_FREE(rt_mesh)
     
     ! make (1-\hat{r}\hat{r}) dyadic integrals
     gs1=size(pawang%gntselect,1)
@@ -2617,7 +2572,7 @@ subroutine dterm_ZA0(atindx,cplex_dij,dterm,dtset,paw_an,pawang,pawrad,pawtab,qp
       do adir = 1, 3 ! A0 direction (that is, B-field direction)
         do sdir = 1, 3 ! S direction (spin angular momentum)
           me_kbs=zero
-          !if ( (adir == sdir) .AND. (ilm == jlm) ) me_kbs=za0_rad(1,kln)
+          if ( (adir == sdir) .AND. (ilm == jlm) ) me_kbs=za0_rad(1,kln)
           me_k2bs=dyadic(adir,sdir,klm)*za0_rad(2,kln)
           cme=CMPLX(me_kbs+me_k2bs,zero)
           select case(sdir)
