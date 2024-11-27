@@ -1244,16 +1244,10 @@ subroutine upfold_oper(oper,paw_dmft,procb,iproc,gpu_option)
          call abi_gpu_xgemm_strided(2,'n','n',mbandc,mbandc,ndim,cone,mat_temp(:,:,:),mbandc,ndim*mbandc,&
          &    paw_dmft%chipsi(:,:,ik,isppol,iatom),ndim_max,0,czero,mat_temp2(:,:,:),mbandc,mbandc*mbandc,ndat)
 #endif
-
-         !$OMP TARGET TEAMS DISTRIBUTE MAP(to:ks,mat_temp2) PRIVATE(idat)
-         do idat=1,ndat
-           !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(ib,ib1)
-           do ib=1,mbandc
-             do ib1=1,mbandc
-               ks(ib,ib1+(idat-1)*mbandc,ikpt,isppol) = ks(ib,ib1+(idat-1)*mbandc,ikpt,isppol) + mat_temp2(ib,ib1,idat)
-             end do
-           end do
-         end do ! idat
+         !$OMP TARGET DATA USE_DEVICE_PTR(ks,mat_temp2)
+         call abi_gpu_xaxpy(2, mbandc*mbandc*ndat, cone, &
+         &    c_loc(mat_temp2), 1, c_loc(ks(:,:,ikpt,isppol)), 1)
+         !$OMP END TARGET DATA
 #endif
        end if
 
