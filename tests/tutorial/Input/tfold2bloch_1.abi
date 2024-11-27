@@ -31,7 +31,7 @@
  ntypat   1
  znucl    1
  pp_dirpath "$ABI_PSPDIR"
- pseudos "Pseudodojo_paw_pw_standard/H.xml"
+ pseudos "Psdj_paw_pw_std/H.xml"
 
 #Definition of the atoms
  natom   6
