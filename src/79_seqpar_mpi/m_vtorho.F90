@@ -1343,10 +1343,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      if(paw_dmft%use_dmft==1.and.psps%usepaw==1.and.dtset%nbandkss==0) then
        call timab(991,1,tsec)
 
+       ! energies%entropy is the non-interacting entropy. This is obviously
+       ! wrong in DFT+DMFT (except if U=J=0), so we set it to 0.
        if (dtset%dmftcheck>=0.and.dtset%usedmft>=1.and.(sum(pawtab(:)%upawu)>=tol8.or.  &
-&       sum(pawtab(:)%jpawu)>tol8).and.(dtset%dmft_entropy==0.or.&
-&       ((dtset%dmft_solv==6.or.dtset%dmft_solv==7).and.(dtset%dmft_integral==0 &
-&       .or.dtset%dmftctqmc_triqs_entropy==0)))) energies%entropy=zero
+&       sum(pawtab(:)%jpawu)>tol8).and.dtset%dmft_entropy==0) energies%entropy=zero
 
 !      ==  0 to a dmft calculation and do not use lda occupations
 !      ==  1 to a lda calculation with the dmft loop

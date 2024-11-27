@@ -702,6 +702,8 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
 !    In the basis where levels/density matrix/green function is diagonal
 !    ================================================================================
 
+     ! When J=0, vee(:,i,:,j) and vee(i,:,j,:) are homotheties for all i,j
+     ! when using Slater parametrization ; so no need to rotate them
      if (rot_type == 1 .and. jpawu > tol10) then
 !      ---------------------
 
@@ -761,7 +763,7 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
          call udens_slatercondon_hu(hu(itypat)%fk(:),lpawu)
        end if
 
-!      Build large matrix
+!      Build large matrix (neglect imaginary part)
        call vee_ndim2tndim_hu(lpawu,cmplx(dble(veeylm(:,:,:,:)),zero,kind=dp),veeylm2(:,:,:,:))
 
        if (rot_type == 3 .or. rot_type == 4) then
@@ -840,6 +842,8 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
 
        !uaver=zero
      if (rot_type /= 0 .and. jpawu > tol10) then
+       ! Careful, since vee now has spin off-diagonal elements, this is wrong to
+       ! use vee2udensatom_hu in order to compute udens
        do ms1=1,tndim
          do ms=1,tndim
            udens_atoms(iatom)%mat(ms,ms1,1) = vee_rotated(iatom)%mat(ms,ms1,ms,ms1) - vee_rotated(iatom)%mat(ms,ms1,ms1,ms)
@@ -945,7 +949,7 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
        ABI_MALLOC(veetemp,(ndim,ndim,ndim,ndim))
        call rotate_hu(rot_mat(iatom)%mat(:,:,1),ndim,hu(itypat)%vee(:,:,:,:),veetemp(:,:,:,:))
        if (paw_dmft%dmft_solv /= 6 .and. paw_dmft%dmft_solv /= 7) &
-         & veetemp(:,:,:,:) = cmplx(dble(veetemp(:,:,:,:)),zero,kind=dp)
+         & veetemp(:,:,:,:) = cmplx(dble(veetemp(:,:,:,:)),zero,kind=dp) ! neglect imaginary part in Abinit
        call vee_ndim2tndim_hu(lpawu,veetemp(:,:,:,:),vee_rotated(iatom)%mat(:,:,:,:))
      else
        udens_atoms(iatom)%mat(:,:,1)   = hu(itypat)%udens(:,:)
