@@ -1226,7 +1226,7 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
    end do ! ifreq
  end if ! optself
 #else
- call copy_oper_to_ndat(green%oper,green_oper_ndat,ndat,green%nw,green%distrib%proct,green%distrib%me_freq,.false.)
+ !call copy_oper_to_ndat(green%oper,green_oper_ndat,ndat,green%nw,green%distrib%proct,green%distrib%me_freq,.false.)
  if (optself == 0) then
    if(green_oper_ndat%gpu_option==ABI_GPU_DISABLED) then
      green_oper_ndat%ks(:,:,:,:) = czero
@@ -1235,8 +1235,10 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
    end if
  else
    do ifreq=ifreq_beg,ifreq_end
-     call add_matlu(self%hdc%matlu(:),self%oper(ifreq)%matlu(:),green_oper_ndat%matlu(:),natom,-1,idat=ifreq-(ifreq_end-ndat),ndat=ndat)
+     !call add_matlu(self%hdc%matlu(:),self%oper(ifreq)%matlu(:),green_oper_ndat%matlu(:),natom,-1,idat=ifreq-(ifreq_end-ndat),ndat=ndat)
+     call add_matlu(self%hdc%matlu(:),self%oper(ifreq)%matlu(:),green%oper(ifreq)%matlu(:),natom,-1)
    end do
+   call copy_oper_to_ndat(green%oper,green_oper_ndat,ndat,green%nw,green%distrib%proct,green%distrib%me_freq,.false.)
    call upfold_oper(green_oper_ndat,paw_dmft,procb=green%distrib%procb(:),iproc=me_kpt,gpu_option=gpu_option)
  end if ! optself
 #endif
