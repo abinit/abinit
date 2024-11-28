@@ -127,7 +127,7 @@ xred
               6.66971121710000e-01   6.66971121710000e-01   6.66971121710000e-01
 
 pp_dirpath   "$ABI_PSPDIR"
-pseudos      "Pseudodojo_paw_pw_standard/Au.xml"
+pseudos      "Psdj_paw_pw_std/Au.xml"
 
 # Electronic configuration
 # ========================

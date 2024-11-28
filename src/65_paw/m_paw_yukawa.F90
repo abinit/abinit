@@ -234,17 +234,10 @@ CONTAINS  !=====================================================================
  if (lpawu > 0) then
 
    ! Default values from scipy
-   n = 2
-   xtol = dble(1.49012e-8)
-   maxfev = 200 * (n+1)
-   ml = n - 1
-   mu = n - 1
-   epsfcn = epsilon(one)
-   mode = 1
-   fac = dble(100.)
-   nprint = 0
-   ldfjac = n
-   lr = n * (n+1) / 2
+   epsfcn = epsilon(one) ; fac = dble(100.) ; n = 2
+   ldfjac = n ; lr = n * (n+1) / 2
+   maxfev = 200 * (n+1) ; ml = n - 1 ; mode = 1
+   mu = n - 1 ; nprint = 0 ; xtol = dble(1.49012e-8)
 
    ! Now find lambda and epsilon
    call hybrd(get_coulomb_uj,2,lmb_eps(:),fvec(:),xtol,maxfev,ml,mu,epsfcn,diag(:),mode, &

@@ -1,5 +1,5 @@
 
-.Version 10.2.4.2 of ABINIT, released Nov 2024.
+.Version 10.3.3.2 of ABINIT, released Nov 2024.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2024 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 19 Nov 2024.
-- ( at 18h37 )
+.Starting date : Sun 24 Nov 2024.
+- ( at 07h23 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_release-10.2/tests/TestBot_MPI1/tutorespfn_teph4mob_1-teph4mob_2-teph4mob_3-teph4mob_4-teph4mob_5-teph4mob_6-teph4mob_7/teph4mob_5.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__mmignolet/tests/TestBot_MPI1/tutorespfn_teph4mob_1-teph4mob_2-teph4mob_3-teph4mob_4-teph4mob_5-teph4mob_6-teph4mob_7/teph4mob_5.abi
 - output file    -> teph4mob_5.abo
 - root for input  files -> teph4mob_5i
 - root for output files -> teph4mob_5o
@@ -435,8 +435,8 @@ meta: {optdriver: 7, eph_task: -4, }
 - Writing phonon DOS to netcdf file: teph4mob_5o_PHDOS.nc
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_release-10.2/tests/Psps_for_tests/13al.981214.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_release-10.2/tests/Psps_for_tests/13al.981214.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_release-10.2/tests/Pspdir/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_release-10.2/tests/Pspdir/13al.981214.fhi
 - Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
 - 13.00000   3.00000    981214                znucl, zion, pspdat
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -448,8 +448,8 @@ meta: {optdriver: 7, eph_task: -4, }
              1    0.900554
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_release-10.2/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_release-10.2/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_release-10.2/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_release-10.2/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
 -  Troullier-Martins psp for element  As        Thu Oct 27 17:37:14 EDT 1994
 - 33.00000   5.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -538,7 +538,7 @@ P Number of k-point in Sigma_nk treated by this proc: 3 of 3
  
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.521
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.573    0.000  36716.3    0.000
+   5   3.573    0.000  36716.2    0.000
 ============================================================================================
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.475
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -566,7 +566,7 @@ K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.521
 ============================================================================================
 K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.475
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.608    0.001    412.0    0.000
+   5   3.608    0.001    411.9    0.000
 ============================================================================================
 K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:  123.0 [K], mu_e:    3.428
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -668,7 +668,7 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.274
           123.00        0.10E+16        0.00E+00          375.46            0.00
           182.00        0.10E+16        0.00E+00          471.05            0.00
           241.00        0.10E+16        0.00E+00          469.77            0.00
-          300.00        0.10E+16        0.25E+05          411.40            0.00
+          300.00        0.10E+16        0.25E+05          411.39            0.00
 
 
  Cartesian component of MRTA mobility tensor: yy
@@ -678,7 +678,7 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.274
           123.00        0.10E+16        0.00E+00          375.46            0.00
           182.00        0.10E+16        0.00E+00          471.05            0.00
           241.00        0.10E+16        0.00E+00          469.77            0.00
-          300.00        0.10E+16        0.25E+05          411.40            0.00
+          300.00        0.10E+16        0.25E+05          411.39            0.00
 
 
  Cartesian component of MRTA mobility tensor: zz
@@ -688,7 +688,7 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.274
           123.00        0.10E+16        0.00E+00          375.46            0.00
           182.00        0.10E+16        0.00E+00          471.05            0.00
           241.00        0.10E+16        0.00E+00          469.77            0.00
-          300.00        0.10E+16        0.25E+05          411.40            0.00
+          300.00        0.10E+16        0.25E+05          411.39            0.00
 
 
 
