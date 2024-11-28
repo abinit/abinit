@@ -1016,7 +1016,7 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
  complex(dpc), allocatable :: mat_tmp(:,:),omega_fac(:),work(:),omega_current(:)
  type(oper_type), target :: green_oper_ndat
  real(dp), ABI_CONTIGUOUS pointer :: eigen_dft(:,:,:)
- complex(dpc), ABI_CONTIGUOUS pointer :: ks(:,:,:,:),occup_ks(:,:,:,:),moments_ks(:,:,:,:)
+ complex(dpc), ABI_CONTIGUOUS pointer :: ks(:,:,:,:),occup_ks(:,:,:,:)
 ! integer, allocatable :: procb(:,:),proct(:,:)
 ! *********************************************************************
 
@@ -1509,6 +1509,7 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
      end do ! ifreq
 
    else if(gpu_option==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
      if (diag == 1) then
 
        !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) MAP(tofrom:occup_ks) MAP(to:ks,fac) PRIVATE(isppol,ikpt)
@@ -1544,6 +1545,7 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
        end do ! ifreq
 
      end if ! diag
+#endif
    end if
 #endif
 #ifdef HAVE_GPU_MARKERS
