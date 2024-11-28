@@ -353,13 +353,11 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  e_fermih = results_gs%energies%e_fermih
  ebands%entropy = results_gs%energies%entropy
 
-#ifndef FC_CRAY
  ! YAML output
  if (me == master) then
    call results_gs%yaml_write(ab_out, cryst=crystal, info="Summary of ground state results",&
                               occopt=dtset%occopt, with_conv=(dtset%nstep > 0))
  end if
-#endif FC_CRAY
 
  call timab(1151,2,tsec)
 
@@ -1340,7 +1338,6 @@ if (dtset%prt_lorbmag==1) then
 
  ! Output of the GSR file (except when we are inside mover)
  ! Temporarily disable for CRAY
-#ifndef FC_CRAY
  if (me == master .and. dtset%prtgsr == 1 .and. dtset%usewvl == 0) then
    !.and. (dtset%ionmov /= 0 .or. dtset%optcell /= 0)) then
    fname = strcat(dtfil%filnam_ds(4), "_GSR.nc")
@@ -1365,7 +1362,6 @@ if (dtset%prt_lorbmag==1) then
    end if
    NCF_CHECK(nf90_close(ncid))
  end if
-#endif
 
  call timab(1154,2,tsec)
 
