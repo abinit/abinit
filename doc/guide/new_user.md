@@ -105,7 +105,7 @@ and in the [[topic:PseudosPAW|PseudosPAW]] topics.
 !!! warning
 
     A subset of existing pseudopotentials are used for test cases, and are located in the
-    ~abinit/tests/Psps_for_tests directory but they **are not recommended** for production.
+    ~abinit/tests/Pspdir directory but they **are not recommended** for production.
 
 ## Other programs in the package
 

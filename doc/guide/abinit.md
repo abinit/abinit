@@ -166,8 +166,8 @@ ABINIT has also some (very limited) interpretor capabilities:
     The end of the name of the environment variable, VAR, is determined by finding the closest separator
     among a blank, a slash, or a double quote.
     The parser will automatically substitute the value of the environment variable to the `$VAR` string.
-    As an example, "$PSPDIR/PseudosHGH_pwteter" with PSPDIR being Psps_for_tests will give
-    "Psps_for_tests/PseudosHGH_pwteter".
+    As an example, "$PSPDIR/PseudosHGH_pwteter" with PSPDIR being Pspdir will give
+    "Pspdir/PseudosHGH_pwteter".
 
 Comments should be placed to the right of the comment characters # or !;
 anything to the right of a "#" or a "!" on any line is **simply ignored** by the

@@ -30,6 +30,7 @@ module m_getghc
  use m_errors
  use m_abicore
  use m_xmpi
+ use m_xomp
 
  use defs_abitypes, only : mpi_type
  use m_time,        only : timab
@@ -2055,7 +2056,7 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lamb
 !Local variables-------------------------------
 !scalars
  integer :: firstelt, firstprj, lastelt, lastprj,usegvnlxc,usegsc
- integer :: nthreads
+ integer :: nthreads,fftalga
  integer :: ithread
  integer :: chunk
  integer :: residuchunk
@@ -2072,6 +2073,11 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lamb
  spacedim     = size(cwavef  ,dim=2)/ndat
  spacedim_prj = size(cwaveprj,dim=2)/ndat
 
+ nthreads = xomp_get_num_threads(open_parallel=.True.)
+ fftalga = gs_ham%ngfft(7)/100
+ if (fftalga==FFT_SG.and.nthreads>1.and.ndat>1) then
+   ABI_ERROR("fftalg=1XX is not thread-safe, so it cannot be used in multi-threaded hamiltonian with nthreads>1 and ndat>1.")
+ end if
 
  ! Disabling multithreading for GPU variants (getghc_ompgpu is not thread-safe for now)
  !$omp parallel default (none) &

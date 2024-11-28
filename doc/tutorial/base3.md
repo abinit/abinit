@@ -178,7 +178,7 @@ at fixed [[acell]], fixed [[ecut]], is -8.8251 Ha.
     ABINIT never outputs the value of input variable [[ngkpt]], but instead uses [[kptrlatt]], a 3x3 matrix of integers.
     In the simplest case, with [[nshiftk]]=1, [[kptrlatt]] will simply be a diagonal matrix with diagonal values equal to the
     input [[ngkpt]]. However, if [[nshiftk]] is not 1, but the combination of [[ngkpt]] and [[shiftk]] allows ABINIT
-    to generate an homogeneous k point grid with different basis vercotr in reciprocal space, [[nshiftk]] might
+    to generate an homogeneous k point grid with different basis vectors in reciprocal space, [[nshiftk]] might
     be reduced to 1, and [[kptrlatt]] will not be a simple diagonal matrix. Nevertheless, both the input
     and the echoed grids are equivalent.
 
@@ -432,7 +432,7 @@ corresponding k point must belong to the grid used for self-consistent calculati
 However, this point with the highest occupied state is not known a priori.
 
 If this is a mandatory target of the electronic structure representation, the user has the choice.
-He/she can make his/her own post-treatment of the data contained in the GSR file.
+One can make their own post-treatment of the data contained in the GSR file.
 Alternatively, for the automatic generation of the correcly aligned band structure using AbiPy,
 the user should proceed with more steps: after the self-consistent calculation with a particular k point grid,
 the band structure at high symmetry points is scanned, the k point for which the top of the valence band is obtained

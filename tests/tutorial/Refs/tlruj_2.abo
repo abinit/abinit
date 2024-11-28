@@ -1,8 +1,8 @@
 
 .Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,18 +16,18 @@
 
 .Starting date : Fri 13 Sep 2024.
 - ( at 19h07 )
-  
+
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/tutorial_tlruj_1-tlruj_2-tlruj_3/tlruj_2.abi
 - output file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/tutorial_tlruj_1-tlruj_2-tlruj_3/tlruj_2.abo
 - root for input  files -> tlruj_2i
 - root for output files -> tlruj_2.o
 
-- inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ni.xml
-- inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ni.xml
-- inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/O.xml
+- inpspheads : Reading pseudopotential header in XML form from
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_paw_pbe_std/Ni.xml
+- inpspheads : Reading pseudopotential header in XML form from
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_paw_pbe_std/Ni.xml
+- inpspheads : Reading pseudopotential header in XML form from
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_paw_pbe_std/O.xml
  DATASET    1 : space group R-3 m (#166); Bravais hR (rhombohedral)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
@@ -307,9 +307,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.06006
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ni.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ni.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ni.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_paw_pbe_std/Ni.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_paw_pbe_std/Ni.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_paw_pbe_std/Ni.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 1.81432190
@@ -327,9 +327,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ni.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ni.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ni.xml
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_paw_pbe_std/Ni.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_paw_pbe_std/Ni.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_paw_pbe_std/Ni.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 1.81432190
@@ -347,9 +347,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/O.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/O.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/O.xml
+- pspini: atom type   3  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_paw_pbe_std/O.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_paw_pbe_std/O.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_paw_pbe_std/O.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.41465230
@@ -638,7 +638,7 @@ force_length_stats: {min:   0.00000000E+00, max:   6.65439841E-04, mean:   3.327
   -0.00033   0.05050  -0.00033  -0.00001   0.00287  -0.00001
   -0.00033  -0.00033   0.05050  -0.00001  -0.00001   0.00287
 
- ---------- DFT+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA ---------------------------------------------------
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
@@ -730,7 +730,7 @@ force_length_stats: {min:   0.00000000E+00, max:   6.65439841E-04, mean:   3.327
 
 
 
- ---------- calculate U, (J) start ---------- 
+ ---------- calculate U, (J) start ----------
 
  All pawujat  ok and equal to   1
  macro_uj=1 and nspden=2: standard determination of Hubbard U-parameter
@@ -741,7 +741,7 @@ force_length_stats: {min:   0.00000000E+00, max:   6.65439841E-04, mean:   3.327
 
  Info printed for perturbed atom:    1
 
-  Perturbations           Occupations 
+  Perturbations           Occupations
  --------------- -----------------------------
     alpha [eV]     Unscreened      Screened
  --------------- -----------------------------
@@ -768,7 +768,7 @@ See the LRUJ protocol for more information.
  URES       5    125    24.28780     9.44276     7.59891     7.35068
  URES       6    216    33.43200     9.47484     7.62472     7.37565
 
- ---------- calculate U, (J) end -------------- 
+ ---------- calculate U, (J) end --------------
 
 ================================================================================
 
@@ -1163,7 +1163,7 @@ force_length_stats: {min:   0.00000000E+00, max:   4.45603314E-04, mean:   2.228
   -0.00033   0.05051  -0.00033  -0.00001   0.00287  -0.00001
   -0.00033  -0.00033   0.05051  -0.00001  -0.00001   0.00287
 
- ---------- DFT+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA ---------------------------------------------------
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
@@ -1255,7 +1255,7 @@ force_length_stats: {min:   0.00000000E+00, max:   4.45603314E-04, mean:   2.228
 
 
 
- ---------- calculate U, (J) start ---------- 
+ ---------- calculate U, (J) start ----------
 
  All pawujat  ok and equal to   1
  macro_uj=1 and nspden=2: standard determination of Hubbard U-parameter
@@ -1266,7 +1266,7 @@ force_length_stats: {min:   0.00000000E+00, max:   4.45603314E-04, mean:   2.228
 
  Info printed for perturbed atom:    1
 
-  Perturbations           Occupations 
+  Perturbations           Occupations
  --------------- -----------------------------
     alpha [eV]     Unscreened      Screened
  --------------- -----------------------------
@@ -1293,7 +1293,7 @@ See the LRUJ protocol for more information.
  URES       5    125    24.28780     9.32516     7.50427     7.25913
  URES       6    216    33.43200     9.35684     7.52976     7.28379
 
- ---------- calculate U, (J) end -------------- 
+ ---------- calculate U, (J) end --------------
 
 ================================================================================
 
@@ -1686,7 +1686,7 @@ force_length_stats: {min:   4.00889160E-20, max:   2.25569967E-04, mean:   1.127
   -0.00033   0.05052  -0.00033  -0.00001   0.00287  -0.00001
   -0.00033  -0.00033   0.05052  -0.00001  -0.00001   0.00287
 
- ---------- DFT+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA ---------------------------------------------------
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
@@ -1778,7 +1778,7 @@ force_length_stats: {min:   4.00889160E-20, max:   2.25569967E-04, mean:   1.127
 
 
 
- ---------- calculate U, (J) start ---------- 
+ ---------- calculate U, (J) start ----------
 
  All pawujat  ok and equal to   1
  macro_uj=1 and nspden=2: standard determination of Hubbard U-parameter
@@ -1789,7 +1789,7 @@ force_length_stats: {min:   4.00889160E-20, max:   2.25569967E-04, mean:   1.127
 
  Info printed for perturbed atom:    1
 
-  Perturbations           Occupations 
+  Perturbations           Occupations
  --------------- -----------------------------
     alpha [eV]     Unscreened      Screened
  --------------- -----------------------------
@@ -1816,7 +1816,7 @@ See the LRUJ protocol for more information.
  URES       5    125    24.28780     9.24546     7.44013     7.19708
  URES       6    216    33.43200     9.27686     7.46540     7.22153
 
- ---------- calculate U, (J) end -------------- 
+ ---------- calculate U, (J) end --------------
 
 ================================================================================
 
@@ -2211,7 +2211,7 @@ force_length_stats: {min:   2.24743238E-20, max:   2.29500421E-04, mean:   1.147
   -0.00033   0.05053  -0.00033  -0.00001   0.00287  -0.00001
   -0.00033  -0.00033   0.05053  -0.00001  -0.00001   0.00287
 
- ---------- DFT+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA ---------------------------------------------------
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
@@ -2303,7 +2303,7 @@ force_length_stats: {min:   2.24743238E-20, max:   2.29500421E-04, mean:   1.147
 
 
 
- ---------- calculate U, (J) start ---------- 
+ ---------- calculate U, (J) start ----------
 
  All pawujat  ok and equal to   1
  macro_uj=1 and nspden=2: standard determination of Hubbard U-parameter
@@ -2314,7 +2314,7 @@ force_length_stats: {min:   2.24743238E-20, max:   2.29500421E-04, mean:   1.147
 
  Info printed for perturbed atom:    1
 
-  Perturbations           Occupations 
+  Perturbations           Occupations
  --------------- -----------------------------
     alpha [eV]     Unscreened      Screened
  --------------- -----------------------------
@@ -2341,7 +2341,7 @@ See the LRUJ protocol for more information.
  URES       5    125    24.28780     9.14239     7.35719     7.11686
  URES       6    216    33.43200     9.17345     7.38218     7.14103
 
- ---------- calculate U, (J) end -------------- 
+ ---------- calculate U, (J) end --------------
 
 ================================================================================
 
@@ -2736,7 +2736,7 @@ force_length_stats: {min:   3.83323354E-20, max:   4.60337496E-04, mean:   2.301
   -0.00033   0.05053  -0.00033  -0.00001   0.00287  -0.00001
   -0.00033  -0.00033   0.05053  -0.00001  -0.00001   0.00287
 
- ---------- DFT+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA ---------------------------------------------------
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
@@ -2828,7 +2828,7 @@ force_length_stats: {min:   3.83323354E-20, max:   4.60337496E-04, mean:   2.301
 
 
 
- ---------- calculate U, (J) start ---------- 
+ ---------- calculate U, (J) start ----------
 
  All pawujat  ok and equal to   1
  macro_uj=1 and nspden=2: standard determination of Hubbard U-parameter
@@ -2839,7 +2839,7 @@ force_length_stats: {min:   3.83323354E-20, max:   4.60337496E-04, mean:   2.301
 
  Info printed for perturbed atom:    1
 
-  Perturbations           Occupations 
+  Perturbations           Occupations
  --------------- -----------------------------
     alpha [eV]     Unscreened      Screened
  --------------- -----------------------------
@@ -2866,7 +2866,7 @@ See the LRUJ protocol for more information.
  URES       5    125    24.28780     9.10706     7.32876     7.08935
  URES       6    216    33.43200     9.13800     7.35365     7.11343
 
- ---------- calculate U, (J) end -------------- 
+ ---------- calculate U, (J) end --------------
 
 ================================================================================
 
@@ -2963,7 +2963,7 @@ total_energy_dc_eV  : -9.89621111421267E+03
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      7.8800000000E+00  7.8800000000E+00  7.8800000000E+00 Bohr
               amu      5.86900000E+01  5.86900000E+01  1.59994000E+01
@@ -3189,7 +3189,7 @@ P           mkmem          10
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -3201,12 +3201,12 @@ P           mkmem          10
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -3224,7 +3224,7 @@ P           mkmem          10
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016

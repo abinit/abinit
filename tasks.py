@@ -29,8 +29,8 @@ from tests.pymods.termcolor import cprint
 ABINIT_ROOTDIR = os.path.dirname(__file__)
 ABINIT_SRCDIR = os.path.join(ABINIT_ROOTDIR, "src")
 
-# Set ABI_PSPDIR env variable to point to the absolute path of Psps_for_tests
-#os.environ["ABI_PSPDIR"] = os.path.abspath(os.path.join(ABINIT_ROOTDIR, "Psps_for_tests"))
+# Set ABI_PSPDIR env variable to point to the absolute path of Pspdir
+#os.environ["ABI_PSPDIR"] = os.path.abspath(os.path.join(ABINIT_ROOTDIR, "Pspdir"))
 #print("ABI_PSPDIR:", os.environ["ABI_PSPDIR"])
 
 ALL_BINARIES = [
@@ -360,7 +360,7 @@ def env(ctx):
     cprint("\nExecute the following lines in the shell to set the env:\n", color="green")
     top = find_top_build_tree(".", with_abinit=True)
     binpath = os.path.join(top, "src", "98_main")
-    print(f"export ABI_PSPDIR={ABINIT_ROOTDIR}/tests/Psps_for_tests")
+    print(f"export ABI_PSPDIR={ABINIT_ROOTDIR}/tests/Pspdir")
     print(f"export PATH={binpath}:$PATH")
 
 

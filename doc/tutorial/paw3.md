@@ -78,7 +78,7 @@ PAW datasets. To exactly reproduce the results in this tutorial, you will
 need:
 
   * The `ATOMPAW` code for generating PAW datasets (see tutorial [PAW2](/tutorial/paw2), section **2.**).
-  
+
 ```sh
 	   cd atompaw-4.x.y.z
 	   mkdir build
@@ -86,7 +86,7 @@ need:
 	   ../configure
 	   make
 ```
-  
+
   * the `Elk` code (this tutorial was designed with v1.2.15),
     available [here](https://sourceforge.net/projects/elk/files/).
     We will use the `Elk` code itself, as well as its `eos` (equation-of-state) utility,
@@ -173,7 +173,7 @@ input variable, and perform ground state and band structure calculations for
 each value of `ecut`. This is thus the internal `ABINIT` convergence study. Any
 dataset is expected to converge to a result sooner or later, but that does not
 mean that the final result is accurate, unless the dataset is good. The goal
-is of course to generate a dataset which both converges quickly and is very accurate.  
+is of course to generate a dataset which both converges quickly and is very accurate.
 
 {% dialog tutorial/paw3_assets/inputs/ab_C_test.abi %}
 
@@ -192,7 +192,7 @@ called `outputs/`. Make sure to create it before you start the `ABINIT` run by w
     mkdir outputs
 
 !!! important
-    You may have to change the path to reach the Psps_for_tests repository. For this, modify the varaible `pp_dirpath` in the input file. 
+    You may have to change the path to reach the Pspdir repository. For this, modify the variable `pp_dirpath` in the input file.
 
 You can now run the `ABINIT` tests (maybe even in a separate new `xterm` window), by executing:
 
@@ -351,7 +351,7 @@ The outputs should be something like this:
      Unit cell volume ucvol=  7.8608000E+01 bohr^3
      Unit cell volume ucvol=  8.2127250E+01 bohr^3
      Unit cell volume ucvol=  8.5750000E+01 bohr^3
-     ...  
+     ...
            etotal1    -1.1461991605E+01
            etotal2    -1.1480508012E+01
            etotal3    -1.1494820912E+01
@@ -400,12 +400,12 @@ file `PARAM.OUT` contains the information we need:
 
      (Default units are atomic: Hartree, Bohr etc.)
 
-     V0                =            75.50730327    
-     E0                =           -11.51817590    
+     V0                =            75.50730327
+     E0                =           -11.51817590
      B0                =           0.1564766690E-01
-     B0'               =            3.685291965    
+     B0'               =            3.685291965
 
-     B0 (GPa)          =            460.3701770  
+     B0 (GPa)          =            460.3701770
 
 
 This tells us the equilibrium volume and bulk modulus. The volume of our
@@ -835,7 +835,7 @@ convergence like this (again, the values to the left are just there to help):
       etotal71 -1.1523525440E+01   -   0.01 mHa (35 Ha)
       etotal81 -1.1523552361E+01   -   0.03 mHa (40 Ha)
       etotal91 -1.1523572404E+01   -   0.02 mHa (45 Ha)
- 
+
 
 This dataset already seems to be converged to about 1 mHa at an `ecut` of 15 Ha,
 so it is much more efficient. A comparison of bands (in units of eV) between
@@ -867,7 +867,7 @@ in `ab_C_equi.abi`, you should get data for an `eos.in` file:
      7.8608000E+01  -1.1522330567E+01
      8.2127250E+01  -1.1518796247E+01
      8.5750000E+01  -1.1513430193E+01
-     
+
 
 And when fed to `eos`, this gives us the equilibrium data:
 
@@ -906,7 +906,7 @@ should be something like this:
      #        nvals:   174
      # average diff:     0.016247  eV
      # minimum diff:    -0.013699  eV
-     # maximum diff:     0.117064  eV 
+     # maximum diff:     0.117064  eV
      ...
 
 Which shows a precision, on average, of slightly better than 0.01 eV for both
@@ -998,22 +998,22 @@ structure to. There is one more thing we need to check, and that is the Fermi en
 
      grep 'Fermi  ' INFO.OUT
 
-     Fermi                       :     0.116185305134    
-     Fermi                       :     0.115496524671    
-     Fermi                       :     0.122186414492    
-     Fermi                       :     0.128341839155    
-     Fermi                       :     0.132281493053    
-     Fermi                       :     0.133819140456    
-     Fermi                       :     0.134308473303    
-     Fermi                       :     0.134328785350    
-     Fermi                       :     0.134347853104    
-     Fermi                       :     0.134347939064    
-     Fermi                       :     0.134347635069    
-     Fermi                       :     0.134347477436    
-     Fermi                       :     0.134347453635    
-     Fermi                       :     0.134347448126    
-     Fermi                       :     0.134347446032    
-     Fermi                       :     0.134347446149    
+     Fermi                       :     0.116185305134
+     Fermi                       :     0.115496524671
+     Fermi                       :     0.122186414492
+     Fermi                       :     0.128341839155
+     Fermi                       :     0.132281493053
+     Fermi                       :     0.133819140456
+     Fermi                       :     0.134308473303
+     Fermi                       :     0.134328785350
+     Fermi                       :     0.134347853104
+     Fermi                       :     0.134347939064
+     Fermi                       :     0.134347635069
+     Fermi                       :     0.134347477436
+     Fermi                       :     0.134347453635
+     Fermi                       :     0.134347448126
+     Fermi                       :     0.134347446032
+     Fermi                       :     0.134347446149
 
 
 The last one is the Fermi energy at convergence. We will need this later when
@@ -1092,13 +1092,13 @@ Upon using the eos utility you will get standard type of outputs in `PARAM.OUT`:
 
      (Default units are atomic: Hartree, Bohr etc.)
 
-      V0                =            291.6029247    
-      E0                =           -399.0449584    
+      V0                =            291.6029247
+      E0                =           -399.0449584
       B0                =           0.1364455738E-02
-      B0'               =            4.304295809    
+      B0'               =            4.304295809
 
-      B0 (GPa)          =            40.14366703    
- 
+      B0 (GPa)          =            40.14366703
+
 Now we have to translate this in terms of the lattice parameters. The
 equilibrium scale factor is given by:
 $scale = (\frac{V_0}{V_1})^{\frac{1}{3}} = (\frac{291.6029247}{313.6208908})^{\frac{1}{3}} = 0.9760280459$
@@ -1135,7 +1135,7 @@ and others like it to get a feel for the quality of this dataset.
 Generate the `ABINIT` dataset file, and make sure it's given as:
 `./Mg_atompaw/Mg_LDA-PW-paw.xml`, then go to the subdirectory for the `ABINIT` test,
 and copy these files to it: [ab_Mg_test.abi](paw3_assets/inputs/ab_Mg_test.abi),
-and [ab_Mg_equi.abi](paw3_assets/inputs/ab_Mg_equi.abi). 
+and [ab_Mg_equi.abi](paw3_assets/inputs/ab_Mg_equi.abi).
 The file for testing the convergence has already been set up so that the smearing
 strategy is equivalent to the `Elk` one, as evidenced by the lines:
 
@@ -1199,7 +1199,7 @@ Which means that we are on average accurate to about 0.03 eV. If you pipe the
 output to a file `bands_abinit_elk.dat`, and go into gnuplot and use the script `plot_Mg_bands.p`:
 
      gnuplot> load 'plot_Mg_bands.p'
-     
+
 You should get a plot that looks something like this:
 
 ![Comparison of Mg `ABINIT` and Elk bands alignet at Fermi level](paw3_assets/images/band_abinit_elk_III.png)
@@ -1258,5 +1258,5 @@ calculations, here is a list of a few:
   * As a rule of thumb, a PAW dataset for GW should have at least three projectors per state, if not more.
 
   * A particularly sensitive thing is the quality of the expansion of the pseudised plane-wave part in terms of the on-site basis.
-     This can be checked by using the density of states (DOS), as described in the 
+     This can be checked by using the density of states (DOS), as described in the
      [first PAW tutorial](/tutorial/paw1).

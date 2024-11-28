@@ -371,7 +371,7 @@ subroutine pawxc_size_dvxc_local()
    else if (ixc<0) then
      if (libxc_functionals_has_k3xc() then
        if (.not.need_gradient) nd2vxc_=3*min(nspden,2)-2
-     end if  
+     end if
    end if
  end if
 
@@ -4000,7 +4000,7 @@ end subroutine pawxcsphpositron
 !!  == For the TB09 XC functional (modified Becke-Johnson)
 !!    [grho1_over_rho1]=Integral of |Grad(rho^1)|/rho^1 over the augmentation region
 !!                      Used to compute the c parameter of the TB09 XC functional
-!!    WARNING: NOT YET IMPLEMENTED! 
+!!    WARNING: NOT YET IMPLEMENTED!
 !!
 !! NOTES
 !!  Content of Kxc array:
@@ -5793,7 +5793,8 @@ subroutine pawxc_drivexc_abinit()
 
 ! *************************************************************************
 
- test_args=(present(dvxc).and.present(d2vxc))
+ test_args=present(dvxc)
+ if (nd2vxc>0) test_args=(test_args.and.present(d2vxc))
  if (usegradient==1) test_args=(test_args.and.present(grho2).and.present(vxcgrho))
  if (uselaplacian==1) test_args=(test_args.and.present(lrho).and.present(vxclrho))
  if (usekden==1) test_args=(test_args.and.present(tau).and.present(vxctau))

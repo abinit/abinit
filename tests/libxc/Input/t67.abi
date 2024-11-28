@@ -3,17 +3,17 @@
  ndtset    3
 
 #DATASET 1  PBE (because the PAW pseudopotential for N is with PBE XC)
- xcart1 -0.550  0 0  0.550 0 0 Angstrom   
+ xcart1 -0.550  0 0  0.550 0 0 Angstrom
 
 #DATASET 2 PBE0
  ixc2    41
  getwfk2   1
- xcart2 -0.5415  0 0  0.5415 0 0 Angstrom   
+ xcart2 -0.5415  0 0  0.5415 0 0 Angstrom
 
 #DATASET 3 HSE06
  ixc3    -428
  getwfk3   2
- xcart3 -0.5415  0 0  0.5415 0 0 Angstrom   
+ xcart3 -0.5415  0 0  0.5415 0 0 Angstrom
 
 #Common
  acell 5  2*4 Angstrom
@@ -21,7 +21,7 @@
  ecut 18  pawecutdg 35.0
  ionmov 2
  ntime 15
- tolrff 0.01 
+ tolrff 0.01
  tolmxf 2.0d-4  # For testing. Should be more stringent.
 
  kptopt 1
@@ -32,27 +32,27 @@
  nband 5
  nbdbuf 0
 
- nstep 6 
+ nstep 6
  ntypat  1
  typat  1 1
  znucl  7
 
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "Pseudodojo_paw_pbe_standard/N.xml"
+ pseudos "Psdj_paw_pbe_std/N.xml"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t67.abo, tolnlines = 5, tolabs = 1.100e-3, tolrel = 3.000e-01, fld_options = -easy
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = X. Gonze
-#%% keywords = 
-#%% description = 
+#%% keywords =
+#%% description =
 #%%   N2 molecule non-spin-polarized, in a big box.
 #%%   PAW : first PBE, then PBE0, then HSE06. Interatomic distance optimization.
 #%%   Test the geometry convergence in the hybrid functional case
