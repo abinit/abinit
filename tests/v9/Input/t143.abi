@@ -1,4 +1,4 @@
-# test DDK and orbital magnetism response with nuclear dipole moment 
+# test DDK and orbital magnetism response with nuclear dipole moment
 # metallic Na
 # also tests reading of Lamb shielding from PAW data set file
 #
@@ -18,7 +18,7 @@ nucdipmom
 1.0 0.0 0.0
 
 # metallic occupancy with empty bands
-occopt 7 
+occopt 7
 nband 8
 
 ndtset 2
@@ -60,19 +60,19 @@ usexcnhat 0
 paral_atom 0
 paral_kgb 0
 
-acell    3*8.12582223  
+acell    3*8.12582223
 
-rprim   -0.500000000000000   0.500000000000000   0.500000000000000 
-         0.500000000000000  -0.500000000000000   0.500000000000000 
-         0.500000000000000   0.500000000000000  -0.500000000000000 
-       
-natom    1  
-ntypat   1  
-typat    1  
-znucl    11  
-xred     0.000000000000000   0.000000000000000   0.000000000000000 
+rprim   -0.500000000000000   0.500000000000000   0.500000000000000
+         0.500000000000000  -0.500000000000000   0.500000000000000
+         0.500000000000000   0.500000000000000  -0.500000000000000
 
-pp_dirpath="$ABI_PSPDIR/Pseudodojo_paw_pbe_standard/"
+natom    1
+ntypat   1
+typat    1
+znucl    11
+xred     0.000000000000000   0.000000000000000   0.000000000000000
+
+pp_dirpath="$ABI_PSPDIR/Psdj_paw_pbe_std/"
 pseudos="Na.xml"
 
 ##############################################################
@@ -82,13 +82,13 @@ pseudos="Na.xml"
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t143.abo, tolnlines= 90, tolabs=  1.5E-5, tolrel= 1.0
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = J. Zwanziger
 #%% keywords = PAW
-#%% description = Orbital magnetism in metallic sodium 
+#%% description = Orbital magnetism in metallic sodium
 #%% topics = NMR, MagField
 #%%<END TEST_INFO>

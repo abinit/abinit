@@ -37,11 +37,9 @@ This tutorial should take about 2 hours.
 For this tutorial, one needs a working directory.
 So, you should create a *Work* subdirectory inside $ABI_TESTS/tutorial, e.g. with the commands:
 
-```sh
-cd $ABI_TESTS/tutorial/Input
-mkdir Work   # ~abinit/tests/tutorial/Input/Work
-cd Work
-```
+    cd $ABI_TESTS/tutorial/Input
+    mkdir Work   # ~abinit/tests/tutorial/Input/Work
+    cd Work
 
 We will do most of the actions of this tutorial in this working directory.
 Let us now run the code ...
@@ -65,19 +63,17 @@ Wait a few seconds ... it's done!
 You can look at the content of the *Work* directory with the **ls** command.
 You should get something like:
 
-```sh
-ls
-log           tbase1_1o_DDB	    tbase1_1o_EIG     tbase1_1o_OUT.nc
-tbase1_1.abi  tbase1_1o_DEN	    tbase1_1o_EIG.nc  tbase1_1o_WFK
-tbase1_1.abo  tbase1_1o_EBANDS.agr  tbase1_1o_GSR.nc
-```
+    ls
+    log           tbase1_1o_DDB	    tbase1_1o_EIG     tbase1_1o_OUT.nc
+    tbase1_1.abi  tbase1_1o_DEN	    tbase1_1o_EIG.nc  tbase1_1o_WFK
+    tbase1_1.abo  tbase1_1o_EBANDS.agr  tbase1_1o_GSR.nc
 
 Different output files have been created, including a *log* file and the output file *tbase1_1.abo*.
 To check that everything is correct, you can make a diff of
 *tbase1_1.abo* with the reference file *$ABI_TESTS/tutorial/Refs/tbase1_1.abo*
 
-```sh
-diff tbase1_1.abo ../../Refs/tbase1_1.abo | less
+``` sh
+    diff tbase1_1.abo ../../Refs/tbase1_1.abo | less
 ```
 
 That reference file uses slightly different file names.
@@ -104,11 +100,11 @@ files, slightly different numerical results, or timing differences, e.g.:
 > - input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_serial/trunk_beauty/tests/TestBot_MPI1/tutorial_tbase1_1/tbase1_1.abi
 > - output file    -> tbase1_1.abo
 117,118c117,118
-< - pspini: atom type   1  psp file is /Users/gonze/_Research/ABINIT_git/beauty/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/H.psp8
-< - pspatm: opening atomic psp file    /Users/gonze/_Research/ABINIT_git/beauty/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/H.psp8
+< - pspini: atom type   1  psp file is /Users/gonze/_Research/ABINIT_git/beauty/tests/Pspdir/Pseudodojo_nc_sr_04_pw_standard_psp8/H.psp8
+< - pspatm: opening atomic psp file    /Users/gonze/_Research/ABINIT_git/beauty/tests/Pspdir/Pseudodojo_nc_sr_04_pw_standard_psp8/H.psp8
 ---
-> - pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_beauty/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/H.psp8
-> - pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_beauty/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/H.psp8
+> - pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_beauty/tests/Pspdir/Pseudodojo_nc_sr_04_pw_standard_psp8/H.psp8
+> - pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_beauty/tests/Pspdir/Pseudodojo_nc_sr_04_pw_standard_psp8/H.psp8
 216,217c216,217
 <     1     -1.38336201933863    -0.00000000000000    -0.00000000000000
 <     2      1.38336201933863    -0.00000000000000    -0.00000000000000

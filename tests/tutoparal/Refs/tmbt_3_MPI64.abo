@@ -1,8 +1,8 @@
 
-.Version 9.3.4 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu10.2 computer) 
+.Version 9.3.4 of ABINIT
+.(MPI version, prepared for a x86_64_linux_gnu10.2 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Sat  9 Jan 2021.
 - ( at 07h06 )
-  
+
 - input  file    -> /home/buildbot/ABINIT/scope_gnu_10.2_s64/trunk_beauty/tests/TestBot_MPI64/tutoparal_tmbt_1_MPI64-tmbt_2_MPI64-tmbt_3_MPI64/tmbt_3.abi
 - output file    -> tmbt_3_MPI64.abo
 - root for input  files -> tmbt_3_MPI64i
@@ -43,10 +43,10 @@ _ WF disk file :     54.240 Mbytes ; DEN or POT disk file :      1.337 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
+- outvars: echo of selected default values
 -   iomode0 =  3 , fftalg0 =312 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -155,7 +155,7 @@ electrons: {nelect:   4.80000000E+01, charge:   0.00000000E+00, occopt:   1.0000
 meta: {optdriver: 3, gwcalctyp: 2, }
 ...
 
- SCREENING: Calculation of the susceptibility and dielectric matrices 
+ SCREENING: Calculation of the susceptibility and dielectric matrices
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
@@ -169,8 +169,8 @@ meta: {optdriver: 3, gwcalctyp: 2, }
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  1.20000000E+02 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_s64/trunk_beauty/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Si.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_s64/trunk_beauty/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Si.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_s64/trunk_beauty/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/Si.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_s64/trunk_beauty/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/Si.psp8
 - Si    ONCVPSP-3.3.0  r_core=   1.60303   1.72197   1.91712
 - 14.00000   4.00000    171102                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -184,8 +184,8 @@ meta: {optdriver: 3, gwcalctyp: 2, }
              2   -2.124804   -0.444604
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_s64/trunk_beauty/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/O.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_s64/trunk_beauty/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/O.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_s64/trunk_beauty/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/O.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_s64/trunk_beauty/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/O.psp8
 - O     ONCVPSP-3.3.0  r_core=   1.35509   1.45563   1.35509
 -  8.00000   6.00000    171101                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -204,7 +204,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
 
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :     9
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.02083
      2)     2.50000000E-01  0.00000000E+00  0.00000000E+00       0.12500
@@ -216,13 +216,13 @@ meta: {optdriver: 3, gwcalctyp: 2, }
      8)    -2.50000000E-01  0.00000000E+00  3.33333333E-01       0.12500
      9)     2.50000000E-01  2.50000000E-01  3.33333333E-01       0.25000
 
- Together with  6 symmetry operations and time-reversal symmetry 
+ Together with  6 symmetry operations and time-reversal symmetry
  yields    48 points in the full Brillouin Zone.
 
 
  ==== Q-mesh for the screening function ====
  Number of points in the irreducible wedge :     9
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.02083
      2)     2.50000000E-01  0.00000000E+00  0.00000000E+00       0.12500
@@ -234,7 +234,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
      8)    -2.50000000E-01  0.00000000E+00  3.33333333E-01       0.12500
      9)     2.50000000E-01  2.50000000E-01  3.33333333E-01       0.25000
 
- Together with  6 symmetry operations and time-reversal symmetry 
+ Together with  6 symmetry operations and time-reversal symmetry
  yields    48 points in the full Brillouin Zone.
 
 
@@ -242,7 +242,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
           total number of points  =        46080
 
 
-- screening: taking advantage of time-reversal symmetry 
+- screening: taking advantage of time-reversal symmetry
 - Maximum band index for partially occupied states nbvw = 24
 - Remaining bands to be divided among processors   nbcw = 26
 - Number of bands treated by each node ~0
@@ -410,7 +410,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
   dielectric constant without local fields =   2.4419
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     21.24  [%]
-  Heads and wings of the symmetrical epsilon^-1(G,G') 
+  Heads and wings of the symmetrical epsilon^-1(G,G')
 
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
@@ -1656,7 +1656,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      9.2843000799E+00  9.2843000799E+00  1.0213270550E+01 Bohr
               amu      2.80855000E+01  1.59994000E+01
@@ -1760,8 +1760,8 @@ P           mkmem           1
 
 ================================================================================
 
- Test the timer : 
-  a combined call timab(*,1,tsec) + timab(*,2,tsec) is 
+ Test the timer :
+  a combined call timab(*,1,tsec) + timab(*,2,tsec) is
 - CPU time =    7.5392E-07 sec,    Wall time =    7.5388E-07 sec
 
 - Total cpu        time (s,m,h):      15413.3      256.89      4.281
@@ -1791,7 +1791,7 @@ P           mkmem           1
 - subtotal                       2.256   0.0      2.256   0.0                                  1.00       1.00
 
 - For major independent code sections, cpu and wall times (sec),
-- as well as % of the total time and number of calls 
+- as well as % of the total time and number of calls
 
 -<BEGIN_TIMER mpi_nprocs = 64, omp_nthreads = 1, mpi_rank = world>
 - cpu_time =       15413.3, wall_time =       15413.5
@@ -1817,7 +1817,7 @@ P           mkmem           1
 
  Partitioning of abinit
 - abinit                     15413.331 100.0  15413.477 100.0             64                   1.00       1.00
- 
+
 - indefo+macroin+invars2m        4.203   0.0      4.203   0.0             64                   1.00       1.00
 - abinit(4)                      6.494   0.0      6.538   0.0             64                   0.99       0.99
 - driver                     15394.671  99.9  15394.772  99.9             64                   1.00       1.00
@@ -1827,14 +1827,14 @@ P           mkmem           1
 
  Partitioning of driver
 - driver                     15394.671  99.9  15394.772  99.9             64                   1.00       1.00
- 
+
 - screening                  15391.907  99.9  15392.008  99.9             64                   1.00       1.00
 
 - subtotal                   15394.671  99.9  15394.772  99.9                                  1.00       1.00
 
  Partitioning of screening
 - screening                  15391.907  99.9  15392.008  99.9             64                   1.00       1.00
- 
+
 - screening(init1)              69.480   0.5     69.477   0.5             64                   1.00       1.00
 - screening(wfs)                34.267   0.2     34.281   0.2             64                   1.00       1.00
 - screening(density)            11.886   0.1     11.887   0.1             64                   1.00       1.00
@@ -1848,11 +1848,11 @@ P           mkmem           1
 
  Partitioning of  fourdp (upwards partitioning)
 - fourdp                         1.695   0.0      1.695   0.0            320                   1.00       1.00
- 
+
 
 - subtotal                       1.695   0.0      1.695   0.0                                  1.00       1.00
 -
--Synchronisation (=leave_test) and MPI calls 
+-Synchronisation (=leave_test) and MPI calls
 - communic.MPI                   0.111   0.0      0.111   0.0             64                   1.00       1.00
 -
 - subtotal                       0.000   0.0      0.000   0.0                                  0.00       0.00
@@ -1863,7 +1863,7 @@ P           mkmem           1
 - cchi0                      10679.419  69.3  10679.182  69.3            512                   1.00       1.00
 
 
- Detailed analysis of some time consuming routines 
+ Detailed analysis of some time consuming routines
                                   tcpu    ncalls  tcpu/ncalls    ndata tcpu/ncalls/ndata
                                  (sec)                (msec)              (microsec)
 - fourwf%(pot)                   0.000         0
@@ -1914,7 +1914,7 @@ P           mkmem           1
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -1931,12 +1931,12 @@ P           mkmem           1
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -1954,7 +1954,7 @@ P           mkmem           1
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016

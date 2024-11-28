@@ -1,8 +1,8 @@
 
 .Version 10.1.4.2 of ABINIT, released Jun 2024.
-.(MPI version, prepared for a aarch64_darwin22.6.0_gnu12.2 computer) 
+.(MPI version, prepared for a aarch64_darwin22.6.0_gnu12.2 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Sat 17 Aug 2024.
 - ( at 14h02 )
-  
+
 - input  file    -> t04.abi
 - output file    -> t04.abo
 - root for input  files -> t04i
@@ -183,11 +183,11 @@ meta: {optdriver: 7, eph_task: 17, }
 
 ================================================================================
 
- Dielectric Tensor and Effective Charges 
+ Dielectric Tensor and Effective Charges
 
 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
-   and impose the ASR on the effective charges 
+   and impose the ASR on the effective charges
 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
@@ -203,7 +203,7 @@ meta: {optdriver: 7, eph_task: 17, }
        3               2       -0.000000        0.000000
        3               3       -0.085945        0.000000
 
- Effective charge tensors after 
+ Effective charge tensors after
  imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
@@ -224,8 +224,8 @@ meta: {optdriver: 7, eph_task: 17, }
  The interatomic forces have been obtained
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /Users/giantomassi/git_repos/abinit/tests/Psps_for_tests/O.psp8
-- pspatm: opening atomic psp file    /Users/giantomassi/git_repos/abinit/tests/Psps_for_tests/O.psp8
+- pspini: atom type   1  psp file is /Users/giantomassi/git_repos/abinit/tests/Pspdir/O.psp8
+- pspatm: opening atomic psp file    /Users/giantomassi/git_repos/abinit/tests/Pspdir/O.psp8
 - O     ONCVPSP  r_core=  1.36  1.46  1.26
 -  8.00000   6.00000    151103                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -239,8 +239,8 @@ meta: {optdriver: 7, eph_task: 17, }
              2   -4.371486
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /Users/giantomassi/git_repos/abinit/tests/Psps_for_tests/Mg-sp-gw.psp8
-- pspatm: opening atomic psp file    /Users/giantomassi/git_repos/abinit/tests/Psps_for_tests/Mg-sp-gw.psp8
+- pspini: atom type   2  psp file is /Users/giantomassi/git_repos/abinit/tests/Pspdir/Mg-sp-gw.psp8
+- pspatm: opening atomic psp file    /Users/giantomassi/git_repos/abinit/tests/Pspdir/Mg-sp-gw.psp8
 - Mg    ONCVPSP  r_core=  1.16  1.56
 - 12.00000  10.00000    150902                znucl, zion, pspdat
     8   11    1    4       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -289,7 +289,7 @@ P Number of CPUs for parallelism over k-points: 1
      1)      0.000010    0.000020    0.000030
  Reading KS GS potential for Sternheimer from: MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_POT.nc
  DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
- 
+
  gstore_completed: 1
  gstore_done_qbz_spin: 1
  gqk%nb: 9
@@ -466,7 +466,7 @@ P Number of CPUs for parallelism over k-points: 1
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      1.0000000000E+00  1.0000000000E+00  1.0000000000E+00 Bohr
               amu      1.59994000E+01  2.43050000E+01
@@ -573,7 +573,7 @@ P           mkmem           8
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -590,12 +590,12 @@ P           mkmem           8
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -613,7 +613,7 @@ P           mkmem           8
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -628,7 +628,7 @@ P           mkmem           8
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009

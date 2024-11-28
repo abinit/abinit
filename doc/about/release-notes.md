@@ -31,6 +31,9 @@ Xavier
 
 By M. Torrent (MR1069)
 
+**A.2** Renaming tests/Psps_for_tests to tests/Pspdir
+
+By X. Gonze (fc5345534a and subsequent commits)
 
 * * *
 
@@ -78,7 +81,7 @@ See tests: [[test:gwr_07]], [[test:gwr_08]], [[test:gwr_09]], [[test:gwr_10]] an
 
 By M. Giantomassi (MR 1006) and F. Bruneval (MR1024).
 
-**B.4** Speed-up of the calculation (PAW as well as norm-conserving), thanks to cprj_in_memory. 
+**B.4** Speed-up of the calculation (PAW as well as norm-conserving), thanks to cprj_in_memory.
 
 The coefficients of the wavefunctions giving the in-sphere contribution, denoted "cprj", can now be stored in memory,
 thanks to the input variable [[cprj_in_memory]].
@@ -88,7 +91,7 @@ There are many tests of this functionality, [[test:v10_10]] to [[test:v10_19]], 
 However, as usual, the users are advised to check for themselves the results from turning on this new implementation (still mentioned as being "in development").
 
 Many parts are now computed with matrix-matrix multiplications, done with BLAS routines ("gemm").
-As a consequence, the efficiency of the implementation strongly depends on the BLAS library, which has to be multi-threaded if used with OpenMP. 
+As a consequence, the efficiency of the implementation strongly depends on the BLAS library, which has to be multi-threaded if used with OpenMP.
 
 Available only for the ground state. See the other limitations in the documentation of [[cprj_in_memory]].
 
@@ -134,7 +137,7 @@ By A. Blanchet (MR1013).
 They cover the basic functionalities of ABINIT, and the detection of failures is modified and made more robust.
 There should not be false failures due to tight tolerances.
 So, this should be the ideal set of tests to be executed after a new installation.
-Use "runtests.py -k MINIMAL". Also, "make check-local" and "make check-am" trigger this suite. 
+Use "runtests.py -k MINIMAL". Also, "make check-local" and "make check-am" trigger this suite.
 
 By M. Verstrate, M. Torrent and X. Gonze (MR1035, MR1041)
 
@@ -222,7 +225,7 @@ By J.Zwanziger (MR993, MR1016, MR1051, MR1052)
 
 This includes the rework of [[istwfk]]=2 with xg_tools (both CPU and GPU) and the extension of [[istwfk]]>2 to lobpcg2 and chebfi2
 (but works only with DFTI - the FFT from MKL).
-Tested in [[test:v10_03]], [[test:v10_04]], [[test:paral_44]] and [[test:paral_45]] for DFTI. 
+Tested in [[test:v10_03]], [[test:v10_04]], [[test:paral_44]] and [[test:paral_45]] for DFTI.
 Same inputs are tested without DFTI in [[test:v10_05]], [[test:v10_06]], [[test:paral_46]] and [[test:paral_47]], but they use only [[istwfk]]=1 and 2.
 The Chebicheff filtering algorithm has been generalized to PAW with Spin-Orbit Coupling.
 See [[test:paral_44]] to [[test:paral_47]], as well as [[test:v10_03]] to [[test:v10_06]].
@@ -389,7 +392,7 @@ outbsd routine by copying the eig2nkq array into eig2nkq_tmp in the eig2tot subr
 When the outbsd routine was replaced by ddb%set_d2eig_reshape(), the eig2nkq was passed instead of the correct eig2nkq_tmp one,
 resulting in a bug --> the fully EIG2D was printed to file instead of the partial Sternheimer only one.
 See documentation of [[ieig2rf]] for explanation.
-This bug is corrected here. In addition, the coding was not optimal. The content of the former array eig2nkq_tmp could be printed directly in m_eig2d/eig2stern, 
+This bug is corrected here. In addition, the coding was not optimal. The content of the former array eig2nkq_tmp could be printed directly in m_eig2d/eig2stern,
 instead of inside m_dfpt_looppert, avoiding the allocation of this large array, and mirroring the same printing done in eig2tot.
 
 Fix EIGR2D files for the case [[ieig2rf]]=5.
@@ -401,7 +404,7 @@ The electron-phonon legacy scripts have been put back in the package, and have b
 By S. Ponce (MR1036, MR1045) and G. Antonius (MR1043), with help from X. Gonze.
 
 **E.12**
-AbiDev 2024 hackathon tutorial fixes, specifically to the lruj tutorial, the eph_legacy and the DFPT2 modifications.  
+AbiDev 2024 hackathon tutorial fixes, specifically to the lruj tutorial, the eph_legacy and the DFPT2 modifications.
 LRUJ tutorial fixes and acknowledgements changes.
 
 By L. MacEnulty (MR1044)
@@ -427,7 +430,7 @@ m_kpts:kpts_map was always assuming spatial symmetries for mapping one set of k-
 
 By M. Mignolet (MR1057)
 
-**E.16** New NVHPC version 24.9 dropped recently and was failing to compile (again). Switching loop order simply fixes the thing. 
+**E.16** New NVHPC version 24.9 dropped recently and was failing to compile (again). Switching loop order simply fixes the thing.
 
 By M. Sarraute (MR1064)
 

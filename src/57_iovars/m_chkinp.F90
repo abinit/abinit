@@ -92,8 +92,8 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
  integer :: ipsp,isppol,isym,itypat,iz,jdtset,jj,kk,maxiatsph,maxidyn,minplowan_iatom,maxplowan_iatom
  integer :: mband,miniatsph,minidyn,mod10,mpierr,all_nprocs
  integer :: mu,natom,nfft,nfftdg,nkpt,nloc_mem,nlpawu
- integer :: nproc,nspden,nspinor,nsppol,optdriver,mismatch_fft_tnons,response
- integer :: fftalg,usepaw,usewvl
+ integer :: nproc,nthreads,nspden,nspinor,nsppol,optdriver,mismatch_fft_tnons,response
+ integer :: fftalg,fftalga,usepaw,usewvl
  integer :: ttoldfe,ttoldff,ttolrff,ttolvrs,ttolwfr
  logical :: test,twvl,allowed,berryflag
  logical :: wvlbigdft=.false.
@@ -143,7 +143,8 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 
    ! Copy or initialize locally a few input dataset values
    fftalg   =dt%ngfft(7)
-   !fftalga  =fftalg/100; fftalgc=mod(fftalg,10)
+   fftalga  =fftalg/100!; fftalgc=mod(fftalg,10)
+   nthreads = xomp_get_num_threads(.true.)
    natom    =dt%natom
    nkpt     =dt%nkpt
    nspden   =dt%nspden
@@ -924,7 +925,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    !  cond_string(1)='optcell' ; cond_values(1)=dt%optcell
    !  call chkdpr(1,1,cond_string,cond_values,ierr,'ecutsm',dt%ecutsm,1,tol8,iout)
    !end if
-!  At present (v10.2.2), Chebyshev filtering algorithm (wfoptalg=1 or 111) cannot be used with ecutsm=0.
+!  At present (v10.2.2), Chebyshev filtering algorithm (wfoptalg=1 or 111) cannot be used with ecutsm>0.
 !  So we allow ecutsm=0 but with a warning.
    if(dt%optcell/=0 .and. dt%ecutsm < tol8 .and. dt%wfoptalg/=1 .and. dt%wfoptalg/=111) then
      write(msg, "(2a)") 'For optcell > 0, it is highly recommended to set ecutsm > 0 to have better precision on stress',&
@@ -2199,17 +2200,22 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    end if
 #ifdef HAVE_OPENMP
    if (dt%wfoptalg==114 .or. dt%wfoptalg==1 .or. dt%wfoptalg==111) then
-     if ( xomp_get_num_threads(.true.) > 1 ) then
+     if ( nthreads > 1 ) then
        if ( dt%npfft > 1 ) then
          write(msg,'(4a,i4,a,i4,a)') "Using LOBPCG algorithm (wfoptalg=114), the FFT parallelization is not ",&
           "compatible with multiple threads.",ch10,"Please set npfft to 1 (currently npfft=",dt%npfft,&
-          ") or export OMP_NUM_THREADS=1 (currently: the number of threads is ",xomp_get_num_threads(.true.),")"
+          ") or export OMP_NUM_THREADS=1 (currently: the number of threads is ",nthreads,")"
          ABI_ERROR_NOSTOP(msg, ierr)
        end if
        if ( dt%npspinor > 1 ) then
          write(msg,'(4a,i1,a,i4,a)') "Using LOBPCG algorithm (wfoptalg=114), the parallelization on spinorial components is not",&
           " compatible with multiple threads.",ch10,"Please set npspinor to 1 (currently npspinor=",dt%npspinor,&
-          ") or export OMP_NUM_THREADS=1 (currently: the number of threads is ",xomp_get_num_threads(.true.),")"
+          ") or export OMP_NUM_THREADS=1 (currently: the number of threads is ",nthreads,")"
+         ABI_ERROR_NOSTOP(msg, ierr)
+       end if
+       if ( dt%bandpp>1.and.fftalga==FFT_SG ) then
+         write(msg,'(4a,i1,a,i4,a)') "To use bandpp > 1 and nthreads > 1 is not possible with S. Goedecker FFT (fftalg=1XX).",ch10,&
+          "Change nthreads, bandpp, or fftalg (for example fftalg=401)."
          ABI_ERROR_NOSTOP(msg, ierr)
        end if
      end if
@@ -4018,7 +4024,6 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      if(dt%ecutsm > 0) then
        ABI_ERROR_NOSTOP('Ecutsm > 0 not yet compatible with wfoptalg 1', ierr)
      end if
-     !! TODO check bandpp instead of overwriting it
    end if
 
 !  np_slk

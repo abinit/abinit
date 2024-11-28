@@ -2750,6 +2750,8 @@ subroutine compute_eigen_problem(processor, matrix, results, eigen, comm, istwf_
   ABI_MALLOC(ICLUSTR,(2*processor%grid%dims(1)*processor%grid%dims(2)))
   ABI_MALLOC(GAP,(processor%grid%dims(1)*processor%grid%dims(2)))
 
+  CWORK_tmp = (0.0_DP,0.0_DP)
+  RWORK_tmp = 0.0_DP
   ! Get the size of the work arrays
   if (istwf_k/=2) then
      call PZHEEVX('V', range, 'U',&
@@ -3120,6 +3122,8 @@ subroutine compute_generalized_eigen_problem(processor,matrix1,matrix2,results,e
   ABI_MALLOC(ICLUSTR,(2*processor%grid%dims(1)*processor%grid%dims(2)))
   ABI_MALLOC(GAP    ,(  processor%grid%dims(1)*processor%grid%dims(2)))
 
+  CWORK_tmp = (0.0_DP,0.0_DP)
+  RWORK_tmp = 0.0_DP
   ! Get the size of the work arrays
   if (istwf_k /= 2) then
      call PZHEGVX(1, 'V', range, 'U',&

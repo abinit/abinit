@@ -59,8 +59,8 @@ rprim 1. 0. 0. 0. 1. 0. 0. 0. 1.
 natom 29
 znucl 56 22 8
 ntypat 3
-typat 1   2   3   3   3   1   2   3   3   3   
-      1   2   3   3   3   1   2   3   3   3   
+typat 1   2   3   3   3   1   2   3   3   3
+      1   2   3   3   3   1   2   3   3   3
       1   2   3   3   3   1   2   3   3  !3
 chkprim 0
 
@@ -101,7 +101,7 @@ xred
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% psp_files = Pseudodojo_paw_pw_stringent/Ba.xml, Pseudodojo_paw_pw_stringent/Ti.xml, Pseudodojo_paw_pw_stringent/O.xml
+#%% psp_files = Psdj_paw_pw_stringent/Ba.xml, Psdj_paw_pw_stringent/Ti.xml, Psdj_paw_pw_stringent/O.xml
 #%% [paral_info]
 #%% nprocs_to_test = 32, 64, 128
 #%% max_nprocs = 128

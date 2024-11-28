@@ -1,8 +1,8 @@
 
 .Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Fri 13 Sep 2024.
 - ( at 19h13 )
-  
+
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v7_t68/t68.abi
 - output file    -> t68.abo
 - root for input  files -> t68i
@@ -799,8 +799,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/C.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/C.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/C.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/C.psp8
 - C     ONCVPSP-3.2.3  r_core=   1.51078   1.70218
 -  6.00000   4.00000    160922                znucl, zion, pspdat
     8   11    1    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1003,7 +1003,7 @@ meta: {optdriver: 4, gwcalctyp: 25, }
  Citation for XC functional:
   J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
 
- SIGMA: Calculation of the GW corrections 
+ SIGMA: Calculation of the GW corrections
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
@@ -1017,8 +1017,8 @@ meta: {optdriver: 4, gwcalctyp: 25, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/C.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/C.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/C.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/C.psp8
 - C     ONCVPSP-3.2.3  r_core=   1.51078   1.70218
 -  6.00000   4.00000    160922                znucl, zion, pspdat
     8   11    1    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1035,7 +1035,7 @@ meta: {optdriver: 4, gwcalctyp: 25, }
 
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :     6
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)    -2.50000000E-01 -2.50000000E-01  0.00000000E+00       0.18750
      2)    -2.50000000E-01  2.50000000E-01  0.00000000E+00       0.37500
@@ -1044,7 +1044,7 @@ meta: {optdriver: 4, gwcalctyp: 25, }
      5)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.12500
      6)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.03125
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields    32 points in the full Brillouin Zone.
      1)    -2.50000000E-01 -2.50000000E-01  0.00000000E+00
      2)     2.50000000E-01  2.50000000E-01  0.00000000E+00
@@ -1082,7 +1082,7 @@ meta: {optdriver: 4, gwcalctyp: 25, }
 
  ==== Q-mesh for screening function ====
  Number of points in the irreducible wedge :     6
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.03125
      2)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.09375
@@ -1091,7 +1091,7 @@ meta: {optdriver: 4, gwcalctyp: 25, }
      5)     5.00000000E-01 -2.50000000E-01  2.50000000E-01       0.18750
      6)     0.00000000E+00 -2.50000000E-01 -2.50000000E-01       0.18750
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields    32 points in the full Brillouin Zone.
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00
      2)     5.00000000E-01  5.00000000E-01  0.00000000E+00
@@ -1128,9 +1128,9 @@ meta: {optdriver: 4, gwcalctyp: 25, }
 
 
 
- === Spherical cutoff === 
+ === Spherical cutoff ===
 
-  Cutoff radius .........     8.3631 [Bohr] 
+  Cutoff radius .........     8.3631 [Bohr]
   Volume of the sphere ..    2450.17 [Bohr^3]
  q-points for optical limit:   1
      1)      0.000010    0.000020    0.000030
@@ -1143,9 +1143,9 @@ meta: {optdriver: 4, gwcalctyp: 25, }
  omega_plasma =   31.1801 [eV]
 
 
- rdqps: reading QP wavefunctions of the previous step 
+ rdqps: reading QP wavefunctions of the previous step
         looking for file t68o_DS1_QPS
- file not found, 1st iteration initialized with KS eigenelements 
+ file not found, 1st iteration initialized with KS eigenelements
 
  Number of electrons calculated from density =    8.0000; Expected =    8.0000
  average of density, n =  0.104483
@@ -1155,7 +1155,7 @@ meta: {optdriver: 4, gwcalctyp: 25, }
 
 --------------------------------------------------------------------------------
 
- QP results after the unitary transformation in the KS subspace: 
+ QP results after the unitary transformation in the KS subspace:
 
   Number of electrons    =    8.0000
 
@@ -1390,7 +1390,7 @@ meta: {optdriver: 4, gwcalctyp: 25, }
  Citation for XC functional:
   J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
 
- SIGMA: Calculation of the GW corrections 
+ SIGMA: Calculation of the GW corrections
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
@@ -1406,7 +1406,7 @@ meta: {optdriver: 4, gwcalctyp: 25, }
 
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :     6
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)    -2.50000000E-01 -2.50000000E-01  0.00000000E+00       0.18750
      2)    -2.50000000E-01  2.50000000E-01  0.00000000E+00       0.37500
@@ -1415,7 +1415,7 @@ meta: {optdriver: 4, gwcalctyp: 25, }
      5)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.12500
      6)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.03125
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields    32 points in the full Brillouin Zone.
      1)    -2.50000000E-01 -2.50000000E-01  0.00000000E+00
      2)     2.50000000E-01  2.50000000E-01  0.00000000E+00
@@ -1453,7 +1453,7 @@ meta: {optdriver: 4, gwcalctyp: 25, }
 
  ==== Q-mesh for screening function ====
  Number of points in the irreducible wedge :     6
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.03125
      2)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.09375
@@ -1462,7 +1462,7 @@ meta: {optdriver: 4, gwcalctyp: 25, }
      5)     5.00000000E-01 -2.50000000E-01  2.50000000E-01       0.18750
      6)     0.00000000E+00 -2.50000000E-01 -2.50000000E-01       0.18750
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields    32 points in the full Brillouin Zone.
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00
      2)     5.00000000E-01  5.00000000E-01  0.00000000E+00
@@ -1499,9 +1499,9 @@ meta: {optdriver: 4, gwcalctyp: 25, }
 
 
 
- === Spherical cutoff === 
+ === Spherical cutoff ===
 
-  Cutoff radius .........     8.3631 [Bohr] 
+  Cutoff radius .........     8.3631 [Bohr]
   Volume of the sphere ..    2450.17 [Bohr^3]
  q-points for optical limit:   1
      1)      0.000010    0.000020    0.000030
@@ -1514,7 +1514,7 @@ meta: {optdriver: 4, gwcalctyp: 25, }
  omega_plasma =   31.1801 [eV]
 
 
- rdqps: reading QP wavefunctions of the previous step 
+ rdqps: reading QP wavefunctions of the previous step
         looking for file t68o_DS2_QPS
  Number of iteration(s) already performed:    1
 
@@ -1526,7 +1526,7 @@ meta: {optdriver: 4, gwcalctyp: 25, }
 
 --------------------------------------------------------------------------------
 
- QP results after the unitary transformation in the KS subspace: 
+ QP results after the unitary transformation in the KS subspace:
 
   Number of electrons    =    8.0000
 
@@ -1761,7 +1761,7 @@ meta: {optdriver: 4, gwcalctyp: 25, }
  Citation for XC functional:
   J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
 
- SIGMA: Calculation of the GW corrections 
+ SIGMA: Calculation of the GW corrections
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
@@ -1777,7 +1777,7 @@ meta: {optdriver: 4, gwcalctyp: 25, }
 
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :     6
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)    -2.50000000E-01 -2.50000000E-01  0.00000000E+00       0.18750
      2)    -2.50000000E-01  2.50000000E-01  0.00000000E+00       0.37500
@@ -1786,7 +1786,7 @@ meta: {optdriver: 4, gwcalctyp: 25, }
      5)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.12500
      6)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.03125
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields    32 points in the full Brillouin Zone.
      1)    -2.50000000E-01 -2.50000000E-01  0.00000000E+00
      2)     2.50000000E-01  2.50000000E-01  0.00000000E+00
@@ -1824,7 +1824,7 @@ meta: {optdriver: 4, gwcalctyp: 25, }
 
  ==== Q-mesh for screening function ====
  Number of points in the irreducible wedge :     6
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.03125
      2)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.09375
@@ -1833,7 +1833,7 @@ meta: {optdriver: 4, gwcalctyp: 25, }
      5)     5.00000000E-01 -2.50000000E-01  2.50000000E-01       0.18750
      6)     0.00000000E+00 -2.50000000E-01 -2.50000000E-01       0.18750
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields    32 points in the full Brillouin Zone.
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00
      2)     5.00000000E-01  5.00000000E-01  0.00000000E+00
@@ -1870,9 +1870,9 @@ meta: {optdriver: 4, gwcalctyp: 25, }
 
 
 
- === Spherical cutoff === 
+ === Spherical cutoff ===
 
-  Cutoff radius .........     8.3631 [Bohr] 
+  Cutoff radius .........     8.3631 [Bohr]
   Volume of the sphere ..    2450.17 [Bohr^3]
  q-points for optical limit:   1
      1)      0.000010    0.000020    0.000030
@@ -1885,7 +1885,7 @@ meta: {optdriver: 4, gwcalctyp: 25, }
  omega_plasma =   31.1801 [eV]
 
 
- rdqps: reading QP wavefunctions of the previous step 
+ rdqps: reading QP wavefunctions of the previous step
         looking for file t68o_DS3_QPS
  Number of iteration(s) already performed:    2
 
@@ -1897,7 +1897,7 @@ meta: {optdriver: 4, gwcalctyp: 25, }
 
 --------------------------------------------------------------------------------
 
- QP results after the unitary transformation in the KS subspace: 
+ QP results after the unitary transformation in the KS subspace:
 
   Number of electrons    =    8.0000
 
@@ -2132,7 +2132,7 @@ meta: {optdriver: 4, gwcalctyp: 25, }
  Citation for XC functional:
   J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
 
- SIGMA: Calculation of the GW corrections 
+ SIGMA: Calculation of the GW corrections
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
@@ -2148,7 +2148,7 @@ meta: {optdriver: 4, gwcalctyp: 25, }
 
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :     6
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)    -2.50000000E-01 -2.50000000E-01  0.00000000E+00       0.18750
      2)    -2.50000000E-01  2.50000000E-01  0.00000000E+00       0.37500
@@ -2157,7 +2157,7 @@ meta: {optdriver: 4, gwcalctyp: 25, }
      5)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.12500
      6)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.03125
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields    32 points in the full Brillouin Zone.
      1)    -2.50000000E-01 -2.50000000E-01  0.00000000E+00
      2)     2.50000000E-01  2.50000000E-01  0.00000000E+00
@@ -2195,7 +2195,7 @@ meta: {optdriver: 4, gwcalctyp: 25, }
 
  ==== Q-mesh for screening function ====
  Number of points in the irreducible wedge :     6
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.03125
      2)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.09375
@@ -2204,7 +2204,7 @@ meta: {optdriver: 4, gwcalctyp: 25, }
      5)     5.00000000E-01 -2.50000000E-01  2.50000000E-01       0.18750
      6)     0.00000000E+00 -2.50000000E-01 -2.50000000E-01       0.18750
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields    32 points in the full Brillouin Zone.
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00
      2)     5.00000000E-01  5.00000000E-01  0.00000000E+00
@@ -2241,9 +2241,9 @@ meta: {optdriver: 4, gwcalctyp: 25, }
 
 
 
- === Spherical cutoff === 
+ === Spherical cutoff ===
 
-  Cutoff radius .........     8.3631 [Bohr] 
+  Cutoff radius .........     8.3631 [Bohr]
   Volume of the sphere ..    2450.17 [Bohr^3]
  q-points for optical limit:   1
      1)      0.000010    0.000020    0.000030
@@ -2256,7 +2256,7 @@ meta: {optdriver: 4, gwcalctyp: 25, }
  omega_plasma =   31.1801 [eV]
 
 
- rdqps: reading QP wavefunctions of the previous step 
+ rdqps: reading QP wavefunctions of the previous step
         looking for file t68o_DS4_QPS
  Number of iteration(s) already performed:    3
 
@@ -2268,7 +2268,7 @@ meta: {optdriver: 4, gwcalctyp: 25, }
 
 --------------------------------------------------------------------------------
 
- QP results after the unitary transformation in the KS subspace: 
+ QP results after the unitary transformation in the KS subspace:
 
   Number of electrons    =    8.0000
 
@@ -2503,7 +2503,7 @@ meta: {optdriver: 4, gwcalctyp: 25, }
  Citation for XC functional:
   J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
 
- SIGMA: Calculation of the GW corrections 
+ SIGMA: Calculation of the GW corrections
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
@@ -2519,7 +2519,7 @@ meta: {optdriver: 4, gwcalctyp: 25, }
 
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :     6
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)    -2.50000000E-01 -2.50000000E-01  0.00000000E+00       0.18750
      2)    -2.50000000E-01  2.50000000E-01  0.00000000E+00       0.37500
@@ -2528,7 +2528,7 @@ meta: {optdriver: 4, gwcalctyp: 25, }
      5)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.12500
      6)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.03125
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields    32 points in the full Brillouin Zone.
      1)    -2.50000000E-01 -2.50000000E-01  0.00000000E+00
      2)     2.50000000E-01  2.50000000E-01  0.00000000E+00
@@ -2566,7 +2566,7 @@ meta: {optdriver: 4, gwcalctyp: 25, }
 
  ==== Q-mesh for screening function ====
  Number of points in the irreducible wedge :     6
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.03125
      2)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.09375
@@ -2575,7 +2575,7 @@ meta: {optdriver: 4, gwcalctyp: 25, }
      5)     5.00000000E-01 -2.50000000E-01  2.50000000E-01       0.18750
      6)     0.00000000E+00 -2.50000000E-01 -2.50000000E-01       0.18750
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields    32 points in the full Brillouin Zone.
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00
      2)     5.00000000E-01  5.00000000E-01  0.00000000E+00
@@ -2612,9 +2612,9 @@ meta: {optdriver: 4, gwcalctyp: 25, }
 
 
 
- === Spherical cutoff === 
+ === Spherical cutoff ===
 
-  Cutoff radius .........     8.3631 [Bohr] 
+  Cutoff radius .........     8.3631 [Bohr]
   Volume of the sphere ..    2450.17 [Bohr^3]
  q-points for optical limit:   1
      1)      0.000010    0.000020    0.000030
@@ -2627,7 +2627,7 @@ meta: {optdriver: 4, gwcalctyp: 25, }
  omega_plasma =   31.1801 [eV]
 
 
- rdqps: reading QP wavefunctions of the previous step 
+ rdqps: reading QP wavefunctions of the previous step
         looking for file t68o_DS5_QPS
  Number of iteration(s) already performed:    4
 
@@ -2639,7 +2639,7 @@ meta: {optdriver: 4, gwcalctyp: 25, }
 
 --------------------------------------------------------------------------------
 
- QP results after the unitary transformation in the KS subspace: 
+ QP results after the unitary transformation in the KS subspace:
 
   Number of electrons    =    8.0000
 
@@ -2890,8 +2890,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/C.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/C.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/C.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/C.psp8
 - C     ONCVPSP-3.2.3  r_core=   1.51078   1.70218
 -  6.00000   4.00000    160922                znucl, zion, pspdat
     8   11    1    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3105,7 +3105,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
  Citation for XC functional:
   J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
 
- SCREENING: Calculation of the susceptibility and dielectric matrices 
+ SCREENING: Calculation of the susceptibility and dielectric matrices
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
@@ -3119,8 +3119,8 @@ meta: {optdriver: 3, gwcalctyp: 0, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/C.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/C.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/C.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/C.psp8
 - C     ONCVPSP-3.2.3  r_core=   1.51078   1.70218
 -  6.00000   4.00000    160922                znucl, zion, pspdat
     8   11    1    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3137,7 +3137,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :     6
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)    -2.50000000E-01 -2.50000000E-01  0.00000000E+00       0.18750
      2)    -2.50000000E-01  2.50000000E-01  0.00000000E+00       0.37500
@@ -3146,7 +3146,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
      5)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.12500
      6)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.03125
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields    32 points in the full Brillouin Zone.
      1)    -2.50000000E-01 -2.50000000E-01  0.00000000E+00
      2)     2.50000000E-01  2.50000000E-01  0.00000000E+00
@@ -3184,7 +3184,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 
  ==== Q-mesh for the screening function ====
  Number of points in the irreducible wedge :     6
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.03125
      2)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.09375
@@ -3193,7 +3193,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
      5)     5.00000000E-01 -2.50000000E-01  2.50000000E-01       0.18750
      6)     0.00000000E+00 -2.50000000E-01 -2.50000000E-01       0.18750
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields    32 points in the full Brillouin Zone.
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00
      2)     5.00000000E-01  5.00000000E-01  0.00000000E+00
@@ -3237,7 +3237,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
  q-points for optical limit:   1
      1)      0.000010    0.000020    0.000030
 
-- screening: taking advantage of time-reversal symmetry 
+- screening: taking advantage of time-reversal symmetry
 - Maximum band index for partially occupied states nbvw = 4
 - Remaining bands to be divided among processors   nbcw = 10
 - Number of bands treated by each node ~10
@@ -3277,7 +3277,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
   dielectric constant without local fields =   9.5787
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     30.32  [%]
-  Heads and wings of the symmetrical epsilon^-1(G,G') 
+  Heads and wings of the symmetrical epsilon^-1(G,G')
 
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
@@ -3432,7 +3432,7 @@ meta: {optdriver: 4, gwcalctyp: 0, }
  Citation for XC functional:
   J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
 
- SIGMA: Calculation of the GW corrections 
+ SIGMA: Calculation of the GW corrections
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
@@ -3448,7 +3448,7 @@ meta: {optdriver: 4, gwcalctyp: 0, }
 
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :     6
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)    -2.50000000E-01 -2.50000000E-01  0.00000000E+00       0.18750
      2)    -2.50000000E-01  2.50000000E-01  0.00000000E+00       0.37500
@@ -3457,7 +3457,7 @@ meta: {optdriver: 4, gwcalctyp: 0, }
      5)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.12500
      6)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.03125
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields    32 points in the full Brillouin Zone.
      1)    -2.50000000E-01 -2.50000000E-01  0.00000000E+00
      2)     2.50000000E-01  2.50000000E-01  0.00000000E+00
@@ -3495,7 +3495,7 @@ meta: {optdriver: 4, gwcalctyp: 0, }
 
  ==== Q-mesh for screening function ====
  Number of points in the irreducible wedge :     6
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.03125
      2)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.09375
@@ -3504,7 +3504,7 @@ meta: {optdriver: 4, gwcalctyp: 0, }
      5)     5.00000000E-01 -2.50000000E-01  2.50000000E-01       0.18750
      6)     0.00000000E+00 -2.50000000E-01 -2.50000000E-01       0.18750
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields    32 points in the full Brillouin Zone.
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00
      2)     5.00000000E-01  5.00000000E-01  0.00000000E+00
@@ -3541,9 +3541,9 @@ meta: {optdriver: 4, gwcalctyp: 0, }
 
 
 
- === Spherical cutoff === 
+ === Spherical cutoff ===
 
-  Cutoff radius .........     8.3631 [Bohr] 
+  Cutoff radius .........     8.3631 [Bohr]
   Volume of the sphere ..    2450.17 [Bohr^3]
  q-points for optical limit:   1
      1)      0.000010    0.000020    0.000030
@@ -3644,7 +3644,7 @@ meta: {optdriver: 3, gwcalctyp: 20, }
  Citation for XC functional:
   J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
 
- SCREENING: Calculation of the susceptibility and dielectric matrices 
+ SCREENING: Calculation of the susceptibility and dielectric matrices
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
@@ -3660,7 +3660,7 @@ meta: {optdriver: 3, gwcalctyp: 20, }
 
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :     6
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)    -2.50000000E-01 -2.50000000E-01  0.00000000E+00       0.18750
      2)    -2.50000000E-01  2.50000000E-01  0.00000000E+00       0.37500
@@ -3669,7 +3669,7 @@ meta: {optdriver: 3, gwcalctyp: 20, }
      5)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.12500
      6)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.03125
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields    32 points in the full Brillouin Zone.
      1)    -2.50000000E-01 -2.50000000E-01  0.00000000E+00
      2)     2.50000000E-01  2.50000000E-01  0.00000000E+00
@@ -3707,7 +3707,7 @@ meta: {optdriver: 3, gwcalctyp: 20, }
 
  ==== Q-mesh for the screening function ====
  Number of points in the irreducible wedge :     6
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.03125
      2)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.09375
@@ -3716,7 +3716,7 @@ meta: {optdriver: 3, gwcalctyp: 20, }
      5)     5.00000000E-01 -2.50000000E-01  2.50000000E-01       0.18750
      6)     0.00000000E+00 -2.50000000E-01 -2.50000000E-01       0.18750
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields    32 points in the full Brillouin Zone.
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00
      2)     5.00000000E-01  5.00000000E-01  0.00000000E+00
@@ -3760,13 +3760,13 @@ meta: {optdriver: 3, gwcalctyp: 20, }
  q-points for optical limit:   1
      1)      0.000010    0.000020    0.000030
 
-- screening: taking advantage of time-reversal symmetry 
+- screening: taking advantage of time-reversal symmetry
 - Maximum band index for partially occupied states nbvw = 4
 - Remaining bands to be divided among processors   nbcw = 10
 - Number of bands treated by each node ~10
 
 
- rdqps: reading QP wavefunctions of the previous step 
+ rdqps: reading QP wavefunctions of the previous step
         looking for file t68o_DS6_QPS
  Number of iteration(s) already performed:    5
 
@@ -3805,7 +3805,7 @@ meta: {optdriver: 3, gwcalctyp: 20, }
   dielectric constant without local fields =   4.4767
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     35.17  [%]
-  Heads and wings of the symmetrical epsilon^-1(G,G') 
+  Heads and wings of the symmetrical epsilon^-1(G,G')
 
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
@@ -3960,7 +3960,7 @@ meta: {optdriver: 4, gwcalctyp: 20, }
  Citation for XC functional:
   J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
 
- SIGMA: Calculation of the GW corrections 
+ SIGMA: Calculation of the GW corrections
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
@@ -3976,7 +3976,7 @@ meta: {optdriver: 4, gwcalctyp: 20, }
 
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :     6
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)    -2.50000000E-01 -2.50000000E-01  0.00000000E+00       0.18750
      2)    -2.50000000E-01  2.50000000E-01  0.00000000E+00       0.37500
@@ -3985,7 +3985,7 @@ meta: {optdriver: 4, gwcalctyp: 20, }
      5)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.12500
      6)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.03125
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields    32 points in the full Brillouin Zone.
      1)    -2.50000000E-01 -2.50000000E-01  0.00000000E+00
      2)     2.50000000E-01  2.50000000E-01  0.00000000E+00
@@ -4023,7 +4023,7 @@ meta: {optdriver: 4, gwcalctyp: 20, }
 
  ==== Q-mesh for screening function ====
  Number of points in the irreducible wedge :     6
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.03125
      2)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.09375
@@ -4032,7 +4032,7 @@ meta: {optdriver: 4, gwcalctyp: 20, }
      5)     5.00000000E-01 -2.50000000E-01  2.50000000E-01       0.18750
      6)     0.00000000E+00 -2.50000000E-01 -2.50000000E-01       0.18750
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields    32 points in the full Brillouin Zone.
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00
      2)     5.00000000E-01  5.00000000E-01  0.00000000E+00
@@ -4069,9 +4069,9 @@ meta: {optdriver: 4, gwcalctyp: 20, }
 
 
 
- === Spherical cutoff === 
+ === Spherical cutoff ===
 
-  Cutoff radius .........     8.3631 [Bohr] 
+  Cutoff radius .........     8.3631 [Bohr]
   Volume of the sphere ..    2450.17 [Bohr^3]
  q-points for optical limit:   1
      1)      0.000010    0.000020    0.000030
@@ -4084,7 +4084,7 @@ meta: {optdriver: 4, gwcalctyp: 20, }
  omega_plasma =   31.1801 [eV]
 
 
- rdqps: reading QP wavefunctions of the previous step 
+ rdqps: reading QP wavefunctions of the previous step
         looking for file t68o_DS6_QPS
  Number of iteration(s) already performed:    5
 
@@ -4096,7 +4096,7 @@ meta: {optdriver: 4, gwcalctyp: 20, }
 
 --------------------------------------------------------------------------------
 
- QP results after the unitary transformation in the KS subspace: 
+ QP results after the unitary transformation in the KS subspace:
 
   Number of electrons    =    8.0000
 
@@ -4339,7 +4339,7 @@ meta: {optdriver: 3, gwcalctyp: 20, }
  Citation for XC functional:
   J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
 
- SCREENING: Calculation of the susceptibility and dielectric matrices 
+ SCREENING: Calculation of the susceptibility and dielectric matrices
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
@@ -4355,7 +4355,7 @@ meta: {optdriver: 3, gwcalctyp: 20, }
 
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :     6
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)    -2.50000000E-01 -2.50000000E-01  0.00000000E+00       0.18750
      2)    -2.50000000E-01  2.50000000E-01  0.00000000E+00       0.37500
@@ -4364,7 +4364,7 @@ meta: {optdriver: 3, gwcalctyp: 20, }
      5)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.12500
      6)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.03125
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields    32 points in the full Brillouin Zone.
      1)    -2.50000000E-01 -2.50000000E-01  0.00000000E+00
      2)     2.50000000E-01  2.50000000E-01  0.00000000E+00
@@ -4402,7 +4402,7 @@ meta: {optdriver: 3, gwcalctyp: 20, }
 
  ==== Q-mesh for the screening function ====
  Number of points in the irreducible wedge :     6
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.03125
      2)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.09375
@@ -4411,7 +4411,7 @@ meta: {optdriver: 3, gwcalctyp: 20, }
      5)     5.00000000E-01 -2.50000000E-01  2.50000000E-01       0.18750
      6)     0.00000000E+00 -2.50000000E-01 -2.50000000E-01       0.18750
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields    32 points in the full Brillouin Zone.
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00
      2)     5.00000000E-01  5.00000000E-01  0.00000000E+00
@@ -4455,15 +4455,15 @@ meta: {optdriver: 3, gwcalctyp: 20, }
  q-points for optical limit:   1
      1)      0.000010    0.000020    0.000030
 
-- screening: taking advantage of time-reversal symmetry 
+- screening: taking advantage of time-reversal symmetry
 - Maximum band index for partially occupied states nbvw = 4
 - Remaining bands to be divided among processors   nbcw = 10
 - Number of bands treated by each node ~10
 
 
- rdqps: reading QP wavefunctions of the previous step 
+ rdqps: reading QP wavefunctions of the previous step
         looking for file t68i_DS12_QPS
- file not found, 1st iteration initialized with KS eigenelements 
+ file not found, 1st iteration initialized with KS eigenelements
 
  Number of electrons calculated from density =    8.0000; Expected =    8.0000
  average of density, n =  0.104483
@@ -4500,7 +4500,7 @@ meta: {optdriver: 3, gwcalctyp: 20, }
   dielectric constant without local fields =   4.4917
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     35.04  [%]
-  Heads and wings of the symmetrical epsilon^-1(G,G') 
+  Heads and wings of the symmetrical epsilon^-1(G,G')
 
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
@@ -4651,7 +4651,7 @@ meta: {optdriver: 4, gwcalctyp: 0, }
  Exchange-correlation functional for the present dataset will be:
   modified PBE0 with alpha=0.33
 
- SIGMA: Calculation of the GW corrections 
+ SIGMA: Calculation of the GW corrections
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
@@ -4665,8 +4665,8 @@ meta: {optdriver: 4, gwcalctyp: 0, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/C.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/C.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/C.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/C.psp8
 - C     ONCVPSP-3.2.3  r_core=   1.51078   1.70218
 -  6.00000   4.00000    160922                znucl, zion, pspdat
     8   11    1    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4683,7 +4683,7 @@ meta: {optdriver: 4, gwcalctyp: 0, }
 
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :     6
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)    -2.50000000E-01 -2.50000000E-01  0.00000000E+00       0.18750
      2)    -2.50000000E-01  2.50000000E-01  0.00000000E+00       0.37500
@@ -4692,7 +4692,7 @@ meta: {optdriver: 4, gwcalctyp: 0, }
      5)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.12500
      6)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.03125
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields    32 points in the full Brillouin Zone.
      1)    -2.50000000E-01 -2.50000000E-01  0.00000000E+00
      2)     2.50000000E-01  2.50000000E-01  0.00000000E+00
@@ -4730,7 +4730,7 @@ meta: {optdriver: 4, gwcalctyp: 0, }
 
  ==== Q-mesh for screening function ====
  Number of points in the irreducible wedge :     6
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.03125
      2)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.09375
@@ -4739,7 +4739,7 @@ meta: {optdriver: 4, gwcalctyp: 0, }
      5)     5.00000000E-01 -2.50000000E-01  2.50000000E-01       0.18750
      6)     0.00000000E+00 -2.50000000E-01 -2.50000000E-01       0.18750
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields    32 points in the full Brillouin Zone.
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00
      2)     5.00000000E-01  5.00000000E-01  0.00000000E+00
@@ -4776,16 +4776,16 @@ meta: {optdriver: 4, gwcalctyp: 0, }
 
 
 
- === Spherical cutoff === 
+ === Spherical cutoff ===
 
-  Cutoff radius .........     8.3631 [Bohr] 
+  Cutoff radius .........     8.3631 [Bohr]
   Volume of the sphere ..    2450.17 [Bohr^3]
  q-points for optical limit:   1
      1)      0.000010    0.000020    0.000030
 
- === Spherical cutoff === 
+ === Spherical cutoff ===
 
-  Cutoff radius .........     8.3631 [Bohr] 
+  Cutoff radius .........     8.3631 [Bohr]
   Volume of the sphere ..    2450.17 [Bohr^3]
  q-points for optical limit:   1
      1)      0.000010    0.000020    0.000030
@@ -4866,7 +4866,7 @@ data: !SigmaeeData |
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      6.7406530879E+00  6.7406530879E+00  6.7406530879E+00 Bohr
               amu      1.20110000E+01
@@ -5466,7 +5466,7 @@ P           mkmem           6
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -5483,12 +5483,12 @@ P           mkmem           6
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -5506,7 +5506,7 @@ P           mkmem           6
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016

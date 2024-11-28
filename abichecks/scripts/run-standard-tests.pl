@@ -369,7 +369,7 @@ $SORTED_CMD = &perlpath("$PERL $top_testdir/scripts/Sort.sh");	# sorting lines f
 
 $INPUTDIR = &transpath("$CYGWIN$top_testdir/$TestDir/Input");	# input directory
 $REF = &transpath("$top_testdir/$TestDir/Refs");		# reference directory
-$PSPS = &transpath("$CYGWIN$top_testdir/Psps_for_tests");	# pseudopotential directory
+$PSPS = &transpath("$CYGWIN$top_testdir/Pspdir");	# pseudopotential directory
 $CHKINABI = &perlpath("$PERL $top_testdir/scripts/chkinabi.pl");  # relative paths
 $FLDIFF = &perlpath("$PERL $top_testdir/scripts/fldiff.pl");	# to scripts directory
 #
@@ -1136,7 +1136,7 @@ sub dovdwkgtest {
         if ($OStype eq 'MacOS') {
                 system ("$CODE_VDWKG < $infn \xb7 $logfn ");
                 }
-        else {  
+        else {
                 $REDIRECT_ERR = "2> $errfn";
                 system ("$CODE_VDWKG < $infn > $logfn $REDIRECT_ERR");
                 $REDIRECT_ERR = '2>&1';

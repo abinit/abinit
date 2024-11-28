@@ -1,8 +1,8 @@
 
-.Version 9.1.4 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.1 computer) 
+.Version 9.1.4 of ABINIT
+.(MPI version, prepared for a x86_64_linux_gnu9.1 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,15 +16,15 @@
 
 .Starting date : Mon 25 May 2020.
 - ( at 11h34 )
-  
+
 - input  file    -> tucrpa_5.in
 - output file    -> tucrpa_5.out
 - root for input  files -> tucrpa_I
 - root for output files -> tucrpa_O
 
-- inpspheads : Reading pseudopotential header in XML form from ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
-- inpspheads : Reading pseudopotential header in XML form from ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
-- inpspheads : Reading pseudopotential header in XML form from ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
+- inpspheads : Reading pseudopotential header in XML form from ../../../Pspdir/Psdj_paw_pw_std/V.xml
+- inpspheads : Reading pseudopotential header in XML form from ../../../Pspdir/Psdj_paw_pw_std/Sr.xml
+- inpspheads : Reading pseudopotential header in XML form from ../../../Pspdir/Psdj_paw_pw_std/O.xml
 
  DATASET    1 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -107,10 +107,10 @@ _ WF disk file :      4.653 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
+- outvars: echo of selected default values
 -   iomode0 =  0 , fftalg0 =312 , wfoptalg0 = 10
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    1
 -
  -outvars: echo values of preprocessed input variables --------
@@ -466,9 +466,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.05246
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
-- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
+- pspini: atom type   1  psp file is ../../../Pspdir/Psdj_paw_pw_std/V.xml
+- pspatm: opening atomic psp file    ../../../Pspdir/Psdj_paw_pw_std/V.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Pspdir/Psdj_paw_pw_std/V.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20000000
@@ -486,9 +486,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
-- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
+- pspini: atom type   2  psp file is ../../../Pspdir/Psdj_paw_pw_std/Sr.xml
+- pspatm: opening atomic psp file    ../../../Pspdir/Psdj_paw_pw_std/Sr.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Pspdir/Psdj_paw_pw_std/Sr.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20669967
@@ -506,9 +506,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
-- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
+- pspini: atom type   3  psp file is ../../../Pspdir/Psdj_paw_pw_std/O.xml
+- pspatm: opening atomic psp file    ../../../Pspdir/Psdj_paw_pw_std/O.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Pspdir/Psdj_paw_pw_std/O.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.41465230
@@ -537,8 +537,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
  ******************************************
 
  =======================================================================
-  == Calculation of diagonal bare Coulomb interaction on ATOMIC orbitals 
-     (it is assumed that the wavefunction for the first reference 
+  == Calculation of diagonal bare Coulomb interaction on ATOMIC orbitals
+     (it is assumed that the wavefunction for the first reference
              energy in PAW atomic data is an atomic eigenvalue)
 
  Max value of the radius in atomic data file   =    201.3994
@@ -705,7 +705,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
    0.00000   0.00000   0.00000   0.05936   0.00000   0.00000   0.00000   0.00000   0.01041   0.00000
    0.00000   0.00000   0.00000   0.00000   0.16598   0.00000   0.00000   0.00000   0.00000   0.03840
 
- ---------- DFT+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA ---------------------------------------------------
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
@@ -874,8 +874,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
 
 
  =======================================================================
-  == Calculation of diagonal bare Coulomb interaction on ATOMIC orbitals 
-     (it is assumed that the wavefunction for the first reference 
+  == Calculation of diagonal bare Coulomb interaction on ATOMIC orbitals
+     (it is assumed that the wavefunction for the first reference
              energy in PAW atomic data is an atomic eigenvalue)
 
  Max value of the radius in atomic data file   =    201.3994
@@ -1042,7 +1042,7 @@ force_length_stats: {min: null, max: null, mean: null, }
    0.00000   0.00000   0.00000   0.05936   0.00000   0.00000   0.00000   0.00000   0.01041   0.00000
    0.00000   0.00000   0.00000   0.00000   0.16598   0.00000   0.00000   0.00000   0.00000   0.03840
 
- ---------- DFT+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA ---------------------------------------------------
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
@@ -1144,7 +1144,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   2.
 
- SCREENING: Calculation of the susceptibility and dielectric matrices 
+ SCREENING: Calculation of the susceptibility and dielectric matrices
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
@@ -1161,9 +1161,9 @@ meta: {optdriver: 3, gwcalctyp: 2, }
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
-- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
+- pspini: atom type   1  psp file is ../../../Pspdir/Psdj_paw_pw_std/V.xml
+- pspatm: opening atomic psp file    ../../../Pspdir/Psdj_paw_pw_std/V.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Pspdir/Psdj_paw_pw_std/V.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20000000
@@ -1181,9 +1181,9 @@ meta: {optdriver: 3, gwcalctyp: 2, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
-- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
+- pspini: atom type   2  psp file is ../../../Pspdir/Psdj_paw_pw_std/Sr.xml
+- pspatm: opening atomic psp file    ../../../Pspdir/Psdj_paw_pw_std/Sr.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Pspdir/Psdj_paw_pw_std/Sr.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20669967
@@ -1201,9 +1201,9 @@ meta: {optdriver: 3, gwcalctyp: 2, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
-- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
+- pspini: atom type   3  psp file is ../../../Pspdir/Psdj_paw_pw_std/O.xml
+- pspatm: opening atomic psp file    ../../../Pspdir/Psdj_paw_pw_std/O.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Pspdir/Psdj_paw_pw_std/O.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.41465230
@@ -1225,20 +1225,20 @@ meta: {optdriver: 3, gwcalctyp: 2, }
 
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :     4
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     1.25000000E-01  1.25000000E-01  1.25000000E-01       0.12500
      2)     3.75000000E-01  1.25000000E-01  1.25000000E-01       0.37500
      3)     3.75000000E-01  3.75000000E-01  1.25000000E-01       0.37500
      4)     3.75000000E-01  3.75000000E-01  3.75000000E-01       0.12500
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields    64 points in the full Brillouin Zone.
 
 
  ==== Q-mesh for the screening function ====
  Number of points in the irreducible wedge :    10
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.01563
      2)    -2.50000000E-01 -2.50000000E-01 -2.50000000E-01       0.12500
@@ -1251,7 +1251,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
      9)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.04688
     10)     5.00000000E-01  5.00000000E-01  5.00000000E-01       0.01563
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields    64 points in the full Brillouin Zone.
 
 
@@ -1265,8 +1265,8 @@ meta: {optdriver: 3, gwcalctyp: 2, }
  ******************************************
 
  =======================================================================
-  == Calculation of diagonal bare Coulomb interaction on ATOMIC orbitals 
-     (it is assumed that the wavefunction for the first reference 
+  == Calculation of diagonal bare Coulomb interaction on ATOMIC orbitals
+     (it is assumed that the wavefunction for the first reference
              energy in PAW atomic data is an atomic eigenvalue)
 
  Max value of the radius in atomic data file   =    201.3994
@@ -1286,9 +1286,9 @@ meta: {optdriver: 3, gwcalctyp: 2, }
      The bare interaction (for a renorm. wfn ) =     23.0248 eV
  =======================================================================
 
- ==================================== 
- ==== Info on PAW TABulated data ==== 
- ==================================== 
+ ====================================
+ ==== Info on PAW TABulated data ====
+ ====================================
 
 
   ******************************
@@ -1436,7 +1436,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
   Compensation charge radius (if >rshp, g(r)=0) ...  1.20231231E+00
   Sigma parameter in gaussian shape function ......  1.20231231E+00
 
-- screening: taking advantage of time-reversal symmetry 
+- screening: taking advantage of time-reversal symmetry
 - Maximum band index for partially occupied states nbvw = 23
 - Remaining bands to be divided among processors   nbcw = 77
 - Number of bands treated by each node ~19
@@ -1521,7 +1521,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
    0.00000   0.00000   0.00000   0.05936   0.00000   0.00000   0.00000   0.00000   0.01041   0.00000
    0.00000   0.00000   0.00000   0.00000   0.16598   0.00000   0.00000   0.00000   0.00000   0.03840
 
- ---------- DFT+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA ---------------------------------------------------
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
@@ -1743,7 +1743,7 @@ Reading of the Wannier weights from data.plowann
   dielectric constant without local fields =   5.4957
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     59.23  [%]
-  Heads and wings of the symmetrical epsilon^-1(G,G') 
+  Heads and wings of the symmetrical epsilon^-1(G,G')
 
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
@@ -3356,12 +3356,12 @@ meta: {optdriver: 4, gwcalctyp: 2, }
 
  mkfilename : getscr/=0, take file _SCR from output of DATASET   3.
 
- SIGMA: Calculation of the GW corrections 
+ SIGMA: Calculation of the GW corrections
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
 
- cRPA Calculation: Calculation of the screened Coulomb interaction (ucrpa/=0) 
+ cRPA Calculation: Calculation of the screened Coulomb interaction (ucrpa/=0)
 
 .Using single precision arithmetic ; gwpc =  4
 
@@ -3373,9 +3373,9 @@ meta: {optdriver: 4, gwcalctyp: 2, }
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
-- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
+- pspini: atom type   1  psp file is ../../../Pspdir/Psdj_paw_pw_std/V.xml
+- pspatm: opening atomic psp file    ../../../Pspdir/Psdj_paw_pw_std/V.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Pspdir/Psdj_paw_pw_std/V.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20000000
@@ -3393,9 +3393,9 @@ meta: {optdriver: 4, gwcalctyp: 2, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
-- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
+- pspini: atom type   2  psp file is ../../../Pspdir/Psdj_paw_pw_std/Sr.xml
+- pspatm: opening atomic psp file    ../../../Pspdir/Psdj_paw_pw_std/Sr.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Pspdir/Psdj_paw_pw_std/Sr.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20669967
@@ -3413,9 +3413,9 @@ meta: {optdriver: 4, gwcalctyp: 2, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
-- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
+- pspini: atom type   3  psp file is ../../../Pspdir/Psdj_paw_pw_std/O.xml
+- pspatm: opening atomic psp file    ../../../Pspdir/Psdj_paw_pw_std/O.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Pspdir/Psdj_paw_pw_std/O.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.41465230
@@ -3437,20 +3437,20 @@ meta: {optdriver: 4, gwcalctyp: 2, }
 
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :     4
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     1.25000000E-01  1.25000000E-01  1.25000000E-01       0.12500
      2)     3.75000000E-01  1.25000000E-01  1.25000000E-01       0.37500
      3)     3.75000000E-01  3.75000000E-01  1.25000000E-01       0.37500
      4)     3.75000000E-01  3.75000000E-01  3.75000000E-01       0.12500
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields    64 points in the full Brillouin Zone.
 
 
  ==== Q-mesh for screening function ====
  Number of points in the irreducible wedge :    10
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.01563
      2)    -2.50000000E-01 -2.50000000E-01 -2.50000000E-01       0.12500
@@ -3463,7 +3463,7 @@ meta: {optdriver: 4, gwcalctyp: 2, }
      9)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.04688
     10)     5.00000000E-01  5.00000000E-01  5.00000000E-01       0.01563
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields    64 points in the full Brillouin Zone.
 
 
@@ -3477,8 +3477,8 @@ meta: {optdriver: 4, gwcalctyp: 2, }
  ******************************************
 
  =======================================================================
-  == Calculation of diagonal bare Coulomb interaction on ATOMIC orbitals 
-     (it is assumed that the wavefunction for the first reference 
+  == Calculation of diagonal bare Coulomb interaction on ATOMIC orbitals
+     (it is assumed that the wavefunction for the first reference
              energy in PAW atomic data is an atomic eigenvalue)
 
  Max value of the radius in atomic data file   =    201.3994
@@ -3498,9 +3498,9 @@ meta: {optdriver: 4, gwcalctyp: 2, }
      The bare interaction (for a renorm. wfn ) =     22.5848 eV
  =======================================================================
 
- ==================================== 
- ==== Info on PAW TABulated data ==== 
- ==================================== 
+ ====================================
+ ==== Info on PAW TABulated data ====
+ ====================================
 
 
   ******************************
@@ -3727,7 +3727,7 @@ meta: {optdriver: 4, gwcalctyp: 2, }
    0.00000   0.00000   0.00000   0.05936   0.00000   0.00000   0.00000   0.00000   0.01041   0.00000
    0.00000   0.00000   0.00000   0.00000   0.16598   0.00000   0.00000   0.00000   0.00000   0.03840
 
- ---------- DFT+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA ---------------------------------------------------
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
@@ -3767,7 +3767,7 @@ Reading of the Wannier weights from data.plowann
  == Value of the angular momenta for atom 1 is :  2
  == Value of the projectors      for atom 1 is : -2
  Reconstruction of the full Brillouin Zone using data.plowann in the IBZ
- 
+
 ==== Calculation of the screened interaction ====
 
  Read K and Q mesh
@@ -3775,7 +3775,7 @@ Reading of the Wannier weights from data.plowann
 
 
  ==Calculation of the bare interaction  V m==
- 
+
 ==Definition of the orbitals==
   Only one orbital
   Orbital with l=           2 on atom           1 with spin's orientations Up-Up
@@ -3809,7 +3809,7 @@ Reading of the Wannier weights from data.plowann
 
    bare interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.6268   -0.0000
 
- 
+
  Hund coupling J2=U(m1,m2,m2,m1) for the bare interaction
  -      1      2      3      4      5
    1 15.807  0.461  0.529  0.450  0.210
@@ -3821,7 +3821,7 @@ Reading of the Wannier weights from data.plowann
 
 
  == Calculation of the screened interaction on the correlated orbital U m ==
- 
+
  = Start loop over frequency
 
  --- For frequency w =   1  -------------
@@ -3856,7 +3856,7 @@ Reading of the Wannier weights from data.plowann
 
    cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.5730    0.0000
 
- 
+
  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
    1  3.490  0.428  0.493  0.419  0.207
@@ -3897,7 +3897,7 @@ Reading of the Wannier weights from data.plowann
 
    cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.5729   -0.0003
 
- 
+
  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
    1  3.462  0.428  0.493  0.418  0.207
@@ -3938,7 +3938,7 @@ Reading of the Wannier weights from data.plowann
 
    cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.5724   -0.0003
 
- 
+
  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
    1  3.372  0.427  0.493  0.418  0.207
@@ -3979,7 +3979,7 @@ Reading of the Wannier weights from data.plowann
 
    cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.5713   -0.0004
 
- 
+
  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
    1  3.192  0.426  0.492  0.417  0.207
@@ -4020,7 +4020,7 @@ Reading of the Wannier weights from data.plowann
 
    cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.5694   -0.0010
 
- 
+
  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
    1  2.877  0.425  0.491  0.416  0.207
@@ -4061,7 +4061,7 @@ Reading of the Wannier weights from data.plowann
 
    cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.5661   -0.0043
 
- 
+
  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
    1  2.656  0.424  0.490  0.415  0.207
@@ -4102,7 +4102,7 @@ Reading of the Wannier weights from data.plowann
 
    cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.5692   -0.0075
 
- 
+
  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
    1  2.915  0.422  0.488  0.413  0.207
@@ -4143,7 +4143,7 @@ Reading of the Wannier weights from data.plowann
 
    cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.5703   -0.0131
 
- 
+
  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
    1  2.127  0.426  0.491  0.415  0.207
@@ -4184,7 +4184,7 @@ Reading of the Wannier weights from data.plowann
 
    cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.5695   -0.0121
 
- 
+
  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
    1  2.342  0.423  0.488  0.413  0.207
@@ -4225,7 +4225,7 @@ Reading of the Wannier weights from data.plowann
 
    cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.5691   -0.0112
 
- 
+
  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
    1  2.644  0.422  0.487  0.412  0.207
@@ -4266,7 +4266,7 @@ Reading of the Wannier weights from data.plowann
 
    cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.5678   -0.0235
 
- 
+
  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
    1  2.754  0.420  0.485  0.411  0.207
@@ -4307,7 +4307,7 @@ Reading of the Wannier weights from data.plowann
 
    cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.5773   -0.0161
 
- 
+
  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
    1  2.552  0.430  0.494  0.422  0.207
@@ -4348,7 +4348,7 @@ Reading of the Wannier weights from data.plowann
 
    cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.5741   -0.0327
 
- 
+
  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
    1  1.726  0.434  0.499  0.422  0.207
@@ -4389,7 +4389,7 @@ Reading of the Wannier weights from data.plowann
 
    cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.5895   -0.0189
 
- 
+
  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
    1  2.149  0.453  0.522  0.444  0.207
@@ -4430,7 +4430,7 @@ Reading of the Wannier weights from data.plowann
 
    cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.5875   -0.0147
 
- 
+
  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
    1  1.632  0.447  0.515  0.439  0.207
@@ -4471,7 +4471,7 @@ Reading of the Wannier weights from data.plowann
 
    cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.5877   -0.0126
 
- 
+
  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
    1  0.516  0.446  0.512  0.436  0.207
@@ -4512,7 +4512,7 @@ Reading of the Wannier weights from data.plowann
 
    cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.5831   -0.0095
 
- 
+
  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
    1  0.898  0.440  0.508  0.431  0.207
@@ -4553,7 +4553,7 @@ Reading of the Wannier weights from data.plowann
 
    cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.5831   -0.0110
 
- 
+
  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
    1 -0.990  0.444  0.509  0.433  0.208
@@ -4594,7 +4594,7 @@ Reading of the Wannier weights from data.plowann
 
    cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.5819   -0.0101
 
- 
+
  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
    1  0.580  0.441  0.507  0.430  0.208
@@ -4635,7 +4635,7 @@ Reading of the Wannier weights from data.plowann
 
    cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.5760   -0.0092
 
- 
+
  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
    1  0.437  0.438  0.504  0.429  0.207
@@ -4676,7 +4676,7 @@ Reading of the Wannier weights from data.plowann
 
    cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.5778   -0.0166
 
- 
+
  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
    1 -1.357  0.438  0.504  0.429  0.208
@@ -4717,7 +4717,7 @@ Reading of the Wannier weights from data.plowann
 
    cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.5710   -0.0202
 
- 
+
  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
    1 -6.630  0.436  0.501  0.426  0.208
@@ -4758,7 +4758,7 @@ Reading of the Wannier weights from data.plowann
 
    cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.5815   -0.0295
 
- 
+
  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
    1 -6.974  0.433  0.499  0.425  0.207
@@ -4799,7 +4799,7 @@ Reading of the Wannier weights from data.plowann
 
    cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.5874   -0.0176
 
- 
+
  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
    1  1.281  0.436  0.502  0.428  0.207
@@ -4840,7 +4840,7 @@ Reading of the Wannier weights from data.plowann
 
    cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.5849   -0.0134
 
- 
+
  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
    1 20.387  0.435  0.500  0.426  0.207
@@ -4881,7 +4881,7 @@ Reading of the Wannier weights from data.plowann
 
    cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.5780   -0.0208
 
- 
+
  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
    1  4.361  0.434  0.500  0.426  0.207
@@ -4922,7 +4922,7 @@ Reading of the Wannier weights from data.plowann
 
    cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.5887   -0.0133
 
- 
+
  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
    1 19.253  0.433  0.498  0.423  0.207
@@ -4963,7 +4963,7 @@ Reading of the Wannier weights from data.plowann
 
    cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.5839   -0.0184
 
- 
+
  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
    1 10.832  0.432  0.498  0.422  0.207
@@ -5004,7 +5004,7 @@ Reading of the Wannier weights from data.plowann
 
    cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.5777   -0.0147
 
- 
+
  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
    1 10.437  0.431  0.496  0.422  0.207
@@ -5045,7 +5045,7 @@ Reading of the Wannier weights from data.plowann
 
    cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.5782   -0.0185
 
- 
+
  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
    1  8.768  0.428  0.493  0.420  0.207
@@ -5086,7 +5086,7 @@ Reading of the Wannier weights from data.plowann
 
    cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.5726   -0.0241
 
- 
+
  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
    1  8.677  0.429  0.495  0.420  0.207
@@ -5127,7 +5127,7 @@ Reading of the Wannier weights from data.plowann
 
    cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.5802   -0.0223
 
- 
+
  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
    1  8.702  0.429  0.494  0.420  0.206
@@ -5168,7 +5168,7 @@ Reading of the Wannier weights from data.plowann
 
    cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.5826   -0.0292
 
- 
+
  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
    1  6.207  0.436  0.501  0.428  0.207
@@ -5209,7 +5209,7 @@ Reading of the Wannier weights from data.plowann
 
    cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.5787   -0.0268
 
- 
+
  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
    1  4.623  0.434  0.500  0.424  0.207
@@ -5250,7 +5250,7 @@ Reading of the Wannier weights from data.plowann
 
    cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.5871   -0.0289
 
- 
+
  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
    1  6.533  0.439  0.502  0.429  0.208
@@ -5291,7 +5291,7 @@ Reading of the Wannier weights from data.plowann
 
    cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.5854   -0.0265
 
- 
+
  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
    1  7.270  0.437  0.501  0.429  0.208
@@ -5332,7 +5332,7 @@ Reading of the Wannier weights from data.plowann
 
    cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.5894   -0.0256
 
- 
+
  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
    1  8.124  0.446  0.507  0.435  0.208
@@ -5373,7 +5373,7 @@ Reading of the Wannier weights from data.plowann
 
    cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.5798   -0.0266
 
- 
+
  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
    1  8.652  0.439  0.501  0.430  0.207
@@ -5414,7 +5414,7 @@ Reading of the Wannier weights from data.plowann
 
    cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.5863   -0.0285
 
- 
+
  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
    1  8.495  0.442  0.504  0.432  0.207
@@ -5455,7 +5455,7 @@ Reading of the Wannier weights from data.plowann
 
    cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.5801   -0.0210
 
- 
+
  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
    1 10.766  0.438  0.502  0.430  0.207
@@ -5496,7 +5496,7 @@ Reading of the Wannier weights from data.plowann
 
    cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.5791   -0.0276
 
- 
+
  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
    1  4.477  0.442  0.505  0.433  0.207
@@ -5537,7 +5537,7 @@ Reading of the Wannier weights from data.plowann
 
    cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.5755   -0.0278
 
- 
+
  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
    1 12.402  0.438  0.501  0.430  0.207
@@ -5578,7 +5578,7 @@ Reading of the Wannier weights from data.plowann
 
    cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.5713   -0.0333
 
- 
+
  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
    1 12.298  0.436  0.500  0.430  0.207
@@ -5619,7 +5619,7 @@ Reading of the Wannier weights from data.plowann
 
    cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.5811   -0.0419
 
- 
+
  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
    1 10.561  0.438  0.503  0.428  0.207
@@ -5660,7 +5660,7 @@ Reading of the Wannier weights from data.plowann
 
    cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.5738   -0.0416
 
- 
+
  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
    1  9.489  0.443  0.507  0.430  0.207
@@ -5701,7 +5701,7 @@ Reading of the Wannier weights from data.plowann
 
    cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.5894   -0.0398
 
- 
+
  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
    1  8.161  0.438  0.502  0.427  0.207
@@ -5742,7 +5742,7 @@ Reading of the Wannier weights from data.plowann
 
    cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.5819   -0.0634
 
- 
+
  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
    1 10.205  0.439  0.503  0.429  0.208
@@ -5783,7 +5783,7 @@ Reading of the Wannier weights from data.plowann
 
    cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.6055   -0.0478
 
- 
+
  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
    1  4.424  0.440  0.502  0.430  0.208
@@ -5824,7 +5824,7 @@ Reading of the Wannier weights from data.plowann
 
    cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.6015   -0.0377
 
- 
+
  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
    1  9.965  0.435  0.501  0.426  0.207
@@ -5865,7 +5865,7 @@ Reading of the Wannier weights from data.plowann
 
    cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.5930   -0.0295
 
- 
+
  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
    1  9.967  0.439  0.501  0.430  0.207
@@ -5873,11 +5873,11 @@ Reading of the Wannier weights from data.plowann
    3  0.501  0.285 10.609  0.361  0.478
    4  0.430  0.435  0.361  9.943  0.427
    5  0.207  0.430  0.478  0.427 10.349
- 
+
 ==Reminder of the orbitals==
   Only one orbital
   Orbital with l=           2 on atom           1 with spin's orientations Up-Up
- 
+
   -------------------------------------------------------------
             Average U and J as a function of frequency
    -------------------------------------------------------------
@@ -5936,7 +5936,7 @@ Reading of the Wannier weights from data.plowann
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      7.2605000000E+00  7.2605000000E+00  7.2605000000E+00 Bohr
               amu      5.09415000E+01  8.76200000E+01  1.59994000E+01
@@ -6431,7 +6431,7 @@ P           mkmem           1
  of the ABINIT implementation.
  For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
-- [1] Screened Coulomb interaction calculations: cRPA implementation and applications 
+- [1] Screened Coulomb interaction calculations: cRPA implementation and applications
 - to dynamical screening and self-consistency in uranium dioxide and cerium
 - B. Amadon, T. Applencourt and F. Bruneval  Phys. Rev. B 89, 125110 (2014).
 - Comment: Describes the cRPA implementation of the screened Coulomb interaction in PAW
@@ -6465,7 +6465,7 @@ P           mkmem           1
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -6483,7 +6483,7 @@ P           mkmem           1
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -6496,7 +6496,7 @@ P           mkmem           1
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
