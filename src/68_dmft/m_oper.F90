@@ -994,8 +994,10 @@ call nvtxStartRange("downfold_oper",20)
              &    ndim_max,oper%ks(:,:,ikpt,isppol),mbandc,czero,mat_temp(:,:,:),ndim)
            else if(l_gpu_option == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-             call abi_gpu_xgemm(2,"n","n",ndim,mbandc*ndat,mbandc,cone,chipsi(:,:,ik,isppol,iatom),&
-             &    ndim_max,ks(:,:,ikpt,isppol),mbandc,czero,mat_temp(:,:,:),ndim)
+             !$OMP TARGET DATA USE_DEVICE_PTR(mat_temp,chipsi,ks)
+             call abi_gpu_xgemm(2,"n","n",ndim,mbandc*ndat,mbandc,cone,c_loc(chipsi(:,:,ik,isppol,iatom)),&
+             &    ndim_max,c_loc(ks(:,:,ikpt,isppol)),mbandc,czero,c_loc(mat_temp(:,:,:)),ndim)
+             !$OMP END TARGET DATA
 #endif
            end if
 
@@ -1054,8 +1056,10 @@ call nvtxStartRange("downfold_oper",20)
            end do ! ndat
 #else
 #ifdef HAVE_OPENMP_OFFLOAD
-           call abi_gpu_xgemm_strided(2,'n','c',ndim,ndim,mbandc,cone,mat_temp(:,:,:),ndim,ndim*mbandc,&
-           &    paw_dmft%chipsi(:,:,ik,isppol,iatom),ndim_max,0,czero,mat_temp2(:,:,:),ndim,ndim*ndim,ndat)
+           !$OMP TARGET DATA USE_DEVICE_PTR(mat_temp,chipsi,mat_temp2)
+           call abi_gpu_xgemm_strided(2,'n','c',ndim,ndim,mbandc,cone,c_loc(mat_temp(:,:,:)),ndim,ndim*mbandc,&
+           &    c_loc(chipsi(:,:,ik,isppol,iatom)),ndim_max,0,czero,c_loc(mat_temp2(:,:,:)),ndim,ndim*ndim,ndat)
+           !$OMP END TARGET DATA
 #endif
 #endif
          end if
@@ -1270,8 +1274,10 @@ subroutine upfold_oper(oper,paw_dmft,procb,iproc,gpu_option)
 
        else if(l_gpu_option == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-         call abi_gpu_xgemm(2,"c","n",mbandc,ndat*ndim,ndim,cone,paw_dmft%chipsi(:,:,ik,isppol,iatom),&
-                      & ndim,oper%matlu(iatom)%mat(:,:,(isppol-1)*ndat+1:isppol*ndat),ndim,czero,mat_temp(:,:,:),mbandc)
+         !$OMP TARGET DATA USE_DEVICE_PTR(mat_temp,chipsi,mat)
+         call abi_gpu_xgemm(2,"c","n",mbandc,ndat*ndim,ndim,cone,c_loc(chipsi(:,:,ik,isppol,iatom)),&
+         &    ndim,c_loc(mat(:,:,(isppol-1)*ndat+1:isppol*ndat)),ndim,czero,c_loc(mat_temp(:,:,:)),mbandc)
+         !$OMP END TARGET DATA
 
 #if 0
          do idat=1,ndat
@@ -1279,8 +1285,10 @@ subroutine upfold_oper(oper,paw_dmft,procb,iproc,gpu_option)
            &    paw_dmft%chipsi(:,:,ik,isppol,iatom),ndim_max,  czero,mat_temp2(:,:,idat),mbandc)
          end do ! idat
 #else
-         call abi_gpu_xgemm_strided(2,'n','n',mbandc,mbandc,ndim,cone,mat_temp(:,:,:),mbandc,ndim*mbandc,&
-         &    paw_dmft%chipsi(:,:,ik,isppol,iatom),ndim_max,0,czero,mat_temp2(:,:,:),mbandc,mbandc*mbandc,ndat)
+         !$OMP TARGET DATA USE_DEVICE_PTR(mat_temp,chipsi,mat_temp2)
+         call abi_gpu_xgemm_strided(2,'n','n',mbandc,mbandc,ndim,cone,c_loc(mat_temp(:,:,:)),mbandc,ndim*mbandc,&
+         &    c_loc(chipsi(:,:,ik,isppol,iatom)),ndim_max,0,czero,c_loc(mat_temp2(:,:,:)),mbandc,mbandc*mbandc,ndat)
+         !$OMP END TARGET DATA
 #endif
          !$OMP TARGET DATA USE_DEVICE_PTR(ks,mat_temp2)
          call abi_gpu_xaxpy(2, mbandc*mbandc*ndat, cone, &
