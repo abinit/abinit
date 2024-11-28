@@ -284,7 +284,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
      write(message,'(5a)') ch10,"   == Hamiltonian in local basis is diagonal in the Slm basis ",ch10, &
         & "      CTQMC will use this basis",ch10
      opt_diag = 0
-   end if ! nondiaglevels or useylm or triqs
+   end if ! nondiaglevels or useylm
  else if (paw_dmft%dmftctqmc_basis == 0) then
    if (nondiaglevels) then
      write(message,'(4a)') ch10,"   == Hamiltonian in local basis is non diagonal",ch10, &
@@ -1676,7 +1676,10 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
      call shift_matlu(weiss%oper(ifreq)%matlu(:),natom,shift(:))
      call fac_matlu(weiss%oper(ifreq)%matlu(:),natom,-cone)
      call add_matlu(weiss%oper(ifreq)%matlu(:),energy_level%matlu(:),matlu1(:),natom,-1)
+
+     ! Remove spurious 0th order moment of the hybridization
      call add_matlu(matlu1(:),weiss%moments(1)%matlu(:),weiss%oper(ifreq)%matlu(:),natom,-1)
+
      call zero_matlu(weiss%oper(ifreq)%matlu(:),natom,onlynondiag=option,maxoffdiag=maxoffdiag_)
      if (maxoffdiag_ > maxoffdiag) maxoffdiag = maxoffdiag_
 
@@ -3424,7 +3427,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
 
  if (paw_dmft%dmft_integral == 0 .or. paw_dmft%dmftctqmc_triqs_entropy == 0) ntot = 1
 
- ABI_MALLOC(lam_list,(ntot))
+ ABI_MALLOC(lam_list,(ntot)) ! scaling factor of U matrix for thermodynamic integration
  lam_list(ntot) = one
 
  ! Prepare Gauss-Legendre quadrature for thermodynamic integration over U
@@ -3457,6 +3460,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
 
  end if ! dmft_integral=1
 
+ ! Solve impurity model for each atom
  do iatom=1,natom
 
    lpawu = paw_dmft%lpawu(iatom)
@@ -3531,7 +3535,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
 
    do ilam=1,ntot
 
-     iilam = ilam
+     iilam = ilam ! lambda index to write files
      if (ilam == ntot) iilam = 0
 
 #if defined HAVE_TRIQS_v3_4
@@ -3647,6 +3651,14 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
          do im=1,tndim
            iflavor = im + (isppol-1)*ndim
 
+           ! Replace the diagonal elements of G(0+) by the more accurate <c_i^d c_i> - 1,
+           ! directy sampled from the Monte-Carlo. If the density matrix is implemented in TRIQS
+           ! for the off-diagonal elements someday, this should also be done for the
+           ! off-diagonal elements (only for dmft_solv=7, as <c_j^d c_i> cannot
+           ! be sampled in the density-density approximation if i/=j).
+           ! In that case, please do not forget to declare occ as a complex
+           ! array, and to initialize it to 0.
+
            if (nsppol == 1 .and. nspinor == 1) then
              occ_tmp = cmplx((occ(iflavor)+occ(iflavor+ndim))*half,zero,kind=dp)
            else
@@ -3666,6 +3678,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
 
      ABI_MALLOC(gl_tmp,(nleg,tndim,tndim,nsppol))
      ABI_MALLOC(jbes,(nleg))
+     gl_tmp(:,:,:,:) = czero
      do ifreq=1,nwlo
        xx = dble(2*ifreq-1) * pi / two
        if (xx <= dble(100)) then
@@ -3701,6 +3714,8 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
 
      fact = one ! this is equal to (p-1)!
 
+     ! Compute analytical moments of Fourier transform of Legendre polynomial
+     ! (equation (E2) of PRB, 84(7), 2011, Boehnke et al)
      do p=1,green%nmoments
        if (p > 1) fact = fact * dble(p-1)
        fact2 = fact
@@ -3737,10 +3752,14 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
      ABI_MALLOC(bdlr,(ntau))
      ABI_MALLOC(gtau_dlr,(ntau,nflavor,nflavor))
 
-     ncon = 1
-     if (density_matrix_measure) ncon = 4
-     ABI_MALLOC(mgreen,(max(1,ncon-1)))
-     nmoments = max(1,ncon-1)
+     gtau_dlr(:,:,:) = czero
+
+     ! Constrain the first three moments of the Green's function, as
+     ! well as G(0+) in the diagonal case, since they can be sampled
+     ! very accurately from the Monte-Carlo
+     nmoments = 1
+     if (density_matrix_measure) nmoments = 3
+     ABI_MALLOC(mgreen,(nmoments))
 
      do isppol=1,nsppol
        do im1=1,tndim
@@ -3748,10 +3767,10 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
          do im=1,tndim
            iflavor = im + (isppol-1)*ndim
 
-           if (iflavor == iflavor1) then
-             ncon = 4
-           else
+           ncon = 1
+           if (density_matrix_measure) then
              ncon = 3
+             if (iflavor == iflavor1) ncon = 4
            end if
 
            if (nsppol == 1 .and. nspinor == 1) gtau(:,iflavor,iflavor1) = &
@@ -3762,11 +3781,15 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
            end do ! i
            occ_tmp = dble(green%oper_tau(1)%matlu(iatom)%mat(im,im1,isppol))
            call fit_dlr(ncon,ndlr,lsq_g,con_moments,jac_lsq_g,jac_con_moments,gl_dlr_re(:))
+
+           if (density_matrix_measure) ncon = 3
+
            bdlr(:) = aimag(gtau(:,iflavor,iflavor1))
            do i=1,nmoments
              mgreen(i) = aimag(green%moments(i)%matlu(iatom)%mat(im,im1,isppol))
            end do ! i
            call fit_dlr(ncon,ndlr,lsq_g,con_moments,jac_lsq_g,jac_con_moments,gl_dlr_im(:))
+
            gl_dlr(:,im,im1,isppol) = cmplx(gl_dlr_re(:),gl_dlr_im(:),kind=dp)
            green%moments(1)%matlu(iatom)%mat(im,im1,isppol) = sum(gl_dlr(:,im,im1,isppol))
            green%moments(2)%matlu(iatom)%mat(im,im1,isppol) = sum(gl_dlr(:,im,im1,isppol)*wdlr_beta(:))
