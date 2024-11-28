@@ -20,13 +20,13 @@ extern "C"{
                           int nbins_histo, int rank, int nspinor, int iatom, int ilam, double beta, double move_global_prob,
                           double imag_threshold, double det_precision_warning, double det_precision_error,
                           double det_singular_threshold, double lam, complex<double> *ftau, complex<double> *gtau,
-                          complex<double> *gl, complex<double> *udens, complex<double> *vee, complex<double> *levels,
-                          complex<double> *moments_self_1, complex<double> *moments_self_2, double *Eu, double *occ ) ;
+                          complex<double> *gl, complex<double> *udens_cmplx, complex<double> *vee_cmplx, complex<double> *levels_cmplx,
+                          complex<double> *moments_self_1, complex<double> *moments_self_2, double *eu, double *occ ) ;
 
-    many_body_op_t init_Hamiltonian( complex<double> *eps, int nflavor, complex<double> *U, bool orb_off_diag,
+    many_body_op_t init_Hamiltonian( h_scalar_t *eps, int nflavor, h_scalar_t *udens, bool orb_off_diag,
                                      bool spin_off_diag, double lambda, std::vector<string> &labels );
 
-    many_body_op_t init_fullHamiltonian( complex<double> *eps, int nflavor, complex<double> *U, bool orb_off_diag,
+    many_body_op_t init_fullHamiltonian( h_scalar_t *eps, int nflavor, h_scalar_t *vee, bool orb_off_diag,
                                          bool spin_off_diag, double lambda, std::vector<string> &labels );
 
     pair<int,int> convert_indexes(int iflavor, bool off_diag, bool spin_off_diag, int ndim);

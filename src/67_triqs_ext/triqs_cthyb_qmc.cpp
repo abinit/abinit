@@ -17,14 +17,16 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
                      int nspinor, int iatom, int ilam, double beta, double move_global_prob, double imag_threshold,
                      double det_precision_warning, double det_precision_error, double det_singular_threshold,
                      double lam, complex<double> *ftau, complex<double> *gtau, complex<double> *gl,
-                     complex<double> *udens, complex<double> *vee, complex<double> *levels,
-                     complex<double> *moments_self_1, complex<double> *moments_self_2, double *Eu, double *occ) {
+                     complex<double> *udens_cmplx, complex<double> *vee_cmplx, complex<double> *levels_cmplx,
+                     complex<double> *moments_self_1, complex<double> *moments_self_2, double *eu, double *occ) {
 
   cout.setf(ios::fixed);
 
   int verbo = 1;
   int ndim = num_orbitals / 2;
-  string config_fname = "configs_iatom_"+to_string(iatom)+"_ilam_"+to_string(ilam)+".h5";
+  string lam_fname = "";
+  if (ilam != 0) lam_fname = "_ilam_" + to_string(ilam);
+  string config_fname = "configs_iatom_" + to_string(iatom) + lam_fname + ".h5";
   auto comm = MPI_COMM_WORLD;
   int size;
   MPI_Comm_size(comm,&size);
@@ -67,31 +69,55 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
   }
 
   // Hamiltonian definition
-  many_body_operator Hint;
   many_body_op_t H;
+  many_body_operator Hint;
+  h_scalar_t *levels,*udens,*vee;
 
-  complex<double> levels_tmp [num_orbitals*num_orbitals] = {0};
+#if defined HAVE_TRIQS_COMPLEX
+  levels = levels_cmplx;
+  udens = udens_cmplx;
+  vee = vee_cmplx;
+#else
+  double levels_real [num_orbitals*num_orbitals] = {};
+  double udens_real [num_orbitals*num_orbitals] = {};
+  double vee_real [num_orbitals*num_orbitals*num_orbitals*num_orbitals] = {};
+  for (int i = 0; i < num_orbitals*num_orbitals; ++i) {
+    levels_real[i] = levels_cmplx[i].real();
+    udens_real[i]  = udens_cmplx[i].real();
+  }
+  for (int i = 0; i < num_orbitals*num_orbitals*num_orbitals*num_orbitals; ++i)
+    vee_real[i] = vee_cmplx[i].real();
+  levels = levels_real;
+  udens = udens_real;
+  vee = vee_real;
+#endif
+
+  h_scalar_t levels_tmp [num_orbitals*num_orbitals] = {0};
   int nblocks,siz_block;
 
   if (!orb_off_diag && !spin_off_diag) {
+    // 1*1 block for each flavor
     nblocks = num_orbitals;
     siz_block = 1;
   }
   if (orb_off_diag && !spin_off_diag) {
+    // n/2*n/2 blocks for each spin (named up and down)
     nblocks = 2;
     siz_block = ndim;
   }
   if (!orb_off_diag && spin_off_diag) {
+    // 2*2 blocks for each orbital (named 0 to n/2-1)
     nblocks = ndim;
     siz_block = 2;
   }
   if (orb_off_diag && spin_off_diag) {
+    // n*n block (named tot)
     nblocks = 1;
     siz_block = num_orbitals;
   }
 
   std::vector<string> labels(nblocks);
-  std::vector<pair<string,long>> gf_struct;
+  triqs::gfs::gf_struct_t gf_struct;
 
   if (!orb_off_diag && !spin_off_diag) {
     for (int o = 0; o < num_orbitals; ++o)
@@ -122,7 +148,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
   else {
     if (rank == 0 && verbo > 0) cout << "   == Rotationally Invariant Terms Included ==  " << endl << endl;
     H = init_fullHamiltonian(levels,num_orbitals,vee,orb_off_diag,spin_off_diag,lam,labels);
-    Hint = init_Hamiltonian(levels_tmp,num_orbitals,vee,orb_off_diag,spin_off_diag,double(1),labels);
+    Hint = init_fullHamiltonian(levels_tmp,num_orbitals,vee,orb_off_diag,spin_off_diag,double(1),labels);
   }
 
   // Construct CTQMC solver with mesh parameters
@@ -216,7 +242,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
           tag_move = "insert";
         else
           tag_move = "remove";
-        string fname = "histogram_"+tag_move+"_"+labels[i];
+        string fname = "histogram_" + tag_move + "_" + labels[i] + "_iatom_" + to_string(iatom) + lam_fname;
         if (!exists(fname)) {
           verif_histo = false;
           break;
@@ -348,7 +374,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
         }
         if (rank == 0) {
           ofstream hist_file;
-          hist_file.open("histogram_"+tag_move+"_"+labels[j]);
+          hist_file.open("histogram_"+tag_move+"_"+labels[j]+"_iatom_"+to_string(iatom)+lam_fname);
           for (int k = 0; k < nbins_histo; ++k) {
             hist_file << double(k) * beta / double(nbins_histo - 1) << "\t" << hist_accept.data()[k] / s  << endl;
           }
@@ -391,15 +417,15 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
   if (measure_density_matrix) {
 
     auto h_loc_diag = solver.h_loc_diagonalization();
-    many_body_operator N_op;
+    many_body_operator n_op;
     auto subspaces = h_loc_diag.n_subspaces();
     auto rho = solver.density_matrix();
 
     for (int iblock = 0; iblock < nblocks; ++iblock) {
       for (int o = 0; o < siz_block; ++o) {
         int iflavor = convert_indexes_back(iblock,o,orb_off_diag,spin_off_diag,ndim);
-        N_op = c_dag(labels[iblock],o) * c(labels[iblock],o);
-        occ[iflavor] = trace_rho_op(rho,N_op,h_loc_diag);
+        n_op = c_dag(labels[iblock],o) * c(labels[iblock],o);
+        occ[iflavor] = trace_rho_op(rho,n_op,h_loc_diag);
       }
     }
 
@@ -411,22 +437,25 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
         auto fock_states = h_loc_diag.get_fock_states(sub);
         int sub_dim = h_loc_diag.get_subspace_dim(sub);
         auto unit_mat = h_loc_diag.get_unitary_matrix(sub);
-        auto rho_temp = unit_mat * rho[sub] * dagger(unit_mat);  // transform density matrix to Fock basis
+        auto rho_tmp = unit_mat * rho[sub] * dagger(unit_mat);  // transform density matrix to Fock basis
         for (int ind : range(sub_dim)) {
           auto f_state = fock_states[ind];
-          auto prob = rho_temp(ind,ind);
+          auto prob = rho_tmp(ind,ind);
           occ_file << bitset<64>(f_state).to_string().substr(64-num_orbitals) << "\t" << scientific << setprecision(17) << prob << endl;
         }
       }
     }
 
-    *Eu = trace_rho_op(rho,Hint,h_loc_diag);
+    *eu = trace_rho_op(rho,Hint,h_loc_diag);
 
-    if (!leg_measure) {   // Get moments of the self-energy
+    if (!leg_measure) { // Get moments of the self-energy
 
       many_body_operator commut,commut2,Sinf_op,S1_op;
 
       auto Sinf_mat = matrix_t(siz_block,siz_block);
+
+      // I use slightly different formulas than the ones used in TRIQS.
+      // This is because their formula is wrong, and mine is correct.
 
       for (int iblock = 0; iblock < nblocks; ++iblock) {
         for (int o = 0; o < siz_block; ++o) {
@@ -448,7 +477,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
         for (int o = 0; o < siz_block; ++o) {
           int iflavor = convert_indexes_back(iblock,o,orb_off_diag,spin_off_diag,ndim);
           for (int oo = 0; oo < siz_block; ++oo) {
-            int iflavor1 = convert_indexes_back(iblock,o,orb_off_diag,spin_off_diag,ndim);
+            int iflavor1 = convert_indexes_back(iblock,oo,orb_off_diag,spin_off_diag,ndim);
             moments_self_2[iflavor+iflavor1*num_orbitals] -= Sinf_mat(o,oo);
           }
         }
@@ -463,7 +492,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
 /********************************************************/
 
 // Build density-density Hamiltonian
-many_body_op_t init_Hamiltonian(complex<double> *eps, int nflavor, complex<double> *U,
+many_body_op_t init_Hamiltonian(h_scalar_t *eps, int nflavor, h_scalar_t *udens,
                                 bool orb_off_diag, bool spin_off_diag, double lambda,
                                 std::vector<string> &labels) {
 
@@ -474,20 +503,15 @@ many_body_op_t init_Hamiltonian(complex<double> *eps, int nflavor, complex<doubl
     tie(iblock,o) = convert_indexes(i,orb_off_diag,spin_off_diag,nflavor/2);
     for (int j = 0; j < nflavor; ++j) {
       tie(iblock1,oo) = convert_indexes(j,orb_off_diag,spin_off_diag,nflavor/2);
-#if defined HAVE_TRIQS_COMPLEX
-      H += 0.5 * lambda * U[i+j*nflavor] * n(labels[iblock],o) * n(labels[iblock1],oo);
+      H += 0.5 * lambda * udens[i+j*nflavor] * n(labels[iblock],o) * n(labels[iblock1],oo);
       H += eps[i+j*nflavor] * c_dag(labels[iblock],o) * c(labels[iblock1],oo);
-#else
-      H += 0.5 * lambda * U[i+j*nflavor].real() * n(labels[iblock],o) * n(labels[iblock1],oo);
-      H += eps[i+j*nflavor].real() * c_dag(labels[iblock],o) * c(labels[iblock1],oo);
-#endif
     }
   }
   return H;
 }
 
 // Build full Hamiltonian
-many_body_op_t init_fullHamiltonian(complex<double> *eps, int nflavor, complex<double> *U,
+many_body_op_t init_fullHamiltonian(h_scalar_t *eps, int nflavor, h_scalar_t *vee,
                                     bool orb_off_diag, bool spin_off_diag, double lambda,
                                     std::vector<string> &labels) {
 
@@ -498,22 +522,13 @@ many_body_op_t init_fullHamiltonian(complex<double> *eps, int nflavor, complex<d
     tie(iblock,o) = convert_indexes(i,orb_off_diag,spin_off_diag,nflavor/2);
     for (int j = 0; j < nflavor; ++j) {
       tie(iblock1,oo) = convert_indexes(j,orb_off_diag,spin_off_diag,nflavor/2);
-#if defined HAVE_TRIQS_COMPLEX
       H += eps[i+j*nflavor] * c_dag(labels[iblock],o) * c(labels[iblock1],oo);
-#else
-      H += eps[i+j*nflavor].real() * c_dag(labels[iblock],o) * c(labels[iblock1],oo);
-#endif
       for (int k = 0; k < nflavor; ++k) {
         tie(iblock2,ooo) = convert_indexes(k,orb_off_diag,spin_off_diag,nflavor/2);
         for (int l = 0; l < nflavor; ++l) {
           tie(iblock3,oooo) = convert_indexes(l,orb_off_diag,spin_off_diag,nflavor/2);
-#if defined HAVE_TRIQS_COMPLEX
-          H += 0.5 * lambda * U[i+j*nflavor+k*nflavor*nflavor+l*nflavor*nflavor*nflavor] * c_dag(labels[iblock],o) *
+          H += 0.5 * lambda * vee[i+j*nflavor+k*nflavor*nflavor+l*nflavor*nflavor*nflavor] * c_dag(labels[iblock],o) *
                c_dag(labels[iblock1],oo) * c(labels[iblock3],oooo) * c(labels[iblock2],ooo);
-#else
-          H += 0.5 * lambda * U[i+j*nflavor+k*nflavor*nflavor+l*nflavor*nflavor*nflavor].real() * c_dag(labels[iblock],o) *
-               c_dag(labels[iblock1],oo) * c(labels[iblock3],oooo) * c(labels[iblock2],ooo);
-#endif
         }
       }
     }
