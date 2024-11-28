@@ -153,9 +153,9 @@ devoted to the building of the PAW atomic data, for a complete understanding of 
 
 ```
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /Users/torrentm/WORK/ABINIT/GIT/beauty/tests//Psps_for_tests/Pseudodojo_paw_pw_standard/C.xml
-- pspatm: opening atomic psp file    /Users/torrentm/WORK/ABINIT/GIT/beauty/tests//Psps_for_tests/Pseudodojo_paw_pw_standard/C.xml
-- pspatm : Reading pseudopotential header in XML form from /Users/torrentm/WORK/ABINIT/GIT/beauty/tests//Psps_for_tests/Pseudodojo_paw_pw_standard/C.xml
+- pspini: atom type   1  psp file is /Users/torrentm/WORK/ABINIT/GIT/beauty/tests//Pspdir/Pseudodojo_paw_pw_standard/C.xml
+- pspatm: opening atomic psp file    /Users/torrentm/WORK/ABINIT/GIT/beauty/tests//Pspdir/Pseudodojo_paw_pw_standard/C.xml
+- pspatm : Reading pseudopotential header in XML form from /Users/torrentm/WORK/ABINIT/GIT/beauty/tests//Pspdir/Pseudodojo_paw_pw_standard/C.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.50736703

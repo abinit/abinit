@@ -31,6 +31,9 @@ Xavier
 
 By M. Torrent (MR1069)
 
+**A.2** Renaming tests/Psps_for_tests to tests/Pspdir
+
+By X. Gonze (fc5345534a and subsequent commits)
 
 * * *
 

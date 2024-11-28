@@ -47,19 +47,19 @@ adpimd 0 adpimd_gamma 1.
 #DATASET 1: langevin + primitive coordinates
 imgmov1 9
 irandom1 1
-vis1 5.0d-04
+friction1 5.0d-04
 pitransform1 0  #primitive
 
 #DATASET 2: langevin + normal mode coordinates
 imgmov2 9
 irandom2 1
-vis2 5.0d-04
+friction2 5.0d-04
 pitransform2 2  #normal mode
 
 #DATASET 3: langevin + staging coordinates
 imgmov3 9
 irandom3 1
-vis3 5.0d-04
+friction3 5.0d-04
 pitransform3 2  #staging
 
 #DATASET 4: Nose-Hoover chains + primitive coordinates

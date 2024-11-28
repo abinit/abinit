@@ -776,8 +776,8 @@ P    mkmem9        1
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gonze/ABINIT/ABINITv5.6/trunk/devel-private3/tests/Psps_for_tests/6c_lda.paw
-- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv5.6/trunk/devel-private3/tests/Psps_for_tests/6c_lda.paw
+- pspini: atom type   1  psp file is /home/gonze/ABINIT/ABINITv5.6/trunk/devel-private3/tests/Pspdir/6c_lda.paw
+- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv5.6/trunk/devel-private3/tests/Pspdir/6c_lda.paw
 - Paw atomic data extracted from US-psp (D.Vanderbilt): carbon
    6.00000   4.00000  20041014                znucl, zion, pspdat
     7    2    1    0       467   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3152,8 +3152,8 @@ P newkpt: treating     12 bands with npw=      63 for ikpt=   1 by node    0
          ecut(hartree)=     60.500   => boxcut(ratio)=   2.07719
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gonze/ABINIT/ABINITv5.6/trunk/devel-private3/tests/Psps_for_tests/6c_lda.paw
-- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv5.6/trunk/devel-private3/tests/Psps_for_tests/6c_lda.paw
+- pspini: atom type   1  psp file is /home/gonze/ABINIT/ABINITv5.6/trunk/devel-private3/tests/Pspdir/6c_lda.paw
+- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv5.6/trunk/devel-private3/tests/Pspdir/6c_lda.paw
 - Paw atomic data extracted from US-psp (D.Vanderbilt): carbon
    6.00000   4.00000  20041014                znucl, zion, pspdat
     7    2    1    0       467   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4756,8 +4756,8 @@ P newkpt: treating     12 bands with npw=      88 for ikpt=  30 by node    0
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gonze/ABINIT/ABINITv5.6/trunk/devel-private3/tests/Psps_for_tests/6c_lda.paw
-- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv5.6/trunk/devel-private3/tests/Psps_for_tests/6c_lda.paw
+- pspini: atom type   1  psp file is /home/gonze/ABINIT/ABINITv5.6/trunk/devel-private3/tests/Pspdir/6c_lda.paw
+- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv5.6/trunk/devel-private3/tests/Pspdir/6c_lda.paw
 - Paw atomic data extracted from US-psp (D.Vanderbilt): carbon
    6.00000   4.00000  20041014                znucl, zion, pspdat
     7    2    1    0       467   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
