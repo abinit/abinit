@@ -382,16 +382,16 @@ def enclose(lines, magic_line, filepath):
         start = lines.index(magic_line)
     except ValueError:
         #print(lines)
-        raise ValueError(f"Cannot find {magic_line=} in {filepath=}")
+        raise ValueError("Cannot find magic_line=%s in filepath=%s" % (magic_line, filepath))
 
     for i, l in enumerate(lines[start:]):
         if l.endswith(")"):
             if len(l.strip()) > 1:
-                raise RuntimeError(f"Closing `)` should be placed on a separate line while got: {l=} in {filepath=}")
+                raise RuntimeError("Closing `)` should be placed on a separate line while got: l=%s in filepath=%" % (l, filepath))
             return start, i + start + 1
 
     #print(lines)
-    raise ValueError(f"Cannot find closing `)` after {magic_line=} in {filepath=}")
+    raise ValueError("Cannot find closing `)` after magic_line=%s in filepath=%s" % (magic_line, filepath))
 
 
 def parse_extra_dist(filepath, varname):
