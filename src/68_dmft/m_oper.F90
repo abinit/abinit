@@ -443,11 +443,11 @@ subroutine copy_oper_from_ndat(oper1,oper2,ndat,nw,proct,me_freq,copy_ks)
 
 !Arguments ------------------------------------
 !type
- type(oper_type),target,intent(in) :: oper1
- type(oper_type),intent(inout) :: oper2(nw) !vz_i
  integer,intent(in) :: nw,ndat,me_freq
  logical,intent(in) :: copy_ks
  integer,intent(in) :: proct(nw)
+ type(oper_type),target,intent(in) :: oper1
+ type(oper_type),intent(inout) :: oper2(nw) !vz_i
 
 !oper variables-------------------------------
  integer ::  ikpt, isppol, idat, iw, iatom, mbandc
@@ -513,11 +513,11 @@ subroutine copy_oper_to_ndat(oper1,oper2,ndat,nw,proct,me_freq,copy_ks)
 
 !Arguments ------------------------------------
 !type
- type(oper_type),intent(in) :: oper1(nw)
- type(oper_type),target,intent(inout) :: oper2 !vz_i
  integer,intent(in) :: nw,ndat,me_freq
  logical,intent(in) :: copy_ks
  integer,intent(in) :: proct(nw)
+ type(oper_type),intent(in) :: oper1(nw)
+ type(oper_type),target,intent(inout) :: oper2 !vz_i
 
 !oper variables-------------------------------
  integer :: ikpt, isppol, idat, iw, iatom, mbandc
