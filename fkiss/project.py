@@ -71,6 +71,7 @@ EXTERNAL_MODS = {
 
 
 def load_mod(filepath):
+    """To maintain compatibility with py <= 3.12"""
     try:
         import imp
         return imp.load_source(filepath, filepath)
