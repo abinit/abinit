@@ -179,7 +179,9 @@ subroutine init_matlu(natom,nspinor,nsppol,lpawu_natom,matlu,gpu_option)
    else if(l_gpu_option==ABI_GPU_OPENMP) then
      matlu(iatom)%mat(:,:,:) = czero
      mat => matlu(iatom)%mat ! array of structs in OpenMP loosely supported
+#ifdef HAVE_OPENMP_OFFLOAD
      !$OMP TARGET ENTER DATA MAP(alloc:mat)
+#endif
      call gpu_set_to_zero_complex(matlu(iatom)%mat, int(nsppol,c_size_t)*ndim*ndim)
    end if
 
@@ -271,7 +273,9 @@ subroutine destroy_matlu(matlu,natom)
  do iatom=1,natom
    mat => matlu(iatom)%mat ! array of structs in OpenMP loosely supported
    if(matlu(iatom)%gpu_option==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
      !$OMP TARGET EXIT DATA MAP(delete:mat)
+#endif
    end if
    ABI_SFREE(matlu(iatom)%mat)
  end do ! iatom
