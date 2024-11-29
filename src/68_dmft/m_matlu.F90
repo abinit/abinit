@@ -1185,7 +1185,9 @@ subroutine diff_matlu(char1,char2,matlu1,matlu2,natom,option,toldiff,ierr,zero_o
      call wrtout(std_out,message,'COLL')
    else if (option == 1) then
      call flush_unit(std_out)
-     ABI_ERROR("option==1, aborting now!")
+     write(message,'(5a,6x,3a,4x,e12.4,a,e12.4)') ch10,'   ** Differences between ',trim(char1),' and ',&
+       & ch10,trim(char2),' are too high:',ch10,matludiff,' is greater than',toldiff
+     ABI_ERROR(message)
    end if ! zero_or_one
    if (present(ierr)) ierr = -1
  end if ! matludiff < toldiff
