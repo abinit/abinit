@@ -23,7 +23,7 @@
 - root for output files -> t11o
 
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/13_Al_atom.psml
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/13_Al_atom.psml
 - psxml2ab: ps_Number_of_Projectors not relativistic     4
 - psxml2ab: ps_Number_of_Projectors scalar relativistic     0
 - psxml2ab: ps_Projector_L     0
@@ -360,8 +360,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 5, paral_kgb: 0, }
          ecut(hartree)=      8.470   => boxcut(ratio)=   2.02466
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/13_Al_atom.psml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/13_Al_atom.psml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/13_Al_atom.psml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/13_Al_atom.psml
 - Al    ATM4.2.6
 - 13.00000   3.00000         0                znucl, zion, pspdat
     9   -1009    3   -1        -1   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -524,8 +524,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 5, paral_kgb: 0, }
          ecut(hartree)=      9.680   => boxcut(ratio)=   2.15349
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/13_Al_atom.psml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/13_Al_atom.psml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/13_Al_atom.psml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/13_Al_atom.psml
 - Al    ATM4.2.6
 - 13.00000   3.00000         0                znucl, zion, pspdat
     9   -1009    3   -1        -1   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -687,8 +687,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 5, paral_kgb: 0, }
          ecut(hartree)=     10.890   => boxcut(ratio)=   2.03033
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/13_Al_atom.psml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/13_Al_atom.psml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/13_Al_atom.psml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/13_Al_atom.psml
 - Al    ATM4.2.6
 - 13.00000   3.00000         0                znucl, zion, pspdat
     9   -1009    3   -1        -1   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well

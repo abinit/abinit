@@ -69,7 +69,7 @@ toldfe 1.0d-8          # Total energy difference to achieve
 # 7- Pseudopotentials
 # -----------------------------------------------------
  pp_dirpath "$ABI_PSPDIR"
- pseudos "Pseudodojo_paw_pw_standard/Al.xml"
+ pseudos "Psdj_paw_pw_std/Al.xml"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
