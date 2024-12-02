@@ -307,8 +307,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     12.000   => boxcut(ratio)=   2.13964
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/13alpos.psppos
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/13alpos.psppos
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/13alpos.psppos
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/13alpos.psppos
 - Alu, fhi98PP : Troullier-Martins-type, LDA CA PerdewWang, l=1 local
 - 13.00000   3.00000    990622                znucl, zion, pspdat
     6    0    0    0       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well

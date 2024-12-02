@@ -140,8 +140,8 @@ meta: {optdriver: 1, rfphon: 1, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/32ge.SJ_mod
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/32ge.SJ_mod
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/32ge.SJ_mod
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/32ge.SJ_mod
 -   Starkloff-Joannopoulos local psp ( !!! OLD : only for tests)
 - 32.00000   4.00000    900101                znucl, zion, pspdat
     5    3    0    0       700   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well

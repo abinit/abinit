@@ -119,8 +119,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.14587
  
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /opt/home/buildbot/ABINIT/ubu_intel_16.0_mpich/trunk__gonze3/tests/Psps_for_tests/22ti.12.khgh
-- pspatm: opening atomic psp file    /opt/home/buildbot/ABINIT/ubu_intel_16.0_mpich/trunk__gonze3/tests/Psps_for_tests/22ti.12.khgh
+- pspini: atom type   1  psp file is /opt/home/buildbot/ABINIT/ubu_intel_16.0_mpich/trunk__gonze3/tests/Pspdir/22ti.12.khgh
+- pspatm: opening atomic psp file    /opt/home/buildbot/ABINIT/ubu_intel_16.0_mpich/trunk__gonze3/tests/Pspdir/22ti.12.khgh
 - Goedecker pseudopotential for Ti
 - 22.00000  12.00000     70301                znucl, zion, pspdat
    10   11    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -159,8 +159,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
              2   -0.006735
  pspatm: atomic psp has been read  and splines computed
  
-- pspini: atom type   2  psp file is /opt/home/buildbot/ABINIT/ubu_intel_16.0_mpich/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/11na.1.hgh
-- pspatm: opening atomic psp file    /opt/home/buildbot/ABINIT/ubu_intel_16.0_mpich/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/11na.1.hgh
+- pspini: atom type   2  psp file is /opt/home/buildbot/ABINIT/ubu_intel_16.0_mpich/trunk__gonze3/tests/Pspdir/PseudosHGH_pwteter/11na.1.hgh
+- pspatm: opening atomic psp file    /opt/home/buildbot/ABINIT/ubu_intel_16.0_mpich/trunk__gonze3/tests/Pspdir/PseudosHGH_pwteter/11na.1.hgh
 - Hartwigsen-Goedecker-Hutter psp for Na,  from PRB58, 3641 (1998)
 - 11.00000   1.00000     10605                znucl, zion, pspdat
     3    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
