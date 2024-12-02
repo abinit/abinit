@@ -313,8 +313,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 2, paral_kgb: 0, }
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/torrent_beauty/tests/Psps_for_tests/C-q4
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/torrent_beauty/tests/Psps_for_tests/C-q4
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/torrent_beauty/tests/Pspdir/C-q4
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/torrent_beauty/tests/Pspdir/C-q4
 - Goedecker pseudopotential for C
 -  6.00000   4.00000     70301                znucl, zion, pspdat
    10    1    1    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -349,8 +349,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 2, paral_kgb: 0, }
              1    0.000000
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/torrent_beauty/tests/Psps_for_tests/H-q1
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/torrent_beauty/tests/Psps_for_tests/H-q1
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/torrent_beauty/tests/Pspdir/H-q1
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/torrent_beauty/tests/Pspdir/H-q1
 - Goedecker pseudopotential for H
 -  1.00000   1.00000     70301                znucl, zion, pspdat
    10    1   -1    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well

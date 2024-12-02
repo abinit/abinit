@@ -192,7 +192,7 @@ called `outputs/`. Make sure to create it before you start the `ABINIT` run by w
     mkdir outputs
 
 !!! important
-    You may have to change the path to reach the Psps_for_tests repository. For this, modify the varaible `pp_dirpath` in the input file. 
+    You may have to change the path to reach the Pspdir repository. For this, modify the variable `pp_dirpath` in the input file.
 
 You can now run the `ABINIT` tests (maybe even in a separate new `xterm` window), by executing:
 

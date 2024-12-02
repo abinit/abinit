@@ -3,8 +3,8 @@ from __future__ import print_function, division, absolute_import  #, unicode_lit
 
 import sys
 import os
-# Set ABI_PSPDIR env variable to point to the absolute path of Psps_for_tests
-os.environ["ABI_PSPDIR"] = os.path.abspath(os.path.join(os.path.dirname(__file__), "Psps_for_tests"))
+# Set ABI_PSPDIR env variable to point to the absolute path of Pspdir
+os.environ["ABI_PSPDIR"] = os.path.abspath(os.path.join(os.path.dirname(__file__), "Pspdir"))
 #print("ABI_PSPDIR:", os.environ["ABI_PSPDIR"])
 import platform
 
