@@ -62,7 +62,7 @@ typat  1 1
 xcart   5.  5.  4.65
         5.  5.  5.35 angstrom
 
-pp_dirpath "$ABI_PSPDIR/Pseudodojo_nc_sr_04_pbe_standard_psp8/"
+pp_dirpath "$ABI_PSPDIR/Psdj_nc_sr_04_pbe_std_psp8/"
 pseudos "H.psp8"
 
 ##############################################################

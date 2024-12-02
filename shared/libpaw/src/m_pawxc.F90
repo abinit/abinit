@@ -5793,7 +5793,8 @@ subroutine pawxc_drivexc_abinit()
 
 ! *************************************************************************
 
- test_args=(present(dvxc).and.present(d2vxc))
+ test_args=present(dvxc)
+ if (nd2vxc>0) test_args=(test_args.and.present(d2vxc))
  if (usegradient==1) test_args=(test_args.and.present(grho2).and.present(vxcgrho))
  if (uselaplacian==1) test_args=(test_args.and.present(lrho).and.present(vxclrho))
  if (usekden==1) test_args=(test_args.and.present(tau).and.present(vxctau))

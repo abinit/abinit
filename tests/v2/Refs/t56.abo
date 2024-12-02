@@ -128,8 +128,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     30.000   => boxcut(ratio)=   2.16284
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/24cr.000107.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/24cr.000107.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/24cr.000107.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/24cr.000107.fhi
 - Cromium fhi98PP : TM-type, LDA CA PerdewWang, l=0 local (by Alessio Filipetti)
 - 24.00000   6.00000       107                znucl, zion, pspdat
     6    1    2    0       517   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well

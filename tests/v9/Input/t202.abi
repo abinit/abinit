@@ -50,6 +50,7 @@ pseudos "28ni.paw, 8o.2.paw"
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% need_cpp_vars = HAVE_FFTW3 or HAVE_DFTI
 #%% [files]
 #%% files_to_test =
 #%%   t202.abo, tolnlines = 95, tolabs = 4.e-6, tolrel = 7.e-3

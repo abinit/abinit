@@ -58,7 +58,7 @@ znucl    10
 xred
 3*1/2 
 
-pp_dirpath="$ABI_PSPDIR/Pseudodojo_paw_pbe_standard/"
+pp_dirpath="$ABI_PSPDIR/Psdj_paw_pbe_std/"
 pseudos="Ne.xml"
 
 ##############################################################
