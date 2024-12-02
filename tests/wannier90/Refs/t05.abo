@@ -23,7 +23,7 @@
 - root for output files -> t05o
 
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_EOF-10.2/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Fe.xml
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_EOF-10.2/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
 
  invars1: COMMENT -
   With nspinor=2 and usepaw=1, pawspnorb=1 has been switched on by default.
@@ -624,9 +624,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.13671
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_EOF-10.2/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Fe.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_EOF-10.2/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Fe.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_EOF-10.2/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Fe.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_EOF-10.2/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_EOF-10.2/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_EOF-10.2/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.11531574

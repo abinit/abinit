@@ -26,7 +26,7 @@ ntypat 1          # There is only one type of atom
 znucl 28          # Atomic number of the possible type(s) of atom. Here Nickel.
 pp_dirpath "$ABI_PSPDIR"                    # Path to the directory were
                                             #   pseudopotentials for tests are stored
-pseudos "Ni.GGA-PBE-paw.bloechl.xml"        # Name and location of the pseudopotential
+pseudos "Ni.PBE-paw.bloechl.xml"        # Name and location of the pseudopotential
                          
 #Definition of the atoms
 natom 1           # There is one atom

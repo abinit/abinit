@@ -8,7 +8,7 @@
 # pseudos  = '20ca_sic.drh, 8o_sic.drh'
 # output_file  = 't20.abo'
 ## Possibly, the path to the pseudopotential directory might be defined
-# pp_dirpath  = '../../Psps_for_tests'
+# pp_dirpath  = '../../Pspdir'
 
 # Dataset 1 : self-consistent ground state calculation
 
