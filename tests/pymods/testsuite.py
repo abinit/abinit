@@ -531,7 +531,7 @@ TESTCNF_KEYWORDS = {
                                                        "\t    foo.out, tolnlines = 2, tolabs = 0.1, tolrel = 1.0e-01;\n" +
                                                        "\t    bar.out, tolnlines = 4, tolabs = 0.0, tolrel = 1.0e-01"
                                                            ),
-    "psp_files"      : (_str2list,        "", "files", "List of pseudopotential files (located in the Psps_for_tests directory)."),
+    "psp_files"      : (_str2list,        "", "files", "List of pseudopotential files (located in the Pspdir directory)."),
     "extra_inputs"   : (_str2list,        "", "files", "List of extra input files."),
     "use_git_submodule"   : (str,        "", "files", "Take input files from git submodule in ~/abinit/tests/modules_with_data/."),
     # [shell]
@@ -1701,7 +1701,7 @@ pp_dirpath $ABI_PSPDIR
                     # Use local pseudo. This is needed for atompaw tests.
                     psp_paths[i] = pname
                 else:
-                    err_msg = "Cannot find pp file %s, neither in Psps_for_tests nor in self.workdir" % pname
+                    err_msg = "Cannot find pp file %s, neither in Pspdir nor in self.workdir" % pname
                     self.exceptions.append(self.Error(err_msg))
 
         if not dir_and_names:
@@ -1816,10 +1816,21 @@ pp_dirpath $ABI_PSPDIR
         # !HAVE_FOO --> HAVE_FOO should not be present.
         errors = []
         eapp = errors.append
+        or_token =  " or "
         for var in self.need_cpp_vars:
-            if not var.startswith("!") and var not in build_env.defined_cppvars:
+            if or_token in var:
+                # handle HAVE_FOO or HAVE_BAR syntax
+                var_list = [v.strip() for v in var.split(or_token)]
+                #print("in or_token with var_list:", var_list)
+                if not any(v in build_env.defined_cppvars for v in var_list):
+                    eapp("Build environment does not define any of the following CPP variables %s" % str(var_list))
+
+            elif not var.startswith("!") and var not in build_env.defined_cppvars:
+                # handle HAVE_FOO syntax
                 eapp("Build environment does not define the CPP variable %s" % var)
+
             elif var[1:] in build_env.defined_cppvars:
+                # handle !HAVE_FOO syntax
                 eapp("Build environment defines the CPP variable %s" % var[1:])
 
         # Remove this check to run the entire test suite in parallel
