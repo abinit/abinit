@@ -35,7 +35,7 @@ acell   5.6691783749808  5.6691783749808  20.7869873749295
 angdeg 90 90 120
 chkprim 0
 
- pp_dirpath "$ABI_PSPDIR/Pseudodojo_nc_sr_04_pbe_standard_psp8"
+ pp_dirpath "$ABI_PSPDIR/Psdj_nc_sr_04_pbe_std_psp8"
  pseudos "In.psp8, Ga.psp8, N.psp8"
 
 #%%<BEGIN TEST_INFO>
