@@ -97,10 +97,10 @@ module m_varpeq
   integer :: np = -1
    ! Number of polaronic states
 
-  real(dp) :: nkbz = -1
+  integer :: nkbz = -1
    ! Number of k-points in full BZ
 
-  real(dp) :: nqbz = -1
+  integer :: nqbz = -1
    ! Number of q-points in full BZ
 
   real(dp) :: e_frohl
@@ -1452,10 +1452,10 @@ subroutine varpeq_init(self, gstore, dtset)
    polstate%translate = (dtset%varpeq_translate /= 0)
    ! integers
    polstate%np = dtset%varpeq_nstates
-   ! real
-   polstate%e_frohl = zero
    polstate%nkbz = gstore%nkbz
    polstate%nqbz = gstore%nqbz
+   ! real
+   polstate%e_frohl = zero
 
    ! Static arrays
    ! integer
@@ -2318,7 +2318,7 @@ subroutine polstate_calc_grad(self, ip)
    enddo
  enddo
  call xmpi_sum(self%my_grad, gqk%qpt_pert_comm%value, ierr)
- self%my_grad(:, :) = -two/(self%nkbz*self%nqbz) * self%my_grad(:, :)
+ self%my_grad(:, :) = -two/(one*self%nkbz*self%nqbz) * self%my_grad(:, :)
 
  ! Scattering-independent part
  eps = self%enterms(4, ip)
@@ -2467,7 +2467,7 @@ real(dp) function polstate_get_enelph(self, ip) result(enelph)
    enddo
  enddo
  call xmpi_sum(enelph, gqk%comm%value, ierr)
- enelph = -two*enelph/(self%nkbz*self%nqbz)
+ enelph = -two*enelph/(one*self%nkbz*self%nqbz)
 
  end function polstate_get_enelph
 !!***
@@ -2611,7 +2611,7 @@ subroutine polstate_calc_b_from_a(self, ip)
    do my_pert=1,gqk%my_npert
      wqnu = gqk%my_wnuq(my_pert, my_iq)
      ! Skip acoustic modes at Gamma
-     if (abs(wqnu) < tol10) then
+     if (abs(wqnu) < tol12) then
        self%my_b(my_pert, my_iq, ip) = zero
        cycle
      endif
