@@ -70,7 +70,7 @@ jpawu  1.0000 eV
 
  pp_dirpath "$ABI_PSPDIR"
  pseudos "26fe.lda2.paw"
- #pseudos "Pseudodojo_paw_pbe_standard/Fe.xml"
+ #pseudos "Psdj_paw_pbe_std/Fe.xml"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

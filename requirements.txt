@@ -1,18 +1,18 @@
-# IMPORTANT: python 3.6 is REQUIRED. Later version are not supported.  
+# IMPORTANT: tested with python 3.12
 
 html2text
 
 # Pinned versions for website deployment
-mkdocs==1.1.2
-mkdocs-material==7.0.6
-jinja2<3.1.0
+mkdocs==1.6.1
+mkdocs-material==9.5.43
+jinja2==3.1.4
 
-pymdown-extensions==8.2
-python-markdown-math
+pymdown-extensions==10.12
+python-markdown-math==0.8
 pyyaml
 pygments
 pybtex
-numpy 
+numpy
 pyyaml
 pandas
 
