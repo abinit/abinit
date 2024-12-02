@@ -97,10 +97,10 @@ module m_varpeq
   integer :: np = -1
    ! Number of polaronic states
 
-  integer :: nkbz = -1
+  real(dp) :: nkbz = -1
    ! Number of k-points in full BZ
 
-  integer :: nqbz = -1
+  real(dp) :: nqbz = -1
    ! Number of q-points in full BZ
 
   real(dp) :: e_frohl
@@ -1452,10 +1452,10 @@ subroutine varpeq_init(self, gstore, dtset)
    polstate%translate = (dtset%varpeq_translate /= 0)
    ! integers
    polstate%np = dtset%varpeq_nstates
-   polstate%nkbz = gstore%nkbz
-   polstate%nqbz = gstore%nqbz
    ! real
    polstate%e_frohl = zero
+   polstate%nkbz = gstore%nkbz
+   polstate%nqbz = gstore%nqbz
 
    ! Static arrays
    ! integer
@@ -2164,7 +2164,7 @@ subroutine polstate_calc_pcjgrad(self, ip, ii, nstep_ort)
    call xmpi_sum(beta_num, gqk%kpt_comm%value, ierr)
    call xmpi_sum(beta_den, gqk%kpt_comm%value, ierr)
    beta = beta_num / beta_den
-   if (abs(aimag(beta)) < tol6) beta = real(beta)
+   if (abs(aimag(beta)) < tol12) beta = real(beta)
 
    self%my_pcjgrad(:,:) = self%my_pcgrad(:,:) + beta*self%my_prev_pcjgrad(:,:)
  else
@@ -2611,7 +2611,7 @@ subroutine polstate_calc_b_from_a(self, ip)
    do my_pert=1,gqk%my_npert
      wqnu = gqk%my_wnuq(my_pert, my_iq)
      ! Skip acoustic modes at Gamma
-     if (abs(wqnu) < tol8) then
+     if (abs(wqnu) < tol10) then
        self%my_b(my_pert, my_iq, ip) = zero
        cycle
      endif
