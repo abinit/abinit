@@ -253,7 +253,11 @@ contains
    if (mpopt==2) call ddb%to_d2etot(ddb%val_rs,kblok,1,qeq0,qphon,qphnrm,ucvol,omega=omega)
 
    !Print the physical quantities in the new magnetic boundary conditions
-   call mp_d2etot_print(ddb,ddb%val_fs,kblok,mpert,natom,nblok,1,omega,prtvol,qeq0,qphnrm,qphon)
+   if (mpopt==1) then
+     call mp_d2etot_print(ddb,ddb%val_fs,kblok,mpert,natom,nblok,1,omega,prtvol,qeq0,qphnrm,qphon)
+   else if (mpopt==2) then
+     call mp_d2etot_print(ddb,ddb%val_rs,kblok,mpert,natom,nblok,2,omega,prtvol,qeq0,qphnrm,qphon)
+   end if
 
    rfmagn(:)=0
    rfelfd(:)=0
@@ -1040,7 +1044,7 @@ contains
      do ipert1= 1, natom+5
        do idir1= 1, 3
          irow= (ipert1-1)*3 + idir1
-         index= index + 1
+         index= idir1 + 3*((ipert1-1)+mpert*((idir2-1)+3*(ipert2-1)))
 
          !Extract the penalized second-order derivatives 
          val_ps= cmplx(ddb%val(1,index,iblok),ddb%val(2,index,iblok),16)
@@ -1133,6 +1137,34 @@ contains
 
   if (qeq0) then
 
+   !IFCs
+   rfphon(1:2)=1
+   call ddb%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, omega=omega)
+   if (iblok/=0.and.iblok==kblok) then
+     if (opt==1) then
+       call wrtout([ab_out,std_out], ' Frozen-spin interatomic force constants')
+     else if (opt==2) then
+       call wrtout([ab_out,std_out], ' Relaxed-spin interatomic force constants')
+     end if
+     call wrtout([ab_out,std_out], '  atom1  dir  atom2  dir        Real              Imag')
+     do ipert1= 1, natom
+       do idir1= 1, 3
+         irow=( ipert1-1)*3 + idir1
+         do ipert2= 1, natom
+           do idir2= 1, 3
+             icol=( ipert2-1)*3 + idir2
+             val(:)=blkval(:,idir1,ipert1,idir2,ipert2,kblok)
+             write(msg,'(2(i4,4x,a2,2x),2x,2es18.9)') &
+           & ipert1, cart(idir1), ipert2, cart(idir2), val(1), val(2)
+             call wrtout([ab_out,std_out], msg)
+           end do
+         end do
+         write(msg,'(a)') '  '
+         call wrtout([ab_out,std_out], msg)
+       end do
+     end do
+   end if
+
    !Born charges 
    rfphon(1:2)=1
    rfelfd(1:2)=2
@@ -1154,6 +1186,8 @@ contains
            call wrtout([ab_out,std_out], msg)
          end do
        end do
+       write(msg,'(a)') '  '
+       call wrtout([ab_out,std_out], msg)
      end do
    end if
 

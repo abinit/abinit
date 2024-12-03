@@ -936,7 +936,7 @@ subroutine ddb_to_d2etot(ddb,blkval,kblok,option,qeq0,qphon,qphnrm,ucvol,omega)
 
 !Local variables -------------------------
 !scalars
- integer :: index,iblok,nsize,rftyp
+ integer :: iblok,nsize,rftyp
  integer :: idir1,idir2,ipert1,ipert2,mpert
 !arrays
  integer :: rfelfd(4),rfmagn(4),rfphon(4),rfstrs(4)
