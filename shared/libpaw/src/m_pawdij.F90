@@ -39,7 +39,7 @@ MODULE m_pawdij
  use m_pawfgrtab,    only : pawfgrtab_type
  use m_pawrhoij,     only : pawrhoij_type
  use m_paw_finegrid, only : pawgylm, pawexpiqr
- use m_paw_sphharm,  only : slxyzs
+ use m_paw_sphharm,  only : slxyzs,make_dyadic
 
  implicit none
 
@@ -2562,15 +2562,16 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
  type(pawtab_type),target,intent(in) :: pawtab
 !Local variables ---------------------------------------
 !scalars
- integer :: angl_size,idij,ii,ij_size,ilm,ipts,ispden,jlm,klm,klmn,klmn1,kln
- integer :: lm_size,lmn2_size,mesh_size,nsploop
+ integer :: angl_size,gs1,gs2,idij,ii,ij_size,ilm,ipts,ispden,jlm,klm,klmn,klmn1,kln
+ integer :: lm_size,lmn2_size,mesh_size,ngnt,nsploop
  real(dp), parameter :: HalfFineStruct2=half/InvFineStruct**2
  real(dp) :: fact,rc,rr,rt
+ logical :: has_nucdipmom
  character(len=500) :: msg
 !arrays
  integer, pointer :: indklmn(:,:)
- real(dp),allocatable :: dijso_rad(:),dkdr(:),dv1dr(:),rt_dkdr(:),v1(:)
- real(dp),allocatable :: zk1(:),zintgd(:),zso_kernel(:)
+ real(dp),allocatable :: dijso_rad(:),dkdr(:),dv1dr(:),dyadic(:,:,:,:),rt_dkdr(:),v1(:)
+ real(dp),allocatable :: zk1(:),z_intgd(:),z_kernel(:)
 
 ! *************************************************************************
 
@@ -2614,9 +2615,12 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
    msg='invalid sizes for vxc1!'
    LIBPAW_BUG(msg)
  end if
- if (present(nucdipmom).AND. .NOT.present(znuc)) then
-   msg='Nuclear dipole present in pawdijso but not znuc, cannot make corrections'
-   LIBPAW_BUG(msg)
+ if (present(nucdipmom)) then
+   has_nucdipmom = ANY(ABS(nucdipmom(:))>tol8)
+   if (has_nucdipmom .AND. .NOT.present(znuc)) then
+     msg='Nuclear dipole present in pawdijso but znuc missing, cannot make corrections'
+     LIBPAW_BUG(msg)
+   end if
  end if
 
 !------------------------------------------------------------------------
@@ -2654,22 +2658,41 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
    LIBPAW_DEALLOCATE(rt_dkdr)
  end if
 
- LIBPAW_ALLOCATE(zso_kernel,(mesh_size))
- zso_kernel(2:mesh_size) = dkdr(2:mesh_size)/pawrad%rad(2:mesh_size)
- call pawrad_deducer0(zso_kernel,mesh_size,pawrad)
- LIBPAW_DEALLOCATE(dkdr)
- 
- LIBPAW_ALLOCATE(zintgd,(mesh_size))
+!------------------------------------------------------------------------
+!----- do radial integrals
+!------------------------------------------------------------------------
+
+ LIBPAW_ALLOCATE(z_kernel,(mesh_size))
+ LIBPAW_ALLOCATE(z_intgd,(mesh_size))
  LIBPAW_ALLOCATE(dijso_rad,(ij_size))
+
+ ! spin-orbit kernel
+ z_kernel(2:mesh_size) = dkdr(2:mesh_size)/pawrad%rad(2:mesh_size)
+ call pawrad_deducer0(z_kernel,mesh_size,pawrad)
  do kln=1,ij_size
-   zintgd = zso_kernel*pawtab%phiphj(1:mesh_size,kln)
-   call simp_gen(dijso_rad(kln),zintgd,pawrad)
+   z_intgd = z_kernel*pawtab%phiphj(1:mesh_size,kln)
+   call simp_gen(dijso_rad(kln),z_intgd,pawrad)
  end do
 
- LIBPAW_DEALLOCATE(zso_kernel)
- LIBPAW_DEALLOCATE(zintgd)
+ LIBPAW_DEALLOCATE(z_kernel)
+ LIBPAW_DEALLOCATE(z_intgd)
+ LIBPAW_DEALLOCATE(dkdr)
 
  dijso_rad(:)=spnorbscl*dijso_rad(:)
+
+!------------------------------------------------------------------------
+!----- compute dyadics if necessay
+!------------------------------------------------------------------------
+ if (has_nucdipmom) then
+   gs1=size(pawang%gntselect,1)
+   gs2=size(pawang%gntselect,2)
+   ngnt=size(pawang%realgnt)
+   LIBPAW_ALLOCATE(dyadic,(2,3,3,gs2))
+   call make_dyadic(one,one,dyadic(1,1:3,1:3,1:gs2),pawang%gntselect,&
+           gs1,gs2,gs2,ngnt,pawang%realgnt)
+   call make_dyadic(one,three,dyadic(2,1:3,1:3,1:gs2),pawang%gntselect,&
+           gs1,gs2,gs2,ngnt,pawang%realgnt)
+ end if
 
 !------------------------------------------------------------------------
 !----- Loop over density components
@@ -2715,6 +2738,10 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
  end do
 
  LIBPAW_DEALLOCATE(dijso_rad)
+
+ if(has_nucdipmom) then
+   LIBPAW_DEALLOCATE(dyadic)
+ end if
 
 end subroutine pawdijso
 
