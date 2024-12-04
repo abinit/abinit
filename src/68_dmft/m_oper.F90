@@ -233,16 +233,15 @@ subroutine destroy_oper(oper)
 !Arguments ------------------------------------
  type(oper_type), intent(inout) :: oper
 !Local variables-------------------------------
- character(len=500) :: message
 !! *********************************************************************
 
  DBG_ENTER("COLL")
 
  if (oper%has_opermatlu == 1) then
    call destroy_matlu(oper%matlu(:),oper%natom)
- else
-   message = " Operator is not defined to be used in destroy_oper"
-   ABI_ERROR(message)
+ !else
+ !  message = " Operator is not defined to be used in destroy_oper"
+ !  ABI_ERROR(message)
  end if ! has_opermatlu=1
 
  if (allocated(oper%matlu)) then
@@ -366,7 +365,7 @@ subroutine print_oper(oper,option,paw_dmft,prtopt)
 !     call wrtout(std_out,message,'COLL')
      nkptr = min(nkpt,4)
      do isppol=1,paw_dmft%nsppol
-       write(message,'(a,3x,a,x,i1)') ch10,"--isppol--",isppol
+       write(message,'(a,3x,a,1x,i1)') ch10,"--isppol--",isppol
        call wrtout(std_out,message,'COLL')
        write(message,'(2a)') ch10,&
          & "   - (in the following only the value for the first k-points are printed)"
@@ -1243,6 +1242,7 @@ subroutine gather_oper(oper,distrib,paw_dmft,opt_ksloc,master,opt_diag,opt_commk
        call xmpi_allgatherv(buffer(:),recvcounts(myproc+1),buffer_tot(:),recvcounts(:),displs(:),comm,ierr)
      end if  ! present(master)
 
+     ibuf = 0
      do ikpt=1,nkpt
        do ifreq=1,nw
          do ib1=1,mbandc

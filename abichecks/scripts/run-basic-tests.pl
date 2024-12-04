@@ -212,15 +212,15 @@ print FILES "test$TestN";
 print "Psp files: @PsP" if ($debug >=1);
 
 if( $UNkernel eq 'MINGW64_NT') {
-   print FILES &transpath("/cygwin$srcDir/Psps_for_tests/$PsP[0]");
-   print FILES &transpath("/cygwin$srcDir/Psps_for_tests/$PsP[1]") if ($PsP[1] ne '');
+   print FILES &transpath("/cygwin$srcDir/Pspdir/$PsP[0]");
+   print FILES &transpath("/cygwin$srcDir/Pspdir/$PsP[1]") if ($PsP[1] ne '');
 } else {
-   print FILES &transpath("$srcDir/Psps_for_tests/$PsP[0]");
-   print FILES &transpath("$srcDir/Psps_for_tests/$PsP[1]") if ($PsP[1] ne '');
+   print FILES &transpath("$srcDir/Pspdir/$PsP[0]");
+   print FILES &transpath("$srcDir/Pspdir/$PsP[1]") if ($PsP[1] ne '');
 }
 
-print FILES &transpath("$srcDir/Psps_for_tests/$PsP[0]");
-print FILES &transpath("$srcDir/Psps_for_tests/$PsP[1]") if ($PsP[1] ne '');
+print FILES &transpath("$srcDir/Pspdir/$PsP[0]");
+print FILES &transpath("$srcDir/Pspdir/$PsP[1]") if ($PsP[1] ne '');
 close (FILES);
 # abinit will be started through a dotest perl script
 # this is necessary under DOS/Windows because of file redirections

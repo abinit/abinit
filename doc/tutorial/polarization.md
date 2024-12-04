@@ -339,7 +339,7 @@ $$
 $$
 Don't forget that in the input file, vectors are read in as rows of numbers, not columns!
 
-Notice how in the relaxed ion case, the input file includes [[ionmov]] = 2 and [[optcell]] = 0, in
+Notice how in the relaxed ion case, the input file includes [[geoopt]] "bfgs" and [[optcell]] = 0, in
 order to relax the ion positions at fixed cell geometry. These calculations
 should give the following final results (obtained by taking finite difference
 expressions of the strains for different electric fields): 

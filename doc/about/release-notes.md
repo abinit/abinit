@@ -31,6 +31,9 @@ Xavier
 
 By M. Torrent (MR1069)
 
+**A.2** Renaming tests/Psps_for_tests to tests/Pspdir
+
+By X. Gonze (fc5345534a and subsequent commits)
 
 * * *
 
@@ -148,9 +151,9 @@ By J.-M. Beuken (MR995) and M. Verstraete (MR1007)
 
 By M. Torrent (MR986, MR1032)
 
-**C.4** There is an embryo documentation for cmake build
+**C.4** There is an embryo documentation for cmake build. Also, the need to modify CMakeLists.txt is not mentioned in doc/developers/developers_howto.md .
 
-By P. Kestener (MR994)
+By P. Kestener (MR994), and a comment from Maxime Mignolet.
 
 **C.5** Manage GPU markers with compilation flag rather than input parameters.
 

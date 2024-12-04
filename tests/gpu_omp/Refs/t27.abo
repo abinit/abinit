@@ -23,7 +23,7 @@
 - root for output files -> t27o
  
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/sarrautem/abinit/tests/Psps_for_tests/Si.LDA_PW-JTH.xml
+-   /home/sarrautem/abinit/tests/Pspdir/Si.LDA_PW-JTH.xml
  DATASET    1 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
@@ -244,9 +244,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  
  
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/sarrautem/abinit/tests/Psps_for_tests/Si.LDA_PW-JTH.xml
-- pspatm: opening atomic psp file    /home/sarrautem/abinit/tests/Psps_for_tests/Si.LDA_PW-JTH.xml
-- pspatm : Reading pseudopotential header in XML form from /home/sarrautem/abinit/tests/Psps_for_tests/Si.LDA_PW-JTH.xml
+- pspini: atom type   1  psp file is /home/sarrautem/abinit/tests/Pspdir/Si.LDA_PW-JTH.xml
+- pspatm: opening atomic psp file    /home/sarrautem/abinit/tests/Pspdir/Si.LDA_PW-JTH.xml
+- pspatm : Reading pseudopotential header in XML form from /home/sarrautem/abinit/tests/Pspdir/Si.LDA_PW-JTH.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.90944987
@@ -500,9 +500,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  
  
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/sarrautem/abinit/tests/Psps_for_tests/Si.LDA_PW-JTH.xml
-- pspatm: opening atomic psp file    /home/sarrautem/abinit/tests/Psps_for_tests/Si.LDA_PW-JTH.xml
-- pspatm : Reading pseudopotential header in XML form from /home/sarrautem/abinit/tests/Psps_for_tests/Si.LDA_PW-JTH.xml
+- pspini: atom type   1  psp file is /home/sarrautem/abinit/tests/Pspdir/Si.LDA_PW-JTH.xml
+- pspatm: opening atomic psp file    /home/sarrautem/abinit/tests/Pspdir/Si.LDA_PW-JTH.xml
+- pspatm : Reading pseudopotential header in XML form from /home/sarrautem/abinit/tests/Pspdir/Si.LDA_PW-JTH.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.90944987
