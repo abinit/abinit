@@ -2286,7 +2286,7 @@ end subroutine paw_setup_copy
      !MGNAG v7[62]
      ! Runtime Error: m_pawxmlps_cpp.f90, line 1657: 
      ! Record too long for input bufferProgram terminated by I/O error on unit 9 
-     ! (File="/home/buildbot/ABINIT_OD/petrus_nag/gmatteo_7.7.1-training/tests/Psps_for_tests/Al.LDA",Formatted,Sequential)
+     ! (File="/home/buildbot/ABINIT_OD/petrus_nag/gmatteo_7.7.1-training/tests/Pspdir/Al.LDA",Formatted,Sequential)
      read(funit,*) (paw_setup%ae_core_density%data(ir),ir=1,mesh_size)
      cycle
    end if
@@ -2342,7 +2342,7 @@ end subroutine paw_setup_copy
      !MGNAG v7[62]
      ! Runtime Error: m_pawxmlps_cpp.f90, line 1657: 
      ! Record too long for input bufferProgram terminated by I/O error on unit 9 
-     ! (File="/home/buildbot/ABINIT_OD/petrus_nag/gmatteo_7.7.1-training/tests/Psps_for_tests/Al.LDA",Formatted,Sequential)
+     ! (File="/home/buildbot/ABINIT_OD/petrus_nag/gmatteo_7.7.1-training/tests/Pspdir/Al.LDA",Formatted,Sequential)
      read(funit,*) (paw_setup%ae_core_kinetic_energy_density%data(ir),ir=1,mesh_size)
      cycle
    end if

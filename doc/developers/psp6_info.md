@@ -12,7 +12,7 @@ ABINITv2.2 is able to read them with core correction (thanks to AF).
 # The original cpi file
 
 We will suppose that the user has been able to generate a `cpi` file from the FHI98PP code. 
-There is one such file in the `~abinit/tests/Psps_for_tests` directory, 
+There is one such file in the `~abinit/tests/Pspdir` directory,
 with the name `al_h.cpi` (the FHI98PP code generated a file named `al:h.cpi`, 
 but the name was changed, to allow portability under DOS/Windows) .
 It begins by:
@@ -45,7 +45,7 @@ From these numbers, we will make direct use of:
 # The new file
 
 For the purpose of generating the corresponding file readable by ABINIT (also
-found in the `~abinit/tests/Psps_for_tests` directory, with the name `13al.981214.fhi`),
+found in the `~abinit/tests/Pspdir` directory, with the name `13al.981214.fhi`),
 the following seven lines have been added at the beginning of the `al_h.cpi file`:
 
     Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local

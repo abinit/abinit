@@ -49,7 +49,7 @@ rprim
 # available through www.pseudo-dojo.org
 # this set uses the Perdew-Wang parameterization of LDA for the xc model
  pp_dirpath "$ABI_PSPDIR"
- pseudos "Pseudodojo_nc_sr_04_pw_standard_psp8/P.psp8, Pseudodojo_nc_sr_04_pw_standard_psp8/Al.psp8"
+ pseudos "Psdj_nc_sr_04_pw_std_psp8/P.psp8, Psdj_nc_sr_04_pw_std_psp8/Al.psp8"
 
 #Definition of the atoms
  natom 2 # two atoms in the cell
@@ -98,7 +98,7 @@ prteig 0
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   tpolarization_6.abo, tolnlines=  0, tolabs=  1.001e-04, tolrel=  5.000e-04, fld_options = -ridiculous
+#%%   tpolarization_6.abo, tolnlines = 0, tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options = -ridiculous
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

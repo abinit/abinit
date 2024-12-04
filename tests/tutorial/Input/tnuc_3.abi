@@ -20,7 +20,7 @@ ntypat 1 # one types of atom
 znucl 50 # atomic number of atoms, will be cross checked against pseudopotential files
            # here Tin (50) is the atom type
 pp_dirpath "$ABI_PSPDIR" # pseudopotential directory
-pseudos "Pseudodojo_paw_pbe_standard/Sn-sp.xml"
+pseudos "Psdj_paw_pbe_std/Sn-sp.xml"
 
 #Definition of the atoms
 natom 2 # 2 atoms in the primitive unit cell
