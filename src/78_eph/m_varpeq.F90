@@ -1377,6 +1377,8 @@ subroutine varpeq_init(self, gstore, dtset)
  integer :: ierr, my_is, spin, bstart, bend, my_iq
  real(dp) :: wtq
  real(dp) :: cpu, wall, gflops
+ integer, allocatable :: my_states(:,:)
+ integer, allocatable :: glob_states(:,:)
 
 !----------------------------------------------------------------------
 
@@ -1444,6 +1446,15 @@ subroutine varpeq_init(self, gstore, dtset)
    spin = gstore%my_spins(my_is)
    gqk => gstore%gqk(my_is)
    polstate => self%polstate(my_is)
+
+   ABI_MALLOC(my_states, (gqk%nb, gqk%my_nk))
+   ABI_MALLOC(glob_states, (gqk%nb, gqk%glob_nk))
+   if (self%gstore%kfilter == "erange") then
+     call gqk%filter_erange(gstore, gstore%erange_spin(:,spin), &
+       my_states, glob_states)
+   endif
+   ABI_FREE(my_states)
+   ABI_FREE(glob_states)
 
    ! Scalars
    ! character
