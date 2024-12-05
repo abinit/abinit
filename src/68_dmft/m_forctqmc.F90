@@ -3985,7 +3985,7 @@ function k_iw(iom,omega)
  complex(dpc) :: k_iw
 ! *********************************************************************
 
- k_iw = one / (cmplx(zero,iom,kind=dp)-omega)
+ k_iw = cone / (cmplx(zero,iom,kind=dp)-omega)
 
 end function k_iw
 !!***

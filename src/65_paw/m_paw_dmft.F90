@@ -721,30 +721,12 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  nsym    = dtset%nsym
  ntypat  = dtset%ntypat
 
- ! In the case where no kpt is treated by the current CPU (ie sum(isppoltab)=0),
- ! dtset%mkmem is set to nkpt by convention in Abinit. We set it to its true value 0.
- if (sum(mpi_enreg%my_isppoltab(1:nsppol)) == 0) mkmem = 0
-
  dmftbandi = dtset%dmftbandi
  dmftbandf = dtset%dmftbandf
  dmft_solv = dtset%dmft_solv
  use_dmft  = abs(dtset%usedmft)
  paw_dmft%use_dmft = use_dmft
  paw_dmft%use_sc_dmft = 0
- if (dtset%nbandkss == 0) paw_dmft%use_sc_dmft = use_sc_dmft
-
- ! Check processors for DMFT
- ! Initialize spaceComm, myproc, and nproc
- !spacecomm=mpi_enreg%comm_cell
- !myproc=mpi_enreg%me_cell
- !nproc=mpi_enreg%nproc_cell
- !spacecomm = mpi_enreg%comm_world
- myproc = mpi_enreg%me
- nproc  = mpi_enreg%nproc
- !print *, " spacecomm,myproc,nproc",spacecomm,myproc,nproc
- paw_dmft%spacecomm = mpi_enreg%comm_world
- paw_dmft%myproc    = myproc
- paw_dmft%nproc     = nproc
 
  paw_dmft%dmftbandf = dmftbandf
  paw_dmft%dmftbandi = dmftbandi
@@ -753,7 +735,6 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  paw_dmft%nkpt      = nkpt
  paw_dmft%nsym      = nsym
  paw_dmft%ntypat    = ntypat
- paw_dmft%unpaw     = unpaw
 
  ! Spin related variables
  paw_dmft%nsppol    = nsppol
@@ -770,6 +751,27 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  ABI_MALLOC(paw_dmft%exclude_bands,(mband*use_dmft))
 
  if (use_dmft == 0) return
+
+ ! In the case where no kpt is treated by the current CPU (ie sum(isppoltab)=0),
+ ! dtset%mkmem is set to nkpt by convention in Abinit. We set it to its true value 0.
+ if (sum(mpi_enreg%my_isppoltab(1:nsppol)) == 0) mkmem = 0
+
+ ! Check processors for DMFT
+ ! Initialize spaceComm, myproc, and nproc
+ !spacecomm=mpi_enreg%comm_cell
+ !myproc=mpi_enreg%me_cell
+ !nproc=mpi_enreg%nproc_cell
+ !spacecomm = mpi_enreg%comm_world
+ myproc = mpi_enreg%me
+ nproc  = mpi_enreg%nproc
+ !print *, " spacecomm,myproc,nproc",spacecomm,myproc,nproc
+ paw_dmft%spacecomm = mpi_enreg%comm_world
+ paw_dmft%myproc    = myproc
+ paw_dmft%nproc     = nproc
+
+ paw_dmft%unpaw = unpaw
+
+ if (dtset%nbandkss == 0) paw_dmft%use_sc_dmft = use_sc_dmft
 
  ! Do not comment these lines: it guarantees the parallelism in DMFT/QMC will work.
  if (xmpi_comm_size(xmpi_world) /= xmpi_comm_size(mpi_enreg%comm_world)) &
