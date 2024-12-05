@@ -753,7 +753,6 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  paw_dmft%nkpt      = nkpt
  paw_dmft%nsym      = nsym
  paw_dmft%ntypat    = ntypat
- paw_dmft%unpaw     = unpaw
 
  ! Spin related variables
  paw_dmft%nsppol    = nsppol
@@ -770,6 +769,8 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  ABI_MALLOC(paw_dmft%exclude_bands,(mband*use_dmft))
 
  if (use_dmft == 0) return
+
+ paw_dmft%unpaw = unpaw
 
  ! Do not comment these lines: it guarantees the parallelism in DMFT/QMC will work.
  if (xmpi_comm_size(xmpi_world) /= xmpi_comm_size(mpi_enreg%comm_world)) &

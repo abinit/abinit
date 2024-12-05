@@ -1,5 +1,5 @@
 
-.Version 9.11.3.1 of ABINIT, released Mar 2024.
+.Version 10.3.4.4 of ABINIT, released Nov 2024.
 .(MPI version, prepared for a x86_64_linux_gnu9.1 computer) 
 
 .Copyright (C) 1998-2024 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri  5 Apr 2024.
-- ( at 14h55 )
+.Starting date : Thu  5 Dec 2024.
+- ( at 15h24 )
   
-- input  file    -> t03.abi
+- input  file    -> /tmp/abinit/opt/Test_suite/rttddft_t03/t03.abi
 - output file    -> t03.abo
 - root for input  files -> t03i
 - root for output files -> t03o
@@ -74,10 +74,10 @@ _ WF disk file :      1.772 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
+- outvars: echo of selected default values
 -   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    1
 -
  -outvars: echo values of preprocessed input variables --------
@@ -395,8 +395,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /cea/home/abinit/abinit/REPOSITORY/BRIEUC/abinit/gitlab/tests/Psps_for_tests//Pseudodojo_nc_sr_04_pbe_standard_psp8/Al.psp8
-- pspatm: opening atomic psp file    /cea/home/abinit/abinit/REPOSITORY/BRIEUC/abinit/gitlab/tests/Psps_for_tests//Pseudodojo_nc_sr_04_pbe_standard_psp8/Al.psp8
+- pspini: atom type   1  psp file is /cea/home/abinit/abinit/REPOSITORY/BRIEUC/abinit/gitlab/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/Al.psp8
+- pspatm: opening atomic psp file    /cea/home/abinit/abinit/REPOSITORY/BRIEUC/abinit/gitlab/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/Al.psp8
 - Al    ONCVPSP-3.2.3.1  r_core=   1.76802   1.76802   1.70587
 - 13.00000   3.00000    170504                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -610,8 +610,8 @@ meta: {optdriver: 9, }
 
 --- Iteration 1
 
-Total energy =      -9.190766 Ha
-Integrated density (ie. total nb of electrons) =      12.000000
+Total energy =      -9.189778 Ha
+Integrated density (ie. total nb of electrons) =      12.0000000000
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=   4  k points:
@@ -621,13 +621,13 @@ Integrated density (ie. total nb of electrons) =      12.000000
    0.61999    0.61999    0.61999    0.74436    0.74436    0.74436    0.81289    0.81290
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    1.08    1.08
+- Time - cpu, wall (sec):    1.09    1.09
 
 
 --- Iteration 2
 
-Total energy =      -9.190766 Ha
-Integrated density (ie. total nb of electrons) =      12.000000
+Total energy =      -9.189778 Ha
+Integrated density (ie. total nb of electrons) =      12.0000000000
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=   4  k points:
@@ -642,8 +642,8 @@ Integrated density (ie. total nb of electrons) =      12.000000
 
 --- Iteration 3
 
-Total energy =      -9.190766 Ha
-Integrated density (ie. total nb of electrons) =      12.000000
+Total energy =      -9.189778 Ha
+Integrated density (ie. total nb of electrons) =      12.0000000000
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=   4  k points:
@@ -719,8 +719,8 @@ meta: {optdriver: 9, }
 
 --- Iteration 4
 
-Total energy =      -9.190766 Ha
-Integrated density (ie. total nb of electrons) =      12.000000
+Total energy =      -9.189778 Ha
+Integrated density (ie. total nb of electrons) =      12.0000000000
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=   4  k points:
@@ -735,8 +735,8 @@ Integrated density (ie. total nb of electrons) =      12.000000
 
 --- Iteration 5
 
-Total energy =      -9.190766 Ha
-Integrated density (ie. total nb of electrons) =      12.000000
+Total energy =      -9.189778 Ha
+Integrated density (ie. total nb of electrons) =      12.0000000000
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=   4  k points:
@@ -751,8 +751,8 @@ Integrated density (ie. total nb of electrons) =      12.000000
 
 --- Iteration 6
 
-Total energy =      -9.190766 Ha
-Integrated density (ie. total nb of electrons) =      12.000000
+Total energy =      -9.189778 Ha
+Integrated density (ie. total nb of electrons) =      12.0000000000
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=   4  k points:
