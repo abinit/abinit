@@ -32,7 +32,7 @@ xred 0.00 0.00 0.00     # This keyword indicates that the location of the atoms
      0.00 0.00 0.50
 pp_dirpath "$ABI_PSPDIR"        # This is the path to the directory where
                                 # pseudopotentials for tests are stored
-pseudos "Pseudodojo_paw_pw_standard/V.xml, Pseudodojo_paw_pw_standard/Sr.xml, Pseudodojo_paw_pw_standard/O.xml" # Name and location of the pseudopotentials
+pseudos "Psdj_paw_pw_std/V.xml, Psdj_paw_pw_std/Sr.xml, Psdj_paw_pw_std/O.xml" # Name and location of the pseudopotentials
 
 #Planewave basis set, number of bands and occupations
 ecut      12.0          # Maximal plane-wave kinetic energy cut-off, in Hartree
