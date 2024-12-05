@@ -156,7 +156,6 @@ module m_orbmag
   private :: orbmag_output
   private :: dterm_alloc
   private :: dterm_free
-  private :: rt_dkdr
 
 CONTAINS  !========================================================================================
 !!***
@@ -2467,12 +2466,12 @@ subroutine dterm_ZA0(atindx,cplex_dij,dterm,dtset,paw_an,pawang,pawrad,pawtab,qp
   !scalars
   integer :: adir,gs1,gs2,iat,iatom,ierr,ii,ij_size,ilm,itypat,jlm
   integer :: klmn,klm,kln,lmn2_size,mesh_size,ndij,ngnt,nrt,sdir
-  real(dp) :: me_kbs,me_k2bs,rc,rt
+  real(dp) :: me_kbs,me_k2bs,rc,rr,rt
   complex(dpc) :: cme
   real(dp), parameter :: HalfFineStruct2=half*FineStructureConstant2
   !arrays
   character(len=500) :: msg
-  real(dp),allocatable :: dkdr(:),dv1dr(:),dyadic(:,:,:),rt_dkdr(:)
+  real(dp),allocatable :: dkdr(:),dv1dr(:),dyadic(:,:,:)
   real(dp),allocatable :: v1(:),zk1(:)
   real(dp),allocatable :: za0(:,:,:),za0_kernel(:),za0_rad(:,:)
 !--------------------------------------------------------------------
@@ -2507,10 +2506,7 @@ subroutine dterm_ZA0(atindx,cplex_dij,dterm,dtset,paw_an,pawang,pawrad,pawtab,qp
     ABI_MALLOC(dv1dr,(mesh_size))
     call nderiv_gen(dv1dr,v1,pawrad(itypat))
     
-    ABI_MALLOC(rt_dkdr,(mesh_size))
     rc=FineStructureConstant2
-    rt=dtset%znucl(itypat)*rc
-    rt_dkdr = two*rt/(rt+two*pawrad(itypat)%rad(1:mesh_size))**2
 
     ABI_MALLOC(zk1,(mesh_size))
     zk1 = one/(one - HalfFineStruct2*v1)
@@ -2518,17 +2514,15 @@ subroutine dterm_ZA0(atindx,cplex_dij,dterm,dtset,paw_an,pawang,pawrad,pawtab,qp
     ABI_MALLOC(dkdr,(mesh_size))
     dkdr = dv1dr*HalfFineStruct2*zk1*zk1
 
+    rt=dtset%znucl(itypat)*rc
     do ii=1,mesh_size
-      if(pawrad(itypat)%rad(ii)<rc) then
-        dkdr(ii)=rt_dkdr(ii)
-      else
-        exit
-      end if
+      rr=pawrad(itypat)%rad(ii)
+      if(rr<rc) dkdr(ii)=two*rt/(two*rr+rt)**2
+      if(rr>rc) exit
     end do
 
     ABI_FREE(v1)
     ABI_FREE(dv1dr)
-    ABI_FREE(rt_dkdr)
 
     ! radial integrals
     ! za0_rad(1,kln) = int ui K uj dr
@@ -2804,71 +2798,5 @@ subroutine local_fermie(dtset,eigen0,fermie,mpi_enreg,occ)
 
 end subroutine local_fermie
 !!***
-
-!!****f* ABINIT/rt_dkdr
-!! NAME
-!! rt_dkdr
-!!
-!! FUNCTION
-!! model ZORA dK/dr using -Z/r potential
-!!
-!! COPYRIGHT
-!! Copyright (C) 2003-2024 ABINIT  group
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
-!!
-!! INPUTS
-!!  mesh_size
-!!  rad(mesh_size)
-!!  z=atomic number
-!!
-!! OUTPUT
-!!  dkdr(mesh_size) 
-!!
-!! SIDE EFFECTS
-!!
-!! TODO
-!!
-!! NOTES
-!!  this routine is parallelized over kpts only, not bands
-!!
-!! PARENTS
-!!      m_orbmag
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-subroutine rt_dkdr(dkdr,mesh_size,rad,z)
-
-  !Arguments ------------------------------------
-  !scalars
-  integer,intent(in) :: mesh_size
-  real(dp),intent(in) :: z
-
-  !arrays
-  real(dp),intent(in) :: rad(mesh_size)
-  real(dp), intent(out) :: dkdr(mesh_size)
-
-  !Local variables -------------------------
-  !scalars
-  integer :: ii
-  real(dp) :: rr,rt
-
-  !arrays
-
-!--------------------------------------------------------------------
-
-
-  rt=z*FineStructureConstant2
-  dkdr = two*rt/(rt+2*rad)**2
-  
-end subroutine rt_dkdr
-!!***
-
-
-
 
 end module m_orbmag
