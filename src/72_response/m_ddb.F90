@@ -1003,9 +1003,10 @@ subroutine ddb_to_d2etot(ddb,blkval,kblok,option,qeq0,qphon,qphnrm,ucvol,omega)
    !Magnetoelectric susceptibility
    iblok=0
    rfphon(:)=0
-   rfelfd(:)=0
+   rfelfd(1)=0
+   rfelfd(2)=2
    rfmagn(1)=1
-   rfmagn(2)=1
+   rfmagn(2)=0
    call ddb%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, omega=omega)
    if (iblok/=0.and.iblok==kblok) then
      ipert1= ddb%natom + 5
