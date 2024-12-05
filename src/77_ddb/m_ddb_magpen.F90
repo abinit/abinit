@@ -254,9 +254,9 @@ contains
 
    !Print the physical quantities in the new magnetic boundary conditions
    if (mpopt==1) then
-     call mp_d2etot_print(ddb,ddb%val_fs,kblok,mpert,natom,nblok,1,omega,prtvol,qeq0,qphnrm,qphon)
+     call mp_d2etot_print(ddb,ddb%val_fs,kblok,mpert,natom,nblok,1,omega,prtvol,qeq0,qphnrm,qphon,ucvol)
    else if (mpopt==2) then
-     call mp_d2etot_print(ddb,ddb%val_rs,kblok,mpert,natom,nblok,2,omega,prtvol,qeq0,qphnrm,qphon)
+     call mp_d2etot_print(ddb,ddb%val_rs,kblok,mpert,natom,nblok,2,omega,prtvol,qeq0,qphnrm,qphon,ucvol)
    end if
 
    rfmagn(:)=0
@@ -1100,18 +1100,20 @@ contains
 !!      2 write the relaxed-spin second-order quantities 
 !! omega= frequency of the perturbation
 !! qphon= momentum wave-vector
+!! ucvol= unit-cell volume
 !!
 !! OUTPUT
 !!
 !! SOURCE
 
- subroutine mp_d2etot_print(ddb,blkval,kblok,mpert,natom,nblok,opt,omega,prtvol,qeq0,qphnrm,qphon)
+ subroutine mp_d2etot_print(ddb,blkval,kblok,mpert,natom,nblok,opt,omega,prtvol,qeq0,qphnrm,qphon,ucvol)
 
 !Arguments -------------------------------
 !scalars
  class(ddb_type),intent(in) :: ddb
  integer,intent(in) :: kblok,mpert,natom,nblok,opt,prtvol
  logical,intent(in) :: qeq0
+ real(dp),intent(in) :: ucvol
 !arrays
  real(dp),intent(in) :: omega(3)
  real(dp),intent(in) :: blkval(2,3,mpert,3,mpert,nblok)
@@ -1129,41 +1131,40 @@ contains
  
 ! *********************************************************************
 
-  rfelfd(:)=0
-  rfphon(:)=0
-  rfstrs(:)=0
-  rfmagn(:)=0
-  rftyp = 1
+ rfelfd(:)=0
+ rfphon(:)=0
+ rfstrs(:)=0
+ rfmagn(:)=0
+ rftyp = 1
 
-  if (qeq0) then
-
-   !IFCs
-   rfphon(1:2)=1
-   call ddb%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, omega=omega)
-   if (iblok/=0.and.iblok==kblok) then
-     if (opt==1) then
-       call wrtout([ab_out,std_out], ' Frozen-spin interatomic force constants')
-     else if (opt==2) then
-       call wrtout([ab_out,std_out], ' Relaxed-spin interatomic force constants')
-     end if
-     call wrtout([ab_out,std_out], '  atom1  dir  atom2  dir        Real              Imag')
-     do ipert1= 1, natom
-       do idir1= 1, 3
-         irow=( ipert1-1)*3 + idir1
-         do ipert2= 1, natom
-           do idir2= 1, 3
-             icol=( ipert2-1)*3 + idir2
-             val(:)=blkval(:,idir1,ipert1,idir2,ipert2,kblok)
-             write(msg,'(2(i4,4x,a2,2x),2x,2es18.9)') &
-           & ipert1, cart(idir1), ipert2, cart(idir2), val(1), val(2)
-             call wrtout([ab_out,std_out], msg)
-           end do
-         end do
-         write(msg,'(a)') '  '
-         call wrtout([ab_out,std_out], msg)
-       end do
-     end do
+ !IFCs
+ rfphon(1:2)=1
+ call ddb%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, omega=omega)
+ if (iblok/=0.and.iblok==kblok) then
+   if (opt==1) then
+     call wrtout([ab_out,std_out], ' Frozen-spin interatomic force constants')
+   else if (opt==2) then
+     call wrtout([ab_out,std_out], ' Relaxed-spin interatomic force constants')
    end if
+   call wrtout([ab_out,std_out], '  atom1  dir  atom2  dir        Real              Imag')
+   do ipert1= 1, natom
+     do idir1= 1, 3
+       irow=( ipert1-1)*3 + idir1
+       do ipert2= 1, natom
+         do idir2= 1, 3
+           icol=( ipert2-1)*3 + idir2
+           val(:)=blkval(:,idir1,ipert1,idir2,ipert2,kblok)
+           write(msg,'(2(i4,4x,a2,2x),2x,2es18.9)') &
+         & ipert1, cart(idir1), ipert2, cart(idir2), val(1), val(2)
+           call wrtout([ab_out,std_out], msg)
+         end do
+       end do
+       call wrtout([ab_out,std_out], ' ')
+     end do
+   end do
+ end if
+
+ if (qeq0) then
 
    !Born charges 
    rfphon(1:2)=1
@@ -1186,62 +1187,120 @@ contains
            call wrtout([ab_out,std_out], msg)
          end do
        end do
-       write(msg,'(a)') '  '
-       call wrtout([ab_out,std_out], msg)
+       call wrtout([ab_out,std_out], ' ')
      end do
    end if
 
-!   !Dielectric tensor
-!   iblok=0
-!   rfphon(:)=0
-!   rfelfd(1:2)=2
-!   call ddb%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, omega=omega)
-!   if (iblok/=0.and.iblok==kblok) then
-!     ipert1= ddb%natom + 2
-!     ipert2= ddb%natom + 2
-!     do idir2= 1, 3
-!       do idir1= 1, 3
-!         val(:)=blkval(:,idir1,ipert1,idir2,ipert2,kblok)
-!         if (option==0) then
-!           if (idir1==idir2) then
-!             blkval(:,idir1,ipert1,idir2,ipert2,kblok)= (one - val(:))*ucvol/four_pi
-!           else
-!             blkval(:,idir1,ipert1,idir2,ipert2,kblok)= -ucvol/four_pi*val(:)
-!           end if
-!         else if (option==1) then
-!           if (idir1==idir2) then
-!             blkval(:,idir1,ipert1,idir2,ipert2,kblok)= one - four_pi/ucvol*val(:)
-!           else
-!             blkval(:,idir1,ipert1,idir2,ipert2,kblok)= -four_pi/ucvol*val(:)
-!           end if
-!         end if
-!       end do
-!     end do
-!   end if
-!
-!   !Magnetoelectric susceptibility
-!   iblok=0
-!   rfphon(:)=0
-!   rfelfd(:)=0
-!   rfmagn(1)=1
-!   rfmagn(2)=1
-!   call ddb%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, omega=omega)
-!   if (iblok/=0.and.iblok==kblok) then
-!     ipert1= ddb%natom + 5
-!     ipert2= ddb%natom + 2
-!     do idir2= 1, 3
-!       do idir1= 1, 3
-!         val(:)=blkval(:,idir1,ipert1,idir2,ipert2,kblok)
-!         blkval(:,idir1,ipert1,idir2,ipert2,kblok)=-val(:)
-!         val(:)=blkval(:,idir2,ipert2,idir1,ipert1,kblok)
-!         blkval(:,idir2,ipert2,idir1,ipert1,kblok)=-val(:)
-!       end do
-!     end do
-!   end if
+   !Dielectric tensor
+   iblok=0
+   rfphon(:)=0
+   rfelfd(1:2)=2
+   call ddb%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, omega=omega)
+   if (iblok/=0.and.iblok==kblok) then
+     if (opt==1) then
+       call wrtout([ab_out,std_out], ' Frozen-spin clamped-ion dielectric tensor')
+     else if (opt==2) then
+       call wrtout([ab_out,std_out], ' Relaxed-spin clamped-ion dielectric tensor')
+     end if
+     call wrtout([ab_out,std_out], '  dir  dir        Real              Imag')
+     ipert1= ddb%natom + 2
+     ipert2= ddb%natom + 2
+     do idir2= 1, 3
+       do idir1= 1, 3
+         val(:)=blkval(:,idir1,ipert1,idir2,ipert2,kblok)
+         write(msg,'(2x,a2,3x,a2,2x,2es18.9)' ) cart(idir1), cart(idir2), &
+       & val(1), val(2)
+         call wrtout([ab_out,std_out], msg)
+       end do
+       call wrtout([ab_out,std_out], ' ')
+     end do
+   end if
+
+   !Magnetoelectric susceptibility
+   iblok=0
+   rfphon(:)=0
+   rfelfd(1)=0
+   rfelfd(2)=2
+   rfmagn(1)=1
+   rfmagn(2)=0
+   call ddb%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, omega=omega)
+   if (iblok/=0.and.iblok==kblok) then
+     if (opt==1) then
+       call wrtout([ab_out,std_out], ' Frozen-spin clamped-ion magnetoelectric susceptibility')
+     else if (opt==2) then
+       call wrtout([ab_out,std_out], ' Relaxed-spin clamped-ion magnetoelectric susceptibility')
+     end if
+     call wrtout([ab_out,std_out], ' M-dir E-dir        Real              Imag')
+     ipert1= ddb%natom + 5
+     ipert2= ddb%natom + 2
+     do idir2= 1, 3
+       do idir1= 1, 3
+         val(:)=blkval(:,idir1,ipert1,idir2,ipert2,kblok)/ucvol
+         write(msg,'(2x,a2,3x,a2,2x,2es18.9)' ) cart(idir1), cart(idir2), &
+       & val(1), val(2)
+         call wrtout([ab_out,std_out], msg)
+       end do
+       call wrtout([ab_out,std_out], ' ')
+     end do
+   end if
 
  end if
 
- 
+ !Magnetic susceptibility
+ iblok=0
+ rfphon(:)=0
+ rfelfd(:)=0
+ rfmagn(1)=1
+ rfmagn(2)=1
+ call ddb%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, omega=omega)
+ if (iblok/=0.and.iblok==kblok) then
+   if (opt==1) then
+     call wrtout([ab_out,std_out], ' Frozen-spin clamped-ion magnetic susceptibility')
+   else if (opt==2) then
+     call wrtout([ab_out,std_out], ' Relaxed-spin clamped-ion magnetic susceptibility')
+   end if
+   call wrtout([ab_out,std_out], '  dir  dir        Real              Imag')
+   ipert1= ddb%natom + 5
+   ipert2= ddb%natom + 5
+   do idir2= 1, 3
+     do idir1= 1, 3
+       val(:)=blkval(:,idir1,ipert1,idir2,ipert2,kblok)/ucvol
+       write(msg,'(2x,a2,3x,a2,2x,2es18.9)' ) cart(idir1), cart(idir2), &
+     & val(1), val(2)
+       call wrtout([ab_out,std_out], msg)
+     end do
+     call wrtout([ab_out,std_out], ' ')
+   end do
+ end if
+
+ !Magnetic Born effective charges
+ iblok=0
+ rfphon(1)=1
+ rfelfd(:)=0
+ rfmagn(1)=0
+ rfmagn(2)=1
+ call ddb%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, omega=omega)
+ if (iblok/=0.and.iblok==kblok) then
+   if (opt==1) then
+     call wrtout([ab_out,std_out], ' Frozen-spin magnetic Born effective charges')
+   else if (opt==2) then
+     call wrtout([ab_out,std_out], ' Relaxed-spin magnetic Born effective charges')
+   end if
+   call wrtout([ab_out,std_out], ' atom   dir     B-dir        Real              Imag')
+
+   ipert2= ddb%natom + 5
+   do ipert1= 1, natom
+     do idir1= 1, 3
+       do idir2= 1, 3
+         val(:)=blkval(:,idir1,ipert1,idir2,ipert2,kblok)
+         write(msg,'(i3,4x,a2,7x,a2,2x,2es18.9)') &
+       & ipert1, cart(idir1), cart(idir2), val(1), val(2)
+         call wrtout([ab_out,std_out], msg)
+       end do
+     end do
+     call wrtout([ab_out,std_out], ' ')
+   end do
+ end if
 
  end subroutine mp_d2etot_print
 !!***
