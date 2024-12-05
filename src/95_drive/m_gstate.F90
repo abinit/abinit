@@ -1030,7 +1030,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  end if
 
  call init_sc_dmft(dtset,psps%mpsang,paw_dmft,gprimd(:,:),kg(:,:),mpi_enreg,npwarr(:),occ(:),pawang, &
-                & pawrad(:),pawtab(:),rprimd(:,:),ucvol,dtfil%unpaw,use_sc_dmft,xred(:,:),ylm(:,:))
+                 & pawrad(:),pawtab(:),rprimd(:,:),ucvol,dtfil%unpaw,use_sc_dmft,xred(:,:),ylm(:,:))
  if (paw_dmft%use_dmft == 1) then
    if (paw_dmft%myproc == 0) then
      call readocc_dmft(paw_dmft,dtfil%filnam_ds(3),dtfil%filnam_ds(4))
