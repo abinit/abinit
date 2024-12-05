@@ -2571,7 +2571,7 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
 !arrays
  integer, pointer :: indklmn(:,:)
  real(dp),allocatable :: dijnd_rad(:,:),dijso_rad(:),dkdr(:),dv1dr(:),dyadic(:,:,:,:)
- real(dp),allocatable :: rt_dkdr(:),v1(:),zk1(:),z_intgd(:),z_kernel(:)
+ real(dp),allocatable :: v1(:),zk1(:),z_intgd(:),z_kernel(:)
 
 ! *************************************************************************
 
@@ -2647,21 +2647,18 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
  LIBPAW_DEALLOCATE(dv1dr)
 
  if(present(znuc)) then
-   LIBPAW_ALLOCATE(rt_dkdr,(mesh_size))
    ! relevant ZORA length scale for Coulomb potential
    rt=znuc*rc
-   rt_dkdr = two*rt/(rt+two*pawrad%rad(1:mesh_size))**2
    ! replace dk/dr at short range with Coulomb potential dk/dr
    do ii=1,mesh_size
      rr=pawrad%rad(ii)
-     if (rr<rc) dkdr(ii)=rt_dkdr(ii)
+     if (rr<rc) dkdr(ii)=two*rt/(two*rr+rt)**2
      if (rr>rc) exit
    end do
-   LIBPAW_DEALLOCATE(rt_dkdr)
  end if
 
 !------------------------------------------------------------------------
-!----- do radial integrals
+!----- radial integrals
 !------------------------------------------------------------------------
 
  LIBPAW_ALLOCATE(z_kernel,(mesh_size))
