@@ -646,12 +646,12 @@ end subroutine kpts_pack_in_stars
 !!
 !! SOURCE
 
-integer function kpts_map(mode, timrev, cryst, krank, nkpt2, kpt2, map, qpt, dksqmax_tol) result(ierr)
+integer function kpts_map(mode, kptopt, cryst, krank, nkpt2, kpt2, map, qpt, dksqmax_tol) result(ierr)
 
 !Arguments ------------------------------------
 !scalars
  character(len=*),intent(in) :: mode
- integer,intent(in) :: timrev, nkpt2
+ integer,intent(in) :: kptopt, nkpt2
  class(crystal_t),intent(in) :: cryst
  class(krank_t),intent(inout) :: krank
  real(dp),optional,intent(in) :: dksqmax_tol
@@ -663,19 +663,28 @@ integer function kpts_map(mode, timrev, cryst, krank, nkpt2, kpt2, map, qpt, dks
 !Local variables-------------------------------
 !scalars
  real(dp) :: dksqmax, my_tol
+ integer :: timrev, nsym
 !arrays
  real(dp) :: my_qpt(3)
 
 ! *************************************************************************
 
  my_qpt = zero; if (present(qpt)) my_qpt = qpt
+ timrev = kpts_timrev_from_kptopt(kptopt)
+ ! if no spatial symm. set nsym to 1 to suppress the use of spatial symm.
+ ! the first symm. is always the identity
+ if(kptopt==2 .or. kptopt==3) then
+   nsym = 1
+ else
+  nsym = cryst%nsym
+ end if
 
  select case (mode)
  case("symrel")
    ! Note symrel and use_symrec = .False.
    ! These are the conventions for the symmetrization of the wavefunctions used in cgtk_rotate.
    call krank%get_mapping(nkpt2, kpt2, dksqmax, cryst%gmet, map, &
-                          cryst%nsym, cryst%symafm, cryst%symrel, timrev, use_symrec=.False., qpt=my_qpt)
+                          nsym, cryst%symafm, cryst%symrel, timrev, use_symrec=.False., qpt=my_qpt)
 
  case("symrec")
    ! Note symrec and use_symrec = .True.
@@ -2721,11 +2730,9 @@ subroutine testkgrid(bravais,iout,kptrlatt,kptrlen,msym,nshiftk,nsym,prtkpt,rpri
      axes(:,1)=-axes(:,1)
    end if
 !  Prefer symmetry axes on the same side as the primitive axes
-   sca=axes(1,1)*r2d(1,1)+axes(2,1)*r2d(2,1)+axes(3,1)*r2d(3,1)
-   scb=axes(1,2)*r2d(1,2)+axes(2,2)*r2d(2,2)+axes(3,2)*r2d(3,2)
-   scc=axes(1,3)*rprimd(1,dirvacuum)&
-&   +axes(2,3)*rprimd(2,dirvacuum)&
-&   +axes(3,3)*rprimd(3,dirvacuum)
+   sca=DOT_PRODUCT(axes(:,1), r2d(:,1))
+   scb=DOT_PRODUCT(axes(:,2), r2d(:,2))
+   scc=DOT_PRODUCT(axes(:,3), rprimd(:,dirvacuum))
    if(sca<-tol8 .and. scb<-tol8)then
      axes(:,1)=-axes(:,1) ; sca=-sca
      axes(:,2)=-axes(:,2) ; scb=-scb
@@ -2740,8 +2747,8 @@ subroutine testkgrid(bravais,iout,kptrlatt,kptrlen,msym,nshiftk,nsym,prtkpt,rpri
 !  axes(:,2)=-axes(:,2) ; scb=-scb
 !  axes(:,3)=-axes(:,3) ; scc=-scc
 !  end if
-   length_axis1=sqrt(axes(1,1)**2+axes(2,1)**2+axes(3,1)**2)
-   length_axis2=sqrt(axes(1,2)**2+axes(2,2)**2+axes(3,2)**2)
+   length_axis1=NORM2(axes(:,1))
+   length_axis2=NORM2(axes(:,2))
 
 !  DEBUG
 !  write(std_out,*)' testkgrid: iholohedry, center =',iholohedry,center
@@ -2767,9 +2774,9 @@ subroutine testkgrid(bravais,iout,kptrlatt,kptrlen,msym,nshiftk,nsym,prtkpt,rpri
    do ii=1,3
      axes(:,ii)=rprimd(:,1)*matrix2(ii,1)+rprimd(:,2)*matrix2(ii,2)+rprimd(:,3)*matrix2(ii,3)
    end do
-   length_axis1=sqrt(axes(1,1)**2+axes(2,1)**2+axes(3,1)**2)
-   length_axis2=sqrt(axes(1,2)**2+axes(2,2)**2+axes(3,2)**2)
-   length_axis3=sqrt(axes(1,3)**2+axes(2,3)**2+axes(3,3)**2)
+   length_axis1 = NORM2(axes(:,1))
+   length_axis2 = NORM2(axes(:,2))
+   length_axis3 = NORM2(axes(:,3))
 !  DEBUG
 !  write(std_out,*)' testkgrid: axes=',axes(:,:)
 !  write(std_out,*)' length_axis=',length_axis1,length_axis2,length_axis3

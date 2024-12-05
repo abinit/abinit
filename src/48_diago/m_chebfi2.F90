@@ -339,8 +339,6 @@ subroutine chebfi_free(chebfi)
  call xg_free(chebfi%AX)
  call xg_free(chebfi%BX)
 
-!call xg_finalize()
-
 end subroutine chebfi_free
 !!***
 
@@ -820,9 +818,9 @@ subroutine chebfi_rayleighRitzQuotients(chebfi,maxeig,mineig,DivResults)
    call xg_init(Results2, space_res, chebfi%bandpp, 1, gpu_option=chebfi%gpu_option)
  end if
 
- call xgBlock_colwiseDotProduct(chebfi%xXColsRows, chebfi%xAXColsRows, Results1%self)
+ call xgBlock_colwiseDotProduct(chebfi%xXColsRows, chebfi%xAXColsRows, Results1%self, comm_loc=xmpi_comm_null)
 
- call xgBlock_colwiseDotProduct(chebfi%xXColsRows, chebfi%xBXColsRows, Results2%self)
+ call xgBlock_colwiseDotProduct(chebfi%xXColsRows, chebfi%xBXColsRows, Results2%self, comm_loc=xmpi_comm_null)
 
  call xgBlock_colwiseDivision(Results1%self, Results2%self, DivResults, &
    & maxeig, maxeig_pos, mineig, mineig_pos)

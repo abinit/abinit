@@ -59,7 +59,7 @@ dmatpawu
      0.00000   -0.00010    0.00000    0.00010    0.11580
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "Pseudodojo_paw_pbe_standard/Ni.xml, Pseudodojo_paw_pbe_standard/O.xml"
+ pseudos "Psdj_paw_pbe_std/Ni.xml, Psdj_paw_pbe_std/O.xml"
 
 ##############################################################
 # This section is used only for regression testing of ABINIT #

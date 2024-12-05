@@ -14,7 +14,7 @@ ndtset 2  udtset 1 2
 
 #First dataset : find the optimal bond length of H2, and associated total energy
    natom?1 2             # There are two atoms
-  ionmov?1 2             # Use the modified Broyden algorithm
+  geoopt?1 "bfgs"        # Use the modified Broyden algorithm
    ntime?1 10            # Maximum number of Broyden "timesteps"
   tolmxf?1 5.0d-4        # Stopping criterion for the geometry optimization : when 
                          # the residual forces are less than tolmxf, the Broyden 
@@ -48,7 +48,7 @@ znucl 1           # The keyword "znucl" refers to the atomic number of the possi
                   # Here, the only type is Hydrogen. The pseudopotential(s)
                   # mentioned after the keyword "pseudos" should correspond to this type of atom.
 pp_dirpath "$ABI_PSPDIR"                 # This is the path to the directory were pseudopotentials for tests are stored
-pseudos "Pseudodojo_nc_sr_04_pw_standard_psp8/H.psp8"  # Name and location of the pseudopotential
+pseudos "Psdj_nc_sr_04_pw_std_psp8/H.psp8"  # Name and location of the pseudopotential
                   # This pseudopotential comes from the pseudodojo site http://www.pseudo-dojo.org/  (NC SR LDA standard),
                   # and was generated using the LDA exchange-correlation functional (PW=Perdew-Wang, ixc=-1012).
                   # By default, abinit uses the same exchange-correlation functional than the one of the input pseudopotential(s)

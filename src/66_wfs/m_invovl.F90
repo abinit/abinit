@@ -40,7 +40,7 @@ MODULE m_invovl
  use m_hamiltonian, only : gs_hamiltonian_type
  use m_bandfft_kpt, only : bandfft_kpt_get_ikpt
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_axpby
- use m_gemm_nonlop, only : gemm_nonlop_use_gemm
+ use m_gemm_nonlop_projectors, only : gemm_nonlop_use_gemm
  use m_nonlop,      only : nonlop
  use m_prep_kgb,    only : prep_nonlop
 
@@ -495,7 +495,9 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
  integer :: ikpt_this_proc,cplex_dij
  logical :: parity
  real(dp) :: tsec(2)
+#if defined(HAVE_FC_ISO_C_BINDING) && defined(HAVE_GPU_CUDA)
  character(len=500) :: message
+#endif
  character :: blas_transpose
 
  type(invovl_kpt_type), pointer :: invovl
@@ -766,6 +768,10 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
    call refresh_invovl_ompgpu_kpt(ikpt_this_proc)
  end if
 #endif
+
+! LB-10/06/24: This message is too verbose on some cases (for example many k-points)
+! write(message,*) 'Invovl built'
+! call wrtout(std_out,message,'COLL')
 
 end subroutine make_invovl
 !!***

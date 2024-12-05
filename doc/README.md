@@ -1,10 +1,12 @@
 ## Getting started with mkdocs
 
 !!! warning
-    
+
     The code supports py2.7 and python3.6 but py3k is **strongly** suggested
-    especially when building the final version before deploying 
+    especially when building the final version before deploying
     as py3k has native support for unicode.
+
+    In addition, all the commands should be run in the top abinit directory (so one level above /doc)
 
 Install the python packages required to build the static website with:
 
@@ -22,8 +24,8 @@ If you use conda, you may want to create a new environment based on python3.6 wi
 
 and then install the packages with pip (see above commands).
 
-MkDocs comes with a built-in dev-server that lets you preview your documentation as you work on it. 
-Make sure you are in `~abinit`, and then start *our customized* server 
+MkDocs comes with a built-in dev-server that lets you preview your documentation as you work on it.
+Make sure you are in `~abinit`, and then start *our customized* server
 by running the `mksite.py` serve command with the `--dirtyreload` option:
 
 ```console
@@ -62,7 +64,7 @@ wikilink syntax: <span style="background-color: #E0E0E0;font-size:90%;"> &#91; [
 
 If you get error message about ASCII being used as default encoding on your machine add:
 
-    export LC_ALL=en_US.UTF-8  
+    export LC_ALL=en_US.UTF-8
     export LANG=en_US.UTF-8
 
 to your ~/.bashrc and source it
@@ -103,7 +105,7 @@ For a parallel calculation, [[timopt]] is enforced to be 0.
 ),
 ```
 
-Adding a new variable is easy. Edit the python module and add a new item at the end of the list. 
+Adding a new variable is easy. Edit the python module and add a new item at the end of the list.
 A template is provided ...
 
 
@@ -115,8 +117,8 @@ For published work with a DOI, we strongly recommend *avoiding* a `cut&paste` fr
 (there are units tests to enforce the presence of particular entries in the bibtex document and
 your bibtex may not fullfill these requirements).
 
-A much better solution is to use BetterBib and the DOI of the article to fetch data 
-from Crossref and produce the bibtex entry. 
+A much better solution is to use BetterBib and the DOI of the article to fetch data
+from Crossref and produce the bibtex entry.
 BetterBib is available from the Python Package Index, so simply type:
 
     pip install betterbib
@@ -125,10 +127,10 @@ and then use doi2bibtex from the command line:
 
     doi2bibtex 10.1103/PhysRevLett.96.066402
 
-Add the entry to the bibtex file and use the `FirstAuthorYear` convention for the key 
+Add the entry to the bibtex file and use the `FirstAuthorYear` convention for the key
 (make sure it's not a duplicated entry).
-Note that the bibtex ID must be of the form "FirstauthornameYEAR", e.g. "Amadon2008" 
-(start with an uppercase letter, then lower case, then four-digit year). 
+Note that the bibtex ID must be of the form "FirstauthornameYEAR", e.g. "Amadon2008"
+(start with an uppercase letter, then lower case, then four-digit year).
 Possibly, a letter might be added in case of ambiguity: e.g. there exists also `Amadon2008a`
 Then, build the HTML pages using `mksite.py serve`.
 
@@ -136,7 +138,7 @@ Run the tests in `./tests/test_bibtex.py` with pytest (see next section) to vali
 
 ## Running the unit tests
 
-Unit tests are located in the ./tests directory. 
+Unit tests are located in the ./tests directory.
 To execute the tests, install `pytest` with:
 
     pip install pytest
@@ -145,7 +147,7 @@ and then:
 
     pytest -v ./tests/
 
-Use 
+Use
 
     pytest -v ./tests/test_variables.py
 

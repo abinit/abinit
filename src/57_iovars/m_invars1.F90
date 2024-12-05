@@ -674,6 +674,9 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    ABI_MALLOC(dtsets(idtset)%constraint_kind,(mxntypat))
    ABI_MALLOC(dtsets(idtset)%corecs,(mxntypat))
    ABI_MALLOC(dtsets(idtset)%densty,(mxntypat,4))
+   ABI_MALLOC(dtsets(idtset)%dmft_nominal,(mxnatom))
+   ABI_MALLOC(dtsets(idtset)%dmft_proj,(mxntypat))
+   ABI_MALLOC(dtsets(idtset)%dmft_shiftself,(mxnatom))
    ABI_MALLOC(dtsets(idtset)%dynimage,(mxnimage))
    ABI_MALLOC(dtsets(idtset)%iatfix,(3,mxnatom))
    ABI_MALLOC(dtsets(idtset)%f4of2_sla,(mxntypat))
@@ -1553,12 +1556,12 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 ! if getxred or getxcart we need to import xred before entering ingeo.
 ! NB: xred/cart might be re-updated at runtime after running source dtset
 !   call intagm(dprarr,intarr,source_dtset,marr,3,string(1:lenstr),'getxred',tread,'INT')
-!   if (tread==1 .or. tread_geo==1) 
-!     source_dtset = 
+!   if (tread==1 .or. tread_geo==1)
+!     source_dtset =
 !     if (== -1) source_dtset = jdtset-1
 !   end if
 !   call intagm(dprarr,intarr,source_dtset,marr,3,string(1:lenstr),'getxcart',tread_geo,'INT')
-! 
+!
 
    ABI_MALLOC(chrgat,(natom))
    ABI_MALLOC(iatfix,(3,natom))
@@ -2146,7 +2149,12 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  if(tread==1) dtset%constraint_kind(1:dtset%ntypat)=intarr(1:dtset%ntypat)
 
 !Some special cases are not compatible with GPU implementation
- if (dtset%optdriver/=0) dtset%gpu_option=ABI_GPU_DISABLED  ! GPU only compatible with GS
+ if (dtset%optdriver/=RUNL_GSTATE .and. dtset%optdriver/=RUNL_RESPFN) then
+   dtset%gpu_option=ABI_GPU_DISABLED  ! GPU only compatible with GS and RESPFN
+ end if
+ if (dtset%optdriver==RUNL_RESPFN .and. dtset%gpu_option/=ABI_GPU_OPENMP) then
+   dtset%gpu_option=ABI_GPU_DISABLED  ! RESPFN on GPU only implemented with OpenMP
+ end if
  if (dtset%tfkinfunc/=0) dtset%gpu_option=ABI_GPU_DISABLED  ! Recursion method has its own GPU impl
  if (dtset%nspinor/=1)   dtset%gpu_option=ABI_GPU_DISABLED  ! nspinor=2 not yet GPU compatible
 
@@ -2299,10 +2307,11 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%chkparal=1
    dtsets(idtset)%chksymbreak=1
    dtsets(idtset)%chksymtnons=1
-   dtsets(idtset)%chneut=1      
+   dtsets(idtset)%chneut=1
    dtsets(idtset)%cineb_start=7
    dtsets(idtset)%corecs(:) = zero
-   dtsets(idtset)%cprj_update_lvl=0
+   dtsets(idtset)%cprj_in_memory=0
+   dtsets(idtset)%cprj_update_lvl=3
 !  D
    dtsets(idtset)%ddamp=0.1_dp
    dtsets(idtset)%delayperm=0
@@ -2326,20 +2335,32 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    if (size(dtsets(idtset)%dmatpawu,4)>0) dtsets(idtset)%dmatpawu=-10._dp
    dtsets(idtset)%dmatudiag=0
    dtsets(idtset)%dmft_entropy=0
-   dtsets(idtset)%dmft_dc  =1
+   dtsets(idtset)%dmft_dc=1
+   dtsets(idtset)%dmft_fermi_step=0.02_dp
+   dtsets(idtset)%dmft_gaussorder=2
+   dtsets(idtset)%dmft_integral=1
    dtsets(idtset)%dmft_iter=0
    dtsets(idtset)%dmft_kspectralfunc=0
    dtsets(idtset)%dmft_nlambda=6
+   dtsets(idtset)%dmft_nominal(:)=1.0_dp
    dtsets(idtset)%dmft_nwli=0
    dtsets(idtset)%dmft_nwlo=0
    dtsets(idtset)%dmft_mxsf=0.3_dp
    dtsets(idtset)%dmft_occnd_imag=1
+   dtsets(idtset)%dmft_proj(:)=1
+   dtsets(idtset)%dmft_prt_maxent=1
+   dtsets(idtset)%dmft_prtwan=0
    dtsets(idtset)%dmft_read_occnd=0
    dtsets(idtset)%dmft_rslf=0
+   dtsets(idtset)%dmft_shiftself(:)=0.0_dp
    dtsets(idtset)%dmft_solv=5
    if(dtsets(idtset)%ucrpa>0.and.dtsets(idtset)%usedmft==1) dtsets(idtset)%dmft_solv=0
    dtsets(idtset)%dmft_t2g=0
-!  dtsets(idtset)%dmft_x2my2d=0
+   dtsets(idtset)%dmft_test=0
+   dtsets(idtset)%dmft_use_all_bands=0
+   dtsets(idtset)%dmft_use_full_chipsi=0
+   dtsets(idtset)%dmft_wanrad=-1.0_dp
+   dtsets(idtset)%dmft_x2my2d=0
    dtsets(idtset)%dmft_tolfreq=tol4
    dtsets(idtset)%dmft_tollc=tol5
    dtsets(idtset)%dmft_charge_prec=tol6
@@ -2356,7 +2377,32 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmftctqmc_mrka  =0
    dtsets(idtset)%dmftctqmc_mov   =0
    dtsets(idtset)%dmftctqmc_order =0
+   dtsets(idtset)%dmftctqmc_triqs_det_init_size=100
+   dtsets(idtset)%dmftctqmc_triqs_det_n_operations_before_check=10000
+   dtsets(idtset)%dmftctqmc_triqs_det_precision_error=1.0d-5
+   dtsets(idtset)%dmftctqmc_triqs_det_precision_warning=1.0d-8
+   dtsets(idtset)%dmftctqmc_triqs_det_singular_threshold=-1.0_dp
+   dtsets(idtset)%dmftctqmc_triqs_entropy=0
+   dtsets(idtset)%dmftctqmc_triqs_epsilon=1.0d-10
+   dtsets(idtset)%dmftctqmc_triqs_imag_threshold=1.0d-13
+   dtsets(idtset)%dmftctqmc_triqs_lambda=1000
+   dtsets(idtset)%dmftctqmc_triqs_leg_measure=0
+   dtsets(idtset)%dmftctqmc_triqs_loc_n_min=0
+   dtsets(idtset)%dmftctqmc_triqs_loc_n_max=huge(0)
+   dtsets(idtset)%dmftctqmc_triqs_measure_density_matrix=1
+   dtsets(idtset)%dmftctqmc_triqs_move_double=0
+   dtsets(idtset)%dmftctqmc_triqs_move_global_prob=0.0_dp
+   dtsets(idtset)%dmftctqmc_triqs_move_shift=1
+   dtsets(idtset)%dmftctqmc_triqs_nbins_histo=100
    dtsets(idtset)%dmftctqmc_triqs_nleg=30
+   dtsets(idtset)%dmftctqmc_triqs_ntau_delta=-1
+   dtsets(idtset)%dmftctqmc_triqs_orb_off_diag=0
+   dtsets(idtset)%dmftctqmc_triqs_seed_a=34788
+   dtsets(idtset)%dmftctqmc_triqs_seed_b=928374
+   dtsets(idtset)%dmftctqmc_triqs_spin_off_diag=0
+   dtsets(idtset)%dmftctqmc_triqs_therm=1000
+   dtsets(idtset)%dmftctqmc_triqs_time_invariance=1
+   dtsets(idtset)%dmftctqmc_triqs_use_norm_as_weight=0
    dtsets(idtset)%dmftqmc_l=0
    dtsets(idtset)%dmftqmc_n=0.0_dp
    dtsets(idtset)%dmftqmc_seed=jdtset
@@ -2407,6 +2453,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%fock_icutcoul=3
    dtsets(idtset)%freqim_alpha=five
    dtsets(idtset)%friction=0.001_dp
+   dtsets(idtset)%frictionbar=0.001_dp
    dtsets(idtset)%frzfermi=0
    dtsets(idtset)%fxcartfactor=one ! Should be adjusted to the H2 conversion factor
 !  G
@@ -2414,6 +2461,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%ga_fitness =1
    dtsets(idtset)%ga_opt_percent =0.2_dp
    dtsets(idtset)%ga_rules(:) =1
+   dtsets(idtset)%geoopt = "none"
    dtsets(idtset)%goprecon =0
    dtsets(idtset)%goprecprm(:)=0
    dtsets(idtset)%gpu_devices=(/-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1/)
@@ -2536,6 +2584,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%mgfft = -1
    dtsets(idtset)%mgfftdg = -1
    dtsets(idtset)%mixesimgf(:)=zero
+   dtsets(idtset)%moldyn = "none"
    dtsets(idtset)%mpw = -1
    dtsets(idtset)%mqgrid=0
    dtsets(idtset)%mqgriddg=0
@@ -2571,12 +2620,20 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
 !
    !nline
    dtsets(idtset)%nline=4
-
+   !Specific value for wavelets
    if(dtsets(idtset)%usewvl==1 .and. .not. wvl_bigdft) then
      if(dtsets(idtset)%usepaw==1) then
        dtsets(idtset)%nline=4
      else
        dtsets(idtset)%nline=2
+     end if
+   end if
+   !For Chebyshev filtering algo, nline is the degree of the Chebyshev polynomial
+   if (mod(dtsets(idtset)%wfoptalg,10) == 1) then
+     if (dtsets(idtset)%gpu_option == ABI_GPU_DISABLED) then
+       dtsets(idtset)%nline = 6
+     else
+       dtsets(idtset)%nline = 6
      end if
    end if
 
@@ -2834,6 +2891,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%write_files = "default"
 !  X
    dtsets(idtset)%xclevel  = 0
+   dtsets(idtset)%xg_nonlop_option  = 0
    dtsets(idtset)%xc_denpos = tol14
    dtsets(idtset)%xc_taupos = tol14
    dtsets(idtset)%xc_tb09_c = 99.99_dp

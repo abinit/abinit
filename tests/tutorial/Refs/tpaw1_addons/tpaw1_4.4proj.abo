@@ -22,7 +22,7 @@
 - root for input  files -> tpaw1_4.i
 - root for output files -> tpaw1_4.o
 
-- inpspheads : Reading pseudopotential header in XML form from ../../../Psps_for_tests/C.LDA_PW-JTH.xml
+- inpspheads : Reading pseudopotential header in XML form from ../../../Pspdir/C.LDA_PW-JTH.xml
 
  Symmetries : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -300,9 +300,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is ../../../Psps_for_tests/C.LDA_PW-JTH.xml
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/C.LDA_PW-JTH.xml
-- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/C.LDA_PW-JTH.xml
+- pspini: atom type   1  psp file is ../../../Pspdir/C.LDA_PW-JTH.xml
+- pspatm: opening atomic psp file    ../../../Pspdir/C.LDA_PW-JTH.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Pspdir/C.LDA_PW-JTH.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.50736703

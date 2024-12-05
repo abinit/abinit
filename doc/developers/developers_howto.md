@@ -177,6 +177,7 @@ In particular:
 
 * Create the F90 module and `git add` it
 * Register the F90 file in the `abinit.src` file (avoid duplicated names in the public API, **abisrc.py** will complain about that)
+* Register the F90 file in the `CMakeLists.txt` file as well 
 * Rerun `makemake` in the source directory
 * Rerun `configure` and `make` in the build directory (possibly `make clean && make`)
 

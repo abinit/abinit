@@ -18,6 +18,9 @@
 
 #include "abi_common.h"
 
+! nvtx related macro definition
+#include "nvtx_macros.h"
+
 module m_dfpt_scfcv
 
  use defs_basis
@@ -86,6 +89,10 @@ module m_dfpt_scfcv
  use m_dfpt_nstwf,   only : dfpt_nstpaw, dfpt_nstwf
  use m_mkcore,         only : dfpt_mkcore
  use m_spacepar,   only : hartrestr, make_vectornd, symrhg
+
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+ use m_nvtx_data
+#endif
 
  implicit none
 
@@ -692,6 +699,11 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
    & ngfftf,dtset%nspden,dtset%nucdipmom,rprimd,vectornd,xred)
  endif
 
+#ifdef HAVE_OPENMP_OFFLOAD
+ ! Upload cgq array to GPU
+ !$OMP TARGET ENTER DATA MAP(to:cgq) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+#endif
+
  call timab(154,2,tsec)
 
 !######################################################################
@@ -708,6 +720,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 
  quitsum_request = xmpi_request_null; timelimit_exit = 0
 
+ ABI_NVTX_START_RANGE(NVTX_DFPT_SCF)
  do istep=1,max(1,nstep)
 
    ! Handle time limit condition.
@@ -1144,6 +1157,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !  Note that there are different "exit" instructions within the loop
 !  ######################################################################
  end do ! istep
+ ABI_NVTX_END_RANGE()
 
  ! Avoid pending requests if itime == ntime.
  call xmpi_wait(quitsum_request,ierr)
@@ -1366,6 +1380,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  call timab(150,2,tsec)
  call timab(160,1,tsec)
 
+
 !calculate Born effective charge and store it in d2lo
  if ((dtset%berryopt== 4.or.dtset%berryopt== 6.or.dtset%berryopt== 7.or.&
 & dtset%berryopt==14.or.dtset%berryopt==16.or.dtset%berryopt==17).and.&
@@ -1375,6 +1390,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
    blkflg(:,dtset%natom+2,:,1:dtset%natom)=1
  end if
 
+
 !calculate dielectric tensor and store it in d2lo
  if ((dtset%berryopt== 4.or.dtset%berryopt== 6.or.dtset%berryopt== 7.or.&
 & dtset%berryopt==14.or.dtset%berryopt==16.or.dtset%berryopt==17).and.&
@@ -1383,6 +1399,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &   mpi_enreg,mpw,mpw1,mpert,nkpt,npwarr,npwar1,dtset%nsppol,dtset%nspinor,pwindall,qmat,rprimd)
    blkflg(:,dtset%natom+2,:,dtset%natom+2)=1
  end if
+
 
 !If SCF convergence was not reached (for nstep>0),
 !print a warning to the output file (non-dummy arguments: nstep,
@@ -1506,6 +1523,10 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  end if
 
 !Deallocate arrays
+#ifdef HAVE_OPENMP_OFFLOAD
+ !$OMP TARGET EXIT DATA MAP(delete:cgq) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+#endif
+
  ABI_FREE(fcart)
  ABI_FREE(vtrial1)
  if (.not.kramers_deg) then
@@ -2405,7 +2426,7 @@ subroutine dfpt_nselt(blkflg,cg,cg1,cplex,&
 
 
 ! *********************************************************************
-
+ ABI_NVTX_START_RANGE(NVTX_DFPT_NSELT)
 !Init me
  comm = mpi_enreg%comm_cell
  me   = mpi_enreg%me_kpt
@@ -2684,6 +2705,7 @@ g0term=0; if (rfstrs_ref_==1) g0term=1
  ABI_FREE(kg_k)
  ABI_FREE(kg1_k)
  ABI_FREE(vpsp1)
+ ABI_NVTX_END_RANGE()
 
 end subroutine dfpt_nselt
 !!***
@@ -3060,6 +3082,8 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
  ABI_UNUSED(nkpt)
 
  DBG_ENTER("COLL")
+
+ ABI_NVTX_START_RANGE(NVTX_DFPT_NSTDY)
 
 !Not valid for PAW
  if (psps%usepaw==1) then
@@ -3450,6 +3474,8 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
 
  call timab(111,2,tsec)
 
+ ABI_NVTX_END_RANGE()
+
  DBG_EXIT("COLL")
 
 end subroutine dfpt_nstdy
@@ -3652,6 +3678,7 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
 ! *********************************************************************
 
  DBG_ENTER('COLL')
+ ABI_NVTX_START_RANGE(NVTX_DFPT_RHOFERMI)
 
 !Check arguments validity
  if (ipert>natom.and.ipert/=natom+3.and.ipert/=natom+4.and.ipert/=natom+5) then
@@ -4163,6 +4190,7 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
  call timab(127,2,tsec)
  call timab(121,2,tsec)
 
+ ABI_NVTX_END_RANGE()
  DBG_EXIT('COLL')
 
 end subroutine dfpt_rhofermi
@@ -4268,7 +4296,7 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
  integer :: iband_me, nband_me
  integer :: ipw,me,nkpt_max,optlocal,optnl,opt_accrho,opt_corr
  integer :: opt_gvnlx1,sij_opt,tim_fourwf,tim_getgh1c,usevnl
- real(dp) :: dotr,lambda,wtband
+ real(dp) :: dotr(1),lambda,wtband
  character(len=500) :: msg
 !arrays
  real(dp) :: dum_grad_berry(1,1),dum_gvnlx1(1,1),dum_gs1(1,1),tsec(2)
@@ -4278,6 +4306,7 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
 ! *********************************************************************
 
  DBG_ENTER('COLL')
+ ABI_NVTX_START_RANGE(NVTX_DFPT_WFKFERMI)
 
 !Check arguments validity
  if (ipert>gs_hamkq%natom.and.ipert/=gs_hamkq%natom+3.and.ipert/=gs_hamkq%natom+4.and.ipert/=gs_hamkq%natom+5) then !SPr rfmagn deb
@@ -4374,21 +4403,21 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
 !    Apply H^(1)-Esp.S^(1) to Psi^(0) (H(^1)=only (NL+kin) frozen part)
      lambda=eig0_k(iband)
      call getgh1c(berryopt,cwave0,cwaveprj0,gh1,dum_grad_berry,dum_gs1,gs_hamkq,dum_gvnlx1,&
-&     idir,ipert,lambda,mpi_enreg,optlocal,optnl,opt_gvnlx1,rf_hamkq,sij_opt,&
+&     idir,ipert,(/lambda/),mpi_enreg,1,optlocal,optnl,opt_gvnlx1,rf_hamkq,sij_opt,&
 &     tim_getgh1c,usevnl)
 !    Compute Eig1=<Psi^(0)|H^(1)-Eps.S^(1)|Psi(0)>
-     call dotprod_g(dotr,lambda,gs_hamkq%istwf_k,npw_k*nspinor,1,cwave0,gh1,mpi_enreg%me_g0, &
+     call dotprod_g(dotr(1),lambda,gs_hamkq%istwf_k,npw_k*nspinor,1,cwave0,gh1,mpi_enreg%me_g0, &
 &     mpi_enreg%comm_spinorfft)
      indx=2*iband-1+(iband-1)*2*nband_k
-     eig1_k(indx)=dotr
+     eig1_k(indx)=dotr(1)
 !    Compute the fixed contribution to the 1st-order Fermi energy
      fe1fixed_k(iband)=two*wtband*eig1_k(indx)
      fe1norm_k(iband) =two*wtband
 
 !    Accumulate contribution to density and PAW occupation matrix
 
-     call dfpt_accrho(cplex,cwave0,cwaveq,cwaveq,cwaveprj0,cwaveprjq,dotr,&
-       gs_hamkq,iband,0,0,isppol,kptopt,mpi_enreg,gs_hamkq%natom,nband_k,ncpgr,&
+     call dfpt_accrho(cplex,cwave0,cwaveq,cwaveq,cwaveprj0,cwaveprjq,dotr(1),&
+       gs_hamkq,iband,0,0,isppol,kptopt,mpi_enreg,1,gs_hamkq%natom,nband_k,ncpgr,&
        npw_k,npw1_k,nspinor,occ_k,opt_accrho,pawrhoijfermi,rhoaug,tim_fourwf,&
        opt_corr,wtk_k)
    end if ! End of non-zero occupation and rocceig
@@ -4416,6 +4445,7 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
 
  call timab(130,2,tsec)
 
+ ABI_NVTX_END_RANGE()
  DBG_EXIT('COLL')
 
 end subroutine dfpt_wfkfermi

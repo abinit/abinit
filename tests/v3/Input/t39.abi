@@ -39,7 +39,9 @@ ntypat 1
 znucl 1
 natrd 1
 xred 0.17 0.15 0.11
+nsppol 2
 spinat 0.0 0.0 1.0
+occopt 7
 typat 1
 ecut 1
   kptopt 0

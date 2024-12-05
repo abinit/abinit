@@ -141,7 +141,7 @@ gwpara?4 2        # necessary for dataset 3 DO NOT CHANGE IT if nsppol=2
 
 
 pp_dirpath "$ABI_PSPDIR"
-pseudos "Pseudodojo_paw_pw_standard/V.xml, Pseudodojo_paw_pw_standard/Sr.xml, Pseudodojo_paw_pw_standard/O.xml"
+pseudos "Psdj_paw_pw_std/V.xml, Psdj_paw_pw_std/Sr.xml, Psdj_paw_pw_std/O.xml"
 
 
 

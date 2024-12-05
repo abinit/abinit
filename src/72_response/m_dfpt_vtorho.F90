@@ -18,6 +18,9 @@
 
 #include "abi_common.h"
 
+! nvtx related macro definition
+#include "nvtx_macros.h"
+
 module m_dfpt_vtorho
 
  use defs_basis
@@ -28,8 +31,10 @@ module m_dfpt_vtorho
  use m_hamiltonian
  use m_wfk
  use m_cgtools
+ use m_gemm_nonlop_projectors
  use m_dtset
  use m_dtfil
+ use m_ompgpu_utils
 
 
  use defs_datatypes, only : pseudopotential_type
@@ -54,6 +59,10 @@ module m_dfpt_vtorho
  use m_dfpt_fef,    only : dfptff_gradberry, dfptff_gbefd
  use m_mpinfo,      only : proc_distrb_cycle,proc_distrb_nband
  use m_fourier_interpol, only : transgrid
+
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+ use m_nvtx_data
+#endif
 
  implicit none
 
@@ -326,6 +335,8 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 ! *********************************************************************
 
  DBG_ENTER('COLL')
+
+ ABI_NVTX_START_RANGE(NVTX_DFPT_VTORHO)
 
 !Keep track of total time spent in this routine
  call timab(121,1,tsec)
@@ -635,6 +646,12 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 &         nsppol,qmat,pwindall,rprimd)
        end if
      end if
+
+     ! Setup gemm_nonlop
+     if (gemm_nonlop_use_gemm) then
+       !set the global variable indicating to gemm_nonlop where to get its data from
+       gemm_nonlop_ikpt_this_proc_being_treated = ikpt
+     end if ! gemm_nonlop_use_gemm
 
      ! Free some memory before calling dfpt_vtowfk
      ABI_FREE(ylm_k)
@@ -951,6 +968,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  end if ! iscf>0
 
  call timab(121,2,tsec)
+ ABI_NVTX_END_RANGE()
 
  DBG_EXIT('COLL')
 

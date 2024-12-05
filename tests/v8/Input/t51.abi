@@ -99,7 +99,7 @@ pawecutdg   9.
  pawxcdev   0    # This a restriction for PAW+DFPT+GGA
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "Pseudodojo_paw_pbe_standard/Al.xml, As.GGA_PBE-JTH_sp.xml"
+ pseudos "Psdj_paw_pbe_std/Al.xml, As.GGA_PBE-JTH_sp.xml"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
