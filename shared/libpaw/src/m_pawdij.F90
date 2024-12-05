@@ -2570,8 +2570,8 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
  character(len=500) :: msg
 !arrays
  integer, pointer :: indklmn(:,:)
- real(dp),allocatable :: dijso_rad(:),dkdr(:),dv1dr(:),dyadic(:,:,:,:),rt_dkdr(:),v1(:)
- real(dp),allocatable :: zk1(:),z_intgd(:),z_kernel(:)
+ real(dp),allocatable :: dijnd_rad(:,:),dijso_rad(:),dkdr(:),dv1dr(:),dyadic(:,:,:,:)
+ real(dp),allocatable :: rt_dkdr(:),v1(:),zk1(:),z_intgd(:),z_kernel(:)
 
 ! *************************************************************************
 
@@ -2621,11 +2621,16 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
      msg='Nuclear dipole present in pawdijso but znuc missing, cannot make corrections'
      LIBPAW_BUG(msg)
    end if
+ else
+   has_nucdipmom=.FALSE.
  end if
 
 !------------------------------------------------------------------------
 !----------- Allocations and initializations
 !------------------------------------------------------------------------
+
+ ! classical electron radius \alpha^2
+ rc=two*HalfFineStruct2
 
  LIBPAW_ALLOCATE(v1,(mesh_size))
  call pawv1(mesh_size,nspden,pawang,pawrad,pawxcdev,v1,vh1,vxc1)
@@ -2640,12 +2645,9 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
  LIBPAW_ALLOCATE(dkdr,(mesh_size))
  dkdr = HalfFineStruct2*zk1*zk1*dv1dr
  LIBPAW_DEALLOCATE(dv1dr)
- LIBPAW_DEALLOCATE(zk1)
 
  if(present(znuc)) then
    LIBPAW_ALLOCATE(rt_dkdr,(mesh_size))
-   ! classical electron radius \alpha^2
-   rc=two*HalfFineStruct2
    ! relevant ZORA length scale for Coulomb potential
    rt=znuc*rc
    rt_dkdr = two*rt/(rt+two*pawrad%rad(1:mesh_size))**2
@@ -2674,20 +2676,42 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
    call simp_gen(dijso_rad(kln),z_intgd,pawrad)
  end do
 
+ ! nuclear dipole kernels
+ if (has_nucdipmom) then
+   LIBPAW_ALLOCATE(dijnd_rad,(2,ij_size))
+   ! -\alpha^2 K(r)/r^3
+   z_kernel(2:mesh_size) = -rc*zk1(2:mesh_size)/pawrad%rad(2:mesh_size)**3
+   call pawrad_deducer0(z_kernel,mesh_size,pawrad)
+   do kln=1,ij_size
+     z_intgd = z_kernel*pawtab%phiphj(1:mesh_size,kln)
+     call simp_gen(dijnd_rad(1,kln),z_intgd,pawrad)
+   end do
+   ! \alpha^2 K'(r)/r^2
+   z_kernel(2:mesh_size) = rc*dkdr(2:mesh_size)/pawrad%rad(2:mesh_size)**2
+   call pawrad_deducer0(z_kernel,mesh_size,pawrad)
+   do kln=1,ij_size
+     z_intgd = z_kernel*pawtab%phiphj(1:mesh_size,kln)
+     call simp_gen(dijnd_rad(2,kln),z_intgd,pawrad)
+   end do
+ end if ! nuclear dipole radial integrals
+
  LIBPAW_DEALLOCATE(z_kernel)
  LIBPAW_DEALLOCATE(z_intgd)
+ LIBPAW_DEALLOCATE(zk1)
  LIBPAW_DEALLOCATE(dkdr)
 
  dijso_rad(:)=spnorbscl*dijso_rad(:)
 
 !------------------------------------------------------------------------
-!----- compute dyadics if necessay
+!----- compute dyadics if necessary
 !------------------------------------------------------------------------
  if (has_nucdipmom) then
    gs1=size(pawang%gntselect,1)
    gs2=size(pawang%gntselect,2)
    ngnt=size(pawang%realgnt)
    LIBPAW_ALLOCATE(dyadic,(2,3,3,gs2))
+   ! dyadic(1,:,:,:) : (1 - \hat{r}\hat{r})
+   ! dyadic(2,:,:,:) : (1 - 3\hat{r}\hat{r})
    call make_dyadic(one,one,dyadic(1,1:3,1:3,1:gs2),pawang%gntselect,&
            gs1,gs2,gs2,ngnt,pawang%realgnt)
    call make_dyadic(one,three,dyadic(2,1:3,1:3,1:gs2),pawang%gntselect,&
@@ -2741,6 +2765,7 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
 
  if(has_nucdipmom) then
    LIBPAW_DEALLOCATE(dyadic)
+   LIBPAW_DEALLOCATE(dijnd_rad)
  end if
 
 end subroutine pawdijso
