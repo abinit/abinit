@@ -22,30 +22,30 @@
 module m_rttddft_propagators
 
  use defs_basis
- use defs_abitypes,         only: MPI_type
- use defs_datatypes,        only: pseudopotential_type
+ use defs_abitypes,            only: MPI_type
+ use defs_datatypes,           only: pseudopotential_type
 
- use m_bandfft_kpt,         only: bandfft_kpt, bandfft_kpt_type, &
-                                & bandfft_kpt_set_ikpt,          &
-                                & prep_bandfft_tabs
- use m_dtset,               only: dataset_type
- use m_energies,            only: energies_type, energies_init, energies_copy
- use m_gemm_nonlop,         only: make_gemm_nonlop
+ use m_bandfft_kpt,            only: bandfft_kpt, bandfft_kpt_type, &
+                                   & bandfft_kpt_set_ikpt,          &
+                                   & prep_bandfft_tabs
+ use m_dtset,                  only: dataset_type
+ use m_energies,               only: energies_type, energies_init, energies_copy
+ use m_errors,                 only: msg_hndl
  use m_gemm_nonlop_projectors, only: gemm_nonlop_ikpt_this_proc_being_treated
- use m_hamiltonian,         only: gs_hamiltonian_type, gspot_transgrid_and_pack
- use m_invovl,              only: make_invovl
- use m_kg,                  only: mkkin, mkkpg
- use m_mkffnl,              only: mkffnl
- use m_mpinfo,              only: proc_distrb_cycle
- use m_profiling_abi,       only: abimem_record
- use m_rttddft,             only: rttddft_init_hamiltonian
- use m_rttddft_exponential, only: rttddft_exp_taylor
- use m_rttddft_properties,  only: rttddft_calc_density, &
-                                & rttddft_calc_occ,     &
-                                & rttddft_calc_kin
- use m_rttddft_tdks,        only: tdks_type
- use m_specialmsg,          only: wrtout
- use m_xmpi,                only: xmpi_comm_rank, xmpi_sum, xmpi_max
+ use m_hamiltonian,            only: gs_hamiltonian_type, gspot_transgrid_and_pack
+ use m_invovl,                 only: make_invovl
+ use m_kg,                     only: mkkin, mkkpg
+ use m_mkffnl,                 only: mkffnl
+ use m_mpinfo,                 only: proc_distrb_cycle
+ use m_profiling_abi,          only: abimem_record
+ use m_rttddft,                only: rttddft_init_hamiltonian
+ use m_rttddft_exponential,    only: rttddft_exp_taylor
+ use m_rttddft_properties,     only: rttddft_calc_density, &
+                                   & rttddft_calc_occ,     &
+                                   & rttddft_calc_kin
+ use m_rttddft_tdks,           only: tdks_type
+ use m_specialmsg,             only: wrtout
+ use m_xmpi,                   only: xmpi_comm_rank, xmpi_sum, xmpi_max
 
  implicit none
 

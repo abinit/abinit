@@ -215,9 +215,9 @@ subroutine tdef_update(tdef,dtset,mpi_enreg,time,rprimd,gprimd,kg,mpsang,npwarr,
       else if (time >= tdef%ef_tzero) then
          t = time-tdef%ef_tzero
          tdef%efield(:) = tdef%ef_ezero*cos(tdef%ef_omega*t)*sin(pi*t/tdef%ef_tau)**2
-         tdef%vecpot_ext(:) = tdef%ef_ezero*(-sin(tdef%ef_omega*t)/(2.0_dp*tdef%ef_omega) &
-                                           & +sin(tdef%ef_sin_a*t)/(4.0_dp*tdef%ef_sin_a) &
-                                           & +sin(tdef%ef_sin_b*t)/(4.0_dp*tdef%ef_sin_b))
+         tdef%vecpot_ext(:) = tdef%ef_ezero*(-sin(tdef%ef_omega*t)/(two*tdef%ef_omega) &
+                                           & +sin(tdef%ef_sin_a*t)/(four*tdef%ef_sin_a) &
+                                           & +sin(tdef%ef_sin_b*t)/(four*tdef%ef_sin_b))
       end if
    case default
       write(msg,"(a)") "Unknown electric field type - check the value of td_ef_type"
@@ -226,10 +226,10 @@ subroutine tdef_update(tdef,dtset,mpi_enreg,time,rprimd,gprimd,kg,mpsang,npwarr,
 
  !Induced vector potential
  !Should deal with sppol?! How?
- tmp = tdef%vecpot_ind(:,1)
- tdef%vecpot_ind(:,1) = 2*tdef%vecpot_ind(:,1) - tdef%vecpot_ind(:,2) + 4.0_dp*pi*(dtset%dtele**2)*current(:,1)
- tdef%vecpot_ind(:,2) = tmp
  if (tdef%induced_vecpot) then
+   tmp = tdef%vecpot_ind(:,1)
+   tdef%vecpot_ind(:,1) = 2*tdef%vecpot_ind(:,1) - tdef%vecpot_ind(:,2) + four*pi*(dtset%dtele**2)*current(:,1)
+   tdef%vecpot_ind(:,2) = tmp
    tdef%vecpot = tdef%vecpot_ext + tdef%vecpot_ind(:,1)
  else
     tdef%vecpot = tdef%vecpot_ext

@@ -1,3 +1,10 @@
+# Added by runtests.py
+output_file = "t01.abo"
+indata_prefix = "t01i"
+outdata_prefix = "t01o"
+tmpdata_prefix = "t01t"
+# end runtests.py section
+
 ########################################################
 # Automatic test for ABINIT:                           #
 #   Nickel 4 atoms, non-magnetic, FCC, GGA, PAW        #
@@ -46,7 +53,7 @@ nshiftk 1
 shiftk 0 0 0
 occopt 3
 tsmear 300 K
-nband 40
+nband 48
 
 # Convergence parameters
 ecut 20       # Not converged
@@ -54,7 +61,7 @@ pawecutdg 30
 tolvrs 1.d-4  # not sufficient
 nstep 50 
 
-pp_dirpath "$ABI_PSPDIR/Pseudodojo_paw_pbe_standard/"
+pp_dirpath "$ABI_PSPDIR/Psdj_paw_pbe_std"
 pseudos "Ni.xml"
   
 # Printing parameters
