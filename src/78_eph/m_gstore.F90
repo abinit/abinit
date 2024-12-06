@@ -4891,9 +4891,9 @@ subroutine gqk_filter_erange(gqk, gstore, erange, my_states, glob_states)
  class(ebands_t), pointer :: ebands
  type(gaps_t) :: gaps
  type(krank_t) :: krank_kpts
- logical :: assume_gap
+ logical :: assume_gap, skip_nk, skip_mkq, skip_q
  integer :: my_ik, ik_ibz, ik_glob
- integer :: my_iq, ikq
+ integer :: my_iq, ikq, ipert
  integer :: ib, jb, bstart
  integer :: gap_err, ierr
  real(dp) :: vmax, cmin, eig, wtq
@@ -4967,16 +4967,9 @@ subroutine gqk_filter_erange(gqk, gstore, erange, my_states, glob_states)
    kpt(:) = gqk%my_kpts(:, my_ik)
 
    do ib=1,gqk%nb
-
      ! |nk> is forbidden
-     if (my_states(ib, my_ik) == 0) then
-       if (gqk%cplex == 1) then
-         gqk%my_g2(:,:,:, ib, my_ik) = zero
-       else
-         gqk%my_g(:,:,:, ib, my_ik) = czero
-       end if
-       cycle
-     end if
+     skip_nk = .false.
+     if (my_states(ib, my_ik) == 0) skip_nk = .true.
 
      do my_iq=1,gqk%my_nq
        qpt(:) = my_qpts(:, my_iq)
@@ -4986,27 +4979,28 @@ subroutine gqk_filter_erange(gqk, gstore, erange, my_states, glob_states)
        ikq = krank_kpts%get_index(kpq)
 
        ! k+q falls outside the filtered kpts pool
-       if (ikq == -1) then
-         if (gqk%cplex == 1) then
-           gqk%my_g2(:,:, my_iq, ib, my_ik) = zero
-         else
-           gqk%my_g(:,:, my_iq, ib, my_ik) = czero
-         end if
-         cycle
-       end if
+       skip_q = .false.
+       if (ikq == -1) skip_q = .true.
 
        do jb=1,gqk%nb
-
          ! |mk+q> is forbidden
-         if (glob_states(jb, ikq) == 0) then
-           if (gqk%cplex == 1) then
-             gqk%my_g2(:, jb, my_iq, ib, my_ik) = zero
-           else
-             gqk%my_g(:, jb, my_iq, ib, my_ik) = czero
-           end if
-           cycle
-         end if
+         skip_mkq = .false.
+         if (glob_states(jb, ikq) == 0) skip_mkq = .true.
 
+         do ipert=1,gqk%my_npert
+
+           if (skip_nk .or. skip_q .or. skip_mkq) then
+             select case (gqk%cplex)
+             case (1)
+               gqk%my_g2(ipert, jb, my_iq, ib, my_ik) = zero
+             case (2)
+               gqk%my_g(ipert, jb, my_iq, ib, my_ik) = czero
+             case default
+               ABI_ERROR(sjoin("Invalid gqk%cplex:", itoa(gqk%cplex)))
+             end select
+           end if
+
+         enddo
        enddo
      enddo
    enddo

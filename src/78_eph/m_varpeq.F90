@@ -119,12 +119,12 @@ module m_varpeq
    ! (np)
    ! Flag indicating if an electroic gradient has been computed at previous step
 
-  integer, allocatable :: my_a_mask(:,:)
+  integer, allocatable :: my_states_mask(:,:)
    ! (gqk%nb, gqk%my_nk)
-   ! Energy filtering mask for electronic coefficients A_nk trated by this MPI proc
+   ! Energy filtering mask for electronic states trated by this MPI proc
    ! Relevant if energy filtering is used in gstore
 
-  integer, allocatable :: a_mask_glob(:,:)
+  integer, allocatable :: states_mask_glob(:,:)
    ! (gqk%nb, gqk%glob_nk)
    ! Global filtering mask array
 
@@ -169,6 +169,10 @@ module m_varpeq
   complex(dp), allocatable :: my_b(:,:,:)
    ! (gqk%my_npert, gqk%my_nq, np)
    ! Vibrational coefficients B_q\nu for each state treated by this MPI proc
+
+  complex(dp), allocatable :: my_prev_b(:,:)
+   ! (gqk%my_npert, gqk%my_nq)
+   ! Previous vibrational coefficients B_q\nu for each state treated by this MPI proc
 
   complex(dp), allocatable :: my_pc(:,:)
    ! (gqk%nb, gqk%my_nk)
@@ -262,10 +266,6 @@ module m_varpeq
     procedure :: load_a => polstate_load_a
     ! Initialize A_nk from an existent vector of electronic coefficients
 
-    procedure :: mask_a => polstate_mask_a
-    ! Calculate the mask array my_a_filter to exclude energy forbidden transitions
-    ! Relevant if energy filtering is used in gstore
-
     procedure :: filter => polstate_filter
     ! Filter the vector of electronic coefficients A_nk using a mask
 
@@ -358,6 +358,9 @@ module m_varpeq
 
    real(dp) :: e_frohl
    ! Long-range divergence correction of polaron binding energy
+
+   real(dp) :: mixing_factor
+   ! Mixing factor to be used in the solver for vibrational coefficients
 
    real(dp) :: tolgrs
    ! L^2 gradient norm tolerance
@@ -1241,10 +1244,6 @@ subroutine varpeq_solve(self)
    spin = self%gstore%my_spins(my_is)
    polstate => self%polstate(my_is)
 
-   if (self%gstore%kfilter == "erange") then
-     call polstate%mask_a(self%gstore%erange_spin(:, spin), self%pkind)
-   endif
-
    do ip=1,self%nstates
      ! initialize A_nk at this state, orthogonalize to the previous ones
      ! and normalize
@@ -1252,7 +1251,7 @@ subroutine varpeq_solve(self)
 
      do ii=1,self%nstep
        ! gather A, get B_qnu, get energies
-       call polstate%localize(ip)
+       call polstate%localize(ip, self%mixing_factor)
 
        ! get bare gradient
        call polstate%calc_grad(ip)
@@ -1409,6 +1408,7 @@ subroutine varpeq_init(self, gstore, dtset)
  self%frohl_ntheta = dtset%eph_frohl_ntheta
  ! real
  self%tolgrs = dtset%varpeq_tolgrs
+ self%mixing_factor = dtset%varpeq_mixing_factor
 
  ! Static arrays
  ! integer
@@ -1447,15 +1447,6 @@ subroutine varpeq_init(self, gstore, dtset)
    gqk => gstore%gqk(my_is)
    polstate => self%polstate(my_is)
 
-   ABI_MALLOC(my_states, (gqk%nb, gqk%my_nk))
-   ABI_MALLOC(glob_states, (gqk%nb, gqk%glob_nk))
-   if (self%gstore%kfilter == "erange") then
-     call gqk%filter_erange(gstore, gstore%erange_spin(:,spin), &
-       my_states, glob_states)
-   endif
-   ABI_FREE(my_states)
-   ABI_FREE(glob_states)
-
    ! Scalars
    ! character
    polstate%aseed = dtset%varpeq_aseed
@@ -1480,10 +1471,17 @@ subroutine varpeq_init(self, gstore, dtset)
    ABI_MALLOC(polstate%has_prev_grad, (dtset%varpeq_nstates))
    polstate%has_prev_grad(:) = .false.
    ! integer
-   ABI_MALLOC(polstate%my_a_mask, (gqk%nb, gqk%my_nk))
-   ABI_MALLOC(polstate%a_mask_glob, (gqk%nb, gqk%glob_nk))
-   polstate%my_a_mask(:,:) = 1
-   polstate%a_mask_glob(:,:) = 1
+   ABI_MALLOC(polstate%my_states_mask, (gqk%nb, gqk%my_nk))
+   ABI_MALLOC(polstate%states_mask_glob, (gqk%nb, gqk%glob_nk))
+   polstate%my_states_mask(:,:) = 1
+   polstate%states_mask_glob(:,:) = 1
+
+   if (self%gstore%kfilter == "erange") then
+     ! Nullify forbidden transitions and update the masks accordingly
+     call gqk%filter_erange(gstore, gstore%erange_spin(:,spin), &
+       polstate%my_states_mask, polstate%states_mask_glob)
+   endif
+
    ! real
    ABI_MALLOC(polstate%gradres, (dtset%varpeq_nstates))
    ABI_MALLOC(polstate%enterms, (4, dtset%varpeq_nstates))
@@ -1516,6 +1514,7 @@ subroutine varpeq_init(self, gstore, dtset)
    ABI_MALLOC(polstate%my_a, (gqk%nb, gqk%my_nk, dtset%varpeq_nstates))
    ABI_MALLOC(polstate%a_glob, (gqk%nb, gqk%glob_nk))
    ABI_MALLOC(polstate%my_b, (gqk%my_npert, gqk%my_nq, dtset%varpeq_nstates))
+   ABI_MALLOC(polstate%my_prev_b, (gqk%my_npert, gqk%my_nq))
    ABI_MALLOC(polstate%my_pc, (gqk%nb, gqk%my_nk))
    ABI_MALLOC(polstate%my_grad, (gqk%nb, gqk%my_nk))
    ABI_MALLOC(polstate%my_prev_grad, (gqk%nb, gqk%my_nk))
@@ -1697,8 +1696,8 @@ subroutine polstate_free(self)
  ! logical
  ABI_SFREE(self%has_prev_grad)
  ! integer
- ABI_SFREE(self%my_a_mask)
- ABI_SFREE(self%a_mask_glob)
+ ABI_SFREE(self%my_states_mask)
+ ABI_SFREE(self%states_mask_glob)
  ! real
  ABI_SFREE(self%gradres)
  ABI_SFREE(self%enterms)
@@ -1709,6 +1708,7 @@ subroutine polstate_free(self)
  ABI_SFREE(self%my_a)
  ABI_SFREE(self%a_glob)
  ABI_SFREE(self%my_b)
+ ABI_SFREE(self%my_prev_b)
  ABI_SFREE(self%my_pc)
  ABI_SFREE(self%my_grad)
  ABI_SFREE(self%my_prev_grad)
@@ -1779,8 +1779,6 @@ subroutine polstate_setup(self, ip, a_src, load)
 
  ! Orthogonalize current states to the previous ones
  call self%ort_to_states(self%my_a(:,:,ip), 1, ip-1, tr_flag=self%translate)
-
- !call self%filter(ip)
 
  ! Normalize A_nk at current polaronic state
  a_sqnorm = self%get_sqnorm("a", ip)
@@ -2013,8 +2011,6 @@ real(dp) function polstate_get_lm_theta(self, ip) result(theta)
  ! Orthogonalize pcj direction to the current state and normalize
  call self%ort_to_states(self%my_pcjgrad, ip, ip, tr_flag=.false.)
 
- !call self%filter(ip)
-
  sqnorm = self%get_sqnorm('pcjgrad', ip)
  self%my_pcjgrad(:,:) = sqrt(self%nkbz/sqnorm)*self%my_pcjgrad(:,:)
 
@@ -2029,7 +2025,7 @@ real(dp) function polstate_get_lm_theta(self, ip) result(theta)
    ak(:) = self%my_a(:, my_ik, ip)
    dk(:) = self%my_pcjgrad(:, my_ik)
 
-   ak_filter(:) = self%my_a_mask(:, my_ik)
+   ak_filter(:) = self%my_states_mask(:, my_ik)
 
    do my_iq=1,gqk%my_nq
      qpt(:) = self%my_qpts(:, my_iq)
@@ -2048,7 +2044,7 @@ real(dp) function polstate_get_lm_theta(self, ip) result(theta)
      akq(:) = self%a_glob(:, ik_forw)
      dkq(:) = self%pcjgrad_glob(:, ik_forw)
 
-     akq_filter(:) = self%a_mask_glob(:, ik_forw)
+     akq_filter(:) = self%states_mask_glob(:, ik_forw)
 
      do ib=1,gqk%nb
        if (ak_filter(ib) == 0) cycle
@@ -2086,7 +2082,7 @@ real(dp) function polstate_get_lm_theta(self, ip) result(theta)
  ! Scattering-independent part
  do my_ik=1,gqk%my_nk
    ik_ibz = gqk%my_k2ibz(1, my_ik)
-   ak_filter(:) = self%my_a_mask(:, my_ik)
+   ak_filter(:) = self%my_states_mask(:, my_ik)
 
    do ib=1,gqk%nb
      if (ak_filter(ib) == 0) cycle
@@ -2154,8 +2150,6 @@ subroutine polstate_calc_pcjgrad(self, ip, ii, nstep_ort)
    call self%ort_to_states(self%my_grad, 1, ip-1, tr_flag=self%translate)
  endif
 
- !call self%filter(ip)
-
  ! Precondtion vector
  self%my_pcgrad(:,:) = self%my_pc(:,:)*self%my_grad(:,:)
  ! Orthogonalize to all bands
@@ -2163,8 +2157,6 @@ subroutine polstate_calc_pcjgrad(self, ip, ii, nstep_ort)
    call self%ort_to_states(self%my_pcgrad, 1, ip-1, tr_flag=self%translate)
  endif
  call self%ort_to_states(self%my_pcgrad, ip, ip, tr_flag=.false.)
-
- !call self%filter(ip)
 
  ! Conjugate gradient direction
  if (self%has_prev_grad(ip)) then
@@ -2181,8 +2173,6 @@ subroutine polstate_calc_pcjgrad(self, ip, ii, nstep_ort)
  else
    self%my_pcjgrad(:,:) = self%my_pcgrad(:,:)
  endif
-
- !call self%filter(ip)
 
  ! Save previous gradients
  self%my_prev_grad(:,:) = self%my_grad(:,:)
@@ -2264,8 +2254,8 @@ subroutine polstate_calc_grad(self, ip)
      ! If erange filter was used in gstore, some transitions are not valid
      if (ik_forw /= -1) then
        akq(:) = self%a_glob(:, ik_forw)
-       ak_filter(:) = self%my_a_mask(:, my_ik)
-       akq_filter(:) = self%a_mask_glob(:, ik_forw)
+       ak_filter(:) = self%my_states_mask(:, my_ik)
+       akq_filter(:) = self%states_mask_glob(:, ik_forw)
 
        do ib=1,gqk%nb
          if (ak_filter(ib) == 0) cycle
@@ -2299,8 +2289,8 @@ subroutine polstate_calc_grad(self, ip)
      ! If erange filter was used in gstore, some transitions are not valid
      if (ik_back /= -1) then
        akmq(:) = self%a_glob(:, ik_back)
-       ak_filter(:) = self%my_a_mask(:, my_ik)
-       akmq_filter(:) = self%a_mask_glob(:, ik_back)
+       ak_filter(:) = self%my_states_mask(:, my_ik)
+       akmq_filter(:) = self%states_mask_glob(:, ik_back)
 
        do ib=1,gqk%nb
          if (ak_filter(ib) == 0) cycle
@@ -2335,7 +2325,7 @@ subroutine polstate_calc_grad(self, ip)
  eps = self%enterms(4, ip)
  do my_ik=1,gqk%my_nk
    ik_ibz = gqk%my_k2ibz(1, my_ik)
-   ak_filter(:) = self%my_a_mask(:, my_ik)
+   ak_filter(:) = self%my_states_mask(:, my_ik)
    do ib=1,gqk%nb
      if (ak_filter(ib) == 0) cycle
      self%my_grad(ib, my_ik) = self%my_grad(ib, my_ik) + &
@@ -2360,22 +2350,30 @@ end subroutine polstate_calc_grad
 !!
 !! INPUTS
 !!  ip=Index of a polaronic state.
+!!  alpha=Mixing factor.
 !!
 !! OUTPUT
 !!
 !! SOURCE
 
-subroutine polstate_localize(self, ip)
+subroutine polstate_localize(self, ip, alpha)
 
 !Arguments ------------------------------------
  class(polstate_t), intent(inout) :: self
  integer, intent(in) :: ip
+ real(dp), intent(in) :: alpha
 
 !----------------------------------------------------------------------
 
  ! Calculation of B_qnu requires globally available A_nk
  call self%gather("a", ip)
  call self%calc_b_from_a(ip)
+
+ ! Mixing the previous & current vectors of vibrational coefficients
+ if (self%has_prev_grad(ip)) then
+   self%my_b(:,:, ip) = (one - alpha)*self%my_b(:,:, ip) + alpha*self%my_prev_b(:,:)
+ end if
+ self%my_prev_b(:,:) = self%my_b(:,:, ip)
 
  ! Electronic term
  self%enterms(1, ip) = self%get_enel(ip)
@@ -2432,7 +2430,7 @@ real(dp) function polstate_get_enelph(self, ip) result(enelph)
  do my_ik=1,gqk%my_nk
    kpt(:) = self%my_kpts(:, my_ik)
    ak(:) = self%my_a(:, my_ik, ip)
-   ak_filter(:) = self%my_a_mask(:, my_ik)
+   ak_filter(:) = self%my_states_mask(:, my_ik)
 
    do my_iq=1,gqk%my_nq
      qpt(:) = self%my_qpts(:, my_iq)
@@ -2450,7 +2448,7 @@ real(dp) function polstate_get_enelph(self, ip) result(enelph)
      akq(:) = self%a_glob(:, ik_forw)
      bq(:) = self%my_b(:, my_iq, ip)
 
-     akq_filter(:) = self%a_mask_glob(:, ik_forw)
+     akq_filter(:) = self%states_mask_glob(:, ik_forw)
 
      do ib=1,gqk%nb
        if (ak_filter(ib) == 0) cycle
@@ -2562,7 +2560,7 @@ real(dp) function polstate_get_enel(self, ip) result(enel)
  enel = zero
  do my_ik=1,gqk%my_nk
    ik_ibz = gqk%my_k2ibz(1, my_ik)
-   ak_filter(:) = self%my_a_mask(:, my_ik)
+   ak_filter(:) = self%my_states_mask(:, my_ik)
    do ib=1,gqk%nb
      if (ak_filter(ib) == 0) cycle
      enel = enel + self%eig(ib, ik_ibz)*abs(self%my_a(ib, my_ik, ip))**2
@@ -2640,8 +2638,8 @@ subroutine polstate_calc_b_from_a(self, ip)
        ak(:) = self%my_a(:, my_ik, ip)
        akq(:) = self%a_glob(:, ik_forw)
 
-       ak_filter(:) = self%my_a_mask(:, my_ik)
-       akq_filter(:) = self%a_mask_glob(:, ik_forw)
+       ak_filter(:) = self%my_states_mask(:, my_ik)
+       akq_filter(:) = self%states_mask_glob(:, ik_forw)
 
        do ib=1,gqk%nb
         if (ak_filter(ib) == 0) cycle
@@ -2747,7 +2745,7 @@ subroutine polstate_filter(self, ip)
 
  do my_ik=1,gqk%my_nk
    do ib=1,gqk%nb
-     if (self%my_a_mask(ib, my_ik) == 0) then
+     if (self%my_states_mask(ib, my_ik) == 0) then
        self%my_a(ib, my_ik, ip) = czero
        self%my_grad(ib, my_ik) = czero
      end if
@@ -2755,67 +2753,6 @@ subroutine polstate_filter(self, ip)
  enddo
 
 end subroutine polstate_filter
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_varpeq/polstate_mask_a
-!! NAME
-!!  polstate_mask_a
-!!
-!! FUNCTION
-!!  Create mask for the vector of electronic coefficients A_nk defined by
-!! the energy range
-!!
-!! INPUTS
-!!  erange(2)=erange for this spin from gstore
-!!  pkind=Type of polaron
-!!
-!! OUTPUT
-!!
-!! SOURCE
-
-subroutine polstate_mask_a(self, erange, pkind)
-
-!Arguments ------------------------------------
-!scalars
- class(polstate_t), intent(inout) :: self
- character(len=*), intent(in) :: pkind
-!arrays
- real(dp), intent(in) :: erange(2)
-
-!Local variables-------------------------------
- class(gqk_t), pointer :: gqk
- integer :: my_ik, ik_ibz, ib
- real(dp) :: elim
-
-!----------------------------------------------------------------------
-
- gqk => self%gqk
-
- select case(pkind)
- case ("hole")
-   elim = erange(1)
- case ("electron")
-   elim = erange(2)
- case default
-   ABI_ERROR(sjoin("polstate_mask_a, unsuported pkind: ", pkind))
- end select
-
- self%my_a_mask(:,:) = 0
- do my_ik=1,gqk%my_nk
-   ik_ibz = gqk%my_k2ibz(1, my_ik)
-   do ib=1,gqk%nb
-     if (self%eig(ib, ik_ibz) <= elim) then
-       self%my_a_mask(ib, my_ik) = 1
-     end if
-   enddo
- enddo
-
- ! Make the mask available for all processes: useful for k+q->k' filtering
- call self%gather("a_mask", 1)
-
-end subroutine polstate_mask_a
 !!***
 
 !----------------------------------------------------------------------
@@ -3012,9 +2949,6 @@ subroutine polstate_gather(self, mode, ip)
  case ("pcjgrad")
    call gather_(self%my_pcjgrad, gqk%my_nk, gqk%my_kstart, self%pcjgrad_glob, &
      gqk%kpt_comm%value)
- case ("a_mask")
-   call gather_int(self%my_a_mask, gqk%my_nk, gqk%my_kstart, self%a_mask_glob, &
-     gqk%kpt_comm%value)
  case default
    ABI_ERROR(sjoin("polstate_gather, unsuported mode: ", mode))
  end select
@@ -3040,27 +2974,6 @@ subroutine polstate_gather(self, mode, ip)
   call xmpi_sum(glob_arr, comm, ierr)
 
  end subroutine gather_
-
- !----------------------------------------------------------------------
-
- subroutine gather_int(my_arr, my_nk, my_kstart, glob_arr, comm)
-
-  integer, intent(in) :: comm, my_nk, my_kstart
-  integer, intent(in) :: my_arr(:, :)
-  integer, intent(out) :: glob_arr(:, :)
-
-  integer :: ierr, my_ik, ik_glob
-
- !----------------------------------------------------------------------
-
-  glob_arr(:, :) = zero
-  do my_ik=1,my_nk
-    ik_glob = my_ik + my_kstart - 1
-    glob_arr(:, ik_glob) = my_arr(:, my_ik)
-  enddo
-  call xmpi_sum(glob_arr, comm, ierr)
-
- end subroutine gather_int
 
 end subroutine polstate_gather
 !!***
