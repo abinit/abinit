@@ -173,7 +173,7 @@ for isolated defects in a solid, not for e.g. correcting the band gap.
   8. [[topic:DeltaSCF|DeltaSCF calculations]]
   9. [[topic:RandStopPow|Random electronic stopping power]]
   10. [[topic:GWls|GW- Lanczos-Sternheimer method]] (not in production)
-  11. [[topic:RTTDDFT|Real-time TDDFT calculations]] (still experimental)
+  11. [[topic:RTTDDFT|Real-time TDDFT calculations]] (experimental - under development)
 
 ## 8 Second-principles calculations with MULTIBINIT: handling millions of atoms with first-principles accuracy
 

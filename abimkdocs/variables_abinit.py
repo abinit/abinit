@@ -3611,31 +3611,23 @@ Variable(
     abivarname="dtele",
     varset="rttddft",
     vartype="real",
-    topics=['RTTDDFT_compulsory'],
+    topics=['RTTDDFT_basic'],
     dimensions="scalar",
-    defaultval=100, #HEREHERE
-    mnemonics="Delta Time for ELECtrons",
-    added_in_version="before_v9",
+    requires="[[optdriver]] is 9",
+    defaultval=0.1, 
+    mnemonics="Delta Time for ELEctrons",
+    added_in_version="10",
     text=r"""
-Used for controlling ion time steps. If [[ionmov]] is set to 1, 6, 7 and 15, then
-molecular dynamics is  used to update atomic positions in response to forces.
-The parameter [[dtion]] is a time step in atomic units of time. (One atomic
-time unit is 2.418884e-17 seconds, which is the value of Planck's constant in
-hartree*sec.) In this case the atomic masses, in amu (given in array " [[amu]]
-"), are used in Newton's equation and the viscosity (for [[ionmov]] =1) and
-number of time steps are provided to the code using input variables "[[vis]]"
-and "[[ntime]]". The code actually converts from masses in amu to masses in
-atomic units (in units of electron masses) but the user enters masses in
-[[amu]]. (The conversion from amu to atomic units (electron masses) is
-1822.88851 electron masses/amu.)
+Used for controlling the electron time step. If [[optdriver]] is 9, then
+real-time TDDFT [[topic:RTTDDFT]] is used. The parameter [[dtele]] is 
+the time step, in atomic units of time, used to integrate the time-dependent 
+Kohn-Sham equations (One atomic time unit is 2.418884e-17 seconds).
+One should also set the number of time steps to be performed using the 
+parameter [[ntime]].
 
-A typical good value for [[dtion]] is about 100. The user must try several
-values for [[dtion]] in order to establish the stable and efficient choice for
-the accompanying amu, atom types and positions, and [[vis]] (viscosity).
-For quenched dynamics ([[ionmov]] = 7), a larger time step might be taken, for
-example 200. No meaning for RF calculations.
-It is also used in geometric relaxation calculation with the FIRE algorithm
-([[ionmov]]=15), where the time is virtual. A small dtion should be set, for example 0.03.
+A typical good value for [[dtele]]] usually is less or equal than 0.1. 
+The user should try several values in order to find the one allowing for 
+a stable and efficient integration.
 """,
 ),
 
@@ -13220,7 +13212,7 @@ Variable(
 Gives the maximum number of molecular dynamics or electron dynamics time steps or structural
 optimization steps to be done if [[geoopt]] or [[moldyn]] are not "none" or [[optdriver]] is 9 
 (real-time TDDFT).
-Starting with Abinit9, ntime is automatically set to 1000,
+Starting with Abinit9, ntime is automatically set to 1000, if [[geoopt]] or [[moldyn]] are not "none", 
 [[ntimimage]] is zero and [[ntime]] is not specified in the input file.
 Users are encouraged to pass a **timelimit** to Abinit using the command line and the syntax:
 
@@ -22483,6 +22475,177 @@ See also [[sigma_nshiftk]].
 !!! important
 
    This variable is not compatible with [[nkptgw]] and [[sigma_erange]].
+""",
+),
+
+Variable(
+    abivarname="td_ef_type",
+    varset="rttddft",
+    topics=['RTTDDFT_useful'],
+    vartype="integer",
+    defaultval=0,
+    dimensions="scalar",
+    requires="[[optdriver]] is 9",
+    mnemonics="Time-Dependent Electric Field TYPE",
+    added_in_version="10",
+    text=r"""
+This variable controls the type of external electric field to apply. 
+As of now, only impulse electric field are implemented, [[td_ef_type]] is 1.
+Moreover, the response to such impulse electric field can only 
+be performed within the PAW approach (see [[topic:PAW]]).
+The intensity of the Dirac pulse as well as the time at which it is 
+applied are controlled by the parameters [[td_ef_tzero]] and [[td_ef_ezero]].
+If [[td_ef_type]] is 0, no electric field is applied.
+""",
+),
+
+Variable(
+    abivarname="td_ef_tzero",
+    varset="rttddft",
+    topics=['RTTDDFT_useful'],
+    vartype="integer",
+    defaultval=0.0,
+    dimensions="scalar",
+    requires="[[optdriver]] is 9",
+    mnemonics="Time-Dependent Electric Field TZERO",
+    added_in_version="10",
+    text=r"""
+This variable controls the time (in atomic units) at which the external electric field is applied (see [[td_ef_type]]).
+""",
+),
+
+Variable(
+    abivarname="td_ef_ezero",
+    varset="rttddft",
+    topics=['RTTDDFT_useful'],
+    vartype="integer",
+    defaultval=0.1,
+    dimensions="scalar",
+    requires="[[optdriver]] is 9",
+    mnemonics="Time-Dependent Electric Field EZERO",
+    added_in_version="10",
+    text=r"""
+This variable is the intensity (in atomic units) of the external electric field applied (see [[td_ef_type]]). 
+""",
+),
+
+Variable(
+    abivarname="td_ef_pol",
+    varset="rttddft",
+    topics=['RTTDDFT_useful'],
+    vartype="integer",
+    defaultval=[1.0, 0.0, 0.0],
+    dimensions=[3],
+    requires="[[optdriver]] is 9",
+    mnemonics="Time-Dependent Electric Field POLarization",
+    added_in_version="10",
+    text=r"""
+This variable is the polarization vector (direction) of the external electric field applied (see [[td_ef_type]]). 
+""",
+),
+
+Variable(
+    abivarname="td_exp_order",
+    varset="rttddft",
+    topics=['RTTDDFT_expert'],
+    vartype="integer",
+    defaultval=4,
+    dimensions="scalar",
+    requires="[[optdriver]] is 9",
+    mnemonics="Time-Dependent EXPonential ORDER",
+    added_in_version="10",
+    text=r"""
+This variable controls the order of the Taylor expansion used to approximate the exponential 
+of an operator in the propagator. The default value of 4 is usually a good choice that ensure 
+good stability and acceptable computation time.
+""",
+),
+
+Variable(
+    abivarname="td_propagator",
+    varset="rttddft",
+    topics=['RTTDDFT_useful'],
+    vartype="integer",
+    defaultval=0,
+    dimensions="scalar",
+    requires="[[optdriver]] is 9",
+    mnemonics="Time-Dependent PROPAGATOR",
+    added_in_version="10",
+    text=r"""
+This variable controls the propagation algorithm used to integrate the time-dependent
+Kohn-Sham equations. At present only the exponential rule, [[td_propagator]] is 0, 
+and the exponential mid-point rule, [[td_propagator]] is 1, propagators are implemented.
+Both are based on a Taylor expansion of the exponential of an operator which order is
+controlled by the [[td_exp_order]] parameter. In case of [[td_propagator]] equal to 1
+the code uses a predictor-corrector schemes associated with two parameters [[td_scnmax]] 
+and [[td_scthr]].
+""",
+),
+
+Variable(
+    abivarname="td_prtstr",
+    varset="rttddft",
+    topics=['RTTDDFT_useful'],
+    vartype="integer",
+    defaultval=1,
+    dimensions="scalar",
+    requires="[[optdriver]] is 9",
+    mnemonics="Time-Dependent PRinT STRide",
+    added_in_version="10",
+    text=r"""
+This variable controls how often the code outputs various physical 
+properties (DOS, occupations, current density etc.).
+The code will write these properties in files every [[td_prtstr]] time step.
+""",
+),
+
+Variable(
+    abivarname="td_restart",
+    varset="rttddft",
+    topics=['RTTDDFT_useful'],
+    vartype="integer",
+    defaultval=0,
+    dimensions="scalar",
+    requires="[[optdriver]] is 9",
+    mnemonics="Time-Dependent calculation RESTART",
+    added_in_version="10",
+    text=r"""
+This variable controls wether we are restarting a RTTDDFT run.
+If [[td_restart]] is 0 the calculation starts from scratch, if it is 
+set to 1 than ABINIT will read the file called TD_RESTART that contains 
+some information in order to continue the previous RTTDDFT calculation.
+""",
+),
+
+Variable(
+    abivarname="td_scnmax",
+    varset="rttddft",
+    topics=['RTTDDFT_expert'],
+    vartype="integer",
+    defaultval=0,
+    dimensions="scalar",
+    requires="[[optdriver]] is 9 and [[td_propagator]] is 1",
+    mnemonics="Time-Dependent Self-Consistent Nstep",
+    added_in_version="10",
+    text=r"""
+This variable controls the maximum number of self-consistent corrector step
+in the predictor-corrector scheme ([[td_propagator]] equal to 1).
+""",
+),
+
+Variable(
+    abivarname="td_scthr",
+    varset="rttddft",
+    topics=['RTTDDFT_expert'],
+    vartype="integer",
+    defaultval=1e-7,
+    dimensions="scalar",
+    requires="[[optdriver]] is 9 and [[td_propagator]] is 1",
+    mnemonics="Time-Dependent propagation Self-Consistent THReshold",
+    added_in_version="10",
+    text=r"""
+This variable controls the threshold used to define the convergence of the 
+self-consistent predictor-corrector scheme ([[td_propagator]] equal to 1).
 """,
 ),
 

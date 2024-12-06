@@ -123,6 +123,7 @@ nav:
     - topics/RandStopPow.md
     - topics/Recursion.md
     - topics/RPACorrEn.md
+    - topics/RTTDDFT.md
     - topics/SCFControl.md
     - topics/SCFAlgorithms.md
     - topics/SelfEnergy.md
@@ -162,6 +163,7 @@ nav:
         - PAW: variables/paw.md
         - DFPT: variables/dfpt.md
         - Relaxation: variables/rlx.md
+        - RTTDDFT: variables/rttddft.md
         - VdW: variables/vdw.md
         - Wannier90: variables/w90.md
     - Anaddb: variables/anaddb.md
