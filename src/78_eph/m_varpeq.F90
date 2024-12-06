@@ -1192,7 +1192,11 @@ subroutine varpeq_load(self, dtfil, pselect)
 
    else ! Restart
      call wrtout(units, " - restarting from previous A_nk")
-     self%a_spin(:,:,:,:) = vpq_ld%a_spin(:,:,:,:)
+     if (single_state) then
+       self%a_spin(:,:,:,:) = vpq_ld%a_spin(:,:,pselect:pselect,:)
+     else
+       self%a_spin(:,:,:,:) = vpq_ld%a_spin(:,:,:,:)
+     endif
    endif
 
    call vpq_ld%free()
