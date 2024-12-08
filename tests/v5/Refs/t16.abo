@@ -1040,16 +1040,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-<<<<<<< HEAD
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/leshu_spinat-check/tests/Psps_for_tests/8o.2.paw
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/leshu_spinat-check/tests/Psps_for_tests/8o.2.paw
-||||||| 59a51ceaf6
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_gonze-10.2/tests/Psps_for_tests/8o.2.paw
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_gonze-10.2/tests/Psps_for_tests/8o.2.paw
-=======
 - pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_gonze-10.2/tests/Pspdir/8o.2.paw
 - pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_gonze-10.2/tests/Pspdir/8o.2.paw
->>>>>>> develop
 - Paw atomic data extracted from US-psp (D.Vanderbilt): Oxygen
 -  8.00000   6.00000  20050722                znucl, zion, pspdat
     7   11    2    0       489   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
