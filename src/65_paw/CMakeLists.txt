@@ -10,7 +10,7 @@ add_library(65_paw STATIC
   m_paw_dfptnl.F90
   m_paw_dmft.F90
   m_paw_efield.F90
-  m_paw_exactDC.F90
+  #m_paw_exactDC.F90
   m_paw_hr.F90
   m_paw_init.F90
   m_paw_lmn.F90
@@ -26,7 +26,7 @@ add_library(65_paw STATIC
   m_paw_sym.F90
   m_paw_tools.F90
   m_paw_uj.F90
-  m_paw_yukawa.F90
+  #m_paw_yukawa.F90
   m_pawfgr.F90
   m_pawpwij.F90
   )
