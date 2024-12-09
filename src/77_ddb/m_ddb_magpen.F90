@@ -188,7 +188,7 @@ contains
        call wrtout([std_out, ab_out], msg)
      end if
 
-     call local_spinsus(barmagsus,ddb%val,iblok,invbarmagsus,invmagsus,invhmat,magpen,magsus,&
+     call local_spinsus(barmagsus,ddb,iblok,invbarmagsus,invmagsus,invhmat,magpen,magsus,&
    & mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,omega(1),omegaflag,prtopt,prtvol)
 
    end if
@@ -230,8 +230,26 @@ contains
    & mpatpol=mpatpol,mpdir=mpdir,omega=omega,rfmagn=rfmagn)
    end if
 
-   if (iblok /= 0 .or. jblok /=0) then
-     call magmom(barmmom,barmmom_tr,ddb%val,invbarmagsus,invhmat,iblok,jblok,magpen,magsus,mmom,mmom_tr,&
+   ! Then macroscopic Zeeman field
+   ! Look for the induced magnetic moments block in the DDB
+   lblok=0
+   if (qeq0) then
+     rfphon(:)=0
+     rfelfd(:)=0
+     rfstrs(1:2)=0
+     rfmagn(2)=1
+     if (magpen<zero) then
+       rfmagn(1)= 1
+     else if (magpen>zero) then
+       rfmagn(1)= 2
+     end if
+
+     call ddb%get_block(lblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, &
+   & mpatpol=mpatpol,mpdir=mpdir,omega=omega,rfmagn=rfmagn)
+   end if
+
+   if (iblok /= 0 .or. jblok /=0 .or. lblok/=0) then
+     call magmom(barmmom,barmmom_tr,ddb,invbarmagsus,invhmat,iblok,jblok,lblok,magpen,magsus,mmom,mmom_tr,&
    & mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,omega(1),omegaflag,prtopt,prtvol,qphon,xred,zfield,zfield_tr)
    end if
 
@@ -454,8 +472,7 @@ contains
 !! Calculate the spin-susceptibility matrix and its inverse
 !!
 !! INPUTS
-!! blkval(2,3*mpert*3*mpert,nblok)=  Second-order derivative matrices
-!!  In our case, the nblok is restricted to iblok
+!! ddb=  Second-order derivative arrais
 !! iblok= index of the current block
 !! magpen = amplitude (in Ha) of the applied magnetic penalty 
 !! mpatpol(2) = Atoms on which the magnetic penalty has been applied
@@ -475,7 +492,7 @@ contains
 !!
 !! SOURCE
 
- subroutine local_spinsus(barmagsus,blkval,iblok,invbarmagsus,invmagsus,invhmat,magpen,magsus,&
+ subroutine local_spinsus(barmagsus,ddb,iblok,invbarmagsus,invmagsus,invhmat,magpen,magsus,&
 & mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,omega,omegaflag,prtopt,prtvol)
 
 !Arguments -------------------------------
@@ -484,8 +501,8 @@ contains
  integer,intent(in) :: omegaflag,prtopt,prtvol
  real(dp),intent(in) :: magpen,omega
 !arrays
+ type(ddb_type),intent(inout) :: ddb
  integer,intent(in) :: mpatpol(2),mpdir(3)
- real(dp),intent(inout) :: blkval(2,3,mpert,3,mpert,nblok)
  complex(dpc),intent(out) :: barmagsus(ndim,ndim)
  complex(dpc),intent(out) :: invbarmagsus(ndim,ndim)
  complex(dpc),intent(out) :: invhmat(ndim,ndim)
@@ -494,7 +511,7 @@ contains
 
 !Local variables -------------------------
 !scalars
- integer :: iat1,iat2,icol,idir1,idir2,info,ipert1,ipert2,irow,lwork
+ integer :: iat1,iat2,icol,idir1,idir2,index,info,ipert1,ipert2,irow,lwork
  integer :: ipert1_red,ipert2_red,idir1_red,idir2_red
  real(dp) :: fac
  character(len=1000) :: msg
@@ -530,10 +547,10 @@ contains
          if (mpdir(idir1)==0) cycle
          idir1_red=idir1_red+1
          irow=idir1_red+(ipert1_red-1)*nmdir
+         index= idir1 + 3*((ipert1-1)+mpert*((idir2-1)+3*(ipert2-1)))
 
          barmagsus(irow,icol)= &
-       & cmplx(blkval(1,idir1,ipert1,idir2,ipert2,iblok), &
-       & blkval(2,idir1,ipert1,idir2,ipert2,iblok),16)
+       & cmplx(ddb%val(1,index,iblok),ddb%val(2,index,iblok),16)
 
        end do
      end do
@@ -589,13 +606,14 @@ contains
  ABI_FREE(work2)
 
  if (prtopt==1) then
-  ! fac=2.714943600699**2*27.2114/four
-   fac=27.2114/four
-   open(10,file='k_ss.txt')
-     do irow=1, ndim
-       write(10,*) invmagsus(irow,1:ndim)*fac
-     end do 
-   close(10)
+!TODO: remove
+!  ! fac=2.714943600699**2*27.2114/four
+!   fac=27.2114/four
+!   open(10,file='k_ss.txt')
+!     do irow=1, ndim
+!       write(10,*) invmagsus(irow,1:ndim)*fac
+!     end do 
+!   close(10)
   
    !Write results in output
    if (magpen > zero) then
@@ -666,36 +684,37 @@ contains
 
  end if !prtopt
 
-!For linear interpolation of Hessians substitute invmagsus into 
-!the ddb object.
- if (omegaflag==2.and.abs(omega)<tol12) then
-   ipert2_red= 0
-   do iat2= mpatpol(1), mpatpol(2)
-     ipert2= natom + 11 + iat2
-     ipert2_red= ipert2_red + 1
-     idir2_red= 0
-     do idir2= 1, 3
-       if (mpdir(idir2)==0) cycle
-       idir2_red= idir2_red + 1
-       icol=idir2_red+(ipert2_red-1)*nmdir
-       ipert1_red=0
-       do iat1= mpatpol(1), mpatpol(2)
-         ipert1= natom + 11 + iat1
-         ipert1_red= ipert1_red + 1
-         idir1_red= 0
-         do idir1= 1, 3
-           if (mpdir(idir1)==0) cycle
-           idir1_red=idir1_red+1
-           irow=idir1_red+(ipert1_red-1)*nmdir
-  
-           blkval(1,idir1,ipert1,idir2,ipert2,iblok)=real(invmagsus(irow,icol))
-           blkval(2,idir1,ipert1,idir2,ipert2,iblok)=aimag(invmagsus(irow,icol))
-  
-         end do
+!Store the FS and RS flavors on the DDB array
+ ipert2_red= 0
+ do iat2= mpatpol(1), mpatpol(2)
+   ipert2= natom + 11 + iat2
+   ipert2_red= ipert2_red + 1
+   idir2_red= 0
+   do idir2= 1, 3
+     if (mpdir(idir2)==0) cycle
+     idir2_red= idir2_red + 1
+     icol=idir2_red+(ipert2_red-1)*nmdir
+     ipert1_red=0
+     do iat1= mpatpol(1), mpatpol(2)
+       ipert1= natom + 11 + iat1
+       ipert1_red= ipert1_red + 1
+       idir1_red= 0
+       do idir1= 1, 3
+         if (mpdir(idir1)==0) cycle
+         idir1_red=idir1_red+1
+         irow=idir1_red+(ipert1_red-1)*nmdir
+         index= idir1 + 3*((ipert1-1)+mpert*((idir2-1)+3*(ipert2-1)))
+ 
+         ddb%val_fs(1,index,iblok)=real(invmagsus(irow,icol))
+         ddb%val_fs(2,index,iblok)=aimag(invmagsus(irow,icol))
+
+         ddb%val_rs(1,index,iblok)=real(magsus(irow,icol))
+         ddb%val_rs(2,index,iblok)=aimag(magsus(irow,icol))
+ 
        end do
      end do
    end do
- end if
+ end do
  
  end subroutine local_spinsus
 !!***
@@ -709,8 +728,7 @@ contains
 !! Zeeman fields
 !!
 !! INPUTS
-!! blkval(2,3*mpert*3*mpert,nblok)=  Second-order derivative matrices
-!!  In our case, the nblok is restricted to iblok
+!! ddb=  Second-order derivative arrais
 !! invbarmagsus(ndim,ndim)= Inverse of the penalized spin-sussceptibility tensor
 !! iblok= index of the atomic displacement block
 !! jblok= index of the electric field block
@@ -734,15 +752,15 @@ contains
 !!
 !! SOURCE
 
- subroutine magmom(barmmom,barmmom_tr,blkval,invbarmagsus,invhmat,iblok,jblok,magpen,magsus,mmom,mmom_tr,&
+ subroutine magmom(barmmom,barmmom_tr,ddb,invbarmagsus,invhmat,iblok,jblok,lblok,magpen,magsus,mmom,mmom_tr,&
 & mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,omega,omegaflag,prtopt,prtvol,qphon,xred,zfield,zfield_tr)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: iblok,jblok,mpert,natom,nblok,ndim,nmdir,omegaflag,prtopt,prtvol
+ integer,intent(in) :: iblok,jblok,lblok,mpert,natom,nblok,ndim,nmdir,omegaflag,prtopt,prtvol
  real(dp),intent(in) :: omega,magpen
 !arrays
- real(dp),intent(inout) :: blkval(2,3,mpert,3,mpert,nblok)
+ type(ddb_type),intent(inout) :: ddb
  real(dp),intent(in) :: qphon(3),xred(3,natom)
  integer,intent(in) :: mpatpol(2),mpdir(3)
  complex(dpc),intent(out) :: barmmom(ndim,(natom+2)*3)
@@ -756,8 +774,8 @@ contains
  complex(dpc),intent(out) :: zfield_tr((natom+2)*3,ndim)
 !Local variables -------------------------
 !scalars
- integer :: iat1,iat2,icol,idir1,idir2,ipert1,ipert2,irow
- integer :: ipert1_red,ipert2_red,idir1_red,idir2_red
+ integer :: iat1,iat2,icol,idir1,idir2,index,ipert1,ipert2,irow
+ integer :: ipert1_red,ipert2_red,idir1_red,idir2_red,jndex
  real(dp) :: fac
  character(len=1000) :: msg
 !arrays
@@ -769,7 +787,9 @@ contains
 ! *********************************************************************
 
 !Extract the penalized moments
- do ipert2=1,natom+2
+ do ipert2=1,natom+5
+   !exclude strain perturbation
+   if (ipert2==natom+3.or.ipert2==natom+4) cycle
    do idir2=1,3
      icol=idir2+(ipert2-1)*3
      indexat2(icol)=ipert2
@@ -786,21 +806,18 @@ contains
          irow=idir1_red+(ipert1_red-1)*nmdir
          indexat1(irow)=iat1
          indexdir1(irow)=idir1
-         
+         index= idir1 + 3*((ipert1-1)+mpert*((idir2-1)+3*(ipert2-1)))
+         jndex= idir2 + 3*((ipert2-1)+mpert*((idir1-1)+3*(ipert1-1)))
+
          if (iblok /=0 .and. ipert2 <= natom) then
-           barmmom(irow,icol)= &
-         & cmplx(blkval(1,idir1,ipert1,idir2,ipert2,iblok), &
-         & blkval(2,idir1,ipert1,idir2,ipert2,iblok),16)
-           barmmom_tr(icol,irow)= &
-         & cmplx(blkval(1,idir2,ipert2,idir1,ipert1,iblok), &
-         & blkval(2,idir2,ipert2,idir1,ipert1,iblok),16)
+           barmmom(irow,icol)= cmplx(ddb%val(1,index,iblok),ddb%val(2,index,iblok),16)
+           barmmom_tr(icol,irow)= cmplx(ddb%val(1,jndex,iblok),ddb%val(2,jndex,iblok),16)
          else if (jblok /=0 .and. ipert2 == natom+2) then
-           barmmom(irow,icol)= &
-         & cmplx(blkval(1,idir1,ipert1,idir2,ipert2,jblok), &
-         & blkval(2,idir1,ipert1,idir2,ipert2,jblok),16)
-           barmmom_tr(icol,irow)= &
-         & cmplx(blkval(1,idir2,ipert2,idir1,ipert1,jblok), &
-         & blkval(2,idir2,ipert2,idir1,ipert1,jblok),16)
+           barmmom(irow,icol)= cmplx(ddb%val(1,index,jblok),ddb%val(2,index,jblok),16)
+           barmmom_tr(icol,irow)= cmplx(ddb%val(1,jndex,jblok),ddb%val(2,jndex,jblok),16)
+         else if (lblok /=0 .and. ipert2 == natom+5) then
+           barmmom(irow,icol)= cmplx(ddb%val(1,index,lblok),ddb%val(2,index,lblok),16)
+           barmmom_tr(icol,irow)= cmplx(ddb%val(1,jndex,lblok),ddb%val(2,jndex,lblok),16)
          end if
 
        end do
@@ -818,22 +835,26 @@ contains
  mmom_tr=matmul(barmmom_tr,invhmat)
 
  if (prtopt==1) then
-  ! fac=2.714943600699/two*27.2114/0.529177
-   fac=27.2114/0.529177/two
-  
-   open(10,file='k_ps.txt')
-   do iat1= 1, natom
-     do idir1= 1, 3
-       icol= (iat1-1)*3 + idir1
-       !MR: caution, this conjg might be incorrect in presence of dissipation
-       write(10,*) conjg(zfield(1:ndim,icol)*fac* &
-     & exp(two_pi*(0.d0,1.d0)* dot_product(qphon,xred(:,iat1))))
-     end do
-   end do 
-   close(10)
+    !TODO: the change of phase should rather be done on the magnetic variables, for them
+    !to follow the same criterion as the atomic displacement ones. 
+!  ! fac=2.714943600699/two*27.2114/0.529177
+!   fac=27.2114/0.529177/two
+!  
+!   open(10,file='k_ps.txt')
+!   do iat1= 1, natom
+!     do idir1= 1, 3
+!       icol= (iat1-1)*3 + idir1
+!       !MR: caution, this conjg might be incorrect in presence of dissipation
+!       write(10,*) conjg(zfield(1:ndim,icol)*fac* &
+!     & exp(two_pi*(0.d0,1.d0)* dot_product(qphon,xred(:,iat1))))
+!     end do
+!   end do 
+!   close(10)
   
   !Write the results
    if (magpen > zero) then
+
+     !Atomic displacements
      if (iblok /= 0) then
        call wrtout([ab_out,std_out], ' Local Zeeman fields induced by atomic displacements (at constrained magnetic moments)')
        call wrtout([ab_out,std_out], '  atom1  dir  atom2  dir        Real              Imag')
@@ -871,6 +892,8 @@ contains
        end do
        call wrtout([ab_out,std_out], '   ')
      end if
+     
+     !Electric field
      if (jblok /= 0) then
        call wrtout([ab_out,std_out], ' Local Zeeman fields induced by electric field (at constrained magnetic moments)')
        call wrtout([ab_out,std_out], '  atom1  dir  efld.dir         Real              Imag')
@@ -906,6 +929,44 @@ contains
        end do
        call wrtout([ab_out,std_out], '   ')
      end if
+     
+     !Macroscopic Zeeman
+     if (lblok /= 0) then
+       call wrtout([ab_out,std_out], ' Local Zeeman fields induced by macroscopic Zeeman field (at constrained magnetic moments)')
+       call wrtout([ab_out,std_out], '  atom1  dir  efld.dir         Real              Imag')
+       do irow=1, ndim
+         do icol=(natom+4)*3+1, (natom+5)*3
+           write(msg,'(i4,4x,a2,4x,a2,6x,2es18.9)' ) &
+         & indexat1(irow), cart(indexdir1(irow)), cart(indexdir2(icol)), &
+         & real(zfield(irow,icol)), aimag(zfield(irow,icol))
+           call wrtout([ab_out,std_out], msg)
+         end do
+       end do
+       call wrtout([ab_out,std_out], '   ')
+       call wrtout([ab_out,std_out], ' Local magnetic moments induced by macroscopic Zeeman field (from induced Zeeman fields)')
+       call wrtout([ab_out,std_out], '  atom1  dir  efld.dir         Real              Imag')
+       do irow=1, ndim
+         do icol=(natom+4)*3+1, (natom+4)*3
+           write(msg,'(i4,4x,a2,4x,a2,6x,2es18.9)' ) &
+         & indexat1(irow), cart(indexdir1(irow)), cart(indexdir2(icol)), &
+         & real(mmom(irow,icol)), aimag(mmom(irow,icol))
+           call wrtout([ab_out,std_out], msg)
+         end do
+       end do
+       call wrtout([ab_out,std_out], '   ')
+       call wrtout([ab_out,std_out], ' Local magnetic moments induced by macroscopic Zeeman field (from induced penalized moments)')
+       call wrtout([ab_out,std_out], '  atom1  dir  efld.dir         Real              Imag')
+       do irow=1, ndim
+         do icol=(natom+4)*3+1, (natom+5)*3
+           write(msg,'(i4,4x,a2,4x,a2,6x,2es18.9)' ) &
+         & indexat1(irow), cart(indexdir1(irow)), cart(indexdir2(icol)), &
+         & real(mmom_alt(irow,icol)), aimag(mmom_alt(irow,icol))
+           call wrtout([ab_out,std_out], msg)
+         end do
+       end do
+       call wrtout([ab_out,std_out], '   ')
+     end if
+
      if (prtvol > 1) then
        if (iblok /= 0) then
          call wrtout([ab_out,std_out], ' Penalized local magnetic moments induced by atomic displacements ')
@@ -939,37 +1000,37 @@ contains
   
 !For linear interpolation of Hessians substitute Zeeman fields into 
 !the ddb object.
- if (omegaflag==2.and.abs(omega)<tol12) then
-   do ipert2=1,natom+2
-     do idir2=1,3
-       icol=idir2+(ipert2-1)*3
-       indexat2(icol)=ipert2
-       indexdir2(icol)=idir2
-  
-       ipert1_red= 0
-       do iat1= mpatpol(1), mpatpol(2)
-         ipert1= natom + 11 + iat1
-         ipert1_red= ipert1_red + 1
-         idir1_red= 0
-         do idir1= 1, 3
-           if (mpdir(idir1)==0) cycle
-           idir1_red= idir1_red + 1
-           irow=idir1_red+(ipert1_red-1)*nmdir
-           indexat1(irow)=iat1
-           indexdir1(irow)=idir1
-           
-           if (iblok /=0 .and. ipert2 <= natom) then
-             blkval(1,idir1,ipert1,idir2,ipert2,iblok)=real(zfield(irow,icol))
-             blkval(2,idir1,ipert1,idir2,ipert2,iblok)=aimag(zfield(irow,icol))
-             blkval(1,idir2,ipert2,idir1,ipert1,iblok)=real(zfield_tr(icol,irow))
-             blkval(2,idir2,ipert2,idir1,ipert1,iblok)=aimag(zfield_tr(icol,irow))
-           end if
-  
-         end do
-       end do
-     end do
-   end do
- end if
+! if (omegaflag==2.and.abs(omega)<tol12) then
+!   do ipert2=1,natom+2
+!     do idir2=1,3
+!       icol=idir2+(ipert2-1)*3
+!       indexat2(icol)=ipert2
+!       indexdir2(icol)=idir2
+!  
+!       ipert1_red= 0
+!       do iat1= mpatpol(1), mpatpol(2)
+!         ipert1= natom + 11 + iat1
+!         ipert1_red= ipert1_red + 1
+!         idir1_red= 0
+!         do idir1= 1, 3
+!           if (mpdir(idir1)==0) cycle
+!           idir1_red= idir1_red + 1
+!           irow=idir1_red+(ipert1_red-1)*nmdir
+!           indexat1(irow)=iat1
+!           indexdir1(irow)=idir1
+!           
+!           if (iblok /=0 .and. ipert2 <= natom) then
+!             blkval(1,idir1,ipert1,idir2,ipert2,iblok)=real(zfield(irow,icol))
+!             blkval(2,idir1,ipert1,idir2,ipert2,iblok)=aimag(zfield(irow,icol))
+!             blkval(1,idir2,ipert2,idir1,ipert1,iblok)=real(zfield_tr(icol,irow))
+!             blkval(2,idir2,ipert2,idir1,ipert1,iblok)=aimag(zfield_tr(icol,irow))
+!           end if
+!  
+!         end do
+!       end do
+!     end do
+!   end do
+! end if
  end subroutine magmom
 !!***
 
@@ -1037,7 +1098,6 @@ contains
  
 ! *********************************************************************
 
- index=0
  do ipert2= 1, natom+5
    do idir2= 1, 3
      icol= (ipert2-1)*3 + idir2
@@ -2789,11 +2849,11 @@ contains
 
    if (omegaflag==1.or.omegaflag==3) then
      !Calculate the local spin susceptibilities
-     call local_spinsus(barmagsus(:,:,iw),int_barddb,1,invbarmagsus(:,:,iw),invmagsus(:,:,iw),&
+     call local_spinsus(barmagsus(:,:,iw),ddb,1,invbarmagsus(:,:,iw),invmagsus(:,:,iw),&
    & invhmat,magpen,magsus(:,:,iw),mpatpol,mpdir,mpert,natom,1,ndim,nmdir,omega(iw),omegaflag,prtopt,prtvol)
 
      !Calculate the magnetic moments
-     call magmom(barmmom,barmmom_tr,int_barddb,invbarmagsus(:,:,iw),invhmat,1,1,magpen,magsus(:,:,iw),mmom(:,:,iw),mmom_tr(:,:,iw),&
+     call magmom(barmmom,barmmom_tr,ddb,invbarmagsus(:,:,iw),invhmat,1,1,1,magpen,magsus(:,:,iw),mmom(:,:,iw),mmom_tr(:,:,iw),&
    & mpatpol,mpdir,mpert,natom,1,ndim,nmdir,omega(iw),omegaflag,prtopt,prtvol,qphon,xred,zfield(:,:,iw),zfield_tr)
   
      !Calculate the dielectric susceptibility
