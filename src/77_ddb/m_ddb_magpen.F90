@@ -287,63 +287,6 @@ contains
    rfelfd(:)=0
    rfphon(:)=0
    
-!   !IFCs block
-!   rfphon(1:2)=1
-!   call ddb%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, omega=omega)
-!   if (iblok /= 0) then
-!     call mp_ifc(barmagsus,barmmom,barmmom_tr,ddb%val,0,iblok,ifcmat,&
-!   & ifcmat_fm,invhmat,magsus,magpen,mpert,mpopt,&
-!   & natom,nblok,ndim,omega(1),omegaflag,prtopt,prtvol,qphon,xred,zfield,zfield_tr)
-!     
-!     !Apply ASR
-!     if (omega(1) < tol12) then
-!       call asrw0(delta_asrw0,ifcmat,natom,0) 
-!       call asrw0(delta_asrw0_fm,ifcmat_fm,natom,0) 
-!     else 
-!       call asrw0(delta_asrw0,ifcmat,natom,1) 
-!       call asrw0(delta_asrw0_fm,ifcmat_fm,natom,1) 
-!     end if
-!   end if
-!
-!   !Born effective charges block
-!   jblok=0
-!   if (qeq0) then
-!     rfphon(1:2)=1
-!     rfelfd(1:2)=2
-!     call ddb%get_block(jblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, omega=omega)
-!   end if
-!   if (jblok /= 0 ) then
-!     call mp_zeff(barmagsus,barmmom,barmmom_tr,ddb%val,&
-!   & 0,fmzeff,fmzeff_tr,jblok,invhmat,lm_epsilon,magpen,magsus,mpert,mpopt,&
-!   & natom,nblok,ndim,dum_phongreen,prtopt,prtvol,ucvol,zeff,zeff_tr,zfield,zfield_tr)
-!   end if
-!
-!   !Dielectric susceptibility block
-!   lblok=0
-!   if (qeq0) then
-!     rfphon(:)=0
-!     rfelfd(1:2)=2
-!     call ddb%get_block(lblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, omega=omega)
-!   end if
-!   if (lblok /= 0 ) then
-!     call mp_diel(barepsilon,barmagsus,barmmom,barmmom_tr,ddb%val,&
-!   & 0,epsilon,lblok,invhmat,magpen,magsus,mpert,mpopt,&
-!   & natom,nblok,ndim,prtopt,prtvol,ucvol,zfield,zfield_tr)
-!   end if
-!
-!   !Magnetic susceptibility block
-!   iblok=0
-!   rfphon(:)=0
-!   rfelfd(1:2)=0
-!   rfstrs(1:2)=0
-!   rfmagn(1:2)=1
-!   call ddb%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, omega=omega)
-!   if (lblok /= 0 ) then
-!     call mp_macmagsus(barmagsus,ddb%val,&
-!   & 0,iblok,invbarmagsus,invhmat,macmagsus,magpen,magsus,mpatpol,mpdir,mpert,mpopt,&
-!   & natom,nblok,ndim,nmdir,prtopt,prtvol,ucvol)
-!   end if
-
  end do
 
  ! BERRY CURVATURES
@@ -352,6 +295,7 @@ contains
 !   if (dissip==1) then
 !     ABI_BUG("Berry curvatures calculation is not implemented with dissipation, set dissip=0")
 !   end if
+   ABI_MALLOC(ddb_lw%val_fs,(2,ddb_lw%msize,ddb_lw%nblok))
 
    ABI_MALLOC(bc_barmagsus,(ndim,ndim))
    ABI_MALLOC(bc_ss,(ndim,ndim))
@@ -396,7 +340,7 @@ contains
    & mpatpol=mpatpol,mpdir=mpdir,omega=omega,rfmagn=rfmagn,rffreq=rffreq)
 
      if (iblok /= 0) then
-       call berrycurv_ss(bc_barmagsus,bc_ss,ddb_lw%val,iblok,invbarmagsus,mpatpol,mpdir,mpert,&
+       call berrycurv_ss(bc_barmagsus,bc_ss,ddb_lw,iblok,invbarmagsus,mpatpol,mpdir,mpert,&
      & natom,nblok,ndim,nmdir,omega(1),omegaflag,prtvol)
      end if
 
@@ -1485,7 +1429,7 @@ contains
 !!
 !! SOURCE
 
- subroutine berrycurv_ss(bc_barmagsus,bc_ss,blkval,iblok,invbarmagsus,&
+ subroutine berrycurv_ss(bc_barmagsus,bc_ss,ddb_lw,iblok,invbarmagsus,&
 & mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,omega,omegaflag,prtvol)
 
 !Arguments -------------------------------
@@ -1493,14 +1437,15 @@ contains
  integer,intent(in) :: iblok,mpert,natom,nblok,ndim,nmdir,omegaflag,prtvol
  real(dp),intent(in) :: omega
 !arrays
+ type(ddb_type),intent(inout) :: ddb_lw
  integer,intent(in) :: mpatpol(2),mpdir(3)
- real(dp),intent(inout) :: blkval(2,3,mpert,3,mpert,3,mpert,nblok)
  complex(dpc),intent(in) :: invbarmagsus(ndim,ndim)
  complex(dpc),intent(out) :: bc_ss(ndim,ndim)
  complex(dpc),intent(out) :: bc_barmagsus(ndim,ndim)
 !Local variables -------------------------
 !scalars
- integer :: iat1,iat2,icol,idir1,idir2,idir3,info,ipert1,ipert2,ipert3,irow,lwork
+ integer :: iat1,iat2,icol,idir1,idir2,idir3,index
+ integer :: info,ipert1,ipert2,ipert3,irow,lwork
  integer :: ipert1_red,ipert2_red,idir1_red,idir2_red
  real(dp) :: fac
  complex(dpc), parameter :: ione=(0.d0,1.d0)
@@ -1539,10 +1484,12 @@ contains
          if (mpdir(idir1)==0) cycle
          idir1_red=idir1_red+1
          irow=idir1_red+(ipert1_red-1)*nmdir
+         index = idir1 + &
+       & 3*((ipert1 - 1) + mpert*((idir2 - 1) + &
+       & 3*((ipert2 -1 ) + mpert*((idir3 - 1) + 3*(ipert3 - 1)))))
 
          bc_barmagsus(irow,icol)= -one* &
-       & cmplx(blkval(1,idir1,ipert1,idir2,ipert2,idir3,ipert3,iblok), &
-       & blkval(2,idir1,ipert1,idir2,ipert2,idir3,ipert3,iblok),16)
+       & cmplx(ddb_lw%val(1,index,iblok),ddb_lw%val(2,index,iblok),16)
 
        end do
      end do
@@ -1552,57 +1499,59 @@ contains
 !Calculate the Berry-curvature of the inverse magnetic susceptibility
  bc_ss=-matmul(invbarmagsus,matmul(bc_barmagsus,invbarmagsus)) 
 
+!TODO: Adapt the phase of this quantity
 ! fac=2.714943600699**2/four !TMP
- fac=one/four !TMP
- open(10,file='g_ss.txt')
+! fac=one/four !TMP
+! open(10,file='g_ss.txt')
+!   do irow=1, ndim
+!     write(10,*) -ione*bc_ss(irow,1:ndim)*fac
+!   end do 
+! close(10)
+
+
+ if (prtvol>1) then
+   call wrtout([ab_out,std_out], ' Fixed-spin Berry curvature of the inverse spin susceptibility ')
+   call wrtout([ab_out,std_out], '  atom1  dir  atom2  dir        Real              Imag')
    do irow=1, ndim
-     write(10,*) -ione*bc_ss(irow,1:ndim)*fac
-   end do 
- close(10)
-
-
- call wrtout([ab_out,std_out], ' Berry curvature of the inverse spin susceptibility ')
- call wrtout([ab_out,std_out], '  atom1  dir  atom2  dir        Real              Imag')
- do irow=1, ndim
-   do icol=1, ndim
-     write(msg,'(2(i4,4x,a2,2x),2x,2es18.9)' ) &
-   & indexat(irow), cart(indexdir(irow)), indexat(icol), cart(indexdir(icol)), &
-   & real(bc_ss(irow,icol)), aimag(bc_ss(irow,icol))
-     call wrtout([ab_out,std_out], msg)
+     do icol=1, ndim
+       write(msg,'(2(i4,4x,a2,2x),2x,2es18.9)' ) &
+     & indexat(irow), cart(indexdir(irow)), indexat(icol), cart(indexdir(icol)), &
+     & real(bc_ss(irow,icol)), aimag(bc_ss(irow,icol))
+       call wrtout([ab_out,std_out], msg)
+     end do
    end do
- end do
- call wrtout([ab_out,std_out], '   ')
+   call wrtout([ab_out,std_out], '   ')
+ end if
 
-!For linear interpolation of Hessians substitute FM Berry curvature 
-!into the ddb_lw object.
- if (omegaflag==2.and.abs(omega)<tol12) then
-   ipert2_red= 0
-   do iat2= mpatpol(1), mpatpol(2)
-     ipert2= natom + 11 + iat2
-     ipert2_red= ipert2_red + 1
-     idir2_red= 0
-     do idir2= 1, 3
-       if (mpdir(idir2)==0) cycle
-       idir2_red= idir2_red + 1
-       icol=idir2_red+(ipert2_red-1)*nmdir
-       ipert1_red=0
-       do iat1= mpatpol(1), mpatpol(2)
-         ipert1= natom + 11 + iat1
-         ipert1_red= ipert1_red + 1
-         idir1_red= 0
-         do idir1= 1, 3
-           if (mpdir(idir1)==0) cycle
-           idir1_red=idir1_red+1
-           irow=idir1_red+(ipert1_red-1)*nmdir
-           blkval(1,idir1,ipert1,idir2,ipert2,idir3,ipert3,iblok)= &
-         & real(bc_ss(irow,icol))
-           blkval(2,idir1,ipert1,idir2,ipert2,idir3,ipert3,iblok)= &
-         & aimag(bc_ss(irow,icol))
-         end do
+!Store the FM flavor in the DDB file
+ ipert2_red= 0
+ do iat2= mpatpol(1), mpatpol(2)
+   ipert2= natom + 11 + iat2
+   ipert2_red= ipert2_red + 1
+   idir2_red= 0
+   do idir2= 1, 3
+     if (mpdir(idir2)==0) cycle
+     idir2_red= idir2_red + 1
+     icol=idir2_red+(ipert2_red-1)*nmdir
+     ipert1_red=0
+     do iat1= mpatpol(1), mpatpol(2)
+       ipert1= natom + 11 + iat1
+       ipert1_red= ipert1_red + 1
+       idir1_red= 0
+       do idir1= 1, 3
+         if (mpdir(idir1)==0) cycle
+         idir1_red=idir1_red+1
+         irow=idir1_red+(ipert1_red-1)*nmdir
+         index = idir1 + &
+       & 3*((ipert1 - 1) + mpert*((idir2 - 1) + &
+       & 3*((ipert2 -1 ) + mpert*((idir3 - 1) + 3*(ipert3 - 1)))))
+
+         ddb_lw%val_fs(1,index,iblok)= real(bc_ss(irow,icol))
+         ddb_lw%val_fs(2,index,iblok)= aimag(bc_ss(irow,icol))
        end do
      end do
    end do
- end if
+ end do
 
  end subroutine berrycurv_ss
 !!***
