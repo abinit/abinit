@@ -132,12 +132,12 @@ contains
  ABI_MALLOC(invbarmagsus,(ndim,ndim))
  ABI_MALLOC(invmagsus,(ndim,ndim))
  ABI_MALLOC(invhmat,(ndim,ndim))
- ABI_MALLOC(barmmom,(ndim,(natom+2)*3))
- ABI_MALLOC(barmmom_tr,(ndim,(natom+2)*3))
- ABI_MALLOC(mmom,(ndim,(natom+2)*3))
- ABI_MALLOC(mmom_tr,((natom+2)*3,ndim))
- ABI_MALLOC(zfield,(ndim,(natom+2)*3))
- ABI_MALLOC(zfield_tr,((natom+2)*3,ndim))
+ ABI_MALLOC(barmmom,(ndim,(natom+5)*3))
+ ABI_MALLOC(barmmom_tr,((natom+5)*3,ndim))
+ ABI_MALLOC(mmom,(ndim,(natom+5)*3))
+ ABI_MALLOC(mmom_tr,((natom+5)*3,ndim))
+ ABI_MALLOC(zfield,(ndim,(natom+5)*3))
+ ABI_MALLOC(zfield_tr,((natom+5)*3,ndim))
 
  ABI_MALLOC(ddb%val_fs,(2,ddb%msize,ddb%nblok))
  if (mpopt==2) ABI_MALLOC(ddb%val_rs,(2,ddb%msize,ddb%nblok))
@@ -180,12 +180,14 @@ contains
 
    ! Calculate and write the spin-susceptibility matrices
    if (iblok /= 0) then
-     if (magpen<zero) then
-       write(msg, '(2a)' ) ' Spin susceptibility (Uniform Zeeman) ',ch10
-       call wrtout([std_out, ab_out], msg)
-     else if (magpen>zero) then
-       write(msg, '(2a)' ) ' Spin susceptibility (Local Zeeman) ',ch10
-       call wrtout([std_out, ab_out], msg)
+     if (prtvol>1) then
+       if (magpen<zero) then
+         write(msg, '(2a)' ) ' Spin susceptibility (Uniform Zeeman) ',ch10
+         call wrtout([std_out, ab_out], msg)
+       else if (magpen>zero) then
+         write(msg, '(2a)' ) ' Spin susceptibility (Local Zeeman) ',ch10
+         call wrtout([std_out, ab_out], msg)
+       end if
      end if
 
      call local_spinsus(barmagsus,ddb,iblok,invbarmagsus,invmagsus,invhmat,magpen,magsus,&
@@ -194,9 +196,11 @@ contains
    end if
 
    ! Calculate and write the induced magnetic moments 
-   write(msg, '(2a,(80a),4a)' ) ch10,('-',ii=1,80),ch10,ch10,&
-   ' First-order magnetic moments ',ch10
-   call wrtout([std_out, ab_out], msg)
+   if (prtvol>1) then
+     write(msg, '(2a,(80a),4a)' ) ch10,('-',ii=1,80),ch10,ch10,&
+     ' First-order magnetic moments ',ch10
+     call wrtout([std_out, ab_out], msg)
+   end if
 
    ! First atomic-displacement
    rfphon(2)=1
@@ -262,7 +266,7 @@ contains
    call ddb%to_d2etot(ddb%val,kblok,0,qeq0,qphon,qphnrm,ucvol,omega=omega)
 
    !Convert second-order derivatives to diferent magnetic boundary conditions
-   call mp_d2etot(barmagsus,barmmom,barmmom_tr,ddb,0,kblok,&
+   call mp_d2etot(barmagsus,ddb,0,kblok,&
  & invhmat,magsus,magpen,mpert,mpopt,natom,nblok,ndim,qphon,xred,zfield,zfield_tr)
 
    !Convert second-order energies to the physical quantities of ddb%val
@@ -271,10 +275,12 @@ contains
    if (mpopt==2) call ddb%to_d2etot(ddb%val_rs,kblok,1,qeq0,qphon,qphnrm,ucvol,omega=omega)
 
    !Print the physical quantities in the new magnetic boundary conditions
-   if (mpopt==1) then
-     call mp_d2etot_print(ddb,ddb%val_fs,kblok,mpert,natom,nblok,1,omega,prtvol,qeq0,qphnrm,qphon,ucvol)
-   else if (mpopt==2) then
-     call mp_d2etot_print(ddb,ddb%val_rs,kblok,mpert,natom,nblok,2,omega,prtvol,qeq0,qphnrm,qphon,ucvol)
+   if (prtopt==1) then
+     if (mpopt==1) then
+       call mp_d2etot_print(ddb,ddb%val_fs,kblok,mpert,natom,nblok,1,omega,prtvol,qeq0,qphnrm,qphon,ucvol)
+     else if (mpopt==2) then
+       call mp_d2etot_print(ddb,ddb%val_rs,kblok,mpert,natom,nblok,2,omega,prtvol,qeq0,qphnrm,qphon,ucvol)
+     end if
    end if
 
    rfmagn(:)=0
@@ -605,7 +611,7 @@ contains
  ABI_FREE(work1)
  ABI_FREE(work2)
 
- if (prtopt==1) then
+ if (prtopt>1.and.prtvol>1) then
 !TODO: remove
 !  ! fac=2.714943600699**2*27.2114/four
 !   fac=27.2114/four
@@ -642,7 +648,7 @@ contains
      end do
      call wrtout([ab_out,std_out], '   ')
   
-     if (prtvol > 1) then
+     if (prtvol > 2) then
        call wrtout([ab_out,std_out], ' Penalized local spin susceptibility ')
        call wrtout([ab_out,std_out], '  atom1  dir  atom2  dir        Real              Imag')
        do irow=1, ndim
@@ -763,25 +769,25 @@ contains
  type(ddb_type),intent(inout) :: ddb
  real(dp),intent(in) :: qphon(3),xred(3,natom)
  integer,intent(in) :: mpatpol(2),mpdir(3)
- complex(dpc),intent(out) :: barmmom(ndim,(natom+2)*3)
- complex(dpc),intent(out) :: barmmom_tr((natom+2)*3,ndim)
+ complex(dpc),intent(out) :: barmmom(ndim,(natom+5)*3)
+ complex(dpc),intent(out) :: barmmom_tr((natom+5)*3,ndim)
  complex(dpc),intent(in) :: invbarmagsus(ndim,ndim)
  complex(dpc),intent(in) :: invhmat(ndim,ndim)
  complex(dpc),intent(in) :: magsus(ndim,ndim)
- complex(dpc),intent(out) :: mmom(ndim,(natom+2)*3)
- complex(dpc),intent(out) :: mmom_tr((natom+2)*3,ndim)
- complex(dpc),intent(out) :: zfield(ndim,(natom+2)*3)
- complex(dpc),intent(out) :: zfield_tr((natom+2)*3,ndim)
+ complex(dpc),intent(out) :: mmom(ndim,(natom+5)*3)
+ complex(dpc),intent(out) :: mmom_tr((natom+5)*3,ndim)
+ complex(dpc),intent(out) :: zfield(ndim,(natom+5)*3)
+ complex(dpc),intent(out) :: zfield_tr((natom+5)*3,ndim)
 !Local variables -------------------------
 !scalars
  integer :: iat1,iat2,icol,idir1,idir2,index,ipert1,ipert2,irow
- integer :: ipert1_red,ipert2_red,idir1_red,idir2_red,jndex
+ integer :: ipert1_red,ipert2_red,idir1_red,idir2_red,jndex,zblok
  real(dp) :: fac
  character(len=1000) :: msg
 !arrays
  integer(dp) :: indexat1(ndim),indexdir1(ndim)
- integer(dp) :: indexat2((natom+2)*3),indexdir2((natom+2)*3)
- complex(dpc) :: mmom_alt(ndim,(natom+2)*3)
+ integer(dp) :: indexat2((natom+5)*3),indexdir2((natom+5)*3)
+ complex(dpc) :: mmom_alt(ndim,(natom+5)*3)
  character(len=1) :: cart(3)=(/'x','y','z'/)
 
 ! *********************************************************************
@@ -834,7 +840,7 @@ contains
  mmom_alt=matmul(invhmat,barmmom)
  mmom_tr=matmul(barmmom_tr,invhmat)
 
- if (prtopt==1) then
+ if (prtopt==1.and.prtvol>1) then
     !TODO: the change of phase should rather be done on the magnetic variables, for them
     !to follow the same criterion as the atomic displacement ones. 
 !  ! fac=2.714943600699/two*27.2114/0.529177
@@ -933,7 +939,7 @@ contains
      !Macroscopic Zeeman
      if (lblok /= 0) then
        call wrtout([ab_out,std_out], ' Local Zeeman fields induced by macroscopic Zeeman field (at constrained magnetic moments)')
-       call wrtout([ab_out,std_out], '  atom1  dir  efld.dir         Real              Imag')
+       call wrtout([ab_out,std_out], '  atom1  dir  Bfld.dir         Real              Imag')
        do irow=1, ndim
          do icol=(natom+4)*3+1, (natom+5)*3
            write(msg,'(i4,4x,a2,4x,a2,6x,2es18.9)' ) &
@@ -944,9 +950,9 @@ contains
        end do
        call wrtout([ab_out,std_out], '   ')
        call wrtout([ab_out,std_out], ' Local magnetic moments induced by macroscopic Zeeman field (from induced Zeeman fields)')
-       call wrtout([ab_out,std_out], '  atom1  dir  efld.dir         Real              Imag')
+       call wrtout([ab_out,std_out], '  atom1  dir  Bfld.dir         Real              Imag')
        do irow=1, ndim
-         do icol=(natom+4)*3+1, (natom+4)*3
+         do icol=(natom+4)*3+1, (natom+5)*3
            write(msg,'(i4,4x,a2,4x,a2,6x,2es18.9)' ) &
          & indexat1(irow), cart(indexdir1(irow)), cart(indexdir2(icol)), &
          & real(mmom(irow,icol)), aimag(mmom(irow,icol))
@@ -955,7 +961,7 @@ contains
        end do
        call wrtout([ab_out,std_out], '   ')
        call wrtout([ab_out,std_out], ' Local magnetic moments induced by macroscopic Zeeman field (from induced penalized moments)')
-       call wrtout([ab_out,std_out], '  atom1  dir  efld.dir         Real              Imag')
+       call wrtout([ab_out,std_out], '  atom1  dir  Bfld.dir         Real              Imag')
        do irow=1, ndim
          do icol=(natom+4)*3+1, (natom+5)*3
            write(msg,'(i4,4x,a2,4x,a2,6x,2es18.9)' ) &
@@ -967,7 +973,7 @@ contains
        call wrtout([ab_out,std_out], '   ')
      end if
 
-     if (prtvol > 1) then
+     if (prtvol > 2) then
        if (iblok /= 0) then
          call wrtout([ab_out,std_out], ' Penalized local magnetic moments induced by atomic displacements ')
          call wrtout([ab_out,std_out], '  atom1  dir  atom2  dir        Real              Imag')
@@ -994,43 +1000,65 @@ contains
          end do
          call wrtout([ab_out,std_out], '   ')
        end if
+       if (lblok /= 0) then
+         call wrtout([ab_out,std_out], ' Penalized local magnetic moments induced by macroscopic Zeeman field ')
+         call wrtout([ab_out,std_out], '  atom1  dir  Bfld.dir         Real              Imag')
+         do irow=1, ndim
+           do icol=(natom+4)*3+1, (natom+5)*3
+             write(msg,'(i4,4x,a2,4x,a2,6x,2es18.9)' ) &
+           & indexat1(irow), cart(indexdir1(irow)), cart(indexdir2(icol)), &
+           & real(barmmom(irow,icol)), aimag(barmmom(irow,icol))
+             call wrtout([ab_out,std_out], msg)
+           end do
+         end do
+         call wrtout([ab_out,std_out], '   ')
+       end if
      end if
    end if
  end if 
   
-!For linear interpolation of Hessians substitute Zeeman fields into 
-!the ddb object.
-! if (omegaflag==2.and.abs(omega)<tol12) then
-!   do ipert2=1,natom+2
-!     do idir2=1,3
-!       icol=idir2+(ipert2-1)*3
-!       indexat2(icol)=ipert2
-!       indexdir2(icol)=idir2
-!  
-!       ipert1_red= 0
-!       do iat1= mpatpol(1), mpatpol(2)
-!         ipert1= natom + 11 + iat1
-!         ipert1_red= ipert1_red + 1
-!         idir1_red= 0
-!         do idir1= 1, 3
-!           if (mpdir(idir1)==0) cycle
-!           idir1_red= idir1_red + 1
-!           irow=idir1_red+(ipert1_red-1)*nmdir
-!           indexat1(irow)=iat1
-!           indexdir1(irow)=idir1
-!           
-!           if (iblok /=0 .and. ipert2 <= natom) then
-!             blkval(1,idir1,ipert1,idir2,ipert2,iblok)=real(zfield(irow,icol))
-!             blkval(2,idir1,ipert1,idir2,ipert2,iblok)=aimag(zfield(irow,icol))
-!             blkval(1,idir2,ipert2,idir1,ipert1,iblok)=real(zfield_tr(icol,irow))
-!             blkval(2,idir2,ipert2,idir1,ipert1,iblok)=aimag(zfield_tr(icol,irow))
-!           end if
-!  
-!         end do
-!       end do
-!     end do
-!   end do
-! end if
+!Store the FS and RS flavors on the DDB array
+ do ipert2=1,natom+2
+   do idir2=1,3
+     icol=idir2+(ipert2-1)*3
+     indexat2(icol)=ipert2
+     indexdir2(icol)=idir2
+
+     ipert1_red= 0
+     do iat1= mpatpol(1), mpatpol(2)
+       ipert1= natom + 11 + iat1
+       ipert1_red= ipert1_red + 1
+       idir1_red= 0
+       do idir1= 1, 3
+         if (mpdir(idir1)==0) cycle
+         idir1_red= idir1_red + 1
+         irow=idir1_red+(ipert1_red-1)*nmdir
+         indexat1(irow)=iat1
+         indexdir1(irow)=idir1
+         index= idir1 + 3*((ipert1-1)+mpert*((idir2-1)+3*(ipert2-1)))
+         jndex= idir2 + 3*((ipert2-1)+mpert*((idir1-1)+3*(ipert1-1)))
+         
+         zblok= 0
+         if (iblok /=0 .and. ipert2 <= natom) zblok= iblok
+         if (jblok /=0 .and. ipert2 == natom+2) zblok= jblok
+         if (lblok /=0 .and. ipert2 == natom+5) zblok= lblok
+         if (zblok /= 0) then
+           ddb%val_fs(1,index,zblok)=real(zfield(irow,icol))
+           ddb%val_fs(2,index,zblok)=aimag(zfield(irow,icol))
+           ddb%val_fs(1,jndex,zblok)=real(zfield_tr(icol,irow))
+           ddb%val_fs(2,jndex,zblok)=aimag(zfield_tr(icol,irow))
+
+           ddb%val_rs(1,index,zblok)=real(mmom(irow,icol))
+           ddb%val_rs(2,index,zblok)=aimag(mmom(irow,icol))
+           ddb%val_rs(1,jndex,zblok)=real(mmom_tr(icol,irow))
+           ddb%val_rs(2,jndex,zblok)=aimag(mmom_tr(icol,irow))
+         end if
+
+       end do
+     end do
+   end do
+ end do
+
  end subroutine magmom
 !!***
 
@@ -1044,8 +1072,6 @@ contains
 !!
 !! INPUTS
 !! barmagsus(ndim,ndim)= Penalized spin-sussceptibility tensor (\bar{\chi})
-!! barmom(ndim,(natom+2)*3)= Penalized first-order magnetic moments
-!! barmom_tr((natom+2)*3,ndim)= Penalized first-order responses to local Zeeman fields
 !! (equal to barmom^{\dagger} in the nondissipative regime)
 !! ddb= the ddb object
 !! dissip= if 0 a nondissipative regime is assumed
@@ -1072,7 +1098,7 @@ contains
 !!
 !! SOURCE
 
- subroutine mp_d2etot(barmagsus,barmmom,barmmom_tr,ddb,dissip,&
+ subroutine mp_d2etot(barmagsus,ddb,dissip,&
 & iblok,invhmat,magsus,magpen,mpert,mpopt,&
 & natom,nblok,ndim,qphon,xred,zfield,zfield_tr)
 
@@ -1084,12 +1110,10 @@ contains
  type(ddb_type),intent(inout) :: ddb
  real(dp),intent(in) :: qphon(3),xred(3,natom)
  complex(dpc),intent(in) :: barmagsus(ndim,ndim)
- complex(dpc),intent(in) :: barmmom(ndim,(natom+2)*3)
- complex(dpc),intent(in) :: barmmom_tr((natom+2)*3,ndim)
  complex(dpc),intent(in) :: invhmat(ndim,ndim)
  complex(dpc),intent(in) :: magsus(ndim,ndim)
- complex(dpc),intent(in) :: zfield(ndim,(natom+2)*3)
- complex(dpc),intent(in) :: zfield_tr((natom+2)*3,ndim)
+ complex(dpc),intent(in) :: zfield(ndim,(natom+5)*3)
+ complex(dpc),intent(in) :: zfield_tr((natom+5)*3,ndim)
 !Local variables -------------------------
 !scalars
  integer :: idir1,idir2,ipert1,ipert2,index,irow,icol
@@ -1128,7 +1152,7 @@ contains
    end do
  end do 
 
-!TODO:
+!TODO:This should be applied to the magnetic variables instead
 ! !Adopt the same phase convention as for the local Zeeman perturbation
 ! do ipert2= 1, natom
 !   do idir2= 1, 3
@@ -1152,6 +1176,7 @@ contains
 !!
 !! FUNCTION
 !! Write on output file the fixed- and relaxed-spin susceptibilities
+!! Only macroscopic quantities are printed if prtvol=1
 !!
 !! INPUTS
 !! blkval= 2nd-order susceptibilities matrix 
@@ -1198,30 +1223,32 @@ contains
  rftyp = 1
 
  !IFCs
- rfphon(1:2)=1
- call ddb%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, omega=omega)
- if (iblok/=0.and.iblok==kblok) then
-   if (opt==1) then
-     call wrtout([ab_out,std_out], ' Frozen-spin interatomic force constants')
-   else if (opt==2) then
-     call wrtout([ab_out,std_out], ' Relaxed-spin interatomic force constants')
-   end if
-   call wrtout([ab_out,std_out], '  atom1  dir  atom2  dir        Real              Imag')
-   do ipert1= 1, natom
-     do idir1= 1, 3
-       irow=( ipert1-1)*3 + idir1
-       do ipert2= 1, natom
-         do idir2= 1, 3
-           icol=( ipert2-1)*3 + idir2
-           val(:)=blkval(:,idir1,ipert1,idir2,ipert2,kblok)
-           write(msg,'(2(i4,4x,a2,2x),2x,2es18.9)') &
-         & ipert1, cart(idir1), ipert2, cart(idir2), val(1), val(2)
-           call wrtout([ab_out,std_out], msg)
+ if (prtvol >1) then
+   rfphon(1:2)=1
+   call ddb%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, omega=omega)
+   if (iblok/=0.and.iblok==kblok) then
+     if (opt==1) then
+       call wrtout([ab_out,std_out], ' Frozen-spin interatomic force constants')
+     else if (opt==2) then
+       call wrtout([ab_out,std_out], ' Relaxed-spin interatomic force constants')
+     end if
+     call wrtout([ab_out,std_out], '  atom1  dir  atom2  dir        Real              Imag')
+     do ipert1= 1, natom
+       do idir1= 1, 3
+         irow=( ipert1-1)*3 + idir1
+         do ipert2= 1, natom
+           do idir2= 1, 3
+             icol=( ipert2-1)*3 + idir2
+             val(:)=blkval(:,idir1,ipert1,idir2,ipert2,kblok)
+             write(msg,'(2(i4,4x,a2,2x),2x,2es18.9)') &
+           & ipert1, cart(idir1), ipert2, cart(idir2), val(1), val(2)
+             call wrtout([ab_out,std_out], msg)
+           end do
          end do
+         call wrtout([ab_out,std_out], ' ')
        end do
-       call wrtout([ab_out,std_out], ' ')
      end do
-   end do
+   end if
  end if
 
  if (qeq0) then
@@ -1365,191 +1392,6 @@ contains
  end subroutine mp_d2etot_print
 !!***
 
-!!****f* m_ddb_magpen/mp_ifc
-!! NAME
-!! mp_ifc
-!!
-!! FUNCTION
-!! Calculate the different flavor (see mpopt below) of the second-
-!! order linear-response quantities
-!!
-!! INPUTS
-!! barmagsus(ndim,ndim)= Penalized spin-sussceptibility tensor
-!! blkval(2,3*mpert*3*mpert,nblok)=  Second-order derivative matrices
-!!  In our case, the nblok is restricted to iblok
-!! iblok= index of the IFCs block
-!! magsus(ndim,ndim)= Spin-sussceptibility tensor
-!! mpert =maximum number of ipert
-!! mpopt = 1 calculate the frozen-magnetic second-order quantities
-!!         2 calculate the spin-relaxed second-order quantities 
-!! natom= number of atoms in unit cell
-!! nblok= number of blocks in the DDB
-!! ndim= dimension of the square susceptibilities 
-!! prtvol= control the volume of information written on output
-!!
-!! OUTPUT
-!! ifcmat(3*natom,3*natom)= IFC matrix calculated at the level of mpopt.
-!! ifcmat_fm(3*natom,3*natom)= IFC matrix calculated at the frozen magnetic level.
-!!
-!! SOURCE
-
- subroutine mp_ifc(barmagsus,barmmom,barmmom_tr,blkval,dissip,&
-& iblok,ifcmat,ifcmat_fm,invhmat,magsus,magpen,mpert,mpopt,&
-& natom,nblok,ndim,omega,omegaflag,prtopt,prtvol,qphon,xred,zfield,zfield_tr)
-
-!Arguments -------------------------------
-!scalars
- integer,intent(in) :: iblok,dissip,mpert,mpopt,natom,nblok,ndim,omegaflag,prtopt,prtvol
- real(dp),intent(in) :: magpen,omega
-!arrays
- real(dp),intent(inout) :: blkval(2,3,mpert,3,mpert,nblok)
- real(dp),intent(in) :: qphon(3),xred(3,natom)
- complex(dpc),intent(in) :: barmagsus(ndim,ndim)
- complex(dpc),intent(in) :: barmmom(ndim,(natom+2)*3)
- complex(dpc),intent(in) :: barmmom_tr((natom+2)*3,ndim)
- complex(dpc),intent(in) :: invhmat(ndim,ndim)
- complex(dpc),intent(in) :: magsus(ndim,ndim)
- complex(dpc),intent(in) :: zfield(ndim,(natom+2)*3)
- complex(dpc),intent(in) :: zfield_tr((natom+2)*3,ndim)
- complex(dpc),intent(out) :: ifcmat(3*natom,3*natom)
- complex(dpc),intent(out) :: ifcmat_fm(3*natom,3*natom)
-!Local variables -------------------------
-!scalars
- integer :: icol,idir1,idir2,ipert1,ipert2,irow
- real(dp) :: fac
- character(len=1000) :: msg
-!arrays
- character(len=1) :: cart(3)=(/'x','y','z'/)
- complex(dpc) :: barifc(natom*3,natom*3)
- complex(dpc) :: fmifc(natom*3,natom*3)
- complex(dpc) :: fmifc_sf(natom*3,natom*3)
- complex(dpc) :: srifc(natom*3,natom*3)
- complex(dpc) :: ifc_zfield(ndim,natom*3),ifc_zfield_tr(natom*3,ndim)
-
-! *********************************************************************
-
-!Extract the penalized IFCs 
- do ipert2= 1, natom
-   do idir2= 1, 3
-     icol=( ipert2-1)*3 + idir2
-     do ipert1= 1, natom
-       do idir1= 1, 3
-         irow=( ipert1-1)*3 + idir1
-         barifc(irow,icol)= &
-       & cmplx(blkval(1,idir1,ipert1,idir2,ipert2,iblok), &
-       &       blkval(2,idir1,ipert1,idir2,ipert2,iblok),16)
-       end do
-     end do
-   end do
- end do 
-
- !Calculate the frozen-magnetic flavor
- ifc_zfield(:,:)=zfield(:,1:natom*3)
- ifc_zfield_tr(:,:)=zfield_tr(1:natom*3,:)
- if (dissip==0) then
-   fmifc= matmul(transpose(conjg(ifc_zfield)),matmul(barmagsus,ifc_zfield))
- else if (dissip==1) then
-   fmifc= matmul(ifc_zfield_tr,matmul(barmagsus,ifc_zfield))
- end if
- fmifc= barifc + fmifc
-
- ifcmat= fmifc
- ifcmat_fm= fmifc
-
- !Calculate the spin-relaxed flavor
- if (mpopt==2) then
-   if (dissip==0) then
-     srifc= matmul(transpose(conjg(ifc_zfield)),matmul(magsus,ifc_zfield))
-     srifc= fmifc - srifc
-   else if (dissip==1) then
-     srifc= barifc - magpen*matmul(barmmom_tr(1:natom*3,:),matmul(invhmat,barmmom(:,1:natom*3)))
-   end if
-
-   ifcmat= srifc
- end if
-
- !Adopt the same phase convention as for the local Zeeman perturbation
- do ipert2= 1, natom
-   do idir2= 1, 3
-     icol=( ipert2-1)*3 + idir2
-     do ipert1= 1, natom
-       do idir1= 1, 3
-         irow=( ipert1-1)*3 + idir1
-         fmifc_sf(irow,icol)=fmifc(irow,icol)* &
-       & exp(two_pi*(0.d0,1.d0)* dot_product(qphon,xred(:,ipert2)-xred(:,ipert1)))
-       end do
-     end do
-   end do
- end do 
- 
- if (prtopt==1) then
-   fac=27.2114/(0.52917)**2
-   open(10,file='k_pp.txt')
-   do irow=1,natom*3
-      write(10,*) fmifc_sf(irow,1:natom*3)*fac
-   end do 
-   close(10)
-   
-   !Write the results
-   call wrtout([ab_out,std_out], ' Frozen-magnetic interatomic force constants')
-   call wrtout([ab_out,std_out], '  atom1  dir  atom2  dir        Real              Imag')
-   do ipert1= 1, natom
-     do idir1= 1, 3
-       irow=( ipert1-1)*3 + idir1
-       do ipert2= 1, natom
-         do idir2= 1, 3
-           icol=( ipert2-1)*3 + idir2
-           write(msg,'(2(i4,4x,a2,2x),2x,2es18.9)') &
-         & ipert1, cart(idir1), ipert2, cart(idir2), &
-         & real(fmifc(irow,icol)), aimag(fmifc(irow,icol))
-           call wrtout([ab_out,std_out], msg)
-         end do
-       end do
-       call wrtout([ab_out,std_out], '   ')
-     end do
-   end do 
-  
-   if (mpopt==2) then
-     call wrtout([ab_out,std_out], ' Spin-relaxed interatomic force constants')
-     call wrtout([ab_out,std_out], '  atom1  dir  atom2  dir        Real              Imag')
-     do ipert1= 1, natom
-       do idir1= 1, 3
-         irow=( ipert1-1)*3 + idir1
-         do ipert2= 1, natom
-           do idir2= 1, 3
-             icol=( ipert2-1)*3 + idir2
-             write(msg,'(2(i4,4x,a2,2x),2x,2es18.9)') &
-           & ipert1, cart(idir1), ipert2, cart(idir2), &
-           & real(srifc(irow,icol)), aimag(srifc(irow,icol))
-             call wrtout([ab_out,std_out], msg)
-           end do
-         end do
-         call wrtout([ab_out,std_out], '   ')
-       end do
-     end do 
-   end if
- end if
-
-!For linear interpolation of Hessians substitute FM force constants into 
-!the ddb object.
- if (omegaflag==2.and.abs(omega)<tol12) then
-   do ipert2= 1, natom
-     do idir2= 1, 3
-       icol=( ipert2-1)*3 + idir2
-       do ipert1= 1, natom
-         do idir1= 1, 3
-           irow=( ipert1-1)*3 + idir1
-         blkval(1,idir1,ipert1,idir2,ipert2,iblok)=real(ifcmat_fm(irow,icol))
-         blkval(2,idir1,ipert1,idir2,ipert2,iblok)=aimag(ifcmat_fm(irow,icol))
-         end do
-       end do
-     end do
-   end do 
- end if
-
- end subroutine mp_ifc
-!!***
-
 !!****f* m_ddb_magpen/asrw0
 !! NAME
 !! asrw0
@@ -1614,528 +1456,6 @@ contains
  end do
   
  end subroutine asrw0
-!!***
-
-!!****f* m_ddb_magpen/mp_diel
-!! NAME
-!! mp_diel
-!!
-!! FUNCTION
-!! Calculate the different flavor (see mpopt below) of the second-
-!! order linear-response quantities
-!!
-!! INPUTS
-!! barmagsus(ndim,ndim)= Penalized spin-sussceptibility tensor
-!! blkval(2,3*mpert*3*mpert,nblok)=  Second-order derivative matrices
-!!  In our case, the nblok is restricted to iblok
-!! iblok= index of the IFCs block
-!! magsus(ndim,ndim)= Spin-sussceptibility tensor
-!! mpert =maximum number of ipert
-!! mpopt = 1 calculate the frozen-magnetic second-order quantities
-!!         2 calculate the spin-relaxed second-order quantities 
-!! natom= number of atoms in unit cell
-!! nblok= number of blocks in the DDB
-!! ndim= dimension of the square susceptibilities 
-!! prtvol= control the volume of information written on output
-!! ucvol= unit cell volume
-!!
-!! OUTPUT
-!!  
-!! epsilon(3,3)= Complex dielectric tensor calculated at the level of mpopt.
-!!
-!! SOURCE
-
- subroutine mp_diel(barepsilon,barmagsus,barmmom,barmmom_tr,blkval,dissip,&
-& epsilon,iblok,invhmat,magpen,magsus,mpert,mpopt,&
-& natom,nblok,ndim,prtopt,prtvol,ucvol,zfield,zfield_tr)
-
-!Arguments -------------------------------
-!scalars
- integer,intent(in) :: iblok,dissip,mpert,mpopt,natom,nblok,ndim,prtopt,prtvol
- real(dp), intent(in) :: magpen,ucvol
-!arrays
- real(dp),intent(in) :: blkval(2,3,mpert,3,mpert,nblok)
- complex(dpc),intent(out) ::barepsilon(3,3)
- complex(dpc),intent(in) :: barmagsus(ndim,ndim)
- complex(dpc),intent(in) :: barmmom(ndim,(natom+2)*3)
- complex(dpc),intent(in) :: barmmom_tr((natom+2)*3,ndim)
- complex(dpc),intent(in) :: invhmat(ndim,ndim)
- complex(dpc),intent(out) :: epsilon(3,3)
- complex(dpc),intent(in) :: magsus(ndim,ndim)
- complex(dpc),intent(in) :: zfield(ndim,(natom+2)*3)
- complex(dpc),intent(in) :: zfield_tr((natom+2)*3,ndim)
-
-!Local variables -------------------------
-!scalars
- integer :: idir1,idir2,ipert1,ipert2
- character(len=1000) :: msg
-!arrays
- complex(dpc) :: bardielsus(3,3)
- complex(dpc) :: fmepsilon(3,3), fmdielsus(3,3)
- complex(dpc) :: srepsilon(3,3), srdielsus(3,3)
- complex(dpc) :: diel_zfield(ndim,3),diel_zfield_tr(3,ndim)
- character(len=1) :: cart(3)=(/'x','y','z'/)
-
-! *********************************************************************
-
-!Extract the penalized dielectric tensor
- ipert2= natom + 2
- ipert1= natom + 2
- do idir2= 1, 3
-   do idir1= 1, 3
-     barepsilon(idir1,idir2)= &
-   & cmplx(blkval(1,idir1,ipert1,idir2,ipert2,iblok), &
-   &       blkval(2,idir1,ipert1,idir2,ipert2,iblok),16)
-     if (idir1==idir2) then
-       bardielsus(idir1,idir2)= one - barepsilon(idir1,idir2)
-     else
-       bardielsus(idir1,idir2)= -barepsilon(idir1,idir2)
-     end if
-   end do
- end do
- bardielsus= ucvol/four_pi * bardielsus
-
-!Calculate the frozen-magnetic flavor
- diel_zfield(:,:)=zfield(:,(natom+2)*3-2:(natom+2)*3)
- diel_zfield_tr(:,:)=zfield_tr((natom+2)*3-2:(natom+2)*3,:)
- if (dissip==0) then
-   fmdielsus= matmul(transpose(conjg(diel_zfield)),matmul(barmagsus,diel_zfield))
- else if (dissip==1) then
-   fmdielsus= matmul(diel_zfield_tr,matmul(barmagsus,diel_zfield))
- end if
- fmdielsus= bardielsus + fmdielsus
- fmepsilon= -four_pi/ucvol*fmdielsus
- fmepsilon(1,1)= one + fmepsilon(1,1)
- fmepsilon(2,2)= one + fmepsilon(2,2)
- fmepsilon(3,3)= one + fmepsilon(3,3)
-
- epsilon=fmepsilon
-
-!Calculate the spin-relaxed flavor
- if (mpopt==2) then
-   if (dissip==0) then
-     srdielsus= matmul(transpose(conjg(diel_zfield)),matmul(magsus,diel_zfield))
-     srdielsus= fmdielsus - srdielsus
-   else if (dissip==1) then
-     srdielsus= bardielsus - magpen*matmul(barmmom_tr((natom+2)*3-2:(natom+2)*3,:),& 
-   & matmul(invhmat,barmmom(:,(natom+2)*3-2:(natom+2)*3)))
-   end if
-   srepsilon= -four_pi/ucvol*srdielsus
-   srepsilon(1,1)= one + srepsilon(1,1)
-   srepsilon(2,2)= one + srepsilon(2,2)
-   srepsilon(3,3)= one + srepsilon(3,3)
-
-   epsilon=srepsilon
- end if
-
- if (prtopt==1) then
-   !Write the results
-   call wrtout([ab_out,std_out], ' Frozen-magnetic dielectric tensor (clamped ion)')
-   call wrtout([ab_out,std_out], '  dir  dir        Real              Imag')
-   do idir1= 1, 3
-     do idir2= 1, 3
-       write(msg,'(2x,a2,3x,a2,2x,2es18.9)') cart(idir1), cart(idir2), &
-     & real(fmepsilon(idir1,idir2)), aimag(fmepsilon(idir1,idir2))
-       call wrtout([ab_out,std_out], msg)
-     end do
-   end do
-   call wrtout([ab_out,std_out], '   ')
-  
-   if (mpopt==2) then
-     call wrtout([ab_out,std_out], ' Spin-relaxed dielectric tensor (clamped ion)')
-     call wrtout([ab_out,std_out], '  dir  dir        Real              Imag')
-     do idir1= 1, 3
-       do idir2= 1, 3
-         write(msg,'(2x,a2,3x,a2,2x,2es18.9)' ) cart(idir1), cart(idir2), &
-       & real(srepsilon(idir1,idir2)), aimag(srepsilon(idir1,idir2))
-         call wrtout([ab_out,std_out], msg)
-       end do
-     end do
-     call wrtout([ab_out,std_out], '   ')
-   end if
-   
-   if (prtvol > 1) then
-     call wrtout([ab_out,std_out], ' Penalized dielectric tensor (clamped ion)')
-     call wrtout([ab_out,std_out], '  dir  dir        Real              Imag')
-     do idir1= 1, 3
-       do idir2= 1, 3
-         write(msg,'(2x,a2,3x,a2,2x,2es18.9)') cart(idir1), cart(idir2), &
-       & real(barepsilon(idir1,idir2)), aimag(barepsilon(idir1,idir2))
-         call wrtout([ab_out,std_out], msg)
-       end do
-     end do
-     call wrtout([ab_out,std_out], '   ')
-   end if
- end if
-
- end subroutine mp_diel
-!!***
-
-!!****f* m_ddb_magpen/mp_macmagsus
-!! NAME
-!! mp_macmagsus
-!!
-!! FUNCTION
-!! Calculate the different flavor (see mpopt below) of the second-
-!! order linear-response quantities
-!!
-!! INPUTS
-!! barmagsus(ndim,ndim)= Penalized spin-sussceptibility tensor
-!! blkval(2,3*mpert*3*mpert,nblok)=  Second-order derivative matrices
-!!  In our case, the nblok is restricted to iblok
-!! iblok= index of the IFCs block
-!! magsus(ndim,ndim)= Spin-sussceptibility tensor
-!! mpert =maximum number of ipert
-!! mpopt = 1 calculate the frozen-magnetic second-order quantities
-!!         2 calculate the spin-relaxed second-order quantities 
-!! natom= number of atoms in unit cell
-!! nblok= number of blocks in the DDB
-!! ndim= dimension of the square susceptibilities 
-!! prtvol= control the volume of information written on output
-!! ucvol= unit cell volume
-!!
-!! OUTPUT
-!!  
-!! macmagsus(3,3)= Complex magnetic susceptibility tensor calculated at the level of mpopt.
-!!
-!! SOURCE
-
- subroutine mp_macmagsus(barmagsus,blkval,&
-& dissip,iblok,invbarmagsus,invhmat,macmagsus,magpen,magsus,&
-& mpatpol,mpdir,mpert,mpopt,&
-& natom,nblok,ndim,nmdir,prtopt,prtvol,ucvol)
-
-!Arguments -------------------------------
-!scalars
- integer,intent(in) :: iblok,dissip,mpert,mpopt,natom,nblok,ndim,nmdir,prtopt,prtvol
- real(dp),intent(in) :: magpen,ucvol
-!arrays
- integer,intent(in) :: mpatpol(2),mpdir(3)
- real(dp),intent(in) :: blkval(2,3,mpert,3,mpert,nblok)
- complex(dpc),intent(in) :: barmagsus(ndim,ndim)
- complex(dpc),intent(in) :: invhmat(ndim,ndim)
- complex(dpc),intent(in) :: invbarmagsus(ndim,ndim)
- complex(dpc),intent(out) :: macmagsus(3,3)
- complex(dpc),intent(in) :: magsus(ndim,ndim)
-
-!Local variables -------------------------
-!scalars
- integer :: iat1,idir1,idir2,ipert1,ipert2,irow
- integer :: ipert1_red,ipert2_red,idir1_red,idir2_red
- character(len=1000) :: msg
-!arrays
- complex(dpc) :: barmacmagsus(3,3)
- complex(dpc) :: fmmacmagsus(3,3)
- complex(dpc) :: srmacmagsus(3,3)
- complex(dpc) :: barmmom(ndim,3),barmmom_tr(3,ndim)
- complex(dpc), allocatable :: macmag_zfield(:,:)
- complex(dpc), allocatable :: macmag_zfield_tr(:,:)
- character(len=1) :: cart(3)=(/'x','y','z'/)
-
-! *********************************************************************
-
-!Extract the penalized magnetic susceptibility
- ipert2= natom + 5
- ipert1= natom + 5
- barmacmagsus=(zero,zero)
- do idir2= 1, 3
-   do idir1= 1, 3
-     barmacmagsus(idir1,idir2)= &
-   & cmplx(blkval(1,idir1,ipert1,idir2,ipert2,iblok), &
-   &       blkval(2,idir1,ipert1,idir2,ipert2,iblok),16)
-   end do
- end do
-
-!Extract the penalized magnetic moments and fields
- ipert2=natom+5
- do idir2=1,3
-   ipert1_red= 0
-   do iat1= mpatpol(1), mpatpol(2)
-     ipert1= natom + 11 + iat1
-     ipert1_red= ipert1_red + 1
-     idir1_red= 0
-     do idir1= 1, 3
-       if (mpdir(idir1)==0) cycle
-       idir1_red= idir1_red + 1
-       irow=idir1_red+(ipert1_red-1)*nmdir
-       barmmom(irow,idir2)= &
-     & cmplx(blkval(1,idir1,ipert1,idir2,ipert2,iblok), &
-     & blkval(2,idir1,ipert1,idir2,ipert2,iblok),16)
-       barmmom_tr(idir2,irow)= &
-     & cmplx(blkval(1,idir2,ipert2,idir1,ipert1,iblok), &
-     & blkval(2,idir2,ipert2,idir1,ipert1,iblok),16)
-
-     end do
-   end do
- end do
-
- !Zeeman fields
- ABI_MALLOC(macmag_zfield,(ndim,3))
- ABI_MALLOC(macmag_zfield_tr,(3,ndim))
- macmag_zfield=-matmul(invbarmagsus,barmmom)
- macmag_zfield_tr=-matmul(barmmom_tr,invbarmagsus)
-
-!The signs of FM and SR terms is reversed here because barmacmagsus is already 
-!the magnetic susceptibility, i.e., *minus* the second derivative of the total 
-!energy wrt two uniform Zeeman fields. 
-!Calculate the frozen-magnetic flavor
- if (dissip==0) then
-   fmmacmagsus= matmul(transpose(conjg(macmag_zfield)),matmul(barmagsus,macmag_zfield))
- else if (dissip==1) then
-   fmmacmagsus= matmul(macmag_zfield_tr,matmul(barmagsus,macmag_zfield))
- end if
-
- fmmacmagsus= barmacmagsus - fmmacmagsus
-
- macmagsus= fmmacmagsus
-!
-!Calculate the spin-relaxed flavor
- if (mpopt==2) then
-   if (dissip==0) then
-     srmacmagsus= matmul(transpose(conjg(macmag_zfield)),matmul(magsus,macmag_zfield))
-     srmacmagsus= fmmacmagsus + srmacmagsus
-   else if (dissip==1) then
-     srmacmagsus= barmacmagsus + magpen*matmul(barmmom_tr,matmul(invhmat,barmmom))
-   end if
-
-   macmagsus= srmacmagsus
- end if
-
- ABI_FREE(macmag_zfield)
- ABI_FREE(macmag_zfield_tr)
-
- if (prtopt==1) then
-   !Write the results
-   call wrtout([ab_out,std_out], ' Frozen-magnetic magnetic susceptibility tensor (clamped ion)')
-   call wrtout([ab_out,std_out], '  dir  dir        Real              Imag')
-   do idir1= 1, 3
-     do idir2= 1, 3
-       write(msg,'(2x,a2,3x,a2,2x,2es18.9)') cart(idir1), cart(idir2), &
-     & real(fmmacmagsus(idir1,idir2)), aimag(fmmacmagsus(idir1,idir2))
-       call wrtout([ab_out,std_out], msg)
-     end do
-   end do
-   call wrtout([ab_out,std_out], '   ')
-  
-   if (mpopt==2) then
-     call wrtout([ab_out,std_out], ' Spin-relaxed magnetic susceptibility (clamped ion)')
-     call wrtout([ab_out,std_out], '  dir  dir        Real              Imag')
-     do idir1= 1, 3
-       do idir2= 1, 3
-         write(msg,'(2x,a2,3x,a2,2x,2es18.9)' ) cart(idir1), cart(idir2), &
-       & real(srmacmagsus(idir1,idir2)), aimag(srmacmagsus(idir1,idir2))
-         call wrtout([ab_out,std_out], msg)
-       end do
-     end do
-     call wrtout([ab_out,std_out], '   ')
-   end if
-   
-   if (prtvol > 1) then
-     call wrtout([ab_out,std_out], ' Penalized magnetic susceptibility tensor (clamped ion)')
-     call wrtout([ab_out,std_out], '  dir  dir        Real              Imag')
-     do idir1= 1, 3
-       do idir2= 1, 3
-         write(msg,'(2x,a2,3x,a2,2x,2es18.9)') cart(idir1), cart(idir2), &
-       & real(barmacmagsus(idir1,idir2)), aimag(barmacmagsus(idir1,idir2))
-         call wrtout([ab_out,std_out], msg)
-       end do
-     end do
-     call wrtout([ab_out,std_out], '   ')
-   end if
- end if
-
- end subroutine mp_macmagsus
-!!***
-!!****f* m_ddb_magpen/mp_zeff
-!! NAME
-!! mp_zeff
-!!
-!! FUNCTION
-!! Calculate the different flavor (see mpopt below) of the second-
-!! order linear-response quantities
-!!
-!! INPUTS
-!! barmagsus(ndim,ndim)= Penalized spin-sussceptibility tensor
-!! blkval(2,3*mpert*3*mpert,nblok)=  Second-order derivative matrices
-!!  In our case, the nblok is restricted to iblok
-!! iblok= index of the IFCs block
-!! magsus(ndim,ndim)= Spin-sussceptibility tensor
-!! mpert =maximum number of ipert
-!! mpopt = 1 calculate the frozen-magnetic second-order quantities
-!!         2 calculate the spin-relaxed second-order quantities 
-!! natom= number of atoms in unit cell
-!! nblok= number of blocks in the DDB
-!! ndim= dimension of the square susceptibilities 
-!! prtvol= control the volume of information written on output
-!! ucvol= unit cell volume
-!!
-!! OUTPUT
-!! zeff(3,natom*3)= Born effective charges calculated at the level of mpopt
-!!
-!! SOURCE
-
- subroutine mp_zeff(barmagsus,barmmom,barmmom_tr,blkval,dissip,&
-& fmzeff,fmzeff_tr,iblok,invhmat,lm_epsilon,magpen,magsus,mpert,mpopt,&
-& natom,nblok,ndim,phongreen,prtopt,prtvol,ucvol,zeff,zeff_tr,zfield,zfield_tr)
-
-!Arguments -------------------------------
-!scalars
- integer,intent(in) :: iblok,dissip,mpert,mpopt,natom,nblok,ndim,prtopt,prtvol
- real(dp), intent(in) :: magpen,ucvol
-!arrays
- real(dp),intent(in) :: blkval(2,3,mpert,3,mpert,nblok)
- complex(dpc),intent(in) :: barmagsus(ndim,ndim)
- complex(dpc),intent(in) :: barmmom(ndim,(natom+2)*3)
- complex(dpc),intent(in) :: barmmom_tr((natom+2)*3,ndim)
- complex(dpc),intent(out) :: fmzeff(3,natom*3)
- complex(dpc),intent(out) :: fmzeff_tr(natom*3,3)
- complex(dpc),intent(in) :: invhmat(ndim,ndim)
- complex(dpc),intent(out) :: lm_epsilon(3,3)
- complex(dpc),intent(in) :: magsus(ndim,ndim)
- complex(dpc),intent(in) :: phongreen(3*natom,3*natom)
- complex(dpc),intent(out) :: zeff(3,natom*3)
- complex(dpc),intent(out) :: zeff_tr(natom*3,3)
- complex(dpc),intent(in) :: zfield(ndim,(natom+2)*3)
- complex(dpc),intent(in) :: zfield_tr((natom+2)*3,ndim)
-
-!Local variables -------------------------
-!scalars
- integer :: icol,idir1,idir2,ipert1,ipert2
- character(len=1000) :: msg
-!arrays
- complex(dpc) :: barzeff(3,natom*3)
- complex(dpc) :: barzeff_tr(natom*3,3)
- complex(dpc) :: srzeff(3,natom*3)
- complex(dpc) :: srzeff_tr(natom*3,3)
- complex(dpc) :: diel_zfield(ndim,3)
- complex(dpc) :: diel_zfield_tr(3,ndim)
- complex(dpc) :: ifc_zfield(ndim,natom*3)
- complex(dpc) :: ifc_zfield_tr(natom*3,ndim)
- character(len=1) :: cart(3)=(/'x','y','z'/)
-
-! *********************************************************************
-
-!Extract the penalized Born charges
- ipert1= natom + 2
- do ipert2= 1, natom
-   do idir2= 1, 3
-     icol=( ipert2-1)*3 + idir2
-     do idir1= 1, 3
-       barzeff(idir1,icol)= &
-     & cmplx(blkval(1,idir1,ipert1,idir2,ipert2,iblok), &
-     &        blkval(2,idir1,ipert1,idir2,ipert2,iblok),16) 
-       barzeff_tr(icol,idir1)= &
-     & cmplx(blkval(1,idir2,ipert2,idir1,ipert1,iblok), &
-     &        blkval(2,idir2,ipert2,idir1,ipert1,iblok),16)
-     end do
-   end do
- end do
-
-!The signs of FM and SR terms is reversed here because barzeff are already 
-!the Born charges , i.e., *minus* the second derivative of the total 
-!energy wrt an electric field and atomic displacement. 
- !Calculate the frozen-magnetic flavor
- ifc_zfield(:,:)=zfield(:,1:natom*3)
- ifc_zfield_tr(:,:)=zfield_tr(1:natom*3,:)
- diel_zfield(:,:)=zfield(:,(natom+2)*3-2:(natom+2)*3)
- diel_zfield_tr(:,:)=zfield_tr((natom+2)*3-2:(natom+2)*3,:)
- if (dissip==0) then
-   fmzeff= matmul(transpose(conjg(diel_zfield)),matmul(barmagsus,ifc_zfield))
- else if (dissip==1) then
-   fmzeff= matmul(diel_zfield_tr,matmul(barmagsus,ifc_zfield))
-   fmzeff_tr= matmul(ifc_zfield_tr,matmul(barmagsus,diel_zfield))
- end if
- fmzeff= barzeff - fmzeff
- fmzeff_tr= barzeff_tr - fmzeff_tr
-
- zeff= fmzeff
- zeff_tr= fmzeff_tr
-
- !Calculate the spin-relaxed flavor
- if (mpopt==2) then
-   if (dissip==0) then
-     srzeff= matmul(transpose(conjg(diel_zfield)),matmul(magsus,ifc_zfield))
-     srzeff= fmzeff + srzeff
-   else if (dissip==1) then
-     srzeff= barzeff + magpen*matmul(barmmom_tr((natom+2)*3-2:(natom+2)*3,:),&
-   & matmul(invhmat,barmmom(:,1:natom*3)))
-     srzeff_tr= barzeff_tr + magpen*matmul(barmmom_tr(1:natom*3,:),&
-   & matmul(invhmat,barmmom(:,(natom+2)*3-2:(natom+2)*3)))
-   end if
- 
-   zeff= srzeff
-   zeff_tr= srzeff_tr
- end if
-
- !Now calculate the lattice-mediated contribution to the dielectric tensor
- if (dissip==0) then
-   lm_epsilon=-four_pi/ucvol*matmul(zeff,matmul(phongreen,transpose(conjg(zeff))))
- else if (dissip==1) then
-   lm_epsilon=-four_pi/ucvol*matmul(zeff,matmul(phongreen,zeff_tr))
- end if
-
- if (prtopt==1) then
-   !Write the results
-   call wrtout([ab_out,std_out], ' Frozen-magnetic Born effective charges')
-   call wrtout([ab_out,std_out], ' efld.dir   atom   dir        Real              Imag')
-   do idir1= 1, 3
-     do ipert2= 1, natom
-       do idir2= 1, 3
-         icol=( ipert2-1)*3 + idir2
-         write(msg,'(3x,a2,7x,i3,4x,a2,2x,2es18.9)') &
-       & cart(idir1), ipert2, cart(idir2), &
-       & real(fmzeff(idir1,icol)), aimag(fmzeff(idir1,icol))
-         call wrtout([ab_out,std_out], msg)
-       end do
-     end do
-     call wrtout([ab_out,std_out], '   ')
-   end do 
-   if (mpopt==2) then
-     call wrtout([ab_out,std_out], ' Spin-relaxed Born effective charges')
-     call wrtout([ab_out,std_out], ' efld.dir   atom   dir        Real              Imag')
-     do idir1= 1, 3
-       do ipert2= 1, natom
-         do idir2= 1, 3
-           icol=( ipert2-1)*3 + idir2
-           write(msg,'(3x,a2,7x,i3,4x,a2,2x,2es18.9)') &
-         & cart(idir1), ipert2, cart(idir2), &
-         & real(srzeff(idir1,icol)), aimag(srzeff(idir1,icol))
-           call wrtout([ab_out,std_out], msg)
-         end do
-       end do
-       call wrtout([ab_out,std_out], '   ')
-     end do 
-   end if
-  
-   if (prtvol > 1) then
-     call wrtout([ab_out,std_out], ' Penalized Born effective charges')
-     call wrtout([ab_out,std_out], ' efld.dir   atom   dir        Real              Imag')
-     do idir1= 1, 3
-       do ipert2= 1, natom
-         do idir2= 1, 3
-           icol=( ipert2-1)*3 + idir2
-           write(msg,'(3x,a2,7x,i3,4x,a2,2x,2es18.9)') &
-         & cart(idir1), ipert2, cart(idir2), &
-         & real(barzeff(idir1,icol)), aimag(barzeff(idir1,icol))
-           call wrtout([ab_out,std_out], msg)
-         end do
-       end do
-       call wrtout([ab_out,std_out], '   ')
-     end do 
-   end if
-!   call wrtout([ab_out,std_out], ' Lattice-mediated contribution to dielectric tensor')
-!   call wrtout([ab_out,std_out], '  dir  dir        Real              Imag')
-!   do idir1= 1, 3
-!     do idir2= 1, 3
-!       write(msg,'(2x,a2,3x,a2,2x,2es18.9)') cart(idir1), cart(idir2), &
-!     & real(lm_epsilon(idir1,idir2)), aimag(lm_epsilon(idir1,idir2))
-!       call wrtout([ab_out,std_out], msg)
-!     end do
-!   end do
-!   call wrtout([ab_out,std_out], '   ')
- end if
-
- end subroutine mp_zeff
 !!***
 
 !!****f* m_ddb_magpen/berrycurv_ss
@@ -2856,21 +2176,21 @@ contains
      call magmom(barmmom,barmmom_tr,ddb,invbarmagsus(:,:,iw),invhmat,1,1,1,magpen,magsus(:,:,iw),mmom(:,:,iw),mmom_tr(:,:,iw),&
    & mpatpol,mpdir,mpert,natom,1,ndim,nmdir,omega(iw),omegaflag,prtopt,prtvol,qphon,xred,zfield(:,:,iw),zfield_tr)
   
-     !Calculate the dielectric susceptibility
-     call mp_diel(barepsilon(:,:,iw),barmagsus(:,:,iw),barmmom,barmmom_tr,&
-   & int_barddb,dissip,epsilon(:,:,iw),1,invhmat,magpen,magsus(:,:,iw),mpert,mpopt,&
-   & natom,1,ndim,prtopt,prtvol,ucvol,zfield(:,:,iw),zfield_tr)
-  
-     !Calculate the interatomic force constants
-     call mp_ifc(barmagsus(:,:,iw),barmmom,barmmom_tr,int_barddb,dissip,1,ifcmat,&
-   & ifcmat_fm,invhmat,magsus(:,:,iw),magpen,mpert,mpopt,&
-   & natom,1,ndim,omega(iw),omegaflag,prtopt,prtvol,qphon,xred,zfield(:,:,iw),zfield_tr)
-  
-     !Calculate the macroscopic magnetic susceptibility
-     call mp_macmagsus(barmagsus(:,:,iw),int_barddb,&
-   & dissip,1,invbarmagsus(:,:,iw),invhmat, macmagsus(:,:,iw),magpen,&
-   & magsus(:,:,iw),mpatpol,mpdir,mpert,mpopt,&
-   & natom,nblok,ndim,nmdir,prtopt,prtvol,ucvol)
+!     !Calculate the dielectric susceptibility
+!     call mp_diel(barepsilon(:,:,iw),barmagsus(:,:,iw),barmmom,barmmom_tr,&
+!   & int_barddb,dissip,epsilon(:,:,iw),1,invhmat,magpen,magsus(:,:,iw),mpert,mpopt,&
+!   & natom,1,ndim,prtopt,prtvol,ucvol,zfield(:,:,iw),zfield_tr)
+!  
+!     !Calculate the interatomic force constants
+!     call mp_ifc(barmagsus(:,:,iw),barmmom,barmmom_tr,int_barddb,dissip,1,ifcmat,&
+!   & ifcmat_fm,invhmat,magsus(:,:,iw),magpen,mpert,mpopt,&
+!   & natom,1,ndim,omega(iw),omegaflag,prtopt,prtvol,qphon,xred,zfield(:,:,iw),zfield_tr)
+!  
+!     !Calculate the macroscopic magnetic susceptibility
+!     call mp_macmagsus(barmagsus(:,:,iw),int_barddb,&
+!   & dissip,1,invbarmagsus(:,:,iw),invhmat, macmagsus(:,:,iw),magpen,&
+!   & magsus(:,:,iw),mpatpol,mpdir,mpert,mpopt,&
+!   & natom,nblok,ndim,nmdir,prtopt,prtvol,ucvol)
    end if
 
    !Apply ASR
@@ -2892,9 +2212,9 @@ contains
      call mode_mmom(amu,eigvec,mmom(:,:,iw),mmomspec(:,iw),modemm(:,:,iw),mode_phonspec(:,iw),natom,ndim,ntypat,typat)
 
 !     !Calculate the Born effective charges
-     call mp_zeff(barmagsus(:,:,iw),barmmom,barmmom_tr,int_barddb,&
-   & dissip,fmzeff,fmzeff_tr,1,invhmat,lm_epsilon(:,:,iw),magpen,magsus(:,:,iw),mpert,mpopt,&
-   & natom,1,ndim,phongreen,prtopt,prtvol,ucvol,zeff,zeff_tr,zfield(:,:,iw),zfield_tr)
+!     call mp_zeff(barmagsus(:,:,iw),barmmom,barmmom_tr,int_barddb,&
+!   & dissip,fmzeff,fmzeff_tr,1,invhmat,lm_epsilon(:,:,iw),magpen,magsus(:,:,iw),mpert,mpopt,&
+!   & natom,1,ndim,phongreen,prtopt,prtvol,ucvol,zeff,zeff_tr,zfield(:,:,iw),zfield_tr)
 
      !Calculate the mode-resolved Born effective charges
 !     call mode_zeff(amu,eigvec,mode_phonspec(:,iw),modezeff(:,:,iw),natom,ntypat,&
