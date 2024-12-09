@@ -2,7 +2,7 @@
 
 Version 10.2, released on October 10, 2024.
 List of changes with respect to version 10.0.
-<!-- Release notes updated on Oct 27, 2024. -->
+<!-- Release notes updated on Nov 27, 2024. -->
 
 Many thanks to the contributors to the ABINIT project between
 March 2024 and October 2024.
@@ -10,7 +10,7 @@ March 2024 and October 2024.
 These release notes
 are relative to modifications/improvements of ABINIT v10.2 with respect to v10.0, with also some late fixes to v10.0, after March 2024,
 that had not yet been documented.
-<!-- Initially, merge requests from MR986 up to and including MR1062 in the beta-release v10.2.1. Also, MR1034, MR1064 to MR1067, MR1069 to MR1072, MR1074 are taken into account in v10.2.3, publicly released.. -->
+<!-- Initially, merge requests from MR986 up to and including MR1062 in the beta-release v10.2.1. Also, MR1034, MR1064 to MR1067, MR1069 to MR1072, MR1074 are taken into account in v10.2.3, publicly released. For v10.2.5, MR1075, 1078 and 1987 are also included. -->
 
 The list of contributors includes:
 G. Antonius, M. Azizi, L. Baguet, J.-M. Beuken, O. Bistoni, A. Blanchet, F. Bottin, F. Bruneval, Siyu Chen, F. Gendron, M. Giantomassi, X. Gonze,
@@ -162,6 +162,12 @@ By M. Sarraute (MR989)
 **C.6** Improve NVPL lib support in build system
 
 By M. Torrent (MR1069)
+
+**C.7** Upgrade of mksite.py (abimkdocs).
+
+Make mksite.py compatible with mkdocs-material==9.5.43, mkdocs==1.6.1 and python3.12
+
+By M. Giantomassi (MR1078), with checking by M. Azizi of possible glitches in the web pages.
 
 * * *
 
@@ -324,6 +330,13 @@ Also, the elph legacy tutorial has been updated.
 
 By S. Ponce, with contribution from M. Royo (MR1034).
 
+**D.22**
+
+Clickable version of the tutorial flowchart
+
+By M. Azizi (MR1076, backported to ABINITv10.2)
+
+
 
 ### **E.**  Bug fixes, not yet mentioned in the previous sections of these release notes.
 
@@ -437,6 +450,16 @@ By M. Sarraute (MR1064)
 **E.17** Minor fixes : fix compilation with gcc8.5 regarding contiguous pointers ; Fix gpu[1], by fixing condition restricting GPU to DFPT, only with OpenMP ; Reduce implicit copies when nspinor==1 in GEMM nonlop.
 
 By M. Sarraute (MR1074)
+
+**E.18** Several fixes
+
+Bug 1 : random errors on bob (only bot with threads) for some test cases (in fact : cases with bandpp>1). 
+It was due to calls of goedecker fft (non thread-safe) by multiple threads in the routine multithreaded_getghc. 
+Bug 2 : error on eos for paral[45]
+It was due to uninitialized variables in m_slk module. 
+Bug 3 : random compiler errors with cray. Modifications done to compile and run with fortran cray compiler. 
+
+By L. Baguet (MR1087)
 
 **E.18** Miscellaneous bug fixes and cleaning
 
@@ -932,7 +955,6 @@ From L. Baguet (MR1021, MR1039, MR1040)
 **D.30**
 
 Fix restartxf -1 in Molecular Dynamics. See tests v10 81 & 82.
-
 
 From F. Brieuc (MR1054)
 
