@@ -473,8 +473,8 @@ subroutine ddb_copy(iddb, oddb)
  call alloc_copy(iddb%omega, oddb%omega)
  call alloc_copy(iddb%qpt, oddb%qpt)
  call alloc_copy(iddb%val, oddb%val)
- call alloc_copy(iddb%val_fs, oddb%val_fs)
- call alloc_copy(iddb%val_rs, oddb%val_rs)
+! call alloc_copy(iddb%val_fs, oddb%val_fs)
+! call alloc_copy(iddb%val_rs, oddb%val_rs)
 
 end subroutine ddb_copy
 !!***
