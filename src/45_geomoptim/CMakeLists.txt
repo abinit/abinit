@@ -25,6 +25,7 @@ add_library(45_geomoptim STATIC
   m_pred_isokinetic.F90
   m_pred_isothermal.F90
   m_pred_langevin.F90
+  m_pred_langevin_pimd.F90
   m_pred_moldyn.F90
   m_pred_nose.F90
   m_pred_simple.F90
