@@ -299,7 +299,7 @@ contains
 
    ABI_MALLOC(bc_barmagsus,(ndim,ndim))
    ABI_MALLOC(bc_ss,(ndim,ndim))
-   ABI_MALLOC(bc_sp,(ndim,(natom+2)*3))
+   ABI_MALLOC(bc_sp,(ndim,(natom+5)*3))
 
    write(msg, '(2a,(80a),4a)' ) ch10,('=',ii=1,80),ch10,ch10,&
    ' Frequency-derivatives magnetic penalty section ',ch10
@@ -369,8 +369,18 @@ contains
      & mpatpol=mpatpol,mpdir=mpdir,omega=omega,rfmagn=rfmagn,rffreq=rffreq)
      end if
 
-     if (iblok /= 0 .or. jblok /=0) then
-       call berrycurv_sp(barmmom,bc_sp,bc_ss,ddb_lw%val,iblok,invbarmagsus,jblok, &
+     ! Then macroscopic Zeeman field
+     lblok=0
+     if (qeq0) then
+       rfelfd(2)=0
+       rfmagn(2)=1
+
+       call ddb_lw%get_block(lblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, 33, &
+     & mpatpol=mpatpol,mpdir=mpdir,omega=omega,rfmagn=rfmagn,rffreq=rffreq)
+     end if
+
+     if (iblok /= 0 .or. jblok /=0 .or. lblok /= 0) then
+       call berrycurv_sp(barmmom,bc_sp,bc_ss,ddb_lw,iblok,invbarmagsus,jblok,lblok, &
      & mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,omega(1),omegaflag,prtvol,qphon,xred)
      end if
 
@@ -846,7 +856,7 @@ contains
      !Electric field
      if (jblok /= 0) then
        call wrtout([ab_out,std_out], ' Local Zeeman fields induced by electric field (at constrained magnetic moments)')
-       call wrtout([ab_out,std_out], '  atom1  dir  efld.dir         Real              Imag')
+       call wrtout([ab_out,std_out], '  atom1  dir  E-dir            Real              Imag')
        do irow=1, ndim
          do icol=(natom+1)*3+1, (natom+2)*3
            write(msg,'(i4,4x,a2,4x,a2,6x,2es18.9)' ) &
@@ -857,7 +867,7 @@ contains
        end do
        call wrtout([ab_out,std_out], '   ')
        call wrtout([ab_out,std_out], ' Local magnetic moments induced by electric field (from induced Zeeman fields)')
-       call wrtout([ab_out,std_out], '  atom1  dir  efld.dir         Real              Imag')
+       call wrtout([ab_out,std_out], '  atom1  dir  E-dir            Real              Imag')
        do irow=1, ndim
          do icol=(natom+1)*3+1, (natom+2)*3
            write(msg,'(i4,4x,a2,4x,a2,6x,2es18.9)' ) &
@@ -868,7 +878,7 @@ contains
        end do
        call wrtout([ab_out,std_out], '   ')
        call wrtout([ab_out,std_out], ' Local magnetic moments induced by electric field (from induced penalized moments)')
-       call wrtout([ab_out,std_out], '  atom1  dir  efld.dir         Real              Imag')
+       call wrtout([ab_out,std_out], '  atom1  dir  E-dir            Real              Imag')
        do irow=1, ndim
          do icol=(natom+1)*3+1, (natom+2)*3
            write(msg,'(i4,4x,a2,4x,a2,6x,2es18.9)' ) &
@@ -883,7 +893,7 @@ contains
      !Macroscopic Zeeman
      if (lblok /= 0) then
        call wrtout([ab_out,std_out], ' Local Zeeman fields induced by macroscopic Zeeman field (at constrained magnetic moments)')
-       call wrtout([ab_out,std_out], '  atom1  dir  Bfld.dir         Real              Imag')
+       call wrtout([ab_out,std_out], '  atom1  dir  B-dir            Real              Imag')
        do irow=1, ndim
          do icol=(natom+4)*3+1, (natom+5)*3
            write(msg,'(i4,4x,a2,4x,a2,6x,2es18.9)' ) &
@@ -894,7 +904,7 @@ contains
        end do
        call wrtout([ab_out,std_out], '   ')
        call wrtout([ab_out,std_out], ' Local magnetic moments induced by macroscopic Zeeman field (from induced Zeeman fields)')
-       call wrtout([ab_out,std_out], '  atom1  dir  Bfld.dir         Real              Imag')
+       call wrtout([ab_out,std_out], '  atom1  dir  B-dir            Real              Imag')
        do irow=1, ndim
          do icol=(natom+4)*3+1, (natom+5)*3
            write(msg,'(i4,4x,a2,4x,a2,6x,2es18.9)' ) &
@@ -905,7 +915,7 @@ contains
        end do
        call wrtout([ab_out,std_out], '   ')
        call wrtout([ab_out,std_out], ' Local magnetic moments induced by macroscopic Zeeman field (from induced penalized moments)')
-       call wrtout([ab_out,std_out], '  atom1  dir  Bfld.dir         Real              Imag')
+       call wrtout([ab_out,std_out], '  atom1  dir  B-dir            Real              Imag')
        do irow=1, ndim
          do icol=(natom+4)*3+1, (natom+5)*3
            write(msg,'(i4,4x,a2,4x,a2,6x,2es18.9)' ) &
@@ -933,7 +943,7 @@ contains
        end if
        if (jblok /= 0) then
          call wrtout([ab_out,std_out], ' Penalized local magnetic moments induced by electric field ')
-         call wrtout([ab_out,std_out], '  atom1  dir  efld.dir         Real              Imag')
+         call wrtout([ab_out,std_out], '  atom1  dir  E-dir            Real              Imag')
          do irow=1, ndim
            do icol=(natom+1)*3+1, (natom+2)*3
              write(msg,'(i4,4x,a2,4x,a2,6x,2es18.9)' ) &
@@ -946,7 +956,7 @@ contains
        end if
        if (lblok /= 0) then
          call wrtout([ab_out,std_out], ' Penalized local magnetic moments induced by macroscopic Zeeman field ')
-         call wrtout([ab_out,std_out], '  atom1  dir  Bfld.dir         Real              Imag')
+         call wrtout([ab_out,std_out], '  atom1  dir  B-dir            Real              Imag')
          do irow=1, ndim
            do icol=(natom+4)*3+1, (natom+5)*3
              write(msg,'(i4,4x,a2,4x,a2,6x,2es18.9)' ) &
@@ -1207,7 +1217,7 @@ contains
      else if (opt==2) then
        call wrtout([ab_out,std_out], ' Relaxed-spin Born effective charges')
      end if
-     call wrtout([ab_out,std_out], ' efld.dir   atom   dir        Real              Imag')
+     call wrtout([ab_out,std_out], ' E-dir      atom   dir        Real              Imag')
      ipert1= natom + 2
      do idir1= 1, 3
        do ipert2= 1, natom
@@ -1566,7 +1576,7 @@ contains
 !! magnetic moments)
 !!
 !! INPUTS
-!! blkval(2,3*mpert*3*mpert*3*mpert,nblok)=  Third-order derivative matrices
+!! ddb_lw=  Third-order derivative ddb
 !!  In our case, the nblok is restricted to iblok
 !! iblok= index of the current block
 !! invbarmagsus(ndim,ndim)= Inverse of the penalized spin-sussceptibility tensor
@@ -1583,43 +1593,42 @@ contains
 !!
 !! SOURCE
 
- subroutine berrycurv_sp(barmmom,bc_sp,bc_ss,blkval,iblok,invbarmagsus,&
-& jblok,mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,omega,omegaflag,prtvol,qphon,xred)
+ subroutine berrycurv_sp(barmmom,bc_sp,bc_ss,ddb_lw,iblok,invbarmagsus,&
+& jblok,lblok,mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,omega,omegaflag,prtvol,qphon,xred)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: iblok,jblok,mpert,natom,nblok,ndim,nmdir,omegaflag,prtvol
+ integer,intent(in) :: iblok,jblok,lblok,mpert,natom,nblok,ndim,nmdir,omegaflag,prtvol
  real(dp),intent(in) :: omega
 !arrays
+ type(ddb_type),intent(inout) :: ddb_lw
  integer,intent(in) :: mpatpol(2),mpdir(3)
- real(dp),intent(inout) :: blkval(2,3,mpert,3,mpert,3,mpert,nblok)
  real(dp),intent(in) :: qphon(3),xred(3,natom)
- complex(dpc),intent(in) :: barmmom(ndim,(natom+2)*3)
+ complex(dpc),intent(in) :: barmmom(ndim,(natom+5)*3)
  complex(dpc),intent(in) :: bc_ss(ndim,ndim)
  complex(dpc),intent(in) :: invbarmagsus(ndim,ndim)
- complex(dpc),intent(out) :: bc_sp(ndim,(natom+2)*3)
+ complex(dpc),intent(out) :: bc_sp(ndim,(natom+5)*3)
 !Local variables -------------------------
 !scalars
- integer :: iat1,iat2,icol,idir1,idir2,idir3,ipert1,ipert2,ipert3,irow
- integer :: ipert1_red,ipert2_red,idir1_red,idir2_red
+ integer :: iat1,iat2,icol,idir1,idir2,idir3,index,ipert1,ipert2,ipert3,irow
+ integer :: ipert1_red,ipert2_red,idir1_red,idir2_red,jndex
  real(dp) :: fac,re,im
  complex(dpc), parameter :: ione=(0.d0,1.d0)
  character(len=1000) :: msg
 !arrays
  integer(dp) :: indexat1(ndim),indexdir1(ndim)
- integer(dp) :: indexat2((natom+2)*3),indexdir2((natom+2)*3)
- complex(dpc) :: bc_barsp(ndim,(natom+2)*3)
- complex(dpc) :: bc_ps((natom+2)*3,ndim)
+ integer(dp) :: indexat2((natom+5)*3),indexdir2((natom+5)*3)
+ complex(dpc) :: bc_barsp(ndim,(natom+5)*3)
+! complex(dpc) :: bc_ps((natom+2)*3,ndim)
  character(len=1) :: cart(3)=(/'x','y','z'/)
 
 ! *********************************************************************
-
 
 !Extract the berry curvature of the penalized moments
  bc_barsp=(zero,zero)
  ipert3= natom + 9
  idir3= 1
- do ipert2=1,natom+2
+ do ipert2=1,natom+5
    do idir2=1,3
      icol=idir2+(ipert2-1)*3
      indexat2(icol)=ipert2
@@ -1636,15 +1645,19 @@ contains
          irow=idir1_red+(ipert1_red-1)*nmdir
          indexat1(irow)=iat1
          indexdir1(irow)=idir1
+         index = idir1 + &
+       & 3*((ipert1 - 1) + mpert*((idir2 - 1) + &
+       & 3*((ipert2 -1 ) + mpert*((idir3 - 1) + 3*(ipert3 - 1)))))
          
          if (iblok /=0 .and. ipert2 <= natom) then
            bc_barsp(irow,icol)= -one* &
-         & cmplx(blkval(1,idir1,ipert1,idir2,ipert2,idir3,ipert3,iblok), &
-         & blkval(2,idir1,ipert1,idir2,ipert2,idir3,ipert3,iblok),16)
+         & cmplx(ddb_lw%val(1,index,iblok),ddb_lw%val(2,index,iblok),16)
          else if (jblok /=0 .and. ipert2 == natom+2) then
            bc_barsp(irow,icol)= -one* &
-         & cmplx(blkval(1,idir1,ipert1,idir2,ipert2,idir3,ipert3,jblok), &
-         & blkval(2,idir1,ipert1,idir2,ipert2,idir3,ipert3,jblok),16)
+         & cmplx(ddb_lw%val(1,index,jblok),ddb_lw%val(2,index,jblok),16)
+         else if (lblok /=0 .and. ipert2 == natom+5) then
+           bc_barsp(irow,icol)= -one* &
+         & cmplx(ddb_lw%val(1,index,lblok),ddb_lw%val(2,index,lblok),16)
          end if
 
        end do
@@ -1655,86 +1668,111 @@ contains
  !Calculate the Berry curvature of the induced Zeeman fields
  bc_sp= -matmul(bc_ss,barmmom) - matmul(invbarmagsus,bc_barsp)
 
- do irow=1,ndim
-   do iat1= 1, natom
-     do idir1= 1, 3
-       icol= (iat1-1)*3 + idir1
-       !MR: Caution, this conjg might be wrong in presence of dissipation
-       bc_ps(icol,irow)=conjg(bc_sp(irow,icol)*exp(two_pi*(0.d0,1.d0)* dot_product(qphon,xred(:,iat1))))
-     end do
-   end do
- end do 
+!TO DO: apply the q-depenent phase on the magnetic variables
+! do irow=1,ndim
+!   do iat1= 1, natom
+!     do idir1= 1, 3
+!       icol= (iat1-1)*3 + idir1
+!       !MR: Caution, this conjg might be wrong in presence of dissipation
+!       bc_ps(icol,irow)=conjg(bc_sp(irow,icol)*exp(two_pi*(0.d0,1.d0)* dot_product(qphon,xred(:,iat1))))
+!     end do
+!   end do
+! end do 
+!
+!! fac=2.714943600699/two/0.52917 !TMP
+! fac=one/two/0.52917 !TMP
+! open(10,file='g_ps.txt')
+! do irow=1,natom*3
+!   write(10,*) (0.d0,-1.d0)*bc_ps(irow,1:ndim)*fac
+! end do 
+! close(10)
 
-! fac=2.714943600699/two/0.52917 !TMP
- fac=one/two/0.52917 !TMP
- open(10,file='g_ps.txt')
- do irow=1,natom*3
-   write(10,*) (0.d0,-1.d0)*bc_ps(irow,1:ndim)*fac
- end do 
- close(10)
-
- if (iblok /= 0) then
-   call wrtout([ab_out,std_out], ' Berry curvature of the Zeeman fields induced by atomic displacements (at constrained magnetic moments)')
-   call wrtout([ab_out,std_out], '  atom1  dir  efld.dir         Real              Imag')
-   do irow=1, ndim
-     do icol=1, natom*3
-       write(msg,'(2(i4,4x,a2,2x),2x,2es18.9)' ) &
-     & indexat1(irow), cart(indexdir1(irow)), indexat2(icol), cart(indexdir2(icol)), &
-     & real(bc_sp(irow,icol)), aimag(bc_sp(irow,icol))
-       call wrtout([ab_out,std_out], msg)
+ if (prtvol > 1) then
+   if (iblok /= 0) then
+     call wrtout([ab_out,std_out], ' Fixed-spin Berry curvature of the Zeeman fields induced by atomic displacements')
+     call wrtout([ab_out,std_out], '  atom1  dir  E-dir            Real              Imag')
+     do irow=1, ndim
+       do icol=1, natom*3
+         write(msg,'(2(i4,4x,a2,2x),2x,2es18.9)' ) &
+       & indexat1(irow), cart(indexdir1(irow)), indexat2(icol), cart(indexdir2(icol)), &
+       & real(bc_sp(irow,icol)), aimag(bc_sp(irow,icol))
+         call wrtout([ab_out,std_out], msg)
+       end do
      end do
-   end do
-   call wrtout([ab_out,std_out], '   ')
+     call wrtout([ab_out,std_out], '   ')
+   end if
+   if (jblok /= 0) then
+     call wrtout([ab_out,std_out], ' Fixed-spin Berry curvature of the Zeeman fields induced by electric field')
+     call wrtout([ab_out,std_out], '  atom1  dir  E-dir            Real              Imag')
+     do irow=1, ndim
+       do icol=(natom+1)*3+1, (natom+2)*3
+         write(msg,'(i4,4x,a2,4x,a2,6x,2es18.9)' ) &
+       & indexat1(irow), cart(indexdir1(irow)), cart(indexdir2(icol)), &
+       & real(bc_sp(irow,icol)), aimag(bc_sp(irow,icol))
+         call wrtout([ab_out,std_out], msg)
+       end do
+     end do
+     call wrtout([ab_out,std_out], '   ')
+   end if
+   if (lblok /= 0) then
+     call wrtout([ab_out,std_out], ' Fixed-spin Berry curvature of the Zeeman fields induced by macroscopic Zeeman field')
+     call wrtout([ab_out,std_out], '  atom1  dir  B-dir            Real              Imag')
+     do irow=1, ndim
+       do icol=(natom+4)*3+1, (natom+5)*3
+         write(msg,'(i4,4x,a2,4x,a2,6x,2es18.9)' ) &
+       & indexat1(irow), cart(indexdir1(irow)), cart(indexdir2(icol)), &
+       & real(bc_sp(irow,icol)), aimag(bc_sp(irow,icol))
+         call wrtout([ab_out,std_out], msg)
+       end do
+     end do
+     call wrtout([ab_out,std_out], '   ')
+   end if
  end if
- if (jblok /= 0) then
-   call wrtout([ab_out,std_out], ' Berry curvature of the Zeeman fields induced by electric field (at constrained magnetic moments)')
-   call wrtout([ab_out,std_out], '  atom1  dir  efld.dir         Real              Imag')
-   do irow=1, ndim
-     do icol=(natom+1)*3+1, (natom+2)*3
-       write(msg,'(i4,4x,a2,4x,a2,6x,2es18.9)' ) &
-     & indexat1(irow), cart(indexdir1(irow)), cart(indexdir2(icol)), &
-     & real(bc_sp(irow,icol)), aimag(bc_sp(irow,icol))
-       call wrtout([ab_out,std_out], msg)
-     end do
-   end do
-   call wrtout([ab_out,std_out], '   ')
- end if
 
-!For linear interpolation of Hessians substitute sp  Berry curvature 
-!into the ddb_lw object.
- if (omegaflag==2.and.abs(omega)<tol12) then
-   do ipert2=1,natom+2
-     do idir2=1,3
-       icol=idir2+(ipert2-1)*3
-       indexat2(icol)=ipert2
-       indexdir2(icol)=idir2
-  
-       ipert1_red= 0
-       do iat1= mpatpol(1), mpatpol(2)
-         ipert1= natom + 11 + iat1
-         ipert1_red= ipert1_red + 1
-         idir1_red= 0
-         do idir1= 1, 3
-           if (mpdir(idir1)==0) cycle
-           idir1_red= idir1_red + 1
-           irow=idir1_red+(ipert1_red-1)*nmdir
-           
-           if (iblok /=0 .and. ipert2 <= natom) then
-           blkval(1,idir1,ipert1,idir2,ipert2,idir3,ipert3,iblok)= &
-         & real(bc_sp(irow,icol))
-           blkval(2,idir1,ipert1,idir2,ipert2,idir3,ipert3,iblok)= &
-         & aimag(bc_sp(irow,icol))
-           blkval(1,idir2,ipert2,idir1,ipert1,idir3,ipert3,iblok)= &
-         & real(bc_sp(irow,icol))
-           blkval(2,idir2,ipert2,idir1,ipert1,idir3,ipert3,iblok)= &
-         & -aimag(bc_sp(irow,icol))
-           end if
-  
-         end do
+!Store the FM flavor in the DDB file
+ do ipert2=1,natom+2
+   do idir2=1,3
+     icol=idir2+(ipert2-1)*3
+     indexat2(icol)=ipert2
+     indexdir2(icol)=idir2
+
+     ipert1_red= 0
+     do iat1= mpatpol(1), mpatpol(2)
+       ipert1= natom + 11 + iat1
+       ipert1_red= ipert1_red + 1
+       idir1_red= 0
+       do idir1= 1, 3
+         if (mpdir(idir1)==0) cycle
+         idir1_red= idir1_red + 1
+         irow=idir1_red+(ipert1_red-1)*nmdir
+         index = idir1 + &
+       & 3*((ipert1 - 1) + mpert*((idir2 - 1) + &
+       & 3*((ipert2 -1 ) + mpert*((idir3 - 1) + 3*(ipert3 - 1)))))
+         jndex = idir2 + &
+       & 3*((ipert2 - 1) + mpert*((idir1 - 1) + &
+       & 3*((ipert1 -1 ) + mpert*((idir3 - 1) + 3*(ipert3 - 1)))))
+         
+         if (iblok /=0 .and. ipert2 <= natom) then
+           ddb_lw%val_fs(1,index,iblok)=real(bc_sp(irow,icol))
+           ddb_lw%val_fs(2,index,iblok)=aimag(bc_sp(irow,icol))
+           ddb_lw%val_fs(1,jndex,iblok)=real(bc_sp(irow,icol))
+           ddb_lw%val_fs(2,jndex,iblok)=-aimag(bc_sp(irow,icol))
+         else if (jblok /=0 .and. ipert2 == natom+2) then
+           ddb_lw%val_fs(1,index,jblok)=real(bc_sp(irow,icol))
+           ddb_lw%val_fs(2,index,jblok)=aimag(bc_sp(irow,icol))
+           ddb_lw%val_fs(1,jndex,jblok)=real(bc_sp(irow,icol))
+           ddb_lw%val_fs(2,jndex,jblok)=-aimag(bc_sp(irow,icol))
+         else if (lblok /=0 .and. ipert2 == natom+5) then
+           ddb_lw%val_fs(1,index,lblok)=real(bc_sp(irow,icol))
+           ddb_lw%val_fs(2,index,lblok)=aimag(bc_sp(irow,icol))
+           ddb_lw%val_fs(1,jndex,lblok)=real(bc_sp(irow,icol))
+           ddb_lw%val_fs(2,jndex,lblok)=-aimag(bc_sp(irow,icol))
+         end if
+
        end do
      end do
    end do
- end if
+ end do
 
  end subroutine berrycurv_sp
 !!***
