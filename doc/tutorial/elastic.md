@@ -83,7 +83,7 @@ an error message if the grid does not have the proper symmetry.
 The self-consistency procedures follow [tutorial RF1](/tutorial/rf1).
 
 Dataset 1 optimizes the atomic positions keeping the lattice parameters fixed,
-setting [[ionmov]]=2 as in [tutorial 1](/tutorial/base1). The optimization
+setting [[geoopt]] "bfgs" as in [tutorial 1](/tutorial/base1). The optimization
 steps proceed until the maximum force component on any atom is less than
 [[tolmxf]]. It is always advised to relax the forces before beginning the
 lattice parameter optimization. Dataset 2 optimizes the lattice parameters

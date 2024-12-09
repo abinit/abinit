@@ -29,7 +29,7 @@ nshiftk 1
 shiftk  0.0 0.0 0.0
 
 pp_dirpath "$ABI_PSPDIR"
-pseudos "Pseudodojo_paw_pw_standard/Si.xml"
+pseudos "Psdj_paw_pw_std/Si.xml"
 
 # Definition of the unit cell
 acell 1.0 1.0 1.0

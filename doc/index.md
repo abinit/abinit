@@ -246,10 +246,12 @@ input file, are listed below:
 
 **Specification of the type of calculation to be done:**
 
-[[ionmov]]
-:       when [[ionmov]] = 0: the ions and cell shape are fixed
-                        = 2: search for the equilibrium geometry
-                        = 6: molecular dynamics
+[[geoopt]]
+:       when [[geoopt]] = none: the ions and cell shape are fixed
+                        = bfgs: search for the equilibrium geometry
+
+[[moldyn]]
+:       when [[moldyn]] = nve_verlet: molecular dynamics using the Verlet algorithm
 
 [[iscf]]
 :       either a positive number for defining self-consistent

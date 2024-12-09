@@ -14,9 +14,12 @@ class MarkdownInclude(Extension):
         for key, value in configs.items():
             self.setConfig(key, value)
 
-    def extendMarkdown(self, md, md_globals):
-        md.preprocessors.add(
-            'include', IncludePreprocessor(md, self.getConfigs()), '_begin')
+    #def extendMarkdown(self, md, md_globals):
+    def extendMarkdown(self, md):
+        #md.preprocessors.add(
+        md.preprocessors.register(
+            #'include', IncludePreprocessor(md, self.getConfigs()), '_begin')
+            IncludePreprocessor(md, self.getConfigs()), 'include', +10000000000)
 
 
 class IncludePreprocessor(Preprocessor):
