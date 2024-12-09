@@ -49,7 +49,7 @@ target_compile_definitions(65_paw
   HAVE_CONFIG_H)
 
 if(HAVE_OPENMP_OFFLOAD)
-  target_compile_options(66_nonlocal
+  target_compile_options(65_paw
     PRIVATE
     $<$<COMPILE_LANGUAGE:Fortran>:${OPENMP_OFFLOAD_FLAGS}>)
 endif()
