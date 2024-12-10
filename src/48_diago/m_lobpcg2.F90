@@ -569,7 +569,8 @@ module m_lobpcg2
           if ( ierr /= 0 ) then
             ABI_COMMENT("B-orthonormalization (XW) did not work.")
           end if
-          call xg_RayleighRitz(lobpcg%X,lobpcg%AX,lobpcg%BX,eigenvalues2N,ierr,lobpcg%prtvol,tim_RR_XW,lobpcg%gpu_option,tolerance=tolerance,&
+          call xg_RayleighRitz(lobpcg%X,lobpcg%AX,lobpcg%BX,eigenvalues2N,ierr,lobpcg%prtvol,tim_RR_XW,lobpcg%gpu_option,&
+           & tolerance=tolerance,&
            & XW=lobpcg%XW,AW=lobpcg%AW,BW=lobpcg%BW,P=lobpcg%P,AP=lobpcg%AP,BP=lobpcg%BP,WP=lobpcg%WP,&
            & AWP=lobpcg%AWP,BWP=lobpcg%BWP)
           if ( ierr /= 0 ) then
@@ -598,7 +599,8 @@ module m_lobpcg2
             call xgBlock_zero(lobpcg%AP)
             call xgBlock_zero(lobpcg%BP)
             nrestart = nrestart + 1
-            call xg_RayleighRitz(lobpcg%X,lobpcg%AX,lobpcg%BX,eigenvalues2N,ierr,lobpcg%prtvol,tim_RR_XW,lobpcg%gpu_option,tolerance=tolerance,&
+            call xg_RayleighRitz(lobpcg%X,lobpcg%AX,lobpcg%BX,eigenvalues2N,ierr,lobpcg%prtvol,tim_RR_XW,lobpcg%gpu_option,&
+           & tolerance=tolerance,&
            & XW=lobpcg%XW,AW=lobpcg%AW,BW=lobpcg%BW,P=lobpcg%P,AP=lobpcg%AP,BP=lobpcg%BP,WP=lobpcg%WP,&
            & AWP=lobpcg%AWP,BWP=lobpcg%BWP)
             if ( ierr /= 0 ) then

@@ -514,7 +514,7 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,eigen,occ,residu,nspinor)
  integer :: space_res
  integer :: neigenpairs,bandpp
  integer :: nline,nline_max
- integer :: iline, iband, ierr
+ integer :: iline, ierr
  real(dp) :: tolerance
  real(dp) :: maxeig, maxeig_global
  real(dp) :: mineig, mineig_global
