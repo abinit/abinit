@@ -3355,7 +3355,6 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
  if (paw_dmft%dmft_solv == 7) rot_inv = .true.
 
  ntau_delta = paw_dmft%dmftctqmc_triqs_ntau_delta
- if (ntau_delta == -1) ntau_delta = ntau
 
  beta = one / paw_dmft%temp
 
@@ -3418,20 +3417,20 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
 
  end if ! not leg_measure
 
- ngauss = paw_dmft%dmft_gaussorder
- nlam   = paw_dmft%dmft_nlambda
+ ngauss = paw_dmft%dmftctqmc_triqs_gaussorder
+ nlam   = paw_dmft%dmftctqmc_triqs_nsubdivisions
 
  ! ntot is total number of lambda pts, + 1 is because we add the case lambda = 1 (which has no reason to be included in the
  ! Gauss-Legendre grid), since we need it for the rest of the SCF calculation
  ntot = ngauss*(nlam-1) + 1
 
- if (paw_dmft%dmft_integral == 0 .or. paw_dmft%dmftctqmc_triqs_entropy == 0) ntot = 1
+ if (paw_dmft%dmftctqmc_triqs_compute_integral == 0 .or. paw_dmft%dmftctqmc_triqs_entropy == 0) ntot = 1
 
  ABI_MALLOC(lam_list,(ntot)) ! scaling factor of U matrix for thermodynamic integration
  lam_list(ntot) = one
 
  ! Prepare Gauss-Legendre quadrature for thermodynamic integration over U
- if (paw_dmft%dmft_integral == 1 .and. paw_dmft%dmftctqmc_triqs_entropy == 1) then
+ if (paw_dmft%dmftctqmc_triqs_compute_integral == 1 .and. paw_dmft%dmftctqmc_triqs_entropy == 1) then
 
    ABI_MALLOC(tweights,(ngauss))
    ABI_MALLOC(tpoints,(ngauss))
@@ -3458,7 +3457,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
      end do ! i
    end do ! ilam
 
- end if ! dmft_integral=1
+ end if ! compute_integral=1
 
  ! Solve impurity model for each atom
  do iatom=1,natom
@@ -3545,7 +3544,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
                         & paw_dmft%dmftctqmc_triqs_loc_n_min,paw_dmft%dmftctqmc_triqs_loc_n_max, &
                         & paw_dmft%dmftctqmc_triqs_seed_a,paw_dmft%dmftctqmc_triqs_seed_b,nflavor,ntau, &
                         & nleg,int(paw_dmft%dmftqmc_n/paw_dmft%nproc),paw_dmft%dmftctqmc_meas, &
-                        & paw_dmft%dmftqmc_therm,paw_dmft%dmftctqmc_triqs_therm, &
+                        & paw_dmft%dmftqmc_therm,paw_dmft%dmftctqmc_triqs_therm_restart, &
                         & paw_dmft%dmftctqmc_triqs_det_init_size,paw_dmft%dmftctqmc_triqs_det_n_operations_before_check, &
                         & ntau_delta,paw_dmft%dmftctqmc_triqs_nbins_histo,myproc,nspinor,iatom,iilam,beta, &
                         & paw_dmft%dmftctqmc_triqs_move_global_prob,paw_dmft%dmftctqmc_triqs_imag_threshold, &
@@ -3554,7 +3553,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
                         & vee_ptr,levels_ptr,mself_1_ptr,mself_2_ptr,eu_ptr,occ_ptr)
 #endif
 
-     if (paw_dmft%dmft_integral == 1 .and. ilam < ntot .and. paw_dmft%dmftctqmc_triqs_entropy == 1) then
+     if (paw_dmft%dmftctqmc_triqs_compute_integral == 1 .and. ilam < ntot .and. paw_dmft%dmftctqmc_triqs_entropy == 1) then
        i = mod(ilam,ngauss)
        if (i == 0) i = ngauss
        green%integral = green%integral + tweights(i)*eu*dx*half
@@ -3562,16 +3561,16 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
        write(tag2,'(f13.6)') lam_list(ilam)
        write(message,*) "Value of Eu/lambda: ",trim(adjustl(tag))," for lambda= ",trim(adjustl(tag2))
        call wrtout(std_out,message,'COLL')
-     end if ! dmft_integral=1 and ilam<Ntot
+     end if ! compute_integral=1 and ilam<Ntot
 
-     if (paw_dmft%dmft_integral == 1 .and. ilam == ntot-1 .and. paw_dmft%dmftctqmc_triqs_entropy == 1) then
+     if (paw_dmft%dmftctqmc_triqs_compute_integral == 1 .and. ilam == ntot-1 .and. paw_dmft%dmftctqmc_triqs_entropy == 1) then
        write(tag,'(i4)') iatom
        write(tag2,'(f13.6)') green%integral
        write(message,*) "Integral of Eu/lambda for atom ",trim(adjustl(tag)),'is: ',trim(adjustl(tag2))
        call wrtout(std_out,message,'COLL')
        write(message,*) "Starting now the calculation for lambda=1"
        call wrtout(std_out,message,'COLL')
-     end if ! dmft_integral=1 and ilam=Ntot-1
+     end if ! compute_integral=1 and ilam=Ntot-1
 
    end do ! ilam
 

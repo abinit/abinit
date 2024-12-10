@@ -129,8 +129,6 @@ type, public :: dataset_type
  integer :: dmatudiag
  integer :: dmft_dc
  integer :: dmft_entropy
- integer :: dmft_gaussorder
- integer :: dmft_integral
  integer :: dmft_iter
  integer :: dmft_kspectralfunc
  integer :: dmft_nlambda
@@ -161,9 +159,11 @@ type, public :: dataset_type
  integer :: dmftctqmc_mov
  integer :: dmftctqmc_mrka
  integer :: dmftctqmc_order
+ integer :: dmftctqmc_triqs_compute_integral
  integer :: dmftctqmc_triqs_det_init_size
  integer :: dmftctqmc_triqs_det_n_operations_before_check
  integer :: dmftctqmc_triqs_entropy
+ integer :: dmftctqmc_triqs_gaussorder
  integer :: dmftctqmc_triqs_leg_measure
  integer :: dmftctqmc_triqs_loc_n_min
  integer :: dmftctqmc_triqs_loc_n_max
@@ -172,12 +172,13 @@ type, public :: dataset_type
  integer :: dmftctqmc_triqs_move_shift
  integer :: dmftctqmc_triqs_nbins_histo
  integer :: dmftctqmc_triqs_nleg
+ integer :: dmftctqmc_triqs_nsubdivisions
  integer :: dmftctqmc_triqs_ntau_delta
  integer :: dmftctqmc_triqs_orb_off_diag
  integer :: dmftctqmc_triqs_seed_a
  integer :: dmftctqmc_triqs_seed_b
  integer :: dmftctqmc_triqs_spin_off_diag
- integer :: dmftctqmc_triqs_therm
+ integer :: dmftctqmc_triqs_therm_restart
  integer :: dmftctqmc_triqs_time_invariance
  integer :: dmftctqmc_triqs_use_norm_as_weight
  integer :: dmftqmc_l
@@ -816,8 +817,8 @@ type, public :: dataset_type
  real(dp) :: dmftctqmc_triqs_det_singular_threshold
  real(dp) :: dmftctqmc_triqs_epsilon
  real(dp) :: dmftctqmc_triqs_imag_threshold
- real(dp) :: dmftctqmc_triqs_lambda
  real(dp) :: dmftctqmc_triqs_move_global_prob
+ real(dp) :: dmftctqmc_triqs_wmax
  real(dp) :: dmftqmc_n
  real(dp) :: dosdeltae
  real(dp) :: dtion
@@ -1505,8 +1506,6 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%dmft_entropy       = dtin%dmft_entropy
  dtout%dmft_charge_prec   = dtin%dmft_charge_prec
  dtout%dmft_fermi_step    = dtin%dmft_fermi_step
- dtout%dmft_gaussorder    = dtin%dmft_gaussorder
- dtout%dmft_integral      = dtin%dmft_integral
  dtout%dmft_iter          = dtin%dmft_iter
  dtout%dmft_kspectralfunc = dtin%dmft_kspectralfunc
  dtout%dmft_nlambda       = dtin%dmft_nlambda
@@ -1541,6 +1540,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%dmftctqmc_mrka     = dtin%dmftctqmc_mrka
  dtout%dmftctqmc_mov      = dtin%dmftctqmc_mov
  dtout%dmftctqmc_order    = dtin%dmftctqmc_order
+ dtout%dmftctqmc_triqs_compute_integral = dtin%dmftctqmc_triqs_compute_integral
  dtout%dmftctqmc_triqs_det_init_size = dtin%dmftctqmc_triqs_det_init_size
  dtout%dmftctqmc_triqs_det_n_operations_before_check = dtin%dmftctqmc_triqs_det_n_operations_before_check
  dtout%dmftctqmc_triqs_det_precision_error = dtin%dmftctqmc_triqs_det_precision_error
@@ -1548,8 +1548,8 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%dmftctqmc_triqs_det_singular_threshold = dtin%dmftctqmc_triqs_det_singular_threshold
  dtout%dmftctqmc_triqs_entropy = dtin%dmftctqmc_triqs_entropy
  dtout%dmftctqmc_triqs_epsilon = dtin%dmftctqmc_triqs_epsilon
+ dtout%dmftctqmc_triqs_gaussorder = dtin%dmftctqmc_triqs_gaussorder
  dtout%dmftctqmc_triqs_imag_threshold = dtin%dmftctqmc_triqs_imag_threshold
- dtout%dmftctqmc_triqs_lambda = dtin%dmftctqmc_triqs_lambda
  dtout%dmftctqmc_triqs_leg_measure = dtin%dmftctqmc_triqs_leg_measure
  dtout%dmftctqmc_triqs_loc_n_min = dtin%dmftctqmc_triqs_loc_n_min
  dtout%dmftctqmc_triqs_loc_n_max = dtin%dmftctqmc_triqs_loc_n_max
@@ -1559,14 +1559,16 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%dmftctqmc_triqs_move_shift = dtin%dmftctqmc_triqs_move_shift
  dtout%dmftctqmc_triqs_nbins_histo = dtin%dmftctqmc_triqs_nbins_histo
  dtout%dmftctqmc_triqs_nleg = dtin%dmftctqmc_triqs_nleg
+ dtout%dmftctqmc_triqs_nsubdivisions = dtin%dmftctqmc_triqs_nsubdivisions
  dtout%dmftctqmc_triqs_ntau_delta = dtin%dmftctqmc_triqs_ntau_delta
  dtout%dmftctqmc_triqs_orb_off_diag = dtin%dmftctqmc_triqs_orb_off_diag
  dtout%dmftctqmc_triqs_seed_a = dtin%dmftctqmc_triqs_seed_a
  dtout%dmftctqmc_triqs_seed_b = dtin%dmftctqmc_triqs_seed_b
  dtout%dmftctqmc_triqs_spin_off_diag = dtin%dmftctqmc_triqs_spin_off_diag
- dtout%dmftctqmc_triqs_therm = dtin%dmftctqmc_triqs_therm
+ dtout%dmftctqmc_triqs_therm_restart = dtin%dmftctqmc_triqs_therm_restart
  dtout%dmftctqmc_triqs_time_invariance = dtin%dmftctqmc_triqs_time_invariance
  dtout%dmftctqmc_triqs_use_norm_as_weight = dtin%dmftctqmc_triqs_use_norm_as_weight
+ dtout%dmftctqmc_triqs_wmax = dtin%dmftctqmc_triqs_wmax
  dtout%dmftqmc_n          = dtin%dmftqmc_n
  dtout%dmftqmc_l          = dtin%dmftqmc_l
  dtout%dmftqmc_seed       = dtin%dmftqmc_seed
@@ -3433,18 +3435,18 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' dmftbandi dmftbandf dmftctqmc_basis'
  list_vars=trim(list_vars)//' dmftctqmc_check dmftctqmc_correl dmftctqmc_gmove'
  list_vars=trim(list_vars)//' dmftctqmc_grnns dmftctqmc_config dmftctqmc_meas dmftctqmc_mrka'
- list_vars=trim(list_vars)//' dmftctqmc_mov dmftctqmc_order dmftctqmc_triqs_det_init_size'
+ list_vars=trim(list_vars)//' dmftctqmc_mov dmftctqmc_order dmftctqmc_triqs_compute_integral dmftctqmc_triqs_det_init_size'
  list_vars=trim(list_vars)//' dmftctqmc_triqs_det_n_operations_before_check dmftctqmc_triqs_det_precision_error'
  list_vars=trim(list_vars)//' dmftctqmc_triqs_det_precision_warning dmftctqmc_triqs_det_singular_threshold'
- list_vars=trim(list_vars)//' dmftctqmc_triqs_entropy dmftctqmc_triqs_epsilon dmftctqmc_triqs_imag_threshold dmftctqmc_triqs_lambda'
+ list_vars=trim(list_vars)//' dmftctqmc_triqs_entropy dmftctqmc_triqs_epsilon dmftctqmc_triqs_gaussorder dmftctqmc_triqs_imag_threshold'
  list_vars=trim(list_vars)//' dmftctqmc_triqs_leg_measure dmftctqmc_triqs_loc_n_min dmftctqmc_triqs_loc_n_max'
  list_vars=trim(list_vars)//' dmftctqmc_triqs_measure_density_matrix dmftctqmc_triqs_move_double'
  list_vars=trim(list_vars)//' dmftctqmc_triqs_move_global_prob dmftctqmc_triqs_move_shift dmftctqmc_triqs_nbins_histo'
- list_vars=trim(list_vars)//' dmftctqmc_triqs_nleg dmftctqmc_triqs_ntau_delta dmftctqmc_triqs_orb_off_diag'
- list_vars=trim(list_vars)//' dmftctqmc_triqs_seed_a dmftctqmc_triqs_seed_b dmftctqmc_triqs_spin_off_diag dmftctqmc_triqs_therm'
- list_vars=trim(list_vars)//' dmftctqmc_triqs_time_invariance dmftctqmc_triqs_use_norm_as_weight dmftcheck'
+ list_vars=trim(list_vars)//' dmftctqmc_triqs_nleg dmftctqmc_triqs_nsubdivisions dmftctqmc_triqs_ntau_delta dmftctqmc_triqs_orb_off_diag'
+ list_vars=trim(list_vars)//' dmftctqmc_triqs_seed_a dmftctqmc_triqs_seed_b dmftctqmc_triqs_spin_off_diag dmftctqmc_triqs_therm_restart'
+ list_vars=trim(list_vars)//' dmftctqmc_triqs_time_invariance dmftctqmc_triqs_use_norm_as_weight dmftctqmc_triqs_wmax dmftcheck'
  list_vars=trim(list_vars)//' dmftqmc_l dmftqmc_n dmftqmc_seed dmftqmc_therm dmft_charge_prec dmft_dc'
- list_vars=trim(list_vars)//' dmft_entropy dmft_fermi_step dmft_gaussorder dmft_integral'
+ list_vars=trim(list_vars)//' dmft_entropy dmft_fermi_step'
  list_vars=trim(list_vars)//' dmft_iter dmft_kspectralfunc dmft_mxsf dmft_nlambda dmft_nominal dmft_nwli dmft_nwlo'
  list_vars=trim(list_vars)//' dmft_occnd_imag dmft_proj dmft_prt_maxent dmft_prtwan dmft_read_occnd'
  list_vars=trim(list_vars)//' dmft_rslf dmft_shiftself dmft_solv dmft_tolfreq dmft_tollc'

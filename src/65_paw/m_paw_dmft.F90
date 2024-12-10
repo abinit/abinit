@@ -137,15 +137,6 @@ MODULE m_paw_dmft
   ! = 0: do not compute entropy
   ! >= 1: compute entropy with an integration over self-consistent calculations
 
-  integer :: dmft_gaussorder
-  ! Only relevant when dmftctqmc_triqs_entropy=1 and dmft_integral=1.
-  ! Order of the Gauss-Legendre quadrature for each interval of the thermodynamic integration.
-
-  integer :: dmft_integral
-  ! Only relevant when dmftctqmc_triqs_entropy=1.
-  ! =1: Compute the thermodynamic integration over the impurity models.
-  ! =0: Do not compute the integral. All the other contributions are still computed.
-
   integer :: dmft_iter
   ! Nb of iterations for DMFT self-consistent cycle.
 
@@ -156,9 +147,6 @@ MODULE m_paw_dmft
   integer :: dmft_log_freq
   ! = 0: do not use log frequencies
   ! = 1: use log frequencies
-
-  integer :: dmft_nlambda
-  ! Number of subdivisions of the interval [0,U] for the thermodynamic integration.
 
   integer :: dmft_nwli
   ! Physical index of the last imaginary frequency (/=dmft_nwlo when dmft_log_freq=1)
@@ -264,6 +252,12 @@ MODULE m_paw_dmft
   ! ABINIT CTQMC: Gives perturbation order of CTQMC solver
   ! 0 : nothing, >=1 max order evaluated in Perturbation.dat
 
+  integer :: dmftctqmc_triqs_compute_integral
+  ! Only relevant when dmftctqmc_triqs_entropy=1.
+  ! =1: Compute the thermodynamic integration over the impurity models.
+  ! =0: Do not compute the integral. All the other contributions to the free
+  ! energy are still computed.
+
   integer :: dmftctqmc_triqs_det_init_size
   ! TRIQS CTQMC: Initial size of the hybridization matrix. If it is too low,
   ! the matrix will be resized very often, which can be slow.
@@ -275,6 +269,10 @@ MODULE m_paw_dmft
   integer :: dmftctqmc_triqs_entropy
   ! TRIQS CTQMC: Compute the DMFT entropy by integrating several impurity models
   ! over U.
+
+  integer :: dmftctqmc_triqs_gaussorder
+  ! Order of the Gauss-Legendre quadrature for each subdivision of the
+  ! thermodynamic integration.
 
   integer :: dmftctqmc_triqs_loc_n_min
   ! TRIQS CTQMC: Only configurations with a number of electrons in [nlocmin,nlocmax]
@@ -291,6 +289,10 @@ MODULE m_paw_dmft
   ! TRIQS CTQMC: Nb of Legendre polynomials used for the
   ! Green's function (Phys. Rev. B 84, 075145) [[cite:Boehnke2011]].
 
+  integer :: dmftctqmc_triqs_nsubdivisions
+  ! Number of regular subdivisions of the interval [0,U], each of which containing
+  ! dmftctqmc_triqs_gaussorder points
+
   integer :: dmftctqmc_triqs_ntau_delta
   ! TRIQS CTQMC: Nb of imaginary time points for the hybridization.
 
@@ -300,7 +302,7 @@ MODULE m_paw_dmft
   integer :: dmftctqmc_triqs_seed_b
   ! TRIQS CTQMC: The CTQMC seed is seed_a + rank * seed_b.
 
-  integer :: dmftctqmc_triqs_therm
+  integer :: dmftctqmc_triqs_therm_restart
   ! TRIQS CTQMC: Number of thermalization steps when we restart from a previous configuration
 
   integer :: dmftqmc_l
@@ -931,9 +933,6 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  paw_dmft%dmft_charge_prec     = dtset%dmft_charge_prec
  paw_dmft%dmft_fermi_prec      = dtset%dmft_charge_prec * ten
  paw_dmft%dmft_fermi_step      = dtset%dmft_fermi_step
- paw_dmft%dmft_nlambda         = dtset%dmft_nlambda
- paw_dmft%dmft_gaussorder      = dtset%dmft_gaussorder
- paw_dmft%dmft_integral        = dtset%dmft_integral
  paw_dmft%dmft_prt_maxent      = dtset%dmft_prt_maxent
  paw_dmft%dmft_prtwan          = dtset%dmft_prtwan
  paw_dmft%dmft_wanrad          = dtset%dmft_wanrad
@@ -1013,7 +1012,7 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
 !=======================
 
  paw_dmft%dmftctqmc_triqs_nleg                          = dtset%dmftctqmc_triqs_nleg
- paw_dmft%dmftctqmc_triqs_therm                         = dtset%dmftctqmc_triqs_therm
+ paw_dmft%dmftctqmc_triqs_therm_restart                 = dtset%dmftctqmc_triqs_therm_restart
  paw_dmft%dmftctqmc_triqs_det_init_size                 = dtset%dmftctqmc_triqs_det_init_size
  paw_dmft%dmftctqmc_triqs_det_n_operations_before_check = dtset%dmftctqmc_triqs_det_n_operations_before_check
  paw_dmft%dmftctqmc_triqs_move_shift                    = (dtset%dmftctqmc_triqs_move_shift == 1)
@@ -1034,10 +1033,13 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  paw_dmft%dmftctqmc_triqs_det_precision_error           = dtset%dmftctqmc_triqs_det_precision_error
  paw_dmft%dmftctqmc_triqs_det_singular_threshold        = dtset%dmftctqmc_triqs_det_singular_threshold
  paw_dmft%dmftctqmc_triqs_epsilon                       = dtset%dmftctqmc_triqs_epsilon
- paw_dmft%dmftctqmc_triqs_lambda                        = dtset%dmftctqmc_triqs_lambda
+ paw_dmft%dmftctqmc_triqs_lambda                        = dtset%dmftctqmc_triqs_wmax / dtset%tsmear
  paw_dmft%dmftctqmc_triqs_ntau_delta                    = dtset%dmftctqmc_triqs_ntau_delta
  paw_dmft%dmftctqmc_triqs_nbins_histo                   = dtset%dmftctqmc_triqs_nbins_histo
  paw_dmft%dmftctqmc_triqs_entropy                       = dtset%dmftctqmc_triqs_entropy
+ paw_dmft%dmftctqmc_triqs_compute_integral              = dtset%dmftctqmc_triqs_compute_integral
+ paw_dmft%dmftctqmc_triqs_gaussorder                    = dtset%dmftctqmc_triqs_gaussorder
+ paw_dmft%dmftctqmc_triqs_nsubdivisions                 = dtset%dmftctqmc_triqs_nsubdivisions
 
 !==============================
 !==  Variables for DMFT itself
@@ -1064,6 +1066,11 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
    ABI_ERROR(message)
  end if
 
+ if (paw_dmft%dmft_dc == 8 .and. dtset%ixc /= 7) then
+   message = "dmft_dc=8 is not implemented for ixc=7"
+   ABI_ERROR(message)
+ end if
+
  paw_dmft%typat => dtset%typat(:)
 
  ABI_MALLOC(paw_dmft%lpawu,(natom))
@@ -1078,6 +1085,10 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
    if (x2my2d .and. lpawu /= -1) lpawu = 0
    if (lpawu > maxlpawu) maxlpawu = lpawu
    paw_dmft%lpawu(iatom) = lpawu
+   if (paw_dmft%dmft_dc == 7 .and. lpawu /= -1 .and. paw_dmft%dmft_nominal(iatom) <= 0) then
+     message = "Please set a physical value for nominal occupancies"
+     ABI_ERROR(message)
+   end if
  end do ! iatom
  paw_dmft%maxlpawu = maxlpawu
  ndim = 2*maxlpawu + 1
@@ -1102,19 +1113,17 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  do lpawu=0,maxlpawu
    if (lcycle(lpawu+1)) cycle
    ndim = 2*lpawu + 1
-   do irot=1,nsym
-     if (t2g) then
-       do im1=1,ndim
-         do im=1,ndim
-           paw_dmft%zarot(im,im1,irot,lpawu+1) = cmplx(pawang%zarot(mt2g(im),mt2g(im1),3,irot),zero,kind=dp)
-         end do ! im
-       end do ! im1
-     else if (x2my2d) then
-       paw_dmft%zarot(1,1,irot,lpawu+1) = cmplx(pawang%zarot(5,5,3,irot),zero,kind=dp)
-     else
-       paw_dmft%zarot(1:ndim,1:ndim,irot,lpawu+1) = cmplx(pawang%zarot(1:ndim,1:ndim,lpawu+1,irot),zero,kind=dp)
-     end if
-   end do ! irot
+   if (t2g) then
+     do im1=1,ndim
+       do im=1,ndim
+         paw_dmft%zarot(im,im1,:,lpawu+1) = cmplx(pawang%zarot(mt2g(im),mt2g(im1),3,1:nsym),zero,kind=dp)
+       end do ! im
+     end do ! im1
+   else if (x2my2d) then
+     paw_dmft%zarot(1,1,:,lpawu+1) = cmplx(pawang%zarot(5,5,3,1:nsym),zero,kind=dp)
+   else
+     paw_dmft%zarot(1:ndim,1:ndim,:,lpawu+1) = cmplx(pawang%zarot(1:ndim,1:ndim,lpawu+1,1:nsym),zero,kind=dp)
+   end if
  end do ! lpawu
 
 !=======================
@@ -1305,9 +1314,7 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
          else if (x2my2d) then
            paw_dmft%ylm(1:npw,1,lpawu+1,ik) = ylm(ikg+1:ikg+npw,9)
          else
-           do im=1,ndim
-             paw_dmft%ylm(1:npw,im,lpawu+1,ik) = ylm(ikg+1:ikg+npw,lpawu**2+im)
-           end do ! im
+           paw_dmft%ylm(1:npw,1:ndim,lpawu+1,ik) = ylm(ikg+1:ikg+npw,lpawu**2+1:lpawu**2+ndim)
          end if
          lcycle(lpawu+1) = .true.
        end if ! not lcycle
@@ -1419,7 +1426,7 @@ subroutine init_dmft(cryst_struc,dmatpawu,dtset,fermie_dft,fnamei,fnametmp_app,p
 
  do isym=1,nsym
    if (dtset%symafm(isym) < 0) then
-     message = 'symafm negative is not implemented in DMFT '
+     message = 'symafm negative is not implemented in DMFT'
      ABI_ERROR(message)
    end if
  end do ! isym

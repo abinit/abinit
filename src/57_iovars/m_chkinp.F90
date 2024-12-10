@@ -661,7 +661,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        end if
 
        cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
-       call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_integral',dt%dmft_integral,2,(/0,1/),iout)
        call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_read_occnd',dt%dmft_read_occnd,3,(/0,1,2/),iout)
        call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_occnd_imag',dt%dmft_occnd_imag,2,(/0,1/),iout)
        call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_prt_maxent',dt%dmft_prt_maxent,2,(/0,1/),iout)
@@ -677,12 +676,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        call chkdpr(0,1,cond_string,cond_values,ierr,'dmft_tollc',dt%dmft_tollc,-1,tol5,iout)
        call chkdpr(0,1,cond_string,cond_values,ierr,'dmft_charge_prec',dt%dmft_charge_prec,-1,tol4,iout)
        call chkdpr(0,1,cond_string,cond_values,ierr,'dmft_charge_prec',dt%dmft_charge_prec,1,tol20,iout)
-       call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_dc',dt%dmft_dc,7,(/0,1,2,5,6,7,8/),iout)
-       call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_gaussorder',dt%dmft_gaussorder,2,iout)
-       if(dt%usepawu==14) then
-         cond_string(1)='usepawu' ; cond_values(1)=dt%usepawu
-         call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_dc',dt%dmft_dc,4,(/5,6,7,8/),iout)
-       endif
+       call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_dc',dt%dmft_dc,6,(/1,2,5,6,7,8/),iout)
        call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_wanorthnorm',dt%dmft_wanorthnorm,2,(/2,3/),iout)
        if(dt%getwfk==0.and.dt%irdwfk==0.and.dt%irdden==0.and.dt%getden==0.and.dt%ucrpa==0) then
          write(msg,'(3a,i3,a,i3,a,i3,a,i3,a)' )&
@@ -702,6 +696,12 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
          call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftqmc_seed',dt%dmftqmc_seed,0,iout)
          call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftqmc_therm',dt%dmftqmc_therm,1,iout)
        end if
+       cond_string(1)='usepawu' ; cond_values(1)=dt%usepawu
+       if(dt%usepawu==14) then
+         call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_dc',dt%dmft_dc,4,(/5,6,7,8/),iout)
+       else
+         call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_dc',dt%dmft_dc,2,(/1,2/),iout)
+       endif
 
        if (dt%dmft_solv>=5) then
          cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
@@ -762,10 +762,13 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 #endif
 
    if(dt%dmft_solv==6.or.dt%dmft_solv==7) then
+     call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_iter',dt%dmft_iter,1,iout)
      call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_nwli',dt%dmft_nwli,1,iout)
+     call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_compute_integral',dt%dmftctqmc_triqs_compute_integral,2,(/0,1/),iout)
      call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_det_init_size',dt%dmftctqmc_triqs_det_init_size,1,iout)
      call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_det_n_operations_before_check',dt%dmftctqmc_triqs_det_n_operations_before_check,1,iout)
      call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_entropy',dt%dmftctqmc_triqs_entropy,2,(/0,1/),iout)
+     call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_gaussorder',dt%dmftctqmc_triqs_gaussorder,2,iout)
      call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_leg_measure',dt%dmftctqmc_triqs_leg_measure,2,(/0,1/),iout)
      call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_loc_n_min',dt%dmftctqmc_triqs_loc_n_min,0,iout)
      call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_loc_n_max',dt%dmftctqmc_triqs_loc_n_max,dt%dmftctqmc_triqs_loc_n_min,iout)
@@ -773,9 +776,12 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_move_double',dt%dmftctqmc_triqs_move_double,2,(/0,1/),iout)
      call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_move_shift',dt%dmftctqmc_triqs_move_shift,2,(/0,1/),iout)
      call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_nbins_histo',dt%dmftctqmc_triqs_nbins_histo,1,iout)
+     call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_nleg',dt%dmftctqmc_triqs_nleg,1,iout)
+     call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_nsubdivisions',dt%dmftctqmc_triqs_nsubdivisions,1,iout)
+     call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_ntau_delta',dt%dmftctqmc_triqs_ntau_delta,1,iout)
      call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_orb_off_diag',dt%dmftctqmc_triqs_orb_off_diag,2,(/0,1/),iout)
      call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_spin_off_diag',dt%dmftctqmc_triqs_spin_off_diag,2,(/0,1/),iout)
-     call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_therm',dt%dmftctqmc_triqs_therm,0,iout)
+     call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_therm_restart',dt%dmftctqmc_triqs_therm_restart,0,iout)
      call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_time_invariance',dt%dmftctqmc_triqs_time_invariance,2,(/0,1/),iout)
      call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_use_norm_as_weight',dt%dmftctqmc_triqs_use_norm_as_weight,2,(/0,1/),iout)
      call chkdpr(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_det_precision_error',dt%dmftctqmc_triqs_det_precision_error,1,zero,iout)
@@ -783,17 +789,16 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      call chkdpr(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_det_precision_error',dt%dmftctqmc_triqs_det_precision_error,1,dt%dmftctqmc_triqs_det_precision_warning,iout)
      call chkdpr(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_epsilon',dt%dmftctqmc_triqs_epsilon,1,zero,iout)
      call chkdpr(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_imag_threshold',dt%dmftctqmc_triqs_imag_threshold,1,zero,iout)
-     call chkdpr(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_lambda',dt%dmftctqmc_triqs_lambda,1,zero,iout)
      call chkdpr(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_move_global_prob',dt%dmftctqmc_triqs_move_global_prob,1,zero,iout)
-     if (dt%dmft_integral==1.and.dt%dmftctqmc_triqs_measure_density_matrix==0) then
-       write(msg,'(a)') 'You need to activate the measurement of the density matrix when dmft_integral=1'
+     call chkdpr(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_wmax',dt%dmftctqmc_triqs_wmax,1,zero,iout)
+     if (dt%dmftctqmc_triqs_compute_integral==1.and.dt%dmftctqmc_triqs_measure_density_matrix==0) then
+       write(msg,'(a)') 'You need to activate the measurement of the density matrix when dmftctqmc_triqs_compute_integral=1'
        ABI_ERROR(msg)
      end if
      if (dt%dmftctqmc_triqs_entropy == 1 .and. dt%dmft_use_all_bands == 0) then
        write(msg,'(a)') 'You need to activate dmft_use_all_bands in order to activate dmftctqmc_triqs_entropy'
        ABI_ERROR(msg)
      end if
-     call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_nlambda',dt%dmft_nlambda,1,iout)
    end if
 
 !  dosdeltae
