@@ -1480,7 +1480,9 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !        end if
 
          if(paw_dmft%myproc==0) then
+           call timab(628,1,tsec)
            call saveocc_dmft(paw_dmft)
+           call timab(628,2,tsec)
          end if
          call destroy_dmft(paw_dmft)
 
