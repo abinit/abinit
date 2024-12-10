@@ -16,6 +16,9 @@ inp_files = [
     "t04.abi" ,  # same as v9[206] but with istwfk>1 (with DFTI)
     "t05.abi" ,  # same as v10[04] but with norm-conserving pseudos (without DFTI)
     "t06.abi" ,  # same as v9[206] but with istwfk>1 (without DFTI)
+    "t07.abi" ,  # test oracle and nbdbuf in chebfi (cprj_in_memory=0 and 1).
+    "t08.abi" ,  # same as v10[07] but with istwfk>1 (with less datasets)
+    "t09.abi" ,  # same as v10[07] but with nspinor=2 (with less datasets)
     "t10.abi" ,  # compare cprj_in_memory=1 with cprj_in_memory=0. PAW, istwfk=1.
     "t11.abi" ,  # same as v10[10], with nsppol=2.
     "t12.abi" ,  # same as v10[10], with nspinor=2.
@@ -28,7 +31,6 @@ inp_files = [
     "t19.abi" ,  # compare cprj_in_memory=1 with cprj_in_memory=0 for cell optimization.
     "t20.abi" ,  # test nvt_langevin MD algorithm (PIMD implementation)
     "t21.abi" ,  # test npt_langevin MD algorithm (PIMD implementation)
-    "t22.abi" ,  # test oracle and nbdbuf in chebfi (cprj_in_memory=0 and 1).
     "t40.abi" ,  # test orbmag calculation when using spatial symmetries for GS nuclear dipole 
     "t81.abi" ,  # Short MD to test restart on next test
     "t82.abi" ,  # Test restart of MD from the HIST of previous test using restartxf -1

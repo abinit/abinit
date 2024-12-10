@@ -1,5 +1,5 @@
 
-.Version 10.2.2.7 of ABINIT, released Sep 2024.
+.Version 10.3.4.2 of ABINIT, released Nov 2024.
 .(MPI version, prepared for a x86_64_linux_gnu9.1 computer) 
 
 .Copyright (C) 1998-2024 ABINIT group . 
@@ -14,18 +14,18 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 30 Oct 2024.
-- ( at 09h01 )
+.Starting date : Tue 10 Dec 2024.
+- ( at 14h58 )
   
-- input  file    -> /tmp/abinit/chebfi-oracle_debug/Test_suite/v10_t22/t22.abi
-- output file    -> t22.abo
-- root for input  files -> t22i
-- root for output files -> t22o
+- input  file    -> /tmp/abinit/chebfi-oracle_debug/Test_suite/v10_t07/t07.abi
+- output file    -> t07.abo
+- root for input  files -> t07i
+- root for output files -> t07o
 
 - inpspheads : Reading pseudopotential header in XML form from 
--   /cea/home/l2/baguetl/PROGRAM/abinit/chebfi-oracle/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/P.xml
+-   /cea/home/l2/baguetl/PROGRAM/abinit/chebfi-oracle/tests/Pspdir/Psdj_paw_pbe_std/P.xml
 - inpspheads : Reading pseudopotential header in XML form from 
--   /cea/home/l2/baguetl/PROGRAM/abinit/chebfi-oracle/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Al.xml
+-   /cea/home/l2/baguetl/PROGRAM/abinit/chebfi-oracle/tests/Pspdir/Psdj_paw_pbe_std/Al.xml
  DATASET    1 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
@@ -315,9 +315,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /cea/home/l2/baguetl/PROGRAM/abinit/chebfi-oracle/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/P.xml
-- pspatm: opening atomic psp file    /cea/home/l2/baguetl/PROGRAM/abinit/chebfi-oracle/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/P.xml
-- pspatm : Reading pseudopotential header in XML form from /cea/home/l2/baguetl/PROGRAM/abinit/chebfi-oracle/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/P.xml
+- pspini: atom type   1  psp file is /cea/home/l2/baguetl/PROGRAM/abinit/chebfi-oracle/tests/Pspdir/Psdj_paw_pbe_std/P.xml
+- pspatm: opening atomic psp file    /cea/home/l2/baguetl/PROGRAM/abinit/chebfi-oracle/tests/Pspdir/Psdj_paw_pbe_std/P.xml
+- pspatm : Reading pseudopotential header in XML form from /cea/home/l2/baguetl/PROGRAM/abinit/chebfi-oracle/tests/Pspdir/Psdj_paw_pbe_std/P.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.90690075
@@ -335,9 +335,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /cea/home/l2/baguetl/PROGRAM/abinit/chebfi-oracle/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Al.xml
-- pspatm: opening atomic psp file    /cea/home/l2/baguetl/PROGRAM/abinit/chebfi-oracle/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Al.xml
-- pspatm : Reading pseudopotential header in XML form from /cea/home/l2/baguetl/PROGRAM/abinit/chebfi-oracle/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Al.xml
+- pspini: atom type   2  psp file is /cea/home/l2/baguetl/PROGRAM/abinit/chebfi-oracle/tests/Pspdir/Psdj_paw_pbe_std/Al.xml
+- pspatm: opening atomic psp file    /cea/home/l2/baguetl/PROGRAM/abinit/chebfi-oracle/tests/Pspdir/Psdj_paw_pbe_std/Al.xml
+- pspatm : Reading pseudopotential header in XML form from /cea/home/l2/baguetl/PROGRAM/abinit/chebfi-oracle/tests/Pspdir/Psdj_paw_pbe_std/Al.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.90363307
@@ -369,21 +369,21 @@ tolerances: {tolvrs: 1.00E-20, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor
- ETOT  1  -8.7465038108563    -8.747E+00 2.900E-06 1.448E+00 6.924E-03 6.924E-03
- ETOT  2  -8.7227954860066     2.371E-02 1.541E-09 1.864E-01 8.753E-04 7.800E-03
- ETOT  3  -8.7214807082120     1.315E-03 3.982E-08 1.260E-02 9.679E-05 7.896E-03
- ETOT  4  -8.7217971631571    -3.165E-04 2.881E-09 9.951E-04 8.253E-05 7.814E-03
- ETOT  5  -8.7219026986909    -1.055E-04 7.236E-10 1.735E-05 2.991E-05 7.784E-03
- ETOT  6  -8.7219049783788    -2.280E-06 7.715E-12 2.850E-07 1.174E-06 7.785E-03
- ETOT  7  -8.7219049901113    -1.173E-08 3.912E-13 3.323E-08 4.372E-07 7.784E-03
- ETOT  8  -8.7219049940364    -3.925E-09 1.888E-14 2.445E-09 3.447E-08 7.784E-03
- ETOT  9  -8.7219049944303    -3.939E-10 6.927E-16 1.006E-10 9.403E-08 7.785E-03
- ETOT 10  -8.7219049944340    -3.745E-12 1.215E-16 6.014E-12 1.612E-08 7.785E-03
- ETOT 11  -8.7219049944337     3.233E-13 1.430E-17 2.120E-14 1.495E-09 7.785E-03
- ETOT 12  -8.7219049944337     1.066E-14 9.693E-20 2.727E-15 1.057E-09 7.785E-03
- ETOT 13  -8.7219049944338    -1.226E-13 7.248E-22 3.076E-17 1.274E-10 7.785E-03
- ETOT 14  -8.7219049944337     7.994E-14 2.106E-23 2.543E-18 7.746E-11 7.785E-03
- ETOT 15  -8.7219049944337    -1.954E-14 1.251E-24 1.039E-19 8.056E-12 7.785E-03
+ ETOT  1  -8.7465038108563    -8.747E+00 5.438E-06 1.448E+00 6.924E-03 6.924E-03
+ ETOT  2  -8.7227954860066     2.371E-02 9.010E-09 1.864E-01 8.753E-04 7.800E-03
+ ETOT  3  -8.7214807082120     1.315E-03 1.745E-07 1.260E-02 9.679E-05 7.896E-03
+ ETOT  4  -8.7217971631571    -3.165E-04 1.681E-08 9.951E-04 8.253E-05 7.814E-03
+ ETOT  5  -8.7219026986909    -1.055E-04 5.318E-09 1.735E-05 2.991E-05 7.784E-03
+ ETOT  6  -8.7219049783788    -2.280E-06 5.630E-11 2.850E-07 1.174E-06 7.785E-03
+ ETOT  7  -8.7219049901113    -1.173E-08 1.741E-12 3.323E-08 4.372E-07 7.784E-03
+ ETOT  8  -8.7219049940364    -3.925E-09 1.015E-13 2.445E-09 3.447E-08 7.784E-03
+ ETOT  9  -8.7219049944303    -3.939E-10 6.130E-15 1.006E-10 9.403E-08 7.785E-03
+ ETOT 10  -8.7219049944340    -3.745E-12 4.924E-16 6.014E-12 1.612E-08 7.785E-03
+ ETOT 11  -8.7219049944337     3.233E-13 7.356E-17 2.120E-14 1.495E-09 7.785E-03
+ ETOT 12  -8.7219049944337     1.066E-14 6.900E-19 2.727E-15 1.057E-09 7.785E-03
+ ETOT 13  -8.7219049944338    -1.226E-13 6.039E-21 3.076E-17 1.274E-10 7.785E-03
+ ETOT 14  -8.7219049944337     7.994E-14 1.166E-22 2.543E-18 7.746E-11 7.785E-03
+ ETOT 15  -8.7219049944337    -1.954E-14 7.378E-24 1.039E-19 8.056E-12 7.785E-03
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -6.02910429E-04  sigma(3 2)=  1.75404114E-05
@@ -406,7 +406,7 @@ lattice_vectors:
 lattice_lengths: [   7.07107,    7.07107,    7.07107, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.5000000E+02
-convergence: {deltae: -1.954E-14, res2:  1.039E-19, residm:  1.251E-24, diffor:  8.056E-12, }
+convergence: {deltae: -1.954E-14, res2:  1.039E-19, residm:  7.378E-24, diffor:  8.056E-12, }
 etotal    :  -8.72190499E+00
 entropy   :   0.00000000E+00
 fermie    :   2.53959488E-01
@@ -484,7 +484,7 @@ force_length_stats: {min:   8.85498969E-03, max:   8.85498969E-03, mean:   8.854
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   11.233E-26; max=  12.509E-25
+ Mean square residual over all n,k,spin=   84.027E-26; max=  73.779E-25
  reduced coordinates (array xred) for    2 atoms
        0.240000000000      0.255000000000      0.249000000000
        0.000000000000      0.000000000000      0.000000000000
@@ -608,21 +608,21 @@ tolerances: {tolvrs: 1.00E-20, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor
- ETOT  1  -8.7465038108563    -8.747E+00 2.900E-06 1.448E+00 6.924E-03 6.924E-03
- ETOT  2  -8.7227954860066     2.371E-02 1.541E-09 1.864E-01 8.753E-04 7.800E-03
- ETOT  3  -8.7214807082120     1.315E-03 3.982E-08 1.260E-02 9.679E-05 7.896E-03
- ETOT  4  -8.7217971631571    -3.165E-04 2.881E-09 9.951E-04 8.253E-05 7.814E-03
- ETOT  5  -8.7219026986909    -1.055E-04 7.236E-10 1.735E-05 2.991E-05 7.784E-03
- ETOT  6  -8.7219049783788    -2.280E-06 7.715E-12 2.850E-07 1.174E-06 7.785E-03
- ETOT  7  -8.7219049901113    -1.173E-08 3.912E-13 3.323E-08 4.372E-07 7.784E-03
- ETOT  8  -8.7219049940364    -3.925E-09 1.888E-14 2.445E-09 3.447E-08 7.784E-03
- ETOT  9  -8.7219049944303    -3.939E-10 6.927E-16 1.006E-10 9.403E-08 7.785E-03
- ETOT 10  -8.7219049944340    -3.745E-12 1.222E-16 6.091E-12 1.636E-08 7.785E-03
- ETOT 11  -8.7219049944337     2.789E-13 8.988E-17 2.188E-14 1.393E-09 7.785E-03
- ETOT 12  -8.7219049944337     5.329E-14 1.166E-16 2.962E-15 3.744E-11 7.785E-03
- ETOT 13  -8.7219049944337     3.553E-15 1.293E-16 4.571E-17 3.987E-11 7.785E-03
- ETOT 14  -8.7219049944337    -1.776E-15 1.287E-16 7.085E-18 1.338E-11 7.785E-03
- ETOT 15  -8.7219049944336     3.730E-14 1.289E-16 2.606E-19 1.503E-11 7.785E-03
+ ETOT  1  -8.7465038108563    -8.747E+00 5.438E-06 1.448E+00 6.924E-03 6.924E-03
+ ETOT  2  -8.7227954860066     2.371E-02 9.010E-09 1.864E-01 8.753E-04 7.800E-03
+ ETOT  3  -8.7214807082120     1.315E-03 1.745E-07 1.260E-02 9.679E-05 7.896E-03
+ ETOT  4  -8.7217971631571    -3.165E-04 1.681E-08 9.951E-04 8.253E-05 7.814E-03
+ ETOT  5  -8.7219026986909    -1.055E-04 5.318E-09 1.735E-05 2.991E-05 7.784E-03
+ ETOT  6  -8.7219049783788    -2.280E-06 5.630E-11 2.850E-07 1.174E-06 7.785E-03
+ ETOT  7  -8.7219049901113    -1.173E-08 1.741E-12 3.323E-08 4.372E-07 7.784E-03
+ ETOT  8  -8.7219049940364    -3.925E-09 1.015E-13 2.445E-09 3.447E-08 7.784E-03
+ ETOT  9  -8.7219049944303    -3.939E-10 6.130E-15 1.006E-10 9.403E-08 7.785E-03
+ ETOT 10  -8.7219049944340    -3.745E-12 4.924E-16 6.091E-12 1.636E-08 7.785E-03
+ ETOT 11  -8.7219049944337     2.789E-13 3.437E-16 2.188E-14 1.393E-09 7.785E-03
+ ETOT 12  -8.7219049944337     5.329E-14 4.199E-16 2.962E-15 3.744E-11 7.785E-03
+ ETOT 13  -8.7219049944337     3.553E-15 4.764E-16 4.571E-17 3.987E-11 7.785E-03
+ ETOT 14  -8.7219049944337    -1.776E-15 4.752E-16 7.085E-18 1.338E-11 7.785E-03
+ ETOT 15  -8.7219049944336     3.730E-14 4.777E-16 2.606E-19 1.503E-11 7.785E-03
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -6.02910524E-04  sigma(3 2)=  1.75404157E-05
@@ -645,7 +645,7 @@ lattice_vectors:
 lattice_lengths: [   7.07107,    7.07107,    7.07107, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.5000000E+02
-convergence: {deltae:  3.730E-14, res2:  2.606E-19, residm:  1.289E-16, diffor:  1.503E-11, }
+convergence: {deltae:  3.730E-14, res2:  2.606E-19, residm:  4.777E-16, diffor:  1.503E-11, }
 etotal    :  -8.72190499E+00
 entropy   :   0.00000000E+00
 fermie    :   2.53959491E-01
@@ -723,7 +723,7 @@ force_length_stats: {min:   8.85498899E-03, max:   8.85498899E-03, mean:   8.854
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   83.627E-18; max=  12.890E-17
+ Mean square residual over all n,k,spin=   34.505E-17; max=  47.773E-17
  reduced coordinates (array xred) for    2 atoms
        0.240000000000      0.255000000000      0.249000000000
        0.000000000000      0.000000000000      0.000000000000
@@ -847,21 +847,21 @@ tolerances: {tolvrs: 1.00E-20, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor
- ETOT  1  -8.7465038108563    -8.747E+00 2.900E-06 1.448E+00 6.924E-03 6.924E-03
- ETOT  2  -8.7227954860066     2.371E-02 1.541E-09 1.864E-01 8.753E-04 7.800E-03
- ETOT  3  -8.7214807082120     1.315E-03 3.982E-08 1.260E-02 9.679E-05 7.896E-03
- ETOT  4  -8.7217971631571    -3.165E-04 2.881E-09 9.951E-04 8.253E-05 7.814E-03
- ETOT  5  -8.7219026986909    -1.055E-04 7.236E-10 1.735E-05 2.991E-05 7.784E-03
- ETOT  6  -8.7219049783788    -2.280E-06 7.715E-12 2.850E-07 1.174E-06 7.785E-03
- ETOT  7  -8.7219049901113    -1.173E-08 3.912E-13 3.323E-08 4.372E-07 7.784E-03
- ETOT  8  -8.7219049940364    -3.925E-09 1.888E-14 2.445E-09 3.447E-08 7.784E-03
- ETOT  9  -8.7219049944302    -3.938E-10 6.927E-16 1.006E-10 9.403E-08 7.785E-03
- ETOT 10  -8.7219049944340    -3.810E-12 1.222E-16 6.091E-12 1.636E-08 7.785E-03
- ETOT 11  -8.7219049944337     2.949E-13 8.988E-17 2.188E-14 1.393E-09 7.785E-03
- ETOT 12  -8.7219049944337     1.421E-14 1.166E-16 2.962E-15 3.744E-11 7.785E-03
- ETOT 13  -8.7219049944337     2.842E-14 1.293E-16 4.571E-17 3.987E-11 7.785E-03
- ETOT 14  -8.7219049944337    -3.730E-14 1.287E-16 7.084E-18 1.337E-11 7.785E-03
- ETOT 15  -8.7219049944337     2.309E-14 1.289E-16 2.604E-19 1.503E-11 7.785E-03
+ ETOT  1  -8.7465038108563    -8.747E+00 5.438E-06 1.448E+00 6.924E-03 6.924E-03
+ ETOT  2  -8.7227954860066     2.371E-02 9.010E-09 1.864E-01 8.753E-04 7.800E-03
+ ETOT  3  -8.7214807082120     1.315E-03 1.745E-07 1.260E-02 9.679E-05 7.896E-03
+ ETOT  4  -8.7217971631571    -3.165E-04 1.681E-08 9.951E-04 8.253E-05 7.814E-03
+ ETOT  5  -8.7219026986909    -1.055E-04 5.318E-09 1.735E-05 2.991E-05 7.784E-03
+ ETOT  6  -8.7219049783788    -2.280E-06 5.630E-11 2.850E-07 1.174E-06 7.785E-03
+ ETOT  7  -8.7219049901113    -1.173E-08 1.741E-12 3.323E-08 4.372E-07 7.784E-03
+ ETOT  8  -8.7219049940364    -3.925E-09 1.015E-13 2.445E-09 3.447E-08 7.784E-03
+ ETOT  9  -8.7219049944302    -3.938E-10 6.130E-15 1.006E-10 9.403E-08 7.785E-03
+ ETOT 10  -8.7219049944340    -3.810E-12 4.924E-16 6.091E-12 1.636E-08 7.785E-03
+ ETOT 11  -8.7219049944337     2.949E-13 3.437E-16 2.188E-14 1.393E-09 7.785E-03
+ ETOT 12  -8.7219049944337     1.421E-14 4.199E-16 2.962E-15 3.744E-11 7.785E-03
+ ETOT 13  -8.7219049944337     2.842E-14 4.764E-16 4.571E-17 3.987E-11 7.785E-03
+ ETOT 14  -8.7219049944337    -3.730E-14 4.752E-16 7.084E-18 1.337E-11 7.785E-03
+ ETOT 15  -8.7219049944337     2.309E-14 4.777E-16 2.604E-19 1.503E-11 7.785E-03
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -6.02910524E-04  sigma(3 2)=  1.75404157E-05
@@ -884,7 +884,7 @@ lattice_vectors:
 lattice_lengths: [   7.07107,    7.07107,    7.07107, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.5000000E+02
-convergence: {deltae:  2.309E-14, res2:  2.604E-19, residm:  1.289E-16, diffor:  1.503E-11, }
+convergence: {deltae:  2.309E-14, res2:  2.604E-19, residm:  4.777E-16, diffor:  1.503E-11, }
 etotal    :  -8.72190499E+00
 entropy   :   0.00000000E+00
 fermie    :   2.53959491E-01
@@ -962,7 +962,7 @@ force_length_stats: {min:   8.85498899E-03, max:   8.85498899E-03, mean:   8.854
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   83.627E-18; max=  12.890E-17
+ Mean square residual over all n,k,spin=   34.505E-17; max=  47.772E-17
  reduced coordinates (array xred) for    2 atoms
        0.240000000000      0.255000000000      0.249000000000
        0.000000000000      0.000000000000      0.000000000000
@@ -1086,21 +1086,21 @@ tolerances: {tolvrs: 1.00E-20, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor
- ETOT  1  -8.7461178851830    -8.746E+00 1.393E-04 1.406E+00 7.267E-03 7.267E-03
- ETOT  2  -8.7229638539992     2.315E-02 6.247E-07 1.924E-01 4.713E-04 7.726E-03
- ETOT  3  -8.7214726001937     1.491E-03 5.896E-07 1.168E-02 1.744E-04 7.900E-03
- ETOT  4  -8.7218113541621    -3.388E-04 2.200E-08 9.052E-04 1.073E-04 7.793E-03
- ETOT  5  -8.7219022523686    -9.090E-05 1.294E-08 5.772E-05 1.616E-05 7.797E-03
- ETOT  6  -8.7219049356381    -2.683E-06 1.416E-09 7.645E-06 1.626E-05 7.781E-03
- ETOT  7  -8.7219049858621    -5.022E-08 2.028E-10 4.586E-08 3.482E-06 7.784E-03
- ETOT  8  -8.7219049936361    -7.774E-09 1.002E-11 1.167E-08 6.845E-07 7.784E-03
- ETOT  9  -8.7219049943599    -7.238E-10 6.835E-13 8.927E-10 2.160E-07 7.785E-03
- ETOT 10  -8.7219049944317    -7.178E-11 3.284E-14 2.284E-11 4.160E-08 7.785E-03
- ETOT 11  -8.7219049944345    -2.844E-12 2.462E-15 1.474E-11 1.176E-08 7.785E-03
- ETOT 12  -8.7219049944338     6.839E-13 2.859E-16 1.239E-12 6.171E-09 7.785E-03
- ETOT 13  -8.7219049944337     1.492E-13 3.575E-16 1.255E-13 3.896E-10 7.785E-03
- ETOT 14  -8.7219049944336     1.776E-14 3.267E-16 8.050E-15 4.048E-10 7.785E-03
- ETOT 15  -8.7219049944337    -6.395E-14 3.991E-16 3.362E-16 8.914E-12 7.785E-03
+ ETOT  1  -8.7461178851830    -8.746E+00 2.391E-04 1.406E+00 7.267E-03 7.267E-03
+ ETOT  2  -8.7229638539992     2.315E-02 1.245E-06 1.924E-01 4.713E-04 7.726E-03
+ ETOT  3  -8.7214726001937     1.491E-03 2.131E-06 1.168E-02 1.744E-04 7.900E-03
+ ETOT  4  -8.7218113541621    -3.388E-04 1.115E-07 9.052E-04 1.073E-04 7.793E-03
+ ETOT  5  -8.7219022523686    -9.090E-05 6.671E-08 5.772E-05 1.616E-05 7.797E-03
+ ETOT  6  -8.7219049356381    -2.683E-06 5.969E-09 7.645E-06 1.626E-05 7.781E-03
+ ETOT  7  -8.7219049858621    -5.022E-08 7.592E-10 4.586E-08 3.482E-06 7.784E-03
+ ETOT  8  -8.7219049936361    -7.774E-09 3.696E-11 1.167E-08 6.845E-07 7.784E-03
+ ETOT  9  -8.7219049943599    -7.238E-10 2.502E-12 8.927E-10 2.160E-07 7.785E-03
+ ETOT 10  -8.7219049944317    -7.178E-11 1.368E-13 2.284E-11 4.160E-08 7.785E-03
+ ETOT 11  -8.7219049944345    -2.844E-12 9.247E-15 1.474E-11 1.176E-08 7.785E-03
+ ETOT 12  -8.7219049944338     6.839E-13 1.051E-15 1.239E-12 6.171E-09 7.785E-03
+ ETOT 13  -8.7219049944337     1.492E-13 7.720E-16 1.255E-13 3.896E-10 7.785E-03
+ ETOT 14  -8.7219049944336     1.776E-14 6.201E-16 8.050E-15 4.048E-10 7.785E-03
+ ETOT 15  -8.7219049944337    -6.395E-14 7.569E-16 3.362E-16 8.914E-12 7.785E-03
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -6.02910345E-04  sigma(3 2)=  1.75404166E-05
@@ -1123,7 +1123,7 @@ lattice_vectors:
 lattice_lengths: [   7.07107,    7.07107,    7.07107, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.5000000E+02
-convergence: {deltae: -6.395E-14, res2:  3.362E-16, residm:  3.991E-16, diffor:  8.914E-12, }
+convergence: {deltae: -6.395E-14, res2:  3.362E-16, residm:  7.569E-16, diffor:  8.914E-12, }
 etotal    :  -8.72190499E+00
 entropy   :   0.00000000E+00
 fermie    :   2.53959483E-01
@@ -1201,7 +1201,7 @@ force_length_stats: {min:   8.85499090E-03, max:   8.85499090E-03, mean:   8.854
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   18.509E-17; max=  39.908E-17
+ Mean square residual over all n,k,spin=   37.602E-17; max=  75.689E-17
  reduced coordinates (array xred) for    2 atoms
        0.240000000000      0.255000000000      0.249000000000
        0.000000000000      0.000000000000      0.000000000000
@@ -1325,21 +1325,21 @@ tolerances: {tolvrs: 1.00E-20, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor
- ETOT  1  -8.7461178851830    -8.746E+00 1.393E-04 1.406E+00 7.267E-03 7.267E-03
- ETOT  2  -8.7229638539992     2.315E-02 6.247E-07 1.924E-01 4.713E-04 7.726E-03
- ETOT  3  -8.7214726001937     1.491E-03 5.896E-07 1.168E-02 1.744E-04 7.900E-03
- ETOT  4  -8.7218113541621    -3.388E-04 2.200E-08 9.052E-04 1.073E-04 7.793E-03
- ETOT  5  -8.7219022523687    -9.090E-05 1.294E-08 5.772E-05 1.616E-05 7.797E-03
- ETOT  6  -8.7219049356381    -2.683E-06 1.416E-09 7.645E-06 1.626E-05 7.781E-03
- ETOT  7  -8.7219049858621    -5.022E-08 2.028E-10 4.586E-08 3.482E-06 7.784E-03
- ETOT  8  -8.7219049936361    -7.774E-09 1.002E-11 1.167E-08 6.845E-07 7.784E-03
- ETOT  9  -8.7219049943598    -7.237E-10 6.835E-13 8.927E-10 2.160E-07 7.785E-03
- ETOT 10  -8.7219049944317    -7.181E-11 3.284E-14 2.284E-11 4.160E-08 7.785E-03
- ETOT 11  -8.7219049944344    -2.759E-12 2.462E-15 1.474E-11 1.176E-08 7.785E-03
- ETOT 12  -8.7219049944338     5.826E-13 2.859E-16 1.239E-12 6.171E-09 7.785E-03
- ETOT 13  -8.7219049944337     1.705E-13 3.575E-16 1.255E-13 3.896E-10 7.785E-03
- ETOT 14  -8.7219049944337    -2.309E-14 3.267E-16 8.050E-15 4.048E-10 7.785E-03
- ETOT 15  -8.7219049944337     1.954E-14 3.991E-16 3.362E-16 8.912E-12 7.785E-03
+ ETOT  1  -8.7461178851830    -8.746E+00 2.391E-04 1.406E+00 7.267E-03 7.267E-03
+ ETOT  2  -8.7229638539992     2.315E-02 1.245E-06 1.924E-01 4.713E-04 7.726E-03
+ ETOT  3  -8.7214726001937     1.491E-03 2.131E-06 1.168E-02 1.744E-04 7.900E-03
+ ETOT  4  -8.7218113541621    -3.388E-04 1.115E-07 9.052E-04 1.073E-04 7.793E-03
+ ETOT  5  -8.7219022523687    -9.090E-05 6.671E-08 5.772E-05 1.616E-05 7.797E-03
+ ETOT  6  -8.7219049356381    -2.683E-06 5.969E-09 7.645E-06 1.626E-05 7.781E-03
+ ETOT  7  -8.7219049858621    -5.022E-08 7.592E-10 4.586E-08 3.482E-06 7.784E-03
+ ETOT  8  -8.7219049936361    -7.774E-09 3.696E-11 1.167E-08 6.845E-07 7.784E-03
+ ETOT  9  -8.7219049943598    -7.237E-10 2.502E-12 8.927E-10 2.160E-07 7.785E-03
+ ETOT 10  -8.7219049944317    -7.181E-11 1.368E-13 2.284E-11 4.160E-08 7.785E-03
+ ETOT 11  -8.7219049944344    -2.759E-12 9.247E-15 1.474E-11 1.176E-08 7.785E-03
+ ETOT 12  -8.7219049944338     5.826E-13 1.051E-15 1.239E-12 6.171E-09 7.785E-03
+ ETOT 13  -8.7219049944337     1.705E-13 7.720E-16 1.255E-13 3.896E-10 7.785E-03
+ ETOT 14  -8.7219049944337    -2.309E-14 6.201E-16 8.050E-15 4.048E-10 7.785E-03
+ ETOT 15  -8.7219049944337     1.954E-14 7.569E-16 3.362E-16 8.912E-12 7.785E-03
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -6.02910345E-04  sigma(3 2)=  1.75404166E-05
@@ -1362,7 +1362,7 @@ lattice_vectors:
 lattice_lengths: [   7.07107,    7.07107,    7.07107, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.5000000E+02
-convergence: {deltae:  1.954E-14, res2:  3.362E-16, residm:  3.991E-16, diffor:  8.912E-12, }
+convergence: {deltae:  1.954E-14, res2:  3.362E-16, residm:  7.569E-16, diffor:  8.912E-12, }
 etotal    :  -8.72190499E+00
 entropy   :   0.00000000E+00
 fermie    :   2.53959483E-01
@@ -1440,7 +1440,7 @@ force_length_stats: {min:   8.85499090E-03, max:   8.85499090E-03, mean:   8.854
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   18.509E-17; max=  39.908E-17
+ Mean square residual over all n,k,spin=   37.602E-17; max=  75.688E-17
  reduced coordinates (array xred) for    2 atoms
        0.240000000000      0.255000000000      0.249000000000
        0.000000000000      0.000000000000      0.000000000000
@@ -1564,21 +1564,21 @@ tolerances: {tolvrs: 1.00E-20, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor
- ETOT  1  -8.7461178851830    -8.746E+00 2.785E-04 1.406E+00 7.267E-03 7.267E-03
- ETOT  2  -8.7229638539992     2.315E-02 1.249E-06 1.924E-01 4.713E-04 7.726E-03
- ETOT  3  -8.7214726001937     1.491E-03 1.179E-06 1.168E-02 1.744E-04 7.900E-03
- ETOT  4  -8.7218113541621    -3.388E-04 4.400E-08 9.052E-04 1.073E-04 7.793E-03
- ETOT  5  -8.7219022523686    -9.090E-05 2.587E-08 5.772E-05 1.616E-05 7.797E-03
- ETOT  6  -8.7219049356381    -2.683E-06 2.832E-09 7.645E-06 1.626E-05 7.781E-03
- ETOT  7  -8.7219049858621    -5.022E-08 4.055E-10 4.586E-08 3.482E-06 7.784E-03
- ETOT  8  -8.7219049936361    -7.774E-09 2.004E-11 1.167E-08 6.845E-07 7.784E-03
- ETOT  9  -8.7219049943599    -7.238E-10 1.367E-12 8.927E-10 2.160E-07 7.785E-03
- ETOT 10  -8.7219049944317    -7.178E-11 6.568E-14 2.284E-11 4.160E-08 7.785E-03
- ETOT 11  -8.7219049944345    -2.844E-12 4.923E-15 1.474E-11 1.176E-08 7.785E-03
- ETOT 12  -8.7219049944338     6.839E-13 5.719E-16 1.239E-12 6.171E-09 7.785E-03
- ETOT 13  -8.7219049944337     1.492E-13 7.151E-16 1.255E-13 3.896E-10 7.785E-03
- ETOT 14  -8.7219049944336     1.776E-14 6.534E-16 8.050E-15 4.048E-10 7.785E-03
- ETOT 15  -8.7219049944337    -6.395E-14 7.982E-16 3.362E-16 8.914E-12 7.785E-03
+ ETOT  1  -8.7461178851830    -8.746E+00 4.782E-04 1.406E+00 7.267E-03 7.267E-03
+ ETOT  2  -8.7229638539992     2.315E-02 2.490E-06 1.924E-01 4.713E-04 7.726E-03
+ ETOT  3  -8.7214726001937     1.491E-03 4.261E-06 1.168E-02 1.744E-04 7.900E-03
+ ETOT  4  -8.7218113541621    -3.388E-04 2.229E-07 9.052E-04 1.073E-04 7.793E-03
+ ETOT  5  -8.7219022523686    -9.090E-05 1.334E-07 5.772E-05 1.616E-05 7.797E-03
+ ETOT  6  -8.7219049356381    -2.683E-06 1.194E-08 7.645E-06 1.626E-05 7.781E-03
+ ETOT  7  -8.7219049858621    -5.022E-08 1.518E-09 4.586E-08 3.482E-06 7.784E-03
+ ETOT  8  -8.7219049936361    -7.774E-09 7.392E-11 1.167E-08 6.845E-07 7.784E-03
+ ETOT  9  -8.7219049943599    -7.238E-10 5.004E-12 8.927E-10 2.160E-07 7.785E-03
+ ETOT 10  -8.7219049944317    -7.178E-11 2.736E-13 2.284E-11 4.160E-08 7.785E-03
+ ETOT 11  -8.7219049944345    -2.844E-12 1.849E-14 1.474E-11 1.176E-08 7.785E-03
+ ETOT 12  -8.7219049944338     6.839E-13 2.101E-15 1.239E-12 6.171E-09 7.785E-03
+ ETOT 13  -8.7219049944337     1.492E-13 1.544E-15 1.255E-13 3.896E-10 7.785E-03
+ ETOT 14  -8.7219049944336     1.776E-14 1.240E-15 8.050E-15 4.048E-10 7.785E-03
+ ETOT 15  -8.7219049944337    -6.395E-14 1.514E-15 3.362E-16 8.914E-12 7.785E-03
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -6.02910345E-04  sigma(3 2)=  1.75404166E-05
@@ -1601,7 +1601,7 @@ lattice_vectors:
 lattice_lengths: [   7.07107,    7.07107,    7.07107, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.5000000E+02
-convergence: {deltae: -6.395E-14, res2:  3.362E-16, residm:  7.982E-16, diffor:  8.914E-12, }
+convergence: {deltae: -6.395E-14, res2:  3.362E-16, residm:  1.514E-15, diffor:  8.914E-12, }
 etotal    :  -8.72190499E+00
 entropy   :   0.00000000E+00
 fermie    :   2.53959483E-01
@@ -1679,7 +1679,7 @@ force_length_stats: {min:   8.85499090E-03, max:   8.85499090E-03, mean:   8.854
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   14.081E-06; max=  30.856E-05
+ Mean square residual over all n,k,spin=   35.936E-06; max=  80.231E-05
  reduced coordinates (array xred) for    2 atoms
        0.240000000000      0.255000000000      0.249000000000
        0.000000000000      0.000000000000      0.000000000000
@@ -1803,21 +1803,21 @@ tolerances: {tolvrs: 1.00E-20, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor
- ETOT  1  -8.7461178851830    -8.746E+00 2.785E-04 1.406E+00 7.267E-03 7.267E-03
- ETOT  2  -8.7229638539992     2.315E-02 1.249E-06 1.924E-01 4.713E-04 7.726E-03
- ETOT  3  -8.7214726001937     1.491E-03 1.179E-06 1.168E-02 1.744E-04 7.900E-03
- ETOT  4  -8.7218113541621    -3.388E-04 4.400E-08 9.052E-04 1.073E-04 7.793E-03
- ETOT  5  -8.7219022523687    -9.090E-05 2.587E-08 5.772E-05 1.616E-05 7.797E-03
- ETOT  6  -8.7219049356381    -2.683E-06 2.832E-09 7.645E-06 1.626E-05 7.781E-03
- ETOT  7  -8.7219049858621    -5.022E-08 4.055E-10 4.586E-08 3.482E-06 7.784E-03
- ETOT  8  -8.7219049936361    -7.774E-09 2.004E-11 1.167E-08 6.845E-07 7.784E-03
- ETOT  9  -8.7219049943598    -7.237E-10 1.367E-12 8.927E-10 2.160E-07 7.785E-03
- ETOT 10  -8.7219049944317    -7.181E-11 6.568E-14 2.284E-11 4.160E-08 7.785E-03
- ETOT 11  -8.7219049944344    -2.759E-12 4.923E-15 1.474E-11 1.176E-08 7.785E-03
- ETOT 12  -8.7219049944338     5.826E-13 5.719E-16 1.239E-12 6.171E-09 7.785E-03
- ETOT 13  -8.7219049944337     1.705E-13 7.151E-16 1.255E-13 3.896E-10 7.785E-03
- ETOT 14  -8.7219049944337    -2.309E-14 6.534E-16 8.050E-15 4.048E-10 7.785E-03
- ETOT 15  -8.7219049944337     1.954E-14 7.982E-16 3.362E-16 8.912E-12 7.785E-03
+ ETOT  1  -8.7461178851830    -8.746E+00 4.782E-04 1.406E+00 7.267E-03 7.267E-03
+ ETOT  2  -8.7229638539992     2.315E-02 2.490E-06 1.924E-01 4.713E-04 7.726E-03
+ ETOT  3  -8.7214726001937     1.491E-03 4.261E-06 1.168E-02 1.744E-04 7.900E-03
+ ETOT  4  -8.7218113541621    -3.388E-04 2.229E-07 9.052E-04 1.073E-04 7.793E-03
+ ETOT  5  -8.7219022523687    -9.090E-05 1.334E-07 5.772E-05 1.616E-05 7.797E-03
+ ETOT  6  -8.7219049356381    -2.683E-06 1.194E-08 7.645E-06 1.626E-05 7.781E-03
+ ETOT  7  -8.7219049858621    -5.022E-08 1.518E-09 4.586E-08 3.482E-06 7.784E-03
+ ETOT  8  -8.7219049936361    -7.774E-09 7.392E-11 1.167E-08 6.845E-07 7.784E-03
+ ETOT  9  -8.7219049943598    -7.237E-10 5.004E-12 8.927E-10 2.160E-07 7.785E-03
+ ETOT 10  -8.7219049944317    -7.181E-11 2.736E-13 2.284E-11 4.160E-08 7.785E-03
+ ETOT 11  -8.7219049944344    -2.759E-12 1.849E-14 1.474E-11 1.176E-08 7.785E-03
+ ETOT 12  -8.7219049944338     5.826E-13 2.101E-15 1.239E-12 6.171E-09 7.785E-03
+ ETOT 13  -8.7219049944337     1.705E-13 1.544E-15 1.255E-13 3.896E-10 7.785E-03
+ ETOT 14  -8.7219049944337    -2.309E-14 1.240E-15 8.050E-15 4.048E-10 7.785E-03
+ ETOT 15  -8.7219049944337     1.954E-14 1.514E-15 3.362E-16 8.912E-12 7.785E-03
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -6.02910345E-04  sigma(3 2)=  1.75404166E-05
@@ -1840,7 +1840,7 @@ lattice_vectors:
 lattice_lengths: [   7.07107,    7.07107,    7.07107, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.5000000E+02
-convergence: {deltae:  1.954E-14, res2:  3.362E-16, residm:  7.982E-16, diffor:  8.912E-12, }
+convergence: {deltae:  1.954E-14, res2:  3.362E-16, residm:  1.514E-15, diffor:  8.912E-12, }
 etotal    :  -8.72190499E+00
 entropy   :   0.00000000E+00
 fermie    :   2.53959483E-01
@@ -1918,7 +1918,7 @@ force_length_stats: {min:   8.85499090E-03, max:   8.85499090E-03, mean:   8.854
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   14.081E-06; max=  30.856E-05
+ Mean square residual over all n,k,spin=   35.936E-06; max=  80.231E-05
  reduced coordinates (array xred) for    2 atoms
        0.240000000000      0.255000000000      0.249000000000
        0.000000000000      0.000000000000      0.000000000000
@@ -2207,10 +2207,10 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         26.9  wall=         27.1
+- Proc.   0 individual time (sec): cpu=         27.4  wall=         27.6
 
 ================================================================================
 
  Calculation completed.
 .Delivered   7 WARNINGs and  57 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         26.9  wall=         27.1
++Overall time at end (sec) : cpu=         27.4  wall=         27.6
