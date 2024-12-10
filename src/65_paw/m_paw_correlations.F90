@@ -829,6 +829,11 @@ CONTAINS  !=====================================================================
        me = xmpi_comm_rank(xmpi_world)
 
        if (dmft_proj(itypat) > 0) then ! use atomic orbital from PAW dataset
+         if (dmft_proj(itypat) > pawtab(itypat)%nproju) then
+           write(message,*) "For atom type:",itypat,"you need to set dmft_proj to a value", &
+                        & " lower than",pawtab(itypat)%nproju
+           ABI_ERROR(message)
+         end if
          write(message,'(2a,i1,a)') ch10," Using atomic orbital number ",dmft_proj(itypat)," from PAW dataset"
          call wrtout(std_out,message,"COLL")
          meshsz = pawrad(itypat)%int_meshsz
@@ -878,6 +883,17 @@ CONTAINS  !=====================================================================
        end if ! me=0
 
        if (dmft_dc == 8) then
+
+         if (dmft_proj(itypat) > 0) then
+           message = "WARNING: You are using dmft_dc=8 while using an atomic orbital from &
+               & the PAW dataset. Make sure you know what you're doing, and please &
+               & look at the tutorial. In our current implementation, we assume that &
+               & the projection of the orbital on [dmftbandi,dmftbandf] is the same &
+               & as the orbital itself, and this can hardly be the case with a truncated atomic &
+               & orbital. Please compute the projection of the atomic orbital with dmft_prtwan=1, &
+               & and then use this projection as your DMFT orbital with dmft_proj=-1."
+           ABI_WARNING(message)
+         end if
 
          ABI_MALLOC(pawtab(itypat)%proj2,(meshsz))
          pawtab(itypat)%proj2(1:meshsz) = (pawtab(itypat)%proj(1:meshsz)/int1)**2

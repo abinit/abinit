@@ -1443,7 +1443,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          edmft=paw_dmft%edmft
          energies%e_paw=energies%e_paw+edmft
          energies%e_pawdc=energies%e_pawdc+edmft
-         if (dtset%dmftctqmc_triqs_entropy == 1 .and. dtset%dmft_integral == 1) energies%entropy = paw_dmft%sdmft
+         if (dtset%dmftctqmc_triqs_entropy == 1 .and. dtset%dmftctqmc_triqs_compute_integral == 1) energies%entropy = paw_dmft%sdmft
          call flush_unit(std_out)
 !        paw_dmft%occnd(:,:,:,:,:)=0.5_dp
 

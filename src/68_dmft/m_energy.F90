@@ -1216,7 +1216,7 @@ subroutine compute_free_energy(energies_dmft,paw_dmft,green,part,self,weiss)
    call compute_trace_log_loc(weiss,paw_dmft,energies_dmft%fband_weiss,opt_inv=1)
 
    ! Integral of E_u/U
-   if (paw_dmft%dmft_integral == 1) energies_dmft%integral = green%integral
+   if (paw_dmft%dmftctqmc_triqs_compute_integral == 1) energies_dmft%integral = green%integral
 
    ! Tr(log(G_imp))
    call compute_trace_log_loc(green,paw_dmft,energies_dmft%fband_imp)

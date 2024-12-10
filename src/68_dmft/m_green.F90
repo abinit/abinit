@@ -1002,6 +1002,10 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
 ! integer, allocatable :: procb(:,:),proct(:,:)
 ! *********************************************************************
 
+ ! CAREFUL: this is not the only routine where the Green's function is computed.
+ ! If you want to add some modifications here, please also add them to
+ ! compute_nb_elec.
+
  !lintegrate=.true.
  !if(lintegrate.and.green%w_type=="real") then
  !if(green%w_type=="real") then
