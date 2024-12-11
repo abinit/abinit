@@ -74,6 +74,7 @@ module m_anaddb_dataset
   integer:: elphflag
   integer:: enunit
   integer:: flexoflag
+  integer:: freqflag
   integer:: gkk2write
   integer:: gkk_rptwrite
   integer:: gkqwrite
@@ -97,7 +98,6 @@ module m_anaddb_dataset
   integer:: nfreq
   integer:: ngrids
   integer:: nlflag
-  integer:: nomega
   integer:: nph1l
   integer:: nph2l
   integer:: nqpath
@@ -106,7 +106,6 @@ module m_anaddb_dataset
   integer:: nstrfix
   integer:: ntemper
   integer:: nwchan
-  integer:: omegaflag
   integer:: outboltztrap
   integer:: piezoflag
   integer:: polflag
@@ -162,7 +161,6 @@ module m_anaddb_dataset
   real(dp):: elph_fermie
   real(dp):: ep_extrael
   real(dp):: eta
-  real(dp):: eta_phongreen
   real(dp):: freeze_displ
   real(dp):: frmax
   real(dp):: frmin
@@ -172,8 +170,6 @@ module m_anaddb_dataset
   real(dp):: lwf_sigma
   real(dp):: magpen
   real(dp):: mustar
-  real(dp):: omegamin
-  real(dp):: omegamax
   real(dp):: temperinc
   real(dp):: tempermin
   real(dp):: thmtol
@@ -646,12 +642,6 @@ subroutine invars9 (anaddb_dtset, lenstr, natom, string)
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'eta',tread, 'DPR')
  if(tread == 1) anaddb_dtset%eta = dprarr(1)
 
-
- anaddb_dtset%eta_phongreen = 0.000001_dp
- call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'eta_phongreen',tread, 'DPR')
- if(tread == 1) anaddb_dtset%eta_phongreen = dprarr(1)
-
-
 !F
 
  anaddb_dtset%flexoflag = 0
@@ -668,6 +658,15 @@ subroutine invars9 (anaddb_dtset, lenstr, natom, string)
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'freeze_displ',tread, 'DPR')
  if(tread == 1) anaddb_dtset%freeze_displ = dprarr(1)
 
+ anaddb_dtset%freqflag = 0
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'freqflag',tread, 'INT')
+ if(tread == 1) anaddb_dtset%freqflag = intarr(1)
+ if(anaddb_dtset%freqflag < 0 .or. anaddb_dtset%freqflag > 3)then
+   write(message, '(a, i0, 5a)' )&
+   'freqflag is ',anaddb_dtset%freqflag, ', but the only allowed values',ch10, &
+   'are between 0 to 3 (included).',ch10, 'Action: correct freqflag in your input file.'
+   ABI_ERROR(message)
+ end if
 
  anaddb_dtset%frmax = ten
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'frmax',tread, 'DPR')
@@ -1082,16 +1081,6 @@ if(tread == 1) anaddb_dtset%lwf_sigma = dprarr(1)
    ABI_ERROR(message)
  end if
 
- anaddb_dtset%nomega = 10
- call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'nomega',tread, 'INT')
- if(tread == 1) anaddb_dtset%nomega = intarr(1)
- if(anaddb_dtset%nomega < 0)then
-   write(message, '(a, i0, 3a)' )&
-   'nomega is ',anaddb_dtset%nomega, ', which is lower than 0',ch10, &
-   'Action: correct nomega in your input file.'
-   ABI_ERROR(message)
- end if
-
  anaddb_dtset%nqpath = 0
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'nqpath',tread, 'INT')
  if(tread == 1) anaddb_dtset%nqpath = intarr(1)
@@ -1161,36 +1150,6 @@ if(tread == 1) anaddb_dtset%lwf_sigma = dprarr(1)
  end if
 
 !O
- anaddb_dtset%omegaflag = 0
- call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'omegaflag',tread, 'INT')
- if(tread == 1) anaddb_dtset%omegaflag = intarr(1)
- if(anaddb_dtset%omegaflag < 0 .or. anaddb_dtset%omegaflag > 3)then
-   write(message, '(a, i0, 5a)' )&
-   'omegaflag is ',anaddb_dtset%omegaflag, ', but the only allowed values',ch10, &
-   'are between 0 to 3 (included).',ch10, 'Action: correct omegaflag in your input file.'
-   ABI_ERROR(message)
- end if
-
- anaddb_dtset%omegamin = 0.0_dp
- call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'omegamin',tread, 'DPR')
- if(tread == 1) anaddb_dtset%omegamin = dprarr(1)
- if(anaddb_dtset%omegamin < -tol12)then
-   write(message, '(a, f10.3, 3a)' )&
-   'omegamin is ',anaddb_dtset%omegamin, ', which is lower than 0 .',ch10, &
-   'Action: correct omegamin in your input file.'
-   ABI_ERROR(message)
- end if
-
- anaddb_dtset%omegamax = 0.01_dp
- call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'omegamax',tread, 'DPR')
- if(tread == 1) anaddb_dtset%omegamax = dprarr(1)
- if(anaddb_dtset%omegamax < anaddb_dtset%omegamin)then
-   write(message, '(a, f12.6 a,f12.6,a,a)' )&
-   'omegamax ',anaddb_dtset%omegamax, ', is lower than omegamin', anaddb_dtset%omegamin,ch10, &
-   'Action: correct omegamax or omegamin in your input file.'
-   ABI_ERROR(message)
- end if
-
  anaddb_dtset%outboltztrap = 0
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'outboltztrap',tread, 'INT')
  if(tread == 1) anaddb_dtset%outboltztrap = intarr(1)
@@ -2023,7 +1982,7 @@ subroutine outvars_anaddb (anaddb_dtset, nunit)
      anaddb_dtset%nlflag /= 0 .or. anaddb_dtset%thmflag /= 0 .or. &
      anaddb_dtset%elaflag /= 0 .or. anaddb_dtset%elphflag /= 0 .or. &
      anaddb_dtset%polflag /= 0 .or. anaddb_dtset%instrflag /= 0 .or. &
-     anaddb_dtset%piezoflag /= 0 .or. anaddb_dtset%omegaflag /= 0) then
+     anaddb_dtset%piezoflag /= 0 .or. anaddb_dtset%freqflag /= 0) then
    write(nunit, '(a)')' Flags :'
    if(anaddb_dtset%dieflag /= 0)write(nunit, '(3x, a9, 3i10)')'  dieflag',anaddb_dtset%dieflag
    if(anaddb_dtset%flexoflag /= 0)write(nunit, '(3x, a9, 3i10)')'flexoflag',anaddb_dtset%flexoflag
@@ -2036,7 +1995,7 @@ subroutine outvars_anaddb (anaddb_dtset, nunit)
    if(anaddb_dtset%instrflag /= 0)write(nunit, '(3x, a9, 3i10)')'instrflag',anaddb_dtset%instrflag
    if(anaddb_dtset%piezoflag /= 0)write(nunit, '(3x, a9, 3i10)')'piezoflag',anaddb_dtset%piezoflag
    if(anaddb_dtset%lwfflag /= 0)write(nunit, '(3x, a9, 3i10)')'lwfflag',anaddb_dtset%lwfflag
-   if(anaddb_dtset%omegaflag /= 0)write(nunit, '(3x, a9, 3i10)')'lwfflag',anaddb_dtset%omegaflag
+   if(anaddb_dtset%freqflag /= 0)write(nunit, '(3x, a9, 3i10)')'lwfflag',anaddb_dtset%freqflag
  end if
 
 !Write the general information
@@ -2313,12 +2272,11 @@ subroutine outvars_anaddb (anaddb_dtset, nunit)
  write(nunit, '(a, 80a, a)') ch10, ('=',ii = 1, 80), ch10
 
 !Omega interpolation
- if (abs(anaddb_dtset%magpen) > tol8 .and. anaddb_dtset%omegaflag==1) then
+ if (abs(anaddb_dtset%magpen) > tol8 .and. anaddb_dtset%freqflag==1) then
    write(nunit, '(a)') ' Omega interpolation of second-order quantities calculated with the magnetic penalty and the corrected ones'
-   write(nunit, '(3x, a9, i10)')       '   nomega',anaddb_dtset%nomega
-   write(nunit, '(3x, a9, 7x, es16.8)')' omegamin',anaddb_dtset%omegamin
-   write(nunit, '(3x, a9, 7x, es16.8)')' omegamax',anaddb_dtset%omegamax
-   write(nunit, '(3x, a9, 7x, es16.8)')' eta_phongreen',anaddb_dtset%eta_phongreen
+   write(nunit, '(3x, a9, i10)')       '   nfreq',anaddb_dtset%nfreq
+   write(nunit, '(3x, a9, 7x, es16.8)')' frmin',anaddb_dtset%frmin
+   write(nunit, '(3x, a9, 7x, es16.8)')' frmax',anaddb_dtset%frmax
    write(nunit, '(3x, a9, 3i10)')     '    dissip',anaddb_dtset%dissip
    write(nunit, '(3x, a9, 7x, es16.8)')'      eta',anaddb_dtset%eta
  end if
@@ -2507,9 +2465,9 @@ subroutine anaddb_chkvars(string)
 !E
  list_vars = trim(list_vars)//' ep_scalprod eivec elaflag elphflag enunit'
  list_vars = trim(list_vars)//' ep_b_min ep_b_max ep_int_gkk ep_keepbands ep_nqpt ep_nspline ep_prt_yambo'
- list_vars = trim(list_vars)//' elphsmear elph_fermie ep_extrael ep_qptlist eta eta_phongreen'
+ list_vars = trim(list_vars)//' elphsmear elph_fermie ep_extrael ep_qptlist eta'
 !F
- list_vars = trim(list_vars)//' flexoflag freeze_displ frmax frmin'
+ list_vars = trim(list_vars)//' flexoflag freeze_displ freqflag frmax frmin'
 !G
  list_vars = trim(list_vars)//' gkk2write gkk_rptwrite gkqwrite gruns_nddbs'
 !H
@@ -2527,9 +2485,9 @@ subroutine anaddb_chkvars(string)
  list_vars = trim(list_vars)//' magpen mpatpol mpdir mpopt mustar'
 !N
  list_vars = trim(list_vars)//' natfix natifc natom natprj_bs nchan ndivsm nfreq ngrids nlflag nph1l nph2l'
- list_vars = trim(list_vars)//' nomega nqpath nqshft nsphere nstrfix ntemper nwchan ngqpt ng2qpt'
+ list_vars = trim(list_vars)//' nqpath nqshft nsphere nstrfix ntemper nwchan ngqpt ng2qpt'
 !O
- list_vars = trim(list_vars)//' omegaflag omegamax omegamin outboltztrap'
+ list_vars = trim(list_vars)//' outboltztrap'
 !P
  list_vars = trim(list_vars)//' piezoflag polflag prtddb prtdos prt_ifc prtmbm prtfsurf'
  list_vars = trim(list_vars)//' prtnest prtphbands prtsrlr prtvol prtbltztrp'

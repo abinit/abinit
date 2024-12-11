@@ -1000,6 +1000,10 @@ subroutine ddb_to_d2etot(ddb,blkval,kblok,option,qeq0,qphon,qphnrm,ucvol,omega)
      end do
    end if
 
+   !TODO: the two next susceptibilities should include a volume factor. But since 
+   !this has not been included in ABINIT when creating the DDB cannot be applied 
+   !here. I include them when writting in output but not internaly. 
+
    !Magnetoelectric susceptibility
    iblok=0
    rfphon(:)=0
