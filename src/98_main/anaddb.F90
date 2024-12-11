@@ -68,7 +68,8 @@ program anaddb
  use m_ddb_piezo,      only : ddb_piezo
  use m_ddb_internalstr, only : ddb_internalstr
  use m_ddb_flexo,      only : ddb_flexo
- use m_ddb_magpen,     only : ddb_magpen,ddb_omega_interpol
+ use m_ddb_magpen,     only : ddb_magpen
+ use m_ddb_omega_interpol, only : ddb_omega_interpol
  use m_lwf,            only : run_lattice_wannier
 
  implicit none
@@ -251,13 +252,13 @@ program anaddb
    ABI_MALLOC(delta_asrw0,(3*natom,3))
    ABI_MALLOC(delta_asrw0_fm,(3*natom,3))
    call ddb_magpen(ddb, ddb_lw, delta_asrw0, delta_asrw0_fm, inp%dissip, inp%magpen, inp%mpatpol, & 
- & inp%mpdir, mpert, inp%mpopt, natom, ntypat, inp%omegaflag, inp%prtvol, 1, Crystal%ucvol, inp%timdisp, &
+ & inp%mpdir, mpert, inp%mpopt, natom, ntypat, inp%freqflag, inp%prtvol, 1, Crystal%ucvol, inp%timdisp, &
  & Crystal%xred)
 
-   if (inp%omegaflag/=0) then
-     call ddb_omega_interpol(Crystal%amu, ddb, ddb_lw, delta_asrw0, delta_asrw0_fm, inp%dissip, inp%eta, inp%eta_phongreen, filnam(8), &
-   & inp%magpen, inp%mpatpol, inp%mpdir, mpert, inp%mpopt, natom, inp%nomega, ntypat, & 
-   & inp%omegaflag, inp%omegamax, inp%omegamin, inp%prtvol, 1, Crystal%typat, Crystal%ucvol, Crystal%xred)
+   if (inp%freqflag/=0) then
+     call ddb_omega_interpol(Crystal%amu, ddb, ddb_lw, delta_asrw0, delta_asrw0_fm, inp%dissip, inp%eta, filnam(8), &
+   & inp%magpen, inp%mpatpol, inp%mpdir, mpert, inp%mpopt, natom, inp%nfreq, ntypat, & 
+   & inp%freqflag, inp%frmax, inp%frmin, inp%prtvol, 1, Crystal%typat, Crystal%ucvol, Crystal%xred)
    end if
 
    ABI_FREE(delta_asrw0)
