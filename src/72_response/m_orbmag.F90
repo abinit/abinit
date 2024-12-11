@@ -2517,8 +2517,14 @@ subroutine dterm_ZA0(atindx,cplex_dij,dterm,dtset,paw_an,pawang,pawrad,pawtab,qp
     rt=dtset%znucl(itypat)*rc
     do ii=1,mesh_size
       rr=pawrad(itypat)%rad(ii)
-      if(rr<rc) dkdr(ii)=two*rt/(two*rr+rt)**2
       if(rr>rc) exit
+      if (rr<tol8) then
+        zk1(ii)=zero
+        dkdr(ii)=two/rt
+      else
+        zk1(ii)=one/(one+rt/(two*rr))
+        dkdr(ii)=two*rt/(two*rr+rt)**2
+      end if
     end do
 
     ABI_FREE(v1)
