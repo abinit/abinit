@@ -16,7 +16,7 @@ The present revision ABINITv10.3.4 is for developments
 ================================================================
 0. Platforms
 
-For ABINITv10.3.4, list closed on 2024 11 28
+For ABINITv10.3.4, list closed on 2024 12 YY
 after installation and successful tests for the standard set of platforms,
 as mentioned on
 https://bbportal.abinit.org/#/status
@@ -24,7 +24,7 @@ and
 https://abinit.github.io/abinit_web/builder.html
 Corresponding configuration files are to be found in doc/build/config-examples
 
-Supported compilers : gfortran, intel fortran, NAG, nvhpc. Temporarily NAG untested.
+Supported compilers : gfortran, intel fortran, NAG, nvhpc. 
 The following compilers are either obsolete, or considered too unstable/buggy for ABINIT :
 IBM XLF, g95, pathscale, open64, PGI . This does not mean that ABINIT will not work with these,
 but there is no check on the ABINIT testfarm that ABINIT runs correctly with these.
@@ -32,7 +32,7 @@ The compiler nvhpc has been specifically added for tests of GPUs.
 
 Status, for the different versions of compilers that are supported (or might become soon).
 
-GNU Fortran compiler (presently tested : v8.5, v9.5, v10.2, v12.2, v13.2, v13.3)
+GNU Fortran compiler (presently tested : v8.5, v9.5, v10.2, v12.2, v12.3, v13.2)
 All are mostly OK
 GNU 10.2 : tutoparal/teph_tdep_legacy_4 is disactivated, as well as tutorespfn/tlw#1-7
 GNU 12.2 : tutoparal/timages#04 is disactivated, as well as bigdft_paral#01,02,86, tutoparal/teph_tdep_legacy_4
@@ -51,7 +51,8 @@ Intel Ifort compiler (presently tested : 16.0, NOT CURRENTLY TESTED : 21.4-OneAP
 Ifort 16.0 is mostly OK, except for test paral#30 (Paral KGB), tutoparal/tgswvl#1, v4#32,33,34, and gpu_omp#03 , that are disactivated.
 ! NOT TESTED Ifort 21.4 is mostly OK, except for one problem in DMFT, see test v6#45, like with Ifort 19.1.
 
-NAG Compiler (NOT TESTED CURRENTLY)
+NAG Compiler (presently tested : 7.2 - sequential only)
+NAG 7.2, ABINIT sequential : tmulti6_1, v9#83-87 are disactivated.
 Previously, NAG 7.1, mostly OK, except for test mpiio#28 ; v8#16,#23 ; v9#81-87 ; paral#32 ; tmulti5#1,#2,#3 6#1, l_6#1 and l_7#1; gw1#5  (get the list by filtering over nag_)
 
 nvhpc compiler (presently tested : 23.9)
