@@ -2649,11 +2649,16 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
  if(present(znuc)) then
    ! relevant ZORA length scale for Coulomb potential
    rt=znuc*rc
-   ! replace dk/dr at short range with Coulomb potential dk/dr
+   ! replace k and dk/dr at short range with Coulomb potential version
    do ii=1,mesh_size
      rr=pawrad%rad(ii)
-     if (rr<rc) dkdr(ii)=two*rt/(two*rr+rt)**2
      if (rr>rc) exit
+     if (rr<tol8) then
+       zk1(ii)=zero; dkdr(ii)=two/rt
+     else
+       zk1(ii)=one/(one+rt/(two*rr))
+       dkdr(ii)=two*rt/(two*rr+rt)**2
+     end if
    end do
  end if
 
