@@ -871,6 +871,51 @@ subroutine gpu_copy(dest, src, sizea)
 end subroutine gpu_copy
 !!***
 
+!!****f* m_abi_gpu_linalg/gpu_copy_complex
+!! NAME
+!!  gpu_copy_complex
+!!
+!! FUNCTION
+!!  Copy array content on GPU to another
+!!
+!! INPUTS
+!!  src  = array to be copied
+!!  size = size of src and dest
+!!
+!! OUTPUT
+!!  dest = array to be set
+!!
+!! SOURCE
+subroutine gpu_copy_complex(dest, src, sizea)
+ use, intrinsic :: iso_c_binding
+ integer(c_size_t),intent(in)  :: sizea
+ complex(dpc),target,intent(in)  :: src(sizea)
+ complex(dpc),target,intent(out) :: dest(sizea)
+
+! *********************************************************************
+
+#if defined HAVE_OPENMP_OFFLOAD
+ integer(c_size_t)  :: i
+
+#if defined HAVE_GPU_CUDA
+ !$OMP TARGET DATA USE_DEVICE_PTR(dest,src)
+ call copy_gpu_to_gpu(c_loc(dest), c_loc(src), sizea*dpc*2)
+ !$OMP END TARGET DATA
+#elif defined HAVE_GPU_HIP
+ !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(i) MAP(to:src,dest)
+ do i=1,sizea
+   dest(i)=src(i)
+ end do
+#endif
+
+#else
+ ! Make testfarm happy
+ ABI_UNUSED((/src,dest/))
+#endif
+
+end subroutine gpu_copy_complex
+!!***
+
 !------------------------------------------------------------------------------
 !                         abi_gpu_xgemm
 !------------------------------------------------------------------------------

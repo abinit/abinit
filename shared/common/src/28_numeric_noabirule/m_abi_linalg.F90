@@ -146,6 +146,7 @@ module m_abi_linalg
  public :: gpu_set_to_zero
  public :: gpu_set_to_zero_complex
  public :: gpu_copy
+ public :: gpu_copy_complex
 
 !BLAS INTERFACE
  !public :: abi_zgemm
