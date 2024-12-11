@@ -690,19 +690,22 @@ end subroutine print_matlu
  use m_abi_linalg, only : abi_xgemm
 
 !Arguments ------------------------------------
- type(paw_dmft_type), intent(in) :: paw_dmft
- type(matlu_type), intent(inout) :: gloc(paw_dmft%natom)
+ type(paw_dmft_type), target, intent(in) :: paw_dmft
+ type(matlu_type), target, intent(inout) :: gloc(paw_dmft%natom)
 !Local variables-------------------------------
- integer :: at_indx,iatom,irot,isppol,lpawu,mu,natom
- integer :: ndim,ndim_max,nspinor,nsppol,nsym,nu
+ integer :: at_indx,iatom,irot,isppol,lpawu,m1,m2,mu,natom
+ integer :: ndim,ndim_max,nspinor,nsppol,nsym,nu,ndat
  complex(dpc), allocatable :: gloc_tmp(:,:),gloc_tmp2(:,:)
- type(matlu_type), allocatable :: gloc_nmrep(:),glocsym(:)
+ type(matlu_type), allocatable, target :: gloc_nmrep(:),glocsym(:)
+ complex(dpc), ABI_CONTIGUOUS pointer :: zarot(:,:),gloc_mat(:,:,:),glocsym_mat(:,:,:)
+ real(dp), ABI_CONTIGUOUS pointer :: symrec_cart(:,:)
 
  natom    = paw_dmft%natom
  ndim_max = 2*paw_dmft%maxlpawu + 1
  nspinor  = paw_dmft%nspinor
  nsppol   = paw_dmft%nsppol
  nsym     = paw_dmft%nsym
+ ndat     = gloc(1)%ndat
  ABI_MALLOC(glocsym,(natom))
 
 !=========  Case nspinor ==1 ========================
@@ -718,28 +721,31 @@ end subroutine print_matlu
      lpawu = gloc(iatom)%lpawu
      if (lpawu == -1) cycle
      ndim = 2*lpawu + 1
+     glocsym_mat => glocsym(iatom)%mat
 
      ABI_MALLOC(gloc_tmp2,(ndim,ndim))
 
      do irot=1,nsym
 
        at_indx = paw_dmft%indsym(irot,iatom)
+       zarot       => paw_dmft%zarot(:,1:ndim,irot,lpawu+1)
+       gloc_mat    => gloc(at_indx)%mat
 
        do isppol=1,nsppol
 
          call abi_xgemm("n","n",ndim,ndim,ndim,cone,gloc(at_indx)%mat(:,:,isppol),ndim,&
-                      & paw_dmft%zarot(:,1:ndim,irot,lpawu+1),ndim_max,czero,gloc_tmp(:,1:ndim),ndim_max)
+                      & zarot(:,1:ndim),ndim_max,czero,gloc_tmp(:,1:ndim),ndim_max)
 
-         call abi_xgemm("t","n",ndim,ndim,ndim,cone,paw_dmft%zarot(:,1:ndim,irot,lpawu+1),ndim_max,&
+         call abi_xgemm("t","n",ndim,ndim,ndim,cone,zarot(:,1:ndim),ndim_max,&
                       & gloc_tmp(:,1:ndim),ndim_max,czero,gloc_tmp2(:,:),ndim)
 
-         glocsym(iatom)%mat(:,:,isppol) = glocsym(iatom)%mat(:,:,isppol) + gloc_tmp2(:,:)
+         glocsym_mat(:,:,isppol) = glocsym_mat(:,:,isppol) + gloc_tmp2(:,:)
 
        end do ! isppol
 
      end do ! irot
 
-     glocsym(iatom)%mat(:,:,:) = glocsym(iatom)%mat(:,:,:) / dble(nsym)
+     glocsym_mat(:,:,:) = glocsym_mat(:,:,:) / dble(nsym)
 
      ABI_FREE(gloc_tmp2)
 
@@ -768,12 +774,16 @@ end subroutine print_matlu
      lpawu = gloc(iatom)%lpawu
      if (lpawu == 1) cycle
      ndim = 2*lpawu + 1
+     glocsym_mat => glocsym(iatom)%mat
 
      ABI_MALLOC(gloc_tmp2,(ndim,4*ndim))
 
      do irot=1,nsym
 
        at_indx = paw_dmft%indsym(irot,iatom)
+       zarot       => paw_dmft%zarot(:,1:ndim,irot,lpawu+1)
+       symrec_cart => paw_dmft%symrec_cart(:,:,irot)
+       gloc_mat    => gloc_nmrep(at_indx)%mat
 
        do mu=1,4 ! Symmetrize density and magnetization
 
@@ -801,7 +811,7 @@ end subroutine print_matlu
      ABI_FREE(gloc_tmp2)
 
   !  ==  Normalize sum
-     glocsym(iatom)%mat(:,:,:) = glocsym(iatom)%mat(:,:,:) / dble(nsym)
+     glocsym_mat(:,:,:) = glocsym_mat(:,:,:) / dble(nsym)
 
    end do ! iatom
 
