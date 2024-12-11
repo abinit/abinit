@@ -36,6 +36,10 @@ MODULE m_matlu
  use, intrinsic :: iso_c_binding, only: c_size_t, c_loc
  use m_abi_linalg
 
+#ifdef HAVE_GPU_MARKERS
+ use m_nvtx
+#endif
+
  implicit none
 
  private
@@ -146,19 +150,20 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine init_matlu(natom,nspinor,nsppol,lpawu_natom,matlu,gpu_option)
+subroutine init_matlu(natom,nspinor,nsppol,lpawu_natom,matlu,gpu_option,ndat)
 
 !Arguments ------------------------------------
  integer, intent(in) :: natom,nspinor,nsppol
  integer, intent(in) :: lpawu_natom(natom)
- integer, intent(in), optional :: gpu_option
+ integer, intent(in), optional :: gpu_option,ndat
  type(matlu_type), target, intent(inout) :: matlu(natom)
 !Local variables ------------------------------------
- integer :: iatom,lpawu,ndim,l_gpu_option
+ integer :: iatom,lpawu,ndim,l_gpu_option,l_ndat
  complex(dpc), ABI_CONTIGUOUS pointer :: mat(:,:,:)
 !************************************************************************
 
  l_gpu_option=ABI_GPU_DISABLED; if(present(gpu_option)) l_gpu_option=gpu_option
+ l_ndat=1; if(present(ndat)) l_ndat=ndat
 ! matlu%mband       = mband
 ! matlu%dmftbandf   = dmftbandf
 ! matlu%dmftbandi   = dmftbandi
@@ -170,6 +175,7 @@ subroutine init_matlu(natom,nspinor,nsppol,lpawu_natom,matlu,gpu_option)
    matlu(iatom)%lpawu   = lpawu
    matlu(iatom)%nspinor = nspinor
    matlu(iatom)%nsppol  = nsppol
+   matlu(iatom)%ndat  = l_ndat
    matlu(iatom)%gpu_option  = l_gpu_option
    if (lpawu == -1) cycle
    ndim = (2*lpawu+1) * nspinor
@@ -322,6 +328,21 @@ subroutine copy_matlu(mat1,mat2,natom,opt_diag,opt_non_diag,opt_re)
    if (lpawu == -1) cycle
    ndim = (2*lpawu+1) * nspinor
 
+   !if both matrix are on GPU and no opt is provided, perform copy on GPU
+   !Other cases can be handled through OpenMP kernels on GPU but no use case exists.
+   if(mat1(iatom)%gpu_option==ABI_GPU_OPENMP .and. mat2(iatom)%gpu_option==ABI_GPU_OPENMP &
+   &    .and. .not. (present(opt_diag) .or. present(opt_non_diag) .or. present(opt_re))) then
+#ifdef HAVE_OPENMP_OFFLOAD
+     call gpu_copy_complex(mat2(iatom)%mat, mat1(iatom)%mat, int(nsppol, c_size_t)*ndim*ndim)
+#endif
+     cycle
+   end if
+
+
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET UPDATE FROM(mat1(iatom)%mat) IF(mat1(iatom)%gpu_option==ABI_GPU_OPENMP)
+   !$OMP TARGET UPDATE FROM(mat2(iatom)%mat) IF(mat2(iatom)%gpu_option==ABI_GPU_OPENMP)
+#endif
    if (present(opt_diag)) then
      do isppol=1,nsppol
        do im=1,ndim
@@ -341,6 +362,9 @@ subroutine copy_matlu(mat1,mat2,natom,opt_diag,opt_non_diag,opt_re)
    else
      mat2(iatom)%mat(:,:,:) = mat1(iatom)%mat(:,:,:)
    end if ! opt
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET UPDATE TO(mat2(iatom)%mat) IF(mat2(iatom)%gpu_option==ABI_GPU_OPENMP)
+#endif
 
  end do ! iatom
 
@@ -694,72 +718,166 @@ end subroutine print_matlu
  type(matlu_type), target, intent(inout) :: gloc(paw_dmft%natom)
 !Local variables-------------------------------
  integer :: at_indx,iatom,irot,isppol,lpawu,m1,m2,mu,natom
- integer :: ndim,ndim_max,nspinor,nsppol,nsym,nu,ndat
- complex(dpc), allocatable :: gloc_tmp(:,:),gloc_tmp2(:,:)
+ integer :: ndim,ndim_max,nspinor,nsppol,nsym,nu,gpu_option
+ complex(dpc), allocatable :: gloc_tmp(:,:,:),gloc_tmp2(:,:,:)
  type(matlu_type), allocatable, target :: gloc_nmrep(:),glocsym(:)
- complex(dpc), ABI_CONTIGUOUS pointer :: zarot(:,:),gloc_mat(:,:,:),glocsym_mat(:,:,:)
+ complex(dpc), ABI_CONTIGUOUS pointer :: zarot(:,:,:,:),gloc_mat(:,:,:),glocsym_mat(:,:,:)
  real(dp), ABI_CONTIGUOUS pointer :: symrec_cart(:,:)
+ complex(dpc) :: ratio
 
  natom    = paw_dmft%natom
  ndim_max = 2*paw_dmft%maxlpawu + 1
  nspinor  = paw_dmft%nspinor
- nsppol   = paw_dmft%nsppol
+ nsppol   = gloc(1)%nsppol
  nsym     = paw_dmft%nsym
- ndat     = gloc(1)%ndat
+ gpu_option = gloc(1)%gpu_option
+ zarot    => paw_dmft%zarot
+ ratio = dcmplx(1.0_dp/nsym,0.0_dp)
+ !zarot       => paw_dmft%zarot(:,1:ndim,irot,lpawu+1)
  ABI_MALLOC(glocsym,(natom))
+#ifdef HAVE_OPENMP_OFFLOAD
+ !$OMP TARGET ENTER DATA MAP(alloc:zarot) IF(gpu_option==ABI_GPU_OPENMP)
+ !$OMP TARGET UPDATE TO(zarot) IF(gpu_option==ABI_GPU_OPENMP)
+#else
+  ABI_UNUSED((/m1,m2/))
+#endif
 
 !=========  Case nspinor ==1 ========================
 
  if (nspinor == 1) then
 
-   ABI_MALLOC(gloc_tmp,(ndim_max,ndim_max))
+   ABI_MALLOC(gloc_tmp,(ndim_max,ndim_max*nsppol,nsym))
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET ENTER DATA MAP(alloc:gloc_tmp) IF(gpu_option==ABI_GPU_OPENMP)
+#endif
 
-   call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu(:),glocsym(:))
+   call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu(:),glocsym(:),gpu_option=gpu_option)
 
    do iatom=1,natom
+#ifdef HAVE_GPU_MARKERS
+     call nvtxStartRange("iter_atom",29)
+#endif
 
      lpawu = gloc(iatom)%lpawu
      if (lpawu == -1) cycle
      ndim = 2*lpawu + 1
      glocsym_mat => glocsym(iatom)%mat
 
-     ABI_MALLOC(gloc_tmp2,(ndim,ndim))
+     ABI_MALLOC(gloc_tmp2,(ndim,ndim*nsppol,nsym))
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET ENTER DATA MAP(alloc:gloc_tmp2) IF(gpu_option==ABI_GPU_OPENMP)
+#endif
 
-     do irot=1,nsym
 
-       at_indx = paw_dmft%indsym(irot,iatom)
-       zarot       => paw_dmft%zarot(:,1:ndim,irot,lpawu+1)
-       gloc_mat    => gloc(at_indx)%mat
+     if(gpu_option==ABI_GPU_DISABLED) then
 
+       do irot=1,nsym
+#ifdef HAVE_GPU_MARKERS
+         call nvtxStartRange("iter_rot",28)
+#endif
+         at_indx = paw_dmft%indsym(irot,iatom)
+         gloc_mat    => gloc(at_indx)%mat
+
+         do isppol=1,nsppol
+           call abi_xgemm("n","n",ndim,ndim,ndim,cone,gloc_mat(:,:,isppol),ndim,&
+                        & zarot(:,1:ndim,irot,lpawu+1),ndim_max,czero,gloc_tmp(:,1+ndim*(isppol-1):ndim*isppol,irot),ndim_max)
+         end do ! isppol
+
+           call abi_xgemm("t","n",ndim,ndim*nsppol,ndim,cone,zarot(:,1:ndim,irot,lpawu+1),ndim_max,&
+                        & gloc_tmp(:,:,irot),ndim_max,czero,gloc_tmp2(:,:,irot),ndim)
+
+         do isppol=1,nsppol
+           glocsym_mat(:,:,isppol) = glocsym_mat(:,:,isppol) + gloc_tmp2(:,1+ndim*(isppol-1):ndim*isppol,irot)
+         end do ! isppol
+
+#ifdef HAVE_GPU_MARKERS
+         call nvtxEndRange()
+#endif
+       end do ! irot
+
+       glocsym_mat(:,:,:) = glocsym_mat(:,:,:) / dble(nsym)
+
+     else if(gpu_option==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+
+#ifdef HAVE_GPU_MARKERS
+       call nvtxStartRange("1st_gemm",28)
+#endif
+       do irot=1,nsym
+         at_indx = paw_dmft%indsym(irot,iatom)
+         gloc_mat    => gloc(at_indx)%mat
+
+         !$OMP TARGET DATA USE_DEVICE_PTR(gloc_tmp,zarot,gloc_mat)
+         call abi_gpu_xgemm_strided(2,"n","n",ndim,ndim,ndim,cone,&
+         &    c_loc(gloc_mat(:,:,:)),ndim,ndim*ndim,&
+         &    c_loc(zarot(:,1:ndim,irot,lpawu+1)),ndim_max,0,czero,&
+         &    c_loc(gloc_tmp(:,:,irot)),ndim_max,ndim*ndim,nsppol)
+         !$OMP END TARGET DATA
+       end do ! irot
+#ifdef HAVE_GPU_MARKERS
+       call nvtxEndRange()
+#endif
+
+#ifdef HAVE_GPU_MARKERS
+       call nvtxStartRange("2nd_gemm",27)
+#endif
+       !$OMP TARGET DATA USE_DEVICE_PTR(gloc_tmp,zarot,gloc_tmp2)
+       call abi_gpu_xgemm_strided(2,"t","n",ndim,ndim*nsppol,ndim,cone,&
+       &    c_loc(zarot(:,:,:,lpawu+1)),ndim_max,ndim_max*ndim_max,&
+       &    c_loc(gloc_tmp(:,:,:)),ndim_max,ndim_max*ndim_max*nsppol,czero,&
+       &    c_loc(gloc_tmp2(:,:,:)),ndim,ndim*ndim*nsppol,nsym)
+       !$OMP END TARGET DATA
+#ifdef HAVE_GPU_MARKERS
+       call nvtxEndRange()
+#endif
+
+#ifdef HAVE_GPU_MARKERS
+       call nvtxStartRange("axpy",26)
+#endif
+       !$OMP TARGET TEAMS DISTRIBUTE MAP(to:glocsym_mat,gloc_tmp2) PRIVATE(isppol)
        do isppol=1,nsppol
-
-         call abi_xgemm("n","n",ndim,ndim,ndim,cone,gloc(at_indx)%mat(:,:,isppol),ndim,&
-                      & zarot(:,1:ndim),ndim_max,czero,gloc_tmp(:,1:ndim),ndim_max)
-
-         call abi_xgemm("t","n",ndim,ndim,ndim,cone,zarot(:,1:ndim),ndim_max,&
-                      & gloc_tmp(:,1:ndim),ndim_max,czero,gloc_tmp2(:,:),ndim)
-
-         glocsym_mat(:,:,isppol) = glocsym_mat(:,:,isppol) + gloc_tmp2(:,:)
-
+         !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(m1,m2,irot)
+         do m2=1,ndim
+           do m1=1,ndim
+             do irot=1,nsym
+               glocsym_mat(m1,m2,isppol) = glocsym_mat(m1,m2,isppol) + gloc_tmp2(m1,m2+ndim*(isppol-1),irot)
+             end do ! irot
+           end do ! m1
+         end do  ! m2
        end do ! isppol
+#ifdef HAVE_GPU_MARKERS
+       call nvtxEndRange()
+#endif
 
-     end do ! irot
+       !$OMP TARGET DATA USE_DEVICE_PTR(glocsym_mat)
+       call abi_gpu_xscal(2, ndim*ndim*nsppol, ratio, c_loc(glocsym_mat), 1)
+       !$OMP END TARGET DATA
 
-     glocsym_mat(:,:,:) = glocsym_mat(:,:,:) / dble(nsym)
+#endif
+     end if
 
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET EXIT DATA MAP(delete:gloc_tmp2) IF(gpu_option==ABI_GPU_OPENMP)
+#endif
      ABI_FREE(gloc_tmp2)
+#ifdef HAVE_GPU_MARKERS
+     call nvtxEndRange()
+#endif
 
    end do ! iatom
 
    !==  Put glocsym into gloc
    call copy_matlu(glocsym(:),gloc(:),natom)
 
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET EXIT DATA MAP(delete:gloc_tmp) IF(gpu_option==ABI_GPU_OPENMP)
+#endif
+   ABI_FREE(gloc_tmp)
 !=========  Case nspinor ==2 ========================
 
  else
 
    !== Allocate temporary arrays
-   ABI_MALLOC(gloc_tmp,(ndim_max,4*ndim_max))
    ABI_MALLOC(gloc_nmrep,(natom))
    call init_matlu(natom,1,4,paw_dmft%lpawu(:),glocsym(:))
    call init_matlu(natom,1,4,paw_dmft%lpawu(:),gloc_nmrep(:))
@@ -776,39 +894,44 @@ end subroutine print_matlu
      ndim = 2*lpawu + 1
      glocsym_mat => glocsym(iatom)%mat
 
-     ABI_MALLOC(gloc_tmp2,(ndim,4*ndim))
+     ABI_MALLOC(gloc_tmp,(ndim,ndim,4))
+     ABI_MALLOC(gloc_tmp2,(ndim,ndim,4))
 
      do irot=1,nsym
 
        at_indx = paw_dmft%indsym(irot,iatom)
-       zarot       => paw_dmft%zarot(:,1:ndim,irot,lpawu+1)
        symrec_cart => paw_dmft%symrec_cart(:,:,irot)
        gloc_mat    => gloc_nmrep(at_indx)%mat
 
        do mu=1,4 ! Symmetrize density and magnetization
 
          call abi_xgemm("n","n",ndim,ndim,ndim,cone,gloc_nmrep(at_indx)%mat(:,:,mu),ndim, &
-                      & paw_dmft%zarot(:,1:ndim,irot,lpawu+1),ndim_max,czero,gloc_tmp(:,1+ndim*(mu-1):ndim*mu),ndim_max)
+                      & paw_dmft%zarot(:,1:ndim,irot,lpawu+1),ndim_max,czero,gloc_tmp(:,:,mu),ndim)
 
        end do ! mu
 
-       call abi_xgemm("t","n",ndim,4*ndim,ndim,cone,paw_dmft%zarot(:,1:ndim,irot,lpawu+1),ndim_max,&
-                    & gloc_tmp(:,1:4*ndim),ndim_max,czero,gloc_tmp2(:,:),ndim)
+       do mu=1,4
 
-       glocsym(iatom)%mat(:,:,1) = glocsym(iatom)%mat(:,:,1) + gloc_tmp2(:,1:ndim)
+       call abi_xgemm("t","n",ndim,ndim,ndim,cone,paw_dmft%zarot(:,1:ndim,irot,lpawu+1),ndim_max,&
+                    & gloc_tmp(:,:,mu),ndim,czero,gloc_tmp2(:,:,mu),ndim)
+
+       end do ! mu
+
+       glocsym(iatom)%mat(:,:,1) = glocsym(iatom)%mat(:,:,1) + gloc_tmp2(:,:,1)
 
        ! Symmetrize magnetization
 
        do nu=2,4
          do mu=2,4
            glocsym(iatom)%mat(:,:,mu) = glocsym(iatom)%mat(:,:,mu) + &
-             & paw_dmft%symrec_cart(mu-1,nu-1,irot)*gloc_tmp2(:,1+(nu-1)*ndim:ndim*nu)
+             & paw_dmft%symrec_cart(mu-1,nu-1,irot)*gloc_tmp2(:,:,nu)
          end do ! mu
        end do ! nu
 
      end do ! irot
 
      ABI_FREE(gloc_tmp2)
+     ABI_FREE(gloc_tmp)
 
   !  ==  Normalize sum
      glocsym_mat(:,:,:) = glocsym_mat(:,:,:) / dble(nsym)
@@ -826,7 +949,9 @@ end subroutine print_matlu
 
  call destroy_matlu(glocsym(:),natom)
  ABI_FREE(glocsym)
- ABI_FREE(gloc_tmp)
+#ifdef HAVE_OPENMP_OFFLOAD
+ !$OMP TARGET EXIT DATA MAP(delete:zarot) IF(gpu_option==ABI_GPU_OPENMP)
+#endif
 
  !mt2g(1)=1
  !mt2g(2)=2
