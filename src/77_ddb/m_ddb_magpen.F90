@@ -500,7 +500,6 @@ contains
    & ' but fs2rs=1 ',ch10
      ABI_ERROR(msg)
    end if 
-   write(100,*) size(blkval_fs)
  end if
 
 !Extract the penalized susceptibility
