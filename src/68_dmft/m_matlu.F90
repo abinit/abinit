@@ -811,9 +811,10 @@ end subroutine print_matlu
          call abi_gpu_xgemm_strided(2,"n","n",ndim,ndim,ndim,cone,&
          &    c_loc(gloc_mat(:,:,:)),ndim,ndim*ndim,&
          &    c_loc(zarot(:,1:ndim,irot,lpawu+1)),ndim_max,0,czero,&
-         &    c_loc(gloc_tmp(:,:,irot)),ndim_max,ndim*ndim,nsppol)
+         &    c_loc(gloc_tmp(:,:,irot)),ndim_max,ndim*ndim,nsppol,async=.true.)
          !$OMP END TARGET DATA
        end do ! irot
+       call gpu_linalg_stream_synchronize()
 #ifdef HAVE_GPU_MARKERS
        call nvtxEndRange()
 #endif
