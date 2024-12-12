@@ -153,8 +153,7 @@ CONTAINS  !=====================================================================
  logical :: compute_euijkl,compute_euij_fll,lexist
  real(dp) :: ak,eps,f4of2,f6of2,int1,intg,jh,lambda,lstep,phiint_ij,phiint_ipjp,rstep,uh,vee1,vee2
  character(len=4) :: tag
- character(len=15) :: tmpfil
- character(len=500) :: message
+ character(len=500) :: message,tmpfil
  logical :: lmagCalc_
 !arrays
  integer,ABI_CONTIGUOUS pointer :: indlmn(:,:)
@@ -820,7 +819,7 @@ CONTAINS  !=====================================================================
 
        write(tag,'(i4)') itypat
        write(message,'(4a)') &
-         & ch10,' =====  Build DMFT radial orbital for atom type ',trim(adjustl(tag)),' ========'
+         & ch10,' =====  Build unprojected DMFT radial orbital for atom type ',trim(adjustl(tag)),' ========'
        call wrtout(std_out,message,"COLL")
 
        ABI_SFREE(pawtab(itypat)%proj)
@@ -841,7 +840,7 @@ CONTAINS  !=====================================================================
          pawtab(itypat)%proj(1:meshsz) = pawtab(itypat)%phi(1:meshsz,pawtab(itypat)%lnproju(dmft_proj(itypat)))
        else  ! read orbital from file
          tmpfil = 'dmft_proj_'//adjustl(tag)
-         write(message,'(2a)') " Using wavefunction from file ",tmpfil
+         write(message,'(2a)') " Using wavefunction from file ",trim(tmpfil)
          call wrtout(std_out,message,"COLL")
          inquire(file=trim(tmpfil),exist=lexist)
          if (.not. lexist) ABI_ERROR("File "//trim(tmpfil)//" does not exist !")
@@ -869,29 +868,33 @@ CONTAINS  !=====================================================================
        call pawrad_init(pawrad_tmp,meshsz,mesh_type,rstep,lstep)
        call simp_gen(int1,pawtab(itypat)%proj(1:meshsz)**2,pawrad_tmp)
 
-       write(message,'(a,f9.4)') " Squared norm of the DMFT orbital: ",int1
+       write(message,'(a,f6.4)') " Squared norm of the DMFT orbital: ",int1
        call wrtout(std_out,message,"COLL")
 
        int1 = sqrt(int1)
 
+       tmpfil = "dmft_unprojected_normalized_orbital_itypat_"//trim(adjustl(tag))
        if (me == 0) then
-         open(unit=505,file="dmft_normalized_orbital_itypat_"//trim(adjustl(tag)),status="unknown",form="formatted")
+         open(unit=505,file=trim(tmpfil),status="unknown",form="formatted")
          do ir=1,meshsz
            write(505,*) pawrad_tmp%rad(ir),pawtab(itypat)%proj(ir)/int1
          end do
          close(505)
        end if ! me=0
 
+       write(message,'(3a)') ch10," Writing unprojected normalized orbital on file ",trim(tmpfil)
+       call wrtout(std_out,message,"COLL")
+
        if (dmft_dc == 8) then
 
          if (dmft_proj(itypat) > 0) then
            message = "WARNING: You are using dmft_dc=8 while using an atomic orbital from &
-               & the PAW dataset. Make sure you know what you're doing, and please &
-               & look at the tutorial. In our current implementation, we assume that &
+               & the PAW dataset. In our current implementation, we assume that &
                & the projection of the orbital on [dmftbandi,dmftbandf] is the same &
                & as the orbital itself, and this can hardly be the case with a truncated atomic &
                & orbital. Please compute the projection of the atomic orbital with dmft_prtwan=1, &
-               & and then use this projection as your DMFT orbital with dmft_proj=-1."
+               & and then use this projection as your DMFT orbital with dmft_proj=-1. This is explained &
+               & in the tutorial."
            ABI_WARNING(message)
          end if
 
@@ -1435,7 +1438,7 @@ CONTAINS  !=====================================================================
      write(message, '(6a)') ch10,'======= DFT+U Energy terms (in Hartree) ====',ch10,&
 &     ch10,' For Atom ',tag
    else if (pawtab%usepawu >= 10) then
-     write(message, '(6a)') ch10,'  ===   DFT+U Energy terms for the DMFT occupation matrix ==',ch10,&
+     write(message, '(6a)') ch10,'  ===   DFT+U Energy terms from the DMFT occupation matrix ==',ch10,&
 &     ch10,' For Atom ',tag
    end if
 

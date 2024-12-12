@@ -328,7 +328,11 @@ subroutine compute_energy(energies_dmft,green,paw_dmft,pawprtvol,pawtab,self,occ
 ! *********************************************************************
 
  if (part == 'both') then
-   write(message,'(2a)') ch10,"  == Compute DFT+DMFT energy terms "
+   if (occ_type == " lda") then
+     write(message,'(2a)') ch10,"  == Check: Compute DFT energy terms"
+   else
+     write(message,'(2a)') ch10,"  == Compute DFT+DMFT energy terms"
+   end if
    call wrtout(std_out,message,'COLL')
  else if (part == 'band') then
    write(message,'(2a)') ch10,"  == Compute DFT+DMFT energy terms : Band energy terms"
@@ -487,7 +491,11 @@ subroutine compute_band_energy(energies_dmft,green,paw_dmft,occ_type,ecalc_dft,f
  character(len=500) :: message
 ! *********************************************************************
 
- write(message,'(2a)') ch10,"  == Compute Band Energy terms for DMFT "
+ if (occ_type == " lda") then
+   write(message,'(2a)') ch10,"  == Compute DFT Band Energy terms"
+ else
+   write(message,'(2a)') ch10,"  == Compute DMFT Band Energy terms"
+ end if
  call wrtout(std_out,message,'COLL')
  beta = one / paw_dmft%temp
 
@@ -593,17 +601,17 @@ subroutine compute_band_energy(energies_dmft,green,paw_dmft,occ_type,ecalc_dft,f
  if (occ_type == " lda") then
    if (abs(energies_dmft%eband_dft-energies_dmft%eband_dmft) > tol5) then
      write(message,'(5x,3a,15x,a,f12.6,a,15x,a,5x,f12.5)') "Warning: ", &
-       & "Differences between band energy from DFT occupations",ch10, &
-       & "and DFT green function is:",energies_dmft%eband_dft-energies_dmft%eband_dmft,ch10, &
+       & "Differences between band energy with Fermi-Dirac occupations",ch10, &
+       & "and occupations from DFT Green's function is:",energies_dmft%eband_dft-energies_dmft%eband_dmft,ch10, &
        & "which is larger than",tol5
      call wrtout(std_out,message,'COLL')
      write(message,'(a)') &
-       & "   Action: increase the number of frequencies, or reduce the number of high energy dmft bands"
+       & "   Action: increase the number of frequencies, or reduce the number of high energy DMFT bands"
      call wrtout(std_out,message,'COLL')
    else
      write(message,'(3a,10x,a,f12.6,a,10x,a,5x,f12.5)')  "          ", &
-      & "Differences between band energy from DFT occupations",ch10, &
-      & "and DFT green function is:",energies_dmft%eband_dft-energies_dmft%eband_dmft,ch10, &
+      & "Differences between band energy with Fermi-Dirac occupations",ch10, &
+      & "and occupations from DFT Green's function is:",energies_dmft%eband_dft-energies_dmft%eband_dmft,ch10, &
       & "which is smaller than",tol5
      call wrtout(std_out,message,'COLL')
    end if ! tol
@@ -612,17 +620,17 @@ subroutine compute_band_energy(energies_dmft,green,paw_dmft,occ_type,ecalc_dft,f
  if (present(fcalc_dft)) then
    if (abs(energies_dmft%fband_dft-green%trace_log) > tol5) then
      write(message,'(5x,3a,15x,a,f12.6,a,15x,a,5x,f12.5)') "Warning: ", &
-       & "Differences between free energy from DFT occupations",ch10, &
-       & "and DFT green function is:",energies_dmft%fband_dft-green%trace_log,ch10, &
+       & "Differences between free energy with Fermi-Dirac occupations",ch10, &
+       & "and occupations from DFT Green's function is:",energies_dmft%fband_dft-green%trace_log,ch10, &
        & "which is larger than",tol5
      call wrtout(std_out,message,'COLL')
      write(message,'(a)') &
-       & "   Action: increase the number of frequencies, or reduce the number of high energy dmft bands"
+       & "   Action: increase the number of frequencies, or reduce the number of high energy DMFT bands"
      call wrtout(std_out,message,'COLL')
    else
      write(message,'(3a,10x,a,f12.6,a,10x,a,5x,f12.5)')  "          ", &
-      & "Differences between free energy from DFT occupations",ch10, &
-      & "and DFT green function is:",energies_dmft%fband_dft-green%trace_log,ch10, &
+      & "Differences between free energy with Fermi-Dirac occupations",ch10, &
+      & "and occupations from DFT Green's function is:",energies_dmft%fband_dft-green%trace_log,ch10, &
       & "which is smaller than",tol5
      call wrtout(std_out,message,'COLL')
    end if ! tol
