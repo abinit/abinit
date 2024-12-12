@@ -34,7 +34,7 @@ module m_ddb_omega_interpol
  use m_profiling_abi
  use m_errors
  use m_ddb
- use m_ddb_magpen,      only : local_spinsus, magmom
+ use m_ddb_magpen,      only : local_spinsus, magmom, mp_d2etot
  use m_fstrings,        only : itoa, sjoin
  use m_macroave,        only : POLINT
  use m_io_tools,        only : open_file
@@ -105,9 +105,11 @@ contains
  character(len=fnlen) :: diel_filename,spin_filename,mmom_filename,mmspec_filename
  character(len=fnlen) :: phon_filename,zeff_filename,zeffspec_filename,zfield_filename
  complex(dpc) :: cplxvar,cplx_weta
+ logical :: qeq0
 !arrays
  real(dp) :: qphnrm(3),qphon(3,3)
- real(dp), allocatable :: dint_fsddb(:,:),int_fsddb(:,:,:),omega(:),omegacalc(:)
+ real(dp), allocatable :: dint_fsddb(:,:),int_fsddb(:,:,:),int_rsddb(:,:,:)
+ real(dp), allocatable :: omega(:),omegacalc(:)
  real(dp), allocatable :: w0hessian(:,:),w0berry(:,:)
  real(dp), allocatable :: eigvec(:,:,:,:,:),eigvec_fm(:,:,:,:,:),phfrq(:,:)
  real(dp), allocatable :: magphonspec(:),mode_magphonspec(:,:),mode_phonspec(:,:),phonspec(:)
@@ -154,6 +156,7 @@ contains
  nmdir=sum(mpdir(:))
  ndim=nmat*nmdir
  fs2rs=1
+ qeq0=(sqrt(sum(qphon(:,1)**2))<tol8)
  ABI_MALLOC(omega,(nomega))
  ABI_MALLOC(phfrq,(3*natom,nomega))
  ABI_MALLOC(phonspec,(nomega))
@@ -196,6 +199,7 @@ contains
  ABI_MALLOC(ifcmat_fm,(3*natom,3*natom))
  ABI_MALLOC(dint_fsddb,(2,ddb%msize))
  ABI_MALLOC(int_fsddb,(2,ddb%msize,1))
+ ABI_MALLOC(int_rsddb,(2,ddb%msize,1))
  ABI_MALLOC(ri_mmom,(ndim,3,nomega))
 
 !For linear interpolation detect the w=0 Hessians and Berry curvatures
@@ -299,12 +303,22 @@ contains
  & dummysus,magpen,magsus(:,:,iw),mpatpol,mpdir,mpert,natom,1,ndim,nmdir,prtopt,prtvol,&
  & fs2rs=fs2rs,blkval_fs=int_fsddb)
 
-   !Calculate the magnetic moments
+   !Calculate the 1st-order magnetic moments
    call magmom(dummymom,dummymom_tr,ddb,dummysus,dummysus,1,1,1,magpen,&
-   & magsus(:,:,iw),mmom(:,:,iw),mmom_tr(:,:,iw),mpatpol,mpdir,mpert,natom,&
-   &1,ndim,nmdir,prtopt,prtvol,qphon,xred,zfield(:,:,iw),zfield_tr,&
-   &fs2rs=fs2rs,blkval_fs=int_fsddb)
+ & magsus(:,:,iw),mmom(:,:,iw),mmom_tr(:,:,iw),mpatpol,mpdir,mpert,natom,&
+ & 1,ndim,nmdir,prtopt,prtvol,qphon,xred,zfield(:,:,iw),zfield_tr,&
+ & fs2rs=fs2rs,blkval_fs=int_fsddb)
   
+   !Now calculate the non-magnetic second-order quantities
+   call ddb%to_d2etot(int_fsddb,1,0,qeq0,qphon,qphnrm,ucvol,omega=omega(iw))
+
+   call mp_d2etot(dummysus,ddb,1,dummysus,magsus(:,:,iw),&
+ & magpen,mpert,mpopt,natom,1,ndim,qphon,xred,zfield(:,:,iw),zfield_tr, &
+ & fs2rs=fs2rs,blkval_fs=int_fsddb,blkval_rs=int_rsddb)
+
+   call ddb%to_d2etot(int_fsddb,1,1,qeq0,qphon,qphnrm,ucvol,omega=omega(iw))
+   if (mpopt==2) call ddb%to_d2etot(int_rsddb,1,1,qeq0,qphon,qphnrm,ucvol,omega=omega)
+
 !     !Calculate the dielectric susceptibility
 !     call mp_diel(barepsilon(:,:,iw),barmagsus(:,:,iw),barmmom,barmmom_tr,&
 !   & int_fsddb,dissip,epsilon(:,:,iw),1,invhmat,magpen,magsus(:,:,iw),mpert,mpopt,&
@@ -1013,6 +1027,7 @@ contains
 
  ABI_FREE(dint_fsddb)
  ABI_FREE(int_fsddb)
+ ABI_FREE(int_rsddb)
  ABI_FREE(dummysus)
  ABI_FREE(magsus)
  ABI_FREE(lm_magsus)

@@ -49,8 +49,9 @@ module m_ddb_magpen
  implicit none
 
  public :: ddb_magpen       ! Convert the derivatives calculated with the magnetic penalty into the physically relevant ones.
- public :: local_spinsus    ! Treat local spin susceptibility
- public :: magmom           ! Treat first-order magnetic moments
+ public :: local_spinsus    ! Treat local spin susceptibility (2nd-order magnetic derivatives)
+ public :: magmom           ! Treat first-order magnetic moments (2nd-order mixed derivatives)
+ public :: mp_d2etot        ! Treat 2nd-order nonmagnetic derivatives
 
  private
 
@@ -271,8 +272,8 @@ contains
    call ddb%to_d2etot(ddb%val,kblok,0,qeq0,qphon,qphnrm,ucvol,omega=omega)
 
    !Convert second-order derivatives to diferent magnetic boundary conditions
-   call mp_d2etot(barmagsus,ddb,0,kblok,&
- & invhmat,magsus,magpen,mpert,mpopt,natom,nblok,ndim,qphon,xred,zfield,zfield_tr)
+   call mp_d2etot(barmagsus,ddb,kblok,invhmat,magsus,magpen,mpert,mpopt,natom, &
+ & nblok,ndim,qphon,xred,zfield,zfield_tr)
 
    !Convert second-order energies to the physical quantities of ddb%val
    call ddb%to_d2etot(ddb%val,kblok,1,qeq0,qphon,qphnrm,ucvol,omega=omega)
@@ -748,7 +749,7 @@ contains
 
  subroutine magmom(barmmom,barmmom_tr,ddb,invbarmagsus,invhmat,iblok,jblok,lblok,magpen,magsus,mmom,mmom_tr,&
 & mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,prtopt,prtvol,qphon,xred,zfield,zfield_tr, &
-& fs2rs,blkval_fs)
+& fs2rs,blkval_fs) !optional
 
 !Arguments -------------------------------
 !scalars
@@ -856,6 +857,7 @@ contains
  else if (fs2rs_==1) then
    mmom=-matmul(magsus,zfield)
    mmom_tr=-matmul(zfield_tr,magsus)
+   return
  end if
 
  if (prtopt==1.and.prtvol>1) then
@@ -1109,24 +1111,31 @@ contains
 !! zfield(ndim,(natom+2)*3)= First-order induced Zeeman fields
 !! zfield_tr(natom+2)*3,ndim)= Linear-responses to external Zeeman fields
 !! (equal to zfield^{\dagger} in the nondissipative regime)
+!! fs2rs= (optional) if 1, the routine starts from a precalculated blkval_fs 
+!! blkval_fs(2,3,mpert,3,mpert,1)= fixed-spin 2nd-order derivatives
 !!
 !! OUTPUT
 !! ddb%val_fs(2,msize,nblok)= second-order derivatives at fixed spin.
 !! ddb%val_rs(2,msize,nblok)= second-order derivatives at relaxed spin.
+!! blkval_rs(2,3,mpert,3,mpert,1)= (optional) relaxed-spin 2nd-order derivatives
 !!
 !! SOURCE
 
- subroutine mp_d2etot(barmagsus,ddb,dissip,&
+ subroutine mp_d2etot(barmagsus,ddb,&
 & iblok,invhmat,magsus,magpen,mpert,mpopt,&
-& natom,nblok,ndim,qphon,xred,zfield,zfield_tr)
+& natom,nblok,ndim,qphon,xred,zfield,zfield_tr,&
+& fs2rs,blkval_fs,blkval_rs) !optional
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: iblok,dissip,mpert,mpopt,natom,nblok,ndim
+ integer,intent(in) :: iblok,mpert,mpopt,natom,nblok,ndim
+ integer,intent(in),optional :: fs2rs
  real(dp),intent(in) :: magpen
 !arrays
  type(ddb_type),intent(inout) :: ddb
  real(dp),intent(in) :: qphon(3),xred(3,natom)
+ real(dp),intent(in),optional :: blkval_fs(2,3,mpert,3,mpert,1)
+ real(dp),intent(out),optional :: blkval_rs(2,3,mpert,3,mpert,1)
  complex(dpc),intent(in) :: barmagsus(ndim,ndim)
  complex(dpc),intent(in) :: invhmat(ndim,ndim)
  complex(dpc),intent(in) :: magsus(ndim,ndim)
@@ -1134,12 +1143,30 @@ contains
  complex(dpc),intent(in) :: zfield_tr((natom+5)*3,ndim)
 !Local variables -------------------------
 !scalars
+ integer :: fs2rs_
  integer :: idir1,idir2,ipert1,ipert2,index,irow,icol
  complex(dpc) :: val_ps,val_fs, val_rs
+ character(len=1000) :: msg
 !arrays
  
 ! *********************************************************************
 
+!If fixed-spin case has been precalculated do less stuff
+ fs2rs_=0; if (present(fs2rs)) fs2rs_=fs2rs
+ if (fs2rs_==1) then
+   if (.not.present(blkval_fs)) then
+     write(msg, '(3a)' )' No fixed-spin array has been passed to mp_d2etot', &
+   & ' but fs2rs=1 ',ch10
+     ABI_ERROR(msg)
+   end if 
+   if (.not.present(blkval_rs)) then
+     write(msg, '(3a)' )' No relaxed-spin array has been passed to mp_d2etot', &
+   & ' but fs2rs=1 ',ch10
+     ABI_ERROR(msg)
+   end if 
+ end if
+
+!Extract the penalized/constrained quantities
  do ipert2= 1, natom+5
    do idir2= 1, 3
      icol= (ipert2-1)*3 + idir2
@@ -1148,21 +1175,31 @@ contains
          irow= (ipert1-1)*3 + idir1
          index= idir1 + 3*((ipert1-1)+mpert*((idir2-1)+3*(ipert2-1)))
 
-         !Extract the penalized second-order derivatives 
-         val_ps= cmplx(ddb%val(1,index,iblok),ddb%val(2,index,iblok),16)
-       
-         !Calculate the fixed-spin flavor
-         val_fs= val_ps + &
-       & sum( zfield_tr(irow,:) * matmul( barmagsus,zfield(:,icol) ) ) 
-         ddb%val_fs(1,index,iblok)= real(val_fs)
-         ddb%val_fs(2,index,iblok)= aimag(val_fs)
+         if (fs2rs_==0) then
+           !Extract the penalized second-order derivatives 
+           val_ps= cmplx(ddb%val(1,index,iblok),ddb%val(2,index,iblok),16)
+           !Calculate the fixed-spin flavor
+           val_fs= val_ps + &
+         & sum( zfield_tr(irow,:) * matmul( barmagsus,zfield(:,icol) ) ) 
+           ddb%val_fs(1,index,iblok)= real(val_fs)
+           ddb%val_fs(2,index,iblok)= aimag(val_fs)
+         else if (fs2rs_==1) then
+           val_fs= &
+         & cmplx(blkval_fs(1,idir1,ipert1,idir2,ipert2,iblok), &
+         & blkval_fs(2,idir1,ipert1,idir2,ipert2,iblok),16)
+         end if
 
          if (mpopt==2) then
            !Calculate the relaxed-spin flavor
            val_rs= val_fs - &
          & sum( zfield_tr(irow,:) * matmul( magsus,zfield(:,icol) ) ) 
-           ddb%val_rs(1,index,iblok)= real(val_rs)
-           ddb%val_rs(2,index,iblok)= aimag(val_rs)
+           if (fs2rs_==0) then
+             ddb%val_rs(1,index,iblok)= real(val_rs)
+             ddb%val_rs(2,index,iblok)= aimag(val_rs)
+           else if (fs2rs_==1) then
+             blkval_rs(1,idir1,ipert1,idir2,ipert2,iblok)=real(val_rs)
+             blkval_rs(2,idir1,ipert1,idir2,ipert2,iblok)=aimag(val_rs)
+           end if
          end if
 
        end do
