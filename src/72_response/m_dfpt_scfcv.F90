@@ -407,7 +407,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  real(dp) :: res2_mq,fe1fixed_mq,elast_mq
  real(dp) :: eberry_mq,edocc_mq,eeig0_mq,ehart01_mq,ehart1_mq,ek0_mq,ek1_mq,eloc0_mq,elpsp1_mq
  real(dp) :: end0_mq,end1_mq,enl0_mq,enl1_mq,eovl1_mq,epaw1_mq,exc1_mq,fermie1_mq,deltae_mq,elmag1_mq
- real(dp) :: etotal_mq,evar_mq,omega_mq,zeemfac
+ real(dp) :: etotal_mq,evar_mq,omega_mq
  character(len=500) :: msg
  character(len=500),parameter :: MY_NAME="dfpt_scfcv"
  character(len=fnlen) :: fi1o
@@ -1132,11 +1132,10 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 
    if (ipert/=dtset%natom+1.and.dtset%prt1mag==2) then
      prtopt=1
-     zeemfac=half
      call calcdenmagsph(mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
    & dtset%ntypat,dtset%ratsm,dtset%ratsph,rhor1,rprimd,dtset%typat,xred,&
    & dtset%ratopt,prtopt,cplex,intgden=intgden,dentot=dentot,rhomag=rhomag,&
-   & qphon=qphon,zeemfac=zeemfac)
+   & qphon=qphon)
      call prtdenmagsph(cplex,intgden,dtset%natom,nspden,dtset%ntypat,&
    & ab_out,prtopt,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat)
    end if
@@ -1553,15 +1552,14 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 
  if (ipert/=dtset%natom+1.and.dtset%prt1mag/=0) then
    prtopt=1
-   zeemfac=half
    call calcdenmagsph(mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
  & dtset%ntypat,dtset%ratsm,dtset%ratsph,rhor1,rprimd,dtset%typat,xred,&
  & dtset%ratopt,prtopt,cplex,intgden=intgden,dentot=dentot,rhomag=rhomag,&
- & qphon=qphon,zeemfac=zeemfac)
+ & qphon=qphon)
    call prtdenmagsph(cplex,intgden,dtset%natom,nspden,dtset%ntypat,&
  & ab_out,prtopt,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat)
 
-   call  magmom_to_d2(blkflg,cplex,d2lo,idir,intgden,ipert,mpert,&
+   call magmom_to_d2(blkflg,cplex,d2lo,idir,intgden,ipert,mpert,&
  & dtset%natom,nspden,rhomag)
    
  end if

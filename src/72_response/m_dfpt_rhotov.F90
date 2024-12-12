@@ -158,7 +158,7 @@ contains
  integer :: ifft,ispden,nfftot,option
  integer :: optnc,nkxc_cur,prtopt
  logical :: vhartr1_allocated,vxc1_allocated
- real(dp) :: doti,elpsp10,zeemfac
+ real(dp) :: doti,elpsp10
  character(len=500) :: msg
 !arrays
  real(dp)             :: tsec(20)
@@ -214,14 +214,13 @@ contains
 
   !Compute the first-order magnetic moments. 
    prtopt=1 
-   zeemfac=half
    ABI_MALLOC(intgden,(cplex,nspden,natom))
    ABI_MALLOC(rhomag,(2,nspden))
    ABI_MALLOC(fatsph,(nfft,natom))
    ABI_MALLOC(taumr,(nfft,natom,3))
    call calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,&
   &  ntypat,ratsm,ratsph,rhor1,rprimd,typat,xred,ratopt,prtopt,cplex,&
-  &  intgden=intgden,rhomag=rhomag,fatsph=fatsph,qphon=qphon,taumr=taumr,zeemfac=zeemfac)
+  &  intgden=intgden,rhomag=rhomag,fatsph=fatsph,qphon=qphon,taumr=taumr)
  end if
 
  if(ipert>natom+11.and.ipert<=2*natom+11)then
