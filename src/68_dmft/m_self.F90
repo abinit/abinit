@@ -331,11 +331,11 @@ subroutine print_self(self,prtdc,paw_dmft,prtopt)
 ! write(message,'(2a)') ch10,"  == The self-energy for small (3) frequency is   == "
 ! call wrtout(std_out,message,'COLL')
 ! call print_oper(self%oper(3),1,paw_dmft,prtopt)
- write(message,'(2a)') ch10,"  == The self-energy for large frequency is   == "
+ write(message,'(2a)') ch10,"  == The self-energy for largest frequency is   == "
  call wrtout(std_out,message,'COLL')
  call print_oper(self%oper(self%nw),1,paw_dmft,prtopt)
  if (prtdc == "print_dc") then
-   write(message,'(2a)') ch10,"  == The double counting hamiltonian is  == "
+   write(message,'(2a)') ch10,"  == The double counting potential is  == "
    call wrtout(std_out,message,'COLL')
    call print_matlu(self%hdc%matlu(:),paw_dmft%natom,prtopt)
  end if ! prtdc
@@ -592,9 +592,9 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
 !   - For the Tentative rotation of the self-energy file (begin init)
  if (optmaxent > 0) then
    if (optrw == 2) then
-     write(message,'(a,2x,a)') ch10," == About to print self-energy for MAXENT code "
+     write(message,'(a,2x,a)') ch10," == About to print self-energy for MAXENT code in basis which diagonalizes the atomic levels"
    else if (optrw == 1)  then
-     write(message,'(a,2x,a)') ch10," == About to read self-energy from MAXENT code "
+     write(message,'(a,2x,a)') ch10," == About to read self-energy from MAXENT code"
    end if
    call wrtout(std_out,message,'COLL')
 

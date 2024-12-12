@@ -700,9 +700,9 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  real(dp), optional, intent(in) :: gprimd(3,3),rprimd(3,3),xred(3,dtset%natom)
  real(dp), optional, intent(in) :: ylm(dtset%mpw*dtset%mkmem,mpsang*mpsang)
 !Local variables ------------------------------------
- integer :: bdtot_index,dmft_solv,dmftbandi,dmftbandf,fac,i
+ integer :: bdtot_index,dmft_dc,dmft_solv,dmftbandi,dmftbandf,fac,i
  integer :: iatom,iatom1,iband,icb,ig,ik,ikg,ikpt,im,im1
- integer :: indproj,iproj,ir,irot,isppol,itypat,lpawu,lpawu1,maxlpawu
+ integer :: indproj,iproj,ir,isppol,itypat,lpawu,lpawu1,maxlpawu
  integer :: mband,mbandc,mesh_size,mesh_type,mkmem,mpw,myproc,natom,nband_k,ndim
  integer :: nkpt,nproc,nproju,npw,nspinor,nsppol
  integer :: nsym,ntypat,siz_paw,siz_proj,use_dmft
@@ -711,7 +711,7 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  integer, parameter :: mt2g(3) = (/1,2,4/)
  logical, allocatable :: lcycle(:),typcycle(:)
  real(dp), allocatable :: rmax(:),kpg(:,:),kpg_norm(:)
- character(len=500) :: message
+ character(len=500) :: dc_string,lda_string,message
 !************************************************************************
 
  mband   = dtset%mband
@@ -725,6 +725,7 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
 
  dmftbandi = dtset%dmftbandi
  dmftbandf = dtset%dmftbandf
+ dmft_dc   = dtset%dmft_dc
  dmft_solv = dtset%dmft_solv
  use_dmft  = abs(dtset%usedmft)
  paw_dmft%use_dmft = use_dmft
@@ -820,11 +821,6 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
 ! endif
 !#endif
 
- if (nspinor == 2 .and. dtset%nspden == 1) then
-   message = ' nspinor=2, nspden=1 and usedmft=1 is not implemented'
-   ABI_ERROR(message)
- end if
-
 !=============================
 !==  Associate pointers
 !=============================
@@ -867,10 +863,10 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  end if
 
  if (mbandc /= dmftbandf-dmftbandi+1) then
-   write(message,'(5a)') ' WARNING init_sc_dmft',ch10,&
+   write(message,'(5a)') ' BUG init_sc_dmft',ch10,&
     & '  number of bands in dmft is not correctly computed ',ch10, &
     & '  Action : check the code'
-   ABI_ERROR(message)
+   ABI_BUG(message)
  end if
 
  write(message,'(7a)') ch10, &
@@ -894,16 +890,36 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
    write(message,'(2a)') ch10,' DMFT uses the Continuous Time Quantum Monte Carlo solver of ABINIT'
  else if (dmft_solv == 6) then
    write(message,'(2a)') ch10,' DMFT uses the Continuous Time Quantum Monte Carlo solver of TRIQS &
-     & (with density density interactions)'
+     &(with density density interactions)'
  else if (dmft_solv == 7) then
    write(message,'(2a)') ch10,' DMFT uses the Continuous Time Quantum Monte Carlo solver of TRIQS &
-     & (with rotationally invariant interactions)'
+     &(with rotationally invariant interactions)'
  else if (dmft_solv == 9) then
    write(message,'(2a)') ch10,' DMFT uses the python invocation of TRIQS, for which you need to &
      & give your personal script'
  end if ! dmft_solv
  call wrtout(std_out,message,'COLL')
  call wrtout(ab_out,message,'COLL')
+
+ if (dmft_dc == 1) then
+   dc_string = "Magnetic FLL (Full Localized Limit)"
+ else if (dmft_dc == 2) then
+   dc_string = "Magnetic AMF (Around Mean Field)"
+ else if (dmft_dc == 5) then
+   dc_string = "Non-Magnetic FLL (Full Localized Limit)"
+ else if (dmft_dc == 6) then
+   dc_string = "Non-Magnetic AMF (Around Mean Field)"
+ else if (dmft_dc == 7) then
+   dc_string = "Non-Magnetic nominal"
+ else if (dmft_dc == 8) then
+   dc_string = "Non-Magnetic exact"
+ end if
+ dc_string = trim(dc_string)//" double counting"
+
+ lda_string = "Magnetic DFT, with "
+ if (dtset%usepawu == 14) lda_string = "Non "//lda_string
+ write(message,'(2(a,1x),a)') ch10,trim(adjustl(lda_string)),trim(adjustl(dc_string))
+ call wrtout(std_out,message,'COLL')
 
 !=============================
 !==  Define integers and reals
@@ -924,7 +940,7 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  paw_dmft%dmft_iter            = dtset%dmft_iter
  paw_dmft%dmft_entropy         = dtset%dmft_entropy
  paw_dmft%dmft_kspectralfunc   = dtset%dmft_kspectralfunc
- paw_dmft%dmft_dc              = dtset%dmft_dc
+ paw_dmft%dmft_dc              = dmft_dc
  paw_dmft%dmft_wanorthnorm     = dtset%dmft_wanorthnorm
  paw_dmft%prtvol               = dtset%prtvol
  paw_dmft%prtdos               = dtset%prtdos
@@ -1050,26 +1066,11 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  sumwtk = sum(paw_dmft%wtk(1:nkpt))
  if (abs(sumwtk-one) > tol11 .and. dtset%iscf >= 0) then
    write(message,'(a,f15.11)') ' sum of k-point is incorrect',sumwtk
-   ABI_ERROR(message)
+   ABI_BUG(message)
  end if
 
  t2g = (paw_dmft%dmft_t2g == 1)
  x2my2d = (paw_dmft%dmft_x2my2d == 1)
-
- if ((t2g .or. x2my2d) .and. paw_dmft%dmft_dc == 8) then
-   message = "dmft_dc=8 is not implemented for the t2g and x2my2d cases"
-   ABI_ERROR(message)
- end if
-
- if (paw_dmft%dmft_dc == 8 .and. paw_dmft%dmft_solv == -1) then
-   message = "dmft_dc=8 is not implemented for dmft_solv=-1"
-   ABI_ERROR(message)
- end if
-
- if (paw_dmft%dmft_dc == 8 .and. dtset%ixc /= 7) then
-   message = "dmft_dc=8 is not implemented for ixc=7"
-   ABI_ERROR(message)
- end if
 
  paw_dmft%typat => dtset%typat(:)
 
@@ -1078,17 +1079,10 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  maxlpawu = 0
  do iatom=1,natom
    lpawu = pawtab(paw_dmft%typat(iatom))%lpawu
-   if (lpawu > 3) ABI_ERROR("lpawu > 3 is not handled")
-   if (t2g .and. lpawu /= 2 .and. lpawu /= -1) ABI_ERROR("lpawu/=2 and dmft_t2g=1 are not compatible")
-   if (x2my2d .and. lpawu /= 2 .and. lpawu /= -1) ABI_ERROR("lpawu/=2 and dmft_x2my2d=1 are not compatible")
    if (t2g .and. lpawu /= -1) lpawu = 1
    if (x2my2d .and. lpawu /= -1) lpawu = 0
    if (lpawu > maxlpawu) maxlpawu = lpawu
    paw_dmft%lpawu(iatom) = lpawu
-   if (paw_dmft%dmft_dc == 7 .and. lpawu /= -1 .and. paw_dmft%dmft_nominal(iatom) <= 0) then
-     message = "Please set a physical value for nominal occupancies"
-     ABI_ERROR(message)
-   end if
  end do ! iatom
  paw_dmft%maxlpawu = maxlpawu
  ndim = 2*maxlpawu + 1
@@ -1192,10 +1186,6 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
    ABI_MALLOC(paw_dmft%phimtphi,(maxval(pawrad(1:ntypat)%int_meshsz),paw_dmft%maxnproju,ntypat))
    ABI_MALLOC(paw_dmft%phimtphi_int,(paw_dmft%maxnproju,ntypat))
  else
-   if (paw_dmft%dmft_prtwan == 1) then
-     message = "Case dmft_prtwan=1 and dmft_use_full_chipsi=0 not handled"
-     ABI_ERROR(message)
-   end if
    ABI_MALLOC(paw_dmft%phi_int,(paw_dmft%maxnproju,ntypat))
  end if
 
@@ -1660,6 +1650,7 @@ subroutine construct_nwlo_dmft(paw_dmft)
 !Local variables-------------------------------
  integer :: deltaw,ifreq,ifreq2,myproc,nlin,nproc,nwli
  integer :: nwlo,omegaBegin,omegaEnd,residu,spacecomm
+ character(len=10) :: tag
  character(len=500) :: message
  real(dp) :: deltaomega,expfac,omegamaxmin,prefacexp,temp,wl
  complex(dpc):: ybcbeg,ybcend
@@ -1899,7 +1890,8 @@ subroutine construct_nwlo_dmft(paw_dmft)
 
    ABI_MALLOC(paw_dmft%omega_lo,(nwlo))
    ABI_MALLOC(paw_dmft%wgt_wlo,(nwlo))
-   write(message,'(a,10x,2(2x,a))') ch10,"   Use of linear frequencies for DMFT calculation"
+   write(tag,'(i10)') nwlo
+   write(message,'(4a)') ch10," Use of ",trim(adjustl(tag))," linear Matsubara frequencies for DMFT calculation"
    call wrtout(std_out,message,'COLL')
    call construct_nwli_dmft(paw_dmft,nwli,paw_dmft%omega_lo(:))
    paw_dmft%wgt_wlo(:) = one
@@ -2060,19 +2052,19 @@ subroutine print_dmft(paw_dmft,pawprtvol)
    write(message,'(4a,3(a,2x,e21.14,a))') &
      & "  -------------------------------------------------",ch10,&
      & "  --- Data for DMFT ",ch10,&
-     & "  --- paw_dmft%fermie     = ",paw_dmft%fermie    ,ch10,&
-     & "  --- paw_dmft%fermie_dft = ",paw_dmft%fermie_dft,ch10,&
-     & "  --- paw_dmft%temp       = ",paw_dmft%temp      ,ch10
+     & "  --- fermie     = ",paw_dmft%fermie    ,ch10,&
+     & "  --- fermie_dft = ",paw_dmft%fermie_dft,ch10,&
+     & "  --- temp       = ",paw_dmft%temp      ,ch10
    call wrtout(std_out,message,'COLL')
    write(message,'(7(a,15x,i8,a),a,2x,e21.14,2a)') &
-     & "  --- paw_dmft%natpawu    = ",paw_dmft%natpawu   ,ch10,&
-     & "  --- paw_dmft%dmft_iter  = ",paw_dmft%dmft_iter ,ch10,&
-     & "  --- paw_dmft%dmft_solv  = ",paw_dmft%dmft_solv ,ch10,&
-     & "  --- paw_dmft%dmft_nwlo  = ",paw_dmft%dmft_nwlo ,ch10,&
-     & "  --- paw_dmft%dmft_nwli  = ",paw_dmft%dmft_nwli ,ch10,&
-     & "  --- paw_dmft%dmft_dc    = ",paw_dmft%dmft_dc   ,ch10,&
-     & "  --- paw_dmft%dmftqmc_l  = ",paw_dmft%dmftqmc_l ,ch10,&
-     & "  --- paw_dmft%dmftqmc_n  = ",paw_dmft%dmftqmc_n ,ch10,&
+     & "  --- natpawu    = ",paw_dmft%natpawu   ,ch10,&
+     & "  --- dmft_iter  = ",paw_dmft%dmft_iter ,ch10,&
+     & "  --- dmft_solv  = ",paw_dmft%dmft_solv ,ch10,&
+     & "  --- dmft_nwlo  = ",paw_dmft%dmft_nwlo ,ch10,&
+     & "  --- dmft_nwli  = ",paw_dmft%dmft_nwli ,ch10,&
+     & "  --- dmft_dc    = ",paw_dmft%dmft_dc   ,ch10,&
+     & "  --- dmftqmc_l  = ",paw_dmft%dmftqmc_l ,ch10,&
+     & "  --- dmftqmc_n  = ",paw_dmft%dmftqmc_n ,ch10,&
      & "  -------------------------------------------------"
    call wrtout(std_out,message,'COLL')
 
@@ -2144,34 +2136,40 @@ subroutine print_sc_dmft(paw_dmft,pawprtvol)
 ! *********************************************************************
 
  if (abs(pawprtvol) >= 3) then
-   write(message,'(5a,8(a,2x,i5,a),a)') ch10, &
-     & "-----------------------------------------------",ch10,&
-     & "--- Data for SC DMFT ",ch10,&
-     & "--- paw_dmft%mband       = ",paw_dmft%mband,ch10,&
-     & "--- paw_dmft%dmftbandf   = ",paw_dmft%dmftbandf,ch10,&
-     & "--- paw_dmft%dmftbandi   = ",paw_dmft%dmftbandi,ch10,&
-     & "--- paw_dmft%nkpt        = ",paw_dmft%nkpt,ch10,&
-     & "--- paw_dmft%nsppol      = ",paw_dmft%nsppol,ch10,&
-     & "--- paw_dmft%use_dmft    = ",paw_dmft%use_dmft,ch10,&
-     & "--- paw_dmft%use_sc_dmft = ",paw_dmft%use_sc_dmft,ch10,&
-     & "--- paw_dmft%mbandc      = ",paw_dmft%mbandc,ch10,&
-     & "-----------------------------------------------"
+   write(message,'(5a,7(a,2x,i5,a),a)') ch10, &
+     & " -----------------------------------------------",ch10,&
+     & " --- Data for self-consistent DFT+DMFT cycle",ch10,&
+     & " --- mband             = ",paw_dmft%mband,ch10,&
+     & " --- dmftbandi         = ",paw_dmft%dmftbandi,ch10,&
+     & " --- dmftbandf         = ",paw_dmft%dmftbandf,ch10,&
+     & " --- nb of corr. bands = ",paw_dmft%mbandc,ch10,&
+     & " --- nkpt              = ",paw_dmft%nkpt,ch10,&
+     & " --- nsppol            = ",paw_dmft%nsppol,ch10,&
+     & " --- usedmft           = ",paw_dmft%use_dmft,ch10,&
+     !& " --- use_sc_dmft = ",paw_dmft%use_sc_dmft,ch10,&
+     & " -----------------------------------------------"
    call wrtout(std_out,message,'COLL')
-   write(message,'(a)') " paw_dmft%band_in"
+   write(message,'(2a)') ch10," Indicating correlated bands"
    call wrtout(std_out,message,'COLL')
    write(message,'(100i5)') (iband,iband=1,min(paw_dmft%mband,100))
    call wrtout(std_out,message,'COLL')
-   write(message,'(100L3)') (paw_dmft%band_in(iband),iband=1,min(paw_dmft%mband,100))
+   write(message,'(100L5)') (paw_dmft%band_in(iband),iband=1,min(paw_dmft%mband,100))
+   call wrtout(std_out,message,'COLL')
+   write(message,'(2a)') ch10," Correlated index   Band index"
    call wrtout(std_out,message,'COLL')
    do iband=1,paw_dmft%mbandc
-     write(message,*) "include_bands",iband,paw_dmft%include_bands(iband)
+     write(message,'(5x,i5,10x,i5)') iband,paw_dmft%include_bands(iband)
      call wrtout(std_out,message,'COLL')
    end do ! iband
-   write(message,'(2a,i4,a)' ) ch10,&
-      & 'The',paw_dmft%mband-paw_dmft%dmftbandf+paw_dmft%dmftbandi-1,&
-      & '  Following bands are excluded from the DMFT calculation  '
-   call wrtout(std_out,message,'COLL')
-   write(message,'(100i5)') (paw_dmft%exclude_bands(iband),iband=1,min(paw_dmft%mband-paw_dmft%dmftbandf+paw_dmft%dmftbandi-1,100))
+   if (.not. paw_dmft%dmft_use_all_bands) then
+     write(message,'(2a,i4,a)') ch10,&
+        & 'The',paw_dmft%mband-paw_dmft%dmftbandf+paw_dmft%dmftbandi-1,&
+        & '  Following bands are excluded from the DMFT calculation'
+     call wrtout(std_out,message,'COLL')
+     write(message,'(100i5)') (paw_dmft%exclude_bands(iband),iband=1,min(paw_dmft%mband-paw_dmft%dmftbandf+paw_dmft%dmftbandi-1,100))
+     call wrtout(std_out,message,'COLL')
+   end if
+   write(message,*)
    call wrtout(std_out,message,'COLL')
  end if ! abs(pawprtvol)>=3
 
@@ -2206,7 +2204,7 @@ subroutine saveocc_dmft(paw_dmft)
  if (open_file(tmpfil,message,newunit=unitsaveocc,status='unknown',form='formatted') /= 0) ABI_ERROR(message)
 
  rewind(unitsaveocc)
- write(message,'(2a)') ch10,"  == Print DMFT non diagonal occupations on disk"
+ write(message,'(2a)') ch10,"  == Print DFT+DMFT non diagonal occupations on disk"
  call wrtout(std_out,message,'COLL')
  write(message,'(3a,2x,4i5)') "# natom,nsppol,mbandc,nkpt",ch10, &
          & "####",paw_dmft%natom,paw_dmft%nsppol,paw_dmft%mbandc,paw_dmft%nkpt

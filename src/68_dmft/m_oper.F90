@@ -331,7 +331,7 @@ subroutine print_oper(oper,option,paw_dmft,prtopt)
  integer, intent(in) :: option,prtopt
 !Local variables-------------------------------
  integer :: ib,ib1,iband1,iband2,ikpt,isppol,mbandc,nkpt,nkptr
- character(len=50000) :: message
+ character(len=100000) :: message
  logical  :: ximag
  real(dp) :: maximag
 ! *********************************************************************
@@ -345,7 +345,7 @@ subroutine print_oper(oper,option,paw_dmft,prtopt)
  end if ! has_opermatlu=1
 
  if (oper%has_operks == 1) then
-   write(message,'(2a)') ch10,'   = In the KS basis'
+   write(message,'(2a)') ch10,'   = In the Kohn-Sham basis'
    call wrtout(std_out,message,'COLL')
 
 !todo_ba complete print_out
@@ -368,36 +368,36 @@ subroutine print_oper(oper,option,paw_dmft,prtopt)
        write(message,'(a,3x,a,1x,i1)') ch10,"--isppol--",isppol
        call wrtout(std_out,message,'COLL')
        write(message,'(2a)') ch10,&
-         & "   - (in the following only the value for the first k-points are printed)"
+         & "   - (in the following only the values for the correlated bands and the first k-points are printed)"
        call wrtout(std_out,message,'COLL')
        do ikpt=1,nkptr
-         if (option < 5) then
-           write(message,'(2a,i4,2x,f14.5,a)') ch10,&
+         write(message,'(2a,i4,2x,f14.5,a)') ch10,&
              & "   -k-pt--",ikpt,oper%wtk(ikpt),"(<-weight(k-pt))"
+         call wrtout(std_out,message,'COLL')
+         if (option < 5) then
+           write(message,'(20x,a,6x,a)') "Eigenvalues","Occupations"
            call wrtout(std_out,message,'COLL')
          else if (abs(prtopt) >= 4 .or. option > 8) then
-           write(message,'(2a,i5,a,i5,a,i5)') ch10,"  Writes occupations for k-pt",&
-             & ikpt, "and between bands",iband1," and",iband2
+           write(message,'(a,10x,2000(i5,12x))') ch10,(paw_dmft%include_bands(ib),ib=iband1,iband2)
            call wrtout(std_out,message,'COLL')
          end if ! option
          do ib=1,mbandc
            if (option < 5) then
              if (abs(aimag(oper%ks(ib,ib,ikpt,isppol))) >= tol10) then
-               write(message,'(a,i5,e14.5,3x,e14.5,3x,e21.14)') "   -iband--",ib,&
+               write(message,'(a,i5,e14.5,3x,e14.5,3x,e21.14)') "   -iband--",paw_dmft%include_bands(ib),&
                  & paw_dmft%eigen_dft(ib,ikpt,isppol),oper%ks(ib,ib,ikpt,isppol)
              else
-               write(message,'(a,i5,e14.5,3x,e14.5)') "   -iband--",ib,&
+               write(message,'(a,i5,e14.5,3x,e14.5)') "   -iband--",paw_dmft%include_bands(ib),&
                  & paw_dmft%eigen_dft(ib,ikpt,isppol),dble(oper%ks(ib,ib,ikpt,isppol))
              end if ! imaginary part
              call wrtout(std_out,message,'COLL')
            end if ! option<5
            if (abs(prtopt) >= 4 .or. option > 8 .and. ib >= iband1 .and. ib <= iband2) then
-             write(message,'(2000(f8.3))') (dble(oper%ks(ib,ib1,ikpt,isppol)),ib1=iband1,iband2)
+
+             write(message,'(i5,1x,2000(2f7.3,3x))') paw_dmft%include_bands(ib),(dble(oper%ks(ib,ib1,ikpt,isppol)), &
+                 & aimag(oper%ks(ib,ib1,ikpt,isppol)),ib1=iband1,iband2)
              call wrtout(std_out,message,'COLL')
-             write(message,'(2000(f8.3))') (aimag(oper%ks(ib,ib1,ikpt,isppol)),ib1=iband1,iband2)
-             call wrtout(std_out,message,'COLL')
-             write(message,'(2000(f8.3))') (abs(oper%ks(ib,ib1,ikpt,isppol)),ib1=iband1,iband2)
-             call wrtout(std_out,message,'COLL')
+
 !   to write imaginary part
 !             write(message, '(1000(2f9.3,2x))') &
 !&               (real(oper%ks(isppol,ikpt,ib,ib1)),imag(oper%ks(isppol,ikpt,ib,ib1)),ib1=iband1,iband2)

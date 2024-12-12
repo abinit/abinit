@@ -2430,13 +2430,13 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
      dtset%dmft_dc=5
      dtset%dmft_iter=1
      dtset%dmft_mxsf=0.6_dp
-     dtset%dmft_nwli=max(ceiling((1_dp+15_dp/(dtset%tsmear*pi))*half),100)
+     dtset%dmft_nwli=max(ceiling((1_dp+20_dp/(dtset%tsmear*pi))*half),100)
      dtset%dmft_rslf=1
      dtset%dmft_test=1
      dtset%dmft_use_all_bands=1
      dtset%dmft_use_full_chipsi=1
      dtset%dmftbandi=1
-     dtset%dmftbandf=minval(dtset%nband(:))
+     dtset%dmftbandf=maxval(dtset%nband(:))
      dtset%dmftqmc_l=max(ceiling(1.0d6/(dtset%tsmear*Ha_K)),100)
      dtset%dmftqmc_n=1.0d8
      dtset%dmftqmc_therm=50000

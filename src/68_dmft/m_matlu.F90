@@ -1300,12 +1300,12 @@ end subroutine add_matlu
    write(tag_nb_elec,'(f12.6)') traceloc(nsppol+1,iatom)
    tag_nb_elec = adjustl(tag_nb_elec)
    if (.not. present(itau)) then
-     write(message,'(8x,2a)') 'Nb of Corr. elec. from G(w) is: ',tag_nb_elec
+     write(message,'(8x,2a)') 'Nb of Corr. elec. from G(iw) is: ',tag_nb_elec
      call wrtout(std_out,message,'COLL')
    end if ! not present(itau)
    if (present(itau)) then
      if (itau == 1) then
-       write(message,'(8x,2a)') 'Nb of Corr. elec. from G(tau) is: ',tag_nb_elec
+       write(message,'(8x,2a)') 'Nb of Corr. elec. from G(tau=0-) is: ',tag_nb_elec
        call wrtout(std_out,message,'COLL')
      else if (itau == -1) then
        write(message,'(8x,2a)') 'Nb: Sum of the values of G0(tau=0-) is: ',tag_nb_elec
@@ -1330,7 +1330,7 @@ end subroutine add_matlu
     ! if(nsppol>1.and.present(itau)) then
     !   if(itau==1) then
      write(tag_nb_elec,'(f12.6)') traceloc(2,iatom) - traceloc(1,iatom)
-     write(message,'(8x,2a)') 'DMFT Cor. El. Mag: ',adjustl(tag_nb_elec)
+     write(message,'(8x,2a)') 'DMFT Corr. Elec. Mag.: ',adjustl(tag_nb_elec)
      call wrtout(std_out,message,'COLL')
     !   endif
    end do ! iatom

@@ -191,7 +191,7 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
 
  if (nproc_band /= (mband/mband_cprj)) then
    message = "Inconsistency in datafordmft: nproc_band should be equal to mband/mband_cprj"
-   ABI_ERROR(message)
+   ABI_BUG(message)
  end if
 
  iorder_cprj = 0
@@ -215,7 +215,7 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
 !if(mpi_enreg%me==0) write(7886,*) "in datafordmft", mpi_enreg%me, mpi_enreg%nproc
 !if(mpi_enreg%me==1) write(7887,*) "in datafordmft", mpi_enreg%me, mpi_enreg%nproc
 !if(mpi_enreg%me==2) write(7888,*) "in datafordmft", mpi_enreg%me, mpi_enreg%nproc
- write(message,'(2a)') ch10,'  == Prepare data for DMFT calculation  '
+ write(message,'(2a)') ch10,' == Prepare data for DMFT calculation'
  call wrtout(std_out,message,'COLL')
  if (abs(pawprtvol) >= 3) then
    write(message,'(2a)') ch10,'---------------------------------------------------------------'
@@ -291,7 +291,7 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
  end do ! isppol
 
  if (abs(pawprtvol) >= 3) then
-   write(message,'(2a)') ch10,'   datafordmft :  eigenvalues written'
+   write(message,'(2a)') ch10,' datafordmft : eigenvalues written on file'
    call wrtout(std_out,message,'COLL')
  end if
 !==========================================================================
@@ -588,12 +588,15 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
 !==========================================================================
 !***************  write checks  *******************************************
 !==========================================================================
-   if (abs(pawprtvol) >= 3) then
-     write(message,*) "normalization computed"
-     call wrtout(std_out,message,'COLL')
-   end if
+   !if (abs(pawprtvol) >= 3) then
+   !  write(message,*) "normalization computed"
+   !  call wrtout(std_out,message,'COLL')
+   !end if
 
-   write(message,'(2a,i4)') ch10," == Check: Occupations and Norm from chipsi are"
+   write(message,'(2a)') ch10," == The DMFT orbitals are now projected on the correlated bands"
+   call wrtout(std_out,message,'COLL')
+
+   write(message,'(2a,i4)') ch10," == Check: Downfolded Occupations and Norm of unnormalized projected orbitals"
    call wrtout(std_out,message,'COLL')
 
    if (paw_dmft%dmftcheck >= 1) then
@@ -645,8 +648,7 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
            ispinor  = spinor_idxs(1,idijeff)
            ispinor1 = spinor_idxs(2,idijeff)
          else
-           write(message,'(2a)') " BUG in datafordmft: nsploop should be equal to 2 or 4"
-           call wrtout(std_out,message,'COLL')
+           ABI_BUG(" BUG in datafordmft: nsploop should be equal to 2 or 4")
          end if ! nsploop
          do im1=1,ndim
            do im=1,ndim
@@ -666,7 +668,7 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
      if (ierr == -1) then
        write(message,'(10a)') ch10,&
         & '    -> These two quantities should agree if three conditions are fullfilled',ch10,&
-        & '         -  input wavefunctions come from the same Hamiltonien (e.g LDA/GGA)',ch10,&
+        & '         -  input wavefunctions come from the same Hamiltonian (e.g LDA/GGA)',ch10,&
         & '         -  dmatpuopt is equal to 1',ch10,&
         & '         -  all valence states are in the valence',ch10,&
         & '    (for experts users: it is not compulsory that these conditions are fullfilled)'
@@ -923,7 +925,7 @@ subroutine chipsi_print(paw_dmft,pawtab)
  end if
 
  write(tag,'(f13.5)') paw_dmft%fermie
- write(message,'(a,2x,2a)') ch10," == Print Energy levels for Fermi Level= ",adjustl(tag)
+ write(message,'(a,2x,2a)') ch10," == Print Energy levels in Slm basis for Fermi Level= ",adjustl(tag)
  call wrtout(std_out,message,'COLL')
 !call print_oper(energy_level,1,paw_dmft,1)
  call print_matlu(energy_level%matlu(:),natom,1)
@@ -1006,6 +1008,12 @@ subroutine chipsi_renormalization(paw_dmft,opt)
  !  end do ! isppol
 !  todo_ab introduce correct orthonormalization in the general case.
 
+ write(message,'(6a)') ch10, &
+   &      '  =============================================== ',&
+   & ch10,'  == The DMFT orbitals are now orthonormalized == ',&
+   & ch10,'  =============================================== '
+ call wrtout(std_out,message,'COLL')
+
  if (option == 2) then ! option==2
 !  ====================================
 !  == renormalize k-point after k-point
@@ -1044,7 +1052,7 @@ subroutine chipsi_renormalization(paw_dmft,opt)
 !==  Compute norm with new chipsi
 !===============================================
 
- write(message,'(2a)') ch10,'  ===== Compute norm with new chipsi'
+ write(message,'(2a)') ch10,'  ===== Compute new norm after renormalization'
  call wrtout(std_out,message,'COLL')
  call init_oper(paw_dmft,oper_temp,opt_ksloc=2)
  call identity_oper(oper_temp,2)
@@ -1057,7 +1065,7 @@ subroutine chipsi_renormalization(paw_dmft,opt)
      norm%shiftk = jkpt - 1
      call downfold_oper(norm,paw_dmft,option=2)
      write(message,'(2a,i5)') &
-       & ch10,"  == Check: Overlap with renormalized chipsi for k-point",jkpt
+       & ch10,"  == Check: Overlap after renormalization for k-point",jkpt
      call wrtout(std_out,message,'COLL')
      call print_matlu(norm%matlu(:),natom,prtopt=1)
 !== Check that norm is now the identity
@@ -1066,12 +1074,12 @@ subroutine chipsi_renormalization(paw_dmft,opt)
    end do ! jkpt
    ABI_FREE(wtk_tmp)
  else !dmft_kspectralfunc
-   write(message,'(2a)') ch10,'  ===== Calling downfold_oper'
+   write(message,'(2a)') ch10,'  ===== Starting downfold'
    call wrtout(std_out,message,'COLL')
    call init_oper(paw_dmft,norm,opt_ksloc=2)
    call downfold_oper(norm,paw_dmft,procb=paw_dmft%distrib%procb(:),iproc=paw_dmft%distrib%me_kpt,option=2)
    call xmpi_matlu(norm%matlu(:),natom,paw_dmft%distrib%comm_kpt)
-   write(message,'(2a)') ch10,'  ===== Finished downfold_oper'
+   write(message,'(2a)') ch10,'  ===== Finished downfold'
    call wrtout(std_out,message,'COLL')
 
 !== Print unsymmetrized norm%matlu with new chipsi
@@ -1149,10 +1157,7 @@ subroutine normalizechipsi(nkpt,paw_dmft,jkpt)
  ndim_max  = (2*paw_dmft%maxlpawu+1)*nspinor
  pawprtvol = 3
 
- if (nkpt /= 1 .and. present(jkpt)) then
-   message = 'BUG in chipsi_normalization'
-   ABI_ERROR(message)
- end if
+ if (nkpt /= 1 .and. present(jkpt)) ABI_BUG('BUG in chipsi_normalization')
 
   ! iortho=1
   ! write(6,*) "nkpt, iortho",nkpt,iortho
@@ -1172,14 +1177,14 @@ subroutine normalizechipsi(nkpt,paw_dmft,jkpt)
    end if
 
    if (pawprtvol > 2) then
-     write(message,'(2a)') ch10,'  - Print norm with current chipsi '
+     write(message,'(2a)') ch10,'  - Print current norm and overlap (before orthonormalization)'
      call wrtout(std_out,message,'COLL')
      call print_matlu(norm1%matlu(:),natom,prtopt=1,opt_exp=1)
    end if
 
 !    build large overlap matrix
-   write(message,'(2a)') ch10,'  - Overlap (before orthonormalization) -'
-   call wrtout(std_out,message,'COLL')
+   !write(message,'(2a)') ch10,'  - Overlap (before orthonormalization) -'
+   !call wrtout(std_out,message,'COLL')
 
 !  ==-------------------------------------
 !  == Start loop over atoms
@@ -1307,7 +1312,7 @@ subroutine normalizechipsi(nkpt,paw_dmft,jkpt)
    end if
 
    if (pawprtvol > 2) then
-     write(message,'(2a)') ch10,'  - Print norm with new chipsi '
+     write(message,'(2a)') ch10,'  - Print new norm after orthonormalization'
      call wrtout(std_out,message,'COLL')
      call print_matlu(norm1%matlu(:),natom,prtopt=1)
    end if
@@ -1321,7 +1326,7 @@ subroutine normalizechipsi(nkpt,paw_dmft,jkpt)
    call add_matlu(norm1%matlu(:),norm2%matlu(:),norm3%matlu(:),natom,-1)
    call destroy_oper(norm2)
    if (pawprtvol > 2) then
-     write(message,'(2a)') ch10,'  - Print norm with new chipsi minus Identity '
+     write(message,'(2a)') ch10,'  - Print new norm minus Identity '
      call wrtout(std_out,message,'COLL')
      call print_matlu(norm3%matlu(:),natom,prtopt=1,opt_exp=1)
    end if

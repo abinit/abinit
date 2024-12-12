@@ -594,7 +594,7 @@ subroutine printocc_green(green,option,paw_dmft,pawprtvol,opt_weissgreen,chtype)
      if (present(chtype)) then
        write(message,'(4a)') ch10,"  == The ",trim(chtype)," occupations are  == "
      else
-       write(message,'(2a)') ch10,"  == The occupations (integral of the Green function) are  == "
+       write(message,'(2a)') ch10,"  == The occupations (integral of the Green's function) are  == "
      end if ! present(chtype)
    else if (optweissgreen == 1) then
      write(message,'(2a)') ch10,"  == The integrals of the Weiss function are  == "
@@ -615,7 +615,7 @@ subroutine printocc_green(green,option,paw_dmft,pawprtvol,opt_weissgreen,chtype)
 !   call wrtout(std_out,message,'COLL')
 !   call print_oper(green%occup,1,paw_dmft,pawprtvol)
    if (mod(option,4) >= 3) then
-     call diff_matlu("Local occup from integral of G(w) ","Local occup from G(tau=0-) ",&
+     call diff_matlu("Local occup from integral of G(iw) ","Local occup from G(tau=0-) ",&
        & green%occup%matlu(:),green%occup_tau%matlu(:),paw_dmft%natom,1,tol4)
      write(message,'(2a)') ch10,&
        & '  *****  => Calculations of occupations in omega and tau spaces are coherent ****'
@@ -1027,7 +1027,7 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
  diag = 1 - optself
 
  if (prtopt > 0) then
-   write(message,'(2a)') ch10,'  ===  Compute green function '
+   write(message,'(2a)') ch10," ===  Compute Green's function "
    call wrtout(std_out,message,'COLL')
  end if ! prtopt>0
 
@@ -1066,10 +1066,6 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
  omega_current = czero
  !icomp_chloc = 0
 
- if (prtopt /= 0 .and. prtopt > -100) then
-   write(message,'(2a)') ch10,'  == Green function is computed:'
-   call wrtout(std_out,message,'COLL')
- end if
  option = 1
  fermilevel = paw_dmft%fermie
  if (option == 123) then
@@ -1466,21 +1462,26 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
  call gather_oper_ks(green%occup,green%distrib,paw_dmft,opt_diag=diag)
 ! write(std_out,*) 'afterxsum sym     %matlu(1)%mat(2,5,1,1,1) 1',green%oper(1)%matlu(1)%mat(2,5,1,1,1)
 
+ if (prtopt /= 0 .and. prtopt > -100) then
+   write(message,'(2a)') ch10," ===  Green's function is computed"
+   call wrtout(std_out,message,'COLL')
+ end if
+
  if (prtopt /= 0 .and. prtopt > -100 .and. (paw_dmft%lchipsiortho == 1 .or. optself == 1)) then
    write(message,'(2a)') ch10,&
-     & '  == Local Green function has been computed and projected on local orbitals'
+     & " ===  Local Green's function has been computed and projected on local orbitals"
    call wrtout(std_out,message,'COLL')
  end if
 ! useless test
  if (abs(prtopt) >= 4 .and. prtopt > -100) then
-   write(message,'(2a)') ch10,' == Green function is now printed for first frequency'
+   write(message,'(2a)') ch10," == Green's function is now printed for first frequency"
    call wrtout(std_out,message,'COLL')
    call print_oper(green%oper(1),9,paw_dmft,3)
-   write(message,'(2a)') ch10,' == Green function is now printed for second frequency'
+   write(message,'(2a)') ch10," == Green's function is now printed for second frequency"
    call wrtout(std_out,message,'COLL')
    call print_oper(green%oper(2),9,paw_dmft,3)
    if (paw_dmft%dmft_nwlo >= 11) then
-     write(message,'(2a)') ch10,' == Green function is now printed for 11th frequency'
+     write(message,'(2a)') ch10," == Green's function is now printed for 11th frequency"
      call wrtout(std_out,message,'COLL')
      call print_oper(green%oper(11),9,paw_dmft,3)
    end if
@@ -1553,7 +1554,7 @@ subroutine integrate_green(green,paw_dmft,prtopt,opt_ksloc,opt_after_solver,opt_
  call timab(625,1,tsec(:))
 
  if (prtopt > 0) then
-   write(message,'(2a,i3,13x,a)') ch10,'   ===  Integrate green function'
+   write(message,'(2a,i3,13x,a)') ch10," ===  Integrate Green's function"
    call wrtout(std_out,message,'COLL')
  end if
  if (green%w_type == "real") then
@@ -1772,9 +1773,9 @@ subroutine integrate_green(green,paw_dmft,prtopt,opt_ksloc,opt_after_solver,opt_
      end if ! optaftsolv
    else
      write(message,'(a,4x,3a,4x,a)') ch10,&
-       & " Local basis is not (yet) orthonormal:",&
-       & " local green function is thus not integrated",ch10,&
-       & " Local occupations are computed from KS occupations"
+       & "  Local basis is not (yet) orthonormal:",&
+       & " local Green's function is thus not integrated",ch10,&
+       & "  Local occupations are computed by downfolding the Kohn-Sham occupations instead"
      call wrtout(std_out,message,'COLL')
    end if ! lchipsiortho=1
 
@@ -1896,7 +1897,7 @@ subroutine integrate_green(green,paw_dmft,prtopt,opt_ksloc,opt_after_solver,opt_
      if (abs(prtopt) >= 2) then
 !       write(message,'(a,a,i10,a)') ch10,&
 !&        "  = green%occup%matlu from projection of int(gks(w)) with symetrization"
-       write(message,'(2a,i10,a)') ch10,"  = Occupation matrix from KS occupations"
+       write(message,'(2a,i10,a)') ch10,"  ==  Occupation matrix from downfolded Kohn-Sham occupations"
        call wrtout(std_out,message,'COLL')
        call print_matlu(green%occup%matlu(:),natom,prtopt=3,opt_diag=0)
      end if ! abs(prtopt)>=2
@@ -1933,7 +1934,7 @@ subroutine integrate_green(green,paw_dmft,prtopt,opt_ksloc,opt_after_solver,opt_
    if (abs(prtopt) > 0) then
      write(tag,'(f12.6)') green%charge_ks
      write(message,'(3a)') ch10,&
-       & "  ==  Total number of electrons from KS green function is : ",adjustl(tag)
+       & "  ==  Total number of electrons from integration of Kohn-Sham Green's function is : ",adjustl(tag)
      call wrtout(std_out,message,'COLL')
      write(tag,'(f12.6)') paw_dmft%nelectval
      write(message,'(8x,3a)') " (should be ",trim(adjustl(tag)),")"
@@ -1951,9 +1952,9 @@ subroutine integrate_green(green,paw_dmft,prtopt,opt_ksloc,opt_after_solver,opt_
  if ((abs(optksloc) == 3) .and. (paw_dmft%lchipsiortho == 1)) then ! optksloc= 3
    call diff_matlu("Local projection of Kohn-Sham occupations ",&
         & "Integration of local Green's function ",&
-        & green%occup%matlu(:),matlu_temp(:),natom,option,tol4)
+        & green%occup%matlu(:),matlu_temp(:),natom,1,tol4)
    write(message,'(2a)') ch10,&
-       & '  ***** => Calculations of Green function in KS and local spaces are coherent ****'
+       & "  ***** => Calculations of Green's function in Kohn-Sham and local spaces are coherent ****"
    call wrtout(std_out,message,'COLL')
  end if ! abs(optksloc)=3
 
@@ -2073,9 +2074,9 @@ subroutine icip_green(char1,green,paw_dmft,pawprtvol,self,opt_self,opt_moments,o
    if (self%oper(1)%matlu(1)%lpawu /= -1) then
      if (abs(dble(self%oper(1)%matlu(1)%mat(1,1,1))) > tol7) then
 ! todo_ab: generalise this
-       write(message,'(a,a,2(e15.4))') ch10,&
-          & "Warning:  a DFT calculation is carried out and self is not zero"
-       call wrtout(std_out,message,'COLL')
+       write(message,'(a)') ch10,&
+          & "Warning: a DFT calculation is carried out and self is not zero"
+       ABI_WARNING(message)
 !       call abi_abort('COLL')
      end if
    end if
@@ -3254,7 +3255,7 @@ subroutine fermi_green(green,paw_dmft,self)
 !=============
 !headers
 !=============
- write(message,'(2a)') ch10,"  |---Newton method to search Fermi level ------------|"
+ write(message,'(2a)') ch10,"  |--- Newton method to search for Fermi level ------------|"
  call wrtout(std_out,message,'COLL')
  write(tag,'(f13.6)') paw_dmft%fermie
  write(message,'(3a)') ch10,"  |--- Initial value for Fermi level ",adjustl(tag)
@@ -3302,7 +3303,7 @@ subroutine fermi_green(green,paw_dmft,self)
    write(message,'(a)') "Warning, check Fermi level"
    call wrtout(std_out,message,'COLL')
 !  call abi_abort('COLL')
-   write(message,'(2a,f13.6)') ch10,"  |---  Final value for Fermi level (check)",paw_dmft%fermie
+   write(message,'(2a,f13.6)') ch10,"  |--- Final value for Fermi level (check)",paw_dmft%fermie
    call wrtout(std_out,message,'COLL')
  else if (ierr_hh == -123) then
    write(message,'(a,f13.6)') " Fermi level is set to",fermi_old
@@ -3320,7 +3321,7 @@ subroutine fermi_green(green,paw_dmft,self)
    write(message,'(4x,2a)') " Precision achieved on number of electrons : ",adjustl(tag)
    call wrtout(std_out,message,'COLL')
    write(tag,'(f13.6)') paw_dmft%fermie
-   write(message,'(3a)') ch10,"  |---  Final value for Fermi level ",adjustl(tag)
+   write(message,'(3a)') ch10,"  |--- Final value for Fermi level ",adjustl(tag)
    call wrtout(std_out,message,'COLL')
  end if ! ierr_hh
 
@@ -3432,6 +3433,8 @@ subroutine newton(green,self,paw_dmft,x_input,x_precision,max_iter,&
  x_optimum = zero
 
  dmft_test = paw_dmft%dmft_test
+
+ if (dmft_test == 1) xold = x_input
 
 !========================================
 ! Start iteration to find fermi level
@@ -3556,6 +3559,7 @@ subroutine newton(green,self,paw_dmft,x_input,x_precision,max_iter,&
      Fxoptimum = Fx
      x_optimum = x_input
      if (dmft_test == 1) x_optimum = xold
+
    end if ! abs(Fx)<abs(Fxoptimum)
 
 
