@@ -234,7 +234,7 @@ contains
  if (abs(magpen) > tol6) then
    call dfpt_v1magpen(cplex,emagpen1,fatsph,intgden,magpen,mpatpol,&
 & mpdir,mpi_enreg,natom,nfft,ngfft,nspden,qphon,rhomag,taumr,vmagpen1,xred)
-  emagpen1=two*emagpen1
+!  emagpen1=two*emagpen1
  end if
 
 !------ Compute 1st-order Hartree potential (and energy) ----------------------
