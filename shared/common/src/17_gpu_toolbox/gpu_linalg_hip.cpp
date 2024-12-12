@@ -24,6 +24,12 @@ hipblasHandle_t hipblas_handle;
 hipsolverDnHandle_t hipsolverDn_handle;
 static hipStream_t stream_compute;
 
+
+static bool linalg_multi_init;
+static hipStream_t   multi_stream_compute[32];
+hipblasHandle_t      multi_hipblas_handle[32];
+hipsolverDnHandle_t  multi_hipsolverDn_handle[32];
+
 // Parameters to HIP SYEVJ and SYGVJ (Jacobi-based eigensolver)
 hipsolverSyevjInfo_t syevj_params = nullptr;
 const int    MAX_SWEEPS  = 100;
@@ -164,6 +170,20 @@ extern "C" void gpu_linalg_init_()
   //fflush(stdout);
   rocblas_initialize();
   rocfft_setup();
+  linalg_multi_init = false;
+}
+
+extern "C" void gpu_linalg_init_multi_()
+{
+  int i;
+  for(i=0; i<32; ++i) {
+    HIP_API_CHECK( hipblasCreate(&multi_hipblas_handle[i]) );
+    HIP_API_CHECK( hipsolverDnCreate(&multi_hipsolverDn_handle[i]) );
+    HIP_API_CHECK( hipStreamCreate(&multi_stream_compute[i]) );
+    HIP_API_CHECK( hipsolverDnSetStream(multi_hipsolverDn_handle[i],multi_stream_compute[i]) );
+    HIP_API_CHECK( hipblasSetStream(multi_hipblas_handle[i],multi_stream_compute[i]) );
+  }
+  linalg_multi_init = true;
 }
 
 /*=========================================================================*/
@@ -177,12 +197,19 @@ extern "C" void gpu_linalg_init_()
 
 extern "C" void gpu_linalg_shutdown_()
 {
-  //FIXME
-  //HIP_API_CHECK( hipblasDestroy(hipblas_handle) );
-  hipblasDestroy(hipblas_handle);
+  HIP_API_CHECK( hipblasDestroy(hipblas_handle) );
   HIP_API_CHECK( hipsolverDestroySyevjInfo(syevj_params) );
   HIP_API_CHECK( hipsolverDnDestroy(hipsolverDn_handle) );
   HIP_API_CHECK( hipStreamDestroy(stream_compute) );
+  if(linalg_multi_init) {
+    int i;
+    for(i=0; i<32; ++i) {
+      HIP_API_CHECK( hipblasDestroy(multi_hipblas_handle[i]) );
+      HIP_API_CHECK( hipsolverDnDestroy(multi_hipsolverDn_handle[i]) );
+      HIP_API_CHECK( hipStreamDestroy(multi_stream_compute[i]) );
+    }
+    linalg_multi_init = false;
+  }
 }
 
 /*=========================================================================*/
@@ -291,20 +318,26 @@ extern "C" void gpu_xgemm_strided_batched_(int* cplx, char *transA, char *transB
                            void **A_ptr, int *lda, int *strideA,
                            void** B_ptr, int *ldb, int *strideB,
                            hipDoubleComplex *beta,
-                           void** C_ptr, int *ldc, int *strideC, int *batchCount)
+                           void** C_ptr, int *ldc, int *strideC, int *batchCount,
+                           int *stream_id)
 {
 
   hipblasOperation_t opA = select_hipblas_op(transA);
   hipblasOperation_t opB = select_hipblas_op(transB);
+  hipblasHandle_t* handle_ptr = &hipblas_handle;
+  if(*stream_id != -1) {
+    if(!linalg_multi_init) gpu_linalg_init_multi_();
+    handle_ptr = &(multi_hipblas_handle[*stream_id]);
+  }
 
   (*cplx==1)?
-    HIP_API_CHECK( hipblasDgemmStridedBatched(hipblas_handle, opA, opB,
+    HIP_API_CHECK( hipblasDgemmStridedBatched(*handle_ptr, opA, opB,
                 *N, *M, *K, &((*alpha).x),
                 (double *)(*A_ptr), *lda, *strideA,
                 (double *)(*B_ptr), *ldb, *strideB,
                 &((*beta).x),
                 (double *)(*C_ptr), *ldc, *strideC, *batchCount)) :
-    HIP_API_CHECK( hipblasZgemmStridedBatched(hipblas_handle, opA, opB,
+    HIP_API_CHECK( hipblasZgemmStridedBatched(*handle_ptr, opA, opB,
                 *N, *M, *K, (hipblasDoubleComplex *) alpha,
                 (hipblasDoubleComplex *)(*A_ptr), *lda, *strideA,
                 (hipblasDoubleComplex *)(*B_ptr), *ldb, *strideB,

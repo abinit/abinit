@@ -18,6 +18,11 @@ cublasHandle_t cublas_handle;
 cusolverDnHandle_t cusolverDn_handle;
 static cudaStream_t stream_compute;
 
+static bool linalg_multi_init;
+static cudaStream_t multi_stream_compute[32];
+cublasHandle_t      multi_cublas_handle[32];
+cusolverDnHandle_t  multi_cusolverDn_handle[32];
+
 //! utility function for compatiblity between cublas v1/v2 API
 cublasOperation_t select_cublas_op(const char *c)
 {
@@ -127,6 +132,20 @@ extern "C" void gpu_linalg_init_()
   CUDA_API_CHECK( cudaStreamCreate(&stream_compute) );
   CUDA_API_CHECK( cusolverDnSetStream(cusolverDn_handle,stream_compute) );
   CUDA_API_CHECK( cublasSetStream(cublas_handle,stream_compute) );
+  linalg_multi_init = false;
+}
+
+extern "C" void gpu_linalg_init_multi_()
+{
+  int i;
+  for(i=0; i<32; ++i) {
+    CUDA_API_CHECK( cublasCreate(&multi_cublas_handle[i]) );
+    CUDA_API_CHECK( cusolverDnCreate(&multi_cusolverDn_handle[i]) );
+    CUDA_API_CHECK( cudaStreamCreate(&multi_stream_compute[i]) );
+    CUDA_API_CHECK( cusolverDnSetStream(multi_cusolverDn_handle[i],multi_stream_compute[i]) );
+    CUDA_API_CHECK( cublasSetStream(multi_cublas_handle[i],multi_stream_compute[i]) );
+  }
+  linalg_multi_init = true;
 }
 
 /*=========================================================================*/
@@ -143,6 +162,15 @@ extern "C" void gpu_linalg_shutdown_()
   CUDA_API_CHECK( cublasDestroy(cublas_handle) );
   CUDA_API_CHECK( cusolverDnDestroy(cusolverDn_handle) );
   CUDA_API_CHECK( cudaStreamDestroy(stream_compute) );
+  if(linalg_multi_init) {
+    int i;
+    for(i=0; i<32; ++i) {
+      CUDA_API_CHECK( cublasDestroy(multi_cublas_handle[i]) );
+      CUDA_API_CHECK( cusolverDnDestroy(multi_cusolverDn_handle[i]) );
+      CUDA_API_CHECK( cudaStreamDestroy(multi_stream_compute[i]) );
+    }
+    linalg_multi_init = false;
+  }
 }
 
 /*=========================================================================*/
@@ -251,20 +279,26 @@ extern "C" void gpu_xgemm_strided_batched_(int* cplx, char *transA, char *transB
                            void **A_ptr, int *lda, int *strideA,
                            void** B_ptr, int *ldb, int *strideB,
                            cuDoubleComplex *beta,
-                           void** C_ptr, int *ldc, int *strideC, int *batchCount)
+                           void** C_ptr, int *ldc, int *strideC, int *batchCount,
+                           int *stream_id)
 {
 
   cublasOperation_t opA = select_cublas_op(transA);
   cublasOperation_t opB = select_cublas_op(transB);
+  cublasHandle_t* handle_ptr = &cublas_handle;
+  if(*stream_id != -1) {
+    if(!linalg_multi_init) gpu_linalg_init_multi_();
+    handle_ptr = &(multi_cublas_handle[*stream_id]);
+  }
 
   (*cplx==1)?
-    CUDA_API_CHECK( cublasDgemmStridedBatched(cublas_handle, opA, opB,
+    CUDA_API_CHECK( cublasDgemmStridedBatched(*handle_ptr, opA, opB,
                 *N, *M, *K, &((*alpha).x),
                 (double *)(*A_ptr), *lda, *strideA,
                 (double *)(*B_ptr), *ldb, *strideB,
                 &((*beta).x),
                 (double *)(*C_ptr), *ldc, *strideC, *batchCount)) :
-    CUDA_API_CHECK( cublasZgemmStridedBatched(cublas_handle, opA, opB,
+    CUDA_API_CHECK( cublasZgemmStridedBatched(*handle_ptr, opA, opB,
                 *N, *M, *K, alpha,
                 (cuDoubleComplex *)(*A_ptr), *lda, *strideA,
                 (cuDoubleComplex *)(*B_ptr), *ldb, *strideB,

@@ -1175,18 +1175,21 @@ end subroutine abi_gpu_xgemm_2z
 !!
 !! SOURCE
 
-subroutine abi_gpu_xgemm_strided_cptr(cplx,transa,transb,m,n,k,alpha,a,lda,strideA,b,ldb,strideB,beta,c,ldc,strideC,batchCount,async)
+subroutine abi_gpu_xgemm_strided_cptr(cplx,transa,transb,m,n,k,alpha,&
+    a,lda,strideA,b,ldb,strideB,beta,c,ldc,strideC,batchCount,async,stream_id)
 
 !Arguments ------------------------------------
  integer,intent(in) :: cplx,lda,ldb,ldc,m,n,k
  integer,intent(in) :: strideA,strideB,strideC,batchCount
- logical,optional :: async
+ logical,intent(in),optional :: async
+ integer,intent(in),optional :: stream_id
  complex(dpc),intent(in) :: alpha,beta
  character(len=1),intent(in) :: transa,transb
  type(c_ptr),intent(in) :: a,b
  type(c_ptr),intent(in) :: c
 !Locals ---------------------------------------
  logical :: async_
+ integer :: stream_id_
 ! *********************************************************************
 
   if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
@@ -1198,11 +1201,15 @@ subroutine abi_gpu_xgemm_strided_cptr(cplx,transa,transb,m,n,k,alpha,a,lda,strid
   ! Therefore, we issue a stream sync here to avoid
   ! potential mistakes in calling context.
   if(present(async)) async_=async
+  stream_id_=-1;
+  if(present(stream_id)) then
+    stream_id_=modulo(stream_id,32);
+    async_=.true.
+  end if
 
 #ifdef HAVE_GPU
-
-  call gpu_xgemm_strided_batched(cplx,transa,transb,m,n,k,alpha,&
-      a,lda,strideA,b,ldb,strideB,beta,c,ldc,strideC,batchCount)
+    call gpu_xgemm_strided_batched(cplx,transa,transb,m,n,k,alpha,&
+        a,lda,strideA,b,ldb,strideB,beta,c,ldc,strideC,batchCount,stream_id_)
 
   if (.not. async_) then
     call gpu_linalg_stream_synchronize()
