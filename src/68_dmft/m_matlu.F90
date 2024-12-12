@@ -36,6 +36,10 @@ MODULE m_matlu
  use, intrinsic :: iso_c_binding, only: c_size_t, c_loc
  use m_abi_linalg
 
+#ifdef HAVE_GPU
+ use m_gpu_toolbox
+#endif
+
 #ifdef HAVE_GPU_MARKERS
  use m_nvtx
 #endif
@@ -811,10 +815,10 @@ end subroutine print_matlu
          call abi_gpu_xgemm_strided(2,"n","n",ndim,ndim,ndim,cone,&
          &    c_loc(gloc_mat(:,:,:)),ndim,ndim*ndim,&
          &    c_loc(zarot(:,1:ndim,irot,lpawu+1)),ndim_max,0,czero,&
-         &    c_loc(gloc_tmp(:,:,irot)),ndim_max,ndim*ndim,nsppol,async=.true.)
+         &    c_loc(gloc_tmp(:,:,irot)),ndim_max,ndim*ndim,nsppol,async=.true.,stream_id=irot)
          !$OMP END TARGET DATA
        end do ! irot
-       call gpu_linalg_stream_synchronize()
+       call gpu_device_synchronize()
 #ifdef HAVE_GPU_MARKERS
        call nvtxEndRange()
 #endif
