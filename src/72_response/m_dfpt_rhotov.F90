@@ -234,6 +234,7 @@ contains
  if (abs(magpen) > tol6) then
    call dfpt_v1magpen(cplex,emagpen1,fatsph,intgden,magpen,mpatpol,&
 & mpdir,mpi_enreg,natom,nfft,ngfft,nspden,qphon,rhomag,taumr,vmagpen1,xred)
+  emagpen1=two*emagpen1
  end if
 
 !------ Compute 1st-order Hartree potential (and energy) ----------------------
@@ -663,10 +664,8 @@ subroutine dfpt_v1magpen(cplex,emagpen1,fatsph,intgden,magpen,mpatpol,mpdir,&
                         & + rhomag_eff(1,4)**2+rhomag_eff(2,4)**2 )
    end if
    
-   !MR: a factor of two is needed (not sure yet why).
-   emagpen1=two*emagpen1
-
    !A 0.5 factor has been applied here to be consistent with the Zeeman field perturbation
+   !(It is due to the representation on the basis of spins)
    Bx(:)=-half*magpen*rhomag_eff(:,2)
    By(:)=-half*magpen*rhomag_eff(:,3)
    Bz(:)=-half*magpen*rhomag_eff(:,4)
@@ -713,9 +712,6 @@ subroutine dfpt_v1magpen(cplex,emagpen1,fatsph,intgden,magpen,mpatpol,mpdir,&
                           & + intgden_eff(1,3,iatom)**2+intgden_eff(2,3,iatom)**2 &
                           & + intgden_eff(1,4,iatom)**2+intgden_eff(2,4,iatom)**2 )
      end if
-
-     !MR: a factor of two is needed (not sure yet why).
-     emagpen1=two*emagpen1
 
      if (cplex==1) then
        do ifft=1,nfft
