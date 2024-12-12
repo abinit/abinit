@@ -478,9 +478,9 @@ contains
 
 !Local variables -------------------------
 !scalars
+ integer :: fs2rs_
  integer :: iat1,iat2,icol,idir1,idir2,index,info,ipert1,ipert2,irow,lwork
  integer :: ipert1_red,ipert2_red,idir1_red,idir2_red
- integer :: fs2rs_
  real(dp) :: fac
  character(len=1000) :: msg
 !arrays
@@ -734,6 +734,8 @@ contains
 !! nmdir= number of directions along which the magnetic penalty was applied
 !! ndim= dimension of the square susceptibilities 
 !! prtvol= control the volume of information written on output
+!! fs2rs= (optional) if 1, the routine starts from a precalculated blkval_fs 
+!! blkval_fs(2,3,mpert,3,mpert)= fixed-spin 2nd-order derivatives
 !!
 !! OUTPUT
 !! barmmom(ndim,(natom+2)*3)= penalized first order magnetic moments on the atoms and 
@@ -745,16 +747,19 @@ contains
 !! SOURCE
 
  subroutine magmom(barmmom,barmmom_tr,ddb,invbarmagsus,invhmat,iblok,jblok,lblok,magpen,magsus,mmom,mmom_tr,&
-& mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,prtopt,prtvol,qphon,xred,zfield,zfield_tr)
+& mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,prtopt,prtvol,qphon,xred,zfield,zfield_tr, &
+& fs2rs,blkval_fs)
 
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: iblok,jblok,lblok,mpert,natom,nblok,ndim,nmdir,prtopt,prtvol
+ integer,intent(in),optional :: fs2rs
  real(dp),intent(in) :: magpen
 !arrays
  type(ddb_type),intent(inout) :: ddb
  real(dp),intent(in) :: qphon(3),xred(3,natom)
  integer,intent(in) :: mpatpol(2),mpdir(3)
+ real(dp),intent(in),optional :: blkval_fs(2,3,mpert,3,mpert,1)
  complex(dpc),intent(out) :: barmmom(ndim,(natom+5)*3)
  complex(dpc),intent(out) :: barmmom_tr((natom+5)*3,ndim)
  complex(dpc),intent(in) :: invbarmagsus(ndim,ndim)
@@ -766,6 +771,7 @@ contains
  complex(dpc),intent(out) :: zfield_tr((natom+5)*3,ndim)
 !Local variables -------------------------
 !scalars
+ integer :: fs2rs_
  integer :: iat1,iat2,icol,idir1,idir2,index,ipert1,ipert2,irow
  integer :: ipert1_red,ipert2_red,idir1_red,idir2_red,jndex,zblok
  real(dp) :: fac
@@ -777,6 +783,16 @@ contains
  character(len=1) :: cart(3)=(/'x','y','z'/)
 
 ! *********************************************************************
+
+!If fixed-spin case has been precalculated do less stuff
+ fs2rs_=0; if (present(fs2rs)) fs2rs_=fs2rs
+ if (fs2rs_==1) then
+   if (.not.present(blkval_fs)) then
+     write(msg, '(3a)' )' No fixed-spin array has been passed to magmom', &
+   & ' but fs2rs=1 ',ch10
+     ABI_ERROR(msg)
+   end if 
+ end if
 
 !Extract the penalized moments
  do ipert2=1,natom+5
@@ -801,15 +817,24 @@ contains
          index= idir1 + 3*((ipert1-1)+mpert*((idir2-1)+3*(ipert2-1)))
          jndex= idir2 + 3*((ipert2-1)+mpert*((idir1-1)+3*(ipert1-1)))
 
-         if (iblok /=0 .and. ipert2 <= natom) then
-           barmmom(irow,icol)= cmplx(ddb%val(1,index,iblok),ddb%val(2,index,iblok),16)
-           barmmom_tr(icol,irow)= cmplx(ddb%val(1,jndex,iblok),ddb%val(2,jndex,iblok),16)
-         else if (jblok /=0 .and. ipert2 == natom+2) then
-           barmmom(irow,icol)= cmplx(ddb%val(1,index,jblok),ddb%val(2,index,jblok),16)
-           barmmom_tr(icol,irow)= cmplx(ddb%val(1,jndex,jblok),ddb%val(2,jndex,jblok),16)
-         else if (lblok /=0 .and. ipert2 == natom+5) then
-           barmmom(irow,icol)= cmplx(ddb%val(1,index,lblok),ddb%val(2,index,lblok),16)
-           barmmom_tr(icol,irow)= cmplx(ddb%val(1,jndex,lblok),ddb%val(2,jndex,lblok),16)
+         if (fs2rs_==0) then
+           if (iblok /=0 .and. ipert2 <= natom) then
+             barmmom(irow,icol)= cmplx(ddb%val(1,index,iblok),ddb%val(2,index,iblok),16)
+             barmmom_tr(icol,irow)= cmplx(ddb%val(1,jndex,iblok),ddb%val(2,jndex,iblok),16)
+           else if (jblok /=0 .and. ipert2 == natom+2) then
+             barmmom(irow,icol)= cmplx(ddb%val(1,index,jblok),ddb%val(2,index,jblok),16)
+             barmmom_tr(icol,irow)= cmplx(ddb%val(1,jndex,jblok),ddb%val(2,jndex,jblok),16)
+           else if (lblok /=0 .and. ipert2 == natom+5) then
+             barmmom(irow,icol)= cmplx(ddb%val(1,index,lblok),ddb%val(2,index,lblok),16)
+             barmmom_tr(icol,irow)= cmplx(ddb%val(1,jndex,lblok),ddb%val(2,jndex,lblok),16)
+           end if
+         else if (fs2rs_==1) then
+           zfield(irow,icol)= &
+         & cmplx(blkval_fs(1,idir1,ipert1,idir2,ipert2,iblok), &
+         & blkval_fs(2,idir1,ipert1,idir2,ipert2,iblok),16)
+           zfield_tr(icol,irow)= &
+         & cmplx(blkval_fs(1,idir2,ipert2,idir1,ipert1,iblok), &
+         & blkval_fs(2,idir2,ipert2,idir1,ipert1,iblok),16)
          end if
 
        end do
@@ -818,13 +843,20 @@ contains
  end do
 
 !Compute the Zeeman fields 
- zfield=-matmul(invbarmagsus,barmmom)
- zfield_tr=-matmul(barmmom_tr,invbarmagsus)
+ if (fs2rs_==0) then
+   zfield=-matmul(invbarmagsus,barmmom)
+   zfield_tr=-matmul(barmmom_tr,invbarmagsus)
+ end if
 
 !Compute the moments
- mmom=-matmul(magsus,zfield)
- mmom_alt=matmul(invhmat,barmmom)
- mmom_tr=matmul(barmmom_tr,invhmat)
+ if (fs2rs_==0) then
+   mmom=-matmul(magsus,zfield)
+   mmom_alt=matmul(invhmat,barmmom)
+   mmom_tr=matmul(barmmom_tr,invhmat)
+ else if (fs2rs_==1) then
+   mmom=-matmul(magsus,zfield)
+   mmom_tr=-matmul(zfield_tr,magsus)
+ end if
 
  if (prtopt==1.and.prtvol>1) then
     !TODO: the change of phase should rather be done on the magnetic variables, for them

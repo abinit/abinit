@@ -114,7 +114,7 @@ contains
  real(dp), allocatable :: coeffs(:,:,:)
  complex(dpc), allocatable :: dummysus(:,:)
  complex(dpc), allocatable :: invmagsus(:,:,:), lm_magsus(:,:,:), magsus(:,:,:), invhmat(:,:)
- complex(dpc), allocatable :: barmmom(:,:),barmmom_tr(:,:),mmom(:,:,:), mmom_tr(:,:,:)
+ complex(dpc), allocatable :: dummymom(:,:),dummymom_tr(:,:),mmom(:,:,:), mmom_tr(:,:,:)
  complex(dpc), allocatable :: ri_mmom(:,:,:)
  complex(dpc), allocatable :: lm_zfield(:,:,:),zfield(:,:,:),zfield_tr(:,:)
  complex(dpc), allocatable :: bc_barmagsus(:,:),bc_ss(:,:),bc_sp(:,:)
@@ -182,14 +182,13 @@ contains
  ABI_MALLOC(ri_magelsus,(ndim,3))
  ABI_MALLOC(lm_magelsus,(ndim,3,nomega))
  ABI_MALLOC(invmagsus,(ndim,ndim,nomega))
- ABI_MALLOC(invhmat,(ndim,ndim))
- ABI_MALLOC(barmmom,(ndim,(natom+2)*3))
- ABI_MALLOC(barmmom_tr,(ndim,(natom+2)*3))
+ ABI_MALLOC(dummymom,(ndim,(natom+2)*3))
+ ABI_MALLOC(dummymom_tr,(ndim,(natom+2)*3))
  ABI_MALLOC(mmom,(ndim,(natom+2)*3,nomega))
  ABI_MALLOC(mmom_tr,((natom+2)*3,ndim,nomega))
  ABI_MALLOC(lm_zfield,(ndim,3,nomega))
- ABI_MALLOC(zfield,(ndim,(natom+2)*3,nomega))
- ABI_MALLOC(zfield_tr,((natom+2)*3,ndim))
+ ABI_MALLOC(zfield,(ndim,(natom+5)*3,nomega))
+ ABI_MALLOC(zfield_tr,((natom+5)*3,ndim))
  ABI_MALLOC(barepsilon,(3,3,nomega))
  ABI_MALLOC(epsilon,(3,3,nomega))
  ABI_MALLOC(macmagsus,(3,3,nomega))
@@ -297,12 +296,14 @@ contains
 
    !Calculate the local spin susceptibilities
    call local_spinsus(dummysus,ddb,1,dummysus,invmagsus(:,:,iw),&
- & invhmat,magpen,magsus(:,:,iw),mpatpol,mpdir,mpert,natom,1,ndim,nmdir,prtopt,prtvol,&
+ & dummysus,magpen,magsus(:,:,iw),mpatpol,mpdir,mpert,natom,1,ndim,nmdir,prtopt,prtvol,&
  & fs2rs=fs2rs,blkval_fs=int_fsddb)
 
-     !Calculate the magnetic moments
-!     call magmom(barmmom,barmmom_tr,ddb,invbarmagsus(:,:,iw),invhmat,1,1,1,magpen,magsus(:,:,iw),mmom(:,:,iw),mmom_tr(:,:,iw),&
-!   & mpatpol,mpdir,mpert,natom,1,ndim,nmdir,prtopt,prtvol,qphon,xred,zfield(:,:,iw),zfield_tr)
+   !Calculate the magnetic moments
+   call magmom(dummymom,dummymom_tr,ddb,dummysus,dummysus,1,1,1,magpen,&
+   & magsus(:,:,iw),mmom(:,:,iw),mmom_tr(:,:,iw),mpatpol,mpdir,mpert,natom,&
+   &1,ndim,nmdir,prtopt,prtvol,qphon,xred,zfield(:,:,iw),zfield_tr,&
+   &fs2rs=fs2rs,blkval_fs=int_fsddb)
   
 !     !Calculate the dielectric susceptibility
 !     call mp_diel(barepsilon(:,:,iw),barmagsus(:,:,iw),barmmom,barmmom_tr,&
@@ -533,33 +534,33 @@ contains
 
  close (spin_unit)
 
-!!Zfields
-! write(pfmt, '( "(es15.7, ", I4, "(es15.7))" )' )  ndim*3
-! zfield_filename=trim(outfilename_radix)//"_ZFIELDS"
-! if (open_file(zfield_filename, msg, newunit=zfield_unit) /= 0) then
-!   ABI_ERROR(msg)
-! end if
-!
-! write(zfield_unit,*) '#  Real part of clamped-ion local Zeeman fields induced by electric field (at. units)'
-! write(msg,'(a,a)') ch10,&
-!&           ' # At  hw     Z_11     Z_12      Z_13    ...     Z_21     Z_22     ...'
-! call wrtout(zfield_unit,msg,'COLL')
-! do iw=1,nomega
-!   write(msg,pfmt) omega(iw), ((real(zfield(i,(natom+1)*3+j,iw)),j=1,3),i=1,ndim)
-!   call wrtout(zfield_unit,msg,'COLL')
-! end do
-!
-! write(zfield_unit,*) ' '
-! write(zfield_unit,*) '#  Imag part of clamped-ion local Zeeman fields induced by electric field (at. units)'
-! write(msg,'(a,a)') ch10,&
-!&           ' # At  hw     Z_11     Z_12      Z_13    ...     Z_21     Z_22     ...'
-! call wrtout(zfield_unit,msg,'COLL')
-! do iw=1,nomega
-!   write(msg,pfmt) omega(iw), ((aimag(zfield(i,(natom+1)*3+j,iw)),j=1,3),i=1,ndim)
-!   call wrtout(zfield_unit,msg,'COLL')
-! end do
-!
-! write(zfield_unit,*) ' '
+!Zfields
+ write(pfmt, '( "(es15.7, ", I4, "(es15.7))" )' )  ndim*3
+ zfield_filename=trim(outfilename_radix)//"_ZFIELDS"
+ if (open_file(zfield_filename, msg, newunit=zfield_unit) /= 0) then
+   ABI_ERROR(msg)
+ end if
+
+ write(zfield_unit,*) '#  Real part of clamped-ion local Zeeman fields induced by electric field (at. units)'
+ write(msg,'(a,a)') ch10,&
+&           ' # At  hw     Z_11     Z_12      Z_13    ...     Z_21     Z_22     ...'
+ call wrtout(zfield_unit,msg,'COLL')
+ do iw=1,nomega
+   write(msg,pfmt) omega(iw), ((real(zfield(i,(natom+1)*3+j,iw)),j=1,3),i=1,ndim)
+   call wrtout(zfield_unit,msg,'COLL')
+ end do
+
+ write(zfield_unit,*) ' '
+ write(zfield_unit,*) '#  Imag part of clamped-ion local Zeeman fields induced by electric field (at. units)'
+ write(msg,'(a,a)') ch10,&
+&           ' # At  hw     Z_11     Z_12      Z_13    ...     Z_21     Z_22     ...'
+ call wrtout(zfield_unit,msg,'COLL')
+ do iw=1,nomega
+   write(msg,pfmt) omega(iw), ((aimag(zfield(i,(natom+1)*3+j,iw)),j=1,3),i=1,ndim)
+   call wrtout(zfield_unit,msg,'COLL')
+ end do
+
+ write(zfield_unit,*) ' '
 ! write(zfield_unit,*) '#  Real part of lattice-mediated local Zeeman fields induced by electric field (at. units)'
 ! write(msg,'(a,a)') ch10,&
 !&           ' # At  hw     Z_11     Z_12      Z_13    ...     Z_21     Z_22     ...'
@@ -579,18 +580,18 @@ contains
 !   call wrtout(zfield_unit,msg,'COLL')
 ! end do
 ! 
-! close (zfield_unit)
-!
-!!Magnetic moments
-! mmom_filename=trim(outfilename_radix)//"_MAGMOM"
-! if (open_file(mmom_filename, msg, newunit=mmom_unit) /= 0) then
-!   ABI_ERROR(msg)
-! end if
-!
-! write(mmom_unit,*) '#'
-! write(mmom_unit,*) '#  Magnetic moments calculated and interpolated by ANADDB'
-! write(mmom_unit,*) '#'
-!
+ close (zfield_unit)
+
+!Magnetic moments
+ mmom_filename=trim(outfilename_radix)//"_MAGMOM"
+ if (open_file(mmom_filename, msg, newunit=mmom_unit) /= 0) then
+   ABI_ERROR(msg)
+ end if
+
+ write(mmom_unit,*) '#'
+ write(mmom_unit,*) '#  Magnetic moments calculated and interpolated by ANADDB'
+ write(mmom_unit,*) '#'
+
 ! write(pfmt, '( "(es15.7, ", I2, "(es17.7))" )' )  ndim
 ! do imode= 1, 3*natom
 !   write(mmom_unit,*) ' '
@@ -614,32 +615,32 @@ contains
 !     call wrtout(mmom_unit,msg,'COLL')
 !   end do
 ! end do
-!
-! write(pfmt, '( "(es15.7, ", I2, "(es17.7))" )' )  ndim*3
-! write(mmom_unit,*) ' '
-! write(mmom_unit,*) '#  Real part of the clamped-ion local magnetoelectric tensor(at. units)'
-! write(msg,'(a,a,a)') ch10,&
-!&           ' # At  hw     m_{mat_1,1}^{Ex}     m_{mat_1,1}^{Ey}',&
-!&           '      ...     m_{mat_1,2}^{Ex}     ...     m_{mat_2,1}^{Ex}     ...'
-! call wrtout(mmom_unit,msg,'COLL')
-! do iw=1,nomega
-!    write(msg,pfmt) &
-! &  omega(iw), ((real(mmom(i,j,iw)),j=3*(natom+1)+1,3*(natom+2)),i=1,ndim)
-!    call wrtout(mmom_unit,msg,'COLL')
-! end do
-!
-! write(mmom_unit,*) ' '
-! write(mmom_unit,*) '#  Imaginary part of the clamped-ion local magnetoelectric tensor(at. units)'
-! write(msg,'(a,a,a)') ch10,&
-!&           ' # At  hw     m_{mat_1,1}^{Ex}     m_{mat_1,1}^{Ey}',&
-!&           '      ...     m_{mat_1,2}^{Ex}     ...     m_{mat_2,1}^{Ex}     ...'
-! call wrtout(mmom_unit,msg,'COLL')
-! do iw=1,nomega
-!    write(msg,pfmt) &
-! &  omega(iw), ((aimag(mmom(i,j,iw)),j=3*(natom+1)+1,3*(natom+2)),i=1,ndim)
-!    call wrtout(mmom_unit,msg,'COLL')
-! end do
-!
+
+ write(pfmt, '( "(es15.7, ", I2, "(es17.7))" )' )  ndim*3
+ write(mmom_unit,*) ' '
+ write(mmom_unit,*) '#  Real part of the clamped-ion local magnetoelectric tensor(at. units)'
+ write(msg,'(a,a,a)') ch10,&
+&           ' # At  hw     m_{mat_1,1}^{Ex}     m_{mat_1,1}^{Ey}',&
+&           '      ...     m_{mat_1,2}^{Ex}     ...     m_{mat_2,1}^{Ex}     ...'
+ call wrtout(mmom_unit,msg,'COLL')
+ do iw=1,nomega
+    write(msg,pfmt) &
+ &  omega(iw), ((real(mmom(i,j,iw)),j=3*(natom+1)+1,3*(natom+2)),i=1,ndim)
+    call wrtout(mmom_unit,msg,'COLL')
+ end do
+
+ write(mmom_unit,*) ' '
+ write(mmom_unit,*) '#  Imaginary part of the clamped-ion local magnetoelectric tensor(at. units)'
+ write(msg,'(a,a,a)') ch10,&
+&           ' # At  hw     m_{mat_1,1}^{Ex}     m_{mat_1,1}^{Ey}',&
+&           '      ...     m_{mat_1,2}^{Ex}     ...     m_{mat_2,1}^{Ex}     ...'
+ call wrtout(mmom_unit,msg,'COLL')
+ do iw=1,nomega
+    write(msg,pfmt) &
+ &  omega(iw), ((aimag(mmom(i,j,iw)),j=3*(natom+1)+1,3*(natom+2)),i=1,ndim)
+    call wrtout(mmom_unit,msg,'COLL')
+ end do
+
 ! write(pfmt, '( "(es15.7, ", I2, "(es17.7))" )' )  ndim*3
 ! write(mmom_unit,*) ' '
 ! write(mmom_unit,*) '#  Real part of the phonon-modes contribution to the local magnetoelectric tensor(at. units)'
@@ -1016,9 +1017,6 @@ contains
  ABI_FREE(magsus)
  ABI_FREE(lm_magsus)
  ABI_FREE(invmagsus)
- ABI_FREE(invhmat)
- ABI_FREE(barmmom)
- ABI_FREE(barmmom_tr)
  ABI_FREE(mmom)
  ABI_FREE(mmom_tr)
  ABI_FREE(zfield)
