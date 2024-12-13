@@ -211,6 +211,7 @@ nav:
         - Bethe-Salpeter: tutorial/bse.md
         - DMFT: tutorial/dmft.md
         - TDDFT (Casida): tutorial/tddft.md
+        - RT-TDDFT: tutorial/rttddft.md
     - DFPT & electron-phonon:
         - elastic: tutorial/elastic.md
         - nonlinear : tutorial/nlo.md
