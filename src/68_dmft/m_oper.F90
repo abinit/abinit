@@ -375,7 +375,7 @@ subroutine print_oper(oper,option,paw_dmft,prtopt)
              & "   -k-pt--",ikpt,oper%wtk(ikpt),"(<-weight(k-pt))"
          call wrtout(std_out,message,'COLL')
          if (option < 5) then
-           write(message,'(20x,a,6x,a)') "Eigenvalues","Occupations"
+           write(message,'(19x,a,6x,a)') "Eigenvalues","Occupations"
            call wrtout(std_out,message,'COLL')
          else if (abs(prtopt) >= 4 .or. option > 8) then
            write(message,'(a,10x,2000(i5,12x))') ch10,(paw_dmft%include_bands(ib),ib=iband1,iband2)

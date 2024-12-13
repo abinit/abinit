@@ -1209,7 +1209,7 @@ if (dtset%prt_lorbmag==1) then
 
        ! For the DFT BS: use opt_self=0 and fermie=fermie_dft
 
-      ! Compute green's function on real axis
+      ! Compute Green's function on real axis
        call compute_green(greenr,paw_dmft,1,selfr,opt_self=1,opt_nonxsum=0)
 
       !write(6,*) "compute green done"

@@ -234,10 +234,10 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 
  !write(6,*) "nspinor,useylm",nspinor,useylm
  if (useylm == 0) then
-   write(std_out,*) " Slm basis is used (before rotation)"
+   write(std_out,*) " Slm (real spherical harmonics) basis is used (before a possible rotation)"
    rot_type_vee = 1 ! for rotatevee_hu
  else if (useylm == 1) then
-   write(std_out,*) " Ylm basis is used (before rotation)"
+   write(std_out,*) " Ylm (complex spherical harmonics) basis is used (before rotation)"
    rot_type_vee = 4 ! for rotatevee_hu
  end if ! useylm
 

@@ -151,10 +151,10 @@ type, public :: dataset_type
  integer :: dmftcheck
  integer :: dmftctqmc_basis
  integer :: dmftctqmc_check
+ integer :: dmftctqmc_config
  integer :: dmftctqmc_correl
  integer :: dmftctqmc_gmove
  integer :: dmftctqmc_grnns
- integer :: dmftctqmc_config
  integer :: dmftctqmc_meas
  integer :: dmftctqmc_mov
  integer :: dmftctqmc_mrka
@@ -1249,7 +1249,7 @@ subroutine dtset_initocc_chkneu(dtset, nelectjell, occopt)
          do ikpt=1,dtset%nkpt
            do iband=1,dtset%nband(1)
              dtset%occ_orig(iband+(ikpt-1)*dtset%nband(1),:)=tmpocc(iband)
-           enddo
+           end do
          end do
        else
          do ikpt=1,dtset%nkpt
