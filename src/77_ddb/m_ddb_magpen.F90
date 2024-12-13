@@ -52,6 +52,7 @@ module m_ddb_magpen
  public :: local_spinsus    ! Treat local spin susceptibility (2nd-order magnetic derivatives)
  public :: magmom           ! Treat first-order magnetic moments (2nd-order mixed derivatives)
  public :: mp_d2etot        ! Treat 2nd-order nonmagnetic derivatives
+ public :: asrw0            ! Apply the ASR correction calculated at w=0 at any value of w
 
  private
 
@@ -104,7 +105,7 @@ contains
 !Local variables -------------------------
 !scalars
  integer :: iblok,ii,ipert1,ipert2,jblok,kblok,lblok,nblok,ndim 
- integer :: nmat,nmdir,prtopt
+ integer :: nmat,nmdir,optgb,prtopt
  character(len=500) :: msg
  logical :: qeq0
 !arrays
@@ -133,6 +134,7 @@ contains
  end if
  nmdir=sum(mpdir(:))
  ndim=nmat*nmdir
+ optgb=1
  ABI_MALLOC(barmagsus,(ndim,ndim))
  ABI_MALLOC(magsus,(ndim,ndim))
  ABI_MALLOC(invbarmagsus,(ndim,ndim))
@@ -269,16 +271,16 @@ contains
    call wrtout([std_out, ab_out], msg)
 
    !Convert ddb%val to second-order energies
-   call ddb%to_d2etot(ddb%val,kblok,0,qeq0,qphon,qphnrm,ucvol,omega=omega)
+   call ddb%to_d2etot(ddb%val,kblok,0,qeq0,qphon,qphnrm,ucvol,optgb,omega=omega)
 
    !Convert second-order derivatives to diferent magnetic boundary conditions
    call mp_d2etot(barmagsus,ddb,kblok,invhmat,magsus,magpen,mpert,mpopt,natom, &
  & nblok,ndim,qphon,xred,zfield,zfield_tr)
 
    !Convert second-order energies to the physical quantities of ddb%val
-   call ddb%to_d2etot(ddb%val,kblok,1,qeq0,qphon,qphnrm,ucvol,omega=omega)
-   call ddb%to_d2etot(ddb%val_fs,kblok,1,qeq0,qphon,qphnrm,ucvol,omega=omega)
-   if (mpopt==2) call ddb%to_d2etot(ddb%val_rs,kblok,1,qeq0,qphon,qphnrm,ucvol,omega=omega)
+   call ddb%to_d2etot(ddb%val,kblok,1,qeq0,qphon,qphnrm,ucvol,optgb,omega=omega)
+   call ddb%to_d2etot(ddb%val_fs,kblok,1,qeq0,qphon,qphnrm,ucvol,optgb,omega=omega)
+   if (mpopt==2) call ddb%to_d2etot(ddb%val_rs,kblok,1,qeq0,qphon,qphnrm,ucvol,optgb,omega=omega)
 
    !Print the physical quantities in the new magnetic boundary conditions
    if (prtopt==1) then

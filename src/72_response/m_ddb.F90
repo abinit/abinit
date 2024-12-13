@@ -913,6 +913,8 @@ end subroutine ddb_set_brav
 !! ddb<type(ddb_type)>=Derivative Database.
 !! option= 0 transform ddb to d2etot
 !!         1 transform d2etot to ddb
+!! optgb=  0 do the transform even it ddb might be zeros
+!!         1 check whether the corresponding quantity is present in the ddb data
 !! qeq0= called from a Gamma point blok
 !! ucvol= unit cell volume
 !!
@@ -921,12 +923,12 @@ end subroutine ddb_set_brav
 !!
 !! SOURCE
 
-subroutine ddb_to_d2etot(ddb,blkval,kblok,option,qeq0,qphon,qphnrm,ucvol,omega) 
+subroutine ddb_to_d2etot(ddb,blkval,kblok,option,qeq0,qphon,qphnrm,ucvol,optgb,omega) 
 
 !Arguments -------------------------------
 !scalars
  class(ddb_type),intent(inout) :: ddb
- integer,intent(in) :: kblok,option
+ integer,intent(in) :: kblok,option,optgb
  real(dp),intent(in) :: ucvol
  logical,intent(in) :: qeq0
 !arrays
@@ -955,10 +957,12 @@ subroutine ddb_to_d2etot(ddb,blkval,kblok,option,qeq0,qphon,qphnrm,ucvol,omega)
  if (qeq0) then
 
    !Born charges 
-   rfphon(1:2)=1
-   rfelfd(1:2)=2
-   call ddb%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, omega=omega)
-   if (iblok/=0.and.iblok==kblok) then
+   if (optgb==1) then
+     rfphon(1:2)=1
+     rfelfd(1:2)=2
+     call ddb%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, omega=omega)
+   end if
+   if ((iblok/=0.and.iblok==kblok).or.optgb==0) then
      ipert1= ddb%natom + 2
      do ipert2= 1, ddb%natom
        do idir2= 1, 3
@@ -973,11 +977,13 @@ subroutine ddb_to_d2etot(ddb,blkval,kblok,option,qeq0,qphon,qphnrm,ucvol,omega)
    end if
 
    !Dielectric tensor
-   iblok=0
-   rfphon(:)=0
-   rfelfd(1:2)=2
-   call ddb%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, omega=omega)
-   if (iblok/=0.and.iblok==kblok) then
+   if (optgb==1) then
+     iblok=0
+     rfphon(:)=0
+     rfelfd(1:2)=2
+     call ddb%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, omega=omega)
+   end if
+   if ((iblok/=0.and.iblok==kblok).or.optgb==0) then
      ipert1= ddb%natom + 2
      ipert2= ddb%natom + 2
      do idir2= 1, 3
@@ -1005,14 +1011,16 @@ subroutine ddb_to_d2etot(ddb,blkval,kblok,option,qeq0,qphon,qphnrm,ucvol,omega)
    !here. I include them when writting in output but not internaly. 
 
    !Magnetoelectric susceptibility
-   iblok=0
-   rfphon(:)=0
-   rfelfd(1)=0
-   rfelfd(2)=2
-   rfmagn(1)=1
-   rfmagn(2)=0
-   call ddb%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, omega=omega)
-   if (iblok/=0.and.iblok==kblok) then
+   if (optgb==1) then
+     iblok=0
+     rfphon(:)=0
+     rfelfd(1)=0
+     rfelfd(2)=2
+     rfmagn(1)=1
+     rfmagn(2)=0
+     call ddb%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, omega=omega)
+   end if
+   if ((iblok/=0.and.iblok==kblok).or.optgb==0) then
      ipert1= ddb%natom + 5
      ipert2= ddb%natom + 2
      do idir2= 1, 3
@@ -1028,12 +1036,14 @@ subroutine ddb_to_d2etot(ddb,blkval,kblok,option,qeq0,qphon,qphnrm,ucvol,omega)
  end if
 
  !Magnetic susceptibility
- iblok=0
- rfphon(:)=0
- rfelfd(1:2)=0
- rfmagn(1:2)=1
- call ddb%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, omega=omega)
- if (iblok/=0.and.iblok==kblok) then
+ if (optgb==1) then
+   iblok=0
+   rfphon(:)=0
+   rfelfd(1:2)=0
+   rfmagn(1:2)=1
+   call ddb%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, omega=omega)
+ end if
+ if ((iblok/=0.and.iblok==kblok).or.optgb==0) then
    ipert2= ddb%natom + 5
    ipert1= ddb%natom + 5
    do idir2= 1, 3
@@ -1045,13 +1055,15 @@ subroutine ddb_to_d2etot(ddb,blkval,kblok,option,qeq0,qphon,qphnrm,ucvol,omega)
  end if
 
  !Forces induced by magnetic field
- iblok=0
- rfelfd(:)=0
- rfmagn(:)=0
- rfphon(2)=1
- rfmagn(1)=1
- call ddb%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, omega=omega)
- if (iblok/=0.and.iblok==kblok) then
+ if (optgb==1) then
+   iblok=0
+   rfelfd(:)=0
+   rfmagn(:)=0
+   rfphon(2)=1
+   rfmagn(1)=1
+   call ddb%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, omega=omega)
+ end if
+ if ((iblok/=0.and.iblok==kblok).or.optgb==0) then
    ipert1= ddb%natom + 5
    do ipert2= 1, ddb%natom
      do idir2= 1, 3
