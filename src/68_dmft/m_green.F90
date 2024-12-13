@@ -2074,7 +2074,7 @@ subroutine icip_green(char1,green,paw_dmft,pawprtvol,self,opt_self,opt_moments,o
    if (self%oper(1)%matlu(1)%lpawu /= -1) then
      if (abs(dble(self%oper(1)%matlu(1)%mat(1,1,1))) > tol7) then
 ! todo_ab: generalise this
-       write(message,'(a)') ch10,&
+       write(message,'(2a)') ch10,&
           & "Warning: a DFT calculation is carried out and self is not zero"
        ABI_WARNING(message)
 !       call abi_abort('COLL')

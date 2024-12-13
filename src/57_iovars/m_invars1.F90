@@ -2338,9 +2338,9 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmft_dc=1
    dtsets(idtset)%dmft_entropy=0
    dtsets(idtset)%dmft_fermi_step=0.02_dp
-   dtsets(idtset)%dmft_iter=0
+   dtsets(idtset)%dmft_iter=10
    dtsets(idtset)%dmft_kspectralfunc=0
-   dtsets(idtset)%dmft_mxsf=0.3_dp
+   dtsets(idtset)%dmft_mxsf=0.6_dp
    dtsets(idtset)%dmft_nlambda=6
    dtsets(idtset)%dmft_nominal(:)=0
    dtsets(idtset)%dmft_nwli=0
@@ -2350,7 +2350,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmft_prt_maxent=1
    dtsets(idtset)%dmft_prtwan=0
    dtsets(idtset)%dmft_read_occnd=0
-   dtsets(idtset)%dmft_rslf=0
+   dtsets(idtset)%dmft_rslf=1
    dtsets(idtset)%dmft_shiftself(:)=0.0_dp
    dtsets(idtset)%dmft_solv=5
    if(dtsets(idtset)%ucrpa>0.and.dtsets(idtset)%usedmft==1) dtsets(idtset)%dmft_solv=0
@@ -2368,9 +2368,10 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmftcheck=0
    dtsets(idtset)%dmftctqmc_basis=1
    dtsets(idtset)%dmftctqmc_check=0
-   dtsets(idtset)%dmftctqmc_correl=0
-   dtsets(idtset)%dmftctqmc_grnns=0
    dtsets(idtset)%dmftctqmc_config=0
+   dtsets(idtset)%dmftctqmc_correl=0
+   dtsets(idtset)%dmftctqmc_gmove=0
+   dtsets(idtset)%dmftctqmc_grnns=0
    dtsets(idtset)%dmftctqmc_meas=1
    dtsets(idtset)%dmftctqmc_mrka=0
    dtsets(idtset)%dmftctqmc_mov=0
@@ -2383,7 +2384,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmftctqmc_triqs_det_singular_threshold=-1.0_dp
    dtsets(idtset)%dmftctqmc_triqs_entropy=0
    dtsets(idtset)%dmftctqmc_triqs_epsilon=1.0d-6
-   dtsets(idtset)%dmftctqmc_triqs_gaussorder=15
+   dtsets(idtset)%dmftctqmc_triqs_gaussorder=10
    dtsets(idtset)%dmftctqmc_triqs_imag_threshold=1.0d-13
    dtsets(idtset)%dmftctqmc_triqs_leg_measure=0
    dtsets(idtset)%dmftctqmc_triqs_loc_n_min=0
@@ -2396,19 +2397,18 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmftctqmc_triqs_nleg=30
    dtsets(idtset)%dmftctqmc_triqs_nsubdivisions=1
    dtsets(idtset)%dmftctqmc_triqs_ntau_delta=0
-   dtsets(idtset)%dmftctqmc_triqs_orb_off_diag=0
+   dtsets(idtset)%dmftctqmc_triqs_orb_off_diag=-1
    dtsets(idtset)%dmftctqmc_triqs_seed_a=34788
    dtsets(idtset)%dmftctqmc_triqs_seed_b=928374
-   dtsets(idtset)%dmftctqmc_triqs_spin_off_diag=0
+   dtsets(idtset)%dmftctqmc_triqs_spin_off_diag=-1
    dtsets(idtset)%dmftctqmc_triqs_therm_restart=1000
    dtsets(idtset)%dmftctqmc_triqs_time_invariance=1
    dtsets(idtset)%dmftctqmc_triqs_use_norm_as_weight=0
-   dtsets(idtset)%dmftctqmc_triqs_wmax=1.0_dp
+   dtsets(idtset)%dmftctqmc_triqs_wmax=-1.0_dp
    dtsets(idtset)%dmftqmc_l=0
    dtsets(idtset)%dmftqmc_n=0.0_dp
    dtsets(idtset)%dmftqmc_seed=jdtset
-   dtsets(idtset)%dmftqmc_therm=1000
-   dtsets(idtset)%dmftctqmc_gmove=dtsets(idtset)%dmftqmc_therm / 10
+   dtsets(idtset)%dmftqmc_therm=0
    dtsets(idtset)%dosdeltae=0.0
    dtsets(idtset)%dtion=100.0_dp
    dtsets(idtset)%dtele=0.1_dp

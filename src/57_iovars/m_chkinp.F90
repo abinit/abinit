@@ -665,6 +665,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        if(dt%ucrpa==0.and.dt%dmft_solv/=9.and.dt%dmft_solv/=6.and.dt%dmft_solv/=7) then
          cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
          call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_nwlo',dt%dmft_nwlo,1,iout)
+         cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
          call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_nwli',dt%dmft_nwli,1,iout)
        end if
 
@@ -798,13 +799,13 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
          end if
        end if
        if (dt%nspinor==2.and.dt%nspden==1) ABI_ERROR(' nspinor=2, nspden=1 and usedmft=1 is not implemented')
-       if (maxval(abs(dt%nband-dt%nband(1)))>0) ABI_ERROR("Every kpt needs to have the same number of bands")
+       if (maxval(abs(dt%nband-dt%nband(1)))>0) ABI_ERROR("Every kpt needs to have the same number of bands in DMFT")
        do iatom=1,natom
          lpawu = dt%lpawu(dt%typat(iatom))
          if (lpawu==-1) cycle
          if (dt%dmft_t2g==1.and.lpawu/=2) ABI_ERROR("lpawu/=2 and dmft_t2g=1 are not compatible")
          if (dt%dmft_x2my2d==1.and.lpawu/=2) ABI_ERROR("lpawu/=2 and dmft_x2my2d=1 are not compatible")
-         if (dt%dmft_dc==7.and.dt%dmft_nominal(iatom)<1) ABI_ERROR("Please set a physical value for nominal occupancies")
+         if (dt%dmft_dc==7.and.dt%dmft_nominal(iatom)<1) ABI_ERROR("Please set a physical value for nominal occupancies with dmft_nominal")
        end do
      end if
    end if
@@ -819,8 +820,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 #endif
 
    if(dt%dmft_solv==6.or.dt%dmft_solv==7) then
-     cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
-     call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_iter',dt%dmft_iter,1,iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
      call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_nwli',dt%dmft_nwli,1,iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv

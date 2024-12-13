@@ -873,8 +873,7 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
   & ch10," ******************************************", &
   & ch10," DFT+DMFT Method is used", &
   & ch10," ******************************************"
- call wrtout(std_out,message,'COLL')
- call wrtout(ab_out,message,'COLL')
+ call wrtout([std_out,ab_out],message,'COLL')
 
  if (dmft_solv == 0) then
    write(message,'(2a)') ch10,' DMFT check: no solver and U=J=0'
@@ -898,8 +897,7 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
    write(message,'(2a)') ch10,' DMFT uses the python invocation of TRIQS, for which you need to &
      & give your personal script'
  end if ! dmft_solv
- call wrtout(std_out,message,'COLL')
- call wrtout(ab_out,message,'COLL')
+ call wrtout([std_out,ab_out],message,'COLL')
 
  if (dmft_dc == 1) then
    dc_string = "Magnetic FLL (Full Localized Limit)"
@@ -919,7 +917,29 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  lda_string = "Magnetic DFT, with "
  if (dtset%usepawu == 14) lda_string = "Non "//lda_string
  write(message,'(2(a,1x),a)') ch10,trim(adjustl(lda_string)),trim(adjustl(dc_string))
- call wrtout(std_out,message,'COLL')
+ call wrtout([std_out,ab_out],message,'COLL')
+
+ if (dtset%dmft_entropy == 0 .and. ((dmft_solv /= 6 .and. dmft_solv /= 7)  &
+    & .or. (dtset%dmftctqmc_triqs_entropy == 0 .or. &
+    & dtset%dmftctqmc_triqs_compute_integral == 0))) then
+   write(message,'(a,1x,a)') ch10,"Entropy is not computed, only the internal energy is printed"
+   call wrtout([std_out,ab_out],message,'COLL')
+ end if
+
+ if (dmft_solv == 6 .and. dmft_solv == 7) then
+#if !defined HAVE_TRIQS_COMPLEX
+   write(message,'(a,1x,a)') ch10,"The imaginary part of the Green's function is neglected"
+#endif
+ else
+   write(message,'(a,1x,a)') ch10,"The imaginary part of the Green's function is neglected"
+ end if
+ call wrtout([std_out,ab_out],message,'COLL')
+ if (dmft_solv == 5 .or. ((dmft_solv == 6 .or. dmft_solv == 7) .and. &
+   & dtset%dmftctqmc_triqs_orb_off_diag == 0 .or. &
+   & (nspinor == 2 .and. dtset%dmftctqmc_triqs_spin_off_diag == 0))) then
+   write(message,'(a,1x,a)') ch10,"The off-diagonal elements of the Green's function are neglected"
+   call wrtout([std_out,ab_out],message,'COLL')
+ end if
 
 !=============================
 !==  Define integers and reals
@@ -1393,9 +1413,9 @@ subroutine init_dmft(cryst_struc,dmatpawu,dtset,fermie_dft,fnamei,fnametmp_app,p
 ! *********************************************************************
 
  if (dtset%ucrpa == 0) then
-   write(message,'(6a)') ch10,' ====================================', &
+   write(message,'(7a)') ch10,' ====================================', &
                        & ch10,' =====  Start of DMFT calculation', &
-                       & ch10,' ===================================='
+                       & ch10,' ====================================',ch10
  else if (dtset%ucrpa > 0) then
    write(message,'(6a)') ch10,' ============================================================', &
                        & ch10,' =====  Initialize construction of Wannier in DMFT routines',&
@@ -2056,7 +2076,7 @@ subroutine print_dmft(paw_dmft,pawprtvol)
      & "  --- fermie_dft = ",paw_dmft%fermie_dft,ch10,&
      & "  --- temp       = ",paw_dmft%temp      ,ch10
    call wrtout(std_out,message,'COLL')
-   write(message,'(7(a,15x,i8,a),a,2x,e21.14,2a)') &
+   write(message,'(7(a,15x,i8,a),a,2x,e21.14,3a)') &
      & "  --- natpawu    = ",paw_dmft%natpawu   ,ch10,&
      & "  --- dmft_iter  = ",paw_dmft%dmft_iter ,ch10,&
      & "  --- dmft_solv  = ",paw_dmft%dmft_solv ,ch10,&
@@ -2065,7 +2085,7 @@ subroutine print_dmft(paw_dmft,pawprtvol)
      & "  --- dmft_dc    = ",paw_dmft%dmft_dc   ,ch10,&
      & "  --- dmftqmc_l  = ",paw_dmft%dmftqmc_l ,ch10,&
      & "  --- dmftqmc_n  = ",paw_dmft%dmftqmc_n ,ch10,&
-     & "  -------------------------------------------------"
+     & "  -------------------------------------------------",ch10
    call wrtout(std_out,message,'COLL')
 
 !  write(message,'(4a,3(a,2x,f8.3,a),8(a,2x,i8,a),a)') "-----------------------------------------------",ch10,&

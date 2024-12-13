@@ -234,9 +234,9 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
 !  ==  re-construct DFT green function with new chipsis
 !  ===========================================================================
    write(message,'(6a)') &
-    & ch10," ======================================================================", &
+    & ch10," ========================================================================", &
     & ch10," =====  Check: DFT Green's Function Calculation with normalized orbitals", &
-    & ch10," ======================================================================"
+    & ch10," ========================================================================"
  end if ! dmft_solv/=1
  call timab(621,2,tsec(:))
  call wrtout(std_out,message,'COLL')

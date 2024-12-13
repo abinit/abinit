@@ -2427,23 +2427,11 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_solv',tread,'INT')
    if(tread==1) dtset%dmft_solv=intarr(1)
    if (dtset%dmft_solv==6.or.dtset%dmft_solv==7) then ! change some default values for TRIQS
-     dtset%dmft_dc=5
-     dtset%dmft_iter=1
-     dtset%dmft_mxsf=0.6_dp
-     dtset%dmft_nwli=max(ceiling((1_dp+20_dp/(dtset%tsmear*pi))*half),100)
-     dtset%dmft_rslf=1
      dtset%dmft_test=1
      dtset%dmft_use_all_bands=1
      dtset%dmft_use_full_chipsi=1
-     dtset%dmftbandi=1
-     dtset%dmftbandf=maxval(dtset%nband(:))
-     dtset%dmftqmc_l=max(ceiling(1.0d6/(dtset%tsmear*Ha_K)),100)
-     dtset%dmftqmc_n=1.0d8
-     dtset%dmftqmc_therm=50000
-     dtset%usepawu=14
-     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'usepawu',tread,'INT')
-     if(tread==1) dtset%usepawu=intarr(1)
    end if
+   if (dtset%usepawu==14) dtset%dmft_dc=5
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_dc',tread,'INT')
    if(tread==1) dtset%dmft_dc=intarr(1)
 ! XG20220322 - Should not impose dmft_dc on the flight. Should check in m_chkinp, and possibly stop.
@@ -2521,7 +2509,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
     &  (dtset%dmft_t2g==0).and.(dtset%dmft_x2my2d==0)).or.&
     &  ((dtset%dmftbandf-dtset%dmftbandi+1)<3.and.dtset%dmft_t2g==1)) then
      write(msg, '(4a,i2,2a)' )&
-     '   dmftbandf-dmftbandi+1)<2*max(lpawu(:))+1)',ch10, &
+     '   dmftbandf-dmftbandi+1<2*max(lpawu(:))+1',ch10, &
      '   Number of bands to construct Wannier functions is not', &
      ' sufficient to build Wannier functions for l=',maxval(dtset%lpawu(:)),ch10, &
      '   Action: select a correct number of KS bands with dmftbandi and dmftbandf.'
@@ -2568,7 +2556,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
        if(tread==1) dtset%dmftctqmc_order  =intarr(1)
      end if
      if(dtset%dmft_solv>=6.and.dtset%dmft_solv<=7) then
-       dtset%dmftctqmc_triqs_ntau_delta=dtset%dmftqmc_l
+       dtset%dmftctqmc_triqs_ntau_delta=max(dtset%dmftqmc_l,1)
+       if (dtset%nspinor == 1) dtset%dmftctqmc_triqs_spin_off_diag=0
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_triqs_compute_integral',tread,'INT')
        if(tread==1) dtset%dmftctqmc_triqs_compute_integral=intarr(1)
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_triqs_det_init_size',tread,'INT')

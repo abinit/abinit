@@ -337,7 +337,7 @@ subroutine init_hu(hu,paw_dmft,pawtab)
    end if ! t2g and dmft_test=1
 
    xij(tndim,tndim) = 0
-   write(message,'(a,5x,a)') ch10,"-------- Interactions in the density-density representation, in the Slm basis "
+   write(message,'(a,5x,a)') ch10,"-------- Interactions in the density-density representation, in the real spherical harmonics basis "
    call wrtout(std_out,message,'COLL')
    write(message,'(1x,14(2x,i5))') (m,m=1,tndim)
    call wrtout(std_out,message,'COLL')
