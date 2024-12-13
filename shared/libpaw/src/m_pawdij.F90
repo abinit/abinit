@@ -2563,9 +2563,9 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
 !Local variables ---------------------------------------
 !scalars
  integer :: angl_size,gs1,gs2,idij,ii,ij_size,ilm,ipts,ispden,jlm,klm,klmn,klmn1,kln
- integer :: lm_size,lmn2_size,mesh_size,ngnt,nsploop
+ integer :: lm_size,lmn2_size,mdir,mesh_size,ngnt,sdir
  real(dp), parameter :: HalfFineStruct2=half/InvFineStruct**2
- real(dp) :: fact,rc,rr,rt
+ real(dp) :: fact,me1,me2,rc,rr,rt,sme
  logical :: has_nucdipmom
  character(len=500) :: msg
 !arrays
@@ -2582,7 +2582,6 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
  angl_size=pawang%angl_size
  mesh_size=pawtab%mesh_size
  indklmn => pawtab%indklmn
- nsploop=4
 
 !Check data consistency
  if (qphase/=1) then
@@ -2712,18 +2711,18 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
    gs2=size(pawang%gntselect,2)
    ngnt=size(pawang%realgnt)
    LIBPAW_ALLOCATE(dyadic,(2,3,3,gs2))
-   ! dyadic(1,:,:,:) : (1 - \hat{r}\hat{r})
-   ! dyadic(2,:,:,:) : (1 - 3\hat{r}\hat{r})
-   call make_dyadic(one,one,dyadic(1,1:3,1:3,1:gs2),pawang%gntselect,&
+   ! dyadic(1,:,:,:) : (1 - 3\hat{r}\hat{r})
+   ! dyadic(2,:,:,:) : (1 - \hat{r}\hat{r})
+   call make_dyadic(one,three,dyadic(1,1:3,1:3,1:gs2),pawang%gntselect,&
            gs1,gs2,gs2,ngnt,pawang%realgnt)
-   call make_dyadic(one,three,dyadic(2,1:3,1:3,1:gs2),pawang%gntselect,&
+   call make_dyadic(one,one,dyadic(2,1:3,1:3,1:gs2),pawang%gntselect,&
            gs1,gs2,gs2,ngnt,pawang%realgnt)
  end if
 
 !------------------------------------------------------------------------
 !----- Loop over density components
 !------------------------------------------------------------------------
- do idij=1,nsploop
+ do idij=1,ndij
 
 !  ------------------------------------------------------------------------
 !  ----- Computation of Dij_so
@@ -2759,13 +2758,35 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
        klmn1=klmn1+cplex_dij
      end do
    end if
-
-!  ----- End loop over idij
- end do
-
+ end do !  ----- End loop over idij
  LIBPAW_DEALLOCATE(dijso_rad)
 
+ ! add nucdipmom terms if present
  if(has_nucdipmom) then
+   klmn1=1
+   do klmn=1,lmn2_size
+     klm=indklmn(1,klmn); kln=indklmn(2,klmn)
+     do mdir=1,3
+       if (abs(nucdipmom(mdir))<tol8) cycle
+       do sdir=1,3
+         me1=nucdipmom(mdir)*dijnd_rad(1,kln)*dyadic(1,mdir,sdir,klm)
+         me2=nucdipmom(mdir)*dijnd_rad(2,kln)*dyadic(2,mdir,sdir,klm)
+         sme = half*(me1+me2)
+         select case(sdir)
+         case(1) !Sx operator
+           dijso(klmn1,3)=dijso(klmn1,3)+sme
+           dijso(klmn1,4)=dijso(klmn1,4)+sme
+         case(2) !Sy operator
+           dijso(klmn1+1,3)=dijso(klmn1+1,3)-sme
+           dijso(klmn1+1,4)=dijso(klmn1+1,4)+sme
+         case(3) !Sz operator
+           dijso(klmn1,1)=dijso(klmn1,1)+sme
+           dijso(klmn1,2)=dijso(klmn1,2)-sme
+         end select
+       end do ! loop on sdir
+     end do ! loop on mdir
+     klmn1=klmn1+cplex_dij
+   end do !loop on klmn
    LIBPAW_DEALLOCATE(dyadic)
    LIBPAW_DEALLOCATE(dijnd_rad)
  end if
