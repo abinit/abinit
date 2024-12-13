@@ -2138,7 +2138,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'optstress',tread,'INT')
  if(tread==1) then
    dtset%optstress=intarr(1)
- else if (xc_is_mgga.or.xc_is_tb09) then
+ else if (xc_is_tb09) then
    dtset%optstress=0  ! This is temporary, hopefully
  end if
 
