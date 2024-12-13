@@ -2133,6 +2133,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !  npfft
 !  Must be greater or equal to 1
    call chkint_ge(0,0,cond_string,cond_values,ierr,'npfft',dt%npfft,1,iout)
+
 !  If usepaw==1 and pawmixdg==0, npfft must be equal to 1
    if(usepaw==1 .and. dt%pawmixdg==0)then
      cond_string(1)='usepaw  ' ; cond_values(1)=usepaw
