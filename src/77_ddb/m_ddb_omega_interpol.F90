@@ -109,7 +109,7 @@ contains
  logical :: qeq0
 !arrays
  real(dp) :: qphnrm(3),qphon(3,3)
- real(dp), allocatable :: dint_fsddb(:,:),int_fsddb(:,:,:),int_rsddb(:,:,:)
+ real(dp), allocatable :: dint_fsddb(:,:),int_fsddb(:,:,:),int_rsddb(:,:,:),int_lmddb(:,:,:)
  real(dp), allocatable :: omega(:),omegacalc(:)
  real(dp), allocatable :: w0hessian(:,:),w0berry(:,:)
  real(dp), allocatable :: eigvec(:,:,:,:,:),eigvec_fm(:,:,:,:,:),phfrq(:,:)
@@ -185,10 +185,10 @@ contains
  ABI_MALLOC(ri_magelsus,(ndim,3))
  ABI_MALLOC(lm_magelsus,(ndim,3,nomega))
  ABI_MALLOC(invmagsus,(ndim,ndim,nomega))
- ABI_MALLOC(dummymom,(ndim,(natom+2)*3))
- ABI_MALLOC(dummymom_tr,(ndim,(natom+2)*3))
- ABI_MALLOC(mmom,(ndim,(natom+2)*3,nomega))
- ABI_MALLOC(mmom_tr,((natom+2)*3,ndim,nomega))
+ ABI_MALLOC(dummymom,(ndim,(natom+5)*3))
+ ABI_MALLOC(dummymom_tr,(ndim,(natom+5)*3))
+ ABI_MALLOC(mmom,(ndim,(natom+5)*3,nomega))
+ ABI_MALLOC(mmom_tr,((natom+5)*3,ndim,nomega))
  ABI_MALLOC(lm_zfield,(ndim,3,nomega))
  ABI_MALLOC(zfield,(ndim,(natom+5)*3,nomega))
  ABI_MALLOC(zfield_tr,((natom+5)*3,ndim))
@@ -199,6 +199,7 @@ contains
  ABI_MALLOC(dint_fsddb,(2,ddb%msize))
  ABI_MALLOC(int_fsddb,(2,ddb%msize,1))
  ABI_MALLOC(int_rsddb,(2,ddb%msize,1))
+ ABI_MALLOC(int_lmddb,(2,ddb%msize,1))
  ABI_MALLOC(ri_mmom,(ndim,3,nomega))
 
 !For linear interpolation detect the w=0 Hessians and Berry curvatures
@@ -319,6 +320,7 @@ contains
    if (mpopt==2) call ddb%to_d2etot(int_rsddb,1,1,qeq0,qphon,qphnrm,ucvol,optgb,omega=omega)
 
    !Calculate the phonon propagator (Green's function) and spectral function
+   !and the lattice-mediated contributions to the different susceptibilities.
    if (mpopt==1) then
      call phonon_green(amu,eigvec,eta,int_fsddb,& 
    & mode_phonspec(:,iw),mpert,natom,ntypat,omega(iw),&
@@ -327,7 +329,11 @@ contains
      call phonon_green(amu,eigvec,eta,int_rsddb,& 
    & mode_phonspec(:,iw),mpert,natom,ntypat,omega(iw),&
    & phfrq(:,iw),phongreen,phonspec(iw),typat)
+
+     call lm_d2etot(int_lmddb,int_rsddb,magsus,mpert,mmom(:,:,iw),&
+   & mmom_tr(:,:,iw),natom,ndim,phongreen,ucvol)
    end if
+
 
 !   if (omegaflag==2.or.omegaflag==3) then
      !Calculate the mode-resolved magnetic moments
@@ -379,25 +385,14 @@ contains
 !   end if
  end do
 
-!Calculate the norm of the phonon spectral function
- totnorm=zero
- do imode=1, 3*natom
-   write(msg,'(a,i3,a,es15.7)') 'Phonon mode: ', imode, & 
- & '. Norm of the spectral function: ', sum(mode_phonspec(imode,:))*omegastp
-   call wrtout([ab_out,std_out],msg,'COLL')
-   totnorm= totnorm + sum(mode_phonspec(imode,:))*omegastp
- end do
- write(msg,'(a,es15.7)') & 
- & ' Total norm of the spectral function: ', totnorm
-   call wrtout([ab_out,std_out],msg,'COLL')
-
-!!Calculate the norm of the magnon phonon spectral function
+!Calculate the norm of the phonon spectral function.
+!(it only yields 3*natom if ASR is well fulfilled)
 ! totnorm=zero
-! do imode=1, 3*natom+ndim
-!   write(msg,'(a,i3,a,es15.7)') 'Magnon-Phonon mode: ', imode, & 
-! & '. Norm of the spectral function: ', sum(mode_magphonspec(imode,:))*omegastp
+! do imode=1, 3*natom
+!   write(msg,'(a,i3,a,es15.7)') 'Phonon mode: ', imode, & 
+! & '. Norm of the spectral function: ', sum(mode_phonspec(imode,:))*omegastp
 !   call wrtout([ab_out,std_out],msg,'COLL')
-!   totnorm= totnorm + sum(mode_magphonspec(imode,:))*omegastp
+!   totnorm= totnorm + sum(mode_phonspec(imode,:))*omegastp
 ! end do
 ! write(msg,'(a,es15.7)') & 
 ! & ' Total norm of the spectral function: ', totnorm
@@ -773,35 +768,10 @@ contains
 !   ABI_ERROR(msg)
 ! end if
 !
-! write(diel_unit,*) '#'
-! write(pfmt, '( "(es15.7, ", I4, "(es15.7))" )' ) 9
-!
-! write(diel_unit,*) '#  Real part of clamped-ion penalized dielectric tensor'
-! write(msg,'(a,a)') ch10,&
-!&           ' # At  hw     eps_11     eps_12     ...     eps_21     eps_22     ...'
-! call wrtout(diel_unit,msg,'COLL')
-! do iw=1,nomega
-!    write(msg,pfmt) &
-! &  omega(iw), ((real(barepsilon(i,j,iw)),j=1,3),i=1,3)
-!    call wrtout(diel_unit,msg,'COLL')
-! end do
-!
-! write(diel_unit,*) ' '
-! write(diel_unit,*) '#  Imaginary part of clamped-ion penalized dielectric tensor'
-! write(msg,'(a,a)') ch10,&
-!&           ' # At  hw     eps_11     eps_12     ...     eps_21     eps_22     ...'
-! call wrtout(diel_unit,msg,'COLL')
-! do iw=1,nomega
-!    write(msg,pfmt) &
-! &  omega(iw), ((aimag(barepsilon(i,j,iw)),j=1,3),i=1,3)
-!    call wrtout(diel_unit,msg,'COLL')
-! end do
-!
-! write(diel_unit,*) '#'
 ! if (mpopt==1) then
-!   write(diel_unit,*) '#  Frozen-magnetic clamped-ion dielectric tensor calculated and interpolated by ANADDB'
+!   write(diel_unit,*) '#  Frozen-magnetic dielectric tensor calculated and interpolated by ANADDB'
 ! else if (mpopt==2) then
-!   write(diel_unit,*) '#  Spin-relaxed clamped-ion dielectric tensor calculated and interpolated by ANADDB'
+!   write(diel_unit,*) '#  Spin-relaxed dielectric tensor calculated and interpolated by ANADDB'
 ! else
 !   write(msg,'(a)') 'ddb_omega_interpol: variable mpopt just can be 1 or 2'
 !   ABI_ERROR(msg)
@@ -830,7 +800,7 @@ contains
 ! &  omega(iw), ((aimag(epsilon(i,j,iw)),j=1,3),i=1,3)
 !    call wrtout(diel_unit,msg,'COLL')
 ! end do
-!
+
 ! write(diel_unit,*) '#'
 ! if (mpopt==1) then
 !   write(diel_unit,*) '#  Frozen-magnetic lattice-mediated dielectric tensor calculated and interpolated by ANADDB'
@@ -1008,6 +978,7 @@ contains
  ABI_FREE(dint_fsddb)
  ABI_FREE(int_fsddb)
  ABI_FREE(int_rsddb)
+ ABI_FREE(int_lmddb)
  ABI_FREE(dummysus)
  ABI_FREE(magsus)
  ABI_FREE(lm_magsus)
@@ -1047,197 +1018,6 @@ contains
  ABI_SFREE(coeffs)
 
  end subroutine ddb_omega_interpol
-!!***
-
-!!****f* ABINIT/lineal_omega_interp
-!! NAME
-!!  lineal_omega_interp
-!!
-!! FUNCTION
-!!  Calgulates a omega dependent matrix of penalized second-order energies via
-!!  \Phi(w)=K+iwG, where K and G are the w=0 penalized Hessians and Berry curvatures.    
-!!
-!! COPYRIGHT
-!!  Copyright (C) 2024 ABINIT group (FIXME: add author)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! INPUTS
-!! blkval(2,3*mpert*3*mpert)=  Second-order w=0 derivative matrices
-!! blkval_lw(2,3*mpert*3*mpert)=  Third-order w=0 derivative matrices
-!!  mpert= maximum number of perturbations
-!!  natom= number of atoms in the cell
-!!  ndim= dimension of the local spin susceptibilities 
-!!  omega= frequency at which the IFCs have been calculated
-!!
-!! OUTPUT
-!!  int_fsddb(2,ddb%msize,1)= interpolated hessian at omega
-!!
-!! SIDE EFFECTS
-!!
-!! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
-subroutine lineal_omega_interp(blkval,blkval_lw,eta,ifcmat_fm, &
-& invmagsus,magsus,mpatpol,mpdir,mpert,msize,natom,ndim,nmdir,int_fsddb, &
-& omega,zfield,zfield_tr)
-
- use defs_basis
- use m_errors
- use m_profiling_abi
-
- implicit none
-
-!Arguments ------------------------------------
-!scalars
- integer, intent(in)  :: mpert,msize,natom,ndim,nmdir 
- real(dp), intent(in) :: eta,omega
-!arrays
- integer,intent(in) :: mpatpol(2),mpdir(3)
- real(dp), intent(in) :: blkval(2,3,mpert,3,mpert)
- real(dp), intent(in) :: blkval_lw(2,3,mpert,3,mpert,3,mpert)
- real(dp), intent(out) :: int_fsddb(2,msize,1)
- complex(dpc), intent(out) :: ifcmat_fm(3*natom,3*natom)
- complex(dpc), intent(out) :: invmagsus(ndim,ndim)
- complex(dpc), intent(out) :: magsus(ndim,ndim)
- complex(dpc), intent(out) :: zfield(ndim,(natom+2)*3)
- complex(dpc), intent(out) :: zfield_tr((natom+2)*3,ndim)
- 
-!Local variables -------------------------
-!scalars
- integer :: idir1,idir2,idir3,info,ipert1,ipert2,ipert3
- integer :: iat1,iat2,icol,irow,idir1_red,idir2_red,ipert1_red,ipert2_red
- integer :: lwork
-!arrays
- real(dp), allocatable :: lhess(:,:,:,:,:)
- integer, allocatable :: ipiv(:)
- complex(dpc),allocatable :: work(:),work1(:,:)
- 
-! *********************************************************************
-
- ABI_MALLOC(lhess,(2,3,mpert,3,mpert))
- ipert3= natom + 9
- idir3= 1
- do ipert2= 1, mpert
-   do idir2= 1, 3
-     do ipert1= 1, mpert
-       do idir1= 1, 3
-         lhess(1,idir1,ipert1,idir2,ipert2)= blkval(1,idir1,ipert1,idir2,ipert2) + &
-       & omega*blkval_lw(1,idir1,ipert1,idir2,ipert2,idir3,ipert3) - &
-       & eta*blkval_lw(2,idir1,ipert1,idir2,ipert2,idir3,ipert3)
-         lhess(2,idir1,ipert1,idir2,ipert2)= blkval(2,idir1,ipert1,idir2,ipert2) + &
-       & omega*blkval_lw(2,idir1,ipert1,idir2,ipert2,idir3,ipert3) + &
-       & eta*blkval_lw(1,idir1,ipert1,idir2,ipert2,idir3,ipert3)
-!         lhess(:,idir1,ipert1,idir2,ipert2)= blkval(:,idir1,ipert1,idir2,ipert2) + &
-!       & omega*blkval_lw(:,idir1,ipert1,idir2,ipert2,idir3,ipert3) 
-       end do
-     end do
-   end do
- end do
- int_fsddb(1,:,1)= reshape( lhess(1,:,:,:,:), shape = (/msize/) )
- int_fsddb(2,:,1)= reshape( lhess(2,:,:,:,:), shape = (/msize/) )
-
-!Store the relevant matrices for the magnon-phonon Green's function
-!First phonon-phonon
- do ipert2= 1, natom
-   do idir2= 1, 3
-     icol=( ipert2-1)*3 + idir2
-     do ipert1= 1, natom
-       do idir1= 1, 3
-         irow=( ipert1-1)*3 + idir1
-         ifcmat_fm(irow,icol)= cmplx(lhess(1,idir1,ipert1,idir2,ipert2), &
-       & lhess(2,idir1,ipert1,idir2,ipert2),16)
-       end do
-     end do
-   end do
- end do 
-
-!Then, spin-spin
- ipert2_red= 0
- invmagsus=cmplx(zero,zero,16)
- do iat2= mpatpol(1), mpatpol(2)
-   ipert2= natom + 11 + iat2
-   ipert2_red= ipert2_red + 1
-   idir2_red= 0
-   do idir2= 1, 3
-     if (mpdir(idir2)==0) cycle
-     idir2_red= idir2_red + 1
-     icol=idir2_red+(ipert2_red-1)*nmdir
-     ipert1_red=0
-     do iat1= mpatpol(1), mpatpol(2)
-       ipert1= natom + 11 + iat1
-       ipert1_red= ipert1_red + 1
-       idir1_red= 0
-       do idir1= 1, 3
-         if (mpdir(idir1)==0) cycle
-         idir1_red=idir1_red+1
-         irow=idir1_red+(ipert1_red-1)*nmdir
-         invmagsus(irow,icol)= cmplx(lhess(1,idir1,ipert1,idir2,ipert2), &
-       & lhess(2,idir1,ipert1,idir2,ipert2),16)
-       end do
-     end do
-   end do
- end do
-
-!Invert to obtain magsus
- ABI_MALLOC(work1,(ndim,ndim))
- work1=invmagsus
- 
- ABI_MALLOC(ipiv,(ndim))
- call zgetrf( ndim, ndim, work1, ndim, ipiv, info )
- ABI_CHECK(info == 0, sjoin('zgetrf returned:', itoa(info)))
-
- ABI_MALLOC(work,(2))
- call zgetri( ndim, work1, ndim, ipiv, work, -1, info )
- ABI_CHECK(info == 0, sjoin('zgetri returned:', itoa(info)))
- lwork=int(work(1))
-
- ABI_REMALLOC(work,(lwork))
- call zgetri( ndim, work1, ndim, ipiv, work, lwork, info )
- ABI_CHECK(info == 0, sjoin('zgetri returned:', itoa(info)))
-
- magsus=work1
- ABI_FREE(ipiv)
- ABI_FREE(work)
- ABI_FREE(work1)
-
-!Finally, the spin-phonon
- do ipert2=1,natom
-   do idir2=1,3
-     icol=idir2+(ipert2-1)*3
-     ipert1_red= 0
-     do iat1= mpatpol(1), mpatpol(2)
-       ipert1= natom + 11 + iat1
-       ipert1_red= ipert1_red + 1
-       idir1_red= 0
-       do idir1= 1, 3
-         if (mpdir(idir1)==0) cycle
-         idir1_red= idir1_red + 1
-         irow=idir1_red+(ipert1_red-1)*nmdir
-         zfield(irow,icol)= cmplx(lhess(1,idir1,ipert1,idir2,ipert2), &
-       & lhess(2,idir1,ipert1,idir2,ipert2),16)
-         zfield_tr(icol,irow)= cmplx(lhess(1,idir2,ipert2,idir1,ipert1), &
-       & lhess(2,idir2,ipert2,idir1,ipert1),16)
-       end do
-     end do
-   end do
- end do
-
- ABI_FREE(lhess)
-
-end subroutine lineal_omega_interp
 !!***
 
 !!****f* ABINIT/phonon_green
@@ -1351,12 +1131,12 @@ subroutine phonon_green(amu,eigvec,eta,blkval,&
 
 !Apply ASR: it has weird consequences on the intensities of the spectral function
 !better not applied.
- ABI_MALLOC_IFNOT(delta_asrw0,(3*natom,3))
- if (omega < tol14) then
-   call asrw0(delta_asrw0,ifc,natom,0) 
- else 
-   call asrw0(delta_asrw0,ifc,natom,1) 
- end if
+! ABI_MALLOC_IFNOT(delta_asrw0,(3*natom,3))
+! if (omega < tol14) then
+!   call asrw0(delta_asrw0,ifc,natom,0) 
+! else 
+!   call asrw0(delta_asrw0,ifc,natom,1) 
+! end if
 
 !Build an array with the inverse mass factors
  ABI_MALLOC(invmassfac,(natom,natom))
@@ -1468,7 +1248,7 @@ subroutine phonon_green(amu,eigvec,eta,blkval,&
  ABI_FREE(work1)
  ABI_FREE(mass_phongreen)
  ABI_FREE(invmassfac)
- ABI_FREE(delta_asrw0)
+! ABI_FREE(delta_asrw0)
 
  DBG_EXIT("COLL")
 
@@ -1938,6 +1718,110 @@ subroutine me_altcalc(amu,eigvec,lm_magsus,lm_zfield,phongreen_fm,magsus,natom,n
 end subroutine me_altcalc
 !!***
 
+!!****f* ABINIT/lm_d2etot
+!! NAME
+!!  lm_d2etot
+!!
+!! FUNCTION
+!!  Calculates the lattice-mediated contributions to second-order quantities
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2024 ABINIT group (FIXME: add author)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! INPUTS
+!!  blkval(2,3,mpert,3,mpert,1)= array with second-order derivatives
+!!  magsus(ndim,ndim)= local magnetic susceptibility (RS) or its inverse (FS)
+!!  mpert= maximum number of perturbations
+!!  mcoup(ndim,natom+5)= magnetic Zeman fields (FS) or moments (RS)
+!!  mcoup_tr(natom+5,ndim)= hermitian conjugate of mmom 
+!!  natom= number of atoms in the cell
+!!  ndim= dimension of the local magnetic degrees of freedom
+!!  phongreen(3*natom,3*natom)= Phonon Green's function
+!!
+!! OUTPUT
+!!  blkval_lm(2,3,mpert,3,mpert,1)= array with the lattice-mediated 
+!!    second-order derivatives
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+
+ subroutine lm_d2etot(blkval_lm,blkval,magsus,mpert,mcoup, &
+& mcoup_tr,natom,ndim,phongreen,ucvol)
+
+!Arguments ------------------------------------
+!scalars
+ integer, intent(in)  :: mpert,natom,ndim
+ real(dp), intent(in) :: ucvol
+!arrays
+ real(dp), intent(in) :: blkval(2,3,mpert,3,mpert,1)
+ real(dp), intent(out) :: blkval_lm(2,3,mpert,3,mpert,1)
+ complex(dpc), intent(in) :: magsus(ndim,ndim)
+ complex(dpc), intent(in) :: mcoup(ndim,(natom+5)*3)
+ complex(dpc), intent(in) :: mcoup_tr((natom+5)*3,ndim)
+ complex(dpc), intent(in) :: phongreen(3*natom,3*natom)
+
+!Local variables-------------------------------
+!scalars
+ integer :: i,iat1,iat2,icol,idir1,idir2,ipert1,ipert2,irow,j,k,l
+ integer :: pdim
+ real(dp) :: fac
+!arrays
+ complex(dpc),allocatable :: c_blkval(:,:,:,:)
+ complex(dpc),allocatable :: c_blkval_lm(:,:,:,:)
+ complex(dpc),allocatable :: coup(:,:),coup_tr(:,:)
+
+! *************************************************************************
+
+ DBG_ENTER("COLL")
+
+ pdim= 3*natom
+ ABI_MALLOC(c_blkval,(3,mpert,3,mpert))
+ ABI_MALLOC(c_blkval_lm,(3,mpert,3,mpert))
+ c_blkval= cmplx(blkval(1,:,:,:,:,1),blkval(2,:,:,:,:,1),16)
+
+ !Dielectric tensor
+ fac= -four_pi/ucvol
+ ABI_MALLOC(coup,(3,pdim))
+ ABI_MALLOC(coup_tr,(pdim,3))
+ ipert1= natom + 2
+ do idir1= 1, 3
+   irow= idir1
+   do ipert2= 1, natom
+     do idir2= 1, 3
+       icol= (ipert2-1)*3 + idir2
+       coup(irow,icol)= c_blkval(idir1,ipert1,idir2,ipert2)
+       coup(icol,irow)= c_blkval(idir2,ipert2,idir1,ipert1)
+     end do
+   end do
+ end do
+ ipert2= natom + 2
+ c_blkval_lm(:,ipert1,:,ipert2)= fac*matmul(coup(:,:),matmul(phongreen,coup_tr(:,:)))
+
+
+ ABI_FREE(c_blkval)
+ ABI_FREE(c_blkval_lm)
+
+ DBG_EXIT("COLL")
+
+end subroutine lm_d2etot
+!!***
 
 end module m_ddb_omega_interpol
 !!***
