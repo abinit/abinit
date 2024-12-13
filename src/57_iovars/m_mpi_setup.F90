@@ -184,48 +184,12 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'npband',tread(7),'INT')
    if(tread(7)==1) dtsets(idtset)%npband=intarr(1)
 
+   !LTEST
+   write(900,*) '0 paral_kgb : ',dtsets(idtset)%paral_kgb
+   write(900,*) '0 wfoptalg  : ',dtsets(idtset)%wfoptalg 
+   flush(900)
+   !LTEST
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'bandpp',tread(8),'INT')
-   !Nband might have different values for different kpoint, but not bandpp.
-   !In this case, we just use the largest nband (mband_upper), and the input will probably fail
-   !at the bandpp check later on
-   if(tread(8)==1) then
-     dtsets(idtset)%bandpp=intarr(1)
-     ! check if nblock_lobpcg is read from the input, if so error msg
-     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nblock_lobpcg',tread0,'INT')
-     if (tread0==1) then
-       write(msg,'(3a)') 'Both bandpp and nblock_lobpcg are defined for the same dataset, this is confusing.',ch10,&
-         'Change the input to keep only nblock_lobpcg (preferably) or bandpp.'
-       ABI_ERROR(msg)
-     end if
-     if (dtsets(idtset)%wfoptalg==114.or.dtsets(idtset)%wfoptalg==14.or.dtsets(idtset)%wfoptalg==4) then !if LOBPCG
-       if (mod(mband_upper,dtsets(idtset)%bandpp*dtsets(idtset)%npband)==0) then
-         dtsets(idtset)%nblock_lobpcg=mband_upper/(dtsets(idtset)%bandpp*dtsets(idtset)%npband)
-       else
-         write(msg,'(5a)') 'mband_upper( =max_{kpt}(nband) ) should be a mutltiple of npband*bandpp.',ch10,&
-           'Change nband, npband or bandpp in the input.',ch10,&
-           'A simpler solution is to use nblock_lobpcg instead of bandpp.'
-         ABI_ERROR(msg)
-       end if
-     end if
-   else if (dtsets(idtset)%wfoptalg==114.or.dtsets(idtset)%wfoptalg==14.or.dtsets(idtset)%wfoptalg==4) then !if LOBPCG
-     if (mod(mband_upper,dtsets(idtset)%nblock_lobpcg*dtsets(idtset)%npband)==0) then
-       dtsets(idtset)%bandpp=mband_upper/(dtsets(idtset)%nblock_lobpcg*dtsets(idtset)%npband)
-     else
-       write(msg,'(3a)') 'mband_upper( =max_{kpt}(nband) ) should be a mutltiple of nblock_lobpcg*npband.',ch10,&
-         'Change nband, npband or nblock_lobpcg in the input.'
-       ABI_ERROR(msg)
-     end if
-   end if
-
-   ! Warning when using different number of bands for different kpoints (occopt=2)
-   if ( dtsets(idtset)%occopt==2 .and. dtsets(idtset)%nkpt>1 .and. &
-     & ((dtsets(idtset)%bandpp > 1) .or. (dtsets(idtset)%npband > 1)) ) then
-     write(msg, '(4a)' ) &
-       'When working with blocks of bands (bandpp>1 or npband>1),'&
-      &' the number of bands should be the same for every kpoints.',ch10,&
-      &' The run will most probably fail on a other check. If it does not fail, ignore this message.'
-     ABI_WARNING(msg)
-   end if
 
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'use_slk',tread(9),'INT')
    if(tread(9)==1) dtsets(idtset)%use_slk=intarr(1)
@@ -299,6 +263,16 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
      iexit = iexit + 1
    end if
 
+   !LTEST
+   write(900,*) '1a paral_kgb : ',dtsets(idtset)%paral_kgb
+   write(900,*) '1a wfoptalg  : ',dtsets(idtset)%wfoptalg 
+   flush(900)
+   write(900,*) '1a nband  : ',mband_upper
+   write(900,*) '1a nblock : ',dtsets(idtset)%nblock_lobpcg
+   write(900,*) '1a bandpp : ',dtsets(idtset)%bandpp
+   flush(900)
+   !LTEST
+
    ! From total number of procs, compute all possible distributions
    ! Ignore exit flag if GW/EPH calculations because autoparal section is performed in screening/sigma/bethe_salpeter/eph
    if (any(optdriver == [RUNL_SCREENING, RUNL_SIGMA, RUNL_BSE, RUNL_EPH, RUNL_GWR, RUNL_NONLINEAR])) then
@@ -306,6 +280,15 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    else
      call finddistrproc(dtsets,filnam,idtset,iexit,mband_upper,mpi_enregs(idtset),ndtset_alloc,tread)
    end if
+   !LTEST
+   write(900,*) '1b paral_kgb : ',dtsets(idtset)%paral_kgb
+   write(900,*) '1b wfoptalg  : ',dtsets(idtset)%wfoptalg 
+   flush(900)
+   write(900,*) '1b nband  : ',mband_upper
+   write(900,*) '1b nblock : ',dtsets(idtset)%nblock_lobpcg
+   write(900,*) '1b bandpp : ',dtsets(idtset)%bandpp
+   flush(900)
+   !LTEST
 
    call initmpi_img(dtsets(idtset),mpi_enregs(idtset),-1)
    nproc=mpi_enregs(idtset)%nproc_cell
@@ -331,6 +314,12 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
      ABI_COMMENT('For non ground state calculations, set bandpp, npfft, npband, npspinor, np_spkpt and nphf to 1')
    end if
 
+   !LTEST
+   write(900,*) '1c paral_kgb : ',dtsets(idtset)%paral_kgb
+   write(900,*) '1c wfoptalg  : ',dtsets(idtset)%wfoptalg 
+   flush(900)
+   !LTEST
+
 !  Take into account a possible change of paral_kgb (change of the default algorithm)
    if (.not.wfoptalg_read) then
      if (dtsets(idtset)%usepaw==0) dtsets(idtset)%wfoptalg=0
@@ -350,6 +339,74 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
      end if
 #endif
    end if
+
+   if (dtsets(idtset)%wfoptalg==114.or.dtsets(idtset)%wfoptalg==14.or.dtsets(idtset)%wfoptalg==4) then !if LOBPCG
+     !Nband might have different values for different kpoint, but not bandpp.
+     !In this case, we just use the largest nband (mband_upper), and the input will probably fail
+     !at the bandpp check later on
+     if(tread(8)==1) then
+       dtsets(idtset)%bandpp=intarr(1)
+       ! check if nblock_lobpcg is read from the input, if so error msg
+       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nblock_lobpcg',tread0,'INT')
+       if (tread0==1) then
+         write(msg,'(3a)') 'Both bandpp and nblock_lobpcg are defined for the same dataset, this is confusing.',ch10,&
+           'Change the input to keep only nblock_lobpcg (preferably) or bandpp.'
+         ABI_ERROR(msg)
+       end if
+       if (mod(mband_upper,dtsets(idtset)%bandpp*dtsets(idtset)%npband)==0) then
+         dtsets(idtset)%nblock_lobpcg=mband_upper/(dtsets(idtset)%bandpp*dtsets(idtset)%npband)
+       else
+         write(msg,'(5a)') 'mband_upper( =max_{kpt}(nband) ) should be a mutltiple of npband*bandpp.',ch10,&
+           'Change nband, npband or bandpp in the input.',ch10,&
+           'A simpler solution is to use nblock_lobpcg instead of bandpp.'
+         ABI_ERROR(msg)
+       end if
+       !LTEST
+       write(900,*) 'bandpp read : ',dtsets(idtset)%bandpp
+       write(900,*) '     nblock : ',dtsets(idtset)%nblock_lobpcg
+       flush(900)
+       !LTEST
+     else
+       if (mod(mband_upper,dtsets(idtset)%nblock_lobpcg*dtsets(idtset)%npband)==0) then
+         dtsets(idtset)%bandpp=mband_upper/(dtsets(idtset)%nblock_lobpcg*dtsets(idtset)%npband)
+       else
+         write(msg,'(3a)') 'mband_upper( =max_{kpt}(nband) ) should be a mutltiple of nblock_lobpcg*npband.',ch10,&
+           'Change nband, npband or nblock_lobpcg in the input.'
+         ABI_ERROR(msg)
+       end if
+       !LTEST
+       write(900,*) 'nblock read : ',dtsets(idtset)%bandpp
+       write(900,*) '     nblock : ',dtsets(idtset)%nblock_lobpcg
+       flush(900)
+       !LTEST
+     end if
+   end if
+   !LTEST
+   write(900,*) '1 paral_kgb : ',dtsets(idtset)%paral_kgb
+   write(900,*) '1 wfoptalg  : ',dtsets(idtset)%wfoptalg 
+   flush(900)
+   write(900,*) '1 nband  : ',mband_upper
+   write(900,*) '1 nblock : ',dtsets(idtset)%nblock_lobpcg
+   write(900,*) '1 bandpp : ',dtsets(idtset)%bandpp
+   flush(900)
+   !LTEST
+
+   ! Warning when using different number of bands for different kpoints (occopt=2)
+   if ( dtsets(idtset)%occopt==2 .and. dtsets(idtset)%nkpt>1 .and. &
+     & ((dtsets(idtset)%bandpp > 1) .or. (dtsets(idtset)%npband > 1)) ) then
+     write(msg, '(4a)' ) &
+       'When working with blocks of bands (bandpp>1 or npband>1),'&
+      &' the number of bands should be the same for every kpoints.',ch10,&
+      &' The run will most probably fail on a other check. If it does not fail, ignore this message.'
+     ABI_WARNING(msg)
+   end if
+
+   !LTEST
+   write(900,*) '1d paral_kgb : ',dtsets(idtset)%paral_kgb
+   write(900,*) '1d wfoptalg  : ',dtsets(idtset)%wfoptalg 
+   flush(900)
+   !LTEST
+
 
    dtsets(idtset)%densfor_pred=2
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'densfor_pred',tread0,'INT')
@@ -436,6 +493,12 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
      ABI_WARNING(msg)
    end if
 
+   !LTEST
+   write(900,*) '1c nband  : ',mband_upper
+   write(900,*) '1c nblock : ',dtsets(idtset)%nblock_lobpcg
+   write(900,*) '1c bandpp : ',dtsets(idtset)%bandpp
+   flush(900)
+   !LTEST
    if (dtsets(idtset)%npspinor>=2.and.dtsets(idtset)%nspinor==1) then
      dtsets(idtset)%npspinor=1
      dtsets(idtset)%npfft=2*dtsets(idtset)%npfft
@@ -865,12 +928,15 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
            do iikpt=1,nkpt*nsppol
              iikpt_modulo = modulo(iikpt,nkpt)+1
              if ((dtsets(idtset)%istwfk(iikpt_modulo)==2)) then !.and.(dtsets(idtset)%ngfft(7)==401)) then
-               if ((mpi_enregs(idtset)%bandpp==0).or. &
-               ((mpi_enregs(idtset)%bandpp/=1).and.(modulo(mpi_enregs(idtset)%bandpp,2)/=0))) then
-                 write(msg,'(3a,i0)') &
-                 'The number bandpp should be 1 or a multiple of 2',ch10,&
-                 'However, bandpp=',mpi_enregs(idtset)%bandpp
-                 ABI_BUG(msg)
+               if (mpi_enregs(idtset)%bandpp>1 .and. modulo(mpi_enregs(idtset)%bandpp,2)/=0) then
+                 ! with istwfk=2, bandpp has to be even for some cases
+                 !if ( dtsets(idtset)%wfoptalg==10 .or. dtsets(idtset)%wfoptalg==14 .or. &
+                 !    (dtsets(idtset)%wfoptalg==114.and.mpi_enregs(idtset)%nproc_fft>1) ) then
+                   write(msg,'(3a,i0)') &
+                   'The number bandpp should be 1 or a multiple of 2',ch10,&
+                   'However, bandpp=',mpi_enregs(idtset)%bandpp
+                   ABI_BUG(msg)
+                 !end if
                end if
                if(modulo(dtsets(idtset)%nband(iikpt),mpi_enregs(idtset)%nproc_band*mpi_enregs(idtset)%bandpp)/=0)then
                  write(msg,'(3a,i0,a,i0)') &
@@ -1241,7 +1307,8 @@ end subroutine mpi_setup
      if (tread(5)==0.or.xmpi_paral==0) dtset%np_spkpt = 1
      if (tread(6)==0.or.xmpi_paral==0) dtset%npfft    = 1
      if (tread(7)==0.or.xmpi_paral==0) dtset%npband   = 1
-     if (tread(8)==0.or.xmpi_paral==0) dtset%bandpp   = 1
+     !LB-2024-12-13 : no need to change bandpp. bandpp>1 is legit even for sequential jobs!
+     !if (tread(8)==0.or.xmpi_paral==0) dtset%bandpp   = 1
      if (tread(9)==0.or.xmpi_paral==0) dtset%use_slk  = 0
      if (tread(10)==0.or.xmpi_paral==0) dtset%np_slk  = 1000000
      return
@@ -1975,6 +2042,11 @@ end subroutine mpi_setup
      end if
    end do
  end if
+
+ !LTEST
+ write(900,*) 'mcount :',mcount
+ write(900,*) 'max_ncpus :',max_ncpus
+ !LTEST
 
 !Store new process distribution
  if (mcount>0.and.max_ncpus<=0) then
