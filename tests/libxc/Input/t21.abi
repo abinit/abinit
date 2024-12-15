@@ -27,7 +27,7 @@ ixc12 -151131
 ixc13 -158131
 ixc14 -191131
 ixc15 -192131
-ixc16 -193131 ! Not portable from libxc v6 to v7 (GGA_X_LAG modified)
+# ixc16 -193131 ! Not portable from libxc v6 to v7 (GGA_X_LAG modified)
 ixc17 -524131
 ixc18 -525131
 # ixc19 -526131 ! Not portable from libxc v3 to v4
