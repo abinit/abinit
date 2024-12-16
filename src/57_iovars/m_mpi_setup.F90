@@ -184,11 +184,6 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'npband',tread(7),'INT')
    if(tread(7)==1) dtsets(idtset)%npband=intarr(1)
 
-   !LTEST
-   !write(900,*) '0 paral_kgb : ',dtsets(idtset)%paral_kgb
-   !write(900,*) '0 wfoptalg  : ',dtsets(idtset)%wfoptalg 
-   !flush(900)
-   !LTEST
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'bandpp',tread(8),'INT')
    if(tread(8)==1) dtsets(idtset)%bandpp=intarr(1)
 
@@ -264,16 +259,6 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
      iexit = iexit + 1
    end if
 
-   !LTEST
-   !write(900,*) '1a paral_kgb : ',dtsets(idtset)%paral_kgb
-   !write(900,*) '1a wfoptalg  : ',dtsets(idtset)%wfoptalg 
-   !flush(900)
-   !write(900,*) '1a nband  : ',mband_upper
-   !write(900,*) '1a nblock : ',dtsets(idtset)%nblock_lobpcg
-   !write(900,*) '1a bandpp : ',dtsets(idtset)%bandpp
-   !flush(900)
-   !LTEST
-
    ! From total number of procs, compute all possible distributions
    ! Ignore exit flag if GW/EPH calculations because autoparal section is performed in screening/sigma/bethe_salpeter/eph
    if (any(optdriver == [RUNL_SCREENING, RUNL_SIGMA, RUNL_BSE, RUNL_EPH, RUNL_GWR, RUNL_NONLINEAR])) then
@@ -281,15 +266,6 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    else
      call finddistrproc(dtsets,filnam,idtset,iexit,mband_upper,mpi_enregs(idtset),ndtset_alloc,tread)
    end if
-   !LTEST
-   !write(900,*) '1b paral_kgb : ',dtsets(idtset)%paral_kgb
-   !write(900,*) '1b wfoptalg  : ',dtsets(idtset)%wfoptalg 
-   !flush(900)
-   !write(900,*) '1b nband  : ',mband_upper
-   !write(900,*) '1b nblock : ',dtsets(idtset)%nblock_lobpcg
-   !write(900,*) '1b bandpp : ',dtsets(idtset)%bandpp
-   !flush(900)
-   !LTEST
 
    call initmpi_img(dtsets(idtset),mpi_enregs(idtset),-1)
    nproc=mpi_enregs(idtset)%nproc_cell
@@ -315,12 +291,6 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
      ABI_COMMENT('For non ground state calculations, set bandpp, npfft, npband, npspinor, np_spkpt and nphf to 1')
    end if
 
-   !LTEST
-   !write(900,*) '1c paral_kgb : ',dtsets(idtset)%paral_kgb
-   !write(900,*) '1c wfoptalg  : ',dtsets(idtset)%wfoptalg 
-   !flush(900)
-   !LTEST
-
 !  Take into account a possible change of paral_kgb (change of the default algorithm)
    if (.not.wfoptalg_read) then
      if (dtsets(idtset)%usepaw==0) dtsets(idtset)%wfoptalg=0
@@ -342,10 +312,6 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    end if
 
    if (dtsets(idtset)%wfoptalg==114.or.dtsets(idtset)%wfoptalg==14.or.dtsets(idtset)%wfoptalg==4) then !if LOBPCG
-     !LTEST
-     !write(900,*) '      nband : ',mband_upper
-     !write(900,*) '-    npband : ',dtsets(idtset)%npband
-     !LTEST
      if (dtsets(idtset)%autoparal==0) then
        !Nband might have different values for different kpoint, but not bandpp.
        !In this case, we just use the largest nband (mband_upper), and the input will probably fail
@@ -358,11 +324,6 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
              'Change the input to keep only nblock_lobpcg (preferably) or bandpp.'
            ABI_ERROR(msg)
          end if
-         !LTEST
-         !write(900,*) 'bandpp read'
-         !write(900,*) 'bandpp : ',dtsets(idtset)%bandpp
-         !flush(900)
-         !LTEST
          if (mod(mband_upper,dtsets(idtset)%bandpp*dtsets(idtset)%npband)==0) then
            dtsets(idtset)%nblock_lobpcg=mband_upper/(dtsets(idtset)%bandpp*dtsets(idtset)%npband)
          else
@@ -371,16 +332,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
              'A simpler solution is to use nblock_lobpcg instead of bandpp.'
            ABI_ERROR(msg)
          end if
-         !LTEST
-         !write(900,*) 'nblock : ',dtsets(idtset)%nblock_lobpcg
-         !flush(900)
-         !LTEST
        else
-         !LTEST
-         !write(900,*) 'nblock read'
-         !write(900,*) 'nblock : ',dtsets(idtset)%nblock_lobpcg
-         !flush(900)
-         !LTEST
          if (mod(mband_upper,dtsets(idtset)%nblock_lobpcg*dtsets(idtset)%npband)==0) then
            dtsets(idtset)%bandpp=mband_upper/(dtsets(idtset)%nblock_lobpcg*dtsets(idtset)%npband)
          else
@@ -388,10 +340,6 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
              'Change nband, npband or nblock_lobpcg in the input.'
            ABI_ERROR(msg)
          end if
-         !LTEST
-         !write(900,*) 'bandpp : ',dtsets(idtset)%bandpp
-         !flush(900)
-         !LTEST
        end if
      else ! autoparal /= 0
        ! check if nblock_lobpcg is read from the input, if so error msg
@@ -404,15 +352,6 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
        dtsets(idtset)%nblock_lobpcg=mband_upper/(dtsets(idtset)%bandpp*dtsets(idtset)%npband)
      end if
    end if
-   !LTEST
-   !write(900,*) '1 paral_kgb : ',dtsets(idtset)%paral_kgb
-   !write(900,*) '1 wfoptalg  : ',dtsets(idtset)%wfoptalg 
-   !flush(900)
-   !write(900,*) '1 nband  : ',mband_upper
-   !write(900,*) '1 nblock : ',dtsets(idtset)%nblock_lobpcg
-   !write(900,*) '1 bandpp : ',dtsets(idtset)%bandpp
-   !flush(900)
-   !LTEST
 
    ! Warning when using different number of bands for different kpoints (occopt=2)
    if ( dtsets(idtset)%occopt==2 .and. dtsets(idtset)%nkpt>1 .and. &
@@ -423,13 +362,6 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
       &' The run will most probably fail on a other check. If it does not fail, ignore this message.'
      ABI_WARNING(msg)
    end if
-
-   !LTEST
-   !write(900,*) '1d paral_kgb : ',dtsets(idtset)%paral_kgb
-   !write(900,*) '1d wfoptalg  : ',dtsets(idtset)%wfoptalg 
-   !flush(900)
-   !LTEST
-
 
    dtsets(idtset)%densfor_pred=2
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'densfor_pred',tread0,'INT')
@@ -516,12 +448,6 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
      ABI_WARNING(msg)
    end if
 
-   !LTEST
-   !write(900,*) '1c nband  : ',mband_upper
-   !write(900,*) '1c nblock : ',dtsets(idtset)%nblock_lobpcg
-   !write(900,*) '1c bandpp : ',dtsets(idtset)%bandpp
-   !flush(900)
-   !LTEST
    if (dtsets(idtset)%npspinor>=2.and.dtsets(idtset)%nspinor==1) then
      dtsets(idtset)%npspinor=1
      dtsets(idtset)%npfft=2*dtsets(idtset)%npfft
@@ -2061,11 +1987,6 @@ end subroutine mpi_setup
      end if
    end do
  end if
-
- !LTEST
- !write(900,*) 'mcount :',mcount
- !write(900,*) 'max_ncpus :',max_ncpus
- !LTEST
 
 !Store new process distribution
  if (mcount>0.and.max_ncpus<=0) then
