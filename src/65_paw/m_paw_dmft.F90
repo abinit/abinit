@@ -935,8 +935,8 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  end if
  call wrtout([std_out,ab_out],message,'COLL')
  if (dmft_solv == 5 .or. ((dmft_solv == 6 .or. dmft_solv == 7) .and. &
-   & dtset%dmftctqmc_triqs_orb_off_diag == 0 .or. &
-   & (nspinor == 2 .and. dtset%dmftctqmc_triqs_spin_off_diag == 0))) then
+   & (dtset%dmftctqmc_triqs_orb_off_diag == 0 .or. &
+   & (nspinor == 2 .and. dtset%dmftctqmc_triqs_spin_off_diag == 0)))) then
    write(message,'(a,1x,a)') ch10,"The off-diagonal elements of the Green's function are neglected"
    call wrtout([std_out,ab_out],message,'COLL')
  end if
@@ -1234,7 +1234,7 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
    ! mesh_type > 3 cannot be extended outside the PAW sphere while keeping the
    ! mesh inside the sphere unchanged.
    if ((mesh_size /= pawrad(itypat)%mesh_size) .and. mesh_type > 3) then
-     message = "mesh_type > 3 is only compatible with dmft_proj=1 and dmft_prtwan=0"
+     message = "mesh_type > 3 is only compatible with dmft_orbital=1 and dmft_prtwan=0"
      ABI_ERROR(message)
    end if
    if (mesh_size > pawrad(itypat)%int_meshsz .and. (.not. use_full_chipsi)) then

@@ -1009,9 +1009,9 @@ subroutine chipsi_renormalization(paw_dmft,opt)
 !  todo_ab introduce correct orthonormalization in the general case.
 
  write(message,'(6a)') ch10, &
-   &      '  =============================================== ',&
-   & ch10,'  == The DMFT orbitals are now orthonormalized == ',&
-   & ch10,'  =============================================== '
+   &      '  =================================================== ',&
+   & ch10,'  == The DMFT orbitals will now be orthonormalized == ',&
+   & ch10,'  =================================================== '
  call wrtout(std_out,message,'COLL')
 
  if (option == 2) then ! option==2

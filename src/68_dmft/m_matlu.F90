@@ -2210,6 +2210,7 @@ end subroutine add_matlu
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
+!!  dmft_solv :: impurity solver
 !!  matlu(natom) :: input quantity to check
 !!  natom=number of atoms in cell.
 !!  tol : threshold. Print a warning if max(abs(imag(off diagonal elements))) > tol or
@@ -2221,14 +2222,18 @@ end subroutine add_matlu
 !!
 !! SOURCE
 
- subroutine checkreal_matlu(matlu,natom,tol)
+ subroutine checkreal_matlu(matlu,natom,tol,paw_dmft)
+
+ use m_paw_dmft, only : paw_dmft_type
 
 !Arguments ------------------------------------
  real(dp), intent(in) :: tol
  integer, intent(in)  :: natom
  type(matlu_type), intent(in) :: matlu(natom)
+ type(paw_dmft_type), intent(in) :: paw_dmft
 !Local variables-------------------------------
  integer :: iatom,im,im1,isppol,lpawu,ndim,nspinor,nsppol
+ logical :: orb_off_diag,spin_off_diag,triqs
  character(len=500) :: message
  real(dp) :: elem,maximag,maximagdiag,maxoffdiag
 !************************************************************************
@@ -2238,6 +2243,10 @@ end subroutine add_matlu
  maxoffdiag  = zero
  nspinor     = matlu(1)%nspinor
  nsppol      = matlu(1)%nsppol
+
+ triqs = (paw_dmft%dmft_solv == 6) .or. (paw_dmft%dmft_solv == 7)
+ orb_off_diag = paw_dmft%dmftctqmc_triqs_orb_off_diag
+ spin_off_diag = paw_dmft%dmftctqmc_triqs_spin_off_diag
 
  do iatom=1,natom
    lpawu = matlu(iatom)%lpawu
@@ -2268,19 +2277,26 @@ end subroutine add_matlu
  end if ! maximagdiag > tol
  if (maximag > tol) then
    write(message,'(3x,2a,e12.4,a,e12.4,2a)') ch10,&
-     & ' Off diag occupation matrix is complex: the imaginary part ',maximag,' is larger than',tol,ch10,&
+     & ' The off diagonal occupation matrix is complex: the imaginary part ',maximag,' is larger than',tol,ch10,&
      & "Check that your calculation is meaningful"
-   ABI_WARNING(message)
- else
-   write(message,'(3x,2a,e12.4,a,e12.4,2a)') ch10,' Occupation matrix is real: the imaginary part ',maximag,' is lower than',tol
-   ABI_COMMENT(message)
+   if (triqs) then
+#if !defined HAVE_TRIQS_COMPLEX
+     ABI_WARNING(message)
+#endif
+   else
+     ABI_WARNING(message)
+   end if
  end if ! maximag > tol
  if (maxoffdiag > tol) then
-   write(message,'(3x,2a,e12.4,a,e12.4,6a)') ch10,&
-    & ' Occupation matrix is non diagonal : the maximum off-diag part ',maxoffdiag,' is larger than',tol,ch10,&
-    & "The corresponding non diagonal elements will be neglected in the Weiss/Hybridization functions",ch10,&
-    & "(Except if dmft_solv=8,9, or dmft_solv=6,7 and dmftctqmc_triqs_orb_off_diag/spin_off_diag=true, &
-    & where these elements are taken into account)",ch10,"This is an approximation."
+   if (triqs .and. ((.not. orb_off_diag) .or. (.not. spin_off_diag))) then
+     write(message,'(3x,3a,e12.4,a,e12.4)') ch10,' Occupation matrix is non diagonal : the maximum ', &
+               & 'off-diagonal part ',maxoffdiag,' is larger than',tol
+   else
+     write(message,'(3x,2a,e12.4,a,e12.4,6a)') ch10,&
+        & ' Occupation matrix is non diagonal : the maximum off-diag part ',maxoffdiag,' is larger than',tol,ch10,&
+        & "The corresponding non diagonal elements will be neglected in the Weiss/Hybridization functions",ch10,&
+        & "(Except if dmft_solv=8,9 where these elements are taken into account)",ch10,"This is an approximation."
+   end if
    ABI_WARNING(message)
  else
    write(message,'(3x,2a,e12.4,a,e12.4,2a)') ch10,' Occupation matrix is diagonal : the off-diag part ',&

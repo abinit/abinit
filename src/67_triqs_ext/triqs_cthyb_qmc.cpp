@@ -20,8 +20,6 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
                      complex<double> *udens_cmplx, complex<double> *vee_cmplx, complex<double> *levels_cmplx,
                      complex<double> *moments_self_1, complex<double> *moments_self_2, double *eu, double *occ) {
 
-  cout.setf(ios::fixed);
-
   int verbo = 1;
   int ndim = num_orbitals / 2;
   string lam_fname = "";
@@ -30,6 +28,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
   auto comm = MPI_COMM_WORLD;
   int size;
   MPI_Comm_size(comm,&size);
+  int itask = 0;
 
   int therm = ntherm;
   if (exists(config_fname)) therm = ntherm2;
@@ -37,35 +36,35 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
   // Print information about the Solver Parameters
   if (rank == 0 && verbo > 0) {
 
-    cout << endl <<"   == Key Input Parameters for the TRIQS CTHYB solver ==" << endl << endl;
-    cout << setw(27) << left << "   Beta                  = " << beta << endl;
-    cout << setw(27) << left << "   Nflavor               = " << num_orbitals << endl;
-    cout << setw(27) << left << "   Ntau                  = " << n_tau << endl;
-    cout << setw(27) << left << "   Nl                    = " << n_l << endl;
-    cout << setw(27) << left << "   Legendre measurement  = " << leg_measure << endl;
-    cout << setw(27) << left << "   Ncycles               = " << n_cycles << endl;
-    cout << setw(27) << left << "   Cycle length          = " << cycle_length << endl;
-    cout << setw(27) << left << "   Ntherm                = " << therm << endl;
-    cout << setw(27) << left << "   Seed                  = " << seed_a << " + " << seed_b << " * rank" << endl;
-    cout << setw(27) << left << "   Orbital Off-Diag      = " << orb_off_diag << endl;
-    cout << setw(27) << left << "   Spin Off-Diag         = " << spin_off_diag << endl;
-    cout << setw(27) << left << "   Move shift            = " << move_shift << endl;
-    cout << setw(27) << left << "   Move double           = " << move_double << endl;
-    cout << setw(27) << left << "   Meas. density mat.    = " << measure_density_matrix << endl;
-    cout << setw(27) << left << "   Use norm as weight    = " << use_norm_as_weight << endl;
-    cout << setw(27) << left << "   N min                 = " << loc_n_min << endl;
-    cout << setw(27) << left << "   N max                 = " << loc_n_max << endl;
-    cout << setw(27) << left << "   Det init size         = " << det_init_size << endl;
-    cout << setw(27) << left << "   Det N ops. bef. check = " << det_n_operations_before_check << endl;
-    cout << setw(27) << left << "   Global moves prob.    = " << scientific << move_global_prob << endl;
-    cout << setw(27) << left << "   Imaginary Threshold   = " << scientific << imag_threshold << endl;
-    cout << setw(27) << left << "   Det Precision warning = " << scientific << det_precision_warning << endl;
-    cout << setw(27) << left << "   Det Precision error   = " << scientific << det_precision_error << endl;
-    cout << setw(27) << left << "   Det sing. threshold   = " << det_singular_threshold << endl;
-    cout << setw(27) << left << "   Time invariance       = " << time_invariance << endl;
-    cout << setw(27) << left << "   Ntau delta            = " << ntau_delta << endl;
-    cout << setw(27) << left << "   Nbins histo           = " << nbins_histo << endl;
-    cout << setw(27) << left << "   Lambda                = " << lam << endl;
+    cout << endl << "   == Key Input Parameters for the TRIQS CTHYB solver ==" << endl << endl;
+    cout << "   Beta                  = " << fixed << beta << endl;
+    cout << "   Nflavor               = " << num_orbitals << endl;
+    cout << "   Ntau                  = " << n_tau << endl;
+    cout << "   Nl                    = " << n_l << endl;
+    cout << "   Legendre measurement  = " << leg_measure << endl;
+    cout << "   Ncycles               = " << n_cycles << endl;
+    cout << "   Cycle length          = " << cycle_length << endl;
+    cout << "   Ntherm                = " << therm << endl;
+    cout << "   Seed                  = " << seed_a << " + " << seed_b << " * rank" << endl;
+    cout << "   Orbital Off-Diag      = " << orb_off_diag << endl;
+    cout << "   Spin Off-Diag         = " << spin_off_diag << endl;
+    cout << "   Move shift            = " << move_shift << endl;
+    cout << "   Move double           = " << move_double << endl;
+    cout << "   Meas. density mat.    = " << measure_density_matrix << endl;
+    cout << "   Use norm as weight    = " << use_norm_as_weight << endl;
+    cout << "   N min                 = " << loc_n_min << endl;
+    cout << "   N max                 = " << loc_n_max << endl;
+    cout << "   Det init size         = " << det_init_size << endl;
+    cout << "   Det N ops. bef. check = " << det_n_operations_before_check << endl;
+    cout << "   Global moves prob.    = " << scientific << move_global_prob << endl;
+    cout << "   Imaginary Threshold   = " << imag_threshold << endl;
+    cout << "   Det Precision warning = " << det_precision_warning << endl;
+    cout << "   Det Precision error   = " << det_precision_error << endl;
+    cout << "   Det sing. threshold   = " << det_singular_threshold << endl;
+    cout << "   Time invariance       = " << time_invariance << endl;
+    cout << "   Ntau delta            = " << ntau_delta << endl;
+    cout << "   Nbins histo           = " << nbins_histo << endl;
+    cout << "   Lambda                = " << lam << endl << endl;
   }
 
   // Hamiltonian definition
@@ -137,7 +136,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
   for (int i = 0; i < nblocks; ++i)
     gf_struct.emplace_back(labels[i],siz_block);
 
-  if (rank == 0 && verbo > 0) cout << "   == Green Function Structure Initialized ==" << endl << endl;
+  if (rank == 0 && verbo > 0) cout << "   == Green's Function Structure Initialized ==" << endl << endl;
 
   // Init Hamiltonian Basic terms
   if (!rot_inv) {
@@ -295,7 +294,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
   if (rank == 0 && verbo > 0) cout << "   == Starting Solver [node " << rank << "] ==" << endl << endl;
   solver.solve(paramCTQMC);
 
-  if (rank == 0 && verbo > 0) cout << "   == Reporting ==" << endl << endl;
+  if (rank == 0 && verbo > 0) cout << endl << "   == Reporting ==" << endl << endl;
 
   if (rank == 0 && verbo > 0) cout << "   == Writing final configuration ==      " << endl << endl;
 
@@ -395,8 +394,6 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
     }
   }
 
-  if (rank == 0 && verbo > 0) cout << "Gtau reported" << endl;
-
   // Report G(l)
   if (leg_measure) {
     for (int iblock = 0; iblock < nblocks; ++iblock) {
@@ -412,8 +409,6 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
     }
   }
 
-  if (rank == 0 && verbo > 0) cout << "Gl reported" << endl;
-
   if (measure_density_matrix) {
 
     auto h_loc_diag = solver.h_loc_diagonalization();
@@ -426,6 +421,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
         int iflavor = convert_indexes_back(iblock,o,orb_off_diag,spin_off_diag,ndim);
         n_op = c_dag(labels[iblock],o) * c(labels[iblock],o);
         occ[iflavor] = trace_rho_op(rho,n_op,h_loc_diag);
+        itask = (itask+1)%size;
       }
     }
 
@@ -447,6 +443,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
     }
 
     *eu = trace_rho_op(rho,Hint,h_loc_diag);
+    itask = (itask+1)%size;
 
     if (!leg_measure) { // Get moments of the self-energy
 
@@ -457,6 +454,8 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
       // I use slightly different formulas than the ones used in TRIQS.
       // This is because their formula is wrong, and mine is correct.
 
+      h_scalar_t Sinf,S1;
+
       for (int iblock = 0; iblock < nblocks; ++iblock) {
         for (int o = 0; o < siz_block; ++o) {
           int iflavor = convert_indexes_back(iblock,o,orb_off_diag,spin_off_diag,ndim);
@@ -466,8 +465,10 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
             Sinf_op = - commut*c_dag(labels[iblock],oo) - c_dag(labels[iblock],oo)*commut;
             commut2 = c_dag(labels[iblock],oo)*Hint - Hint*c_dag(labels[iblock],oo);
             S1_op = commut2*commut + commut*commut2;
-            auto Sinf = trace_rho_op(rho,Sinf_op,h_loc_diag);
-            auto S1 = trace_rho_op(rho,S1_op,h_loc_diag);
+            Sinf = trace_rho_op(rho,Sinf_op,h_loc_diag);
+            itask = (itask+1)%size;
+            S1 = trace_rho_op(rho,S1_op,h_loc_diag);
+            itask = (itask+1)%size;
             moments_self_1[iflavor+iflavor1*num_orbitals] = Sinf;
             moments_self_2[iflavor+iflavor1*num_orbitals] = S1;
             Sinf_mat(o,oo) = Sinf;
@@ -483,6 +484,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
         }
       }
     }   // not legendre
+
   }   // measure_density_matrix
   if (rank == 0 && verbo > 0) cout << "   == CTHYB-QMC Process Finished [node "<< rank <<"] =="<< endl << endl;
 }

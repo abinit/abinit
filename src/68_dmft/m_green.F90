@@ -1256,6 +1256,8 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
            end do ! ib
            trace_tmp = trace_tmp + trace_tmp2*wtk
          else
+           ! Use Tr(log(G(iw))) + Tr(log(G(-iw))) = Tr(log(G(iw)G(iw)^H)) so that we can use the much faster zheev instead of
+           ! zgeev. Even if G(iw) and G(iw)^H have no reason to commute, this equality still holds since we only care about the trace.
            call abi_xgemm("n","c",mbandc,mbandc,mbandc,cone,green%oper(ifreq)%ks(:,:,ikpt+shift_green,isppol), &
                         & mbandc,green%oper(ifreq)%ks(:,:,ikpt+shift_green,isppol),mbandc,czero,mat_tmp(:,:),mbandc)
            call zheev("n","u",mbandc,mat_tmp(:,:),mbandc,eig(:),work(:),lwork,rwork(:),info)

@@ -561,7 +561,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
    write(message,'(a,2x,a)') ch10," == Rotated occupations (for information)"
    call wrtout(std_out,message,'COLL')
    call print_matlu(matlu1(:),natom,1,compl=1)
-   call checkreal_matlu(matlu1(:),natom,tol10)
+   call checkreal_matlu(matlu1(:),natom,tol10,paw_dmft)
    call destroy_matlu(matlu1(:),natom)
    ABI_FREE(matlu1)
 
@@ -1650,17 +1650,34 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
    orb_off_diag  = paw_dmft%dmftctqmc_triqs_orb_off_diag
    spin_off_diag = paw_dmft%dmftctqmc_triqs_spin_off_diag
 
-   if ((.not. orb_off_diag) .and. (.not. spin_off_diag)) option = 1
-   if ((.not. orb_off_diag) .and. (spin_off_diag)) option = 2
-   if (orb_off_diag .and. (.not. spin_off_diag)) option = 3
-
-   !call wrtout(std_out,message,'COLL')
-
    if (opt_diag /= 0) then
+     write(message,'(3x,a)') "== Rotating Weiss field in CTQMC basis"
+     call wrtout(std_out,message,'COLL')
      do i=1,weiss%nmoments-1
        call rotate_matlu(weiss%moments(i)%matlu(:),eigvectmatlu(:),natom,1)
      end do ! i
    end if
+
+   if ((.not. orb_off_diag) .and. (.not. spin_off_diag)) then
+     option = 1
+     write(message,'(3x,a)') "== All the off-diagonal elements will be neglected"
+     call wrtout(std_out,message,'COLL')
+   else if ((.not. orb_off_diag) .and. (spin_off_diag)) then
+     option = 2
+     write(message,'(3x,2a)') "== Only the spin off-diagonal elements will be kept ;", &
+                            & " while the orbital off-diagonal elements will be neglected"
+     call wrtout(std_out,message,'COLL')
+   else if (orb_off_diag .and. (.not. spin_off_diag)) then
+     option = 3
+     write(message,'(3x,2a)') "== Only the orbital off-diagonal elements will be kept ;", &
+                           & " while the spin off-diagonal elements will be neglected"
+     call wrtout(std_out,message,'COLL')
+   end if
+
+#if !defined HAVE_TRIQS_COMPLEX
+   write(message,'(3x,a)') "== The imaginary part will be neglected"
+   call wrtout(std_out,message,'COLL')
+#endif
 
    maxoffdiag = zero
 
@@ -1684,6 +1701,19 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
      call zero_matlu(weiss%oper(ifreq)%matlu(:),natom,onlynondiag=option,maxoffdiag=maxoffdiag_)
      if (maxoffdiag_ > maxoffdiag) maxoffdiag = maxoffdiag_
 
+#if !defined HAVE_TRIQS_COMPLEX
+     ! Symmetrize Delta(iw) to make Delta(tau) real
+     do iatom=1,natom
+       lpawu = paw_dmft%lpawu(iatom)
+       if (lpawu == -1) cycle
+       do isppol=1,nsppol
+         weiss%oper(ifreq)%matlu(iatom)%mat(:,:,isppol) = half * &
+           & (weiss%oper(ifreq)%matlu(iatom)%mat(:,:,isppol)+ &
+           & transpose(weiss%oper(ifreq)%matlu(iatom)%mat(:,:,isppol)))
+       end do
+     end do
+#endif
+
    end do ! ifreq
 
    call gather_oper(weiss%oper(:),weiss%distrib,paw_dmft,opt_ksloc=2)
@@ -1698,10 +1728,27 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
      if (maxoffdiag > maxoffdiag_) maxoffdiag_ = maxoffdiag
    end do ! i
 
+#if !defined HAVE_TRIQS_COMPLEX
+   do i=2,weiss%nmoments-1
+     do iatom=1,natom
+       lpawu = paw_dmft%lpawu(iatom)
+       if (lpawu == -1) cycle
+       do isppol=1,nsppol
+         weiss%moments(i)%matlu(iatom)%mat(:,:,isppol) = half * &
+           & (weiss%moments(i)%matlu(iatom)%mat(:,:,isppol)+ &
+           & transpose(weiss%moments(i)%matlu(iatom)%mat(:,:,isppol)))
+       end do
+     end do
+   end do
+#endif
+
    if (maxoffdiag > tol10) then
-     message = "WARNING: You have neglected some off-diagonal elements in your calculation &
-              & but they are non-negligible."
+     write(message,'(2a,e12.4)') "WARNING: You have neglected some off-diagonal elements in your calculation", &
+              &" but they are non-negligible. The maximal off-diagonal element is:",maxoffdiag
      ABI_WARNING(message)
+   else
+     write(message,'(a,3x,a,e12.4)') ch10,"== The maximal off-diagonal element is small enough:",maxoffdiag
+     call wrtout(std_out,message,'COLL')
    end if
 
    call destroy_matlu(matlu1(:),natom)
@@ -3337,7 +3384,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
  type(matlu_type), target, allocatable :: ftau(:)
  character(len=4) :: tag_at
  character(len=13) :: tag,tag2
- character(len=500) :: message
+ character(len=10000) :: message
 ! ************************************************************************
 
  leg_measure   = paw_dmft%dmftctqmc_triqs_leg_measure
@@ -3346,7 +3393,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
  nleg          = paw_dmft%dmftctqmc_triqs_nleg
  nspinor       = paw_dmft%nspinor
  nsppol        = paw_dmft%nsppol
- ntau          = paw_dmft%dmftqmc_l + 1
+ ntau          = paw_dmft%dmftqmc_l + 1 ! +1 to match Abinit conventions
  nwlo          = paw_dmft%dmft_nwlo
  orb_off_diag  = paw_dmft%dmftctqmc_triqs_orb_off_diag
  spin_off_diag = paw_dmft%dmftctqmc_triqs_spin_off_diag
@@ -3365,6 +3412,9 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
 
  nmoments = weiss%nmoments - 2
 
+ write(message,'(a,3x,a)') ch10,"== Inverse Fourier transform of Delta(iw)"
+ call wrtout(std_out,message,"COLL")
+
  ! Inverse Fourier transform of the hybridization
  call fourier_inv(paw_dmft,nmoments,ntau_delta,ftau(:),weiss%oper(:),weiss%moments(2:nmoments+1))
 
@@ -3378,7 +3428,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
 
  ! Prepare DLR frequencies
  if (.not. leg_measure) then
-   wdlr_size = 1000
+   wdlr_size = 1000 ! make sure this is big enough
    ABI_MALLOC(wdlr_tmp,(wdlr_size))
    ndlr_ptr = C_LOC(ndlr)
    wdlr_ptr = C_LOC(wdlr_tmp)
@@ -3391,6 +3441,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
                     & " Something is wrong here."
      ABI_ERROR(message)
    end if
+
    ABI_MALLOC(wdlr,(ndlr))
    ABI_MALLOC(wdlr_beta,(ndlr))
    ABI_MALLOC(wdlr2,(ndlr))
@@ -3416,6 +3467,12 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
        Adlr(iw,itau) = k_it(dble(itau-1)/dble(ntau-1),wdlr(iw))
      end do ! iw
    end do ! itau
+
+   write(tag_at,'(i4)') ndlr
+   write(message,'(a,3x,3a)') ch10,"== There are ",trim(adjustl(tag_at))," DLR frequencies"
+   call wrtout(std_out,message,"COLL")
+   write(message,'(3x,1000(e10.3,2x))') wdlr_beta
+   call wrtout(std_out,message,"COLL")
 
  end if ! not leg_measure
 
@@ -3477,7 +3534,10 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
    ABI_CHECK((tag_at(1:1)/='#'),'Bug: string length too short!')
    tag_at = trim(tag_at)
 
-   if (myproc == 0) then
+   write(message,'(a,3x,2a)') ch10,"== Solving impurity model for atom ",tag_at
+   call wrtout(std_out,message,'COLL')
+
+   if (myproc == 0 .and. (orb_off_diag .or. spin_off_diag)) then
 
      open(unit=505,file="Hybridization_offdiag_iatom"//tag_at//".dat",status='unknown',form='formatted')
      do itau=1,ntau_delta
@@ -3485,6 +3545,10 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
           & ((dble(ftau(iatom)%mat(im,im1,itau)),aimag(ftau(iatom)%mat(im,im1,itau)),im=1,nflavor),im1=1,nflavor)
      end do ! itau
      close(505)
+
+   end if
+
+   if (myproc == 0) then
 
      open(unit=505,file="Hybridization_diag_iatom"//tag_at//".dat",status='unknown',form='formatted')
      do itau=1,ntau_delta
@@ -3539,6 +3603,8 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
      iilam = ilam ! lambda index to write files
      if (ilam == ntot) iilam = 0
 
+     call flush_unit(std_out)
+
 #if defined HAVE_TRIQS_v3_4
      call Ctqmc_triqs_run(rot_inv,leg_measure,orb_off_diag,spin_off_diag,paw_dmft%dmftctqmc_triqs_move_shift, &
                         & paw_dmft%dmftctqmc_triqs_move_double,density_matrix_measure, &
@@ -3554,6 +3620,8 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
                         & paw_dmft%dmftctqmc_triqs_det_singular_threshold,lam_list(ilam),ftau_ptr,gtau_ptr,gl_ptr,udens_ptr, &
                         & vee_ptr,levels_ptr,mself_1_ptr,mself_2_ptr,eu_ptr,occ_ptr)
 #endif
+
+     call flush_unit(std_out)
 
      if (paw_dmft%dmftctqmc_triqs_compute_integral == 1 .and. ilam < ntot .and. paw_dmft%dmftctqmc_triqs_entropy == 1) then
        i = mod(ilam,ngauss)
@@ -3576,7 +3644,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
 
    end do ! ilam
 
-   if (myproc == 0) then
+   if (myproc == 0 .and. (orb_off_diag .or. spin_off_diag)) then
 
      open(unit=505,file="Gtau_offdiag_iatom"//tag_at//".dat",status='unknown',form='formatted')
      do itau=1,ntau
@@ -3584,6 +3652,10 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
           & ((dble(gtau(itau,im,im1)),aimag(gtau(itau,im,im1)),im=1,nflavor),im1=1,nflavor)
      end do ! itau
      close(505)
+
+   end if
+
+   if (myproc == 0) then
 
      open(unit=505,file="Gtau_diag_iatom"//tag_at//".dat",status='unknown',form='formatted')
      do itau=1,ntau
@@ -3780,7 +3852,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
            do i=1,nmoments
              mgreen(i) = dble(green%moments(i)%matlu(iatom)%mat(im,im1,isppol))
            end do ! i
-           occ_tmp = dble(green%oper_tau(1)%matlu(iatom)%mat(im,im1,isppol))
+           occ_tmp = green%oper_tau(1)%matlu(iatom)%mat(im,im1,isppol)
            call fit_dlr(ncon,ndlr,lsq_g,con_moments,jac_lsq_g,jac_con_moments,gl_dlr_re(:))
 
            if (density_matrix_measure) ncon = 3
@@ -3817,7 +3889,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
        end do ! isppol
      end do ! ifreq
 
-     if (myproc == 0) then
+     if (myproc == 0 .and. (orb_off_diag .and. spin_off_diag)) then
 
        open(unit=505,file="Gtau_offdiag_DLR_iatom"//tag_at//".dat",status='unknown',form='formatted')
        do itau=1,ntau
@@ -3825,6 +3897,10 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
             & ((dble(gtau_dlr(itau,im,im1)),aimag(gtau_dlr(itau,im,im1)),im=1,nflavor),im1=1,nflavor)
        end do ! itau
        close(505)
+
+     end if
+
+     if (myproc == 0) then
 
        open(unit=505,file="Gtau_diag_DLR_iatom"//tag_at//".dat",status='unknown',form='formatted')
        do itau=1,ntau
@@ -3839,13 +3915,6 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
      ABI_FREE(gl_dlr_im)
      ABI_FREE(bdlr)
      ABI_FREE(mgreen)
-     ABI_FREE(Adlr)
-     ABI_FREE(Adlr_iw)
-     ABI_FREE(wdlr)
-     ABI_FREE(wdlr_beta)
-     ABI_FREE(wdlr2)
-     ABI_FREE(wdlr3)
-     ABI_FREE(wdlr4)
      ABI_FREE(gtau_dlr)
 
    end if ! leg_measure
@@ -3863,6 +3932,14 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
  call destroy_matlu(ftau(:),natom)
 
  ABI_FREE(ftau)
+
+ ABI_FREE(Adlr)
+ ABI_FREE(Adlr_iw)
+ ABI_FREE(wdlr)
+ ABI_FREE(wdlr_beta)
+ ABI_FREE(wdlr2)
+ ABI_FREE(wdlr3)
+ ABI_FREE(wdlr4)
 
 contains
 
