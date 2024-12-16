@@ -675,7 +675,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    ABI_MALLOC(dtsets(idtset)%corecs,(mxntypat))
    ABI_MALLOC(dtsets(idtset)%densty,(mxntypat,4))
    ABI_MALLOC(dtsets(idtset)%dmft_nominal,(mxnatom))
-   ABI_MALLOC(dtsets(idtset)%dmft_proj,(mxntypat))
+   ABI_MALLOC(dtsets(idtset)%dmft_orbital,(mxntypat))
    ABI_MALLOC(dtsets(idtset)%dmft_shiftself,(mxnatom))
    ABI_MALLOC(dtsets(idtset)%dynimage,(mxnimage))
    ABI_MALLOC(dtsets(idtset)%iatfix,(3,mxnatom))
@@ -2346,7 +2346,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmft_nwli=0
    dtsets(idtset)%dmft_nwlo=0
    dtsets(idtset)%dmft_occnd_imag=1
-   dtsets(idtset)%dmft_proj(:)=1
+   dtsets(idtset)%dmft_orbital(:)=1
    dtsets(idtset)%dmft_prt_maxent=1
    dtsets(idtset)%dmft_prtwan=0
    dtsets(idtset)%dmft_read_occnd=0
@@ -2384,7 +2384,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmftctqmc_triqs_det_singular_threshold=-1.0_dp
    dtsets(idtset)%dmftctqmc_triqs_entropy=0
    dtsets(idtset)%dmftctqmc_triqs_epsilon=1.0d-6
-   dtsets(idtset)%dmftctqmc_triqs_gaussorder=10
+   dtsets(idtset)%dmftctqmc_triqs_gaussorder=0
    dtsets(idtset)%dmftctqmc_triqs_imag_threshold=1.0d-13
    dtsets(idtset)%dmftctqmc_triqs_leg_measure=0
    dtsets(idtset)%dmftctqmc_triqs_loc_n_min=0

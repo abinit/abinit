@@ -2460,8 +2460,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    if(tread==1) dtset%dmft_nwlo=intarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_occnd_imag',tread,'INT')
    if(tread==1) dtset%dmft_occnd_imag=intarr(1)
-   call intagm(dprarr,intarr,jdtset,marr,ntypat,string(1:lenstr),'dmft_proj',tread,'INT')
-   if(tread==1) dtset%dmft_proj(:)=intarr(1:ntypat)
+   call intagm(dprarr,intarr,jdtset,marr,ntypat,string(1:lenstr),'dmft_orbital',tread,'INT')
+   if(tread==1) dtset%dmft_orbital(:)=intarr(1:ntypat)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_prt_maxent',tread,'INT')
    if(tread==1) dtset%dmft_prt_maxent=intarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_prtwan',tread,'INT')
@@ -2556,7 +2556,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
        if(tread==1) dtset%dmftctqmc_order  =intarr(1)
      end if
      if(dtset%dmft_solv>=6.and.dtset%dmft_solv<=7) then
-       dtset%dmftctqmc_triqs_ntau_delta=max(dtset%dmftqmc_l,1)
+       dtset%dmftctqmc_triqs_ntau_delta=dtset%dmftqmc_l+1
        if (dtset%nspinor == 1) dtset%dmftctqmc_triqs_spin_off_diag=0
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_triqs_compute_integral',tread,'INT')
        if(tread==1) dtset%dmftctqmc_triqs_compute_integral=intarr(1)

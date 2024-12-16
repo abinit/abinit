@@ -764,7 +764,7 @@ type, public :: dataset_type
  integer, allocatable ::  bs_loband(:)
  integer, allocatable ::  constraint_kind(:) ! constraint_kind(ntypat)
  integer, allocatable ::  dmft_nominal(:)    ! dmft_nominal(natom)
- integer, allocatable ::  dmft_proj(:)       ! dmft_proj(ntypat)
+ integer, allocatable ::  dmft_orbital(:)    ! dmft_orbital(ntypat)
  integer, allocatable ::  dynimage(:)        ! dynimage(nimage or mxnimage)
  integer, allocatable ::  efmas_bands(:,:)   ! efmas_bands(2,nkptgw)
  integer, allocatable ::  iatfix(:,:)        ! iatfix(3,natom)
@@ -2344,7 +2344,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  call alloc_copy(dtin%bs_loband, dtout%bs_loband)
  call alloc_copy(dtin%constraint_kind, dtout%constraint_kind)
  call alloc_copy(dtin%dmft_nominal, dtout%dmft_nominal)
- call alloc_copy(dtin%dmft_proj, dtout%dmft_proj)
+ call alloc_copy(dtin%dmft_orbital, dtout%dmft_orbital)
  call alloc_copy(dtin%dynimage, dtout%dynimage)
  call alloc_copy(dtin%efmas_bands, dtout%efmas_bands)
  call alloc_copy(dtin%iatfix, dtout%iatfix)
@@ -2456,7 +2456,7 @@ subroutine dtset_free(dtset)
  ABI_SFREE(dtset%bs_loband)
  ABI_SFREE(dtset%constraint_kind)
  ABI_SFREE(dtset%dmft_nominal)
- ABI_SFREE(dtset%dmft_proj)
+ ABI_SFREE(dtset%dmft_orbital)
  ABI_SFREE(dtset%dynimage)
  ABI_SFREE(dtset%efmas_bands)
  ABI_SFREE(dtset%iatfix)
@@ -3448,7 +3448,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' dmftqmc_l dmftqmc_n dmftqmc_seed dmftqmc_therm dmft_charge_prec dmft_dc'
  list_vars=trim(list_vars)//' dmft_entropy dmft_fermi_step'
  list_vars=trim(list_vars)//' dmft_iter dmft_kspectralfunc dmft_mxsf dmft_nlambda dmft_nominal dmft_nwli dmft_nwlo'
- list_vars=trim(list_vars)//' dmft_occnd_imag dmft_proj dmft_prt_maxent dmft_prtwan dmft_read_occnd'
+ list_vars=trim(list_vars)//' dmft_occnd_imag dmft_orbital dmft_prt_maxent dmft_prtwan dmft_read_occnd'
  list_vars=trim(list_vars)//' dmft_rslf dmft_shiftself dmft_solv dmft_tolfreq dmft_tollc'
  list_vars=trim(list_vars)//' dmft_t2g dmft_test dmft_use_all_bands dmft_use_full_chipsi dmft_wanorthnorm' ! dmft_wanorthnorm is not documented
  list_vars=trim(list_vars)//' dmft_wanrad dmft_x2my2d dosdeltae dtion dtele dynamics dynimage' !FB: dynamics?

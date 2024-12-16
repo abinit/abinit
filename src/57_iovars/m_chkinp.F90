@@ -705,7 +705,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_wanorthnorm',dt%dmft_wanorthnorm,2,(/2,3/),iout)
        if(dt%getwfk==0.and.dt%irdwfk==0.and.dt%irdden==0.and.dt%getden==0.and.dt%ucrpa==0) then
          write(msg,'(3a,i3,a,i3,a,i3,a,i3,a)' )&
-         'When usedmft==1, A WFK file or a DEN file have to be read. In the current calculation:',ch10, &
+         'When usedmft==1, A WFK file or a DEN file has to be read. In the current calculation:',ch10, &
          '  getwfk =',dt%getwfk, &
          '  irdwfk =',dt%irdwfk, &
          '  getden =',dt%getden, &
@@ -831,8 +831,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
      call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_entropy',dt%dmftctqmc_triqs_entropy,2,(/0,1/),iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
-     call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_gaussorder',dt%dmftctqmc_triqs_gaussorder,2,iout)
-     cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
      call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_leg_measure',dt%dmftctqmc_triqs_leg_measure,2,(/0,1/),iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
      call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_loc_n_min',dt%dmftctqmc_triqs_loc_n_min,0,iout)
@@ -874,11 +872,18 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      call chkdpr(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_imag_threshold',dt%dmftctqmc_triqs_imag_threshold,1,zero,iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
      call chkdpr(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_move_global_prob',dt%dmftctqmc_triqs_move_global_prob,1,zero,iout)
-     cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
-     call chkdpr(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_wmax',dt%dmftctqmc_triqs_wmax,1,zero,iout)
-     if (dt%dmftctqmc_triqs_compute_integral==1) then
+     if (dt%dmftctqmc_triqs_leg_measure == 0) then
+       cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
+       cond_string(2)='dmftctqmc_triqs_leg_measure' ; cond_values(2)=dt%dmftctqmc_triqs_leg_measure
+       call chkdpr(0,2,cond_string,cond_values,ierr,'dmftctqmc_triqs_wmax',dt%dmftctqmc_triqs_wmax,1,zero,iout)
+     end if
+     if (dt%dmftctqmc_triqs_compute_integral==1 .and. dt%dmftctqmc_triqs_entropy==1) then
        cond_string(1)='dmftctqmc_triqs_compute_integral' ; cond_values(1)=dt%dmftctqmc_triqs_compute_integral
-       call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_measure_density_matrix',dt%dmftctqmc_triqs_measure_density_matrix,1,(/1/),iout)
+       cond_string(2)='dmftctqmc_triqs_entropy' ; cond_values(2)=dt%dmftctqmc_triqs_entropy
+       call chkint_eq(0,2,cond_string,cond_values,ierr,'dmftctqmc_triqs_measure_density_matrix',dt%dmftctqmc_triqs_measure_density_matrix,1,(/1/),iout)
+       cond_string(1)='dmftctqmc_triqs_compute_integral' ; cond_values(1)=dt%dmftctqmc_triqs_compute_integral
+       cond_string(2)='dmftctqmc_triqs_entropy' ; cond_values(2)=dt%dmftctqmc_triqs_entropy
+       call chkint_ge(0,2,cond_string,cond_values,ierr,'dmftctqmc_triqs_gaussorder',dt%dmftctqmc_triqs_gaussorder,2,iout)
      end if
      if (dt%dmftctqmc_triqs_entropy == 1) then
        cond_string(1)='dmftctqmc_triqs_entropy' ; cond_values(1)=dt%dmftctqmc_triqs_entropy

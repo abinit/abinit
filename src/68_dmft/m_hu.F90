@@ -688,7 +688,7 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
 !    ==================================
 
      ! Print udens in the Slm basis
-     call vee2udensatom_hu(ndim,hu(itypat)%udens(:,:),hu(itypat)%vee(:,:,:,:),"slm",prtonly=1)
+     call vee2udensatom_hu(ndim,hu(itypat)%udens(:,:),hu(itypat)%vee(:,:,:,:),"Slm",prtonly=1)
 
      basis_vee = 'Slm'
 !    First print veeslm

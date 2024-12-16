@@ -77,7 +77,7 @@ CONTAINS  !=====================================================================
 !! INPUTS
 !!  dmatpuopt= select expression for the density matrix
 !!  dmft_dc= option for the double-counting scheme in DMFT
-!!  dmft_proj(ntypat)= option for the choice of the DMFT radial orbital
+!!  dmft_orbital(ntypat)= option for the choice of the DMFT radial orbital
 !!  exchmix= mixing factor for local exact-exchange
 !!  is_dfpt=true if we are running a DFPT calculation
 !!  jpawu(ntypat)= value of J
@@ -119,7 +119,7 @@ CONTAINS  !=====================================================================
  subroutine pawpuxinit(dmatpuopt,exchmix,f4of2_sla,f6of2_sla,is_dfpt,jpawu,llexexch,llpawu,&
 &           nspinor,ntypat,option_interaction,pawang,pawprtvol,pawrad,pawtab,upawu,use_dmft,&
 &           useexexch,usepawu,&
-&           ucrpa,lmagCalc,dmft_proj,dmft_dc) ! optional argument
+&           ucrpa,lmagCalc,dmft_orbital,dmft_dc) ! optional argument
 
 !Arguments ---------------------------------------------
 !scalars
@@ -141,7 +141,7 @@ CONTAINS  !=====================================================================
  type(pawrad_type),intent(inout) :: pawrad(ntypat)
  type(pawtab_type),target,intent(inout) :: pawtab(ntypat)
  logical,optional,intent(in) :: lmagCalc
- integer,optional,intent(in) :: dmft_proj(ntypat)
+ integer,optional,intent(in) :: dmft_orbital(ntypat)
 !Local variables ---------------------------------------
 !scalars
  integer :: icount,ierr,il,ilmn,ilmnp,ir,isela,iselb,itemp,itypat,iu,iup,j0lmn,jl,jlmn,jlmnp,ju,jup
@@ -819,7 +819,7 @@ CONTAINS  !=====================================================================
 
        write(tag,'(i4)') itypat
        write(message,'(4a)') &
-         & ch10,' =====  Build unprojected DMFT radial orbital for atom type ',trim(adjustl(tag)),' ========'
+         & ch10,' =====  Build DMFT radial orbital for atom type ',trim(adjustl(tag)),' ========'
        call wrtout(std_out,message,"COLL")
 
        ABI_SFREE(pawtab(itypat)%proj)
@@ -827,19 +827,19 @@ CONTAINS  !=====================================================================
 
        me = xmpi_comm_rank(xmpi_world)
 
-       if (dmft_proj(itypat) > 0) then ! use atomic orbital from PAW dataset
-         if (dmft_proj(itypat) > pawtab(itypat)%nproju) then
-           write(message,*) "For atom type:",itypat,"you need to set dmft_proj to a value", &
+       if (dmft_orbital(itypat) > 0) then ! use atomic orbital from PAW dataset
+         if (dmft_orbital(itypat) > pawtab(itypat)%nproju) then
+           write(message,*) "For atom type:",itypat,"you need to set dmft_orbital to a value", &
                         & " lower than",pawtab(itypat)%nproju
            ABI_ERROR(message)
          end if
-         write(message,'(2a,i1,a)') ch10," Using atomic orbital number ",dmft_proj(itypat)," from PAW dataset"
+         write(message,'(2a,i1,a)') ch10," Using atomic orbital number ",dmft_orbital(itypat)," from PAW dataset"
          call wrtout(std_out,message,"COLL")
          meshsz = pawrad(itypat)%int_meshsz
          ABI_MALLOC(pawtab(itypat)%proj,(meshsz))
-         pawtab(itypat)%proj(1:meshsz) = pawtab(itypat)%phi(1:meshsz,pawtab(itypat)%lnproju(dmft_proj(itypat)))
+         pawtab(itypat)%proj(1:meshsz) = pawtab(itypat)%phi(1:meshsz,pawtab(itypat)%lnproju(dmft_orbital(itypat)))
        else  ! read orbital from file
-         tmpfil = 'dmft_proj_'//adjustl(tag)
+         tmpfil = 'dmft_orbital_'//adjustl(tag)
          write(message,'(2a)') " Using wavefunction from file ",trim(tmpfil)
          call wrtout(std_out,message,"COLL")
          inquire(file=trim(tmpfil),exist=lexist)
@@ -859,7 +859,7 @@ CONTAINS  !=====================================================================
          call xmpi_bcast(ierr,0,xmpi_world,ir)
          if (ierr /= 0) ABI_ERROR("Error when reading file "//trim(tmpfil))
          call xmpi_bcast(pawtab(itypat)%proj(:),0,xmpi_world,ierr)
-       end if ! dmft_proj
+       end if ! dmft_orbital
 
        mesh_type = pawrad(itypat)%mesh_type
        lstep = pawrad(itypat)%lstep
@@ -873,7 +873,7 @@ CONTAINS  !=====================================================================
 
        int1 = sqrt(int1)
 
-       tmpfil = "dmft_unprojected_normalized_orbital_itypat_"//trim(adjustl(tag))
+       tmpfil = "dmft_normalized_orbital_itypat_"//trim(adjustl(tag))
        if (me == 0) then
          open(unit=505,file=trim(tmpfil),status="unknown",form="formatted")
          do ir=1,meshsz
@@ -887,13 +887,13 @@ CONTAINS  !=====================================================================
 
        if (dmft_dc == 8) then
 
-         if (dmft_proj(itypat) > 0) then
+         if (dmft_orbital(itypat) > 0) then
            message = "WARNING: You are using dmft_dc=8 while using an atomic orbital from &
                & the PAW dataset. In our current implementation, we assume that &
                & the projection of the orbital on [dmftbandi,dmftbandf] is the same &
                & as the orbital itself, and this can hardly be the case with a truncated atomic &
                & orbital. Please compute the projection of the atomic orbital with dmft_prtwan=1, &
-               & and then use this projection as your DMFT orbital with dmft_proj=-1. This is explained &
+               & and then use this projection as your DMFT orbital with dmft_orbital=-1. This is explained &
                & in the tutorial."
            ABI_WARNING(message)
          end if

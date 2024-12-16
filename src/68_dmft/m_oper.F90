@@ -403,12 +403,19 @@ subroutine print_oper(oper,option,paw_dmft,prtopt)
 !&               (real(oper%ks(isppol,ikpt,ib,ib1)),imag(oper%ks(isppol,ikpt,ib,ib1)),ib1=iband1,iband2)
 !             call wrtout(std_out,message,'COLL')
            end if ! prtopt>=20
-           do ib1=1,mbandc
-             if (abs(aimag(oper%ks(ib1,ib,ikpt,isppol))) > max(tol10,maximag)) then
+           if (paw_dmft%dmft_solv == 6 .or. paw_dmft%dmft_solv == 7) then ! only need to check diagonal elements
+             if (abs(aimag(oper%ks(ib,ib,ikpt,isppol))) > max(tol10,maximag)) then
                ximag   = .true.
-               maximag = aimag(oper%ks(ib1,ib,ikpt,isppol))
+               maximag = aimag(oper%ks(ib,ib,ikpt,isppol))
              end if
-           end do ! ib1
+           else
+             do ib1=1,mbandc
+               if (abs(aimag(oper%ks(ib1,ib,ikpt,isppol))) > max(tol10,maximag)) then
+                 ximag   = .true.
+                 maximag = aimag(oper%ks(ib1,ib,ikpt,isppol))
+               end if
+             end do ! ib1
+           end if
          end do ! ib
        end do ! ikpt
      end do ! isppol
