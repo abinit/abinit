@@ -340,8 +340,8 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 #endif
    end if
 
-   if (dtsets(idtset)%autoparal==0) then
-     if (dtsets(idtset)%wfoptalg==114.or.dtsets(idtset)%wfoptalg==14.or.dtsets(idtset)%wfoptalg==4) then !if LOBPCG
+   if (dtsets(idtset)%wfoptalg==114.or.dtsets(idtset)%wfoptalg==14.or.dtsets(idtset)%wfoptalg==4) then !if LOBPCG
+     if (dtsets(idtset)%autoparal==0) then
        !Nband might have different values for different kpoint, but not bandpp.
        !In this case, we just use the largest nband (mband_upper), and the input will probably fail
        !at the bandpp check later on
@@ -381,9 +381,9 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
          !flush(900)
          !LTEST
        end if
+     else
+       dtsets(idtset)%nblock_lobpcg=mband_upper/(dtsets(idtset)%bandpp*dtsets(idtset)%npband)
      end if
-   else
-     dtsets(idtset)%nblock_lobpcg=mband_upper/(dtsets(idtset)%bandpp*dtsets(idtset)%npband)
    end if
    !LTEST
    !write(900,*) '1 paral_kgb : ',dtsets(idtset)%paral_kgb
