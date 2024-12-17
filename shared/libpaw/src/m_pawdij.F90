@@ -828,7 +828,8 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
        LIBPAW_ALLOCATE(dijso,(cplex_dij*qphase*lmn2_size,ndij))
        call pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
 &                    pawang,pawrad(itypat),pawtab(itypat),pawxcdev,spnorbscl,&
-&                    paw_an(iatom)%vh1,paw_an(iatom)%vxc1)
+&                    paw_an(iatom)%vh1,paw_an(iatom)%vxc1,&
+&                    nucdipmom=nucdipmom(1:3,iatom))
        if (dijso_need) paw_ij(iatom)%dijso(:,:)=dijso(:,:)
        if (dij_need) paw_ij(iatom)%dij(:,:)=paw_ij(iatom)%dij(:,:)+dijso(:,:)
        LIBPAW_DEALLOCATE(dijso)
