@@ -737,6 +737,10 @@ end subroutine print_matlu
  gpu_option = gloc(1)%gpu_option
  zarot    => paw_dmft%zarot
  ratio = dcmplx(1.0_dp/nsym,0.0_dp)
+
+ if(gpu_option==ABI_GPU_OPENMP .and. nspinor==2) then
+   ABI_ERROR("nspinor==2 isn't supported with GPU yet!")
+ end if
  !zarot       => paw_dmft%zarot(:,1:ndim,irot,lpawu+1)
  ABI_MALLOC(glocsym,(natom))
 #ifdef HAVE_OPENMP_OFFLOAD
