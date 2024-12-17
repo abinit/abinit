@@ -886,7 +886,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
      if (option/=2.or.cplex_rhoij==2) then
        call pawdijso(paw_ij(iatom)%dijso,cplex_dij,cplex,ndij,nspden,pawang,pawrad(itypat),pawtab(itypat), &
 &                    pawxcdev,spnorbscl,paw_an(iatom)%vh1,paw_an(iatom)%vxc1,&
-&                    znuc=znucl(itypat))
+&                    nucdipmom=nucdipmom(1:3,iatom),znuc=znucl(itypat))
        paw_ij(iatom)%has_dijso=2
      end if
 
