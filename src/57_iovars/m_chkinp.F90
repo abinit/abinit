@@ -845,8 +845,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
      call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_nbins_histo',dt%dmftctqmc_triqs_nbins_histo,1,iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
-     call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_nleg',dt%dmftctqmc_triqs_nleg,1,iout)
-     cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
      call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_nsubdivisions',dt%dmftctqmc_triqs_nsubdivisions,1,iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
      call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_ntau_delta',dt%dmftctqmc_triqs_ntau_delta,1,iout)
@@ -872,10 +870,12 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      call chkdpr(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_imag_threshold',dt%dmftctqmc_triqs_imag_threshold,1,zero,iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
      call chkdpr(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_move_global_prob',dt%dmftctqmc_triqs_move_global_prob,1,zero,iout)
+     cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
+     cond_string(2)='dmftctqmc_triqs_leg_measure' ; cond_values(2)=dt%dmftctqmc_triqs_leg_measure
      if (dt%dmftctqmc_triqs_leg_measure == 0) then
-       cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
-       cond_string(2)='dmftctqmc_triqs_leg_measure' ; cond_values(2)=dt%dmftctqmc_triqs_leg_measure
        call chkdpr(0,2,cond_string,cond_values,ierr,'dmftctqmc_triqs_wmax',dt%dmftctqmc_triqs_wmax,1,zero,iout)
+     else
+       call chkint_ge(0,2,cond_string,cond_values,ierr,'dmftctqmc_triqs_nleg',dt%dmftctqmc_triqs_nleg,1,iout)
      end if
      if (dt%dmftctqmc_triqs_compute_integral==1 .and. dt%dmftctqmc_triqs_entropy==1) then
        cond_string(1)='dmftctqmc_triqs_compute_integral' ; cond_values(1)=dt%dmftctqmc_triqs_compute_integral
@@ -888,6 +888,14 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      if (dt%dmftctqmc_triqs_entropy == 1) then
        cond_string(1)='dmftctqmc_triqs_entropy' ; cond_values(1)=dt%dmftctqmc_triqs_entropy
        call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_use_all_bands',dt%dmft_use_all_bands,1,(/1/),iout)
+     end if
+     if (dt%dmftctqmc_triqs_orb_off_diag == 1) then
+       cond_string(1)='dmftctqmc_triqs_orb_off_diag' ; cond_values(1)=dt%dmftctqmc_triqs_orb_off_diag
+       call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_measure_density_matrix',dt%dmftctqmc_triqs_measure_density_matrix,1,(/0/),iout)
+     end if
+     if (dt%dmftctqmc_triqs_spin_off_diag == 1) then
+       cond_string(1)='dmftctqmc_triqs_spin_off_diag' ; cond_values(1)=dt%dmftctqmc_triqs_spin_off_diag
+       call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_measure_density_matrix',dt%dmftctqmc_triqs_measure_density_matrix,1,(/0/),iout)
      end if
 #if defined HAVE_TRIQS_COMPLEX
      if (dt%dmftctqmc_triqs_orb_off_diag==0.and.dt%dmftctqmc_triqs_spin_off_diag==0) then

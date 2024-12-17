@@ -9,10 +9,14 @@
 #include <triqs_cthyb/solver_core.hpp>
 #include <triqs_cthyb_qmc.hpp>
 
+using namespace h5;
+using namespace mpi;
+using namespace triqs::gfs;
+
 void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spin_off_diag, bool move_shift, bool move_double,
                      bool measure_density_matrix, bool time_invariance, bool use_norm_as_weight,
                      int loc_n_min, int loc_n_max, int seed_a, int seed_b, int num_orbitals, int n_tau,
-                     int n_l, int n_cycles, int cycle_length, int ntherm, int ntherm2, int det_init_size,
+                     int n_l, int n_cycles, int cycle_length, int ntherm, int ntherm_restart, int det_init_size,
                      int det_n_operations_before_check, int ntau_delta, int nbins_histo, int rank,
                      int nspinor, int iatom, int ilam, double beta, double move_global_prob, double imag_threshold,
                      double det_precision_warning, double det_precision_error, double det_singular_threshold,
@@ -26,12 +30,12 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
   if (ilam != 0) lam_fname = "_ilam_" + to_string(ilam);
   string config_fname = "configs_iatom_" + to_string(iatom) + lam_fname + ".h5";
   auto comm = MPI_COMM_WORLD;
-  int size;
-  MPI_Comm_size(comm,&size);
+  int nproc;
+  MPI_Comm_size(comm,&nproc);
   int itask = 0;
 
   int therm = ntherm;
-  if (exists(config_fname)) therm = ntherm2;
+  if (exists(config_fname)) therm = ntherm_restart;
 
   // Print information about the Solver Parameters
   if (rank == 0 && verbo > 0) {
@@ -91,7 +95,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
   vee = vee_real;
 #endif
 
-  h_scalar_t levels_tmp [num_orbitals*num_orbitals] = {0};
+  h_scalar_t levels_zero [num_orbitals*num_orbitals] = {0};
   int nblocks,siz_block;
 
   if (!orb_off_diag && !spin_off_diag) {
@@ -116,7 +120,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
   }
 
   std::vector<string> labels(nblocks);
-  triqs::gfs::gf_struct_t gf_struct;
+  gf_struct_t gf_struct;
 
   if (!orb_off_diag && !spin_off_diag) {
     for (int o = 0; o < num_orbitals; ++o)
@@ -142,12 +146,12 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
   if (!rot_inv) {
     if (rank == 0 && verbo > 0) cout << "   == Density-Density Terms Included == " << endl << endl;
     H = init_Hamiltonian(levels,num_orbitals,udens,orb_off_diag,spin_off_diag,lam,labels);
-    Hint = init_Hamiltonian(levels_tmp,num_orbitals,udens,orb_off_diag,spin_off_diag,double(1),labels);
+    Hint = init_Hamiltonian(levels_zero,num_orbitals,udens,orb_off_diag,spin_off_diag,double(1),labels);
   }
   else {
     if (rank == 0 && verbo > 0) cout << "   == Rotationally Invariant Terms Included ==  " << endl << endl;
     H = init_fullHamiltonian(levels,num_orbitals,vee,orb_off_diag,spin_off_diag,lam,labels);
-    Hint = init_fullHamiltonian(levels_tmp,num_orbitals,vee,orb_off_diag,spin_off_diag,double(1),labels);
+    Hint = init_fullHamiltonian(levels_zero,num_orbitals,vee,orb_off_diag,spin_off_diag,double(1),labels);
   }
 
   // Construct CTQMC solver with mesh parameters
@@ -184,24 +188,24 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
   // Set initial configuration
   if (exists(config_fname)) {
     if (rank == 0 && verbo > 0) cout << "   == Reading previous configuration == " << endl;
-    std::vector<int> sendcounts(size);
-    h5::file config_hfile(config_fname,'r');
-    h5::group gr = config_hfile;
+    std::vector<int> sendcounts(nproc);
+    file config_hfile(config_fname,'r');
+    group gr = config_hfile;
     if (rank == 0) {
       int ncpus;
       h5_read(gr,"ncpus",ncpus);
-      if (ncpus != size) TRIQS_RUNTIME_ERROR << "You are trying to read a file configs.h5 generated with a different number of CPUs";
+      if (ncpus != nproc) TRIQS_RUNTIME_ERROR << "You are trying to read a file configs.h5 generated with a different number of CPUs";
       h5_read(gr,"size",sendcounts);
     }
-    MPI_Bcast(&sendcounts[0],size,MPI_INTEGER,0,comm);
+    MPI_Bcast(&sendcounts[0],nproc,MPI_INTEGER,0,comm);
     int length = sendcounts[rank];
     std::vector<uint64_t> tau_list(length);
     std::vector<int> block_index_list(length);
     std::vector<int> inner_index_list(length);
     std::vector<int> is_dagger_list(length);
-    int displs [size] = {0};
-    for (int i = 1; i < size; ++i) displs[i] = displs[i-1] + sendcounts[i-1];
-    int tot_size = displs[size-1] + sendcounts[size-1];
+    int displs [nproc] = {0};
+    for (int i = 1; i < nproc; ++i) displs[i] = displs[i-1] + sendcounts[i-1];
+    int tot_size = displs[nproc-1] + sendcounts[nproc-1];
     std::vector<uint64_t> tau_list_tot(tot_size);
     std::vector<int> block_index_list_tot(tot_size);
     std::vector<int> inner_index_list_tot(tot_size);
@@ -258,7 +262,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
       }
     }
   }
-  mpi::mpi_broadcast(verif_histo,comm,0);
+  mpi_broadcast(verif_histo,comm,0);
   paramCTQMC.performance_analysis = !verif_histo;
   if (verif_histo) {
     if (rank == 0 && verbo > 0) cout << "   == Reading previous histogram == " << endl;
@@ -267,8 +271,8 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
         paramCTQMC.hist_insert[labels[i]] = std::vector<double>(nbins_histo);
         paramCTQMC.hist_remove[labels[i]] = std::vector<double>(nbins_histo);
       }
-      mpi::mpi_broadcast(paramCTQMC.hist_insert[labels[i]],comm,0);
-      mpi::mpi_broadcast(paramCTQMC.hist_remove[labels[i]],comm,0);
+      mpi_broadcast(paramCTQMC.hist_insert[labels[i]],comm,0);
+      mpi_broadcast(paramCTQMC.hist_remove[labels[i]],comm,0);
     }
   }
   else {
@@ -319,11 +323,11 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
     is_dagger_list[count] = is_dagger;
     ++count;
   }
-  std::vector<int> recvcounts(size);
+  std::vector<int> recvcounts(nproc);
   MPI_Allgather(&length,1,MPI_INTEGER,&recvcounts[0],1,MPI_INTEGER,comm);
-  int displs [size] = {0};
-  for (int i = 1; i < size; ++i) displs[i] = displs[i-1] + recvcounts[i-1];
-  int tot_size = displs[size-1] + recvcounts[size-1];
+  int displs [nproc] = {0};
+  for (int i = 1; i < nproc; ++i) displs[i] = displs[i-1] + recvcounts[i-1];
+  int tot_size = displs[nproc-1] + recvcounts[nproc-1];
   std::vector<uint64_t> tau_list_tot(tot_size);
   std::vector<int> block_index_list_tot(tot_size);
   std::vector<int> inner_index_list_tot(tot_size);
@@ -335,10 +339,10 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
 
   if (rank == 0) {
 
-    h5::file configs_hfile(config_fname,'w');   // very important to open in write mode, so that previous configs are erased
-    h5::group gr = configs_hfile;
+    file configs_hfile(config_fname,'w');   // very important to open in write mode, so that previous configs are erased
+    group gr = configs_hfile;
 
-    h5_write(gr,"ncpus",size);
+    h5_write(gr,"ncpus",nproc);
     h5_write(gr,"size",recvcounts);
     h5_write(gr,"tau",tau_list_tot);
     h5_write(gr,"block",block_index_list_tot);
@@ -361,8 +365,8 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
       for (int j = 0; j < nblocks; ++j) {  // loop over blocks
         auto hist_accept = histo[tag_move+"_length_accepted_"+labels[j]];
         auto hist_prop = histo[tag_move+"_length_proposed_"+labels[j]];
-        hist_accept = mpi::all_reduce(hist_accept,comm);
-        hist_prop = mpi::all_reduce(hist_prop,comm);
+        hist_accept = all_reduce(hist_accept,comm);
+        hist_prop = all_reduce(hist_prop,comm);
         double s = 0.;
         double step = beta / (nbins_histo - 1.);  // stepsize of the histogram
         for (int k = 0; k < nbins_histo; ++k) {
@@ -416,14 +420,18 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
     auto subspaces = h_loc_diag.n_subspaces();
     auto rho = solver.density_matrix();
 
+    double occ_tmp [num_orbitals] = {0};
+
     for (int iblock = 0; iblock < nblocks; ++iblock) {
       for (int o = 0; o < siz_block; ++o) {
         int iflavor = convert_indexes_back(iblock,o,orb_off_diag,spin_off_diag,ndim);
         n_op = c_dag(labels[iblock],o) * c(labels[iblock],o);
-        occ[iflavor] = trace_rho_op(rho,n_op,h_loc_diag);
-        itask = (itask+1)%size;
+        if (itask == rank) occ_tmp[iflavor] = trace_rho_op(rho,n_op,h_loc_diag);
+        itask = (itask+1)%nproc;
       }
     }
+
+    MPI_Allreduce(occ_tmp,occ,num_orbitals,MPI_DOUBLE,MPI_SUM,comm);
 
     if (rank == 0) {
       ofstream occ_file;
@@ -442,19 +450,20 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
       }
     }
 
-    *eu = trace_rho_op(rho,Hint,h_loc_diag);
-    itask = (itask+1)%size;
+    if (itask == rank) *eu = trace_rho_op(rho,Hint,h_loc_diag);
+    mpi_broadcast(*eu,comm,itask);
+    itask = (itask+1)%nproc;
 
     if (!leg_measure) { // Get moments of the self-energy
 
       many_body_operator commut,commut2,Sinf_op,S1_op;
 
-      auto Sinf_mat = matrix_t(siz_block,siz_block);
+      complex<double> mself2 [num_orbitals*num_orbitals] = {0};
+      auto Sinf_mat = matrix_t(num_orbitals,num_orbitals);
+      Sinf_mat = h_scalar_t{0};
 
       // I use slightly different formulas than the ones used in TRIQS.
-      // This is because their formula is wrong, and mine is correct.
-
-      h_scalar_t Sinf,S1;
+      // This is because their formulas are wrong, and mine are correct.
 
       for (int iblock = 0; iblock < nblocks; ++iblock) {
         for (int o = 0; o < siz_block; ++o) {
@@ -465,23 +474,27 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
             Sinf_op = - commut*c_dag(labels[iblock],oo) - c_dag(labels[iblock],oo)*commut;
             commut2 = c_dag(labels[iblock],oo)*Hint - Hint*c_dag(labels[iblock],oo);
             S1_op = commut2*commut + commut*commut2;
-            Sinf = trace_rho_op(rho,Sinf_op,h_loc_diag);
-            itask = (itask+1)%size;
-            S1 = trace_rho_op(rho,S1_op,h_loc_diag);
-            itask = (itask+1)%size;
-            moments_self_1[iflavor+iflavor1*num_orbitals] = Sinf;
-            moments_self_2[iflavor+iflavor1*num_orbitals] = S1;
-            Sinf_mat(o,oo) = Sinf;
+            if (itask == rank) Sinf_mat(iflavor,iflavor1) = trace_rho_op(rho,Sinf_op,h_loc_diag);
+            itask = (itask+1)%nproc;
+            if (itask == rank) mself2[iflavor+iflavor1*num_orbitals] = trace_rho_op(rho,S1_op,h_loc_diag);
+            itask = (itask+1)%nproc;
           }
         }
-        Sinf_mat = Sinf_mat * Sinf_mat;
-        for (int o = 0; o < siz_block; ++o) {
-          int iflavor = convert_indexes_back(iblock,o,orb_off_diag,spin_off_diag,ndim);
-          for (int oo = 0; oo < siz_block; ++oo) {
-            int iflavor1 = convert_indexes_back(iblock,oo,orb_off_diag,spin_off_diag,ndim);
-            moments_self_2[iflavor+iflavor1*num_orbitals] -= Sinf_mat(o,oo);
-          }
-        }
+      }
+
+      Sinf_mat = all_reduce(Sinf_mat,comm);
+      MPI_Allreduce(mself2,moments_self_2,num_orbitals*num_orbitals,MPI_C_DOUBLE_COMPLEX,MPI_SUM,comm);
+
+      for (int iflavor = 0; iflavor < num_orbitals; ++iflavor) {
+        for (int iflavor1 = 0; iflavor1 < num_orbitals; ++iflavor1)
+          moments_self_1[iflavor+iflavor1*num_orbitals] = Sinf_mat(iflavor,iflavor1);
+      }
+
+      Sinf_mat = Sinf_mat * Sinf_mat;
+
+      for (int iflavor = 0; iflavor < num_orbitals; ++iflavor) {
+        for (int iflavor1 = 0; iflavor1 < num_orbitals; ++iflavor1)
+          moments_self_2[iflavor+iflavor1*num_orbitals] -= Sinf_mat(iflavor,iflavor1);
       }
     }   // not legendre
 
