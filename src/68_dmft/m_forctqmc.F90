@@ -3933,13 +3933,13 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
 
  ABI_FREE(ftau)
 
- ABI_FREE(Adlr)
- ABI_FREE(Adlr_iw)
- ABI_FREE(wdlr)
- ABI_FREE(wdlr_beta)
- ABI_FREE(wdlr2)
- ABI_FREE(wdlr3)
- ABI_FREE(wdlr4)
+ ABI_SFREE(Adlr)
+ ABI_SFREE(Adlr_iw)
+ ABI_SFREE(wdlr)
+ ABI_SFREE(wdlr_beta)
+ ABI_SFREE(wdlr2)
+ ABI_SFREE(wdlr3)
+ ABI_SFREE(wdlr4)
 
 contains
 

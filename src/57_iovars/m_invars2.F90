@@ -2557,7 +2557,13 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
      end if
      if(dtset%dmft_solv>=6.and.dtset%dmft_solv<=7) then
        dtset%dmftctqmc_triqs_ntau_delta=dtset%dmftqmc_l+1
-       if (dtset%nspinor == 1) dtset%dmftctqmc_triqs_spin_off_diag=0
+       if (dtset%nspinor == 1) dtset%dmftctqmc_triqs_spin_off_diag = 0
+       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_triqs_orb_off_diag',tread,'INT')
+       if(tread==1) dtset%dmftctqmc_triqs_orb_off_diag=intarr(1)
+       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_triqs_spin_off_diag',tread,'INT')
+       if(tread==1) dtset%dmftctqmc_triqs_spin_off_diag=intarr(1)
+       if (dtset%dmftctqmc_triqs_orb_off_diag == 1 .or. dtset%dmftctqmc_triqs_spin_off_diag == 1) &
+           & dtset%dmftctqmc_triqs_measure_density_matrix = 0
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_triqs_compute_integral',tread,'INT')
        if(tread==1) dtset%dmftctqmc_triqs_compute_integral=intarr(1)
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_triqs_det_init_size',tread,'INT')
@@ -2600,14 +2606,10 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
        if(tread==1) dtset%dmftctqmc_triqs_nsubdivisions=intarr(1)
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_triqs_ntau_delta',tread,'INT')
        if(tread==1) dtset%dmftctqmc_triqs_ntau_delta=intarr(1)
-       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_triqs_orb_off_diag',tread,'INT')
-       if(tread==1) dtset%dmftctqmc_triqs_orb_off_diag=intarr(1)
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_triqs_seed_a',tread,'INT')
        if(tread==1) dtset%dmftctqmc_triqs_seed_a=intarr(1)
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_triqs_seed_b',tread,'INT')
        if(tread==1) dtset%dmftctqmc_triqs_seed_b=intarr(1)
-       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_triqs_spin_off_diag',tread,'INT')
-       if(tread==1) dtset%dmftctqmc_triqs_spin_off_diag=intarr(1)
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_triqs_therm_restart',tread,'INT')
        if(tread==1) dtset%dmftctqmc_triqs_therm_restart=intarr(1)
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_triqs_time_invariance',tread,'INT')
