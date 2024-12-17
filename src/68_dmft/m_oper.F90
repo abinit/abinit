@@ -55,6 +55,7 @@ MODULE m_oper
  public :: copy_oper_to_ndat
  public :: trace_oper
  public :: upfold_oper
+ public :: upfold_oper_batched
  public :: prod_oper
  public :: trace_prod_oper
  public :: gather_oper
@@ -1180,7 +1181,152 @@ end subroutine downfold_oper
 !!
 !! SOURCE
 
-subroutine upfold_oper(oper,paw_dmft,procb,iproc,gpu_option)
+subroutine upfold_oper(oper,paw_dmft,procb,iproc)
+
+ use m_paw_dmft, only : paw_dmft_type
+ use m_abi_linalg, only : abi_xgemm
+
+!Arguments ------------------------------------
+ type(oper_type), intent(inout)  :: oper
+ type(paw_dmft_type), intent(in) :: paw_dmft
+ integer, optional, intent(in)   :: iproc
+ integer, optional, intent(in)   :: procb(oper%nkpt)
+!Local variables-------------------------------
+ integer :: iatom,ik,ikpt,isppol,lpawu,mbandc
+ integer :: ndim,ndim_max,nspinor,paral,shift
+ complex(dpc), allocatable :: mat_temp(:,:),mat_temp2(:,:)
+! *********************************************************************
+
+!   write(6,*) "upfold_oper procb",procb
+!   write(6,*) "iproc",iproc
+!   write(6,*) size(procb)
+!   write(6,*) size(procb2)
+!   write(6,*) procb2(1),procb2(16)
+#ifdef HAVE_GPU_MARKERS
+ call nvtxStartRange("upfold_oper",15)
+#endif
+ DBG_ENTER("COLL")
+
+ !if ((oper%has_opermatlu == 0) .or. (oper%has_operks == 0)) then
+ !  message = " Operator is not defined to be used in upfold_oper"
+ !  ABI_ERROR(message)
+ !end if
+
+ mbandc   = paw_dmft%mbandc
+ nspinor  = paw_dmft%nspinor
+ ndim_max = nspinor * (2*paw_dmft%maxlpawu+1)
+ paral    = 0
+ shift    = oper%shiftk
+
+ if (present(procb) .and. present(iproc) .and. oper%paral == 0) paral = 1
+
+ oper%ks(:,:,:,:) = czero
+
+ ABI_MALLOC(mat_temp,(mbandc,ndim_max))
+ ABI_MALLOC(mat_temp2,(mbandc,mbandc))
+
+ do iatom=1,oper%natom
+   lpawu = oper%matlu(iatom)%lpawu
+   if (lpawu == -1) cycle
+   ndim = (2*lpawu+1) * nspinor
+   do isppol=1,oper%nsppol
+     do ikpt=1,oper%nkpt ! index of kpt on the current CPU
+
+       if (paral == 1) then
+         if (procb(ikpt) /= iproc) cycle
+       end if
+
+       ik = ikpt + shift ! true kpt index (needed for chipsi)
+
+       call abi_xgemm("c","n",mbandc,ndim,ndim,cone,paw_dmft%chipsi(:,:,ik,isppol,iatom),&
+                    & ndim_max,oper%matlu(iatom)%mat(:,:,isppol),ndim,czero,mat_temp(:,1:ndim),mbandc)
+
+       call abi_xgemm("n","n",mbandc,mbandc,ndim,cone,mat_temp(:,1:ndim),mbandc,&
+                    & paw_dmft%chipsi(:,:,ik,isppol,iatom),ndim_max,czero,mat_temp2(:,:),mbandc)
+
+       oper%ks(:,:,ikpt,isppol) = oper%ks(:,:,ikpt,isppol) + mat_temp2(:,:)
+
+     end do ! ikpt
+   end do ! isppol
+ end do ! iatom
+
+ ABI_FREE(mat_temp)
+ ABI_FREE(mat_temp2)
+
+!do isppol=1,nsppol
+ !  do ikpt=1,nkpt
+ !   if ((paral==1.and.(procb2(ikpt)==iproc)).or.(paral==0)) then
+ !    do ib=1,mbandc
+ !      do ib1=1,mbandc
+!               if(ib==1.and.ib1==3) write(std_out,*) "IKPT=",ikpt
+ !       oper%ks(isppol,ikpt,ib,ib1)=czero
+
+  !       do iatom=1,natom
+  !         if(oper%matlu(iatom)%lpawu.ne.-1) then
+  !           ndim=2*oper%matlu(iatom)%lpawu+1
+  !           do im=1,ndim
+  !             do im1=1,ndim
+  !               do ispinor=1,nspinor
+  !                 do ispinor1=1,nspinor
+
+! psichi(isppol,ikpt,ib,ispinor,iatom,im)=<\chi_{m,R,ispinor)|\Psi(s,k,nu)>
+   !                  oper%ks(isppol,ikpt,ib,ib1)= oper%ks(isppol,ikpt,ib,ib1) &
+!&                     + ( paw_dmft%psichi(isppol,ikpt,ib1,ispinor1,iatom,im1)
+!&
+!&                     * oper%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)
+!&
+!&                     *
+!conjg(paw_dmft%psichi(isppol,ikpt,ib,ispinor,iatom,im)))
+              ! if(present(prt).and.(ib==1.and.ib1==1)) then
+              !   write(6,*) "im,im1",im,im1
+              !   write(6,*) "ispinor,ispinor1",ispinor,ispinor1
+              !   write(6,*)
+              !   "psichi",paw_dmft%psichi(isppol,ikpt,ib1,ispinor1,iatom,im1)
+              !   write(6,*) "psichi
+              !   2",paw_dmft%psichi(isppol,ikpt,ib,ispinor,iatom,im1)
+              !   write(6,*) "oper%matlu",
+              !   oper%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)
+              ! endif
+
+   !                enddo ! ispinor1
+   !              enddo ! ispinor
+   !            enddo ! im1
+   !          enddo ! im
+   !        endif
+   !      enddo ! iatom
+
+   !    enddo ! ib
+   !  enddo ! ib
+   ! endif
+   !enddo ! ikpt
+ !enddo ! isppol
+
+ DBG_EXIT("COLL")
+#ifdef HAVE_GPU_MARKERS
+ call nvtxEndRange()
+#endif
+
+end subroutine upfold_oper
+!!***
+
+!!****f* m_oper/upfold_oper_batched
+!! NAME
+!! upfold_oper_batched
+!!
+!! FUNCTION
+!!  Upfold an operator from local space to KS space
+!!
+!! INPUTS
+!!  oper <type(oper_type)>= operator
+!!  paw_dmft  <type(paw_dmft_type)>= paw+dmft related data
+!!  procb(ikpt)=for kpt parallelization; gives the rank (in the kpt communicator) of the CPU handling each ikpt
+!!  iproc=rank of the current process in the kpt communicator
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine upfold_oper_batched(oper,paw_dmft,procb,iproc,gpu_option)
 
  use m_paw_dmft, only : paw_dmft_type
  use m_abi_linalg, only : abi_xgemm
@@ -1200,11 +1346,6 @@ subroutine upfold_oper(oper,paw_dmft,procb,iproc,gpu_option)
 #ifdef HAVE_GPU_MARKERS
  call nvtxStartRange("upfold_oper",15)
 #endif
-!   write(6,*) "upfold_oper procb",procb
-!   write(6,*) "iproc",iproc
-!   write(6,*) size(procb)
-!   write(6,*) size(procb2)
-!   write(6,*) procb2(1),procb2(16)
 
  l_gpu_option=ABI_GPU_DISABLED; if(present(gpu_option)) l_gpu_option=gpu_option
 
@@ -1313,60 +1454,12 @@ subroutine upfold_oper(oper,paw_dmft,procb,iproc,gpu_option)
 #endif
  ABI_FREE(mat_temp2)
 
-!do isppol=1,nsppol
- !  do ikpt=1,nkpt
- !   if ((paral==1.and.(procb2(ikpt)==iproc)).or.(paral==0)) then
- !    do ib=1,mbandc
- !      do ib1=1,mbandc
-!               if(ib==1.and.ib1==3) write(std_out,*) "IKPT=",ikpt
- !       oper%ks(isppol,ikpt,ib,ib1)=czero
-
-  !       do iatom=1,natom
-  !         if(oper%matlu(iatom)%lpawu.ne.-1) then
-  !           ndim=2*oper%matlu(iatom)%lpawu+1
-  !           do im=1,ndim
-  !             do im1=1,ndim
-  !               do ispinor=1,nspinor
-  !                 do ispinor1=1,nspinor
-
-! psichi(isppol,ikpt,ib,ispinor,iatom,im)=<\chi_{m,R,ispinor)|\Psi(s,k,nu)>
-   !                  oper%ks(isppol,ikpt,ib,ib1)= oper%ks(isppol,ikpt,ib,ib1) &
-!&                     + ( paw_dmft%psichi(isppol,ikpt,ib1,ispinor1,iatom,im1)
-!&
-!&                     * oper%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)
-!&
-!&                     *
-!conjg(paw_dmft%psichi(isppol,ikpt,ib,ispinor,iatom,im)))
-              ! if(present(prt).and.(ib==1.and.ib1==1)) then
-              !   write(6,*) "im,im1",im,im1
-              !   write(6,*) "ispinor,ispinor1",ispinor,ispinor1
-              !   write(6,*)
-              !   "psichi",paw_dmft%psichi(isppol,ikpt,ib1,ispinor1,iatom,im1)
-              !   write(6,*) "psichi
-              !   2",paw_dmft%psichi(isppol,ikpt,ib,ispinor,iatom,im1)
-              !   write(6,*) "oper%matlu",
-              !   oper%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)
-              ! endif
-
-   !                enddo ! ispinor1
-   !              enddo ! ispinor
-   !            enddo ! im1
-   !          enddo ! im
-   !        endif
-   !      enddo ! iatom
-
-   !    enddo ! ib
-   !  enddo ! ib
-   ! endif
-   !enddo ! ikpt
- !enddo ! isppol
-
  DBG_EXIT("COLL")
 
 #ifdef HAVE_GPU_MARKERS
  call nvtxEndRange()
 #endif
-end subroutine upfold_oper
+end subroutine upfold_oper_batched
 !!***
 
 !!****f* m_oper/identity_oper
