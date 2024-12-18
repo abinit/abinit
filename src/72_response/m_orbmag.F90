@@ -2097,10 +2097,10 @@ subroutine orbmag_output(dtset,orbmag_terms,orbmag_trace)
    call wrtout(ab_out,message,'COLL')
    write(message,'(a,3es16.8)') ' <A0.An> terms : ',(orbmag_trace(1,adir,imbm),adir=1,3)
    call wrtout(ab_out,message,'COLL')
-   if (dtset%pawspnorb /= 0) then
-     write(message,'(a,3es16.8)') ' <ZORA B1> terms : ',(orbmag_trace(1,adir,imza0),adir=1,3)
-     call wrtout(ab_out,message,'COLL')
-   end if
+   !!if (dtset%pawspnorb /= 0) then
+   !!  write(message,'(a,3es16.8)') ' <ZORA B1> terms : ',(orbmag_trace(1,adir,imza0),adir=1,3)
+   !!  call wrtout(ab_out,message,'COLL')
+   !!end if
    write(message,'(a,3es16.8)') '    Lamb terms : ',(orbmag_trace(1,adir,iomlmb),adir=1,3)
    call wrtout(ab_out,message,'COLL')
    write(message,'(a)')' Chern vector, term-by-term breakdown : '
@@ -2142,10 +2142,10 @@ subroutine orbmag_output(dtset,orbmag_terms,orbmag_trace)
        call wrtout(ab_out,message,'COLL')
        write(message,'(a,3es16.8)') ' <A0.An> terms : ',(orbmag_terms(1,iband,isppol,adir,imbm),adir=1,3)
        call wrtout(ab_out,message,'COLL')
-       if (dtset%pawspnorb /= 0) then
-         write(message,'(a,3es16.8)') ' <ZORA B1> terms : ',(orbmag_terms(1,iband,isppol,adir,imza0),adir=1,3)
-         call wrtout(ab_out,message,'COLL')
-       end if
+       !!if (dtset%pawspnorb /= 0) then
+       !!  write(message,'(a,3es16.8)') ' <ZORA B1> terms : ',(orbmag_terms(1,iband,isppol,adir,imza0),adir=1,3)
+       !!  call wrtout(ab_out,message,'COLL')
+       !!end if
        write(message,'(a)')ch10
        call wrtout(ab_out,message,'COLL')
        write(message,'(a,3es16.8)') ' Chern vector : ',(berry_bb(1,iband,adir),adir=1,3)
@@ -2323,12 +2323,14 @@ subroutine dterm_alloc(dterm,lmnmax,lmn2max,natom,ndij,pawspnorb)
   if(allocated(dterm%ZA0)) then
     ABI_FREE(dterm%ZA0)
   end if
-  if (pawspnorb /= 0) then
-    ABI_MALLOC(dterm%ZA0,(natom,lmn2max,ndij,3))
-    dterm%has_ZA0=1
-  else
-    dterm%has_ZA0=0
-  end if
+  dterm%has_ZA0=0
+  !! JWZ debug suppress ZA0 for now
+  !!if (pawspnorb /= 0) then
+  !!  ABI_MALLOC(dterm%ZA0,(natom,lmn2max,ndij,3))
+  !!  dterm%has_ZA0=1
+  !!else
+  !!  dterm%has_ZA0=0
+  !!end if
   
 
 end subroutine dterm_alloc
@@ -2600,6 +2602,7 @@ subroutine dterm_ZA0(atindx,cplex_dij,dterm,dtset,paw_an,pawang,pawrad,pawtab,qp
     ABI_FREE(za0)
   end do ! iat
 !!
+
   dterm%has_ZA0 = 2
 
 end subroutine dterm_ZA0
@@ -2691,11 +2694,11 @@ subroutine make_d(atindx,dterm,dtset,gprimd,paw_an,paw_ij,pawang,pawrad,pawtab,p
  ! transfers paw_ij to dterm%aij because it's convenient
  call dterm_aij(atindx,dterm,dtset,paw_ij,pawtab)
 
- ! generate dterm%ZA0 if necessary
- if (dtset%pawspnorb /= 0) then
-   call dterm_ZA0(atindx,paw_ij(1)%cplex_dij,dterm,dtset,paw_an,pawang,&
-     & pawrad,pawtab,paw_ij(1)%qphase)
- end if
+ !!! generate dterm%ZA0 if necessary
+ !!if (dtset%pawspnorb /= 0) then
+ !!  call dterm_ZA0(atindx,paw_ij(1)%cplex_dij,dterm,dtset,paw_an,pawang,&
+ !!    & pawrad,pawtab,paw_ij(1)%qphase)
+ !!end if
 
  ABI_FREE(realgnt)
  ABI_FREE(gntselect)
