@@ -2280,7 +2280,7 @@ end subroutine add_matlu
      & ' The off diagonal occupation matrix is complex: the imaginary part ',maximag,' is larger than',tol,ch10,&
      & "Check that your calculation is meaningful"
    if (triqs) then
-#if !defined HAVE_TRIQS_COMPLEX
+#ifndef HAVE_TRIQS_COMPLEX
      ABI_WARNING(message)
 #endif
    else

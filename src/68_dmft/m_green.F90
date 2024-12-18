@@ -625,7 +625,7 @@ subroutine printocc_green(green,option,paw_dmft,pawprtvol,opt_weissgreen,chtype)
 
  if (present(chtype)) then
    if (paw_dmft%prtvol >= 4 .and. &
-      & (chtype == "DMFT (end of DMFT loop)" .or. chtype == "converged DMFT") &
+      & (chtype == "DFT+DMFT (end of DMFT loop)" .or. chtype == "converged DMFT") &
       & .and. green%occup%has_opermatlu == 1) then
      write(message,'(4a)') ch10,"  == The DFT+DMFT occupation matrix for correlated electrons is == "
      call wrtout(ab_out,message,'COLL')
