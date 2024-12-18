@@ -337,7 +337,7 @@ subroutine init_green(green,paw_dmft,opt_oper_ksloc,wtype,opt_moments,opt_moment
    do i=2,green%nmoments
      call init_oper(paw_dmft,green%moments(i),nkpt=mkmem,shiftk=shift,opt_ksloc=optmoments_ksloc)
    end do ! i
-   if (paw_dmft%dmftctqmc_triqs_entropy == 1) then
+   if (paw_dmft%dmft_triqs_entropy == 1) then
      ABI_MALLOC(green%trace_moments_log_ks,(green%nmoments-1))
      ABI_MALLOC(green%trace_moments_log_loc,(green%nmoments-1))
    end if ! entropy

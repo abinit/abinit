@@ -349,7 +349,7 @@ subroutine compute_energy(energies_dmft,green,paw_dmft,pawprtvol,pawtab,self,occ
    ABI_BUG(message)
  end if
 
- if ((paw_dmft%dmftctqmc_triqs_entropy /= 1 .or. occ_type == " lda") &
+ if ((paw_dmft%dmft_triqs_entropy /= 1 .or. occ_type == " lda") &
       & .and. (part == 'band' .or. part == 'both')) then
    call compute_band_energy(energies_dmft,green,paw_dmft,occ_type,ecalc_dft=1)
  end if
@@ -407,13 +407,13 @@ subroutine compute_energy(energies_dmft,green,paw_dmft,pawprtvol,pawtab,self,occ
        ABI_ERROR(message)
      end if
    else if (paw_dmft%dmft_solv == 2 .or. ((paw_dmft%dmft_solv == 6 .or. paw_dmft%dmft_solv == 7) &
-     & .and. (.not. paw_dmft%dmftctqmc_triqs_measure_density_matrix)) .or. paw_dmft%dmft_solv == 9) then
+     & .and. (.not. paw_dmft%dmft_triqs_measure_density_matrix)) .or. paw_dmft%dmft_solv == 9) then
      energies_dmft%e_hu => energies_dmft%e_hu_mig(:)
      energies_dmft%e_hu_tot = energies_dmft%e_hu_mig_tot
      energies_dmft%e_hu_qmc_tot = energies_dmft%e_hu_tot
    else if (paw_dmft%dmft_solv == 5 .or. paw_dmft%dmft_solv == 8 .or. &
       & ((paw_dmft%dmft_solv == 6 .or. paw_dmft%dmft_solv == 7) .and. &
-      & paw_dmft%dmftctqmc_triqs_measure_density_matrix) .and. occ_type /= " lda") then
+      & paw_dmft%dmft_triqs_measure_density_matrix) .and. occ_type /= " lda") then
      if (paw_dmft%dmft_solv == 8) then
        write(message,'(2a)') ch10,"Warning, energy is recently computed, not checked"
        call wrtout(std_out,message,'COLL')
@@ -1224,7 +1224,7 @@ subroutine compute_free_energy(energies_dmft,paw_dmft,green,part,self,weiss)
    call compute_trace_log_loc(weiss,paw_dmft,energies_dmft%fband_weiss,opt_inv=1)
 
    ! Integral of E_u/U
-   if (paw_dmft%dmftctqmc_triqs_compute_integral == 1) energies_dmft%integral = green%integral
+   if (paw_dmft%dmft_triqs_compute_integral == 1) energies_dmft%integral = green%integral
 
    ! Tr(log(G_imp))
    call compute_trace_log_loc(green,paw_dmft,energies_dmft%fband_imp)

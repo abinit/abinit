@@ -242,7 +242,7 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
  call wrtout(std_out,message,'COLL')
 
  opt_log = 0
- if (paw_dmft%dmftctqmc_triqs_entropy == 1) opt_log = 1
+ if (paw_dmft%dmft_triqs_entropy == 1) opt_log = 1
  call icip_green("DFT renormalized",greendft,paw_dmft,pawprtvol,self,opt_moments=opt_moments,opt_log=opt_log)
  !call print_green('DFT_renormalized',greendft,1,paw_dmft,pawprtvol=1,opt_wt=1)
 
@@ -258,7 +258,7 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
  idmftloop = paw_dmft%idmftloop
  paw_dmft%idmftloop = 0
  call compute_energy(energies_dmft,greendft,paw_dmft,pawprtvol,pawtab(:),self,occ_type=" lda",part='both')
- if (paw_dmft%dmftctqmc_triqs_entropy == 1) then
+ if (paw_dmft%dmft_triqs_entropy == 1) then
    call compute_free_energy(energies_dmft,paw_dmft,greendft,"band")
  end if
  paw_dmft%idmftloop = idmftloop
@@ -327,7 +327,7 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
 !---------------------------------------------------------------------
 !write(message,'(2a,i3,13x,a)') ch10,'   ===  Compute green function from self-energy'
  opt_fill_occnd = 0
- if (paw_dmft%dmftctqmc_triqs_entropy == 1 .and. dmft_iter == 1) opt_fill_occnd = 1
+ if (paw_dmft%dmft_triqs_entropy == 1 .and. dmft_iter == 1) opt_fill_occnd = 1
 
  call fermi_green(green,paw_dmft,self)
  call compute_green(green,paw_dmft,0,self,opt_self=1,opt_nonxsum=1,opt_log=opt_log,opt_restart_moments=1)
@@ -389,7 +389,7 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
      call printocc_green(weiss,5,paw_dmft,3,opt_weissgreen=1)
    end if
 
-   if (paw_dmft%dmftctqmc_triqs_entropy == 1) then
+   if (paw_dmft%dmft_triqs_entropy == 1) then
      call compute_free_energy(energies_dmft,paw_dmft,green,"main",self=self,weiss=weiss)
    end if
 
@@ -449,7 +449,7 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
 !  green= local green function and local charge comes directly from solver
 !  green= ks green function and occupations comes from old_self
    call compute_energy(energies_dmft,green,paw_dmft,pawprtvol,pawtab(:),self_new,occ_type="nlda",part=part2)
-   if (paw_dmft%dmftctqmc_triqs_entropy == 1) then
+   if (paw_dmft%dmft_triqs_entropy == 1) then
      call compute_free_energy(energies_dmft,paw_dmft,green,"impu",self=self_new,weiss=weiss)
    end if
 
@@ -465,8 +465,8 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
    call destroy_self(self_new)
 
    opt_fill_occnd = 0
-   if ((idmftloop == dmft_iter .and. paw_dmft%dmftctqmc_triqs_entropy == 0) &
-     & .or. (paw_dmft%dmftctqmc_triqs_entropy == 1 .and. idmftloop == dmft_iter-1)) opt_fill_occnd = 1
+   if ((idmftloop == dmft_iter .and. paw_dmft%dmft_triqs_entropy == 0) &
+     & .or. (paw_dmft%dmft_triqs_entropy == 1 .and. idmftloop == dmft_iter-1)) opt_fill_occnd = 1
 
 !  ==  Compute green function self -> G(k)
 !  ---------------------------------------------------------------------

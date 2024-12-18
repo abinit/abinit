@@ -2245,8 +2245,8 @@ end subroutine add_matlu
  nsppol      = matlu(1)%nsppol
 
  triqs = (paw_dmft%dmft_solv == 6) .or. (paw_dmft%dmft_solv == 7)
- orb_off_diag = paw_dmft%dmftctqmc_triqs_orb_off_diag
- spin_off_diag = paw_dmft%dmftctqmc_triqs_spin_off_diag
+ orb_off_diag = paw_dmft%dmft_triqs_orb_off_diag
+ spin_off_diag = paw_dmft%dmft_triqs_spin_off_diag
 
  do iatom=1,natom
    lpawu = matlu(iatom)%lpawu

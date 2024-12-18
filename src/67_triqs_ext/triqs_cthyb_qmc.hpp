@@ -21,7 +21,7 @@ extern "C"{
                           double imag_threshold, double det_precision_warning, double det_precision_error,
                           double det_singular_threshold, double lam, complex<double> *ftau, complex<double> *gtau,
                           complex<double> *gl, complex<double> *udens_cmplx, complex<double> *vee_cmplx, complex<double> *levels_cmplx,
-                          complex<double> *moments_self_1, complex<double> *moments_self_2, double *eu, double *occ ) ;
+                          complex<double> *moments_self_1, complex<double> *moments_self_2, complex<double> *occ, complex<double> *eu ) ;
 
     many_body_op_t init_Hamiltonian( h_scalar_t *eps, int nflavor, h_scalar_t *udens, bool orb_off_diag,
                                      bool spin_off_diag, double lambda, std::vector<string> &labels );
