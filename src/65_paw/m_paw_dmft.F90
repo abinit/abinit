@@ -927,7 +927,7 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  end if
 
  if (dmft_solv == 6 .and. dmft_solv == 7) then
-#if !defined HAVE_TRIQS_COMPLEX
+#ifndef HAVE_TRIQS_COMPLEX
    write(message,'(a,1x,a)') ch10,"The imaginary part of the Green's function is neglected"
 #endif
  else
