@@ -762,7 +762,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
          if (dt%dmft_solv==9) then
            call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftqmc_l',dt%dmftqmc_l,2*dt%dmft_nwli+1,iout)
            cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
-           call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_nleg',dt%dmftctqmc_triqs_nleg,1,iout)
+           call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_triqs_nleg',dt%dmft_triqs_nleg,1,iout)
          end if
 #endif
 #if !defined HAVE_PYTHON_INVOCATION
@@ -810,7 +810,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      end if
    end if
 
-#if !defined HAVE_TRIQS_v3_4
+#ifndef HAVE_TRIQS_v3_4
    if(dt%dmft_solv>=6.and.dt%dmft_solv<=7) then
      write(msg,'(3a)') &
       & ' dmft_solv=6, or 7 is only relevant if the TRIQS library v3.4>= is linked',ch10,&
@@ -823,87 +823,87 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
      call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_nwli',dt%dmft_nwli,1,iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
-     call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_compute_integral',dt%dmftctqmc_triqs_compute_integral,2,(/0,1/),iout)
+     call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_triqs_compute_integral',dt%dmft_triqs_compute_integral,2,(/0,1/),iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
-     call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_det_init_size',dt%dmftctqmc_triqs_det_init_size,1,iout)
+     call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_triqs_det_init_size',dt%dmft_triqs_det_init_size,1,iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
-     call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_det_n_operations_before_check',dt%dmftctqmc_triqs_det_n_operations_before_check,1,iout)
+     call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_triqs_det_n_operations_before_check',dt%dmft_triqs_det_n_operations_before_check,1,iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
-     call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_entropy',dt%dmftctqmc_triqs_entropy,2,(/0,1/),iout)
+     call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_triqs_entropy',dt%dmft_triqs_entropy,2,(/0,1/),iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
-     call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_leg_measure',dt%dmftctqmc_triqs_leg_measure,2,(/0,1/),iout)
+     call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_triqs_leg_measure',dt%dmft_triqs_leg_measure,2,(/0,1/),iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
-     call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_loc_n_min',dt%dmftctqmc_triqs_loc_n_min,0,iout)
+     call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_triqs_loc_n_min',dt%dmft_triqs_loc_n_min,0,iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
-     call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_loc_n_max',dt%dmftctqmc_triqs_loc_n_max,dt%dmftctqmc_triqs_loc_n_min,iout)
+     call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_triqs_loc_n_max',dt%dmft_triqs_loc_n_max,dt%dmft_triqs_loc_n_min,iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
-     call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_measure_density_matrix',dt%dmftctqmc_triqs_measure_density_matrix,2,(/0,1/),iout)
+     call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_triqs_measure_density_matrix',dt%dmft_triqs_measure_density_matrix,2,(/0,1/),iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
-     call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_move_double',dt%dmftctqmc_triqs_move_double,2,(/0,1/),iout)
+     call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_triqs_move_double',dt%dmft_triqs_move_double,2,(/0,1/),iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
-     call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_move_shift',dt%dmftctqmc_triqs_move_shift,2,(/0,1/),iout)
+     call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_triqs_move_shift',dt%dmft_triqs_move_shift,2,(/0,1/),iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
-     call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_nbins_histo',dt%dmftctqmc_triqs_nbins_histo,1,iout)
+     call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_triqs_nbins_histo',dt%dmft_triqs_nbins_histo,1,iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
-     call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_nsubdivisions',dt%dmftctqmc_triqs_nsubdivisions,1,iout)
+     call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_triqs_nsubdivisions',dt%dmft_triqs_nsubdivisions,1,iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
-     call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_ntau_delta',dt%dmftctqmc_triqs_ntau_delta,1,iout)
+     call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_triqs_ntau_delta',dt%dmft_triqs_ntau_delta,1,iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
-     call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_orb_off_diag',dt%dmftctqmc_triqs_orb_off_diag,2,(/0,1/),iout)
+     call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_triqs_orb_off_diag',dt%dmft_triqs_orb_off_diag,2,(/0,1/),iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
-     call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_spin_off_diag',dt%dmftctqmc_triqs_spin_off_diag,2,(/0,1/),iout)
+     call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_triqs_spin_off_diag',dt%dmft_triqs_spin_off_diag,2,(/0,1/),iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
-     call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_therm_restart',dt%dmftctqmc_triqs_therm_restart,0,iout)
+     call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_triqs_therm_restart',dt%dmft_triqs_therm_restart,0,iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
-     call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_time_invariance',dt%dmftctqmc_triqs_time_invariance,2,(/0,1/),iout)
+     call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_triqs_time_invariance',dt%dmft_triqs_time_invariance,2,(/0,1/),iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
-     call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_use_norm_as_weight',dt%dmftctqmc_triqs_use_norm_as_weight,2,(/0,1/),iout)
+     call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_triqs_use_norm_as_weight',dt%dmft_triqs_use_norm_as_weight,2,(/0,1/),iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
-     call chkdpr(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_det_precision_error',dt%dmftctqmc_triqs_det_precision_error,1,zero,iout)
+     call chkdpr(0,1,cond_string,cond_values,ierr,'dmft_triqs_det_precision_error',dt%dmft_triqs_det_precision_error,1,zero,iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
-     call chkdpr(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_det_precision_warning',dt%dmftctqmc_triqs_det_precision_warning,1,zero,iout)
+     call chkdpr(0,1,cond_string,cond_values,ierr,'dmft_triqs_det_precision_warning',dt%dmft_triqs_det_precision_warning,1,zero,iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
-     call chkdpr(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_det_precision_error',dt%dmftctqmc_triqs_det_precision_error,1,dt%dmftctqmc_triqs_det_precision_warning,iout)
+     call chkdpr(0,1,cond_string,cond_values,ierr,'dmft_triqs_det_precision_error',dt%dmft_triqs_det_precision_error,1,dt%dmft_triqs_det_precision_warning,iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
-     call chkdpr(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_epsilon',dt%dmftctqmc_triqs_epsilon,1,zero,iout)
+     call chkdpr(0,1,cond_string,cond_values,ierr,'dmft_triqs_epsilon',dt%dmft_triqs_epsilon,1,zero,iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
-     call chkdpr(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_imag_threshold',dt%dmftctqmc_triqs_imag_threshold,1,zero,iout)
+     call chkdpr(0,1,cond_string,cond_values,ierr,'dmft_triqs_imag_threshold',dt%dmft_triqs_imag_threshold,1,zero,iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
-     call chkdpr(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_move_global_prob',dt%dmftctqmc_triqs_move_global_prob,1,zero,iout)
+     call chkdpr(0,1,cond_string,cond_values,ierr,'dmft_triqs_move_global_prob',dt%dmft_triqs_move_global_prob,1,zero,iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
-     cond_string(2)='dmftctqmc_triqs_leg_measure' ; cond_values(2)=dt%dmftctqmc_triqs_leg_measure
-     if (dt%dmftctqmc_triqs_leg_measure == 0) then
-       call chkdpr(0,2,cond_string,cond_values,ierr,'dmftctqmc_triqs_wmax',dt%dmftctqmc_triqs_wmax,1,zero,iout)
+     cond_string(2)='dmft_triqs_leg_measure' ; cond_values(2)=dt%dmft_triqs_leg_measure
+     if (dt%dmft_triqs_leg_measure == 0) then
+       call chkdpr(0,2,cond_string,cond_values,ierr,'dmft_triqs_wmax',dt%dmft_triqs_wmax,1,zero,iout)
      else
-       call chkint_ge(0,2,cond_string,cond_values,ierr,'dmftctqmc_triqs_nleg',dt%dmftctqmc_triqs_nleg,1,iout)
+       call chkint_ge(0,2,cond_string,cond_values,ierr,'dmft_triqs_nleg',dt%dmft_triqs_nleg,1,iout)
      end if
-     if (dt%dmftctqmc_triqs_compute_integral==1 .and. dt%dmftctqmc_triqs_entropy==1) then
-       cond_string(1)='dmftctqmc_triqs_compute_integral' ; cond_values(1)=dt%dmftctqmc_triqs_compute_integral
-       cond_string(2)='dmftctqmc_triqs_entropy' ; cond_values(2)=dt%dmftctqmc_triqs_entropy
-       call chkint_eq(0,2,cond_string,cond_values,ierr,'dmftctqmc_triqs_measure_density_matrix',dt%dmftctqmc_triqs_measure_density_matrix,1,(/1/),iout)
-       cond_string(1)='dmftctqmc_triqs_compute_integral' ; cond_values(1)=dt%dmftctqmc_triqs_compute_integral
-       cond_string(2)='dmftctqmc_triqs_entropy' ; cond_values(2)=dt%dmftctqmc_triqs_entropy
-       call chkint_ge(0,2,cond_string,cond_values,ierr,'dmftctqmc_triqs_gaussorder',dt%dmftctqmc_triqs_gaussorder,2,iout)
+     if (dt%dmft_triqs_compute_integral==1 .and. dt%dmft_triqs_entropy==1) then
+       cond_string(1)='dmft_triqs_compute_integral' ; cond_values(1)=dt%dmft_triqs_compute_integral
+       cond_string(2)='dmft_triqs_entropy' ; cond_values(2)=dt%dmft_triqs_entropy
+       call chkint_eq(0,2,cond_string,cond_values,ierr,'dmft_triqs_measure_density_matrix',dt%dmft_triqs_measure_density_matrix,1,(/1/),iout)
+       cond_string(1)='dmft_triqs_compute_integral' ; cond_values(1)=dt%dmft_triqs_compute_integral
+       cond_string(2)='dmft_triqs_entropy' ; cond_values(2)=dt%dmft_triqs_entropy
+       call chkint_ge(0,2,cond_string,cond_values,ierr,'dmft_triqs_gaussorder',dt%dmft_triqs_gaussorder,2,iout)
      end if
-     if (dt%dmftctqmc_triqs_entropy == 1) then
-       cond_string(1)='dmftctqmc_triqs_entropy' ; cond_values(1)=dt%dmftctqmc_triqs_entropy
+     if (dt%dmft_triqs_entropy == 1) then
+       cond_string(1)='dmft_triqs_entropy' ; cond_values(1)=dt%dmft_triqs_entropy
        call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_use_all_bands',dt%dmft_use_all_bands,1,(/1/),iout)
      end if
-     if (dt%dmftctqmc_triqs_orb_off_diag == 1) then
-       cond_string(1)='dmftctqmc_triqs_orb_off_diag' ; cond_values(1)=dt%dmftctqmc_triqs_orb_off_diag
-       call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_measure_density_matrix',dt%dmftctqmc_triqs_measure_density_matrix,1,(/0/),iout)
+     if (dt%dmft_triqs_orb_off_diag == 1) then
+       cond_string(1)='dmft_triqs_orb_off_diag' ; cond_values(1)=dt%dmft_triqs_orb_off_diag
+       call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_triqs_measure_density_matrix',dt%dmft_triqs_measure_density_matrix,1,(/0/),iout)
      end if
-     if (dt%dmftctqmc_triqs_spin_off_diag == 1) then
-       cond_string(1)='dmftctqmc_triqs_spin_off_diag' ; cond_values(1)=dt%dmftctqmc_triqs_spin_off_diag
-       call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_measure_density_matrix',dt%dmftctqmc_triqs_measure_density_matrix,1,(/0/),iout)
+     if (dt%dmft_triqs_spin_off_diag == 1) then
+       cond_string(1)='dmft_triqs_spin_off_diag' ; cond_values(1)=dt%dmft_triqs_spin_off_diag
+       call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_triqs_measure_density_matrix',dt%dmft_triqs_measure_density_matrix,1,(/0/),iout)
      end if
-#if defined HAVE_TRIQS_COMPLEX
-     if (dt%dmftctqmc_triqs_orb_off_diag==0.and.dt%dmftctqmc_triqs_spin_off_diag==0) then
+#ifdef HAVE_TRIQS_COMPLEX
+     if (dt%dmft_triqs_orb_off_diag==0.and.dt%dmft_triqs_spin_off_diag==0) then
        ABI_WARNING("WARNING: You have compiled with the complex version of TRIQS/CTHYB, yet you do not &
                  & sample any off-diagonal element. This is a waste of computation time.")
      end if
 #else
-     if (dt%dmftctqmc_triqs_orb_off_diag==1.or.dt%dmftctqmc_triqs_spin_off_diag==1) then
+     if (dt%dmft_triqs_orb_off_diag==1.or.dt%dmft_triqs_spin_off_diag==1) then
        ABI_WARNING("WARNING: You have compiled with the real version of TRIQS/CTHYB, yet you have &
            & activated the sampling of the off-diagonal elements. Thus their imaginary part will be &
            & neglected. You'll have to check that this is a good approximation.")

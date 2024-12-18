@@ -22,7 +22,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
                      double det_precision_warning, double det_precision_error, double det_singular_threshold,
                      double lam, complex<double> *ftau, complex<double> *gtau, complex<double> *gl,
                      complex<double> *udens_cmplx, complex<double> *vee_cmplx, complex<double> *levels_cmplx,
-                     complex<double> *moments_self_1, complex<double> *moments_self_2, double *eu, double *occ) {
+                     complex<double> *moments_self_1, complex<double> *moments_self_2, complex<double> *occ, complex<double> *eu) {
 
   int verbo = 1;
   int ndim = num_orbitals / 2;
@@ -76,10 +76,10 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
   many_body_operator Hint;
   h_scalar_t *levels,*udens,*vee;
 
-#if defined HAVE_TRIQS_COMPLEX
+#ifdef HAVE_TRIQS_COMPLEX
   levels = levels_cmplx;
-  udens = udens_cmplx;
-  vee = vee_cmplx;
+  udens  = udens_cmplx;
+  vee    = vee_cmplx;
 #else
   double levels_real [num_orbitals*num_orbitals] = {};
   double udens_real [num_orbitals*num_orbitals] = {};
@@ -91,8 +91,8 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
   for (int i = 0; i < num_orbitals*num_orbitals*num_orbitals*num_orbitals; ++i)
     vee_real[i] = vee_cmplx[i].real();
   levels = levels_real;
-  udens = udens_real;
-  vee = vee_real;
+  udens  = udens_real;
+  vee    = vee_real;
 #endif
 
   h_scalar_t levels_zero [num_orbitals*num_orbitals] = {0};
@@ -145,12 +145,12 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
   // Init Hamiltonian Basic terms
   if (!rot_inv) {
     if (rank == 0 && verbo > 0) cout << "   == Density-Density Terms Included == " << endl << endl;
-    H = init_Hamiltonian(levels,num_orbitals,udens,orb_off_diag,spin_off_diag,lam,labels);
+    H    = init_Hamiltonian(levels,num_orbitals,udens,orb_off_diag,spin_off_diag,lam,labels);
     Hint = init_Hamiltonian(levels_zero,num_orbitals,udens,orb_off_diag,spin_off_diag,double(1),labels);
   }
   else {
     if (rank == 0 && verbo > 0) cout << "   == Rotationally Invariant Terms Included ==  " << endl << endl;
-    H = init_fullHamiltonian(levels,num_orbitals,vee,orb_off_diag,spin_off_diag,lam,labels);
+    H    = init_fullHamiltonian(levels,num_orbitals,vee,orb_off_diag,spin_off_diag,lam,labels);
     Hint = init_fullHamiltonian(levels_zero,num_orbitals,vee,orb_off_diag,spin_off_diag,double(1),labels);
   }
 
@@ -420,7 +420,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
     auto subspaces = h_loc_diag.n_subspaces();
     auto rho = solver.density_matrix();
 
-    double occ_tmp [num_orbitals] = {0};
+    complex<double> occ_tmp [num_orbitals] = {0};
 
     for (int iblock = 0; iblock < nblocks; ++iblock) {
       for (int o = 0; o < siz_block; ++o) {
@@ -431,7 +431,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
       }
     }
 
-    MPI_Allreduce(occ_tmp,occ,num_orbitals,MPI_DOUBLE,MPI_SUM,comm);
+    MPI_Allreduce(occ_tmp,occ,num_orbitals,MPI_C_DOUBLE_COMPLEX,MPI_SUM,comm);
 
     if (rank == 0) {
       ofstream occ_file;
@@ -458,7 +458,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
 
       many_body_operator commut,commut2,Sinf_op,S1_op;
 
-      complex<double> mself2 [num_orbitals*num_orbitals] = {0};
+      complex<double> mself2 [num_orbitals] = {0};
       auto Sinf_mat = matrix_t(num_orbitals,num_orbitals);
       Sinf_mat = h_scalar_t{0};
 
@@ -468,34 +468,28 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
       for (int iblock = 0; iblock < nblocks; ++iblock) {
         for (int o = 0; o < siz_block; ++o) {
           int iflavor = convert_indexes_back(iblock,o,orb_off_diag,spin_off_diag,ndim);
-          for (int oo = 0; oo < siz_block; ++oo) {
-            int iflavor1 = convert_indexes_back(iblock,oo,orb_off_diag,spin_off_diag,ndim);
-            commut = Hint*c(labels[iblock],o) - c(labels[iblock],o)*Hint;
-            Sinf_op = - commut*c_dag(labels[iblock],oo) - c_dag(labels[iblock],oo)*commut;
-            commut2 = c_dag(labels[iblock],oo)*Hint - Hint*c_dag(labels[iblock],oo);
-            S1_op = commut2*commut + commut*commut2;
-            if (itask == rank) Sinf_mat(iflavor,iflavor1) = trace_rho_op(rho,Sinf_op,h_loc_diag);
-            itask = (itask+1)%nproc;
-            if (itask == rank) mself2[iflavor+iflavor1*num_orbitals] = trace_rho_op(rho,S1_op,h_loc_diag);
-            itask = (itask+1)%nproc;
-          }
+          commut = Hint*c(labels[iblock],o) - c(labels[iblock],o)*Hint;
+          Sinf_op = - commut*c_dag(labels[iblock],o) - c_dag(labels[iblock],o)*commut;
+          commut2 = c_dag(labels[iblock],o)*Hint - Hint*c_dag(labels[iblock],o);
+          S1_op = commut2*commut + commut*commut2;
+          if (itask == rank) Sinf_mat(iflavor,iflavor) = trace_rho_op(rho,Sinf_op,h_loc_diag);
+          itask = (itask+1)%nproc;
+          if (itask == rank) mself2[iflavor] = trace_rho_op(rho,S1_op,h_loc_diag);
+          itask = (itask+1)%nproc;
         }
       }
 
       Sinf_mat = all_reduce(Sinf_mat,comm);
-      MPI_Allreduce(mself2,moments_self_2,num_orbitals*num_orbitals,MPI_C_DOUBLE_COMPLEX,MPI_SUM,comm);
+      MPI_Allreduce(mself2,moments_self_2,num_orbitals,MPI_C_DOUBLE_COMPLEX,MPI_SUM,comm);
 
-      for (int iflavor = 0; iflavor < num_orbitals; ++iflavor) {
-        for (int iflavor1 = 0; iflavor1 < num_orbitals; ++iflavor1)
-          moments_self_1[iflavor+iflavor1*num_orbitals] = Sinf_mat(iflavor,iflavor1);
-      }
+      for (int iflavor = 0; iflavor < num_orbitals; ++iflavor)
+        moments_self_1[iflavor] = Sinf_mat(iflavor,iflavor);
 
       Sinf_mat = Sinf_mat * Sinf_mat;
 
-      for (int iflavor = 0; iflavor < num_orbitals; ++iflavor) {
-        for (int iflavor1 = 0; iflavor1 < num_orbitals; ++iflavor1)
-          moments_self_2[iflavor+iflavor1*num_orbitals] -= Sinf_mat(iflavor,iflavor1);
-      }
+      for (int iflavor = 0; iflavor < num_orbitals; ++iflavor)
+        moments_self_2[iflavor] -= Sinf_mat(iflavor,iflavor);
+
     }   // not legendre
 
   }   // measure_density_matrix

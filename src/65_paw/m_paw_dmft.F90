@@ -252,57 +252,57 @@ MODULE m_paw_dmft
   ! ABINIT CTQMC: Gives perturbation order of CTQMC solver
   ! 0 : nothing, >=1 max order evaluated in Perturbation.dat
 
-  integer :: dmftctqmc_triqs_compute_integral
-  ! Only relevant when dmftctqmc_triqs_entropy=1.
+  integer :: dmft_triqs_compute_integral
+  ! Only relevant when dmft_triqs_entropy=1.
   ! =1: Compute the thermodynamic integration over the impurity models.
   ! =0: Do not compute the integral. All the other contributions to the free
   ! energy are still computed.
 
-  integer :: dmftctqmc_triqs_det_init_size
+  integer :: dmft_triqs_det_init_size
   ! TRIQS CTQMC: Initial size of the hybridization matrix. If it is too low,
   ! the matrix will be resized very often, which can be slow.
 
-  integer :: dmftctqmc_triqs_det_n_operations_before_check
+  integer :: dmft_triqs_det_n_operations_before_check
   ! TRIQS CTQMC: Number of operations before check of the hybridization matrix.
   ! If it is low, the matrix will be checked too often, which can be slow.
 
-  integer :: dmftctqmc_triqs_entropy
+  integer :: dmft_triqs_entropy
   ! TRIQS CTQMC: Compute the DMFT entropy by integrating several impurity models
   ! over U.
 
-  integer :: dmftctqmc_triqs_gaussorder
+  integer :: dmft_triqs_gaussorder
   ! Order of the Gauss-Legendre quadrature for each subdivision of the
   ! thermodynamic integration.
 
-  integer :: dmftctqmc_triqs_loc_n_min
+  integer :: dmft_triqs_loc_n_min
   ! TRIQS CTQMC: Only configurations with a number of electrons in [nlocmin,nlocmax]
   ! are taken into account.
 
-  integer :: dmftctqmc_triqs_loc_n_max
+  integer :: dmft_triqs_loc_n_max
   ! TRIQS CTQMC: Only configurations with a number of electrons in [nlocmin,nlocmax]
   ! are taken into account.
 
-  integer :: dmftctqmc_triqs_nbins_histo
+  integer :: dmft_triqs_nbins_histo
   ! TRIQS CTQMC: Nb of bins for the histogram.
 
-  integer :: dmftctqmc_triqs_nleg
+  integer :: dmft_triqs_nleg
   ! TRIQS CTQMC: Nb of Legendre polynomials used for the
   ! Green's function (Phys. Rev. B 84, 075145) [[cite:Boehnke2011]].
 
-  integer :: dmftctqmc_triqs_nsubdivisions
+  integer :: dmft_triqs_nsubdivisions
   ! Number of regular subdivisions of the interval [0,U], each of which containing
-  ! dmftctqmc_triqs_gaussorder points
+  ! dmft_triqs_gaussorder points
 
-  integer :: dmftctqmc_triqs_ntau_delta
+  integer :: dmft_triqs_ntau_delta
   ! TRIQS CTQMC: Nb of imaginary time points for the hybridization.
 
-  integer :: dmftctqmc_triqs_seed_a
+  integer :: dmft_triqs_seed_a
   ! TRIQS CTQMC: The CTQMC seed is seed_a + rank * seed_b.
 
-  integer :: dmftctqmc_triqs_seed_b
+  integer :: dmft_triqs_seed_b
   ! TRIQS CTQMC: The CTQMC seed is seed_a + rank * seed_b.
 
-  integer :: dmftctqmc_triqs_therm_restart
+  integer :: dmft_triqs_therm_restart
   ! TRIQS CTQMC: Number of thermalization steps when we restart from a previous configuration
 
   integer :: dmftqmc_l
@@ -401,29 +401,29 @@ MODULE m_paw_dmft
   ! =0 Only consider the DMFT contribution on the correlated bands
   ! =1 Considers the DMFT contribution on every band
 
-  logical :: dmftctqmc_triqs_leg_measure
+  logical :: dmft_triqs_leg_measure
   ! TRIQS CTQMC: Flag to activate Legendre measurement
 
-  logical :: dmftctqmc_triqs_measure_density_matrix
+  logical :: dmft_triqs_measure_density_matrix
   ! TRIQS CTQMC: Flag to activate the measurement of the density matrix
 
-  logical :: dmftctqmc_triqs_move_double
+  logical :: dmft_triqs_move_double
   ! TRIQS CTQMC: Flag to activate the double moves
 
-  logical :: dmftctqmc_triqs_move_shift
+  logical :: dmft_triqs_move_shift
   ! TRIQS CTQMC: Flag to activate the shift move
 
-  logical :: dmftctqmc_triqs_orb_off_diag
+  logical :: dmft_triqs_orb_off_diag
   ! TRIQS CTQMC: Flag to sample the orbital off-diagonal elements of the Green's function
 
-  logical :: dmftctqmc_triqs_spin_off_diag
+  logical :: dmft_triqs_spin_off_diag
   ! TRIQS CTQMC: Flag to sample the spin off-diagonal elements of the Green's function
 
-  logical :: dmftctqmc_triqs_time_invariance
+  logical :: dmft_triqs_time_invariance
   ! TRIQS CTQMC: Flag to activate the use of time invariance for the sampling
   ! of the density matrix
 
-  logical :: dmftctqmc_triqs_use_norm_as_weight
+  logical :: dmft_triqs_use_norm_as_weight
   ! TRIQS CTQMC: Flag to activate the use of the norm of the matrix as weight
   ! instead of the trace
 
@@ -451,25 +451,25 @@ MODULE m_paw_dmft
   real(dp) :: dmft_wanrad
   ! Maximal radius for print of the Wannier functions
 
-  real(dp) :: dmftctqmc_triqs_det_precision_error
+  real(dp) :: dmft_triqs_det_precision_error
   ! TRIQS CTQMC: Error threshold for the deviation of the determinant.
 
-  real(dp) :: dmftctqmc_triqs_det_precision_warning
+  real(dp) :: dmft_triqs_det_precision_warning
   ! TRIQS CTQMC: Warning threshold for the deviation of the determinant.
 
-  real(dp) :: dmftctqmc_triqs_det_singular_threshold
+  real(dp) :: dmft_triqs_det_singular_threshold
   ! TRIQS CTQMC: Threshold when checking if the determinant is singular.
 
-  real(dp) :: dmftctqmc_triqs_epsilon
+  real(dp) :: dmft_triqs_epsilon
   ! TRIQS CTQMC: Threshold for singular values of the kernel matrix for the DLR fit
 
-  real(dp) :: dmftctqmc_triqs_imag_threshold
+  real(dp) :: dmft_triqs_imag_threshold
   ! TRIQS CTQMC: Threshold for the imaginary part of F(tau)
 
-  real(dp) :: dmftctqmc_triqs_lambda
+  real(dp) :: dmft_triqs_lambda
   ! TRIQS CTQMC: Cutoff for the real frequency grid for the DLR fit
 
-  real(dp) :: dmftctqmc_triqs_move_global_prob
+  real(dp) :: dmft_triqs_move_global_prob
   ! TRIQS CTQMC: Proposal probability for the global move
 
   real(dp) :: dmftqmc_n
@@ -920,8 +920,8 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  call wrtout([std_out,ab_out],message,'COLL')
 
  if (dtset%dmft_entropy == 0 .and. ((dmft_solv /= 6 .and. dmft_solv /= 7)  &
-    & .or. (dtset%dmftctqmc_triqs_entropy == 0 .or. &
-    & dtset%dmftctqmc_triqs_compute_integral == 0))) then
+    & .or. (dtset%dmft_triqs_entropy == 0 .or. &
+    & dtset%dmft_triqs_compute_integral == 0))) then
    write(message,'(a,1x,a)') ch10,"Entropy is not computed, only the internal energy is printed"
    call wrtout([std_out,ab_out],message,'COLL')
  end if
@@ -935,8 +935,8 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  end if
  call wrtout([std_out,ab_out],message,'COLL')
  if (dmft_solv == 5 .or. ((dmft_solv == 6 .or. dmft_solv == 7) .and. &
-   & (dtset%dmftctqmc_triqs_orb_off_diag == 0 .or. &
-   & (nspinor == 2 .and. dtset%dmftctqmc_triqs_spin_off_diag == 0)))) then
+   & (dtset%dmft_triqs_orb_off_diag == 0 .or. &
+   & (nspinor == 2 .and. dtset%dmft_triqs_spin_off_diag == 0)))) then
    write(message,'(a,1x,a)') ch10,"The off-diagonal elements of the Green's function are neglected"
    call wrtout([std_out,ab_out],message,'COLL')
  end if
@@ -1047,35 +1047,35 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
 !==  TRIQS CTQMC
 !=======================
 
- paw_dmft%dmftctqmc_triqs_nleg                          = dtset%dmftctqmc_triqs_nleg
- paw_dmft%dmftctqmc_triqs_therm_restart                 = dtset%dmftctqmc_triqs_therm_restart
- paw_dmft%dmftctqmc_triqs_det_init_size                 = dtset%dmftctqmc_triqs_det_init_size
- paw_dmft%dmftctqmc_triqs_det_n_operations_before_check = dtset%dmftctqmc_triqs_det_n_operations_before_check
- paw_dmft%dmftctqmc_triqs_move_shift                    = (dtset%dmftctqmc_triqs_move_shift == 1)
- paw_dmft%dmftctqmc_triqs_move_double                   = (dtset%dmftctqmc_triqs_move_double == 1)
- paw_dmft%dmftctqmc_triqs_loc_n_min                     = dtset%dmftctqmc_triqs_loc_n_min
- paw_dmft%dmftctqmc_triqs_loc_n_max                     = dtset%dmftctqmc_triqs_loc_n_max
- paw_dmft%dmftctqmc_triqs_seed_a                        = dtset%dmftctqmc_triqs_seed_a
- paw_dmft%dmftctqmc_triqs_seed_b                        = dtset%dmftctqmc_triqs_seed_b
- paw_dmft%dmftctqmc_triqs_measure_density_matrix        = (dtset%dmftctqmc_triqs_measure_density_matrix == 1)
- paw_dmft%dmftctqmc_triqs_time_invariance               = (dtset%dmftctqmc_triqs_time_invariance == 1)
- paw_dmft%dmftctqmc_triqs_use_norm_as_weight            = (dtset%dmftctqmc_triqs_use_norm_as_weight == 1)
- paw_dmft%dmftctqmc_triqs_leg_measure                   = (dtset%dmftctqmc_triqs_leg_measure == 1)
- paw_dmft%dmftctqmc_triqs_orb_off_diag                  = (dtset%dmftctqmc_triqs_orb_off_diag == 1)
- paw_dmft%dmftctqmc_triqs_spin_off_diag                 = (dtset%dmftctqmc_triqs_spin_off_diag == 1)
- paw_dmft%dmftctqmc_triqs_move_global_prob              = dtset%dmftctqmc_triqs_move_global_prob
- paw_dmft%dmftctqmc_triqs_imag_threshold                = dtset%dmftctqmc_triqs_imag_threshold
- paw_dmft%dmftctqmc_triqs_det_precision_warning         = dtset%dmftctqmc_triqs_det_precision_warning
- paw_dmft%dmftctqmc_triqs_det_precision_error           = dtset%dmftctqmc_triqs_det_precision_error
- paw_dmft%dmftctqmc_triqs_det_singular_threshold        = dtset%dmftctqmc_triqs_det_singular_threshold
- paw_dmft%dmftctqmc_triqs_epsilon                       = dtset%dmftctqmc_triqs_epsilon
- paw_dmft%dmftctqmc_triqs_lambda                        = dtset%dmftctqmc_triqs_wmax / dtset%tsmear
- paw_dmft%dmftctqmc_triqs_ntau_delta                    = dtset%dmftctqmc_triqs_ntau_delta
- paw_dmft%dmftctqmc_triqs_nbins_histo                   = dtset%dmftctqmc_triqs_nbins_histo
- paw_dmft%dmftctqmc_triqs_entropy                       = dtset%dmftctqmc_triqs_entropy
- paw_dmft%dmftctqmc_triqs_compute_integral              = dtset%dmftctqmc_triqs_compute_integral
- paw_dmft%dmftctqmc_triqs_gaussorder                    = dtset%dmftctqmc_triqs_gaussorder
- paw_dmft%dmftctqmc_triqs_nsubdivisions                 = dtset%dmftctqmc_triqs_nsubdivisions
+ paw_dmft%dmft_triqs_nleg                          = dtset%dmft_triqs_nleg
+ paw_dmft%dmft_triqs_therm_restart                 = dtset%dmft_triqs_therm_restart
+ paw_dmft%dmft_triqs_det_init_size                 = dtset%dmft_triqs_det_init_size
+ paw_dmft%dmft_triqs_det_n_operations_before_check = dtset%dmft_triqs_det_n_operations_before_check
+ paw_dmft%dmft_triqs_move_shift                    = (dtset%dmft_triqs_move_shift == 1)
+ paw_dmft%dmft_triqs_move_double                   = (dtset%dmft_triqs_move_double == 1)
+ paw_dmft%dmft_triqs_loc_n_min                     = dtset%dmft_triqs_loc_n_min
+ paw_dmft%dmft_triqs_loc_n_max                     = dtset%dmft_triqs_loc_n_max
+ paw_dmft%dmft_triqs_seed_a                        = dtset%dmft_triqs_seed_a
+ paw_dmft%dmft_triqs_seed_b                        = dtset%dmft_triqs_seed_b
+ paw_dmft%dmft_triqs_measure_density_matrix        = (dtset%dmft_triqs_measure_density_matrix == 1)
+ paw_dmft%dmft_triqs_time_invariance               = (dtset%dmft_triqs_time_invariance == 1)
+ paw_dmft%dmft_triqs_use_norm_as_weight            = (dtset%dmft_triqs_use_norm_as_weight == 1)
+ paw_dmft%dmft_triqs_leg_measure                   = (dtset%dmft_triqs_leg_measure == 1)
+ paw_dmft%dmft_triqs_orb_off_diag                  = (dtset%dmft_triqs_orb_off_diag == 1)
+ paw_dmft%dmft_triqs_spin_off_diag                 = (dtset%dmft_triqs_spin_off_diag == 1)
+ paw_dmft%dmft_triqs_move_global_prob              = dtset%dmft_triqs_move_global_prob
+ paw_dmft%dmft_triqs_imag_threshold                = dtset%dmft_triqs_imag_threshold
+ paw_dmft%dmft_triqs_det_precision_warning         = dtset%dmft_triqs_det_precision_warning
+ paw_dmft%dmft_triqs_det_precision_error           = dtset%dmft_triqs_det_precision_error
+ paw_dmft%dmft_triqs_det_singular_threshold        = dtset%dmft_triqs_det_singular_threshold
+ paw_dmft%dmft_triqs_epsilon                       = dtset%dmft_triqs_epsilon
+ paw_dmft%dmft_triqs_lambda                        = dtset%dmft_triqs_wmax / dtset%tsmear
+ paw_dmft%dmft_triqs_ntau_delta                    = dtset%dmft_triqs_ntau_delta
+ paw_dmft%dmft_triqs_nbins_histo                   = dtset%dmft_triqs_nbins_histo
+ paw_dmft%dmft_triqs_entropy                       = dtset%dmft_triqs_entropy
+ paw_dmft%dmft_triqs_compute_integral              = dtset%dmft_triqs_compute_integral
+ paw_dmft%dmft_triqs_gaussorder                    = dtset%dmft_triqs_gaussorder
+ paw_dmft%dmft_triqs_nsubdivisions                 = dtset%dmft_triqs_nsubdivisions
 
 !==============================
 !==  Variables for DMFT itself

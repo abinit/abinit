@@ -28,7 +28,7 @@ MODULE TRIQS_CTQMC
                               & use_norm_as_weight,loc_n_min,loc_n_max,seed_a,seed_b,num_orbitals,n_tau,n_l,n_cycles,cycle_length,ntherm,ntherm_restart, &
                               & det_init_size,det_n_operations_before_check,ntau_delta,nbins_histo,rank,nspinor,iatom,ilam,beta,move_global_prob, &
                               & imag_threshold,det_precision_warning,det_precision_error,det_singular_threshold,lam,ftau,gtau,gl,udens_cmplx, &
-                              & vee_cmplx,levels_cmplx,moments_self_1,moments_self_2,eu,occ) bind(c)
+                              & vee_cmplx,levels_cmplx,moments_self_1,moments_self_2,occ,eu) bind(c)
 
       use iso_c_binding
 
