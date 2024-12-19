@@ -40,10 +40,6 @@ MODULE m_matlu
  use m_gpu_toolbox
 #endif
 
-#ifdef HAVE_GPU_MARKERS
- use m_nvtx
-#endif
-
  implicit none
 
  private
@@ -762,9 +758,6 @@ end subroutine print_matlu
    call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu(:),glocsym(:),gpu_option=gpu_option)
 
    do iatom=1,natom
-#ifdef HAVE_GPU_MARKERS
-     call nvtxStartRange("iter_atom",29)
-#endif
 
      lpawu = gloc(iatom)%lpawu
      if (lpawu == -1) cycle
@@ -780,9 +773,6 @@ end subroutine print_matlu
      if(gpu_option==ABI_GPU_DISABLED) then
 
        do irot=1,nsym
-#ifdef HAVE_GPU_MARKERS
-         call nvtxStartRange("iter_rot",28)
-#endif
          at_indx = paw_dmft%indsym(irot,iatom)
          gloc_mat    => gloc(at_indx)%mat
 
@@ -798,9 +788,6 @@ end subroutine print_matlu
            glocsym_mat(:,:,isppol) = glocsym_mat(:,:,isppol) + gloc_tmp2(:,1+ndim*(isppol-1):ndim*isppol,irot)
          end do ! isppol
 
-#ifdef HAVE_GPU_MARKERS
-         call nvtxEndRange()
-#endif
        end do ! irot
 
        glocsym_mat(:,:,:) = glocsym_mat(:,:,:) / dble(nsym)
@@ -808,9 +795,6 @@ end subroutine print_matlu
      else if(gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
 
-#ifdef HAVE_GPU_MARKERS
-       call nvtxStartRange("1st_gemm",28)
-#endif
        do irot=1,nsym
          at_indx = paw_dmft%indsym(irot,iatom)
          gloc_mat    => gloc(at_indx)%mat
@@ -823,26 +807,14 @@ end subroutine print_matlu
          !$OMP END TARGET DATA
        end do ! irot
        call gpu_device_synchronize()
-#ifdef HAVE_GPU_MARKERS
-       call nvtxEndRange()
-#endif
 
-#ifdef HAVE_GPU_MARKERS
-       call nvtxStartRange("2nd_gemm",27)
-#endif
        !$OMP TARGET DATA USE_DEVICE_PTR(gloc_tmp,zarot,gloc_tmp2)
        call abi_gpu_xgemm_strided(2,"t","n",ndim,ndim*nsppol,ndim,cone,&
        &    c_loc(zarot(:,:,:,lpawu+1)),ndim_max,ndim_max*ndim_max,&
        &    c_loc(gloc_tmp(:,:,:)),ndim_max,ndim_max*ndim_max*nsppol,czero,&
        &    c_loc(gloc_tmp2(:,:,:)),ndim,ndim*ndim*nsppol,nsym)
        !$OMP END TARGET DATA
-#ifdef HAVE_GPU_MARKERS
-       call nvtxEndRange()
-#endif
 
-#ifdef HAVE_GPU_MARKERS
-       call nvtxStartRange("axpy",26)
-#endif
        !$OMP TARGET TEAMS DISTRIBUTE MAP(to:glocsym_mat,gloc_tmp2) PRIVATE(isppol)
        do isppol=1,nsppol
          !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(m1,m2,irot)
@@ -854,9 +826,6 @@ end subroutine print_matlu
            end do ! m1
          end do  ! m2
        end do ! isppol
-#ifdef HAVE_GPU_MARKERS
-       call nvtxEndRange()
-#endif
 
        !$OMP TARGET DATA USE_DEVICE_PTR(glocsym_mat)
        call abi_gpu_xscal(2, ndim*ndim*nsppol, ratio, c_loc(glocsym_mat), 1)
@@ -869,9 +838,6 @@ end subroutine print_matlu
      !$OMP TARGET EXIT DATA MAP(delete:gloc_tmp2) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
      ABI_FREE(gloc_tmp2)
-#ifdef HAVE_GPU_MARKERS
-     call nvtxEndRange()
-#endif
 
    end do ! iatom
 
