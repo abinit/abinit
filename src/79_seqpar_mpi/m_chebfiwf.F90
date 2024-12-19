@@ -217,7 +217,6 @@ subroutine chebfiwf2_blocksize(gs_hamk,ndat,npw,nband,nspinor,paral_kgb,gpu_opti
 !!
 !! INPUTS
 !!  dtset= input variables for this dataset
-!!  kinpw(npw)= kinetic energy for each plane wave (Hartree)
 !!  mpi_enreg= MPI-parallelisation information
 !!  nband= number of bands at this k point
 !!  npw= number of plane waves at this k point
@@ -235,7 +234,7 @@ subroutine chebfiwf2_blocksize(gs_hamk,ndat,npw,nband,nspinor,paral_kgb,gpu_opti
 !!
 !! SOURCE
 
-subroutine chebfiwf2(cg,dtset,eig,occ,enl_out,gs_hamk,kinpw,mpi_enreg,&
+subroutine chebfiwf2(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
 &                    nband,npw,nspinor,prtvol,resid)
 
  implicit none
@@ -244,7 +243,6 @@ subroutine chebfiwf2(cg,dtset,eig,occ,enl_out,gs_hamk,kinpw,mpi_enreg,&
  integer,intent(in) :: nband,npw,prtvol,nspinor
  type(mpi_type),target,intent(in) :: mpi_enreg
  real(dp),target,intent(inout) :: cg(2,npw*nspinor*nband)
- real(dp),intent(in) :: kinpw(npw)
  real(dp),target,intent(out) :: resid(nband)
  real(dp),intent(out) :: enl_out(nband)
  real(dp),target,intent(out) :: eig(nband)
