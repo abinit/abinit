@@ -1,6 +1,6 @@
 
-.Version 10.1.4.4 of ABINIT, released Jun 2024.
-.(MPI version, prepared for a x86_64_linux_nvhpc24.7-0 computer) 
+.Version 10.3.4.3 of ABINIT, released Nov 2024.
+.(MPI version, prepared for a x86_64_linux_nvhpc23.9-0 computer) 
 
 .Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 26 Aug 2024.
-- ( at 17h40 )
+.Starting date : Wed 18 Dec 2024.
+- ( at 19h34 )
   
-- input  file    -> t16.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_nvhpc_23.9_elpa/baguetl_chebfi-oracle/tests/TestBot_MPI1/gpu_omp_t16_MPI1/t16.abi
 - output file    -> t16_MPI1.abo
 - root for input  files -> t16_MPI1i
 - root for output files -> t16_MPI1o
@@ -33,7 +33,7 @@
 -    mband =          12        mffmem =           1         mkmem =           1
        mpw =         259          nfft =        5832          nkpt =           1
 ================================================================================
-P This job should need less than                       3.614 Mbytes of memory.
+P This job should need less than                       3.629 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.097 Mbytes ; DEN or POT disk file :      0.091 Mbytes.
 ================================================================================
@@ -42,13 +42,14 @@ _ WF disk file :      0.097 Mbytes ; DEN or POT disk file :      0.091 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  3 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
--  max_nthreads =    8
+- outvars: echo of global parameters not present in the input file
+-  max_nthreads =    1
 -
  -outvars: echo values of preprocessed input variables --------
+-          iomode           0
             acell      7.0000000000E+00  7.0000000000E+00  7.0000000000E+00 Bohr
               amu      1.20110000E+01
            bandpp          12
@@ -121,7 +122,7 @@ P           mkmem           1
  
 ================================================================================
 == DATASET  1 ==================================================================
--   mpi_nproc: 1, omp_nthreads: 8 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: 1 (-1 if OMP is not activated)
  
 
 --- !DatasetInfo
@@ -148,8 +149,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 1, }
          ecut(hartree)=     15.000   => boxcut(ratio)=   2.09226
  
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/marc/work/abinit/abinit-git/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
-- pspatm: opening atomic psp file    /home/marc/work/abinit/abinit-git/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_nvhpc_23.9_elpa/baguetl_chebfi-oracle/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_nvhpc_23.9_elpa/baguetl_chebfi-oracle/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -177,22 +178,22 @@ tolerances: {tolvrs: 1.00E-28, }
 ...
  
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -10.914247580216    -1.091E+01 3.757E-06 9.771E+01
- ETOT  2  -10.934409211410    -2.016E-02 3.674E-09 1.056E+00
- ETOT  3  -10.934530393629    -1.212E-04 6.769E-10 1.688E-02
- ETOT  4  -10.934532356422    -1.963E-06 8.693E-11 2.729E-05
- ETOT  5  -10.934532360234    -3.813E-09 1.956E-12 8.899E-08
- ETOT  6  -10.934532360248    -1.348E-11 6.579E-14 3.996E-10
- ETOT  7  -10.934532360248    -1.776E-15 6.057E-16 1.683E-12
- ETOT  8  -10.934532360248     2.842E-14 5.513E-18 1.328E-14
- ETOT  9  -10.934532360248    -1.954E-14 1.190E-20 2.032E-17
- ETOT 10  -10.934532360248    -2.487E-14 6.667E-22 1.368E-20
- ETOT 11  -10.934532360248     1.421E-14 6.667E-22 2.378E-22
- ETOT 12  -10.934532360248    -3.553E-15 6.663E-22 3.349E-24
- ETOT 13  -10.934532360248     5.329E-15 6.664E-22 1.541E-27
- ETOT 14  -10.934532360248     0.000E+00 6.664E-22 1.862E-27
- ETOT 15  -10.934532360248     1.776E-15 6.665E-22 6.814E-28
- ETOT 16  -10.934532360248    -3.553E-15 6.663E-22 5.981E-28
+ ETOT  1  -10.914247580216    -1.091E+01 1.648E-04 9.771E+01
+ ETOT  2  -10.934409211410    -2.016E-02 1.925E-07 1.056E+00
+ ETOT  3  -10.934530393629    -1.212E-04 6.174E-08 1.688E-02
+ ETOT  4  -10.934532356422    -1.963E-06 8.140E-09 2.729E-05
+ ETOT  5  -10.934532360234    -3.813E-09 1.272E-10 8.899E-08
+ ETOT  6  -10.934532360248    -1.346E-11 5.008E-12 3.996E-10
+ ETOT  7  -10.934532360248     3.553E-15 2.324E-14 1.683E-12
+ ETOT  8  -10.934532360248     2.309E-14 3.823E-16 1.328E-14
+ ETOT  9  -10.934532360248    -1.776E-14 4.423E-19 2.032E-17
+ ETOT 10  -10.934532360248    -8.882E-15 2.266E-21 1.154E-20
+ ETOT 11  -10.934532360248    -2.842E-14 2.267E-21 1.866E-22
+ ETOT 12  -10.934532360248     1.954E-14 2.266E-21 2.950E-24
+ ETOT 13  -10.934532360248     1.776E-15 2.267E-21 4.565E-27
+ ETOT 14  -10.934532360248    -5.329E-15 2.267E-21 3.784E-27
+ ETOT 15  -10.934532360248     5.329E-15 2.267E-21 1.294E-27
+ ETOT 16  -10.934532360248     0.000E+00 2.265E-21 1.870E-27
  
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -5.77543783E-03  sigma(3 2)= -1.59085611E-03
@@ -202,7 +203,7 @@ tolerances: {tolvrs: 1.00E-28, }
  
  scprqt:  WARNING -
   nstep=   16 was not enough SCF cycles to converge;
-  maximum energy difference=  3.553E-15 exceeds tolvrs=  1.000E-28
+  potential residual=  1.870E-27 exceeds tolvrs=  1.000E-28
  
 
 --- !ResultsGS
@@ -215,7 +216,7 @@ lattice_vectors:
 lattice_lengths: [   4.94975,    4.94975,    4.94975, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   8.5750000E+01
-convergence: {deltae: -3.553E-15, res2:  5.981E-28, residm:  6.663E-22, diffor: null, }
+convergence: {deltae:  0.000E+00, res2:  1.870E-27, residm:  2.265E-21, diffor: null, }
 etotal    :  -1.09345324E+01
 entropy   :   0.00000000E+00
 fermie    :   5.23389539E-01
@@ -242,31 +243,31 @@ force_length_stats: {min:   4.05939413E-01, max:   4.05939413E-01, mean:   4.059
  ---------------------------------------------------------------------
   Sum:              4.581852     4.581852      9.163705     0.000000
  Total magnetization (from the atomic spheres):             0.000000
- Total magnetization (exact up - dn):                      -0.000000
+ Total magnetization (exact up - dn):                       0.000000
 ================================================================================
  
  ----iterations are completed or convergence reached----
  
- Mean square residual over all n,k,spin=   68.012E-24; max=  66.619E-23
+ Mean square residual over all n,k,spin=   24.097E-23; max=  22.651E-22
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.220000000000      0.220000000000      0.220000000000
  rms dE/dt=  1.6406E+00; max dE/dt=  1.6406E+00; dE/dt below (all hartree)
-    1       1.640584604745      1.640584604745      1.640584604745
-    2      -1.640584604745     -1.640584604745     -1.640584604745
+    1       1.640584604765      1.640584604765      1.640584604765
+    2      -1.640584604765     -1.640584604765     -1.640584604765
  
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
     2      0.81493290122860     0.81493290122860     0.81493290122860
  
  cartesian forces (hartree/bohr) at end:
-    1     -0.23436922924936    -0.23436922924936    -0.23436922924936
-    2      0.23436922924936     0.23436922924936     0.23436922924936
+    1     -0.23436922925221    -0.23436922925221    -0.23436922925221
+    2      0.23436922925221     0.23436922925221     0.23436922925221
  frms,max,avg= 2.3436923E-01 2.3436923E-01   0.000E+00  0.000E+00  0.000E+00 h/b
  
  cartesian forces (eV/Angstrom) at end:
-    1    -12.05174931677333   -12.05174931677333   -12.05174931677332
-    2     12.05174931677333    12.05174931677333    12.05174931677332
+    1    -12.05174931692002   -12.05174931692002   -12.05174931692002
+    2     12.05174931692002    12.05174931692002    12.05174931692002
  frms,max,avg= 1.2051749E+01 1.2051749E+01   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  7.000000000000  7.000000000000  7.000000000000 bohr
               =  3.704240460130  3.704240460130  3.704240460130 angstroms
@@ -293,16 +294,16 @@ force_length_stats: {min:   4.05939413E-01, max:   4.05939413E-01, mean:   4.059
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  1.06815546419788E+01
-hartree             :  1.49476741154069E+00
-xc                  : -4.42100460426020E+00
+kinetic             :  1.06815546419861E+01
+hartree             :  1.49476741154093E+00
+xc                  : -4.42100460426047E+00
 Ewald energy        : -1.22408856604630E+01
 psp_core            :  1.72763340806685E-01
-local_psp           : -7.30529939675058E+00
-non_local_psp       :  6.83571906900004E-01
+local_psp           : -7.30529939675754E+00
+non_local_psp       :  6.83571906899640E-01
 total_energy        : -1.09345323602476E+01
 total_energy_eV     : -2.97543757384289E+02
-band_energy         :  2.17409356020640E+00
+band_energy         :  2.17409356020675E+00
 ...
 
  
@@ -320,6 +321,7 @@ band_energy         :  2.17409356020640E+00
 ================================================================================
   
  -outvars: echo values of variables after computation  --------
+-          iomode           0
             acell      7.0000000000E+00  7.0000000000E+00  7.0000000000E+00 Bohr
               amu      1.20110000E+01
            bandpp          12
@@ -482,10 +484,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          2.1  wall=          2.1
+- Proc.   0 individual time (sec): cpu=         11.7  wall=         11.7
  
 ================================================================================
  
  Calculation completed.
 .Delivered   3 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.1  wall=          2.1
++Overall time at end (sec) : cpu=         11.7  wall=         11.7
