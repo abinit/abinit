@@ -384,9 +384,9 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
 
        if (verif_band) then
          call pawcprj_get(cryst_struc%atindx1(:),cwaveprj(:,:),cprj(:,:),natom,ib,icprj,ikpt,&
-                       & iorder_cprj,isppol,mband_cprj,dtset%mkmem,natom,1,nband_k_cprj,&
-                       & my_nspinor,nsppol,paw_dmft%unpaw,mpicomm=mpi_enreg%comm_kpt,&
-                       & proc_distrb=mpi_enreg%proc_distrb(:,:,:))
+                        & iorder_cprj,isppol,mband_cprj,dtset%mkmem,natom,1,nband_k_cprj,&
+                        & my_nspinor,nsppol,paw_dmft%unpaw,mpicomm=mpi_enreg%comm_kpt,&
+                        & proc_distrb=mpi_enreg%proc_distrb(:,:,:))
        end if
 
        do ispinor=1,my_nspinor
@@ -429,25 +429,27 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
 
              if (use_full_chipsi) then
 
-               do ir=1,siz_wan
+               buf_chipsi(ibuf_chipsi) = sum(cmplx(cg(1,icgb+1:icgb+npw),cg(2,icgb+1:icgb+npw),kind=dp)* &
+                                           & paw_dmft%dpro(1:npw,iatom,ik)*paw_dmft%ylm(1:npw,im,lpawu+1,ik)* &
+                                           & paw_dmft%bessel_int(1:npw,itypat,ik))
 
-                 ! Compute <Ylm|Psi_tilde>(r) = sum_g c_g * <Ylm|exp(j*(k+G)*(r+Rat))> / sqrt(ucvol)
-                 ! using exp(j*(k+G)*r) = 4*pi*sum_{lm} j**l * jl(|k+G|*r) * ylm(k+G) * ylm(theta,phi)
-                 ! (spherical harmonics expansion of planewave)
+               if (prt_wan) then
 
-                 psi_tmp = sum(paw_dmft%dpro(1:npw,iatom,ik) * paw_dmft%bessel(1:npw,ir,itypat,ik) * &
-                             & cmplx(cg(1,icgb+1:icgb+npw),cg(2,icgb+1:icgb+npw),kind=dp) * &
-                             & paw_dmft%ylm(1:npw,im,lpawu+1,ik))
+                 do ir=1,siz_wan
 
-                 if (ir <= siz_proj) chipsi_tmp(ir) = psi_tmp * pawtab(itypat)%proj(ir)
-                 if (prt_wan) paw_dmft%buf_psi(ibuf_psi+ir) = psi_tmp
+                   ! Compute <Ylm|Psi_tilde>(r) = sum_g c_g * <Ylm|exp(j*(k+G)*(r+Rat))> / sqrt(ucvol)
+                   ! using exp(j*(k+G)*r) = 4*pi*sum_{lm} j**l * jl(|k+G|*r) * ylm(k+G) * ylm(theta,phi)
+                   ! (spherical harmonics expansion of planewave)
 
-               end do ! ir
+                   psi_tmp = sum(paw_dmft%dpro(1:npw,iatom,ik) * paw_dmft%bessel(1:npw,ir,itypat,ik) * &
+                               & cmplx(cg(1,icgb+1:icgb+npw),cg(2,icgb+1:icgb+npw),kind=dp) * &
+                               & paw_dmft%ylm(1:npw,im,lpawu+1,ik))
 
-               call simp_gen(re,dble(chipsi_tmp(1:siz_proj)),paw_dmft%radgrid(itypat),r_for_intg=rint)
-               call simp_gen(ima,aimag(chipsi_tmp(1:siz_proj)),paw_dmft%radgrid(itypat),r_for_intg=rint)
+                   paw_dmft%buf_psi(ibuf_psi+ir) = psi_tmp
 
-               buf_chipsi(ibuf_chipsi) = cmplx(re,ima,kind=dp)
+                 end do ! ir
+
+               end if
 
                if (verif_band) then
                  do iproj=1,nproju

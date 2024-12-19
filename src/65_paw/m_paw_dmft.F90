@@ -573,6 +573,9 @@ MODULE m_paw_dmft
   complex(dpc), allocatable :: bessel(:,:,:,:)
   ! 4*pi*(i**l)*jl(|k+G|r)*r/sqrt(ucvol) for each G,r,atom type and kpt
 
+  complex(dpc), allocatable :: bessel_int(:,:,:)
+  ! Integral over r of bessel(ig,:,iat,ikpt)
+
   complex(dpc), allocatable :: buf_psi(:)
   ! Temporary buffer for the computation of Wannier function
 
@@ -705,7 +708,7 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  integer :: indproj,iproj,ir,isppol,itypat,lpawu,lpawu1,maxlpawu
  integer :: mband,mbandc,mesh_size,mesh_type,mkmem,mpw,myproc,natom,nband_k,ndim
  integer :: nkpt,nproc,nproju,npw,nspinor,nsppol
- integer :: nsym,ntypat,siz_paw,siz_proj,use_dmft
+ integer :: nsym,ntypat,siz_paw,siz_proj,siz_wan,use_dmft
  logical :: t2g,use_full_chipsi,verif,x2my2d
  real(dp) :: bes,besp,lstep,norm,rad,rint,rstep,sumwtk
  integer, parameter :: mt2g(3) = (/1,2,4/)
@@ -1243,9 +1246,9 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
    end if
    call pawrad_init(paw_dmft%radgrid(itypat),mesh_size,mesh_type,rstep,lstep)
    if (mesh_size > paw_dmft%maxmeshsize) paw_dmft%maxmeshsize = mesh_size
-   siz_paw = min(mesh_size,pawrad(itypat)%int_meshsz)
+   siz_paw  = min(mesh_size,pawrad(itypat)%int_meshsz)
    siz_proj = min(siz_proj,pawrad(itypat)%int_meshsz)
-   rint = paw_dmft%radgrid(itypat)%rad(siz_proj)
+   rint   = paw_dmft%radgrid(itypat)%rad(siz_proj)
    nproju = pawtab(itypat)%nproju
    do iproj=1,nproju
      indproj = pawtab(itypat)%lnproju(iproj)
@@ -1279,6 +1282,7 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
    ABI_MALLOC(paw_dmft%ylm,(mpw,2*maxlpawu+1,maxlpawu+1,mkmem))
    ABI_MALLOC(paw_dmft%dpro,(mpw,natom,mkmem))
    ABI_MALLOC(paw_dmft%bessel,(mpw,paw_dmft%maxmeshsize,ntypat,mkmem))
+   ABI_MALLOC(paw_dmft%bessel_int,(mpw,ntypat,mkmem))
    ABI_MALLOC(typcycle,(ntypat))
    ABI_MALLOC(kpg,(3,mpw))
    ABI_MALLOC(kpg_norm,(mpw))
@@ -1336,14 +1340,23 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
        if (.not. typcycle(itypat)) then   ! if this type has not been visited
          lpawu1 = lpawu
          if (t2g .or. x2my2d) lpawu1 = 2
-         do ir=1,paw_dmft%radgrid(itypat)%mesh_size
+         siz_proj = paw_dmft%siz_proj(itypat)
+         rint = paw_dmft%radgrid(itypat)%rad(siz_proj)
+         siz_wan = paw_dmft%radgrid(itypat)%mesh_size
+         do ir=1,siz_wan
            rad = paw_dmft%radgrid(itypat)%rad(ir)
            do ig=1,npw
              call paw_jbessel_4spline(bes,besp,lpawu1,0,two_pi*kpg_norm(ig)*rad,tol3)
              ! Multiply by r since we want to compute Psi(r) * r, for radial integration
-             paw_dmft%bessel(ig,ir,itypat,ik) = four_pi * (j_dpc**lpawu1) * bes * rad / sqrt(ucvol)
+             paw_dmft%bessel(ig,ir,itypat,ik) = four_pi * bes * rad / sqrt(ucvol)
            end do ! ig
          end do ! ir
+         do ig=1,npw
+           call simp_gen(bes,pawtab(itypat)%proj(1:siz_proj)*dble(paw_dmft%bessel(ig,1:siz_proj,itypat,ik)), &
+                       & paw_dmft%radgrid(itypat),r_for_intg=rint)
+           paw_dmft%bessel_int(ig,itypat,ik) = bes * (j_dpc**lpawu1)
+         end do ! ig
+         paw_dmft%bessel(:,1:siz_wan,itypat,ik) = paw_dmft%bessel(:,1:siz_wan,itypat,ik) * (j_dpc**lpawu1)
         typcycle(itypat) = .true.
        end if ! not typcycle
 
@@ -1357,6 +1370,8 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
    ABI_FREE(typcycle)
 
  end if ! use_full_chipsi
+
+ if (paw_dmft%dmft_prtwan /= 1) ABI_FREE(paw_dmft%bessel)
 
  ABI_FREE(lcycle)
 
@@ -2017,6 +2032,7 @@ subroutine destroy_sc_dmft(paw_dmft)
  ABI_SFREE(paw_dmft%ylm)
  ABI_SFREE(paw_dmft%dpro)
  ABI_SFREE(paw_dmft%bessel)
+ ABI_SFREE(paw_dmft%bessel_int)
  ABI_SFREE(paw_dmft%lpawu)
  ABI_SFREE(paw_dmft%omega_lo)
  ABI_SFREE(paw_dmft%wgt_wlo)
