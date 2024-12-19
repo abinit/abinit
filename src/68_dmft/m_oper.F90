@@ -789,54 +789,7 @@ subroutine inverse_oper(oper,option,procb,iproc,gpu_option)
          end do ! idat
        else if(l_gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-!NOTE Doesn't work
-#if 0
-         ABI_MALLOC(work, (mbandc,mbandc))
-         !$OMP TARGET ENTER DATA MAP(alloc:work)
-         do idat=1,oper%ndat
-           call gpu_set_to_zero_complex(work, int(mbandc,c_size_t)*mbandc)
-           !$OMP TARGET PARALLEL DO MAP(to:work) PRIVATE(ib)
-           do ib=1,mbandc
-             work(ib,ib) = cone
-           end do
-           !$OMP TARGET DATA USE_DEVICE_PTR(ks,work)
-           call abi_gpu_xginv(2,mbandc,c_loc(ks(:,1+(idat-1)*mbandc:idat*mbandc,ikpt,isppol)),mbandc,c_loc(work))
-           !$OMP END TARGET DATA
-         end do ! idat
-         !$OMP TARGET EXIT DATA MAP(delete:work)
-         ABI_FREE(work)
-#endif
 
-
-!NOTE Slow
-#if 0
-         ABI_MALLOC(work, (mbandc,mbandc))
-         !$OMP TARGET ENTER DATA MAP(alloc:work)
-         do idat=1,oper%ndat
-#ifdef HAVE_GPU_MARKERS
-           call nvtxStartRange("idat",25)
-#endif
-           call gpu_set_to_zero_complex(work, int(mbandc,c_size_t)*mbandc)
-           !$OMP TARGET PARALLEL DO MAP(to:work) PRIVATE(ib)
-           do ib=1,mbandc
-             work(ib,ib) = cone
-           end do
-           !$OMP TARGET DATA USE_DEVICE_PTR(ks,work)
-           call gpu_xginv_old(2,mbandc,ks(:,1+(idat-1)*mbandc:idat*mbandc,ikpt,isppol),mbandc,work)
-           !$OMP END TARGET DATA
-#ifdef HAVE_GPU_MARKERS
-           call nvtxEndRange()
-#endif
-         end do ! idat
-         !$OMP TARGET EXIT DATA MAP(delete:work)
-         ABI_FREE(work)
-#endif
-
-
-#if 1
-#ifdef HAVE_GPU_MARKERS
-         call nvtxStartRange("gpu_xginv_strided",26)
-#endif
          ABI_MALLOC(work, (mbandc,mbandc*oper%ndat))
          !$OMP TARGET ENTER DATA MAP(alloc:work)
          !do idat=1,oper%ndat,32
@@ -849,13 +802,6 @@ subroutine inverse_oper(oper,option,procb,iproc,gpu_option)
          !end do ! idat
          !$OMP TARGET EXIT DATA MAP(delete:work)
          ABI_FREE(work)
-#ifdef HAVE_GPU_MARKERS
-         call nvtxEndRange()
-#endif
-#endif
-
-
-
 
 #endif
        end if
@@ -1050,18 +996,11 @@ call nvtxStartRange("downfold_oper",20)
            &    paw_dmft%chipsi(:,:,ik,isppol,iatom),ndim_max,czero,mat_temp2(:,:,idat),ndim)
            end do ! ndat
          else if(l_gpu_option == ABI_GPU_OPENMP) then
-#if 0
-           do idat=1,ndat
-           call abi_gpu_xgemm(2,"n","c",ndim,ndim,mbandc,cone,mat_temp(:,:,idat),ndim,&
-           &    paw_dmft%chipsi(:,:,ik,isppol,iatom),ndim_max,czero,mat_temp2(:,:,idat),ndim)
-           end do ! ndat
-#else
 #ifdef HAVE_OPENMP_OFFLOAD
            !$OMP TARGET DATA USE_DEVICE_PTR(mat_temp,chipsi,mat_temp2)
            call abi_gpu_xgemm_strided(2,'n','c',ndim,ndim,mbandc,cone,c_loc(mat_temp(:,:,:)),ndim,ndim*mbandc,&
            &    c_loc(chipsi(:,:,ik,isppol,iatom)),ndim_max,0,czero,c_loc(mat_temp2(:,:,:)),ndim,ndim*ndim,ndat)
            !$OMP END TARGET DATA
-#endif
 #endif
          end if
 
@@ -1420,17 +1359,10 @@ subroutine upfold_oper_batched(oper,paw_dmft,procb,iproc,gpu_option)
          &    ndim,c_loc(mat(:,:,(isppol-1)*ndat+1:isppol*ndat)),ndim,czero,c_loc(mat_temp(:,:,:)),mbandc)
          !$OMP END TARGET DATA
 
-#if 0
-         do idat=1,ndat
-           call abi_gpu_xgemm(2,"n","n",mbandc,mbandc,ndim,cone,mat_temp(:,:,idat),mbandc,&
-           &    paw_dmft%chipsi(:,:,ik,isppol,iatom),ndim_max,  czero,mat_temp2(:,:,idat),mbandc)
-         end do ! idat
-#else
          !$OMP TARGET DATA USE_DEVICE_PTR(mat_temp,chipsi,mat_temp2)
          call abi_gpu_xgemm_strided(2,'n','n',mbandc,mbandc,ndim,cone,c_loc(mat_temp(:,:,:)),mbandc,ndim*mbandc,&
          &    c_loc(chipsi(:,:,ik,isppol,iatom)),ndim_max,0,czero,c_loc(mat_temp2(:,:,:)),mbandc,mbandc*mbandc,ndat)
          !$OMP END TARGET DATA
-#endif
          !$OMP TARGET DATA USE_DEVICE_PTR(ks,mat_temp2)
          call abi_gpu_xaxpy(2, mbandc*mbandc*ndat, cone, &
          &    c_loc(mat_temp2), 1, c_loc(ks(:,:,ikpt,isppol)), 1)
