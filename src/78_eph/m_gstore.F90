@@ -345,6 +345,9 @@ type, public :: gqk_t
   procedure :: gather => gqk_gather
   ! Gather the MPI-distributed matrix elements for a given k/q-point index
 
+  procedure :: get_erange_mask => gqk_get_erange_mask
+  ! Compute MPI-distributed & global mask for electronic states allowed by energy filtering
+
   procedure :: filter_erange => gqk_filter_erange
   ! Nullify all matrix elements connecting electronic states outside of specfied erange
 
@@ -4855,12 +4858,12 @@ end subroutine gstore_wannierize_and_write_gwan
 
 !----------------------------------------------------------------------
 
-!!****f* m_gstore/gqk_filter_erange
+!!****f* m_gstore/gqk_get_erange_mask
 !! NAME
-!!  gqk_filter_erange
+!!  gqk_get_erange_mask
 !!
 !! FUNCTION
-!!  Nullify all matrix elements connecting electronic states excluded by energy range.
+!!  Compute MPI-distributed and global masks for electronic states alllowed by erange
 !!
 !! INPUTS
 !!  gstore<gstore_t>=Electron-phonon object containing dimensions and related quantities.
@@ -4875,7 +4878,7 @@ end subroutine gstore_wannierize_and_write_gwan
 !!
 !! SOURCE
 
-subroutine gqk_filter_erange(gqk, gstore, erange, my_states, glob_states)
+subroutine gqk_get_erange_mask(gqk, gstore, erange, my_states, glob_states)
 
 !Arguments ------------------------------------
 !scalars
@@ -4890,16 +4893,11 @@ subroutine gqk_filter_erange(gqk, gstore, erange, my_states, glob_states)
 !scalars
  class(ebands_t), pointer :: ebands
  type(gaps_t) :: gaps
- type(krank_t) :: krank_kpts
- logical :: assume_gap, skip_nk, skip_mkq, skip_q
+ logical :: assume_gap
  integer :: my_ik, ik_ibz, ik_glob
- integer :: my_iq, ikq, ipert
- integer :: ib, jb, bstart
+ integer :: ib, bstart
  integer :: gap_err, ierr
- real(dp) :: vmax, cmin, eig, wtq
-!arrays
- real(dp) :: kpt(3), qpt(3), kpq(3)
- real(dp) :: kpts(3, gqk%glob_nk), my_qpts(3, gqk%my_nq)
+ real(dp) :: vmax, cmin, eig
 !----------------------------------------------------------------------
 
  ebands => gstore%ebands
@@ -4946,6 +4944,61 @@ subroutine gqk_filter_erange(gqk, gstore, erange, my_states, glob_states)
    enddo
  enddo
  call xmpi_sum(glob_states, gqk%kpt_comm%value, ierr)
+
+ call gaps%free()
+end subroutine gqk_get_erange_mask
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_gstore/gqk_filter_erange
+!! NAME
+!!  gqk_filter_erange
+!!
+!! FUNCTION
+!!  Nullify all matrix elements connecting electronic states excluded by energy range.
+!!
+!! INPUTS
+!!  gstore<gstore_t>=Electron-phonon object containing dimensions and related quantities.
+!!  erange=Energy range:
+!!    -- if both entries are negative, assume metal and include states within the
+!! [efermi-abs(erange(1)), efermi+abs(erange(2))] window;
+!!    -- otherwise, erange(1) & erange(2) select window wrt VBM & CBM, respectively.
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine gqk_filter_erange(gqk, gstore, erange)
+
+!Arguments ------------------------------------
+!scalars
+ class(gqk_t), target, intent(inout) :: gqk
+ class(gstore_t), target, intent(in) :: gstore
+!arrays
+ real(dp), intent(in) :: erange(2)
+
+!Local variables-------------------------------
+!scalars
+ class(ebands_t), pointer :: ebands
+ type(krank_t) :: krank_kpts
+ logical :: skip_nk, skip_mkq, skip_q
+ integer :: my_ik, ik_glob
+ integer :: my_iq, ikq, ipert
+ integer :: ib, jb, bstart
+ integer :: ierr
+ real(dp) :: wtq
+!arrays
+ integer :: my_states(gqk%nb, gqk%my_nk)
+ integer :: glob_states(gqk%nb, gqk%glob_nk)
+ real(dp) :: kpt(3), qpt(3), kpq(3)
+ real(dp) :: kpts(3, gqk%glob_nk), my_qpts(3, gqk%my_nq)
+!----------------------------------------------------------------------
+
+ ebands => gstore%ebands
+
+ ! Compute masks
+ call gqk%get_erange_mask(gstore, erange, my_states, glob_states)
 
  ! Get global krank for k+q transitions
  kpts(:, :) = zero
@@ -5006,7 +5059,6 @@ subroutine gqk_filter_erange(gqk, gstore, erange, my_states, glob_states)
    enddo
  enddo
 
- call gaps%free()
  call krank_kpts%free()
 end subroutine gqk_filter_erange
 !!***
