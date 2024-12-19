@@ -109,7 +109,7 @@ contains
  logical :: qeq0
 !arrays
  real(dp) :: qphnrm(3),qphon(3,3)
- real(dp), allocatable :: dint_fsddb(:,:),int_fsddb(:,:,:),int_rsddb(:,:,:),int_lmddb(:,:,:)
+ real(dp), allocatable :: dint_fsddb(:,:),int_fsddb(:,:,:),int_rsddb(:,:,:)
  real(dp), allocatable :: omega(:),omegacalc(:)
  real(dp), allocatable :: w0hessian(:,:),w0berry(:,:)
  real(dp), allocatable :: eigvec(:,:,:,:,:),eigvec_fm(:,:,:,:,:),phfrq(:,:)
@@ -121,11 +121,11 @@ contains
  complex(dpc), allocatable :: ri_mmom(:,:,:)
  complex(dpc), allocatable :: lm_zfield(:,:,:),zfield(:,:,:),zfield_tr(:,:)
  complex(dpc), allocatable :: bc_barmagsus(:,:),bc_ss(:,:),bc_sp(:,:)
- complex(dpc), allocatable :: barepsilon(:,:,:),epsilon(:,:,:),ifcmat(:,:)
+ complex(dpc), allocatable :: ci_epsilon(:,:,:),lm_epsilon(:,:,:)
  complex(dpc), allocatable :: modemm(:,:,:),zeff(:,:),zeff_tr(:,:),modezeff(:,:,:)
  complex(dpc), allocatable :: fmzeff(:,:),fmzeff_tr(:,:)
  complex(dpc), allocatable :: zeffspec(:,:),mmomspec(:,:),magphongreen(:,:),phongreen(:,:),phongreen_fm(:,:)
- complex(dpc), allocatable :: lm_epsilon(:,:,:),ri_magelsus(:,:),lm_magelsus(:,:,:)
+ complex(dpc), allocatable :: ri_magelsus(:,:),lm_magelsus(:,:,:)
  complex(dpc), allocatable :: macmagsus(:,:,:)
  complex(dpc), allocatable :: genzeff_tr(:,:), ri_genelsus(:,:,:)
 
@@ -171,12 +171,12 @@ contains
  ABI_MALLOC(eigvec,(2,3,natom,3,natom))
  ABI_MALLOC(eigvec_fm,(2,3,natom,3,natom))
  ABI_MALLOC(modemm,(ndim,3*natom,nomega))
- ABI_MALLOC(fmzeff,(3,3*natom))
  ABI_MALLOC(fmzeff_tr,(3*natom,3))
  ABI_MALLOC(zeff,(3,3*natom))
  ABI_MALLOC(zeff_tr,(3*natom,3))
  ABI_MALLOC(genzeff_tr,(3*natom+ndim,3))
  ABI_MALLOC(ri_genelsus,(3*natom+ndim,3,nomega))
+ ABI_MALLOC(ci_epsilon,(3,3,nomega))
  ABI_MALLOC(lm_epsilon,(3,3,nomega))
  ABI_MALLOC(modezeff,(3,3*natom,nomega))
  ABI_MALLOC(dummysus,(ndim,ndim))
@@ -192,14 +192,10 @@ contains
  ABI_MALLOC(lm_zfield,(ndim,3,nomega))
  ABI_MALLOC(zfield,(ndim,(natom+5)*3,nomega))
  ABI_MALLOC(zfield_tr,((natom+5)*3,ndim))
- ABI_MALLOC(barepsilon,(3,3,nomega))
- ABI_MALLOC(epsilon,(3,3,nomega))
  ABI_MALLOC(macmagsus,(3,3,nomega))
- ABI_MALLOC(ifcmat,(3*natom,3*natom))
  ABI_MALLOC(dint_fsddb,(2,ddb%msize))
  ABI_MALLOC(int_fsddb,(2,ddb%msize,1))
  ABI_MALLOC(int_rsddb,(2,ddb%msize,1))
- ABI_MALLOC(int_lmddb,(2,ddb%msize,1))
  ABI_MALLOC(ri_mmom,(ndim,3,nomega))
 
 !For linear interpolation detect the w=0 Hessians and Berry curvatures
@@ -254,9 +250,6 @@ contains
    !Perform the different interpolations
    !Lineal (with analytic Berry curvature) with dissipation if eta/=0
    if (omegaflag==1) then
-!     call lineal_omega_interp(w0hessian,w0berry,eta,ifcmat_fm, &
-!   & invmagsus(:,:,iw),magsus(:,:,iw),mpatpol,mpdir,mpert,ddb%msize, &
-!   & natom,ndim,nmdir,int_fsddb,omega(iw),zfield(:,:,iw),zfield_tr)
      do ii=1,ddb%msize
        if (all(ddb%flg(ii,:)==1)) then
          int_fsddb(1,ii,1)= w0hessian(1,ii) + omega(iw)*w0berry(1,ii) - eta*w0berry(2,ii)
@@ -330,7 +323,7 @@ contains
    & mode_phonspec(:,iw),mpert,natom,ntypat,omega(iw),&
    & phfrq(:,iw),phongreen,phonspec(iw),typat)
 
-     call lm_d2etot(int_lmddb,int_rsddb,magsus,mpert,mmom(:,:,iw),&
+     call ri_d2etot(int_rsddb,ci_epsilon(:,:,iw),lm_epsilon(:,:,iw),magsus,mpert,mmom(:,:,iw),&
    & mmom_tr(:,:,iw),natom,ndim,phongreen,ucvol)
    end if
 
@@ -338,11 +331,6 @@ contains
 !   if (omegaflag==2.or.omegaflag==3) then
      !Calculate the mode-resolved magnetic moments
 !     call mode_mmom(amu,eigvec,mmom(:,:,iw),mmomspec(:,iw),modemm(:,:,iw),mode_phonspec(:,iw),natom,ndim,ntypat,typat)
-
-!     !Calculate the Born effective charges
-!     call mp_zeff(barmagsus(:,:,iw),barmmom,barmmom_tr,int_fsddb,&
-!   & dissip,fmzeff,fmzeff_tr,1,invhmat,lm_epsilon(:,:,iw),magpen,magsus(:,:,iw),mpert,mpopt,&
-!   & natom,1,ndim,phongreen,prtopt,prtvol,ucvol,zeff,zeff_tr,zfield(:,:,iw),zfield_tr)
 
      !Calculate the mode-resolved Born effective charges
 !     call mode_zeff(amu,eigvec,mode_phonspec(:,iw),modezeff(:,:,iw),natom,ntypat,&
@@ -762,103 +750,69 @@ contains
 !!
 !! close(mmspec_unit)
 !
-!!Dielectric susceptibility
-! diel_filename=trim(outfilename_radix)//"_DIELSUS"
-! if (open_file(diel_filename, msg, newunit=diel_unit) /= 0) then
-!   ABI_ERROR(msg)
-! end if
-!
-! if (mpopt==1) then
-!   write(diel_unit,*) '#  Frozen-magnetic dielectric tensor calculated and interpolated by ANADDB'
-! else if (mpopt==2) then
-!   write(diel_unit,*) '#  Spin-relaxed dielectric tensor calculated and interpolated by ANADDB'
-! else
-!   write(msg,'(a)') 'ddb_omega_interpol: variable mpopt just can be 1 or 2'
-!   ABI_ERROR(msg)
-! end if
-! 
-! write(diel_unit,*) '#'
-! write(pfmt, '( "(es15.7, ", I4, "(es15.7))" )' ) 9 
-!
-! write(diel_unit,*) '#  Real part of clamped-ion dielectric tensor'
-! write(msg,'(a,a)') ch10,&
-!&           ' # At  hw     eps_11     eps_12     ...     eps_21     eps_22     ...'
-! call wrtout(diel_unit,msg,'COLL')
-! do iw=1,nomega
-!    write(msg,pfmt) &
-! &  omega(iw), ((real(epsilon(i,j,iw)),j=1,3),i=1,3)
-!    call wrtout(diel_unit,msg,'COLL')
-! end do
-!
-! write(diel_unit,*) ' '
-! write(diel_unit,*) '#  Imaginary part of clamped-ion dielectric tensor'
-! write(msg,'(a,a)') ch10,&
-!&           ' # At  hw     eps_11     eps_12     ...     eps_21     eps_22     ...'
-! call wrtout(diel_unit,msg,'COLL')
-! do iw=1,nomega
-!    write(msg,pfmt) &
-! &  omega(iw), ((aimag(epsilon(i,j,iw)),j=1,3),i=1,3)
-!    call wrtout(diel_unit,msg,'COLL')
-! end do
+!Dielectric susceptibility
+ diel_filename=trim(outfilename_radix)//"_DIELSUS"
+ if (open_file(diel_filename, msg, newunit=diel_unit) /= 0) then
+   ABI_ERROR(msg)
+ end if
 
-! write(diel_unit,*) '#'
-! if (mpopt==1) then
-!   write(diel_unit,*) '#  Frozen-magnetic lattice-mediated dielectric tensor calculated and interpolated by ANADDB'
-! else if (mpopt==2) then
-!   write(diel_unit,*) '#  Spin-relaxed lattice-mediated dielectric tensor calculated and interpolated by ANADDB'
-! else
-!   write(msg,'(a)') 'ddb_omega_interpol: variable mpopt just can be 1 or 2'
-!   ABI_ERROR(msg)
-! end if
-! 
-! write(diel_unit,*) '#'
-! write(pfmt, '( "(es15.7, ", I4, "(es15.7))" )' ) 9 
-!
-! write(diel_unit,*) '#  Real part of lattice-mediated dielectric tensor'
-! write(msg,'(a,a)') ch10,&
-!&           ' # At  hw     eps_11     eps_12     ...     eps_21     eps_22     ...'
-! call wrtout(diel_unit,msg,'COLL')
-! do iw=1,nomega
-!    write(msg,pfmt) &
-! &  omega(iw), ((real(lm_epsilon(i,j,iw)),j=1,3),i=1,3)
-!    call wrtout(diel_unit,msg,'COLL')
-! end do
-!
-! write(diel_unit,*) ' '
-! write(diel_unit,*) '#  Imaginary part of lattice-mediated dielectric tensor'
-! write(msg,'(a,a)') ch10,&
-!&           ' # At  hw     eps_11     eps_12     ...     eps_21     eps_22     ...'
-! call wrtout(diel_unit,msg,'COLL')
-! do iw=1,nomega
-!    write(msg,pfmt) &
-! &  omega(iw), ((aimag(lm_epsilon(i,j,iw)),j=1,3),i=1,3)
-!    call wrtout(diel_unit,msg,'COLL')
-! end do
-!
-! write(diel_unit,*) ' '
-! write(diel_unit,*) '#  Real part of relaxed-ion dielectric tensor'
-! write(msg,'(a,a)') ch10,&
-!&           ' # At  hw     eps_11     eps_12     ...     eps_21     eps_22     ...'
-! call wrtout(diel_unit,msg,'COLL')
-! do iw=1,nomega
-!    write(msg,pfmt) &
-! &  omega(iw), ((real(lm_epsilon(i,j,iw)+epsilon(i,j,iw)),j=1,3),i=1,3)
-!    call wrtout(diel_unit,msg,'COLL')
-! end do
-!
-! write(diel_unit,*) ' '
-! write(diel_unit,*) '#  Imaginary part of relaxed-ion dielectric tensor'
-! write(msg,'(a,a)') ch10,&
-!&           ' # At  hw     eps_11     eps_12     ...     eps_21     eps_22     ...'
-! call wrtout(diel_unit,msg,'COLL')
-! do iw=1,nomega
-!    write(msg,pfmt) &
-! &  omega(iw), ((aimag(lm_epsilon(i,j,iw)+epsilon(i,j,iw)),j=1,3),i=1,3)
-!    call wrtout(diel_unit,msg,'COLL')
-! end do
-!
-! close(diel_unit)
-!
+ if (mpopt==1) then
+   write(diel_unit,*) '#  Frozen-magnetic dielectric tensor calculated and interpolated by ANADDB'
+ else if (mpopt==2) then
+   write(diel_unit,*) '#  Spin-relaxed dielectric tensor calculated and interpolated by ANADDB'
+ else
+   write(msg,'(a)') 'ddb_omega_interpol: variable mpopt just can be 1 or 2'
+   ABI_ERROR(msg)
+ end if
+ 
+ write(diel_unit,*) '#'
+ write(pfmt, '( "(es15.7, ", I4, "(es15.7))" )' ) 9 
+
+ write(diel_unit,*) '#  Real part of clamped-ion dielectric tensor'
+ write(msg,'(a,a)') ch10,&
+&           ' # At  hw     eps_11     eps_12     ...     eps_21     eps_22     ...'
+ call wrtout(diel_unit,msg,'COLL')
+ do iw=1,nomega
+    write(msg,pfmt) &
+ &  omega(iw), ((real(ci_epsilon(i,j,iw)),j=1,3),i=1,3)
+    call wrtout(diel_unit,msg,'COLL')
+ end do
+
+ write(diel_unit,*) ' '
+ write(diel_unit,*) '#  Imaginary part of clamped-ion dielectric tensor'
+ write(msg,'(a,a)') ch10,&
+&           ' # At  hw     eps_11     eps_12     ...     eps_21     eps_22     ...'
+ call wrtout(diel_unit,msg,'COLL')
+ do iw=1,nomega
+    write(msg,pfmt) &
+ &  omega(iw), ((aimag(ci_epsilon(i,j,iw)),j=1,3),i=1,3)
+    call wrtout(diel_unit,msg,'COLL')
+ end do
+
+ write(diel_unit,*) ' '
+ write(diel_unit,*) '#  Real part of relaxed-ion dielectric tensor'
+ write(msg,'(a,a)') ch10,&
+&           ' # At  hw     eps_11     eps_12     ...     eps_21     eps_22     ...'
+ call wrtout(diel_unit,msg,'COLL')
+ do iw=1,nomega
+    write(msg,pfmt) &
+ &  omega(iw), ((real(lm_epsilon(i,j,iw)+ci_epsilon(i,j,iw)),j=1,3),i=1,3)
+    call wrtout(diel_unit,msg,'COLL')
+ end do
+
+ write(diel_unit,*) ' '
+ write(diel_unit,*) '#  Imaginary part of relaxed-ion dielectric tensor'
+ write(msg,'(a,a)') ch10,&
+&           ' # At  hw     eps_11     eps_12     ...     eps_21     eps_22     ...'
+ call wrtout(diel_unit,msg,'COLL')
+ do iw=1,nomega
+    write(msg,pfmt) &
+ &  omega(iw), ((aimag(lm_epsilon(i,j,iw)+ci_epsilon(i,j,iw)),j=1,3),i=1,3)
+    call wrtout(diel_unit,msg,'COLL')
+ end do
+
+ close(diel_unit)
+
 !Phonon spectral function
  phon_filename=trim(outfilename_radix)//"_SPECTRAL_PHONON"
  if (open_file(phon_filename, msg, newunit=phon_unit) /= 0) then
@@ -978,7 +932,6 @@ contains
  ABI_FREE(dint_fsddb)
  ABI_FREE(int_fsddb)
  ABI_FREE(int_rsddb)
- ABI_FREE(int_lmddb)
  ABI_FREE(dummysus)
  ABI_FREE(magsus)
  ABI_FREE(lm_magsus)
@@ -987,10 +940,9 @@ contains
  ABI_FREE(mmom_tr)
  ABI_FREE(zfield)
  ABI_FREE(zfield_tr)
- ABI_FREE(barepsilon)
- ABI_FREE(epsilon)
+ ABI_FREE(ci_epsilon)
+ ABI_FREE(lm_epsilon)
  ABI_FREE(macmagsus)
- ABI_FREE(ifcmat)
  ABI_FREE(omega)
  ABI_FREE(phfrq)
  ABI_FREE(magphongreen)
@@ -1003,12 +955,10 @@ contains
  ABI_FREE(eigvec)
  ABI_FREE(eigvec_fm)
  ABI_FREE(modemm)
- ABI_FREE(fmzeff)
  ABI_FREE(fmzeff_tr)
  ABI_FREE(zeff)
  ABI_FREE(zeff_tr)
  ABI_FREE(genzeff_tr)
- ABI_FREE(lm_epsilon)
  ABI_FREE(ri_magelsus)
  ABI_FREE(lm_magelsus)
  ABI_FREE(ri_genelsus)
@@ -1718,12 +1668,13 @@ subroutine me_altcalc(amu,eigvec,lm_magsus,lm_zfield,phongreen_fm,magsus,natom,n
 end subroutine me_altcalc
 !!***
 
-!!****f* ABINIT/lm_d2etot
+!!****f* ABINIT/ri_d2etot
 !! NAME
-!!  lm_d2etot
+!!  ri_d2etot
 !!
 !! FUNCTION
-!!  Calculates the lattice-mediated contributions to second-order quantities
+!!  Extracts the CI 2nd-order susceptibilities and calculates the corresponding 
+!!  lattice-mediated contributions
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2024 ABINIT group (FIXME: add author)
@@ -1762,7 +1713,7 @@ end subroutine me_altcalc
 #include "abi_common.h"
 
 
- subroutine lm_d2etot(blkval_lm,blkval,magsus,mpert,mcoup, &
+ subroutine ri_d2etot(blkval,ci_epsilon,lm_epsilon,magsus,mpert,mcoup, &
 & mcoup_tr,natom,ndim,phongreen,ucvol)
 
 !Arguments ------------------------------------
@@ -1771,7 +1722,8 @@ end subroutine me_altcalc
  real(dp), intent(in) :: ucvol
 !arrays
  real(dp), intent(in) :: blkval(2,3,mpert,3,mpert,1)
- real(dp), intent(out) :: blkval_lm(2,3,mpert,3,mpert,1)
+ complex(dpc), intent(out) :: ci_epsilon(3,3)
+ complex(dpc), intent(out) :: lm_epsilon(3,3)
  complex(dpc), intent(in) :: magsus(ndim,ndim)
  complex(dpc), intent(in) :: mcoup(ndim,(natom+5)*3)
  complex(dpc), intent(in) :: mcoup_tr((natom+5)*3,ndim)
@@ -1784,7 +1736,6 @@ end subroutine me_altcalc
  real(dp) :: fac
 !arrays
  complex(dpc),allocatable :: c_blkval(:,:,:,:)
- complex(dpc),allocatable :: c_blkval_lm(:,:,:,:)
  complex(dpc),allocatable :: coup(:,:),coup_tr(:,:)
 
 ! *************************************************************************
@@ -1793,7 +1744,6 @@ end subroutine me_altcalc
 
  pdim= 3*natom
  ABI_MALLOC(c_blkval,(3,mpert,3,mpert))
- ABI_MALLOC(c_blkval_lm,(3,mpert,3,mpert))
  c_blkval= cmplx(blkval(1,:,:,:,:,1),blkval(2,:,:,:,:,1),16)
 
  !Dielectric tensor
@@ -1807,20 +1757,24 @@ end subroutine me_altcalc
      do idir2= 1, 3
        icol= (ipert2-1)*3 + idir2
        coup(irow,icol)= c_blkval(idir1,ipert1,idir2,ipert2)
-       coup(icol,irow)= c_blkval(idir2,ipert2,idir1,ipert1)
+       coup_tr(icol,irow)= c_blkval(idir2,ipert2,idir1,ipert1)
      end do
    end do
  end do
  ipert2= natom + 2
- c_blkval_lm(:,ipert1,:,ipert2)= fac*matmul(coup(:,:),matmul(phongreen,coup_tr(:,:)))
-
+ lm_epsilon= fac*matmul(coup(:,:),matmul(phongreen,coup_tr(:,:)))
+ 
+ do idir1= 1, 3
+   do idir2= 1, 3
+     ci_epsilon(idir1,idir2)= c_blkval(idir1,ipert1,idir2,ipert2)
+   end do
+ end do 
 
  ABI_FREE(c_blkval)
- ABI_FREE(c_blkval_lm)
 
  DBG_EXIT("COLL")
 
-end subroutine lm_d2etot
+end subroutine ri_d2etot
 !!***
 
 end module m_ddb_omega_interpol
