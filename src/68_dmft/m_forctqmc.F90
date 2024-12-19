@@ -4230,11 +4230,13 @@ subroutine fourier_inv(paw_dmft,nmoments,ntau,matlu_tau,oper_freq,moments)
  type(oper_type), intent(in) :: oper_freq(paw_dmft%dmft_nwlo),moments(nmoments)
  type(matlu_type), intent(inout) :: matlu_tau(paw_dmft%natom)
 !Local variables ------------------------------
- integer :: i,iatom,ifreq,im,im1,isppol,itau,j,lpawu
- integer :: myproc,natom,ndim,nspinor,nsppol,nwlo,tndim
+ integer :: i,iatom,ibuf,ierr,ifreq,im,im1,isppol,itau,itaub,itauf,j,lpawu
+ integer :: myproc,natom,ndim,nproc,nspinor,nsppol,ntau_proc,nwlo
+ integer :: ratio,residu,siz_buf,tndim
  real(dp) :: beta,omegatau,tau
  complex(dpc) :: fac,omega,sumterm
- complex(dpc), allocatable :: omega_fac(:)
+ integer, allocatable :: displs(:),recvcounts(:)
+ complex(dpc), allocatable :: buffer(:),buffer_tot(:),omega_fac(:)
 ! ************************************************************************
 
  beta    = one / paw_dmft%temp
@@ -4242,65 +4244,115 @@ subroutine fourier_inv(paw_dmft,nmoments,ntau,matlu_tau,oper_freq,moments)
  natom   = paw_dmft%natom
  nspinor = paw_dmft%nspinor
  nsppol  = paw_dmft%nsppol
+ nproc   = paw_dmft%nproc
  nwlo    = paw_dmft%dmft_nwlo
 
  call zero_matlu(matlu_tau(:),natom)
 
+ ABI_MALLOC(displs,(nproc))
+ ABI_MALLOC(recvcounts,(nproc))
+
+ ratio  = ntau / nproc
+ residu = ntau - ratio*nproc
+
+ itau = 1
+ do i=0,nproc-1
+   ntau_proc = ratio
+   if (i < residu) ntau_proc = ratio + 1
+   recvcounts(i+1) = ntau_proc
+   if (myproc == i) itaub = itau
+   itau = itau + ntau_proc
+ end do
+ itauf = itaub + recvcounts(myproc+1) - 1
+
+ siz_buf = 0
+ do iatom=1,natom
+   lpawu = paw_dmft%lpawu(iatom)
+   if (lpawu == -1) cycle
+   siz_buf = siz_buf + (2*lpawu+1)**2
+ end do
+
+ siz_buf = siz_buf * (nspinor**2) * nsppol
+
+ recvcounts(:) = recvcounts(:) * siz_buf
+
+ displs(1) = 0
+ do i=2,nproc
+   displs(i) = displs(i-1) + recvcounts(i-1)
+ end do
+
+ ABI_MALLOC(buffer,(recvcounts(myproc+1)))
+ ABI_MALLOC(buffer_tot,(recvcounts(nproc)+displs(nproc)))
  ABI_MALLOC(omega_fac,(nmoments))
 
+ buffer(:) = czero
+
  do ifreq=1,nwlo
-   if (paw_dmft%distrib%procf(ifreq) /= myproc) cycle
    omega = cmplx(zero,paw_dmft%omega_lo(ifreq),kind=dp)
    do i=1,nmoments
-     do iatom=1,natom
-       lpawu = paw_dmft%lpawu(iatom)
-       if (lpawu == -1) cycle
-       ndim = 2*lpawu + 1
-       tndim = ndim * nspinor
-       do itau=1,ntau
-         tau = dble(itau-1) * beta / dble(ntau-1)
-         omegatau = mod(paw_dmft%omega_lo(ifreq)*tau,two*pi)
-         fac = two * paw_dmft%temp * exp(-j_dpc*omegatau)
-         omega_fac(1) = - fac / omega
-         do j=2,nmoments
-           omega_fac(j) = omega_fac(j-1) / omega
-         end do
-         if (ifreq == 1) then
-           omega_fac(1) = omega_fac(1) - half
-           omega_fac(2) = omega_fac(2) + tau/two - beta/four
-           omega_fac(3) = omega_fac(3) - tau**2/four + tau*beta/four
-         end if
+     ibuf = 0
+     do itau=itaub,itauf
+       tau = dble(itau-1) * beta / dble(ntau-1)
+       omegatau = mod(paw_dmft%omega_lo(ifreq)*tau,two*pi)
+       fac = two * paw_dmft%temp * exp(-j_dpc*omegatau)
+       omega_fac(1) = - fac / omega
+       do j=2,nmoments
+         omega_fac(j) = omega_fac(j-1) / omega
+       end do
+       if (ifreq == 1) then
+         omega_fac(1) = omega_fac(1) - half
+         omega_fac(2) = omega_fac(2) + tau/two - beta/four
+         omega_fac(3) = omega_fac(3) - (tau**2)/four + tau*beta/four
+       end if
+       do iatom=1,natom
+         lpawu = paw_dmft%lpawu(iatom)
+         if (lpawu == -1) cycle
+         tndim = nspinor * (2*lpawu+1)
          do isppol=1,nsppol
            do im1=1,tndim
              do im=1,tndim
+               ibuf = ibuf + 1
                sumterm = moments(i)%matlu(iatom)%mat(im,im1,isppol) * omega_fac(i)
-               if (i == 1) sumterm = sumterm + fac* &
-                  & oper_freq(ifreq)%matlu(iatom)%mat(im,im1,isppol)
-               matlu_tau(iatom)%mat(im+(isppol-1)*ndim,im1+(isppol-1)*ndim,itau) = &
-                 & matlu_tau(iatom)%mat(im+(isppol-1)*ndim,im1+(isppol-1)*ndim,itau) + sumterm
+               if (i == 1) sumterm = sumterm + fac*oper_freq(ifreq)%matlu(iatom)%mat(im,im1,isppol)
+               buffer(ibuf) = buffer(ibuf) + sumterm
              end do ! im
            end do ! im1
          end do ! isppol
-       end do ! itau
-     end do ! iatom
+       end do ! iatom
+     end do ! itau
    end do ! i
  end do ! ifreq
 
  ABI_FREE(omega_fac)
 
- call xmpi_matlu(matlu_tau,natom,paw_dmft%spacecomm)
+ call xmpi_allgatherv(buffer(:),recvcounts(myproc+1),buffer_tot(:),recvcounts(:),displs(:),paw_dmft%spacecomm,ierr)
 
- do iatom=1,natom
-   lpawu = paw_dmft%lpawu(iatom)
-   if (lpawu == -1) cycle
-   ndim = nsppol * nspinor * (2*lpawu+1)
-   do itau=1,ntau
+ ABI_FREE(displs)
+ ABI_FREE(recvcounts)
+
+ ibuf = 0
+ do itau=1,ntau
+   do iatom=1,natom
+     lpawu = paw_dmft%lpawu(iatom)
+     if (lpawu == -1) cycle
+     ndim  = 2*lpawu + 1
+     tndim = ndim * nspinor
+     ndim  = 2 * ndim
      do isppol=1,nsppol
-       matlu_tau(iatom)%mat(1:ndim,1:ndim,itau) = (matlu_tau(iatom)%mat(1:ndim,1:ndim,itau)+ &
-         & conjg(transpose(matlu_tau(iatom)%mat(1:ndim,1:ndim,itau)))) * half
+       do im1=1,tndim
+         do im=1,tndim
+           ibuf = ibuf + 1
+           matlu_tau(iatom)%mat(im+(isppol-1)*ndim,im1+(isppol-1)*ndim,itau) = buffer_tot(ibuf)
+         end do ! im
+       end do ! im1
      end do ! isppol
-   end do ! itau
- end do ! iatom
+     matlu_tau(iatom)%mat(1:ndim,1:ndim,itau) = (matlu_tau(iatom)%mat(1:ndim,1:ndim,itau)+ &
+         & conjg(transpose(matlu_tau(iatom)%mat(1:ndim,1:ndim,itau)))) * half
+   end do ! iatom
+ end do ! itau
+
+ ABI_FREE(buffer)
+ ABI_FREE(buffer_tot)
 
 end subroutine fourier_inv
 !!***
