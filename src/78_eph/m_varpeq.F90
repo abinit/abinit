@@ -1481,8 +1481,8 @@ subroutine varpeq_init(self, gstore, dtset)
    polstate%states_mask_glob(:,:) = 1
 
    if (self%gstore%kfilter == "erange") then
-     ! Nullify forbidden transitions and update the masks accordingly
-     call gqk%filter_erange(gstore, gstore%erange_spin(:,spin), &
+     ! Calculate the mask for selected electronic states
+     call gqk%get_erange_mask(gstore, gstore%erange_spin(:,spin), &
        polstate%my_states_mask, polstate%states_mask_glob)
    endif
 
@@ -1779,7 +1779,7 @@ subroutine polstate_setup(self, ip, a_src, load)
    call self%seed_a(self%aseed, ip)
  endif
 
- call self%filter(ip)
+ !call self%filter(ip)
 
  ! Orthogonalize current states to the previous ones
  call self%ort_to_states(self%my_a(:,:,ip), 1, ip-1, tr_flag=self%translate)
@@ -2002,7 +2002,7 @@ real(dp) function polstate_get_lm_theta(self, ip) result(theta)
  complex(dp) :: a_from, a_forw, d_from, d_forw
  complex(dp) :: g_forw, g0, b
 !arrays
- integer :: ak_filter(self%gqk%nb), akq_filter(self%gqk%nb)
+ !integer :: ak_filter(self%gqk%nb), akq_filter(self%gqk%nb)
  real(dp) :: kpt(3), qpt(3), kpq(3)
  complex(dp) :: ak(self%gqk%nb), akq(self%gqk%nb)
  complex(dp) :: dk(self%gqk%nb), dkq(self%gqk%nb)
@@ -2029,7 +2029,7 @@ real(dp) function polstate_get_lm_theta(self, ip) result(theta)
    ak(:) = self%my_a(:, my_ik, ip)
    dk(:) = self%my_pcjgrad(:, my_ik)
 
-   ak_filter(:) = self%my_states_mask(:, my_ik)
+   !ak_filter(:) = self%my_states_mask(:, my_ik)
 
    do my_iq=1,gqk%my_nq
      qpt(:) = self%my_qpts(:, my_iq)
@@ -2048,15 +2048,15 @@ real(dp) function polstate_get_lm_theta(self, ip) result(theta)
      akq(:) = self%a_glob(:, ik_forw)
      dkq(:) = self%pcjgrad_glob(:, ik_forw)
 
-     akq_filter(:) = self%states_mask_glob(:, ik_forw)
+     !akq_filter(:) = self%states_mask_glob(:, ik_forw)
 
      do ib=1,gqk%nb
-       if (ak_filter(ib) == 0) cycle
+       !if (ak_filter(ib) == 0) cycle
        a_from = ak(ib)
        d_from = dk(ib)
 
        do jb=1,gqk%nb
-         if (akq_filter(jb) == 0) cycle
+         !if (akq_filter(jb) == 0) cycle
          a_forw = akq(jb)
          d_forw = dkq(jb)
 
@@ -2086,10 +2086,10 @@ real(dp) function polstate_get_lm_theta(self, ip) result(theta)
  ! Scattering-independent part
  do my_ik=1,gqk%my_nk
    ik_ibz = gqk%my_k2ibz(1, my_ik)
-   ak_filter(:) = self%my_states_mask(:, my_ik)
+   !ak_filter(:) = self%my_states_mask(:, my_ik)
 
    do ib=1,gqk%nb
-     if (ak_filter(ib) == 0) cycle
+     !if (ak_filter(ib) == 0) cycle
      a_from = self%my_a(ib, my_ik, ip)
      d_from = self%my_pcjgrad(ib, my_ik)
 
@@ -2221,8 +2221,8 @@ subroutine polstate_calc_grad(self, ip)
  complex(dp) :: g_forw, g_back
  complex(dp) :: b, g0
 !arrays
- integer :: ak_filter(self%gqk%nb)
- integer :: akq_filter(self%gqk%nb), akmq_filter(self%gqk%nb)
+ !integer :: ak_filter(self%gqk%nb)
+ !integer :: akq_filter(self%gqk%nb), akmq_filter(self%gqk%nb)
  real(dp) :: kpt(3), qpt(3), kpq(3), kmq(3)
  complex(dp) :: akq(self%gqk%nb), akmq(self%gqk%nb)
  complex(dp) :: bq(self%gqk%my_npert)
@@ -2258,14 +2258,14 @@ subroutine polstate_calc_grad(self, ip)
      ! If erange filter was used in gstore, some transitions are not valid
      if (ik_forw /= -1) then
        akq(:) = self%a_glob(:, ik_forw)
-       ak_filter(:) = self%my_states_mask(:, my_ik)
-       akq_filter(:) = self%states_mask_glob(:, ik_forw)
+       !ak_filter(:) = self%my_states_mask(:, my_ik)
+       !akq_filter(:) = self%states_mask_glob(:, ik_forw)
 
        do ib=1,gqk%nb
-         if (ak_filter(ib) == 0) cycle
+         !if (ak_filter(ib) == 0) cycle
 
          do jb=1,gqk%nb
-           if (akq_filter(jb) == 0) cycle
+           !if (akq_filter(jb) == 0) cycle
            a_forw = akq(jb)
 
            do my_pert=1,gqk%my_npert
@@ -2293,14 +2293,14 @@ subroutine polstate_calc_grad(self, ip)
      ! If erange filter was used in gstore, some transitions are not valid
      if (ik_back /= -1) then
        akmq(:) = self%a_glob(:, ik_back)
-       ak_filter(:) = self%my_states_mask(:, my_ik)
-       akmq_filter(:) = self%states_mask_glob(:, ik_back)
+       !ak_filter(:) = self%my_states_mask(:, my_ik)
+       !akmq_filter(:) = self%states_mask_glob(:, ik_back)
 
        do ib=1,gqk%nb
-         if (ak_filter(ib) == 0) cycle
+         !if (ak_filter(ib) == 0) cycle
 
          do jb=1,gqk%nb
-           if (akmq_filter(jb) == 0) cycle
+           !if (akmq_filter(jb) == 0) cycle
            a_back = akmq(jb)
 
            do my_pert=1,gqk%my_npert
@@ -2329,9 +2329,9 @@ subroutine polstate_calc_grad(self, ip)
  eps = self%enterms(4, ip)
  do my_ik=1,gqk%my_nk
    ik_ibz = gqk%my_k2ibz(1, my_ik)
-   ak_filter(:) = self%my_states_mask(:, my_ik)
+   !ak_filter(:) = self%my_states_mask(:, my_ik)
    do ib=1,gqk%nb
-     if (ak_filter(ib) == 0) cycle
+     !if (ak_filter(ib) == 0) cycle
      self%my_grad(ib, my_ik) = self%my_grad(ib, my_ik) + &
        two/self%nkbz * (self%eig(ib, ik_ibz) - eps) * self%my_a(ib, my_ik, ip)
    enddo
@@ -2422,7 +2422,7 @@ real(dp) function polstate_get_enelph(self, ip) result(enelph)
  integer :: ierr, my_iq, my_pert, my_ik, ik_forw, ib, jb
  complex(dp) :: a_from, a_forw, g_forw, g0, b
 !arrays
- integer :: ak_filter(self%gqk%nb), akq_filter(self%gqk%nb)
+ !integer :: ak_filter(self%gqk%nb), akq_filter(self%gqk%nb)
  real(dp) :: kpt(3), qpt(3), kpq(3)
  complex(dp) :: ak(self%gqk%nb), akq(self%gqk%nb), bq(self%gqk%my_npert)
 
@@ -2434,7 +2434,7 @@ real(dp) function polstate_get_enelph(self, ip) result(enelph)
  do my_ik=1,gqk%my_nk
    kpt(:) = self%my_kpts(:, my_ik)
    ak(:) = self%my_a(:, my_ik, ip)
-   ak_filter(:) = self%my_states_mask(:, my_ik)
+   !ak_filter(:) = self%my_states_mask(:, my_ik)
 
    do my_iq=1,gqk%my_nq
      qpt(:) = self%my_qpts(:, my_iq)
@@ -2452,14 +2452,14 @@ real(dp) function polstate_get_enelph(self, ip) result(enelph)
      akq(:) = self%a_glob(:, ik_forw)
      bq(:) = self%my_b(:, my_iq, ip)
 
-     akq_filter(:) = self%states_mask_glob(:, ik_forw)
+     !akq_filter(:) = self%states_mask_glob(:, ik_forw)
 
      do ib=1,gqk%nb
-       if (ak_filter(ib) == 0) cycle
+       !if (ak_filter(ib) == 0) cycle
        a_from = ak(ib)
 
        do jb=1,gqk%nb
-         if (akq_filter(jb) == 0) cycle
+         !if (akq_filter(jb) == 0) cycle
          a_forw = akq(jb)
 
          do my_pert=1,gqk%my_npert
@@ -2555,7 +2555,7 @@ real(dp) function polstate_get_enel(self, ip) result(enel)
 !Local variables-------------------------------
  class(gqk_t), pointer :: gqk
  integer :: ierr, my_ik, ik_ibz, ib
- integer :: ak_filter(self%gqk%nb)
+ !integer :: ak_filter(self%gqk%nb)
 
 !----------------------------------------------------------------------
 
@@ -2564,9 +2564,9 @@ real(dp) function polstate_get_enel(self, ip) result(enel)
  enel = zero
  do my_ik=1,gqk%my_nk
    ik_ibz = gqk%my_k2ibz(1, my_ik)
-   ak_filter(:) = self%my_states_mask(:, my_ik)
+   !ak_filter(:) = self%my_states_mask(:, my_ik)
    do ib=1,gqk%nb
-     if (ak_filter(ib) == 0) cycle
+     !if (ak_filter(ib) == 0) cycle
      enel = enel + self%eig(ib, ik_ibz)*abs(self%my_a(ib, my_ik, ip))**2
    enddo
  enddo
@@ -2607,7 +2607,7 @@ subroutine polstate_calc_b_from_a(self, ip)
  real(dp) :: wqnu
  complex(dp) :: a_from, a_forw, g_forw, g0, b_tmp
 !arrays
- integer :: ak_filter(self%gqk%nb), akq_filter(self%gqk%nb)
+ !integer :: ak_filter(self%gqk%nb), akq_filter(self%gqk%nb)
  real(dp) :: qpt(3), kpq(3)
  complex(dp) :: ak(self%gqk%nb), akq(self%gqk%nb)
 
@@ -2642,15 +2642,15 @@ subroutine polstate_calc_b_from_a(self, ip)
        ak(:) = self%my_a(:, my_ik, ip)
        akq(:) = self%a_glob(:, ik_forw)
 
-       ak_filter(:) = self%my_states_mask(:, my_ik)
-       akq_filter(:) = self%states_mask_glob(:, ik_forw)
+       !ak_filter(:) = self%my_states_mask(:, my_ik)
+       !akq_filter(:) = self%states_mask_glob(:, ik_forw)
 
        do ib=1,gqk%nb
-        if (ak_filter(ib) == 0) cycle
+         !if (ak_filter(ib) == 0) cycle
          a_from = ak(ib)
 
          do jb=1,gqk%nb
-           if (akq_filter(jb) == 0) cycle
+           !if (akq_filter(jb) == 0) cycle
            a_forw = akq(jb)
 
            g_forw = gqk%my_g(my_pert, jb, my_iq, ib, my_ik)
