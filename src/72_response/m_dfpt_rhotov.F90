@@ -500,33 +500,33 @@ subroutine dfpt_v1zeeman(nspden,nfft,cplex,idir,v1zeeman)
  case(1)
    if (nspden==4) then
      if(idir==3)then       ! Zeeman field along the 3rd axis (z)
-       v1zeeman(:,1)=-0.5d0
-       v1zeeman(:,2)=+0.5d0
+       v1zeeman(:,1)=-1.0d0
+       v1zeeman(:,2)=+1.0d0
        v1zeeman(:,3)= 0.0d0
        v1zeeman(:,4)= 0.0d0
      else if(idir==2)then  ! Zeeman field along the 2nd axis (y)
        v1zeeman(:,1)= 0.0d0
        v1zeeman(:,2)= 0.0d0
        v1zeeman(:,3)= 0.0d0
-       v1zeeman(:,4)=+0.5d0
+       v1zeeman(:,4)=+1.0d0
      else                  ! Zeeman field along the 1st axis (x)
        v1zeeman(:,1)= 0.0d0
        v1zeeman(:,2)= 0.0d0
-       v1zeeman(:,3)=-0.5d0
+       v1zeeman(:,3)=-1.0d0
        v1zeeman(:,4)= 0.0d0
      end if
    else if (nspden==2) then
-     v1zeeman(:,1)=-0.5e0
-     v1zeeman(:,2)= 0.5e0
+     v1zeeman(:,1)=-1.0e0
+     v1zeeman(:,2)= 1.0e0
    else
      v1zeeman(:,1)= 0.0e0
    end if
  case(2)
    if (nspden==2) then
      do ifft=1,nfft
-       v1zeeman(2*ifft-1,1)  =-0.5e0
+       v1zeeman(2*ifft-1,1)  =-1.0e0
        v1zeeman(2*ifft  ,1)  = 0.0e0
-       v1zeeman(2*ifft-1,2)  = 0.5e0
+       v1zeeman(2*ifft-1,2)  = 1.0e0
        v1zeeman(2*ifft  ,2)  = 0.0e0
      end do
    else if (nspden==4) then
@@ -537,10 +537,10 @@ subroutine dfpt_v1zeeman(nspden,nfft,cplex,idir,v1zeeman)
          v1zeeman(2*ifft  ,1)= 0.0e0 !Im[V^11]
          v1zeeman(2*ifft-1,2)= 0.0e0 !Re[V^22]
          v1zeeman(2*ifft  ,2)= 0.0e0 !Im[V^22]
-         v1zeeman(2*ifft-1,3)=-0.5e0 !Re[V^12]
+         v1zeeman(2*ifft-1,3)=-1.0e0 !Re[V^12]
          v1zeeman(2*ifft  ,3)= 0.0e0 !Im[V^12]
          v1zeeman(2*ifft-1,4)= 0.0e0 !Re[i.V^21]=Im[V^12]
-         v1zeeman(2*ifft  ,4)=-0.5e0 !Im[i.V^21]=Re[V^12]
+         v1zeeman(2*ifft  ,4)=-1.0e0 !Im[i.V^21]=Re[V^12]
        end do
      case(2) !along y, v1 = -sigma_y
        do ifft=1,nfft
@@ -549,15 +549,15 @@ subroutine dfpt_v1zeeman(nspden,nfft,cplex,idir,v1zeeman)
          v1zeeman(2*ifft-1,2)= 0.0e0 !Re[V^22]
          v1zeeman(2*ifft  ,2)= 0.0e0 !Im[V^22]
          v1zeeman(2*ifft-1,3)= 0.0e0 !Re[V^12]
-         v1zeeman(2*ifft  ,3)=+0.5e0 !Im[V^12]
-         v1zeeman(2*ifft-1,4)=+0.5e0 !Re[i.V^21]=Im[V^12]
+         v1zeeman(2*ifft  ,3)=+1.0e0 !Im[V^12]
+         v1zeeman(2*ifft-1,4)=+1.0e0 !Re[i.V^21]=Im[V^12]
          v1zeeman(2*ifft  ,4)= 0.0e0 !Im[i.V^21]=Re[V^12]
        end do
      case(3)
        do ifft=1,nfft
-         v1zeeman(2*ifft-1,1)=-0.5e0 !Re[V^11]
+         v1zeeman(2*ifft-1,1)=-1.0e0 !Re[V^11]
          v1zeeman(2*ifft  ,1)= 0.0e0 !Im[V^11]
-         v1zeeman(2*ifft-1,2)= 0.5e0 !Re[V^22]
+         v1zeeman(2*ifft-1,2)= 1.0e0 !Re[V^22]
          v1zeeman(2*ifft  ,2)= 0.0e0 !Im[V^22]
          v1zeeman(2*ifft-1,3)= 0.0e0 !Re[V^12]
          v1zeeman(2*ifft  ,3)= 0.0e0 !Im[V^12]
@@ -657,18 +657,16 @@ subroutine dfpt_v1magpen(cplex,emagpen1,fatsph,intgden,magpen,mpatpol,mpdir,&
    end do
 
    if (cplex==1) then
-     emagpen1=-half*magpen*(rhomag_eff(1,2)**2+rhomag_eff(1,3)**2+rhomag_eff(1,4)**2)
+     emagpen1=-one*magpen*(rhomag_eff(1,2)**2+rhomag_eff(1,3)**2+rhomag_eff(1,4)**2)
    else if (cplex==2) then
-     emagpen1=-half*magpen*(rhomag_eff(1,2)**2+rhomag_eff(2,2)**2 &
+     emagpen1=-one*magpen*(rhomag_eff(1,2)**2+rhomag_eff(2,2)**2 &
                         & + rhomag_eff(1,3)**2+rhomag_eff(2,3)**2 &
                         & + rhomag_eff(1,4)**2+rhomag_eff(2,4)**2 )
    end if
    
-   !A 0.5 factor has been applied here to be consistent with the Zeeman field perturbation
-   !(It is due to the representation on the basis of spins)
-   Bx(:)=-half*magpen*rhomag_eff(:,2)
-   By(:)=-half*magpen*rhomag_eff(:,3)
-   Bz(:)=-half*magpen*rhomag_eff(:,4)
+   Bx(:)=-one*magpen*rhomag_eff(:,2)
+   By(:)=-one*magpen*rhomag_eff(:,3)
+   Bz(:)=-one*magpen*rhomag_eff(:,4)
    if (cplex==1) then
      do ifft=1,nfft
        vmagpen1(ifft,1)=Bz(1)
@@ -704,41 +702,41 @@ subroutine dfpt_v1magpen(cplex,emagpen1,fatsph,intgden,magpen,mpatpol,mpdir,&
      end do
 
      if (cplex==1) then
-       emagpen1=emagpen1+half*magpen*(intgden_eff(1,2,iatom)**2+ &
+       emagpen1=emagpen1+one*magpen*(intgden_eff(1,2,iatom)**2+ &
                                     & intgden_eff(1,3,iatom)**2+ &
                                     & intgden_eff(1,4,iatom)**2)
      else if (cplex==2) then
-       emagpen1=emagpen1+half*magpen*(intgden_eff(1,2,iatom)**2+intgden_eff(2,2,iatom)**2 &
+       emagpen1=emagpen1+one*magpen*(intgden_eff(1,2,iatom)**2+intgden_eff(2,2,iatom)**2 &
                           & + intgden_eff(1,3,iatom)**2+intgden_eff(2,3,iatom)**2 &
                           & + intgden_eff(1,4,iatom)**2+intgden_eff(2,4,iatom)**2 )
      end if
 
      if (cplex==1) then
        do ifft=1,nfft
-         Blocx(ifft)=Blocx(ifft)+half*magpen*intgden_eff(1,2,iatom)*fatsph(ifft,iatom)
-         Blocy(ifft)=Blocy(ifft)+half*magpen*intgden_eff(1,3,iatom)*fatsph(ifft,iatom)
-         Blocz(ifft)=Blocz(ifft)+half*magpen*intgden_eff(1,4,iatom)*fatsph(ifft,iatom)
+         Blocx(ifft)=Blocx(ifft)+one*magpen*intgden_eff(1,2,iatom)*fatsph(ifft,iatom)
+         Blocy(ifft)=Blocy(ifft)+one*magpen*intgden_eff(1,3,iatom)*fatsph(ifft,iatom)
+         Blocz(ifft)=Blocz(ifft)+one*magpen*intgden_eff(1,4,iatom)*fatsph(ifft,iatom)
        end do
      else if (cplex==2.and.sum(qphon(:)**2) < tol8) then
        do ifft=1,nfft
-         Blocx(2*ifft-1)=Blocx(2*ifft-1)+half*magpen*intgden_eff(1,2,iatom)*fatsph(ifft,iatom)
-         Blocy(2*ifft-1)=Blocy(2*ifft-1)+half*magpen*intgden_eff(1,3,iatom)*fatsph(ifft,iatom)
-         Blocz(2*ifft-1)=Blocz(2*ifft-1)+half*magpen*intgden_eff(1,4,iatom)*fatsph(ifft,iatom)
-         Blocx(2*ifft)=Blocx(2*ifft)+half*magpen*intgden_eff(2,2,iatom)*fatsph(ifft,iatom)
-         Blocy(2*ifft)=Blocy(2*ifft)+half*magpen*intgden_eff(2,3,iatom)*fatsph(ifft,iatom)
-         Blocz(2*ifft)=Blocz(2*ifft)+half*magpen*intgden_eff(2,4,iatom)*fatsph(ifft,iatom)
+         Blocx(2*ifft-1)=Blocx(2*ifft-1)+one*magpen*intgden_eff(1,2,iatom)*fatsph(ifft,iatom)
+         Blocy(2*ifft-1)=Blocy(2*ifft-1)+one*magpen*intgden_eff(1,3,iatom)*fatsph(ifft,iatom)
+         Blocz(2*ifft-1)=Blocz(2*ifft-1)+one*magpen*intgden_eff(1,4,iatom)*fatsph(ifft,iatom)
+         Blocx(2*ifft)=Blocx(2*ifft)+one*magpen*intgden_eff(2,2,iatom)*fatsph(ifft,iatom)
+         Blocy(2*ifft)=Blocy(2*ifft)+one*magpen*intgden_eff(2,3,iatom)*fatsph(ifft,iatom)
+         Blocz(2*ifft)=Blocz(2*ifft)+one*magpen*intgden_eff(2,4,iatom)*fatsph(ifft,iatom)
        end do
      else if (cplex==2.and.sum(qphon(:)**2) > tol8) then
        do ifft=1,nfft
          re=2*ifft-1
          im=2*ifft
   
-         Blocx_re=+half*magpen*intgden_eff(1,2,iatom)*fatsph(ifft,iatom)
-         Blocy_re=+half*magpen*intgden_eff(1,3,iatom)*fatsph(ifft,iatom)
-         Blocz_re=+half*magpen*intgden_eff(1,4,iatom)*fatsph(ifft,iatom)
-         Blocx_im=+half*magpen*intgden_eff(2,2,iatom)*fatsph(ifft,iatom)
-         Blocy_im=+half*magpen*intgden_eff(2,3,iatom)*fatsph(ifft,iatom)
-         Blocz_im=+half*magpen*intgden_eff(2,4,iatom)*fatsph(ifft,iatom)
+         Blocx_re=+one*magpen*intgden_eff(1,2,iatom)*fatsph(ifft,iatom)
+         Blocy_re=+one*magpen*intgden_eff(1,3,iatom)*fatsph(ifft,iatom)
+         Blocz_re=+one*magpen*intgden_eff(1,4,iatom)*fatsph(ifft,iatom)
+         Blocx_im=+one*magpen*intgden_eff(2,2,iatom)*fatsph(ifft,iatom)
+         Blocy_im=+one*magpen*intgden_eff(2,3,iatom)*fatsph(ifft,iatom)
+         Blocz_im=+one*magpen*intgden_eff(2,4,iatom)*fatsph(ifft,iatom)
       
          arg=two_pi*dot_product(qphon,-taumr(ifft,iatom,:))
          phr1d_re=dcos(arg)
@@ -856,17 +854,17 @@ subroutine dfpt_v1zeeman_atsph(cplex,fatsph,idir,ipert,mpi_enreg,natom,nfft,ngff
  !Define the local magnetic field
  if (cplex==1) then
    do ifft=1,nfft
-     Bloc(ifft)=-half*fatsph(ifft,iatom)
+     Bloc(ifft)=-one*fatsph(ifft,iatom)
    end do
  else if (cplex==2) then
    do ifft=1,nfft
      re=2*ifft-1
      im=2*ifft
      if (sum(qphon(:)**2)<tol8) then 
-       Bloc(re)=-half*fatsph(ifft,iatom)
+       Bloc(re)=-one*fatsph(ifft,iatom)
        Bloc(im)=zero
      else 
-       Bloc_re=-half*fatsph(ifft,iatom)
+       Bloc_re=-one*fatsph(ifft,iatom)
        Bloc_im=zero
        arg=two_pi*dot_product(qphon,-taumr(ifft,iatom,:))
        phr1d_re=dcos(arg)
