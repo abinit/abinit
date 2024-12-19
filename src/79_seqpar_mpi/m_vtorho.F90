@@ -1480,9 +1480,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !        end if
 
          if(paw_dmft%myproc==0) then
+           ABI_NVTX_START_RANGE(NVTX_DMFT_SAVEOCC)
            call timab(628,1,tsec)
            call saveocc_dmft(paw_dmft)
            call timab(628,2,tsec)
+           ABI_NVTX_END_RANGE()
          end if
          call destroy_dmft(paw_dmft)
 
