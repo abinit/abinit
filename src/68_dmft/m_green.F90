@@ -19,6 +19,9 @@
 
 #include "abi_common.h"
 
+! nvtx related macro definition
+#include "nvtx_macros.h"
+
  MODULE m_green
 
  use defs_basis
@@ -33,7 +36,7 @@
  use, intrinsic :: iso_c_binding, only: c_size_t
 
 #ifdef HAVE_GPU_MARKERS
- use m_nvtx
+ use m_nvtx_data
 #endif
 
  implicit none
@@ -1002,9 +1005,7 @@ subroutine compute_green_batched_core(green,paw_dmft,self,optself,optlog)
  complex(dpc), ABI_CONTIGUOUS pointer :: ks(:,:,:,:),occup_ks(:,:,:,:)
 ! *********************************************************************
 
-#ifdef HAVE_GPU_MARKERS
- call nvtxStartRange("compute_green_batched_core",7)
-#endif
+ ABI_NVTX_START_RANGE(NVTX_DMFT_COMPUTE_GREEN_BATCHED)
 
  diag = 1 - optself
 
@@ -1067,9 +1068,6 @@ subroutine compute_green_batched_core(green,paw_dmft,self,optself,optlog)
    end if
  end do
 
-#ifdef HAVE_GPU_MARKERS
-   call nvtxStartRange("ifreq_loop",9)
-#endif
  ABI_MALLOC(omega_current,(green%nw))
  ABI_MALLOC(fac,(green%nw))
 ! Initialise for compiler
@@ -1209,9 +1207,7 @@ subroutine compute_green_batched_core(green,paw_dmft,self,optself,optlog)
  end if ! optlog=1
 
  if (green%w_type /= "real") then
-#ifdef HAVE_GPU_MARKERS
-   call nvtxStartRange("add_int_fct",13)
-#endif
+   ABI_NVTX_START_RANGE(NVTX_DMFT_ADD_INT_FCT)
    occup_ks    => green%occup%ks
    ks          => green_oper_ndat%ks
    if(gpu_option==ABI_GPU_DISABLED) then
@@ -1275,9 +1271,7 @@ subroutine compute_green_batched_core(green,paw_dmft,self,optself,optlog)
      end if ! diag
 #endif
    end if
-#ifdef HAVE_GPU_MARKERS
-   call nvtxEndRange()
-#endif
+   ABI_NVTX_END_RANGE()
  end if ! w_type/="real"
 
  if (paw_dmft%lchipsiortho == 1 .or. optself == 1) then
@@ -1298,13 +1292,8 @@ subroutine compute_green_batched_core(green,paw_dmft,self,optself,optlog)
  call destroy_oper(green_oper_ndat)
  ABI_FREE(omega_current)
  ABI_FREE(fac)
-#ifdef HAVE_GPU_MARKERS
- call nvtxEndRange()
-#endif
 
-#ifdef HAVE_GPU_MARKERS
- call nvtxEndRange()
-#endif
+ ABI_NVTX_END_RANGE()
 
 end subroutine compute_green_batched_core
 !!***
@@ -1367,9 +1356,7 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
 ! integer, allocatable :: procb(:,:),proct(:,:)
 ! *********************************************************************
 
-#ifdef HAVE_GPU_MARKERS
- call nvtxStartRange("compute_green",7)
-#endif
+ ABI_NVTX_START_RANGE(NVTX_DMFT_COMPUTE_GREEN)
  !lintegrate=.true.
  !if(lintegrate.and.green%w_type=="real") then
  !if(green%w_type=="real") then
@@ -1497,9 +1484,7 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
  if(mkmem>0 .and. gpu_option==ABI_GPU_OPENMP) then
    call compute_green_batched_core(green,paw_dmft,self,optself,optlog)
  else if(mkmem>0) then
-#ifdef HAVE_GPU_MARKERS
-   call nvtxStartRange("ifreq_loop",9)
-#endif
+   ABI_NVTX_START_RANGE(NVTX_DMFT_COMPUTE_GREEN_LOOP)
 ! Initialise for compiler
  omega_current = czero
  do ifreq=1,green%nw
@@ -1719,9 +1704,7 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
    end if
 ! call flush(std_out)
  end do ! ifreq
-#ifdef HAVE_GPU_MARKERS
-   call nvtxEndRange()
-#endif
+   ABI_NVTX_END_RANGE()
  end if
 
 
@@ -1856,9 +1839,7 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
  end if
 ! call flush(std_out)
 
-#ifdef HAVE_GPU_MARKERS
- call nvtxEndRange()
-#endif
+ ABI_NVTX_END_RANGE()
  call timab(624,2,tsec(:))
 
 end subroutine compute_green
@@ -1922,9 +1903,7 @@ subroutine integrate_green(green,paw_dmft,prtopt,opt_ksloc,opt_after_solver,opt_
 
  DBG_ENTER("COLL")
  call timab(625,1,tsec(:))
-#ifdef HAVE_GPU_MARKERS
- call nvtxStartRange("integrate_green",8)
-#endif
+ ABI_NVTX_START_RANGE(NVTX_DMFT_INTEGRATE_GREEN)
 
  if (prtopt > 0) then
    write(message,'(2a,i3,13x,a)') ch10," ===  Integrate Green's function"
@@ -2365,9 +2344,7 @@ subroutine integrate_green(green,paw_dmft,prtopt,opt_ksloc,opt_after_solver,opt_
  call destroy_matlu(matlu_temp(:),natom)
  ABI_FREE(matlu_temp)
 ! deallocate(charge_loc_old)
-#ifdef HAVE_GPU_MARKERS
- call nvtxEndRange()
-#endif
+ ABI_NVTX_END_RANGE()
  call timab(625,2,tsec(:))
  DBG_EXIT("COLL")
 
@@ -3628,9 +3605,7 @@ subroutine fermi_green(green,paw_dmft,self)
  character(len=500) :: message
 !************************************************************************
 !
-#ifdef HAVE_GPU_MARKERS
- call nvtxStartRange("fermi_green",24)
-#endif
+ ABI_NVTX_START_RANGE(NVTX_DMFT_FERMI_GREEN)
  write(message,'(a,8x,a)') ch10,"  == Compute Fermi level"
  call wrtout(std_out,message,'COLL')
 
@@ -3734,9 +3709,7 @@ subroutine fermi_green(green,paw_dmft,self)
  !call compute_green(green,paw_dmft,0,self,opt_self=1,opt_nonxsum=1)
  !call integrate_green(green,paw_dmft,prtopt=0,opt_ksloc=3) !,opt_nonxsum=1)
 
-#ifdef HAVE_GPU_MARKERS
- call nvtxEndRange()
-#endif
+ ABI_NVTX_END_RANGE()
  !return
 end subroutine fermi_green
 !!***
@@ -4117,9 +4090,7 @@ subroutine compute_nb_elec(green,self,paw_dmft,Fx,nb_elec_x,fermie,Fxprime)
  complex(dpc), allocatable :: omega_fac(:),trace_moments(:),trace_moments_prime(:)
 ! *********************************************************************
 
-#ifdef HAVE_GPU_MARKERS
-   call nvtxStartRange("compute_nb_elec",29)
-#endif
+   ABI_NVTX_START_RANGE(NVTX_DMFT_COMPUTE_NB_ELEC)
    dmft_test = paw_dmft%dmft_test
 
    if (dmft_test == 0) then
@@ -4244,9 +4215,7 @@ subroutine compute_nb_elec(green,self,paw_dmft,Fx,nb_elec_x,fermie,Fxprime)
    nb_elec_x = green%charge_ks
    Fx = green%charge_ks - paw_dmft%nelectval
 
-#ifdef HAVE_GPU_MARKERS
-   call nvtxEndRange()
-#endif
+   ABI_NVTX_END_RANGE()
  end subroutine compute_nb_elec
 !!***
 

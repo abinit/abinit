@@ -25,13 +25,16 @@
 
 #include "abi_common.h"
 
+! nvtx related macro definition
+#include "nvtx_macros.h"
+
 MODULE m_hubbard_one
 
 
  use defs_basis
 
 #ifdef HAVE_GPU_MARKERS
- use m_nvtx
+ use m_nvtx_data
 #endif
 
  implicit none
@@ -425,9 +428,7 @@ subroutine green_atomic_hubbard(cryst_struc,green_hubbard,hu,level_diag,paw_dmft
  real(dp), allocatable :: elevels(:)
  real(dp) :: emax,emin,eshift,prtopt, Ej_np1, Ei_n,beta,maxarg_exp,tmp
 !************************************************************************
-#ifdef HAVE_GPU_MARKERS
-   call nvtxStartRange("green_atomic_hubbard",11)
-#endif
+   ABI_NVTX_START_RANGE(NVTX_DMFT_HUBBARD_ONE)
    maxarg_exp=300
 
 !  hu is not used anymore.
@@ -809,9 +810,8 @@ subroutine green_atomic_hubbard(cryst_struc,green_hubbard,hu,level_diag,paw_dmft
      end if
    end do
    call destroy_green(green_hubbard_realw)
-#ifdef HAVE_GPU_MARKERS
-   call nvtxEndRange()
-#endif
+
+   ABI_NVTX_END_RANGE()
 
  end subroutine green_atomic_hubbard
 !!***

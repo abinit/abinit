@@ -23,6 +23,9 @@
 
 #include "abi_common.h"
 
+! nvtx related macro definition
+#include "nvtx_macros.h"
+
 MODULE m_oper
 
  use defs_basis
@@ -35,7 +38,7 @@ MODULE m_oper
  use m_matlu, only : matlu_type
 
 #ifdef HAVE_GPU_MARKERS
- use m_nvtx
+ use m_nvtx_data
 #endif
 
  implicit none
@@ -749,10 +752,8 @@ subroutine inverse_oper(oper,option,procb,iproc,gpu_option)
 !todo_ba: prb with gwpc here: necessary for matcginv but should be dpc
 ! *********************************************************************
 
-#ifdef HAVE_GPU_MARKERS
- call nvtxStartRange("inverse_oper",14)
-#endif
  DBG_ENTER("COLL")
+ ABI_NVTX_START_RANGE(NVTX_DMFT_INVERSE_OPER)
 
  l_gpu_option=ABI_GPU_DISABLED; if(present(gpu_option)) l_gpu_option=gpu_option
  paral = 0
@@ -812,9 +813,7 @@ subroutine inverse_oper(oper,option,procb,iproc,gpu_option)
  !$OMP TARGET EXIT DATA MAP(from:ks) IF(l_gpu_option==ABI_GPU_OPENMP .and. oper%gpu_option/=ABI_GPU_OPENMP)
 #endif
 
-#ifdef HAVE_GPU_MARKERS
-  call nvtxEndRange()
-#endif
+ ABI_NVTX_END_RANGE()
  DBG_EXIT("COLL")
 
 end subroutine inverse_oper
@@ -866,10 +865,8 @@ subroutine downfold_oper(oper,paw_dmft,procb,iproc,option,op_ks_diag,gpu_option)
  complex(dpc), allocatable :: mat_temp(:,:,:),mat_temp2(:,:,:),mat_temp3(:,:)
 ! *********************************************************************
 
-#ifdef HAVE_GPU_MARKERS
-call nvtxStartRange("downfold_oper",20)
-#endif
  DBG_ENTER("COLL")
+ ABI_NVTX_START_RANGE(NVTX_DMFT_DOWNFOLD_OPER)
 
 #ifndef HAVE_OPENMP_OFFLOAD
  ABI_UNUSED(alpha); ABI_UNUSED(im)
@@ -1097,9 +1094,7 @@ call nvtxStartRange("downfold_oper",20)
 
  DBG_EXIT("COLL")
 
-#ifdef HAVE_GPU_MARKERS
- call nvtxEndRange()
-#endif
+ ABI_NVTX_END_RANGE()
 end subroutine downfold_oper
 !!***
 
@@ -1141,10 +1136,8 @@ subroutine upfold_oper(oper,paw_dmft,procb,iproc)
 !   write(6,*) size(procb)
 !   write(6,*) size(procb2)
 !   write(6,*) procb2(1),procb2(16)
-#ifdef HAVE_GPU_MARKERS
- call nvtxStartRange("upfold_oper",15)
-#endif
  DBG_ENTER("COLL")
+ ABI_NVTX_START_RANGE(NVTX_DMFT_UPFOLD_OPER)
 
  !if ((oper%has_opermatlu == 0) .or. (oper%has_operks == 0)) then
  !  message = " Operator is not defined to be used in upfold_oper"
@@ -1240,10 +1233,8 @@ subroutine upfold_oper(oper,paw_dmft,procb,iproc)
    !enddo ! ikpt
  !enddo ! isppol
 
+ ABI_NVTX_END_RANGE()
  DBG_EXIT("COLL")
-#ifdef HAVE_GPU_MARKERS
- call nvtxEndRange()
-#endif
 
 end subroutine upfold_oper
 !!***
@@ -1282,13 +1273,10 @@ subroutine upfold_oper_batched(oper,paw_dmft,procb,iproc,gpu_option)
  complex(dpc), allocatable :: mat_temp(:,:,:),mat_temp2(:,:,:)
 ! *********************************************************************
 
-#ifdef HAVE_GPU_MARKERS
- call nvtxStartRange("upfold_oper",15)
-#endif
-
  l_gpu_option=ABI_GPU_DISABLED; if(present(gpu_option)) l_gpu_option=gpu_option
 
  DBG_ENTER("COLL")
+ ABI_NVTX_START_RANGE(NVTX_DMFT_UPFOLD_OPER)
 
  !if ((oper%has_opermatlu == 0) .or. (oper%has_operks == 0)) then
  !  message = " Operator is not defined to be used in upfold_oper"
@@ -1386,11 +1374,9 @@ subroutine upfold_oper_batched(oper,paw_dmft,procb,iproc,gpu_option)
 #endif
  ABI_FREE(mat_temp2)
 
+ ABI_NVTX_END_RANGE()
  DBG_EXIT("COLL")
 
-#ifdef HAVE_GPU_MARKERS
- call nvtxEndRange()
-#endif
 end subroutine upfold_oper_batched
 !!***
 
