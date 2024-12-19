@@ -272,7 +272,7 @@ contains
 subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,&
 &  dielt,dim_eig2rf,doccde_rbz,docckqde,dtfil,dtset,&
 &  d2bbb,d2lo,d2nl,d2ovl,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrnl,efrx1,efrx2,&
-&  ehart01,ehart1,eigenq,eigen0,eigen1,eii,ek0,ek1,eloc0,elmag1,elpsp1,emagpen1,&
+&  ehart01,ehart1,eigenq,eigen0,eigen1,eii,ek0,ek1,elmag1,eloc0,elpsp1,emagpen1,&
 &  end0,end1,enl0,enl1,eovl1,epaw1,etotal,evdw,exc1,fermie,gh0c1_set,gh1c_set,hdr,idir,indkpt1,&
 &  indsy1,initialized,ipert,irrzon1,istwfk_rbz,&
 &  kg,kg1,kpt_rbz,kxc,mband_mem_rbz,mgfftf,mkmem,mkqmem,mk1mem,&
