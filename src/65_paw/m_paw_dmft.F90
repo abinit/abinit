@@ -1369,9 +1369,9 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
    ABI_FREE(kpg_norm)
    ABI_FREE(typcycle)
 
- end if ! use_full_chipsi
+   if (paw_dmft%dmft_prtwan /= 1) ABI_FREE(paw_dmft%bessel)
 
- if (paw_dmft%dmft_prtwan /= 1) ABI_FREE(paw_dmft%bessel)
+ end if ! use_full_chipsi
 
  ABI_FREE(lcycle)
 
