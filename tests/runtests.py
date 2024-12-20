@@ -4,8 +4,8 @@ from __future__ import print_function, division, absolute_import #, unicode_lite
 
 import sys
 import os
-# Set ABI_PSPDIR env variable to point to the absolute path of Psps_for_tests
-os.environ["ABI_PSPDIR"] = os.path.abspath(os.path.join(os.path.dirname(__file__), "Psps_for_tests"))
+# Set ABI_PSPDIR env variable to point to the absolute path of Pspdir
+os.environ["ABI_PSPDIR"] = os.path.abspath(os.path.join(os.path.dirname(__file__), "Pspdir"))
 #print("ABI_PSPDIR:", os.environ["ABI_PSPDIR"])
 import platform
 import time
@@ -294,6 +294,9 @@ def main():
     parser.add_option("-l", "--list-tests-info", dest="list_info", default=False, action="store_true",
                       help="List the tests in test suite (echo description section in ListOfFile files) and exit")
 
+    parser.add_option("--tolerances", default=False, action="store_true",
+                      help="Write csv files with tolerances of each test.")
+
     parser.add_option("-m", "--make", dest="make", type="int", default=0,
                       help="Find the abinit build tree, and compile to code with 'make -j#NUM' before running the tests.")
 
@@ -570,6 +573,38 @@ def main():
 
         with open("ListOfTests.txt", "w") as fh:
             fh.write(test_suite.make_listoftests(width=100, html=False))
+        sys.exit(0)
+
+    if options.tolerances:
+
+        def get_tol_rows(this_test):
+            rows = []
+            print("test:", this_test, this_test.__class__.__name__)
+            for f in this_test.files_to_test:
+                print("file_name:", f.name, ", f.tolnlines:", f.tolnlines, ", tolabs: ", f.tolabs, ", tolrel:", f.tolrel)
+                d = dict(test=str(test), cls=this_test.__class__.__name__,
+                         file_name=f.name, tolnlines=f.tolnlines, tolabs=f.tolabs, tolrel=f.tolrel)
+                rows.append(d)
+            return rows
+
+        dict_list = []
+        for test in test_suite:
+            if test.is_chain():
+                for child_test in test:
+                    rows = get_tol_rows(child_test)
+                    dict_list.extend(rows)
+            else:
+                rows = get_tol_rows(test)
+                dict_list.extend(rows)
+
+        import pandas as pd
+        df = pd.DataFrame(dict_list)
+        #print(df)
+
+        filepath = "tolerances.csv"
+        print("Writing dataframe with tolerances to:", filepath)
+        df.to_csv(filepath, index=False)
+
         sys.exit(0)
 
     if options.dry_run:

@@ -708,8 +708,8 @@ P           mkmem           3
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/waroquiers/devel/6.8.1-private/build/../tests/Psps_for_tests/14si.bj_noNLCC.psp
-- pspatm: opening atomic psp file    /home/waroquiers/devel/6.8.1-private/build/../tests/Psps_for_tests/14si.bj_noNLCC.psp
+- pspini: atom type   1  psp file is /home/waroquiers/devel/6.8.1-private/build/../tests/Pspdir/14si.bj_noNLCC.psp
+- pspatm: opening atomic psp file    /home/waroquiers/devel/6.8.1-private/build/../tests/Pspdir/14si.bj_noNLCC.psp
 -   Si  APE 1.x : Troullier-Martins scheme, , llocal= 2
 - 14.00000   4.00000  20110507                znucl, zion, pspdat
     6    0    2    2      2400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -997,8 +997,8 @@ Result for kinetic energy density :
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/waroquiers/devel/6.8.1-private/build/../tests/Psps_for_tests/14si.bj_noNLCC.psp
-- pspatm: opening atomic psp file    /home/waroquiers/devel/6.8.1-private/build/../tests/Psps_for_tests/14si.bj_noNLCC.psp
+- pspini: atom type   1  psp file is /home/waroquiers/devel/6.8.1-private/build/../tests/Pspdir/14si.bj_noNLCC.psp
+- pspatm: opening atomic psp file    /home/waroquiers/devel/6.8.1-private/build/../tests/Pspdir/14si.bj_noNLCC.psp
 -   Si  APE 1.x : Troullier-Martins scheme, , llocal= 2
 - 14.00000   4.00000  20110507                znucl, zion, pspdat
     6    0    2    2      2400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
