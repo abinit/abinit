@@ -3006,9 +3006,9 @@ subroutine dfpt_prtene(berryopt,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrn
  if (emagpen1>tol8) then
    write(msg,'(a,es17.8)') &
 &   '     Magnetic penalty contribution=', emagpen1   
+   call wrtout(iout,msg)
+   call wrtout(std_out,msg)
  end if 
- call wrtout(iout,msg)
- call wrtout(std_out,msg)
 
  if (usepaw==1) then
    numb='10';if( ipert==natom+3.or.ipert==natom+4) numb='11'
