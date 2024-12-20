@@ -997,7 +997,7 @@ subroutine trace_oper(oper,trace_ks,trace_loc,opt_ksloc,trace_ks_cmplx)
    !temp1=zero
    do isppol=1,oper%nsppol
      do ikpt=1,oper%nkpt
-       do ib=1,oper%mbandc
+       do ib=oper%mbandc,1,-1 ! Never change this order
          trace = trace + oper%ks(ib,ib,ikpt,isppol)*oper%wtk(ikpt+oper%shiftk)
          !temp1=temp1+oper%wtk(ikpt)
        end do ! ib

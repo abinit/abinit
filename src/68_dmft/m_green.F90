@@ -3771,23 +3771,11 @@ subroutine compute_nb_elec(green,self,paw_dmft,Fx,nb_elec_x,fermie,Fxprime)
 
      call init_oper(paw_dmft,oper_tmp,nkpt=mkmem,shiftk=shift)
 
-     ABI_MALLOC(omega_fac,(nmoments))
-     do ifreq=1,green%nw
+     do ifreq=green%nw,1,-1
        if (green%distrib%proct(ifreq) /= green%distrib%me_freq) cycle
-       omega = cmplx(zero,green%omega(ifreq),kind=dp)
+       omega = j_dpc * green%omega(ifreq)
        fac = two * paw_dmft%wgt_wlo(ifreq) * temp
-       omega_fac(1) = - fac / omega
-       do i=2,nmoments
-         omega_fac(i) = omega_fac(i-1) / omega
-       end do ! i
        if (nsppol == 1 .and. nspinor == 1) fac = fac * two
-       if (ifreq == green%nw) then
-         omega_fac(1) = omega_fac(1) + half
-         if (green%has_moments == 1) then
-           omega_fac(2) = omega_fac(2) - cone/(four*temp)
-           omega_fac(4) = omega_fac(4) + cone/(dble(48)*(temp**3))
-         end if ! moments
-       end if ! ifreq=green%nw
 
        call add_matlu(self%hdc%matlu(:),self%oper(ifreq)%matlu(:),oper_tmp%matlu(:),paw_dmft%natom,-1)
        call upfold_oper(oper_tmp,paw_dmft)
@@ -3801,30 +3789,39 @@ subroutine compute_nb_elec(green,self,paw_dmft,Fx,nb_elec_x,fermie,Fxprime)
            end do ! ib
            call xginv(oper_tmp%ks(:,:,ikpt,isppol),mbandc)
 
-           if (present(Fxprime)) Fxprime = Fxprime - &
-              & dble(sum(oper_tmp%ks(:,:,ikpt,isppol)*transpose(oper_tmp%ks(:,:,ikpt,isppol))))*wtk*fac
-           do ib=1,mbandc
+           Fxprime = Fxprime - dble(sum(oper_tmp%ks(:,:,ikpt,isppol)*transpose(oper_tmp%ks(:,:,ikpt,isppol))))*wtk*fac
+           do ib=mbandc,1,-1
              green%charge_ks = green%charge_ks + dble(oper_tmp%ks(ib,ib,ikpt,isppol))*wtk*fac
            end do ! ib
          end do ! ikpt
        end do ! isppol
 
-       if (green%distrib%me_kpt == 0) then
-         green%charge_ks = green%charge_ks + dble(sum(trace_moments(1:nmoments)*omega_fac(1:nmoments)))
-         if (present(Fxprime)) Fxprime = Fxprime + dble(sum(trace_moments_prime(1:nmoments)*omega_fac(1:nmoments)))
-       end if
      end do ! ifreq
 
      call xmpi_sum(green%charge_ks,paw_dmft%spacecomm,ierr)
-     if (present(Fxprime)) then
-       call xmpi_sum(Fxprime,paw_dmft%spacecomm,ierr)
-     end if
+     call xmpi_sum(Fxprime,paw_dmft%spacecomm,ierr)
+
+     call destroy_oper(oper_tmp)
+
+     ABI_MALLOC(omega_fac,(nmoments))
+
+     do i=nmoments,1,-1 ! Never change the summation orders, this is VERY IMPORTANT to have better accuracy
+       omega_fac(i) = czero
+       do ifreq=green%nw,1,-1
+         omega_fac(i) = omega_fac(i) + paw_dmft%wgt_wlo(ifreq) / (paw_dmft%omega_lo(ifreq))**i
+       end do
+       omega_fac(i) = - two * temp * omega_fac(i) / (j_dpc)**i
+       if (i == 1) omega_fac(i) = omega_fac(i) + half
+       if (i == 2) omega_fac(i) = omega_fac(i) - cone/(four*temp)
+       if (i == 4) omega_fac(i) = omega_fac(i) + cone/(dble(48)*(temp**3))
+     end do ! i
+
+     green%charge_ks = green%charge_ks + dble(sum(trace_moments(1:nmoments)*omega_fac(1:nmoments)))
+     Fxprime = Fxprime + dble(sum(trace_moments_prime(1:nmoments)*omega_fac(1:nmoments)))
 
      ABI_FREE(trace_moments)
      ABI_FREE(trace_moments_prime)
      ABI_FREE(omega_fac)
-
-     call destroy_oper(oper_tmp)
 
      if (paw_dmft%dmft_use_all_bands) then
        band_index = 0
@@ -3833,35 +3830,25 @@ subroutine compute_nb_elec(green,self,paw_dmft,Fx,nb_elec_x,fermie,Fxprime)
        do isppol=1,nsppol
          do ikpt=1,nkpt
            nband_k = paw_dmft%nband(ikpt+(isppol-1)*nkpt)
-           if (green%distrib%procb(ikpt) /= green%distrib%me_kpt) then
-             band_index = band_index + nband_k
-             cycle
-           end if
            wtk = paw_dmft%wtk(ikpt)
-           do ib=1,nband_k
+           do ib=nband_k,1,-1
              if (paw_dmft%band_in(ib)) cycle
              eig = paw_dmft%eigen(ib+band_index)
              correction = correction + occup_fd(eig,fermie,paw_dmft%temp)*wtk
-             if (present(Fxprime)) then
-               if ((eig-fermie) > zero) then
-                 occ_prime = exp(-(eig-fermie)/temp) / (one+exp(-(eig-fermie)/temp))**2 / temp
-               else
-                 occ_prime = exp((eig-fermie)/temp) / (one+exp((eig-fermie)/temp))**2 / temp
-               end if
-               correction_prime = correction_prime + occ_prime*wtk
-             end if ! opt>=1
+             if ((eig-fermie) > zero) then
+               occ_prime = exp(-(eig-fermie)/temp) / (one+exp(-(eig-fermie)/temp))**2 / temp
+             else
+               occ_prime = exp((eig-fermie)/temp) / (one+exp((eig-fermie)/temp))**2 / temp
+             end if
+             correction_prime = correction_prime + occ_prime*wtk
            end do ! ib
            band_index = band_index + nband_k
          end do ! ikpt
        end do ! isppol
-       call xmpi_sum(correction,green%distrib%comm_kpt,ierr)
        if (nsppol == 1 .and. nspinor == 1) correction = correction * two
        green%charge_ks = green%charge_ks + correction
-       if (present(Fxprime)) then
-         call xmpi_sum(correction_prime,green%distrib%comm_kpt,ierr)
-         if (nsppol == 1 .and. nspinor == 1) correction_prime = correction_prime * two
-         Fxprime = Fxprime + correction_prime
-       end if ! Fxprime
+       if (nsppol == 1 .and. nspinor == 1) correction_prime = correction_prime * two
+       Fxprime = Fxprime + correction_prime
      end if ! use_all_bands
 
    end if ! dmft_test
