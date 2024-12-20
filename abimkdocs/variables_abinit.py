@@ -3625,7 +3625,7 @@ Kohn-Sham equations (One atomic time unit is 2.418884e-17 seconds).
 One should also set the number of time steps to be performed using the 
 parameter [[ntime]].
 
-A typical good value for [[dtele]]] usually is less or equal than 0.1. 
+A good value for [[dtele]] is usually less than or equal to 0.1. 
 The user should try several values in order to find the one allowing for 
 a stable and efficient integration.
 """,
@@ -22625,7 +22625,7 @@ Variable(
     defaultval=0,
     dimensions="scalar",
     requires="[[optdriver]] is 9 and [[td_propagator]] is 1",
-    mnemonics="Time-Dependent Self-Consistent Nstep",
+    mnemonics="Time-Dependent Self-Consistent NMAX",
     added_in_version="10",
     text=r"""
 This variable controls the maximum number of self-consistent corrector step
