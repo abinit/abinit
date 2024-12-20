@@ -56,7 +56,7 @@ nstep         50       # Maximal number of SCF steps
 
 # Control of the relaxation
 # =========================
-ionmov        2        # BFGS (Broyden) algorithm for ions relaxation
+geoopt        "bfgs"   # BFGS (Broyden) algorithm for ions relaxation
 optcell       0        # No cell optimization
 ntime         500      # Max. number of "time" steps
 tolmxf        5.0d-5   # Stopping criterion of relaxation cycle

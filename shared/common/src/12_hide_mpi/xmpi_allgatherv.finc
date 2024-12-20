@@ -953,3 +953,61 @@ subroutine xmpi_allgatherv_coeff2d_indx(xval_in,xval_out,comm,indx,ierr)
 
 end subroutine xmpi_allgatherv_coeff2d_indx
 !!***
+
+!!****f* ABINIT/xmpi_allgatherv_dc
+!! NAME
+!!  xmpi_allgatherv_dc
+!!
+!! FUNCTION
+!!  Gathers data from all tasks and delivers it to all.
+!!  Target: one-dimensional double complex arrays.
+!!
+!! INPUTS
+!!  xval= buffer array
+!!  recvcounts= number of received elements
+!!  displs= relative offsets for incoming data
+!!  nelem= number of elements
+!!  comm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  recvbuf= received buffer
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!      xmpi_allgatherv
+!!
+!! SOURCE
+
+subroutine xmpi_allgatherv_dc(xval,nelem,recvbuf,recvcounts,displs,comm,ier)
+
+!Arguments-------------------------
+ complex(dpc), DEV_CONTARRD intent(in) :: xval(:)
+ complex(dpc), DEV_CONTARRD intent(inout) :: recvbuf(:)
+ integer,intent(in) :: recvcounts(:),displs(:)
+ integer,intent(in) :: nelem,comm
+ integer,intent(out) :: ier
+
+!Local variables--------------
+ integer :: cc,dd
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+   call MPI_ALLGATHERV(xval,nelem,MPI_DOUBLE_COMPLEX,recvbuf,recvcounts,displs,&
+&   MPI_DOUBLE_COMPLEX,comm,ier)
+ else if (comm == MPI_COMM_SELF) then
+#endif
+   dd=0;if (size(displs)>0) dd=displs(1)
+   cc=size(xval);if (size(recvcounts)>0) cc=recvcounts(1)
+   recvbuf(dd+1:dd+cc)=xval(1:cc)
+#if defined HAVE_MPI
+ end if
+#endif
+end subroutine xmpi_allgatherv_dc
+!!***

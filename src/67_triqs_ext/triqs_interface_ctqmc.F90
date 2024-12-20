@@ -21,30 +21,46 @@ MODULE TRIQS_CTQMC
 ! =====================================================================
 !
 ! Ctqmc_triqs_run(Boolean args, int args, real args, pointer array args)
-! 
+!
 ! =====================================================================
 
- 
-    subroutine Ctqmc_triqs_run (    rot_inv, leg_measure, hist, wrt_files, tot_not,                                    &
+     SUBROUTINE Ctqmc_triqs_run(rot_inv,leg_measure,orb_off_diag,spin_off_diag,move_shift,move_double,measure_density_matrix,time_invariance, &
+                              & use_norm_as_weight,loc_n_min,loc_n_max,seed_a,seed_b,nflavor,ntau,nl,ncycle,cycle_length, &
+                              & ntherm,ntherm2,det_init_size,det_n_operations_before_check,ntau_delta,nbins_histo, &
+                              & rank,nspinor,iatom,ilam,beta,move_global_prob,imag_threshold,det_precision_warning, &
+                              & det_precision_error,det_singular_threshold,lam,ftau,gtau,gl,udens,vee,levels,moments_self_1, &
+                              & moments_self_2,Eu,occ) bind(c)
 
-                                    nflavor, nfreq, ntau, nl, ncycle, cycle_length, ntherm, verbosity_solver,seed,beta,&
+      use iso_c_binding
 
-                               &    levels,  u_mat_ij, u_mat_ijkl, fiw_nd, g_iw, gtau, gl, comm                        ) bind( c )
-     
-      use, intrinsic :: iso_c_binding
+      LOGICAL, VALUE, INTENT(IN) :: rot_inv,leg_measure,orb_off_diag,spin_off_diag,move_shift,move_double
 
-      LOGICAL(Kind=1), VALUE, INTENT(IN) :: rot_inv, leg_measure, hist, wrt_files, tot_not
- 
-      INTEGER,  VALUE, INTENT(IN)        :: nflavor, nfreq, ntau, nl, ncycle, cycle_length, ntherm, verbosity_solver, seed 
+      LOGICAL, VALUE, INTENT(IN) :: measure_density_matrix,time_invariance,use_norm_as_weight
 
-      REAL(Kind=8), VALUE, INTENT(IN)    :: beta
+      INTEGER, VALUE, INTENT(IN) :: loc_n_min,loc_n_max,seed_a,seed_b,nflavor,ntau,nl,ncycle,cycle_length,ntherm,ntherm2
 
-      TYPE(C_PTR), VALUE, INTENT(IN)     :: levels,  u_mat_ij, u_mat_ijkl, fiw_nd, g_iw, gtau, gl
+      INTEGER, VALUE, INTENT(IN) :: det_init_size,det_n_operations_before_check,ntau_delta,nbins_histo,rank,nspinor,iatom,ilam
 
-      INTEGER,  VALUE, INTENT(IN)        :: comm
- 
+      REAL(KIND=8), VALUE, INTENT(IN) :: beta,move_global_prob,imag_threshold,det_precision_warning,det_precision_error
+
+      REAL(KIND=8), VALUE, INTENT(IN) :: det_singular_threshold,lam
+
+      TYPE(C_PTR), VALUE, INTENT(IN) :: ftau,gtau,gl,udens,vee,levels,moments_self_1,moments_self_2,Eu,occ
+
     end subroutine Ctqmc_triqs_run
-   
+
+    subroutine build_dlr(wdlr_size,ndlr,wdlr,lam,eps) bind(c)
+
+      use iso_c_binding
+
+      INTEGER, VALUE, INTENT(IN) :: wdlr_size
+
+      TYPE(C_PTR), VALUE, INTENT(IN)  :: ndlr,wdlr
+
+      REAL(KIND=8), VALUE, INTENT(IN) :: lam,eps
+
+    end subroutine build_dlr
+
   end interface
 
 
