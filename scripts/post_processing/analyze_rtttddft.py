@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 Script to compute the optical conductivity and the dielectric 
 function from the time-dependent current density obtained 

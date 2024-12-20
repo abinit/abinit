@@ -315,10 +315,8 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
  call second_setup(dtset,mpi_enreg,pawang,pawrad,pawtab,psps,psp_gencond,tdks)
 
  !6) TD external elec. field perturbation
- !Test that we use spherical harmonics if TD electric field
- if (dtset%td_ef_type/=0 .and. psps%useylm/=1) then
-   ABI_ERROR("TD Electric field only work with spherical harmonics (useylm=1)")
- end if
+ if (dtset%td_ef_type/=0 .and. psps%useylm/=1) ABI_ERROR("TD Electric field only works with spherical harmonics (useylm=1)")
+ if (dtset%td_ef_type/=0 .and. psps%usepaw/=1) ABI_ERROR("TD Electric field only works with PAW")
  !Init vector potential and associated constants
  if (dtset%td_ef_type/=0 .or. dtset%prtcurrent/=0) then
     ABI_MALLOC(tdks%current,(3,dtset%nsppol))
@@ -1118,9 +1116,9 @@ subroutine read_wfk(dtfil, dtset, ecut_eff, fname_wfk, mpi_enreg, tdks)
 
  !Actually read the intial KS orbitals here
  if (dtset%td_restart /= 1) then
-   write(msg,'(3a)') ch10,'-------------    Reading initial wavefunctions     -------------',ch10
+   write(msg,'(3a)') ch10,'-------------------    Reading initial wavefunctions    -------------------',ch10
  else
-   write(msg,'(3a)') ch10,'-------------   Reading wavefunctions for restart  -------------',ch10
+   write(msg,'(3a)') ch10,'-------------------   Reading wavefunctions for restart  ------------------',ch10
  end if
  call wrtout(ab_out,msg)
  if (do_write_log) call wrtout(std_out,msg)
@@ -1144,7 +1142,7 @@ subroutine read_wfk(dtfil, dtset, ecut_eff, fname_wfk, mpi_enreg, tdks)
 
  !In case of restart also read wfk file containing wave functions at t=0
  if (dtset%td_restart == 1 .and. tdks%fname_wfk0 /= fname_wfk) then
-   write(msg,'(3a)') ch10,'-------------   Reading initial wavefunctions   -------------',ch10
+   write(msg,'(3a)') ch10,'-------------------    Reading initial wavefunctions    -------------------',ch10
    ABI_MALLOC_OR_DIE(tdks%cg0,(2,tdks%mcg),ierr)
    call wrtout(ab_out,msg)
    if (do_write_log) call wrtout(std_out,msg)

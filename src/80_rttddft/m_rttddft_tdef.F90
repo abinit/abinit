@@ -111,7 +111,11 @@ subroutine tdef_init(tdef,td_ef_type,td_ef_pol,td_ef_ezero,td_ef_tzero,td_ef_lam
 
 ! ***********************************************************************
 
- 
+ if (td_ef_type > 1 .or. td_ef_type < 0) then
+   ABI_ERROR("Wrong value of td_ef_type")
+ end if
+
+
  tdef%ef_type  = td_ef_type
  tdef%ef_ezero = td_ef_pol*td_ef_ezero
  tdef%ef_tau   = td_ef_tau
