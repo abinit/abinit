@@ -67,6 +67,7 @@ module m_multibinit_dataset
   integer :: confinement
   integer :: conf_power_disp
   integer :: conf_power_strain
+  integer :: dim_msr
   integer :: dipdip
   integer :: eivec
   integer :: elphflag
@@ -814,10 +815,10 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  multibinit_dtset%asr=2
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'asr',tread,'INT')
  if(tread==1) multibinit_dtset%asr=intarr(1)
- if(multibinit_dtset%asr<-2.or.multibinit_dtset%asr>5)then
+ if(multibinit_dtset%asr<-2.or.multibinit_dtset%asr>6)then
    write(message, '(a,i8,a,a,a,a,a)' )&
 &   'asr is',multibinit_dtset%asr,', but the only allowed values',ch10,&
-&   'are 0, 1, 2, 3, 4, 5, -1 or -2 .',ch10,&
+&   'are 0, 1, 2, 3, 4, 5, 6, -1 or -2 .',ch10,&
 &   'Action: correct asr in your input file.'
 !  Note : negative values are allowed when the acoustic sum rule
 !  is to be applied after the analysis of IFCs
@@ -935,6 +936,17 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  if(tread==1) multibinit_dtset%conf_power_fact_strain=dprarr(1)
 
 !D
+
+multibinit_dtset%dim_msr=1
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dim_msr',tread,'INT')
+ if(tread==1) multibinit_dtset%dim_msr=intarr(1)
+ if(multibinit_dtset%dim_msr<1.or.multibinit_dtset%dim_msr>9)then
+   write(message, '(a,i0,5a)' )&
+   'dim_msr is ',multibinit_dtset%dim_msr,', but the only allowed values',ch10,&
+   'are 1, 2, 3, 4, 5, 6, 7 or 8.',ch10,'Action: correct dim_msr in your input file.'
+   ABI_ERROR(message)
+ end if
+
  multibinit_dtset%dipdip=1
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dipdip',tread,'INT')
  if(tread==1) multibinit_dtset%dipdip=intarr(1)

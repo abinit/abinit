@@ -74,7 +74,7 @@ program anaddb
  integer:: msym !  msym = maximum number of symmetry elements in space group
 !Define input and output unit numbers (some are defined in defs_basis-all should be there ...):
  integer, parameter:: master = 0
- integer:: comm, iblok, iblok_stress, iblok_epsinf, iblock_quadrupoles, ii
+ integer:: comm, dim_msr, iblok, iblok_stress, iblok_epsinf, iblock_quadrupoles, ii
  integer:: ierr, iphl2, lenstr, lwsym, mtyp, mpert, msize, natom
  integer:: nsym, ntypat, usepaw, nproc, my_rank, ana_ncid, prt_internalstr
  integer:: phdos_ncid, ncerr
@@ -92,7 +92,7 @@ program anaddb
  real(dp), allocatable:: d2cart(:,:), dchide(:,:,:), lst(:)
  real(dp), allocatable:: dchidt(:,:,:,:), displ(:), eigval(:,:)
  real(dp), allocatable:: eigvec(:,:,:,:,:), fact_oscstr(:,:,:), instrain(:,:)
- real(dp), allocatable:: gred(:,:), phfrq(:)
+ real(dp), allocatable:: gred(:,:), phi1(:,:,:,:,:),phfrq(:)
  real(dp), allocatable:: rsus(:,:,:)
  real(dp), allocatable:: zeff(:,:,:)
  real(dp), allocatable:: qdrp_cart(:,:,:,:)
@@ -245,7 +245,15 @@ program anaddb
  ! Acoustic Sum Rule
  ! In case the interatomic forces are not calculated, the
  ! ASR-correction (asrq0%d2asr) has to be determined here from the Dynamical matrix at Gamma.
- asrq0 = ddb%get_asrq0(inp%asr, inp%rfmeth, crystal%xcart)
+ ! BVT 12/12/24: for asr+rotational invariance, may also need phi^(1) from ddb_lw; otherwise
+ ! get it later using real-space IFCs
+ ABI_MALLOC(phi1, (3,natom,3,natom,3))      
+ if (inp%asr ==6 .and. inp%flexoflag == 1) then
+   call ddb_phi1(ddb,ddb_lw,ddb_hdr%ddb_version, crystal, filnam(3), phi1)
+   asrq0 = ddb%get_asrq0(inp%asr,inp%rfmeth,crystal,comm,inp%dim_msr,phi1)
+ else
+   asrq0 = ddb%get_asrq0(inp%asr,inp%rfmeth,crystal,comm,inp%dim_msr)      
+ end if
 
  ! TODO: This is to maintain the previous behaviour in which all the arrays were initialized to zero.
  ! In the new version asrq0%d2asr is always computed if the Gamma block is present
@@ -904,7 +912,7 @@ end if  ! condition on nlflag
  ABI_FREE(zeff)
  ABI_FREE(qdrp_cart)
  ABI_FREE(instrain)
-
+ ABI_FREE(phi1)
  50 continue
 
  call asrq0%free()

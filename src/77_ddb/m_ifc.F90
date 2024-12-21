@@ -1845,7 +1845,6 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid, &
      do ii=1,3
        xred(ii)=Ifc%gprim(1,ii)*Ifc%rcan(1,ia)+Ifc%gprim(2,ii)*Ifc%rcan(2,ia)+Ifc%gprim(3,ii)*Ifc%rcan(3,ia)
      end do
-
      ! Then to cartesian coordinates
      ra(:)=xred(1)*Ifc%acell(1)*Ifc%rprim(:,1)+ xred(2)*Ifc%acell(2)*Ifc%rprim(:,2)+ xred(3)*Ifc%acell(3)*Ifc%rprim(:,3)
 

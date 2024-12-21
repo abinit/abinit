@@ -39,6 +39,7 @@ module m_ddb_flexo
  private
 
  public :: ddb_flexo
+ public :: ddb_phi1
 ! *************************************************************************
 
 contains
@@ -1416,5 +1417,90 @@ subroutine dtlattflexo(amu,blkval1d,blkvalA,blkvalB,ddb_version,intstrn,lattflex
 
  end subroutine dm_psinv
 !!***
+
+!!****f* ABINIT/m_ddb_flexo/ddb_phi1
+!! NAME
+!!  ddb_phi1
+!!
+!! FUNCTION
+!! Return the moment of IFCs Phi^(1)
+!!
+!! INPUTS
+!!  ddb<type(ddb_type)>=Long wave 3rd order derivative database.
+!!  ddb_version = 8 digit integer giving date. To mantain compatibility with old DDB files.
+!!  Crystal<type(crystal_t)>=Crystal structure parameters
+!!  filnamddb = name of the ddb file
+!!
+!! OUTPUT
+!!  phi1(3,natom,3,natom,3)=Moment of IFCs Phi^(1)
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! SOURCE
+
+subroutine ddb_phi1(ddb,ddb_lw,ddb_version,crystal,filnamddb,phi1)
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: ddb_version
+ class(ddb_type),intent(in) :: ddb,ddb_lw
+ type(crystal_t),intent(in) :: crystal
+ character(len=fnlen) :: filnamddb
+!arrays
+ real(dp),intent(out) :: phi1(3,ddb%natom,3,ddb%natom,3)
+
+!Local variables-------------------------------
+ integer,parameter :: cvrsio8=20100401
+ integer :: iblok
+ logical :: intstrn_only,iwrite
+ character(len=500) :: msg
+
+!arrays
+ integer :: rfelfd(4),rfphon(4),rfstrs(4)
+ integer :: rfqvec(4)
+ real(dp) :: qphnrm(3),qphon(3,3),fac
+ real(dp) :: d3cart(2,3,ddb%mpert,3,ddb%mpert,3,ddb%mpert)
+
+! *********************************************************************
+
+ DBG_ENTER("COLL")
+
+ qphon(:,:)=zero
+ qphnrm(:)=one
+ rfphon(1)=1
+ rfphon(2)=1
+ rfqvec(3)=1
+
+ write(msg, '(2a)' ) ch10," Extract the Phi^(1) coeficients from 3DTE"
+ call wrtout(std_out,msg,'COLL')
+ call ddb_lw%get_block(iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,BLKTYP_d3E_lw,rfqvec=rfqvec)
+
+ if (iblok == 0) then
+   call wrtout(std_out, "  ")
+   call wrtout(std_out, "--- !WARNING")
+   call wrtout(std_out, sjoin("- Cannot find Phi^(1) tensor in DDB file:", filnamddb))
+   call wrtout(std_out, "  flexoflag=1 or 3 requires the DDB file to include the corresponding long wave 3rd derivatives")
+ end if
+
+ d3cart(1,:,:,:,:,:,:) = reshape(ddb_lw%val(1,:,iblok),shape = (/3,ddb%mpert,3,ddb%mpert,3,ddb%mpert/))
+ d3cart(2,:,:,:,:,:,:) = reshape(ddb_lw%val(2,:,iblok),shape = (/3,ddb%mpert,3,ddb%mpert,3,ddb%mpert/))
+
+!Define the factors to apply if DDB file has been created with the old version of
+!the longwave driver.
+ if (ddb_version <= cvrsio8) then
+   fac=-two
+ else
+   fac=-one
+ end if
+
+!Extraction of Phi^(1) tensor
+ phi1(:,:,:,:,:) = fac*RESHAPE(d3cart(2,1:3,1:ddb%natom,1:3,1:ddb%natom,1:3,ddb%natom+8), &
+                               & SHAPE=[3,ddb%natom,3,ddb%natom,3]) 
+ DBG_EXIT("COLL")
+ end subroutine ddb_phi1
+ !!***
 end module m_ddb_flexo
-!!***

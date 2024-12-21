@@ -44,7 +44,8 @@ module m_ddb
  use m_copy,           only : alloc_copy
  use m_geometry,       only : phdispl_cart2red, mkrdim, xred2xcart, metric
  use m_crystal,        only : crystal_t, crystal_init
- use m_dynmat,         only : cart29, d2sym3, cart39, d3sym, chneu9, asria_calc, asria_corr, asrprs, dfpt_phfrq, sytens
+ use m_dynmat,         only : cart29, d2sym3, cart39, d3sym, chneu9, asria_calc, asria_corr,&
+                              msria_calc, asrprs, dfpt_phfrq, sytens
  use m_pawtab,         only : pawtab_type, pawtab_nullify, pawtab_free
  use m_psps,           only : psps_copy, psps_free
 
@@ -379,6 +380,10 @@ module m_ddb
    ! d2asr,(2,3,natom,3,natom))
    ! In case the interatomic forces are not calculated, the
    ! ASR-correction (d2asr) has to be determined here from the Dynamical matrix at Gamma.
+
+   real(dp),allocatable :: d2dqmsr(:,:,:,:,:)
+   ! d2dqmsr,(3,natom,3,natom,3))
+   ! Corrections to the IFCs moment from translational + rotational invariance.
 
    ! singular, uinvers and vtinvers are allocated and used only if asr in [3,4]
    ! i.e. Rotational invariance for 1D and 0D systems. dims=3*natom*(3*natom-1)/2
@@ -4092,7 +4097,10 @@ end function ddb_get_strten
 !!  rftyp  = 1 if non-stationary block
 !!           2 if stationary block
 !!           3 if third order derivatives
-!!  xcart(3,ddb%atom)=Cartesian coordinates of the atoms.
+!!  Crystal<type(crystal_t)>=Crystal structure parameter
+!!  dim_msr=System dimensionality (0D, 1D, ...) used for rotational invariance
+!!  comm=MPI communicator.
+!!  d2dq=Moment of IFCs from LW DDB or Fourier transform
 !!
 !! SIDE EFFECTS
 !!  ddb<type(ddb_type)>= Database with the derivates. The routine does not change it
@@ -4104,15 +4112,16 @@ end function ddb_get_strten
 !!
 !! SOURCE
 
-type(asrq0_t) function ddb_get_asrq0(ddb, asr, rftyp, xcart) result(asrq0)
+type(asrq0_t) function ddb_get_asrq0(ddb,asr,rftyp,crystal,comm,dim_msr,d2dq) result(asrq0)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: asr,rftyp
+ integer,intent(in) :: asr,comm,rftyp
  class(ddb_type),intent(inout) :: ddb
+ type(crystal_t),intent(in) :: crystal
+ integer,intent(in) :: dim_msr
 !arrays
- real(dp),intent(in) :: xcart(3,ddb%natom)
-
+ real(dp),intent(in),optional :: d2dq(3,ddb%natom,3,ddb%natom,3)
 !Local variables-------------------------------
 !scalars
  integer :: dims,iblok
@@ -4136,7 +4145,9 @@ type(asrq0_t) function ddb_get_asrq0(ddb, asr, rftyp, xcart) result(asrq0)
  call ddb%get_block(asrq0%iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
  ! this is to maintain the old behaviour in which the arrays where allocated and set to zero in anaddb.
  ABI_MALLOC(asrq0%d2asr, (2,3,ddb%natom,3,ddb%natom))
+ ABI_MALLOC(asrq0%d2dqmsr, (3,ddb%natom,3,ddb%natom,3))
  asrq0%d2asr = zero
+ asrq0%d2dqmsr = zero
 
  if (asrq0%iblok == 0) return
  iblok = asrq0%iblok
@@ -4157,7 +4168,7 @@ type(asrq0_t) function ddb_get_asrq0(ddb, asr, rftyp, xcart) result(asrq0)
    ABI_CALLOC(asrq0%singular, (dims))
 
    call asrprs(asr,1,3,asrq0%uinvers,asrq0%vtinvers,asrq0%singular,&
-     ddb%val(:,:,iblok),ddb%mpert,ddb%natom,xcart)
+     ddb%val(:,:,iblok),ddb%mpert,ddb%natom,crystal%xcart)
 
  case (5)
    ! d2cart is a temp variable here
@@ -4177,7 +4188,16 @@ type(asrq0_t) function ddb_get_asrq0(ddb, asr, rftyp, xcart) result(asrq0)
 
    ABI_FREE(d2cart)
    ABI_FREE(d2asr_res)
-
+ case (6)  
+   if (present(d2dq)) then
+      call msria_calc(asr,crystal,asrq0%d2asr,ddb%val(:,:,iblok),d2dq,asrq0%d2dqmsr,dim_msr,ddb%mpert,ddb%natom)
+     print *, 'Using dC/dq from Long Wave driver or after Fourier transform'
+   else
+     print *, 'No dC/dq from DDB; postponing the ASR calculation after Fourier transform'       
+   end if
+   !call arsr_recip(asr,asrq0%d2asr,ddb%val(:,:,iblok),asrq0%d2dqmsr,dcdq,asrq0%dim_msr,ddb%mpert,&
+   !        ddb%natom,crystal%xcart,crystal%xred,crystal%indsym,crystal%nsym,crystal%symrel,crystal%symafm,&
+   !        crystal%symrec,crystal%rprimd,crystal%gprimd,ddb%gprim,asrq0%qpt_msr)
  case default
    ABI_ERROR(sjoin("Wrong value for asr:", itoa(asr)))
  end select

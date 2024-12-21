@@ -35,6 +35,7 @@ module m_dynmat
  use m_numeric_tools,   only : wrap2_pmhalf, mkherm
  use m_symtk,           only : mati3inv, matr3inv, littlegroup_q
  use m_cgtools,         only : fxphas_seq
+ use m_crystal,        only : crystal_t
  use m_ewald,           only : ewald9
  use m_time,            only : timab
 
@@ -104,6 +105,10 @@ module m_dynmat
  public :: ftgam
  public :: ftgam_init
 
+ public :: msria_calc          ! Calculate the correction for the Acoustic sum rule 
+                               ! + rotational invariance on the IFCs in reciprocal space
+ !public :: msria_apply         ! Apply the correction for the Acoustic sum rule
+ !                              ! + rotational invariance on the IFCs (first neighbors)
 
 ! *************************************************************************
 
@@ -6497,5 +6502,294 @@ subroutine ftgam_init (gprim,nqpt,nrpt,qpt_full,rpt,coskr, sinkr)
 
 end subroutine ftgam_init
 !!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_dynmat/msria_calc
+!! NAME
+!! msria_calc
+!!
+!! FUNCTION
+!! Calculate the corrections on the zone-center IFCs and their derivatives with respect to the phonon
+!! wavevector q to achieve both translational (acoustic sum rule) and rotational invariances,
+!! i.e. there is not remanent forces on the atoms if they are moved or rotated globablly.
+!! This function needs the dimensionality of the system (0D, 1D, 2D, ...) to work properly, as well 
+!! as the moment of the IFCs, i.e. Phi^(1). It can be obtained by a long wave calculation
+!! or with the Fourier transform. Be careful for the second option that the non-analytical part
+!! is not (yet) treated for the 1D and 2D cases; ideally this routine should only impacts the
+!! short-range IFCs (and the long-range subtracted before entering this routine)
+!!
+!! INPUTS
+!!  asr=(6 Impose accoustic sum rules + rotational invariance)
+!!  crystal<type(crystal_t)>=Crystal structure parameters
+!!  d2cart(2,3,natom,3,natom)= Dynamical matrices coming from the Derivative Data Base at Gamma
+!!  d2dq (3,natom,3,natom,3): moment of IFCs (Phi^(1)) in cartesian coordinates 
+!!  dim_msr=System dimensionality (0D, 1D, ...) used for rotational invariance
+!!  mpert =maximum number of ipert
+!!  natom=number of atom
+!!
+!! OUTPUT
+!! d2asr= (2,3,natom,3,natom) matrix used to store the correction needed to fulfill
+!! the acoustic + rotational sum rule on IFCs.
+!! d2dqmsr= (3,natom,3,natom,3) matrix used to store the correction on IFCs moments
+!!
+!! SOURCE
+
+!!***
+
+subroutine msria_calc(asr,crystal,d2asr,d2cart,d2dq,d2dqmsr,dim_msr,mpert,natom)
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: dim_msr,asr,mpert,natom
+ type(crystal_t),intent(in) :: crystal
+!arrays
+ real(dp),intent(in) :: d2cart(2,3,mpert,3,mpert)
+ real(dp),intent(in) :: d2dq(3,natom,3,natom,3)
+ real(dp),intent(out) :: d2asr(2,3,natom,3,natom)
+ real(dp),intent(out) :: d2dqmsr(3,natom,3,natom,3)        
+!Local variables-------------------------------
+!scalars
+ integer :: idir1,idir2,idir3,idir4,idir5,info,ipert1,ipert2,col,ncol,nrow,row
+ character(len=500) :: msg
+ integer :: bool_kdir(3), bool_ldir(3)
+!arrays
+ real(dp) :: tmp,tmp2,Levi_Civita(3,3,3)
+ real(dp) :: d2dqred(3,natom,3,natom,3)
+ real(dp),allocatable :: msr(:,:,:),msr_init(:,:,:)
+ real(dp),allocatable :: d2cart_vec(:),rcond(:,:),cond(:),pseudo_mat(:,:)
+ real(dp),allocatable :: mat_tmp(:,:),mat_tmp2(:,:),mat_tmp3(:,:),d2cart_sol(:),umat(:,:),vtmat(:,:)
+ real(dp),allocatable :: vmat(:,:),sing(:),work(:),sing1(:,:),sing2(:,:),simrel(:,:,:)
+
+! *********************************************************************
+ if(asr/=6)then
+   write(msg,'(3a,i0)')&
+   'The argument asr should be 6,',ch10, 'however, asr = ',asr
+   ABI_BUG(msg)
+ end if
+
+ if (asr==6)then
+   write(msg, '(a,a)' ) ch10, &
+   'asrprs: imposition of the ASR for the interatomic forces and rotational invariance'
+   call wrtout(std_out,msg)
+ end if
+
+ bool_kdir = 0
+ bool_ldir = 0
+ ! When periodic, additional variable spaces coming from dynamical matrices derivatives
+ if (dim_msr == 1) then ! 3D
+    bool_kdir = 0 ; bool_ldir = 1
+ elseif (dim_msr == 2) then ! 2D yz
+    bool_kdir(1) = 1 ; bool_ldir(2) = 1 ; bool_ldir(3) = 1
+ elseif (dim_msr == 3) then ! 2D xz
+    bool_kdir(2) = 1 ; bool_ldir(1) = 1 ; bool_ldir(3) = 1
+ elseif (dim_msr == 4) then ! 2D xy
+    bool_kdir(3) = 1 ; bool_ldir(1) = 1 ; bool_ldir(2) = 1
+ elseif (dim_msr == 5) then ! 1D x
+    bool_kdir(2) = 1 ; bool_kdir(3) = 1 ; bool_ldir(1) = 1
+ elseif (dim_msr == 6) then ! 1D y
+    bool_kdir(1) = 1 ; bool_kdir(2) = 1 ; bool_ldir(2) = 1
+ elseif (dim_msr == 7) then ! 1D z
+    bool_kdir(1) = 1 ;  bool_kdir(2) = 1 ; bool_ldir(3) = 1
+ elseif (dim_msr == 8) then ! Molecule
+    bool_kdir = 1 ; bool_ldir = 0
+ else
+    write(msg,'(3a,i0)')&
+   'The argument dim_msr should be between 1 and 8,',ch10, 'however, dim_msr = ',dim_msr
+   ABI_BUG(msg)
+ end if
+
+ ! Matrix sizing for pseudoinverse and alocation of corresponding matrix
+ nrow = 2*3*3*natom ! 9*natom conditions for ASR, 9*natom conditions for MSR
+ nrow = nrow +4*(3*natom)**2 ! + Hermiticity
+
+ ncol = (3*natom)**2 ! 9*natom**2 variable workspace (for dynamical matrices, initial)
+ ncol = ncol + 3*(3*natom)**2 ! Aditional variable space coming from dD/dq (only for periodic systems)
+
+ ABI_MALLOC(msr,(1:3,1:natom,1:3))
+ ABI_MALLOC(msr_init,(1:3,1:natom,1:3))
+ ABI_MALLOC(d2cart_vec,(1:ncol))
+ ABI_MALLOC(d2cart_sol,(1:ncol))
+ ABI_MALLOC(cond,(1:nrow))
+ ABI_MALLOC(rcond,(1:nrow,1:ncol))
+ d2cart_vec=0d0
+ d2cart_sol=0d0
+ cond = 0d0
+ rcond = 0d0
+
+ Levi_Civita(:,:,:)=zero
+ Levi_Civita(1,2,3)=+1 ; Levi_Civita(2,3,1)=+1 ; Levi_Civita(3,1,2)=+1
+ Levi_Civita(3,2,1)=-1 ; Levi_Civita(1,3,2)=-1 ; Levi_Civita(2,1,3)=-1
+
+ ! Convert d2dq in relative coordinates with respect to q
+ d2dqred = zero
+ do idir1=1,3
+   do idir2=1,3
+     d2dqred(:,:,:,:,idir1)=d2dqred(:,:,:,:,idir1)-two*d2dq(:,:,:,:,idir2)*crystal%gprimd(idir1,idir2)
+   end do
+ end do
+ !d2dqred=d2dqred/two_pi
+ do idir1=1,3
+  do ipert1=1,natom
+    do idir2=1,3
+      do ipert2=1,natom
+        col= ipert2+natom*(idir2-1)+3*natom*(ipert1-1)+3*natom**2*(idir1-1)
+        d2cart_vec(col) = d2cart(1,idir1,ipert1,idir2,ipert2)
+        row= idir2+3*(ipert1-1)+3*natom*(idir1-1) ! Acoustic sum rule
+        rcond(row,col) = one ! Sum of IFCs along ipert2 = 0
+        ! Rotational invariance
+        do idir3=1,3
+          col= ipert2+natom*(idir2-1)+3*natom*(ipert1-1)+3*natom**2*(idir1-1)
+          ! Treat separately confined and periodic directions
+          if ( bool_kdir(idir3) == 1) then ! confined direction
+            do idir4 = 1,3
+                row = 9*natom+idir4+3*(ipert1-1)+3*natom*(idir1-1) 
+                rcond(row,col) = rcond(row,col)+ &
+                (crystal%xcart(idir3,ipert2)-crystal%xcart(idir3,ipert1))*Levi_Civita(idir2,idir3,idir4)
+            end do
+          end if
+          if ( bool_ldir(idir3) == 1 ) then ! periodic direction
+            col= (3*natom)**2*idir3+ipert2+natom*(idir2-1)+3*natom*(ipert1-1)+3*natom**2*(idir1-1)
+            d2cart_vec(col) = d2dqred(idir1,ipert1,idir2,ipert2,idir3)
+            do idir5 = 1,3
+              do idir4 = 1,3
+                row = 9*natom+idir4+3*(ipert1-1)+3*natom*(idir1-1) 
+                rcond(row,col) = rcond(row,col)+ Levi_Civita(idir2,idir5,idir4)*crystal%rprimd(idir5,idir3)
+              end do
+            end do
+          end if
+        end do
+        ! Additionally, add the condition of matrix Hermiticity, both on IFCs and their derivatives
+        col= ipert2+natom*(idir2-1)+3*natom*(ipert1-1)+3*natom**2*(idir1-1)
+        row= 2*(9*natom)+ipert2+natom*(idir2-1)+3*natom*(ipert1-1)+3*natom**2*(idir1-1)
+        rcond(row,col) = rcond(row,col)+ one ! Hermicity
+        col= ipert1+natom*(idir1-1)+3*natom*(ipert2-1)+3*natom**2*(idir2-1)
+        rcond(row,col) = rcond(row,col)- one ! Hermicity
+         do idir3=1,3
+            row= 2*(9*natom)+ipert2+natom*(idir2-1)+3*natom*(ipert1-1)+3*natom**2*(idir1-1)+9*natom**2*(idir3)
+            col= (3*natom)**2*idir3+ipert2+natom*(idir2-1)+3*natom*(ipert1-1)+3*natom**2*(idir1-1)
+            rcond(row,col) = rcond(row,col)+ one
+            col= (3*natom)**2*idir3+ipert1+natom*(idir1-1)+3*natom*(ipert2-1)+3*natom**2*(idir2-1)
+            rcond(row,col) = rcond(row,col)+ one
+         end do
+       end do
+     end do
+   end do
+ end do          
+
+! Use LAPACK singular value decomposition
+ ABI_MALLOC(sing,(1:nrow))
+ ABI_MALLOC(umat,(1:nrow,1:nrow))
+ ABI_MALLOC(vtmat,(1:ncol,1:ncol))
+ ABI_MALLOC(work,(1:5*max(nrow,ncol)))
+ call dgesvd('A','A',nrow,ncol,rcond,nrow,sing,umat,nrow, &
+         vtmat, ncol, work,5*max(nrow,ncol),info)
+ ABI_CHECK(info == 0, sjoin('dgesvd returned:', itoa(info)))
+ ABI_FREE(umat)
+ ABI_FREE(work)
+
+ write(msg, '(a,es16.8,es16.8)' )' Largest and smallest values from svd', sing(1), sing(nrow)
+ call wrtout([std_out, ab_out], msg)
+
+ ABI_MALLOC(vmat,(1:ncol,1:ncol))
+ ABI_MALLOC(sing1,(1:nrow,1:ncol))
+ ABI_MALLOC(sing2,(1:ncol,1:nrow))
+ vmat = zero
+ sing1 = zero
+ sing2 = zero
+ do ipert1=1,ncol
+   do ipert2 =1,ncol
+     vmat(ipert1,ipert2) = vtmat(ipert2,ipert1)
+   end do
+ end do
+ ! To compute the pseudoinverse, product of the singular matrix with its inverse
+ do ipert1=1,min(nrow,ncol)
+   sing1(ipert1,ipert1) = sing(ipert1)
+   if (sing(ipert1)>1d-12) then
+     sing2(ipert1,ipert1) = 1d0/sing(ipert1)
+   end if
+ end do
+
+ ABI_MALLOC(mat_tmp,(1:ncol,1:ncol))
+ ABI_MALLOC(mat_tmp2,(1:ncol,1:ncol))
+
+ mat_tmp = matmul(sing2,sing1)
+ mat_tmp2 = matmul(vmat,mat_tmp)
+ mat_tmp3 = matmul(mat_tmp2,vtmat)
+
+ ! Change of IFCs and its derivatives
+ d2cart_sol = matmul(mat_tmp3,d2cart_vec)
+
+ ! Now unravel the IFCs and derivatives in arrays
+ d2asr = zero
+ d2dqmsr = zero
+ do idir1=1,3
+   do ipert1=1, natom
+     do idir2=1,3
+       do ipert2=1, natom
+         col = ipert2+natom*(idir2-1)+3*natom*(ipert1-1)+3*natom**2*(idir1-1)
+         d2asr(1,idir1,ipert1,idir2,ipert2) = d2cart_sol(col)
+         do idir3=1,3
+           col = (3*natom)**2*idir3+ipert2+natom*(idir2-1)+3*natom*(ipert1-1)+3*natom**2*(idir1-1)
+           d2dqmsr(idir1,ipert1,idir2,ipert2,idir3) = d2cart_sol(col)
+         end do
+       end do
+     end do
+   end do
+ end do
+ msr = zero
+ msr_init = zero
+ do ipert1=1, natom
+   do idir1=1,3
+     do idir2=1,3
+       do ipert2=1, natom
+         do idir3=1,3
+           do idir4=1,3
+           !if (bool_kdir(idir3)==1) then
+             msr_init(idir1,ipert1,idir4)=msr_init(idir1,ipert1,idir4)-2*&
+             d2dq(idir1,ipert1,idir2,ipert2,idir3)*Levi_Civita(idir2,idir3,idir4)
+            !else
+             !msr_init(idir1,ipert1,idir4)=msr_init(idir1,ipert1,idir4)+&
+             !d2cart(1,idir1,ipert1,idir2,ipert2)*(crystal%xcart(idir3,ipert2)-crystal%xcart(idir3,ipert1))*Levi_Civita(idir2,idir3,idir4)
+           !end if
+           end do
+         end do
+         do idir3=1,3
+           if ( bool_kdir(idir3) == 1) then ! Contribution from zone-center 
+             tmp = d2cart(1,idir1,ipert1,idir2,ipert2)
+             tmp2 = tmp-d2asr(1,idir1,ipert1,idir2,ipert2)      
+             do idir4 = 1,3
+               !msr_init(idir1,ipert1,idir4)=msr_init(idir1,ipert1,idir4)+&
+               !        tmp*(crystal%xcart(idir3,ipert2)-crystal%xcart(idir3,ipert1))*Levi_Civita(idir2,idir3,idir4)
+               msr(idir1,ipert1,idir4)=msr(idir1,ipert1,idir4)+&
+                       tmp*(crystal%xcart(idir3,ipert2)-crystal%xcart(idir3,ipert1))*Levi_Civita(idir2,idir3,idir4)
+             end do
+           end if
+           if ( bool_ldir(idir3) == 1 ) then ! Contribution from dC/dq 
+             tmp =d2dqred(idir1,ipert1,idir2,ipert2,idir3) 
+             tmp2=tmp-d2dqmsr(idir1,ipert1,idir2,ipert2,idir3)
+             do idir4 = 1,3
+              do idir5 = 1,3
+                !msr_init(idir1,ipert1,idir4)=msr_init(idir1,ipert1,idir4)+&
+                !        tmp*crystal%rprimd(idir5,idir3)*Levi_Civita(idir2,idir5,idir4)
+                msr(idir1,ipert1,idir4)=msr(idir1,ipert1,idir4)+&
+                        tmp*crystal%rprimd(idir5,idir3)*Levi_Civita(idir2,idir5,idir4)
+              end do
+            end do
+           end if
+         end do
+       end do
+     end do
+   end do
+ end do
+ do ipert1=1,natom
+   do idir1=1,3
+     do idir4=1,3
+       print *, 'MSR dC/dq ',ipert1, idir1, idir4, msr_init(idir1,ipert1,idir4), msr(idir1,ipert1,idir4)
+     end do
+   end do
+ end do
+
+end subroutine msria_calc
+
 
 end module m_dynmat

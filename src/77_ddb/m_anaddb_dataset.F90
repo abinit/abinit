@@ -64,6 +64,7 @@ module m_anaddb_dataset
   integer:: brav
   integer:: chneut
   integer:: dieflag
+  integer:: dim_msr
   integer:: dipdip
   integer:: dipquad
   integer:: dossum
@@ -335,10 +336,10 @@ subroutine invars9(anaddb_dtset, lenstr, natom, string)
  anaddb_dtset%asr = 1
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'asr',tread, 'INT')
  if(tread == 1) anaddb_dtset%asr = intarr(1)
- if(anaddb_dtset%asr < -2 .or. anaddb_dtset%asr > 5)then
+ if(anaddb_dtset%asr < -2 .or. anaddb_dtset%asr > 6)then
    write(message, '(a, i0, 5a)' )&
    'asr is ',anaddb_dtset%asr, ', but the only allowed values',ch10, &
-   'are 0, 1, 2, 3, 4, 5, -1 or-2 .',ch10, 'Action: correct asr in your input file.'
+   'are 0, 1, 2, 3, 4, 5, 6, -1 or-2 .',ch10, 'Action: correct asr in your input file.'
 !  Note : negative values are allowed when the acoustic sum rule
 !  is to be applied after the analysis of IFCs
 !  3, 4 are for rotational invariance (under development)
@@ -385,6 +386,16 @@ subroutine invars9(anaddb_dtset, lenstr, natom, string)
    write(message, '(a, i0, 5a)' )&
    'dieflag is ',anaddb_dtset%dieflag, ', but the only allowed values',ch10, &
    'are 0, 1, 2, 3 or 4.',ch10, 'Action: correct dieflag in your input file.'
+   ABI_ERROR(message)
+ end if
+
+ anaddb_dtset%dim_msr=1
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dim_msr',tread,'INT')
+ if(tread==1) anaddb_dtset%dim_msr=intarr(1)
+ if(anaddb_dtset%dim_msr<1.or.anaddb_dtset%dim_msr>9)then
+   write(message, '(a,i0,5a)' )&
+   'dim_msr is ',anaddb_dtset%dim_msr,', but the only allowed values',ch10,&
+   'are 1, 2, 3, 4, 5, 6, 7 or 8.',ch10,'Action: correct dim_msr in your input file.'
    ABI_ERROR(message)
  end if
 
@@ -2372,7 +2383,7 @@ subroutine anaddb_chkvars(string)
 !C
  list_vars = trim(list_vars)//' chneut'
 !D
- list_vars = trim(list_vars)//' dieflag dipdip dipquad dossum dosdeltae dossmear dostol dos_maxmode'
+ list_vars = trim(list_vars)//' dieflag dim_msr dipdip dipquad dossum dosdeltae dossmear dostol dos_maxmode'
 !E
  list_vars = trim(list_vars)//' ep_scalprod eivec elaflag elphflag enunit'
  list_vars = trim(list_vars)//' ep_b_min ep_b_max ep_int_gkk ep_keepbands ep_nqpt ep_nspline ep_prt_yambo'
