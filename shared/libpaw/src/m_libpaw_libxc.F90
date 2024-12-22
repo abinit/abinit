@@ -599,8 +599,9 @@ contains
 !  Retrieve/set parameters for metaGGA functionals
    if (xc_func%family==LIBPAW_XC_FAMILY_MGGA.or. &
 &      xc_func%family==LIBPAW_XC_FAMILY_HYB_MGGA) then
-     xc_func%needs_tau=(iand(flags,LIBPAW_XC_FLAGS_NEEDS_TAU)>0)
-     xc_func%needs_laplacian=(iand(flags,LIBPAW_XC_FLAGS_NEEDS_LAPLACIAN)>0)
+     xc_func%needs_tau=.true.;xc_func%needs_laplacian=.false.
+     if (LIBPAW_XC_FLAGS_NEEDS_TAU>0) xc_func%needs_tau=(iand(flags,LIBPAW_XC_FLAGS_NEEDS_TAU)>0)
+     if (LIBPAW_XC_FLAGS_NEEDS_LAPLACIAN>0) xc_func%needs_laplacian=(iand(flags,LIBPAW_XC_FLAGS_NEEDS_LAPLACIAN)>0)
      fhc_c=int(0,kind=C_INT) ; if (present(enforce_fhc)) fhc_c=merge(int(1,kind=C_INT),int(0,kind=C_INT),enforce_fhc)
      call libpaw_xc_func_set_enforce_fhc(xc_func%conf,fhc_c)
    end if
