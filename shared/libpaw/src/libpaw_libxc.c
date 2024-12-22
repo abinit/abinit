@@ -101,14 +101,14 @@ void libpaw_xc_get_flags_constants(int *xc_cst_flags_have_exc,
 #if ( XC_MAJOR_VERSION > 3 )
  *xc_cst_flags_needs_laplacian  = XC_FLAGS_NEEDS_LAPLACIAN;
 #else
- *xc_cst_flags_needs_laplacian  = 1; /* 1 will always be interpreted as true */
+ *xc_cst_flags_needs_laplacian  = -1; /* should be interpreted as true */
 #endif
 #if ( XC_MAJOR_VERSION > 6 )
  *xc_cst_flags_needs_tau   = XC_FLAGS_NEEDS_TAU;
  *xc_cst_flags_enforce_fhc = XC_FLAGS_ENFORCE_FHC;
 #else
- *xc_cst_flags_needs_tau   = 1; /* 1 will always be interpreted as true */
- *xc_cst_flags_enforce_fhc = 0; /* 0 will always be interpreted as false */
+ *xc_cst_flags_needs_tau   = -1; /* should be interpreted as true */
+ *xc_cst_flags_enforce_fhc = 0; /* should be interpreted as false */
 #endif
 }
 
@@ -367,7 +367,10 @@ void libpaw_xc_func_set_enforce_fhc(XC(func_type) *xc_func, int *on_off)
 /* ==== libXC v7.0 and later ==== */
    {xc_func_set_fhc_enforcement(xc_func, *on_off);}
 #else
-   {fprintf(stderr, "WARNING: enforcement of Fermi Hole curvature not available for libXC<7.0!\n");}
+   {if (*on_off) {
+     fprintf(stderr, "WARNING: enforcement of Fermi Hole curvature not available for libXC<7.0!\n");
+     }
+   }
 #endif
 
 /* ===============================================================
