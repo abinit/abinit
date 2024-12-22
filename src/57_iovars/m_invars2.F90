@@ -1774,7 +1774,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  if (ixc_here<0) then
    xc_is_mgga=libxc_functionals_ismgga(xc_functionals=xcfunc)
    xc_is_tb09=libxc_functionals_is_tb09(xc_functionals=xcfunc)
-   xc_need_kden=xc_is_mgga  ! We shoud discriminate with Laplacian based mGGa functionals
+   xc_need_kden=libxc_functionals_needs_tau(xc_functionals=xcfunc)
  else
    xc_is_mgga=(ixc_here>=31.and.ixc_here<=35)
    xc_is_tb09=.false.

@@ -418,7 +418,10 @@ void xc_func_set_enforce_fhc(XC(func_type) *xc_func, int *on_off)
 /* ==== libXC v7.0 and later ==== */
    {xc_func_set_fhc_enforcement(xc_func, *on_off);}
 #else
-   {fprintf(stderr, "WARNING: enforcement of Fermi Hole curvature not available for libXC<7.0!\n");}
+   {if (*on_off) {
+     fprintf(stderr, "WARNING: enforcement of Fermi Hole curvature not available for libXC<7.0!\n");
+     }
+   }
 #endif
 
 /* ===============================================================
