@@ -115,7 +115,7 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
  ! Important things for NC
  integer,parameter :: choice=1, paw_opt=0, signs=1
  type(pawcprj_type) :: cprj_dum(1,1)
- integer :: iband, shift, me_g0, me_g0_fft
+ integer :: iblock, shift, me_g0, me_g0_fft
  real(dp) :: gsc_dummy(0,0)
  real(dp), allocatable :: gvnlxc(:,:)
  real(dp), allocatable :: pcon(:)
@@ -135,7 +135,10 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
  l_paral_kgb = dtset%paral_kgb
 
 !Variables
- blockdim=nband/dtset%nblock_lobpcg !=l_mpi_enreg%nproc_band*l_mpi_enreg%bandpp
+ blockdim=nband/dtset%nblock_lobpcg
+ if (blockdim/=mpi_enreg%nproc_band*mpi_enreg%bandpp) then ! without this check computation of enl_out can be wrong
+   ABI_ERROR('blockdim is not consistent with nproc_band and bandpp')
+ end if
 
 !Depends on istwfk
  if ( gs_hamk%istwf_k > 1 ) then ! Real only
@@ -209,11 +212,11 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
 #ifdef HAVE_OPENMP_OFFLOAD
      !$OMP TARGET UPDATE FROM(cg) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
 #endif
-     do iband=1,nband/blockdim
-       shift = (iband-1)*blockdim*l_npw*l_nspinor
+     do iblock=1,nband/blockdim
+       shift = (iblock-1)*blockdim*l_npw*l_nspinor
        call prep_nonlop(choice,l_cpopt,cprj_dum, &
-&        enl_out((iband-1)*blockdim+1:iband*blockdim),l_gs_hamk,0,&
-&        eig((iband-1)*blockdim+1:iband*blockdim),blockdim,mpi_enreg,1,paw_opt,signs,&
+&        enl_out((iblock-1)*blockdim+1:iblock*blockdim),l_gs_hamk,0,&
+&        eig((iblock-1)*blockdim+1:iblock*blockdim),blockdim,mpi_enreg,1,paw_opt,signs,&
 &        gsc_dummy,l_tim_getghc, &
 &        cg(:,shift+1:shift+blockdim*l_npw*l_nspinor),&
 !&        l_gvnlxc(:,shift+1:shift+blockdim*l_npw*l_nspinor),&
