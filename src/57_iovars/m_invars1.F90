@@ -2621,17 +2621,14 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
 !
    !nline
    dtsets(idtset)%nline=4
-   !Specific value for wavelets
-   if(dtsets(idtset)%usewvl==1 .and. .not. wvl_bigdft) then
-     if(dtsets(idtset)%usepaw==1) then
-       dtsets(idtset)%nline=4
-     else
-       dtsets(idtset)%nline=2
-     end if
-   end if
    !For Chebyshev filtering algo, nline is the degree of the Chebyshev polynomial
    if (mod(dtsets(idtset)%wfoptalg,10) == 1) then
      dtsets(idtset)%nline = dtsets(idtset)%mdeg_filter
+   end if
+   !Specific value for wavelets
+   if(dtsets(idtset)%usewvl==1 .and. .not. wvl_bigdft) then
+     if(dtsets(idtset)%usepaw==1) dtsets(idtset)%nline=4
+     if(dtsets(idtset)%usepaw/=1) dtsets(idtset)%nline=2
    end if
 
 !  nloalg is also a special case
