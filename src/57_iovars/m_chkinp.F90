@@ -2291,6 +2291,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !  npfft
 !  Must be greater or equal to 1
    call chkint_ge(0,0,cond_string,cond_values,ierr,'npfft',dt%npfft,1,iout)
+
 !  If usepaw==1 and pawmixdg==0, npfft must be equal to 1
    if(usepaw==1 .and. dt%pawmixdg==0)then
      cond_string(1)='usepaw  ' ; cond_values(1)=usepaw
@@ -3647,6 +3648,14 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    !   'Action: re-run with spinat zero '
    !  ABI_ERROR_NOSTOP(msg, ierr)
    !end if
+
+!  prevent the running if the spinat is not 0 0 0 when nspden=1 nsppol=1
+  if(any(abs(dt%spinat)>tol8).and.nspden==1.and.nsppol==1) then
+    write(msg, '(3a)')&
+      'A spinat/=0 is not allowed when nspden=1 and nsppol=1!',ch10,&
+      'Action: re-run with spinat zero '
+    ABI_ERROR_NOSTOP(msg,ierr)
+  end if
 
 !  spinmagntarget
    if(abs(dt%spinmagntarget+99.99d0)>tol8 .and. abs(dt%spinmagntarget)>tol8)then
