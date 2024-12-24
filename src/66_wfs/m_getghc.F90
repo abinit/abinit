@@ -44,6 +44,10 @@ module m_getghc
  use m_fft,         only : fourwf
  use m_getghc_ompgpu,  only : getghc_ompgpu
 
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+ use m_abi_linalg,  only : gpu_set_to_zero
+#endif
+
 #ifdef HAVE_FFTW3_THREADS
  use m_fftw3,       only : fftw3_spawn_threads_here, fftw3_use_lib_threads
 #endif
