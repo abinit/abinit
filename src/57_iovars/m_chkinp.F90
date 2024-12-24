@@ -179,7 +179,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      xc_is_mgga=libxc_functionals_ismgga(xc_functionals=xcfunc)
      xc_is_tb09=libxc_functionals_is_tb09(xc_functionals=xcfunc)
      xc_is_hybrid=libxc_functionals_is_hybrid(xc_functionals=xcfunc)
-     xc_need_kden=xc_is_mgga  ! We shoud discriminate with Laplacian based mGGa functionals
+     xc_need_kden=libxc_functionals_needs_tau(xc_functionals=xcfunc)
      call libxc_functionals_end(xc_functionals=xcfunc)
    end if
 

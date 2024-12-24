@@ -522,7 +522,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  if(dtset%usewvl==0) then
    ABI_MALLOC(eknk,(mbdkpsp))
    ABI_MALLOC(enlxnk,(mbdkpsp))
-   ABI_MALLOC(eknk_nd,(2,dtset%mband,dtset%mband,dtset%nkpt,dtset%nsppol*paw_dmft%use_dmft))
+   ABI_MALLOC(eknk_nd,(2,dtset%mband,dtset%mband*paw_dmft%use_dmft,dtset%nkpt,dtset%nsppol))
    ABI_MALLOC(EigMin,(2,dtset%mband))
    ABI_MALLOC(grnlnk,(3*natom,mbdkpsp*optforces))
    if (usefock) then
