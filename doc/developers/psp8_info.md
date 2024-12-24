@@ -19,8 +19,8 @@ good idea to do a well-converged calculation of an isolated atom in a big
 box to confirm that you are correctly recreating the atomic valence levels you intend.
 
 The format is best explained by an example, which is presented in
-detail below.  (The example is excerpted from `Psps_for_tests/20ca_sic.drh`.
-Another example of pspcod=8 is `Psps_for_tests/8o_sic.drh`.)
+detail below.  (The example is excerpted from `Pspdir/20ca_sic.drh`.
+Another example of pspcod=8 is `Pspdir/8o_sic.drh`.)
 All but the last data block of this file are read in subroutine psp8in.f.
 The "comment" (#) lines below are not permitted in the actual file. Nor are blank lines.
 
@@ -167,7 +167,7 @@ This block is only read if the header variable fchrg >0.0.
 
 ## SPIN-ORBIT
 
-Spin-orbit coupling is present in the file `Psps_for_tests/78_Pt_r.oncvpsp.psp8`.
+Spin-orbit coupling is present in the file `Pspdir/78_Pt_r.oncvpsp.psp8`.
 This pseudopotential treats the 5s and 5p core states as valence.  
 More details are given in the spin-orbit portion of the discussion section 
 

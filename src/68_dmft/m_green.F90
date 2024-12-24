@@ -1264,8 +1264,10 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
        end do ! ikpt
      end do ! isppol
      if (nsppol == 1 .and. nspinor == 1) trace_tmp = trace_tmp * two
-     trace_tmp = trace_tmp*fac + sum(green%trace_moments_log_ks(1:nmoments-1)*omega_fac(1:nmoments-1))
-     if (ifreq == green%nw) then
+     trace_tmp = trace_tmp*fac
+     if (green%distrib%me_kpt == 0) trace_tmp = trace_tmp + &
+            & sum(green%trace_moments_log_ks(1:nmoments-1)*omega_fac(1:nmoments-1))
+     if (green%distrib%me_kpt == 0 .and. green%distrib%me_freq == 0) then
        trace_tmp2 = cmplx(log(two)*mbandc*nsppol*paw_dmft%temp,zero,kind=dp)
        if (nsppol == 1 .and. nspinor == 1) trace_tmp2 = trace_tmp2 * two
        trace_tmp = trace_tmp - trace_tmp2
@@ -3227,6 +3229,8 @@ end subroutine occup_green_tau
 
 subroutine fermi_green(green,paw_dmft,self)
 
+ use m_xmpi, only : xmpi_sum
+
 !Arguments ------------------------------------
  type(green_type), intent(inout) :: green
  type(paw_dmft_type), intent(inout) :: paw_dmft
@@ -3294,7 +3298,7 @@ subroutine fermi_green(green,paw_dmft,self)
    write(message,'(a)') "Warning, check Fermi level"
    call wrtout(std_out,message,'COLL')
 !  call abi_abort('COLL')
-   write(message,'(2a,f13.6)') ch10,"  |---  Final  value for Fermi level (check)",paw_dmft%fermie
+   write(message,'(2a,f13.6)') ch10,"  |---  Final value for Fermi level (check)",paw_dmft%fermie
    call wrtout(std_out,message,'COLL')
  else if (ierr_hh == -123) then
    write(message,'(a,f13.6)') " Fermi level is set to",fermi_old
@@ -3433,7 +3437,7 @@ subroutine newton(green,self,paw_dmft,x_input,x_precision,max_iter,&
 !  ========================================
 !  If zero is located between two values: apply newton method or dichotomy
 !  ========================================
-   if ((l_minus .and. l_plus) .or. dmft_test == 0) then
+   if ((l_minus .and. l_plus) .or. dmft_test == 1) then
 
 !    ==============================================
 !    Compute the function and derivatives for newton
@@ -3471,7 +3475,7 @@ subroutine newton(green,self,paw_dmft,x_input,x_precision,max_iter,&
 !    ==============================================
      xold = x_input
      if (option == 1) then
-       if (dmft_test == 0) then
+       if (dmft_test == 1) then
          if (Fxprime < 0) then
            x_input = x_input - sign(one,Fx)*step
          else
@@ -3487,7 +3491,7 @@ subroutine newton(green,self,paw_dmft,x_input,x_precision,max_iter,&
 !    If newton does not work well, use dichotomy.
 !    ==============================================
 
-     if (dmft_test == 0) then
+     if (dmft_test == 1) then
        if (Fx < 0) then
          l_minus = .true.
          x_minus = xold
@@ -3500,13 +3504,13 @@ subroutine newton(green,self,paw_dmft,x_input,x_precision,max_iter,&
 
      if ((x_input < x_minus .or. x_input > x_plus) .and. (l_minus .and. l_plus)) then
 
-       if (dmft_test == 1) then
+       if (dmft_test == 0) then
          call compute_nb_elec(green,self,paw_dmft,Fx,nb_elec_x,xold)
        end if
 
        write(message,'(a,3f12.6)') " ---",x_input,Fx+paw_dmft%nelectval,Fx
        call wrtout(std_out,message,'COLL')
-       if (dmft_test == 1) then
+       if (dmft_test == 0) then
          if (Fx > 0) then
            x_plus = xold
          else if (Fx < 0) then
@@ -3547,7 +3551,7 @@ subroutine newton(green,self,paw_dmft,x_input,x_precision,max_iter,&
    if (abs(Fx) < abs(Fxoptimum)) then
      Fxoptimum = Fx
      x_optimum = x_input
-     if (dmft_test == 0) x_optimum = xold
+     if (dmft_test == 1) x_optimum = xold
    end if ! abs(Fx)<abs(Fxoptimum)
 
 
@@ -3617,7 +3621,7 @@ subroutine function_and_deriv(green,self,paw_dmft,x_input,x_precision, &
 
    dmft_test = paw_dmft%dmft_test
 
-   if (dmft_test == 1) then
+   if (dmft_test == 0) then
 
 !  Choose deltax: for numeric evaluation of derivative
    !if(iter==1) then
@@ -3722,7 +3726,7 @@ subroutine compute_nb_elec(green,self,paw_dmft,Fx,nb_elec_x,fermie,Fxprime)
 
    dmft_test = paw_dmft%dmft_test
 
-   if (dmft_test == 1) then
+   if (dmft_test == 0) then
 
      paw_dmft%fermie = fermie
      call compute_green(green,paw_dmft,0,self,opt_self=1,opt_nonxsum=1,opt_nonxsum2=1)
@@ -3878,11 +3882,11 @@ subroutine compute_trace_moments(fermie,trace_fermie,trace_moments,trace_moments
          & six*(fermie**2)*trace_fermie(4) - four*(fermie**3)*trace_fermie(2) + &
          & (fermie**4)*trace_fermie(1)
 
-  trace_moments_prime(2) = -trace_fermie(1)
+  trace_moments_prime(2) = - trace_fermie(1)
   trace_moments_prime(3) = two * (fermie*trace_fermie(1)-trace_fermie(2))
-  trace_moments_prime(4) = -two*trace_fermie(3) - three*trace_fermie(4) + &
+  trace_moments_prime(4) = - two*trace_fermie(3) - three*trace_fermie(4) + &
          & six*fermie*trace_fermie(2) - three*(fermie**2)*trace_fermie(1)
-  trace_moments_prime(5) = -two*trace_fermie(5) + three*(-two*trace_fermie(6)+ &
+  trace_moments_prime(5) = - two*trace_fermie(5) + three*(-two*trace_fermie(6)+ &
          & two*fermie*trace_fermie(3)) - four*trace_fermie(7) + &
          & dble(12)*fermie*trace_fermie(4) - dble(12)*(fermie**2)*trace_fermie(2) + &
          & four*(fermie**3)*trace_fermie(1)
@@ -4093,6 +4097,7 @@ subroutine compute_moments_ks(green,self,paw_dmft,opt_self,opt_log,opt_quick_res
 
  use m_matlu, only : add_matlu
  use m_oper, only : prod_oper,trace_oper,upfold_oper
+ use m_xmpi, only : xmpi_sum
 
 !Arguments ------------------------------------
 !scalars
@@ -4101,7 +4106,7 @@ subroutine compute_moments_ks(green,self,paw_dmft,opt_self,opt_log,opt_quick_res
  type(paw_dmft_type), intent(in)  :: paw_dmft
  integer, optional, intent(in) :: opt_log,opt_quick_restart,opt_self
 !Local variables ------------------------------
- integer :: diag,i,ib,ikpt,isppol,mkmem,natom,nsppol
+ integer :: diag,i,ib,ierr,ikpt,isppol,mkmem,natom,nsppol
  integer :: optlog,optquickrestart,optself,shift
  real(dp) :: dum,mu
  complex(dpc) :: trace_tmp
@@ -4139,7 +4144,7 @@ subroutine compute_moments_ks(green,self,paw_dmft,opt_self,opt_log,opt_quick_res
    call add_matlu(self%moments(1)%matlu(:),self%hdc%matlu(:),green%moments(2)%matlu(:),natom,-1)
    call upfold_oper(green%moments(2),paw_dmft)
    do i=2,self%nmoments
-     call upfold_oper(self%moments(2),paw_dmft)
+     call upfold_oper(self%moments(i),paw_dmft)
    end do ! i
  end if ! optself=1
 
@@ -4236,6 +4241,10 @@ subroutine compute_moments_ks(green,self,paw_dmft,opt_self,opt_log,opt_quick_res
    call destroy_oper(oper_tmp2)
  end if ! optself>=1
 
+ if (optlog == 1 .and. optquickrestart == 0) then
+   call xmpi_sum(green%trace_moments_log_ks(1:green%nmoments-1),green%distrib%comm_kpt,ierr)
+ end if
+
  ABI_SFREE(trace_loc)
 
 end subroutine compute_moments_ks
@@ -4282,6 +4291,7 @@ subroutine compute_trace_moments_ks(green,self,paw_dmft)
 
  use m_matlu, only : add_matlu
  use m_oper, only : prod_oper,trace_oper,trace_prod_oper,upfold_oper
+ use m_xmpi, only : xmpi_sum
 
 !Arguments ------------------------------------
 !scalars
@@ -4289,7 +4299,7 @@ subroutine compute_trace_moments_ks(green,self,paw_dmft)
  type(self_type), intent(inout) :: self
  type(paw_dmft_type), intent(in) :: paw_dmft
 !Local variables ------------------------------
- integer :: i,ib,ikpt,isppol,mkmem,natom,nsppol,shift
+ integer :: i,ib,ierr,ikpt,isppol,mkmem,natom,nsppol,shift
  real(dp) :: dum
  type(oper_type) :: oper_tmp
  real(dp), allocatable :: trace_loc(:,:)
@@ -4310,10 +4320,12 @@ subroutine compute_trace_moments_ks(green,self,paw_dmft)
    call upfold_oper(self%moments(i),paw_dmft)
  end do ! i
 
+ oper_tmp%ks(:,:,:,:) = green%moments(2)%ks(:,:,:,:)
+
  do isppol=1,nsppol
    do ikpt=1,mkmem
      do ib=1,paw_dmft%mbandc
-       oper_tmp%ks(ib,ib,ikpt,isppol) = green%moments(2)%ks(ib,ib,ikpt,isppol) + &
+       oper_tmp%ks(ib,ib,ikpt,isppol) = oper_tmp%ks(ib,ib,ikpt,isppol) + &
           & paw_dmft%eigen_dft(ib,ikpt+shift,isppol)
      end do ! ib
    end do ! ikpt
@@ -4334,6 +4346,8 @@ subroutine compute_trace_moments_ks(green,self,paw_dmft)
 
  call destroy_oper(oper_tmp)
  ABI_FREE(trace_loc)
+
+ call xmpi_sum(green%trace_fermie(2:12),green%distrib%comm_kpt,ierr)
 
 end subroutine compute_trace_moments_ks
 !!***
@@ -4441,7 +4455,7 @@ subroutine compute_moments_loc(green,self,energy_level,weiss,option,opt_log)
  if (optlog == 1) then
    call trace_matlu(matlu2(:),natom,itau=0,trace=green%trace_moments_log_loc(2))
    call trace_matlu(matlu(:),natom,itau=0,trace=trace)
-   green%trace_moments_log_loc(2) = half * trace
+   green%trace_moments_log_loc(2) = green%trace_moments_log_loc(2) + half*trace
  end if ! optlog
 
  if (option == 0) then

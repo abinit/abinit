@@ -92,8 +92,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
  integer :: ipsp,isppol,isym,itypat,iz,jdtset,jj,kk,maxiatsph,maxidyn,minplowan_iatom,maxplowan_iatom
  integer :: mband,miniatsph,minidyn,mod10,mpierr,all_nprocs
  integer :: mu,natom,nfft,nfftdg,nkpt,nloc_mem,nlpawu
- integer :: nproc,nspden,nspinor,nsppol,optdriver,mismatch_fft_tnons,response
- integer :: fftalg,usepaw,usewvl
+ integer :: nproc,nthreads,nspden,nspinor,nsppol,optdriver,mismatch_fft_tnons,response
+ integer :: fftalg,fftalga,usepaw,usewvl
  integer :: ttoldfe,ttoldff,ttolrff,ttolvrs,ttolwfr
  logical :: test,twvl,allowed,berryflag
  logical :: wvlbigdft=.false.
@@ -143,7 +143,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 
    ! Copy or initialize locally a few input dataset values
    fftalg   =dt%ngfft(7)
-   !fftalga  =fftalg/100; fftalgc=mod(fftalg,10)
+   fftalga  =fftalg/100!; fftalgc=mod(fftalg,10)
+   nthreads = xomp_get_num_threads(.true.)
    natom    =dt%natom
    nkpt     =dt%nkpt
    nspden   =dt%nspden
@@ -177,7 +178,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      xc_is_mgga=libxc_functionals_ismgga(xc_functionals=xcfunc)
      xc_is_tb09=libxc_functionals_is_tb09(xc_functionals=xcfunc)
      xc_is_hybrid=libxc_functionals_is_hybrid(xc_functionals=xcfunc)
-     xc_need_kden=xc_is_mgga  ! We shoud discriminate with Laplacian based mGGa functionals
+     xc_need_kden=libxc_functionals_needs_tau(xc_functionals=xcfunc)
      call libxc_functionals_end(xc_functionals=xcfunc)
    end if
 
@@ -751,10 +752,10 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      end if
    end if
 
-#if !defined HAVE_TRIQS
+#if !defined HAVE_TRIQS_v3_4
    if(dt%dmft_solv>=6.and.dt%dmft_solv<=7) then
      write(msg,'(3a)') &
-      & ' dmft_solv=6, or 7 is only relevant if the TRIQS library is linked',ch10,&
+      & ' dmft_solv=6, or 7 is only relevant if the TRIQS library v3.4>= is linked',ch10,&
       & ' Action: check compilation options'
      ABI_ERROR(msg)
    end if
@@ -771,7 +772,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_move_double',dt%dmftctqmc_triqs_move_double,2,(/0,1/),iout)
      call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_move_shift',dt%dmftctqmc_triqs_move_shift,2,(/0,1/),iout)
      call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_nbins_histo',dt%dmftctqmc_triqs_nbins_histo,1,iout)
-     call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_off_diag',dt%dmftctqmc_triqs_off_diag,2,(/0,1/),iout)
+     call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_orb_off_diag',dt%dmftctqmc_triqs_orb_off_diag,2,(/0,1/),iout)
+     call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_spin_off_diag',dt%dmftctqmc_triqs_spin_off_diag,2,(/0,1/),iout)
      call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_therm',dt%dmftctqmc_triqs_therm,0,iout)
      call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_time_invariance',dt%dmftctqmc_triqs_time_invariance,2,(/0,1/),iout)
      call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_use_norm_as_weight',dt%dmftctqmc_triqs_use_norm_as_weight,2,(/0,1/),iout)
@@ -923,7 +925,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    !  cond_string(1)='optcell' ; cond_values(1)=dt%optcell
    !  call chkdpr(1,1,cond_string,cond_values,ierr,'ecutsm',dt%ecutsm,1,tol8,iout)
    !end if
-!  At present (v10.2.2), Chebyshev filtering algorithm (wfoptalg=1 or 111) cannot be used with ecutsm=0.
+!  At present (v10.2.2), Chebyshev filtering algorithm (wfoptalg=1 or 111) cannot be used with ecutsm>0.
 !  So we allow ecutsm=0 but with a warning.
    if(dt%optcell/=0 .and. dt%ecutsm < tol8 .and. dt%wfoptalg/=1 .and. dt%wfoptalg/=111) then
      write(msg, "(2a)") 'For optcell > 0, it is highly recommended to set ecutsm > 0 to have better precision on stress',&
@@ -2173,6 +2175,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !  npfft
 !  Must be greater or equal to 1
    call chkint_ge(0,0,cond_string,cond_values,ierr,'npfft',dt%npfft,1,iout)
+
 !  If usepaw==1 and pawmixdg==0, npfft must be equal to 1
    if(usepaw==1 .and. dt%pawmixdg==0)then
      cond_string(1)='usepaw  ' ; cond_values(1)=usepaw
@@ -2181,17 +2184,22 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    end if
 #ifdef HAVE_OPENMP
    if (dt%wfoptalg==114 .or. dt%wfoptalg==1 .or. dt%wfoptalg==111) then
-     if ( xomp_get_num_threads(.true.) > 1 ) then
+     if ( nthreads > 1 ) then
        if ( dt%npfft > 1 ) then
          write(msg,'(4a,i4,a,i4,a)') "Using LOBPCG algorithm (wfoptalg=114), the FFT parallelization is not ",&
           "compatible with multiple threads.",ch10,"Please set npfft to 1 (currently npfft=",dt%npfft,&
-          ") or export OMP_NUM_THREADS=1 (currently: the number of threads is ",xomp_get_num_threads(.true.),")"
+          ") or export OMP_NUM_THREADS=1 (currently: the number of threads is ",nthreads,")"
          ABI_ERROR_NOSTOP(msg, ierr)
        end if
        if ( dt%npspinor > 1 ) then
          write(msg,'(4a,i1,a,i4,a)') "Using LOBPCG algorithm (wfoptalg=114), the parallelization on spinorial components is not",&
           " compatible with multiple threads.",ch10,"Please set npspinor to 1 (currently npspinor=",dt%npspinor,&
-          ") or export OMP_NUM_THREADS=1 (currently: the number of threads is ",xomp_get_num_threads(.true.),")"
+          ") or export OMP_NUM_THREADS=1 (currently: the number of threads is ",nthreads,")"
+         ABI_ERROR_NOSTOP(msg, ierr)
+       end if
+       if ( dt%bandpp>1.and.fftalga==FFT_SG ) then
+         write(msg,'(4a,i1,a,i4,a)') "To use bandpp > 1 and nthreads > 1 is not possible with S. Goedecker FFT (fftalg=1XX).",ch10,&
+          "Change nthreads, bandpp, or fftalg (for example fftalg=401)."
          ABI_ERROR_NOSTOP(msg, ierr)
        end if
      end if
@@ -3525,6 +3533,14 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    !  ABI_ERROR_NOSTOP(msg, ierr)
    !end if
 
+!  prevent the running if the spinat is not 0 0 0 when nspden=1 nsppol=1
+  if(any(abs(dt%spinat)>tol8).and.nspden==1.and.nsppol==1) then
+    write(msg, '(3a)')&
+      'A spinat/=0 is not allowed when nspden=1 and nsppol=1!',ch10,&
+      'Action: re-run with spinat zero '
+    ABI_ERROR_NOSTOP(msg,ierr)
+  end if
+
 !  spinmagntarget
    if(abs(dt%spinmagntarget+99.99d0)>tol8 .and. abs(dt%spinmagntarget)>tol8)then
      if(nsppol==1)then
@@ -4000,7 +4016,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      if(dt%ecutsm > 0) then
        ABI_ERROR_NOSTOP('Ecutsm > 0 not yet compatible with wfoptalg 1', ierr)
      end if
-     !! TODO check bandpp instead of overwriting it
    end if
 
 !  np_slk
