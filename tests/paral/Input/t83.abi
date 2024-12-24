@@ -85,7 +85,7 @@ jpawu2  0.5   eV
 #%% exclude_builders = eos_gnu_13.2_mpich
 #%% [files]
 #%% files_to_test =
-#%%                  t83.abo,  tolnlines =0, tolabs =1.1e-16, tolrel = 2.0e-16, fld_options=-medium ;
+#%%                  t83.abo,  tolnlines = 0, tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options=-medium ;
 #%% [paral_info]
 #%% nprocs_to_test = 10
 #%% max_nprocs = 10

@@ -514,7 +514,7 @@ MODULE m_pawtab
   real(dp), allocatable :: proj(:)
    ! proj(mesh_size)
    ! non-normalized DMFT orbital
-   
+
   real(dp), allocatable :: proj2(:)
   ! proj2(mesh_size)
   ! square of the normalized DMFT orbital
@@ -1689,7 +1689,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
    siz_fk=0       ; siz_gammaij=0  ; siz_gnorm=0
    siz_nabla_ij=0 ; siz_nabla_im_ij=0
    siz_nablaphi=0 ; siz_phiphj=0   ; siz_phiphjint=0 ; siz_ph0phiint=0
-   siz_proj=0 ; siz_proj2=0 ;  
+   siz_proj=0 ; siz_proj2=0 ;
    siz_qgrid_shp=0; siz_qijl=0     ; siz_rad_for_spline=0
    siz_shapefncg=0; siz_sij=0      ; siz_tnablaphi=0 ; siz_tphitphj=0
    siz_vee=0      ; siz_vex=0      ; siz_zioneff=0
@@ -2467,7 +2467,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
      if (siz_proj>0) then
        list_dpr(ii:ii+siz_proj-1)=pawtab%proj(1:siz_proj)
        ii=ii+siz_proj
-     end if 
+     end if
      if (siz_proj2>0) then
        list_dpr(ii:ii+siz_proj2-1)=pawtab%proj2(1:siz_proj2)
        ii=ii+siz_proj2
@@ -2902,7 +2902,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
        LIBPAW_ALLOCATE(pawtab%proj2,(siz_proj2))
        pawtab%proj2=list_dpr(ii:ii+siz_proj2-1)
        ii=ii+siz_proj2
-     end if 
+     end if
      if (allocated(pawtab%qgrid_shp)) then
        LIBPAW_DEALLOCATE(pawtab%qgrid_shp)
      end if

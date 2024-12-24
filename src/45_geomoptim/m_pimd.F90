@@ -501,7 +501,7 @@ function pimd_temperature(mass,vel)
  real(dp),intent(in) :: mass(:,:),vel(:,:,:)
 !Local variables-------------------------------
 !scalars
- integer :: iatom,idir,iimage,imass,natom,natom_mass,ndir,nimage,nmass
+ integer :: iatom,iimage,imass,natom,natom_mass,ndir,nimage,nmass
  real(dp) :: v2
  character(len=500) :: msg
 !arrays
@@ -520,14 +520,12 @@ function pimd_temperature(mass,vel)
  end if
 
  v2=zero
- do iimage=1,nimage
-   imass=min(nmass,iimage)
-   do iatom=1,natom
-     do idir=1,3
-       v2=v2+vel(idir,iatom,iimage)*vel(idir,iatom,iimage)*mass(iatom,imass)
-     end do
-   end do
- end do
+do iimage = 1, nimage
+  imass = min(nmass, iimage)
+  do iatom = 1, natom
+    v2 = v2 + sum(vel(:, iatom, iimage)**2) * mass(iatom, imass)
+  end do
+end do
  pimd_temperature=v2/(dble(3*natom*nimage)*kb_HaK)
 
 end function pimd_temperature
@@ -1708,18 +1706,13 @@ function pimd_diff_stress(stress_pimd,stress_target)
  real(dp) :: pimd_diff_stress(3,3)
 !Local variables-------------------------------
 !scalars
- integer :: ii,jj
 !arrays
  real(dp) :: stress_pimd2(3,3)
 
 !************************************************************************
 
 !Choice: the primitive estimator for pressure is chosen
- do ii=1,3
-   do jj=1,3
-     stress_pimd2(ii,jj)=stress_pimd(1,ii,jj)
-   end do
- end do
+ stress_pimd2(:,:) = stress_pimd(1, :, :)
 
 !+stress_target instead of - because it is translated from stress to pressure tensor
  pimd_diff_stress(1,1)=stress_pimd2(1,1)+stress_target(1)

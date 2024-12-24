@@ -1,5 +1,5 @@
 #  Basic input for Z2pack. The code will append the variables defining each line on the surface
-pp_dirpath "$ABI_PSPDIR/Pseudodojo_nc_fr_04_pbe_standard_psp8/"
+pp_dirpath "$ABI_PSPDIR/Psdj_nc_fr_04_pbe_std_psp8/"
 pseudos "Bi.psp8,Te.psp8,I.psp8"
 
 # Unit cell

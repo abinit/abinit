@@ -403,7 +403,7 @@ contains
     real(dp) :: vec2(3)
     real(dp) :: half_angle, r(3), w, norm
     half_angle=angle/2.0_dp
-    norm=sqrt(axis(1)*axis(1)+axis(2)*axis(2)+axis(3)*axis(3))
+    norm=norm2(axis)
     r(:)=axis(:)/norm * sin(half_angle)
     w=cos(half_angle)
     ! (w, r) is the quaternion

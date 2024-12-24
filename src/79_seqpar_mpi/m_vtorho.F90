@@ -392,7 +392,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  real(dp) :: dielar(7),dphase_k(3),kpoint(3),qpt(3),rhodum(1),tsec(2),ylmgr_dum(0,0,0)
  real(dp),allocatable :: EigMin(:,:),buffer1(:),cgq(:,:)
  real(dp),allocatable :: cgrkxc(:,:),doccde(:)
- real(dp),allocatable :: dphasek(:,:),ek_k(:),eknk(:),eknk_nd(:,:,:,:,:),end_k(:)
+ real(dp),allocatable :: dphasek(:,:),ek_k(:),ek_k_nd(:,:,:),eknk(:),eknk_nd(:,:,:,:,:),end_k(:)
  real(dp),allocatable :: enlx_k(:),enlxnk(:),focknk(:),fockfornk(:,:,:),ffnl(:,:,:,:),grnl_k(:,:), xcart(:,:)
  real(dp),allocatable :: grnlnk(:,:)
 
@@ -535,7 +535,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
    end if
    eknk(:)=zero;enlxnk(:)=zero
    if (optforces>0) grnlnk(:,:)=zero
-   if(paw_dmft%use_dmft==1) eknk_nd=zero
+   if (paw_dmft%use_dmft==1) eknk_nd(:,:,:,:,:)=zero
  end if !usewvl==0
 
 !Initialize rhor if needed; store old rhor
@@ -873,6 +873,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !       end if
 
        ABI_MALLOC(ek_k,(nband_k))
+       ABI_MALLOC(ek_k_nd,(2,nband_k,nband_k*paw_dmft%use_dmft))
        ABI_MALLOC(end_k,(nband_k))
        ABI_MALLOC(enlx_k,(nband_k))
        ABI_MALLOC(occ_k,(nband_k))
@@ -893,6 +894,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        ek_k(:)=zero
        end_k(:)=zero
        enlx_k(:)=zero
+       if(paw_dmft%use_dmft==1) ek_k_nd(:,:,:)=zero
        if (optforces>0) grnl_k(:,:)=zero
        kpoint(:)=dtset%kptns(:,ikpt)
        occ_k(:)=occ(1+bdtot_index:nband_k+bdtot_index)
@@ -1063,7 +1065,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !      nonlocal energy, forces,
 !      and update of rhor to this k-point and this spin polarization.
        call vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,&
-&       dtset,eig_k,ek_k,eknk_nd(:,:,:,ikpt,isppol),end_k,enlx_k,fixed_occ,grnl_k,gs_hamk,&
+&       dtset,eig_k,ek_k,ek_k_nd,end_k,enlx_k,fixed_occ,grnl_k,gs_hamk,&
 &       ibg,icg,ikpt,iscf,isppol,kg_k,kinpw,mband_cprj,mcg,mcgq,mcprj_local,mkgq,&
 &       mpi_enreg,dtset%mpw,natom,nband_k,nbdbuf_eff,dtset%nkpt,istep,nnsclo_now,npw_k,npwarr,&
 &       occ_k,optforces,prtvol,pwind,pwind_alloc,pwnsfac,pwnsfacq,resid_k,&
@@ -1120,6 +1122,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          focknk (1+bdtot_index : nband_k+bdtot_index) = fock%fock_common%eigen_ikpt (:)
          if (optforces>0) fockfornk(:,:,1+bdtot_index : nband_k+bdtot_index) = fock%fock_common%forces_ikpt(:,:,:)
        end if
+       if(paw_dmft%use_dmft==1) eknk_nd(:,:,:,ikpt,isppol) = ek_k_nd(:,:,:)
        resid(1+bdtot_index : nband_k+bdtot_index) = resid_k(:)
        if (optforces>0) grnlnk(:,1+bdtot_index : nband_k+bdtot_index) = grnl_k(:,:)
        enlxnk(1+bdtot_index : nband_k+bdtot_index) = enlx_k(:)
@@ -1160,6 +1163,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 #endif
 
        ABI_FREE(ek_k)
+       ABI_FREE(ek_k_nd)
        ABI_FREE(end_k)
        ABI_FREE(grnl_k)
        ABI_FREE(occ_k)
@@ -1294,7 +1298,9 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        call timab(48,1,tsec)
        call xmpi_sum(buffer1,mpi_enreg%comm_kpt,ierr)
 !      if(mpi_enreg%paral_kgb/=1.and.paw_dmft%use_dmft==1) then
-       if(paw_dmft%use_dmft==1) call xmpi_sum(eknk_nd(:,:,:,:,:),mpi_enreg%comm_kpt,ierr)
+       if(paw_dmft%use_dmft==1) then
+         call xmpi_sum(eknk_nd(:,:,:,:,:),mpi_enreg%comm_kpt,ierr)
+       end if
        call timab(48,2,tsec)
 
 !      Unpack eigen,resid,eknk,enlxnk,grnlnk in buffer1

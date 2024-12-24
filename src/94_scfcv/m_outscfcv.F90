@@ -48,7 +48,7 @@ module m_outscfcv
  use m_crystal,          only : crystal_init, crystal_t, prt_cif
  use m_results_gs,       only : results_gs_type, results_gs_ncwrite
  use m_ioarr,            only : ioarr, fftdatar_write
- use m_matlu,            only : matlu_type
+ use m_matlu,            only : copy_matlu,destroy_matlu,init_matlu,matlu_type
  use m_nucprop,          only : calc_efg,calc_fc
  use m_outwant,          only : outwant
  use m_pawang,           only : pawang_type
@@ -283,7 +283,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  type(self_type) :: selfr
  type(self_type), target :: self
  type(green_type) :: greenr
- type(matlu_type), pointer :: opt_selflimit(:) => null()
+ type(matlu_type), allocatable :: opt_selflimit(:)
 
 ! *************************************************************************
 
@@ -1183,15 +1183,21 @@ if (dtset%prt_lorbmag==1) then
       ! and limit at high frequency)
        call rw_self(self,paw_dmft,prtopt=5,opt_rw=1,opt_stop=1)
 
-       if (opt_moments == 1) then
-         opt_selflimit => self%oper(self%nw)%matlu(:)
+       ABI_MALLOC(opt_selflimit,(paw_dmft%natom))
+       call init_matlu(paw_dmft%natom,paw_dmft%nspinor,paw_dmft%nsppol,paw_dmft%lpawu(:),opt_selflimit(:))
+
+       if (opt_moments == 0) then
+         call copy_matlu(self%oper(self%nw)%matlu(:),opt_selflimit(:),paw_dmft%natom,opt_re=1)
        else
-         opt_selflimit => self%moments(1)%matlu(:)
+         call copy_matlu(self%moments(1)%matlu(:),opt_selflimit(:),paw_dmft%natom)
        end if ! moments
 
       ! Read self energy on real axis obtained from Maxent
        call rw_self(selfr,paw_dmft,prtopt=5,opt_rw=1,opt_imagonly=opt_imagonly, &
-         & opt_selflimit=opt_selflimit(:),opt_hdc=self%hdc%matlu(:),opt_maxent=1)
+                  & opt_selflimit=opt_selflimit(:),opt_hdc=self%hdc%matlu(:),opt_maxent=1)
+
+       call destroy_matlu(opt_selflimit(:),paw_dmft%natom)
+       ABI_FREE(opt_selflimit)
 
       ! Check: from self on real axis, recompute self on Imaginary axis.
        call selfreal2imag_self(selfr,self,paw_dmft%filapp,paw_dmft)
@@ -1199,8 +1205,6 @@ if (dtset%prt_lorbmag==1) then
       !  paw_dmft%fermie=hdr%fermie ! for tests
        write(std_out,*) "    Fermi level is",paw_dmft%fermie
 
-       ! selfr does not have any double couting in self%hdc
-       ! hdc from self%hdc has been put in real part of self in rw_self.
        ! For the DFT BS: use opt_self=0 and fermie=fermie_dft
 
       ! Compute green  function on real axis
@@ -1343,7 +1347,6 @@ if (dtset%prt_lorbmag==1) then
 
  ! Output of the GSR file (except when we are inside mover)
  ! Temporarily disable for CRAY
-#ifndef FC_CRAY
  if (me == master .and. dtset%prtgsr == 1 .and. dtset%usewvl == 0) then
    !.and. (dtset%ionmov /= 0 .or. dtset%optcell /= 0)) then
    fname = strcat(dtfil%filnam_ds(4), "_GSR.nc")
@@ -1368,7 +1371,6 @@ if (dtset%prt_lorbmag==1) then
    end if
    NCF_CHECK(nf90_close(ncid))
  end if
-#endif
 
  call timab(1154,2,tsec)
 

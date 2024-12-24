@@ -1821,7 +1821,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  if (ixc_here<0) then
    xc_is_mgga=libxc_functionals_ismgga(xc_functionals=xcfunc)
    xc_is_tb09=libxc_functionals_is_tb09(xc_functionals=xcfunc)
-   xc_need_kden=xc_is_mgga  ! We shoud discriminate with Laplacian based mGGa functionals
+   xc_need_kden=libxc_functionals_needs_tau(xc_functionals=xcfunc)
  else
    xc_is_mgga=(ixc_here>=31.and.ixc_here<=35)
    xc_is_tb09=.false.
@@ -2464,10 +2464,10 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    if(tread==1) dtset%dmft_solv=intarr(1)
    if (dtset%dmft_solv==6.or.dtset%dmft_solv==7) then ! change some default values for TRIQS
      dtset%dmft_rslf=1
-     dtset%dmft_test=0
+     dtset%dmft_test=1
      dtset%dmft_use_all_bands=1
      dtset%dmft_use_full_chipsi=1
-   end if 
+   end if
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_rslf',tread,'INT')
    if(tread==1) dtset%dmft_rslf=intarr(1)
    call intagm(dprarr,intarr,jdtset,marr,natom,string(1:lenstr),'dmft_shiftself',tread,'DPR')
@@ -2582,33 +2582,35 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_triqs_loc_n_min',tread,'INT')
        if(tread==1) dtset%dmftctqmc_triqs_loc_n_min=intarr(1)
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_triqs_loc_n_max',tread,'INT')
-       if(tread==1) dtset%dmftctqmc_triqs_loc_n_max=intarr(1)    
+       if(tread==1) dtset%dmftctqmc_triqs_loc_n_max=intarr(1)
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_triqs_measure_density_matrix',tread,'INT')
-       if(tread==1) dtset%dmftctqmc_triqs_measure_density_matrix=intarr(1) 
+       if(tread==1) dtset%dmftctqmc_triqs_measure_density_matrix=intarr(1)
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_triqs_move_double',tread,'INT')
-       if(tread==1) dtset%dmftctqmc_triqs_move_double=intarr(1) 
+       if(tread==1) dtset%dmftctqmc_triqs_move_double=intarr(1)
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_triqs_move_global_prob',tread,'DPR')
        if(tread==1) dtset%dmftctqmc_triqs_move_global_prob=dprarr(1)
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_triqs_move_shift',tread,'INT')
-       if(tread==1) dtset%dmftctqmc_triqs_move_shift=intarr(1) 
+       if(tread==1) dtset%dmftctqmc_triqs_move_shift=intarr(1)
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_triqs_nbins_histo',tread,'INT')
-       if(tread==1) dtset%dmftctqmc_triqs_nbins_histo=intarr(1) 
+       if(tread==1) dtset%dmftctqmc_triqs_nbins_histo=intarr(1)
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_triqs_nleg',tread,'INT')
        if(tread==1) dtset%dmftctqmc_triqs_nleg  =intarr(1)
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_triqs_ntau_delta',tread,'INT')
-       if(tread==1) dtset%dmftctqmc_triqs_ntau_delta=intarr(1) 
-       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_triqs_off_diag',tread,'INT')
-       if(tread==1) dtset%dmftctqmc_triqs_off_diag=intarr(1) 
+       if(tread==1) dtset%dmftctqmc_triqs_ntau_delta=intarr(1)
+       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_triqs_orb_off_diag',tread,'INT')
+       if(tread==1) dtset%dmftctqmc_triqs_orb_off_diag=intarr(1)
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_triqs_seed_a',tread,'INT')
-       if(tread==1) dtset%dmftctqmc_triqs_seed_a=intarr(1) 
+       if(tread==1) dtset%dmftctqmc_triqs_seed_a=intarr(1)
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_triqs_seed_b',tread,'INT')
-       if(tread==1) dtset%dmftctqmc_triqs_seed_b=intarr(1) 
+       if(tread==1) dtset%dmftctqmc_triqs_seed_b=intarr(1)
+       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_triqs_spin_off_diag',tread,'INT')
+       if(tread==1) dtset%dmftctqmc_triqs_spin_off_diag=intarr(1)
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_triqs_therm',tread,'INT')
-       if(tread==1) dtset%dmftctqmc_triqs_therm=intarr(1) 
+       if(tread==1) dtset%dmftctqmc_triqs_therm=intarr(1)
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_triqs_time_invariance',tread,'INT')
-       if(tread==1) dtset%dmftctqmc_triqs_time_invariance=intarr(1) 
+       if(tread==1) dtset%dmftctqmc_triqs_time_invariance=intarr(1)
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_triqs_use_norm_as_weight',tread,'INT')
-       if(tread==1) dtset%dmftctqmc_triqs_use_norm_as_weight=intarr(1) 
+       if(tread==1) dtset%dmftctqmc_triqs_use_norm_as_weight=intarr(1)
      end if
    end if
  end if
