@@ -515,7 +515,7 @@ subroutine ddb_init(ddb, dtset, nblok, mpert, &
 
  ! TODO: Allocate d2eig here instead of leaving it to the calling routine.
  if (with_d2eig_) then
-    call ddb%malloc_d2eig(ddb%nband, ddb%nkpt)
+    call ddb%malloc_d2eig(ddb%nband*ddb%nsppol, ddb%nkpt)
  end if
 
  if (present(kpt)) then
@@ -1968,12 +1968,7 @@ subroutine ddb_read_d2eig_txt(ddb, unddb, iblok)
   iblok_eig2d = 1
   if (present(iblok)) iblok_eig2d = iblok
 
-   ! GA: Here, nband should really be nband * nsppol.
-   !     but this is the responsibility of the calling routine
-   !     see thmeig and merge_ddb
-   !     FIXME This is inconsistent with ddb_malloc_d2eig...
-   !     I think I should change this with ddb%nband * ddb%nsppol
-  call ddb%read_block_txt(iblok_eig2d,ddb%nband,ddb%mpert,ddb%msize,ddb%nkpt,unddb,&
+  call ddb%read_block_txt(iblok_eig2d,ddb%nband*ddb%nsppol,ddb%mpert,ddb%msize,ddb%nkpt,unddb,&
                       ddb%eig2dval(:,:,:,:),ddb%kpt(:,:))
 
 end subroutine ddb_read_d2eig_txt
@@ -2703,7 +2698,7 @@ subroutine ddb_read_nc(ddb, filename, ddb_hdr, crystal, comm, prtvol, raw)
    ! Copy dimensions from header and allocate arrays
    call ddb%malloc(ddb_hdr%msize, ddb_hdr%nblok, ddb_hdr%natom, &
                    ddb_hdr%ntypat, ddb_hdr%mpert,&
-                   ddb_hdr%nkpt, ddb_hdr%mband)
+                   ddb_hdr%nkpt, ddb_hdr%mband*ddb_hdr%nsppol)
 
    ! Copy arrays from header
    ddb%typ(:) = ddb_hdr%typ(:)

@@ -317,7 +317,7 @@ subroutine pawxc_size_dvxc_local()
 
 !Do we use the kinetic energy density?
  need_kden=(ixc==31.or.ixc==34.or.ixc==35)
- if (ixc<0) need_kden=libxc_functionals_ismgga()
+ if (ixc<0) need_kden=libxc_functionals_needs_tau()
  usekden_=0 ; if (need_kden) usekden_=min(nspden,2)
 
 !First derivative(s) of XC functional wrt gradient of density

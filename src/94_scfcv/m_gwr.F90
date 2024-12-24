@@ -4878,7 +4878,6 @@ subroutine gwr_build_wc(gwr)
 !Arguments ------------------------------------
  class(gwr_t),target,intent(inout) :: gwr
 
-#ifndef FC_CRAY
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0
@@ -5068,7 +5067,6 @@ subroutine gwr_build_wc(gwr)
  call cwtime_report(" gwr_build_wc:", cpu_all, wall_all, gflops_all)
  call timab(1924, 2, tsec)
 
-#endif
 end subroutine gwr_build_wc
 !!***
 
@@ -5092,7 +5090,6 @@ subroutine gwr_build_sigmac(gwr)
 !Arguments ------------------------------------
  class(gwr_t),target,intent(inout) :: gwr
 
-#ifndef FC_CRAY
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0
@@ -5977,7 +5974,6 @@ subroutine print_sigma_header()
 
 end subroutine print_sigma_header
 
-#endif
 end subroutine gwr_build_sigmac
 !!***
 
