@@ -2156,9 +2156,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !  Must be equal to mdeg_filter for filtering algorithms
    if (mod(dt%wfoptalg,10) == 1) then
      if (dt%nline/=dt%mdeg_filter) then
-       write(msg,'(4a,i4,a,i4,a)') &
-&      "If you use a subspace filtering algorithm to optimize wavefunctions,",&
-&      "the degree of the polynomial filter (i.e. mdeg_filter) must be equal to",&
+       write(msg,'(5a)') &
+&      "If you use a subspace filtering algorithm to optimize wavefunctions,",ch10,&
+&      "the degree of the polynomial filter (i.e. mdeg_filter) must be equal to",ch10,&
 &      "the value of nline parameter (which is obsolete for filtering algorithms)!"
          ABI_ERROR_NOSTOP(msg, ierr)
      end if
