@@ -10503,6 +10503,8 @@ The value of [[mdeg_filter]] serves as a maximum threshold: the degree may be au
 > * Combined with the input variable [[nnsclo]], [[mdeg_filter]] controls the convergence of wavefunctions for a fixed potential.
 >
 > * On GPUs, the polynomial degree can be increased with minimal impact on computational cost.
+>
+> * Previously, [[nline]] was used to adjust the degree of the filtering polynomial. In the absence of [[mdeg_filter]], the value of [[nline]], if specified, is still used.”
 """,
 ),
 
@@ -12076,28 +12078,29 @@ Variable(
     vartype="integer",
     topics=['SCFControl_expert'],
     dimensions="scalar",
-    defaultval=ValueWithConditions({'[[wfoptalg]] == 1 or 11 ': 6, 'defaultval': 4}),
+    defaultval=ValueWithConditions({'[[wfoptalg]] == 1 or 11 ': '[[mdeg_filter]]', 'defaultval': 4}),
     mnemonics="Number of LINE minimizations",
-    commentdefault="4 for conjugate-gradient-based algorithm, 6 for spectrum-filtering-based algorithms",
+    commentdefault="Default is 4 line minimizations for conjugate-gradient-based algorithms, the degree of the polynomial filter for spectrum-filtering-based algorithms",
     added_in_version="before_v9",
     text=r"""
-For conjugate-gradient based algorithms (conjugate gradient or LOBPCG):
 
+Allows one to adjust the number of "iterations" used to optimize the wavefunctions.  
+With the input variable [[nnsclo]], [[nline]] governs the convergence of the
+wavefunctions for fixed potential.  
+
+- For **conjugate-gradient based algorithms** (e.g. conjugate gradient or LOBPCG):
 [[nline]] gives the maximum number of line minimizations allowed in preconditioned conjugate
 gradient minimization for each band. The default, 4, is fine.
 Special cases, with degeneracies or near-degeneracies of levels at the Fermi
 energy may require a larger value of [[nline]] (5 or 6 ?). Line minimizations
-will be stopped anyway when improvement gets small (governed by [[tolrde]]).
-Note that [[nline]] = 0 can be used to diagonalize the Hamiltonian matrix in the
+will be stopped anyway when improvement gets small (governed by [[tolrde]]).  
+> Note that [[nline]] **= 0** can be used to diagonalize the Hamiltonian matrix in the
 subspace spanned by the input wavefunctions.
 
-For algorithms using spectrum filtering (f.i. Chebyshev filtering, [[wfoptalg]]=1 or 111):
-
+- For **spectrum filtering algorithms** (e.g. Chebyshev filtering, spectrum slicing):
 [[nline]] gives the maximum degree of the Chebyshev polynomial used as filtering function.
-The default is 6 to ensure a good quality of the filtering.
-
-With the input variable [[nnsclo]], [[nline]] governs the convergence of the
-wavefunctions for fixed potential.
+The default value ([[nline]] = 6) provides sufficient filtering quality for most cases.  
+> Note however that the use of [[nline]] is **outdated**, replaced by [[mdeg_filter]].
 """,
 ),
 
