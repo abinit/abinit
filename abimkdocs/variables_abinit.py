@@ -21759,35 +21759,36 @@ Variable(
 Allows one to choose the algorithm for the optimisation of the wavefunctions.
 The different possibilities are:
 
-  * [[wfoptalg]] = 0: standard state-by-state conjugate gradient algorithm, with no possibility to parallelize over the states;
+  * [[wfoptalg]] = 0: The standard **state-by-state conjugate gradient** algorithm, which does not allow for parallelization over states. A detailed description of this algorithm can be found in [[cite:Payne1992]].
 
-  * [[wfoptalg]] = 2: minimisation of the residual with respect to different shifts, in order to cover the whole set of occupied bands,
-  with possibility to parallelize over blocks of states (or bands). The number of states in a block is defined in [[nbdblock]]. THIS IS STILL IN DEVELOPMENT.
+  * [[wfoptalg]] = 10:  (For PAW) The standard **state-by-state conjugate gradient** algorithm (as described in [[cite:Payne1992]]) with no parallelization over states. This version includes **modifications** described in [[cite:Kresse1996]], such as a modified kinetic energy, improved preconditioning, minimal orthogonalization, etc. 
 
-  * [[wfoptalg]] = 3: minimisation of the residual with respect to a shift. Available only in the non-self-consistent case [[iscf]] = -2,
-  in order to find eigenvalues and wavefunctions close to a prescribed value.
+  * [[wfoptalg]] = 2: **Minimization of the residual** with respect to different shifts to cover the entire set of occupied bands. This allows for parallelization over blocks of states (or bands), with the number of states per block defined by [[nbdblock]].  
+> Note: This algorithm is experimental and possibly obsolete.
 
-  * [[wfoptalg]] = 4: (see also [[wfoptalg]] = 14), a parallel code based on the Locally Optimal Block Preconditioned Conjugate Gradient (LOBPCG)
-  method of [[cite:Knyazev2001 ]].
-  The implementation rests on the [matlab program by Knyazev](http://www.mathworks.com/matlabcentral/fileexchange/48-lobpcg-m) [[cite:Knyazev2007]].
-  For more information see [[cite:Bottin2008]]
+  * [[wfoptalg]] = 3: **Residual minimization** with respect to a shift. This is available only in the non-self-consistent case ([[iscf]] = -2) and is used to find eigenvalues and wavefunctions near a prescribed value.
 
-  * [[wfoptalg]] = 10: (for PAW) standard state-by-state conjugate gradient algorithm, with no possibility to parallelize over the states,
-  but modified scheme described in [[cite:Kresse1996]] (modified kinetic energy, modified preconditionning, minimal orthogonalization, ...);
+  * [[wfoptalg]] = 4 (see also [[wfoptalg]] = 14 or 114): A parallel implementation of the **Locally Optimal Block Preconditioned Conjugate Gradient (LOBPCG)** method, based on [[cite:Knyazev2001]]. This implementation relies on the Matlab program by Knyazev [[cite:Knyazev2007]]. For further details, see [[cite:Bottin2008]].  
+> Recommendation: use [[wfoptalg]] = 114, which is the modern and improved version of this algorithm.
 
-  * [[wfoptalg]] = 14: the recommended for parallel code, the same as [[wfoptalg]] = 4 except that the preconditioning of the block vectors does not
-  depend on the kinetic energy of each band, and the orthogonalization after the LOBPCG algorithm is no longer performed. The first modification increases the convergence and the second one the efficiency.
+  * [[wfoptalg]] = 14: Similar to [[wfoptalg]] = 4, **Locally Optimal Block Preconditioned Conjugate Gradient (LOBPCG)**, but with two key differences: (1) the preconditioning of block vectors is independent of the kinetic energy of each band, which improves convergence; and (2) orthogonalization after the LOBPCG algorithm is no longer performed, enhancing efficiency.  
+> Recommendation: use [[wfoptalg]] = 114 for a more modern and optimized version of this algorithm.
 
-  * [[wfoptalg]] = 114: A new version of [[wfoptalg]] = 14 which is more efficient for few blocks and can take advantage of OpenMP if abinit is compiled with a multithreaded linear algebra library.
-  With more than 1 thread [[npfft]] shoud NOT be used for the time being.
+  * [[wfoptalg]] = 114: A modern and highly efficient version of [[wfoptalg]] = 14 (**Locally Optimal Block Preconditioned Conjugate Gradient**), particularly suited for parallel computations. It performs well with a small number of blocks and can utilize OpenMP if ABINIT is compiled with a multithreaded linear algebra library.  
+> Note: When using more than one thread, [[npfft]] cannot be used.
 
-  * [[wfoptalg]] = 1: new algorithm based on Chebyshev filtering, designed for very large number of processors, in the regime
-  where LOBPCG does not scale anymore. It is not able to use preconditionning and therefore might converge slower than other algorithms.
-  By design, it will **not** converge the last bands: it is recommended to use slightly more bands than necessary.
-  For usage with [[tolwfr_diago]], it is imperative to use [[nbdbuf]]. For more performance, try [[use_gemm_nonlop]].
-  For more information, see the [performance guide](/theory/howto_chebfi.pdf) and the [[cite:Levitt2015]]. Status: experimental but usable.
-  Questions and bug reports should be sent to antoine (dot) levitt (at) gmail.com.
-""",
+  * [[wfoptalg]] = 1: A spectrum filtering algorithm based on **Chebyshev filtering**, designed for use with a large number of processors. It is suitable when the LOBPCG algorithm no longer scales efficiently. For more information, see the [performance guide](/theory/howto_chebfi.pdf) and [[cite:Levitt2015]].  
+> Recommendation: use [[wfoptalg]] = 111, which is the modern and improved version of this algorithm.  
+> See **notes** in the "[[wfoptalg]] = 111" section. 
+
+* [[wfoptalg]] = 111: A **modern and highly efficient version** of [[wfoptalg]] = 1, a spectrum filtering algorithm based on **Chebyshev filtering**, designed for use with a large number of processors. For more information, see the [performance guide](/theory/howto_chebfi.pdf) and [[cite:Levitt2015]].  
+> **Notes**:  
+>
+> * For more performance, try enabling [[use_gemm_nonlop]].  
+>
+> * This algorithm struggles to converge the last bands, so it is advisable to use slightly more bands than required. When using [[tolwfr_diago]], it is mandatory to set [[nbdbuf]].    
+>
+> * By design, this algorithm cannot use preconditioning and, therefore, cannot handle [[ecutsm]]. Consequently, _Pulay stresses_ are not corrected. If stresses are important for the calculation (e.g., when pressure is required), it is necessary to slightly increase the plane-wave cutoff ([[ecut]]). """,
 ),
 
 Variable(
