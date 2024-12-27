@@ -10481,6 +10481,32 @@ it mimics a second iteration self-consistent GW calculation.
 ),
 
 Variable(
+    abivarname="mdeg_filter",
+    varset="gstate",
+    vartype="integer",
+    topics=['SCFControl_expert'],
+    dimensions="scalar",
+    defaultval=ValueWithConditions({'[[wfoptalg]] == 1 or 11 ': 6, 'defaultval': 6}),
+    mnemonics="Maximum DEGree of the polynomial for spectrum FILTERing algorithms",
+    commentdefault="6 for chebyshev filtering algorithm",
+    added_in_version="v10",
+    text=r"""
+For spectrum-filtering based algorithms (e.g. Chebyshev filtering ([[wfoptalg]]=1 or 11) or spectrum slicing ([[wfoptalg]]=TODO).  
+The parameter [[mdeg_filter]] defines the maximum degree of the Chebyshev polynomial used in spectrum-filtering algorithms, such as Chebyshev filtering or spectrum slicing. These algorithms are employed to optimize the wavefunctions during the self-consistent cycle.  
+Increasing the degree improves the effectiveness of the filtering, reducing the number of self-consistent iterations required. However, a high polynomial degree is computationally expensive. Conversely, using a degree that is too low (e.g., <5) often leads to inefficient convergence or even incorrect results.
+The value of [[mdeg_filter]] serves as a maximum threshold: the degree may be automatically reduced to meet the required tolerance specified by [[tolwfr_diago]].
+
+> Notes:  
+>
+> * The default value ([[mdeg_filter]] = 6) provides sufficient filtering quality for most cases.
+>
+> * Combined with the input variable [[nnsclo]], [[mdeg_filter]] controls the convergence of wavefunctions for a fixed potential.
+>
+> * On GPUs, the polynomial degree can be increased with minimal impact on computational cost.
+""",
+),
+
+Variable(
     abivarname="mdf_epsinf",
     varset="gw",
     vartype="real",
@@ -21777,14 +21803,14 @@ The different possibilities are:
   * [[wfoptalg]] = 114: A modern and highly efficient version of [[wfoptalg]] = 14 (**Locally Optimal Block Preconditioned Conjugate Gradient**), particularly suited for parallel computations. It performs well with a small number of blocks and can utilize OpenMP if ABINIT is compiled with a multithreaded linear algebra library.  
 > Note: When using more than one thread, [[npfft]] cannot be used.
 
-  * [[wfoptalg]] = 1: A spectrum filtering algorithm based on **Chebyshev filtering**, designed for use with a large number of processors. It is suitable when the LOBPCG algorithm no longer scales efficiently. For more information, see the [performance guide](/theory/howto_chebfi.pdf) and [[cite:Levitt2015]].  
+  * [[wfoptalg]] = 1: A spectrum filtering algorithm based on **Chebyshev filtering**, designed for use with a large number of processors. It is suitable when the LOBPCG algorithm no longer scales efficiently. The degree of the polynomial filter can be adjusted with [[mdeg_filter]] (formerly [[nline]]). For more information, see the [performance guide](/theory/howto_chebfi.pdf) and [[cite:Levitt2015]].  
 > Recommendation: use [[wfoptalg]] = 111, which is the modern and improved version of this algorithm.  
 > See **notes** in the "[[wfoptalg]] = 111" section. 
 
-* [[wfoptalg]] = 111: A **modern and highly efficient version** of [[wfoptalg]] = 1, a spectrum filtering algorithm based on **Chebyshev filtering**, designed for use with a large number of processors. For more information, see the [performance guide](/theory/howto_chebfi.pdf) and [[cite:Levitt2015]].  
+* [[wfoptalg]] = 111: A **modern and highly efficient version** of [[wfoptalg]] = 1, a spectrum filtering algorithm based on **Chebyshev filtering**, designed for use with a large number of processors. The degree of the polynomial filter can be adjusted with [[mdeg_filter]] (formerly [[nline]]). For more information, see the [performance guide](/theory/howto_chebfi.pdf) and [[cite:Levitt2015]].  
 > **Notes**:  
 >
-> * For more performance, try enabling [[use_gemm_nonlop]].  
+> * For more performance, try enabling [[use_gemm_nonlop]] (default on [[GPU]]).  
 >
 > * This algorithm struggles to converge the last bands, so it is advisable to use slightly more bands than required. When using [[tolwfr_diago]], it is mandatory to set [[nbdbuf]].    
 >
