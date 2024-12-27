@@ -2764,10 +2764,10 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  if(tread_alt==1) dtset%mdeg_filter=intarr(1)
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nline',tread,'INT')
  if (tread==1) dtset%nline=intarr(1)
+ if (tread_alt/=1.and.tread==1) dtset%mdeg_filter = dtset%nline
  if (mod(dtset%wfoptalg,10) == 1) then
 !  For Chebyshev filtering algo, nline is the degree of the Chebyshev polynomial (but is obsolete)
    if (tread_alt==1.and.tread/=1) dtset%nline = dtset%mdeg_filter
-   if (tread_alt/=1.and.tread==1) dtset%mdeg_filter = dtset%nline
  end if 
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nblock_lobpcg',tread,'INT')
