@@ -17,7 +17,7 @@ converge to the solution of this set of equations.
 The input variables [[iscf]] governs 
 the choice of density/potential
 self-consistency algorithms, while [[wfoptalg]] focuses on the determination
-of the wavefunction through the solution of the Schrodinger equation with fixed
+of the wavefunctions through the solution of the Schrodinger equation with fixed
 Kohn-Sham potential.
 
 In the first class of algorithms, selected by [[iscf]]), Pulay
@@ -30,9 +30,10 @@ band structure, the loop over density/potentials self-consistency must be
 disabled, for which [[iscf]]=-2 must be chosen.
 
 Among the algorithms to find the wavefunctions, selected by [[wfoptalg]], the
-conjugate-gradient and the LOBPCG ones are the favourite. 
+conjugate-gradient and the LOBPCG ones are the favourite.  
 The RMM-DIIS algorithm is faster, but might be unstable. Use it for molecular dynamics run
-or long geometry optimizations. Use the Chebyshev filtering for massive parallel runs.
+or long geometry optimizations.  
+A new class of algorithms, spectral filtering algorithms, achieves very high levels of parallelization and is particularly efficient on hybrid architectures (using [[GPU]]s). Use them for massive parallel runs.
 
 Inner electronic eigenvalues can be computed thanks to the minimisation of the
 residual with respect to a target energy value, see [[eshift]].
