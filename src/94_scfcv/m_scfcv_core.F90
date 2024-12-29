@@ -623,7 +623,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  ABI_MALLOC(vtrial,(nfftf,dtset%nspden))
  ABI_MALLOC(vpsp,(nfftf))
  ABI_MALLOC(vxc,(nfftf,dtset%nspden))
- usevxctau=xc_need_kden(dtset%ixc)
+ usevxctau=merge(1,0,xc_need_kden(dtset%ixc))
  ABI_MALLOC(vxctau,(nfftf,dtset%nspden,4*usevxctau))
 
  wfmixalg=dtset%fockoptmix/100

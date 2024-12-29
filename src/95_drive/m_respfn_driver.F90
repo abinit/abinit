@@ -944,7 +944,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  call check_kxc(dtset%ixc,dtset%optdriver)
  ABI_MALLOC(kxc,(nfftf,nkxc))
  ABI_MALLOC(vxc,(nfftf,dtset%nspden))
- usevxctau=xc_need_kden(dtset%ixc)
+ usevxctau=merge(1,0,xc_need_kden(dtset%ixc))
  ABI_MALLOC(vxctau,(nfftf,dtset%nspden,4*usevxctau))
 
  call xcdata_init(xcdata,dtset=dtset)

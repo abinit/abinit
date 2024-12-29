@@ -922,7 +922,7 @@ subroutine second_setup(dtset, mpi_enreg, pawang, pawrad, pawtab, psps, psp_genc
     tdks%xcctau3d=zero
  endif
  !For mGGA
- usevxctau=xc_need_kden(dtset%ixc)
+ usevxctau=merge(1,0,xc_need_kden(dtset%ixc))
  ABI_MALLOC(tdks%vxctau,(tdks%nfftf,dtset%nspden,4*usevxctau))
  tdks%vxctau=zero
  !For hybrid functionals

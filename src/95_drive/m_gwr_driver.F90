@@ -597,7 +597,7 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
  ! TODO: I don't think direct diago can be used with mega-GGA due to the functional derivative wrt KS states.
  ! TB-BK should be OK though.
 
- !usevxctau=xc_need_kden(dtset%ixc)
+ !usevxctau=merge(1,0,xc_need_kden(dtset%ixc))
  !ABI_MALLOC(ks_vxctau, (nfftf, dtset%nspden * usevxctau))
  !ABI_MALLOC(xcctau3d, (n3xccc * dtset%usekden))
  !ABI_FREE(ks_vxctau)
