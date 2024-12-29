@@ -2125,7 +2125,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  if(tread==1) then
    dtset%optforces=intarr(1)
  else if (xc_is_tb09) then
-   dtset%optforces=0
+   dtset%optforces=0 ; dtset%optstress=0
    write(msg, '(9a)' ) &
 &      'When the selected XC functional is Tran-Blaha 2009 functional (modified Becke-Johnson),',ch10,&
 &        'which is a potential-only functional, calculations cannot be self-consistent',ch10,&
