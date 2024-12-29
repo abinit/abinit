@@ -952,9 +952,10 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
                s1=-grho(1)*grho(1)*coeff
                s2=-grho(2)*grho(2)*coeff
                s3=-grho(3)*grho(3)*coeff
-               !Diagonal part: -Int[n.grad(dFxc/grad(n))] = Int[grad(n).grad(dFxc/grad(n))]
+               !Diagonal part: +Int[n*Grad.dot.(dFxc/dgrad(n))] = -Int[grad(n).dot.(dFxc/dgrad(n))]
+               !  dFxc/dgrad(n) is 1/|grad(n)|.dFxc/d[grad(n)|*grad(n) = coeff * grho(:)
                dstrsxc=dstrsxc+s1+s2+s3
-               !Non-diagonal part: -Int[dn/dr_alpha.grad(dFxc/grad_beta(n))]
+               !Non-diagonal part: -Int[dn/dr_alpha.dFxc/grad_beta(n)]
                strsxc1_tot=strsxc1_tot+s1
                strsxc2_tot=strsxc2_tot+s2
                strsxc3_tot=strsxc3_tot+s3
@@ -991,15 +992,15 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
                if (nspden_updn==2.and.ispden==1) d2rho(1:6)=d2rhonow(ipts,2,1:6)
                if (nspden_updn==2.and.ispden==2) d2rho(1:6)=d2rhonow(ipts,1,1:6)-d2rhonow(ipts,2,1:6)
                coeff=vxclrho_b_updn(indx,ispden)
-               !Diagonal part: Int[n.Lapl(dFxc/Lapl(n))] = Int[Lapl(n).dFxc/grad(n)]
-               dstrsxc=dstrsxc+(d2rho(1)+d2rho(2)+d2rho(3))*coeff
+               !Diagonal part: -Int[n.Lapl(dFxc/Lapl(n))] = -Int[Lapl(n).dFxc/grad(n)]
+               dstrsxc=dstrsxc-(d2rho(1)+d2rho(2)+d2rho(3))*coeff
                !Non-diagonal part: -2*Int[d2n/dr_alpha.dr_beta.dFxc/Lapl(n)]
                strsxc1_tot=strsxc1_tot-two*d2rho(1)*coeff
                strsxc2_tot=strsxc2_tot-two*d2rho(2)*coeff
                strsxc3_tot=strsxc3_tot-two*d2rho(3)*coeff
                strsxc4_tot=strsxc4_tot-two*d2rho(4)*coeff
                strsxc5_tot=strsxc5_tot-two*d2rho(5)*coeff
-               strsxc5_tot=strsxc6_tot-two*d2rho(6)*coeff
+               strsxc6_tot=strsxc6_tot-two*d2rho(6)*coeff
              end do
            end if
          end if
