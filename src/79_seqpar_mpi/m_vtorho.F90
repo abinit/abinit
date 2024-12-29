@@ -523,7 +523,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  if(dtset%usewvl==0) then
    ABI_MALLOC(eknk,(mbdkpsp))
    ABI_MALLOC(enlxnk,(mbdkpsp))
-   ABI_MALLOC(eknk_nd,(2,dtset%mband,dtset%mband,dtset%nkpt,dtset%nsppol*paw_dmft%use_dmft))
+   ABI_MALLOC(eknk_nd,(2,dtset%mband,dtset%mband*paw_dmft%use_dmft,dtset%nkpt,dtset%nsppol))
    ABI_MALLOC(EigMin,(2,dtset%mband))
    ABI_MALLOC(grnlnk,(3*natom,mbdkpsp*optforces))
    if (usefock) then
@@ -1402,7 +1402,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
              write(msg,'(a,e12.3)')&
               ' ERROR: Wavefunctions not converged: DFT+DMFT calculation cannot be carried out safely ',residm
              call wrtout(std_out,msg)
-             write(msg,'(a,i0)')'  Action: increase nline and nnsclo',dtset%nstep
+             write(msg,'(a,i0)')'  Action: increase nline (or mdeg_filter) and nnsclo',dtset%nstep
              ABI_ERROR(msg)
            end if
 

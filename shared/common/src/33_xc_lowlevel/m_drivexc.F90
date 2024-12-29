@@ -224,20 +224,23 @@ end subroutine echo_xc_name
 !!
 !! INPUTS
 !!  ixc= choice of exchange-correlation scheme
+!!  [xc_funcs(2)]= <type(libxc_functional_type)>= optional - libXC functional(s)
 !!
 !! SOURCE
 
-function xc_need_kden(ixc)
+function xc_need_kden(ixc,xc_funcs)
 
 !Arguments ------------------------------------
  integer,intent(in) :: ixc
  integer :: xc_need_kden
+ type(libxc_functional_type),intent(in),optional :: xc_funcs(2)
 
 ! *************************************************************************
 
  xc_need_kden=0
  if (ixc<0) then
-   if (libxc_functionals_ismgga()) xc_need_kden=1
+   if(present(xc_funcs)) need_kden=merge(1,0,libxc_functionals_needs_tau(xc_functionals=xc_funcs))
+   if(.not.present(xc_funcs)) need_kden=merge(1,0,libxc_functionals_needs_tau())
  else if (ixc==31.or.ixc==34.or.ixc==35) then
    xc_need_kden=1
  end if
@@ -245,6 +248,265 @@ function xc_need_kden(ixc)
 end function xc_need_kden
 !!***
 
+!!****f* m_drivexc/has_kxc
+!! NAME
+!! has_kxc
+!!
+!! FUNCTION
+!!  Given a XC functional (defined by ixc), return TRUE if Kxc (dVxc/drho) is avalaible.
+!!
+!! INPUTS
+!!  ixc = internal code for xc functional
+!!  [xc_funcs(2)]= <type(libxc_functional_type)> = optional - libXC set of functionals
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+logical function has_kxc(ixc,xc_funcs)
+
+!Arguments -------------------------------
+ integer, intent(in) :: ixc
+ type(libxc_functional_type),intent(in),optional :: xc_funcs(2)
+
+!Local variables -------------------------
+
+! *********************************************************************
+
+ has_kxc=.false.
+
+ if (ixc>=0) then
+   has_kxc=(ixc/=16.and.ixc/=17.and.ixc/=26.and.ixc/=27)
+ else if (ixc==-406.or.ixc==-427.or.ixc==-428.or.ixc==-456)then
+   has_kxc=.true.
+ else ! ixc<0 and not one of the allowed hybrids
+   if (present(xc_funcs)) then
+     has_kxc=libxc_functionals_has_kxc(xc_funcs)
+   else
+     has_kxc=libxc_functionals_has_kxc()
+   end if
+ end if
+
+end function has_kxc
+!!***
+
+!!****f* m_drivexc/has_k3xc
+!! NAME
+!! has_k3xc
+!!
+!! FUNCTION
+!!  Given a XC functional (defined by ixc), return TRUE if K3xc (d2Vxc/drho2) is avalaible.
+!!
+!! INPUTS
+!!  ixc = internal code for xc functional
+!!  [xc_funcs(2)]= <type(libxc_functional_type)> = optional - libXC set of functionals
+!!
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+logical function has_k3xc(ixc,xc_funcs)
+
+!Arguments -------------------------------
+ integer, intent(in) :: ixc
+ type(libxc_functional_type),intent(in),optional :: xc_funcs(2)
+
+!Local variables -------------------------
+
+! *********************************************************************
+
+ has_k3xc=.false.
+
+ if (ixc>=0) then
+   has_k3xc=(ixc==0.or.ixc==3.or.(ixc>=7.and.ixc<=15).or. &
+&    ixc==23.or.ixc==24.or.ixc==41.or.ixc==42.or.ixc==1402000)
+ else if (ixc==-406.or.ixc==-427.or.ixc==-428.or.ixc==-456)then
+   has_k3xc=.false.
+ else ! ixc<0 and not one of the allowed hybrids
+   if (present(xc_funcs)) then
+     has_k3xc=libxc_functionals_has_k3xc(xc_funcs)
+   else
+     has_k3xc=libxc_functionals_has_k3xc()
+   end if
+ end if
+
+end function has_k3xc
+!!***
+
+!!****f* m_drivexc/check_kxc
+!! NAME
+!! check_kxc
+!!
+!! FUNCTION
+!!  Given a XC functional (defined by ixc), check if Kxc and/or K3xc is avalaible.
+!!
+!! INPUTS
+!!  ixc = internal code for xc functional
+!!  optdriver=type of calculation (ground-state, response function, GW, ...)
+!!  [check_k3xc]= optional ; check also k3xc availability
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine check_kxc(ixc,optdriver,check_k3xc)
+
+!Arguments -------------------------------
+ integer, intent(in) :: ixc,optdriver
+ logical,intent(in),optional :: check_k3xc
+
+!Local variables -------------------------
+ logical :: check_k3xc_,kxc_available,k3xc_available
+ character(len=500) :: msg
+
+! *********************************************************************
+
+ check_k3xc_=.false. ; if (present(check_k3xc)) check_k3xc_=check_k3xc
+
+ kxc_available=has_kxc(ixc)
+ k3xc_available=has_k3xc(ixc)
+
+ if (ixc>=0) then
+   if (.not.kxc_available) then
+     write(msg,'(a,i0,3a)') &
+&     'The selected XC functional (ixc=',ixc,')',ch10,&
+&     'does not provide Kxc (dVxc/drho) !'
+   end if
+   if (check_k3xc_.and.(.not.k3xc_available)) then
+     write(msg,'(a,i0,3a)') &
+&     'The selected XC functional (ixc=',ixc,')',ch10,&
+&     'does not provide K3xc (d^2Vxc/drho^2) !'
+   end if
+ else ! ixc<0
+   if (.not.kxc_available) then
+     write(msg,'(a,i0,7a)') &
+&     'The selected XC functional (ixc=',ixc,'):',ch10,&
+&     '   <<',trim(libxc_functionals_fullname()),'>>',ch10,&
+&     'does not provide Kxc (dVxc/drho) !'
+   end if
+   if (check_k3xc_.and.(.not.k3xc_available)) then
+     write(msg,'(a,i0,7a)') &
+&     'The selected XC functional (ixc=',ixc,'):',ch10,&
+&     '   <<',trim(libxc_functionals_fullname()),'>>',ch10,&
+&     'does not provide K3xc (d^2Vxc/d^2rho) !'
+   end if
+ end if
+
+ if (.not.kxc_available) then
+   write(msg,'(7a)') trim(msg),ch10,&
+&   'However, with the current input options, ABINIT needs Kxc.',ch10,&
+&   '>Possible action:',ch10,&
+&   'Change the XC functional in psp file or input file.'
+   if (optdriver==0) then
+     write(msg,'(13a)') trim(msg),ch10,&
+&     '>Possible action (2):',ch10,&
+&     'If you are using density mixing for the SCF cycle',ch10,&
+&     '(iscf>=10, which is the default for PAW),',ch10,&
+&     'change to potential mixing (iscf=7, for instance).',ch10,&
+&     '>Possible action (3):',ch10,&
+&     'Switch to another value of densfor_pred (=5, for instance).'
+   end if
+   ABI_ERROR(msg)
+ else if (check_k3xc_.and.(.not.k3xc_available)) then
+   write(msg,'(13a)') trim(msg),ch10,&
+&   'However, with the current input options, ABINIT needs K3xc.',ch10,&
+&   '>Possible actions:',ch10,&
+&   '- Recompile libXC using --enable-kxc.',ch10,&
+&   '  or',ch10,&
+&   '- Change the XC functional in psp file or input file:',ch10,&
+&   '  use one of the internal LDA (ixc=3, 7 to 15, 23, 24).'
+   ABI_ERROR(msg)
+ end if
+
+end subroutine check_kxc
+!!***
+
+!!****f* m_drivexc/size_dvxc
+!! NAME
+!! size_dvxc
+!!
+!! FUNCTION
+!! Give the sizes of the several arrays involved in exchange-correlation calculation
+!! needed to allocated them for the drivexc routine
+!!
+!! INPUTS
+!!  ixc= choice of exchange-correlation scheme
+!!  order= gives the maximal derivative of Exc computed.
+!!    1=usual value (return exc and vxc)
+!!    2=also computes the kernel (return exc,vxc,kxc)
+!!   -2=like 2, except (to be described)
+!!    3=also computes the derivative of the kernel (return exc,vxc,kxc,k3xc)
+!!  nspden= number of spin components
+!!  [add_tfw]= optional flag controling the addition of Weiszacker gradient correction to Thomas-Fermi XC energy
+!!
+!! OUTPUT
+!!  --- All optionals
+!!  [usegradient]= [flag] 1 if the XC functional needs the gradient of the density (grho2_updn)
+!!  [uselaplacian]= [flag] 1 if the XC functional needs the laplacian of the density (lrho_updn)
+!!  [usekden]= [flag] 1 if the XC functional needs the kinetic energy density (lrho_updn)
+!!  [nvxcgrho]= size of the array dvxcdgr(npts,nvxcgrho) (derivative of Exc wrt to gradient)
+!!  [nvxclrho]= size of the array dvxclpl(npts,nvxclrho) (derivative of Exc wrt to laplacian)
+!!  [nvxctau]= size of the array dvxctau(npts,nvxctau) (derivative of Exc wrt to kin. ener. density)
+!!  [ndvxc]= size of the array dvxc(npts,ndvxc) (second derivatives of Exc wrt to density and gradient)
+!!  [nd2vxc]= size of the array d2vxc(npts,nd2vxc) (third derivatives of Exc wrt density)
+!!
+!! SOURCE
+
+subroutine size_dvxc(ixc,order,nspden,&
+&          usegradient,uselaplacian,usekden,&
+&          nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc,&
+&          add_tfw,xc_funcs) ! Optional
+
+!Arguments----------------------
+ integer,intent(in) :: ixc,nspden,order
+ integer,intent(out),optional :: nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc
+ integer,intent(out),optional :: usegradient,uselaplacian,usekden
+ logical, intent(in),optional :: add_tfw
+ type(libxc_functional_type),intent(in),optional :: xc_funcs(2)
+
+!Local variables----------------
+ logical :: libxc_has_kxc,libxc_has_k3xc,libxc_isgga,libxc_ismgga,libxc_ishybrid,my_add_tfw
+ logical :: need_gradient,need_laplacian,need_kden
+
+! *************************************************************************
+
+!Several flags
+ my_add_tfw=.false.;if (present(add_tfw)) my_add_tfw=add_tfw
+ libxc_isgga=.false. ; libxc_ismgga=.false. ; libxc_ishybrid=.false.
+ if(ixc<0)then
+   if(present(xc_funcs))then
+     libxc_has_kxc=libxc_functionals_has_kxc(xc_funcs)
+     libxc_has_k3xc=libxc_functionals_has_k3xc(xc_funcs)
+     libxc_isgga=libxc_functionals_isgga(xc_functionals=xc_funcs)
+     libxc_ismgga=libxc_functionals_ismgga(xc_functionals=xc_funcs)
+     libxc_ishybrid=libxc_functionals_is_hybrid(xc_functionals=xc_funcs)
+   else
+     libxc_has_kxc=libxc_functionals_has_kxc()
+     libxc_has_k3xc=libxc_functionals_has_k3xc()
+     libxc_isgga=libxc_functionals_isgga()
+     libxc_ismgga=libxc_functionals_ismgga()
+     libxc_ishybrid=libxc_functionals_is_hybrid()
+   end if
+ end if
+
+!Do we use the gradient?
+ need_gradient=((ixc>=11.and.ixc<=17).or.(ixc==23.or.ixc==24).or. &
+&               (ixc==26.or.ixc==27).or.(ixc>=31.and.ixc<=35).or. &
+&               (ixc==41.or.ixc==42).or.ixc==1402000)
+ if (ixc<0.and.(libxc_isgga.or.libxc_ismgga.or.libxc_ishybrid)) need_gradient=.true.
+ if (my_add_tfw) need_gradient=.true.
+ if (present(usegradient)) usegradient=merge(1,0,need_gradient)
+
+!Do we use the laplacian?
+ need_laplacian=(ixc==32.or.ixc==35)
+ if (ixc<0) then
+   if(present(xc_funcs)) need_laplacian=libxc_functionals_needs_laplacian(xc_functionals=xc_funcs)
+   if(.not.present(xc_funcs)) need_laplacian=libxc_functionals_needs_laplacian()
+ end if
+ if (present(uselaplacian)) uselaplacian=merge(1,0,need_laplacian)
+
+!Do we use the kinetic energy density?
 !!****f* m_drivexc/has_kxc
 !! NAME
 !! has_kxc
@@ -505,7 +767,8 @@ subroutine size_dvxc(ixc,order,nspden,&
  if (present(uselaplacian)) uselaplacian=merge(1,0,need_laplacian)
 
 !Do we use the kinetic energy density?
- usekden=xc_need_kden(ixc)
+ if(present(xc_funcs)) usekden=xc_need_kden(ixc,xc_funcs)
+ if(.not.present(xc_funcs)) usekden=xc_need_kden(ixc)
  need_kden=(usekden==1)
 
 !First derivative(s) of XC functional wrt gradient of density
