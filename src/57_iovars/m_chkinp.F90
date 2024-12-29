@@ -1791,8 +1791,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 &      (/RUNL_SCREENING,RUNL_SIGMA,RUNL_BSE,RUNL_NONLINEAR,RUNL_LONGWAVE/),iout)
    end if
 
-
-
 !  ixcpositron
    call chkint_eq(0,0,cond_string,cond_values,ierr,'ixcpositron',dt%ixcpositron,8,(/0,-1,1,11,2,3,31,4/),iout)
 
@@ -2268,6 +2266,18 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      cond_string(2)='prteig' ; cond_values(2)=dt%prteig
      cond_string(3)='prtvol' ; cond_values(3)=dt%prtvol
      call chkint_le(1,3,cond_string,cond_values,ierr,'nkpt',nkpt,50,iout)
+   end if
+
+!  nline
+!  Must be equal to mdeg_filter for filtering algorithms
+   if (mod(dt%wfoptalg,10) == 1) then
+     if (dt%nline/=dt%mdeg_filter) then
+       write(msg,'(5a)') &
+&      "If you use a subspace filtering algorithm to optimize wavefunctions,",ch10,&
+&      "the degree of the polynomial filter (i.e. mdeg_filter) must be equal to",ch10,&
+&      "the value of nline parameter (which is obsolete for filtering algorithms)!"
+         ABI_ERROR_NOSTOP(msg, ierr)
+     end if
    end if
 
 !  nloalg(1)= nloc_alg
