@@ -2563,7 +2563,8 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
  type(pawtab_type),target,intent(in) :: pawtab
 !Local variables ---------------------------------------
 !scalars
- integer :: angl_size,gs1,gs2,idij,ii,ij_size,ilm,ipts,ispden,jlm,klm,klmn,klmn1,kln
+ integer :: angl_size,basis_size,gs1,gs2,ibasis,idij,ii,ij_size,ilm,ipts,ispden
+ integer :: jbasis,jlm,klm,klmn,klmn1,kln
  integer :: lm_size,lmn2_size,mdir,mesh_size,ngnt,sdir
  real(dp), parameter :: HalfFineStruct2=half/InvFineStruct**2
  real(dp) :: fact,me1,me2,rc,rr,rt,sme
@@ -2571,7 +2572,7 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
  character(len=500) :: msg
 !arrays
  integer, pointer :: indklmn(:,:)
- real(dp),allocatable :: dijnd_rad(:,:),dijso_rad(:),dkdr(:),dv1dr(:),dyadic(:,:,:,:)
+ real(dp),allocatable :: dijdr_rad(:),dijnd_rad(:,:),dijso_rad(:),dkdr(:),dv1dr(:),dyadic(:,:,:,:)
  real(dp),allocatable :: v1(:),zk1(:),z_intgd(:),z_kernel(:)
 
 ! *************************************************************************
@@ -2580,6 +2581,7 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
  lm_size=pawtab%lcut_size**2
  lmn2_size=pawtab%lmn2_size
  ij_size=pawtab%ij_size
+ basis_size=pawtab%basis_size
  angl_size=pawang%angl_size
  mesh_size=pawtab%mesh_size
  indklmn => pawtab%indklmn
@@ -2623,6 +2625,10 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
    end if
  else
    has_nucdipmom=.FALSE.
+ end if
+ if (pawtab%has_nablaphi /= 2) then
+   msg='nablaphi not available in pawdijso'
+   LIBPAW_BUG(msg)
  end if
 
 !------------------------------------------------------------------------
@@ -2669,14 +2675,26 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
  LIBPAW_ALLOCATE(z_kernel,(mesh_size))
  LIBPAW_ALLOCATE(z_intgd,(mesh_size))
  LIBPAW_ALLOCATE(dijso_rad,(ij_size))
+ LIBPAW_ALLOCATE(dijdr_rad,(ij_size))
 
  ! spin-orbit kernel
  z_kernel(2:mesh_size) = dkdr(2:mesh_size)/pawrad%rad(2:mesh_size)
  call pawrad_deducer0(z_kernel,mesh_size,pawrad)
- do kln=1,ij_size
-   z_intgd = z_kernel*pawtab%phiphj(1:mesh_size,kln)
-   call simp_gen(dijso_rad(kln),z_intgd,pawrad)
+ kln=0
+ do jbasis=1,basis_size
+   do ibasis=1,jbasis
+     kln=kln+1
+     z_intgd = z_kernel*pawtab%phiphj(1:mesh_size,kln)
+     call simp_gen(dijso_rad(kln),z_intgd,pawrad)
+     z_intgd = -half*dkdr(1:mesh_size)*&
+       & pawtab%phi(1:mesh_size,ibasis)*pawtab%nablaphi(1:mesh_size,jbasis)
+     call simp_gen(dijdr_rad(kln),z_intgd,pawrad)
+   end do
  end do
+ !do kln=1,ij_size
+ !  z_intgd = z_kernel*pawtab%phiphj(1:mesh_size,kln)
+ !  call simp_gen(dijso_rad(kln),z_intgd,pawrad)
+ !end do
  dijso_rad(:)=spnorbscl*dijso_rad(:)
 
  ! nuclear dipole kernels
@@ -2762,6 +2780,20 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
    end if
  end do !  ----- End loop over idij
  LIBPAW_DEALLOCATE(dijso_rad)
+
+ klmn1=1
+ do klmn=1,lmn2_size
+   ilm=indklmn(5,klmn); jlm=indklmn(6,klmn)
+   klm=indklmn(1,klmn); kln=indklmn(2,klmn)
+   fact = dijdr_rad(kln)
+   !! fact = zero
+   if (ilm == jlm) then
+     dijso(klmn1,1) = dijso(klmn1,1) + fact
+     dijso(klmn1,2) = dijso(klmn1,2) + fact
+   end if
+   klmn1=klmn1+cplex_dij
+ end do !loop on klmn
+ LIBPAW_DEALLOCATE(dijdr_rad)
 
  ! add nucdipmom terms if present
  if(has_nucdipmom) then
