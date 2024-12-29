@@ -14037,7 +14037,7 @@ Variable(
     text=r"""
 If set to 1, the computation of stresses is done, in the SCF case (under the
 conditions [[iscf]] > 0, [[prtstm]] == 0, [[positron]] == 0, and either
-[[nstep]] >0, or [[usepaw]] == 0 or [[irdwfk]] == 1).
+[[nstep]] >0 or [[irdwfk]] == 1).
 Otherwise, to save CPU time, if no optimization of the cell is required, one
 can skip the computation of stresses. The CPU time saving might be interesting
 for some PAW calculations.
