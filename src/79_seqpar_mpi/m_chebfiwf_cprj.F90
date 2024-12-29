@@ -213,7 +213,7 @@ subroutine chebfiwf2_cprj(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
 
  call chebfi_init(chebfi,nband,npw*nspinor,cprjdim,dtset%tolwfr_diago,dtset%ecut, &
 &                 mpi_enreg%bandpp, &
-&                 dtset%nline, space,space_cprj,1, &
+&                 dtset%mdeg_filter, space,space_cprj,1, &
 &                 l_mpi_enreg%comm_band,me_g0,paw,&
 &                 xg_nonlop,me_g0_fft)
 

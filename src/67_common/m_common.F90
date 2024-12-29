@@ -339,6 +339,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
      end if
 
      ydoc = yamldoc_open('BeginCycle')
+!    If wfoptalg=1 or 111, we should write mdeg_filter
      call ydoc%add_ints("iscf, nstep, nline, wfoptalg", &
                         [dtset%iscf, dtset%nstep, dtset%nline, dtset%wfoptalg], dict_key="solver")
      call ydoc%add_reals("tolwfr, toldff, toldfe, tolvrs, tolrff", & ! , vdw_df_threshold", &
