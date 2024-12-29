@@ -175,6 +175,7 @@ _ WF disk file :      0.272 Mbytes ; DEN or POT disk file :      0.213 Mbytes.
            kptopt           3
          kptrlatt        2    0    0      0    2    0      0    0    2
           kptrlen      1.41421356E+01
+      mdeg_filter           8
 P           mkmem           8
             natom           2
             nband           8
@@ -2039,6 +2040,7 @@ total_energy_dc_eV  : -2.35592356288525E+02
            kptopt           3
          kptrlatt        2    0    0      0    2    0      0    0    2
           kptrlen      1.41421356E+01
+      mdeg_filter           8
 P           mkmem           8
             natom           2
             nband           8

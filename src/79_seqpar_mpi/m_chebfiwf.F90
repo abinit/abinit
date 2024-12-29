@@ -387,7 +387,7 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  ABI_NVTX_START_RANGE(NVTX_CHEBFI2_INIT)
  call chebfi_init(chebfi,nband,l_npw*l_nspinor,dtset%tolwfr_diago,dtset%ecut, &
 &                 dtset%paral_kgb,l_mpi_enreg%bandpp, &
-&                 dtset%nline, space,1, &
+&                 dtset%mdeg_filter, space,1, &
 &                 l_mpi_enreg%comm_bandspinorfft,me_g0,me_g0_fft,l_paw,&
 &                 l_mpi_enreg%comm_spinorfft,l_mpi_enreg%comm_band,&
 &                 l_gs_hamk%gpu_option,gpu_kokkos_nthrd=dtset%gpu_kokkos_nthrd)

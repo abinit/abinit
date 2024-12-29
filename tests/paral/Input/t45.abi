@@ -17,6 +17,7 @@ ecut 5
 
 nstep 15
 nline  8
+mdeg_filter 8
 
 # bands and spinors
 nband  8

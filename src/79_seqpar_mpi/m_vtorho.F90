@@ -1401,7 +1401,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
              write(msg,'(a,e12.3)')&
               ' ERROR: Wavefunctions not converged: DFT+DMFT calculation cannot be carried out safely ',residm
              call wrtout(std_out,msg)
-             write(msg,'(a,i0)')'  Action: increase nline and nnsclo',dtset%nstep
+             write(msg,'(a,i0)')'  Action: increase nline (or mdeg_filter) and nnsclo',dtset%nstep
              ABI_ERROR(msg)
            end if
 
