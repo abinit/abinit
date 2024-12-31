@@ -39,6 +39,7 @@ module m_drivexc
 
  public :: drivexc         ! Driver of XC functionals. Optionally, deliver the XC kernel, or even the derivative
  public :: echo_xc_name    ! Write to log and output the xc functional which will be used for this dataset
+ public :: xc_need_kden    ! Given a XC functional (defined by ixc), return TRUE if it needs kinetic energy density.
  public :: has_kxc         ! Given a XC functional (defined by ixc), return TRUE if Kxc (dVxc/drho) is avalaible.
  public :: has_k3xc        ! Given a XC functional (defined by ixc), return TRUE if K3xc (d2Vxc/drho2) is avalaible.
  public :: check_kxc       ! Given a XC functional (defined by ixc), check if Kxc and/or K3xc is avalaible.
@@ -212,6 +213,39 @@ subroutine echo_xc_name (ixc)
  end if ! end libxc if
 
 end subroutine echo_xc_name
+!!***
+
+!!****f* m_drivexc/xc_need_kden
+!! NAME
+!!  xc_need_kden
+!!
+!! FUNCTION
+!!  Check if kinetic energy density is used in XC functional
+!!
+!! INPUTS
+!!  ixc= choice of exchange-correlation scheme
+!!  [xc_funcs(2)]= <type(libxc_functional_type)>= optional - libXC functional(s)
+!!
+!! SOURCE
+
+logical function xc_need_kden(ixc,xc_funcs)
+
+!Arguments ------------------------------------
+ integer,intent(in) :: ixc
+ type(libxc_functional_type),intent(in),optional :: xc_funcs(2)
+
+! *************************************************************************
+
+ xc_need_kden=.false.
+
+ if (ixc>=0) then
+   xc_need_kden=(ixc==31.or.ixc==34.or.ixc==35)
+ else
+   if(present(xc_funcs)) xc_need_kden=libxc_functionals_needs_tau(xc_functionals=xc_funcs)
+   if(.not.present(xc_funcs)) xc_need_kden=libxc_functionals_needs_tau()
+ end if
+
+end function xc_need_kden
 !!***
 
 !!****f* m_drivexc/has_kxc
@@ -404,7 +438,7 @@ end subroutine check_kxc
 !!   -2=like 2, except (to be described)
 !!    3=also computes the derivative of the kernel (return exc,vxc,kxc,k3xc)
 !!  nspden= number of spin components
-!!  [xc_funcs(2)]= <type(libxc_functional_type)>
+!!  [xc_funcs(2)]= <type(libxc_functional_type)>= optional - libXC functional(s)
 !!  [add_tfw]= optional flag controling the addition of Weiszacker gradient correction to Thomas-Fermi XC energy
 !!
 !! OUTPUT
@@ -474,12 +508,9 @@ subroutine size_dvxc(ixc,order,nspden,&
  if (present(uselaplacian)) uselaplacian=merge(1,0,need_laplacian)
 
 !Do we use the kinetic energy density?
- need_kden=(ixc==31.or.ixc==34.or.ixc==35)
- if (ixc<0) then
-   if(present(xc_funcs)) need_kden=libxc_functionals_needs_tau(xc_functionals=xc_funcs)
-   if(.not.present(xc_funcs)) need_kden=libxc_functionals_needs_tau()
- end if
- if (present(usekden)) usekden=merge(1,0,need_kden)
+ if(present(xc_funcs)) need_kden=xc_need_kden(ixc,xc_funcs)
+ if(.not.present(xc_funcs)) need_kden=xc_need_kden(ixc)
+ usekden=merge(1,0,need_kden)
 
 !First derivative(s) of XC functional wrt gradient of density
  if (present(nvxcgrho)) then

@@ -58,6 +58,7 @@ module m_libpaw_libxc_funcs
  public :: libpaw_libxc_isgga              ! Return TRUE if the set of XC functional(s) is GGA or meta-GGA
  public :: libpaw_libxc_ismgga             ! Return TRUE if the set of XC functional(s) is meta-GGA
  public :: libpaw_libxc_is_tb09            ! Return TRUE if the XC functional is Tran-Blaha 2009.
+ public :: libpaw_libxc_is_potential_only  ! Return TRUE if one of the XC functionals in the set is potential-only
  public :: libpaw_libxc_set_c_tb09         ! Set c parameter for Tran-Blaha 2009 functional
  public :: libpaw_libxc_needs_tau          ! Return TRUE if the set of XC functional(s) uses KINETIC EN. DENSITY
  public :: libpaw_libxc_needs_laplacian    ! Return TRUE if the set of XC functional uses LAPLACIAN
@@ -1036,7 +1037,7 @@ end function libpaw_libxc_ismgga
 !!  is Tran-Blaha 2009 or not
 !!
 !! INPUTS
-!! [xc_functionals(2)]=<type(libxc_functional_type)>, optional argument
+!! [xc_functionals(2)]=<type(libpaw_libxc_type)>, optional argument
 !!                     Handle for XC functionals
 !!
 !! SOURCE
@@ -1045,16 +1046,18 @@ logical function libpaw_libxc_is_tb09(xc_functionals) result(ans)
 
 !Arguments ------------------------------------
  type(libpaw_libxc_type),intent(in),optional :: xc_functionals(2)
+!Local variables-------------------------------
+ integer :: id_tb09
 
 ! *************************************************************************
 
- ans  = .false.
- if (.not.libpaw_xc_constants_initialized) call libpaw_libxc_constants_load()
+ ans = .false.
+ id_tb09 = libpaw_libxc_getid('XC_MGGA_X_TB09')
 
  if (present(xc_functionals)) then
-   ans = any(xc_functionals%id == libpaw_libxc_getid('XC_MGGA_X_TB09'))
+   ans = any(xc_functionals%id == id_tb09)
  else
-   ans = any(paw_xc_global%id == libpaw_libxc_getid('XC_MGGA_X_TB09'))
+   ans = any(paw_xc_global%id == id_tb09)
  end if
 
 end function libpaw_libxc_is_tb09
@@ -1062,7 +1065,46 @@ end function libpaw_libxc_is_tb09
 
 !----------------------------------------------------------------------
 
-!!****f* libpaw_libxc_funcs/libpaw_libxcset_c_tb09
+!!****f* libpaw_libxc_funcs/libpaw_libxc_is_potential_only
+!! NAME
+!!  libpaw_libxc_is_potential_only
+!!
+!! FUNCTION
+!!  Test function to identify whether the presently used (set of) functional(s)
+!!  provides a potential-only functional
+!!
+!! INPUTS
+!! [xc_functionals(2)]=<type(libpaw_libxc_type)>, optional argument
+!!                     Handle for XC functionals
+!!
+!! SOURCE
+
+logical function libpaw_libxc_is_potential_only(xc_functionals) result(ans)
+
+!Arguments ------------------------------------
+ type(libpaw_libxc_type),intent(in),optional,target :: xc_functionals(2)
+!Local variables-------------------------------
+ integer :: id_tb09,id_bj06
+
+! *************************************************************************
+
+ ans = .false.
+ id_tb09 = libpaw_libxc_getid('XC_MGGA_X_TB09')
+ id_bj06 = libpaw_libxc_getid('XC_MGGA_X_BJ06')
+
+ if (present(xc_functionals)) then
+   ans = (any(xc_functionals%id == id_tb09) .or. &
+&         any(xc_functionals%id == id_bj06))
+ else
+   ans = (any(paw_xc_global%id == id_tb09) .or. &
+&         any(paw_xc_global%id == id_bj06))
+ end if
+
+end function libpaw_libxc_is_potential_only
+
+!----------------------------------------------------------------------
+
+!!****f* libpaw_libxc_funcs/libpaw_libxc_set_c_tb09
 !! NAME
 !!  libpaw_libxc_set_c_tb09
 !!
@@ -1082,19 +1124,21 @@ subroutine libpaw_libxc_set_c_tb09(xc_tb09_c,xc_functionals)
  real(dp),intent(in) :: xc_tb09_c
  type(libpaw_libxc_type),intent(inout),optional :: xc_functionals(2)
 !Local variables -------------------------------
- integer :: ii
+ integer :: id_tb09,ii
 
 ! *************************************************************************
 
+ id_tb09 = libpaw_libxc_getid('XC_MGGA_X_TB09')
+
  if (present(xc_functionals)) then
    do ii=1,2
-     if (xc_functionals(ii)%id == libpaw_libxc_getid('XC_MGGA_X_TB09')) then
+     if (xc_functionals(ii)%id == id_tb09) then
        xc_functionals(ii)%xc_tb09_c = xc_tb09_c
      end if
    end do
  else
    do ii=1,2
-     if (paw_xc_global(ii)%id == libpaw_libxc_getid('XC_MGGA_X_TB09')) then
+     if (paw_xc_global(ii)%id == id_tb09) then
        paw_xc_global(ii)%xc_tb09_c = xc_tb09_c
      end if
    end do

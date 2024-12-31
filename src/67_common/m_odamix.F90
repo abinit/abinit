@@ -156,7 +156,7 @@ contains
 !!   | e_entropy(OUT)=entropy energy due to the occupation number smearing (if metal)
 !!   |                this value is %entropy * dtset%tsmear (hartree).
 !!  kxc(nfft,nkxc)=exchange-correlation kernel, needed only if nkxc>0
-!!  [vxctau(nfftf,dtset%nspden,4*dtset%usekden)]=derivative of XC energy density with respect to
+!!  [vxctau(nfftf,dtset%nspden,4*usevxctau)]=derivative of XC energy density with respect to
 !!      kinetic energy density (metaGGA cases) (optional output)
 !!  ===== if psps%usepaw==1
 !!   pawrhoij(my_natom) <type(pawrhoij_type)>= paw rhoij occupancies and related data
@@ -206,7 +206,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
  real(dp),intent(inout) :: vtrial(nfft,dtset%nspden),vxc(nfft,dtset%nspden)
  real(dp),intent(inout) :: xccc3d(n3xccc)
  real(dp),intent(out) :: strsxc(6)
- real(dp),intent(inout),optional :: vxctau(nfft,dtset%nspden,4*dtset%usekden)
+ real(dp),intent(inout),optional :: vxctau(:,:,:) !vxctau(nfft,dtset%nspden,4*dtset%usekden)
  type(paw_an_type),intent(inout) :: paw_an(my_natom)
  type(paw_ij_type),intent(inout) :: paw_ij(my_natom)
  type(pawfgrtab_type),intent(inout) :: pawfgrtab(my_natom)
@@ -236,9 +236,6 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 
  call timab(80,1,tsec)
 
-!Check that usekden is not 0 if want to use vxctau
- with_vxctau = (present(vxctau).and.present(taur).and.(dtset%usekden/=0))
-
 !To be adjusted for the call to rhotoxc
  add_tfw_=.false.;if (present(add_tfw)) add_tfw_=add_tfw
  nk3xc=1;nmxc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
@@ -267,6 +264,15 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
    if(paw_ij(1)%cplex_dij==2.or.paw_ij(1)%qphase==2)then
      message = ' complex dij not allowed in odamix! '
      ABI_ERROR(message)
+   end if
+ end if
+
+!Test size of kinetic energy potential Vxctau
+ with_vxctau = (present(vxctau).and.present(taur))
+ if (with_vxctau) with_vxctau = (size(vxctau)>0.and.dtset%usekden/=0)
+ if (with_vxctau) then
+   if (size(vxctau)/=nfft*dtset%nspden*4) then
+     ABI_BUG("Wrong size for vxctau!")
    end if
  end if
 
@@ -361,8 +367,9 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 !Compute xc potential (separate up and down if spin-polarized)
  optxc=1
  call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
-& nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,nmxc,n3xccc,optxc,rhor,rprimd,strsxc,&
-& usexcnhat,vxc,vxcavg,xccc3d,xcdata,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
+& nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,nmxc,n3xccc,optxc,rhor,rprimd,&
+& usexcnhat,vxc,vxcavg,xccc3d,xcdata,taur=taur,vhartr=vhartr,&
+& vxctau=vxctau,add_tfw=add_tfw_,strsxc=strsxc)
 
 !------Compute parts of total energy depending on potentials--------
 
@@ -612,8 +619,9 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 !Compute xc potential (separate up and down if spin-polarized)
  optxc=1;if (nkxc>0) optxc=2
  call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
-& nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,nmxc,n3xccc,optxc,rhor,rprimd,strsxc,&
-& usexcnhat,vxc,vxcavg,xccc3d,xcdata,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
+& nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,nmxc,n3xccc,optxc,rhor,rprimd,&
+& usexcnhat,vxc,vxcavg,xccc3d,xcdata,taur=taur,vhartr=vhartr,&
+& vxctau=vxctau,add_tfw=add_tfw_,strsxc=strsxc)
 
  if (nhatgrdim>0)  then
    ABI_FREE(nhatgr)

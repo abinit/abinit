@@ -97,7 +97,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
  integer :: ttoldfe,ttoldff,ttolrff,ttolvrs,ttolwfr
  logical :: test,twvl,allowed,berryflag
  logical :: wvlbigdft=.false.
- logical :: xc_is_lda,xc_is_gga,xc_is_mgga,xc_is_hybrid,xc_is_tb09,xc_need_kden
+ logical :: xc_is_lda,xc_is_gga,xc_is_mgga,xc_is_hybrid,xc_is_pot_only,xc_need_kden
  real(dp) :: dz,sumalch,summix,sumocc,ucvol,wvl_hgrid,zatom
  character(len=1000) :: msg
  type(dataset_type) :: dt
@@ -168,7 +168,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      xc_is_lda=((dt%ixc>=1.and.dt%ixc<=10).or.dt%ixc==50)
      xc_is_gga=((dt%ixc>=11.and.dt%ixc<=16).or.(dt%ixc>=23.and.dt%ixc<=39))
      xc_is_mgga=(dt%ixc>=31.and.dt%ixc<=35)
-     xc_is_tb09=.false.
+     xc_is_pot_only=.false.
      xc_is_hybrid=(dt%ixc==40.or.dt%ixc==41.or.dt%ixc==42)
      xc_need_kden=(dt%ixc==31.or.dt%ixc==34.or.dt%ixc==35)
    else
@@ -176,7 +176,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      xc_is_lda=libxc_functionals_islda(xc_functionals=xcfunc)
      xc_is_gga=libxc_functionals_isgga(xc_functionals=xcfunc)
      xc_is_mgga=libxc_functionals_ismgga(xc_functionals=xcfunc)
-     xc_is_tb09=libxc_functionals_is_tb09(xc_functionals=xcfunc)
+     xc_is_pot_only=libxc_functionals_is_potential_only(xc_functionals=xcfunc)
      xc_is_hybrid=libxc_functionals_is_hybrid(xc_functionals=xcfunc)
      xc_need_kden=libxc_functionals_needs_tau(xc_functionals=xcfunc)
      call libxc_functionals_end(xc_functionals=xcfunc)
@@ -2802,21 +2802,20 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 
 !  optstress
 !  Por mGGA, optstress not yet allowed (temporary, hopefully)
-   if(dt%optstress>0.and.xc_is_mgga)then
-     msg='Computation of stress tensor is not yet implemented for meta-GGA XC functionals!'
-     ABI_ERROR_NOSTOP(msg, ierr)
-   end if
+!   if(dt%optstress>0.and.xc_is_mgga)then
+!     msg='Computation of stress tensor is not yet implemented for meta-GGA XC functionals!'
+!     ABI_ERROR_NOSTOP(msg, ierr)
+!   end if
 !  When optcell>0, optstress must be >0
    if(dt%optcell>0)then
      cond_string(1)='optcell' ; cond_values(1)=dt%optcell
      call chkint_eq(1,1,cond_string,cond_values,ierr,'optstress',dt%optstress,1,(/1/),iout)
    end if
 !  TB09 XC functional cannot provide forces/stresses
-   if((dt%optforces/=0.or.dt%optstress/=0).and.xc_is_tb09)then
-     write(msg, '(9a)' ) &
-&      'When the selected XC functional is Tran-Blaha 2009 functional (modified Becke-Johnson),',ch10,&
-&        'which is a potential-only functional, calculations cannot be self-consistent',ch10,&
-&        'with respect to the total energy.',ch10, &
+   if((dt%optforces/=0.or.dt%optstress/=0).and.xc_is_pot_only)then
+     write(msg, '(7a)' ) &
+&      'When the selected XC functional is a potential-only functional (Becke-Johnson or Tran-Blaha),',ch10,&
+&        'calculations cannot be self-consistent with respect to the total energy.',ch10,&
 &        'For that reason, neither forces nor stresses can be computed.',ch10,&
 &        'You should set optforces and optstress to 0!'
      ABI_WARNING(msg)
