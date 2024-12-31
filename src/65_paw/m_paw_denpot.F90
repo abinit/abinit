@@ -36,7 +36,7 @@ MODULE m_paw_denpot
  use m_pawrhoij,         only : pawrhoij_type
  use m_pawdij,           only : pawdijhartree,pawdiju_euijkl,pawdijnd,pawdijso,pawxpot,pawdijfock,symdij,symdij_all
  use m_pawxc,            only : pawxc,pawxc_dfpt,pawxcm,pawxcm_dfpt,pawxcpositron,pawxcmpositron, &
-&                               pawxc_get_usekden,pawxc_is_tb09
+&                               pawxc_get_usekden
  use m_paw_finegrid,     only : pawgylm
  use m_paral_atom,       only : get_my_atmtab,free_my_atmtab
  use m_paw_correlations, only : pawuenergy,pawxenergy,setnoccmmp
@@ -180,7 +180,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
  integer :: my_comm_atom,ndij,nkxc1,nk3xc1,nsppol,opt_compch,pawu_algo,pawu_dblec
  integer :: qphase,usecore,usekden,usetcore,usepawu,usexcnhat,usenhat,usefock
  logical :: keep_vhartree,my_atmtab_allocated,need_kxc,need_k3xc,need_vxctau
- logical :: xc_is_tb09,non_magnetic_xc,paral_atom,temp_vxc
+ logical :: non_magnetic_xc,paral_atom,temp_vxc
  real(dp) :: e1t10,e1xc,e1xcdc,efock,efockdc,eexc,eexcdc,eexdctemp
  real(dp) :: eexc_val,eexcdc_val,eexex,eexexdc,eextemp,eh2
  real(dp) :: edftumdc,edftumdcdc,edftufll,enucdip,etmp,espnorb,etild1xc,etild1xcdc
@@ -212,7 +212,6 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
  usefock=0;if (abs(hyb_mixing_)>tol8.or.abs(hyb_mixing_sr_)>tol8) usefock=1
  usexcnhat=maxval(pawtab(1:ntypat)%usexcnhat)
  usekden=pawxc_get_usekden(ixc)
- xc_is_tb09=pawxc_is_tb09(ixc)
  usenhat = usexcnhat
  keep_vhartree=(maxval(paw_an(:)%has_vhartree)>0)
  if (keep_vhartree) usenhat = 1
@@ -1066,7 +1065,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
  call free_my_atmtab(my_atmtab,my_atmtab_allocated)
 
  call timab(560,2,tsec)
- 
+
  DBG_EXIT("COLL")
 
 end subroutine pawdenpot

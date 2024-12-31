@@ -63,6 +63,7 @@ module m_rttddft_tdks
  use m_paw_sphharm,      only: setsym_ylm
  use m_pawtab,           only: pawtab_type, pawtab_get_lsize
  use m_paw_tools,        only: chkpawovlp
+ use m_pawxc,            only: pawxc_get_usekden
  use m_pspini,           only: pspini
  use m_profiling_abi,    only: abimem_record
  use m_spacepar,         only: setsym
@@ -70,6 +71,7 @@ module m_rttddft_tdks
  use m_symtk,            only: symmetrize_xred
  use m_wffile,           only: wffile_type, WffClose
  use m_xmpi,             only: xmpi_bcast, xmpi_sum
+ use m_drivexc,          only: xc_need_kden
 
  implicit none
 
@@ -755,7 +757,7 @@ subroutine second_setup(dtset, mpi_enreg, pawang, pawrad, pawtab, psps, psp_genc
  integer             :: ncpgr
  integer             :: optcut, optgr0, optgr1, optgr2, optrad
  integer             :: stress_needed
- integer             :: use_hybcomp
+ integer             :: use_hybcomp, usevxctau
  real(dp)            :: gsqcut_shp
  real(dp)            :: hyb_range_fock
  real(dp),parameter  :: k0(3)=(/zero,zero,zero/)
@@ -845,7 +847,7 @@ subroutine second_setup(dtset, mpi_enreg, pawang, pawrad, pawtab, psps, psp_genc
    has_dijnd=0;if(any(abs(dtset%nucdipmom)>tol8)) has_dijnd=1
    has_dijfock=0
    has_dijU=merge(0,1,dtset%usepawu>0) !Be careful on this!
-   has_vxctau=dtset%usekden
+   has_vxctau=pawxc_get_usekden(dtset%ixc)
    call paw_an_init(tdks%paw_an,dtset%natom,dtset%ntypat,0,0,dtset%nspden,        &
                   & cplex,dtset%pawxcdev,dtset%typat,pawang,pawtab,has_vxc=1,     &
                   & has_vxctau=has_vxctau,has_vxc_ex=1,has_vhartree=has_vhartree, &
@@ -917,7 +919,8 @@ subroutine second_setup(dtset, mpi_enreg, pawang, pawrad, pawtab, psps, psp_genc
     tdks%xcctau3d=zero
  endif
  !For mGGA
- ABI_MALLOC(tdks%vxctau,(tdks%nfftf,dtset%nspden,4*dtset%usekden))
+ usevxctau=merge(1,0,xc_need_kden(dtset%ixc))
+ ABI_MALLOC(tdks%vxctau,(tdks%nfftf,dtset%nspden,4*usevxctau))
  tdks%vxctau=zero
  !For hybrid functionals
  use_hybcomp=0
