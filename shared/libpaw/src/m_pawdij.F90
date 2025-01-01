@@ -2646,7 +2646,8 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
  dkdr = HalfFineStruct2*zk1*zk1*dv1dr
  LIBPAW_DEALLOCATE(dv1dr)
 
-!! if(present(znuc)) then
+ !! use hybrid potential only in nucdipmom case (backwards compatibility with
+ !! original pawspnorb code)
  if(has_nucdipmom) then
    ! relevant ZORA length scale for Coulomb potential
    rt=znuc*rc
@@ -2678,6 +2679,7 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
    z_intgd = z_kernel*pawtab%phiphj(1:mesh_size,kln)
    call simp_gen(dijso_rad(kln),z_intgd,pawrad)
  end do
+ dijso_rad(:)=spnorbscl*dijso_rad(:)
 
  ! nuclear dipole kernels
  if (has_nucdipmom) then
@@ -2696,6 +2698,7 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
      z_intgd = z_kernel*pawtab%phiphj(1:mesh_size,kln)
      call simp_gen(dijnd_rad(2,kln),z_intgd,pawrad)
    end do
+   dijnd_rad(:,:)=spnorbscl*dijnd_rad(:,:)
  end if ! nuclear dipole radial integrals
 
  LIBPAW_DEALLOCATE(z_kernel)
@@ -2703,7 +2706,6 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
  LIBPAW_DEALLOCATE(zk1)
  LIBPAW_DEALLOCATE(dkdr)
 
- dijso_rad(:)=spnorbscl*dijso_rad(:)
 
 !------------------------------------------------------------------------
 !----- compute dyadics if necessary
