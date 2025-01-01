@@ -443,8 +443,7 @@ subroutine pawinit(effmass_free,gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lm
      end do
    end do
 
-   !!if (usekden==1)  then
-   if (usekden==1 .or. pawspnorb /= 0)  then
+   if (usekden==1)  then
      pw_mesh_size=pawtab(itypat)%partialwave_mesh_size
      if (allocated(pawtab(itypat)%nablaphi)) then
        ABI_FREE(pawtab(itypat)%nablaphi)
