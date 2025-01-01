@@ -4,7 +4,7 @@
 ndtset 18
 
 # (S)LDAs X + different correlations
-ixc1  -1003
+#ixc1 -1003 ! Not portable from libxc v6 to v7 (LDA_C_RPA modified)
 ixc2  -1012
 ixc3  -1024
 

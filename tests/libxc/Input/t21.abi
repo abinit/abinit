@@ -18,7 +18,7 @@ ixc5  -1030
 ixc6  -1031
 
 # GGAs : different exchanges + LYP correlation
-ixc7  -90131
+# ixc7  -90131  ! Not portable from libxc v6 to v7 (GGA_X_SSB_SW modified)
 # ixc8  -91131  ! Was giving NaN on ibm
 # ixc9  -92131  ! Was giving NaN on ibm
 ixc10 -98131
@@ -27,7 +27,7 @@ ixc12 -151131
 ixc13 -158131
 ixc14 -191131
 ixc15 -192131
-ixc16 -193131
+# ixc16 -193131 ! Not portable from libxc v6 to v7 (GGA_X_LAG modified)
 ixc17 -524131
 ixc18 -525131
 # ixc19 -526131 ! Not portable from libxc v3 to v4

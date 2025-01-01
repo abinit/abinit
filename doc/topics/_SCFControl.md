@@ -25,7 +25,7 @@ Note that [[tolwfr]] (which controls the precision of wavefunctions), can be cou
 
 Some input variables relate to the solution of the Schrodinger equation.
 However, usually the related iterative techniques are well-tuned, so that
-these input variables ([[nline]], [[tolrde]] or [[tolwfr_diago]]) are usually used only by
+these input variables ([[nline]], [[tolrde]], [[mdeg_filter]], or [[tolwfr_diago]]) are usually used only by
 experts. However, in cases where the convergence is difficult, it might be
 interesting to test improving them, as well as modifying [[nnsclo]].
 

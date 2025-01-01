@@ -181,10 +181,11 @@ contains
 !!  timrev=1 if time-reversal preserves the q wavevector; 0 otherwise.
 !!  usecprj= 1 if cprj, cprjq, cprj1 arrays are stored in memory
 !!  usevdw= flag set to 1 if vdw DFT-D semi-empirical potential is in use
+!!  usevxctau=1 if if XC functional depends on kinetic energy density
 !!  vtrial(nfftf,nspden)=GS potential (Hartree)
 !!  vxc(nfftf,nspden)=Exchange-Correlation GS potential (Hartree)
 !!  vxcavg=average of vxc potential
-!!  vxctau(nfftf,nspden,4*usekden)=derivative of e_xc with respect to kinetic energy density, for mGGA
+!!  vxctau(nfftf,nspden,4*usevxctau)=derivative of e_xc with respect to kinetic energy density, for mGGA
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
 !!
 !! OUTPUT
@@ -207,12 +208,12 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &  nfftf,nhat,nkpt,nkxc,nspden,nsym,occ,&
 &  paw_an,paw_ij,pawang,pawfgr,pawfgrtab,pawrad,pawrhoij,pawtab,&
 &  pertsy,prtbbb,psps,rfpert,rf2_dirs_from_rfpert_nl,rhog,rhor,symq,symrec,timrev,&
-&  usecprj,usevdw,vtrial,vxc,vxcavg,vxctau,xred,clflg,occ_rbz_pert,eigen0_pert,eigenq_pert,&
+&  usecprj,usevdw,usevxctau,vtrial,vxc,vxcavg,vxctau,xred,clflg,occ_rbz_pert,eigen0_pert,eigenq_pert,&
 &  eigen1_pert,nkpt_rbz,eigenq_fine,hdr_fine,hdr0)
 
 !Arguments ------------------------------------
  integer, intent(in) :: dim_eigbrd,dim_eig2nkq,dyfr_cplex,dyfr_nondiag,mk1mem,mkmem,mkqmem,mpert
- integer, intent(in) :: nfftf,nkpt,nkxc,nspden,nsym,prtbbb,timrev,usecprj,usevdw
+ integer, intent(in) :: nfftf,nkpt,nkxc,nspden,nsym,prtbbb,timrev,usecprj,usevdw,usevxctau
  integer, intent(out) :: iexit
  integer, intent(inout) :: my_natom
  real(dp), intent(in) :: cpus,vxcavg
@@ -245,7 +246,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  real(dp), intent(in) :: occ(dtset%mband*nkpt*dtset%nsppol)
  real(dp), intent(in) :: rhog(2,nfftf),rhor(nfftf,nspden),vxc(nfftf,nspden)
  real(dp), intent(in) :: vtrial(nfftf,nspden)
- real(dp), intent(inout) :: vxctau(nfftf,dtset%nspden,4*dtset%usekden)
+ real(dp), intent(inout) :: vxctau(nfftf,dtset%nspden,4*usevxctau)
  real(dp), intent(inout) :: xred(3,dtset%natom)
  real(dp), intent(inout) :: d2bbb(2,3,3,mpert,dtset%mband,dtset%mband*prtbbb)!vz_i
  real(dp), intent(inout) :: d2lo(2,3,mpert,3,mpert),d2nl(2,3,mpert,3,mpert) !vz_i
@@ -292,7 +293,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  real(dp) :: ucvol, eig1_r, eig1_i
  real(dp) :: residm_mq !+/-q duplicates
  logical,parameter :: paral_pert_inplace=.true.,remove_inv=.false.
- logical :: first_entry,found_eq_gkk,has_nd,has_vxctau,t_exist,paral_atom,write_1wfk,init_rhor1
+ logical :: first_entry,found_eq_gkk,has_nd,t_exist,paral_atom,write_1wfk,init_rhor1,with_vxctau
  logical :: kramers_deg
  character(len=fnlen) :: fiden1i,fiwf1i,fiwf1o,fiwfddk,fnamewff(4),gkkfilnam,fname,filnam
  character(len=500) :: msg
@@ -369,7 +370,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    kramers_deg=.false.
  end if
 
- has_vxctau = (size(vxctau) > 0)
+ with_vxctau = (usevxctau > 0)
  evxctau0=zero; evxctau1=0
  has_nd = ANY(ABS(dtset%nucdipmom(:,:))>tol8)
  end0=zero; end1=zero
@@ -1890,7 +1891,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &       pertcase,phnons1,ph1d,ph1df,prtbbb,psps,&
 &       dtset%qptn,resid,residm,rhog,rhog1,&
 &       rhor,rhor1,rprimd,symaf1,symrc1,symrl1,tnons1,&
-&       usecprj,useylmgr,useylmgr1,ddk_f,vpsp1,vtrial,vxc,vxctau,&
+&       usecprj,useylmgr,useylmgr1,usevxctau,ddk_f,vpsp1,vtrial,vxc,vxctau,&
 &       wtk_rbz,xccc3d1,xred,ylm,ylm1,ylmgr,ylmgr1,zeff,dfpt_scfcv_retcode,&
 &       kramers_deg)
      else
@@ -1910,7 +1911,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &       pertcase,phnons1,ph1d,ph1df,prtbbb,psps,&
 &       dtset%qptn,resid,residm,rhog,rhog1,&
 &       rhor,rhor1,rprimd,symaf1,symrc1,symrl1,tnons1,&
-&       usecprj,useylmgr,useylmgr1,ddk_f,vpsp1,vtrial,vxc,vxctau,&
+&       usecprj,useylmgr,useylmgr1,usevxctau,ddk_f,vpsp1,vtrial,vxc,vxctau,&
 &       wtk_rbz,xccc3d1,xred,ylm,ylm1,ylmgr,ylmgr1,zeff,dfpt_scfcv_retcode,&
 &       kramers_deg,&
 &       cg_mq=cg_mq,cg1_mq=cg1_mq,cg1_active_mq=cg1_active_mq,docckde_mq=docckde_mq,eigen_mq=eigen_mq,&
@@ -2186,7 +2187,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    if (dtset%nline/=0 .or. dtset%nstep/=0)then
      call dfpt_prtene(dtset%berryopt,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrnl,efrx1,efrx2,&
           &     ehart01,ehart1,eii,ek0,ek1,eloc0,elpsp1,end0,end1,enl0,enl1,eovl1,epaw1,evxctau0,evxctau1,&
-          &     evdw,exc1,has_nd,has_vxctau,ab_out,ipert,dtset%natom,psps%usepaw,usevdw)
+          &     evdw,exc1,has_nd,with_vxctau,ab_out,ipert,dtset%natom,psps%usepaw,usevdw)
    end if
 
    ! call orbmag if needed
@@ -2198,7 +2199,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      end if
      vtrial_local = vtrial
      call orbmag(cg,cg1_3,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mkmem_rbz,mpi_enreg,mpw,nfftf,ngfftf,&
-        & npwarr,occ,paw_an,paw_ij,pawang,pawfgr,pawrad,pawtab,psps,rprimd,vtrial_local,vxctau,xred,ylm,ylmgr)
+        & npwarr,occ,paw_an,paw_ij,pawang,pawfgr,pawrad,pawtab,psps,rprimd,usevxctau,vtrial_local,vxctau,xred,ylm,ylmgr)
      if( ALLOCATED(vtrial_local) ) then
        ABI_FREE(vtrial_local)
      end if
@@ -2740,7 +2741,7 @@ end subroutine getcgqphase
 !! evdw=DFT-D semi-empirical part of 2nd-order total energy
 !! exc1=1st-order exchange-correlation part of 2nd-order total energy
 !! has_nd=logical, whether nuclear dipole energies are present
-!! has_vxctau=logical, whether mgga vxctau energies are present
+!! with_vxctau=logical, whether mgga vxctau energies are present
 !! iout=unit number to which output is written
 !! ipert=type of the perturbation
 !! natom=number of atoms in unit cell
@@ -2757,7 +2758,7 @@ end subroutine getcgqphase
 
 subroutine dfpt_prtene(berryopt,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrnl,efrx1,efrx2,&
      &  ehart01,ehart1,eii,ek0,ek1,eloc0,elpsp1,end0,end1,enl0,enl1,eovl1,epaw1,evxctau0,evxctau1,&
-     & evdw,exc1,has_nd,has_vxctau,iout,ipert,natom,usepaw,usevdw)
+     & evdw,exc1,has_nd,with_vxctau,iout,ipert,natom,usepaw,usevdw)
 
 !Arguments -------------------------------
 !scalars
@@ -2765,7 +2766,7 @@ subroutine dfpt_prtene(berryopt,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrn
  real(dp),intent(in) :: eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrnl,efrx1
  real(dp),intent(in) :: efrx2,ehart01,ehart1,eii,ek0,ek1,eloc0,elpsp1,end0,end1,enl0,enl1
  real(dp),intent(in) :: eovl1,epaw1,evxctau0,evxctau1,evdw,exc1
- logical,intent(in) :: has_nd,has_vxctau
+ logical,intent(in) :: has_nd,with_vxctau
 
 !Local variables -------------------------
 !scalars
@@ -2813,7 +2814,7 @@ subroutine dfpt_prtene(berryopt,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrn
     write(msg, '(a,es17.8,a,es17.8,a,es17.8,a,es17.8)' )&
          &   '     kin0=',ek0,   ' eigvalue=',eeig0,'  local=',eloc0,'  nclr dpl0=',end0
  end if
- if (has_vxctau) then
+ if (with_vxctau) then
     write(msg, '(a,es17.8,a,es17.8,a,es17.8,a,es17.8)' )&
          &   '     kin0=',ek0,   ' eigvalue=',eeig0,'  local=',eloc0,'  evxctau0=',evxctau0
  end if
@@ -2836,7 +2837,7 @@ subroutine dfpt_prtene(berryopt,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrn
       write(msg, '(a,es17.8,a,es17.8,a,es17.8,a,es17.8)' ) &
            &     '     kin1=',ek1,   '  Hartree=',ehart1,'     xc=',exc1,'  nclr dpl1=',end1
    end if
-   if (has_vxctau) then
+   if (with_vxctau) then
       write(msg, '(a,es17.8,a,es17.8,a,es17.8,a,es17.8)' ) &
            &     '     kin1=',ek1,   '  Hartree=',ehart1,'     xc=',exc1,'  evxctau1=',evxctau1
    end if
