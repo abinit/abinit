@@ -212,11 +212,12 @@ contains
 !!  usecprj= 1 if cprj, cprjq arrays are stored in memory
 !!  useylmgr = 1 if ylmgr  array is allocated
 !!  useylmgr1= 1 if ylmgr1 array is allocated
+!!  usevxctau=1 if if XC functional depends on kinetic energy density
 !!  ddk<wfk_t>=ddk file
 !!  vpsp1(cplex*nfftf)=first-order derivative of the ionic potential
 !!  vtrial(nfftf,nspden)=GS potential (Hartree).
 !!  vxc(nfftf,nspden)=Exchange-Correlation GS potential (Hartree)
-!!  vxctau(nfftf,nspden,4*usekden)=derivative of e_xc with respect to kinetic energy density, for mGGA
+!!  vxctau(nfftf,nspden,4*usevxctau)=derivative of e_xc with respect to kinetic energy density, for mGGA
 !!  wtk_rbz(nkpt_rbz)=weight for each k point in the reduced Brillouin zone
 !!  xccc3d1(cplex*n3xccc)=3D change in core charge density, see n3xccc
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
@@ -291,7 +292,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &  pertcase,phnons1,ph1d,ph1df,&
 &  prtbbb,psps,qphon,resid,residm,rhog,rhog1,&
 &  rhor,rhor1,rprimd,symaf1,symrc1,symrl1,tnons1,&
-&  usecprj,useylmgr,useylmgr1,ddk_f,vpsp1,vtrial,vxc,vxctau,&
+&  usecprj,useylmgr,useylmgr1,usevxctau,ddk_f,vpsp1,vtrial,vxc,vxctau,&
 &  wtk_rbz,xccc3d1,xred,ylm,ylm1,ylmgr,ylmgr1,zeff,conv_retcode,&
 &  kramers_deg,&
 &  cg_mq,cg1_mq,cg1_active_mq,docckde_mq,eigen_mq,eigen1_mq,gh0c1_set_mq,gh1c_set_mq,&
@@ -305,7 +306,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  integer,intent(in) :: mband_mem_rbz
  integer,intent(in) :: mpw1_mq !-q duplicate
  integer,intent(in) :: nkpt,nkpt_rbz,nkxc,nspden
- integer,intent(in) :: nsym1,pertcase,prtbbb,usecprj,useylmgr,useylmgr1
+ integer,intent(in) :: nsym1,pertcase,prtbbb,usecprj,useylmgr,useylmgr1,usevxctau
  logical,intent(in) :: kramers_deg
  integer,intent(inout) :: initialized
 ! nfft**(1-1/nsym1) is 1 if nsym1==1, and nfft otherwise
@@ -368,7 +369,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  real(dp),intent(in) :: tnons1(3,nsym1)
  real(dp),target,intent(in) :: vtrial(nfftf,nspden)
  real(dp),intent(in) :: vpsp1(cplex*nfftf),vxc(nfftf,nspden)
- real(dp),intent(inout) :: vxctau(nfftf,dtset%nspden,4*dtset%usekden)
+ real(dp),intent(inout) :: vxctau(nfftf,dtset%nspden,4*usevxctau)
  real(dp),intent(in) :: wtk_rbz(nkpt_rbz),xccc3d1(cplex*n3xccc)
  real(dp),intent(in) :: ylm(mpw*mkmem,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(in) :: ylm1(mpw1*mk1mem,psps%mpsang*psps%mpsang*psps%useylm)
@@ -560,7 +561,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
    has_dijfr=0;if (ipert/=dtset%natom+1.and.ipert/=dtset%natom+10) has_dijfr=1
    has_diju=merge(0,1,dtset%usepawu==0)
    call paw_an_init(paw_an1,dtset%natom,dtset%ntypat,0,0,dtset%nspden,&
-&   cplex,dtset%pawxcdev,dtset%typat,pawang,pawtab,has_vxc=1,has_vxctau=dtset%usekden,&
+&   cplex,dtset%pawxcdev,dtset%typat,pawang,pawtab,has_vxc=1,has_vxctau=usevxctau,&
 &   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
    call paw_ij_init(paw_ij1,cplex,dtset%nspinor,dtset%nsppol,dtset%nspden,0,dtset%natom,&
 &   dtset%ntypat,dtset%typat,pawtab,&
@@ -956,7 +957,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &   nhat1,nkpt_rbz,npwarr,npwar1,res2,nspden,dtset%nsppol,nsym1,dtset%ntypat,nvresid1,&
 &   occkq,occ_rbz,optres,paw_ij,paw_ij1,pawang,pawang1,pawfgr,pawfgrtab,pawrhoij,&
 &   pawrhoij1,pawtab,phnons1,ph1d,dtset%prtvol,psps,pwindall,qmat,resid,residm,rhog1,&
-&   rhor1,rmet,rprimd,symaf1,symrc1,symrl1,tnons1,ucvol,usecprj,useylmgr1,ddk_f,&
+&   rhor1,rmet,rprimd,symaf1,symrc1,symrl1,tnons1,ucvol,usecprj,useylmgr1,usevxctau,ddk_f,&
 &   vectornd,vtrial,vtrial1,vxctau,with_vectornd,wtk_rbz,xred,ylm,ylm1,ylmgr1)
    if (.not.kramers_deg) then
      rhor1_pq=rhor1 !at this stage rhor1_pq contains only one term of the 1st order density at +q
@@ -972,7 +973,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &     nhat1,nkpt_rbz,npwarr,npwar1_mq,res2_mq,nspden,dtset%nsppol,nsym1,dtset%ntypat,nvresid1_mq,&
 &     occk_mq,occ_rbz,optres,paw_ij,paw_ij1,pawang,pawang1,pawfgr,pawfgrtab,pawrhoij,&
 &     pawrhoij1,pawtab,phnons1,ph1d,dtset%prtvol,psps,pwindall,qmat,resid_mq,residm_mq,rhog1_mq,&
-&     rhor1_mq,rmet,rprimd,symaf1,symrc1,symrl1,tnons1,ucvol,usecprj,useylmgr1,ddk_f,&
+&     rhor1_mq,rmet,rprimd,symaf1,symrc1,symrl1,tnons1,ucvol,usecprj,useylmgr1,usevxctau,ddk_f,&
 &     vectornd,vtrial,vtrial1_mq,vxctau,with_vectornd,wtk_rbz,xred,ylm,ylm1,ylmgr1)
      !reconstruct the +q and -q densities, this might bug if fft parallelization is used, todo...
      do ifft=1,nfftf
@@ -1203,7 +1204,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &   nhat1,nkpt_rbz,npwarr,npwar1,res3,nspden,dtset%nsppol,nsym1,dtset%ntypat,nvresid2,&
 &   occkq,occ_rbz,optres,paw_ij,paw_ij1,pawang,pawang1,pawfgr,pawfgrtab,pawrhoij,&
 &   pawrhoij1,pawtab,phnons1,ph1d,dtset%prtvol,psps,pwindall,qmat,resid2,residm2,rhog2,&
-&   rhor2,rmet,rprimd,symaf1,symrc1,symrl1,tnons1,ucvol,usecprj,useylmgr1,ddk_f,&
+&   rhor2,rmet,rprimd,symaf1,symrc1,symrl1,tnons1,ucvol,usecprj,useylmgr1,usevxctau,ddk_f,&
 &   vectornd,vtrial,vtrial2,vxctau,with_vectornd,wtk_rbz,xred,ylm,ylm1,ylmgr1,1)
 
    write(msg,'(a)') ' '//char(10)//&

@@ -52,6 +52,7 @@ ndtset 3
  paral_kgb 1
  npfft 2
  npband 2
+ bandpp 1 # old default value
 
 # Cutoff energy
  ecut 1.0

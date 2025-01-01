@@ -190,10 +190,11 @@ contains
 !!  symrec(3,3,nsym)=symmetries in reciprocal space, reduced coordinates
 !!  tollist(12)=list of tolerances
 !!  usecprj=1 if cprj datastructure has been allocated
+!!  usevxctau=1 if kinetic energy density contribution has to be included (mGGA)
 !!  vhartr(nfftf)=Hartree potential
 !!  vpsp(nfftf)=array for holding local psp
 !!  vxc(nfftf,nspden)=exchange-correlation potential (hartree) in real space
-!!  vxctau(nfft,nspden,4*usekden)=(only for meta-GGA) derivative of XC energy density
+!!  vxctau(nfft,nspden,4*usevxctau)=(only for meta-GGA) derivative of XC energy density
 !!                                wrt kinetic energy density (depsxcdtau)
 !!  vxcavg=vxc average
 !!  xccc3d(n3xccc)=3D core electron density for XC core correction, bohr^-3
@@ -285,14 +286,14 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 & pawfgrtab,pawrad,pawrhoij,pawtab,pel,pel_cg,ph1d,ph1df,phnons,pion,prtfor,prtxml,&
 & psps,pwind,pwind_alloc,pwnsfac,res2,resid,residm,results_gs,&
 & rhog,rhor,rprimd,stress_needed,strscondft,strsxc,strten,symrec,synlgr,taug,&
-& taur,tollist,usecprj,vhartr,vpsp,vtrial,vxc,vxctau,vxcavg,wvl,&
+& taur,tollist,usecprj,usevxctau,vhartr,vpsp,vtrial,vxc,vxctau,vxcavg,wvl,&
 & xccc3d,xcctau3d,xred,ylm,ylmgr,qvpotzero,conv_retcode,xg_nonlop)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: istep,istep_fock_outer,istep_mix
  integer,intent(in) :: mcg,mcprj,mgfftf,moved_atm_inside,my_natom,n3xccc,nfftf,ngrvdw,nkxc
- integer,intent(in) :: optres,prtfor,prtxml,pwind_alloc,stress_needed,usecprj
+ integer,intent(in) :: optres,prtfor,prtxml,pwind_alloc,stress_needed,usecprj,usevxctau
  integer,intent(inout) :: computed_forces
  real(dp),intent(in) :: cpus,deltae,gsqcut,res2,residm
  real(dp),intent(in) :: qvpotzero
@@ -341,7 +342,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  real(dp),intent(inout) :: ph1df(2,3*(2*mgfftf+1)*dtset%natom),pion(3)
  real(dp),intent(inout) :: rprimd(3,3)
  real(dp),intent(inout) :: rhog(2,nfftf),rhor(nfftf,dtset%nspden),strsxc(6)
- real(dp),intent(inout) :: vhartr(nfftf),vxc(nfftf,dtset%nspden),vxctau(nfftf,dtset%nspden,4*dtset%usekden)
+ real(dp),intent(inout) :: vhartr(nfftf),vxc(nfftf,dtset%nspden),vxctau(nfftf,dtset%nspden,4*usevxctau)
  real(dp),intent(inout) :: xccc3d(n3xccc),xcctau3d(n3xccc*dtset%usekden),xred(3,dtset%natom)
  real(dp),intent(inout) :: favg(3),fcart(3,dtset%natom),gred(3,dtset%natom)
  real(dp),intent(inout) :: gresid(3,dtset%natom),grhf(3,dtset%natom)
@@ -557,7 +558,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
    vtrial_local = vtrial
    call orbmag(cg,cg1_3,cprj,dtset,eigen,gsqcut,kg,mcg,mcg1_3,mcprj,dtset%mkmem,&
      & mpi_enreg,dtset%mpw,nfftf,ngfftf,npwarr,occ,paw_an,paw_ij,pawang,pawfgr,&
-     & pawrad,pawtab,psps,rprimd,vtrial_local,vxctau,xred,ylm,ylmgr)
+     & pawrad,pawtab,psps,rprimd,usevxctau,vtrial_local,vxctau,xred,ylm,ylmgr)
 
    ABI_FREE(vtrial_local)
    ABI_FREE(cg1_3)
@@ -953,7 +954,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 &   npwarr,dtset%ntypat,nvresid,occ,optfor,optres,&
 &   paw_ij,pawang,pawfgr,pawfgrtab,pawrad,pawrhoij,pawtab,ph1d,ph1df,&
 &   psps,rhog,rhor,rprimd,stress_needed,strscondft,strsxc,strten,symrec,synlgr,&
-&   ucvol,usecprj,vhartr,vpsp,vxc,vxctau,wvl,xccc3d,xcctau3d,xred,ylm,ylmgr,qvpotzero,xg_nonlop)
+&   ucvol,usecprj,usevxctau,vhartr,vpsp,vxc,vxctau,wvl,xccc3d,xcctau3d,xred,ylm,ylmgr,qvpotzero,xg_nonlop)
  end if
 
  ! Init values with MAGIC_UNDEF if not computed.

@@ -1,0 +1,73 @@
+##############################################
+####                SECTION: basic
+##############################################
+ ecut 15.0
+ nband 8
+ ngkpt 1 1 1
+ kptopt 1
+ nshiftk 1
+ shiftk 0 0 0
+ tolvrs 1e-20
+##############################################
+####                 SECTION: dev
+##############################################
+ iomode 1
+##############################################
+####                SECTION: files
+##############################################
+ pp_dirpath "$ABI_PSPDIR/Psdj_nc_sr_04_pbe_std_psp8/"
+ pseudos "Mg.psp8"
+##############################################
+####                SECTION: paral
+##############################################
+ 
+ ndtset 4
+
+ autoparal1 0
+ npband1    4
+ bandpp1    1
+
+ autoparal2 0
+ npband2    4
+
+ autoparal3 0
+ npband3    2
+ npfft3     2
+ bandpp3    1
+
+ autoparal4 1
+
+##############################################
+####                 SECTION: rlx
+##############################################
+ ecutsm 0.5
+##############################################
+####                  STRUCTURE
+##############################################
+ natom 1
+ ntypat 1
+ typat 1
+ znucl 12
+ xred    0.0000000000    0.0000000000    0.0000000000
+ acell    1.0    1.0    1.0
+ rprim
+   -3.3819389103    3.3819389103    3.3819389103
+    3.3819389103   -3.3819389103    3.3819389103
+    3.3819389103    3.3819389103   -3.3819389103
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% [paral_info]
+#%% nprocs_to_test = 4
+#%% max_nprocs = 4
+#%% [NCPU_4]
+#%% files_to_test =
+#%%   t33_MPI4.abo, tolnlines=0, tolabs=0, tolrel=0, fld_options = -ridiculous
+#%% [extra_info]
+#%% keywords = NC
+#%% authors = L. Baguet
+#%% description =
+#%%  Test LOBPCG with npband>1 for norm-conserving pseudo, without explicit wfoptalg in the input.
+#%%<END TEST_INFO>

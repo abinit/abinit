@@ -201,8 +201,9 @@ CONTAINS  !=====================================================================
 !!  pawtab(dtset%ntypat) <type(pawtab_type)>=paw tabulated starting data
 !!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
 !!  rprimd(3,3)=real space translation vectors
+!!  usevxctau=1 if kinetic energy density contribution has to be included (mGGA)
 !!  vtrial(nfftf,dtset%nspden)=GS potential (Hartree)
-!!  vxctau(nfftf,nspden,4*usekden)=derivative of e_xc with respect to kinetic energy density, for mGGA  
+!!  vxctau(nfftf,nspden,4*usevxctau)=derivative of e_xc with respect to kinetic energy density, for mGGA  
 !!  xred(3,dtset%natom)=reduced dimensionless atomic coordinates
 !!  ylm(mpw*mkmem_rbz,psps%mpsang*psps%mpsang*psps%useylm)=all ylm's
 !!  ylmgr(mpw*mkmem_rbz,3,psps%mpsang*psps%mpsang*psps%useylm)=gradients of ylm's
@@ -222,11 +223,11 @@ CONTAINS  !=====================================================================
 
 subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mkmem_rbz,mpi_enreg,mpw,&
     & nfftf,ngfftf,npwarr,occ,paw_an,paw_ij,pawang,pawfgr,pawrad,&
-    & pawtab,psps,rprimd,vtrial,vxctau,xred,ylm,ylmgr)
+    & pawtab,psps,rprimd,usevxctau,vtrial,vxctau,xred,ylm,ylmgr)
 
  !Arguments ------------------------------------
  !scalars
- integer,intent(in) :: mcprj,mcg,mcg1,mkmem_rbz,mpw,nfftf
+ integer,intent(in) :: mcprj,mcg,mcg1,mkmem_rbz,mpw,nfftf,usevxctau
  real(dp),intent(in) :: gsqcut
  type(dataset_type),intent(in) :: dtset
  type(MPI_type), intent(inout) :: mpi_enreg
@@ -240,7 +241,7 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mkmem_rbz,mp
  real(dp), intent(in) :: occ(dtset%mband*dtset%nkpt*dtset%nsppol)
  real(dp),intent(in) :: rprimd(3,3),xred(3,dtset%natom)
  real(dp),intent(inout) :: vtrial(nfftf,dtset%nspden)
- real(dp),intent(inout) :: vxctau(nfftf,dtset%nspden,4*dtset%usekden)
+ real(dp),intent(inout) :: vxctau(nfftf,dtset%nspden,4*usevxctau)
  real(dp),intent(in) :: ylm(mpw*mkmem_rbz,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(in) :: ylmgr(mpw*mkmem_rbz,3,psps%mpsang*psps%mpsang*psps%useylm)
  type(pawcprj_type),intent(in) ::  cprj(dtset%natom,mcprj)
@@ -258,7 +259,7 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mkmem_rbz,mp
  integer :: me,mcgk,mcprjk,my_lmax,my_nspinor,nband_k,nband_me,ngfft1,ngfft2,ngfft3,ngfft4
  integer :: ngfft5,ngfft6,ngnt,nl1_option,nn,nkpg,npw_k,npwsp,nproc,spaceComm
  real(dp) :: arg,ecut_eff,fermie,ucvol
- logical :: has_nucdip,has_vxctau
+ logical :: has_nucdip
  type(dterm_type) :: dterm
  type(gs_hamiltonian_type) :: gs_hamk
 
@@ -374,8 +375,7 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mkmem_rbz,mp
 
    !========  compute vxctaulocal if vxctau present =====================
 
-   has_vxctau = ( size(vxctau) > 0 )
-   if(has_vxctau) then
+   if (usevxctau==1) then
      ABI_MALLOC(vxctaulocal,(ngfft4,ngfft5,ngfft6,gs_hamk%nvloc,4))
      call gspot_transgrid_and_pack(isppol, psps%usepaw, dtset%paral_kgb, dtset%nfft, dtset%ngfft, nfftf, &
        & dtset%nspden, gs_hamk%nvloc, 4, pawfgr, mpi_enreg, vxctau, vxctaulocal)

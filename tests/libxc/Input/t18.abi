@@ -6,7 +6,7 @@ jdtset 1  2  3  4  5  6  7  8  9
    10 11 12 13 14 15 16    18
 
 # (S)LDAs X + different correlations
-ixc1  -1003
+#ixc1 -1003 ! Not portable from libxc v6 to v7 (LDA_C_RPA modified)
 ixc2  -1012
 ixc3  -1024
 

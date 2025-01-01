@@ -84,6 +84,30 @@ contains
     
     ! *********************************************************************
     
+    ! Initialize arrays
+    ihist_prev=0
+    ucvol=zero
+    etotal=zero
+    acell=zero
+    rprimd=zero
+    rprimd_next=zero
+    rprimd_prev=zero
+    gprimd=zero
+    gmet=zero
+    rmet=zero
+    strten=zero
+    fcart=zero
+    xred=zero
+    vel=zero
+    vel_cell=zero
+    pimd_etotal=zero
+    pimd_stressin=zero
+    pimd_xred=zero
+    pimd_xred_next=zero
+    pimd_xred_prev=zero
+    pimd_forces=zero
+    pimd_vel=zero
+    
     ! Get last positions
     call hist2var(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
     fcart(:,:)=hist%fcart(:,:,hist%ihist)
