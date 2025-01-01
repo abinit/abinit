@@ -2646,7 +2646,9 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
  dkdr = HalfFineStruct2*zk1*zk1*dv1dr
  LIBPAW_DEALLOCATE(dv1dr)
 
- if(present(znuc)) then
+ !! use hybrid potential only in nucdipmom case (backwards compatibility with
+ !! original pawspnorb code)
+ if(has_nucdipmom) then
    ! relevant ZORA length scale for Coulomb potential
    rt=znuc*rc
    ! replace k and dk/dr at short range with Coulomb potential version
