@@ -24,6 +24,10 @@ project(abinit
   HOMEPAGE_URL https://www.abinit.org/
   DESCRIPTION "ABINIT is an atomic-scale simulation software suite.")
 
+# will collect a list of all executables
+Set(ALL_EXECUTABLES "" CACHE INTERNAL "")
+
+
 #
 # Export compile command to json (for editors like emacs, clion, vim, etc...).
 # It allows nice code editing features provided by LSP (Language Server Protocol)

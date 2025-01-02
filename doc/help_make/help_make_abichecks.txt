@@ -2,6 +2,8 @@
 Keywords to use with the make command to run quick tests,
   possibly with -j x option:
 
+>>> In build directory:
+
 check              Launch a small set of tests that cover most of the main features
                    For these tests, only a comparison of the main physical results
                    in the output is performed.
@@ -9,6 +11,15 @@ check              Launch a small set of tests that cover most of the main featu
 test_fast          Launch 3 very small tests
 
 tests_in           Launch test_fast, followed by other internal tests
+
+>>> In "abichecks" directory (cd abichecks first)
+
+tests_abirules     Launch the abirules tests
+                   Warning: to be run with the command: make > make.log 2>&1`
+
+tests_buildsys     Launch the buildsys tests
+
+tests_libpaw       Launch the libpaw tests
 
 ==============================================================================
 [This file can be found at doc/help_make/help_make_abichecks.txt]
