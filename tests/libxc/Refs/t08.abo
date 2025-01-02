@@ -1,11 +1,6 @@
 
-<<<<<<< HEAD
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
-=======
 .Version 10.3.4.9 of ABINIT, released Nov 2024.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
->>>>>>> 374d5a9319d0bcf497ce25d1687c0f2df60cefca
 
 .Copyright (C) 1998-2024 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
