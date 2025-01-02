@@ -272,6 +272,22 @@ Additionally, you can configure ABINIT to leverage GPU hardware, if supported by
     Most of the external dependencies are detected by `CMake` using either macro [find_package](https://cmake.org/cmake/help/latest/command/find_package.html) or macro [pkg_check_modules](https://cmake.org/cmake/help/latest/module/FindPkgConfig.html#command:pkg_check_modules).
     In case `CMake` isn't able to detect the location of some required dependencies, e.g. when you installed a library in a non standard directory, most of the time you just need to export an environment variable to tell `CMake` where to look for. As an example, if you installed library fftw in a custom location, as fftw is detected by `pkg_check_modules` you just need to prepend variable `PKG_CONFIG_PATH` with the name of the folder containing file `fftw3.pc`. Alternatively, if the library is detected using `find_package`, you may need to adjust environment variable `CMAKE_PREFIX_PATH` with the full path location where the library is installed (usually a subfolder named `cmake`).
 
+## How to quickly check ABINIT installation
+
+After compiling ABINIT, it is highly recommended to run some tests to validate the installation.
+
+Obviously, it is recommended to run the full test suite, but this can take a lot of time. However, it is possible to run **a smaller set of tests** that cover most of the main features. For these tests, only a comparison of the main physical results in the output is performed (and not a line-by-line comparison of the output files), making it a very useful feature for quickly verifying an installation on a new architecture.
+
+
+To do this, simply run:
+```bash
+make check
+```
+
+> Note: make check is strictly equivalent to executing:  
+  `cd tests && ~abinit_src_dir/tests/runtests.py --keywords MINIMAL --yaml-simplified-diff`
+
+
 ## How to run the internal tests
 
 The abinit code has several small internal tests (three basic ones, called *fast*, *v1* and
@@ -281,6 +297,8 @@ These tests are available whether you have got the package from the Web or from 
 archive. Of course, you need to have compiled abinit in order to run the
 internal tests. Moreover, the simple implementation procedure assumes that the
 executable is located in ~abinit/src/98_main (the standard location after issuing *make*).
+
+> Note: The difference between the internal tests and running `make check` lies in the fact that these internal tests only include testing a fixed set of very simple features, and in this case, the output files are compared line by line.
 
 You can begin with the *fast* suite. Simply issue the command:
 
