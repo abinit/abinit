@@ -2563,7 +2563,7 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
  type(pawtab_type),target,intent(in) :: pawtab
 !Local variables ---------------------------------------
 !scalars
- integer :: angl_size,gs1,gs2,idij,ii,ij_size,ilm,ipts,ispden,jlm,klm,klmn,klmn1,kln
+ integer :: angl_size,gs1,gs2,idij,ii,ij_size,ilm,ispden,jlm,klm,klmn,klmn1,kln
  integer :: lm_size,lmn2_size,mdir,mesh_size,ngnt,sdir
  real(dp), parameter :: HalfFineStruct2=half/InvFineStruct**2
  real(dp) :: fact,me1,me2,rc,rr,rt,sme
@@ -2633,7 +2633,7 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
  rc=two*HalfFineStruct2
 
  LIBPAW_ALLOCATE(v1,(mesh_size))
- call pawv1(mesh_size,nspden,pawang,pawrad,pawxcdev,v1,vh1,vxc1)
+ call pawv1(mesh_size,nspden,pawang,pawxcdev,v1,vh1,vxc1)
  
  LIBPAW_ALLOCATE(dv1dr,(mesh_size))
  call nderiv_gen(dv1dr,v1,pawrad)
@@ -5856,8 +5856,7 @@ end subroutine pawdij_print_dij
 !!
 !! SOURCE
 
-subroutine pawv1(mesh_size,nspden,pawang,pawrad,pawxcdev,&
-    & v1,vh1,vxc1)
+subroutine pawv1(mesh_size,nspden,pawang,pawxcdev,v1,vh1,vxc1)
 
 !Arguments ---------------------------------------------
 !scalars
@@ -5866,7 +5865,6 @@ subroutine pawv1(mesh_size,nspden,pawang,pawrad,pawxcdev,&
 !arrays
  real(dp),intent(in) :: vh1(:,:,:),vxc1(:,:,:)
  real(dp),intent(out) :: v1(mesh_size)
- type(pawrad_type),intent(in) :: pawrad
 !Local variables ---------------------------------------
 !scalars
  integer :: angl_size,ipts
