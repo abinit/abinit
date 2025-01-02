@@ -334,8 +334,8 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mkmem_rbz,mp
 
  lmn2max = psps%lmnmax*(psps%lmnmax+1)/2
  ! note: in make_d, terms will be filled as iatom using atindx
- call dterm_alloc(dterm,psps%lmnmax,lmn2max,dtset%natom,paw_ij(1)%ndij,dtset%pawspnorb)
- call make_d(atindx,dterm,dtset,gprimd,paw_an,paw_ij,pawang,pawrad,pawtab,psps)
+ call dterm_alloc(dterm,psps%lmnmax,lmn2max,dtset%natom,paw_ij(1)%ndij)
+ call make_d(atindx,dterm,dtset,gprimd,paw_ij,pawrad,pawtab,psps)
 
  ABI_MALLOC(orbmag_terms,(2,dtset%mband,dtset%nsppol,3,nterms))
  orbmag_terms = zero
@@ -2276,11 +2276,11 @@ end subroutine dterm_free
 !!
 !! SOURCE
 
-subroutine dterm_alloc(dterm,lmnmax,lmn2max,natom,ndij,pawspnorb)
+subroutine dterm_alloc(dterm,lmnmax,lmn2max,natom,ndij)
 
   !Arguments ------------------------------------
   !scalars
-  integer,intent(in) :: lmnmax,lmn2max,natom,ndij,pawspnorb
+  integer,intent(in) :: lmnmax,lmn2max,natom,ndij
   type(dterm_type),intent(inout) :: dterm
 
   !arrays
@@ -2466,8 +2466,8 @@ subroutine dterm_ZA0(atindx,cplex_dij,dterm,dtset,paw_an,pawang,pawrad,pawtab,qp
 
   !Local variables -------------------------
   !scalars
-  integer :: adir,gs1,gs2,iat,iatom,ierr,ii,ij_size,ilm,itypat,jlm
-  integer :: klmn,klm,kln,lmn2_size,mesh_size,ndij,ngnt,nrt,sdir
+  integer :: adir,gs1,gs2,iat,iatom,ii,ij_size,ilm,itypat,jlm
+  integer :: klmn,klm,kln,lmn2_size,mesh_size,ndij,ngnt,sdir
   real(dp) :: me_kbs,me_k2bs,rc,rr,rt
   complex(dpc) :: cme
   real(dp), parameter :: HalfFineStruct2=half*FineStructureConstant2
@@ -2503,8 +2503,8 @@ subroutine dterm_ZA0(atindx,cplex_dij,dterm,dtset,paw_an,pawang,pawrad,pawtab,qp
 
     
     ABI_MALLOC(v1,(mesh_size))
-    call pawv1(mesh_size,dtset%nspden,pawang,pawrad(itypat),&
-      & dtset%pawxcdev,v1,paw_an(iat)%vh1,paw_an(iat)%vxc1)
+    call pawv1(mesh_size,dtset%nspden,pawang,dtset%pawxcdev,&
+      & v1,paw_an(iat)%vh1,paw_an(iat)%vxc1)
     ABI_MALLOC(dv1dr,(mesh_size))
     call nderiv_gen(dv1dr,v1,pawrad(itypat))
     
@@ -2647,7 +2647,7 @@ end subroutine dterm_ZA0
 !!
 !! SOURCE
 
-subroutine make_d(atindx,dterm,dtset,gprimd,paw_an,paw_ij,pawang,pawrad,pawtab,psps)
+subroutine make_d(atindx,dterm,dtset,gprimd,paw_ij,pawrad,pawtab,psps)
 
   !Arguments ------------------------------------
   !scalars
@@ -2658,9 +2658,7 @@ subroutine make_d(atindx,dterm,dtset,gprimd,paw_an,paw_ij,pawang,pawrad,pawtab,p
   !arrays
   integer,intent(in) :: atindx(dtset%natom)
   real(dp),intent(in) :: gprimd(3,3)
-  type(paw_an_type),intent(inout) :: paw_an(dtset%natom)
   type(paw_ij_type),intent(inout) :: paw_ij(dtset%natom)
-  type(pawang_type),intent(in) :: pawang
   type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
   type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
 
