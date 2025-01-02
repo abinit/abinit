@@ -260,7 +260,7 @@ AC_DEFUN([_SD_NETCDF_CHECK_USE], [
 #     include <netcdf.h>
     ]],
     [[
-      const char fname[12] = "conftest.nc\0";
+      const char fname[13] = "conftest.nc\0";
       int ierr, ncid;
       ierr = nc_open(fname, NC_WRITE, &ncid);
     ]])], [sd_netcdf_ok="yes"], [sd_netcdf_ok="no"])
