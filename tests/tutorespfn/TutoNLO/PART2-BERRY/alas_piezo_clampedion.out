@@ -16,8 +16,8 @@
 
  Starting date : Tue  3 May 2005.
   
-- input  file    -> alas_piezo_clampedion.in
-- output file    -> alas_piezo_clampedion.out
+- input  file    -> alas_pz_clamped.in
+- output file    -> alas_pz_clamped.out
 - root for input  files -> alasi_piezo
 - root for output files -> alaso_piezo
 
