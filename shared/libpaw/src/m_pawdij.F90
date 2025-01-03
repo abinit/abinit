@@ -117,6 +117,7 @@ CONTAINS
 !!  vtrial(cplex*nfft,nspden)=GS potential on real space grid
 !!  vxc(cplex*nfft,nspden)=XC potential (Hartree) on real space grid
 !!  xred(3,my_natom)= reduced atomic coordinates
+!!  znuc(ntypat)=nuclear charges
 !!  ======== Optional arguments ==============
 !!  Parallelism over atomic sites:
 !!    mpi_atmtab(:)=indexes of the atoms treated by current proc
@@ -161,7 +162,7 @@ CONTAINS
 
 subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,ntypat,&
 &          paw_an,paw_ij,pawang,pawfgrtab,pawprtvol,pawrad,pawrhoij,pawspnorb,pawtab,&
-&          pawxcdev,qphon,spnorbscl,ucvol,charge,vtrial,vxc,xred,&
+&          pawxcdev,qphon,spnorbscl,ucvol,charge,vtrial,vxc,xred,znuc,&
 &          electronpositron_calctype,electronpositron_pawrhoij,electronpositron_lmselect,&
 &          atvshift,fatvshift,natvshift,nucdipmom,&
 &          mpi_atmtab,comm_atom,mpi_comm_grid,hyb_mixing,hyb_mixing_sr)
@@ -179,7 +180,7 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
  integer,optional,target,intent(in) :: mpi_atmtab(:)
  logical,optional,intent(in) :: electronpositron_lmselect(:,:)
  real(dp),intent(in) :: gprimd(3,3),qphon(3)
- real(dp),intent(in) ::  vxc(:,:),xred(3,natom)
+ real(dp),intent(in) ::  vxc(:,:),xred(3,natom),znuc(ntypat)
  real(dp),intent(in),target :: vtrial(cplex*nfft,nspden)
  real(dp),intent(in),optional :: atvshift(:,:,:)
  real(dp),intent(in),optional :: nucdipmom(3,natom)
@@ -828,7 +829,7 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
        LIBPAW_ALLOCATE(dijso,(cplex_dij*qphase*lmn2_size,ndij))
        call pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
 &                    pawang,pawrad(itypat),pawtab(itypat),pawxcdev,spnorbscl,&
-&                    paw_an(iatom)%vh1,paw_an(iatom)%vxc1,&
+&                    paw_an(iatom)%vh1,paw_an(iatom)%vxc1,znuc(itypat),&
 &                    nucdipmom=nucdipmom(1:3,iatom))
        if (dijso_need) paw_ij(iatom)%dijso(:,:)=dijso(:,:)
        if (dij_need) paw_ij(iatom)%dij(:,:)=paw_ij(iatom)%dij(:,:)+dijso(:,:)
@@ -2525,7 +2526,7 @@ end subroutine pawdijnd
 !!  vxc1(qphase*mesh_size,v_size,nspden)=all-electron on-site XC potential for current atom
 !!                                given on a (r,theta,phi) grid (v_size=angl_size)
 !!                                or on (l,m) spherical moments (v_size=lm_size)
-!!  znuc=optional input of nuclear charge
+!!  znuc=nuclear charge
 !!
 !! OUTPUT
 !!  dijso(cplex_dij*qphase*lmn2_size,ndij)= spin-orbit Dij terms
@@ -2546,14 +2547,13 @@ end subroutine pawdijnd
 !! SOURCE
 
 subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
-&                   pawang,pawrad,pawtab,pawxcdev,spnorbscl,vh1,vxc1,&
-&                   nucdipmom,znuc)
+&                   pawang,pawrad,pawtab,pawxcdev,spnorbscl,vh1,vxc1,znuc,&
+&                   nucdipmom)
 
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: cplex_dij,ndij,nspden,pawxcdev,qphase
- real(dp), intent(in) :: spnorbscl
- real(dp),optional,intent(in) :: znuc
+ real(dp), intent(in) :: spnorbscl,znuc
  type(pawang_type),intent(in) :: pawang
 !arrays
  real(dp),intent(out) :: dijso(:,:)
@@ -2617,10 +2617,6 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
  end if
  if (present(nucdipmom)) then
    has_nucdipmom = ANY(ABS(nucdipmom(:))>tol8)
-   if (has_nucdipmom .AND. .NOT.present(znuc)) then
-     msg='Nuclear dipole present in pawdijso but znuc missing, cannot make corrections'
-     LIBPAW_BUG(msg)
-   end if
  else
    has_nucdipmom=.FALSE.
  end if
