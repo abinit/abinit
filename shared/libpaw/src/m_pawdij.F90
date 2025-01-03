@@ -2642,23 +2642,22 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
  dkdr = HalfFineStruct2*zk1*zk1*dv1dr
  LIBPAW_DEALLOCATE(dv1dr)
 
- !! use hybrid potential only in nucdipmom case (backwards compatibility with
- !! original pawspnorb code)
- if(has_nucdipmom) then
-   ! relevant ZORA length scale for Coulomb potential
-   rt=znuc*rc
-   ! replace k and dk/dr at short range with Coulomb potential version
-   do ii=1,mesh_size
-     rr=pawrad%rad(ii)
-     if (rr>rc) exit
-     if (rr<tol8) then
-       zk1(ii)=zero; dkdr(ii)=two/rt
-     else
-       zk1(ii)=one/(one+rt/(two*rr))
-       dkdr(ii)=two*rt/(two*rr+rt)**2
-     end if
-   end do
- end if
+ !! replace v1 potential with -Z/r for distances < r_c, the 
+ !! classical electron radius. This is an accurate replacement
+ !! with better analytic properties at r=0.
+ !!if(has_nucdipmom) then
+ rt=znuc*rc
+ ! replace k and dk/dr at short range with Coulomb potential version
+ do ii=1,mesh_size
+   rr=pawrad%rad(ii)
+   if (rr>rc) exit
+   if (rr<tol8) then
+     zk1(ii)=zero; dkdr(ii)=two/rt
+   else
+     zk1(ii)=one/(one+rt/(two*rr))
+     dkdr(ii)=two*rt/(two*rr+rt)**2
+   end if
+ end do
 
 !------------------------------------------------------------------------
 !----- radial integrals
