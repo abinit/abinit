@@ -224,11 +224,12 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  integer :: bandpp_cprj,blocksize,choice,cpopt,iband,iband1
  integer :: iblock,iblocksize,ibs,idir,ierr,igs,igsc,ii,inonsc
  integer :: iorder_cprj,ipw,ispinor,ispinor_index,istwf_k,iwavef,me_g0,mgsc,my_nspinor,n1,n2,n3 !kk
- integer :: nband_k_cprj,ncols_cprj,nblockbd,ncpgr,ndat,nkpt_max,nnlout,ortalgo
+ integer :: nband_k_cprj,ncols_cprj,nblockbd,ncpgr,ndat,niter,nkpt_max,nnlout,ortalgo
  integer :: paw_opt,quit,signs,space,spaceComm,tim_nonlop,wfoptalg,wfopta10
  logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc
  real(dp) :: ar,ar_im,eshift,occblock,norm
  real(dp) :: residk,weight,cpu,wall,gflops
+ character(len=50) :: iter_name
  character(len=500) :: msg
  real(dp) :: dummy(2,1),nonlop_dum(1,1),tsec(2)
  real(dp),allocatable :: cwavef1(:,:),cwavef_x(:,:),cwavef_y(:,:),cwavefb(:,:,:)
@@ -367,7 +368,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    end if
  end if
 
- ! Carry out UP TO dtset%nline steps, or until resid for every band is < dtset%tolwfr
+ ! Carry out UP TO dtset%nline (or dtset%mdeg_filter) steps, or until resid for every band is < dtset%tolwfr
  if (prtvol/=5 .and. (prtvol>2 .or. ikpt <= nkpt_max)) then
    write(msg,'(a,i5,2x,a,3f9.5,2x,a)')' non-scf iterations; kpt # ',ikpt,', k= (',gs_hamk%kpt_k,'), band residuals:'
    call wrtout(std_out,msg,'PERS')
@@ -1271,10 +1272,17 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  end if
 
 !Print out eigenvalues (hartree)
+ if (mod(dtset%wfoptalg,10)==1) then 
+   niter=dtset%mdeg_filter
+   iter_name='as the degree of the polynomial filter'
+ else
+   niter=dtset%nline
+   iter_name='CG line minimizations'
+ end if
  if (prtvol/=5.and.(prtvol>2 .or. ikpt<=nkpt_max)) then
-   write(msg, '(5x,a,i5,2x,a,a,a,i4,a,i4,a)' ) &
+   write(msg, '(5x,a,i5,2x,a,a,a,i4,a,i4,2a)' ) &
     'eigenvalues (hartree) for',nband_k,'bands',ch10,&
-    '              after ',inonsc,' non-SCF iterations with ',dtset%nline,' CG line minimizations'
+    '              after ',inonsc,' non-SCF iterations with ',niter,' ',trim(iter_name)
    call wrtout(std_out,msg,'PERS')
    do ii=0,(nband_k-1)/6
      write(msg, '(1p,6e12.4)' ) (eig_k(iband),iband=1+6*ii,min(6+6*ii,nband_k))
@@ -1286,9 +1294,9 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
 !Print out decomposition of eigenvalues in the non-selfconsistent case or if prtvol>=10
  if( (iscf<0 .and. (prtvol>2 .or. ikpt<=nkpt_max)) .or. prtvol>=10)then
-   write(msg, '(5x,a,i5,2x,a,a,a,i4,a,i4,a)' ) &
+   write(msg, '(5x,a,i5,2x,a,a,a,i4,a,i4,2a)' ) &
 &   ' mean kinetic energy (hartree) for ',nband_k,' bands',ch10,&
-&   '              after ',inonsc,' non-SCF iterations with ',dtset%nline,' CG line minimizations'
+&   '              after ',inonsc,' non-SCF iterations with ',niter,' ',trim(iter_name)
    call wrtout(std_out,msg,'PERS')
 
    do ii=0,(nband_k-1)/6
@@ -1297,9 +1305,9 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    end do
 
    if (gs_hamk%usepaw==0) then
-     write(msg, '(5x,a,i5,2x,a,a,a,i4,a,i4,a)' ) &
+     write(msg, '(5x,a,i5,2x,a,a,a,i4,a,i4,2a)' ) &
 &     ' mean NL+Fock-type energy (hartree) for ',nband_k,' bands',ch10,&
-&     '              after ',inonsc,' non-SCF iterations with ',dtset%nline,' CG line minimizations'
+&     '              after ',inonsc,' non-SCF iterations with ',niter,' ',trim(iter_name)
      call wrtout(std_out,msg,'PERS')
 
      do ii=0,(nband_k-1)/6

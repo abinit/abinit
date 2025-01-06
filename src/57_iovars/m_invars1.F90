@@ -2578,6 +2578,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%magcon_lambda = 0.01_dp
    dtsets(idtset)%mband = -1
    dtsets(idtset)%mdtemp(:)=300.0_dp
+   dtsets(idtset)%mdeg_filter = 6
    dtsets(idtset)%mdwall=10000_dp
    dtsets(idtset)%mep_mxstep=100._dp
    dtsets(idtset)%mep_solver=0
@@ -2621,21 +2622,14 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
 !
    !nline
    dtsets(idtset)%nline=4
-   !Specific value for wavelets
-   if(dtsets(idtset)%usewvl==1 .and. .not. wvl_bigdft) then
-     if(dtsets(idtset)%usepaw==1) then
-       dtsets(idtset)%nline=4
-     else
-       dtsets(idtset)%nline=2
-     end if
-   end if
    !For Chebyshev filtering algo, nline is the degree of the Chebyshev polynomial
    if (mod(dtsets(idtset)%wfoptalg,10) == 1) then
-     if (dtsets(idtset)%gpu_option == ABI_GPU_DISABLED) then
-       dtsets(idtset)%nline = 6
-     else
-       dtsets(idtset)%nline = 6
-     end if
+     dtsets(idtset)%nline = dtsets(idtset)%mdeg_filter
+   end if
+   !Specific value for wavelets
+   if(dtsets(idtset)%usewvl==1 .and. .not. wvl_bigdft) then
+     if(dtsets(idtset)%usepaw==1) dtsets(idtset)%nline=4
+     if(dtsets(idtset)%usepaw/=1) dtsets(idtset)%nline=2
    end if
 
 !  nloalg is also a special case
