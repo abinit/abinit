@@ -404,6 +404,7 @@ type, public :: dataset_type
  integer :: max_ncpus = 0
  integer :: mband
  integer :: mband_mem
+ integer :: mdeg_filter
  integer :: mep_solver
  integer :: mem_test = 1
  integer :: mffmem
@@ -1858,6 +1859,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%max_ncpus          = dtin%max_ncpus
  dtout%mband              = dtin%mband
  dtout%mband_mem          = dtin%mband_mem
+ dtout%mdeg_filter        = dtin%mdeg_filter
  dtout%mdf_epsinf         = dtin%mdf_epsinf
  dtout%mep_solver         = dtin%mep_solver
  dtout%mem_test           = dtin%mem_test
@@ -3562,7 +3564,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' lwf_temperature_nstep lwf_var_temperature'
 !M
  list_vars=trim(list_vars)//' max_ncpus macro_uj maxestep maxnsym mdf_epsinf mdtemp mdwall'
- list_vars=trim(list_vars)//' magconon magcon_lambda mbpt_sciss'
+ list_vars=trim(list_vars)//' magconon magcon_lambda mbpt_sciss mdeg_filter'
  list_vars=trim(list_vars)//' mep_mxstep mep_solver mem_test mixalch mixprec mixesimgf'
  list_vars=trim(list_vars)//' moldyn mqgrid mqgriddg'
 !N

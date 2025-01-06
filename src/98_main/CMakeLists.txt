@@ -9,6 +9,9 @@ macro(abi_build_exe exe_name)
 
   add_executable(${exe_name} ${exe_name}.F90)
 
+# add name to the list of all executables
+  Set(ALL_EXECUTABLES ${ALL_EXECUTABLES} "${exe_name}" CACHE INTERNAL "ALL_EXECUTABLES")
+
   target_include_directories(${exe_name}
     PRIVATE
     ${CMAKE_BINARY_DIR}

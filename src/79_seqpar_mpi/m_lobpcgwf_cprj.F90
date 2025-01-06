@@ -120,7 +120,10 @@ subroutine lobpcgwf2_cprj(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,is
  cprjdim = xg_nonlop%cprjdim
 
 !Variables
- blockdim=mpi_enreg%nproc_band*mpi_enreg%bandpp
+ blockdim=nband/dtset%nblock_lobpcg
+ if (blockdim/=mpi_enreg%nproc_band*mpi_enreg%bandpp) then
+   ABI_ERROR('blockdim is not consistent with nproc_band and bandpp')
+ end if
  nband_cprj=nband/mpi_enreg%nproc_band
 
 !Depends on istwfk
