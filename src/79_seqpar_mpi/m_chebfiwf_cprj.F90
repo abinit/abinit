@@ -158,9 +158,6 @@ subroutine chebfiwf2_cprj(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
 
 !Variables
  blockdim=mpi_enreg%nproc_band*mpi_enreg%bandpp
- if (blockdim/=nband) then
-   ABI_ERROR('blockdim is not consistent with nband')
- end if
  nband_cprj=nband/mpi_enreg%nproc_band
 
 !Depends on istwfk
@@ -214,8 +211,7 @@ subroutine chebfiwf2_cprj(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
  call xg_init(cprj_xgx0,space_cprj,xg_nonlop%cprjdim,nband_cprj*nspinor,comm=l_mpi_enreg%comm_band)
 
  call chebfi_init(chebfi,nband,npw*nspinor,cprjdim,dtset%tolwfr_diago,dtset%ecut, &
-&                 mpi_enreg%bandpp, &
-&                 dtset%mdeg_filter, space,space_cprj,1, &
+&                 mpi_enreg%bandpp, dtset%nline, dtset%nbdbuf, space,space_cprj,1, &
 &                 l_mpi_enreg%comm_band,me_g0,paw,&
 &                 dtset%chebfi_oracle,dtset%oracle_factor,dtset%oracle_min_occ,&
 &                 xg_nonlop,me_g0_fft)
@@ -277,6 +273,7 @@ subroutine xg_getghc(X,AX)
  integer         :: blockdim
  integer         :: spacedim
  integer,parameter :: sij_opt=0,cpopt=-1,type_calc=1 ! Compute local part only
+! integer :: iatom,iband,ispinor,cprj_index,cprj_rows,cprj_cols,ncpgr,nlmn
  real(dp) :: eval
  type(pawcprj_type) :: cprj_dum(l_gs_hamk%natom,1)
 !arrays

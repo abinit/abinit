@@ -86,8 +86,9 @@ module m_chebfi2
    integer :: total_spacedim                ! Maybe not needed
    integer :: neigenpairs                   ! Number of eigen values/vectors we want
    integer :: ndeg_filter                   ! Degree of the polynomial filter
+   integer :: nbdbuf                        ! Number of bands in the buffer
    integer :: spacecom                      ! Communicator for MPI
-   integer :: oracle                        ! Option to compute nline from residuals
+   integer :: oracle                        ! Option to compute ndeg_filter from residuals
    real(dp) :: tolerance            ! Tolerance on the residu to stop the minimization
    real(dp) :: ecut                 ! Ecut for Chebfi oracle
    real(dp) :: oracle_factor                ! factor used to decrease residuals
@@ -179,8 +180,8 @@ module m_chebfi2
 !! SOURCE
 
 subroutine chebfi_init(chebfi,neigenpairs,spacedim,tolerance,ecut,paral_kgb,bandpp, &
-                       ndeg_filter,space,eigenProblem,spacecom,me_g0,me_g0_fft,paw,comm_rows,comm_cols,&
-                       gpu_option,gpu_kokkos_nthrd)
+                       ndeg_filter,nbdbuf,space,eigenProblem,spacecom,me_g0,me_g0_fft,paw,comm_rows,comm_cols, &
+                       oracle,oracle_factor,oracle_min_occ,gpu_option,gpu_kokkos_nthrd)
 
  implicit none
 
@@ -191,6 +192,7 @@ subroutine chebfi_init(chebfi,neigenpairs,spacedim,tolerance,ecut,paral_kgb,band
  integer       , intent(in   ) :: me_g0_fft
  integer       , intent(in   ) :: neigenpairs
  integer       , intent(in   ) :: ndeg_filter
+ integer       , intent(in   ) :: nbdbuf
  integer       , intent(in   ) :: comm_cols
  integer       , intent(in   ) :: comm_rows
  integer       , intent(in   ) :: paral_kgb
@@ -228,6 +230,7 @@ subroutine chebfi_init(chebfi,neigenpairs,spacedim,tolerance,ecut,paral_kgb,band
  chebfi%bandpp      = bandpp
  chebfi%comm_rows   = comm_rows
  chebfi%ndeg_filter = ndeg_filter
+ chebfi%nbdbuf      = nbdbuf
  chebfi%spacecom    = spacecom
  chebfi%eigenProblem = eigenProblem
  chebfi%me_g0        = me_g0
@@ -509,10 +512,9 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,eigen,occ,residu,nspinor)
 !scalars
  integer :: spacedim
  integer :: space_res
- integer :: neigenpairs
+ integer :: neigenpairs,bandpp
  integer :: ndeg_filter,ndeg_filter_max
- integer :: iband, ideg, ierr
-! integer :: comm_fft_save,comm_band_save !FFT and BAND MPI communicators from rest of Abinit, to be saved
+ integer :: ideg, ierr
  real(dp) :: tolerance
  real(dp) :: maxeig, maxeig_global
  real(dp) :: mineig, mineig_global
@@ -527,7 +529,6 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,eigen,occ,residu,nspinor)
  real(dp) :: tsec(2)
  !Pointers similar to old Chebfi
  integer,allocatable :: ndeg_filter_bands(:) !Oracle variable
- real(dp),pointer :: eig(:,:)
 
 ! *********************************************************************
 
@@ -535,6 +536,7 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,eigen,occ,residu,nspinor)
 
  spacedim = chebfi%spacedim
  neigenpairs = chebfi%neigenpairs
+ bandpp = chebfi%bandpp
  ndeg_filter = chebfi%ndeg_filter
  chebfi%eigenvalues = eigen
 
@@ -550,8 +552,8 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,eigen,occ,residu,nspinor)
    ABI_MALLOC(ndeg_filter_bands,(neigenpairs))
    call xg_init(DivResults, space_res, neigenpairs, 1, gpu_option=chebfi%gpu_option)
  else
-   ABI_MALLOC(ndeg_filter_bands,(chebfi%bandpp))
-   call xg_init(DivResults, space_res, chebfi%bandpp, 1, gpu_option=chebfi%gpu_option)
+   ABI_MALLOC(ndeg_filter_bands,(bandpp))
+   call xg_init(DivResults, space_res, bandpp, 1, gpu_option=chebfi%gpu_option)
  end if
 
  tolerance = chebfi%tolerance
@@ -629,25 +631,13 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,eigen,occ,residu,nspinor)
  lambda_minus = maxeig_global
 
  call timab(tim_oracle,1,tsec)
- ndeg_filter_max = cheb_oracle1(mineig_global, lambda_minus, lambda_plus, 1D-16, 40)
 
- if (chebfi%paral_kgb == 0) then
-   call xgBlock_reverseMap(DivResults%self,eig,rows=1,cols=neigenpairs)
-   do iband=1, neigenpairs !TODO TODO
-  ! !Polynomial degree necessary to converge to tolerance
-  ! !ndeg_filter_tolwfr = cheb_oracle1(dble(eig(iband*2-1,1)), lambda_minus, lambda_plus, tolerance / resids_filter(iband), ndeg_filter)
-  ! !Polynomial degree necessary to decrease residual by a constant factor
-  ! !ndeg_filter_decrease = cheb_oracle1(dble(eig(iband*2-1,1)), lambda_minus, lambda_plus, 0.1D, dtset%mdeg_filter)
-  ! !ndeg_filter_bands(iband) = MAX(MIN(ndeg_filter_tolwfr, ndeg_filter_decrease, ndeg_filter_max, chebfi%mdeg_filter), 1)
-     ndeg_filter_bands(iband) = ndeg_filter ! fiddle with this to use locking
-   end do
- else
-   call xgBlock_reverseMap(DivResults%self,eig,rows=1,cols=chebfi%bandpp)
-   do iband=1, chebfi%bandpp !TODO TODO
-     ndeg_filter_bands(iband) = ndeg_filter ! fiddle with this to use locking
-   end do
+ ndeg_filter_max = cheb_oracle1(mineig_global, lambda_minus, lambda_plus, 1D-16, 40)
+ ndeg_filter = MIN(ndeg_filter_max,chebfi%ndeg_filter)
+ if (chebfi%oracle>0) then
+   call chebfi_set_ndeg_from_residu(chebfi,lambda_minus,lambda_plus,occ,DivResults%self,ndeg_filter_max,ndeg_filter)
  end if
- nline_bands(:) = nline
+ ndeg_filter_bands(:) = ndeg_filter
 
  call timab(tim_oracle,2,tsec)
 
@@ -693,7 +683,7 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,eigen,occ,residu,nspinor)
  end if
 
  call timab(tim_amp_f,1,tsec)
- call chebfi_ampfactor(chebfi, eig, lambda_minus, lambda_plus, ndeg_filter_bands)
+ call chebfi_ampfactor(chebfi, DivResults%self, lambda_minus, lambda_plus, ndeg_filter_bands)
  call timab(tim_amp_f,2,tsec)
 
  call xg_free(DivResults)
@@ -981,13 +971,13 @@ end subroutine chebfi_swapInnerBuffers
 !!
 !! SOURCE
 
-subroutine chebfi_ampfactor(chebfi,eig,lambda_minus,lambda_plus,ndeg_filter_bands)
+subroutine chebfi_ampfactor(chebfi,DivResults,lambda_minus,lambda_plus,ndeg_filter_bands)
 
   implicit none
 
   ! Arguments ------------------------------------
   integer,           intent(in   ) :: ndeg_filter_bands(:)
-  real(dp), pointer, intent(in   ) :: eig(:,:)
+  type(xgBlock_t),   intent(in   ) :: DivResults
   real(dp),          intent(in   ) :: lambda_minus
   real(dp),          intent(in   ) :: lambda_plus
   type(chebfi_t),    intent(inout) :: chebfi
@@ -1142,12 +1132,12 @@ function cheb_poly1(xx,nn,aa,bb) result(yy)
 end function cheb_poly1
 !!***
 
-!!****f* m_chebfi2/chebfi_set_nline_from_residu
+!!****f* m_chebfi2/chebfi_set_ndeg_from_residu
 !! NAME
-!! chebfi_set_nline_from_residu
+!! chebfi_set_ndeg_from_residu
 !!
 !! FUNCTION
-!! Compute nline with the oracle and reisduals.
+!! Compute ndeg_filter using the oracle and residuals.
 !!
 !! INPUTS
 !!
@@ -1157,20 +1147,20 @@ end function cheb_poly1
 !!
 !! SOURCE
 
-subroutine chebfi_set_nline_from_residu(chebfi,lambda_minus,lambda_plus,occ,DivResults,nline_max,nline)
+subroutine chebfi_set_ndeg_from_residu(chebfi,lambda_minus,lambda_plus,occ,DivResults,ndeg_filter_max,ndeg_filter)
 
  implicit none
 
- integer,intent(in) :: nline_max
- integer,intent(out) :: nline
+ integer,intent(in) :: ndeg_filter_max
+ integer,intent(out) :: ndeg_filter
  type(chebfi_t), intent(inout) :: chebfi
  type(xgBlock_t), intent(in)    :: occ
  type(xgBlock_t), intent(in)    :: DivResults
  real(dp), intent(in) :: lambda_minus, lambda_plus
 
  integer :: iband_tot,iband
- integer :: bandpp,ierr,nline_tolwfr,nline_decrease,nbdbuf,nline_all,shift
- integer,allocatable :: nline_bands(:)
+ integer :: bandpp,ierr,ndeg_filter_tolwfr,ndeg_filter_decrease,nbdbuf,ndeg_filter_all,shift
+ integer,allocatable :: ndeg_filter_bands(:)
  type(xgBlock_t) :: occBlock,occ_reshaped
  type(xg_t) :: residu
  real(dp),pointer :: residu_(:,:),occ_(:,:)
@@ -1200,7 +1190,7 @@ subroutine chebfi_set_nline_from_residu(chebfi,lambda_minus,lambda_plus,occ,DivR
    call xgBlock_apply_diag(residu%self,occBlock,1)
  end if
 
- ABI_MALLOC(nline_bands,(bandpp))
+ ABI_MALLOC(ndeg_filter_bands,(bandpp))
 
  ! DivResults could be complex (with null imaginary part), so bandpp has to be in cols, not rows
  call xgBlock_reverseMap(DivResults,eig,rows=1,cols=bandpp)
@@ -1218,34 +1208,34 @@ subroutine chebfi_set_nline_from_residu(chebfi,lambda_minus,lambda_plus,occ,DivR
    res_iband = residu_(1,iband)
    occ_iband = occ_(1,iband)
    if (res_iband<chebfi%tolerance.or.(chebfi%nbdbuf==-101.and.occ_iband<chebfi%oracle_min_occ)) then
-     nline_bands(iband) = 0
+     ndeg_filter_bands(iband) = 0
    else
-     !nline necessary to converge to tolerance
-     nline_tolwfr = cheb_oracle1(eig_iband, lambda_minus, lambda_plus, chebfi%tolerance / res_iband, 100)
+     !ndeg_filter necessary to converge to tolerance
+     ndeg_filter_tolwfr = cheb_oracle1(eig_iband, lambda_minus, lambda_plus, chebfi%tolerance / res_iband, 100)
      iband_tot = iband + shift
      if (iband_tot<=chebfi%neigenpairs-nbdbuf) then
        if (chebfi%oracle==1) then
-         nline_bands(iband) = MIN(nline_max, nline_tolwfr, chebfi%nline)
+         ndeg_filter_bands(iband) = MIN(ndeg_filter_max, ndeg_filter_tolwfr, chebfi%ndeg_filter)
        else if (chebfi%oracle==2) then
-         !nline necessary to decrease residual by a constant factor
-         nline_decrease = cheb_oracle1(eig_iband, lambda_minus, lambda_plus, chebfi%oracle_factor, 15)
-         nline_bands(iband) = MIN(nline_max, nline_tolwfr, nline_decrease)
+         !ndeg_filter necessary to decrease residual by a constant factor
+         ndeg_filter_decrease = cheb_oracle1(eig_iband, lambda_minus, lambda_plus, chebfi%oracle_factor, 15)
+         ndeg_filter_bands(iband) = MIN(ndeg_filter_max, ndeg_filter_tolwfr, ndeg_filter_decrease)
        else
          ABI_ERROR('Wrong value for chebfi%oracle')
        end if
      else
-       nline_bands(iband) = 0
+       ndeg_filter_bands(iband) = 0
      end if
    end if
  end do
- nline = MAXVAL(nline_bands)
- call xmpi_max(nline,nline_all,chebfi%comm_cols,ierr)
- nline=nline_all
+ ndeg_filter = MAXVAL(ndeg_filter_bands)
+ call xmpi_max(ndeg_filter,ndeg_filter_all,chebfi%comm_cols,ierr)
+ ndeg_filter=ndeg_filter_all
 
  call xg_free(residu)
- ABI_FREE(nline_bands)
+ ABI_FREE(ndeg_filter_bands)
 
-end subroutine chebfi_set_nline_from_residu
+end subroutine chebfi_set_ndeg_from_residu
 !!***
 
 end module m_chebfi2
