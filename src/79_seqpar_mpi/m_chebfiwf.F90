@@ -254,7 +254,7 @@ subroutine chebfiwf2(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
  ! scalars
  integer, parameter :: tim_chebfiwf2 = 1750
  integer, parameter :: tim_nonlop = 1753
- integer :: space,blockdim,total_spacedim,ierr
+ integer :: iband,shift,space,blockdim,total_spacedim,ierr
  integer :: me_g0,me_g0_fft
  real(dp) :: localmem
  type(chebfi_t) :: chebfi
@@ -289,9 +289,6 @@ subroutine chebfiwf2(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
 
 !Variables
  blockdim=l_mpi_enreg%nproc_band*l_mpi_enreg%bandpp
- if (blockdim/=nband) then
-   ABI_ERROR('blockdim is not consistent with nband')
- end if
  !for debug
  l_useria=dtset%useria
 
@@ -363,7 +360,7 @@ subroutine chebfiwf2(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
  ABI_NVTX_START_RANGE(NVTX_CHEBFI2_INIT)
  call chebfi_init(chebfi,nband,l_npw*l_nspinor,dtset%tolwfr_diago,dtset%ecut, &
 &                 dtset%paral_kgb,l_mpi_enreg%bandpp, &
-&                 dtset%mdeg_filter, space,1, &
+&                 dtset%nline, dtset%nbdbuf, space,1, &
 &                 l_mpi_enreg%comm_bandspinorfft,me_g0,me_g0_fft,l_paw,&
 &                 l_mpi_enreg%comm_spinorfft,l_mpi_enreg%comm_band,&
 &                 dtset%chebfi_oracle,dtset%oracle_factor,dtset%oracle_min_occ,&
@@ -399,13 +396,17 @@ subroutine chebfiwf2(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
 #ifdef HAVE_OPENMP_OFFLOAD
      !$OMP TARGET UPDATE FROM(cg) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
 #endif
-     call prep_nonlop(choice,l_cpopt,cprj_dum, &
-&      enl_out(1:nband),l_gs_hamk,0,&
-&      eig(1:nband),nband,mpi_enreg,1,paw_opt,signs,&
-&      gsc_dummy,l_tim_getghc, &
-&      cg(:,1:nband*l_npw*l_nspinor),&
-&      l_gvnlxc(:,:),&
-&      already_transposed=.false.)
+     do iband=1,nband/blockdim
+       shift = (iband-1)*blockdim*l_npw*l_nspinor
+       call prep_nonlop(choice,l_cpopt,cprj_dum, &
+&        enl_out((iband-1)*blockdim+1:iband*blockdim),l_gs_hamk,0,&
+&        eig((iband-1)*blockdim+1:iband*blockdim),blockdim,mpi_enreg,1,paw_opt,signs,&
+&        gsc_dummy,l_tim_getghc, &
+&        cg(:,shift+1:shift+blockdim*l_npw*l_nspinor),&
+!&        l_gvnlxc(:,shift+1:shift+blockdim*l_npw*l_nspinor),&
+&        l_gvnlxc(:,:),&
+&        already_transposed=.false.)
+     end do
    end if
    ABI_NVTX_END_RANGE()
    ABI_FREE(l_gvnlxc)
