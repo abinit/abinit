@@ -3810,8 +3810,8 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
  ! Using the random q for the optical limit is one of the reasons
  ! why sigma breaks the initial energy degeneracies.
  Vcp%i_sz=zero
- Vcp%vc_sqrt(1,:)=czero
- Vcp%vcqlwl_sqrt(1,:)=czero
+ Vcp%vc_sqrt(1,1)=czero
+ Vcp%vcqlwl_sqrt(1,1)=czero
 #endif
 
  ABI_FREE(qlwl)
