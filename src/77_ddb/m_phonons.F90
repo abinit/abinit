@@ -1412,20 +1412,18 @@ subroutine zacharias_supercell_make(Crystal, Ifc, ntemper, rlatt, tempermin, tem
      thm_scells(itemper)%qphon(:) = qibz(:,iq)
 
      ! find thermal displacement amplitude eq 4 of Zacharias
-     !   combined with l_nu,q expression in paragraph before
-     sigma = sqrt( (bose_einstein(phfrq_allq(imode), temperature) + half)/phfrq_allq(imode) )
+     ! combined with l_nu,q expression in paragraph before
+     sigma = sqrt((bose_einstein(phfrq_allq(imode), temperature) + half)/phfrq_allq(imode))
 
      ! add displacement for this mode to supercell positions eq 5 of Zacharias
-       freeze_displ = modesign * sigma
-       call thm_scells(itemper)%freeze_displ(phdispl1(:,:,:), freeze_displ)
-
+     freeze_displ = modesign * sigma
+     call thm_scells(itemper)%freeze_displ(phdispl1(:,:,:), freeze_displ)
    end do !itemper
 
    ! this is the prescription: flip sign for each successive mode in full
    ! spectrum, to cancel electron phonon coupling to 1st order
    ! (hopefully 3rd order as well)
-   modesign=-modesign
-
+   modesign = -modesign
  end do !imode
 
  ABI_FREE(modeindex)
@@ -1708,9 +1706,9 @@ subroutine zacharias_supercell_print(fname, ntemper, tempermin, temperinc, thm_s
 
  do itemp = 1, ntemper
    temper = dble(itemp-1)*temperinc+tempermin
-   write (temper_str,'(I8)') int(temper)
-   write (filename, '(3a)') trim(fname), "_T_", trim(adjustl(temper_str))
-   write (title1, '(3a)') "#  Zacharias thermalized supercell at temperature T= ", trim(temper_str), " Kelvin"
+   write(temper_str,'(I8)') int(temper)
+   write(filename, '(3a)') trim(fname), "_T_", trim(adjustl(temper_str))
+   write(title1, '(3a)') "#  Zacharias thermalized supercell at temperature T= ", trim(temper_str), " Kelvin"
    title2 = "#  generated with alternating thermal displacements of all phonons"
    call thm_scells(itemp)%print_abinit(filename, title1, title2)
  end do
@@ -1747,9 +1745,9 @@ subroutine thermal_supercell_print(fname, nconfig, temperature_K, thm_scells)
  character(len=10) :: config_str
 
  do iconfig = 1, nconfig
-   write (config_str,'(I8)') iconfig
-   write (filename, '(3a)') trim(fname), "_cf_", trim(adjustl(config_str))
-   write (title1, '(a,I6,a)') "#  thermalized supercell at temperature T= ", temperature_K, " Kelvin"
+   write(config_str,'(I8)') iconfig
+   write(filename, '(3a)') trim(fname), "_cf_", trim(adjustl(config_str))
+   write(title1, '(a,I6,a)') "#  thermalized supercell at temperature T= ", temperature_K, " Kelvin"
    title2 = "#  generated with random thermal displacements of all phonons"
    call thm_scells(itemp)%print_abinit(filename, title1, title2)
  end do
