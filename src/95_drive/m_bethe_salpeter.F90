@@ -692,7 +692,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
      Dtset%nspden,Cryst%ntypat,KS_paw_an,KS_paw_ij,Pawang,Pawfgrtab,&
      Dtset%pawprtvol,Pawrad,KS_Pawrhoij,Dtset%pawspnorb,Pawtab,Dtset%pawxcdev,&
      k0,Dtset%spnorbscl,Cryst%ucvol,dtset%cellcharge(1),ks_vtrial,ks_vxc,Cryst%xred,&
-     nucdipmom=Dtset%nucdipmom)
+     Dtset%znucl,nucdipmom=Dtset%nucdipmom)
 
    ! Symmetrize KS Dij
    call symdij(Cryst%gprimd,Cryst%indsym,ipert0,&

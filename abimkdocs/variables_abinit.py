@@ -14234,7 +14234,7 @@ printed out.
 When [[pawcpxocc]] == 2, PAW augmentation occupancies are treated as
 COMPLEX; else they are considered as REAL.
 This is needed when time-reversal symmetry is broken (typically when spin-
-orbit coupling is activated).
+orbit coupling is activated or nuclear magnetic dipole moments are present).
 
 Note for ground-state calculations ([[optdriver]] == 0):
 The imaginary part of PAW augmentation occupancies is only used for the
@@ -14729,9 +14729,13 @@ Variable(
     requires="[[usepaw]] == 1",
     added_in_version="before_v9",
     text=r"""
-When PAW is activated, the **spin-orbit coupling** can be added without the
-use of specific PAW datasets (pseudopotentials).
-If [[pawspnorb]] = 1, spin-orbit will be added.
+When PAW is activated, the **spin-orbit coupling** as derived from the
+zero-order regular approximation to relativistic effects (ZORA)
+can be added without the
+use of specific PAW datasets (pseudopotentials).  If in addition, a
+nuclear magnetic dipole moment (see [[nucdipmom]]) is present, ZORA terms due
+to the electron-nuclear spin interactions are added as well.
+If [[pawspnorb]] = 1, spin-orbit (and nuclear-electron spin) interactions will be added.
 If the wavefunction is spinorial (that is, if [[nspinor]] = 2), there is no
 reason not to include the spin-orbit interaction, so that the default value of
 [[pawspnorb]] becomes 1 when [[nspinor]] = 2.
