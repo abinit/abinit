@@ -1016,11 +1016,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     263.704     263.654
  DFT+DMFT Method is used
  ******************************************
 
-
- ******************************************
- DFT+DMFT Method is used
- ******************************************
-
  Magnetic DFT, with Magnetic FLL (Full Localized Limit) double counting
 
  Entropy is not computed, only the internal energy is printed
@@ -1722,14 +1717,16 @@ force_length_stats: {min: null, max: null, mean: null, }
 
 --- !EnergyTerms
 iteration_state     : {dtset: 2, }
-comment             : Components of total free energy in Hartree
+comment             : Components of total energy in Hartree
 kinetic             :  6.17970445753736E+00
 hartree             :  1.08999538295454E+01
 xc                  : -7.90387841341107E+00
 Ewald energy        : -5.53458350375165E+01
 psp_core            :  4.12014356490741E+00
 local_psp           : -3.45750360300472E+01
-spherical_terms     :  4.57687300379216E+00
+spherical_terms     :  4.52071085982644E+00
+interaction         :  8.34814069036986E-01
+'-double_counting'  : -7.78651925717740E-01
 internal            : -7.20480746251924E+01
 total_energy        : -7.20480746251924E+01
 total_energy_eV     : -1.96052781500004E+03
@@ -1738,12 +1735,14 @@ total_energy_eV     : -1.96052781500004E+03
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 2, }
-comment             : '"Double-counting" decomposition of free energy'
+comment             : '"Double-counting" decomposition of internal energy'
 band_energy         : -8.13424212389940E+00
 Ewald energy        : -5.53458350375165E+01
 psp_core            :  4.12014356490741E+00
 xc_dc               : -8.43469614645793E+00
-spherical_terms     : -4.27844984584269E+00
+spherical_terms     : -4.33461198935527E+00
+interaction         :  8.34814069036986E-01
+'-double_counting'  : -7.78651925717740E-01
 internal            : -7.20730795888091E+01
 total_energy_dc     : -7.20730795888091E+01
 total_energy_dc_eV  : -1.96120823466341E+03

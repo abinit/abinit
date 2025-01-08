@@ -192,6 +192,7 @@ P           mkmem           3
             upawu2     2.20495952E-01 Hartree
           usedmft1          0
           usedmft2          1
+         use_yaml           1
           usepawu1          1
           usepawu2         10
            useylm           1
@@ -1025,7 +1026,7 @@ total_energy_eV     : -1.07402418763251E+03
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 2, }
-comment             : '"Double-counting" decomposition of free energy'
+comment             : '"Double-counting" decomposition of internal energy'
 band_energy         : -1.68467497652561E+00
 Ewald energy        : -3.61669335556889E+01
 psp_core            :  1.64203904117002E+00
@@ -1214,6 +1215,7 @@ P           mkmem           3
             upawu2     2.20495952E-01 Hartree
           usedmft1          0
           usedmft2          1
+         use_yaml           1
           usepawu1          1
           usepawu2         10
            useylm           1

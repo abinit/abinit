@@ -192,6 +192,7 @@ P           mkmem           1
             upawu2     2.20495952E-01 Hartree
           usedmft1          0
           usedmft2          1
+         use_yaml           1
           usepawu1          1
           usepawu2         10
            useylm           1
@@ -1214,6 +1215,7 @@ P           mkmem           1
             upawu2     2.20495952E-01 Hartree
           usedmft1          0
           usedmft2          1
+         use_yaml           1
           usepawu1          1
           usepawu2         10
            useylm           1

@@ -871,6 +871,10 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      call chkdpr(0,1,cond_string,cond_values,ierr,'dmft_triqs_move_global_prob',dt%dmft_triqs_move_global_prob,1,zero,iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
      cond_string(2)='dmft_triqs_leg_measure' ; cond_values(2)=dt%dmft_triqs_leg_measure
+     if (dt%dmft_triqs_time_invariance == 1) then
+       cond_string(1)='dmft_triqs_time_invariance' ; cond_values(1)=dt%dmft_triqs_time_invariance
+       call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_triqs_measure_density_matrix',dt%dmft_triqs_measure_density_matrix,1,(/1/),iout)
+     end if
      if (dt%dmft_triqs_leg_measure == 0) then
        call chkdpr(0,2,cond_string,cond_values,ierr,'dmft_triqs_wmax',dt%dmft_triqs_wmax,1,zero,iout)
      else
