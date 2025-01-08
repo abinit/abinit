@@ -898,14 +898,16 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      end if
 #ifdef HAVE_TRIQS_COMPLEX
      if (dt%dmft_triqs_orb_off_diag==0.and.dt%dmft_triqs_spin_off_diag==0) then
-       ABI_WARNING("WARNING: You have compiled with the complex version of TRIQS/CTHYB, yet you do not &
-                 & sample any off-diagonal element. This is a waste of computation time.")
+       write(msg,'(2a)') "WARNING: You have compiled with the complex version of TRIQS/CTHYB, yet you do not", &
+                 & "sample any off-diagonal element. This is a waste of computation time."
+       ABI_WARNING(msg)
      end if
 #else
      if (dt%dmft_triqs_orb_off_diag==1.or.dt%dmft_triqs_spin_off_diag==1) then
-       ABI_WARNING("WARNING: You have compiled with the real version of TRIQS/CTHYB, yet you have &
-           & activated the sampling of the off-diagonal elements. Thus their imaginary part will be &
-           & neglected. You'll have to check that this is a good approximation.")
+       write(msg,'(3a)') "WARNING: You have compiled with the real version of TRIQS/CTHYB, yet you have", &
+           & "activated the sampling of the off-diagonal elements. Thus their imaginary part will be", &
+           & "neglected. You'll have to check that this is a good approximation."
+       ABI_WARNING(msg)
      end if
 #endif
    end if
