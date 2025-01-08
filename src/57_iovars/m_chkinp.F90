@@ -109,7 +109,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
  real(dp),allocatable :: frac(:,:),tnons_new(:,:),xred(:,:)
  character(len=32) :: cond_string(4)
  character(len=32) :: input_name
- character(len=500) :: message
  type(libxc_functional_type) :: xcfunc(2)
 
 ! *************************************************************************
