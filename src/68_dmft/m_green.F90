@@ -4387,6 +4387,7 @@ subroutine compute_moments_loc(green,self,energy_level,weiss,option,opt_log)
 !Local variables ------------------------------
  integer :: i,natom,nspinor,nsppol,optlog
  complex(dpc) :: trace
+ integer, allocatable :: lpawu(:)
  complex(dpc), allocatable :: trace_loc(:)
  type(matlu_type), allocatable :: matlu(:),matlu2(:),matlu3(:),matlu4(:),matlu5(:),matlu6(:)
 !************************************************************************
@@ -4400,6 +4401,7 @@ subroutine compute_moments_loc(green,self,energy_level,weiss,option,opt_log)
 
  ABI_MALLOC(trace_loc,(natom))
 
+ ABI_MALLOC(lpawu,(natom))
  ABI_MALLOC(matlu,(natom))
  ABI_MALLOC(matlu2,(natom))
  ABI_MALLOC(matlu3,(natom))
@@ -4407,12 +4409,14 @@ subroutine compute_moments_loc(green,self,energy_level,weiss,option,opt_log)
  ABI_MALLOC(matlu5,(natom))
  ABI_MALLOC(matlu6,(natom))
 
- call init_matlu(natom,nspinor,nsppol,energy_level%matlu(:)%lpawu,matlu(:))
- call init_matlu(natom,nspinor,nsppol,energy_level%matlu(:)%lpawu,matlu2(:))
- call init_matlu(natom,nspinor,nsppol,energy_level%matlu(:)%lpawu,matlu3(:))
- call init_matlu(natom,nspinor,nsppol,energy_level%matlu(:)%lpawu,matlu4(:))
- call init_matlu(natom,nspinor,nsppol,energy_level%matlu(:)%lpawu,matlu5(:))
- call init_matlu(natom,nspinor,nsppol,energy_level%matlu(:)%lpawu,matlu6(:))
+ lpawu(:) = energy_level%matlu(:)%lpawu ! to prevent the creation of a temporary array when calling init_matlu
+
+ call init_matlu(natom,nspinor,nsppol,lpawu(:),matlu(:))
+ call init_matlu(natom,nspinor,nsppol,lpawu(:),matlu2(:))
+ call init_matlu(natom,nspinor,nsppol,lpawu(:),matlu3(:))
+ call init_matlu(natom,nspinor,nsppol,lpawu(:),matlu4(:))
+ call init_matlu(natom,nspinor,nsppol,lpawu(:),matlu5(:))
+ call init_matlu(natom,nspinor,nsppol,lpawu(:),matlu6(:))
 
  if (option == 0) then
    call add_matlu(green%moments(2)%matlu(:),energy_level%matlu(:),matlu(:),natom,-1)
@@ -4538,6 +4542,7 @@ subroutine compute_moments_loc(green,self,energy_level,weiss,option,opt_log)
  call destroy_matlu(matlu5(:),natom)
  call destroy_matlu(matlu6(:),natom)
 
+ ABI_FREE(lpawu)
  ABI_FREE(matlu)
  ABI_FREE(matlu2)
  ABI_FREE(matlu3)

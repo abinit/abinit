@@ -1051,14 +1051,15 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
 !Arguments ------------------------------------
  integer, intent(in) :: tndim
  complex(dpc), intent(in) :: rot_mat(tndim,tndim),vee(tndim,tndim,tndim,tndim)
- complex(dpc), intent(inout) :: vee_rotated(tndim,tndim,tndim,tndim)
+ complex(dpc), target, intent(inout) :: vee_rotated(tndim,tndim,tndim,tndim)
 !Local variables-------------------------------
  integer :: m1,m2
- complex(dpc), allocatable :: mat_tmp(:,:),rot_mat_conjg(:,:)
+ complex(dpc), allocatable :: mat_tmp(:,:),rot_mat_conjg(:,:),vee_tmp(:,:)
 ! *********************************************************************
 
  ABI_MALLOC(rot_mat_conjg,(tndim,tndim))
  ABI_MALLOC(mat_tmp,(tndim,tndim))
+ ABI_MALLOC(vee_tmp,(tndim,tndim))
 
  rot_mat_conjg(:,:) = conjg(rot_mat(:,:))
 
@@ -1076,10 +1077,15 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
  do m2=1,tndim
    do m1=1,tndim
 
+     ! Make a copy instead of creating temporary to please -fcheck-array-temps
+     vee_tmp = vee_rotated(m1,m2,:,:) 
+
      call abi_xgemm("t","n",tndim,tndim,tndim,cone,rot_mat(:,:),tndim,&
-                  & vee_rotated(m1,m2,:,:),tndim,czero,mat_tmp(:,:),tndim)
+                  & vee_tmp(:,:),tndim,czero,mat_tmp(:,:),tndim)
      call abi_xgemm("n","n",tndim,tndim,tndim,cone,mat_tmp(:,:),tndim,&
-                  & rot_mat(:,:),tndim,czero,vee_rotated(m1,m2,:,:),tndim)
+                  & rot_mat(:,:),tndim,czero,vee_tmp(:,:),tndim)
+
+     vee_rotated(m1,m2,:,:) = vee_tmp(:,:)
 
    end do ! m1
  end do ! m2
