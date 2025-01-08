@@ -1022,6 +1022,11 @@ _setup2: Arith. and geom. avg. npw (full set) are     131.963     131.939
  DFT+DMFT Method is used
  ******************************************
 
+
+ ******************************************
+ DFT+DMFT Method is used
+ ******************************************
+
  Magnetic DFT, with Magnetic FLL (Full Localized Limit) double counting
 
  Entropy is not computed, only the internal energy is printed

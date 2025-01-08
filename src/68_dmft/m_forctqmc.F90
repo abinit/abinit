@@ -4337,7 +4337,6 @@ subroutine fourier_inv(paw_dmft,nmoments,ntau,matlu_tau,oper_freq,moments)
      if (lpawu == -1) cycle
      ndim  = 2*lpawu + 1
      tndim = ndim * nspinor
-     ndim  = 2 * ndim
      do isppol=1,nsppol
        do im1=1,tndim
          do im=1,tndim
@@ -4346,6 +4345,7 @@ subroutine fourier_inv(paw_dmft,nmoments,ntau,matlu_tau,oper_freq,moments)
          end do ! im
        end do ! im1
      end do ! isppol
+     ndim = 2 * ndim
      matlu_tau(iatom)%mat(1:ndim,1:ndim,itau) = (matlu_tau(iatom)%mat(1:ndim,1:ndim,itau)+ &
          & conjg(transpose(matlu_tau(iatom)%mat(1:ndim,1:ndim,itau)))) * half
    end do ! iatom
