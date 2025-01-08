@@ -494,10 +494,15 @@ has_fock=.false.
      if (nspinortot==2) then
        ABI_MALLOC(cwavef1,(2,npw_k1*ndat))
        ABI_MALLOC(cwavef2,(2,npw_k1*ndat))
+       !$OMP TARGET ENTER DATA MAP(alloc:cwavef1,cwavef2)
+       !$OMP TARGET TEAMS DISTRIBUTE PRIVATE(idat) MAP(to:cwavef1,cwavef2,cwavef)
        do idat=1,ndat
+         !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(ipw,ig)
          do ipw=1,npw_k1
-           cwavef1(1:2,ipw+(idat-1)*npw_k1)=cwavef(1:2,ipw+(idat-1)*my_nspinor*npw_k1)
-           cwavef2(1:2,ipw+(idat-1)*npw_k1)=cwavef(1:2,ipw+(idat-1)*my_nspinor*npw_k1+shift1)
+           do ig=1,im
+             cwavef1(ig,ipw+(idat-1)*npw_k1)=cwavef(ig,ipw+(idat-1)*my_nspinor*npw_k1)
+             cwavef2(ig,ipw+(idat-1)*npw_k1)=cwavef(ig,ipw+(idat-1)*my_nspinor*npw_k1+shift1)
+           end do
          end do
        end do
 !      call cg_zcopy(npw_k1*ndat,cwavef(1,1),cwavef1)
@@ -545,17 +550,24 @@ has_fock=.false.
                end do
              end do
            end do
+           !$OMP TARGET UPDATE TO(work)
          end if
          ABI_MALLOC(ghc1,(2,npw_k2*ndat))
+         !$OMP TARGET ENTER DATA MAP(alloc:ghc1)
          call fourwf(1,gs_ham%vlocal,cwavef1,ghc1,work,gbound_k1,gbound_k2,&
 &         gs_ham%istwf_k,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
 &         npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,option_fft,tim_fourwf,&
 &         weight,weight,gpu_option=gs_ham%gpu_option)
+         !$OMP TARGET TEAMS DISTRIBUTE PRIVATE(idat) MAP(to:ghc,ghc1)
          do idat=1,ndat
+           !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(ipw,ig)
            do ipw =1, npw_k2
-             ghc(1:2,ipw+(idat-1)*my_nspinor*npw_k2)=ghc1(1:2,ipw+(idat-1)*npw_k2)
+             do ig =1, im
+               ghc(ig,ipw+(idat-1)*my_nspinor*npw_k2)=ghc1(ig,ipw+(idat-1)*npw_k2)
+             end do
            end do
          end do
+         !$OMP TARGET EXIT DATA MAP(delete:ghc1)
          ABI_FREE(ghc1)
        end if ! spin 1 treated by this proc
 
@@ -569,17 +581,24 @@ has_fock=.false.
                end do
              end do
            end do
+           !$OMP TARGET UPDATE TO(work)
          end if
          ABI_MALLOC(ghc2,(2,npw_k2*ndat))
+         !$OMP TARGET ENTER DATA MAP(alloc:ghc2)
          call fourwf(1,gs_ham%vlocal,cwavef2,ghc2,work,gbound_k1,gbound_k2,&
 &         gs_ham%istwf_k,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
 &         npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,option_fft,tim_fourwf,weight,weight,&
 &         gpu_option=gs_ham%gpu_option)
+         !$OMP TARGET TEAMS DISTRIBUTE PRIVATE(idat) MAP(to:ghc,ghc2)
          do idat=1,ndat
+           !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(ipw,ig)
            do ipw=1,npw_k2
-             ghc(1:2,ipw+(idat-1)*my_nspinor*npw_k2+shift2)=ghc2(1:2,ipw+(idat-1)*npw_k2)
+             do ig =1, im
+               ghc(ig,ipw+(idat-1)*my_nspinor*npw_k2+shift2)=ghc2(ig,ipw+(idat-1)*npw_k2)
+             end do
            end do
          end do
+         !$OMP TARGET EXIT DATA MAP(delete:ghc2)
          ABI_FREE(ghc2)
        end if ! spin 2 treated by this proc
 
@@ -749,6 +768,7 @@ has_fock=.false.
    end if ! nvloc
 
    if (nspinortot==2)  then
+     !$OMP TARGET EXIT DATA MAP(delete:cwavef1,cwavef2) IF (.not.use_cwavef_r)
      ABI_FREE(cwavef1)
      ABI_FREE(cwavef2)
    end if
