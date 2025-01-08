@@ -476,8 +476,11 @@ MODULE m_paw_dmft
   ! ABINIT CTQMC: Nb of sweeps
   ! TRIQS CTQMC: Nb of measurements
 
-  real(dp) :: edmft
-  ! DMFT correction to the energy
+  real(dp) :: e_dc
+  ! Double counting energy
+
+  real(dp) :: e_hu
+  ! Interaction energy
 
   real(dp) :: fermie
   ! DMFT Fermi level

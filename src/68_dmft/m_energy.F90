@@ -197,7 +197,8 @@ subroutine destroy_energy(energies_dmft,paw_dmft)
 !Local variables-------------------------------
 ! *********************************************************************
 
- paw_dmft%edmft = energies_dmft%edmft
+ paw_dmft%e_dc = energies_dmft%e_dc_tot
+ paw_dmft%e_hu = energies_dmft%e_hu_tot
 
  energies_dmft%e_hu => null()
  ABI_SFREE(energies_dmft%e_dc)
