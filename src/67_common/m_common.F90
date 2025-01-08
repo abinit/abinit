@@ -1484,7 +1484,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
  real(dp) :: eent,enevalue,etotal,etotaldc,exc_semilocal
  ! Do not modify the length of these strings
  character(len=14) :: eneName
- character(len=500) :: msg
+ character(len=500) :: info,msg
  type(yamldoc_t) :: edoc, dc_edoc
 !arrays
  !character(len=10) :: EPName(1:2)=(/"Positronic","Electronic"/)
@@ -1532,7 +1532,9 @@ subroutine prtene(dtset,energies,iout,usepaw)
  if (optdc==0.or.optdc==2) then
 
    if (directE_avail) then
-     edoc = yamldoc_open('EnergyTerms', info='Components of total free energy in Hartree', &
+     info = 'Components of total free energy in Hartree'
+     if(testdmft) info = 'Components of total energy in Hartree'
+     edoc = yamldoc_open('EnergyTerms', info=trim(adjustl(info)), &
                          width=20, real_fmt='(es21.14)')
      call edoc%add_real('kinetic', energies%e_kinetic)
      if(abs(energies%e_extfpmd)>tiny(0.0_dp)) then
@@ -1581,6 +1583,10 @@ subroutine prtene(dtset,energies,iout,usepaw)
      if (dtset%nzchempot>=1) then
        call edoc%add_real('chem_potential', energies%e_chempot)
      end if
+     if (dtset%usedmft==1) then
+       call edoc%add_real('interaction', energies%e_hu)
+       call edoc%add_real('-double_counting', -energies%e_dc)
+     end if
      if(dtset%occopt>=3.and.dtset%occopt<=8.and.ipositron==0) then
        call edoc%add_real('internal', etotal-eent)
        if(.not.testdmft) then
@@ -1627,7 +1633,9 @@ subroutine prtene(dtset,energies,iout,usepaw)
 
  if (optdc>=1) then
 
-   dc_edoc = yamldoc_open('EnergyTermsDC', info='"Double-counting" decomposition of free energy', &
+   info = '"Double-counting" decomposition of free energy'
+   if(testdmft) info = '"Double-counting" decomposition of internal energy'
+   dc_edoc = yamldoc_open('EnergyTermsDC', info=trim(adjustl(info)), &
                           width=20, real_fmt="(es21.14)")
    call dc_edoc%add_real('band_energy', energies%e_eigenvalues)
    if(abs(energies%e_extfpmd)>tiny(0.0_dp)) then
@@ -1657,6 +1665,10 @@ subroutine prtene(dtset,energies,iout,usepaw)
    end if
    if (dtset%nzchempot>=1) then
      call dc_edoc%add_real('chem_potential', energies%e_chempot)
+   end if
+   if (dtset%usedmft==1) then
+     call dc_edoc%add_real('interaction', energies%e_hu)
+     call dc_edoc%add_real('-double_counting', -energies%e_dc)
    end if
    if(dtset%occopt>=3.and.dtset%occopt<=8.and.ipositron==0) then
      if(.not.testdmft) then

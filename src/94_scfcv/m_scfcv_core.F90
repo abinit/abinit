@@ -1395,7 +1395,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 &     taur=taur,vxc_hybcomp=vxc_hybcomp,vxctau=vxctau,add_tfw=tfw_activated,xcctau3d=xcctau3d)
      ABI_NVTX_END_RANGE()
 
-!DEBUG MJV for kinetic energy mGGA NC psp 
+!DEBUG MJV for kinetic energy mGGA NC psp
 !write (1001, *) '# xccc3d, n3xccc = ', n3xccc
 !do ii=1,n3xccc
 !  write (1001, *) xccc3d(ii)
@@ -2708,7 +2708,6 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 &           + energies%e_hybcomp_E0 - energies%e_hybcomp_v0 + energies%e_hybcomp_v &
 &           + energies%e_constrained_dft + energies%e_ewald &
 &           + energies%e_chempot + energies%e_vdw_dftd
-
 !    +two*energies%e_fock-energies%e_fock0 ! The Fock energy is already included in the non-local one
 !    +energies%e_nlpsp_vfock - energies%e_fock0
 
@@ -2719,7 +2718,7 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 !    if (usepaw==1) etotal = etotal + energies%e_paw + energies%e_nlpsp_vfock - energies%e_fock0
 !    XG 20181025 So, the following is giving a non-variational expression ...
      if (usepaw==1) etotal = etotal + energies%e_paw + energies%e_fock
-
+     if (dtset%usedmft/=0) etotal = etotal + energies%e_hu - energies%e_dc
    end if
 
 !  Compute total (free) energy by double-counting scheme
@@ -2730,6 +2729,7 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 &     + energies%e_hybcomp_E0 - energies%e_hybcomp_v0 + energies%e_constrained_dft
      etotal = etotal + energies%e_ewald + energies%e_chempot + energies%e_vdw_dftd
      if (usepaw/=0) etotal = etotal + energies%e_pawdc
+     if (dtset%usedmft/=0) etotal = etotal + energies%e_hu - energies%e_dc
    end if
 
 !  Additional stuff for electron-positron

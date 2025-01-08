@@ -1440,9 +1440,9 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          call xmpi_barrier(spaceComm_distrb)
 
          call dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawtab(:),dtset%pawprtvol)
-         edmft=paw_dmft%edmft
-         energies%e_paw=energies%e_paw+edmft
-         energies%e_pawdc=energies%e_pawdc+edmft
+         edmft=paw_dmft%e_hu-paw_dmft%e_dc
+         energies%e_dc=paw_dmft%e_dc
+         energies%e_hu=paw_dmft%e_hu
          if (dtset%dmft_triqs_entropy == 1 .and. dtset%dmft_triqs_compute_integral == 1 &
             & .and. (dtset%dmft_solv == 6 .or. dtset%dmft_solv == 7)) energies%entropy = paw_dmft%sdmft
          call flush_unit(std_out)
