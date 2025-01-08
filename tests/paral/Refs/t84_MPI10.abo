@@ -1,8 +1,8 @@
 
 .Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Fri 13 Sep 2024.
 - ( at 19h38 )
-  
+
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI10/paral_t84_MPI10/t84.abi
 - output file    -> t84_MPI10.abo
 - root for input  files -> t84_MPI10i
@@ -79,14 +79,16 @@ _ WF disk file :      0.324 Mbytes ; DEN or POT disk file :      0.358 Mbytes.
         dmftbandf2         20
         dmftbandi1          0
         dmftbandi2          9
-        dmft_iter1          0
+        dmft_iter1         10
         dmft_iter2          1
-        dmft_mxsf1     3.0000000000E-01
+        dmft_mxsf1     6.0000000000E-01
         dmft_mxsf2     7.0000000000E-01
         dmft_nwli1          0
         dmft_nwli2     100000
         dmft_nwlo1          0
         dmft_nwlo2        100
+        dmft_rslf1          1
+        dmft_rslf2          0
         dmft_solv1          5
         dmft_solv2          8
  dmft_charge_prec1     1.0000000000E-06
@@ -687,7 +689,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
   -0.00000  -0.00013  -0.00000  -0.00000   0.00000  -0.00000  -0.00010  -0.00000  -0.00000   0.00000
   -0.00046  -0.00000   0.00000  -0.00000   0.00000  -0.00016  -0.00000   0.00000  -0.00000   0.00000
 
- ---------- DFT+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA ---------------------------------------------------
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
@@ -1013,17 +1015,18 @@ P newkpt: treating     22 bands with npw=     137 for ikpt=   6 by node    2
 P newkpt: treating     22 bands with npw=     133 for ikpt=   7 by node    3
 _setup2: Arith. and geom. avg. npw (full set) are     131.963     131.939
 
--       ( number of procs used in dmft ) = 10
+-       ( number of procs used in dmft ) =   10
 
 
  ******************************************
  DFT+DMFT Method is used
  ******************************************
 
+ Magnetic DFT, with Magnetic FLL (Full Localized Limit) double counting
 
- ******************************************
- DFT+DMFT Method is used
- ******************************************
+ Entropy is not computed, only the internal energy is printed
+
+ The imaginary part of the Green's function is neglected
 
 ================================================================================
 
@@ -1038,30 +1041,30 @@ tolerances: {tolvrs: 1.00E-12, }
 
   == The DFT+DMFT occupation matrix for correlated electrons is ==
 
-   -------> For Correlated Atom   1
+   -------> For Correlated Atom 1
 
-          -- spin components  1  1
+          -- spin components 1 1
        0.44162  0.00000    0.00000  0.00000    0.00000 -0.00000    0.00000 -0.00000   -0.00000 -0.00578
        0.00000 -0.00000    0.44162  0.00000   -0.00000 -0.00000   -0.00000 -0.00505    0.00000 -0.00000
       -0.00000  0.00000   -0.00000  0.00000    0.30091 -0.00000   -0.00000 -0.00000    0.00000  0.00000
        0.00000  0.00000    0.00000  0.00505   -0.00000  0.00000    0.44162  0.00000   -0.00000 -0.00000
       -0.00000  0.00578    0.00000  0.00000   -0.00000 -0.00000    0.00000  0.00000    0.30091 -0.00000
 
-          -- spin components  1  2
+          -- spin components 1 2
       -0.00000  0.00000   -0.00505  0.00000   -0.00000 -0.00000    0.00000  0.00505   -0.00000  0.00000
        0.00505 -0.00000    0.00000  0.00000    0.00000  0.00501   -0.00000  0.00000    0.00000  0.00289
        0.00000  0.00000    0.00000 -0.00501    0.00000  0.00000    0.00501  0.00000   -0.00000 -0.00000
       -0.00000 -0.00505    0.00000 -0.00000   -0.00501  0.00000   -0.00000 -0.00000    0.00289 -0.00000
        0.00000 -0.00000    0.00000 -0.00289    0.00000  0.00000   -0.00289 -0.00000    0.00000 -0.00000
 
-          -- spin components  2  1
+          -- spin components 2 1
       -0.00000 -0.00000    0.00505 -0.00000    0.00000 -0.00000    0.00000  0.00505    0.00000  0.00000
       -0.00505  0.00000    0.00000 -0.00000    0.00000  0.00501    0.00000  0.00000    0.00000  0.00289
       -0.00000  0.00000    0.00000 -0.00501    0.00000  0.00000   -0.00501 -0.00000    0.00000 -0.00000
       -0.00000 -0.00505   -0.00000 -0.00000    0.00501 -0.00000   -0.00000 -0.00000   -0.00289  0.00000
       -0.00000 -0.00000    0.00000 -0.00289    0.00000  0.00000    0.00289  0.00000    0.00000  0.00000
 
-          -- spin components  2  2
+          -- spin components 2 2
        0.44162  0.00000    0.00000 -0.00000    0.00000  0.00000   -0.00000  0.00000    0.00000  0.00578
        0.00000  0.00000    0.44162  0.00000   -0.00000  0.00000    0.00000  0.00505    0.00000  0.00000
        0.00000 -0.00000   -0.00000 -0.00000    0.30091 -0.00000   -0.00000  0.00000    0.00000 -0.00000
@@ -1073,30 +1076,30 @@ tolerances: {tolvrs: 1.00E-12, }
 
   == The DFT+DMFT occupation matrix for correlated electrons is ==
 
-   -------> For Correlated Atom   1
+   -------> For Correlated Atom 1
 
-          -- spin components  1  1
+          -- spin components 1 1
        0.44082  0.00000    0.00000  0.00000   -0.00000 -0.00000    0.00000 -0.00000   -0.00009 -0.00564
        0.00000 -0.00000    0.44082  0.00000   -0.00000 -0.00000    0.00000 -0.00548    0.00000 -0.00000
        0.00000  0.00000    0.00000  0.00000    0.29821 -0.00000    0.00000 -0.00000   -0.00000  0.00000
        0.00000  0.00000   -0.00000  0.00548    0.00000  0.00000    0.44082  0.00000   -0.00000 -0.00000
       -0.00009  0.00564    0.00000  0.00000   -0.00000  0.00000   -0.00000  0.00000    0.29821 -0.00000
 
-          -- spin components  1  2
+          -- spin components 1 2
       -0.00000  0.00000   -0.00548 -0.00000   -0.00000 -0.00000   -0.00000  0.00548   -0.00000  0.00000
        0.00548  0.00000    0.00000  0.00000    0.00008  0.00489   -0.00000  0.00000    0.00004  0.00282
        0.00000  0.00000    0.00008 -0.00489    0.00000 -0.00000    0.00489  0.00008    0.00000  0.00000
        0.00000 -0.00548    0.00000 -0.00000   -0.00489  0.00008   -0.00000 -0.00000    0.00282 -0.00004
        0.00000 -0.00000    0.00004 -0.00282    0.00000  0.00000   -0.00282 -0.00004    0.00000 -0.00000
 
-          -- spin components  2  1
+          -- spin components 2 1
       -0.00000 -0.00000    0.00548  0.00000    0.00000 -0.00000   -0.00000  0.00548    0.00000  0.00000
       -0.00548 -0.00000    0.00000 -0.00000    0.00008  0.00489    0.00000  0.00000    0.00004  0.00282
       -0.00000  0.00000    0.00008 -0.00489    0.00000  0.00000   -0.00489 -0.00008    0.00000  0.00000
        0.00000 -0.00548   -0.00000 -0.00000    0.00489 -0.00008   -0.00000 -0.00000   -0.00282  0.00004
       -0.00000 -0.00000    0.00004 -0.00282    0.00000  0.00000    0.00282  0.00004    0.00000 -0.00000
 
-          -- spin components  2  2
+          -- spin components 2 2
        0.44082  0.00000    0.00000 -0.00000   -0.00000  0.00000   -0.00000  0.00000    0.00009  0.00564
        0.00000  0.00000    0.44082  0.00000   -0.00000  0.00000   -0.00000  0.00548    0.00000  0.00000
       -0.00000 -0.00000    0.00000 -0.00000    0.29821 -0.00000   -0.00000  0.00000    0.00000 -0.00000
@@ -1489,7 +1492,7 @@ force_length_stats: {min: null, max: null, mean: null, }
   -0.00000   0.00006   0.00000   0.00000   0.00000  -0.00000  -0.00010  -0.00000   0.00000   0.00000
   -0.00046  -0.00000   0.00000  -0.00000  -0.00000  -0.00016  -0.00000   0.00000  -0.00000  -0.00000
 
- ---------- DFT+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA ---------------------------------------------------
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
@@ -1720,14 +1723,16 @@ force_length_stats: {min: null, max: null, mean: null, }
 
 --- !EnergyTerms
 iteration_state     : {dtset: 2, }
-comment             : Components of total free energy in Hartree
+comment             : Components of total energy in Hartree
 kinetic             :  6.17961622725756E+00
 hartree             :  1.08999133852073E+01
 xc                  : -7.90387315526480E+00
 Ewald energy        : -5.53458350375165E+01
 psp_core            :  4.12014356490741E+00
 local_psp           : -3.45749799534520E+01
-spherical_terms     :  4.57659160644720E+00
+spherical_terms     :  4.51973521599572E+00
+interaction         :  8.35197663379708E-01
+'-double_counting'  : -7.78982324591438E-01
 internal            : -7.20484233624138E+01
 total_energy        : -7.20484233624138E+01
 total_energy_eV     : -1.96053730462243E+03
@@ -1736,12 +1741,14 @@ total_energy_eV     : -1.96053730462243E+03
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 2, }
-comment             : '"Double-counting" decomposition of free energy'
+comment             : '"Double-counting" decomposition of internal energy'
 band_energy         : -8.13445157401840E+00
 Ewald energy        : -5.53458350375165E+01
 psp_core            :  4.12014356490741E+00
 xc_dc               : -8.43465739544003E+00
-spherical_terms     : -4.27842840343266E+00
+spherical_terms     : -4.33427224758013E+00
+interaction         :  8.35197663379708E-01
+'-double_counting'  : -7.78982324591438E-01
 internal            : -7.20732288455001E+01
 total_energy_dc     : -7.20732288455001E+01
 total_energy_dc_eV  : -1.96121229614453E+03
@@ -1760,7 +1767,7 @@ total_energy_dc_eV  : -1.96121229614453E+03
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
 -          iomode           1
             acell      7.0000000000E+00  7.0000000000E+00  7.0000000000E+00 Bohr
@@ -1772,14 +1779,16 @@ total_energy_dc_eV  : -1.96121229614453E+03
         dmftbandf2         20
         dmftbandi1          0
         dmftbandi2          9
-        dmft_iter1          0
+        dmft_iter1         10
         dmft_iter2          1
-        dmft_mxsf1     3.0000000000E-01
+        dmft_mxsf1     6.0000000000E-01
         dmft_mxsf2     7.0000000000E-01
         dmft_nwli1          0
         dmft_nwli2     100000
         dmft_nwlo1          0
         dmft_nwlo2        100
+        dmft_rslf1          1
+        dmft_rslf2          0
         dmft_solv1          5
         dmft_solv2          8
  dmft_charge_prec1     1.0000000000E-06
@@ -1953,7 +1962,7 @@ P           mkmem           2
  of the ABINIT implementation.
  For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
-- [1] A self-consistent DFT + DMFT scheme in the projector augmented wave method: 
+- [1] A self-consistent DFT + DMFT scheme in the projector augmented wave method:
 - applications to cerium, Ce2O3 and Pu2O3 with the Hubbard I solver and comparison to DFT + U,
 - B. Amadon,  J. Phys.: Condens. Matter 24 075604 (2012).
 - Comment : Describes the self-consistent implementation of DFT+DMFT in PAW
@@ -1996,7 +2005,7 @@ P           mkmem           2
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -2008,12 +2017,12 @@ P           mkmem           2
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -2031,7 +2040,7 @@ P           mkmem           2
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016

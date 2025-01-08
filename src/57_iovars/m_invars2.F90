@@ -2467,8 +2467,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    if(tread==1) dtset%dmft_prtwan=intarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_read_occnd',tread,'INT')
    if(tread==1) dtset%dmft_read_occnd=intarr(1)
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_solv',tread,'INT')
-   if(tread==1) dtset%dmft_solv=intarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_rslf',tread,'INT')
    if(tread==1) dtset%dmft_rslf=intarr(1)
    call intagm(dprarr,intarr,jdtset,marr,natom,string(1:lenstr),'dmft_shiftself',tread,'DPR')
@@ -2561,8 +2559,10 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
        if(tread==1) dtset%dmft_triqs_orb_off_diag=intarr(1)
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_spin_off_diag',tread,'INT')
        if(tread==1) dtset%dmft_triqs_spin_off_diag=intarr(1)
-       if (dtset%dmft_triqs_orb_off_diag == 1 .or. dtset%dmft_triqs_spin_off_diag == 1) &
-           & dtset%dmft_triqs_measure_density_matrix = 0
+       if (dtset%dmft_triqs_orb_off_diag == 1 .or. dtset%dmft_triqs_spin_off_diag == 1) then
+          dtset%dmft_triqs_measure_density_matrix = 0
+          dtset%dmft_triqs_time_invariance = 0
+       end if
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_compute_integral',tread,'INT')
        if(tread==1) dtset%dmft_triqs_compute_integral=intarr(1)
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_det_init_size',tread,'INT')
@@ -2591,6 +2591,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
        if(tread==1) dtset%dmft_triqs_loc_n_max=intarr(1)
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_measure_density_matrix',tread,'INT')
        if(tread==1) dtset%dmft_triqs_measure_density_matrix=intarr(1)
+       if(dtset%dmft_triqs_measure_density_matrix==0) dtset%dmft_triqs_time_invariance=0
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_move_double',tread,'INT')
        if(tread==1) dtset%dmft_triqs_move_double=intarr(1)
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_move_global_prob',tread,'DPR')
@@ -2774,7 +2775,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  if (mod(dtset%wfoptalg,10) == 1) then
 !  For Chebyshev filtering algo, nline is the degree of the Chebyshev polynomial (but is obsolete)
    if (tread_alt==1.and.tread/=1) dtset%nline = dtset%mdeg_filter
- end if 
+ end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nblock_lobpcg',tread,'INT')
  if(tread==1) dtset%nblock_lobpcg=intarr(1)
