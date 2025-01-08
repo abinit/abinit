@@ -1264,6 +1264,8 @@ Ewald energy        : -1.18956266545226E+02
 psp_core            :  1.06954683193368E+01
 local_psp           : -7.52252912410358E+01
 spherical_terms     : -3.59956814289605E+01
+interaction         :  0.00000000000000E+00
+'-double_counting'  : -0.00000000000000E+00
 internal            : -1.85432635060139E+02
 '-kT*entropy'       : -3.08894638433016E-05
 total_energy        : -1.85432665949603E+02
@@ -1279,6 +1281,8 @@ Ewald energy        : -1.18956266545226E+02
 psp_core            :  1.06954683193368E+01
 xc_dc               : -2.26304754213666E+01
 spherical_terms     : -3.51704762494068E+01
+interaction         :  0.00000000000000E+00
+'-double_counting'  : -0.00000000000000E+00
 internal            : -1.85389195370908E+02
 '-kT*entropy'       : -3.08894638433016E-05
 total_energy_dc     : -1.85389226260372E+02
@@ -1709,14 +1713,16 @@ force_length_stats: {min: null, max: null, mean: null, }
 
 --- !EnergyTerms
 iteration_state     : {dtset: 3, }
-comment             : Components of total free energy in Hartree
+comment             : Components of total energy in Hartree
 kinetic             :  2.24625561835323E+01
 hartree             :  2.76417173962921E+01
 xc                  : -1.60554330479803E+01
 Ewald energy        : -1.18956266545226E+02
 psp_core            :  1.06954683193368E+01
 local_psp           : -7.52157228659739E+01
-spherical_terms     : -3.58902415905044E+01
+spherical_terms     : -3.59572421288117E+01
+interaction         :  9.64167765941042E+00
+'-double_counting'  : -9.57467712110342E+00
 internal            : -1.85317922150524E+02
 total_energy        : -1.85317922150524E+02
 total_energy_eV     : -5.04275711577550E+03
@@ -1725,12 +1731,14 @@ total_energy_eV     : -5.04275711577550E+03
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 3, }
-comment             : '"Double-counting" decomposition of free energy'
+comment             : '"Double-counting" decomposition of internal energy'
 band_energy         : -1.93772204265434E+01
 Ewald energy        : -1.18956266545226E+02
 psp_core            :  1.06954683193368E+01
 xc_dc               : -2.26187519898537E+01
-spherical_terms     : -3.50648142783725E+01
+spherical_terms     : -3.51318148168403E+01
+interaction         :  9.64167765941042E+00
+'-double_counting'  : -9.57467712110342E+00
 internal            : -1.85321584920659E+02
 total_energy_dc     : -1.85321584920659E+02
 total_energy_dc_eV  : -5.04285678481965E+03
@@ -2160,14 +2168,16 @@ force_length_stats: {min: null, max: null, mean: null, }
 
 --- !EnergyTerms
 iteration_state     : {dtset: 4, }
-comment             : Components of total free energy in Hartree
+comment             : Components of total energy in Hartree
 kinetic             :  2.24771023870395E+01
 hartree             :  2.76541033779573E+01
 xc                  : -1.60574668655234E+01
 Ewald energy        : -1.18956266545226E+02
 psp_core            :  1.06954683193368E+01
 local_psp           : -7.52252912410358E+01
-spherical_terms     : -3.58227890810618E+01
+spherical_terms     : -3.59956814289605E+01
+interaction         :  7.46616521412912E+00
+'-double_counting'  : -7.29327286623040E+00
 internal            : -1.85235139648514E+02
 total_energy        : -1.85235139648514E+02
 total_energy_eV     : -5.04050448933641E+03
@@ -2176,12 +2186,14 @@ total_energy_eV     : -5.04050448933641E+03
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 4, }
-comment             : '"Double-counting" decomposition of free energy'
+comment             : '"Double-counting" decomposition of internal energy'
 band_energy         : -1.93267776295340E+01
 Ewald energy        : -1.18956266545226E+02
 psp_core            :  1.06954683193368E+01
 xc_dc               : -2.26304754213666E+01
-spherical_terms     : -3.49975839015081E+01
+spherical_terms     : -3.51704762494068E+01
+interaction         :  7.46616521412912E+00
+'-double_counting'  : -7.29327286623040E+00
 internal            : -1.85215635178298E+02
 total_energy_dc     : -1.85215635178298E+02
 total_energy_dc_eV  : -5.03997374571039E+03
@@ -2611,14 +2623,16 @@ force_length_stats: {min: null, max: null, mean: null, }
 
 --- !EnergyTerms
 iteration_state     : {dtset: 5, }
-comment             : Components of total free energy in Hartree
+comment             : Components of total energy in Hartree
 kinetic             :  2.24980678534335E+01
 hartree             :  2.76541033779573E+01
 xc                  : -1.60574668655234E+01
 Ewald energy        : -1.18956266545226E+02
 psp_core            :  1.06954683193368E+01
 local_psp           : -7.52252912410358E+01
-spherical_terms     : -3.59895104146003E+01
+spherical_terms     : -3.59956814289605E+01
+interaction         :  1.07946700572067E+01
+'-double_counting'  : -1.07884990428464E+01
 internal            : -1.85380895515658E+02
 total_energy        : -1.85380895515658E+02
 total_energy_eV     : -5.04447070818713E+03
@@ -2627,12 +2641,14 @@ total_energy_eV     : -5.04447070818713E+03
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 5, }
-comment             : '"Double-counting" decomposition of free energy'
+comment             : '"Double-counting" decomposition of internal energy'
 band_energy         : -1.92884600300925E+01
 Ewald energy        : -1.18956266545226E+02
 psp_core            :  1.06954683193368E+01
 xc_dc               : -2.26304754213666E+01
-spherical_terms     : -3.51643052350466E+01
+spherical_terms     : -3.51704762494068E+01
+interaction         :  1.07946700572067E+01
+'-double_counting'  : -1.07884990428464E+01
 internal            : -1.85344038912395E+02
 total_energy_dc     : -1.85344038912395E+02
 total_energy_dc_eV  : -5.04346778900796E+03
