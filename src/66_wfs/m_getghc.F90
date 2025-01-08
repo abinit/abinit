@@ -1536,6 +1536,7 @@ end subroutine getghc_nucdip
 !! INPUTS
 !! cwavef(2,npw_k*my_nspinor*ndat)=planewave coefficients of wavefunction.
 !! gbound_k(2*mgfft+4)=sphere boundary info
+!! gprimd(3,3)=dimensional reciprocal space primitive translations (b^-1)
 !! istwf_k=input parameter that describes the storage of wfs
 !! kg_k(3,npw_k)=G vec coordinates wrt recip lattice transl.
 !! kpt(3)=current k point

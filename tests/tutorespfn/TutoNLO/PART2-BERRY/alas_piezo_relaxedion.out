@@ -16,8 +16,8 @@
 
  Starting date : Tue  3 May 2005.
   
-- input  file    -> alas_piezo_relaxedion.in
-- output file    -> alas_piezo_relaxedion.out
+- input  file    -> alas_pz_relaxed.in
+- output file    -> alas_pz_relaxed.out
 - root for input  files -> alasi_piezo
 - root for output files -> alaso_piezo
 

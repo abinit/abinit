@@ -250,7 +250,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  real(dp) :: eig0nk !,eig0mkq !eig0mk,
  complex(gwpc) :: ctmp_gwpc
 !arrays
- real(dp) :: fermie1_idir_ipert(3,cryst%natom), ylmgr_dum(1,1,1), dum_nhat(0), dum_xccc3d(0), strsxc(6)
+ real(dp) :: fermie1_idir_ipert(3,cryst%natom), ylmgr_dum(1,1,1), dum_nhat(0), dum_xccc3d(0)
  real(dp),allocatable :: qlwl(:,:), vk_cart_ibz(:,:,:), displ_cart_qq(:,:,:,:),displ_red_qq(:,:,:,:)
  real(dp),allocatable :: kinpw1(:),kpg_k(:,:),kpg_kq(:,:),kpg_kmp(:,:),kpg_kqmp(:,:), dkinpw(:) ! grad_berry(:,:),
  real(dp),allocatable :: ffnl_k(:,:,:,:),ffnl_kq(:,:,:,:), ffnl_kmp(:,:,:,:),ffnl_kqmp(:,:,:,:)
@@ -813,7 +813,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  nk3xc=1; option=2; usexcnhat=0
  call rhotoxc(enxc, kxc, mpi_enreg, nfft, ngfft, &
               dum_nhat, 0, dum_nhat, 0, nkxc, nk3xc, non_magnetic_xc, n3xccc0, option, rhor, &
-              cryst%rprimd, strsxc, usexcnhat, vxc, vxcavg, dum_xccc3d, xcdata)
+              cryst%rprimd, usexcnhat, vxc, vxcavg, dum_xccc3d, xcdata)
 
  ! ========================================
  ! Loop over MPI distributed spins in Sigma

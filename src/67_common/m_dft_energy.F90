@@ -172,7 +172,7 @@ contains
 !!  vhartr(nfftf)=work space to hold Hartree potential in real space (hartree)
 !!  vtrial(nfftf,nspden)=total local potential (hartree)
 !!  vxc(nfftf,nspden)=work space to hold Vxc(r) in real space (hartree)
-!!  [vxctau(nfft,nspden,4*usekden)]=(only for meta-GGA): derivative of XC energy density
+!!  [vxctau(nfftf,nspden,4*usevxctau)]=(only for meta-GGA): derivative of XC energy density
 !!    with respect to kinetic energy density (depsxcdtau). The arrays vxctau contains also
 !!    the gradient of vxctau (gvxctau) in vxctau(:,:,2:4)
 !!
@@ -262,7 +262,7 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
  real(dp), intent(in) :: rprimd(3,3),vpsp(nfftf),xccc3d(n3xccc),xred(3,dtset%natom)
  real(dp), intent(in) :: xcctau3d(nfftf*dtset%usekden)
  real(dp), intent(out) :: vhartr(nfftf),vtrial(nfftf,dtset%nspden),vxc(nfftf,dtset%nspden)
- real(dp),intent(out),optional,target :: vxctau(nfftf,dtset%nspden,4*dtset%usekden)
+ real(dp),intent(out),optional,target :: vxctau(:,:,:) ! vxctau(nfftf,dtset%nspden,4*usevxctau)
  real(dp), intent(in) :: ylm(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm)
  type(paw_ij_type), intent(in) :: paw_ij(my_natom*psps%usepaw)
  type(pawfgrtab_type),intent(inout) :: pawfgrtab(my_natom)
@@ -305,8 +305,14 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
 
  DBG_ENTER("COLL")
 
-!Check that usekden is not 0 if want to use vxctau
- with_vxctau = (present(vxctau).and.dtset%usekden/=0)
+!Test size of kinetic energy potential Vxctau
+ with_vxctau = (present(vxctau))
+ if (with_vxctau) with_vxctau = (size(vxctau)>0.and.dtset%usekden/=0)
+ if (with_vxctau) then 
+   if (size(vxctau)/=nfftf*dtset%nspden*4) then
+     ABI_BUG("Wrong size for vxctau!")
+   end if
+ end if
  vxctau_ => vxctau_dum ; if (with_vxctau) vxctau_ => vxctau
 
 !Test size of FFT grids (1 grid in norm-conserving, 2 grids in PAW)
@@ -365,18 +371,18 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
      if (ipositron==0) then
        call rhotoxc(energies%e_xc,kxc, &
 &       mpi_enreg,nfftf,ngfftf,nhat,psps%usepaw,nhatgr,nhatgrdim, &
-&       nkxc,nk3xc,non_magnetic_xc,n3xccc,option,rhor,rprimd,strsxc, &
+&       nkxc,nk3xc,non_magnetic_xc,n3xccc,option,rhor,rprimd, &
 &       usexcnhat,vxc,vxcavg,xccc3d,xcdata,taur=taur,vhartr=vhartr, &
-&       vxctau=vxctau_,exc_vdw_out=energies%e_xc_vdw,add_tfw=add_tfw_,&
-&       xcctau3d=xcctau3d)
+&       vxctau=vxctau_,exc_vdw_out=energies%e_xc_vdw,add_tfw=add_tfw_, &
+&       xcctau3d=xcctau3d,strsxc=strsxc)
      else
        call rhotoxc(energies%e_xc,kxc, &
 &       mpi_enreg,nfftf,ngfftf,nhat,psps%usepaw,nhatgr,nhatgrdim, &
-&       nkxc,nk3xc,non_magnetic_xc,n3xccc,option,rhor,rprimd,strsxc, &
+&       nkxc,nk3xc,non_magnetic_xc,n3xccc,option,rhor,rprimd, &
 &       usexcnhat,vxc,vxcavg,xccc3d,xcdata, &
 &       electronpositron=electronpositron,taur=taur,vhartr=vhartr, &
 &       vxctau=vxctau_,exc_vdw_out=energies%e_xc_vdw,add_tfw=add_tfw_, &
-&       xcctau3d=xcctau3d)
+&       xcctau3d=xcctau3d,strsxc=strsxc)
      end if
      ABI_FREE(kxc)
    else if (dtset%usewvl == 0) then
