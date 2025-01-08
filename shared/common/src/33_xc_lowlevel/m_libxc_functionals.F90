@@ -70,6 +70,7 @@ module libxc_functionals
  public :: libxc_functionals_isgga              ! Return TRUE if the set of XC functional(s) is GGA or meta-GGA
  public :: libxc_functionals_ismgga             ! Return TRUE if the set of XC functional(s) set is meta-GGA
  public :: libxc_functionals_is_tb09            ! Return TRUE if the XC functional is Tran-Blaha 2009.
+ public :: libxc_functionals_is_potential_only  ! Return TRUE if one of the XC functionals in the set is potential-only
  public :: libxc_functionals_set_c_tb09         ! Set c parameter for Tran-Blaha 2009 functional
  public :: libxc_functionals_needs_tau          ! Return TRUE if the set of XC functional(s) uses KINETIC EN. DENSITY
  public :: libxc_functionals_needs_laplacian    ! Return TRUE if the set of XC functional(s) uses LAPLACIAN
@@ -1058,19 +1059,61 @@ logical function libxc_functionals_is_tb09(xc_functionals) result(ans)
 
 !Arguments ------------------------------------
  type(libxc_functional_type),intent(in),optional :: xc_functionals(2)
+!Local variables-------------------------------
+ integer :: id_tb09
 
 ! *************************************************************************
 
  ans  = .false.
+ id_tb09 = libxc_functionals_getid('XC_MGGA_X_TB09')
 
  if (present(xc_functionals)) then
-   ans = any(xc_functionals%id == libxc_functionals_getid('XC_MGGA_X_TB09'))
+   ans = any(xc_functionals%id == id_tb09)
  else
-   ans = any(xc_global%id == libxc_functionals_getid('XC_MGGA_X_TB09'))
+   ans = any(xc_global%id == id_tb09)
  end if
 
 end function libxc_functionals_is_tb09
 !!***
+
+!----------------------------------------------------------------------
+
+!!****f* libxc_functionals/libxc_functionals_is_potential_only
+!! NAME
+!!  libxc_functionals_is_potential_only
+!!
+!! FUNCTION
+!!  Test function to identify whether the presently used (set of) functional(s)
+!!  provides a potential-only functional
+!!
+!! INPUTS
+!! [xc_functionals(2)]=<type(libxc_functional_type)>, optional argument
+!!                     Handle for XC functionals
+!!
+!! SOURCE
+
+logical function libxc_functionals_is_potential_only(xc_functionals) result(ans)
+
+!Arguments ------------------------------------
+ type(libxc_functional_type),intent(in),optional,target :: xc_functionals(2)
+!Local variables-------------------------------
+ integer :: id_tb09,id_bj06
+
+! *************************************************************************
+
+ ans = .false.
+ id_tb09 = libxc_functionals_getid('XC_MGGA_X_TB09')
+ id_bj06 = libxc_functionals_getid('XC_MGGA_X_BJ06')
+
+ if (present(xc_functionals)) then
+   ans = (any(xc_functionals%id == id_tb09) .or. &
+&         any(xc_functionals%id == id_bj06))
+ else
+   ans = (any(xc_global%id == id_tb09) .or. &
+&         any(xc_global%id == id_bj06))
+ end if
+
+end function libxc_functionals_is_potential_only
 
 !----------------------------------------------------------------------
 
@@ -1094,19 +1137,21 @@ subroutine libxc_functionals_set_c_tb09(xc_tb09_c,xc_functionals)
  real(dp),intent(in) :: xc_tb09_c
  type(libxc_functional_type),intent(inout),optional :: xc_functionals(2)
 !Local variables -------------------------------
- integer :: ii
+ integer :: id_tb09,ii
 
 ! *************************************************************************
 
+ id_tb09 = libxc_functionals_getid('XC_MGGA_X_TB09')
+
  if (present(xc_functionals)) then
    do ii=1,2
-     if (xc_functionals(ii)%id == libxc_functionals_getid('XC_MGGA_X_TB09')) then
+     if (xc_functionals(ii)%id == id_tb09) then
        xc_functionals(ii)%xc_tb09_c = xc_tb09_c
      end if
    end do
  else
    do ii=1,2
-     if (xc_global(ii)%id == libxc_functionals_getid('XC_MGGA_X_TB09')) then
+     if (xc_global(ii)%id == id_tb09) then
        xc_global(ii)%xc_tb09_c = xc_tb09_c
      end if
    end do
