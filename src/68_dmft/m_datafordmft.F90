@@ -129,7 +129,7 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
  integer :: nproc_band,nproc_spkpt,nproju,npw,nspinor,nsploop,nsppol,nsppol_mem,opt_renorm
  integer :: option,paral_kgb,pawprtvol,siz_buf,siz_buf_psi,siz_paw,siz_proj,siz_wan,unt
  logical :: prt_wan,t2g,use_full_chipsi,verif_band,x2my2d
- real(dp) :: ima,re,rint
+ real(dp) :: rint
  complex(dpc) :: psi_tmp
  character(len=500) :: message
  type(oper_type) :: loc_norm_check

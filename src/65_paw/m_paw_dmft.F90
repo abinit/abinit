@@ -187,7 +187,7 @@ MODULE m_paw_dmft
   ! Only use t2g orbitals
 
   integer :: dmft_test
-  ! Do not use it, this is only here for backwards-compatibility for some tests.
+  ! Correct some bugs and activates some optimizations, should alway be set to 1
 
   integer :: dmft_use_full_chipsi
   ! =0 Only use the PAW contribution sum_i <pi|Psi_tilde> |Phi> to compute <Chi|Psi>
@@ -267,12 +267,10 @@ MODULE m_paw_dmft
   ! If it is low, the matrix will be checked too often, which can be slow.
 
   integer :: dmft_triqs_entropy
-  ! TRIQS CTQMC: Compute the DMFT entropy by integrating several impurity models
-  ! over U.
+  ! TRIQS CTQMC: Compute the DMFT entropy by integrating several impurity models over U.
 
   integer :: dmft_triqs_gaussorder
-  ! Order of the Gauss-Legendre quadrature for each subdivision of the
-  ! thermodynamic integration.
+  ! Order of the Gauss-Legendre quadrature for each subdivision of the thermodynamic integration.
 
   integer :: dmft_triqs_loc_n_min
   ! TRIQS CTQMC: Only configurations with a number of electrons in [nlocmin,nlocmax]
@@ -921,7 +919,7 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  dc_string = trim(dc_string)//" double counting"
 
  lda_string = "Magnetic DFT, with "
- if (dtset%usepawu == 14) lda_string = "Non "//lda_string
+ if (dtset%usepawu == 14) lda_string = "Non "//lda_string(:100)
  write(message,'(2(a,1x),a)') ch10,trim(adjustl(lda_string)),trim(adjustl(dc_string))
  call wrtout([std_out,ab_out],message,'COLL')
 
