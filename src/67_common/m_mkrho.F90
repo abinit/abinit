@@ -437,6 +437,17 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 &                npw_k,1,n4,n5,n6,1,tim_fourwf,weight,weight_i,&
 &                weight_array_r=weight_t(1:nband_occ),weight_array_i=weight_t(1:nband_occ),&
 &                gpu_option=gpu_option)
+               if(dtset%nspinor==2)then
+                 if(dtset%nspden==1) then
+                   ! We need only the total density : accumulation continues on top of rhoaug
+                   call fourwf(1,rhoaug,cwavef(:,1:nband_occ*npw_k,2),dummy,wfraug(:,:,:,1:n6*nband_occ),&
+&                      gbound,gbound,istwf_k,kg_k,kg_k,dtset%mgfft,mpi_enreg,nband_occ,dtset%ngfft,&
+&                      npw_k,1,n4,n5,n6,1,tim_fourwf,weight,weight_i,&
+&                      weight_array_r=weight_t(1:nband_occ),weight_array_i=weight_t(1:nband_occ),&
+&                      gpu_option=gpu_option)
+                 else if(dtset%nspden==4) then
+                 end if
+               end if
              end if
              ABI_FREE(weight_t)
 
