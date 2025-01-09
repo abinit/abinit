@@ -1078,7 +1078,7 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
    do m1=1,tndim
 
      ! Make a copy instead of creating temporary to please -fcheck-array-temps
-     vee_tmp = vee_rotated(m1,m2,:,:) 
+     vee_tmp(:,:) = vee_rotated(m1,m2,:,:)
 
      call abi_xgemm("t","n",tndim,tndim,tndim,cone,rot_mat(:,:),tndim,&
                   & vee_tmp(:,:),tndim,czero,mat_tmp(:,:),tndim)
@@ -1092,6 +1092,7 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
 
  ABI_FREE(rot_mat_conjg)
  ABI_FREE(mat_tmp)
+ ABI_FREE(vee_tmp)
 
  end subroutine rotate_hu
 
