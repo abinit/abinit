@@ -1340,12 +1340,12 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    call chkint_eq(0,0,cond_string,cond_values,ierr,'gpu_option',dt%gpu_option,4, &
    &        (/ABI_GPU_DISABLED,ABI_GPU_LEGACY,ABI_GPU_OPENMP,ABI_GPU_KOKKOS/),iout)
    if (dt%gpu_option/=ABI_GPU_DISABLED) then
-     if (dt%nspinor==2) then
-       write(msg,'(3a)')&
-&       'Use of GPU is not allowed when nspinor==2 !',ch10,&
-&       'Action: impose gpu_option=0 in your input file.'
-       ABI_ERROR_NOSTOP(msg, ierr)
-     end if
+!     if (dt%nspinor==2) then
+!       write(msg,'(3a)')&
+!&       'Use of GPU is not allowed when nspinor==2 !',ch10,&
+!&       'Action: impose gpu_option=0 in your input file.'
+!       ABI_ERROR_NOSTOP(msg, ierr)
+!     end if
 !    if (dt%optdriver==RUNL_GSTATE.and.mod(dt%wfoptalg,10)/=4) then
 !    write(msg,'(6a)') ch10,&
 !    &       ' chkinp : ERROR -',ch10,&
