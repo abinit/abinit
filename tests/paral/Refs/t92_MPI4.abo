@@ -210,6 +210,10 @@ P           mkmem           3
 == DATASET  1 ==================================================================
 -   mpi_nproc: 4, omp_nthreads: -1 (-1 if OMP is not activated)
 
+--- !IterStart
+dtset:     1
+...
+
 
 --- !DatasetInfo
 iteration_state: {dtset: 1, }
@@ -223,6 +227,14 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
   LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7
  Citation for XC functional:
   J.P.Perdew and Y.Wang, PRB 45, 13244 (1992)
+
+--- !IterStart
+timimage:     1
+...
+
+--- !IterStart
+image:     1
+...
 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  4.5637000  4.5637000  G(1)= -0.1095602  0.1095602  0.1095602
@@ -288,7 +300,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     288.375     288.353
 ================================================================================
 
 --- !BeginCycle
-iteration_state: {dtset: 1, }
+iteration_state: {dtset: 1, timimage: 1, image: 1, }
 solver: {iscf: 17, nstep: 30, nline: 4, wfoptalg: 10, }
 tolerances: {tolvrs: 1.00E-10, }
 ...
@@ -337,7 +349,7 @@ tolerances: {tolvrs: 1.00E-10, }
 
 
 --- !ResultsGS
-iteration_state: {dtset: 1, }
+iteration_state: {dtset: 1, timimage: 1, image: 1, }
 comment   : Summary of ground state results
 lattice_vectors:
 - [  0.0000000,   4.5637000,   4.5637000, ]
@@ -594,7 +606,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
    Integrated=    1.2000E+01
 
 --- !EnergyTerms
-iteration_state     : {dtset: 1, }
+iteration_state     : {dtset: 1, timimage: 1, image: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  9.78083649875938E+00
 hartree             :  4.75295847026130E+00
@@ -611,7 +623,7 @@ total_energy_eV     : -1.07468169886268E+03
 
 
 --- !EnergyTermsDC
-iteration_state     : {dtset: 1, }
+iteration_state     : {dtset: 1, timimage: 1, image: 1, }
 comment             : '"Double-counting" decomposition of free energy'
 band_energy         : -1.69444180954469E+00
 Ewald energy        : -3.61669335556889E+01
@@ -639,6 +651,10 @@ total_energy_dc_eV  : -1.07468156273397E+03
 == DATASET  2 ==================================================================
 -   mpi_nproc: 4, omp_nthreads: -1 (-1 if OMP is not activated)
 
+--- !IterStart
+dtset:     2
+...
+
 
 --- !DatasetInfo
 iteration_state: {dtset: 2, }
@@ -654,6 +670,14 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
   LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7
  Citation for XC functional:
   J.P.Perdew and Y.Wang, PRB 45, 13244 (1992)
+
+--- !IterStart
+timimage:     1
+...
+
+--- !IterStart
+image:     1
+...
 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  4.5637000  4.5637000  G(1)= -0.1095602  0.1095602  0.1095602
@@ -706,7 +730,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     288.375     288.353
 ================================================================================
 
 --- !BeginCycle
-iteration_state: {dtset: 2, }
+iteration_state: {dtset: 2, timimage: 1, image: 1, }
 solver: {iscf: 17, nstep: 2, nline: 4, wfoptalg: 10, }
 tolerances: {tolvrs: 1.00E-10, }
 ...
@@ -757,7 +781,7 @@ tolerances: {tolvrs: 1.00E-10, }
 
 
 --- !ResultsGS
-iteration_state: {dtset: 2, }
+iteration_state: {dtset: 2, timimage: 1, image: 1, }
 comment   : Summary of ground state results
 lattice_vectors:
 - [  0.0000000,   4.5637000,   4.5637000, ]
@@ -1007,7 +1031,7 @@ force_length_stats: {min: null, max: null, mean: null, }
    Integrated=    1.2000E+01
 
 --- !EnergyTerms
-iteration_state     : {dtset: 2, }
+iteration_state     : {dtset: 2, timimage: 1, image: 1, }
 comment             : Components of total energy in Hartree
 kinetic             :  9.78556276807225E+00
 hartree             :  4.75341033426656E+00
@@ -1025,7 +1049,7 @@ total_energy_eV     : -1.07402418763251E+03
 
 
 --- !EnergyTermsDC
-iteration_state     : {dtset: 2, }
+iteration_state     : {dtset: 2, timimage: 1, image: 1, }
 comment             : '"Double-counting" decomposition of internal energy'
 band_energy         : -1.68467497652561E+00
 Ewald energy        : -3.61669335556889E+01
