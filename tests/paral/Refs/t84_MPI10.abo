@@ -1735,9 +1735,9 @@ xc                  : -7.90387315526480E+00
 Ewald energy        : -5.53458350375165E+01
 psp_core            :  4.12014356490741E+00
 local_psp           : -3.45749799534520E+01
-spherical_terms     :  4.51973521599572E+00
-interaction         :  8.35197663379708E-01
-'-double_counting'  : -7.78982324591438E-01
+spherical_terms     :  4.52051559478840E+00
+interaction         :  8.34732229010683E-01
+'-double_counting'  : -7.78656217679182E-01
 internal            : -7.20484233624138E+01
 total_energy        : -7.20484233624138E+01
 total_energy_eV     : -1.96053730462243E+03
@@ -1751,9 +1751,9 @@ band_energy         : -8.13445157401840E+00
 Ewald energy        : -5.53458350375165E+01
 psp_core            :  4.12014356490741E+00
 xc_dc               : -8.43465739544003E+00
-spherical_terms     : -4.33427224758013E+00
-interaction         :  8.35197663379708E-01
-'-double_counting'  : -7.78982324591438E-01
+spherical_terms     : -4.33450441511831E+00
+interaction         :  8.34732229010683E-01
+'-double_counting'  : -7.78656217679182E-01
 internal            : -7.20732288455001E+01
 total_energy_dc     : -7.20732288455001E+01
 total_energy_dc_eV  : -1.96121229614453E+03
