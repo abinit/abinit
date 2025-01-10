@@ -251,8 +251,7 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
  ABI_MALLOC(hu,(ntypat))
  call init_hu(hu(:),paw_dmft,pawtab(:))
 
- call dc_self(greendft%charge_matlu(:,:),self%hdc%matlu(:),hu(:), &
-            & paw_dmft,pawtab(:),greendft%occup%matlu(:))
+ call dc_self(greendft%charge_matlu(:,:),self%hdc%matlu(:),hu(:),paw_dmft,pawtab(:),greendft%occup%matlu(:))
 
  ! Need to store idmftloop and set it to zero to avoid useless print_energy in ab_out
  idmftloop = paw_dmft%idmftloop

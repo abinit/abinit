@@ -130,7 +130,6 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
  integer :: option,paral_kgb,pawprtvol,siz_buf,siz_buf_psi,siz_paw,siz_proj,siz_wan,unt
  logical :: prt_wan,t2g,use_full_chipsi,verif_band,x2my2d
  real(dp) :: rint
- complex(dpc) :: psi_tmp
  character(len=500) :: message
  type(oper_type) :: loc_norm_check
  integer, allocatable :: displs(:),recvcounts(:)
@@ -441,11 +440,9 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
                    ! using exp(j*(k+G)*r) = 4*pi*sum_{lm} j**l * jl(|k+G|*r) * ylm(k+G) * ylm(theta,phi)
                    ! (spherical harmonics expansion of planewave)
 
-                   psi_tmp = sum(paw_dmft%dpro(1:npw,iatom,ik) * paw_dmft%bessel(1:npw,ir,itypat,ik) * &
-                               & cmplx(cg(1,icgb+1:icgb+npw),cg(2,icgb+1:icgb+npw),kind=dp) * &
-                               & paw_dmft%ylm(1:npw,im,lpawu+1,ik))
-
-                   paw_dmft%buf_psi(ibuf_psi+ir) = psi_tmp
+                   paw_dmft%buf_psi(ibuf_psi+ir) = sum(paw_dmft%dpro(1:npw,iatom,ik) * paw_dmft%bessel(1:npw,ir,itypat,ik) * &
+                                                 & cmplx(cg(1,icgb+1:icgb+npw),cg(2,icgb+1:icgb+npw),kind=dp) * &
+                                                 & paw_dmft%ylm(1:npw,im,lpawu+1,ik))
 
                  end do ! ir
 
@@ -453,10 +450,9 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
 
                if (verif_band) then
                  do iproj=1,nproju
-                   buf_chipsi(ibuf_chipsi) = buf_chipsi(ibuf_chipsi) + &
-                                           & cwprj(iproj,im)*paw_dmft%phimtphi_int(iproj,itypat)
+                   buf_chipsi(ibuf_chipsi) = buf_chipsi(ibuf_chipsi) + cwprj(iproj,im)*paw_dmft%phimtphi_int(iproj,itypat)
                    if (prt_wan) paw_dmft%buf_psi(ibuf_psi+1:ibuf_psi+siz_paw) = paw_dmft%buf_psi(ibuf_psi+1:ibuf_psi+siz_paw) + &
-                     & cwprj(iproj,im)*paw_dmft%phimtphi(1:siz_paw,iproj,itypat)
+                                                          & cwprj(iproj,im)*paw_dmft%phimtphi(1:siz_paw,iproj,itypat)
                  end do ! iproj
                end if ! verif
 
@@ -467,8 +463,7 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
 
                if (verif_band) then
                  do iproj=1,nproju
-                   buf_chipsi(ibuf_chipsi) = buf_chipsi(ibuf_chipsi) + &
-                                           & cwprj(iproj,im)*paw_dmft%phi_int(iproj,itypat)
+                   buf_chipsi(ibuf_chipsi) = buf_chipsi(ibuf_chipsi) + cwprj(iproj,im)*paw_dmft%phi_int(iproj,itypat)
                  end do ! iproj
                end if ! verif
 

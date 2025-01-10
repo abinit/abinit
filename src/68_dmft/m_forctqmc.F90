@@ -1677,8 +1677,10 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
    end if
 
 #ifndef HAVE_TRIQS_COMPLEX
-   write(message,'(3x,a)') "== The imaginary part will be neglected"
-   call wrtout(std_out,message,'COLL')
+   if (orb_off_diag .or. (nspinor == 2 .and. spin_off_diag)) then
+     write(message,'(3x,a)') "== The imaginary part will be neglected"
+     call wrtout(std_out,message,'COLL')
+   end if
 #endif
 
    maxoffdiag = zero
@@ -3467,8 +3469,8 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
    wdlr3(:) = wdlr2(:) * wdlr_beta(:)
    wdlr4(:) = wdlr3(:) * wdlr_beta(:)
    ABI_FREE(wdlr_tmp)
-   ABI_MALLOC(Adlr,(ndlr,ntau))
-   ABI_MALLOC(Adlr_iw,(ndlr,nwlo))
+   ABI_MALLOC(adlr,(ndlr,ntau))
+   ABI_MALLOC(adlr_iw,(ndlr,nwlo))
 
    do ifreq=1,nwlo
      do iw=1,ndlr
@@ -3535,12 +3537,9 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
 
    lpawu = paw_dmft%lpawu(iatom)
    if (lpawu == -1) cycle
-   ndim = 2*lpawu + 1
-   tndim = nspinor * ndim
+   ndim    = 2*lpawu + 1
+   tndim   = nspinor * ndim
    nflavor = 2 * ndim
-
-   if (nsppol == 1 .and. nspinor == 1) &
-     & ftau(iatom)%mat(ndim+1:nflavor,ndim+1:nflavor,:) = ftau(iatom)%mat(1:ndim,1:ndim,:)
 
    call int2char4(iatom,tag_at)
    ABI_CHECK((tag_at(1:1)/='#'),'Bug: string length too short!')
@@ -3724,6 +3723,8 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
 
          end do ! im
 
+         ! Use matmul in prevision of the day where the off-diagonal density
+         ! matrix will be available
          green%moments(3)%matlu(iatom)%mat(:,:,isppol) = &
            & green%moments(3)%matlu(iatom)%mat(:,:,isppol) + &
            & matmul(green%moments(2)%matlu(iatom)%mat(:,:,isppol), &
@@ -3737,16 +3738,16 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
      end if ! not leg_measure
 
      do isppol=1,nsppol
-         do im=1,tndim
-           iflavor = im + (isppol-1)*ndim
+       do im=1,tndim
+         iflavor = im + (isppol-1)*ndim
 
-           if (nsppol == 1 .and. nspinor == 1) then
-             occ_tmp = (occ(iflavor)+occ(iflavor+ndim)) * half
-           else
-             occ_tmp = occ(iflavor)
-           end if
+         if (nsppol == 1 .and. nspinor == 1) then
+           occ_tmp = (occ(iflavor)+occ(iflavor+ndim)) * half
+         else
+           occ_tmp = occ(iflavor)
+         end if
 
-           green%oper_tau(1)%matlu(iatom)%mat(im,im,isppol) = occ_tmp - cone
+         green%oper_tau(1)%matlu(iatom)%mat(im,im,isppol) = occ_tmp - cone
 
        end do ! im
      end do ! isppol
@@ -3875,7 +3876,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
            green%moments(4)%matlu(iatom)%mat(im,im1,isppol) = sum(gl_dlr(:,im,im1,isppol)*wdlr3(:))
            green%moments(5)%matlu(iatom)%mat(im,im1,isppol) = sum(gl_dlr(:,im,im1,isppol)*wdlr4(:))
            do itau=1,ntau
-             gtau_dlr(itau,iflavor,iflavor1) = sum(gl_dlr(:,im,im1,isppol)*Adlr(:,itau))
+             gtau_dlr(itau,iflavor,iflavor1) = sum(gl_dlr(:,im,im1,isppol)*adlr(:,itau))
            end do ! itau
            if (nsppol == 1 .and. nspinor == 1) gtau_dlr(:,iflavor+ndim,iflavor1+ndim) = gtau_dlr(:,iflavor,iflavor1)
          end do ! im
@@ -3888,7 +3889,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
            do im=1,tndim
              green%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol) = &
                & green%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol) + &
-               & sum(gl_dlr(:,im,im1,isppol)*Adlr_iw(:,ifreq))
+               & sum(gl_dlr(:,im,im1,isppol)*adlr_iw(:,ifreq))
            end do ! im
          end do ! im1
        end do ! isppol
@@ -3938,8 +3939,8 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
 
  ABI_FREE(ftau)
 
- ABI_SFREE(Adlr)
- ABI_SFREE(Adlr_iw)
+ ABI_SFREE(adlr)
+ ABI_SFREE(adlr_iw)
  ABI_SFREE(wdlr)
  ABI_SFREE(wdlr_beta)
  ABI_SFREE(wdlr2)
@@ -3957,7 +3958,7 @@ subroutine lsq_g(gl,err)
 
  err = zero
  do itau=1,ntau
-   err = err + (sum(gl(:)*Adlr(:,itau))-bdlr(itau))**2
+   err = err + (sum(gl(:)*adlr(:,itau))-bdlr(itau))**2
  end do
 
 end subroutine lsq_g
@@ -3971,7 +3972,7 @@ subroutine jac_lsq_g(gl,jac)
 
  jac(:) = zero
  do itau=1,ntau
-   jac(1:ndlr) = jac(1:ndlr) + (sum(gl(:)*Adlr(:,itau))-bdlr(itau))*Adlr(:,itau)
+   jac(1:ndlr) = jac(1:ndlr) + (sum(gl(:)*adlr(:,itau))-bdlr(itau))*adlr(:,itau)
  end do
  jac = jac * two
 
@@ -3988,7 +3989,7 @@ subroutine con_moments(gl,con)
  if (ncon > 1) then
    con(2) = sum(gl(:)*wdlr_beta(:)) - mgreen(2)
    con(3) = sum(gl(:)*wdlr2(:)) - mgreen(3)
-   if (ncon == 4) con(4) = sum(gl(:)*Adlr(:,1)) - dble(occ_tmp)
+   if (ncon == 4) con(4) = sum(gl(:)*adlr(:,1)) - dble(occ_tmp)
  end if ! ncon>1
 
 end subroutine con_moments
@@ -4006,7 +4007,7 @@ subroutine jac_con_moments(gl,jac_con)
  if (ncon > 1) then
    jac_con(2,1:ndlr) = wdlr_beta(:)
    jac_con(3,1:ndlr) = wdlr2(:)
-   if (ncon == 4) jac_con(4,1:ndlr) = Adlr(:,1)
+   if (ncon == 4) jac_con(4,1:ndlr) = adlr(:,1)
  end if ! ncon>1
  jac_con(:,ndlr+1) = zero  ! not sure if this is necessary, but this is what they do in the SCIPY interface with SLSQP
 
@@ -4201,7 +4202,7 @@ end subroutine fit_dlr
 !! FUNCTION
 !!  Computes the inverse Fourier transform of a frequency-dependent operator,
 !!  using analytical formulas for the asymptotic behavior. It is assumed the
-!!  asymptotic behavior is moments(1)/(iw_n) + moments(i)/(iwn)**2 + ...,
+!!  asymptotic behavior is moments(1)/(iw_n) + moments(2)/(iwn)**2 + ...,
 !!  so if you want to use this routine for an operator with a 0th order moment,
 !!  you need to subtract it before calling this routine.
 !!
@@ -4213,8 +4214,7 @@ end subroutine fit_dlr
 !!  moments = high-frequency moments of the operator
 !!
 !! OUTPUT
-!!  matlu_tau(nsppol*nspinor*(2*lpawu+1),nsppol*nspinor*(2*lpawu+1),ntau) =
-!!     operator for each tau point
+!!  matlu_tau(2*(2*lpawu+1),2*(2*lpawu+1),ntau) = operator for each tau point
 !!
 !! SIDE EFFECTS
 !!
@@ -4230,9 +4230,8 @@ subroutine fourier_inv(paw_dmft,nmoments,ntau,matlu_tau,oper_freq,moments)
  type(oper_type), intent(in) :: oper_freq(paw_dmft%dmft_nwlo),moments(nmoments)
  type(matlu_type), intent(inout) :: matlu_tau(paw_dmft%natom)
 !Local variables ------------------------------
- integer :: i,iatom,ibuf,ierr,ifreq,im,im1,isppol,itau,itaub,itauf,j,lpawu
- integer :: myproc,natom,ndim,nproc,nspinor,nsppol,ntau_proc,nwlo
- integer :: ratio,residu,siz_buf,tndim
+ integer :: i,iatom,ibuf,ibuf_tau,ierr,ifreq,im,im1,isppol,itau,itaub,itauf,j,lpawu
+ integer :: myproc,natom,ndim,nproc,nspinor,nsppol,ntau_proc,nwlo,ratio,residu,siz_buf,tndim
  real(dp) :: beta,omegatau,tau
  complex(dpc) :: fac,omega,sumterm
  integer, allocatable :: displs(:),recvcounts(:)
@@ -4262,7 +4261,7 @@ subroutine fourier_inv(paw_dmft,nmoments,ntau,matlu_tau,oper_freq,moments)
    recvcounts(i+1) = ntau_proc
    if (myproc == i) itaub = itau
    itau = itau + ntau_proc
- end do
+ end do ! i
  itauf = itaub + recvcounts(myproc+1) - 1
 
  siz_buf = 0
@@ -4287,41 +4286,58 @@ subroutine fourier_inv(paw_dmft,nmoments,ntau,matlu_tau,oper_freq,moments)
 
  buffer(:) = czero
 
- do ifreq=1,nwlo
-   omega = cmplx(zero,paw_dmft%omega_lo(ifreq),kind=dp)
+ ibuf_tau = 0
+ do itau=itaub,itauf
+
+   tau = dble(itau-1) * beta / dble(ntau-1)
+   omega_fac(:) = czero
+
+   do ifreq=nwlo,1,-1 ! NEVER change this summation order
+     omegatau = mod(paw_dmft%omega_lo(ifreq)*tau,two_pi)
+     fac = two * paw_dmft%temp * exp(-j_dpc*omegatau)
+     do i=1,nmoments
+       omega_fac(i) = omega_fac(i) - fac/(j_dpc*paw_dmft%omega_lo(ifreq))**i
+     end do
+     ibuf = 0
+     do iatom=1,natom
+       lpawu = paw_dmft%lpawu(iatom)
+       if (lpawu == -1) cycle
+       tndim = nspinor * (2*lpawu+1)
+       do isppol=1,nsppol
+         do im1=1,tndim
+           do im=1,tndim
+             ibuf = ibuf + 1
+             buffer(ibuf_tau+ibuf) = buffer(ibuf_tau+ibuf) + fac*oper_freq(ifreq)%matlu(iatom)%mat(im,im1,isppol)
+           end do ! im
+         end do ! im
+       end do ! isppol
+     end do ! iatom
+   end do ! ifreq
+
+   omega_fac(1) = omega_fac(1) - half
+   omega_fac(2) = omega_fac(2) + tau/two - beta/(four)
+   omega_fac(3) = omega_fac(3) - (tau**2)/four + tau*beta/four
+
    do i=1,nmoments
      ibuf = 0
-     do itau=itaub,itauf
-       tau = dble(itau-1) * beta / dble(ntau-1)
-       omegatau = mod(paw_dmft%omega_lo(ifreq)*tau,two*pi)
-       fac = two * paw_dmft%temp * exp(-j_dpc*omegatau)
-       omega_fac(1) = - fac / omega
-       do j=2,nmoments
-         omega_fac(j) = omega_fac(j-1) / omega
-       end do
-       if (ifreq == 1) then
-         omega_fac(1) = omega_fac(1) - half
-         omega_fac(2) = omega_fac(2) + tau/two - beta/four
-         omega_fac(3) = omega_fac(3) - (tau**2)/four + tau*beta/four
-       end if
-       do iatom=1,natom
-         lpawu = paw_dmft%lpawu(iatom)
-         if (lpawu == -1) cycle
-         tndim = nspinor * (2*lpawu+1)
-         do isppol=1,nsppol
-           do im1=1,tndim
-             do im=1,tndim
-               ibuf = ibuf + 1
-               sumterm = moments(i)%matlu(iatom)%mat(im,im1,isppol) * omega_fac(i)
-               if (i == 1) sumterm = sumterm + fac*oper_freq(ifreq)%matlu(iatom)%mat(im,im1,isppol)
-               buffer(ibuf) = buffer(ibuf) + sumterm
-             end do ! im
-           end do ! im1
-         end do ! isppol
-       end do ! iatom
-     end do ! itau
+     do iatom=1,natom
+       lpawu = paw_dmft%lpawu(iatom)
+       if (lpawu == -1) cycle
+       tndim = nspinor * (2*lpawu+1)
+       do isppol=1,nsppol
+         do im1=1,tndim
+           do im=1,tndim
+             ibuf = ibuf + 1
+             buffer(ibuf_tau+ibuf) = buffer(ibuf_tau+ibuf) + moments(i)%matlu(iatom)%mat(im,im1,isppol)*omega_fac(i)
+           end do ! im
+         end do ! im1
+       end do ! isppol
+     end do ! iatom
    end do ! i
- end do ! ifreq
+
+   ibuf_tau = ibuf_tau + siz_buf
+
+ end do ! itau
 
  ABI_FREE(omega_fac)
 
@@ -4345,6 +4361,8 @@ subroutine fourier_inv(paw_dmft,nmoments,ntau,matlu_tau,oper_freq,moments)
          end do ! im
        end do ! im1
      end do ! isppol
+     if (nsppol == 1 .and. nspinor == 1) matlu_tau(iatom)%mat(ndim+1:2*ndim,ndim+1:2*ndim,itau) = &
+         & matlu_tau(iatom)%mat(1:ndim,1:ndim,itau)
      ndim = 2 * ndim
      matlu_tau(iatom)%mat(1:ndim,1:ndim,itau) = (matlu_tau(iatom)%mat(1:ndim,1:ndim,itau)+ &
          & conjg(transpose(matlu_tau(iatom)%mat(1:ndim,1:ndim,itau)))) * half

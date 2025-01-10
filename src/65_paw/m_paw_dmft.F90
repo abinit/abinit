@@ -189,6 +189,59 @@ MODULE m_paw_dmft
   integer :: dmft_test
   ! Correct some bugs and activates some optimizations, should alway be set to 1
 
+  integer :: dmft_triqs_compute_integral
+  ! Only relevant when dmft_triqs_entropy=1.
+  ! =1: Compute the thermodynamic integration over the impurity models.
+  ! =0: Do not compute the integral. All the other contributions to the free
+  ! energy are still computed.
+
+  integer :: dmft_triqs_det_init_size
+  ! TRIQS CTQMC: Initial size of the hybridization matrix. If it is too low,
+  ! the matrix will be resized very often, which can be slow.
+
+  integer :: dmft_triqs_det_n_operations_before_check
+  ! TRIQS CTQMC: Number of operations before check of the hybridization matrix.
+  ! If it is low, the matrix will be checked too often, which can be slow.
+
+  integer :: dmft_triqs_entropy
+  ! TRIQS CTQMC: Compute the DMFT entropy by integrating several impurity models over U.
+
+  integer :: dmft_triqs_gaussorder
+  ! Order of the Gauss-Legendre quadrature for each subdivision of the thermodynamic integration.
+
+  integer :: dmft_triqs_loc_n_min
+  ! TRIQS CTQMC: Only configurations with a number of electrons in
+  ! [nlocmin,nlocmax] are taken into account.
+
+  integer :: dmft_triqs_loc_n_max
+  ! TRIQS CTQMC: Only configurations with a number of electrons in
+  ! [nlocmin,nlocmax]
+  ! are taken into account.
+
+  integer :: dmft_triqs_nbins_histo
+  ! TRIQS CTQMC: Number of bins for the histogram of P(k')/P(k)
+  ! in imaginary time.
+
+  integer :: dmft_triqs_nleg
+  ! TRIQS CTQMC: Nb of Legendre polynomials used for the
+  ! Green's function (Phys. Rev. B 84, 075145) [[cite:Boehnke2011]].
+
+  integer :: dmft_triqs_nsubdivisions
+  ! Number of regular subdivisions of the interval [0,U], each of which
+  ! containing dmft_triqs_gaussorder points
+
+  integer :: dmft_triqs_ntau_delta
+  ! TRIQS CTQMC: Nb of imaginary time points for the hybridization.
+
+  integer :: dmft_triqs_seed_a
+  ! TRIQS CTQMC: The CTQMC seed is seed_a + rank * seed_b.
+
+  integer :: dmft_triqs_seed_b
+  ! TRIQS CTQMC: The CTQMC seed is seed_a + rank * seed_b.
+
+  integer :: dmft_triqs_therm_restart
+  ! TRIQS CTQMC: Number of thermalization steps when we restart from a previous configuration.
+
   integer :: dmft_use_full_chipsi
   ! =0 Only use the PAW contribution sum_i <pi|Psi_tilde> |Phi> to compute <Chi|Psi>
   ! =1 Use the full formula |Psi_tilde> + sum_i <pi|Psi_tilde> (|Phi> - |Phi_tilde>) to compute <Chi|Psi>
@@ -251,57 +304,6 @@ MODULE m_paw_dmft
   integer :: dmftctqmc_order
   ! ABINIT CTQMC: Gives perturbation order of CTQMC solver
   ! 0 : nothing, >=1 max order evaluated in Perturbation.dat
-
-  integer :: dmft_triqs_compute_integral
-  ! Only relevant when dmft_triqs_entropy=1.
-  ! =1: Compute the thermodynamic integration over the impurity models.
-  ! =0: Do not compute the integral. All the other contributions to the free
-  ! energy are still computed.
-
-  integer :: dmft_triqs_det_init_size
-  ! TRIQS CTQMC: Initial size of the hybridization matrix. If it is too low,
-  ! the matrix will be resized very often, which can be slow.
-
-  integer :: dmft_triqs_det_n_operations_before_check
-  ! TRIQS CTQMC: Number of operations before check of the hybridization matrix.
-  ! If it is low, the matrix will be checked too often, which can be slow.
-
-  integer :: dmft_triqs_entropy
-  ! TRIQS CTQMC: Compute the DMFT entropy by integrating several impurity models over U.
-
-  integer :: dmft_triqs_gaussorder
-  ! Order of the Gauss-Legendre quadrature for each subdivision of the thermodynamic integration.
-
-  integer :: dmft_triqs_loc_n_min
-  ! TRIQS CTQMC: Only configurations with a number of electrons in [nlocmin,nlocmax]
-  ! are taken into account.
-
-  integer :: dmft_triqs_loc_n_max
-  ! TRIQS CTQMC: Only configurations with a number of electrons in [nlocmin,nlocmax]
-  ! are taken into account.
-
-  integer :: dmft_triqs_nbins_histo
-  ! TRIQS CTQMC: Nb of bins for the histogram.
-
-  integer :: dmft_triqs_nleg
-  ! TRIQS CTQMC: Nb of Legendre polynomials used for the
-  ! Green's function (Phys. Rev. B 84, 075145) [[cite:Boehnke2011]].
-
-  integer :: dmft_triqs_nsubdivisions
-  ! Number of regular subdivisions of the interval [0,U], each of which containing
-  ! dmft_triqs_gaussorder points
-
-  integer :: dmft_triqs_ntau_delta
-  ! TRIQS CTQMC: Nb of imaginary time points for the hybridization.
-
-  integer :: dmft_triqs_seed_a
-  ! TRIQS CTQMC: The CTQMC seed is seed_a + rank * seed_b.
-
-  integer :: dmft_triqs_seed_b
-  ! TRIQS CTQMC: The CTQMC seed is seed_a + rank * seed_b.
-
-  integer :: dmft_triqs_therm_restart
-  ! TRIQS CTQMC: Number of thermalization steps when we restart from a previous configuration
 
   integer :: dmftqmc_l
   ! Number of points on the imaginary time grid
@@ -395,10 +397,6 @@ MODULE m_paw_dmft
   integer :: use_sc_dmft
   ! 1 for charge-self consistent calculations
 
-  logical :: dmft_use_all_bands
-  ! =0 Only consider the DMFT contribution on the correlated bands
-  ! =1 Considers the DMFT contribution on every band
-
   logical :: dmft_triqs_leg_measure
   ! TRIQS CTQMC: Flag to activate Legendre measurement
 
@@ -425,6 +423,10 @@ MODULE m_paw_dmft
   ! TRIQS CTQMC: Flag to activate the use of the norm of the matrix as weight
   ! instead of the trace
 
+  logical :: dmft_use_all_bands
+  ! =0 Only consider the DMFT contribution on the correlated bands
+  ! =1 Considers the DMFT contribution on every band
+
   real(dp) :: dmft_charge_prec
   ! Precision on charge required for determination of fermi level (fermi_green)
 
@@ -446,9 +448,6 @@ MODULE m_paw_dmft
   ! Required precision on local correlated density matrix (depends on
   ! frequency mesh), used in m_dmft/dmft_solve
 
-  real(dp) :: dmft_wanrad
-  ! Maximal radius for print of the Wannier functions
-
   real(dp) :: dmft_triqs_det_precision_error
   ! TRIQS CTQMC: Error threshold for the deviation of the determinant.
 
@@ -469,6 +468,9 @@ MODULE m_paw_dmft
 
   real(dp) :: dmft_triqs_move_global_prob
   ! TRIQS CTQMC: Proposal probability for the global move
+
+  real(dp) :: dmft_wanrad
+  ! Maximal radius for print of the Wannier functions
 
   real(dp) :: dmftqmc_n
   ! ABINIT CTQMC: Nb of sweeps
@@ -542,7 +544,7 @@ MODULE m_paw_dmft
   ! DFT eigenvalues for each correlated band, k-point, polarization
 
   real(dp), allocatable :: occnd(:,:,:,:,:)
-  ! Non diagonal band-occupation for each k-point, polarisation.
+  ! Non diagonal band-occupation for each k-point, polarization.
 
   real(dp), allocatable :: omega_lo(:)
   ! Imaginary frequencies
@@ -704,13 +706,12 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  real(dp), optional, intent(in) :: gprimd(3,3),rprimd(3,3),xred(3,dtset%natom)
  real(dp), optional, intent(in) :: ylm(dtset%mpw*dtset%mkmem,mpsang*mpsang)
 !Local variables ------------------------------------
- integer :: bdtot_index,dmft_dc,dmft_solv,dmftbandi,dmftbandf,fac,i
- integer :: iatom,iatom1,iband,icb,ig,ik,ikg,ikpt,im,im1
- integer :: indproj,iproj,ir,isppol,itypat,lpawu,lpawu1,maxlpawu
- integer :: mband,mbandc,mesh_size,mesh_type,mkmem,mpw,myproc,natom,nband_k,ndim
- integer :: nkpt,nproc,nproju,npw,nspinor,nsppol
- integer :: nsym,ntypat,siz_paw,siz_proj,siz_wan,use_dmft
- logical :: t2g,use_full_chipsi,verif,x2my2d
+ integer :: bdtot_index,dmft_dc,dmft_solv,dmftbandi,dmftbandf,fac,i,iatom
+ integer :: iatom1,iband,icb,ig,ik,ikg,ikpt,im,im1,indproj,iproj,ir,isppol
+ integer :: itypat,lpawu,lpawu1,maxlpawu,mband,mbandc,mesh_size,mesh_type
+ integer :: mkmem,mpw,myproc,natom,nband_k,ndim,nkpt,nproc,nproju,npw
+ integer :: nspinor,nsppol,nsym,ntypat,siz_paw,siz_proj,siz_wan,use_dmft
+ logical :: t2g,use_full_chipsi,neglect_off_diag,verif,x2my2d
  real(dp) :: bes,besp,lstep,norm,rad,rint,rstep,sumwtk
  integer, parameter :: mt2g(3) = (/1,2,4/)
  logical, allocatable :: lcycle(:),typcycle(:)
@@ -809,8 +810,7 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  paw_dmft%dmftcheck = dtset%dmftcheck
 
  write(message,'(2a,i4)') ch10,'-       ( number of procs used in dmft ) = ',nproc
- call wrtout(std_out,message,'COLL')
- call wrtout(ab_out,message,'COLL')
+ call wrtout([std_out,ab_out],message,'COLL')
  write(std_out_default,'(2a,i4)') ch10,'       ( current proc is        ) = ',myproc
   ! write(ab_out_default,'(2a,i3)') ch10,'       ( current proc is        ) =', myproc
  if (myproc == nproc-1) write(std_out_default,'(2a,i4)') ch10,'      ( last proc            ) = ',myproc
@@ -919,7 +919,7 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  dc_string = trim(dc_string)//" double counting"
 
  lda_string = "Magnetic DFT, with "
- if (dtset%usepawu == 14) lda_string = "Non "//lda_string(:100)
+ if (dtset%usepawu == 14) lda_string = "Non "//trim(adjustl(lda_string))
  write(message,'(2(a,1x),a)') ch10,trim(adjustl(lda_string)),trim(adjustl(dc_string))
  call wrtout([std_out,ab_out],message,'COLL')
 
@@ -930,17 +930,19 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
    call wrtout([std_out,ab_out],message,'COLL')
  end if
 
- if (dmft_solv == 6 .and. dmft_solv == 7) then
+ neglect_off_diag = (dtset%dmft_triqs_orb_off_diag == 0) .or. &
+                  & (nspinor == 2 .and. dtset%dmft_triqs_spin_off_diag == 0)
+
+ if ((dmft_solv == 6 .or. dmft_solv == 7) .and. (.not. neglect_off_diag))  then
 #ifndef HAVE_TRIQS_COMPLEX
    write(message,'(a,1x,a)') ch10,"The imaginary part of the Green's function is neglected"
+   call wrtout([std_out,ab_out],message,'COLL')
 #endif
- else
+ else if (dmft_solv /= 6 .and. dmft_solv /= 7) then
    write(message,'(a,1x,a)') ch10,"The imaginary part of the Green's function is neglected"
+   call wrtout([std_out,ab_out],message,'COLL')
  end if
- call wrtout([std_out,ab_out],message,'COLL')
- if (dmft_solv == 5 .or. ((dmft_solv == 6 .or. dmft_solv == 7) .and. &
-   & (dtset%dmft_triqs_orb_off_diag == 0 .or. &
-   & (nspinor == 2 .and. dtset%dmft_triqs_spin_off_diag == 0)))) then
+ if (dmft_solv == 5 .or. ((dmft_solv == 6 .or. dmft_solv == 7) .and. neglect_off_diag)) then
    write(message,'(a,1x,a)') ch10,"The off-diagonal elements of the Green's function are neglected"
    call wrtout([std_out,ab_out],message,'COLL')
  end if
@@ -1288,7 +1290,7 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
    ABI_MALLOC(kpg,(3,mpw))
    ABI_MALLOC(kpg_norm,(mpw))
 
-   ik = 0
+   ik  = 0
    ikg = 0
 
    do ikpt=1,nkpt

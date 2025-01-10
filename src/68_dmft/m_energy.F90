@@ -517,10 +517,6 @@ subroutine compute_band_energy(energies_dmft,green,paw_dmft,occ_type,ecalc_dft,f
  do isppol=1,nsppol
    do ikpt=1,nkpt
      nband_k = paw_dmft%nband(ikpt+(isppol-1)*nkpt)
-     if (paw_dmft%distrib%procb(ikpt) /= paw_dmft%distrib%me_kpt) then
-       band_index = band_index + nband_k
-       cycle
-     end if
      wtk = paw_dmft%wtk(ikpt)
      ibc = 0
      do ib=1,nband_k
@@ -579,17 +575,12 @@ subroutine compute_band_energy(energies_dmft,green,paw_dmft,occ_type,ecalc_dft,f
  end do ! isppol
 
  if (present(fcalc_dft)) then
-   call xmpi_sum(energies_dmft%fband_dft,paw_dmft%distrib%comm_kpt,ierr)
    energies_dmft%fband_dft = energies_dmft%fband_dft * paw_dmft%temp
    if (nsppol == 1 .and. nspinor == 1) energies_dmft%fband_dft = energies_dmft%fband_dft * two
    if (fcalc_dft == 1 .or. fcalc_dft == 4) energies_dmft%fband_dft = energies_dmft%fband_dft + &
       & fermie_used*paw_dmft%nelectval
  else
-   if (occ_type == " lda") then
-     call xmpi_sum(energies_dmft%eband_dft,paw_dmft%distrib%comm_kpt,ierr)
-     if (nsppol == 1 .and. nspinor == 1) energies_dmft%eband_dft = two * energies_dmft%eband_dft
-   end if
-   call xmpi_sum(energies_dmft%eband_dmft,paw_dmft%distrib%comm_kpt,ierr)
+   if (occ_type == " lda" .and. nsppol == 1 .and. nspinor == 1) energies_dmft%eband_dft = two * energies_dmft%eband_dft
    if (nsppol == 1 .and. nspinor == 1) energies_dmft%eband_dmft = two * energies_dmft%eband_dmft
  end if ! present(fcalc_dft)
    !if (fcalc_dft == 3 .or. fcalc_dft == 2) write(std_out,*) "compute_band_energy totch",totch
@@ -676,9 +667,9 @@ subroutine compute_migdal_energy(e_hu_migdal,e_hu_migdal_tot,green,paw_dmft,self
 ! integer :: prtopt
 !Local variables-------------------------------
  integer :: i,ierr,ifreq,myproc,natom,nmoments,nspinor,nsppol,nwlo
- real(dp) :: beta
+ real(dp) :: beta,temp
  complex(dpc) :: omega
- complex(dpc), allocatable :: correction(:),integral(:),omega_inv(:),trace_moments(:,:)
+ complex(dpc), allocatable :: integral(:),omega_fac(:),trace_moments(:,:)
  type(matlu_type), allocatable :: self_nwlo_re(:)
  type(matlu_type), ABI_CONTIGUOUS pointer :: matlu_tmp(:) => null()
  character(len=500) :: message
@@ -699,6 +690,7 @@ subroutine compute_migdal_energy(e_hu_migdal,e_hu_migdal_tot,green,paw_dmft,self
  nspinor  = paw_dmft%nspinor
  nsppol   = paw_dmft%nsppol
  nwlo     = green%nw
+ temp     = paw_dmft%temp
 
  if (self%has_moments == 1) nmoments = self%nmoments
 
@@ -709,11 +701,10 @@ subroutine compute_migdal_energy(e_hu_migdal,e_hu_migdal_tot,green,paw_dmft,self
 ! write(std_out,*) "beta",beta
 
  ABI_MALLOC(trace_moments,(natom,nmoments))
- ABI_MALLOC(omega_inv,(nmoments))
  ABI_MALLOC(integral,(natom))
 
  e_hu_migdal(:) = zero
- integral(:) = czero
+ integral(:)    = czero
 
  if (self%has_moments == 1) then
    trace_moments(:,:) = czero
@@ -740,11 +731,6 @@ subroutine compute_migdal_energy(e_hu_migdal,e_hu_migdal_tot,green,paw_dmft,self
    if (self%distrib%procf(ifreq) /= myproc) cycle
 
    omega = cmplx(zero,paw_dmft%omega_lo(ifreq),kind=dp)
-   if (self%has_moments == 1) omega_inv(1) = cone / omega
-
-   do i=2,nmoments
-     omega_inv(i) = omega_inv(i-1) / omega
-   end do ! i
 
    if (self%has_moments == 1) then
      matlu_tmp => self%oper(ifreq)%matlu(:)
@@ -754,15 +740,25 @@ subroutine compute_migdal_energy(e_hu_migdal,e_hu_migdal_tot,green,paw_dmft,self
 
    call trace_prod_matlu(matlu_tmp(:),green%oper(ifreq)%matlu(:),natom,integral(:))
 
-   do i=1,nmoments
-     integral(:) = integral(:) - trace_moments(:,i)*omega_inv(i)
-   end do ! i
-
-   e_hu_migdal(:) = e_hu_migdal(:) + dble(integral(:))*paw_dmft%wgt_wlo(ifreq)
+   e_hu_migdal(:) = e_hu_migdal(:) + dble(integral(:))*paw_dmft%wgt_wlo(ifreq)*temp*two
 
  end do ! ifreq
 
  call xmpi_sum(e_hu_migdal(:),paw_dmft%spacecomm,ierr)
+
+ ABI_MALLOC(omega_fac,(nmoments))
+
+ do i=1,nmoments
+   omega_fac(i) = czero
+   do ifreq=nwlo,1,-1 ! NEVER change the summation order
+     omega_fac(i) = omega_fac(i) + cone / (paw_dmft%omega_lo(ifreq))**i
+   end do
+   omega_fac(i) = - two * temp * omega_fac(i) / (j_dpc)**i
+   if (i == 1) omega_fac(i) = omega_fac(i) + half
+   if (i == 2) omega_fac(i) = omega_fac(i) - cone/(four*temp)
+   if (i == 4) omega_fac(i) = omega_fac(i) + cone/(dble(48)*(temp**3))
+   e_hu_migdal(:) = e_hu_migdal(:) + dble(trace_moments(:,i)*omega_fac(i))
+ end do
 
  if (self%has_moments /= 1) then
    call destroy_matlu(matlu_tmp(:),natom)
@@ -770,31 +766,22 @@ subroutine compute_migdal_energy(e_hu_migdal,e_hu_migdal_tot,green,paw_dmft,self
  end if
  matlu_tmp => null()
 
- ABI_FREE(omega_inv)
- ABI_FREE(integral)
- ABI_MALLOC(correction,(natom))
-
- correction(:) = czero
- e_hu_migdal_tot = zero
-
- do i=1,nmoments
-   if (i == 1) correction(:) = correction(:) + trace_moments(:,i)*half
-   if (i == 2) correction(:) = correction(:) - trace_moments(:,i)*beta/four
-   if (i == 4) correction(:) = correction(:) + trace_moments(:,i)*(beta**3)/dble(48)
- end do ! i
+ ABI_FREE(omega_fac)
 
  if (self%has_moments == 0) then
-   call trace_prod_matlu(self_nwlo_re(:),green%occup%matlu(:),natom,correction(:))
+   integral(:) = czero
+   call trace_prod_matlu(self_nwlo_re(:),green%occup%matlu(:),natom,integral(:))
    call destroy_matlu(self_nwlo_re(:),natom)
    ABI_FREE(self_nwlo_re)
+   e_hu_migdal(:) = e_hu_migdal(:) + dble(integral(:))
  end if
 
  ABI_FREE(trace_moments)
 
- e_hu_migdal(:) = e_hu_migdal(:)*paw_dmft%temp + dble(correction(:))*half
+ e_hu_migdal(:)  = half * e_hu_migdal(:) ! E_mig = 1/2 * Tr(Sig*G)
  e_hu_migdal_tot = sum(e_hu_migdal(:))
 
- ABI_FREE(correction)
+ ABI_FREE(integral)
 
  !xmig_1=zero
  !xmig_2=zero
@@ -1283,7 +1270,7 @@ subroutine compute_trace_log_loc(green,paw_dmft,trace,opt_inv)
  integer, optional, intent(in) :: opt_inv
 !Local variables-------------------------------
  integer  :: i,iatom,ierr,ifreq,info,isppol,lpawu,lwork,natom,ndim,nmoments,nspinor,nsppol,nwlo,optinv
- real(dp) :: correction,fac
+ real(dp) :: correction,fac,temp
  complex(dpc) :: omega,trace_tmp
  real(dp), allocatable :: eig(:),rwork(:)
  complex(dpc), allocatable :: mat_temp(:,:),omega_fac(:),work(:)
@@ -1297,6 +1284,7 @@ subroutine compute_trace_log_loc(green,paw_dmft,trace,opt_inv)
  nspinor  = paw_dmft%nspinor
  nsppol   = paw_dmft%nsppol
  nwlo     = green%nw
+ temp     = paw_dmft%temp
  trace    = zero
  ndim     = nspinor * (2*paw_dmft%maxlpawu+1)
 
@@ -1310,21 +1298,10 @@ subroutine compute_trace_log_loc(green,paw_dmft,trace,opt_inv)
  ABI_MALLOC(work,(lwork))
  ABI_FREE(mat_temp)
 
- ABI_MALLOC(omega_fac,(nmoments))
-
  do ifreq=1,nwlo
    if (green%distrib%procf(ifreq) /= paw_dmft%myproc) cycle
    omega = cmplx(zero,paw_dmft%omega_lo(ifreq),kind=dp)
-   fac = paw_dmft%temp
-   omega_fac(1) = - two * fac / omega
-   do i=2,nmoments
-     omega_fac(i) = omega_fac(i-1) / omega
-   end do ! i
-   if (ifreq == nwlo) then
-     omega_fac(1) = omega_fac(1) + half
-     omega_fac(2) = omega_fac(2) - cone/(four*paw_dmft%temp)
-     omega_fac(4) = omega_fac(4) + cone/(dble(48)*(paw_dmft%temp**3))
-   end if ! ifreq=nwlo
+   fac = temp
    if (nsppol == 1 .and. nspinor == 1) fac = fac * two
    trace_tmp = czero
    do iatom=1,natom
@@ -1343,22 +1320,37 @@ subroutine compute_trace_log_loc(green,paw_dmft,trace,opt_inv)
        end if ! optinv
      end do ! isppol
      if (ifreq == nwlo) then
-       correction = paw_dmft%temp * nsppol * ndim * log(two)
-       if (nsppol == 1 .and. nspinor == 1) correction = correction * two
+       correction = fac * nsppol * ndim * log(two)
        trace = trace - correction
      end if
      ABI_FREE(mat_temp)
    end do ! iatom
-   trace = trace + dble(trace_tmp)*fac + &
-         & dble(sum(green%trace_moments_log_loc(1:nmoments)*omega_fac(1:nmoments)))
+   trace = trace + dble(trace_tmp)*fac
  end do ! ifreq
 
- ABI_FREE(omega_fac)
  ABI_FREE(rwork)
  ABI_FREE(work)
  ABI_FREE(eig)
 
  call xmpi_sum(trace,paw_dmft%spacecomm,ierr)
+
+ ABI_MALLOC(omega_fac,(nmoments))
+
+ do i=1,nmoments
+   omega_fac(i) = czero
+   do ifreq=nwlo,1,-1 ! NEVER change the summation order
+     omega_fac(i) = omega_fac(i) + cone / (paw_dmft%omega_lo(ifreq))**i
+   end do
+   omega_fac(i) = - two * temp * omega_fac(i) / (j_dpc)**i
+   if (i == 1) omega_fac(i) = omega_fac(i) + half
+   if (i == 2) omega_fac(i) = omega_fac(i) - cone/(four*temp)
+   if (i == 4) omega_fac(i) = omega_fac(i) + cone/(dble(48)*(temp**3))
+ end do
+
+ ! Do not use dot_product
+ trace = trace + dble(sum(green%trace_moments_log_loc(1:nmoments)*omega_fac(1:nmoments)))
+
+ ABI_FREE(omega_fac)
 
 end subroutine compute_trace_log_loc
 !!***
