@@ -74,8 +74,6 @@ module m_chebfi2
  integer, parameter :: tim_oracle       = 1763
  integer, parameter :: tim_barrier      = 1764
  integer, parameter :: tim_copy         = 1765
- integer, parameter :: tim_X_NP_init    = 1769
- integer, parameter :: tim_AX_BX_init   = 1770
 
 !Public 'chebfi' datatype
 !-------------------------------------------------
@@ -296,7 +294,6 @@ subroutine chebfi_allocateAll(chebfi)
 
  call chebfi_free(chebfi)
 
- call timab(tim_X_NP_init,1,tsec)
  if (chebfi%paral_kgb == 0) then
    chebfi%total_spacedim = spacedim
    call xg_init(chebfi%X_NP,space,spacedim,2*neigenpairs,chebfi%spacecom,me_g0=chebfi%me_g0,gpu_option=chebfi%gpu_option) !regular arrays
@@ -311,13 +308,10 @@ subroutine chebfi_allocateAll(chebfi)
    call xg_setBlock(chebfi%X_NP, chebfi%X_next, total_spacedim, chebfi%bandpp)
    call xg_setBlock(chebfi%X_NP, chebfi%X_prev, total_spacedim, chebfi%bandpp, fcol=chebfi%bandpp+1)
  end if
- call timab(tim_X_NP_init,2,tsec)
 
- call timab(tim_AX_BX_init,1,tsec)
  !transposer will handle these arrays automatically
  call xg_init(chebfi%AX,space,spacedim,neigenpairs,chebfi%spacecom,me_g0=chebfi%me_g0,gpu_option=chebfi%gpu_option)
  call xg_init(chebfi%BX,space,spacedim,neigenpairs,chebfi%spacecom,me_g0=chebfi%me_g0,gpu_option=chebfi%gpu_option)
- call timab(tim_AX_BX_init,2,tsec)
 
 end subroutine chebfi_allocateAll
 !!***
