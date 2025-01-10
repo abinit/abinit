@@ -1371,7 +1371,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          if(dtset%occopt/=3) then
            ABI_ERROR('occopt should be equal to 3 in dmft')
          end if
-!        ==  initialise edmft
+!        ==  initialize edmft
          if(paw_dmft%use_dmft>=1) edmft = zero
 
          !  Compute residm to check the value
@@ -1478,7 +1478,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !          endif
 !        end if
 
-         if(me_distrb==0) then
+         if(paw_dmft%myproc==0) then
            call saveocc_dmft(paw_dmft)
          end if
          call destroy_dmft(paw_dmft)

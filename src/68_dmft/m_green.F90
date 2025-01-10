@@ -993,8 +993,8 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
  integer :: band_index,diag,i,ib,ib1,ierr,ifreq,ikpt,info,isppol,lwork,mbandc
  integer :: me_kpt,mkmem,myproc,natom,nband_k,nkpt,nmoments,nspinor,nsppol
  integer :: opt_quick_restart,option,optlog,optnonxsum,optnonxsum2,optself,shift,shift_green,spacecomm
- real(dp) :: beta,correction,eigen,fac,fermilevel,trace_tmp3,wtk
- complex(dpc) :: green_tmp,omega_current,trace_tmp,trace_tmp2
+ real(dp) :: beta,correction,eigen,fac,fermilevel,temp,wtk
+ complex(dpc) :: green_tmp,omega_current,trace_tmp
  character(len=500) :: message
  real(dp) :: tsec(2)
  real(dp), allocatable :: eig(:),rwork(:)
@@ -1049,6 +1049,7 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
  nkpt    = paw_dmft%nkpt
  nspinor = paw_dmft%nspinor
  nsppol  = paw_dmft%nsppol
+ temp    = paw_dmft%temp
 
  if (optlog == 1) then
    ABI_MALLOC(eig,(mbandc))
@@ -1112,7 +1113,18 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
 
  if (green%w_type /= "real") then
    ABI_MALLOC(omega_fac,(nmoments))
- end if
+   do i=1,nmoments
+     omega_fac(i) = czero
+     do ifreq=green%nw,1,-1 ! NEVER change the summation order
+       omega_fac(i) = omega_fac(i) + paw_dmft%wgt_wlo(ifreq) / (paw_dmft%omega_lo(ifreq))**i
+     end do
+     omega_fac(i) = - two * temp * omega_fac(i) / (j_dpc)**i
+     if (i == 1) omega_fac(i) = omega_fac(i) + half
+     if (i == 2) omega_fac(i) = omega_fac(i) - cone/(four*temp)
+     if (i == 4) omega_fac(i) = omega_fac(i) + cone/(dble(48)*(temp**3))
+   end do ! i
+ end if ! w_type
+
  shift = green%distrib%shiftk
  mkmem = green%distrib%nkpt_mem(green%distrib%me_kpt+1)
  shift_green = shift
@@ -1128,18 +1140,7 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
    if (green%distrib%proct(ifreq) /= green%distrib%me_freq) cycle
    if (green%w_type == "imag") then
      omega_current = cmplx(zero,green%omega(ifreq),kind=dp)
-     fac = two * paw_dmft%wgt_wlo(ifreq) * paw_dmft%temp
-     omega_fac(1) = - fac / omega_current
-     do i=2,nmoments
-       omega_fac(i) = omega_fac(i-1) / omega_current
-     end do ! i
-     if (ifreq == green%nw) then
-       omega_fac(1) = omega_fac(1) + half
-       if (green%has_moments == 1) then
-         omega_fac(2) = omega_fac(2) - cone/(four*paw_dmft%temp)
-         omega_fac(4) = omega_fac(4) + cone /(dble(48)*(paw_dmft%temp**3))
-       end if ! moments
-     end if ! ifreq=1
+     fac = two * paw_dmft%wgt_wlo(ifreq) * temp
    else if (green%w_type == "real") then
      omega_current = cmplx(green%omega(ifreq),paw_dmft%temp,kind=dp)
    end if ! green%w_type
@@ -1250,30 +1251,20 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
        do ikpt=1,mkmem
          wtk = green%oper(ifreq)%wtk(ikpt+shift)
          if (optself == 0) then
-           trace_tmp2 = czero
            do ib=1,mbandc
-             trace_tmp2 = trace_tmp2 + log(green%oper(ifreq)%ks(ib,ib,ikpt+shift_green,isppol)*omega_current)
+             trace_tmp = trace_tmp + two*temp*wtk*log(green%oper(ifreq)%ks(ib,ib,ikpt+shift_green,isppol)*omega_current)
            end do ! ib
-           trace_tmp = trace_tmp + trace_tmp2*wtk
          else
            ! Use Tr(log(G(iw))) + Tr(log(G(-iw))) = Tr(log(G(iw)G(iw)^H)) so that we can use the much faster zheev instead of
            ! zgeev. Even if G(iw) and G(iw)^H have no reason to commute, this equality still holds since we only care about the trace.
            call abi_xgemm("n","c",mbandc,mbandc,mbandc,cone,green%oper(ifreq)%ks(:,:,ikpt+shift_green,isppol), &
                         & mbandc,green%oper(ifreq)%ks(:,:,ikpt+shift_green,isppol),mbandc,czero,mat_tmp(:,:),mbandc)
            call zheev("n","u",mbandc,mat_tmp(:,:),mbandc,eig(:),work(:),lwork,rwork(:),info)
-           trace_tmp = trace_tmp + sum(log(eig(:)*omega_current))*wtk*half
+           trace_tmp = trace_tmp + sum(log(eig(:)*omega_current))*wtk*temp
          end if ! optself
        end do ! ikpt
      end do ! isppol
      if (nsppol == 1 .and. nspinor == 1) trace_tmp = trace_tmp * two
-     trace_tmp = trace_tmp*fac
-     if (green%distrib%me_kpt == 0) trace_tmp = trace_tmp + &
-            & sum(green%trace_moments_log_ks(1:nmoments-1)*omega_fac(1:nmoments-1))
-     if (green%distrib%me_kpt == 0 .and. green%distrib%me_freq == 0) then
-       trace_tmp2 = cmplx(log(two)*mbandc*nsppol*paw_dmft%temp,zero,kind=dp)
-       if (nsppol == 1 .and. nspinor == 1) trace_tmp2 = trace_tmp2 * two
-       trace_tmp = trace_tmp - trace_tmp2
-     end if
      green%trace_log = green%trace_log + dble(trace_tmp)
    end if ! optlog=1
 
@@ -1303,7 +1294,6 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
      do isppol=1,nsppol
        do ikpt=1,mkmem
          do ib1=1,mbandc
-           green%occup%ks(ib1,ib1,ikpt+shift,isppol) = green%occup%ks(ib1,ib1,ikpt+shift,isppol) + omega_fac(1)
            if (diag == 1) then
              green%occup%ks(ib1,ib1,ikpt+shift,isppol) = green%occup%ks(ib1,ib1,ikpt+shift,isppol) + &
                 & fac*green%oper(ifreq)%ks(ib1,ib1,ikpt+shift_green,isppol)
@@ -1316,26 +1306,8 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
          end do ! ib1
        end do ! ikpt
      end do ! isppol
+   end if ! green%wtype
 
-     do i=2,nmoments
-       do isppol=1,nsppol
-         do ikpt=1,mkmem
-           do ib1=1,mbandc
-             if (diag == 1) then
-               green%occup%ks(ib1,ib1,ikpt+shift,isppol) = green%occup%ks(ib1,ib1,ikpt+shift,isppol) + &
-                 & omega_fac(i)*green%moments(i)%ks(ib1,ib1,ikpt,isppol)
-             else
-               do ib=1,mbandc
-                 green%occup%ks(ib,ib1,ikpt+shift,isppol) = green%occup%ks(ib,ib1,ikpt+shift,isppol) + &
-                    & omega_fac(i)*green%moments(i)%ks(ib,ib1,ikpt,isppol)
-               end do ! ib
-             end if ! diag
-           end do ! ib1
-         end do ! ikpt
-       end do ! isppol
-     end do ! i
-
-   end if ! w_type/="real"
 !        write(std_out,*) 'after inverse_oper'
 !      if(ikpt==1.and.is==1.and.ib==1.and.ib1==1) then
 !        write(6,*) 'occup(is,ikpt,ib,ib1)',ifreq,green%occup%ks(1,1,1,1),green_temp%ks(1,1,1,1)
@@ -1367,7 +1339,6 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
 !       ! ok
 !     endif
 ! call flush(std_out)
-     call sym_matlu(green%oper(ifreq)%matlu(:),paw_dmft)
    end if ! lchipsiortho=1
      !call copy_matlu(green_temp%matlu,green%oper(ifreq)%matlu,natom)
 !     if(ifreq==1.and.ifreq==11) then
@@ -1381,8 +1352,6 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
 ! call flush(std_out)
  end do ! ifreq
 
- ABI_SFREE(omega_fac)
-
  if (optlog == 1) then
 
    ABI_FREE(eig)
@@ -1392,38 +1361,29 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
 
    call xmpi_sum(green%trace_log,spacecomm,ierr)
 
-   if (paw_dmft%dmft_use_all_bands) then
-     correction = zero
-     band_index = 0
-     beta = one / paw_dmft%temp
-     do isppol=1,nsppol
-       do ikpt=1,nkpt
-         nband_k = paw_dmft%nband(ikpt+(isppol-1)*nkpt)
-         if (green%distrib%procb(ikpt) /= me_kpt) then
-           band_index = band_index + nband_k
-           cycle
-         end if
-         trace_tmp3 = zero
-         do ib=1,nband_k
-           if (paw_dmft%band_in(ib)) cycle
-           eigen = paw_dmft%eigen(ib+band_index)
-           if (eigen-fermilevel >= zero) then
-             trace_tmp3 = trace_tmp3 - log(one+exp(-beta*(eigen-fermilevel)))
-           else
-             trace_tmp3 = trace_tmp3 - (log(one+exp(beta*(eigen-fermilevel)))-beta*(eigen-fermilevel))
-           end if ! eigen-fermilevel>=0
-         end do ! ib
-         correction = correction + trace_tmp3*paw_dmft%wtk(ikpt)
-         band_index = band_index + nband_k
-       end do ! ikpt
-     end do ! isppol
-     correction = correction * paw_dmft%temp
-     if (nsppol == 1 .and. nspinor == 1) correction = correction * two
-     call xmpi_sum(correction,green%distrib%comm_kpt,ierr)
-     green%trace_log = green%trace_log + correction
-   end if ! use_all_bands
+   correction = log(two) * mbandc * nsppol * temp
 
-   green%trace_log = green%trace_log + fermilevel*paw_dmft%nelectval
+   band_index = 0
+   beta = one / paw_dmft%temp
+   do isppol=1,nsppol
+     do ikpt=1,nkpt
+       nband_k = paw_dmft%nband(ikpt+(isppol-1)*nkpt)
+       do ib=1,nband_k
+         if (paw_dmft%band_in(ib)) cycle
+         eigen = paw_dmft%eigen(ib+band_index)
+         if (eigen-fermilevel >= zero) then
+           correction = correction - temp*paw_dmft%wtk(ikpt)*log(one+exp(-beta*(eigen-fermilevel)))
+         else
+           correction = correction - temp*paw_dmft%wtk(ikpt)*(log(one+exp(beta*(eigen-fermilevel)))-beta*(eigen-fermilevel))
+         end if ! eigen-fermilevel>=0
+       end do ! ib
+       band_index = band_index + nband_k
+     end do ! ikpt
+   end do ! isppol
+   if (nsppol == 1 .and. nspinor == 1) correction = correction * two
+
+   green%trace_log = green%trace_log + correction + fermilevel*paw_dmft%nelectval + &
+      & dble(sum(green%trace_moments_log_ks(1:nmoments-1)*omega_fac(1:nmoments-1)))
 
  end if ! optlog=1
 
@@ -1449,6 +1409,11 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
  if (optnonxsum2 == 0) then
    if (paw_dmft%lchipsiortho == 1 .or. optself == 1) then
      call gather_oper(green%oper(:),green%distrib,paw_dmft,opt_ksloc=2,opt_commkpt=1)
+     do ifreq=1,green%nw
+       if (green%distrib%procf(ifreq) /= myproc) cycle
+       call sym_matlu(green%oper(ifreq)%matlu(:),paw_dmft)
+     end do
+     call gather_oper(green%oper(:),green%distrib,paw_dmft,opt_ksloc=2)
    end if
    green%has_greenmatlu_xsum = 1
  else if (optnonxsum2 == 1) then
@@ -1463,6 +1428,38 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
  !call xmpi_barrier(spacecomm)
  call gather_oper_ks(green%occup,green%distrib,paw_dmft,opt_diag=diag)
 ! write(std_out,*) 'afterxsum sym     %matlu(1)%mat(2,5,1,1,1) 1',green%oper(1)%matlu(1)%mat(2,5,1,1,1)
+
+ if (green%w_type /= "real") then
+
+   do isppol=1,nsppol
+     do ikpt=1,mkmem
+       do ib=1,mbandc
+         green%occup%ks(ib,ib,ikpt+shift,isppol) = green%occup%ks(ib,ib,ikpt+shift,isppol) + omega_fac(1)
+       end do ! ib
+     end do ! ikpt
+   end do ! isppol
+
+   do i=2,nmoments
+     do isppol=1,nsppol
+       do ikpt=1,mkmem
+         do ib1=1,mbandc
+           if (diag == 1) then
+             green%occup%ks(ib1,ib1,ikpt+shift,isppol) = green%occup%ks(ib1,ib1,ikpt+shift,isppol) + &
+               & omega_fac(i)*green%moments(i)%ks(ib1,ib1,ikpt,isppol)
+           else
+             do ib=1,mbandc
+               green%occup%ks(ib,ib1,ikpt+shift,isppol) = green%occup%ks(ib,ib1,ikpt+shift,isppol) + &
+                  & omega_fac(i)*green%moments(i)%ks(ib,ib1,ikpt,isppol)
+             end do ! ib
+           end if ! diag
+         end do ! ib1
+       end do ! ikpt
+     end do ! isppol
+   end do ! i
+
+ end if ! w_type/="real"
+
+ ABI_SFREE(omega_fac)
 
  if (prtopt /= 0 .and. prtopt > -100) then
    write(message,'(2a)') ch10," ===  Green's function is computed"
@@ -1527,7 +1524,7 @@ end subroutine compute_green
 
 subroutine integrate_green(green,paw_dmft,prtopt,opt_ksloc,opt_after_solver,opt_diff,opt_fill_occnd,opt_self)
 
- use m_matlu, only : destroy_matlu,diff_matlu,init_matlu,print_matlu,sym_matlu,xmpi_matlu,zero_matlu
+ use m_matlu, only : destroy_matlu,diff_matlu,init_matlu,print_matlu,shift_matlu,sym_matlu,xmpi_matlu,zero_matlu
  use m_oper, only : downfold_oper,trace_oper
  use m_time, only : timab
 
@@ -1541,12 +1538,12 @@ subroutine integrate_green(green,paw_dmft,prtopt,opt_ksloc,opt_after_solver,opt_
  integer :: band_index,i,iatom,ib,ib1,icomp_chloc,ifreq,ikpt,im,isppol
  integer :: lpawu,mbandc,myproc,natom,nband_k,ndim,nkpt,nmoments,nspinor
  integer :: nsppol,optaftsolv,optdiff,optfilloccnd,option,optksloc,optself
- real(dp) :: correction,diff_chloc,fac
+ real(dp) :: correction,diff_chloc,fac,temp
  complex(dpc) :: omega
  character(len=12) :: tag
  character(len=500) :: message
  real(dp) :: tsec(2)
- complex(dpc), allocatable :: omega_fac(:)
+ complex(dpc), allocatable :: omega_fac(:),shift(:)
  type(matlu_type), allocatable :: matlu_temp(:)
 ! real(dp), allocatable :: charge_loc_old(:,:)
 ! type(oper_type)  :: oper_c
@@ -1584,6 +1581,7 @@ subroutine integrate_green(green,paw_dmft,prtopt,opt_ksloc,opt_after_solver,opt_
  nkpt    = paw_dmft%nkpt
  nspinor = paw_dmft%nspinor
  nsppol  = paw_dmft%nsppol
+ temp    = paw_dmft%temp
 
  nmoments = 1
  if (green%has_moments == 1) nmoments = green%nmoments
@@ -1670,47 +1668,49 @@ subroutine integrate_green(green,paw_dmft,prtopt,opt_ksloc,opt_after_solver,opt_
 
      ABI_MALLOC(omega_fac,(nmoments))
 
-     do ifreq=1,green%nw
-       if (green%distrib%procf(ifreq) /= myproc) cycle
-       omega = cmplx(zero,paw_dmft%omega_lo(ifreq),kind=dp)
-       fac = two * paw_dmft%temp * paw_dmft%wgt_wlo(ifreq)
-       omega_fac(1) = - fac / omega
-       do i=2,nmoments
-         omega_fac(i) = omega_fac(i-1) / omega
-       end do ! i
-       if (ifreq == green%nw) then
-         omega_fac(1) = omega_fac(1) + half
-         if (green%has_moments == 1) then
-           omega_fac(2) = omega_fac(2) - cone/(four*paw_dmft%temp)
-           omega_fac(4) = omega_fac(4) + cone/(dble(48)*(paw_dmft%temp**3))
-         end if ! moments
-       end if ! ifreq=green%nw
+     do i=1,nmoments
+       omega_fac(i) = czero
+       do ifreq=green%nw,1,-1 ! NEVER change the summation order
+         omega_fac(i) = omega_fac(i) + paw_dmft%wgt_wlo(ifreq) / (paw_dmft%omega_lo(ifreq))**i
+       end do
+       omega_fac(i) = - two * temp * omega_fac(i) / (j_dpc)**i
+       if (i == 1) omega_fac(i) = omega_fac(i) + half
+       if (i == 2) omega_fac(i) = omega_fac(i) - cone/(four*temp)
+       if (i == 4) omega_fac(i) = omega_fac(i) + cone/(dble(48)*(temp**3))
+     end do ! i
 
+     do ifreq=1,green%nw
+
+       if (green%distrib%procf(ifreq) /= myproc) cycle
+       fac = two * temp * paw_dmft%wgt_wlo(ifreq)
+       do iatom=1,natom
+         lpawu = paw_dmft%lpawu(iatom)
+         if (lpawu == -1) cycle
+         green%occup%matlu(iatom)%mat(:,:,:) = green%occup%matlu(iatom)%mat(:,:,:) + &
+            & fac*green%oper(ifreq)%matlu(iatom)%mat(:,:,:)
+       end do ! iatom
+
+     end do ! ifreq
+
+     call xmpi_matlu(green%occup%matlu(:),natom,paw_dmft%spacecomm)
+
+     if (green%has_moments == 1) then
        do i=1,nmoments
          do iatom=1,natom
            lpawu = paw_dmft%lpawu(iatom)
            if (lpawu == -1) cycle
-           if (i == 1) green%occup%matlu(iatom)%mat(:,:,:) = green%occup%matlu(iatom)%mat(:,:,:) + &
-             & fac*green%oper(ifreq)%matlu(iatom)%mat(:,:,:)
-           if (green%has_moments == 1) then
-             green%occup%matlu(iatom)%mat(:,:,:) = green%occup%matlu(iatom)%mat(:,:,:) &
-                & + omega_fac(i)*green%moments(i)%matlu(iatom)%mat(:,:,:)
-           else
-             ndim = nspinor * (2*lpawu+1)
-             do isppol=1,nsppol
-               do im=1,ndim
-                 green%occup%matlu(iatom)%mat(im,im,isppol) = &
-                    & green%occup%matlu(iatom)%mat(im,im,isppol) + omega_fac(1)
-               end do ! im
-             end do ! isppol
-           end if ! moments
+           green%occup%matlu(iatom)%mat(:,:,:) = green%occup%matlu(iatom)%mat(:,:,:) + &
+             omega_fac(i)*green%moments(i)%matlu(iatom)%mat(:,:,:)
          end do ! iatom
        end do ! i
-     end do ! ifreq
+     else
+       ABI_MALLOC(shift,(natom))
+       shift(:) = omega_fac(1)
+       call shift_matlu(green%occup%matlu(:),natom,shift(:))
+       ABI_FREE(shift)
+     end if
 
      ABI_FREE(omega_fac)
-
-     call xmpi_matlu(green%occup%matlu(:),natom,paw_dmft%spacecomm)
 
 !    Print density matrix if prtopt high
      if (abs(prtopt) > 2) then
@@ -1872,7 +1872,7 @@ subroutine integrate_green(green,paw_dmft,prtopt,opt_ksloc,opt_after_solver,opt_
            nband_k = paw_dmft%nband(ikpt+(isppol-1)*nkpt)
            do ib=1,nband_k
              if (paw_dmft%band_in(ib)) cycle
-             paw_dmft%occnd(:,:,ib,ikpt,isppol) = zero
+             paw_dmft%occnd(:,:,ib,ikpt,isppol)  = zero
              paw_dmft%occnd(1,ib,ib,ikpt,isppol) = fac * &
                & occup_fd(paw_dmft%eigen(ib+band_index),paw_dmft%fermie,paw_dmft%temp)
            end do ! ib
@@ -3805,9 +3805,9 @@ subroutine compute_nb_elec(green,self,paw_dmft,Fx,nb_elec_x,fermie,Fxprime)
 
      ABI_MALLOC(omega_fac,(nmoments))
 
-     do i=nmoments,1,-1 ! Never change the summation orders, this is VERY IMPORTANT to have better accuracy
+     do i=1,nmoments
        omega_fac(i) = czero
-       do ifreq=green%nw,1,-1
+       do ifreq=green%nw,1,-1 ! Never change the summation orders, this is VERY IMPORTANT to have better accuracy
          omega_fac(i) = omega_fac(i) + paw_dmft%wgt_wlo(ifreq) / (paw_dmft%omega_lo(ifreq))**i
        end do
        omega_fac(i) = - two * temp * omega_fac(i) / (j_dpc)**i

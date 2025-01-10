@@ -28,7 +28,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
   int ndim = num_orbitals / 2;
   string lam_fname = "";
   if (ilam != 0) lam_fname = "_ilam_" + to_string(ilam);
-  string config_fname = "configs_iatom_" + to_string(iatom) + lam_fname + ".h5";
+  string config_fname = "qmc_data_iatom_" + to_string(iatom) + lam_fname + ".h5";
   auto comm = MPI_COMM_WORLD;
   int nproc;
   MPI_Comm_size(comm,&nproc);

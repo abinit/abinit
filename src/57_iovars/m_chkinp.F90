@@ -907,7 +907,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        ABI_WARNING(msg)
      end if
 #else
-     if (dt%dmft_triqs_orb_off_diag==1.or.dt%dmft_triqs_spin_off_diag==1) then
+     if (dt%dmft_triqs_orb_off_diag==1.or.(dt%nspinor==2.and.dt%dmft_triqs_spin_off_diag==1)) then
        write(msg,'(3a)') "WARNING: You have compiled with the real version of TRIQS/CTHYB, yet you have", &
            & "activated the sampling of the off-diagonal elements. Thus their imaginary part will be", &
            & "neglected. You'll have to check that this is a good approximation."

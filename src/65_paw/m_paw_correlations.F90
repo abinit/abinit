@@ -874,6 +874,10 @@ CONTAINS  !=====================================================================
        int1 = sqrt(int1)
 
        tmpfil = "dmft_normalized_orbital_itypat_"//trim(adjustl(tag))
+
+       write(message,'(3a)') ch10," Writing unprojected normalized orbital on file ",trim(tmpfil)
+       call wrtout(std_out,message,"COLL")
+
        if (me == 0) then
          open(unit=505,file=trim(tmpfil),status="unknown",form="formatted")
          do ir=1,meshsz
@@ -881,9 +885,6 @@ CONTAINS  !=====================================================================
          end do
          close(505)
        end if ! me=0
-
-       write(message,'(3a)') ch10," Writing unprojected normalized orbital on file ",trim(tmpfil)
-       call wrtout(std_out,message,"COLL")
 
        if (dmft_dc == 8) then
 

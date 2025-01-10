@@ -1035,7 +1035,9 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    if (paw_dmft%myproc == 0) then
      call readocc_dmft(paw_dmft,dtfil%filnam_ds(3),dtfil%filnam_ds(4))
    end if
-   call xmpi_bcast(paw_dmft%occnd(:,:,:,:,:),0,paw_dmft%spacecomm,ierr)
+   if (paw_dmft%dmft_read_occnd /= 0) then
+     call xmpi_bcast(paw_dmft%occnd(:,:,:,:,:),0,paw_dmft%spacecomm,ierr)
+   end if
    call print_sc_dmft(paw_dmft,dtset%pawprtvol)
  end if
 
