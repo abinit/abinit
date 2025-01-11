@@ -345,6 +345,12 @@ type, public :: gqk_t
   procedure :: gather => gqk_gather
   ! Gather the MPI-distributed matrix elements for a given k/q-point index
 
+  procedure :: get_erange_mask => gqk_get_erange_mask
+  ! Compute MPI-distributed & global mask for electronic states allowed by energy filtering
+
+  procedure :: filter_erange => gqk_filter_erange
+  ! Nullify all matrix elements connecting electronic states outside of specfied erange
+
   procedure :: myqpt => gqk_myqpt
   ! Return the q-point and the weight from my local index my_iq
 
@@ -4848,6 +4854,213 @@ end subroutine gstore_wannierize_and_write_gwan
 !! *************************************************************************
 !
 !end subroutine handle_lr_term
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_gstore/gqk_get_erange_mask
+!! NAME
+!!  gqk_get_erange_mask
+!!
+!! FUNCTION
+!!  Compute MPI-distributed and global masks for electronic states alllowed by erange
+!!
+!! INPUTS
+!!  gstore<gstore_t>=Electron-phonon object containing dimensions and related quantities.
+!!  erange=Energy range:
+!!    -- if both entries are negative, assume metal and include states within the
+!! [efermi-abs(erange(1)), efermi+abs(erange(2))] window;
+!!    -- otherwise, erange(1) & erange(2) select window wrt VBM & CBM, respectively.
+!!
+!! OUTPUT
+!!  my_states(gqk%nb, gqk%my_nk)=Mask for selected states at this MPI proc.
+!!  glob_states(gqk%nb, gqk%my_nk)=Global mask for selected states.
+!!
+!! SOURCE
+
+subroutine gqk_get_erange_mask(gqk, gstore, erange, my_states, glob_states)
+
+!Arguments ------------------------------------
+!scalars
+ class(gqk_t), target, intent(inout) :: gqk
+ class(gstore_t), target, intent(in) :: gstore
+!arrays
+ real(dp), intent(in) :: erange(2)
+ integer, intent(out) :: my_states(gqk%nb, gqk%my_nk)
+ integer, intent(out) :: glob_states(gqk%nb, gqk%glob_nk)
+
+!Local variables-------------------------------
+!scalars
+ class(ebands_t), pointer :: ebands
+ type(gaps_t) :: gaps
+ logical :: assume_gap
+ integer :: my_ik, ik_ibz, ik_glob
+ integer :: ib, bstart
+ integer :: gap_err, ierr
+ real(dp) :: vmax, cmin, eig
+!----------------------------------------------------------------------
+
+ ebands => gstore%ebands
+
+ assume_gap = .not. all(erange < tol12)
+ gaps = ebands%get_gaps(gap_err)
+ if (assume_gap) call gaps%print([std_out])
+
+ if (assume_gap) then
+   vmax = gaps%vb_max(gqk%spin) + tol2 * eV_Ha
+   cmin = gaps%cb_min(gqk%spin) - tol2 * eV_Ha
+ else
+   vmax = ebands%fermie
+   cmin = ebands%fermie
+ end if
+
+ ! Fill the mask for allowed states
+ my_states(:,:) = 0
+ glob_states(:,:) = 0
+ bstart = gstore%brange_spin(1, gqk%spin)
+ do my_ik=1,gqk%my_nk
+   ik_ibz = gqk%my_k2ibz(1, my_ik)
+   ik_glob = my_ik + gqk%my_kstart - 1
+
+   do ib=1,gqk%nb
+     eig = ebands%eig(bstart + ib - 1, ik_ibz, gqk%spin)
+
+     if (abs(erange(1)) > tol12) then
+       ! Filter valence states
+       if (eig <= vmax .and. vmax - eig <= abs(erange(1))) then
+         my_states(ib, my_ik) = 1
+         glob_states(ib, ik_glob) = 1
+       end if
+     end if
+
+     if (abs(erange(2)) > tol12) then
+       ! Filter conduction states
+       if (eig >= cmin .and. eig - cmin <= abs(erange(2))) then
+         my_states(ib, my_ik) = 1
+         glob_states(ib, ik_glob) = 1
+       end if
+     end if
+
+   enddo
+ enddo
+ call xmpi_sum(glob_states, gqk%kpt_comm%value, ierr)
+
+ call gaps%free()
+end subroutine gqk_get_erange_mask
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_gstore/gqk_filter_erange
+!! NAME
+!!  gqk_filter_erange
+!!
+!! FUNCTION
+!!  Nullify all matrix elements connecting electronic states excluded by energy range.
+!!
+!! INPUTS
+!!  gstore<gstore_t>=Electron-phonon object containing dimensions and related quantities.
+!!  erange=Energy range:
+!!    -- if both entries are negative, assume metal and include states within the
+!! [efermi-abs(erange(1)), efermi+abs(erange(2))] window;
+!!    -- otherwise, erange(1) & erange(2) select window wrt VBM & CBM, respectively.
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine gqk_filter_erange(gqk, gstore, erange)
+
+!Arguments ------------------------------------
+!scalars
+ class(gqk_t), target, intent(inout) :: gqk
+ class(gstore_t), target, intent(in) :: gstore
+!arrays
+ real(dp), intent(in) :: erange(2)
+
+!Local variables-------------------------------
+!scalars
+ class(ebands_t), pointer :: ebands
+ type(krank_t) :: krank_kpts
+ logical :: skip_nk, skip_mkq, skip_q
+ integer :: my_ik, ik_glob
+ integer :: my_iq, ikq, ipert
+ integer :: ib, jb, bstart
+ integer :: ierr
+ real(dp) :: wtq
+!arrays
+ integer :: my_states(gqk%nb, gqk%my_nk)
+ integer :: glob_states(gqk%nb, gqk%glob_nk)
+ real(dp) :: kpt(3), qpt(3), kpq(3)
+ real(dp) :: kpts(3, gqk%glob_nk), my_qpts(3, gqk%my_nq)
+!----------------------------------------------------------------------
+
+ ebands => gstore%ebands
+
+ ! Compute masks
+ call gqk%get_erange_mask(gstore, erange, my_states, glob_states)
+
+ ! Get global krank for k+q transitions
+ kpts(:, :) = zero
+ do my_ik=1,gqk%my_nk
+   ik_glob = my_ik + gqk%my_kstart - 1
+   kpts(:, ik_glob) = gqk%my_kpts(:, my_ik)
+ enddo
+ call xmpi_sum(kpts, gqk%kpt_comm%value, ierr)
+ krank_kpts = krank_from_kptrlatt(gqk%glob_nk, kpts, ebands%kptrlatt, &
+   compute_invrank=.True.)
+
+ ! Get all q-points for this proc
+ do my_iq=1,gqk%my_nq
+   call gqk%myqpt(my_iq, gstore, wtq, my_qpts(:, my_iq))
+ enddo
+
+ ! Nullify matrix elements connecting the excluded states
+ do my_ik=1,gqk%my_nk
+   kpt(:) = gqk%my_kpts(:, my_ik)
+
+   do ib=1,gqk%nb
+     ! |nk> is forbidden
+     skip_nk = .false.
+     if (my_states(ib, my_ik) == 0) skip_nk = .true.
+
+     do my_iq=1,gqk%my_nq
+       qpt(:) = my_qpts(:, my_iq)
+
+       ! Find k+q-->k' index in krank_kpts
+       kpq(:) = kpt(:) + qpt(:)
+       ikq = krank_kpts%get_index(kpq)
+
+       ! k+q falls outside the filtered kpts pool
+       skip_q = .false.
+       if (ikq == -1) skip_q = .true.
+
+       do jb=1,gqk%nb
+         ! |mk+q> is forbidden
+         skip_mkq = .false.
+         if (glob_states(jb, ikq) == 0) skip_mkq = .true.
+
+         do ipert=1,gqk%my_npert
+
+           if (skip_nk .or. skip_q .or. skip_mkq) then
+             select case (gqk%cplex)
+             case (1)
+               gqk%my_g2(ipert, jb, my_iq, ib, my_ik) = zero
+             case (2)
+               gqk%my_g(ipert, jb, my_iq, ib, my_ik) = czero
+             case default
+               ABI_ERROR(sjoin("Invalid gqk%cplex:", itoa(gqk%cplex)))
+             end select
+           end if
+
+         enddo
+       enddo
+     enddo
+   enddo
+ enddo
+
+ call krank_kpts%free()
+end subroutine gqk_filter_erange
 !!***
 
 end module m_gstore

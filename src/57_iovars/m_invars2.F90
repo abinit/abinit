@@ -2293,6 +2293,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'varpeq_select', tread, 'INT')
  if (tread == 1) dtset%varpeq_select = intarr(1)
 
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'varpeq_mixing_factor', tread, 'DPR')
+ if(tread==1) dtset%varpeq_mixing_factor = dprarr(1)
+
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'varpeq_tolgrs', tread, 'DPR')
  if(tread==1) dtset%varpeq_tolgrs = dprarr(1)
 
