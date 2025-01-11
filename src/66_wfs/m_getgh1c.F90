@@ -2323,14 +2323,16 @@ subroutine getgh1c_mGGA(cwavein,dkinpw,gbound_k,gh1c_mGGA,gprimd,idir,istwf_k,kg
  integer,parameter :: tim_fourwf=1
  real(dp) :: weight=one
  real(dp) :: dkcartdk
- real(dp) :: scale_grad=one, scale_laplacian
+ real(dp) :: scale_grad, scale_laplacian
  real(dp) :: gp2pi1,gp2pi2,gp2pi3,kpt_cart,kg_k_cart
  logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc
  !arrays
  real(dp),allocatable :: cwavein1(:,:),cwavein2(:,:),dgcwavef(:,:,:),dlcwavef(:,:)
  real(dp),allocatable :: ghc1(:,:),ghc2(:,:),work(:,:,:,:)
 
- scale_laplacian=one/(two_pi*two_pi)
+ ! scale_grad one, scale_laplacian zero gives perfect agreement between 2DEtotals
+ ! scale_grad zero, scale_laplacian one gives poor agreement between 2DEtotals
+ scale_grad=one
  scale_laplacian=one
  
  if(present(gpu_option)) then
