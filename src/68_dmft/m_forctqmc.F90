@@ -4230,10 +4230,10 @@ subroutine fourier_inv(paw_dmft,nmoments,ntau,matlu_tau,oper_freq,moments)
  type(oper_type), intent(in) :: oper_freq(paw_dmft%dmft_nwlo),moments(nmoments)
  type(matlu_type), intent(inout) :: matlu_tau(paw_dmft%natom)
 !Local variables ------------------------------
- integer :: i,iatom,ibuf,ibuf_tau,ierr,ifreq,im,im1,isppol,itau,itaub,itauf,j,lpawu
+ integer :: i,iatom,ibuf,ibuf_tau,ierr,ifreq,im,im1,isppol,itau,itaub,itauf,lpawu
  integer :: myproc,natom,ndim,nproc,nspinor,nsppol,ntau_proc,nwlo,ratio,residu,siz_buf,tndim
  real(dp) :: beta,omegatau,tau
- complex(dpc) :: fac,omega,sumterm
+ complex(dpc) :: fac
  integer, allocatable :: displs(:),recvcounts(:)
  complex(dpc), allocatable :: buffer(:),buffer_tot(:),omega_fac(:)
 ! ************************************************************************

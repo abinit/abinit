@@ -487,7 +487,7 @@ subroutine compute_band_energy(energies_dmft,green,paw_dmft,occ_type,ecalc_dft,f
  integer, optional, intent(in) :: ecalc_dft,ecalc_dmft,fcalc_dft
 ! integer :: prtopt
 !Local variables-------------------------------
- integer :: band_index,ib,ibc,ierr,ikpt,isppol,nband_k,nkpt,nspinor,nsppol
+ integer :: band_index,ib,ibc,ikpt,isppol,nband_k,nkpt,nspinor,nsppol
  real(dp) :: beta,eig,fermie_used,occ,totch2,wtk !,totch3
  character(len=500) :: message
 ! *********************************************************************
