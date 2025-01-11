@@ -1,6 +1,6 @@
 
-.Version 9.11.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Jul 2023.
-- ( at 11h59 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h08 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v2_t46/t46.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v2_t46/t46.abi
 - output file    -> t46.abo
 - root for input  files -> t46i
 - root for output files -> t46o
@@ -170,10 +170,10 @@ _ WF disk file :      0.112 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -181,7 +181,7 @@ _ WF disk file :      0.112 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
               amu      2.69815390E+01
              ecut      3.00000000E+00 Hartree
            enunit           2
--          fftalg         312
+-          fftalg         512
            getwfk          -1
             intxc           1
            jdtset       11   12   13   21   22   23   31   32   33
@@ -903,8 +903,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/13al.981214.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/13al.981214.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/13al.981214.fhi
 - Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
 - 13.00000   3.00000    981214                znucl, zion, pspdat
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -932,13 +932,13 @@ tolerances: {toldfe: 1.00E-08, }
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -2.0786775130692    -2.079E+00 2.949E-04 7.865E-02
  ETOT  2  -2.0788376759149    -1.602E-04 2.674E-07 3.792E-03
- ETOT  3  -2.0788453476606    -7.672E-06 4.568E-07 1.777E-05
- ETOT  4  -2.0788453749681    -2.731E-08 4.722E-09 2.107E-08
- ETOT  5  -2.0788453750044    -3.625E-11 4.719E-10 6.392E-11
- ETOT  6  -2.0788453750045    -1.426E-13 7.423E-12 5.104E-13
+ ETOT  3  -2.0788453476607    -7.672E-06 4.568E-07 1.777E-05
+ ETOT  4  -2.0788453749682    -2.731E-08 4.722E-09 2.107E-08
+ ETOT  5  -2.0788453750044    -3.625E-11 4.719E-10 6.391E-11
+ ETOT  6  -2.0788453750045    -1.279E-13 7.423E-12 5.100E-13
 
  At SCF step    6, etot is converged : 
-  for the second time, diff in etot=  1.426E-13 < toldfe=  1.000E-08
+  for the second time, diff in etot=  1.279E-13 < toldfe=  1.000E-08
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  2.59332926E-04  sigma(3 2)=  0.00000000E+00
@@ -956,7 +956,7 @@ lattice_vectors:
 lattice_lengths: [   5.37401,    5.37401,    5.37401, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.0974400E+02
-convergence: {deltae: -1.426E-13, res2:  5.104E-13, residm:  7.423E-12, diffor: null, }
+convergence: {deltae: -1.279E-13, res2:  5.100E-13, residm:  7.423E-12, diffor: null, }
 etotal    :  -2.07884538E+00
 entropy   :   0.00000000E+00
 fermie    :   2.88742110E-01
@@ -1017,18 +1017,18 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 11, }
 comment             : Components of total free energy in Hartree
-kinetic             :  8.33778721309690E-01
-hartree             :  3.77124720423400E-03
-xc                  : -8.03327942750931E-01
+kinetic             :  8.33778721312668E-01
+hartree             :  3.77124720497432E-03
+xc                  : -8.03327942751559E-01
 Ewald energy        : -2.71472096493581E+00
 psp_core            :  3.72610088794390E-02
-local_psp           :  9.42590830558463E-02
-non_local_psp       :  4.70652812964901E-01
-internal            : -2.07832603427263E+00
-'-kT*entropy'       : -5.19340731894545E-04
+local_psp           :  9.42590830561914E-02
+non_local_psp       :  4.70652812961455E-01
+internal            : -2.07832603427264E+00
+'-kT*entropy'       : -5.19340731892881E-04
 total_energy        : -2.07884537500453E+00
-total_energy_eV     : -5.65682594848338E+01
-band_energy         :  3.59623863178430E-01
+total_energy_eV     : -5.65682594848340E+01
+band_energy         :  3.59623863175066E-01
 ...
 
 
@@ -1038,9 +1038,9 @@ band_energy         :  3.59623863178430E-01
   sigma(3 3)=  2.59332926E-04  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -7.6298E+00 GPa]
-- sigma(1 1)=  7.62983680E+00  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  7.62983680E+00  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  7.62983680E+00  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  7.62983681E+00  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  7.62983681E+00  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  7.62983681E+00  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET 12 ==================================================================
@@ -1093,11 +1093,11 @@ tolerances: {toldfe: 1.00E-08, }
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -2.0788506840713    -2.079E+00 1.244E-14 2.290E-10
- ETOT  2  -2.0788506840718    -4.983E-13 2.699E-17 1.371E-11
- ETOT  3  -2.0788506840718    -2.309E-14 1.609E-15 6.462E-15
+ ETOT  2  -2.0788506840718    -4.730E-13 2.699E-17 1.371E-11
+ ETOT  3  -2.0788506840718    -2.576E-14 1.609E-15 6.462E-15
 
  At SCF step    3, etot is converged : 
-  for the second time, diff in etot=  2.309E-14 < toldfe=  1.000E-08
+  for the second time, diff in etot=  2.576E-14 < toldfe=  1.000E-08
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  2.59158336E-04  sigma(3 2)=  0.00000000E+00
@@ -1115,7 +1115,7 @@ lattice_vectors:
 lattice_lengths: [   5.37401,    5.37401,    5.37401, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.0974400E+02
-convergence: {deltae: -2.309E-14, res2:  6.462E-15, residm:  1.609E-15, diffor: null, }
+convergence: {deltae: -2.576E-14, res2:  6.462E-15, residm:  1.609E-15, diffor: null, }
 etotal    :  -2.07885068E+00
 entropy   :   0.00000000E+00
 fermie    :   2.89036278E-01
@@ -1176,18 +1176,18 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 12, }
 comment             : Components of total free energy in Hartree
-kinetic             :  8.33755832164904E-01
-hartree             :  3.75969795896415E-03
-xc                  : -8.03317826516385E-01
+kinetic             :  8.33755832164911E-01
+hartree             :  3.75969795896420E-03
+xc                  : -8.03317826516394E-01
 Ewald energy        : -2.71472096493581E+00
 psp_core            :  3.72610088794390E-02
-local_psp           :  9.42798879267933E-02
-non_local_psp       :  4.70694899247346E-01
+local_psp           :  9.42798879268011E-02
+non_local_psp       :  4.70694899247341E-01
 internal            : -2.07828746527475E+00
-'-kT*entropy'       : -5.63218797038582E-04
+'-kT*entropy'       : -5.63218797038563E-04
 total_energy        : -2.07885068407179E+00
 total_energy_eV     : -5.65684039519010E+01
-band_energy         :  3.59654081412296E-01
+band_energy         :  3.59654081412299E-01
 ...
 
 
@@ -1251,12 +1251,12 @@ tolerances: {toldfe: 1.00E-08, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -2.0794007306112    -2.079E+00 4.550E-14 2.113E-10
- ETOT  2  -2.0794007306116    -4.388E-13 2.858E-18 1.259E-11
- ETOT  3  -2.0794007306116    -4.086E-14 1.475E-15 5.816E-15
+ ETOT  1  -2.0794007306111    -2.079E+00 4.550E-14 2.113E-10
+ ETOT  2  -2.0794007306116    -4.672E-13 2.858E-18 1.259E-11
+ ETOT  3  -2.0794007306116    -1.377E-14 1.475E-15 5.816E-15
 
  At SCF step    3, etot is converged : 
-  for the second time, diff in etot=  4.086E-14 < toldfe=  1.000E-08
+  for the second time, diff in etot=  1.377E-14 < toldfe=  1.000E-08
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  2.58993397E-04  sigma(3 2)=  0.00000000E+00
@@ -1274,7 +1274,7 @@ lattice_vectors:
 lattice_lengths: [   5.37401,    5.37401,    5.37401, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.0974400E+02
-convergence: {deltae: -4.086E-14, res2:  5.816E-15, residm:  1.475E-15, diffor: null, }
+convergence: {deltae: -1.377E-14, res2:  5.816E-15, residm:  1.475E-15, diffor: null, }
 etotal    :  -2.07940073E+00
 entropy   :   0.00000000E+00
 fermie    :   2.87542068E-01
@@ -1335,18 +1335,18 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 13, }
 comment             : Components of total free energy in Hartree
-kinetic             :  8.33734264834889E-01
-hartree             :  3.74884031888846E-03
-xc                  : -8.03308315319444E-01
+kinetic             :  8.33734264834890E-01
+hartree             :  3.74884031888841E-03
+xc                  : -8.03308315319445E-01
 Ewald energy        : -2.71472096493581E+00
 psp_core            :  3.72610088794390E-02
-local_psp           :  9.42994464813749E-02
-non_local_psp       :  4.70734620467296E-01
+local_psp           :  9.42994464813796E-02
+non_local_psp       :  4.70734620467292E-01
 internal            : -2.07825109927337E+00
-'-kT*entropy'       : -1.14963133826362E-03
+'-kT*entropy'       : -1.14963133826363E-03
 total_energy        : -2.07940073061163E+00
-total_energy_eV     : -5.65833714794376E+01
-band_energy         :  3.59682593818882E-01
+total_energy_eV     : -5.65833714794375E+01
+band_energy         :  3.59682593818891E-01
 ...
 
 
@@ -1413,15 +1413,15 @@ tolerances: {toldfe: 1.00E-08, }
  ETOT  1  -2.0804551314968    -2.080E+00 8.184E-05 2.353E-04
  ETOT  2  -2.0804551792797    -4.778E-08 2.268E-07 3.778E-06
  ETOT  3  -2.0804551804129    -1.133E-09 5.126E-09 2.344E-08
- ETOT  4  -2.0804551804496    -3.675E-11 1.239E-09 2.071E-10
+ ETOT  4  -2.0804551804496    -3.675E-11 1.239E-09 2.070E-10
 
  At SCF step    4, etot is converged : 
   for the second time, diff in etot=  3.675E-11 < toldfe=  1.000E-08
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  2.71705913E-04  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  2.71705913E-04  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  2.71705913E-04  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  2.71705914E-04  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  2.71705914E-04  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  2.71705914E-04  sigma(2 1)=  0.00000000E+00
 
 
 --- !ResultsGS
@@ -1434,14 +1434,14 @@ lattice_vectors:
 lattice_lengths: [   5.37401,    5.37401,    5.37401, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.0974400E+02
-convergence: {deltae: -3.675E-11, res2:  2.071E-10, residm:  1.239E-09, diffor: null, }
+convergence: {deltae: -3.675E-11, res2:  2.070E-10, residm:  1.239E-09, diffor: null, }
 etotal    :  -2.08045518E+00
 entropy   :   0.00000000E+00
 fermie    :   2.80026866E-01
 cartesian_stress_tensor: # hartree/bohr^3
-- [  2.71705913E-04,   0.00000000E+00,   0.00000000E+00, ]
-- [  0.00000000E+00,   2.71705913E-04,   0.00000000E+00, ]
-- [  0.00000000E+00,   0.00000000E+00,   2.71705913E-04, ]
+- [  2.71705914E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   2.71705914E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   2.71705914E-04, ]
 pressure_GPa:  -7.9939E+00
 xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00, Al]
@@ -1495,30 +1495,30 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 21, }
 comment             : Components of total free energy in Hartree
-kinetic             :  8.31059719096333E-01
-hartree             :  3.57822636947083E-03
-xc                  : -8.03176053705830E-01
+kinetic             :  8.31059719100282E-01
+hartree             :  3.57822637192278E-03
+xc                  : -8.03176053708009E-01
 Ewald energy        : -2.71472096493581E+00
 psp_core            :  3.72610088794390E-02
-local_psp           :  9.51815556532934E-02
-non_local_psp       :  4.70291404449963E-01
-internal            : -2.08052510419314E+00
-'-kT*entropy'       :  6.99237435353573E-05
+local_psp           :  9.51815558201936E-02
+non_local_psp       :  4.70291404278927E-01
+internal            : -2.08052510419305E+00
+'-kT*entropy'       :  6.99237434478713E-05
 total_energy        : -2.08045518044961E+00
 total_energy_eV     : -5.66120645187398E+01
-band_energy         :  3.57279747405426E-01
+band_energy         :  3.57279747380175E-01
 ...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  2.71705913E-04  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  2.71705913E-04  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  2.71705913E-04  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  2.71705914E-04  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  2.71705914E-04  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  2.71705914E-04  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -7.9939E+00 GPa]
-- sigma(1 1)=  7.99386259E+00  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  7.99386259E+00  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  7.99386259E+00  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  7.99386262E+00  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  7.99386262E+00  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  7.99386262E+00  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET 22 ==================================================================
@@ -1571,11 +1571,11 @@ tolerances: {toldfe: 1.00E-08, }
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -2.0804451084846    -2.080E+00 2.965E-12 3.823E-10
- ETOT  2  -2.0804451084855    -8.460E-13 8.999E-15 2.267E-11
- ETOT  3  -2.0804451084855    -5.107E-14 1.248E-14 9.184E-15
+ ETOT  2  -2.0804451084855    -8.376E-13 9.000E-15 2.267E-11
+ ETOT  3  -2.0804451084855    -4.396E-14 1.248E-14 9.184E-15
 
  At SCF step    3, etot is converged : 
-  for the second time, diff in etot=  5.107E-14 < toldfe=  1.000E-08
+  for the second time, diff in etot=  4.396E-14 < toldfe=  1.000E-08
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  2.71647506E-04  sigma(3 2)=  0.00000000E+00
@@ -1593,7 +1593,7 @@ lattice_vectors:
 lattice_lengths: [   5.37401,    5.37401,    5.37401, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.0974400E+02
-convergence: {deltae: -5.107E-14, res2:  9.184E-15, residm:  1.248E-14, diffor: null, }
+convergence: {deltae: -4.396E-14, res2:  9.184E-15, residm:  1.248E-14, diffor: null, }
 etotal    :  -2.08044511E+00
 entropy   :   0.00000000E+00
 fermie    :   2.80048982E-01
@@ -1654,18 +1654,18 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 22, }
 comment             : Components of total free energy in Hartree
-kinetic             :  8.31073700663560E-01
-hartree             :  3.58937464014486E-03
-xc                  : -8.03185532581915E-01
+kinetic             :  8.31073700663564E-01
+hartree             :  3.58937464014474E-03
+xc                  : -8.03185532581921E-01
 Ewald energy        : -2.71472096493581E+00
 psp_core            :  3.72610088794390E-02
-local_psp           :  9.51361966379496E-02
-non_local_psp       :  4.70295524730278E-01
+local_psp           :  9.51361966379475E-02
+non_local_psp       :  4.70295524730288E-01
 internal            : -2.08055069196635E+00
-'-kT*entropy'       :  1.05583480847746E-04
-total_energy        : -2.08044510848551E+00
-total_energy_eV     : -5.66117904466584E+01
-band_energy         :  3.57262345248405E-01
+'-kT*entropy'       :  1.05583480847760E-04
+total_energy        : -2.08044510848550E+00
+total_energy_eV     : -5.66117904466583E+01
+band_energy         :  3.57262345248418E-01
 ...
 
 
@@ -1731,10 +1731,10 @@ tolerances: {toldfe: 1.00E-08, }
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -2.0807638505696    -2.081E+00 1.491E-11 1.166E-08
  ETOT  2  -2.0807638505958    -2.613E-11 1.914E-13 6.870E-10
- ETOT  3  -2.0807638505974    -1.585E-12 1.426E-13 2.672E-13
+ ETOT  3  -2.0807638505974    -1.577E-12 1.426E-13 2.672E-13
 
  At SCF step    3, etot is converged : 
-  for the second time, diff in etot=  1.585E-12 < toldfe=  1.000E-08
+  for the second time, diff in etot=  1.577E-12 < toldfe=  1.000E-08
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  2.71092508E-04  sigma(3 2)=  0.00000000E+00
@@ -1752,7 +1752,7 @@ lattice_vectors:
 lattice_lengths: [   5.37401,    5.37401,    5.37401, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.0974400E+02
-convergence: {deltae: -1.585E-12, res2:  2.672E-13, residm:  1.426E-13, diffor: null, }
+convergence: {deltae: -1.577E-12, res2:  2.672E-13, residm:  1.426E-13, diffor: null, }
 etotal    :  -2.08076385E+00
 entropy   :   0.00000000E+00
 fermie    :   2.80668376E-01
@@ -1813,18 +1813,18 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 23, }
 comment             : Components of total free energy in Hartree
-kinetic             :  8.31260583377038E-01
-hartree             :  3.52860533915900E-03
-xc                  : -8.03134222382996E-01
+kinetic             :  8.31260583377049E-01
+hartree             :  3.52860533915865E-03
+xc                  : -8.03134222383005E-01
 Ewald energy        : -2.71472096493581E+00
 psp_core            :  3.72610088794390E-02
-local_psp           :  9.54157315436923E-02
-non_local_psp       :  4.70192355779166E-01
-internal            : -2.08019690240031E+00
-'-kT*entropy'       : -5.66948197049901E-04
-total_energy        : -2.08076385059736E+00
-total_energy_eV     : -5.66204638606165E+01
-band_energy         :  3.57571595677663E-01
+local_psp           :  9.54157315437121E-02
+non_local_psp       :  4.70192355779154E-01
+internal            : -2.08019690240030E+00
+'-kT*entropy'       : -5.66948197049887E-04
+total_energy        : -2.08076385059735E+00
+total_energy_eV     : -5.66204638606162E+01
+band_energy         :  3.57571595677672E-01
 ...
 
 
@@ -1891,7 +1891,7 @@ tolerances: {toldfe: 1.00E-08, }
  ETOT  1  -2.0807696707479    -2.081E+00 1.133E-04 2.364E-05
  ETOT  2  -2.0807697124253    -4.168E-08 3.624E-06 8.620E-07
  ETOT  3  -2.0807697144745    -2.049E-09 2.270E-08 6.680E-09
- ETOT  4  -2.0807697144886    -1.417E-11 1.104E-07 4.852E-12
+ ETOT  4  -2.0807697144886    -1.417E-11 1.104E-07 4.851E-12
 
  At SCF step    4, etot is converged : 
   for the second time, diff in etot=  1.417E-11 < toldfe=  1.000E-08
@@ -1912,7 +1912,7 @@ lattice_vectors:
 lattice_lengths: [   5.37401,    5.37401,    5.37401, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.0974400E+02
-convergence: {deltae: -1.417E-11, res2:  4.852E-12, residm:  1.104E-07, diffor: null, }
+convergence: {deltae: -1.417E-11, res2:  4.851E-12, residm:  1.104E-07, diffor: null, }
 etotal    :  -2.08076971E+00
 entropy   :   0.00000000E+00
 fermie    :   2.81461961E-01
@@ -1973,18 +1973,18 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 31, }
 comment             : Components of total free energy in Hartree
-kinetic             :  8.30096325980092E-01
-hartree             :  3.44759631967888E-03
-xc                  : -8.03065218417227E-01
+kinetic             :  8.30096325981884E-01
+hartree             :  3.44759632010007E-03
+xc                  : -8.03065218417608E-01
 Ewald energy        : -2.71472096493581E+00
 psp_core            :  3.72610088794390E-02
-local_psp           :  9.68142120583514E-02
-non_local_psp       :  4.69389868401537E-01
-internal            : -2.08077717171394E+00
-'-kT*entropy'       :  7.45722530164742E-06
-total_energy        : -2.08076971448864E+00
-total_energy_eV     : -5.66206234252129E+01
-band_energy         :  3.56932034762940E-01
+local_psp           :  9.68142120448382E-02
+non_local_psp       :  4.69389868413239E-01
+internal            : -2.08077717171392E+00
+'-kT*entropy'       :  7.45722528601962E-06
+total_energy        : -2.08076971448863E+00
+total_energy_eV     : -5.66206234252128E+01
+band_energy         :  3.56932034762832E-01
 ...
 
 
@@ -2049,11 +2049,11 @@ tolerances: {toldfe: 1.00E-08, }
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -2.0807621291455    -2.081E+00 3.319E-09 6.672E-12
- ETOT  2  -2.0807621291455    -8.438E-15 9.882E-11 4.105E-13
- ETOT  3  -2.0807621291455     8.438E-15 5.889E-13 6.094E-17
+ ETOT  2  -2.0807621291455    -8.882E-15 9.882E-11 4.105E-13
+ ETOT  3  -2.0807621291455    -2.220E-15 5.889E-13 6.094E-17
 
  At SCF step    3, etot is converged : 
-  for the second time, diff in etot=  8.438E-15 < toldfe=  1.000E-08
+  for the second time, diff in etot=  2.220E-15 < toldfe=  1.000E-08
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  2.81807892E-04  sigma(3 2)=  0.00000000E+00
@@ -2071,7 +2071,7 @@ lattice_vectors:
 lattice_lengths: [   5.37401,    5.37401,    5.37401, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.0974400E+02
-convergence: {deltae:  8.438E-15, res2:  6.094E-17, residm:  5.889E-13, diffor: null, }
+convergence: {deltae: -2.220E-15, res2:  6.094E-17, residm:  5.889E-13, diffor: null, }
 etotal    :  -2.08076213E+00
 entropy   :   0.00000000E+00
 fermie    :   2.81485927E-01
@@ -2132,18 +2132,18 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 32, }
 comment             : Components of total free energy in Hartree
-kinetic             :  8.30071499291244E-01
-hartree             :  3.44529562282620E-03
-xc                  : -8.03063279964654E-01
+kinetic             :  8.30071499291230E-01
+hartree             :  3.44529562282623E-03
+xc                  : -8.03063279964644E-01
 Ewald energy        : -2.71472096493581E+00
 psp_core            :  3.72610088794390E-02
-local_psp           :  9.67429877070929E-02
-non_local_psp       :  4.69486129994538E-01
-internal            : -2.08077732340532E+00
-'-kT*entropy'       :  1.51942598530915E-05
-total_energy        : -2.08076212914547E+00
-total_energy_eV     : -5.66204170175283E+01
-band_energy         :  3.56930267625025E-01
+local_psp           :  9.67429877070953E-02
+non_local_psp       :  4.69486129994530E-01
+internal            : -2.08077732340533E+00
+'-kT*entropy'       :  1.51942598531107E-05
+total_energy        : -2.08076212914548E+00
+total_energy_eV     : -5.66204170175286E+01
+band_energy         :  3.56930267625009E-01
 ...
 
 
@@ -2209,10 +2209,10 @@ tolerances: {toldfe: 1.00E-08, }
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -2.0810139756815    -2.081E+00 9.909E-13 5.563E-10
  ETOT  2  -2.0810139756828    -1.248E-12 9.147E-14 3.251E-11
- ETOT  3  -2.0810139756828    -7.550E-14 2.992E-13 1.516E-14
+ ETOT  3  -2.0810139756828    -8.082E-14 2.992E-13 1.516E-14
 
  At SCF step    3, etot is converged : 
-  for the second time, diff in etot=  7.550E-14 < toldfe=  1.000E-08
+  for the second time, diff in etot=  8.082E-14 < toldfe=  1.000E-08
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  2.80016724E-04  sigma(3 2)=  0.00000000E+00
@@ -2230,7 +2230,7 @@ lattice_vectors:
 lattice_lengths: [   5.37401,    5.37401,    5.37401, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.0974400E+02
-convergence: {deltae: -7.550E-14, res2:  1.516E-14, residm:  2.992E-13, diffor: null, }
+convergence: {deltae: -8.082E-14, res2:  1.516E-14, residm:  2.992E-13, diffor: null, }
 etotal    :  -2.08101398E+00
 entropy   :   0.00000000E+00
 fermie    :   2.82060879E-01
@@ -2292,17 +2292,17 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 iteration_state     : {dtset: 33, }
 comment             : Components of total free energy in Hartree
 kinetic             :  8.30350336943931E-01
-hartree             :  3.45500588935203E-03
-xc                  : -8.03071872227372E-01
+hartree             :  3.45500588935222E-03
+xc                  : -8.03071872227374E-01
 Ewald energy        : -2.71472096493581E+00
 psp_core            :  3.72610088794390E-02
-local_psp           :  9.66332995300435E-02
-non_local_psp       :  4.69529985948311E-01
-internal            : -2.08056319997210E+00
-'-kT*entropy'       : -4.50775710730236E-04
-total_energy        : -2.08101397568283E+00
-total_energy_eV     : -5.66272701103303E+01
-band_energy         :  3.57151383458055E-01
+local_psp           :  9.66332995300329E-02
+non_local_psp       :  4.69529985948320E-01
+internal            : -2.08056319997211E+00
+'-kT*entropy'       : -4.50775710730257E-04
+total_energy        : -2.08101397568284E+00
+total_energy_eV     : -5.66272701103304E+01
+band_energy         :  3.57151383458053E-01
 ...
 
 
@@ -2342,7 +2342,7 @@ band_energy         :  3.57151383458055E-01
             fcart31   -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart32   -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart33   -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
--          fftalg         312
+-          fftalg         512
            getwfk          -1
             intxc           1
            jdtset       11   12   13   21   22   23   31   32   33
@@ -2943,19 +2943,19 @@ P           mkmem33        60
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
            shiftk      5.00000000E-01  5.00000000E-01  5.00000000E-01
           spgroup         216
-           strten11    2.5933292557E-04  2.5933292557E-04  2.5933292557E-04
+           strten11    2.5933292558E-04  2.5933292558E-04  2.5933292558E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten12    2.5915833629E-04  2.5915833629E-04  2.5915833629E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten13    2.5899339718E-04  2.5899339718E-04  2.5899339718E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten21    2.7170591269E-04  2.7170591269E-04  2.7170591269E-04
+           strten21    2.7170591362E-04  2.7170591362E-04  2.7170591362E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten22    2.7164750585E-04  2.7164750585E-04  2.7164750585E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten23    2.7109250834E-04  2.7109250834E-04  2.7109250834E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten31    2.8233991483E-04  2.8233991483E-04  2.8233991483E-04
+           strten31    2.8233991476E-04  2.8233991476E-04  2.8233991476E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten32    2.8180789154E-04  2.8180789154E-04  2.8180789154E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -3126,10 +3126,10 @@ P           mkmem33        60
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          3.7  wall=          4.0
+- Proc.   0 individual time (sec): cpu=          2.4  wall=          2.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered  39 WARNINGs and  34 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.7  wall=          4.0
++Overall time at end (sec) : cpu=          2.4  wall=          2.4

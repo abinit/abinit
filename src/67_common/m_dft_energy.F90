@@ -27,9 +27,7 @@ module m_dft_energy
  use m_hamiltonian
  use m_errors
  use m_xmpi
- use m_gemm_nonlop
- use m_gemm_nonlop_gpu
- use m_gemm_nonlop_ompgpu
+ use m_gemm_nonlop_projectors
  use m_xcdata
  use m_cgtools
  use m_dtset
@@ -174,7 +172,7 @@ contains
 !!  vhartr(nfftf)=work space to hold Hartree potential in real space (hartree)
 !!  vtrial(nfftf,nspden)=total local potential (hartree)
 !!  vxc(nfftf,nspden)=work space to hold Vxc(r) in real space (hartree)
-!!  [vxctau(nfft,nspden,4*usekden)]=(only for meta-GGA): derivative of XC energy density
+!!  [vxctau(nfftf,nspden,4*usevxctau)]=(only for meta-GGA): derivative of XC energy density
 !!    with respect to kinetic energy density (depsxcdtau). The arrays vxctau contains also
 !!    the gradient of vxctau (gvxctau) in vxctau(:,:,2:4)
 !!
@@ -264,7 +262,7 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
  real(dp), intent(in) :: rprimd(3,3),vpsp(nfftf),xccc3d(n3xccc),xred(3,dtset%natom)
  real(dp), intent(in) :: xcctau3d(nfftf*dtset%usekden)
  real(dp), intent(out) :: vhartr(nfftf),vtrial(nfftf,dtset%nspden),vxc(nfftf,dtset%nspden)
- real(dp),intent(out),optional,target :: vxctau(nfftf,dtset%nspden,4*dtset%usekden)
+ real(dp),intent(out),optional,target :: vxctau(:,:,:) ! vxctau(nfftf,dtset%nspden,4*usevxctau)
  real(dp), intent(in) :: ylm(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm)
  type(paw_ij_type), intent(in) :: paw_ij(my_natom*psps%usepaw)
  type(pawfgrtab_type),intent(inout) :: pawfgrtab(my_natom)
@@ -307,8 +305,14 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
 
  DBG_ENTER("COLL")
 
-!Check that usekden is not 0 if want to use vxctau
- with_vxctau = (present(vxctau).and.dtset%usekden/=0)
+!Test size of kinetic energy potential Vxctau
+ with_vxctau = (present(vxctau))
+ if (with_vxctau) with_vxctau = (size(vxctau)>0.and.dtset%usekden/=0)
+ if (with_vxctau) then 
+   if (size(vxctau)/=nfftf*dtset%nspden*4) then
+     ABI_BUG("Wrong size for vxctau!")
+   end if
+ end if
  vxctau_ => vxctau_dum ; if (with_vxctau) vxctau_ => vxctau
 
 !Test size of FFT grids (1 grid in norm-conserving, 2 grids in PAW)
@@ -367,18 +371,18 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
      if (ipositron==0) then
        call rhotoxc(energies%e_xc,kxc, &
 &       mpi_enreg,nfftf,ngfftf,nhat,psps%usepaw,nhatgr,nhatgrdim, &
-&       nkxc,nk3xc,non_magnetic_xc,n3xccc,option,rhor,rprimd,strsxc, &
+&       nkxc,nk3xc,non_magnetic_xc,n3xccc,option,rhor,rprimd, &
 &       usexcnhat,vxc,vxcavg,xccc3d,xcdata,taur=taur,vhartr=vhartr, &
-&       vxctau=vxctau_,exc_vdw_out=energies%e_xc_vdw,add_tfw=add_tfw_,&
-&       xcctau3d=xcctau3d)
+&       vxctau=vxctau_,exc_vdw_out=energies%e_xc_vdw,add_tfw=add_tfw_, &
+&       xcctau3d=xcctau3d,strsxc=strsxc)
      else
        call rhotoxc(energies%e_xc,kxc, &
 &       mpi_enreg,nfftf,ngfftf,nhat,psps%usepaw,nhatgr,nhatgrdim, &
-&       nkxc,nk3xc,non_magnetic_xc,n3xccc,option,rhor,rprimd,strsxc, &
+&       nkxc,nk3xc,non_magnetic_xc,n3xccc,option,rhor,rprimd, &
 &       usexcnhat,vxc,vxcavg,xccc3d,xcdata, &
 &       electronpositron=electronpositron,taur=taur,vhartr=vhartr, &
 &       vxctau=vxctau_,exc_vdw_out=energies%e_xc_vdw,add_tfw=add_tfw_, &
-&       xcctau3d=xcctau3d)
+&       xcctau3d=xcctau3d,strsxc=strsxc)
      end if
      ABI_FREE(kxc)
    else if (dtset%usewvl == 0) then
@@ -679,35 +683,21 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
 !    If OpenMP GPU, load "hamiltonian" on GPU device
      if (dtset%gpu_option == ABI_GPU_OPENMP) then
        if(dtset%paral_kgb==0) then
-         call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp)
+         call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp,gs_hamk%ffnl_k,gs_hamk%ph3d_k)
        else if(istwf_k==1) then
-         call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp,kg_k_gather=my_bandfft_kpt%kg_k_gather)
+         call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp,gs_hamk%ffnl_k,gs_hamk%ph3d_k,kg_k_gather=my_bandfft_kpt%kg_k_gather)
        else if(istwf_k==2) then
-         call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp,kg_k_gather=my_bandfft_kpt%kg_k_gather_sym)
+         call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp,gs_hamk%ffnl_k,gs_hamk%ph3d_k,kg_k_gather=my_bandfft_kpt%kg_k_gather_sym)
        else
          ABI_ERROR("istwfk > 2 is not handled with OpenMP GPU offload mode !")
        end if
      end if
 
+     choice=1-gs_hamk%usepaw ; signs=1 ; idir=0 ; nnlout=blocksize
+
 !    Setup gemm_nonlop
      if (gemm_nonlop_use_gemm) then
        gemm_nonlop_ikpt_this_proc_being_treated = my_ikpt
-       if(dtset%gpu_option==ABI_GPU_DISABLED) then
-         call make_gemm_nonlop(my_ikpt,gs_hamk%npw_fft_k,gs_hamk%lmnmax, &
-             gs_hamk%ntypat, gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%istwf_k, &
-             gs_hamk%ucvol, gs_hamk%ffnl_k, &
-             gs_hamk%ph3d_k, gs_hamk%kpt_k, gs_hamk%kg_k, gs_hamk%kpg_k)
-       else if(dtset%gpu_option==ABI_GPU_LEGACY .or. dtset%gpu_option==ABI_GPU_KOKKOS) then
-         call make_gemm_nonlop_gpu(my_ikpt,gs_hamk%npw_fft_k,gs_hamk%lmnmax, &
-             gs_hamk%ntypat, gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%istwf_k, &
-             gs_hamk%ucvol, gs_hamk%ffnl_k, &
-             gs_hamk%ph3d_k, gs_hamk%kpt_k, gs_hamk%kg_k, gs_hamk%kpg_k)
-       else if(dtset%gpu_option==ABI_GPU_OPENMP) then
-         call make_gemm_nonlop_ompgpu(my_ikpt,gs_hamk%npw_fft_k,gs_hamk%lmnmax, &
-             gs_hamk%ntypat, gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%istwf_k, &
-             gs_hamk%ucvol, gs_hamk%ffnl_k, &
-             gs_hamk%ph3d_k, gs_hamk%kpt_k, gs_hamk%kg_k, gs_hamk%kpg_k)
-       end if
      end if
 
 #if defined HAVE_GPU_CUDA
@@ -731,7 +721,6 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
          cwavef(:,1:npw_k*my_nspinor*blocksize)=&
 &         cg(:,1+(iblock-1)*npw_k*my_nspinor*blocksize+icg:iblock*npw_k*my_nspinor*blocksize+icg)
 
-         choice=1-gs_hamk%usepaw ; signs=1 ; idir=0 ; nnlout=blocksize
          paw_opt=gs_hamk%usepaw;cpopt=gs_hamk%usepaw-1
 
          if (mpi_enreg%paral_kgb/=1) then

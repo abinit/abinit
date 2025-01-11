@@ -1,6 +1,6 @@
 
-.Version 9.11.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Jul 2023.
-- ( at 12h00 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h09 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v4_t56-t57/t56.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v4_t56-t57/t56.abi
 - output file    -> t56.abo
 - root for input  files -> t56i
 - root for output files -> t56o
@@ -109,10 +109,10 @@ _ WF disk file :      1.430 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -120,7 +120,7 @@ _ WF disk file :      1.430 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
               amu      6.97200000E+01  7.49216000E+01
            diemac      1.00000000E+01
              ecut      4.00000000E+00 Hartree
--          fftalg         312
+-          fftalg         512
            getden1          0
            getden2          1
            getden3          0
@@ -378,8 +378,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      4.000   => boxcut(ratio)=   2.08519
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/31ga.SGS_mod
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/31ga.SGS_mod
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/31ga.SGS_mod
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/31ga.SGS_mod
 -   pspot from prpsa - Bachelet or Stumpf table ( !! OLD, only for tests )
 - 31.00000   3.00000    900101                znucl, zion, pspdat
     5    3    2    2       267   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -397,8 +397,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              1   -0.525725
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/33as.SGS_mod
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/33as.SGS_mod
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/33as.SGS_mod
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/33as.SGS_mod
 -   pspot from prpsa - Bachelet or Stumpf table ( !! OLD, for testing purposes only )
 - 33.00000   5.00000    900101                znucl, zion, pspdat
     5    3    2    2       269   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -433,20 +433,20 @@ tolerances: {tolwfr: 1.00E-22, }
  ETOT  1  -8.5441099119996    -8.544E+00 1.180E-02 3.699E-01
  ETOT  2  -8.5523492922350    -8.239E-03 7.202E-05 3.434E-02
  ETOT  3  -8.5524155355974    -6.624E-05 3.966E-06 2.688E-03
- ETOT  4  -8.5524232226337    -7.687E-06 2.190E-07 7.690E-05
- ETOT  5  -8.5524233609593    -1.383E-07 2.717E-08 3.131E-06
+ ETOT  4  -8.5524232226338    -7.687E-06 2.190E-07 7.690E-05
+ ETOT  5  -8.5524233609592    -1.383E-07 2.717E-08 3.131E-06
  ETOT  6  -8.5524233693986    -8.439E-09 4.687E-10 2.263E-08
- ETOT  7  -8.5524233695054    -1.069E-10 6.004E-11 4.345E-10
- ETOT  8  -8.5524233695101    -4.659E-12 9.498E-13 1.052E-10
- ETOT  9  -8.5524233695106    -4.903E-13 1.608E-13 9.106E-13
- ETOT 10  -8.5524233695106    -4.796E-14 4.036E-15 2.750E-14
- ETOT 11  -8.5524233695106     3.908E-14 7.789E-16 1.506E-15
- ETOT 12  -8.5524233695106     2.309E-14 1.853E-17 5.328E-17
- ETOT 13  -8.5524233695107    -9.415E-14 3.629E-18 3.553E-19
- ETOT 14  -8.5524233695106     2.842E-14 8.581E-20 1.578E-19
- ETOT 15  -8.5524233695106     2.842E-14 1.666E-20 7.215E-21
- ETOT 16  -8.5524233695106    -2.487E-14 3.997E-22 9.577E-21
- ETOT 17  -8.5524233695106     1.421E-14 5.539E-23 3.383E-21
+ ETOT  7  -8.5524233695055    -1.069E-10 6.004E-11 4.345E-10
+ ETOT  8  -8.5524233695101    -4.620E-12 9.498E-13 1.052E-10
+ ETOT  9  -8.5524233695106    -5.045E-13 1.608E-13 9.106E-13
+ ETOT 10  -8.5524233695106    -4.619E-14 4.036E-15 2.750E-14
+ ETOT 11  -8.5524233695106     4.441E-14 7.789E-16 1.506E-15
+ ETOT 12  -8.5524233695106     1.776E-14 1.853E-17 5.327E-17
+ ETOT 13  -8.5524233695107    -8.704E-14 3.629E-18 3.553E-19
+ ETOT 14  -8.5524233695106     2.487E-14 8.580E-20 1.578E-19
+ ETOT 15  -8.5524233695106     2.665E-14 1.666E-20 7.215E-21
+ ETOT 16  -8.5524233695106    -2.665E-14 3.997E-22 9.577E-21
+ ETOT 17  -8.5524233695106     1.421E-14 5.537E-23 3.388E-21
 
  At SCF step   17   max residual=  5.54E-23 < tolwfr=  1.00E-22 =>converged.
 
@@ -466,7 +466,7 @@ lattice_vectors:
 lattice_lengths: [   7.49533,    7.49533,    7.49533, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.9775400E+02
-convergence: {deltae:  1.421E-14, res2:  3.383E-21, residm:  5.539E-23, diffor: null, }
+convergence: {deltae:  1.421E-14, res2:  3.388E-21, residm:  5.537E-23, diffor: null, }
 etotal    :  -8.55242337E+00
 entropy   :   0.00000000E+00
 fermie    :   8.02229777E-05
@@ -493,7 +493,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   36.531E-24; max=  55.386E-24
+ Mean square residual over all n,k,spin=   36.527E-24; max=  55.372E-24
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -528,15 +528,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  3.00077550899490E+00
-hartree             :  7.38727150229730E-01
+hartree             :  7.38727150229729E-01
 xc                  : -2.38303395045599E+00
 Ewald energy        : -8.48789573682593E+00
 psp_core            :  1.23030629308494E+00
 local_psp           : -2.59596319570626E+00
-non_local_psp       : -5.53394388320077E-02
+non_local_psp       : -5.53394388320076E-02
 total_energy        : -8.55242336951062E+00
 total_energy_eV     : -2.32723275240988E+02
-band_energy         : -1.28063989444583E+00
+band_energy         : -1.28063989444584E+00
 ...
 
 
@@ -586,12 +586,12 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
 ================================================================================
  prteigrs : about to open file t56o_DS2_EIG
  Non-SCF case, kpt    1 ( -0.25000  0.50000  0.00000), residuals and eigenvalues=
-  1.54E-23  4.42E-23  3.18E-23  2.12E-23  8.26E-25  1.46E-23  8.33E-24  4.15E-23
-  3.40E-23  9.28E-23  6.61E-23  6.96E-23  9.63E-23  2.25E-24  5.58E-24  1.55E-24
-  1.91E-24  7.05E-24  1.79E-23  8.73E-25  2.06E-23  2.22E-23  2.06E-24  8.94E-23
-  6.50E-23  7.89E-23  1.60E-23  1.23E-23  5.97E-23  6.80E-23  7.32E-23  8.47E-23
+  1.53E-23  4.41E-23  3.18E-23  2.12E-23  8.26E-25  1.46E-23  8.33E-24  4.16E-23
+  3.39E-23  9.28E-23  6.61E-23  6.96E-23  9.63E-23  2.25E-24  5.58E-24  1.55E-24
+  1.91E-24  7.05E-24  1.79E-23  8.73E-25  2.05E-23  2.22E-23  2.06E-24  8.93E-23
+  6.50E-23  7.89E-23  1.60E-23  1.23E-23  5.96E-23  6.80E-23  7.32E-23  8.47E-23
   3.05E-24  2.25E-23  6.29E-23  5.81E-23  9.91E-24  3.54E-23  9.56E-23  1.49E-23
-  1.73E-23  9.43E-23  3.26E-22  8.57E-23  1.47E-20  4.00E-16  4.68E-17  4.90E-14
+  1.73E-23  9.44E-23  3.26E-22  8.62E-23  1.47E-20  4.00E-16  4.68E-17  4.90E-14
   4.51E-13  2.91E-08
  -3.4387E-01 -1.9721E-01 -9.2937E-02 -4.8837E-02  1.1567E-01  2.1156E-01
   2.6651E-01  2.8351E-01  4.0860E-01  4.7542E-01  5.0611E-01  5.2522E-01
@@ -607,15 +607,15 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
 
   prteigrs : nnsclo,ikpt=   15    2 max resid (excl. the buffer)=  6.99248E-07
   prteigrs : nnsclo,ikpt=   15    3 max resid (excl. the buffer)=  2.81721E-07
-  prteigrs : nnsclo,ikpt=   15    4 max resid (excl. the buffer)=  2.34412E-08
+  prteigrs : nnsclo,ikpt=   15    4 max resid (excl. the buffer)=  2.34413E-08
   prteigrs : nnsclo,ikpt=   15    5 max resid (excl. the buffer)=  1.14006E-07
-  prteigrs : nnsclo,ikpt=   15    6 max resid (excl. the buffer)=  2.67513E-09
-  prteigrs : nnsclo,ikpt=   15    7 max resid (excl. the buffer)=  4.38335E-08
+  prteigrs : nnsclo,ikpt=   15    6 max resid (excl. the buffer)=  2.67518E-09
+  prteigrs : nnsclo,ikpt=   15    7 max resid (excl. the buffer)=  4.38336E-08
   prteigrs : nnsclo,ikpt=   15    8 max resid (excl. the buffer)=  3.25760E-08
-  prteigrs : nnsclo,ikpt=   15    9 max resid (excl. the buffer)=  5.71179E-08
+  prteigrs : nnsclo,ikpt=   15    9 max resid (excl. the buffer)=  5.71177E-08
   prteigrs : nnsclo,ikpt=   15   10 max resid (excl. the buffer)=  1.64476E-07
   prteigrs : nnsclo,ikpt=   15   11 max resid (excl. the buffer)=  5.98656E-08
-  prteigrs : nnsclo,ikpt=   15   12 max resid (excl. the buffer)=  1.50520E-08
+  prteigrs : nnsclo,ikpt=   15   12 max resid (excl. the buffer)=  1.50525E-08
   prteigrs : nnsclo,ikpt=   15   13 max resid (excl. the buffer)=  1.97288E-06
   prteigrs : nnsclo,ikpt=   15   14 max resid (excl. the buffer)=  1.94694E-07
   prteigrs : nnsclo,ikpt=   15   15 max resid (excl. the buffer)=  2.22128E-08
@@ -740,21 +740,21 @@ tolerances: {tolwfr: 1.00E-22, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -11.304682535668     -1.130E+01 3.171E+00 0.000E+00
- ETOT  2  -11.304690554595     -8.019E-06 6.260E-01 0.000E+00
- ETOT  3  -11.304690558173     -3.577E-09 1.306E-01 0.000E+00
- ETOT  4  -11.304690558173     -5.329E-15 1.780E-02 0.000E+00
- ETOT  5  -11.304690558173     -3.553E-15 1.721E-02 0.000E+00
- ETOT  6  -11.304690558173      0.000E+00 3.452E-03 0.000E+00
- ETOT  7  -11.304690558173      0.000E+00 3.273E-03 0.000E+00
- ETOT  8  -11.304690558173      0.000E+00 7.080E-04 0.000E+00
- ETOT  9  -11.304690558173      5.329E-15 6.585E-04 0.000E+00
- ETOT 10  -11.304690558173     -1.776E-15 1.500E-04 0.000E+00
- ETOT 11  -11.304690558173     -3.553E-15 1.371E-04 0.000E+00
- ETOT 12  -11.304690558173      7.105E-15 3.249E-05 0.000E+00
- ETOT 13  -11.304690558173     -5.329E-15 2.918E-05 0.000E+00
- ETOT 14  -11.304690558173     -1.776E-15 7.153E-06 0.000E+00
- ETOT 15  -11.304690558173      0.000E+00 6.307E-06 0.000E+00
+-ETOT  1  -11.304682535639     -1.130E+01 3.171E+00 0.000E+00
+ ETOT  2  -11.304690554566     -8.019E-06 6.260E-01 0.000E+00
+ ETOT  3  -11.304690558144     -3.577E-09 1.306E-01 0.000E+00
+ ETOT  4  -11.304690558144      8.882E-15 1.780E-02 0.000E+00
+ ETOT  5  -11.304690558144     -7.105E-15 1.721E-02 0.000E+00
+ ETOT  6  -11.304690558144     -5.329E-15 3.452E-03 0.000E+00
+ ETOT  7  -11.304690558144      5.329E-15 3.273E-03 0.000E+00
+ ETOT  8  -11.304690558144      0.000E+00 7.080E-04 0.000E+00
+ ETOT  9  -11.304690558144      0.000E+00 6.585E-04 0.000E+00
+ ETOT 10  -11.304690558144      0.000E+00 1.500E-04 0.000E+00
+ ETOT 11  -11.304690558144     -1.776E-15 1.371E-04 0.000E+00
+ ETOT 12  -11.304690558144      1.776E-15 3.249E-05 0.000E+00
+ ETOT 13  -11.304690558144     -1.776E-15 2.918E-05 0.000E+00
+ ETOT 14  -11.304690558144      1.776E-15 7.153E-06 0.000E+00
+ ETOT 15  -11.304690558144      0.000E+00 6.307E-06 0.000E+00
 
  scprqt:  WARNING -
   nstep=   15 was not enough SCF cycles to converge;
@@ -791,7 +791,7 @@ tolerances: {tolwfr: 1.00E-22, }
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -1.13046906E+01
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.1130469056E+02 Ha. Also 2DEtotal=   -0.307616274197E+03 eV
+ 2DEtotal=   -0.1130469056E+02 Ha. Also 2DEtotal=   -0.307616274196E+03 eV
     (  non-var. 2DEtotal :   -1.1304690558E+01 Ha)
 ================================================================================
 
@@ -876,21 +876,21 @@ tolerances: {tolwfr: 1.00E-22, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -11.304682716132     -1.130E+01 3.161E+00 0.000E+00
- ETOT  2  -11.304690733766     -8.018E-06 6.260E-01 0.000E+00
- ETOT  3  -11.304690737349     -3.583E-09 1.293E-01 0.000E+00
- ETOT  4  -11.304690737349     -1.066E-14 1.825E-02 0.000E+00
- ETOT  5  -11.304690737349      8.882E-15 1.779E-02 0.000E+00
- ETOT  6  -11.304690737349      1.776E-15 3.548E-03 0.000E+00
- ETOT  7  -11.304690737349      0.000E+00 3.391E-03 0.000E+00
- ETOT  8  -11.304690737349     -1.776E-15 7.290E-04 0.000E+00
- ETOT  9  -11.304690737349      0.000E+00 6.839E-04 0.000E+00
- ETOT 10  -11.304690737349      0.000E+00 1.547E-04 0.000E+00
- ETOT 11  -11.304690737349      0.000E+00 1.426E-04 0.000E+00
- ETOT 12  -11.304690737349      0.000E+00 3.354E-05 0.000E+00
- ETOT 13  -11.304690737349      0.000E+00 3.039E-05 0.000E+00
- ETOT 14  -11.304690737349      0.000E+00 7.386E-06 0.000E+00
- ETOT 15  -11.304690737349      0.000E+00 6.575E-06 0.000E+00
+-ETOT  1  -11.304682716091     -1.130E+01 3.161E+00 0.000E+00
+ ETOT  2  -11.304690733725     -8.018E-06 6.260E-01 0.000E+00
+ ETOT  3  -11.304690737308     -3.583E-09 1.293E-01 0.000E+00
+ ETOT  4  -11.304690737308     -3.553E-15 1.825E-02 0.000E+00
+ ETOT  5  -11.304690737308      8.882E-15 1.779E-02 0.000E+00
+ ETOT  6  -11.304690737308      1.776E-15 3.548E-03 0.000E+00
+ ETOT  7  -11.304690737308      3.553E-15 3.391E-03 0.000E+00
+ ETOT  8  -11.304690737308     -3.553E-15 7.290E-04 0.000E+00
+ ETOT  9  -11.304690737308     -3.553E-15 6.839E-04 0.000E+00
+ ETOT 10  -11.304690737308      0.000E+00 1.547E-04 0.000E+00
+ ETOT 11  -11.304690737308      1.776E-15 1.426E-04 0.000E+00
+ ETOT 12  -11.304690737308      0.000E+00 3.354E-05 0.000E+00
+ ETOT 13  -11.304690737308     -1.776E-15 3.039E-05 0.000E+00
+ ETOT 14  -11.304690737308      3.553E-15 7.386E-06 0.000E+00
+ ETOT 15  -11.304690737308     -3.553E-15 6.575E-06 0.000E+00
 
  scprqt:  WARNING -
   nstep=   15 was not enough SCF cycles to converge;
@@ -927,7 +927,7 @@ tolerances: {tolwfr: 1.00E-22, }
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -1.13046907E+01
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.1130469074E+02 Ha. Also 2DEtotal=   -0.307616279073E+03 eV
+ 2DEtotal=   -0.1130469074E+02 Ha. Also 2DEtotal=   -0.307616279071E+03 eV
     (  non-var. 2DEtotal :   -1.1304690737E+01 Ha)
 ================================================================================
 
@@ -1012,21 +1012,21 @@ tolerances: {tolwfr: 1.00E-22, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -11.304682365638     -1.130E+01 3.167E+00 0.000E+00
- ETOT  2  -11.304690387243     -8.022E-06 6.260E-01 0.000E+00
- ETOT  3  -11.304690390820     -3.576E-09 1.297E-01 0.000E+00
- ETOT  4  -11.304690390820     -5.329E-15 1.759E-02 0.000E+00
- ETOT  5  -11.304690390820      1.776E-15 1.693E-02 0.000E+00
- ETOT  6  -11.304690390820      0.000E+00 3.407E-03 0.000E+00
- ETOT  7  -11.304690390820     -1.776E-15 3.215E-03 0.000E+00
- ETOT  8  -11.304690390820     -1.776E-15 6.980E-04 0.000E+00
- ETOT  9  -11.304690390820      0.000E+00 6.461E-04 0.000E+00
- ETOT 10  -11.304690390820      1.776E-15 1.478E-04 0.000E+00
- ETOT 11  -11.304690390820      1.776E-15 1.344E-04 0.000E+00
- ETOT 12  -11.304690390820      0.000E+00 3.200E-05 0.000E+00
- ETOT 13  -11.304690390820     -3.553E-15 2.859E-05 0.000E+00
- ETOT 14  -11.304690390820      1.776E-15 7.044E-06 0.000E+00
- ETOT 15  -11.304690390820     -1.776E-15 6.178E-06 0.000E+00
+-ETOT  1  -11.304682365601     -1.130E+01 3.167E+00 0.000E+00
+ ETOT  2  -11.304690387207     -8.022E-06 6.260E-01 0.000E+00
+ ETOT  3  -11.304690390783     -3.576E-09 1.297E-01 0.000E+00
+ ETOT  4  -11.304690390783     -5.329E-15 1.759E-02 0.000E+00
+ ETOT  5  -11.304690390783      1.776E-15 1.693E-02 0.000E+00
+ ETOT  6  -11.304690390783      0.000E+00 3.407E-03 0.000E+00
+ ETOT  7  -11.304690390783      0.000E+00 3.215E-03 0.000E+00
+ ETOT  8  -11.304690390783      0.000E+00 6.980E-04 0.000E+00
+ ETOT  9  -11.304690390783      0.000E+00 6.461E-04 0.000E+00
+ ETOT 10  -11.304690390783     -1.776E-15 1.478E-04 0.000E+00
+ ETOT 11  -11.304690390783      0.000E+00 1.344E-04 0.000E+00
+ ETOT 12  -11.304690390783      0.000E+00 3.200E-05 0.000E+00
+ ETOT 13  -11.304690390783      0.000E+00 2.859E-05 0.000E+00
+ ETOT 14  -11.304690390783     -1.776E-15 7.044E-06 0.000E+00
+ ETOT 15  -11.304690390783      0.000E+00 6.178E-06 0.000E+00
 
  scprqt:  WARNING -
   nstep=   15 was not enough SCF cycles to converge;
@@ -1063,7 +1063,7 @@ tolerances: {tolwfr: 1.00E-22, }
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -1.13046904E+01
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.1130469039E+02 Ha. Also 2DEtotal=   -0.307616269643E+03 eV
+ 2DEtotal=   -0.1130469039E+02 Ha. Also 2DEtotal=   -0.307616269642E+03 eV
     (  non-var. 2DEtotal :   -1.1304690391E+01 Ha)
 ================================================================================
 
@@ -1104,7 +1104,7 @@ tolerances: {tolwfr: 1.00E-22, }
            etotal5    -1.1304690391E+01
             fcart1    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
--          fftalg         312
+-          fftalg         512
            getden1          0
            getden2          1
            getden3          0
@@ -1410,10 +1410,10 @@ P          mk1mem5         16
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         24.1  wall=         24.3
+- Proc.   0 individual time (sec): cpu=         13.1  wall=         14.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered  45 WARNINGs and  10 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         24.1  wall=         24.3
++Overall time at end (sec) : cpu=         13.1  wall=         14.5

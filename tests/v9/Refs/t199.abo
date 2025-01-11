@@ -1,6 +1,6 @@
 
-.Version 9.11.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 17 Jul 2023.
-- ( at 17h10 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h17 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v9_t199/t199.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v9_t199/t199.abi
 - output file    -> t199.abo
 - root for input  files -> t199i
 - root for output files -> t199o
@@ -42,10 +42,10 @@ _ WF disk file :      0.073 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -53,7 +53,7 @@ _ WF disk file :      0.073 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
               amu      2.43050000E+01  4.49559100E+01  5.09415000E+01
                        3.20660000E+01
              ecut      2.00000000E+00 Hartree
--          fftalg         312
+-          fftalg         512
            istwfk        2
          kptrlatt        1    0    0      0    1    0      0    0    1
           kptrlen      1.39340352E+01
@@ -155,8 +155,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      2.000   => boxcut(ratio)=   2.01722
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/12mg.2.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/12mg.2.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/12mg.2.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/12mg.2.hgh
 - Hartwigsen-Goedecker-Hutter psp for Mg,  from PRB58, 3641 (1998)
 - 12.00000   2.00000     10605                znucl, zion, pspdat
     3    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -178,8 +178,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              1    1.063023
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/21sc.3.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/21sc.3.hgh
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/21sc.3.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/21sc.3.hgh
 - Hartwigsen-Goedecker-Hutter psp for Sc,  from PRB58, 3641 (1998)
 - 21.00000   3.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -204,8 +204,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              2   -0.219749
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/23v.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/23v.5.hgh
+- pspini: atom type   3  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/23v.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/23v.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for V,  from PRB58, 3641 (1998)
 - 23.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -230,8 +230,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              2   -0.086204
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   4  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/16s.6.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/16s.6.hgh
+- pspini: atom type   4  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/16s.6.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/16s.6.hgh
 - Hartwigsen-Goedecker-Hutter psp for S,  from PRB58, 3641 (1998)
 - 16.00000   6.00000     10605                znucl, zion, pspdat
     3    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -378,7 +378,7 @@ force_length_stats: {min:   2.16694698E-02, max:   5.74120677E-01, mean:   2.862
     6       0.106765695626      0.431621697550      0.331510982701
     7      -7.858189800879     -4.863486532033     -4.857570148992
     8       1.504982090480     -2.997349533232     -4.581787994041
-    9       0.489518209938     -3.823768150497     -3.133909112933
+    9       0.489518209939     -3.823768150497     -3.133909112933
    10      -6.993770242573     -2.633270550823     -3.046630634365
    11       0.416564856503      4.156672381333      3.965050836143
    12       7.708993455844      3.292883608366      2.928191076560
@@ -414,25 +414,25 @@ force_length_stats: {min:   2.16694698E-02, max:   5.74120677E-01, mean:   2.862
    10      0.45818024198719    -0.06014303139688     0.21671663725957
    11      0.13840225037271    -0.23403650745868    -0.28348749916837
    12     -0.50431064127392     0.02465724997228    -0.20760187818436
-   13     -0.34222416320987     0.00097945935103    -0.33613230939845
+   13     -0.34222416320988     0.00097945935103    -0.33613230939844
    14      0.21950770706002    -0.19617058072020    -0.23125631809303
  frms,max,avg= 2.0727416E-01 5.0431064E-01  -8.815E-03 -2.513E-03 -2.071E-04 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -1.85033196911782     2.13020240017348     0.89130992438209
-    2      3.06398460199290    -2.41647764396444    -3.06651380721988
-    3     -0.60625317197037     1.12062817945694    -0.35941261014120
-    4      1.32970997558250    -0.17623649716061     0.95711939891502
-    5     -0.51868394402899    -0.97077941626055    -0.17376399260491
-    6      0.70595866994466    -1.15946839154959    -1.20786539085636
-    7     23.36946915524679     2.94785273044935    17.79759236810332
-    8    -15.65275950301455     9.01387395185905    16.89834491734054
-    9     -8.27556940917828    13.40692703527207    11.54829542879122
-   10     23.56057335689417    -3.09267876106247    11.14401661596816
-   11      7.11692926461150   -12.03464007582782   -14.57751209644146
-   12    -25.93269366409908     1.26792666622089   -10.67531689882046
-   13    -17.59787254648434     0.05036582064298   -17.28461685483531
-   14     11.28753918362091   -10.08749599824928   -11.89167700258076
+    1     -1.85033196911786     2.13020240017352     0.89130992438209
+    2      3.06398460199293    -2.41647764396444    -3.06651380721992
+    3     -0.60625317197037     1.12062817945695    -0.35941261014121
+    4      1.32970997558251    -0.17623649716059     0.95711939891502
+    5     -0.51868394402896    -0.97077941626056    -0.17376399260492
+    6      0.70595866994471    -1.15946839154959    -1.20786539085637
+    7     23.36946915524683     2.94785273044938    17.79759236810330
+    8    -15.65275950301454     9.01387395185903    16.89834491734049
+    9     -8.27556940917828    13.40692703527195    11.54829542879121
+   10     23.56057335689412    -3.09267876106246    11.14401661596816
+   11      7.11692926461154   -12.03464007582776   -14.57751209644146
+   12    -25.93269366409907     1.26792666622088   -10.67531689882044
+   13    -17.59787254648444     0.05036582064297   -17.28461685483522
+   14     11.28753918362090   -10.08749599824927   -11.89167700258075
  frms,max,avg= 1.0658465E+01 2.5932694E+01  -4.533E-01 -1.292E-01 -1.065E-02 e/A
  length scales=  1.000000000000  1.000000000000  1.000000000000 bohr
               =  0.529177208590  0.529177208590  0.529177208590 angstroms
@@ -450,15 +450,15 @@ force_length_stats: {min:   2.16694698E-02, max:   5.74120677E-01, mean:   2.862
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  2.91646963565421E+01
-hartree             :  6.29679140304494E+00
+hartree             :  6.29679140304493E+00
 xc                  : -2.12985039687814E+01
 Ewald energy        : -9.01306265177375E+01
 psp_core            :  1.01310330167917E+00
-local_psp           : -3.48700732126151E+01
+local_psp           : -3.48700732126150E+01
 non_local_psp       :  2.21578888910940E+01
 total_energy        : -8.76667237467738E+01
 total_energy_eV     : -2.38553287162204E+03
-band_energy         :  5.02826626748791E+00
+band_energy         :  5.02826626748792E+00
 ...
 
 
@@ -495,7 +495,7 @@ band_energy         :  5.02826626748791E+00
                       -5.0431064127E-01  2.4657249972E-02 -2.0760187818E-01
                       -3.4222416321E-01  9.7945935103E-04 -3.3613230940E-01
                        2.1950770706E-01 -1.9617058072E-01 -2.3125631809E-01
--          fftalg         312
+-          fftalg         512
            istwfk        2
          kptrlatt        1    0    0      0    1    0      0    0    1
           kptrlen      1.39340352E+01
@@ -655,10 +655,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          0.4  wall=          0.4
+- Proc.   0 individual time (sec): cpu=          0.3  wall=          0.3
 
 ================================================================================
 
  Calculation completed.
-.Delivered   1 WARNINGs and   9 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          0.4  wall=          0.4
+.Delivered   1 WARNINGs and   8 COMMENTs to log file.
++Overall time at end (sec) : cpu=          0.3  wall=          0.3

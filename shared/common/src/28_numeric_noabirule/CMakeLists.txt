@@ -2,24 +2,28 @@
 # 28_numeric_noabirule
 #
 add_library(28_numeric_noabirule STATIC
-  m_lib_four.F90
   m_abi_linalg.F90
   m_array.F90
   m_bessel.F90
-  m_cplxtools.F90
+  #m_bessel2.F90
+  #m_brentq.F90
   m_bspline.F90
+  m_cplxtools.F90
   m_elpa.F90
   m_gaussian_quadrature.F90
   m_hide_blas.F90
   m_hide_lapack.F90
+  #m_hybrd.F90
   m_lebedev.F90
   m_levenberg_marquardt.F90
+  m_lib_four.F90
   m_linalg_interfaces.F90
   m_numeric_tools.F90
   m_per_cond.F90
   m_random_xoroshiro128plus.F90
   m_random_zbq.F90
   m_slk.F90
+  #m_slsqp.F90
   m_sort.F90
   m_splines.F90
   )

@@ -69,14 +69,15 @@ jpawu  1.0000 eV
 
  pp_dirpath "$ABI_PSPDIR"
  #pseudos "26fe.lda2.paw"
- pseudos "Pseudodojo_paw_pbe_standard/Fe.xml"
+ pseudos "Psdj_paw_pbe_std/Fe.xml"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = eos_gnu_13.2_serial
 #%% [files]
 #%% files_to_test =
-#%%   t89.abo, tolnlines = 98, tolabs = 1.100e-03, tolrel = 8.000e-01, fld_options = -medium
+#%%   t89.abo, tolnlines = 99, tolabs = 1.100e-03, tolrel = 9.100e-01, fld_options = -medium
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

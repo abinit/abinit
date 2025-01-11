@@ -27,8 +27,8 @@ from tests.pymods.termcolor import cprint
 ABINIT_ROOTDIR = os.path.dirname(__file__)
 ABINIT_SRCDIR = os.path.join(ABINIT_ROOTDIR, "src")
 
-# Set ABI_PSPDIR env variable to point to the absolute path of Psps_for_tests
-#os.environ["ABI_PSPDIR"] = os.path.abspath(os.path.join(ABINIT_ROOTDIR, "Psps_for_tests"))
+# Set ABI_PSPDIR env variable to point to the absolute path of Pspdir
+#os.environ["ABI_PSPDIR"] = os.path.abspath(os.path.join(ABINIT_ROOTDIR, "Pspdir"))
 #print("ABI_PSPDIR:", os.environ["ABI_PSPDIR"])
 
 ALL_BINARIES = [
@@ -114,11 +114,11 @@ def make(ctx, jobs="auto", touch=False, clean=False, binary=""):
         # TODO Check for errors in make.stderr
         #cprint("Exit code: %s" % retcode, "green" if retcode == 0 else "red")
 
-        if SYSTEM == "Darwin":
-            for binary in ALL_BINARIES:
-                cmd = f"codesign -v --force --deep src/98_main/{binary}"
-                cprint("Executing: %s" % cmd, "yellow")
-                ctx.run(cmd, pty=True)
+        #if SYSTEM == "Darwin":
+        #    for binary in ALL_BINARIES:
+        #        cmd = f"codesign -v --force --deep src/98_main/{binary}"
+        #        cprint("Executing: %s" % cmd, "yellow")
+        #        ctx.run(cmd, pty=True)
 
 @task
 def clean(ctx):
@@ -305,7 +305,7 @@ def env(ctx):
     print("\nExecute the following lines in the shell to set the env:\n")
     top = find_top_build_tree(".", with_abinit=True)
     binpath = os.path.join(top, "src", "98_main")
-    print(f"export ABI_PSPDIR={ABINIT_ROOTDIR}/tests/Psps_for_tests")
+    print(f"export ABI_PSPDIR={ABINIT_ROOTDIR}/tests/Pspdir")
     print(f"export PATH={binpath}:$PATH")
 
 

@@ -1,6 +1,6 @@
 
-.Version 9.11.2 of ANADDB 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.3.3.2 of ANADDB, released Nov 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2024 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Jul 2023.
-- ( at 12h12 )
+.Starting date : Sun 24 Nov 2024.
+- ( at 07h32 )
   
 
 ================================================================================
@@ -119,7 +119,7 @@
 
  Calculation of the interatomic forces 
 
--begin at tcpu      0.040  and twall      0.046 sec
+-begin at tcpu      0.034  and twall      0.034 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :       64
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -361,13 +361,13 @@
  Symmetry characters of vibration mode #   4
        degenerate with vibration modes #   5 to    6
   3.0 -3.0 -1.0  1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0
-  0.0 -0.0 -0.0  0.0  0.0 -0.0 -0.0  0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
-  0.0 -0.0  0.0 -0.0 -0.0  0.0 -0.0  0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
+ -0.0  0.0 -0.0  0.0  0.0 -0.0  0.0 -0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
+ -0.0  0.0  0.0 -0.0  0.0 -0.0 -0.0  0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
  Symmetry characters of vibration mode #   7
        degenerate with vibration modes #   8 to    9
   3.0 -3.0 -1.0  1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0
- -0.0  0.0 -0.0  0.0  0.0 -0.0  0.0 -0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
- -0.0  0.0  0.0 -0.0  0.0 -0.0 -0.0  0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
+  0.0 -0.0 -0.0  0.0  0.0 -0.0 -0.0  0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
+  0.0 -0.0  0.0 -0.0 -0.0  0.0 -0.0  0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
  Symmetry characters of vibration mode #  10
        degenerate with vibration modes #  11 to   12
   3.0 -3.0 -1.0  1.0 -1.0  1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0
@@ -376,8 +376,8 @@
  Symmetry characters of vibration mode #  13
        degenerate with vibration modes #  14 to   15
   3.0 -3.0 -1.0  1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0
- -0.0  0.0 -0.0  0.0  0.0 -0.0  0.0 -0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
- -0.0  0.0  0.0 -0.0  0.0 -0.0 -0.0  0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
+  0.0 -0.0  0.0 -0.0 -0.0  0.0 -0.0  0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
+  0.0 -0.0 -0.0  0.0 -0.0  0.0  0.0 -0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.02500  0.00000
  Phonon energies in Hartree :
@@ -1448,13 +1448,13 @@
  Symmetry characters of vibration mode #   4
        degenerate with vibration modes #   5 to    6
   3.0 -3.0 -1.0  1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0
-  0.0 -0.0 -0.0  0.0  0.0 -0.0 -0.0  0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
-  0.0 -0.0  0.0 -0.0 -0.0  0.0 -0.0  0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
+ -0.0  0.0 -0.0  0.0  0.0 -0.0  0.0 -0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
+ -0.0  0.0  0.0 -0.0  0.0 -0.0 -0.0  0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
  Symmetry characters of vibration mode #   7
        degenerate with vibration modes #   8 to    9
   3.0 -3.0 -1.0  1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0
- -0.0  0.0 -0.0  0.0  0.0 -0.0  0.0 -0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
- -0.0  0.0  0.0 -0.0  0.0 -0.0 -0.0  0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
+  0.0 -0.0 -0.0  0.0  0.0 -0.0 -0.0  0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
+  0.0 -0.0  0.0 -0.0 -0.0  0.0 -0.0  0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
  Symmetry characters of vibration mode #  10
        degenerate with vibration modes #  11 to   12
   3.0 -3.0 -1.0  1.0 -1.0  1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0
@@ -1463,8 +1463,8 @@
  Symmetry characters of vibration mode #  13
        degenerate with vibration modes #  14 to   15
   3.0 -3.0 -1.0  1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0
- -0.0  0.0 -0.0  0.0  0.0 -0.0  0.0 -0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
- -0.0  0.0  0.0 -0.0  0.0 -0.0 -0.0  0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
+  0.0 -0.0  0.0 -0.0 -0.0  0.0 -0.0  0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
+  0.0 -0.0 -0.0  0.0 -0.0  0.0  0.0 -0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
 
   Phonon wavevector (reduced coordinates) :  0.01429  0.01429  0.01429
  Phonon energies in Hartree :
@@ -2706,10 +2706,10 @@
 -  1.790039E+02  3.633951E+02  3.633951E+02  3.972643E+02  3.972643E+02
 -  3.972643E+02  4.216572E+02  4.216572E+02  4.216572E+02  7.514479E+02
 -
-- Proc.   0 individual time (sec): cpu=          0.2  wall=          0.3
+- Proc.   0 individual time (sec): cpu=          0.2  wall=          0.2
 
 ================================================================================
 
-+Total cpu time      0.246  and wall time      0.259 sec
++Total cpu time      0.163  and wall time      0.163 sec
 
  anaddb : the run completed succesfully.

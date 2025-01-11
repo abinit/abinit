@@ -1,6 +1,6 @@
 
-.Version 9.11.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Jul 2023.
-- ( at 11h58 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h08 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v1_t55-t56/t56.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v1_t55-t56/t56.abi
 - output file    -> t56.abo
 - root for input  files -> t55o
 - root for output files -> t56o
@@ -42,10 +42,10 @@ _ WF disk file :      0.086 Mbytes ; DEN or POT disk file :      0.051 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -53,7 +53,7 @@ _ WF disk file :      0.086 Mbytes ; DEN or POT disk file :      0.051 Mbytes.
               amu      9.59400000E+01
              ecut      3.50000000E+00 Hartree
            enunit           2
--          fftalg         312
+-          fftalg         512
             intxc           1
            irdwfk           1
              iscf           1
@@ -131,8 +131,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 1, paral_kgb: 0, }
          ecut(hartree)=      3.500   => boxcut(ratio)=   2.16250
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/42mo.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/42mo.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/42mo.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/42mo.pspnc
 -  Troullier-Martins psp for element  Mo        Thu Oct 27 17:40:28 EDT 1994
 - 42.00000   6.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -165,23 +165,23 @@ tolerances: {toldfe: 1.00E-12, }
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -22.158800808735    -2.216E+01 5.042E-12 8.290E-11
- ETOT  2  -22.158798044176     2.765E-06 3.906E-10 1.886E-03
+ ETOT  2  -22.158798044177     2.765E-06 3.906E-10 1.886E-03
  scfeig : Operator expectation value  -1.3116E+00 (extremal eigenvalue * diemix)
  scfeig : Inverse of renormalization factor  -4.3287E-01
  scfeig : Convergence criterion value (->0 at convergency)  -1.2130E-01
- ETOT  3  -22.158794581452     3.463E-06 4.727E-09 9.741E-03
+ ETOT  3  -22.158794581454     3.463E-06 4.727E-09 9.741E-03
  scfeig : Operator expectation value  -1.5918E+00 (extremal eigenvalue * diemix)
  scfeig : Inverse of renormalization factor  -6.3589E-01
  scfeig : Convergence criterion value (->0 at convergency)  -4.4126E-02
- ETOT  4  -22.158787878700     6.703E-06 5.744E-09 2.840E-02
+ ETOT  4  -22.158787878712     6.703E-06 5.744E-09 2.840E-02
  scfeig : Operator expectation value  -1.8418E+00 (extremal eigenvalue * diemix)
  scfeig : Inverse of renormalization factor  -9.4748E-01
  scfeig : Convergence criterion value (->0 at convergency)  -1.0567E-01
- ETOT  5  -22.158770825722     1.705E-05 1.455E-08 7.870E-02
+ ETOT  5  -22.158770825739     1.705E-05 1.455E-08 7.870E-02
  scfeig : Operator expectation value  -2.2989E+00 (extremal eigenvalue * diemix)
  scfeig : Inverse of renormalization factor  -1.3962E+00
  scfeig : Convergence criterion value (->0 at convergency)  -9.7354E-02
- ETOT  6  -22.158759685362     1.114E-05 6.255E-09 1.114E-01
+ ETOT  6  -22.158759685366     1.114E-05 6.255E-09 1.114E-01
  scfeig : Operator expectation value  -2.6071E+00 (extremal eigenvalue * diemix)
  scfeig : Inverse of renormalization factor  -1.6293E+00
  scfeig : Convergence criterion value (->0 at convergency)  -2.2186E-02
@@ -197,15 +197,15 @@ tolerances: {toldfe: 1.00E-12, }
  scfeig : Operator expectation value  -2.6827E+00 (extremal eigenvalue * diemix)
  scfeig : Inverse of renormalization factor  -1.6828E+00
  scfeig : Convergence criterion value (->0 at convergency)  -7.9571E-05
- ETOT 10  -22.158756834339     1.045E-08 1.849E-10 1.198E-01
+ ETOT 10  -22.158756834339     1.045E-08 1.850E-10 1.198E-01
  scfeig : Operator expectation value  -2.6829E+00 (extremal eigenvalue * diemix)
  scfeig : Inverse of renormalization factor  -1.6829E+00
  scfeig : Convergence criterion value (->0 at convergency)  -1.1769E-05
- ETOT 11  -22.158756832169     2.169E-09 8.768E-11 1.198E-01
+ ETOT 11  -22.158756832169     2.170E-09 8.768E-11 1.198E-01
  scfeig : Operator expectation value  -2.6830E+00 (extremal eigenvalue * diemix)
  scfeig : Inverse of renormalization factor  -1.6830E+00
  scfeig : Convergence criterion value (->0 at convergency)  -1.7867E-06
- ETOT 12  -22.158756831635     5.341E-10 3.375E-11 1.198E-01
+ ETOT 12  -22.158756831635     5.345E-10 3.375E-11 1.198E-01
  scfeig : Operator expectation value  -2.6830E+00 (extremal eigenvalue * diemix)
  scfeig : Inverse of renormalization factor  -1.6830E+00
  scfeig : Convergence criterion value (->0 at convergency)  -2.7278E-07
@@ -218,7 +218,7 @@ tolerances: {toldfe: 1.00E-12, }
 
  scprqt:  WARNING -
   nstep=   12 was not enough SCF cycles to converge;
-  maximum energy difference=  5.341E-10 exceeds toldfe=  1.000E-12
+  maximum energy difference=  5.345E-10 exceeds toldfe=  1.000E-12
 
 
 --- !ResultsGS
@@ -231,7 +231,7 @@ lattice_vectors:
 lattice_lengths: [   6.04000,    6.04000,   24.16000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   8.8139546E+02
-convergence: {deltae:  5.341E-10, res2:  1.198E-01, residm:  3.375E-11, diffor: null, }
+convergence: {deltae:  5.345E-10, res2:  1.198E-01, residm:  3.375E-11, diffor: null, }
 etotal    :  -2.21587568E+01
 entropy   :   0.00000000E+00
 fermie    :   3.29378047E-01
@@ -276,10 +276,10 @@ force_length_stats: {min:   1.77149385E-02, max:   4.58297715E-01, mean:   2.131
        0.000000000000      0.000000000000     -0.250000000000
  rms dE/dt=  4.0721E+00; max dE/dt=  1.0981E+01; dE/dt below (all hartree)
     1       0.000000000000      0.000000000000      0.429682346957
-    2       0.000000000000      0.000000000000     -1.799201760821
-    3       0.000000000000      0.000000000000    -11.070783368532
-    4       0.000000000000      0.000000000000      1.467414919495
-    5       0.000000000000      0.000000000000     10.981335021306
+    2       0.000000000000      0.000000000000     -1.799201760823
+    3       0.000000000000      0.000000000000    -11.070783368530
+    4       0.000000000000      0.000000000000      1.467414919497
+    5       0.000000000000      0.000000000000     10.981335021304
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.01278492135953
@@ -290,18 +290,18 @@ force_length_stats: {min:   1.77149385E-02, max:   4.58297715E-01, mean:   2.131
 
  cartesian forces (hartree/bohr) at end:
     1     -0.00000000000000    -0.00000000000000    -0.01771493854620
-    2     -0.00000000000000    -0.00000000000000     0.07454019836515
-    3     -0.00000000000000    -0.00000000000000     0.45829771524060
-    4     -0.00000000000000    -0.00000000000000    -0.06066744568766
-    5     -0.00000000000000    -0.00000000000000    -0.45445552937190
+    2     -0.00000000000000    -0.00000000000000     0.07454019836524
+    3     -0.00000000000000    -0.00000000000000     0.45829771524053
+    4     -0.00000000000000    -0.00000000000000    -0.06066744568776
+    5     -0.00000000000000    -0.00000000000000    -0.45445552937180
  frms,max,avg= 1.6854618E-01 4.5829772E-01   0.000E+00  0.000E+00 -6.993E-05 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.00000000000000    -0.00000000000000    -0.91093868936888
-    2     -0.00000000000000    -0.00000000000000     3.83301079069350
-    3     -0.00000000000000    -0.00000000000000    23.56661407395453
-    4     -0.00000000000000    -0.00000000000000    -3.11964522586155
-    5     -0.00000000000000    -0.00000000000000   -23.36904094941761
+    1     -0.00000000000000    -0.00000000000000    -0.91093868936929
+    2     -0.00000000000000    -0.00000000000000     3.83301079069851
+    3     -0.00000000000000    -0.00000000000000    23.56661407395045
+    4     -0.00000000000000    -0.00000000000000    -3.11964522586689
+    5     -0.00000000000000    -0.00000000000000   -23.36904094941278
  frms,max,avg= 8.6669923E+00 2.3566614E+01   0.000E+00  0.000E+00 -3.596E-03 e/A
  length scales=  6.040000000000  6.040000000000 24.160000000000 bohr
               =  3.196230339884  3.196230339884 12.784921359534 angstroms
@@ -326,18 +326,18 @@ force_length_stats: {min:   1.77149385E-02, max:   4.58297715E-01, mean:   2.131
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  1.53403379819353E+01
-hartree             :  3.56148445147695E+01
+kinetic             :  1.53403379819364E+01
+hartree             :  3.56148445147837E+01
 xc                  :  0.00000000000000E+00
 Ewald energy        : -6.67573965170043E+00
 psp_core            :  1.51866811340446E+01
-local_psp           : -7.63830101961660E+01
-non_local_psp       : -5.24941060774380E+00
-internal            : -2.21662968248609E+01
-'-kT*entropy'       :  7.53999322564924E-03
-total_energy        : -2.21587568316352E+01
-total_energy_eV     : -6.02970438006023E+02
-band_energy         :  4.93751007107157E+00
+local_psp           : -7.63830101961802E+01
+non_local_psp       : -5.24941060774449E+00
+internal            : -2.21662968248604E+01
+'-kT*entropy'       :  7.53999322570202E-03
+total_energy        : -2.21587568316347E+01
+total_energy_eV     : -6.02970438006009E+02
+band_energy         :  4.93751007107071E+00
 ...
 
 
@@ -365,7 +365,7 @@ band_energy         :  4.93751007107157E+00
                       -0.0000000000E+00 -0.0000000000E+00  4.5829771524E-01
                       -0.0000000000E+00 -0.0000000000E+00 -6.0667445688E-02
                       -0.0000000000E+00 -0.0000000000E+00 -4.5445552937E-01
--          fftalg         312
+-          fftalg         512
             intxc           1
            irdwfk           1
              iscf           1
@@ -503,10 +503,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          1.7  wall=          1.8
+- Proc.   0 individual time (sec): cpu=          1.2  wall=          1.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered  21 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.7  wall=          1.8
++Overall time at end (sec) : cpu=          1.2  wall=          1.2

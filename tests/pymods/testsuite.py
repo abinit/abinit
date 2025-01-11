@@ -38,6 +38,7 @@ from .devtools import NoErrorFileLock, makeunique
 from .memprof import AbimemFile
 from .termcolor import cprint
 from .fldiff import Differ as FlDiffer
+from .abo_file_analysis import AboFileAnalysis, AboDataset
 
 import logging
 logger = logging.getLogger(__name__)
@@ -56,13 +57,10 @@ _MY_NAME = os.path.basename(__file__)[:-3] + "-" + __version__
 
 
 # Helper functions and tools
-
-
 def my_getlogin():
     """
     Returns the user logged in to the controlling terminal of the process.
-
-    https://stackoverflow.com/questions/4399617/python-os-getlogin-problem
+    Based on: https://stackoverflow.com/questions/4399617/python-os-getlogin-problem
     """
     username = "No_username"
     if hasattr(os, 'getlogin'):
@@ -81,10 +79,10 @@ def my_getlogin():
 
 @makeunique
 def genid():
-    '''
+    """
     Produce a random sequence 12 bytes represented as 16 ascii characters.
     The decorator ensure that output is different at each call.
-    '''
+    """
     return b64encode(os.urandom(12)).decode('ascii')
 
 
@@ -214,7 +212,7 @@ def rmrf(top, exclude_paths=None):
 
 def find_abortfile(workdir):
     """
-    Return the absolute path of the MPIABORTFILE file produced by (Abinit|Abinit_with_libpaw)
+    Return the absolute path of the MPIABORTFILE file produced by Abinit
     Empty string if file is not present.
 
     Args:
@@ -331,7 +329,7 @@ class FileToTest(object):
     def __str__(self): pass
 
     def compare(self, fldiff_path, ref_dir, workdir, yaml_test, timebomb=None,
-                outf=sys.stdout):
+                outf=sys.stdout, simplified_yaml_test=False, forced_tolerance='default'):
         """
         Use fldiff_path to compare the reference file located in ref_dir with
         the output file located in workdir. Results are written to stream outf.
@@ -343,6 +341,36 @@ class FileToTest(object):
             #ref_fname = ref_fname[:-7] + ".abo"
         out_fname = os.path.abspath(os.path.join(workdir, self.name))
 
+        # Select only YAML section in the two files
+        if simplified_yaml_test:
+
+          yaml_section_start = "--- !"
+          yaml_section_end = "..."
+
+          def make_simplified(file_in,file_out,start_string,end_string):
+              f_in=open(file_in,'r')
+              f_out=open(file_out,'w')
+              inRecordingMode = False
+              for line in f_in.readlines():
+                  if not inRecordingMode:
+                      if start_string in line:
+                          inRecordingMode = True
+                          f_out.write(line)
+                  elif end_string in line:
+                      inRecordingMode = False
+                      f_out.write(line)
+                  else:
+                      f_out.write(line)
+              f_in.close()
+              f_out.close()
+
+          ref_fname_min = os.path.abspath(os.path.join(workdir, self.name + ".min_ref"))
+          out_fname_min = os.path.abspath(os.path.join(workdir, self.name + ".min"))
+          make_simplified(ref_fname,ref_fname_min,yaml_section_start,yaml_section_end)
+          make_simplified(out_fname,out_fname_min,yaml_section_start,yaml_section_end)
+          ref_fname = ref_fname_min
+          out_fname = out_fname_min
+
         opts = {
             'label': self.name,
             'ignore': True,
@@ -350,7 +378,16 @@ class FileToTest(object):
             'debug': fldebug,
         }
 
-        if '-medium' in self.fld_options:
+
+        if forced_tolerance == 'high':
+            opts['tolerance'] = 1.01e-10
+        elif forced_tolerance == 'medium':
+            opts['tolerance'] = 1.01e-8
+        elif forced_tolerance == 'easy':
+            opts['tolerance'] = 1.01e-5
+        elif forced_tolerance == 'ridiculous':
+            opts['tolerance'] = 1.01e-2
+        elif '-medium' in self.fld_options:
             opts['tolerance'] = 1.01e-8
         elif '-easy' in self.fld_options:
             opts['tolerance'] = 1.01e-5
@@ -477,10 +514,10 @@ TESTCNF_KEYWORDS = {
     "system_xml"     : (str       , ""   , "setup","The system.xml file read by multibinit"),
     "coeff_xml"      : (str       , ""   , "setup","The coeff.xml file read by multibinit"),
     "md_hist"        : (str       , ""   , "setup","The hist file file read by multibinit"),
-    "test_set"        : (str       , ""   , "setup","The test set (HIST format) read by multibinit"),
+    "test_set"       : (str       , ""   , "setup","The test set (HIST format) read by multibinit"),
     "no_check"       : (_str2bool , "no" , "setup","Explicitly do not check any files"),
-    "spin_pot"        : (str       , ""   , "setup","The spin potential file read by multibinit"),
-    "latt_pot"        : (str       , ""   , "setup","The lattice potential file read by multibinit"),
+    "spin_pot"       : (str       , ""   , "setup","The spin potential file read by multibinit"),
+    "latt_pot"       : (str       , ""   , "setup","The lattice potential file read by multibinit"),
     "slc_pot"        : (str       , ""   , "setup","The spin-lattice coupling potential file read by multibinit"),
     "lwf_pot"        : (str       , ""   , "setup","The LWF potential file read by multibinit"),
     # [files]
@@ -494,7 +531,7 @@ TESTCNF_KEYWORDS = {
                                                        "\t    foo.out, tolnlines = 2, tolabs = 0.1, tolrel = 1.0e-01;\n" +
                                                        "\t    bar.out, tolnlines = 4, tolabs = 0.0, tolrel = 1.0e-01"
                                                            ),
-    "psp_files"      : (_str2list,        "", "files", "List of pseudopotential files (located in the Psps_for_tests directory)."),
+    "psp_files"      : (_str2list,        "", "files", "List of pseudopotential files (located in the Pspdir directory)."),
     "extra_inputs"   : (_str2list,        "", "files", "List of extra input files."),
     "use_git_submodule"   : (str,        "", "files", "Take input files from git submodule in ~/abinit/tests/modules_with_data/."),
     # [shell]
@@ -505,7 +542,7 @@ TESTCNF_KEYWORDS = {
     "nprocs_to_test" : (_str2intlist, "","paral_info","List with the number of MPI processes that should be used for the test"),
     "exclude_nprocs" : (_str2intlist, "","paral_info","List with the number of MPI processes that should not be used for the test"),
     # [extra_info]
-    "authors"         : (_str2set , "Unknown"                 , "extra_info", "Author(s) of the test"),
+    "authors"        : (_str2set , "Unknown"                 , "extra_info", "Author(s) of the test"),
     "keywords"       : (_str2set , ""                         , "extra_info", "List of keywords associated to the test"),
     "description"    : (str      , "No description available",  "extra_info", "String containing extra information on the test"),
     "topics"         : (_str2list, "",  "extra_info", "Topics associated to the test"),
@@ -535,7 +572,7 @@ for key, tup in TESTCNF_KEYWORDS.items():
 
 
 def line_starts_with_section_or_option(string):
-    """True if string start with a TEST_INFO section or option."""
+    """True if string starts with a TEST_INFO section or option."""
     from re import compile
     re_ncpu = compile(r"^NCPU_(\d+)$")
     s = string.strip()
@@ -644,8 +681,7 @@ class AbinitTestInfoParser(object):
         FOOTER = "<END TEST_INFO>\n"
 
         lines = lazy_readlines(inp_fname)
-        lines = [l.replace(SENTINEL, "", 1)
-                 for l in lines if l.startswith(SENTINEL)]
+        lines = [l.replace(SENTINEL, "", 1) for l in lines if l.startswith(SENTINEL)]
 
         try:
             start, stop = lines.index(HEADER), lines.index(FOOTER)
@@ -658,8 +694,7 @@ class AbinitTestInfoParser(object):
                  for i, line in enumerate(lines) if start < i < stop]
 
         if not lines:
-            raise self.Error(
-                "%s does not contain any valid testcnf section!" % inp_fname)
+            raise self.Error("%s does not contain any valid testcnf section!" % inp_fname)
 
         # Interface in python 3 is richer so we rebuilt part of it
         if py2:
@@ -669,8 +704,7 @@ class AbinitTestInfoParser(object):
 
                 def get(self, section, option, raw=False, vars=None):
                     if option in self.raw_options and section == TESTCNF_KEYWORDS[option][2]:
-                        logger.debug(
-                            "Disabling interpolation for section = %s, option = %s" % (section, option))
+                        logger.debug("Disabling interpolation for section = %s, option = %s" % (section, option))
                         return SafeConfigParser.get(self, section, option, raw=True, vars=vars)
                     else:
                         return SafeConfigParser.get(self, section, option, raw, vars)
@@ -686,12 +720,12 @@ class AbinitTestInfoParser(object):
         try:
             self.parser.read_string("".join(lines), source=inp_fname)
         except CPError as exc:
-            cprint("Exception while parsing: %s\n%s" % (inp_fname, exc), "red")
+            cprint("Exception while parsing: %s\n%s" % (inp_fname, exc), color="red")
             for l in lines:
                 print(l, end="")
             cprint("A common problem is inappropriate indentation. The rules is"
                    ": do not indent options more than section title, indent "
-                   "lines that belong to the option above.", "red")
+                   "lines that belong to the option above.", color="red")
             raise exc
 
         # Consistency check
@@ -735,8 +769,7 @@ class AbinitTestInfoParser(object):
                 d[key] = line_parser(d[key])
             except Exception as exc:
                 err_msg = ("In file: %s\nWrong line:\n key = %s, d[key] = %s\n"
-                           "%s: %s") % (self.inp_fname, key, d[key],
-                                        type(exc).__name__, str(exc))
+                           "%s: %s") % (self.inp_fname, key, d[key], type(exc).__name__, str(exc))
                 raise self.Error(err_msg)
 
         # At this point info contains the parsed global values.
@@ -772,8 +805,7 @@ class AbinitTestInfoParser(object):
 
             ncpu_section = "NCPU_" + str(nprocs)
             if not self.parser.has_section(ncpu_section):
-                raise self.Error("Cannot find section %s in %s" %
-                                 (ncpu_section, self.inp_fname))
+                raise self.Error("Cannot find section %s in %s" % (ncpu_section, self.inp_fname))
 
             for key in self.parser.options(ncpu_section):
                 if key in self.parser.defaults():
@@ -788,8 +820,7 @@ class AbinitTestInfoParser(object):
                 except Exception as exc:
                     err_msg = ("In file: %s\nWrong line:\n"
                                " key = %s, d[key] = %s\n %s: %s") % (
-                                   self.inp_fname, key, d[key], type(
-                                       exc).__name__, str(exc)
+                                   self.inp_fname, key, d[key], type(exc).__name__, str(exc)
                     )
                     raise self.Error(err_msg)
 
@@ -877,13 +908,12 @@ def find_top_build_tree(start_path, with_abinit=True, ntrials=10):
         else:
             abs_path, _ = os.path.split(abs_path)
 
-    raise RuntimeError(
-        "Cannot find the ABINIT build tree after %s trials" % ntrials)
+    raise RuntimeError("Cannot find the ABINIT build tree after %s trials" % ntrials)
 
 
 class Compiler(object):
     """
-    Base class for C,Fortran,C++ compilers.
+    Base class for C, Fortran, C++ compilers.
     Usually instantiated through the class method from_defined_cpp_vars.
     """
 
@@ -953,7 +983,7 @@ class CPreProcessor(object):
 
     def process_file(self, filepath, remove_lhash=True):
         """
-        Read source from filepath, call CPP wit the includes and the
+        Read source from filepath, call CPP with the includes and the
         options passed to the constructor.
 
         Returns:
@@ -999,8 +1029,7 @@ class FortranBacktrace(object):
         return str(self.trace)
 
     def parse(self):
-        raise NotImplementedError(
-            "parse method must be implemented by the subclass")
+        raise NotImplementedError("parse method must be implemented by the subclass")
 
     def locate_srcfile(self, base_name):
         top = find_top_build_tree(start_path=".", with_abinit=True)
@@ -1011,7 +1040,7 @@ class FortranBacktrace(object):
                 apath = os.path.join(dirpath, base_name)
                 return apath
         else:
-            cprint("Cannot find file: %s" % base_name, "red")
+            cprint("Cannot find file: %s" % base_name, color="red")
             return None
 
     def edit_source(self, editor=None):
@@ -1096,8 +1125,7 @@ class BuildEnvironment(object):
         self.defined_cppvars = parse_configh_file(self.configh_path)
 
         # Get info on the compilers
-        self.fortran_compiler = FortranCompiler.from_defined_cpp_vars(
-            self.defined_cppvars)
+        self.fortran_compiler = FortranCompiler.from_defined_cpp_vars(self.defined_cppvars)
         # print(self.fortran_compiler)
         # if not self.has_bin("timeout"): print("Cannot find timeout executable!")
 
@@ -1155,7 +1183,7 @@ class BuildEnvironment(object):
 def parse_configh_file(fname):
     """
     Parse the configuration file config.h,
-    Returns a list with the CCP variables that are #defined.
+    Returns a list with the CCP variables that are CPP defined.
 
     Note:
       Not very robust. It does not handle instructions such as:
@@ -1186,20 +1214,17 @@ def input_file_has_vars(fname, ivars, comment="#", mode="any"):
     Primitive parser that searches for the occurrence of input variables in the input file fname
 
     Args:
-        fname:
-            Input file
-        ivars:
-            dictionary whose keys are strings with the input variables to search.
+        fname: Input file
+        ivars: dictionary whose keys are strings with the input variables to search.
             ivar[varname] can be either None or an integer
             if ivar[varname] is None, we have a match if varname is present
             if ivar[varname] is int, we have a match if varname is present and it has value int
-
         mode: "all" or "any"
-
-        return:
-            (bool, d)
-            bool is True is the input file contains the specified variables
-            d is a dictionary with the matching lines (empty dict if no occurence).
+        o
+    return:
+        (bool, d)
+        bool is True is the input file contains the specified variables
+        d is a dictionary with the matching lines (empty dict if no occurence).
     """
     # This algorithm is not very robust as it assumes that the variable and the line
     # are placed on the same line.
@@ -1372,6 +1397,9 @@ class BaseTest(object):
     # Possible status of the test.
     _possible_status = ["failed", "passed", "succeeded", "skipped", "disabled"]
 
+    def is_chain(self):
+        return False
+
     def __init__(self, test_info, abenv):
         logger.info("Initializing BaseTest from inp_fname: ",
                     test_info.inp_fname)
@@ -1497,7 +1525,7 @@ pp_dirpath $ABI_PSPDIR
     def cprint(self, msg='', color=None):
         with self._print_lock:
             if color is not None:
-                cprint(msg, color)
+                cprint(msg, color=color)
             else:
                 print(msg)
 
@@ -1673,7 +1701,7 @@ pp_dirpath $ABI_PSPDIR
                     # Use local pseudo. This is needed for atompaw tests.
                     psp_paths[i] = pname
                 else:
-                    err_msg = "Cannot find pp file %s, neither in Psps_for_tests nor in self.workdir" % pname
+                    err_msg = "Cannot find pp file %s, neither in Pspdir nor in self.workdir" % pname
                     self.exceptions.append(self.Error(err_msg))
 
         if not dir_and_names:
@@ -1788,10 +1816,21 @@ pp_dirpath $ABI_PSPDIR
         # !HAVE_FOO --> HAVE_FOO should not be present.
         errors = []
         eapp = errors.append
+        or_token =  " or "
         for var in self.need_cpp_vars:
-            if not var.startswith("!") and var not in build_env.defined_cppvars:
+            if or_token in var:
+                # handle HAVE_FOO or HAVE_BAR syntax
+                var_list = [v.strip() for v in var.split(or_token)]
+                #print("in or_token with var_list:", var_list)
+                if not any(v in build_env.defined_cppvars for v in var_list):
+                    eapp("Build environment does not define any of the following CPP variables %s" % str(var_list))
+
+            elif not var.startswith("!") and var not in build_env.defined_cppvars:
+                # handle HAVE_FOO syntax
                 eapp("Build environment does not define the CPP variable %s" % var)
+
             elif var[1:] in build_env.defined_cppvars:
+                # handle !HAVE_FOO syntax
                 eapp("Build environment defines the CPP variable %s" % var[1:])
 
         # Remove this check to run the entire test suite in parallel
@@ -1877,7 +1916,7 @@ pp_dirpath $ABI_PSPDIR
     def run(self, build_env, runner, workdir, print_lock=None, nprocs=1, runmode="static", **kwargs):
         """
         Run the test with nprocs MPI nodes in the build environment build_env using the `JobRunner` runner.
-        Results are produced in directory workdir. kwargs is used to pass additional options
+        Results are produced in the directory workdir. kwargs is used to pass additional options
 
         ================  ====================================================================
         kwargs            Meaning
@@ -1894,6 +1933,11 @@ pp_dirpath $ABI_PSPDIR
                            Default: False
         etsf_check         True if netcdf files should be validated. Requires netcdf4.
                            Default: False
+        simplified_diff    True if we perform a "simplified diff" when comparing files
+                             by using only YAML sections in abo files
+        forced_tolerance   String: Force the use of fldiff tool with the specified tolerance.
+                           Possible values are: default (from test config), high(1.e-10),
+                                                medium (1.e-8), easy (1.e-5), ridiculous (1.e-2)
         ================  ====================================================================
 
         .. warning:
@@ -1921,6 +1965,8 @@ pp_dirpath $ABI_PSPDIR
         self.erase_files = kwargs.get("erase_files", self.erase_files)
         self.make_html_diff = kwargs.get("make_html_diff", self.make_html_diff)
         self.sub_timeout = kwargs.get("sub_timeout", self.sub_timeout)
+        simplified_diff = kwargs.get("simplified_diff")
+        forced_tolerance = kwargs.get("forced_tolerance")
 
         timeout = self.sub_timeout
         if self.build_env.has_bin("timeout") and timeout > 0.0:
@@ -1942,7 +1988,7 @@ pp_dirpath $ABI_PSPDIR
         if self._status == "disabled":
             msg = self.full_id + ": Disabled"
             can_run = False
-            self.cprint(msg, status2txtcolor[self._status])
+            self.cprint(msg=msg, color=status2txtcolor[self._status])
 
         # Here we get the number of MPI nodes for test.
         self.nprocs, self.skip_msg = self.compute_nprocs(
@@ -1951,22 +1997,22 @@ pp_dirpath $ABI_PSPDIR
         if self.skip_msg:
             self._status = "skipped"
             msg = self.full_id + ": Skipped."
-            self.cprint(msg, status2txtcolor[self._status])
+            self.cprint(msg=msg, color=status2txtcolor[self._status])
             for l in self.skip_msg.splitlines():
-                self.cprint("\t" + l, status2txtcolor[self._status])
+                self.cprint(msg="\t" + l, color=status2txtcolor[self._status])
             self.cprint()
             can_run = False
 
         if self.skip_host():
             self._status = "skipped"
             msg = self.full_id + ": Skipped: this hostname has been excluded."
-            self.cprint(msg, status2txtcolor[self._status])
+            self.cprint(msg=msg, color=status2txtcolor[self._status])
             can_run = False
 
         if self.skip_buildbot_builder():
             self._status = "skipped"
             msg = self.full_id + ": Skipped: this buildbot builder has been excluded."
-            self.cprint(msg, status2txtcolor[self._status])
+            self.cprint(msg=msg, color=status2txtcolor[self._status])
             can_run = False
 
         if self.use_git_submodule:
@@ -1981,7 +2027,7 @@ pp_dirpath $ABI_PSPDIR
                     ": Skipped:\n\tThis test requires files in the git submodule:\n\t\t%s\n" % src
                 msg += "\tbut cannot find README.md file in dir\n"
                 msg += "\tUse:\n\t\t`git submodule init && git submodule update --recursive --remote`\n\tto fetch the last version from the remote url."
-                self.cprint(msg, status2txtcolor[self._status])
+                self.cprint(msg=msg, color=status2txtcolor[self._status])
                 can_run = False
             else:
                 if not os.path.exists(dst):
@@ -2053,7 +2099,7 @@ pp_dirpath $ABI_PSPDIR
                 self.exceptions.extend(runner.exceptions)
                 if not self.expected_failure:
                     for exc in runner.exceptions:
-                        self.cprint(exc)
+                        self.cprint(msg=str(exc))
 
             # Execute post_commands in workdir.
             for cmd_str in self.post_commands:
@@ -2068,6 +2114,13 @@ pp_dirpath $ABI_PSPDIR
             # 1) use fldiff to compare ref and output files.
             # 2) fldiff stdout is redirected to fldiff_fname.
             for f in self.files_to_test:
+
+                simplified_test = simplified_diff
+                is_abo = os.path.splitext(f.name)[-1] == ".abo" or os.path.splitext(f.name)[-1] == ".out"
+                if simplified_test:
+                  fld_options_sav = f.fld_options
+                  f.fld_options = "-easy"
+
                 fldiff_fname = os.path.join(self.workdir, f.name + ".fldiff")
                 self.keep_files(fldiff_fname)
 
@@ -2075,9 +2128,14 @@ pp_dirpath $ABI_PSPDIR
                     f.fldiff_fname = fldiff_fname
 
                     isok, status, msg = f.compare(self.abenv.fldiff_path, self.ref_dir, self.workdir,
-                                                  yaml_test=self.yaml_test, timebomb=self.timebomb, outf=fh)
+                                                  yaml_test=self.yaml_test, timebomb=self.timebomb, outf=fh,
+                                                  simplified_yaml_test=simplified_test,
+                                                  forced_tolerance=forced_tolerance)
                 self.keep_files(os.path.join(self.workdir, f.name))
                 self.fld_isok = self.fld_isok and isok
+
+                if simplified_test:
+                  f.fld_options= fld_options_sav
 
                 if not self.exec_error and f.has_line_count_error:
                     f.do_html_diff = True
@@ -2096,24 +2154,33 @@ pp_dirpath $ABI_PSPDIR
                     if out_size_bites >= html_max_bites or ref_size_bites >= html_max_bites:
                         f.do_html_diff = False
 
-                self.cprint(self.full_id + "[run_etime: %s s]: " % sec2str(self.run_etime) + msg,
-                            status2txtcolor[status])
+                self.cprint(msg=self.full_id + "[run_etime: %s s]: " % sec2str(self.run_etime) + msg,
+                            color=status2txtcolor[status])
+
+                # In the case of a "simplified" test, lets check the number of iterations
+                if simplified_test and is_abo:
+                    abo_analysis = AboFileAnalysis(os.path.join(self.workdir,f.name),option="iterations")
+                    ref_analysis = AboFileAnalysis(os.path.join(self.ref_dir,f.name),option="iterations")
+                    st, err_msg, err_msg_short = abo_analysis.compare_with(ref_analysis,option="iterations", \
+                                                 percent_allowed_small=40,percent_allowed_large=25)
+                    if st == "failed":
+                        self._status = "failed"
+                        self.fld_isok= False
+                        indent = ' '*len(self.full_id)
+                        msg = indent + err_msg.replace('\n','\n'+indent)
+                        self.cprint(msg=msg, color=status2txtcolor[self._status])
 
                 # Print message for users running the test suite on their machine
                 # if the test failed and we have exclusion rules on the ABINIT testfarm.
                 if status == "failed" and (self.exclude_hosts or self.exclude_builders):
                     cprint("\tTest `%s` with keywords: `%s` failed." %
                            (self.full_id, str(self.keywords)), color="yellow")
-                    cprint(
-                        "\tNote however that this feature is not portable", color="yellow")
-                    cprint(
-                        "\tand this test is partly disabled on the Abinit testfarm.", color="yellow")
+                    cprint("\tNote however that this feature is not portable", color="yellow")
+                    cprint("\tand this test is partly disabled on the Abinit testfarm.", color="yellow")
                     if self.exclude_hosts:
-                        cprint("\t\texclude_hosts: %s" %
-                               str(self.exclude_hosts), color="yellow")
+                        cprint("\t\texclude_hosts: %s" % str(self.exclude_hosts), color="yellow")
                     if self.exclude_builders:
-                        cprint("\t\texclude_builder: %s" %
-                               str(self.exclude_builders), color="yellow")
+                        cprint("\t\texclude_builder: %s" % str(self.exclude_builders), color="yellow")
 
                 if status == "failed" and self.use_git_submodule:
                     cprint("\tTest %s failed. Note, however, that this test requires external files in %s" % (
@@ -2126,19 +2193,19 @@ pp_dirpath $ABI_PSPDIR
                 self._status = "failed"
                 self.had_timeout = True
                 msg = self.full_id + " Test has reached timeout and has been killed by SIGTERM"
-                self.cprint(msg, status2txtcolor["failed"])
+                self.cprint(msg=msg, color=status2txtcolor["failed"])
 
             elif runner.retcode == 137:
                 self._status = "failed"
                 self.had_timeout = True
                 msg = self.full_id + " Test has reached timeout and has been killed by SIGKILL"
-                self.cprint(msg, status2txtcolor["failed"])
+                self.cprint(msg=msg, color=status2txtcolor["failed"])
 
             elif runner.retcode != 0 and not self.expected_failure:
                 self._status = "failed"
                 msg = (
                     self.full_id + " Test was not expected to fail but subprocesses returned retcode: %s" % runner.retcode)
-                self.cprint(msg, status2txtcolor["failed"])
+                self.cprint(msg=msg, color=status2txtcolor["failed"])
 
             # If pedantic, stderr must be empty unless the test is expected to fail!
             if self.pedantic and not self.expected_failure:
@@ -2162,7 +2229,7 @@ pp_dirpath $ABI_PSPDIR
                         self._status = "failed"
                         msg = " ".join(
                             [self.full_id, "VALGRIND ERROR:", parser.error_report])
-                        self.cprint(msg, status2txtcolor["failed"])
+                        self.cprint(msg=msg, color=status2txtcolor["failed"])
 
                 except Exception as exc:
                     self.exceptions.append(exc)
@@ -2173,26 +2240,23 @@ pp_dirpath $ABI_PSPDIR
                 try:
                     errout = self.stderr_read()
                     if errout:
-                        self.cprint(errout, status2txtcolor["failed"])
+                        self.cprint(msg=errout, color=status2txtcolor["failed"])
 
                     # Extract YAML error message from ABORTFILE or stdout.
                     abort_file = os.path.join(
                         self.workdir, "__ABI_MPIABORTFILE__")
                     if os.path.exists(abort_file):
                         with open(abort_file, "rt") as f:
-                            self.cprint(
-                                12 * "=" + " ABI_MPIABORTFILE " + 12 * "=")
-                            self.cprint(f.read(), status2txtcolor["failed"])
+                            self.cprint(msg=12 * "=" + " ABI_MPIABORTFILE " + 12 * "=")
+                            self.cprint(msg=f.read(), color=status2txtcolor["failed"])
                             f.close()
                     else:
                         yamlerr = read_yaml_errmsg(self.stdout_fname)
                         if yamlerr:
-                            self.cprint(
-                                "YAML Error found in the stdout of: " + repr(self))
-                            self.cprint(yamlerr, status2txtcolor["failed"])
+                            self.cprint(msg="YAML Error found in the stdout of: " + repr(self))
+                            self.cprint(msg=yamlerr, color=status2txtcolor["failed"])
                         else:
-                            self.cprint(
-                                "No YAML Error found in: " + repr(self))
+                            self.cprint(msg="No YAML Error found in: " + repr(self))
 
                 except Exception as exc:
                     self.exceptions.append(exc)
@@ -2200,7 +2264,7 @@ pp_dirpath $ABI_PSPDIR
             if kwargs.get("abimem_check", False):
                 paths = [os.path.join(self.workdir, f) for f in os.listdir(self.workdir)
                          if f.startswith("abimem") and f.endswith(".mocc")]
-                self.cprint("Found %s abimem files" % len(paths))
+                self.cprint(msg="Found %s abimem files" % len(paths))
                 # abimem_retcode = 0
                 for path in paths:
                     memfile = AbimemFile(path)
@@ -2234,9 +2298,9 @@ pp_dirpath $ABI_PSPDIR
 
                             if elist:
                                 all_errors.append(elist)
-                                self.cprint("%s [FAILED]" % p, "red")
+                                self.cprint(msg="%s [FAILED]" % p, color="red")
                             else:
-                                self.cprint("%s [OK]" % p, "green")
+                                self.cprint(msg="%s [OK]" % p, color="green")
 
                     nc_retcode = len(all_errors)
 
@@ -2252,9 +2316,9 @@ pp_dirpath $ABI_PSPDIR
                     self._status = "failed"
                     # Store the exception and continue.
                     self.exceptions.append(Exception(errmsg))
-                    self.cprint(errmsg)
+                    self.cprint(msg=errmsg)
                 else:
-                    self.cprint("netcdf validation [OK]", "green")
+                    self.cprint(msg="netcdf validation [OK]", color="green")
 
         self._executed = True
         self.tot_etime = time.time() - start_time
@@ -2721,7 +2785,7 @@ class AnaddbTest(BaseTest):
         if self.input_ddb:
             # Use output DDB of a previous run.
             iddb_fname = os.path.join(self.workdir, self.input_ddb)
-            if (not os.path.isfile(iddb_fname) 
+            if (not os.path.isfile(iddb_fname)
                 and not os.path.isfile(iddb_fname + '.nc')):
                 self.exceptions.append(self.Error(
                     "%s no such DDB file: " % iddb_fname))
@@ -2952,7 +3016,7 @@ class MultibinitTest(BaseTest):
         return t_stdin.getvalue()
 
     def prepare_new_cli_invokation(self):
-        """Perform operations required to execute test with new CLI."""
+        """Perform operations required to execute test with the new CLI."""
         # Need to add extra variables depending on calculation type.
         with open(self.inp_fname, "rt") as fh:
             line = fh.read()
@@ -3158,6 +3222,9 @@ class ChainOfTests(object):
     It provides the same interface as the one given by BaseTest
     """
     Error = BaseTestError
+
+    def is_chain(self):
+        return True
 
     def __init__(self, tests):
         self.tests = tuple(t for t in tests)
@@ -3494,91 +3561,6 @@ class AbinitTestSuite(object):
                 "need_cpp_vars argument is not expected with test_list.")
             self.tests = tuple(test_list)
 
-    # def git_rename(self):
-
-    #    import subprocess
-    #    seen = set()
-    #    def rename(test):
-    #        #print(test, type(test))
-    #        if test.inp_fname in seen: return
-    #        seen.add(test.inp_fname)
-
-    #        root, ext = os.path.splitext(test.inp_fname)
-    #        #assert ext == ".in"
-    #        new = root + ".abi"
-    #        inbase = os.path.basename(root)
-    #        cmd = f"git mv {test.inp_fname} {new}"
-
-    #        #print("cmd", cmd)
-    #        #subprocess.run(cmd, shell=True, check=True)
-    #        #call(cmd)
-    #        #print("inp_fname", test.inp_fname)
-
-    #        # Rename ref files
-    #        old_new = []
-    #        for f in test.files_to_test:
-    #            root, ext = os.path.splitext(test.inp_fname)
-    #            if not f.name.endswith(".out"): continue
-    #            if f.name == inbase + ".out" or "MPI" in f.name:
-    #                old_ref = os.path.join(test.ref_dir, f.name)
-    #                new, ext = os.path.splitext(old_ref)
-    #                new = new + ".abo"
-    #                cmd = f"git mv {old_ref} {new}"
-    #                print(cmd)
-    #                if os.path.exists(old_ref) and not os.path.exists(new):
-    #                    subprocess.run(cmd, shell=True, check=True)
-    #                if not os.path.exists(old_ref):
-    #                    print("Warning. unexistent:", old_ref)
-    #                old_new.append((os.path.basename(old_ref), os.path.basename(new)))
-
-    #            else:
-    #                continue
-    #                #print("strange f.name", f.name)
-
-    #        # Change names in TEST_INFO section
-    #        if old_new:
-    #            with open(test.inp_fname, "rt") as fh:
-    #                s = fh.read()
-    #                for old, new in old_new:
-    #                    print("replacing`", old, "`with:`", new, "`in:", test.inp_fname)
-    #                    s = s.replace(old, new)
-    #            #print(s)
-    #            with open(test.inp_fname, "wt") as fh:
-    #                fh.write(s)
-
-    #    def rename_chain(chain):
-    #        old_new = []
-    #        for test in chain:
-    #            print(test)
-    #            root, ext = os.path.splitext(test.inp_fname)
-    #            #assert ext == ".abi"
-    #            old = os.path.basename(root + ".in")
-    #            new = os.path.basename(root + ".abi")
-    #            #inbase = os.path.basename(root)
-    #            #cmd = f"git mv {test.inp_fname} {new}"
-    #            old_new.append((old, new))
-
-    #        # Change names in TEST_INFO section
-    #        if old_new:
-    #            for test in chain:
-    #                with open(test.inp_fname, "rt") as fh:
-    #                    s = fh.read()
-    #                    for old, new in old_new:
-    #                        print("replacing test_chain`", old, "`with:`", new, "`in:", test.inp_fname)
-    #                        s = s.replace(old, new)
-    #                #print(s)
-    #                with open(test.inp_fname, "wt") as fh:
-    #                    fh.write(s)
-
-    #    for test in self:
-    #        if isinstance(test, ChainOfTests):
-    #            #print("Skipping test chain")
-    #            #rename_chain(test)
-    #            for t in test:
-    #                rename(t)
-    #        else:
-    #            rename(test)
-
     def __str__(self):
         return "\n".join(str(t) for t in self.tests)
 
@@ -3797,7 +3779,7 @@ class AbinitTestSuite(object):
     def start_workers(self, nprocs, runner):
         """
         Start nprocs new processes that will get tests from a queue and run
-        them with runner and put the result of runner in a output queue.
+        them with runner and put the result of the runner in an output queue.
         Return the task/input queue (to be closed only) and the results/output queue.
         """
 
@@ -3811,10 +3793,11 @@ class AbinitTestSuite(object):
                         all_done = True
                     else:
                         qout.put(runner(test, print_lock=print_lock))
+
             except EmptyQueueError:
                 # If that happen it is a probably a bug
-                done['error'] = RuntimeError(
-                    'Task queue is unexpectedly empty.')
+                done['error'] = RuntimeError('Task queue is unexpectedly empty.')
+
             except Exception as e:
                 # Any other error is reported
                 done['error'] = e
@@ -3822,6 +3805,7 @@ class AbinitTestSuite(object):
                     done['task'] = test.full_id
                 except (AttributeError, NameError):
                     pass
+
             finally:
                 qout.put(done)
 
@@ -3845,9 +3829,8 @@ class AbinitTestSuite(object):
 
         # Add the worker as a thread of the main process
         t = Thread(target=worker, args=(task_q, res_q, print_lock, True))
-        # make it daemon so it will die if the main process is interupted early
+        # make it daemon so it will die if the main process is interrupted early
         t.daemon = True
-
         t.start()
 
         return task_q, res_q
@@ -3925,8 +3908,7 @@ class AbinitTestSuite(object):
         self.workdir = workdir
 
         # Acquire the lock file.
-        self.lock = NoErrorFileLock(os.path.join(workdir, "__run_tests_lock__"),
-                                    timeout=3)
+        self.lock = NoErrorFileLock(os.path.join(workdir, "__run_tests_lock__"), timeout=3)
 
         with self.lock as locked:
             # aquire the global file lock
@@ -3937,7 +3919,7 @@ class AbinitTestSuite(object):
                     "process is running in the same directory.\n If you are "
                     "sure no other process is in execution, remove the directory with `rm -rf` and rerun.\n"
                 ).format(self.workdir)
-                cprint(msg, "red")
+                cprint(msg, color="red")
                 return
 
             # Remove all stale files present in workdir (except the lock!)
@@ -4041,8 +4023,7 @@ class AbinitTestSuite(object):
                     stats_suite[test.suite_name]["run_etime"] += test.run_etime
                     stats_suite[test.suite_name]["tot_etime"] += test.tot_etime
                 except AttributeError:
-                    print(
-                        "Cannot access run_etime, tot_etime attributes of test:\n\t%s" % str(test))
+                    print("Cannot access run_etime, tot_etime attributes of test:\n\t%s" % str(test))
                     print("Likely due to timeout error.")
                     print("Continuing anyway despite the error.")
                     stats_suite[test.suite_name]["run_etime"] += 0.0
@@ -4071,16 +4052,15 @@ class AbinitTestSuite(object):
                              2 for test in executed) / len(executed))**0.5
 
                 cprint("Completed in %.2f [s]. Average time for test=%.2f [s], stdev=%.2f [s]" % (
-                    self.tot_etime, mean_etime, dev_etime), "yellow"
-                )
+                    self.tot_etime, mean_etime, dev_etime), color="yellow")
 
                 msg = "Summary: failed=%s, succeeded=%s, passed=%s, skipped=%s, disabled=%s" % (
                     nfail, nsucc, npass, nskip, ndisa)
 
                 if nfail:
-                    cprint(msg, "red", attrs=['underline'])
+                    cprint(msg, color="red", attrs=['underline'])
                 else:
-                    cprint(msg, "green")
+                    cprint(msg, color="green")
 
                 # Print outliers
                 if False and dev_etime > 0.0:
@@ -4256,24 +4236,19 @@ class AbinitTestSuite(object):
         test_list = [test for test in self]
 
         if with_keys:
-            test_list = [test for test in test_list if test.has_keywords(
-                with_keys, mode=mode)]
+            test_list = [test for test in test_list if test.has_keywords(with_keys, mode=mode)]
 
         if exclude_keys:
-            test_list = [test for test in test_list if not test.has_keywords(
-                exclude_keys, mode=mode)]
+            test_list = [test for test in test_list if not test.has_keywords(exclude_keys, mode=mode)]
 
         if with_authors:
-            test_list = [test for test in test_list if test.has_authors(
-                with_authors, mode=mode)]
+            test_list = [test for test in test_list if test.has_authors(with_authors, mode=mode)]
 
         if exclude_authors:
-            test_list = [test for test in test_list if not test.has_authors(
-                exclude_authors, mode=mode)]
+            test_list = [test for test in test_list if not test.has_authors(exclude_authors, mode=mode)]
 
         if ivars:
-            test_list = [
-                test for test in test_list if test.has_variables(ivars)]
+            test_list = [test for test in test_list if test.has_variables(ivars)]
 
         return AbinitTestSuite(self.abenv, test_list=test_list)
 
@@ -4403,8 +4378,7 @@ class Results(object):
 
     def stderr_files(self, status="failed"):
         """List of non-empty error files of the tests with the specified status."""
-        # Loop over the tests, open the stderr to see if it's empty ot not
-        # and add it to the list.
+        # Loop over the tests, open the stderr to see if it's empty or not and add it to the list.
         err_files = []
         for test in self.tests_with_status(status):
             if isinstance(test, ChainOfTests):

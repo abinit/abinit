@@ -317,7 +317,7 @@ subroutine pawxc_size_dvxc_local()
 
 !Do we use the kinetic energy density?
  need_kden=(ixc==31.or.ixc==34.or.ixc==35)
- if (ixc<0) need_kden=libxc_functionals_ismgga()
+ if (ixc<0) need_kden=libxc_functionals_needs_tau()
  usekden_=0 ; if (need_kden) usekden_=min(nspden,2)
 
 !First derivative(s) of XC functional wrt gradient of density
@@ -5793,7 +5793,8 @@ subroutine pawxc_drivexc_abinit()
 
 ! *************************************************************************
 
- test_args=(present(dvxc).and.present(d2vxc))
+ test_args=present(dvxc)
+ if (nd2vxc>0) test_args=(test_args.and.present(d2vxc))
  if (usegradient==1) test_args=(test_args.and.present(grho2).and.present(vxcgrho))
  if (uselaplacian==1) test_args=(test_args.and.present(lrho).and.present(vxclrho))
  if (usekden==1) test_args=(test_args.and.present(tau).and.present(vxctau))

@@ -30,7 +30,7 @@ module m_rttddft_propagators
                                 & prep_bandfft_tabs
  use m_dtset,               only: dataset_type
  use m_energies,            only: energies_type, energies_init, energies_copy
- use m_gemm_nonlop,         only: make_gemm_nonlop
+ use m_gemm_nonlop_projectors, only: gemm_nonlop_ikpt_this_proc_being_treated
  use m_hamiltonian,         only: gs_hamiltonian_type, gspot_transgrid_and_pack
  use m_invovl,              only: make_invovl
  use m_kg,                  only: mkkin, mkkpg
@@ -105,7 +105,6 @@ subroutine rttddft_propagator_er(dtset, ham_k, istep, mpi_enreg, psps, tdks, cal
  integer                        :: bdtot_index
  integer                        :: calc_forces
  integer                        :: dimffnl
- integer                        :: gemm_nonlop_ikpt_this_proc_being_treated
  integer                        :: iband
  integer                        :: ibg, icg
  integer                        :: ider, idir
@@ -194,7 +193,7 @@ subroutine rttddft_propagator_er(dtset, ham_k, istep, mpi_enreg, psps, tdks, cal
  my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
  n4=dtset%ngfft(4); n5=dtset%ngfft(5); n6=dtset%ngfft(6)
  ABI_MALLOC(vlocal,(n4,n5,n6,ham_k%nvloc))
- with_vxctau=(dtset%usekden/=0)
+ with_vxctau=(size(tdks%vxctau)>0)
  if(with_vxctau) then
    ABI_MALLOC(vxctaulocal,(n4,n5,n6,ham_k%nvloc,4))
  end if
@@ -329,13 +328,6 @@ subroutine rttddft_propagator_er(dtset, ham_k, istep, mpi_enreg, psps, tdks, cal
       if (tdks%gemm_nonlop_use_gemm) then
          !set the global variable indicating to gemm_nonlop where to get its data from
          gemm_nonlop_ikpt_this_proc_being_treated = my_ikpt
-         if (istep <= tdks%first_step) then
-            !Init the arrays
-            call make_gemm_nonlop(my_ikpt,ham_k%npw_fft_k,ham_k%lmnmax, &
-                ham_k%ntypat, ham_k%indlmn, ham_k%nattyp, ham_k%istwf_k, &
-                ham_k%ucvol,  ham_k%ffnl_k, &
-                ham_k%ph3d_k, ham_k%kpt_k, ham_k%kg_k, ham_k%kpg_k)
-         end if
       end if
 
       !** Compute the exp[(S^{-1})H]*cg using Taylor expansion to approximate the exponential

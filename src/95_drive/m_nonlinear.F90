@@ -206,7 +206,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,pawang,pawra
  real(dp) :: dum_gauss(0),dum_dyfrn(0),dum_dyfrv(0),dum_eltfrxc(0)
  real(dp) :: dum_grn(0),dum_grv(0),dum_rhog(0),dum_vg(0)
  real(dp) :: dum_shiftk(3,MAX_NSHIFTK),dummy6(6),other_dummy6(6),gmet(3,3),gprimd(3,3)
- real(dp) :: qphon(3),rmet(3,3),rprimd(3,3),strsxc(6),tsec(2)
+ real(dp) :: qphon(3),rmet(3,3),rprimd(3,3),tsec(2)
  real(dp),allocatable :: cg(:,:),d3cart(:,:,:,:,:,:,:)
  real(dp),allocatable :: d3etot(:,:,:,:,:,:,:),dum_kptns(:,:)
 ! We need all these arrays instead of one because in Fortran the maximum number of dimensions is 7...
@@ -880,7 +880,7 @@ end if
  nmxc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
  call rhotoxc(enxc,kxc,mpi_enreg,nfftf,ngfftf,&
 & nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,nmxc,n3xccc,option,rhor,&
-& rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,k3xc=k3xc,vhartr=vhartr)
+& rprimd,usexcnhat,vxc,vxcavg,xccc3d,xcdata,k3xc=k3xc,vhartr=vhartr)
 
 !Compute local + Hxc potential, and subtract mean potential.
  ABI_MALLOC(vtrial,(nfftf,dtset%nspden))
@@ -918,7 +918,8 @@ end if
    call pawdij(cplex,dtset%enunit,gprimd,ipert,my_natom,natom,nfftf,nfftotf,&
 &   dtset%nspden,ntypat,paw_an,paw_ij,pawang,pawfgrtab,dtset%pawprtvol,&
 &   pawrad,pawrhoij,dtset%pawspnorb,pawtab,dtset%pawxcdev,k0,&
-&   dtset%spnorbscl,ucvol,dtset%cellcharge(1),vtrial,vxc,xred,nucdipmom=dtset%nucdipmom,&
+&   dtset%spnorbscl,ucvol,dtset%cellcharge(1),vtrial,vxc,xred,dtset%znucl,&
+&   nucdipmom=dtset%nucdipmom,&
 &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
    call symdij(gprimd,indsym,ipert,my_natom,natom,dtset%nsym,ntypat,0,&
 &   paw_ij,pawang,dtset%pawprtvol,pawtab,rprimd,dtset%symafm,symrec,&

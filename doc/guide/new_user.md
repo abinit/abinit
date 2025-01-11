@@ -105,7 +105,7 @@ and in the [[topic:PseudosPAW|PseudosPAW]] topics.
 !!! warning
 
     A subset of existing pseudopotentials are used for test cases, and are located in the 
-    ~abinit/tests/Psps_for_tests directory but they **are not recommended** for production. 
+    ~abinit/tests/Pspdir directory but they **are not recommended** for production.
 
 ## Other programs in the package
   
@@ -241,10 +241,13 @@ input file, are listed below:
 
 **Specification of the type of calculation to be done:**
 
-[[ionmov]]
-:       when [[ionmov]] = 0: the ions and cell shape are fixed
-                        = 2: search for the equilibrium geometry
-                        = 6: molecular dynamics
+[[moldyn]]
+:       when [[moldyn]] is "none": the ions and cell shape are fixed
+                        is "nve_verlet": molecular dynamics (NVE)
+
+[[geoopt]]
+:       when [[geoopt]] is "none": the ions and cell shape are fixed
+                        is "bfgs": search for the equilibrium geometry
 
 [[iscf]]
 :       either a positive number for defining self-consistent

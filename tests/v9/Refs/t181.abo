@@ -1,6 +1,6 @@
 
-.Version 9.11.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 17 Jul 2023.
-- ( at 17h10 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h17 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v9_t181/t181.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v9_t181/t181.abi
 - output file    -> t181.abo
 - root for input  files -> t181i
 - root for output files -> t181o
@@ -42,17 +42,17 @@ _ WF disk file :      0.014 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
             acell      1.0883424564E+01  1.0883424564E+01  1.3134016143E+01 Bohr
               amu      1.37327000E+02  1.07868200E+02  1.21753000E+02
              ecut      2.00000000E+00 Hartree
--          fftalg         312
+-          fftalg         512
            istwfk        2
          kptrlatt        1    0    0      0    1    0      0    0    1
           kptrlen      1.08834246E+01
@@ -150,8 +150,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      2.000   => boxcut(ratio)=   2.02747
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/56ba.2.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/56ba.2.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/56ba.2.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/56ba.2.hgh
 - Hartwigsen-Goedecker-Hutter psp for Ba,  from PRB58, 3641 (1998)
 - 56.00000   2.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -176,8 +176,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              2   -6.472077
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/47ag.1.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/47ag.1.hgh
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/47ag.1.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/47ag.1.hgh
 - Hartwigsen-Goedecker-Hutter psp for Ag,  from PRB58, 3641 (1998)
 - 47.00000   1.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -202,8 +202,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              2   -0.616167
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/51sb.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/51sb.5.hgh
+- pspini: atom type   3  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/51sb.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/51sb.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Sb,  from PRB58, 3641 (1998)
 - 51.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -363,10 +363,10 @@ xc                  : -3.46684164720768E+00
 Ewald energy        : -1.21884367255288E+01
 psp_core            :  1.02172222631012E+00
 local_psp           : -1.51236407832339E+00
-non_local_psp       :  3.50935912438167E-01
+non_local_psp       :  3.50935912438166E-01
 total_energy        : -1.16855849947332E+01
 total_energy_eV     : -3.17980938920342E+02
-band_energy         : -5.99812543722562E-01
+band_energy         : -5.99812543722563E-01
 ...
 
 
@@ -394,7 +394,7 @@ band_energy         : -5.99812543722562E-01
                       -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
--          fftalg         312
+-          fftalg         512
            istwfk        2
          kptrlatt        1    0    0      0    1    0      0    0    1
           kptrlen      1.08834246E+01
@@ -550,10 +550,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          0.7  wall=          0.7
+- Proc.   0 individual time (sec): cpu=          0.4  wall=          0.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered   2 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          0.7  wall=          0.7
++Overall time at end (sec) : cpu=          0.4  wall=          0.5

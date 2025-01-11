@@ -25,7 +25,7 @@ ntypat 1          # There is only one type of atom
 znucl 6           # Atomic number of the possible type(s) of atom. Here carbon.
 pp_dirpath "$ABI_PSPDIR"                    # Path to the directory were
                                             #   pseudopotentials for tests are stored
-pseudos "Pseudodojo_paw_pw_standard/C.xml"  # Name and location of the pseudopotential
+pseudos "Psdj_paw_pw_std/C.xml"  # Name and location of the pseudopotential
                          
 #Definition of the atoms
 natom 2           # There are two atoms

@@ -4,7 +4,7 @@
 !!
 !! FUNCTION
 !! This module provides routines for the calculation of the dielectric constant (anaddb)
-!! 
+!!
 !! COPYRIGHT
 !!  Copyright (C) 1999-2024 ABINIT group (XG,XW, MVeithen, EB)
 !!  This file is distributed under the terms of the
@@ -146,7 +146,7 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
 !  In case the ionic contribution to the dielectric tensor is asked
    if (dieflag/=2 .and. nph2l==0) then
 !   Check if the alignement of phonon modes eigenvector is requested from the input flag alphon;
-!   useful in case of degenerate modes 
+!   useful in case of degenerate modes
      if (anaddb_dtset%alphon > 0) then
        write(message, '(3a)' )&
         ' The alphon input variable is non-zero, will mix the degenerate phonon modes',ch10,&
@@ -178,7 +178,7 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
 !      Compute the relaxed ion dielectric tensor
        do idir1=1,3
          do idir2=1,3
-!          The electronic contribution to epsilon is added 
+!          The electronic contribution to epsilon is added
            dielt_rlx(idir1,idir2)=epsinf(idir1,idir2)
 !          calculation of the phonon contribution (ionic) to epsilon
            do imode=4,3*natom
@@ -192,7 +192,7 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
 !            Mode decomposition of epsilon
              if (dieflag==3)then
                dielt_modedecompo(idir1,idir2,imode)=oscstr(1,idir1,idir2,imode) / (phfrq(imode)**2)*four_pi/ucvol
-             endif ! mode decompo of epsilon 
+             endif ! mode decompo of epsilon
 !DEBUG
 !         if(idir1==1 .and. idir2==2)then
 !           write(std_out,'(a,i4,a,3es16.6)')'imode=',imode,' dielt_rlx(idir1,idir2),oscstr(1,idir1,idir2,imode),phfrq(imode)=',&
@@ -203,7 +203,7 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
          end do ! idir2
        end do ! idir1
 
-       ! Print the electronic dielectric tensor 
+       ! Print the electronic dielectric tensor
        call ddb_diel_elec(iout,epsinf)
 
        ! Print the relaxed ion dielectric tensor
@@ -218,7 +218,7 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
        end do
        call wrtout(iout, " ",'COLL')
        call wrtout(std_out, " ",'COLL')
-     
+
 !      Mode decompo of epsilon
        if (dieflag==3) then
          write(message,'(a,a,a,a)') ch10,' Mode by mode decomposition of the ionic dielectric tensor',&
@@ -235,7 +235,7 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
              write(message,'(3f16.8)')(dielt_modedecompo(idir1,idir2,imode),idir2=1,3)
              call wrtout(std_out,message,'COLL')
              call wrtout(iout,message,'COLL')
-           end do 
+           end do
          end do
        endif ! mode decompo of epsilon
 
@@ -256,7 +256,7 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
        call wrtout(std_out,message,'COLL')
        write(message,'(3a)') ch10,' Frequency dependent dielectric constant:',ch10
        call wrtout(iout,message,'COLL')
-   
+
 !      Check the possibility of asking the frequency-dependent
 !      dielectric tensor (there should be more than one atom in the unit cell)
 !      EB: this check is not in any automatic test
@@ -363,7 +363,7 @@ if(nph2l/=0 .and. dieflag/=2) then
      end if
    end do
  end if ! End of the condition of nph2l does not vanish for Lyddane-Sachs-Teller
- 
+
 
  ABI_FREE(frdiel)
  ABI_FREE(modez)
@@ -389,7 +389,7 @@ end subroutine ddb_diel
 !!  dielectric tensor
 !!
 !! OUTPUT
-!! 
+!!
 !! SOURCE
 
 subroutine ddb_diel_elec(iout,epsinf)
@@ -411,7 +411,7 @@ subroutine ddb_diel_elec(iout,epsinf)
  call wrtout(iout,message,'COLL')
 
  !Compute the electronic contribution to the dielectric tensor
- !Needs only the perturbations with E-field from the DDB 
+ !Needs only the perturbations with E-field from the DDB
  do idir1=1,3
 !   do idir2=1,3
 !     epsinf(idir1,idir2)=d2cart(1,idir1,natom+2,idir2,natom+2)
@@ -461,7 +461,7 @@ end subroutine ddb_diel_elec
 !!  the definition Eq.(53) in PRB55, 10355 (1997) [[cite:Gonze1997a]]
 !! oscstr(2,3,3,3*natom)=oscillator strengths, following
 !!  the definition Eq.(54) in PRB55, 10355 (1997) [[cite:Gonze1997a]]
-!! 
+!!
 !! SOURCE
 
 subroutine ddb_oscstr(displ,d2cart,fact_oscstr,oscstr,modez,iout,mpert,natom,phfrq,ncid,my_rank)
@@ -490,11 +490,8 @@ subroutine ddb_oscstr(displ,d2cart,fact_oscstr,oscstr,modez,iout,mpert,natom,phf
 !  Get the factors of the oscillator strength, and the mode effective charge for each mode
    do imode=1,3*natom
      usquare=zero
-     do idir1=1,3
-       do ipert1=1,natom
-         i1=idir1+(ipert1-1)*3
-         usquare=usquare+displ(1,i1,imode)*displ(1,i1,imode)+displ(2,i1,imode)*displ(2,i1,imode)
-       end do
+     do i1=1,3*natom
+       usquare=usquare+displ(1,i1,imode)*displ(1,i1,imode)+displ(2,i1,imode)*displ(2,i1,imode)
      end do
      do idir2=1,3
        fact_oscstr(:,idir2,imode)=zero
@@ -594,7 +591,7 @@ subroutine ddb_oscstr(displ,d2cart,fact_oscstr,oscstr,modez,iout,mpert,natom,phf
    end if
 
    ABI_FREE(metacharacter)
-   
+
 end subroutine ddb_oscstr
 !!***
 

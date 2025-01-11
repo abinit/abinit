@@ -135,7 +135,7 @@ CONTAINS !===========================================================
        & ' Total amount of global memory: ',nint(globalmem),' Mbytes',ch10, &
        & ' Clock rate:                    ',clockRate,' GHz',ch10, &
        & ' Number of processors/cores:    ',nprocs,'/',ncores,ch10, &
-       & ' Max GFLOPS:                    ',trim(gflops_stg),ch10, &
+       & ' Max FP64 GFLOPS:               ',trim(gflops_stg),ch10, &
        & ' Total  constant memory:        ',constmem,' bytes',ch10, &
        & ' Shared memory per block:       ',sharemem,' bytes',ch10, &
        & ' Number of registers per block: ',regist,ch10

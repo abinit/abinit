@@ -1,0 +1,86 @@
+# H2. Interface with CC4S code (NC pseudos)
+# Test in particular time-reversal symmetry with Hartree-Fock
+
+iomode 1
+enunit 2
+ixc 40   # HF
+
+# Number of datasets: 2-step calculation
+ndtset 3  jdtset 1 2 3
+
+gw_icutcoul 0
+icutcoul    0
+rcut      5.0
+
+kptopt    1
+ngkpt     1 1 1              # Number of grid points for k-point generation
+nshiftk   1
+shiftk    0 0 0              # Mesh centered on gamma
+istwfk    *2                 # Use time-reversal symmetry for HF Gamma-only
+
+nsym      1
+
+# Definition of the plane-wave basis set
+ecut 20.0                    # This should be used to reach convergence.
+
+####################
+# Dataset 1: true SCF run
+####################
+nband1   2            # Number of bands in the ground state calculations
+toldfe1  1.0e-6       # Tolerance to stop SCF cycles
+nstep1  20 
+
+####################
+# Dataset 2: fake SCF to obtain the empty states iteratively
+####################
+nband2   24           # Number of bands
+toldfe2  1.0e-12      # Tolerance to stop SCF cycles
+nnsclo2 12
+nstep2   1 
+getwfk_filepath2 "t10o_DS1_WFK"
+
+###########################################
+# Dataset 3: CC4S interface
+###########################################
+optdriver3  6         # Activate GWR code
+gwr_task3 "CC4S_FROM_WFK"     # Enter Abinit -> CC4S interface
+getden3     1
+nband3     20        # Number of (occ + empty) bands used to compute the oscillator matrix elements
+ecuteps3   20.
+getwfk_filepath3 "t10o_DS2_WFK"
+
+# Definition of the unit cell: simple cubic
+acell  3*10.00         # Experimental lattice constants in Bohr
+
+# Definition of the atom types
+ntypat  1
+znucl   1
+
+# Definition of the atoms
+natom  2
+typat  1 1
+xcart   5.  5.  4.65
+        5.  5.  5.35 angstrom
+
+pp_dirpath "$ABI_PSPDIR/Psdj_nc_sr_04_pbe_std_psp8/"
+pseudos "H.psp8"
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% exclude_builders = eos_nvhpc_23.9_elpa
+#%% [files]
+#%% files_to_test = 
+#%%   t10.abo, tolnlines=  15, tolabs=  1.2e-09, tolrel= 1.0
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors = F. Bruneval, M. Giantomassi
+#%% keywords = NC, CC4S
+#%% description = Hartree-Fock with time-reversal, then CC4S output
+#%%<END TEST_INFO>
+
+

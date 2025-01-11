@@ -1,6 +1,6 @@
 
-.Version 9.3.3 of ABINIT 
-.(sequential version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 14 Dec 2020.
-- ( at 15h49 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h06 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_serial/bruneval_beauty/tests/TestBot_MPI1/tutorial_tgw2_1-tgw2_2-tgw2_3-tgw2_4/tgw2_3.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/tutorial_tgw2_1-tgw2_2-tgw2_3-tgw2_4/tgw2_3.abi
 - output file    -> tgw2_3.abo
 - root for input  files -> tgw2_3i
 - root for output files -> tgw2_3o
-
 
  Symmetries : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
@@ -34,7 +33,7 @@
 -    mband =          30        mffmem =           1         mkmem =           8
        mpw =         126          nfft =        3375          nkpt =           8
 ================================================================================
-P This job should need less than                       3.012 Mbytes of memory.
+P This job should need less than                       3.034 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.463 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
@@ -43,10 +42,10 @@ _ WF disk file :      0.463 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -58,7 +57,7 @@ _ WF disk file :      0.463 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
          ecutsigx      8.00000000E+00 Hartree
           ecutwfn      8.00000000E+00 Hartree
            enunit           1
--          fftalg         312
+-          fftalg         512
         gwcalctyp          12
            istwfk        1    0    1    0    0    0    1    0
               ixc          11
@@ -206,8 +205,8 @@ meta: {optdriver: 4, gwcalctyp: 12, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_serial/bruneval_beauty/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Al.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_serial/bruneval_beauty/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Al.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/Al.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/Al.psp8
 - Al    ONCVPSP-3.2.3.1  r_core=   1.76802   1.76802   1.70587
 - 13.00000   3.00000    170504                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -283,8 +282,8 @@ meta: {optdriver: 4, gwcalctyp: 12, }
 
   Number of electrons    =    3.0000
 
-  QP Band energy    [Ha] =  3.25200685419914E-01
-  QP Hartree energy [Ha] =  3.52483235044972E-03
+  QP Band energy    [Ha] =  3.25200685419909E-01
+  QP Hartree energy [Ha] =  3.52483235044968E-03
 
 --------------------------------------------------------------------------------
  SIGMA fundamental parameters:
@@ -432,7 +431,7 @@ data: !SigmaeeData |
         1     6.090    -9.522     6.090    15.612    -8.997    -0.748     0.691    -0.447    -9.676    -0.154     5.936     5.867
         2     6.090    -9.522     6.090    15.612    -8.997    -0.748     0.691    -0.447    -9.676    -0.154     5.936     5.867
         3     7.106    -9.299     7.106    16.405    -7.401    -2.024     0.698    -0.433    -9.387    -0.088     7.018     6.980
-        4     7.961    -9.478     7.961    17.439    -6.608    -2.982     0.696    -0.438    -9.555    -0.078     7.883     7.849
+        4     7.961    -9.478     7.961    17.439    -6.608    -2.982     0.696    -0.438    -9.556    -0.078     7.883     7.849
 ...
 
 
@@ -465,7 +464,7 @@ data: !SigmaeeData |
            enunit           1
            etotal      0.0000000000E+00
             fcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         312
+-          fftalg         512
         gwcalctyp          12
            istwfk        1    0    1    0    0    0    1    0
               ixc          11
@@ -581,41 +580,10 @@ P           mkmem           8
 
 ================================================================================
 
-- Total cpu        time (s,m,h):          5.0        0.08      0.001
-- Total wall clock time (s,m,h):          5.0        0.08      0.001
--
-- For major independent code sections, cpu and wall times (sec),
--  as well as % of the time and number of calls for node 0-
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =            5.0, wall_time =            5.0
--
-- routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
--                                                                  (-1=no count)
-- sigma/=fourdp                  4.684  94.5      4.693  94.5              1      -1.00        1.00       1.00
-- pspini                         0.197   4.0      0.197   4.0              1      -1.00        1.00       1.00
-- timing timab                   0.148   3.0      0.148   3.0             11      -1.00        1.00       1.00
-- invars2                        0.033   0.7      0.033   0.7              1      -1.00        1.01       1.01
-- others (125)                   0.036   0.7      0.039   0.8             -1      -1.00        0.92       0.92
--<END_TIMER>
--
-- subtotal                       5.099 102.9      5.110 102.9                                  1.00       1.00
 
-- For major independent code sections, cpu and wall times (sec),
-- as well as % of the total time and number of calls 
+- Timing analysis has been suppressed with timopt=0
 
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =           5.0, wall_time =           5.0
--
-- routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
--                                                                  (-1=no count)
-- sigma/=fourdp                  4.684  94.5      4.693  94.5              1      -1.00        1.00       1.00
-- pspini                         0.197   4.0      0.197   4.0              1      -1.00        1.00       1.00
-- timing timab                   0.148   3.0      0.148   3.0             11      -1.00        1.00       1.00
-- invars2                        0.033   0.7      0.033   0.7              1      -1.00        1.01       1.01
-- others (125)                   0.036   0.7      0.039   0.8             -1      -1.00        0.92       0.92
--<END_TIMER>
 
-- subtotal                       5.099 102.9      5.110 102.9                                  1.00       1.00
 
 ================================================================================
 
@@ -694,10 +662,10 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          5.0  wall=          5.0
+- Proc.   0 individual time (sec): cpu=          4.0  wall=          4.0
 
 ================================================================================
 
  Calculation completed.
-.Delivered   9 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          5.0  wall=          5.0
+.Delivered   8 WARNINGs and   3 COMMENTs to log file.
++Overall time at end (sec) : cpu=          4.0  wall=          4.0

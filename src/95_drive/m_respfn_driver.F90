@@ -19,6 +19,9 @@
 
 #include "abi_common.h"
 
+! nvtx related macro definition
+#include "nvtx_macros.h"
+
 module m_respfn_driver
 
  use defs_basis
@@ -36,11 +39,12 @@ module m_respfn_driver
  use m_xcdata
  use m_dtset
  use m_dtfil
+ use m_gemm_nonlop_projectors
 
  use defs_datatypes, only : pseudopotential_type, ebands_t
  use defs_abitypes, only : MPI_type
  use m_time,        only : timab
- use m_fstrings,    only : strcat
+ use m_fstrings,    only : strcat, endswith
  use m_symtk,       only : matr3inv, littlegroup_q, symmetrize_xred
  use m_fft,         only : zerosym, fourdp
  use m_kpts,        only : symkchk
@@ -66,7 +70,7 @@ module m_respfn_driver
  use m_pawdij,      only : pawdij, symdij, pawdij_print_dij
  use m_pawfgr,      only : pawfgr_type, pawfgr_init, pawfgr_destroy
  use m_paw_finegrid,only : pawexpiqr
- use m_pawxc,       only : pawxc_get_nkxc
+ use m_pawxc,       only : pawxc_get_nkxc, pawxc_get_usekden
  use m_paw_dmft,    only : paw_dmft_type
  use m_paw_sphharm, only : setsym_ylm
  use m_paw_nhat,    only : nhatgrid,pawmknhat
@@ -85,7 +89,7 @@ module m_respfn_driver
  use m_atm2fft,     only : atm2fft
  use m_dfpt_loopert,only : dfpt_looppert, eigen_meandege
  use m_rhotoxc,     only : rhotoxc
- use m_drivexc,     only : check_kxc
+ use m_drivexc,     only : check_kxc, xc_need_kden
  use m_xc_tb09,     only : xc_tb09_update_c
  use m_mklocl,      only : mklocl, mklocl_recipspace
  use m_common,      only : setup1, prteigrs
@@ -97,8 +101,12 @@ module m_respfn_driver
  use m_dfpt_elt,   only : dfpt_eltfrxc, dfpt_eltfrloc, dfpt_eltfrkin, dfpt_eltfrhar, elt_ewald, dfpt_ewald
  use m_d2frnl,     only : d2frnl
 
-#if defined HAVE_GPU_CUDA
+#if defined HAVE_GPU
  use m_alloc_hamilt_gpu
+#endif
+
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+ use m_nvtx_data
 #endif
 
  implicit none
@@ -224,7 +232,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  integer :: optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv
  integer :: outd2,pawbec,pawpiezo,prtbbb,psp_gencond,qzero,rdwrpaw
  integer :: rfddk,rfelfd,rfphon,rfstrs,rfuser,rf2_dkdk,rf2_dkde,rfmagn
- integer :: spaceworld,sumg0,sz1,sz2,tim_mkrho,timrev,usecprj,usevdw
+ integer :: spaceworld,sumg0,sz1,sz2,tim_mkrho,timrev,usecprj,usevdw,usevxctau,usevxctau_paw
  integer :: usexcnhat,use_sym,vloc_method,zero_by_symm
  logical :: has_full_piezo,has_allddk,is_dfpt=.true.,non_magnetic_xc
  logical :: paral_atom,qeq0,use_nhat_gga,call_pawinit
@@ -253,7 +261,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  real(dp) :: dummy6(6),gmet(3,3),gmet_for_kg(3,3),gprimd(3,3),gprimd_for_kg(3,3),qphon(3)
  real(dp) :: dummy_in(0)
  real(dp) :: dummy_out1(0),dummy_out2(0),dummy_out3(0),dummy_out4(0),dummy_out5(0),dummy_out6(0)
- real(dp) :: rmet(3,3),rprimd(3,3),rprimd_for_kg(3,3),strn_dummy6(6),strv_dummy6(6),strsxc(6),tsec(2)
+ real(dp) :: rmet(3,3),rprimd(3,3),rprimd_for_kg(3,3),strn_dummy6(6),strv_dummy6(6),tsec(2)
  real(dp),parameter :: k0(3)=(/zero,zero,zero/)
  real(dp),allocatable :: becfrnl(:,:,:),cg(:,:),d2bbb(:,:,:,:,:,:),d2cart(:,:,:,:,:)
  real(dp),allocatable :: d2cart_bbb(:,:,:,:,:,:),d2eig0(:,:,:,:,:)
@@ -290,6 +298,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
  call timab(132,1,tsec)
  call timab(133,1,tsec)
+ ABI_NVTX_START_RANGE(NVTX_RESPFN)
 
 !Some data for parallelism
 
@@ -339,7 +348,6 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
   ecutdg_eff,ecut_eff,gmet,gprimd,gsqcut_eff,gsqcutc_eff,&
   ngfftf,ngfft,dtset%nkpt,dtset%nsppol,&
   response,rmet,dtset%rprim_orig(1:3,1:3,1),rprimd,ucvol,psps%usepaw)
-
 !In some cases (e.g. getcell/=0), the plane wave vectors have
 ! to be generated from the original simulation cell
  rprimd_for_kg=rprimd
@@ -549,8 +557,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  end do
 
 !Here allocation of GPU for fft calculations
-#if defined HAVE_GPU_CUDA
- if (dtset%gpu_option==ABI_GPU_LEGACY .or. dtset%gpu_option==ABI_GPU_KOKKOS) then
+#if defined HAVE_GPU
+ if (dtset%gpu_option/=ABI_GPU_DISABLED) then
    call alloc_hamilt_gpu(atindx1,dtset,gprimd,mpi_enreg,nattyp,npwarr,0,psps,dtset%gpu_option)
  end if
 #endif
@@ -688,8 +696,9 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    end if
    has_vhartree=0
    if(dtset%orbmag>0 .AND. dtset%pawspnorb > 0) has_vhartree=1
+   usevxctau_paw=pawxc_get_usekden(dtset%ixc)
    call paw_an_init(paw_an,dtset%natom,dtset%ntypat,nkxc1,0,dtset%nspden,&
-        &   cplex,dtset%pawxcdev,dtset%typat,pawang,pawtab,has_vxc=1,has_vhartree=has_vhartree,has_vxctau=dtset%usekden,&
+        &   cplex,dtset%pawxcdev,dtset%typat,pawang,pawtab,has_vxc=1,has_vhartree=has_vhartree,has_vxctau=usevxctau_paw,&
         &   has_vxc_ex=1,has_kxc=has_kxc,mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
    call paw_ij_init(paw_ij,cplex,dtset%nspinor,dtset%nsppol,dtset%nspden,dtset%pawspnorb,&
 &   natom,dtset%ntypat,dtset%typat,pawtab,has_dij=1,has_dijhartree=1,has_dijnd=has_dijnd,&
@@ -712,6 +721,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
 !>>> Initialize charge density
 
+ ABI_NVTX_START_RANGE(NVTX_MKRHO)
  if (dtset%getden/=0.or.dtset%irdden/=0) then
    ! Choice 1: read charge density from a disk file and broadcast data
    !   This part is not compatible with MPI-FFT (note single_proc=.True. below)
@@ -758,9 +768,10 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    end if
 
  end if ! choice for charge density initialization
+ ABI_NVTX_END_RANGE()
 
 !>>> Initialize kinetic energy density
- if (dtset%usekden==1) then 
+ if (dtset%usekden==1) then
 
    if (dtset%getkden/=0.or.dtset%irdkden/=0) then
      ! Choice 1: read kinetic energy density from a disk file and broadcast data
@@ -837,7 +848,20 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  else
     ABI_MALLOC(xcctau3d,(0))
  end if
- 
+
+ ! Handling GEMM nonlop use
+ ! Not enabled by default for CPU and CUDA implementations
+ ! Enabled if using OpenMP GPU offload
+ gemm_nonlop_use_gemm = .false.
+
+ ! OpenMP GPU offload case (GEMM nonlop used by default)
+ if(dtset%gpu_option == ABI_GPU_OPENMP .or. dtset%use_gemm_nonlop == 1) then
+   gemm_nonlop_use_gemm = .true.
+   call init_gemm_nonlop(dtset%gpu_option)
+ end if
+
+ gemm_nonlop_is_distributed = .false.
+ if(dtset%gpu_nl_distrib == 1) gemm_nonlop_is_distributed = .true.
 
 !Determine by which method the local ionic potential and/or
 ! the pseudo core charge density have to be computed
@@ -858,7 +882,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
        coretau_method=2
     end if
  end if
- 
+
 
 !Local ionic potential and/or pseudo core charge by method 1
  if (vloc_method==1.or.coredens_method==1) then
@@ -920,7 +944,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  call check_kxc(dtset%ixc,dtset%optdriver)
  ABI_MALLOC(kxc,(nfftf,nkxc))
  ABI_MALLOC(vxc,(nfftf,dtset%nspden))
- ABI_MALLOC(vxctau,(nfftf,dtset%nspden,4*dtset%usekden))
+ usevxctau=merge(1,0,xc_need_kden(dtset%ixc))
+ ABI_MALLOC(vxctau,(nfftf,dtset%nspden,4*usevxctau))
 
  call xcdata_init(xcdata,dtset=dtset)
  non_magnetic_xc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
@@ -934,7 +959,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
  call rhotoxc(enxc,kxc,mpi_enreg,nfftf,ngfftf,&
 & nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,rhor,&
-& rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,&
+& rprimd,usexcnhat,vxc,vxcavg,xccc3d,xcdata,&
 & taur=taur,vhartr=vhartr,vxctau=vxctau,xcctau3d=xcctau3d)
 
 !Compute local + Hxc potential, and subtract mean potential.
@@ -952,7 +977,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    end do
  end if
 
- ABI_FREE(vhartr) 
+ ABI_FREE(vhartr)
 
  if(dtset%prtvol==-level) call wrtout(std_out,' respfn: ground-state density and potential set up.')
 
@@ -971,7 +996,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    call pawdij(cplex,dtset%enunit,gprimd,ipert,my_natom,natom,nfftf,nfftotf,&
 &   dtset%nspden,ntypat,paw_an,paw_ij,pawang,pawfgrtab,dtset%pawprtvol,&
 &   pawrad,pawrhoij,dtset%pawspnorb,pawtab,dtset%pawxcdev,k0,&
-&   dtset%spnorbscl,ucvol,dtset%cellcharge(1),vtrial,vxc,xred,nucdipmom=dtset%nucdipmom,&
+&   dtset%spnorbscl,ucvol,dtset%cellcharge(1),vtrial,vxc,xred,dtset%znucl,&
+&   nucdipmom=dtset%nucdipmom,&
 &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
    call symdij(gprimd,indsym,ipert,my_natom,natom,dtset%nsym,ntypat,0,&
 &   paw_ij,pawang,dtset%pawprtvol,pawtab,rprimd,dtset%symafm,symrec,&
@@ -979,7 +1005,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    call timab(561,2,tsec)
 
  end if
- 
+
 !-----2. Frozen-wavefunctions and Ewald(q=0) parts of 2DTE
 
  dyfr_nondiag=0;if (psps%usepaw==1.and.rfphon==1) dyfr_nondiag=1
@@ -1084,6 +1110,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 !Section for the strain perturbation
  if(rfstrs/=0) then
 
+   ABI_NVTX_START_RANGE(NVTX_DFPT_ELT)
 !  Verify that k-point set has full space-group symmetry; otherwise exit
    timrev=1
    if (symkchk(dtset%kptns,dtset%nkpt,dtset%nsym,symrec,timrev,message) /= 0) then
@@ -1139,6 +1166,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 !  elteew:   Ewald contribution
 !  eltvdw:   vdw DFT-D contribution
 !  In case of PAW, it misses a term coming from the perturbed overlap operator
+ABI_NVTX_END_RANGE()
  end if
 
  ABI_FREE(vpsp)
@@ -1146,7 +1174,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  if(allocated(xcctau3d)) then
     ABI_FREE(xcctau3d)
  end if
- 
+
  if(dtset%prtvol==-level) call wrtout(std_out,' respfn: frozen wavef. and Ewald(q=0) part of 2DTE done.')
 
  call timab(136,2,tsec)
@@ -1316,7 +1344,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
            do i1pert = 1,natom+8
              do i1dir = 1, 3
                if (rfpert_lw(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1) then
-                 if (pertsy(i1dir,i1pert)==-1) then 
+                 if (pertsy(i1dir,i1pert)==-1) then
                    pertsy(i1dir,i1pert)=1
                    write(message,'(a,i2,a,i4)' )'    idir=',i1dir,'    ipert=',i1pert
                    call wrtout(ab_out,message,'COLL')
@@ -1351,6 +1379,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  ABI_MALLOC(dyfrx1,(2,3,natom,3,natom))
  dyfrx1(:,:,:,:,:)=zero
  if(rfphon==1.and.psps%n1xccc/=0)then
+   ABI_NVTX_START_RANGE(NVTX_DFPT_DYXC)
    ABI_MALLOC(blkflgfrx1,(3,natom,3,natom))
 !FR non-collinear magnetism
    if (dtset%nspden==4) then
@@ -1364,6 +1393,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 &     ntypat,psps%n1xccc,psps,pawtab,ph1df,psps%qgrid_vl,qphon,&
 &     rfdir,rfpert,rprimd,timrev,dtset%typat,ucvol,psps%usepaw,psps%xcccrc,psps%xccc1d,xred)
    end if
+   ABI_NVTX_END_RANGE()
  end if
 
 !Deallocate the arrays that were needed only for the frozen wavefunction part
@@ -1458,7 +1488,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 &   nfftf,nhat,dtset%nkpt,nkxc,dtset%nspden,dtset%nsym,occ,&
 &   paw_an,paw_ij,pawang,pawfgr,pawfgrtab,pawrad,pawrhoij,pawtab,&
 &   pertsy,prtbbb,psps,rfpert,rf2_dirs_from_rfpert_nl,rhog,rhor,symq,symrec,timrev,&
-&   usecprj,usevdw,vtrial,vxc,vxcavg,vxctau,xred,clflg,occ_rbz_pert,eigen0_pert,eigenq_pert,&
+&   usecprj,usevdw,usevxctau,vtrial,vxc,vxcavg,vxctau,xred,clflg,occ_rbz_pert,eigen0_pert,eigenq_pert,&
 &   eigen1_pert,nkpt_rbz,eigenq_fine,hdr_fine,hdr0)
 
 !  #####################################################################
@@ -1472,6 +1502,12 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
  ABI_FREE(vxc)
  ABI_FREE(vxctau)
+
+ ! Cleaning GEMM nonlop data
+ if(gemm_nonlop_use_gemm) then
+   call destroy_gemm_nonlop(dtset%gpu_option)
+   gemm_nonlop_use_gemm = .false.
+ end if
 
  if (dtset%prepanl==1.and.(rf2_dkdk/=0 .or. rf2_dkde/=0)) then
    ABI_FREE(rfpert_nl)
@@ -1572,22 +1608,21 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 &   dtset%typat,rfdir,rfpert,rfphon,rfstrs,psps%usepaw,usevdw,psps%ziontypat)
 
 
-!  Initialize ddb header object
-   call ddb_hdr%init(dtset,psps,pawtab,&
-&   dscrpt=' Note : temporary (transfer) database ',&
-&   nblok=1,xred=xred,occ=occ,ngfft=ngfft)
+   ! Initialize ddb header object
+   call ddb_hdr%init(dtset,psps,pawtab, dscrpt=' Note : temporary (transfer) database ', &
+     nblok=1,xred=xred,occ=occ,ngfft=ngfft)
 
-!  Initialize ddb object
+   ! Initialize ddb object
    call ddb%init(dtset, nblok=1, mpert=mpert, with_d2E=.true.)
 
-! Set the values for the 2nd order derivatives
+   ! Set the values for the 2nd order derivatives
    call ddb%set_qpt(iblok=1, qpt=qphon(1:3))
    call ddb%set_d2matr(1, d2matr, blkflg)
 
-! Output dynamical matrix
+   ! Output dynamical matrix
    call ddb%write(ddb_hdr, dtfil%fnameabo_ddb)
 
-! Deallocate ddb object
+   ! Deallocate ddb object
    call ddb_hdr%free()
    call ddb%free()
 
@@ -1904,12 +1939,13 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  call hdr%free()
 
 !Clean GPU data
-#if defined HAVE_GPU_CUDA
- if (dtset%gpu_option==ABI_GPU_LEGACY .or. dtset%gpu_option==ABI_GPU_KOKKOS) then
+#if defined HAVE_GPU
+ if (dtset%gpu_option/=ABI_GPU_DISABLED) then
    call dealloc_hamilt_gpu(0,dtset%gpu_option)
  end if
 #endif
 
+ ABI_NVTX_END_RANGE()
  call timab(138,2,tsec)
  call timab(132,2,tsec)
 

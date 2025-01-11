@@ -1,6 +1,6 @@
 
-.Version 9.11.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 17 Jul 2023.
-- ( at 17h10 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h17 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v9_t180/t180.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v9_t180/t180.abi
 - output file    -> t180.abo
 - root for input  files -> t180i
 - root for output files -> t180o
@@ -42,17 +42,17 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.008 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
             acell      5.8157047289E+00  5.8157047289E+00  9.3030215967E+00 Bohr
               amu      6.94100000E+00
              ecut      2.00000000E+00 Hartree
--          fftalg         312
+-          fftalg         512
            istwfk        2
          kptrlatt        1    0    0      0    1    0      0    0    1
           kptrlen      5.81570473E+00
@@ -137,8 +137,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      2.000   => boxcut(ratio)=   2.02618
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/3li.1.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/3li.1.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/3li.1.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/3li.1.hgh
 - Hartwigsen-Goedecker-Hutter psp for Li,  from PRB58, 3641 (1998)
 -  3.00000   1.00000     10605                znucl, zion, pspdat
     3    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -289,7 +289,7 @@ band_energy         : -1.52321802241722E-01
            etotal     -6.6736957802E-01
             fcart     -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
--          fftalg         312
+-          fftalg         512
            istwfk        2
          kptrlatt        1    0    0      0    1    0      0    0    1
           kptrlen      5.81570473E+00
@@ -432,10 +432,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          0.6  wall=          0.7
+- Proc.   0 individual time (sec): cpu=          0.4  wall=          0.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered   2 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          0.6  wall=          0.7
++Overall time at end (sec) : cpu=          0.4  wall=          0.4

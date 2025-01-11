@@ -1,6 +1,6 @@
 
-.Version 9.7.4 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  4 May 2022.
-- ( at 03h29 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h05 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/tutorespfn_toptic_3-toptic_4-toptic_5/toptic_3.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/tutorespfn_toptic_3-toptic_4-toptic_5/toptic_3.abi
 - output file    -> toptic_3.abo
 - root for input  files -> toptic_3i
 - root for output files -> toptic_3o
-
 
  DATASET    1 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
@@ -39,7 +38,6 @@ P This job should need less than                       1.545 Mbytes of memory.
 _ WF disk file :      0.028 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
 
-
  DATASET    2 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  2.
@@ -56,7 +54,6 @@ P This job should need less than                       1.466 Mbytes of memory.
 _ WF disk file :      0.061 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
 
-
  DATASET    3 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  3.
@@ -72,7 +69,6 @@ P This job should need less than                       2.383 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.758 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
-
 
  DATASET    4 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
@@ -91,7 +87,6 @@ P This job should need less than                       4.034 Mbytes of memory.
 _ WF disk file :      0.758 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
 
-
  DATASET    5 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  5 (RF).
@@ -108,7 +103,6 @@ P This job should need less than                       4.034 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.758 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
-
 
  DATASET    6 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
@@ -131,10 +125,10 @@ _ WF disk file :      0.758 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -142,7 +136,7 @@ _ WF disk file :      0.758 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
               amu      6.97230000E+01  7.49215900E+01
            diemac      1.00000000E+01
              ecut      2.00000000E+00 Hartree
--          fftalg         312
+-          fftalg         512
            getden1          0
            getden2          1
            getden3          1
@@ -594,8 +588,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      2.000   => boxcut(ratio)=   2.11655
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_largecore_psp8/Ga-low.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_largecore_psp8/Ga-low.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_lrgcore_psp8/Ga-low.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_lrgcore_psp8/Ga-low.psp8
 - Ga    ONCVPSP-3.3.0  r_core=   1.85767   1.81388   2.62545
 - 31.00000   3.00000    171103                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -609,8 +603,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              2    1.406259    0.234121
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_largecore_psp8/As.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_largecore_psp8/As.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_lrgcore_psp8/As.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_lrgcore_psp8/As.psp8
 - As    ONCVPSP-3.3.0  r_core=   1.83037   1.80867   2.40819
 - 33.00000   5.00000    171103                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -640,17 +634,17 @@ tolerances: {tolwfr: 1.00E-20, }
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -10.987197480409    -1.099E+01 5.631E-04 5.358E-01
  ETOT  2  -10.988827297125    -1.630E-03 1.246E-09 3.315E-02
- ETOT  3  -10.988936293158    -1.090E-04 3.980E-07 1.014E-03
- ETOT  4  -10.988940493276    -4.200E-06 2.145E-08 2.964E-05
- ETOT  5  -10.988940580632    -8.736E-08 3.887E-10 1.647E-07
- ETOT  6  -10.988940581014    -3.827E-10 1.267E-12 1.440E-09
- ETOT  7  -10.988940581017    -2.615E-12 4.896E-15 6.534E-11
- ETOT  8  -10.988940581017    -1.332E-13 5.161E-16 5.920E-13
- ETOT  9  -10.988940581017    -2.487E-14 3.627E-18 6.828E-16
- ETOT 10  -10.988940581017     7.105E-15 1.881E-20 1.764E-18
- ETOT 11  -10.988940581017     0.000E+00 6.981E-21 2.678E-19
+ ETOT  3  -10.988936294335    -1.090E-04 3.980E-07 1.014E-03
+ ETOT  4  -10.988940493242    -4.199E-06 2.145E-08 2.966E-05
+ ETOT  5  -10.988940580634    -8.739E-08 3.888E-10 1.641E-07
+ ETOT  6  -10.988940581014    -3.805E-10 1.257E-12 1.431E-09
+ ETOT  7  -10.988940581017    -2.624E-12 4.889E-15 6.449E-11
+ ETOT  8  -10.988940581017    -1.634E-13 5.193E-16 5.694E-13
+ ETOT  9  -10.988940581017     3.553E-15 3.966E-18 7.543E-16
+ ETOT 10  -10.988940581017     3.553E-14 2.241E-20 1.523E-18
+ ETOT 11  -10.988940581017     0.000E+00 7.530E-21 2.297E-19
 
- At SCF step   11   max residual=  6.98E-21 < tolwfr=  1.00E-20 =>converged.
+ At SCF step   11   max residual=  7.53E-21 < tolwfr=  1.00E-20 =>converged.
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  1.14753590E-03  sigma(3 2)=  0.00000000E+00
@@ -668,7 +662,7 @@ lattice_vectors:
 lattice_lengths: [   7.49533,    7.49533,    7.49533, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.9775400E+02
-convergence: {deltae:  0.000E+00, res2:  2.678E-19, residm:  6.981E-21, diffor: null, }
+convergence: {deltae:  0.000E+00, res2:  2.297E-19, residm:  7.530E-21, diffor: null, }
 etotal    :  -1.09889406E+01
 entropy   :   0.00000000E+00
 fermie    :   1.70313507E-01
@@ -695,7 +689,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   22.163E-22; max=  69.805E-22
+ Mean square residual over all n,k,spin=   20.468E-22; max=  75.297E-22
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -729,16 +723,16 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  2.88500343877408E+00
-hartree             :  6.16278782516558E-01
-xc                  : -5.39065093929777E+00
+kinetic             :  2.88500343877095E+00
+hartree             :  6.16278782515117E-01
+xc                  : -5.39065093930122E+00
 Ewald energy        : -8.48789573682593E+00
 psp_core            :  3.84840039201296E-02
-local_psp           : -2.50963319442433E+00
-non_local_psp       :  1.85947306432003E+00
+local_psp           : -2.50963319443699E+00
+non_local_psp       :  1.85947306434072E+00
 total_energy        : -1.09889405810172E+01
 total_energy_eV     : -2.99024280364791E+02
-band_energy         :  8.28583789333812E-02
+band_energy         :  8.28583789363118E-02
 ...
 
 
@@ -785,7 +779,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
 ================================================================================
  prteigrs : about to open file toptic_3o_DS2_EIG
  Non-SCF case, kpt    1 ( -0.12500 -0.25000  0.00000), residuals and eigenvalues=
-  8.78E-22  1.05E-21  3.31E-21  1.62E-21  1.90E-21  5.11E-21  3.50E-21  2.75E-21
+  7.70E-22  8.80E-22  3.45E-21  1.72E-21  1.90E-21  5.11E-21  3.50E-21  2.75E-21
   4.76E-14
  -2.0665E-01  8.6096E-02  1.3197E-01  1.4252E-01  3.0932E-01  3.7478E-01
   3.8478E-01  4.0321E-01  5.0802E-01
@@ -825,7 +819,7 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   31.834E-22; max=  85.729E-22
+ Mean square residual over all n,k,spin=   30.578E-22; max=  85.729E-22
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -876,7 +870,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
 ================================================================================
  prteigrs : about to open file toptic_3o_DS3_EIG
  Non-SCF case, kpt    1 ( -0.12500 -0.25000  0.00000), residuals and eigenvalues=
-  8.78E-22  1.05E-21  3.31E-21  1.62E-21  1.90E-21  5.11E-21  3.50E-21  2.75E-21
+  7.70E-22  8.80E-22  3.45E-21  1.72E-21  1.90E-21  5.11E-21  3.50E-21  2.75E-21
   4.50E-16
  -2.0665E-01  8.6096E-02  1.3197E-01  1.4252E-01  3.0932E-01  3.7478E-01
   3.8478E-01  4.0321E-01  5.0802E-01
@@ -916,7 +910,7 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   33.403E-22; max=  85.729E-22
+ Mean square residual over all n,k,spin=   30.900E-22; max=  85.729E-22
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -989,7 +983,7 @@ tolerances: {tolwfr: 1.00E-20, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -7.5851241437422     -7.585E+00 0.000E+00 0.000E+00
+-ETOT  1  -7.5851241437322     -7.585E+00 0.000E+00 0.000E+00
 
  At SCF step    1   max residual=  0.00E+00 < tolwfr=  1.00E-20 =>converged.
 ================================================================================
@@ -1100,7 +1094,7 @@ tolerances: {tolwfr: 1.00E-20, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -7.5851241436443     -7.585E+00 0.000E+00 0.000E+00
+-ETOT  1  -7.5851241436343     -7.585E+00 0.000E+00 0.000E+00
 
  At SCF step    1   max residual=  0.00E+00 < tolwfr=  1.00E-20 =>converged.
 ================================================================================
@@ -1109,7 +1103,7 @@ tolerances: {tolwfr: 1.00E-20, }
 
  Mean square residual over all n,k,spin=   00.000E+00; max=  00.000E+00
  dfpt_looppert : ek2=    1.6865112540E+01
-          f-sum rule ratio=    8.4133506047E-01
+          f-sum rule ratio=    8.4133506046E-01
  prteigrs : about to open file toptic_3t_1WF1_EIG
  Expectation of eigenvalue derivatives (hartree) for nkpt= 128  k points:
   (in case of degenerate eigenvalues, averaged derivative)
@@ -1211,7 +1205,7 @@ tolerances: {tolwfr: 1.00E-20, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -7.5851241435455     -7.585E+00 0.000E+00 0.000E+00
+-ETOT  1  -7.5851241435355     -7.585E+00 0.000E+00 0.000E+00
 
  At SCF step    1   max residual=  0.00E+00 < tolwfr=  1.00E-20 =>converged.
 ================================================================================
@@ -1240,7 +1234,7 @@ tolerances: {tolwfr: 1.00E-20, }
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -7.58512414E+00
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.7585124144E+01 Ha. Also 2DEtotal=   -0.206401724696E+03 eV
+ 2DEtotal=   -0.7585124144E+01 Ha. Also 2DEtotal=   -0.206401724695E+03 eV
     (  non-var. 2DEtotal :   -7.5851241435E+00 Ha)
 ================================================================================
 
@@ -1281,7 +1275,7 @@ tolerances: {tolwfr: 1.00E-20, }
            etotal6    -7.5851241435E+00
             fcart1    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
--          fftalg         312
+-          fftalg         512
            getden1          0
            getden2          1
            getden3          1
@@ -1793,10 +1787,10 @@ P          mk1mem6        128
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          2.3  wall=          2.5
+- Proc.   0 individual time (sec): cpu=          1.6  wall=          1.7
 
 ================================================================================
 
  Calculation completed.
-.Delivered  20 WARNINGs and  11 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.3  wall=          2.5
+.Delivered  26 WARNINGs and  11 COMMENTs to log file.
++Overall time at end (sec) : cpu=          1.6  wall=          1.7

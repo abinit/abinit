@@ -40,7 +40,7 @@ znucl 26
 #Definition of the unit cell
  acell   3*5.2
  pp_dirpath "$ABI_PSPDIR"
- pseudos "Pseudodojo_paw_pbe_standard/Fe.xml"
+ pseudos "Psdj_paw_pbe_std/Fe.xml"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

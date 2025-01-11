@@ -1,6 +1,6 @@
 
-.Version 10.0.2.1 of ABINIT, released Mar 2024.
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.3.3.2 of ABINIT, released Nov 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 20 Mar 2024.
-- ( at 23h25 )
+.Starting date : Sun 24 Nov 2024.
+- ( at 12h17 )
   
-- input  file    -> /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__sponce/tests/TestBot_MPI1/tutorespfn_teph4mob_1-teph4mob_2-teph4mob_3-teph4mob_4-teph4mob_5-teph4mob_6-teph4mob_7/teph4mob_7.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__mmignolet/tests/TestBot_MPI1/tutorespfn_teph4mob_1-teph4mob_2-teph4mob_3-teph4mob_4-teph4mob_5-teph4mob_6-teph4mob_7/teph4mob_7.abi
 - output file    -> teph4mob_7.abo
 - root for input  files -> teph4mob_7i
 - root for output files -> teph4mob_7o
@@ -58,10 +58,10 @@ _ WF disk file :      3.985 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -74,7 +74,7 @@ _ WF disk file :      3.985 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
    eph_ngqpt_fine       24   24   24
          eph_task1         -4
          eph_task2          7
--          fftalg         312
+-          fftalg         512
            istwfk        2    0    0    0    0    0    0    0    0    0
                          0    0    3    0    0    0    0    0    0    0
                          0    0    0    0    0    0    0    0    0    0
@@ -372,12 +372,12 @@ meta: {optdriver: 7, eph_task: -4, }
  imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
-         1         1    2.115792E+00   -1.150854E-16   -1.153161E-16
-         1         2   -1.150854E-16    2.115792E+00    1.148547E-16
-         1         3    1.150854E-16    1.150854E-16    2.115792E+00
-         2         1   -2.115792E+00    1.150854E-16    1.153161E-16
-         2         2    1.150854E-16   -2.115792E+00   -1.148547E-16
-         2         3   -1.150854E-16   -1.150854E-16   -2.115792E+00
+         1         1    2.115792E+00   -3.228956E-17   -3.258074E-17
+         1         2   -3.228956E-17    2.115792E+00    3.199839E-17
+         1         3    3.228956E-17    3.228956E-17    2.115792E+00
+         2         1   -2.115792E+00    3.228956E-17    3.258074E-17
+         2         2    3.228956E-17   -2.115792E+00   -3.199839E-17
+         2         3   -3.228956E-17   -3.228956E-17   -2.115792E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: teph4mob_2_DDB
 - Cannot find quadrupole tensor in DDB file: teph4mob_2_DDB
@@ -450,18 +450,18 @@ meta: {optdriver: 7, eph_task: -4, }
  64)  -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
 
  The interatomic forces have been obtained
- Average speed of sound partial sums:     0.1673176170E-02 (at units)
+ Average speed of sound partial sums:     0.1673176172E-02 (at units)
 -                                   =           3.6604 [km/s]
 
- Debye frequency from partial sums:     0.9757306381E-03 (Ha)
--                                 =     0.6419999191E+01 (THz)
--Debye temperature from partial sums:     0.3081110008E+03 (K)
+ Debye frequency from partial sums:     0.9757306393E-03 (Ha)
+-                                 =     0.6419999198E+01 (THz)
+-Debye temperature from partial sums:     0.3081110011E+03 (K)
 
 - Writing phonon DOS to netcdf file: teph4mob_7o_DS1_PHDOS.nc
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__sponce/tests/Psps_for_tests/13al.981214.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__sponce/tests/Psps_for_tests/13al.981214.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_EOF-10.2/tests/Pspdir/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_EOF-10.2/tests/Pspdir/13al.981214.fhi
 - Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
 - 13.00000   3.00000    981214                znucl, zion, pspdat
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -473,8 +473,8 @@ meta: {optdriver: 7, eph_task: -4, }
              1    0.900554
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__sponce/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__sponce/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_EOF-10.2/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_EOF-10.2/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
 -  Troullier-Martins psp for element  As        Thu Oct 27 17:37:14 EDT 1994
 - 33.00000   5.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -566,27 +566,27 @@ P Number of k-point in Sigma_nk treated by this proc: 3 of 3
  
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.522
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.573    0.000   5148.3    0.000
+   5   3.573    0.000   5186.5    0.000
 ============================================================================================
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.485
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.573    0.000   1277.5    0.000
+   5   3.573    0.000   1319.8    0.000
 ============================================================================================
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:  123.0 [K], mu_e:    3.441
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.573    0.001    585.9    0.000
+   5   3.573    0.001    603.8    0.000
 ============================================================================================
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:  182.0 [K], mu_e:    3.390
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.573    0.001    314.2    0.000
+   5   3.573    0.001    321.9    0.000
 ============================================================================================
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:  241.0 [K], mu_e:    3.336
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.573    0.002    196.5    0.000
+   5   3.573    0.002    200.5    0.000
 ============================================================================================
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.280
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.573    0.002    137.7    0.000
+   5   3.573    0.002    140.2    0.000
 ============================================================================================
 K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.522
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -594,23 +594,23 @@ K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.522
 ============================================================================================
 K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.485
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.608    0.004     90.6    0.000
+   5   3.608    0.004     90.5    0.000
 ============================================================================================
 K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:  123.0 [K], mu_e:    3.441
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.608    0.004     81.9    0.000
+   5   3.608    0.004     81.7    0.000
 ============================================================================================
 K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:  182.0 [K], mu_e:    3.390
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.608    0.005     70.0    0.000
+   5   3.608    0.005     69.8    0.000
 ============================================================================================
 K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:  241.0 [K], mu_e:    3.336
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.608    0.006     58.7    0.000
+   5   3.608    0.006     58.5    0.000
 ============================================================================================
 K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.280
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.608    0.007     49.4    0.000
+   5   3.608    0.007     49.3    0.000
 ============================================================================================
 K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.522
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -618,19 +618,19 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.522
 ============================================================================================
 K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.485
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.525    0.000 308488.4    0.000
+   5   3.525    0.000 308516.9    0.000
 ============================================================================================
 K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  123.0 [K], mu_e:    3.441
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.525    0.000   5512.3    0.000
+   5   3.525    0.000   5512.9    0.000
 ============================================================================================
 K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  182.0 [K], mu_e:    3.390
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.525    0.000   1266.0    0.000
+   5   3.525    0.000   1266.1    0.000
 ============================================================================================
 K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  241.0 [K], mu_e:    3.336
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.525    0.001    574.4    0.000
+   5   3.525    0.001    574.5    0.000
 ============================================================================================
 K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.280
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -662,61 +662,61 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.280
  Cartesian component of SERTA mobility tensor: xx
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.80E+16        0.00E+00            0.00            0.00
-           64.00        0.68E+16        0.00E+00            4.70            0.00
-          123.00        0.34E+16        0.00E+00           75.49            0.00
-          182.00        0.20E+16        0.00E+00          142.48            0.00
-          241.00        0.15E+16        0.00E+00          169.29            0.00
-          300.00        0.12E+16        0.23E+05          163.65            0.00
+           64.00        0.68E+16        0.00E+00            4.85            0.00
+          123.00        0.34E+16        0.00E+00           77.55            0.00
+          182.00        0.20E+16        0.00E+00          144.68            0.00
+          241.00        0.15E+16        0.00E+00          170.60            0.00
+          300.00        0.12E+16        0.23E+05          164.28            0.00
 
 
  Cartesian component of SERTA mobility tensor: yy
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.80E+16        0.00E+00            0.00            0.00
-           64.00        0.68E+16        0.00E+00            4.70            0.00
-          123.00        0.34E+16        0.00E+00           75.49            0.00
-          182.00        0.20E+16        0.00E+00          142.48            0.00
-          241.00        0.15E+16        0.00E+00          169.29            0.00
-          300.00        0.12E+16        0.23E+05          163.65            0.00
+           64.00        0.68E+16        0.00E+00            4.85            0.00
+          123.00        0.34E+16        0.00E+00           77.55            0.00
+          182.00        0.20E+16        0.00E+00          144.68            0.00
+          241.00        0.15E+16        0.00E+00          170.60            0.00
+          300.00        0.12E+16        0.23E+05          164.28            0.00
 
 
  Cartesian component of SERTA mobility tensor: zz
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.80E+16        0.00E+00            0.00            0.00
-           64.00        0.68E+16        0.00E+00            4.70            0.00
-          123.00        0.34E+16        0.00E+00           75.49            0.00
-          182.00        0.20E+16        0.00E+00          142.48            0.00
-          241.00        0.15E+16        0.00E+00          169.29            0.00
-          300.00        0.12E+16        0.23E+05          163.65            0.00
+           64.00        0.68E+16        0.00E+00            4.85            0.00
+          123.00        0.34E+16        0.00E+00           77.55            0.00
+          182.00        0.20E+16        0.00E+00          144.68            0.00
+          241.00        0.15E+16        0.00E+00          170.60            0.00
+          300.00        0.12E+16        0.23E+05          164.28            0.00
 
 
  Cartesian component of MRTA mobility tensor: xx
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.80E+16        0.00E+00            0.00            0.00
-           64.00        0.68E+16        0.00E+00            4.99            0.00
-          123.00        0.34E+16        0.00E+00           83.56            0.00
-          182.00        0.20E+16        0.00E+00          161.31            0.00
-          241.00        0.15E+16        0.00E+00          192.10            0.00
-          300.00        0.12E+16        0.23E+05          185.42            0.00
+           64.00        0.68E+16        0.00E+00            5.09            0.00
+          123.00        0.34E+16        0.00E+00           85.03            0.00
+          182.00        0.20E+16        0.00E+00          163.01            0.00
+          241.00        0.15E+16        0.00E+00          193.15            0.00
+          300.00        0.12E+16        0.23E+05          185.92            0.00
 
 
  Cartesian component of MRTA mobility tensor: yy
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.80E+16        0.00E+00            0.00            0.00
-           64.00        0.68E+16        0.00E+00            4.99            0.00
-          123.00        0.34E+16        0.00E+00           83.56            0.00
-          182.00        0.20E+16        0.00E+00          161.31            0.00
-          241.00        0.15E+16        0.00E+00          192.10            0.00
-          300.00        0.12E+16        0.23E+05          185.42            0.00
+           64.00        0.68E+16        0.00E+00            5.09            0.00
+          123.00        0.34E+16        0.00E+00           85.03            0.00
+          182.00        0.20E+16        0.00E+00          163.01            0.00
+          241.00        0.15E+16        0.00E+00          193.15            0.00
+          300.00        0.12E+16        0.23E+05          185.92            0.00
 
 
  Cartesian component of MRTA mobility tensor: zz
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.80E+16        0.00E+00            0.00            0.00
-           64.00        0.68E+16        0.00E+00            4.99            0.00
-          123.00        0.34E+16        0.00E+00           83.56            0.00
-          182.00        0.20E+16        0.00E+00          161.31            0.00
-          241.00        0.15E+16        0.00E+00          192.10            0.00
-          300.00        0.12E+16        0.23E+05          185.42            0.00
+           64.00        0.68E+16        0.00E+00            5.09            0.00
+          123.00        0.34E+16        0.00E+00           85.03            0.00
+          182.00        0.20E+16        0.00E+00          163.01            0.00
+          241.00        0.15E+16        0.00E+00          193.15            0.00
+          300.00        0.12E+16        0.23E+05          185.92            0.00
 
 
 
@@ -803,12 +803,12 @@ meta: {optdriver: 7, eph_task: 7, }
  imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
-         1         1    2.115792E+00   -1.150854E-16   -1.153161E-16
-         1         2   -1.150854E-16    2.115792E+00    1.148547E-16
-         1         3    1.150854E-16    1.150854E-16    2.115792E+00
-         2         1   -2.115792E+00    1.150854E-16    1.153161E-16
-         2         2    1.150854E-16   -2.115792E+00   -1.148547E-16
-         2         3   -1.150854E-16   -1.150854E-16   -2.115792E+00
+         1         1    2.115792E+00   -3.228956E-17   -3.258074E-17
+         1         2   -3.228956E-17    2.115792E+00    3.199839E-17
+         1         3    3.228956E-17    3.228956E-17    2.115792E+00
+         2         1   -2.115792E+00    3.228956E-17    3.258074E-17
+         2         2    3.228956E-17   -2.115792E+00   -3.199839E-17
+         2         3   -3.228956E-17   -3.228956E-17   -2.115792E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: teph4mob_2_DDB
 - Cannot find quadrupole tensor in DDB file: teph4mob_2_DDB
@@ -881,12 +881,12 @@ meta: {optdriver: 7, eph_task: 7, }
  64)  -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
 
  The interatomic forces have been obtained
- Average speed of sound partial sums:     0.1673176170E-02 (at units)
+ Average speed of sound partial sums:     0.1673176172E-02 (at units)
 -                                   =           3.6604 [km/s]
 
- Debye frequency from partial sums:     0.9757306381E-03 (Ha)
--                                 =     0.6419999191E+01 (THz)
--Debye temperature from partial sums:     0.3081110008E+03 (K)
+ Debye frequency from partial sums:     0.9757306393E-03 (Ha)
+-                                 =     0.6419999198E+01 (THz)
+-Debye temperature from partial sums:     0.3081110011E+03 (K)
 
 - Writing phonon DOS to netcdf file: teph4mob_7o_DS2_PHDOS.nc
 --------------------------------------------------------------------------------
@@ -998,7 +998,7 @@ meta: {optdriver: 7, eph_task: 7, }
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         312
+-          fftalg         512
               ixc           7
            jdtset        1    2
          kptrlatt       24    0    0      0   24    0      0    0   24
@@ -1233,10 +1233,10 @@ P           mkmem         413
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         27.3  wall=         27.7
+- Proc.   0 individual time (sec): cpu=         27.5  wall=         27.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered   5 WARNINGs and   8 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         27.3  wall=         27.7
++Overall time at end (sec) : cpu=         27.5  wall=         27.5

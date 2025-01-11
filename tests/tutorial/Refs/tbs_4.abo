@@ -1,6 +1,6 @@
 
-.Version 9.3.3 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_intel15.0 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,15 +14,14 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 12 Dec 2020.
-- ( at 11h05 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h07 )
   
-- input  file    -> tbs_4.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/tutorial_tbs_1-tbs_2-tbs_3-tbs_4/tbs_4.abi
 - output file    -> tbs_4.abo
 - root for input  files -> tbs_4i
 - root for output files -> tbs_4o
- 
- 
+
  DATASET    1 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
@@ -34,12 +33,11 @@
 -    mband =           7        mffmem =           1         mkmem =          64
        mpw =         535          nfft =       13824          nkpt =          64
 ================================================================================
-P This job should need less than                       8.809 Mbytes of memory.
+P This job should need less than                       9.207 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      3.659 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
- 
- 
+
  DATASET    2 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  2.
@@ -51,19 +49,19 @@ _ WF disk file :      3.659 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 -    mband =           7        mffmem =           1         mkmem =          64
        mpw =         535          nfft =       13824          nkpt =          64
 ================================================================================
-P This job should need less than                       8.809 Mbytes of memory.
+P This job should need less than                       9.207 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      3.659 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
- 
+
 --------------------------------------------------------------------------------
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
+- outvars: echo of selected default values
 -   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -225,17 +223,17 @@ P           mkmem          64
                        2.5000000000E-01  2.5000000000E-01  2.5000000000E-01
              zcut      5.51239881E-03 Hartree
             znucl       14.00000
- 
+
 ================================================================================
- 
+
  chkinp: Checking input parameters for consistency, jdtset=   1.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=   2.
- 
+
 ================================================================================
 == DATASET  1 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
- 
+
 
 --- !DatasetInfo
 iteration_state: {dtset: 1, }
@@ -249,19 +247,19 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
  in frequency domain and reciprocal space on a transitions basis set. 
  Based on a program developed by L. Reining, V. Olevano, F. Sottile, 
  S. Albrecht, and G. Onida. Incorporated in ABINIT by M. Giantomassi. 
- 
+
 .Using double precision arithmetic ; gwpc =  8
- 
+
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  5.1085000  5.1085000  G(1)= -0.0978761  0.0978761  0.0978761
  R(2)=  5.1085000  0.0000000  5.1085000  G(2)=  0.0978761 -0.0978761  0.0978761
  R(3)=  5.1085000  5.1085000  0.0000000  G(3)=  0.0978761  0.0978761 -0.0978761
  Unit cell volume ucvol=  2.6663072E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- 
+
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/wchen/abinit/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Si.psp8
-- pspatm: opening atomic psp file    /home/wchen/abinit/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Si.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/Si.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/Si.psp8
 - Si    ONCVPSP-3.3.0  r_core=   1.60303   1.72197   1.91712
 - 14.00000   4.00000    171102                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -274,14 +272,14 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
              1    2.726111    0.629828
              2   -2.124804   -0.444604
  pspatm: atomic psp has been read  and splines computed
- 
+
    1.06720658E+02                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
- 
+
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :    64
  Reduced coordinates and weights : 
- 
+
      1)     2.75000000E-02  5.25000000E-02  7.75000000E-02       0.01563
      2)     2.77500000E-01  5.25000000E-02  7.75000000E-02       0.01563
      3)    -4.72500000E-01  5.25000000E-02  7.75000000E-02       0.01563
@@ -346,15 +344,15 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
     62)     2.77500000E-01 -1.97500000E-01 -1.72500000E-01       0.01563
     63)    -4.72500000E-01 -1.97500000E-01 -1.72500000E-01       0.01563
     64)    -2.22500000E-01 -1.97500000E-01 -1.72500000E-01       0.01563
- 
+
  Together with 48 symmetry operations and time-reversal symmetry 
  yields    64 points in the full Brillouin Zone.
- 
- 
+
+
  ==== Q-mesh for the screening function ====
  Number of points in the irreducible wedge :     8
  Reduced coordinates and weights : 
- 
+
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.01563
      2)     2.50000000E-01  0.00000000E+00  0.00000000E+00       0.12500
      3)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.06250
@@ -363,14 +361,14 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
      6)    -2.50000000E-01  2.50000000E-01  0.00000000E+00       0.18750
      7)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.04688
      8)    -2.50000000E-01  5.00000000E-01  2.50000000E-01       0.09375
- 
+
  Together with 48 symmetry operations and time-reversal symmetry 
  yields    64 points in the full Brillouin Zone.
- 
- 
+
+
  setmesh: FFT mesh size selected  =    20x   20x   20
           total number of points  =         8000
- 
+
  ==== Fundamental parameters for the solution of the Bethe-Salpeter equation: ====
  Algorithm: Haydock technique.
  Dimension of the v, W matrices,  npweps  = 27
@@ -394,8 +392,8 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
  Full W_GG' included
  W is read from an external SCR file
  Resonant-only calculation (Hermitian case)
- 
- 
+
+
  Calculating epsilon_Macro(q-->0,w), along the following directions:
  q = (  0.938821  0.000000  0.000000) [r.l.u.]
  q = (  0.000000  0.938821  0.000000) [r.l.u.]
@@ -407,7 +405,7 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
  average of density, n =  0.030004
  r_s =    1.9964
  omega_plasma =   16.7088 [eV]
- 
+
 . Writing resonant excitonic Hamiltonian on file tbs_4o_DS1_BSR; file size=   0.00 [Gb].
  Writing KS-RPA macroscopic dielectric function without local fields to file: tbs_4o_DS1_RPA_NLF_MDF
  Writing GW-RPA macroscopic dielectric function without local fields to file: tbs_4o_DS1_GW_NLF_MDF
@@ -432,11 +430,11 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
    0.1600  17.2411   0.0644  14.2613   0.0339  15.9582   0.0491
    0.1800  17.2501   0.0726  14.2661   0.0382  15.9651   0.0553
   
- 
+
 ================================================================================
 == DATASET  2 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
- 
+
 
 --- !DatasetInfo
 iteration_state: {dtset: 2, }
@@ -450,9 +448,9 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
  in frequency domain and reciprocal space on a transitions basis set. 
  Based on a program developed by L. Reining, V. Olevano, F. Sottile, 
  S. Albrecht, and G. Onida. Incorporated in ABINIT by M. Giantomassi. 
- 
+
 .Using double precision arithmetic ; gwpc =  8
- 
+
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  5.1085000  5.1085000  G(1)= -0.0978761  0.0978761  0.0978761
  R(2)=  5.1085000  0.0000000  5.1085000  G(2)=  0.0978761 -0.0978761  0.0978761
@@ -460,11 +458,11 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
  Unit cell volume ucvol=  2.6663072E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 --------------------------------------------------------------------------------
- 
+
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :    64
  Reduced coordinates and weights : 
- 
+
      1)     2.75000000E-02  5.25000000E-02  7.75000000E-02       0.01563
      2)     2.77500000E-01  5.25000000E-02  7.75000000E-02       0.01563
      3)    -4.72500000E-01  5.25000000E-02  7.75000000E-02       0.01563
@@ -529,15 +527,15 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
     62)     2.77500000E-01 -1.97500000E-01 -1.72500000E-01       0.01563
     63)    -4.72500000E-01 -1.97500000E-01 -1.72500000E-01       0.01563
     64)    -2.22500000E-01 -1.97500000E-01 -1.72500000E-01       0.01563
- 
+
  Together with 48 symmetry operations and time-reversal symmetry 
  yields    64 points in the full Brillouin Zone.
- 
- 
+
+
  ==== Q-mesh for the screening function ====
  Number of points in the irreducible wedge :     8
  Reduced coordinates and weights : 
- 
+
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.01563
      2)     2.50000000E-01  0.00000000E+00  0.00000000E+00       0.12500
      3)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.06250
@@ -546,14 +544,14 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
      6)    -2.50000000E-01  2.50000000E-01  0.00000000E+00       0.18750
      7)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.04688
      8)    -2.50000000E-01  5.00000000E-01  2.50000000E-01       0.09375
- 
+
  Together with 48 symmetry operations and time-reversal symmetry 
  yields    64 points in the full Brillouin Zone.
- 
- 
+
+
  setmesh: FFT mesh size selected  =    20x   20x   20
           total number of points  =         8000
- 
+
  ==== Fundamental parameters for the solution of the Bethe-Salpeter equation: ====
  Algorithm: Haydock technique.
  Dimension of the v, W matrices,  npweps  = 59
@@ -577,8 +575,8 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
  Full W_GG' included
  W is read from an external SCR file
  Resonant-only calculation (Hermitian case)
- 
- 
+
+
  Calculating epsilon_Macro(q-->0,w), along the following directions:
  q = (  0.938821  0.000000  0.000000) [r.l.u.]
  q = (  0.000000  0.938821  0.000000) [r.l.u.]
@@ -590,7 +588,7 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
  average of density, n =  0.030004
  r_s =    1.9964
  omega_plasma =   16.7088 [eV]
- 
+
 . Writing resonant excitonic Hamiltonian on file tbs_4o_DS2_BSR; file size=   0.00 [Gb].
  Writing KS-RPA macroscopic dielectric function without local fields to file: tbs_4o_DS2_RPA_NLF_MDF
  Writing GW-RPA macroscopic dielectric function without local fields to file: tbs_4o_DS2_GW_NLF_MDF
@@ -615,7 +613,7 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
    0.1600  17.2411   0.0644  14.2613   0.0339  15.5507   0.0453
    0.1800  17.2501   0.0726  14.2661   0.0382  15.5571   0.0510
   
- 
+
 == END DATASET(S) ==============================================================
 ================================================================================
   
@@ -788,7 +786,7 @@ P           mkmem          64
                        2.5000000000E-01  2.5000000000E-01  2.5000000000E-01
              zcut      5.51239881E-03 Hartree
             znucl       14.00000
- 
+
 ================================================================================
 
 
@@ -874,10 +872,10 @@ P           mkmem          64
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         37.0  wall=         39.1
- 
+- Proc.   0 individual time (sec): cpu=         25.7  wall=         25.8
+
 ================================================================================
- 
+
  Calculation completed.
-.Delivered  12 WARNINGs and  24 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         37.0  wall=         39.1
+.Delivered   4 WARNINGs and  25 COMMENTs to log file.
++Overall time at end (sec) : cpu=         25.7  wall=         25.8

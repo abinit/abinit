@@ -524,6 +524,12 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  end do
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,narrm,ncid,ndtset_alloc,'corecs','DPR',multivals%ntypat)
 
+ intarr(1,:)=dtsets(:)%cprj_in_memory
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'cprj_in_memory','INT',0)
+
+ intarr(1,:)=dtsets(:)%xg_nonlop_option
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'xg_nonlop_option','INT',0)
+
  intarr(1,:)=dtsets(:)%cprj_update_lvl
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'cprj_update_lvl','INT',0)
 
@@ -1019,6 +1025,9 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  dprarr(1,:)=dtsets(:)%friction
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'friction','DPR',0)
 
+ dprarr(1,:)=dtsets(:)%frictionbar
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'frictionbar','DPR',0)
+
  intarr(1,:)=dtsets(:)%frzfermi
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'frzfermi','INT',0)
 
@@ -1071,6 +1080,12 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
    intarr(1:narrm(idtset),idtset)=dtsets(idtset)%ga_rules(1:narrm(idtset))
  end do
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,narrm,ncid,ndtset_alloc,'ga_rules','INT',multivals%ga_n_rules)
+
+ intarr(1,:)=dtsets(:)%getabiwan
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'getabiwan','INT',0)
+
+ intarr(1,:)=dtsets(:)%getgwan
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'getgwan','INT',0)
 
  intarr(1,:)=dtsets(:)%getbscoup
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'getbscoup','INT',0)
@@ -1136,6 +1151,9 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
 
  intarr(1,:)=dtsets(:)%getsuscep
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'getsuscep','INT',0)
+
+ intarr(1,:)=dtsets(:)%getvarpeq
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'getvarpeq','INT',0)
 
  intarr(1,:)=dtsets(:)%getvel
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'getvel','INT',0)
