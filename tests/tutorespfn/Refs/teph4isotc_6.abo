@@ -449,7 +449,7 @@ P Number of CPUs for parallelism over k-points: 1
  Cannot find all IBZ q-points in the DVDB --> Activating Fourier interpolation.
 
  gstore_completed: 1
- ndone_done_qbz_spin: 216
+ gstore_done_qbz_spin: 216
  gqk%nb: 3
  gqk%glob_nq: 216
  gqk%glob_nk: 173

@@ -4420,7 +4420,7 @@ subroutine gstore_print_for_abitests(gstore, dtset)
 
  ABI_MALLOC(done_qbz_spin, (gstore%nqbz, dtset%nsppol))
  NCF_CHECK(nf90_get_var(root_ncid, root_vid("gstore_done_qbz_spin"), done_qbz_spin))
- write(ab_out, "(a,*(i0,1x))")" ndone_done_qbz_spin: ", count(done_qbz_spin == 1)
+ write(ab_out, "(a,*(i0,1x))")" gstore_done_qbz_spin: ", count(done_qbz_spin == 1)
  ABI_FREE(done_qbz_spin)
 
  do spin=1,gstore%nsppol
