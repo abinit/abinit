@@ -298,7 +298,7 @@ def ctags(ctx):
     Update ctags file.
     """
     with cd(ABINIT_ROOTDIR):
-        cmd = "ctags -R --langmap=fortran:+.finc.f90,c:.c.cu shared/ src/"
+        cmd = "ctags -R --langmap=fortran:+.finc.f90.F90,c:.c.cpp shared/ src/"
         print("Executing:", cmd)
         ctx.run(cmd, pty=True)
         #ctx.run('ctags -R --exclude="_*"', pty=True)

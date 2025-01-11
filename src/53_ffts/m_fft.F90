@@ -4852,7 +4852,7 @@ subroutine uplan_execute_gr_spc(uplan, ndat, ug, ur, isign, iscale)
 ! *************************************************************************
 
  ABI_CHECK_ILEQ(ndat, uplan%batch_size, "ndat > batch_size!")
- ABI_CHECK_IEQ(sp, uplan%kind, "Incosistent kind!")
+ ABI_CHECK_IEQ(sp, uplan%kind, "Inconsistent kind!")
 
  isign__ = +1; if (present(isign)) isign__ = isign
  iscale__ = 0; if (present(iscale)) iscale__ = iscale
@@ -4909,7 +4909,7 @@ subroutine uplan_execute_gr_dpc(uplan, ndat, ug, ur, isign, iscale)
 ! *************************************************************************
 
  ABI_CHECK_ILEQ(ndat, uplan%batch_size, "ndat > batch_size!")
- ABI_CHECK_IEQ(dp, uplan%kind, "Incosistent kind!")
+ ABI_CHECK_IEQ(dp, uplan%kind, "Inconsistent kind!")
 
  isign__ = +1; if (present(isign)) isign__ = isign
  iscale__ = 0; if (present(iscale)) iscale__ = iscale
@@ -4966,7 +4966,7 @@ subroutine uplan_execute_rg_spc(uplan, ndat, ur, ug, isign, iscale)
 ! *************************************************************************
 
  ABI_CHECK_ILEQ(ndat, uplan%batch_size, "ndat > batch_size!")
- ABI_CHECK_IEQ(sp, uplan%kind, "Incosistent kind!")
+ ABI_CHECK_IEQ(sp, uplan%kind, "Inconsistent kind!")
 
  isign__ = -1; if (present(isign)) isign__ = isign
  iscale__ = 1; if (present(iscale)) iscale__ = iscale
@@ -5020,7 +5020,7 @@ subroutine uplan_execute_rg_dpc(uplan, ndat, ur, ug, isign, iscale)
 ! *************************************************************************
 
  ABI_CHECK_ILEQ(ndat, uplan%batch_size, "ndat > batch_size!")
- ABI_CHECK_IEQ(dp, uplan%kind, "Incosistent kind!")
+ ABI_CHECK_IEQ(dp, uplan%kind, "Inconsistent kind!")
 
  isign__ = -1; if (present(isign)) isign__ = isign
  iscale__ = 1; if (present(iscale)) iscale__ = iscale
