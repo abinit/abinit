@@ -47,6 +47,7 @@ AC_DEFUN([SD_LINALG_INIT], [
   sd_linalg_has_lapacke="unknown"
   sd_linalg_has_blacs="unknown"
   sd_linalg_has_scalapack="unknown"
+  sd_linalg_has_buggy_zdot="unknown"
   sd_linalg_has_elpa="unknown"
   sd_linalg_has_elpa_2013="unknown"
   sd_linalg_has_elpa_2014="unknown"
@@ -121,12 +122,13 @@ AC_DEFUN([SD_LINALG_INIT], [
   AC_ARG_VAR([LINALG_CFLAGS], [C flags for linear algebra.])
   AC_ARG_VAR([LINALG_CXXFLAGS], [C++ flags for linear algebra.])
   AC_ARG_VAR([LINALG_FCFLAGS], [Fortran flags for linear algebra.])
+  AC_ARG_VAR([LINALG_FFLAGS], [Fortran flags for linear algebra (better use LINALG_FCFLAGS).])
   AC_ARG_VAR([LINALG_LDFLAGS], [Linker flags for linear algebra.])
   AC_ARG_VAR([LINALG_LIBS], [Library flags for linear algebra.])
 
   # Detect use of environment variables
   if test "${sd_linalg_enable}" = "yes" -o "${sd_linalg_enable}" = "auto"; then
-    tmp_linalg_vars="${LINALG_CPPFLAGS}${LINALG_CFLAGS}${LINALG_CXXFLAGS}${LINALG_FCFLAGS}${LINALG_LDFLAGS}${LINALG_LIBS}"
+    tmp_linalg_vars="${LINALG_CPPFLAGS}${LINALG_CFLAGS}${LINALG_CXXFLAGS}${LINALG_FFLAGS}${LINALG_FCFLAGS}${LINALG_LDFLAGS}${LINALG_LIBS}"
     if test "${sd_linalg_init}" = "def" -a ! -z "${tmp_linalg_vars}"; then
       sd_linalg_enable="yes"
       sd_linalg_init="env"
@@ -174,6 +176,7 @@ AC_DEFUN([SD_LINALG_INIT], [
         test ! -z "${LINALG_CPPFLAGS}" && sd_linalg_cppflags="${LINALG_CPPFLAGS}"
         test ! -z "${LINALG_CFLAGS}" && sd_linalg_cflags="${LINALG_CFLAGS}"
         test ! -z "${LINALG_CXXFLAGS}" && sd_linalg_cxxflags="${LINALG_CXXFLAGS}"
+        test ! -z "${LINALG_FFLAGS}" && sd_linalg_fcflags="${LINALG_FFLAGS}"
         test ! -z "${LINALG_FCFLAGS}" && sd_linalg_fcflags="${LINALG_FCFLAGS}"
         test ! -z "${LINALG_LDFLAGS}" && sd_linalg_ldflags="${LINALG_LDFLAGS}"
         test ! -z "${LINALG_LIBS}" && sd_linalg_libs="${LINALG_LIBS}"

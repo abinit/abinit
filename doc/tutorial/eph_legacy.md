@@ -6,7 +6,7 @@ authors: MVer
 
 ## Electron-Phonon interaction and superconducting properties of Al.
 
-This tutorial demonstrates how to obtain the following physical properties, for a metal:
+This tutorial demonstrates how to obtain the following physical properties for a metal:
 
   * the phonon linewidths (inverse lifetimes) due to the electron-phonon interaction
   * the Eliashberg spectral function
@@ -15,12 +15,12 @@ This tutorial demonstrates how to obtain the following physical properties, for 
   * the resistivity and electronic part of the thermal conductivity
 
 Here you will learn to use the electron-phonon coupling part of the ANADDB
-utility. This implies a preliminary calculation of the electron-phonon matrix
-elements and phonon frequencies and eigenvectors, from a standard ABINIT
-phonon calculation, which will be reviewed succinctly.
+utility. This requires a preliminary calculation of the electron-phonon matrix
+elements, phonon frequencies and phonon eigenvectors from a standard ABINIT
+phonon calculation, which we will briefly review.
 
 Note that this tutorial covers a legacy version of the electron-phonon calculation.
-A new, more efficient workflow is presented in Tutorials [Introduction to the new EPH workflow](/tutorial/eph_intro).
+A new, more efficient workflow is presented in Tutorial [Introduction to the new EPH workflow](/tutorial/eph_intro).
 The old workflow is still useful because it is compatible with spinors (spin orbit coupling), PAW, and
 therefore also DFT+U, but it will be deprecated at some time in the future.
 

@@ -46,7 +46,7 @@ znucl 14          # The keyword "znucl" refers to the atomic number of the
                   # mentioned in the "files" file must correspond
                   # to the type(s) of atom. Here, the only type is Silicon.
 pp_dirpath "$ABI_PSPDIR"
-pseudos "Pseudodojo_nc_sr_04_pbe_standard_psp8/Si.psp8"
+pseudos "Psdj_nc_sr_04_pbe_std_psp8/Si.psp8"
 
 # Definition of the atoms
 natom 2           # There are two atoms

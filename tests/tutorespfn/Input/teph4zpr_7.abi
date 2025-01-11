@@ -10,7 +10,7 @@
  eph_stern 1
  getpot_filepath "MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_POT.nc"
  # nline tolwfr
- 
+
  getddb_filepath "teph4zpr_1_DDB"
  ddb_ngqpt 4 4 4
  getdvdb_filepath "teph4zpr_2_DVDB"
@@ -54,6 +54,7 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = eos_nvhpc_*,
 #%% test_chain =  teph4zpr_1.abi, teph4zpr_2.abi, teph4zpr_3.abi, teph4zpr_4.abi,
 #%%               teph4zpr_5.abi, teph4zpr_6.abi, teph4zpr_7.abi, teph4zpr_8.abi
 #%% [files]

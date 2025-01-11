@@ -261,11 +261,11 @@ minutes or so. After completion you will find in the output file:
     Orbital magnetic moment computed with DFPT derivative wavefunctions
 
     Orbital magnetic moment, Cartesian directions :
-    -5.54888268E-04 -1.71209435E-14  1.51847951E-14
+    -5.54877537E-04  6.30837909E-15  4.28342968E-15
     
     
     Chern vector, Cartesian directions :
-    -2.52162344E-09 -1.72263462E-17  1.13073711E-17
+    -2.52162344E-09  1.10115145E-17  6.96089655E-18
 
 The first result is the induced magnetic moment, which is a
 vector--note that it points in the original dipole direction. To get

@@ -46,7 +46,7 @@ nband       5
 ixc         -208012  # TB09 xc functional
 
 pp_dirpath "$ABI_PSPDIR"
-pseudos "Pseudodojo_paw_pbe_standard/Si.xml"
+pseudos "Psdj_paw_pbe_std/Si.xml"
 
 #---- Miscellaneous
 enunit      1

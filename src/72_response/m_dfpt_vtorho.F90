@@ -18,6 +18,9 @@
 
 #include "abi_common.h"
 
+! nvtx related macro definition
+#include "nvtx_macros.h"
+
 module m_dfpt_vtorho
 
  use defs_basis
@@ -28,8 +31,10 @@ module m_dfpt_vtorho
  use m_hamiltonian
  use m_wfk
  use m_cgtools
+ use m_gemm_nonlop_projectors
  use m_dtset
  use m_dtfil
+ use m_ompgpu_utils
 
 
  use defs_datatypes, only : pseudopotential_type
@@ -54,6 +59,10 @@ module m_dfpt_vtorho
  use m_dfpt_fef,    only : dfptff_gradberry, dfptff_gbefd
  use m_mpinfo,      only : proc_distrb_cycle,proc_distrb_nband
  use m_fourier_interpol, only : transgrid
+
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+ use m_nvtx_data
+#endif
 
  implicit none
 
@@ -157,11 +166,12 @@ contains
 !!  ucvol=unit cell volume in bohr**3.
 !!  usecprj= 1 if cprj, cprjq, cprj1 arrays are stored in memory
 !!  useylmgr1= 1 if ylmgr1 array is allocated
+!!  usevxctau=1 if if XC functional depends on kinetic energy density
 !!  ddk<wfk_t)=struct info DDK file
 !!  vectornd(with_vectornd*nfftf,nspden,3)=nuclear dipole moment vector potential
 !!  vtrial(nfftf,nspden)=GS Vtrial(r).
 !!  vtrial1(cplex*nfftf,nspden)=INPUT RF Vtrial(r).
-!!  vxctau(nfftf,nspden,4*usekden)=derivative of e_xc wrt kin energy density, for mGGA
+!!  vxctau(nfftf,nspden,4*usevxctau)=derivative of e_xc wrt kin energy density, for mGGA
 !!  with_vectornd = 1 if vectornd allocated
 !!  wtk_rbz(nkpt_rbz)=weight assigned to each k point.
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
@@ -220,14 +230,14 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 & nsppol,nsym1,ntypat,nvresid1,occkq,occ_rbz,optres,&
 & paw_ij,paw_ij1,pawang,pawang1,pawfgr,pawfgrtab,pawrhoij,pawrhoij1,pawtab,&
 & phnons1,ph1d,prtvol,psps,pwindall,qmat,resid,residm,rhog1,rhor1,rmet,rprimd,symaf1,symrc1,symrl1,tnons1,ucvol,&
-& usecprj,useylmgr1,ddk_f,vectornd,vtrial,vtrial1,vxctau,with_vectornd,wtk_rbz,xred,ylm,ylm1,ylmgr1,cg1_out)
+& usecprj,useylmgr1,usevxctau,ddk_f,vectornd,vtrial,vtrial1,vxctau,with_vectornd,wtk_rbz,xred,ylm,ylm1,ylmgr1,cg1_out)
 
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: cplex,dbl_nnsclo,dim_eig2rf,idir,ipert,mband,mk1mem,mkmem
  integer,intent(in) :: mband_mem
  integer,intent(in) :: mkqmem,mpw,mpw1,my_natom,natom,ncpgr,nfftf,nkpt_rbz,nspden
- integer,intent(in) :: nsppol,nsym1,ntypat,optres,prtvol,usecprj,useylmgr1,with_vectornd
+ integer,intent(in) :: nsppol,nsym1,ntypat,optres,prtvol,usecprj,useylmgr1,usevxctau,with_vectornd
  integer,optional,intent(in) :: cg1_out
  real(dp),intent(in) :: fermie1,ucvol
  real(dp),intent(out) :: edocc,eeig0,ek0,ek1,eloc0,end0,end1,enl0,enl1,evxctau0,evxctau1,nres2,residm
@@ -270,7 +280,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  real(dp),intent(in) :: tnons1(3,nsym1)
  real(dp),intent(in),target :: vtrial(nfftf,nspden)
  real(dp),intent(inout),target :: vtrial1(cplex*nfftf,nspden)
- real(dp),intent(inout) :: vxctau(nfftf,dtset%nspden,4*dtset%usekden)
+ real(dp),intent(inout) :: vxctau(nfftf,dtset%nspden,4*usevxctau)
  real(dp),intent(in) :: wtk_rbz(nkpt_rbz),xred(3,natom)
  real(dp),intent(in) :: ylm(mpw*mkmem,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(in) :: ylm1(mpw1*mk1mem,psps%mpsang*psps%mpsang*psps%useylm)
@@ -298,7 +308,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  integer :: nband_eff
  integer :: nnsclo_now,npw1_k,npw_k,nspden_rhoij,qphase_rhoij,spaceworld,test_dot
  integer :: nband_me
- logical :: has_vectornd,has_vxctau,paral_atom,qne0
+ logical :: has_vectornd,paral_atom,qne0,with_vxctau
  real(dp) :: arg,wtk_k
  type(gs_hamiltonian_type) :: gs_hamkq
  type(rf_hamiltonian_type) :: rf_hamkq,rf_hamk_dir2
@@ -326,6 +336,8 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 ! *********************************************************************
 
  DBG_ENTER('COLL')
+
+ ABI_NVTX_START_RANGE(NVTX_DFPT_VTORHO)
 
 !Keep track of total time spent in this routine
  call timab(121,1,tsec)
@@ -449,8 +461,8 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  ABI_MALLOC(vlocal,(n4,n5,n6,gs_hamkq%nvloc))
  ABI_MALLOC(vlocal1,(cplex*n4,n5,n6,gs_hamkq%nvloc))
 
- has_vxctau = ( size(vxctau) > 0 )
- if(has_vxctau) then
+ with_vxctau = ( usevxctau > 0 )
+ if(with_vxctau) then
     ABI_MALLOC(vxctaulocal,(n4,n5,n6,gs_hamkq%nvloc,4))
  end if
  
@@ -504,7 +516,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
    end if
 
    !! add vxctau for mGGA to GS hamiltonian and RF hamiltonian
-   if (has_vxctau) then
+   if (with_vxctau) then
      call gspot_transgrid_and_pack(isppol, psps%usepaw, dtset%paral_kgb, dtset%nfft, dtset%ngfft, nfftf, &
                                    dtset%nspden, gs_hamkq%nvloc, 4, pawfgr, mpi_enreg, vxctau, vxctaulocal)
      call gs_hamkq%load_spin(isppol, vxctaulocal=vxctaulocal)
@@ -635,6 +647,12 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 &         nsppol,qmat,pwindall,rprimd)
        end if
      end if
+
+     ! Setup gemm_nonlop
+     if (gemm_nonlop_use_gemm) then
+       !set the global variable indicating to gemm_nonlop where to get its data from
+       gemm_nonlop_ikpt_this_proc_being_treated = ikpt
+     end if ! gemm_nonlop_use_gemm
 
      ! Free some memory before calling dfpt_vtowfk
      ABI_FREE(ylm_k)
@@ -951,6 +969,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  end if ! iscf>0
 
  call timab(121,2,tsec)
+ ABI_NVTX_END_RANGE()
 
  DBG_EXIT('COLL')
 

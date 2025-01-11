@@ -3,7 +3,6 @@
 #    Test of constrained DFT in the PAW case, non-spin polarized#
 #    BCC iron, nonmagnetic  GGA, PAW                    XG 2020 #
 #################################################################
-
   ndtset 3
 
 # Spin variables

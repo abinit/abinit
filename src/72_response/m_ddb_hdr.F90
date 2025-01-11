@@ -74,12 +74,12 @@ MODULE m_ddb_hdr
  integer,public,parameter :: BLKTYP_d0E_xx=0       ! Total energy
  integer,public,parameter :: BLKTYP_d1E_xx=4       ! First-order derivatives of total energy
  integer,public,parameter :: BLKTYP_d2E_ns=1       ! Second-order derivatives of total energy, non-stationary
- integer,public,parameter :: BLKTYP_d2E_st=2  ! Second-order derivatives of total energy, stationary
+ integer,public,parameter :: BLKTYP_d2E_st=2       ! Second-order derivatives of total energy, stationary
  integer,public,parameter :: BLKTYP_d2E_mbc=85     ! Molecular Berry curvature (MBC)
  integer,public,parameter :: BLKTYP_d3E_xx=3       ! Third-order derivatives of total energy
- integer,public,parameter :: BLKTYP_d3E_lw=33   ! Long-wave third-order derivatives of total energy
+ integer,public,parameter :: BLKTYP_d3E_lw=33      ! Long-wave third-order derivatives of total energy
  integer,public,parameter :: BLKTYP_d2eig_re=5     ! Second-order derivatives of eigenvalues
- integer,public,parameter :: BLKTYP_d2eig_im=6 ! Static broadening of eigenvalues
+ integer,public,parameter :: BLKTYP_d2eig_im=6     ! Static broadening of eigenvalues
 
  integer,public,parameter :: descrlen=500
  integer,public,parameter :: ntypes=9  ! The number of different block types
@@ -2798,6 +2798,7 @@ end subroutine ddb_hdr_bcast
 !! SOURCE
 
 subroutine ddb_hdr_get_iomode(ddb_hdr, filenamein, io, iomode, filenameout)
+
 !Arguments ------------------------------------
  class(ddb_hdr_type),intent(inout) :: ddb_hdr
  character(len=fnlen),intent(in) :: filenamein
@@ -4378,7 +4379,7 @@ subroutine inprep8 (filename,unddb,dimekb,lmnmax,mband,mblktyp,msym,natom,nblok,
 
    read (unddb,*)
    if (ddbvrs==cvrsio8_old.or.ddbvrs==cvrsio8_old_old) then
-     ! this format statement is inconsistent with the ddb for test v2[13] 
+     ! this format statement is inconsistent with the ddb for test v2[13]
      ! JWZ 31 May 2024
      !read (unddb, '(10x,i3,14x,i3,11x,i3)', iostat=ios )dimekb,lmnmax,usepaw
      read (unddb, '(10x,i3,14x,i3,14x,i3)', iostat=ios )dimekb,lmnmax,usepaw

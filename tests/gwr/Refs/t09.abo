@@ -1,6 +1,6 @@
 
-.Version 10.1.0.1 of ABINIT, released Apr 2024.
-.(MPI version, prepared for a aarch64_darwin22.6.0_gnu12.2 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun 16 Jun 2024.
-- ( at 13h54 )
+.Starting date : Wed 18 Sep 2024.
+- ( at 17h21 )
   
-- input  file    -> /Users/giantomassi/git_repos/abinit/_build/tests/Test_suite/gwr_t09/t09.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/TestBot_MPI1/gwr_t09/t09.abi
 - output file    -> t09.abo
 - root for input  files -> t09i
 - root for output files -> t09o
@@ -58,10 +58,10 @@ _ WF disk file :      0.027 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -71,7 +71,7 @@ _ WF disk file :      0.027 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
              ecut      1.50000000E+01 Hartree
           ecuteps1     0.00000000E+00 Hartree
           ecuteps2     4.00000000E+00 Hartree
--          fftalg         312
+-          fftalg         512
            getden1          0
            getden2         -1
            getwfk1          0
@@ -167,8 +167,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     15.000   => boxcut(ratio)=   2.10595
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /Users/giantomassi/git_repos/abinit/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Li.psp8
-- pspatm: opening atomic psp file    /Users/giantomassi/git_repos/abinit/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Li.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/Li.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/Li.psp8
 - Li    ONCVPSP-3.3.0  r_core=   1.20595   1.00838
 -  3.00000   3.00000    171101                znucl, zion, pspdat
     8   -1012    1    4       400   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -181,8 +181,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              1   -2.259133   -0.579420
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /Users/giantomassi/git_repos/abinit/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/F.upf
-- pspatm: opening atomic psp file    /Users/giantomassi/git_repos/abinit/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/F.upf
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/F.upf
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/F.upf
 - F Generated using ONCVPSP code by D. R. Hamann
 -  9.00000   7.00000  201202                  znucl, zion, pspdat
 12 -1012 2 -1 824                             pspcod,pspxc,lmax,lloc,mmax
@@ -214,9 +214,9 @@ tolerances: {tolwfr: 1.00E-12, }
  ETOT  4  -30.891370370775    -4.426E-04 2.915E-05 1.279E-03
  ETOT  5  -30.891370724482    -3.537E-07 1.577E-07 4.677E-06
  ETOT  6  -30.891370726017    -1.535E-09 6.359E-10 6.767E-09
- ETOT  7  -30.891370726019    -1.467E-12 7.496E-12 6.074E-11
- ETOT  8  -30.891370726019    -2.132E-13 1.785E-12 6.386E-13
- ETOT  9  -30.891370726019     5.684E-14 9.163E-13 4.434E-15
+ ETOT  7  -30.891370726019    -1.478E-12 7.496E-12 6.074E-11
+ ETOT  8  -30.891370726019    -2.167E-13 1.785E-12 6.386E-13
+ ETOT  9  -30.891370726019     7.461E-14 9.163E-13 4.434E-15
 
  At SCF step    9   max residual=  9.16E-13 < tolwfr=  1.00E-12 =>converged.
 
@@ -236,7 +236,7 @@ lattice_vectors:
 lattice_lengths: [   5.44718,    5.44718,    5.44718, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.1428787E+02
-convergence: {deltae:  5.684E-14, res2:  4.434E-15, residm:  9.163E-13, diffor: null, }
+convergence: {deltae:  7.461E-14, res2:  4.434E-15, residm:  9.163E-13, diffor: null, }
 etotal    :  -3.08913707E+01
 entropy   :   0.00000000E+00
 fermie    :   6.49026406E-02
@@ -298,15 +298,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  2.07183053636601E+01
-hartree             :  8.46611420240759E+00
+hartree             :  8.46611420240762E+00
 xc                  : -7.04589124330262E+00
 Ewald energy        : -2.02305295457931E+01
 psp_core            :  5.88173805351174E-01
 local_psp           : -2.77439245155501E+01
-non_local_psp       : -5.64361879279193E+00
+non_local_psp       : -5.64361879279194E+00
 total_energy        : -3.08913707260190E+01
 total_energy_eV     : -8.40596946787269E+02
-band_energy         : -4.06072528241290E+00
+band_energy         : -4.06072528241291E+00
 ...
 
 
@@ -396,11 +396,11 @@ my_nband: 10
  For band1: 1 , band2: 2
   0.00000E+00  3.38012E-02  3.38012E-02  3.38012E-02
  For band1: 1 , band2: 3
-  0.00000E+00  7.28340E-03  1.04089E-03  2.87697E-02
+  0.00000E+00  7.28339E-03  1.04164E-03  2.87700E-02
  For band1: 1 , band2: 4
-  0.00000E+00  9.70191E-03  3.11884E-02  9.70229E-03
+  0.00000E+00  9.70308E-03  3.11884E-02  9.70134E-03
  For band1: 1 , band2: 5
-  0.00000E+00  2.87699E-02  1.04120E-03  7.28366E-03
+  0.00000E+00  2.87695E-02  1.04014E-03  7.28377E-03
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -418,7 +418,7 @@ my_nband: 10
                       -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         312
+-          fftalg         512
            getden1          0
            getden2         -1
            getwfk1          0
@@ -573,10 +573,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          0.5  wall=          0.5
+- Proc.   0 individual time (sec): cpu=          1.0  wall=          1.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          0.5  wall=          0.5
++Overall time at end (sec) : cpu=          1.0  wall=          1.0

@@ -41,7 +41,6 @@ optforces 0
 optstress 0
 pawcpxocc 2
 usexcnhat 0
-pawxcdev 0
 
 paral_atom 0
 paral_kgb 0
@@ -59,7 +58,7 @@ znucl    10
 xred
 3*1/2 
 
-pp_dirpath="$ABI_PSPDIR/Pseudodojo_paw_pbe_standard/"
+pp_dirpath="$ABI_PSPDIR/Psdj_paw_pbe_std/"
 pseudos="Ne.xml"
 
 ##############################################################

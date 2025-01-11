@@ -45,7 +45,7 @@
 #%% max_nprocs = 10
 #%% [extra_info]
 #%% authors = G. Antonius
-#%% keywords = NC, DFPT, EPH
+#%% keywords = NC, DFPT, EPH, MINIMAL
 #%% description = 
 #%%   Testing of the phonon potential interpolation routines.
 #%%<END TEST_INFO>

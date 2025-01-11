@@ -3,7 +3,7 @@
 
 
 #First dataset : SC run with kpoints in the IBZ
-  nband   8     
+  nband   8
   nstep  2
  irdwfk 0
  prtwant 2
@@ -33,7 +33,7 @@ istwfk 8*1
  ecut 4.00             ! This is also too low
 # pawecutdg 40.00             ! This is also too low
  ixc 1
- natom  2  
+ natom  2
  ntypat  2
  rprim   0 .5 .5  .5 0 .5  .5 .5 0
  xred 3*0.00d0 3*0.25d0
@@ -53,6 +53,6 @@ istwfk 8*1
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
-#%% keywords = 
+#%% keywords = MINIMAL
 #%% description = GaAs crystal with few bands. Very quick built-in test, to check that Wannier90 is installed.
 #%%<END TEST_INFO>

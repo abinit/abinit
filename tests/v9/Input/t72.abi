@@ -5,15 +5,15 @@
 
   ndtset 12
 
-  cprj_update_lvl1  3
-  cprj_update_lvl2  3
-  cprj_update_lvl3  3
-  cprj_update_lvl4  3
-  cprj_update_lvl5  3
-  cprj_update_lvl6  3
-  cprj_update_lvl7  3
-  cprj_update_lvl8  3
-  cprj_update_lvl9  3
+  cprj_in_memory1  2
+  cprj_in_memory2  2
+  cprj_in_memory3  2
+  cprj_in_memory4  2
+  cprj_in_memory5  2
+  cprj_in_memory6  2
+  cprj_in_memory7  2
+  cprj_in_memory8  2
+  cprj_in_memory9  2
 
   nloc_alg1  2
   nloc_alg2  3
@@ -24,10 +24,6 @@
   nloc_alg7  8
   nloc_alg8  9
   nloc_alg9  10
-
-  cprj_update_lvl10 0
-  cprj_update_lvl11 0
-  cprj_update_lvl12 0
 
   nloc_alg10  2
   nloc_alg11  3
@@ -76,7 +72,7 @@
    kptopt   1
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "Pseudodojo_paw_pw_standard/Al.xml, As.LDA_PW-JTH_sp.xml"
+ pseudos "Psdj_paw_pw_std/Al.xml, As.LDA_PW-JTH_sp.xml"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

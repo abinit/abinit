@@ -4,8 +4,8 @@ from __future__ import print_function, division, absolute_import #, unicode_lite
 
 import sys
 import os
-# Set ABI_PSPDIR env variable to point to the absolute path of Psps_for_tests
-os.environ["ABI_PSPDIR"] = os.path.abspath(os.path.join(os.path.dirname(__file__), "Psps_for_tests"))
+# Set ABI_PSPDIR env variable to point to the absolute path of Pspdir
+os.environ["ABI_PSPDIR"] = os.path.abspath(os.path.join(os.path.dirname(__file__), "Pspdir"))
 #print("ABI_PSPDIR:", os.environ["ABI_PSPDIR"])
 import platform
 import time
@@ -276,6 +276,13 @@ def main():
     parser.add_option("--etsf", action="store_true", default=False,
                        help="Validate netcdf files produced by the tests. Requires netcdf4")
 
+    parser.add_option("-Y","--yaml-simplified-diff", dest="yaml_simplified_diff", default=False, action="store_true",
+                      help="Will only perform a simplified diff when comparing .abo files (based only on YAML sections)")
+
+    parser.add_option("-T","--forced-tolerance", dest="forced_tolerance", type="string", default="default",
+                      help="[string] Force the use of fldiff comparison tool with the specified tolerance. "+
+                           "Possible values are: default (from test config), high(1.e-10), medium (1.e-8), easy (1.e-5), ridiculous (1.e-2)")
+
     parser.add_option("--touch", default="",
                       help=("Used in conjunction with `-m`."
                             "Touch the source files containing the given expression(s) before recompiling the code. "
@@ -286,6 +293,9 @@ def main():
 
     parser.add_option("-l", "--list-tests-info", dest="list_info", default=False, action="store_true",
                       help="List the tests in test suite (echo description section in ListOfFile files) and exit")
+
+    parser.add_option("--tolerances", default=False, action="store_true",
+                      help="Write csv files with tolerances of each test.")
 
     parser.add_option("-m", "--make", dest="make", type="int", default=0,
                       help="Find the abinit build tree, and compile to code with 'make -j#NUM' before running the tests.")
@@ -565,6 +575,38 @@ def main():
             fh.write(test_suite.make_listoftests(width=100, html=False))
         sys.exit(0)
 
+    if options.tolerances:
+
+        def get_tol_rows(this_test):
+            rows = []
+            print("test:", this_test, this_test.__class__.__name__)
+            for f in this_test.files_to_test:
+                print("file_name:", f.name, ", f.tolnlines:", f.tolnlines, ", tolabs: ", f.tolabs, ", tolrel:", f.tolrel)
+                d = dict(test=str(test), cls=this_test.__class__.__name__,
+                         file_name=f.name, tolnlines=f.tolnlines, tolabs=f.tolabs, tolrel=f.tolrel)
+                rows.append(d)
+            return rows
+
+        dict_list = []
+        for test in test_suite:
+            if test.is_chain():
+                for child_test in test:
+                    rows = get_tol_rows(child_test)
+                    dict_list.extend(rows)
+            else:
+                rows = get_tol_rows(test)
+                dict_list.extend(rows)
+
+        import pandas as pd
+        df = pd.DataFrame(dict_list)
+        #print(df)
+
+        filepath = "tolerances.csv"
+        print("Writing dataframe with tolerances to:", filepath)
+        df.to_csv(filepath, index=False)
+
+        sys.exit(0)
+
     if options.dry_run:
         print("Dry-run mode, print list of tests and exit(0)")
         for i, test in enumerate(test_suite):
@@ -584,7 +626,9 @@ def main():
                                    sub_timeout=options.sub_timeout,
                                    pedantic=options.pedantic,
                                    abimem_check=options.abimem,
-                                   etsf_check=options.etsf)
+                                   etsf_check=options.etsf,
+                                   simplified_diff=options.yaml_simplified_diff,
+                                   forced_tolerance=options.forced_tolerance)
     if results is None: return 99
 
     if options.looponfail:

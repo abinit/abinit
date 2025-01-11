@@ -78,9 +78,7 @@ include "fexcp.h"
  public :: abi_cabort            ! C-interoperable version.
 
  ! This flag activate the output of the backtrace in msg_hndl
- ! Unfortunately, gcc4.9 seems to crash inside this routine
- ! hence, for the time being, this optional feature has been disabled
- integer, save, private :: m_errors_show_backtrace = 0
+ integer, save, private :: m_errors_show_backtrace = 1
 
  interface assert_eq
    module procedure assert_eq2

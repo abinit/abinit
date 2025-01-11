@@ -84,6 +84,7 @@ module m_sigmaph
  use m_pawfgr,         only : pawfgr_type
  use m_dfpt_cgwf,      only : stern_t
  use m_phonons,        only : phstore_t, phstore_new
+ use m_pstat,          only : pstat_t
 
  implicit none
 
@@ -672,7 +673,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  type(hdr_type) :: pot_hdr
  type(phstore_t) :: phstore
  type(u1cache_t) :: u1c
- type(stern_t) :: stern
+ type(stern_t),target :: stern
+ type(pstat_t) :: pstat
  character(len=5000) :: msg
  character(len=fnlen) :: sigeph_filepath
 !arrays
@@ -727,6 +729,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  call cwtime(cpu_all, wall_all, gflops_all, "start")
 
  units = [std_out, ab_out]
+
+ call pstat%from_pid()
+ call pstat%print([std_out], header="Memory at the beginning of sigmaph")
 
  ! Copy important dimensions
  natom = cryst%natom; natom3 = 3 * natom; nsppol = ebands%nsppol; nspinor = ebands%nspinor
@@ -1145,6 +1150,11 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    sigma%use_ftinterp = .False.
  end if
 
+ if (.not. sigma%use_ftinterp .and. dtset%eph_use_ftinterp /= 0) then
+   ABI_WARNING("Enforcing FT interpolation for q-points even if it's not strictly needed.")
+   sigma%use_ftinterp = .True.
+ end if
+
  if (sigma%use_ftinterp) then
    ! Use ddb_ngqpt q-mesh to compute the real-space represention of DFPT v1scf potentials to prepare Fourier interpolation.
    ! R-points are distributed inside comm_rpt
@@ -1193,6 +1203,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
  ABI_FREE(qselect)
  zpr_frohl_sphcorr = zero; zpr_frohl_sphcorr_done = .False.
+
+ call pstat%print([std_out], header="Memory before k-point loop")
 
  ! Loop over k-points in Sigma_nk. Loop over spin is internal as we operate on nspden components at once.
  do my_ikcalc=1,sigma%my_nkcalc
@@ -1682,7 +1694,7 @@ end if
            eshift = eig0nk - dtset%dfpt_sciss
 
            call getgh1c(berryopt0, kets_k(:,:,ib_k), cwaveprj0, h1kets_kq(:,:,imyp, ib_k), &
-             grad_berry, gs1c, gs_hamkq, gvnlx1, idir, ipert, eshift, mpi_enreg, optlocal, &
+             grad_berry, gs1c, gs_hamkq, gvnlx1, idir, ipert, (/eshift/), mpi_enreg, 1, optlocal, &
              optnl, opt_gvnlx1, rf_hamkq, sij_opt, tim_getgh1c1, usevnl)
          end do
 
@@ -2547,7 +2559,8 @@ end if
    !call wrtout(std_out, sjoin("xmpi_count_requests", itoa(xmpi_count_requests)))
 
    call cwtime_report(" One ikcalc k-point", cpu_ks, wall_ks, gflops_ks)
- end do ! ikcalc
+   call pstat%print([std_out], header="Memory at the end of my_ikcalc iteration")
+ end do ! my_ikcalc
 
  call cwtime_report(" Sigma_eph full calculation", cpu_all, wall_all, gflops_all, end_str=ch10)
 
@@ -2628,6 +2641,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  integer :: ii, ierr, spin, gap_err, ikcalc, qprange_, bstop !it,
  integer :: jj, bstart, natom, natom3 !, ip, iatom, idir, pertcase,
  integer :: isym_k, trev_k, mband, nrest, color
+ integer :: kptopt
  logical :: downsample
  character(len=fnlen) :: wfk_fname_dense
  character(len=5000) :: msg
@@ -2704,7 +2718,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  ABI_MALLOC(temp, (6, new%nqbz))
 
  qrank = krank_from_kptrlatt(new%nqibz, new%qibz, qptrlatt, compute_invrank=.False.)
- if (kpts_map("symrec", qtimrev, cryst, qrank, new%nqbz, new%qbz, temp) /= 0) then
+ if (kpts_map("symrec", qptopt, cryst, qrank, new%nqbz, new%qbz, temp) /= 0) then
    ABI_ERROR("Cannot map qBZ to qIBZ!")
  end if
 
@@ -2825,8 +2839,12 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
    ! Note symrel and use_symrel.
    ! These are the conventions for the symmetrization of the wavefunctions used in cgtk_rotate.
    kk = new%kcalc(:, ikcalc)
-
-   if (kpts_map("symrel", new%timrev, cryst, krank, 1, kk, indkk_k) /= 0) then
+   if (new%timrev == 1) then
+     kptopt=1
+   else
+     kptopt=4
+   end if
+   if (kpts_map("symrel", kptopt, cryst, krank, 1, kk, indkk_k) /= 0) then
       write(msg, '(11a)' )&
        "The WFK file cannot be used to compute self-energy corrections at k-point: ",trim(ktoa(kk)),ch10,&
        "The k-point cannot be generated from a symmetrical one.", ch10,&
@@ -3715,17 +3733,14 @@ type(sigmaph_t) function sigmaph_read(path, dtset, comm, msg, ierr, keep_open, &
 
 ! *************************************************************************
 
- ! Open netcdf file
- msg = "Netcdf not activated at configure time!"
- ierr = 1
- ierr = 0
+ call cwtime(cpu, wall, gflops, "start")
 
+ msg = ""; ierr = 0
  if (.not. file_exists(path)) then
-   msg = sjoin("Cannot find file", path)
-   ierr = 1; return
+   msg = sjoin("Cannot find file", path); ierr = 1; return
  end if
 
- call cwtime(cpu, wall, gflops, "start")
+ ! Open netcdf file
  NCF_CHECK(nctk_open_read(ncid, path, comm))
 
  !TODO?
@@ -3886,7 +3901,7 @@ type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, brange, kcalc2eb
 !Local variables -----------------------------------------
 !scalars
  integer,parameter :: master = 0
- integer :: spin, ikpt, ikcalc, iband, itemp, nsppol, nkpt, timrev, band_ks, bstart_ks, nbcalc_ks, mband
+ integer :: spin, ikpt, ikcalc, iband, itemp, nsppol, nkpt, band_ks, bstart_ks, nbcalc_ks, mband
  integer :: bmin, bmax, my_rank, ierr
  integer :: ncerr
  type(krank_t) :: krank
@@ -3903,11 +3918,10 @@ type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, brange, kcalc2eb
 
  ! Map input ebands kpoints to kcalc k-points stored in sigmaph file.
  ABI_MALLOC(kcalc2ebands, (6, self%nkcalc))
- timrev = kpts_timrev_from_kptopt(ebands%kptopt)
 
  krank = krank_from_kptrlatt(ebands%nkpt, ebands%kptns, ebands%kptrlatt, compute_invrank=.False.)
 
- if (kpts_map("symrec", timrev, cryst, krank, self%nkcalc, self%kcalc, kcalc2ebands) /= 0) then
+ if (kpts_map("symrec", ebands%kptopt, cryst, krank, self%nkcalc, self%kcalc, kcalc2ebands) /= 0) then
     write(msg, '(3a)' ) &
      "Error mapping input ebands%kptns to sigmaph kcalc",ch10,&
      "the k-point could not be generated from a symmetrical one"
@@ -4176,7 +4190,7 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, ebands, ikcalc, prtvol, comm)
 
 !Local variables-------------------------------
  integer,parameter :: master = 0
- integer :: spin, my_rank, iq_ibz, nprocs, qtimrev, qptopt  !, nbcalc_ks !, bstart_ks
+ integer :: spin, my_rank, iq_ibz, nprocs, qptopt, kptopt !, nbcalc_ks !, bstart_ks
  integer :: ikpt, ibz_k, isym_k, itim_k !isym_lgk,
  real(dp) :: cpu, wall, gflops
  character(len=5000) :: msg
@@ -4282,11 +4296,10 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, ebands, ikcalc, prtvol, comm)
 
    ! Assume qptopt == kptopt unless value is specified in input
    qptopt = ebands%kptopt; if (dtset%qptopt /= 0) qptopt = dtset%qptopt
-   qtimrev = kpts_timrev_from_kptopt(qptopt)
    qptrlatt = 0; qptrlatt(1,1) = self%ngqpt(1); qptrlatt(2,2) = self%ngqpt(2); qptrlatt(3,3) = self%ngqpt(3)
    qrank = krank_from_kptrlatt(self%nqibz, self%qibz, qptrlatt, compute_invrank=.False.)
 
-   if (kpts_map("symrec", qtimrev, cryst, qrank, self%nqibz_k, self%qibz_k, iqk2dvdb) /= 0) then
+   if (kpts_map("symrec", qptopt, cryst, qrank, self%nqibz_k, self%qibz_k, iqk2dvdb) /= 0) then
      write(msg, '(3a)' )&
        "At least one of the q points in the IBZ_k could not be generated from one in the IBZ.", ch10,&
        "Action: check your DVDB file and use eph_task to interpolate the potentials on a denser q-mesh."
@@ -4367,7 +4380,13 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, ebands, ikcalc, prtvol, comm)
 
  krank = krank_from_kptrlatt(ebands%nkpt, ebands%kptns, ebands%kptrlatt, compute_invrank=.False.)
 
- if (kpts_map("symrel", self%timrev, cryst, krank, self%nqibz_k, kq_list, iqk2dvdb) /= 0) then
+ if (self%timrev == 1) then
+   kptopt=1
+ else
+   kptopt=4
+ end if
+
+ if (kpts_map("symrel", kptopt, cryst, krank, self%nqibz_k, kq_list, iqk2dvdb) /= 0) then
    write(msg, '(11a)' )&
     "The WFK file cannot be used to compute self-energy corrections at k: ", trim(ktoa(kk)), ch10,&
     "At least one of the k+q points could not be generated from a symmetrical one.", ch10,&
@@ -5445,7 +5464,7 @@ subroutine qpoints_oracle(sigma, dtset, cryst, ebands, qpts, nqpt, nqbz, qbz, qs
 !scalars
  integer,parameter :: master = 0
  integer :: spin, ikcalc, ik_ibz, iq_bz, ierr, db_iqpt, ibsum_kq, ikq_ibz, ikq_bz
- integer :: cnt, my_rank, nprocs, ib_k, band_ks, nkibz, nkbz, kq_rank, qptopt, qtimrev
+ integer :: cnt, my_rank, nprocs, ib_k, band_ks, nkibz, nkbz, kq_rank, qptopt
  real(dp) :: eig0nk, eig0mkq, ediff, cpu, wall, gflops
  character(len=5000) :: msg
  type(krank_t) :: krank, qrank
@@ -5524,9 +5543,8 @@ subroutine qpoints_oracle(sigma, dtset, cryst, ebands, qpts, nqpt, nqbz, qbz, qs
  qptrlatt = 0; qptrlatt(1,1) = sigma%ngqpt(1); qptrlatt(2,2) = sigma%ngqpt(2); qptrlatt(3,3) = sigma%ngqpt(3)
  qrank = krank_from_kptrlatt(nqpt, qpts, qptrlatt, compute_invrank=.False.)
  qptopt = ebands%kptopt; if (dtset%qptopt /= 0) qptopt = dtset%qptopt
- qtimrev = kpts_timrev_from_kptopt(qptopt)
 
- if (kpts_map("symrec", qtimrev, cryst, qrank, nqbz, qbz, qbz2qpt) /= 0) then
+ if (kpts_map("symrec", qptopt, cryst, qrank, nqbz, qbz, qbz2qpt) /= 0) then
    write(msg, '(3a)' )&
      "At least one of the q-points could not be generated from a symmetrical one in the DVDB.", ch10, &
      "Action: check your DVDB file and use eph_task to interpolate the potentials on a denser q-mesh."

@@ -1,6 +1,6 @@
 
-.Version 9.11.2 of ANADDB 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ANADDB, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2024 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Jul 2023.
-- ( at 12h02 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h11 )
   
 
 ================================================================================
@@ -83,7 +83,7 @@
 
  Calculation of the interatomic forces 
 
--begin at tcpu      0.029  and twall      0.039 sec
+-begin at tcpu      0.029  and twall      0.029 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -115,90 +115,90 @@
 
  Q point =    0.000000E+00    0.000000E+00    0.000000E+00   isppol =    1
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-       1        0.000000E+00    1.102417E-14    0.000000E+00
-       2        0.000000E+00    1.102417E-14    0.000000E+00
-       3        0.000000E+00    1.102417E-14    0.000000E+00
+       1        0.000000E+00    1.102178E-14    0.000000E+00
+       2        0.000000E+00    1.102178E-14    0.000000E+00
+       3        0.000000E+00    1.102178E-14    0.000000E+00
 
  Q point =    5.000000E-01    5.000000E-01    0.000000E+00   isppol =    1
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-       1        7.426537E-03    9.194745E-15    9.381192E-13
-       2        7.426537E-03    9.194745E-15    9.381192E-13
-       3        1.003673E-02    1.312745E-14    7.333087E-13
+       1        7.426537E-03    9.195635E-15    9.382100E-13
+       2        7.426537E-03    9.195635E-15    9.382100E-13
+       3        1.003673E-02    1.312823E-14    7.333522E-13
 
  Q point =    0.000000E+00    0.000000E+00    0.000000E+00   isppol =    1
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-       1        0.000000E+00    1.102417E-14    0.000000E+00
-       2        0.000000E+00    1.102417E-14    0.000000E+00
-       3        0.000000E+00    1.102417E-14    0.000000E+00
+       1        0.000000E+00    1.102178E-14    0.000000E+00
+       2        0.000000E+00    1.102178E-14    0.000000E+00
+       3        0.000000E+00    1.102178E-14    0.000000E+00
 
  Q point =    5.000000E-01    5.000000E-01    5.000000E-01   isppol =    1
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-       1        7.830046E-03    6.521026E-18    5.985195E-16
-       2        7.830046E-03    6.521026E-18    5.985195E-16
-       3        1.138187E-02    3.152033E-19    1.369160E-17
+       1        7.830046E-03    6.520943E-18    5.985119E-16
+       2        7.830046E-03    6.520943E-18    5.985119E-16
+       3        1.138187E-02    3.150904E-19    1.368670E-17
 
  Q point =    5.000000E-01    5.000000E-01    0.000000E+00   isppol =    1
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-       1        7.426537E-03    9.194745E-15    9.381192E-13
-       2        7.426537E-03    9.194745E-15    9.381192E-13
-       3        1.003673E-02    1.312745E-14    7.333087E-13
+       1        7.426537E-03    9.195635E-15    9.382100E-13
+       2        7.426537E-03    9.195635E-15    9.382100E-13
+       3        1.003673E-02    1.312823E-14    7.333522E-13
 
  Q point =    5.000000E-01   -2.500000E-01    2.500000E-01   isppol =    1
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-       1        8.098458E-03    5.651137E-15    4.848665E-13
-       2        9.400866E-03    7.617489E-15    4.850284E-13
-       3        9.400866E-03    7.617489E-15    4.850284E-13
+       1        8.098458E-03    5.652012E-15    4.849416E-13
+       2        9.400866E-03    7.618309E-15    4.850806E-13
+       3        9.400866E-03    7.618309E-15    4.850806E-13
 
  Q point =    5.000000E-01    5.000000E-01    5.000000E-01   isppol =    1
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-       1        7.830046E-03    6.521026E-18    5.985195E-16
-       2        7.830046E-03    6.521026E-18    5.985195E-16
-       3        1.138187E-02    3.152033E-19    1.369160E-17
+       1        7.830046E-03    6.520943E-18    5.985119E-16
+       2        7.830046E-03    6.520943E-18    5.985119E-16
+       3        1.138187E-02    3.150904E-19    1.368670E-17
 
 
  Output of the linewidths for the first point of each segment. Linewidths are given in Hartree.
 
  Q point =    0.000000E+00    0.000000E+00    0.000000E+00   isppol =    2
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-       1        0.000000E+00    4.698159E-15    0.000000E+00
-       2        0.000000E+00    4.698159E-15    0.000000E+00
-       3        0.000000E+00    4.698159E-15    0.000000E+00
+       1        0.000000E+00    4.695540E-15    0.000000E+00
+       2        0.000000E+00    4.695540E-15    0.000000E+00
+       3        0.000000E+00    4.695540E-15    0.000000E+00
 
  Q point =    5.000000E-01    5.000000E-01    0.000000E+00   isppol =    2
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-       1        7.426537E-03    7.289729E-18    2.790111E-15
-       2        7.426537E-03    7.289729E-18    2.790111E-15
-       3        1.003673E-02    9.933627E-18    2.081643E-15
+       1        7.426537E-03    7.290182E-18    2.790285E-15
+       2        7.426537E-03    7.290182E-18    2.790285E-15
+       3        1.003673E-02    9.934200E-18    2.081763E-15
 
  Q point =    0.000000E+00    0.000000E+00    0.000000E+00   isppol =    2
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-       1        0.000000E+00    4.698159E-15    0.000000E+00
-       2        0.000000E+00    4.698159E-15    0.000000E+00
-       3        0.000000E+00    4.698159E-15    0.000000E+00
+       1        0.000000E+00    4.695540E-15    0.000000E+00
+       2        0.000000E+00    4.695540E-15    0.000000E+00
+       3        0.000000E+00    4.695540E-15    0.000000E+00
 
  Q point =    5.000000E-01    5.000000E-01    5.000000E-01   isppol =    2
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-       1        7.830046E-03    7.783386E-18    2.679926E-15
-       2        7.830046E-03    7.783386E-18    2.679926E-15
-       3        1.138187E-02    3.751880E-19    6.113702E-17
+       1        7.830046E-03    7.783288E-18    2.679893E-15
+       2        7.830046E-03    7.783288E-18    2.679893E-15
+       3        1.138187E-02    3.750536E-19    6.111512E-17
 
  Q point =    5.000000E-01    5.000000E-01    0.000000E+00   isppol =    2
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-       1        7.426537E-03    7.289729E-18    2.790111E-15
-       2        7.426537E-03    7.289729E-18    2.790111E-15
-       3        1.003673E-02    9.933627E-18    2.081643E-15
+       1        7.426537E-03    7.290182E-18    2.790285E-15
+       2        7.426537E-03    7.290182E-18    2.790285E-15
+       3        1.003673E-02    9.934200E-18    2.081763E-15
 
  Q point =    5.000000E-01   -2.500000E-01    2.500000E-01   isppol =    2
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-       1        8.098458E-03   -3.844949E-16   -1.237567E-13
-       2        9.400866E-03   -3.831730E-16   -9.152548E-14
-       3        9.400866E-03   -3.831730E-16   -9.152548E-14
+       1        8.098458E-03   -3.842764E-16   -1.236864E-13
+       2        9.400866E-03   -3.829544E-16   -9.147328E-14
+       3        9.400866E-03   -3.829544E-16   -9.147328E-14
 
  Q point =    5.000000E-01    5.000000E-01    5.000000E-01   isppol =    2
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-       1        7.830046E-03    7.783386E-18    2.679926E-15
-       2        7.830046E-03    7.783386E-18    2.679926E-15
-       3        1.138187E-02    3.751880E-19    6.113702E-17
+       1        7.830046E-03    7.783288E-18    2.679893E-15
+       2        7.830046E-03    7.783288E-18    2.679893E-15
+       3        1.138187E-02    3.750536E-19    6.111512E-17
 
 
  Warning : some of the following quantities should be integrated over spin
@@ -206,28 +206,28 @@
 
  Superconductivity : isotropic evaluation of parameters from electron-phonon coupling.
 
- mka2f: isotropic lambda for spin      1 =     4.868864E-13
- mka2f: lambda <omega^2> =     3.327593E-17
- mka2f: lambda <omega^3> =     2.841630E-19
- mka2f: lambda <omega^4> =     2.482055E-21
- mka2f: lambda <omega^5> =     2.216368E-23
- mka2f: omegalog for spin      1 =     8.103101E-03 (Ha)     2.558754E+03 (Kelvin)
+ mka2f: isotropic lambda for spin      1 =     4.869282E-13
+ mka2f: lambda <omega^2> =     3.327862E-17
+ mka2f: lambda <omega^3> =     2.841851E-19
+ mka2f: lambda <omega^4> =     2.482242E-21
+ mka2f: lambda <omega^5> =     2.216529E-23
+ mka2f: omegalog for spin      1 =     8.103082E-03 (Ha)     2.558748E+03 (Kelvin)
 
  Warning : some of the following quantities should be integrated over spin
 
 
  Superconductivity : isotropic evaluation of parameters from electron-phonon coupling.
 
- mka2f: isotropic lambda for spin      2 =     2.735799E-15
- mka2f: lambda <omega^2> =     1.782096E-19
- mka2f: lambda <omega^3> =     1.468398E-21
- mka2f: lambda <omega^4> =     1.229945E-23
- mka2f: lambda <omega^5> =     1.049035E-25
- mka2f: omegalog for spin      2 =     7.976320E-03 (Ha)     2.518719E+03 (Kelvin)
- mka2f: isotropic lambda =     4.896222E-13
- mka2f: omegalog  =     8.102387E-03 (Ha)     2.558528E+03 (Kelvin)
+ mka2f: isotropic lambda for spin      2 =     2.735865E-15
+ mka2f: lambda <omega^2> =     1.782138E-19
+ mka2f: lambda <omega^3> =     1.468432E-21
+ mka2f: lambda <omega^4> =     1.229973E-23
+ mka2f: lambda <omega^5> =     1.049058E-25
+ mka2f: omegalog for spin      2 =     7.976317E-03 (Ha)     2.518719E+03 (Kelvin)
+ mka2f: isotropic lambda =     4.896641E-13
+ mka2f: omegalog  =     8.102368E-03 (Ha)     2.558522E+03 (Kelvin)
  mka2f: input mustar =     1.360000E-01
--mka2f: MacMillan Tc =     1.414188E+01 (Ha)     4.465647E+06 (Kelvin)
+-mka2f: MacMillan Tc =     1.414185E+01 (Ha)     4.465637E+06 (Kelvin)
 
 ================================================================================
 
@@ -247,17 +247,17 @@
   Mode number    1   Energy    0.000000E+00
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  2.13355005E-06 -6.83158742E-06 -3.05729048E-03
+-  1  1.01145896E-06  2.91926778E-06  3.05729730E-03
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    2   Energy    0.000000E+00
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  1.25942396E-06  3.05729097E-03 -6.83070962E-06
+-  1  1.15447580E-06 -3.05729725E-03  2.91888580E-06
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    3   Energy    0.000000E+00
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  3.05729786E-03 -1.25465366E-06  2.13635874E-06
+-  1  3.05729848E-03  1.15350955E-06 -1.01256078E-06
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
 
  Analysis of degeneracies and characters (maximum tolerance=1.00E-06 a.u.)
@@ -266,13 +266,13 @@
  Symmetry characters of vibration mode #   1
        degenerate with vibration modes #   2 to    3
   3.0 -3.0 -1.0  1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0
- -0.0  0.0  0.0 -0.0 -0.0  0.0  0.0 -0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
- -0.0  0.0 -0.0  0.0 -0.0  0.0  0.0 -0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
+  0.0 -0.0 -0.0  0.0  0.0 -0.0 -0.0  0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
+  0.0 -0.0  0.0 -0.0 -0.0  0.0 -0.0  0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
 -
-- Proc.   0 individual time (sec): cpu=          0.1  wall=          0.2
+- Proc.   0 individual time (sec): cpu=          0.1  wall=          0.1
 
 ================================================================================
 
-+Total cpu time      0.130  and wall time      0.150 sec
++Total cpu time      0.114  and wall time      0.114 sec
 
  anaddb : the run completed succesfully.

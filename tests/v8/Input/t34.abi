@@ -24,7 +24,6 @@ ncell = 2 2 2
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = multibinit
-#%% exclude_builders = ubu_gnu_9.2_openmpi
 #%% system_xml = t98_model.xml
 #%% [files]
 #%% files_to_test = 

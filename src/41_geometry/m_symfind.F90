@@ -63,7 +63,7 @@ contains
 !! INPUTS
 !! chrgat(natom) (optional)=target charge for each atom. Not always used, it depends on the value of constraint_kind
 !! invardir_red (optional)=reduced coordinates of an invariant direction (only acting with symrel - not tnons)
-!! invar_z (optional)= if 1, the z direction must stay invariant for all symrel applied ; 
+!! invar_z (optional)= if 1, the z direction must stay invariant for all symrel applied ;
 !!                     if 2, z must stay invariant and also there cannot be any associated tnons along z.
 !! gprimd(3,3)=dimensional primitive translations for reciprocal space
 !! msym=default maximal number of symmetries
@@ -574,7 +574,7 @@ contains
            if( (diff(1)**2+diff(2)**2+diff(3)**2) > tolsym**2 )then
              found3=0
              cycle
-           endif  
+           endif
            ! Check the nucdipmom
            ! hand3 gives original circulation sense of nuclear dipole
            call acrossb(local_nucdipmom(1:3,2,iatom3),local_nucdipmom(1:3,3,iatom3),hand3)
@@ -694,7 +694,7 @@ end subroutine symfind
 !! symfind_expert
 !!
 !! FUNCTION
-!! Symmetry finder, with an added layer of robustness compared to symfind, 
+!! Symmetry finder, with an added layer of robustness compared to symfind,
 !! and for which resymmetrization of atomic positions and tnons is needed..
 !! From the symmetries of the Bravais lattice (ptsymrel),
 !! select those that leave invariant the system, and generate
@@ -762,9 +762,9 @@ end subroutine symfind
  integer :: ierr,isym,use_inversion
  character(len=1000) :: msg
 !arrays
- integer,allocatable :: indsym(:,:,:),symrec(:,:,:) 
+ integer,allocatable :: indsym(:,:,:),symrec(:,:,:)
  real(dp),allocatable :: tnons_new(:,:)
- 
+
 
 !**************************************************************************
 
@@ -1266,7 +1266,7 @@ subroutine symbrav(bravais,msym,nsym,ptgroup,rprimd,symrel,tolsym,axis)
        'iholohedry=',iholohedry
        ABI_BUG(msg)
      end if
-!    Try to increase tolsym to find the Bravais lattice. 
+!    Try to increase tolsym to find the Bravais lattice.
      maxsym=max(192,msym)
      ABI_MALLOC(ptsymrel,(3,3,maxsym))
 !DEBUG
@@ -1275,7 +1275,7 @@ subroutine symbrav(bravais,msym,nsym,ptgroup,rprimd,symrel,tolsym,axis)
      call symlatt(bravais,std_out,maxsym,nptsym,ptsymrel,rprimdtry,3*tolsym)
      ABI_FREE(ptsymrel)
      if(bravais(1)==iholohedry)then
-!      Succeeded  
+!      Succeeded
        exit
      else
        write(msg, '(3a,3i3,2a,i3,2a,i3)' )&
@@ -1401,7 +1401,7 @@ subroutine symbrav(bravais,msym,nsym,ptgroup,rprimd,symrel,tolsym,axis)
 !DEBUG
 !  write(6,*)' axis_trial =',axis_trial
 !  write(6,*)' axis_red =',axis_red
-!  write(6,*)' axis_cart =',axis_cart 
+!  write(6,*)' axis_cart =',axis_cart
 !  write(6,*)' rprimdnow=',rprimdnow
 !ENDDEBUG
 !  Expand by a uniform, quite arbitrary, dilatation, along the invariant axis

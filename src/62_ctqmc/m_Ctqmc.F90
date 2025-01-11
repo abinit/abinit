@@ -123,6 +123,8 @@ TYPE, PUBLIC :: Ctqmc
 
   INTEGER _PRIVATE :: flavors
 !
+  INTEGER _PRIVATE :: endDensity
+!
   INTEGER _PRIVATE :: nspinor
 !
   INTEGER _PRIVATE :: measurements
@@ -774,9 +776,11 @@ SUBROUTINE Ctqmc_allocateOpt(this)
 
   IF (this%opt_spectra .GE. 1 ) THEN
     FREEIF(this%density)
+    this%endDensity=-1
     !MALLOC(this%density,(1:this%thermalization,1:this%flavors))
     i = CEILING(DBLE(this%thermalization+this%sweeps)/DBLE(this%measurements*this%opt_spectra))
     MALLOC(this%density,(1:this%flavors+1,1:i))
+    this%endDensity=i
     this%density = 0.d0
   END IF
 !#endif
@@ -1572,7 +1576,10 @@ SUBROUTINE Ctqmc_loop(this,itotal,ilatex)
   MALLOC(gtmp_old2,(1,1))
   gtmp_old2 = 0.d0
 
-  endDensity = SIZE(this%density,2)
+!PROBLEM eos_gnu_13.2_openmpi . %endDensity was introduced throughout
+!  endDensity = SIZE(this%density,2)
+   endDensity=this%endDensity
+!ENDPROBLEM
 
   IF ( this%opt_noise .GT. 0 ) THEN
     FREEIF(gtmp_new)
@@ -2601,7 +2608,10 @@ include 'mpif.h'
   FREE(buffer)
 
   IF ( this%opt_spectra .GE. 1 ) THEN
-    endDensity = SIZE(this%density,2)
+!PROBLEM eos_gnu_13.2_openmpi . %endDensity was introduced throughout
+!   endDensity = SIZE(this%density,2)
+    endDensity=this%endDensity
+!ENDPROBLEM
     IF ( this%density(1,endDensity) .EQ. -1.d0 ) &
       endDensity = endDensity - 1
     CALL FFTHyb_init(FFTmrka,endDensity,DBLE(this%thermalization)/DBLE(this%measurements*this%opt_spectra))
@@ -2710,7 +2720,11 @@ include 'mpif.h'
     !==============================
     ! Print Susceptibilities
     !==============================
-    write(atomnb, '("0",i1)') Iatom
+    if(Iatom .lt. 10) then
+       write(atomnb, '("0",i1)') Iatom
+    else
+       write(atomnb, '(i2)') Iatom
+    end if
     !Local Magnetic Susceptibility
     if(this%opt_histo .gt. 1) then
       !Scalar
@@ -2721,6 +2735,8 @@ include 'mpif.h'
           this%suscep(:,n1)=this%suscep(:,n1)/float(this%size)/float(this%samples)
           write(735,'(1x,f14.8,2x,f12.8,2x,f12.8,2x,f12.8)') (n1-1)*this%beta/this%samples,(this%suscep(n2,n1),n2=1,3)
         enddo
+        !add tau=beta
+        write(735,'(1x,f14.8,2x,f12.8,2x,f12.8,2x,f12.8)') (this%samples)*this%beta/this%samples,(this%suscep(n2,1),n2=1,3) 
 
       else
         !SOC
@@ -2730,6 +2746,8 @@ include 'mpif.h'
           this%chi(:,n1)=this%chi(:,n1)/float(this%size)/float(this%samples)
           write(735,'(1x,f14.8,2x,f12.8,2x,f12.8,2x,f12.8)') (n1-1)*this%beta/this%samples,(this%chi(n2,n1),n2=1,3)
         enddo
+        !add tau=beta
+        write(735,'(1x,f14.8,2x,f12.8,2x,f12.8,2x,f12.8)') (this%samples)*this%beta/this%samples,(this%chi(n2,1),n2=1,3)
       endif
     close(unit=735)
     endif
@@ -2746,6 +2764,8 @@ include 'mpif.h'
         !write(735 '(1x,f14.8,2x,f14.8,2x,f14.8,2x,f14.8,2x,f14.8)') (n1-1)*this%beta/this%samples,(this%chicharge(n2,n1),n2=1,3),this%ntot(1)
         write(735, '(1x,f14.8,2x,f14.8,2x,f14.8)') (n1-1)*this%beta/this%samples,(this%chicharge(1,n1)),this%ntot(1)
       enddo
+      !add tau=beta
+      write(735, '(1x,f14.8,2x,f14.8,2x,f14.8)') (this%samples)*this%beta/this%samples,(this%chicharge(1,1)),this%ntot(1)
       close(unit=735)
     endif
  
@@ -3536,7 +3556,10 @@ SUBROUTINE Ctqmc_printSpectra(this, oFileIn)
   formatSpectra ='(1x,'//TRIM(ADJUSTL(a))//'ES22.14)'
   WRITE(oFile,*) "# freq[/hermalization] FFT"
 
-  endDensity = SIZE(this%density,2)
+!PROBLEM eos_gnu_13.2_openmpi . %endDensity was introduced throughout
+!  endDensity = SIZE(this%density,2)
+   endDensity=this%endDensity
+!ENDPROBLEM
   DO WHILE ( this%density(flavors+1,endDensity) .EQ. -1 )
     endDensity = endDensity -1
   END DO
@@ -3626,6 +3649,7 @@ SUBROUTINE Ctqmc_destroy(this)
     DT_FREE(this%measNoiseG)
   END IF
   FREEIF(this%density)
+  this%endDensity=-1
 !#endif
   this%ostream        = 0
   this%istream        = 0

@@ -54,7 +54,7 @@ class AbinitEnvironment(object):
         self.home_dir, tail = os.path.split(self.tests_dir)
 
         self.src_dir = os.path.join(self.home_dir, "src")
-        self.psps_dir = os.path.join(self.tests_dir, "Psps_for_tests")
+        self.psps_dir = os.path.join(self.tests_dir, "Pspdir")
         self.fldiff_path = os.path.join(self.tests_dir, "Scripts", "fldiff.pl")
 
     def __str__(self):
@@ -241,8 +241,7 @@ class Suite(object):
                 self.subsuites[k] = []
 
             for name in subsuite_names:
-                #pattern = re.compile("-?t" + name + "_\d+\.in")
-                pattern = re.compile("-?t" + name + "_\d+\.abi")
+                pattern = re.compile("-?t" + name + r"_\d+\.abi")
                 for inp in module.inp_files:
                     if pattern.match(inp):
                         #print(inp, "--> subsuite: ", name)
@@ -733,8 +732,8 @@ class AbinitTests(object):
 
         else:
             import re
-            re_slice = re.compile("^\[(\d*):(\d*)\]$")
-            re_single = re.compile("^\[(\d*)\]$")
+            re_slice = re.compile(r"^\[(\d*):(\d*)\]$")
+            re_single = re.compile(r"^\[(\d*)\]$")
 
             d = {}
             for arg in args:
@@ -1002,4 +1001,5 @@ KNOWN_KEYWORDS = {
     'magnetic_constraint': "Tests employing magnetic constraints",
     "FOLD2BLOCH": "Fold2Bloch tests.",
     "LWF": "Lattice Wannier function tests",
+    "MINIMAL": "Quick set of tests covering all abinit optdriver and executables",
 }

@@ -260,7 +260,7 @@ module m_dvdb
   ! Number of v1 potentials present in file.
 
   integer :: nqpt
-  ! Number of q-points
+  ! Number of q-points (usually the IBZ)
 
   integer :: natom
    ! Number of atoms
@@ -3337,7 +3337,7 @@ subroutine prepare_ftinterp(db, ngqpt, qptopt, nqshift, qshift, &
 !Local variables-------------------------------
 !scalars
  integer,parameter :: cutmode2 = 2
- integer :: iq_ibz,nqibz,iq_bz,nqbz,ii,iq_dvdb,qtimrev
+ integer :: iq_ibz,nqibz,iq_bz,nqbz,ii,iq_dvdb
  integer :: iqst,nqst,ix,iy,iz,nq1,nq2,nq3,r1,r2,r3, nrtot
  real(dp) :: r_inscribed_sphere
  logical :: found
@@ -3362,7 +3362,6 @@ subroutine prepare_ftinterp(db, ngqpt, qptopt, nqshift, qshift, &
  ABI_CHECK(nqshift == 1, "nshift > 1 not supported")
  ABI_CHECK(all(qshift(:, 1) == zero), "qshift != 0 not supported")
 
- qtimrev = kpts_timrev_from_kptopt(qptopt)
  call kpts_ibz_from_kptrlatt(cryst, qptrlatt, qptopt, nqshift, qshift, &
                              nqibz, qibz, wtq, nqbz, qbz) ! new_kptrlatt, new_shiftk)
 
@@ -3435,7 +3434,7 @@ subroutine prepare_ftinterp(db, ngqpt, qptopt, nqshift, qshift, &
  ABI_MALLOC(indqq, (6, nqbz))
  qrank = krank_from_kptrlatt(nqibz, qibz, qptrlatt, compute_invrank=.False.)
 
- if (kpts_map("symrec", qtimrev, cryst, qrank, nqbz, qbz, indqq) /= 0) then
+ if (kpts_map("symrec", qptopt, cryst, qrank, nqbz, qbz, indqq) /= 0) then
    ABI_BUG("Something wrong in the generation of the q-points in the BZ! Cannot map qBZ --> qIBZ")
  end if
 
@@ -3492,7 +3491,7 @@ subroutine prepare_ftinterp(db, ngqpt, qptopt, nqshift, qshift, &
  ! Redo the mapping with the new IBZ
  qrank = krank_from_kptrlatt(nqibz, qibz, qptrlatt, compute_invrank=.False.)
 
- if (kpts_map("symrec", qtimrev, cryst, qrank, nqbz, qbz, indqq) /= 0) then
+ if (kpts_map("symrec", qptopt, cryst, qrank, nqbz, qbz, indqq) /= 0) then
    ABI_BUG("Something wrong in the generation of the q-points in the BZ! Cannot map qBZ --> qIBZ")
  end if
  call qrank%free()
@@ -6850,7 +6849,7 @@ subroutine dvdb_interpolate_and_write(dvdb, dtset, new_dvdb_fname, ngfft, ngfftf
  integer :: cplex,db_iqpt,natom,natom3,npc,trev_q,nspden
  integer :: nqbz, nqibz, iq, ifft, nqbz_coarse
  integer :: nperts_read, nperts_interpolate, nperts
- integer :: nqpt_read, nqpt_interpolate, qptopt, qtimrev
+ integer :: nqpt_read, nqpt_interpolate, qptopt
  integer :: nfft,nfftf, dimv1
  integer :: ount, unt, fform
  integer :: ncid, ncerr
@@ -6884,7 +6883,6 @@ subroutine dvdb_interpolate_and_write(dvdb, dtset, new_dvdb_fname, ngfft, ngfftf
    qptrlatt = 0
    qptrlatt(1,1) = dtset%eph_ngqpt_fine(1); qptrlatt(2,2) = dtset%eph_ngqpt_fine(2); qptrlatt(3,3) = dtset%eph_ngqpt_fine(3)
    qptopt = 1; if (dtset%qptopt /= 0) qptopt = dtset%qptopt
-   qtimrev = kpts_timrev_from_kptopt(qptopt)
    call wrtout(std_out, sjoin(" Generating q-IBZ for DVDB with qptopt:", itoa(qptopt)))
    call kpts_ibz_from_kptrlatt(cryst, qptrlatt, qptopt, 1, [zero, zero, zero], nqibz, qibz, wtq, nqbz, qbz)
 

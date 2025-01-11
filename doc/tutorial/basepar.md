@@ -213,7 +213,7 @@ to a local temporary disk space named `/scratch/user`, then you might add to the
 Note that determining ahead of time the precise resources you will need for
 your run will save you a lot of time if you are using a batch queue system.
 
-Also, for parallel runs, note that the _log_ files **will not** be written exept the main log file.
+Also, for parallel runs, note that the _log_ files **will not** be written except the main log file.
 You can change this behaviour by creating a file named `_LOG` to enforce the creation of all log files
 
 ```bash

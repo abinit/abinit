@@ -1,6 +1,6 @@
 
-.Version 9.11.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Jul 2023.
-- ( at 12h09 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h15 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v9_t07-t08/t07.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v9_t07-t08/t07.abi
 - output file    -> t07.abo
 - root for input  files -> t07i
 - root for output files -> t07o
@@ -125,10 +125,10 @@ _ WF disk file :      2.063 Mbytes ; DEN or POT disk file :      0.091 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -136,7 +136,7 @@ _ WF disk file :      2.063 Mbytes ; DEN or POT disk file :      0.091 Mbytes.
               amu      6.97230000E+01  7.49215900E+01
            diemac      1.00000000E+01
              ecut      6.00000000E+00 Hartree
--          fftalg         312
+-          fftalg         512
            getden1          0
            getden2          1
            getden3          1
@@ -465,8 +465,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.18463
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Ga-low_r.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Ga-low_r.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Ga-low_r.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Ga-low_r.psp8
 - Ga    ONCVPSP-3.3.0  r_core=   1.85767   1.81388   2.62545
 - 31.00000   3.00000    170607                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -489,8 +489,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
   spin-orbit 2
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/As_r.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/As_r.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/As_r.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/As_r.psp8
 - As    ONCVPSP-3.3.0  r_core=   1.85233   1.80867   2.40819
 - 33.00000   5.00000    170607                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -533,7 +533,7 @@ tolerances: {tolwfr: 1.00E-12, }
  ETOT  4  -11.250579211526    -1.363E-06 6.892E-09 5.749E-04
  ETOT  5  -11.250579342469    -1.309E-07 5.498E-10 3.115E-06
  ETOT  6  -11.250579343470    -1.001E-09 1.675E-12 3.491E-08
- ETOT  7  -11.250579343476    -6.205E-12 9.109E-13 1.485E-09
+ ETOT  7  -11.250579343476    -6.208E-12 9.109E-13 1.485E-09
 
  At SCF step    7   max residual=  9.11E-13 < tolwfr=  1.00E-12 =>converged.
 
@@ -553,7 +553,7 @@ lattice_vectors:
 lattice_lengths: [   7.49533,    7.49533,    7.49533, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.9775400E+02
-convergence: {deltae: -6.205E-12, res2:  1.485E-09, residm:  9.109E-13, diffor: null, }
+convergence: {deltae: -6.208E-12, res2:  1.485E-09, residm:  9.109E-13, diffor: null, }
 etotal    :  -1.12505793E+01
 entropy   :   0.00000000E+00
 fermie    :   1.59156789E-01
@@ -566,9 +566,9 @@ xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00, Ga]
 - [  2.5000E-01,   2.5000E-01,   2.5000E-01, As]
 cartesian_forces: # hartree/bohr
-- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+- [ -1.33181281E-23,  -1.33181281E-23,   3.99543843E-23, ]
+- [  1.33181281E-23,   1.33181281E-23,  -3.99543843E-23, ]
+force_length_stats: {min:   4.41712338E-23, max:   4.41712338E-23, mean:   4.41712338E-23, }
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
@@ -576,10 +576,10 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
  Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1   2.00000     0.542320     0.542320      1.084640     0.000000
-    2   2.00000     1.237560     1.237560      2.475120    -0.000000
+    2   2.00000     1.237560     1.237560      2.475120     0.000000
  ---------------------------------------------------------------------
-  Sum:              1.779880     1.779880      3.559760    -0.000000
- Total magnetization (from the atomic spheres):            -0.000000
+  Sum:              1.779880     1.779880      3.559760     0.000000
+ Total magnetization (from the atomic spheres):             0.000000
  Total magnetization (exact up - dn):                       0.000000
 ================================================================================
 
@@ -589,8 +589,8 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
- rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
-    1       0.000000000000      0.000000000000      0.000000000000
+ rms dE/dt=  1.9965E-22; max dE/dt=  2.8234E-22; dE/dt below (all hartree)
+    1      -0.000000000000     -0.000000000000      0.000000000000
     2       0.000000000000      0.000000000000      0.000000000000
 
  cartesian coordinates (angstrom) at end:
@@ -598,14 +598,14 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     2      1.40231960276350     1.40231960276350     1.40231960276350
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.00000000000000    -0.00000000000000    -0.00000000000000
-    2     -0.00000000000000    -0.00000000000000    -0.00000000000000
- frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 h/b
+    1     -0.00000000000000    -0.00000000000000     0.00000000000000
+    2      0.00000000000000     0.00000000000000    -0.00000000000000
+ frms,max,avg= 2.5502274E-23 3.9954384E-23   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.00000000000000    -0.00000000000000    -0.00000000000000
-    2     -0.00000000000000    -0.00000000000000    -0.00000000000000
- frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
+    1     -0.00000000000000    -0.00000000000000     0.00000000000000
+    2      0.00000000000000     0.00000000000000    -0.00000000000000
+ frms,max,avg= 1.3113795E-21 2.0545369E-21   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.600000000000 10.600000000000 10.600000000000 bohr
               =  5.609278411054  5.609278411054  5.609278411054 angstroms
  prteigrs : about to open file t07o_DS1_EIG
@@ -625,15 +625,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  3.12668139318270E+00
-hartree             :  7.54378341044608E-01
-xc                  : -5.46795341841534E+00
+hartree             :  7.54378341044609E-01
+xc                  : -5.46795341841533E+00
 Ewald energy        : -8.48789573682593E+00
 psp_core            :  1.08742128495567E-01
-local_psp           : -2.97008596022434E+00
+local_psp           : -2.97008596022435E+00
 non_local_psp       :  1.68555390926641E+00
 total_energy        : -1.12505793434763E+01
 total_energy_eV     : -3.06143833162721E+02
-band_energy         : -7.89972068554908E-02
+band_energy         : -7.89972068554900E-02
 ...
 
 
@@ -738,10 +738,10 @@ force_length_stats: {min: null, max: null, mean: null, }
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
  Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1   2.00000     0.542320     0.542320      1.084640     0.000000
-    2   2.00000     1.237560     1.237560      2.475120    -0.000000
+    2   2.00000     1.237560     1.237560      2.475120     0.000000
  ---------------------------------------------------------------------
-  Sum:              1.779880     1.779880      3.559760    -0.000000
- Total magnetization (from the atomic spheres):            -0.000000
+  Sum:              1.779880     1.779880      3.559760     0.000000
+ Total magnetization (from the atomic spheres):             0.000000
  Total magnetization (exact up - dn):                       0.000000
 ================================================================================
 
@@ -864,10 +864,10 @@ force_length_stats: {min: null, max: null, mean: null, }
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
  Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1   2.00000     0.542320     0.542320      1.084640     0.000000
-    2   2.00000     1.237560     1.237560      2.475120    -0.000000
+    2   2.00000     1.237560     1.237560      2.475120     0.000000
  ---------------------------------------------------------------------
-  Sum:              1.779880     1.779880      3.559760    -0.000000
- Total magnetization (from the atomic spheres):            -0.000000
+  Sum:              1.779880     1.779880      3.559760     0.000000
+ Total magnetization (from the atomic spheres):             0.000000
  Total magnetization (exact up - dn):                       0.000000
 ================================================================================
 
@@ -1286,9 +1286,9 @@ tolerances: {tolwfr: 1.00E-08, }
            etotal4    -1.0595099962E+01
            etotal5    -1.0594983198E+01
            etotal6    -1.0595090106E+01
-            fcart1    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
--          fftalg         312
+            fcart1    -1.3318128101E-23 -1.3318128101E-23  3.9954384304E-23
+                       1.3318128101E-23  1.3318128101E-23 -3.9954384304E-23
+-          fftalg         512
            getden1          0
            getden2          1
            getden3          1
@@ -1636,10 +1636,10 @@ P          mk1mem6         16
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          5.2  wall=          5.4
+- Proc.   0 individual time (sec): cpu=          2.6  wall=          2.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered  28 WARNINGs and  13 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          5.2  wall=          5.4
++Overall time at end (sec) : cpu=          2.6  wall=          2.7

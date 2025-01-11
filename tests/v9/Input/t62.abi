@@ -50,20 +50,20 @@
  getwfk     1
  nqpt       1
 
- rfphon     1 
+ rfphon     1
 
  rfdir3 1 0 0
- rfdir4 1 0 0 
+ rfdir4 1 0 0
  rfdir5 0 1 0
  rfdir6 1 0 0
- 
+
  # 2x2x2 Q-mesh
  qpt3 0.00000000E+00  0.00000000E+00  0.00000000E+00
  qpt4 5.00000000E-01  0.00000000E+00  0.00000000E+00
  qpt5 5.00000000E-01  0.00000000E+00  0.00000000E+00
  qpt6 5.00000000E-01  5.00000000E-01  0.00000000E+00
 #############################################
-# Dataset 7: 
+# Dataset 7:
 # Use GS WFK file on (4,4,4) k-mesh to interpolate band energies on a 16x16x16 k-mesh (sigma_ngkpt)
 # with star-functions.
 #############################################
@@ -79,14 +79,14 @@
  sigma_erange7 -0.2 -0.2 eV   # Select kpts in fine mesh within this energy window.
 
  # Cancel default values
- nqpt7     0 
- rfphon7   0 
+ nqpt7     0
+ rfphon7   0
  kptopt7   1
  #nband7   7
 
 
 ##############################################
-####                  STRUCTURE                  
+####                  STRUCTURE
 ##############################################
  natom 1
  ntypat 1
@@ -105,20 +105,21 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = eos_nvhpc_*
 #%% test_chain = t62.abi, t63.abi, t64.abi, t65.abi
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t62.abo, tolnlines = 180, tolabs = 1.1e-3, tolrel = 1.1;
-#%%   t62o_DS7_KERANGE, tolnlines = 0, tolabs = 1.1e-6, tolrel = 1.0e-4
+#%%   t62o_DS7_KERANGE, tolnlines = 0, tolabs = 0.0e+00, tolrel = 0.0e+00
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [shell]
-#%% post_commands = 
+#%% post_commands =
 #%%  ww_cp t62o_DS2_WFK t65o_DS20_WFK;
 #%%  ww_cp t62o_DS1_DEN t65o_DS20_DEN;
 #%% [extra_info]
 #%% authors = O. Nadeau
 #%% keywords = NC, DFPT, EPH
-#%% description = 
+#%% description =
 #%%   Calculation of the Fan-Migdal + Debye-Waller self-energy matrix elements.
 #%%<END TEST_INFO>

@@ -34,7 +34,7 @@
 
 # Pseudo:
  pp_dirpath "$ABI_PSPDIR"
- pseudos "Pseudodojo_paw_pw_standard/Bi.xml"
+ pseudos "Psdj_paw_pw_std/Bi.xml"
 
 ##############################################################
 # This section is used only for regression testing of ABINIT #

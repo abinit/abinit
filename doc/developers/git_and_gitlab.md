@@ -10,7 +10,7 @@ If you are not familiar with *git*, we would strongly advise to watch this tutor
 
 <iframe width="1384" height="629" src="https://www.youtube.com/embed/HVsySz-h9r4" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
-For further information about *git*, please consult 
+For further information about *git*, please consult
 the [official documentation](https://git-scm.com/).
 
 !!! tip
@@ -24,9 +24,9 @@ the [official documentation](https://git-scm.com/).
 In the next sections, we explain how to configure *git* to interoperate with
 our [ABINIT gitlab server](https://gitlab.abinit.org/).
 It is assumed you already have an account on our **internal gitlab server**.
-Note that having an account on gitlab.com or github.com is not enough since we run our own server 
+Note that having an account on gitlab.com or github.com is not enough since we run our own server
 (you need to contact Jean-Michel Beuken to have an account created for you).
-    
+
 
 ## Initial configuration
 
@@ -263,26 +263,24 @@ of the trunk, you should first register *git@gitlab.abinit.org:trunk/abinit.git*
 
     git remote add trunk gitlab:trunk/abinit.git
 
-At this point, one can fetch the branches in trunk with:
+At this point, one can fetch the branches (also the tags) in trunk with:
 
-    git fetch trunk
+    git fetch --tags trunk develop
 
 then, if the develop branch is to be updated, supposing it is checked out,
-To merge *trunk/develop* in your develop branch:
+to merge *trunk/develop* in your develop branch:
 
     git checkout develop
     git merge trunk develop
+    git pull -t trunk develop
+    git push --tags
 
-You can combine the last two commands in one as:
+If, on the contrary, a new branch (e.g. a release branch, let's says 10.2.3 to fix the ideas) has to be created:
 
-    git pull trunk develop
-
-If, on the contrary, a new branch (e.g. a release branch, let's says 8.8 to fix the ideas) has to be created:
-
-    git branch release-8.8 start-8.8.1    # this creates the branch release-8.8 from the start-8.8.1 tag
-    git checkout release-8.8
-    git merge remotes/trunk/release-8.8
-    git push -u origin release-8.8
+    git branch release-10.2 10.2.3   # this creates the branch release-10.2 from the 10.2.3 tag
+    git checkout release-10.2
+    git merge remotes/trunk/release-10.2
+    git push -u origin release-10.2
 
 That's it! You can now make modifications in your release-8.8, then issue a merge request to the trunk/release-8.8.
 

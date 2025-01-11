@@ -1,6 +1,6 @@
 
-.Version 9.11.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Jul 2023.
-- ( at 11h58 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h07 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v1_t34/t34.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v1_t34/t34.abi
 - output file    -> t34.abo
 - root for input  files -> t34i
 - root for output files -> t34o
@@ -58,10 +58,10 @@ _ WF disk file :      0.018 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -70,7 +70,7 @@ _ WF disk file :      0.018 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
            diemac      1.00000000E+00
              ecut      5.00000000E+00 Hartree
            enunit           2
--          fftalg         312
+-          fftalg         512
               ixc           3
               kpt      2.50000000E-01  2.50000000E-01  2.50000000E-01
            kptopt           0
@@ -137,8 +137,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/82pb.960808c_mod
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/82pb.960808c_mod
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/82pb.960808c_mod
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/82pb.960808c_mod
 - (Xe+4f14)+6s1.8 5d10 6p0.2 5f0.05;rcs=rcd=2.0(exnc11),rcp=2.0(26),rcf=1.3(11) no chem-hard; ecut 19/25
 - 82.00000  14.00000    960808                znucl, zion, pspdat
     4    3    3    3      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -258,7 +258,7 @@ tolerances: {tolwfr: 1.00E-16, }
   -5.95642   -1.59670   -1.59669   -1.51240   -0.81665   -0.81664    7.08934    8.06670
    8.06670
 
- ETOT  7  -50.487155084540    -1.108E-11 1.168E-13 4.212E-10
+ ETOT  7  -50.487155084540    -1.110E-11 1.168E-13 4.212E-10
 
  prteigrs : about to open file t34o_EIG
  Fermi (or HOMO) energy (hartree) =   0.29644   Average Vxc (hartree)=  -0.37160
@@ -272,7 +272,7 @@ tolerances: {tolwfr: 1.00E-16, }
   -5.95662   -1.59691   -1.59690   -1.51260   -0.81685   -0.81685    7.08914    8.06650
    8.06650
 
- ETOT  8  -50.487155084541    -8.811E-13 1.483E-14 5.505E-13
+ ETOT  8  -50.487155084541    -9.024E-13 1.483E-14 5.505E-13
 
  prteigrs : about to open file t34o_EIG
  Fermi (or HOMO) energy (hartree) =   0.29644   Average Vxc (hartree)=  -0.37160
@@ -385,15 +385,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  2.02944921657867E+01
-hartree             :  7.56026730951488E+00
-xc                  : -6.47997702687596E+00
+hartree             :  7.56026730951487E+00
+xc                  : -6.47997702687597E+00
 Ewald energy        : -4.63425254981845E+01
 psp_core            :  1.74864702135053E+00
 local_psp           : -2.97983683732133E+01
 non_local_psp       :  2.53030931708068E+00
 total_energy        : -5.04871550845410E+01
 total_energy_eV     : -1.37382535700480E+03
-band_energy         : -3.34856735816377E-01
+band_energy         : -3.34856735816371E-01
 ...
 
 
@@ -403,9 +403,9 @@ band_energy         : -3.34856735816377E-01
  nonlocal contribution to red. grads
     1       0.000000000000      0.000000000000      0.000000000000
  local psp contribution to red. grads
-    1      -0.000000000000     -0.000000000000      0.000000000000
+    1      -0.000000000000      0.000000000000     -0.000000000000
  residual contribution to red. grads
-    1       0.000000000000      0.000000000000     -0.000000000000
+    1       0.000000000000     -0.000000000000      0.000000000000
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  3.30715671E-02  sigma(3 2)=  0.00000000E+00
@@ -428,7 +428,7 @@ band_energy         : -3.34856735816377E-01
            enunit           2
            etotal     -5.0487155085E+01
             fcart     -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
--          fftalg         312
+-          fftalg         512
               ixc           3
               kpt      2.50000000E-01  2.50000000E-01  2.50000000E-01
            kptopt           0
@@ -553,10 +553,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          0.5  wall=          0.5
+- Proc.   0 individual time (sec): cpu=          0.4  wall=          0.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered   9 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          0.5  wall=          0.5
++Overall time at end (sec) : cpu=          0.4  wall=          0.5

@@ -25,6 +25,7 @@ AC_DEFUN([SD_TRIQS_INIT], [
   sd_triqs_init="unknown"
   sd_triqs_ok="unknown"
   sd_triqs_api_version="unknown"
+  sd_triqs_complex="unknown"
 
   # Set adjustable parameters
   sd_triqs_options="$1"
@@ -57,10 +58,13 @@ AC_DEFUN([SD_TRIQS_INIT], [
   done
 
   # Set reasonable defaults if not provided
-  test -z "${sd_triqs_libs_def}" && sd_triqs_libs_def="-ltriqs -lcthyb_c"
+  test -z "${sd_triqs_libs_def}" && sd_triqs_libs_def="-lcppdlr_c -lh5_c -lnda_c -ltriqs -ltriqs_cthyb_c"
   test -z "${sd_triqs_policy}" && sd_triqs_policy="fail"
   test -z "${sd_triqs_status}" && sd_triqs_status="optional"
   test -z "${sd_triqs_enable_def}" && sd_triqs_enable_def="no"
+  test -z "${sd_triqs_cxxflags_def}" && sd_triqs_cxxflags_def="-std=c++20"
+  test -z "${sd_triqs_fcflags_def}" && sd_triqs_fcflags_def="-lstdc++"
+
   case "${sd_triqs_status}" in
     implicit|required)
       sd_triqs_enable_def="yes"
@@ -68,7 +72,7 @@ AC_DEFUN([SD_TRIQS_INIT], [
   esac
 
   # Declare configure option
-  # TODO: make it switchable for the implicit case 
+  # TODO: make it switchable for the implicit case
   AC_ARG_WITH([triqs],
     [AS_HELP_STRING([--with-triqs],
       [Install prefix of the TRIQS library (e.g. /usr/local).])],
@@ -135,6 +139,7 @@ AC_DEFUN([SD_TRIQS_INIT], [
         test ! -z "${TRIQS_CPPFLAGS}" && sd_triqs_cppflags="${TRIQS_CPPFLAGS}"
         test ! -z "${TRIQS_CFLAGS}" && sd_triqs_cflags="${TRIQS_CFLAGS}"
         test ! -z "${TRIQS_CXXFLAGS}" && sd_triqs_cxxflags="${TRIQS_CXXFLAGS}"
+        test ! -z "${TRIQS_FFLAGS}" && sd_triqs_fcflags="${TRIQS_FFLAGS}"
         test ! -z "${TRIQS_FCFLAGS}" && sd_triqs_fcflags="${TRIQS_FCFLAGS}"
         test ! -z "${TRIQS_LDFLAGS}" && sd_triqs_ldflags="${TRIQS_LDFLAGS}"
         test ! -z "${TRIQS_LIBS}" && sd_triqs_libs="${TRIQS_LIBS}"
@@ -199,12 +204,22 @@ AC_DEFUN([SD_TRIQS_DETECT], [
           ;;
         2.0)
           AC_DEFINE([HAVE_TRIQS_v2_0], 1,
-            [Define to 1 if you have the TRIQS 1.4 libraries.])
+            [Define to 1 if you have the TRIQS 2.0 libraries.])
+          ;;
+        3.4)
+          AC_DEFINE([HAVE_TRIQS_v3_4], 1,
+            [Define to 1 if you have the TRIQS 3.4 libraries.])
           ;;
         *)
           AC_MSG_ERROR([TRIQS API version ${sd_triqs_api_version} not implemented in the build system])
           ;;
       esac
+
+      if test "${sd_triqs_complex}" = "yes"; then
+        AC_DEFINE([HAVE_TRIQS_COMPLEX], 1,
+          [Define to 1 if you have the complex TRIQS version.])
+      fi
+
     else
       if test "${sd_triqs_status}" = "optional" -a \
               "${sd_triqs_init}" = "def"; then
@@ -252,20 +267,55 @@ AC_DEFUN([_SD_TRIQS_CHECK_USE], [
   AC_LANG_PUSH([C++])
   AC_LINK_IFELSE([AC_LANG_PROGRAM(
     [[
-#     include <solver_core.hpp>
-#     include <triqs/h5.hpp>
-      using namespace std;
-      using namespace triqs_cthyb;
+#     include <triqs_cthyb/solver_core.hpp>
+      using triqs::hilbert_space::gf_struct_t;
     ]],
     [[
-      std::vector<std::pair<std::string, indices_type>> gf_struct;
-    ]])], [sd_triqs_ok="yes"; sd_triqs_api_version="2.0"], [sd_triqs_ok="no"])
+      gf_struct_t gf_struct;
+      triqs_cthyb::solver_core solver({1.,gf_struct,1,1,1,1,true});
+    ]])], [sd_triqs_ok="yes"; sd_triqs_api_version="3.4"], [sd_triqs_ok="no"])
   AC_LANG_POP([C++])
   AC_MSG_RESULT([${sd_triqs_ok}])
+
+  # Check if we have the complex version
+  if test "${sd_triqs_ok}" = "yes"; then
+    AC_MSG_CHECKING([whether the TRIQS library supports complex Hamiltonian])
+    AC_LANG_PUSH([C++])
+    AC_LINK_IFELSE([AC_LANG_PROGRAM(
+      [[
+#       include <triqs_cthyb/solver_core.hpp>
+#       include <complex>
+        using namespace triqs_cthyb;
+      ]],
+      [[
+        many_body_op_t H;
+        H += 1i;
+      ]])], [sd_triqs_complex="yes"], [sd_triqs_complex="no"])
+    AC_LANG_POP([C++])
+    AC_MSG_RESULT([${sd_triqs_complex}])
+  fi
 
   # Check old TRIQS C++ API
   if test "${sd_triqs_ok}" != "yes"; then
     AC_MSG_CHECKING([whether the TRIQS library has an old API])
+    AC_LANG_PUSH([C++])
+    AC_LINK_IFELSE([AC_LANG_PROGRAM(
+      [[
+#       include <solver_core.hpp>
+#       include <triqs/h5.hpp>
+        using namespace std;
+        using namespace triqs_cthyb;
+      ]],
+      [[
+        std::vector<std::pair<std::string, indices_type>> gf_struct;
+      ]])], [sd_triqs_ok="yes"; sd_triqs_api_version="2.0"], [sd_triqs_ok="no"])
+    AC_LANG_POP([C++])
+    AC_MSG_RESULT([${sd_triqs_ok}])
+  fi
+
+  # Check even older TRIQS C++ API
+  if test "${sd_triqs_ok}" != "yes"; then
+    AC_MSG_CHECKING([whether the TRIQS library has an even older API])
     AC_LANG_PUSH([C++])
     AC_LINK_IFELSE([AC_LANG_PROGRAM(
       [[

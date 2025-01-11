@@ -9,7 +9,6 @@ nsppol 1  nspden 1  nspinor 2
 
 # === Structure and cell
 natom 4 ntypat 2 typat 1 1 2 2
-spinat 0 0 1   0 0 -1   0 0 0   0 0 0
 znucl  28.0 8.0
 xred 0 0 0.1 # to test non-zero forces
     0.0 0.0 0.5

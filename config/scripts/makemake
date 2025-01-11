@@ -96,9 +96,8 @@ def run_script(name, title, cmdline, stop_on_error=True,
 
                     # ------------------------------------ #
 
-# Translate version strings into usable numbers
 def translate_version(name, version_string):
-
+  """Translate version strings into usable numbers"""
   # Init
   ret = version_string
   ret = ret.split(".")
@@ -201,6 +200,10 @@ if ( not os.path.exists(my_configs["fbks"]) ):
 from optparse import OptionParser
 my_help = "Usage: %prog [options] vdW-DF_file"
 parser = OptionParser(usage=my_help, version="%prog for Abinit 9")
+
+parser.add_option("--without-chmod", action="store_false",
+  dest="run_chmod", default=True,
+  help="Skip chmod operations")
 parser.add_option("-a", "--without-autotools", action="store_false",
   dest="run_autotools", default=True,
   help="Skip Autotools-related operations")
@@ -243,8 +246,9 @@ print_message(my_name, "-------------------------------------")
 
 # Make sure the directory tree is writable
 print_header(my_name, "Source tree consistency")
-run_script(my_name, "Enabling write permission for all dirs & files",
-  "chmod -R u+w .")
+if opts.run_chmod:
+    run_script(my_name, "Enabling write permission for all dirs & files",
+      "chmod -R u+w .")
 
 # Special case: clean-up
 if ( opts.run_clean ):
@@ -453,19 +457,36 @@ if ( lt_ret == 0 ):
 else:
   lt_version = 0
 
-if ( m4_version < 10408 ):
+if  m4_version == 0:
+  sys.stderr.write("[%s] Error: M4 is not installed (%d) - " % \
+    (my_name, m4_version) + \
+    "please install v1.4.8 or above\n%s: Aborting now\n" % (my_name))
+  sys.exit(10)
+
+if  m4_version < 10408:
   sys.stderr.write("[%s] Error: M4 is too old (%d) - " % \
     (my_name, m4_version) + \
     "please install v1.4.8 or above\n%s: Aborting now\n" % (my_name))
   sys.exit(10)
 
-if ( ac_version < 26100 ):
+if ac_version == 0:
+  sys.stderr.write("[%s] Error: Autoconf is not installed (%d) - " % \
+    (my_name, ac_version) + \
+    "please install v2.61 or above\n%s: Aborting now\n" % (my_name))
+
+if ac_version < 26100:
   sys.stderr.write("[%s] Error: Autoconf is too old (%d) - " % \
     (my_name, ac_version) + \
     "please install v2.61 or above\n%s: Aborting now\n" % (my_name))
   sys.exit(20)
 
-if ( am_version < 11000 ):
+if am_version == 0:
+  sys.stderr.write("[%s] Error: Automake is not installed (%d) - " % \
+    (my_name, am_version) + \
+    "please install v1.10 or above\n%s: Aborting now\n" % (my_name))
+  sys.exit(30)
+
+if am_version < 11000:
   sys.stderr.write("[%s] Error: Automake is too old (%d) - " % \
     (my_name, am_version) + \
     "please install v1.10 or above\n%s: Aborting now\n" % (my_name))
