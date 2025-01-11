@@ -1426,36 +1426,41 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
 !     endif
  !end do ! ifreq
  !call xmpi_barrier(spacecomm)
- call gather_oper_ks(green%occup,green%distrib,paw_dmft,opt_diag=diag)
 ! write(std_out,*) 'afterxsum sym     %matlu(1)%mat(2,5,1,1,1) 1',green%oper(1)%matlu(1)%mat(2,5,1,1,1)
 
  if (green%w_type /= "real") then
+        
+   if (green%distrib%me_freq == 0) then
 
-   do isppol=1,nsppol
-     do ikpt=1,mkmem
-       do ib=1,mbandc
-         green%occup%ks(ib,ib,ikpt+shift,isppol) = green%occup%ks(ib,ib,ikpt+shift,isppol) + omega_fac(1)
-       end do ! ib
-     end do ! ikpt
-   end do ! isppol
-
-   do i=2,nmoments
      do isppol=1,nsppol
        do ikpt=1,mkmem
-         do ib1=1,mbandc
-           if (diag == 1) then
-             green%occup%ks(ib1,ib1,ikpt+shift,isppol) = green%occup%ks(ib1,ib1,ikpt+shift,isppol) + &
-               & omega_fac(i)*green%moments(i)%ks(ib1,ib1,ikpt,isppol)
-           else
-             do ib=1,mbandc
-               green%occup%ks(ib,ib1,ikpt+shift,isppol) = green%occup%ks(ib,ib1,ikpt+shift,isppol) + &
-                  & omega_fac(i)*green%moments(i)%ks(ib,ib1,ikpt,isppol)
-             end do ! ib
-           end if ! diag
-         end do ! ib1
+         do ib=1,mbandc
+           green%occup%ks(ib,ib,ikpt+shift,isppol) = green%occup%ks(ib,ib,ikpt+shift,isppol) + omega_fac(1)
+         end do ! ib
        end do ! ikpt
      end do ! isppol
-   end do ! i
+
+     do i=2,nmoments
+       do isppol=1,nsppol
+         do ikpt=1,mkmem
+           do ib1=1,mbandc
+             if (diag == 1) then
+               green%occup%ks(ib1,ib1,ikpt+shift,isppol) = green%occup%ks(ib1,ib1,ikpt+shift,isppol) + &
+                 & omega_fac(i)*green%moments(i)%ks(ib1,ib1,ikpt,isppol)
+             else
+               do ib=1,mbandc
+                 green%occup%ks(ib,ib1,ikpt+shift,isppol) = green%occup%ks(ib,ib1,ikpt+shift,isppol) + &
+                    & omega_fac(i)*green%moments(i)%ks(ib,ib1,ikpt,isppol)
+               end do ! ib
+             end if ! diag
+           end do ! ib1
+         end do ! ikpt
+       end do ! isppol
+     end do ! i
+
+   end if ! me_freq = 0 
+
+   call gather_oper_ks(green%occup,green%distrib,paw_dmft,opt_diag=diag)
 
  end if ! w_type/="real"
 
@@ -1535,11 +1540,10 @@ subroutine integrate_green(green,paw_dmft,prtopt,opt_ksloc,opt_after_solver,opt_
  integer, intent(in) :: prtopt
  integer, optional, intent(in) :: opt_after_solver,opt_diff,opt_fill_occnd,opt_ksloc,opt_self
 !Local variables-------------------------------
- integer :: band_index,i,iatom,ib,ib1,icomp_chloc,ifreq,ikpt,im,isppol
- integer :: lpawu,mbandc,myproc,natom,nband_k,ndim,nkpt,nmoments,nspinor
+ integer :: band_index,i,iatom,ib,ib1,icomp_chloc,ifreq,ikpt,isppol
+ integer :: lpawu,mbandc,myproc,natom,nband_k,nkpt,nmoments,nspinor
  integer :: nsppol,optaftsolv,optdiff,optfilloccnd,option,optksloc,optself
  real(dp) :: correction,diff_chloc,fac,temp
- complex(dpc) :: omega
  character(len=12) :: tag
  character(len=500) :: message
  real(dp) :: tsec(2)
