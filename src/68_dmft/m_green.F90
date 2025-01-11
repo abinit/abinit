@@ -1706,7 +1706,7 @@ subroutine integrate_green(green,paw_dmft,prtopt,opt_ksloc,opt_after_solver,opt_
      else
        ABI_MALLOC(shift,(natom))
        shift(:) = omega_fac(1)
-       call shift_matlu(green%occup%matlu(:),natom,shift(:))
+       call shift_matlu(green%occup%matlu(:),natom,shift(:),signe=-1)
        ABI_FREE(shift)
      end if
 
