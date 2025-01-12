@@ -291,7 +291,7 @@ type, public :: gqk_t
   ! (my_npert, nb, my_nq, nb, my_nk)
   ! |g|^2 (local buffer). Allocated if cplex == 1
 
-  integer :: coords_qkpb_sumbp(ndims)
+  integer :: coords_qkpb_sumbp(ndims) = 0
   ! Coordinates of this processor in the (q, k, pert, band, band_sum, pp_sum) Cartesian grid.
 
   type(xcomm_t) :: kpt_comm
@@ -1344,6 +1344,7 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, nproc_spin, comm_spin)
 
    ! Note comm_spin(spin)
    gqk%comm = xcomm_from_mpi_int(comm_spin(spin))
+   gqk%coords_qkpb_sumbp = 0
 
 #ifdef HAVE_MPI
    call MPI_CART_CREATE(gqk%comm, ndims, dims, periods, reorder, comm_cart, ierr)

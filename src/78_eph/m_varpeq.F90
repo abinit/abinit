@@ -1489,8 +1489,8 @@ subroutine varpeq_init(self, gstore, dtset)
    ABI_MALLOC(polstate%enterms, (4, dtset%varpeq_nstates))
 
    ABI_MALLOC(polstate%eig, (gqk%nb, gstore%ebands%nkpt))
-   msg = sjoin(self%gaps%errmsg_spin(spin), ". VarPEq is incompatible with &
-     metals and needs CBM/VBM for electron/hole polaron calculations.")
+   msg = sjoin(self%gaps%errmsg_spin(spin), &
+     ". VarPEq is incompatible with metals and needs CBM/VBM for electron/hole polaron calculations.")
    ABI_CHECK(self%gaps%ierr(spin) == 0, msg)
 
    bstart = gstore%brange_spin(1, spin)
