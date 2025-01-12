@@ -3727,7 +3727,10 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
      ABI_FREE(vlocal1)
 
      ! Dump buffer
-     if (iqbuf_cnt == qbuf_size) call dump_my_gbuf()
+     if (iqbuf_cnt == qbuf_size) then
+       !call dump_my_gbuf()
+       call new_dump_my_gbuf(gqk, spin, iq_buf, iqbuf_cnt, my_gbuf, root_ncid, spin_ncid)
+     end if
 
      if (print_time) then
        write(msg,'(2(a,i0),a)')" My q-point [", my_iq, "/", gqk%my_nq, "]"
@@ -3736,7 +3739,10 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
    end do ! my_iq
 
    ! Dump the remainder.
-   if (iqbuf_cnt /= 0) call dump_my_gbuf()
+   if (iqbuf_cnt /= 0) then
+     !call dump_my_gbuf()
+     call new_dump_my_gbuf(gqk, spin, iq_buf, iqbuf_cnt, my_gbuf, root_ncid, spin_ncid)
+   end if
 
    ABI_FREE(iq_buf)
    ABI_FREE(my_gbuf)
@@ -3851,6 +3857,76 @@ end function spin_vid
 
 end subroutine gstore_compute
 !!***
+
+subroutine new_dump_my_gbuf(gqk, spin, iq_buf, iqbuf_cnt, my_gbuf, root_ncid, spin_ncid)
+
+ type(gqk_t),intent(in) :: gqk
+ integer,intent(inout) :: iqbuf_cnt
+ integer,intent(in) :: spin, root_ncid, spin_ncid
+ integer,intent(in) :: iq_buf(:,:)
+ real(dp),intent(in) :: my_gbuf(:,:,:,:,:,:)
+
+ ! This function is called inside the double loop over (my_is, my_iq) or when we exit
+ ! from the my_iq loop to dump the remainder that is still in the q-buffer,
+ ! All the MPI procs in the (kpt_comm x pert_comm) grid shall call this contained routine
+ ! as we have side-effects i.e. iqbuf_cnt set to 0.
+
+ ! On disk we have the global arrays:
+ !
+ !      nctkarr_t("gvals", "dp", "gstore_cplex, nb, nb, natom3, glob_nk, glob_nq")
+ !
+ ! while the local MPI buffers are dimensioned as follows:
+ !
+ !      my_gbuf(2, nb, nb, natom3, gqk%my_nk, qbuf_size)
+
+ ! If parallelism over pertubation is activated, only the procs treating the first perturbation
+ ! i.e. the procs treating different k-points for this q are involved in IO
+ ! as all the local buffers store results for all natom3 pertubations.
+
+ integer :: ii, iq_bz, iq_glob, my_iq, ncerr
+
+ if (gqk%coords_qkpb_sumbp(3) /= 0) goto 10 ! Yes, I'm very proud of this GOTO.
+
+ !iq_buf(:, iqbuf_cnt) = [my_iq, iq_bz]
+ my_iq = iq_buf(1, 1)
+ iq_glob = my_iq + gqk%my_qstart - 1
+
+ !print *, "in dump_my_gbuf with start: ", [1, 1, 1, 1, gqk%my_kstart, iq_glob]
+ !print *, "                  count; ", [gqk%cplex, gqk%nb, gqk%nb, gqk%natom3, gqk%my_nk, iqbuf_cnt]
+
+ ! NB: this is an individual IO operation
+ ncerr = nf90_put_var(spin_ncid, spin_vid("gvals"), my_gbuf, &
+                      start=[1, 1, 1, 1, gqk%my_kstart, iq_glob], &
+                      count=[gqk%cplex, gqk%nb, gqk%nb, gqk%natom3, gqk%my_nk, iqbuf_cnt])
+ NCF_CHECK(ncerr)
+
+ ! Only one proc sets the entry in done_qbz_spin to 1 for all the q-points in the buffer.
+ !if (all(gqk%coords_qkpb_sumbp(2:3) == [0, 0]))  then
+   do ii=1,iqbuf_cnt
+     iq_bz = iq_buf(2, ii)
+     NCF_CHECK(nf90_put_var(root_ncid, root_vid("gstore_done_qbz_spin"), 1, start=[iq_bz, spin]))
+   end do
+ !end if
+
+ ! Zero the counter before returning
+10 iqbuf_cnt = 0
+
+ NCF_CHECK(nf90_sync(spin_ncid))
+ NCF_CHECK(nf90_sync(root_ncid))
+
+contains
+
+integer function spin_vid(var_name)
+  character(len=*),intent(in) :: var_name
+  spin_vid = nctk_idname(spin_ncid, var_name)
+end function spin_vid
+
+integer function root_vid(var_name)
+  character(len=*),intent(in) :: var_name
+  root_vid = nctk_idname(root_ncid, var_name)
+end function root_vid
+
+end subroutine new_dump_my_gbuf
 
 !----------------------------------------------------------------------
 
