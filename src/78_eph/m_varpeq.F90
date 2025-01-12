@@ -1380,9 +1380,7 @@ subroutine varpeq_init(self, gstore, dtset)
  integer :: ierr, my_is, spin, bstart, bend, my_iq
  real(dp) :: wtq
  real(dp) :: cpu, wall, gflops
- integer, allocatable :: my_states(:,:)
- integer, allocatable :: glob_states(:,:)
-
+ !integer, allocatable :: my_states(:,:), glob_states(:,:)
 !----------------------------------------------------------------------
 
  call cwtime(cpu, wall, gflops, "start")
@@ -1765,9 +1763,8 @@ subroutine polstate_setup(self, ip, a_src, load)
  real(dp) :: a_sqnorm
  !complex(dp) :: prod
  class(gqk_t), pointer :: gqk
- integer :: my_ik, ik_ibz, ib
- real(dp) :: eig
-
+ !integer :: my_ik, ik_ibz, ib
+ !real(dp) :: eig
 !----------------------------------------------------------------------
 
  gqk => self%gqk

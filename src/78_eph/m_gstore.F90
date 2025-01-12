@@ -4985,7 +4985,7 @@ subroutine gqk_filter_erange(gqk, gstore, erange)
  logical :: skip_nk, skip_mkq, skip_q
  integer :: my_ik, ik_glob
  integer :: my_iq, ikq, ipert
- integer :: ib, jb, bstart
+ integer :: ib, jb !, bstart
  integer :: ierr
  real(dp) :: wtq
 !arrays
