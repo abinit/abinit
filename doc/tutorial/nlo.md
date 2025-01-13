@@ -288,7 +288,7 @@ can use it to perform the merge via *\$ABI_HOME/src/98_main/mrgddb < tnlo_3.abi*
 
 We are now ready for the analysis of the results using [[help:anaddb|ANADDB]]. You can copy
 the files *\$ABI_TESTS/tutorespfn/Input/tnlo_4.abi* and
-*\$ABI_TESTS/tutorespfn/Input/tnlo_4.files* to *Work-NLO*. 
+*\$ABI_TESTS/tutorespfn/Input/tnlo_4.files* to *Work_NLO*. 
 
 {% dialog tests/tutorespfn/Input/tnlo_4.files tests/tutorespfn/Input/tnlo_4.abi %}
 

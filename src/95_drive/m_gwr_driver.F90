@@ -78,6 +78,7 @@ module m_gwr_driver
  use m_paw_denpot,      only : pawdenpot
  use m_paw_init,        only : pawinit, paw_gencond
  use m_pawcprj,         only : pawcprj_type, pawcprj_free, pawcprj_alloc ! , paw_overlap
+ use m_pawxc,           only : pawxc_get_usekden
  use m_ksdiago,         only : ugb_t, hyb_t
  use m_mkrho,           only : prtrhomxmn
  use m_melemts,         only : melflags_t
@@ -162,7 +163,7 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
 !scalars
  integer,parameter :: master = 0, cplex1 = 1, ipert0 = 0, idir0 = 0, optrhoij1 = 1
  integer :: ii, comm, nprocs, my_rank, mgfftf, nfftf, omp_ncpus, work_size, nks_per_proc
- integer :: ierr, spin, ik_ibz, nband_k, iomode__, color, io_comm !, kg_varid
+ integer :: ierr, spin, ik_ibz, nband_k, iomode__, color, io_comm, usevxctau_paw !, kg_varid
  real(dp) :: eff, mempercpu_mb, max_wfsmem_mb, nonscal_mem
  real(dp) :: ecore, ecut_eff, ecutdg_eff, cpu, wall, gflops, diago_cpu, diago_wall, diago_gflops
  logical, parameter :: is_dfpt = .false.
@@ -511,8 +512,9 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
    nkxc1 = 0
    ABI_MALLOC(KS_paw_an, (Cryst%natom))
    call paw_an_nullify(KS_paw_an)
+   usevxctau_paw=pawxc_get_usekden(dtset%ixc)
    call paw_an_init(KS_paw_an,Cryst%natom,Cryst%ntypat,nkxc1,0,Dtset%nspden,&
-     cplex,Dtset%pawxcdev,Cryst%typat,Pawang,Pawtab,has_vxc=1,has_vxcval=1,has_vxctau=dtset%usekden)
+     cplex,Dtset%pawxcdev,Cryst%typat,Pawang,Pawtab,has_vxc=1,has_vxcval=1,has_vxctau=usevxctau_paw)
 
    !  Calculate onsite vxc with and without core charge.
    nzlmopt=-1; option=0; compch_sph=greatest_real
@@ -595,7 +597,8 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
  ! TODO: I don't think direct diago can be used with mega-GGA due to the functional derivative wrt KS states.
  ! TB-BK should be OK though.
 
- !ABI_MALLOC(ks_vxctau, (nfftf, dtset%nspden * dtset%usekden))
+ !usevxctau=merge(1,0,xc_need_kden(dtset%ixc))
+ !ABI_MALLOC(ks_vxctau, (nfftf, dtset%nspden * usevxctau))
  !ABI_MALLOC(xcctau3d, (n3xccc * dtset%usekden))
  !ABI_FREE(ks_vxctau)
  !ABI_FREE(xcctau3d)
@@ -624,7 +627,8 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
                Cryst%natom,Cryst%natom,nfftf,ngfftf(1)*ngfftf(2)*ngfftf(3),&
                Dtset%nspden,Cryst%ntypat,KS_paw_an,KS_paw_ij,Pawang,Pawfgrtab,&
                Dtset%pawprtvol,Pawrad,KS_Pawrhoij,Dtset%pawspnorb,Pawtab,Dtset%pawxcdev,&
-               k0,Dtset%spnorbscl,Cryst%ucvol,dtset%cellcharge(1),ks_vtrial,ks_vxc,Cryst%xred,&
+               k0,Dtset%spnorbscl,Cryst%ucvol,dtset%cellcharge(1),ks_vtrial,&
+               ks_vxc,Cryst%xred,Dtset%znucl,&
                nucdipmom=Dtset%nucdipmom)
 
    ! Symmetrize KS Dij

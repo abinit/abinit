@@ -10505,6 +10505,34 @@ it mimics a second iteration self-consistent GW calculation.
 ),
 
 Variable(
+    abivarname="mdeg_filter",
+    varset="gstate",
+    vartype="integer",
+    topics=['SCFControl_expert'],
+    dimensions="scalar",
+    defaultval=ValueWithConditions({'[[wfoptalg]] == 1 or 11 ': 6, 'defaultval': 6}),
+    mnemonics="Maximum DEGree of the polynomial for spectrum FILTERing algorithms",
+    commentdefault="6 for chebyshev filtering algorithm",
+    added_in_version="v10",
+    text=r"""
+For spectrum-filtering based algorithms (e.g. Chebyshev filtering ([[wfoptalg]]=1 or 11) or spectrum slicing ([[wfoptalg]]=TODO).  
+The parameter [[mdeg_filter]] defines the maximum degree of the Chebyshev polynomial used in spectrum-filtering algorithms, such as Chebyshev filtering or spectrum slicing. These algorithms are employed to optimize the wavefunctions during the self-consistent cycle.  
+Increasing the degree improves the effectiveness of the filtering, reducing the number of self-consistent iterations required. However, a high polynomial degree is computationally expensive. Conversely, using a degree that is too low (e.g., <5) often leads to inefficient convergence or even incorrect results.
+The value of [[mdeg_filter]] serves as a maximum threshold: the degree may be automatically reduced to meet the required tolerance specified by [[tolwfr_diago]].
+
+> Notes:  
+>
+> * The default value ([[mdeg_filter]] = 6) provides sufficient filtering quality for most cases.
+>
+> * Combined with the input variable [[nnsclo]], [[mdeg_filter]] controls the convergence of wavefunctions for a fixed potential.
+>
+> * On GPUs, the polynomial degree can be increased with minimal impact on computational cost.
+>
+> * Previously, [[nline]] was used to adjust the degree of the filtering polynomial. In the absence of [[mdeg_filter]], the value of [[nline]], if specified, is still used.”
+""",
+),
+
+Variable(
     abivarname="mdf_epsinf",
     varset="gw",
     vartype="real",
@@ -12074,28 +12102,29 @@ Variable(
     vartype="integer",
     topics=['SCFControl_expert'],
     dimensions="scalar",
-    defaultval=ValueWithConditions({'[[wfoptalg]] == 1 or 11 ': 6, 'defaultval': 4}),
+    defaultval=ValueWithConditions({'[[wfoptalg]] == 1 or 11 ': '[[mdeg_filter]]', 'defaultval': 4}),
     mnemonics="Number of LINE minimizations",
-    commentdefault="4 for conjugate-gradient-based algorithm, 6 for spectrum-filtering-based algorithms",
+    commentdefault="Default is 4 line minimizations for conjugate-gradient-based algorithms, the degree of the polynomial filter for spectrum-filtering-based algorithms",
     added_in_version="before_v9",
     text=r"""
-For conjugate-gradient based algorithms (conjugate gradient or LOBPCG):
 
+Allows one to adjust the number of "iterations" used to optimize the wavefunctions.  
+With the input variable [[nnsclo]], [[nline]] governs the convergence of the
+wavefunctions for fixed potential.  
+
+- For **conjugate-gradient based algorithms** (e.g. conjugate gradient or LOBPCG):
 [[nline]] gives the maximum number of line minimizations allowed in preconditioned conjugate
 gradient minimization for each band. The default, 4, is fine.
 Special cases, with degeneracies or near-degeneracies of levels at the Fermi
 energy may require a larger value of [[nline]] (5 or 6 ?). Line minimizations
-will be stopped anyway when improvement gets small (governed by [[tolrde]]).
-Note that [[nline]] = 0 can be used to diagonalize the Hamiltonian matrix in the
+will be stopped anyway when improvement gets small (governed by [[tolrde]]).  
+> Note that [[nline]] **= 0** can be used to diagonalize the Hamiltonian matrix in the
 subspace spanned by the input wavefunctions.
 
-For algorithms using spectrum filtering (f.i. Chebyshev filtering, [[wfoptalg]]=1 or 111):
-
+- For **spectrum filtering algorithms** (e.g. Chebyshev filtering, spectrum slicing):
 [[nline]] gives the maximum degree of the Chebyshev polynomial used as filtering function.
-The default is 6 to ensure a good quality of the filtering.
-
-With the input variable [[nnsclo]], [[nline]] governs the convergence of the
-wavefunctions for fixed potential.
+The default value ([[nline]] = 6) provides sufficient filtering quality for most cases.  
+> Note however that the use of [[nline]] is **outdated**, replaced by [[mdeg_filter]].
 """,
 ),
 
@@ -14035,7 +14064,7 @@ Variable(
     text=r"""
 If set to 1, the computation of stresses is done, in the SCF case (under the
 conditions [[iscf]] > 0, [[prtstm]] == 0, [[positron]] == 0, and either
-[[nstep]] >0, or [[usepaw]] == 0 or [[irdwfk]] == 1).
+[[nstep]] >0 or [[irdwfk]] == 1).
 Otherwise, to save CPU time, if no optimization of the cell is required, one
 can skip the computation of stresses. The CPU time saving might be interesting
 for some PAW calculations.
@@ -14260,7 +14289,7 @@ printed out.
 When [[pawcpxocc]] == 2, PAW augmentation occupancies are treated as
 COMPLEX; else they are considered as REAL.
 This is needed when time-reversal symmetry is broken (typically when spin-
-orbit coupling is activated).
+orbit coupling is activated or nuclear magnetic dipole moments are present).
 
 Note for ground-state calculations ([[optdriver]] == 0):
 The imaginary part of PAW augmentation occupancies is only used for the
@@ -14755,9 +14784,13 @@ Variable(
     requires="[[usepaw]] == 1",
     added_in_version="before_v9",
     text=r"""
-When PAW is activated, the **spin-orbit coupling** can be added without the
-use of specific PAW datasets (pseudopotentials).
-If [[pawspnorb]] = 1, spin-orbit will be added.
+When PAW is activated, the **spin-orbit coupling** as derived from the
+zero-order regular approximation to relativistic effects (ZORA) 
+can be added without the
+use of specific PAW datasets (pseudopotentials).  If in addition, a 
+nuclear magnetic dipole moment (see [[nucdipmom]]) is present, ZORA terms due 
+to the electron-nuclear spin interactions are added as well.
+If [[pawspnorb]] = 1, spin-orbit (and nuclear-electron spin) interactions will be added.
 If the wavefunction is spinorial (that is, if [[nspinor]] = 2), there is no
 reason not to include the spin-orbit interaction, so that the default value of
 [[pawspnorb]] becomes 1 when [[nspinor]] = 2.
@@ -21786,35 +21819,36 @@ Variable(
 Allows one to choose the algorithm for the optimisation of the wavefunctions.
 The different possibilities are:
 
-  * [[wfoptalg]] = 0: standard state-by-state conjugate gradient algorithm, with no possibility to parallelize over the states;
+  * [[wfoptalg]] = 0: The standard **state-by-state conjugate gradient** algorithm, which does not allow for parallelization over states. A detailed description of this algorithm can be found in [[cite:Payne1992]].
 
-  * [[wfoptalg]] = 2: minimisation of the residual with respect to different shifts, in order to cover the whole set of occupied bands,
-  with possibility to parallelize over blocks of states (or bands). The number of states in a block is defined in [[nbdblock]]. THIS IS STILL IN DEVELOPMENT.
+  * [[wfoptalg]] = 10:  (For PAW) The standard **state-by-state conjugate gradient** algorithm (as described in [[cite:Payne1992]]) with no parallelization over states. This version includes **modifications** described in [[cite:Kresse1996]], such as a modified kinetic energy, improved preconditioning, minimal orthogonalization, etc. 
 
-  * [[wfoptalg]] = 3: minimisation of the residual with respect to a shift. Available only in the non-self-consistent case [[iscf]] = -2,
-  in order to find eigenvalues and wavefunctions close to a prescribed value.
+  * [[wfoptalg]] = 2: **Minimization of the residual** with respect to different shifts to cover the entire set of occupied bands. This allows for parallelization over blocks of states (or bands), with the number of states per block defined by [[nbdblock]].  
+> Note: This algorithm is experimental and possibly obsolete.
 
-  * [[wfoptalg]] = 4: (see also [[wfoptalg]] = 14), a parallel code based on the Locally Optimal Block Preconditioned Conjugate Gradient (LOBPCG)
-  method of [[cite:Knyazev2001 ]].
-  The implementation rests on the [matlab program by Knyazev](http://www.mathworks.com/matlabcentral/fileexchange/48-lobpcg-m) [[cite:Knyazev2007]].
-  For more information see [[cite:Bottin2008]]
+  * [[wfoptalg]] = 3: **Residual minimization** with respect to a shift. This is available only in the non-self-consistent case ([[iscf]] = -2) and is used to find eigenvalues and wavefunctions near a prescribed value.
 
-  * [[wfoptalg]] = 10: (for PAW) standard state-by-state conjugate gradient algorithm, with no possibility to parallelize over the states,
-  but modified scheme described in [[cite:Kresse1996]] (modified kinetic energy, modified preconditionning, minimal orthogonalization, ...);
+  * [[wfoptalg]] = 4 (see also [[wfoptalg]] = 14 or 114): A parallel implementation of the **Locally Optimal Block Preconditioned Conjugate Gradient (LOBPCG)** method, based on [[cite:Knyazev2001]]. This implementation relies on the Matlab program by Knyazev [[cite:Knyazev2007]]. For further details, see [[cite:Bottin2008]].  
+> Recommendation: use [[wfoptalg]] = 114, which is the modern and improved version of this algorithm.
 
-  * [[wfoptalg]] = 14: the recommended for parallel code, the same as [[wfoptalg]] = 4 except that the preconditioning of the block vectors does not
-  depend on the kinetic energy of each band, and the orthogonalization after the LOBPCG algorithm is no longer performed. The first modification increases the convergence and the second one the efficiency.
+  * [[wfoptalg]] = 14: Similar to [[wfoptalg]] = 4, **Locally Optimal Block Preconditioned Conjugate Gradient (LOBPCG)**, but with two key differences: (1) the preconditioning of block vectors is independent of the kinetic energy of each band, which improves convergence; and (2) orthogonalization after the LOBPCG algorithm is no longer performed, enhancing efficiency.  
+> Recommendation: use [[wfoptalg]] = 114 for a more modern and optimized version of this algorithm.
 
-  * [[wfoptalg]] = 114: A new version of [[wfoptalg]] = 14 which is more efficient for few blocks and can take advantage of OpenMP if abinit is compiled with a multithreaded linear algebra library.
-  With more than 1 thread [[npfft]] shoud NOT be used for the time being.
+  * [[wfoptalg]] = 114: A modern and highly efficient version of [[wfoptalg]] = 14 (**Locally Optimal Block Preconditioned Conjugate Gradient**), particularly suited for parallel computations. It performs well with a small number of blocks and can utilize OpenMP if ABINIT is compiled with a multithreaded linear algebra library.  
+> Note: When using more than one thread, [[npfft]] cannot be used.
 
-  * [[wfoptalg]] = 1: new algorithm based on Chebyshev filtering, designed for very large number of processors, in the regime
-  where LOBPCG does not scale anymore. It is not able to use preconditionning and therefore might converge slower than other algorithms.
-  By design, it will **not** converge the last bands: it is recommended to use slightly more bands than necessary.
-  For usage with [[tolwfr_diago]], it is imperative to use [[nbdbuf]]. For more performance, try [[use_gemm_nonlop]].
-  For more information, see the [performance guide](/theory/howto_chebfi.pdf) and the [[cite:Levitt2015]]. Status: experimental but usable.
-  Questions and bug reports should be sent to antoine (dot) levitt (at) gmail.com.
-""",
+  * [[wfoptalg]] = 1: A spectrum filtering algorithm based on **Chebyshev filtering**, designed for use with a large number of processors. It is suitable when the LOBPCG algorithm no longer scales efficiently. The degree of the polynomial filter can be adjusted with [[mdeg_filter]] (formerly [[nline]]). For more information, see the [performance guide](/theory/howto_chebfi.pdf) and [[cite:Levitt2015]].  
+> Recommendation: use [[wfoptalg]] = 111, which is the modern and improved version of this algorithm.  
+> See **notes** in the "[[wfoptalg]] = 111" section. 
+
+* [[wfoptalg]] = 111: A **modern and highly efficient version** of [[wfoptalg]] = 1, a spectrum filtering algorithm based on **Chebyshev filtering**, designed for use with a large number of processors. The degree of the polynomial filter can be adjusted with [[mdeg_filter]] (formerly [[nline]]). For more information, see the [performance guide](/theory/howto_chebfi.pdf) and [[cite:Levitt2015]].  
+> **Notes**:  
+>
+> * For more performance, try enabling [[use_gemm_nonlop]] (default on [[GPU]]).  
+>
+> * This algorithm struggles to converge the last bands, so it is advisable to use slightly more bands than required. When using [[tolwfr_diago]], it is mandatory to set [[nbdbuf]].    
+>
+> * By design, this algorithm cannot use preconditioning and, therefore, cannot handle [[ecutsm]]. Consequently, _Pulay stresses_ are not corrected. If stresses are important for the calculation (e.g., when pressure is required), it is necessary to slightly increase the plane-wave cutoff ([[ecut]]). """,
 ),
 
 Variable(
