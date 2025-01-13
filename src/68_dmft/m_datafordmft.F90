@@ -509,7 +509,7 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
 !********************* Gather information for MPI before printing
 !==========================================================================
 
- call xmpi_barrier(comm_kpt)
+ !call xmpi_barrier(comm_kpt)
  if (paral_kgb == 1 .and. nproc_band > 1) then
    ! Build sum over band processors
    call xmpi_sum(buf_chipsi(:),comm_band,ierr)
@@ -547,7 +547,7 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
    end do ! isppol
  end do ! irank
 
- call xmpi_barrier(comm_kpt)
+ !call xmpi_barrier(comm_kpt)
 
  ABI_FREE(buf_chipsi_tot)
 
@@ -1741,8 +1741,8 @@ subroutine compute_wannier(paw_dmft,mpi_enreg)
  type(paw_dmft_type), intent(inout) :: paw_dmft
  type(MPI_type), intent(in) :: mpi_enreg
 !Local variables ------------------------------
- integer :: iatom,ibuf_psi,ibandc,ierr,iflavor,ik,ikpt,im,ispinor
- integer :: isppol,itypat,lpawu,natom,nband_k,ndim,nkpt,nspinor,nsppol,siz_wan
+ integer :: iatom,ibuf_psi,ibandc,ierr,iflavor,ik,ikpt,im,ispinor,isppol
+ integer :: itypat,lpawu,natom,nband_k,ndim,nkpt,nspinor,nsppol,siz_wan
 !************************************************************************
 
  natom   = paw_dmft%natom

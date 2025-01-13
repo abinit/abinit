@@ -1345,7 +1345,7 @@ subroutine compute_trace_log_loc(green,paw_dmft,trace,opt_inv)
    if (i == 1) omega_fac(i) = omega_fac(i) + half
    if (i == 2) omega_fac(i) = omega_fac(i) - cone/(four*temp)
    if (i == 4) omega_fac(i) = omega_fac(i) + cone/(dble(48)*(temp**3))
- end do
+ end do ! i
 
  ! Do not use dot_product
  trace = trace + dble(sum(green%trace_moments_log_loc(1:nmoments)*omega_fac(1:nmoments)))
