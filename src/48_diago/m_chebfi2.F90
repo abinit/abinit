@@ -85,7 +85,7 @@ module m_chebfi2
    integer :: spacedim                      ! Space dimension for one vector
    integer :: total_spacedim                ! Maybe not needed
    integer :: neigenpairs                   ! Number of eigen values/vectors we want
-   integer :: nline                         ! Number of line to perform
+   integer :: ndeg_filter                   ! Degree of the polynomial filter
    integer :: spacecom                      ! Communicator for MPI
    real(dp) :: tolerance            ! Tolerance on the residu to stop the minimization
    real(dp) :: ecut                 ! Ecut for Chebfi oracle
@@ -157,7 +157,7 @@ module m_chebfi2
 !!  eigenProblem= type of eigenpb: 1 (A*x = (lambda)*B*x), 2 (A*B*x = (lambda)*x), 3 (B*A*x = (lambda)*x)
 !!  me_g0= 1 if this processors treats G=0, 0 otherwise
 !!  neigenpairs= number of requested eigenvectors/eigenvalues
-!!  nline= Chebyshev polynomial level (.i.e. number of H applications)
+!!  ndeg_filter= polynomial degree of the Chebyshev filter (.i.e. number of H applications)
 !!  comm_rows= "rows" communicator
 !!  comm_cols= "cols" communicator
 !!  paral_kgb= flag controlling (k,g,bands) parallelization
@@ -176,7 +176,7 @@ module m_chebfi2
 !! SOURCE
 
 subroutine chebfi_init(chebfi,neigenpairs,spacedim,tolerance,ecut,paral_kgb,bandpp, &
-                       nline,space,eigenProblem,spacecom,me_g0,me_g0_fft,paw,comm_rows,comm_cols,&
+                       ndeg_filter,space,eigenProblem,spacecom,me_g0,me_g0_fft,paw,comm_rows,comm_cols,&
                        gpu_option,gpu_kokkos_nthrd)
 
  implicit none
@@ -187,7 +187,7 @@ subroutine chebfi_init(chebfi,neigenpairs,spacedim,tolerance,ecut,paral_kgb,band
  integer       , intent(in   ) :: me_g0
  integer       , intent(in   ) :: me_g0_fft
  integer       , intent(in   ) :: neigenpairs
- integer       , intent(in   ) :: nline
+ integer       , intent(in   ) :: ndeg_filter
  integer       , intent(in   ) :: comm_cols
  integer       , intent(in   ) :: comm_rows
  integer       , intent(in   ) :: paral_kgb
@@ -217,7 +217,7 @@ subroutine chebfi_init(chebfi,neigenpairs,spacedim,tolerance,ecut,paral_kgb,band
  chebfi%comm_cols   = comm_cols
  chebfi%bandpp      = bandpp
  chebfi%comm_rows   = comm_rows
- chebfi%nline       = nline
+ chebfi%ndeg_filter = ndeg_filter
  chebfi%spacecom    = spacecom
  chebfi%eigenProblem = eigenProblem
  chebfi%me_g0        = me_g0
@@ -498,8 +498,8 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,nspinor)
  integer :: spacedim
  integer :: space_res
  integer :: neigenpairs
- integer :: nline,nline_max
- integer :: iline, iband, ierr
+ integer :: ndeg_filter,ndeg_filter_max
+ integer :: iband, ideg, ierr
 ! integer :: comm_fft_save,comm_band_save !FFT and BAND MPI communicators from rest of Abinit, to be saved
  real(dp) :: tolerance
  real(dp) :: maxeig, maxeig_global
@@ -514,7 +514,7 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,nspinor)
 !arrays
  real(dp) :: tsec(2)
  !Pointers similar to old Chebfi
- integer,allocatable :: nline_bands(:) !Oracle variable
+ integer,allocatable :: ndeg_filter_bands(:) !Oracle variable
  real(dp),pointer :: eig(:,:)
 
 ! *********************************************************************
@@ -523,7 +523,7 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,nspinor)
 
  spacedim = chebfi%spacedim
  neigenpairs = chebfi%neigenpairs
- nline = chebfi%nline
+ ndeg_filter = chebfi%ndeg_filter
  chebfi%eigenvalues = eigen
 
  if (chebfi%space==SPACE_C) then
@@ -535,10 +535,10 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,nspinor)
  end if
 
  if (chebfi%paral_kgb == 0) then
-   ABI_MALLOC(nline_bands,(neigenpairs))
+   ABI_MALLOC(ndeg_filter_bands,(neigenpairs))
    call xg_init(DivResults, space_res, neigenpairs, 1, gpu_option=chebfi%gpu_option)
  else
-   ABI_MALLOC(nline_bands,(chebfi%bandpp))
+   ABI_MALLOC(ndeg_filter_bands,(chebfi%bandpp))
    call xg_init(DivResults, space_res, chebfi%bandpp, 1, gpu_option=chebfi%gpu_option)
  end if
 
@@ -628,22 +628,22 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,nspinor)
  lambda_minus = maxeig_global
 
  call timab(tim_oracle,1,tsec)
- nline_max = cheb_oracle1(mineig_global, lambda_minus, lambda_plus, 1D-16, 40)
+ ndeg_filter_max = cheb_oracle1(mineig_global, lambda_minus, lambda_plus, 1D-16, 40)
 
  if (chebfi%paral_kgb == 0) then
    call xgBlock_reverseMap(DivResults%self,eig,rows=1,cols=neigenpairs)
    do iband=1, neigenpairs !TODO TODO
-  ! !nline necessary to converge to tolerance
-  ! !nline_tolwfr = cheb_oracle1(dble(eig(iband*2-1,1)), lambda_minus, lambda_plus, tolerance / resids_filter(iband), nline)
-  ! !nline necessary to decrease residual by a constant factor
-  ! !nline_decrease = cheb_oracle1(dble(eig(iband*2-1,1)), lambda_minus, lambda_plus, 0.1D, dtset%nline)
-  ! !nline_bands(iband) = MAX(MIN(nline_tolwfr, nline_decrease, nline_max, chebfi%nline), 1)
-     nline_bands(iband) = nline ! fiddle with this to use locking
+  ! !Polynomial degree necessary to converge to tolerance
+  ! !ndeg_filter_tolwfr = cheb_oracle1(dble(eig(iband*2-1,1)), lambda_minus, lambda_plus, tolerance / resids_filter(iband), ndeg_filter)
+  ! !Polynomial degree necessary to decrease residual by a constant factor
+  ! !ndeg_filter_decrease = cheb_oracle1(dble(eig(iband*2-1,1)), lambda_minus, lambda_plus, 0.1D, dtset%mdeg_filter)
+  ! !ndeg_filter_bands(iband) = MAX(MIN(ndeg_filter_tolwfr, ndeg_filter_decrease, ndeg_filter_max, chebfi%mdeg_filter), 1)
+     ndeg_filter_bands(iband) = ndeg_filter ! fiddle with this to use locking
    end do
  else
    call xgBlock_reverseMap(DivResults%self,eig,rows=1,cols=chebfi%bandpp)
    do iband=1, chebfi%bandpp !TODO TODO
-     nline_bands(iband) = nline ! fiddle with this to use locking
+     ndeg_filter_bands(iband) = ndeg_filter ! fiddle with this to use locking
    end do
  end if
  call timab(tim_oracle,2,tsec)
@@ -655,10 +655,10 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,nspinor)
  two_over_r = 2/radius
 
  ABI_NVTX_START_RANGE(NVTX_CHEBFI2_CORE)
- do iline = 0, nline - 1
+ do ideg = 0, ndeg_filter - 1
 
    ABI_NVTX_START_RANGE(NVTX_CHEBFI2_NEXT_ORDER)
-   call chebfi_computeNextOrderChebfiPolynom(chebfi, iline, center, one_over_r, two_over_r, getBm1X)
+   call chebfi_computeNextOrderChebfiPolynom(chebfi, ideg, center, one_over_r, two_over_r, getBm1X)
    ABI_NVTX_END_RANGE()
 
    call timab(tim_swap,1,tsec)
@@ -680,7 +680,7 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,nspinor)
    ABI_NVTX_END_RANGE()
    call timab(tim_getAX_BX,2,tsec)
 
- end do ! iline
+ end do ! ideg
  ABI_NVTX_END_RANGE()
 
  if (chebfi%paral_kgb == 1) then
@@ -690,11 +690,11 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,nspinor)
  end if
 
  call timab(tim_amp_f,1,tsec)
- call chebfi_ampfactor(chebfi, eig, lambda_minus, lambda_plus, nline_bands)
+ call chebfi_ampfactor(chebfi, eig, lambda_minus, lambda_plus, ndeg_filter_bands)
  call timab(tim_amp_f,2,tsec)
 
  call xg_free(DivResults)
- ABI_FREE(nline_bands)
+ ABI_FREE(ndeg_filter_bands)
 
  call timab(tim_transpose,1,tsec)
  ABI_NVTX_START_RANGE(NVTX_CHEBFI2_TRANSPOSE)
@@ -842,9 +842,9 @@ end subroutine chebfi_rayleighRitzQuotients
 !!   computes P_n+1(B-^1.A)|X>
 !!
 !! INPUTS
-!!  iline=order of polynom
-!!  center=
-!!  one_over_r,two_over_r=
+!!  ideg=current degree of polynom
+!!  center=filter center
+!!  one_over_r,two_over_r=1/R, 2/R, R being the radius of the filter
 !!  getBm1X= pointer to the function giving B^-1|X>
 !!           B is typically the overlap operator S
 !!
@@ -855,13 +855,13 @@ end subroutine chebfi_rayleighRitzQuotients
 !!
 !! SOURCE
 
-subroutine chebfi_computeNextOrderChebfiPolynom(chebfi,iline,center,one_over_r,two_over_r,getBm1X)
+subroutine chebfi_computeNextOrderChebfiPolynom(chebfi,ideg,center,one_over_r,two_over_r,getBm1X)
 
  implicit none
 
 !Arguments ------------------------------------
  real(dp)       , intent(in) :: center
- integer        , intent(in) :: iline
+ integer        , intent(in) :: ideg
  real(dp)       , intent(in) :: one_over_r
  real(dp)       , intent(in) :: two_over_r
  type(chebfi_t) , intent(inout) :: chebfi
@@ -900,7 +900,7 @@ subroutine chebfi_computeNextOrderChebfiPolynom(chebfi,iline,center,one_over_r,t
  !Psi^i-1  = 1/c * Psi^i-1
  call xgBlock_scale(chebfi%xXColsRows, 1/center, 1) !counter scale by 1/center
 
- if (iline == 0) then
+ if (ideg == 0) then
    call xgBlock_scale(chebfi%X_next, one_over_r, 1)
  else
    call xgBlock_scale(chebfi%X_next, two_over_r, 1)
@@ -970,7 +970,7 @@ end subroutine chebfi_swapInnerBuffers
 !! INPUTS
 !! eig (:,:)= eigenvalues
 !! lambda_minus,lambda_plus=
-!! nline_bands(:)= order of Chebyshev polynom for each band
+!! ndeg_filter_bands(:)= degree of Chebyshev polynomial filter for each band
 !!
 !! OUTPUT
 !!
@@ -980,12 +980,12 @@ end subroutine chebfi_swapInnerBuffers
 !!
 !! SOURCE
 
-subroutine chebfi_ampfactor(chebfi,eig,lambda_minus,lambda_plus,nline_bands)
+subroutine chebfi_ampfactor(chebfi,eig,lambda_minus,lambda_plus,ndeg_filter_bands)
 
   implicit none
 
   ! Arguments ------------------------------------
-  integer,           intent(in   ) :: nline_bands(:)
+  integer,           intent(in   ) :: ndeg_filter_bands(:)
   real(dp), pointer, intent(in   ) :: eig(:,:)
   real(dp),          intent(in   ) :: lambda_minus
   real(dp),          intent(in   ) :: lambda_plus
@@ -1013,7 +1013,7 @@ subroutine chebfi_ampfactor(chebfi,eig,lambda_minus,lambda_plus,nline_bands)
     eig_per_band = eig(1,iband)
 
     !cheb_poly1(x, n, a, b)
-    ampfactor = cheb_poly1(eig_per_band, nline_bands(iband), lambda_minus, lambda_plus)
+    ampfactor = cheb_poly1(eig_per_band, ndeg_filter_bands(iband), lambda_minus, lambda_plus)
 
     if(abs(ampfactor) < 1e-3) ampfactor = 1e-3 !just in case, avoid amplifying too much
 

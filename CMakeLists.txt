@@ -24,6 +24,10 @@ project(abinit
   HOMEPAGE_URL https://www.abinit.org/
   DESCRIPTION "ABINIT is an atomic-scale simulation software suite.")
 
+# will collect a list of all executables
+Set(ALL_EXECUTABLES "" CACHE INTERNAL "")
+
+
 #
 # Export compile command to json (for editors like emacs, clion, vim, etc...).
 # It allows nice code editing features provided by LSP (Language Server Protocol)
@@ -295,13 +299,13 @@ if (MPI_FOUND)
     try_compile(MPI_NOT_BUGGY
       ${CMAKE_BINARY_DIR}/try_compile ${CMAKE_SOURCE_DIR}/cmake/try_compile/have_mpi_buggy_interfaces.F90
       LINK_LIBRARIES MPI::MPI_Fortran)
-    if(NOT MPI_NOT_BUGGY)
-      set(ABINIT_ENABLE_MPI_INTERFACES_BUGFIX ON CACHE STRING "Enable a workaround for buggy MPI interfaces (mishandling scalars) (default: auto)" FORCE)
+    if(MPI_NOT_BUGGY)
+      set(ABINIT_ENABLE_MPI_INTERFACES_BUGFIX OFF CACHE STRING "Enable a workaround for buggy MPI interfaces (mishandling scalars) (default: auto)" FORCE)
     else()
       if(NOT ABINIT_ENABLE_MPI_INTERFACES_BUGFIX)
         message(FATAL_ERROR "ABINIT_ENABLE_MPI_INTERFACES_BUGFIX option is deactivated but the MPI library has buggy interfaces!")
       endif()
-      set(ABINIT_ENABLE_MPI_INTERFACES_BUGFIX OFF CACHE STRING "Enable a workaround for buggy MPI interfaces (mishandling scalars) (default: auto)" FORCE)
+      set(ABINIT_ENABLE_MPI_INTERFACES_BUGFIX ON CACHE STRING "Enable a workaround for buggy MPI interfaces (mishandling scalars) (default: auto)" FORCE)
     endif()
   endif()
   if(ABINIT_ENABLE_MPI_INTERFACES_BUGFIX)
