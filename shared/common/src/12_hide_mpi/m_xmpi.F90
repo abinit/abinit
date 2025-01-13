@@ -779,6 +779,12 @@ subroutine xmpi_init()
 
 ! *************************************************************************
 
+ ! The Fortran compiler may limit the length of character string constants to a specific maximum e.g.
+ ! intel16 has a 7198 limit so we allocate INPUT_STRING here and fill it with blank lines.
+ ABI_MALLOC_TYPE_SCALAR(character(len=strlen), INPUT_STRING)
+ !allocate(character(len=strlen) :: INPUT_STRING)
+ INPUT_STRING = repeat(' ', strlen)
+
  call set_num_threads_if_undef()
 
  mpierr=0
@@ -965,6 +971,8 @@ subroutine xmpi_end()
  call MPI_BARRIER(MPI_COMM_WORLD,mpierr)  !  Needed by some HPC architectures (MT, 20110315)
  call MPI_FINALIZE(mpierr)
 #endif
+
+ ABI_FREE_SCALAR(INPUT_STRING)
 
 #ifndef FC_IBM
  ! IBM8 returns 260. 320 ...
