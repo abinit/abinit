@@ -82,9 +82,8 @@ module defs_basis
  integer, parameter :: fnlen=264     ! maximum length of file name variables
  integer, parameter :: strlen=2000000 ! maximum length of input string
 
- ! The input file used to run the code, allocated in xmpi_init and set by parsefile.
+ ! The input file used to run the code, allocated and set by parsefile.
  ! It will be added to the netcdf files in ntck_open_create
- !character(len=strlen), save :: INPUT_STRING = repeat(' ', strlen)
  character(len=:), allocatable, save :: INPUT_STRING
 
  integer, parameter :: md5_slen = 32 ! lenght of strings storing the pseudos' md5 checksum.

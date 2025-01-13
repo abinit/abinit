@@ -795,7 +795,8 @@ integer function nctk_open_create(ncid, path, comm) result(ncerr)
  ! Define the basic dimensions used in ETSF-IO files.
  NCF_CHECK(nctk_def_basedims(ncid, defmode=.True.))
 
- if (len_trim(INPUT_STRING) /= 0) then
+ ! INPUT_STRING is allocated and initialized in parsefile
+ if (allocated(INPUT_STRING)) then
    ! Write string with input.
    my_string = trim(INPUT_STRING)
    if (DTSET_IDX /= -1 .and. index(INPUT_STRING, "jdtset ") == 0) then

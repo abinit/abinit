@@ -274,6 +274,13 @@ subroutine parsefile(filnamin, lenstr, ndtset, string, comm)
    call xmpi_bcast(string_raw, master, comm, ierr)
  end if
 
+ ! The Fortran compiler may limit the length of character string constants to a specific maximum e.g.
+ ! intel16 has a 7198 limit so we allocate INPUT_STRING here and fill it with blank lines.
+ if (allocated(INPUT_STRING)) then
+   ABI_FREE_SCALAR(INPUT_STRING)
+ end if
+ ABI_MALLOC_TYPE_SCALAR(character(len=len_trim(string_with_comments)), INPUT_STRING)
+
  ! Save input string in global variable so that we can access it in ntck_open_create
  ! XG20200720: Why not saving string ? string_raw is less processed than string ...
  ! MG: Because we don't want a processed string without comments.
@@ -281,9 +288,7 @@ subroutine parsefile(filnamin, lenstr, ndtset, string, comm)
  INPUT_STRING = trim(string_with_comments)
 
  !write(std_out,'(4a)')"string_with_comments", ch10, trim(string_with_comments), ch10
- !write(std_out,'(4a)')"INPUT_STRING", ch10, trim(INPUT_STRING), ch10
- !write(std_out,'(a)')string(:lenstr)
- !stop
+ !write(std_out,'(4a)')"INPUT_STRING", ch10, trim(INPUT_STRING), ch10; write(std_out,'(a)')string(:lenstr); stop
 
 end subroutine parsefile
 !!***
