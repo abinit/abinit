@@ -364,8 +364,10 @@ end subroutine print_self
 
 subroutine dc_self(charge_loc,hdc,hu,paw_dmft,pawtab,occ_matlu)
 
+ use m_matlu, only : xmpi_matlu
  use m_pawtab, only : pawtab_type
  use m_paw_exactDC, only : compute_exactDC
+ use m_xmpi, only : xmpi_sum
 
 !Arguments ------------------------------------
 !type
@@ -379,7 +381,8 @@ subroutine dc_self(charge_loc,hdc,hu,paw_dmft,pawtab,occ_matlu)
  !type(hu_type),intent(inout) :: hu(cryst_struc%ntypat)
  !integer, intent(in) :: dmft_dc
 !Local variables-------------------------------
- integer :: dmft_dc,iatom,im,im1,ispinor,isppol,itypat,lpawu,ndim,nspinor,nsppol
+ integer :: dmft_dc,iatom,iatomc,ierr,im,im1,ispinor,isppol
+ integer :: itypat,lpawu,natom,ndim,nspinor,nsppol
  real(dp) :: dc,jpawu,ntot,upawu
  logical :: amf,fll,nmdc
  character(len=500) :: message
@@ -387,6 +390,7 @@ subroutine dc_self(charge_loc,hdc,hu,paw_dmft,pawtab,occ_matlu)
 ! *********************************************************************
 
  dmft_dc = paw_dmft%dmft_dc
+ natom   = paw_dmft%natom
  nspinor = paw_dmft%nspinor
  nsppol  = paw_dmft%nsppol
 
@@ -401,7 +405,12 @@ subroutine dc_self(charge_loc,hdc,hu,paw_dmft,pawtab,occ_matlu)
    ABI_WARNING(message)
  end if
 
- do iatom=1,paw_dmft%natom
+ paw_dmft%edc(:)   = zero
+ paw_dmft%edcdc(:) = zero
+
+ iatomc = 0
+
+ do iatom=1,natom
    lpawu = paw_dmft%lpawu(iatom)
    if (lpawu == -1) cycle
    hdc(iatom)%mat(:,:,:) = czero
@@ -413,6 +422,7 @@ subroutine dc_self(charge_loc,hdc,hu,paw_dmft,pawtab,occ_matlu)
    if (dmft_dc == 4) jpawu = zero
 
    if (dmft_dc == 8) then
+     if (mod(iatomc,paw_dmft%nproc) /= paw_dmft%myproc) cycle
      ABI_MALLOC(occ,(ndim,ndim))
      ABI_MALLOC(vdc,(ndim,ndim))
      occ(:,:) = czero
@@ -440,6 +450,7 @@ subroutine dc_self(charge_loc,hdc,hu,paw_dmft,pawtab,occ_matlu)
      end do ! isppol
      ABI_FREE(occ)
      ABI_FREE(vdc)
+     iatomc = iatomc + 1
    else
      if (nmdc) then ! Non-magnetic DC
        if (fll) dc = upawu*(ntot-half) - half*jpawu*(ntot-one)
@@ -460,6 +471,12 @@ subroutine dc_self(charge_loc,hdc,hu,paw_dmft,pawtab,occ_matlu)
      end do ! isppol
    end if ! dc=8
  end do ! iatom
+
+ if (dmft_dc == 8) then
+   call xmpi_sum(paw_dmft%edc(:),paw_dmft%spacecomm,ierr)
+   call xmpi_sum(paw_dmft%edcdc(:),paw_dmft%spacecomm,ierr)
+   call xmpi_matlu(hdc(:),natom,paw_dmft%spacecomm)
+ end if ! dmft_dc=8
 
 end subroutine dc_self
 !!***
