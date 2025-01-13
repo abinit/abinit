@@ -1622,9 +1622,12 @@ subroutine getghc_mGGA(cwavef,ghc_mGGA,gbound_k,gprimd,istwf_k,kg_k,kpt,mgfft,mp
    gcwavef = zero; lcwavef = zero
    do idat=1,ndat
      do ipw=1,npw_k
+       ! convert k + G from reduced coords to Cartesian
        kg_k_cart_vec = two_pi*MATMUL(gprimd,kpt(1:3)+kg_k(1:3,ipw))
+       ! form \grad\psi = i(k + G) \psi in Cartesian frame
        gcwavef(1,ipw+(idat-1)*npw_k,1:3)=  cwavef(2,ipw+(idat-1)*npw_k)*kg_k_cart_vec(1:3)
        gcwavef(2,ipw+(idat-1)*npw_k,1:3)= -cwavef(1,ipw+(idat-1)*npw_k)*kg_k_cart_vec(1:3)
+       ! form \nabla^2\psi = -|k + G|^2 \psi
        lcwavef(1:2,ipw+(idat-1)*npw_k)=&
          &lcwavef(1:2,ipw+(idat-1)*npw_k)-cwavef(1:2,ipw+(idat-1)*npw_k)*DOT_PRODUCT(kg_k_cart_vec,kg_k_cart_vec)
      end do
@@ -1677,30 +1680,20 @@ subroutine getghc_mGGA(cwavef,ghc_mGGA,gbound_k,gprimd,istwf_k,kg_k,kpt,mgfft,mp
 !    STEP1: Compute grad of cwavef and Laplacian of cwavef
      ABI_MALLOC(gcwavef1,(2,npw_k*ndat,3))
      ABI_MALLOC(lcwavef1,(2,npw_k*ndat))
+     gcwavef1 = zero; lcwavef1 = zero
 !!$OMP PARALLEL DO
-     do idat=1,ndat
-       do ipw=1,npw_k
-         gcwavef1(:,ipw+(idat-1)*npw_k,1:3)=zero
-         lcwavef1(:,ipw+(idat-1)*npw_k)=zero
-       end do
-     end do
-     do idir=1,3
-       gp2pi1=gprimd(idir,1)*two_pi
-       gp2pi2=gprimd(idir,2)*two_pi
-       gp2pi3=gprimd(idir,3)*two_pi
-       kpt_cart=gp2pi1*kpt(1)+gp2pi2*kpt(2)+gp2pi3*kpt(3)
-!      Multiplication by 2pi i (G+k)_idir for gradient
-!      Multiplication by -(2pi (G+k)_idir )**2 for Laplacian
-       do idat=1,ndat
-         do ipw=1,npw_k
-           kg_k_cart=gp2pi1*kg_k(1,ipw)+gp2pi2*kg_k(2,ipw)+gp2pi3*kg_k(3,ipw)+kpt_cart
-           gcwavef1(1,ipw+(idat-1)*npw_k,idir)= cwavef1(2,ipw+(idat-1)*npw_k)*kg_k_cart
-           gcwavef1(2,ipw+(idat-1)*npw_k,idir)=-cwavef1(1,ipw+(idat-1)*npw_k)*kg_k_cart
-           lcwavef1(1,ipw+(idat-1)*npw_k)=lcwavef1(1,ipw+(idat-1)*npw_k)-cwavef1(1,ipw+(idat-1)*npw_k)*kg_k_cart**2
-           lcwavef1(2,ipw+(idat-1)*npw_k)=lcwavef1(2,ipw+(idat-1)*npw_k)-cwavef1(2,ipw+(idat-1)*npw_k)*kg_k_cart**2
-         end do
-       end do
-     end do ! idir
+      do idat=1,ndat
+        do ipw=1,npw_k
+          ! convert k + G from reduced coords to Cartesian
+          kg_k_cart_vec = two_pi*MATMUL(gprimd,kpt(1:3)+kg_k(1:3,ipw))
+          ! form \grad\psi = i(k + G) \psi in Cartesian frame
+          gcwavef1(1,ipw+(idat-1)*npw_k,1:3)=  cwavef1(2,ipw+(idat-1)*npw_k)*kg_k_cart_vec(1:3)
+          gcwavef1(2,ipw+(idat-1)*npw_k,1:3)= -cwavef1(1,ipw+(idat-1)*npw_k)*kg_k_cart_vec(1:3)
+          ! form \nabla^2\psi = -|k + G|^2 \psi
+          lcwavef1(1:2,ipw+(idat-1)*npw_k)=&
+            &lcwavef1(1:2,ipw+(idat-1)*npw_k)-cwavef1(1:2,ipw+(idat-1)*npw_k)*DOT_PRODUCT(kg_k_cart_vec,kg_k_cart_vec)
+        end do
+      end do
 !    STEP2: Compute (vxctaulocal)*(Laplacian of cwavef) and add it to ghc
      call fourwf(1,vxctaulocal(:,:,:,:,1),lcwavef1,ghc1,work,gbound_k,gbound_k,&
 &     istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
@@ -1738,29 +1731,19 @@ subroutine getghc_mGGA(cwavef,ghc_mGGA,gbound_k,gprimd,istwf_k,kg_k,kpt,mgfft,mp
      ABI_MALLOC(gcwavef2,(2,npw_k*ndat,3))
      ABI_MALLOC(lcwavef2,(2,npw_k*ndat))
 !!$OMP PARALLEL DO
+     gcwavef2 = zero; lcwavef2 = zero
      do idat=1,ndat
        do ipw=1,npw_k
-         gcwavef2(:,ipw+(idat-1)*npw_k,1:3)=zero
-         lcwavef2(:,ipw+(idat-1)*npw_k)  =zero
+         ! convert k + G from reduced coords to Cartesian
+         kg_k_cart_vec = two_pi*MATMUL(gprimd,kpt(1:3)+kg_k(1:3,ipw))
+         ! form \grad\psi = i(k + G) \psi in Cartesian frame
+         gcwavef2(1,ipw+(idat-1)*npw_k,1:3)=  cwavef2(2,ipw+(idat-1)*npw_k)*kg_k_cart_vec(1:3)
+         gcwavef2(2,ipw+(idat-1)*npw_k,1:3)= -cwavef2(1,ipw+(idat-1)*npw_k)*kg_k_cart_vec(1:3)
+         ! form \nabla^2\psi = -|k + G|^2 \psi
+         lcwavef2(1:2,ipw+(idat-1)*npw_k)=&
+           &lcwavef2(1:2,ipw+(idat-1)*npw_k)-cwavef2(1:2,ipw+(idat-1)*npw_k)*DOT_PRODUCT(kg_k_cart_vec,kg_k_cart_vec)
        end do
      end do
-     do idir=1,3
-       gp2pi1=gprimd(idir,1)*two_pi
-       gp2pi2=gprimd(idir,2)*two_pi
-       gp2pi3=gprimd(idir,3)*two_pi
-       kpt_cart=gp2pi1*kpt(1)+gp2pi2*kpt(2)+gp2pi3*kpt(3)
-!      Multiplication by 2pi i (G+k)_idir for gradient
-!      Multiplication by -(2pi (G+k)_idir )**2 for Laplacian
-       do idat=1,ndat
-         do ipw=1,npw_k
-           kg_k_cart=gp2pi1*kg_k(1,ipw)+gp2pi2*kg_k(2,ipw)+gp2pi3*kg_k(3,ipw)+kpt_cart
-           gcwavef2(1,ipw+(idat-1)*npw_k,idir)= cwavef2(2,ipw+(idat-1)*npw_k)*kg_k_cart
-           gcwavef2(2,ipw+(idat-1)*npw_k,idir)=-cwavef2(1,ipw+(idat-1)*npw_k)*kg_k_cart
-           lcwavef2(1,ipw+(idat-1)*npw_k)=lcwavef2(1,ipw+(idat-1)*npw_k)-cwavef2(1,ipw+(idat-1)*npw_k)*kg_k_cart**2
-           lcwavef2(2,ipw+(idat-1)*npw_k)=lcwavef2(2,ipw+(idat-1)*npw_k)-cwavef2(2,ipw+(idat-1)*npw_k)*kg_k_cart**2
-         end do
-       end do
-     end do ! idir
 !    STEP2: Compute (vxctaulocal)*(Laplacian of cwavef) and add it to ghc
      call fourwf(1,vxctaulocal(:,:,:,:,1),lcwavef2,ghc2,work,gbound_k,gbound_k,&
 &     istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
