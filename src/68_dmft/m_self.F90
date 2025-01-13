@@ -364,7 +364,7 @@ end subroutine print_self
 
 subroutine dc_self(charge_loc,hdc,hu,paw_dmft,pawtab,occ_matlu)
 
- use m_matlu, only : xmpi_matlu
+ use m_matlu, only : xmpi_matlu,zero_matlu
  use m_pawtab, only : pawtab_type
  use m_paw_exactDC, only : compute_exactDC
  use m_xmpi, only : xmpi_sum
@@ -405,8 +405,11 @@ subroutine dc_self(charge_loc,hdc,hu,paw_dmft,pawtab,occ_matlu)
    ABI_WARNING(message)
  end if
 
- paw_dmft%edc(:)   = zero
- paw_dmft%edcdc(:) = zero
+ if (dmft_dc == 8) then
+   paw_dmft%edc(:)   = zero
+   paw_dmft%edcdc(:) = zero
+   call zero_matlu(hdc(:),natom)
+ end if
 
  iatomc = 0
 
