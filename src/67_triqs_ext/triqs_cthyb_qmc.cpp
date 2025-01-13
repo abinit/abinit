@@ -28,14 +28,14 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
   int ndim = num_orbitals / 2;
   string lam_fname = "";
   if (ilam != 0) lam_fname = "_ilam_" + to_string(ilam);
-  string config_fname = "qmc_data_iatom_" + to_string(iatom) + lam_fname + ".h5";
+  string qmc_data_fname = "qmc_data_iatom_" + to_string(iatom) + lam_fname + ".h5";
   auto comm = MPI_COMM_WORLD;
   int nproc;
   MPI_Comm_size(comm,&nproc);
   int itask = 0;
 
   int therm = ntherm;
-  if (exists(config_fname)) therm = ntherm_restart;
+  if (exists(qmc_data_fname)) therm = ntherm_restart;
 
   // Print information about the Solver Parameters
   if (rank == 0 && verbo > 0) {
@@ -100,22 +100,22 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
 
   if (!orb_off_diag && !spin_off_diag) {
     // 1*1 block for each flavor
-    nblocks = num_orbitals;
+    nblocks   = num_orbitals;
     siz_block = 1;
   }
   if (orb_off_diag && !spin_off_diag) {
     // n/2*n/2 blocks for each spin (named up and down)
-    nblocks = 2;
+    nblocks   = 2;
     siz_block = ndim;
   }
   if (!orb_off_diag && spin_off_diag) {
     // 2*2 blocks for each orbital (named 0 to n/2-1)
-    nblocks = ndim;
+    nblocks   = ndim;
     siz_block = 2;
   }
   if (orb_off_diag && spin_off_diag) {
     // n*n block (named tot)
-    nblocks = 1;
+    nblocks   = 1;
     siz_block = num_orbitals;
   }
 
@@ -179,22 +179,26 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
   many_body_op_t hloc0;
   paramCTQMC.h_loc0 = hloc0;
   paramCTQMC.max_time = -1;
+  paramCTQMC.measure_weight_ratio = true;
   paramCTQMC.random_name = "";
   paramCTQMC.random_seed = seed_b * rank + seed_a;
   paramCTQMC.length_cycle = cycle_length;
   paramCTQMC.n_warmup_cycles = therm;
   paramCTQMC.time_invariance = time_invariance;
+  paramCTQMC.nbins_histo = nbins_histo;
 
-  // Set initial configuration
-  if (exists(config_fname)) {
+  if (exists(qmc_data_fname)) {
+
+    // Read initial configuration
     if (rank == 0 && verbo > 0) cout << "   == Reading previous configuration == " << endl;
     std::vector<int> sendcounts(nproc);
-    file config_hfile(config_fname,'r');
-    group gr = config_hfile;
+    file qmc_data_hfile(qmc_data_fname,'r');
+    group grp = qmc_data_hfile;
+    group gr  = grp.open_group("config");
     if (rank == 0) {
       int ncpus;
       h5_read(gr,"ncpus",ncpus);
-      if (ncpus != nproc) TRIQS_RUNTIME_ERROR << "You are trying to read a file configs.h5 generated with a different number of CPUs";
+      if (ncpus != nproc) TRIQS_RUNTIME_ERROR << "You are trying to read a configuration file generated with a different number of CPUs";
       h5_read(gr,"size",sendcounts);
     }
     MPI_Bcast(&sendcounts[0],nproc,MPI_INTEGER,0,comm);
@@ -216,7 +220,6 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
       h5_read(gr,"inner",inner_index_list_tot);
       h5_read(gr,"dagger",is_dagger_list_tot);
     }
-    config_hfile.close();
     MPI_Scatterv(&tau_list_tot[0],&sendcounts[0],displs,MPI_UNSIGNED_LONG_LONG,&tau_list[0],length,MPI_UNSIGNED_LONG_LONG,0,comm);
     MPI_Scatterv(&block_index_list_tot[0],&sendcounts[0],displs,MPI_INTEGER,&block_index_list[0],length,MPI_INTEGER,0,comm);
     MPI_Scatterv(&inner_index_list_tot[0],&sendcounts[0],displs,MPI_INTEGER,&inner_index_list[0],length,MPI_INTEGER,0,comm);
@@ -227,57 +230,31 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
       time_pt tau = time_pt(tau_list[i],beta);
       paramCTQMC.initial_configuration.insert(tau,op);
     }
-  }
 
-  paramCTQMC.nbins_histo = nbins_histo;
-
-  // Read histograms
-  bool verif_histo = true;
-
-  if (rank == 0) {
-    for (int i = 0; i < nblocks; ++i) {  // loop over blocks
-      if (!verif_histo) break;
-      paramCTQMC.hist_insert[labels[i]] = std::vector<double>(nbins_histo);
-      paramCTQMC.hist_remove[labels[i]] = std::vector<double>(nbins_histo);
-      for (int j = 0; j < 2; ++j) {  // loop over moves
-        string tag_move;
-        if (j == 0)
-          tag_move = "insert";
-        else
-          tag_move = "remove";
-        string fname = "histogram_" + tag_move + "_" + labels[i] + "_iatom_" + to_string(iatom) + lam_fname;
-        if (!exists(fname)) {
-          verif_histo = false;
-          break;
-        }
-        ifstream hist_file(fname);
-        for (int k = 0; k < nbins_histo; ++k) {
-          double tau,val;
-          hist_file >> tau >> val;
-          if (j == 0)
-            paramCTQMC.hist_insert[labels[i]][k] = val;
-          else
-            paramCTQMC.hist_remove[labels[i]][k] = val;
-        }
-      }
-    }
-  }
-  mpi_broadcast(verif_histo,comm,0);
-  paramCTQMC.performance_analysis = !verif_histo;
-  if (verif_histo) {
+    // Read binned time histogram
     if (rank == 0 && verbo > 0) cout << "   == Reading previous histogram == " << endl;
+    gr = grp.open_group("histo");
+    int nbins_file;
+    h5_read(gr,"nbins",nbins_file);
+    if (nbins_file != nbins_histo) TRIQS_RUNTIME_ERROR << "You are trying to read a configuration file generated with a different number of time bins";
+    std::vector<double> *hist;
+    string tag_move;
     for (int i = 0; i < nblocks; ++i) {
-      if (rank != 0) {
-        paramCTQMC.hist_insert[labels[i]] = std::vector<double>(nbins_histo);
-        paramCTQMC.hist_remove[labels[i]] = std::vector<double>(nbins_histo);
+      for (int j = 0; j < 2; ++j) {
+        if (j == 0) {
+          tag_move = "insert";
+          hist = &paramCTQMC.hist_insert[labels[i]];
+        }
+        else {
+          tag_move = "remove";
+          hist = &paramCTQMC.hist_remove[labels[i]];
+        }
+        *hist = std::vector<double>(nbins_histo);
+        if (rank == 0) h5_read(gr,tag_move+"_"+labels[i],*hist);
+        mpi_broadcast(*hist,comm,0);
       }
-      mpi_broadcast(paramCTQMC.hist_insert[labels[i]],comm,0);
-      mpi_broadcast(paramCTQMC.hist_remove[labels[i]],comm,0);
     }
-  }
-  else {
-    paramCTQMC.hist_insert = {};
-    paramCTQMC.hist_remove = {};
+    qmc_data_hfile.close();
   }
 
   paramCTQMC.move_shift = move_shift;
@@ -339,8 +316,9 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
 
   if (rank == 0) {
 
-    file configs_hfile(config_fname,'w');   // very important to open in write mode, so that previous configs are erased
-    group gr = configs_hfile;
+    file qmc_data_hfile(qmc_data_fname,'w');   // very important to open in write mode, so that previous data is erased
+    group grp = qmc_data_hfile;
+    group gr  = grp.create_group("config");
 
     h5_write(gr,"ncpus",nproc);
     h5_write(gr,"size",recvcounts);
@@ -349,41 +327,50 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
     h5_write(gr,"inner",inner_index_list_tot);
     h5_write(gr,"dagger",is_dagger_list_tot);
 
-    configs_hfile.close();
-  }
+    // Write all histograms
 
-  // Write all histograms
-  if (!verif_histo) {
+    gr = grp.create_group("histo");
+    h5_write(gr,"nbins",nbins_histo);
 
-    auto histo = solver.get_performance_analysis();
-    for (int i = 0; i < 2; ++i) {  // loop over moves
-      string tag_move;
-      if (i == 0)
-        tag_move="insert";
-      else
-        tag_move="remove";
-      for (int j = 0; j < nblocks; ++j) {  // loop over blocks
-        auto hist_accept = histo[tag_move+"_length_accepted_"+labels[j]];
-        auto hist_prop = histo[tag_move+"_length_proposed_"+labels[j]];
-        hist_accept = all_reduce(hist_accept,comm);
-        hist_prop = all_reduce(hist_prop,comm);
+    auto hist_insert = solver.get_weight_ratio_insert();
+    auto hist_remove = solver.get_weight_ratio_remove();
+    double step = beta / nbins_histo;
+    std::vector<double> *hist;
+    double p_local = 0.9;
+    string tag_move;
+
+    for (int i = 0; i < nblocks; ++i) {
+      for (int j = 0; j < 2; j++) {
+
+        std::vector<int> ind_vec; // indices of unsampled bins
+        ind_vec.reserve(nbins_histo);
+
+        if (j == 0) {
+          hist = &hist_insert[labels[i]];
+          tag_move = "insert";
+        }
+        else {
+          tag_move = "remove";
+          hist = &hist_remove[labels[i]];
+        }
+
         double s = 0.;
-        double step = beta / (nbins_histo - 1.);  // stepsize of the histogram
         for (int k = 0; k < nbins_histo; ++k) {
-          hist_accept.data()[k] = max(hist_accept.data()[k] / max(hist_prop.data()[k],1.), 1.e-5);  // prevents division by zero
-          double fac = step;
-          if (k == 0 || k == nbins_histo-1) fac /= 2.;  // the first and last bin are half-sized
-          s += fac * hist_accept.data()[k];
+          if ((*hist)[k] < 1.e-15)
+            ind_vec.push_back(k);
+          else
+            s += (*hist)[k];
         }
-        if (rank == 0) {
-          ofstream hist_file;
-          hist_file.open("histogram_"+tag_move+"_"+labels[j]+"_iatom_"+to_string(iatom)+lam_fname);
-          for (int k = 0; k < nbins_histo; ++k) {
-            hist_file << double(k) * beta / double(nbins_histo - 1) << "\t" << hist_accept.data()[k] / s  << endl;
-          }
-        }
+        s *= step;
+
+        double x = s * (1. / p_local - 1.) / (step * double(ind_vec.size()));
+        for (auto const &ind : ind_vec) (*hist)[ind] = x;
+
+        h5_write(gr,tag_move+"_"+labels[i],*hist);
       }
     }
+
+    qmc_data_hfile.close();
   }
 
   for (int iblock = 0; iblock < nblocks; ++iblock) {
