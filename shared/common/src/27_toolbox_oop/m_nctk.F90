@@ -757,7 +757,7 @@ integer function nctk_open_create(ncid, path, comm) result(ncerr)
  character(len=*),intent(in) :: path
 
 !Local variables-------------------------------
- integer :: input_len, cmode !, ii, ich
+ integer :: input_len, cmode, ii, ich
  character(len=strlen) :: my_string
 ! *********************************************************************
 
@@ -805,7 +805,7 @@ integer function nctk_open_create(ncid, path, comm) result(ncerr)
    ! Since INPUT_STRING contains many control characters at the end (likely because it's a global var)
    ! and we want to save space on disk, we cannot use trim_len and we have to find the last alphanum char in my_string.
    input_len = len_trim(my_string)
-#if 0
+#if 1
    do ii=len(my_string), 1, -1
      ich = iachar(my_string(ii:ii))
      select case(ich)

@@ -759,8 +759,7 @@ class AbinitTests(object):
                             start = int(match.group(1))
                             start_stop = slice(start, start+1)
                         else:
-                            raise ValueError(
-                                "Wrong or unknown argument: %s" % arg)
+                            raise ValueError("Wrong or unknown argument: %s" % arg)
 
                 if arg in self.suite_names:
                     tp = (arg, None)
@@ -768,8 +767,7 @@ class AbinitTests(object):
                     suite = self.suite_of_subsuite(arg)
                     tp = (suite.name, arg)
                 else:
-                    raise ValueError(
-                        "Wrong (suite_name|subsuite_name) : %s" % arg)
+                    raise ValueError("Wrong (suite_name|subsuite_name): `%s`. Did you remove the initial `t`?" % arg)
 
                 if tp not in d:
                     d[tp] = [start_stop]
