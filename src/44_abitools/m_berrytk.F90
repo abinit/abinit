@@ -162,10 +162,10 @@ subroutine smatrix(cg,cgq,cg1_k,ddkflag,dtm_k,icg,icg1,itrs,job,maxbd,&
 ! ***********************************************************************
 
 !DEBUG
-!write(std_out,*)'smatrix : enter'
-!write(std_out,*)'sflag_k = ',sflag_k
-!write(std_out,'(a,4i4)' )'job, ddkflag, shiftbd, itrs = ',job,ddkflag,shiftbd,itrs
-!write(std_out,'(a,2i6)')' JWZ smatrix.F90 debug : npw_k1, npw_k2 ',npw_k1,npw_k2
+write(std_out,*)'smatrix : enter'
+write(std_out,*)'sflag_k = ',sflag_k
+write(std_out,'(a,4i4)' )'job, ddkflag, shiftbd, itrs = ',job,ddkflag,shiftbd,itrs
+write(std_out,'(a,2i6)')' JWZ smatrix.F90 debug : npw_k1, npw_k2 ',npw_k1,npw_k2
 !stop
 !ENDDEBUG
 
@@ -518,6 +518,8 @@ subroutine smatrix(cg,cgq,cg1_k,ddkflag,dtm_k,icg,icg1,itrs,job,maxbd,&
                  wfi = cgq(1,icg1+(iband-1)*npw_k2*nspinor+spnshft_k2+jpw)*pwnsfac_k(4,jpw)&
 &                 +cgq(2,icg1+(iband-1)*npw_k2*nspinor+spnshft_k2+jpw)*pwnsfac_k(3,jpw)
 
+                 write(std_out,'(a,2i4,2es16.8)')'JWZ debug iband jband smat ',&
+                   & iband,jband,smat_inv(1,iband,jband),smat_inv(2,iband,jband)
                  cg1_k(1,(jband1-1)*npw_k1*nspinor + spnshft_k1 + ipw) = &
 &                 cg1_k(1,(jband1-1)*npw_k1*nspinor + spnshft_k1 + ipw) + &
 &                 smat_inv(1,iband,jband)*wfr - smat_inv(2,iband,jband)*wfi
