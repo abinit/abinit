@@ -131,8 +131,8 @@
  * and abipy can detect the problem.
  *
  *   ABI_MALLOC    --> Allocate memory for intrinsic datatypes (real, integer, complex).
- *   ABI_CALLOC     --> Clear alloc: same as ABI_MALLOC but initializes memory with zeros
- *   ABI_FREE --> Free memory allocated by ABI_MALLOC
+ *   ABI_CALLOC    --> Clear alloc: same as ABI_MALLOC but initializes memory with zeros
+ *   ABI_FREE      --> Free memory allocated by ABI_MALLOC
  *
  * To allocate scalars, use:
  *
