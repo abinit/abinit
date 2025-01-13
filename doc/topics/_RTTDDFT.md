@@ -21,7 +21,7 @@ intense excitation such as the response to high intensity lasers.
 It has been successfully used to study different phenomena including high-harmonics generation, 
 electron stopping power, core electron excitations etc.
 A detailed description of TDDFT including real-time propagation schemes can be found for instance 
-in the book of C. Ullrich [[cite:Ullrich2012]].
+in the book of C. Ullrich [[cite:Ullrich2011]].
 
 ## Implementation in ABINIT
 ABINIT implements RT-TDDFT in the so-called adiabatic approximation using the standard XC functionals 

@@ -17,7 +17,7 @@ It could also be useful that you know how to do PAW calculations using Abinit.
 If you are interested you can follow the first two tutorials on PAW: 
 [PAW1](/tutorial/paw1) and [PAW2](/tutorial/paw2).
 
-This tutorial should take about XXX hour to complete, depending on the amount of 
+This tutorial should take about two hours to complete, depending on the amount of 
 computing power you have access to and how much of the convergence study you decide to do.
 
 [TUTORIAL_README]
@@ -26,19 +26,19 @@ computing power you have access to and how much of the convergence study you dec
 
 Time-dependent DFT (TDDFT) has been developed in the 1980s as a generalization of 
 DFT to the time-dependent case and is based on similar theorems than the standard 
-Hohenberg and Kohn theorems. They were first developed, in the general case, by 
+Hohenberg and Kohn theorems. They were developed, in the general case, by 
 Runge and Gross in 1984 [[cite:Runge1984]] establishing a one-to-one correspondence
 between the time-dependent potential and the time-dependent density $n(\vec{r},t)$.
 In the spirit of Kohn and Sham, Runge and Gross introduced a non-interacting
 system evolving in an effective time-dependent potential such that its density 
-is the same as the interacting system of interest.
+is the same as the one of the interacting system of interest.
 Further work by Van Leeuwen [[cite:VanLeeuwen1999]] proved the existence of this 
 effective potential under some rather mild approximations. 
 
 Within this framework, one ends up with the so-called time-dependent Kohn-Sham (TDKS)
 equations that have a similar form as the time-dependent Shrödinger equation
 \begin{equation}
-    i\hat{S}\partial_t \psi_{nk}(\vec{r},t) = \hat{H} \psi_{nk}(\vec{r},t),
+    i\hat{S}\partial_t \tilde{\psi}_{nk}(\vec{r},t) = \hat{H} \tilde{\psi}_{nk}(\vec{r},t),
 \end{equation}
 but with the Hamiltonian being now a functional of the density and the initial 
 state $\Psi^0$, $\hat{H} \equiv \hat{H}[n,\Psi^0]$.
@@ -60,21 +60,21 @@ The propagator to go from time $t$ to $t+\Delta t$ can be approximated as
 In the present implementation only two simple propagators are available: 
 the so-called exponential rule (ER) and exponential midpoint rule (EMR)
 propagators. In both of them, the exponential in the propagator is approximated 
-by a Taylor expansion (usually up to fourth order as it was found to be the best
-choice to ensure good stability while minimizing computation time [[cite:Castro2004]]).
+by a Taylor expansion, usually up to fourth order as it was found to be the best
+choice to ensure good stability while minimizing computation time [[cite:Castro2004]].
 These two propagators differ only by the choice of the Hamiltonian used in the exponential.
 The simplest ER propagator uses the Hamiltonian at time $t$, while the EMR propagator
-uses the Hamiltonian at time $t+\Delta t/2$. This last choice ensure the correct 
+uses the Hamiltonian at time $t+\Delta t/2$. This last choice ensures the correct 
 time reversal symmetry and is thus supposed to be better than the simple ER propagator. 
 It also introduces a self-consistency since one needs the density at time 
 $t+\Delta t/2$ to evolve the orbitals at time $t$. This is solved by a
 predictor-corrector scheme. See [[cite:Castro2004]] for more information 
 on propagators for the TDKS equations including the ER and EMR propagators.
 More general information on TDDFT including its real-time formulation can be 
-found in [[cite:Ullrich2012]].
+found in [[cite:Ullrich2011]].
 
 TDDFT is usually used to study the response of a system to a time-dependent perturbation. 
-In Abinit it is possible for now to apply an impulse external electric field that allows 
+In Abinit it is possible to apply an impulse external electric field that allows 
 the computation of associated response functions: the electronic conductivity and the
 dielectric function. This tutorial describes how to perform such calculation with Abinit.
 
@@ -99,7 +99,7 @@ The first thing that a real-time TDDFT (RT-TDDFT) calculation needs is a set of 
 In the following we will start our calculations from the ground state KS orbitals. 
 Thus let us start by computing the ground state orbitals of diamond.
 This system was actually treated in details in the first PAW tutorial.
-If you have not done this first tutorial [PAW1](/tutorial/paw1) it might be a good idea to do it first. 
+If you have not done this tutorial [PAW1](/tutorial/paw1) it might be a good idea to do it first. 
 
 The input file *trttddft_1.abi* can be used to compute the ground state of diamond in PAW
 with a description that is similar to what was used in the first PAW tutorial. 
@@ -119,12 +119,15 @@ and execute Abinit:
 
 The code should run quickly.
 
-You can have a look at the input file it is very similar to the input file from the first PAW tutorial.
-In this tutorial it was found that a plane wave cut-off energy [[ecut]] of $16$ Ha, a double grid cut-off 
-energy [[pawecutdg]] of $18$ Ha and a $k$-points grid defined by [[ngkpt]] 6 6 6 with 4 shifts 
-was enough to finely converge the total energy. Thus we use these values here.
-Finally, we ask Abinit to write the wavefunctions in a file by setting [[prtwf]] to 1, as we will 
-need to read this file to start the following real-time calculations.
+You can have a look at the input file. It is similar to the input files from the first PAW tutorial.
+
+{% dialog tests/tutorial/Input/trttddft_1.abi %} 
+
+The values of the plane wave cut-off energy [[ecut]], the double grid cut-off energy [[pawecutdg]] 
+and the $k$-points grid defined by [[ngkpt]] are set to ensure a relatively good convergence of 
+the total energy and pressure. The cell parameter [[acell]] is chosen to work at the equilibrium 
+volume. Finally, we ask Abinit to write the wavefunctions in a file by setting [[prtwf]] to 1, 
+as we will need to read this file to start the following real-time calculations.
 
 !!! tip
 
@@ -133,7 +136,7 @@ need to read this file to start the following real-time calculations.
     the initial orbitals without it as well.
     You may also notice that we set the variable [[istwfk]] to 1 for all $k$-points, that is 
     because we cannot consider the orbitals to be real in RT-TDDFT. Even if the GS orbitals
-    are indeed real, they will be multiplied by a complex phase factor during the time propagation.
+    are real, they will be multiplied by a complex phase factor during the time propagation.
 
 ## 3. Real-time TDDFT and stability
 Now that we have a set of initial orbitals we can run some time-dependent calculations.
@@ -153,6 +156,9 @@ If you have a look at the input file you will see that it is almost exactly the 
 one except that a few keywords were added: [[optdriver]] was set to 9 which tells the driver of Abinit 
 to run real-time TDDFT and the keyword [[getwfk_filepath]] was used to read the initial wavefunctions 
 from the previous ground state calculation.
+
+{% dialog tests/tutorial/Input/trttddft_2.abi %} 
+
 If you have a look at the output (*trttddft_2.abo*) or the log file you will see that Abinit has read
 the previous ground state orbitals and started a RT-TDDFT run as expected. However, it only performed one step 
 which is not very useful.
@@ -163,7 +169,7 @@ You may notice that additional files have been created. The file called *TD_REST
 needed to restart a RT-TDDFT run if one wants to continue a calculation. In that case, the variable
 [[td_restart]] should be set to 1. The file *trttddft_2o_TDENER* contains the total energy and its decomposition into 
 the different contributions as a function of time. You can have a look at this file and try to plot the total 
-energy as well as some energy contributions. You should find that the total energy as well as all other 
+energy as well as some energy contributions. You should find that the total energy as well as all
 contributions remain constant. This is to be expected as we started from the ground state orbitals
  which are *stationary states*.
 If we do not perturb the system then running a time-dependent calculation does not make much sense.
@@ -172,7 +178,10 @@ be discussed in the following. But let us stay in that special stationary case f
 stability of the integration.
 
 In order to do so, copy the input file *trttddft_3.abi* and run Abinit. 
-This run takes a little longer, you can parallelize by launching Abinit with mpirun if you have access 
+
+{% dialog tests/tutorial/Input/trttddft_3.abi %} 
+
+This run takes a little longer, you can parallelize it by launching Abinit with mpirun if you have access 
 to several cores and that your executable has been correctly compiled with MPI, see [[topic:parallelism]].
 A basic parallelisation over $k$-points by simply running Abinit with mpirun is enough. 
 There are 28 $k$-points and the best is of course to use a number that divides it, so you could use 
@@ -261,13 +270,15 @@ the field is switched on.
 
 In order to launch the next calculation with the electric field, you should first copy the input *trttddft_4.abi*
 and run Abinit again. From now on the calculations will take more time and, if you can it may be better to run 
-in parallel. That is because we have to work now in the full Brillouin zone. 
+in parallel. That is because we have to work now in the full Brillouin zone. Indeed the application of the 
+time-dependent electric field will break some symmetries and we thus cannot make use of them to reduce the
+number of $k$-points. 
 The variable [[kptopt]] is thus set to 3 and, as a consequence, the total number of $k$-points is now much larger. 
-If you have a look at the input file you can see that the value of [[ngkpt]] used to define the 
-$k$-points grid was reduced to 2 2 2 instead of the previous 6 6 6 to decrease the computation time. Unfortunately, 
+If you have a look at the input file you can see that the value of [[ngkpt]] used to define the $k$-points grid 
+was reduced to 2 2 2 instead of the previous 6 6 6 to decrease the computation time. Unfortunately, 
 this is not enough to converge as we will see in the following. You can have a look at the input file.
 
-<!--- {% dialog tests/tutorial/Input/trttddft_4.abi %} -->
+{% dialog tests/tutorial/Input/trttddft_4.abi %} 
 
 A few additional keywords [[td_ef_type]] and [[td_ef_tzero]] were added. Moreover, we now use two datasets.
 The first one performs a ground state calculation to generate the initial wavefunctions while the second one runs 
@@ -277,14 +288,15 @@ or [[ngkpt]] as we will need to generate the ground state wavefunctions with the
 Two new files were created: _trttddft_4o_TDEFIELD_ which contains the time evolution of the electric field as well 
 as the associated vector potential and _trttddft_4o_TDCURRENT_ which contains the time evolution of the macroscopic 
 current density.
-If you look at this file you can clearly see that a macroscopic current density is induced by the application of the 
-electric field for $t \geq t_0$. Before $t_0$, there is no global current in the system as expected. That would not be 
-the case if we had not set [[kptopt]] to 3. Moreover, as we applied an electric field in the $x$ direction, the induced
-current density only appeared in that direction. That would also not have been the case if we did not use [[kptopt]] 3.
+If you look at this file you can see that a macroscopic current density is induced by the application of the 
+electric field for $t \geq t_0$. Before $t_0$, there is no global current in the system as expected. That would not 
+be the case if we did not set [[kptopt]] to 3. Moreover, as we applied an electric field in the $x$ direction, 
+the induced current density only appeared in that direction. That would also not have been the case if we did not 
+use [[kptopt]] 3.
 
 ### Convergence study (Optional)
 We should now make sure that all the parameters are correctly chosen to ensure a proper convergence of the current 
-density as this is central property here. This will require to launch several calculations with varying parameters 
+density as this is the central property here. This will require to launch several calculations with varying parameters 
 which can take some time especially if you do not have access to several processors to run in parallel. 
 In that case, it is probably better to not run the whole convergence study.
 
@@ -292,7 +304,7 @@ Let us start by studying the convergence of the current density with respect to 
 To do so you can modify the *trttddft_4.abi* input file and run for different values of [[ecut]] maybe 
 something like 8, 10, 12, 14 and 16 Ha. You should also increase [[ntime]] to a larger value to check 
 the convergence of the current density on a sufficient propagation time. You can try using [[ntime]] 
-around 500.
+around 800.
 We can perform this study keeping [[ngkpt]] to 2 2 2 to save computation time.
 If you do so and plot the current density you should get the same results as what is displayed on the 
 following figure.
@@ -300,33 +312,35 @@ following figure.
 ![Convergence of the induced current density with respect to ecut](rttddft_assets/cv_ecut.png)
 
 Clearly the current density is not too sensitive to the value of [[ecut]] and seems to be converged from 
-ecut > 12 Ha. To remain finely converged in terms of the total energy we will keep ecut = 16 Ha in the 
-following. It is even less sensitive to the value of [[pawecutdg]] and we will keep it at 18 Ha.
+[[ecut]] $\gt 12$ Ha. To remain finely converged in terms of the total energy we will keep [[ecut]] to 
+18 Ha in the following. It is even less sensitive to the value of [[pawecutdg]] and we will just keep 
+it at 36 Ha although we could probably decrease it a bit without problem.
 
 Now we switch to the convergence with respect to the number of $k$-points. Again, this is now going to 
 take more time to run and you should consider running in parallel.
-We now run similar calculations keeping [[ecut]] constant and varying the value of [[ngkpt]]. 
-You can maybe try 2 2 2, 4 4 4, 6 6 6 and 8 8 8 to start. You will find that the current density 
-is significantly impacted by the value of [[ngkpt]] and that the previous value of 6 6 6 is not enough 
+We now run similar calculations keeping [[ecut]] constant and varying the value of [[ngkpt]].
+You can maybe try 2 2 2, 4 4 4, 6 6 6 and 8 8 8 to start. You can use a lower value of [[ecut]] if you 
+wish to decrease the computation time. You should find that the current density is significantly 
+impacted by the value of [[ngkpt]] and that the previous value of 6 6 6 is not enough 
 to converge the current density. The following figure shows the current density obtained with 
 larger number of $k$-points.
 
 ![Convergence of the induced current density with respect to ngkpt](rttddft_assets/cv_kpt.png)
 
 The current density clearly requires a large number of $k$-points and it seems that we need to use 
-at least ngkpt 12 12 12, which leads to 6912 $k$-points, to get converged results over the integration 
+at least [[ngkpt]] 12 12 12, which leads to 6912 $k$-points, to get converged results over the integration 
 time considered here. It appears that converging the current density at short times is relatively easy 
 but longer trajectories require more $k$-points. That means high frequencies will be easier to 
 converge but accessing low frequencies will be more demanding.
 
-## 4. Conductivity and the dielectric function
+## 5. Conductivity and the dielectric function
 The optical conductivity tensor $\sigma_{\alpha\beta}$ can be obtained from the Fourier transform 
 of the induced current density and the external electric field using the following relation
 \begin{equation}
     \sigma_{\alpha\beta}(\omega) = \frac{J_\alpha(\omega)}{E_\beta(\omega)}.
 \end{equation}
-This equation is the well known Ohm's law and translate the fact that, within linear response theory, 
-the conductivity is the response function linking the induced current density and the applied 
+This equation is the well-known Ohm's law which translate the fact that, within linear response theory, 
+the conductivity is the response function that links the induced current density and the applied 
 external electric field.
 The dielectric tensor can then be obtained directly from the conductivity tensor using the 
 following relation 
@@ -341,7 +355,7 @@ the current density by using the _analyze_rtttddft.py_ script to analyze the res
 your previous calculation. To do so you can run the following command 
 
 ```sh
-python3 $ABI_HOME/scripts/post_processing/analyze_rtttddft.py -c trttddft_4o_DS2_TDCURRENT -e dirac -ez 0.1 -d x -wc 0.005 -ts 1 -p 12
+python3 $ABI_HOME/scripts/post_processing/analyze_rtttddft.py -c trttddft_4o_DS2_TDCURRENT -e dirac -ez 0.1 -d x -wc 0.01 -ts 1 -p 8
 ```
 A description of the different options of this script can be obtained by typing 
 
@@ -349,12 +363,57 @@ A description of the different options of this script can be obtained by typing
 python3 $ABI_HOME/scripts/post_processing/analyze_rtttddft.py -h
 ```
 
-Here we use already quite a few that should give some rather good results. 
-Here are their meaning:
-* -c gives the path to the file containing the current density (*TDCURRENT file*)
-+ -e tells the script that the electric field is a Dirac pulse
-- -ez gives the intensity of the applied impulse electric field (ezero in atomic units)
-- -d option indicates by which direction of the electric field we wish to divide ie. it corresponds to the value of $\beta$ in equation (6) and (7)
-- -wc is the $\omega_cut$ (in Ha) parameter of an decaying exponential window ($\exp(-\omega_{cut}t)$) applied to the signal. Such window leads to a convolution of the Fourier transform of the signal with a Lorentzian of width $\Gamma=2\omega_{cut}$ in frequency space and is mostly used to smooth the results.
-- -ts applies a time shift discarding all time before *ts* which is mostly used to effectively set the time at which the electric field is applied to zero.
-- -p is an option to use zero-padding of the signal. This will artificially increase the number of points used in the Fourier transform which in turn increases the number of frequencies and thus helps getting a better resolution in frequency space.
+Here we use already quite a few that should give some rather good results:
+
+  * *-c* gives the path to the file containing the current density (*TDCURRENT* file)
+  * *-e dirac* tells the script that the electric field is a Dirac pulse
+  * *-ez* gives the intensity of the applied impulse electric field (in atomic units)
+  * *-d* indicates by which direction of the electric field we wish to divide. It corresponds to the value of $\beta$ in equation (6) and (7)
+  * *-wc* is the cutoff angular frequency $\omega_c$ (in Ha) of a decaying exponential window $\exp(-\omega_ct)$ that is applied to the signal. 
+Such window leads to a convolution of the Fourier transform of the signal with a Lorentzian of width $\Gamma=2\omega_c$ in frequency space and is mostly used to smooth/broaden the results.
+  * *-ts* applies a time shift discarding all times before *ts* which is mostly used to effectively set the time at which the electric field is applied to zero.
+  * *-p* is to use zero-padding on the signal. This will artificially increase the number of points used in the Fourier transform by a factor of *p* which in turn increases the number of frequencies and thus helps getting a better resolution in frequency space.
+
+If you use this script to compute the dielectric function from the current densities obtained with different number of $k$-points during 
+the convergence study of the previous section you will get results similar to the ones presented on the next figure.
+
+![Convergence of the dielectric function with respect to ngkpt](rttddft_assets/dielectric_kpt.png)
+
+The global shape of the dielectric function does not seem to be as sensitive to the number of $k$-points than the current density and 
+it looks like we are perfectly converged for grid that are finer than [[ngkpt]] 12 12 12. However, that depends on the length of the 
+trajectory. Indeed we have seen that at longer times the current density requires more $k$-points.
+In the following, we will stick to [[ngkpt]] 12 12 12 to make sure we are well converged although a coarser grid could already be used 
+to get relatively good results.
+
+Before launching the last calculation to compute the conductivity and the dielectric function we should finally decide how long the trajectory should be.
+This is mostly defined by the frequency range we want to study and the resolution we need in frequency space. 
+For diamond, we know that the dielectric function exhibits interesting features for energies $\hbar\omega$ between 4 and 20 eV (see next figure). 
+The maximum frequency that can be sampled is $f_{max} = 1/dt$ which is directly related to the time step $dt$. 
+In our case we used a time step $dt = 0.1$ au $\approx 2.4\,10^{-3}$ fs, which corresponds to an energy of about $1700$ eV that is much higher than 
+what we are interested in. The minimum frequency that can be sampled is given by $f_{min} = f_{max}/N$.
+So the total number of steps $N$ will directly define the minimum frequency that can theoretically be accessed.
+As we are interested in energies down to the eV a 100 steps should already be enough. However this minimum frequency also defines the resolution 
+in frequency space $\Delta f = f_{min}$. This frequency step $\delta f$ needs to be small enough to accurately resolve the variations of the 
+conductivity and the dielectric function. In practice here, it needs to be much smaller and we need to at least perform a few thousands steps 
+(about 4000 steps should give good results).
+
+!!! tip
+
+    You can easily restart a RT-TDDFT calculation using the [[td_restart]] input variable.
+    Thus you can start with a relatively short trajectory first and increase its length as required.
+    Note that it is also possible to artificially increase the frequency resolution by using zero-padding 
+    (*-p* option of the script *analyze_rtttddft.py*).
+
+Now, we can launch our final calculation using [[ntime]] 4000 and [[ngkpt]] 12 12 12 to ensure good convergence.
+Unfortunately, this is now quite a long calculation that can take several hours even if running on several cores.
+The dielectric function obtained after running such calculation is presented on the following figure. 
+It is compared to the results from [[cite:Botti2004]] obtained using linear-response TDDFT (LR-TDDFT) in the LDA approximation 
+(Linear-Response Time-Dependent LDA -- LR-TDLDA) and to experimental results from [[cite:Edwards1985]].
+
+![Dielectric function of Diamond computed with RT-TDDFT using Abinit compared to LR-TDDFT and experiment](rttddft_assets/dielectric_final.png)
+
+Clearly, the implementation in Abinit is able to retrieve the correct dielectric function and compares well with LR-TDDFT 
+using similar approximations. Moreover, the results we obtained are also quite close to the experimental ones.
+In the case of diamond, TDDFT in the adiabatic approximation describes relatively well the dielectric function but that is 
+not the case for all systems, see for instance [[cite:Botti2004]] for different cases.
+well the dielectric function that 
