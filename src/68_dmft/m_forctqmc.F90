@@ -2028,7 +2028,7 @@ end if !nspinor
  call wrtout(std_out,message,'COLL')
  call print_matlu(matlu1(:),natom,1)
 
- call diff_matlu("CTQMC occupations","Symmetrized CTQMC occupations",green%occup_tau%matlu(:),matlu1(:),natom,0,tol4,ierr)
+ call diff_matlu("CTQMC occupations","Symmetrized CTQMC occupations",green%occup_tau%matlu(:),matlu1(:),natom,0,tol4,ierr=ierr)
  call destroy_matlu(matlu1(:),natom)
  ABI_FREE(matlu1)
 

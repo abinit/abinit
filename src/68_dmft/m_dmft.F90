@@ -396,7 +396,7 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
 !  ---------------------------------------------------------------------
    call initialize_self(self_new,paw_dmft,opt_moments=opt_moments)
 
-   call impurity_solve(cryst_struc,green,hu(:),paw_dmft,pawang,pawtab,self,self_new,weiss,pawprtvol) ! weiss-> green, or self if dmft_solv=1
+   call impurity_solve(cryst_struc,green,hu(:),paw_dmft,pawang,pawtab(:),self,self_new,weiss,pawprtvol) ! weiss-> green, or self if dmft_solv=1
 !  if(paw_dmft%dmft_solv==4)  write(std_out,*) "shift after impurity",self%qmc_shift(1)
 
 !  ==  Compute double counting from charge from green_solver
