@@ -554,8 +554,8 @@ end subroutine print_matlu
  type(matlu_type), intent(inout) :: gloc(paw_dmft%natom)
 !Local variables-------------------------------
  integer :: at_indx,iatom,irot,isppol,lpawu,m1,m2,mu,natom
- integer :: ndim,ndim_max,nspinor,nsppol,nsym
- complex(dpc), allocatable :: gloc_tmp(:,:),gloc_tmp2(:,:),gloc_tmp3(:,:,:)
+ integer :: ndim,ndim_max,nspinor,nsppol,nsym,nu
+ complex(dpc), allocatable :: gloc_tmp(:,:),gloc_tmp2(:,:)
  type(matlu_type), allocatable :: gloc_nmrep(:),glocsym(:)
 
  natom    = paw_dmft%natom
@@ -564,11 +564,12 @@ end subroutine print_matlu
  nsppol   = paw_dmft%nsppol
  nsym     = paw_dmft%nsym
  ABI_MALLOC(glocsym,(natom))
- ABI_MALLOC(gloc_tmp,(ndim_max,ndim_max))
 
 !=========  Case nspinor ==1 ========================
 
  if (nspinor == 1) then
+
+   ABI_MALLOC(gloc_tmp,(ndim_max,ndim_max))
 
    call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu(:),glocsym(:))
 
@@ -612,6 +613,7 @@ end subroutine print_matlu
  else
 
    !== Allocate temporary arrays
+   ABI_MALLOC(gloc_tmp,(ndim_max,4*ndim_max))
    ABI_MALLOC(gloc_nmrep,(natom))
    call init_matlu(natom,1,4,paw_dmft%lpawu(:),glocsym(:))
    call init_matlu(natom,1,4,paw_dmft%lpawu(:),gloc_nmrep(:))
@@ -620,8 +622,6 @@ end subroutine print_matlu
    ! gloc_nmrep(iatom)%mat(:,:,i) = n,mx,my,mz for i=1,2,3,4 respectively
    call chg_repr_matlu(gloc(:),gloc_nmrep(:),natom,1,1)
 
-   ABI_MALLOC(gloc_tmp3,(ndim_max,ndim_max,3))
-
   !==  Do the sum over symmetrized density matrix (in n,m repr)
    do iatom=1,natom
 
@@ -629,39 +629,32 @@ end subroutine print_matlu
      if (lpawu == 1) cycle
      ndim = 2*lpawu + 1
 
-     ABI_MALLOC(gloc_tmp2,(ndim,ndim))
+     ABI_MALLOC(gloc_tmp2,(ndim,4*ndim))
 
      do irot=1,nsym
 
        at_indx = paw_dmft%indsym(irot,iatom)
 
-       ! Symmetrize density
+       do mu=1,4 ! Symmetrize density and magnetization
 
-       call abi_xgemm("n","n",ndim,ndim,ndim,cone,gloc_nmrep(at_indx)%mat(:,:,1),ndim, &
-                    & paw_dmft%zarot(:,1:ndim,irot,lpawu+1),ndim_max,czero,gloc_tmp(:,1:ndim),ndim_max)
+         call abi_xgemm("n","n",ndim,ndim,ndim,cone,gloc_nmrep(at_indx)%mat(:,:,mu),ndim, &
+                      & paw_dmft%zarot(:,1:ndim,irot,lpawu+1),ndim_max,czero,gloc_tmp(:,1+ndim*(mu-1):ndim*mu),ndim_max)
 
-       call abi_xgemm("t","n",ndim,ndim,ndim,cone,paw_dmft%zarot(:,1:ndim,irot,lpawu+1),ndim_max,&
-                    & gloc_tmp(:,1:ndim),ndim_max,czero,gloc_tmp2(:,:),ndim)
+       end do ! mu
 
-       glocsym(iatom)%mat(:,:,1) = glocsym(iatom)%mat(:,:,1) + gloc_tmp2(:,:)
+       call abi_xgemm("t","n",ndim,4*ndim,ndim,cone,paw_dmft%zarot(:,1:ndim,irot,lpawu+1),ndim_max,&
+                    & gloc_tmp(:,1:4*ndim),ndim_max,czero,gloc_tmp2(:,:),ndim)
+
+       glocsym(iatom)%mat(:,:,1) = glocsym(iatom)%mat(:,:,1) + gloc_tmp2(:,1:ndim)
 
        ! Symmetrize magnetization
 
-       do mu=1,3
-
-         call abi_xgemm("n","n",ndim,ndim,ndim,cone,gloc_nmrep(at_indx)%mat(:,:,mu+1),ndim, &
-                      & paw_dmft%zarot(:,1:ndim,irot,lpawu+1),ndim_max,czero,gloc_tmp(:,1:ndim),ndim_max)
-
-         call abi_xgemm("t","n",ndim,ndim,ndim,cone,paw_dmft%zarot(:,1:ndim,irot,lpawu+1),ndim_max,&
-                      & gloc_tmp(:,1:ndim),ndim_max,czero,gloc_tmp3(:,1:ndim,mu),ndim_max)
-       end do ! mu
-
-       do m2=1,ndim
-         do m1=1,ndim
-           glocsym(iatom)%mat(m1,m2,2:4) = glocsym(iatom)%mat(m1,m2,2:4) + &
-                       & matmul(paw_dmft%symrec_cart(:,:,irot),gloc_tmp3(m1,m2,:))
-         end do ! m1
-       end do  ! m2
+       do nu=2,4
+         do mu=2,4
+           glocsym(iatom)%mat(:,:,mu) = glocsym(iatom)%mat(:,:,mu) + &
+             & paw_dmft%symrec_cart(mu-1,nu-1,irot)*gloc_tmp2(:,1+(nu-1)*ndim:ndim*nu)
+         end do ! mu
+       end do ! nu
 
      end do ! irot
 
@@ -671,8 +664,6 @@ end subroutine print_matlu
      glocsym(iatom)%mat(:,:,:) = glocsym(iatom)%mat(:,:,:) / dble(nsym)
 
    end do ! iatom
-
-   ABI_FREE(gloc_tmp3)
 
 !==  Compute back density matrix in upup dndn updn dnup representation
    call chg_repr_matlu(gloc(:),glocsym(:),natom,-1,1)
@@ -2182,15 +2173,13 @@ end subroutine add_matlu
    lpawu = matlu(iatom)%lpawu
    if (lpawu == -1) cycle
    ndim = nspinor * (2*lpawu+1)
-   do isppol=1,nsppol
-     do im=1,ndim
-       if (signe_used == 1) then
-         matlu(iatom)%mat(im,im,isppol) = matlu(iatom)%mat(im,im,isppol) - shift(iatom)
-       else
-         matlu(iatom)%mat(im,im,isppol) = matlu(iatom)%mat(im,im,isppol) + shift(iatom)
-       end if ! signe_used
-     end do ! im
-   end do ! isppol
+   do im=1,ndim
+     if (signe_used == 1) then
+       matlu(iatom)%mat(im,im,:) = matlu(iatom)%mat(im,im,:) - shift(iatom)
+     else
+       matlu(iatom)%mat(im,im,:) = matlu(iatom)%mat(im,im,:) + shift(iatom)
+     end if ! signe_used
+   end do ! im
  end do ! iatom
 
  end subroutine shift_matlu
@@ -2894,11 +2883,9 @@ end subroutine add_matlu
    lpawu = matlu(iatom)%lpawu
    if (lpawu == -1) cycle
    ndim = nspinor * (2*lpawu+1)
-   do isppol=1,nsppol
-     do im=1,ndim
-       matlu(iatom)%mat(im,im,isppol) = cone
-     end do ! im
-   end do ! isppol
+   do im=1,ndim
+     matlu(iatom)%mat(im,im,:) = cone
+   end do ! im
  end do ! iatom
 
  end subroutine identity_matlu
@@ -4034,10 +4021,8 @@ end subroutine add_matlu
    ndim = nspinor * (2*lpawu+1)
    do isppol=1,nsppol
      do im1=1,ndim
-       do im=1,ndim
-         ibuf = ibuf + 1
-         buffer(ibuf) = matlu(iatom)%mat(im,im1,isppol)
-       end do ! im
+       buffer(ibuf+1:ibuf+ndim) = matlu(iatom)%mat(:,im1,isppol)
+       ibuf = ibuf + ndim
      end do ! im1
    end do ! isppol
  end do ! iatom
@@ -4055,10 +4040,8 @@ end subroutine add_matlu
    ndim = nspinor * (2*lpawu+1)
    do isppol=1,nsppol
      do im1=1,ndim
-       do im=1,ndim
-         ibuf = ibuf + 1
-         matlu(iatom)%mat(im,im1,isppol) = buffer(ibuf)
-       end do ! im
+       matlu(iatom)%mat(:,im1,isppol) = buffer(ibuf+1:ibuf+ndim)
+       ibuf = ibuf + ndim
      end do ! im1
    end do ! isppol
  end do ! iatom

@@ -860,13 +860,9 @@ subroutine identity_oper(oper,option)
  if (option == 1 .or. option == 3) then
 
    oper%ks(:,:,:,:) = czero
-   do isppol=1,oper%nsppol
-     do ikpt=1,oper%nkpt
-       do ib=1,oper%mbandc
-         oper%ks(ib,ib,ikpt,isppol) = cone
-       end do ! ib
-     end do ! ikpt
-   end do ! isppol
+   do ib=1,oper%mbandc
+     oper%ks(ib,ib,:,:) = cone
+   end do ! ib
 
  end if ! option=1 or 3
 
@@ -997,7 +993,7 @@ subroutine trace_oper(oper,trace_ks,trace_loc,opt_ksloc,trace_ks_cmplx)
    !temp1=zero
    do isppol=1,oper%nsppol
      do ikpt=1,oper%nkpt
-       do ib=oper%mbandc,1,-1 ! Never change this order
+       do ib=1,oper%mbandc
          trace = trace + oper%ks(ib,ib,ikpt,isppol)*oper%wtk(ikpt+oper%shiftk)
          !temp1=temp1+oper%wtk(ikpt)
        end do ! ib
@@ -1065,18 +1061,18 @@ subroutine prod_oper(oper1,oper2,oper3,opt_ksloc,opt_diag)
    if (present(opt_diag)) then
      if (opt_diag == 1) diag = .true.
    end if
-   do isppol=1,oper1%nsppol
-     do ikpt=1,oper1%nkpt
-       if (diag) then
-         do ib=1,mbandc
-           oper3%ks(ib,ib,ikpt,isppol) = oper1%ks(ib,ib,ikpt,isppol) * oper2%ks(ib,ib,ikpt,isppol)
-         end do ! ib
-       else
+   if (diag) then
+     do ib=1,mbandc
+       oper3%ks(ib,ib,:,:) = oper1%ks(ib,ib,:,:) * oper2%ks(ib,ib,:,:)
+     end do ! ib
+   else
+     do isppol=1,oper1%nsppol
+       do ikpt=1,oper1%nkpt
          call abi_xgemm("n","n",mbandc,mbandc,mbandc,cone,oper1%ks(:,:,ikpt,isppol),mbandc,&
                       & oper2%ks(:,:,ikpt,isppol),mbandc,czero,oper3%ks(:,:,ikpt,isppol),mbandc)
-         end if ! diag
        end do ! ikpt
      end do ! isppol
+   end if ! diag
  end if ! opt_ksloc=1
 
  DBG_EXIT("COLL")
@@ -1234,10 +1230,8 @@ subroutine gather_oper(oper,distrib,paw_dmft,opt_ksloc,master,opt_diag,opt_commk
              ibuf = ibuf + 1
              buffer(ibuf) = oper(ifreq)%ks(ib1,ib1,ikpt,isppol)
            else
-             do ib=1,mbandc
-               ibuf = ibuf + 1
-               buffer(ibuf) = oper(ifreq)%ks(ib,ib1,ikpt,isppol)
-             end do ! ib
+             buffer(ibuf+1:ibuf+mbandc) = oper(ifreq)%ks(:,ib1,ikpt,isppol)
+             ibuf = ibuf + mbandc
            end if ! diag
          end do ! ib1
        end do ! ifreq
@@ -1257,10 +1251,8 @@ subroutine gather_oper(oper,distrib,paw_dmft,opt_ksloc,master,opt_diag,opt_commk
              ibuf = ibuf + 1
              oper(ifreq)%ks(ib1,ib1,ikpt,isppol) = buffer_tot(ibuf)
            else
-             do ib=1,mbandc
-               ibuf = ibuf + 1
-               oper(ifreq)%ks(ib,ib1,ikpt,isppol) = buffer_tot(ibuf)
-             end do ! ib
+             oper(ifreq)%ks(:,ib1,ikpt,isppol) = buffer_tot(ibuf+1:ibuf+mbandc)
+             ibuf = ibuf + mbandc
            end if ! diag
          end do ! ib1
        end do ! ifreq
@@ -1330,10 +1322,8 @@ subroutine gather_oper(oper,distrib,paw_dmft,opt_ksloc,master,opt_diag,opt_commk
        ndim = (2*lpawu+1) * nspinor
        do isppol=1,nsppol
          do im1=1,ndim
-           do im=1,ndim
-             ibuf = ibuf + 1
-             buffer(ibuf) = oper(ifreq)%matlu(iatom)%mat(im,im1,isppol)
-           end do ! im
+           buffer(ibuf+1:ibuf+ndim) = oper(ifreq)%matlu(iatom)%mat(:,im1,isppol)
+           ibuf = ibuf + ndim
          end do ! im1
        end do ! isppol
      end do ! iatom
@@ -1360,10 +1350,8 @@ subroutine gather_oper(oper,distrib,paw_dmft,opt_ksloc,master,opt_diag,opt_commk
        ndim = (2*lpawu+1) * nspinor
        do isppol=1,nsppol
          do im1=1,ndim
-           do im=1,ndim
-             ibuf = ibuf + 1
-             oper(ifreq)%matlu(iatom)%mat(im,im1,isppol) = buffer_tot(ibuf)
-           end do ! im
+           oper(ifreq)%matlu(iatom)%mat(:,im1,isppol) = buffer_tot(ibuf+1:ibuf+ndim)
+           ibuf = ibuf + ndim
          end do ! im1
        end do ! isppol
      end do ! iatom
@@ -1460,10 +1448,8 @@ subroutine gather_oper_ks(oper,distrib,paw_dmft,opt_diag)
          ibuf = ibuf + 1
          buffer(ibuf) = oper%ks(ib1,ib1,ikpt,isppol)
        else
-         do ib=1,mbandc
-           ibuf = ibuf + 1
-           buffer(ibuf) = oper%ks(ib,ib1,ikpt,isppol)
-         end do ! ib
+         buffer(ibuf+1:ibuf+mbandc) = oper%ks(:,ib1,ikpt,isppol)
+         ibuf = ibuf + mbandc
        end if ! diag
      end do ! ib1
    end do ! ikpt
@@ -1480,10 +1466,8 @@ subroutine gather_oper_ks(oper,distrib,paw_dmft,opt_diag)
          ibuf = ibuf + 1
          oper%ks(ib1,ib1,ikpt,isppol) = buffer_tot(ibuf)
        else
-         do ib=1,mbandc
-           ibuf = ibuf + 1
-           oper%ks(ib,ib1,ikpt,isppol) = buffer_tot(ibuf)
-         end do ! ib
+         oper%ks(:,ib1,ikpt,isppol) = buffer_tot(ibuf+1:ibuf+mbandc)
+         ibuf = ibuf + mbandc
        end if ! diag
      end do ! ib
    end do ! ikpt

@@ -750,7 +750,7 @@ subroutine compute_migdal_energy(e_hu_migdal,e_hu_migdal_tot,green,paw_dmft,self
 
  do i=1,nmoments
    omega_fac(i) = czero
-   do ifreq=nwlo,1,-1 ! NEVER change the summation order
+   do ifreq=nwlo,1,-1 ! NEVER change the summation order and DON'T use the intrinsic SUM
      omega_fac(i) = omega_fac(i) + cone / (paw_dmft%omega_lo(ifreq))**i
    end do
    omega_fac(i) = - two * temp * omega_fac(i) / (j_dpc)**i
@@ -1338,7 +1338,7 @@ subroutine compute_trace_log_loc(green,paw_dmft,trace,opt_inv)
 
  do i=1,nmoments
    omega_fac(i) = czero
-   do ifreq=nwlo,1,-1 ! NEVER change the summation order
+   do ifreq=nwlo,1,-1 ! NEVER change the summation order and DON'T use the intrinsic SUM
      omega_fac(i) = omega_fac(i) + cone / (paw_dmft%omega_lo(ifreq))**i
    end do
    omega_fac(i) = - two * temp * omega_fac(i) / (j_dpc)**i
