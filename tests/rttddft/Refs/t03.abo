@@ -1,5 +1,5 @@
 
-.Version 10.3.4.4 of ABINIT, released Nov 2024.
+.Version 10.3.4.1 of ABINIT, released Nov 2024.
 .(MPI version, prepared for a x86_64_linux_gnu9.1 computer) 
 
 .Copyright (C) 1998-2024 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu  5 Dec 2024.
-- ( at 15h24 )
+.Starting date : Tue 14 Jan 2025.
+- ( at 12h22 )
   
 - input  file    -> /tmp/abinit/opt/Test_suite/rttddft_t03/t03.abi
 - output file    -> t03.abo
@@ -30,12 +30,12 @@
      natom =       4  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =     192    n1xccc =    2501    ntypat =       1
     occopt =       3   xclevel =       2
--    mband =          24        mffmem =           1         mkmem =           4
-       mpw =         604          nfft =       27000          nkpt =           4
+-    mband =          24        mffmem =           1         mkmem =           1
+       mpw =        1208          nfft =       27000          nkpt =           4
 ================================================================================
-P This job should need less than                      11.070 Mbytes of memory.
+P This job should need less than                      10.613 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.887 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
+_ WF disk file :      1.772 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
 ================================================================================
 
  DATASET    2 : the unit cell is not primitive
@@ -46,10 +46,10 @@ _ WF disk file :      0.887 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
      natom =       4  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =     192    n1xccc =    2501    ntypat =       1
     occopt =       3   xclevel =       2
--    mband =          24        mffmem =           1         mkmem =           4
+-    mband =          24        mffmem =           1         mkmem =           1
        mpw =        1208          nfft =       27000          nkpt =           4
 ================================================================================
-P This job should need less than                      11.982 Mbytes of memory.
+P This job should need less than                      10.613 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      1.772 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
 ================================================================================
@@ -62,10 +62,10 @@ _ WF disk file :      1.772 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
      natom =       4  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =     192    n1xccc =    2501    ntypat =       1
     occopt =       3   xclevel =       2
--    mband =          24        mffmem =           1         mkmem =           4
+-    mband =          24        mffmem =           1         mkmem =           1
        mpw =        1208          nfft =       27000          nkpt =           4
 ================================================================================
-P This job should need less than                      11.982 Mbytes of memory.
+P This job should need less than                      10.613 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      1.772 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
 ================================================================================
@@ -93,9 +93,7 @@ _ WF disk file :      1.772 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
            getwfk1          0
            getwfk2          1
            getwfk3          0
-           istwfk1       2    3    7    9
-           istwfk2       1    1    1    1
-           istwfk3       1    1    1    1
+           istwfk        1    1    1    1
               ixc          11
            jdtset        1    2    3
               kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -104,7 +102,7 @@ _ WF disk file :      1.772 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
                        5.00000000E-01  5.00000000E-01  5.00000000E-01
          kptrlatt        2    0    0      0    2    0      0    0    2
           kptrlen      1.50422200E+01
-P           mkmem           4
+P           mkmem           1
             natom           4
             nband          24
            ndtset           3
@@ -361,12 +359,12 @@ P           mkmem           4
 
 ================================================================================
 == DATASET  1 ==================================================================
--   mpi_nproc: 1, omp_nthreads: 1 (-1 if OMP is not activated)
+-   mpi_nproc: 4, omp_nthreads: 1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
 iteration_state: {dtset: 1, }
-dimensions: {natom: 4, nkpt: 4, mband: 24, nsppol: 1, nspinor: 1, nspden: 1, mpw: 604, }
+dimensions: {natom: 4, nkpt: 4, mband: 24, nsppol: 1, nspinor: 1, nspden: 1, mpw: 1208, }
 cutoff_energies: {ecut:  15.0, pawecutdg:  -1.0, }
 electrons: {nelect:   1.20000000E+01, charge:   0.00000000E+00, occopt:   3.00000000E+00, tsmear:   9.50044626E-04, }
 meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
@@ -424,17 +422,17 @@ tolerances: {tolvrs: 1.00E-04, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -9.1867684466168    -9.187E+00 4.633E-02 2.637E+00
- ETOT  2  -9.1907430348742    -3.975E-03 4.039E-03 1.215E-01
- ETOT  3  -9.1907653750195    -2.234E-05 1.534E-03 9.578E-04
- ETOT  4  -9.1907656535713    -2.786E-07 1.951E-03 2.584E-06
+ ETOT  1  -9.1855603918746    -9.186E+00 5.548E-02 2.679E+00
+ ETOT  2  -9.1907442915610    -5.184E-03 3.837E-03 1.144E-01
+ ETOT  3  -9.1907653659965    -2.107E-05 1.219E-03 1.003E-03
+ ETOT  4  -9.1907656538551    -2.879E-07 6.338E-04 2.387E-06
 
- At SCF step    4       vres2   =  2.58E-06 < tolvrs=  1.00E-04 =>converged.
+ At SCF step    4       vres2   =  2.39E-06 < tolvrs=  1.00E-04 =>converged.
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)= -1.86735031E-05  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)= -1.86735031E-05  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)= -1.86735031E-05  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)= -1.86909216E-05  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)= -1.86909216E-05  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)= -1.86909216E-05  sigma(2 1)=  0.00000000E+00
 
 
 --- !ResultsGS
@@ -447,15 +445,15 @@ lattice_vectors:
 lattice_lengths: [   7.52111,    7.52111,    7.52111, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   4.2544735E+02
-convergence: {deltae: -2.786E-07, res2:  2.584E-06, residm:  1.951E-03, diffor: null, }
+convergence: {deltae: -2.879E-07, res2:  2.387E-06, residm:  6.338E-04, diffor: null, }
 etotal    :  -9.19076565E+00
 entropy   :   0.00000000E+00
-fermie    :   2.74268956E-01
+fermie    :   2.74269575E-01
 cartesian_stress_tensor: # hartree/bohr^3
-- [ -1.86735031E-05,   0.00000000E+00,   0.00000000E+00, ]
-- [  0.00000000E+00,  -1.86735031E-05,   0.00000000E+00, ]
-- [  0.00000000E+00,   0.00000000E+00,  -1.86735031E-05, ]
-pressure_GPa:   5.4939E-01
+- [ -1.86909216E-05,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,  -1.86909216E-05,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,  -1.86909216E-05, ]
+pressure_GPa:   5.4991E-01
 xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00, Al]
 - [  0.0000E+00,   5.0000E-01,   5.0000E-01, Al]
@@ -472,15 +470,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
-    1        2.00000          0.87059474
-    2        2.00000          0.87059474
-    3        2.00000          0.87059474
-    4        2.00000          0.87059474
+    1        2.00000          0.87059736
+    2        2.00000          0.87059736
+    3        2.00000          0.87059736
+    4        2.00000          0.87059736
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   38.231E-06; max=  19.508E-04
+ Mean square residual over all n,k,spin=   10.749E-06; max=  63.376E-05
  reduced coordinates (array xred) for    4 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.000000000000      0.500000000000      0.500000000000
@@ -518,7 +516,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  kpt#   1, nband= 24, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -0.15040    0.15907    0.15907    0.15907    0.21158    0.21158    0.21158    0.46446
    0.46446    0.46446    0.48457    0.48457    0.48457    0.48457    0.48457    0.48457
-   0.61999    0.61999    0.61999    0.74436    0.74436    0.74436    0.81289    0.81290
+   0.61999    0.61999    0.61999    0.74436    0.74436    0.74436    0.81289    0.81289
       occupation numbers for kpt#   1
    2.00000    2.00000    2.00000    2.00000    2.00000    2.00000    2.00000    0.00000
    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000
@@ -529,34 +527,34 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  3.61041061669878E+00
-hartree             :  1.72007930560841E-02
-xc                  : -4.37684571600566E+00
+kinetic             :  3.61041229620445E+00
+hartree             :  1.72007516517168E-02
+xc                  : -4.37684651185886E+00
 Ewald energy        : -1.09727842348479E+01
 psp_core            :  4.60474116797787E-01
-local_psp           :  6.36319476232344E-01
-non_local_psp       :  1.43544707562809E+00
-internal            : -9.18977787244052E+00
-'-kT*entropy'       : -9.87781130789758E-04
-total_energy        : -9.19076565357131E+00
-total_energy_eV     : -2.50093452166633E+02
-band_energy         :  1.31836476553767E+00
+local_psp           :  6.36310102327598E-01
+non_local_psp       :  1.43545560700098E+00
+internal            : -9.18977787272427E+00
+'-kT*entropy'       : -9.87781130789759E-04
+total_energy        : -9.19076565385506E+00
+total_energy_eV     : -2.50093452174354E+02
+band_energy         :  1.31836653929976E+00
 ...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)= -1.86735031E-05  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)= -1.86735031E-05  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)= -1.86735031E-05  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)= -1.86909216E-05  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)= -1.86909216E-05  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)= -1.86909216E-05  sigma(2 1)=  0.00000000E+00
 
--Cartesian components of stress tensor (GPa)         [Pressure=  5.4939E-01 GPa]
-- sigma(1 1)= -5.49393337E-01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)= -5.49393337E-01  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)= -5.49393337E-01  sigma(2 1)=  0.00000000E+00
+-Cartesian components of stress tensor (GPa)         [Pressure=  5.4991E-01 GPa]
+- sigma(1 1)= -5.49905806E-01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)= -5.49905806E-01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)= -5.49905806E-01  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  2 ==================================================================
--   mpi_nproc: 1, omp_nthreads: 1 (-1 if OMP is not activated)
+-   mpi_nproc: 4, omp_nthreads: 1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -601,7 +599,7 @@ meta: {optdriver: 9, }
 --------------------------------------------------------------------------------
 
 
--------------    Reading initial wavefunctions     -------------
+-------------------    Reading initial wavefunctions    -------------------
 
 -inwffil : will read wavefunctions from disk file t03o_DS1_WFK
 
@@ -618,10 +616,10 @@ Integrated density (ie. total nb of electrons) =      12.0000000000
  kpt#   1, nband= 24, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -0.15040    0.15907    0.15907    0.15907    0.21158    0.21158    0.21158    0.46446
    0.46446    0.46446    0.48457    0.48457    0.48457    0.48457    0.48457    0.48457
-   0.61999    0.61999    0.61999    0.74436    0.74436    0.74436    0.81289    0.81290
+   0.61999    0.61999    0.61999    0.74436    0.74436    0.74436    0.81289    0.81289
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    1.09    1.09
+- Time - cpu, wall (sec):    0.98    0.98
 
 
 --- Iteration 2
@@ -634,10 +632,10 @@ Integrated density (ie. total nb of electrons) =      12.0000000000
  kpt#   1, nband= 24, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -0.15040    0.15907    0.15907    0.15907    0.21158    0.21158    0.21158    0.46446
    0.46446    0.46446    0.48457    0.48457    0.48457    0.48457    0.48457    0.48457
-   0.61999    0.61999    0.61999    0.74436    0.74436    0.74436    0.81289    0.81290
+   0.61999    0.61999    0.61999    0.74436    0.74436    0.74436    0.81289    0.81289
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.27    0.27
+- Time - cpu, wall (sec):    0.09    0.09
 
 
 --- Iteration 3
@@ -650,10 +648,10 @@ Integrated density (ie. total nb of electrons) =      12.0000000000
  kpt#   1, nband= 24, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -0.15040    0.15907    0.15907    0.15907    0.21158    0.21158    0.21158    0.46446
    0.46446    0.46446    0.48457    0.48457    0.48457    0.48457    0.48457    0.48457
-   0.61999    0.61999    0.61999    0.74436    0.74436    0.74436    0.81289    0.81290
+   0.61999    0.61999    0.61999    0.74436    0.74436    0.74436    0.81289    0.81289
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.27    0.27
+- Time - cpu, wall (sec):    0.10    0.10
 
 
 ---------------------------------------------------------------------------
@@ -663,7 +661,7 @@ Integrated density (ie. total nb of electrons) =      12.0000000000
 
 ================================================================================
 == DATASET  3 ==================================================================
--   mpi_nproc: 1, omp_nthreads: 1 (-1 if OMP is not activated)
+-   mpi_nproc: 4, omp_nthreads: 1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -706,11 +704,11 @@ meta: {optdriver: 9, }
 --------------------------------------------------------------------------------
 
 
--------------   Reading wavefunctions for restart  -------------
+-------------------   Reading wavefunctions for restart  ------------------
 
 -inwffil : will read wavefunctions from disk file t03o_DS2_3_WFK
 
--------------   Reading initial wavefunctions   -------------
+-------------------    Reading initial wavefunctions    -------------------
 
 -inwffil : will read wavefunctions from disk file t03o_DS1_WFK
 
@@ -727,10 +725,10 @@ Integrated density (ie. total nb of electrons) =      12.0000000000
  kpt#   1, nband= 24, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -0.15040    0.15907    0.15907    0.15907    0.21158    0.21158    0.21158    0.46446
    0.46446    0.46446    0.48457    0.48457    0.48457    0.48457    0.48457    0.48457
-   0.61999    0.61999    0.61999    0.74436    0.74436    0.74436    0.81289    0.81290
+   0.61999    0.61999    0.61999    0.74436    0.74436    0.74436    0.81289    0.81289
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    1.08    1.08
+- Time - cpu, wall (sec):    0.97    0.97
 
 
 --- Iteration 5
@@ -743,10 +741,10 @@ Integrated density (ie. total nb of electrons) =      12.0000000000
  kpt#   1, nband= 24, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -0.15040    0.15907    0.15907    0.15907    0.21158    0.21158    0.21158    0.46446
    0.46446    0.46446    0.48457    0.48457    0.48457    0.48457    0.48457    0.48457
-   0.61999    0.61999    0.61999    0.74436    0.74436    0.74436    0.81289    0.81290
+   0.61999    0.61999    0.61999    0.74436    0.74436    0.74436    0.81289    0.81289
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.27    0.27
+- Time - cpu, wall (sec):    0.09    0.09
 
 
 --- Iteration 6
@@ -759,10 +757,10 @@ Integrated density (ie. total nb of electrons) =      12.0000000000
  kpt#   1, nband= 24, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -0.15040    0.15907    0.15907    0.15907    0.21158    0.21158    0.21158    0.46446
    0.46446    0.46446    0.48457    0.48457    0.48457    0.48457    0.48457    0.48457
-   0.61999    0.61999    0.61999    0.74436    0.74436    0.74436    0.81289    0.81290
+   0.61999    0.61999    0.61999    0.74436    0.74436    0.74436    0.81289    0.81289
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.27    0.27
+- Time - cpu, wall (sec):    0.09    0.09
 
 
 ---------------------------------------------------------------------------
@@ -782,7 +780,7 @@ Integrated density (ie. total nb of electrons) =      12.0000000000
           chkprim           0
             dtele      1.00000000E-02
              ecut      1.50000000E+01 Hartree
-           etotal1    -9.1907656536E+00
+           etotal1    -9.1907656539E+00
            etotal2     0.0000000000E+00
            etotal3     0.0000000000E+00
             fcart1    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
@@ -801,9 +799,7 @@ Integrated density (ie. total nb of electrons) =      12.0000000000
            getwfk1          0
            getwfk2          1
            getwfk3          0
-           istwfk1       2    3    7    9
-           istwfk2       1    1    1    1
-           istwfk3       1    1    1    1
+           istwfk        1    1    1    1
               ixc          11
            jdtset        1    2    3
               kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -812,7 +808,7 @@ Integrated density (ie. total nb of electrons) =      12.0000000000
                        5.00000000E-01  5.00000000E-01  5.00000000E-01
          kptrlatt        2    0    0      0    2    0      0    0    2
           kptrlen      1.50422200E+01
-P           mkmem           4
+P           mkmem           1
             natom           4
             nband          24
            ndtset           3
@@ -881,7 +877,7 @@ P           mkmem           4
             prtwf1          1
             prtwf2          0
             prtwf3          0
-           strten1    -1.8673503117E-05 -1.8673503117E-05 -1.8673503117E-05
+           strten1    -1.8690921584E-05 -1.8690921584E-05 -1.8690921584E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -1191,10 +1187,10 @@ P           mkmem           4
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          7.0  wall=          7.1
+- Proc.   0 individual time (sec): cpu=          5.6  wall=          5.6
 
 ================================================================================
 
  Calculation completed.
-.Delivered  18 WARNINGs and  31 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          7.0  wall=          7.1
+.Delivered   0 WARNINGs and   6 COMMENTs to log file.
++Overall time at end (sec) : cpu=         22.2  wall=         22.3
