@@ -411,11 +411,12 @@ subroutine dc_self(charge_loc,hdc,hu,paw_dmft,pawtab,occ_matlu)
    call zero_matlu(hdc(:),natom)
  end if
 
- iatomc = 0
+ iatomc = -1
 
  do iatom=1,natom
    lpawu = paw_dmft%lpawu(iatom)
    if (lpawu == -1) cycle
+   iatomc = iatomc + 1
    hdc(iatom)%mat(:,:,:) = czero
    ntot   = charge_loc(nsppol+1,iatom)
    ndim   = 2*lpawu + 1
@@ -453,7 +454,6 @@ subroutine dc_self(charge_loc,hdc,hu,paw_dmft,pawtab,occ_matlu)
      end do ! isppol
      ABI_FREE(occ)
      ABI_FREE(vdc)
-     iatomc = iatomc + 1
    else
      if (nmdc) then ! Non-magnetic DC
        if (fll) dc = upawu*(ntot-half) - half*jpawu*(ntot-one)

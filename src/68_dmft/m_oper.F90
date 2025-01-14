@@ -1010,7 +1010,7 @@ subroutine trace_oper(oper,trace_ks,trace_loc,opt_ksloc,trace_ks_cmplx)
  end if ! opt_ksloc
 
  if (opt_ksloc == 2 .or. opt_ksloc == 3) then
-   call trace_matlu(oper%matlu(:),oper%natom,trace_loc(:,:))
+   call trace_matlu(oper%matlu(:),oper%natom,trace_loc=trace_loc(:,:))
  end if
 
  DBG_EXIT("COLL")
