@@ -971,7 +971,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
    end if
    ABI_MALLOC(gh1c_mGGA,(2,npw*my_nspinor))
    ! this is hard coded for ndat = 1
-   call getgh1c_mGGA(cwave,gs_hamkq%gbound_k,gh1c_mGGA,gs_hamkq%gmet,gs_hamkq%gprimd,idir,gs_hamkq%istwf_k,&
+   call getgh1c_mGGA(cwave,dkinpw,gs_hamkq%gbound_k,gh1c_mGGA,gs_hamkq%gmet,gs_hamkq%gprimd,idir,gs_hamkq%istwf_k,&
         & gs_hamkq%kg_k,kinpw1,gs_hamkq%kpt_k,gs_hamkq%mgfft,mpi_enreg,my_nspinor,gs_hamkq%n4,gs_hamkq%n5,&
         & gs_hamkq%n6,1,gs_hamkq%ngfft,npw,gs_hamkq%nvloc,rf_hamkq%vxctaulocal,&
         & gs_hamkq%gpu_option)
@@ -2301,7 +2301,7 @@ end subroutine getgh1ndc
 !!
 !! SOURCE
 
-subroutine getgh1c_mGGA(cwavein,gbound_k,gh1c_mGGA,gmet,gprimd,idir,istwf_k,kg_k,&
+subroutine getgh1c_mGGA(cwavein,dkinpw,gbound_k,gh1c_mGGA,gmet,gprimd,idir,istwf_k,kg_k,&
      & kinpw1,kpt,mgfft,mpi_enreg,my_nspinor,n4,n5,n6,ndat,ngfft,npw_k,nvloc,vxctaulocal,gpu_option)
 
 !Arguments ------------------------------------
@@ -2315,7 +2315,7 @@ subroutine getgh1c_mGGA(cwavein,gbound_k,gh1c_mGGA,gmet,gprimd,idir,istwf_k,kg_k
  real(dp),intent(inout) :: cwavein(2,npw_k*my_nspinor*ndat)
  real(dp),intent(inout) :: gh1c_mGGA(2,npw_k*my_nspinor*ndat)
  real(dp),intent(inout) :: vxctaulocal(n4,n5,n6,nvloc,4)
- real(dp),pointer,intent(in) :: kinpw1(:)
+ real(dp),pointer,intent(in) :: dkinpw(:),kinpw1(:)
  
 !Local variables-------------------------------
  !scalars
@@ -2374,8 +2374,9 @@ subroutine getgh1c_mGGA(cwavein,gbound_k,gh1c_mGGA,gmet,gprimd,idir,istwf_k,kg_k
          &cwavein(2,ipw+(idat-1)*npw_k)
        dgcwavef(2,ipw+(idat-1)*npw_k,1:3)=-two_pi*gprimd(1:3,idir)*&
          &cwavein(1,ipw+(idat-1)*npw_k)
-       dlcwavef(1:2,ipw+(idat-1)*npw_k)=-two*two_pi**2*&
-         & DOT_PRODUCT(gmet(idir,1:3),(kpt(1:3)+kg_k(1:3,ipw)))*cwavein(1:2,ipw+(idat-1)*npw_k)
+       !dlcwavef(1:2,ipw+(idat-1)*npw_k)=-two*two_pi**2*&
+       !  & DOT_PRODUCT(gmet(idir,1:3),(kpt(1:3)+kg_k(1:3,ipw)))*cwavein(1:2,ipw+(idat-1)*npw_k)
+       dlcwavef(1:2,ipw+(idat-1)*npw_k)=-two*dkinpw(ipw)*cwavein(1:2,ipw+(idat-1)*npw_k)
      end do
    end do
 !  STEP2: Compute (vxctaulocal)*(Laplacian of cwavef) and add it to ghc
