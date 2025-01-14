@@ -40,6 +40,7 @@ kptopt 1
 ngkpt 2 2 2 # Not converged
 nshiftk 1
 shiftk 0 0 0
+istwfk *1
 occopt 3
 tsmear 300 K
 nband 24

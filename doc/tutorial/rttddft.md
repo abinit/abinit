@@ -416,4 +416,3 @@ Clearly, the implementation in Abinit is able to retrieve the correct dielectric
 using similar approximations. Moreover, the results we obtained are also quite close to the experimental ones.
 In the case of diamond, TDDFT in the adiabatic approximation describes relatively well the dielectric function but that is 
 not the case for all systems, see for instance [[cite:Botti2004]] for different cases.
-well the dielectric function that 
