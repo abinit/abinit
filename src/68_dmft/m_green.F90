@@ -1115,7 +1115,7 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
    ABI_MALLOC(omega_fac,(nmoments))
    do i=1,nmoments
      omega_fac(i) = czero
-     do ifreq=green%nw,1,-1 ! NEVER change the summation order
+     do ifreq=green%nw,1,-1 ! NEVER change the summation order and DON'T use the intrinsic SUM
        omega_fac(i) = omega_fac(i) + paw_dmft%wgt_wlo(ifreq) / (paw_dmft%omega_lo(ifreq))**i
      end do
      omega_fac(i) = - two * temp * omega_fac(i) / (j_dpc)**i
@@ -1291,21 +1291,16 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
      !  end do ! ikpt
      !end do ! isppol
 
-     do isppol=1,nsppol
-       do ikpt=1,mkmem
-         do ib1=1,mbandc
-           if (diag == 1) then
-             green%occup%ks(ib1,ib1,ikpt+shift,isppol) = green%occup%ks(ib1,ib1,ikpt+shift,isppol) + &
-                & fac*green%oper(ifreq)%ks(ib1,ib1,ikpt+shift_green,isppol)
-           else
-             do ib=1,mbandc
-               green%occup%ks(ib,ib1,ikpt+shift,isppol) = green%occup%ks(ib,ib1,ikpt+shift,isppol) + &
-                  & fac*green%oper(ifreq)%ks(ib,ib1,ikpt+shift_green,isppol)
-             end do ! ib
-           end if ! diag
-         end do ! ib1
-       end do ! ikpt
-     end do ! isppol
+     if (diag == 1) then
+       do ib=1,mbandc
+         green%occup%ks(ib,ib,1+shift:mkmem+shift,:) = green%occup%ks(ib,ib,1+shift:mkmem+shift,:) + &
+                 & fac*green%oper(ifreq)%ks(ib,ib,1+shift_green:mkmem+shift_green,:)
+       end do ! ib
+     else
+       green%occup%ks(:,:,1+shift:mkmem+shift,:) = green%occup%ks(:,:,1+shift:mkmem+shift,:) + &
+          & fac*green%oper(ifreq)%ks(:,:,1+shift_green:mkmem+shift_green,:)
+     end if ! diag
+
    end if ! green%wtype
 
 !        write(std_out,*) 'after inverse_oper'
@@ -1429,36 +1424,26 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
 ! write(std_out,*) 'afterxsum sym     %matlu(1)%mat(2,5,1,1,1) 1',green%oper(1)%matlu(1)%mat(2,5,1,1,1)
 
  if (green%w_type /= "real") then
-        
+
    if (green%distrib%me_freq == 0) then
 
-     do isppol=1,nsppol
-       do ikpt=1,mkmem
-         do ib=1,mbandc
-           green%occup%ks(ib,ib,ikpt+shift,isppol) = green%occup%ks(ib,ib,ikpt+shift,isppol) + omega_fac(1)
-         end do ! ib
-       end do ! ikpt
-     end do ! isppol
+     do ib=1,mbandc
+       green%occup%ks(ib,ib,1+shift:mkmem+shift,:) = green%occup%ks(ib,ib,1+shift:mkmem+shift,:) + omega_fac(1)
+     end do ! ib
 
      do i=2,nmoments
-       do isppol=1,nsppol
-         do ikpt=1,mkmem
-           do ib1=1,mbandc
-             if (diag == 1) then
-               green%occup%ks(ib1,ib1,ikpt+shift,isppol) = green%occup%ks(ib1,ib1,ikpt+shift,isppol) + &
-                 & omega_fac(i)*green%moments(i)%ks(ib1,ib1,ikpt,isppol)
-             else
-               do ib=1,mbandc
-                 green%occup%ks(ib,ib1,ikpt+shift,isppol) = green%occup%ks(ib,ib1,ikpt+shift,isppol) + &
-                    & omega_fac(i)*green%moments(i)%ks(ib,ib1,ikpt,isppol)
-               end do ! ib
-             end if ! diag
-           end do ! ib1
-         end do ! ikpt
-       end do ! isppol
+       if (diag == 1) then
+         do ib=1,mbandc
+           green%occup%ks(ib,ib,1+shift:mkmem+shift,:) = green%occup%ks(ib,ib,1+shift:mkmem+shift,:) + &
+                & omega_fac(i)*green%moments(i)%ks(ib,ib,:,:)
+         end do ! ib
+       else
+         green%occup%ks(:,:,1+shift:mkmem+shift,:) = green%occup%ks(:,:,1+shift:mkmem+shift,:) + &
+           & omega_fac(i)*green%moments(i)%ks(:,:,:,:)
+       end if ! diag
      end do ! i
 
-   end if ! me_freq = 0 
+   end if ! me_freq = 0
 
    call gather_oper_ks(green%occup,green%distrib,paw_dmft,opt_diag=diag)
 
@@ -1674,7 +1659,7 @@ subroutine integrate_green(green,paw_dmft,prtopt,opt_ksloc,opt_after_solver,opt_
 
      do i=1,nmoments
        omega_fac(i) = czero
-       do ifreq=green%nw,1,-1 ! NEVER change the summation order
+       do ifreq=green%nw,1,-1 ! NEVER change the summation order and DON'T use the intrinsic SUM
          omega_fac(i) = omega_fac(i) + paw_dmft%wgt_wlo(ifreq) / (paw_dmft%omega_lo(ifreq))**i
        end do
        omega_fac(i) = - two * temp * omega_fac(i) / (j_dpc)**i
@@ -3794,7 +3779,7 @@ subroutine compute_nb_elec(green,self,paw_dmft,Fx,nb_elec_x,fermie,Fxprime)
            call xginv(oper_tmp%ks(:,:,ikpt,isppol),mbandc)
 
            Fxprime = Fxprime - dble(sum(oper_tmp%ks(:,:,ikpt,isppol)*transpose(oper_tmp%ks(:,:,ikpt,isppol))))*wtk*fac
-           do ib=mbandc,1,-1
+           do ib=1,mbandc
              green%charge_ks = green%charge_ks + dble(oper_tmp%ks(ib,ib,ikpt,isppol))*wtk*fac
            end do ! ib
          end do ! ikpt
@@ -4149,20 +4134,15 @@ subroutine compute_moments_ks(green,self,paw_dmft,opt_self,opt_log,opt_quick_res
    end do ! i
  end if ! optself=1
 
- do isppol=1,nsppol
-   do ikpt=1,mkmem
-     do ib=1,paw_dmft%mbandc
-       if (optself == 1) then
-         green%moments(2)%ks(ib,ib,ikpt,isppol) = green%moments(2)%ks(ib,ib,ikpt,isppol) + &
-              & paw_dmft%eigen_dft(ib,ikpt+shift,isppol) - mu
-       else
-         green%moments(2)%ks(ib,ib,ikpt,isppol) = paw_dmft%eigen_dft(ib,ikpt+shift,isppol) - mu
-       end if ! optself
-       if (optquickrestart == 1) &
-         & green%moments(3)%ks(ib,ib,ikpt,isppol) = green%moments(3)%ks(ib,ib,ikpt,isppol) - mu**2
-     end do ! ib
-   end do ! ikpt
- end do ! isppol
+ do ib=1,paw_dmft%mbandc
+   if (optself == 1) then
+     green%moments(2)%ks(ib,ib,:,:) = green%moments(2)%ks(ib,ib,:,:) + &
+            & paw_dmft%eigen_dft(ib,1+shift:mkmem+shift,:) - mu
+   else
+     green%moments(2)%ks(ib,ib,:,:) = paw_dmft%eigen_dft(ib,1+shift:mkmem+shift,:) - mu
+   end if
+   if (optquickrestart == 1) green%moments(3)%ks(ib,ib,:,:) = green%moments(3)%ks(ib,ib,:,:) - mu**2
+ end do ! ib
 
  if (optquickrestart == 1) then
    green%moments(3)%ks(:,:,:,:) = green%moments(3)%ks(:,:,:,:) - two*mu*green%moments(2)%ks(:,:,:,:)
@@ -4323,14 +4303,9 @@ subroutine compute_trace_moments_ks(green,self,paw_dmft)
 
  oper_tmp%ks(:,:,:,:) = green%moments(2)%ks(:,:,:,:)
 
- do isppol=1,nsppol
-   do ikpt=1,mkmem
-     do ib=1,paw_dmft%mbandc
-       oper_tmp%ks(ib,ib,ikpt,isppol) = oper_tmp%ks(ib,ib,ikpt,isppol) + &
-          & paw_dmft%eigen_dft(ib,ikpt+shift,isppol)
-     end do ! ib
-   end do ! ikpt
- end do ! isppol
+ do ib=1,paw_dmft%mbandc
+   oper_tmp%ks(ib,ib,:,:) = oper_tmp%ks(ib,ib,:,:) + paw_dmft%eigen_dft(ib,1+shift:mkmem+shift,:)
+ end do ! ib
 
  call prod_oper(oper_tmp,oper_tmp,green%moments(3),1)
  call trace_oper(oper_tmp,dum,trace_loc(:,:),1,trace_ks_cmplx=green%trace_fermie(2))

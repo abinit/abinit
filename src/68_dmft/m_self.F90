@@ -432,12 +432,7 @@ subroutine dc_self(charge_loc,hdc,hu,paw_dmft,pawtab,occ_matlu)
      occ(:,:) = czero
      do isppol=1,nsppol
        do ispinor=1,nspinor
-         do im1=1,ndim
-           do im=1,ndim
-             occ(im,im1) = occ(im,im1) + &
-                 & (occ_matlu(iatom)%mat(im+(ispinor-1)*ndim,im1+(ispinor-1)*ndim,isppol))
-           end do ! im
-         end do ! im1
+         occ(:,:) = occ(:,:) + occ_matlu(iatom)%mat(1+(ispinor-1)*ndim:ispinor*ndim,1+(ispinor-1)*ndim:ispinor*ndim,isppol)
        end do ! ispinor
      end do ! isppol
      if (nsppol == 1 .and. nspinor == 1) occ(:,:) = occ(:,:) * two
@@ -445,11 +440,7 @@ subroutine dc_self(charge_loc,hdc,hu,paw_dmft,pawtab,occ_matlu)
                         & vdc(:,:),paw_dmft%edc(iatom),paw_dmft%edcdc(iatom))
      do isppol=1,nsppol
        do ispinor=1,nspinor
-         do im1=1,ndim
-           do im=1,ndim
-             hdc(iatom)%mat(im+(ispinor-1)*ndim,im1+(ispinor-1)*ndim,isppol) = vdc(im,im1)
-           end do ! im
-         end do ! im1
+         hdc(iatom)%mat(1+(ispinor-1)*ndim:ispinor*ndim,1+(ispinor-1)*ndim:ispinor*ndim,isppol) = vdc(:,:)
        end do ! ispinor
      end do ! isppol
      ABI_FREE(occ)
@@ -1170,15 +1161,13 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
            ndim = (2*lpawu+1) * nspinor
            do isppol=1,nsppol
              do im1=1,ndim
-               do im=1,ndim
-                 icount = icount + 1
+               buffer(icount+1:icount+ndim) = self%oper(ifreq)%matlu(iatom)%mat(:,im1,isppol)
+               icount = icount + ndim
                  !if (icount > ncount) then
                  !  write(message,'(2a,2i5)') ch10,"Error buffer",icount,ncount
                  !  iexit = 1
                  !  ABI_ERROR(message)
                  !end if ! icount > ncount
-                 buffer(icount) = self%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol)
-               end do ! im
              end do ! im1
            end do ! isppol
          end do ! iatom
@@ -1190,15 +1179,13 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
          ndim = (2*lpawu+1) * nspinor
          do isppol=1,nsppol
            do im1=1,ndim
-             do im=1,ndim
-               icount = icount + 1
+             buffer(icount+1:icount+ndim) = self%hdc%matlu(iatom)%mat(:,im1,isppol)
+             icount = icount + ndim
              !if (icount > ncount) then
              !  write(message,'(2a,2i5)') ch10,"Error buffer",icount,ncount
              !  iexit = 1
              !  ABI_ERROR(message)
              !end if ! icount > ncount
-               buffer(icount) = self%hdc%matlu(iatom)%mat(im,im1,isppol)
-             end do ! im
            end do ! im1
          end do ! isppol
        end do ! iatom
@@ -1210,10 +1197,8 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
              ndim = (2*lpawu+1) * nspinor
              do isppol=1,nsppol
                do im1=1,ndim
-                 do im=1,ndim
-                   icount = icount + 1
-                   buffer(icount) = self%moments(i)%matlu(iatom)%mat(im,im1,isppol)
-                 end do ! im
+                 buffer(icount+1:icount+ndim) = self%moments(i)%matlu(iatom)%mat(:,im1,isppol)
+                 icount = icount + ndim
                end do ! im1
              end do ! isppol
            end do ! iatom
@@ -1245,11 +1230,9 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
          ndim = (2*lpawu+1) * nspinor
          do isppol=1,nsppol
            do im1=1,ndim
-             do im=1,ndim
-               icount = icount + 1
-               self%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol) = buffer(icount)
+             self%oper(ifreq)%matlu(iatom)%mat(:,im1,isppol) = buffer(icount+1:icount+ndim)
+             icount = icount + ndim
                      !write(6,*)'self procs', ifreq, self%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)
-             end do ! im
            end do ! im1
          end do ! isppol
        end do ! iatom
@@ -1261,10 +1244,8 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
        ndim = (2*lpawu+1) * nspinor
        do isppol=1,nsppol
          do im1=1,ndim
-           do im=1,ndim
-             icount = icount + 1
-             self%hdc%matlu(iatom)%mat(im,im1,isppol) = buffer(icount)
-           end do ! im
+           self%hdc%matlu(iatom)%mat(:,im1,isppol) = buffer(icount+1:icount+ndim)
+           icount = icount + ndim
          end do ! im1
        end do ! isppol
      end do ! iatom
@@ -1276,10 +1257,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
            ndim = (2*lpawu+1) * nspinor
            do isppol=1,nsppol
              do im1=1,ndim
-               do im=1,ndim
-                 icount = icount + 1
-                 self%moments(i)%matlu(iatom)%mat(im,im1,isppol) = buffer(icount)
-               end do ! im
+               self%moments(i)%matlu(iatom)%mat(:,im1,isppol) = buffer(icount+1:icount+ndim)
              end do ! im1
            end do ! isppol
          end do ! iatom
