@@ -1152,6 +1152,7 @@ subroutine chebfi_set_ndeg_from_residu(chebfi,lambda_minus,lambda_plus,occ,DivRe
  type(xgBlock_t), intent(in)    :: DivResults
  real(dp), intent(in) :: lambda_minus, lambda_plus
 
+ logical :: test1,test2,test3
  integer :: iband_tot,iband
  integer :: bandpp,ierr,ndeg_filter_tolwfr,ndeg_filter_decrease,nbdbuf,ndeg_filter_all,shift
  integer,allocatable :: ndeg_filter_bands(:)
@@ -1201,24 +1202,23 @@ subroutine chebfi_set_ndeg_from_residu(chebfi,lambda_minus,lambda_plus,occ,DivRe
    eig_iband = eig(1,iband)
    res_iband = residu_(1,iband)
    occ_iband = occ_(1,iband)
-   if (res_iband<chebfi%tolerance.or.(chebfi%nbdbuf==-101.and.occ_iband<chebfi%oracle_min_occ)) then
+   iband_tot = iband + shift
+   test1 = res_iband<chebfi%tolerance ! band already converged
+   test2 = iband_tot>chebfi%neigenpairs-nbdbuf ! band in the buffer
+   test3 = chebfi%nbdbuf==-101.and.occ_iband<chebfi%oracle_min_occ ! occupancy is too low
+   if (test1.or.test2.or.test3) then
      ndeg_filter_bands(iband) = 0
    else
      !ndeg_filter necessary to converge to tolerance
-     ndeg_filter_tolwfr = cheb_oracle1(eig_iband, lambda_minus, lambda_plus, chebfi%tolerance / res_iband, 100)
-     iband_tot = iband + shift
-     if (iband_tot<=chebfi%neigenpairs-nbdbuf) then
-       if (chebfi%oracle==1) then
-         ndeg_filter_bands(iband) = MIN(ndeg_filter_max, ndeg_filter_tolwfr, chebfi%ndeg_filter)
-       else if (chebfi%oracle==2) then
-         !ndeg_filter necessary to decrease residual by a constant factor
-         ndeg_filter_decrease = cheb_oracle1(eig_iband, lambda_minus, lambda_plus, chebfi%oracle_factor, 15)
-         ndeg_filter_bands(iband) = MIN(ndeg_filter_max, ndeg_filter_tolwfr, ndeg_filter_decrease)
-       else
-         ABI_ERROR('Wrong value for chebfi%oracle')
-       end if
+     ndeg_filter_tolwfr = cheb_oracle1(eig_iband, lambda_minus, lambda_plus, chebfi%tolerance / res_iband, 1000)
+     if (chebfi%oracle==1) then
+       ndeg_filter_bands(iband) = MIN(ndeg_filter_max, ndeg_filter_tolwfr, chebfi%ndeg_filter)
+     else if (chebfi%oracle==2) then
+       !ndeg_filter necessary to decrease residual by a constant factor
+       ndeg_filter_decrease = cheb_oracle1(eig_iband, lambda_minus, lambda_plus, chebfi%oracle_factor, 15)
+       ndeg_filter_bands(iband) = MIN(ndeg_filter_max, ndeg_filter_tolwfr, ndeg_filter_decrease)
      else
-       ndeg_filter_bands(iband) = 0
+       ABI_ERROR('Wrong value for chebfi%oracle')
      end if
    end if
  end do
