@@ -2877,7 +2877,6 @@ end subroutine add_matlu
 !************************************************************************
 
  nspinor = matlu(1)%nspinor
- nsppol  = matlu(1)%nsppol
 
  do iatom=1,natom
    lpawu = matlu(iatom)%lpawu

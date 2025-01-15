@@ -1270,7 +1270,7 @@ subroutine compute_trace_log_loc(green,paw_dmft,trace,opt_inv)
  integer, optional, intent(in) :: opt_inv
 !Local variables-------------------------------
  integer  :: i,iatom,ierr,ifreq,info,isppol,lpawu,lwork,natom,ndim,nmoments,nspinor,nsppol,nwlo,optinv
- real(dp) :: correction,fac,temp
+ real(dp) :: correction,fac,signe,temp
  complex(dpc) :: omega,trace_tmp
  real(dp), allocatable :: eig(:),rwork(:)
  complex(dpc), allocatable :: mat_temp(:,:),omega_fac(:),work(:)
@@ -1287,6 +1287,9 @@ subroutine compute_trace_log_loc(green,paw_dmft,trace,opt_inv)
  temp     = paw_dmft%temp
  trace    = zero
  ndim     = nspinor * (2*paw_dmft%maxlpawu+1)
+
+ signe = one
+ if (optinv == 1) signe = - one
 
  ABI_MALLOC(eig,(ndim))
  ABI_MALLOC(rwork,(3*ndim-2))
@@ -1313,11 +1316,7 @@ subroutine compute_trace_log_loc(green,paw_dmft,trace,opt_inv)
        call abi_xgemm("n","c",ndim,ndim,ndim,cone,green%oper(ifreq)%matlu(iatom)%mat(:,:,isppol),ndim,&
                     & green%oper(ifreq)%matlu(iatom)%mat(:,:,isppol),ndim,czero,mat_temp(:,:),ndim)
        call zheev('n','u',ndim,mat_temp(:,:),ndim,eig(:),work(:),lwork,rwork(1:3*ndim-2),info)
-       if (optinv == 0) then
-         trace_tmp = trace_tmp + sum(log(eig(1:ndim)*omega))
-       else
-         trace_tmp = trace_tmp - sum(log(eig(1:ndim)*omega))
-       end if ! optinv
+       trace_tmp = trace_tmp + signe*sum(log(eig(1:ndim)*omega))
      end do ! isppol
      if (ifreq == nwlo) then
        correction = fac * nsppol * ndim * log(two)

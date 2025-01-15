@@ -3809,6 +3809,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
        do isppol=1,nsppol
          do im1=1,tndim
            do im=1,tndim
+             ! Do not use DOT_PRODUCT
              green%moments(p)%matlu(iatom)%mat(im,im1,isppol) = sum(t_lp(:,p)*gl_tmp(:,im,im1,isppol))
            end do ! im
          end do ! im1
@@ -3862,12 +3863,14 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
            call fit_dlr(ncon,ndlr,lsq_g,con_moments,jac_lsq_g,jac_con_moments,gl_dlr_im(:))
 
            gl_dlr(:,im,im1,isppol) = cmplx(gl_dlr_re(:),gl_dlr_im(:),kind=dp)
+           ! Do not use DOT_PRODUCT
            green%moments(1)%matlu(iatom)%mat(im,im1,isppol) = sum(gl_dlr(:,im,im1,isppol))
            green%moments(2)%matlu(iatom)%mat(im,im1,isppol) = sum(gl_dlr(:,im,im1,isppol)*wdlr_beta(:))
            green%moments(3)%matlu(iatom)%mat(im,im1,isppol) = sum(gl_dlr(:,im,im1,isppol)*wdlr2(:))
            green%moments(4)%matlu(iatom)%mat(im,im1,isppol) = sum(gl_dlr(:,im,im1,isppol)*wdlr3(:))
            green%moments(5)%matlu(iatom)%mat(im,im1,isppol) = sum(gl_dlr(:,im,im1,isppol)*wdlr4(:))
            do itau=1,ntau
+             ! Do not use DOT_PRODUCT
              gtau_dlr(itau,iflavor,iflavor1) = sum(gl_dlr(:,im,im1,isppol)*adlr(:,itau))
            end do ! itau
            if (nsppol == 1 .and. nspinor == 1) gtau_dlr(:,iflavor+ndim,iflavor1+ndim) = gtau_dlr(:,iflavor,iflavor1)
@@ -3879,6 +3882,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,weiss,energy_level,udens,vee)
        do isppol=1,nsppol
          do im1=1,tndim
            do im=1,tndim
+             ! Do not use DOT_PRODUCT
              green%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol) = &
                & green%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol) + &
                & sum(gl_dlr(:,im,im1,isppol)*adlr_iw(:,ifreq))
@@ -3950,7 +3954,7 @@ subroutine lsq_g(gl,err)
 
  err = zero
  do itau=1,ntau
-   err = err + (sum(gl(:)*adlr(:,itau))-bdlr(itau))**2
+   err = err + (dot_product(gl(:),adlr(:,itau))-bdlr(itau))**2
  end do
 
 end subroutine lsq_g
@@ -3964,7 +3968,7 @@ subroutine jac_lsq_g(gl,jac)
 
  jac(:) = zero
  do itau=1,ntau
-   jac(1:ndlr) = jac(1:ndlr) + (sum(gl(:)*adlr(:,itau))-bdlr(itau))*adlr(:,itau)
+   jac(1:ndlr) = jac(1:ndlr) + (dot_product(gl(:),adlr(:,itau))-bdlr(itau))*adlr(:,itau)
  end do
  jac = jac * two
 
@@ -3979,9 +3983,9 @@ subroutine con_moments(gl,con)
 
  con(1) = sum(gl(:)) - mgreen(1)
  if (ncon > 1) then
-   con(2) = sum(gl(:)*wdlr_beta(:)) - mgreen(2)
-   con(3) = sum(gl(:)*wdlr2(:)) - mgreen(3)
-   if (ncon == 4) con(4) = sum(gl(:)*adlr(:,1)) - dble(occ_tmp)
+   con(2) = dot_product(gl(:),wdlr_beta(:)) - mgreen(2)
+   con(3) = dot_product(gl(:),wdlr2(:)) - mgreen(3)
+   if (ncon == 4) con(4) = dot_product(gl(:),adlr(:,1)) - dble(occ_tmp)
  end if ! ncon>1
 
 end subroutine con_moments
@@ -4306,7 +4310,7 @@ subroutine fourier_inv(paw_dmft,nmoments,ntau,matlu_tau,oper_freq,moments)
    end do ! ifreq
 
    omega_fac(1) = omega_fac(1) - half
-   omega_fac(2) = omega_fac(2) + tau/two - beta/(four)
+   omega_fac(2) = omega_fac(2) + tau/two - beta/four
    omega_fac(3) = omega_fac(3) - (tau**2)/four + tau*beta/four
 
    do i=1,nmoments

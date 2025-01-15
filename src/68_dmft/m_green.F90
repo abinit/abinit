@@ -1260,6 +1260,7 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
            call abi_xgemm("n","c",mbandc,mbandc,mbandc,cone,green%oper(ifreq)%ks(:,:,ikpt+shift_green,isppol), &
                         & mbandc,green%oper(ifreq)%ks(:,:,ikpt+shift_green,isppol),mbandc,czero,mat_tmp(:,:),mbandc)
            call zheev("n","u",mbandc,mat_tmp(:,:),mbandc,eig(:),work(:),lwork,rwork(:),info)
+           ! Do not use DOT_PRODUCT
            trace_tmp = trace_tmp + sum(log(eig(:)*omega_current))*wtk*temp
          end if ! optself
        end do ! ikpt
@@ -1356,7 +1357,7 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
 
    call xmpi_sum(green%trace_log,spacecomm,ierr)
 
-   correction = log(two) * mbandc * nsppol * temp
+   correction = - log(two) * mbandc * nsppol * temp
 
    band_index = 0
    beta = one / paw_dmft%temp
@@ -1377,6 +1378,7 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
    end do ! isppol
    if (nsppol == 1 .and. nspinor == 1) correction = correction * two
 
+   ! Do not use DOT_PRODUCT
    green%trace_log = green%trace_log + correction + fermilevel*paw_dmft%nelectval + &
       & dble(sum(green%trace_moments_log_ks(1:nmoments-1)*omega_fac(1:nmoments-1)))
 
@@ -3546,7 +3548,7 @@ subroutine newton(green,self,paw_dmft,x_input,x_precision,max_iter,&
 
    end if ! l_minus and l_plus
 
-   if (abs(Fx) < abs(Fxoptimum)) then
+   if (abs(Fx) < abs(Fxoptimum) .or. (iter == 1 .and. dmft_test == 1)) then
      Fxoptimum = Fx
      x_optimum = x_input
      if (dmft_test == 1) x_optimum = xold
@@ -3762,7 +3764,7 @@ subroutine compute_nb_elec(green,self,paw_dmft,Fx,nb_elec_x,fermie,Fxprime)
 
      do ifreq=green%nw,1,-1
        if (green%distrib%proct(ifreq) /= green%distrib%me_freq) cycle
-       omega = j_dpc * green%omega(ifreq)
+       omega = cmplx(zero,green%omega(ifreq),kind=dp)
        fac = two * paw_dmft%wgt_wlo(ifreq) * temp
        if (nsppol == 1 .and. nspinor == 1) fac = fac * two
 
@@ -3796,7 +3798,7 @@ subroutine compute_nb_elec(green,self,paw_dmft,Fx,nb_elec_x,fermie,Fxprime)
 
      do i=1,nmoments
        omega_fac(i) = czero
-       do ifreq=green%nw,1,-1 ! Never change the summation orders, this is VERY IMPORTANT to have better accuracy
+       do ifreq=green%nw,1,-1 ! NEVER change the summation order and DON'T use the intrinsic SUM
          omega_fac(i) = omega_fac(i) + paw_dmft%wgt_wlo(ifreq) / (paw_dmft%omega_lo(ifreq))**i
        end do
        omega_fac(i) = - two * temp * omega_fac(i) / (j_dpc)**i
@@ -3805,7 +3807,9 @@ subroutine compute_nb_elec(green,self,paw_dmft,Fx,nb_elec_x,fermie,Fxprime)
        if (i == 4) omega_fac(i) = omega_fac(i) + cone/(dble(48)*(temp**3))
      end do ! i
 
+     ! Do not use DOT_PRODUCT
      green%charge_ks = green%charge_ks + dble(sum(trace_moments(1:nmoments)*omega_fac(1:nmoments)))
+     ! Do not use DOT_PRODUCT
      Fxprime = Fxprime + dble(sum(trace_moments_prime(1:nmoments)*omega_fac(1:nmoments)))
 
      ABI_FREE(trace_moments)
@@ -3820,10 +3824,10 @@ subroutine compute_nb_elec(green,self,paw_dmft,Fx,nb_elec_x,fermie,Fxprime)
          do ikpt=1,nkpt
            nband_k = paw_dmft%nband(ikpt+(isppol-1)*nkpt)
            wtk = paw_dmft%wtk(ikpt)
-           do ib=nband_k,1,-1
+           do ib=1,nband_k
              if (paw_dmft%band_in(ib)) cycle
              eig = paw_dmft%eigen(ib+band_index)
-             correction = correction + occup_fd(eig,fermie,paw_dmft%temp)*wtk
+             correction = correction + occup_fd(eig,fermie,temp)*wtk
              if ((eig-fermie) > zero) then
                occ_prime = exp(-(eig-fermie)/temp) / (one+exp(-(eig-fermie)/temp))**2 / temp
              else
