@@ -773,6 +773,27 @@ has_fock=.false.
      ABI_FREE(cwavef2)
    end if
 
+   !  Add nuclear dipole moment contribution
+   if (associated(gs_ham%vectornd)) then
+     if (.not.k1_eq_k2) then
+       ABI_BUG('nuclear dipole vector potential not allowed for k/=k_^prime!')
+     end if
+     if (size(gs_ham%vectornd)/=gs_ham%n4*gs_ham%n5*gs_ham%n6*gs_ham%nvloc*3) then
+       ABI_BUG('wrong sizes for vectornd in getghc!')
+     end if
+     ABI_MALLOC(ghc_vectornd,(2,npw_k2*my_nspinor*ndat))
+
+     call getghc_nucdip_ompgpu(cwavef,ghc_vectornd,gbound_k1,gs_ham%istwf_k,kg_k1,kpt_k1,&
+     &    gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,npw_k1,gs_ham%nvloc,&
+     &    gs_ham%n4,gs_ham%n5,gs_ham%n6,my_nspinor,gs_ham%vectornd,gs_ham%gpu_option)
+
+     !$OMP TARGET UPDATE FROM(ghc)
+     ghc(1:2,1:npw_k2*my_nspinor*ndat)=ghc(1:2,1:npw_k2*my_nspinor*ndat)+ghc_vectornd(1:2,1:npw_k2*my_nspinor*ndat)
+     !$OMP TARGET UPDATE TO(ghc)
+
+     ABI_FREE(ghc_vectornd)
+   end if
+
    if (type_calc==1 .and. .not. fourwf_on_cpu) then
      !$OMP TARGET UPDATE FROM(ghc) nowait IF(transfer_ghc)
    end if
@@ -1016,6 +1037,260 @@ has_fock=.false.
 
 #endif
 end subroutine getghc_ompgpu
+!!***
+
+!!****f* ABINIT/getghc_nucdip_ompgpu
+!!
+!! NAME
+!! getghc_nucdip_ompgpu
+!!
+!! FUNCTION
+!! Compute magnetic nuclear dipole moment contribution to <G|H|C>
+!! for input vector |C> expressed in reciprocal space.
+!!
+!! INPUTS
+!! cwavef(2,npw_k*my_nspinor*ndat)=planewave coefficients of wavefunction.
+!! gbound_k(2*mgfft+4)=sphere boundary info
+!! gprimd(3,3)=dimensional reciprocal space primitive translations (b^-1)
+!! istwf_k=input parameter that describes the storage of wfs
+!! kg_k(3,npw_k)=G vec coordinates wrt recip lattice transl.
+!! kpt(3)=current k point
+!! mgfft=maximum single fft dimension
+!! mpi_enreg=information about MPI parallelization
+!! my_nspinor=number of spinorial components of the wavefunctions (on current proc)
+!! ndat=number of FFTs to perform in parall
+!! ngfft(18)=contain all needed information about 3D FFT
+!! npw_k=number of planewaves in basis for given k point.
+!! nvloc=number of spin components of vxctaulocal
+!! n4,n5,n6=for dimensionning of vxctaulocal
+!! gpu_option= GPU implementation to use, i.e. cuda, openMP, ... (0=not using GPU)
+!! vectornd(n4,n5,n6,nvloc,3)= local potential corresponding to the vector potential of the array
+!!  of nuclear magnetic dipoles, in real space, on the augmented fft grid.
+!!
+!! OUTPUT
+!!  ghc_vectornd(2,npw_k*my_nspinor*ndat)=A.p contribution to <G|H|C> for array of nuclear dipoles
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!! this code is a copied, simplied version of getghc_mGGA (see below) and should eventually be
+!! integrated into that code, to simplify maintenance
+!!
+!! SOURCE
+
+subroutine getghc_nucdip_ompgpu(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mgfft,mpi_enreg,&
+&                      ndat,ngfft,npw_k,nvloc,n4,n5,n6,my_nspinor,vectornd,gpu_option)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: istwf_k,mgfft,my_nspinor,ndat,npw_k,nvloc,n4,n5,n6,gpu_option
+ type(MPI_type),intent(in) :: mpi_enreg
+!arrays
+ integer,intent(in) :: gbound_k(2*mgfft+4),kg_k(3,npw_k),ngfft(18)
+ real(dp),intent(in) :: kpt(3)
+ real(dp),intent(inout) :: cwavef(2,npw_k*my_nspinor*ndat)
+ real(dp),intent(inout) :: ghc_vectornd(2,npw_k*my_nspinor*ndat)
+ real(dp),intent(inout) :: vectornd(n4,n5,n6,nvloc,3)
+
+!Local variables-------------------------------
+!scalars
+ integer,parameter :: tim_fourwf=1
+ integer :: icmplx,idat,idir,ipw,iv1,iv2,nspinortot,shift
+ logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc
+ real(dp) :: scale_conversion,weight=one
+ !arrays
+ real(dp),allocatable :: cwavef1(:,:),cwavef2(:,:)
+ real(dp),allocatable :: gcwavef(:,:,:),gcwavef1(:,:,:),gcwavef2(:,:,:)
+ real(dp),allocatable :: ghc1(:,:),ghc2(:,:),kgkpk(:,:)
+ real(dp),allocatable :: dx(:),dy(:)
+
+! *********************************************************************
+
+ ghc_vectornd(:,:)=zero
+ if (nvloc/=1) return
+
+ nspinortot=min(2,(1+mpi_enreg%paral_spinor)*my_nspinor)
+ if (mpi_enreg%paral_spinor==0) then
+   shift=npw_k
+   nspinor1TreatedByThisProc=.true.
+   nspinor2TreatedByThisProc=(nspinortot==2)
+ else
+   shift=0
+   nspinor1TreatedByThisProc=(mpi_enreg%me_spinor==0)
+   nspinor2TreatedByThisProc=(mpi_enreg%me_spinor==1)
+ end if
+
+ ! scale conversion from SI to atomic units,
+ ! here \alpha^2 where \alpha is the fine structure constant
+ scale_conversion = FineStructureConstant2
+
+ if (nspinortot==1) then
+
+    ABI_MALLOC(ghc1,(2,npw_k*ndat))
+
+    !  Do it in 2 STEPs:
+    !  STEP1: Compute grad of cwavef
+    ABI_MALLOC(gcwavef,(2,npw_k*ndat,3))
+
+    gcwavef = zero
+
+    ! compute k + G. Note these are in reduced coords
+    ABI_MALLOC(kgkpk,(npw_k,3))
+    do ipw = 1, npw_k
+       kgkpk(ipw,:) = kpt(:) + kg_k(:,ipw)
+    end do
+
+    ! make 2\pi(k+G)c(G)|G> by element-wise multiplication
+    do idir = 1, 3
+       do idat = 1, ndat
+          iv1=1+(idat-1)*npw_k; iv2=-1+iv1+npw_k
+          gcwavef(1,iv1:iv2,idir) = cwavef(1,iv1:iv2)*kgkpk(1:npw_k,idir)
+          gcwavef(2,iv1:iv2,idir) = cwavef(2,iv1:iv2)*kgkpk(1:npw_k,idir)
+       end do
+    end do
+    ABI_FREE(kgkpk)
+    gcwavef = gcwavef*two_pi
+
+    !  STEP2: Compute sum of (grad components of vectornd)*(grad components of cwavef)
+    ABI_MALLOC(dx,(npw_k))
+    ABI_MALLOC(dy,(npw_k))
+    do idir=1,3
+      call fourwf(1,vectornd(:,:,:,:,idir),gcwavef(:,:,idir),ghc1,work,gbound_k,gbound_k,&
+           istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
+           &     tim_fourwf,weight,weight,gpu_option=gpu_option)
+!!$OMP PARALLEL DO
+       ! DAXPY is a BLAS routine for y -> A*x + y, here x = ghc1, A = scale_conversion, and y = ghc_vectornd
+       ! should be faster than explicit loop over ipw as npw_k gets large
+      do idat=1,ndat
+        iv1=1+(idat-1)*npw_k; iv2=-1+iv1+npw_k
+        do icmplx=1,2
+          dx=ghc1(icmplx,iv1:iv2)
+          dy=ghc_vectornd(icmplx,iv1:iv2)
+          call DAXPY(npw_k,scale_conversion,dx,1,dy,1)
+          ghc_vectornd(icmplx,iv1:iv2)=dy
+        end do
+      end do
+    end do ! idir
+    ABI_FREE(dx)
+    ABI_FREE(dy)
+    ABI_FREE(gcwavef)
+    ABI_FREE(ghc1)
+
+ else ! nspinortot==2
+
+    ABI_MALLOC(cwavef1,(2,npw_k*ndat))
+    ABI_MALLOC(cwavef2,(2,npw_k*ndat))
+    do idat=1,ndat
+       iv1=1+(idat-1)*npw_k; iv2=-1+iv1+npw_k
+       cwavef1(1:2,iv1:iv2) = cwavef(1:2,1+(idat-1)*my_nspinor*npw_k:npw_k+(idat-1)*my_nspinor*npw_k)
+       cwavef2(1:2,iv1:iv2) = &
+         & cwavef(1:2,1+(idat-1)*my_nspinor*npw_k+shift:npw_k+(idat-1)*my_nspinor*npw_k+shift)
+    end do
+
+    ! compute k + G. Note these are in reduced coords
+    ABI_MALLOC(kgkpk,(npw_k,3))
+    do ipw = 1, npw_k
+       kgkpk(ipw,:) = kpt(:) + kg_k(:,ipw)
+    end do
+
+    if (nspinor1TreatedByThisProc) then
+
+       ABI_MALLOC(ghc1,(2,npw_k*ndat))
+
+       !  Do it in 2 STEPs:
+       !  STEP1: Compute grad of cwavef
+       ABI_MALLOC(gcwavef1,(2,npw_k*ndat,3))
+
+       gcwavef1 = zero
+       ! make 2\pi(k+G)c(G)|G> by element-wise multiplication
+       do idir = 1, 3
+         do idat = 1, ndat
+           iv1=1+(idat-1)*npw_k; iv2=-1+iv1+npw_k
+           gcwavef1(1,iv1:iv2,idir) = cwavef1(1,iv1:iv2)*kgkpk(1:npw_k,idir)
+           gcwavef1(2,iv1:iv2,idir) = cwavef1(2,iv1:iv2)*kgkpk(1:npw_k,idir)
+         end do
+       end do
+       gcwavef1 = gcwavef1*two_pi
+
+       !  STEP2: Compute sum of (grad components of vectornd)*(grad components of cwavef)
+       ABI_MALLOC(dx,(npw_k))
+       ABI_MALLOC(dy,(npw_k))
+       do idir=1,3
+          call fourwf(1,vectornd(:,:,:,:,idir),gcwavef1(:,:,idir),ghc1,work,gbound_k,gbound_k,&
+               istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
+               &     tim_fourwf,weight,weight,gpu_option=gpu_option)
+!!$OMP PARALLEL DO
+          ! DAXPY is a BLAS routine for y -> A*x + y, here x = ghc1, A = scale_conversion, and y = ghc_vectornd
+          ! should be faster than explicit loop over ipw as npw_k gets large
+          do idat=1,ndat
+            iv1=1+(idat-1)*npw_k; iv2=-1+iv1+npw_k
+            do icmplx=1,2
+              dx=ghc1(icmplx,iv1:iv2)
+              dy=ghc_vectornd(icmplx,iv1:iv2)
+              call DAXPY(npw_k,scale_conversion,dx,1,dy,1)
+              ghc_vectornd(icmplx,iv1:iv2)=dy
+            end do
+          end do
+       end do ! idir
+       ABI_FREE(dx)
+       ABI_FREE(dy)
+       ABI_FREE(gcwavef1)
+       ABI_FREE(ghc1)
+
+    end if ! end spinor 1
+
+    if (nspinor2TreatedByThisProc) then
+
+       ABI_MALLOC(ghc2,(2,npw_k*ndat))
+
+       !  Do it in 2 STEPs:
+       !  STEP1: Compute grad of cwavef
+       ABI_MALLOC(gcwavef2,(2,npw_k*ndat,3))
+       gcwavef2 = zero
+       ! make 2\pi(k+G)c(G)|G> by element-wise multiplication
+       do idir = 1, 3
+         do idat = 1, ndat
+           iv1=1+(idat-1)*npw_k; iv2=-1+iv1+npw_k
+           gcwavef2(1,iv1:iv2,idir) = cwavef2(1,iv1:iv2)*kgkpk(1:npw_k,idir)
+           gcwavef2(2,iv1:iv2,idir) = cwavef2(2,iv1:iv2)*kgkpk(1:npw_k,idir)
+          end do
+       end do
+       gcwavef2 = gcwavef2*two_pi
+
+       !  STEP2: Compute sum of (grad components of vectornd)*(grad components of cwavef)
+       ABI_MALLOC(dx,(npw_k))
+       ABI_MALLOC(dy,(npw_k))
+       do idir=1,3
+          call fourwf(1,vectornd(:,:,:,:,idir),gcwavef2(:,:,idir),ghc2,work,gbound_k,gbound_k,&
+               istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
+               &     tim_fourwf,weight,weight,gpu_option=gpu_option)
+!!$OMP PARALLEL DO
+          ! DAXPY is a BLAS routine for y -> A*x + y, here x = ghc1, A = scale_conversion, and y = ghc_vectornd
+          ! should be faster than explicit loop over ipw as npw_k gets large
+          do idat=1,ndat
+            iv1=1+(idat-1)*npw_k; iv2=-1+iv1+npw_k
+            do icmplx=1,2
+              dx=ghc2(icmplx,iv1:iv2)
+              dy=ghc_vectornd(icmplx,iv1+shift:iv2+shift)
+              call DAXPY(npw_k,scale_conversion,dx,1,dy,1)
+              ghc_vectornd(icmplx,iv1+shift:iv2+shift)=dy
+            end do
+          end do
+       end do ! idir
+       ABI_FREE(dx)
+       ABI_FREE(dy)
+       ABI_FREE(gcwavef2)
+       ABI_FREE(ghc2)
+
+    end if ! end spinor 2
+
+    ABI_FREE(cwavef1)
+    ABI_FREE(cwavef2)
+    ABI_FREE(kgkpk)
+
+ end if ! nspinortot
+
+end subroutine getghc_nucdip_ompgpu
 !!***
 
 end module m_getghc_ompgpu
