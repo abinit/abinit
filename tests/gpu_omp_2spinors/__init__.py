@@ -16,4 +16,5 @@ is_multi_parallel = True
 #: List of input files
 inp_files = [
 "t01.abi", # PAW, GS, using CHEBFI and LOBPCG (AlP, nspinor==2, nspden==1)
+"t02.abi", # PAW, GS+DFPT, only DDK (AlP, nspinor==2, nspden==1)
 ]
