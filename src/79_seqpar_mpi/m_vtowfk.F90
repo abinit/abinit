@@ -69,10 +69,6 @@ module m_vtowfk
  use gator_mod
 #endif
 
-#ifdef HAVE_OPENMP_OFFLOAD
- use m_ompgpu_fourwf
-#endif
-
 #if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
  use m_nvtx_data
 #endif
@@ -853,85 +849,12 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
            if (abs(occ_k(iband)) < tol8) weight_t(iblocksize) = zero
          end do
 
-         if (dtset%gpu_option == ABI_GPU_LEGACY) then
-#if defined HAVE_GPU_CUDA
-           call gpu_fourwf(1,&        ! cplex
-             &     rhoaug(:,:,:,1),&  ! denpot
-             &     cwavef(:,:),&      ! fofgin
-             &     dummy,&            ! fofgout
-             &     wfraug,&           ! fofr
-             &     gs_hamk%gbound_k,& ! gboundin
-             &     gs_hamk%gbound_k,& ! gboundout
-             &     istwf_k,&          ! istwf_k
-             &     kg_k,&             ! kg_kin
-             &     kg_k,&             ! kg_kout
-             &     gs_hamk%mgfft,&    ! mgfft
-             &     mpi_enreg,&        ! mpi_enreg
-             &     blocksize,&        ! ndat = number of band in current block of bands
-             &     gs_hamk%ngfft,&    ! ngfft
-             &     npw_k,&            ! npwin
-             &     1,&                ! npwout
-             &     gs_hamk%n4,&       ! n4
-             &     gs_hamk%n5,&       ! n5
-             &     gs_hamk%n6,&       ! n6
-             &     1,&                ! option
-             &     mpi_enreg%paral_kgb,& ! paral_kgb
-             &     tim_fourwf,&          ! tim_fourwf
-             &     weight_t,&            ! weight_r
-             &     weight_t)             ! weight_i
-#endif
-         else if (dtset%gpu_option == ABI_GPU_KOKKOS) then
-#if defined HAVE_GPU_CUDA
-           call gpu_fourwf_managed(1,&        ! cplex
-             &     rhoaug(:,:,:,1),&  ! denpot
-             &     cwavef(:,:),&      ! fofgin
-             &     dummy,&            ! fofgout
-             &     wfraug,&           ! fofr
-             &     gs_hamk%gbound_k,& ! gboundin
-             &     gs_hamk%gbound_k,& ! gboundout
-             &     istwf_k,&          ! istwf_k
-             &     kg_k,&             ! kg_kin
-             &     kg_k,&             ! kg_kout
-             &     gs_hamk%mgfft,&    ! mgfft
-             &     mpi_enreg,&        ! mpi_enreg
-             &     blocksize,&        ! ndat = number of band in current block of bands
-             &     gs_hamk%ngfft,&    ! ngfft
-             &     npw_k,&            ! npwin
-             &     1,&                ! npwout
-             &     gs_hamk%n4,&       ! n4
-             &     gs_hamk%n5,&       ! n5
-             &     gs_hamk%n6,&       ! n6
-             &     1,&                ! option
-             &     mpi_enreg%paral_kgb,& ! paral_kgb
-             &     tim_fourwf,&          ! tim_fourwf
-             &     weight_t,&            ! weight_r
-             &     weight_t)             ! weight_i
-#endif
-         else if (dtset%gpu_option == ABI_GPU_OPENMP) then
-#if defined HAVE_OPENMP_OFFLOAD
-           call ompgpu_fourwf(1,&     ! cplex
-             &     rhoaug(:,:,:,1),&  ! denpot
-             &     cwavef(:,:),&      ! fofgin
-             &     dummy,&            ! fofgout
-             &     wfraug,&           ! fofr
-             &     gs_hamk%gbound_k,& ! gboundin
-             &     gs_hamk%gbound_k,& ! gboundout
-             &     istwf_k,&          ! istwf_k
-             &     kg_k,&             ! kg_kin
-             &     kg_k,&             ! kg_kout
-             &     gs_hamk%mgfft,&    ! mgfft
-             &     blocksize,&        ! ndat = number of band in current block of bands
-             &     gs_hamk%ngfft,&    ! ngfft
-             &     npw_k,&            ! npwin
-             &     1,&                ! npwout
-             &     gs_hamk%n4,&       ! n4
-             &     gs_hamk%n5,&       ! n5
-             &     gs_hamk%n6,&       ! n6
-             &     1,&                ! option
-             &     weight_t,&         ! weight_r
-             &     weight_t)          ! weight_i
-#endif
-         end if
+         call fourwf(1,rhoaug(:,:,:,1),cwavef(:,:),dummy,wfraug,&
+         &    gs_hamk%gbound_k,gs_hamk%gbound_k,istwf_k,kg_k,kg_k,&
+         &    gs_hamk%mgfft,mpi_enreg,blocksize,gs_hamk%ngfft,&
+         &    npw_k,1,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,1,tim_fourwf,weight,weight,&
+         &    weight_array_r=weight_t,weight_array_i=weight_t,&
+         &    gpu_option=dtset%gpu_option)
 
              if (dtset%nspinor==2) then
                ABI_ERROR('The case where iscf>0, fixed_occ=True and nspinor=2 is not yet implemented on GPU. FIX ME.')
