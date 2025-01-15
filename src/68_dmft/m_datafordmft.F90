@@ -460,7 +460,7 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
 
                ! In that case, simply assume |Psi> = \sum_{proja} <P_a|Psi><Chi|phi_a> (only true inside the PAW sphere
                ! and if your PAW basis is complete)
-
+               ! Do not use DOT_PRODUCT
                if (verif_band) buf_chipsi(ibuf_chipsi) = buf_chipsi(ibuf_chipsi) + sum(cwprj(1:nproju,im)*paw_dmft%phi_int(1:nproju,itypat))
 
              end if ! use_full_chipsi
@@ -1817,6 +1817,7 @@ subroutine print_wannier(paw_dmft,istep)
  integer :: iatom,iflavor,ir,itypat,lpawu,nflavor,unt
  character(len=3) :: tag_iter
  character(len=10) :: tag_at
+ character(len=500) :: message
  character(len=fnlen) :: tmpfil
 !************************************************************************
 
@@ -1838,9 +1839,7 @@ subroutine print_wannier(paw_dmft,istep)
    call int2char4(iatom,tag_at)
    ABI_CHECK((tag_at(1:1)/='#'),'Bug: string length too short!')
    tmpfil = trim(paw_dmft%filapp)//'Wannier_functions_iatom_'//trim(tag_at)//'_'//tag_iter
-   unt = get_unit()
-   open(unit=unt,file=tmpfil,status='unknown',form='formatted')
-   rewind(unt)
+   if (open_file(tmpfil,message,newunit=unt) /= 0) ABI_ERROR(message)
    do ir=1,paw_dmft%radgrid(itypat)%mesh_size
      write(unt,*) paw_dmft%radgrid(itypat)%rad(ir),(dble(paw_dmft%wannier(ir,iflavor,iatom)),iflavor=1,nflavor)
    end do ! ir

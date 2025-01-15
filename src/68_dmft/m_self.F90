@@ -1258,6 +1258,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
            do isppol=1,nsppol
              do im1=1,ndim
                self%moments(i)%matlu(iatom)%mat(:,im1,isppol) = buffer(icount+1:icount+ndim)
+               icount = icount + ndim
              end do ! im1
            end do ! isppol
          end do ! iatom
