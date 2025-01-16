@@ -3,7 +3,8 @@
 #
 add_library(10_defs STATIC
   defs_basis.F90
-  defs_datatypes.F90)
+  defs_datatypes.F90
+)
 
 set_target_properties(10_defs
   PROPERTIES

@@ -1,6 +1,6 @@
-Hartwigsen-Goedecker-Hutter psp for Ni,  from PRB58, 3641 (1998) 
+Hartwigsen-Goedecker-Hutter psp for Ni,  from PRB58, 3641 (1998)
    28  10  010605 zatom,zion,pspdat
- 3 1   2 0 2001 0  pspcod,pspxc,lmax,lloc,mmax,r2well 
+ 3 1   2 0 2001 0  pspcod,pspxc,lmax,lloc,mmax,r2well
   0.560000    0.000000    0.000000    0.000000   0.000000 rloc, c1, c2, c3, c4
   0.425399    3.619651    3.088965    3.058598          rs, h11s, h22s, h33s
   0.584081    1.742220    0.386341    0.000000          rp, h11p, h22p, h33p

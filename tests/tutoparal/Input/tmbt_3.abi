@@ -1,5 +1,5 @@
 # Crystalline alpha-quartz
-# DATASET 1 : Screening calculation 
+# DATASET 1 : Screening calculation
 #
 optdriver   3    # Screening run
 irdwfk      1    # To read the WFK file.
@@ -11,7 +11,7 @@ inclvkb     2    # Correct treatment of the optical limit.
 
 gwcalctyp   2    # Contour-deformation technique.
 spmeth      1    # Enable the spectral method.
-nomegasf  100    # Number of points for the spectral function. 
+nomegasf  100    # Number of points for the spectral function.
 gwpara      2    # Parallelization over bands
 awtr        1    # Take advantage of time-reversal. Mandatory when gwpara=2 is used.
 freqremax  40 eV # Frequency mesh for the polarizability
@@ -87,6 +87,6 @@ rprim   5.0000000000e-01 -8.6602540378e-01  0.0000000000e+00
 #%% [extra_info]
 #%% authors = M. Giantomassi
 #%% keywords =  GW
-#%% description = GW calculation for crystalline alpha-quartz. 
+#%% description = GW calculation for crystalline alpha-quartz.
 #%%   Screening calculation with Hilbert transform
 #%%<END TEST_INFO>

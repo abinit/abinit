@@ -1,6 +1,6 @@
-Hartwigsen-Goedecker-Hutter psp for Xe,  from PRB58, 3641 (1998) 
+Hartwigsen-Goedecker-Hutter psp for Xe,  from PRB58, 3641 (1998)
    54   8  010605 zatom,zion,pspdat
- 3 1   2 0 2001 0  pspcod,pspxc,lmax,lloc,mmax,r2well 
+ 3 1   2 0 2001 0  pspcod,pspxc,lmax,lloc,mmax,r2well
   0.560000   12.734280    0.000000    0.000000   0.000000 rloc, c1, c2, c3, c4
   0.507371    2.236451   -0.403551   -1.132507          rs, h11s, h22s, h33s
   0.541024    1.130043   -0.752764    0.000000          rp, h11p, h22p, h33p

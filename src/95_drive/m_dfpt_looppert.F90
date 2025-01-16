@@ -4,7 +4,6 @@
 !!
 !! FUNCTION
 !!
-!!
 !! COPYRIGHT
 !!  Copyright (C) 1999-2024 ABINIT group (XG, DRH, MB, XW, MT, SPr, MJV)
 !!  This file is distributed under the terms of the
@@ -40,13 +39,11 @@ module m_dfpt_loopert
  use m_ddb
  use m_wfd
  use m_ddb_hdr
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
  use m_hdr
  use m_ebands
 
- use defs_datatypes, only : pseudopotential_type, ebands_t
+ use defs_datatypes, only : pseudopotential_type
  use defs_abitypes, only : MPI_type
  use m_occ,        only : getnel
  use m_io_tools,   only : file_exists
@@ -57,7 +54,7 @@ module m_dfpt_loopert
  use m_atomdata,   only : atom_gauss
  use m_eig2d,      only : eigr2d_init,eigr2d_t, eigr2d_ncwrite,eigr2d_free, &
                           gkk_t, gkk_init, gkk_ncwrite,gkk_free, outbsd, eig2stern
- use m_crystal,    only : crystal_init, crystal_t
+ use m_crystal,    only : crystal_t
  use m_efmas,      only : efmas_main, efmas_analysis, print_efmas
  use m_fft,        only : fourdp
  use m_fftcore,    only : fftcore_set_mixprec
@@ -282,9 +279,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  integer :: nstep_save,nsym1,ntypat,nwffile,nylmgr,nylmgr1,old_comm_atom,openexit,option,optorth,optthm,pertcase
  integer :: qphase_rhoij,rdwr,rdwrpaw,spaceComm,smdelta,timrev_pert,timrev_kpt,to_compute_this_pert
  integer :: useylmgr,useylmgr1,dfpt_scfcv_retcode,optn2
-#ifdef HAVE_NETCDF
  integer :: ncerr,ncid
-#endif
  real(dp) :: boxcut,dosdeltae,eberry,ecore,ecut_eff,ecutf,edocc,eei,eeig0,eew,efrhar,efrkin,efrloc
  real(dp) :: efrnl,efrx1,efrx2,ehart,ehart01,ehart1,eii,ek,ek0,ek1,ek2,eloc0
  real(dp) :: elpsp1,enl,enl0,enl1,end0,end1,entropy,enxc,eovl1,epaw1,evxctau0,evxctau1,evdw,exc1
@@ -299,8 +294,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  character(len=500) :: msg
  type(crystal_t) :: crystal,ddb_crystal
  type(dataset_type), pointer :: dtset_tmp
- type(ebands_t) :: ebands_k,ebands_kq,gkk_ebands
- type(ebands_t) :: ebands_kmq !+/-q duplicates
+ type(ebands_t) :: ebands_k,ebands_kq,gkk_ebands, ebands_kmq !+/-q duplicates
  type(gkk_t)     :: gkk2d
  type(hdr_type) :: hdr,hdr_den,hdr_tmp
  type(ddb_hdr_type) :: ddb_hdr
@@ -380,10 +374,10 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  call mkrdim(dtset%acell_orig(1:3,1),dtset%rprim_orig(1:3,1:3,1),rprimd)
  call metric(gmet,gprimd,std_out,rmet,rprimd,ucvol)
 
- call crystal_init(dtset%amu_orig(:,1),crystal,dtset%spgroup,dtset%natom,dtset%npsp,&
-& psps%ntypat,dtset%nsym,rprimd,dtset%typat,xred,dtset%ziontypat,dtset%znucl,1,&
-& dtset%nspden==2.and.dtset%nsppol==1,remove_inv,psps%title,&
-& symrel=dtset%symrel,tnons=dtset%tnons,symafm=dtset%symafm)
+ call crystal%init(dtset%amu_orig(:,1),dtset%spgroup,dtset%natom,dtset%npsp,&
+  psps%ntypat,dtset%nsym,rprimd,dtset%typat,xred,dtset%ziontypat,dtset%znucl,1,&
+  dtset%nspden==2.and.dtset%nsppol==1,remove_inv,psps%title,&
+  symrel=dtset%symrel,tnons=dtset%tnons,symafm=dtset%symafm)
 
 !Get FFT grid(s) sizes (be careful !) See NOTES in the comments at the beginning of respfn.F90
  if (psps%usepaw==1.and.pawfgr%usefinegrid==1) then
@@ -1091,7 +1085,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    bantot_rbz=sum(nband_rbz(1:nkpt_rbz*dtset%nsppol))
    ABI_MALLOC(eigen0,(bantot_rbz))
    eigen0(:)=zero
-   call ebands_init(bantot_rbz,ebands_k,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,&
+   call ebands_k%init(bantot_rbz, dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,&
      doccde_rbz,eigen0,istwfk_rbz,kpt_rbz,&
      nband_rbz,nkpt_rbz,npwarr,dtset%nsppol,dtset%nspinor,dtset%tphysel,dtset%tsmear,dtset%occopt,occ_rbz,wtk_rbz,&
      dtset%cellcharge(1), dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
@@ -1100,7 +1094,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 
 !  Initialize header, update it with evolving variables
    gscase=0 ! A GS WF file is read
-   call hdr_init(ebands_k,codvsn,dtset,hdr0,pawtab,gscase,psps,wvl%descr,&
+   call hdr0%init(ebands_k,codvsn,dtset,pawtab,gscase,psps,wvl%descr,&
      comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
 
    call hdr0%update(bantot_rbz,etotal,fermie,fermie,& ! CP: duplicated fermie to fit new def of hdr_update
@@ -1250,14 +1244,14 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    ABI_MALLOC(eigenq,(bantot_rbz))
    ABI_MALLOC(doccde_tmp,(dtset%mband*nkpt_rbz*dtset%nsppol))
    eigenq(:)=zero
-   call ebands_init(bantot_rbz,ebands_kq,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,&
+   call ebands_kq%init(bantot_rbz, dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,&
 &   doccde_tmp,eigenq,istwfk_rbz,kpq_rbz,&
 &   nband_rbz,nkpt_rbz,npwar1,dtset%nsppol,dtset%nspinor,dtset%tphysel,dtset%tsmear,dtset%occopt,occ_rbz,wtk_rbz,&
 &   dtset%cellcharge(1), dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
 &   dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
    if (.not.kramers_deg) then
      eigenq(:)=zero
-     call ebands_init(bantot_rbz,ebands_kmq,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,&
+     call ebands_kmq%init(bantot_rbz, dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,&
 &     doccde_tmp,eigenq,istwfk_rbz,kmq_rbz,&
 &     nband_rbz,nkpt_rbz,npwar1_mq,dtset%nsppol,dtset%nspinor,dtset%tphysel,dtset%tsmear,dtset%occopt,occ_rbz,wtk_rbz,&
 &     dtset%cellcharge(1), dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
@@ -1267,10 +1261,10 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    ABI_FREE(doccde_tmp)
 
 !  Initialize header
-   call hdr_init(ebands_kq,codvsn,dtset,hdr,pawtab,pertcase,psps,wvl%descr, &
+   call hdr%init(ebands_kq,codvsn,dtset,pawtab,pertcase,psps,wvl%descr, &
      comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab )
    if (.not.kramers_deg) then
-     call hdr_init(ebands_kmq,codvsn,dtset,hdr,pawtab,pertcase,psps,wvl%descr, &
+     call hdr%init(ebands_kmq,codvsn,dtset,pawtab,pertcase,psps,wvl%descr, &
        comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab )
    end if
 
@@ -2015,7 +2009,6 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      call outgkk(bantot_rbz, nmatel,gkkfilnam,eigen0,eigen1,hdr0,hdr,mpi_enreg,phasecg)
      ABI_FREE(phasecg)
 
-#ifdef HAVE_NETCDF
      ! Reshape eigen1 into gkk for netCDF output
      ABI_MALLOC_OR_DIE(gkk,(2*dtset%mband*dtset%nsppol,dtset%nkpt,1,1,dtset%mband), ierr)
      gkk(:,:,:,:,:) = zero
@@ -2043,7 +2036,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      ! MG FIXME: Here there's a bug because eigen0 is dimensioned with nkpt_rbz i.e. IBZ(q)
      ! but the ebands_t object is constructed with dimensions taken from hdr0 i.e. the IBZ(q=0).
      bantot= dtset%mband*dtset%nkpt*dtset%nsppol
-     call ebands_init(bantot,gkk_ebands,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,&
+     call gkk_ebands%init(bantot,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,&
 &     doccde,eigen0,hdr0%istwfk,hdr0%kptns,&
 &     hdr0%nband, hdr0%nkpt,hdr0%npwarr,hdr0%nsppol,hdr0%nspinor,&
 &     hdr0%tphysel,hdr0%tsmear,hdr0%occopt,hdr0%occ,hdr0%wtk,&
@@ -2058,7 +2051,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        fname = strcat(gkkfilnam,".nc")
        NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating GKK file")
        NCF_CHECK(crystal%ncwrite(ncid))
-       NCF_CHECK(ebands_ncwrite(gkk_ebands, ncid))
+       NCF_CHECK(gkk_ebands%ncwrite(ncid))
        call gkk_ncwrite(gkk2d,dtset%qptn(:),dtset%wtq, ncid)
        NCF_CHECK(nf90_close(ncid))
      end if
@@ -2066,8 +2059,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      ! Free memory
      ABI_FREE(gkk)
      call gkk_free(gkk2d)
-     call ebands_free(gkk_ebands)
-#endif
+     call gkk_ebands%free()
    end if
 
    if (dtset%prepgkk == 1 .and. found_eq_gkk) then
@@ -2124,22 +2116,20 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 !&     occ_rbz,resid,response,dtfil%unwff2,wvl%wfs,wvl%descr)
    end if
 
-
-#ifdef HAVE_NETCDF
    ! Output DDK file in netcdf format.
    ! Can be used by optic instead of the 1WF file that is really huge.
    if (me == master .and. ipert == dtset%natom + 1 .and. dtset%prtevk == 1) then
      fname = strcat(dtfil%filnam_ds(4), "_EVK.nc" )
      NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating EVK.nc file")
      ! Have to build hdr on k-grid with info about perturbation.
-     call hdr_copy(hdr0, hdr_tmp)
+     call hdr0%copy(hdr_tmp)
      hdr_tmp%kptopt = dtset%kptopt
      hdr_tmp%pertcase = pertcase
      hdr_tmp%qptn = dtset%qptn(1:3)
      NCF_CHECK(hdr_tmp%ncwrite(ncid, 43, nc_define=.True.))
      call hdr_tmp%free()
      NCF_CHECK(crystal%ncwrite(ncid))
-     NCF_CHECK(ebands_ncwrite(ebands_k, ncid))
+     NCF_CHECK(ebands_k%ncwrite(ncid))
      ncerr = nctk_def_arrays(ncid, [ &
      nctkarr_t('h1_matrix_elements', "dp", &
        "two, max_number_of_states, max_number_of_states, number_of_kpoints, number_of_spins")], defmode=.True.)
@@ -2150,8 +2140,6 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      NCF_CHECK(ncerr)
      NCF_CHECK(nf90_close(ncid))
    end if
-#endif
-
 
 !  If the perturbation is d/dk, evaluate the f-sum rule.
    if (ipert==dtset%natom+1 )then
@@ -2310,9 +2298,9 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    call hdr%free()
 
    ! Clean band structure datatypes (should use it more in the future !)
-   call ebands_free(ebands_k)
-   call ebands_free(ebands_kq)
-   if(.not.kramers_deg) call ebands_free(ebands_kmq)
+   call ebands_k%free()
+   call ebands_kq%free()
+   if(.not.kramers_deg) call ebands_kmq%free()
 
 !  %%%% Parallelization over perturbations %%%%%
 !  *Redefine output/log files
@@ -2434,13 +2422,11 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 
    if (dtset%prtefmas == 1 .and. me == master) then
      fname = strcat(dtfil%filnam_ds(4), "_EFMAS.nc")
-#ifdef HAVE_NETCDF
      NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating EFMAS file")
      NCF_CHECK(crystal%ncwrite(ncid))
-     !NCF_CHECK(ebands_ncwrite(ebands_k, ncid)) ! At this stage, ebands_k is not available
+     !NCF_CHECK(ebands_k%ncwrite(ncid)) ! At this stage, ebands_k is not available
      call print_efmas(efmasdeg, efmasval, kpt_rbz_pert, ncid)
      NCF_CHECK(nf90_close(ncid))
-#endif
    endif
 
    call efmas_analysis(dtset,efmasdeg,efmasval,kpt_rbz_pert,mpi_enreg,nkpt_rbz,rprimd)

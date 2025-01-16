@@ -1,6 +1,6 @@
-Hartwigsen-Goedecker-Hutter psp for Ru,  from PRB58, 3641 (1998) 
+Hartwigsen-Goedecker-Hutter psp for Ru,  from PRB58, 3641 (1998)
    44  16  010605 zatom,zion,pspdat
- 3 1   2 0 2001 0  pspcod,pspxc,lmax,lloc,mmax,r2well 
+ 3 1   2 0 2001 0  pspcod,pspxc,lmax,lloc,mmax,r2well
   0.430000   13.582571    0.596227    0.000000   0.000000 rloc, c1, c2, c3, c4
   0.364084    4.480632   -5.268679    0.000000          rs, h11s, h22s, h33s
   0.364053   -0.320372   -3.059714    0.000000          rp, h11p, h22p, h33p

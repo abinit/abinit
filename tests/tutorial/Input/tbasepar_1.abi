@@ -17,7 +17,7 @@ pseudos "Psdj_nc_sr_04_pw_std_psp8/Pb.psp8"
 
 #Definition of the atoms and atoms positions
 natom  1
-typat  1 
+typat  1
 xred
   0.000   0.000   0.000
 

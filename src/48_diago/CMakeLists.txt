@@ -29,7 +29,8 @@ target_link_libraries(48_diago
   PUBLIC
   abinit::44_abitools
   abinit::44_abitypes_defs
-  abinit::45_xgTools)
+  abinit::45_xgTools
+)
 
 if(ABINIT_ENABLE_GPU_CUDA)
   target_link_libraries(48_diago

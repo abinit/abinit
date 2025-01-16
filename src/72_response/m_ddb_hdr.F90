@@ -29,9 +29,7 @@ MODULE m_ddb_hdr
  use m_dtset
  use m_crystal
  use m_nctk
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
 
  use defs_datatypes, only : pseudopotential_type
  use m_copy,      only : alloc_copy
@@ -486,7 +484,7 @@ subroutine ddb_hdr_init(ddb_hdr, dtset, psps, pawtab, dscrpt, &
    end do
  end if
 
- call crystal_init(dtset%amu_orig(:,1), ddb_hdr%crystal, &
+ call ddb_hdr%crystal%init(dtset%amu_orig(:,1), &
 & dtset%spgroup, dtset%natom, dtset%npsp, psps%ntypat, &
 & dtset%nsym, dtset%rprimd_orig(:,:,1), dtset%typat, &
 & ddb_hdr%xred, dtset%ziontypat, dtset%znucl, 1, &
@@ -1795,7 +1793,7 @@ subroutine ddb_hdr_open_read_txt(ddb_hdr, filename, comm, &
    spgroup = 1
    timrev = 2
 
-   call crystal_init(ddb_hdr%amu, ddb_hdr%crystal, &
+   call ddb_hdr%crystal%init(ddb_hdr%amu, &
 &   spgroup, ddb_hdr%natom, npsp, ddb_hdr%ntypat, &
 &   ddb_hdr%nsym, rprimd, ddb_hdr%typat, &
 &   ddb_hdr%xred, ddb_hdr%zion, ddb_hdr%znucl, timrev, &
@@ -2182,10 +2180,8 @@ subroutine ddb_hdr_close(ddb_hdr, comm)
     ddb_hdr%has_open_file_txt = .false.
   end if
   if (ddb_hdr%has_open_file_nc) then
-#ifdef HAVE_NETCDF
     ncerr = nf90_close(ddb_hdr%ncid)
     ddb_hdr%has_open_file_nc = .false.
-#endif
   end if
 
 end subroutine ddb_hdr_close

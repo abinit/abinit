@@ -9,7 +9,7 @@ add_library(44_abitools STATIC
   m_macroave.F90
   m_nvtx_data.F90
   m_wfutils.F90
-  )
+)
 
 set_target_properties(44_abitools
   PROPERTIES
@@ -38,7 +38,8 @@ target_link_libraries(44_abitools
   28_numeric_noabirule
   32_util
   39_libpaw
-  41_geometry)
+  41_geometry
+)
 
 if(ABINIT_ENABLE_GPU_CUDA OR ABINIT_ENABLE_GPU_HIP)
   target_link_libraries(44_abitools

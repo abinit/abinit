@@ -250,7 +250,7 @@ subroutine xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,qphon,rho
        ndir=3; if (need_derivative2) ndir=6
        do ivoigt=1,ndir
          idir=voigt1(ivoigt) ; jdir=voigt2(ivoigt)
-         
+
          workgr=zero
          if (need_laplacian.or.need_derivative2) workgr2=zero
 
@@ -495,7 +495,7 @@ subroutine xcpot (cplex,gprimd,ishift,use_laplacian,mpi_enreg,nfft,ngfft,ngrad,n
      ABI_BUG(message)
    end if
  end if
- 
+
 !Keep local copy of fft dimensions
  n1=ngfft(1) ; n2=ngfft(2) ; n3=ngfft(3)
 
@@ -577,7 +577,7 @@ subroutine xcpot (cplex,gprimd,ishift,use_laplacian,mpi_enreg,nfft,ngfft,ngrad,n
       end if
 
        do idir=1,3
-       
+
          if (with_vxc) then
 !$OMP PARALLEL DO PRIVATE(ifft) SHARED(cplex,idir,ispden,nfft,rhonow,work)
            do ifft=1,cplex*nfft
@@ -761,7 +761,7 @@ end subroutine xcpot
 !!  cplex=if 1, real space 1-order functions on FFT grid are REAL, if 2, COMPLEX
 !!  gprimd(3,3)=dimensional primitive translations in reciprocal space (bohr^-1)
 !!  ishift : if ==0, do not shift the xc grid (usual case);
-!!           if ==1, shift the xc grid (not implemented) 
+!!           if ==1, shift the xc grid (not implemented)
 !!  nfft=(effective) number of FFT grid points (for this processor)
 !!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  ngrad : =1, only take into account derivative wrt the density ;
@@ -771,12 +771,12 @@ end subroutine xcpot
 !!
 !! OUTPUT
 !!  vxc(cplex*nfft,nspden)]=q-derivative of the GGA xc potential.
-!!      At input already includes three terms. 
+!!      At input already includes three terms.
 !!
 !! SOURCE
 
-subroutine xcpotdq (agradn,cplex,gprimd,ishift,mpi_enreg, & 
-&    nfft,ngfft,ngrad,nspden,nspgrad,vxc) 
+subroutine xcpotdq (agradn,cplex,gprimd,ishift,mpi_enreg, &
+&    nfft,ngfft,ngrad,nspden,nspgrad,vxc)
 
 !Arguments ------------------------------------
 !scalars
@@ -847,7 +847,7 @@ subroutine xcpotdq (agradn,cplex,gprimd,ishift,mpi_enreg, &
    call timab(82,1,tsec)
    call fourdp(cplex,workgr,work,-1,mpi_enreg,nfft,1,ngfft,0)
    call timab(82,2,tsec)
-  
+
    do i1=1,n1
      ig1=i1-(i1/id1)*n1-1
      gcart1(i1)=gprimd(idir,1)*two_pi*dble(ig1)
@@ -864,7 +864,7 @@ subroutine xcpotdq (agradn,cplex,gprimd,ishift,mpi_enreg, &
      gcart3(i3)=gprimd(idir,3)*two_pi*dble(ig3)
    end do
    if(mod(n3,2)==0) gcart3(n3/2+1)=zero
-  
+
   ! !$OMP PARALLEL DO PRIVATE(ifft,i1,i2,i3,gc23_idir,gcart_idir) &
   ! !$OMP&SHARED(gcart1,gcart2,gcart3,n1,n2,n3,wkcmpx,workgr)
    ifft = 0

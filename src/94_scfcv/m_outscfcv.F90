@@ -37,7 +37,7 @@ module m_outscfcv
  use m_dtset
  use m_dtfil
 
- use defs_datatypes,     only : pseudopotential_type, ebands_t
+ use defs_datatypes,     only : pseudopotential_type
  use defs_abitypes,      only : MPI_type
  use m_time,             only : timab
  use m_io_tools,         only : open_file
@@ -45,7 +45,7 @@ module m_outscfcv
  use m_geometry,         only : bonds_lgth_angles
  use m_electronpositron, only : electronpositron_type,electronpositron_calctype
  use m_oper,             only : oper_type,init_oper,destroy_oper
- use m_crystal,          only : crystal_init, crystal_t, prt_cif
+ use m_crystal,          only : crystal_t, prt_cif
  use m_results_gs,       only : results_gs_type, results_gs_ncwrite
  use m_ioarr,            only : ioarr, fftdatar_write
  use m_matlu,            only : copy_matlu,destroy_matlu,init_matlu,matlu_type
@@ -333,7 +333,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  if (dtset%nspden==4 .and. dtset%usedmft==1) remove_inv=.true. ! MG: why this?
 
  timrev = 2; if (any(dtset%kptopt == [3, 4])) timrev= 1
- call crystal_init(dtset%amu_orig(:,1),crystal,dtset%spgroup,natom,dtset%npsp,ntypat, &
+ call crystal%init(dtset%amu_orig(:,1),dtset%spgroup,natom,dtset%npsp,ntypat, &
    dtset%nsym,rprimd,dtset%typat,xred,dtset%ziontypat,dtset%znucl,timrev,&
    dtset%nspden==2.and.dtset%nsppol==1,remove_inv,hdr%title,&
    dtset%symrel,dtset%tnons,dtset%symafm)
@@ -341,7 +341,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  ! Electron band energies.
  bantot= dtset%mband*dtset%nkpt*dtset%nsppol
  ABI_CALLOC(doccde, (bantot))
- call ebands_init(bantot,ebands,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,&
+ call ebands%init(bantot,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,&
    doccde,eigen,hdr%istwfk,hdr%kptns,hdr%nband,&
    hdr%nkpt,hdr%npwarr,hdr%nsppol,hdr%nspinor,hdr%tphysel,hdr%tsmear,hdr%occopt,hdr%occ,hdr%wtk,&
    hdr%cellcharge, hdr%kptopt, hdr%kptrlatt_orig, hdr%nshiftk_orig, hdr%shiftk_orig, &
@@ -377,8 +377,6 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 !&   mband,mcg,mcprj,mgfftc,mkmem,mpi_enreg,mpw,natom,&
 !&   nattyp,nfft,ngfft,nkpt,npwarr,nsppol,ntypat,occ,&
 !&   pawang,pawrad,pawtab,prtvol,psps,rprimd,ucvol,xred)
-
-
 
  else if (dtset%prtwant==3) then
 
@@ -762,14 +760,14 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 !  POT
    if (dtset%prtpot>0) then
      call fftdatar_write("vtrial",dtfil%fnameabo_app_pot,dtset%iomode,hdr,&
-     crystal,ngfft,cplex1,nfft,nspden,vtrial,mpi_enreg,ebands=ebands)
+                         crystal,ngfft,cplex1,nfft,nspden,vtrial,mpi_enreg,ebands=ebands)
    end if
 
 !  EIG
    if (dtset%prteig==2 .and. me == master) then
      fname=trim(dtfil%fnameabo_app_eig)//'.nc'
      call write_eig(eigen,e_fermie,fname,dtset%kptns,dtset%mband,dtset%nband,dtset%nkpt,dtset%nsppol,&
-&     results_gs%extfpmd_eshift) ! Optional arguments
+                    results_gs%extfpmd_eshift) ! Optional arguments
    end if
 
    call timab(1160,2,tsec)
@@ -777,13 +775,12 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
    if (dtset%prtgeo>0) then
      coordn=dtset%prtgeo
-     call bonds_lgth_angles(coordn,dtfil%fnameabo_app_geo,natom,psps%ntypat,&
-      rprimd,dtset%typat,xred,dtset%znucl)
+     call bonds_lgth_angles(coordn,dtfil%fnameabo_app_geo,natom,psps%ntypat, rprimd,dtset%typat,xred,dtset%znucl)
    end if
 
    if (dtset%prtcif > 0) then
      call prt_cif(dtset%brvltt, dtfil%fnameabo_app_cif, natom, dtset%nsym, dtset%ntypat, rprimd, &
-      dtset%spgaxor, dtset%spgroup, dtset%spgorig, dtset%symrel, dtset%tnons, dtset%typat, xred, dtset%znucl)
+                  dtset%spgaxor, dtset%spgroup, dtset%spgorig, dtset%symrel, dtset%tnons, dtset%typat, xred, dtset%znucl)
    end if
 
    call timab(1161,2,tsec)
@@ -791,16 +788,14 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
 !  STM
    if (dtset%prtstm/=0) then
-     call fftdatar_write("stm",dtfil%fnameabo_app_stm,dtset%iomode,hdr,&
-     crystal,ngfft,cplex1,nfft,nspden,rhor,mpi_enreg,ebands=ebands)
+     call fftdatar_write("stm",dtfil%fnameabo_app_stm,dtset%iomode,hdr,crystal,ngfft,cplex1,nfft,nspden,rhor,mpi_enreg,ebands=ebands)
    end if
 
    call timab(1162,2,tsec)
    call timab(1163,1,tsec)
 
    if (dtset%prt1dm>0) then
-     call out1dm(dtfil%fnameabo_app_1dm,mpi_enreg,natom,nfft,ngfft,nspden,psps%ntypat,&
-      rhor,rprimd,dtset%typat,ucvol,vtrial,xred,dtset%znucl)
+     call out1dm(dtfil%fnameabo_app_1dm,mpi_enreg,natom,nfft,ngfft,nspden,psps%ntypat,rhor,rprimd,dtset%typat,ucvol,vtrial,xred,dtset%znucl)
    end if
 
    call timab(1163,2,tsec)
@@ -813,9 +808,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
        vwork(:,ispden)=vhartr(:)
      end do
 
-     call fftdatar_write("vhartree",dtfil%fnameabo_app_vha,dtset%iomode,hdr,&
-     crystal,ngfft,cplex1,nfft,nspden,vwork,mpi_enreg,ebands=ebands)
-
+     call fftdatar_write("vhartree",dtfil%fnameabo_app_vha,dtset%iomode,hdr,crystal,ngfft,cplex1,nfft,nspden,vwork,mpi_enreg,ebands=ebands)
      ABI_FREE(vwork)
    end if
 
@@ -826,8 +819,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
        vwork(:,ispden)=vpsp(:)
      end do
 
-     call fftdatar_write("vpsp",dtfil%fnameabo_app_vpsp,dtset%iomode,hdr,&
-     crystal,ngfft,cplex1,nfft,nspden,vwork,mpi_enreg,ebands=ebands)
+     call fftdatar_write("vpsp",dtfil%fnameabo_app_vpsp,dtset%iomode,hdr,crystal,ngfft,cplex1,nfft,nspden,vwork,mpi_enreg,ebands=ebands)
 
      ABI_FREE(vwork)
    end if
@@ -847,7 +839,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
      end if
 
      call fftdatar_write("vhartree_vloc",dtfil%fnameabo_app_vclmb,dtset%iomode,hdr,&
-&     crystal,ngfft,cplex1,nfft,nspden,vwork,mpi_enreg,ebands=ebands)
+                          crystal,ngfft,cplex1,nfft,nspden,vwork,mpi_enreg,ebands=ebands)
 
 !TODO: find out why this combination of calls with fftdatar_write then out1dm fails on buda with 4 mpi-fft procs (np_spkpt 1).
 !      For the moment comment it out. Only DS2 of mpiio test 27 fails
@@ -872,16 +864,14 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
        vwork(:,ispden)=vhartr(:)+vxc(:,ispden)
      end do
 
-     call fftdatar_write("vhxc",dtfil%fnameabo_app_vhxc,dtset%iomode,hdr,&
-&     crystal,ngfft,cplex1,nfft,nspden,vwork,mpi_enreg,ebands=ebands)
-
+     call fftdatar_write("vhxc",dtfil%fnameabo_app_vhxc,dtset%iomode,hdr,crystal,ngfft,cplex1,nfft,nspden,vwork,mpi_enreg,ebands=ebands)
      ABI_FREE(vwork)
    end if
 
 !  VXC
    if (dtset%prtvxc>0) then
      call fftdatar_write("exchange_correlation_potential",dtfil%fnameabo_app_vxc,dtset%iomode,hdr,&
-     crystal,ngfft,cplex1,nfft,nspden,vxc,mpi_enreg,ebands=ebands)
+                         crystal,ngfft,cplex1,nfft,nspden,vxc,mpi_enreg,ebands=ebands)
    end if
 
    call timab(1164,2,tsec)
@@ -903,7 +893,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
      end if
 
      if (psps%usepaw==1 .and. dos%partial_dos_flag /= 2) then
-!      TODO: update partial_dos_fractions_paw for extra atoms - no PAW contribution normally, but check bounds and so on.
+       ! TODO: update partial_dos_fractions_paw for extra atoms - no PAW contribution normally, but check bounds and so on.
        call partial_dos_fractions_paw(dos,cprj,dimcprj,dtset,mcprj,mkmem,mpi_enreg,pawrad,pawtab)
      end if
 
@@ -929,7 +919,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
      NCF_CHECK(nf90_close(ncid))
    end if
 
-!TODO: do not free dos here, but use the fractions below in calcdenmagsph
+   !TODO: do not free dos here, but use the fractions below in calcdenmagsph
    call dos%free()
  end if ! prtdos > 1
 
@@ -1292,9 +1282,9 @@ if (dtset%prt_lorbmag==1) then
  if (me == master .and. dtset%tfkinfunc==0) then
    call timab(1178,1,tsec)
    if (size(dtset%kptbounds, dim=2) > 0) then
-     call ebands_write(ebands, dtset%prtebands, dtfil%filnam_ds(4), kptbounds=dtset%kptbounds)
+     call ebands%write(dtset%prtebands, dtfil%filnam_ds(4), kptbounds=dtset%kptbounds)
    else
-     call ebands_write(ebands, dtset%prtebands, dtfil%filnam_ds(4))
+     call ebands%write(dtset%prtebands, dtfil%filnam_ds(4))
    end if
    call timab(1178,2,tsec)
  end if
@@ -1302,7 +1292,7 @@ if (dtset%prt_lorbmag==1) then
 !Optionally provide Xcrysden output for the Fermi surface (Only master writes)
  if (me == master .and. dtset%prtfsurf == 1) then
    call timab(1179,1,tsec)
-   if (ebands_write_bxsf(ebands,crystal,dtfil%fnameabo_app_bxsf) /= 0) then
+   if (ebands%write_bxsf(crystal,dtfil%fnameabo_app_bxsf) /= 0) then
      msg = "Cannot produce BXSF file with Fermi surface, see log file for more info"
      ABI_WARNING(msg)
      call wrtout(ab_out, msg)
@@ -1313,7 +1303,7 @@ if (dtset%prt_lorbmag==1) then
 !output nesting factor for Fermi surface (requires ph_nqpath)
  if (me == master .and. dtset%prtnest>0 .and. dtset%ph_nqpath > 0) then
    call timab(1180,1,tsec)
-   ierr = ebands_write_nesting(ebands,crystal,dtfil%fnameabo_app_nesting,dtset%prtnest,&
+   ierr = ebands%write_nesting(crystal,dtfil%fnameabo_app_nesting,dtset%prtnest,&
      dtset%tsmear,dtset%fermie_nest,dtset%ph_qpath(:,1:dtset%ph_nqpath),msg)
    if (ierr /= 0) then
      ABI_WARNING(msg)
@@ -1332,14 +1322,14 @@ if (dtset%prt_lorbmag==1) then
  ! BoltzTraP output files in GENEric format
  if (dtset%prtbltztrp == 1 .and. me==master)then
    call timab(1182,1,tsec)
-   call ebands_prtbltztrp(ebands, crystal, dtfil%filnam_ds(4))
+   call ebands%prtbltztrp(crystal, dtfil%filnam_ds(4))
    call timab(1182,2,tsec)
  endif
 
  ! Band structure interpolation from eigenvalues computed on the k-mesh.
  if (nint(dtset%einterp(1)) /= 0 .and. dtset%kptopt > 0) then
    call timab(1183,1,tsec)
-   call ebands_interpolate_kpath(ebands, dtset, crystal, [0, 0], dtfil%filnam_ds(4), comm)
+   call ebands%interpolate_kpath(dtset, crystal, [0, 0], dtfil%filnam_ds(4), comm)
    call timab(1183,2,tsec)
  end if
 
@@ -1354,7 +1344,7 @@ if (dtset%prt_lorbmag==1) then
    NCF_CHECK(nctk_open_create(ncid, fname, xmpi_comm_self))
    NCF_CHECK(hdr%ncwrite(ncid, fform_den, spinat=dtset%spinat, nc_define=.True.))
    NCF_CHECK(crystal%ncwrite(ncid))
-   NCF_CHECK(ebands_ncwrite(ebands, ncid))
+   NCF_CHECK(ebands%ncwrite(ncid))
    ! Add energy, forces, stresses
    NCF_CHECK(results_gs_ncwrite(results_gs, ncid, dtset%ecut, dtset%pawecutdg))
 
@@ -1381,7 +1371,7 @@ if (dtset%prt_lorbmag==1) then
  ABI_SFREE(intgden)
 
  call crystal%free()
- call ebands_free(ebands)
+ call ebands%free()
 
  ! Destroy atom table used for parallelism
  call free_my_atmtab(my_atmtab,my_atmtab_allocated)

@@ -261,7 +261,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
 !Test size of kinetic energy potential Vxctau
  with_vxctau = (present(vxctau).and.present(taur))
  if (with_vxctau) with_vxctau = (size(vxctau)>0.and.dtset%usekden/=0)
- if (with_vxctau) then 
+ if (with_vxctau) then
    if (size(vxctau)/=nfft*dtset%nspden*4) then
      ABI_BUG("Wrong size for vxctau!")
    end if
@@ -548,7 +548,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
          call hartre(1,gsqcut,dtset%icutcoul,psps%usepaw,mpi_enreg,nfft,ngfft,&
                      &dtset%nkpt,dtset%rcut,rhog,rprimd,dtset%vcutgeo,vhartr)
        end if
-       
+
 !      >>>> Exchange-correlation potential
        call xcdata_init(xcdata,dtset=dtset)
        if(mod(dtset%fockoptmix,100)==11)then

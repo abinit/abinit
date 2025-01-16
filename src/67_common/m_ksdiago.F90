@@ -36,7 +36,7 @@ module m_ksdiago
  use m_hdr
  use m_wfk
 
- use defs_datatypes,      only : pseudopotential_type, ebands_t
+ use defs_datatypes,      only : pseudopotential_type
  use defs_abitypes,       only : MPI_type
  use m_gwdefs,            only : GW_TOLQ0, GW_Q0_DEFAULT !, cone_gw, czero_gw, j_gw
  use m_dtset,             only : dataset_type
@@ -487,10 +487,10 @@ subroutine ksdiago(Diago_ctl, nband_k, nfftc, mgfftc, ngfftc, natom, &
 
  ! Initialize the Hamiltonian datatype on the coarse FFT mesh.
  if (present(electronpositron)) then
-   call init_hamiltonian(gs_hamk, psps, pawtab, nspinor, nsppol, nspden, natom, typat, xred, nfftc, &
+   call gs_hamk%init(psps, pawtab, nspinor, nsppol, nspden, natom, typat, xred, nfftc, &
     mgfftc, ngfftc, rprimd, nloalg, paw_ij=paw_ij, usecprj=0, electronpositron=electronpositron)
  else
-   call init_hamiltonian(gs_hamk, psps, pawtab, nspinor, nsppol, nspden, natom, typat, xred, nfftc, &
+   call gs_hamk%init(psps, pawtab, nspinor, nsppol, nspden, natom, typat, xred, nfftc, &
     mgfftc, ngfftc, rprimd, nloalg, paw_ij=paw_ij, usecprj=0)
  end if
 
@@ -1002,6 +1002,12 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
 
  ! See sequence of calls in vtorho.
+ ! Check that usekden is not 0 if want to use vxctau
+ !with_vxctau = dtset%usekden/=0
+
+ if (dtset%usekden/=0) then
+   ABI_ERROR("nscf_init with mgga not yet coded")
+ end if
  ! Check if want to use vxctau
  !with_vxctau = (present(vxctau).and.usevxctau/=0)
 
@@ -1045,10 +1051,10 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
 
  ! Initialize the Hamiltonian on the coarse FFT mesh.
  if (present(electronpositron)) then
-   call init_hamiltonian(gs_hamk, psps, pawtab, nspinor, nsppol, nspden, cryst%natom, cryst%typat, cryst%xred, nfftc, &
+   call gs_hamk%init(psps, pawtab, nspinor, nsppol, nspden, cryst%natom, cryst%typat, cryst%xred, nfftc, &
     mgfftc, ngfftc, cryst%rprimd, dtset%nloalg, paw_ij=paw_ij, usecprj=0, electronpositron=electronpositron)
  else
-   call init_hamiltonian(gs_hamk, psps, pawtab, nspinor, nsppol, nspden, cryst%natom, cryst%typat, cryst%xred, nfftc, &
+   call gs_hamk%init(psps, pawtab, nspinor, nsppol, nspden, cryst%natom, cryst%typat, cryst%xred, nfftc, &
     mgfftc, ngfftc, cryst%rprimd, dtset%nloalg, paw_ij=paw_ij, usecprj=0)
  end if
 
@@ -1728,7 +1734,7 @@ subroutine ugb_from_wfk_file(ugb, ik_ibz, spin, istwf_k, kpoint, nband_k, &
  call ugb%print(units, dtset%prtvol)
 
  call wfk_hdr%free()
- call ebands_free(wfk_ebands)
+ call wfk_ebands%free()
 
 end subroutine ugb_from_wfk_file
 !!***
@@ -1956,7 +1962,7 @@ subroutine hyb_from_wfk_file(hyb, cryst, dtfil, dtset, psps, pawtab, ngfftc, dia
                dtset%nspden, dtset%nspinor, dtset%ecut, dtset%ecutsm, dtset%dilatmx, wfd_istwfk, hyb%ebands%kptns, ngfftc, &
                dtset%nloalg, dtset%prtvol, dtset%pawprtvol, comm)
 
- call hyb%wfd%print(header="Wavefunctions for Hybrid WKF file")
+ call hyb%wfd%print([std_out], header="Wavefunctions for Hybrid WKF file")
 
  ABI_FREE(nband)
  ABI_FREE(keep_ur)
@@ -2090,7 +2096,7 @@ subroutine hyb_free(hyb)
  ! Free datatypes
  call hyb%wfd%free()
  call hyb%vcgen%free()
- call ebands_free(hyb%ebands)
+ call hyb%ebands%free()
 
 end subroutine hyb_free
 !!***

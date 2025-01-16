@@ -4,31 +4,31 @@ Created: Nov 12, 2016
 Author : Nicholas Pike
 Email  : Nicholas.pike@ulg.ac.be
 
-Purpose: To calculate the Raman spectrum, at a user defined orientation and angle, 
+Purpose: To calculate the Raman spectrum, at a user defined orientation and angle,
          by reading in data from an abinit calculation.  This program will read
-         the anaddb output file "anaddb.out" or from a user specified file, 
-         extract the needed data, and output the result for plotting with your 
-         favorite program. 
-         
+         the anaddb output file "anaddb.out" or from a user specified file,
+         extract the needed data, and output the result for plotting with your
+         favorite program.
+
 To run:  To run this script simply execute the following code
          python Raman_spec.py "name of input file"
-         
+
 Version: 0.0 - Initial building of program
          0.1 - Additional for angle dependent calculation
          0.2 - Additional user input required and number of output files reduced
          0.3 - Moved all user prompted input to an input file
 
 Input:  Input variables : filename, temp, laser_freq, spread,
-        calctype, outname, relative_intensity, freq_unit, 
+        calctype, outname, relative_intensity, freq_unit,
         keep_file, n_freq, min_freq, max_freq.
         See a minimal input file at the end of the tutorial nlo.
 
 Output: Program will output a text file containing the raman spectrum vs frequency
         and an outfile which outlines what happens in the calculation.
 
-Bugs:   If you find a bug with this program or wish to see a feature added to 
+Bugs:   If you find a bug with this program or wish to see a feature added to
         this script please let me know at Nicholas.pike@ulg.ac.be
-        
+
         Happy Hunting!
 """
 #begin main program
@@ -48,17 +48,17 @@ def READ_INPUT(user_filein):
     """
     Author: Nicholas Pike
     Email: Nicholas.pike@ulg.ac.be
-    
+
     Purpose: Reads the input file and determines if the user's input is acceptable.
-    
+
     Output:  array of input information used by program
     """
     #declare array of default values
     vararray = [0,0,[0,2],[0,2],0,0,False,2,False,1000,[-1.0,2],[-1.0,2]]
-    
+
     #check if file exists
-    check = CHECK_FILE(user_filein)  
-    
+    check = CHECK_FILE(user_filein)
+
     if check == False:
         print('')
         print('The input file was not found in the directory. \n Please correct this.')
@@ -70,7 +70,7 @@ def READ_INPUT(user_filein):
     else:
         for line in open(user_filein):
             li=line.strip('\n')        #Removes any newline command
-            if not li.startswith("#"): #Checks if the line does not start with a # 
+            if not li.startswith("#"): #Checks if the line does not start with a #
                                        #character
                 l = li.split()
                 if len(l)>0:
@@ -111,11 +111,11 @@ def READ_INPUT(user_filein):
         #check for output file
         outname = vararray[5]
         delete  = vararray[8]
-        outname = CHECK_REPEAT(outname,delete)  
+        outname = CHECK_REPEAT(outname,delete)
 
         vararray[5] = outname
         printout('Input file located and read in.\n')
-                    
+
     #Now check that the user put a valid name in for the anaddb output file
     # Sanity check...
     if vararray[0] == '' : # no file name given
@@ -126,7 +126,7 @@ def READ_INPUT(user_filein):
         sys.exit()
     else:
         check = CHECK_FILE(vararray[0])
-    
+
     if not check:
         printout('')
         printout('The anaddb output file was not found in the directory.\n Please correct this.')
@@ -137,11 +137,11 @@ def READ_INPUT(user_filein):
 
     return vararray
 
-def CHECK_FILE(filename): 
+def CHECK_FILE(filename):
     """
     Author: Nicholas Pike
     Email : Nicholas.pike@ulg.ac.be
-        
+
     Purpose: Checks if the file "filename" exists in the current directory and outputs
     a boolean value indicating whether or not the file is found.
     """
@@ -149,18 +149,18 @@ def CHECK_FILE(filename):
         logic  = True
     else:
         logic  = False
-        
+
     return logic
-    
+
 def PRINT_HEADER():
     """
     Author: Nicholas Pike
     Email : Nicholas.pike@ulg.ac.be
-        
+
     Purpose: Prints a header to the output file and terminal when the user
-    starts to run the program. 
+    starts to run the program.
     """
-       
+
     #Header for output file
     printout('')
     printout('++++++++++++++++++++++++ Version %s ++++++++++++++++++++++++\n'%__version__)
@@ -174,42 +174,42 @@ def PRINT_HEADER():
     printout('Author: Nicholas Pike')
     printout('Email:  Nicholas.pike@ulg.ac.be')
     printout('')
-           
-    return 
-    
+
+    return
+
 def printout(to_output):
     """
     Author: Nicholas Pike
     Email: Nicholas.pike@ulg.ac.be
-        
+
     Purpose: This defintion should print to an output file, known as the output,
-    in which all comments, warnings, and results are printed too. 
+    in which all comments, warnings, and results are printed too.
     """
     #print to file
     f1= open(outname,'a')
     f1.write(to_output+'\n')
     f1.close()
-        
+
     return
-    
+
 def printoutfile(output,outfile):
     """
     Author: Nicholas Pike
     Email: Nicholas.pike@ulg.ac.be
-    
+
     Purpose: Print raman spectrum as a function of frequency to the output file.
     """
     f1= open(outfile,'a')
     f1.write(output+'\n')
     f1.close()
     return
-    
+
 def CHECK_REPEAT(filename,delete):
     """
     Author: Nicholas Pike
     Email: Nicholas.pike@ulg.ac.be
-        
-    In order to create a new output file a file the name must not be used. If 
+
+    In order to create a new output file a file the name must not be used. If
     this file already exists then we rename the file until it no longer exists.
     """
     c = 1
@@ -227,7 +227,7 @@ def CHECK_REPEAT(filename,delete):
             else:
                 newfilename = filename
                 break
-        
+
     return newfilename
 
 def UNIT_TO_HA(val,unit):
@@ -254,7 +254,7 @@ def CALL_RAMAN_MENU(output,keywords,vararray):
     """
     Author:Nicholas Pike
     Email: Nicholas.pike@ulg.ac.be
-    
+
     Purpose: To call and activate the raman spectrum part of this calculation.
     """
     T          = vararray[1]
@@ -284,7 +284,7 @@ def CALL_RAMAN_MENU(output,keywords,vararray):
     max_freq = HA_TO_UNIT(max_freq,freq_unit)
     #Get some data
     modeenergy = output[1]
-    modedata   = output[2] 
+    modedata   = output[2]
     qdirs      = output[4]
     n_modes    = len(modeenergy[0])
 
@@ -321,7 +321,7 @@ def CALL_RAMAN_MENU(output,keywords,vararray):
         out = CHECK_FILE(outfile)
         if out and delete:
             os.remove(outfile)
-       
+
         #Modify the input data silently.
         menergy = GET_MODEENERGY(modeenergy[idir])
         rarray  = GET_RAMANMATRIX(modedata[idir])
@@ -342,7 +342,7 @@ def CALL_RAMAN_MENU(output,keywords,vararray):
             printoutfile('#*** LO modes : %s %s %s '%(qdir[0],qdir[1],qdir[2]),outfile)
         else:
             printoutfile('#*** TO modes',outfile)
-        
+
         string_freq = '  freq (Ha)'
         if freq_unit == 1:
             string_freq = '  freq (Hz)'
@@ -438,16 +438,16 @@ def CALL_RAMAN_MENU(output,keywords,vararray):
                     ramanplot[4][i],ramanplot[5][i],ramanplot[6][i]),outfile)
 
     return
-        
+
 def LOAD_ANADDB(infile):
     """
     Author: Nicholas Pike
     Email: Nicholas.pike@ulg.ac.be
-        
+
     Loads abinit data by reading the output file and storing necessary information
-    in the correct arrays.  This is done by reading the file twice. First to 
+    in the correct arrays.  This is done by reading the file twice. First to
     find keywords, and the second time to extract dat
-    
+
     """
     keywords =['', #Abinit version
                False, #dieflag - frequency dependent dielectric constant
@@ -481,20 +481,20 @@ def LOAD_ANADDB(infile):
                 l = line.strip('\n').split()
                 if int(l[len(l)-1])> 0:
                     keywords[3] = True
-                else: 
+                else:
                     keywords[3] = False
-    
+
                 #Now that keywords are read in and stored. We can read the file again and
                 #figure out what information needs to be stored
-    
-    
-    #declare storage arrays    
+
+
+    #declare storage arrays
     outinfo= [0,0,0,0,0]
     qdirs = []
     modeenergy = []
     modedata = []
     diedata = []
-    
+
     if keywords[1]: #dielectric tensor as a function of frequency
         #Do something
         printout('Starting extraction of the dielectric Tensor as a function of frequency.')
@@ -505,7 +505,7 @@ def LOAD_ANADDB(infile):
                     c=2
                     for c in range(2,keywords[2]+2):
                         data = linecache.getline(infile,num+c)
-                        l=data.strip('\n').split()                            
+                        l=data.strip('\n').split()
                         diedata[c-2][0]= l[0]
                         diedata[c-2][1]= l[1]
                         diedata[c-2][2]= l[2]
@@ -513,7 +513,7 @@ def LOAD_ANADDB(infile):
                         diedata[c-2][4]= l[4]
                         diedata[c-2][5]= l[5]
                         diedata[c-2][6]= l[6]
-                            
+
         outinfo[3] = diedata
         printout('Finished extraction of the dielectric Tensor as a function of frequency.')
 
@@ -539,7 +539,7 @@ def LOAD_ANADDB(infile):
                     l = line.strip('\n').split('(')
                     onemode_energy = float(l[1].split()[0])
                     onemode_raman = np.zeros([3,3])
-                    for ii in range(3):  
+                    for ii in range(3):
                         data = linecache.getline(infile,num+ii+1)
                         l = data.strip('\n').split()
                         for jj in range(3):
@@ -553,32 +553,32 @@ def LOAD_ANADDB(infile):
 
         printout('Finished extraction of the raman tensor.')
         printout('')
-            
+
     return keywords,outinfo
-    
+
 def GET_MODEENERGY(modeenergy):
     """
     Author: Nicholas Pike
     Email: Nicholas.Pike@ulg.ac.be
-    
+
     Purpose: Convert the Mode energies from cm-1 to Ha for later calculations
     """
     nmode   = int(len(modeenergy))
     energy = np.zeros(shape=(nmode,3))
-    
+
     for j in range(nmode):
-        energy[j][0] = float(modeenergy[j])*cm1_to_hartree 
+        energy[j][0] = float(modeenergy[j])*cm1_to_hartree
         energy[j][1] = float(modeenergy[j])*cm1_to_hz
         energy[j][2] = float(modeenergy[j])
-        
+
     return energy
 
 def GET_RAMANMATRIX(modedata):
     """
     Author: Nicholas Pike
     Email: Nicholas.pike@ulg.ac.be
-    
-    Purpose: Convert the long list of matrix elements to 3x3 arrays for each 
+
+    Purpose: Convert the long list of matrix elements to 3x3 arrays for each
     mode index
     """
     nmode = len(modedata)
@@ -625,7 +625,7 @@ def RAMAN_INTENSITIES(menergy,rarray,laser,T,option):
     """
     Author: Nicholas Pike
     Email: Nicholas.pike@ulg.ac.be
-    
+
     Purpose: To compute the intensities of each modes
     """
     nmode = len(menergy)
@@ -655,16 +655,16 @@ def RAMAN_INTENSITIES(menergy,rarray,laser,T,option):
                     Outpol   = np.array([1,0,0])
                 elif option == 'XY':
                     Inpol    = np.array([1,0,0])
-                    Outpol   = np.array([0,1,0]) 
+                    Outpol   = np.array([0,1,0])
                 elif option == 'XZ':
                     Inpol    = np.array([1,0,0])
-                    Outpol   = np.array([0,0,1]) 
+                    Outpol   = np.array([0,0,1])
                 elif option == 'YY':
                     Inpol    = np.array([0,1,0])
                     Outpol   = np.array([0,1,0])
                 elif option == 'YZ':
                     Inpol    = np.array([0,1,0])
-                    Outpol   = np.array([0,0,1]) 
+                    Outpol   = np.array([0,0,1])
                 elif option == 'ZZ':
                     Inpol    = np.array([0,0,1])
                     Outpol   = np.array([0,0,1])
@@ -674,28 +674,28 @@ def RAMAN_INTENSITIES(menergy,rarray,laser,T,option):
                 modearray = np.array([rj1,rj2,rj3])
                 alpha_ij = np.dot(Outpol,np.dot(modearray,Inpol))
                 Intensities[j] = alpha_ij**2*pref
-      
+
     max_int = max(Intensities)
     if max_int > 0.0:
         Intensities_rel = Intensities/max_int
-                        
+
     return Intensities,Intensities_rel
-    
+
 def DETER_MENU(var_array):
     """
     Author: Nicholas Pike
     Email : Nicholas.pike@ulg.ac.be
-    
+
     Determine what calculation to ask the user about depending on what anaddb
-    calculation was done.  This is done by reading the file and looking for 
+    calculation was done.  This is done by reading the file and looking for
     specific flags in the output file
-    
+
     Args: infile - name of input file (assumed to be anaddb.out)
     """
     infile = var_array[0]
-    
+
     keywords,output = LOAD_ANADDB(infile)
-           
+
     if keywords[1]:
         #run module to print Dielectric tensor as a function of frequency
         outfile = outname+'_dielectric_freq'
@@ -705,20 +705,20 @@ def DETER_MENU(var_array):
             o3j=output[3][j]
             printoutfile('%e %e %e %e %e %e %e' %(o3j[0],o3j[1],o3j[2],o3j[3],o3j[4],o3j[5],o3j[6]),outfile)
     if keywords[3]:
-        #Choose to identify the modes characteristics or make a Raman Spectrum  
+        #Choose to identify the modes characteristics or make a Raman Spectrum
         printout('Entering Raman Spectrum Calculation.')
         printout('')
         CALL_RAMAN_MENU(output,keywords,var_array) #Calls the menu for the Raman calculation
-              
+
     printout('Thank you for using this program.')
-    
-    return 
-    
-    
+
+    return
+
+
 """
 Execution Code below this line
 """
-   
+
 #Program runs via this if statement (needed for windows computers):
 if __name__ == '__main__':
     #declare important information
@@ -731,17 +731,17 @@ if __name__ == '__main__':
     __email__      = 'Nicholas.pike@ulg.ac.be'
     __status__     = 'production'
     __date__       = 'November 2016'
-    
+
     #Import useful python programs
-    import os 
+    import os
     import sys
     import numpy as np
     import linecache
     systemversion = sys.version_info
-    
+
     #Declare global variables
     global outname
-    global cm1_to_hartree 
+    global cm1_to_hartree
     global cm1_to_hz
     global Hz_to_Ha
     global hplank
@@ -749,10 +749,10 @@ if __name__ == '__main__':
     global T
     global clight
     global width
-    
+
     cm1_to_hartree = 4.55633E-6         # conversion factor between cm-1 and Hartree
     cm1_to_hz      = 2.99793E10         # conversion factor between cm-1 and Hz
-    Hz_to_Ha       = 1.519828500716E-16 # conversion factor between Hz and Hartree 
+    Hz_to_Ha       = 1.519828500716E-16 # conversion factor between Hz and Hartree
     kb             = 8.6173324E-5       # Boltzmann constant in eV/K
     T              = 0                  # Default Temperature (user input variable)
     hplank         = 6.58211928E-16     # h in eVs
@@ -763,17 +763,17 @@ if __name__ == '__main__':
         user_inputfile = 'input_raman'
     else:
         #Determines what the program is to do if it is run from command line
-        user_inputfile = sys.argv[1] #input should be python program_name tfile 
-          
+        user_inputfile = sys.argv[1] #input should be python program_name tfile
+
     #Name of default input file
     vararray = READ_INPUT(user_inputfile) #The program will look for the specified input file
-    
-       
+
+
     #Print header file and start the calculation
     PRINT_HEADER()
-    
+
     #Read anaddb.out file and determine what type of calculation to run
     DETER_MENU(vararray)
-    
-    
+
+
 #Ends program
