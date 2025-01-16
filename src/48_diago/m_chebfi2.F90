@@ -626,6 +626,8 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,eigen,occ,residu,nspinor)
 
  call timab(tim_oracle,1,tsec)
 
+ ! ndeg_filter_max limits the reduction of the residual of the smallest eigenvalue (i.e. the most amplified one by the filter) by a factor 1e8.
+ ! Also, the maximal value of ndeg_filter_max is 40.
  ndeg_filter_max = cheb_oracle1(mineig_global, lambda_minus, lambda_plus, 1D-16, 40)
  ndeg_filter = MIN(ndeg_filter_max,chebfi%ndeg_filter)
  if (chebfi%oracle>0) then
