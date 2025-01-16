@@ -98,7 +98,7 @@ contains
 !!
 !! SOURCE
 
-subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,weiss)
+subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,weiss,self_new)
 
 !Arguments ------------------------------------
 !scalars
@@ -111,6 +111,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  integer, intent(in) :: pawprtvol
  type(green_type), target, intent(inout) :: weiss
  type(self_type), intent(inout) :: self
+ type(self_type), optional, intent(inout) :: self_new
 !Local variables ------------------------------
  integer :: i,iatom,icomp,ierr,if1,if2,iflavor1,iflavor2,ifreq,im1,im2,ima,imb,ispa,ispb,ispinor
  integer :: ispinor1,ispinor2,isppol,itau,itypat,lpawu,myproc,natom,ndim,nflavor,nomega,nproc
@@ -1971,7 +1972,7 @@ end if !nspinor
    call sym_matlu(energy_level%matlu(:),paw_dmft)
    opt_log = 0
    if (paw_dmft%dmft_triqs_entropy == 1) opt_log = 1
-   call compute_moments_loc(green,self,energy_level,weiss,1,opt_log=opt_log)
+   call compute_moments_loc(green,self_new,energy_level,weiss,1,opt_log=opt_log)
  end if ! moments
  !write(message,'(i3,4x,2e21.14)') 10,weiss%oper(1)%matlu(1)%mat(1,1,1,1,1)
  !call wrtout(std_out,message,'COLL')  ! debug
@@ -4226,8 +4227,9 @@ subroutine fourier_inv(paw_dmft,nmoments,ntau,matlu_tau,oper_freq,moments)
  type(oper_type), intent(in) :: oper_freq(paw_dmft%dmft_nwlo),moments(nmoments)
  type(matlu_type), intent(inout) :: matlu_tau(paw_dmft%natom)
 !Local variables ------------------------------
- integer :: i,iatom,ibuf,ibuf_tau,ierr,ifreq,im1,isppol,itau,itaub,itauf,lpawu
- integer :: myproc,natom,ndim,nproc,nspinor,nsppol,ntau_proc,nwlo,ratio,residu,siz_buf,tndim
+ integer :: i,iatom,ibuf,ibuf_tau,ierr,ifreq,im1,isppol
+ integer :: itau,itaub,itauf,lpawu,myproc,natom,ndim,nproc
+ integer :: nspinor,nsppol,ntau_proc,nwlo,ratio,residu,siz_buf,tndim
  real(dp) :: beta,omegatau,tau
  complex(dpc) :: fac
  integer, allocatable :: displs(:),recvcounts(:)

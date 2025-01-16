@@ -1165,8 +1165,10 @@ subroutine gather_oper(oper,distrib,paw_dmft,opt_ksloc,master,opt_diag,opt_commk
  integer, intent(in) :: opt_ksloc
  integer, optional, intent(in) :: master,opt_commkpt,opt_diag
 !Local variables-------------------------------
- integer :: comm,iatom,ib,ib1,ibuf,ierr,ifreq,ikpt,im,im1,irank,irank1,irank2,isppol,lpawu,mbandc
- integer :: myproc,myproc2,natom,ndim,nkpt,nproc,nproc_freq,nproc_kpt,nproc2,nspinor,nsppol,nw,optcommkpt,siz_buf
+ integer :: comm,iatom,ib,ib1,ibuf,ierr,ifreq,ikpt,im,im1
+ integer :: irank,irank1,irank2,isppol,lpawu,mbandc,myproc
+ integer :: myproc2,natom,ndim,nkpt,nproc,nproc_freq,nproc_kpt
+ integer :: nproc2,nspinor,nsppol,nw,optcommkpt,siz_buf
  logical :: diag
  integer, allocatable :: displs(:),recvcounts(:)
  complex(dpc), allocatable :: buffer(:),buffer_tot(:)
@@ -1407,7 +1409,6 @@ subroutine gather_oper_ks(oper,distrib,paw_dmft,opt_diag)
  nkpt   = paw_dmft%nkpt
  nproc  = paw_dmft%nproc
  nsppol = paw_dmft%nsppol
- nw     = distrib%nw
 
  nproc_freq = nproc / nkpt
 

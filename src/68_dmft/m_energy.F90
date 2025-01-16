@@ -666,10 +666,10 @@ subroutine compute_migdal_energy(e_hu_migdal,e_hu_migdal_tot,green,paw_dmft,self
  type(self_type), target, intent(in) :: self
 ! integer :: prtopt
 !Local variables-------------------------------
- integer :: i,ierr,ifreq,myproc,natom,nmoments,nspinor,nsppol,nwlo
+ integer :: i,ierr,ifreq,j,myproc,natom,nmoments,nspinor,nsppol,nwlo
  real(dp) :: beta,temp
  complex(dpc) :: omega
- complex(dpc), allocatable :: integral(:),omega_fac(:),trace_moments(:,:)
+ complex(dpc), allocatable :: omega_fac(:),trace_moments(:,:),trace(:)
  type(matlu_type), allocatable :: self_nwlo_re(:)
  type(matlu_type), ABI_CONTIGUOUS pointer :: matlu_tmp(:) => null()
  character(len=500) :: message
@@ -701,23 +701,19 @@ subroutine compute_migdal_energy(e_hu_migdal,e_hu_migdal_tot,green,paw_dmft,self
 ! write(std_out,*) "beta",beta
 
  ABI_MALLOC(trace_moments,(natom,nmoments))
- ABI_MALLOC(integral,(natom))
+ ABI_MALLOC(trace,(natom))
 
  e_hu_migdal(:) = zero
- integral(:)    = czero
+ trace(:) = czero
 
  if (self%has_moments == 1) then
    trace_moments(:,:) = czero
-   call trace_prod_matlu(self%moments(1)%matlu(:),green%moments(1)%matlu(:),natom,trace_moments(:,1))
-   call trace_prod_matlu(self%moments(1)%matlu(:),green%moments(2)%matlu(:),natom,trace_moments(:,2))
-   call trace_prod_matlu(self%moments(2)%matlu(:),green%moments(1)%matlu(:),natom,trace_moments(:,2),opt_add=1)
-   call trace_prod_matlu(self%moments(1)%matlu(:),green%moments(3)%matlu(:),natom,trace_moments(:,3))
-   call trace_prod_matlu(self%moments(2)%matlu(:),green%moments(2)%matlu(:),natom,trace_moments(:,3),opt_add=1)
-   call trace_prod_matlu(self%moments(3)%matlu(:),green%moments(1)%matlu(:),natom,trace_moments(:,3),opt_add=1)
-   call trace_prod_matlu(self%moments(1)%matlu(:),green%moments(4)%matlu(:),natom,trace_moments(:,4))
-   call trace_prod_matlu(self%moments(2)%matlu(:),green%moments(3)%matlu(:),natom,trace_moments(:,4),opt_add=1)
-   call trace_prod_matlu(self%moments(3)%matlu(:),green%moments(2)%matlu(:),natom,trace_moments(:,4),opt_add=1)
-   call trace_prod_matlu(self%moments(4)%matlu(:),green%moments(1)%matlu(:),natom,trace_moments(:,4),opt_add=1)
+   do i=1,nmoments
+     do j=1,i
+       call trace_prod_matlu(self%moments(j)%matlu(:),green%moments(i-j+1)%matlu(:),natom,trace(:))
+       trace_moments(:,i) = trace_moments(:,i) + trace(:)
+     end do ! j
+   end do ! i
  else
    ABI_MALLOC(self_nwlo_re,(natom))
    ABI_MALLOC(matlu_tmp,(natom))
@@ -738,9 +734,9 @@ subroutine compute_migdal_energy(e_hu_migdal,e_hu_migdal_tot,green,paw_dmft,self
      call add_matlu(self%oper(ifreq)%matlu(:),self_nwlo_re(:),matlu_tmp(:),natom,-1)
    end if ! moments
 
-   call trace_prod_matlu(matlu_tmp(:),green%oper(ifreq)%matlu(:),natom,integral(:))
+   call trace_prod_matlu(matlu_tmp(:),green%oper(ifreq)%matlu(:),natom,trace(:))
 
-   e_hu_migdal(:) = e_hu_migdal(:) + dble(integral(:))*paw_dmft%wgt_wlo(ifreq)*temp*two
+   e_hu_migdal(:) = e_hu_migdal(:) + dble(trace(:))*paw_dmft%wgt_wlo(ifreq)*temp*two
 
  end do ! ifreq
 
@@ -769,11 +765,10 @@ subroutine compute_migdal_energy(e_hu_migdal,e_hu_migdal_tot,green,paw_dmft,self
  ABI_FREE(omega_fac)
 
  if (self%has_moments == 0) then
-   integral(:) = czero
-   call trace_prod_matlu(self_nwlo_re(:),green%occup%matlu(:),natom,integral(:))
+   call trace_prod_matlu(self_nwlo_re(:),green%occup%matlu(:),natom,trace(:))
    call destroy_matlu(self_nwlo_re(:),natom)
    ABI_FREE(self_nwlo_re)
-   e_hu_migdal(:) = e_hu_migdal(:) + dble(integral(:))
+   e_hu_migdal(:) = e_hu_migdal(:) + dble(trace(:))
  end if
 
  ABI_FREE(trace_moments)
@@ -781,7 +776,7 @@ subroutine compute_migdal_energy(e_hu_migdal,e_hu_migdal_tot,green,paw_dmft,self
  e_hu_migdal(:)  = half * e_hu_migdal(:) ! E_mig = 1/2 * Tr(Sig*G)
  e_hu_migdal_tot = sum(e_hu_migdal(:))
 
- ABI_FREE(integral)
+ ABI_FREE(trace)
 
  !xmig_1=zero
  !xmig_2=zero
