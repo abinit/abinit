@@ -56,7 +56,7 @@ module m_vtorho
  use m_pawcprj,            only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_getdim
  use m_pawfgr,             only : pawfgr_type
  use m_energies,           only : energies_type
- use m_hamiltonian,        only : init_hamiltonian, gs_hamiltonian_type, gspot_transgrid_and_pack
+ use m_hamiltonian,        only : gs_hamiltonian_type, gspot_transgrid_and_pack
  use m_bandfft_kpt,        only : bandfft_kpt, bandfft_kpt_type, bandfft_kpt_set_ikpt, &
                                   bandfft_kpt_savetabs, bandfft_kpt_restoretabs, prep_bandfft_tabs
  use m_electronpositron,   only : electronpositron_type,electronpositron_calctype
@@ -64,7 +64,7 @@ module m_vtorho
  use m_paw_correlations,   only : setnoccmmp
  use m_paw_occupancies,    only : pawmkrhoij
  use m_paw_mkrho,          only : pawmkrho
- use m_crystal,            only : crystal_init, crystal_t
+ use m_crystal,            only : crystal_t
  use m_oper,               only : oper_type,init_oper,destroy_oper
  use m_io_tools,           only : flush_unit
  use m_abi2big,            only : wvl_occ_abi2big, wvl_rho_abi2big, wvl_occopt_abi2big, wvl_eigen_abi2big
@@ -608,13 +608,13 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
    if (nnsclo_now > 1) call wrtout(std_out, sjoin(" Max number of non-self-consistent loops:", itoa(nnsclo_now)))
  end if
 
-!==== Initialize most of the Hamiltonian ====
-!Allocate all arrays and initialize quantities that do not depend on k and spin.
- call init_hamiltonian(gs_hamk,psps,pawtab,dtset%nspinor,dtset%nsppol,dtset%nspden,natom,&
-& dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,&
-& paw_ij=paw_ij,ph1d=ph1d,usecprj=usecprj_local,electronpositron=electronpositron,fock=fock,&
-& comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab,&
-& nucdipmom=dtset%nucdipmom,gpu_option=dtset%gpu_option)
+ !==== Initialize most of the Hamiltonian ====
+ ! Allocate all arrays and initialize quantities that do not depend on k and spin.
+ call gs_hamk%init(psps,pawtab,dtset%nspinor,dtset%nsppol,dtset%nspden,natom,&
+  dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,&
+  paw_ij=paw_ij,ph1d=ph1d,usecprj=usecprj_local,electronpositron=electronpositron,fock=fock,&
+  comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab,&
+  nucdipmom=dtset%nucdipmom,gpu_option=dtset%gpu_option)
 
  if (dtset%cprj_in_memory==1) then
    call xg_nonlop_update_weight(xg_nonlop,ucvol) ! ucvol could have changed in mover
@@ -786,7 +786,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      ! if vectornd is present, set it up for addition to gs_hamk similarly to how it's done for
      ! vtrial. Note that it must be done for the three Cartesian directions. Also, the following
      ! code assumes explicitly and implicitly that nvloc = 1. This should eventually be generalized.
-     if(has_vectornd) then
+     if (has_vectornd) then
        call gspot_transgrid_and_pack(isppol, psps%usepaw, dtset%paral_kgb, dtset%nfft, dtset%ngfft, nfftf, &
          & dtset%nspden, gs_hamk%nvloc, 3, pawfgr, mpi_enreg, vectornd, vectornd_pac)
        call gs_hamk%load_spin(isppol, vectornd=vectornd_pac)
@@ -794,11 +794,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
      call timab(982,2,tsec)
 
-!    BIG FAT k POINT LOOP
-!    MVeithen: I had to modify the structure of this loop in order to implement MPI // of the electric field
-!    Note that the loop here differs from the similar one in berryphase_new.F90.
-!    here, ikpt_loc numbers the kpts treated by the current processor.
-!    in berryphase_new.F90, ikpt_loc ALSO includes info about value of isppol.
+     ! BIG FAT k POINT LOOP
+     ! MVeithen: I had to modify the structure of this loop in order to implement MPI // of the electric field
+     ! Note that the loop here differs from the similar one in berryphase_new.F90.
+     ! here, ikpt_loc numbers the kpts treated by the current processor.
+     ! in berryphase_new.F90, ikpt_loc ALSO includes info about value of isppol.
 
      ikpt = 0
      do while (ikpt_loc < nkpt1)
@@ -962,14 +962,14 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
        if(usefock_ACE/=0) then
          call gs_hamk%load_k(kpt_k=dtset%kptns(:,ikpt),istwf_k=istwf_k,npw_k=npw_k,&
-&         kinpw_k=kinpw,kg_k=kg_k,kpg_k=kpg_k,ffnl_k=ffnl,fockACE_k=fock%fockACE(ikpt,isppol),ph3d_k=ph3d,&
-&         compute_ph3d=(mpi_enreg%paral_kgb/=1.or.istep<=1),&
-&         compute_gbound=(mpi_enreg%paral_kgb/=1))
+           kinpw_k=kinpw,kg_k=kg_k,kpg_k=kpg_k,ffnl_k=ffnl,fockACE_k=fock%fockACE(ikpt,isppol),ph3d_k=ph3d,&
+           compute_ph3d=(mpi_enreg%paral_kgb/=1.or.istep<=1),&
+          compute_gbound=(mpi_enreg%paral_kgb/=1))
        else
          call gs_hamk%load_k(kpt_k=dtset%kptns(:,ikpt),istwf_k=istwf_k,npw_k=npw_k,&
-&         kinpw_k=kinpw,kg_k=kg_k,kpg_k=kpg_k,ffnl_k=ffnl,ph3d_k=ph3d,&
-&         compute_ph3d=(mpi_enreg%paral_kgb/=1.or.istep<=1),&
-&         compute_gbound=(mpi_enreg%paral_kgb/=1))
+           kinpw_k=kinpw,kg_k=kg_k,kpg_k=kpg_k,ffnl_k=ffnl,ph3d_k=ph3d,&
+           compute_ph3d=(mpi_enreg%paral_kgb/=1.or.istep<=1),&
+           compute_gbound=(mpi_enreg%paral_kgb/=1))
        end if
 
 !      Load band-FFT tabs (transposed k-dependent arrays)
@@ -1415,7 +1415,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !        ==  gather crystal structure date into data "cryst_struc"
          remove_inv=.false.
          if(dtset%nspden==4) remove_inv=.true.
-         call crystal_init(dtset%amu_orig(:,1),cryst_struc,dtset%spgroup,natom,dtset%npsp,ntypat, &
+         call cryst_struc%init(dtset%amu_orig(:,1),dtset%spgroup,natom,dtset%npsp,ntypat, &
           dtset%nsym,rprimd,dtset%typat,xred,dtset%ziontypat,dtset%znucl,1,&
           dtset%nspden==2.and.dtset%nsppol==1,remove_inv,hdr%title,&
           dtset%symrel,dtset%tnons,dtset%symafm)

@@ -278,7 +278,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
        end if
      end if
    end if
-     
+
    if ((optdriver/=RUNL_GSTATE.and.optdriver/=RUNL_GWLS.and.optdriver/=RUNL_RTTDDFT).and. &
 &   (dtsets(idtset)%np_spkpt/=1   .or.dtsets(idtset)%npband/=1.or.dtsets(idtset)%npfft/=1.or. &
 &   dtsets(idtset)%npspinor/=1.or.dtsets(idtset)%bandpp/=1)) then
@@ -414,7 +414,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    else if (dtsets(idtset)%npfft>1.and.usepaw==1) then
      dtsets(idtset)%pawmixdg=1
    end if
-     
+
 !  Cycle if the processor is not used
    if (mpi_enregs(idtset)%me<0.or.iexit>0) then
      ABI_FREE(intarr)
@@ -1416,7 +1416,7 @@ end subroutine mpi_setup
          if (mpi_enreg%me==0) then
            inquire(file=trim(filden),exist=file_found)
            if (file_found) then
-             call hdr_read_from_fname(hdr0,filden,ii,xmpi_comm_self)
+             call hdr0%from_fname(filden,ii,xmpi_comm_self)
              idum3(1:2)=hdr0%ngfft(2:3);if (file_found) idum3(3)=1
              call hdr0%free()
              ABI_WARNING("Cannot find filden "//filden)

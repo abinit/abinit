@@ -33,7 +33,7 @@ module m_dtset
  use m_symkpt,       only : symkpt
  use m_geometry,     only : mkrdim, metric, littlegroup_pert, irreducible_set_pert
  use m_parser,       only : intagm, chkvars_in_string
- use m_crystal,      only : crystal_t, crystal_init
+ use m_crystal,      only : crystal_t
 
  implicit none
 
@@ -202,11 +202,11 @@ type, public :: dataset_type
  integer :: efmas_ntheta
  integer :: enunit
  integer :: eph_ahc_type = 1
+ integer :: eph_path_brange(2) = 0
  integer :: eph_intmeth = 2
  integer :: eph_frohlichm = 0
  integer :: eph_frohl_ntheta = 0
  integer :: eph_phrange(2) = 0
-
  integer :: eph_prtscratew = 0
  integer :: eph_restart = 0
  integer :: eph_stern = 0
@@ -685,16 +685,20 @@ type, public :: dataset_type
 !V
  integer :: vacnum
 
- character(len=fnlen) :: varpeq_aseed = "gaussian"
+ character(len=fnlen) :: varpeq_aseed = "gau_energy"
  character(len=fnlen) :: varpeq_pkind = "none"
- integer :: varpeq_interpolate = 0
- integer :: varpeq_orth = 0
- integer :: varpeq_nstep = 30
- integer :: varpeq_pc_nupdate = 20
+ integer :: varpeq_avg_g = 0
+ integer :: varpeq_translate = 0
+ integer :: varpeq_interp = 0
+ integer :: varpeq_nstates = 1
+ integer :: varpeq_nstep = 50
+ integer :: varpeq_nstep_ort = 50
+ integer :: varpeq_select = -1
+ real(dp) :: varpeq_mixing_factor = zero
  real(dp) :: varpeq_tolgrs = tol6
- real(dp) :: varpeq_pc_factor = eighth
- real(dp) :: varpeq_gau_params(2) = [zero, one]
- real(dp) :: varpeq_erange(2) = zero
+ integer :: varpeq_trvec(3) = [0, 0, 0]
+ real(dp) :: varpeq_gpr_energy(2) = [zero, one]
+ real(dp) :: varpeq_gpr_length(3) = [one, one, one]
 
  integer :: vdw_nfrag
  integer :: vdw_df_ndpts
@@ -731,6 +735,7 @@ type, public :: dataset_type
  integer :: d3e_pert3_dir(3)
  integer :: eph_ngqpt_fine(3) = 0
  integer :: eph_np_pqbks(5) = 0
+ integer :: gwpt_np_wpqbks(6) = 0
  integer :: fockdownsampling(3)
  integer :: gwr_np_kgts(4) = 0
  integer :: gwr_ucsc_batch(2) = -1
@@ -824,8 +829,6 @@ type, public :: dataset_type
  real(dp) :: dosdeltae
  real(dp) :: dtion
  real(dp) :: dtele
- !real(dp) :: dvdb_qcache_mb = 1024.0_dp
- real(dp) :: dvdb_qcache_mb = zero
  real(dp) :: dvdb_qdamp = 0.1_dp
  real(dp) :: ecut
  real(dp) :: ecuteps
@@ -976,6 +979,7 @@ type, public :: dataset_type
  real(dp) :: efield(3)
  real(dp) :: einterp(4) = zero
  real(dp) :: eph_tols_idelta(2) = [tol12, tol12]
+ real(dp) :: eph_fix_wavevec(3) = zero
  real(dp) :: field_red(3)
  real(dp) :: genafm(3)
  real(dp) :: goprecprm(3)
@@ -1072,6 +1076,7 @@ type, public :: dataset_type
  character(len=fnlen) :: getabiwan_filepath = ABI_NOFILE
  character(len=fnlen) :: getgwan_filepath = ABI_NOFILE
  character(len=fnlen) :: write_files = ABI_NOFILE
+ character(len=1) :: eph_fix_korq = "k"
  character(len=fnlen) :: geoopt = ABI_NOFILE
  character(len=fnlen) :: moldyn = ABI_NOFILE
 
@@ -1597,9 +1602,11 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%chneut             = dtin%chneut
 
  dtout%eph_ahc_type       = dtin%eph_ahc_type
+ dtout%eph_path_brange    = dtin%eph_path_brange
  dtout%eph_mustar         = dtin%eph_mustar
  dtout%eph_intmeth        = dtin%eph_intmeth
  dtout%eph_tols_idelta    = dtin%eph_tols_idelta
+ dtout%eph_fix_wavevec    = dtin%eph_fix_wavevec
  dtout%eph_phrange        = dtin%eph_phrange
  dtout%eph_phrange_w      = dtin%eph_phrange_w
  dtout%eph_extrael        = dtin%eph_extrael
@@ -1612,6 +1619,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%eph_phwinfact      = dtin%eph_phwinfact
  dtout%eph_ngqpt_fine     = dtin%eph_ngqpt_fine
  dtout%eph_np_pqbks       = dtin%eph_np_pqbks
+ dtout%gwpt_np_wpqbks     = dtin%gwpt_np_wpqbks
 
  dtout%eph_prtscratew     = dtin%eph_prtscratew
  dtout%eph_restart        = dtin%eph_restart
@@ -1629,7 +1637,6 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%ph_smear          = dtin%ph_smear
  dtout%ddb_ngqpt         = dtin%ddb_ngqpt
  dtout%ddb_shiftq        = dtin%ddb_shiftq
- dtout%dvdb_qcache_mb    = dtin%dvdb_qcache_mb
  dtout%dvdb_qdamp        = dtin%dvdb_qdamp
  dtout%dvdb_add_lr       = dtin%dvdb_add_lr
  dtout%dvdb_rspace_cell  = dtin%dvdb_rspace_cell
@@ -2130,14 +2137,18 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
 
  dtout%varpeq_aseed       = dtin%varpeq_aseed
  dtout%varpeq_pkind       = dtin%varpeq_pkind
- dtout%varpeq_interpolate = dtin%varpeq_interpolate
- dtout%varpeq_orth        = dtin%varpeq_orth
+ dtout%varpeq_avg_g       = dtin%varpeq_avg_g
+ dtout%varpeq_translate   = dtin%varpeq_translate
+ dtout%varpeq_interp      = dtin%varpeq_interp
+ dtout%varpeq_nstates     = dtin%varpeq_nstates
  dtout%varpeq_nstep       = dtin%varpeq_nstep
+ dtout%varpeq_nstep_ort   = dtin%varpeq_nstep_ort
+ dtout%varpeq_select      = dtin%varpeq_select
+ dtout%varpeq_mixing_factor = dtin%varpeq_mixing_factor
  dtout%varpeq_tolgrs      = dtin%varpeq_tolgrs
- dtout%varpeq_pc_nupdate  = dtin%varpeq_pc_nupdate
- dtout%varpeq_pc_factor   = dtin%varpeq_pc_factor
- dtout%varpeq_gau_params  = dtin%varpeq_gau_params
- dtout%varpeq_erange      = dtin%varpeq_erange
+ dtout%varpeq_trvec       = dtin%varpeq_trvec
+ dtout%varpeq_gpr_energy  = dtin%varpeq_gpr_energy
+ dtout%varpeq_gpr_length  = dtin%varpeq_gpr_length
 
  dtout%vdw_df_acutmin     = dtin%vdw_df_acutmin
  dtout%vdw_df_aratio      = dtin%vdw_df_aratio
@@ -2166,6 +2177,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%wfinit             = dtin%wfinit
  dtout%wfoptalg           = dtin%wfoptalg
  dtout%write_files        = dtin%write_files
+ dtout%eph_fix_korq       = dtin%eph_fix_korq
  dtout%wvl_bigdft_comp    = dtin%wvl_bigdft_comp
  dtout%w90iniprj          = dtin%w90iniprj
  dtout%w90prtunk          = dtin%w90prtunk
@@ -3030,7 +3042,7 @@ type(crystal_t) function dtset_get_crystal(dtset, img) result(cryst)
  gw_timrev = 1; if (any(dtset%kptopt == [3, 4])) gw_timrev = 0
  gw_timrev = gw_timrev + 1
 
- call crystal_init(dtset%amu_orig(:, img), cryst, dtset%spgroup, dtset%natom, dtset%npsp, &
+ call cryst%init(dtset%amu_orig(:, img), dtset%spgroup, dtset%natom, dtset%npsp, &
                    dtset%ntypat, dtset%nsym, my_rprimd, dtset%typat, my_xred, dtset%ziontypat, dtset%znucl, gw_timrev, &
                    dtset%nspden==2 .and. dtset%nsppol==1, remove_inv, my_title,&
                    symrel=dtset%symrel, tnons=dtset%tnons, symafm=dtset%symafm)
@@ -3055,7 +3067,6 @@ subroutine dtset_get_ktmesh(dtset, ntemp, ktmesh)
  class(dataset_type),intent(in) :: dtset
  integer,intent(out) :: ntemp
  real(dp),allocatable,intent(out) :: ktmesh(:)
-
 ! *********************************************************************
 
  ntemp = nint(dtset%tmesh(3))
@@ -3458,7 +3469,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' dmft_rslf dmft_shiftself dmft_solv dmft_tolfreq dmft_tollc'
  list_vars=trim(list_vars)//' dmft_t2g dmft_test dmft_use_all_bands dmft_use_full_chipsi dmft_wanorthnorm' ! dmft_wanorthnorm is not documented
  list_vars=trim(list_vars)//' dmft_wanrad dmft_x2my2d dosdeltae dtion dtele dynamics dynimage' !FB: dynamics?
- list_vars=trim(list_vars)//' dvdb_add_lr dvdb_ngqpt dvdb_qcache_mb dvdb_qdamp dvdb_rspace_cell'
+ list_vars=trim(list_vars)//' dvdb_add_lr dvdb_ngqpt dvdb_qdamp dvdb_rspace_cell'
  list_vars=trim(list_vars)//' dyn_chksym dyn_tolsym'
  list_vars=trim(list_vars)//' d3e_pert1_atpol d3e_pert1_dir d3e_pert1_elfd d3e_pert1_phon'
  list_vars=trim(list_vars)//' d3e_pert2_atpol d3e_pert2_dir d3e_pert2_elfd d3e_pert2_phon'
@@ -3471,14 +3482,14 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' efield einterp elph2_imagden energy_reference enunit'
  list_vars=trim(list_vars)//' eph_frohl_ntheta'
  list_vars=trim(list_vars)//' eph_doping eph_ecutosc eph_extrael eph_fermie eph_frohlich eph_frohlichm eph_fsewin eph_fsmear '
- list_vars=trim(list_vars)//' eph_intmeth eph_mustar eph_ngqpt_fine eph_ahc_type'
+ list_vars=trim(list_vars)//' eph_intmeth eph_mustar eph_ngqpt_fine eph_ahc_type eph_path_brange'
  ! XG20200321, please provide testing for eph_np_pqbks
- ! MG: Well, eph_np_pqbks cannot be tested with the present infrastructure because it's a MPI-related variable
+ ! MG: Well, eph_np_pqbks and gwpt_np_wpqbks cannot be tested with the present infrastructure because it's a MPI-related variable
  ! and all the tests in the paral and mpiio directory are done with a single input file
  ! whereas EPH requires GS + DFPT + MRGDV + MRGDDB + TESTS_MULTIPLES_PROCS
- list_vars=trim(list_vars)//' eph_np_pqbks'
- list_vars=trim(list_vars)//' eph_phrange eph_phrange_w eph_phwinfact'
- list_vars=trim(list_vars)//' eph_prtscratew eph_restart eph_stern eph_task eph_tols_idelta eph_transport eph_use_ftinterp'
+ list_vars=trim(list_vars)//' eph_np_pqbks gwpt_np_wpqbks'
+ list_vars=trim(list_vars)//' eph_phrange eph_phrange_w eph_phwinfact eph_fix_korq'
+ list_vars=trim(list_vars)//' eph_prtscratew eph_restart eph_stern eph_task eph_tols_idelta eph_fix_wavevec eph_transport eph_use_ftinterp'
  list_vars=trim(list_vars)//' eshift esmear exchmix exchn2n3d expert_user'
  list_vars=trim(list_vars)//' extfpmd_nbcut extfpmd_nbdbuf extfpmd_nband extrapwf'
 !F
@@ -3672,9 +3683,10 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' use_oldchi'
 !V
  list_vars=trim(list_vars)//' vaclst vacnum vacuum vacwidth vcutgeo'
- list_vars=trim(list_vars)//' varpeq_aseed varpeq_erange varpeq_gau_params'
- list_vars=trim(list_vars)//' varpeq_interpolate varpeq_orth varpeq_nstep varpeq_pkind'
- list_vars=trim(list_vars)//' varpeq_tolgrs varpeq_pc_nupdate varpeq_pc_factor'
+ list_vars=trim(list_vars)//' varpeq_avg_g varpeq_aseed varpeq_gpr_energy'
+ list_vars=trim(list_vars)//' varpeq_gpr_length varpeq_interp varpeq_mixing_factor varpeq_nstates'
+ list_vars=trim(list_vars)//' varpeq_nstep varpeq_nstep_ort varpeq_select varpeq_pkind'
+ list_vars=trim(list_vars)//' varpeq_tolgrs varpeq_translate varpeq_trvec'
  list_vars=trim(list_vars)//' vdw_nfrag vdw_supercell'
  list_vars=trim(list_vars)//' vdw_tol vdw_tol_3bt vdw_typfrag vdw_xc'
  list_vars=trim(list_vars)//' vdw_df_acutmin vdw_df_aratio vdw_df_damax'

@@ -557,7 +557,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
    end if
    vtrial_local = vtrial
    call orbmag(cg,cg1_3,cprj,dtset,eigen,gsqcut,kg,mcg,mcg1_3,mcprj,dtset%mkmem,&
-     & mpi_enreg,dtset%mpw,nfftf,ngfftf,npwarr,occ,paw_an,paw_ij,pawang,pawfgr,&
+     & mpi_enreg,dtset%mpw,nfftf,ngfftf,npwarr,occ,paw_ij,pawfgr,&
      & pawrad,pawtab,psps,rprimd,usevxctau,vtrial_local,vxctau,xred,ylm,ylmgr)
 
    ABI_FREE(vtrial_local)

@@ -37,7 +37,7 @@ tolvrs1  1.0d-8              # Tolerance to stop SCF cycles
 # Dataset 2: CC4S interface
 ###########################################
 optdriver2  6        # Activate GWR code
-gwr_task2 "CC4S"     
+gwr_task2 "CC4S"
 getden2     1
 nband2     40         # Number of (occ + empty) bands
 ecuteps2   4

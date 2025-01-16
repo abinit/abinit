@@ -26,10 +26,11 @@ endif()
 set(16_kokkos_toolbox_SRC
   kokkos_utils.cpp
   m_kokkos_utils.F90
-  )
+)
 
 add_library(16_kokkos_toolbox STATIC
-  ${16_kokkos_toolbox_SRC})
+  ${16_kokkos_toolbox_SRC}
+)
 
 #####################################################################
 # Set paths for integration with autotools buildsystem

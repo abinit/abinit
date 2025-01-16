@@ -2,7 +2,7 @@
 .Version 10.3.4.3 of ABINIT, released Nov 2024.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -477,7 +477,7 @@ tolerances: {toldfe: 1.00E-10, }
  ETOT  7  -7.2585848333285    -5.838E-12 1.118E-13 5.877E-10
  ETOT  8  -7.2585848333286    -1.110E-13 6.190E-15 3.900E-12
 
- At SCF step    8, etot is converged : 
+ At SCF step    8, etot is converged :
   for the second time, diff in etot=  1.110E-13 < toldfe=  1.000E-10
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -638,7 +638,7 @@ tolerances: {toldfe: 1.00E-10, }
  ETOT  7  -7.2585848333285    -5.838E-12 1.118E-13 5.877E-10
  ETOT  8  -7.2585848333286    -1.110E-13 6.190E-15 3.900E-12
 
- At SCF step    8, etot is converged : 
+ At SCF step    8, etot is converged :
   for the second time, diff in etot=  1.110E-13 < toldfe=  1.000E-10
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -804,7 +804,7 @@ tolerances: {toldfe: 1.00E-10, }
  ETOT  7  -7.8994190142823    -1.483E-12 8.992E-06 6.009E-11
  ETOT  8  -7.8994190142823    -3.109E-14 1.486E-06 1.067E-12
 
- At SCF step    8, etot is converged : 
+ At SCF step    8, etot is converged :
   for the second time, diff in etot=  3.109E-14 < toldfe=  1.000E-10
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -969,7 +969,7 @@ tolerances: {toldfe: 1.00E-10, }
  ETOT  7  -7.8994190142823    -1.483E-12 8.992E-06 6.009E-11
  ETOT  8  -7.8994190142823    -3.109E-14 1.486E-06 1.067E-12
 
- At SCF step    8, etot is converged : 
+ At SCF step    8, etot is converged :
   for the second time, diff in etot=  3.109E-14 < toldfe=  1.000E-10
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1123,7 +1123,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     106.000     106.000
 
 ================================================================================
 
-=== [ionmov= 3] Broyden-Fletcher-Goldfarb-Shanno method (forces,Tot energy) 
+=== [ionmov= 3] Broyden-Fletcher-Goldfarb-Shanno method (forces,Tot energy)
 ================================================================================
 
 --- Iteration: (1/5) Internal Cycle: (1/1)
@@ -1146,7 +1146,7 @@ tolerances: {toldff: 1.00E-06, }
  ETOT  6  -7.2585848333226    -1.842E-10 1.239E-12 3.261E-08 5.492E-07 1.083E-01
  ETOT  7  -7.2585848333285    -5.838E-12 1.118E-13 5.877E-10 1.713E-07 1.083E-01
 
- At SCF step    7, forces are converged : 
+ At SCF step    7, forces are converged :
   for the second time, max diff in force=  1.713E-07 < toldff=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1225,7 +1225,7 @@ tolerances: {toldff: 1.00E-06, }
  ETOT  6  -7.3011190745482    -5.477E-12 5.331E-14 7.943E-10 2.625E-07 2.743E-02
  ETOT  7  -7.3011190745484    -2.220E-13 8.628E-16 2.518E-12 1.139E-08 2.743E-02
 
- At SCF step    7, forces are converged : 
+ At SCF step    7, forces are converged :
   for the second time, max diff in force=  1.139E-08 < toldff=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1307,7 +1307,7 @@ tolerances: {toldff: 1.00E-06, }
  ETOT  5  -7.3049058280525    -3.202E-11 8.317E-14 9.410E-10 3.367E-07 9.107E-04
  ETOT  6  -7.3049058280527    -1.901E-13 1.027E-14 5.118E-12 7.279E-09 9.107E-04
 
- At SCF step    6, forces are converged : 
+ At SCF step    6, forces are converged :
   for the second time, max diff in force=  7.279E-09 < toldff=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1386,7 +1386,7 @@ tolerances: {toldff: 1.00E-06, }
  ETOT  2  -7.3049104217182    -1.170E-10 2.397E-15 2.499E-08 1.828E-07 1.548E-06
  ETOT  3  -7.3049104217221    -3.890E-12 1.686E-14 1.010E-09 6.025E-08 1.609E-06
 
- At SCF step    3, forces are converged : 
+ At SCF step    3, forces are converged :
   for the second time, max diff in force=  6.025E-08 < toldff=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1449,7 +1449,7 @@ force_length_stats: {min:   2.78623317E-06, max:   2.78623317E-06, mean:   2.786
            Absolute (Ha)=-4.59367E-06
            Relative     =-6.28847E-07
 
- At Broyd/MD step   4, gradients are converged : 
+ At Broyd/MD step   4, gradients are converged :
   max grad (force/stress) = 1.6086E-06 < tolmxf= 1.0000E-05 ha/bohr (free atoms)
 
 ================================================================================
@@ -1558,7 +1558,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     106.000     106.000
 
 ================================================================================
 
-=== [ionmov= 3] Broyden-Fletcher-Goldfarb-Shanno method (forces,Tot energy) 
+=== [ionmov= 3] Broyden-Fletcher-Goldfarb-Shanno method (forces,Tot energy)
 ================================================================================
 
 --- Iteration: (1/5) Internal Cycle: (1/1)
@@ -1581,7 +1581,7 @@ tolerances: {toldff: 1.00E-06, }
  ETOT  6  -7.2585848333226    -1.842E-10 1.239E-12 3.261E-08 5.492E-07 1.083E-01
  ETOT  7  -7.2585848333285    -5.838E-12 1.118E-13 5.877E-10 1.713E-07 1.083E-01
 
- At SCF step    7, forces are converged : 
+ At SCF step    7, forces are converged :
   for the second time, max diff in force=  1.713E-07 < toldff=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1660,7 +1660,7 @@ tolerances: {toldff: 1.00E-06, }
  ETOT  6  -7.3011190745482    -5.477E-12 5.331E-14 7.943E-10 2.625E-07 2.743E-02
  ETOT  7  -7.3011190745484    -2.220E-13 8.628E-16 2.518E-12 1.139E-08 2.743E-02
 
- At SCF step    7, forces are converged : 
+ At SCF step    7, forces are converged :
   for the second time, max diff in force=  1.139E-08 < toldff=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1742,7 +1742,7 @@ tolerances: {toldff: 1.00E-06, }
  ETOT  5  -7.3049058280525    -3.202E-11 8.317E-14 9.410E-10 3.367E-07 9.107E-04
  ETOT  6  -7.3049058280527    -1.901E-13 1.027E-14 5.118E-12 7.279E-09 9.107E-04
 
- At SCF step    6, forces are converged : 
+ At SCF step    6, forces are converged :
   for the second time, max diff in force=  7.279E-09 < toldff=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1821,7 +1821,7 @@ tolerances: {toldff: 1.00E-06, }
  ETOT  2  -7.3049104217182    -1.170E-10 2.397E-15 2.499E-08 1.828E-07 1.548E-06
  ETOT  3  -7.3049104217221    -3.890E-12 1.686E-14 1.010E-09 6.025E-08 1.609E-06
 
- At SCF step    3, forces are converged : 
+ At SCF step    3, forces are converged :
   for the second time, max diff in force=  6.025E-08 < toldff=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1884,7 +1884,7 @@ force_length_stats: {min:   2.78623317E-06, max:   2.78623317E-06, mean:   2.786
            Absolute (Ha)=-4.59367E-06
            Relative     =-6.28847E-07
 
- At Broyd/MD step   4, gradients are converged : 
+ At Broyd/MD step   4, gradients are converged :
   max grad (force/stress) = 1.6086E-06 < tolmxf= 1.0000E-05 ha/bohr (free atoms)
 
 ================================================================================
@@ -1998,7 +1998,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     105.500     105.493
 
 ================================================================================
 
-=== [ionmov= 3] Broyden-Fletcher-Goldfarb-Shanno method (forces,Tot energy) 
+=== [ionmov= 3] Broyden-Fletcher-Goldfarb-Shanno method (forces,Tot energy)
 ================================================================================
 
 --- Iteration: (1/5) Internal Cycle: (1/1)
@@ -2023,7 +2023,7 @@ tolerances: {toldff: 1.00E-07, }
  ETOT  8  -7.8994190142823    -3.109E-14 1.486E-06 1.067E-12 4.819E-09 5.852E-02
  ETOT  9  -7.8994190142823    -1.332E-14 1.310E-06 4.300E-15 4.726E-10 5.852E-02
 
- At SCF step    9, forces are converged : 
+ At SCF step    9, forces are converged :
   for the second time, max diff in force=  4.726E-10 < toldff=  1.000E-07
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2103,7 +2103,7 @@ tolerances: {toldff: 1.00E-07, }
  ETOT  7  -7.9150512566433    -6.573E-14 4.565E-08 9.281E-13 2.714E-08 3.164E-02
  ETOT  8  -7.9150512566433     2.309E-14 2.519E-08 1.263E-14 3.611E-10 3.164E-02
 
- At SCF step    8, forces are converged : 
+ At SCF step    8, forces are converged :
   for the second time, max diff in force=  3.611E-10 < toldff=  1.000E-07
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2186,7 +2186,7 @@ tolerances: {toldff: 1.00E-07, }
  ETOT  6  -7.9235528304741    -3.671E-12 1.352E-05 5.181E-11 1.569E-08 4.759E-04
  ETOT  7  -7.9235528304742    -4.086E-14 7.500E-06 1.457E-12 7.899E-09 4.759E-04
 
- At SCF step    7, forces are converged : 
+ At SCF step    7, forces are converged :
   for the second time, max diff in force=  7.899E-09 < toldff=  1.000E-07
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2267,7 +2267,7 @@ tolerances: {toldff: 1.00E-07, }
  ETOT  4  -7.9235555182241    -1.950E-12 3.272E-08 1.232E-10 2.834E-09 1.623E-07
  ETOT  5  -7.9235555182241     7.994E-15 2.291E-08 1.249E-12 3.991E-09 1.583E-07
 
- At SCF step    5, forces are converged : 
+ At SCF step    5, forces are converged :
   for the second time, max diff in force=  3.991E-09 < toldff=  1.000E-07
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2330,7 +2330,7 @@ force_length_stats: {min:   2.74258947E-07, max:   2.74258947E-07, mean:   2.742
            Absolute (Ha)=-2.68775E-06
            Relative     =-3.39210E-07
 
- At Broyd/MD step   4, gradients are converged : 
+ At Broyd/MD step   4, gradients are converged :
   max grad (force/stress) = 1.5834E-07 < tolmxf= 1.0000E-05 ha/bohr (free atoms)
 
 ================================================================================
@@ -2443,7 +2443,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     105.500     105.493
 
 ================================================================================
 
-=== [ionmov= 3] Broyden-Fletcher-Goldfarb-Shanno method (forces,Tot energy) 
+=== [ionmov= 3] Broyden-Fletcher-Goldfarb-Shanno method (forces,Tot energy)
 ================================================================================
 
 --- Iteration: (1/5) Internal Cycle: (1/1)
@@ -2468,7 +2468,7 @@ tolerances: {toldff: 1.00E-07, }
  ETOT  8  -7.8994190142823    -3.109E-14 1.486E-06 1.067E-12 4.819E-09 5.852E-02
  ETOT  9  -7.8994190142823    -1.332E-14 1.310E-06 4.300E-15 4.726E-10 5.852E-02
 
- At SCF step    9, forces are converged : 
+ At SCF step    9, forces are converged :
   for the second time, max diff in force=  4.726E-10 < toldff=  1.000E-07
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2548,7 +2548,7 @@ tolerances: {toldff: 1.00E-07, }
  ETOT  7  -7.9150512566433    -6.573E-14 4.565E-08 9.281E-13 2.714E-08 3.164E-02
  ETOT  8  -7.9150512566433     2.309E-14 2.519E-08 1.263E-14 3.611E-10 3.164E-02
 
- At SCF step    8, forces are converged : 
+ At SCF step    8, forces are converged :
   for the second time, max diff in force=  3.611E-10 < toldff=  1.000E-07
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2631,7 +2631,7 @@ tolerances: {toldff: 1.00E-07, }
  ETOT  6  -7.9235528304741    -3.671E-12 1.352E-05 5.181E-11 1.569E-08 4.759E-04
  ETOT  7  -7.9235528304742    -4.086E-14 7.500E-06 1.457E-12 7.899E-09 4.759E-04
 
- At SCF step    7, forces are converged : 
+ At SCF step    7, forces are converged :
   for the second time, max diff in force=  7.899E-09 < toldff=  1.000E-07
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2712,7 +2712,7 @@ tolerances: {toldff: 1.00E-07, }
  ETOT  4  -7.9235555182241    -1.950E-12 3.272E-08 1.232E-10 2.834E-09 1.623E-07
  ETOT  5  -7.9235555182241     7.994E-15 2.291E-08 1.249E-12 3.991E-09 1.583E-07
 
- At SCF step    5, forces are converged : 
+ At SCF step    5, forces are converged :
   for the second time, max diff in force=  3.991E-09 < toldff=  1.000E-07
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2775,7 +2775,7 @@ force_length_stats: {min:   2.74258947E-07, max:   2.74258947E-07, mean:   2.742
            Absolute (Ha)=-2.68775E-06
            Relative     =-3.39210E-07
 
- At Broyd/MD step   4, gradients are converged : 
+ At Broyd/MD step   4, gradients are converged :
   max grad (force/stress) = 1.5834E-07 < tolmxf= 1.0000E-05 ha/bohr (free atoms)
 
 ================================================================================
@@ -2857,7 +2857,7 @@ band_energy         :  3.40453014982664E-01
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      1.0366000000E+01  1.0366000000E+01  1.0366000000E+01 Bohr
               amu      2.80855000E+01
@@ -3220,7 +3220,7 @@ P           mkmem8          5
 - subtotal                                  4.608  12.7         4.611  12.7                                  1.00       1.00
 
 - For major independent code sections, cpu and wall times (sec),
-- as well as % of the total time and number of calls 
+- as well as % of the total time and number of calls
 
 -<BEGIN_TIMER mpi_nprocs = 4, omp_nthreads = 1, mpi_rank = world>
 - cpu_time =          36.2, wall_time =          36.2
@@ -3389,13 +3389,13 @@ P           mkmem8          5
 
  Partitioning of inwffil
 - inwffil                                   0.005   0.0         0.005   0.0             32                   1.00       1.00
- 
+
 
 - subtotal                                  0.005   0.0         0.005   0.0                                  1.00       1.00
 
  Partitioning of newkpt
 - newkpt                                    0.004   0.0         0.004   0.0             32                   1.00       1.00
- 
+
 
 - subtotal                                  0.004   0.0         0.004   0.0                                  0.99       0.99
 
@@ -3562,7 +3562,7 @@ P           mkmem8          5
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -3574,12 +3574,12 @@ P           mkmem8          5
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -3597,7 +3597,7 @@ P           mkmem8          5
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -3612,7 +3612,7 @@ P           mkmem8          5
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009

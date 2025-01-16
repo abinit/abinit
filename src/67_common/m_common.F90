@@ -32,9 +32,7 @@ module m_common
 #if defined DEV_YP_VDWXC
  use m_xc_vdw
 #endif
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
  use m_nctk
  use m_crystal
  use m_wfk
@@ -57,7 +55,7 @@ module m_common
  use m_invars1,           only : invars0, invars1m, indefo
  use m_time,              only : timab, time_set_papiopt
  use defs_abitypes,       only : MPI_type
- use defs_datatypes,      only : pspheader_type, ebands_t
+ use defs_datatypes,      only : pspheader_type
  use m_pspheads,          only : inpspheads, pspheads_comm
  use m_kpts,              only : kpts_timrev_from_kptopt
 
@@ -296,18 +294,18 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
        if (prtfor==0) then
          if (optres==0) then
            write(message, '(4a)' ) ch10,&
-&           '     iter   Etot(hartree)     deltaE(h) ',colname,'  vres2    magn'
+            '     iter   Etot(hartree)     deltaE(h) ',colname,'  vres2    magn'
          else
            write(message, '(4a)' ) ch10,&
-&           '     iter   Etot(hartree)     deltaE(h) ',colname,'  nres2    magn'
+            '     iter   Etot(hartree)     deltaE(h) ',colname,'  nres2    magn'
          end if
        else
          if (optres==0) then
            write(message, '(4a)' ) ch10,&
-&           '     iter   Etot(hartree)     deltaE(h) ',colname,'  vres2   diffor   maxfor   magn'
+            '     iter   Etot(hartree)     deltaE(h) ',colname,'  vres2   diffor   maxfor   magn'
          else
            write(message, '(4a)' ) ch10,&
-&           '     iter   Etot(hartree)     deltaE(h) ',colname,'  nres2   diffor   maxfor   magn'
+            '     iter   Etot(hartree)     deltaE(h) ',colname,'  nres2   diffor   maxfor   magn'
          end if
        end if
      else
@@ -348,13 +346,8 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
                         [tolwfr, toldff, toldfe, tolvrs, tolrff], & !, vdw_df_threshold], &
                         real_fmt="(es8.2)", dict_key="tolerances", ignore=zero)
 
-     !if (dtset%use_yaml == 1) then
      call ydoc%write_and_free(ab_out, newline=.False.)
-     !else
-     !call ydoc%write_and_free(std_out, newline=.False.)
-     !end if
-
-     call wrtout(ab_out,message)
+     call wrtout(ab_out, message)
    end if
 
  case (2)
@@ -436,10 +429,10 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
        end if
        if (prtfor==0) then
          write(message, '(a,'//format_istep//',1p,g22.14,3es9.2,0p,'//format_magnet ) &
-&         ' ETOT',istep,etotal,deltae,residm,res2,magnet
+          ' ETOT',istep,etotal,deltae,residm,res2,magnet
        else
          write(message, '(a,'//format_istep//',1p,g22.14,3es9.2,es8.1,es9.2,0p,'//format_magnet ) &
-&         ' ETOT',istep,etotal,deltae,residm,res2,diffor,maxfor,magnet
+          ' ETOT',istep,etotal,deltae,residm,res2,diffor,maxfor,magnet
        end if
      else
        firstchar=' '
@@ -447,14 +440,14 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
        if (response==0) then
          if (prtfor==0) then
            write(message, '(2a,'//format_istep//',1p,g22.14,3es10.3)' ) &
-&           firstchar,'ETOT',istep,etotal,deltae,residm,res2
+            firstchar,'ETOT',istep,etotal,deltae,residm,res2
          else
            write(message, '(2a,'//format_istep//',1p,g22.14,5es10.3)' ) &
-&           firstchar,'ETOT',istep,etotal,deltae,residm,res2,diffor,maxfor
+            firstchar,'ETOT',istep,etotal,deltae,residm,res2,diffor,maxfor
          end if
        else
          write(message, '(2a,'//format_istep//',1p,g22.14,1x,3es10.3)' ) &
-&         firstchar,'ETOT',istep,etotal,deltae,residm,res2
+          firstchar,'ETOT',istep,etotal,deltae,residm,res2
        end if
      end if
      !if (etot_yaml_doc%stream%length /= 0) call etot_yaml_doc%add_tabular_line('  '//message(6:))
@@ -475,7 +468,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
      ! Print up and down charge and magnetization
      if(tmagnet==1) then
        write(message,'(a,f11.6,a,f11.6,a,f10.6)')&
-&       ' #electrons spin up=',rhoup,', spin down=',rhodn,', magnetization=',magnet
+        ' #electrons spin up=',rhoup,', spin down=',rhodn,', magnetization=',magnet
        call wrtout([std_out, ab_out], message)
      end if
 
@@ -512,9 +505,9 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
    if (my_rank == master .and. (dtset%prtvol>=10 .and. response==0 .and. dtset%tfkinfunc==0 .and. dtset%usewvl==0)) then
      option=1
      call prteigrs(eigen,dtset%enunit,fermie,fermih,fname_eig,ab_out,iscf,kpt,dtset%kptopt,dtset%mband,&
-&     nband,dtset%nbdbuf,nkpt,dtset%nnsclo,dtset%nsppol,occ,dtset%occopt,option,dtset%prteig,dtset%prtvol,resid,tolwfr,vxcavg,wtk)
+      nband,dtset%nbdbuf,nkpt,dtset%nnsclo,dtset%nsppol,occ,dtset%occopt,option,dtset%prteig,dtset%prtvol,resid,tolwfr,vxcavg,wtk)
      call prteigrs(eigen,dtset%enunit,fermie,fermih,fname_eig,std_out,iscf,kpt,dtset%kptopt,dtset%mband,&
-&     nband,dtset%nbdbuf,nkpt,dtset%nnsclo,dtset%nsppol,occ,dtset%occopt,option,dtset%prteig,dtset%prtvol,resid,tolwfr,vxcavg,wtk)
+      nband,dtset%nbdbuf,nkpt,dtset%nnsclo,dtset%nsppol,occ,dtset%occopt,option,dtset%prteig,dtset%prtvol,resid,tolwfr,vxcavg,wtk)
    end if
 
    if(response==0)then
@@ -529,8 +522,8 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 
    ! In special cases, do not quit even if convergence is reached
    noquit=((istep<nstep).and.(usepaw==1).and.(dtset%usepawu/=0).and.&
-&   (dtset%usedmatpu/=0).and.(istep<=abs(dtset%usedmatpu)).and.&
-&   (dtset%usedmatpu<0.or.initGS==0))
+           (dtset%usedmatpu/=0).and.(istep<=abs(dtset%usedmatpu)).and.&
+           (dtset%usedmatpu<0.or.initGS==0))
 
    ! Additional stuff for electron/positron
    if (present(electronpositron)) then
@@ -581,7 +574,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
          ! functions are relatively converged as well
          if (diffor < tol12) then
            write (message,'(3a)') ' toldff criterion is satisfied, but your forces are suspiciously low.', ch10,&
-&           ' Check if the forces are 0 by symmetry: in that case you can not use the toldff convergence criterion!'
+            ' Check if the forces are 0 by symmetry: in that case you can not use the toldff convergence criterion!'
            ABI_WARNING(message)
            if (maxfor < tol16 .and. res2 > tol9) tolrff_ok=0
          end if
@@ -593,14 +586,14 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
        if(toldff_ok>=2 .and..not.noquit)then
          if (ttolwfr==0) then
            write(message, '(a,a,i5,a,a,a,es11.3,a,es11.3)' ) ch10, &
-&           ' At SCF step',istep,', forces are converged : ',ch10,&
-&           '  for the second time, max diff in force=',diffor,' < toldff=',toldff
+            ' At SCF step',istep,', forces are converged : ',ch10,&
+            '  for the second time, max diff in force=',diffor,' < toldff=',toldff
            call wrtout([std_out, ab_out], message)
            quit=1
          else if (ttolwfr==1 .and. residm < tolwfr )then
            write(message, '(a,a,i5,a,1p,e10.2,a,e10.2,a,a,a,es11.3,a,es11.3)' ) ch10, &
-&           ' At SCF step',istep,', max residual=',residm,' < tolwfr=',tolwfr,' AND forces are converged : ',ch10,&
-&           '  for the second time, max diff in force=',diffor,' < toldff=',toldff
+            ' At SCF step',istep,', max residual=',residm,' < tolwfr=',tolwfr,' AND forces are converged : ',ch10,&
+            '  for the second time, max diff in force=',diffor,' < toldff=',toldff
            call wrtout([std_out, ab_out], message)
            quit=1
         end if
@@ -679,7 +672,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
        end if
        if(usefock==1 .and. nnsclohf>1)then
          if(istep_mix==1 .and. (.not.noquit))then
-!          The change due to the update of the Fock operator is sufficiently small. No need to meet it a second times.
+           ! The change due to the update of the Fock operator is sufficiently small. No need to meet it a second times.
            if (abs(deltae)<toldfe) then
              write(message, '(a,i3,a,i3,a,a,a,es11.3,a,es11.3)' ) &
              ' Outer loop step',istep_fock_outer,' - inner step',istep_mix,' - etot converged : ',ch10,&
@@ -689,7 +682,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
              quit=1
            endif
          endif
-!TODO: separate messages: if HF is imposing a continuation of the loop, then abs(deltae) is actually not > toldfe
+         !TODO: separate messages: if HF is imposing a continuation of the loop, then abs(deltae) is actually not > toldfe
          if(istep_mix==nnsclohf .and. quit==0)then
            write(message, '(a,i3,a,i3,a,a,a,es11.3,a,es11.3)' ) &
            ' Outer loop step',istep_fock_outer,' - inner step',istep_mix,' - frozen Fock etot NOT converged : ',ch10,&
@@ -1064,7 +1057,7 @@ subroutine setup1(acell,bantot,dtset,ecut_eff,ecutc_eff,gmet,&
 !scalars
  integer :: ikpt,isppol
  real(dp) :: boxcut,boxcutc
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
  real(dp) :: k0(3)
 
@@ -1079,11 +1072,9 @@ subroutine setup1(acell,bantot,dtset,ecut_eff,ecutc_eff,gmet,&
  end do
 
  if(dtset%nqpt>1.or.dtset%nqpt<0) then
-   write(message,'(a,i0,5a)')&
-   'nqpt =',dtset%nqpt,' is not allowed',ch10,&
-   '(only 0 or 1 are allowed).',ch10,&
-   'Action: correct your input file.'
-   ABI_ERROR(message)
+   write(msg,'(a,i0,5a)')&
+   'nqpt =',dtset%nqpt,' is not allowed',ch10,'(only 0 or 1 are allowed).',ch10,'Action: correct your input file.'
+   ABI_ERROR(msg)
  end if
 
  ! Compute dimensional primitive translations rprimd
@@ -1100,15 +1091,14 @@ subroutine setup1(acell,bantot,dtset,ecut_eff,ecutc_eff,gmet,&
  k0(:)=0.0_dp
  if(response==1 .and. dtset%nqpt==1)then
    k0(:)=dtset%qptn(:)
-   write(message, '(a)' )' setup1 : take into account q-point for computing boxcut.'
-   call wrtout([std_out, ab_out], message)
+   call wrtout([std_out, ab_out], ' setup1 : take into account q-point for computing boxcut.')
  end if
  if (usepaw==1) then
-   write(message,'(2a)') ch10,' Coarse grid specifications (used for wave-functions):'
-   call wrtout([std_out, ab_out], message)
+   write(msg,'(2a)') ch10,' Coarse grid specifications (used for wave-functions):'
+   call wrtout([std_out, ab_out], msg)
    call getcut(boxcutc,ecutc_eff,gmet,gsqcutc_eff,dtset%iboxcut,ab_out,k0,ngfftc)
-   write(message,'(2a)') ch10,' Fine grid specifications (used for densities):'
-   call wrtout([std_out, ab_out], message)
+   write(msg,'(2a)') ch10,' Fine grid specifications (used for densities):'
+   call wrtout([std_out, ab_out], msg)
    call getcut(boxcut,ecut_eff,gmet,gsqcut_eff,dtset%iboxcut,ab_out,k0,ngfft)
  else
    call getcut(boxcut,ecut_eff,gmet,gsqcut_eff,dtset%iboxcut,ab_out,k0,ngfft)
@@ -1117,11 +1107,11 @@ subroutine setup1(acell,bantot,dtset,ecut_eff,ecutc_eff,gmet,&
 
  ! Check that boxcut>=2 if dtset%intxc=1; otherwise dtset%intxc must be set=0
  if (boxcut<2.0_dp.and.dtset%intxc==1) then
-   write(message, '(a,es12.4,a,a,a,a,a)' )&
+   write(msg, '(a,es12.4,a,a,a,a,a)' )&
    'boxcut= ',boxcut,' is < 2.0  => intxc must be 0;',ch10,&
    'Need larger ngfft to use intxc=1.',ch10,&
    'Action: you could increase ngfft, or decrease ecut, or put intxcn=0.'
-   ABI_ERROR(message)
+   ABI_ERROR(msg)
  end if
 
 end subroutine setup1
@@ -1980,18 +1970,16 @@ type(ebands_t) function ebands_from_file(path, comm) result(new)
  ! NOTE: Assume file with header. Must use wfk_read_eigenvalues to handle Fortran WFK
  if (endswith(path, "_WFK") .or. endswith(path, "_WFK.nc")) then
    call wfk_read_eigenvalues(path, gs_eigen, hdr, comm)
-   new = ebands_from_hdr(hdr, maxval(hdr%nband), gs_eigen)
+   call new%from_hdr(hdr, maxval(hdr%nband), gs_eigen)
 
  else if (endswith(path, ".nc")) then
-#ifdef HAVE_NETCDF
    NCF_CHECK(nctk_open_read(ncid, path, comm))
-   call hdr_ncread(hdr, ncid, fform)
+   call hdr%ncread(ncid, fform)
    ABI_CHECK(fform /= 0, "fform == 0")
    ABI_MALLOC(gs_eigen, (hdr%mband, hdr%nkpt, hdr%nsppol))
    NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "eigenvalues"), gs_eigen))
-   new = ebands_from_hdr(hdr, maxval(hdr%nband), gs_eigen)
+   call new%from_hdr(hdr, maxval(hdr%nband), gs_eigen)
    NCF_CHECK(nf90_close(ncid))
-#endif
  else
    ABI_ERROR(sjoin("Don't know how to construct crystal structure from: ", path, ch10, "Supported extensions: _WFK or .nc"))
  end if
@@ -2031,7 +2019,7 @@ type(crystal_t) function crystal_from_file(path, comm) result(new)
 
  ! Assume file with Abinit header
  ! TODO: Should add routine to read crystal from structure without hdr
- call hdr_read_from_fname(hdr, path, fform, comm)
+ call hdr%from_fname(path, fform, comm)
  ABI_CHECK(fform /= 0, "fform == 0")
  new = hdr%get_crystal()
  call hdr%free()

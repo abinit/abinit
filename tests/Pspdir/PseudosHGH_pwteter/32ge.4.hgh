@@ -1,6 +1,6 @@
-Hartwigsen-Goedecker-Hutter psp for Ge,  from PRB58, 3641 (1998) 
+Hartwigsen-Goedecker-Hutter psp for Ge,  from PRB58, 3641 (1998)
    32   4  010605 zatom,zion,pspdat
- 3 1   2 0 2001 0  pspcod,pspxc,lmax,lloc,mmax,r2well 
+ 3 1   2 0 2001 0  pspcod,pspxc,lmax,lloc,mmax,r2well
   0.540000    0.000000    0.000000    0.000000   0.000000 rloc, c1, c2, c3, c4
   0.493743    3.826891    1.100231   -1.344218          rs, h11s, h22s, h33s
   0.601064    1.362518   -0.627370    0.000000          rp, h11p, h22p, h33p

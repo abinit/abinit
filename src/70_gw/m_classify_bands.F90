@@ -27,7 +27,7 @@ module m_classify_bands
  use m_esymm
  use m_errors
 
- use defs_datatypes,   only : pseudopotential_type, ebands_t
+ use defs_datatypes,   only : pseudopotential_type
  use m_numeric_tools,  only : get_trace
  use m_symtk,          only : mati3inv
  use m_hide_blas,      only : xdotc, xdotu, xcopy
@@ -42,6 +42,7 @@ module m_classify_bands
  use m_paw_sphharm,    only : setsym_ylm
  use m_paw_nhat,       only : nhatgrid
  use m_wfd,            only : wfd_t
+ use m_ebands,         only : ebands_t
 
  implicit none
 

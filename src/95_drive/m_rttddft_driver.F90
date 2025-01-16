@@ -24,7 +24,6 @@ module m_rttddft_driver
  use defs_basis
  use defs_abitypes,        only: MPI_type
  use defs_datatypes,       only: pseudopotential_type
-
  use m_dtfil,              only: datafiles_type
  use m_dtset,              only: dataset_type
  use m_errors,             only: msg_hndl
@@ -133,11 +132,11 @@ subroutine rttddft(codvsn,dtfil,dtset,mpi_enreg,pawang,pawrad,pawtab,psps)
  write(msg,'(3a)') ch10,'-------------------------   Starting propagation   ------------------------',ch10
  call wrtout(ab_out,msg)
  if (do_write_log) call wrtout(std_out,msg)
- 
+
  do istep = tdks%first_step, tdks%first_step+tdks%ntime-1
 
    call cwtime(cpu, wall, gflops, "start")
- 
+
    !Perform electronic step
    !Compute new WF at time t and energy contribution at time t-dt
    call rttddft_propagate_ele(dtset,istep,mpi_enreg,psps,tdks)

@@ -1,4 +1,4 @@
-1.65bohr 35 hartree exncc psp for oxygen with core 19 june 1992                 
+1.65bohr 35 hartree exncc psp for oxygen with core 19 june 1992
   8.00000  6.00000  920619                    zatom,zion,pspdat
   4         3         1   1      2001    0    pspcod,pspxc,lmax,lloc,mmax,r2well
   0  0  0   2    1.64916222999999995          l,e99.0,e99.9,nproj,rcpsp

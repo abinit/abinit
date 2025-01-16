@@ -433,7 +433,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
  end if
 
 !Select k-dependent objects according to select_k input parameter
- select_k_=1;if (present(select_k)) select_k_=select_k
+ select_k_=KPRIME_H_K;if (present(select_k)) select_k_=select_k
  ! If both K-Kprime variant of each attribute of hamiltonian share the same
  ! address, we can assume select_k==K_H_K.
  if (        c_associated(c_loc(hamk%ffnl_k), c_loc(hamk%ffnl_kp)) &

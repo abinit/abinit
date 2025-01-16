@@ -4,7 +4,7 @@ abinit for Debian
 How to run the tutorial 1: install the abinit-doc package, and
 create the file "t1x.files":
 
-$ cat t1x.files 
+$ cat t1x.files
 /usr/share/doc/abinit-doc/tests/tutorial/Input/t11.in
 t11.out
 t1xi
@@ -24,11 +24,11 @@ You should get only minor differences (different filenames, differences in
 energies like 1e-10 etc.). The output on my computer is:
 
 2,3c2,3
-< .Version 5.3.4  of ABINIT 
-< .(sequential version, prepared for a i486_linux_UNKNOWN computer) 
+< .Version 5.3.4  of ABINIT
+< .(sequential version, prepared for a i486_linux_UNKNOWN computer)
 ---
-> .Version 5.3.3  of ABINIT 
-> .(sequential version, prepared for a x86_64_linux_pgi computer) 
+> .Version 5.3.3  of ABINIT
+> .(sequential version, prepared for a x86_64_linux_pgi computer)
 17c17
 < .Starting date : Fri 27 Jul 2007.
 ---
