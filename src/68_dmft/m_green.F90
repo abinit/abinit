@@ -681,8 +681,10 @@ subroutine print_green(char1,green,option,paw_dmft,opt_wt,opt_decim)
  integer, optional, intent(in) :: opt_wt,opt_decim
  character(len=*), intent(in) :: char1
 !Local variables-------------------------------
- integer :: iall,iatom,ib,ifreq,ikpt,im,ispinor,isppol,itau,lpawu,lsub,mbandc,natom
- integer :: ndim,nkpt,nspinor,nsppol,optwt,spf_unt,spfkresolved_unt,spcorb_unt
+ integer :: iall,iatom,ib,ifreq,ikpt,im,ispinor
+ integer :: isppol,itau,lpawu,lsub,mbandc,natom
+ integer :: ndim,nkpt,nspinor,nsppol,optwt,spf_unt
+ integer :: spfkresolved_unt,spcorb_unt
  !real(dp) :: ima,re
  character(len=2000) :: message
  character(len=fnlen) :: tmpfil
@@ -992,7 +994,8 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
  !logical :: lintegrate
  integer :: band_index,diag,i,ib,ib1,ierr,ifreq,ikpt,info,isppol,lwork,mbandc
  integer :: me_kpt,mkmem,myproc,natom,nband_k,nkpt,nmoments,nspinor,nsppol
- integer :: opt_quick_restart,option,optlog,optnonxsum,optnonxsum2,optself,shift,shift_green,spacecomm
+ integer :: opt_quick_restart,option,optlog,optnonxsum,optnonxsum2,optself
+ integer :: shift,shift_green,spacecomm
  real(dp) :: beta,correction,eigen,fac,fermilevel,temp,wtk
  complex(dpc) :: green_tmp,omega_current,trace_tmp
  character(len=500) :: message
@@ -4372,7 +4375,8 @@ subroutine compute_moments_loc(green,self,energy_level,weiss,option,opt_log)
  complex(dpc) :: trace
  integer, allocatable :: lpawu(:)
  complex(dpc), allocatable :: trace_loc(:)
- type(matlu_type), allocatable :: matlu(:),matlu2(:),matlu3(:),matlu4(:),matlu5(:),matlu6(:)
+ type(matlu_type), allocatable :: matlu(:),matlu2(:),matlu3(:)
+ type(matlu_type), allocatable :: matlu4(:),matlu5(:),matlu6(:)
 !************************************************************************
 
  optlog = 0

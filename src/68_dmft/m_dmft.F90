@@ -743,7 +743,7 @@ subroutine impurity_solve(cryst_struc,green,hu,paw_dmft,pawang,pawtab,&
 !   call copy_green(weiss,green,opt_tw=1)
 !   call copy_green(weiss,green,opt_tw=2)
 
-   call qmc_prep_ctqmc(cryst_struc,green,self_old,hu(:),paw_dmft,pawang,pawprtvol,weiss)
+   call qmc_prep_ctqmc(cryst_struc,green,self_old,hu(:),paw_dmft,pawang,pawprtvol,weiss,self_new=self_new)
 
 
  else if (abs(paw_dmft%dmft_solv) == 0) then

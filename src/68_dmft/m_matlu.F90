@@ -194,7 +194,8 @@ subroutine zero_matlu(matlu,natom,onlynondiag,maxoffdiag)
  integer, optional, intent(in) :: onlynondiag
  real(dp), optional, intent(out) :: maxoffdiag
 !Local variables-------------------------------
- integer :: iatom,im,im1,ispinor,ispinor1,isppol,lpawu,ndim,nspinor,nsppol,tndim
+ integer :: iatom,im,im1,ispinor,ispinor1,isppol
+ integer :: lpawu,ndim,nspinor,nsppol,tndim
  real(dp) :: maxoffdiag_
 !*********************************************************************
 
@@ -387,7 +388,8 @@ subroutine print_matlu(matlu,natom,prtopt,opt_diag,opt_ab_out,opt_exp,argout,com
  type(matlu_type), intent(in) :: matlu(natom)
  integer, optional, intent(in) :: opt_diag,opt_ab_out,opt_exp,argout,compl
 !Local variables-------------------------------
- integer :: arg_out,iatom,im,im1,ispinor,ispinor1,isppol,lpawu,ndim,nspinor,nsppol,optab_out,optdiag
+ integer :: arg_out,iatom,im,im1,ispinor,ispinor1,isppol,lpawu
+ integer :: ndim,nspinor,nsppol,optab_out,optdiag
  logical :: testcmplx
  complex(dpc), allocatable :: mat_nmrep(:,:)
  character(len=500) :: message
@@ -2421,7 +2423,7 @@ end subroutine add_matlu
    ndim = nspinor * (2*lpawu+1)
    do isppol=1,nsppol
      call abi_xgemm("n","n",ndim,ndim,ndim,cone,matlu1(iatom)%mat(:,:,isppol),ndim,&
-                 &  matlu2(iatom)%mat(:,:,isppol),ndim,czero,matlu3(iatom)%mat(:,:,isppol),ndim)
+                  & matlu2(iatom)%mat(:,:,isppol),ndim,czero,matlu3(iatom)%mat(:,:,isppol),ndim)
    end do ! isppol
  end do ! iatom
 
@@ -3923,41 +3925,33 @@ end subroutine add_matlu
 !!
 !! SOURCE
 
- subroutine trace_prod_matlu(matlu1,matlu2,natom,trace,opt_add,trace_tot)
+ subroutine trace_prod_matlu(matlu1,matlu2,natom,trace,trace_tot)
 
 !Arguments ------------------------------------
  integer, intent(in) :: natom
  type(matlu_type), intent(in) :: matlu1(natom),matlu2(natom)
  complex(dpc), intent(inout) :: trace(natom)
- integer, optional, intent(in) :: opt_add
  complex(dpc), optional, intent(out) :: trace_tot
 !Local variables-------------------------------
- integer :: iatom,isppol,lpawu,nspinor,nsppol
- complex(dpc) :: trace_tmp,trace_tmp2
+ integer :: iatom,isppol,lpawu,nspinor,nsppol,optadd
+ complex(dpc) :: trace_tmp
 !************************************************************************
 
  nspinor = matlu1(1)%nspinor
  nsppol  = matlu1(1)%nsppol
 
- trace_tmp2 = czero
+ trace(:)  = czero
 
  do iatom=1,natom
    lpawu = matlu1(iatom)%lpawu
    if (lpawu == -1) cycle
-   trace_tmp = czero
    do isppol=1,nsppol
-     trace_tmp = trace_tmp + sum(matlu1(iatom)%mat(:,:,isppol)*transpose(matlu2(iatom)%mat(:,:,isppol)))
+     trace(iatom) = trace(iatom) + sum(matlu1(iatom)%mat(:,:,isppol)*transpose(matlu2(iatom)%mat(:,:,isppol)))
    end do ! isppol
-   if (nsppol == 1 .and. nspinor == 1) trace_tmp = trace_tmp * two
-   trace_tmp2 = trace_tmp2 + trace_tmp
-   if (present(opt_add)) then
-     trace(iatom) = trace(iatom) + trace_tmp
-   else
-     trace(iatom) = trace_tmp
-   end if
+   if (nsppol == 1 .and. nspinor == 1) trace(iatom) = trace(iatom) * two
  end do ! iatom
 
- if (present(trace_tot)) trace_tot = trace_tmp2
+ if (present(trace_tot)) trace_tot = sum(trace(:))
 
  end subroutine trace_prod_matlu
 !!***
@@ -3991,7 +3985,8 @@ end subroutine add_matlu
  type(matlu_type), intent(inout) :: matlu(natom)
  integer, optional, intent(in) :: master,option
 !Local variables-------------------------------
- integer :: iatom,ibuf,im,im1,ierr,isppol,lpawu,master_node,ndim,nspinor,nsppol,opt,siz_buf
+ integer :: iatom,ibuf,im,im1,ierr,isppol,lpawu
+ integer :: master_node,ndim,nspinor,nsppol,opt,siz_buf
  complex(dpc), allocatable :: buffer(:)
 !************************************************************************
 
