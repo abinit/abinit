@@ -133,7 +133,7 @@ contains
 !!  intgres(nspden,ngrcondft)=integrated residuals from constrained DFT.
 !!    They are also Lagrange parameters, or gradients with respect to constraints.
 !!  kxc(nfft,nkxc)=exchange-correlation kernel, needed only if optxc==2.
-!!  strscondft(6)=constrained DFT contribution to stress tensor (hartree/bohr^3) 
+!!  strscondft(6)=constrained DFT contribution to stress tensor (hartree/bohr^3)
 !!  strsxc(6)=xc contribution to stress tensor (hartree/bohr^3)
 !!  vxc(nfft,nspden)=Vxc(r) (already computed above; gets recomputed below too)
 !!  vxcavg=mean of the vxc potential
@@ -196,7 +196,7 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,grcondft,gsqcut,intgres,
  real(dp),intent(out) :: grcondft(:,:) ! (3,ngrcondft) ngrcondft=natom when condft is activated
  real(dp),intent(out) :: intgres(:,:) ! (nspden,ngrcondft) ngrcondft=natom when condft is activated
  real(dp),intent(out) :: kxc(nfft,nkxc),strsxc(6),vnew_mean(dtset%nspden)
- real(dp),intent(out) :: strscondft(6) 
+ real(dp),intent(out) :: strscondft(6)
  real(dp),intent(out) :: vres_mean(dtset%nspden),vresidnew(nfft,dtset%nspden)
  real(dp),intent(inout) :: vtauresid(nfft,dtset%nspden*usevxctau)
  real(dp),intent(out),target :: vxctau(nfft,dtset%nspden,4*usevxctau)

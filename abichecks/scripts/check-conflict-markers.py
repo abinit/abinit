@@ -11,8 +11,8 @@ re_markers = re.compile("^(<<<<<<< TREE|=======|>>>>>>> MERGE-SOURCE)$")
 re_fbktop  = re.compile("fallbacks$")
 re_fbkdir  = re.compile("(exports|sources|stamps)")
 re_tmpdir  = re.compile("^tmp")
-re_tmpfile = re.compile("\.(orig|rej)$")
-re_rstfile = re.compile("\.rst$")
+re_tmpfile = re.compile(r"\.(orig|rej)$")
+re_rstfile = re.compile(r"\.rst$")
 
 # TODO: Should look at ..gitignore
 exclude_exts = set([

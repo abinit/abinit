@@ -15,7 +15,7 @@ nbdbuf 6
 tolvrs 2.15e-8
 #tolwfr  1.e-12
 
-ecut 12.0  
+ecut 12.0
 pawecutdg 24.00
 diemac 10.0
 

@@ -1437,6 +1437,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'eph_tols_idelta',tread,'DPR')
  if (tread == 1) dtset%eph_tols_idelta = dprarr(1:2)
 
+ call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'eph_fix_wavevec',tread,'DPR')
+ if (tread == 1) dtset%eph_fix_wavevec = dprarr(1:3)
+
  call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'eph_phrange',tread,'INT')
  if (tread == 1) dtset%eph_phrange = intarr(1:2)
 
@@ -1471,6 +1474,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_ahc_type',tread,'INT')
  if(tread==1) dtset%eph_ahc_type=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'eph_path_brange',tread,'INT')
+ if(tread==1) dtset%eph_path_brange=intarr(1:2)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_fermie',tread,'ENE')
  if(tread==1) dtset%eph_fermie=dprarr(1)
 
@@ -1499,6 +1505,10 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,narr,string(1:lenstr),'eph_np_pqbks',tread,'INT')
  if (tread==1) dtset%eph_np_pqbks = intarr(1:narr)
 
+ narr = size(dtset%gwpt_np_wpqbks)
+ call intagm(dprarr,intarr,jdtset,marr,narr,string(1:lenstr),'gwpt_np_wpqbks',tread,'INT')
+ if (tread==1) dtset%gwpt_np_wpqbks = intarr(1:narr)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_stern',tread,'INT')
  if(tread==1) dtset%eph_stern = intarr(1)
 
@@ -1522,9 +1532,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'ddb_shiftq',tread,'DPR')
  if(tread==1) dtset%ddb_shiftq=dprarr(1:3)
-
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dvdb_qcache_mb',tread,'DPR')
- if(tread==1) dtset%dvdb_qcache_mb = dprarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dvdb_qdamp',tread,'DPR')
  if(tread==1) dtset%dvdb_qdamp = dprarr(1)
@@ -1653,7 +1660,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  ! variables for random positions in unit cell
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'random_atpos',tread,'INT')
  if(tread==1) dtset%random_atpos=intarr(1)
- 
+
 ! parsing GEOmetryOPTimization keys to internal variable ionmov
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'geoopt',tread,'KEY',key_value=key_value)
  if(tread==1) dtset%geoopt = tolower(key_value)
@@ -1672,7 +1679,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
      dtset%ionmov=15
    end if
  end if
- 
+
 ! parsing MOLecularDYNamics keys to internal variable ionmov
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'moldyn',tread,'KEY',key_value=key_value)
  if(tread==1) dtset%moldyn = tolower(key_value)
@@ -2265,32 +2272,41 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'varpeq_pkind', tread, 'KEY', key_value=key_value)
  if (tread == 1) dtset%varpeq_pkind = tolower(trim(key_value))
 
- call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'varpeq_interpolate', tread, 'INT')
- if (tread == 1) dtset%varpeq_interpolate = intarr(1)
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'varpeq_avg_g', tread, 'INT')
+ if (tread == 1) dtset%varpeq_avg_g = intarr(1)
 
- call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'varpeq_orth', tread, 'INT')
- if (tread == 1) dtset%varpeq_orth = intarr(1)
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'varpeq_translate', tread, 'INT')
+ if (tread == 1) dtset%varpeq_translate = intarr(1)
+
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'varpeq_interp', tread, 'INT')
+ if (tread == 1) dtset%varpeq_interp = intarr(1)
+
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'varpeq_nstates', tread, 'INT')
+ if (tread == 1) dtset%varpeq_nstates = intarr(1)
 
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'varpeq_nstep', tread, 'INT')
  if (tread == 1) dtset%varpeq_nstep = intarr(1)
 
- call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'varpeq_pc_nupdate', tread, 'INT')
- if (tread == 1) dtset%varpeq_pc_nupdate = intarr(1)
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'varpeq_nstep_ort', tread, 'INT')
+ if (tread == 1) dtset%varpeq_nstep_ort = intarr(1)
+
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'varpeq_select', tread, 'INT')
+ if (tread == 1) dtset%varpeq_select = intarr(1)
+
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'varpeq_mixing_factor', tread, 'DPR')
+ if(tread==1) dtset%varpeq_mixing_factor = dprarr(1)
 
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'varpeq_tolgrs', tread, 'DPR')
  if(tread==1) dtset%varpeq_tolgrs = dprarr(1)
 
- call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'varpeq_pc_factor', tread, 'DPR')
- if(tread==1) dtset%varpeq_pc_factor = dprarr(1)
+ call intagm(dprarr, intarr, jdtset, marr, 3, string(1:lenstr), 'varpeq_trvec', tread, 'INT')
+ if (tread == 1) dtset%varpeq_trvec = intarr(1:3)
 
- call intagm(dprarr, intarr, jdtset, marr, 2, string(1:lenstr), 'varpeq_gau_params', tread, 'DPR')
- if (tread == 1) dtset%varpeq_gau_params = dprarr(1:2)
+ call intagm(dprarr, intarr, jdtset, marr, 2, string(1:lenstr), 'varpeq_gpr_energy', tread, 'DPR')
+ if (tread == 1) dtset%varpeq_gpr_energy = dprarr(1:2)
 
- narr = nsppol
- call intagm(dprarr, intarr, jdtset, marr, narr, string(1:lenstr), 'varpeq_erange', tread, 'ENE')
- if (tread == 1) then
-   dtset%varpeq_erange(1:narr) = dprarr(1:narr)
- end if
+ call intagm(dprarr, intarr, jdtset, marr, 3, string(1:lenstr), 'varpeq_gpr_length', tread, 'DPR')
+ if (tread == 1) dtset%varpeq_gpr_length = dprarr(1:3)
 
  call intagm(dprarr,intarr,jdtset,marr,ntypat,string(1:lenstr),'lambsig',tread,'DPR')
  if(tread==1) dtset%lambsig(1:ntypat)=dprarr(1:ntypat)
@@ -2780,7 +2796,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  if (mod(dtset%wfoptalg,10) == 1) then
 !  For Chebyshev filtering algo, nline is the degree of the Chebyshev polynomial (but is obsolete)
    if (tread_alt==1.and.tread/=1) dtset%nline = dtset%mdeg_filter
- end if 
+ end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nblock_lobpcg',tread,'INT')
  if(tread==1) dtset%nblock_lobpcg=intarr(1)
@@ -3063,6 +3079,9 @@ if (dtset%usekden==1) then
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'tl_radius',tread,'DPR')
  if(tread==1) dtset%tl_radius=dprarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_fix_korq',tread,'KEY', key_value=key_value)
+ if(tread==1) dtset%eph_fix_korq = key_value(1:1)
 
 ! Print variables
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'write_files',tread,'KEY', key_value=key_value)

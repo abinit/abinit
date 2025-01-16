@@ -2024,7 +2024,7 @@
   0.0000000000000000E+00  0.0000000000000000E+00  0.0000000000000000E+00
   0.0000000000000000E+00  0.0000000000000000E+00  0.0000000000000000E+00
 </ae_core_wavefunction>
-<!-- Program:  atompaw - input data follows: 
+<!-- Program:  atompaw - input data follows:
 Si 14
 XC_LDA_X+XC_LDA_C_PW scalarrelativistic loggrid 2001
 3 3 0 0 0 0

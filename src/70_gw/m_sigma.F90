@@ -34,7 +34,7 @@ MODULE m_sigma
  use netcdf
  use m_wfd
 
- use defs_datatypes,   only : ebands_t
+ use m_ebands,         only : ebands_t
  use defs_abitypes,    only : MPI_type
  use m_numeric_tools,  only : c2r
  use m_gwdefs,         only : unt_gw, unt_sig, unt_sgr, unt_sgm, unt_gwdiag, sigparams_t, sigma_needs_w, unt_sigc
@@ -1414,7 +1414,6 @@ integer function sigma_ncwrite(sigma, Sigp, Er, ncid) result (ncerr)
  type(Epsilonm1_results),target,intent(in) :: Er
 
 !Local variables ---------------------------------------
-#ifdef HAVE_NETCDF
 !scalars
  integer :: nbgw,ndim_sig,b1gw,b2gw,cplex
  !character(len=500) :: msg
@@ -1637,10 +1636,6 @@ integer function sigma_ncwrite(sigma, Sigp, Er, ncid) result (ncerr)
  rdata5=c2r(sigma%omega4sd)
  NCF_CHECK(nf90_put_var(ncid, vid('omega4sd'), rdata5*Ha_eV))
  ABI_FREE(rdata5)
-
-#else
-  ABI_ERROR('netcdf support is not activated.')
-#endif
 
 contains
  integer function vid(vname)

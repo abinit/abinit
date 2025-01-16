@@ -1743,7 +1743,7 @@ function fftbox_mpi_utests(fftalg, cplex, ndat, nthreads, comm_fft, unit) result
    ngfft(12)=ngfft(2)/nproc_fft    ! n2proc
    ngfft(13)=ngfft(3)/nproc_fft    ! n3proc
 
-   !call print_ngfft(ngfft,"ngfft for MPI-fourdp",unit=std_out,mode_paral="COLL",prtvol=0)
+   !call print_ngfft([std_out], ngfft, header="ngfft for MPI-fourdp", prtvol=0)
 
    ! Allocate arrays, fill fofr with random numbers and keep a copy.
    nfft = (n1 * n2 * n3) / nproc_fft
@@ -1920,7 +1920,7 @@ function fftu_mpi_utests(fftalg, ecut, rprimd, ndat, nthreads, comm_fft, paral_k
    !ngfft(4:6) = ngfft(1:3)
    n4 = ngfft(4); n5 = ngfft(5); n6 = ngfft(6)
 
-   call print_ngfft(ngfft,"ngfft for MPI-fourwf",unit=std_out,mode_paral="COLL",prtvol=0)
+   call print_ngfft([std_out], ngfft, header="ngfft for MPI-fourwf", prtvol=0)
 
    ! Compute FFT distribution tables.
    call init_distribfft(fftabs,"c",nproc_fft,n2,n3)
@@ -4852,7 +4852,7 @@ subroutine uplan_execute_gr_spc(uplan, ndat, ug, ur, isign, iscale)
 ! *************************************************************************
 
  ABI_CHECK_ILEQ(ndat, uplan%batch_size, "ndat > batch_size!")
- ABI_CHECK_IEQ(sp, uplan%kind, "Incosistent kind!")
+ ABI_CHECK_IEQ(sp, uplan%kind, "Inconsistent kind!")
 
  isign__ = +1; if (present(isign)) isign__ = isign
  iscale__ = 0; if (present(iscale)) iscale__ = iscale
@@ -4909,7 +4909,7 @@ subroutine uplan_execute_gr_dpc(uplan, ndat, ug, ur, isign, iscale)
 ! *************************************************************************
 
  ABI_CHECK_ILEQ(ndat, uplan%batch_size, "ndat > batch_size!")
- ABI_CHECK_IEQ(dp, uplan%kind, "Incosistent kind!")
+ ABI_CHECK_IEQ(dp, uplan%kind, "Inconsistent kind!")
 
  isign__ = +1; if (present(isign)) isign__ = isign
  iscale__ = 0; if (present(iscale)) iscale__ = iscale
@@ -4966,7 +4966,7 @@ subroutine uplan_execute_rg_spc(uplan, ndat, ur, ug, isign, iscale)
 ! *************************************************************************
 
  ABI_CHECK_ILEQ(ndat, uplan%batch_size, "ndat > batch_size!")
- ABI_CHECK_IEQ(sp, uplan%kind, "Incosistent kind!")
+ ABI_CHECK_IEQ(sp, uplan%kind, "Inconsistent kind!")
 
  isign__ = -1; if (present(isign)) isign__ = isign
  iscale__ = 1; if (present(iscale)) iscale__ = iscale
@@ -5020,7 +5020,7 @@ subroutine uplan_execute_rg_dpc(uplan, ndat, ur, ug, isign, iscale)
 ! *************************************************************************
 
  ABI_CHECK_ILEQ(ndat, uplan%batch_size, "ndat > batch_size!")
- ABI_CHECK_IEQ(dp, uplan%kind, "Incosistent kind!")
+ ABI_CHECK_IEQ(dp, uplan%kind, "Inconsistent kind!")
 
  isign__ = -1; if (present(isign)) isign__ = isign
  iscale__ = 1; if (present(iscale)) iscale__ = iscale
