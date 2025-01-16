@@ -1,6 +1,6 @@
-Hartwigsen-Goedecker-Hutter psp for Na,  from PRB58, 3641 (1998) 
+Hartwigsen-Goedecker-Hutter psp for Na,  from PRB58, 3641 (1998)
    11   9  010605 zatom,zion,pspdat
- 3 1   1 0 2001 0  pspcod,pspxc,lmax,lloc,mmax,r2well 
+ 3 1   1 0 2001 0  pspcod,pspxc,lmax,lloc,mmax,r2well
   0.246318   -7.545593    1.125997    0.000000   0.000000 rloc, c1, c2, c3, c4
   0.141251   36.556987    0.000000    0.000000          rs, h11s, h22s, h33s
   0.139668  -10.392083    0.000000    0.000000          rp, h11p, h22p, h33p

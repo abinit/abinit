@@ -57,7 +57,7 @@ of uniaxial crystals, the z-axis should be chosen along the optical axis.
         added_in_version="before_v9",
         text=r"""
 Governs the imposition of the Acoustic Sum Rule (ASR) in the ANADDB application.
-Note that there is a similar input variable [[asr]] for ABINIT. 
+Note that there is a similar input variable [[asr]] for ABINIT.
 
   * 0 --> no ASR for interatomic force constants is imposed.
   * 1 or 2 --> the ASR for interatomic force constants is imposed by modifying
@@ -109,7 +109,7 @@ exactly the same likely due to an extra symmetrisation in the
 diagonalisation routine. Of course, when the matrix at Gamma has been
 generated from IFCs coming from dynamical matrices none of which are Gamma,
 the breaking of the ASR is rather severe. In order to clear the situation, one
-should use a diagonalisation routine for non-hermitian matrices. 
+should use a diagonalisation routine for non-hermitian matrices.
 ).
 """,
     ),

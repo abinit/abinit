@@ -270,7 +270,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 !Test size of kinetic energy potential Vxctau
  with_vxctau = (present(vxctau).and.present(taur))
  if (with_vxctau) with_vxctau = (size(vxctau)>0.and.dtset%usekden/=0)
- if (with_vxctau) then 
+ if (with_vxctau) then
    if (size(vxctau)/=nfft*dtset%nspden*4) then
      ABI_BUG("Wrong size for vxctau!")
    end if

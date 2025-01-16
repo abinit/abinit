@@ -1,6 +1,6 @@
-Hartwigsen-Goedecker-Hutter psp for F,  from PRB58, 3641 (1998) 
+Hartwigsen-Goedecker-Hutter psp for F,  from PRB58, 3641 (1998)
     9   7  010605 zatom,zion,pspdat
- 3 1   1 0 2001 0  pspcod,pspxc,lmax,lloc,mmax,r2well 
+ 3 1   1 0 2001 0  pspcod,pspxc,lmax,lloc,mmax,r2well
   0.218525  -21.307361    3.072869    0.000000   0.000000 rloc, c1, c2, c3, c4
   0.195567   23.584942    0.000000    0.000000          rs, h11s, h22s, h33s
   0.174268    0.000000    0.000000    0.000000          rp, h11p, h22p, h33p

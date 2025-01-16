@@ -1066,7 +1066,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
  call free_my_atmtab(my_atmtab,my_atmtab_allocated)
 
  call timab(560,2,tsec)
- 
+
  DBG_EXIT("COLL")
 
 end subroutine pawdenpot

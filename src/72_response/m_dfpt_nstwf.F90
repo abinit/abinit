@@ -543,7 +543,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 !Initialize most of the (1st-order) Hamiltonian
 !1) Allocate all arrays and initialize quantities that do not depend on k and spin.
 !2) Perform the setup needed for the non-local factors:
- call init_hamiltonian(gs_hamkq,psps,pawtab,nspinor,nsppol,nspden,dtset%natom,&
+ call gs_hamkq%init(psps,pawtab,nspinor,nsppol,nspden,dtset%natom,&
 & dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,ph1d=ph1d,&
 & paw_ij=paw_ij,mpi_atmtab=my_atmtab,comm_atom=my_comm_atom,mpi_spintab=mpi_enreg%my_isppoltab,&
 & usecprj=usecprj,nucdipmom=dtset%nucdipmom,gpu_option=gpu_option)
@@ -616,7 +616,7 @@ has_vectornd = (with_vectornd .EQ. 1)
    need_wf1=(.true.)
 
 !  Initialize data for NL 1st-order (j1) hamiltonian
-   call init_rf_hamiltonian(cplex,gs_hamkq,ipert1,rf_hamkq,mpi_spintab=[0,0])
+   call rf_hamkq%init(cplex,gs_hamkq,ipert1,mpi_spintab=[0,0])
 
 !  The following contributions are needed only for non-DDK perturbation:
 !  - Frozen part of 1st-order Dij
@@ -2526,7 +2526,7 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
        if( ipert1<=dtset%natom .or. ipert1==dtset%natom+2 )then
 
 !        Initialize data for NL 1st-order hamiltonian
-         call init_rf_hamiltonian(1,gs_hamkq,ipert1,rf_hamkq)
+         call rf_hamkq%init(1,gs_hamkq,ipert1)
 
          if (((ipert <= dtset%natom).or.(ipert == dtset%natom + 2)) &
 &         .and.(ipert1 == dtset%natom+2).and. dtset%prtbbb==1) then

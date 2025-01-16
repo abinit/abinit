@@ -27,9 +27,7 @@ module m_energies
  use m_errors
  use m_nctk
  use m_dtset
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
 
  implicit none
 
@@ -45,8 +43,8 @@ module m_energies
 !! energies_type
 !!
 !! FUNCTION
-!! This structured datatype contains all parts of total energy. Not all
-!! attributes may have a value, depending on the scheme used to
+!! This structured datatype contains all parts of the total energy.
+!! Not all attributes may have a value, depending on the scheme used to
 !! compute the total energy and several options read from dtset.
 !!
 !! SOURCE
@@ -221,8 +219,7 @@ subroutine energies_init(energies)
 
 !Arguments ------------------------------------
 !scalars
- type(energies_type),intent(out) :: energies
-
+ class(energies_type),intent(out) :: energies
 ! *************************************************************************
 
 !@energies_type
@@ -290,13 +287,12 @@ end subroutine energies_init
 !!
 !! SOURCE
 
- subroutine energies_copy(energies_in,energies_out)
+ subroutine energies_copy(energies_in, energies_out)
 
 !Arguments ------------------------------------
 !scalars
- type(energies_type),intent(in)  :: energies_in
- type(energies_type),intent(out) :: energies_out
-
+ class(energies_type),intent(in)  :: energies_in
+ class(energies_type),intent(out) :: energies_out
 !*************************************************************************
 
 !@energies_type
@@ -369,15 +365,14 @@ end subroutine energies_copy
 !!
 !! SOURCE
 
- subroutine energies_to_array(energies,energies_array,option)
+ subroutine energies_to_array(energies, energies_array, option)
 
 !Arguments ------------------------------------
 !scalars
+ class(energies_type),intent(inout)  :: energies
  integer,intent(in) :: option
 !arrays
  real(dp),intent(inout) :: energies_array(n_energies)
- type(energies_type),intent(inout)  :: energies
-
 !*************************************************************************
 
 !@energies_type
@@ -497,15 +492,13 @@ end subroutine energies_to_array
 !!  eint=internal energy with direct scheme
 !!  eintdc=internal energy with double counting scheme
 !!
-!! SIDE EFFECTS
-!!
 !! SOURCE
 
  subroutine energies_eval_eint(energies,dtset,usepaw,optdc,eint,eintdc)
 
 !Arguments ------------------------------------
 !scalars
- type(energies_type),intent(in) :: energies
+ class(energies_type),intent(in) :: energies
  type(dataset_type),intent(in) :: dtset
  integer,intent(in) :: usepaw
  integer , intent(out) :: optdc
@@ -513,11 +506,9 @@ end subroutine energies_to_array
  real(dp), intent(out) :: eintdc
 
 !Local variables-------------------------------
-! Do not modify the length of this string
 !scalars
  logical :: positron
  logical :: wvlbigdft=.false.
-
 ! *************************************************************************
 
 !If usewvl: wvlbigdft indicates that the BigDFT workflow will be followed
@@ -601,14 +592,12 @@ subroutine energies_ncwrite(enes, ncid)
 
 !Arguments ------------------------------------
 !scalars
+ class(energies_type),intent(in) :: enes
  integer,intent(in) :: ncid
- type(energies_type),intent(in) :: enes
 
 !Local variables-------------------------------
 !scalars
-#ifdef HAVE_NETCDF
  integer :: ncerr
-
 ! *************************************************************************
 
 !@energies_type
@@ -634,10 +623,6 @@ subroutine energies_ncwrite(enes, ncid)
    enes%h0,enes%e_zeeman,enes%e_fermih])
 
  NCF_CHECK(ncerr)
-
-#else
- ABI_ERROR("ETSF-IO support is not activated.")
-#endif
 
 end subroutine energies_ncwrite
 !!***

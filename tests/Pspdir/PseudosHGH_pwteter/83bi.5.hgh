@@ -1,6 +1,6 @@
-Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998) 
+Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
    83   5  010605 zatom,zion,pspdat
- 3 1   2 0 2001 0  pspcod,pspxc,lmax,lloc,mmax,r2well 
+ 3 1   2 0 2001 0  pspcod,pspxc,lmax,lloc,mmax,r2well
   0.605000    6.679437    0.000000    0.000000   0.000000 rloc, c1, c2, c3, c4
   0.678858    1.377634   -0.513697   -0.471028          rs, h11s, h22s, h33s
   0.798673    0.655578   -0.402932    0.000000          rp, h11p, h22p, h33p

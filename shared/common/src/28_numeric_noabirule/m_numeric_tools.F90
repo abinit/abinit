@@ -3752,11 +3752,7 @@ end function check_vec_conjg
 !!
 !! INPUTS
 !!  arr(:)=vector/matrix to be printed
-!!  mode_paral(optional)=parallel mode, DEFAULT is "COLL"
-!!   "COLL" if all procs are calling the routine with the same message to be written only once
-!!   "PERS" if the procs are calling the routine with different mesgs each to be written,
-!!          or if one proc is calling the routine
-!!  unit(optional)=the unit number of the file, DEFAULT=std_out
+!!  units(:)=unit numbers
 !!  max_r,max_c(optional)=Max number of rows and columns to be printed
 !!   (DEFAULT is 9, output format assumes to be less that 99, but there might be
 !!    problems with wrtout if message size exceeds 500 thus max number of elements should be ~60)
@@ -3766,44 +3762,34 @@ end function check_vec_conjg
 !!
 !! SOURCE
 
-subroutine print_arr1d_spc(arr,max_r,unit,mode_paral)
+subroutine print_arr1d_spc(units, arr, max_r)
 
 !Arguments ------------------------------------
 !scalars
- integer,optional,intent(in) :: unit,max_r
- character(len=4),optional,intent(in) :: mode_paral
+ integer,intent(in) :: units(:)
+ integer,optional,intent(in) :: max_r
 !arrays
  complex(spc),intent(in) :: arr(:)
 
 !Local variables-------------------------------
 !scalars
- integer :: unt,ii,nr,mr
- character(len=4) :: mode
+ integer :: ii, nr, mr
  character(len=500) :: msg
  character(len=100) :: fmth,fmt1
 ! *************************************************************************
 
- unt=std_out ; if (PRESENT(unit      )) unt=unit
- mode='COLL' ; if (PRESENT(mode_paral)) mode=mode_paral
  mr=15       ; if (PRESENT(max_r     )) mr=max_r
-
- if (mode/='COLL'.and.mode/='PERS') then
-  write(msg,'(2a)')' Wrong value of mode_paral ',mode
-  ABI_BUG(msg)
- end if
- !
- ! === Print out matrix ===
- nr=SIZE(arr,DIM=1) ; if (mr>nr) mr=nr
+ nr=SIZE(arr,DIM=1); if (mr>nr) mr=nr
 
  write(fmth,*)'(6x,',mr,'(i2,6x))'
  write(fmt1,*)'(3x,',mr,'f8.3)'
 
  write(msg,fmth)(ii,ii=1,mr)
- call wrtout(unt,msg,mode) !header
+ call wrtout(units, msg) !header
  write(msg,fmt1)REAL (arr(1:mr))
- call wrtout(unt,msg,mode) !real part
+ call wrtout(units, msg) !real part
  write(msg,fmt1)AIMAG(arr(1:mr))
- call wrtout(unt,msg,mode) !imag part
+ call wrtout(units, msg) !imag part
 
 end subroutine print_arr1d_spc
 !!***
@@ -3822,31 +3808,23 @@ end subroutine print_arr1d_spc
 !!
 !! SOURCE
 
-subroutine print_arr1d_dpc(arr, max_r, unit, mode_paral)
+subroutine print_arr1d_dpc(units, arr, max_r)
 
 !Arguments ------------------------------------
 !scalars
- integer,optional,intent(in) :: unit, max_r
- character(len=4),optional,intent(in) :: mode_paral
+ integer,intent(in) :: units(:)
+ integer,optional,intent(in) :: max_r
 !arrays
  complex(dpc),intent(in) :: arr(:)
 
 !Local variables-------------------------------
 !scalars
- integer :: unt,ii,nr,mr
- character(len=4) :: mode
+ integer :: ii,nr,mr
  character(len=500) :: msg
  character(len=100) :: fmth,fmt1
 ! *************************************************************************
 
- unt=std_out ; if (PRESENT(unit      )) unt=unit
- mode='COLL' ; if (PRESENT(mode_paral)) mode=mode_paral
  mr=15       ; if (PRESENT(max_r     )) mr=max_r
-
- if (mode/='COLL'.and.mode/='PERS') then
-  write(msg,'(2a)')' Wrong value of mode_paral ',mode
-  ABI_BUG(msg)
- end if
 
  ! Print out matrix.
  nr=SIZE(arr,DIM=1) ; if (mr>nr) mr=nr
@@ -3855,11 +3833,11 @@ subroutine print_arr1d_dpc(arr, max_r, unit, mode_paral)
  write(fmt1,*)'(3x,',mr,'f8.3)'
 
  write(msg,fmth)(ii,ii=1,mr)
- call wrtout(unt,msg,mode) ! header
+ call wrtout(units, msg) ! header
  write(msg,fmt1)REAL (arr(1:mr))
- call wrtout(unt,msg,mode) !real part
+ call wrtout(units, msg) !real part
  write(msg,fmt1)AIMAG(arr(1:mr))
- call wrtout(unt,msg,mode) !imag part
+ call wrtout(units, msg) !imag part
 
 end subroutine print_arr1d_dpc
 !!***
@@ -3878,33 +3856,25 @@ end subroutine print_arr1d_dpc
 !!
 !! SOURCE
 
-subroutine print_arr2d_spc(arr, max_r, max_c, unit, mode_paral)
+subroutine print_arr2d_spc(units, arr, max_r, max_c)
 
 !Arguments ------------------------------------
 !scalars
- integer,optional,intent(in) :: unit, max_r, max_c
- character(len=4),optional,intent(in) :: mode_paral
+ integer,intent(in) :: units(:)
+ integer,optional,intent(in) :: max_r, max_c
 !arrays
  complex(spc),intent(in) :: arr(:,:)
 
 !Local variables-------------------------------
 !scalars
- integer :: unt,ii,jj,nc,nr,mc,mr
- character(len=4) :: mode
+ integer :: ii,jj,nc,nr,mc,mr
  character(len=500) :: msg
  character(len=100) :: fmth,fmt1,fmt2
 ! *************************************************************************
 
- unt =std_out; if (PRESENT(unit      )) unt =unit
- mode='COLL' ; if (PRESENT(mode_paral)) mode=mode_paral
  mc  =9      ; if (PRESENT(max_c     )) mc  =max_c
  mr  =9      ; if (PRESENT(max_r     )) mr  =max_r
 
- if (mode/='COLL'.and.mode/='PERS') then
-   write(msg,'(2a)')'Wrong value of mode_paral ',mode
-   ABI_BUG(msg)
- end if
- !
  ! === Print out matrix ===
  nr=SIZE(arr,DIM=1); if (mr>nr) mr=nr
  nc=SIZE(arr,DIM=2); if (mc>nc) mc=nc
@@ -3914,12 +3884,12 @@ subroutine print_arr2d_spc(arr, max_r, max_c, unit, mode_paral)
  write(fmt2,*)'(5x   ,',mc,'f8.3,a)'
 
  write(msg,fmth)(jj,jj=1,mc)
- call wrtout(unt,msg,mode) !header
+ call wrtout(units, msg) !header
  do ii=1,mr
    write(msg,fmt1)ii,REAL(arr(ii,1:mc))
-   call wrtout(unt,msg,mode) !real part
+   call wrtout(units, msg) !real part
    write(msg,fmt2)  AIMAG(arr(ii,1:mc)),ch10
-   call wrtout(unt,msg,mode) !imag part
+   call wrtout(units, msg) !imag part
  end do
 
 end subroutine print_arr2d_spc
@@ -3939,33 +3909,25 @@ end subroutine print_arr2d_spc
 !!
 !! SOURCE
 
-subroutine print_arr2d_dpc(arr,max_r,max_c,unit,mode_paral)
+subroutine print_arr2d_dpc(units, arr, max_r, max_c)
 
 !Arguments ------------------------------------
 !scalars
- integer,optional,intent(in) :: unit,max_r,max_c
- character(len=4),optional,intent(in) :: mode_paral
+ integer,intent(in) :: units(:)
+ integer,optional,intent(in) :: max_r,max_c
 !arrays
  complex(dpc),intent(in) :: arr(:,:)
 
 !Local variables-------------------------------
 !scalars
- integer :: unt,ii,jj,nc,nr,mc,mr
- character(len=4) :: mode
+ integer :: ii,jj,nc,nr,mc,mr
  character(len=500) :: msg
  character(len=100) :: fmth,fmt1,fmt2
 ! *************************************************************************
 
- unt =std_out; if (PRESENT(unit      )) unt =unit
- mode='COLL' ; if (PRESENT(mode_paral)) mode=mode_paral
  mc  =9      ; if (PRESENT(max_c     )) mc  =max_c
  mr  =9      ; if (PRESENT(max_r     )) mr  =max_r
 
- if (mode/='COLL'.and.mode/='PERS') then
-   write(msg,'(2a)')'Wrong value of mode_paral ',mode
-   ABI_BUG(msg)
- end if
- !
  ! === Print out matrix ===
  nr=SIZE(arr,DIM=1); if (mr>nr) mr=nr
  nc=SIZE(arr,DIM=2); if (mc>nc) mc=nc
@@ -3975,12 +3937,12 @@ subroutine print_arr2d_dpc(arr,max_r,max_c,unit,mode_paral)
  write(fmt2,*)'(5x   ,',mc,'f8.3,a)'
 
  write(msg,fmth)(jj,jj=1,mc)
- call wrtout(unt, msg, mode) ! header
+ call wrtout(units, msg) ! header
  do ii=1,mr
    write(msg,fmt1)ii,REAL(arr(ii,1:mc))
-   call wrtout(unt,msg,mode) ! real part
+   call wrtout(units, msg) ! real part
    write(msg,fmt2)  AIMAG(arr(ii,1:mc)),ch10
-   call wrtout(unt,msg,mode) ! imag part
+   call wrtout(units, msg) ! imag part
  end do
 
 end subroutine print_arr2d_dpc
