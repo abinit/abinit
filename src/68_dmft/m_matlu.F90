@@ -2590,7 +2590,7 @@ end subroutine add_matlu
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
-!!  matlu1(natom)%(nsppol,nspinor,nspinor,ndim,ndim) :: input quantity
+!!  matlu1(natom) :: input quantity
 !!  natom :: number of atoms
 !!  option=1 go from Slm to Ylm basis
 !!  option=2 go from Ylm to Slm basis
@@ -2599,117 +2599,209 @@ end subroutine add_matlu
 !! NOTES
 !!
 !! SOURCE
- subroutine slm2ylm_matlu(matlu,natom,option,optprt)
- use defs_basis
- use defs_wvltypes
- implicit none
+
+ subroutine slm2ylm_matlu(matlu,natom,paw_dmft,option,optprt)
+
+ use m_abi_linalg, only : abi_xgemm
+ use m_paw_dmft, only : paw_dmft_type
 
 !Arguments ------------------------------------
-!scalars
  integer, intent(in) :: natom,option,optprt
-!arrays
- type(matlu_type), intent(inout) :: matlu(natom)
+ type(matlu_type), target, intent(inout) :: matlu(natom)
+ type(paw_dmft_type), target, intent(in) :: paw_dmft
 !Local variables-------------------------------
-!scalars
- integer :: iatom,im,ispinor,isppol,ispinor2
- integer :: lpawu,ll,mm,jm,ii,jj,im1,im2,ndim
+ integer :: iatom,im1,im2,ispin,ispinor1,ispinor2,isppol
+ integer :: lpawu,ndim,ndim_max,nspin,nspinor,nsppol
+ complex(dpc), pointer :: mat_inp(:,:) => null()
+ complex(dpc), pointer :: mat_out(:,:) => null(), slm2ylm(:,:) => null()
+ complex(dpc), allocatable :: mat_tmp(:,:)
+ complex(dpc), target, allocatable :: mat_tmp2(:,:)
+ character(len=1) :: c1,c2
  character(len=500) :: message
- real(dp) :: onem
- complex(dpc),allocatable :: slm2ylm(:,:)
- complex(dpc),allocatable :: mat_inp_c(:,:)
- complex(dpc),allocatable :: mat_out_c(:,:)
- complex(dpc) :: tmp2
- real(dp),parameter :: invsqrt2=one/sqrt2
-!arrays
 !************************************************************************
 
+ ndim_max = 2*paw_dmft%maxlpawu + 1
+ nspinor  = paw_dmft%nspinor
+ nsppol   = paw_dmft%nsppol
+ nspin    = nsppol * (nspinor**2)
+
+ if (option == 1) then
+   c1 = "n" ; c2 = "c"
+ else if (option == 2) then
+   c1 = "c" ; c2 = "n"
+ end if
+
  do iatom=1,natom
-   lpawu=matlu(iatom)%lpawu
-   if(lpawu.ne.-1) then
-     ndim=2*lpawu+1
-     ll=lpawu
-     ABI_MALLOC(slm2ylm,(2*ll+1,2*ll+1))
-     slm2ylm=czero
-     do im=1,2*ll+1
-       mm=im-ll-1;jm=-mm+ll+1
-       onem=dble((-1)**mm)
-       if (mm> 0) then
-         slm2ylm(im,im)= cmplx(onem*invsqrt2,zero,kind=dp)
-         slm2ylm(jm,im)= cmplx(invsqrt2,     zero,kind=dp)
-       end if
-       if (mm==0) then
-         slm2ylm(im,im)=cone
-       end if
-       if (mm< 0) then
-         slm2ylm(im,im)= cmplx(zero,     invsqrt2,kind=dp)
-         slm2ylm(jm,im)=-cmplx(zero,onem*invsqrt2,kind=dp)
-       end if
-     end do
-     if(optprt>2) then
-       write(message,'(2a)') ch10,"SLM2YLM matrix"
+
+   lpawu = paw_dmft%lpawu(iatom)
+   if (lpawu == -1) cycle
+   ndim = 2*lpawu + 1
+   slm2ylm => paw_dmft%slm2ylm(:,:,lpawu+1)
+
+   if (optprt > 2) then
+     write(message,'(2a)') ch10,"SLM2YLM matrix"
+     call wrtout(std_out,message,'COLL')
+     do im1=1,ndim
+       write(message,'(12(1x,9(1x,"(",f9.5,",",f9.5,")")))') (slm2ylm(im1,im2),im2=1,ndim)
        call wrtout(std_out,message,'COLL')
-       do im1=1,ll*2+1
-         write(message,'(12(1x,9(1x,"(",f9.5,",",f9.5,")")))')&
-&         (slm2ylm(im1,im2),im2=1,ll*2+1)
-         call wrtout(std_out,message,'COLL')
-       end do
-     endif
-     do isppol=1,matlu(1)%nsppol
-       do ispinor=1,matlu(1)%nspinor
-         do ispinor2=1,matlu(1)%nspinor
-           ABI_MALLOC(mat_out_c,(2*ll+1,2*ll+1))
-           ABI_MALLOC(mat_inp_c,(2*ll+1,2*ll+1))
-           mat_inp_c(:,:) = matlu(iatom)%mat(1+(ispinor-1)*ndim:ndim+(ispinor-1)*ndim,1+(ispinor2-1)*ndim:ndim+(ispinor2-1)*ndim,isppol)
-           mat_out_c=czero
+     end do ! im1
+   end if ! optprt>2
 
-           if(optprt>2) then
-             write(message,'(2a, i2, a, i2, a, i2)') ch10,"SLM input matrix, isppol=", isppol, ", ispinor=", ispinor,&
-&             ", ispinor2=", ispinor2
+   ABI_MALLOC(mat_tmp,(ndim,nspin*ndim))
+   ABI_MALLOC(mat_tmp2,(ndim,nspin*ndim))
+
+   ispin = 0
+
+   do isppol=1,nsppol
+     do ispinor2=1,nspinor
+       do ispinor1=1,nspinor
+
+         ispin = ispin + 1
+
+         mat_inp => matlu(iatom)%mat(1+(ispinor1-1)*ndim:ndim*ispinor1,1+(ispinor2-1)*ndim:ispinor2*ndim,isppol)
+
+         if (optprt > 2) then
+           write(message,'(2a,i2,a,i2,a,i2)') ch10,"SLM input matrix,&
+             & isppol=",isppol,", ispinor1=",ispinor1,", ispinor2=",ispinor2
+           call wrtout(std_out,message,'COLL')
+           do im1=1,ndim
+             write(message,'(12(1x,9(1x,"(",f9.5,",",f9.5,")")))') &
+               & (mat_inp(im1,im2),im2=1,ndim)
              call wrtout(std_out,message,'COLL')
-             do im1=1,ll*2+1
-               write(message,'(12(1x,9(1x,"(",f9.5,",",f9.5,")")))')&
-&               (mat_inp_c(im1,im2),im2=1,ll*2+1)
-               call wrtout(std_out,message,'COLL')
-             end do
-           endif
+           end do ! im1
+         end if ! optprt>2
 
-           do jm=1,2*ll+1
-             do im=1,2*ll+1
-               tmp2=czero
-               do ii=1,2*ll+1
-                 do jj=1,2*ll+1
-                   if(option==1) then
-                     tmp2=tmp2+mat_inp_c(ii,jj)*(slm2ylm(im,ii))*CONJG(slm2ylm(jm,jj))
-                   else if(option==2) then
-                     tmp2=tmp2+mat_inp_c(ii,jj)*CONJG(slm2ylm(ii,im))*(slm2ylm(jj,jm))
-                   end if
-                 end do
-               end do
-               mat_out_c(im,jm)=tmp2
-             end do
-           end do
+         call abi_xgemm("n",c2,ndim,ndim,ndim,cone,mat_inp(:,:),ndim,slm2ylm(:,1:ndim), &
+                      & ndim_max,czero,mat_tmp(:,1+(ispin-1)*ndim:ndim*ispin),ndim)
 
-           if(optprt>2) then
-             write(message,'(2a, i2, a, i2, a, i2)') ch10,"YLM output matrix, isppol=", isppol, ", ispinor=", ispinor,&
-&             ", ispinor2=", ispinor2
+       end do ! ispinor2
+     end do ! ispinor1
+   end do ! isppol
+
+   call abi_xgemm(c1,"n",ndim,ndim*nspin,ndim,cone,slm2ylm(:,1:ndim),ndim_max,mat_tmp(:,:),ndim, &
+                & czero,mat_tmp2(:,:),ndim)
+
+   ispin = 0
+
+   do isppol=1,nsppol
+     do ispinor2=1,nspinor
+       do ispinor1=1,nspinor
+
+         ispin = ispin + 1
+
+         mat_out => mat_tmp2(:,1+(ispin-1)*ndim:ndim*ispin)
+
+         matlu(iatom)%mat(1+(ispinor1-1)*ndim:ndim*ispinor1,1+(ispinor2-1)*ndim:ispinor2*ndim,isppol) = mat_out(:,:)
+
+         if (optprt > 2) then
+           write(message,'(2a,i2,a,i2,a,i2)') ch10,"YLM output matrix, isppol=",isppol,", ispinor=",ispinor1,&
+              & ", ispinor2=",ispinor2
+           call wrtout(std_out,message,'COLL')
+           do im1=1,ndim
+             write(message,'(12(1x,9(1x,"(",f9.5,",",f9.5,")")))') (mat_out(im1,im2),im2=1,ndim)
              call wrtout(std_out,message,'COLL')
-             do im1=1,ll*2+1
-               write(message,'(12(1x,9(1x,"(",f9.5,",",f9.5,")")))')&
-      &         (mat_out_c(im1,im2),im2=1,ll*2+1)
-               call wrtout(std_out,message,'COLL')
-             end do
-           endif
+           end do ! im1
+         end if ! optprt>2
 
-           matlu(iatom)%mat(1+(ispinor-1)*ndim:ndim+(ispinor-1)*ndim,1+(ispinor2-1)*ndim:ndim+(ispinor2-1)*ndim,isppol)=mat_out_c(:,:)
-           ABI_FREE(mat_out_c)
-           ABI_FREE(mat_inp_c)
-         enddo ! im
-       enddo ! ispinor
-     enddo ! isppol
-     ABI_FREE(slm2ylm)
-   endif ! lpawu
- enddo ! iatom
+       end do ! ispinor1
+     end do ! ispinor2
+   end do ! isppol
 
+   ABI_FREE(mat_tmp)
+   ABI_FREE(mat_tmp2)
+
+ end do ! iatom
+
+ mat_inp => null()
+ mat_out => null()
+ slm2ylm => null()
+
+ !do iatom=1,natom
+ !  lpawu=matlu(iatom)%lpawu
+ !  if(lpawu.ne.-1) then
+ !    ndim=2*lpawu+1
+ !    ll=lpawu
+ !    ABI_MALLOC(slm2ylm,(2*ll+1,2*ll+1))
+ !    slm2ylm=czero
+ !    do im=1,2*ll+1
+ !      mm=im-ll-1;jm=-mm+ll+1
+ !      onem=dble((-1)**mm)
+ !      if (mm> 0) then
+ !        slm2ylm(im,im)= cmplx(onem*invsqrt2,zero,kind=dp)
+ !        slm2ylm(jm,im)= cmplx(invsqrt2,     zero,kind=dp)
+ !      end if
+ !      if (mm==0) then
+ !        slm2ylm(im,im)=cone
+ !      end if
+ !      if (mm< 0) then
+ !        slm2ylm(im,im)= cmplx(zero,     invsqrt2,kind=dp)
+ !        slm2ylm(jm,im)=-cmplx(zero,onem*invsqrt2,kind=dp)
+ !      end if
+ !    end do
+ !    if(optprt>2) then
+ !      write(message,'(2a)') ch10,"SLM2YLM matrix"
+ !      call wrtout(std_out,message,'COLL')
+ !      do im1=1,ll*2+1
+ !        write(message,'(12(1x,9(1x,"(",f9.5,",",f9.5,")")))')&
+!&         (slm2ylm(im1,im2),im2=1,ll*2+1)
+ !        call wrtout(std_out,message,'COLL')
+ !      end do
+ !    endif
+ !    do isppol=1,matlu(1)%nsppol
+ !      do ispinor=1,matlu(1)%nspinor
+ !        do ispinor2=1,matlu(1)%nspinor
+ !          ABI_MALLOC(mat_out_c,(2*ll+1,2*ll+1))
+ !          ABI_MALLOC(mat_inp_c,(2*ll+1,2*ll+1))
+ !          mat_inp_c(:,:) = matlu(iatom)%mat(1+(ispinor-1)*ndim:ndim+(ispinor-1)*ndim,1+(ispinor2-1)*ndim:ndim+(ispinor2-1)*ndim,isppol)
+ !          mat_out_c=czero
+
+ !          if(optprt>2) then
+ !            write(message,'(2a, i2, a, i2, a, i2)') ch10,"SLM input matrix, isppol=", isppol, ", ispinor=", ispinor,&
+!&             ", ispinor2=", ispinor2
+ !            call wrtout(std_out,message,'COLL')
+ !            do im1=1,ll*2+1
+ !              write(message,'(12(1x,9(1x,"(",f9.5,",",f9.5,")")))')&
+!&               (mat_inp_c(im1,im2),im2=1,ll*2+1)
+ !              call wrtout(std_out,message,'COLL')
+ !            end do
+ !          endif
+
+  !         do jm=1,2*ll+1
+  !           do im=1,2*ll+1
+  !             tmp2=czero
+  !             do ii=1,2*ll+1
+  !               do jj=1,2*ll+1
+  !                 if(option==1) then
+  !                   tmp2=tmp2+mat_inp_c(ii,jj)*(slm2ylm(im,ii))*CONJG(slm2ylm(jm,jj))
+  !                 else if(option==2) then
+  !                   tmp2=tmp2+mat_inp_c(ii,jj)*CONJG(slm2ylm(ii,im))*(slm2ylm(jj,jm))
+  !                 end if
+  !               end do
+  !             end do
+  !             mat_out_c(im,jm)=tmp2
+  !           end do
+  !         end do
+
+  !         if(optprt>2) then
+  !           write(message,'(2a, i2, a, i2, a, i2)') ch10,"YLM output matrix, isppol=", isppol, ", ispinor=", ispinor,&
+!&             ", ispinor2=", ispinor2
+  !           call wrtout(std_out,message,'COLL')
+  !           do im1=1,ll*2+1
+  !             write(message,'(12(1x,9(1x,"(",f9.5,",",f9.5,")")))')&
+  !    &         (mat_out_c(im1,im2),im2=1,ll*2+1)
+  !             call wrtout(std_out,message,'COLL')
+  !           end do
+  !         endif
+
+  !         matlu(iatom)%mat(1+(ispinor-1)*ndim:ndim+(ispinor-1)*ndim,1+(ispinor2-1)*ndim:ndim+(ispinor2-1)*ndim,isppol)=mat_out_c(:,:)
+  !         ABI_FREE(mat_out_c)
+  !         ABI_FREE(mat_inp_c)
+  !      enddo ! im
+ !      enddo ! ispinor
+ !    enddo ! isppol
+ !    ABI_FREE(slm2ylm)
+ !  endif ! lpawu
+ !enddo ! iatom
 
  end subroutine slm2ylm_matlu
 !!***

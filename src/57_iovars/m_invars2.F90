@@ -2445,6 +2445,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
      dtset%dmft_test=1
      dtset%dmft_use_all_bands=1
      dtset%dmft_use_full_chipsi=1
+     dtset%dmftctqmc_basis=0
    end if
    if (dtset%usepawu==14) dtset%dmft_dc=5
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_dc',tread,'INT')
@@ -2547,8 +2548,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
      call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftqmc_therm',tread,'INT')
      if(tread==1) dtset%dmftqmc_therm=intarr(1)
      if(dtset%dmft_solv>=5.and.dtset%dmft_solv<=9) then
-       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_basis',tread,'INT')
-       if(tread==1) dtset%dmftctqmc_basis  =intarr(1)
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_check',tread,'INT')
        if(tread==1) dtset%dmftctqmc_check  =intarr(1)
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_correl',tread,'INT')
@@ -2576,9 +2575,16 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_spin_off_diag',tread,'INT')
        if(tread==1) dtset%dmft_triqs_spin_off_diag=intarr(1)
        if (dtset%dmft_triqs_orb_off_diag == 1 .or. dtset%dmft_triqs_spin_off_diag == 1) then
-          dtset%dmft_triqs_measure_density_matrix = 0
-          dtset%dmft_triqs_time_invariance = 0
+         dtset%dmft_triqs_measure_density_matrix = 0
+         dtset%dmft_triqs_time_invariance = 0
+         dtset%dmftctqmc_basis = 3
        end if
+     end if
+     if(dtset%dmft_solv>=5.and.dtset%dmft_solv<=9) then
+       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_basis',tread,'INT')
+       if(tread==1) dtset%dmftctqmc_basis  =intarr(1)
+     end if
+     if(dtset%dmft_solv>=6.and.dtset%dmft_solv<=7) then
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_compute_integral',tread,'INT')
        if(tread==1) dtset%dmft_triqs_compute_integral=intarr(1)
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_det_init_size',tread,'INT')
