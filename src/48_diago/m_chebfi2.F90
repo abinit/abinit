@@ -283,8 +283,6 @@ subroutine chebfi_allocateAll(chebfi)
  integer  :: space
  integer  :: spacedim
  integer  :: total_spacedim, ierr
- ! arrays
- real(dp) :: tsec(2)
 
 ! *********************************************************************
 
