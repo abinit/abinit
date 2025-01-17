@@ -589,6 +589,9 @@ MODULE m_paw_dmft
   complex(dpc), allocatable :: dpro(:,:,:)
   ! Exp(i(k+G).xred(iatom)) for each G,correlated atom and k
 
+  complex(dpc), allocatable :: slm2ylm(:,:,:)
+  ! Transformation matrix from real to complex harmonics for each lpawu
+
   complex(dpc), allocatable :: wannier(:,:,:)
   ! Wannier functions for each r,flavor and atom
 
@@ -708,11 +711,11 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
 !Local variables ------------------------------------
  integer :: bdtot_index,dmft_dc,dmft_solv,dmftbandi,dmftbandf,fac,i,iatom
  integer :: iatom1,iband,icb,ig,ik,ikg,ikpt,im,im1,indproj,iproj,ir,isppol
- integer :: itypat,lpawu,lpawu1,maxlpawu,mband,mbandc,mesh_size,mesh_type
- integer :: mkmem,mpw,myproc,natom,nband_k,ndim,nkpt,nproc,nproju,npw
+ integer :: itypat,jm,lpawu,lpawu1,maxlpawu,mband,mbandc,mesh_size,mesh_type
+ integer :: mkmem,mm,mpw,myproc,natom,nband_k,ndim,nkpt,nproc,nproju,npw
  integer :: nspinor,nsppol,nsym,ntypat,siz_paw,siz_proj,siz_wan,use_dmft
  logical :: t2g,use_full_chipsi,neglect_off_diag,verif,x2my2d
- real(dp) :: bes,besp,lstep,norm,rad,rint,rstep,sumwtk
+ real(dp) :: bes,besp,lstep,norm,onem,rad,rint,rstep,sumwtk
  integer, parameter :: mt2g(3) = (/1,2,4/)
  logical, allocatable :: lcycle(:),typcycle(:)
  real(dp), allocatable :: rmax(:),kpg(:,:),kpg_norm(:)
@@ -1129,7 +1132,28 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
    if (pawtab(itypat)%nproju > paw_dmft%maxnproju) paw_dmft%maxnproju = pawtab(itypat)%nproju
  end do ! itypat
 
+ ABI_MALLOC(paw_dmft%slm2ylm,(ndim,ndim,maxlpawu+1))
  ABI_MALLOC(paw_dmft%zarot,(ndim,ndim,nsym,maxlpawu+1))
+
+ paw_dmft%slm2ylm(:,:,:) = czero
+ do lpawu=0,maxlpawu
+   if (lcycle(lpawu+1)) cycle
+   ndim = 2*lpawu +1
+   do im=1,ndim
+     mm = im - lpawu - 1 ; jm = - mm + lpawu + 1
+     onem = (-1)**mm
+     if (mm > 0) then
+       paw_dmft%slm2ylm(im,im,lpawu+1) = cmplx(onem/sqrt2,zero,kind=dp)
+       paw_dmft%slm2ylm(jm,im,lpawu+1) = cmplx(one/sqrt2,zero,kind=dp)
+     end if
+     if (mm == 0) paw_dmft%slm2ylm(im,im,lpawu+1) = cone
+     if (mm < 0) then
+       paw_dmft%slm2ylm(im,im,lpawu+1) =  cmplx(zero,one/sqrt2,kind=dp)
+       paw_dmft%slm2ylm(jm,im,lpawu+1) = -cmplx(zero,onem/sqrt2,kind=dp)
+     end if
+   end do ! im
+ end do ! lpawu
+
  do lpawu=0,maxlpawu
    if (lcycle(lpawu+1)) cycle
    ndim = 2*lpawu + 1
@@ -2041,6 +2065,7 @@ subroutine destroy_sc_dmft(paw_dmft)
  ABI_SFREE(paw_dmft%lpawu)
  ABI_SFREE(paw_dmft%omega_lo)
  ABI_SFREE(paw_dmft%wgt_wlo)
+ ABI_SFREE(paw_dmft%slm2ylm)
 
  paw_dmft%nband => null()
  paw_dmft%dmft_shiftself => null()

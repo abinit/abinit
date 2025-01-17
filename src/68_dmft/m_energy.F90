@@ -671,7 +671,7 @@ subroutine compute_migdal_energy(e_hu_migdal,e_hu_migdal_tot,green,paw_dmft,self
  complex(dpc) :: omega
  complex(dpc), allocatable :: omega_fac(:),trace_moments(:,:),trace(:)
  type(matlu_type), allocatable :: self_nwlo_re(:)
- type(matlu_type), ABI_CONTIGUOUS pointer :: matlu_tmp(:) => null()
+ type(matlu_type), pointer :: matlu_tmp(:) => null()
  character(len=500) :: message
 ! *********************************************************************
 

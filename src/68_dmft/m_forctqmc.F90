@@ -231,7 +231,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  !end if
 
  useylm = 0
- if (nspinor == 2 .and. (.not. triqs)) useylm = 1 ! to avoid complex G(tau)
+ if ((nspinor == 2 .and. (.not. triqs)) .or. paw_dmft%dmftctqmc_basis == 3) useylm = 1 ! to avoid complex G(tau)
 
  !write(6,*) "nspinor,useylm",nspinor,useylm
  if (useylm == 0) then
@@ -240,6 +240,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  else if (useylm == 1) then
    write(std_out,*) " Ylm (complex spherical harmonics) basis is used (before rotation)"
    rot_type_vee = 4 ! for rotatevee_hu
+   if (paw_dmft%dmftctqmc_basis == 3) rot_type_vee = 2
  end if ! useylm
 
 ! if(useylm==1.and.opt_diag/=1) ABI_ERROR("useylm==1 and opt_diag/=0 is not possible")
@@ -284,6 +285,15 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
         & "      CTQMC will use this basis",ch10
      opt_diag = 0
    end if ! nondiaglevels or useylm
+ else if (paw_dmft%dmftctqmc_basis == 3) then
+   if (nondiaglevels) then
+     write(message,'(5a)') ch10,"  == Crystal field in local basis is not diagonal",ch10, &
+       & "   == According to dmftctqmc_basis: switch to Ylm basis",ch10
+   else
+     write(message,'(5a)') ch10,"  == Crystal field in local basis is diagonal in the Slm basis ",ch10, &
+       & "      CTQMC will use the Ylm basis",ch10
+   end if
+   opt_diag = 0
  else if (paw_dmft%dmftctqmc_basis == 0) then
    if (nondiaglevels) then
      write(message,'(4a)') ch10,"   == Crystal field in local basis is not diagonal",ch10, &
@@ -302,11 +312,6 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  end if ! opt_diag
 
  if (weiss%has_moments == 1) then
-
-   if (useylm == 1) then
-     message = "Computation of the moments is not implemented for the Ylm case"
-     ABI_BUG(message)
-   end if
 
    if (.not. triqs) then
      message = "The case weiss%has_moments=1 and dmft_solv/=6 and dmft_solv/=7 &
@@ -331,7 +336,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 
    ! Rotate from Slm to Ylm the atomic levels
    ! ----------------------------------------
-   call slm2ylm_matlu(energy_level%matlu(:),natom,1,pawprtvol)
+   call slm2ylm_matlu(energy_level%matlu(:),natom,paw_dmft,1,pawprtvol)
 
    ! Print atomic energy levels in Ylm basis
    ! --------------------------------
@@ -546,13 +551,13 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
    ! 1) rotate density matrix to Ylm basis
    ! --------------------------------------
    if (useylm == 1) then
-     call slm2ylm_matlu(matlu1(:),natom,1,pawprtvol)
+     call slm2ylm_matlu(matlu1(:),natom,paw_dmft,1,pawprtvol)
      if (pawprtvol >= 3) then
        write(message,'(2a)') ch10," == Print occupations in Ylm basis"
        call wrtout(std_out,message,'COLL')
        call print_matlu(matlu1(:),natom,1)
      end if
-   end if    ! useylm
+   end if ! useylm
 
    ! 2) rotate density matrix to rotated basis
    ! -------------------------------------------
@@ -582,8 +587,8 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
    write(message,'(a,2x,a)') ch10, " == Rotation of weiss and greendft in the Ylm Basis="
    call wrtout(std_out,message,'COLL')
    do ifreq=1,nwlo
-     call slm2ylm_matlu(weiss_for_rot%oper(ifreq)%matlu(:),natom,1,0)
-     call slm2ylm_matlu(weiss%oper(ifreq)%matlu(:),natom,1,0)
+     call slm2ylm_matlu(weiss_for_rot%oper(ifreq)%matlu(:),natom,paw_dmft,1,0)
+     call slm2ylm_matlu(weiss%oper(ifreq)%matlu(:),natom,paw_dmft,1,0)
      ! call slm2ylm_matlu(greendft%oper(ifreq)%matlu,natom,1,0)
    end do
  end if
@@ -689,7 +694,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  ! Rotate analytical C_ij in Ylm basis
  ! ---------------------------------------
  if (useylm == 1) then
-   call slm2ylm_matlu(hybri_coeff(:),natom,1,pawprtvol)
+   call slm2ylm_matlu(hybri_coeff(:),natom,paw_dmft,1,pawprtvol)
  end if
 
  if (opt_diag /= 0)  then
@@ -715,7 +720,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
    call wrtout(std_out,message,'COLL')
    call print_matlu(green%occup%matlu(:),natom,1)
    if (useylm == 1) then
-     call slm2ylm_matlu(green%occup%matlu(:),natom,1,pawprtvol)
+     call slm2ylm_matlu(green%occup%matlu(:),natom,paw_dmft,1,pawprtvol)
    end if
    if (opt_rot == 1) then
      call rotate_matlu(green%occup%matlu(:),eigvectmatlu(:),natom,1)
@@ -1651,13 +1656,16 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
    orb_off_diag  = paw_dmft%dmft_triqs_orb_off_diag
    spin_off_diag = paw_dmft%dmft_triqs_spin_off_diag
 
-   if (opt_diag /= 0) then
-     write(message,'(3x,a)') "== Rotating Weiss field in CTQMC basis"
-     call wrtout(std_out,message,'COLL')
-     do i=1,weiss%nmoments-1
+   write(message,'(3x,a)') "== Rotating Weiss field in CTQMC basis"
+   call wrtout(std_out,message,'COLL')
+   do i=1,weiss%nmoments-1
+     if (useylm == 1) then
+       call slm2ylm_matlu(weiss%moments(i)%matlu(:),natom,paw_dmft,1,0)
+     end if
+     if (opt_diag /= 0) then
        call rotate_matlu(weiss%moments(i)%matlu(:),eigvectmatlu(:),natom,1)
-     end do ! i
-   end if ! opt_diag/=0
+     end if ! opt_diag /= 0
+   end do ! i
 
    if ((.not. orb_off_diag) .and. (.not. spin_off_diag)) then
      option = 1
@@ -1688,9 +1696,13 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 
    do ifreq=1,nwlo
 
-     if (weiss%distrib%procf(ifreq) /= myproc .and. opt_diag /= 0) cycle
+     if (weiss%distrib%procf(ifreq) /= myproc .and. (opt_diag /= 0 .or. useylm == 1)) cycle
 
      shift(:) = cmplx(zero,paw_dmft%omega_lo(ifreq),kind=dp)
+
+     if (useylm == 1) then
+       call slm2ylm_matlu(weiss%oper(ifreq)%matlu(:),natom,paw_dmft,1,0)
+     end if
 
      if (opt_diag /= 0) then
        call rotate_matlu(weiss%oper(ifreq)%matlu(:),eigvectmatlu(:),natom,1)
@@ -1721,7 +1733,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 
    end do ! ifreq
 
-   if (opt_diag /= 0) then
+   if (opt_diag /= 0 .or. useylm == 1) then
      call gather_oper(weiss%oper(:),weiss%distrib,paw_dmft,opt_ksloc=2)
      call xmpi_max(maxoffdiag,maxoffdiag_,paw_dmft%spacecomm,ierr)
    end if
@@ -1877,7 +1889,7 @@ end if !nspinor
      call rotate_matlu(green%oper_tau(itau)%matlu(:),eigvectmatlu(:),natom,0)
    end if
    if (useylm == 1) then
-     call slm2ylm_matlu(green%oper_tau(itau)%matlu(:),natom,2,0)
+     call slm2ylm_matlu(green%oper_tau(itau)%matlu(:),natom,paw_dmft,2,0)
    end if
  end do ! itau
 
@@ -1892,10 +1904,7 @@ end if !nspinor
    write(message,'(a,2x,a)') ch10," == Occupations from G(tau=0-) in the Ylm basis"
    call wrtout(std_out,message,'COLL')
    call print_matlu(green%occup_tau%matlu(:),natom,1)
- end if ! useylm=1
-
- if (useylm == 1) then
-   call slm2ylm_matlu(green%occup_tau%matlu(:),natom,2,0)
+   call slm2ylm_matlu(green%occup_tau%matlu(:),natom,paw_dmft,2,0)
  end if
  !write(message,'(a,2x,a)') ch10," == Occupations from G(tau=0-) in the Slm basis"
  !call wrtout(std_out,message,'COLL')
@@ -1924,7 +1933,7 @@ end if !nspinor
  end if
 
  do ifreq=1,nwlo
-   if (weiss%distrib%procf(ifreq) /= myproc .and. opt_diag /= 0) cycle
+   if (weiss%distrib%procf(ifreq) /= myproc .and. (opt_diag /= 0 .or. useylm == 1)) cycle
    if (triqs) then
      shift(:) = cmplx(zero,paw_dmft%omega_lo(ifreq),kind=dp)
      call add_matlu(weiss%oper(ifreq)%matlu(:),energy_level%matlu(:),matlu1(:),natom,1)
@@ -1937,8 +1946,8 @@ end if !nspinor
      call rotate_matlu(weiss%oper(ifreq)%matlu(:),eigvectmatlu(:),natom,0)
    end if
    if (useylm == 1) then
-     call slm2ylm_matlu(green%oper(ifreq)%matlu(:),natom,2,0)
-     call slm2ylm_matlu(weiss%oper(ifreq)%matlu(:),natom,2,0)
+     call slm2ylm_matlu(green%oper(ifreq)%matlu(:),natom,paw_dmft,2,0)
+     call slm2ylm_matlu(weiss%oper(ifreq)%matlu(:),natom,paw_dmft,2,0)
    end if
  end do ! ifreq
 
@@ -1948,7 +1957,7 @@ end if !nspinor
    ABI_FREE(matlu1)
  end if
 
- if (opt_diag /= 0) then
+ if (opt_diag /= 0 .or. useylm == 1) then
    call gather_oper(weiss%oper(:),weiss%distrib,paw_dmft,opt_ksloc=2)
    call gather_oper(green%oper(:),green%distrib,paw_dmft,opt_ksloc=2)
  end if ! opt_diag/=0
@@ -1958,16 +1967,25 @@ end if !nspinor
      if (opt_diag /= 0) then
        call rotate_matlu(green%moments(i)%matlu(:),eigvectmatlu(:),natom,0)
      end if
+     if (useylm == 1) then
+       call slm2ylm_matlu(green%moments(i)%matlu(:),natom,paw_dmft,2,0)
+     end if
      call sym_matlu(green%moments(i)%matlu(:),paw_dmft)
    end do ! i
    do i=2,weiss%nmoments-1
      if (opt_diag /= 0) then
        call rotate_matlu(weiss%moments(i)%matlu(:),eigvectmatlu(:),natom,0)
      end if
+     if (useylm == 1) then
+       call slm2ylm_matlu(weiss%moments(i)%matlu(:),natom,paw_dmft,2,0)
+     end if
      call sym_matlu(weiss%moments(i)%matlu(:),paw_dmft)
    end do ! i
    if (opt_diag /= 0) then
      call rotate_matlu(energy_level%matlu(:),eigvectmatlu(:),natom,0)
+   end if
+   if (useylm == 1) then
+     call slm2ylm_matlu(energy_level%matlu(:),natom,paw_dmft,2,0)
    end if
    call sym_matlu(energy_level%matlu(:),paw_dmft)
    opt_log = 0
