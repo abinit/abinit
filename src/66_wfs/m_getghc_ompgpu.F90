@@ -611,7 +611,12 @@ has_fock=.false.
      ABI_MALLOC(ghc2,(2,npw_k2*ndat))
      ABI_MALLOC(ghc3,(2,npw_k2*ndat))
      ABI_MALLOC(ghc4,(2,npw_k2*ndat))
-     ghc1(:,:)=zero; ghc2(:,:)=zero; ghc3(:,:)=zero ;  ghc4(:,:)=zero
+     !$OMP TARGET ENTER DATA MAP(alloc:ghc1,ghc2,ghc3,ghc4)
+     call gpu_set_to_zero(ghc1, int(2,c_size_t)*npw_k2*ndat)
+     call gpu_set_to_zero(ghc2, int(2,c_size_t)*npw_k2*ndat)
+     call gpu_set_to_zero(ghc3, int(2,c_size_t)*npw_k2*ndat)
+     call gpu_set_to_zero(ghc4, int(2,c_size_t)*npw_k2*ndat)
+
      if (use_cwavef_r) then
        ABI_MALLOC(vlocal_tmp,(0,0,0))
      else
@@ -628,6 +633,7 @@ has_fock=.false.
              end do
            end do
          end do
+         !$OMP TARGET UPDATE TO(work)
        else
          ! LB,07/22:
          ! Weird segmentation fault encountered here if called with multithreaded_getghc for big systems.
@@ -657,6 +663,7 @@ has_fock=.false.
              end do
            end do
          end do
+         !$OMP TARGET UPDATE TO(work)
        else
          ! LB,07/22:
          ! Weird segmentation fault encountered here if called with multithreaded_getghc for big systems.
@@ -669,6 +676,7 @@ has_fock=.false.
              end do
            end do
          end do
+         !$OMP TARGET UPDATE TO(work)
        end if
        call fourwf(1,vlocal_tmp,cwavef2,ghc2,work,gbound_k1,gbound_k2,&
 &       gs_ham%istwf_k,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
@@ -693,6 +701,7 @@ has_fock=.false.
              end do
            end do
          end do
+         !$OMP TARGET UPDATE TO(work)
        else
          do i3=1,gs_ham%n6
            do i2=1,gs_ham%n5
@@ -719,6 +728,7 @@ has_fock=.false.
              end do
            end do
          end do
+         !$OMP TARGET UPDATE TO(work)
        else
          do i3=1,gs_ham%n6
            do i2=1,gs_ham%n5
@@ -738,29 +748,40 @@ has_fock=.false.
 !    Build ghc from pieces
 !    (v11,v22,Re(v12)+iIm(v12);Re(v12)-iIm(v12))(psi1;psi2): matrix product
      if (mpi_enreg%paral_spinor==0) then
+       !$OMP TARGET TEAMS DISTRIBUTE MAP(to:ghc,ghc1,ghc2,ghc3,ghc4) PRIVATE(idat)
        do idat=1,ndat
+         !$OMP PARALLEL DO PRIVATE(ipw)
          do ipw=1,npw_k2
-           ghc(1:2,ipw+(idat-1)*my_nspinor*npw_k2)       =ghc1(1:2,ipw+(idat-1)*npw_k2)+ghc4(1:2,ipw+(idat-1)*npw_k2)
-           ghc(1:2,ipw+(idat-1)*my_nspinor*npw_k2+shift2)=ghc3(1:2,ipw+(idat-1)*npw_k2)+ghc2(1:2,ipw+(idat-1)*npw_k2)
+           ghc(1,ipw+(idat-1)*my_nspinor*npw_k2)       =ghc1(1,ipw+(idat-1)*npw_k2)+ghc4(1,ipw+(idat-1)*npw_k2)
+           ghc(2,ipw+(idat-1)*my_nspinor*npw_k2)       =ghc1(2,ipw+(idat-1)*npw_k2)+ghc4(2,ipw+(idat-1)*npw_k2)
+           ghc(1,ipw+(idat-1)*my_nspinor*npw_k2+shift2)=ghc3(1,ipw+(idat-1)*npw_k2)+ghc2(1,ipw+(idat-1)*npw_k2)
+           ghc(2,ipw+(idat-1)*my_nspinor*npw_k2+shift2)=ghc3(2,ipw+(idat-1)*npw_k2)+ghc2(2,ipw+(idat-1)*npw_k2)
          end do
        end do
      else
-       call xmpi_sum(ghc4,mpi_enreg%comm_spinor,ierr)
-       call xmpi_sum(ghc3,mpi_enreg%comm_spinor,ierr)
+       call xmpi_sum(ghc4,mpi_enreg%comm_spinor,ierr,use_omp_map=.true.)
+       call xmpi_sum(ghc3,mpi_enreg%comm_spinor,ierr,use_omp_map=.true.)
        if (nspinor1TreatedByThisProc) then
+         !$OMP TARGET TEAMS DISTRIBUTE MAP(to:ghc,ghc1,ghc4) PRIVATE(idat)
          do idat=1,ndat
+           !$OMP PARALLEL DO PRIVATE(ipw)
            do ipw=1,npw_k2
-             ghc(1:2,ipw+(idat-1)*my_nspinor*npw_k2)=ghc1(1:2,ipw+(idat-1)*npw_k2)+ghc4(1:2,ipw+(idat-1)*npw_k2)
+             ghc(1,ipw+(idat-1)*my_nspinor*npw_k2)=ghc1(1,ipw+(idat-1)*npw_k2)+ghc4(1,ipw+(idat-1)*npw_k2)
+             ghc(2,ipw+(idat-1)*my_nspinor*npw_k2)=ghc1(2,ipw+(idat-1)*npw_k2)+ghc4(2,ipw+(idat-1)*npw_k2)
            end do
          end do
        else if (nspinor2TreatedByThisProc) then
+         !$OMP TARGET TEAMS DISTRIBUTE MAP(to:ghc,ghc2,ghc3) PRIVATE(idat)
          do idat=1,ndat
+           !$OMP PARALLEL DO PRIVATE(ipw)
            do ipw=1,npw_k2
-             ghc(1:2,ipw+(idat-1)*my_nspinor*npw_k2+shift2)=ghc3(1:2,ipw+(idat-1)*npw_k2)+ghc2(1:2,ipw+(idat-1)*npw_k2)
+             ghc(1,ipw+(idat-1)*my_nspinor*npw_k2+shift2)=ghc3(1,ipw+(idat-1)*npw_k2)+ghc2(1,ipw+(idat-1)*npw_k2)
+             ghc(2,ipw+(idat-1)*my_nspinor*npw_k2+shift2)=ghc3(2,ipw+(idat-1)*npw_k2)+ghc2(2,ipw+(idat-1)*npw_k2)
            end do
          end do
        end if
      end if
+     !$OMP TARGET EXIT DATA MAP(delete:ghc1,ghc2,ghc3,ghc4)
      ABI_FREE(ghc1)
      ABI_FREE(ghc2)
      ABI_FREE(ghc3)
