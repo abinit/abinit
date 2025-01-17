@@ -3765,7 +3765,7 @@ subroutine compute_nb_elec(green,self,paw_dmft,Fx,nb_elec_x,fermie,Fxprime)
 
      call init_oper(paw_dmft,oper_tmp,nkpt=mkmem,shiftk=shift)
 
-     do ifreq=green%nw,1,-1
+     do ifreq=1,green%nw
        if (green%distrib%proct(ifreq) /= green%distrib%me_freq) cycle
        omega = cmplx(zero,green%omega(ifreq),kind=dp)
        fac = two * paw_dmft%wgt_wlo(ifreq) * temp
