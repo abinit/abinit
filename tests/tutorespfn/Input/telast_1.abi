@@ -7,9 +7,9 @@
 
   geoopt1   "bfgs"  # Use BFGS algorithm for structural optimization
    ntime1   5       # Maximum number of optimization steps
-  tolmxf1   1.0e-6  # Optimization is converged when maximum force 
+  tolmxf1   1.0e-6  # Optimization is converged when maximum force
                     # (Hartree/Bohr) is less than this maximum
-  natfix1   2       # Fix the position of two symmetry-equivalent atoms 
+  natfix1   2       # Fix the position of two symmetry-equivalent atoms
                     #  in doing the structural optimization
   iatfix1   1 2     # Choose atoms 1 and 2 as the fixed atoms (see discussion)
 
@@ -26,8 +26,8 @@
  strfact2   100     # Test convergence of stresses (Hartree/bohr^3) by
                     # multiplying by this factor and applying force
                     # convergence test
-  natfix2   2       
-  iatfix2   1 2     
+  natfix2   2
+  iatfix2   1 2
 
 #Common input data
 
@@ -43,8 +43,8 @@
                                         #process
 
 #Definition of the atom types and atoms
- ntypat   2 
-  znucl   13 15 
+ ntypat   2
+  znucl   13 15
   natom   4
   typat   1 1 2 2
 
@@ -56,7 +56,7 @@
           2/3  1/3  0.875
 
 #Gives the number of bands, explicitely (do not take the default)
-  nband   8              # For an insulator (if described correctly as an 
+  nband   8              # For an insulator (if described correctly as an
                          # insulator by DFT), conduction bands should not
                          # be included in response-function calculations
 
@@ -94,14 +94,14 @@ nshiftk   1              # Use one copy of grid only (default)
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   telast_1.abo, tolnlines=  3, tolabs=  1.1e-7, tolrel=  2.0e-2, fld_options = -medium
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = D. Hamann
-#%% keywords = 
-#%% description = 
+#%% keywords =
+#%% description =
 #%%   AlAs in hypothetical wurzite (hexagonal) structure
 #%%   Structural optimization run
 #%%<END TEST_INFO>

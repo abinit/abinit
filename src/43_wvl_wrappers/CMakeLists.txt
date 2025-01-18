@@ -30,7 +30,8 @@ target_compile_definitions(43_wvl_wrappers
 
 target_link_libraries(43_wvl_wrappers
   PUBLIC
-  abinit::41_geometry)
+  abinit::41_geometry
+)
 
 if(ABINIT_BIGDFT_FOUND)
   target_link_libraries(43_wvl_wrappers

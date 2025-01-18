@@ -59,7 +59,7 @@
 #%% [extra_info]
 #%% keywords = PAW, DFPT
 #%% authors =  P. Hermet
-#%% description = 
+#%% description =
 #%%    GaAs with 2 atoms per cell.
 #%%    Test computation of the Berry phase in PAW, with GGA functional.
 #%%    WARNING : HAS BEEN TRANSFERRED TO tests/seq

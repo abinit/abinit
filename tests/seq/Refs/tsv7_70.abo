@@ -1,8 +1,8 @@
 
 .Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(sequential version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(sequential version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Sat 14 Sep 2024.
 - ( at 19h24 )
-  
+
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk_merge-10.0/tests/TestBot_MPI1/seq_tsv7_70/tsv7_70.abi
 - output file    -> tsv7_70.abo
 - root for input  files -> tsv7_70i
@@ -338,14 +338,14 @@ tolerances: {toldfe: 1.00E-22, }
  (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
      Electronic berry phase:        0.626942747E-03   0.626942747E-03   0.626942747E-03
      ...includes PAW on-site term:  0.000000000E+00   0.000000000E+00   0.000000000E+00
-     Ionic:                        -0.270560574E-01  -0.270560574E-01  -0.270560574E-01  
+     Ionic:                        -0.270560574E-01  -0.270560574E-01  -0.270560574E-01
      Total:                        -0.264291147E-01  -0.264291147E-01  -0.264291147E-01
 
  Polarization in cartesian coordinates (C/m^2):
  (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
      Electronic berry phase:        0.358703798E-01   0.358703798E-01   0.358703798E-01
      ...includes PAW on-site term:  0.000000000E+00   0.000000000E+00   0.000000000E+00
-     Ionic:                        -0.154800587E+01  -0.154800587E+01  -0.154800587E+01  
+     Ionic:                        -0.154800587E+01  -0.154800587E+01  -0.154800587E+01
      Total:                        -0.151213549E+01  -0.151213549E+01  -0.151213549E+01
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -567,7 +567,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     132.000     131.955
   initberry: for direction 2, nkstr =   2, nstr =     16
   initberry: for direction 3, nkstr =   2, nstr =     16
 
- initberry: COMMENT - 
+ initberry: COMMENT -
   As a rough estimate,
   to be below the critical field, the bandgap of your system
   should be larger than    0.03 eV.
@@ -645,14 +645,14 @@ tolerances: {toldfe: 1.00E-22, }
  (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
      Electronic berry phase:        0.674718459E-03   0.630967713E-03   0.630967713E-03
      ...includes PAW on-site term: -0.710088114E-06   0.000000000E+00   0.000000000E+00
-     Ionic:                        -0.270560574E-01  -0.270560574E-01  -0.270560574E-01  
+     Ionic:                        -0.270560574E-01  -0.270560574E-01  -0.270560574E-01
      Total:                        -0.263813390E-01  -0.264250897E-01  -0.264250897E-01
 
  Polarization in cartesian coordinates (C/m^2):
  (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
      Electronic berry phase:        0.386038557E-01   0.361006672E-01   0.361006672E-01
      ...includes PAW on-site term: -0.406275221E-04   0.000000000E+00   0.000000000E+00
-     Ionic:                        -0.154800587E+01  -0.154800587E+01  -0.154800587E+01  
+     Ionic:                        -0.154800587E+01  -0.154800587E+01  -0.154800587E+01
      Total:                        -0.150940202E+01  -0.151190521E+01  -0.151190521E+01
 
  Stress tensor under a constant electric field:
@@ -826,21 +826,21 @@ total_energy_dc_eV  : -2.33595289985537E+02
 
 Constant unreduced E calculation  - final values:
  (a. u.)
-       E:   1.000000000E-04   0.000000000E+00   0.000000000E+00  
+       E:   1.000000000E-04   0.000000000E+00   0.000000000E+00
        P:  -2.638133899E-02  -2.642508973E-02  -2.642508973E-02
 
-    ebar:   0.000000000E+00   5.265000000E-04   5.265000000E-04  
+    ebar:   0.000000000E+00   5.265000000E-04   5.265000000E-04
     pbar:  -3.496670471E+00  -3.493775836E+00  -3.493775836E+00
 
-       e:  -2.205905416E-04   2.205905416E-04   2.205905416E-04  
+       e:  -2.205905416E-04   2.205905416E-04   2.205905416E-04
        p:  -7.337222136E-01  -7.312966525E-01  -7.312966525E-01
 
  (S.I.), that is V/m for E, and C/m^2 for P
--      E:   5.142206319E+07   0.000000000E+00   0.000000000E+00  
-       P:  -1.509402018E+00  -1.511905206E+00  -1.511905206E+00  
+-      E:   5.142206319E+07   0.000000000E+00   0.000000000E+00
+       P:  -1.509402018E+00  -1.511905206E+00  -1.511905206E+00
 
 
- Please check: COMMENT - 
+ Please check: COMMENT -
   As a rough estimate,
   to be below the critical field, the bandgap of your system
   should be larger than    0.03 eV.
@@ -859,7 +859,7 @@ Constant unreduced E calculation  - final values:
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      1.0530000000E+01  1.0530000000E+01  1.0530000000E+01 Bohr
               amu      2.69815390E+01  7.49215900E+01
@@ -1004,7 +1004,7 @@ P           mkmem2          6
 - subtotal                                  0.941  57.1         0.990  58.9                                  0.95       0.95
 
 - For major independent code sections, cpu and wall times (sec),
-- as well as % of the total time and number of calls 
+- as well as % of the total time and number of calls
 
 -<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
 - cpu_time =           1.6, wall_time =           1.7
@@ -1068,7 +1068,7 @@ P           mkmem2          6
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -1080,12 +1080,12 @@ P           mkmem2          6
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -1103,7 +1103,7 @@ P           mkmem2          6
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -1118,7 +1118,7 @@ P           mkmem2          6
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009

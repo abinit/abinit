@@ -1,8 +1,8 @@
 
-.Version 10.0.2.1 of ABINIT, released Apr 2024.
-.(MPI version, prepared for a aarch64_darwin22.6.0_gnu12.2 computer) 
+.Version 10.1.4.2 of ABINIT, released Jun 2024.
+.(MPI version, prepared for a aarch64_darwin22.6.0_gnu12.2 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,9 +14,9 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 13 Apr 2024.
-- ( at 23h08 )
-  
+.Starting date : Sat 17 Aug 2024.
+- ( at 14h02 )
+
 - input  file    -> t04.abi
 - output file    -> t04.abo
 - root for input  files -> t04i
@@ -26,35 +26,37 @@
 ================================================================================
  Values of the parameters that define the memory need of the present run
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       5
-     lnmax =       5     mgfft =      32  mpssoang =       3    mqgrid =    3001
+     lnmax =       5     mgfft =      18  mpssoang =       3    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       2
     occopt =       1   xclevel =       2
--    mband =          12        mffmem =           1         mkmem =           8
-       mpw =        1304          nfft =       32768          nkpt =           8
+-    mband =           9        mffmem =           1         mkmem =           8
+       mpw =        1304          nfft =        5832          nkpt =           8
 ================================================================================
-P This job should need less than                      13.632 Mbytes of memory.
+P This job should need less than                       4.756 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      1.912 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
+_ WF disk file :      1.435 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 ================================================================================
 
 --------------------------------------------------------------------------------
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
+- outvars: echo of selected default values
 -   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
             acell      1.0000000000E+00  1.0000000000E+00  1.0000000000E+00 Bohr
               amu      1.59994000E+01  2.43050000E+01
-        ddb_ngqpt        4    4    4
+        boxcutmin      1.10000000E+00
+        ddb_ngqpt        1    1    1
              ecut      3.50000000E+01 Hartree
-          ecuteps      4.00000000E+00 Hartree
-         ecutsigx      4.00000000E+00 Hartree
+          ecuteps      1.00000000E+00 Hartree
+         ecutsigx      1.00000000E+00 Hartree
+    elph2_imagden      3.67493254E-03 Hartree
          eph_task          17
 -          fftalg         312
            istwfk        2    0    3    0    0    0    7    0
@@ -72,13 +74,13 @@ _ WF disk file :      1.912 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
        mdf_epsinf      1.20000000E+01
 P           mkmem           8
             natom           2
-            nband          12
-            ngfft          32      32      32
+            nband           9
+            ngfft          18      18      18
              nkpt           8
              nsym          48
            ntypat           2
               occ      2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  0.000000  0.000000  0.000000  0.000000
+                       2.000000  2.000000  0.000000
         optdriver           7
           ppmodel           2
        prtphbands           0
@@ -111,7 +113,7 @@ P           mkmem           8
                        1 -1  0   0 -1  0   0 -1  1      -1  1  0   0  1  0   0  1 -1
                        0  0 -1   1  0 -1   0  1 -1       0  0  1  -1  0  1   0 -1  1
                       -1  1  0  -1  0  1  -1  0  0       1 -1  0   1  0 -1   1  0  0
-           tolwfr      1.00000000E-14
+           tolwfr      1.00000000E-08
             typat      2  1
               wtk        0.01563    0.12500    0.06250    0.09375    0.37500    0.18750
                          0.04688    0.09375
@@ -135,7 +137,7 @@ P           mkmem           8
 
 --- !DatasetInfo
 iteration_state: {dtset: 1, }
-dimensions: {natom: 2, nkpt: 8, mband: 12, nsppol: 1, nspinor: 1, nspden: 1, mpw: 1304, }
+dimensions: {natom: 2, nkpt: 8, mband: 9, nsppol: 1, nspinor: 1, nspden: 1, mpw: 1304, }
 cutoff_energies: {ecut:  35.0, pawecutdg:  -1.0, }
 electrons: {nelect:   1.60000000E+01, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 7, eph_task: 17, }
@@ -144,6 +146,8 @@ meta: {optdriver: 7, eph_task: 17, }
  mkfilename: getwfk from: t03o_WFK
 
  mkfilename: getddb from: t01_DDB
+
+ mkfilename: getpot from: MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_POT.nc
 
  mkfilename: getdvdb from: t02_DVDB
 
@@ -179,11 +183,11 @@ meta: {optdriver: 7, eph_task: 17, }
 
 ================================================================================
 
- Dielectric Tensor and Effective Charges 
+ Dielectric Tensor and Effective Charges
 
 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
-   and impose the ASR on the effective charges 
+   and impose the ASR on the effective charges
 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
@@ -199,7 +203,7 @@ meta: {optdriver: 7, eph_task: 17, }
        3               2       -0.000000        0.000000
        3               3       -0.085945        0.000000
 
- Effective charge tensors after 
+ Effective charge tensors after
  imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
@@ -214,71 +218,8 @@ meta: {optdriver: 7, eph_task: 17, }
 - Cannot find quadrupole tensor in DDB file: t01_DDB
  Values initialized with zeros.
        Homogeneous q point set in the B.Z.
- Grid q points  :       64
+ Grid q points  :        1
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
-  2)   2.50000000E-01  0.00000000E+00  0.00000000E+00
-  3)   5.00000000E-01  0.00000000E+00  0.00000000E+00
-  4)  -2.50000000E-01  0.00000000E+00  0.00000000E+00
-  5)   0.00000000E+00  2.50000000E-01  0.00000000E+00
-  6)   2.50000000E-01  2.50000000E-01  0.00000000E+00
-  7)   5.00000000E-01  2.50000000E-01  0.00000000E+00
-  8)  -2.50000000E-01  2.50000000E-01  0.00000000E+00
-  9)   0.00000000E+00  5.00000000E-01  0.00000000E+00
- 10)   2.50000000E-01  5.00000000E-01  0.00000000E+00
- 11)   5.00000000E-01  5.00000000E-01  0.00000000E+00
- 12)  -2.50000000E-01  5.00000000E-01  0.00000000E+00
- 13)   0.00000000E+00 -2.50000000E-01  0.00000000E+00
- 14)   2.50000000E-01 -2.50000000E-01  0.00000000E+00
- 15)   5.00000000E-01 -2.50000000E-01  0.00000000E+00
- 16)  -2.50000000E-01 -2.50000000E-01  0.00000000E+00
- 17)   0.00000000E+00  0.00000000E+00  2.50000000E-01
- 18)   2.50000000E-01  0.00000000E+00  2.50000000E-01
- 19)   5.00000000E-01  0.00000000E+00  2.50000000E-01
- 20)  -2.50000000E-01  0.00000000E+00  2.50000000E-01
- 21)   0.00000000E+00  2.50000000E-01  2.50000000E-01
- 22)   2.50000000E-01  2.50000000E-01  2.50000000E-01
- 23)   5.00000000E-01  2.50000000E-01  2.50000000E-01
- 24)  -2.50000000E-01  2.50000000E-01  2.50000000E-01
- 25)   0.00000000E+00  5.00000000E-01  2.50000000E-01
- 26)   2.50000000E-01  5.00000000E-01  2.50000000E-01
- 27)   5.00000000E-01  5.00000000E-01  2.50000000E-01
- 28)  -2.50000000E-01  5.00000000E-01  2.50000000E-01
- 29)   0.00000000E+00 -2.50000000E-01  2.50000000E-01
- 30)   2.50000000E-01 -2.50000000E-01  2.50000000E-01
- 31)   5.00000000E-01 -2.50000000E-01  2.50000000E-01
- 32)  -2.50000000E-01 -2.50000000E-01  2.50000000E-01
- 33)   0.00000000E+00  0.00000000E+00  5.00000000E-01
- 34)   2.50000000E-01  0.00000000E+00  5.00000000E-01
- 35)   5.00000000E-01  0.00000000E+00  5.00000000E-01
- 36)  -2.50000000E-01  0.00000000E+00  5.00000000E-01
- 37)   0.00000000E+00  2.50000000E-01  5.00000000E-01
- 38)   2.50000000E-01  2.50000000E-01  5.00000000E-01
- 39)   5.00000000E-01  2.50000000E-01  5.00000000E-01
- 40)  -2.50000000E-01  2.50000000E-01  5.00000000E-01
- 41)   0.00000000E+00  5.00000000E-01  5.00000000E-01
- 42)   2.50000000E-01  5.00000000E-01  5.00000000E-01
- 43)   5.00000000E-01  5.00000000E-01  5.00000000E-01
- 44)  -2.50000000E-01  5.00000000E-01  5.00000000E-01
- 45)   0.00000000E+00 -2.50000000E-01  5.00000000E-01
- 46)   2.50000000E-01 -2.50000000E-01  5.00000000E-01
- 47)   5.00000000E-01 -2.50000000E-01  5.00000000E-01
- 48)  -2.50000000E-01 -2.50000000E-01  5.00000000E-01
- 49)   0.00000000E+00  0.00000000E+00 -2.50000000E-01
- 50)   2.50000000E-01  0.00000000E+00 -2.50000000E-01
- 51)   5.00000000E-01  0.00000000E+00 -2.50000000E-01
- 52)  -2.50000000E-01  0.00000000E+00 -2.50000000E-01
- 53)   0.00000000E+00  2.50000000E-01 -2.50000000E-01
- 54)   2.50000000E-01  2.50000000E-01 -2.50000000E-01
- 55)   5.00000000E-01  2.50000000E-01 -2.50000000E-01
- 56)  -2.50000000E-01  2.50000000E-01 -2.50000000E-01
- 57)   0.00000000E+00  5.00000000E-01 -2.50000000E-01
- 58)   2.50000000E-01  5.00000000E-01 -2.50000000E-01
- 59)   5.00000000E-01  5.00000000E-01 -2.50000000E-01
- 60)  -2.50000000E-01  5.00000000E-01 -2.50000000E-01
- 61)   0.00000000E+00 -2.50000000E-01 -2.50000000E-01
- 62)   2.50000000E-01 -2.50000000E-01 -2.50000000E-01
- 63)   5.00000000E-01 -2.50000000E-01 -2.50000000E-01
- 64)  -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
 
  The interatomic forces have been obtained
 
@@ -322,12 +263,20 @@ meta: {optdriver: 7, eph_task: 17, }
  nkbz: 64
  glob_nk_spin: [1]
  qzone: bz
- nqibz: 8
- nqbz: 64
- glob_nq_spin: [8]
+ nqibz: 1
+ nqbz: 1
+ glob_nq_spin: [1]
  kptopt: 1
  qptopt: 1
  with_vk: 1
+
+ gqk_cplex: 2
+ gqk_bstart: 1
+ gqk_bstop: 9
+ gqk_nb: 9
+ gqk_my_npert: 6
+ gqk_my_nk: -1
+ gqk_my_nq: -1
 
   === MPI distribution ===
 P Number of CPUs for parallelism over perturbations: 1
@@ -335,56 +284,198 @@ P Number of perturbations treated by this CPU: 6
 P Number of CPUs for parallelism over q-points: 1
 P Number of CPUs for parallelism over k-points: 1
 
- gqk_cplex: 2
- gqk_bstart: 1
- gqk_bstop: 12
- gqk_nb: 12
- gqk_my_npert: 6
- gqk_my_nk: -1
- gqk_my_nq: -1
+ vcoul_init : cutoff-mode = AUXILIARY_FUNCTION
+ q-points for optical limit:   1
+     1)      0.000010    0.000020    0.000030
+ Reading KS GS potential for Sternheimer from: MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_POT.nc
  DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
- 
+
  gstore_completed: 1
- gstore_done_qbz_spin: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
- gqk%nb: 12
- Group velocites v_nk in Cartesian coordinates:
- For k-point [ 0.0000E+00,  0.0000E+00,  0.0000E+00] , spin 1
-    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00
-    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00
-    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00
-    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00
-    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00
-    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00
-    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00
-    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00
-    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00
-    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00
-    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00
-    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00
- For k-point [-2.5000E-01,  5.0000E-01,  2.5000E-01] , spin 1
-    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00
-    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00
-    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00
-    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00
-    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00
-    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00
-    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00
-    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00
-    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00
-    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00
-    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00
-    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00
+ gstore_done_qbz_spin: 1
+ gqk%nb: 9
+ gqk%glob_nq: 1
+ gqk%glob_nk: 1
+ E-PH matrix elements:
+    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
+ |g(k,q)|^2 in Ha^2 for iq: 1 ik: 1 mode: 4
+    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
+     1     1     4     1     1     1.614327E-07
+     1     1     4     1     2     5.348935E-02
+     1     1     4     1     3     1.223925E+02
+     1     1     4     1     4     1.260401E+03
+     1     1     4     1     5     5.653283E-06
+     1     1     4     1     6     1.761561E+03
+     1     1     4     1     7     3.968762E+03
+     1     1     4     1     8     1.013507E+04
+     1     1     4     1     9     1.782709E-06
+     1     1     4     2     1     1.177128E-02
+     1     1     4     2     2     9.817360E-12
+     1     1     4     2     3     1.375444E-08
+     1     1     4     2     4     5.710549E-06
+     1     1     4     2     5     1.190859E+01
+     1     1     4     2     6     1.966054E-03
+     1     1     4     2     7     8.914651E-03
+     1     1     4     2     8     2.017433E-02
+     1     1     4     2     9     1.437496E+00
+     1     1     4     3     1     2.071350E+00
+     1     1     4     3     2     1.712476E-06
+     1     1     4     3     3     1.558361E-04
+     1     1     4     3     4     6.218857E-04
+     1     1     4     3     5     4.288923E+02
+     1     1     4     3     6     1.368710E-01
+     1     1     4     3     7     2.999678E-01
+     1     1     4     3     8     6.539060E-01
+     1     1     4     3     9     1.247586E+02
+     1     1     4     4     1     2.086667E+01
+     1     1     4     4     2     3.324801E-06
+     1     1     4     4     3     1.826303E-04
+     1     1     4     4     4     1.731833E-04
+     1     1     4     4     5     5.044797E+03
+     1     1     4     4     6     4.499243E-01
+     1     1     4     4     7     5.826352E-02
+     1     1     4     4     8     1.245457E-01
+     1     1     4     4     9     1.254429E+03
+     1     1     4     5     1     2.312151E-05
+     1     1     4     5     2     3.051954E+01
+     1     1     4     5     3     1.536514E+03
+     1     1     4     5     4     1.768306E+04
+     1     1     4     5     5     2.255250E-07
+     1     1     4     5     6     1.721762E+04
+     1     1     4     5     7     2.549890E+05
+     1     1     4     5     8     5.491547E+05
+     1     1     4     5     9     2.364135E-06
+     1     1     4     6     1     5.930789E+02
+     1     1     4     6     2     2.912097E-04
+     1     1     4     6     3     3.443490E-04
+     1     1     4     6     4     4.701036E-03
+     1     1     4     6     5     1.853185E+04
+     1     1     4     6     6     5.113722E-01
+     1     1     4     6     7     4.540673E+00
+     1     1     4     6     8     1.144318E+01
+     1     1     4     6     9     3.380767E+02
+     1     1     4     7     1     8.942466E+03
+     1     1     4     7     2     5.214714E-03
+     1     1     4     7     3     5.853771E-03
+     1     1     4     7     4     4.220331E-02
+     1     1     4     7     5     2.612196E+05
+     1     1     4     7     6     3.264222E-02
+     1     1     4     7     7     7.609717E+00
+     1     1     4     7     8     9.886078E+00
+     1     1     4     7     9     3.050785E+03
+     1     1     4     8     1     1.870867E+04
+     1     1     4     8     2     8.932166E-03
+     1     1     4     8     3     6.320277E-04
+     1     1     4     8     4     1.799833E-02
+     1     1     4     8     5     5.672782E+05
+     1     1     4     8     6     8.810165E-01
+     1     1     4     8     7     2.298432E-01
+     1     1     4     8     8     4.135546E+00
+     1     1     4     8     9     8.761069E+03
+     1     1     4     9     1     1.963719E-08
+     1     1     4     9     2     6.531368E+00
+     1     1     4     9     3     1.624663E+02
+     1     1     4     9     4     2.053394E+03
+     1     1     4     9     5     2.202079E-05
+     1     1     4     9     6     8.916955E+03
+     1     1     4     9     7     1.063776E+05
+     1     1     4     9     8     2.328972E+05
+     1     1     4     9     9     1.334448E-05
+ |g(k,q)|^2 in Ha^2 for iq: 1 ik: 1 mode: 6
+    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
+     1     1     6     1     1     2.995332E-08
+     1     1     6     1     2     9.606437E+02
+     1     1     6     1     3     4.672479E+01
+     1     1     6     1     4     5.116175E+02
+     1     1     6     1     5     5.688550E-06
+     1     1     6     1     6     2.499658E+03
+     1     1     6     1     7     1.369382E+02
+     1     1     6     1     8     4.010656E+03
+     1     1     6     1     9     1.600232E-06
+     1     1     6     2     1     1.920027E+01
+     1     1     6     2     2     3.640784E-04
+     1     1     6     2     3     3.146407E-05
+     1     1     6     2     4     2.842105E-08
+     1     1     6     2     5     3.087316E+03
+     1     1     6     2     6     8.494337E-02
+     1     1     6     2     7     4.702626E-01
+     1     1     6     2     8     1.821240E-01
+     1     1     6     2     9     8.734740E+02
+     1     1     6     3     1     1.094920E+00
+     1     1     6     3     2     2.199983E-04
+     1     1     6     3     3     2.197664E-05
+     1     1     6     3     4     2.001789E-04
+     1     1     6     3     5     9.008269E+01
+     1     1     6     3     6     1.141409E-01
+     1     1     6     3     7     1.036787E-03
+     1     1     6     3     8     2.426465E-01
+     1     1     6     3     9     3.352763E+01
+     1     1     6     4     1     9.233626E+00
+     1     1     6     4     2     2.779579E-05
+     1     1     6     4     3     6.671629E-05
+     1     1     6     4     4     2.101446E-04
+     1     1     6     4     5     1.763986E+03
+     1     1     6     4     6     1.716987E-01
+     1     1     6     4     7     1.173771E-01
+     1     1     6     4     8     3.709411E-01
+     1     1     6     4     9     4.972454E+02
+     1     1     6     5     1     2.457525E-05
+     1     1     6     5     2     1.105299E+04
+     1     1     6     5     3     3.341227E+02
+     1     1     6     5     4     6.234453E+03
+     1     1     6     5     5     5.884540E-07
+     1     1     6     5     6     2.605778E+05
+     1     1     6     5     7     2.021303E+04
+     1     1     6     5     8     5.547569E+05
+     1     1     6     5     9     2.368086E-06
+     1     1     6     6     1     9.072257E+03
+     1     1     6     6     2     4.083223E-02
+     1     1     6     6     3     5.537626E-03
+     1     1     6     6     4     6.602655E-03
+     1     1     6     6     5     2.681077E+05
+     1     1     6     6     6     7.646378E+00
+     1     1     6     6     7     3.098204E-02
+     1     1     6     6     8     9.748901E+00
+     1     1     6     6     9     4.570521E+03
+     1     1     6     7     1     7.046381E+02
+     1     1     6     7     2     2.461120E-03
+     1     1     6     7     3     6.199349E-07
+     1     1     6     7     4     3.023050E-03
+     1     1     6     7     5     1.945730E+04
+     1     1     6     7     6     4.633363E+00
+     1     1     6     7     7     5.229519E-01
+     1     1     6     7     8     1.146925E+01
+     1     1     6     7     9     2.618088E+02
+     1     1     6     8     1     2.026423E+04
+     1     1     6     8     2     4.501295E-03
+     1     1     6     8     3     1.611862E-03
+     1     1     6     8     4     2.163293E-02
+     1     1     6     8     5     5.694735E+05
+     1     1     6     8     6     2.390389E-01
+     1     1     6     8     7     8.827462E-01
+     1     1     6     8     8     4.129753E+00
+     1     1     6     8     9     8.506872E+03
+     1     1     6     9     1     2.873958E-08
+     1     1     6     9     2     1.172903E+03
+     1     1     6     9     3     3.171508E+01
+     1     1     6     9     4     6.898002E+02
+     1     1     6     9     5     2.136365E-05
+     1     1     6     9     6     1.104939E+05
+     1     1     6     9     7     7.559659E+03
+     1     1     6     9     8     2.297395E+05
+     1     1     6     9     9     1.342927E-05
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      1.0000000000E+00  1.0000000000E+00  1.0000000000E+00 Bohr
               amu      1.59994000E+01  2.43050000E+01
-        ddb_ngqpt        4    4    4
+        boxcutmin      1.10000000E+00
+        ddb_ngqpt        1    1    1
              ecut      3.50000000E+01 Hartree
-          ecuteps      4.00000000E+00 Hartree
-         ecutsigx      4.00000000E+00 Hartree
+          ecuteps      1.00000000E+00 Hartree
+         ecutsigx      1.00000000E+00 Hartree
+    elph2_imagden      3.67493254E-03 Hartree
          eph_task          17
            etotal      0.0000000000E+00
             fcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -396,13 +487,13 @@ P Number of CPUs for parallelism over k-points: 1
        mdf_epsinf      1.20000000E+01
 P           mkmem           8
             natom           2
-            nband          12
-            ngfft          32      32      32
+            nband           9
+            ngfft          18      18      18
              nkpt           8
              nsym          48
            ntypat           2
               occ      2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  0.000000  0.000000  0.000000  0.000000
+                       2.000000  2.000000  0.000000
         optdriver           7
           ppmodel           2
        prtphbands           0
@@ -437,7 +528,7 @@ P           mkmem           8
                        1 -1  0   0 -1  0   0 -1  1      -1  1  0   0  1  0   0  1 -1
                        0  0 -1   1  0 -1   0  1 -1       0  0  1  -1  0  1   0 -1  1
                       -1  1  0  -1  0  1  -1  0  0       1 -1  0   1  0 -1   1  0  0
-           tolwfr      1.00000000E-14
+           tolwfr      1.00000000E-08
             typat      2  1
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.1263589907E+00  2.1263589907E+00  2.1263589907E+00
@@ -482,7 +573,7 @@ P           mkmem           8
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -499,12 +590,12 @@ P           mkmem           8
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -522,7 +613,7 @@ P           mkmem           8
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -537,15 +628,15 @@ P           mkmem           8
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          4.0  wall=          4.0
+- Proc.   0 individual time (sec): cpu=         11.7  wall=         11.7
 
 ================================================================================
 
  Calculation completed.
-.Delivered   0 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          4.0  wall=          4.0
+.Delivered   1 WARNINGs and   5 COMMENTs to log file.
++Overall time at end (sec) : cpu=         19.7  wall=         19.8

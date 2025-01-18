@@ -24,23 +24,21 @@ module m_rttddft_tdks
 
  use defs_basis
  use defs_abitypes,      only: MPI_type
- use defs_datatypes,     only: pseudopotential_type, ebands_t
+ use defs_datatypes,     only: pseudopotential_type
  use defs_wvltypes,      only: wvl_data, nullify_wvl_data
-
  use libxc_functionals,  only: libxc_functionals_get_hybridparams
- use m_bandfft_kpt,      only: bandfft_kpt, bandfft_kpt_init1, &
-                             & bandfft_kpt_destroy_array
+ use m_bandfft_kpt,      only: bandfft_kpt, bandfft_kpt_init1, bandfft_kpt_destroy_array
  use m_cgprj,            only: ctocprj
  use m_common,           only: setup1
  use m_dtfil,            only: datafiles_type
  use m_dtset,            only: dataset_type
- use m_ebands,           only: ebands_from_dtset, ebands_free, unpack_eneocc
+ use m_ebands,           only: ebands_t, unpack_eneocc
  use m_energies,         only: energies_type, energies_init
  use m_errors,           only: msg_hndl, assert
  use m_extfpmd,          only: extfpmd_type
  use m_gemm_nonlop_projectors, only: init_gemm_nonlop, destroy_gemm_nonlop
  use m_geometry,         only: fixsym
- use m_hdr,              only: hdr_type, hdr_init
+ use m_hdr,              only: hdr_type
  use m_initylmg,         only: initylmg
  use m_invovl,           only: init_invovl, destroy_invovl
  use m_io_tools,         only: open_file
@@ -273,8 +271,7 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
  else
    if (mpi_enreg%me == 0) then
       if (open_file('TD_RESTART', msg, newunit=tdks%tdrestart_unit, status='unknown', form='formatted') /= 0) then
-         write(msg,'(a,a,a)') 'Error while trying to open file TD_RESTART.'
-         ABI_ERROR(msg)
+        ABI_ERROR( 'Error while trying to open file TD_RESTART.')
       end if
    end if
  end if
@@ -597,7 +594,7 @@ subroutine first_setup(codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad,pawtab,psps,
  if (dtset%paral_kgb/=0) then
    call xmpi_sum(npwarr_,mpi_enreg%comm_bandfft,ierr)
  end if
- bstruct = ebands_from_dtset(dtset, npwarr_)
+ call bstruct%from_dtset(dtset, npwarr_)
  ABI_FREE(npwarr_)
  call unpack_eneocc(dtset%nkpt,dtset%nsppol,bstruct%mband,bstruct%nband,dtset%occ_orig(:,1),bstruct%occ,val=zero)
 
@@ -617,11 +614,11 @@ subroutine first_setup(codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad,pawtab,psps,
 
  !** Initialize header
  gscase=0
- call hdr_init(bstruct,codvsn,dtset,tdks%hdr,pawtab,gscase,psps,tdks%wvl%descr,&
-             & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+ call tdks%hdr%init(bstruct,codvsn,dtset,pawtab,gscase,psps,tdks%wvl%descr,&
+                    comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
 
  !Clean band structure datatype
- call ebands_free(bstruct)
+ call bstruct%free()
 
  !** PW basis set: test if the problem is ill-defined.
  npwmin=minval(tdks%hdr%npwarr(:))

@@ -16,7 +16,8 @@ add_library(02_clib STATIC
   xmalloc.c
   xmalloc.h
   m_fsockets.F90
-  m_clib.F90)
+  m_clib.F90
+)
 
 set_target_properties(02_clib
   PROPERTIES

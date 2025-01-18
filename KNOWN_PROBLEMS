@@ -36,16 +36,16 @@ GNU Fortran compiler (presently tested : v8.5, v9.5, v10.2, v12.2, v12.3, v13.2)
 All are mostly OK
 GNU 10.2 : tutoparal/teph_tdep_legacy_4 is disactivated, as well as tutorespfn/tlw#1-7
 GNU 12.2 : tutoparal/timages#04 is disactivated, as well as bigdft_paral#01,02,86, tutoparal/teph_tdep_legacy_4
-GNU 13.2 : bigdft#14, libxc#74 are disactivated on the reference bot eos_gnu_13.2_mpich 
-GNU 13.2 : tutorespfn/teph4mob#1-7 are disactivated on the reference bot eos_gnu_13.2_serial, 
+GNU 13.2 : bigdft#14, libxc#74 are disactivated on the reference bot eos_gnu_13.2_mpich
+GNU 13.2 : tutorespfn/teph4mob#1-7 are disactivated on the reference bot eos_gnu_13.2_serial,
            as well as tutorespfn/trf2#1-7, v2#04,09, v3#92, v5#85-95, v6#72-76, v6#90-94, v67mbpt#51, v7#05, v8#41-44, v8#66-70, v8#97,
            v9#50-56, v9#88-89, v9#112, wannier90#05
 GNU 13.2 : v7#90-94 is disactivated on the reference bots eos_gnu_13.2_mpich and serial
-GNU 13.2 : paral 78, 83, 84, 96, 101 are disactivated on the reference bot eos_gnu_13.2_mpich 
+GNU 13.2 : paral 78, 83, 84, 96, 101 are disactivated on the reference bot eos_gnu_13.2_mpich
 GNU 13.2 with OpenMP : several atdep tests are disactivated (08,20,24,25,27,30,31,34,36)
 GNU 13.2 with OpenMP : several libxc tests are disactivated (34,35)
 GNU 13.2 with OpenMP : several tutorespfn/tlw tests are disactivated (4,5,6,7)
-GNU 13.2 with OpenMP : several v10#10-19 are disactivated, as well as v4#32-34 
+GNU 13.2 with OpenMP : several v10#10-19 are disactivated, as well as v4#32-34
 
 Intel Ifort compiler (presently tested : 16.0, 2025-OneAPI)
 Ifort 16.0 is mostly OK, except for test paral#30 (Paral KGB), tutoparal/tgswvl#1, v4#32,33,34, and gpu_omp#03 , that are disactivated.

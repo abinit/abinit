@@ -16784,7 +16784,7 @@
   1.5925884543398203E-01 -3.5570258246798776E-02 -2.3254217919773429E-01
 </exact_exchange_X_matrix>
 <exact_exchange core-core=" -8.4313315813905092E+00"/>
-<!-- Program:  atompaw - input data follows: 
+<!-- Program:  atompaw - input data follows:
 Si 14
 XC_LDA_X+XC_LDA_C_PW scalarrelativistic loggrid 2001
 3 3 0 0 0 0

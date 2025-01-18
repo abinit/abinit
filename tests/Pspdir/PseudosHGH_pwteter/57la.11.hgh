@@ -1,6 +1,6 @@
-Hartwigsen-Goedecker-Hutter psp for La,  from PRB58, 3641 (1998) 
+Hartwigsen-Goedecker-Hutter psp for La,  from PRB58, 3641 (1998)
    57  11  010605 zatom,zion,pspdat
- 3 1   3 0 2001 0  pspcod,pspxc,lmax,lloc,mmax,r2well 
+ 3 1   3 0 2001 0  pspcod,pspxc,lmax,lloc,mmax,r2well
   0.535000   19.909308   -1.474830    0.000000   0.000000 rloc, c1, c2, c3, c4
   0.551775    1.293272   -1.121819    0.000000          rs, h11s, h22s, h33s
   0.476308    1.172527   -0.828810    0.029857          rp, h11p, h22p, h33p

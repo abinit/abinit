@@ -37,20 +37,20 @@ module m_wfd_wannier
   use m_errors
   use m_xmpi
 
-  use m_fstrings,        only : strcat, sjoin
   use defs_abitypes,     only : mpi_type
   use m_dtset,           only : dataset_type
-  use m_hdr,             only: hdr_type
-  use m_wfd,             only: wfd_t
-  use m_crystal,         only: crystal_t
+  use m_hdr,             only : hdr_type
+  use m_wfd,             only : wfd_t
+  use m_crystal,         only : crystal_t
   use m_pawang,          only : pawang_type
   use m_pawrad,          only : pawrad_type
   use m_pawtab,          only : pawtab_type
   use m_pawcprj,         only : pawcprj_type
-  use defs_datatypes,    only : pseudopotential_type, ebands_t
+  use defs_datatypes,    only : pseudopotential_type
   use m_dtfil,           only : datafiles_type
   use m_abstract_wf,     only : abstract_wf, compute_iwav, write_cg_and_cprj, wann_ksetting_t, init_mywfc
   use m_mlwfovlp,        only : mlwfovlp
+  use m_ebands,          only : ebands_t
 
   use defs_wannier90
 
