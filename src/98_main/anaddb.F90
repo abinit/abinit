@@ -188,7 +188,8 @@ program anaddb
  call xmpi_bcast(lenstr, master, comm, ierr)
 
  ! Save input string in global variable so that we can access it in ntck_open_create
- INPUT_STRING = raw_string
+ ABI_MALLOC_TYPE_SCALAR(character(len=len_trim(raw_string)), INPUT_STRING)
+ INPUT_STRING = trim(raw_string)
 
  ! Read the inputs
  call invars9(inp, lenstr, natom, string)

@@ -126,7 +126,7 @@ MODULE m_fft
 
  type,public :: fftbox_plan3_t
 
-   integer :: fftalg = 112       ! The library to call.
+   integer :: fftalg = 112       ! The library to call on the CPU
    integer :: fftcache = 16      ! Cache size in kB. Only used in SG routines.
    integer :: nfft = -1          ! Total number of points in the FFT box.
    integer :: ldxyz = -1         ! Physical dimension of the array to transform
