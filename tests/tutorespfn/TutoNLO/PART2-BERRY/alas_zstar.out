@@ -1,8 +1,8 @@
 
- Version 4.4.4  of ABINIT 
- (sequential version, prepared for a MacOSX computer) 
+ Version 4.4.4  of ABINIT
+ (sequential version, prepared for a MacOSX computer)
 
- Copyright (C) 1998-2004 ABINIT group . 
+ Copyright (C) 1998-2004 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
  Starting date : Tue  3 May 2005.
-  
+
 - input  file    -> alas_zstar.in
 - output file    -> alas_zstar.out
 - root for input  files -> alasi_zstar
@@ -408,7 +408,7 @@ P newkpt: treating      5 bands with npw=     190 for ikpt=  25
 P newkpt: treating      5 bands with npw=     172 for ikpt=  26
 P newkpt: treating      5 bands with npw=     180 for ikpt=  27
 P newkpt: treating      5 bands with npw=     183 for ikpt=  28
- 
+
  setup2: Arith. and geom. avg. npw (full set) are     186.093     186.049
   initberry: for direction 1, nkstr =   6, nstr = 144
   initberry: for direction 2, nkstr =   6, nstr = 144
@@ -499,7 +499,7 @@ P newkpt: treating      5 bands with npw=     183 for ikpt=  28
   sigma(1 1)= -1.22633370E-09  sigma(3 2)=  0.00000000E+00
   sigma(2 2)= -1.22633370E-09  sigma(3 1)=  0.00000000E+00
   sigma(3 3)= -1.22633370E-09  sigma(2 1)=  0.00000000E+00
- 
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -567,7 +567,7 @@ P newkpt: treating      5 bands with npw=     183 for ikpt=  28
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
     1       0.000000000000      0.000000000000      0.000000000000
     2       0.000000000000      0.000000000000      0.000000000000
- 
+
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
     2      1.40754758212239     1.40754758212239     1.40754758212239
@@ -738,7 +738,7 @@ P newkpt: treating      5 bands with npw=     186 for ikpt=  48
 P newkpt: treating      5 bands with npw=     185 for ikpt=  49
 P newkpt: treating      5 bands with npw=     186 for ikpt=  50
   newkpt: prtvol=0 or 1, do not print more k-points.
- 
+
  setup2: Arith. and geom. avg. npw (full set) are     186.093     186.049
   initberry: for direction 1, nkstr =   6, nstr = 144
   initberry: for direction 2, nkstr =   6, nstr = 144
@@ -829,7 +829,7 @@ P newkpt: treating      5 bands with npw=     186 for ikpt=  50
   sigma(1 1)=  1.43981947E-09  sigma(3 2)= -5.27012910E-06
   sigma(2 2)= -4.09291521E-08  sigma(3 1)=  0.00000000E+00
   sigma(3 3)= -4.09291521E-08  sigma(2 1)=  0.00000000E+00
- 
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -943,7 +943,7 @@ P newkpt: treating      5 bands with npw=     186 for ikpt=  50
  rms dE/dt=  4.2321E-03; max dE/dt=  5.1832E-03; dE/dt below (all hartree)
     1       0.000000000000      0.005183232867      0.005183232867
     2       0.000000000000     -0.005183233748     -0.005183233748
- 
+
  cartesian coordinates (angstrom) at end:
     1      0.00529177210800     0.00000000000000     0.00000000000000
     2      1.40754758211803     1.40754758212239     1.40754758212239
@@ -1160,7 +1160,7 @@ P newkpt: treating      5 bands with npw=     186 for ikpt=  48
 P newkpt: treating      5 bands with npw=     185 for ikpt=  49
 P newkpt: treating      5 bands with npw=     186 for ikpt=  50
   newkpt: prtvol=0 or 1, do not print more k-points.
- 
+
  setup2: Arith. and geom. avg. npw (full set) are     186.093     186.049
   initberry: for direction 1, nkstr =   6, nstr = 144
   initberry: for direction 2, nkstr =   6, nstr = 144
@@ -1251,7 +1251,7 @@ P newkpt: treating      5 bands with npw=     186 for ikpt=  50
   sigma(1 1)=  1.43984413E-09  sigma(3 2)=  5.27012926E-06
   sigma(2 2)= -4.09291505E-08  sigma(3 1)=  0.00000000E+00
   sigma(3 3)= -4.09291505E-08  sigma(2 1)=  0.00000000E+00
- 
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1365,7 +1365,7 @@ P newkpt: treating      5 bands with npw=     186 for ikpt=  50
  rms dE/dt=  4.2321E-03; max dE/dt=  5.1832E-03; dE/dt below (all hartree)
     1       0.000000000000     -0.005183232858     -0.005183232858
     2       0.000000000000      0.005183233746      0.005183233746
- 
+
  cartesian coordinates (angstrom) at end:
     1     -0.00529177210800     0.00000000000000     0.00000000000000
     2      1.40754758211803     1.40754758212239     1.40754758212239
@@ -1519,7 +1519,7 @@ P newkpt: treating      5 bands with npw=     186 for ikpt=  50
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
      acell    1.0639517752E+01  1.0639517752E+01  1.0639517752E+01 Bohr
        amu    2.69815390E+01  7.49215900E+01
@@ -1794,9 +1794,9 @@ P    mkmem3      126
 - Total wall clock time (s,m,h):        112.7        1.88      0.031
 
 - For major independent code sections, cpu and wall times (sec),
-- as well as % of the total time and number of calls 
+- as well as % of the total time and number of calls
 
-- routine                 cpu     %       wall     %      number of calls 
+- routine                 cpu     %       wall     %      number of calls
 -                                                          (-1=no count)
 - fourwf(pot)           16.540  31.3     35.758  31.7         104475
 - nonlop(apply)          8.380  15.9     17.138  15.2         104475

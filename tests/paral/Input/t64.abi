@@ -6,7 +6,7 @@ use_gemm_nonlop 1
 
 # Dataset 1
 rmm_diis1 +1
-npband1 4 bandpp1 2 npfft1 1 np_spkpt1 1 
+npband1 4 bandpp1 2 npfft1 1 np_spkpt1 1
 toldfe1 1e-8
 #tolvrs1 1e-4
 #tolvrs1 1e-6

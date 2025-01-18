@@ -12,9 +12,7 @@ module m_tdep_abitypes
   use m_nctk
   use m_xmpi
   use m_errors
-#ifdef HAVE_NETCDF
   use netcdf
-#endif
   use m_ddb_hdr,          only : ddb_hdr_type
   use m_geometry,         only : xred2xcart
   use m_dynmat,           only : asrif9, d2cart_to_red
@@ -25,7 +23,7 @@ module m_tdep_abitypes
   use m_tdep_sym,         only : Symetries_type
   use m_tdep_shell,       only : Shell_type
   use m_ifc,              only : ifc_type
-  use m_crystal,          only : crystal_t, crystal_init
+  use m_crystal,          only : crystal_t
   use m_ddb,              only : ddb_type
   use m_kpts,             only : smpbz
   use m_copy,             only : alloc_copy
@@ -78,7 +76,7 @@ contains
   ABI_MALLOC(zion,(Invar%ntypat)) ; zion(:)=zero
   ABI_MALLOC(znucl,(npsp)) ; znucl(:)=zero
   ABI_MALLOC(title,(Invar%ntypat))
-  call crystal_init(Invar%amu,Crystal,Sym%spgroup,Invar%natom_unitcell,npsp,&
+  call crystal%init(Invar%amu,Sym%spgroup,Invar%natom_unitcell,npsp,&
 &   Invar%ntypat,Sym%nsym,Lattice%rprimdt,Invar%typat_unitcell,Sym%xred_zero,&
 &  zion,znucl,timrev,use_antiferro,remove_inv,title,&
 !BUG&  Sym%ptsymrel(:,:,1:Sym%nsym),Sym%tnons(:,1:Sym%nsym),Sym%symafm(1:Sym%nsym)) ! Optional
@@ -495,7 +493,7 @@ contains
 
     call ddb%write(ddb_hdr, filename)
 
-  end if  
+  end if
 
 !!!!!!!!! Test !!!!!!!!
   nqshft=1
@@ -657,7 +655,6 @@ subroutine tdep_write_ifc(Crystal,Ifc,Invar,natom_unitcell,unitfile)
 &   ' The value of unitfile ',unitfile,' is not allowed.'
     ABI_ERROR(message)
   end if
-#ifdef HAVE_NETCDF
   if (unitfile.eq.0) then
     NCF_CHECK_MSG(nctk_open_create(ncid, trim(Invar%output_prefix)//"ifc_out.nc", xmpi_comm_self), "Creating ifc_out.nc")
   else if (unitfile.eq.1) then
@@ -669,7 +666,6 @@ subroutine tdep_write_ifc(Crystal,Ifc,Invar,natom_unitcell,unitfile)
   NCF_CHECK(nctk_defnwrite_ivars(ncid, ["anaddb_version"], [1]))
   NCF_CHECK(crystal%ncwrite(ncid))
   call ifc%write(ifcana,atifc,ifcout,prt_ifc,ncid,77)
-#endif
   close(77)
   write(Invar%stdout,'(a)') ' ------- achieved'
 

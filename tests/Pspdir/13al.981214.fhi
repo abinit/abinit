@@ -1,4 +1,4 @@
-Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local 
+Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
  13.000  3.000    981214              zatom,zion,pspdat
  6       7        2   2    493     0   pspcod,pspxc,lmax,lloc,mmax,r2well
 4--- These three lines are available for giving more information, later

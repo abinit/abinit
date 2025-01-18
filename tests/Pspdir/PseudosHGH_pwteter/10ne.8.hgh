@@ -1,6 +1,6 @@
-Hartwigsen-Goedecker-Hutter psp for Ne,  from PRB58, 3641 (1998) 
+Hartwigsen-Goedecker-Hutter psp for Ne,  from PRB58, 3641 (1998)
    10   8  010605 zatom,zion,pspdat
- 3 1   1 0 2001 0  pspcod,pspxc,lmax,lloc,mmax,r2well 
+ 3 1   1 0 2001 0  pspcod,pspxc,lmax,lloc,mmax,r2well
   0.190000  -27.692852    4.005906    0.000000   0.000000 rloc, c1, c2, c3, c4
   0.179488   28.506098   -1.076245    0.000000          rs, h11s, h22s, h33s
   0.214913   -0.000090    0.000000    0.000000          rp, h11p, h22p, h33p

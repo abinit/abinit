@@ -26,6 +26,8 @@ MODULE m_dmft
 
  use defs_abitypes
  use defs_basis
+ !use netcdf
+ use m_xmpi
  use m_abicore
  use m_data4entropyDMFT
  use m_errors

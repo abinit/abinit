@@ -134,6 +134,7 @@ module m_cgtools
  public :: cg_precon_many
  public :: cg_zaxpy_many_areal
  public :: cg_set_imag0_to_zero
+ public :: cg_randomize             ! Initialize cg_k with random numbers.
 !***
 
 CONTAINS  !========================================================================================
@@ -3463,7 +3464,6 @@ end subroutine projbd
 !!
 !! SOURCE
 
-
 subroutine cg_envlop(cg, ecut, gmet, icgmod, kg, kpoint, mcg, nband, npw, nspinor)
 
 !Arguments ------------------------------------
@@ -5027,8 +5027,9 @@ end subroutine subdiago_low_memory
 !! FUNCTION
 !! Normalize nvec complex vectors each of length nelem and then orthogonalize by modified Gram-Schmidt.
 !! Two orthogonality conditions are available:
-!!  Simple orthogonality: ${<Vec_{i}|Vec_{j}>=Delta_ij}$
-!!  Orthogonality with overlap S: ${<Vec_{i}|S|Vec_{j}>=Delta_ij}$
+!!
+!!      1) Simple orthogonality: ${<Vec_{i}|Vec_{j}>=Delta_ij}$
+!!      2) Orthogonality with overlap S: ${<Vec_{i}|S|Vec_{j}>=Delta_ij}$
 !!
 !! INPUTS
 !!  icg=shift to be given to the location of the data in cg(=vecnm)
@@ -6154,7 +6155,6 @@ pure subroutine cg_set_imag0_to_zero(istwfk, me_g0, npwsp, nband, cg, max_absima
 
 !Local variables ------------------------------
  integer :: ib, ii
-
 ! *************************************************************************
 
  max_absimag = zero
@@ -6167,6 +6167,67 @@ pure subroutine cg_set_imag0_to_zero(istwfk, me_g0, npwsp, nband, cg, max_absima
  end if
 
 end subroutine cg_set_imag0_to_zero
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_cgtools/cg_randomize
+!! NAME
+!!  cg_randomize
+!!
+!! FUNCTION
+!!  Initialize block of wavefunctions with random numbers. See wfconv
+!!
+!! INPUTS
+!!
+!! SOURCE
+
+subroutine cg_randomize(istwf_k, npw_k, nspinor, nband_k, me_g0, cg_k)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: istwf_k, npw_k, nspinor, nband_k, me_g0
+!arrays
+ real(dp),intent(inout) :: cg_k(2,npw_k*nspinor,nband_k)
+
+!Local variables ------------------------------
+ integer :: ipw, ispinor, index
+ integer, parameter :: int64 = selected_int_kind(18)
+ integer(KIND=int64) :: seed
+ integer :: fold1,fold2,foldim,foldre,iband
+! *************************************************************************
+
+ do iband=1,nband_k
+   index = 0
+   do ispinor=1,nspinor
+     do ipw=1,npw_k
+       index=index+1
+       seed=(iband-1)*npw_k*nspinor + (ispinor-1)*npw_k + ipw
+
+       ! For portability, use only integer numbers
+       ! The series of couples (fold1,fold2) is periodic with a period of
+       ! 3x5x7x11x13x17x19x23x29x31, that is, larger than 2**32, the largest integer*4
+       ! fold1 is between 0 and 34, fold2 is between 0 and 114. As sums of five
+       ! uniform random variables, their distribution is close to a gaussian
+       fold1=modulo(seed,3)+modulo(seed,5)+modulo(seed,7)+modulo(seed,11)+modulo(seed,13)
+       fold2=modulo(seed,17)+modulo(seed,19)+modulo(seed,23)+modulo(seed,29)+modulo(seed,31)
+
+       ! The gaussian distributions are folded, in order to be back to a uniform distribution
+       ! foldre is between 0 and 20, foldim is between 0 and 18
+       foldre=mod(fold1+fold2,21)
+       foldim=mod(3*fold1+2*fold2,19)
+
+       cg_k(1,index,iband) = dble(foldre)
+       cg_k(2,index,iband) = dble(foldim)
+
+       ! XG030513: Time-reversal symmetry for k=gamma imposes zero imaginary part at G=0
+       ! XG: I do not know what happens for spin-orbit here.
+       if (istwf_k == 2 .and. me_g0 == 1) cg_k(2,1,iband)=zero
+     end do ! ipw
+   end do ! ispinor
+ end do ! iband
+
+end subroutine cg_randomize
 !!***
 
 end module m_cgtools

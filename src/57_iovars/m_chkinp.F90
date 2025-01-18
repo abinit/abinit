@@ -6,7 +6,7 @@
 !! Check consistency of Abinit input data against itself.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, MKV, DRH, MVer)
+!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, MKV, DRH, MVer, MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -35,7 +35,7 @@ module m_chkinp
  use m_io_tools,       only : flush_unit
  use m_numeric_tools,  only : iseven, isdiagmat
  use m_symtk,          only : sg_multable, chkorthsy, symmetrize_xred
- use m_fstrings,       only : string_in, sjoin
+ use m_fstrings,       only : string_in, sjoin, itoa
  use m_geometry,       only : metric
  use m_fftcore,        only : fftalg_has_mpi
  use m_exit,           only : get_timelimit
@@ -76,7 +76,7 @@ contains
 !!
 !! SOURCE
 
-subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
+subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads, comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -1004,11 +1004,13 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      call chkint_eq(1,1,cond_string,cond_values,ierr,'enable_mpi_io',xmpi_mpiio,1,(/1/),iout)
    end if
 
-   ! eph variables
+   ! ========
+   ! eph code
+   ! ========
    if (optdriver == RUNL_EPH) then
      cond_string(1)='optdriver'; cond_values(1)=optdriver
      call chkint_eq(1,1,cond_string,cond_values,ierr,'eph_task',dt%eph_task, &
-       22, [0, 1, 2, -2, 3, 4, -4, 5, -5, 6, 7, -7, 8, 9, 10, 11, -12, 13, -13, 14, 15, -15, 16, 17], iout)
+       25, [0, 1, 2, -2, 3, 4, -4, 5, -5, 6, 7, -7, 8, 9, 10, 11, -12, 13, -13, 14, 15, -15, 16, 17, 18], iout)
 
      if (any(dt%ddb_ngqpt <= 0)) then
        ABI_ERROR_NOSTOP("ddb_ngqpt must be specified when performing EPH calculations.", ierr)
@@ -1027,14 +1029,27 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        ABI_ERROR_NOSTOP('Either getwfq or irdwfq must be non-zero in order to compute the gkk', ierr)
      end if
      if (any(dt%eph_task == [-5])) then
-       ABI_CHECK(dt%ph_nqpath > 0, "ph_nqpath must be specified when eph_task in [-5]")
+       ABI_CHECK(dt%ph_nqpath > 0, "ph_nqpath must be specified when eph_task == -5")
      end if
+
+     if (any(dt%eph_task == [18])) then
+       if (dt%tolwfr == zero) then
+         ABI_ERROR_NOSTOP("tolwfr must be specified when eph_stern /= 0", ierr)
+       end if
+       if (dt%eph_fix_korq == "k") then
+         ABI_CHECK(dt%ph_nqpath > 0, "ph_nqpath must be specified when elh_fix_kord = 'k' with eph_task == -5")
+       end if
+       if (dt%eph_fix_korq == "q") then
+         ABI_CHECK(dt%nkpath > 0, "nkpath and kptbounds must be specified when eph_fix_kord = 'q' with eph_task == -5")
+         ABI_CHECK(allocated(dt%kptbounds), "kptbounds must be specified when eph_fix_kord = 'q' with eph_task == -5")
+       end if
+     end if
+
      if (dt%eph_task == 13) then
        msg = "electron, hole"
        if (.not. string_in(dt%varpeq_pkind, msg)) then
          ABI_ERROR_NOSTOP(sjoin("Invalid varpeq_pkind: `", dt%varpeq_pkind, "`, must be among:", msg), ierr)
        end if
-       ABI_CHECK(dt%varpeq_pc_nupdate > 0, "varpeq_pc_nupdate must be > 0, if specified")
      end if
      !if (dt%eph_task == -4 .and. dt%occopt /= 3) then
      !  ABI_ERROR_NOSTOP("eph_task -4 requires occopt 3 in the input file (Fermi-Dirac with physical Temperature!", ierr)
@@ -1071,6 +1086,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        call chkdpr(0,0,cond_string,cond_values,ierr,'ecuteps',dt%ecuteps,1,0.0_dp,iout)
        if (dt%ecuteps <= 0) then
          ABI_ERROR_NOSTOP("ecuteps must be specified if GWPT is activated", ierr)
+       end if
+       if (dt%ecutsigx <= 0) then
+         ABI_ERROR_NOSTOP("ecutsigx must be specified if GWPT is activated", ierr)
        end if
      end if
 
@@ -1126,15 +1144,14 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      ! MT oct 14: Should use chkint_eq but the msg is not clear enough
    end if
 
-!  expert_user
+   ! expert_user
    call chkint_eq(0,0,cond_string,cond_values,ierr,'expert_user',dt%expert_user,4, [0,1,2,3],iout)
 
    ! fermie_nest
    call chkdpr(0,0,cond_string,cond_values,ierr,'fermie_nest',dt%fermie_nest,1,0.0_dp,iout)
 
-!  ffnl_lw
+   !  ffnl_lw
    call chkint_eq(0,0,cond_string,cond_values,ierr,'ffnl_lw',dt%ffnl_lw,2,(/0,1/),iout)
-
 
    ! fftgw
    call chkint_eq(0,0,cond_string,cond_values,ierr,'fftgw',dt%fftgw,8, [00,01,10,11,20,21,30,31],iout)
@@ -1344,11 +1361,11 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 
    ! gwpara
    call chkint_eq(0,0,cond_string,cond_values,ierr,'gwpara',dt%gwpara,3,[0,1,2],iout)
-!  if(dt%chkparal/=0.and.(dt%gwpara==0.and.(dt%optdriver==RUNL_SCREENING.and.dt%optdriver==RUNL_SIGMA))) then
-!      cond_string(1)='optdriver' ; cond_values(1)=dt%optdriver
-!      cond_string(2)='chkparal' ; cond_values(2)=dt%chkparal
-!      call chkint_eq(2,2,cond_string,cond_values,ierr,'gwpara',dt%gwpara,1,(/0/),iout)
-!  end if
+   !if(dt%chkparal/=0.and.(dt%gwpara==0.and.(dt%optdriver==RUNL_SCREENING.and.dt%optdriver==RUNL_SIGMA))) then
+   !    cond_string(1)='optdriver' ; cond_values(1)=dt%optdriver
+   !    cond_string(2)='chkparal' ; cond_values(2)=dt%chkparal
+   !    call chkint_eq(2,2,cond_string,cond_values,ierr,'gwpara',dt%gwpara,1,(/0/),iout)
+   !end if
 
    ! gwrpacorr
    if(dt%gwrpacorr>0) then
@@ -4196,9 +4213,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      enddo
      if (npsp /= dt%ntypat) then
        write(msg, '(a,a,a,a,I0,a,I0,a,a,a)' ) ch10,&
-&       'wvl_wfs_set:  consistency checks failed,', ch10, &
-&       'dtset%npsp (', npsp, ') /= dtset%ntypat (', dt%ntypat, ').', ch10, &
-&       'No alchemy pseudo are allowed with wavelets.'
+       'wvl_wfs_set:  consistency checks failed,', ch10, &
+       'dtset%npsp (', npsp, ') /= dtset%ntypat (', dt%ntypat, ').', ch10, &
+       'No alchemy pseudo are allowed with wavelets.'
        ABI_ERROR_NOSTOP(msg,ierr)
      end if
    end if

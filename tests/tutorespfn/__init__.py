@@ -69,6 +69,7 @@ inp_files = [
 "teph4zpr_6.abi",
 "teph4zpr_7.abi",
 "teph4zpr_8.abi",
+"teph4zpr_9.abi",
 #
 "tpolarization_1.abi",
 "tpolarization_2.abi",

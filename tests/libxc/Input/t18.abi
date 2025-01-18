@@ -70,14 +70,14 @@ prteig 0
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t18.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = Unknown
-#%% keywords = 
-#%% description = 
+#%% keywords =
+#%% description =
 #%%   Isolated Bismuth atom
 #%%   Test functionals from libXC that were untested before ABINIT v6.12 (libxc 1.0.0.1 was used).
 #%%   Spin-polarized case.

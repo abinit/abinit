@@ -300,7 +300,7 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
 !Test size of kinetic energy potential Vtau
  with_vtau = (present(vtau).and.present(vtauresid))
  with_vtau = (with_vtau.and.size(vtau)>0)
- if (with_vtau) then 
+ if (with_vtau) then
    if (size(vtau)/=nfft*dtset%nspden*4.or.size(vtauresid)/=nfft*dtset%nspden) then
      ABI_BUG("Wrong size for vxctau/vtauresid!")
    end if

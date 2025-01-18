@@ -13,7 +13,7 @@ add_library(44_abitypes_defs STATIC
   m_results_gs.F90
   m_results_img.F90
   m_results_respfn.F90
-  )
+)
 
 set_target_properties(44_abitypes_defs
   PROPERTIES
@@ -36,6 +36,7 @@ target_link_libraries(44_abitypes_defs
   29_kpoints
   32_util
   41_geometry
-  42_parser)
+  42_parser
+)
 
 add_library(abinit::44_abitypes_defs ALIAS 44_abitypes_defs)

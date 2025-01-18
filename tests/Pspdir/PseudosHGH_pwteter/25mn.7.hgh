@@ -1,6 +1,6 @@
-Hartwigsen-Goedecker-Hutter psp for Mn,  from PRB58, 3641 (1998) 
+Hartwigsen-Goedecker-Hutter psp for Mn,  from PRB58, 3641 (1998)
    25   7  010605 zatom,zion,pspdat
- 3 1   2 0 2001 0  pspcod,pspxc,lmax,lloc,mmax,r2well 
+ 3 1   2 0 2001 0  pspcod,pspxc,lmax,lloc,mmax,r2well
   0.640000    0.000000    0.000000    0.000000   0.000000 rloc, c1, c2, c3, c4
   0.481246    2.799031    2.486101    2.565630          rs, h11s, h22s, h33s
   0.669304    1.368776    0.316763    0.000000          rp, h11p, h22p, h33p
