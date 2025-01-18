@@ -757,7 +757,7 @@ integer function nctk_open_create(ncid, path, comm) result(ncerr)
  character(len=*),intent(in) :: path
 
 !Local variables-------------------------------
- integer :: input_len, cmode, ii, ich
+ integer :: input_len, cmode
  character(len=strlen) :: my_string
 ! *********************************************************************
 

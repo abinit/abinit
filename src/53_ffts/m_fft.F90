@@ -1687,8 +1687,7 @@ function fftbox_mpi_utests(fftalg, cplex, ndat, nthreads, comm_fft, unit) result
  integer :: ierr,old_nthreads,ount,iset,mpierr,nfft,me_fft
  integer :: nproc_fft,fftalga,fftalgc,n1,n2,n3,n4,n5,n6
  real(dp),parameter :: ATOL_DP=tol12
- real(dp) :: max_abserr
- real(dp) ::  ctime,wtime,gflops
+ real(dp) :: max_abserr, ctime, wtime, gflops
  character(len=500) :: msg,info,library,cplex_mode,padding_mode
  type(distribfft_type),target :: fftabs
 !arrays

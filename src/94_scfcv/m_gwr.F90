@@ -624,6 +624,8 @@ module m_gwr
    character(len=fnlen) :: gwrnc_path = ABI_NOFILE
    ! Path to the GWR.nc file with output results.
 
+   logical :: gwrnc_write = .True.
+
    real(dp),allocatable :: kbz(:,:)
    ! (3, nkbz)
    ! Reduced coordinates of the k-points in the full BZ.
@@ -1579,9 +1581,10 @@ end block
  ! ====================================
  ! Create netcdf file to store results
  ! ====================================
+ gwr%gwrnc_write = .False.
  gwr%gwrnc_path = strcat(dtfil%filnam_ds(4), "_GWR.nc")
 
- if (my_rank == master) then
+ if (my_rank == master .and. gwr%gwrnc_write) then
    call gwr%print(units)
    NCF_CHECK(nctk_open_create(ncid, gwr%gwrnc_path, xmpi_comm_self))
    ! Write structure and ebands
@@ -5903,45 +5906,47 @@ end if
    ! ======================
    ! Add results to GWR.nc
    ! ======================
-   NCF_CHECK(nctk_open_modify(ncid, gwr%gwrnc_path, xmpi_comm_self))
+   if (gwr%gwrnc_write) then
+     NCF_CHECK(nctk_open_modify(ncid, gwr%gwrnc_path, xmpi_comm_self))
 
-   ! Define arrays with results.
-   define = .True.
-   if (define) then
-     ncerr = nctk_def_arrays(ncid, [ &
-       nctkarr_t("e0_kcalc", "dp", "smat_bsize1, nkcalc, nsppol"), &
-       nctkarr_t("ze0_kcalc", "dp", "two, smat_bsize1, nkcalc, nsppol"), &
-       nctkarr_t("qpz_ene", "dp", "two, smat_bsize1, nkcalc, nsppol"), &
-       nctkarr_t("qp_pade", "dp", "two, smat_bsize1, nkcalc, nsppol"), &
-       nctkarr_t("pade_solver_ierr", "int", "smat_bsize1, nkcalc, nsppol"), &
-       nctkarr_t("ks_gaps", "dp", "nkcalc, nsppol"), &
-       nctkarr_t("qpz_gaps", "dp", "nkcalc, nsppol"), &
-       !nctkarr_t("qp_pade_gaps", "dp", "nkcalc, nsppol"), &
-       nctkarr_t("sigx_mat", "dp", "two, smat_bsize1, smat_bsize2, nkcalc, nsppol"), &
-       nctkarr_t("sigc_it_mat", "dp", "two, two, ntau, smat_bsize1, smat_bsize2, nkcalc, nsppol"), &
-       nctkarr_t("sigc_iw_mat", "dp", "two, ntau, smat_bsize1, smat_bsize2, nkcalc, nsppol"), &
-       nctkarr_t("sigxc_rw_diag", "dp", "two, nwr, smat_bsize1, nkcalc, nsppol"), &
-       nctkarr_t("spfunc_diag", "dp", "nwr, smat_bsize1, nkcalc, nsppol") &
-     ])
-     NCF_CHECK(ncerr)
+     ! Define arrays with results.
+     define = .True.
+     if (define) then
+       ncerr = nctk_def_arrays(ncid, [ &
+         nctkarr_t("e0_kcalc", "dp", "smat_bsize1, nkcalc, nsppol"), &
+         nctkarr_t("ze0_kcalc", "dp", "two, smat_bsize1, nkcalc, nsppol"), &
+         nctkarr_t("qpz_ene", "dp", "two, smat_bsize1, nkcalc, nsppol"), &
+         nctkarr_t("qp_pade", "dp", "two, smat_bsize1, nkcalc, nsppol"), &
+         nctkarr_t("pade_solver_ierr", "int", "smat_bsize1, nkcalc, nsppol"), &
+         nctkarr_t("ks_gaps", "dp", "nkcalc, nsppol"), &
+         nctkarr_t("qpz_gaps", "dp", "nkcalc, nsppol"), &
+         !nctkarr_t("qp_pade_gaps", "dp", "nkcalc, nsppol"), &
+         nctkarr_t("sigx_mat", "dp", "two, smat_bsize1, smat_bsize2, nkcalc, nsppol"), &
+         nctkarr_t("sigc_it_mat", "dp", "two, two, ntau, smat_bsize1, smat_bsize2, nkcalc, nsppol"), &
+         nctkarr_t("sigc_iw_mat", "dp", "two, ntau, smat_bsize1, smat_bsize2, nkcalc, nsppol"), &
+         nctkarr_t("sigxc_rw_diag", "dp", "two, nwr, smat_bsize1, nkcalc, nsppol"), &
+         nctkarr_t("spfunc_diag", "dp", "nwr, smat_bsize1, nkcalc, nsppol") &
+       ])
+       NCF_CHECK(ncerr)
+     end if
+
+     ! Write data.
+     NCF_CHECK(nctk_set_datamode(ncid))
+     NCF_CHECK(nf90_put_var(ncid, vid("e0_kcalc"), e0_kcalc))
+     NCF_CHECK(nf90_put_var(ncid, vid("ze0_kcalc"), c2r(ze0_kcalc)))
+     NCF_CHECK(nf90_put_var(ncid, vid("sigx_mat"), c2r(gwr%sigx_mat)))
+     NCF_CHECK(nf90_put_var(ncid, vid("qpz_ene"), c2r(qpz_ene)))
+     NCF_CHECK(nf90_put_var(ncid, vid("qp_pade"), c2r(qp_pade)))
+     NCF_CHECK(nf90_put_var(ncid, vid("pade_solver_ierr"), pade_solver_ierr))
+     NCF_CHECK(nf90_put_var(ncid, vid("ks_gaps"), ks_gaps))
+     NCF_CHECK(nf90_put_var(ncid, vid("qpz_gaps"), qpz_gaps))
+     !NCF_CHECK(nf90_put_var(ncid, vid("qp_pade_gaps"), qp_pade_gaps))
+     !NCF_CHECK(nf90_put_var(ncid, vid("sigc_it_mat"), c2r(sigc_it_mat)))
+     NCF_CHECK(nf90_put_var(ncid, vid("sigc_iw_mat"), c2r(gwr%sigc_iw_mat)))
+     NCF_CHECK(nf90_put_var(ncid, vid("sigxc_rw_diag"), c2r(sigxc_rw_diag)))
+     NCF_CHECK(nf90_put_var(ncid, vid("spfunc_diag"), spfunc_diag))
+     NCF_CHECK(nf90_close(ncid))
    end if
-
-   ! Write data.
-   NCF_CHECK(nctk_set_datamode(ncid))
-   NCF_CHECK(nf90_put_var(ncid, vid("e0_kcalc"), e0_kcalc))
-   NCF_CHECK(nf90_put_var(ncid, vid("ze0_kcalc"), c2r(ze0_kcalc)))
-   NCF_CHECK(nf90_put_var(ncid, vid("sigx_mat"), c2r(gwr%sigx_mat)))
-   NCF_CHECK(nf90_put_var(ncid, vid("qpz_ene"), c2r(qpz_ene)))
-   NCF_CHECK(nf90_put_var(ncid, vid("qp_pade"), c2r(qp_pade)))
-   NCF_CHECK(nf90_put_var(ncid, vid("pade_solver_ierr"), pade_solver_ierr))
-   NCF_CHECK(nf90_put_var(ncid, vid("ks_gaps"), ks_gaps))
-   NCF_CHECK(nf90_put_var(ncid, vid("qpz_gaps"), qpz_gaps))
-   !NCF_CHECK(nf90_put_var(ncid, vid("qp_pade_gaps"), qp_pade_gaps))
-   !NCF_CHECK(nf90_put_var(ncid, vid("sigc_it_mat"), c2r(sigc_it_mat)))
-   NCF_CHECK(nf90_put_var(ncid, vid("sigc_iw_mat"), c2r(gwr%sigc_iw_mat)))
-   NCF_CHECK(nf90_put_var(ncid, vid("sigxc_rw_diag"), c2r(sigxc_rw_diag)))
-   NCF_CHECK(nf90_put_var(ncid, vid("spfunc_diag"), spfunc_diag))
-   NCF_CHECK(nf90_close(ncid))
  end if ! master
 
  ABI_FREE(sigc_it_mat)
@@ -6263,22 +6268,24 @@ subroutine gwr_rpa_energy(gwr)
    ! ======================
    ! Add results to GWR.nc
    ! ======================
-   NCF_CHECK(nctk_open_modify(ncid, gwr%gwrnc_path, xmpi_comm_self))
-   ncerr = nctk_def_dims(ncid, [nctkdim_t("ncut", ncut)], defmode=.True.)
-   NCF_CHECK(ncerr)
+   if (gwr%gwrnc_write) then
+     NCF_CHECK(nctk_open_modify(ncid, gwr%gwrnc_path, xmpi_comm_self))
+     ncerr = nctk_def_dims(ncid, [nctkdim_t("ncut", ncut)], defmode=.True.)
+     NCF_CHECK(ncerr)
 
-   ncerr = nctk_def_arrays(ncid, [ &
-     nctkarr_t("ecut_chi", "dp", "ncut"), &
-     nctkarr_t("ec_rpa_ecut", "dp", "ncut"), &
-     nctkarr_t("ec_mp2_ecut", "dp", "ncut") &
-   ])
-   NCF_CHECK(ncerr)
+     ncerr = nctk_def_arrays(ncid, [ &
+       nctkarr_t("ecut_chi", "dp", "ncut"), &
+       nctkarr_t("ec_rpa_ecut", "dp", "ncut"), &
+       nctkarr_t("ec_mp2_ecut", "dp", "ncut") &
+     ])
+     NCF_CHECK(ncerr)
 
-   ! Write data.
-   NCF_CHECK(nctk_set_datamode(ncid))
-   NCF_CHECK(nf90_put_var(ncid, vid("ecut_chi"), ecut_chi))
-   NCF_CHECK(nf90_put_var(ncid, vid("ec_rpa_ecut"), ec_rpa))
-   NCF_CHECK(nf90_put_var(ncid, vid("ec_mp2_ecut"), ec_mp2))
+     ! Write data.
+     NCF_CHECK(nctk_set_datamode(ncid))
+     NCF_CHECK(nf90_put_var(ncid, vid("ecut_chi"), ecut_chi))
+     NCF_CHECK(nf90_put_var(ncid, vid("ec_rpa_ecut"), ec_rpa))
+     NCF_CHECK(nf90_put_var(ncid, vid("ec_mp2_ecut"), ec_mp2))
+   end if
  end if ! master
 
  ABI_FREE(ec_rpa)
