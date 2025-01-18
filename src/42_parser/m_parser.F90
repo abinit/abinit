@@ -215,14 +215,13 @@ subroutine parsefile(filnamin, lenstr, ndtset, string, comm)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: master=0, option1= 1
+ integer,parameter :: master = 0, option1 = 1
  integer :: marr,tread,lenstr_noxyz,ierr
  character(len=strlen) :: string_raw, string_with_comments
  character(len=500) :: msg
 !arrays
  integer :: intarr(1)
  real(dp) :: dprarr(1)
-
 ! *************************************************************************
 
  ! Read the input file, and store the information in a long string of characters
@@ -246,7 +245,7 @@ subroutine parsefile(filnamin, lenstr, ndtset, string, comm)
    ! Need string_raw to deal properly with xyz filenames
    ! TODO: This capabilty can now be implemented via the structure:"xyx:path" variable
    lenstr_noxyz = lenstr
-   call importxyz(lenstr,string_raw,string,strlen)
+   call importxyz(lenstr, string_raw, string, strlen)
 
    ! Make sure we don't have unmatched quotation marks
    if (mod(char_count(string(:lenstr), '"'), 2) /= 0) then
@@ -274,17 +273,18 @@ subroutine parsefile(filnamin, lenstr, ndtset, string, comm)
    call xmpi_bcast(string_raw, master, comm, ierr)
  end if
 
+ ! Save input string in global variable so that we can access it in ntck_open_create
+ ! XG20200720: Why not saving string? string_raw is less processed than string ...
+ ! MG: Because we don't want a processed string without comments.
+ ! Abipy may use the commented section to extract additional metadata e.g. the pseudos md5
+
  ! The Fortran compiler may limit the length of character string constants to a specific maximum e.g.
- ! intel16 has a 7198 limit so we allocate INPUT_STRING here and fill it with blank lines.
+ ! intel16 has a 7198 limit so we allocate INPUT_STRING here.
  if (allocated(INPUT_STRING)) then
    ABI_FREE_SCALAR(INPUT_STRING)
  end if
- ABI_MALLOC_TYPE_SCALAR(character(len=len_trim(string_with_comments)), INPUT_STRING)
 
- ! Save input string in global variable so that we can access it in ntck_open_create
- ! XG20200720: Why not saving string ? string_raw is less processed than string ...
- ! MG: Because we don't want a processed string without comments.
- ! Abipy may use the commented section to extract additional metadata e.g. the pseudos md5
+ ABI_MALLOC_TYPE_SCALAR(character(len=len_trim(string_with_comments)), INPUT_STRING)
  INPUT_STRING = trim(string_with_comments)
 
  !write(std_out,'(4a)')"string_with_comments", ch10, trim(string_with_comments), ch10

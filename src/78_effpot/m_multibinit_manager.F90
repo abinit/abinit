@@ -323,7 +323,10 @@ contains
     call xmpi_bcast(raw_string,master, comm, ierr)
     call xmpi_bcast(lenstr,master, comm, ierr)
 
-    INPUT_STRING=raw_string
+    !INPUT_STRING=raw_string
+    ! Save input string in global variable so that we can access it in ntck_open_create
+    !ABI_MALLOC_TYPE_SCALAR(character(len=len_trim(raw_string)), INPUT_STRING)
+    !INPUT_STRING = string(1:len_trim(raw_string))
 
     !Read the input file
     call invars10(self%params,lenstr,natom, string)
