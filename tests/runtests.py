@@ -297,7 +297,6 @@ def main():
     parser.add_option("--target", default="",
                       help="Used in conjunction with `-m` to specify the make target e.g. `abinit` to build abinit only")
 
-
     parser.add_option("-s", "--show-info", dest="show_info", default=False, action="store_true",
                       help="Show information on the test suite (keywords, authors ...) and exit.")
 

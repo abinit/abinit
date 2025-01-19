@@ -1581,7 +1581,8 @@ end block
  ! ====================================
  ! Create netcdf file to store results
  ! ====================================
- gwr%gwrnc_write = .False.
+ gwr%gwrnc_write = .True.
+ !gwr%gwrnc_write = .False.
  gwr%gwrnc_path = strcat(dtfil%filnam_ds(4), "_GWR.nc")
 
  if (my_rank == master .and. gwr%gwrnc_write) then
@@ -5941,7 +5942,7 @@ end if
      NCF_CHECK(nf90_put_var(ncid, vid("ks_gaps"), ks_gaps))
      NCF_CHECK(nf90_put_var(ncid, vid("qpz_gaps"), qpz_gaps))
      !NCF_CHECK(nf90_put_var(ncid, vid("qp_pade_gaps"), qp_pade_gaps))
-     !NCF_CHECK(nf90_put_var(ncid, vid("sigc_it_mat"), c2r(sigc_it_mat)))
+     NCF_CHECK(nf90_put_var(ncid, vid("sigc_it_mat"), c2r(sigc_it_mat)))
      NCF_CHECK(nf90_put_var(ncid, vid("sigc_iw_mat"), c2r(gwr%sigc_iw_mat)))
      NCF_CHECK(nf90_put_var(ncid, vid("sigxc_rw_diag"), c2r(sigxc_rw_diag)))
      NCF_CHECK(nf90_put_var(ncid, vid("spfunc_diag"), spfunc_diag))
@@ -6314,7 +6315,7 @@ end subroutine gwr_rpa_energy
 !!  Driver to compute QP energies within the G0W0 approximation and minimax meshes along the imaginary axis.
 !!
 !! INPUTS
-!!  [free_ugb]: True if array with empty KS states should freed as soon as possibile. Default: True
+!!  [free_ugb]: True if array with empty KS states should be freed as soon as possibile. Default: True
 !!
 !! OUTPUT
 !!
@@ -6542,7 +6543,7 @@ subroutine gwr_check_scf_cycle(gwr, converged)
    !else
    !  call wrtout(units, sjoin(" Convergence achieved at iteration", itoa(gwr%scf_iteration)))
    end if
-   ! TODO: Incremente scf_interation in GWR.nc
+   ! TODO: Increment scf_interation in GWR.nc
  end if
 
 end subroutine gwr_check_scf_cycle
