@@ -96,7 +96,7 @@ if(ABINIT_ENABLE_GPU_CUDA)
     # if you want to use nvc++ you need at least cmake 3.22.0
     #
     # the following will make target like CUDA::cublas and CUDA::cufft available
-    message("Using CUDAToolkit macros")
+    message(STATUS "Using CUDAToolkit macros")
     find_package(CUDAToolkit REQUIRED)
 
   endif()
