@@ -20,11 +20,15 @@
 #include "abi_common.h"
 
 !Include and generate MKL_RCI module
+#if defined HAVE_LINALG_MKL_OMATCOPY
 #include "mkl_rci.f90"
+#endif
 
 module m_prcref
 
- use mkl_rci, only : dfgmres, dfgmres_check, dfgmres_get, dfgmres_init
+#if defined HAVE_LINALG_MKL_OMATCOPY
+use mkl_rci, only : dfgmres, dfgmres_check, dfgmres_get, dfgmres_init
+#endif
 
  use defs_basis
  use defs_wvltypes
@@ -1109,6 +1113,7 @@ end subroutine prcref
 
    else if (dtset%iprcel>=200 .and. dtset%iprcel<300) then
      cplex=optreal
+     write(6,*)'    prcref : iprcel=2**'; flush(6) !DEBUG
      call chi0diel(precon, dtset, cplex, mpi_enreg, nfftprc, ngfftprc, gprimd, dtset%nspden, optreal, optres, 10, 0.001, vresid, vrespc)
  
 !    Other choice ?
@@ -2388,16 +2393,15 @@ end subroutine dieltcel
 !! compute_g
 !!
 !! FUNCTION
-!! Computes the (3*1D) array of G-vectors (in CARTESIAN coordinates) matching fourdp
-!! (Fourier transform for densities and potentials) on this processor.
+!! Computes the array of G-vectors (in REDUCED coordinates) corresponding to the coordinates
+!! of the result from fourdp (Fourier transform for densities and potentials) on this processor.
 !!
 !! INPUTS
-!!  mpi_enreg = information about MPI parallelization
-!!  ngfft(:)  = contain all needed information about 3D FFT, see ~abinit/doc/variables/gstate/#ngfft
-!!  gprimd    = reciprocal lattice in bohr**-2.
+!!  mpi_enreg = Information about MPI parallelization.
+!!  ngfft(:)  = All needed information about 3D FFT, see ~abinit/doc/variables/gstate/#ngfft.
 !!
 !! OUTPUT
-!!  g(3, :)   = 3 coordinates of the G-vectors with indices matching fourdp on this processor
+!!  g(3, :)   = 3 coordinates of the G-vectors.
 !!
 !! NOTES
 !!
@@ -2431,30 +2435,27 @@ subroutine compute_g(mpi_enreg, ngfft, g_vectors)
 
 !Triple loop for the 3 dimensions over all the G-vectors
  do i3=1,n3
-   !if (fftn3_distrib(i3)==me_fft) then
-    ! i3_loc=ffti3_local(i3)         ! local index of the 3rd coordinates on this processor
+   if (fftn3_distrib(i3)==me_fft) then
+     i3_loc=ffti3_local(i3)         ! local index of the 3rd coordinates on this processor
      do i2=1,n2
        if (fftn2_distrib(i2)==me_fft) then
            i2_loc=ffti2_local(i2)   ! local index of the 2nd coordinates on this processor
            do i1=1,n1
-!            i_fft = index of the (i1, i2, i3)-G-vector in the fft
+            !i_fft = index of the (i1, i2, i3)-G-vector in the fft
              i_fft=i1 + n1*( i2_loc-1+(n2/nproc_fft)*(i3-1))
              g_vectors(1, i_fft) = i1-1 - n1*merge(1, 0, (2*i1>n1))
              g_vectors(2, i_fft) = i2-1 - n2*merge(1, 0, (2*i2>n2))
              g_vectors(3, i_fft) = i3-1 - n3*merge(1, 0, (2*i3>n3))
-!            multiply by gprimd to get cartesian coordinates
-             !g_vectors(:, i_fft) = two_pi * matmul(gprimd, g_vectors(:, i_fft))
+            !Not multiply by gprimd to get cartesian coordinates
+            !g_vectors(:, i_fft) = two_pi * matmul(gprimd, g_vectors(:, i_fft))
            end do
        end if
      end do
-   !end if
-end do
+   end if
+ end do
 
 end subroutine compute_g
 !!***
-
-!subroutine compute_r()
-!end subroutine compute_r
 
 !!****f* ABINIT/apply_vc
 !! NAME
@@ -2490,17 +2491,16 @@ subroutine chi0diel_apply_vc(g_vectors, gprimd, nfft, vec_g)
 ! *************************************************************************
 
  if (ALL(g_vectors(:, 1)==0)) then
-   !The component G=0 is not multiplied
+   !If the vector G=0 is on this processor, its component is not multiplied.
    start = 2
  else
    start = 1
  end if
 
- do i=start,nfft
+ do i=start, nfft
    vec_g(:, i) = (2*two_pi/norm2(two_pi * matmul(gprimd, g_vectors(:, i)))) * vec_g(:, i)
  end do
-!real and imaginary part
-!vec_g(1, start:) = (2*two_pi/norm2(two_pi * matmul(gprimd, g_vectors), 1)) * vec_g(1, start:)
+ !TODO : optimize this ?
  
 end subroutine chi0diel_apply_vc
 
@@ -2514,9 +2514,9 @@ end subroutine chi0diel_apply_vc
 !!
 !! INPUTS
 !!  precon      = precon_object that contain the model chi0 operator.
-!!  g_vectors   = Coordinates of the G-vectors (should not be distributed).
+!!  g_vectors   = Coordinates of the G-vectors (should not be distributed over the processors).
 !!  mpi_enreg   = Information about MPI parallelization.
-!!  ngfft       = Contain all needed information about 3D FFT, see ~abinit/doc/variables/gstate/#ngfft.
+!!  ngfft       = Contains all needed information about 3D FFT, see ~abinit/doc/variables/gstate/#ngfft.
 !!  ispden      = Index of spin-density component.
 !!  rho_g       = Density vector (in G-space).
 !!
@@ -2545,6 +2545,7 @@ subroutine chi0diel_apply_adjdielmat(precon, g_vectors, gprimd, ispden, mpi_enre
  integer :: nfft
 
 ! *************************************************************************
+ write(6,*)'    chi0diel_apply_adjdielmat'; flush(6) !DEBUG
 
  adjdielmat_rho_g = rho_g
 
@@ -2553,13 +2554,16 @@ subroutine chi0diel_apply_adjdielmat(precon, g_vectors, gprimd, ispden, mpi_enre
  call chi0diel_apply_vc(g_vectors, gprimd, nfft, adjdielmat_rho_g)
 
 !2) Applying the model chi0 operator
- call precon%apply_chi0(mpi_enreg, ngfft, ispden, g_vectors, adjdielmat_rho_g)
+ call precon%apply_chi0(mpi_enreg, ngfft, ispden, adjdielmat_rho_g)
 
 !3) adjdielmat_rho_g = rho_g - chi0 * vc * rho_g = adjdielmat * rho_g
  adjdielmat_rho_g = rho_g - adjdielmat_rho_g
 
 !Components G=0 unchanged
  adjdielmat_rho_g(1:2) = rho_g(1:2)
+
+!For code validation only
+ call precon%save_applied_op(ngfft, 2, rho_g, adjdielmat_rho_g)
 
 end subroutine chi0diel_apply_adjdielmat
 !!***
@@ -2574,9 +2578,9 @@ end subroutine chi0diel_apply_adjdielmat
 !!
 !! INPUTS
 !!  precon      = precon_object that contain the modl chi0 operator.
-!!  g_vectors   = Coordinates of the G-vectors (should not be distributed).
+!!  g_vectors   = Coordinates of the G-vectors (should not be distributed over the processors).
 !!  mpi_enreg   = Information about MPI parallelization.
-!!  ngfft       = Contain all needed information about 3D FFT, see ~abinit/doc/variables/gstate/#ngfft.
+!!  ngfft       = Contains all needed information about 3D FFT, see ~abinit/doc/variables/gstate/#ngfft.
 !!  ispden      = Index of spin-density component.
 !!  v_g         = Potential vector (in G-space)
 !!
@@ -2606,11 +2610,12 @@ subroutine chi0diel_apply_dielmat(precon, g_vectors, gprimd, ispden, mpi_enreg, 
  integer :: nfft
 
 ! *************************************************************************
+ write(6,*)'    chi0diel_apply_dielmat'; flush(6) !DEBUG
 
  dielmat_v_g = v_g
 
 !1) Applying the model chi0 operator
- call precon%apply_chi0(mpi_enreg, ngfft, ispden, g_vectors, dielmat_v_g)
+ call precon%apply_chi0(mpi_enreg, ngfft, ispden, dielmat_v_g)
 
 !2) Applying the Coulomb kernel vc
  nfft = size(g_vectors, 2)
@@ -2621,6 +2626,9 @@ subroutine chi0diel_apply_dielmat(precon, g_vectors, gprimd, ispden, mpi_enreg, 
 
 !Components G=0 unchanged
  dielmat_v_g(1:2) = v_g(1:2)
+
+!For code validation only 
+ call precon%save_applied_op(ngfft, 2, v_g, dielmat_v_g)
 
 end subroutine chi0diel_apply_dielmat
 !!***
@@ -2641,7 +2649,8 @@ end subroutine chi0diel_apply_dielmat
 !!  cplex         = If 1, vresid is REAL, if 2, vresid is COMPLEX.
 !!  mpi_enreg     = Information about MPI parallelization.
 !!  nfft          = Number of FFT grid points (for this processor).
-!!  ngfft         = Contain all needed information about 3D FFT, see ~abinit/doc/variables/gstate/#ngfft
+!!                      *To use this preconditioner, there must be no fft-grid parallelization.  
+!!  ngfft         = Contains all needed information about 3D FFT, see ~abinit/doc/variables/gstate/#ngfft.
 !!  gprimd        = Reciprocal space metric tensor in bohr**-2.
 !!  nspden        = Number of spin-density components.
 !!  optreal       = 1: vresid is given in the REAL space.
@@ -2692,6 +2701,7 @@ subroutine chi0diel(precon, dtset, cplex, mpi_enreg, nfft, ngfft, gprimd, nspden
  real(dp), allocatable :: tmp(:)
 
 ! *************************************************************************
+ write(6,*)'    chi0diel : '; flush(6) !DEBUG
 
  if (ngfft(9)/=0) then
    ABI_BUG("chi0-based preconditioning (chi0diel) used with fft-grid parallelization")
@@ -2730,9 +2740,9 @@ subroutine chi0diel(precon, dtset, cplex, mpi_enreg, nfft, ngfft, gprimd, nspden
  ABI_MALLOC(est, (2*size_vres))
  est = 0
 
-!MKL GMRES :
-    !TODO : dirty check of MKL availability
- !#if defined HAVE_LINALG_MKL_OMATCOPY  
+!MKL GMRES :   
+ !TODO : dirty check of MKL availability
+#if defined HAVE_LINALG_MKL_OMATCOPY
 
 !FGMRES initialization
  ABI_MALLOC(tmp, ((2*gmres_maxiter+1)*2*size_vres + gmres_maxiter*(gmres_maxiter+9)/2 + 1))
@@ -2755,12 +2765,13 @@ subroutine chi0diel(precon, dtset, cplex, mpi_enreg, nfft, ngfft, gprimd, nspden
  call dfgmres(2*size_vres, est, rhs, RCI_request, ipar, dpar, tmp)
  
  do
+ write(6,*)'    chi0diel : ite = ipar(4)'; flush(6) !DEBUG
    if (RCI_request==-1) then
 !    maximum number of iterations is reached
      call dfgmres_get(2*size_vres, est, rhs, RCI_request, ipar, dpar, tmp, itercount)
      exit
    else if (RCI_request==0) then
- !    successful completion of the task
+!    successful completion of the task
      call dfgmres_get(2*size_vres, est, rhs, RCI_request, ipar, dpar, tmp, itercount)
      exit
    else  if (RCI_request==1) then
@@ -2784,35 +2795,35 @@ subroutine chi0diel(precon, dtset, cplex, mpi_enreg, nfft, ngfft, gprimd, nspden
 !---------------------------------------------------------------------
 !  FGMRES Errors
    else if (RCI_request==-10) then
-     ABI_BUG('FGMRES : attempt to divide by zero')
+     ABI_BUG('chi0-based preconditioner (iprcel=2**) - FGMRES : attempt to divide by zero')
      exit
    else if (RCI_request==-11) then
-     ABI_BUG('FGMRES : infinite cycle')
+     ABI_BUG('chi0-based preconditioner (iprcel=2**) - FGMRES : infinite cycle')
      exit
    else if (RCI_request==-12) then
-     ABI_BUG('FGMRES : errors were found in the method parameters')
+     ABI_BUG('chi0-based preconditioner (iprcel=2**) - FGMRES : errors were found in the method parameters')
      exit
 
 !  RCI_request = 2, 3, 4 should not happen with this choice of parameters
    else
-     ABI_BUG('FGMRES : RCI_request has unexpected value')
+     ABI_BUG('chi0-based preconditioner (iprcel=2**) - FGMRES : RCI_request has unexpected value')
    end if
 !---------------------------------------------------------------------
 
  end do
 
- !#else
- !  ABI_ERROR("chi0 SCF preconditioning require MKL (TODO)")
- !#endif
+#else
+ ABI_ERROR("chi0-based SCF preconditioning requires MKL (TODO)")
+#endif
 
 !Fourier transform if optreal==1
  if (optreal==1) then
   !vrespc must be returned in the real space : We need to do a ifft. 
    call fourdp(cplex, est, vrespc(:, ispden), 1, mpi_enreg, size_vres, 1, ngfft, 0)
-  else
+ else
   !vrespc must be returned in the fourier space.
    vrespc(:, ispden) = est
-  end if
+ end if
 
  ABI_FREE(rhs)
  ABI_FREE(est)

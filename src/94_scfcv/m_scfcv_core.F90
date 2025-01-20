@@ -864,8 +864,9 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  end if ! iscf>0
 
 ! Initializing precon-object for chi0 based preconditioning
- call precon%init(dtset, gprimd, rprimd, ucvol, cg, eigen, fermie, irrzon, kg, npwarr, phnons)
-
+ call precon%init(dtset, atindx1, cg, eigen, results_gs%fermie, gprimd, &
+ &   irrzon, kg, nattyp, npwarr, phnons, rhor, rprimd, ucvol, xred)
+ 
 ! Here initialize the datastructure constrained_dft, for constrained DFT calculations
 ! as well as penalty function constrained magnetization
  if(any(dtset%constraint_kind(:)/=0).or.dtset%magconon/=0)then
@@ -1870,7 +1871,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
      endif
 
 !    Updating precon-object for chi0-based preconditioning
-     call precon%update(dtset, mpi_enreg)
+     call precon%update(dtset, istep, mpi_enreg)
 
      ABI_NVTX_START_RANGE(NVTX_SCFCV_NEWRHO)
      call newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,&
@@ -2130,7 +2131,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 !    (Warning: the (H)xc potential may have been subtracted from vtrial)
 
 !    Updating precon-object for chi0-based preconditioning
-     call precon%update(dtset, mpi_enreg)
+     call precon%update(dtset, istep, mpi_enreg)
 
      call newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
 &     dtn_pc,dtset,etotal,fcart,pawfgr%fintocoa,&
@@ -2479,6 +2480,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  ABI_FREE(intgden0)
 
 !Deallocate precon-object 
+ call precon%save(ngfft, 1)   ! For validation only - TODO : delete
  call precon%free()
 
  if(allocated(vectornd)) then

@@ -11,15 +11,15 @@
 
 module m_precon
     
+    use defs_abitypes, only : MPI_type
     use defs_basis
+    use defs_wvltypes
+
+    use m_atomdata,  only : atom_length
     use m_dtset
     use m_fft,      only : fourdp
-    use defs_abitypes, only : MPI_type
-
     use m_mkrho
     use m_paw_dmft
-    use defs_wvltypes
-    use defs_wvltypes
     
     implicit none
     private
@@ -32,29 +32,35 @@ module m_precon
         real(dp) :: gprimd(3, 3), rprimd(3, 3)
         real(dp) :: ucvol, dvol
         !For LDOS preconditioner :
-        integer  :: occopt
-        real(dp) :: tsmear
         real(dp), pointer :: fermie
         real(dp), pointer :: cg(:, :), eigen(:), phnons(:, :, :)
         integer, pointer  :: kg(:, :), npwarr(:), irrzon(:, :, :)
         real(dp), allocatable :: ldos(:, :), tdos(:)
+        !For local polarizability preconditioner :
+        real(dp) :: gc
+        real(dp), allocatable :: loc_pola(:, :)
+            !To compute loc_pola :
+        integer, pointer :: atindx1(:), nattyp(:)
+        real(dp), pointer :: xred(:, :)
+        real(dp), pointer :: rhor(:, :)
         !For ffts :
         integer  :: nfft
 
     contains
-        procedure :: init => precon_init
-        procedure :: update => precon_update
-        procedure :: free => precon_free
-        procedure :: save_ldos => save_ldos
-        procedure :: apply_chi0 => apply_chi0
+        procedure :: init => precon_init        ! Initializes the precon_object.
+        procedure :: update => precon_update    ! Updates the precon_object according to iprcel.
+        procedure :: free => precon_free        ! Dealocate arrays that are allocated in precon_init.
+        procedure :: save => precon_save        ! Saves the LDOS or local polarizability contained in the precon_object in a file.
+        procedure :: apply_chi0 => apply_chi0   ! Applies the model chi0 operator to an imput vector.
+        procedure :: save_applied_op => save_applied_op ! Saves the application of an operator.
 
     end type precon_object
 
 contains 
 
-    !****f* m_precon/update
+    !****f* m_precon/precon_init
     !! NAME
-    !! update
+    !! precon_init
     !!
     !! FUNCTION
     !! Initializes the precon_object.
@@ -73,7 +79,8 @@ contains
     !!  phnons   = nonsymmorphic translation phases
     !!
     !! SOURCE
-    subroutine precon_init(this, dtset, gprimd, rprimd, ucvol, cg, eigen, fermie, irrzon, kg, npwarr, phnons)
+    subroutine precon_init(this, dtset, atindx1, cg, eigen, fermie, gprimd, &
+        &   irrzon, kg, nattyp, npwarr, phnons, rhor, rprimd, ucvol, xred)
 
         !Arguments ------------------------------------
         class(precon_object), intent(inout) :: this
@@ -84,8 +91,11 @@ contains
 
         !arrays
         real(dp), intent(in) :: gprimd(:, :), rprimd(:, :)
-        real(dp), intent(in), target :: cg(:, :), eigen(:), phnons(:, :, :)
         integer, intent(in), target  :: irrzon(:, :, :), kg(:, :), npwarr(:)
+        integer, intent(in), target :: atindx1(:), nattyp(:)
+        real(dp), intent(in), target :: cg(:, :), eigen(:), phnons(:, :, :)
+        real(dp), intent(in), target :: rhor(:, :)
+        real(dp), intent(in), target :: xred(:, :)
 
         ! *************************************************************************
         !Constant data from dtset
@@ -94,50 +104,62 @@ contains
         this%iprcel = dtset%iprcel
         this%nfft   = dtset%nfft
         this%nspden = dtset%nspden
-        this%occopt = dtset%occopt
-        this%tsmear = dtset%tsmear
         !Other constants
+        this%dvol   = ucvol/this%nfft ! factor for integrals in real space: sum(f) * dvol ~ integral f
         this%gprimd = gprimd
         this%rprimd = rprimd
         this%ucvol  = ucvol
-        this%dvol   = ucvol/this%nfft ! factor for integrals in real space: sum(f) * dvol ~ integral f
         !Pointers
+        this%atindx1=> atindx1 
         this%cg     => cg
         this%eigen  => eigen
         this%fermie => fermie
         this%irrzon => irrzon
         this%kg     => kg
+        this%nattyp => nattyp
         this%npwarr => npwarr
         this%phnons => phnons
+        this%rhor   => rhor
+        this%xred   => xred
         !Initializing LDOS specific variables
         if (this%iprcel == 202) then
-            !Allocating the array containing ldos and tdos
+            !Allocating the arrays containing ldos and tdos
             ABI_MALLOC(this%ldos, (this%nfft, this%nspden))
             ABI_MALLOC(this%tdos, (this%nspden))
+        end if
+        !Initializing loc_pola specific variables
+        if (this%iprcel == 203) then
+            this%gc = 1.0 ! TODO
+            !Allocating the array containing the local polarizability
+            ABI_MALLOC(this%loc_pola, (this%nfft, this%nspden))
         end if
 
     end subroutine precon_init
 
-    !****f* m_precon/update
+    !****f* m_precon/precon_update
     !! NAME
     !! update
     !!
     !! FUNCTION
     !! Updates the precon_object :
-    !!      For LDOS preconditioning (iprcel=...) : 
-    !!          computes the new ldos (local density of state) with current wavefunctions 
-    !!          and the new tdos (total density of state = integral of ldos) 
+    !!      For LDOS preconditioning (iprcel=202) : 
+    !!          Computes the new ldos (local density of state) with current wavefunctions 
+    !!          and the new tdos (total density of state = integral of ldos).
+    !!      For Pola preconditioning :
+    !!          Computes the local polarizability if istep = 1 (first SCF iteration).
     !!
     !! INPUTS
-    !!  dtset     = all input variables for this dataset
-    !!  mpi_enreg = information about MPI parallelization
+    !!  dtset     = All input variables for this dataset.
+    !!  istep     = SCF step.
+    !!  mpi_enreg = Information about MPI parallelization.
     !!
     !! SOURCE
-    subroutine precon_update(this, dtset, mpi_enreg)
+    subroutine precon_update(this, dtset, istep, mpi_enreg)
 
         !Arguments ------------------------------------
         class(precon_object), intent(inout) :: this
         type(dataset_type), intent(in) :: dtset
+        integer, intent(in) :: istep
         type(MPI_type), intent(inout) :: mpi_enreg
         
         !Local variables-------------------------------
@@ -145,25 +167,42 @@ contains
 
         ! *************************************************************************
 
+        !LDOS
         if (this%iprcel == 202) then 
             !update ldos
-            call compute_ldos(this%occopt, this%eigen, this%fermie, this%tsmear, this%cg,   &
-            &   dtset, this%ucvol, this%rprimd, this%gprimd,                                &
-            &   this%irrzon, this%kg, this%npwarr, this%phnons,                             &
-            &   this%nfft, mpi_enreg,                                                       &
+            call compute_ldos(dtset, this%cg, this%eigen, this%fermie, this%gprimd, this%irrzon, &
+            &   this%kg, mpi_enreg, this%nfft, this%npwarr, this%phnons, this%rprimd, this%ucvol, &
             &   this%ldos)
             !update tdos
             do ispden=1,this%nspden
                 this%tdos = sum(this%ldos(:, ispden)) * this%dvol
             end do
         end if
+
+        !Local polarizability
+        if (this%iprcel == 203) then
+            if (istep == 1) then    ! TODO : More option to control when the ldos is updated
+                call compute_loc_pola(dtset, this%atindx1, this%gprimd, this%nattyp, this%nfft, this%nspden, &
+                &   mpi_enreg, this%rhor, this%rprimd, this%xred, &
+                &   this%loc_pola)
+            end if
+        end if
        
     end subroutine precon_update
 
+    !****f* m_precon/precon_free
+    !! NAME
+    !! precon_free
+    !!
+    !! FUNCTION
+    !! Dealocate arrays that are allocated in precon_init.
+    !!
+    !! SOURCE
     subroutine precon_free(this)
 
         !Arguments ------------------------------------
         class(precon_object), intent(inout) :: this
+        
         ! *************************************************************************
        
         if (this%iprcel == 202) then
@@ -171,13 +210,136 @@ contains
             ABI_FREE(this%ldos)
             ABI_FREE(this%tdos)
         end if
+
+        if (this%iprcel == 203) then
+            ABI_FREE(this%loc_pola)
+        end if
+
     end subroutine precon_free
 
-    subroutine save_ldos(this, ispden)
+    !****f* m_precon/compute_r
+    !! NAME
+    !! compute_r
+    !!
+    !! FUNCTION
+    !! Computes the array of r-vectors (in REDUCED coordinates).
+    !!
+    !! INPUTS
+    !!  ngfft   = All needed information about 3D FFT, see ~abinit/doc/variables/gstate/#ngfft.
+    !!
+    !! OUTPUTS
+    !!  r_vectors(3, :) = 3 coordinates of the r_vectors.
+    !!
+    !! SOURCE
+    subroutine compute_r(ngfft, r_vectors)
+
+        !Arguments ------------------------------------
+        real(dp), intent(out) :: r_vectors(:, :)
+        integer, intent(in) :: ngfft(:)
+
+        !Local variables-------------------------------
+        integer :: n1, n2, n3, i1, i2, i3, i_r
+
+        ! *************************************************************************
+        
+        n1=ngfft(1) ; n2=ngfft(2) ; n3=ngfft(3)
+        do i3=1,n3
+            do i2=1,n2
+                do i1=1,n1
+                    i_r = 1 + (i1-1) + (i2-1)*n1 + (i3-1)*n1*n2
+                    r_vectors(1, i_r) = real(i1-1)/n1
+                    r_vectors(2, i_r) = real(i2-1)/n2
+                    r_vectors(3, i_r) = real(i3-1)/n3
+                end do
+            end do
+        end do
+
+    end subroutine compute_r
+
+    !****f* m_precon/get_r_vector
+    !! NAME
+    !! get_r_vector
+    !!
+    !! FUNCTION
+    !! Get the vector r (in reduced coordinates) of index ifft
+    !!
+    !! SOURCE
+    function get_r_vector(ifft, ngfft) result(r)
+        
+        !Arguments ------------------------------------
+        integer, intent(in) :: ifft
+        integer, intent(in) :: ngfft(:)
+        
+        !Local variables-------------------------------
+        integer :: n1, n2, n3, i1, i2, i3
+        
+        !Returned variable-------------------------------
+        real(dp) :: r(3)
+                
+        ! *************************************************************************
+        
+        n1=ngfft(1) ; n2=ngfft(2) ; n3=ngfft(3)
+        i1 = modulo((ifft-1), n1) + 1
+        i2 = modulo((ifft-1)/n1, n2) + 1
+        i3 = ((ifft-1)/n1)/n2 + 1
+        r(1) = real(i1-1)/n1
+        r(2) = real(i2-1)/n2
+        r(3) = real(i3-1)/n3
+
+    end function get_r_vector
+
+    !****f* m_precon/get_g_vector
+    !! NAME
+    !! get_g_vector
+    !!
+    !! FUNCTION
+    !! Get the vector g (in reduced coordinates) of index ifft
+    !!
+    !! SOURCE
+    function get_g_vector(ifft, ngfft) result(g)
+        
+        !Arguments ------------------------------------
+        integer, intent(in) :: ifft
+        integer, intent(in) :: ngfft(:)
+
+        !Local variables-------------------------------
+        integer :: n1, n2, n3, i1, i2, i3
+        
+        !Returned variable-------------------------------
+        integer(dp) :: g(3)
+                
+        ! *************************************************************************
+        
+        n1=ngfft(1) ; n2=ngfft(2) ; n3=ngfft(3)
+        i1 = modulo((ifft-1), n1) + 1
+        i2 = modulo((ifft-1)/n1, n2) + 1
+        i3 = ((ifft-1)/n1)/n2 + 1
+        g(1) = i1-1
+        g(2) = i2-1
+        g(3) = i3-1
+
+    end function get_g_vector
+
+    !****f* m_precon/precon_save
+    !! NAME
+    !! precon_save
+    !!
+    !! FUNCTION
+    !! Saves the LDOS contained in the precon_object in a file named ldos.txt.
+    !!     "     locale polarizability                "              loc_pola.txt. 
+    !! (For code validation)
+    !!
+    !! INPUTS
+    !!  ngfft   = All needed informations about the 3D FFT.
+    !!  ispden  = Index of spin-density component.
+    !!
+    !! SOURCE
+    subroutine precon_save(this, ngfft, ispden)
 
         !Arguments ------------------------------------
         class(precon_object), intent(inout) :: this
         integer :: ispden
+        integer, intent(in) :: ngfft(:)
 
         !Local variables-------------------------------
         logical :: exist
@@ -186,25 +348,44 @@ contains
         ! *************************************************************************
        
         if (this%iprcel==202) then
-            n = size(this%ldos)
+            n = size(this%ldos(:, ispden))
+            ! Writing the file
             inquire(file="ldos.txt", exist=exist)
             if (exist) then
                 open(newunit=io, file="ldos.txt", status="replace", action="write")
                 do i=1,n
-                    ! TODO : compute r 
-                    write (io, '(*(G0.6,:,","))') this%ldos(i, ispden)
+                    write (io, '(*(G0.6,:,","))') matmul(this%rprimd, get_r_vector(i, ngfft)), this%ldos(i, ispden)
                 end do
                 close(io)
             else
                 open(newunit=io, file="ldos.txt", status="new", action="write")
                 do i=1,n
-                    write (io, '(*(G0.6,:,","))') this%ldos(i, ispden)
+                    write (io, '(*(G0.6,:,","))') matmul(this%rprimd, get_r_vector(i, ngfft)), this%ldos(i, ispden)
                 end do
                 close(io)
             end if 
         end if 
 
-    end subroutine save_ldos
+        if (this%iprcel==203) then
+            n = size(this%loc_pola(:, ispden))
+            ! Writing the file
+            inquire(file="loc_pola.txt", exist=exist)
+            if (exist) then
+                open(newunit=io, file="loc_pola.txt", status="replace", action="write")
+                do i=1,n
+                    write (io, '(*(G0.6,:,","))') matmul(this%rprimd, get_r_vector(i, ngfft)), this%loc_pola(i, ispden)
+                end do
+                close(io)
+            else
+                open(newunit=io, file="loc_pola.txt", status="new", action="write")
+                do i=1,n
+                    write (io, '(*(G0.6,:,","))') matmul(this%rprimd, get_r_vector(i, ngfft)), this%loc_pola(i, ispden)
+                end do
+                close(io)
+            end if 
+        end if 
+
+    end subroutine precon_save
 
     !****f* m_precon/derivative_occ
     !! NAME
@@ -272,7 +453,7 @@ contains
           ABI_BUG("LDOS preconditioning not implemented for this smearing function")
          end if
         
-         fprim = -1/tsmear * delta
+         fprim = 1/tsmear * delta
         
     end function derivative_occ
 
@@ -305,16 +486,14 @@ contains
     !!  ldos     = local density of state
     !!
     !! SOURCE
-    subroutine compute_ldos(occopt, eigen, fermie, tsmear, cg,  &
-        &   dtset, ucvol, rprimd, gprimd,                       &
-        &   irrzon, kg, npwarr, phnons,                         &
-        &   nfft, mpi_enreg,                                    &
+    subroutine compute_ldos(dtset, cg, eigen, fermie, gprimd, irrzon, &
+        &   kg, mpi_enreg, nfft, npwarr, phnons, rprimd, ucvol, &
         &   ldos)
 
         !Arguments ------------------------------------
         !scalars
-        integer, intent(in) :: occopt, nfft
-        real(dp), intent(in) :: tsmear, fermie
+        integer, intent(in) :: nfft
+        real(dp), intent(in) :: fermie
         !arrays
         real(dp), intent(in) :: eigen(:)
         real(dp), intent(out) :: ldos(:, :)
@@ -332,7 +511,7 @@ contains
         
         !Local variables-------------------------------
         !scalars
-        integer :: mband, i, mcg
+        integer :: mband, i, mcg, maxocc
         !arrays
         real(dp), allocatable :: ldos_wheights(:)
 
@@ -347,20 +526,184 @@ contains
         !compute wheights
         mband = size(eigen)
         ABI_MALLOC(ldos_wheights, (mband))
+        maxocc = two / (dtset%nsppol * dtset%nspinor)   !Maximum number of occupations (1 or 2)
         do i=1, mband
-            ldos_wheights(i) = derivative_occ(occopt, eigen(i), fermie, tsmear)
+            ldos_wheights(i) = derivative_occ(dtset%occopt, eigen(i), fermie, dtset%tsmear) * maxocc
         end do
 
+        !Compute ldos using mkrho with ldos_wheights in place of the occupations
         mcg = size(cg)
         paw_dmft%use_dmft = 0
         paw_dmft%use_sc_dmft = 0
-        !compute ldos using mkrho with ldos_wheights in place of the occupations
         call mkrho(cg, dtset, gprimd, irrzon, kg, mcg, mpi_enreg, npwarr, ldos_wheights, &
         &   paw_dmft, phnons, rhog, ldos, rprimd, 0, ucvol, wvl_den, wvl_wfs, option=0)
 
         ABI_FREE(ldos_wheights)
 
     end subroutine compute_ldos
+
+    !****f* m_precon/complex_mult
+    !! NAME
+    !! complex_mult
+    !!
+    !! FUNCTION
+    !! Multiply to complex numbers given as size two arrays.
+    !!
+    !! SOURCE
+    function complex_mult(z1, z2) result(z3)
+        !Arguments ------------------------------------
+        real(dp), intent(in) :: z1(2), z2(2)
+        
+        !Returned variable-------------------------------
+        real(dp) :: z3(2)
+                
+        ! *************************************************************************
+        
+        !Performs z3 = z1*z2, the complex multiplication
+        z3(1) = z1(1)*z2(1)-z1(2)*z2(2)
+        z3(2) = z1(1)*z2(2)+z1(2)*z2(1)
+
+    end function complex_mult
+
+    !****f* m_precon/compute_loc_pola
+    !! NAME
+    !! compute_loc_pola
+    !!
+    !! FUNCTION
+    !! computes the local polarizability estimate
+    !!
+    !! INPUTS
+    !!
+    !! SIDE EFFECTS
+    !!
+    !! SOURCE
+    subroutine compute_loc_pola(dtset, atindx1, gprimd, nattyp, nfft, &
+        &   nspden, mpi_enreg, rhor, rprimd, xred, &
+        &   loc_pola)
+
+        !Arguments ------------------------------------
+        !scalars
+        type(dataset_type),intent(in) :: dtset
+        integer, intent(in) :: nfft, nspden
+        type(MPI_type), intent(in) :: mpi_enreg
+        !arrays
+        integer, intent(in) :: atindx1(:), nattyp(:)
+        real(dp), intent(in) :: rhor(:, :), rprimd(3, 3), gprimd(3, 3), xred(:, :)
+        real(dp), intent(out) :: loc_pola(:, :)
+       
+        !Local variables-------------------------------
+        !scalars
+        integer :: itypat, iattyp, iatom, ig, ir, ispden
+        integer :: re, im
+        real(dp) :: l_atom
+        !arrays
+        integer :: g(3)
+        real(dp) :: form_factor(2), structure_factor(2)
+        real(dp) :: r_atom(3)
+        real(dp), allocatable:: rhor0(:), rhor0_atom(:)
+        real(dp), allocatable :: r2(:)
+        real(dp), allocatable:: rhog0_atom(:, :)
+        
+        ! *************************************************************************
+        
+        loc_pola = 0.0
+
+        ! Arrays allocation
+        ABI_MALLOC(rhor0, (nfft))
+        ABI_MALLOC(rhor0_atom, (nfft))
+        ABI_MALLOC(r2, (nfft))
+        ABI_MALLOC(rhog0_atom, (2, nfft))
+        re = 1
+        im = 2
+
+        do itypat = 1, dtset%ntypat !Loop over the types of atom
+            l_atom = atom_length(dtset%densty(itypat, 1), dtset%ziontypat(itypat), dtset%znucl(itypat))   ! Atomic decay length
+            
+            do iattyp = 1, nattyp(itypat) !Loop over the atom (of this type)
+                iatom = atindx1(iattyp)
+                r_atom = xred(:, iatom) !in reduced coordinates
+                
+                !1) Computing rhor0_atom (with Gaussians)
+                do ig = 1, nfft !Loop over the fft grid
+                    g = get_g_vector(ig, dtset%ngfft) !in reduced coordinates
+                    ! structure_factor(g) = exp(-i*2pi*dot(g, r_atom))
+                    structure_factor(re) = cos(-two_pi*dot_product(g, r_atom))
+                    structure_factor(im) = sin(-two_pi*dot_product(g, r_atom))
+                    ! form_factor(g) = exp(-(2pi*l_atom*g)^2) (Gaussian)
+                    form_factor(re) = exp(-(two_pi*l_atom*norm2(matmul(gprimd, g)))**2)
+                    form_factor(im) = 0 
+                    ! rhog0_atom = structure_factor * form_factor (multiplication in g-space)
+                    rhog0_atom(:, ig) = complex_mult(form_factor, structure_factor)
+                end do
+                !ifft to get rhor0_atom in real space
+                call fourdp(1, rhog0_atom, rhor0_atom, 1, mpi_enreg, nfft, 1, dtset%ngfft, 0) ! irfft (cplex=1)
+                !write(6,*)'    compute_loc_pola : rhor0_atom', rhor0_atom; flush(6) !DEBUG
+
+                !2) Computing norm(r-r_atom)^2 (periodized with sin)
+                !TODO : better + mistake (pic dans loc_pola)
+                do ir = 1, nfft
+                    r2(ir) = norm2(matmul(rprimd, 1/two_pi*sin(two_pi * (get_r_vector(ir, dtset%ngfft) - r_atom)))) ** 2
+                end do
+                !write(6,*)'    compute_loc_pola : r2', r2; flush(6) !DEBUG
+
+                !3) loc_pola = sum_atom rho_atom * |r-r_atom|^2
+                do ispden = 1, nspden
+                    ! TODO : add atom-specific coefficients
+                    loc_pola(:, ispden) = loc_pola(:, ispden) * rhor0/(rhor0+rhor0_atom) + rhor(:, ispden) * rhor0_atom/(rhor0+rhor0_atom) * r2
+                end do
+                rhor0 = rhor0 + rhor0_atom
+            
+            end do 
+        end do
+
+        ABI_FREE(rhor0)
+        ABI_FREE(rhor0_atom)
+        ABI_FREE(r2)
+        ABI_FREE(rhog0_atom)
+
+    end subroutine compute_loc_pola
+
+    subroutine save_applied_op(this, ngfft, optspace, vec, op_vec)
+
+        !Arguments ------------------------------------
+        class(precon_object), intent(in) :: this
+        !scalars
+        integer, intent(in) :: optspace ! 1 for real space, 2 for Fourier space
+        !arrays
+        real(dp), intent(in) :: vec(:), op_vec(:)
+        integer, intent(in) :: ngfft(:)
+       
+        !Local variables-------------------------------
+        !scalars
+        logical :: exist
+        integer :: io, n, i
+        
+        ! *************************************************************************
+        n = size(vec)
+        ! Writing the file
+        inquire(file="applied_op.txt", exist=exist)
+        if (exist) then
+            open(newunit=io, file="applied_op.txt", status="replace", action="write")
+            do i=1,n
+                if(optspace==1) then
+                    write (io, '(*(G0.6,:,","))') matmul(this%rprimd, get_r_vector(i, ngfft)), vec(i), op_vec(i)
+                else if(optspace==2) then
+                    write (io, '(*(G0.6,:,","))') matmul(this%gprimd, get_g_vector(i, ngfft)), vec(i), op_vec(i)
+                end if
+            end do
+            close(io)
+        else
+            open(newunit=io, file="applied_op.txt", status="new", action="write")
+            do i=1,n
+                if(optspace==1) then
+                    write (io, '(*(G0.6,:,","))') matmul(this%rprimd, get_r_vector(i, ngfft)), vec(i), op_vec(i)
+                else if(optspace==2) then
+                    write (io, '(*(G0.6,:,","))') matmul(this%gprimd, get_g_vector(i, ngfft)), vec(i), op_vec(i)
+                end if
+            end do
+            close(io)
+        end if 
+    end subroutine save_applied_op
 
     !****f* m_precon/apply_chi0
     !! NAME
@@ -378,7 +721,7 @@ contains
     !!  vec_g (2, :) = Vector (in G-space) to which the model chi0 operator is applied (in place).
     !!
     !! SOURCE
-    subroutine apply_chi0(this, mpi_enreg, ngfft, ispden, g_vectors, vec_g)
+    subroutine apply_chi0(this, mpi_enreg, ngfft, ispden, vec_g)
 
         !Arguments ------------------------------------
         class(precon_object), intent(in) :: this
@@ -387,14 +730,16 @@ contains
         integer, intent(in) :: ispden
         !arrays
         integer, intent(in) :: ngfft(:)
-        integer, intent(in) :: g_vectors(:, :)
         real(dp), intent(inout) :: vec_g(2, this%nfft)
        
         !Local variables-------------------------------
         !scalars
         integer :: size_vec, cplex
-        !real(dp) :: 
+        integer :: i, i_g
+        !arrays
         real(dp), allocatable :: work_r(:)
+        real(dp), allocatable :: work_g(:, :), vec_g_saved(:, :)
+        real(dp) :: g(3)
         
         ! *************************************************************************
        
@@ -402,8 +747,10 @@ contains
         if (this%iprcel == 201) then
         !Kerker
             vec_g = (-1/(4*pi*(this%dielng)**2)) * vec_g
-        else if (this%iprcel == 202) then
-        !LDOS
+        end if
+        
+        if (this%iprcel == 202) then
+        !LDOS model
             !1) ifft to get vec in the real space
             size_vec = size(vec_g, 2)
             cplex = 1                           ! TODO : cplex as argument ?
@@ -417,9 +764,38 @@ contains
             !3) fft to get vec back in the reciprocal space
             call fourdp(cplex, vec_g, work_r, -1, mpi_enreg, size_vec, 1, ngfft, 0)
             ABI_FREE(work_r)
-
         end if
 
+        if (this%iprcel == 203) then
+        !Local polarizability model
+            ABI_MALLOC(work_g, (2, this%nfft))
+            ABI_MALLOC(vec_g_saved, (2, this%nfft))
+            vec_g_saved = vec_g
+            vec_g = 0.0
+            do i=1, 3
+                work_g = 0.0
+                !1) Multiplication by d_i(g) in reciprocal space
+                do i_g = 1, this%nfft
+                    !g = two_pi * matmul(this%gprimd, g_vectors(:, i_g))
+                    g = two_pi * matmul(this%gprimd, get_g_vector(i_g, ngfft))
+                    work_g(:, i_g) = complex_mult( [0.0_dp, g(i)/sqrt(1+(norm2(g)/this%gc)**2)], vec_g_saved(:, i_g) )
+                end do
+
+                !2) Multiplication by the local polarizability in real space
+                call fourdp(cplex, work_g, work_r, 1, mpi_enreg, size_vec, 1, ngfft, 0) !ifft
+                work_r = this%loc_pola(:, ispden) * work_r                                         !local multiplication
+                call fourdp(cplex, work_g, work_r, -1, mpi_enreg, size_vec, 1, ngfft, 0) !fft
+
+                !3) Multiplication by d_i(g) in reciprocal space
+                do i_g = 1, this%nfft
+                    g = two_pi * matmul(this%gprimd, get_g_vector(i_g, ngfft))
+                    work_g(:, i_g) = complex_mult( [0.0_dp, g(i)/sqrt(1+(norm2(g)/this%gc)**2)], work_g(:, i_g) )
+                end do
+
+                vec_g = vec_g + work_g
+
+            end do
+        end if
 
     end subroutine apply_chi0
 
