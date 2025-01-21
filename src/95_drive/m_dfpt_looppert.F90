@@ -2833,13 +2833,17 @@ subroutine dfpt_prtene(berryopt,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrn
  else if(ipert==natom+1) then
    write(msg, '(a,es17.8,a,es17.8,a,es17.8)' ) &
 &     '     kin1=',ek1,   '  Hartree=',ehart1,'     xc=',exc1
-   if (has_nd) then
+   if (has_nd .and. (.not.with_vxctau) ) then
       write(msg, '(a,es17.8,a,es17.8,a,es17.8,a,es17.8)' ) &
            &     '     kin1=',ek1,   '  Hartree=',ehart1,'     xc=',exc1,'  nclr dpl1=',end1
    end if
-   if (with_vxctau) then
+   if (with_vxctau .and. (.not.has_nd) ) then
       write(msg, '(a,es17.8,a,es17.8,a,es17.8,a,es17.8)' ) &
            &     '     kin1=',ek1,   '  Hartree=',ehart1,'     xc=',exc1,'  evxctau1=',evxctau1
+   end if
+   if (with_vxctau .and. has_nd ) then
+      write(msg, '(a,es17.8,a,es17.8,a,es17.8,a,es17.8,a,es17.8)' ) &
+           &     '     kin1=',ek1,   '  Hartree=',ehart1,'     xc=',exc1,'  evxctau1=',evxctau1,'  nclr dpl1=',end1
    end if
  else if(ipert==natom+2) then
    write(msg, '(a,es17.8,a,es17.8,a,es17.8)' ) &
