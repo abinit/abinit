@@ -392,6 +392,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwr_nstep',tread,'INT')
  if(tread==1) dtset%gwr_nstep=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwr_fit',tread,'INT')
+ if(tread==1) dtset%gwr_fit=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwr_tolqpe',tread,'ENE')
  if(tread==1) dtset%gwr_tolqpe=dprarr(1)
 

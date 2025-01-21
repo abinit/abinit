@@ -940,7 +940,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        ! Set entry to zero. Important as there are cycle instructions inside these loops
        ! and we don't want random numbers written to disk.
        my_gbuf(:,:,:,:, my_ik, iqbuf_cnt) = zero
-
        gks_atm = zero
 
        ! Symmetry indices for kk.
@@ -1616,17 +1615,9 @@ end if ! .not qq_is_gamma.
  ABI_FREE(kxc)
  ABI_FREE(vxc)
 
- call gs_ham_kqmp%free()
- call gs_ham_kmp%free()
- call wfd%free()
- call vcp%free()
- call screen%free()
- call pp_mesh%free()
- call gsph_c%free()
- call gsph_x%free()
- call gstore%free()
- call pawcprj_free(cwaveprj0)
- call pawcprj_free(cwaveprj)
+ call gs_ham_kqmp%free(); call gs_ham_kmp%free(); call wfd%free(); call vcp%free()
+ call screen%free(); call pp_mesh%free(); call gsph_c%free(); call gsph_x%free(); call gstore%free()
+ call pawcprj_free(cwaveprj0); call pawcprj_free(cwaveprj)
  ABI_FREE(cwaveprj0)
  ABI_FREE(cwaveprj)
 
