@@ -1301,7 +1301,7 @@ end subroutine cwavef_double_rfft_trick_unpack
 !! SIDE EFFECTS
 !!
 !! NOTES
-!! this code is a copied, simplied version of getghc_mGGA (see below) and should eventually be
+!! this code is a copied, simplified version of getghc_mGGA (see below) and should eventually be
 !! integrated into that code, to simplify maintenance
 !!
 !! SOURCE
@@ -1580,6 +1580,7 @@ subroutine getghc_mGGA(cwavef,ghc_mGGA,gbound_k,gprimd,istwf_k,kg_k,kpt,mgfft,mp
  integer :: idat,idir,ipw,nspinortot,shift
  logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc
  real(dp) :: gp2pi1,gp2pi2,gp2pi3,kpt_cart,kg_k_cart,weight=one
+ real(dp) :: scale_grad,scale_laplacian
 !arrays
  real(dp) :: kg_k_cart_vec(3)
  real(dp),allocatable :: cwavef1(:,:),cwavef2(:,:)
@@ -1590,11 +1591,13 @@ subroutine getghc_mGGA(cwavef,ghc_mGGA,gbound_k,gprimd,istwf_k,kg_k,kpt,mgfft,mp
 
 ! *********************************************************************
 
+ !JWZ debug
+ scale_grad=one
+ scale_laplacian=one
+
+
  ghc_mGGA(:,:)=zero
 
- ! JWZ debug
- ! return
- 
  if (nvloc/=1) return
 
  nspinortot=min(2,(1+mpi_enreg%paral_spinor)*my_nspinor)
@@ -1639,11 +1642,13 @@ subroutine getghc_mGGA(cwavef,ghc_mGGA,gbound_k,gprimd,istwf_k,kg_k,kpt,mgfft,mp
 !!$OMP PARALLEL DO
    do idat=1,ndat
      do ipw=1,npw_k
-        ghc_mGGA(:,ipw+(idat-1)*npw_k)=ghc_mGGA(:,ipw+(idat-1)*npw_k)-half*ghc1(:,ipw+(idat-1)*npw_k)
+        ghc_mGGA(:,ipw+(idat-1)*npw_k)=ghc_mGGA(:,ipw+(idat-1)*npw_k)-&
+          & scale_laplacian*half*ghc1(:,ipw+(idat-1)*npw_k)
      end do
    end do
    ABI_FREE(lcwavef)
 !  STEP3: Compute sum of (grad components of vxctaulocal)*(grad components of cwavef)
+!  note: since grad cwavef is in Cart frame, evidently grad vxc is also
    do idir=1,3
      call fourwf(1,vxctaulocal(:,:,:,:,1+idir),gcwavef(:,:,idir),ghc1,work,gbound_k,gbound_k,&
      istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
@@ -1651,7 +1656,8 @@ subroutine getghc_mGGA(cwavef,ghc_mGGA,gbound_k,gprimd,istwf_k,kg_k,kpt,mgfft,mp
 !!$OMP PARALLEL DO
      do idat=1,ndat
        do ipw=1,npw_k
-          ghc_mGGA(:,ipw+(idat-1)*npw_k)=ghc_mGGA(:,ipw+(idat-1)*npw_k)-half*ghc1(:,ipw+(idat-1)*npw_k)
+          ghc_mGGA(:,ipw+(idat-1)*npw_k)=ghc_mGGA(:,ipw+(idat-1)*npw_k)-&
+            & scale_grad*half*ghc1(:,ipw+(idat-1)*npw_k)
        end do
      end do
    end do ! idir
