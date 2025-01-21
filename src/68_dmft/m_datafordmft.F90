@@ -1540,7 +1540,7 @@ subroutine chipsi_gather(paw_dmft)
      ndim = nspinor * (2*lpawu+1)
      do isppol=1,nsppol
        do ib=1,mbandc
-         paw_dmft%chipsi(1:ndim,ib,ikpt,isppol,iatom) = buffer(ibuf+1:ibuf+ndim)
+         paw_dmft%chipsi(1:ndim,ib,ikpt,isppol,iatom) = buffer_tot(ibuf+1:ibuf+ndim)
          ibuf = ibuf + ndim
        end do ! ib
      end do ! isppol

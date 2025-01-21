@@ -2612,9 +2612,8 @@ end subroutine add_matlu
 !Local variables-------------------------------
  integer :: iatom,im1,im2,ispin,ispinor1,ispinor2,isppol
  integer :: lpawu,ndim,ndim_max,nspin,nspinor,nsppol
- complex(dpc), pointer :: mat_inp(:,:) => null()
  complex(dpc), pointer :: mat_out(:,:) => null(), slm2ylm(:,:) => null()
- complex(dpc), allocatable :: mat_tmp(:,:)
+ complex(dpc), allocatable :: mat_inp(:,:),mat_tmp(:,:)
  complex(dpc), target, allocatable :: mat_tmp2(:,:)
  character(len=1) :: c1,c2
  character(len=500) :: message
@@ -2647,6 +2646,7 @@ end subroutine add_matlu
      end do ! im1
    end if ! optprt>2
 
+   ABI_MALLOC(mat_inp,(ndim,ndim))
    ABI_MALLOC(mat_tmp,(ndim,nspin*ndim))
    ABI_MALLOC(mat_tmp2,(ndim,nspin*ndim))
 
@@ -2658,7 +2658,8 @@ end subroutine add_matlu
 
          ispin = ispin + 1
 
-         mat_inp => matlu(iatom)%mat(1+(ispinor1-1)*ndim:ndim*ispinor1,1+(ispinor2-1)*ndim:ispinor2*ndim,isppol)
+         ! Make copy here instead of creating a temporary when calling zgemm in order to please -fcheck
+         mat_inp(:,:) = matlu(iatom)%mat(1+(ispinor1-1)*ndim:ndim*ispinor1,1+(ispinor2-1)*ndim:ispinor2*ndim,isppol)
 
          if (optprt > 2) then
            write(message,'(2a,i2,a,i2,a,i2)') ch10,"SLM input matrix,&
@@ -2707,12 +2708,12 @@ end subroutine add_matlu
      end do ! ispinor2
    end do ! isppol
 
+   ABI_FREE(mat_inp)
    ABI_FREE(mat_tmp)
    ABI_FREE(mat_tmp2)
 
  end do ! iatom
 
- mat_inp => null()
  mat_out => null()
  slm2ylm => null()
 
