@@ -6610,6 +6610,22 @@ until the quasi-particle energies are converged within [[gwr_tolqpe]].
 ),
 
 Variable(
+    abivarname="gwr_fit",
+    varset="gw",
+    vartype="integer",
+    topics=['GW_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="GWR FIT",
+    requires="[[optdriver]] == 6",
+    added_in_version="10.3.4",
+    text=r"""
+A non-zero value activates the fit of the polarizabily and of the inverse dielectric matrix
+in order to accelerate the convergence of the GWR results wrt the number of points in the minimax mesh.
+""",
+),
+
+Variable(
     abivarname="gw_qlwl",
     varset="gw",
     vartype="real",

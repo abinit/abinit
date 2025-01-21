@@ -591,6 +591,11 @@ module m_gwr
    character(len=10) :: wc_space = "none"
    ! "none", "itau", "iomega"
 
+   !type(__slkmat_t),allocatable :: fit_r_params_qibz(:,:)
+   !type(__slkmat_t),allocatable :: fit_c_params_qibz(:,:)
+   ! (nqibz, ntau, nsppol)
+   ! Fit parameters for tchi/Wc (real and complex)
+
    !type(__slkmat_t),allocatable :: em1_qibz(:,:,:)
    ! Inverse dielectric matrix at omega = 0
    ! (nqibz, nsppol)
@@ -625,6 +630,7 @@ module m_gwr
    ! Path to the GWR.nc file with output results.
 
    logical :: gwrnc_write = .True.
+   ! Activate/deactivate the output of the GWR.nc file.
 
    real(dp),allocatable :: kbz(:,:)
    ! (3, nkbz)
@@ -1578,6 +1584,12 @@ end block
  ABI_MALLOC(gwr%tchi_qibz, (gwr%nqibz, gwr%ntau, gwr%nsppol))
  ABI_MALLOC(gwr%sigc_kibz, (2, gwr%nkibz, gwr%ntau, gwr%nsppol))
 
+ !if (gwr%dtset%gwr_fit /= 0) then
+ !  ! Allocate entries for fit.
+ !  ABI_MALLOC(gwr%fit_r_params_qibz, (gwr%nqibz, gwr%nsppol))
+ !  ABI_MALLOC(gwr%fit_c_params_qibz, (gwr%nqibz, gwr%nsppol))
+ !end if
+
  ! ====================================
  ! Create netcdf file to store results
  ! ====================================
@@ -1854,7 +1866,30 @@ subroutine gwr_malloc_free_mats(gwr, mask_ibz, what, action)
          if (action == "free") call mat%free()
        end do
 
-    case ("sigma")
+     !case ("fit")
+     !  ! ===========================
+     !  ! Allocate/free fit_q(g,g')
+     !  ! ===========================
+     !  ABI_CHECK_IEQ(size(mask_ibz), gwr%nqibz, "wrong mask size")
+     !  if (my_it /= 1) cycle ! Fit parameters do not depend on ntau
+
+     !  do iq_ibz=1,gwr%nqibz
+     !    if (mask_ibz(iq_ibz) == 0) cycle
+     !    npwsp = gwr%tchi_desc_qibz(iq_ibz)%npw * gwr%nspinor
+     !    ABI_CHECK(block_dist_1d(npwsp, gwr%g_comm%nproc, col_bsize, msg), msg)
+     !    associate (r_params => gwr%fit_r_params_qibz(iq_ibz, spin), c_params => gwr%fit_c_params_qibz(iq_ibz, spin))
+     !    if (action == "malloc") then
+     !       call r_params%init(npwsp, npwsp, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize])
+     !       call c_params%init(npwsp, npwsp, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize])
+     !    end if
+     !    if (action == "free") then
+     !      call r_params%free()
+     !      call c_params%free()
+     !    end if
+     !    end associate
+     !  end do
+
+     case ("sigma")
        ! ================================
        ! Allocate/free sigmac_kibz(g,g')
        ! ================================
@@ -1965,6 +2000,14 @@ subroutine gwr_free(gwr)
    call slk_array_free(gwr%tchi_qibz)
    ABI_FREE(gwr%tchi_qibz)
  end if
+ !if (allocated(gwr%fit_r_params_qibz)) then
+ !  call slk_array_free(gwr%fit_r_params_qibz)
+ !  ABI_FREE(gwr%fit_r_params_qibz)
+ !end if
+ !if (allocated(gwr%fit_c_params_qibz)) then
+ !  call slk_array_free(gwr%fit_c_params_qibz)
+ !  ABI_FREE(gwr%fit_c_params_qibz)
+ !end if
  if (allocated(gwr%wc_qibz)) then
    call slk_array_free(gwr%wc_qibz)
    ABI_FREE(gwr%wc_qibz)
@@ -3501,15 +3544,18 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
 
 !Local variables-------------------------------
 !scalars
- integer :: my_iqi, my_is, ig1, ig2, my_it, ierr, iq_ibz, itau, spin, it0, iw
- integer :: ndat, idat, loc1_size, loc2_size, batch_size
+ integer, parameter :: W_SPACE = 0, TAU_SPACE = 1
+ integer :: my_iqi, my_is, ig1, ig2, my_it, ierr, iq_ibz, itau, spin, it0, iw, cnt
+ integer :: ndat, idat, loc1_size, loc2_size, batch_size, from_space
  real(dp) :: cpu, wall, gflops
+ complex(dp) :: cval
  logical :: sum_spins_
 !arrays
- integer,allocatable :: requests(:)
+ integer :: mask_qibz(gwr%nqibz)
  real(dp), contiguous, pointer :: weights_ptr(:,:)
+ real(dp),allocatable :: alpha_r(:,:)
  complex(dp) :: wgt_globmy(gwr%ntau, gwr%my_ntau)  ! Complex instead of real to be able to call ZGEMM.
- complex(dp),allocatable :: cwork_myit(:,:,:), glob_cwork(:,:,:)
+ complex(dp),allocatable :: cwork_myit(:,:,:), glob_cwork(:,:,:), beta_c(:,:)
  type(__slkmat_t), pointer :: mats(:)
 ! *************************************************************************
 
@@ -3517,11 +3563,13 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
  sum_spins_ = .False.; if (present(sum_spins)) sum_spins_ = sum_spins
 
  call wrtout(std_out, sjoin(" Performing cosine transform. what:", what, ", mode:", mode))
+ mask_qibz = 0; mask_qibz(gwr%my_qibz_inds(:)) = 1
 
  ! Target weights depending on mode.
  select case(mode)
  case ("iw2t")
    ! From omega to tau
+   from_space = W_SPACE
    if (what == "tchi") then
      ABI_CHECK(gwr%tchi_space == "iomega", sjoin("mode:", mode, "with what:", what, "and tchi_space:", gwr%tchi_space))
      gwr%tchi_space = "itau"
@@ -3534,6 +3582,7 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
 
  case ("it2w")
    ! From tau to omega
+   from_space = TAU_SPACE
    if (what == "tchi") then
      ABI_CHECK(gwr%tchi_space == "itau", sjoin("mode:", mode, " with what:", what, "and tchi_space:", gwr%tchi_space))
      gwr%tchi_space = "iomega"
@@ -3555,6 +3604,8 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
      wgt_globmy(iw, my_it) = weights_ptr(iw, itau)
    end do
  end do
+
+ if (gwr%dtset%gwr_fit /= 0) call gwr%malloc_free_mats(mask_qibz, "fit", "malloc")
 
  ! Perform inhomogeneous FT in parallel.
  do my_is=1,gwr%my_nspins
@@ -3581,40 +3632,94 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
 
      ABI_MALLOC(cwork_myit, (gwr%my_ntau, loc1_size, batch_size))
      ABI_MALLOC(glob_cwork, (gwr%ntau, loc1_size, batch_size))
-     ABI_MALLOC(requests, (batch_size))
+     if (gwr%dtset%gwr_fit /= 0) then
+       ABI_MALLOC(alpha_r, (loc1_size, batch_size))
+       ABI_MALLOC(beta_c, (loc1_size, batch_size))
+     end if
 
      do ig2=1,mats(it0)%sizeb_local(2), batch_size
        ndat = blocked_loop(ig2, mats(it0)%sizeb_local(2), batch_size)
 
+       ! TODO
+       ! When fit mode is activated, collect all tau/omega points for this set of (g1, g2) inside tau_comm
+       ! Each MPI rank performs the fit locally using the first point and all the points treated by the rank.
+       ! compute loss functions of all the fits and find the one leading to the minimum loss.
+       if (gwr%dtset%gwr_fit /= 0) then
+         glob_cwork = zero
+         do idat=1,ndat
+           do my_it=1,gwr%my_ntau
+             itau = gwr%my_itaus(my_it)
+             do ig1=1,mats(it0)%sizeb_local(1)
+               glob_cwork(itau, ig1, idat) = mats(itau)%buffer_cplx(ig1, ig2+idat-1)
+             end do
+           end do
+         end do
+         call xmpi_sum(glob_cwork, gwr%tau_comm%value, ierr)
+
+         ! Start the fit
+         cnt = 0; alpha_r = zero; beta_c = zero
+         do idat=1,ndat
+           do ig1=1,mats(it0)%sizeb_local(1)
+              cnt = cnt + 1; if (gwr%tau_comm%skip(cnt)) cycle ! MPI parallelism inside tau_comm
+              if (from_space == TAU_SPACE) then
+                call fit_tau_exp(gwr%ntau, gwr%tau_mesh, gwr%tau_wgs, glob_cwork(:,ig1,idat), &
+                                 alpha_r(ig1,idat), beta_c(ig1,idat))
+              else if (from_space == W_SPACE) then
+                call fit_iomega(gwr%ntau, gwr%iw_mesh, gwr%iw_wgs, glob_cwork(:,ig1,idat), &
+                                alpha_r(ig1,idat), beta_c(ig1,idat))
+              else
+                ABI_ERROR(sjoin("Invalid from_space:", itoa(from_space)))
+              end if
+              !gwr%fit_c_params_qibz(iq_ibz, spin)%buffer_cplx(ig1, ig2+idat-1) = ??
+              !gwr%fit_r_params_qibz(iq_ibz, spin)%buffer_real(ig1, ig2+idat-1) = ??
+           end do
+         end do
+         call xmpi_sum(alpha_r, gwr%tau_comm%value, ierr)
+         call xmpi_sum(beta_c, gwr%tau_comm%value, ierr)
+       end if ! gwr_fit
+
        ! Extract (g1, g2) matrix elements as a function of tau/omega
-       !!$OMP PARALLEL DO PRIVATE(itau) COLLAPSE(2)
+       !!$OMP PARALLEL DO PRIVATE(itau, cval) COLLAPSE(2)
        do idat=1,ndat
          do my_it=1,gwr%my_ntau
            itau = gwr%my_itaus(my_it)
+           cval = zero
            do ig1=1,mats(it0)%sizeb_local(1)
-             cwork_myit(my_it, ig1, idat) = mats(itau)%buffer_cplx(ig1, ig2+idat-1)
+             if (gwr%dtset%gwr_fit /= 0) then
+               ! Eval the fit and remove it from the signal.
+               if (from_space == TAU_SPACE) then
+                 call fit_tau_exp_eval("func", gwr%tau_mesh(itau), alpha_r(ig1,idat), beta_c(ig1,idat), cval)
+               else if (from_space == W_SPACE) then
+                 call fit_iomega_eval("func", gwr%iw_mesh(itau), alpha_r(ig1,idat), beta_c(ig1,idat), cval)
+               end if
+             end if
+             cwork_myit(my_it, ig1, idat) = mats(itau)%buffer_cplx(ig1, ig2+idat-1) - cval
            end do
          end do
        end do
 
        ! Compute contribution to itau matrix
-       !do idat=1,ndat
-       !  call ZGEMM("N", "N", gwr%ntau, loc1_size, gwr%my_ntau, cone, &
-       !             wgt_globmy, gwr%ntau, cwork_myit(1,1,idat), gwr%my_ntau, czero, glob_cwork(1,1,idat), gwr%ntau)
-       !end do
-
        call ZGEMM("N", "N", gwr%ntau, loc1_size*ndat, gwr%my_ntau, cone, &
                    wgt_globmy, gwr%ntau, cwork_myit, gwr%my_ntau, czero, glob_cwork, gwr%ntau)
 
        call xmpi_sum(glob_cwork, gwr%tau_comm%value, ierr)
 
        ! Update my local (g1, g2) entry to have it in imaginary-frequency.
-       !!$OMP PARALLEL DO PRIVATE(itau) COLLAPSE(2)
+       !!$OMP PARALLEL DO PRIVATE(itau, cval) COLLAPSE(2)
        do idat=1,ndat
          do my_it=1,gwr%my_ntau
            itau = gwr%my_itaus(my_it)
+           cval = zero
            do ig1=1,mats(it0)%sizeb_local(1)
-             mats(itau)%buffer_cplx(ig1, ig2+idat-1) = glob_cwork(itau, ig1, idat)
+             if (gwr%dtset%gwr_fit /= 0) then
+               ! Add Fourier transform of the fitted model.
+               if (from_space == TAU_SPACE) then
+                 call fit_tau_exp_eval("ft", gwr%iw_mesh(itau), alpha_r(ig1,idat), beta_c(ig1,idat), cval)
+               else if (from_space == W_SPACE) then
+                 call fit_iomega_eval("ft", gwr%tau_mesh(itau), alpha_r(ig1,idat), beta_c(ig1,idat), cval)
+               end if
+             end if
+             mats(itau)%buffer_cplx(ig1, ig2+idat-1) = glob_cwork(itau, ig1, idat) + cval
            end do
          end do
        end do
@@ -3623,7 +3728,8 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
 
      ABI_FREE(cwork_myit)
      ABI_FREE(glob_cwork)
-     ABI_FREE(requests)
+     ABI_SFREE(alpha_r)
+     ABI_SFREE(beta_c)
      end associate
    end do ! my_iqi
  end do ! my_is
@@ -3663,9 +3769,153 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
    end do ! my_iqi
  end if
 
+ if (gwr%dtset%gwr_fit /= 0) call gwr%malloc_free_mats(mask_qibz, "fit", "free")
+
  call cwtime_report(" gwr_cos_transform:", cpu, wall, gflops)
 
 end subroutine gwr_cos_transform
+!!***
+
+!!****f* m_gwr/fit_tau_exp
+!! NAME
+!!
+!! FUNCTION
+!!
+!! SOURCE
+
+subroutine fit_tau_exp(ntau, tau_mesh, tau_wgs, cvals, alpha_r, beta_c)
+
+!Arguments ------------------------------------
+ integer,intent(in) :: ntau
+ real(dp),intent(in) :: tau_mesh(ntau), tau_wgs(ntau)
+ complex(dp),intent(in) :: cvals(ntau)
+ real(dp),intent(out) :: alpha_r
+ complex(dp),intent(out) :: beta_c
+
+!Local variables-------------------------------
+ integer :: ii, imin
+ real(dp) :: loss, min_loss, my_alpha_r
+ complex(dp) :: my_beta_c, cfit(ntau)
+! *************************************************************************
+
+ imin = -1; min_loss = huge(one)
+ do ii=2,ntau
+   ! Find my_beta_c and my_alpha_r
+
+   ! Compute loss function.
+   cfit(:) = my_beta_c * exp(-my_alpha_r ** tau_mesh)
+   loss = sum(tau_wgs * abs(cvals - cfit)**2)
+   if (loss < min_loss) then
+     imin = ii; min_loss = loss
+   end if
+ end do
+
+ alpha_r = my_alpha_r
+ beta_c = my_beta_c
+
+end subroutine fit_tau_exp
+!!***
+
+!!****f* m_gwr/fit_tau_exp_eval
+!! NAME
+!!
+!! FUNCTION
+!!
+!! SOURCE
+
+pure subroutine fit_tau_exp_eval(what, xx, alpha_r, beta_c, cval)
+
+!Arguments ------------------------------------
+ character(len=*),intent(in) :: what
+ real(dp),intent(in) :: xx, alpha_r
+ complex(dp),intent(in) :: beta_c
+ complex(dp),intent(out) :: cval
+
+!Local variables-------------------------------
+! integer :: ii
+! *************************************************************************
+
+ select case (what)
+ case ("func")
+   cval = beta_c * exp(-alpha_r ** xx)
+ case ("ft")
+   !cval = beta_c * exp(-alpha_r ** xx)
+ case default
+   cval = huge(one)
+ end select
+
+end subroutine fit_tau_exp_eval
+!!***
+
+!!****f* m_gwr/fit_iomega
+!! NAME
+!!
+!! FUNCTION
+!!
+!! SOURCE
+
+subroutine fit_iomega(ntau, iw_mesh, iw_wgs, cvals, alpha_r, beta_c)
+
+!Arguments ------------------------------------
+ integer,intent(in) :: ntau
+ real(dp),intent(in) :: iw_mesh(ntau), iw_wgs(ntau)
+ complex(dp),intent(in) :: cvals(ntau)
+ real(dp),intent(out) :: alpha_r
+ complex(dp),intent(out) :: beta_c
+
+!Local variables-------------------------------
+ integer :: ii, imin
+ real(dp) :: loss, min_loss, my_alpha_r
+ complex(dp) :: my_beta_c, cfit(ntau)
+! *************************************************************************
+
+ imin = -1; min_loss = huge(one)
+ do ii=2,ntau
+   ! Find my_beta_c and my_alpha_r
+
+   ! Compute loss function.
+   cfit(:) = my_beta_c * exp(-my_alpha_r ** iw_mesh)
+   !loss = sum(iw_wgs * abs(cvals - cfit)**2)
+   if (loss < min_loss) then
+     imin = ii; min_loss = loss
+   end if
+ end do
+
+ alpha_r = my_alpha_r
+ beta_c = my_beta_c
+
+end subroutine fit_iomega
+!!***
+
+!!****f* m_gwr/fit_iomega_eval
+!! NAME
+!!
+!! FUNCTION
+!!
+!! SOURCE
+
+pure subroutine fit_iomega_eval(what, xx, alpha_r, beta_c, cval)
+
+!Arguments ------------------------------------
+ character(len=*),intent(in) :: what
+ real(dp),intent(in) :: xx, alpha_r
+ complex(dp),intent(in) :: beta_c
+ complex(dp),intent(out) :: cval
+
+!Local variables-------------------------------
+! integer :: ii
+! *************************************************************************
+
+ select case (what)
+ case ("func")
+   !cval = beta_c * exp(-alpha_r ** xx)
+ case ("ft")
+   !cval = beta_c * exp(-alpha_r ** xx)
+ case default
+   !cval = huge(one)
+ end select
+
+end subroutine fit_iomega_eval
 !!***
 
 !----------------------------------------------------------------------
@@ -3695,7 +3945,6 @@ subroutine desc_init(desc, kk, istwfk, ecut, gwr, kin_sorted)
 
 !Local variables-------------------------------
  integer :: ig
-
 ! *************************************************************************
 
  desc%kin_sorted = .False.; if (present(kin_sorted)) desc%kin_sorted = kin_sorted
@@ -4048,7 +4297,7 @@ subroutine gwr_build_tchi(gwr)
  real(dp) :: tchi_rfact, mem_mb, local_max, max_abs_imag_chit, wtqp, wtqm
  complex(gwpc) :: head_q
  complex(dp) :: chq(3), wng(3)
- logical :: q_is_gamma, use_shmem_for_k, use_mpi_for_k, print_time ! isirr_k,
+ logical :: q_is_gamma, use_shmem_for_k, use_mpi_for_k, print_time, keep_tchim ! isirr_k,
  character(len=5000) :: msg
  type(desc_t),pointer :: desc_q ! desc_k,
  type(__slkmat_t) :: chi_rgp
@@ -4078,8 +4327,8 @@ subroutine gwr_build_tchi(gwr)
  ! Allocate tchi_q(g,g') matrices
  mask_qibz = 0; mask_qibz(gwr%my_qibz_inds(:)) = 1
  call gwr%print_mem([std_out])
- call gwr%malloc_free_mats(mask_qibz, "tchi", "malloc")
 
+ call gwr%malloc_free_mats(mask_qibz, "tchi", "malloc")
  max_abs_imag_chit = zero
 
  ! Setup FFT mesh in the supercell.
@@ -4468,6 +4717,12 @@ end if
  ! Print trace of chi_q(i tau) matrices for testing purposes.
  if (gwr%dtset%prtvol > 0) call gwr%print_trace(units, "tchi_qibz")
 
+ keep_tchim = .False.
+ if (gwr%dtset%prtsuscep == -1) then
+   call gwr%ncwrite_tchi_wc("tchi", "tau", keep_tchim, trim(gwr%dtfil%filnam_ds(4))//'_TCHIM.nc')
+   keep_tchim = .True.
+ end if
+
  ! Transform irreducible tchi from imaginary tau to imaginary omega.
  ! Also sum over spins to get total tchi if collinear spin.
  call gwr%cos_transform("tchi", "it2w", sum_spins=.True.)
@@ -4507,7 +4762,9 @@ end if
  if (gwr%dtset%prtvol > 0) call gwr%print_trace(units, "tchi_qibz")
 
  ! Write file with chi0(i omega) if asked by user.
- if (gwr%dtset%prtsuscep > 0) call gwr%ncwrite_tchi_wc("tchi", trim(gwr%dtfil%filnam_ds(4))//'_TCHIM.nc')
+ if (abs(gwr%dtset%prtsuscep) == 1) then
+   call gwr%ncwrite_tchi_wc("tchi", "omega", keep_tchim, trim(gwr%dtfil%filnam_ds(4))//'_TCHIM.nc')
+ end if
 
  call cwtime_report(" gwr_build_tchi:", cpu_all, wall_all, gflops_all)
  call timab(1923, 2, tsec)
@@ -4888,7 +5145,7 @@ subroutine gwr_build_wc(gwr)
  integer :: my_iqi, my_it, my_is, iq_ibz, spin, itau, iw, ierr
  integer :: il_g1, il_g2, ig1, ig2, iglob1, iglob2, ig0
  real(dp) :: cpu_all, wall_all, gflops_all, cpu_q, wall_q, gflops_q
- logical :: q_is_gamma, free_tchi, print_time
+ logical :: q_is_gamma, free_tchi, print_time, keep_wcimw
  character(len=5000) :: msg
  complex(dpc) :: vcs_g1, vcs_g2
  type(__slkmat_t) :: em1
@@ -5057,13 +5314,19 @@ subroutine gwr_build_wc(gwr)
  if (gwr%dtset%prtvol > 0) call gwr%print_trace(units, "wc_qibz")
 
  ! Write file with Wc(i omega)
- !if (gwr%dtset%prtsuscep > 0) call gwr%ncwrite_tchi_wc("wc", trim(gwr%dtfil%filnam_ds(4))//'_WCIMW.nc')
+ keep_wcimw = .False.
+ if (gwr%dtset%prtsuscep == -1) then
+   call gwr%ncwrite_tchi_wc("wc", "omega", keep_wcimw, trim(gwr%dtfil%filnam_ds(4))//'_WCIM.nc')
+   keep_wcimw = .True.
+ end if
 
  ! Cosine transform from iomega to itau to get Wc(i tau)
  call gwr%cos_transform("wc", "iw2t")
 
  ! Write file with Wc(i tau)
- !if (gwr%dtset%prtsuscep > 0) call gwr%ncwrite_tchi_wc("wc", trim(gwr%dtfil%filnam_ds(4))//'_WCIMT.nc')
+ if (abs(gwr%dtset%prtsuscep) == 1) then
+   call gwr%ncwrite_tchi_wc("wc", "tau", keep_wcimw, trim(gwr%dtfil%filnam_ds(4))//'_WCIM.nc')
+ end if
 
  ! Print trace of wc_q(iomega) matrices for testing purposes.
  !if (gwr%dtset%prtvol > 0) call gwr%print_trace(units, "wc_qibz")
@@ -6559,21 +6822,24 @@ end subroutine gwr_check_scf_cycle
 !!  Write tchi or wc to netcdf file
 !!
 !! INPUTS
+!!  what: "tchi" or "wc"
+!!  wt_space: "omega" or "tau"
 !!
 !! OUTPUT
 !!
 !! SOURCE
 
-subroutine gwr_ncwrite_tchi_wc(gwr, what, filepath)
+subroutine gwr_ncwrite_tchi_wc(gwr, what, wt_space, keep_file, filepath)
 
 !Arguments ------------------------------------
  class(gwr_t),target,intent(in) :: gwr
- character(len=*),intent(in) :: what, filepath
+ logical,intent(in) :: keep_file
+ character(len=*),intent(in) :: what, wt_space, filepath
 
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0
- integer :: my_is, my_iqi, my_it, spin, iq_ibz, itau, npwtot_q, my_ncols, my_gcol_start, ncid, ncerr !, ierr
+ integer :: my_is, my_iqi, my_it, spin, iq_ibz, itau, npwtot_q, my_ncols, my_gcol_start, ncid, ncerr, var_id !, ierr
  real(dp) :: cpu, wall, gflops
 !arrays
  real(dp), ABI_CONTIGUOUS pointer :: fptr(:,:,:)
@@ -6587,9 +6853,16 @@ subroutine gwr_ncwrite_tchi_wc(gwr, what, filepath)
  call cwtime(cpu, wall, gflops, "start")
 
  if (gwr%comm%me == master) then
-   call wrtout(std_out, sjoin(" Writing", what, "to:", filepath))
-   NCF_CHECK(nctk_open_create(ncid, filepath, xmpi_comm_self))
+   call wrtout(std_out, sjoin(" Writing", what, "with wt_space:", wt_space, "to:", filepath))
+   if (keep_file) then
+     NCF_CHECK(nctk_open_modify(ncid, filepath, xmpi_comm_self))
+   else
+     NCF_CHECK(nctk_open_create(ncid, filepath, xmpi_comm_self))
+   end if
+
+   ! Write structure and qp_ebands
    NCF_CHECK(gwr%cryst%ncwrite(ncid))
+   NCF_CHECK(gwr%qp_ebands%ncwrite(ncid))
 
    ! Add dimensions.
    ncerr = nctk_def_dims(ncid, [ &
@@ -6610,10 +6883,15 @@ subroutine gwr_ncwrite_tchi_wc(gwr, what, filepath)
      nctkarr_t("iw_mesh", "dp", "ntau"), &
      nctkarr_t("iw_wgs", "dp", "ntau"), &
      nctkarr_t("gvecs", "int", "three, mpw, nqibz"), &
-     nctkarr_t("chinpw_qibz", "int", "nqibz"), &
-     nctkarr_t("mats", "dp", "two, mpw, mpw, ntau, nqibz, nsppol") &
+     nctkarr_t("chinpw_qibz", "int", "nqibz") &
    ])
    NCF_CHECK(ncerr)
+
+   if (wt_space == "omega") then
+     NCF_CHECK(nctk_def_arrays(ncid, [nctkarr_t("mats_w", "dp", "two, mpw, mpw, ntau, nqibz, nsppol")]))
+   else if (wt_space == "tau") then
+     NCF_CHECK(nctk_def_arrays(ncid, [nctkarr_t("mats_tau", "dp", "two, mpw, mpw, ntau, nqibz, nsppol")]))
+   end if
 
    ! Write global arrays.
    NCF_CHECK(nctk_set_datamode(ncid))
@@ -6671,7 +6949,15 @@ subroutine gwr_ncwrite_tchi_wc(gwr, what, filepath)
        fptr(1,:,:) = dble(mats(itau)%buffer_cplx)
        fptr(2,:,:) = aimag(mats(itau)%buffer_cplx)
 
-       ncerr = nf90_put_var(ncid, vid("mats"), fptr, &
+       if (wt_space == "omega") then
+         var_id = vid("mats_w")
+       else if (wt_space == "tau") then
+         var_id = vid("mats_tau")
+       else
+         ABI_ERROR(sjoin("Invalid wt_space:", wt_space))
+       end if
+
+       ncerr = nf90_put_var(ncid, var_id, fptr, &
                             start=[1, 1, my_gcol_start, itau, iq_ibz, spin], &
                             count=[2, npwtot_q, my_ncols, 1, 1, 1])
                             !stride=[1, gwr%g_comm%nproc, 1, 1, 1])
