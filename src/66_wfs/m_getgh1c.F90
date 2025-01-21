@@ -2370,16 +2370,17 @@ subroutine getgh1c_mGGA(cwavein,dkinpw,gbound_k,gh1c_mGGA,gmet,gprimd,idir,istwf
    dgcwavef = zero; dlcwavef = zero
    do idat=1,ndat
      do ipw=1,npw_k
-       dgcwavef(1,ipw+(idat-1)*npw_k,1:3)=+two_pi*gprimd(1:3,idir)*&
+       dgcwavef(1,ipw+(idat-1)*npw_k,1:3)=-two_pi*gprimd(1:3,idir)*&
          &cwavein(2,ipw+(idat-1)*npw_k)
-       dgcwavef(2,ipw+(idat-1)*npw_k,1:3)=-two_pi*gprimd(1:3,idir)*&
+       dgcwavef(2,ipw+(idat-1)*npw_k,1:3)=+two_pi*gprimd(1:3,idir)*&
          &cwavein(1,ipw+(idat-1)*npw_k)
-       !dlcwavef(1:2,ipw+(idat-1)*npw_k)=-two*two_pi**2*&
-       !  & DOT_PRODUCT(gmet(idir,1:3),(kpt(1:3)+kg_k(1:3,ipw)))*cwavein(1:2,ipw+(idat-1)*npw_k)
-       dlcwavef(1:2,ipw+(idat-1)*npw_k)=-two*dkinpw(ipw)*cwavein(1:2,ipw+(idat-1)*npw_k)
+       dlcwavef(1:2,ipw+(idat-1)*npw_k)=-two*two_pi**2*&
+         & DOT_PRODUCT(gmet(idir,1:3),(kpt(1:3)+kg_k(1:3,ipw)))*cwavein(1:2,ipw+(idat-1)*npw_k)
+       !dlcwavef(1:2,ipw+(idat-1)*npw_k)=-two*dkinpw(ipw)*cwavein(1:2,ipw+(idat-1)*npw_k)
      end do
    end do
 !  STEP2: Compute (vxctaulocal)*(Laplacian of cwavef) and add it to ghc
+   ghc1=zero
    call fourwf(1,vxctaulocal(:,:,:,:,1),dlcwavef,ghc1,work,gbound_k,gbound_k,&
 &   istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
 &   tim_fourwf,weight,weight,gpu_option=gpu_option)
@@ -2392,6 +2393,7 @@ subroutine getgh1c_mGGA(cwavein,dkinpw,gbound_k,gh1c_mGGA,gmet,gprimd,idir,istwf
    end do
 !  STEP3: Compute sum of (grad components of vxctaulocal)*(grad components of cwavef)
    do ii=1,3
+     ghc1=zero
      call fourwf(1,vxctaulocal(:,:,:,:,1+ii),dgcwavef(:,:,ii),ghc1,work,gbound_k,gbound_k,&
      istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
 &     tim_fourwf,weight,weight,gpu_option=gpu_option)
