@@ -332,15 +332,13 @@ check_fortran_source_runs(
   HAVE_FC_IEEE_EXCEPTIONS
   SRC_EXT f90)
 
-# TODO : not sure of the purpose of this one, if does not compile
-# since -Werror=line-truncation
-# check_fortran_source_runs(
-#   "program test
-#      implicit none
-#      write(*,*) \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\" !142
-#    end program test"
-#   HAVE_FC_LONG_LINES
-#   SRC_EXT f90)
+check_fortran_source_runs(
+  "program test
+     implicit none
+     write(*,*) \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\" !142
+   end program test"
+  HAVE_FC_LONG_LINES
+  SRC_EXT f90)
 
 check_fortran_source_runs(
   "program test
