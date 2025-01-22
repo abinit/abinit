@@ -2323,7 +2323,7 @@ subroutine getgh1c_mGGA(cwavein,dkinpw,gbound_k,gh1c_mGGA,gmet,gprimd,idir,istwf
  integer,parameter :: tim_fourwf=1
  real(dp) :: weight=one
  real(dp) :: dkcartdk
- real(dp) :: scale_grad, scale_laplacian
+ real(dp) :: dlfac,scale_grad, scale_laplacian
  real(dp) :: gp2pi1,gp2pi2,gp2pi3,kpt_cart,kg_k_cart
  logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc
  !arrays
@@ -2334,6 +2334,7 @@ subroutine getgh1c_mGGA(cwavein,dkinpw,gbound_k,gh1c_mGGA,gmet,gprimd,idir,istwf
  ! scale_grad zero, scale_laplacian one gives poor agreement between 2DEtotals
  scale_grad=one
  scale_laplacian=one
+ dlfac = -two*two_pi*two_pi
  
  if(present(gpu_option)) then
     gpu_option_=gpu_option
@@ -2370,13 +2371,10 @@ subroutine getgh1c_mGGA(cwavein,dkinpw,gbound_k,gh1c_mGGA,gmet,gprimd,idir,istwf
    dgcwavef = zero; dlcwavef = zero
    do idat=1,ndat
      do ipw=1,npw_k
-       dgcwavef(1,ipw+(idat-1)*npw_k,1:3)=-two_pi*gprimd(1:3,idir)*&
-         &cwavein(2,ipw+(idat-1)*npw_k)
-       dgcwavef(2,ipw+(idat-1)*npw_k,1:3)=+two_pi*gprimd(1:3,idir)*&
-         &cwavein(1,ipw+(idat-1)*npw_k)
-       dlcwavef(1:2,ipw+(idat-1)*npw_k)=-two*two_pi**2*&
-         & DOT_PRODUCT(gmet(idir,1:3),(kpt(1:3)+kg_k(1:3,ipw)))*cwavein(1:2,ipw+(idat-1)*npw_k)
-       !dlcwavef(1:2,ipw+(idat-1)*npw_k)=-two*dkinpw(ipw)*cwavein(1:2,ipw+(idat-1)*npw_k)
+       dgcwavef(1,ipw+(idat-1)*npw_k,1:3)=-two_pi*gprimd(1:3,idir)*cwavein(2,ipw+(idat-1)*npw_k)
+       dgcwavef(2,ipw+(idat-1)*npw_k,1:3)=+two_pi*gprimd(1:3,idir)*cwavein(1,ipw+(idat-1)*npw_k)
+       dlcwavef(1:2,ipw+(idat-1)*npw_k)=dlfac*DOT_PRODUCT(gmet(idir,:),(kpt(:)+kg_k(:,ipw)))*&
+         &cwavein(1:2,ipw+(idat-1)*npw_k)
      end do
    end do
 !  STEP2: Compute (vxctaulocal)*(Laplacian of cwavef) and add it to ghc
