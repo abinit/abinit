@@ -2878,11 +2878,11 @@ subroutine dfpt_prtene(berryopt,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrn
    if(ipert>=1.and.ipert<=natom)then
      erelax=ek0+edocc+eeig0+eloc0+elpsp1+ehart1+exc1+enl0+enl1+epaw1
   else if(ipert==natom+1.or.ipert==natom+2)then
-     ! JWZ: end0 and evxctau0 are included as "local" in getghc, while
-     ! JWZ: end1 and evxctau1 are included in gvnlx1 (non local) in getgh1c
-     ! JWZ: therefore, in erelax, end0 and evxctau0 are added in explicitly while
-     ! JWZ: end1 and evxctau1 are already present in enl1
-     erelax=ek0+edocc+eeig0+eloc0+ek1+ehart1+exc1+enl0+enl1+epaw1+end0+evxctau0
+     ! NOTE: end0 and evxctau0 are included as "local" in getghc, while
+     !   end1 and evxctau1 are included in gvnlx1 (non local) in getgh1c
+     !   but in dfpt_vtowfk, end1 and evxctau1 have been subtracted from enl1,
+     !   at the same point where ek1 is subtracted from enl1, leaving enl1 "pure"
+     erelax=ek0+edocc+eeig0+eloc0+ek1+ehart1+exc1+enl0+enl1+epaw1+end0+end1+evxctau0+evxctau1
    else if(ipert==natom+3.or.ipert==natom+4)then
      erelax=ek0+edocc+eeig0+eloc0+ek1+elpsp1+ehart1+exc1+enl0+enl1+epaw1
    else if(ipert==natom+5)then
@@ -2985,7 +2985,7 @@ subroutine dfpt_prtene(berryopt,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrn
    call wrtout(iout,msg)
    call wrtout(std_out,msg)
    write(msg, '(a,es20.10,a)' ) &
-&   '    (  non-var. 2DEtotal :',0.5_dp*(ek1+enl1_effective)+eovl1,' Ha)'
+&   '    (  non-var. 2DEtotal :',0.5_dp*(ek1+enl1_effective+end1+evxctau1)+eovl1,' Ha)'
    call wrtout(iout,msg)
    call wrtout(std_out,msg)
 
