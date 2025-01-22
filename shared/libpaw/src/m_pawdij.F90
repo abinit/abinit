@@ -2621,9 +2621,6 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
    has_nucdipmom=.FALSE.
  end if
 
- !! deactivate nuclear dipole for testing
- has_nucdipmom=.FALSE.
-
 !------------------------------------------------------------------------
 !----------- Allocations and initializations
 !------------------------------------------------------------------------
