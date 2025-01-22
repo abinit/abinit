@@ -577,40 +577,60 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
 
 !  === Diagonal term(s) (up-up, down-down)
 
-       !$OMP TARGET UPDATE FROM(gxfac_,gx,enl_)
+       !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) &
+       !$OMP& MAP(to:gxfac_,gx,enl_ptr,atindx1,sij) PRIVATE(idat,ispinor)
        do idat=1,ndat
-       do ispinor=1,nspinor
-         ispinor_index=ispinor+shift
-         do ia=1,nincat
-           index_enl=atindx1(iatm+ia)
-           do jlmn=1,nlmn
-             j0lmn=jlmn*(jlmn-1)/2
-             jjlmn=j0lmn+jlmn
-             enl_(1)=enl_ptr(2*jjlmn-1,index_enl,ispinor_index)
-             if (paw_opt==2) enl_(1)=enl_(1)-lambda(idat)*sij(jjlmn)
-             gxj(1:cplex)=gx(1:cplex,jlmn+(ia-1)*nlmn+ibeg,ispinor,idat)
-             gxfac_(1,jlmn+(ia-1)*nlmn+ibeg,ispinor,idat)=gxfac_(1,jlmn+(ia-1)*nlmn+ibeg,ispinor,idat)+enl_(1)*gxj(1)
-             if (cplex==2)  gxfac_(2,jlmn+(ia-1)*nlmn+ibeg,ispinor,idat)=gxfac_(2,jlmn+(ia-1)*nlmn+ibeg,ispinor,idat)+enl_(1)*gxj(2)
-             do ilmn=1,jlmn-1
-               ijlmn=j0lmn+ilmn
-               enl_(1:2)=enl_ptr(2*ijlmn-1:2*ijlmn,index_enl,ispinor_index)
-               if (paw_opt==2) enl_(1)=enl_(1)-lambda(idat)*sij(ijlmn)
-               gxi(1:cplex)=gx(1:cplex,ilmn+(ia-1)*nlmn+ibeg,ispinor,idat)
-               gxfac_(1,jlmn+(ia-1)*nlmn+ibeg,ispinor,idat)=gxfac_(1,jlmn+(ia-1)*nlmn+ibeg,ispinor,idat)+enl_(1)*gxi(1)
-               gxfac_(2,jlmn+(ia-1)*nlmn+ibeg,ispinor,idat)=gxfac_(2,jlmn+(ia-1)*nlmn+ibeg,ispinor,idat)-enl_(2)*gxi(1)
+         do ispinor=1,nspinor
+           !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(ia,jlmn,ispinor_index,index_enl,j0lmn,jjlmn,i0lmn,ijlmn,gxi,gxj,enl_)
+           do ia=1,nincat
+             do jlmn=1,nlmn
+               ispinor_index=ispinor+shift
+               index_enl=atindx1(iatm+ia)
+               j0lmn=jlmn*(jlmn-1)/2
+               jjlmn=j0lmn+jlmn
+               enl_(1)=enl_ptr(2*jjlmn-1,index_enl,ispinor_index)
+               if (paw_opt==2) enl_(1)=enl_(1)-lambda(idat)*sij(jjlmn)
+               gxj(1)    =gx(1    ,jlmn+(ia-1)*nlmn+ibeg,ispinor,idat)
+               gxj(cplex)=gx(cplex,jlmn+(ia-1)*nlmn+ibeg,ispinor,idat)
+               gxfac_(1,jlmn+(ia-1)*nlmn+ibeg,ispinor,idat)=gxfac_(1,jlmn+(ia-1)*nlmn+ibeg,ispinor,idat)+enl_(1)*gxj(1)
                if (cplex==2) then
-                 gxfac_(1,jlmn+(ia-1)*nlmn+ibeg,ispinor,idat)=gxfac_(1,jlmn+(ia-1)*nlmn+ibeg,ispinor,idat)+enl_(2)*gxi(2)
-                 gxfac_(2,jlmn+(ia-1)*nlmn+ibeg,ispinor,idat)=gxfac_(2,jlmn+(ia-1)*nlmn+ibeg,ispinor,idat)+enl_(1)*gxi(2)
+                 gxfac_(2,jlmn+(ia-1)*nlmn+ibeg,ispinor,idat)=gxfac_(2,jlmn+(ia-1)*nlmn+ibeg,ispinor,idat)+enl_(1)*gxj(2)
                end if
+               do ilmn=1,jlmn-1
+                 ijlmn=j0lmn+ilmn
+                 enl_(1)=enl_ptr(2*ijlmn-1,index_enl,ispinor_index)
+                 enl_(2)=enl_ptr(2*ijlmn  ,index_enl,ispinor_index)
+                 if (paw_opt==2) enl_(1)=enl_(1)-lambda(idat)*sij(ijlmn)
+                 gxi(1)    =gx(1    ,ilmn+(ia-1)*nlmn+ibeg,ispinor,idat)
+                 gxi(cplex)=gx(cplex,ilmn+(ia-1)*nlmn+ibeg,ispinor,idat)
+                 gxfac_(1,jlmn+(ia-1)*nlmn+ibeg,ispinor,idat)=gxfac_(1,jlmn+(ia-1)*nlmn+ibeg,ispinor,idat)+enl_(1)*gxi(1)
+                 gxfac_(2,jlmn+(ia-1)*nlmn+ibeg,ispinor,idat)=gxfac_(2,jlmn+(ia-1)*nlmn+ibeg,ispinor,idat)-enl_(2)*gxi(1)
+                 if (cplex==2) then
+                   gxfac_(1,jlmn+(ia-1)*nlmn+ibeg,ispinor,idat)=gxfac_(1,jlmn+(ia-1)*nlmn+ibeg,ispinor,idat)+enl_(2)*gxi(2)
+                   gxfac_(2,jlmn+(ia-1)*nlmn+ibeg,ispinor,idat)=gxfac_(2,jlmn+(ia-1)*nlmn+ibeg,ispinor,idat)+enl_(1)*gxi(2)
+                 end if
+               end do
              end do
-#if defined HAVE_OPENMP
-             if(jlmn<nlmn) then
+           end do
+         end do
+       end do
+       !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) &
+       !$OMP& MAP(to:gxfac_,gx,enl_ptr,atindx1) PRIVATE(idat,ispinor)
+       do idat=1,ndat
+         do ispinor=1,nspinor
+           !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(ia,jlmn,ilmn,ispinor_index,index_enl,i0lmn,ijlmn,gxi,gxj,enl_)
+           do ia=1,nincat
+             do jlmn=1,nlmn-1
                do ilmn=jlmn+1,nlmn
+                 ispinor_index=ispinor+shift
+                 index_enl=atindx1(iatm+ia)
                  i0lmn=ilmn*(ilmn-1)/2
                  ijlmn=i0lmn+jlmn
-                 enl_(1:2)=enl_ptr(2*ijlmn-1:2*ijlmn,index_enl,ispinor_index)
+                 enl_(1)=enl_ptr(2*ijlmn-1,index_enl,ispinor_index)
+                 enl_(2)=enl_ptr(2*ijlmn  ,index_enl,ispinor_index)
                  if (paw_opt==2) enl_(1)=enl_(1)-lambda(idat)*sij(ijlmn)
-                 gxi(1:cplex)=gx(1:cplex,ilmn+(ia-1)*nlmn+ibeg,ispinor,idat)
+                 gxi(1)    =gx(1    ,ilmn+(ia-1)*nlmn+ibeg,ispinor,idat)
+                 gxi(cplex)=gx(cplex,ilmn+(ia-1)*nlmn+ibeg,ispinor,idat)
                  gxfac_(1,jlmn+(ia-1)*nlmn+ibeg,ispinor,idat)=gxfac_(1,jlmn+(ia-1)*nlmn+ibeg,ispinor,idat)+enl_(1)*gxi(1)
                  gxfac_(2,jlmn+(ia-1)*nlmn+ibeg,ispinor,idat)=gxfac_(2,jlmn+(ia-1)*nlmn+ibeg,ispinor,idat)+enl_(2)*gxi(1)
                  if (cplex==2) then
@@ -618,13 +638,10 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
                    gxfac_(2,jlmn+(ia-1)*nlmn+ibeg,ispinor,idat)=gxfac_(2,jlmn+(ia-1)*nlmn+ibeg,ispinor,idat)+enl_(1)*gxi(2)
                  end if
                end do
-             end if
-#endif
+             end do
            end do
          end do
        end do
-       end do
-       !$OMP TARGET UPDATE TO(gxfac_)
      end if !nspinortot
    end if !complex_enl
 
@@ -634,41 +651,55 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
    if (nspinortot==2.and.nspinor==nspinortot) then
      ABI_CHECK(cplex_enl==2,"BUG: invalid cplex_enl/=2!")
      ABI_CHECK(cplex_fac==cplex,"BUG: invalid cplex_fac/=cplex)!")
-     !$OMP TARGET UPDATE FROM(gxfac_,gx,enl_)
+     !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) &
+     !$OMP& MAP(to:gxfac_,gx,enl_ptr,atindx1) PRIVATE(idat,ispinor)
      do idat=1,ndat
-     do ispinor=1,nspinortot
-       jspinor=3-ispinor
-       do ia=1,nincat
-         index_enl=atindx1(iatm+ia)
-         do jlmn=1,nlmn
-           j0lmn=jlmn*(jlmn-1)/2
-           jjlmn=j0lmn+jlmn
-           enl_(1)=enl_ptr(2*jjlmn-1,index_enl,2+ispinor )
-           enl_(2)=enl_ptr(2*jjlmn  ,index_enl,2+ispinor )
-           gxi(1)    =gx(1    ,jlmn+(ia-1)*nlmn+ibeg,ispinor,idat)
-           gxi(cplex)=gx(cplex,jlmn+(ia-1)*nlmn+ibeg,ispinor,idat)
-           gxfac_(1,jlmn+(ia-1)*nlmn+ibeg,jspinor,idat)=gxfac_(1,jlmn+(ia-1)*nlmn+ibeg,jspinor,idat)+enl_(1)*gxi(1)
-           gxfac_(2,jlmn+(ia-1)*nlmn+ibeg,jspinor,idat)=gxfac_(2,jlmn+(ia-1)*nlmn+ibeg,jspinor,idat)-enl_(2)*gxi(1)
-           if (cplex==2) then
-             gxfac_(1,jlmn+(ia-1)*nlmn+ibeg,jspinor,idat)=gxfac_(1,jlmn+(ia-1)*nlmn+ibeg,jspinor,idat)+enl_(2)*gxi(2)
-             gxfac_(2,jlmn+(ia-1)*nlmn+ibeg,jspinor,idat)=gxfac_(2,jlmn+(ia-1)*nlmn+ibeg,jspinor,idat)+enl_(1)*gxi(2)
-           end if
-           do ilmn=1,jlmn-1
-             ijlmn=j0lmn+ilmn
-             enl_(1)=enl_ptr(2*ijlmn-1,index_enl,2+ispinor)
-             enl_(2)=enl_ptr(2*ijlmn  ,index_enl,2+ispinor)
-             gxi(1)    =gx(1    ,ilmn+(ia-1)*nlmn+ibeg,ispinor,idat)
-             gxi(cplex)=gx(cplex,ilmn+(ia-1)*nlmn+ibeg,ispinor,idat)
+       do ispinor=1,nspinortot
+         !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(ia,jlmn,jspinor,index_enl,j0lmn,jjlmn,i0lmn,ijlmn,gxi,enl_)
+         do ia=1,nincat
+           do jlmn=1,nlmn
+             jspinor=3-ispinor
+             index_enl=atindx1(iatm+ia)
+             j0lmn=jlmn*(jlmn-1)/2
+             jjlmn=j0lmn+jlmn
+             enl_(1)=enl_ptr(2*jjlmn-1,index_enl,2+ispinor )
+             enl_(2)=enl_ptr(2*jjlmn  ,index_enl,2+ispinor )
+             gxi(1)    =gx(1    ,jlmn+(ia-1)*nlmn+ibeg,ispinor,idat)
+             gxi(cplex)=gx(cplex,jlmn+(ia-1)*nlmn+ibeg,ispinor,idat)
              gxfac_(1,jlmn+(ia-1)*nlmn+ibeg,jspinor,idat)=gxfac_(1,jlmn+(ia-1)*nlmn+ibeg,jspinor,idat)+enl_(1)*gxi(1)
              gxfac_(2,jlmn+(ia-1)*nlmn+ibeg,jspinor,idat)=gxfac_(2,jlmn+(ia-1)*nlmn+ibeg,jspinor,idat)-enl_(2)*gxi(1)
              if (cplex==2) then
                gxfac_(1,jlmn+(ia-1)*nlmn+ibeg,jspinor,idat)=gxfac_(1,jlmn+(ia-1)*nlmn+ibeg,jspinor,idat)+enl_(2)*gxi(2)
                gxfac_(2,jlmn+(ia-1)*nlmn+ibeg,jspinor,idat)=gxfac_(2,jlmn+(ia-1)*nlmn+ibeg,jspinor,idat)+enl_(1)*gxi(2)
              end if
+             do ilmn=1,jlmn-1
+               j0lmn=jlmn*(jlmn-1)/2
+               ijlmn=j0lmn+ilmn
+               enl_(1)=enl_ptr(2*ijlmn-1,index_enl,2+ispinor)
+               enl_(2)=enl_ptr(2*ijlmn  ,index_enl,2+ispinor)
+               gxi(1)    =gx(1    ,ilmn+(ia-1)*nlmn+ibeg,ispinor,idat)
+               gxi(cplex)=gx(cplex,ilmn+(ia-1)*nlmn+ibeg,ispinor,idat)
+               gxfac_(1,jlmn+(ia-1)*nlmn+ibeg,jspinor,idat)=gxfac_(1,jlmn+(ia-1)*nlmn+ibeg,jspinor,idat)+enl_(1)*gxi(1)
+               gxfac_(2,jlmn+(ia-1)*nlmn+ibeg,jspinor,idat)=gxfac_(2,jlmn+(ia-1)*nlmn+ibeg,jspinor,idat)-enl_(2)*gxi(1)
+               if (cplex==2) then
+                 gxfac_(1,jlmn+(ia-1)*nlmn+ibeg,jspinor,idat)=gxfac_(1,jlmn+(ia-1)*nlmn+ibeg,jspinor,idat)+enl_(2)*gxi(2)
+                 gxfac_(2,jlmn+(ia-1)*nlmn+ibeg,jspinor,idat)=gxfac_(2,jlmn+(ia-1)*nlmn+ibeg,jspinor,idat)+enl_(1)*gxi(2)
+               end if
+             end do
            end do
-#if defined HAVE_OPENMP
-           if(jlmn<nlmn) then
+         end do
+       end do
+     end do
+     !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) &
+     !$OMP& MAP(to:gxfac_,gx,enl_ptr,atindx1) PRIVATE(idat,ispinor)
+     do idat=1,ndat
+       do ispinor=1,nspinortot
+         !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(ia,jlmn,ilmn,jspinor,index_enl,i0lmn,ijlmn,gxi,enl_)
+         do ia=1,nincat
+           do jlmn=1,nlmn-1
              do ilmn=jlmn+1,nlmn
+               jspinor=3-ispinor
+               index_enl=atindx1(iatm+ia)
                i0lmn=ilmn*(ilmn-1)/2
                ijlmn=i0lmn+jlmn
                enl_(1)=enl_ptr(2*ijlmn-1,index_enl,2+ispinor)
@@ -682,13 +713,10 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
                  gxfac_(2,jlmn+(ia-1)*nlmn+ibeg,ispinor,idat)=gxfac_(2,jlmn+(ia-1)*nlmn+ibeg,ispinor,idat)+enl_(1)*gxi(2)
                end if
              end do
-           end if
-#endif
+           end do
          end do
        end do
      end do
-     end do
-     !$OMP TARGET UPDATE TO(gxfac_)
 
 !    --- Parallelization over spinors ---
    else if (nspinortot==2.and.nspinor/=nspinortot) then
