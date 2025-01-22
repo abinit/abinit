@@ -67,10 +67,13 @@ MODULE m_nctk
  ! The maximum allowable number of characters
 
 
+#ifndef FC_INTEL
  ! netcdf4-hdf5 is the default
  integer,save,private :: def_cmode_for_seq_create = ior(ior(nf90_clobber, nf90_netcdf4), nf90_write)
+#else
  ! netcdf4 classic
- !integer,save,private :: def_cmode_for_seq_create = ior(nf90_clobber, nf90_write)
+ integer,save,private :: def_cmode_for_seq_create = ior(nf90_clobber, nf90_write)
+#endif
 
  character(len=5),private,parameter :: NCTK_IMPLICIT_DIMS(10) = [ &
    "one  ", "two  ", "three", "four ", "five ", "six  ", "seven", "eight", "nine ", "ten  "]
@@ -773,7 +776,7 @@ integer function nctk_open_create(ncid, path, comm) result(ncerr)
 #endif
  else
    ! Note that here we don't enforce nf90_netcdf4 hence the netcdf file with be in classic model.
-   write(my_string,'(2a)') "- Creating HDf5 file with MPI-IO support: ",trim(path)
+   write(my_string,'(2a)') "- Creating HDf5 file without MPI-IO support: ",trim(path)
    call wrtout(std_out,my_string)
    !ncerr = nf90_create(path, ior(nf90_clobber, nf90_write), ncid)
    cmode = def_cmode_for_seq_create
