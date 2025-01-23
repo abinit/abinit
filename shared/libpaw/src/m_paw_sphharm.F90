@@ -585,11 +585,23 @@ subroutine initylmr(mpsang,normchoice,npts,nrm,option,rr,ylmr,ylmr_gr)
        cphi=one
        sphi=zero
        ctheta=rr(3,inpt)/rnorm
-!      MM030519 : abs is needed to prevent very small negative arg
-       stheta=sqrt(abs((one-ctheta)*(one+ctheta)))
-       if (stheta>tol10) then
+       if (abs(one-ctheta)<tol12) then
+         ctheta=one
+         !LTEST
+         !cray value to check if the testfarm is sensible to this
+         ctheta=zero
+         !LTEST
+       end if
+       stheta=sqrt((one-ctheta)*(one+ctheta))
+       if (stheta>tol6) then
          cphi=rr(1,inpt)/(rnorm*stheta)
          sphi=rr(2,inpt)/(rnorm*stheta)
+       else
+         stheta=zero
+         !LTEST
+         !cray value to check if the testfarm is sensible to this
+         stheta=one
+         !LTEST
        end if
        do mm=1,mpsang-1
          rphase(mm)=dreal(dcmplx(cphi,sphi)**mm)
