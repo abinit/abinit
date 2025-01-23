@@ -2672,6 +2672,19 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'use_gemm_nonlop',tread,'INT')
  if(tread==1) dtset%use_gemm_nonlop=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'chebfi_oracle',tread,'INT')
+ if(tread==1) dtset%chebfi_oracle=intarr(1)
+
+ if (dtset%chebfi_oracle==2) then
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'oracle_factor',tread,'DPR')
+   if(tread==1) dtset%oracle_factor = dprarr(1)
+ end if
+
+ if (dtset%chebfi_oracle>0.and.dtset%nbdbuf==-101) then
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'oracle_min_occ',tread,'DPR')
+   if(tread==1) dtset%oracle_min_occ = dprarr(1)
+ end if
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'cprj_in_memory',tread,'INT')
  if(tread==1) dtset%cprj_in_memory=intarr(1)
 

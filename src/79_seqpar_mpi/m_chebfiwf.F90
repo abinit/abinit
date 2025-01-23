@@ -103,12 +103,6 @@ module m_chebfiwf
  integer, save :: l_useria
  integer, save :: l_block_sliced
 
-#if defined HAVE_GPU && defined HAVE_YAKL
- real(kind=c_double), ABI_CONTIGUOUS pointer, save :: pcon(:)
-#else
- real(dp),            allocatable,            save :: pcon(:)
-#endif
-
  type(mpi_type),pointer,save :: l_mpi_enreg
  type(gs_hamiltonian_type),pointer,save :: l_gs_hamk
 
@@ -223,7 +217,6 @@ subroutine chebfiwf2_blocksize(gs_hamk,ndat,npw,nband,nspinor,paral_kgb,gpu_opti
 !!
 !! INPUTS
 !!  dtset= input variables for this dataset
-!!  kinpw(npw)= kinetic energy for each plane wave (Hartree)
 !!  mpi_enreg= MPI-parallelisation information
 !!  nband= number of bands at this k point
 !!  npw= number of plane waves at this k point
@@ -241,7 +234,7 @@ subroutine chebfiwf2_blocksize(gs_hamk,ndat,npw,nband,nspinor,paral_kgb,gpu_opti
 !!
 !! SOURCE
 
-subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
+subroutine chebfiwf2(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
 &                    nband,npw,nspinor,prtvol,resid)
 
  implicit none
@@ -250,10 +243,10 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  integer,intent(in) :: nband,npw,prtvol,nspinor
  type(mpi_type),target,intent(in) :: mpi_enreg
  real(dp),target,intent(inout) :: cg(2,npw*nspinor*nband)
- real(dp),intent(in) :: kinpw(npw)
  real(dp),target,intent(out) :: resid(nband)
  real(dp),intent(out) :: enl_out(nband)
  real(dp),target,intent(out) :: eig(nband)
+ real(dp),target,intent(in) :: occ(nband)
  type(dataset_type),intent(in) :: dtset
  type(gs_hamiltonian_type),target,intent(inout) :: gs_hamk
 
@@ -261,23 +254,19 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  ! scalars
  integer, parameter :: tim_chebfiwf2 = 1750
  integer, parameter :: tim_nonlop = 1753
- integer :: space,blockdim,total_spacedim,ierr
+ integer :: iband,shift,space,blockdim,total_spacedim,ierr
  integer :: me_g0,me_g0_fft
  real(dp) :: localmem
  type(chebfi_t) :: chebfi
- type(xgBlock_t) :: xgx0,xgeigen,xgresidu,precond
+ type(xgBlock_t) :: xgx0,xgeigen,xgocc,xgresidu
  ! arrays
  real(dp) :: tsec(2),chebfiMem(2)
- real(dp), allocatable :: l_gvnlxc(:,:)
+ real(dp), allocatable :: l_gvnlxc(:,:),occ_tmp(:)
 
  ! Parameters for nonlop call in NC
  integer,parameter :: choice=1, paw_opt=0, signs=1
  real(dp) :: gsc_dummy(1,1)
  type(pawcprj_type) :: cprj_dum(gs_hamk%natom,1)
-
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
- integer(kind=c_size_t) :: pcon_size_bytes
-#endif
 
 ! *********************************************************************
 
@@ -300,9 +289,6 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
 
 !Variables
  blockdim=l_mpi_enreg%nproc_band*l_mpi_enreg%bandpp
- if (blockdim/=nband) then
-   ABI_ERROR('blockdim is not consistent with nband')
- end if
  !for debug
  l_useria=dtset%useria
 
@@ -325,7 +311,7 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  if (space==SPACE_CR) then
    me_g0 = 0
    me_g0_fft = 0
-   if ( gs_hamk%istwf_k == 2) then
+   if (gs_hamk%istwf_k == 2) then
      if (l_mpi_enreg%me_g0 == 1) me_g0 = 1
      if (l_mpi_enreg%me_g0_fft == 1) me_g0_fft = 1
    end if
@@ -350,66 +336,46 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  end if
 
 #ifdef HAVE_OPENMP_OFFLOAD
- !$OMP TARGET ENTER DATA MAP(to:cg,eig,resid) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
+ !$OMP TARGET ENTER DATA MAP(to:cg,eig,resid,occ) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
 #endif
 
  call xgBlock_map(xgx0,cg,space,l_npw*l_nspinor,nband,comm=l_mpi_enreg%comm_bandspinorfft,me_g0=me_g0,&
    & gpu_option=dtset%gpu_option)
 
- !For preconditionning
- if(dtset%gpu_option==ABI_GPU_KOKKOS) then
-#if defined HAVE_GPU && defined HAVE_YAKL
-   ABI_MALLOC_MANAGED(pcon, (/npw/))
-#endif
- else
-   ABI_MALLOC(pcon,(npw))
- end if
-
- !For preconditionning
- call build_pcon(pcon,kinpw,npw)
-
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
- if(l_gs_hamk%gpu_option==ABI_GPU_KOKKOS) then
-   ! upload pcon to device / gpu
-   pcon_size_bytes = npw * dp
-   call gpu_data_prefetch_async(C_LOC(pcon), pcon_size_bytes)
- end if
-#endif
-
- call xgBlock_map_1d(precond,pcon,SPACE_R,npw,gpu_option=dtset%gpu_option)
-
  call xgBlock_map_1d(xgeigen,eig,SPACE_R,nband,gpu_option=dtset%gpu_option)
 
  call xgBlock_map_1d(xgresidu,resid,SPACE_R,nband,gpu_option=dtset%gpu_option)
+
+ ! Occupancies in chebyshev are used for convergence criteria only
+ if (dtset%nbdbuf==-101.and.nspinor==1.and.dtset%nsppol==1) then
+   ABI_MALLOC(occ_tmp,(nband))
+   occ_tmp(:) = half*occ(:)
+   call xgBlock_map_1d(xgocc,occ_tmp,SPACE_R,nband,gpu_option=dtset%gpu_option)
+ else
+   call xgBlock_map_1d(xgocc,occ,SPACE_R,nband,gpu_option=dtset%gpu_option)
+ end if
 
  call timab(tim_chebfiwf2,2,tsec)
 
  ABI_NVTX_START_RANGE(NVTX_CHEBFI2_INIT)
  call chebfi_init(chebfi,nband,l_npw*l_nspinor,dtset%tolwfr_diago,dtset%ecut, &
 &                 dtset%paral_kgb,l_mpi_enreg%bandpp, &
-&                 dtset%mdeg_filter, space,1, &
+&                 dtset%nline, dtset%nbdbuf, space,1, &
 &                 l_mpi_enreg%comm_bandspinorfft,me_g0,me_g0_fft,l_paw,&
 &                 l_mpi_enreg%comm_spinorfft,l_mpi_enreg%comm_band,&
+&                 dtset%chebfi_oracle,dtset%oracle_factor,dtset%oracle_min_occ,&
 &                 l_gs_hamk%gpu_option,gpu_kokkos_nthrd=dtset%gpu_kokkos_nthrd)
  ABI_NVTX_END_RANGE()
 
 !################    RUUUUUUUN    #####################################
 !######################################################################
 
- call chebfi_run(chebfi,xgx0,getghc_gsc1,getBm1X,precond,xgeigen,xgresidu,nspinor)
+ call chebfi_run(chebfi,xgx0,getghc_gsc1,getBm1X,xgeigen,xgocc,xgresidu,nspinor)
 
-!Free preconditionning since not needed anymore
- if(dtset%gpu_option==ABI_GPU_KOKKOS) then
-#if defined HAVE_GPU && defined HAVE_YAKL
-   ABI_FREE_MANAGED(pcon)
-#endif
- else
-   ABI_FREE(pcon)
+ if (allocated(occ_tmp)) then
+   ABI_FREE(occ_tmp)
  end if
 
-!Compute enlout (nonlocal energy for each band if necessary) This is the best
-!  quick and dirty trick to compute this part in NC. gvnlc cannot be part of
-!  chebfi algorithm
  if ( .not. l_paw ) then
    call timab(tim_nonlop,1,tsec)
 #ifdef FC_CRAY
@@ -430,13 +396,17 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
 #ifdef HAVE_OPENMP_OFFLOAD
      !$OMP TARGET UPDATE FROM(cg) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
 #endif
-     call prep_nonlop(choice,l_cpopt,cprj_dum, &
-&      enl_out(1:nband),l_gs_hamk,0,&
-&      eig(1:nband),nband,mpi_enreg,1,paw_opt,signs,&
-&      gsc_dummy,l_tim_getghc, &
-&      cg(:,1:nband*l_npw*l_nspinor),&
-&      l_gvnlxc(:,:),&
-&      already_transposed=.false.)
+     do iband=1,nband/blockdim
+       shift = (iband-1)*blockdim*l_npw*l_nspinor
+       call prep_nonlop(choice,l_cpopt,cprj_dum, &
+&        enl_out((iband-1)*blockdim+1:iband*blockdim),l_gs_hamk,0,&
+&        eig((iband-1)*blockdim+1:iband*blockdim),blockdim,mpi_enreg,1,paw_opt,signs,&
+&        gsc_dummy,l_tim_getghc, &
+&        cg(:,shift+1:shift+blockdim*l_npw*l_nspinor),&
+!&        l_gvnlxc(:,shift+1:shift+blockdim*l_npw*l_nspinor),&
+&        l_gvnlxc(:,:),&
+&        already_transposed=.false.)
+     end do
    end if
    ABI_NVTX_END_RANGE()
    ABI_FREE(l_gvnlxc)
@@ -448,10 +418,8 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
 
 #ifdef HAVE_OPENMP_OFFLOAD
  !$OMP TARGET UPDATE FROM(cg,eig,resid) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
- !$OMP TARGET EXIT DATA MAP(delete:cg,eig,resid) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
+ !$OMP TARGET EXIT DATA MAP(delete:cg,eig,resid,occ) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
 #endif
-!################    SORRY IT'S ALREADY FINISHED : )  #################
-!######################################################################
 
  call timab(tim_chebfiwf2,2,tsec)
 
@@ -590,41 +558,6 @@ subroutine getBm1X(X,Bm1X)
 
 end subroutine getBm1X
 !!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_chebfiwf/build_pcon
-!! NAME
-!! build_pcon
-!!
-!! FUNCTION
-!! This routine build the array containing the preconditionning
-!!
-!! SOURCE
-
-subroutine build_pcon(pcon,kinpw,npw)
-
-  implicit none
-
-  integer,intent(in) :: npw
-  real(dp),intent(in) :: kinpw(:)
-  real(dp),intent(out) :: pcon(:)
-
-  integer :: ipw
-
-  !$omp parallel do schedule(static), shared(pcon,kinpw)
-  do ipw=1,npw
-    if(kinpw(ipw)>huge(0.0_dp)*1.d-11) then
-      pcon(ipw)=0.d0
-    else
-      pcon(ipw) = (27+kinpw(ipw)*(18+kinpw(ipw)*(12+8*kinpw(ipw)))) &
-&     / (27+kinpw(ipw)*(18+kinpw(ipw)*(12+8*kinpw(ipw))) + 16*kinpw(ipw)**4)
-    end if
-  end do
-
-end subroutine build_pcon
-
-!----------------------------------------------------------------------
 
 end module m_chebfiwf
 !!***

@@ -80,9 +80,13 @@ module m_chebfi2_cprj
    integer :: total_spacedim                ! Maybe not needed
    integer :: neigenpairs                   ! Number of eigen values/vectors we want
    integer :: ndeg_filter                   ! Degree of the polynomial filter
+   integer :: nbdbuf                        ! Number of bands in the buffer
    integer :: spacecom                      ! Communicator for MPI
+   integer :: oracle                        ! Option to compute ndeg_filter from residuals
    real(dp) :: tolerance            ! Tolerance on the residu to stop the minimization
    real(dp) :: ecut                 ! Ecut for Chebfi oracle
+   real(dp) :: oracle_factor                ! factor used to decrease residuals
+   real(dp) :: oracle_min_occ               ! threshold on occupancies used for nbdbuf=-101
 
    integer :: bandpp
 
@@ -158,7 +162,8 @@ module m_chebfi2_cprj
 !! SOURCE
 
 subroutine chebfi_init(chebfi,neigenpairs,spacedim,cprjdim,tolerance,ecut,bandpp, &
-                       ndeg_filter,space,space_cprj,eigenProblem,spacecom,me_g0,paw,xg_nonlop,me_g0_fft)
+                       ndeg_filter,nbdbuf,space,space_cprj,eigenProblem,spacecom,me_g0,paw,&
+                       oracle,oracle_factor,oracle_min_occ,xg_nonlop,me_g0_fft)
 
  implicit none
 
@@ -169,14 +174,18 @@ subroutine chebfi_init(chebfi,neigenpairs,spacedim,cprjdim,tolerance,ecut,bandpp
  integer          , intent(in   ) :: me_g0_fft
  integer          , intent(in   ) :: neigenpairs
  integer          , intent(in   ) :: ndeg_filter
+ integer          , intent(in   ) :: nbdbuf
  integer          , intent(in   ) :: space
  integer          , intent(in   ) :: space_cprj
  integer          , intent(in   ) :: spacecom
  integer          , intent(in   ) :: spacedim
  integer          , intent(in   ) :: cprjdim
+ integer          , intent(in   ) :: oracle
  logical          , intent(in   ) :: paw
  real(dp)         , intent(in   ) :: ecut
  real(dp)         , intent(in   ) :: tolerance
+ real(dp)         , intent(in   ) :: oracle_factor
+ real(dp)         , intent(in   ) :: oracle_min_occ
  type(xg_nonlop_t), intent(in   ) :: xg_nonlop
  type(chebfi_t)   , intent(inout) :: chebfi
 
@@ -193,16 +202,24 @@ subroutine chebfi_init(chebfi,neigenpairs,spacedim,cprjdim,tolerance,ecut,bandpp
  chebfi%spacedim      = spacedim
  chebfi%cprjdim       = cprjdim
  chebfi%blockdim_cprj = bandpp*xg_nonlop%nspinor
- chebfi%tolerance     = tolerance
+ if (tolerance > 0.0) then
+   chebfi%tolerance = tolerance
+ else
+   chebfi%tolerance = 1.0e-20
+ end if
  chebfi%ecut          = ecut
  chebfi%bandpp        = bandpp
  chebfi%ndeg_filter   = ndeg_filter
+ chebfi%nbdbuf        = nbdbuf
  chebfi%spacecom      = spacecom
  chebfi%eigenProblem  = eigenProblem
  chebfi%me_g0         = me_g0
  chebfi%me_g0_fft     = me_g0_fft
  chebfi%paw           = paw
  chebfi%xg_nonlop     = xg_nonlop
+ chebfi%oracle        = oracle
+ chebfi%oracle_factor = oracle_factor
+ chebfi%oracle_min_occ = oracle_min_occ
 
  call chebfi_allocateAll(chebfi)
 
@@ -419,7 +436,6 @@ end function chebfi_memInfo
 !!            A is typically the Hamiltonian H, and B the overlap operator S
 !!  getBm1X= pointer to the function giving B^-1|X>
 !!           B is typically the overlap operator S
-!!  pcond= pointer to the function used to apply the preconditioning
 !!
 !! OUTPUT
 !!
@@ -431,7 +447,7 @@ end function chebfi_memInfo
 !!
 !! SOURCE
 
-subroutine chebfi_run_cprj(chebfi,X0,cprjX0,getAX,kin,pcond,eigen,residu,enl,nspinor)
+subroutine chebfi_run_cprj(chebfi,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor)
 
  implicit none
 
@@ -441,10 +457,10 @@ subroutine chebfi_run_cprj(chebfi,X0,cprjX0,getAX,kin,pcond,eigen,residu,enl,nsp
  type(xgBlock_t), intent(inout) :: X0
  type(xgBlock_t), intent(inout) :: cprjX0
  type(xgBlock_t), intent(inout) :: eigen
+ type(xgBlock_t), intent(in)    :: occ
  type(xgBlock_t), intent(inout) :: residu
  type(xgBlock_t), intent(inout) :: enl
  type(xgBlock_t), intent(in   ) :: kin
- type(xgBlock_t), intent(in   ) :: pcond
  interface
    subroutine getAX(X,AX)
      use m_xg, only : xgBlock_t
@@ -459,8 +475,7 @@ subroutine chebfi_run_cprj(chebfi,X0,cprjX0,getAX,kin,pcond,eigen,residu,enl,nsp
  integer :: space_res
  integer :: neigenpairs
  integer :: ndeg_filter,ndeg_filter_max
- integer :: iband, ideg, ierr
-! integer :: comm_fft_save,comm_band_save !FFT and BAND MPI communicators from rest of Abinit, to be saved
+ integer :: ideg, ierr
  real(dp) :: tolerance
  real(dp) :: maxeig, maxeig_global
  real(dp) :: mineig, mineig_global
@@ -475,7 +490,6 @@ subroutine chebfi_run_cprj(chebfi,X0,cprjX0,getAX,kin,pcond,eigen,residu,enl,nsp
  real(dp) :: tsec(2)
  !Pointers similar to old Chebfi
  integer,allocatable :: ndeg_filter_bands(:) !Oracle variable
- real(dp),pointer :: eig(:,:)
  type(xg_nonlop_t) :: xg_nonlop
 
 ! *********************************************************************
@@ -531,7 +545,7 @@ subroutine chebfi_run_cprj(chebfi,X0,cprjX0,getAX,kin,pcond,eigen,residu,enl,nsp
 
 !********************* Compute Rayleigh quotients for every band, and set lambda equal to the largest one *****
  call timab(tim_RR_q, 1, tsec)
- call chebfi_rayleighRitzQuotients(chebfi, maxeig, mineig, DivResults%self) !OK
+ call chebfi_rayleighRitzQuotients(chebfi, maxeig, mineig, DivResults%self)
 
  call xmpi_max(maxeig,maxeig_global,chebfi%spacecom,ierr)
  call xmpi_min(mineig,mineig_global,chebfi%spacecom,ierr)
@@ -539,24 +553,18 @@ subroutine chebfi_run_cprj(chebfi,X0,cprjX0,getAX,kin,pcond,eigen,residu,enl,nsp
 
  lambda_minus = maxeig_global
 
- ndeg_filter_max = cheb_oracle1(mineig_global, lambda_minus, lambda_plus, 1D-16, 40)
+ call timab(tim_oracle,1,tsec)
 
- !if (chebfi%paral_kgb == 0) then
- !  call xgBlock_reverseMap(DivResults%self,eig,1,neigenpairs)
- !  do iband=1, neigenpairs !TODO TODO
- ! ! !Polynomial degree necessary to converge to tolerance
- ! ! !ndeg_filter_tolwfr = cheb_oracle1(dble(eig(iband*2-1,1)), lambda_minus, lambda_plus, tolerance / resids_filter(iband), nline)
- ! ! !olynomial degree to decrease residual by a constant factor
- ! ! !ndeg_filter_decrease = cheb_oracle1(dble(eig(iband*2-1,1)), lambda_minus, lambda_plus, 0.1D, dtset%mdeg_filter)
- ! ! !ndeg_filter_bands(iband) = MAX(MIN(ndeg_filter_tolwfr, ndeg_filter_decrease, ndeg_filter_max, chebfi%ndeg_filter), 1)
- !    ndeg_filter_bands(iband) = ndeg_filter ! fiddle with this to use locking
- !  end do
- !else
- call xgBlock_reverseMap(DivResults%self,eig,1,chebfi%bandpp)
- do iband=1, chebfi%bandpp !TODO TODO
-   ndeg_filter_bands(iband) = ndeg_filter ! fiddle with this to use locking
- end do
- !end if
+ ! ndeg_filter_max limits the reduction of the residual of the smallest eigenvalue (i.e. the most amplified one by the filter) by a factor 1e8.
+ ! Also, the maximal value of ndeg_filter_max is 40.
+ ndeg_filter_max = cheb_oracle1(mineig_global, lambda_minus, lambda_plus, 1D-16, 40)
+ ndeg_filter = MIN(ndeg_filter_max,chebfi%ndeg_filter)
+ if (chebfi%oracle>0) then
+   call chebfi_set_ndeg_from_residu(chebfi,lambda_minus,lambda_plus,occ,DivResults%self,ndeg_filter_max,ndeg_filter)
+ end if
+ ndeg_filter_bands(:) = ndeg_filter
+
+ call timab(tim_oracle,2,tsec)
 
  center = (lambda_plus + lambda_minus)*0.5
  radius = (lambda_plus - lambda_minus)*0.5
@@ -596,7 +604,7 @@ subroutine chebfi_run_cprj(chebfi,X0,cprjX0,getAX,kin,pcond,eigen,residu,enl,nsp
  call timab(tim_barrier,2,tsec)
 
  call timab(tim_amp_f,1,tsec)
- call chebfi_ampfactor(chebfi, eig, lambda_minus, lambda_plus, ndeg_filter_bands)
+ call chebfi_ampfactor(chebfi, DivResults%self, lambda_minus, lambda_plus, ndeg_filter_bands)
  call timab(tim_amp_f,2,tsec)
 
  call xg_free(DivResults)
@@ -632,8 +640,6 @@ subroutine chebfi_run_cprj(chebfi,X0,cprjX0,getAX,kin,pcond,eigen,residu,enl,nsp
  if (.not.chebfi%paw) then
    call xgBlock_yxmax(chebfi%AX%self,chebfi%eigenvalues,chebfi%X)
  end if
-
- call xgBlock_apply_diag(chebfi%AX%self,pcond,nspinor)
 
  call xgBlock_colwiseNorm2(chebfi%AX%self, residu)
  call timab(tim_residu, 2, tsec)
@@ -863,29 +869,31 @@ end subroutine chebfi_swapInnerBuffers
 !!
 !! SOURCE
 
-subroutine chebfi_ampfactor(chebfi,eig,lambda_minus,lambda_plus,ndeg_filter_bands)
+subroutine chebfi_ampfactor(chebfi,DivResults,lambda_minus,lambda_plus,ndeg_filter_bands)
 
   implicit none
 
   ! Arguments ------------------------------------
   integer,           intent(in   ) :: ndeg_filter_bands(:)
-  real(dp), pointer, intent(in   ) :: eig(:,:)
+  type(xgBlock_t),   intent(in   ) :: DivResults
   real(dp),          intent(in   ) :: lambda_minus
   real(dp),          intent(in   ) :: lambda_plus
   type(chebfi_t),    intent(inout) :: chebfi
 
   ! Local variables-------------------------------
   ! scalars
-  integer         :: iband,nbands
+  integer         :: iband
   real(dp)        :: ampfactor
   real(dp)        :: eig_per_band
   type(xgBlock_t) :: X_part
   type(xgBlock_t) :: AX_part
+  real(dp),pointer :: eig(:,:)
 
   ! *********************************************************************
 
+  call xgBlock_reverseMap(DivResults,eig,rows=1,cols=chebfi%bandpp)
 
-  do iband = 1, nbands
+  do iband = 1, chebfi%bandpp
 
     eig_per_band = eig(1,iband)
 
@@ -1011,6 +1019,114 @@ function cheb_poly1(xx,nn,aa,bb) result(yy)
   end do
 
 end function cheb_poly1
+!!***
+
+!!****f* m_chebfi2/chebfi_set_ndeg_from_residu
+!! NAME
+!! chebfi_set_ndeg_from_residu
+!!
+!! FUNCTION
+!! Compute ndeg_filter using the oracle and residuals.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! SOURCE
+
+subroutine chebfi_set_ndeg_from_residu(chebfi,lambda_minus,lambda_plus,occ,DivResults,ndeg_filter_max,ndeg_filter)
+
+ implicit none
+
+ integer,intent(in) :: ndeg_filter_max
+ integer,intent(out) :: ndeg_filter
+ type(chebfi_t), intent(inout) :: chebfi
+ type(xgBlock_t), intent(in)    :: occ
+ type(xgBlock_t), intent(in)    :: DivResults
+ real(dp), intent(in) :: lambda_minus, lambda_plus
+
+ logical :: test1,test2,test3
+ integer :: iband_tot,iband
+ integer :: bandpp,ierr,ndeg_filter_tolwfr,ndeg_filter_decrease,nbdbuf,ndeg_filter_all,shift
+ integer,allocatable :: ndeg_filter_bands(:)
+ type(xgBlock_t) :: occBlock,occ_reshaped
+ type(xg_t) :: residu
+ real(dp),pointer :: residu_(:,:),occ_(:,:)
+ real(dp) :: eig_iband,res_iband,occ_iband
+ real(dp),pointer :: eig(:,:)
+
+ bandpp = chebfi%bandpp
+
+ !Compute residu here for oracle, use X_next as a work space
+ ! X_next = S|Psi>
+ call xgBlock_copy(chebfi%xXColsRows,chebfi%X_next)
+ if (chebfi%paw) then
+   call xg_nonlop_getSX(chebfi%xg_nonlop,chebfi%X_next,chebfi%cprjX,chebfi%cprj_work%self,chebfi%proj_work%self)
+ end if
+ ! X_next = - eig * S|Psi>
+ call xgBlock_ymax(chebfi%X_next,DivResults,0,1)
+ ! X_next = H|Psi> - eig * S|Psi>
+ call xgBlock_add(chebfi%X_next,chebfi%xAXColsRows)
+ ! resid = |X_next|^2
+ call xg_init(residu,SPACE_R,bandpp,1)
+ call xgBlock_colwiseNorm2(chebfi%X_next, residu%self,comm_loc=xmpi_comm_null)
+
+ occ_reshaped = occ
+ shift=xmpi_comm_rank(chebfi%spacecom)*bandpp
+ call xgBlock_reshape(occ_reshaped,(/ 1, chebfi%neigenpairs /))
+ call xgBlock_setBlock(occ_reshaped,occBlock,1,bandpp,fcol=1+shift)
+ call xgBlock_reshape(occBlock,(/ bandpp, 1 /))
+ if (chebfi%nbdbuf==-101) then
+   call xgBlock_apply_diag(residu%self,occBlock,1)
+ end if
+
+ ABI_MALLOC(ndeg_filter_bands,(bandpp))
+
+ ! DivResults could be complex (with null imaginary part), so bandpp has to be in cols, not rows
+ call xgBlock_reverseMap(DivResults,eig,rows=1,cols=bandpp)
+ call xgBlock_reverseMap(residu%self,residu_,rows=1,cols=bandpp)
+ call xgBlock_reverseMap(occBlock,occ_,rows=1,cols=bandpp)
+
+ if (chebfi%nbdbuf>0) then
+   nbdbuf = chebfi%nbdbuf
+ else if (chebfi%nbdbuf==-101) then
+   nbdbuf = 0
+ end if
+
+ do iband=1, bandpp
+   eig_iband = eig(1,iband)
+   res_iband = residu_(1,iband)
+   occ_iband = occ_(1,iband)
+   iband_tot = iband + shift
+   test1 = res_iband<chebfi%tolerance ! band already converged
+   test2 = iband_tot>chebfi%neigenpairs-nbdbuf ! band in the buffer
+   test3 = chebfi%nbdbuf==-101.and.occ_iband<chebfi%oracle_min_occ ! occupancy is too low
+   if (test1.or.test2.or.test3) then
+     ndeg_filter_bands(iband) = 0
+   else
+     !ndeg_filter necessary to converge to tolerance
+     ndeg_filter_tolwfr = cheb_oracle1(eig_iband, lambda_minus, lambda_plus, chebfi%tolerance / res_iband, 1000)
+     if (chebfi%oracle==1) then
+       ndeg_filter_bands(iband) = MIN(ndeg_filter_max, ndeg_filter_tolwfr, chebfi%ndeg_filter)
+     else if (chebfi%oracle==2) then
+       !ndeg_filter necessary to decrease residual by a constant factor
+       ndeg_filter_decrease = cheb_oracle1(eig_iband, lambda_minus, lambda_plus, chebfi%oracle_factor, 15)
+       ndeg_filter_bands(iband) = MIN(ndeg_filter_max, ndeg_filter_tolwfr, ndeg_filter_decrease)
+     else
+       ABI_ERROR('Wrong value for chebfi%oracle')
+     end if
+   end if
+ end do
+ ndeg_filter = MAXVAL(ndeg_filter_bands)
+ call xmpi_max(ndeg_filter,ndeg_filter_all,chebfi%spacecom,ierr)
+ ndeg_filter=ndeg_filter_all
+
+ call xg_free(residu)
+ ABI_FREE(ndeg_filter_bands)
+
+end subroutine chebfi_set_ndeg_from_residu
 !!***
 
 end module m_chebfi2_cprj
