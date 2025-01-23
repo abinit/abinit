@@ -520,7 +520,7 @@ subroutine copy_green(green1,green2,opt_tw)
  type(green_type), intent(inout) :: green2
  integer, intent(in) :: opt_tw
 !Local variables-------------------------------
- integer :: ifreq,itau
+ integer :: i,ifreq,itau
 ! *********************************************************************
 
  if (opt_tw == 2) then
@@ -528,6 +528,11 @@ subroutine copy_green(green1,green2,opt_tw)
    do ifreq=1,green1%nw
      call copy_oper(green1%oper(ifreq),green2%oper(ifreq))
    end do
+   if (green1%has_moments == 1) then
+     do i=1,green1%nmoments
+       call copy_oper(green1%moments(i),green2%moments(i))
+     end do
+   end if
    ! Indicate to integrate_green that xsum has been done
    ! for matlu in compute_green.
    if (green1%has_greenmatlu_xsum == 1) green2%has_greenmatlu_xsum = 1
