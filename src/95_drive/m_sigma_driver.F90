@@ -1002,6 +1002,11 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 !#endif
 
  call KS_me%print(header="Matrix elements in the KS basis set", prtvol=Dtset%prtvol)
+
+ !if (dtset%prtmels /= 0) then
+ !  call KS_me%ncwrite(trim(dtfil%filnam_ds(4))//'_MELS.nc')
+ !  if (dtset%prtmels == -1) call xmpi_abort()
+ !end if
  !
  ! If possible, calculate the EXX energy between the frozen core
  ! and the valence electrons using KS wavefunctions
