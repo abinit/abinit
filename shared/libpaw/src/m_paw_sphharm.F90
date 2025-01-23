@@ -587,21 +587,16 @@ subroutine initylmr(mpsang,normchoice,npts,nrm,option,rr,ylmr,ylmr_gr)
        ctheta=rr(3,inpt)/rnorm
        if (abs(one-ctheta)<tol12) then
          ctheta=one
-         !LTEST
-         !cray value to check if the testfarm is sensible to this
-         ctheta=zero
-         !LTEST
        end if
-       stheta=sqrt((one-ctheta)*(one+ctheta))
+       if (abs(one+ctheta)<tol12) then
+         ctheta=-one
+       end if
+       stheta=sqrt(one-ctheta*ctheta)
        if (stheta>tol6) then
          cphi=rr(1,inpt)/(rnorm*stheta)
          sphi=rr(2,inpt)/(rnorm*stheta)
        else
          stheta=zero
-         !LTEST
-         !cray value to check if the testfarm is sensible to this
-         stheta=one
-         !LTEST
        end if
        do mm=1,mpsang-1
          rphase(mm)=dreal(dcmplx(cphi,sphi)**mm)
