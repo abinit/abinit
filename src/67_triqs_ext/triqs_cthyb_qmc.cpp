@@ -449,9 +449,6 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
       auto Sinf_mat = matrix_t(num_orbitals,num_orbitals);
       Sinf_mat = h_scalar_t{0};
 
-      // I use slightly different formulas than the ones used in TRIQS.
-      // This is because their formulas are wrong, and mine are correct.
-
       for (int iblock = 0; iblock < nblocks; ++iblock) {
         for (int o = 0; o < siz_block; ++o) {
           int iflavor = convert_indexes_back(iblock,o,orb_off_diag,spin_off_diag,ndim);

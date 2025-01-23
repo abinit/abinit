@@ -4387,5 +4387,176 @@ subroutine fourier_inv(paw_dmft,nmoments,ntau,matlu_tau,oper_freq,moments)
 end subroutine fourier_inv
 !!***
 
+!!****f* m_forctqmc/rotate_ctqmc
+!! NAME
+!! rotate_ctqmc
+!!
+!! FUNCTION
+!!  Rotate energy levels, hybridization, Green's function, moments (but not the
+!!  Coulomb tensor) in the CTQMC basis.
+!!
+!! INPUTS
+!!  paw_dmft <type(paw_dmft_type)>= DMFT data structure
+!!  green = green's function
+!!  levels = electronic levels in the Slm basis
+!!  hyb = hybridization function in the Slm basis
+!!  eigvectmatlu = rotation matrix
+!!  levels_rot = electronic levels in the CTQMC basis
+!!  hyb_rot = hybridization function in the CTQMC basis
+!!  basis = 0: CTQMC basis is the Slm basis
+!!        = 1: basis that diagonalizes the levels
+!!        = 2: basis that diagonalizes the occupation matrix
+!!        = 3: Ylm basis
+!!  option = 1: forward rotation
+!!         = 2: backwards rotation
+!!  pawprtvol = flag for printing
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! SOURCE
+
+subroutine rotate_ctqmc(paw_dmft,green,levels,hyb,eigvectmatlu,levels_rot,hyb_rot,basis,option,pawprtvol)
+
+!Arguments ------------------------------------
+ type(paw_dmft_type), intent(in) :: paw_dmft
+ type(green_type), intent(inout) :: green
+ type(green_type), target, intent(inout) :: hyb,hyb_rot
+ type(oper_type), target, intent(inout) :: levels,levels_rot
+ type(matlu_type), intent(inout) :: eigvectmatlu(paw_dmft%natom)
+ integer, intent(in) :: basis,option,pawprtvol
+!Local variables ------------------------------
+ integer :: i,ifreq,natom
+ type(matlu_type), allocatable :: dmat_diag(:)
+ type(green_type), pointer :: hyb1,hyb2
+ type(oper_type), pointer :: levels1,levels2
+! ************************************************************************
+
+ if (option /= 1 .and. option /= 2) ABI_BUG("option needs to be 1 or 2")
+
+ natom = paw_dmft%natom
+
+ if (option == 1) then
+   hyb1 => hyb ; hyb2 => hyb_rot
+   levels1 => levels ; levels2 => levels_rot
+ else
+   hyb1 => hyb_rot ; hyb2 => hyb
+   levels1 => levels_rot ; levels2 => levels
+ end if
+
+ call copy_green(hyb1,hyb2,opt_tw=2)
+ call copy_matlu(levels1%matlu(:),levels2%matlu(:),natom)
+
+ if (option == 1 .and. (basis == 1 .or. basis == 2)) then
+   ! Build rotation matrix
+   if (basis == 1) then
+     call diag_matlu(levels1%matlu(:),levels2%matlu(:),natom,pawprtvol, &
+                   & eigvectmatlu(:),nsppol_imp=1)
+   else if (basis == 2) then
+     ABI_MALLOC(dmat_diag,(natom))
+     call init_matlu(natom,paw_dmft%nspinor,paw_dmft%nsppol,paw_dmft%lpawu(:),dmat_diag(:))
+     call diag_matlu(green%occup%matlu(:),dmat_diag(:),natom,4, &
+                   & eigvectmatlu(:),nsppol_imp=1,checkstop=.false.)
+     call destroy_matlu(dmat_diag(:),natom)
+     ABI_FREE(dmat_diag)
+   end if
+   ! Use the same rotation matrix on every CPU
+   call xmpi_matlu(eigvectmatlu(:),natom,paw_dmft%spacecomm,master=0,option=2)
+ end if ! option = 1
+
+ if (basis == 2) then
+   call rotate_matlu(levels2%matlu(:),eigvectmatlu(:),natom,option)
+ else if (basis == 3) then
+   call slm2ylm_matlu(levels2%matlu(:),natom,paw_dmft,option,0)
+ end if ! basis = 3
+ if (option /= 1) then
+   call sym_matlu(levels2%matlu(:),paw_dmft)
+ end if
+
+ do i=2,hyb2%nmoments-1
+   if (basis == 3) then
+     call slm2ylm_matlu(hyb2%moments(i)%matlu(:),natom,paw_dmft,option,0)
+   else if (basis > 0) then
+     call rotate_matlu(hyb2%moments(i)%matlu(:),eigvectmatlu(:),natom,option)
+   end if
+   if (option /= 1) then
+     call sym_matlu(hyb2%moments(i)%matlu(:),paw_dmft)
+   end if
+ end do ! i
+
+ if (option /= 1) then
+   do i=1,green%nmoments
+     if (basis == 3) then
+       call slm2ylm_matlu(green%moments(i)%matlu(:),natom,paw_dmft,option,0)
+     else if (basis > 0) then
+       call rotate_matlu(green%moments(i)%matlu(:),eigvectmatlu(:),natom,option)
+     end if
+     call sym_matlu(green%moments(i)%matlu(:),paw_dmft)
+   end do ! i
+ end if ! option/=1
+
+ do ifreq=1,paw_dmft%dmft_nwlo
+   if (hyb%distrib%procf(ifreq) /= paw_dmft%myproc) cycle
+   if (basis == 3) then
+     call slm2ylm_matlu(hyb2%oper(ifreq)%matlu(:),natom,paw_dmft,option,0)
+     if (option /= 1) then
+       call slm2ylm_matlu(green%oper(ifreq)%matlu(:),natom,paw_dmft,option,0)
+     end if
+   else if (basis > 0) then
+     call rotate_matlu(hyb2%oper(ifreq)%matlu(:),eigvectmatlu(:),natom,option)
+     if (option /= 1) then
+       call rotate_matlu(green%oper(ifreq)%matlu(:),eigvectmatlu(:),natom,option)
+     end if
+   end if ! basis
+   if (option /= 1) then
+     call sym_matlu(hyb2%oper(ifreq)%matlu(:),paw_dmft)
+     call sym_matlu(green%oper(ifreq)%matlu(:),paw_dmft)
+   end if
+ end do ! ifreq
+ if (basis /= 0 .or. option /= 1) then
+   call gather_oper(hyb2%oper(:),hyb2%distrib,paw_dmft,opt_ksloc=2)
+ end if
+
+ if (option /= 1) then
+   call gather_oper(green%oper(:),green%distrib,paw_dmft,opt_ksloc=2)
+   if (basis == 3) then
+     call slm2ylm_matlu(green%occup_tau%matlu(:),natom,paw_dmft,option,0)
+   else if (basis > 0) then
+     call rotate_matlu(green%occup_tau%matlu(:),eigvectmatlu(:),natom,0)
+   end if
+   call sym_matlu(green%occup_tau%matlu(:),paw_dmft)
+ end if ! option/=1
+
+ end subroutine rotate_ctqmc
+!!***
+
+!!****f* m_forctqmc/find_block_structure
+!! NAME
+!! find_block_structure
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! SOURCE
+
+subroutine find_block_structure()
+
+!Arguments ------------------------------------
+!Local variables ------------------------------
+! ************************************************************************
+
+ end subroutine find_block_structure
+!!***
+
 END MODULE m_forctqmc
 !!***
