@@ -21,4 +21,7 @@ inp_files = [
 "t04.abi", # PAW, GS, old LOBPCG, (NiO, nspinor==2, nspden==4, paral_kgb==0)
 "t05.abi", # PAW, GS, LOBPCG2,    (NiO, nspinor==2, nspden==4, paral_kgb==1)
 "t06.abi", # PAW, GS, CGWF,       (Fe,  nspinor==2, nspden==4, paral_kgb==0), with fixed_occ
+"t07.abi", # NC,  GS, CGWF, mGGA  (Si,  nspinor==2, nspden==4)
+"t08.abi", # NC,  GS, CGWF,       (H,   nspinor==2, nspden==4)
+"t09.abi", # PAW, GS+Fock, old LOBPCG, (NiO, nspinor==1, paral_kgb==0)
 ]
