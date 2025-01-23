@@ -3746,26 +3746,26 @@ subroutine fit_tau_exp(ntau, tau_mesh, tau_wgs, cvals, alpha_r, beta_c)
  complex(dp),intent(out) :: beta_c
 
 !Local variables-------------------------------
- integer :: ii, imin
+ integer :: ii
  real(dp) :: loss, min_loss, my_alpha_r
- complex(dp) :: my_beta_c, cfit(ntau), zz
+ complex(dp) :: cfit(ntau), zz
 ! *************************************************************************
 
- imin = -1; min_loss = huge(one)
- my_beta_c = cvals(1)
+ min_loss = huge(one)
+ beta_c = cvals(1); alpha_r = zero
  do ii=2,ntau
-   ! Find my_alpha_r
+   ! Find my_alpha_r. Note that we take the real part of the log to avoid oscillatory behaviour in the exp.
    zz = -log(cvals(ii) / cvals(1)) / (tau_mesh(ii) - tau_mesh(1))
    my_alpha_r = real(zz)
    ! Compute loss function.
-   cfit(:) = my_beta_c * exp(-my_alpha_r ** (tau_mesh - tau_mesh(1)))
+   cfit(:) = beta_c * exp(-my_alpha_r ** (tau_mesh - tau_mesh(1)))
    loss = sum(tau_wgs * abs(cvals - cfit)**2)
    if (loss < min_loss) then
-     imin = ii; min_loss = loss
-     alpha_r = my_alpha_r
+     min_loss = loss; alpha_r = my_alpha_r
    end if
  end do
 
+ ! If something goes wrong, disable the fit.
  if (alpha_r <= tol12) then
    alpha_r = tol12; beta_c = zero
  end if
@@ -3821,29 +3821,38 @@ subroutine fit_iomega(ntau, iw_mesh, iw_wgs, cvals, alpha_r, beta_c)
  complex(dp),intent(out) :: beta_c
 
 !Local variables-------------------------------
- integer :: ii, imin
- real(dp) :: loss, min_loss, my_alpha_r, w0, wn
+ integer :: ii
+ real(dp) :: loss, min_loss, my_alpha_r, w0, wn, b2
  complex(dp) :: my_beta_c, zz, cfit(ntau), f0, fn
 ! *************************************************************************
 
- imin = -1; min_loss = huge(one)
+ min_loss = huge(one)
  w0 = iw_mesh(1)
  f0 = cvals(1)
+ alpha_r = zero; beta_c = czero
  do ii=2,ntau
    ! Find my_beta_c and my_alpha_r
    wn = iw_mesh(ii)
    fn = cvals(ii)
 
+   b2 = (real(f0) * w0**2 - real(fn) * wn**2) / (real(fn) - real(f0))
+   if (b2 < tol12) then
+     b2 = tol12
+     my_beta_c = zero
+   else
+     my_beta_c = f0 * (b2 + w0**2)
+   end if
+
    ! Compute loss function.
-   !cfit(:) = my_beta_c * exp(-my_alpha_r ** iw_mesh)
-   !loss = sum(iw_wgs * abs(cvals - cfit)**2)
+   cfit(:) = my_beta_c / (b2 + iw_mesh ** 2)
+   loss = sum(iw_wgs * abs(cvals - cfit)**2)
    if (loss < min_loss) then
-     imin = ii; min_loss = loss
-     alpha_r = my_alpha_r
-     beta_c = my_beta_c
+     min_loss = loss
+     alpha_r = sqrt(b2); beta_c = my_beta_c
    end if
  end do
 
+ ! If something goes wrong, disable the fit.
  !alpha_r = zero; beta_c = zero
  !if ((my_alpha_r) > zero) then
  !  alpha_r = my_alpha_r
@@ -3874,7 +3883,7 @@ pure subroutine fit_iomega_eval(what, xx, alpha_r, beta_c, cval)
 
  select case (what)
  case ("func")
-   !cval = beta_c * exp(-alpha_r ** xx)
+   cval = beta_c / (alpha_r**2 + xx**2)
  case ("ft")
    !cval = beta_c * exp(-alpha_r ** xx)
  case default
