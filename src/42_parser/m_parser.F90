@@ -230,6 +230,8 @@ subroutine parsefile(filnamin, lenstr, ndtset, string, comm)
  if (xmpi_comm_rank(comm) == master) then
 
    ! strlen from defs_basis module
+   string = repeat(" ", strlen)
+   string_with_comments = repeat(" ", strlen)
    call instrng(filnamin, lenstr, option1, strlen, string, string_with_comments)
 
    ! Copy original file, without change of case
@@ -287,6 +289,7 @@ subroutine parsefile(filnamin, lenstr, ndtset, string, comm)
  ABI_MALLOC_TYPE_SCALAR(character(len=len_trim(string_with_comments)), INPUT_STRING)
  INPUT_STRING = trim(string_with_comments)
 
+ !write(std_out, *)"len_trim(string_with_comments):", len_trim(string_with_comments)
  !write(std_out,'(4a)')"string_with_comments", ch10, trim(string_with_comments), ch10
  !write(std_out,'(4a)')"INPUT_STRING", ch10, trim(INPUT_STRING), ch10; write(std_out,'(a)')string(:lenstr); stop
 
@@ -504,8 +507,7 @@ recursive subroutine instrng(filnam, lenstr, option, strln, string, raw_string)
  integer,intent(in) :: option,strln
  integer,intent(out) :: lenstr
  character(len=*),intent(in) :: filnam
- character(len=*),intent(out) :: string
- character(len=*),intent(out) :: raw_string
+ character(len=*),intent(out) :: string, raw_string
 
 !Local variables-------------------------------
  character :: blank=' '

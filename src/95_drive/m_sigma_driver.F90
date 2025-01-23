@@ -1006,7 +1006,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  ! If possible, calculate the EXX energy between the frozen core
  ! and the valence electrons using KS wavefunctions
  ! MG: Be careful here, since ex_energy is meaningful only if all occupied states are calculated.
- if( KS_mflags%has_sxcore ==1 ) then
+ if (KS_mflags%has_sxcore ==1) then
    ! TODO
    !ex_energy = mels_get_exene_core(KS_me,kmesh,ks_ebands)
    ex_energy=zero
