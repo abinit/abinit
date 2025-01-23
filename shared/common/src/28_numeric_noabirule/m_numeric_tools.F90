@@ -3974,9 +3974,8 @@ function pade(n, z, f, zz)
 
 !Local variables-------------------------------
 !scalars
- complex(dpc) :: a(n)
- complex(dpc) :: Az(0:n), Bz(0:n)
  integer :: i
+ complex(dpc) :: a(n), Az(0:n), Bz(0:n)
 ! *************************************************************************
 
  call calculate_pade_a(a, n, z, f)
@@ -3990,10 +3989,11 @@ function pade(n, z, f, zz)
    Az(i+1)=Az(i)+(zz-z(i))*a(i+1)*Az(i-1)
    Bz(i+1)=Bz(i)+(zz-z(i))*a(i+1)*Bz(i-1)
  end do
- !write(std_out,*) 'Bz(n)',Bz(n)
- !if (REAL(Bz(n))==zero.and.AIMAG(Bz(n))==zero) write(std_out,*) ' Bz(n) ',Bz(n)
  pade=Az(n)/Bz(n)
- !write(std_out,*) 'pade_approx ', pade_approx
+
+ !write(std_out,*) 'pade_approx ', pade
+ !write(std_out,*) 'Bz(n)',Bz(n)
+ !if (real(Bz(n))==zero .and. aimag(Bz(n))==zero) write(std_out,*) ' Bz(n) ',Bz(n)
 
 end function pade
 !!***
@@ -4023,9 +4023,7 @@ function dpade(n, z, f, zz)
 !scalars
  integer :: i
 !arrays
- complex(dpc) :: a(n)
- complex(dpc) :: Az(0:n), Bz(0:n)
- complex(dpc) :: dAz(0:n), dBz(0:n)
+ complex(dpc) :: a(n), Az(0:n), Bz(0:n), dAz(0:n), dBz(0:n)
 ! *************************************************************************
 
  call calculate_pade_a(a, n, z, f)

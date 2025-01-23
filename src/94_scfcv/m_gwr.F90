@@ -591,11 +591,6 @@ module m_gwr
    character(len=10) :: wc_space = "none"
    ! "none", "itau", "iomega"
 
-   !type(__slkmat_t),allocatable :: fit_r_params_qibz(:,:)
-   !type(__slkmat_t),allocatable :: fit_c_params_qibz(:,:)
-   ! (nqibz, ntau, nsppol)
-   ! Fit parameters for tchi/Wc (real and complex)
-
    !type(__slkmat_t),allocatable :: em1_qibz(:,:,:)
    ! Inverse dielectric matrix at omega = 0
    ! (nqibz, nsppol)
@@ -1215,9 +1210,6 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
     end if
  end if
 
- ! FIXME: Here we need to rescale the weights because greenx convention is not what we expect!
- !gwr%iw_wgs(:) = gwr%iw_wgs(:) / four
-
  if (gwr%comm%me == 0) then
    write(std_out, "(3a)")ch10, " Computing F(delta) = \int_0^{\infty} dw / (w^2 + delta^2) = pi/2/delta ", ch10
    write(std_out, "(*(a12,2x))")"delta", "numeric", "exact", "abs_rerr (%)"
@@ -1584,12 +1576,6 @@ end block
  ABI_MALLOC(gwr%tchi_qibz, (gwr%nqibz, gwr%ntau, gwr%nsppol))
  ABI_MALLOC(gwr%sigc_kibz, (2, gwr%nkibz, gwr%ntau, gwr%nsppol))
 
- !if (gwr%dtset%gwr_fit /= 0) then
- !  ! Allocate entries for fit.
- !  ABI_MALLOC(gwr%fit_r_params_qibz, (gwr%nqibz, gwr%nsppol))
- !  ABI_MALLOC(gwr%fit_c_params_qibz, (gwr%nqibz, gwr%nsppol))
- !end if
-
  ! ====================================
  ! Create netcdf file to store results
  ! ====================================
@@ -1866,29 +1852,6 @@ subroutine gwr_malloc_free_mats(gwr, mask_ibz, what, action)
          if (action == "free") call mat%free()
        end do
 
-     !case ("fit")
-     !  ! ===========================
-     !  ! Allocate/free fit_q(g,g')
-     !  ! ===========================
-     !  ABI_CHECK_IEQ(size(mask_ibz), gwr%nqibz, "wrong mask size")
-     !  if (my_it /= 1) cycle ! Fit parameters do not depend on ntau
-
-     !  do iq_ibz=1,gwr%nqibz
-     !    if (mask_ibz(iq_ibz) == 0) cycle
-     !    npwsp = gwr%tchi_desc_qibz(iq_ibz)%npw * gwr%nspinor
-     !    ABI_CHECK(block_dist_1d(npwsp, gwr%g_comm%nproc, col_bsize, msg), msg)
-     !    associate (r_params => gwr%fit_r_params_qibz(iq_ibz, spin), c_params => gwr%fit_c_params_qibz(iq_ibz, spin))
-     !    if (action == "malloc") then
-     !       call r_params%init(npwsp, npwsp, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize])
-     !       call c_params%init(npwsp, npwsp, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize])
-     !    end if
-     !    if (action == "free") then
-     !      call r_params%free()
-     !      call c_params%free()
-     !    end if
-     !    end associate
-     !  end do
-
      case ("sigma")
        ! ================================
        ! Allocate/free sigmac_kibz(g,g')
@@ -2000,14 +1963,6 @@ subroutine gwr_free(gwr)
    call slk_array_free(gwr%tchi_qibz)
    ABI_FREE(gwr%tchi_qibz)
  end if
- !if (allocated(gwr%fit_r_params_qibz)) then
- !  call slk_array_free(gwr%fit_r_params_qibz)
- !  ABI_FREE(gwr%fit_r_params_qibz)
- !end if
- !if (allocated(gwr%fit_c_params_qibz)) then
- !  call slk_array_free(gwr%fit_c_params_qibz)
- !  ABI_FREE(gwr%fit_c_params_qibz)
- !end if
  if (allocated(gwr%wc_qibz)) then
    call slk_array_free(gwr%wc_qibz)
    ABI_FREE(gwr%wc_qibz)
@@ -3605,8 +3560,6 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
    end do
  end do
 
- if (gwr%dtset%gwr_fit /= 0) call gwr%malloc_free_mats(mask_qibz, "fit", "malloc")
-
  ! Perform inhomogeneous FT in parallel.
  do my_is=1,gwr%my_nspins
    spin = gwr%my_spins(my_is)
@@ -3632,7 +3585,9 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
 
      ABI_MALLOC(cwork_myit, (gwr%my_ntau, loc1_size, batch_size))
      ABI_MALLOC(glob_cwork, (gwr%ntau, loc1_size, batch_size))
+
      if (gwr%dtset%gwr_fit /= 0) then
+       ! Allocate coefficients for fit.
        ABI_MALLOC(alpha_r, (loc1_size, batch_size))
        ABI_MALLOC(beta_c, (loc1_size, batch_size))
      end if
@@ -3670,8 +3625,6 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
               else
                 ABI_ERROR(sjoin("Invalid from_space:", itoa(from_space)))
               end if
-              !gwr%fit_c_params_qibz(iq_ibz, spin)%buffer_cplx(ig1, ig2+idat-1) = ??
-              !gwr%fit_r_params_qibz(iq_ibz, spin)%buffer_real(ig1, ig2+idat-1) = ??
            end do
          end do
          call xmpi_sum(alpha_r, gwr%tau_comm%value, ierr)
@@ -3686,7 +3639,7 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
            cval = zero
            do ig1=1,mats(it0)%sizeb_local(1)
              if (gwr%dtset%gwr_fit /= 0) then
-               ! Eval the fit and remove it from the signal.
+               ! Evaluate the fit and remove it from the signal.
                if (from_space == TAU_SPACE) then
                  call fit_tau_exp_eval("func", gwr%tau_mesh(itau), alpha_r(ig1,idat), beta_c(ig1,idat), cval)
                else if (from_space == W_SPACE) then
@@ -3795,23 +3748,27 @@ subroutine fit_tau_exp(ntau, tau_mesh, tau_wgs, cvals, alpha_r, beta_c)
 !Local variables-------------------------------
  integer :: ii, imin
  real(dp) :: loss, min_loss, my_alpha_r
- complex(dp) :: my_beta_c, cfit(ntau)
+ complex(dp) :: my_beta_c, cfit(ntau), zz
 ! *************************************************************************
 
  imin = -1; min_loss = huge(one)
+ my_beta_c = cvals(1)
  do ii=2,ntau
-   ! Find my_beta_c and my_alpha_r
-
+   ! Find my_alpha_r
+   zz = -log(cvals(ii) / cvals(1)) / (tau_mesh(ii) - tau_mesh(1))
+   my_alpha_r = real(zz)
    ! Compute loss function.
-   cfit(:) = my_beta_c * exp(-my_alpha_r ** tau_mesh)
+   cfit(:) = my_beta_c * exp(-my_alpha_r ** (tau_mesh - tau_mesh(1)))
    loss = sum(tau_wgs * abs(cvals - cfit)**2)
    if (loss < min_loss) then
      imin = ii; min_loss = loss
+     alpha_r = my_alpha_r
    end if
  end do
 
- alpha_r = my_alpha_r
- beta_c = my_beta_c
+ if (alpha_r <= tol12) then
+   alpha_r = tol12; beta_c = zero
+ end if
 
 end subroutine fit_tau_exp
 !!***
@@ -3838,8 +3795,8 @@ pure subroutine fit_tau_exp_eval(what, xx, alpha_r, beta_c, cval)
  select case (what)
  case ("func")
    cval = beta_c * exp(-alpha_r ** xx)
- case ("ft")
-   !cval = beta_c * exp(-alpha_r ** xx)
+ case ("fit")
+   cval = beta_c * (two * alpha_r) / (alpha_r**2 + xx**2)
  case default
    cval = huge(one)
  end select
@@ -3865,24 +3822,33 @@ subroutine fit_iomega(ntau, iw_mesh, iw_wgs, cvals, alpha_r, beta_c)
 
 !Local variables-------------------------------
  integer :: ii, imin
- real(dp) :: loss, min_loss, my_alpha_r
- complex(dp) :: my_beta_c, cfit(ntau)
+ real(dp) :: loss, min_loss, my_alpha_r, w0, wn
+ complex(dp) :: my_beta_c, zz, cfit(ntau), f0, fn
 ! *************************************************************************
 
  imin = -1; min_loss = huge(one)
+ w0 = iw_mesh(1)
+ f0 = cvals(1)
  do ii=2,ntau
    ! Find my_beta_c and my_alpha_r
+   wn = iw_mesh(ii)
+   fn = cvals(ii)
 
    ! Compute loss function.
-   cfit(:) = my_beta_c * exp(-my_alpha_r ** iw_mesh)
+   !cfit(:) = my_beta_c * exp(-my_alpha_r ** iw_mesh)
    !loss = sum(iw_wgs * abs(cvals - cfit)**2)
    if (loss < min_loss) then
      imin = ii; min_loss = loss
+     alpha_r = my_alpha_r
+     beta_c = my_beta_c
    end if
  end do
 
- alpha_r = my_alpha_r
- beta_c = my_beta_c
+ !alpha_r = zero; beta_c = zero
+ !if ((my_alpha_r) > zero) then
+ !  alpha_r = my_alpha_r
+ !  beta_c = my_beta_c
+ !end if
 
 end subroutine fit_iomega
 !!***

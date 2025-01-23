@@ -311,6 +311,9 @@ contains
     !strlen from defs_basis module
     option=1
     if (iam_master) then
+
+       string = repeat(" ", strlen)
+       raw_string = repeat(" ", strlen)
        call instrng (self%filenames(1),lenstr,option,strlen,string, raw_string)
        !To make case-insensitive, map characters to upper case:
        call inupper(string(1:lenstr))

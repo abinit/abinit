@@ -806,6 +806,7 @@ integer function nctk_open_create(ncid, path, comm) result(ncerr)
    input_len = len_trim(my_string)
    NCF_CHECK(nctk_def_dims(ncid, nctkdim_t("input_len", input_len)))
    NCF_CHECK(nctk_def_arrays(ncid, nctkarr_t("input_string", "c", "input_len")))
+   !print *, "input_len, strlen:", input_len, strlen
 
    if (xmpi_comm_rank(comm) == 0) then
      NCF_CHECK(nctk_set_datamode(ncid))
