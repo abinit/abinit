@@ -16,6 +16,9 @@ inp_files = [
     "t04.abi" ,  # same as v9[206] but with istwfk>1 (with DFTI)
     "t05.abi" ,  # same as v10[04] but with norm-conserving pseudos (without DFTI)
     "t06.abi" ,  # same as v9[206] but with istwfk>1 (without DFTI)
+    "t07.abi" ,  # test oracle and nbdbuf in chebfi (cprj_in_memory=0 and 1).
+    "t08.abi" ,  # same as v10[07] but with istwfk>1 (with less datasets)
+    "t09.abi" ,  # same as v10[07] but with nspinor=2 (with less datasets)
     "t10.abi" ,  # compare cprj_in_memory=1 with cprj_in_memory=0. PAW, istwfk=1.
     "t11.abi" ,  # same as v10[10], with nsppol=2.
     "t12.abi" ,  # same as v10[10], with nspinor=2.

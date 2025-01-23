@@ -511,11 +511,11 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 &           mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k)
            ABI_NVTX_END_RANGE()
          else if (dtset%cprj_in_memory==1) then
-           call chebfiwf2_cprj(cg_k,dtset,eig_k,enlx_k,gs_hamk,kinpw,&
+           call chebfiwf2_cprj(cg_k,dtset,eig_k,occ_k,enlx_k,gs_hamk,&
              mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k,xg_nonlop)
          else
            ABI_NVTX_START_RANGE(NVTX_CHEBFI2)
-           call chebfiwf2(cg_k,dtset,eig_k,enlx_k,gs_hamk,kinpw,&
+           call chebfiwf2(cg_k,dtset,eig_k,occ_k,enlx_k,gs_hamk,&
 &           mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k)
            ABI_NVTX_END_RANGE()
          end if

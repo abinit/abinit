@@ -47,9 +47,9 @@ GNU 13.2 with OpenMP : several libxc tests are disactivated (34,35)
 GNU 13.2 with OpenMP : several tutorespfn/tlw tests are disactivated (4,5,6,7)
 GNU 13.2 with OpenMP : several v10#10-19 are disactivated, as well as v4#32-34
 
-Intel Ifort compiler (presently tested : 16.0, NOT CURRENTLY TESTED : 21.4-OneAPI)
+Intel Ifort compiler (presently tested : 16.0, 2025-OneAPI)
 Ifort 16.0 is mostly OK, except for test paral#30 (Paral KGB), tutoparal/tgswvl#1, v4#32,33,34, and gpu_omp#03 , that are disactivated.
-! NOT TESTED Ifort 21.4 is mostly OK, except for one problem in DMFT, see test v6#45, like with Ifort 19.1.
+2025-oneAPI is mostly OK, except for one problem in DMFT, the numerical inaccuracy for v7#28 and 29 is very large.
 
 NAG Compiler (presently tested : 7.2 - sequential only)
 NAG 7.2, ABINIT sequential : tmulti6_1, v9#83-87 are disactivated.

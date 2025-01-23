@@ -1,6 +1,6 @@
 
-.Version 10.2.2.1 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_nvhpc23.9-0 computer)
+.Version 10.3.4.3 of ABINIT, released Nov 2024.
+.(MPI version, prepared for a x86_64_linux_nvhpc23.9-0 computer) 
 
 .Copyright (C) 1998-2024 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 17 Oct 2024.
-- ( at 16h35 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_nvhpc_23.9_elpa/torrent_quickfix-release/tests/TestBot_MPI1/gpu_omp_t15_MPI1/t15.abi
+.Starting date : Wed 18 Dec 2024.
+- ( at 19h34 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_nvhpc_23.9_elpa/baguetl_chebfi-oracle/tests/TestBot_MPI1/gpu_omp_t15_MPI1/t15.abi
 - output file    -> t15_MPI1.abo
 - root for input  files -> t15_MPI1i
 - root for output files -> t15_MPI1o
@@ -150,8 +150,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 1, }
          ecut(hartree)=     15.000   => boxcut(ratio)=   2.09226
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_nvhpc_23.9_elpa/torrent_quickfix-release/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_nvhpc_23.9_elpa/torrent_quickfix-release/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_nvhpc_23.9_elpa/baguetl_chebfi-oracle/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_nvhpc_23.9_elpa/baguetl_chebfi-oracle/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -179,23 +179,23 @@ tolerances: {tolvrs: 1.00E-28, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -10.913100765356    -1.091E+01 1.280E-03 9.734E+01
- ETOT  2  -10.934409963156    -2.131E-02 2.203E-04 1.056E+00
- ETOT  3  -10.934530379396    -1.204E-04 1.546E-04 1.529E-02
- ETOT  4  -10.934532343207    -1.964E-06 1.758E-04 4.046E-05
- ETOT  5  -10.934532360047    -1.684E-08 1.551E-04 2.501E-07
- ETOT  6  -10.934532360245    -1.980E-10 1.512E-04 4.662E-09
- ETOT  7  -10.934532360248    -3.025E-12 1.238E-04 2.229E-11
- ETOT  8  -10.934532360248    -3.197E-14 1.027E-04 1.696E-12
- ETOT  9  -10.934532360248    -3.553E-14 7.668E-05 4.512E-16
- ETOT 10  -10.934532360248     4.619E-14 5.690E-05 6.297E-16
- ETOT 11  -10.934532360248    -6.573E-14 3.991E-05 1.277E-20
- ETOT 12  -10.934532360248     7.105E-14 2.787E-05 7.565E-20
- ETOT 13  -10.934532360248    -2.487E-14 2.464E-05 1.253E-21
- ETOT 14  -10.934532360248     2.842E-14 2.373E-05 2.380E-23
- ETOT 15  -10.934532360248    -2.842E-14 2.256E-05 7.769E-26
- ETOT 16  -10.934532360248     0.000E+00 2.175E-05 4.202E-27
-
+ ETOT  1  -10.913100765356    -1.091E+01 1.908E-02 9.734E+01
+ ETOT  2  -10.934409963156    -2.131E-02 4.797E-03 1.056E+00
+ ETOT  3  -10.934530379396    -1.204E-04 3.390E-03 1.529E-02
+ ETOT  4  -10.934532343207    -1.964E-06 2.661E-03 4.046E-05
+ ETOT  5  -10.934532360047    -1.684E-08 2.253E-03 2.501E-07
+ ETOT  6  -10.934532360245    -1.980E-10 1.998E-03 4.662E-09
+ ETOT  7  -10.934532360248    -3.034E-12 1.823E-03 2.229E-11
+ ETOT  8  -10.934532360248    -3.020E-14 1.692E-03 1.696E-12
+ ETOT  9  -10.934532360248    -2.842E-14 1.588E-03 4.512E-16
+ ETOT 10  -10.934532360248     4.086E-14 1.501E-03 6.297E-16
+ ETOT 11  -10.934532360248    -6.573E-14 1.427E-03 1.277E-20
+ ETOT 12  -10.934532360248     7.461E-14 1.361E-03 7.565E-20
+ ETOT 13  -10.934532360248    -3.020E-14 1.301E-03 1.251E-21
+ ETOT 14  -10.934532360248     3.020E-14 1.247E-03 2.334E-23
+ ETOT 15  -10.934532360248    -2.665E-14 1.197E-03 3.944E-26
+ ETOT 16  -10.934532360248     8.882E-15 1.150E-03 8.603E-27
+ 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -5.77543783E-03  sigma(3 2)= -1.59085611E-03
   sigma(2 2)= -5.77543783E-03  sigma(3 1)= -1.59085611E-03
@@ -204,8 +204,8 @@ tolerances: {tolvrs: 1.00E-28, }
 
  scprqt:  WARNING -
   nstep=   16 was not enough SCF cycles to converge;
-  potential residual=  4.202E-27 exceeds tolvrs=  1.000E-28
-
+  potential residual=  8.603E-27 exceeds tolvrs=  1.000E-28
+ 
 
 --- !ResultsGS
 iteration_state: {dtset: 1, }
@@ -217,7 +217,7 @@ lattice_vectors:
 lattice_lengths: [   4.94975,    4.94975,    4.94975, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   8.5750000E+01
-convergence: {deltae:  0.000E+00, res2:  4.202E-27, residm:  2.175E-05, diffor: null, }
+convergence: {deltae:  8.882E-15, res2:  8.603E-27, residm:  1.150E-03, diffor: null, }
 etotal    :  -1.09345324E+01
 entropy   :   0.00000000E+00
 fermie    :   5.23389539E-01
@@ -239,17 +239,17 @@ force_length_stats: {min:   4.05939413E-01, max:   4.05939413E-01, mean:   4.059
  ---------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
  Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     2.286621     2.286621      4.573243     0.000000
-    2   2.00000     2.295231     2.295231      4.590462     0.000000
+    1   2.00000     2.286621     2.286621      4.573243    -0.000000
+    2   2.00000     2.295231     2.295231      4.590462    -0.000000
  ---------------------------------------------------------------------
-  Sum:              4.581852     4.581852      9.163705     0.000000
- Total magnetization (from the atomic spheres):             0.000000
- Total magnetization (exact up - dn):                       0.000000
+  Sum:              4.581852     4.581852      9.163705    -0.000000
+ Total magnetization (from the atomic spheres):            -0.000000
+ Total magnetization (exact up - dn):                      -0.000000
 ================================================================================
 
  ----iterations are completed or convergence reached----
-
- Mean square residual over all n,k,spin=   22.919E-07; max=  21.751E-06
+ 
+ Mean square residual over all n,k,spin=   98.347E-06; max=  11.500E-04
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.220000000000      0.220000000000      0.220000000000
@@ -267,8 +267,8 @@ force_length_stats: {min:   4.05939413E-01, max:   4.05939413E-01, mean:   4.059
  frms,max,avg= 2.3436923E-01 2.3436923E-01   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1    -12.05174931699355   -12.05174931699356   -12.05174931699356
-    2     12.05174931699355    12.05174931699356    12.05174931699356
+    1    -12.05174931699353   -12.05174931699353   -12.05174931699353
+    2     12.05174931699353    12.05174931699353    12.05174931699353
  frms,max,avg= 1.2051749E+01 1.2051749E+01   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  7.000000000000  7.000000000000  7.000000000000 bohr
               =  3.704240460130  3.704240460130  3.704240460130 angstroms
@@ -297,11 +297,11 @@ iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  1.06815546419849E+01
 hartree             :  1.49476741154060E+00
-xc                  : -4.42100460426034E+00
+xc                  : -4.42100460426033E+00
 Ewald energy        : -1.22408856604630E+01
 psp_core            :  1.72763340806685E-01
-local_psp           : -7.30529939675595E+00
-non_local_psp       :  6.83571906899520E-01
+local_psp           : -7.30529939675594E+00
+non_local_psp       :  6.83571906899519E-01
 total_energy        : -1.09345323602476E+01
 total_energy_eV     : -2.97543757384289E+02
 band_energy         :  2.17409356020644E+00
@@ -485,10 +485,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         11.3  wall=         11.3
-
+- Proc.   0 individual time (sec): cpu=         10.7  wall=         10.7
+ 
 ================================================================================
 
  Calculation completed.
 .Delivered   3 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         11.3  wall=         11.3
++Overall time at end (sec) : cpu=         10.7  wall=         10.7
