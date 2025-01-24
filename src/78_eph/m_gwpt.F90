@@ -469,16 +469,15 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  !write(std_out,*)"work_ngfft(1:3): ",work_ngfft(1:3)
  ABI_MALLOC(work, (2, work_ngfft(4), work_ngfft(5), work_ngfft(6)))
 
- ! Set the FFT mesh
- !call wfd%change_ngfft(cryst, psps, ngfft)
-
  ! FFT meshes from input file, not necessarly equal to the ones found in the external files.
  nfftf = product(ngfftf(1:3)); mgfftf = maxval(ngfftf(1:3))
  nfft = product(ngfft(1:3)) ; mgfft = maxval(ngfft(1:3))
  n1 = ngfft(1); n2 = ngfft(2); n3 = ngfft(3); n4 = ngfft(4); n5 = ngfft(5); n6 = ngfft(6)
 
- usecprj = dtset%usepaw
+ ! Set the FFT mesh
+ !call wfd%change_ngfft(cryst, psps, ngfft)
 
+ usecprj = dtset%usepaw
  ABI_MALLOC(cwaveprj0, (natom, nspinor*usecprj))
  ABI_MALLOC(cwaveprj, (natom, nspinor*usecprj))
  ABI_MALLOC(displ_cart_qq, (2, 3, cryst%natom, natom3))
@@ -1249,6 +1248,21 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
            ! Contract immediately over g with the frequency convolution: \int de' Wc_{gg'}(pp, e') / (omega - e_{bsum, kqmp) - e')
            ! Store results in vec_gwc_mkq(:,:,m_kq),
            if (gqk%pert_comm%nproc > 1) vec_gwc_mkq = zero
+
+           ! DEBUG
+           !do ig=1,npw_x
+           !if (any(kg_x(:,ig) > ngfft(1:3)/2) .or. any(kg_x(:,ig) < -(ngfft(1:3)-1)/2) ) then
+           !  write(msg,'(a,3(i0,1x),a)')" The G-vector: ",kg_x(:, ig)," falls outside the FFT box. Increase boxcutmin (?)"
+           !  ABI_ERROR(msg)
+           !end if
+           !end do
+           !do ig=1,npw_c
+           !if (any(kg_c(:,ig) > ngfft(1:3)/2) .or. any(kg_c(:,ig) < -(ngfft(1:3)-1)/2) ) then
+           !  write(msg,'(a,3(i0,1x),a)')" The G-vector: ",kg_c(:, ig)," falls outside the FFT box. Increase boxcutmin (?)"
+           !  ABI_ERROR(msg)
+           !end if
+           !end do
+           ! END DEBUG
 
            do m_kq=gqk%bstart, gqk%bstop ! do m_kq=gqk%m_start, gqk%m_stop
              !if (gqk%pert_sumcomm%skip(m_kq)) cycle ! MPI parallelism inside pert_comm

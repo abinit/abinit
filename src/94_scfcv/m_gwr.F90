@@ -3876,18 +3876,15 @@ pure subroutine fit_iomega_eval(what, xx, alpha_r, beta_c, cval)
  real(dp),intent(in) :: xx, alpha_r
  complex(dp),intent(in) :: beta_c
  complex(dp),intent(out) :: cval
-
-!Local variables-------------------------------
-! integer :: ii
 ! *************************************************************************
 
  select case (what)
  case ("func")
    cval = beta_c / (alpha_r**2 + xx**2)
  case ("ft")
-   !cval = beta_c * exp(-alpha_r ** xx)
+   cval = (beta_c / two * alpha_r) * exp(-alpha_r ** abs(xx))
  case default
-   !cval = huge(one)
+   cval = huge(one)
  end select
 
 end subroutine fit_iomega_eval

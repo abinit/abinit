@@ -3350,7 +3350,11 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
  call supercell_fft(vpq%ngkpt, ngfft, sc_nfft, sc_ngfft, sc2uc, scred)
  ABI_FREE(scred)
 
+ ! TODO: Implement possibility of downsampling the grid by taking the average inside
+ ! mini boxes. Useful for polarons in very large supercells.
  call wrtout(std_out, " Computing polaron wavefunction in the real-space supercell...")
+ call wrtout(std_out, sjoin(" Memory required by pol_wf:", &
+             ftoa(two*sc_nfft*nspinor*vpq%nstates*nsppol*storage_size(one)/eight*b2Mb), " <<< MEM"))
 
  ABI_MALLOC(kg_k, (3, mpw))
  ABI_MALLOC(gbound_k, (2*wfd%mgfft+8, 2))

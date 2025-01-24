@@ -2,7 +2,6 @@
 
 # ZPR computation at the Gamma point for MgO.
  nband 9
- #nband 30
  ecut 45.0
  #prtvol 10
 
@@ -72,5 +71,5 @@
 #%% [extra_info]
 #%% authors = M. Giantomassi
 #%% keywords = NC, DFPT, EPH
-#%% description = GWPT calculatiom
+#%% description = GWPT calculation
 #%%<END TEST_INFO>
