@@ -61,6 +61,7 @@
  nstep_min                1
  rcut                    9.7900000000
  ======================= Optional input variables ============================
+ znucl                  13.0000000000
  use_ideal_positions     0
  enunit                  1 (Phonon frequencies in cm-1)
  USE AVERAGE POSITIONS TO COMPUTE SPECTRUM
