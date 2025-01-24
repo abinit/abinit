@@ -585,12 +585,12 @@ subroutine initylmr(mpsang,normchoice,npts,nrm,option,rr,ylmr,ylmr_gr)
        cphi=one
        sphi=zero
        ctheta=rr(3,inpt)/rnorm
-       if (abs(one-ctheta)<tol12) then
-         ctheta=one
-       end if
-       if (abs(one+ctheta)<tol12) then
-         ctheta=-one
-       end if
+       ! LB-2025/01:
+       ! If ctheta is too close to 1 (or -1), then stheta is small with poor accuracy,
+       ! which leads to a numerical instability visible (but negligible) in stress and forces components.
+       ! Here we have stheta>1e-6 with a minimum of 2 correct digits when close to 1e-6.
+       if (abs(one-ctheta)<tol12) ctheta=one
+       if (abs(one+ctheta)<tol12) ctheta=-one
        stheta=sqrt(one-ctheta*ctheta)
        if (stheta>tol6) then
          cphi=rr(1,inpt)/(rnorm*stheta)
