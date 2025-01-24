@@ -96,6 +96,7 @@
  nstep_min                1
  rcut                   17.5000000000
  ======================= Optional input variables ============================
+ znucl                  22.0000000000
  readifc                 1    0.0001000000
  enunit                  2 (Phonon frequencies in mHa)
  bzpath                  4

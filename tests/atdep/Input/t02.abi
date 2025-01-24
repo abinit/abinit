@@ -17,6 +17,7 @@ nstep_max 20
 nstep_min 1
 rcut  11.45
 #OPTIONAL_INPUT_VARIABLES
+znucl 13
 bzpath 7 G A B C D G R
 bzlength 6 100 50 50 35 106 86
 use_ideal_positions 1

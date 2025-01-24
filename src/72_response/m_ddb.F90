@@ -144,6 +144,7 @@ module m_ddb
   !      (5 => 2nd-order derivatives of eigenvalues)
   !      (33 => long wave third order derivatives of total energy)
   !      (85 => Molecular Berry curvature, 2nd-order derivative)
+  ! See m_ddb_hdr for the definition of various block types
 
   real(dp),allocatable :: amu(:)
   ! amu(ntypat)

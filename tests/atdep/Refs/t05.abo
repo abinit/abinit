@@ -57,6 +57,7 @@
  nstep_min                1
  rcut                    7.5000000000
  ======================= Optional input variables ============================
+ znucl                  12.0000000000    8.0000000000
  use_ideal_positions     1
  dielec_constant         3.0000000000
  born_charge             1.7500000000   -1.7500000000
