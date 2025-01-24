@@ -234,6 +234,12 @@ contains
  intarr(1,:)=dtsets(:)%optstress
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'optstress','INT',0)
 
+ dprarr(1,:)=dtsets(:)%oracle_factor
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'oracle_factor','DPR',0)
+
+ dprarr(1,:)=dtsets(:)%oracle_min_occ
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'oracle_min_occ','DPR',0)
+
  intarr(1,:)=dtsets(:)%orbmag
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'orbmag','INT',0)
 
@@ -1497,6 +1503,9 @@ contains
 
  intarr(1,:)=dtsets(:)%x1rdm
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'x1rdm','INT',0)
+
+ intarr(1,:)=dtsets(:)%xg_nonlop_option
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'xg_nonlop_option','INT',0)
 
 !xred
  prtimg(:,:)=1

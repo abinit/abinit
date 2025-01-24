@@ -2780,6 +2780,7 @@ subroutine xg_nonlop_getXHX(xg_nonlop,cprj_left,cprj_right,cprj_work,res,blocksi
    integer :: nrows_cprj_work,ncols_cprj_work
    integer :: nspinor
    logical :: no_H_
+   type(xgBlock_t) :: cprj_work_spinor
 
    call timab(tim_getHmeSX,1,tsec)
 
@@ -2815,7 +2816,8 @@ subroutine xg_nonlop_getXHX(xg_nonlop,cprj_left,cprj_right,cprj_work,res,blocksi
 
    ! cprj_work = - e cprj_work = -e sum_j Saij cprjin
    shift = xg_nonlop%me_band*ncols_cprj/xg_nonlop%nspinor
-   call xgBlock_ymax(cprj_work,eigen,shift,nblocks,xg_nonlop%nspinor)
+   call xgBlock_reshape_spinor(cprj_work,cprj_work_spinor,nspinor,COLS2ROWS)
+   call xgBlock_ymax(cprj_work_spinor,eigen,shift,nblocks)
 
    no_H_=.False.
    if (present(no_H)) then
@@ -2926,7 +2928,8 @@ subroutine xg_nonlop_forces_stress(xg_nonlop,Xin,cprjin,cprj_work,eigen,forces,s
      call xg_nonlop_apply_Aij(xg_nonlop,xg_nonlop%Sij,cprjin,cprj_work)
      ! cprj_work = - e cprj_work = -e sum_j Saij cprjin
      shift = xg_nonlop%me_band*ncols_cprj_nospin
-     call xgBlock_ymax(cprj_work,eigen,shift,nmpi,xg_nonlop%nspinor)
+     call xgBlock_reshape_spinor(cprj_work,cprj_work_spinor,nspinor,COLS2ROWS)
+     call xgBlock_ymax(cprj_work_spinor,eigen,shift,nmpi)
    end if
 
    ! cprj_work = sum_j Daij cprjin + cprj_work

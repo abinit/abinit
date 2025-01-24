@@ -2301,6 +2301,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%cd_frqim_method=1
    dtsets(idtset)%cd_full_grid=0
    dtsets(idtset)%cellcharge(:)=zero
+   dtsets(idtset)%chebfi_oracle=0
    dtsets(idtset)%chempot(:,:,:)=zero
    dtsets(idtset)%chkdilatmx=1
    dtsets(idtset)%chkexit=0
@@ -2664,6 +2665,8 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    if(dtsets(idtset)%usedmft>0) dtsets(idtset)%optforces=0
    dtsets(idtset)%optstress=1
    dtsets(idtset)%optnlxccc=1
+   dtsets(idtset)%oracle_factor=0.1_dp
+   dtsets(idtset)%oracle_min_occ=0.0001_dp
    dtsets(idtset)%orbmag=0
    if (dtsets(idtset)%usepaw==0) then
      dtsets(idtset)%ortalg=2
