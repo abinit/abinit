@@ -1352,6 +1352,8 @@ subroutine frohlich_init_ph(self, cryst, efmas_ntheta, ifc)
        self%investar(nu, iqdir)*self%weights_qdir(iqdir)
    enddo
  enddo
+!Do not remove this useless line: a bug in the ifx2025 compiler is avoided thanks to it ...
+ write(std_out,'(a,es16.6)')' frohlich_init_ph : after the loop, self%zpr_gamma=',self%zpr_gamma
  self%zpr_gamma = quarter*piinv*self%zpr_gamma
  self%zpr_gamma = two*(three*quarter*piinv/self%ucvol)**third * self%zpr_gamma
 

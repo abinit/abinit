@@ -1408,7 +1408,7 @@ contains
       l_gpu_option = ABI_GPU_DISABLED
       call xgBlock_copy_from_gpu(xgBlockA)
     else
-      ABI_ERROR('When xgA%gpu_option/=xgB%gpu_option is possible only with ABI_GPU_OPENMP, ABI_GPU_LEGACY or ABI_GPU_DISABLED')
+      ABI_ERROR('xgA%gpu_option/=xgB%gpu_option is possible only with ABI_GPU_OPENMP, ABI_GPU_LEGACY or ABI_GPU_DISABLED')
     end if
 
     incx = 1; if ( present(inc1) ) incx = inc1
@@ -3212,13 +3212,13 @@ contains
   !!
   !! NAME
   !! xgBlock_ymax
-  subroutine xgBlock_ymax(xgBlockA, da, shift, nblocks, nspinor)
+  subroutine xgBlock_ymax(xgBlockA, da, shift, nblocks)
 
     type(xgBlock_t), intent(inout) :: xgBlockA
     type(xgBlock_t), intent(in   ) :: da
-    integer, intent(in) :: shift,nblocks,nspinor
+    integer, intent(in) :: shift,nblocks
 
-    integer :: iblock,ispinor,ncols_nospin,irow,nrows
+    integer :: iblock,ncols,irow,nrows,fact
     double precision :: tsec(2)
 
     call timab(tim_ymax,1,tsec)
@@ -3229,43 +3229,56 @@ contains
     call xgBlock_check_gpu_option(xgBlockA,da)
 
     nrows = xgBlockA%rows
-    ncols_nospin = xgBlockA%cols / nspinor
-    if ( da%rows /= nblocks*ncols_nospin ) then
-      ABI_ERROR("rows(da)/=nblocks*ncols_nospin")
+    ncols = xgBlockA%cols
+
+    if ( da%rows /= nblocks*ncols ) then
+      ABI_ERROR("rows(da)/=nblocks*ncols")
     end if
     if ( shift<0 ) then
       ABI_ERROR("shift<0")
     end if
-    if ( shift+ncols_nospin > da%rows ) then
+    if ( shift+ncols > da%rows ) then
       ABI_ERROR("shift+xgBlockA%cols > da%rows")
     end if
 
-    select case(xgBlockA%space)
-    case (SPACE_R)
-      !$omp parallel do collapse(3) shared(da,xgBlockA) private(irow,iblock,ispinor)
-      do iblock = 1, ncols_nospin
-        do ispinor = 1, nspinor
-          do irow = 1, nrows
-            xgBlockA%vecR(irow,nspinor*(iblock-1)+ispinor) = - da%vecR(iblock+shift,1) &
-             & * xgBlockA%vecR(irow,nspinor*(iblock-1)+ispinor)
+    fact = 1 ; if (xgBlockA%space==SPACE_CR) fact = 2
+
+    if (space(da)==SPACE_R) then
+      select case(xgBlockA%space)
+      case (SPACE_R,SPACE_CR)
+        !$omp parallel do collapse(2) shared(da,xgBlockA) private(irow,iblock)
+        do iblock = 1, ncols
+          do irow = 1, fact*nrows
+            xgBlockA%vecR(irow,iblock) = - da%vecR(iblock+shift,1) &
+             & * xgBlockA%vecR(irow,iblock)
           end do
+        end do
+        !$omp end parallel do
+      case (SPACE_C)
+        !$omp parallel do collapse(2) shared(da,xgBlockA) private(irow,iblock)
+        do iblock = 1, ncols
+          do irow = 1, nrows
+            xgBlockA%vecC(irow,iblock) = - da%vecR(iblock+shift,1) &
+             & * xgBlockA%vecC(irow,iblock)
+          end do
+        end do
+        !$omp end parallel do
+      end select
+    else if (space(da)==SPACE_C) then
+      if (xgBlockA%space/=SPACE_C) then
+        ABI_ERROR('If space(da)=SPACE_C, space(xgBlockA) has to be SPACE_C')
+      end if
+      !$omp parallel do collapse(2) shared(da,xgBlockA) private(irow,iblock)
+      do iblock = 1, ncols
+        do irow = 1, nrows
+          xgBlockA%vecC(irow,iblock) = - da%vecC(iblock+shift,1) &
+           & * xgBlockA%vecC(irow,iblock)
         end do
       end do
       !$omp end parallel do
-    case (SPACE_CR)
-      ABI_ERROR("Not implemented")
-    case (SPACE_C)
-      !$omp parallel do collapse(3) shared(da,xgBlockA) private(irow,iblock,ispinor)
-      do iblock = 1, ncols_nospin
-        do ispinor = 1, nspinor
-          do irow = 1, nrows
-            xgBlockA%vecC(irow,nspinor*(iblock-1)+ispinor) = - da%vecR(iblock+shift,1) &
-             & * xgBlockA%vecC(irow,nspinor*(iblock-1)+ispinor)
-          end do
-        end do
-      end do
-      !$omp end parallel do
-    end select
+    else
+      ABI_ERROR('Only SPACE_R or SPACE_C (for da) are implemented.')
+    end if
 
     call timab(tim_ymax,2,tsec)
 
@@ -4428,7 +4441,7 @@ contains
   !! NAME
   !! xgBlock_colwiseNorm2
 
-  subroutine xgBlock_colwiseNorm2(xgBlock, dot, max_val, max_elt, min_val, min_elt)
+  subroutine xgBlock_colwiseNorm2(xgBlock, dot, max_val, max_elt, min_val, min_elt, comm_loc)
 
     type(xgBlock_t) , intent(in   ) :: xgBlock
     type(xgBlock_t) , intent(inout) :: dot
@@ -4436,8 +4449,9 @@ contains
     integer         , intent(  out), optional :: max_elt
     double precision, intent(  out), optional :: min_val
     integer         , intent(  out), optional :: min_elt
+    integer         , intent(in   ), optional :: comm_loc
 
-    integer :: icol, ierr, fact
+    integer :: icol, ierr, fact, comm_
     double precision,external :: ddot
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
     integer :: cols,rows
@@ -4455,6 +4469,16 @@ contains
 
     if ( dot%space /= SPACE_R ) then
       ABI_ERROR("space(dot) should be SPACE_R")
+    end if
+    if ( dot%cols /= 1 ) then
+      ABI_ERROR("cols(dot) should be 1")
+    end if
+    if ( dot%rows /= xgBlock%cols ) then
+      ABI_ERROR("rows(dot) should be cols(xgBlock)")
+    end if
+    comm_=comm(xgBlock)
+    if (present(comm_loc)) then
+      comm_ = comm_loc
     end if
 
     if (xgBlock%space==SPACE_CR.and.xgBlock%me_g0<0) then
@@ -4479,7 +4503,7 @@ contains
           & c_loc(dot%vecR), xgBlock%rows, xgBlock%cols, xgBlock%ldim)
 
       end select
-      call xmpi_sum(dot%vecR,xgBlock%spacedim_comm,ierr)
+      call xmpi_sum(dot%vecR,comm_,ierr)
 
       ! do reductions
       if ( present(max_val) ) then
@@ -4540,7 +4564,7 @@ contains
       end select
       !FIXME This should happen inplace ideally
       !$OMP TARGET UPDATE FROM(dot__vecR)
-      call xmpi_sum(dot%vecR,xgBlock%spacedim_comm,icol)
+      call xmpi_sum(dot%vecR,comm_,icol)
       !$OMP TARGET UPDATE TO(dot__vecR)
 
       ! do reductions
@@ -4599,7 +4623,7 @@ contains
         !$omp end parallel do
 #endif
       end select
-      call xmpi_sum(dot%vecR,xgBlock%spacedim_comm,ierr)
+      call xmpi_sum(dot%vecR,comm_,ierr)
 
       if ( present(max_val) ) then
         max_val = maxval(dot%vecR(1:xgBlock%cols,1))
@@ -4680,6 +4704,12 @@ contains
       if (dot%space/=SPACE_R) then
         ABI_ERROR('if space(A)=SPACE_CR, space(dot) should be SPACE_R')
       end if
+    end if
+    if ( dot%cols /= 1 ) then
+      ABI_ERROR("cols(dot) should be 1")
+    end if
+    if ( dot%rows /= xgBlockA%cols ) then
+      ABI_ERROR("rows(dot) should be cols(xgBlockA)")
     end if
 
     fact = 1 ; if (xgBlockA%space==SPACE_CR) fact = 2

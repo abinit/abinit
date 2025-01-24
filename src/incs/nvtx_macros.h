@@ -9,7 +9,9 @@
 #ifndef ABINIT_NVTX_MACRO_H
 #define ABINIT_NVTX_MACRO_H
 
+#if defined HAVE_CONFIG_H
 #include "config.h"
+#endif
 
 /*
  * Note:

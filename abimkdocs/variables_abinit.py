@@ -1515,6 +1515,66 @@ It is still read during a transitional period, likely up to the end of v9 life c
 """,
 ),
 
+Variable(
+    abivarname="chebfi_oracle",
+    varset="gstate",
+    vartype="integer",
+    topics=['TuningSpeedMem_expert'],
+    dimensions="scalar",
+    defaultval="0",
+    mnemonics="CHEByshev FIltering algorithm ORACLE",
+    characteristics=['[[DEVELOP]]'],
+    added_in_version="10.3.4",
+    requires='[[wfoptalg]] == 111',
+    text=r"""
+For the Chebyshev Filtering algorithm, it is possible to estimate the degree of the polynom needed to reach a given precision on the wave-functions.
+Indeed, as explained in [[cite:Levitt2015]], after the application of the Chebyshev polynomial of order $n$ (noted $T_n(x)$) followed by a Rayleigh-Ritz procedure,
+the residual $r_i^n$ of the band $i$ can be estimated as :
+
+  $\|r_i^n\| \approx \|r_i\| \ / \ T_n(\lambda_i^{eff})$
+
+where $r_i$ is the residual before applying the Chebyshev polynomial, and $\lambda_i^{eff}=(\lambda_i - c)/r$ where $\lambda_i$ is the Rayleigh quotient of the band $i$, $r$ the filter radius and $c$ filter center.
+There are two possible scenarii :
+
+  * [[chebfi_oracle]] = 0 : the default value. The order of the polynom, or degree, is equal to [[mdeg_filter]] (or [[nline]],
+  depending on which one is used in the input) for every SCF step.
+
+  * [[chebfi_oracle]] > 0 : the square residuals $\|r_i\|^2$ are computed at the beginning of the algorithm, which adds a small time overhead (which could be negligible).
+  The degree of the polynom $n_i$ is estimated individually for every band, as explained below.
+  Then the maximum value over all bands is taken.
+  Indeed, for an efficient parallelism it is necessary to apply the same degree to every bands.
+
+The individual polynom degree $n_i$ of each band can be computed in two different ways:
+
+  * if [[chebfi_oracle]] = 1, $n_i$ is the minimum value between [[mdeg_filter]] and the degree $n_{tolwfr}$ estimated to insure $\|r_i^{n_{tolwfr}}\|^2 <$ [[tolwfr_diago]].
+  This option could be useful to reduce the polynomial degree for SCF iterations close to convergence.
+
+  * if [[chebfi_oracle]] = 2, $n_i$ is the minimum value between $n_{tolwfr}$ and the degree estimated to insure $\|r_i^n\|^2 < \alpha \|r_i\|^2$,
+  where $\alpha$ is equal to [[oracle_factor]].
+  This option could be useful to insure that the convergence rate of wave-fonctions is constant at every SCF iteration, until the convergence criteria [[tolwfr_diago]] is reached.
+  Note that in this case [[mdeg_filter]] (or [[nline]]) is not used.
+
+In some cases, $n_i$ is set to 0:
+
+  * if the square residual $\|r_i\|^2$ is below [[tolwfr_diago]]
+
+  * if the band $i$ is in the buffer (see [[nbdbuf]])
+
+  * if [[nbdbuf]] = -101 and the band occupancy is below [[oracle_minocc]]
+
+The resulting degree applied to all bands could be 0, for example if the wave-functions are already converged.
+In that case no filter is applied, but the Rayleigh-Ritz procedure is done anyway.
+
+At last, a global maximal degree $n_{max}$ is estimated (without using the residuals) to avoid some numerical instabilities (see section 5.3 in [[cite:Levitt2015]]).
+In practice $n_{max}$ is about 20 or more, but is not bigger than 40.
+This is a hard-coded limit in the code.
+$n_{max}$ is used even if [[chebfi_oracle]] is 0.
+
+[[chebfi_oracle]] > 0 is implemented for [[wfoptalg]] = 111, but not for [[wfoptalg]] = 1.
+It is not implemented for GPUs either (i.e. [[gpu_option]] must be 0 or DISABLE).
+""",
+),
+
 
 Variable(
     abivarname="chempot",
@@ -1888,7 +1948,7 @@ Variable(
     defaultval="0",
     mnemonics="C-PRoJectors IN MEMORY",
     characteristics=['[[DEVELOP]]'],
-    added_in_version="",
+    added_in_version="10.2.0",
     text=r"""
 For systems with many atoms, non-local operations are the most time-consuming part of the computation.
 The non-local contribution of the wavefunction $\psi$ to the energy writes:
@@ -10458,7 +10518,7 @@ Variable(
     vartype="integer",
     topics=['SCFControl_expert'],
     dimensions="scalar",
-    defaultval=ValueWithConditions({'[[wfoptalg]] == 1 or 11 ': 6, 'defaultval': 6}),
+    defaultval=ValueWithConditions({'[[wfoptalg]] == 1 or 111 ': 6, 'defaultval': 6}),
     mnemonics="Maximum DEGree of the polynomial for spectrum FILTERing algorithms",
     commentdefault="6 for chebyshev filtering algorithm",
     added_in_version="v10",
@@ -12050,7 +12110,7 @@ Variable(
     vartype="integer",
     topics=['SCFControl_expert'],
     dimensions="scalar",
-    defaultval=ValueWithConditions({'[[wfoptalg]] == 1 or 11 ': '[[mdeg_filter]]', 'defaultval': 4}),
+    defaultval=ValueWithConditions({'[[wfoptalg]] == 1 or 111 ': '[[mdeg_filter]]', 'defaultval': 4}),
     mnemonics="Number of LINE minimizations",
     commentdefault="Default is 4 line minimizations for conjugate-gradient-based algorithms, the degree of the polynomial filter for spectrum-filtering-based algorithms",
     added_in_version="before_v9",
@@ -19970,11 +20030,12 @@ In practice it is used to reduce the number of "lines" done at the diagonalizati
 If the squared residual becomes lower than **tolwfr_diago**, the remaining "lines" to be done are skipped.
 For LOBPCG, "lines" are skipped if the biggest squared residual of the block is less than **tolwfr_diago**.
 If **tolwfr_diago**=0, [[nline]] "lines" are done at every self-consistent step.
+
 By default **tolwfr_diago** is equal to [[tolwfr]], but can be used independently.
 One can use [[tolvrs]] (or any other tolerance) to define a criterion for SCF cycles, and use **tolwfr_diago** to save computational time.
 However, when [[tolwfr]]>0, **tolwfr_diago**>[[tolwfr]] is forbidden as the SCF cycles cannot converge in that case.
 
-For [[wfoptalg]]=114 only (LOBPCG), if **tolwfr_diago**=0 then it is set to 1e-20 internally.
+For [[wfoptalg]]=114 (LOBPCG) and [[wfoptalg]]=111 (Chebyshev filtering), if **tolwfr_diago**=0 (default value if [[tolwfr]] is not specified in the input) then it is set to 1e-20 internally.
 As a consequence, to ensure that no lines are skipped one has to set **tolwfr_diago**=1e-30 in the input (instead of 0) in this particular case.
 """,
 ),
@@ -25038,6 +25099,38 @@ g(k,q) along either a q-path or k-path ([[eph_task]] == 18].
 One can use these two variables to select the band range of interest and skip, for instance, low-energy states.
 If not specied all bands from 1 up to [[nband]] are included,
 If specified in input, eph_path_brange(2) must be <= [[nband]].
+""",
+),
+
+Variable(
+    abivarname="oracle_factor",
+    varset="gstate",
+    vartype="real",
+    topics=['TuningSpeedMem_expert'],
+    dimensions="scalar",
+    defaultval="0.1",
+    mnemonics="ORACLE in chebyshev filtering algorithm : FACTOR",
+    characteristics=['[[DEVELOP]]'],
+    added_in_version="10.3.4",
+    requires="[[wfoptalg]] == 111 and [[chebfi_oracle]] == 2",
+    text=r"""
+This parameter controls the convergence rate of the wave-functions when using the oracle in the Chebyshev algorithm. See [[chebfi_oracle]] for more information.
+""",
+),
+
+Variable(
+    abivarname="oracle_minocc",
+    varset="gstate",
+    vartype="real",
+    topics=['TuningSpeedMem_expert'],
+    dimensions="scalar",
+    defaultval="0.0001",
+    mnemonics="ORACLE in chebyshev filtering algorithm : MINimal OCCupancy",
+    characteristics=['[[DEVELOP]]'],
+    added_in_version="10.3.4",
+    requires="[[wfoptalg]] == 111 and [[chebfi_oracle]] > 0 and [[nbdbuf]] = -101",
+    text=r"""
+This parameter controls the minimal occupancy when using the oracle in the Chebyshev algorithm. See [[chebfi_oracle]] for more information.
 """,
 ),
 
