@@ -18,9 +18,12 @@ if(NOT CMAKE_VERSION VERSION_LESS 3.12)
   cmake_policy(SET CMP0074 NEW)
 endif()
 
+# Retrieve ABINIT version
+file (STRINGS ".current_version" ABI_VERSION)
+
 project(abinit
   LANGUAGES C CXX Fortran
-  VERSION 9.11.0
+  VERSION ${ABI_VERSION}
   HOMEPAGE_URL https://www.abinit.org/
   DESCRIPTION "ABINIT is an atomic-scale simulation software suite.")
 
