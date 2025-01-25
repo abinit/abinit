@@ -75,6 +75,7 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% need_cpp_vars = HAVE_NETCDF_MPI
 #%% [shell] 
 #%% post_commands = 
 #%% [files]
@@ -90,7 +91,6 @@
 #%% [extra_info]
 #%% authors = S. Ponc\'e 
 #%% keywords = NC, DFPT, EPH_OLD
-#%% need_cpp_vars = HAVE_NETCDF_MPI
 #%% description = 
 #%%  Diamond.
 #%%  Diamond dynamical temperature-dependent of the electronic structure. 

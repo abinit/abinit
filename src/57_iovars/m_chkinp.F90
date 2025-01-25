@@ -3216,7 +3216,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      write(msg,'(8a)')ch10,&
          'prtevk=1 (printing of EVK file) is not compatible with parallelization over',ch10, &
 &        '  perturbations when netCDF/HDF5 is not parallel (MPI)!',ch10,&
-&        'Action: suppress parallelization over parturbations (paral_rf)',ch10,&
+&        'Action: suppress parallelization over perturbations (paral_rf)',ch10,&
 &        '        or link ABINIT with a MPI-compatible netCDF'
     ABI_ERROR_NOSTOP(msg, ierr)
 #endif
