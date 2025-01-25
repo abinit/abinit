@@ -3231,6 +3231,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 
  ! Open the DVDB file
  call dvdb%open_read(ngfftf, xmpi_comm_self)
+ ABI_CHECK(dvdb%has_fields("pot1", msg), msg)
 
  ! Activate parallelism over perturbations at the level of the DVDB
  call gstore%set_perts_distrib(cryst, dvdb, my_npert)
