@@ -124,6 +124,7 @@ pawecutdg   9.
 #%% [extra_info]
 #%% authors = M. Torrent, M. Delaveau
 #%% keywords = PAW, DFPT, DDK
+#%% need_cpp_vars = HAVE_NETCDF_MPI
 #%% description = 
 #%%   This test check the parallelization over atomic sites both for the ground state
 #%%   and response function features (within PAW formalism), together with
