@@ -4371,7 +4371,11 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_filepath, prtvol)
    write(std_out,"(a,i0,2a)")"- Merging file [",ii,"]: ",trim(v1files(ii))
    jj = ii
    hdr1 => hdr1_list(jj)
-   call hdr1%fort_write(ount, fform_pot, ierr)
+   if (any(fform == pot1_fforms)) then
+     call hdr1%fort_write(ount, fform_pot, ierr)
+   else
+     call hdr1%fort_write(ount, den1_fforms(1), ierr)
+   end if
    ABI_CHECK(ierr == 0, "hdr_fort_write returned ierr = 0")
 
    qeq0 = (hdr1%qptn(1)**2+hdr1%qptn(2)**2+hdr1%qptn(3)**2<1.d-14)
