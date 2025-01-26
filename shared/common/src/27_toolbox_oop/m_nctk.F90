@@ -66,7 +66,6 @@ MODULE m_nctk
  ! String length used for the names of dimensions and variables
  ! The maximum allowable number of characters
 
-
  ! netcdf4-hdf5 is the default
  integer,save,private :: def_cmode_for_seq_create = ior(ior(nf90_clobber, nf90_netcdf4), nf90_write)
  ! netcdf4 classic
@@ -773,7 +772,7 @@ integer function nctk_open_create(ncid, path, comm) result(ncerr)
 #endif
  else
    ! Note that here we don't enforce nf90_netcdf4 hence the netcdf file with be in classic model.
-   write(my_string,'(2a)') "- Creating HDf5 file with MPI-IO support: ",trim(path)
+   write(my_string,'(2a)') "- Creating HDf5 file without MPI-IO support: ",trim(path)
    call wrtout(std_out,my_string)
    !ncerr = nf90_create(path, ior(nf90_clobber, nf90_write), ncid)
    cmode = def_cmode_for_seq_create

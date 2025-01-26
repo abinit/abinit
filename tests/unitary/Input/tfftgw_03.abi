@@ -15,7 +15,7 @@ osc_ecut = 10,
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = fftprof
-#%% exclude_builders = eos_nvhpc_23.9_elpa
+#%% exclude_builders = eos_nvhpc_23.9_elpa, .*_intel_2023_.*
 #%% need_cpp_vars = HAVE_OPENMP
 #%% [files]
 #%% files_to_test = tfftgw_03.stdout, tolnlines=0, tolabs=0.0, tolrel=0.0
