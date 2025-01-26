@@ -2379,12 +2379,12 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmft_triqs_nleg=0
    dtsets(idtset)%dmft_triqs_nsubdivisions=1
    dtsets(idtset)%dmft_triqs_ntau_delta=0
-   dtsets(idtset)%dmft_triqs_orb_off_diag=-1
+   dtsets(idtset)%dmft_triqs_off_diag=-1
    dtsets(idtset)%dmft_triqs_seed_a=34788
    dtsets(idtset)%dmft_triqs_seed_b=928374
-   dtsets(idtset)%dmft_triqs_spin_off_diag=-1
    dtsets(idtset)%dmft_triqs_therm_restart=1000
    dtsets(idtset)%dmft_triqs_time_invariance=1
+   dtsets(idtset)%dmft_triqs_tol_block=tol15
    dtsets(idtset)%dmft_triqs_use_norm_as_weight=0
    dtsets(idtset)%dmft_triqs_wmax=-1.0_dp
    dtsets(idtset)%dmft_use_all_bands=0

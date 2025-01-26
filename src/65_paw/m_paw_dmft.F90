@@ -409,11 +409,8 @@ MODULE m_paw_dmft
   logical :: dmft_triqs_move_shift
   ! TRIQS CTQMC: Flag to activate the shift move
 
-  logical :: dmft_triqs_orb_off_diag
-  ! TRIQS CTQMC: Flag to sample the orbital off-diagonal elements of the Green's function
-
-  logical :: dmft_triqs_spin_off_diag
-  ! TRIQS CTQMC: Flag to sample the spin off-diagonal elements of the Green's function
+  logical :: dmft_triqs_off_diag
+  ! TRIQS CTQMC: Flag to sample the off-diagonal elements of the Green's function
 
   logical :: dmft_triqs_time_invariance
   ! TRIQS CTQMC: Flag to activate the use of time invariance for the sampling
@@ -468,6 +465,9 @@ MODULE m_paw_dmft
 
   real(dp) :: dmft_triqs_move_global_prob
   ! TRIQS CTQMC: Proposal probability for the global move
+
+  real(dp) :: dmft_triqs_tol_block
+  ! TRIQS CTQMC: Off-diagonal elements below this threshold are set to 0
 
   real(dp) :: dmft_wanrad
   ! Maximal radius for print of the Wannier functions
@@ -713,8 +713,8 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  integer :: iatom1,iband,icb,ig,ik,ikg,ikpt,im,im1,indproj,iproj,ir,isppol
  integer :: itypat,jm,lpawu,lpawu1,maxlpawu,mband,mbandc,mesh_size,mesh_type
  integer :: mkmem,mm,mpw,myproc,natom,nband_k,ndim,nkpt,nproc,nproju,npw
- integer :: nspinor,nsppol,nsym,ntypat,siz_paw,siz_proj,siz_wan,use_dmft
- logical :: t2g,use_full_chipsi,neglect_off_diag,verif,x2my2d
+ integer :: nspinor,nsppol,nsym,ntypat,off_diag,siz_paw,siz_proj,siz_wan,use_dmft
+ logical :: t2g,use_full_chipsi,verif,x2my2d
  real(dp) :: bes,besp,lstep,norm,onem,rad,rint,rstep,sumwtk
  integer, parameter :: mt2g(3) = (/1,2,4/)
  logical, allocatable :: lcycle(:),typcycle(:)
@@ -735,6 +735,7 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  dmftbandf = dtset%dmftbandf
  dmft_dc   = dtset%dmft_dc
  dmft_solv = dtset%dmft_solv
+ off_diag  = dtset%dmft_triqs_off_diag
  use_dmft  = abs(dtset%usedmft)
  paw_dmft%use_dmft = use_dmft
  paw_dmft%use_sc_dmft = 0
@@ -876,6 +877,29 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
    ABI_BUG(message)
  end if
 
+ if (dmft_solv == 6 .or. dmft_solv == 7) then
+
+   if (off_diag == 1) then
+     write(message,'(3a)') "WARNING: You have activated the sampling of the off-diagonal elements ", &
+                         & "in TRIQS/CTHYB. Some features are not available, and you will not be ", &
+                         & "able to compute an energy."
+     ABI_WARNING(message)
+   end if
+#ifdef HAVE_TRIQS_COMPLEX
+   if (off_diag == 0) then
+     write(message,'(2a)') "WARNING: You have compiled with the complex version of TRIQS/CTHYB, yet you do not", &
+                     & "sample any off-diagonal element. This is a waste of computation time."
+     ABI_WARNING(message)
+   end if
+#else
+   if (off_diag == 1) then
+     write(message,'(3a)') "WARNING: You have compiled with the real version of TRIQS/CTHYB, yet you have", &
+                & "activated the sampling of the off-diagonal elements. Thus their imaginary part will be", &
+                & "neglected. You'll have to check that this is a good approximation."
+     ABI_WARNING(message)
+   end if
+#endif
+
  write(message,'(7a)') ch10, &
   & ch10," ******************************************", &
   & ch10," DFT+DMFT Method is used", &
@@ -933,10 +957,7 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
    call wrtout([std_out,ab_out],message,'COLL')
  end if
 
- neglect_off_diag = (dtset%dmft_triqs_orb_off_diag == 0) .or. &
-                  & (nspinor == 2 .and. dtset%dmft_triqs_spin_off_diag == 0)
-
- if ((dmft_solv == 6 .or. dmft_solv == 7) .and. (.not. neglect_off_diag))  then
+ if ((dmft_solv == 6 .or. dmft_solv == 7) .and. off_diag == 1)  then
 #ifndef HAVE_TRIQS_COMPLEX
    write(message,'(a,1x,a)') ch10,"The imaginary part of the Green's function is neglected"
    call wrtout([std_out,ab_out],message,'COLL')
@@ -945,7 +966,7 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
    write(message,'(a,1x,a)') ch10,"The imaginary part of the Green's function is neglected"
    call wrtout([std_out,ab_out],message,'COLL')
  end if
- if (dmft_solv == 5 .or. ((dmft_solv == 6 .or. dmft_solv == 7) .and. neglect_off_diag)) then
+ if (dmft_solv == 5 .or. ((dmft_solv == 6 .or. dmft_solv == 7) .and. off_diag == 0)) then
    write(message,'(a,1x,a)') ch10,"The off-diagonal elements of the Green's function are neglected"
    call wrtout([std_out,ab_out],message,'COLL')
  end if
@@ -1070,8 +1091,7 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  paw_dmft%dmft_triqs_time_invariance               = (dtset%dmft_triqs_time_invariance == 1)
  paw_dmft%dmft_triqs_use_norm_as_weight            = (dtset%dmft_triqs_use_norm_as_weight == 1)
  paw_dmft%dmft_triqs_leg_measure                   = (dtset%dmft_triqs_leg_measure == 1)
- paw_dmft%dmft_triqs_orb_off_diag                  = (dtset%dmft_triqs_orb_off_diag == 1)
- paw_dmft%dmft_triqs_spin_off_diag                 = (dtset%dmft_triqs_spin_off_diag == 1)
+ paw_dmft%dmft_triqs_off_diag                      = (off_diag == 1)
  paw_dmft%dmft_triqs_move_global_prob              = dtset%dmft_triqs_move_global_prob
  paw_dmft%dmft_triqs_imag_threshold                = dtset%dmft_triqs_imag_threshold
  paw_dmft%dmft_triqs_det_precision_warning         = dtset%dmft_triqs_det_precision_warning
@@ -1085,6 +1105,7 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  paw_dmft%dmft_triqs_compute_integral              = dtset%dmft_triqs_compute_integral
  paw_dmft%dmft_triqs_gaussorder                    = dtset%dmft_triqs_gaussorder
  paw_dmft%dmft_triqs_nsubdivisions                 = dtset%dmft_triqs_nsubdivisions
+ paw_dmft%dmft_triqs_tol_block                     = dtset%dmft_triqs_tol_block
 
 !==============================
 !==  Variables for DMFT itself
@@ -1383,8 +1404,8 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
                        & paw_dmft%radgrid(itypat),r_for_intg=rint)
            paw_dmft%bessel_int(ig,itypat,ik) = bes * (j_dpc**lpawu1)
          end do ! ig
-         paw_dmft%bessel(:,1:siz_wan,itypat,ik) = paw_dmft%bessel(:,1:siz_wan,itypat,ik) * (j_dpc**lpawu1)
-        typcycle(itypat) = .true.
+         paw_dmft%bessel(1:npw,1:siz_wan,itypat,ik) = paw_dmft%bessel(1:npw,1:siz_wan,itypat,ik) * (j_dpc**lpawu1)
+         typcycle(itypat) = .true.
        end if ! not typcycle
 
      end do ! iatom

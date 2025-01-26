@@ -497,7 +497,7 @@ subroutine print_hu(hu,ntypat,prtopt)
      write(message,'(2a,i4)')  ch10,'  -------> For Correlated species'
      call wrtout(std_out,  message,'COLL')
      if(prtopt==0) then
-       write(message,'(a,5x,a)') ch10,"-------- Interactions in the density matrix representation in Slm basis "
+       write(message,'(a,5x,a)') ch10,"-------- Interactions in the density matrix representation in cubic basis "
      else if(prtopt==1) then
        write(message,'(a,5x,a)') ch10,"-------- Interactions in the density matrix representation in diagonal basis"
      else if(prtopt==2) then
@@ -691,9 +691,9 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
 !    ==================================
 
      ! Print udens in the Slm basis
-     call vee2udensatom_hu(ndim,hu(itypat)%udens(:,:),hu(itypat)%vee(:,:,:,:),"Slm",prtonly=1)
+     call vee2udensatom_hu(ndim,hu(itypat)%udens(:,:),hu(itypat)%vee(:,:,:,:),"cubic",prtonly=1)
 
-     basis_vee = 'Slm'
+     basis_vee = 'cubic'
 !    First print veeslm
        !call printvee_hu(ndim,real(veeslm),1,basis_vee)
      call printvee_hu(tndim,hu(itypat)%veeslm2(:,:,:,:),1,basis_vee)
@@ -735,7 +735,7 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
         ! enddo
 
        call rotate_hu(rot_mat(iatom)%mat(:,:,1),tndim,hu(itypat)%veeslm2(:,:,:,:),vee_rotated(iatom)%mat(:,:,:,:))
-       basis_vee = 'Diagonal basis from Slm basis'
+       basis_vee = 'Diagonal basis from cubic basis'
 
 !    In the Ylm basis
 !    ================================================================================
@@ -886,9 +886,9 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
 !  !  then print a warning
 !  !  useful only for magnetic case
 !  ! ================================================================
-     ndim = 2*lpawu + 1
+     ndim  = 2*lpawu + 1
      tndim = nspinor * ndim
-     if (nsppol == 2 .and. pawprtvol >=3) then
+     if (nsppol == 2 .and. pawprtvol >=3 .and. (.not. triqs)) then
        do m2=1,tndim
          do m1=1,tndim
            if (abs(rot_mat(iatom)%mat(m1,m2,1)-rot_mat(iatom)%mat(m1,m2,2)) > tol4) then
@@ -904,7 +904,7 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
 !  ! =================================================
 !  !    See if rotation is complex or real
 !  ! =================================================
-     if (pawprtvol >= 3) then
+     if (pawprtvol >= 3 .and. (.not. triqs)) then
        do m1=1,ndim
          do mi=1,ndim
            if (abs(aimag(rot_mat(iatom)%mat(mi,m1,1))) > tol8) then
@@ -958,9 +958,12 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
        else if (rot_type == 2) then
          call vee_slm2ylm_hu(lpawu,hu(itypat)%vee(:,:,:,:),veetemp(:,:,:,:),paw_dmft,1,2)
        end if
-       if (paw_dmft%dmft_solv /= 6 .and. paw_dmft%dmft_solv /= 7) &
-         & veetemp(:,:,:,:) = cmplx(dble(veetemp(:,:,:,:)),zero,kind=dp) ! neglect imaginary part in Abinit
+       if (.not. triqs) veetemp(:,:,:,:) = cmplx(dble(veetemp(:,:,:,:)),zero,kind=dp) ! neglect imaginary part in Abinit
        call vee_ndim2tndim_hu(lpawu,veetemp(:,:,:,:),vee_rotated(iatom)%mat(:,:,:,:))
+       if (nsppol == 2 .and. triqs .and. rot_type == 1) then
+         call rotate_hu(rot_mat(iatom)%mat(:,:,2),ndim,hu(itypat)%vee(:,:,:,:),veetemp(:,:,:,:))
+         vee_rotated(iatom)%mat(ndim+1:2*ndim,ndim+1:2*ndim,ndim+1:2*ndim,ndim+1:2*ndim) = veetemp(:,:,:,:)
+       end if
      else
        udens_atoms(iatom)%mat(:,:,1)   = hu(itypat)%udens(:,:)
        vee_rotated(iatom)%mat(:,:,:,:) = hu(itypat)%veeslm2(:,:,:,:)
@@ -1634,10 +1637,10 @@ subroutine vee_slm2ylm_hu(lcor,mat_inp_c,mat_out_c,paw_dmft,option,prtvol)
 
  if (abs(prtvol) > 2) then
    if (option == 1) then
-     write(message,'(3a)') ch10,"matrix in Slm basis is changed into Ylm basis"
+     write(message,'(3a)') ch10,"matrix in cubic basis is changed into Ylm basis"
      call wrtout(std_out,message,'COLL')
    else if (option == 2) then
-     write(message,'(3a)') ch10,"matrix in Ylm basis is changed into Slm basis"
+     write(message,'(3a)') ch10,"matrix in Ylm basis is changed into cubic basis"
      call wrtout(std_out,message,'COLL')
    end if
  end if ! prtvol>2

@@ -13,16 +13,17 @@ using namespace h5;
 using namespace mpi;
 using namespace triqs::gfs;
 
-void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spin_off_diag, bool move_shift, bool move_double,
+void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool off_diag, bool move_shift, bool move_double,
                      bool measure_density_matrix, bool time_invariance, bool use_norm_as_weight,
                      int loc_n_min, int loc_n_max, int seed_a, int seed_b, int num_orbitals, int n_tau,
                      int n_l, int n_cycles, int cycle_length, int ntherm, int ntherm_restart, int det_init_size,
                      int det_n_operations_before_check, int ntau_delta, int nbins_histo, int rank,
-                     int nspinor, int iatom, int ilam, double beta, double move_global_prob, double imag_threshold,
+                     int nspinor, int iatom, int ilam, int nblocks, double beta, double move_global_prob, double imag_threshold,
                      double det_precision_warning, double det_precision_error, double det_singular_threshold,
-                     double lam, complex<double> *ftau, complex<double> *gtau, complex<double> *gl,
-                     complex<double> *udens_cmplx, complex<double> *vee_cmplx, complex<double> *levels_cmplx,
-                     complex<double> *moments_self_1, complex<double> *moments_self_2, complex<double> *occ, complex<double> *eu) {
+                     double lam, int *block_list, int *flavor_list, int *inner_list, int *siz_list, complex<double> *ftau,
+                     complex<double> *gtau, complex<double> *gl, complex<double> *udens_cmplx, complex<double> *vee_cmplx,
+                     complex<double> *levels_cmplx, complex<double> *moments_self_1, complex<double> *moments_self_2,
+                     complex<double> *occ, complex<double> *eu) {
 
   int verbo = 1;
   int ndim = num_orbitals / 2;
@@ -50,8 +51,6 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
     cout << "   Cycle length          = " << cycle_length << endl;
     cout << "   Ntherm                = " << therm << endl;
     cout << "   Seed                  = " << seed_a << " + " << seed_b << " * rank" << endl;
-    cout << "   Orbital Off-Diag      = " << orb_off_diag << endl;
-    cout << "   Spin Off-Diag         = " << spin_off_diag << endl;
     cout << "   Move shift            = " << move_shift << endl;
     cout << "   Move double           = " << move_double << endl;
     cout << "   Meas. density mat.    = " << measure_density_matrix << endl;
@@ -96,62 +95,24 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
 #endif
 
   h_scalar_t levels_zero [num_orbitals*num_orbitals] = {0};
-  int nblocks,siz_block;
 
-  if (!orb_off_diag && !spin_off_diag) {
-    // 1*1 block for each flavor
-    nblocks   = num_orbitals;
-    siz_block = 1;
-  }
-  if (orb_off_diag && !spin_off_diag) {
-    // n/2*n/2 blocks for each spin (named up and down)
-    nblocks   = 2;
-    siz_block = ndim;
-  }
-  if (!orb_off_diag && spin_off_diag) {
-    // 2*2 blocks for each orbital (named 0 to n/2-1)
-    nblocks   = ndim;
-    siz_block = 2;
-  }
-  if (orb_off_diag && spin_off_diag) {
-    // n*n block (named tot)
-    nblocks   = 1;
-    siz_block = num_orbitals;
-  }
-
-  std::vector<string> labels(nblocks);
   gf_struct_t gf_struct;
 
-  if (!orb_off_diag && !spin_off_diag) {
-    for (int o = 0; o < num_orbitals; ++o)
-      labels[o] = to_string(o);
-  }
-  if (orb_off_diag && !spin_off_diag) {
-    labels[0] = "up";
-    labels[1] = "down";
-  }
-  if (!orb_off_diag && spin_off_diag) {
-    for (int o = 0; o < ndim; ++o)
-      labels[o] = to_string(o);
-  }
-  if (orb_off_diag && spin_off_diag)
-    labels[0] = "tot";
-
   for (int i = 0; i < nblocks; ++i)
-    gf_struct.emplace_back(labels[i],siz_block);
+    gf_struct.emplace_back(to_string(i),siz_list[i]);
 
   if (rank == 0 && verbo > 0) cout << "   == Green's Function Structure Initialized ==" << endl << endl;
 
   // Init Hamiltonian Basic terms
   if (!rot_inv) {
     if (rank == 0 && verbo > 0) cout << "   == Density-Density Terms Included == " << endl << endl;
-    H    = init_Hamiltonian(levels,num_orbitals,udens,orb_off_diag,spin_off_diag,lam,labels);
-    Hint = init_Hamiltonian(levels_zero,num_orbitals,udens,orb_off_diag,spin_off_diag,double(1),labels);
+    H    = init_Hamiltonian(levels,num_orbitals,udens,block_list,inner_list,lam);
+    Hint = init_Hamiltonian(levels_zero,num_orbitals,udens,block_list,inner_list,double(1));
   }
   else {
     if (rank == 0 && verbo > 0) cout << "   == Rotationally Invariant Terms Included ==  " << endl << endl;
-    H    = init_fullHamiltonian(levels,num_orbitals,vee,orb_off_diag,spin_off_diag,lam,labels);
-    Hint = init_fullHamiltonian(levels_zero,num_orbitals,vee,orb_off_diag,spin_off_diag,double(1),labels);
+    H    = init_fullHamiltonian(levels,num_orbitals,vee,block_list,inner_list,lam);
+    Hint = init_fullHamiltonian(levels_zero,num_orbitals,vee,block_list,inner_list,double(1));
   }
 
   // Construct CTQMC solver with mesh parameters
@@ -160,10 +121,10 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
 
   for (int iblock = 0; iblock < nblocks; ++iblock) {
     for (int tau = 0; tau < ntau_delta; ++tau) {
-      for (int o = 0; o < siz_block; ++o) {
-        int iflavor = convert_indexes_back(iblock,o,orb_off_diag,spin_off_diag,ndim);
-        for (int oo = 0; oo < siz_block; ++oo) {
-          int iflavor1 = convert_indexes_back(iblock,oo,orb_off_diag,spin_off_diag,ndim);
+      for (int o = 0; o < siz_list[iblock]; ++o) {
+        iflavor = flavor_list[o+iblock*num_orbitals];
+        for (int oo = 0; oo < siz_list[iblock]; ++oo) {
+          iflavor1 = flavor_list[oo+iblock*num_orbitals];
           solver.Delta_tau()[iblock][tau](o,oo) = ftau[iflavor+iflavor1*num_orbitals+tau*num_orbitals*num_orbitals];
         }
       }
@@ -243,14 +204,14 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
       for (int j = 0; j < 2; ++j) {
         if (j == 0) {
           tag_move = "insert";
-          hist = &paramCTQMC.hist_insert[labels[i]];
+          hist = &paramCTQMC.hist_insert[to_string(i)];
         }
         else {
           tag_move = "remove";
-          hist = &paramCTQMC.hist_remove[labels[i]];
+          hist = &paramCTQMC.hist_remove[to_string(i)];
         }
         *hist = std::vector<double>(nbins_histo);
-        if (rank == 0) h5_read(gr,tag_move+"_"+labels[i],*hist);
+        if (rank == 0) h5_read(gr,tag_move+"_"+to_string(i),*hist);
         mpi_broadcast(*hist,comm,0);
       }
     }
@@ -346,12 +307,12 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
         ind_vec.reserve(nbins_histo);
 
         if (j == 0) {
-          hist = &hist_insert[labels[i]];
+          hist = &hist_insert[to_string(i)];
           tag_move = "insert";
         }
         else {
           tag_move = "remove";
-          hist = &hist_remove[labels[i]];
+          hist = &hist_remove[to_string(i)];
         }
 
         double s = 0.;
@@ -366,7 +327,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
         double x = s * (1. / p_local - 1.) / (step * double(ind_vec.size()));
         for (auto const &ind : ind_vec) (*hist)[ind] = x;
 
-        h5_write(gr,tag_move+"_"+labels[i],*hist);
+        h5_write(gr,tag_move+"_"+to_string(i),*hist);
       }
     }
 
@@ -375,10 +336,10 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
 
   for (int iblock = 0; iblock < nblocks; ++iblock) {
     for (int tau = 0; tau < n_tau; ++tau) {
-      for (int o = 0; o < siz_block; ++o) {
-        int iflavor = convert_indexes_back(iblock,o,orb_off_diag,spin_off_diag,ndim);
-        for (int oo = 0; oo < siz_block; ++oo) {
-          int iflavor1 = convert_indexes_back(iblock,oo,orb_off_diag,spin_off_diag,ndim);
+      for (int o = 0; o < siz_list[iblock]; ++o) {
+        iflavor = flavor_list[o+iblock*num_orbitals];
+        for (int oo = 0; oo < siz_list[iblock]; ++oo) {
+          iflavor1 = flavor_list[oo+iblock*num_orbitals];
           gtau[tau+iflavor*n_tau+iflavor1*num_orbitals*n_tau] = (*solver.G_tau)[iblock].data()(tau,o,oo);
         }
       }
@@ -389,10 +350,10 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
   if (leg_measure) {
     for (int iblock = 0; iblock < nblocks; ++iblock) {
       for (int l = 0; l < n_l; ++l) {
-        for (int o = 0; o < siz_block; ++o) {
-          int iflavor = convert_indexes_back(iblock,o,orb_off_diag,spin_off_diag,ndim);
-          for (int oo = 0; oo < siz_block; ++oo) {
-            int iflavor1 = convert_indexes_back(iblock,oo,orb_off_diag,spin_off_diag,ndim);
+        for (int o = 0; o < siz_list[iblock]; ++o) {
+          iflavor = flavor_list[o+iblock*num_orbitals];
+          for (int oo = 0; oo < siz_list[iblock]; ++oo) {
+            iflavor1 = flavor_list[oo+iblock*num_orbitals];
             gl[l+iflavor*n_l+iflavor1*num_orbitals*n_l] = (*solver.G_l)[iblock].data()(l,o,oo);
           }
         }
@@ -410,9 +371,9 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
     complex<double> occ_tmp [num_orbitals] = {0};
 
     for (int iblock = 0; iblock < nblocks; ++iblock) {
-      for (int o = 0; o < siz_block; ++o) {
-        int iflavor = convert_indexes_back(iblock,o,orb_off_diag,spin_off_diag,ndim);
-        n_op = c_dag(labels[iblock],o) * c(labels[iblock],o);
+      for (int o = 0; o < siz_list[iblock]; ++o) {
+        iflavor = flavor_list[o+iblock*num_orbitals];
+        n_op = c_dag(to_string(iblock),o) * c(to_string(iblock),o);
         if (itask == rank) occ_tmp[iflavor] = trace_rho_op(rho,n_op,h_loc_diag);
         itask = (itask+1)%nproc;
       }
@@ -450,8 +411,8 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
       Sinf_mat = h_scalar_t{0};
 
       for (int iblock = 0; iblock < nblocks; ++iblock) {
-        for (int o = 0; o < siz_block; ++o) {
-          int iflavor = convert_indexes_back(iblock,o,orb_off_diag,spin_off_diag,ndim);
+        for (int o = 0; o < siz_list[iblock]; ++o) {
+          iflavor = flavor_list[o+iblock*num_orbitals];
           commut = Hint*c(labels[iblock],o) - c(labels[iblock],o)*Hint;
           Sinf_op = - commut*c_dag(labels[iblock],o) - c_dag(labels[iblock],o)*commut;
           commut2 = c_dag(labels[iblock],o)*Hint - Hint*c_dag(labels[iblock],o);
@@ -486,18 +447,17 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool orb_off_diag, bool spi
 
 // Build density-density Hamiltonian
 many_body_op_t init_Hamiltonian(h_scalar_t *eps, int nflavor, h_scalar_t *udens,
-                                bool orb_off_diag, bool spin_off_diag, double lambda,
-                                std::vector<string> &labels) {
+                                int *block_list, int *inner_list, double lambda) {
 
   many_body_op_t H;
   int iblock,iblock1,o,oo;
 
   for (int i = 0; i < nflavor; ++i) {
-    tie(iblock,o) = convert_indexes(i,orb_off_diag,spin_off_diag,nflavor/2);
+    iblock = block_list[i]; o = inner_list[i];
     for (int j = 0; j < nflavor; ++j) {
-      tie(iblock1,oo) = convert_indexes(j,orb_off_diag,spin_off_diag,nflavor/2);
-      H += 0.5 * lambda * udens[i+j*nflavor] * n(labels[iblock],o) * n(labels[iblock1],oo);
-      H += eps[i+j*nflavor] * c_dag(labels[iblock],o) * c(labels[iblock1],oo);
+      iblock1 = block_list[j]; oo = inner_list[j];
+      H += 0.5 * lambda * udens[i+j*nflavor] * n(to_string(iblock),o) * n(to_string(iblock1),oo);
+      H += eps[i+j*nflavor] * c_dag(to_string(iblock),o) * c(to_string(iblock1),oo);
     }
   }
   return H;
@@ -505,65 +465,27 @@ many_body_op_t init_Hamiltonian(h_scalar_t *eps, int nflavor, h_scalar_t *udens,
 
 // Build full Hamiltonian
 many_body_op_t init_fullHamiltonian(h_scalar_t *eps, int nflavor, h_scalar_t *vee,
-                                    bool orb_off_diag, bool spin_off_diag, double lambda,
-                                    std::vector<string> &labels) {
+                                    int *block_list, int *inner_list, double lambda) {
 
   many_body_op_t H;
   int iblock,iblock1,iblock2,iblock3,o,oo,ooo,oooo;
 
   for (int i = 0; i < nflavor; ++i) {
-    tie(iblock,o) = convert_indexes(i,orb_off_diag,spin_off_diag,nflavor/2);
+    iblock = block_list[i]; o = inner_list[i];
     for (int j = 0; j < nflavor; ++j) {
-      tie(iblock1,oo) = convert_indexes(j,orb_off_diag,spin_off_diag,nflavor/2);
-      H += eps[i+j*nflavor] * c_dag(labels[iblock],o) * c(labels[iblock1],oo);
+      iblock1 = block_list[j]; oo = inner_list[j];
+      H += eps[i+j*nflavor] * c_dag(to_string(iblock),o) * c(to_string(iblock1),oo);
       for (int k = 0; k < nflavor; ++k) {
-        tie(iblock2,ooo) = convert_indexes(k,orb_off_diag,spin_off_diag,nflavor/2);
+        iblock2 = block_list[k]; ooo = inner_list[k];
         for (int l = 0; l < nflavor; ++l) {
-          tie(iblock3,oooo) = convert_indexes(l,orb_off_diag,spin_off_diag,nflavor/2);
-          H += 0.5 * lambda * vee[i+j*nflavor+k*nflavor*nflavor+l*nflavor*nflavor*nflavor] * c_dag(labels[iblock],o) *
-               c_dag(labels[iblock1],oo) * c(labels[iblock3],oooo) * c(labels[iblock2],ooo);
+          iblock3 = block_list[l]; oooo = inner_list[l];
+          H += 0.5 * lambda * vee[i+j*nflavor+k*nflavor*nflavor+l*nflavor*nflavor*nflavor] * c_dag(to_string(iblock),o) *
+               c_dag(to_string(iblock1),oo) * c(to_string(iblock3),oooo) * c(to_string(iblock2),ooo);
         }
       }
     }
   }
   return H;
-}
-
-// Convert flavor index to block and block inner indexes
-pair<int,int> convert_indexes(int iflavor, bool orb_off_diag, bool spin_off_diag, int ndim) {
-  int iblock,o;
-  if (!orb_off_diag && !spin_off_diag) {
-    iblock = iflavor;
-    o = 0;
-  }
-  if (orb_off_diag && !spin_off_diag) {
-    iblock = iflavor / ndim;
-    o = iflavor - iblock*ndim;
-  }
-  if (!orb_off_diag && spin_off_diag) {
-    o = iflavor / ndim;
-    iblock = iflavor - o*ndim;
-  }
-  if (orb_off_diag && spin_off_diag) {
-    iblock = 0;
-    o = iflavor;
-  }
-
-  return make_pair(iblock,o);
-}
-
-// Convert block and block inner indexes to flavor
-int convert_indexes_back(int iblock, int o, bool orb_off_diag, bool spin_off_diag, int ndim) {
-  int iflavor;
-  if (!orb_off_diag && !spin_off_diag)
-    iflavor = iblock;
-  if (orb_off_diag && !spin_off_diag)
-    iflavor = o + iblock*ndim;
-  if (!orb_off_diag && spin_off_diag)
-    iflavor = iblock + o*ndim;
-  if (orb_off_diag && spin_off_diag)
-    iflavor = o;
-  return iflavor;
 }
 
 // Build DLR frequencies

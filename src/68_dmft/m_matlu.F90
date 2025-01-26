@@ -176,32 +176,27 @@ end subroutine init_matlu
 !! INPUTS
 !!  matlu <type(matlu_type)>= density matrix in the local orbital basis and related variables
 !!  natom = number of atoms
-!!  onlynondiag = 1: set all the off-diagonal elements to 0
-!!              = 2: set the orbital off-diagonal elements to 0
-!!              = 3: set the spin off-diagonal elements to 0
-!!  maxoffdiag = maximal value of the off-diagonal elements
+!!  onlynondiag = set all the off-diagonal elements to 0
+!!  onlyimag = set the imaginary part to 0
 !!
 !! OUTPUT
 !!  matlu <type(matlu_type)>= density matrix in the local orbital basis and related variables
 !!
 !! SOURCE
 
-subroutine zero_matlu(matlu,natom,onlynondiag,maxoffdiag)
+subroutine zero_matlu(matlu,natom,onlynondiag,onlyimag)
 
 !Arguments ------------------------------------
  integer, intent(in) :: natom
  type(matlu_type), intent(inout) :: matlu(natom)
- integer, optional, intent(in) :: onlynondiag
- real(dp), optional, intent(out) :: maxoffdiag
+ integer, optional, intent(in) :: onlyimag,onlynondiag
 !Local variables-------------------------------
  integer :: iatom,im,im1,ispinor,ispinor1,isppol
  integer :: lpawu,ndim,nspinor,nsppol,tndim
- real(dp) :: maxoffdiag_
 !*********************************************************************
 
  nspinor = matlu(1)%nspinor
  nsppol  = matlu(1)%nsppol
- maxoffdiag_ = zero
 
  do iatom=1,natom
    lpawu = matlu(iatom)%lpawu
@@ -209,40 +204,15 @@ subroutine zero_matlu(matlu,natom,onlynondiag,maxoffdiag)
    if (present(onlynondiag)) then
      ndim  = 2*lpawu + 1
      tndim = nspinor * ndim
-     if (onlynondiag == 1) then
-       do isppol=1,nsppol
-         do im1=1,tndim
-           do im=1,tndim
-             if (im /= im1) then
-               if (abs(matlu(iatom)%mat(im,im1,isppol)) > maxoffdiag_) &
-                 & maxoffdiag_ = abs(matlu(iatom)%mat(im,im1,isppol))
-               matlu(iatom)%mat(im,im1,isppol) = czero
-             end if
-           end do ! im
-         end do ! im1
-       end do ! isppol
-     else if (onlynondiag == 2) then
-       do isppol=1,nsppol
-         do ispinor1=1,nspinor
-           do im1=1,ndim
-             do ispinor=1,nspinor
-               do im=1,ndim
-                 if (im /= im1) then
-                   if (abs(matlu(iatom)%mat(im+(ispinor-1)*ndim,im1+(ispinor1-1)*ndim,isppol)) > maxoffdiag_) &
-                      & maxoffdiag_ = abs(matlu(iatom)%mat(im+(ispinor-1)*ndim,im1+(ispinor1-1)*ndim,isppol))
-                   matlu(iatom)%mat(im+(ispinor-1)*ndim,im1+(ispinor1-1)*ndim,isppol) = czero
-                 end if
-               end do ! im
-             end do ! ispinor
-           end do ! im1
-         end do ! ispinor1
-       end do ! isppol
-     else if (onlynondiag == 3 .and. nspinor == 2) then
-       maxoffdiag_ = maxval(abs(matlu(iatom)%mat(1:ndim,ndim+1:tndim,1)))
-       maxoffdiag_ = max(maxoffdiag_,maxval(abs(matlu(iatom)%mat(ndim+1:tndim,1:ndim,1))))
-       matlu(iatom)%mat(1:ndim,ndim+1:tndim,1) = czero
-       matlu(iatom)%mat(ndim+1:tndim,1:ndim,1) = czero
-     end if ! onlynondiag
+     do isppol=1,nsppol
+       do im1=1,tndim
+         do im=1,tndim
+           if (im /= im1) matlu(iatom)%mat(im,im1,isppol) = czero
+         end do ! im
+       end do ! im1
+     end do ! isppol
+   else if (present(onlyimag)) then
+     matlu(iatom)%mat(:,:,:) = cmplx(dble(matlu(iatom)%mat(:,:,:)),zero,kind=dp)
    else
      matlu(iatom)%mat(:,:,:) = czero
    end if ! onlynondiag
@@ -1519,7 +1489,7 @@ end subroutine add_matlu
 
  if (present(nsppol_imp)) nsppolimp = nsppol_imp
  if (present(checkstop)) checkstop_in = checkstop
- if (present(test)) blockdiag = test == 8
+ if (present(test)) blockdiag = (test == 8)
  if (present(opt_real)) optreal = opt_real
 
  call zero_matlu(matlu_diag(:),natom)
@@ -2213,18 +2183,14 @@ end subroutine add_matlu
 !!
 !! SOURCE
 
- subroutine checkreal_matlu(matlu,natom,tol,paw_dmft)
-
- use m_paw_dmft, only : paw_dmft_type
+ subroutine checkreal_matlu(matlu,natom,tol)
 
 !Arguments ------------------------------------
  real(dp), intent(in) :: tol
  integer, intent(in)  :: natom
  type(matlu_type), intent(in) :: matlu(natom)
- type(paw_dmft_type), intent(in) :: paw_dmft
 !Local variables-------------------------------
  integer :: iatom,im,im1,isppol,lpawu,ndim,nspinor,nsppol
- logical :: orb_off_diag,spin_off_diag,triqs
  character(len=500) :: message
  real(dp) :: elem,maximag,maximagdiag,maxoffdiag
 !************************************************************************
@@ -2234,10 +2200,6 @@ end subroutine add_matlu
  maxoffdiag  = zero
  nspinor     = matlu(1)%nspinor
  nsppol      = matlu(1)%nsppol
-
- triqs = (paw_dmft%dmft_solv == 6) .or. (paw_dmft%dmft_solv == 7)
- orb_off_diag = paw_dmft%dmft_triqs_orb_off_diag
- spin_off_diag = paw_dmft%dmft_triqs_spin_off_diag
 
  do iatom=1,natom
    lpawu = matlu(iatom)%lpawu
@@ -2270,24 +2232,14 @@ end subroutine add_matlu
    write(message,'(3x,2a,e12.4,a,e12.4,2a)') ch10,&
      & ' The off diagonal occupation matrix is complex: the imaginary part ',maximag,' is larger than',tol,ch10,&
      & "Check that your calculation is meaningful"
-   if (triqs) then
-#ifndef HAVE_TRIQS_COMPLEX
-     ABI_WARNING(message)
-#endif
-   else
      ABI_WARNING(message)
    end if
  end if ! maximag > tol
  if (maxoffdiag > tol) then
-   if (triqs .and. ((.not. orb_off_diag) .or. (.not. spin_off_diag))) then
-     write(message,'(3x,3a,e12.4,a,e12.4)') ch10,' Occupation matrix is non diagonal : the maximum ', &
-               & 'off-diagonal part ',maxoffdiag,' is larger than',tol
-   else
-     write(message,'(3x,2a,e12.4,a,e12.4,6a)') ch10,&
+   write(message,'(3x,2a,e12.4,a,e12.4,6a)') ch10,&
         & ' Occupation matrix is non diagonal : the maximum off-diag part ',maxoffdiag,' is larger than',tol,ch10,&
         & "The corresponding non diagonal elements will be neglected in the Weiss/Hybridization functions",ch10,&
         & "(Except if dmft_solv=8,9 where these elements are taken into account)",ch10,"This is an approximation."
-   end if
    ABI_WARNING(message)
  else
    write(message,'(3x,2a,e12.4,a,e12.4,2a)') ch10,' Occupation matrix is diagonal : the off-diag part ',&
@@ -4136,6 +4088,44 @@ end subroutine add_matlu
  ABI_FREE(buffer)
 
  end subroutine xmpi_matlu
+!!***
+
+!!****f* m_matlu/symmetrize_matlu
+!! NAME
+!! symmetrize_matlu
+!!
+!! FUNCTION
+!!  Symmetrizes matlu (A = (A+A^T)/2
+!!
+!! INPUTS
+!!  matlu <type(matlu_type)>= density matrix in the local orbital basis and related variables
+!!  natom = number of atoms
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+ subroutine symmetrize_matlu(matlu,natom)
+
+!Arguments ------------------------------------
+ integer, intent(in) :: natom
+ type(matlu_type), intent(inout) :: matlu(natom)
+!Local variables-------------------------------
+ integer :: iatom,isppol,lpawu,nsppol
+!************************************************************************
+
+ nsppol = matlu(1)%nsppol
+
+ do iatom=1,natom
+   lpawu = matlu(iatom)%lpawu
+   if (lpawu == -1) cycle
+   do isppol=1,nsppol
+     matlu(iatom)%mat(:,:,isppol) = half * (matlu(iatom)%mat(:,:,isppol)+ &
+         & transpose(matlu(iatom)%mat(:,:,isppol)))
+   end do ! isppol
+ end do ! iatom
+
+ end subroutine symmetrize_matlu
 !!***
 
 END MODULE m_matlu

@@ -243,8 +243,7 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
  call timab(621,2,tsec(:))
  call wrtout(std_out,message,'COLL')
 
- opt_log = 0
- if (paw_dmft%dmft_triqs_entropy == 1) opt_log = 1
+ opt_log = paw_dmft%dmft_triqs_entropy
  call icip_green("DFT renormalized",greendft,paw_dmft,pawprtvol,self,opt_moments=opt_moments,opt_log=opt_log)
  !call print_green('DFT_renormalized',greendft,1,paw_dmft,pawprtvol=1,opt_wt=1)
 
@@ -743,7 +742,7 @@ subroutine impurity_solve(cryst_struc,green,hu,paw_dmft,pawang,pawtab,&
 !   call copy_green(weiss,green,opt_tw=1)
 !   call copy_green(weiss,green,opt_tw=2)
 
-   call qmc_prep_ctqmc(cryst_struc,green,self_old,hu(:),paw_dmft,pawang,pawprtvol,weiss,self_new=self_new)
+   call qmc_prep_ctqmc(cryst_struc,green,self_old,hu(:),paw_dmft,pawang,pawprtvol,weiss)
 
 
  else if (abs(paw_dmft%dmft_solv) == 0) then
