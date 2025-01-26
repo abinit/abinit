@@ -1376,7 +1376,7 @@ subroutine print_free_energy(energies_dmft,temp)
  character(len=10000) :: message
 ! *********************************************************************
 
- write(message,'(a,5x,2a,5x,a,19(a,5x,a,2x,f18.11),a,5x,a)') ch10, &
+ write(message,'(a,5x,2a,5x,a,14(a,5x,a,2x,f18.11),a,5x,a)') ch10, &
      & "-----------------------------------------------",ch10, &
      & "--- Free Energy in DMFT (in Ha)  ",ch10, &
      & "--- E_hu                  (1) (Ha.) = ",energies_dmft%e_hu_tot,ch10, &
@@ -1390,7 +1390,6 @@ subroutine print_free_energy(energies_dmft,temp)
      & "--- E_dc - Tr(V_dc*rho)   (8) (Ha.) = ",energies_dmft%e_dcdc,ch10, &
      & "--- Tr(Sig_imp*G_imp)     (9) (Ha.) = ",energies_dmft%emig_imp,ch10, &
      & "--- Tr(Sig*G)            (10) (Ha.) = ",energies_dmft%emig_loc,ch10, &
-     & "--- F_dmft      (3-4-5+6+7-8) (Ha.) = ",energies_dmft%fdmft+energies_dmft%emig_loc-energies_dmft%emig_imp,ch10, &
      & "--- F_dmft (3-4-5+6+7-8+9-10) (Ha.) = ",energies_dmft%fdmft,ch10, &
      & "--- S_dmft = -(F_dmft-E_dmft)/(kT) = ",energies_dmft%sdmft,ch10, &
      & "--- (-kT)*S_dmft             (Ha.) = ",-temp*energies_dmft%sdmft,ch10, &

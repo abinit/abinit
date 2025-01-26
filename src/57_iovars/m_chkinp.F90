@@ -750,7 +750,11 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 
        if (dt%dmft_solv>=5) then
          cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
-         call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftctqmc_basis',dt%dmftctqmc_basis,4,(/0,1,2,3/),iout)
+         if (dt%dmft_solv == 6 .or. dt%dmft_solv == 7) then
+           call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftctqmc_basis',dt%dmftctqmc_basis,4,(/0,1,2,3/),iout)
+         else
+           call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftctqmc_basis',dt%dmftctqmc_basis,3,(/0,1,2/),iout)
+         end if
          cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
          call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftctqmc_check',dt%dmftctqmc_check,4,(/0,1,2,3/),iout)
          cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
@@ -848,9 +852,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
      call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_triqs_ntau_delta',dt%dmft_triqs_ntau_delta,1,iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
-     call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_triqs_orb_off_diag',dt%dmft_triqs_orb_off_diag,2,(/0,1/),iout)
-     cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
-     call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_triqs_spin_off_diag',dt%dmft_triqs_spin_off_diag,2,(/0,1/),iout)
+     call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_triqs_off_diag',dt%dmft_triqs_off_diag,2,(/0,1/),iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
      call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_triqs_therm_restart',dt%dmft_triqs_therm_restart,0,iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
@@ -892,12 +894,8 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
        cond_string(1)='dmft_triqs_entropy' ; cond_values(1)=dt%dmft_triqs_entropy
        call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_use_all_bands',dt%dmft_use_all_bands,1,(/1/),iout)
      end if
-     if (dt%dmft_triqs_orb_off_diag == 1) then
-       cond_string(1)='dmft_triqs_orb_off_diag' ; cond_values(1)=dt%dmft_triqs_orb_off_diag
-       call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_triqs_measure_density_matrix',dt%dmft_triqs_measure_density_matrix,1,(/0/),iout)
-     end if
-     if (dt%dmft_triqs_spin_off_diag == 1) then
-       cond_string(1)='dmft_triqs_spin_off_diag' ; cond_values(1)=dt%dmft_triqs_spin_off_diag
+     if (dt%dmft_triqs_off_diag == 1) then
+       cond_string(1)='dmft_triqs_off_diag' ; cond_values(1)=dt%dmft_triqs_off_diag
        call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_triqs_measure_density_matrix',dt%dmft_triqs_measure_density_matrix,1,(/0/),iout)
      end if
      if (dt%dmft_t2g == 1) then
@@ -908,20 +906,6 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
        cond_string(1)='dmft_x2my2d' ; cond_values(1)=dt%dmft_x2my2d
        call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftctqmc_basis',dt%dmftctqmc_basis,1,(/0/),iout)
      end if
-#ifdef HAVE_TRIQS_COMPLEX
-     if (dt%dmft_triqs_orb_off_diag==0.and.dt%dmft_triqs_spin_off_diag==0) then
-       write(msg,'(2a)') "WARNING: You have compiled with the complex version of TRIQS/CTHYB, yet you do not", &
-                 & "sample any off-diagonal element. This is a waste of computation time."
-       ABI_WARNING(msg)
-     end if
-#else
-     if (dt%dmft_triqs_orb_off_diag==1.or.(dt%nspinor==2.and.dt%dmft_triqs_spin_off_diag==1)) then
-       write(msg,'(3a)') "WARNING: You have compiled with the real version of TRIQS/CTHYB, yet you have", &
-           & "activated the sampling of the off-diagonal elements. Thus their imaginary part will be", &
-           & "neglected. You'll have to check that this is a good approximation."
-       ABI_WARNING(msg)
-     end if
-#endif
    end if
 
 !  dosdeltae

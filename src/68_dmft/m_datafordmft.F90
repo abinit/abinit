@@ -912,7 +912,7 @@ subroutine chipsi_print(paw_dmft,pawtab)
  end if
 
  write(tag,'(f13.5)') paw_dmft%fermie
- write(message,'(a,2x,2a)') ch10," == Print Energy levels in Slm basis for Fermi Level= ",adjustl(tag)
+ write(message,'(a,2x,2a)') ch10," == Print Energy levels in cubic basis for Fermi Level= ",adjustl(tag)
  call wrtout(std_out,message,'COLL')
 !call print_oper(energy_level,1,paw_dmft,1)
  call print_matlu(energy_level%matlu(:),natom,1)

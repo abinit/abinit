@@ -4153,6 +4153,7 @@ subroutine compute_moments_ks(green,self,paw_dmft,opt_self,opt_log,opt_quick_res
    else
      green%moments(2)%ks(ib,ib,:,:) = paw_dmft%eigen_dft(ib,1+shift:mkmem+shift,:) - mu
    end if
+   ! Careful, we need to substract mu**2 below, not add it (think about it)
    if (optquickrestart == 1) green%moments(3)%ks(ib,ib,:,:) = green%moments(3)%ks(ib,ib,:,:) - mu**2
  end do ! ib
 
