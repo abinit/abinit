@@ -420,6 +420,21 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      end do
    end if
 
+!  chebfi_oracle : must be 0,1,2
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'chebfi_oracle',dt%chebfi_oracle,3,(/0,1,2/),iout)
+   if (dt%gpu_option/=ABI_GPU_DISABLED) then ! At present (v10.2.2), chebfi oracle is not available with GPU
+     cond_string(1)='gpu_option' ; cond_values(1)=dt%gpu_option
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'chebfi_oracle',dt%chebfi_oracle,1,(/0/),iout)
+   end if
+
+!  oracle_factor : must be > 1e-30 and below 1
+   call chkdpr(0,0,cond_string,cond_values,ierr,'oracle_factor',dt%oracle_factor,1,tol30,iout)
+   call chkdpr(0,0,cond_string,cond_values,ierr,'oracle_factor',dt%oracle_factor,-1,0.99_dp,iout)
+
+!  oracle_min_occ : must be > 1e-10 and below 1
+   call chkdpr(0,0,cond_string,cond_values,ierr,'oracle_min_occ',dt%oracle_factor,1,tol10,iout)
+   call chkdpr(0,0,cond_string,cond_values,ierr,'oracle_min_occ',dt%oracle_factor,-1,0.99_dp,iout)
+
 !  chkdilatmx
    call chkint_eq(0,0,cond_string,cond_values,ierr,'chkdilatmx',dt%chkdilatmx,2,(/0,1/),iout)
 
