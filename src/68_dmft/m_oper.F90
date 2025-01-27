@@ -845,7 +845,7 @@ subroutine identity_oper(oper,option)
  integer, intent(in) :: option
  type(oper_type), intent(inout) :: oper
 !Local variables-------------------------------
- integer :: ib,ikpt,isppol,natom
+ integer :: ib,natom
  character(len=500) :: message
 ! *********************************************************************
 
@@ -1165,7 +1165,7 @@ subroutine gather_oper(oper,distrib,paw_dmft,opt_ksloc,master,opt_diag,opt_commk
  integer, intent(in) :: opt_ksloc
  integer, optional, intent(in) :: master,opt_commkpt,opt_diag
 !Local variables-------------------------------
- integer :: comm,iatom,ib,ib1,ibuf,ierr,ifreq,ikpt,im,im1
+ integer :: comm,iatom,ib1,ibuf,ierr,ifreq,ikpt,im1
  integer :: irank,irank1,irank2,isppol,lpawu,mbandc,myproc
  integer :: myproc2,natom,ndim,nkpt,nproc,nproc_freq,nproc_kpt
  integer :: nproc2,nspinor,nsppol,nw,optcommkpt,siz_buf
@@ -1397,8 +1397,8 @@ subroutine gather_oper_ks(oper,distrib,paw_dmft,opt_diag)
  type(paw_dmft_type), intent(in) :: paw_dmft
  integer, optional, intent(in) :: opt_diag
 !Local variables-------------------------------
- integer :: ib,ib1,ibuf,ierr,ikpt,irank,isppol,mbandc
- integer :: me_kpt,nkpt,nproc,nproc_freq,nsppol,nw,siz_buf
+ integer :: ib1,ibuf,ierr,ikpt,irank,isppol,mbandc
+ integer :: me_kpt,nkpt,nproc,nproc_freq,nsppol,siz_buf
  logical :: diag
  integer, allocatable :: displs(:),recvcounts(:)
  complex(dpc), allocatable :: buffer(:),buffer_tot(:)

@@ -112,14 +112,14 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  type(green_type), target, intent(inout) :: weiss
  type(self_type), intent(inout) :: self
 !Local variables ------------------------------
- integer :: i,iatom,icomp,ierr,if1,if2,iflavor1,iflavor2,ifreq,im1,im2,ima,imb,ispa,ispb,ispinor
+ integer :: iatom,icomp,ierr,if1,if2,iflavor1,iflavor2,ifreq,im1,im2,ima,imb,ispa,ispb,ispinor
  integer :: ispinor1,ispinor2,isppol,itau,itypat,lpawu,myproc,natom,ndim,nflavor,nomega,nproc
- integer :: nspinor,nsppol,nsppol_imp,ntypat,nwlo,opt_diag,opt_fk,opt_log,opt_nondiag,opt_real
- integer :: opt_rot,option,rot_type_vee,testcode,testrot,tndim,unt,unt2,useylm
+ integer :: nspinor,nsppol,nsppol_imp,ntypat,nwlo,opt_diag,opt_fk,opt_nondiag
+ integer :: opt_rot,rot_type_vee,testcode,testrot,tndim,unt,unt2,useylm
  integer, parameter :: optdb = 0
- logical :: nondiaglevels,orb_off_diag,spin_off_diag,triqs
+ logical :: nondiaglevels,triqs
  logical(kind=1) :: leg_measure = .true.
- real(dp) :: doccsum,EE,f4of2_sla,f6of2_sla,maxoffdiag,maxoffdiag_,noise,omega
+ real(dp) :: doccsum,EE,f4of2_sla,f6of2_sla,noise,omega
  type(green_type) :: weiss_for_rot
  type(oper_type) :: energy_level,level_diag
  type(CtqmcInterface) :: hybrid
