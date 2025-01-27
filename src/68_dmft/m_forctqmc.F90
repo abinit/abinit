@@ -44,9 +44,9 @@ MODULE m_forctqmc
  use m_hu, only : copy_hu,destroy_hu,destroy_vee,hu_type,init_vee, &
     & rotatevee_hu,vee_type,vee_ndim2tndim_hu_r
  use m_io_tools, only : flush_unit,open_file
- use m_matlu, only : add_matlu,checkreal_matlu,chi_matlu,copy_matlu,destroy_matlu,diag_matlu,diff_matlu, &
-     & fac_matlu,gather_matlu,init_matlu,magmomforb_matlu,magmomfspin_matlu,magmomfzeeman_matlu, &
-     & make_real_matlu,matlu_type,print_matlu,printplot_matlu,prod_matlu,rotate_matlu,shift_matlu,&
+ use m_matlu, only : add_matlu,checkdiag_matlu,checkreal_matlu,chi_matlu,copy_matlu,destroy_matlu, &
+     & diag_matlu,diff_matlu,fac_matlu,gather_matlu,init_matlu,magmomforb_matlu,magmomfspin_matlu, &
+     & magmomfzeeman_matlu,matlu_type,print_matlu,printplot_matlu,prod_matlu,rotate_matlu,shift_matlu, &
      & slm2ylm_matlu,sym_matlu,symmetrize_matlu,xmpi_matlu,zero_matlu
  use m_oper, only : destroy_oper,gather_oper,identity_oper,init_oper,inverse_oper,oper_type
  use m_paw_correlations, only : calc_vee
@@ -3162,7 +3162,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
  type(self_type), intent(inout) :: self,self_new
  type(hu_type), intent(inout) :: hu(paw_dmft%ntypat)
 !Local variables ------------------------------
- integer :: i,iatom,iflavor,iflavor1,ifreq,iilam,ilam,ileg,im,im1,isppol,isub
+ integer :: basis,i,iatom,iflavor,iflavor1,ifreq,iilam,ilam,ileg,im,im1,isppol,isub
  integer :: itau,iw,l,lpawu,myproc,natom,ncon,ndim,nflavor,nflavor_max,ngauss,nleg,nmoments
  integer :: nspinor,nsppol,nsub,ntau,ntau_delta,ntot,nwlo,p,tndim,unt,wdlr_size
  integer, target :: ndlr
@@ -3170,19 +3170,24 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
  real(dp) :: besp,bespp,beta,dx,fact,fact2,xx
  complex(dpc) :: mself_1,mself_2,occ_tmp,u_nl
  complex(dpc), target :: eu
- type(c_ptr) :: eu_ptr,ftau_ptr,gl_ptr,gtau_ptr,levels_ptr,mself_1_ptr
- type(c_ptr) :: mself_2_ptr,ndlr_ptr,occ_ptr,udens_ptr,vee_ptr,wdlr_ptr
- integer, allocatable :: block_list(:,:),flavor_list(:,:,:),inner_list(:,:)
- integer, allocatable :: nblocks(:),siz_block(:,:)
+ type(oper_type) :: energy_level
+ type(c_ptr) :: block_ptr,eu_ptr,flavor_ptr,ftau_ptr,gl_ptr,gtau_ptr,inner_ptr,levels_ptr,mself_1_ptr
+ type(c_ptr) :: mself_2_ptr,ndlr_ptr,occ_ptr,siz_ptr,udens_ptr,vee_ptr,wdlr_ptr
+ integer, allocatable :: nblocks(:)
+ integer, target, allocatable :: block_list(:,:),flavor_list(:,:,:),flavor_tmp(:,:)
+ integer, target, allocatable :: inner_list(:,:),siz_block(:,:)
  real(dp), allocatable :: adlr(:,:),bdlr(:),gl_dlr_re(:),gl_dlr_im(:)
  real(dp), allocatable :: jbes(:),lam_list(:),mgreen(:),t_lp(:,:)
  real(dp), allocatable :: tpoints(:),tweights(:),wdlr(:),wdlr_beta(:)
  real(dp), allocatable :: wdlr2(:),wdlr3(:),wdlr4(:)
  real(dp), target, allocatable :: wdlr_tmp(:)
  complex(dpc), allocatable :: adlr_iw(:,:),gl_dlr(:,:,:,:),gl_tmp(:,:,:,:),gtau_dlr(:,:,:)
+ complex(dpc), allocatable :: shift(:)
  complex(dpc), target, allocatable :: gl(:,:,:),gtau(:,:,:),levels_ctqmc(:,:)
  complex(dpc), target, allocatable :: moments_self_1(:),moments_self_2(:),occ(:)
- type(matlu_type), target, allocatable :: ftau(:)
+ type(matlu_type), allocatable :: dmat_ctqmc(:),eigvectmatlu(:),matlu_tmp(:)
+ type(matlu_type), target, allocatable :: ftau(:),udens_rot(:)
+ type(vee_type), target, allocatable :: vee_rot(:)
  character(len=4) :: tag_at
  character(len=13) :: tag,tag2
  character(len=10000) :: message
@@ -3217,7 +3222,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
  ABI_MALLOC(matlu_tmp,(natom))
  ABI_MALLOC(nblocks,(natom))
  ABI_MALLOC(shift,(natom))
- ABI_MALLOC(siz_block,(natom))
+ ABI_MALLOC(siz_block,(nflavor_max,natom))
  ABI_MALLOC(udens_rot,(natom))
  ABI_MALLOC(vee_rot,(natom))
 
@@ -3294,7 +3299,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
 
  write(message,'(a,3x,a)') ch10,"== Print Occupation matrix in CTQMC basis"
  call wrtout(std_out,message,"COLL")
- call print_matlu(dmat_ctqmc%matlu(:),natom,1)
+ call print_matlu(dmat_ctqmc(:),natom,1)
 
  write(message,'(a,3x,a)') ch10,"== Print Delta(iw) for first frequency in CTQMC basis"
  call wrtout(std_out,message,"COLL")
@@ -3303,7 +3308,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
  ! Possibly neglect some imaginary part and off-diagonal elements in the CTQMC basis.
  ! Thus we need to carefully rebuild the Weiss field and levels at the end by rotating
  ! them back to the cubic basis and symmetrize them again since this will not yield the same
- ! value as the original one.
+ ! result as the original value.
 
 #ifndef HAVE_TRIQS_COMPLEX
  write(message,'(a,3x,2a)') ch10,"== The imaginary part of Delta(tau) and of the crystal ", &
@@ -3479,7 +3484,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
 
    end if ! myproc=0
 
-   ABI_MALLOC(levels_ctqmc(nflavor,nflavor))
+   ABI_MALLOC(levels_ctqmc,(nflavor,nflavor))
    ABI_MALLOC(gtau,(ntau,nflavor,nflavor))
    gtau(:,:,:) = czero
    if (density_matrix) then
@@ -3502,6 +3507,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
      if (nsppol == 1 .and. nspinor == 1) levels_ctqmc(1+ndim:2*ndim,1+ndim:2*ndim) = levels_ctqmc(1:ndim,1:ndim)
    end do ! isppol
 
+   ! Need to slice flavor_list to make it size nflavor*nflavor instead of size nflavor_max*nflavor_max
    flavor_tmp(:,:) = flavor_list(1:nflavor,1:nflavor,iatom)
 
    block_ptr   = C_LOC(block_list(:,iatom))
@@ -3862,7 +3868,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
  call destroy_matlu(matlu_tmp(:),natom)
  call destroy_matlu(udens_rot(:),natom)
 
- call destroy_oper(levels_ctqmc)
+ call destroy_oper(energy_level)
 
  call destroy_vee(paw_dmft,vee_rot(:))
 
@@ -4439,7 +4445,7 @@ subroutine rotate_ctqmc(paw_dmft,hu,green,levels,hyb,dmat_ctqmc,udens_rot,vee_ro
      call sym_matlu(green%oper(ifreq)%matlu(:),paw_dmft)
    end if
  end do ! ifreq
- if (basis /= 0 .or. option /= 1) then
+ if (basis > 0 .or. option /= 1) then
    call gather_oper(hyb%oper(:),hyb%distrib,paw_dmft,opt_ksloc=2)
  end if
 
@@ -4505,6 +4511,7 @@ subroutine find_block_structure(paw_dmft,block_list,inner_list,flavor_list, &
 
 !Arguments ------------------------------------
  integer, intent(inout) :: block_list(:,:),inner_list(:,:),flavor_list(:,:,:)
+ integer, intent(inout) :: siz_block(:,:),nblocks(:)
  type(paw_dmft_type), intent(in) :: paw_dmft
  type(green_type), intent(inout) :: hyb
  type(oper_type), intent(inout) :: levels
@@ -4533,7 +4540,7 @@ subroutine find_block_structure(paw_dmft,block_list,inner_list,flavor_list, &
  inner_list(:,:) = 0
  siz_block(:,:)  = 1
 
- if (paw_dmft%dmft_triqs_off_diag == 0) return
+ if (.not. paw_dmft%dmft_triqs_off_diag) return
 
  ABI_MALLOC(found_block,(nflavor_max))
  ABI_MALLOC(label_block,(nflavor_max))
@@ -4550,7 +4557,7 @@ subroutine find_block_structure(paw_dmft,block_list,inner_list,flavor_list, &
 
  siz_block(:,:) = 0
 
- ! Rename the blocks from 0 to nblocks-1 and build mapping lists
+ ! Rename the blocks from 0 to nblocks-1 and build lists
  do iatom=1,natom
    lpawu = paw_dmft%lpawu(iatom)
    if (lpawu == -1) cycle
@@ -4561,16 +4568,16 @@ subroutine find_block_structure(paw_dmft,block_list,inner_list,flavor_list, &
    iblock1 = 0 ! number of blocks
    do iflavor=1,nflavor
      iblock = block_list(iflavor,iatom)
-     if (found_block(iblock) == 0) then
-       label_block(iblock) = iblock1
-       iblock1 = iblock1 + 1 ! next available block index
+     if (found_block(iblock+1) == 0) then
+       label_block(iblock+1) = iblock1
+       iblock1 = iblock1 + 1 ! next block index
      end if
-     iblock2 = label_block(iblock) ! new block index
+     iblock2 = label_block(iblock+1) ! new block index
      block_list(iflavor,iatom) = iblock2
-     inner_list(iflavor,iatom) = found_block(iblock)
-     found_block(iblock) = found_block(iblock) + 1
+     inner_list(iflavor,iatom) = found_block(iblock+1)
+     found_block(iblock+1) = found_block(iblock+1) + 1
      siz_block(iblock2+1,iatom) = siz_block(iblock2+1,iatom) + 1
-     flavor_list(found_block(iblock),iblock2+1,iatom) = iflavor
+     flavor_list(found_block(iblock+1),iblock2+1,iatom) = iflavor
    end do ! iflavor
    nblocks(iatom) = iblock1
  end do ! iatom
@@ -4596,7 +4603,7 @@ subroutine find_block_structure_mat(mat)
 !Arguments ------------------------------------
  type(matlu_type), intent(inout) :: mat(natom)
 !Local variables ------------------------------
- integer :: iflavor1,im,im1,isppol,ndim,tndim
+ integer :: i,iflavor1,im,im1,isppol,ndim,tndim
  complex(dpc) :: elem
 ! ************************************************************************
 
@@ -4654,7 +4661,9 @@ subroutine find_block_structure_mat(mat)
    end do ! isppol
  end do ! iatom
 
- end subroutine apply_block_structure
+ end subroutine apply_block_structure_mat
+
+ end subroutine find_block_structure
 !!***
 
 END MODULE m_forctqmc

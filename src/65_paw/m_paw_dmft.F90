@@ -899,6 +899,7 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
      ABI_WARNING(message)
    end if
 #endif
+ end if ! dmft_solv=6 or 7
 
  write(message,'(7a)') ch10, &
   & ch10," ******************************************", &

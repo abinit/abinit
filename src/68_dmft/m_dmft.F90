@@ -37,7 +37,7 @@ MODULE m_dmft
  use m_dftu_self, only : dftu_self
  use m_energy, only : compute_dftu_energy,compute_energy,compute_free_energy,&
                     & destroy_energy,energy_type,init_energy
- use m_forctqmc, only : qmc_prep_ctqmc
+ use m_forctqmc, only : ctqmc_calltriqs_c,qmc_prep_ctqmc
  use m_green, only : check_fourier_green,compute_green,copy_green,destroy_green,destroy_green_tau, &
                    & fermi_green,fourier_green,green_type,icip_green,init_green,init_green_tau,integrate_green, &
                    & local_ks_green,print_green,printocc_green
@@ -734,6 +734,10 @@ subroutine impurity_solve(cryst_struc,green,hu,paw_dmft,pawang,pawtab,&
  !  ABI_ERROR(message)
 !   call qmc_prep(cryst_struc,green,hu,mpi_enreg,paw_dmft,pawang&
 !&   ,pawprtvol,self_old%qmc_xmu,weiss)
+
+ else if (paw_dmft%dmft_solv == 6 .or. paw_dmft%dmft_solv == 7) then
+
+   call ctqmc_calltriqs_c(paw_dmft,green,self_old,hu(:),weiss,self_new,pawprtvol)
 
  else if (abs(paw_dmft%dmft_solv) >= 5) then
 

@@ -243,8 +243,8 @@ subroutine hubbard_one(cryst_struc,green,hu,paw_dmft,pawprtvol,hdc,weiss)
  if(useylm==1) call slm2ylm_matlu(energy_level%matlu,natom,paw_dmft,1,pawprtvol)
  testblock=1
  if(useylm==1) testblock=8
- call diag_matlu(energy_level%matlu,level_diag,natom,&
-& prtopt=pawprtvol,eigvectmatlu=eigvectmatlu,nsppol_imp=nsppol_imp,opt_real=1,test=testblock)
+ call diag_matlu(energy_level%matlu,level_diag,natom,prtopt=pawprtvol,eigvectmatlu=eigvectmatlu, &
+               & nsppol_imp=nsppol_imp,opt_real=1,test=testblock)
 
 !  Use rotation matrix to rotate interaction
  ABI_MALLOC(vee_rotated,(natom))

@@ -645,8 +645,8 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
  type(matlu_type), intent(inout) :: udens_atoms(paw_dmft%natom)
  type(vee_type), intent(inout) :: vee_rotated(paw_dmft%natom)
 !Local variables-------------------------------
- integer  :: dmft_test,iatom,itypat,lpawu,m1,m2,mi,ms,ms1
- integer  :: nat_correl,natom,ndim,nspinor,nsppol,tndim
+ integer  :: dmft_test,iatom,itypat,lpawu,m,m1,m2,mi,ms,ms1,nat_correl
+ integer  :: natom,ndim,nflavor,nspinor,nsppol,nsppol_,prtonly,tndim
  logical  :: triqs
  real(dp) :: f2,jpawu,xsum,xsum2,xsum2new,xsumnew
  character(len=30)  :: basis_vee
@@ -662,14 +662,14 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
 
  dmft_test = paw_dmft%dmft_test
 
+ write(message,'(a,3x,a)') ch10,"== Rotate interaction in the CTQMC basis"
+ call wrtout(std_out,message,"COLL")
+
 !================================================
 !  NSPINOR = 2
 !================================================
 
  if (nspinor == 2) then
-
-   write(std_out,*)
-   write(std_out,*)" == Rotate interaction in the level basis "
 
    do iatom=1,natom
      lpawu  = paw_dmft%lpawu(iatom)
@@ -734,8 +734,8 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
         !   enddo
         ! enddo
 
-       call rotate_hu(rot_mat(iatom)%mat(:,:,1),tndim,hu(itypat)%veeslm2(:,:,:,:),vee_rotated(iatom)%mat(:,:,:,:))
-       basis_vee = 'Diagonal basis from cubic basis'
+       call rotate_hu(rot_mat(iatom)%mat(:,:,:),1,tndim,hu(itypat)%veeslm2(:,:,:,:),vee_rotated(iatom)%mat(:,:,:,:))
+       basis_vee = 'CTQMC basis from cubic basis'
 
 !    In the Ylm basis
 !    ================================================================================
@@ -823,8 +823,8 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
            !enddo
 
          call udens_inglis_hu(hu(itypat)%fk(:),lpawu)
-         call rotate_hu(rot_mat(iatom)%mat(:,:,1),tndim,veeylm2(:,:,:,:),vee_rotated(iatom)%mat(:,:,:,:))
-         basis_vee = 'Diagonal basis from Ylm'
+         call rotate_hu(rot_mat(iatom)%mat(:,:,:),1,tndim,veeylm2(:,:,:,:),vee_rotated(iatom)%mat(:,:,:,:))
+         basis_vee = 'CTQMC basis from Ylm'
 
        end if ! rot_type
 
@@ -881,6 +881,9 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
        ABI_WARNING(message)
      end if
 
+     write(message,'(2a,i4)') ch10,'  -------> For Correlated atom',iatom
+     call wrtout(std_out,message,'COLL')
+
 !  ! ================================================================
 !  !  If rotation for spin 2 and rotation for spin 1 are not equal
 !  !  then print a warning
@@ -888,7 +891,8 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
 !  ! ================================================================
      ndim  = 2*lpawu + 1
      tndim = nspinor * ndim
-     if (nsppol == 2 .and. pawprtvol >=3 .and. (.not. triqs)) then
+     nflavor = 2 * ndim
+     if (nsppol == 2 .and. pawprtvol >= 3 .and. (.not. triqs)) then
        do m2=1,tndim
          do m1=1,tndim
            if (abs(rot_mat(iatom)%mat(m1,m2,1)-rot_mat(iatom)%mat(m1,m2,2)) > tol4) then
@@ -918,9 +922,10 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
 
 !    write vee for information with a classification.
      if (pawprtvol >= 3) then
-       call printvee_hu(ndim,hu(itypat)%vee(:,:,:,:),2,'original')
+       call printvee_hu(ndim,hu(itypat)%vee(:,:,:,:),2,'cubic')
      end if
 
+     prtonly = 1
      if (jpawu > tol10) then
 
 !  !    Compute rotated vee.
@@ -952,19 +957,31 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
     !     enddo
     !   enddo
 
-       ABI_MALLOC(veetemp,(ndim,ndim,ndim,ndim))
-       if (rot_type == 1) then
-         call rotate_hu(rot_mat(iatom)%mat(:,:,1),ndim,hu(itypat)%vee(:,:,:,:),veetemp(:,:,:,:))
-       else if (rot_type == 2) then
-         call vee_slm2ylm_hu(lpawu,hu(itypat)%vee(:,:,:,:),veetemp(:,:,:,:),paw_dmft,1,2)
-       end if
-       if (.not. triqs) veetemp(:,:,:,:) = cmplx(dble(veetemp(:,:,:,:)),zero,kind=dp) ! neglect imaginary part in Abinit
-       call vee_ndim2tndim_hu(lpawu,veetemp(:,:,:,:),vee_rotated(iatom)%mat(:,:,:,:))
-       if (nsppol == 2 .and. triqs .and. rot_type == 1) then
-         call rotate_hu(rot_mat(iatom)%mat(:,:,2),ndim,hu(itypat)%vee(:,:,:,:),veetemp(:,:,:,:))
-         vee_rotated(iatom)%mat(ndim+1:2*ndim,ndim+1:2*ndim,ndim+1:2*ndim,ndim+1:2*ndim) = veetemp(:,:,:,:)
-       end if
+       nsppol_ = 1
+       prtonly = 0
+       if (triqs .and. rot_type == 1) nsppol_ = nsppol
+
+       if (nsppol_ == 2) then
+         prtonly = 1
+         call rotate_hu(rot_mat(iatom)%mat(:,:,:),nsppol_,ndim,hu(itypat)%veeslm2(:,:,:,:),vee_rotated(iatom)%mat(:,:,:,:))
+         ! It is wrong to use vee2udensatom_hu to build udens_atoms here
+         do m=1,nflavor
+           do m1=1,nflavor
+             udens_atoms(iatom)%mat(m,m1,1) = vee_rotated(iatom)%mat(m,m1,m,m1) - vee_rotated(iatom)%mat(m,m1,m1,m)
+           end do ! m1
+         end do ! m
+       else
+         ABI_MALLOC(veetemp,(ndim,ndim,ndim,ndim))
+         if (rot_type == 1) then
+           call rotate_hu(rot_mat(iatom)%mat(:,:,:),1,ndim,hu(itypat)%vee(:,:,:,:),veetemp(:,:,:,:))
+         else if (rot_type == 2) then
+           call vee_slm2ylm_hu(lpawu,hu(itypat)%vee(:,:,:,:),veetemp(:,:,:,:),paw_dmft,1,2)
+         end if
+         if (.not. triqs) veetemp(:,:,:,:) = cmplx(dble(veetemp(:,:,:,:)),zero,kind=dp) ! neglect imaginary part in Abinit
+         call vee_ndim2tndim_hu(lpawu,veetemp(:,:,:,:),vee_rotated(iatom)%mat(:,:,:,:))
+       end if ! nsppol_
      else
+       prtonly = 1
        udens_atoms(iatom)%mat(:,:,1)   = hu(itypat)%udens(:,:)
        vee_rotated(iatom)%mat(:,:,:,:) = hu(itypat)%veeslm2(:,:,:,:)
      end if ! jpawu=zero
@@ -994,7 +1011,7 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
      if (pawprtvol >= 3) then
        write(message,'(2a)') ch10," VEE ROTATED"
        call wrtout(std_out,message,'COLL')
-       call printvee_hu(2*ndim,vee_rotated(iatom)%mat(:,:,:,:),2,'diag1')
+       call printvee_hu(2*ndim,vee_rotated(iatom)%mat(:,:,:,:),2,'CTQMC')
        write(message,'(a)') ch10
        call wrtout(std_out,message,'COLL')
      end if ! pawprtvol>=3
@@ -1003,10 +1020,10 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
      call wrtout(std_out,message,'COLL')
 
      if (jpawu > tol10) then
-       call vee2udensatom_hu(ndim,udens_atoms(iatom)%mat(:,:,1),veetemp(:,:,:,:),"diag")
+       call vee2udensatom_hu(ndim,udens_atoms(iatom)%mat(:,:,1),veetemp(:,:,:,:),"CTQMC",prtonly=prtonly)
        ABI_FREE(veetemp)
      else
-       call vee2udensatom_hu(ndim,udens_atoms(iatom)%mat(:,:,1),vee_rotated(iatom)%mat(:,:,:,:),"diag",prtonly=1)
+       call vee2udensatom_hu(ndim,udens_atoms(iatom)%mat(:,:,1),vee_rotated(iatom)%mat(:,:,:,:),"CTQMC",prtonly=prtonly)
      end if
 
 !       udens_atoms(iatom)%value=zero
@@ -1075,53 +1092,55 @@ end subroutine rotatevee_hu
 !!
 !! SOURCE
 
-subroutine rotate_hu(rot_mat,tndim,vee,vee_rotated)
+subroutine rotate_hu(rot_mat,nsppol,tndim,vee,vee_rotated)
 
  use m_abi_linalg, only : abi_xgemm
 
 !Arguments ------------------------------------
- integer, intent(in) :: tndim
- complex(dpc), intent(in) :: rot_mat(tndim,tndim),vee(tndim,tndim,tndim,tndim)
- complex(dpc), target, intent(inout) :: vee_rotated(tndim,tndim,tndim,tndim)
+ integer, intent(in) :: nsppol,tndim
+ complex(dpc), intent(in) :: rot_mat(tndim,tndim,nsppol)
+ complex(dpc), intent(in) :: vee(tndim*nsppol,tndim*nsppol,tndim*nsppol,tndim*nsppol)
+ complex(dpc), intent(inout) :: vee_rotated(tndim*nsppol,tndim*nsppol,tndim*nsppol,tndim*nsppol)
 !Local variables-------------------------------
- integer :: m1,m2
- complex(dpc), allocatable :: mat_tmp(:,:),rot_mat_conjg(:,:),vee_tmp(:,:)
+ integer :: is1,is2,loop,m1,m2,ms1,ms2
+ complex(dpc), allocatable :: mat_tmp(:,:),vee_tmp(:,:)
 ! *********************************************************************
 
- ABI_MALLOC(rot_mat_conjg,(tndim,tndim))
  ABI_MALLOC(mat_tmp,(tndim,tndim))
  ABI_MALLOC(vee_tmp,(tndim,tndim))
 
- rot_mat_conjg(:,:) = conjg(rot_mat(:,:))
+ do loop=1,2
+   do is2=1,nsppol
+     do m2=1,tndim
+       ms2 = m2 + (is2-1)*tndim
+       do m1=1,tndim
+         ms1 = m1 + (is2-1)*tndim
+         do is1=1,nsppol
 
- do m2=1,tndim
-   do m1=1,tndim
+           ! Make copy here to prevent creation of temporary when calling zgemm
+           if (loop == 1) then
+             vee_tmp(:,:) = vee(1+(is1-1)*tndim:is1*tndim,ms1,1+(is1-1)*tndim:is1*tndim,ms2)
+           else
+             vee_tmp(:,:) = vee_rotated(ms1,1+(is1-1)*tndim:is1*tndim,ms2,1+(is1-1)*tndim:is1*tndim)
+           end if ! loop
 
-     call abi_xgemm("c","n",tndim,tndim,tndim,cone,rot_mat(:,:),tndim,&
-                  & vee(:,:,m1,m2),tndim,czero,mat_tmp(:,:),tndim)
-     call abi_xgemm("n","n",tndim,tndim,tndim,cone,mat_tmp(:,:),tndim,&
-                  & rot_mat_conjg(:,:),tndim,czero,vee_rotated(:,:,m1,m2),tndim)
+           call abi_xgemm("c","n",tndim,tndim,tndim,cone,rot_mat(:,:,is1),tndim, &
+                        & vee_tmp(:,:),tndim,czero,mat_tmp(:,:),tndim)
+           call abi_xgemm("n","n",tndim,tndim,tndim,cone,mat_tmp(:,:),tndim, &
+                        & rot_mat(:,:,is1),tndim,czero,vee_tmp(:,:),tndim)
 
-   end do ! m1
- end do ! m2
+           if (loop == 1) then
+             vee_rotated(1+(is1-1)*tndim:is1*tndim,ms1,1+(is1-1)*tndim:is1*tndim,ms2) = vee_tmp(:,:)
+           else
+             vee_rotated(ms1,1+(is1-1)*tndim:is1*tndim,ms2,1+(is1-1)*tndim:is1*tndim) = vee_tmp(:,:)
+           end if ! loop
 
- do m2=1,tndim
-   do m1=1,tndim
+         end do ! is1
+       end do ! m1
+     end do ! ms2
+   end do ! is2
+ end do ! loop
 
-     ! Make a copy instead of creating temporary to please -fcheck-array-temps
-     vee_tmp(:,:) = vee_rotated(m1,m2,:,:)
-
-     call abi_xgemm("t","n",tndim,tndim,tndim,cone,rot_mat(:,:),tndim,&
-                  & vee_tmp(:,:),tndim,czero,mat_tmp(:,:),tndim)
-     call abi_xgemm("n","n",tndim,tndim,tndim,cone,mat_tmp(:,:),tndim,&
-                  & rot_mat(:,:),tndim,czero,vee_tmp(:,:),tndim)
-
-     vee_rotated(m1,m2,:,:) = vee_tmp(:,:)
-
-   end do ! m1
- end do ! m2
-
- ABI_FREE(rot_mat_conjg)
  ABI_FREE(mat_tmp)
  ABI_FREE(vee_tmp)
 
@@ -1501,14 +1520,14 @@ subroutine vee2udensatom_hu(ndim,udens_atoms,veetemp,basis,prtonly)
  character(len=*), intent(in) :: basis
  integer, intent(in), optional :: prtonly
 !Local variables-------------------------------
- integer :: m,m1,ms,ms1,prt,tndim
+ integer :: m,m1,ms,ms1,prt_only,tndim
  character(len=1000) :: message
 ! *********************************************************************
 
  tndim = 2 * ndim
- prt = 0
- if (present(prtonly)) prt = prtonly
- if (prt == 0) then
+ prt_only = 0
+ if (present(prtonly)) prt_only = prtonly
+ if (prt_only == 0) then
    udens_atoms(:,:) = czero
    !ij = 0
    do ms=1,tndim-1
@@ -1537,7 +1556,7 @@ subroutine vee2udensatom_hu(ndim,udens_atoms,veetemp,basis,prtonly)
 !     enddo
 !   enddo
 
- end if ! prt=0
+ end if ! prt_only=0
 
 
  write(message,'(4a)') ch10,"-------- Interactions in the ",trim(basis)," basis "
@@ -1647,12 +1666,12 @@ subroutine vee_slm2ylm_hu(lcor,mat_inp_c,mat_out_c,paw_dmft,option,prtvol)
 
  ndim = 2*lcor + 1
 
- slm2ylm => paw_dmft%slm2ylm(1:ndim,1:ndim,lcor+1)
+ slm2ylm => paw_dmft%slm2ylm(:,:,lcor+1)
 
  if (option == 1) then
-   call rotate_hu(conjg(transpose(slm2ylm(:,:))),ndim,mat_inp_c(:,:,:,:),mat_out_c(:,:,:,:))
+   call rotate_hu(conjg(transpose(slm2ylm(1:ndim,1:ndim))),1,ndim,mat_inp_c(:,:,:,:),mat_out_c(:,:,:,:))
  else if (option == 2) then
-   call rotate_hu(slm2ylm(:,:),ndim,mat_inp_c(:,:,:,:),mat_out_c(:,:,:,:))
+   call rotate_hu(slm2ylm(:,:),1,ndim,mat_inp_c(:,:,:,:),mat_out_c(:,:,:,:))
  end if
 
  slm2ylm => null()
