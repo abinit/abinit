@@ -997,7 +997,7 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
  integer, optional, intent(in) :: opt_log,opt_nonxsum,opt_nonxsum2,opt_restart_moments,opt_self
 !Local variables-------------------------------
  !logical :: lintegrate
- integer :: band_index,diag,i,ib,ib1,ierr,ifreq,ikpt,info,isppol,lwork,mbandc
+ integer :: band_index,diag,i,ib,ierr,ifreq,ikpt,info,isppol,lwork,mbandc
  integer :: me_kpt,mkmem,myproc,natom,nband_k,nkpt,nmoments,nspinor,nsppol
  integer :: opt_quick_restart,option,optlog,optnonxsum,optnonxsum2,optself
  integer :: shift,shift_green,spacecomm
@@ -4100,7 +4100,7 @@ subroutine compute_moments_ks(green,self,paw_dmft,opt_self,opt_log,opt_quick_res
  type(paw_dmft_type), intent(in)  :: paw_dmft
  integer, optional, intent(in) :: opt_log,opt_quick_restart,opt_self
 !Local variables ------------------------------
- integer :: diag,i,ib,ierr,ikpt,isppol,mkmem,natom,nsppol
+ integer :: diag,i,ib,ierr,mkmem,natom,nsppol
  integer :: optlog,optquickrestart,optself,shift
  real(dp) :: dum,mu
  complex(dpc) :: trace_tmp
@@ -4289,7 +4289,7 @@ subroutine compute_trace_moments_ks(green,self,paw_dmft)
  type(self_type), intent(inout) :: self
  type(paw_dmft_type), intent(in) :: paw_dmft
 !Local variables ------------------------------
- integer :: i,ib,ierr,ikpt,isppol,mkmem,natom,nsppol,shift
+ integer :: i,ib,ierr,mkmem,natom,nsppol,shift
  real(dp) :: dum
  type(oper_type) :: oper_tmp
  real(dp), allocatable :: trace_loc(:,:)

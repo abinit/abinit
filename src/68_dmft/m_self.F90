@@ -381,7 +381,7 @@ subroutine dc_self(charge_loc,hdc,hu,paw_dmft,pawtab,occ_matlu)
  !type(hu_type),intent(inout) :: hu(cryst_struc%ntypat)
  !integer, intent(in) :: dmft_dc
 !Local variables-------------------------------
- integer :: dmft_dc,iatom,iatomc,ierr,im,im1,ispinor,isppol
+ integer :: dmft_dc,iatom,iatomc,ierr,im,ispinor,isppol
  integer :: itypat,lpawu,natom,ndim,nspinor,nsppol
  real(dp) :: dc,jpawu,ntot,upawu
  logical :: amf,fll,nmdc

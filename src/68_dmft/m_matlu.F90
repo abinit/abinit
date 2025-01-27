@@ -192,7 +192,7 @@ subroutine zero_matlu(matlu,natom,onlynondiag,onlyimag)
  type(matlu_type), intent(inout) :: matlu(natom)
  integer, optional, intent(in) :: onlyimag,onlynondiag
 !Local variables-------------------------------
- integer :: iatom,im,im1,ispinor,ispinor1,isppol
+ integer :: iatom,im,im1,isppol
  integer :: lpawu,ndim,nspinor,nsppol,tndim
 !*********************************************************************
 
@@ -524,7 +524,7 @@ end subroutine print_matlu
  type(paw_dmft_type), intent(in) :: paw_dmft
  type(matlu_type), intent(inout) :: gloc(paw_dmft%natom)
 !Local variables-------------------------------
- integer :: at_indx,iatom,irot,isppol,lpawu,m1,m2,mu,natom
+ integer :: at_indx,iatom,irot,isppol,lpawu,mu,natom
  integer :: ndim,ndim_max,nspinor,nsppol,nsym,nu
  complex(dpc), allocatable :: gloc_tmp(:,:),gloc_tmp2(:,:)
  type(matlu_type), allocatable :: gloc_nmrep(:),glocsym(:)
@@ -2128,7 +2128,7 @@ end subroutine add_matlu
  complex(dpc), intent(in) :: shift(natom)
  integer, optional, intent(in) :: signe
 !Local variables-------------------------------
- integer :: iatom,im,isppol,lpawu,ndim,nspinor,nsppol,signe_used
+ integer :: iatom,im,lpawu,ndim,nspinor,nsppol,signe_used
 ! character(len=500) :: message
 !************************************************************************
 
@@ -2916,7 +2916,7 @@ end subroutine add_matlu
  integer, intent(in) :: natom
  type(matlu_type), intent(inout) :: matlu(natom)
 !Local variables-------------------------------
- integer :: iatom,im,isppol,lpawu,ndim,nspinor,nsppol
+ integer :: iatom,im,lpawu,ndim,nspinor
 ! character(len=500) :: message
 !arrays
 !************************************************************************
@@ -3976,8 +3976,7 @@ end subroutine add_matlu
  complex(dpc), intent(inout) :: trace(natom)
  complex(dpc), optional, intent(out) :: trace_tot
 !Local variables-------------------------------
- integer :: iatom,isppol,lpawu,nspinor,nsppol,optadd
- complex(dpc) :: trace_tmp
+ integer :: iatom,isppol,lpawu,nspinor,nsppol
 !************************************************************************
 
  nspinor = matlu1(1)%nspinor
@@ -4028,7 +4027,7 @@ end subroutine add_matlu
  type(matlu_type), intent(inout) :: matlu(natom)
  integer, optional, intent(in) :: master,option
 !Local variables-------------------------------
- integer :: iatom,ibuf,im,im1,ierr,isppol,lpawu
+ integer :: iatom,ibuf,im1,ierr,isppol,lpawu
  integer :: master_node,ndim,nspinor,nsppol,opt,siz_buf
  complex(dpc), allocatable :: buffer(:)
 !************************************************************************
