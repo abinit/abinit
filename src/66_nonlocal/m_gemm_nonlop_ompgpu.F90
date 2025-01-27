@@ -525,7 +525,7 @@ contains
       if(transfer_vectout) then
         vectout = zero
       else
-        call gpu_set_to_zero(svectout, int(2,c_size_t) * npwout * nspinor * ndat)
+        call gpu_set_to_zero(vectout, int(2,c_size_t) * npwout * nspinor * ndat)
       end if
       if(paw_opt>0) then
         if(transfer_svectout .and. transfer_vectin) then
