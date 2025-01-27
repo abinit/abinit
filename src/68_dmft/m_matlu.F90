@@ -67,6 +67,7 @@ MODULE m_matlu
  public :: chi_matlu
  public :: trace_prod_matlu
  public :: xmpi_matlu
+ public :: symmetrize_matlu
 !!***
 
 !!****t* m_matlu/matlu_type
@@ -217,8 +218,6 @@ subroutine zero_matlu(matlu,natom,onlynondiag,onlyimag)
      matlu(iatom)%mat(:,:,:) = czero
    end if ! onlynondiag
  end do ! iatom
-
- if (present(maxoffdiag)) maxoffdiag = maxoffdiag_
 
 end subroutine zero_matlu
 !!***
@@ -2232,8 +2231,7 @@ end subroutine add_matlu
    write(message,'(3x,2a,e12.4,a,e12.4,2a)') ch10,&
      & ' The off diagonal occupation matrix is complex: the imaginary part ',maximag,' is larger than',tol,ch10,&
      & "Check that your calculation is meaningful"
-     ABI_WARNING(message)
-   end if
+   ABI_WARNING(message)
  end if ! maximag > tol
  if (maxoffdiag > tol) then
    write(message,'(3x,2a,e12.4,a,e12.4,6a)') ch10,&

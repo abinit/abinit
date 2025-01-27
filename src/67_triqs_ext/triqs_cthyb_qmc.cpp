@@ -34,6 +34,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool off_diag, bool move_sh
   int nproc;
   MPI_Comm_size(comm,&nproc);
   int itask = 0;
+  int iflavor,iflavor1;
 
   int therm = ntherm;
   if (exists(qmc_data_fname)) therm = ntherm_restart;
@@ -413,9 +414,9 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool off_diag, bool move_sh
       for (int iblock = 0; iblock < nblocks; ++iblock) {
         for (int o = 0; o < siz_list[iblock]; ++o) {
           iflavor = flavor_list[o+iblock*num_orbitals];
-          commut = Hint*c(labels[iblock],o) - c(labels[iblock],o)*Hint;
-          Sinf_op = - commut*c_dag(labels[iblock],o) - c_dag(labels[iblock],o)*commut;
-          commut2 = c_dag(labels[iblock],o)*Hint - Hint*c_dag(labels[iblock],o);
+          commut = Hint*c(to_string(iblock),o) - c(to_string(iblock),o)*Hint;
+          Sinf_op = - commut*c_dag(to_string(iblock),o) - c_dag(to_string(iblock),o)*commut;
+          commut2 = c_dag(to_string(iblock),o)*Hint - Hint*c_dag(to_string(iblock),o);
           S1_op = commut2*commut + commut*commut2;
           if (itask == rank) Sinf_mat(iflavor,iflavor) = trace_rho_op(rho,Sinf_op,h_loc_diag);
           itask = (itask+1)%nproc;
