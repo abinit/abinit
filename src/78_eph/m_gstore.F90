@@ -3730,8 +3730,8 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 
      ! Dump buffer
      if (iqbuf_cnt == qbuf_size) then
-       !call dump_my_gbuf()
-       call new_dump_my_gbuf(gqk, spin, iq_buf, iqbuf_cnt, my_gbuf, root_ncid, spin_ncid)
+       call dump_my_gbuf()
+       !call new_dump_my_gbuf(gqk, spin, iq_buf, iqbuf_cnt, my_gbuf, root_ncid, spin_ncid)
      end if
 
      if (print_time) then
@@ -3742,8 +3742,8 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 
    ! Dump the remainder.
    if (iqbuf_cnt /= 0) then
-     !call dump_my_gbuf()
-     call new_dump_my_gbuf(gqk, spin, iq_buf, iqbuf_cnt, my_gbuf, root_ncid, spin_ncid)
+     call dump_my_gbuf()
+     !call new_dump_my_gbuf(gqk, spin, iq_buf, iqbuf_cnt, my_gbuf, root_ncid, spin_ncid)
    end if
 
    ABI_FREE(iq_buf)
