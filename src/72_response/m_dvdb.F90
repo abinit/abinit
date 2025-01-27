@@ -302,7 +302,7 @@ module m_dvdb
   real(dp),allocatable :: rhog1_g0(:,:)
   ! rhog1_g0(2, numv1)
   ! G=0 component of rhog1. Used to treat the long range component in (polar) semiconductors.
-  ! NB: For the time being, this quantity is not used. Long range term is treated with Verdi's model.
+  ! NB: For the time being, this quantity is not used. Long range term is treated with Verdi's model and quadrupoles
 
   real(dp),allocatable :: zeff(:,:,:)
   ! zeff(3, 3, natom)

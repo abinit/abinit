@@ -3499,10 +3499,10 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
 
 !Local variables-------------------------------
 !scalars
- integer, parameter :: W_SPACE = 0, TAU_SPACE = 1
+ integer, parameter :: TAU_SPACE = 0, W_SPACE = 1
  integer :: my_iqi, my_is, ig1, ig2, my_it, ierr, iq_ibz, itau, spin, it0, iw, cnt
  integer :: ndat, idat, loc1_size, loc2_size, batch_size, from_space
- real(dp) :: cpu, wall, gflops
+ real(dp) :: cpu, wall, gflops, t0
  complex(dp) :: cval
  logical :: sum_spins_
 !arrays
@@ -3559,6 +3559,10 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
      wgt_globmy(iw, my_it) = weights_ptr(iw, itau)
    end do
  end do
+
+ if (gwr%dtset%gwr_fit /= 0) then
+   call wrtout(std_out, " Activating fit of matrix in tau/iw space")
+ end if
 
  ! Perform inhomogeneous FT in parallel.
  do my_is=1,gwr%my_nspins
@@ -3625,26 +3629,30 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
               else
                 ABI_ERROR(sjoin("Invalid from_space:", itoa(from_space)))
               end if
+              !print *, alpha_r(ig1,idat), beta_c(ig1,idat)
            end do
          end do
          call xmpi_sum(alpha_r, gwr%tau_comm%value, ierr)
          call xmpi_sum(beta_c, gwr%tau_comm%value, ierr)
        end if ! gwr_fit
 
+       t0 = gwr%tau_mesh(1)
        ! Extract (g1, g2) matrix elements as a function of tau/omega
-       !!$OMP PARALLEL DO PRIVATE(itau, cval) COLLAPSE(2)
+       !!$OMP PARALLEL DO PRIVATE(itau, cval, t0) COLLAPSE(2)
        do idat=1,ndat
          do my_it=1,gwr%my_ntau
            itau = gwr%my_itaus(my_it)
            cval = zero
            do ig1=1,mats(it0)%sizeb_local(1)
              if (gwr%dtset%gwr_fit /= 0) then
-               ! Evaluate the fit and remove it from the signal.
+               ! Evaluate the fit and remove it from the signal. Note t0.
                if (from_space == TAU_SPACE) then
-                 call fit_tau_exp_eval("func", gwr%tau_mesh(itau), alpha_r(ig1,idat), beta_c(ig1,idat), cval)
+                 cval = fit_tau_exp_eval("func", gwr%tau_mesh(itau)-t0, alpha_r(ig1,idat), beta_c(ig1,idat))
                else if (from_space == W_SPACE) then
-                 call fit_iomega_eval("func", gwr%iw_mesh(itau), alpha_r(ig1,idat), beta_c(ig1,idat), cval)
+                 cval = fit_iomega_eval("func", gwr%iw_mesh(itau), alpha_r(ig1,idat), beta_c(ig1,idat))
                end if
+               !print *, "cval1:", cval, mats(itau)%buffer_cplx(ig1, ig2+idat-1)
+               !print *, "abd_diff:", abs(cval - mats(itau)%buffer_cplx(ig1, ig2+idat-1))
              end if
              cwork_myit(my_it, ig1, idat) = mats(itau)%buffer_cplx(ig1, ig2+idat-1) - cval
            end do
@@ -3667,10 +3675,11 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
              if (gwr%dtset%gwr_fit /= 0) then
                ! Add Fourier transform of the fitted model.
                if (from_space == TAU_SPACE) then
-                 call fit_tau_exp_eval("ft", gwr%iw_mesh(itau), alpha_r(ig1,idat), beta_c(ig1,idat), cval)
+                 cval = fit_tau_exp_eval("ft", gwr%iw_mesh(itau), alpha_r(ig1,idat), beta_c(ig1,idat))
                else if (from_space == W_SPACE) then
-                 call fit_iomega_eval("ft", gwr%tau_mesh(itau), alpha_r(ig1,idat), beta_c(ig1,idat), cval)
+                 cval = fit_iomega_eval("ft", gwr%tau_mesh(itau), alpha_r(ig1,idat), beta_c(ig1,idat))
                end if
+               !print *, "cval2:", cval, from_space
              end if
              mats(itau)%buffer_cplx(ig1, ig2+idat-1) = glob_cwork(itau, ig1, idat) + cval
            end do
@@ -3686,6 +3695,7 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
      end associate
    end do ! my_iqi
  end do ! my_is
+ !stop
 
  if (sum_spins_ .and. gwr%nspinor /= 2) then  ! gwr%nsppol == 2 .and.
    ! Sum over spin channels.
@@ -3722,8 +3732,6 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
    end do ! my_iqi
  end if
 
- if (gwr%dtset%gwr_fit /= 0) call gwr%malloc_free_mats(mask_qibz, "fit", "free")
-
  call cwtime_report(" gwr_cos_transform:", cpu, wall, gflops)
 
 end subroutine gwr_cos_transform
@@ -3733,6 +3741,9 @@ end subroutine gwr_cos_transform
 !! NAME
 !!
 !! FUNCTION
+!!  Fit values in imaginary time using B exp^{-a t} with B complex and a real and > 0.
+!!  The fit passes through the fist tau point, the second point is selected by
+!!  minimizing the "distance" between the fit and the ab-initio results cvals
 !!
 !! SOURCE
 
@@ -3757,8 +3768,10 @@ subroutine fit_tau_exp(ntau, tau_mesh, tau_wgs, cvals, alpha_r, beta_c)
    ! Find my_alpha_r. Note that we take the real part of the log to avoid oscillatory behaviour in the exp.
    zz = -log(cvals(ii) / cvals(1)) / (tau_mesh(ii) - tau_mesh(1))
    my_alpha_r = real(zz)
+   !my_beta_c = (cvals(ii) + cvals(1)) / (exp(-my_alpha_r * tau_mesh(1)) + exp(-my_alpha_r * tau_mesh(ii)))
+   !cfit(:) = my_beta_c * exp(-my_alpha_r * tau_mesh)
    ! Compute loss function.
-   cfit(:) = beta_c * exp(-my_alpha_r ** (tau_mesh - tau_mesh(1)))
+   cfit(:) = beta_c * exp(-my_alpha_r * (tau_mesh - tau_mesh(1)))
    loss = sum(tau_wgs * abs(cvals - cfit)**2)
    if (loss < min_loss) then
      min_loss = loss; alpha_r = my_alpha_r
@@ -3780,28 +3793,25 @@ end subroutine fit_tau_exp
 !!
 !! SOURCE
 
-pure subroutine fit_tau_exp_eval(what, xx, alpha_r, beta_c, cval)
+pure complex(dp) function fit_tau_exp_eval(what, xx, alpha_r, beta_c) result(cval)
 
 !Arguments ------------------------------------
  character(len=*),intent(in) :: what
  real(dp),intent(in) :: xx, alpha_r
  complex(dp),intent(in) :: beta_c
- complex(dp),intent(out) :: cval
-
-!Local variables-------------------------------
-! integer :: ii
 ! *************************************************************************
 
  select case (what)
  case ("func")
-   cval = beta_c * exp(-alpha_r ** xx)
- case ("fit")
-   cval = beta_c * (two * alpha_r) / (alpha_r**2 + xx**2)
+   cval = beta_c * exp(-alpha_r * xx)
+ case ("ft")
+   ! FIXME: Here I should take into account exp(-alpha_r * tau(1))
+   cval = beta_c * two * alpha_r / (alpha_r**2 + xx**2)
  case default
    cval = huge(one)
  end select
 
-end subroutine fit_tau_exp_eval
+end function fit_tau_exp_eval
 !!***
 
 !!****f* m_gwr/fit_iomega
@@ -3869,13 +3879,12 @@ end subroutine fit_iomega
 !!
 !! SOURCE
 
-pure subroutine fit_iomega_eval(what, xx, alpha_r, beta_c, cval)
+pure complex(dp) function fit_iomega_eval(what, xx, alpha_r, beta_c) result(cval)
 
 !Arguments ------------------------------------
  character(len=*),intent(in) :: what
  real(dp),intent(in) :: xx, alpha_r
  complex(dp),intent(in) :: beta_c
- complex(dp),intent(out) :: cval
 ! *************************************************************************
 
  select case (what)
@@ -3887,7 +3896,7 @@ pure subroutine fit_iomega_eval(what, xx, alpha_r, beta_c, cval)
    cval = huge(one)
  end select
 
-end subroutine fit_iomega_eval
+end function fit_iomega_eval
 !!***
 
 !----------------------------------------------------------------------
@@ -4681,7 +4690,7 @@ end if
      call ltg_qibz(iq_ibz)%free()
    end do
    ABI_FREE(ltg_qibz)
-   !call wrtout(std_out, " Mixed space algorithm for chi completed")
+   call wrtout(std_out, " Mixed space algorithm for chi completed")
  end if
 
  !call wrtout(std_out, sjoin(" max_abs_imag_chit", ftoa(max_abs_imag_chit)))
@@ -4691,12 +4700,13 @@ end if
 
  keep_tchim = .False.
  if (gwr%dtset%prtsuscep == -1) then
+   ! Write tchi(i tau). NB: this option is not documented in the docs.
    call gwr%ncwrite_tchi_wc("tchi", "tau", keep_tchim, trim(gwr%dtfil%filnam_ds(4))//'_TCHIM.nc')
    keep_tchim = .True.
  end if
 
  ! Transform irreducible tchi from imaginary tau to imaginary omega.
- ! Also sum over spins to get total tchi if collinear spin.
+ ! Also, sum over spins to get total tchi if collinear spin.
  call gwr%cos_transform("tchi", "it2w", sum_spins=.True.)
 
  if (gwr%kpt_comm%me == 0) then
@@ -4733,8 +4743,8 @@ end if
  ! Print trace of chi_q(i omega) matrices for testing purposes.
  if (gwr%dtset%prtvol > 0) call gwr%print_trace(units, "tchi_qibz")
 
- ! Write file with chi0(i omega) if asked by user.
  if (abs(gwr%dtset%prtsuscep) == 1) then
+   ! Write file with chi0(i omega).
    call gwr%ncwrite_tchi_wc("tchi", "omega", keep_tchim, trim(gwr%dtfil%filnam_ds(4))//'_TCHIM.nc')
  end if
 

@@ -145,11 +145,10 @@ contains  !=====================================================
 !!  3) The DFPT routines operate on double-precision wavefunctions stored in arrays with real/imag part e.g. cg(1:2,npw_k)
 !!     while the GW routines operate on complex arrays of kind=gwpc where gwpc is defined at configure-time.
 !!     The default value of gwpc is single-precision.
-!!     We use the following conventions:
+!!     We use the following conventions for the buffers used to store the wavefunctions:
 !!
 !!       cg_kq, cr_kq
 !!       cg1_kqmp, cr1_kqmp
-!!       ug_gk
 !!
 !! OUTPUT
 !!
@@ -778,6 +777,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ! but it leads to better performance as the number of IO operations is decreased.
  ! TODO: Should compute it on the basis of my_nkpt and my_nqpt
  qbuf_size = 1
+ !qbuf_size = 16
  call wrtout(std_out, sjoin(" Begin computation of GWPT e-ph matrix elements with qbuf_size:", itoa(qbuf_size)), pre_newlines=1)
 
  ! A similar piece of code is used in m_respfn_driver.

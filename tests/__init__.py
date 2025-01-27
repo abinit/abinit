@@ -140,28 +140,25 @@ database_path = os.path.join(abenv.tests_dir, "test_suite.cpkl")
 
 
 _tsuite_dirs = [
-    # "abirules",
     "atompaw",
     "atdep",
     "bigdft",
     "bigdft_paral",
-    #"buildsys",
     "built-in",
     #"cpu",      This directory is disabled
     "etsf_io",
     "fast",
     "gwr",
-    "gwpt",
+    #"gwpt",
     "psml",
     "gpu",
     "libxc",
     "mpiio",
     "paral",
-    # "hpc",
+    #"hpc",
     "hpc_gpu_omp",
     "gpu_omp",
     "gpu_kokkos",
-    #"physics",
     "seq",
     "tutoatdep",
     "tutomultibinit",
@@ -186,8 +183,7 @@ _tsuite_dirs = [
 ]
 
 _tsuite_dirs.sort()
-_tsuite_dirs = tuple([os.path.join(abenv.tests_dir, dir_name)
-                      for dir_name in _tsuite_dirs])
+_tsuite_dirs = tuple([os.path.join(abenv.tests_dir, dir_name) for dir_name in _tsuite_dirs])
 
 
 def load_mod(filepath):
