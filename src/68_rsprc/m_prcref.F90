@@ -254,7 +254,8 @@ subroutine prcref(atindx,dielar,dielinv,&
  real(dp),allocatable :: work3(:,:),xccc3d(:),xred_wk(:,:)
  logical,allocatable :: mask(:)
 ! *************************************************************************
-
+ write(6,*)'    prcref : entring'; flush(6) !DEBUG
+ write(6,*)'    prcref : iprcel : ', dtset%iprcel; flush(6) !DEBUG
 !Compute different geometric tensor, as well as ucvol, from rprimd
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
@@ -341,7 +342,7 @@ subroutine prcref(atindx,dielar,dielinv,&
      call moddiel(cplex,dielar,mpi_enreg,nfftprc,ngfftprc,dtset%nspden,optreal,optres,qphon,rprimd,vresid,vrespc)
 
 !    Use the inverse dielectric matrix in a small G sphere
-   else if( (istep>=dielstrt .and. dtset%iprcel>=21) .or. modulo(dtset%iprcel,100)>=41 )then
+   else if( (istep>=dielstrt .and. dtset%iprcel>=21 .and. dtset%iprcel<200) .or. modulo(dtset%iprcel,100)>=41 )then
 
 !    With dielop=1, the matrices will be computed when istep=dielstrt
 !    With dielop=2, the matrices will be computed when istep=dielstrt and 1
@@ -458,8 +459,9 @@ subroutine prcref(atindx,dielar,dielinv,&
      ABI_FREE(work2)
 
    else if (dtset%iprcel>=200 .and. dtset%iprcel<300) then
+ write(6,*)'    prcref : chi0 precon'; flush(6) !DEBUG
       cplex=optreal
-      call chi0diel(precon, dtset, cplex, mpi_enreg, nfftprc, ngfftprc, gprimd, dtset%nspden, optreal, optres, 10, 0.001, vresid, vrespc)
+      call chi0diel(precon, dtset, cplex, mpi_enreg, nfftprc, ngfftprc, gprimd, dtset%nspden, optreal, optres, 10, 0.001_dp, vresid, vrespc)
  
 !    Other choice ?
  
@@ -917,7 +919,8 @@ end subroutine prcref
  real(dp),allocatable :: work3(:,:),xccc3d(:),xred_wk(:,:)
  logical,allocatable :: mask(:)
 ! *************************************************************************
-
+ write(6,*)'    prcref_PMA : entering'; flush(6) !DEBUG
+ write(6,*)'    prcref_PMA : iprcel : ', dtset%iprcel; flush(6) !DEBUG
  if(optres==1)then
    ABI_ERROR('density mixing (optres=1) not admitted!')
  end if
@@ -1008,7 +1011,7 @@ end subroutine prcref
      call moddiel(cplex,dielar,mpi_enreg,nfftprc,ngfftprc,dtset%nspden,optreal,optres,qphon,rprimd,vresid,vrespc)
 
 !    Use the inverse dielectric matrix in a small G sphere
-   else if( (istep>=dielstrt .and. dtset%iprcel>=21) .or. modulo(dtset%iprcel,100)>=41 )then
+   else if( (istep>=dielstrt .and. dtset%iprcel>=21 .and. dtset%iprcel<200) .or. modulo(dtset%iprcel,100)>=41 )then
 
 !    Wnith dielop=1, the matrices will be computed when istep=dielstrt
 !    With dielop=2, the matrices will be computed when istep=dielstrt and 1
@@ -1114,7 +1117,7 @@ end subroutine prcref
    else if (dtset%iprcel>=200 .and. dtset%iprcel<300) then
      cplex=optreal
      write(6,*)'    prcref : iprcel=2**'; flush(6) !DEBUG
-     call chi0diel(precon, dtset, cplex, mpi_enreg, nfftprc, ngfftprc, gprimd, dtset%nspden, optreal, optres, 10, 0.001, vresid, vrespc)
+     call chi0diel(precon, dtset, cplex, mpi_enreg, nfftprc, ngfftprc, gprimd, dtset%nspden, optreal, optres, 10, 0.001_dp, vresid, vrespc)
  
 !    Other choice ?
    else
@@ -2670,13 +2673,14 @@ end subroutine chi0diel_apply_dielmat
 !!
 !! SOURCE
 
-subroutine chi0diel(precon, dtset, cplex, mpi_enreg, nfft, ngfft, gprimd, nspden, optreal, optres, gmres_maxiter, gmres_rtol, vresid, vrespc)
+subroutine chi0diel(precon, dtset, cplex, mpi_enreg, nfft, ngfft, gprimd, nspden, optreal, &
+&   optres, gmres_maxiter, gmres_rtol, vresid, vrespc)
 
 !Arguments ------------------------------------
  type(precon_object) :: precon
 !scalars
  integer,intent(in) :: cplex, nfft, nspden, optreal, optres, gmres_maxiter
- real, intent(in) :: gmres_rtol
+ real(dp), intent(in) :: gmres_rtol
  type(MPI_type),intent(in) :: mpi_enreg
  type(dataset_type),intent(in) :: dtset
 !arrays
@@ -2701,9 +2705,9 @@ subroutine chi0diel(precon, dtset, cplex, mpi_enreg, nfft, ngfft, gprimd, nspden
  real(dp), allocatable :: tmp(:)
 
 ! *************************************************************************
- write(6,*)'    chi0diel : '; flush(6) !DEBUG
+ write(6,*)'    chi0diel : ngfft', ngfft; flush(6) !DEBUG
 
- if (ngfft(9)/=0) then
+ if (ngfft(10)>1) then
    ABI_BUG("chi0-based preconditioning (chi0diel) used with fft-grid parallelization")
  end if
 
@@ -2740,81 +2744,9 @@ subroutine chi0diel(precon, dtset, cplex, mpi_enreg, nfft, ngfft, gprimd, nspden
  ABI_MALLOC(est, (2*size_vres))
  est = 0
 
-!MKL GMRES :   
- !TODO : dirty check of MKL availability
-#if defined HAVE_LINALG_MKL_OMATCOPY
-
-!FGMRES initialization
- ABI_MALLOC(tmp, ((2*gmres_maxiter+1)*2*size_vres + gmres_maxiter*(gmres_maxiter+9)/2 + 1))
- call dfgmres_init(2*size_vres, est, rhs, RCI_request, ipar, dpar, tmp)
-!setting FGMRES parameters
- ipar(7) = 0              ! control verbosity : no warning message
- ipar(5) = gmres_maxiter  ! maximum number of iterations
- ipar(8) = 1              ! dfgmres routine performs the stopping test for the maximum number of iterations ipar(4)≤ipar(5)
- ipar(9) = 1              ! dfgmres routine performs the residual stopping test dpar(5)≤dpar(4)=dpar(1)*dpar(3)+dpar(2)
- ipar(10) = 0             ! no user defined stopping tests
- ipar(11) = 0             ! non-preconditioned GMRES
- ipar(12) = 1             ! dfgmres routine performs the automatic test dpar(7)≤dpar(8)
- ipar(15) = gmres_maxiter ! number of the non-restarted FGMRES iterations (no restart here)
- dpar(1) = gmres_rtol     ! relative tolerance
-! dpar(2) = 0.01          ! absolute tolerance  (DFTK default=0.01)
-
-!FGMRES iterations
-
- call dfgmres_check(2*size_vres, est, rhs, RCI_request, ipar, dpar, tmp)
- call dfgmres(2*size_vres, est, rhs, RCI_request, ipar, dpar, tmp)
- 
- do
- write(6,*)'    chi0diel : ite = ipar(4)'; flush(6) !DEBUG
-   if (RCI_request==-1) then
-!    maximum number of iterations is reached
-     call dfgmres_get(2*size_vres, est, rhs, RCI_request, ipar, dpar, tmp, itercount)
-     exit
-   else if (RCI_request==0) then
-!    successful completion of the task
-     call dfgmres_get(2*size_vres, est, rhs, RCI_request, ipar, dpar, tmp, itercount)
-     exit
-   else  if (RCI_request==1) then
-!    multiply the matrix P by tmp(ipar(22)) and put the result in tmp(ipar(23))
-     if (optres==1) then
-!      We are preconditioning density residual so P = (I-chi0*vc) = adjoint dielectric matrix
-       call chi0diel_apply_adjdielmat(precon, g_vectors, gprimd, ispden, mpi_enreg, ngfft, &
-         tmp(ipar(22):ipar(22)+2*size_vres-1), tmp(ipar(23):ipar(23)+2*size_vres-1) &
-       )
-     else if (optres==0) then
-!      We are preconditioning potential residual so P = (I-vc*chi0) = dielectric matrix
-       call chi0diel_apply_dielmat(precon, g_vectors, gprimd, ispden, mpi_enreg, ngfft, &
-         tmp(ipar(22):ipar(22)+2*size_vres-1), tmp(ipar(23):ipar(23)+2*size_vres-1) &
-       )
-     else
-       ABI_BUG('optres != 0 ou 1')
-     end if 
-!    proceed with FGMRES iterations
-     call dfgmres(2*size_vres, est, rhs, RCI_request, ipar, dpar, tmp)
-
-!---------------------------------------------------------------------
-!  FGMRES Errors
-   else if (RCI_request==-10) then
-     ABI_BUG('chi0-based preconditioner (iprcel=2**) - FGMRES : attempt to divide by zero')
-     exit
-   else if (RCI_request==-11) then
-     ABI_BUG('chi0-based preconditioner (iprcel=2**) - FGMRES : infinite cycle')
-     exit
-   else if (RCI_request==-12) then
-     ABI_BUG('chi0-based preconditioner (iprcel=2**) - FGMRES : errors were found in the method parameters')
-     exit
-
-!  RCI_request = 2, 3, 4 should not happen with this choice of parameters
-   else
-     ABI_BUG('chi0-based preconditioner (iprcel=2**) - FGMRES : RCI_request has unexpected value')
-   end if
-!---------------------------------------------------------------------
-
- end do
-
-#else
- ABI_ERROR("chi0-based SCF preconditioning requires MKL (TODO)")
-#endif
+        write(6,*)'    chi0diel : linsolve' ; flush(6) !DEBUG
+!Resolution with GMRES
+ call linsolve(2*size_vres, matvec, rhs, est, gmres_maxiter, gmres_rtol)
 
 !Fourier transform if optreal==1
  if (optreal==1) then
@@ -2830,6 +2762,25 @@ subroutine chi0diel(precon, dtset, cplex, mpi_enreg, nfft, ngfft, gprimd, nspden
 
 !Simple mixing
  vrespc = precon%diemix * vrespc
+
+ contains
+
+ ! Subroutine matvec that apply the preconditioner P.
+ subroutine matvec(n_, x, y)
+   integer, intent(in) :: n_
+   real(dp), intent(inout) :: x(n_), y(n_)
+
+! *************************************************************************
+
+   if (optres==1) then
+   ! We are preconditioning density residual so P = (I-chi0*vc) = adjoint dielectric matrix.
+     call chi0diel_apply_adjdielmat(precon, g_vectors, gprimd, ispden, mpi_enreg, ngfft, x, y)
+   else if (optres==0) then
+   ! We are preconditioning potential residual so P = (I-vc*chi0) = dielectric matrix.
+     call chi0diel_apply_dielmat(precon, g_vectors, gprimd, ispden, mpi_enreg, ngfft, x, y)
+   end if
+
+ end subroutine matvec
 
 end subroutine chi0diel
 !!***
