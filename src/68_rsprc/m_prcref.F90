@@ -461,8 +461,7 @@ subroutine prcref(atindx,dielar,dielinv,&
    else if (dtset%iprcel>=200 .and. dtset%iprcel<300) then
  write(6,*)'    prcref : chi0 precon'; flush(6) !DEBUG
       cplex=optreal
-      call chi0diel(precon, dtset, cplex, mpi_enreg, nfftprc, ngfftprc, gprimd, dtset%nspden, optreal, optres, 10, 0.001_dp, vresid, vrespc)
- 
+      call chi0diel(precon, dtset, cplex, mpi_enreg, nfftprc, ngfftprc, dtset%nspden, optreal, optres, 10, 0.001_dp, vresid, vrespc)
 !    Other choice ?
  
    else
@@ -1117,7 +1116,7 @@ end subroutine prcref
    else if (dtset%iprcel>=200 .and. dtset%iprcel<300) then
      cplex=optreal
      write(6,*)'    prcref : iprcel=2**'; flush(6) !DEBUG
-     call chi0diel(precon, dtset, cplex, mpi_enreg, nfftprc, ngfftprc, gprimd, dtset%nspden, optreal, optres, 10, 0.001_dp, vresid, vrespc)
+     call chi0diel(precon, dtset, cplex, mpi_enreg, nfftprc, ngfftprc, dtset%nspden, optreal, optres, 10, 0.001_dp, vresid, vrespc)
  
 !    Other choice ?
    else
@@ -2391,122 +2390,6 @@ subroutine dieltcel(dielinv,gmet,kg_diel,kxc,nfft,ngfft,nkxc,npwdiel,nspden,occo
 end subroutine dieltcel
 !!***
 
-!!****f* ABINIT/compute_g
-!! NAME
-!! compute_g
-!!
-!! FUNCTION
-!! Computes the array of G-vectors (in REDUCED coordinates) corresponding to the coordinates
-!! of the result from fourdp (Fourier transform for densities and potentials) on this processor.
-!!
-!! INPUTS
-!!  mpi_enreg = Information about MPI parallelization.
-!!  ngfft(:)  = All needed information about 3D FFT, see ~abinit/doc/variables/gstate/#ngfft.
-!!
-!! OUTPUT
-!!  g(3, :)   = 3 coordinates of the G-vectors.
-!!
-!! NOTES
-!!
-!! SOURCE
-
-subroutine compute_g(mpi_enreg, ngfft, g_vectors)
-
-!Arguments ------------------------------------
-!scalars
- type(MPI_type), intent(in) :: mpi_enreg
-!arrays
- integer, intent(in) :: ngfft(:)
- !real(dp), intent(in) :: gprimd(:, :)
- integer, intent(out) :: g_vectors(:, :)
-
-!Local variables-------------------------------
-!scalars
- integer :: i1, i2, i3, i2_loc, i3_loc, i_fft, n1, n2, n3, me_fft, nproc_fft
-!arrays
- integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:), ffti2_local(:)
- integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:), ffti3_local(:)
-
-! *************************************************************************
-
-!Get the distrib associated with this fft_grid
- n1=ngfft(1) ; n2=ngfft(2) ; n3=ngfft(3)
- call ptabs_fourdp(mpi_enreg, n2, n3, fftn2_distrib, ffti2_local, fftn3_distrib, ffti3_local)
-
- me_fft=ngfft(11)
- nproc_fft=ngfft(10)
-
-!Triple loop for the 3 dimensions over all the G-vectors
- do i3=1,n3
-   if (fftn3_distrib(i3)==me_fft) then
-     i3_loc=ffti3_local(i3)         ! local index of the 3rd coordinates on this processor
-     do i2=1,n2
-       if (fftn2_distrib(i2)==me_fft) then
-           i2_loc=ffti2_local(i2)   ! local index of the 2nd coordinates on this processor
-           do i1=1,n1
-            !i_fft = index of the (i1, i2, i3)-G-vector in the fft
-             i_fft=i1 + n1*( i2_loc-1+(n2/nproc_fft)*(i3-1))
-             g_vectors(1, i_fft) = i1-1 - n1*merge(1, 0, (2*i1>n1))
-             g_vectors(2, i_fft) = i2-1 - n2*merge(1, 0, (2*i2>n2))
-             g_vectors(3, i_fft) = i3-1 - n3*merge(1, 0, (2*i3>n3))
-            !Not multiply by gprimd to get cartesian coordinates
-            !g_vectors(:, i_fft) = two_pi * matmul(gprimd, g_vectors(:, i_fft))
-           end do
-       end if
-     end do
-   end if
- end do
-
-end subroutine compute_g
-!!***
-
-!!****f* ABINIT/apply_vc
-!! NAME
-!! apply_vc
-!!
-!! FUNCTION
-!! Applies the Coulomb kernel vc(G) = 4*pi/G^2 to the vector vec_g given in the Fourier space (in place).
-!!
-!! INPUTS
-!!  g_vectors (3, :) = Coordinates of the G-vectors (should not be distributed).
-!!
-!! SIDE EFFECTS
-!!  vec_g (2, :)     = Vector (in G-space) to which the Coulomb kernel vc is applied (in place).
-!!
-!! NOTES
-!!  vec_g(1, :) is the real part of the vector and vec_g(2, :) is the imaginary part.
-!!
-!! SOURCE
-
-subroutine chi0diel_apply_vc(g_vectors, gprimd, nfft, vec_g)
-!Arguments ------------------------------------
-!scalars
- integer :: nfft
-!arrays
- integer, intent(in) :: g_vectors(:, :)
- real(dp), intent(in) :: gprimd(:, :)
- real(dp), intent(inout) :: vec_g(2, nfft)
-
-!Local variables-------------------------------
- integer :: start
- integer :: i
-
-! *************************************************************************
-
- if (ALL(g_vectors(:, 1)==0)) then
-   !If the vector G=0 is on this processor, its component is not multiplied.
-   start = 2
- else
-   start = 1
- end if
-
- do i=start, nfft
-   vec_g(:, i) = (2*two_pi/norm2(two_pi * matmul(gprimd, g_vectors(:, i)))) * vec_g(:, i)
- end do
- !TODO : optimize this ?
- 
-end subroutine chi0diel_apply_vc
-
 !!****f* ABINIT/apply_adjdielmat
 !! NAME
 !!  apply_adjdielmat
@@ -2519,7 +2402,9 @@ end subroutine chi0diel_apply_vc
 !!  precon      = precon_object that contain the model chi0 operator.
 !!  g_vectors   = Coordinates of the G-vectors (should not be distributed over the processors).
 !!  mpi_enreg   = Information about MPI parallelization.
+!!  nfft        = Number of fft grid points.
 !!  ngfft       = Contains all needed information about 3D FFT, see ~abinit/doc/variables/gstate/#ngfft.
+!!  nspden      = Number of spin-density components.
 !!  ispden      = Index of spin-density component.
 !!  rho_g       = Density vector (in G-space).
 !!
@@ -2532,20 +2417,18 @@ end subroutine chi0diel_apply_vc
 !!
 !! SOURCE
 
-subroutine chi0diel_apply_adjdielmat(precon, g_vectors, gprimd, ispden, mpi_enreg, ngfft, rho_g, adjdielmat_rho_g)
+subroutine chi0diel_apply_adjdielmat(precon, mpi_enreg, nfft, ngfft, nspden, rho_g, adjdielmat_rho_g)
 
 !Arguments ------------------------------------
 !scalars
  type(precon_object) :: precon
  type(MPI_type),intent(in) :: mpi_enreg
- integer :: ispden
+ integer :: nfft, nspden
 !arrays
- integer, intent(in) :: ngfft(:), g_vectors(:, :)
- real(dp), intent(in) :: gprimd(:, :)
- real(dp), intent(in) :: rho_g(:)
- real(dp), intent(out) :: adjdielmat_rho_g(:)
+ integer, intent(in) :: ngfft(:)
+ real(dp), intent(in) :: rho_g(nspden, 2, nfft)
+ real(dp), intent(out) :: adjdielmat_rho_g(nspden, 2, nfft)
 !Local variables-------------------------------
- integer :: nfft
 
 ! *************************************************************************
  write(6,*)'    chi0diel_apply_adjdielmat'; flush(6) !DEBUG
@@ -2553,17 +2436,17 @@ subroutine chi0diel_apply_adjdielmat(precon, g_vectors, gprimd, ispden, mpi_enre
  adjdielmat_rho_g = rho_g
 
 !1) Applying the Coulomb kernel vc
- nfft = size(g_vectors, 2)
- call chi0diel_apply_vc(g_vectors, gprimd, nfft, adjdielmat_rho_g)
+ call precon%apply_vc(ngfft, adjdielmat_rho_g)
 
 !2) Applying the model chi0 operator
- call precon%apply_chi0(mpi_enreg, ngfft, ispden, adjdielmat_rho_g)
+ call precon%apply_chi0(mpi_enreg, ngfft, adjdielmat_rho_g)
 
 !3) adjdielmat_rho_g = rho_g - chi0 * vc * rho_g = adjdielmat * rho_g
  adjdielmat_rho_g = rho_g - adjdielmat_rho_g
 
 !Components G=0 unchanged
- adjdielmat_rho_g(1:2) = rho_g(1:2)
+   adjdielmat_rho_g(1, 1, 1) = rho_g(1, 1, 1)
+   adjdielmat_rho_g(1, 2, 1) = rho_g(1, 2, 1)
 
 !For code validation only
  call precon%save_applied_op(ngfft, 2, rho_g, adjdielmat_rho_g)
@@ -2581,10 +2464,10 @@ end subroutine chi0diel_apply_adjdielmat
 !!
 !! INPUTS
 !!  precon      = precon_object that contain the modl chi0 operator.
-!!  g_vectors   = Coordinates of the G-vectors (should not be distributed over the processors).
 !!  mpi_enreg   = Information about MPI parallelization.
+!!  nfft        = Number of fft grid points.
 !!  ngfft       = Contains all needed information about 3D FFT, see ~abinit/doc/variables/gstate/#ngfft.
-!!  ispden      = Index of spin-density component.
+!!  nspden      = Number of spin-density components.
 !!  v_g         = Potential vector (in G-space)
 !!
 !! OUTPUT
@@ -2596,21 +2479,18 @@ end subroutine chi0diel_apply_adjdielmat
 !!
 !! SOURCE
 
-subroutine chi0diel_apply_dielmat(precon, g_vectors, gprimd, ispden, mpi_enreg, ngfft, v_g, dielmat_v_g)
+subroutine chi0diel_apply_dielmat(precon, mpi_enreg, nfft, ngfft, nspden, v_g, dielmat_v_g)
 
 !Arguments ------------------------------------
 !scalars
  type(precon_object) :: precon
  type(MPI_type),intent(in) :: mpi_enreg
- integer :: ispden
+ integer :: nfft, nspden
 !arrays
  integer, intent(in) :: ngfft(:)
- integer, intent(in) :: g_vectors(:, :)
- real(dp), intent(in) :: gprimd(:, :)
- real(dp), intent(inout) ::  v_g(:)
- real(dp), intent(out) :: dielmat_v_g(:)
+ real(dp), intent(inout) ::  v_g(nspden, 2, nfft)
+ real(dp), intent(out) :: dielmat_v_g(nspden, 2, nfft)
 !Local variables-------------------------------
- integer :: nfft
 
 ! *************************************************************************
  write(6,*)'    chi0diel_apply_dielmat'; flush(6) !DEBUG
@@ -2618,17 +2498,17 @@ subroutine chi0diel_apply_dielmat(precon, g_vectors, gprimd, ispden, mpi_enreg, 
  dielmat_v_g = v_g
 
 !1) Applying the model chi0 operator
- call precon%apply_chi0(mpi_enreg, ngfft, ispden, dielmat_v_g)
+ call precon%apply_chi0(mpi_enreg, ngfft, dielmat_v_g)
 
 !2) Applying the Coulomb kernel vc
- nfft = size(g_vectors, 2)
- call chi0diel_apply_vc(g_vectors, gprimd, nfft, dielmat_v_g)
+ call precon%apply_vc(ngfft, dielmat_v_g)
 
 !3) dielmat_v_g = v_g - vc * chi0 * v_g = dielmat * v_g
  dielmat_v_g = v_g - dielmat_v_g
 
 !Components G=0 unchanged
- dielmat_v_g(1:2) = v_g(1:2)
+ dielmat_v_g(1, 1, 1) = v_g(1, 1, 1)
+ dielmat_v_g(1, 2, 1) = v_g(1, 2, 1)
 
 !For code validation only 
  call precon%save_applied_op(ngfft, 2, v_g, dielmat_v_g)
@@ -2662,8 +2542,8 @@ end subroutine chi0diel_apply_dielmat
 !!                  1: the array vresid contains a density residual.
 !!  gmres_maxiter = Maximum number of (non-restarted) iterations for the GMRES.
 !!  gmres_rtol    = Relative tolerance for the GMRES
-!!  vresid (:, nspden) = residual density/potential in REAL space (if optreal==1)
-!!                       residual density/potential in RECIPROCAL space      (if optreal==2)
+!!  vresid (:, nspden) = residual density/potential in REAL space       (if optreal==1)
+!!                       residual density/potential in RECIPROCAL space (if optreal==2)
 !!
 !! OUTPUT
 !!  vrespc (:, nspden) = preconditioned residual of the density/potential in REAL space
@@ -2673,7 +2553,7 @@ end subroutine chi0diel_apply_dielmat
 !!
 !! SOURCE
 
-subroutine chi0diel(precon, dtset, cplex, mpi_enreg, nfft, ngfft, gprimd, nspden, optreal, &
+subroutine chi0diel(precon, dtset, cplex, mpi_enreg, nfft, ngfft, nspden, optreal, &
 &   optres, gmres_maxiter, gmres_rtol, vresid, vrespc)
 
 !Arguments ------------------------------------
@@ -2685,24 +2565,17 @@ subroutine chi0diel(precon, dtset, cplex, mpi_enreg, nfft, ngfft, gprimd, nspden
  type(dataset_type),intent(in) :: dtset
 !arrays
  integer,intent(in) :: ngfft(:)
- real(dp),intent(in) :: gprimd(3,3), vresid(:,:)
+ real(dp),intent(in) :: vresid(:,:)
  real(dp),intent(out) :: vrespc(:,:)
 
 !Local variables-------------------------------
 !scalars
- integer :: ispden
+ integer :: ispden, start_ispden, end_ispden
  real(dp) :: diemix
 !arrays
  !integer :: 
  real(dp), allocatable :: rhs(:), est(:)
- integer :: g_vectors(3,nfft)
  real(dp), allocatable :: workr(:)
- !real(dp), allocatable :: g_vectors(:,:), workr(:), workg(:, :), rhs(:), est(:)
-!MKL FGMRES
- integer :: RCI_request, itercount, size_vres
- integer :: ipar(128)
- real(dp) :: dpar(128)
- real(dp), allocatable :: tmp(:)
 
 ! *************************************************************************
  write(6,*)'    chi0diel : ngfft', ngfft; flush(6) !DEBUG
@@ -2711,76 +2584,86 @@ subroutine chi0diel(precon, dtset, cplex, mpi_enreg, nfft, ngfft, gprimd, nspden
    ABI_BUG("chi0-based preconditioning (chi0diel) used with fft-grid parallelization")
  end if
 
-!Computes G-vectors on the fft grid
- call compute_g(mpi_enreg, ngfft, g_vectors)
-
- size_vres = size(vresid, 1)/cplex  ! vector size in the complex space
- ispden=1   ! Only the total density is preconditioned (for now : TODO)
-
 !The preconditioner P^-1 is defined by : 
 !  P = (I-chi0*vc) the model adjoint dielectric matrix 
 !      if we are preconditioning densities (optres=1)
 !  P = (I-vc*chi0) the model dielectric matrix 
 !      if we are preconditioning potentials (optres=0)
- 
+! 
 !The preconditioned density/potential residual vrespc = P^-1 * vresid is computed 
 !by soling the linear equation P * vrespc = vresid approximately with GMRES.
 
-!The right-hand side : 
-!   rhs is vresid in the Fourier space
- ABI_MALLOC(rhs, (2*size_vres))
- if (optreal==1) then
- !vresid is given in the real space : We need to do a fft.
-   ABI_MALLOC(workr, (cplex*size_vres))   !We need workr here because fourdp needs an 
-   workr(:) = vresid(:, ispden)           !intent(inout) argument while vresid is intent(in).
-   call fourdp(cplex, rhs, workr, -1, mpi_enreg, size_vres, 1, ngfft, 0)
-   ABI_FREE(workr)
- else
- !vresid is already given in the Fourier space.
-   rhs = vresid(:, ispden)
- end if
+!Right-hand side : rhs is vresid in the Fourier space.
+ ABI_MALLOC(rhs, (nspden*2*nfft))
+
+ do ispden = 1, nspden
+   !Indices of the ispden component in the flattened (nspden, 2, nfft)-array 'rhs'.
+   start_ispden = 1+(ispden-1)*2*nfft
+   end_ispden = ispden*2*nfft
+  
+   if (optreal==1) then
+     !vresid is given in the real space : We need to do a fft.
+     ABI_MALLOC(workr, (cplex*nfft))   !We need workr here because fourdp needs an 
+     workr(:) = vresid(:, ispden)      !intent(inout) argument while vresid is intent(in).
+     call fourdp(cplex, rhs(start_ispden:end_ispden), workr, -1, mpi_enreg, nfft, 1, ngfft, 0)
+     ABI_FREE(workr)
+
+    else
+     !vresid is already given in the Fourier space.
+     rhs(start_ispden:end_ispden) = vresid(:, ispden)
+   end if
+
+ end do
 
 !Initial guess :
- ABI_MALLOC(est, (2*size_vres))
+ ABI_MALLOC(est, (nspden*2*nfft))
  est = 0
 
         write(6,*)'    chi0diel : linsolve' ; flush(6) !DEBUG
-!Resolution with GMRES
- call linsolve(2*size_vres, matvec, rhs, est, gmres_maxiter, gmres_rtol)
+!Resolution with GMRES :
+ call linsolve(nspden*2*nfft, matvec, rhs, est, gmres_maxiter, gmres_rtol)
 
-!Fourier transform if optreal==1
- if (optreal==1) then
-  !vrespc must be returned in the real space : We need to do a ifft. 
-   call fourdp(cplex, est, vrespc(:, ispden), 1, mpi_enreg, size_vres, 1, ngfft, 0)
- else
-  !vrespc must be returned in the fourier space.
-   vrespc(:, ispden) = est
- end if
+!Reshaping the final result :
+ do ispden = 1, nspden
+   !Indices of the ispden component in the flattened (nspden, 2, nfft)-array 'est'.
+   start_ispden = 1+(ispden-1)*2*nfft
+   end_ispden = ispden*2*nfft
+
+   if (optreal==1) then
+     !vrespc must be returned in the real space : We need to do a ifft. 
+     call fourdp(cplex, est(start_ispden: end_ispden), vrespc(:, ispden), 1, mpi_enreg, nfft, 1, ngfft, 0)
+
+   else
+     !vrespc must be returned in the fourier space.
+     vrespc(:, ispden) = est(start_ispden: end_ispden)
+   end if
+
+ end do
 
  ABI_FREE(rhs)
  ABI_FREE(est)
 
-!Simple mixing
+!Simple mixing :
  vrespc = precon%diemix * vrespc
 
  contains
 
- ! Subroutine matvec that apply the preconditioner P.
+!Subroutine matvec that apply the preconditioner P. ---------------------------------------
  subroutine matvec(n_, x, y)
    integer, intent(in) :: n_
    real(dp), intent(inout) :: x(n_), y(n_)
 
-! *************************************************************************
+! ******************************************************************************************
 
    if (optres==1) then
    ! We are preconditioning density residual so P = (I-chi0*vc) = adjoint dielectric matrix.
-     call chi0diel_apply_adjdielmat(precon, g_vectors, gprimd, ispden, mpi_enreg, ngfft, x, y)
+     call chi0diel_apply_adjdielmat(precon, mpi_enreg, nfft, ngfft, nspden, x, y)
    else if (optres==0) then
    ! We are preconditioning potential residual so P = (I-vc*chi0) = dielectric matrix.
-     call chi0diel_apply_dielmat(precon, g_vectors, gprimd, ispden, mpi_enreg, ngfft, x, y)
+     call chi0diel_apply_dielmat(precon, mpi_enreg, nfft, ngfft, nspden, x, y)
    end if
 
- end subroutine matvec
+ end subroutine matvec ! -------------------------------------------------------------------
 
 end subroutine chi0diel
 !!***

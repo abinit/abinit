@@ -41,7 +41,8 @@ module m_precon
         real(dp), pointer :: fermie
         real(dp), pointer :: cg(:, :), eigen(:), phnons(:, :, :)
         integer, pointer  :: kg(:, :), npwarr(:), irrzon(:, :, :)
-        real(dp), allocatable :: ldos(:, :), tdos(:)
+        real(dp) :: tdos
+        real(dp), allocatable :: ldos(:, :)
         !For local polarizability preconditioner :
         real(dp) :: gc
         real(dp), allocatable :: loc_pola(:, :)
@@ -57,6 +58,7 @@ module m_precon
         procedure :: update => precon_update    ! Updates the precon_object according to iprcel.
         procedure :: free => precon_free        ! Dealocate arrays that are allocated in precon_init.
         procedure :: save => precon_save        ! Saves the LDOS or local polarizability contained in the precon_object in a file.
+        procedure :: apply_vc => apply_vc       ! Applies the coulomb kernel vc to an imput vector.
         procedure :: apply_chi0 => apply_chi0   ! Applies the model chi0 operator to an imput vector.
         procedure :: save_applied_op => save_applied_op ! Saves the application of an operator.
 
@@ -129,9 +131,8 @@ contains
         this%xred   => xred
         !Initializing LDOS specific variables
         if (this%iprcel == 202) then
-            !Allocating the arrays containing ldos and tdos
+            !Allocating the array containing ldos
             ABI_MALLOC(this%ldos, (this%nfft, this%nspden))
-            ABI_MALLOC(this%tdos, (this%nspden))
         end if
         !Initializing loc_pola specific variables
         if (this%iprcel == 203) then
@@ -180,9 +181,7 @@ contains
             &   this%kg, mpi_enreg, this%nfft, this%npwarr, this%phnons, this%rprimd, this%ucvol, &
             &   this%ldos)
             !update tdos
-            do ispden=1,this%nspden
-                this%tdos = sum(this%ldos(:, ispden)) * this%dvol
-            end do
+            this%tdos = sum(this%ldos(:, 1)) * this%dvol
         end if
 
         !Local polarizability
@@ -214,7 +213,6 @@ contains
         if (this%iprcel == 202) then
             !Deallocating the array containing ldos and tdos
             ABI_FREE(this%ldos)
-            ABI_FREE(this%tdos)
         end if
 
         if (this%iprcel == 203) then
@@ -392,6 +390,33 @@ contains
         end if 
 
     end subroutine precon_save
+
+    subroutine apply_vc(this, ngfft, vec_g)
+        !Arguments ------------------------------------
+        class(precon_object), intent(inout) :: this
+        !arrays
+        integer, intent(in) :: ngfft(:)
+        real(dp), intent(inout) :: vec_g(this%nspden, 2, this%nfft)
+        
+        !Local variables-------------------------------
+        integer :: ifft, ispden
+        real(dp) :: g_cart_2
+        
+        ! *************************************************************************
+        
+        ! The sigma_0 component of the density is multiplied by 4pi/G^2
+        do ifft = 2, this%nfft
+            g_cart_2 = norm2(two_pi * matmul(this%gprimd, get_g_vector(ifft, ngfft)))**2
+            vec_g(1, 1, ifft) = (2*two_pi/g_cart_2) * vec_g(1, 1, ifft)
+            vec_g(1, 2, ifft) = (2*two_pi/g_cart_2) * vec_g(1, 2, ifft)
+        end do
+        !TODO : optimize this ?
+
+        do ispden = 2, this%nspden
+            vec_g(ispden, :, :) = 0
+        end do
+         
+    end subroutine apply_vc
 
     !****f* m_precon/derivative_occ
     !! NAME
@@ -727,23 +752,23 @@ contains
     !!  vec_g (2, :) = Vector (in G-space) to which the model chi0 operator is applied (in place).
     !!
     !! SOURCE
-    subroutine apply_chi0(this, mpi_enreg, ngfft, ispden, vec_g)
+    subroutine apply_chi0(this, mpi_enreg, ngfft, vec_g)
 
         !Arguments ------------------------------------
         class(precon_object), intent(in) :: this
         !scalars
         type(MPI_type), intent(in) :: mpi_enreg
-        integer, intent(in) :: ispden
         !arrays
         integer, intent(in) :: ngfft(:)
-        real(dp), intent(inout) :: vec_g(2, this%nfft)
+        real(dp), intent(inout) :: vec_g(this%nspden, 2, this%nfft)
        
         !Local variables-------------------------------
         !scalars
-        integer :: size_vec, cplex
+        integer :: cplex
+        integer :: ispden
         integer :: i, i_g
         !arrays
-        real(dp), allocatable :: work_r(:)
+        real(dp), allocatable :: work_r(:), vec_r_1(:)
         real(dp), allocatable :: work_g(:, :), vec_g_saved(:, :)
         real(dp) :: g(3)
         
@@ -752,55 +777,68 @@ contains
 
         if (this%iprcel == 201) then
         !Kerker
-            vec_g = (-1/(4*pi*(this%dielng)**2)) * vec_g
+            vec_g(1, :, :) = (-1/(4*pi*(this%dielng)**2)) * vec_g(1, :, :)
+            do ispden = 2, this%nspden
+                vec_g(ispden, :, :) = (-1/(4*pi*(this%dielng)**2)) * vec_g(ispden, :, :)
+                !vec_g(ispden, :, :) = 0
+                ! What is best ?
+            end do
         end if
         
         if (this%iprcel == 202) then
         !LDOS model
-            !1) ifft to get vec in the real space
-            size_vec = size(vec_g, 2)
+
+            ABI_MALLOC(vec_r_1, (cplex*this%nfft))    
+            ABI_MALLOC(work_r, (cplex*this%nfft))
+            
+            !1) ifft to get (the sigma_0 component of) vec in the real space
             cplex = 1                           ! TODO : cplex as argument ?
-            ABI_MALLOC(work_r, (cplex*size_vec))
-            call fourdp(cplex, vec_g, work_r, 1, mpi_enreg, size_vec, 1, ngfft, 0)
+            call fourdp(cplex, vec_g(1, :, :), vec_r_1, 1, mpi_enreg, this%nfft, 1, ngfft, 0)
 
-            !2) chi0(v)(r) = -ldos(r)*v(r) + 1/dos * ldos(r)*integral(ldos(r')*v(r')*dr')
-            work_r = -this%ldos(:, ispden)*work_r &
-                         + 1/this%tdos(ispden) * dot_product(this%ldos(:, ispden), work_r)*this%dvol * this%ldos(:, ispden)
+            do ispden = 1, this%nspden
+                !2) chi0(v)(r)_ispden = -ldos_ispden(r)*v_1(r) + 1/dos * ldos_ispden(r)*integral(ldos_1(r')*v_1(r')*dr')
+                work_r = -this%ldos(:, ispden)*vec_r_1 &
+                                + 1/this%tdos * dot_product(this%ldos(:, 1), vec_r_1)*this%dvol * this%ldos(:, ispden)
 
-            !3) fft to get vec back in the reciprocal space
-            call fourdp(cplex, vec_g, work_r, -1, mpi_enreg, size_vec, 1, ngfft, 0)
+                !3) fft to get vec back in the reciprocal space
+                call fourdp(cplex, vec_g(ispden, :, :), work_r, -1, mpi_enreg, this%nfft, 1, ngfft, 0)
+            end do
+
             ABI_FREE(work_r)
+            ABI_FREE(vec_r_1)
+
         end if
 
         if (this%iprcel == 203) then
         !Local polarizability model
-            ABI_MALLOC(work_g, (2, this%nfft))
-            ABI_MALLOC(vec_g_saved, (2, this%nfft))
-            vec_g_saved = vec_g
-            vec_g = 0.0
-            do i=1, 3
-                work_g = 0.0
-                !1) Multiplication by d_i(g) in reciprocal space
-                do i_g = 1, this%nfft
-                    !g = two_pi * matmul(this%gprimd, g_vectors(:, i_g))
-                    g = two_pi * matmul(this%gprimd, get_g_vector(i_g, ngfft))
-                    work_g(:, i_g) = complex_mult( [0.0_dp, g(i)/sqrt(1+(norm2(g)/this%gc)**2)], vec_g_saved(:, i_g) )
-                end do
+        ! TODO : spin
+        !    ABI_MALLOC(work_g, (2, this%nfft))
+        !    ABI_MALLOC(vec_g_saved, (2, this%nfft))
+        !    vec_g_saved = vec_g
+        !    vec_g = 0.0
+        !    do i=1, 3
+        !        work_g = 0.0
+        !        !1) Multiplication by d_i(g) in reciprocal space
+        !        do i_g = 1, this%nfft
+        !            !g = two_pi * matmul(this%gprimd, g_vectors(:, i_g))
+        !            g = two_pi * matmul(this%gprimd, get_g_vector(i_g, ngfft))
+        !            work_g(:, i_g) = complex_mult( [0.0_dp, g(i)/sqrt(1+(norm2(g)/this%gc)**2)], vec_g_saved(:, i_g) )
+        !        end do
 
-                !2) Multiplication by the local polarizability in real space
-                call fourdp(cplex, work_g, work_r, 1, mpi_enreg, size_vec, 1, ngfft, 0) !ifft
-                work_r = this%loc_pola(:, ispden) * work_r                                         !local multiplication
-                call fourdp(cplex, work_g, work_r, -1, mpi_enreg, size_vec, 1, ngfft, 0) !fft
+        !        !2) Multiplication by the local polarizability in real space
+        !        call fourdp(cplex, work_g, work_r, 1, mpi_enreg, this%nfft, 1, ngfft, 0) !ifft
+        !        work_r = this%loc_pola(:, ispden) * work_r                                         !local multiplication
+        !        call fourdp(cplex, work_g, work_r, -1, mpi_enreg, this%nfft, 1, ngfft, 0) !fft
 
-                !3) Multiplication by d_i(g) in reciprocal space
-                do i_g = 1, this%nfft
-                    g = two_pi * matmul(this%gprimd, get_g_vector(i_g, ngfft))
-                    work_g(:, i_g) = complex_mult( [0.0_dp, g(i)/sqrt(1+(norm2(g)/this%gc)**2)], work_g(:, i_g) )
-                end do
+        !        !3) Multiplication by d_i(g) in reciprocal space
+        !        do i_g = 1, this%nfft
+        !            g = two_pi * matmul(this%gprimd, get_g_vector(i_g, ngfft))
+        !            work_g(:, i_g) = complex_mult( [0.0_dp, g(i)/sqrt(1+(norm2(g)/this%gc)**2)], work_g(:, i_g) )
+        !        end do
 
-                vec_g = vec_g + work_g
+        !        vec_g = vec_g + work_g
 
-            end do
+        !    end do
         end if
 
     end subroutine apply_chi0
