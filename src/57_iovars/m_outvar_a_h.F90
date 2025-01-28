@@ -94,9 +94,9 @@ contains
 !!
 !! SOURCE
 
-subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
-& jdtset_,marr,multivals,mxvals,ncid,ndtset,ndtset_alloc,&
-& results_out,strimg)
+subroutine outvar_a_h(choice,dmatpuflag,dtsets,iout,&
+   jdtset_,marr,multivals,mxvals,ncid,ndtset,ndtset_alloc,&
+   results_out,strimg)
 
 !Arguments ------------------------------------
 !scalars
