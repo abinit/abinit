@@ -3100,7 +3100,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
  integer :: ik_ibz, isym_k, trev_k, npw_k, istwf_k, npw_kq_ibz, istwf_k_ibz, nkpg_k, ierr, nk, spinor, spad, nkbz, ncid
  integer :: nqibz, iq, iq_ibz, isym_q, trev_q, qptopt, uc_iat, sc_iat, nu, nqbz, ip ! icell,
  logical :: isirr_k, isirr_q, have_scell_q, use_displaced_scell
- real(dp) :: cpu_all, wall_all, gflops_all, spread
+ real(dp) :: cpu_all, wall_all, gflops_all, spread, kdotr
  character(len=500) :: msg
  character(len=fnlen) :: path
  type(varpeq_t) :: vpq
@@ -3121,6 +3121,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
  real(dp),allocatable :: sc_displ_cart_re(:,:,:,:), sc_displ_cart_im(:,:,:,:)
  real(dp), ABI_CONTIGUOUS pointer :: xcart_ptr(:,:)
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:)
+ complex(gwpc) :: ceikr_
  complex(gwpc),allocatable :: ur_k(:), pol_wf(:,:,:), sc_ceikr(:)
 !----------------------------------------------------------------------
 
@@ -3421,7 +3422,15 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
                  uc_idx = 1 + wp1 + wp2*ngfft(1) + wp3*ngfft(1)*ngfft(2)
                  ir = ir + 1
                  irsp = ir + spad
+
                  pol_wf(irsp, ip, spin) = pol_wf(irsp, ip, spin) + a_nk * ur_k(uc_idx) * sc_ceikr(irsp)
+
+                 !kdotr = two_pi*( kk_sc(1) * (ir1 / dble(sc_ngfft(1))) &
+                 !                +kk_sc(2) * (ir2 / dble(sc_ngfft(2))) &
+                 !                +kk_sc(3) * (ir3 / dble(sc_ngfft(3))) )
+                 !ceikr_ = dcmplx(cos(kdotr), sin(kdotr))
+
+                 !pol_wf(irsp, ip, spin) = pol_wf(irsp, ip, spin) + a_nk * ur_k(uc_idx) * ceikr_
                end do
              end do
            end do
