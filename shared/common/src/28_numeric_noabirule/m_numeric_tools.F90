@@ -4970,7 +4970,7 @@ end function interpol3d_1d
 !!
 !! FUNCTION
 !! Computes the indices in a cube which are neighbors to the point to be
-!!  interpolated in interpol3d
+!! interpolated in interpol3d
 !!
 !! INPUTS
 !! r(3)=point coordinate
