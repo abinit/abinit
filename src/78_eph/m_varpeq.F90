@@ -3095,7 +3095,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0, ndat1 = 1
- integer :: my_rank, ib, irsp, ir, uc_idx, mpw, band, bstart, ir1, ir2, ir3, wp1, wp2, wp3, ds_nfft
+ integer :: my_rank, ib, irsp, ir, uc_idx, mpw, band, bstart, ir1, ir2, ir3, wp1, wp2, wp3, ds_nfft, idir
  integer :: natom, natom3, nsppol, nspinor, nspden, nkibz, mband, spin, ik, sc_nfft, cnt, nproc, num_writes, ii, uc_nfft
  integer :: ik_ibz, isym_k, trev_k, npw_k, istwf_k, npw_kq_ibz, istwf_k_ibz, nkpg_k, ierr, nk, spinor, spad, nkbz, ncid
  integer :: nqibz, iq, iq_ibz, isym_q, trev_q, qptopt, uc_iat, sc_iat, nu, nqbz, ip, ds_iscale
@@ -3108,6 +3108,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
  type(supercell_type), target :: scell_q, scell_k
  type(krank_t) :: krank_ibz, qrank_ibz
  complex(dp) :: a_nk, bstar_qnu, cphase, cphase_tr, c3tmp(3)
+ complex(gwpc) :: c123, c23, c3
 !arrays
  integer :: sc_ngfft(18), ds_ngfft(18), mapl_k(6), kptrlatt_(3,3), qptrlatt_(3,3)
  integer :: units(2), work_ngfft(18), gmax(3), g0_k(3), mapl_qq(6), g0_q(3), ngqpt(3)
@@ -3122,7 +3123,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
  real(dp), ABI_CONTIGUOUS pointer :: xcart_ptr(:,:)
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:)
  complex(gwpc) :: ceikr_
- complex(gwpc),allocatable :: ur_k(:,:), ds_ur_k(:,:), pol_wf(:,:,:), sc_ceikr(:)
+ complex(gwpc),allocatable :: ur_k(:,:), ds_ur_k(:,:), pol_wf(:,:,:), sc_ceikr_1d(:,:)
 !----------------------------------------------------------------------
 
  units = [std_out, ab_out]
@@ -3382,8 +3383,8 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
  end if
 
  ! FIXME: Toom much memory, should be computed on the fly.
- ABI_MALLOC(sc_ceikr, (sc_nfft*nspinor))
  ABI_CALLOC(pol_wf, (sc_nfft*nspinor, vpq%nstates, nsppol)) ! Init output with zeros.
+ ABI_MALLOC(sc_ceikr_1d, (maxval(sc_ngfft(1:3)), 3))
 
  cnt = 0
  do spin=1,nsppol
@@ -3409,10 +3410,14 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
 
      ABI_MALLOC(ug_k, (2, npw_k*nspinor))
      kk_sc = kk * vpq%ngkpt
-     call calc_ceikr(kk_sc, sc_ngfft, sc_nfft, nspinor, sc_ceikr)
 
-     !call getph(atindx, natom, n1, n2, n3, ph1d, xred)
-     !call ph1d3d(iatom, jatom, kg_k, matblk, natom, npw_k, n1, n2, n3, phkxred, ph1d, ph3d)
+     ! Precompute 1d phases e^{ik R} on the supercell.
+     do idir=1,3
+       do ii=0,sc_ngfft(idir) - 1
+         kdotr = two_pi * (kk_sc(idir) * (ii / dble(sc_ngfft(idir))))
+         sc_ceikr_1d(ii+1, idir) = dcmplx(cos(kdotr), sin(kdotr))
+       end do
+     end do
 
      ! Phase due to the primitive translation (default: 0)
      cphase_tr = exp(-j_dpc * two_pi * dot_product(kk, dtset%varpeq_trvec))
@@ -3438,8 +3443,11 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
                ! Loop over the points in the supercell.
                ir = 0
                do ir3=0,sc_ngfft(3)-1
+                 c3 = sc_ceikr_1d(ir3+1, 3)
                  do ir2=0,sc_ngfft(2)-1
+                   c23 = sc_ceikr_1d(ir2+1, 2) * c3
                    do ir1=0,sc_ngfft(1)-1
+                     c123 = sc_ceikr_1d(ir1+1, 1) * c23
                      ! The FFT index of the point wrapped into the unit cell.
                      wp1 = modulo(ir1, ngfft(1))
                      wp2 = modulo(ir2, ngfft(2))
@@ -3447,14 +3455,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
                      uc_idx = 1 + wp1 + wp2*ngfft(1) + wp3*ngfft(1)*ngfft(2)
                      ir = ir + 1; irsp = ir + spad
 
-                     pol_wf(irsp, ip, spin) = pol_wf(irsp, ip, spin) + a_nk * ur_k(uc_idx,1) * sc_ceikr(irsp)
-
-                     !kdotr = two_pi*( kk_sc(1) * (ir1 / dble(sc_ngfft(1))) &
-                     !                +kk_sc(2) * (ir2 / dble(sc_ngfft(2))) &
-                     !                +kk_sc(3) * (ir3 / dble(sc_ngfft(3))) )
-                     !ceikr_ = dcmplx(cos(kdotr), sin(kdotr))
-
-                     !pol_wf(irsp, ip, spin) = pol_wf(irsp, ip, spin) + a_nk * ur_k(uc_idx,1) * ceikr_
+                     pol_wf(irsp, ip, spin) = pol_wf(irsp, ip, spin) + a_nk * ur_k(uc_idx,1) * c123
                    end do
                  end do
                end do
@@ -3462,8 +3463,11 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
                ! Loop over the points in the supercell.
                ir = 0
                do ir3=0,sc_ngfft(3)-1
+                 c3 = sc_ceikr_1d(ir3+1, 3)
                  do ir2=0,sc_ngfft(2)-1
+                   c23 = sc_ceikr_1d(ir2+1, 2) * c3
                    do ir1=0,sc_ngfft(1)-1
+                     c123 = sc_ceikr_1d(ir1+1, 1) * c23
                      ! The FFT index of the point wrapped into the unit cell.
                      wp1 = modulo(ir1, ds_ngfft(1))
                      wp2 = modulo(ir2, ds_ngfft(2))
@@ -3472,14 +3476,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
                      ir = ir + 1; irsp = ir + spad
 
                      ! Note ds_ur_k here
-                     pol_wf(irsp, ip, spin) = pol_wf(irsp, ip, spin) + a_nk * ds_ur_k(uc_idx,1) * sc_ceikr(irsp)
-
-                     !kdotr = two_pi*( kk_sc(1) * (ir1 / dble(sc_ngfft(1))) &
-                     !                +kk_sc(2) * (ir2 / dble(sc_ngfft(2))) &
-                     !                +kk_sc(3) * (ir3 / dble(sc_ngfft(3))) )
-                     !ceikr_ = dcmplx(cos(kdotr), sin(kdotr))
-
-                     !pol_wf(irsp, ip, spin) = pol_wf(irsp, ip, spin) + a_nk * ur_k(uc_idx,1) * ceikr_
+                     pol_wf(irsp, ip, spin) = pol_wf(irsp, ip, spin) + a_nk * ur_k(uc_idx,1) * c123
                    end do
                  end do
                end do
@@ -3499,7 +3496,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
  ABI_FREE(ur_k)
  ABI_SFREE(ds_ur_k)
  ABI_FREE(gbound_k)
- ABI_FREE(sc_ceikr)
+ ABI_FREE(sc_ceikr_1d)
  call krank_ibz%free()
 
  ! Collect pol_wf on the master rank who's gonna write the polaron density in XSF format.
