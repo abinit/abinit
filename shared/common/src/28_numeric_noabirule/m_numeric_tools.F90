@@ -5113,9 +5113,9 @@ subroutine interpolate_ur_spc(in_ngfft, ndat, in_ur, out_ngfft, out_ur)
 !scalars
  integer,intent(in) :: ndat
 !arrays
- integer,intent(in) :: in_ngfft(3), out_ngfft(3)
- complex(spc),intent(in) :: in_ur(product(in_ngfft), ndat)
- complex(spc),intent(out) :: out_ur(product(out_ngfft), ndat)
+ integer,intent(in) :: in_ngfft(:), out_ngfft(:)
+ complex(spc),intent(in) :: in_ur(product(in_ngfft(1:3)), ndat)
+ complex(spc),intent(out) :: out_ur(product(out_ngfft(1:3)), ndat)
 
 !Local variables--------------------------------------------------------
 !scalars
@@ -5226,9 +5226,9 @@ subroutine interpolate_ur_dpc(in_ngfft, ndat, in_ur, out_ngfft, out_ur)
 !scalars
  integer,intent(in) :: ndat
 !arrays
- integer,intent(in) :: in_ngfft(3), out_ngfft(3)
- complex(dpc),intent(in) :: in_ur(product(in_ngfft), ndat)
- complex(dpc),intent(out) :: out_ur(product(out_ngfft), ndat)
+ integer,intent(in) :: in_ngfft(:), out_ngfft(:)
+ complex(dpc),intent(in) :: in_ur(product(in_ngfft(1:3)), ndat)
+ complex(dpc),intent(out) :: out_ur(product(out_ngfft(1:3)), ndat)
 
 !Local variables--------------------------------------------------------
 !scalars

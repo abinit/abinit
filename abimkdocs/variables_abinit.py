@@ -24919,6 +24919,28 @@ input file.
 """,
 ),
 
+Variable(
+    abivarname="varpeq_mesh_fact",
+    varset="eph",
+    vartype="integer",
+    topics=['Polaron_basic'],
+    dimensions="scalar",
+    defaultval=1,
+    mnemonics="VARiational Polaron EQuations: SCALE MESH for polaron wavefunction",
+    requires="[[eph_task]] == -13",
+    added_in_version="10.1.4",
+    text=r"""
+This variable can used to reduce the density of the real-space mesh used to represent the
+polaron wavefunction and generate the XSF file when [[eph_task]] == -13.
+This is especially useful when computing the VARPEQ equations on extra-dense k-meshes in conjunction with the
+the KERANGE trick.
+The size of the array with polaron wavefunction is indeed proportional to nkbz * nfft where
+nkbz is the number of points in the full BZ and nfft is the number of FFT points in the unit.
+This is the default behaviour when [[varpeq_mesh_fact]] is 1.
+If [[varpeq_mesh_fact]] is greater the one, the mesh in real space will be downsampled by this value along the three reduced
+direction with a significant decrease in the memory requirements.
+""",
+),
 
 Variable(
     abivarname="varpeq_tolgrs",
