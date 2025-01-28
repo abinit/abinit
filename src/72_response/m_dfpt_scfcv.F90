@@ -1330,7 +1330,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  call timab(160,2,tsec)
  call timab(150,1,tsec)
 
- if (psps%usepaw==0.and.dtset%userie/=919.and. &
+ if (psps%usepaw==0.and.dtset%userie/=919.and.dtset%gpu_option/=ABI_GPU_OPENMP .and. &
 & (ipert==dtset%natom+3.or.ipert==dtset%natom+4)) then
    call dfpt_nselt(blkflg,cg,cg1,cplex,&
 &   d2bbb,d2lo,d2nl,ecut,dtset%ecutsm,dtset%effmass_free,&
@@ -1349,8 +1349,10 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 
 !Use of NSTPAW3 for NCPP (instead of DFPT_NSELT/DFPT_NSTDY) can be forced with userie=919
 !MT oct. 2015: this works perfectly on all automatic tests
+!MS jan. 2025: As dfpt_nstpaw has been ported and optimised on OpenMP GPU,
+!              use it when OpenMP GPU is requested.
  if(ipert<=dtset%natom+4)then
-   if (psps%usepaw==1.or.dtset%userie==919) then
+   if (psps%usepaw==1.or.dtset%userie==919.or.dtset%gpu_option==ABI_GPU_OPENMP) then
      call dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dtfil,dtset,d2lo,d2nl,d2ovl,&
 &     eigenq,eigen0,eigen1,eovl1,gmet,gprimd,gsqcut,idir,indkpt1,indsy1,ipert,irrzon1,istwfk_rbz,&
 &     kg,kg1,kpt_rbz,kxc,mgfftf,mkmem,mkqmem,mk1mem,mpert,mpi_enreg,mpw,mpw1,nattyp,nband_rbz,mband_mem_rbz,ncpgr,&
