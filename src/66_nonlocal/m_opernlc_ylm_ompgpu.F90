@@ -732,7 +732,7 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
    !Enl is E(Kleinman-Bylander)
    ABI_CHECK(cplex_enl==1,"BUG: invalid cplex_enl/=1!")
    ABI_CHECK(cplex_fac==cplex,"BUG: invalid cplex_fac/=cplex!")
-   ABI_WARNING("DEBUG: Code section not checked!")
+   !ABI_WARNING("DEBUG: Code section not checked!")
    !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) &
    !$OMP& MAP(to:dgxdtfac_,enl_ptr2,atindx1,dgxdt,indlmn) &
    !$OMP& PRIVATE(idat,ispinor,ispinor_index,ia,index_enl,jlmn,j0lmn,jjlmn,ilmn,ijlmn) &
