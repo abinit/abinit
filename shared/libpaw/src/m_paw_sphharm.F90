@@ -589,14 +589,16 @@ subroutine initylmr(mpsang,normchoice,npts,nrm,option,rr,ylmr,ylmr_gr)
        ! If ctheta is too close to 1 (or -1), then stheta is small with poor accuracy,
        ! which leads to a numerical instability visible (but negligible) in stress and forces components.
        ! Here we have stheta>1e-6 with a minimum of 2 correct digits when close to 1e-6.
-       if (abs(one-ctheta)<tol12) ctheta=one
-       if (abs(one+ctheta)<tol12) ctheta=-one
-       stheta=sqrt(one-ctheta*ctheta)
-       if (stheta>tol6) then
+       if (abs(one-ctheta)<tol12) then
+         ctheta=one
+         stheta=zero
+       else if (abs(one+ctheta)<tol12) then
+         ctheta=-one
+         stheta=zero
+       else
+         stheta=sqrt(one-ctheta*ctheta)
          cphi=rr(1,inpt)/(rnorm*stheta)
          sphi=rr(2,inpt)/(rnorm*stheta)
-       else
-         stheta=zero
        end if
        do mm=1,mpsang-1
          rphase(mm)=dreal(dcmplx(cphi,sphi)**mm)
