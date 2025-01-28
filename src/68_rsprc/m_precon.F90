@@ -404,7 +404,15 @@ contains
         
         ! *************************************************************************
         
-        ! The sigma_0 component of the density is multiplied by 4pi/G^2
+        if (this%nspden == 2) then
+        !Change from up/down basis to sigma_0, sigma_3 basis
+            vec_g(1, :, :) = vec_g(1, :, :) + vec_g(2, :, :)
+            vec_g(2, :, :) = vec_g(1, :, :) - 2* vec_g(2, :, :)
+        end if 
+         
+        !In the sigma_0, 1, 2, 3 basis :
+        !The sigma_0 component of the density is multiplied by 4pi/G^2
+        !and the rest is 0.
         do ifft = 2, this%nfft
             g_cart_2 = norm2(two_pi * matmul(this%gprimd, get_g_vector(ifft, ngfft)))**2
             vec_g(1, 1, ifft) = (2*two_pi/g_cart_2) * vec_g(1, 1, ifft)
@@ -415,7 +423,13 @@ contains
         do ispden = 2, this%nspden
             vec_g(ispden, :, :) = 0
         end do
-         
+
+        if (this%nspden == 2) then
+        !Change from sigma_0, sigma_3 basis to up/dow basis
+            vec_g(1, :, :) = 1/2*vec_g(1, :, :) + 1/2*vec_g(2, :, :)
+            vec_g(2, :, :) = vec_g(1, :, :) - vec_g(2, :, :)
+        end if
+
     end subroutine apply_vc
 
     !****f* m_precon/derivative_occ
@@ -774,6 +788,11 @@ contains
         
         ! *************************************************************************
        
+        if (this%nspden == 2) then
+        !Change from up/down basis to sigma_0, sigma_3 basis
+            vec_g(1, :, :) = vec_g(1, :, :) + vec_g(2, :, :)
+            vec_g(2, :, :) = vec_g(1, :, :) - 2* vec_g(2, :, :)
+        end if 
 
         if (this%iprcel == 201) then
         !Kerker
@@ -839,6 +858,12 @@ contains
         !        vec_g = vec_g + work_g
 
         !    end do
+        end if
+
+        if (this%nspden == 2) then
+        !Change from sigma_0, sigma_3 basis to up/dow basis
+            vec_g(1, :, :) = 1/2*vec_g(1, :, :) + 1/2*vec_g(2, :, :)
+            vec_g(2, :, :) = vec_g(1, :, :) - vec_g(2, :, :)
         end if
 
     end subroutine apply_chi0
