@@ -1141,7 +1141,7 @@ subroutine normalizechipsi(nkpt,paw_dmft,jkpt)
  natom     = paw_dmft%natom
  nspinor   = paw_dmft%nspinor
  nsppol    = paw_dmft%nsppol
- ndim_max  = (2*paw_dmft%maxlpawu+1)*nspinor
+ ndim_max  = (2*paw_dmft%maxlpawu+1) * nspinor
  pawprtvol = 3
 
  if (nkpt /= 1 .and. present(jkpt)) ABI_BUG('BUG in chipsi_normalization')

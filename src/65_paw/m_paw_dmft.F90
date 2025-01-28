@@ -888,14 +888,14 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
 #ifdef HAVE_TRIQS_COMPLEX
    if (off_diag == 0) then
      write(message,'(2a)') "WARNING: You have compiled with the complex version of TRIQS/CTHYB, yet you do not", &
-                     & "sample any off-diagonal element. This is a waste of computation time."
+                     & " sample any off-diagonal element. This is a waste of computation time."
      ABI_WARNING(message)
    end if
 #else
    if (off_diag == 1) then
      write(message,'(3a)') "WARNING: You have compiled with the real version of TRIQS/CTHYB, yet you have", &
-                & "activated the sampling of the off-diagonal elements. Thus their imaginary part will be", &
-                & "neglected. You'll have to check that this is a good approximation."
+                & " activated the sampling of the off-diagonal elements. Thus their imaginary part will be", &
+                & " neglected. You'll have to check that this is a valid approximation."
      ABI_WARNING(message)
    end if
 #endif

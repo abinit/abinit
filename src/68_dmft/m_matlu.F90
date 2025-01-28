@@ -359,7 +359,7 @@ subroutine print_matlu(matlu,natom,prtopt,opt_diag,opt_ab_out,opt_exp,argout,com
 !Local variables-------------------------------
  integer :: arg_out,iatom,im,im1,ispinor,ispinor1,isppol,lpawu
  integer :: ndim,nspinor,nsppol,optab_out,optdiag
- logical :: testcmplx
+ logical :: testcmplx,testcmplx_
  complex(dpc), allocatable :: mat_nmrep(:,:)
  character(len=500) :: message
  character(len=4) :: mode_paral,tag_at
@@ -380,10 +380,10 @@ subroutine print_matlu(matlu,natom,prtopt,opt_diag,opt_ab_out,opt_exp,argout,com
   mode_paral = 'PERS'
  end if
 
- nspinor   = matlu(1)%nspinor
- nsppol    = matlu(1)%nsppol
- testcmplx = nspinor == 2
- if (present(compl)) testcmplx = (nspinor == 2) .or. (compl == 1)
+ nspinor    = matlu(1)%nspinor
+ nsppol     = matlu(1)%nsppol
+ testcmplx_ = (nspinor == 2)
+ if (present(compl)) testcmplx_ = (nspinor == 2) .or. (compl == 1)
 
  do iatom=1,natom
 
@@ -394,6 +394,9 @@ subroutine print_matlu(matlu,natom,prtopt,opt_diag,opt_ab_out,opt_exp,argout,com
    write(tag_at,'(i4)') iatom
    write(message,'(3a)') ch10,'   -------> For Correlated Atom ',adjustl(tag_at)
    call wrtout(arg_out,message,mode_paral)
+
+   testcmplx = testcmplx_
+   if (maxval(aimag(matlu(iatom)%mat(:,:,:))) > tol5) testcmplx = .true.
 
    !do isppol=1,nsppol
    !  if (present(opt_ab_out) .and. nsppol == 2) then
