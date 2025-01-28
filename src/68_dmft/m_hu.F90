@@ -337,7 +337,7 @@ subroutine init_hu(hu,paw_dmft,pawtab)
    end if ! t2g and dmft_test=1
 
    xij(tndim,tndim) = 0
-   write(message,'(a,5x,a)') ch10,"-------- Interactions in the density-density representation, in the real spherical harmonics basis "
+   write(message,'(a,5x,a)') ch10,"-------- Interactions in the density-density representation, in the cubic basis "
    call wrtout(std_out,message,'COLL')
    write(message,'(1x,14(2x,i5))') (m,m=1,tndim)
    call wrtout(std_out,message,'COLL')
@@ -649,7 +649,8 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
  integer  :: natom,ndim,nflavor,nspinor,nsppol,nsppol_,prtonly,tndim
  logical  :: triqs
  real(dp) :: f2,jpawu,xsum,xsum2,xsum2new,xsumnew
- character(len=30)  :: basis_vee
+ character(len=4) :: tag_at
+ character(len=30) :: basis_vee
  character(len=500) :: message
  complex(dpc), allocatable :: veeslm(:,:,:,:),veetemp(:,:,:,:),veeylm(:,:,:,:),veeylm2(:,:,:,:)
 ! *********************************************************************
@@ -662,7 +663,7 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
 
  dmft_test = paw_dmft%dmft_test
 
- write(message,'(a,3x,a)') ch10,"== Rotate interaction in the CTQMC basis"
+ write(message,'(a,3x,a)') ch10,"== Rotate interaction to the CTQMC basis"
  call wrtout(std_out,message,"COLL")
 
 !================================================
@@ -683,7 +684,9 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
 !         call wrtout(std_out,  message,'COLL')
 !         call printvee_hu(ndim,hu(itypat)%vee,1,'Slm')
        !endif
-     write(message,'(2a,i4)') ch10,'  -------> For Correlated atom',iatom
+
+     write(tag_at,'(i4)') iatom
+     write(message,'(3a)') ch10,'  -------> For Correlated atom',adjustl(tag_at)
      call wrtout(std_out,message,'COLL')
 
 !    ==================================
@@ -881,7 +884,8 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
        ABI_WARNING(message)
      end if
 
-     write(message,'(2a,i4)') ch10,'  -------> For Correlated atom',iatom
+     write(tag_at,'(i4)') iatom
+     write(message,'(3a)') ch10,'  -------> For Correlated atom',adjustl(tag_at)
      call wrtout(std_out,message,'COLL')
 
 !  ! ================================================================
@@ -1016,14 +1020,11 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
        call wrtout(std_out,message,'COLL')
      end if ! pawprtvol>=3
 
-     write(message,'(2a,i4)') ch10,'  -------> For Correlated Species',itypat
-     call wrtout(std_out,message,'COLL')
-
      if (jpawu > tol10) then
        call vee2udensatom_hu(ndim,udens_atoms(iatom)%mat(:,:,1),veetemp(:,:,:,:),"CTQMC",prtonly=prtonly)
-       ABI_FREE(veetemp)
+       ABI_SFREE(veetemp)
      else
-       call vee2udensatom_hu(ndim,udens_atoms(iatom)%mat(:,:,1),vee_rotated(iatom)%mat(:,:,:,:),"CTQMC",prtonly=prtonly)
+       call vee2udensatom_hu(ndim,udens_atoms(iatom)%mat(:,:,1),vee_rotated(iatom)%mat(:,:,:,:),"CTQMC",prtonly=1)
      end if
 
 !       udens_atoms(iatom)%value=zero
@@ -1640,7 +1641,7 @@ subroutine vee_slm2ylm_hu(lcor,mat_inp_c,mat_out_c,paw_dmft,option,prtvol)
  type(paw_dmft_type) , target, intent(in) :: paw_dmft
 !Local variables ---------------------------------------
  integer :: ndim
- complex(dpc), pointer :: slm2ylm(:,:) => null()
+ complex(dpc), allocatable :: slm2ylm(:,:)
  character(len=500) :: message
 ! *********************************************************************
 
@@ -1666,15 +1667,18 @@ subroutine vee_slm2ylm_hu(lcor,mat_inp_c,mat_out_c,paw_dmft,option,prtvol)
 
  ndim = 2*lcor + 1
 
- slm2ylm => paw_dmft%slm2ylm(:,:,lcor+1)
+ ABI_MALLOC(slm2ylm,(ndim,ndim))
 
  if (option == 1) then
-   call rotate_hu(conjg(transpose(slm2ylm(1:ndim,1:ndim))),1,ndim,mat_inp_c(:,:,:,:),mat_out_c(:,:,:,:))
+   slm2ylm(:,:) = conjg(transpose(paw_dmft%slm2ylm(1:ndim,1:ndim,lcor+1)))
+   call rotate_hu(slm2ylm(:,:),1,ndim,mat_inp_c(:,:,:,:),mat_out_c(:,:,:,:))
  else if (option == 2) then
+   ! Make copy here to prevent creation of temporary
+   slm2ylm(:,:) = paw_dmft%slm2ylm(1:ndim,1:ndim,lcor+1)
    call rotate_hu(slm2ylm(:,:),1,ndim,mat_inp_c(:,:,:,:),mat_out_c(:,:,:,:))
  end if
 
- slm2ylm => null()
+ ABI_FREE(slm2ylm)
 
  !ll=lcor
  !ABI_MALLOC(slm2ylm,(2*ll+1,2*ll+1))

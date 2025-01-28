@@ -263,29 +263,29 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  if (paw_dmft%dmftctqmc_basis == 1) then
    if (nondiaglevels .or. useylm == 1) then
      opt_diag = 1
-     write(message,'(3a)') ch10,"   == Crystal field in local basis is not diagonal: diagonalize it",ch10
+     write(message,'(3a)') ch10,"   == Hamiltonian in local basis is not diagonal: diagonalize it",ch10
    else
      opt_diag = 0
-     write(message,'(5a)') ch10,"   == Crystal field in local basis is diagonal in the Slm basis ",ch10, &
+     write(message,'(5a)') ch10,"   == Hamiltonian in local basis is diagonal in the Slm basis ",ch10, &
         & "      CTQMC will use this basis",ch10
    end if ! nondiaglevels or useylm
  else if (paw_dmft%dmftctqmc_basis == 2) then
    if (nondiaglevels .or. useylm == 1) then
-     write(message,'(7a)') ch10,"   == Crystal field in local basis is not diagonal",ch10, &
+     write(message,'(7a)') ch10,"   == Hamiltonian in local basis is not diagonal",ch10, &
        & "   == According to dmftctqmc_basis: diagonalize density matrix",ch10, &
-       & "   == Warning : Check that the crystal field is diagonal !",ch10
+       & "   == Warning : Check that the Hamiltonian is diagonal !",ch10
      opt_diag = 2
    else
-     write(message,'(5a)') ch10,"   == Crystal field in local basis is diagonal in the Slm basis ",ch10, &
+     write(message,'(5a)') ch10,"   == Hamiltonian in local basis is diagonal in the Slm basis ",ch10, &
         & "      CTQMC will use this basis",ch10
      opt_diag = 0
    end if ! nondiaglevels or useylm
  else if (paw_dmft%dmftctqmc_basis == 0) then
    if (nondiaglevels) then
-     write(message,'(4a)') ch10,"   == Crystal field in local basis is not diagonal",ch10, &
+     write(message,'(4a)') ch10,"   == Hamiltonian in local basis is not diagonal",ch10, &
        & "   == According to dmftctqmc_basis: keep this non diagonal basis for the calculation"
    else
-     write(message,'(5a)') ch10,"   == Crystal field in local basis is diagonal in the Slm basis ",ch10, &
+     write(message,'(5a)') ch10,"   == Hamiltonian in local basis is diagonal in the Slm basis ",ch10, &
        & "      CTQMC will use this basis",ch10
    end if ! nondiaglevels
    opt_diag = 0
@@ -3162,7 +3162,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
  type(self_type), intent(inout) :: self,self_new
  type(hu_type), intent(inout) :: hu(paw_dmft%ntypat)
 !Local variables ------------------------------
- integer :: basis,i,iatom,iflavor,iflavor1,ifreq,iilam,ilam,ileg,im,im1,isppol,isub
+ integer :: basis,i,iatom,iblock,iflavor,iflavor1,iflavor2,ifreq,iilam,ilam,ileg,im,im1,isppol,isub
  integer :: itau,iw,l,lpawu,myproc,natom,ncon,ndim,nflavor,nflavor_max,ngauss,nleg,nmoments
  integer :: nspinor,nsppol,nsub,ntau,ntau_delta,ntot,nwlo,p,tndim,unt,wdlr_size
  integer, target :: ndlr
@@ -3188,8 +3188,11 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
  type(matlu_type), allocatable :: dmat_ctqmc(:),eigvectmatlu(:),matlu_tmp(:)
  type(matlu_type), target, allocatable :: ftau(:),udens_rot(:)
  type(vee_type), target, allocatable :: vee_rot(:)
+ character(len=1) :: tag_block4
+ character(len=2) :: tag_block,tag_block3
  character(len=4) :: tag_at
  character(len=13) :: tag,tag2
+ character(len=500) :: tag_block2
  character(len=10000) :: message
 ! ************************************************************************
 
@@ -3263,7 +3266,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
    write(message,'(a,3x,a)') ch10,"== Switching to CTQMC basis: using cubic basis"
  else if (basis == 1) then
    write(message,'(a,3x,2a)') ch10,"== Switching to CTQMC basis: using basis that", &
-                            & " diagonalizes the crystal field"
+                            & " diagonalizes the electronic levels"
  else if (basis == 2) then
    write(message,'(a,3x,2a)') ch10,"== Switching to CTQMC basis: using basis that", &
                             & " diagonalizes the occupation matrix"
@@ -3276,7 +3279,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
    call checkdiag_matlu(energy_level%matlu(:),natom,tol15,nondiag)
    if (.not. nondiag) then
      basis = 0
-     write(message,'(a,3x,a)') ch10,"== Crystal field is already diagonal: staying in the cubic basis"
+     write(message,'(a,3x,a)') ch10,"== Electronic levels are already diagonal: staying in the cubic basis"
      call wrtout(std_out,message,"COLL")
    end if
  end if ! basis=1
@@ -3311,7 +3314,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
  ! result as the original value.
 
 #ifndef HAVE_TRIQS_COMPLEX
- write(message,'(a,3x,2a)') ch10,"== The imaginary part of Delta(tau) and of the crystal ", &
+ write(message,'(a,3x,2a)') ch10,"== The imaginary part of Delta(tau) and the crystal ", &
                          & "field are now set to 0"
  call wrtout(std_out,message,"COLL")
  ! Symmetrizing Delta(iw) is equivalent to neglecting the imaginary part of Delta(tau)
@@ -3330,7 +3333,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
 
  if (.not. off_diag) then
    write(message,'(a,3x,2a)') ch10,"== The off-diagonal elements of the hybridization ", &
-                            & "and the crystal field are now set to 0"
+                            & "and the electronic levels are now set to 0"
    call wrtout(std_out,message,"COLL")
    do ifreq=1,nwlo
      call zero_matlu(weiss%oper(ifreq)%matlu(:),natom,onlynondiag=1)
@@ -3445,7 +3448,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
  call wrtout(std_out,message,"COLL")
 
  call find_block_structure(paw_dmft,block_list(:,:),inner_list(:,:),flavor_list(:,:,:), &
-                         & siz_block(:,:),nblocks(:),weiss,energy_level)
+                         & siz_block(:,:),nblocks(:),weiss,energy_level,natom,nflavor_max)
 
  ! Solve impurity model for each atom
  do iatom=1,natom
@@ -3456,12 +3459,56 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
    tndim   = nspinor * ndim
    nflavor = 2 * ndim
 
+   write(tag_at,'(i4)') iatom
+   write(tag_block,'(i2)') nblocks(iatom)
+   write(message,'(a,3x,6a)') ch10,"== Solving impurity model for atom ",trim(adjustl(tag_at)), &
+                            & ", which contains ",trim(adjustl(tag_block))," blocks",ch10
+   call wrtout(std_out,message,'COLL')
+
+   do iblock=1,nblocks(iatom)
+     write(tag_block,'(i2)') iblock - 1
+     tag_block2 = ""
+     do iflavor=1,siz_block(iblock,iatom)
+       write(tag_block3,'(i2)') flavor_list(iflavor,iblock,iatom)
+       tag_block2 = trim(tag_block2) // " " // trim(adjustl(tag_block3))
+     end do ! iflavor
+     tag_block4 = ""
+     if (siz_block(iblock,iatom) > 1) tag_block4 = "s"
+     write(message,'(2x,4a,1x,a)') "--> Block ",trim(adjustl(tag_block))," contains flavor",trim(adjustl(tag_block4)),trim(adjustl(tag_block2))
+     call wrtout(std_out,message,'COLL')
+   end do ! iblock
+
+   write(message,'(a,3x,2a)') ch10,"== Schematic of the block structure",ch10
+   call wrtout(std_out,message,'COLL')
+
+   iflavor = 1
+   do iblock=1,nblocks(iatom)
+     do iflavor1=1,siz_block(iblock,iatom)
+       tag_block2 = ""
+       do iflavor2=1,iflavor-1
+         tag_block2 = trim(tag_block2) // "  ."
+       end do ! iflavor2
+       do iflavor2=1,iflavor1-1
+         tag_block2 = trim(tag_block2) // "  x"
+       end do ! iflavor2
+       write(tag_block,'(i2)') flavor_list(iflavor1,iblock,iatom)
+       i = 2
+       if (flavor_list(iflavor1,iblock,iatom) >= 10) i = 1
+       tag_block2 = trim(tag_block2) // repeat(" ",i) // trim(adjustl(tag_block))
+       do iflavor2=iflavor1+1,siz_block(iblock,iatom)
+         tag_block2 = trim(tag_block2) // "  x"
+       end do ! iflavor2
+       do iflavor2=iflavor+siz_block(iblock,iatom),nflavor
+         tag_block2 = trim(tag_block2) // "  ."
+       end do ! iflavor2
+       write(message,'(4x,a)') tag_block2
+       call wrtout(std_out,message,'COLL')
+     end do ! iflavor1
+     iflavor = iflavor + siz_block(iblock,iatom)
+   end do ! iblock
+
    call int2char4(iatom,tag_at)
    ABI_CHECK((tag_at(1:1)/='#'),'Bug: string length too short!')
-   tag_at = trim(tag_at)
-
-   write(message,'(a,3x,2a)') ch10,"== Solving impurity model for atom ",tag_at
-   call wrtout(std_out,message,'COLL')
 
    if (myproc == 0 .and. off_diag) then
 
@@ -4491,7 +4538,9 @@ subroutine rotate_ctqmc(paw_dmft,hu,green,levels,hyb,dmat_ctqmc,udens_rot,vee_ro
 !! INPUTS
 !!  paw_dmft <type(paw_dmft_type)>= DMFT data structure
 !!  hyb <type(green_type)>= hybridization
-!!  levels <type(oper_type)>= crystal field
+!!  levels <type(oper_type)>= electronic levels
+!!  natom = number of atoms
+!!  nflavor_max = max number of orbitals
 !!
 !! OUTPUT
 !!  block_list(nflavor,natom) = block index for each flavor and atom
@@ -4507,22 +4556,22 @@ subroutine rotate_ctqmc(paw_dmft,hu,green,levels,hyb,dmat_ctqmc,udens_rot,vee_ro
 !! SOURCE
 
 subroutine find_block_structure(paw_dmft,block_list,inner_list,flavor_list, &
-                              & siz_block,nblocks,hyb,levels)
+                              & siz_block,nblocks,hyb,levels,natom,nflavor_max)
 
 !Arguments ------------------------------------
- integer, intent(inout) :: block_list(:,:),inner_list(:,:),flavor_list(:,:,:)
- integer, intent(inout) :: siz_block(:,:),nblocks(:)
+ integer, intent(in) :: natom,nflavor_max
+ integer, intent(inout) :: block_list(nflavor_max,natom),inner_list(nflavor_max,natom)
+ integer, intent(inout) :: flavor_list(nflavor_max,nflavor_max,natom)
+ integer, intent(inout) :: siz_block(nflavor_max,natom),nblocks(natom)
  type(paw_dmft_type), intent(in) :: paw_dmft
  type(green_type), intent(inout) :: hyb
  type(oper_type), intent(inout) :: levels
 !Local variables ------------------------------
  integer :: i,iatom,iblock,iblock1,iblock2,iflavor,ifreq,lpawu
- integer :: natom,nflavor,nflavor_max,nspinor,nsppol,nwlo
+ integer :: nflavor,nspinor,nsppol,nwlo
  integer, allocatable :: found_block(:),label_block(:)
 ! ************************************************************************
 
- natom       = paw_dmft%natom
- nflavor_max = 2 * (2*paw_dmft%maxlpawu+1)
  nspinor     = paw_dmft%nspinor
  nsppol      = paw_dmft%nsppol
  nwlo        = paw_dmft%dmft_nwlo
@@ -4577,7 +4626,7 @@ subroutine find_block_structure(paw_dmft,block_list,inner_list,flavor_list, &
      inner_list(iflavor,iatom) = found_block(iblock+1)
      found_block(iblock+1) = found_block(iblock+1) + 1
      siz_block(iblock2+1,iatom) = siz_block(iblock2+1,iatom) + 1
-     flavor_list(found_block(iblock+1),iblock2+1,iatom) = iflavor
+     flavor_list(found_block(iblock+1),iblock2+1,iatom) = iflavor - 1
    end do ! iflavor
    nblocks(iatom) = iblock1
  end do ! iatom

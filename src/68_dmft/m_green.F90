@@ -3382,7 +3382,7 @@ end subroutine fermi_green
 !! SOURCE
 
 subroutine newton(green,self,paw_dmft,x_input,x_precision,max_iter,&
-   & f_precision,ierr_hh,opt_algo)
+                & f_precision,ierr_hh,opt_algo)
 
 !Arguments ------------------------------------
  type(green_type), intent(inout) :: green

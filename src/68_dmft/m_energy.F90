@@ -655,7 +655,8 @@ subroutine compute_migdal_energy(e_hu_migdal,e_hu_migdal_tot,green,paw_dmft,self
 !DEC$ NOOPTIMIZE
 !#endif
 
- use m_matlu, only : add_matlu,copy_matlu,destroy_matlu,init_matlu,matlu_type,print_matlu,trace_prod_matlu
+ use m_matlu, only : add_matlu,copy_matlu,destroy_matlu,init_matlu, &
+                   & matlu_type,print_matlu,trace_prod_matlu
  use m_xmpi, only : xmpi_sum
 
 !Arguments ------------------------------------
