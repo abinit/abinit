@@ -2455,6 +2455,64 @@ subroutine chi0diel_apply_adjdielmat(precon, mpi_enreg, nfft, ngfft, nspden, rho
 end subroutine chi0diel_apply_adjdielmat
 !!***
 
+subroutine chi0diel_updow_to_pauli(v)
+
+!Arguments ------------------------------------
+ real(dp), intent(inout) ::  v(:, :, :)
+!Local variables-------------------------------
+ integer :: nspden, nfft
+ real(dp), allocatable :: temp(:)
+
+! *************************************************************************
+ nspden = size(v, 1)
+ nfft = size(v, 3)
+
+ if (nspden == 2) then
+   v(1, :, :) = 0.5_dp*(v(1, :, :) + v(2, :, :))
+   v(2, :, :) = v(1, :, :) - v(2, :, :)
+ else if (nspden == 4) then
+   v(1, :, :) = 0.5_dp*(v(1, :, :) + v(2, :, :))
+   v(2, :, :) = v(1, :, :) - v(2, :, :)
+   v(3, :, :) = 0.5_dp*(v(3, :, :) + v(4, :, :))
+   !v(4, :, :) = i*(v(3, :, :) - v(4, :, :)) :
+   ABI_MALLOC(temp, (nfft))
+   temp = (v(3, 1, :) - v(4, 1, :))
+   v(4, 1, :) = -1*(v(3, 2, :) - v(4, 2, :))  !  Re(i*) = -Im()
+   v(4, 2, :) = temp                          !  Im(i*) = Re()
+   ABI_FREE(temp, (nfft))
+ end if
+
+end subroutine chi0diel_updow_to_pauli
+
+subroutine chi0diel_pauli_to_updow(v)
+
+!Arguments ------------------------------------
+ real(dp), intent(inout) ::  v(:, :, :)
+!Local variables-------------------------------
+ integer :: nspden, nfft
+ real(dp), allocatable :: temp(:)
+
+! *************************************************************************
+ nspden = size(v, 1)
+ nfft = size(v, 3)
+
+ if (nspden == 2) then
+   v(1, :, :) = v(1, :, :) + v(2, :, :)
+   v(2, :, :) = v(1, :, :) - 2*v(2, :, :)
+ else if (nspden == 4) then
+   v(1, :, :) = v(1, :, :) + v(2, :, :)
+   v(2, :, :) = v(1, :, :) - 2*v(2, :, :)
+   v(3, :, :) = 0.5_dp*(v(3, :, :) + v(4, :, :))
+   !v(4, :, :) = i*(v(3, :, :) - v(4, :, :)) :
+   ABI_MALLOC(temp, (nfft))
+   temp = (v(3, 1, :) - v(4, 1, :))
+   v(4, 1, :) = -1*(v(3, 2, :) - v(4, 2, :))  !  Re(i*) = -Im()
+   v(4, 2, :) = temp                          !  Im(i*) = Re()
+   ABI_FREE(temp, (nfft))
+ end if
+
+end subroutine chi0diel_pauli_to_updow
+
 !!****f* ABINIT/apply_dielmat
 !! NAME
 !!  apply_dielmat
@@ -2489,20 +2547,30 @@ subroutine chi0diel_apply_dielmat(precon, mpi_enreg, nfft, ngfft, nspden, v_g, d
  integer :: nfft, nspden
 !arrays
  integer, intent(in) :: ngfft(:)
- real(dp), intent(inout) ::  v_g(nspden, 2, nfft)
+ real(dp), intent(in) ::  v_g(nspden, 2, nfft)
+ !TODO : remove nspden and nfft as parameters and replace them with precon%nspden and precon%nfft
  real(dp), intent(out) :: dielmat_v_g(nspden, 2, nfft)
 !Local variables-------------------------------
+ real(dp) :: temp(:)
 
 ! *************************************************************************
  write(6,*)'    chi0diel_apply_dielmat'; flush(6) !DEBUG
-
+ 
  dielmat_v_g = v_g
+
+!0.1) Basis change : Changing to the Pauli basis for collinear and non-collinear magnetism
+!   V = V_0 * sigma_0 + V_3 * sigma_3                                 for collinear spins
+!   V = V_0 * sigma_0 + V_1* sigma_1 + V_2 * sigma_2 + V_3 * sigma_3  for non collinear spins.
+ call chi0diel_updow_to_pauli(dielmat_v_g)
 
 !1) Applying the model chi0 operator
  call precon%apply_chi0(mpi_enreg, ngfft, dielmat_v_g)
 
 !2) Applying the Coulomb kernel vc
  call precon%apply_vc(ngfft, dielmat_v_g)
+
+!0.2) Basis change : Changing back to the up/down basis
+ call chi0diel_pauli_to_updow(dielmat_v_g)
 
 !3) dielmat_v_g = v_g - vc * chi0 * v_g = dielmat * v_g
  dielmat_v_g = v_g - dielmat_v_g
