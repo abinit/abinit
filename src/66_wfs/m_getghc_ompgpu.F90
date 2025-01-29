@@ -70,8 +70,8 @@ module m_getghc_ompgpu
 #ifdef HAVE_OPENMP_OFFLOAD
  integer, save :: mod__n4=0, mod__n5=0, mod__n6=0, mod__nspinor=0, mod__ndat=0, mod__npw=0
  integer, save :: buf_initialized=0
- real(dp),allocatable :: work(:,:,:,:)
 #endif
+ real(dp),allocatable :: work(:,:,:,:)
 
 contains
 !!***
