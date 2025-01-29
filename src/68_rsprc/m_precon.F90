@@ -391,6 +391,15 @@ contains
 
     end subroutine precon_save
 
+    !****f* m_precon/apply_vc
+    !! NAME
+    !! apply_vc
+    !!
+    !! FUNCTION
+    !!
+    !! INPUTS
+    !!
+    !! SOURCE
     subroutine apply_vc(this, ngfft, vec_g)
         !Arguments ------------------------------------
         class(precon_object), intent(inout) :: this
@@ -764,7 +773,8 @@ contains
     !!  ispden       = Index of spin-density component.
     !!
     !! SIDE EFFECTS
-    !!  vec_g (2, :) = Vector (in G-space) to which the model chi0 operator is applied (in place).
+    !!  vec_g (nspden, 2, :) = Vector (in G-space) to which the model chi0 operator is applied (in place).
+    !!                         When nspden > 1 vec_g is in the Pauli basis.
     !!
     !! SOURCE
     subroutine apply_chi0(this, mpi_enreg, ngfft, vec_g)
@@ -789,13 +799,6 @@ contains
         
         ! *************************************************************************
        
-        if (this%nspden == 2) then
-        !TODO
-        !Change from up/down basis to sigma_0, sigma_3 basis
-            vec_g(1, :, :) = vec_g(1, :, :) + vec_g(2, :, :)
-            vec_g(2, :, :) = vec_g(1, :, :) - 2* vec_g(2, :, :)
-        end if 
-
         if (this%iprcel == 201) then
         !Kerker
             vec_g(1, :, :) = (-1/(4*pi*(this%dielng)**2)) * vec_g(1, :, :)
@@ -860,12 +863,6 @@ contains
         !        vec_g = vec_g + work_g
 
         !    end do
-        end if
-
-        if (this%nspden == 2) then
-        !Change from sigma_0, sigma_3 basis to up/dow basis
-            vec_g(1, :, :) = 1/2*vec_g(1, :, :) + 1/2*vec_g(2, :, :)
-            vec_g(2, :, :) = vec_g(1, :, :) - vec_g(2, :, :)
         end if
 
     end subroutine apply_chi0
