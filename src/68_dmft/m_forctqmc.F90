@@ -3163,14 +3163,14 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
  type(hu_type), intent(inout) :: hu(paw_dmft%ntypat)
 !Local variables ------------------------------
  integer :: basis,i,iatom,iblock,iflavor,iflavor1,iflavor2,ifreq,iilam,ilam,ileg,im,im1,isppol,isub
- integer :: itau,iw,l,lpawu,myproc,natom,ncon,ndim,nflavor,nflavor_max,ngauss,nleg,nmoments
- integer :: nspinor,nsppol,nsub,ntau,ntau_delta,ntot,nwlo,p,tndim,unt,wdlr_size
+ integer :: itau,itypat,iw,l,lpawu,myproc,natom,ncon,ndim,nflavor,nflavor_max,ngauss,nleg,nmoments
+ integer :: nspinor,nsppol,nsub,ntau,ntau_delta,ntot,nwlo,p,rot_type_vee,tndim,unt,wdlr_size
  integer, target :: ndlr
  logical :: density_matrix,entropy,integral,leg_measure,nondiag,off_diag,rot_inv
  real(dp) :: besp,bespp,beta,dx,fact,fact2,xx
  complex(dpc) :: mself_1,mself_2,occ_tmp,u_nl
  complex(dpc), target :: eu
- type(oper_type) :: energy_level
+ type(oper_type), target :: energy_level
  type(c_ptr) :: block_ptr,eu_ptr,flavor_ptr,ftau_ptr,gl_ptr,gtau_ptr,inner_ptr,levels_ptr,mself_1_ptr
  type(c_ptr) :: mself_2_ptr,ndlr_ptr,occ_ptr,siz_ptr,udens_ptr,vee_ptr,wdlr_ptr
  integer, allocatable :: nblocks(:)
@@ -3185,8 +3185,9 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
  complex(dpc), allocatable :: shift(:)
  complex(dpc), target, allocatable :: gl(:,:,:),gtau(:,:,:),levels_ctqmc(:,:)
  complex(dpc), target, allocatable :: moments_self_1(:),moments_self_2(:),occ(:)
- type(matlu_type), allocatable :: dmat_ctqmc(:),eigvectmatlu(:),matlu_tmp(:)
- type(matlu_type), target, allocatable :: ftau(:),udens_rot(:)
+ type(matlu_type), allocatable :: eigvectmatlu(:),matlu_tmp(:)
+ type(matlu_type), target, allocatable :: dmat_ctqmc(:),ftau(:),udens_rot(:)
+ type(matlu_type), pointer :: matlu_pt(:) => null()
  type(vee_type), target, allocatable :: vee_rot(:)
  character(len=1) :: tag_block4
  character(len=2) :: tag_block,tag_block3
@@ -3281,7 +3282,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
      basis = 0
      write(message,'(a,3x,a)') ch10,"== Electronic levels are already diagonal: staying in the cubic basis"
      call wrtout(std_out,message,"COLL")
-   end if
+   end if ! not nondiag
  end if ! basis=1
 
  if (basis == 2) then
@@ -3290,11 +3291,67 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
      basis = 0
      write(message,'(a,3x,a)') ch10,"== Occupation matrix is already diagonal: staying in the cubic basis"
      call wrtout(std_out,message,"COLL")
-   end if
+   end if ! not nondiag
  end if ! basis=2
 
- call rotate_ctqmc(paw_dmft,hu(:),green,energy_level,weiss,dmat_ctqmc(:), &
-                 & udens_rot(:),vee_rot(:),eigvectmatlu(:),basis,1,pawprtvol)
+ call copy_matlu(green%occup%matlu(:),dmat_ctqmc(:),natom)
+
+ if (basis > 0) then ! First switch to Ylm basis in all cases
+   call slm2ylm_matlu(energy_level%matlu(:),natom,paw_dmft,1,0)
+   call slm2ylm_matlu(dmat_ctqmc(:),natom,paw_dmft,1,0)
+   do i=2,weiss%nmoments-1
+     call slm2ylm_matlu(weiss%moments(i)%matlu(:),natom,paw_dmft,1,0)
+   end do ! i
+   do ifreq=1,nwlo
+     if (weiss%distrib%procf(ifreq) /= myproc) cycle
+     call slm2ylm_matlu(weiss%oper(ifreq)%matlu(:),natom,paw_dmft,1,0)
+   end do ! ifreq
+ end if ! basis>0
+
+ if (basis == 1 .or. basis == 2) then
+   ! Find block structure in Ylm basis and diagonalize for each block (extremely useful
+   ! in the case of degenerate levels for systems with cubic symmetry ; this ensures
+   ! minimal mixing of Ylm and thus maximal number of subspaces)
+   if (basis == 1) then
+     matlu_pt => energy_level%matlu(:)
+   else
+     matlu_pt => dmat_ctqmc(:)
+   end if ! basis
+   call find_block_structure(paw_dmft,block_list(:,:),inner_list(:,:), &
+       & flavor_list(:,:,:),siz_block(:,:),nblocks(:),matlu_pt(:),natom,nflavor_max)
+   call diag_block(matlu_pt)
+   matlu_pt => null()
+   ! Make sure every process has the same rotation matrix in case of degenerate levels
+   call xmpi_matlu(eigvectmatlu(:),natom,paw_dmft%spacecomm,master=0,option=2)
+   if (basis == 1) then
+     call rotate_matlu(dmat_ctqmc(:),eigvectmatlu(:),natom,1)
+   else
+     call rotate_matlu(energy_level%matlu(:),eigvectmatlu(:),natom,1)
+   end if ! basis
+   do i=2,weiss%nmoments-1
+     call rotate_matlu(weiss%moments(i)%matlu(:),eigvectmatlu(:),natom,1)
+   end do ! i
+   do ifreq=1,nwlo
+     if (weiss%distrib%procf(ifreq) /= myproc) cycle
+     call rotate_matlu(weiss%oper(ifreq)%matlu(:),eigvectmatlu(:),natom,1)
+   end do ! ifreq
+ end if ! basis=1 or 2
+
+ if (basis == 0) then
+   do iatom=1,natom
+     lpawu = paw_dmft%lpawu(iatom)
+     if (lpawu == -1) cycle
+     itypat = paw_dmft%typat(iatom)
+     udens_rot(iatom)%mat(:,:,1) = hu(itypat)%udens(:,:)
+     vee_rot(iatom)%mat(:,:,:,:) = hu(itypat)%veeslm2(:,:,:,:)
+   end do ! iatom
+ else
+   call gather_oper(weiss%oper(:),weiss%distrib,paw_dmft,opt_ksloc=2)
+   rot_type_vee = 4
+   if (basis == 3) rot_type_vee = 2
+   call rotatevee_hu(hu(:),paw_dmft,pawprtvol,eigvectmatlu(:),rot_type_vee, &
+                   & udens_rot(:),vee_rot(:))
+ end if ! basis
 
  write(message,'(a,3x,a)') ch10,"== Print Energy levels in CTQMC basis"
  call wrtout(std_out,message,"COLL")
@@ -3448,7 +3505,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
  call wrtout(std_out,message,"COLL")
 
  call find_block_structure(paw_dmft,block_list(:,:),inner_list(:,:),flavor_list(:,:,:), &
-                         & siz_block(:,:),nblocks(:),weiss,energy_level,natom,nflavor_max)
+                  & siz_block(:,:),nblocks(:),energy_level%matlu(:),natom,nflavor_max,hyb=weiss)
 
  ! Solve impurity model for each atom
  do iatom=1,natom
@@ -3904,8 +3961,54 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
    call fac_matlu(weiss%oper(ifreq)%matlu(:),natom,-cone)
  end do ! ifreq
 
- call rotate_ctqmc(paw_dmft,hu(:),green,energy_level,weiss,dmat_ctqmc(:), &
-                 & udens_rot(:),vee_rot(:),eigvectmatlu(:),basis,2,pawprtvol)
+ if (basis > 0) then
+   call slm2ylm_matlu(energy_level%matlu(:),natom,paw_dmft,2,0)
+   if (basis /= 3) then
+     call rotate_matlu(energy_level%matlu(:),eigvectmatlu(:),natom,0)
+   end if ! basis /= 3
+   do i=2,weiss%nmoments-1
+     call slm2ylm_matlu(weiss%moments(i)%matlu(:),natom,paw_dmft,2,0)
+     if (basis /= 3) then
+       call rotate_matlu(weiss%moments(i)%matlu(:),eigvectmatlu(:),natom,0)
+     end if
+   end do ! i
+   do i=1,green%nmoments
+     call slm2ylm_matlu(green%moments(i)%matlu(:),natom,paw_dmft,2,0)
+     if (basis /= 3) then
+       call rotate_matlu(green%moments(i)%matlu(:),eigvectmatlu(:),natom,0)
+     end if
+   end do ! i
+   do ifreq=1,nwlo
+     if (green%distrib%procf(ifreq) /= myproc) cycle
+     call slm2ylm_matlu(weiss%oper(ifreq)%matlu(:),natom,paw_dmft,2,0)
+     call slm2ylm_matlu(green%oper(ifreq)%matlu(:),natom,paw_dmft,2,0)
+     if (basis /= 3) then
+       call rotate_matlu(weiss%oper(ifreq)%matlu(:),eigvectmatlu(:),natom,0)
+       call rotate_matlu(green%oper(ifreq)%matlu(:),eigvectmatlu(:),natom,0)
+     end if
+   end do ! ifreq
+   call slm2ylm_matlu(green%occup_tau%matlu(:),natom,paw_dmft,2,0)
+   if (basis /= 3) then
+     call rotate_matlu(green%occup_tau%matlu(:),eigvectmatlu(:),natom,0)
+   end if
+ end if! basis > 0
+
+ call sym_matlu(energy_level%matlu(:),paw_dmft)
+ do i=2,weiss%nmoments-1
+   call sym_matlu(weiss%moments(i)%matlu(:),paw_dmft)
+ end do ! i
+ do i=1,green%nmoments
+   call sym_matlu(green%moments(i)%matlu(:),paw_dmft)
+ end do ! i
+ do ifreq=1,nwlo
+   if (green%distrib%procf(ifreq) /= myproc) cycle
+   call sym_matlu(weiss%oper(ifreq)%matlu(:),paw_dmft)
+   call sym_matlu(green%oper(ifreq)%matlu(:),paw_dmft)
+ end do ! ifreq
+ call sym_matlu(green%occup_tau%matlu(:),paw_dmft)
+
+ call gather_oper(weiss%oper(:),weiss%distrib,paw_dmft,opt_ksloc=2)
+ call gather_oper(green%oper(:),green%distrib,paw_dmft,opt_ksloc=2)
 
  call compute_moments_loc(green,self_new,energy_level,weiss,1,opt_log=paw_dmft%dmft_triqs_entropy)
 
@@ -3942,12 +4045,78 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
 
 contains
 
+subroutine diag_block(matlu)
+
+!Arguments ------------------------------------
+ type(matlu_type), intent(inout) :: matlu(natom)
+!Local variables ------------------------------
+ integer :: i,iatom,iblock,iflavor,iflavor1,im,im1
+ integer :: info,is,j,lpawu,lwork,ndim,sizb,tndim
+ real(dp), allocatable :: eig(:),rwork(:)
+ complex(dpc), allocatable :: mat_tmp(:,:),work(:)
+! ************************************************************************
+
+ is = 1
+ ABI_MALLOC(eig,(nflavor_max))
+ ABI_MALLOC(mat_tmp,(nflavor_max,nflavor_max))
+ ABI_MALLOC(rwork,(3*nflavor_max-2))
+ ABI_MALLOC(work,(2*nflavor_max-1))
+
+ do iatom=1,natom
+   lpawu = paw_dmft%lpawu(iatom)
+   if (lpawu == -1) cycle
+   ndim  = 2*lpawu + 1
+   tndim = nspinor * ndim
+   do iblock=1,nblocks(iatom)
+     sizb = siz_block(iblock,iatom)
+     lwork = 2*sizb - 1
+     do j=1,sizb
+       iflavor1 = flavor_list(j,iblock,iatom) + 1
+       im1 = mod(iflavor1-1,tndim) + 1
+       if (nspinor == 1) then
+         is = (iflavor1-1)/ndim + 1
+         if (is > nsppol) exit
+       end if
+       do i=1,sizb
+         iflavor = flavor_list(i,iblock,iatom) + 1
+         im = mod(iflavor-1,tndim) + 1
+         mat_tmp(i,j) = matlu(iatom)%mat(im,im1,is)
+         matlu(iatom)%mat(im,im1,is) = czero
+       end do ! i
+     end do ! j
+
+     if (is > nsppol) cycle
+
+     call zheev('v','u',sizb,mat_tmp(:,1:sizb),nflavor_max,eig(1:sizb), &
+              & work(1:lwork),lwork,rwork(1:3*sizb-2),info)
+
+     do j=1,sizb
+       iflavor1 = flavor_list(j,iblock,iatom) + 1
+       im1 = mod(iflavor1-1,tndim) + 1
+       matlu(iatom)%mat(im1,im1,is) = cmplx(eig(j),zero,kind=dp)
+       do i=1,sizb
+         iflavor = flavor_list(i,iblock,iatom) + 1
+         im = mod(iflavor-1,tndim) + 1
+         eigvectmatlu(iatom)%mat(im,im1,is) = mat_tmp(i,j)
+       end do ! i
+     end do ! j
+   end do ! iblock
+ end do ! iatom
+
+ ABI_FREE(eig)
+ ABI_FREE(mat_tmp)
+ ABI_FREE(rwork)
+ ABI_FREE(work)
+
+end subroutine diag_block
+
 subroutine lsq_g(gl,err)
 
 !Arguments ------------------------------------
  real(dp), intent(in) :: gl(:)
  real(dp), intent(out) :: err
 !Local variables ------------------------------
+! ************************************************************************
 
  err = zero
  do itau=1,ntau
@@ -3962,6 +4131,7 @@ subroutine jac_lsq_g(gl,jac)
  real(dp), intent(in) :: gl(:)
  real(dp), intent(inout) :: jac(:)
 !Local variables ------------------------------
+! ************************************************************************
 
  jac(:) = zero
  do itau=1,ntau
@@ -3977,6 +4147,7 @@ subroutine con_moments(gl,con)
  real(dp), intent(in) :: gl(:)
  real(dp), intent(inout) :: con(:)
 !Local variables ------------------------------
+! ************************************************************************
 
  con(1) = sum(gl(:)) - mgreen(1)
  if (ncon > 1) then
@@ -3993,6 +4164,7 @@ subroutine jac_con_moments(gl,jac_con)
  real(dp), intent(in) :: gl(:)
  real(dp), intent(inout) :: jac_con(:,:)
 !Local variables ------------------------------
+! ************************************************************************
 
  ABI_UNUSED(gl(:))
 
@@ -4131,6 +4303,7 @@ subroutine fit_dlr(m,n,fun,con,jac,jac_con,x)
  real(dp) :: a(m,n+1)
  real(dp), allocatable :: w(:)
  integer, allocatable :: jw(:)
+! ************************************************************************
 
  maxiter = 10000
  meq = m   ! all constraints are equality constraints here
@@ -4365,182 +4538,20 @@ subroutine fourier_inv(paw_dmft,nmoments,ntau,matlu_tau,oper_freq,moments)
 end subroutine fourier_inv
 !!***
 
-!!****f* m_forctqmc/rotate_ctqmc
-!! NAME
-!! rotate_ctqmc
-!!
-!! FUNCTION
-!!  Rotate energy levels, hybridization, Green's function, moments (but not the
-!!  Coulomb tensor) in the CTQMC basis.
-!!
-!! INPUTS
-!!  paw_dmft <type(paw_dmft_type)>= DMFT data structure
-!!  hu <type(hu_type)>= U tensor
-!!  green <type(green_type)>= green's function
-!!  levels <type(oper_type)>= electronic levels
-!!  hyb <type(green_type)>= hybridization function
-!!  dmat_ctqmc <type(matlu_type)>= density matrix in CTQMC basis
-!!  udens_rot <type(matlu_type)>= density-density tensor in CTQMC basis
-!!  vee_rot <type(vee_type)>= U tensor in CTQMC basis
-!!  eigvectmatlu <type(matlu_type)>= rotation matrix from cubic to CTQMC basis
-!!  basis = 0: CTQMC basis is the Slm basis
-!!        = 1: basis that diagonalizes the levels
-!!        = 2: basis that diagonalizes the occupation matrix
-!!        = 3: Ylm basis
-!!  option = 1: forward rotation from cubic to CTQMC basis
-!!         = 2: backward rotation from CTQMC to cubic basis
-!!  pawprtvol = flag for printing
-!!
-!! OUTPUT
-!!
-!! SIDE EFFECTS
-!!
-!! NOTES
-!!
-!! SOURCE
-
-subroutine rotate_ctqmc(paw_dmft,hu,green,levels,hyb,dmat_ctqmc,udens_rot,vee_rot,eigvectmatlu,basis,option,pawprtvol)
-
-!Arguments ------------------------------------
- integer, intent(in) :: basis,option,pawprtvol
- type(paw_dmft_type), intent(in) :: paw_dmft
- type(hu_type), intent(inout) :: hu(paw_dmft%ntypat)
- type(green_type), intent(inout) :: green,hyb
- type(oper_type), intent(inout) :: levels
- type(matlu_type), intent(inout) :: dmat_ctqmc(paw_dmft%natom),eigvectmatlu(paw_dmft%natom)
- type(matlu_type), intent(inout) :: udens_rot(paw_dmft%natom)
- type(vee_type), intent(inout) :: vee_rot(paw_dmft%natom)
-!Local variables ------------------------------
- integer :: i,iatom,ifreq,itypat,lpawu,natom,rot_type_vee
- type(matlu_type), allocatable :: levels_diag(:)
-! ************************************************************************
-
- if (option /= 1 .and. option /= 2) ABI_BUG("option needs to be 1 or 2")
-
- natom = paw_dmft%natom
-
- if (option == 1 .and. (basis == 1 .or. basis == 2)) then ! Build rotation matrix
-   if (basis == 1) then
-     ABI_MALLOC(levels_diag,(natom))
-     call init_matlu(natom,paw_dmft%nspinor,paw_dmft%nsppol,paw_dmft%lpawu(:),levels_diag(:))
-     call diag_matlu(levels%matlu(:),levels_diag(:),natom,pawprtvol,eigvectmatlu(:))
-     call copy_matlu(levels_diag(:),levels%matlu(:),natom)
-     call destroy_matlu(levels_diag(:),natom)
-     ABI_FREE(levels_diag)
-   else if (basis == 2) then
-     call diag_matlu(green%occup%matlu(:),dmat_ctqmc(:),natom,pawprtvol,eigvectmatlu(:))
-   end if
-   ! Use the same rotation matrix on every CPU (eigenvectors might not be the same for degenerate levels)
-   call xmpi_matlu(eigvectmatlu(:),natom,paw_dmft%spacecomm,master=0,option=2)
- end if ! option = 1
-
- if (option == 1 .and. basis /= 2) then ! Rotate occupation matrix
-   call copy_matlu(green%occup%matlu(:),dmat_ctqmc(:),natom)
-   if (basis == 1) then
-     call rotate_matlu(dmat_ctqmc(:),eigvectmatlu(:),natom,option)
-   else if (basis == 3) then
-     call slm2ylm_matlu(dmat_ctqmc(:),natom,paw_dmft,option,0)
-   end if
- end if ! option=1
-
- if (basis == 2) then ! Rotate electronic levels
-   call rotate_matlu(levels%matlu(:),eigvectmatlu(:),natom,option)
- else if (basis == 3) then
-   call slm2ylm_matlu(levels%matlu(:),natom,paw_dmft,option,0)
- end if ! basis = 3
- if (option /= 1) then
-   call sym_matlu(levels%matlu(:),paw_dmft)
- end if
-
- do i=2,hyb%nmoments-1 ! Rotate hybridization moments
-   if (basis == 3) then
-     call slm2ylm_matlu(hyb%moments(i)%matlu(:),natom,paw_dmft,option,0)
-   else if (basis > 0) then
-     call rotate_matlu(hyb%moments(i)%matlu(:),eigvectmatlu(:),natom,option)
-   end if
-   if (option /= 1) then
-     call sym_matlu(hyb%moments(i)%matlu(:),paw_dmft)
-   end if
- end do ! i
-
- if (option /= 1) then ! Rotate back Green's function moments
-   do i=1,green%nmoments
-     if (basis == 3) then
-       call slm2ylm_matlu(green%moments(i)%matlu(:),natom,paw_dmft,option,0)
-     else if (basis > 0) then
-       call rotate_matlu(green%moments(i)%matlu(:),eigvectmatlu(:),natom,option)
-     end if
-     call sym_matlu(green%moments(i)%matlu(:),paw_dmft)
-   end do ! i
- end if ! option/=1
-
- do ifreq=1,paw_dmft%dmft_nwlo ! Rotate hybridization and Green's function
-   if (hyb%distrib%procf(ifreq) /= paw_dmft%myproc) cycle
-   if (basis == 3) then
-     call slm2ylm_matlu(hyb%oper(ifreq)%matlu(:),natom,paw_dmft,option,0)
-     if (option /= 1) then
-       call slm2ylm_matlu(green%oper(ifreq)%matlu(:),natom,paw_dmft,option,0)
-     end if
-   else if (basis > 0) then
-     call rotate_matlu(hyb%oper(ifreq)%matlu(:),eigvectmatlu(:),natom,option)
-     if (option /= 1) then
-       call rotate_matlu(green%oper(ifreq)%matlu(:),eigvectmatlu(:),natom,option)
-     end if
-   end if ! basis
-   if (option /= 1) then
-     call sym_matlu(hyb%oper(ifreq)%matlu(:),paw_dmft)
-     call sym_matlu(green%oper(ifreq)%matlu(:),paw_dmft)
-   end if
- end do ! ifreq
- if (basis > 0 .or. option /= 1) then
-   call gather_oper(hyb%oper(:),hyb%distrib,paw_dmft,opt_ksloc=2)
- end if
-
- if (option /= 1) then ! Rotate back occupation matrix
-   call gather_oper(green%oper(:),green%distrib,paw_dmft,opt_ksloc=2)
-   if (basis == 3) then
-     call slm2ylm_matlu(green%occup_tau%matlu(:),natom,paw_dmft,option,0)
-   else if (basis > 0) then
-     call rotate_matlu(green%occup_tau%matlu(:),eigvectmatlu(:),natom,0)
-   end if
-   call sym_matlu(green%occup_tau%matlu(:),paw_dmft)
- end if ! option/=1
-
- if (option == 1) then ! Rotate U tensor
-   if (basis == 0) then
-     do iatom=1,natom
-       lpawu = paw_dmft%lpawu(iatom)
-       if (lpawu == -1) cycle
-       itypat = paw_dmft%typat(iatom)
-       udens_rot(iatom)%mat(:,:,1) = hu(itypat)%udens(:,:)
-       vee_rot(iatom)%mat(:,:,:,:) = hu(itypat)%veeslm2(:,:,:,:)
-     end do ! iatom
-   else
-     rot_type_vee = 1
-     if (basis == 3) rot_type_vee = 2
-     call rotatevee_hu(hu(:),paw_dmft,pawprtvol,eigvectmatlu(:), &
-                     & rot_type_vee,udens_rot(:),vee_rot(:))
-   end if ! basis
- end if ! option=1
-
- end subroutine rotate_ctqmc
-!!***
-
 !!****f* m_forctqmc/find_block_structure
 !! NAME
 !! find_block_structure
 !!
 !! FUNCTION
-!!  Find the most optimal block structure for TRIQS/CTHYB by
-!!  only keeping the off-diagonal elements above a certain
-!!  threshold dmft_triqs_tol_block.
+!!  Find the most optimal block structure of a matlu
 !!
 !! INPUTS
 !!  paw_dmft <type(paw_dmft_type)>= DMFT data structure
-!!  hyb <type(green_type)>= hybridization
-!!  levels <type(oper_type)>= electronic levels
+!!  matlu <type(oper_type)>= matrix for which the block structure is to be found
 !!  natom = number of atoms
 !!  nflavor_max = max number of orbitals
+!!  hyb <type(green_type)>= hybridization ; if present, the block structure will
+!!                          match both matlu and hyb
 !!
 !! OUTPUT
 !!  block_list(nflavor,natom) = block index for each flavor and atom
@@ -4556,7 +4567,7 @@ subroutine rotate_ctqmc(paw_dmft,hu,green,levels,hyb,dmat_ctqmc,udens_rot,vee_ro
 !! SOURCE
 
 subroutine find_block_structure(paw_dmft,block_list,inner_list,flavor_list, &
-                              & siz_block,nblocks,hyb,levels,natom,nflavor_max)
+                              & siz_block,nblocks,matlu,natom,nflavor_max,hyb)
 
 !Arguments ------------------------------------
  integer, intent(in) :: natom,nflavor_max
@@ -4564,45 +4575,36 @@ subroutine find_block_structure(paw_dmft,block_list,inner_list,flavor_list, &
  integer, intent(inout) :: flavor_list(nflavor_max,nflavor_max,natom)
  integer, intent(inout) :: siz_block(nflavor_max,natom),nblocks(natom)
  type(paw_dmft_type), intent(in) :: paw_dmft
- type(green_type), intent(inout) :: hyb
- type(oper_type), intent(inout) :: levels
+ type(green_type), optional, intent(inout) :: hyb
+ type(matlu_type), intent(inout) :: matlu(natom)
 !Local variables ------------------------------
  integer :: i,iatom,iblock,iblock1,iblock2,iflavor,ifreq,lpawu
  integer :: nflavor,nspinor,nsppol,nwlo
  integer, allocatable :: found_block(:),label_block(:)
 ! ************************************************************************
 
- nspinor     = paw_dmft%nspinor
- nsppol      = paw_dmft%nsppol
- nwlo        = paw_dmft%dmft_nwlo
+ nspinor = paw_dmft%nspinor
+ nsppol  = paw_dmft%nsppol
+ nwlo    = paw_dmft%dmft_nwlo
 
  do iflavor=1,nflavor_max
    block_list(iflavor,:)    = iflavor - 1
-   flavor_list(1,iflavor,:) = iflavor - 1
  end do ! iflavor
- do iatom=1,natom
-   lpawu = paw_dmft%lpawu(iatom)
-   if (lpawu == -1) cycle
-   nblocks(iatom) = 2 * (2*lpawu+1)
- end do ! iatom
-
- inner_list(:,:) = 0
- siz_block(:,:)  = 1
-
- if (.not. paw_dmft%dmft_triqs_off_diag) return
 
  ABI_MALLOC(found_block,(nflavor_max))
  ABI_MALLOC(label_block,(nflavor_max))
 
- call find_block_structure_mat(levels%matlu(:))
+ call find_block_structure_mat(matlu(:))
 
- do i=2,hyb%nmoments-1
-   call find_block_structure_mat(hyb%moments(i)%matlu(:))
- end do ! i
+ if (present(hyb)) then
+   do i=2,hyb%nmoments-1
+     call find_block_structure_mat(hyb%moments(i)%matlu(:))
+   end do ! i
 
- do ifreq=1,nwlo
-   call find_block_structure_mat(hyb%oper(ifreq)%matlu(:))
- end do ! ifreq
+   do ifreq=1,nwlo
+     call find_block_structure_mat(hyb%oper(ifreq)%matlu(:))
+   end do ! ifreq
+ end if ! present(hyb)
 
  siz_block(:,:) = 0
 
@@ -4635,15 +4637,19 @@ subroutine find_block_structure(paw_dmft,block_list,inner_list,flavor_list, &
  ABI_FREE(label_block)
 
  ! Set to 0 the off-diagonal elements that are not kept in a block
- call apply_block_structure_mat(levels%matlu(:))
+ call apply_block_structure_mat(matlu(:))
 
- do i=2,hyb%nmoments-1
-   call apply_block_structure_mat(hyb%moments(i)%matlu(:))
- end do ! i
+ if (present(hyb)) then
 
- do ifreq=1,nwlo
-   call apply_block_structure_mat(hyb%oper(ifreq)%matlu(:))
- end do ! ifreq
+   do i=2,hyb%nmoments-1
+     call apply_block_structure_mat(hyb%moments(i)%matlu(:))
+   end do ! i
+
+   do ifreq=1,nwlo
+     call apply_block_structure_mat(hyb%oper(ifreq)%matlu(:))
+   end do ! ifreq
+
+ end if ! present(hyb)
 
 contains
 
@@ -4679,6 +4685,7 @@ subroutine find_block_structure_mat(mat)
         end do ! im
       end do ! im1
     end do ! isppol
+    if (nsppol == 1 .and. nspinor == 1) block_list(ndim+1:nflavor,iatom) = block_list(1:ndim,iatom) + ndim
   end do ! iatom
 
  end subroutine find_block_structure_mat
