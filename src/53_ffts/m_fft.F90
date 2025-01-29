@@ -2395,7 +2395,7 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
    else if(gpu_option_==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
      call ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
-       kg_kin,kg_kout,mgfft,ndat,ngfft,npwin,npwout,n4,n5,n6,option,&
+       kg_kin,kg_kout,mgfft,me_g0,ndat,ngfft,npwin,npwout,n4,n5,n6,option,&
        weight_ptr_r,weight_ptr_i) !,use_ndo,fofginb)
 #endif
    end if
