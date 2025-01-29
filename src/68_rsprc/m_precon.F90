@@ -582,6 +582,7 @@ contains
         paw_dmft%use_sc_dmft = 0
         call mkrho(cg, dtset, gprimd, irrzon, kg, mcg, mpi_enreg, npwarr, ldos_wheights, &
         &   paw_dmft, phnons, rhog, ldos, rprimd, 0, ucvol, wvl_den, wvl_wfs, option=0)
+        !TODO symrhg + nfftmix != dtset%nfft en PAW grille
 
         ABI_FREE(ldos_wheights)
 
@@ -789,6 +790,7 @@ contains
         ! *************************************************************************
        
         if (this%nspden == 2) then
+        !TODO
         !Change from up/down basis to sigma_0, sigma_3 basis
             vec_g(1, :, :) = vec_g(1, :, :) + vec_g(2, :, :)
             vec_g(2, :, :) = vec_g(1, :, :) - 2* vec_g(2, :, :)
@@ -881,7 +883,7 @@ contains
         interface
             subroutine matvec(n_, x, y)
                 integer, intent(in) :: n_
-                double precision, intent(inout) :: x(n_), y(n_)
+                double precision, intent(inout), target :: x(n_), y(n_)
             end subroutine matvec
         end interface
         !Local variables-------------------------------
@@ -960,7 +962,7 @@ contains
         interface
             subroutine matvec(n_, x, y)
                 integer, intent(in) :: n_
-                double precision, intent(inout) :: x(n_), y(n_)
+                double precision, intent(inout), target :: x(n_), y(n_)
             end subroutine matvec
         end interface
         !Local variables-------------------------------
@@ -1005,7 +1007,7 @@ contains
         interface
             subroutine matvec(n_, x, y)
                 integer, intent(in) :: n_
-                double precision, intent(inout) :: x(n_), y(n_)
+                double precision, intent(inout), target :: x(n_), y(n_)
             end subroutine matvec
         end interface
       

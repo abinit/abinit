@@ -30,6 +30,7 @@ module m_prcref
 use mkl_rci, only : dfgmres, dfgmres_check, dfgmres_get, dfgmres_init
 #endif
 
+ use iso_c_binding
  use defs_basis
  use defs_wvltypes
  use m_errors
@@ -2449,7 +2450,7 @@ subroutine chi0diel_apply_adjdielmat(precon, mpi_enreg, nfft, ngfft, nspden, rho
    adjdielmat_rho_g(1, 2, 1) = rho_g(1, 2, 1)
 
 !For code validation only
- call precon%save_applied_op(ngfft, 2, rho_g, adjdielmat_rho_g)
+ !call precon%save_applied_op(ngfft, 2, rho_g, adjdielmat_rho_g)
 
 end subroutine chi0diel_apply_adjdielmat
 !!***
@@ -2511,7 +2512,7 @@ subroutine chi0diel_apply_dielmat(precon, mpi_enreg, nfft, ngfft, nspden, v_g, d
  dielmat_v_g(1, 2, 1) = v_g(1, 2, 1)
 
 !For code validation only 
- call precon%save_applied_op(ngfft, 2, v_g, dielmat_v_g)
+ !call precon%save_applied_op(ngfft, 2, v_g, dielmat_v_g)
 
 end subroutine chi0diel_apply_dielmat
 !!***
@@ -2643,7 +2644,7 @@ subroutine chi0diel(precon, dtset, cplex, mpi_enreg, nfft, ngfft, nspden, optrea
  ABI_FREE(rhs)
  ABI_FREE(est)
 
-!Simple mixing :
+!Simple mixing : TODO diemixmag
  vrespc = precon%diemix * vrespc
 
  contains
@@ -2651,16 +2652,25 @@ subroutine chi0diel(precon, dtset, cplex, mpi_enreg, nfft, ngfft, nspden, optrea
 !Subroutine matvec that apply the preconditioner P. ---------------------------------------
  subroutine matvec(n_, x, y)
    integer, intent(in) :: n_
-   real(dp), intent(inout) :: x(n_), y(n_)
+   real(dp), intent(inout), target :: x(n_), y(n_)
+   type(c_ptr) :: x_c, y_c
+   real(dp), pointer :: x_3d(:, :, :), y_3d(:, :, :)
 
 ! ******************************************************************************************
 
+   !C pointers to match the flattened arrays x and y to their 3D version needed by
+   !chi0diel_apply_adjdielmat and chi0diel_apply_dielmat
+   x_c = c_loc(x)
+   call c_f_pointer(x_c, x_3d, shape=[nspden, 2, nfft])
+   y_c = c_loc(y)
+   call c_f_pointer(y_c, y_3d, shape=[nspden, 2, nfft])
+
    if (optres==1) then
    ! We are preconditioning density residual so P = (I-chi0*vc) = adjoint dielectric matrix.
-     call chi0diel_apply_adjdielmat(precon, mpi_enreg, nfft, ngfft, nspden, x, y)
+     call chi0diel_apply_adjdielmat(precon, mpi_enreg, nfft, ngfft, nspden, x_3d, y_3d)
    else if (optres==0) then
    ! We are preconditioning potential residual so P = (I-vc*chi0) = dielectric matrix.
-     call chi0diel_apply_dielmat(precon, mpi_enreg, nfft, ngfft, nspden, x, y)
+     call chi0diel_apply_dielmat(precon, mpi_enreg, nfft, ngfft, nspden, x_3d, y_3d)
    end if
 
  end subroutine matvec ! -------------------------------------------------------------------
