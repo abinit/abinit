@@ -318,9 +318,9 @@ contains
         i1 = modulo((ifft-1), n1) + 1
         i2 = modulo((ifft-1)/n1, n2) + 1
         i3 = ((ifft-1)/n1)/n2 + 1
-        g(1) = i1-1
-        g(2) = i2-1
-        g(3) = i3-1
+        g(1) = modulo(i1-1 + n1/2, n1) - n1/2
+        g(2) = modulo(i2-1 + n2/2, n2) - n2/2
+        g(3) = modulo(i3-1 + n3/2, n3) - n3/2
 
     end function get_g_vector
 
@@ -413,12 +413,6 @@ contains
         
         ! *************************************************************************
         
-        if (this%nspden == 2) then
-        !Change from up/down basis to sigma_0, sigma_3 basis
-            vec_g(1, :, :) = vec_g(1, :, :) + vec_g(2, :, :)
-            vec_g(2, :, :) = vec_g(1, :, :) - 2* vec_g(2, :, :)
-        end if 
-         
         !In the sigma_0, 1, 2, 3 basis :
         !The sigma_0 component of the density is multiplied by 4pi/G^2
         !and the rest is 0.
@@ -433,11 +427,7 @@ contains
             vec_g(ispden, :, :) = 0
         end do
 
-        if (this%nspden == 2) then
-        !Change from sigma_0, sigma_3 basis to up/dow basis
-            vec_g(1, :, :) = 1/2*vec_g(1, :, :) + 1/2*vec_g(2, :, :)
-            vec_g(2, :, :) = vec_g(1, :, :) - vec_g(2, :, :)
-        end if
+
 
     end subroutine apply_vc
 
@@ -592,6 +582,9 @@ contains
         call mkrho(cg, dtset, gprimd, irrzon, kg, mcg, mpi_enreg, npwarr, ldos_wheights, &
         &   paw_dmft, phnons, rhog, ldos, rprimd, 0, ucvol, wvl_den, wvl_wfs, option=0)
         !TODO symrhg + nfftmix != dtset%nfft en PAW grille
+        !call symrhg(cplex, gprimd, irrzon, mpi_enreg, nfft, nfftot, ngfft, nspden, nsppol, &
+        !&   nsym, phnons, rhog, ldos, rprimd, symafm, symrel, tnons)
+
 
         ABI_FREE(ldos_wheights)
 

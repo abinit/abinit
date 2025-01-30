@@ -462,7 +462,7 @@ subroutine prcref(atindx,dielar,dielinv,&
    else if (dtset%iprcel>=200 .and. dtset%iprcel<300) then
  write(6,*)'    prcref : chi0 precon'; flush(6) !DEBUG
       cplex=optreal
-      call chi0diel(precon, dtset, cplex, mpi_enreg, nfftprc, ngfftprc, dtset%nspden, optreal, optres, 10, 0.001_dp, vresid, vrespc)
+      call chi0diel(precon, dtset, cplex, mpi_enreg, nfftprc, ngfftprc, dtset%nspden, optreal, optres, 20, tol16, vresid, vrespc)
 !    Other choice ?
  
    else
@@ -1117,7 +1117,7 @@ end subroutine prcref
    else if (dtset%iprcel>=200 .and. dtset%iprcel<300) then
      cplex=optreal
      write(6,*)'    prcref : iprcel=2**'; flush(6) !DEBUG
-     call chi0diel(precon, dtset, cplex, mpi_enreg, nfftprc, ngfftprc, dtset%nspden, optreal, optres, 10, 0.001_dp, vresid, vrespc)
+     call chi0diel(precon, dtset, cplex, mpi_enreg, nfftprc, ngfftprc, dtset%nspden, optreal, optres, 20, tol16, vresid, vrespc)
  
 !    Other choice ?
    else
@@ -2479,7 +2479,7 @@ subroutine chi0diel_updow_to_pauli(v)
    temp = (v(3, 1, :) - v(4, 1, :))
    v(4, 1, :) = -1*(v(3, 2, :) - v(4, 2, :))  !  Re(i*) = -Im()
    v(4, 2, :) = temp                          !  Im(i*) = Re()
-   ABI_FREE(temp, (nfft))
+   ABI_FREE(temp)
  end if
 
 end subroutine chi0diel_updow_to_pauli
@@ -2508,7 +2508,7 @@ subroutine chi0diel_pauli_to_updow(v)
    temp = (v(3, 1, :) - v(4, 1, :))
    v(4, 1, :) = -1*(v(3, 2, :) - v(4, 2, :))  !  Re(i*) = -Im()
    v(4, 2, :) = temp                          !  Im(i*) = Re()
-   ABI_FREE(temp, (nfft))
+   ABI_FREE(temp)
  end if
 
 end subroutine chi0diel_pauli_to_updow
@@ -2550,8 +2550,6 @@ subroutine chi0diel_apply_dielmat(precon, mpi_enreg, nfft, ngfft, nspden, v_g, d
  real(dp), intent(in) ::  v_g(nspden, 2, nfft)
  !TODO : remove nspden and nfft as parameters and replace them with precon%nspden and precon%nfft
  real(dp), intent(out) :: dielmat_v_g(nspden, 2, nfft)
-!Local variables-------------------------------
- real(dp) :: temp(:)
 
 ! *************************************************************************
  write(6,*)'    chi0diel_apply_dielmat'; flush(6) !DEBUG
@@ -2579,7 +2577,7 @@ subroutine chi0diel_apply_dielmat(precon, mpi_enreg, nfft, ngfft, nspden, v_g, d
  dielmat_v_g(1, 1, 1) = v_g(1, 1, 1)
  dielmat_v_g(1, 2, 1) = v_g(1, 2, 1)
 
-!For code validation only 
+ !For code validation only 
  !call precon%save_applied_op(ngfft, 2, v_g, dielmat_v_g)
 
 end subroutine chi0diel_apply_dielmat
@@ -2647,7 +2645,6 @@ subroutine chi0diel(precon, dtset, cplex, mpi_enreg, nfft, ngfft, nspden, optrea
  real(dp), allocatable :: workr(:)
 
 ! *************************************************************************
- write(6,*)'    chi0diel : ngfft', ngfft; flush(6) !DEBUG
 
  if (ngfft(10)>1) then
    ABI_BUG("chi0-based preconditioning (chi0diel) used with fft-grid parallelization")
@@ -2717,7 +2714,7 @@ subroutine chi0diel(precon, dtset, cplex, mpi_enreg, nfft, ngfft, nspden, optrea
 
  contains
 
-!Subroutine matvec that apply the preconditioner P. ---------------------------------------
+!Subroutine matvec that apply the preconditioner P. ----------------------------------------
  subroutine matvec(n_, x, y)
    integer, intent(in) :: n_
    real(dp), intent(inout), target :: x(n_), y(n_)
@@ -2726,7 +2723,7 @@ subroutine chi0diel(precon, dtset, cplex, mpi_enreg, nfft, ngfft, nspden, optrea
 
 ! ******************************************************************************************
 
-   !C pointers to match the flattened arrays x and y to their 3D version needed by
+   !C pointers to match the flattened arrays x and y to their 3D versions needed by
    !chi0diel_apply_adjdielmat and chi0diel_apply_dielmat
    x_c = c_loc(x)
    call c_f_pointer(x_c, x_3d, shape=[nspden, 2, nfft])
