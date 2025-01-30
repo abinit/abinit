@@ -1344,10 +1344,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      if(paw_dmft%use_dmft==1.and.psps%usepaw==1.and.dtset%nbandkss==0) then
        call timab(991,1,tsec)
 
+       ! energies%entropy is the non-interacting entropy. This is obviously
+       ! wrong in DFT+DMFT (except if U=J=0), so we set it to 0.
        if (dtset%dmftcheck>=0.and.dtset%usedmft>=1.and.(sum(pawtab(:)%upawu)>=tol8.or.  &
-&       sum(pawtab(:)%jpawu)>tol8).and.(dtset%dmft_entropy==0.or.&
-&       ((dtset%dmft_solv==6.or.dtset%dmft_solv==7).and.(dtset%dmft_integral==0 &
-&       .or.dtset%dmftctqmc_triqs_entropy==0)))) energies%entropy=zero
+&       sum(pawtab(:)%jpawu)>tol8).and.dtset%dmft_entropy==0) energies%entropy=zero
 
 !      ==  0 to a dmft calculation and do not use lda occupations
 !      ==  1 to a lda calculation with the dmft loop
@@ -1371,7 +1371,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          if(dtset%occopt/=3) then
            ABI_ERROR('occopt should be equal to 3 in dmft')
          end if
-!        ==  initialise edmft
+!        ==  initialize edmft
          if(paw_dmft%use_dmft>=1) edmft = zero
 
          !  Compute residm to check the value
@@ -1441,10 +1441,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          call xmpi_barrier(spaceComm_distrb)
 
          call dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawtab(:),dtset%pawprtvol)
-         edmft=paw_dmft%edmft
-         energies%e_paw=energies%e_paw+edmft
-         energies%e_pawdc=energies%e_pawdc+edmft
-         if (dtset%dmftctqmc_triqs_entropy == 1 .and. dtset%dmft_integral == 1) energies%entropy = paw_dmft%sdmft
+         edmft=paw_dmft%e_hu-paw_dmft%e_dc
+         energies%e_dc=paw_dmft%e_dc
+         energies%e_hu=paw_dmft%e_hu
+         if (dtset%dmft_triqs_entropy == 1 .and. dtset%dmft_triqs_compute_integral == 1 &
+            & .and. (dtset%dmft_solv == 6 .or. dtset%dmft_solv == 7)) energies%entropy = paw_dmft%sdmft
          call flush_unit(std_out)
 !        paw_dmft%occnd(:,:,:,:,:)=0.5_dp
 
@@ -1477,7 +1478,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !          endif
 !        end if
 
-         if(me_distrb==0) then
+         if(paw_dmft%myproc==0) then
            call saveocc_dmft(paw_dmft)
          end if
          call destroy_dmft(paw_dmft)

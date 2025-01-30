@@ -1,0 +1,23 @@
+tol_abs: 0.03
+tol_rel: 0.03
+
+EnergyTerms:
+    tol_abs: 0.03
+    double_counting:
+        tol_rel: 1.0
+
+EnergyTermsDC:
+    double_counting:
+        tol_rel: 1.0
+
+ResultsGS:
+    tol_rel: 0.03
+    convergence:
+        ceil: 0.1
+
+EtotSteps:
+    data:
+        callback:  # callback takes a mapping as its value
+            method: last_iter
+            tol_iter: 0
+
