@@ -42,7 +42,7 @@ module m_orbmag
   use m_xmpi
   use m_dtset
 
-  use defs_datatypes,     only : pseudopotential_type
+  use defs_datatypes,     only : pseudopotential_type, ebands_t
   use defs_abitypes,      only : MPI_type
   use m_crystal,          only : crystal_t
   use m_cgprj,            only : getcprj
@@ -178,7 +178,6 @@ CONTAINS  !=====================================================================
 !!  cg1(2,mcg1,3)=all DDK wavefunctions in all 3 directions
 !!  cprj(dtset%natom,mcprj)<type(pawcprj_type)>=all ground state cprj
 !!  dtset <type(dataset_type)>=all input variables for this dataset
-!!  eigen0(dtset%mband*dtset%nkpt*dtset%nsppol)=all ground state eigenvalues
 !!  gsqcut=large sphere cut-off
 !!  kg(3,mpw*mkmem_rbz)=basis sphere of planewaves at k
 !!  mcg=dimension of cg
@@ -189,8 +188,6 @@ CONTAINS  !=====================================================================
 !!  mpw=max number of planewaves at k
 !!  nfftf=(effective) number of FFT grid points (for this proc) for the "fine" grid (see NOTES in respfn.F90)
 !!  ngfftf(18)=FFT grid size information (from pawfgr%ngfft)
-!!  npwarr(dtset%nkpt)=npw_k at each kpt
-!!  occ(dtset%mband*dtset%nkpt*dtset%nsppol)=occup number for each band (often 2) at each k point
 !!  paw_ij(dtset%natom) <type(paw_ij_type)>=paw arrays given on (i,j) channels for the GS
 !!  pawfgr <type(pawfgr_type)>=fine grid parameters and related data
 !!  pawrad(dtset%ntypat) <type(pawrad_type)>=paw radial mesh and related data
@@ -217,25 +214,24 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine orbmag(crystal,cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mkmem_rbz,mpi_enreg,mpw,&
-    & nfftf,ngfftf,npwarr,occ,paw_ij,pawfgr,pawrad,&
+subroutine orbmag(crystal,cg,cg1,cprj,dtset,ebands_k,gsqcut,kg,mcg,mcg1,&
+    & mcprj,mkmem_rbz,mpi_enreg,mpw,nfftf,ngfftf,paw_ij,pawfgr,pawrad,&
     & pawtab,psps,usevxctau,vtrial,vxctau,ylm,ylmgr)
 
  !Arguments ------------------------------------
  !scalars
  integer,intent(in) :: mcprj,mcg,mcg1,mkmem_rbz,mpw,nfftf,usevxctau
  real(dp),intent(in) :: gsqcut
- type(crystal_t) :: crystal
+ type(crystal_t),intent(in) :: crystal
  type(dataset_type),intent(in) :: dtset
+ type(ebands_t),intent(in) :: ebands_k
  type(MPI_type), intent(inout) :: mpi_enreg
  type(pawfgr_type),intent(in) :: pawfgr
  type(pseudopotential_type), intent(in) :: psps
 
  !arrays
- integer,intent(in) :: kg(3,mpw*mkmem_rbz),ngfftf(18),npwarr(dtset%nkpt)
+ integer,intent(in) :: kg(3,mpw*mkmem_rbz),ngfftf(18)
  real(dp),intent(in) :: cg(2,mcg),cg1(2,mcg1,3)
- real(dp),intent(in) :: eigen0(dtset%mband*dtset%nkpt*dtset%nsppol)
- real(dp), intent(in) :: occ(dtset%mband*dtset%nkpt*dtset%nsppol)
  real(dp),intent(inout) :: vtrial(nfftf,dtset%nspden)
  real(dp),intent(inout) :: vxctau(nfftf,dtset%nspden,4*usevxctau)
  real(dp),intent(in) :: ylm(mpw*mkmem_rbz,psps%mpsang*psps%mpsang*psps%useylm)
@@ -286,7 +282,7 @@ subroutine orbmag(crystal,cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mkme
  exchn2n3d = 0; ikg1 = 0
 
  ! Fermi energy
- call local_fermie(dtset,eigen0,fermie,mpi_enreg,occ)
+ call local_fermie(dtset,ebands_k,fermie,mpi_enreg)
  !fermie = dtset%userra
  !write(std_out,'(a,es16.8)')'JWZ debug using fermi e = ',fermie
 
@@ -387,8 +383,8 @@ subroutine orbmag(crystal,cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mkme
        cycle
      end if
 
-     kpoint(:)=dtset%kptns(:,ikpt)
-     npw_k = npwarr(ikpt)
+     kpoint(:)=ebands_k%kptns(:,ikpt)
+     npw_k = ebands_k%npwarr(ikpt)
      npwsp = npw_k*dtset%nspinor
 
      ! retrieve kg_k at this k point
@@ -404,7 +400,8 @@ subroutine orbmag(crystal,cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mkme
 
      ! retrieve occupation numbers at this k point
      ABI_MALLOC(occ_k,(nband_k))
-     occ_k(:)=occ(1+bdtot_index:nband_k+bdtot_index)
+     !occ_k(:)=occ(1+bdtot_index:nband_k+bdtot_index)
+     occ_k(:)=ebands_k%occ(1:nband_k,ikpt,isppol)
 
      ! Compute kinetic energy at kpt
      kinpw(:) = zero
@@ -456,7 +453,8 @@ subroutine orbmag(crystal,cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mkme
 
      ! retrieve zeroth order eigenvalues at this k point and isppol
      ABI_MALLOC(eig_k,(nband_k))
-     eig_k(:)=eigen0(1+bdtot_index:nband_k+bdtot_index)
+     !eig_k(:)=eigen0(1+bdtot_index:nband_k+bdtot_index)
+     eig_k(:)=ebands_k%eig(1:nband_k,ikpt,isppol)
 
      ! retrieve cprj_k at this k point and isppol
      mcprjk = nband_k*dtset%nspinor
@@ -2734,17 +2732,16 @@ end subroutine make_d
 !!
 !! SOURCE
 
-subroutine local_fermie(dtset,eigen0,fermie,mpi_enreg,occ)
+subroutine local_fermie(dtset,ebands_k,fermie,mpi_enreg)
 
   !Arguments ------------------------------------
   !scalars
   real(dp),intent(out) :: fermie
   type(dataset_type),intent(in) :: dtset
+  type(ebands_t) :: ebands_k
   type(MPI_type), intent(inout) :: mpi_enreg
 
   !arrays
-  real(dp),intent(in) :: eigen0(dtset%mband*dtset%nkpt*dtset%nsppol)
-  real(dp), intent(in) :: occ(dtset%mband*dtset%nkpt*dtset%nsppol)
 
   !Local variables -------------------------
   !scalars
@@ -2775,10 +2772,12 @@ subroutine local_fermie(dtset,eigen0,fermie,mpi_enreg,occ)
       end if
 
       ABI_MALLOC(occ_k,(nband_k))
-      occ_k(:)=occ(1+bdtot_index:nband_k+bdtot_index)
+      !occ_k(:)=occ(1+bdtot_index:nband_k+bdtot_index)
+      occ_k(:)=ebands_k%occ(1:nband_k,ikpt,isppol)
 
       ABI_MALLOC(eig_k,(nband_k))
-      eig_k(:)=eigen0(1+bdtot_index:nband_k+bdtot_index)
+      !eig_k(:)=eigen0(1+bdtot_index:nband_k+bdtot_index)
+      eig_k(:)=ebands_k%eig(1:nband_k,ikpt,isppol)
 
       do nn = 1, nband_k
         if ( (abs(occ_k(nn)).GT.tol8) .AND. (eig_k(nn).GT.fermie_proc) ) then
