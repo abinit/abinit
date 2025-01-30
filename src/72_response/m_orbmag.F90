@@ -83,9 +83,8 @@ module m_orbmag
   ! these parameters name the various output terms                                             
   integer,parameter :: ibcc=1,ibvv1=2,ibvv2=3
   integer,parameter :: imcc=4,imvv1=5,imvv2=6
-  integer,parameter :: imnl=7,imlr=8,imbm=9,imza0=10
-  integer,parameter :: iomlmb=11
-  integer,parameter :: nterms=11
+  integer,parameter :: imnl=7,imlr=8,imbm=9,iomlmb=10
+  integer,parameter :: nterms=10
 
   ! these parameters are constants used repeatedly
 
@@ -105,7 +104,6 @@ module m_orbmag
     integer :: has_qij=0
     integer :: has_LR=0
     integer :: has_BM=0
-    integer :: has_ZA0=0
 
     ! sum of \Delta A_ij
     ! typically will be just paw_ij
@@ -126,10 +124,6 @@ module m_orbmag
     ! BM(natom,lmn2max,ndij,3)
     complex(dpc),allocatable :: BM(:,:,:,:)
 
-    ! onsite ZA0
-    ! ZA0(natom,lmn2max,ndij,3)
-    complex(dpc),allocatable :: ZA0(:,:,:,:)
-
   end type dterm_type
 
   ! Bound methods:
@@ -145,7 +139,6 @@ module m_orbmag
   private :: dterm_qij
   private :: dterm_LR
   private :: dterm_BM
-  !! private :: dterm_ZA0
   private :: tt_me
   private :: txt_me
   private :: local_fermie
@@ -556,14 +549,6 @@ subroutine orbmag(crystal,cg,cg1,cprj,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg1,&
        & nband_k,nl1_option,occ_k,pawtab,crystal%ucvol)
      orbmag_terms(:,:,isppol,:,imbm) = orbmag_terms(:,:,isppol,:,imbm) + m1_k
 
-     ! ZA0
-     if (dterm%has_ZA0 == 2) then
-       nl1_option = 3 ! ZA0
-       call orbmag_nl1_k(atindx,cprj_k,dimlmn,dterm,dtset,ikpt,isppol,m1_k,mcprjk,mkmem_rbz,&
-         & nband_k,nl1_option,occ_k,pawtab,crystal%ucvol)
-       orbmag_terms(:,:,isppol,:,imza0) = orbmag_terms(:,:,isppol,:,imza0) + m1_k
-     end if
-
      ABI_FREE(b1_k)
      ABI_FREE(b2_k)
      ABI_FREE(m1_k)
@@ -630,7 +615,6 @@ subroutine orbmag(crystal,cg,cg1,cprj,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg1,&
  !
  do iterm = 1, nterms
    if ((iterm.EQ.iomlmb)) cycle
-   if ((iterm.EQ.imza0)) cycle
    do isppol = 1, dtset%nsppol
      do nn = 1, nband_k
        do icmplx = 1, 2
@@ -790,8 +774,6 @@ subroutine orbmag_nl1_k(atindx,cprj_k,dimlmn,dterm,dtset,ikpt,isppol,m1_k,mcprjk
        call tt_me(dterm%LR(:,:,:,adir),atindx,cwaveprj,dtset,cwaveprj,dterm%lmn2max,dterm%ndij,pawtab,tt)
      case(2)
        call tt_me(dterm%BM(:,:,:,adir),atindx,cwaveprj,dtset,cwaveprj,dterm%lmn2max,dterm%ndij,pawtab,tt)
-     case(3)
-       call tt_me(dterm%ZA0(:,:,:,adir),atindx,cwaveprj,dtset,cwaveprj,dterm%lmn2max,dterm%ndij,pawtab,tt)
      case default
        tt = czero
      end select
@@ -2090,10 +2072,6 @@ subroutine orbmag_output(dtset,orbmag_terms,orbmag_trace)
    call wrtout(ab_out,message,'COLL')
    write(message,'(a,3es16.8)') ' <A0.An> terms : ',(orbmag_trace(1,adir,imbm),adir=1,3)
    call wrtout(ab_out,message,'COLL')
-   !!if (dtset%pawspnorb /= 0) then
-   !!  write(message,'(a,3es16.8)') ' <ZORA B1> terms : ',(orbmag_trace(1,adir,imza0),adir=1,3)
-   !!  call wrtout(ab_out,message,'COLL')
-   !!end if
    write(message,'(a,3es16.8)') '    Lamb terms : ',(orbmag_trace(1,adir,iomlmb),adir=1,3)
    call wrtout(ab_out,message,'COLL')
    write(message,'(a)')' Chern vector, term-by-term breakdown : '
@@ -2135,10 +2113,6 @@ subroutine orbmag_output(dtset,orbmag_terms,orbmag_trace)
        call wrtout(ab_out,message,'COLL')
        write(message,'(a,3es16.8)') ' <A0.An> terms : ',(orbmag_terms(1,iband,isppol,adir,imbm),adir=1,3)
        call wrtout(ab_out,message,'COLL')
-       !!if (dtset%pawspnorb /= 0) then
-       !!  write(message,'(a,3es16.8)') ' <ZORA B1> terms : ',(orbmag_terms(1,iband,isppol,adir,imza0),adir=1,3)
-       !!  call wrtout(ab_out,message,'COLL')
-       !!end if
        write(message,'(a)')ch10
        call wrtout(ab_out,message,'COLL')
        write(message,'(a,3es16.8)') ' Chern vector : ',(berry_bb(1,iband,adir),adir=1,3)
@@ -2225,11 +2199,6 @@ subroutine dterm_free(dterm)
   end if
   dterm%has_BM=0
 
-  if(allocated(dterm%ZA0)) then
-    ABI_FREE(dterm%ZA0)
-  end if
-  dterm%has_ZA0=0
-
 end subroutine dterm_free
 !!***
 
@@ -2313,19 +2282,6 @@ subroutine dterm_alloc(dterm,lmnmax,lmn2max,natom,ndij)
   ABI_MALLOC(dterm%BM,(natom,lmn2max,ndij,3))
   dterm%has_BM=1
 
-  if(allocated(dterm%ZA0)) then
-    ABI_FREE(dterm%ZA0)
-  end if
-  dterm%has_ZA0=0
-  !! JWZ debug suppress ZA0 for now
-  !!if (pawspnorb /= 0) then
-  !!  ABI_MALLOC(dterm%ZA0,(natom,lmn2max,ndij,3))
-  !!  dterm%has_ZA0=1
-  !!else
-  !!  dterm%has_ZA0=0
-  !!end if
-  
-
 end subroutine dterm_alloc
 !!***
 
@@ -2405,201 +2361,6 @@ subroutine dterm_aij(atindx,dterm,dtset,paw_ij,pawtab)
 end subroutine dterm_aij
 
 !!***
-
-!!!!****f* ABINIT/dterm_ZA0
-!!!! NAME
-!!!! dterm_ZA0
-!!!!
-!!!! FUNCTION
-!!!! compute ZORA terms for A0 vector potential
-!!!!
-!!!! COPYRIGHT
-!!!! Copyright (C) 2003-2024 ABINIT  group
-!!!! This file is distributed under the terms of the
-!!!! GNU General Public License, see ~abinit/COPYING
-!!!! or http://www.gnu.org/copyleft/gpl.txt .
-!!!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
-!!!!
-!!!! INPUTS
-!!!!  atindx(natom)=index table for atoms (see gstate.f)
-!!!!  dtset <type(dataset_type)>=all input variables for this dataset
-!!!!  paw_ij(dtset%natom) <type(paw_ij_type)>=paw arrays given on (i,j) channels for the GS
-!!!!  pawtab(dtset%ntypat) <type(pawtab_type)>=paw tabulated starting data
-!!!!
-!!!! OUTPUT
-!!!!
-!!!! SIDE EFFECTS
-!!!! dterm <type(dterm_type)> data related to onsite interactions
-!!!!
-!!!! TODO
-!!!!
-!!!! NOTES
-!!!!
-!!!! PARENTS
-!!!!      m_orbmag
-!!!!
-!!!! CHILDREN
-!!!!
-!!!! SOURCE
-!!
-!!subroutine dterm_ZA0(atindx,cplex_dij,dterm,dtset,paw_an,pawang,pawrad,pawtab,qphase)
-!!
-!!  !Arguments ------------------------------------
-!!  !scalars
-!!  integer,intent(in) :: cplex_dij,qphase
-!!  type(dterm_type),intent(inout) :: dterm
-!!  type(dataset_type),intent(in) :: dtset
-!!
-!!  !arrays
-!!  integer,intent(in) :: atindx(dtset%natom)
-!!  type(paw_an_type),intent(inout) :: paw_an(dtset%natom)
-!!  type(pawang_type),intent(in) :: pawang
-!!  type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
-!!  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
-!!
-!!  !Local variables -------------------------
-!!  !scalars
-!!  integer :: adir,gs1,gs2,iat,iatom,ii,ij_size,ilm,itypat,jlm
-!!  integer :: klmn,klm,kln,lmn2_size,mesh_size,ndij,ngnt,sdir
-!!  real(dp) :: me_kbs,me_k2bs,rc,rr,rt
-!!  complex(dpc) :: cme
-!!  real(dp), parameter :: HalfFineStruct2=half*FineStructureConstant2
-!!  !arrays
-!!  character(len=500) :: msg
-!!  real(dp),allocatable :: dkdr(:),dv1dr(:),dyadic(:,:,:)
-!!  real(dp),allocatable :: v1(:),zk1(:)
-!!  real(dp),allocatable :: za0(:,:,:),za0_kernel(:),za0_rad(:,:)
-!!!--------------------------------------------------------------------
-!!
-!!  dterm%ZA0 = czero
-!!  !Check data consistency
-!!  if (qphase/=1) then
-!!    msg='qphase=2 not yet available in Dij ZORA B1 '
-!!    ABI_BUG(msg)
-!!  end if
-!!  if (cplex_dij/=2) then
-!!    msg='cplex_dij must be 2 for Dij ZORA B1 '
-!!    ABI_BUG(msg)
-!!  end if
-!!  if (dterm%ndij/=4) then
-!!    msg='ndij must be 4 for Dij ZORA B1 '
-!!    ABI_BUG(msg)
-!!  end if
-!!
-!!  do iat=1,dtset%natom
-!!    iatom=atindx(iat)
-!!    itypat=dtset%typat(iat)
-!!    lmn2_size=pawtab(itypat)%lmn2_size
-!!    ndij=dterm%ndij
-!!    ij_size=pawtab(itypat)%ij_size
-!!    mesh_size=pawtab(itypat)%mesh_size
-!!
-!!    
-!!    ABI_MALLOC(v1,(mesh_size))
-!!    call pawv1(mesh_size,dtset%nspden,pawang,dtset%pawxcdev,&
-!!      & v1,paw_an(iat)%vh1,paw_an(iat)%vxc1)
-!!    ABI_MALLOC(dv1dr,(mesh_size))
-!!    call nderiv_gen(dv1dr,v1,pawrad(itypat))
-!!    
-!!    rc=FineStructureConstant2
-!!
-!!    ABI_MALLOC(zk1,(mesh_size))
-!!    zk1 = one/(one - HalfFineStruct2*v1)
-!!
-!!    ABI_MALLOC(dkdr,(mesh_size))
-!!    dkdr = dv1dr*HalfFineStruct2*zk1*zk1
-!!
-!!    rt=dtset%znucl(itypat)*rc
-!!    do ii=1,mesh_size
-!!      rr=pawrad(itypat)%rad(ii)
-!!      if(rr>rc) exit
-!!      if (rr<tol8) then
-!!        zk1(ii)=zero
-!!        dkdr(ii)=two/rt
-!!      else
-!!        zk1(ii)=one/(one+rt/(two*rr))
-!!        dkdr(ii)=two*rt/(two*rr+rt)**2
-!!      end if
-!!    end do
-!!
-!!    ABI_FREE(v1)
-!!    ABI_FREE(dv1dr)
-!!
-!!    ! radial integrals
-!!    ! za0_rad(1,kln) = int ui K uj dr
-!!    ! za0_rad(2,kln) = 1/2 int ui K' r  uj dr
-!!    ABI_MALLOC(za0_rad,(2,ij_size))
-!!    ABI_MALLOC(za0_kernel,(mesh_size))
-!!
-!!    do kln = 1, ij_size
-!!  
-!!      za0_kernel= pawtab(itypat)%phiphj(1:mesh_size,kln)*zk1(1:mesh_size)
-!!      call simp_gen(za0_rad(1,kln),za0_kernel,pawrad(itypat))
-!!      
-!!      za0_kernel= half*pawtab(itypat)%phiphj(1:mesh_size,kln)*&
-!!        & dkdr(1:mesh_size)*pawrad(itypat)%rad(1:mesh_size)
-!!      call simp_gen(za0_rad(2,kln),za0_kernel,pawrad(itypat))
-!!
-!!    end do
-!!    ABI_FREE(zk1)
-!!    ABI_FREE(dkdr)
-!!    ABI_FREE(za0_kernel)
-!!    
-!!    ! make (1-\hat{r}\hat{r}) dyadic integrals
-!!    gs1=size(pawang%gntselect,1)
-!!    gs2=size(pawang%gntselect,2)
-!!    ngnt=size(pawang%realgnt)
-!!    ABI_MALLOC(dyadic,(3,3,gs2))
-!!    call make_dyadic(one,one,dyadic,pawang%gntselect,&
-!!      & gs1,gs2,gs2,ngnt,pawang%realgnt)
-!!
-!!    ABI_MALLOC(za0,(3,cplex_dij*qphase*lmn2_size,ndij))
-!!    za0=zero
-!!    do klmn=1,lmn2_size
-!!      klm=pawtab(itypat)%indklmn(1,klmn);kln=pawtab(itypat)%indklmn(2,klmn)
-!!      ilm=pawtab(itypat)%indklmn(5,klmn);jlm=pawtab(itypat)%indklmn(6,klmn)
-!!
-!!!!    Dij^SO is represented with 4 components:
-!!!!      dijso(:,:,1) contains Dij_SO^up-up
-!!!!      dijso(:,:,2) contains Dij_SO^dn-dn
-!!!!      dijso(:,:,3) contains Dij_SO^up-dn
-!!!!      dijso(:,:,4) contains Dij_SO^dn-up
-!!      do adir = 1, 3 ! A0 direction (that is, B-field direction)
-!!        do sdir = 1, 3 ! S direction (spin angular momentum)
-!!          me_kbs=zero
-!!          if ( (adir == sdir) .AND. (ilm == jlm) ) me_kbs=za0_rad(1,kln)
-!!          me_k2bs=dyadic(adir,sdir,klm)*za0_rad(2,kln)
-!!          cme=CMPLX(me_kbs+me_k2bs,zero)
-!!          select case(sdir)
-!!          case(1)
-!!            dterm%ZA0(iatom,klmn,3,adir)=&
-!!              dterm%ZA0(iatom,klmn,3,adir)+half*cme
-!!            dterm%ZA0(iatom,klmn,4,adir)=&
-!!              dterm%ZA0(iatom,klmn,4,adir)+half*cme
-!!          case(2)
-!!            dterm%ZA0(iatom,klmn,3,adir)=&
-!!              dterm%ZA0(iatom,klmn,3,adir)+CMPLX(zero,-half)*cme
-!!            dterm%ZA0(iatom,klmn,4,adir)=&
-!!              dterm%ZA0(iatom,klmn,4,adir)+CMPLX(zero,half)*cme
-!!          case(3)
-!!            dterm%ZA0(iatom,klmn,1,adir)=&
-!!              dterm%ZA0(iatom,klmn,1,adir)+half*cme
-!!            dterm%ZA0(iatom,klmn,2,adir)=&
-!!              dterm%ZA0(iatom,klmn,2,adir)-half*cme
-!!          end select
-!!        end do
-!!      end do
-!!    end do
-!!    ABI_FREE(za0_rad)
-!!    ABI_FREE(dyadic)
-!!    ABI_FREE(za0)
-!!  end do ! iat
-!!!!
-!!
-!!  dterm%has_ZA0 = 2
-!!
-!!end subroutine dterm_ZA0
-!!!!***
 
 !!****f* ABINIT/make_d
 !! NAME
@@ -2684,12 +2445,6 @@ subroutine make_d(atindx,dterm,dtset,gprimd,paw_ij,pawrad,pawtab,psps)
 
  ! transfers paw_ij to dterm%aij because it's convenient
  call dterm_aij(atindx,dterm,dtset,paw_ij,pawtab)
-
- !!! generate dterm%ZA0 if necessary
- !!if (dtset%pawspnorb /= 0) then
- !!  call dterm_ZA0(atindx,paw_ij(1)%cplex_dij,dterm,dtset,paw_an,pawang,&
- !!    & pawrad,pawtab,paw_ij(1)%qphase)
- !!end if
 
  ABI_FREE(realgnt)
  ABI_FREE(gntselect)
