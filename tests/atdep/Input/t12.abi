@@ -17,6 +17,7 @@ nstep_max 20
 nstep_min 1
 rcut 17.5
 #OPTIONAL_INPUT_VARIABLES
+znucl 22
 readifc 1 1.d-4
 enunit 2
 bzpath 4 G K M G
