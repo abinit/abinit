@@ -44,9 +44,9 @@ module m_orbmag
 
   use defs_datatypes,     only : pseudopotential_type
   use defs_abitypes,      only : MPI_type
+  use m_crystal,          only : crystal_t
   use m_cgprj,            only : getcprj
   use m_cgtools,          only : projbd
-  use m_geometry,         only : metric
   use m_getghc,           only : getghc
   use m_hamiltonian,      only : init_hamiltonian, gs_hamiltonian_type, gspot_transgrid_and_pack
   use m_kg,               only : getph,mkkin,mkkpg,ph1d3d
@@ -217,14 +217,15 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mkmem_rbz,mpi_enreg,mpw,&
+subroutine orbmag(crystal,cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mkmem_rbz,mpi_enreg,mpw,&
     & nfftf,ngfftf,npwarr,occ,paw_ij,pawfgr,pawrad,&
-    & pawtab,psps,rprimd,usevxctau,vtrial,vxctau,xred,ylm,ylmgr)
+    & pawtab,psps,usevxctau,vtrial,vxctau,ylm,ylmgr)
 
  !Arguments ------------------------------------
  !scalars
  integer,intent(in) :: mcprj,mcg,mcg1,mkmem_rbz,mpw,nfftf,usevxctau
  real(dp),intent(in) :: gsqcut
+ type(crystal_t) :: crystal
  type(dataset_type),intent(in) :: dtset
  type(MPI_type), intent(inout) :: mpi_enreg
  type(pawfgr_type),intent(in) :: pawfgr
@@ -235,7 +236,6 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mkmem_rbz,mp
  real(dp),intent(in) :: cg(2,mcg),cg1(2,mcg1,3)
  real(dp),intent(in) :: eigen0(dtset%mband*dtset%nkpt*dtset%nsppol)
  real(dp), intent(in) :: occ(dtset%mband*dtset%nkpt*dtset%nsppol)
- real(dp),intent(in) :: rprimd(3,3),xred(3,dtset%natom)
  real(dp),intent(inout) :: vtrial(nfftf,dtset%nspden)
  real(dp),intent(inout) :: vxctau(nfftf,dtset%nspden,4*usevxctau)
  real(dp),intent(in) :: ylm(mpw*mkmem_rbz,psps%mpsang*psps%mpsang*psps%useylm)
@@ -252,14 +252,14 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mkmem_rbz,mp
  integer :: ikg,ikg1,ikpt,ilm,indx,isppol,istwf_k,iterm,itypat,lmn2max
  integer :: me,mcgk,mcprjk,my_lmax,my_nspinor,nband_k,nband_me,ngfft1,ngfft2,ngfft3,ngfft4
  integer :: ngfft5,ngfft6,ngnt,nl1_option,nn,nkpg,npw_k,npwsp,nproc,spaceComm
- real(dp) :: arg,ecut_eff,fermie,ucvol
+ real(dp) :: arg,ecut_eff,fermie
  logical :: has_nucdip
  type(dterm_type) :: dterm
  type(gs_hamiltonian_type) :: gs_hamk
 
  !arrays
  integer,allocatable :: atindx(:),atindx1(:),dimlmn(:),gntselect(:,:),kg_k(:,:),nattyp(:)
- real(dp) :: gmet(3,3),gprimd(3,3),kpoint(3),omlamb(2,3),rmet(3,3)
+ real(dp) :: kpoint(3),omlamb(2,3)
  real(dp),allocatable :: buffer1(:),buffer2(:)
  real(dp),allocatable :: b1_k(:,:,:),b2_k(:,:,:)
  real(dp),allocatable :: cg_k(:,:),cg1_k(:,:,:),cwavef(:,:)
@@ -308,7 +308,7 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mkmem_rbz,mp
    end do
  end do
  ABI_MALLOC(ph1d,(2,dtset%natom*(2*(ngfft1+ngfft2+ngfft3)+3)))
- call getph(atindx,dtset%natom,ngfft1,ngfft2,ngfft3,ph1d,xred)
+ call getph(atindx,dtset%natom,ngfft1,ngfft2,ngfft3,ph1d,crystal%xred)
 
  ABI_MALLOC(kg_k,(3,mpw))
  ABI_MALLOC(kinpw,(mpw))
@@ -319,8 +319,6 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mkmem_rbz,mp
  ABI_MALLOC(cwaveprj,(dtset%natom,dtset%nspinor))
  call pawcprj_alloc(cwaveprj,0,dimlmn)
 
- call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
-
  my_lmax = psps%mpsang + 1
  ABI_MALLOC(realgnt,((2*my_lmax-1)**2*(my_lmax)**4))
  ABI_MALLOC(gntselect,((2*my_lmax-1)**2,my_lmax**2*(my_lmax**2+1)/2))
@@ -329,7 +327,7 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mkmem_rbz,mp
  lmn2max = psps%lmnmax*(psps%lmnmax+1)/2
  ! note: in make_d, terms will be filled as iatom using atindx
  call dterm_alloc(dterm,psps%lmnmax,lmn2max,dtset%natom,paw_ij(1)%ndij)
- call make_d(atindx,dterm,dtset,gprimd,paw_ij,pawrad,pawtab,psps)
+ call make_d(atindx,dterm,dtset,crystal%gprimd,paw_ij,pawrad,pawtab,psps)
 
  ABI_MALLOC(orbmag_terms,(2,dtset%mband,dtset%nsppol,3,nterms))
  orbmag_terms = zero
@@ -337,9 +335,9 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mkmem_rbz,mp
  !==== Initialize most of the Hamiltonian ====
  !Allocate all arrays and initialize quantities that do not depend on k and spin.
  !gs_hamk is the normal hamiltonian at k
- call init_hamiltonian(gs_hamk,psps,pawtab,dtset%nspinor,dtset%nsppol,dtset%nspden,dtset%natom,&
-      & dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,nucdipmom=dtset%nucdipmom,&
-      & paw_ij=paw_ij)
+ call init_hamiltonian(gs_hamk,psps,pawtab,dtset%nspinor,dtset%nsppol,dtset%nspden,&
+   & dtset%natom,dtset%typat,crystal%xred,dtset%nfft,dtset%mgfft,dtset%ngfft,&
+   & crystal%rprimd,dtset%nloalg,nucdipmom=dtset%nucdipmom,paw_ij=paw_ij)
 
  ! iterate over spin channels
  bdtot_index=0
@@ -359,7 +357,7 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mkmem_rbz,mp
      ABI_MALLOC(vectornd,(nfftf,dtset%nspden,3))
      vectornd = zero
      call make_vectornd(1,gsqcut,psps%usepaw,mpi_enreg,dtset%natom,nfftf,ngfftf,&
-       & dtset%nspden,dtset%nucdipmom,rprimd,vectornd,xred)
+       & dtset%nspden,dtset%nucdipmom,crystal%rprimd,vectornd,crystal%xred)
      ABI_MALLOC(vectornd_pac,(ngfft4,ngfft5,ngfft6,gs_hamk%nvloc,3))
      call gspot_transgrid_and_pack(isppol, psps%usepaw, dtset%paral_kgb, dtset%nfft, dtset%ngfft, nfftf, &
           & dtset%nspden, gs_hamk%nvloc, 3, pawfgr, mpi_enreg, vectornd,vectornd_pac)
@@ -410,7 +408,7 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mkmem_rbz,mp
 
      ! Compute kinetic energy at kpt
      kinpw(:) = zero
-     call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg_k,kinpw,kpoint,npw_k,0,0)
+     call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,crystal%gmet,kg_k,kinpw,kpoint,npw_k,0,0)
 
      ! Compute k+G at this k point
      nkpg = 3
@@ -421,7 +419,7 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mkmem_rbz,mp
      ABI_MALLOC(phkxred,(2,dtset%natom))
      do iat = 1, dtset%natom
        iatom = atindx(iat)
-       arg=two_pi*DOT_PRODUCT(kpoint,xred(:,iat))
+       arg=two_pi*DOT_PRODUCT(kpoint,crystal%xred(:,iat))
        phkxred(1,iatom)=DCOS(arg);phkxred(2,iatom)=DSIN(arg)
      end do
      ABI_MALLOC(ph3d,(2,npw_k,dtset%natom))
@@ -437,9 +435,10 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mkmem_rbz,mp
      dimffnl=4 ! 1 + number of derivatives
      ABI_MALLOC(ffnl_k,(npw_k,dimffnl,psps%lmnmax,dtset%ntypat))
      call mkffnl(psps%dimekb,dimffnl,psps%ekb,ffnl_k,psps%ffspl,&
-       & gmet,gprimd,ider,idir,psps%indlmn,kg_k,kpg_k,kpoint,psps%lmnmax,&
+       & crystal%gmet,crystal%gprimd,ider,idir,psps%indlmn,&
+       & kg_k,kpg_k,kpoint,psps%lmnmax,&
        & psps%lnmax,psps%mpsang,psps%mqgrid_ff,nkpg,&
-       & npw_k,dtset%ntypat,psps%pspso,psps%qgrid_ff,rmet,&
+       & npw_k,dtset%ntypat,psps%pspso,psps%qgrid_ff,crystal%rmet,&
        & psps%usepaw,psps%useylm,ylm_k,ylmgr_k)
      !  - Load k-dependent quantities in the Hamiltonian
      call gs_hamk%load_k(kpt_k=kpoint(:),istwf_k=istwf_k,npw_k=npw_k,&
@@ -491,7 +490,7 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mkmem_rbz,mp
          cwavef(1:2,1:npwsp) = pcg1_k(1:2,(nn-1)*npwsp+1:nn*npwsp,adir)
          call getcprj(choice,cpopt,cwavef,cwaveprj,ffnl_k,idir,psps%indlmn,istwf_k,&
            & kg_k,kpg_k,kpoint,psps%lmnmax,dtset%mgfft,mpi_enreg,1,dtset%natom,nattyp,dtset%ngfft,&
-           & dtset%nloalg,npw_k,dtset%nspinor,dtset%ntypat,phkxred,ph1d,ph3d,ucvol,psps%useylm)
+           & dtset%nloalg,npw_k,dtset%nspinor,dtset%ntypat,phkxred,ph1d,ph3d,crystal%ucvol,psps%useylm)
          call pawcprj_put(atindx,cwaveprj,cprj1_k(:,:,adir),dtset%natom,nn,0,ikpt,0,isppol,dtset%mband,&
            & mkmem_rbz,dtset%natom,1,nband_k,dimlmn,dtset%nspinor,dtset%nsppol,0)
        end do
@@ -515,7 +514,7 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mkmem_rbz,mp
 
      ! ZTG23 Eq. 36 term 2 and Eq. 46 term 1
      call orbmag_cc_k(atindx,b1_k,cprj1_k,dimlmn,dtset,eig_k,fermie,gs_hamk,ikpt,isppol,&
-       & m1_k,m1_mu_k,mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,occ_k,pcg1_k,ucvol)
+       & m1_k,m1_mu_k,mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,occ_k,pcg1_k,crystal%ucvol)
 
      ! ZTG Eq. 46 term 1
      orbmag_terms(:,:,isppol,:,ibcc) = orbmag_terms(:,:,isppol,:,ibcc) + b1_k(:,:,:)
@@ -526,7 +525,7 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mkmem_rbz,mp
      ! ZTG23 Eq. 36 terms 3 and 4 and Eq. 46 term 2
      call orbmag_vv_k(atindx,b1_k,b2_k,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gs_hamk,&
       & ikpt,isppol,m1_k,m1_mu_k,m2_k,m2_mu_k,mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,&
-      & npw_k,occ_k,pcg1_k,ucvol)
+      & npw_k,occ_k,pcg1_k,crystal%ucvol)
 
      ! ZTG23 Eq. 46 term 2
      orbmag_terms(:,:,isppol,:,ibvv1) = orbmag_terms(:,:,isppol,:,ibvv1) + b1_k(:,:,:)
@@ -542,26 +541,26 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mkmem_rbz,mp
 
      ! ZTG23 Eq. 36 term 1
      call orbmag_nl_k(atindx,cprj_k,dimlmn,dterm,dtset,eig_k,ikpt,isppol,&
-       & m1_k,mcprjk,mkmem_rbz,nband_k,occ_k,pawtab,ucvol)
+       & m1_k,mcprjk,mkmem_rbz,nband_k,occ_k,pawtab,crystal%ucvol)
      orbmag_terms(:,:,isppol,:,imnl) = orbmag_terms(:,:,isppol,:,imnl) + m1_k(:,:,:)
 
      ! ZTG23 text after Eq. 42
      nl1_option = 1 ! LR
      call orbmag_nl1_k(atindx,cprj_k,dimlmn,dterm,dtset,ikpt,isppol,m1_k,mcprjk,mkmem_rbz,&
-       & nband_k,nl1_option,occ_k,pawtab,ucvol)
+       & nband_k,nl1_option,occ_k,pawtab,crystal%ucvol)
      orbmag_terms(:,:,isppol,:,imlr) = orbmag_terms(:,:,isppol,:,imlr) + m1_k
      
      ! ZTG23 Eq. 43
      nl1_option = 2 ! BM
      call orbmag_nl1_k(atindx,cprj_k,dimlmn,dterm,dtset,ikpt,isppol,m1_k,mcprjk,mkmem_rbz,&
-       & nband_k,nl1_option,occ_k,pawtab,ucvol)
+       & nband_k,nl1_option,occ_k,pawtab,crystal%ucvol)
      orbmag_terms(:,:,isppol,:,imbm) = orbmag_terms(:,:,isppol,:,imbm) + m1_k
 
      ! ZA0
      if (dterm%has_ZA0 == 2) then
        nl1_option = 3 ! ZA0
        call orbmag_nl1_k(atindx,cprj_k,dimlmn,dterm,dtset,ikpt,isppol,m1_k,mcprjk,mkmem_rbz,&
-         & nband_k,nl1_option,occ_k,pawtab,ucvol)
+         & nband_k,nl1_option,occ_k,pawtab,crystal%ucvol)
        orbmag_terms(:,:,isppol,:,imza0) = orbmag_terms(:,:,isppol,:,imza0) + m1_k
      end if
 
@@ -637,10 +636,10 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mkmem_rbz,mp
        do icmplx = 1, 2
          if((iterm.EQ.imlr).OR.(iterm.EQ.imbm)) then
            orbmag_terms(icmplx,nn,isppol,1:3,iterm) = &
-             & MATMUL(rprimd,orbmag_terms(icmplx,nn,isppol,1:3,iterm))
+             & MATMUL(crystal%rprimd,orbmag_terms(icmplx,nn,isppol,1:3,iterm))
          else
            orbmag_terms(icmplx,nn,isppol,1:3,iterm) = &
-             & ucvol*MATMUL(gprimd,orbmag_terms(icmplx,nn,isppol,1:3,iterm))
+             & crystal%ucvol*MATMUL(crystal%gprimd,orbmag_terms(icmplx,nn,isppol,1:3,iterm))
          end if
        end do !icmplx
      end do ! nn
@@ -655,7 +654,7 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mkmem_rbz,mp
    if (iterm .EQ. ibvv1) cycle
    if (iterm .EQ. ibvv2) cycle
    if (iterm .EQ. iomlmb) cycle
-   orbmag_terms(:,:,:,:,iterm) = ucvol*orbmag_terms(:,:,:,:,iterm)
+   orbmag_terms(:,:,:,:,iterm) = crystal%ucvol*orbmag_terms(:,:,:,:,iterm)
  end do
 
  ! compute trace over filled states of each term
