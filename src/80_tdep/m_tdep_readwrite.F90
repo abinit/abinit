@@ -64,6 +64,7 @@ module m_tdep_readwrite
     double precision :: multiplicity(3,3)
     double precision, allocatable :: amu(:)
     double precision, allocatable :: born_charge(:)
+    double precision, allocatable :: znucl(:)
     double precision, allocatable :: qpt(:,:)
     double precision, allocatable :: xred_ideal(:,:)
     double precision, allocatable :: xred_unitcell(:,:)
@@ -167,8 +168,8 @@ contains
   integer :: ntypat_id,iatcell
   integer :: ii,jj,tmp,shift,iatom,itypat,sum_alloy1,sum_alloy2
   double precision :: version_value,dtion,amu_average,born_average
-  character (len=30):: string,NormalMode,DebugMode,use_ideal_positions
-  character (len=30):: born_charge,dielec_constant,tolmotifinboxmatch,TheEnd,bzpath,use_weights
+  character (len=30):: string,NormalMode,DebugMode,TheEnd,use_ideal_positions
+  character (len=30):: born_charge,dielec_constant,znucl,tolmotifinboxmatch,bzpath,use_weights
   character (len=30):: order,slice,enunit,readifc,together,alloy,nproc,bzlength,ngqpt1,ngqpt2,dosdeltae
   character (len=8) :: date
   character (len=10) :: time
@@ -179,7 +180,7 @@ contains
   integer, allocatable :: typat_unitcell_tmp(:)
   logical :: has_nimage
   double precision :: rprimd_mdt(3,3)
-  real(dp), allocatable :: znucl(:),xred_unitcell_tmp(:,:),amu_tmp(:),born_charge_tmp(:)
+  real(dp), allocatable :: xred_unitcell_tmp(:,:),amu_tmp(:),born_charge_tmp(:),znucl_tmp(:)
 
 ! Define output files  
   Invar%stdout=8
@@ -190,6 +191,7 @@ contains
   DebugMode='DebugMode'
   use_ideal_positions='use_ideal_positions'
   born_charge='born_charge'
+  znucl='znucl'
   dielec_constant='dielec_constant'
   dosdeltae='dosdeltae'
   bzpath='bzpath'
@@ -289,9 +291,8 @@ contains
 &       natom_id,ntypat_id,nimage_id,time_id,xyz_id,six_id,has_nimage)
     ABI_MALLOC(Invar%amu,(Invar%ntypat)); Invar%amu(:)=zero
     ABI_MALLOC(Invar%typat,(Invar%natom)); Invar%typat(:)=zero
-    ABI_MALLOC(znucl,(Invar%ntypat)) ; znucl(:)=zero
-    call read_csts_hist(ncid,dtion,Invar%typat,znucl,Invar%amu)
-    ABI_FREE(znucl)
+    ABI_MALLOC(Invar%znucl,(Invar%ntypat)) ; Invar%znucl(:)=zero
+    call read_csts_hist(ncid,dtion,Invar%typat,Invar%znucl,Invar%amu)
 
     ! Need to close NetCDF file because it is going to be reopened by read_md_hist
     ncerr = nf90_close(ncid)
@@ -468,10 +469,14 @@ contains
       read(40,*) string,Invar%use_ideal_positions
       write(Invar%stdout,'(1x,a20,1x,i4)') string,Invar%use_ideal_positions
     else if (string.eq.born_charge) then  
-      ABI_MALLOC(Invar%born_charge,(Invar%ntypat)); Invar%born_charge(:)=0.d0
+      ABI_MALLOC(Invar%born_charge,(Invar%ntypat)); Invar%born_charge(:)=zero
       Invar%loto=.true.
       read(40,*) string,Invar%born_charge(:)
       write(Invar%stdout,'(1x,a20,20(1x,f15.10))') string,(Invar%born_charge(jj),jj=1,Invar%ntypat)
+    else if (string.eq.znucl) then  
+      ABI_MALLOC(Invar%znucl,(Invar%ntypat)); Invar%znucl(:)=one
+      read(40,*) string,Invar%znucl(:)
+      write(Invar%stdout,'(1x,a20,20(1x,f15.10))') string,(Invar%znucl(jj),jj=1,Invar%ntypat)
     else if (string.eq.dielec_constant) then  
       read(40,*) string,Invar%dielec_constant
       write(Invar%stdout,'(1x,a20,1x,f15.10)') string,Invar%dielec_constant
@@ -669,6 +674,13 @@ contains
     if (Invar%loto) then
       Invar%born_charge  (:)=born_charge_tmp (:)
     end if  
+    if (allocated(Invar%znucl)) then
+      ABI_MALLOC(znucl_tmp,(Invar%ntypat))
+      znucl_tmp(:) = Invar%znucl(1:Invar%ntypat)
+      ABI_REMALLOC(Invar%znucl,(Invar%ntypat))
+      Invar%znucl(:) = znucl_tmp(:)
+      ABI_FREE(znucl_tmp)
+    end if
     ABI_FREE(typat_unitcell_tmp)
     ABI_FREE(xred_unitcell_tmp)
     ABI_FREE(amu_tmp)
@@ -1012,6 +1024,9 @@ contains
   if (Invar%loto) then
     ABI_FREE(Invar%born_charge)
   end if  
+  if (allocated(Invar%znucl)) then
+    ABI_FREE(Invar%znucl)
+  end if
 
  end subroutine tdep_destroy_invar
 
