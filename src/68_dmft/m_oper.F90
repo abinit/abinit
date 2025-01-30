@@ -29,7 +29,12 @@ MODULE m_oper
  use m_abicore
  use m_errors
 
- use m_matlu, only : matlu_type
+ use m_abi_linalg, only : abi_xgemm
+ use m_hide_lapack, only : xginv
+ use m_matlu, only : copy_matlu,destroy_matlu,diff_matlu,identity_matlu,init_matlu, &
+               & inverse_matlu,matlu_type,print_matlu,prod_matlu,trace_matlu,zero_matlu
+ use m_paw_dmft, only : mpi_distrib_dmft_type,paw_dmft_type
+ use m_xmpi, only : xmpi_allgatherv,xmpi_gatherv,xmpi_sum,xmpi_sum_master
 
  implicit none
 
@@ -139,9 +144,6 @@ CONTAINS  !=====================================================================
 
 subroutine init_oper(paw_dmft,oper,nkpt,wtk,shiftk,opt_ksloc)
 
- use m_matlu, only : init_matlu
- use m_paw_dmft, only : paw_dmft_type
-
 !Arguments ------------------------------------
  integer, optional, intent(in) :: nkpt,opt_ksloc,shiftk
  type(paw_dmft_type), intent(in) :: paw_dmft
@@ -228,8 +230,6 @@ end subroutine init_oper
 
 subroutine destroy_oper(oper)
 
- use m_matlu, only : destroy_matlu
-
 !Arguments ------------------------------------
  type(oper_type), intent(inout) :: oper
 !Local variables-------------------------------
@@ -279,8 +279,6 @@ end subroutine destroy_oper
 
 subroutine copy_oper(oper1,oper2)
 
- use m_matlu, only : copy_matlu
-
 !Arguments ------------------------------------
  type(oper_type), intent(in) :: oper1
  type(oper_type), intent(inout) :: oper2 !vz_i
@@ -321,9 +319,6 @@ end subroutine copy_oper
 !! SOURCE
 
 subroutine print_oper(oper,option,paw_dmft,prtopt)
-
- use m_matlu, only : print_matlu
- use m_paw_dmft, only : paw_dmft_type
 
 !Arguments ------------------------------------
  type(paw_dmft_type), intent(in) :: paw_dmft
@@ -463,9 +458,6 @@ end subroutine print_oper
 
 subroutine inverse_oper(oper,option,procb,iproc)
 
- use m_matlu, only : inverse_matlu
- use m_hide_lapack, only : xginv
-
 !Arguments ------------------------------------
  integer, intent(in) :: option
  type(oper_type), intent(inout) :: oper
@@ -535,9 +527,6 @@ end subroutine inverse_oper
 !! SOURCE
 
 subroutine downfold_oper(oper,paw_dmft,procb,iproc,option,op_ks_diag)
-
- use m_paw_dmft, only : paw_dmft_type
- use m_abi_linalg, only : abi_xgemm
 
 !Arguments ------------------------------------
  type(oper_type), intent(inout) :: oper
@@ -699,9 +688,6 @@ end subroutine downfold_oper
 
 subroutine upfold_oper(oper,paw_dmft,procb,iproc)
 
- use m_paw_dmft, only : paw_dmft_type
- use m_abi_linalg, only : abi_xgemm
-
 !Arguments ------------------------------------
  type(oper_type), intent(inout)  :: oper
  type(paw_dmft_type), intent(in) :: paw_dmft
@@ -839,8 +825,6 @@ end subroutine upfold_oper
 
 subroutine identity_oper(oper,option)
 
- use m_matlu, only : identity_matlu,zero_matlu
-
 !Arguments ------------------------------------
  integer, intent(in) :: option
  type(oper_type), intent(inout) :: oper
@@ -897,8 +881,6 @@ end subroutine identity_oper
 !! SOURCE
 
 subroutine diff_oper(char1,char2,occup1,occup2,option,toldiff)
-
- use m_matlu, only : diff_matlu
 
 !Arguments ------------------------------------
  type(oper_type), intent(in) :: occup1,occup2
@@ -966,8 +948,6 @@ end subroutine diff_oper
 
 subroutine trace_oper(oper,trace_ks,trace_loc,opt_ksloc,trace_ks_cmplx)
 
- use m_matlu, only : trace_matlu
-
 !Arguments ------------------------------------
  type(oper_type), intent(in) :: oper
  real(dp), intent(out) :: trace_ks  !vz_i
@@ -1033,9 +1013,6 @@ end subroutine trace_oper
 !! SOURCE
 
 subroutine prod_oper(oper1,oper2,oper3,opt_ksloc,opt_diag)
-
- use m_matlu, only : prod_matlu
- use m_abi_linalg, only : abi_xgemm
 
 !Arguments ------------------------------------
  type(oper_type), intent(in) :: oper1,oper2
@@ -1154,9 +1131,6 @@ end subroutine trace_prod_oper
 !! SOURCE
 
 subroutine gather_oper(oper,distrib,paw_dmft,opt_ksloc,master,opt_diag,opt_commkpt)
-
- use m_paw_dmft, only : mpi_distrib_dmft_type,paw_dmft_type
- use m_xmpi, only : xmpi_allgatherv,xmpi_gatherv,xmpi_sum,xmpi_sum_master
 
 !Arguments ------------------------------------
  type(mpi_distrib_dmft_type), target, intent(in) :: distrib
@@ -1387,9 +1361,6 @@ end subroutine gather_oper
 !! SOURCE
 
 subroutine gather_oper_ks(oper,distrib,paw_dmft,opt_diag)
-
- use m_paw_dmft, only : mpi_distrib_dmft_type,paw_dmft_type
- use m_xmpi, only : xmpi_allgatherv,xmpi_sum
 
 !Arguments ------------------------------------
  type(oper_type), intent(inout) :: oper

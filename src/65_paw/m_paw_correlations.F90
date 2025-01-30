@@ -29,8 +29,8 @@ MODULE m_paw_correlations
  use m_dtset
  use m_linalg_interfaces
  use m_special_funcs
- use m_fstrings, only : int2char4
- use m_io_tools,    only : open_file
+ use m_fstrings,    only : int2char4
+ use m_io_tools,    only : get_unit,open_file
  use m_paw_dmft,    only : paw_dmft_type
  use m_pawang,      only : pawang_type,pawang_init,pawang_free
  use m_pawrad,      only : pawrad_free,pawrad_init,pawrad_type,simp_gen,nderiv_gen,pawrad_ifromr,poisson
@@ -78,6 +78,7 @@ CONTAINS  !=====================================================================
 !!  dmatpuopt= select expression for the density matrix
 !!  dmft_dc= option for the double-counting scheme in DMFT
 !!  dmft_orbital(ntypat)= option for the choice of the DMFT radial orbital
+!!  dmft_orbital_filepath= name of the DMFT orbital file
 !!  exchmix= mixing factor for local exact-exchange
 !!  is_dfpt=true if we are running a DFPT calculation
 !!  jpawu(ntypat)= value of J
@@ -119,7 +120,7 @@ CONTAINS  !=====================================================================
  subroutine pawpuxinit(dmatpuopt,exchmix,f4of2_sla,f6of2_sla,is_dfpt,jpawu,llexexch,llpawu,&
 &           nspinor,ntypat,option_interaction,pawang,pawprtvol,pawrad,pawtab,upawu,use_dmft,&
 &           useexexch,usepawu,&
-&           ucrpa,lmagCalc,dmft_orbital,dmft_dc) ! optional argument
+&           ucrpa,lmagCalc,dmft_orbital,dmft_dc,dmft_orbital_filepath) ! optional argument
 
 !Arguments ---------------------------------------------
 !scalars
@@ -142,17 +143,18 @@ CONTAINS  !=====================================================================
  type(pawtab_type),target,intent(inout) :: pawtab(ntypat)
  logical,optional,intent(in) :: lmagCalc
  integer,optional,intent(in) :: dmft_orbital(ntypat)
+ character(len=fnlen),optional,intent(in) :: dmft_orbital_filepath
 !Local variables ---------------------------------------
 !scalars
  integer :: icount,ierr,il,ilmn,ilmnp,ir,isela,iselb,itemp,itypat,iu,iup,j0lmn,jl,jlmn,jlmnp,ju,jup
  integer :: klm0x,klma,klmb,klmn,klmna,klmnb,kln,kln1,kln2,kyc,lcur,lexexch,lkyc,ll,ll1
  integer :: lmexexch,lmkyc,lmn_size,lmn2_size,lpawu
  integer :: m1,m11,m2,m21,m3,m31,m4,m41
- integer :: me,mesh_size,mesh_type,meshsz,int_meshsz,mkyc,sz1
+ integer :: me,mesh_size,mesh_type,meshsz,int_meshsz,mkyc,unt,sz1
  integer :: option_interaction_, Loc_prtvol
  logical :: compute_euijkl,compute_euij_fll,lexist
  real(dp) :: ak,eps,f4of2,f6of2,int1,intg,jh,lambda,lstep,phiint_ij,phiint_ipjp,rstep,uh,vee1,vee2
- character(len=4) :: tag
+ character(len=4) :: tag,tag2
  character(len=500) :: message,tmpfil
  logical :: lmagCalc_
 !arrays
@@ -839,22 +841,24 @@ CONTAINS  !=====================================================================
          ABI_MALLOC(pawtab(itypat)%proj,(meshsz))
          pawtab(itypat)%proj(1:meshsz) = pawtab(itypat)%phi(1:meshsz,pawtab(itypat)%lnproju(dmft_orbital(itypat)))
        else  ! read orbital from file
-         tmpfil = 'dmft_orbital_'//adjustl(tag)
+         call int2char4(itypat,tag2)
+         tmpfil = trim(adjustl(dmft_orbital_filepath)) // '_' // tag2
          write(message,'(2a)') " Using wavefunction from file ",trim(tmpfil)
          call wrtout(std_out,message,"COLL")
          inquire(file=trim(tmpfil),exist=lexist)
          if (.not. lexist) ABI_ERROR("File "//trim(tmpfil)//" does not exist !")
          if (me == 0) then
-           open(unit=505,file=trim(tmpfil),status='unknown',form='formatted')
-           read(505,*,iostat=ierr) meshsz
+           unt = get_unit()
+           open(unit=unt,file=trim(tmpfil),status='unknown',form='formatted')
+           read(unt,*,iostat=ierr) meshsz
          end if ! me=0
          call xmpi_bcast(meshsz,0,xmpi_world,ierr)
          ABI_MALLOC(pawtab(itypat)%proj,(meshsz))
          if (me == 0) then
            do ir=1,meshsz
-             read(505,*,iostat=ierr) pawtab(itypat)%proj(ir)
+             read(unt,*,iostat=ierr) pawtab(itypat)%proj(ir)
            end do ! ir
-           close(505)
+           close(unt)
          end if ! me=0
          call xmpi_bcast(ierr,0,xmpi_world,ir)
          if (ierr /= 0) ABI_ERROR("Error when reading file "//trim(tmpfil))
@@ -872,19 +876,6 @@ CONTAINS  !=====================================================================
        call wrtout(std_out,message,"COLL")
 
        int1 = sqrt(int1)
-
-       tmpfil = "dmft_normalized_orbital_itypat_"//trim(adjustl(tag))
-
-       write(message,'(3a)') ch10," Writing unprojected normalized orbital on file ",trim(tmpfil)
-       call wrtout(std_out,message,"COLL")
-
-       if (me == 0) then
-         open(unit=505,file=trim(tmpfil),status="unknown",form="formatted")
-         do ir=1,meshsz
-           write(505,*) pawrad_tmp%rad(ir),pawtab(itypat)%proj(ir)/int1
-         end do
-         close(505)
-       end if ! me=0
 
        if (dmft_dc == 8) then
 

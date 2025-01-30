@@ -29,7 +29,11 @@ MODULE m_hu
 
  use m_abicore
  use m_errors
+
+ use m_abi_linalg, only : abi_xgemm
+ use m_matlu, only : matlu_type
  use m_paw_dmft, only : paw_dmft_type
+ use m_pawtab, only : pawtab_type
 
  implicit none
 
@@ -198,8 +202,6 @@ end subroutine destroy_vee
 !! SOURCE
 
 subroutine init_hu(hu,paw_dmft,pawtab)
-
- use m_pawtab, only : pawtab_type
 
 !Arguments ------------------------------------
  type(paw_dmft_type), intent(in) :: paw_dmft
@@ -635,8 +637,6 @@ end subroutine vee2udens_hu
 
 subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_rotated)
 
- use m_matlu, only : matlu_type
-
 !Arguments ------------------------------------
  type(paw_dmft_type), intent(in) :: paw_dmft
  integer, intent(in) :: pawprtvol,rot_type
@@ -689,7 +689,7 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
        !endif
 
      write(tag_at,'(i4)') iatom
-     write(message,'(3a)') ch10,'  -------> For Correlated atom',adjustl(tag_at)
+     write(message,'(3a)') ch10,'  -------> For Correlated atom ',adjustl(tag_at)
      call wrtout(std_out,message,'COLL')
 
 !    ==================================
@@ -896,7 +896,7 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
      end if
 
      write(tag_at,'(i4)') iatom
-     write(message,'(3a)') ch10,'  -------> For Correlated atom',adjustl(tag_at)
+     write(message,'(3a)') ch10,'  -------> For Correlated atom ',adjustl(tag_at)
      call wrtout(std_out,message,'COLL')
 
 !  ! ================================================================
@@ -1150,8 +1150,6 @@ end subroutine rotatevee_hu
 !! SOURCE
 
 subroutine rotate_hu(rot_mat,nsppol,tndim,vee,vee_rotated)
-
- use m_abi_linalg, only : abi_xgemm
 
 !Arguments ------------------------------------
  integer, intent(in) :: nsppol,tndim

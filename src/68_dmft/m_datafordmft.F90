@@ -33,7 +33,7 @@ MODULE m_datafordmft
  use m_errors
  use m_fstrings, only : int2char4
  use m_io_tools, only : open_file
- use m_matlu, only : add_matlu,checkdiag_matlu,copy_matlu,destroy_matlu,diff_matlu, &
+ use m_matlu, only : add_matlu,checkdiag_matlu,destroy_matlu,diff_matlu, &
                    & init_matlu,matlu_type,print_matlu,sym_matlu,xmpi_matlu
  use m_matrix, only : invsqrt_matrix
  use m_mpinfo, only : proc_distrb_cycle
@@ -41,7 +41,6 @@ MODULE m_datafordmft
  use m_paw_dmft, only : paw_dmft_type
  use m_paw_ij, only : paw_ij_type
  use m_pawcprj, only : pawcprj_alloc,pawcprj_free,pawcprj_get,pawcprj_type
- use m_pawrad, only : pawrad_type,simp_gen
  use m_pawtab, only : pawtab_type
  use m_xmpi
 
@@ -1808,8 +1807,6 @@ end subroutine compute_wannier
 
 subroutine print_wannier(paw_dmft,istep)
 
- use m_io_tools, only : get_unit
-
 !Arguments ------------------------------------
  integer, intent(in) :: istep
  type(paw_dmft_type), intent(in) :: paw_dmft
@@ -1838,8 +1835,11 @@ subroutine print_wannier(paw_dmft,istep)
    nflavor = (2*lpawu+1) * paw_dmft%nspinor * paw_dmft%nsppol
    call int2char4(iatom,tag_at)
    ABI_CHECK((tag_at(1:1)/='#'),'Bug: string length too short!')
-   tmpfil = trim(paw_dmft%filapp)//'Wannier_functions_iatom_'//trim(tag_at)//'_'//tag_iter
+   tmpfil = trim(paw_dmft%filapp)//'Wannier_functions_iatom'//trim(tag_at)//'_'//tag_iter
    if (open_file(tmpfil,message,newunit=unt) /= 0) ABI_ERROR(message)
+   write(unt,'(4a)') "# Radial part of projective Wannier functions, after orthonormalization, for each flavor.", &
+       & ch10,"# First column is the radius (bohr) and the other columns correspond to the radial part of flavor i,", &
+       & " where i=1...2*(2*l+1) (spins up are first)"
    do ir=1,paw_dmft%radgrid(itypat)%mesh_size
      write(unt,*) paw_dmft%radgrid(itypat)%rad(ir),(dble(paw_dmft%wannier(ir,iflavor,iatom)),iflavor=1,nflavor)
    end do ! ir

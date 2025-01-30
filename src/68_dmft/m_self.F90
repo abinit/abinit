@@ -25,10 +25,17 @@ MODULE m_self
  use m_errors
  use m_abicore
 
- use m_paw_dmft, only : mpi_distrib_dmft_type,paw_dmft_type
- use m_matlu, only : matlu_type,print_matlu
- use m_oper, only : oper_type
+ use m_datafordmft, only : compute_levels
+ use m_fstrings, only : int2char4
  use m_hu, only : hu_type
+ use m_io_tools, only : get_unit
+ use m_matlu, only : copy_matlu,destroy_matlu,diag_matlu,fac_matlu,init_matlu,matlu_type,print_matlu, &
+                   & rotate_matlu,xmpi_matlu,zero_matlu
+ use m_oper, only : destroy_oper,gather_oper,init_oper,oper_type,print_oper
+ use m_paw_dmft, only : mpi_distrib_dmft_type,paw_dmft_type
+ use m_paw_exactDC, only : compute_exactDC
+ use m_pawtab, only : pawtab_type
+ use m_xmpi, only : xmpi_bcast,xmpi_sum
 
  implicit none
 
@@ -131,8 +138,6 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
 subroutine alloc_self(self,paw_dmft,opt_oper,wtype,opt_moments)
-
- use m_oper, only : init_oper
 
 !Arguments ------------------------------------
  type(self_type), intent(inout) :: self
@@ -262,8 +267,6 @@ end subroutine initialize_self
 
 subroutine destroy_self(self)
 
- use m_oper, only : destroy_oper
-
 !Arguments ------------------------------------
  type(self_type), intent(inout) :: self
 !Local variables-------------------------------
@@ -313,9 +316,6 @@ end subroutine destroy_self
 
 subroutine print_self(self,prtdc,paw_dmft,prtopt)
 
- use m_matlu, only : print_matlu
- use m_oper, only : print_oper
-
 !Arguments ------------------------------------
  type(paw_dmft_type), intent(in) :: paw_dmft
  type(self_type), intent(in)  :: self
@@ -363,11 +363,6 @@ end subroutine print_self
 !! SOURCE
 
 subroutine dc_self(charge_loc,hdc,hu,paw_dmft,pawtab,occ_matlu)
-
- use m_matlu, only : xmpi_matlu,zero_matlu
- use m_pawtab, only : pawtab_type
- use m_paw_exactDC, only : compute_exactDC
- use m_xmpi, only : xmpi_sum
 
 !Arguments ------------------------------------
 !type
@@ -505,14 +500,6 @@ end subroutine dc_self
 subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,&
                  & opt_selflimit,opt_hdc,opt_stop,opt_maxent)
 
- use m_datafordmft, only : compute_levels
- use m_fstrings, only : int2char4
- use m_io_tools, only : get_unit
- use m_matlu, only : copy_matlu,destroy_matlu,diag_matlu,init_matlu,print_matlu,rotate_matlu,xmpi_matlu,zero_matlu
- use m_oper, only : destroy_oper,gather_oper,init_oper
- use m_pawtab, only : pawtab_type
- use m_xmpi, only : xmpi_bcast
-
 !Arguments ------------------------------------
 !type
  type(self_type), intent(inout) :: self
@@ -528,7 +515,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
  integer :: myproc,natom,natom_read,ncount,ndim,ndim_read,nrecl,nspinor,nspinor_read
  integer :: nsppol,nsppol_read,nw_read,optmaxent,optrw,readimagonly,spacecomm,unitrot
  real(dp) :: fermie_read,x_r,x_i,xtemp
- logical :: lexist,nondiaglevels
+ logical :: lexist,nondiaglevels,prtself
  character(len=30000) :: message ! Big buffer to avoid buffer overflow.
  character(len=fnlen) :: tmpfil,tmpfil2,tmpfilrot,tmpmatrot
  character(len=1) :: tag_is
@@ -559,6 +546,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
  iter_imp  = 0
  optmaxent = 0
  optrw = 0
+ prtself = (paw_dmft%dmft_prtself == 1)
  readimagonly = 0
 
  if (present(opt_rw)) optrw = opt_rw
@@ -813,7 +801,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
 #endif
          rewind(unitselffunc_arr(iall))
 
-         if (optrw == 2) then
+         if (optrw == 2 .and. prtself) then
            unitselffunc_arr2(iall) = get_unit()
            ABI_CHECK(unitselffunc_arr2(iall) > 0, "Cannot find free IO unit!")
 #ifdef FC_NAG
@@ -838,11 +826,21 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
 
        if (optrw == 2) then
 
-         write(message,'(3a,5i5,2x,e25.17e3)') "# natom,nsppol,nspinor,ndim,nw,fermilevel",ch10,&
-           & "####",natom,nsppol,nspinor,ndim,self%nw,paw_dmft%fermie
+         write(message,'(11a,5i5,2x,e25.17e3)') "# DFT+DMFT self-energy for each frequency",ch10, &
+                           & "# Columns are ordered this way:",ch10, &
+                           & "# Frequency (Ha)  ((((Re(Sigma(im,im1,ispinor,ispinor1)) ", &
+                           & "Im(Sigma(im,im1,ispinor,ispinor1)),im=1,2*l+1),im1=1,2*l+1),", &
+                           & "ispinor=1,nspinor),ispinor1=1,nspinor) where the leftmost index varies first", &
+                           & ch10,"# natom,nsppol,nspinor,ndim,nw,fermilevel",ch10,&
+                           & "####",natom,nsppol,nspinor,ndim,self%nw,paw_dmft%fermie
          call wrtout(unitselffunc_arr(iall),message,'COLL')
-         call wrtout(unitselffunc_arr2(iall),message,'COLL')
+         if (prtself) then
+           call wrtout(unitselffunc_arr2(iall),message,'COLL')
+         end if
        else if (optrw == 1 .and. iexist2 == 1 .and. readimagonly == 0) then
+         read(unitselffunc_arr(iall),*)
+         read(unitselffunc_arr(iall),*)
+         read(unitselffunc_arr(iall),*)
          read(unitselffunc_arr(iall),*)
          read(unitselffunc_arr(iall),*,iostat=ioerr) &
            & chtemp,natom_read,nsppol_read,nspinor_read,ndim_read,nw_read,fermie_read
@@ -910,13 +908,14 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
            else
              string_format = '(2x,393(e18.10e3,2x))'
            end if
-
            write(message,string_format) self%omega(ifreq),&
                & ((((dble(self%oper(ifreq)%matlu(iatom)%mat(im+(ispinor-1)*ndim,im1+(ispinor1-1)*ndim,isppol)),&
                & aimag(self%oper(ifreq)%matlu(iatom)%mat(im+(ispinor-1)*ndim,im1+(ispinor1-1)*ndim,isppol)),&
                & im=1,ndim),im1=1,ndim),ispinor=1,nspinor),ispinor1=1,nspinor)
            call wrtout(unitselffunc_arr(iall),message,'COLL')
-           call wrtout(unitselffunc_arr2(iall),message,'COLL')
+           if (prtself) then
+             call wrtout(unitselffunc_arr2(iall),message,'COLL')
+           end if
 
            !- For the Tentative rotation of the self-energy file (begin rot)
            !----------------------------------------------------------------
@@ -1011,14 +1010,18 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
           & "#dc ",((((self%hdc%matlu(iatom)%mat(im+(ispinor-1)*ndim,im1+(ispinor1-1)*ndim,isppol),&
             & im=1,ndim),im1=1,ndim),ispinor=1,nspinor),ispinor1=1,nspinor)
          call wrtout(unitselffunc_arr(iall),message,'COLL')
-         call wrtout(unitselffunc_arr2(iall),message,'COLL')
+         if (prtself) then
+           call wrtout(unitselffunc_arr2(iall),message,'COLL')
+         end if
          if (self%has_moments == 1) then
            do i=1,self%nmoments
              write(tag_is,'(i1)') i
              write(message,'(a,2x,500(e25.17e3,2x))') "#moments_"//trim(tag_is),&
                 & ((self%moments(i)%matlu(iatom)%mat(im,im1,isppol),im=1,nspinor*ndim),im1=1,nspinor*ndim)
              call wrtout(unitselffunc_arr(iall),message,'COLL')
-             call wrtout(unitselffunc_arr2(iall),message,'COLL')
+             if (prtself) then
+               call wrtout(unitselffunc_arr2(iall),message,'COLL')
+             end if
            end do ! i
          end if ! moments
        else if (optrw == 1 .and. iexist2 == 1 .and. ioerr == 0 .and. readimagonly == 0) then
@@ -1047,7 +1050,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
          write(std_out,*) "     self%hdc fixed in kramerskronig_self"
        end if ! optrw
        close(unitselffunc_arr(iall))
-       if (optrw == 2) close(unitselffunc_arr2(iall))
+       if (optrw == 2 .and. prtself) close(unitselffunc_arr2(iall))
 !         enddo ! ispinor
      end do ! isppol
      ABI_FREE(s_r)
@@ -1395,7 +1398,6 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
    end if
 
  end if ! use_fixed_self
-
 end subroutine rw_self
 !!***
 
@@ -1604,8 +1606,6 @@ end subroutine new_self
 !! SOURCE
 
 subroutine kramerskronig_self(self,selflimit,selfhdc,paw_dmft,filapp)
-
- use m_oper, only : gather_oper
 
 !Arguments ------------------------------------
  type(self_type), intent(inout) :: self
@@ -1820,9 +1820,6 @@ end subroutine kramerskronig_self
 !! SOURCE
 
 subroutine selfreal2imag_self(selfr,self,filapp,paw_dmft)
-
- use m_matlu, only : fac_matlu
- use m_oper, only : gather_oper
 
 !Arguments ------------------------------------
 !type

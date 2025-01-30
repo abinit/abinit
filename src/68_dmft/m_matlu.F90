@@ -34,6 +34,14 @@ MODULE m_matlu
  use m_errors
  use m_abicore
 
+ use m_abi_linalg, only : abi_xgemm
+ use m_fstrings, only : int2char4
+ use m_hide_lapack, only : xginv
+ use m_io_tools, only : flush_unit
+ use m_matrix, only : blockdiago_fordsyev
+ use m_paw_dmft, only : paw_dmft_type
+ use m_xmpi, only : xmpi_bcast,xmpi_sum
+
  implicit none
 
  private
@@ -182,22 +190,27 @@ end subroutine init_matlu
 !!
 !! OUTPUT
 !!  matlu <type(matlu_type)>= density matrix in the local orbital basis and related variables
+!!  err = maximal off-diagonal/imaginary element that is neglected
 !!
 !! SOURCE
 
-subroutine zero_matlu(matlu,natom,onlynondiag,onlyimag)
+subroutine zero_matlu(matlu,natom,onlynondiag,onlyimag,err)
 
 !Arguments ------------------------------------
  integer, intent(in) :: natom
  type(matlu_type), intent(inout) :: matlu(natom)
  integer, optional, intent(in) :: onlyimag,onlynondiag
+ real(dp), optional, intent(out) :: err
 !Local variables-------------------------------
  integer :: iatom,im,im1,isppol
  integer :: lpawu,ndim,nspinor,nsppol,tndim
+ real(dp) :: err_
 !*********************************************************************
 
  nspinor = matlu(1)%nspinor
  nsppol  = matlu(1)%nsppol
+
+ if (present(err)) err = zero
 
  do iatom=1,natom
    lpawu = matlu(iatom)%lpawu
@@ -208,11 +221,18 @@ subroutine zero_matlu(matlu,natom,onlynondiag,onlyimag)
      do isppol=1,nsppol
        do im1=1,tndim
          do im=1,tndim
-           if (im /= im1) matlu(iatom)%mat(im,im1,isppol) = czero
+           if (im /= im1) then
+             if (present(err)) then
+               err_ = abs(matlu(iatom)%mat(im,im1,isppol))
+               if (err_ > err) err = err_
+             end if
+             matlu(iatom)%mat(im,im1,isppol) = czero
+           end if ! im/=im1
          end do ! im
        end do ! im1
      end do ! isppol
    else if (present(onlyimag)) then
+     if (present(err)) err = maxval(abs(aimag(matlu(iatom)%mat(:,:,:))))
      matlu(iatom)%mat(:,:,:) = cmplx(dble(matlu(iatom)%mat(:,:,:)),zero,kind=dp)
    else
      matlu(iatom)%mat(:,:,:) = czero
@@ -396,7 +416,7 @@ subroutine print_matlu(matlu,natom,prtopt,opt_diag,opt_ab_out,opt_exp,argout,com
    call wrtout(arg_out,message,mode_paral)
 
    testcmplx = testcmplx_
-   if (maxval(aimag(matlu(iatom)%mat(:,:,:))) > tol5) testcmplx = .true.
+   if (maxval(abs(aimag(matlu(iatom)%mat(:,:,:)))) > tol5) testcmplx = .true.
 
    !do isppol=1,nsppol
    !  if (present(opt_ab_out) .and. nsppol == 2) then
@@ -519,9 +539,6 @@ end subroutine print_matlu
 !! SOURCE
 
  subroutine sym_matlu(gloc,paw_dmft)
-
- use m_paw_dmft, only : paw_dmft_type
- use m_abi_linalg, only : abi_xgemm
 
 !Arguments ------------------------------------
  type(paw_dmft_type), intent(in) :: paw_dmft
@@ -883,8 +900,6 @@ end subroutine print_matlu
 
  subroutine inverse_matlu(matlu,natom)
 
- use m_hide_lapack, only : xginv
-
 !Arguments ------------------------------------
  integer, intent(in) :: natom
  type(matlu_type), intent(inout) :: matlu(natom)
@@ -960,8 +975,6 @@ end subroutine print_matlu
 !! SOURCE
 
 subroutine diff_matlu(char1,char2,matlu1,matlu2,natom,option,toldiff,ierr,zero_or_one)
-
- use m_io_tools, only : flush_unit
 
 !Arguments ------------------------------------
  integer, intent(in) :: natom,option
@@ -1460,9 +1473,6 @@ end subroutine add_matlu
 
  subroutine diag_matlu(matlu,matlu_diag,natom,prtopt,eigvectmatlu,nsppol_imp,checkstop,opt_real,test)
 
- use m_abi_linalg, only : abi_xgemm
- use m_matrix, only : blockdiago_fordsyev
-
 !Arguments ------------------------------------
  integer, intent(in) :: natom,prtopt
  type(matlu_type), intent(in) :: matlu(natom)
@@ -1890,8 +1900,6 @@ end subroutine add_matlu
 !! SOURCE
 
  subroutine rotate_matlu(matlu_inp,rot_mat,natom,inverse)
-
- use m_abi_linalg, only : abi_xgemm
 
 !Arguments ------------------------------------
  integer, intent(in) :: inverse,natom
@@ -2357,8 +2365,6 @@ end subroutine add_matlu
 
  subroutine prod_matlu(matlu1,matlu2,matlu3,natom)
 
- use m_abi_linalg, only : abi_xgemm
-
 !Arguments ------------------------------------
  integer, intent(in) :: natom
  type(matlu_type), intent(in) :: matlu1(natom),matlu2(natom)
@@ -2554,9 +2560,6 @@ end subroutine add_matlu
 !! SOURCE
 
  subroutine slm2ylm_matlu(matlu,natom,paw_dmft,option,optprt)
-
- use m_abi_linalg, only : abi_xgemm
- use m_paw_dmft, only : paw_dmft_type
 
 !Arguments ------------------------------------
  integer, intent(in) :: natom,option,optprt
@@ -2837,8 +2840,6 @@ end subroutine add_matlu
 !! SOURCE
 
  subroutine printplot_matlu(matlu,natom,freq,char1,units,imre)
-
- use m_fstrings, only : int2char4
 
 !Arguments ------------------------------------
 !scalars
@@ -4023,8 +4024,6 @@ end subroutine add_matlu
 
  subroutine xmpi_matlu(matlu,natom,comm,master,option)
 
- use m_xmpi, only : xmpi_bcast,xmpi_sum
-
 !Arguments ------------------------------------
  integer, intent(in) :: comm,natom
  type(matlu_type), intent(inout) :: matlu(natom)
@@ -4102,27 +4101,42 @@ end subroutine add_matlu
 !!  natom = number of atoms
 !!
 !! OUTPUT
+!!  err = difference between A and symmetrized A
 !!
 !! SOURCE
 
- subroutine symmetrize_matlu(matlu,natom)
+ subroutine symmetrize_matlu(matlu,natom,err)
 
 !Arguments ------------------------------------
  integer, intent(in) :: natom
  type(matlu_type), intent(inout) :: matlu(natom)
+ real(dp), optional, intent(out) :: err
 !Local variables-------------------------------
- integer :: iatom,isppol,lpawu,nsppol
+ integer :: iatom,isppol,lpawu,nspinor,nsppol,tndim
+ real(dp) :: err_
+ complex(dpc), allocatable :: mat_tmp(:,:)
 !************************************************************************
 
- nsppol = matlu(1)%nsppol
+ nspinor = matlu(1)%nspinor
+ nsppol  = matlu(1)%nsppol
+
+ if (present(err)) err = zero
 
  do iatom=1,natom
    lpawu = matlu(iatom)%lpawu
    if (lpawu == -1) cycle
+   tndim = nspinor * (2*lpawu+1)
+   ABI_MALLOC(mat_tmp,(tndim,tndim))
    do isppol=1,nsppol
-     matlu(iatom)%mat(:,:,isppol) = half * (matlu(iatom)%mat(:,:,isppol)+ &
-         & transpose(matlu(iatom)%mat(:,:,isppol)))
+     mat_tmp(:,:) = half * (matlu(iatom)%mat(:,:,isppol)+ &
+                  & transpose(matlu(iatom)%mat(:,:,isppol)))
+     if (present(err)) then
+       err_ = sum(abs(mat_tmp(:,:)-matlu(iatom)%mat(:,:,isppol)))
+       if (err_ > err) err = err_
+     end if ! present(err)
+     matlu(iatom)%mat(:,:,isppol) = mat_tmp(:,:)
    end do ! isppol
+   ABI_FREE(mat_tmp)
  end do ! iatom
 
  end subroutine symmetrize_matlu

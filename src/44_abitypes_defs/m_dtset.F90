@@ -137,6 +137,7 @@ type, public :: dataset_type
  integer :: dmft_nwlo
  integer :: dmft_occnd_imag
  integer :: dmft_prt_maxent
+ integer :: dmft_prtself
  integer :: dmft_prtwan
  integer :: dmft_rslf
  integer :: dmft_read_occnd
@@ -1080,6 +1081,7 @@ type, public :: dataset_type
  character(len=1) :: eph_fix_korq = "k"
  character(len=fnlen) :: geoopt = ABI_NOFILE
  character(len=fnlen) :: moldyn = ABI_NOFILE
+ character(len=fnlen) :: dmft_orbital_filepath = ABI_NOFILE
 
  contains
 
@@ -1523,7 +1525,9 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%dmft_nwlo          = dtin%dmft_nwlo
  dtout%dmft_nwli          = dtin%dmft_nwli
  dtout%dmft_occnd_imag    = dtin%dmft_occnd_imag
+ dtout%dmft_orbital_filepath = dtin%dmft_orbital_filepath
  dtout%dmft_prt_maxent    = dtin%dmft_prt_maxent
+ dtout%dmft_prtself       = dtin%dmft_prtself
  dtout%dmft_prtwan        = dtin%dmft_prtwan
  dtout%dmft_read_occnd    = dtin%dmft_read_occnd
  dtout%dmft_rslf          = dtin%dmft_rslf
@@ -3467,7 +3471,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' dmftqmc_l dmftqmc_n dmftqmc_seed dmftqmc_therm dmft_charge_prec dmft_dc'
  list_vars=trim(list_vars)//' dmft_entropy dmft_fermi_step'
  list_vars=trim(list_vars)//' dmft_iter dmft_kspectralfunc dmft_mxsf dmft_nlambda dmft_nominal dmft_nwli dmft_nwlo'
- list_vars=trim(list_vars)//' dmft_occnd_imag dmft_orbital dmft_prt_maxent dmft_prtwan dmft_read_occnd'
+ list_vars=trim(list_vars)//' dmft_occnd_imag dmft_orbital dmft_orbital_filepath dmft_prt_maxent dmft_prtself dmft_prtwan dmft_read_occnd'
  list_vars=trim(list_vars)//' dmft_rslf dmft_shiftself dmft_solv dmft_tolfreq dmft_tollc'
  list_vars=trim(list_vars)//' dmft_t2g dmft_test dmft_use_all_bands dmft_use_full_chipsi dmft_wanorthnorm' ! dmft_wanorthnorm is not documented
  list_vars=trim(list_vars)//' dmft_wanrad dmft_x2my2d dosdeltae dtion dtele dynamics dynimage' !FB: dynamics?

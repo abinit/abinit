@@ -33,8 +33,14 @@ MODULE m_paw_dmft
  use m_xmpi
 
  use defs_abitypes, only : MPI_type
+ use m_crystal, only : crystal_t
+ use m_fstrings, only : int2char4
+ use m_geometry, only : symredcart
  use m_io_tools, only : open_file
- use m_pawrad, only : pawrad_type
+ use m_mpinfo, only : proc_distrb_cycle
+ use m_paw_numeric, only : paw_jbessel_4spline
+ use m_pawang, only : pawang_type
+ use m_pawrad, only : pawrad_free,pawrad_init,pawrad_type,simp_gen
  use m_pawtab, only : pawtab_type
 
  implicit none
@@ -164,6 +170,9 @@ MODULE m_paw_dmft
 
   integer :: dmft_prt_maxent
   ! =1 to print Maxent files
+
+  integer :: dmft_prtself
+  ! =1 to keep self-energy files of all previous iterations
 
   integer :: dmft_prtwan
   ! =1 to print Wannier functions
@@ -685,11 +694,6 @@ CONTAINS  !=====================================================================
 subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,pawang, &
                       & pawrad,pawtab,rprimd,ucvol,unpaw,use_sc_dmft,xred,ylm)
 
- use m_mpinfo, only : proc_distrb_cycle
- use m_paw_numeric, only : paw_jbessel_4spline
- use m_pawang, only : pawang_type
- use m_pawrad, only : pawrad_init,simp_gen
-
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: mpsang
@@ -1001,6 +1005,7 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  paw_dmft%dmft_fermi_prec      = dtset%dmft_charge_prec * ten
  paw_dmft%dmft_fermi_step      = dtset%dmft_fermi_step
  paw_dmft%dmft_prt_maxent      = dtset%dmft_prt_maxent
+ paw_dmft%dmft_prtself         = dtset%dmft_prtself
  paw_dmft%dmft_prtwan          = dtset%dmft_prtwan
  paw_dmft%dmft_wanrad          = dtset%dmft_wanrad
  paw_dmft%dmft_t2g             = dtset%dmft_t2g
@@ -1447,6 +1452,7 @@ end subroutine init_sc_dmft
 !!  fnamei = input file name
 !!  fnametmp_app = header for the output filename
 !!  paw_dmft <type(paw_dmft_type)>= paw+dmft related data
+!! pawtab(ntypat*usepaw) <type(pawtab_type)>=paw tabulated starting data
 !!
 !! SOURCE
 !!
@@ -1458,10 +1464,7 @@ end subroutine init_sc_dmft
 !! described in the  RMP paper written by
 !! G.Kotliar,  S.Y.Savrasov, K.Haule, V.S.Oudovenko, O.Parcollet, C.A.Marianetti.
 
-subroutine init_dmft(cryst_struc,dmatpawu,dtset,fermie_dft,fnamei,fnametmp_app,paw_dmft)
-
- use m_crystal, only : crystal_t
- use m_geometry, only : symredcart
+subroutine init_dmft(cryst_struc,dmatpawu,dtset,fermie_dft,fnamei,fnametmp_app,paw_dmft,pawtab)
 
 !Arguments ------------------------------------
  real(dp), intent(in) :: fermie_dft
@@ -1470,10 +1473,13 @@ subroutine init_dmft(cryst_struc,dmatpawu,dtset,fermie_dft,fnamei,fnametmp_app,p
  type(crystal_t), target, intent(in) :: cryst_struc
  character(len=fnlen), intent(in) :: fnamei,fnametmp_app
  real(dp), target, intent(in) :: dmatpawu(:,:,:,:)
+ type(pawtab_type), intent(in) :: pawtab(dtset%ntypat)
 !Local variables ------------------------------------
- integer :: grid_unt,iatom,ierr,ifreq,ioerr,irot,isym,nflavor,ngrid,nsym
- real(dp) :: step
+ integer :: grid_unt,iatom,ierr,ifreq,ioerr,ir,irot,isym
+ integer :: itypat,lpawu,meshsz,nflavor,ngrid,nsym,unt
+ real(dp) :: int1,step
  logical :: lexist
+ character(len=4) :: tag_at
  character(len=500) :: message
  character(len=fnlen) :: tmpfil
 ! *********************************************************************
@@ -1518,6 +1524,33 @@ subroutine init_dmft(cryst_struc,dmatpawu,dtset,fermie_dft,fnamei,fnametmp_app,p
 
  paw_dmft%filapp   = fnametmp_app
  paw_dmft%filnamei = fnamei
+
+ ! Write orbital on file
+ if (paw_dmft%myproc == 0) then
+   do itypat=1,paw_dmft%ntypat
+     lpawu = pawtab(itypat)%lpawu
+     if (lpawu == -1) cycle
+     meshsz = paw_dmft%siz_proj(itypat)
+
+     call simp_gen(int1,pawtab(itypat)%proj(1:meshsz)**2,paw_dmft%radgrid(itypat), &
+                 & r_for_intg=paw_dmft%radgrid(itypat)%rad(meshsz))
+     int1 = sqrt(int1)
+
+     call int2char4(itypat,tag_at)
+     ABI_CHECK((tag_at(1:1)/='#'),'Bug: string length too short!')
+     if (open_file(trim(paw_dmft%filapp)//"_DMFTORBITAL_itypat"//tag_at//".dat",message,newunit=unt) /= 0) ABI_ERROR(message)
+
+     write(unt,'(4a)') "# Correlated normalized radial orbital for DMFT. This", &
+        & " is not projected on any energy window (you need to use dmft_prtwan for that).",ch10, &
+        & "#       Radius (Bohr)           u_l(r) = R_l * r"
+
+     do ir=1,meshsz
+       write(unt,*) paw_dmft%radgrid(itypat)%rad(ir),pawtab(itypat)%proj(ir)/int1
+     end do ! ir
+
+     close(unt)
+   end do ! itypat
+ end if ! myproc=0
 
 !==================
 ! Real frequencies
@@ -2055,8 +2088,6 @@ end subroutine destroy_dmft
 
 subroutine destroy_sc_dmft(paw_dmft)
 
- use m_pawrad, only : pawrad_free
-
 !Arguments ------------------------------------
  type(paw_dmft_type), intent(inout) :: paw_dmft
 !Local variables-------------------------------
@@ -2294,8 +2325,11 @@ subroutine saveocc_dmft(paw_dmft)
  rewind(unitsaveocc)
  write(message,'(2a)') ch10,"  == Print DFT+DMFT non diagonal occupations on disk"
  call wrtout(std_out,message,'COLL')
- write(message,'(3a,2x,4i5)') "# natom,nsppol,mbandc,nkpt",ch10, &
-         & "####",paw_dmft%natom,paw_dmft%nsppol,paw_dmft%mbandc,paw_dmft%nkpt
+ write(message,'(5a,2x,4i5,2a)') "# DFT+DMFT off-diagonal occupations f_{ib,ib1} = <Psi^{dagger}_{ib1}|Psi_{ib}>", &
+         & ch10,"# natom,nsppol,mbandc,nkpt",ch10, &
+         & "####",paw_dmft%natom,paw_dmft%nsppol,paw_dmft%mbandc,paw_dmft%nkpt,ch10, &
+         & "#        isppol      ikpt         ib          ib1         Re                        Imag"
+
  call wrtout(unitsaveocc,message,'COLL')
  nkpt = paw_dmft%nkpt
  do is=1,paw_dmft%nsppol
@@ -2359,7 +2393,9 @@ subroutine readocc_dmft(paw_dmft,filnam_ds3,filnam_ds4)
    write(message,'(3a)') ch10,"  == Read DMFT non diagonal occupations on disk"
    call wrtout(std_out,message,'COLL')
    read(unitsaveocc,*)
+   read(unitsaveocc,*)
    read(unitsaveocc,*,iostat=ioerr) chtemp,dum1,dum2,dum3,dum4
+   read(unitsaveocc,*)
    if (ioerr < 0) write(std_out,*) "read",dum1,dum2,dum3,dum4
    write(message,'(2a,4i4)') ch10,"  == natom, nsppol, nbandc, nkpt read are",dum1,dum2,dum3,dum4
    call wrtout(std_out,message,'COLL')

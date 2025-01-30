@@ -2349,6 +2349,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmft_occnd_imag=1
    dtsets(idtset)%dmft_orbital(:)=1
    dtsets(idtset)%dmft_prt_maxent=1
+   dtsets(idtset)%dmft_prtself=1
    dtsets(idtset)%dmft_prtwan=0
    dtsets(idtset)%dmft_read_occnd=0
    dtsets(idtset)%dmft_rslf=1
