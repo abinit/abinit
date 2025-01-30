@@ -2234,7 +2234,9 @@ subroutine getgh1ndc(cwavein,gh1ndc,gbound_k,istwf_k,kg_k,mgfft,mpi_enreg,&
  if (nspinortot==1) then
 
    ABI_MALLOC(ghc1,(2,npw_k*ndat))
+#ifdef HAVE_OPENMP_OFFLOAD
    !$OMP TARGET ENTER DATA MAP(alloc:ghc1) IF(gpu_option==ABI_GPU_OPENMP)
+#endif
 
    ! apply vector potential in direction ipert to input wavefunction
    call fourwf(1,vectornd,cwavein,ghc1,work,gbound_k,gbound_k,&
@@ -2245,14 +2247,18 @@ subroutine getgh1ndc(cwavein,gh1ndc,gbound_k,istwf_k,kg_k,mgfft,mpi_enreg,&
    if(gpu_option==ABI_GPU_DISABLED) then
      gh1ndc=two_pi*ghc1
    else if(gpu_option==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
      !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO MAP(to:gh1ndc,ghc1) PRIVATE(ipw)
      do ipw=1,npw_k*ndat
        gh1ndc(1,ipw)=two_pi*ghc1(1,ipw)
        gh1ndc(2,ipw)=two_pi*ghc1(2,ipw)
      end do
+#endif
    end if
 
+#ifdef HAVE_OPENMP_OFFLOAD
    !$OMP TARGET EXIT DATA MAP(delete:ghc1) IF(gpu_option==ABI_GPU_OPENMP)
+#endif
    ABI_FREE(ghc1)
 
  else ! nspinortot==2
@@ -2261,7 +2267,9 @@ subroutine getgh1ndc(cwavein,gh1ndc,gbound_k,istwf_k,kg_k,mgfft,mpi_enreg,&
 
      ABI_MALLOC(cwavein1,(2,npw_k*ndat))
      ABI_MALLOC(ghc1,(2,npw_k*ndat))
+#ifdef HAVE_OPENMP_OFFLOAD
      !$OMP TARGET ENTER DATA MAP(alloc:ghc1,cwavein1) IF(gpu_option==ABI_GPU_OPENMP)
+#endif
 
      if(gpu_option==ABI_GPU_DISABLED) then
        do idat=1,ndat
@@ -2270,6 +2278,7 @@ subroutine getgh1ndc(cwavein,gh1ndc,gbound_k,istwf_k,kg_k,mgfft,mpi_enreg,&
          end do
        end do
      else if(gpu_option==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
        !$OMP TARGET TEAMS DISTRIBUTE MAP(to:cwavein1,cwavein) PRIVATE(idat)
        do idat=1,ndat
          !$OMP PARALLEL DO PRIVATE(ipw)
@@ -2277,6 +2286,7 @@ subroutine getgh1ndc(cwavein,gh1ndc,gbound_k,istwf_k,kg_k,mgfft,mpi_enreg,&
            cwavein1(1:2,ipw+(idat-1)*npw_k)=cwavein(1:2,ipw+(idat-1)*my_nspinor*npw_k)
          end do
        end do
+#endif
      end if
 
      call fourwf(1,vectornd,cwavein1,ghc1,work,gbound_k,gbound_k,&
@@ -2289,6 +2299,7 @@ subroutine getgh1ndc(cwavein,gh1ndc,gbound_k,istwf_k,kg_k,mgfft,mpi_enreg,&
          gh1ndc(1:2,iv1:iv2)=two_pi*ghc1(1:2,iv1:iv2)
        end do
      else if(gpu_option==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
        !$OMP TARGET TEAMS DISTRIBUTE MAP(to:gh1ndc,ghc1) PRIVATE(idat)
        do idat=1,ndat
          !$OMP PARALLEL DO PRIVATE(ipw)
@@ -2297,9 +2308,12 @@ subroutine getgh1ndc(cwavein,gh1ndc,gbound_k,istwf_k,kg_k,mgfft,mpi_enreg,&
            gh1ndc(2,ipw+(idat-1)*npw_k)=two_pi*ghc1(2,ipw+(idat-1)*npw_k)
          end do
        end do
+#endif
      end if
 
+#ifdef HAVE_OPENMP_OFFLOAD
      !$OMP TARGET EXIT DATA MAP(delete:ghc1,cwavein1) IF(gpu_option==ABI_GPU_OPENMP)
+#endif
      ABI_FREE(ghc1)
      ABI_FREE(cwavein1)
 
@@ -2309,7 +2323,9 @@ subroutine getgh1ndc(cwavein,gh1ndc,gbound_k,istwf_k,kg_k,mgfft,mpi_enreg,&
 
      ABI_MALLOC(cwavein2,(2,npw_k*ndat))
      ABI_MALLOC(ghc2,(2,npw_k*ndat))
+#ifdef HAVE_OPENMP_OFFLOAD
      !$OMP TARGET ENTER DATA MAP(alloc:ghc2,cwavein2) IF(gpu_option==ABI_GPU_OPENMP)
+#endif
 
      if(gpu_option==ABI_GPU_DISABLED) then
        do idat=1,ndat
@@ -2318,6 +2334,7 @@ subroutine getgh1ndc(cwavein,gh1ndc,gbound_k,istwf_k,kg_k,mgfft,mpi_enreg,&
          end do
        end do
      else if(gpu_option==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
        !$OMP TARGET TEAMS DISTRIBUTE MAP(to:cwavein2,cwavein) PRIVATE(idat)
        do idat=1,ndat
          !$OMP PARALLEL DO PRIVATE(ipw)
@@ -2325,6 +2342,7 @@ subroutine getgh1ndc(cwavein,gh1ndc,gbound_k,istwf_k,kg_k,mgfft,mpi_enreg,&
            cwavein2(1:2,ipw+(idat-1)*npw_k)=cwavein(1:2,ipw+(idat-1)*my_nspinor*npw_k+shift)
          end do
        end do
+#endif
      end if
 
      call fourwf(1,vectornd,cwavein2,ghc2,work,gbound_k,gbound_k,&
@@ -2337,6 +2355,7 @@ subroutine getgh1ndc(cwavein,gh1ndc,gbound_k,istwf_k,kg_k,mgfft,mpi_enreg,&
          gh1ndc(1:2,iv1+shift:iv2+shift)=two_pi*ghc2(1:2,iv1:iv2)
        end do
      else if(gpu_option==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
        !$OMP TARGET TEAMS DISTRIBUTE MAP(to:gh1ndc,ghc2) PRIVATE(idat)
        do idat=1,ndat
          !$OMP PARALLEL DO PRIVATE(ipw)
@@ -2345,9 +2364,12 @@ subroutine getgh1ndc(cwavein,gh1ndc,gbound_k,istwf_k,kg_k,mgfft,mpi_enreg,&
            gh1ndc(2,ipw+(idat-1)*npw_k+shift)=two_pi*ghc2(2,ipw+(idat-1)*npw_k)
          end do
        end do
+#endif
      end if
 
+#ifdef HAVE_OPENMP_OFFLOAD
      !$OMP TARGET EXIT DATA MAP(delete:ghc2,cwavein2) IF(gpu_option==ABI_GPU_OPENMP)
+#endif
      ABI_FREE(ghc2)
      ABI_FREE(cwavein2)
 
