@@ -46,7 +46,8 @@ module m_longwave
  use m_drivexc,     only : check_kxc
  use m_rhotoxc,     only : rhotoxc
  use m_ioarr,       only : read_rhor
- use m_symtk,       only : matr3inv,symmetrize_xred
+ use m_matrix,      only : matr3inv
+ use m_symtk,       only : symmetrize_xred
  use m_kg,          only : kpgio
  use m_inwffil,     only : inwffil
  use m_spacepar,    only : setsym

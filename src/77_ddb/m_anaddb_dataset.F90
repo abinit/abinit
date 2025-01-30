@@ -26,7 +26,7 @@ module m_anaddb_dataset
 
  use m_fstrings,  only : next_token, rmquotes, sjoin, inupper, ltoa, itoa, basename
  use m_clib,      only : clib_mkdir_if_needed
- use m_symtk,     only : mati3det
+ use m_matrix,    only : mati3det
  use m_parser,    only : intagm, chkvars_in_string, instrng
  use m_ddb,       only : DDB_QTOL
 

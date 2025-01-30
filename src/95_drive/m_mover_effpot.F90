@@ -62,7 +62,8 @@ module m_mover_effpot
  use m_mover,            only : mover
  use m_io_tools,         only : get_unit, open_file
  use m_symfind
- use m_symtk,            only: matr3inv,symatm,mati3inv
+ use m_matrix,           only: matr3inv,mati3inv
+ use m_symtk,            only: symatm
  implicit none
 
  private
