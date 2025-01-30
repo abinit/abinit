@@ -150,7 +150,7 @@ module m_gstore
  use m_kg,             only : getph
  use defs_datatypes,   only : pseudopotential_type
  use m_hdr,            only : hdr_type, fform_from_ext
- use m_symtk,          only : matr3inv
+ use m_matrix,         only : matr3inv
  use m_kpts,           only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, kpts_map, kpts_sort, kpts_pack_in_stars, &
                               kptrlatt_from_ngkpt
  use m_bz_mesh,        only : kmesh_t

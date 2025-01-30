@@ -32,7 +32,7 @@ MODULE m_fft_mesh
  use defs_fftdata,     only : size_goed_fft
  use m_fstrings,       only : sjoin, itoa, ltoa
  use m_numeric_tools,  only : denominator, mincm, iseven, pfactorize
- use m_symtk,          only : mati3inv
+ use m_matrix,         only : mati3inv
  use m_geometry,       only : xred2xcart
  use m_crystal,        only : crystal_t
 

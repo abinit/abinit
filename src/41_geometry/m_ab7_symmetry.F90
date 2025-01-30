@@ -23,7 +23,8 @@ module m_ab7_symmetry
   use defs_basis
   use m_abicore
 
-  use m_symtk,     only : mati3inv, mati3det, symatm, symcharac
+  use m_matrix,    only : mati3inv, mati3det
+  use m_symtk,     only : symatm, symcharac
   use m_symfind,   only : symfind, symanal, symlatt
   use m_geometry,  only : metric
   use m_spgdata,   only : spgdata
