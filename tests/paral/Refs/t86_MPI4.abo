@@ -83,16 +83,14 @@ _ WF disk file :      0.471 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
         dmftbandf2         23
         dmftbandi1          0
         dmftbandi2         12
-        dmft_iter1          0
+        dmft_iter1         10
         dmft_iter2          1
-        dmft_mxsf1     3.0000000000E-01
+        dmft_mxsf1     6.0000000000E-01
         dmft_mxsf2     7.0000000000E-01
         dmft_nwli1          0
         dmft_nwli2     100000
         dmft_nwlo1          0
         dmft_nwlo2        100
-        dmft_rslf1          0
-        dmft_rslf2          1
         dmft_solv1          5
         dmft_solv2          2
  dmft_charge_prec1     1.0000000000E-06
@@ -771,7 +769,7 @@ P newkpt: treating     32 bands with npw=     188 for ikpt=   4 by node    0
 P newkpt: treating     32 bands with npw=     180 for ikpt=   5 by node    0
 _setup2: Arith. and geom. avg. npw (full set) are     188.438     188.419
 
--       ( number of procs used in dmft ) =  4
+-       ( number of procs used in dmft ) =    4
 
 
  ******************************************
@@ -779,6 +777,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     188.438     188.419
  ******************************************
 
  DMFT uses the Hubbard one solver
+
+ Magnetic DFT, with Magnetic FLL (Full Localized Limit) double counting
+
+ Entropy is not computed, only the internal energy is printed
+
+ The imaginary part of the Green's function is neglected
 
 ================================================================================
 
@@ -793,9 +797,9 @@ tolerances: {toldfe: 1.00E-08, }
 
   == The DFT+DMFT occupation matrix for correlated electrons is ==
 
-   -------> For Correlated Atom   1
+   -------> For Correlated Atom 1
 
-          -- polarization spin component  1
+          -- polarization spin component 1
         0.27767  -0.00000   0.00000
        -0.00000   0.27767   0.00000
         0.00000   0.00000   0.27767
@@ -805,9 +809,9 @@ tolerances: {toldfe: 1.00E-08, }
 
   == The DFT+DMFT occupation matrix for correlated electrons is ==
 
-   -------> For Correlated Atom   1
+   -------> For Correlated Atom 1
 
-          -- polarization spin component  1
+          -- polarization spin component 1
         0.29187  -0.00000   0.00000
        -0.00000   0.29187  -0.00000
        -0.00000  -0.00000   0.29187
@@ -817,9 +821,9 @@ tolerances: {toldfe: 1.00E-08, }
 
   == The DFT+DMFT occupation matrix for correlated electrons is ==
 
-   -------> For Correlated Atom   1
+   -------> For Correlated Atom 1
 
-          -- polarization spin component  1
+          -- polarization spin component 1
         0.28614   0.00000  -0.00000
         0.00000   0.28614  -0.00000
        -0.00000  -0.00000   0.28614
@@ -829,9 +833,9 @@ tolerances: {toldfe: 1.00E-08, }
 
   == The DFT+DMFT occupation matrix for correlated electrons is ==
 
-   -------> For Correlated Atom   1
+   -------> For Correlated Atom 1
 
-          -- polarization spin component  1
+          -- polarization spin component 1
         0.29857   0.00000   0.00000
         0.00000   0.29857  -0.00000
        -0.00000   0.00000   0.29857
@@ -841,9 +845,9 @@ tolerances: {toldfe: 1.00E-08, }
 
   == The DFT+DMFT occupation matrix for correlated electrons is ==
 
-   -------> For Correlated Atom   1
+   -------> For Correlated Atom 1
 
-          -- polarization spin component  1
+          -- polarization spin component 1
         0.30581   0.00000  -0.00000
         0.00000   0.30581  -0.00000
        -0.00000  -0.00000   0.30581
@@ -853,9 +857,9 @@ tolerances: {toldfe: 1.00E-08, }
 
   == The DFT+DMFT occupation matrix for correlated electrons is ==
 
-   -------> For Correlated Atom   1
+   -------> For Correlated Atom 1
 
-          -- polarization spin component  1
+          -- polarization spin component 1
         0.30939  -0.00000   0.00000
         0.00000   0.30939  -0.00000
         0.00000  -0.00000   0.30939
@@ -865,9 +869,9 @@ tolerances: {toldfe: 1.00E-08, }
 
   == The DFT+DMFT occupation matrix for correlated electrons is ==
 
-   -------> For Correlated Atom   1
+   -------> For Correlated Atom 1
 
-          -- polarization spin component  1
+          -- polarization spin component 1
         0.31223   0.00000   0.00000
         0.00000   0.31223   0.00000
         0.00000   0.00000   0.31223
@@ -877,9 +881,9 @@ tolerances: {toldfe: 1.00E-08, }
 
   == The DFT+DMFT occupation matrix for correlated electrons is ==
 
-   -------> For Correlated Atom   1
+   -------> For Correlated Atom 1
 
-          -- polarization spin component  1
+          -- polarization spin component 1
         0.31268   0.00000  -0.00000
         0.00000   0.31268  -0.00000
        -0.00000  -0.00000   0.31268
@@ -889,9 +893,9 @@ tolerances: {toldfe: 1.00E-08, }
 
   == The DFT+DMFT occupation matrix for correlated electrons is ==
 
-   -------> For Correlated Atom   1
+   -------> For Correlated Atom 1
 
-          -- polarization spin component  1
+          -- polarization spin component 1
         0.31318   0.00000  -0.00000
         0.00000   0.31318  -0.00000
        -0.00000  -0.00000   0.31318
@@ -901,9 +905,9 @@ tolerances: {toldfe: 1.00E-08, }
 
   == The DFT+DMFT occupation matrix for correlated electrons is ==
 
-   -------> For Correlated Atom   1
+   -------> For Correlated Atom 1
 
-          -- polarization spin component  1
+          -- polarization spin component 1
         0.31371  -0.00000   0.00000
        -0.00000   0.31371  -0.00000
         0.00000  -0.00000   0.31371
@@ -1162,14 +1166,16 @@ force_length_stats: {min: null, max: null, mean: null, }
 
 --- !EnergyTerms
 iteration_state     : {dtset: 2, timimage: 1, image: 1, }
-comment             : Components of total free energy in Hartree
+comment             : Components of total energy in Hartree
 kinetic             :  4.31184992195388E+01
 hartree             :  3.13029594401216E+01
 xc                  : -2.24725457574387E+01
 Ewald energy        : -1.14220316979058E+02
 psp_core            :  6.53692522600457E+00
 local_psp           : -9.85047125514361E+01
-spherical_terms     :  2.59348104190753E+00
+spherical_terms     :  2.62605408357690E+00
+interaction         :  8.25456115827095E-02
+'-double_counting'  : -1.15118651247851E-01
 internal            : -1.51645710360360E+02
 total_energy        : -1.51645710360360E+02
 total_energy_eV     : -4.12648963533813E+03
@@ -1178,12 +1184,14 @@ total_energy_eV     : -4.12648963533813E+03
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 2, timimage: 1, image: 1, }
-comment             : '"Double-counting" decomposition of free energy'
+comment             : '"Double-counting" decomposition of internal energy'
 band_energy         : -1.46872848659089E+01
 Ewald energy        : -1.14220316979058E+02
 psp_core            :  6.53692522600457E+00
 xc_dc               : -2.43713389978472E+01
-spherical_terms     : -4.73302601460361E+00
+spherical_terms     : -4.70045297528042E+00
+interaction         :  8.25456115827095E-02
+'-double_counting'  : -1.15118651247851E-01
 internal            : -1.51475041631413E+02
 total_energy_dc     : -1.51475041631413E+02
 total_energy_dc_eV  : -4.12184550304185E+03
@@ -1217,16 +1225,14 @@ total_energy_dc_eV  : -4.12184550304185E+03
         dmftbandf2         23
         dmftbandi1          0
         dmftbandi2         12
-        dmft_iter1          0
+        dmft_iter1         10
         dmft_iter2          1
-        dmft_mxsf1     3.0000000000E-01
+        dmft_mxsf1     6.0000000000E-01
         dmft_mxsf2     7.0000000000E-01
         dmft_nwli1          0
         dmft_nwli2     100000
         dmft_nwlo1          0
         dmft_nwlo2        100
-        dmft_rslf1          0
-        dmft_rslf2          1
         dmft_solv1          5
         dmft_solv2          2
  dmft_charge_prec1     1.0000000000E-06

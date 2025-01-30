@@ -806,6 +806,8 @@ class AbinitTestInfoParser(object):
             if not self.parser.has_section(ncpu_section):
                 raise self.Error("Cannot find section %s in %s" % (ncpu_section, self.inp_fname))
 
+            d['yaml_test'] = self.yaml_test(ytest=d['yaml_test'], sec_name=ncpu_section)
+
             for key in self.parser.options(ncpu_section):
                 if key in self.parser.defaults():
                     continue
@@ -865,21 +867,20 @@ class AbinitTestInfoParser(object):
         fnames = [f.replace(".in", ".abi") for f in fnames]
         return [os.path.join(self.inp_dir, fname) for fname in fnames]
 
-    def yaml_test(self):
-        sec_name = 'yaml_test'
-        ytest = {}
+    def yaml_test(self, ytest=None, sec_name='yaml_test'):
+
+        if ytest is None:
+            ytest = {}
 
         if self.parser.has_section(sec_name):
             scalar_key = ['file', 'yaml']
             for key in scalar_key:
                 if self.parser.has_option(sec_name, key):
                     ytest[key] = self.parser.get(sec_name, key)
-
-            if 'file' in ytest:
+            if self.parser.has_option(sec_name, 'file'):
                 val = ytest['file']
                 base = os.path.realpath(os.path.dirname(self.inp_fname))
                 ytest['file'] = os.path.join(base, val)
-
         return ytest
 
 

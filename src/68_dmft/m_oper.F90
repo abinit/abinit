@@ -331,7 +331,7 @@ subroutine print_oper(oper,option,paw_dmft,prtopt)
  integer, intent(in) :: option,prtopt
 !Local variables-------------------------------
  integer :: ib,ib1,iband1,iband2,ikpt,isppol,mbandc,nkpt,nkptr
- character(len=2000) :: message
+ character(len=100000) :: message
  logical  :: ximag
  real(dp) :: maximag
 ! *********************************************************************
@@ -345,7 +345,7 @@ subroutine print_oper(oper,option,paw_dmft,prtopt)
  end if ! has_opermatlu=1
 
  if (oper%has_operks == 1) then
-   write(message,'(2a)') ch10,'   = In the KS basis'
+   write(message,'(2a)') ch10,'   = In the Kohn-Sham basis'
    call wrtout(std_out,message,'COLL')
 
 !todo_ba complete print_out
@@ -368,47 +368,54 @@ subroutine print_oper(oper,option,paw_dmft,prtopt)
        write(message,'(a,3x,a,1x,i1)') ch10,"--isppol--",isppol
        call wrtout(std_out,message,'COLL')
        write(message,'(2a)') ch10,&
-         & "   - (in the following only the value for the first k-points are printed)"
+         & "   - (in the following only the values for the correlated bands and the first k-points are printed)"
        call wrtout(std_out,message,'COLL')
        do ikpt=1,nkptr
-         if (option < 5) then
-           write(message,'(2a,i4,2x,f14.5,a)') ch10,&
+         write(message,'(2a,i4,2x,f14.5,a)') ch10,&
              & "   -k-pt--",ikpt,oper%wtk(ikpt),"(<-weight(k-pt))"
+         call wrtout(std_out,message,'COLL')
+         if (option < 5) then
+           write(message,'(19x,a,6x,a)') "Eigenvalues","Occupations"
            call wrtout(std_out,message,'COLL')
          else if (abs(prtopt) >= 4 .or. option > 8) then
-           write(message,'(2a,i5,a,i5,a,i5)') ch10,"  Writes occupations for k-pt",&
-             & ikpt, "and between bands",iband1," and",iband2
+           write(message,'(a,10x,2000(i5,12x))') ch10,(paw_dmft%include_bands(ib),ib=iband1,iband2)
            call wrtout(std_out,message,'COLL')
          end if ! option
          do ib=1,mbandc
            if (option < 5) then
              if (abs(aimag(oper%ks(ib,ib,ikpt,isppol))) >= tol10) then
-               write(message,'(a,i5,e14.5,3x,e14.5,3x,e21.14)') "   -iband--",ib,&
+               write(message,'(a,i5,e14.5,3x,e14.5,3x,e21.14)') "   -iband--",paw_dmft%include_bands(ib),&
                  & paw_dmft%eigen_dft(ib,ikpt,isppol),oper%ks(ib,ib,ikpt,isppol)
              else
-               write(message,'(a,i5,e14.5,3x,e14.5)') "   -iband--",ib,&
+               write(message,'(a,i5,e14.5,3x,e14.5)') "   -iband--",paw_dmft%include_bands(ib),&
                  & paw_dmft%eigen_dft(ib,ikpt,isppol),dble(oper%ks(ib,ib,ikpt,isppol))
              end if ! imaginary part
              call wrtout(std_out,message,'COLL')
            end if ! option<5
            if (abs(prtopt) >= 4 .or. option > 8 .and. ib >= iband1 .and. ib <= iband2) then
-             write(message,'(2000(f8.3))') (dble(oper%ks(ib,ib1,ikpt,isppol)),ib1=iband1,iband2)
+
+             write(message,'(i5,1x,2000(2f7.3,3x))') paw_dmft%include_bands(ib),(dble(oper%ks(ib,ib1,ikpt,isppol)), &
+                 & aimag(oper%ks(ib,ib1,ikpt,isppol)),ib1=iband1,iband2)
              call wrtout(std_out,message,'COLL')
-             write(message,'(2000(f8.3))') (aimag(oper%ks(ib,ib1,ikpt,isppol)),ib1=iband1,iband2)
-             call wrtout(std_out,message,'COLL')
-             write(message,'(2000(f8.3))') (abs(oper%ks(ib,ib1,ikpt,isppol)),ib1=iband1,iband2)
-             call wrtout(std_out,message,'COLL')
+
 !   to write imaginary part
 !             write(message, '(1000(2f9.3,2x))') &
 !&               (real(oper%ks(isppol,ikpt,ib,ib1)),imag(oper%ks(isppol,ikpt,ib,ib1)),ib1=iband1,iband2)
 !             call wrtout(std_out,message,'COLL')
            end if ! prtopt>=20
-           do ib1=1,mbandc
-             if (abs(aimag(oper%ks(ib1,ib,ikpt,isppol))) > max(tol10,maximag)) then
+           if (paw_dmft%dmft_solv == 6 .or. paw_dmft%dmft_solv == 7) then ! only need to check diagonal elements
+             if (abs(aimag(oper%ks(ib,ib,ikpt,isppol))) > max(tol10,maximag)) then
                ximag   = .true.
-               maximag = aimag(oper%ks(ib1,ib,ikpt,isppol))
+               maximag = aimag(oper%ks(ib,ib,ikpt,isppol))
              end if
-           end do ! ib1
+           else
+             do ib1=1,mbandc
+               if (abs(aimag(oper%ks(ib1,ib,ikpt,isppol))) > max(tol10,maximag)) then
+                 ximag   = .true.
+                 maximag = aimag(oper%ks(ib1,ib,ikpt,isppol))
+               end if
+             end do ! ib1
+           end if
          end do ! ib
        end do ! ikpt
      end do ! isppol
@@ -838,7 +845,7 @@ subroutine identity_oper(oper,option)
  integer, intent(in) :: option
  type(oper_type), intent(inout) :: oper
 !Local variables-------------------------------
- integer :: ib,ikpt,isppol,natom
+ integer :: ib,natom
  character(len=500) :: message
 ! *********************************************************************
 
@@ -853,13 +860,9 @@ subroutine identity_oper(oper,option)
  if (option == 1 .or. option == 3) then
 
    oper%ks(:,:,:,:) = czero
-   do isppol=1,oper%nsppol
-     do ikpt=1,oper%nkpt
-       do ib=1,oper%mbandc
-         oper%ks(ib,ib,ikpt,isppol) = cone
-       end do ! ib
-     end do ! ikpt
-   end do ! isppol
+   do ib=1,oper%mbandc
+     oper%ks(ib,ib,:,:) = cone
+   end do ! ib
 
  end if ! option=1 or 3
 
@@ -1003,7 +1006,7 @@ subroutine trace_oper(oper,trace_ks,trace_loc,opt_ksloc,trace_ks_cmplx)
  end if ! opt_ksloc
 
  if (opt_ksloc == 2 .or. opt_ksloc == 3) then
-   call trace_matlu(oper%matlu(:),oper%natom,trace_loc(:,:))
+   call trace_matlu(oper%matlu(:),oper%natom,trace_loc=trace_loc(:,:))
  end if
 
  DBG_EXIT("COLL")
@@ -1058,18 +1061,18 @@ subroutine prod_oper(oper1,oper2,oper3,opt_ksloc,opt_diag)
    if (present(opt_diag)) then
      if (opt_diag == 1) diag = .true.
    end if
-   do isppol=1,oper1%nsppol
-     do ikpt=1,oper1%nkpt
-       if (diag) then
-         do ib=1,mbandc
-           oper3%ks(ib,ib,ikpt,isppol) = oper1%ks(ib,ib,ikpt,isppol) * oper2%ks(ib,ib,ikpt,isppol)
-         end do ! ib
-       else
+   if (diag) then
+     do ib=1,mbandc
+       oper3%ks(ib,ib,:,:) = oper1%ks(ib,ib,:,:) * oper2%ks(ib,ib,:,:)
+     end do ! ib
+   else
+     do isppol=1,oper1%nsppol
+       do ikpt=1,oper1%nkpt
          call abi_xgemm("n","n",mbandc,mbandc,mbandc,cone,oper1%ks(:,:,ikpt,isppol),mbandc,&
                       & oper2%ks(:,:,ikpt,isppol),mbandc,czero,oper3%ks(:,:,ikpt,isppol),mbandc)
-         end if ! diag
        end do ! ikpt
      end do ! isppol
+   end if ! diag
  end if ! opt_ksloc=1
 
  DBG_EXIT("COLL")
@@ -1162,8 +1165,10 @@ subroutine gather_oper(oper,distrib,paw_dmft,opt_ksloc,master,opt_diag,opt_commk
  integer, intent(in) :: opt_ksloc
  integer, optional, intent(in) :: master,opt_commkpt,opt_diag
 !Local variables-------------------------------
- integer :: comm,iatom,ib,ib1,ibuf,ierr,ifreq,ikpt,im,im1,irank,irank1,irank2,isppol,lpawu,mbandc
- integer :: myproc,myproc2,natom,ndim,nkpt,nproc,nproc_freq,nproc_kpt,nproc2,nspinor,nsppol,nw,optcommkpt,siz_buf
+ integer :: comm,iatom,ib1,ibuf,ierr,ifreq,ikpt,im1
+ integer :: irank,irank1,irank2,isppol,lpawu,mbandc,myproc
+ integer :: myproc2,natom,ndim,nkpt,nproc,nproc_freq,nproc_kpt
+ integer :: nproc2,nspinor,nsppol,nw,optcommkpt,siz_buf
  logical :: diag
  integer, allocatable :: displs(:),recvcounts(:)
  complex(dpc), allocatable :: buffer(:),buffer_tot(:)
@@ -1227,10 +1232,8 @@ subroutine gather_oper(oper,distrib,paw_dmft,opt_ksloc,master,opt_diag,opt_commk
              ibuf = ibuf + 1
              buffer(ibuf) = oper(ifreq)%ks(ib1,ib1,ikpt,isppol)
            else
-             do ib=1,mbandc
-               ibuf = ibuf + 1
-               buffer(ibuf) = oper(ifreq)%ks(ib,ib1,ikpt,isppol)
-             end do ! ib
+             buffer(ibuf+1:ibuf+mbandc) = oper(ifreq)%ks(:,ib1,ikpt,isppol)
+             ibuf = ibuf + mbandc
            end if ! diag
          end do ! ib1
        end do ! ifreq
@@ -1250,10 +1253,8 @@ subroutine gather_oper(oper,distrib,paw_dmft,opt_ksloc,master,opt_diag,opt_commk
              ibuf = ibuf + 1
              oper(ifreq)%ks(ib1,ib1,ikpt,isppol) = buffer_tot(ibuf)
            else
-             do ib=1,mbandc
-               ibuf = ibuf + 1
-               oper(ifreq)%ks(ib,ib1,ikpt,isppol) = buffer_tot(ibuf)
-             end do ! ib
+             oper(ifreq)%ks(:,ib1,ikpt,isppol) = buffer_tot(ibuf+1:ibuf+mbandc)
+             ibuf = ibuf + mbandc
            end if ! diag
          end do ! ib1
        end do ! ifreq
@@ -1323,10 +1324,8 @@ subroutine gather_oper(oper,distrib,paw_dmft,opt_ksloc,master,opt_diag,opt_commk
        ndim = (2*lpawu+1) * nspinor
        do isppol=1,nsppol
          do im1=1,ndim
-           do im=1,ndim
-             ibuf = ibuf + 1
-             buffer(ibuf) = oper(ifreq)%matlu(iatom)%mat(im,im1,isppol)
-           end do ! im
+           buffer(ibuf+1:ibuf+ndim) = oper(ifreq)%matlu(iatom)%mat(:,im1,isppol)
+           ibuf = ibuf + ndim
          end do ! im1
        end do ! isppol
      end do ! iatom
@@ -1353,10 +1352,8 @@ subroutine gather_oper(oper,distrib,paw_dmft,opt_ksloc,master,opt_diag,opt_commk
        ndim = (2*lpawu+1) * nspinor
        do isppol=1,nsppol
          do im1=1,ndim
-           do im=1,ndim
-             ibuf = ibuf + 1
-             oper(ifreq)%matlu(iatom)%mat(im,im1,isppol) = buffer_tot(ibuf)
-           end do ! im
+           oper(ifreq)%matlu(iatom)%mat(:,im1,isppol) = buffer_tot(ibuf+1:ibuf+ndim)
+           ibuf = ibuf + ndim
          end do ! im1
        end do ! isppol
      end do ! iatom
@@ -1400,8 +1397,8 @@ subroutine gather_oper_ks(oper,distrib,paw_dmft,opt_diag)
  type(paw_dmft_type), intent(in) :: paw_dmft
  integer, optional, intent(in) :: opt_diag
 !Local variables-------------------------------
- integer :: ib,ib1,ibuf,ierr,ikpt,irank,isppol,mbandc
- integer :: me_kpt,nkpt,nproc,nproc_freq,nsppol,nw,siz_buf
+ integer :: ib1,ibuf,ierr,ikpt,irank,isppol,mbandc
+ integer :: me_kpt,nkpt,nproc,nproc_freq,nsppol,siz_buf
  logical :: diag
  integer, allocatable :: displs(:),recvcounts(:)
  complex(dpc), allocatable :: buffer(:),buffer_tot(:)
@@ -1412,7 +1409,6 @@ subroutine gather_oper_ks(oper,distrib,paw_dmft,opt_diag)
  nkpt   = paw_dmft%nkpt
  nproc  = paw_dmft%nproc
  nsppol = paw_dmft%nsppol
- nw     = distrib%nw
 
  nproc_freq = nproc / nkpt
 
@@ -1453,10 +1449,8 @@ subroutine gather_oper_ks(oper,distrib,paw_dmft,opt_diag)
          ibuf = ibuf + 1
          buffer(ibuf) = oper%ks(ib1,ib1,ikpt,isppol)
        else
-         do ib=1,mbandc
-           ibuf = ibuf + 1
-           buffer(ibuf) = oper%ks(ib,ib1,ikpt,isppol)
-         end do ! ib
+         buffer(ibuf+1:ibuf+mbandc) = oper%ks(:,ib1,ikpt,isppol)
+         ibuf = ibuf + mbandc
        end if ! diag
      end do ! ib1
    end do ! ikpt
@@ -1473,10 +1467,8 @@ subroutine gather_oper_ks(oper,distrib,paw_dmft,opt_diag)
          ibuf = ibuf + 1
          oper%ks(ib1,ib1,ikpt,isppol) = buffer_tot(ibuf)
        else
-         do ib=1,mbandc
-           ibuf = ibuf + 1
-           oper%ks(ib,ib1,ikpt,isppol) = buffer_tot(ibuf)
-         end do ! ib
+         oper%ks(:,ib1,ikpt,isppol) = buffer_tot(ibuf+1:ibuf+mbandc)
+         ibuf = ibuf + mbandc
        end if ! diag
      end do ! ib
    end do ! ikpt
