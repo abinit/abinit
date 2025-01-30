@@ -26,11 +26,17 @@
 MODULE m_energy
 
  use defs_basis
+ use m_abi_linalg, only : abi_xgemm
  use m_abicore
  use m_errors
  use m_green, only : green_type,occup_fd
+ use m_matlu, only : add_matlu,copy_matlu,destroy_matlu,init_matlu, &
+                   & matlu_type,trace_prod_matlu
+ use m_paw_correlations, only : pawuenergy
  use m_paw_dmft, only : paw_dmft_type
+ use m_pawtab, only : pawtab_type
  use m_self, only : self_type
+ use m_xmpi, only : xmpi_sum
 
  implicit none
 
@@ -311,8 +317,6 @@ end subroutine print_energy
 
 subroutine compute_energy(energies_dmft,green,paw_dmft,pawprtvol,pawtab,self,occ_type,part)
 
- use m_pawtab, only : pawtab_type
-
 !Arguments ------------------------------------
 !type
  type(energy_type), target, intent(inout) :: energies_dmft
@@ -476,8 +480,6 @@ end subroutine compute_energy
 !! SOURCE
 
 subroutine compute_band_energy(energies_dmft,green,paw_dmft,occ_type,ecalc_dft,fcalc_dft,ecalc_dmft)
-
- use m_xmpi, only : xmpi_sum
 
 !Arguments ------------------------------------
  type(energy_type), intent(inout) :: energies_dmft
@@ -654,10 +656,6 @@ subroutine compute_migdal_energy(e_hu_migdal,e_hu_migdal_tot,green,paw_dmft,self
 !#ifdef FC_INTEL
 !DEC$ NOOPTIMIZE
 !#endif
-
- use m_matlu, only : add_matlu,copy_matlu,destroy_matlu,init_matlu, &
-                   & matlu_type,print_matlu,trace_prod_matlu
- use m_xmpi, only : xmpi_sum
 
 !Arguments ------------------------------------
  type(green_type), intent(in) :: green
@@ -876,9 +874,6 @@ end subroutine compute_migdal_energy
 !! SOURCE
 
 subroutine compute_dftu_energy(energies_dmft,green,paw_dmft,pawtab,renorm)
-
- use m_pawtab, only : pawtab_type
- use m_paw_correlations, only : pawuenergy
 
 !Arguments ------------------------------------
 !type
@@ -1255,9 +1250,6 @@ end subroutine compute_free_energy
 !! SOURCE
 
 subroutine compute_trace_log_loc(green,paw_dmft,trace,opt_inv)
-
- use m_abi_linalg, only : abi_xgemm
- use m_xmpi, only : xmpi_sum
 
 !Arguments ------------------------------------
  type(green_type), intent(in) :: green

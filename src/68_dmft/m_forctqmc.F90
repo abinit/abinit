@@ -39,7 +39,7 @@ MODULE m_forctqmc
  use m_datafordmft, only : compute_levels,hybridization_asymptotic_coefficient
  use m_fstrings, only : int2char4
  use m_green, only : compute_moments_loc,copy_green,destroy_green,green_type, &
-    & init_green,int_fct,occup_green_tau,print_green,printocc_green
+    & init_green,int_fct,occup_green_tau,print_green
  use m_hide_lapack, only : xginv
  use m_hu, only : copy_hu,destroy_hu,destroy_vee,hu_type,init_vee, &
     & rotatevee_hu,vee_type,vee_ndim2tndim_hu_r
@@ -3167,7 +3167,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
  integer :: nspinor,nsppol,nsub,ntau,ntau_delta,ntot,nwlo,p,rot_type_vee,tndim,unt,wdlr_size
  integer, target :: ndlr
  logical :: density_matrix,entropy,integral,leg_measure,nondiag,off_diag,rot_inv
- real(dp) :: besp,bespp,beta,dx,fact,fact2,xx
+ real(dp) :: besp,bespp,beta,dx,err,err_,fact,fact2,tol,xx
  complex(dpc) :: mself_1,mself_2,occ_tmp,u_nl
  complex(dpc), target :: eu
  type(oper_type), target :: energy_level
@@ -3216,6 +3216,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
  nwlo           = paw_dmft%dmft_nwlo
  off_diag       = paw_dmft%dmft_triqs_off_diag
  rot_inv        = (paw_dmft%dmft_solv == 7)
+ tol            = paw_dmft%dmft_triqs_tol_block
 
  ABI_MALLOC(block_list,(nflavor_max,natom))
  ABI_MALLOC(dmat_ctqmc,(natom))
@@ -3317,10 +3318,12 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
    else
      matlu_pt => dmat_ctqmc(:)
    end if ! basis
+
    call find_block_structure(paw_dmft,block_list(:,:),inner_list(:,:), &
        & flavor_list(:,:,:),siz_block(:,:),nblocks(:),matlu_pt(:),natom,nflavor_max)
    call diag_block(matlu_pt)
    matlu_pt => null()
+
    ! Make sure every process has the same rotation matrix in case of degenerate levels
    call xmpi_matlu(eigvectmatlu(:),natom,paw_dmft%spacecomm,master=0,option=2)
    if (basis == 1) then
@@ -3366,22 +3369,30 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
  call print_matlu(weiss%oper(1)%matlu(:),natom,1)
 
  ! Possibly neglect some imaginary part and off-diagonal elements in the CTQMC basis.
- ! Thus we need to carefully rebuild the Weiss field and levels at the end by rotating
- ! them back to the cubic basis and symmetrize them again since this will not yield the same
- ! result as the original value.
+ ! Thus we need to modify the Weiss field here in order to make sure we use the
+ ! same Weiss field in Dyson's equation as the one that was used to solve the impurity model.
 
 #ifndef HAVE_TRIQS_COMPLEX
- write(message,'(a,3x,2a)') ch10,"== The imaginary part of Delta(tau) and the crystal ", &
-                         & "field are now set to 0"
+ write(message,'(a,3x,2a)') ch10,"== The imaginary part of Delta(tau) and the ", &
+                         & "electronic levels is now set to 0"
  call wrtout(std_out,message,"COLL")
  ! Symmetrizing Delta(iw) is equivalent to neglecting the imaginary part of Delta(tau)
+ err = zero
  do ifreq=1,nwlo
-   call symmetrize_matlu(weiss%oper(ifreq)%matlu(:),natom)
+   call symmetrize_matlu(weiss%oper(ifreq)%matlu(:),natom,err=err_)
+   if (err_ > err) err = err_
  end do ! ifreq
  do i=2,weiss%nmoments-1
-   call symmetrize_matlu(weiss%moments(i)%matlu(:),natom)
+   call symmetrize_matlu(weiss%moments(i)%matlu(:),natom,err=err_)
+   if (err_ > err) err = err_
  end do ! i
- call zero_matlu(energy_level%matlu(:),natom,onlyimag=1)
+ call zero_matlu(energy_level%matlu(:),natom,onlyimag=1,err=err_)
+ if (err_ > err) err = err_
+ if (err > tol) then
+   write(message,'(2a)') "WARNING: This is not a good approximation ; the imaginary ", &
+                      & "part is non negligible !"
+   ABI_WARNING(message)
+ end if ! err>tol
 #endif
 
  if ((.not. rot_inv) .or. (.not. off_diag)) then
@@ -3392,12 +3403,20 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
    write(message,'(a,3x,2a)') ch10,"== The off-diagonal elements of the hybridization ", &
                             & "and the electronic levels are now set to 0"
    call wrtout(std_out,message,"COLL")
+   err = zero
    do ifreq=1,nwlo
-     call zero_matlu(weiss%oper(ifreq)%matlu(:),natom,onlynondiag=1)
+     call zero_matlu(weiss%oper(ifreq)%matlu(:),natom,onlynondiag=1,err=err_)
+     if (err_ > err) err = err_
    end do ! ifreq
    do i=2,weiss%nmoments-1
-     call zero_matlu(weiss%moments(i)%matlu(:),natom,onlynondiag=1)
+     call zero_matlu(weiss%moments(i)%matlu(:),natom,onlynondiag=1,err=err_)
+     if (err_ > err) err = err_
    end do ! i
+   if (err > tol) then
+     write(message,'(2a)') "WARNING: This is not a good approximation ; the off-diagonal ", &
+                         & "elements are non negligible !"
+     ABI_WARNING(message)
+   end if ! err>tol
  end if ! not off_diag
 
  nmoments = weiss%nmoments - 2
@@ -3501,11 +3520,12 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
  end if ! integral and entropy
 
  ! Build most optimal block structure in CTQMC basis
- write(message,'(a,3x,a)') ch10,"== Searching for the most optimal block structure"
+ write(message,'(a,3x,2a)') ch10,"== Searching for the most optimal block structure of", &
+                           & " the electronic levels and the hybridization"
  call wrtout(std_out,message,"COLL")
 
  call find_block_structure(paw_dmft,block_list(:,:),inner_list(:,:),flavor_list(:,:,:), &
-                  & siz_block(:,:),nblocks(:),energy_level%matlu(:),natom,nflavor_max,hyb=weiss)
+               & siz_block(:,:),nblocks(:),energy_level%matlu(:),natom,nflavor_max,hyb=weiss)
 
  ! Solve impurity model for each atom
  do iatom=1,natom
@@ -3570,6 +3590,11 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
    if (myproc == 0 .and. off_diag) then
 
      if (open_file(trim(paw_dmft%filapp)//"Hybridization_offdiag_iatom"//tag_at//".dat",message,newunit=unt) /= 0) ABI_ERROR(message)
+     write(unt,'(6a)') "# Off-diagonal components of Delta(tau) in the CTQMC basis",ch10, &
+                     & "# Columns are ordered this way:",ch10, &
+                     & "# Imaginary Time     ((Re(Delta_{ij}) Im(Delta_{ij}),i=1,2*(2*l+1)),j=1,2*(2*l+1)) where the", &
+                     & " leftmost index varies first"
+
      do itau=1,ntau_delta
        write(unt,'(2x,393(e18.10e3,2x))') beta*dble(itau-1)/dble(ntau_delta-1), &
           & ((dble(ftau(iatom)%mat(im,im1,itau)),aimag(ftau(iatom)%mat(im,im1,itau)),im=1,nflavor),im1=1,nflavor)
@@ -3581,6 +3606,10 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
    if (myproc == 0) then
 
      if (open_file(trim(paw_dmft%filapp)//"Hybridization_diag_iatom"//tag_at//".dat",message,newunit=unt) /= 0) ABI_ERROR(message)
+     write(unt,'(5a)') "# Diagonal components of Delta(tau) in the CTQMC basis",ch10, &
+                     & "# Columns are ordered this way:",ch10, &
+                     & "# Imaginary Time     (Delta_{ii},i=1,2*(2*l+1))"
+
      do itau=1,ntau_delta
        write(unt,'(2x,393(e25.17e3,2x))') beta*dble(itau-1)/dble(ntau_delta-1),(dble(ftau(iatom)%mat(im,im,itau)),im=1,nflavor)
      end do ! itau
@@ -3676,6 +3705,10 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
    if (myproc == 0 .and. off_diag) then
 
      if (open_file(trim(paw_dmft%filapp)//"Gtau_offdiag_iatom"//tag_at//".dat",message,newunit=unt) /= 0) ABI_ERROR(message)
+     write(unt,'(6a)') "# Off-diagonal components of sampled G(tau) in the CTQMC basis",ch10, &
+                     & "# Columns are ordered this way:",ch10, &
+                     & "# Imaginary Time     ((Re(G_{ij}) Im(G_{ij}),i=1,2*(2*l+1)),j=1,2*(2*l+1)) where the", &
+                     & " leftmost index varies first"
      do itau=1,ntau
        write(unt,'(2x,393(e18.10e3,2x))') beta*dble(itau-1)/dble(ntau-1), &
           & ((dble(gtau(itau,im,im1)),aimag(gtau(itau,im,im1)),im=1,nflavor),im1=1,nflavor)
@@ -3687,6 +3720,9 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
    if (myproc == 0) then
 
      if (open_file(trim(paw_dmft%filapp)//"Gtau_diag_iatom"//tag_at//".dat",message,newunit=unt) /= 0) ABI_ERROR(message)
+     write(unt,'(5a)') "# Diagonal components of sampled G(tau) in the CTQMC basis",ch10, &
+                     & "# Columns are ordered this way:",ch10, &
+                     & "# Imaginary Time     (G_{ii},i=1,2*(2*l+1))"
      do itau=1,ntau
        write(unt,'(2x,393(e25.17e3,2x))') beta*dble(itau-1)/dble(ntau-1), &
           & (dble(gtau(itau,im,im)),im=1,nflavor)
@@ -3913,6 +3949,11 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
      if (myproc == 0 .and. off_diag) then
 
        if (open_file(trim(paw_dmft%filapp)//"Gtau_offdiag_DLR_iatom"//tag_at//".dat",message,newunit=unt) /= 0) ABI_ERROR(message)
+       write(unt,'(6a)') "# Off-diagonal components of DLR fit of G(tau) in the CTQMC basis",ch10, &
+                       & "# Columns are ordered this way:",ch10, &
+                       & "# Imaginary Time     ((Re(G_{ij}) Im(G_{ij}),i=1,2*(2*l+1)),j=1,2*(2*l+1)) where the", &
+                       & " leftmost index varies first"
+
        do itau=1,ntau
          write(unt,'(2x,393(e18.10e3,2x))') beta*dble(itau-1)/dble(ntau-1), &
             & ((dble(gtau_dlr(itau,im,im1)),aimag(gtau_dlr(itau,im,im1)),im=1,nflavor),im1=1,nflavor)
@@ -3924,6 +3965,9 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
      if (myproc == 0) then
 
        if (open_file(trim(paw_dmft%filapp)//"Gtau_diag_DLR_iatom"//tag_at//".dat",message,newunit=unt) /= 0) ABI_ERROR(message)
+       write(unt,'(5a)') "# Diagonal components of DLR fit of G(tau) in the CTQMC basis",ch10, &
+                       & "# Columns are ordered this way:",ch10, &
+                       & "# Imaginary Time     (G_{ii},i=1,2*(2*l+1))"
        do itau=1,ntau
          write(unt,'(2x,393(e25.17e3,2x))') beta*dble(itau-1)/dble(ntau-1), &
             & (dble(gtau_dlr(itau,im,im)),im=1,nflavor)
@@ -4101,6 +4145,24 @@ subroutine diag_block(matlu)
        end do ! i
      end do ! j
    end do ! iblock
+
+   if (pawprtvol >= 3) then
+     write(tag_at,'(i4)') iatom
+     do isppol=1,nsppol
+       write(message,'(4a,i1)') ch10,"       EIGENVECTORS for atom ",trim(adjustl(tag_at))
+       if (nspinor == 1) then
+         write(tag_block4,'(i1)') isppol
+         message = trim(message) // " and isppol " // tag_block4
+       end if
+       call wrtout(std_out,message,'COLL')
+       do im=1,tndim
+         write(message,'(12(1x,18(1x,"(",f9.3,",",f9.3,")")))') &
+            & (eigvectmatlu(iatom)%mat(im,im1,isppol),im1=1,tndim)
+         call wrtout(std_out,message,'COLL')
+       end do ! im1
+     end do ! isppol
+   end if ! pawprtvol>=3
+
  end do ! iatom
 
  ABI_FREE(eig)
@@ -4588,7 +4650,7 @@ subroutine find_block_structure(paw_dmft,block_list,inner_list,flavor_list, &
  nwlo    = paw_dmft%dmft_nwlo
 
  do iflavor=1,nflavor_max
-   block_list(iflavor,:)    = iflavor - 1
+   block_list(iflavor,:) = iflavor - 1
  end do ! iflavor
 
  ABI_MALLOC(found_block,(nflavor_max))
@@ -4659,7 +4721,6 @@ subroutine find_block_structure_mat(mat)
  type(matlu_type), intent(inout) :: mat(natom)
 !Local variables ------------------------------
  integer :: i,iflavor1,im,im1,isppol,ndim,tndim
- complex(dpc) :: elem
 ! ************************************************************************
 
   do iatom=1,natom
@@ -4676,8 +4737,7 @@ subroutine find_block_structure_mat(mat)
           iflavor = im + (isppol-1)*ndim
           iblock  = block_list(iflavor,iatom)
           if (iblock == iblock1) cycle
-          elem = mat(iatom)%mat(im,im1,isppol)
-          if (abs(elem) > paw_dmft%dmft_triqs_tol_block) then ! Merge the two blocks
+          if (abs(mat(iatom)%mat(im,im1,isppol)) > paw_dmft%dmft_triqs_tol_block) then ! Merge the two blocks
             do i=1,nflavor
               if (block_list(i,iatom) == iblock) block_list(i,iatom) = iblock1
             end do ! i

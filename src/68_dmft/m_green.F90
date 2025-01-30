@@ -25,10 +25,21 @@
  use m_abicore
  use m_errors
 
- use m_matlu, only : matlu_type
- use m_oper, only : destroy_oper,init_oper,oper_type
- use m_paw_dmft, only : mpi_distrib_dmft_type,paw_dmft_type
+ use m_abi_linalg, only : abi_xgemm
+ use m_crystal, only : crystal_t
+ use m_fstrings, only : int2char4
+ use m_hide_lapack, only : xginv
+ use m_io_tools, only : open_file
+ use m_lib_four
+ use m_matlu, only : add_matlu,copy_matlu,destroy_matlu,diff_matlu,init_matlu,matlu_type,print_matlu, &
+                   & prod_matlu,shift_matlu,sym_matlu,trace_matlu,trace_prod_matlu,xmpi_matlu,zero_matlu
+ use m_oper, only : copy_oper,destroy_oper,downfold_oper,gather_oper,gather_oper_ks,init_oper,inverse_oper, &
+                  & oper_type,print_oper,prod_oper,trace_oper,trace_prod_oper,upfold_oper
+ use m_paw_dmft, only : construct_nwli_dmft,mpi_distrib_dmft_type,paw_dmft_type
  use m_self, only : self_type
+ use m_splines
+ use m_time, only : timab
+ use m_xmpi, only : xmpi_barrier,xmpi_sum
 
  implicit none
 
@@ -513,8 +524,6 @@ end subroutine destroy_green_tau
 
 subroutine copy_green(green1,green2,opt_tw)
 
- use m_oper, only : copy_oper
-
 !Arguments ------------------------------------
  type(green_type), intent(in) :: green1
  type(green_type), intent(inout) :: green2
@@ -576,9 +585,6 @@ end subroutine copy_green
 !! SOURCE
 
 subroutine printocc_green(green,option,paw_dmft,pawprtvol,opt_weissgreen,chtype)
-
- use m_matlu, only : diff_matlu,print_matlu,trace_matlu
- use m_oper, only : print_oper
 
 !Arguments ------------------------------------
  type(paw_dmft_type), intent(in) :: paw_dmft
@@ -675,9 +681,6 @@ end subroutine printocc_green
 !! SOURCE
 
 subroutine print_green(char1,green,option,paw_dmft,opt_wt,opt_decim)
-
- use m_fstrings, only : int2char4
- use m_io_tools, only : open_file
 
 !Arguments ------------------------------------
  type(paw_dmft_type), intent(in) :: paw_dmft
@@ -981,12 +984,6 @@ end subroutine print_green
 !! SOURCE
 
 subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_nonxsum2,opt_log,opt_restart_moments)
-
- use m_abi_linalg, only : abi_xgemm
- use m_matlu, only : add_matlu,sym_matlu,xmpi_matlu
- use m_oper, only : downfold_oper,gather_oper,gather_oper_ks,inverse_oper,print_oper,upfold_oper
- use m_time, only : timab
- use m_xmpi, only : xmpi_sum
 
 !Arguments ------------------------------------
  type(green_type), intent(inout) :: green
@@ -1519,10 +1516,6 @@ end subroutine compute_green
 !! SOURCE
 
 subroutine integrate_green(green,paw_dmft,prtopt,opt_ksloc,opt_after_solver,opt_diff,opt_fill_occnd,opt_self)
-
- use m_matlu, only : destroy_matlu,diff_matlu,init_matlu,print_matlu,shift_matlu,sym_matlu,xmpi_matlu,zero_matlu
- use m_oper, only : downfold_oper,trace_oper
- use m_time, only : timab
 
 !Arguments ------------------------------------
  type(green_type), intent(inout) :: green
@@ -2106,11 +2099,6 @@ end subroutine icip_green
 
 subroutine fourier_green(cryst_struc,green,paw_dmft,opt_ksloc,opt_tw)
 
- use m_crystal, only : crystal_t
- use m_matlu, only : print_matlu,sym_matlu
- use m_oper, only : downfold_oper
- use m_xmpi, only : xmpi_barrier,xmpi_sum
-
 !Arguments ------------------------------------
 !type
  type(crystal_t),intent(in) :: cryst_struc
@@ -2390,8 +2378,6 @@ end subroutine fourier_green
 !! SOURCE
 
 subroutine check_fourier_green(cryst_struc,green,paw_dmft)
-
- use m_crystal, only : crystal_t
 
 !Arguments ------------------------------------
 !type
@@ -2743,10 +2729,6 @@ end subroutine int_fct
 !! SOURCE
 subroutine fourier_fct(fw,ft,ldiag,ltau,opt_four,paw_dmft)
 
- use m_lib_four
- use m_paw_dmft, only : construct_nwli_dmft
- use m_splines
-
 !Arguments ------------------------------------
 !type
  logical,intent(in) :: ldiag
@@ -2882,10 +2864,6 @@ end subroutine fourier_fct
 
 subroutine spline_fct(fw1,fw2,opt_spline,paw_dmft)
 
- use m_lib_four
- use m_paw_dmft, only : construct_nwli_dmft
- use m_splines
-
 !Arguments ------------------------------------
 !type
  integer,intent(in) :: opt_spline
@@ -2949,8 +2927,6 @@ end subroutine spline_fct
 !! SOURCE
 
 subroutine occup_green_tau(green)
-
- use m_matlu, only : copy_matlu,shift_matlu
 
 !Arguments ------------------------------------
  type(green_type), intent(inout) :: green
@@ -3144,9 +3120,6 @@ end subroutine occup_green_tau
 
  subroutine greendftcompute_green(green,paw_dmft)
 
- use m_matlu, only : print_matlu,sym_matlu
- use m_oper, only : downfold_oper
-
 !Arguments ------------------------------------
 !scalars
  type(paw_dmft_type), intent(in)  :: paw_dmft
@@ -3230,8 +3203,6 @@ end subroutine occup_green_tau
 !! SOURCE
 
 subroutine fermi_green(green,paw_dmft,self)
-
- use m_xmpi, only : xmpi_sum
 
 !Arguments ------------------------------------
  type(green_type), intent(inout) :: green
@@ -3704,12 +3675,6 @@ subroutine function_and_deriv(green,self,paw_dmft,x_input,x_precision, &
 
 subroutine compute_nb_elec(green,self,paw_dmft,Fx,nb_elec_x,fermie,Fxprime)
 
- use m_abi_linalg, only : abi_xgemm
- use m_hide_lapack, only : xginv
- use m_matlu, only : add_matlu
- use m_oper, only : upfold_oper
- use m_xmpi, only : xmpi_sum
-
 !Arguments ------------------------------------
  type(green_type), intent(inout) :: green
  type(self_type), intent(inout) :: self
@@ -4089,10 +4054,6 @@ end subroutine local_ks_green
 
 subroutine compute_moments_ks(green,self,paw_dmft,opt_self,opt_log,opt_quick_restart)
 
- use m_matlu, only : add_matlu
- use m_oper, only : prod_oper,trace_oper,upfold_oper
- use m_xmpi, only : xmpi_sum
-
 !Arguments ------------------------------------
 !scalars
  type(green_type), intent(inout) :: green
@@ -4279,10 +4240,6 @@ end subroutine compute_moments_ks
 
 subroutine compute_trace_moments_ks(green,self,paw_dmft)
 
- use m_matlu, only : add_matlu
- use m_oper, only : prod_oper,trace_oper,trace_prod_oper,upfold_oper
- use m_xmpi, only : xmpi_sum
-
 !Arguments ------------------------------------
 !scalars
  type(green_type), intent(inout) :: green
@@ -4363,8 +4320,6 @@ end subroutine compute_trace_moments_ks
 !! SOURCE
 
 subroutine compute_moments_loc(green,self,energy_level,weiss,option,opt_log)
-
- use m_matlu, only : add_matlu,destroy_matlu,init_matlu,prod_matlu,trace_matlu,trace_prod_matlu
 
 !Arguments ------------------------------------
  type(green_type), intent(inout) :: green,weiss
