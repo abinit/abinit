@@ -3659,7 +3659,7 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
          end do
        end do
 
-       ! Compute contribution to itau matrix
+       ! Compute contribution to itau matrix,
        call ZGEMM("N", "N", gwr%ntau, loc1_size*ndat, gwr%my_ntau, cone, &
                    wgt_globmy, gwr%ntau, cwork_myit, gwr%my_ntau, czero, glob_cwork, gwr%ntau)
 

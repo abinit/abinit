@@ -2131,16 +2131,13 @@ subroutine polstate_calc_pcjgrad(self, ip, ii, nstep_ort)
 
 !Arguments ------------------------------------
  class(polstate_t), intent(inout) :: self
- integer, intent(in) :: ip
- integer, intent(in) :: ii
- integer, intent(in) :: nstep_ort
+ integer, intent(in) :: ip, ii, nstep_ort
 
 !Local variables-------------------------------
  class(gqk_t), pointer :: gqk
  integer :: ierr
  !real(dp) :: eps
  complex(dp) :: beta, beta_num, beta_den
-
 !----------------------------------------------------------------------
 
  gqk => self%gqk
@@ -3115,7 +3112,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
  integer,allocatable :: nband(:,:), wfd_istwfk(:), kg_k(:,:), gbound_k(:,:)
  real(dp),parameter :: origin0(3) = zero
  real(dp) :: kk(3), kk_ibz(3), kk_sc(3), qq(3), qq_ibz(3), center_cart(3)
- real(dp),allocatable :: kpg_k(:,:), ug_k(:,:), work(:,:,:,:), pol_rho(:), qibz(:,:)
+ real(dp),allocatable :: kpg_k(:,:), ug_k(:,:), work(:,:,:,:), pol_rhor(:), qibz(:,:)
  real(dp),allocatable :: pheigvec_qibz(:,:,:,:)
  real(dp),allocatable :: displ_cart_qbz(:,:,:,:), pheigvec_qbz(:,:,:,:)  !displ_red_qbz(:,:,:,:), displ_cart_qibz(:,:,:,:),
  real(dp),allocatable :: phfreqs_ibz(:,:), pheigvec_cart_ibz(:,:,:,:,:) !, pheigvec_cart_qbz(:,:,:,:)
@@ -3123,7 +3120,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
  real(dp), ABI_CONTIGUOUS pointer :: xcart_ptr(:,:)
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:)
  complex(gwpc) :: ceikr_
- complex(gwpc),allocatable :: ur_k(:,:), ds_ur_k(:,:), pol_wf(:,:,:), sc_ceikr_1d(:,:)
+ complex(gwpc),allocatable :: ur_k(:,:), ds_ur_k(:,:), pol_wfr(:,:,:), sc_ceikr_1d(:,:)
 !----------------------------------------------------------------------
 
  units = [std_out, ab_out]
@@ -3370,7 +3367,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
  ! mini boxes. Useful for polarons in very large supercells.
  call wrtout(std_out, " Computing polaron wavefunction in the real-space supercell...")
  call wrtout(std_out, sjoin(" Using varpeq_mesh_fact:", itoa(ds_iscale)))
- call wrtout(std_out, sjoin(" Memory required by pol_wf:", &
+ call wrtout(std_out, sjoin(" Memory required by pol_wfr:", &
              ftoa(two*sc_nfft*nspinor*vpq%nstates*nsppol*storage_size(one)/eight*b2Mb), " (Mb) <<< MEM"))
 
  nkbz = product(vpq%ngkpt)
@@ -3382,8 +3379,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
    ABI_MALLOC(ds_ur_k, (ds_nfft*nspinor, ndat1))
  end if
 
- ! FIXME: Toom much memory, should be computed on the fly.
- ABI_CALLOC(pol_wf, (sc_nfft*nspinor, vpq%nstates, nsppol)) ! Init output with zeros.
+ ABI_CALLOC(pol_wfr, (sc_nfft*nspinor, vpq%nstates, nsppol)) ! Init output with zeros.
  ABI_MALLOC(sc_ceikr_1d, (maxval(sc_ngfft(1:3)), 3))
 
  cnt = 0
@@ -3411,7 +3407,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
      ABI_MALLOC(ug_k, (2, npw_k*nspinor))
      kk_sc = kk * vpq%ngkpt
 
-     ! Precompute 1d phases e^{ik R} on the supercell.
+     ! Precompute 1d phases e^{ik_j R_j} on the supercell.
      do idir=1,3
        do ii=0,sc_ngfft(idir) - 1
          kdotr = two_pi * (kk_sc(idir) * (ii / dble(sc_ngfft(idir))))
@@ -3422,61 +3418,62 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
      ! Phase due to the primitive translation (default: 0)
      cphase_tr = exp(-j_dpc * two_pi * dot_product(kk, dtset%varpeq_trvec))
 
+     ! Sum over bands
      do ib=1,vpq%nb_spin(spin)
        band = bstart + ib - 1
+       ! Get periodic part on the real space FFT mesh in ur_k
        call wfd%rotate_cg(band, ndat1, spin, kk_ibz, npw_k, kg_k, istwf_k, &
                           cryst, mapl_k, gbound_k, work_ngfft, work, ug_k, urs_kbz=ur_k)
-       !print *, "int_omega dr |u(r)}^2:", sum(abs(ur_k(:,1)) ** 2) / uc_nfft
+       print *, "int_omega dr |u(r)}^2:", sum(abs(ur_k(:,1)) ** 2) / uc_nfft
 
+       ! Use linear interpolate to downsample from ngfft to ds_ngfft.
        if (ds_iscale /= 1) then
-         ! Use linear interpolate to downsample from ngfft to ds_ngfft.
          call interpolate_ur(ngfft, nspinor*ndat1, ur_k, ds_ngfft, ds_ur_k)
+         print *, "int_omega dr |ds_u(r)}^2:", sum(abs(ds_ur_k(:,1)) ** 2) / product(ds_ngfft(1:3))
        end if
 
+       ! Accumulate for each polaron state.
        do ip=1,vpq%nstates
          a_nk = vpq%a_spin(ib, ik, ip, spin) * cphase_tr
          do spinor=1,nspinor
            spad = (spinor - 1) * sc_nfft
 
-           ! Versions without/with downsampling.
            if (ds_iscale == 1) then
-               ! Loop over the points in the supercell.
+               ! Loop over the points in the R supercell without downsampling.
                ir = 0
                do ir3=0,sc_ngfft(3)-1
+                 ! The FFT index of the point wrapped into the unit cell.
+                 wp3 = modulo(ir3, ngfft(3))
                  c3 = sc_ceikr_1d(ir3+1, 3)
                  do ir2=0,sc_ngfft(2)-1
+                   wp2 = modulo(ir2, ngfft(2))
                    c23 = sc_ceikr_1d(ir2+1, 2) * c3
                    do ir1=0,sc_ngfft(1)-1
-                     c123 = sc_ceikr_1d(ir1+1, 1) * c23
-                     ! The FFT index of the point wrapped into the unit cell.
                      wp1 = modulo(ir1, ngfft(1))
-                     wp2 = modulo(ir2, ngfft(2))
-                     wp3 = modulo(ir3, ngfft(3))
+                     c123 = sc_ceikr_1d(ir1+1, 1) * c23
                      uc_idx = 1 + wp1 + wp2*ngfft(1) + wp3*ngfft(1)*ngfft(2)
                      ir = ir + 1; irsp = ir + spad
-
-                     pol_wf(irsp, ip, spin) = pol_wf(irsp, ip, spin) + a_nk * ur_k(uc_idx,1) * c123
+                     pol_wfr(irsp, ip, spin) = pol_wfr(irsp, ip, spin) + a_nk * ur_k(uc_idx,1) * c123
                    end do
                  end do
                end do
             else
-               ! Loop over the points in the supercell.
+               ! Loop over the points in the supercell with downsampling
                ir = 0
                do ir3=0,sc_ngfft(3)-1
+                 ! The FFT index of the point wrapped into the unit cell.
+                 wp3 = modulo(ir3, ds_ngfft(3))
                  c3 = sc_ceikr_1d(ir3+1, 3)
                  do ir2=0,sc_ngfft(2)-1
+                   wp2 = modulo(ir2, ds_ngfft(2))
                    c23 = sc_ceikr_1d(ir2+1, 2) * c3
                    do ir1=0,sc_ngfft(1)-1
-                     c123 = sc_ceikr_1d(ir1+1, 1) * c23
-                     ! The FFT index of the point wrapped into the unit cell.
                      wp1 = modulo(ir1, ds_ngfft(1))
-                     wp2 = modulo(ir2, ds_ngfft(2))
-                     wp3 = modulo(ir3, ds_ngfft(3))
+                     c123 = sc_ceikr_1d(ir1+1, 1) * c23
                      uc_idx = 1 + wp1 + wp2*ds_ngfft(1) + wp3*ds_ngfft(1)*ds_ngfft(2)
                      ir = ir + 1; irsp = ir + spad
-
-                     ! Note ds_ur_k here
-                     pol_wf(irsp, ip, spin) = pol_wf(irsp, ip, spin) + a_nk * ur_k(uc_idx,1) * c123
+                     ! Note the use of the downsampled ds_ur_k here.
+                     pol_wfr(irsp, ip, spin) = pol_wfr(irsp, ip, spin) + a_nk * ur_k(uc_idx,1) * c123
                    end do
                  end do
                end do
@@ -3499,12 +3496,13 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
  ABI_FREE(sc_ceikr_1d)
  call krank_ibz%free()
 
- ! Collect pol_wf on the master rank who's gonna write the polaron density in XSF format.
- call xmpi_sum_master(pol_wf, master, comm, ierr)
+ ! Collect pol_wfr on the master rank who's gonna write the polaron density in XSF format.
+ call xmpi_sum_master(pol_wfr, master, comm, ierr)
 
  if (my_rank == master) then
-   pol_wf = pol_wf / (nkbz * sqrt(cryst%ucvol))
-   ABI_MALLOC(pol_rho, (sc_nfft))
+   pol_wfr = pol_wfr / (nkbz * sqrt(cryst%ucvol))
+   ! FIXME: Here we're gonna have another big allocation
+   ABI_MALLOC(pol_rhor, (sc_nfft))
 
    ! Here decide if we are gonna write the polaron wavefunctions with_diplaced atoms or not.
    use_displaced_scell = all(kptrlatt_ == qptrlatt_) .and. have_scell_q
@@ -3518,13 +3516,13 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
          write(msg, "(2(a,i0),a,es16.6)")&
            " For spin: ", spin, ": pstate: ", ip, ": 1/N_k \sum_nk |A_nk|^2 = ", sum(abs(vpq%a_spin(:,:,ip,spin))**2) / nkbz
          call wrtout(units, msg)
-         pol_rho = abs(pol_wf(:, ip, spin))**2
+         pol_rhor = abs(pol_wfr(:, ip, spin)) ** 2
          write(msg, "(2(a,i0),a,es16.6)")" Polaron density for spin: ", spin, ": pstate: ", ip, &
-                                         " integrates to: ", sum(pol_rho) * cryst%ucvol/uc_nfft
+                                         " integrates to: ", sum(pol_rhor) * cryst%ucvol / product(ds_ngfft(1:3))
          call wrtout(units, msg)
-         write(msg, "(a,es16.6)")" maxval(abs(aimag(pol_wf))): ", maxval(abs(aimag(pol_wf(:, ip, spin))))
+         write(msg, "(a,es16.6)")" maxval(abs(aimag(pol_wfr))): ", maxval(abs(aimag(pol_wfr(:, ip, spin))))
          call wrtout(units, msg)
-         call center_and_spread(cryst, vpq%ngkpt, sc_ngfft, pol_rho, center_cart, spread, units)
+         call center_and_spread(cryst, vpq%ngkpt, sc_ngfft, pol_rhor, center_cart, spread, units)
 
          do ii=1,num_writes
            if (ii == 1) then
@@ -3542,27 +3540,27 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
              xcart_ptr => scell_q%xcart
            end if
 
-           call write_xsf(path, sc_ngfft(1), sc_ngfft(2), sc_ngfft(3), pol_rho, scell_k%rprimd, origin0, &
+           call write_xsf(path, sc_ngfft(1), sc_ngfft(2), sc_ngfft(3), pol_rhor, scell_k%rprimd, origin0, &
                           scell_k%natom, scell_k%ntypat, scell_k%typat, xcart_ptr, scell_k%znucl, 0)
          end do ! ii
        end do ! ip
      end do ! spin
 
    else
-     ! Spinor wavefunctions
+     ! Spinor wavefunctions.
      do ip=1,vpq%nstates
        write(msg, "(2(a,i0),a,es16.6)")&
          " For spin: ", spin, ": pstate: ", ip, ": 1/N_k \sum_nk |A_nk|^2 = ", sum(abs(vpq%a_spin(:,:,ip,spin))**2) / nkbz
        call wrtout(units, msg)
 
-       pol_rho(:) = abs(pol_wf(1:sc_nfft, ip, 1)) ** 2
-       pol_rho(:) = abs(pol_wf(sc_nfft+1:, ip, 1)) ** 2 + pol_rho(:)
+       pol_rhor(:) = abs(pol_wfr(1:sc_nfft, ip, 1)) ** 2
+       pol_rhor(:) = abs(pol_wfr(sc_nfft+1:, ip, 1)) ** 2 + pol_rhor(:)
        write(msg, "(2(a,i0),a,es16.6)")" Polaron density for spin: ", spin, ": pstate: ", ip, &
-                                       " integrates to: ", sum(pol_rho) * cryst%ucvol/uc_nfft
+                                       " integrates to: ", sum(pol_rhor) * cryst%ucvol / product(ds_ngfft(1:3))
        call wrtout(units, msg)
-       write(msg, "(a,es16.6)")" maxval(abs(aimag(pol_wf))): ", maxval(abs(aimag(pol_wf(:, ip, 1))))
+       write(msg, "(a,es16.6)")" maxval(abs(aimag(pol_wfr))): ", maxval(abs(aimag(pol_wfr(:, ip, 1))))
        call wrtout(units, msg)
-       call center_and_spread(cryst, vpq%ngkpt, sc_ngfft, pol_rho, center_cart, spread, units)
+       call center_and_spread(cryst, vpq%ngkpt, sc_ngfft, pol_rhor, center_cart, spread, units)
 
        spin = 1
        do ii=1,num_writes
@@ -3579,18 +3577,18 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
            xcart_ptr => scell_q%xcart
          end if
 
-         call write_xsf(path, sc_ngfft(1), sc_ngfft(2), sc_ngfft(3), pol_rho, scell_k%rprimd, origin0, &
+         call write_xsf(path, sc_ngfft(1), sc_ngfft(2), sc_ngfft(3), pol_rhor, scell_k%rprimd, origin0, &
                         scell_k%natom, scell_k%ntypat, scell_k%typat, xcart_ptr, scell_k%znucl, 0)
        end do ! ii
      end do ! ip
    end if
-   ABI_FREE(pol_rho)
+   ABI_FREE(pol_rhor)
  end if ! master
 
  call cwtime_report(" Computation of polaron wavefunction completed", cpu_all, wall_all, gflops_all, pre_str=ch10, end_str=ch10)
 
  ABI_SFREE(sc_displ_cart_re)
- ABI_FREE(pol_wf)
+ ABI_FREE(pol_wfr)
 
  call wfd%free(); call scell_q%free(); call scell_k%free(); call vpq%free()
 
@@ -3671,7 +3669,7 @@ subroutine center_and_spread(prim_cryst, ncells, sc_ngfft, rhor, center_cart, sp
  call wrtout(units, msg)
  ! full width at half-maximum
  fwhm = (two * sqrt(two * log(two))) * spread
- write(msg, "(a,2(es16.6,a))")" Full width at half-maximum (FWHM) ", fwhm, "(Bohr) ", fwhm * Bohr_Ang, " (Ang)"
+ write(msg, "(a,2(es16.6,a))")" Full width at half-maximum (FWHM) ", fwhm, " (Bohr) ", fwhm * Bohr_Ang, " (Ang)"
  call wrtout(units, msg)
 
 end subroutine center_and_spread
