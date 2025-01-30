@@ -49,6 +49,7 @@ module m_orbmag
   use m_cgtools,          only : projbd
   use m_getghc,           only : getghc
   use m_hamiltonian,      only : init_hamiltonian, gs_hamiltonian_type, gspot_transgrid_and_pack
+  use m_hdr
   use m_kg,               only : getph,mkkin,mkkpg,ph1d3d
   use m_mkffnl,           only : mkffnl
   use m_mpinfo,           only : proc_distrb_cycle,proc_distrb_nband
@@ -214,7 +215,7 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine orbmag(crystal,cg,cg1,cprj,dtset,ebands_k,gsqcut,kg,mcg,mcg1,&
+subroutine orbmag(crystal,cg,cg1,cprj,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg1,&
     & mcprj,mkmem_rbz,mpi_enreg,mpw,nfftf,ngfftf,paw_ij,pawfgr,pawrad,&
     & pawtab,psps,usevxctau,vtrial,vxctau,ylm,ylmgr)
 
@@ -225,6 +226,7 @@ subroutine orbmag(crystal,cg,cg1,cprj,dtset,ebands_k,gsqcut,kg,mcg,mcg1,&
  type(crystal_t),intent(in) :: crystal
  type(dataset_type),intent(in) :: dtset
  type(ebands_t),intent(in) :: ebands_k
+ type(hdr_type),intent(in) :: hdr
  type(MPI_type), intent(inout) :: mpi_enreg
  type(pawfgr_type),intent(in) :: pawfgr
  type(pseudopotential_type), intent(in) :: psps
