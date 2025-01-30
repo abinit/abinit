@@ -66,7 +66,6 @@ MODULE m_nctk
  ! String length used for the names of dimensions and variables
  ! The maximum allowable number of characters
 
-
  ! netcdf4-hdf5 is the default
  integer,save,private :: def_cmode_for_seq_create = ior(ior(nf90_clobber, nf90_netcdf4), nf90_write)
  ! netcdf4 classic
