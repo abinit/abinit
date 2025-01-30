@@ -3424,12 +3424,12 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
        ! Get periodic part on the real space FFT mesh in ur_k
        call wfd%rotate_cg(band, ndat1, spin, kk_ibz, npw_k, kg_k, istwf_k, &
                           cryst, mapl_k, gbound_k, work_ngfft, work, ug_k, urs_kbz=ur_k)
-       print *, "int_omega dr |u(r)}^2:", sum(abs(ur_k(:,1)) ** 2) / uc_nfft
+       !print *, "int_omega dr |u(r)}^2:", sum(abs(ur_k(:,1)) ** 2) / uc_nfft
 
        ! Use linear interpolate to downsample from ngfft to ds_ngfft.
        if (ds_iscale /= 1) then
          call interpolate_ur(ngfft, nspinor*ndat1, ur_k, ds_ngfft, ds_ur_k)
-         print *, "int_omega dr |ds_u(r)}^2:", sum(abs(ds_ur_k(:,1)) ** 2) / product(ds_ngfft(1:3))
+         !print *, "int_omega dr |ds_u(r)}^2:", sum(abs(ds_ur_k(:,1)) ** 2) / product(ds_ngfft(1:3))
        end if
 
        ! Accumulate for each polaron state.
@@ -3473,7 +3473,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
                      uc_idx = 1 + wp1 + wp2*ds_ngfft(1) + wp3*ds_ngfft(1)*ds_ngfft(2)
                      ir = ir + 1; irsp = ir + spad
                      ! Note the use of the downsampled ds_ur_k here.
-                     pol_wfr(irsp, ip, spin) = pol_wfr(irsp, ip, spin) + a_nk * ur_k(uc_idx,1) * c123
+                     pol_wfr(irsp, ip, spin) = pol_wfr(irsp, ip, spin) + a_nk * ds_ur_k(uc_idx,1) * c123
                    end do
                  end do
                end do
