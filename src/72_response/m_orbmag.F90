@@ -93,6 +93,31 @@ module m_orbmag
   complex(dpc),parameter :: com=-half*j_dpc  ! Orbital magnetism pre-factor
   complex(dpc),parameter :: cbc=-com ! Berry curvature pre-factor
 
+  ! local datatype for orbmag data on kpt mesh, for eventual output to netcdf
+  type,private :: orbmag_mesh_type
+    ! scalars
+    
+    integer :: mband, nkpt, nsppol
+    ! number of bands, kpts, spin polarizations
+
+    integer :: natom, ntypat
+    ! atoms and types of atoms
+
+    integer :: nterms
+    ! number of terms to store on the kpt mesh
+    ! CC, VV1, VV2, NL, L_R, B.M 
+
+    real(dp),allocatable :: lamb_shielding(:)
+    ! lamb_shielding(ntypat)
+    
+    real(dp),allocatable :: nucdipmom(:,:)
+    ! nucdipmom(3,natom)
+
+    real(dp),allocatable :: omesh(:,:,:,:,:)
+    ! omesh(2,mband,nkpt,nsppol,nterms)
+  
+  end type orbmag_mesh_type
+
   ! local datatype for various onsite terms. Probably overkill, but convenient.
   type,private :: dterm_type
     ! scalars
@@ -145,6 +170,8 @@ module m_orbmag
 
   private :: lamb_core
   private :: make_pcg1
+  private :: orbmag_mesh_alloc
+  private :: orbmag_mesh_free
   private :: orbmag_output
   private :: dterm_alloc
   private :: dterm_free
@@ -171,8 +198,11 @@ CONTAINS  !=====================================================================
 !!  cg(2,mcg)=all ground state wavefunctions
 !!  cg1(2,mcg1,3)=all DDK wavefunctions in all 3 directions
 !!  cprj(dtset%natom,mcprj)<type(pawcprj_type)>=all ground state cprj
+!!  crystal(crystal_t)=structured datatype holding details about unit cell
 !!  dtset <type(dataset_type)>=all input variables for this dataset
+!!  ebands_k(ebands_t)=structured datatype holding GS eigenvalues
 !!  gsqcut=large sphere cut-off
+!!  hdr(hdr_type)=structured dataype with header info for eventual output
 !!  kg(3,mpw*mkmem_rbz)=basis sphere of planewaves at k
 !!  mcg=dimension of cg
 !!  mcg1=dimension of cg1
@@ -191,7 +221,6 @@ CONTAINS  !=====================================================================
 !!  usevxctau=1 if kinetic energy density contribution has to be included (mGGA)
 !!  vtrial(nfftf,dtset%nspden)=GS potential (Hartree)
 !!  vxctau(nfftf,nspden,4*usevxctau)=derivative of e_xc with respect to kinetic energy density, for mGGA  
-!!  xred(3,dtset%natom)=reduced dimensionless atomic coordinates
 !!  ylm(mpw*mkmem_rbz,psps%mpsang*psps%mpsang*psps%useylm)=all ylm's
 !!  ylmgr(mpw*mkmem_rbz,3,psps%mpsang*psps%mpsang*psps%useylm)=gradients of ylm's
 !!
@@ -208,7 +237,7 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine orbmag(crystal,cg,cg1,cprj,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg1,&
+subroutine orbmag(cg,cg1,cprj,crystal,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg1,&
     & mcprj,mkmem_rbz,mpi_enreg,mpw,nfftf,ngfftf,paw_ij,pawfgr,pawrad,&
     & pawtab,psps,usevxctau,vtrial,vxctau,ylm,ylmgr)
 
@@ -242,11 +271,12 @@ subroutine orbmag(crystal,cg,cg1,cprj,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg1,&
  integer :: iat,iatom,icg,icmplx,icprj,ider,idir,ierr
  integer :: ikg,ikg1,ikpt,ilm,indx,isppol,istwf_k,iterm,itypat,lmn2max
  integer :: me,mcgk,mcprjk,my_lmax,my_nspinor,nband_k,nband_me,ngfft1,ngfft2,ngfft3,ngfft4
- integer :: ngfft5,ngfft6,ngnt,nl1_option,nn,nkpg,npw_k,npwsp,nproc,spaceComm
+ integer :: ngfft5,ngfft6,ngnt,nl1_option,nn,nkpg,npw_k,npwsp,nproc,orbmag_mesh_nterms,spaceComm
  real(dp) :: arg,ecut_eff,fermie
  logical :: has_nucdip
  type(dterm_type) :: dterm
  type(gs_hamiltonian_type) :: gs_hamk
+ type(orbmag_mesh_type) :: orbmag_mesh
 
  !arrays
  integer,allocatable :: atindx(:),atindx1(:),dimlmn(:),gntselect(:,:),kg_k(:,:),nattyp(:)
@@ -278,8 +308,6 @@ subroutine orbmag(crystal,cg,cg1,cprj,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg1,&
 
  ! Fermi energy
  call local_fermie(dtset,ebands_k,fermie,mpi_enreg)
- !fermie = dtset%userra
- !write(std_out,'(a,es16.8)')'JWZ debug using fermi e = ',fermie
 
  !Definition of atindx array
  !Generate an index table of atoms, in order for them to be used type after type.
@@ -322,6 +350,11 @@ subroutine orbmag(crystal,cg,cg1,cprj,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg1,&
 
  ABI_MALLOC(orbmag_terms,(2,dtset%mband,dtset%nsppol,3,nterms))
  orbmag_terms = zero
+
+ ! number of terms to store on the kpt mesh
+ ! CC, VV1, VV2, NL, L_R, B.M 
+ orbmag_mesh_nterms=6
+ call orbmag_mesh_alloc(dtset,orbmag_mesh_nterms,orbmag_mesh)
 
  !==== Initialize most of the Hamiltonian ====
  !Allocate all arrays and initialize quantities that do not depend on k and spin.
@@ -493,10 +526,6 @@ subroutine orbmag(crystal,cg,cg1,cprj,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg1,&
      !--------------------------------------------------------------------------------
      ! Finally ready to compute contributions to orbital magnetism and Berry curvature
      !--------------------------------------------------------------------------------
-
-     !! check aij against paw_ij
-     !call check_eig_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,&
-     !  & gs_hamk,ikpt,isppol,mcgk,mpi_enreg,my_nspinor,nband_k,npw_k,pawtab)
 
      ABI_MALLOC(b1_k,(2,nband_k,3))
      ABI_MALLOC(b2_k,(2,nband_k,3))
@@ -678,6 +707,8 @@ call orbmag_output(dtset,orbmag_terms,orbmag_trace)
  ABI_FREE(cwaveprj)
 
  call dterm_free(dterm)
+
+ call orbmag_mesh_free(orbmag_mesh)
 
  ABI_FREE(orbmag_terms)
  ABI_FREE(orbmag_trace)
@@ -2283,6 +2314,144 @@ subroutine dterm_alloc(dterm,lmnmax,lmn2max,natom,ndij)
   dterm%has_BM=1
 
 end subroutine dterm_alloc
+!!***
+
+!!****f* ABINIT/orbmag_mesh_alloc
+!! NAME
+!! orbmag_mesh_alloc
+!!
+!! FUNCTION
+!! allocate space in orbmag_mesh_type
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2024 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!  lmnmax=max value of lmn over all psps
+!!  lmn2max=max value of lmn2 over all psps
+!!  natom=number of atoms in cell
+!!  ndij=spin channels in dij
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!! orbmag_mesh <type(orbmag_mesh_type)> data related to orbmag terms on kpt mesh
+!!
+!! TODO
+!!
+!! NOTES
+!!
+!! PARENTS
+!!      m_orbmag
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine orbmag_mesh_alloc(dtset,nterms,orbmag_mesh)
+
+  !Arguments ------------------------------------
+  !scalars
+  integer,intent(in) :: nterms
+  type(dataset_type),intent(in) :: dtset
+  type(orbmag_mesh_type),intent(inout) :: orbmag_mesh
+
+  !arrays
+
+  !Local variables -------------------------
+  !scalars
+
+  !arrays
+!--------------------------------------------------------------------
+
+  orbmag_mesh%mband = dtset%mband
+  orbmag_mesh%nkpt = dtset%nkpt
+  orbmag_mesh%nsppol = dtset%nsppol
+  orbmag_mesh%natom = dtset%natom
+  orbmag_mesh%ntypat = dtset%ntypat
+  orbmag_mesh%nterms = nterms
+
+  if(allocated(orbmag_mesh%lamb_shielding)) then
+    ABI_FREE(orbmag_mesh%lamb_shielding)
+  end if
+  ABI_MALLOC(orbmag_mesh%lamb_shielding,(orbmag_mesh%ntypat))
+  
+  if(allocated(orbmag_mesh%nucdipmom)) then
+    ABI_FREE(orbmag_mesh%nucdipmom)
+  end if
+  ABI_MALLOC(orbmag_mesh%nucdipmom,(3,orbmag_mesh%natom))
+  
+  if(allocated(orbmag_mesh%omesh)) then
+    ABI_FREE(orbmag_mesh%omesh)
+  end if
+  ABI_MALLOC(orbmag_mesh%omesh,(2,orbmag_mesh%mband,orbmag_mesh%nkpt,orbmag_mesh%nsppol,nterms))
+
+end subroutine orbmag_mesh_alloc
+!!***
+
+!!****f* ABINIT/orbmag_mesh_free
+!! NAME
+!! orbmag_mesh_free
+!!
+!! FUNCTION
+!! free space in orbmag_mesh_type
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2024 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!! orbmag_mesh <type(orbmag_mesh_type)> data related to orbmag terms on kpt mesh
+!!
+!! TODO
+!!
+!! NOTES
+!!
+!! PARENTS
+!!      m_orbmag
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine orbmag_mesh_free(orbmag_mesh)
+
+  !Arguments ------------------------------------
+  !scalars
+  type(orbmag_mesh_type),intent(inout) :: orbmag_mesh
+
+  !arrays
+
+  !Local variables -------------------------
+  !scalars
+
+  !arrays
+!--------------------------------------------------------------------
+
+  if(allocated(orbmag_mesh%lamb_shielding)) then
+    ABI_FREE(orbmag_mesh%lamb_shielding)
+  end if
+  
+  if(allocated(orbmag_mesh%nucdipmom)) then
+    ABI_FREE(orbmag_mesh%nucdipmom)
+  end if
+ 
+  if(allocated(orbmag_mesh%omesh)) then
+    ABI_FREE(orbmag_mesh%omesh)
+  end if
+
+end subroutine orbmag_mesh_free
 !!***
 
 !!****f* ABINIT/dterm_aij

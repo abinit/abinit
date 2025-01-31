@@ -2198,7 +2198,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        ABI_MALLOC(vtrial_local,(nfftf,dtset%nspden))
      end if
      vtrial_local = vtrial
-     call orbmag(crystal,cg,cg1_3,cprj,dtset,ebands_k,gsqcut,hdr0,kg,mcg,mcg1,mcprj,mkmem_rbz,&
+     call orbmag(cg,cg1_3,cprj,crystal,dtset,ebands_k,gsqcut,hdr0,kg,mcg,mcg1,mcprj,mkmem_rbz,&
        & mpi_enreg,mpw,nfftf,ngfftf,paw_ij,pawfgr,pawrad,pawtab,psps,usevxctau,&
        & vtrial_local,vxctau,ylm,ylmgr)
      if( ALLOCATED(vtrial_local) ) then
