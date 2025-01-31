@@ -256,16 +256,19 @@ pawprtvol 3
  pseudos "28ni.paw, 8o.2.paw"
 
 paral_kgb 1
+npband 2
 wfoptalg  114
 gpu_option 2
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% [files]
-#%% files_to_test =
-#%%   t05.abo, tolnlines = 70, tolabs = 7.000e-06, tolrel = 7.000e-03, fld_options = -medium
 #%% [paral_info]
-#%% max_nprocs = 1
+#%% nprocs_to_test = 2
+#%% max_nprocs = 2
+#%% [files]
+#%% [NCPU_2]
+#%% files_to_test =
+#%%   t12_MPI2.abo, tolnlines = 70, tolabs = 7.000e-06, tolrel = 7.000e-03, fld_options = -medium
 #%% [extra_info]
 #%% authors = M. Sarraute
 #%% keywords = PAW, DFTU
