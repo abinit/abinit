@@ -26,4 +26,5 @@ inp_files = [
 "t09.abi", # PAW, GS, CGWF,       (Fe, nspinor==2, nspden==4, paral_kgb==0)
 "t10.abi", # NC,  GS+DFPT, CGWF, phon+elfd+effmas (CaO, nspinor==1)
 "t11.abi", # NC,  GS+DFPT, CGWF, phon+elfd+strs   (AlAs, nspinor==1)
+"t12.abi", # PAW, GS, LOBPCG2,    (NiO, nspinor==2, nspden==4, paral_kgb==1, npband==2)
 ]
