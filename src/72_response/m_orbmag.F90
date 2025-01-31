@@ -2845,11 +2845,28 @@ subroutine orbmag_ncwrite(crystal,dtset,ebands,hdr,ncid,orbmag_mesh,psps,pawtab)
  NCF_CHECK(crystal%ncwrite(ncid))
  NCF_CHECK(ebands_ncwrite(ebands, ncid))
 
- !!! Add fatband-specific quantities
- !!ncerr = nctk_def_dims(ncid, [ &
- !!  nctkdim_t("natsph", dtset%natsph), &
- !!  nctkdim_t("ndosfraction", dos%ndosfraction)], defmode=.True.)
+ !! Add orbmag-mesh-specific quantities
+ ncerr = nctk_def_dims(ncid, [ &
+   nctkdim_t("ntypat", dtset%ntypat)],defmode=.True.)
+ NCF_CHECK(ncerr)
+ 
+ ncerr = nctk_def_arrays(ncid, [&
+   nctkarr_t("lambsig", "dp", "ntypat")])
+ NCF_CHECK(ncerr)
+ 
+ NCF_CHECK(nf90_put_var(ncid, vid("lambsig"), orbmag_mesh%lambsig))
+ 
+ !!, &
+ !!  nctkarr_t("iatsph", "int", "natsph"), &
+ !!  nctkarr_t("ratsph", "dp", "number_of_atom_species"), &
+ !!  nctkarr_t("dos_fractions", "dp", "number_of_kpoints, max_number_of_states, number_of_spins, ndosfraction") &
+ !!])
  !!NCF_CHECK(ncerr)
+
+
+ 
+ !! , &
+ !!  nctkdim_t("ndosfraction", dos%ndosfraction)], defmode=.True.)
 
  !!if (dos%ndosfraction*dos%mbesslang > 0) then
  !!  ncerr = nctk_def_dims(ncid, [ &
@@ -2937,11 +2954,11 @@ subroutine orbmag_ncwrite(crystal,dtset,ebands,hdr,ncid,orbmag_mesh,psps,pawtab)
  call wrtout(std_out,msg,"PERS")
 #endif
 
-!!contains
- !!integer function vid(vname)
- !!  character(len=*),intent(in) :: vname
- !!  vid = nctk_idname(ncid, vname)
- !!end function vid
+contains
+ integer function vid(vname)
+   character(len=*),intent(in) :: vname
+   vid = nctk_idname(ncid, vname)
+ end function vid
 
 end subroutine orbmag_ncwrite
 !!***
