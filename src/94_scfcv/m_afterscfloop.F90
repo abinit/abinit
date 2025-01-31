@@ -33,13 +33,13 @@ module m_afterscfloop
  use m_dtfil
  use m_extfpmd
 
- use defs_datatypes,     only : pseudopotential_type
+ use defs_datatypes,     only : pseudopotential_type, ebands_t
  use defs_abitypes,      only : mpi_type
  use m_time,             only : timab
  use m_xmpi,             only : xmpi_sum, xmpi_comm_rank,xmpi_comm_size
  use m_berryphase_new,   only : berryphase_new
  use m_geometry,         only : xred2xcart, metric
- use m_crystal,          only : prtposcar
+ use m_crystal,          only : crystal_init,crystal_t,prtposcar
  use m_results_gs ,      only : results_gs_type
  use m_electronpositron, only : electronpositron_type, electronpositron_calctype, exchange_electronpositron
  use m_paw_dmft,         only : paw_dmft_type
@@ -364,9 +364,11 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  integer :: mcg1_3,nfftotf,ngrad,optcut,optfor,optgr0,optgr1,optgr2,optrad,quit,shft
  integer :: spaceComm_fft,tim_mkrho
  logical :: save_cg1_3,test_gylmgr,test_nfgd,test_rfgd
- logical :: wvlbigdft=.false.
+ logical :: remove_inv=.false.,wvlbigdft=.false.
  real(dp) :: c_fermi,dtaur,dtaurzero,ucvol
  character(len=500) :: message
+ type(crystal_t) :: crystal
+ type(ebands_t) :: ebands_k
  type(paw_dmft_type) :: paw_dmft
 #if defined HAVE_BIGDFT
  integer :: ia,ii,mband_cprj
@@ -393,6 +395,11 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 !Compute different geometric tensor, as well as ucvol, from rprimd
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
  nfftotf=product(ngfftf(1:3))
+ 
+ call crystal_init(dtset%amu_orig(:,1),crystal,dtset%spgroup,dtset%natom,dtset%npsp,&
+& psps%ntypat,dtset%nsym,rprimd,dtset%typat,xred,dtset%ziontypat,dtset%znucl,1,&
+& dtset%nspden==2.and.dtset%nsppol==1,remove_inv,psps%title,&
+& symrel=dtset%symrel,tnons=dtset%tnons,symafm=dtset%symafm)
 
 !MPI FFT communicator
  spaceComm_fft=mpi_enreg%comm_fft
@@ -556,9 +563,9 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
      ABI_MALLOC(vtrial_local,(nfftf,dtset%nspden))
    end if
    vtrial_local = vtrial
-!   call orbmag(cg,cg1_3,cprj,dtset,eigen,gsqcut,kg,mcg,mcg1_3,mcprj,dtset%mkmem,&
-!      & mpi_enreg,dtset%mpw,nfftf,ngfftf,npwarr,occ,paw_ij,pawfgr,&
-!      & pawrad,pawtab,psps,rprimd,usevxctau,vtrial_local,vxctau,xred,ylm,ylmgr)
+!   call orbmag(cg,cg1_3,cprj,crystal,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg1_3,&
+!      & mcprj,dtset%mkmem,mpi_enreg,dtset%mpw,nfftf,ngfftf,occ,paw_ij,pawfgr,&
+!      & pawrad,pawtab,psps,usevxctau,vtrial_local,vxctau,ylm,ylmgr)
 
    ABI_FREE(vtrial_local)
    ABI_FREE(cg1_3)
