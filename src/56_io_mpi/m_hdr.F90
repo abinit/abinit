@@ -374,7 +374,7 @@ module m_hdr
  !    Moreover the files produced by the DFPT code do not have a well-defined extension and, as a consequence,
  !    they require a special treatment. In python I would use regexp but Fortran is not python!
 
- type(abifile_t),private,parameter :: all_abifiles(51) = [ &
+ type(abifile_t),private,parameter :: all_abifiles(52) = [ &
 
     ! Files with wavefunctions:
     abifile_t(varname="coefficients_of_wavefunctions", fform=2, ext="WFK", class="wf_planewave"), &
@@ -452,6 +452,7 @@ module m_hdr
 
    ! Miscellaneous
    abifile_t(varname="dos_fractions", fform=3000, ext="FATBANDS", class="data"), &
+   abifile_t(varname="orbmag_mesh", fform=3100, ext="ORBMAG", class="data"), &
    abifile_t(varname="spectral_weights", fform=5000, ext="FOLD2BLOCH", class="data"), &
    abifile_t(varname="no_fftdatar_write", fform=6000, ext="ABIWAN", class="data"), &
    abifile_t(varname="None", fform=6001, ext="KERANGE", class="data"), &

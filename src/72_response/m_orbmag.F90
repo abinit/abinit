@@ -47,6 +47,7 @@ module m_orbmag
   use m_crystal,          only : crystal_t
   use m_cgprj,            only : getcprj
   use m_cgtools,          only : projbd
+  use m_dtfil
   use m_ebands
   use m_getghc,           only : getghc
   use m_hamiltonian,      only : init_hamiltonian, gs_hamiltonian_type, gspot_transgrid_and_pack
@@ -206,6 +207,7 @@ CONTAINS  !=====================================================================
 !!  cg1(2,mcg1,3)=all DDK wavefunctions in all 3 directions
 !!  cprj(dtset%natom,mcprj)<type(pawcprj_type)>=all ground state cprj
 !!  crystal(crystal_t)=structured datatype holding details about unit cell
+!!  dtfil <type(datafiles_type)>=variables related to files
 !!  dtset <type(dataset_type)>=all input variables for this dataset
 !!  ebands_k(ebands_t)=structured datatype holding GS eigenvalues
 !!  gsqcut=large sphere cut-off
@@ -244,7 +246,7 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine orbmag(cg,cg1,cprj,crystal,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg1,&
+subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg1,&
     & mcprj,mkmem_rbz,mpi_enreg,mpw,nfftf,ngfftf,paw_ij,pawfgr,pawrad,&
     & pawtab,psps,usevxctau,vtrial,vxctau,ylm,ylmgr)
 
@@ -253,6 +255,7 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg1,&
  integer,intent(in) :: mcprj,mcg,mcg1,mkmem_rbz,mpw,nfftf,usevxctau
  real(dp),intent(in) :: gsqcut
  type(crystal_t),intent(in) :: crystal
+ type(datafiles_type), intent(in) :: dtfil
  type(dataset_type),intent(in) :: dtset
  type(ebands_t),intent(in) :: ebands_k
  type(hdr_type),intent(in) :: hdr
@@ -274,11 +277,13 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg1,&
 
  !Local
  !scalars
+ character(len=fnlen) :: fname
  integer :: adir,bdtot_index,buff_size,choice,cpopt,dimffnl,exchn2n3d
  integer :: iat,iatom,icg,icmplx,icprj,ider,idir,ierr
  integer :: ikg,ikg1,ikpt,ilm,indx,isppol,istwf_k,iterm,itypat,lmn2max
- integer :: me,mcgk,mcprjk,my_lmax,my_nspinor,nband_k,nband_me,ngfft1,ngfft2,ngfft3,ngfft4
+ integer :: me,mcgk,mcprjk,my_lmax,my_nspinor,nband_k,nband_me,ncid,ngfft1,ngfft2,ngfft3,ngfft4
  integer :: ngfft5,ngfft6,ngnt,nl1_option,nn,nkpg,npw_k,npwsp,nproc,orbmag_mesh_nterms,spaceComm
+ integer,parameter :: master=0
  real(dp) :: arg,ecut_eff,fermie
  logical :: has_nucdip
  type(dterm_type) :: dterm
@@ -732,11 +737,18 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg1,&
    end do ! nn
  end do ! isppol
 
-! get the Lamb term
-call lamb_core(atindx,dtset,omlamb,pawtab)
-orbmag_trace(:,:,iomlmb) = omlamb
+ ! get the Lamb term
+ call lamb_core(atindx,dtset,omlamb,pawtab)
+ orbmag_trace(:,:,iomlmb) = omlamb
+ 
+ if (me == master) then
+   fname = trim(dtfil%filnam_ds(4))//'_ORBMAG.nc'
+   NCF_CHECK(nctk_open_create(ncid, fname, xmpi_comm_self))
+   call orbmag_ncwrite(crystal,dtset,ebands_k,hdr,ncid,orbmag_mesh,psps,pawtab)
+   NCF_CHECK(nf90_close(ncid))
+ end if
 
-call orbmag_output(dtset,orbmag_terms,orbmag_trace)
+ call orbmag_output(dtset,orbmag_terms,orbmag_trace)
 
 !---------------------------------------------------
 ! deallocate memory
@@ -2825,8 +2837,8 @@ subroutine orbmag_ncwrite(crystal,dtset,ebands,hdr,ncid,orbmag_mesh,psps,pawtab)
 
  call cwtime(cpu, wall, gflops, "start")
 
- fform = fform_from_ext("FATBANDS.nc")
- ABI_CHECK(fform /= 0, "Cannot find fform associated to FATBANDS.nc")
+ fform = fform_from_ext("ORBMAG.nc")
+ ABI_CHECK(fform /= 0, "Cannot find fform associated to ORBMAG.nc")
 
  ! Write header, crystal structure and band energies.
  NCF_CHECK(hdr%ncwrite(ncid, fform, nc_define=.True.))
