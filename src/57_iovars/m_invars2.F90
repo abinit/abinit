@@ -2626,6 +2626,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
        if(tread==1) dtset%dmft_triqs_nsubdivisions=intarr(1)
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_ntau_delta',tread,'INT')
        if(tread==1) dtset%dmft_triqs_ntau_delta=intarr(1)
+       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_read_ctqmcdata',tread,'INT')
+       if(tread==1) dtset%dmft_triqs_read_ctqmcdata=intarr(1)
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_seed_a',tread,'INT')
        if(tread==1) dtset%dmft_triqs_seed_a=intarr(1)
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_seed_b',tread,'INT')

@@ -2382,6 +2382,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmft_triqs_nsubdivisions=1
    dtsets(idtset)%dmft_triqs_ntau_delta=0
    dtsets(idtset)%dmft_triqs_off_diag=-1
+   dtsets(idtset)%dmft_triqs_read_ctqmcdata=1
    dtsets(idtset)%dmft_triqs_seed_a=34788
    dtsets(idtset)%dmft_triqs_seed_b=928374
    dtsets(idtset)%dmft_triqs_therm_restart=1000

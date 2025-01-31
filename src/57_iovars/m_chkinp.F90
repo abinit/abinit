@@ -877,6 +877,8 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
      call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_triqs_off_diag',dt%dmft_triqs_off_diag,2,(/0,1/),iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
+     call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_triqs_read_ctqmcdata',dt%dmft_triqs_read_ctqmcdata,2,(/0,1/),iout)
+     cond_string(1)='dmft_triqs_read_ctqmcdata' ; cond_values(1)=dt%dmft_triqs_read_ctqmcdata
      call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_triqs_therm_restart',dt%dmft_triqs_therm_restart,0,iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
      call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_triqs_time_invariance',dt%dmft_triqs_time_invariance,2,(/0,1/),iout)

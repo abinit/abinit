@@ -3162,27 +3162,27 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
  type(self_type), intent(inout) :: self,self_new
  type(hu_type), intent(inout) :: hu(paw_dmft%ntypat)
 !Local variables ------------------------------
- integer :: basis,i,iatom,iblock,iflavor,iflavor1,iflavor2,ifreq,iilam,ilam,ileg,im,im1,isppol,isub
- integer :: itau,itypat,iw,l,lpawu,myproc,natom,ncon,ndim,nflavor,nflavor_max,ngauss,nleg,nmoments
+ integer :: basis,i,iatom,iblock,iflavor,iflavor1,iflavor2,ifreq,ilam,ileg,im,im1,isppol,isub
+ integer :: itau,itypat,iw,l,len_t,lpawu,myproc,natom,ncon,ndim,nflavor,nflavor_max,ngauss,nleg,nmoments
  integer :: nspinor,nsppol,nsub,ntau,ntau_delta,ntot,nwlo,p,rot_type_vee,tndim,unt,wdlr_size
  integer, target :: ndlr
  logical :: density_matrix,entropy,integral,leg_measure,nondiag,off_diag,rot_inv
- real(dp) :: besp,bespp,beta,dx,err,err_,fact,fact2,tol,xx
+ real(dp) :: besp,bespp,beta,dx,err,err_,fact,fact2,tau,tol,xtau,xx
  complex(dpc) :: mself_1,mself_2,occ_tmp,u_nl
  complex(dpc), target :: eu
  type(oper_type), target :: energy_level
- type(c_ptr) :: block_ptr,eu_ptr,flavor_ptr,ftau_ptr,gl_ptr,gtau_ptr,inner_ptr,levels_ptr,mself_1_ptr
- type(c_ptr) :: mself_2_ptr,ndlr_ptr,occ_ptr,siz_ptr,udens_ptr,vee_ptr,wdlr_ptr
+ type(c_ptr) :: block_ptr,eu_ptr,flavor_ptr,fname_data_ptr,fname_histo_ptr,ftau_ptr,gl_ptr,gtau_ptr
+ type(c_ptr) :: inner_ptr,levels_ptr,mself_1_ptr,mself_2_ptr,ndlr_ptr,occ_ptr,siz_ptr,udens_ptr,vee_ptr,wdlr_ptr
  integer, allocatable :: nblocks(:)
  integer, target, allocatable :: block_list(:,:),flavor_list(:,:,:),flavor_tmp(:,:)
  integer, target, allocatable :: inner_list(:,:),siz_block(:,:)
  real(dp), allocatable :: adlr(:,:),bdlr(:),gl_dlr_re(:),gl_dlr_im(:)
- real(dp), allocatable :: jbes(:),lam_list(:),mgreen(:),t_lp(:,:)
+ real(dp), allocatable :: jbes(:),lam_list(:),leg_array(:,:),mgreen(:),t_lp(:,:)
  real(dp), allocatable :: tpoints(:),tweights(:),wdlr(:),wdlr_beta(:)
  real(dp), allocatable :: wdlr2(:),wdlr3(:),wdlr4(:)
  real(dp), target, allocatable :: wdlr_tmp(:)
  complex(dpc), allocatable :: adlr_iw(:,:),gl_dlr(:,:,:,:),gl_tmp(:,:,:,:),gtau_dlr(:,:,:)
- complex(dpc), allocatable :: shift(:)
+ complex(dpc), allocatable :: gtau_leg(:,:,:),shift(:)
  complex(dpc), target, allocatable :: gl(:,:,:),gtau(:,:,:),levels_ctqmc(:,:)
  complex(dpc), target, allocatable :: moments_self_1(:),moments_self_2(:),occ(:)
  type(matlu_type), allocatable :: eigvectmatlu(:),matlu_tmp(:)
@@ -3190,11 +3190,12 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
  type(matlu_type), pointer :: matlu_pt(:) => null()
  type(vee_type), target, allocatable :: vee_rot(:)
  character(len=1) :: tag_block4
- character(len=2) :: tag_block,tag_block3
+ character(len=2) :: tag_block,tag_block3,tag_lam
  character(len=4) :: tag_at
  character(len=13) :: tag,tag2
- character(len=500) :: tag_block2
+ character(len=500) :: tag_block2,tag_lam2
  character(len=10000) :: message
+ character(len=fnlen), target :: fname_data,fname_histo
 ! ************************************************************************
 
  basis          = paw_dmft%dmftctqmc_basis
@@ -3368,9 +3369,10 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
  call wrtout(std_out,message,"COLL")
  call print_matlu(weiss%oper(1)%matlu(:),natom,1)
 
- ! Possibly neglect some imaginary part and off-diagonal elements in the CTQMC basis.
- ! Thus we need to modify the Weiss field here in order to make sure we use the
- ! same Weiss field in Dyson's equation as the one that was used to solve the impurity model.
+ ! Possibly set the imaginary part and off-diagonal elements to 0. This is
+ ! extremely important to do it explicitly instead of simply sending the real
+ ! part or the diagonal elements to TRIQS since this will modify the electronic levels
+ ! and hybridization that will be used for Dyson's equation.
 
 #ifndef HAVE_TRIQS_COMPLEX
  write(message,'(a,3x,2a)') ch10,"== The imaginary part of Delta(tau) and the ", &
@@ -3395,15 +3397,16 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
  end if ! err>tol
 #endif
 
+ err = zero
  if ((.not. rot_inv) .or. (.not. off_diag)) then
-   call zero_matlu(energy_level%matlu(:),natom,onlynondiag=1)
+   call zero_matlu(energy_level%matlu(:),natom,onlynondiag=1,err=err_)
+   if (err_ > err) err = err_
  end if
 
  if (.not. off_diag) then
    write(message,'(a,3x,2a)') ch10,"== The off-diagonal elements of the hybridization ", &
                             & "and the electronic levels are now set to 0"
    call wrtout(std_out,message,"COLL")
-   err = zero
    do ifreq=1,nwlo
      call zero_matlu(weiss%oper(ifreq)%matlu(:),natom,onlynondiag=1,err=err_)
      if (err_ > err) err = err_
@@ -3643,25 +3646,40 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
    ! Need to slice flavor_list to make it size nflavor*nflavor instead of size nflavor_max*nflavor_max
    flavor_tmp(:,:) = flavor_list(1:nflavor,1:nflavor,iatom)
 
-   block_ptr   = C_LOC(block_list(:,iatom))
-   eu_ptr      = C_LOC(eu)
-   flavor_ptr  = C_LOC(flavor_tmp(:,:))
-   ftau_ptr    = C_LOC(ftau(iatom)%mat(:,:,:))
-   gl_ptr      = C_LOC(gl(:,:,:))
-   gtau_ptr    = C_LOC(gtau(:,:,:))
-   inner_ptr   = C_LOC(inner_list(:,iatom))
-   levels_ptr  = C_LOC(levels_ctqmc(:,:))
-   mself_1_ptr = C_LOC(moments_self_1(:))
-   mself_2_ptr = C_LOC(moments_self_2(:))
-   occ_ptr     = C_LOC(occ(:))
-   siz_ptr     = C_LOC(siz_block(:,iatom))
-   udens_ptr   = C_LOC(udens_rot(iatom)%mat(:,:,1))
-   vee_ptr     = C_LOC(vee_rot(iatom)%mat(:,:,:,:))
+   block_ptr       = C_LOC(block_list(:,iatom))
+   eu_ptr          = C_LOC(eu)
+   flavor_ptr      = C_LOC(flavor_tmp(:,:))
+   fname_data_ptr  = C_LOC(fname_data)
+   fname_histo_ptr = C_LOC(fname_histo)
+   ftau_ptr        = C_LOC(ftau(iatom)%mat(:,:,:))
+   gl_ptr          = C_LOC(gl(:,:,:))
+   gtau_ptr        = C_LOC(gtau(:,:,:))
+   inner_ptr       = C_LOC(inner_list(:,iatom))
+   levels_ptr      = C_LOC(levels_ctqmc(:,:))
+   mself_1_ptr     = C_LOC(moments_self_1(:))
+   mself_2_ptr     = C_LOC(moments_self_2(:))
+   occ_ptr         = C_LOC(occ(:))
+   siz_ptr         = C_LOC(siz_block(:,iatom))
+   udens_ptr       = C_LOC(udens_rot(iatom)%mat(:,:,1))
+   vee_ptr         = C_LOC(vee_rot(iatom)%mat(:,:,:,:))
 
    do ilam=1,ntot
 
-     iilam = ilam ! lambda index to write files
-     if (ilam == ntot) iilam = 0
+     if (ilam < 10) then
+       write(tag_lam,'("0",i1)') ilam
+     else
+       write(tag_lam,'(i2)') ilam
+     end if
+     tag_lam2 = ""
+     if (ilam /= ntot) tag_lam2 = "_ilam" // tag_lam
+
+     fname_data = trim(adjustl(paw_dmft%filapp)) // "_CTQMC_DATA_iatom" // tag_at // trim(adjustl(tag_lam2)) // ".h5"
+     len_t = len(trim(adjustl(fname_data))) + 1
+     fname_data(len_t:len_t) = c_null_char
+
+     fname_histo = trim(adjustl(paw_dmft%filapp)) // "_CTQMC_HISTOGRAM_iatom" // tag_at // trim(adjustl(tag_lam2)) // ".dat"
+     len_t = len(trim(adjustl(fname_histo))) + 1
+     fname_histo(len_t:len_t) = c_null_char
 
      call flush_unit(std_out)
 
@@ -3672,11 +3690,12 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
                         & paw_dmft%dmft_triqs_seed_b,nflavor,ntau,nleg,int(paw_dmft%dmftqmc_n/paw_dmft%nproc), &
                         & paw_dmft%dmftctqmc_meas,paw_dmft%dmftqmc_therm,paw_dmft%dmft_triqs_therm_restart, &
                         & paw_dmft%dmft_triqs_det_init_size,paw_dmft%dmft_triqs_det_n_operations_before_check, &
-                        & ntau_delta,paw_dmft%dmft_triqs_nbins_histo,myproc,nspinor,iatom,iilam,nblocks(iatom), &
-                        & beta,paw_dmft%dmft_triqs_move_global_prob,paw_dmft%dmft_triqs_imag_threshold, &
-                        & paw_dmft%dmft_triqs_det_precision_warning,paw_dmft%dmft_triqs_det_precision_error, &
-                        & paw_dmft%dmft_triqs_det_singular_threshold,lam_list(ilam),block_ptr,flavor_ptr,inner_ptr,siz_ptr, &
-                        & ftau_ptr,gtau_ptr,gl_ptr,udens_ptr,vee_ptr,levels_ptr,mself_1_ptr,mself_2_ptr,occ_ptr,eu_ptr)
+                        & ntau_delta,paw_dmft%dmft_triqs_nbins_histo,myproc,nspinor,nblocks(iatom), &
+                        & paw_dmft%dmft_triqs_read_ctqmcdata,beta,paw_dmft%dmft_triqs_move_global_prob, &
+                        & paw_dmft%dmft_triqs_imag_threshold,paw_dmft%dmft_triqs_det_precision_warning, &
+                        & paw_dmft%dmft_triqs_det_precision_error,paw_dmft%dmft_triqs_det_singular_threshold,lam_list(ilam), &
+                        & block_ptr,flavor_ptr,inner_ptr,siz_ptr,ftau_ptr,gtau_ptr,gl_ptr,udens_ptr,vee_ptr,levels_ptr,mself_1_ptr, &
+                        & mself_2_ptr,occ_ptr,eu_ptr,fname_data_ptr,fname_histo_ptr)
 #endif
 
      call flush_unit(std_out)
@@ -3839,6 +3858,62 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
      end do ! ifreq2
      ABI_FREE(jbes)
 
+     ABI_MALLOC(gtau_leg,(ntau,nflavor,nflavor))
+     ABI_MALLOC(leg_array,(nleg,ntau))
+
+     do itau=1,ntau
+       tau  = dble(itau-1) * beta / (ntau-1)
+       xtau = two*tau/beta - one
+       leg_array(1,itau) = one
+       leg_array(2,itau) = xtau
+       do ileg=3,nleg
+         leg_array(ileg,itau) = (dble(2*(ileg-2)+1)*xtau*leg_array(ileg-1,itau)- &
+             & dble(ileg-2)*leg_array(ileg-2,itau)) / dble(ileg-1)
+       end do ! ileg
+     end do ! itau
+
+     gtau_leg(:,:,:) = czero
+     do iflavor1=1,nflavor
+       do iflavor=1,nflavor
+         do itau=1,ntau
+           gtau_leg(itau,iflavor,iflavor1) = sum(gl(:,iflavor,iflavor1)*leg_array(:,itau)) * &
+                       & sqrt(dble(2*ileg-1)) / beta
+         end do ! itau
+       end do ! iflavor
+     end do ! iflavor1
+
+     if (myproc == 0 .and. off_diag) then
+
+       if (open_file(trim(paw_dmft%filapp)//"Gtau_offdiag_Legendre_iatom"//tag_at//".dat",message,newunit=unt) /= 0) ABI_ERROR(message)
+       write(unt,'(6a)') "# Off-diagonal components of Legendre-sampled G(tau) in the CTQMC basis",ch10, &
+                       & "# Columns are ordered this way:",ch10, &
+                       & "# Imaginary Time     ((Re(G_{ij}) Im(G_{ij}),i=1,2*(2*l+1)),j=1,2*(2*l+1)) where the", &
+                       & " leftmost index varies first"
+       do itau=1,ntau
+         write(unt,'(2x,393(e18.10e3,2x))') beta*dble(itau-1)/dble(ntau-1), &
+            & ((dble(gtau_leg(itau,im,im1)),aimag(gtau_leg(itau,im,im1)),im=1,nflavor),im1=1,nflavor)
+       end do ! itau
+       close(unt)
+
+     end if ! myproc=0
+
+     if (myproc == 0) then
+
+       if (open_file(trim(paw_dmft%filapp)//"Gtau_diag_Legendre_iatom"//tag_at//".dat",message,newunit=unt) /= 0) ABI_ERROR(message)
+       write(unt,'(5a)') "# Diagonal components of Legendre-sampled G(tau) in the CTQMC basis",ch10, &
+                       & "# Columns are ordered this way:",ch10, &
+                       & "# Imaginary Time     (G_{ii},i=1,2*(2*l+1))"
+       do itau=1,ntau
+         write(unt,'(2x,393(e25.17e3,2x))') beta*dble(itau-1)/dble(ntau-1), &
+            & (dble(gtau_leg(itau,im,im)),im=1,nflavor)
+       end do ! itau
+       close(unt)
+
+     end if ! myproc=0
+
+     ABI_FREE(gtau_leg)
+     ABI_FREE(leg_array)
+
      ABI_MALLOC(t_lp,(nleg,green%nmoments))
 
      fact = one ! this is equal to (p-1)!
@@ -3996,6 +4071,13 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
 
  call occup_green_tau(green)
 
+ write(message,'(a,3x,a)') ch10,"== Print Occupation matrix in CTQMC basis"
+ call wrtout(std_out,message,"COLL")
+ call print_matlu(green%occup_tau%matlu(:),natom,1)
+
+ write(message,'(a,3x,a)') ch10,"== Rotating back to cubic basis"
+ call wrtout(std_out,message,"COLL")
+
  ! Build back Weiss field
  do ifreq=1,nwlo
    shift(:) = cmplx(zero,paw_dmft%omega_lo(ifreq),kind=dp)
@@ -4049,7 +4131,10 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
    call sym_matlu(weiss%oper(ifreq)%matlu(:),paw_dmft)
    call sym_matlu(green%oper(ifreq)%matlu(:),paw_dmft)
  end do ! ifreq
+ call copy_matlu(green%occup_tau%matlu(:),dmat_ctqmc(:),natom)
  call sym_matlu(green%occup_tau%matlu(:),paw_dmft)
+
+ call diff_matlu("CTQMC occupations","Symmetrized CTQMC occupations",dmat_ctqmc(:),green%occup_tau%matlu(:),natom,0,tol4)
 
  call gather_oper(weiss%oper(:),weiss%distrib,paw_dmft,opt_ksloc=2)
  call gather_oper(green%oper(:),green%distrib,paw_dmft,opt_ksloc=2)
