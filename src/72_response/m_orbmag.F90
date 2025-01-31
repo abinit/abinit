@@ -47,12 +47,17 @@ module m_orbmag
   use m_crystal,          only : crystal_t
   use m_cgprj,            only : getcprj
   use m_cgtools,          only : projbd
+  use m_ebands
   use m_getghc,           only : getghc
   use m_hamiltonian,      only : init_hamiltonian, gs_hamiltonian_type, gspot_transgrid_and_pack
   use m_hdr
   use m_kg,               only : getph,mkkin,mkkpg,ph1d3d
   use m_mkffnl,           only : mkffnl
   use m_mpinfo,           only : proc_distrb_cycle,proc_distrb_nband
+  use m_nctk
+#ifdef HAVE_NETCDF
+  use netcdf
+#endif
   use m_nonlop,           only : nonlop
   use m_pawcprj,          only : pawcprj_type, pawcprj_alloc, pawcprj_free,pawcprj_getdim, pawcprj_get, pawcprj_put
   use m_pawdij,           only : pawv1
@@ -63,7 +68,7 @@ module m_orbmag
   use m_paw_sphharm,      only : setsym_ylm,slxyzs,realgaunt,make_dyadic
   use m_pawtab,           only : pawtab_type
   use m_spacepar,         only : make_vectornd
-  use m_time,             only : timab
+  use m_time,             only : cwtime, timab
 
   implicit none
 
@@ -174,6 +179,7 @@ module m_orbmag
   private :: orbmag_mesh_alloc
   private :: orbmag_mesh_free
   private :: orbmag_output
+  private :: orbmag_ncwrite   ! Write orbmag_mesh contributions to netcdf file.
   private :: dterm_alloc
   private :: dterm_free
 
@@ -2770,5 +2776,163 @@ subroutine local_fermie(dtset,ebands_k,fermie,mpi_enreg)
 
 end subroutine local_fermie
 !!***
+
+!!****f* m_orbmag/orbmag_ncwrite
+!! NAME
+!! orbmag_ncwrite
+!!
+!! FUNCTION
+!!  Write orbmag_mesh contributions to netcdf file.
+!!
+!! INPUTS
+!!  crystal<crystal_t>=Object defining the unit cell and its symmetries.
+!!  dtset<dtset_type>=Dataset type
+!!  ebands<ebands_t>=Band structure data.
+!!  hdr<hdr_t>=Abinit header
+!!  orbmag_mesh<orbmag_mesh_type>=orbmag_mesh data
+!!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
+!!  pawtab(ntypat*usepaw) <type(pawtab_type)>=paw tabulated starting data
+!!  ncid=NC file handle.
+!!
+!! OUTPUT
+!!  Only writing
+!!
+!! SOURCE
+
+subroutine orbmag_ncwrite(crystal,dtset,ebands,hdr,ncid,orbmag_mesh,psps,pawtab)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: ncid
+ type(crystal_t),intent(in) :: crystal
+ type(dataset_type),intent(in) :: dtset
+ type(ebands_t),intent(in) :: ebands
+ type(hdr_type),intent(in) :: hdr
+ type(orbmag_mesh_type),intent(in) :: orbmag_mesh
+ type(pseudopotential_type),intent(in) :: psps
+!arrays
+ type(pawtab_type),intent(in) :: pawtab(dtset%ntypat*dtset%usepaw)
+
+#ifdef HAVE_NETCDF
+!Local variables-------------------------------
+!scalars
+ integer :: itype,ncerr,fform
+ real(dp) :: cpu,wall,gflops
+ character(len=500) :: msg
+!arrays
+
+!*************************************************************************
+
+ call cwtime(cpu, wall, gflops, "start")
+
+ fform = fform_from_ext("FATBANDS.nc")
+ ABI_CHECK(fform /= 0, "Cannot find fform associated to FATBANDS.nc")
+
+ ! Write header, crystal structure and band energies.
+ NCF_CHECK(hdr%ncwrite(ncid, fform, nc_define=.True.))
+ NCF_CHECK(crystal%ncwrite(ncid))
+ NCF_CHECK(ebands_ncwrite(ebands, ncid))
+
+ !!! Add fatband-specific quantities
+ !!ncerr = nctk_def_dims(ncid, [ &
+ !!  nctkdim_t("natsph", dtset%natsph), &
+ !!  nctkdim_t("ndosfraction", dos%ndosfraction)], defmode=.True.)
+ !!NCF_CHECK(ncerr)
+
+ !!if (dos%ndosfraction*dos%mbesslang > 0) then
+ !!  ncerr = nctk_def_dims(ncid, [ &
+ !!    nctkdim_t("mbesslang", dos%mbesslang), &
+ !!    nctkdim_t("dos_fractions_m_lastsize", dos%ndosfraction*dos%mbesslang)])
+ !!  NCF_CHECK(ncerr)
+ !!end if
+ !!if (dtset%natsph_extra /= 0) then
+ !!  NCF_CHECK(nctk_def_dims(ncid, [nctkdim_t("natsph_extra", dtset%natsph_extra)]))
+ !!end if
+
+ !!ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "prtdos", "pawprtdos", "prtdosm"])
+ !!NCF_CHECK(ncerr)
+ !!ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "ratsph_extra"])
+ !!NCF_CHECK(ncerr)
+
+ !!ncerr = nctk_def_arrays(ncid, [&
+ !!  nctkarr_t("lmax_type", "int", "number_of_atom_species"), &
+ !!  nctkarr_t("iatsph", "int", "natsph"), &
+ !!  nctkarr_t("ratsph", "dp", "number_of_atom_species"), &
+ !!  nctkarr_t("dos_fractions", "dp", "number_of_kpoints, max_number_of_states, number_of_spins, ndosfraction") &
+ !!])
+ !!NCF_CHECK(ncerr)
+
+ !!if (allocated(dos%fractions_m)) then
+ !!  ncerr = nctk_def_arrays(ncid, &
+ !!    nctkarr_t("dos_fractions_m", "dp", &
+ !!              "number_of_kpoints, max_number_of_states, number_of_spins, dos_fractions_m_lastsize"))
+ !!  NCF_CHECK(ncerr)
+ !!end if
+
+ !!if (allocated(dos%fractions_paw1)) then
+ !!  ncerr = nctk_def_arrays(ncid, [&
+ !!    nctkarr_t("dos_fractions_paw1", "dp", "number_of_kpoints, max_number_of_states, number_of_spins, ndosfraction"), &
+ !!    nctkarr_t("dos_fractions_pawt1", "dp", "number_of_kpoints, max_number_of_states, number_of_spins, ndosfraction") &
+ !!  ])
+ !!  NCF_CHECK(ncerr)
+ !!end if
+
+ !!if (dtset%natsph_extra /= 0) then
+ !!  ncerr = nctk_def_arrays(ncid, [&
+ !!    nctkarr_t("xredsph_extra", "dp", "number_of_reduced_dimensions, natsph_extra") &
+ !!  ])
+ !!  NCF_CHECK(ncerr)
+ !!end if
+
+ !!! Write variables
+ !!NCF_CHECK(nctk_set_datamode(ncid))
+
+ !!! scalars
+ !!NCF_CHECK(nf90_put_var(ncid, vid("pawprtdos"), dtset%pawprtdos))
+ !!NCF_CHECK(nf90_put_var(ncid, vid("prtdos"), dos%prtdos))
+ !!NCF_CHECK(nf90_put_var(ncid, vid("prtdosm"), dos%prtdosm))
+
+ !!! arrays
+ !!if (dtset%usepaw == 1) then
+ !!  lmax_type = (pawtab(:)%l_size - 1) / 2
+ !!else
+ !!  do itype=1,crystal%ntypat
+ !!    lmax_type(itype) = maxval(psps%indlmn(1, :, itype))
+ !!  end do
+ !!end if
+ !!NCF_CHECK(nf90_put_var(ncid, vid("lmax_type"), lmax_type))
+ !!NCF_CHECK(nf90_put_var(ncid, vid("dos_fractions"), dos%fractions))
+
+ !!if (dos%prtdos == 3) then
+ !!  NCF_CHECK(nf90_put_var(ncid, vid("iatsph"), dtset%iatsph(1:dtset%natsph)))
+ !!  NCF_CHECK(nf90_put_var(ncid, vid("ratsph"), dtset%ratsph(1:dtset%ntypat)))
+ !!  NCF_CHECK(nf90_put_var(ncid, vid("ratsph_extra"), dtset%ratsph_extra))
+ !!  if (dtset%natsph_extra /= 0) then
+ !!    NCF_CHECK(nf90_put_var(ncid, vid("xredsph_extra"), dtset%xredsph_extra(:, 1:dtset%natsph_extra)))
+ !!  end if
+ !!end if
+
+ !!if (allocated(dos%fractions_m)) then
+ !!  NCF_CHECK(nf90_put_var(ncid, vid("dos_fractions_m"), dos%fractions_m))
+ !!end if
+ !!if (allocated(dos%fractions_paw1)) then
+ !!  NCF_CHECK(nf90_put_var(ncid, vid("dos_fractions_paw1"), dos%fractions_paw1))
+ !!  NCF_CHECK(nf90_put_var(ncid, vid("dos_fractions_pawt1"), dos%fractions_pawt1))
+ !!end if
+
+ call cwtime(cpu,wall,gflops,"stop")
+ write(msg,'(2(a,f8.2),a)')" orbmag_ncwrite: cpu_time: ",cpu,"[s], walltime: ",wall," [s]"
+ call wrtout(std_out,msg,"PERS")
+#endif
+
+!!contains
+ !!integer function vid(vname)
+ !!  character(len=*),intent(in) :: vname
+ !!  vid = nctk_idname(ncid, vname)
+ !!end function vid
+
+end subroutine orbmag_ncwrite
+!!***
+
 
 end module m_orbmag
