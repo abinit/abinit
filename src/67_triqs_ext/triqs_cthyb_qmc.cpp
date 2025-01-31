@@ -18,18 +18,17 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool off_diag, bool move_sh
                      int loc_n_min, int loc_n_max, int seed_a, int seed_b, int num_orbitals, int n_tau,
                      int n_l, int n_cycles, int cycle_length, int ntherm, int ntherm_restart, int det_init_size,
                      int det_n_operations_before_check, int ntau_delta, int nbins_histo, int rank,
-                     int nspinor, int iatom, int ilam, int nblocks, double beta, double move_global_prob, double imag_threshold,
+                     int nspinor, int nblocks, int read_data, double beta, double move_global_prob, double imag_threshold,
                      double det_precision_warning, double det_precision_error, double det_singular_threshold,
                      double lam, int *block_list, int *flavor_list, int *inner_list, int *siz_list, complex<double> *ftau,
                      complex<double> *gtau, complex<double> *gl, complex<double> *udens_cmplx, complex<double> *vee_cmplx,
                      complex<double> *levels_cmplx, complex<double> *moments_self_1, complex<double> *moments_self_2,
-                     complex<double> *occ, complex<double> *eu) {
+                     complex<double> *occ, complex<double> *eu, char *fname_data, char *fname_histo) {
 
   int verbo = 1;
   int ndim = num_orbitals / 2;
-  string lam_fname = "";
-  if (ilam != 0) lam_fname = "_ilam_" + to_string(ilam);
-  string qmc_data_fname = "qmc_data_iatom_" + to_string(iatom) + lam_fname + ".h5";
+  string qmc_data_fname = string(fname_data);
+  string hist_fname = string(fname_histo);
   auto comm = MPI_COMM_WORLD;
   int nproc;
   MPI_Comm_size(comm,&nproc);
@@ -37,7 +36,9 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool off_diag, bool move_sh
   int iflavor,iflavor1;
 
   int therm = ntherm;
-  if (exists(qmc_data_fname)) therm = ntherm_restart;
+
+  bool restart = (exists(qmc_data_fname) && read_data == 1);
+  if (restart) therm = ntherm_restart;
 
   // Print information about the Solver Parameters
   if (rank == 0 && verbo > 0) {
@@ -68,7 +69,6 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool off_diag, bool move_sh
     cout << "   Time invariance       = " << time_invariance << endl;
     cout << "   Ntau delta            = " << ntau_delta << endl;
     cout << "   Nbins histo           = " << nbins_histo << endl;
-    cout << "   Lambda                = " << lam << endl << endl;
   }
 
   // Hamiltonian definition
@@ -84,11 +84,11 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool off_diag, bool move_sh
   double levels_real [num_orbitals*num_orbitals] = {};
   double udens_real [num_orbitals*num_orbitals] = {};
   double vee_real [num_orbitals*num_orbitals*num_orbitals*num_orbitals] = {};
-  for (int i = 0; i < num_orbitals*num_orbitals; ++i) {
+  for (int i : range(num_orbitals*num_orbitals)) {
     levels_real[i] = levels_cmplx[i].real();
     udens_real[i]  = udens_cmplx[i].real();
   }
-  for (int i = 0; i < num_orbitals*num_orbitals*num_orbitals*num_orbitals; ++i)
+  for (int i : range(num_orbitals*num_orbitals*num_orbitals*num_orbitals))
     vee_real[i] = vee_cmplx[i].real();
   levels = levels_real;
   udens  = udens_real;
@@ -99,7 +99,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool off_diag, bool move_sh
 
   gf_struct_t gf_struct;
 
-  for (int i = 0; i < nblocks; ++i)
+  for (int i : range(nblocks))
     gf_struct.emplace_back(to_string(i),siz_list[i]);
 
   if (rank == 0 && verbo > 0) cout << "   == Green's Function Structure Initialized ==" << endl << endl;
@@ -120,11 +120,12 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool off_diag, bool move_sh
   solver_core solver({beta,gf_struct,(n_tau-1)/2,n_tau,n_l,ntau_delta,true});
   if (rank == 0 && verbo > 0) cout << "   == Solver Core Initialized ==" << endl << endl;
 
-  for (int iblock = 0; iblock < nblocks; ++iblock) {
-    for (int tau = 0; tau < ntau_delta; ++tau) {
-      for (int o = 0; o < siz_list[iblock]; ++o) {
+  // Fill Hybridization
+  for (int iblock : range(nblocks)) {
+    for (int tau : range(ntau_delta)) {
+      for (int o : range(siz_list[iblock])) {
         iflavor = flavor_list[o+iblock*num_orbitals];
-        for (int oo = 0; oo < siz_list[iblock]; ++oo) {
+        for (int oo : range(siz_list[iblock])) {
           iflavor1 = flavor_list[oo+iblock*num_orbitals];
           solver.Delta_tau()[iblock][tau](o,oo) = ftau[iflavor+iflavor1*num_orbitals+tau*num_orbitals*num_orbitals];
         }
@@ -149,10 +150,10 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool off_diag, bool move_sh
   paramCTQMC.time_invariance = time_invariance;
   paramCTQMC.nbins_histo = nbins_histo;
 
-  if (exists(qmc_data_fname)) {
+  if (restart) {
 
     // Read initial configuration
-    if (rank == 0 && verbo > 0) cout << "   == Reading previous configuration == " << endl;
+    if (rank == 0 && verbo > 0) cout << "   == Reading previous CTQMC data == " << endl;
     std::vector<int> sendcounts(nproc);
     file qmc_data_hfile(qmc_data_fname,'r');
     group grp = qmc_data_hfile;
@@ -170,7 +171,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool off_diag, bool move_sh
     std::vector<int> inner_index_list(length);
     std::vector<int> is_dagger_list(length);
     int displs [nproc] = {0};
-    for (int i = 1; i < nproc; ++i) displs[i] = displs[i-1] + sendcounts[i-1];
+    for (int i : range(1,nproc)) displs[i] = displs[i-1] + sendcounts[i-1];
     int tot_size = displs[nproc-1] + sendcounts[nproc-1];
     std::vector<uint64_t> tau_list_tot(tot_size);
     std::vector<int> block_index_list_tot(tot_size);
@@ -186,7 +187,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool off_diag, bool move_sh
     MPI_Scatterv(&block_index_list_tot[0],&sendcounts[0],displs,MPI_INTEGER,&block_index_list[0],length,MPI_INTEGER,0,comm);
     MPI_Scatterv(&inner_index_list_tot[0],&sendcounts[0],displs,MPI_INTEGER,&inner_index_list[0],length,MPI_INTEGER,0,comm);
     MPI_Scatterv(&is_dagger_list_tot[0],&sendcounts[0],displs,MPI_INTEGER,&is_dagger_list[0],length,MPI_INTEGER,0,comm);
-    for (int i = 0; i < length; ++i) {
+    for (int i : range(length)) {
       bool is_dagger = (is_dagger_list[i] == 1 ? true : false);
       auto op = op_desc{block_index_list[i],inner_index_list[i],is_dagger,0}; // linear index will be set later, within TRIQS
       time_pt tau = time_pt(tau_list[i],beta);
@@ -194,15 +195,14 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool off_diag, bool move_sh
     }
 
     // Read binned time histogram
-    if (rank == 0 && verbo > 0) cout << "   == Reading previous histogram == " << endl;
     gr = grp.open_group("histo");
     int nbins_file;
     h5_read(gr,"nbins",nbins_file);
     if (nbins_file != nbins_histo) TRIQS_RUNTIME_ERROR << "You are trying to read a configuration file generated with a different number of time bins";
     std::vector<double> *hist;
     string tag_move;
-    for (int i = 0; i < nblocks; ++i) {
-      for (int j = 0; j < 2; ++j) {
+    for (int i : range(nblocks)) {
+      for (int j : range(2)) {
         if (j == 0) {
           tag_move = "insert";
           hist = &paramCTQMC.hist_insert[to_string(i)];
@@ -239,7 +239,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool off_diag, bool move_sh
 
   if (rank == 0 && verbo > 0) cout << endl << "   == Reporting ==" << endl << endl;
 
-  if (rank == 0 && verbo > 0) cout << "   == Writing final configuration ==      " << endl << endl;
+  if (rank == 0 && verbo > 0) cout << "   == Writing CTQMC data ==      " << endl << endl;
 
   // Write all final configurations
   auto config = solver.get_configuration();
@@ -251,7 +251,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool off_diag, bool move_sh
   std::vector<int> is_dagger_list(length);
   int count = 0;
   for (auto const &o : config) {
-    uint64_t tau = floor_div(o.first,tau_0);   // trick to get the value of the integer representing the time_pt
+    uint64_t tau = floor_div(o.first,tau_0); // trick to get the value of the integer representing the time_pt
     auto op = o.second;
     int block_index = op.block_index;
     int inner_index = op.inner_index;
@@ -265,7 +265,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool off_diag, bool move_sh
   std::vector<int> recvcounts(nproc);
   MPI_Allgather(&length,1,MPI_INTEGER,&recvcounts[0],1,MPI_INTEGER,comm);
   int displs [nproc] = {0};
-  for (int i = 1; i < nproc; ++i) displs[i] = displs[i-1] + recvcounts[i-1];
+  for (int i : range(1,nproc)) displs[i] = displs[i-1] + recvcounts[i-1];
   int tot_size = displs[nproc-1] + recvcounts[nproc-1];
   std::vector<uint64_t> tau_list_tot(tot_size);
   std::vector<int> block_index_list_tot(tot_size);
@@ -301,8 +301,8 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool off_diag, bool move_sh
     double p_local = 0.9;
     string tag_move;
 
-    for (int i = 0; i < nblocks; ++i) {
-      for (int j = 0; j < 2; j++) {
+    for (int i : range(nblocks)) {
+      for (int j : range(2)) {
 
         std::vector<int> ind_vec; // indices of unsampled bins
         ind_vec.reserve(nbins_histo);
@@ -317,7 +317,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool off_diag, bool move_sh
         }
 
         double s = 0.;
-        for (int k = 0; k < nbins_histo; ++k) {
+        for (int k : range(nbins_histo)) {
           if ((*hist)[k] < 1.e-15)
             ind_vec.push_back(k);
           else
@@ -335,11 +335,11 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool off_diag, bool move_sh
     qmc_data_hfile.close();
   }
 
-  for (int iblock = 0; iblock < nblocks; ++iblock) {
-    for (int tau = 0; tau < n_tau; ++tau) {
-      for (int o = 0; o < siz_list[iblock]; ++o) {
+  for (int iblock : range(nblocks)) {
+    for (int tau : range(n_tau)) {
+      for (int o : range(siz_list[iblock])) {
         iflavor = flavor_list[o+iblock*num_orbitals];
-        for (int oo = 0; oo < siz_list[iblock]; ++oo) {
+        for (int oo : range(siz_list[iblock])) {
           iflavor1 = flavor_list[oo+iblock*num_orbitals];
           gtau[tau+iflavor*n_tau+iflavor1*num_orbitals*n_tau] = (*solver.G_tau)[iblock].data()(tau,o,oo);
         }
@@ -349,11 +349,11 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool off_diag, bool move_sh
 
   // Report G(l)
   if (leg_measure) {
-    for (int iblock = 0; iblock < nblocks; ++iblock) {
-      for (int l = 0; l < n_l; ++l) {
-        for (int o = 0; o < siz_list[iblock]; ++o) {
+    for (int iblock : range(nblocks)) {
+      for (int l : range(n_l)) {
+        for (int o : range(siz_list[iblock])) {
           iflavor = flavor_list[o+iblock*num_orbitals];
-          for (int oo = 0; oo < siz_list[iblock]; ++oo) {
+          for (int oo : range(siz_list[iblock])) {
             iflavor1 = flavor_list[oo+iblock*num_orbitals];
             gl[l+iflavor*n_l+iflavor1*num_orbitals*n_l] = (*solver.G_l)[iblock].data()(l,o,oo);
           }
@@ -371,8 +371,8 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool off_diag, bool move_sh
 
     complex<double> occ_tmp [num_orbitals] = {0};
 
-    for (int iblock = 0; iblock < nblocks; ++iblock) {
-      for (int o = 0; o < siz_list[iblock]; ++o) {
+    for (int iblock : range(nblocks)) {
+      for (int o : range(siz_list[iblock])) {
         iflavor = flavor_list[o+iblock*num_orbitals];
         n_op = c_dag(to_string(iblock),o) * c(to_string(iblock),o);
         if (itask == rank) occ_tmp[iflavor] = trace_rho_op(rho,n_op,h_loc_diag);
@@ -384,17 +384,50 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool off_diag, bool move_sh
 
     if (rank == 0) {
       ofstream occ_file;
-      occ_file.open("Occupation_numbers_triqs");
+      occ_file.open(hist_fname);
+
+      occ_file << "# Probability of occupying each Fock state" << endl <<
+         "# Regardless of the block structure, leftmost digit always represent the first flavor" << endl <<
+         "# (spin up is first), and is set to 1 (0) if the flavor is (not) occupied" << endl <<
+         "#    Nb elec    Fock state           Probability" << endl;
+
+      double prob;
+      bitset<64> f_stateb;
+      std::vector<std::vector<pair<double,bitset<64>>>> histogram(num_orbitals+1);
+      for (int i : range(num_orbitals+1)) histogram[i].reserve(1 << i);
 
       for (int sub : range(subspaces)) {
         auto fock_states = h_loc_diag.get_fock_states(sub);
         int sub_dim = h_loc_diag.get_subspace_dim(sub);
         auto unit_mat = h_loc_diag.get_unitary_matrix(sub);
-        auto rho_tmp = unit_mat * rho[sub] * dagger(unit_mat);  // transform density matrix to Fock basis
+        auto rho_tmp = unit_mat * rho[sub] * dagger(unit_mat);  // rotate density matrix to Fock basis
         for (int ind : range(sub_dim)) {
           auto f_state = fock_states[ind];
-          auto prob = rho_tmp(ind,ind);
-          occ_file << bitset<64>(f_state).to_string().substr(64-num_orbitals) << "\t" << scientific << setprecision(17) << prob << endl;
+#ifdef HAVE_TRIQS_COMPLEX
+          double prob = rho_tmp(ind,ind).real();
+#else
+          double prob = rho_tmp(ind,ind);
+#endif
+          f_stateb = bitset<64>(f_state);
+          bitset<64> f_stateb_;
+          // Put orbitals in the correct order
+          int i = 0;
+          for (int iblock : range(nblocks)) {
+            for (int o : range(siz_list[iblock])) {
+              iflavor = flavor_list[o+iblock*num_orbitals];
+              f_stateb_[num_orbitals-1-iflavor] = f_stateb[i];
+              i ++;
+            }
+          }
+          histogram[f_stateb_.count()].emplace_back(make_pair(prob,f_stateb_));
+        }
+      }
+      for (int i : range(num_orbitals+1)) {
+        sort(histogram[i].begin(),histogram[i].end(), [](auto &left, auto &right) { return left.first > right.first; });
+        for (int j : range(histogram[i].size())) {
+          tie(prob,f_stateb) = histogram[i][j];
+          occ_file << "\t" << to_string(i) << "\t" << f_stateb.to_string().substr(64-num_orbitals) << "\t" << scientific
+                   << setprecision(17) << prob << endl;
         }
       }
     }
@@ -411,8 +444,8 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool off_diag, bool move_sh
       auto Sinf_mat = matrix_t(num_orbitals,num_orbitals);
       Sinf_mat = h_scalar_t{0};
 
-      for (int iblock = 0; iblock < nblocks; ++iblock) {
-        for (int o = 0; o < siz_list[iblock]; ++o) {
+      for (int iblock : range(nblocks)) {
+        for (int o : range(siz_list[iblock])) {
           iflavor = flavor_list[o+iblock*num_orbitals];
           commut = Hint*c(to_string(iblock),o) - c(to_string(iblock),o)*Hint;
           Sinf_op = - commut*c_dag(to_string(iblock),o) - c_dag(to_string(iblock),o)*commut;
@@ -428,12 +461,13 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool off_diag, bool move_sh
       Sinf_mat = all_reduce(Sinf_mat,comm);
       MPI_Allreduce(mself2,moments_self_2,num_orbitals,MPI_C_DOUBLE_COMPLEX,MPI_SUM,comm);
 
-      for (int iflavor = 0; iflavor < num_orbitals; ++iflavor)
+      for (int iflavor : range(num_orbitals))
         moments_self_1[iflavor] = Sinf_mat(iflavor,iflavor);
 
+      // Matrix product in case the off-diagonal elements are implemented someday
       Sinf_mat = Sinf_mat * Sinf_mat;
 
-      for (int iflavor = 0; iflavor < num_orbitals; ++iflavor)
+      for (int iflavor : range(num_orbitals))
         moments_self_2[iflavor] -= Sinf_mat(iflavor,iflavor);
 
     }   // not legendre
@@ -453,9 +487,9 @@ many_body_op_t init_Hamiltonian(h_scalar_t *eps, int nflavor, h_scalar_t *udens,
   many_body_op_t H;
   int iblock,iblock1,o,oo;
 
-  for (int i = 0; i < nflavor; ++i) {
+  for (int i : range(nflavor)) {
     iblock = block_list[i]; o = inner_list[i];
-    for (int j = 0; j < nflavor; ++j) {
+    for (int j : range(nflavor)) {
       iblock1 = block_list[j]; oo = inner_list[j];
       H += 0.5 * lambda * udens[i+j*nflavor] * n(to_string(iblock),o) * n(to_string(iblock1),oo);
       H += eps[i+j*nflavor] * c_dag(to_string(iblock),o) * c(to_string(iblock1),oo);
@@ -471,14 +505,14 @@ many_body_op_t init_fullHamiltonian(h_scalar_t *eps, int nflavor, h_scalar_t *ve
   many_body_op_t H;
   int iblock,iblock1,iblock2,iblock3,o,oo,ooo,oooo;
 
-  for (int i = 0; i < nflavor; ++i) {
+  for (int i : range(nflavor)) {
     iblock = block_list[i]; o = inner_list[i];
-    for (int j = 0; j < nflavor; ++j) {
+    for (int j : range(nflavor)) {
       iblock1 = block_list[j]; oo = inner_list[j];
       H += eps[i+j*nflavor] * c_dag(to_string(iblock),o) * c(to_string(iblock1),oo);
-      for (int k = 0; k < nflavor; ++k) {
+      for (int k : range(nflavor)) {
         iblock2 = block_list[k]; ooo = inner_list[k];
-        for (int l = 0; l < nflavor; ++l) {
+        for (int l : range(nflavor)) {
           iblock3 = block_list[l]; oooo = inner_list[l];
           H += 0.5 * lambda * vee[i+j*nflavor+k*nflavor*nflavor+l*nflavor*nflavor*nflavor] * c_dag(to_string(iblock),o) *
                c_dag(to_string(iblock1),oo) * c(to_string(iblock3),oooo) * c(to_string(iblock2),ooo);
@@ -494,6 +528,6 @@ void build_dlr(int wdlr_size, int *ndlr, double *wdlr, double lam, double eps) {
   auto omega = cppdlr::build_dlr_rf(lam,eps);
   *ndlr = omega.size();
   if (*ndlr > wdlr_size) return;
-  for (int i = 0; i < (*ndlr); ++i) wdlr[i] = omega[i];
+  for (int i : range((*ndlr))) wdlr[i] = omega[i];
 }
 

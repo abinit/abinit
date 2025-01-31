@@ -27,13 +27,13 @@ module m_dtset
  use m_errors
  use m_xmpi
 
- use m_fstrings,     only : inupper
- use m_numeric_tools,only : arth
- use m_symtk,        only : mati3inv, littlegroup_q, symatm
- use m_symkpt,       only : symkpt
- use m_geometry,     only : mkrdim, metric, littlegroup_pert, irreducible_set_pert
- use m_parser,       only : intagm, chkvars_in_string
- use m_crystal,      only : crystal_t
+ use m_fstrings,      only : inupper
+ use m_numeric_tools, only : arth
+ use m_symtk,         only : mati3inv, littlegroup_q, symatm
+ use m_symkpt,        only : symkpt
+ use m_geometry,      only : mkrdim, metric, littlegroup_pert, irreducible_set_pert
+ use m_parser,        only : intagm, chkvars_in_string
+ use m_crystal,       only : crystal_t
 
  implicit none
 
@@ -160,6 +160,7 @@ type, public :: dataset_type
  integer :: dmft_triqs_nsubdivisions
  integer :: dmft_triqs_ntau_delta
  integer :: dmft_triqs_off_diag
+ integer :: dmft_triqs_read_ctqmcdata
  integer :: dmft_triqs_seed_a
  integer :: dmft_triqs_seed_b
  integer :: dmft_triqs_therm_restart
@@ -1562,6 +1563,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%dmft_triqs_nsubdivisions = dtin%dmft_triqs_nsubdivisions
  dtout%dmft_triqs_ntau_delta = dtin%dmft_triqs_ntau_delta
  dtout%dmft_triqs_off_diag = dtin%dmft_triqs_off_diag
+ dtout%dmft_triqs_read_ctqmcdata = dtin%dmft_triqs_read_ctqmcdata
  dtout%dmft_triqs_seed_a = dtin%dmft_triqs_seed_a
  dtout%dmft_triqs_seed_b = dtin%dmft_triqs_seed_b
  dtout%dmft_triqs_therm_restart = dtin%dmft_triqs_therm_restart
@@ -3465,7 +3467,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' dmft_triqs_leg_measure dmft_triqs_loc_n_min dmft_triqs_loc_n_max'
  list_vars=trim(list_vars)//' dmft_triqs_measure_density_matrix dmft_triqs_move_double'
  list_vars=trim(list_vars)//' dmft_triqs_move_global_prob dmft_triqs_move_shift dmft_triqs_nbins_histo'
- list_vars=trim(list_vars)//' dmft_triqs_nleg dmft_triqs_nsubdivisions dmft_triqs_ntau_delta dmft_triqs_off_diag'
+ list_vars=trim(list_vars)//' dmft_triqs_nleg dmft_triqs_nsubdivisions dmft_triqs_ntau_delta dmft_triqs_off_diag dmft_triqs_read_ctqmcdata'
  list_vars=trim(list_vars)//' dmft_triqs_seed_a dmft_triqs_seed_b dmft_triqs_therm_restart'
  list_vars=trim(list_vars)//' dmft_triqs_time_invariance dmft_triqs_tol_block dmft_triqs_use_norm_as_weight dmft_triqs_wmax dmftcheck'
  list_vars=trim(list_vars)//' dmftqmc_l dmftqmc_n dmftqmc_seed dmftqmc_therm dmft_charge_prec dmft_dc'

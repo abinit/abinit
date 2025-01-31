@@ -242,6 +242,9 @@ MODULE m_paw_dmft
   integer :: dmft_triqs_ntau_delta
   ! TRIQS CTQMC: Nb of imaginary time points for the hybridization.
 
+  integer :: dmft_triqs_read_ctqmcdata
+  ! TRIQS CTQMC: Read CTQMC data of the previous iteration
+
   integer :: dmft_triqs_seed_a
   ! TRIQS CTQMC: The CTQMC seed is seed_a + rank * seed_b.
 
@@ -1112,6 +1115,7 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  paw_dmft%dmft_triqs_gaussorder                    = dtset%dmft_triqs_gaussorder
  paw_dmft%dmft_triqs_nsubdivisions                 = dtset%dmft_triqs_nsubdivisions
  paw_dmft%dmft_triqs_tol_block                     = dtset%dmft_triqs_tol_block
+ paw_dmft%dmft_triqs_read_ctqmcdata                = dtset%dmft_triqs_read_ctqmcdata
 
 !==============================
 !==  Variables for DMFT itself
