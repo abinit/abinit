@@ -6654,9 +6654,9 @@ vectors of the reciprocal lattice and the three Cartesian axis).
 
 Variable(
     abivarname="gwr_nstep",
-    varset="gw",
+    varset="gwr",
     vartype="integer",
-    topics=['GW_basic'],
+    topics=['GWR_basic'],
     dimensions="scalar",
     defaultval=50,
     mnemonics="GWR Number of self-consistent STEPs",
@@ -6671,9 +6671,9 @@ until the quasi-particle energies are converged within [[gwr_tolqpe]].
 
 Variable(
     abivarname="gwr_fit",
-    varset="gw",
+    varset="gwr",
     vartype="integer",
-    topics=['GW_basic'],
+    topics=['GWR_basic'],
     dimensions="scalar",
     defaultval=0,
     mnemonics="GWR FIT",
@@ -6780,9 +6780,9 @@ contribution to sigma.
 
 Variable(
     abivarname="gwr_tolqpe",
-    varset="gw",
+    varset="gwr",
     vartype="real",
-    topics=['GW_basic'],
+    topics=['GWR_basic'],
     dimensions="scalar",
     defaultval=ValueWithUnit(units='eV', value=0.01),
     mnemonics="GWR TOLerance on the difference of the QP Energies",
@@ -6983,8 +6983,7 @@ Variable(
 Governs the use of a dielectric model (as explained in Sec. V of
 [[cite:Laflamme2015]] and the use of the Lanczos scheme to solve Eqs. (30) and
 (35) of the same reference at all external [[gw_freqsp]] and integration (as
-generated from [[gwls_npt_gauss_quad]]) frequencies. The different choices
-are:
+generated from [[gwls_npt_gauss_quad]]) frequencies. The different choices are:
 
   * [[gwls_correlation]] == 1: GWLS calculation **with** the dielectric model and **without** the shift Lanczos technique,
   * [[gwls_correlation]] == 2: GWLS calculation **without** the dielectric model and **without** the shift Lanczos technique,
@@ -24341,7 +24340,7 @@ Note that [[gstore_erange]] is not compatible with [[gstore_brange]].
 
 Variable(
     abivarname="gwr_np_kgts",
-    varset="gw",
+    varset="gwr",
     vartype="integer",
     topics=['GWR_expert'],
     dimensions=[4],
@@ -24367,7 +24366,7 @@ and the basic dimensions of the job computed at runtime.
 
 Variable(
     abivarname="gwr_ucsc_batch",
-    varset="gw",
+    varset="gwr",
     vartype="integer",
     topics=['GWR_expert'],
     dimensions=[2],
@@ -24384,7 +24383,7 @@ to find a good compromise betweeen memory and performance.
 
 Variable(
     abivarname="gwr_task",
-    varset="gw",
+    varset="gwr",
     vartype="string",
     topics=['GWR_basic'],
     dimensions=[1],
@@ -24416,7 +24415,7 @@ The choice is among:
 
 Variable(
     abivarname="gwr_ntau",
-    varset="gw",
+    varset="gwr",
     vartype="integer",
     topics=['GWR_basic'],
     dimensions=[1],
@@ -24431,7 +24430,7 @@ This variable defines the number of imaginary-time points in the minimax mesh.
 
 Variable(
     abivarname="gwr_chi_algo",
-    varset="gw",
+    varset="gwr",
     vartype="integer",
     topics=['GWR_basic'],
     dimensions=[1],
@@ -24451,7 +24450,7 @@ Possible values are
 
 Variable(
     abivarname="gwr_rpa_ncut",
-    varset="gw",
+    varset="gwr",
     vartype="integer",
     topics=['GWR_basic'],
     dimensions=[1],
@@ -24466,7 +24465,7 @@ Number of cutoff energies for extrapolating RPA correlation energy.
 
 Variable(
     abivarname="gwr_sigma_algo",
-    varset="gw",
+    varset="gwr",
     vartype="integer",
     topics=['GWR_basic'],
     dimensions=[1],
@@ -24486,7 +24485,7 @@ Possible values are
 
 Variable(
     abivarname="gwr_boxcutmin",
-    varset="gw",
+    varset="gwr",
     vartype="real",
     topics=['GWR_useful'],
     dimensions=[1],
@@ -24501,7 +24500,7 @@ See the corresponding input variable for the usual GS grid [[boxcutmin]].
 
 Variable(
     abivarname="gwr_max_hwtene",
-    varset="gw",
+    varset="gwr",
     vartype="real",
     topics=['GWR_useful'],
     dimensions=[1],
@@ -24517,7 +24516,7 @@ Energy window in Hartree for the empty states used in the computation of the hea
 
 Variable(
     abivarname="gwr_regterm",
-    varset="gw",
+    varset="gwr",
     vartype="real",
     topics=['GWR_expert'],
     dimensions=[1],

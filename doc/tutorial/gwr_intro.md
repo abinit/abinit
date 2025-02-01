@@ -15,8 +15,8 @@ WARNING: THIS TUTORIAL IS WORK IN PROGRESS! IT IS NOT YET COMPLETE...
 
 The conventional GW code has quartic scaling with the number of atoms whereas GWR scales cubically.
 The legacy GW code computes the self-energy matrix elements by performing an expensive convolution in the frequency domain,
-(by default with the plasmon-pole approximation that makes runs much faster altough approximated and without the possibility
-of accessing the spectral function $A(\omega)$) whereas GWR computes the self-energy matrix elements in the KS representatio
+(by default with the plasmon-pole approximation that makes calculations much faster altough approximated and without the possibility
+of accessing the spectral function $A(\omega)$) whereas GWR computes the self-energy matrix elements in the KS representation
 in imaginary-time followed by an analytic continuation (AC) to the real-frequency axis.
 The GWR + AC approach makes it possible to have access the full frequency dependence of $\Sigma$ and $A$
 at a much reduced cost althugh the accuracy of the results now depends on the AC step.

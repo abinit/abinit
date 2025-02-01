@@ -4245,10 +4245,10 @@ if (dtset%usekden==1) then
 
    ! Some required information are not filled up inside kmesh_init
    ! So doing it here, even though it is not clean
-   Kmesh%kptrlatt(:,:) =Dtset%kptrlatt(:,:)
-   Kmesh%nshift        =Dtset%nshiftk
-   ABI_MALLOC(Kmesh%shift,(3,Kmesh%nshift))
-   Kmesh%shift(:,:)    =Dtset%shiftk(:,1:Dtset%nshiftk)
+   Kmesh%kptrlatt(:,:) = Dtset%kptrlatt(:,:)
+   Kmesh%nshift = Dtset%nshiftk
+   ABI_MALLOC(Kmesh%shift, (3, Kmesh%nshift))
+   Kmesh%shift(:,:) = Dtset%shiftk(:,1:Dtset%nshiftk)
    !call Kmesh%print("K-mesh for the wavefunctions",ab_out, dtset%prtvol)
    call find_qmesh(Qmesh, Cryst, Kmesh)
 #ifdef HAVE_NETCDF
