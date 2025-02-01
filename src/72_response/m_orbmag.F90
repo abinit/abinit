@@ -108,9 +108,13 @@ module m_orbmag
 
     integer :: natom, ntypat
     ! atoms and types of atoms
+    
+    integer :: chern_terms
+    ! number of chern terms to store on the kpt mesh
+    ! CC, VV1, VV2
 
-    integer :: nterms
-    ! number of terms to store on the kpt mesh
+    integer :: orbmag_terms
+    ! number of orbmag terms to store on the kpt mesh
     ! CC, VV1, VV2, NL, L_R, B.M 
 
     real(dp),allocatable :: lambsig(:)
@@ -118,10 +122,14 @@ module m_orbmag
     
     real(dp),allocatable :: nucdipmom(:,:)
     ! nucdipmom(3,natom)
+    
+    real(dp),allocatable :: cmesh(:,:,:,:,:,:)
+    ! 2 because complex; 3 for the 3 directions
+    ! omesh(2,mband,nkpt,nsppol,3,chern_terms)
 
     real(dp),allocatable :: omesh(:,:,:,:,:,:)
     ! 2 because complex; 3 for the 3 directions
-    ! omesh(2,mband,nkpt,nsppol,3,nterms)
+    ! omesh(2,mband,nkpt,nsppol,3,orbmag_terms)
   
   end type orbmag_mesh_type
 
@@ -278,7 +286,7 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
  !Local
  !scalars
  character(len=fnlen) :: fname
- integer :: adir,bdtot_index,buff_size,choice,cpopt,dimffnl,exchn2n3d
+ integer :: adir,bdtot_index,buff_size,chern_mesh_nterms,choice,cpopt,dimffnl,exchn2n3d
  integer :: iat,iatom,icg,icmplx,icprj,ider,idir,ierr
  integer :: ikg,ikg1,ikpt,ilm,indx,isppol,istwf_k,iterm,itypat,lmn2max
  integer :: me,mcgk,mcprjk,my_lmax,my_nspinor,nband_k,nband_me,ncid,ngfft1,ngfft2,ngfft3,ngfft4
@@ -366,7 +374,8 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
  ! number of terms to store on the kpt mesh
  ! CC, VV1, VV2, NL, L_R, B.M 
  orbmag_mesh_nterms=6
- call orbmag_mesh_alloc(dtset,orbmag_mesh_nterms,orbmag_mesh)
+ chern_mesh_nterms=3
+ call orbmag_mesh_alloc(chern_mesh_nterms,dtset,orbmag_mesh_nterms,orbmag_mesh)
  orbmag_mesh%nucdipmom=dtset%nucdipmom
  ! if user input lambsig specifically in the input file, use it
  if ( any ( abs(dtset%lambsig).GT.tol8 ) ) then
@@ -375,7 +384,6 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
  else
    orbmag_mesh%lambsig=pawtab(1:dtset%ntypat)%lamb_shielding
  end if
-
 
  !==== Initialize most of the Hamiltonian ====
  !Allocate all arrays and initialize quantities that do not depend on k and spin.
@@ -561,6 +569,7 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
 
      ! ZTG Eq. 46 term 1
      orbmag_terms(:,:,isppol,:,ibcc) = orbmag_terms(:,:,isppol,:,ibcc) + b1_k(:,:,:)
+     orbmag_mesh%cmesh(1:2,1:nband_k,ikpt,isppol,1:3,1)=b1_k(1:2,1:nband_k,1:3)
 
      orbmag_terms(:,:,isppol,:,imcc) = orbmag_terms(:,:,isppol,:,imcc) + m1_k(:,:,:)
      orbmag_terms(:,:,isppol,:,imcc) = orbmag_terms(:,:,isppol,:,imcc) + m1_mu_k(:,:,:)
@@ -578,6 +587,8 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
      ! ZTG23 Eq. 46 term 2
      orbmag_terms(:,:,isppol,:,ibvv1) = orbmag_terms(:,:,isppol,:,ibvv1) + b1_k(:,:,:)
      orbmag_terms(:,:,isppol,:,ibvv2) = orbmag_terms(:,:,isppol,:,ibvv2) + b2_k(:,:,:)
+     orbmag_mesh%cmesh(1:2,1:nband_k,ikpt,isppol,1:3,2)=b1_k(1:2,1:nband_k,1:3)
+     orbmag_mesh%cmesh(1:2,1:nband_k,ikpt,isppol,1:3,3)=b2_k(1:2,1:nband_k,1:3)
 
      ! ZTG23 Eq. 36 term 3
      orbmag_terms(:,:,isppol,:,imvv1) = orbmag_terms(:,:,isppol,:,imvv1) + m1_k(:,:,:)
@@ -690,6 +701,22 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
    ABI_FREE(buffer1)
    ABI_FREE(buffer2)
  end if
+
+ !! collect chern_mesh if distributed over different processes
+ if (nproc > 1) then
+   buff_size=size(orbmag_mesh%cmesh)
+   ABI_MALLOC(buffer1,(buff_size))
+   ABI_MALLOC(buffer2,(buff_size))
+   buffer1=zero;buffer2=zero
+   buffer1(1:buff_size) = &
+     & reshape(orbmag_mesh%cmesh,(/2*orbmag_mesh%mband*orbmag_mesh%nkpt*orbmag_mesh%nsppol*3*chern_mesh_nterms/))
+   call xmpi_sum(buffer1,buffer2,buff_size,spaceComm,ierr)
+   orbmag_mesh%cmesh(1:2,1:orbmag_mesh%mband,1:orbmag_mesh%nkpt,1:orbmag_mesh%nsppol,1:3,1:chern_mesh_nterms)=&
+     & reshape(buffer2,(/2,orbmag_mesh%mband,orbmag_mesh%nkpt,orbmag_mesh%nsppol,3,chern_mesh_nterms/))
+   ABI_FREE(buffer1)
+   ABI_FREE(buffer2)
+ end if
+
 
  !! convert to cartesian frame from reduced triclinic
  ! general results: [rprimd]*r_red = r_cart
@@ -2417,11 +2444,11 @@ end subroutine dterm_alloc
 !!
 !! SOURCE
 
-subroutine orbmag_mesh_alloc(dtset,nterms,orbmag_mesh)
+subroutine orbmag_mesh_alloc(cterms,dtset,nterms,orbmag_mesh)
 
   !Arguments ------------------------------------
   !scalars
-  integer,intent(in) :: nterms
+  integer,intent(in) :: cterms,nterms
   type(dataset_type),intent(in) :: dtset
   type(orbmag_mesh_type),intent(inout) :: orbmag_mesh
 
@@ -2438,7 +2465,8 @@ subroutine orbmag_mesh_alloc(dtset,nterms,orbmag_mesh)
   orbmag_mesh%nsppol = dtset%nsppol
   orbmag_mesh%natom = dtset%natom
   orbmag_mesh%ntypat = dtset%ntypat
-  orbmag_mesh%nterms = nterms
+  orbmag_mesh%chern_terms = cterms
+  orbmag_mesh%orbmag_terms = nterms
 
   if(allocated(orbmag_mesh%lambsig)) then
     ABI_FREE(orbmag_mesh%lambsig)
@@ -2450,10 +2478,17 @@ subroutine orbmag_mesh_alloc(dtset,nterms,orbmag_mesh)
   end if
   ABI_MALLOC(orbmag_mesh%nucdipmom,(3,orbmag_mesh%natom))
   
+  if(allocated(orbmag_mesh%cmesh)) then
+    ABI_FREE(orbmag_mesh%cmesh)
+  end if
+  ABI_MALLOC(orbmag_mesh%cmesh,(2,orbmag_mesh%mband,orbmag_mesh%nkpt,orbmag_mesh%nsppol,3,cterms))
+  orbmag_mesh%cmesh=zero
+  
   if(allocated(orbmag_mesh%omesh)) then
     ABI_FREE(orbmag_mesh%omesh)
   end if
   ABI_MALLOC(orbmag_mesh%omesh,(2,orbmag_mesh%mband,orbmag_mesh%nkpt,orbmag_mesh%nsppol,3,nterms))
+  orbmag_mesh%omesh=zero
 
 end subroutine orbmag_mesh_alloc
 !!***
@@ -2512,6 +2547,10 @@ subroutine orbmag_mesh_free(orbmag_mesh)
     ABI_FREE(orbmag_mesh%nucdipmom)
   end if
  
+  if(allocated(orbmag_mesh%cmesh)) then
+    ABI_FREE(orbmag_mesh%cmesh)
+  end if
+
   if(allocated(orbmag_mesh%omesh)) then
     ABI_FREE(orbmag_mesh%omesh)
   end if
@@ -2852,12 +2891,14 @@ subroutine orbmag_ncwrite(crystal,dtset,ebands,hdr,ncid,orbmag_mesh,psps,pawtab)
    nctkdim_t("mband", orbmag_mesh%mband),&
    nctkdim_t("nkpt", orbmag_mesh%nkpt),&
    nctkdim_t("nsppol", orbmag_mesh%nsppol),&
-   nctkdim_t("nterms", orbmag_mesh%nterms),&
+   nctkdim_t("cterms", orbmag_mesh%chern_terms),&
+   nctkdim_t("nterms", orbmag_mesh%orbmag_terms),&
    nctkdim_t("ndir",3),&
    nctkdim_t("natom",dtset%natom)],defmode=.True.)
  NCF_CHECK(ncerr)
  
  ncerr = nctk_def_arrays(ncid, [&
+   nctkarr_t("chern_mesh", "dp", "ncplx, mband, nkpt, nsppol, ndir, cterms"),&
    nctkarr_t("orbmag_mesh", "dp", "ncplx, mband, nkpt, nsppol, ndir, nterms"),&
    nctkarr_t("lambsig", "dp", "ntypat"),&
    nctkarr_t("nucdipmom", "dp", "ndir, natom")])
@@ -2865,6 +2906,7 @@ subroutine orbmag_ncwrite(crystal,dtset,ebands,hdr,ncid,orbmag_mesh,psps,pawtab)
 
  NCF_CHECK(nctk_set_datamode(ncid))
  
+ NCF_CHECK(nf90_put_var(ncid, vid("chern_mesh"), orbmag_mesh%cmesh))
  NCF_CHECK(nf90_put_var(ncid, vid("orbmag_mesh"), orbmag_mesh%omesh))
  NCF_CHECK(nf90_put_var(ncid, vid("nucdipmom"), orbmag_mesh%nucdipmom))
  NCF_CHECK(nf90_put_var(ncid, vid("lambsig"), orbmag_mesh%lambsig))
