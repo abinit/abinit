@@ -331,11 +331,11 @@ subroutine print_self(self,prtdc,paw_dmft,prtopt)
 ! write(message,'(2a)') ch10,"  == The self-energy for small (3) frequency is   == "
 ! call wrtout(std_out,message,'COLL')
 ! call print_oper(self%oper(3),1,paw_dmft,prtopt)
- write(message,'(2a)') ch10,"  == The self-energy for large frequency is   == "
+ write(message,'(2a)') ch10,"  == The self-energy for largest frequency is   == "
  call wrtout(std_out,message,'COLL')
  call print_oper(self%oper(self%nw),1,paw_dmft,prtopt)
  if (prtdc == "print_dc") then
-   write(message,'(2a)') ch10,"  == The double counting hamiltonian is  == "
+   write(message,'(2a)') ch10,"  == The double counting potential is  == "
    call wrtout(std_out,message,'COLL')
    call print_matlu(self%hdc%matlu(:),paw_dmft%natom,prtopt)
  end if ! prtdc
@@ -364,8 +364,10 @@ end subroutine print_self
 
 subroutine dc_self(charge_loc,hdc,hu,paw_dmft,pawtab,occ_matlu)
 
+ use m_matlu, only : xmpi_matlu,zero_matlu
  use m_pawtab, only : pawtab_type
  use m_paw_exactDC, only : compute_exactDC
+ use m_xmpi, only : xmpi_sum
 
 !Arguments ------------------------------------
 !type
@@ -379,7 +381,8 @@ subroutine dc_self(charge_loc,hdc,hu,paw_dmft,pawtab,occ_matlu)
  !type(hu_type),intent(inout) :: hu(cryst_struc%ntypat)
  !integer, intent(in) :: dmft_dc
 !Local variables-------------------------------
- integer :: dmft_dc,iatom,im,im1,ispinor,isppol,itypat,lpawu,ndim,nspinor,nsppol
+ integer :: dmft_dc,iatom,iatomc,ierr,im,ispinor,isppol
+ integer :: itypat,lpawu,natom,ndim,nspinor,nsppol
  real(dp) :: dc,jpawu,ntot,upawu
  logical :: amf,fll,nmdc
  character(len=500) :: message
@@ -387,6 +390,7 @@ subroutine dc_self(charge_loc,hdc,hu,paw_dmft,pawtab,occ_matlu)
 ! *********************************************************************
 
  dmft_dc = paw_dmft%dmft_dc
+ natom   = paw_dmft%natom
  nspinor = paw_dmft%nspinor
  nsppol  = paw_dmft%nsppol
 
@@ -401,9 +405,18 @@ subroutine dc_self(charge_loc,hdc,hu,paw_dmft,pawtab,occ_matlu)
    ABI_WARNING(message)
  end if
 
- do iatom=1,paw_dmft%natom
+ if (dmft_dc == 8) then
+   paw_dmft%edc(:)   = zero
+   paw_dmft%edcdc(:) = zero
+   call zero_matlu(hdc(:),natom)
+ end if
+
+ iatomc = -1
+
+ do iatom=1,natom
    lpawu = paw_dmft%lpawu(iatom)
    if (lpawu == -1) cycle
+   iatomc = iatomc + 1
    hdc(iatom)%mat(:,:,:) = czero
    ntot   = charge_loc(nsppol+1,iatom)
    ndim   = 2*lpawu + 1
@@ -413,17 +426,13 @@ subroutine dc_self(charge_loc,hdc,hu,paw_dmft,pawtab,occ_matlu)
    if (dmft_dc == 4) jpawu = zero
 
    if (dmft_dc == 8) then
+     if (mod(iatomc,paw_dmft%nproc) /= paw_dmft%myproc) cycle
      ABI_MALLOC(occ,(ndim,ndim))
      ABI_MALLOC(vdc,(ndim,ndim))
      occ(:,:) = czero
      do isppol=1,nsppol
        do ispinor=1,nspinor
-         do im1=1,ndim
-           do im=1,ndim
-             occ(im,im1) = occ(im,im1) + &
-                 & (occ_matlu(iatom)%mat(im+(ispinor-1)*ndim,im1+(ispinor-1)*ndim,isppol))
-           end do ! im
-         end do ! im1
+         occ(:,:) = occ(:,:) + occ_matlu(iatom)%mat(1+(ispinor-1)*ndim:ispinor*ndim,1+(ispinor-1)*ndim:ispinor*ndim,isppol)
        end do ! ispinor
      end do ! isppol
      if (nsppol == 1 .and. nspinor == 1) occ(:,:) = occ(:,:) * two
@@ -431,11 +440,7 @@ subroutine dc_self(charge_loc,hdc,hu,paw_dmft,pawtab,occ_matlu)
                         & vdc(:,:),paw_dmft%edc(iatom),paw_dmft%edcdc(iatom))
      do isppol=1,nsppol
        do ispinor=1,nspinor
-         do im1=1,ndim
-           do im=1,ndim
-             hdc(iatom)%mat(im+(ispinor-1)*ndim,im1+(ispinor-1)*ndim,isppol) = vdc(im,im1)
-           end do ! im
-         end do ! im1
+         hdc(iatom)%mat(1+(ispinor-1)*ndim:ispinor*ndim,1+(ispinor-1)*ndim:ispinor*ndim,isppol) = vdc(:,:)
        end do ! ispinor
      end do ! isppol
      ABI_FREE(occ)
@@ -460,6 +465,12 @@ subroutine dc_self(charge_loc,hdc,hu,paw_dmft,pawtab,occ_matlu)
      end do ! isppol
    end if ! dc=8
  end do ! iatom
+
+ if (dmft_dc == 8) then
+   call xmpi_sum(paw_dmft%edc(:),paw_dmft%spacecomm,ierr)
+   call xmpi_sum(paw_dmft%edcdc(:),paw_dmft%spacecomm,ierr)
+   call xmpi_matlu(hdc(:),natom,paw_dmft%spacecomm)
+ end if ! dmft_dc=8
 
 end subroutine dc_self
 !!***
@@ -592,9 +603,9 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
 !   - For the Tentative rotation of the self-energy file (begin init)
  if (optmaxent > 0) then
    if (optrw == 2) then
-     write(message,'(a,2x,a)') ch10," == About to print self-energy for MAXENT code "
+     write(message,'(a,2x,a)') ch10," == About to print self-energy for MAXENT code in basis which diagonalizes the atomic levels"
    else if (optrw == 1)  then
-     write(message,'(a,2x,a)') ch10," == About to read self-energy from MAXENT code "
+     write(message,'(a,2x,a)') ch10," == About to read self-energy from MAXENT code"
    end if
    call wrtout(std_out,message,'COLL')
 
@@ -1150,15 +1161,13 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
            ndim = (2*lpawu+1) * nspinor
            do isppol=1,nsppol
              do im1=1,ndim
-               do im=1,ndim
-                 icount = icount + 1
+               buffer(icount+1:icount+ndim) = self%oper(ifreq)%matlu(iatom)%mat(:,im1,isppol)
+               icount = icount + ndim
                  !if (icount > ncount) then
                  !  write(message,'(2a,2i5)') ch10,"Error buffer",icount,ncount
                  !  iexit = 1
                  !  ABI_ERROR(message)
                  !end if ! icount > ncount
-                 buffer(icount) = self%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol)
-               end do ! im
              end do ! im1
            end do ! isppol
          end do ! iatom
@@ -1170,15 +1179,13 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
          ndim = (2*lpawu+1) * nspinor
          do isppol=1,nsppol
            do im1=1,ndim
-             do im=1,ndim
-               icount = icount + 1
+             buffer(icount+1:icount+ndim) = self%hdc%matlu(iatom)%mat(:,im1,isppol)
+             icount = icount + ndim
              !if (icount > ncount) then
              !  write(message,'(2a,2i5)') ch10,"Error buffer",icount,ncount
              !  iexit = 1
              !  ABI_ERROR(message)
              !end if ! icount > ncount
-               buffer(icount) = self%hdc%matlu(iatom)%mat(im,im1,isppol)
-             end do ! im
            end do ! im1
          end do ! isppol
        end do ! iatom
@@ -1190,10 +1197,8 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
              ndim = (2*lpawu+1) * nspinor
              do isppol=1,nsppol
                do im1=1,ndim
-                 do im=1,ndim
-                   icount = icount + 1
-                   buffer(icount) = self%moments(i)%matlu(iatom)%mat(im,im1,isppol)
-                 end do ! im
+                 buffer(icount+1:icount+ndim) = self%moments(i)%matlu(iatom)%mat(:,im1,isppol)
+                 icount = icount + ndim
                end do ! im1
              end do ! isppol
            end do ! iatom
@@ -1225,11 +1230,9 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
          ndim = (2*lpawu+1) * nspinor
          do isppol=1,nsppol
            do im1=1,ndim
-             do im=1,ndim
-               icount = icount + 1
-               self%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol) = buffer(icount)
+             self%oper(ifreq)%matlu(iatom)%mat(:,im1,isppol) = buffer(icount+1:icount+ndim)
+             icount = icount + ndim
                      !write(6,*)'self procs', ifreq, self%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)
-             end do ! im
            end do ! im1
          end do ! isppol
        end do ! iatom
@@ -1241,10 +1244,8 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
        ndim = (2*lpawu+1) * nspinor
        do isppol=1,nsppol
          do im1=1,ndim
-           do im=1,ndim
-             icount = icount + 1
-             self%hdc%matlu(iatom)%mat(im,im1,isppol) = buffer(icount)
-           end do ! im
+           self%hdc%matlu(iatom)%mat(:,im1,isppol) = buffer(icount+1:icount+ndim)
+           icount = icount + ndim
          end do ! im1
        end do ! isppol
      end do ! iatom
@@ -1256,10 +1257,8 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
            ndim = (2*lpawu+1) * nspinor
            do isppol=1,nsppol
              do im1=1,ndim
-               do im=1,ndim
-                 icount = icount + 1
-                 self%moments(i)%matlu(iatom)%mat(im,im1,isppol) = buffer(icount)
-               end do ! im
+               self%moments(i)%matlu(iatom)%mat(:,im1,isppol) = buffer(icount+1:icount+ndim)
+               icount = icount + ndim
              end do ! im1
            end do ! isppol
          end do ! iatom

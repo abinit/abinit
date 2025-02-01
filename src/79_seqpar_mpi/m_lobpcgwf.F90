@@ -118,7 +118,7 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
  integer :: iblock, shift, me_g0, me_g0_fft
  real(dp) :: gsc_dummy(0,0)
  real(dp), allocatable :: gvnlxc(:,:)
- real(dp), allocatable :: pcon(:)
+ real(dp), allocatable :: pcon(:),occ_tmp(:)
 
 ! *********************************************************************
 
@@ -182,7 +182,14 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
 
  call xgBlock_map_1d(xgresidu,resid,SPACE_R,nband,gpu_option=dtset%gpu_option)
 
- call xgBlock_map_1d(xgocc,occ,SPACE_R,nband,gpu_option=dtset%gpu_option)
+ ! Occupancies in LOBPCG are used for convergence criteria only
+ if (dtset%nbdbuf==-101.and.nspinor==1.and.dtset%nsppol==1) then
+   ABI_MALLOC(occ_tmp,(nband))
+   occ_tmp(:) = half*occ(:)
+   call xgBlock_map_1d(xgocc,occ_tmp,SPACE_R,nband,gpu_option=dtset%gpu_option)
+ else
+   call xgBlock_map_1d(xgocc,occ,SPACE_R,nband,gpu_option=dtset%gpu_option)
+ end if
 
  call lobpcg_init(lobpcg,nband,l_npw*l_nspinor,blockdim,dtset%tolwfr_diago,dtset%nline,&
    space,l_mpi_enreg%comm_bandspinorfft,l_paral_kgb,l_mpi_enreg%comm_spinorfft,l_mpi_enreg%comm_band,&
@@ -191,6 +198,9 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
  ! Run lobpcg
  call lobpcg_run(lobpcg,xgx0,getghc_gsc1,xg_precond,xgeigen,xgocc,xgresidu,prtvol,nspinor,isppol,ikpt,inonsc,istep,nbdbuf)
 
+ if (allocated(occ_tmp)) then
+   ABI_FREE(occ_tmp)
+ end if
  ! Free preconditionning since not needed anymore
  ABI_FREE(pcon)
 

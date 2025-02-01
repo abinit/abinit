@@ -320,12 +320,11 @@ end subroutine getmpw
 !!
 !! SOURCE
 
-subroutine mkkin (ecut,ecutsm,effmass_free,gmet,kg,kinpw,kpt,npw,idir1,idir2)
+subroutine mkkin(ecut, ecutsm, effmass_free, gmet, kg, kinpw, kpt, npw, idir1, idir2)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: npw
- integer,intent(in) :: idir1,idir2
+ integer,intent(in) :: npw, idir1,idir2
  real(dp),intent(in) :: ecut,ecutsm,effmass_free
 !arrays
  integer,intent(in) :: kg(3,npw)
@@ -336,8 +335,7 @@ subroutine mkkin (ecut,ecutsm,effmass_free,gmet,kg,kinpw,kpt,npw,idir1,idir2)
 !scalars
  integer :: ig,order
  real(dp),parameter :: break_symm=1.0d-11
- real(dp) :: ecutsm_inv,fsm,gpk1,gpk2,gpk3,htpisq,kinetic,kpg2,dkpg2,xx
- real(dp) :: d1kpg2,d2kpg2,ddfsm, dfsm
+ real(dp) :: ecutsm_inv,fsm,gpk1,gpk2,gpk3,htpisq,kinetic,kpg2,dkpg2,xx, d1kpg2,d2kpg2,ddfsm, dfsm
 !arrays
  real(dp) :: gmet_break(3,3) !, tsec(2)
 

@@ -37,8 +37,9 @@ module m_supercell_maker
   use m_abicore
   use m_errors
   use m_xmpi
-  use m_symtk,    only : matr3inv
-  use m_mathfuncs , only: mat33det, binsearch_left_integerlist, rotate_by_angle_around_axis
+  use m_mathfuncs,     only: binsearch_left_integerlist, rotate_by_angle_around_axis
+  use m_symtk,         only: matr3inv
+  use m_matrix ,       only: mat33det
   use m_mpi_scheduler, only: init_mpi_info
   use m_supercell
   implicit none

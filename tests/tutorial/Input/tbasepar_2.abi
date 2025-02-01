@@ -1,7 +1,7 @@
 # FCC Fe (ferromagnetic for fun) with four atoms per cell
 # Distorted with a A1 phonon, so as to keep the symmetry ...
 # Only one k point in the IBZ
-# Test the parallelism over the spins 
+# Test the parallelism over the spins
 
 #Definition of the unit cell
 acell 3*7.00
@@ -50,9 +50,9 @@ nline  5
 #%% [extra_info]
 #%% keywords = NC
 #%% authors = Unknown
-#%% description = 
+#%% description =
 #%%   FCC Fe (ferromagnetic for fun) with four atoms per cell
 #%%   Distorted with a A1 phonon, so as to keep the symmetry ...
 #%%   Only one k point in the IBZ
-#%%   Test the parallelism over the spins 
+#%%   Test the parallelism over the spins
 #%%<END TEST_INFO>

@@ -30,6 +30,7 @@ gstore_with_vk 1
 # Tricks to make EPH calculations faster.
 mixprec 1
 boxcutmin 1.1
+#nloc_mem 2
 
 # K-mesh: must be consistent with the one used to generate the WFK file
 ngkpt   18 18 18

@@ -5,14 +5,14 @@
  ndtset 6
 
 #First dataset : SCF run
- prtden1  1     
-  nband1  14     
+ prtden1  1
+  nband1  14
  kptopt1  1
  tolwfr1  1.0d-12
 
 #Second dataset : NSCF run with kptopt 1 (more bands)
-   iscf2 -2  
- getwfk2  1   
+   iscf2 -2
+ getwfk2  1
  getden2  1
  kptopt2  1
  tolwfr2  1.0d-12
@@ -64,7 +64,7 @@
  diemac 10.0
  ecut 6.00   # too small !
  pawecutdg 24.00
- natom  2 
+ natom  2
  nband 30
  nbdbuf 2
  nstep 100
@@ -82,14 +82,14 @@
 #%% executable = abinit
 #%% test_chain = t09.abi, t10.abi
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t09.abo, tolnlines = 37, tolabs = 8.000e-05, tolrel = 3.000e-01, fld_options = -medium;
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = Y. Gillet, X. Gonze
-#%% keywords = NC, DFPT 
-#%% description = 
+#%% keywords = NC, DFPT
+#%% description =
 #%%   GaAs, zinc-blende structure. PAW. GGA-PBE. Treated with nsppol=1.
 #%%   Generate the data for optic (linear coefficients).
 #%%   to be analysed in test 10 (netcdf files with h1 matrix elements).

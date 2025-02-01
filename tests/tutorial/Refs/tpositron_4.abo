@@ -1,8 +1,8 @@
 
 .Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,13 +16,13 @@
 
 .Starting date : Fri 13 Sep 2024.
 - ( at 19h06 )
-  
+
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/tutorial_tpositron_4/tpositron_4.abi
 - output file    -> tpositron_4.abo
 - root for input  files -> tpositron_4i
 - root for output files -> tpositron_4o
 
-- inpspheads : Reading pseudopotential header in XML form from 
+- inpspheads : Reading pseudopotential header in XML form from
 -   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_paw_pw_std/Si.xml
  Symmetries : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
@@ -232,7 +232,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    2330.375    2330.278
 
 ================================================================================
 
-=== [ionmov= 2] Broyden-Fletcher-Goldfarb-Shanno method (forces)            
+=== [ionmov= 2] Broyden-Fletcher-Goldfarb-Shanno method (forces)
 ================================================================================
 
 --- Iteration: (1/4) Internal Cycle: (1/1)
@@ -259,7 +259,7 @@ TC-DFT STEP   1 - ELECTRONIC GROUND-STATE CALCULATION
  ETOT  9  -60.147231255433     7.535E-09 1.133E-04 8.810E-08 4.297E-06 3.370E-03
  ETOT 10  -60.147231254157     1.276E-09 1.127E-04 9.697E-09 2.360E-06 3.371E-03
 
- At SCF step   10, etot is converged : 
+ At SCF step   10, etot is converged :
   for the second time, diff in etot=  1.276E-09 < toldfe=  1.000E-08
 
 TC-DFT STEP   2 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS AND IONS
@@ -275,7 +275,7 @@ TC-DFT STEP   2 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS A
  ETOT 20  -60.564502516964    -5.309E-09 2.382E-04 2.055E-08 1.093E-06 5.112E-02
  ETOT 21  -60.564502518284    -1.320E-09 4.817E-04 6.068E-10 3.736E-07 5.112E-02
 
- At SCF step   21, etot is converged : 
+ At SCF step   21, etot is converged :
   for the second time, diff in etot=  1.320E-09 < toldfe=  1.000E-08
 
 TC-DFT STEP   3 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
@@ -291,7 +291,7 @@ TC-DFT STEP   3 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
  ETOT 31  -60.580123288765     1.234E-09 1.626E-06 1.391E-08 8.905E-06 9.985E-03
  ETOT 32  -60.580123288560     2.052E-10 2.693E-06 1.121E-09 4.338E-06 9.981E-03
 
- At SCF step   32, etot is converged : 
+ At SCF step   32, etot is converged :
   for the second time, diff in etot=  2.052E-10 < toldfe=  1.000E-08
 
 TC-DFT STEP   4 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS AND IONS
@@ -302,7 +302,7 @@ TC-DFT STEP   4 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS A
  ETOT 37  -60.585351328641    -2.630E-09 9.448E-04 1.057E-04 7.166E-07 2.444E-02
  ETOT 38  -60.585351329369    -7.282E-10 7.781E-04 5.173E-06 3.700E-07 2.444E-02
 
- At SCF step   38, etot is converged : 
+ At SCF step   38, etot is converged :
   for the second time, diff in etot=  7.282E-10 < toldfe=  1.000E-08
 
 TC-DFT STEP   5 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
@@ -317,7 +317,7 @@ TC-DFT STEP   5 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
  ETOT 47  -60.586372672517     2.037E-10 1.341E-07 5.858E-09 4.512E-06 1.242E-02
  ETOT 48  -60.586372672404     1.130E-10 8.252E-07 1.542E-09 3.152E-06 1.242E-02
 
- At SCF step   48, etot is converged : 
+ At SCF step   48, etot is converged :
   for the second time, diff in etot=  1.130E-10 < toldfe=  1.000E-08
 
 TC-DFT STEP   6 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS AND IONS
@@ -327,7 +327,7 @@ TC-DFT STEP   6 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS A
  ETOT 52  -60.587938861743    -2.964E-09 7.004E-04 9.255E-05 8.709E-07 1.672E-02
  ETOT 53  -60.587938862233    -4.901E-10 4.535E-04 1.522E-05 1.496E-07 1.672E-02
 
- At SCF step   53, etot is converged : 
+ At SCF step   53, etot is converged :
   for the second time, diff in etot=  4.901E-10 < toldfe=  1.000E-08
 
 TC-DFT STEP   7 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
@@ -340,7 +340,7 @@ TC-DFT STEP   7 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
  ETOT 60  -60.584915705627     9.668E-09 1.781E-07 5.228E-08 6.024E-05 1.318E-02
  ETOT 61  -60.584915704123     1.504E-09 4.049E-08 3.942E-09 2.158E-05 1.316E-02
 
- At SCF step   61, etot is converged : 
+ At SCF step   61, etot is converged :
   for the second time, diff in etot=  1.504E-09 < toldfe=  1.000E-08
 
 TC-DFT STEP   8 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS AND IONS
@@ -350,7 +350,7 @@ TC-DFT STEP   8 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS A
  ETOT 65  -60.588260351788    -7.528E-10 2.182E-04 1.260E-05 3.398E-07 1.455E-02
  ETOT 66  -60.588260351912    -1.249E-10 3.151E-04 2.004E-06 6.453E-08 1.455E-02
 
- At SCF step   66, etot is converged : 
+ At SCF step   66, etot is converged :
   for the second time, diff in etot=  1.249E-10 < toldfe=  1.000E-08
 
 TC-DFT STEP   9 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
@@ -362,7 +362,7 @@ TC-DFT STEP   9 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
  ETOT 72  -60.587221907056    -4.113E-09 3.822E-08 7.824E-08 3.671E-05 1.335E-02
  ETOT 73  -60.587221905253     1.803E-09 5.897E-08 6.297E-09 2.639E-05 1.332E-02
 
- At SCF step   73, etot is converged : 
+ At SCF step   73, etot is converged :
   for the second time, diff in etot=  1.803E-09 < toldfe=  1.000E-08
 
 TC-DFT STEP  10 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS AND IONS
@@ -371,7 +371,7 @@ TC-DFT STEP  10 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS A
  ETOT 76  -60.588304393864    -1.778E-09 1.899E-03 2.271E-06 2.142E-07 1.381E-02
  ETOT 77  -60.588304393980    -1.155E-10 4.596E-04 1.596E-06 1.266E-07 1.381E-02
 
- At SCF step   77, etot is converged : 
+ At SCF step   77, etot is converged :
   for the second time, diff in etot=  1.155E-10 < toldfe=  1.000E-08
 
 TC-DFT STEP  11 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
@@ -383,7 +383,7 @@ TC-DFT STEP  11 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
  ETOT 83  -60.587503699430    -4.378E-10 3.168E-08 7.349E-09 1.091E-05 1.342E-02
  ETOT 84  -60.587503699254     1.756E-10 2.276E-08 4.734E-10 8.441E-06 1.341E-02
 
- At SCF step   84, etot is converged : 
+ At SCF step   84, etot is converged :
   for the second time, diff in etot=  1.756E-10 < toldfe=  1.000E-08
 
 TC-DFT STEP  12 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS AND IONS
@@ -392,7 +392,7 @@ TC-DFT STEP  12 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS A
  ETOT 87  -60.588306043330    -2.181E-10 4.936E-03 3.949E-07 7.714E-08 1.357E-02
  ETOT 88  -60.588306043347    -1.766E-11 5.902E-04 3.045E-07 4.926E-08 1.357E-02
 
- At SCF step   88, etot is converged : 
+ At SCF step   88, etot is converged :
   for the second time, diff in etot=  1.766E-11 < toldfe=  1.000E-08
 
 TC-DFT STEP  13 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
@@ -403,7 +403,7 @@ TC-DFT STEP  13 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
  ETOT 93  -60.587950652175     8.754E-09 1.909E-08 4.278E-09 5.643E-05 1.340E-02
  ETOT 94  -60.587950652284    -1.088E-10 1.554E-08 1.921E-09 4.108E-06 1.340E-02
 
- At SCF step   94, etot is converged : 
+ At SCF step   94, etot is converged :
   for the second time, diff in etot=  1.088E-10 < toldfe=  1.000E-08
 
 TC-DFT STEP  14 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS AND IONS
@@ -411,7 +411,7 @@ TC-DFT STEP  14 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS A
  ETOT 96  -60.588307681020    -3.414E-09 5.306E-04 4.453E-07 7.478E-07 1.346E-02
  ETOT 97  -60.588307681049    -2.849E-11 1.098E-03 6.282E-08 2.718E-08 1.346E-02
 
- At SCF step   97, etot is converged : 
+ At SCF step   97, etot is converged :
   for the second time, diff in etot=  2.849E-11 < toldfe=  1.000E-08
 
 TC-DFT STEP  15 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
@@ -420,7 +420,7 @@ TC-DFT STEP  15 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
  ETOT  100  -60.588292952844     9.608E-09 1.389E-08 3.857E-08 3.439E-05 1.344E-02
  ETOT  101  -60.588292951610     1.234E-09 1.203E-08 1.088E-08 1.501E-05 1.343E-02
 
- At SCF step  101, etot is converged : 
+ At SCF step  101, etot is converged :
   for the second time, diff in etot=  1.234E-09 < toldfe=  1.000E-08
 
 TC-DFT STEP  16 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS AND IONS
@@ -428,7 +428,7 @@ TC-DFT STEP  16 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS A
  ETOT  103  -60.588314471240    -5.251E-10 3.791E-04 9.978E-08 3.106E-07 1.345E-02
  ETOT  104  -60.588314471246    -5.720E-12 5.871E-04 1.378E-08 1.111E-08 1.345E-02
 
- At SCF step  104, etot is converged : 
+ At SCF step  104, etot is converged :
   for the second time, diff in etot=  5.720E-12 < toldfe=  1.000E-08
 
 TC-DFT STEP  17 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
@@ -437,7 +437,7 @@ TC-DFT STEP  17 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
  ETOT  107  -60.588295826543     3.629E-09 1.019E-08 1.595E-08 1.764E-05 1.342E-02
  ETOT  108  -60.588295826026     5.166E-10 9.284E-09 6.052E-09 7.759E-06 1.341E-02
 
- At SCF step  108, etot is converged : 
+ At SCF step  108, etot is converged :
   for the second time, diff in etot=  5.166E-10 < toldfe=  1.000E-08
 
 TC-DFT STEP  18 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS AND IONS
@@ -445,7 +445,7 @@ TC-DFT STEP  18 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS A
  ETOT  110  -60.588312307856    -7.383E-11 5.392E-04 2.308E-08 1.052E-07 1.342E-02
  ETOT  111  -60.588312307857    -9.948E-13 3.124E-04 3.376E-09 3.961E-09 1.342E-02
 
- At SCF step  111, etot is converged : 
+ At SCF step  111, etot is converged :
   for the second time, diff in etot=  9.948E-13 < toldfe=  1.000E-08
 
 TC-DFT STEP  19 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
@@ -453,7 +453,7 @@ TC-DFT STEP  19 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
  ETOT  113  -60.588303338027     5.311E-09 8.162E-09 1.413E-08 1.637E-05 1.341E-02
  ETOT  114  -60.588303337173     8.540E-10 7.623E-09 3.936E-09 8.221E-06 1.340E-02
 
- At SCF step  114, etot is converged : 
+ At SCF step  114, etot is converged :
   for the second time, diff in etot=  8.540E-10 < toldfe=  1.000E-08
 
  At SCF step  114, the difference between
@@ -742,7 +742,7 @@ TC-DFT STEP   1 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
  ETOT 16  -60.579538493027     4.296E-09 6.513E-09 3.361E-13 3.811E-08 1.342E-02
  ETOT 17  -60.579538491309     1.718E-09 2.189E-09 6.826E-14 1.419E-08 1.342E-02
 
- At SCF step   17, etot is converged : 
+ At SCF step   17, etot is converged :
   for the second time, diff in etot=  1.718E-09 < toldfe=  1.000E-08
 
 TC-DFT STEP   2 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS AND IONS
@@ -752,7 +752,7 @@ TC-DFT STEP   2 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS A
  ETOT 21  -60.590788455714    -6.981E-09 1.616E-03 6.988E-07 7.960E-07 1.306E-02
  ETOT 22  -60.590788456778    -1.065E-09 1.938E-03 1.364E-07 2.441E-07 1.306E-02
 
- At SCF step   22, etot is converged : 
+ At SCF step   22, etot is converged :
   for the second time, diff in etot=  1.065E-09 < toldfe=  1.000E-08
 
 TC-DFT STEP   3 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
@@ -764,7 +764,7 @@ TC-DFT STEP   3 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
  ETOT 28  -60.590452423679     4.742E-10 7.853E-10 6.071E-09 1.274E-05 1.278E-02
  ETOT 29  -60.590452423288     3.910E-10 2.139E-09 8.065E-10 8.232E-06 1.277E-02
 
- At SCF step   29, etot is converged : 
+ At SCF step   29, etot is converged :
   for the second time, diff in etot=  3.910E-10 < toldfe=  1.000E-08
 
 TC-DFT STEP   4 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS AND IONS
@@ -772,7 +772,7 @@ TC-DFT STEP   4 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS A
  ETOT 31  -60.590792041808    -5.361E-09 2.256E-03 7.902E-07 5.135E-07 1.287E-02
  ETOT 32  -60.590792041881    -7.227E-11 2.191E-03 8.505E-08 7.711E-08 1.287E-02
 
- At SCF step   32, etot is converged : 
+ At SCF step   32, etot is converged :
   for the second time, diff in etot=  7.227E-11 < toldfe=  1.000E-08
 
 TC-DFT STEP   5 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
@@ -782,7 +782,7 @@ TC-DFT STEP   5 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
  ETOT 36  -60.590754054730     1.465E-09 8.472E-10 1.165E-08 1.836E-05 1.282E-02
  ETOT 37  -60.590754053991     7.394E-10 3.125E-10 4.144E-10 1.692E-05 1.281E-02
 
- At SCF step   37, etot is converged : 
+ At SCF step   37, etot is converged :
   for the second time, diff in etot=  7.394E-10 < toldfe=  1.000E-08
 
 TC-DFT STEP   6 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS AND IONS
@@ -790,7 +790,7 @@ TC-DFT STEP   6 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS A
  ETOT 39  -60.590791296884    -1.050E-09 1.463E-03 1.537E-07 3.895E-07 1.283E-02
  ETOT 40  -60.590791296894    -9.962E-12 1.037E-03 2.088E-08 1.699E-08 1.283E-02
 
- At SCF step   40, etot is converged : 
+ At SCF step   40, etot is converged :
   for the second time, diff in etot=  9.962E-12 < toldfe=  1.000E-08
 
 TC-DFT STEP   7 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
@@ -799,7 +799,7 @@ TC-DFT STEP   7 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
  ETOT 43  -60.590785955125     4.957E-09 5.383E-10 1.996E-08 2.205E-05 1.282E-02
  ETOT 44  -60.590785954465     6.602E-10 1.778E-10 7.023E-09 9.431E-06 1.281E-02
 
- At SCF step   44, etot is converged : 
+ At SCF step   44, etot is converged :
   for the second time, diff in etot=  6.602E-10 < toldfe=  1.000E-08
 
  At SCF step   44, the difference between
@@ -1091,7 +1091,7 @@ TC-DFT STEP   1 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
  ETOT 15  -60.422536496473    -5.641E-09 1.193E-10 5.735E-12 7.830E-08 1.434E-02
  ETOT 16  -60.422536494255     2.218E-09 4.729E-11 1.451E-12 5.282E-08 1.434E-02
 
- At SCF step   16, etot is converged : 
+ At SCF step   16, etot is converged :
   for the second time, diff in etot=  2.218E-09 < toldfe=  1.000E-08
 
 TC-DFT STEP   2 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS AND IONS
@@ -1105,7 +1105,7 @@ TC-DFT STEP   2 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS A
  ETOT 24  -60.612913797571    -2.740E-09 8.507E-05 5.810E-08 6.482E-07 5.187E-03
  ETOT 25  -60.612913798102    -5.315E-10 5.042E-05 1.193E-08 4.576E-07 5.188E-03
 
- At SCF step   25, etot is converged : 
+ At SCF step   25, etot is converged :
   for the second time, diff in etot=  5.315E-10 < toldfe=  1.000E-08
 
 TC-DFT STEP   3 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
@@ -1120,7 +1120,7 @@ TC-DFT STEP   3 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
  ETOT 34  -60.613099173903    -1.527E-09 3.536E-10 1.593E-08 1.041E-06 6.397E-03
  ETOT 35  -60.613099173430     4.736E-10 3.401E-10 1.370E-09 5.680E-06 6.397E-03
 
- At SCF step   35, etot is converged : 
+ At SCF step   35, etot is converged :
   for the second time, diff in etot=  4.736E-10 < toldfe=  1.000E-08
 
 TC-DFT STEP   4 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS AND IONS
@@ -1129,7 +1129,7 @@ TC-DFT STEP   4 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS A
  ETOT 38  -60.613130647611    -4.475E-09 4.848E-05 4.188E-06 1.876E-07 6.177E-03
  ETOT 39  -60.613130647866    -2.546E-10 3.932E-05 2.882E-06 9.375E-08 6.177E-03
 
- At SCF step   39, etot is converged : 
+ At SCF step   39, etot is converged :
   for the second time, diff in etot=  2.546E-10 < toldfe=  1.000E-08
 
 TC-DFT STEP   5 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
@@ -1141,7 +1141,7 @@ TC-DFT STEP   5 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
  ETOT 45  -60.611825330767     2.696E-11 1.171E-10 1.899E-08 6.726E-06 6.297E-03
  ETOT 46  -60.611825330161     6.063E-10 3.500E-11 3.902E-09 1.007E-05 6.297E-03
 
- At SCF step   46, etot is converged : 
+ At SCF step   46, etot is converged :
   for the second time, diff in etot=  6.063E-10 < toldfe=  1.000E-08
 
 TC-DFT STEP   6 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS AND IONS
@@ -1150,7 +1150,7 @@ TC-DFT STEP   6 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS A
  ETOT 49  -60.613144686370    -7.462E-10 4.200E-05 7.635E-07 9.679E-08 6.254E-03
  ETOT 50  -60.613144686411    -4.170E-11 3.560E-05 4.522E-07 4.148E-08 6.254E-03
 
- At SCF step   50, etot is converged : 
+ At SCF step   50, etot is converged :
   for the second time, diff in etot=  4.170E-11 < toldfe=  1.000E-08
 
 TC-DFT STEP   7 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
@@ -1162,7 +1162,7 @@ TC-DFT STEP   7 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
  ETOT 56  -60.612527731070     1.614E-11 2.891E-11 3.782E-09 3.816E-06 6.304E-03
  ETOT 57  -60.612527730950     1.198E-10 9.161E-12 6.465E-10 4.938E-06 6.304E-03
 
- At SCF step   57, etot is converged : 
+ At SCF step   57, etot is converged :
   for the second time, diff in etot=  1.198E-10 < toldfe=  1.000E-08
 
 TC-DFT STEP   8 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS AND IONS
@@ -1170,7 +1170,7 @@ TC-DFT STEP   8 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS A
  ETOT 59  -60.613143083924    -5.588E-09 3.394E-05 4.644E-07 1.187E-06 6.290E-03
  ETOT 60  -60.613143083974    -5.043E-11 3.790E-05 6.168E-08 3.131E-08 6.290E-03
 
- At SCF step   60, etot is converged : 
+ At SCF step   60, etot is converged :
   for the second time, diff in etot=  5.043E-11 < toldfe=  1.000E-08
 
 TC-DFT STEP   9 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
@@ -1179,7 +1179,7 @@ TC-DFT STEP   9 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
  ETOT 63  -60.613134441222     8.875E-09 5.825E-11 1.840E-08 4.350E-05 6.299E-03
  ETOT 64  -60.613134440683     5.388E-10 2.573E-12 8.013E-09 8.439E-06 6.300E-03
 
- At SCF step   64, etot is converged : 
+ At SCF step   64, etot is converged :
   for the second time, diff in etot=  5.388E-10 < toldfe=  1.000E-08
 
  At SCF step   64, the difference between
@@ -1471,7 +1471,7 @@ TC-DFT STEP   1 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
  ETOT 15  -60.609962009940     5.901E-09 1.343E-13 4.548E-14 2.736E-09 5.443E-03
  ETOT 16  -60.609962007119     2.821E-09 1.000E-13 5.156E-15 1.170E-09 5.443E-03
 
- At SCF step   16, etot is converged : 
+ At SCF step   16, etot is converged :
   for the second time, diff in etot=  2.821E-09 < toldfe=  1.000E-08
 
 TC-DFT STEP   2 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS AND IONS
@@ -1480,7 +1480,7 @@ TC-DFT STEP   2 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS A
  ETOT 19  -60.613660390050    -4.533E-09 3.246E-05 2.591E-08 1.086E-06 5.461E-03
  ETOT 20  -60.613660390643    -5.935E-10 3.673E-05 1.167E-08 7.947E-08 5.461E-03
 
- At SCF step   20, etot is converged : 
+ At SCF step   20, etot is converged :
   for the second time, diff in etot=  5.935E-10 < toldfe=  1.000E-08
 
 TC-DFT STEP   3 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
@@ -1489,7 +1489,7 @@ TC-DFT STEP   3 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
  ETOT 23  -60.613629237202     3.135E-09 5.330E-11 7.031E-09 1.457E-06 5.478E-03
  ETOT 24  -60.613629237150     5.191E-11 7.741E-12 3.349E-09 1.441E-06 5.479E-03
 
- At SCF step   24, etot is converged : 
+ At SCF step   24, etot is converged :
   for the second time, diff in etot=  5.191E-11 < toldfe=  1.000E-08
 
 TC-DFT STEP   4 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS AND IONS
@@ -1497,7 +1497,7 @@ TC-DFT STEP   4 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS A
  ETOT 26  -60.613663075079    -4.673E-11 3.404E-05 2.612E-09 1.474E-07 5.478E-03
  ETOT 27  -60.613663075084    -5.812E-12 2.758E-05 1.027E-09 3.117E-08 5.478E-03
 
- At SCF step   27, etot is converged : 
+ At SCF step   27, etot is converged :
   for the second time, diff in etot=  5.812E-12 < toldfe=  1.000E-08
 
 TC-DFT STEP   5 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
@@ -1505,7 +1505,7 @@ TC-DFT STEP   5 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
  ETOT 29  -60.613638564410     7.499E-10 4.311E-12 2.920E-09 4.122E-06 5.484E-03
  ETOT 30  -60.613638564200     2.109E-10 4.526E-12 8.718E-10 2.521E-06 5.484E-03
 
- At SCF step   30, etot is converged : 
+ At SCF step   30, etot is converged :
   for the second time, diff in etot=  2.109E-10 < toldfe=  1.000E-08
 
 TC-DFT STEP   6 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS AND IONS
@@ -1513,7 +1513,7 @@ TC-DFT STEP   6 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS A
  ETOT 32  -60.613661321679    -1.407E-12 2.531E-05 2.452E-10 8.778E-09 5.484E-03
  ETOT 33  -60.613661321680    -1.990E-13 2.883E-05 5.123E-11 4.614E-09 5.484E-03
 
- At SCF step   33, etot is converged : 
+ At SCF step   33, etot is converged :
   for the second time, diff in etot=  1.990E-13 < toldfe=  1.000E-08
 
 TC-DFT STEP   7 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
@@ -1521,7 +1521,7 @@ TC-DFT STEP   7 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
  ETOT 35  -60.613658962302     1.202E-10 9.146E-13 5.440E-10 2.274E-06 5.485E-03
  ETOT 36  -60.613658962255     4.744E-11 8.555E-13 1.896E-10 1.445E-06 5.485E-03
 
- At SCF step   36, etot is converged : 
+ At SCF step   36, etot is converged :
   for the second time, diff in etot=  4.744E-11 < toldfe=  1.000E-08
 
  At SCF step   36, the difference between
@@ -1784,7 +1784,7 @@ force_length_stats: {min:   2.60296632E-19, max:   6.68519388E-03, mean:   4.940
            Relative     =-8.65356E-06
 
  fconv : WARNING -
-  ntime=    4 was not enough Broyd/MD steps to converge gradients: 
+  ntime=    4 was not enough Broyd/MD steps to converge gradients:
   max grad (force/stress) = 5.4851E-03 > tolmxf= 5.0000E-05 ha/bohr (free atoms)
 
 ================================================================================
@@ -1943,7 +1943,7 @@ total_energy_dc_eV  : -1.64938154118104E+03
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      1.0261212902E+01  1.0261212902E+01  1.0261212902E+01 Bohr
               amu      2.80855000E+01
@@ -2132,7 +2132,7 @@ P           mkmem           3
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -2144,12 +2144,12 @@ P           mkmem           3
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -2167,7 +2167,7 @@ P           mkmem           3
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016

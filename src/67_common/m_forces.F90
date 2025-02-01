@@ -237,7 +237,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
    ABI_BUG('Wrong size for vxctau!')
  else if (has_vxctau/=0) then
    has_vxctau=1
- end if 
+ end if
 
 !Check if we're in hybrid norm conserving pseudopotential
  is_hybrid_ncpp=(psps%usepaw==0 .and. &

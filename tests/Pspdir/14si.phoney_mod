@@ -1,13 +1,13 @@
-2 bohr rc 15 hartree ec psp for silicon 8 November 1991 (new)                 
- 14.000  4.000    980710              zatom,zion,pspdat 
- 5       3        2   2    600     0   pspcod,pspxc,lmax,lloc,mmax,r2well 
+2 bohr rc 15 hartree ec psp for silicon 8 November 1991 (new)
+ 14.000  4.000    980710              zatom,zion,pspdat
+ 5       3        2   2    600     0   pspcod,pspxc,lmax,lloc,mmax,r2well
   0.999999999999999955E-06  0.307523885541775704E-01 1  r1,al,pspso
  0  0  0   2 2.00426660272461010      l,e99.0,e99.9,nproj,rcpsp
  0  0  0   0                          rms,ekb1,ekb2,epsatm
  1  0  0   2 2.00426660272461010      l,e99.0,e99.9,nproj,rcpsp
  0  0  0   0                          rms,ekb1,ekb2,epsatm
  2  0  0   0 2.00426660272461010      l,e99.0,e99.9,nproj,rcpsp
-  0  0  0   0                         rms,ekb1,ekb2,epsatm 
+  0  0  0   0                         rms,ekb1,ekb2,epsatm
  0  0  0                              rchrg,fchrg,qchrg
    0 = l
    5.9599945230518721E+00   5.9599945230509341E+00   5.9599945230499376E+00
