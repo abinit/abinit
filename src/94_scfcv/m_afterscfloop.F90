@@ -34,13 +34,13 @@ module m_afterscfloop
  use m_dtfil
  use m_extfpmd
 
- use defs_datatypes,     only : pseudopotential_type, ebands_t
+ use defs_datatypes,     only : pseudopotential_type
  use defs_abitypes,      only : mpi_type
  use m_time,             only : timab
  use m_xmpi,             only : xmpi_sum, xmpi_comm_rank,xmpi_comm_size
  use m_berryphase_new,   only : berryphase_new
  use m_geometry,         only : xred2xcart, metric
- use m_crystal,          only : crystal_init,crystal_t,prtposcar
+ use m_crystal,          only : crystal_t,prtposcar
  use m_results_gs ,      only : results_gs_type
  use m_electronpositron, only : electronpositron_type, electronpositron_calctype, exchange_electronpositron
  use m_paw_dmft,         only : paw_dmft_type
@@ -397,14 +397,14 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
  nfftotf=product(ngfftf(1:3))
  
- call crystal_init(dtset%amu_orig(:,1),crystal,dtset%spgroup,dtset%natom,dtset%npsp,&
+ call crystal%init(dtset%amu_orig(:,1),dtset%spgroup,dtset%natom,dtset%npsp,&
 & psps%ntypat,dtset%nsym,rprimd,dtset%typat,xred,dtset%ziontypat,dtset%znucl,1,&
 & dtset%nspden==2.and.dtset%nsppol==1,remove_inv,psps%title,&
 & symrel=dtset%symrel,tnons=dtset%tnons,symafm=dtset%symafm)
 
  ABI_MALLOC(doccde,(dtset%mband*dtset%nkpt*dtset%nsppol))
  doccde=zero
- call ebands_init(hdr%bantot,ebands_k,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,&
+ call ebands_k%init(hdr%bantot,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,&
 & doccde,eigen,hdr%istwfk,hdr%kptns,hdr%nband,&
 & hdr%nkpt,hdr%npwarr,hdr%nsppol,hdr%nspinor,hdr%tphysel,hdr%tsmear,hdr%occopt,hdr%occ,hdr%wtk,&
 & hdr%cellcharge, hdr%kptopt, hdr%kptrlatt_orig, hdr%nshiftk_orig, hdr%shiftk_orig, &

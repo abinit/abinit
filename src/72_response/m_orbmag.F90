@@ -42,7 +42,7 @@ module m_orbmag
   use m_xmpi
   use m_dtset
 
-  use defs_datatypes,     only : pseudopotential_type, ebands_t
+  use defs_datatypes,     only : pseudopotential_type
   use defs_abitypes,      only : MPI_type
   use m_crystal,          only : crystal_t
   use m_cgprj,            only : getcprj
@@ -389,8 +389,8 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
  !Allocate all arrays and initialize quantities that do not depend on k and spin.
  !gs_hamk is the normal hamiltonian at k
  call gs_hamk%init(psps,pawtab,dtset%nspinor,dtset%nsppol,dtset%nspden,dtset%natom,&
-      & dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,nucdipmom=dtset%nucdipmom,&
-      & paw_ij=paw_ij)
+      & dtset%typat,crystal%xred,dtset%nfft,dtset%mgfft,dtset%ngfft,crystal%rprimd,&
+      & dtset%nloalg,nucdipmom=dtset%nucdipmom,paw_ij=paw_ij)
 
  ! iterate over spin channels
  bdtot_index=0
@@ -2862,7 +2862,7 @@ subroutine orbmag_ncwrite(crystal,dtset,ebands,hdr,ncid,orbmag_mesh,psps,pawtab)
  ! Write header, crystal structure and band energies.
  NCF_CHECK(hdr%ncwrite(ncid, fform, nc_define=.True.))
  NCF_CHECK(crystal%ncwrite(ncid))
- NCF_CHECK(ebands_ncwrite(ebands, ncid))
+ NCF_CHECK(ebands%ncwrite(ncid))
 
  !! Add orbmag-mesh-specific quantities
  ncerr = nctk_def_dims(ncid, [ &
