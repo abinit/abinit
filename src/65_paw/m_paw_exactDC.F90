@@ -84,9 +84,10 @@ CONTAINS  !=====================================================================
  real(dp), allocatable :: thetas(:),tweights(:),vxc(:,:,:),vxci(:,:,:),ylm(:,:,:)
  !************************************************************************
 
- ! VERY IMPORTANT: This routine assumes that we work in the real spherical harmonic case.
+ ! VERY IMPORTANT: This routine assumes that we work in the real spherical harmonic basis.
  ! If you want to generalize that to the complex case for some reason, the formulas
  ! below are not valid, so you would need to add some complex conjugates.
+ ! Also, we work with the convention occ(i,j) = <c_j^dagger c_i>.
 
  ln = 13  ! Size of angular mesh, same as eDMFT
  meshsz = size(pawtab%proj2(:)) ! Size of radial mesh

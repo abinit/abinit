@@ -38,10 +38,18 @@ MODULE m_matrix
  public :: invsqrt_matrix         ! inv of Sqrt of Matrix
  public :: blockdiago_fordsyev         ! inv of Sqrt of Matrix
  public :: blockdiago_forzheev         ! inv of Sqrt of Matrix
+ public :: mat33det             ! Determinant of a 3x3 matrix
 ! public :: inverse_matrix      ! Inverse matrix
 ! public :: nullify_matrix      ! Nullify the object
 ! public :: destroy_matrix      ! Frees the allocated memory
 ! public :: print_matrix        ! Printout of the basic info
+
+
+ ! the determinant of a 3*3 matrix
+ interface mat33det
+    procedure  real_mat33det
+    procedure  int_mat33det
+ end interface mat33det
 
 
 CONTAINS  !===========================================================
@@ -820,5 +828,51 @@ subroutine blockdiago_forzheev(matrix,tndim,eig)
 
 end subroutine blockdiago_forzheev
 !!***
+
+!! FUNCTION
+!!  Compute the determinant of a 3x3 real matrix
+!!
+!! INPUTS
+!!  A = 3x3 matrix
+!!
+!! OUTPUT
+!!  det = The determinant
+!!
+!! SOURCE
+
+function real_mat33det(A) result(det)
+  real(dp), intent(in) :: A(3,3)
+  real(dp) :: det
+  DET =  A(1,1)*A(2,2)*A(3,3)  &
+       - A(1,1)*A(2,3)*A(3,2)  &
+       - A(1,2)*A(2,1)*A(3,3)  &
+       + A(1,2)*A(2,3)*A(3,1)  &
+       + A(1,3)*A(2,1)*A(3,2)  &
+       - A(1,3)*A(2,2)*A(3,1)
+end function real_mat33det
+!!***
+
+!! FUNCTION
+!!  Compute the determinant of a 3x3 integer matrix
+!!
+!! INPUTS
+!!  A = 3x3 matrix
+!!
+!! OUTPUT
+!!  det = The determinant
+!!
+!! SOURCE
+
+function int_mat33det(A) result(det)
+  integer, intent(in) :: A(3,3)
+  integer :: det
+  DET =  A(1,1)*A(2,2)*A(3,3)  &
+       - A(1,1)*A(2,3)*A(3,2)  &
+       - A(1,2)*A(2,1)*A(3,3)  &
+       + A(1,2)*A(2,3)*A(3,1)  &
+       + A(1,3)*A(2,1)*A(3,2)  &
+       - A(1,3)*A(2,2)*A(3,1)
+end function int_mat33det
+
 
 END MODULE m_matrix

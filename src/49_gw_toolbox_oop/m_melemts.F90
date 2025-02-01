@@ -763,7 +763,7 @@ subroutine melements_print(Mels, names_list, header, unit, prtvol, mode_paral)
         call wrtout(my_unt,msg,my_mode)
         do iab=1,Mels%nspinor**2
           mat = data_p(tab(ikey))%arr_p(b1:b2,b1:b2,ikibz,iab)*Ha_eV
-          call print_arr(mat,max_r,max_c,my_unt,my_mode)
+          call print_arr([my_unt], mat, max_r, max_c)
         end do
         write(msg,'(a)')ch10
         call wrtout(my_unt,msg,my_mode)

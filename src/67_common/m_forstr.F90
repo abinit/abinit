@@ -59,7 +59,7 @@ module m_forstr
  use m_initylmg,         only : initylmg
  use m_xchybrid,         only : xchybrid_ncpp_cc
  use m_kg,               only : mkkpg
- use m_hamiltonian,      only : init_hamiltonian, gs_hamiltonian_type, gspot_transgrid_and_pack
+ use m_hamiltonian,      only : gs_hamiltonian_type, gs_hamiltonian_type, gspot_transgrid_and_pack !,K_H_KPRIME
  use m_electronpositron, only : electronpositron_type, electronpositron_calctype
  use m_bandfft_kpt,      only : bandfft_kpt, bandfft_kpt_type, prep_bandfft_tabs, &
 &                               bandfft_kpt_savetabs, bandfft_kpt_restoretabs
@@ -766,7 +766,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
  end if
 
 !Initialize Hamiltonian (k-independent terms)
- call init_hamiltonian(gs_hamk,psps,pawtab,nspinor,nsppol,nspden,natom,&
+ call gs_hamk%init(psps,pawtab,nspinor,nsppol,nspden,natom,&
 & typat,xred,nfft,mgfft,ngfft,rprimd,nloalg,usecprj=usecprj_local,&
 & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab,&
 & paw_ij=paw_ij,ph1d=ph1d,electronpositron=electronpositron,fock=fock,&
@@ -1752,7 +1752,7 @@ subroutine stress_mGGA(mggastr,cwavef,effmass_free,gbound_k,gprimd,istwf_k,kg_k,
  real(dp),allocatable :: weight_array(:),work(:,:,:,:)
  real(dp),pointer :: gcwavef_ndat(:,:,:,:),vtau_gcwavef_ndat(:,:,:,:)
  real(dp),pointer :: my_cwavef(:,:)
- 
+
 ! *********************************************************************
 
  if (nvtau/=1) then
@@ -1843,9 +1843,9 @@ subroutine stress_mGGA(mggastr,cwavef,effmass_free,gbound_k,gprimd,istwf_k,kg_k,
 &                 mpi_enreg%me_g0,mpi_enreg%comm_fft,gpu_option=gpu_option_)
      my_mggastr(mu)=my_mggastr(mu) + renorm_factor*sum(weight_array(1:ndat)*dotr(1:ndat))
    end do
- 
+
  end do ! ispinor
- 
+
 !Release memory
  if (nspinortot==2) then
    ABI_FREE(my_cwavef)
@@ -1857,7 +1857,7 @@ subroutine stress_mGGA(mggastr,cwavef,effmass_free,gbound_k,gprimd,istwf_k,kg_k,
 
 !Take into account MPI parallelism (bands, spinors)
  call xmpi_sum(my_mggastr,mpi_enreg%comm_bandspinor ,ierr)
- 
+
 !Final accumulation of stresses
  mggastr(1:6) = mggastr(1:6) + my_mggastr(1:6)
 

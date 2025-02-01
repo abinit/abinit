@@ -117,7 +117,7 @@ module m_multibinit_manager
      ! a polymorphic lattice mover so multiple mover could be used.
      class(lattice_mover_t), pointer :: lattice_mover => null()
      ! as for the spin, there is only one mover which has several methods
-     type(spin_mover_t), pointer :: spin_mover => null() 
+     type(spin_mover_t), pointer :: spin_mover => null()
      ! type(lwf_mover_t) :: lwf_mover
 
      type(slc_mover_t) :: slc_mover
@@ -184,7 +184,7 @@ contains
     logical :: iam_master
     integer :: i
     integer :: c
-    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc)
     self%input_path=input_path
     self%filenames(:)=filenames(:)
     call xmpi_bcast(self%filenames, master, comm, ierr)
@@ -413,7 +413,7 @@ contains
 
     end if
 
-    !LWF 
+    !LWF
     if(self%params%lwf_dynamics>0 .or. self%params%latt_lwf_anharmonic==1) then
        ABI_MALLOC_TYPE_SCALAR(lwf_primitive_potential_t, lwf_pot)
        select type(lwf_pot)
@@ -539,7 +539,7 @@ contains
     select case(self%params%lwf_dynamics)
     case (1)  ! Metropolis Monte Carlo
        ABI_MALLOC_TYPE_SCALAR(lwf_mc_t, self%lwf_mover)
-    case (2) ! dummy 
+    case (2) ! dummy
        ABI_MALLOC_TYPE_SCALAR(lwf_dummy_mover_t, self%lwf_mover)
     case (3)
        ABI_MALLOC_TYPE_SCALAR(lwf_berendsen_mover_t, self%lwf_mover)
@@ -596,7 +596,7 @@ contains
     call self%lattice_mover%ncfile%finalize()
   end subroutine run_lattice_dynamics
 
-  
+
   !-------------------------------------------------------------------!
   ! Run lattice only dynamics at various T
   !-------------------------------------------------------------------!
@@ -718,7 +718,7 @@ contains
     call self%read_potentials()
     !call self%sc_maker%initialize(diag(self%params%ncell))
     call self%sc_maker%initialize(self%params%ncellmat)
-    
+
     call self%fill_supercell()
     call self%set_movers()
     call self%lwf_mover%set_ncfile_name(self%params, self%filenames(2))
@@ -757,7 +757,7 @@ contains
     ! if ... fit lwf model
     ! if ... run dynamics...
     ! spin dynamics
-    if(self%params%latt_lwf_anharmonic==1)then    
+    if(self%params%latt_lwf_anharmonic==1)then
         self%params%lwf_dynamics=2
     end if
 

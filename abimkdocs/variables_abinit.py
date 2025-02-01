@@ -1515,6 +1515,66 @@ It is still read during a transitional period, likely up to the end of v9 life c
 """,
 ),
 
+Variable(
+    abivarname="chebfi_oracle",
+    varset="gstate",
+    vartype="integer",
+    topics=['TuningSpeedMem_expert'],
+    dimensions="scalar",
+    defaultval="0",
+    mnemonics="CHEByshev FIltering algorithm ORACLE",
+    characteristics=['[[DEVELOP]]'],
+    added_in_version="10.3.4",
+    requires='[[wfoptalg]] == 111',
+    text=r"""
+For the Chebyshev Filtering algorithm, it is possible to estimate the degree of the polynom needed to reach a given precision on the wave-functions.
+Indeed, as explained in [[cite:Levitt2015]], after the application of the Chebyshev polynomial of order $n$ (noted $T_n(x)$) followed by a Rayleigh-Ritz procedure,
+the residual $r_i^n$ of the band $i$ can be estimated as :
+
+  $\|r_i^n\| \approx \|r_i\| \ / \ T_n(\lambda_i^{eff})$
+
+where $r_i$ is the residual before applying the Chebyshev polynomial, and $\lambda_i^{eff}=(\lambda_i - c)/r$ where $\lambda_i$ is the Rayleigh quotient of the band $i$, $r$ the filter radius and $c$ filter center.
+There are two possible scenarii :
+
+  * [[chebfi_oracle]] = 0 : the default value. The order of the polynom, or degree, is equal to [[mdeg_filter]] (or [[nline]],
+  depending on which one is used in the input) for every SCF step.
+
+  * [[chebfi_oracle]] > 0 : the square residuals $\|r_i\|^2$ are computed at the beginning of the algorithm, which adds a small time overhead (which could be negligible).
+  The degree of the polynom $n_i$ is estimated individually for every band, as explained below.
+  Then the maximum value over all bands is taken.
+  Indeed, for an efficient parallelism it is necessary to apply the same degree to every bands.
+
+The individual polynom degree $n_i$ of each band can be computed in two different ways:
+
+  * if [[chebfi_oracle]] = 1, $n_i$ is the minimum value between [[mdeg_filter]] and the degree $n_{tolwfr}$ estimated to insure $\|r_i^{n_{tolwfr}}\|^2 <$ [[tolwfr_diago]].
+  This option could be useful to reduce the polynomial degree for SCF iterations close to convergence.
+
+  * if [[chebfi_oracle]] = 2, $n_i$ is the minimum value between $n_{tolwfr}$ and the degree estimated to insure $\|r_i^n\|^2 < \alpha \|r_i\|^2$,
+  where $\alpha$ is equal to [[oracle_factor]].
+  This option could be useful to insure that the convergence rate of wave-fonctions is constant at every SCF iteration, until the convergence criteria [[tolwfr_diago]] is reached.
+  Note that in this case [[mdeg_filter]] (or [[nline]]) is not used.
+
+In some cases, $n_i$ is set to 0:
+
+  * if the square residual $\|r_i\|^2$ is below [[tolwfr_diago]]
+
+  * if the band $i$ is in the buffer (see [[nbdbuf]])
+
+  * if [[nbdbuf]] = -101 and the band occupancy is below [[oracle_minocc]]
+
+The resulting degree applied to all bands could be 0, for example if the wave-functions are already converged.
+In that case no filter is applied, but the Rayleigh-Ritz procedure is done anyway.
+
+At last, a global maximal degree $n_{max}$ is estimated (without using the residuals) to avoid some numerical instabilities (see section 5.3 in [[cite:Levitt2015]]).
+In practice $n_{max}$ is about 20 or more, but is not bigger than 40.
+This is a hard-coded limit in the code.
+$n_{max}$ is used even if [[chebfi_oracle]] is 0.
+
+[[chebfi_oracle]] > 0 is implemented for [[wfoptalg]] = 111, but not for [[wfoptalg]] = 1.
+It is not implemented for GPUs either (i.e. [[gpu_option]] must be 0 or DISABLE).
+""",
+),
+
 
 Variable(
     abivarname="chempot",
@@ -1888,7 +1948,7 @@ Variable(
     defaultval="0",
     mnemonics="C-PRoJectors IN MEMORY",
     characteristics=['[[DEVELOP]]'],
-    added_in_version="",
+    added_in_version="10.2.0",
     text=r"""
 For systems with many atoms, non-local operations are the most time-consuming part of the computation.
 The non-local contribution of the wavefunction $\psi$ to the energy writes:
@@ -2064,35 +2124,6 @@ take some time. If the user want a firm CPU time limit, the present parameter
 must be reduced sufficiently. Intuition about the actual margin to be taken
 into account should come with experience.
 A zero value has no action of the job.
-""",
-),
-
-Variable(
-    abivarname="dvdb_qcache_mb",
-    varset="eph",
-    vartype="real",
-    topics=['ElPhonInt_useful'],
-    dimensions="scalar",
-    #defaultval=1024,
-    defaultval=0.0,
-    mnemonics="DVDB Q-CACHE size in Megabytes",
-    added_in_version="before_v9",
-    text=r"""
-This variable activates a caching mechanism for the DFPT potentials used in the EPH part.
-The code will store in memory multiple q-points up to this size in Megabytes in order
-to reduce the number of IO operations required to read the potentials from the DVDB file.
-
-This option leads to a **significant speedup** of calculations requiring integrations
-in q-space ([[eph_task]] == 4) at the price of an increase of the memory requirements.
-The speedup is important especially if the QP corrections are computed for several k-points.
-
-A negative value signals to the code that all the q-points in the DVDB should be stored in memory.
-Use zero value disables the cache.
-
-!!! note
-
-    This variable is still under development as many things changed in the treatment of the interpolation
-    of the DFPT potential. For the time being, avoid using this option unless you know what you are doing.
 """,
 ),
 
@@ -4353,7 +4384,7 @@ DDB file i.e. [[ddb_ngqpt]] (default behavior).
     The computation of the e-ph matrix elements requires the knowledge of $\psi_{\bf k}$
     and $\psi_{\bf k + q}$. This means that the k-mesh for electrons found in the WFK must be
     compatible with the one given in *eph_ngqpt_fine*.
-    The code can interpolate DFPT potentials but won't try to interpolate KS wavefunctions.
+    The code can interpolate DFPT potentials but is not able to interpolate KS wavefunctions,
     and will stop if ${\bf k + q}$ is not found in the WFK file.
 """,
 ),
@@ -4388,7 +4419,8 @@ The choice is among:
         Requires [[ibte_prep]] = 1 when computing the imaginary part of the e-ph self-energy with [[eph_task]] == -4.
 * 9 --> Compute cumulant from SIGEPH.nc file specifcy via [[getsigeph_filepath]].
 * 10 --> Compute polaron effective mass, using the generalized Frohlich model, in the triply-degenerate VB or CB cubic case.
-         Polaron effective masses are computed along the 3 crystallographic directions: (100), (110) and (111). Same requirements as for [[eph_task]] = 6. Reference: [[cite:Guster2021]]
+         Polaron effective masses are computed along the 3 crystallographic directions: (100), (110) and (111).
+         Same requirements as for [[eph_task]] = 6. Reference: [[cite:Guster2021]]
 * 11 --> Compute e-ph matrix elements on homogeneous k- and q-meshes.
          Save results in GSTORE.nc file (requires netcdf library with MPI-IO support).
          The k-mesh must be equal to the one associated to the input WFK file, the q-mesh is specified
@@ -4406,11 +4438,11 @@ The choice is among:
               In the second case (-15) the q-points are taken directly from the DVDB file.
 * 16, -16 --> test_phrotation TO BE DOCUMENTED.
 * 17 --> Compute e-ph matrix elements with the GWPT formalism  IN DEVELOPMENT.
-
+* 18 --> Compute e-ph matrix g(k,q) along high-symmetry path. See [[eph_fix_wavevec]] and other related variables.
 
 !!! important
 
-    At the time of writing ( |today| ), PAW or norm-conserving pseudos with SOC are not supported by the EPH code.
+    At the time of writing ( |today| ), PAW is not supported by the EPH code.
     Also [[useylm]] must be set to 0 (default for NC pseudos).
 """,
 ),
@@ -10486,17 +10518,17 @@ Variable(
     vartype="integer",
     topics=['SCFControl_expert'],
     dimensions="scalar",
-    defaultval=ValueWithConditions({'[[wfoptalg]] == 1 or 11 ': 6, 'defaultval': 6}),
+    defaultval=ValueWithConditions({'[[wfoptalg]] == 1 or 111 ': 6, 'defaultval': 6}),
     mnemonics="Maximum DEGree of the polynomial for spectrum FILTERing algorithms",
     commentdefault="6 for chebyshev filtering algorithm",
     added_in_version="v10",
     text=r"""
-For spectrum-filtering based algorithms (e.g. Chebyshev filtering ([[wfoptalg]]=1 or 11) or spectrum slicing ([[wfoptalg]]=TODO).  
-The parameter [[mdeg_filter]] defines the maximum degree of the Chebyshev polynomial used in spectrum-filtering algorithms, such as Chebyshev filtering or spectrum slicing. These algorithms are employed to optimize the wavefunctions during the self-consistent cycle.  
+For spectrum-filtering based algorithms (e.g. Chebyshev filtering ([[wfoptalg]]=1 or 11) or spectrum slicing ([[wfoptalg]]=TODO).
+The parameter [[mdeg_filter]] defines the maximum degree of the Chebyshev polynomial used in spectrum-filtering algorithms, such as Chebyshev filtering or spectrum slicing. These algorithms are employed to optimize the wavefunctions during the self-consistent cycle.
 Increasing the degree improves the effectiveness of the filtering, reducing the number of self-consistent iterations required. However, a high polynomial degree is computationally expensive. Conversely, using a degree that is too low (e.g., <5) often leads to inefficient convergence or even incorrect results.
 The value of [[mdeg_filter]] serves as a maximum threshold: the degree may be automatically reduced to meet the required tolerance specified by [[tolwfr_diago]].
 
-> Notes:  
+> Notes:
 >
 > * The default value ([[mdeg_filter]] = 6) provides sufficient filtering quality for most cases.
 >
@@ -10838,13 +10870,13 @@ Choice of algorithm for the molecular dynamics simulation, and possibly changes 
     **Cell optimization:** No (Use [[optcell]] = 0 only)
     **Related variables:** The time step ([[dtion]]), the temperatures ([[mdtemp]]),
     the number of thermostats ([[nnos]]), and the masses of thermostats ([[qmass]]).
-  
+
   * "nvt_langevin" --> Langevin molecular dynamics. The equations of motion of the ions are described
     with the algorithms proposed in [[cite:Quigley2004]] and [[cite:Quigley2005]].
     **Purpose:** Molecular dynamics
     **Cell optimization:** No (Use [[optcell]] = 0 only)
     **Related variables:** time step ([[dtion]]), temperatures ([[mdtemp]]) and friction coefficient ([[friction]]).
-  
+
   * "npt_langevin" --> Langevin molecular dynamics at constant pressure. The equations of motion of the ions are described
     with the algorithms proposed in [[cite:Quigley2004]] and [[cite:Quigley2005]].
     The mass of the barostat ([[bmass]]) must be given in addition.
@@ -12078,28 +12110,28 @@ Variable(
     vartype="integer",
     topics=['SCFControl_expert'],
     dimensions="scalar",
-    defaultval=ValueWithConditions({'[[wfoptalg]] == 1 or 11 ': '[[mdeg_filter]]', 'defaultval': 4}),
+    defaultval=ValueWithConditions({'[[wfoptalg]] == 1 or 111 ': '[[mdeg_filter]]', 'defaultval': 4}),
     mnemonics="Number of LINE minimizations",
     commentdefault="Default is 4 line minimizations for conjugate-gradient-based algorithms, the degree of the polynomial filter for spectrum-filtering-based algorithms",
     added_in_version="before_v9",
     text=r"""
 
-Allows one to adjust the number of "iterations" used to optimize the wavefunctions.  
+Allows one to adjust the number of "iterations" used to optimize the wavefunctions.
 With the input variable [[nnsclo]], [[nline]] governs the convergence of the
-wavefunctions for fixed potential.  
+wavefunctions for fixed potential.
 
 - For **conjugate-gradient based algorithms** (e.g. conjugate gradient or LOBPCG):
 [[nline]] gives the maximum number of line minimizations allowed in preconditioned conjugate
 gradient minimization for each band. The default, 4, is fine.
 Special cases, with degeneracies or near-degeneracies of levels at the Fermi
 energy may require a larger value of [[nline]] (5 or 6 ?). Line minimizations
-will be stopped anyway when improvement gets small (governed by [[tolrde]]).  
+will be stopped anyway when improvement gets small (governed by [[tolrde]]).
 > Note that [[nline]] **= 0** can be used to diagonalize the Hamiltonian matrix in the
 subspace spanned by the input wavefunctions.
 
 - For **spectrum filtering algorithms** (e.g. Chebyshev filtering, spectrum slicing):
 [[nline]] gives the maximum degree of the Chebyshev polynomial used as filtering function.
-The default value ([[nline]] = 6) provides sufficient filtering quality for most cases.  
+The default value ([[nline]] = 6) provides sufficient filtering quality for most cases.
 > Note however that the use of [[nline]] is **outdated**, replaced by [[mdeg_filter]].
 """,
 ),
@@ -14758,10 +14790,10 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 When PAW is activated, the **spin-orbit coupling** as derived from the
-zero-order regular approximation to relativistic effects (ZORA) 
+zero-order regular approximation to relativistic effects (ZORA)
 can be added without the
-use of specific PAW datasets (pseudopotentials).  If in addition, a 
-nuclear magnetic dipole moment (see [[nucdipmom]]) is present, ZORA terms due 
+use of specific PAW datasets (pseudopotentials).  If in addition, a
+nuclear magnetic dipole moment (see [[nucdipmom]]) is present, ZORA terms due
 to the electron-nuclear spin interactions are added as well.
 If [[pawspnorb]] = 1, spin-orbit (and nuclear-electron spin) interactions will be added.
 If the wavefunction is spinorial (that is, if [[nspinor]] = 2), there is no
@@ -19998,11 +20030,12 @@ In practice it is used to reduce the number of "lines" done at the diagonalizati
 If the squared residual becomes lower than **tolwfr_diago**, the remaining "lines" to be done are skipped.
 For LOBPCG, "lines" are skipped if the biggest squared residual of the block is less than **tolwfr_diago**.
 If **tolwfr_diago**=0, [[nline]] "lines" are done at every self-consistent step.
+
 By default **tolwfr_diago** is equal to [[tolwfr]], but can be used independently.
 One can use [[tolvrs]] (or any other tolerance) to define a criterion for SCF cycles, and use **tolwfr_diago** to save computational time.
 However, when [[tolwfr]]>0, **tolwfr_diago**>[[tolwfr]] is forbidden as the SCF cycles cannot converge in that case.
 
-For [[wfoptalg]]=114 only (LOBPCG), if **tolwfr_diago**=0 then it is set to 1e-20 internally.
+For [[wfoptalg]]=114 (LOBPCG) and [[wfoptalg]]=111 (Chebyshev filtering), if **tolwfr_diago**=0 (default value if [[tolwfr]] is not specified in the input) then it is set to 1e-20 internally.
 As a consequence, to ensure that no lines are skipped one has to set **tolwfr_diago**=1e-30 in the input (instead of 0) in this particular case.
 """,
 ),
@@ -21794,32 +21827,32 @@ The different possibilities are:
 
   * [[wfoptalg]] = 0: The standard **state-by-state conjugate gradient** algorithm, which does not allow for parallelization over states. A detailed description of this algorithm can be found in [[cite:Payne1992]].
 
-  * [[wfoptalg]] = 10:  (For PAW) The standard **state-by-state conjugate gradient** algorithm (as described in [[cite:Payne1992]]) with no parallelization over states. This version includes **modifications** described in [[cite:Kresse1996]], such as a modified kinetic energy, improved preconditioning, minimal orthogonalization, etc. 
+  * [[wfoptalg]] = 10:  (For PAW) The standard **state-by-state conjugate gradient** algorithm (as described in [[cite:Payne1992]]) with no parallelization over states. This version includes **modifications** described in [[cite:Kresse1996]], such as a modified kinetic energy, improved preconditioning, minimal orthogonalization, etc.
 
-  * [[wfoptalg]] = 2: **Minimization of the residual** with respect to different shifts to cover the entire set of occupied bands. This allows for parallelization over blocks of states (or bands), with the number of states per block defined by [[nbdblock]].  
+  * [[wfoptalg]] = 2: **Minimization of the residual** with respect to different shifts to cover the entire set of occupied bands. This allows for parallelization over blocks of states (or bands), with the number of states per block defined by [[nbdblock]].
 > Note: This algorithm is experimental and possibly obsolete.
 
   * [[wfoptalg]] = 3: **Residual minimization** with respect to a shift. This is available only in the non-self-consistent case ([[iscf]] = -2) and is used to find eigenvalues and wavefunctions near a prescribed value.
 
-  * [[wfoptalg]] = 4 (see also [[wfoptalg]] = 14 or 114): A parallel implementation of the **Locally Optimal Block Preconditioned Conjugate Gradient (LOBPCG)** method, based on [[cite:Knyazev2001]]. This implementation relies on the Matlab program by Knyazev [[cite:Knyazev2007]]. For further details, see [[cite:Bottin2008]].  
+  * [[wfoptalg]] = 4 (see also [[wfoptalg]] = 14 or 114): A parallel implementation of the **Locally Optimal Block Preconditioned Conjugate Gradient (LOBPCG)** method, based on [[cite:Knyazev2001]]. This implementation relies on the Matlab program by Knyazev [[cite:Knyazev2007]]. For further details, see [[cite:Bottin2008]].
 > Recommendation: use [[wfoptalg]] = 114, which is the modern and improved version of this algorithm.
 
-  * [[wfoptalg]] = 14: Similar to [[wfoptalg]] = 4, **Locally Optimal Block Preconditioned Conjugate Gradient (LOBPCG)**, but with two key differences: (1) the preconditioning of block vectors is independent of the kinetic energy of each band, which improves convergence; and (2) orthogonalization after the LOBPCG algorithm is no longer performed, enhancing efficiency.  
+  * [[wfoptalg]] = 14: Similar to [[wfoptalg]] = 4, **Locally Optimal Block Preconditioned Conjugate Gradient (LOBPCG)**, but with two key differences: (1) the preconditioning of block vectors is independent of the kinetic energy of each band, which improves convergence; and (2) orthogonalization after the LOBPCG algorithm is no longer performed, enhancing efficiency.
 > Recommendation: use [[wfoptalg]] = 114 for a more modern and optimized version of this algorithm.
 
-  * [[wfoptalg]] = 114: A modern and highly efficient version of [[wfoptalg]] = 14 (**Locally Optimal Block Preconditioned Conjugate Gradient**), particularly suited for parallel computations. It performs well with a small number of blocks and can utilize OpenMP if ABINIT is compiled with a multithreaded linear algebra library.  
+  * [[wfoptalg]] = 114: A modern and highly efficient version of [[wfoptalg]] = 14 (**Locally Optimal Block Preconditioned Conjugate Gradient**), particularly suited for parallel computations. It performs well with a small number of blocks and can utilize OpenMP if ABINIT is compiled with a multithreaded linear algebra library.
 > Note: When using more than one thread, [[npfft]] cannot be used.
 
-  * [[wfoptalg]] = 1: A spectrum filtering algorithm based on **Chebyshev filtering**, designed for use with a large number of processors. It is suitable when the LOBPCG algorithm no longer scales efficiently. The degree of the polynomial filter can be adjusted with [[mdeg_filter]] (formerly [[nline]]). For more information, see the [performance guide](/theory/howto_chebfi.pdf) and [[cite:Levitt2015]].  
-> Recommendation: use [[wfoptalg]] = 111, which is the modern and improved version of this algorithm.  
-> See **notes** in the "[[wfoptalg]] = 111" section. 
+  * [[wfoptalg]] = 1: A spectrum filtering algorithm based on **Chebyshev filtering**, designed for use with a large number of processors. It is suitable when the LOBPCG algorithm no longer scales efficiently. The degree of the polynomial filter can be adjusted with [[mdeg_filter]] (formerly [[nline]]). For more information, see the [performance guide](/theory/howto_chebfi.pdf) and [[cite:Levitt2015]].
+> Recommendation: use [[wfoptalg]] = 111, which is the modern and improved version of this algorithm.
+> See **notes** in the "[[wfoptalg]] = 111" section.
 
-* [[wfoptalg]] = 111: A **modern and highly efficient version** of [[wfoptalg]] = 1, a spectrum filtering algorithm based on **Chebyshev filtering**, designed for use with a large number of processors. The degree of the polynomial filter can be adjusted with [[mdeg_filter]] (formerly [[nline]]). For more information, see the [performance guide](/theory/howto_chebfi.pdf) and [[cite:Levitt2015]].  
-> **Notes**:  
+* [[wfoptalg]] = 111: A **modern and highly efficient version** of [[wfoptalg]] = 1, a spectrum filtering algorithm based on **Chebyshev filtering**, designed for use with a large number of processors. The degree of the polynomial filter can be adjusted with [[mdeg_filter]] (formerly [[nline]]). For more information, see the [performance guide](/theory/howto_chebfi.pdf) and [[cite:Levitt2015]].
+> **Notes**:
 >
-> * For more performance, try enabling [[use_gemm_nonlop]] (default on [[GPU]]).  
+> * For more performance, try enabling [[use_gemm_nonlop]] (default on [[GPU]]).
 >
-> * This algorithm struggles to converge the last bands, so it is advisable to use slightly more bands than required. When using [[tolwfr_diago]], it is mandatory to set [[nbdbuf]].    
+> * This algorithm struggles to converge the last bands, so it is advisable to use slightly more bands than required. When using [[tolwfr_diago]], it is mandatory to set [[nbdbuf]].
 >
 > * By design, this algorithm cannot use preconditioning and, therefore, cannot handle [[ecutsm]]. Consequently, _Pulay stresses_ are not corrected. If stresses are important for the calculation (e.g., when pressure is required), it is necessary to slightly increase the plane-wave cutoff ([[ecut]]). """,
 ),
@@ -22839,12 +22872,19 @@ Variable(
     added_in_version="9.0.0",
     text=r"""
 This variable can be used to restart an EPH calculation.
-At present, this feature is supported only when computing the electron-phonon self-energy ([[eph_task]] = 4, -4).
-In this case, the code will look for a **pre-existing** SIGEPH.nc file and will compute the remaining k-points
-provided that the metadata found in the netcdf file is compatible with the input variables specified in the input file.
-The code aborts if the metadata reported in the SIGEPH.nc file is not compatible with the input file.
+At present, this feature is supported only when computing the electron-phonon self-energy ([[eph_task]] = 4, -4)
+and solving the variational polaron equations ([[eph_task]] = 13).
+
+In the first case, the code will look for a **pre-existing** SIGEPH.nc file and will compute the remaining k-points.
 Note that the restart in done **in-place** that is the output SIGEPH.nc is used as input of the calculation so there is no
 need to specify getsigeph or irdsigeph input variables.
+
+In the second case, the code will look for a **pre-existing** VARPEQ.nc file and continue the optimization
+process from the last iteration available in the netcdf file.
+
+!!! note
+
+    The code aborts if the metadata reported in the file netcdf is not compatible with the input file.
 """,
 ),
 
@@ -23225,9 +23265,9 @@ to integrate the Frohlich divergence.
 
 Possible values:
 
-- = 0 --> Approximate oscillators with $ \delta_{b_1 b_2} $
-- > 0 --> Use full expression with G-dependence
-- < 0 --> Deactivate computation of oscillators.
+- $= 0$ --> Approximate oscillators with $ \delta_{b_1 b_2} $
+- $> 0$ --> Use full expression with G-dependence
+- $< 0$ --> Deactivate computation of oscillators.
 
 !!! important
 
@@ -24496,6 +24536,34 @@ while [[optdcmagpawu]]=3 takes into account magnetism in the DC term, that is cu
 """,
 ),
 
+
+Variable(
+    abivarname="gwpt_np_wpqbks",
+    varset="eph",
+    vartype="integer",
+    topics=['ElPhonInt_expert'],
+    dimensions=[6],
+    defaultval=0,
+    mnemonics="GWPT Number of Processors for Wavevector sum, Perturbations, Q-points, Bands, K-points, Spin.",
+    added_in_version="10.1.4",
+    text=r"""
+This variable defines the Cartesian grid of MPI processors used for GWPT calculations.
+If not specified in the input, the code will generate this grid automatically using the total number of processors
+and the basic dimensions of the job computed at runtime.
+
+Preliminary considerations:
+
+!!! important
+
+    The total number of MPI processes must be equal to the product of the different entries.
+
+    Note also that the GWPT code implements its own MPI-algorithm and [[gwpt_np_wpqbks]] is
+    the **only variable** that should be used to change the default behaviour.
+    Other variables such as [[nppert]], [[npband]], [[npfft]], [[np_spkpt]] and [[paral_kgb]]
+    are **not used** in the EPH subdriver.
+""",
+),
+
 Variable(
     abivarname="xg_nonlop_option",
     varset="dev",
@@ -24573,8 +24641,8 @@ Variable(
 This variable can be used when performing GWPT calculations with [[optdriver]] = 17.
 Set to 1, an *input* DRHODB file will be read. See also [[getdrhodb]]
 """,
-),  
-    
+),
+
 Variable(
     abivarname="getvarpeq_filepath",
     varset="eph",
@@ -24591,7 +24659,7 @@ equations optimization results.
 
 This variable can be used when [[eph_task]] == 13 i.e. when we solve the variational
 polaron equations.
-In this case, if [[eph_restart]] == 1, the code assumes we want to
+In this case, if [[eph_restart]] / [[varpeq_interp]] == 1, the code assumes we want to
 initialize the solution by restarting/interpolating from the solution available in
 the VARPEQ.nc file.
 
@@ -24633,13 +24701,21 @@ equations.
 
 Possible values:
 
-- "gaussian" --> Gaussian bassed on the electronic eigenergies
+- "gau_energy" --> Gaussian based on the electronic eigenergies
   $\varepsilon_{n\mathbf{k}}$:
 
     $$A_{n\mathbf{k}} \sim e^{-\frac{(\varepsilon_{n\mathbf{k}} - \mu)^2}{2\sigma^2}}.$$
 
   The mean value $\mu$ and the standard deviation $\sigma$ are defined by the
-  [[varpeq_gau_params]] variable.
+  [[varpeq_gpr_energy]] variable.
+
+- "gau_length" --> Gaussian based on the user-defined polaron localization lengths
+  $a_x$, $a_y$, $a_z$:
+
+    $$A_{n\mathbf{k}} \sim e^{-\frac{1}{2}(a^2_x k^2_x + a^2_y k^2_y + a^2_z k^2_z)}.$$
+
+  The value of the localization lenghts are defined by the [[varpeq_gpr_length]] variable.
+  This option is still under development.
 
 - "random" --> Random initialization.
 
@@ -24687,8 +24763,55 @@ Possible values:
 """,
 ),
 
+
 Variable(
-    abivarname="varpeq_interpolate",
+    abivarname="varpeq_avg_g",
+    varset="eph",
+    vartype="integer",
+    topics=['Polaron_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="VARiational Polaron EQuations: AVeraGe matrix-elements at Gamma",
+    requires="[[eph_task]] == 13",
+    added_in_version="10.1.4",
+    text=r"""
+If non-zero, this variable activates the correction to the the electron-phonon
+matrix elements' Fröhlich divergence.
+In this sense correction terms $g^\mathrm{avg}_\nu(0)$ are added to the matrix
+elements at $\mathbf{q} = \Gamma$:
+
+$$ g^\mathrm{corr}_{nn\nu}(\mathbf{k}, 0) = g_{nn\nu}(\mathbf{k}, 0) + g^\mathrm{avg}_\nu(0). $$
+
+These correction terms are computed from spherical integration of the long-range
+electron-phonon contribution to the polaron enregy around $\Gamma$-point.
+The spherical mesh for the integration is controlled by the [[eph_frohl_ntheta]] variable.
+
+Three scenarios are possible:
+
+- [[eph_frohl_ntheta]] == 0, [[varpeq_avg_g]] == 0
+
+No integration of the electron-phonon energy, and variational polaron equations
+are solved without $g^\mathrm{avg}_\nu(0)$ corrections.
+
+- [[eph_frohl_ntheta]] > 0, [[varpeq_avg_g]] == 0
+
+Integration of the electron-phonon energy is performed, and variational polaron
+equations are solved without $g^\mathrm{avg}_\nu(0)$ corrections.
+In this scenario, the integrated energy can be added a posteriori to the optimized
+polaron binding energy to account for the long-range effects.
+
+- [[eph_frohl_ntheta]] > 0, [[varpeq_avg_g]] != 0
+
+Integration of the electron-phonon energy is performed, and variational polaron
+equations are solved with $g^\mathrm{avg}_\nu(0)$ corrections.
+This option is expected to accelerate the convergence of the optimization process.
+
+""",
+),
+
+
+Variable(
+    abivarname="varpeq_interp",
     varset="eph",
     vartype="integer",
     topics=['Polaron_basic'],
@@ -24713,6 +24836,38 @@ and accelarate the convergence.
 
 
 Variable(
+    abivarname="varpeq_nstates",
+    varset="eph",
+    vartype="integer",
+    topics=['Polaron_basic'],
+    dimensions="scalar",
+    defaultval=1,
+    mnemonics="VARiational Polaron EQuations: Number of polaronic STATES",
+    requires="[[optdriver]] == 7 and [[eph_task]] == 13",
+    added_in_version="10.1.4",
+    text=r"""
+This variables specifies the number of polaronic states to be found by solving the
+variational polaron equations.
+Each new state if found by imposing the orthogonalisation constraint to the all
+previously found states during the optimization process.
+
+!!! important
+
+    Since polaronic solutions are not necessarly orthogonal to each other, only the
+    first solution is expected to reach the required tolerance during optimization.
+    Imposing the orthogonalisation constraint, however, helps to find "metastable"
+    polarons that are far away from the obtained polaronic configurations.
+    One then can use other features, e.g. [[varpeq_select]] or [[varpeq_nstep_ort]]
+    to fully converge a "metastable" state without any constraints.
+
+    Also, a single polaronic solution is invariant by primitive translations in a
+    supercell.
+    In order to eliminiate such trivial solutions, [[varpeq_translate]] variable
+    can be used.
+""",
+),
+
+Variable(
     abivarname="varpeq_nstep",
     varset="eph",
     vartype="integer",
@@ -24730,36 +24885,24 @@ variational polaron equations.
 
 
 Variable(
-    abivarname="varpeq_orth",
+    abivarname="varpeq_select",
     varset="eph",
     vartype="integer",
     topics=['Polaron_basic'],
     dimensions="scalar",
-    defaultval=0,
-    mnemonics="VARiational Polaron EQuations: ORTHogonalization",
-    requires="[[optdriver]] == 7 and [[eph_task]] == 13",
+    defaultval=-1,
+    mnemonics="VARiational Polaron EQuations: SELECT polaronic state",
+    requires="[[eph_task]] == 13",
     added_in_version="10.1.4",
     text=r"""
-This variables controls orthogonalization to a previous solution.
-It is used for testing purpose only and likely will be removed in further releases.
+If non-zero, this variable selects a single polaronic state to be optimized from
+a **pre-existing** VARPEQ.nc file.
+Requires [[eph_restart]] == 1 or [[varpeq_interp]] == 1.
+Also, since a single polaronic state is selected, [[varpeq_nstates]] must be 1 in the
+input file.
 """,
 ),
 
-Variable(
-    abivarname="varpeq_pc_nupdate",
-    varset="eph",
-    vartype="integer",
-    topics=['Polaron_basic'],
-    dimensions="scalar",
-    defaultval=30,
-    mnemonics="VARiational Polaron EQuations: PreConditioner N-th step UPDATE",
-    requires="[[optdriver]] == 7 and [[eph_task]] == 13",
-    added_in_version="10.1.4",
-    text=r"""
-This variables controls update of the preconditioner in the variational polaron equation optimization.
-It is used for testing purpose only and likely will be removed in further releases.
-""",
-),
 
 Variable(
     abivarname="varpeq_tolgrs",
@@ -24774,38 +24917,25 @@ Variable(
     text=r"""
 This variable sets a tolerance for the electronic gradient residual in the optimization
 of the varitional polaron equations.
+When reached, the iterative process will finish for a current polaronic state and move
+to the next one, up to [[varpeq_nstates]].
 """,
 ),
 
-Variable(
-    abivarname="varpeq_pc_factor",
-    varset="eph",
-    vartype="real",
-    topics=['Polaron_basic'],
-    dimensions="scalar",
-    defaultval=0.125,
-    mnemonics="VARiational Polaron EQuations: PreConditioner FACTOR",
-    requires="[[optdriver]] == 7 and [[eph_task]] == 13",
-    added_in_version="10.1.4",
-    text=r"""
-This variables controls the preconditioner in variational polaron equations optimization.
-It is used for testing purpose only and likely will be removed in further releases.
-""",
-),
 
 Variable(
-    abivarname="varpeq_gau_params",
+    abivarname="varpeq_gpr_energy",
     varset="eph",
     vartype="real",
     topics=['Polaron_basic'],
     dimensions="(2)",
     defaultval=[0, 1],
-    mnemonics="VARiational Polaron EQuations: Gaussian PaRameters",
-    requires='[[eph_task]] == 13 and [[varpeq_aseed]] == "gaussian"',
+    mnemonics="VARiational Polaron EQuations: Gaussian PaRameters -- electronic ENERGY",
+    requires='[[eph_task]] == 13 and [[varpeq_aseed]] == "gau_energy"',
     added_in_version="10.1.4",
     text=r"""
-If [[varpeq_aseed]] == "gaussian", this variable defines the mean value and the
-standard deviation [[varpeq_gau_params]](:) = $\mu$, $\sigma$ for the Gaussian function to
+If [[varpeq_aseed]] == "gau_energy", this variable defines the mean value and the
+standard deviation [[varpeq_gpr_energy]](:) = $\mu$, $\sigma$ for the Gaussian function to
 be used as initial seed for the vector electronic coefficients.
 See [[varpeq_aseed]] for details.
 """,
@@ -24813,19 +24943,195 @@ See [[varpeq_aseed]] for details.
 
 
 Variable(
-    abivarname="varpeq_erange",
+    abivarname="varpeq_gpr_length",
     varset="eph",
     vartype="real",
     topics=['Polaron_basic'],
-    dimensions="(2)",
-    defaultval=[0, 0],
-    mnemonics="VARiational Polaron EQuations: Energy Range",
-    requires='[[eph_task]] == 13 and [[varpeq_aseed]] == "gaussian"',
+    dimensions="(3)",
+    defaultval=[1, 1, 1],
+    mnemonics="VARiational Polaron EQuations: Gaussian PaRameters -- localization LENGTH",
+    requires='[[eph_task]] == 13 and [[varpeq_aseed]] == "gau_length"',
     added_in_version="10.1.4",
     text=r"""
-This variables controls the energy window for the inital guess in the variational polaron
-equations optimizaiton.
-It is used for testing purpose only and likely will be removed in further releases.
+If [[varpeq_aseed]] == "gau_length", this variable defines the estimated polaron
+localization lengths $a_x$, $a_y$, $a_z$ for the spread of gaussian function to be used
+as initial seed for the vector electronic coefficients.
+See [[varpeq_aseed]] for details.
 """,
 ),
+
+Variable(
+    abivarname="varpeq_translate",
+    varset="eph",
+    vartype="integer",
+    topics=['Polaron_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="VARiational Polaron EQuations: TRANSLATE solutions",
+    requires='[[eph_task]] == 13 and [[varpeq_nstates]] > 1',
+    added_in_version="10.1.4",
+    text=r"""
+If non-zero and [[varpeq_nstates]] > 1, this variable activates the translation
+of previously obtained polaronic solutions prior to solving variational polaron
+equations for a new one.
+This helps to eliminate trivial states that are invariant by primitie translations.
+See also [[varpeq_nstates]].
+""",
+),
+
+Variable(
+    abivarname="varpeq_nstep_ort",
+    varset="eph",
+    vartype="integer",
+    topics=['Polaron_basic'],
+    dimensions="scalar",
+    defaultval=50,
+    mnemonics="VARiational Polaron EQuations: Number of STEPs with ORThogonalisation",
+    requires='[[eph_task]] == 13 and [[varpeq_nstates]] > 1',
+    added_in_version="10.1.4",
+    text=r"""
+This variable defines the number of optimization steps, up to which the orthogonalization
+to previous polaronic solutions is performed.
+After [[varpeq_nstep_ort]] the orthogonalization constraint is lifted, which helps to
+fully relax the polaron, while keeping it far from the previously obtained states.
+See also [[varpeq_nstates]].
+""",
+),
+
+Variable(
+    abivarname="eph_fix_korq",
+    varset="eph",
+    vartype="string",
+    topics=['ElPhonInt_basic'],
+    dimensions="scalar",
+    defaultval="k",
+    mnemonics="Electron-PHonon: FIX K-point OR Q-point",
+    requires="[[eph_task]] == 18",
+    added_in_version="10.1.4",
+    text=r"""
+This variable defines whether one should fix the k-point or the q-point when computing the e-ph matrix elements
+g(k,q) along either a q-path or k-path ([[eph_task]] == 18].
+Use "k" to fix the k-point or "q" to fix the q-point.
+
+The other piece of information is given by [[eph_fix_wavevec]] that specifies the reduced coordinates of the wavevector.
+""",
+),
+
+Variable(
+    abivarname="eph_fix_wavevec",
+    varset="eph",
+    vartype="real",
+    topics=['ElPhonInt_basic'],
+    dimensions=[3],
+    defaultval=[0, 0, 0],
+    mnemonics="Electron-PHonon: FIX WAVE-VECtor",
+    requires="[[eph_task]] == 18",
+    added_in_version="10.1.4",
+    text=r"""
+This variable defines the wavevector in reduced coordinates of the reciprocal lattice
+that should be fixed when computing the e-ph matrix elements g(k,q) along either a q-path or k-path ([[eph_task]] == 18].
+The other piece of information is given by [[eph_fix_korq]] that specifies whether one should fix the k-point or the q-point.
+
+To compute e-ph matrix as a function of the q-point:
+
+```
+   optdriver 7
+   eph_task 18
+
+   nstep 100      # NSCF cycle for electronic wavefunctions.
+   tolwfr 1e-18
+   nbdbuf 4
+   getpot_filepath  "gs_POT"   # Need to read the GS potential from file produced in a previous run.
+
+
+   # OTHER VARIABLES required by the EPH code such as getdvdb_filepath ...
+
+   eph_fix_korq "k"          # k is fixed in g(k,q)
+   eph_fix_wavevec 0.0 0 0   # k-point
+
+   eph_path_brange 1 4              # Compute g(k,q) with m and n ranging from 4 up to 10
+   nband 40
+
+   ph_ndivsm 10              # the q-path in g(k,q)
+   ph_nqpath 3
+   ph_qpath
+      0.0    0.0    0.0
+      0.5    0.0    0.5
+      0.5    0.25   0.75
+```
+
+To compute e-ph matrix as a function of the k-point:
+
+```
+   optdriver 7
+   eph_task 18
+
+   eph_fix_korq "q"
+   eph_fix_wavevec 0.5 0 0
+   nband 10
+   eph_path_brange 4
+
+   ndivsm 10
+   nkpath 3
+   kptbounds
+      0.0    0.0    0.0
+      0.5    0.0    0.5
+      0.5    0.25   0.75
+```
+""",
+),
+
+
+Variable(
+    abivarname="eph_path_brange",
+    varset="eph",
+    vartype="int",
+    topics=['ElPhonInt_useful'],
+    dimensions=[2],
+    defaultval=[0, 0],
+    mnemonics="Electron-PHonon: Band RANGE",
+    requires="[[eph_task]] == 18",
+    added_in_version="10.1.4",
+    text=r"""
+
+This variable defines the first and the last band that should be included when computing the e-ph matrix elements
+g(k,q) along either a q-path or k-path ([[eph_task]] == 18].
+One can use these two variables to select the band range of interest and skip, for instance, low-energy states.
+If not specied all bands from 1 up to [[nband]] are included,
+If specified in input, eph_path_brange(2) must be <= [[nband]].
+""",
+),
+
+Variable(
+    abivarname="oracle_factor",
+    varset="gstate",
+    vartype="real",
+    topics=['TuningSpeedMem_expert'],
+    dimensions="scalar",
+    defaultval="0.1",
+    mnemonics="ORACLE in chebyshev filtering algorithm : FACTOR",
+    characteristics=['[[DEVELOP]]'],
+    added_in_version="10.3.4",
+    requires="[[wfoptalg]] == 111 and [[chebfi_oracle]] == 2",
+    text=r"""
+This parameter controls the convergence rate of the wave-functions when using the oracle in the Chebyshev algorithm. See [[chebfi_oracle]] for more information.
+""",
+),
+
+Variable(
+    abivarname="oracle_minocc",
+    varset="gstate",
+    vartype="real",
+    topics=['TuningSpeedMem_expert'],
+    dimensions="scalar",
+    defaultval="0.0001",
+    mnemonics="ORACLE in chebyshev filtering algorithm : MINimal OCCupancy",
+    characteristics=['[[DEVELOP]]'],
+    added_in_version="10.3.4",
+    requires="[[wfoptalg]] == 111 and [[chebfi_oracle]] > 0 and [[nbdbuf]] = -101",
+    text=r"""
+This parameter controls the minimal occupancy when using the oracle in the Chebyshev algorithm. See [[chebfi_oracle]] for more information.
+""",
+),
+
 ]

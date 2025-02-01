@@ -1330,7 +1330,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
    ABI_FREE(taunow)
    if (compute_stress.and.uselaplacian>0) then
      ABI_FREE(d2rhonow)
-   end if 
+   end if
    if (need_nhat.or.non_magnetic_xc) then
      ABI_FREE(rhor_)
    end if

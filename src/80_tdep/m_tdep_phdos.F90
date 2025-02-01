@@ -49,7 +49,7 @@ subroutine tdep_calc_phdos(Crystal,DDB,Eigen2nd_MP,Eigen2nd_path,Ifc,Invar,Latti
   type(ifc_type),intent(inout) :: Ifc
   type(Lattice_type),intent(in) :: Lattice
   type(Symetries_type),intent(in) :: Sym
-  type(crystal_t),intent(in) :: Crystal
+  type(crystal_t),intent(inout) :: Crystal
   type(Qbz_type),intent(in) :: Qbz
   type(Qpoints_type),intent(in) :: Qpt
   type(ddb_type),intent(inout) :: DDB
@@ -122,6 +122,7 @@ subroutine tdep_calc_phdos(Crystal,DDB,Eigen2nd_MP,Eigen2nd_path,Ifc,Invar,Latti
     call Ifc_tmp%free()
   end if
   call tdep_destroy_phi2(Phi2_tmp,Invar%loto)
+
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ON THE FINE GRID !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

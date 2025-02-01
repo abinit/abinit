@@ -62,6 +62,32 @@ module m_kpts
  private :: get_kpt_fullbz           ! Create full grid of kpoints from kptrlatt and shiftk
 !!***
 
+#if 0
+   type, public :: kinds_t
+     integer :: ibz_idx
+     integer :: isym
+     integer :: trev
+     integer :: g0(3)
+     logical :: is_irred
+   contains
+   end type kinds_t
+  !!***
+
+   type, public :: kmap_t
+     integer :: nkpt = -1
+     integer :: kptopt = -1
+     integer :: ierr = -1
+     !character(len=500) :: err_msg
+     character(len=20) :: mode
+     real(dp) :: dksqmax
+     real(dp) :: qpt(3) = zero
+     type(kinds_t),allocatable :: inds(:)
+   contains
+     procedure :: free => kmap_free
+   end type kmap_t
+  !!***
+#endif
+
 !----------------------------------------------------------------------
 
 !!****t* m_kpts/bzlint_t
@@ -490,11 +516,7 @@ end function symkchk
 !! kpts_sort
 !!
 !! FUNCTION
-!!  Order list of k-points according to the norm.
-!!
-!! INPUTS
-!!
-!! OUTPUT
+!!  Order list of k-points according to their norm.
 !!
 !! SOURCE
 
@@ -513,7 +535,6 @@ subroutine kpts_sort(gprimd, nkpt, kpts)
 !arrays
  integer,allocatable :: iperm(:)
  real(dp),allocatable :: knorm2(:), kpts_ord(:,:)
-
 ! *************************************************************************
 
  ABI_MALLOC(knorm2, (nkpt))
@@ -543,11 +564,8 @@ end subroutine kpts_sort
 !! kpts_pack_in_stars
 !!
 !! FUNCTION
-!!  Pack k-points in Stars using kmap symmetry table.
-!!
-!! INPUTS
-!!
-!! OUTPUT
+!!  Pack k-points in stars using kmap symmetry table.
+!!  Rearrange kpts as well as kmap.
 !!
 !! SOURCE
 
@@ -569,7 +587,6 @@ subroutine kpts_pack_in_stars(nkpt, kpts, kmap)
  integer,allocatable :: iperm(:), ibz_ids(:), kmap_ord(:,:), star_pos(:,:)
  real(dp) :: swap_kpt(3), swap_kmap(6)
  real(dp),allocatable :: kpts_ord(:,:)
-
 ! *************************************************************************
 
  ! Order according to ik_ibz index
@@ -666,17 +683,16 @@ integer function kpts_map(mode, kptopt, cryst, krank, nkpt2, kpt2, map, qpt, dks
  integer :: timrev, nsym
 !arrays
  real(dp) :: my_qpt(3)
-
 ! *************************************************************************
 
  my_qpt = zero; if (present(qpt)) my_qpt = qpt
  timrev = kpts_timrev_from_kptopt(kptopt)
  ! if no spatial symm. set nsym to 1 to suppress the use of spatial symm.
  ! the first symm. is always the identity
- if(kptopt==2 .or. kptopt==3) then
+ if (kptopt==2 .or. kptopt==3) then
    nsym = 1
  else
-  nsym = cryst%nsym
+   nsym = cryst%nsym
  end if
 
  select case (mode)
@@ -694,7 +710,7 @@ integer function kpts_map(mode, kptopt, cryst, krank, nkpt2, kpt2, map, qpt, dks
    ! wavefunctions should be rewritten almost completely.
 
    call krank%get_mapping(nkpt2, kpt2, dksqmax, cryst%gmet, map, &
-                          cryst%nsym, cryst%symafm, cryst%symrec, timrev, use_symrec=.True., qpt=my_qpt)
+                          nsym, cryst%symafm, cryst%symrec, timrev, use_symrec=.True., qpt=my_qpt)
 
  case default
    ABI_ERROR(sjoin("Invalid mode:", mode))
@@ -703,7 +719,33 @@ integer function kpts_map(mode, kptopt, cryst, krank, nkpt2, kpt2, map, qpt, dks
  my_tol = tol12; if (present(dksqmax_tol)) my_tol = dksqmax_tol
 
  ierr = merge(1, 0, dksqmax > my_tol)
- if (ierr /= 0) call wrtout(std_out, sjoin(" CRITICAL WARNING: dksqmax ", ftoa(dksqmax), " > ", ftoa(my_tol)))
+ !if (ierr /= 0) call wrtout(std_out, sjoin(" CRITICAL WARNING: dksqmax ", ftoa(dksqmax), " > ", ftoa(my_tol)))
+
+#if 0
+ !if (present(pack_in_stars)) then
+ !  if (pack_in_stars)
+ !    call kpts_pack_in_stars(nkpt2, kpt2, kmap)
+ !  end if
+ !end if
+
+
+ kmap%nkpt = nkpt2
+ kmap%kptopt = kptopt
+ kmap%ierr = ierr
+ kmap%dksqmax = dksqmax
+ kmap%mode = trim(mode)
+ kmap%qpt = qpt
+ ABI_MALLOC(kmap%inds, (nkpt2))
+ do ii=1,nkpt2
+   kmap(ii)%ibz_idx = indkk_kq(1, ii)
+   kmap(ii)%isym    = indkk_kq(2, ii)
+   kmap(ii)%trev    = indkk_kq(6, ii)
+   kmap(ii)%g0      = indkk_kq(3:5, ii)
+   kmap(ii)%is_irred = (kmap(ii)%isym == 1 .and. kmap(ii)%trev == 0 .and. all(kmap%g0 == 0))
+ end do
+
+ !ABI_FREE(kmap%inds)
+#endif
 
 end function kpts_map
 !!***
@@ -736,7 +778,6 @@ subroutine kpts_map_print(units, header, mode, bz, ibz, bz2ibz, prtvol)
 ! *************************************************************************
 
  call wrtout(units, " "//trim(header))
-
  select case (mode)
  case ("symrec")
    call wrtout(units, &
@@ -3370,9 +3411,7 @@ subroutine bzlint_init(self, ngkpt, ndat, nkpt, kpts, values)
 
  self%ngkpt = ngkpt; self%ndat = ndat
  ! The mesh is closed i.e. periodic images are included.
- self%nx = ngkpt(1)
- self%ny = ngkpt(2)
- self%nz = ngkpt(3)
+ self%nx = ngkpt(1); self%ny = ngkpt(2); self%nz = ngkpt(3)
  ABI_CALLOC(self%vals_grid, (self%nx, self%ny, self%nz, ndat))
 
  ! Insert values in the grid.

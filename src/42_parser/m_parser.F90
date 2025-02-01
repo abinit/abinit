@@ -26,9 +26,7 @@ module m_parser
  use m_errors
  use m_atomdata
  use m_xmpi
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
  use m_nctk
  !use m_nctk,      only : write_var_netcdf    ! FIXME Deprecated
 
@@ -3323,12 +3321,10 @@ subroutine prttagm(dprarr,intarr,iout,jdtset_,length,&
          if (narr_eff/=0) then
 
            if (print_out) write(iout,full_format) token,trim(appen),intarr(1:narr_eff,idtset)
-#ifdef HAVE_NETCDF
            if (print_netcdf) then
              call write_var_netcdf(intarr(1:narr_eff,idtset),&
 &             dprarr(1:narr_eff,idtset),marr,narr_eff,abs(ncid),typevarphys,token//appen)
            end if
-#endif
          end if
 
        end do
@@ -3462,12 +3458,10 @@ subroutine prttagm(dprarr,intarr,iout,jdtset_,length,&
            else
              if (print_out) write(iout,full_format) token,trim(appen),dprarr(1:narr_eff,idtset)*scale_factor,trim(out_unit)
            end if
-#ifdef HAVE_NETCDF
            if (print_netcdf) then
              call write_var_netcdf(intarr(1:narr_eff,idtset),dprarr(1:narr_eff,idtset),&
                marr,narr_eff,abs(ncid),'DPR',token//trim(appen))
            end if
-#endif
 
          end if
 
@@ -3710,13 +3704,11 @@ subroutine prttagm_images(dprarr_images,iout,jdtset_,length,&
                write(iout,full_format) &
 &               trim(keywd),appen,dprarr_images(1:narrm(idtset),iimage,idtset)
              end if
-#ifdef HAVE_NETCDF
              if (print_netcdf) then
                call write_var_netcdf(intarr_images(1:narrm(idtset),iimage,idtset),&
 &               dprarr_images(1:narrm(idtset),iimage,idtset),&
 &               marr,narrm(idtset),ncid,'DPR',trim(keywd)//appen)
              end if
-#endif
            else
 
              if (print_out) then
@@ -3725,14 +3717,11 @@ subroutine prttagm_images(dprarr_images,iout,jdtset_,length,&
                write(iout,full_format) &
 &               trim(keywd),dprarr_images(1:narrm(idtset),iimage,idtset)
              end if
-#ifdef HAVE_NETCDF
              if (print_netcdf) then
                call write_var_netcdf(intarr_images(1:narrm(idtset),iimage,idtset),&
 &               dprarr_images(1:narrm(idtset),iimage,idtset),&
 &               marr,narrm(idtset),abs(ncid),'DPR',trim(keywd))
              end if
-#endif
-
            end if
          end if
        end do
@@ -4376,7 +4365,6 @@ type(geo_t) function geo_from_netcdf_path(path, comm) result(new)
 
  new%fileformat = "netcdf"
 
-#ifdef HAVE_NETCDF
  if (xmpi_comm_rank(comm) == master) then
    NCF_CHECK(nctk_open_read(ncid, path, xmpi_comm_self))
 
@@ -4426,7 +4414,6 @@ type(geo_t) function geo_from_netcdf_path(path, comm) result(new)
 
    NCF_CHECK(nf90_close(ncid))
  end if
-#endif
 
  call new%bcast(master, comm)
  !call new%print_abivars(std_out)

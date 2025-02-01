@@ -66,6 +66,7 @@
  nstep_min                1
  rcut                    8.4000000000
  ======================= Optional input variables ============================
+ znucl                  94.0000000000
  ngqpt2                 10   10   10
  use_ideal_positions     0
  tolmotif               0.06000

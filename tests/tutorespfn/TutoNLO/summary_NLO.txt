@@ -11,8 +11,8 @@
    system		AlAs
    code			ABINITv4.4.4
 
-   acell		theoretical lattice constant computed for the 
-			same k-point grid as the corresponding response 
+   acell		theoretical lattice constant computed for the
+			same k-point grid as the corresponding response
                         properties
    ixc			3
    ecut			5
