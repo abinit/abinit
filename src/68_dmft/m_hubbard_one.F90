@@ -240,11 +240,11 @@ subroutine hubbard_one(cryst_struc,green,hu,paw_dmft,pawprtvol,hdc,weiss)
  if(.not.hu(1)%jpawu_zero.or.nsppol/=2) nsppol_imp=1
 !  Diagonalize energy levels
  useylm=paw_dmft%dmft_blockdiag
- if(useylm==1) call slm2ylm_matlu(energy_level%matlu,natom,1,pawprtvol)
+ if(useylm==1) call slm2ylm_matlu(energy_level%matlu,natom,paw_dmft,1,pawprtvol)
  testblock=1
  if(useylm==1) testblock=8
- call diag_matlu(energy_level%matlu,level_diag,natom,&
-& prtopt=pawprtvol,eigvectmatlu=eigvectmatlu,nsppol_imp=nsppol_imp,opt_real=1,test=testblock)
+ call diag_matlu(energy_level%matlu,level_diag,natom,prtopt=pawprtvol,eigvectmatlu=eigvectmatlu, &
+               & nsppol_imp=nsppol_imp,opt_real=1,test=testblock)
 
 !  Use rotation matrix to rotate interaction
  ABI_MALLOC(vee_rotated,(natom))
@@ -295,7 +295,7 @@ subroutine hubbard_one(cryst_struc,green,hu,paw_dmft,pawprtvol,hdc,weiss)
  call print_matlu(green_hubbard%oper(1)%matlu,natom,1)
  do ifreq=1,green_hubbard%nw
    call rotate_matlu(green_hubbard%oper(ifreq)%matlu,eigvectmatlu,natom,0)
-   if(useylm==1) call slm2ylm_matlu(green_hubbard%oper(ifreq)%matlu,natom,2,0)
+   if(useylm==1) call slm2ylm_matlu(green_hubbard%oper(ifreq)%matlu,natom,paw_dmft,2,0)
    call copy_matlu(green_hubbard%oper(ifreq)%matlu,green%oper(ifreq)%matlu,natom)
  end do
  write(message,'(2a,f13.5)') ch10," == Green function after rotation"
