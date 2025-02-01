@@ -149,7 +149,7 @@ _tsuite_dirs = [
     "etsf_io",
     "fast",
     "gwr",
-    #"gwpt",
+    "gwpt",
     "psml",
     "gpu",
     "libxc",

@@ -167,7 +167,7 @@ module m_gwr
  use m_bz_mesh,       only : littlegroup_t, findqg0
  use m_gsphere,       only : kg_map, gsphere_t
  use m_melemts,       only : melements_t
- use m_ioarr,         only : fftdatar_write !, read_rhor
+ use m_ioarr,         only : fftdatar_write
  use m_slk,           only : matrix_scalapack, slkmat_sp_t, processor_scalapack, slk_array_free, slk_array_set, &
                              slk_array_locmem_mb, block_dist_1d, slk_pgemm
  use m_wfk,           only : wfk_read_ebands, wfk_t, wfk_open_read
@@ -581,6 +581,7 @@ module m_gwr
    ! Irreducible polarizability tchi_q(g,g')
 
    character(len=10) :: tchi_space = "none"
+   ! Defines if the tchi_qibz matrix stores Chi in tau or iomega domain.
    ! "none", "itau", "iomega"
 
    type(__slkmat_t),allocatable :: wc_qibz(:,:,:)
@@ -589,6 +590,7 @@ module m_gwr
    ! Replicated across spin_comm if nsppol == 2.
 
    character(len=10) :: wc_space = "none"
+   ! Defines if the wc_qibz matrix stores W in tau or iomega domain.
    ! "none", "itau", "iomega"
 
    !type(__slkmat_t),allocatable :: em1_qibz(:,:,:)
@@ -600,6 +602,7 @@ module m_gwr
    ! (2, nkibz, ntau, nsppol)
 
    character(len=10) :: sigc_space = "none"
+   ! Defines if the sigc_kibz matrix stores Sigma in tau or iomega domain.
    ! "none", "itau", "iomega"
 
    type(__slkmat_t),allocatable :: ugb(:,:) !, nato_ugb(:,:)
@@ -690,7 +693,7 @@ module m_gwr
    ! b1gw = minval(gwr%bstart_ks); b2gw = maxval(gwr%bstop_ks)
 
    logical :: sig_diago
-   ! True if Sigma_ matrices are diagonal in the band indices
+   ! True if Sigma_ matrices are diagonal in the band indices (default)
 
    complex(dp),allocatable :: sigx_mat(:,:,:,:)
    ! (b1gw:b2gw, ?, nkcalc, nsppol*nsig_ab)
@@ -781,6 +784,7 @@ module m_gwr
    ! Compute RPA energy.
 
    procedure :: gamma_gw => gwr_gamma_gw
+   ! TODO: Work in progress.
 
    procedure :: build_chi0_head_and_wings => gwr_build_chi0_head_and_wings
    ! Compute head and wings of chi0
