@@ -26,6 +26,7 @@ module m_afterscfloop
  use m_energies
  use m_errors
  use m_abicore
+ use m_ebands
  use m_efield
  use m_ab7_mixing
  use m_hdr
@@ -378,7 +379,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 !arrays
  real(dp) :: gmet(3,3),gprimd(3,3),pelev(3),ptot(3),red_ptot(3),rmet(3,3),tsec(2)
  real(dp) :: dmatdum(0,0,0,0)
- real(dp),allocatable :: cg1_3(:,:,:),mpibuf(:,:),qphon(:),rhonow(:,:,:),sqnormgrhor(:,:)
+ real(dp),allocatable :: cg1_3(:,:,:),doccde(:),mpibuf(:,:),qphon(:),rhonow(:,:,:),sqnormgrhor(:,:)
  real(dp),allocatable :: tauwfg(:,:),tauwfr(:,:),vtrial_local(:,:)
 #if defined HAVE_BIGDFT
  integer,allocatable :: dimcprj_srt(:)
@@ -400,6 +401,15 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 & psps%ntypat,dtset%nsym,rprimd,dtset%typat,xred,dtset%ziontypat,dtset%znucl,1,&
 & dtset%nspden==2.and.dtset%nsppol==1,remove_inv,psps%title,&
 & symrel=dtset%symrel,tnons=dtset%tnons,symafm=dtset%symafm)
+
+ ABI_MALLOC(doccde,(dtset%mband*dtset%nkpt*dtset%nsppol))
+ doccde=zero
+ call ebands_init(hdr%bantot,ebands_k,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,&
+& doccde,eigen,hdr%istwfk,hdr%kptns,hdr%nband,&
+& hdr%nkpt,hdr%npwarr,hdr%nsppol,hdr%nspinor,hdr%tphysel,hdr%tsmear,hdr%occopt,hdr%occ,hdr%wtk,&
+& hdr%cellcharge, hdr%kptopt, hdr%kptrlatt_orig, hdr%nshiftk_orig, hdr%shiftk_orig, &
+& hdr%kptrlatt, hdr%nshiftk, hdr%shiftk)
+ ABI_FREE(doccde)
 
 !MPI FFT communicator
  spaceComm_fft=mpi_enreg%comm_fft
@@ -563,9 +573,9 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
      ABI_MALLOC(vtrial_local,(nfftf,dtset%nspden))
    end if
    vtrial_local = vtrial
-!   call orbmag(cg,cg1_3,cprj,crystal,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg1_3,&
-!      & mcprj,dtset%mkmem,mpi_enreg,dtset%mpw,nfftf,ngfftf,occ,paw_ij,pawfgr,&
-!      & pawrad,pawtab,psps,usevxctau,vtrial_local,vxctau,ylm,ylmgr)
+   call orbmag(cg,cg1_3,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg1_3,&
+      & mcprj,dtset%mkmem,mpi_enreg,dtset%mpw,nfftf,ngfftf,paw_ij,pawfgr,&
+      & pawrad,pawtab,psps,usevxctau,vtrial_local,vxctau,ylm,ylmgr)
 
    ABI_FREE(vtrial_local)
    ABI_FREE(cg1_3)
