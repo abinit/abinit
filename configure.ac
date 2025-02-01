@@ -42,7 +42,7 @@ AC_INIT([ABINIT],
     [m4_esyscmd([config/scripts/git-version-gen .tarball-version])],
     [https://bugs.launchpad.net/abinit/],
     [abinit])
-AC_REVISION([Autotools support for ABINIT 9])
+AC_REVISION([Autotools support for ABINIT 10])
 AC_CONFIG_AUX_DIR([config/gnu])
 AC_CONFIG_MACRO_DIR([config/m4])
 AC_CONFIG_SRCDIR([src/98_main/abinit.F90])
