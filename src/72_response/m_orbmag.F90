@@ -2860,15 +2860,15 @@ subroutine orbmag_ncwrite(crystal,dtset,ebands,hdr,ncid,orbmag_mesh,psps,pawtab)
    nctkdim_t("mband", orbmag_mesh%mband),&
    nctkdim_t("nkpt", orbmag_mesh%nkpt),&
    nctkdim_t("nsppol", orbmag_mesh%nsppol),&
-   nctkdim_t("cterms", orbmag_mesh%chern_terms),&
-   nctkdim_t("nterms", orbmag_mesh%orbmag_terms),&
+   nctkdim_t("chern_terms", orbmag_mesh%chern_terms),&
+   nctkdim_t("orbmat_terms", orbmag_mesh%orbmag_terms),&
    nctkdim_t("ndir",3),&
    nctkdim_t("natom",dtset%natom)],defmode=.True.)
  NCF_CHECK(ncerr)
  
  ncerr = nctk_def_arrays(ncid, [&
-   nctkarr_t("chern_mesh", "dp", "mband, nkpt, nsppol, ndir, cterms"),&
-   nctkarr_t("orbmag_mesh", "dp", "mband, nkpt, nsppol, ndir, nterms"),&
+   nctkarr_t("chern_mesh", "dp", "mband, nkpt, nsppol, ndir, chern_terms"),&
+   nctkarr_t("orbmag_mesh", "dp", "mband, nkpt, nsppol, ndir, orbmag_terms"),&
    nctkarr_t("lambsig", "dp", "ntypat"),&
    nctkarr_t("nucdipmom", "dp", "ndir, natom")])
  NCF_CHECK(ncerr)
