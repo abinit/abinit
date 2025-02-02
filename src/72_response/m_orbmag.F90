@@ -693,7 +693,6 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
  ABI_FREE(cwaveprj)
 
  call dterm_free(dterm)
-
  call orbmag_mesh_free(orbmag_mesh)
 
  ABI_FREE(orbmag_terms)
@@ -2861,7 +2860,7 @@ subroutine orbmag_ncwrite(crystal,dtset,ebands,hdr,ncid,orbmag_mesh,psps,pawtab)
    nctkdim_t("nkpt", orbmag_mesh%nkpt),&
    nctkdim_t("nsppol", orbmag_mesh%nsppol),&
    nctkdim_t("chern_terms", orbmag_mesh%chern_terms),&
-   nctkdim_t("orbmat_terms", orbmag_mesh%orbmag_terms),&
+   nctkdim_t("orbmag_terms", orbmag_mesh%orbmag_terms),&
    nctkdim_t("ndir",3),&
    nctkdim_t("natom",dtset%natom)],defmode=.True.)
  NCF_CHECK(ncerr)

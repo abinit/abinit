@@ -1122,6 +1122,9 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 &   pawtab,ph1d,psps,rprimd,dtset%typat,xred)
  end if
 
+ call crystal%free()
+ call ebands_k%free()
+
  call timab(257,2,tsec)
  call timab(250,2,tsec)
 
