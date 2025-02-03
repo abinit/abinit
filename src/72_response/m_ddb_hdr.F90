@@ -236,7 +236,10 @@ MODULE m_ddb_hdr
  contains
 
    procedure :: init => ddb_hdr_init
-    ! Initialize object
+    ! Initialize object.
+
+   procedure :: init_from_crystal => ddb_hdr_init_from_crystal
+    ! Initialize object from a crystal.
 
    procedure :: malloc => ddb_hdr_malloc
     ! Allocate dynamic memory.
@@ -295,6 +298,111 @@ MODULE m_ddb_hdr
  end type ddb_hdr_type
 
 CONTAINS  !===========================================================
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ddb_hdr/ddb_hdr_init_from_crystal
+!! NAME
+!! ddb_hdr_init_from_crystal
+!!
+!! FUNCTION
+!!   Initialize a ddb_hdr object from a crystal.
+!!   This creates a minimal ddb_hdr with no information whatsoever
+!!   about the parameters that created the ddb.
+!!
+!! INPUTS
+!!   ddb_hdr=the new ddb_hdr object
+!!   crystal=crystal object
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine ddb_hdr_init_from_crystal(ddb_hdr, crystal)
+
+!Arguments ------------------------------------
+ class(ddb_hdr_type),intent(inout) :: ddb_hdr
+ type(crystal_t),intent(inout) :: crystal
+
+!Local variables -------------------------
+
+! ************************************************************************
+
+ ddb_hdr%nblok = 1
+ ddb_hdr%ddb_version = DDB_VERSION
+ ddb_hdr%dscrpt = ''
+
+ ddb_hdr%with_psps = 0
+ ddb_hdr%with_dfpt_vars = 0
+
+ ddb_hdr%matom = crystal%natom
+ ddb_hdr%natom = crystal%natom
+ ddb_hdr%msym = crystal%nsym
+ ddb_hdr%nsym = crystal%nsym
+ ddb_hdr%mtypat = crystal%ntypat
+ ddb_hdr%ntypat = crystal%ntypat
+
+ ddb_hdr%mband = 1
+ ddb_hdr%mkpt = 1
+ ddb_hdr%nkpt = 1
+ ddb_hdr%mpert = crystal%natom
+ ddb_hdr%msize = 3*ddb_hdr%mpert*3*ddb_hdr%mpert
+ !ddb_hdr%mblktyp = BLKTYP_d2E_ns
+
+ ddb_hdr%intxc = 0
+ ddb_hdr%iscf = 0
+ ddb_hdr%ixc = 0
+ ddb_hdr%nspden = 1
+ ddb_hdr%nspinor = 1
+ ddb_hdr%nsppol = 1
+ ddb_hdr%occopt = 0
+ ddb_hdr%usepaw = 0
+
+ ddb_hdr%dilatmx = 0
+ ddb_hdr%ecut = 0
+ ddb_hdr%ecutsm = 0
+ ddb_hdr%kptnrm = 1
+ ddb_hdr%pawecutdg = 0
+ ddb_hdr%dfpt_sciss = 0
+ ddb_hdr%tolwfr = 0
+ ddb_hdr%tphysel = 0
+ ddb_hdr%tsmear = 0
+
+ ddb_hdr%ngfft = zero
+ ddb_hdr%acell = one
+
+ call ddb_hdr%malloc()
+
+ ddb_hdr%rprim(:,:) = crystal%rprimd(:,:)
+ ddb_hdr%symafm(:) = crystal%symafm(:)
+ ddb_hdr%symrel(:,:,:) = crystal%symrel(:,:,:)
+ ddb_hdr%tnons(:,:) = crystal%tnons(:,:)
+ ddb_hdr%typat(:) = crystal%typat(:)
+ ddb_hdr%amu(:) = crystal%amu(:)
+ ddb_hdr%xred(:,:) = crystal%xred(:,:)
+ ddb_hdr%zion(:) = crystal%zion(:)
+ ddb_hdr%znucl(:) = crystal%znucl(:)
+
+ call crystal%copy(ddb_hdr%crystal)
+
+ ! Pseudopotential info will not be written by this header,
+ ! but we still need to initialize certain dimensions and arrays
+ ! because they will be passed to psddb8
+ ddb_hdr%psps%dimekb = zero
+ ddb_hdr%psps%lmnmax = zero
+ ddb_hdr%psps%useylm = zero
+ ddb_hdr%psps%usepaw = zero
+ ABI_MALLOC(ddb_hdr%psps%ekb,(ddb_hdr%psps%dimekb,ddb_hdr%ntypat))
+ ABI_MALLOC(ddb_hdr%psps%indlmn,(6,ddb_hdr%psps%lmnmax,ddb_hdr%ntypat))
+ ABI_MALLOC(ddb_hdr%psps%pspso,(ddb_hdr%ntypat))
+ ABI_MALLOC(ddb_hdr%pawtab,(ddb_hdr%ntypat*ddb_hdr%psps%usepaw))
+ call pawtab_nullify(ddb_hdr%pawtab)
+ ddb_hdr%psps%ekb = zero
+ ddb_hdr%psps%indlmn = zero
+ ddb_hdr%psps%pspso = zero
+
+end subroutine ddb_hdr_init_from_crystal
 !!***
 
 !----------------------------------------------------------------------

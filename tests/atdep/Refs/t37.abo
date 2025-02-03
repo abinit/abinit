@@ -57,6 +57,7 @@
  nstep_min                1
  rcut                   12.7000000000
  ======================= Optional input variables ============================
+ znucl                  92.0000000000   42.0000000000
  alloy                   1    1    2
  use_ideal_positions     1
  enunit                  0 (Phonon frequencies in meV)

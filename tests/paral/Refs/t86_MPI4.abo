@@ -83,16 +83,14 @@ _ WF disk file :      0.471 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
         dmftbandf2         23
         dmftbandi1          0
         dmftbandi2         12
-        dmft_iter1          0
+        dmft_iter1         10
         dmft_iter2          1
-        dmft_mxsf1     3.0000000000E-01
+        dmft_mxsf1     6.0000000000E-01
         dmft_mxsf2     7.0000000000E-01
         dmft_nwli1          0
         dmft_nwli2     100000
         dmft_nwlo1          0
         dmft_nwlo2        100
-        dmft_rslf1          0
-        dmft_rslf2          1
         dmft_solv1          5
         dmft_solv2          2
  dmft_charge_prec1     1.0000000000E-06
@@ -780,6 +778,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     188.438     188.419
 
  DMFT uses the Hubbard one solver
 
+ Magnetic DFT, with Magnetic FLL (Full Localized Limit) double counting
+
+ Entropy is not computed, only the internal energy is printed
+
+ The imaginary part of the Green's function is neglected
+
 ================================================================================
 
 --- !BeginCycle
@@ -808,9 +812,9 @@ tolerances: {toldfe: 1.00E-08, }
    -------> For Correlated Atom 1
 
           -- polarization spin component 1
-        0.29187   0.00000   0.00000
-        0.00000   0.29187   0.00000
-        0.00000   0.00000   0.29187
+        0.29187  -0.00000   0.00000
+       -0.00000   0.29187  -0.00000
+       -0.00000  -0.00000   0.29187
 
  ETOT  2  -151.49598360692     8.229E-03 7.567E-11 1.572E-01
  (Edmft  3  -0.03259115545)
@@ -820,7 +824,7 @@ tolerances: {toldfe: 1.00E-08, }
    -------> For Correlated Atom 1
 
           -- polarization spin component 1
-        0.28614   0.00000   0.00000
+        0.28614   0.00000  -0.00000
         0.00000   0.28614  -0.00000
         0.00000   0.00000   0.28614
 
@@ -844,9 +848,9 @@ tolerances: {toldfe: 1.00E-08, }
    -------> For Correlated Atom 1
 
           -- polarization spin component 1
-        0.30581  -0.00000   0.00000
-       -0.00000   0.30581  -0.00000
-        0.00000  -0.00000   0.30581
+        0.30581   0.00000  -0.00000
+        0.00000   0.30581  -0.00000
+       -0.00000  -0.00000   0.30581
 
  ETOT  5  -151.47861197451     3.939E-03 1.886E-12 7.568E-02
  (Edmft  6  -0.03257400614)
@@ -856,9 +860,9 @@ tolerances: {toldfe: 1.00E-08, }
    -------> For Correlated Atom 1
 
           -- polarization spin component 1
-        0.30939  -0.00000  -0.00000
-       -0.00000   0.30939  -0.00000
-       -0.00000  -0.00000   0.30939
+        0.30939  -0.00000   0.00000
+        0.00000   0.30939  -0.00000
+        0.00000  -0.00000   0.30939
 
  ETOT  6  -151.47669551418     1.916E-03 1.006E-10 9.954E-02
  (Edmft  7  -0.03257358093)
@@ -868,7 +872,7 @@ tolerances: {toldfe: 1.00E-08, }
    -------> For Correlated Atom 1
 
           -- polarization spin component 1
-        0.31223   0.00000  -0.00000
+        0.31223   0.00000   0.00000
         0.00000   0.31223   0.00000
        -0.00000   0.00000   0.31223
 
@@ -880,9 +884,9 @@ tolerances: {toldfe: 1.00E-08, }
    -------> For Correlated Atom 1
 
           -- polarization spin component 1
-        0.31268   0.00000   0.00000
-        0.00000   0.31268   0.00000
-        0.00000   0.00000   0.31268
+        0.31268   0.00000  -0.00000
+        0.00000   0.31268  -0.00000
+       -0.00000  -0.00000   0.31268
 
  ETOT  8  -151.47532298493     2.900E-04 7.918E-12 1.376E-01
  (Edmft  9  -0.03257186546)
@@ -892,9 +896,9 @@ tolerances: {toldfe: 1.00E-08, }
    -------> For Correlated Atom 1
 
           -- polarization spin component 1
-        0.31318  -0.00000  -0.00000
-        0.00000   0.31318   0.00000
-        0.00000  -0.00000   0.31318
+        0.31318   0.00000  -0.00000
+        0.00000   0.31318  -0.00000
+       -0.00000  -0.00000   0.31318
 
  ETOT  9  -151.47515749962     1.655E-04 2.640E-11 1.448E-01
  (Edmft 10  -0.03257303968)
@@ -1162,31 +1166,35 @@ force_length_stats: {min: null, max: null, mean: null, }
 
 --- !EnergyTerms
 iteration_state     : {dtset: 2, timimage: 1, image: 1, }
-comment             : Components of total free energy in Hartree
-kinetic             :  4.31184991762558E+01
-hartree             :  3.13029594211747E+01
-xc                  : -2.24725457560678E+01
+comment             : Components of total energy in Hartree
+kinetic             :  4.31184992195388E+01
+hartree             :  3.13029594401216E+01
+xc                  : -2.24725457574387E+01
 Ewald energy        : -1.14220316979058E+02
 psp_core            :  6.53692522600457E+00
-local_psp           : -9.85047125235628E+01
-spherical_terms     :  2.59348103121789E+00
-internal            : -1.51645710404035E+02
-total_energy        : -1.51645710404035E+02
-total_energy_eV     : -4.12648963652660E+03
+local_psp           : -9.85047125514361E+01
+spherical_terms     :  2.62605408357690E+00
+interaction         :  8.25456115827095E-02
+'-double_counting'  : -1.15118651247851E-01
+internal            : -1.51645710360360E+02
+total_energy        : -1.51645710360360E+02
+total_energy_eV     : -4.12648963533813E+03
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 2, timimage: 1, image: 1, }
-comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -1.46872848854457E+01
+comment             : '"Double-counting" decomposition of internal energy'
+band_energy         : -1.46872848659089E+01
 Ewald energy        : -1.14220316979058E+02
 psp_core            :  6.53692522600457E+00
-xc_dc               : -2.43713389793422E+01
-spherical_terms     : -4.73302601294443E+00
-internal            : -1.51475041630785E+02
-total_energy_dc     : -1.51475041630785E+02
-total_energy_dc_eV  : -4.12184550302478E+03
+xc_dc               : -2.43713389978472E+01
+spherical_terms     : -4.70045297528042E+00
+interaction         :  8.25456115827095E-02
+'-double_counting'  : -1.15118651247851E-01
+internal            : -1.51475041631413E+02
+total_energy_dc     : -1.51475041631413E+02
+total_energy_dc_eV  : -4.12184550304185E+03
 ...
 
 
@@ -1217,16 +1225,14 @@ total_energy_dc_eV  : -4.12184550302478E+03
         dmftbandf2         23
         dmftbandi1          0
         dmftbandi2         12
-        dmft_iter1          0
+        dmft_iter1         10
         dmft_iter2          1
-        dmft_mxsf1     3.0000000000E-01
+        dmft_mxsf1     6.0000000000E-01
         dmft_mxsf2     7.0000000000E-01
         dmft_nwli1          0
         dmft_nwli2     100000
         dmft_nwlo1          0
         dmft_nwlo2        100
-        dmft_rslf1          0
-        dmft_rslf2          1
         dmft_solv1          5
         dmft_solv2          2
  dmft_charge_prec1     1.0000000000E-06

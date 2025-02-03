@@ -675,7 +675,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
 
 _setup2: Arith. and geom. avg. npw (full set) are     270.500     270.474
 
--       ( number of procs used in dmft ) =  1
+-       ( number of procs used in dmft ) =    1
 
 
  ******************************************
@@ -683,6 +683,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     270.500     270.474
  ******************************************
 
  DMFT uses the Hubbard one solver
+
+ Magnetic DFT, with Magnetic FLL (Full Localized Limit) double counting
+
+ Entropy is not computed, only the internal energy is printed
+
+ The imaginary part of the Green's function is neglected
 
 ================================================================================
 
@@ -1035,6 +1041,8 @@ Ewald energy        : -2.38122809319194E+02
 psp_core            :  2.14477051759375E+01
 local_psp           : -1.48793623680390E+02
 spherical_terms     : -7.24058945115786E+01
+interaction         :  0.00000000000000E+00
+'-double_counting'  : -0.00000000000000E+00
 internal            : -3.70802387678617E+02
 '-kT*entropy'       : -1.29946884746098E-02
 total_energy        : -3.70815382367092E+02
@@ -1050,6 +1058,8 @@ Ewald energy        : -2.38122809319194E+02
 psp_core            :  2.14477051759375E+01
 xc_dc               : -4.42682461422218E+01
 spherical_terms     : -6.95130008691462E+01
+interaction         :  0.00000000000000E+00
+'-double_counting'  : -0.00000000000000E+00
 internal            : -3.70803766498261E+02
 '-kT*entropy'       : -1.29946884746098E-02
 total_energy_dc     : -3.70816761186736E+02
