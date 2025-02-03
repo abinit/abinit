@@ -87,14 +87,11 @@ module m_orbmag
 
 
   ! these parameters name the various output terms
-  integer,parameter :: ibcc=1,ibvv1=2,ibvv2=3
-  integer,parameter :: imcc=4,imvv1=5,imvv2=6
-  integer,parameter :: imnl=7,imlr=8,imbm=9,iomlmb=10
-  integer,parameter :: nterms=10
   
   ! these parameters name the various output terms                                             
-  integer,parameter :: chern_mesh_nterms=3
-  integer,parameter :: orbmag_mesh_nterms=6
+  integer,parameter :: chern_nterms=3
+  integer,parameter :: ibcc=1,ibvv1=2,ibvv2=3
+  integer,parameter :: orbmag_nterms=6
   integer,parameter :: incc=1,invv1=2,invv2=3
   integer,parameter :: innl=4,inlr=5,inbm=6
 
@@ -115,11 +112,11 @@ module m_orbmag
     integer :: natom, ntypat
     ! atoms and types of atoms
     
-    integer :: chern_terms
+    integer :: chern_nterms
     ! number of chern terms to store on the kpt mesh
     ! CC, VV1, VV2
 
-    integer :: orbmag_terms
+    integer :: orbmag_nterms
     ! number of orbmag terms to store on the kpt mesh
     ! CC, VV1, VV2, NL, L_R, B.M 
 
@@ -309,7 +306,7 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
  integer,allocatable :: atindx(:),atindx1(:),dimlmn(:),gntselect(:,:),kg_k(:,:),nattyp(:)
  real(dp) :: kpoint(3),omlamb(3)
  real(dp),allocatable :: buffer1(:),buffer2(:)
- real(dp),allocatable :: cg_k(:,:),cg1_k(:,:,:),cwavef(:,:)
+ real(dp),allocatable :: chern_terms(:,:,:,:),chern_trace(:,:),cg_k(:,:),cg1_k(:,:,:),cwavef(:,:)
  real(dp),allocatable :: eig_k(:),ffnl_k(:,:,:,:),kinpw(:),kpg_k(:,:)
  real(dp),allocatable :: occ_k(:),orbmag_terms(:,:,:,:),orbmag_trace(:,:)
  real(dp),allocatable :: pcg1_k(:,:,:),ph1d(:,:),ph3d(:,:,:),phkxred(:,:),realgnt(:)
@@ -614,9 +611,10 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
  end do ! end loop over isppol
 
  ! prepare orbmag_terms for output to abo file
- ABI_MALLOC(orbmag_terms,(dtset%mband,dtset%nsppol,3,nterms))
- call sum_orbmag_mesh(crystal,dtset,ebands_k,mpi_enreg,orbmag_mesh,orbmag_terms)
-
+ ABI_MALLOC(orbmag_terms,(dtset%mband,dtset%nsppol,3,orbmag_nterms))
+ ABI_MALLOC(chern_terms,(dtset%mband,dtset%nsppol,3,chern_nterms))
+ call sum_orbmag_mesh(chern_terms,crystal,dtset,ebands_k,mpi_enreg,orbmag_mesh,orbmag_terms)
+ 
  !! collect orbmag_mesh if distributed over different processes
  if (nproc > 1) then
    buff_size=size(orbmag_mesh%omesh)
@@ -624,10 +622,10 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
    ABI_MALLOC(buffer2,(buff_size))
    buffer1=zero;buffer2=zero
    buffer1(1:buff_size) = &
-     & reshape(orbmag_mesh%omesh,(/orbmag_mesh%mband*orbmag_mesh%nkpt*orbmag_mesh%nsppol*3*orbmag_mesh_nterms/))
+     & reshape(orbmag_mesh%omesh,(/orbmag_mesh%mband*orbmag_mesh%nkpt*orbmag_mesh%nsppol*3*orbmag_nterms/))
    call xmpi_sum(buffer1,buffer2,buff_size,spaceComm,ierr)
-   orbmag_mesh%omesh(1:orbmag_mesh%mband,1:orbmag_mesh%nkpt,1:orbmag_mesh%nsppol,1:3,1:orbmag_mesh_nterms)=&
-     & reshape(buffer2,(/orbmag_mesh%mband,orbmag_mesh%nkpt,orbmag_mesh%nsppol,3,orbmag_mesh_nterms/))
+   orbmag_mesh%omesh(1:orbmag_mesh%mband,1:orbmag_mesh%nkpt,1:orbmag_mesh%nsppol,1:3,1:orbmag_nterms)=&
+     & reshape(buffer2,(/orbmag_mesh%mband,orbmag_mesh%nkpt,orbmag_mesh%nsppol,3,orbmag_nterms/))
    ABI_FREE(buffer1)
    ABI_FREE(buffer2)
  end if
@@ -639,26 +637,29 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
    ABI_MALLOC(buffer2,(buff_size))
    buffer1=zero;buffer2=zero
    buffer1(1:buff_size) = &
-     & reshape(orbmag_mesh%cmesh,(/orbmag_mesh%mband*orbmag_mesh%nkpt*orbmag_mesh%nsppol*3*chern_mesh_nterms/))
+     & reshape(orbmag_mesh%cmesh,(/orbmag_mesh%mband*orbmag_mesh%nkpt*orbmag_mesh%nsppol*3*chern_nterms/))
    call xmpi_sum(buffer1,buffer2,buff_size,spaceComm,ierr)
-   orbmag_mesh%cmesh(1:orbmag_mesh%mband,1:orbmag_mesh%nkpt,1:orbmag_mesh%nsppol,1:3,1:chern_mesh_nterms)=&
-     & reshape(buffer2,(/orbmag_mesh%mband,orbmag_mesh%nkpt,orbmag_mesh%nsppol,3,chern_mesh_nterms/))
+   orbmag_mesh%cmesh(1:orbmag_mesh%mband,1:orbmag_mesh%nkpt,1:orbmag_mesh%nsppol,1:3,1:chern_nterms)=&
+     & reshape(buffer2,(/orbmag_mesh%mband,orbmag_mesh%nkpt,orbmag_mesh%nsppol,3,chern_nterms/))
    ABI_FREE(buffer1)
    ABI_FREE(buffer2)
  end if
-
+ 
  ! compute trace over filled states of each term
- ABI_MALLOC(orbmag_trace,(3,nterms))
+ ABI_MALLOC(orbmag_trace,(3,orbmag_nterms))
+ ABI_MALLOC(chern_trace,(3,chern_nterms))
  orbmag_trace = zero
  do isppol = 1, dtset%nsppol
    do nn = 1, nband_k
-     orbmag_trace = orbmag_trace + orbmag_terms(nn,isppol,:,:)
+     orbmag_trace(1:3,1:orbmag_nterms) = orbmag_trace(1:3,1:orbmag_nterms) + &
+       & orbmag_terms(nn,isppol,1:3,1:orbmag_nterms)
+     chern_trace(1:3,1:chern_nterms) = chern_trace(1:3,1:chern_nterms) + &
+       & chern_terms(nn,isppol,1:3,1:chern_nterms)
    end do ! nn
  end do ! isppol
 
  ! get the Lamb term
  call lamb_core(atindx,dtset,omlamb,pawtab)
- orbmag_trace(:,iomlmb) = omlamb
 
  ! output raw data to netcdf file for more detailed postprocessing 
  if (me == master) then
@@ -669,7 +670,7 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
  end if
 
  ! output summary to abo file
- call orbmag_output(dtset,orbmag_terms,orbmag_trace)
+ call orbmag_output(chern_terms,chern_trace,dtset,omlamb,orbmag_terms,orbmag_trace)
 
 !---------------------------------------------------
 ! deallocate memory
@@ -696,7 +697,9 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
  call orbmag_mesh_free(orbmag_mesh)
 
  ABI_FREE(orbmag_terms)
+ ABI_FREE(chern_terms)
  ABI_FREE(orbmag_trace)
+ ABI_FREE(chern_trace)
 
 end subroutine orbmag
 !!***
@@ -728,7 +731,7 @@ end subroutine orbmag
 !!
 !! SOURCE
 
-subroutine sum_orbmag_mesh(crystal,dtset,ebands_k,mpi_enreg,orbmag_mesh,orbmag_terms)
+subroutine sum_orbmag_mesh(chern_terms,crystal,dtset,ebands_k,mpi_enreg,orbmag_mesh,orbmag_terms)
 
   !Arguments ------------------------------------
   !scalars
@@ -739,7 +742,8 @@ subroutine sum_orbmag_mesh(crystal,dtset,ebands_k,mpi_enreg,orbmag_mesh,orbmag_t
   type(orbmag_mesh_type),intent(in) :: orbmag_mesh
 
   !arrays
-  real(dp),intent(out) :: orbmag_terms(dtset%mband,dtset%nsppol,3,nterms)
+  real(dp),intent(out) :: chern_terms(dtset%mband,dtset%nsppol,3,chern_nterms)
+  real(dp),intent(out) :: orbmag_terms(dtset%mband,dtset%nsppol,3,orbmag_nterms)
 
   !Local variables -------------------------
   !scalars
@@ -755,6 +759,7 @@ subroutine sum_orbmag_mesh(crystal,dtset,ebands_k,mpi_enreg,orbmag_mesh,orbmag_t
   nproc=xmpi_comm_size(spaceComm)
   me = mpi_enreg%me_kpt
   
+  chern_terms = zero
   orbmag_terms = zero
   do isppol = 1, dtset%nsppol
     do ikpt = 1, dtset%nkpt
@@ -766,9 +771,10 @@ subroutine sum_orbmag_mesh(crystal,dtset,ebands_k,mpi_enreg,orbmag_mesh,orbmag_t
         trnrm = ebands_k%occ(nn,ikpt,isppol)*dtset%wtk(ikpt)/crystal%ucvol
         if(abs(trnrm).LT.tol8) cycle
 
-        orbmag_terms(nn,isppol,1:3,ibcc:ibvv2) = orbmag_terms(nn,isppol,1:3,ibcc:ibvv2) + &
+        chern_terms(nn,isppol,1:3,ibcc:ibvv2) = chern_terms(nn,isppol,1:3,ibcc:ibvv2) + &
             & trnrm*orbmag_mesh%cmesh(nn,ikpt,isppol,1:3,ibcc:ibvv2)
-        orbmag_terms(nn,isppol,1:3,imcc:imbm) = orbmag_terms(nn,isppol,1:3,imcc:imbm) + &
+
+        orbmag_terms(nn,isppol,1:3,incc:inbm) = orbmag_terms(nn,isppol,1:3,incc:inbm) + &
             & trnrm*orbmag_mesh%omesh(nn,ikpt,isppol,1:3,incc:inbm)
 
       end do ! loop on bands
@@ -781,12 +787,26 @@ subroutine sum_orbmag_mesh(crystal,dtset,ebands_k,mpi_enreg,orbmag_mesh,orbmag_t
     ABI_MALLOC(buffer1,(buff_size))
     ABI_MALLOC(buffer2,(buff_size))
     buffer1=zero;buffer2=zero
-    buffer1(1:buff_size) = reshape(orbmag_terms,(/nband_k*dtset%nsppol*3*nterms/))
+    buffer1(1:buff_size) = reshape(orbmag_terms,(/nband_k*dtset%nsppol*3*orbmag_nterms/))
     call xmpi_sum(buffer1,buffer2,buff_size,spaceComm,ierr)
-    orbmag_terms(1:nband_k,1:dtset%nsppol,1:3,1:nterms)=reshape(buffer2,(/nband_k,dtset%nsppol,3,nterms/))
+    orbmag_terms(1:nband_k,1:dtset%nsppol,1:3,1:orbmag_nterms)=reshape(buffer2,(/nband_k,dtset%nsppol,3,orbmag_nterms/))
     ABI_FREE(buffer1)
     ABI_FREE(buffer2)
   end if
+
+  !! collect chern_terms if distributed over different processes
+  if (nproc > 1) then
+    buff_size=size(chern_terms)
+    ABI_MALLOC(buffer1,(buff_size))
+    ABI_MALLOC(buffer2,(buff_size))
+    buffer1=zero;buffer2=zero
+    buffer1(1:buff_size) = reshape(chern_terms,(/nband_k*dtset%nsppol*3*chern_nterms/))
+    call xmpi_sum(buffer1,buffer2,buff_size,spaceComm,ierr)
+    chern_terms(1:nband_k,1:dtset%nsppol,1:3,1:chern_nterms)=reshape(buffer2,(/nband_k,dtset%nsppol,3,chern_nterms/))
+    ABI_FREE(buffer1)
+    ABI_FREE(buffer2)
+  end if
+
 
   !! convert to cartesian frame from reduced triclinic
  ! general results: [rprimd]*r_red = r_cart
@@ -797,11 +817,10 @@ subroutine sum_orbmag_mesh(crystal,dtset,ebands_k,mpi_enreg,orbmag_mesh,orbmag_t
  ! \grad_(k_cart) x \grad_(k_cart) but are calculated in reduced k
  ! so [rprimd]*grad_(k_red) x [rprimd]*grad_(k_red) = det[rprimd]*[rprimd]^{-1,T} grad_(k_red) x grad_(k_red)
  !
- do iterm = 1, nterms
-   if ((iterm.EQ.iomlmb)) cycle
+ do iterm = 1, orbmag_nterms
    do isppol = 1, dtset%nsppol
      do nn = 1, nband_k
-       if((iterm.EQ.imlr).OR.(iterm.EQ.imbm)) then
+       if((iterm.EQ.inlr).OR.(iterm.EQ.inbm)) then
          orbmag_terms(nn,isppol,1:3,iterm) = &
            & MATMUL(crystal%rprimd,orbmag_terms(nn,isppol,1:3,iterm))
        else
@@ -812,16 +831,18 @@ subroutine sum_orbmag_mesh(crystal,dtset,ebands_k,mpi_enreg,orbmag_mesh,orbmag_t
    end do !isppol
  end do
 
+ do iterm = 1, chern_nterms
+   do isppol = 1, dtset%nsppol
+     do nn = 1, nband_k
+       chern_terms(nn,isppol,1:3,iterm) = &
+         & crystal%ucvol*MATMUL(crystal%gprimd,chern_terms(nn,isppol,1:3,iterm))
+     end do ! nn
+   end do !isppol
+ end do
+
  !! convert orbmag magnetization to orbital moment
  !! Berry curvature terms are ignored
- !! Lamb term ignored
- do iterm = 1, nterms
-   if (iterm .EQ. ibcc) cycle
-   if (iterm .EQ. ibvv1) cycle
-   if (iterm .EQ. ibvv2) cycle
-   if (iterm .EQ. iomlmb) cycle
-   orbmag_terms(:,:,:,iterm) = crystal%ucvol*orbmag_terms(:,:,:,iterm)
- end do
+ orbmag_terms(:,:,:,incc:inbm)=crystal%ucvol*orbmag_terms(:,:,:,incc:inbm)
 
 end subroutine sum_orbmag_mesh
 !!***
@@ -2087,8 +2108,8 @@ end subroutine dterm_LR
 !!
 !! INPUTS
 !!  dtset <type(dataset_type)>=all input variables for this dataset
-!!  orbmag_terms(2,dtset%mband,dtset%nsppol,3,nterms)=all computed terms per band of orb mag
-!!  orbmag_trace(2,3,nterms)=traces of orbmag_terms
+!!  orbmag_terms(dtset%mband,dtset%nsppol,3,nterms)=all computed terms per band of orb mag
+!!  orbmag_trace(3,nterms)=traces of orbmag_terms
 !!
 !! OUTPUT
 !!
@@ -2100,15 +2121,16 @@ end subroutine dterm_LR
 !!
 !! SOURCE
 
-subroutine orbmag_output(dtset,orbmag_terms,orbmag_trace)
-
+subroutine orbmag_output(chern_terms,chern_trace,dtset,omlamb,orbmag_terms,orbmag_trace)
 
  !Arguments ------------------------------------
  !scalars
  type(dataset_type),intent(in) :: dtset
 
  !arrays
- real(dp),intent(in) :: orbmag_terms(dtset%mband,dtset%nsppol,3,nterms),orbmag_trace(3,nterms)
+ real(dp),intent(in) :: omlamb(3)
+ real(dp),intent(in) :: chern_terms(dtset%mband,dtset%nsppol,3,chern_nterms),chern_trace(3,chern_nterms)
+ real(dp),intent(in) :: orbmag_terms(dtset%mband,dtset%nsppol,3,orbmag_nterms),orbmag_trace(3,orbmag_nterms)
 
  !Local variables -------------------------
  !scalars
@@ -2121,7 +2143,7 @@ subroutine orbmag_output(dtset,orbmag_terms,orbmag_trace)
  ! ***********************************************************************
 
  orbmag_bb=zero;orbmag_total=zero
- do iterms = ibvv2+1, nterms
+ do iterms = 1,orbmag_nterms
    orbmag_total(1:3)=orbmag_total(1:3) + orbmag_trace(1:3,iterms)
    do isppol = 1, dtset%nsppol
      do iband=1, dtset%mband
@@ -2129,12 +2151,15 @@ subroutine orbmag_output(dtset,orbmag_terms,orbmag_trace)
      end do ! iband
    end do ! isppol
  end do
+
+ orbmag_total=orbmag_total+omlamb
+
  berry_bb=zero;berry_total=zero
- do iterms = ibcc,ibvv2
-   berry_total(1:3)=berry_total(1:3) + orbmag_trace(1:3,iterms)
+ do iterms = 1,chern_nterms
+   berry_total(1:3)=berry_total(1:3) + chern_trace(1:3,iterms)
    do isppol = 1, dtset%nsppol
      do iband=1, dtset%mband
-       berry_bb(iband,1:3) = berry_bb(iband,1:3) + orbmag_terms(iband,isppol,1:3,iterms)
+       berry_bb(iband,1:3) = berry_bb(iband,1:3) + chern_terms(iband,isppol,1:3,iterms)
      end do ! iband
    end do ! isppol
  end do
@@ -2161,27 +2186,27 @@ subroutine orbmag_output(dtset,orbmag_terms,orbmag_trace)
    call wrtout(ab_out,message,'COLL')
    write(message,'(a)')' Orbital magnetic moment, term-by-term breakdown : '
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)') '     rho(1) CC : ',(orbmag_trace(adir,imcc),adir=1,3)
+   write(message,'(a,3es16.8)') '     rho(1) CC : ',(orbmag_trace(adir,incc),adir=1,3)
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)') '    rho(1) VV1 : ',(orbmag_trace(adir,imvv1),adir=1,3)
+   write(message,'(a,3es16.8)') '    rho(1) VV1 : ',(orbmag_trace(adir,invv1),adir=1,3)
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)') '    rho(1) VV2 : ',(orbmag_trace(adir,imvv2),adir=1,3)
+   write(message,'(a,3es16.8)') '    rho(1) VV2 : ',(orbmag_trace(adir,invv2),adir=1,3)
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)') '     rho(0) NL : ',(orbmag_trace(adir,imnl),adir=1,3)
+   write(message,'(a,3es16.8)') '     rho(0) NL : ',(orbmag_trace(adir,innl),adir=1,3)
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)') '   <L_R> terms : ',(orbmag_trace(adir,imlr),adir=1,3)
+   write(message,'(a,3es16.8)') '   <L_R> terms : ',(orbmag_trace(adir,inlr),adir=1,3)
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)') ' <A0.An> terms : ',(orbmag_trace(adir,imbm),adir=1,3)
+   write(message,'(a,3es16.8)') ' <A0.An> terms : ',(orbmag_trace(adir,inbm),adir=1,3)
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)') '    Lamb terms : ',(orbmag_trace(adir,iomlmb),adir=1,3)
+   write(message,'(a,3es16.8)') '    Lamb terms : ',(omlamb(adir),adir=1,3)
    call wrtout(ab_out,message,'COLL')
    write(message,'(a)')' Chern vector, term-by-term breakdown : '
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)') '  Ch CC : ',(orbmag_trace(adir,ibcc),adir=1,3)
+   write(message,'(a,3es16.8)') '  Ch CC : ',(chern_trace(adir,ibcc),adir=1,3)
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)') ' Ch vv1 : ',(orbmag_trace(adir,ibvv1),adir=1,3)
+   write(message,'(a,3es16.8)') ' Ch vv1 : ',(chern_trace(adir,ibvv1),adir=1,3)
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)') ' Ch vv2 : ',(orbmag_trace(adir,ibvv2),adir=1,3)
+   write(message,'(a,3es16.8)') ' Ch vv2 : ',(chern_trace(adir,ibvv2),adir=1,3)
    call wrtout(ab_out,message,'COLL')
  end if
 
@@ -2202,27 +2227,27 @@ subroutine orbmag_output(dtset,orbmag_terms,orbmag_trace)
        call wrtout(ab_out,message,'COLL')
        write(message,'(a,3es16.8)') ' Orbital magnetic moment : ',(orbmag_bb(iband,adir),adir=1,3)
        call wrtout(ab_out,message,'COLL')
-       write(message,'(a,3es16.8)') '     rho(1) CC : ',(orbmag_terms(iband,isppol,adir,imcc),adir=1,3)
+       write(message,'(a,3es16.8)') '     rho(1) CC : ',(orbmag_terms(iband,isppol,adir,incc),adir=1,3)
        call wrtout(ab_out,message,'COLL')
-       write(message,'(a,3es16.8)') '    rho(1) VV1 : ',(orbmag_terms(iband,isppol,adir,imvv1),adir=1,3)
+       write(message,'(a,3es16.8)') '    rho(1) VV1 : ',(orbmag_terms(iband,isppol,adir,invv1),adir=1,3)
        call wrtout(ab_out,message,'COLL')
-       write(message,'(a,3es16.8)') '    rho(1) VV2 : ',(orbmag_terms(iband,isppol,adir,imvv2),adir=1,3)
+       write(message,'(a,3es16.8)') '    rho(1) VV2 : ',(orbmag_terms(iband,isppol,adir,invv2),adir=1,3)
        call wrtout(ab_out,message,'COLL')
-       write(message,'(a,3es16.8)') '     rho(0) NL : ',(orbmag_terms(iband,isppol,adir,imnl),adir=1,3)
+       write(message,'(a,3es16.8)') '     rho(0) NL : ',(orbmag_terms(iband,isppol,adir,innl),adir=1,3)
        call wrtout(ab_out,message,'COLL')
-       write(message,'(a,3es16.8)') '   <L_R> terms : ',(orbmag_terms(iband,isppol,adir,imlr),adir=1,3)
+       write(message,'(a,3es16.8)') '   <L_R> terms : ',(orbmag_terms(iband,isppol,adir,inlr),adir=1,3)
        call wrtout(ab_out,message,'COLL')
-       write(message,'(a,3es16.8)') ' <A0.An> terms : ',(orbmag_terms(iband,isppol,adir,imbm),adir=1,3)
+       write(message,'(a,3es16.8)') ' <A0.An> terms : ',(orbmag_terms(iband,isppol,adir,inbm),adir=1,3)
        call wrtout(ab_out,message,'COLL')
        write(message,'(a)')ch10
        call wrtout(ab_out,message,'COLL')
        write(message,'(a,3es16.8)') ' Chern vector : ',(berry_bb(iband,adir),adir=1,3)
        call wrtout(ab_out,message,'COLL')
-       write(message,'(a,3es16.8)') '  Ch CC : ',(orbmag_terms(iband,isppol,adir,ibcc),adir=1,3)
+       write(message,'(a,3es16.8)') '  Ch CC : ',(chern_terms(iband,isppol,adir,ibcc),adir=1,3)
        call wrtout(ab_out,message,'COLL')
-       write(message,'(a,3es16.8)') ' Ch VV1 : ',(orbmag_terms(iband,isppol,adir,ibvv1),adir=1,3)
+       write(message,'(a,3es16.8)') ' Ch VV1 : ',(chern_terms(iband,isppol,adir,ibvv1),adir=1,3)
        call wrtout(ab_out,message,'COLL')
-       write(message,'(a,3es16.8)') ' Ch VV2 : ',(orbmag_terms(iband,isppol,adir,ibvv2),adir=1,3)
+       write(message,'(a,3es16.8)') ' Ch VV2 : ',(chern_terms(iband,isppol,adir,ibvv2),adir=1,3)
        call wrtout(ab_out,message,'COLL')
      end do !isppol
    end do ! iband
@@ -2442,8 +2467,8 @@ subroutine orbmag_mesh_alloc(dtset,orbmag_mesh)
   orbmag_mesh%nsppol = dtset%nsppol
   orbmag_mesh%natom = dtset%natom
   orbmag_mesh%ntypat = dtset%ntypat
-  orbmag_mesh%chern_terms = chern_mesh_nterms
-  orbmag_mesh%orbmag_terms = orbmag_mesh_nterms
+  orbmag_mesh%chern_nterms = chern_nterms
+  orbmag_mesh%orbmag_nterms = orbmag_nterms
 
   if(allocated(orbmag_mesh%lambsig)) then
     ABI_FREE(orbmag_mesh%lambsig)
@@ -2458,13 +2483,13 @@ subroutine orbmag_mesh_alloc(dtset,orbmag_mesh)
   if(allocated(orbmag_mesh%cmesh)) then
     ABI_FREE(orbmag_mesh%cmesh)
   end if
-  ABI_MALLOC(orbmag_mesh%cmesh,(orbmag_mesh%mband,orbmag_mesh%nkpt,orbmag_mesh%nsppol,3,chern_mesh_nterms))
+  ABI_MALLOC(orbmag_mesh%cmesh,(orbmag_mesh%mband,orbmag_mesh%nkpt,orbmag_mesh%nsppol,3,chern_nterms))
   orbmag_mesh%cmesh=zero
   
   if(allocated(orbmag_mesh%omesh)) then
     ABI_FREE(orbmag_mesh%omesh)
   end if
-  ABI_MALLOC(orbmag_mesh%omesh,(orbmag_mesh%mband,orbmag_mesh%nkpt,orbmag_mesh%nsppol,3,orbmag_mesh_nterms))
+  ABI_MALLOC(orbmag_mesh%omesh,(orbmag_mesh%mband,orbmag_mesh%nkpt,orbmag_mesh%nsppol,3,orbmag_nterms))
   orbmag_mesh%omesh=zero
 
 end subroutine orbmag_mesh_alloc
@@ -2859,15 +2884,15 @@ subroutine orbmag_ncwrite(crystal,dtset,ebands,hdr,ncid,orbmag_mesh,psps,pawtab)
    nctkdim_t("mband", orbmag_mesh%mband),&
    nctkdim_t("nkpt", orbmag_mesh%nkpt),&
    nctkdim_t("nsppol", orbmag_mesh%nsppol),&
-   nctkdim_t("chern_terms", orbmag_mesh%chern_terms),&
-   nctkdim_t("orbmag_terms", orbmag_mesh%orbmag_terms),&
+   nctkdim_t("chern_nterms", orbmag_mesh%chern_nterms),&
+   nctkdim_t("orbmag_nterms", orbmag_mesh%orbmag_nterms),&
    nctkdim_t("ndir",3),&
    nctkdim_t("natom",dtset%natom)],defmode=.True.)
  NCF_CHECK(ncerr)
  
  ncerr = nctk_def_arrays(ncid, [&
-   nctkarr_t("chern_mesh", "dp", "mband, nkpt, nsppol, ndir, chern_terms"),&
-   nctkarr_t("orbmag_mesh", "dp", "mband, nkpt, nsppol, ndir, orbmag_terms"),&
+   nctkarr_t("chern_mesh", "dp", "mband, nkpt, nsppol, ndir, chern_nterms"),&
+   nctkarr_t("orbmag_mesh", "dp", "mband, nkpt, nsppol, ndir, orbmag_nterms"),&
    nctkarr_t("lambsig", "dp", "ntypat"),&
    nctkarr_t("nucdipmom", "dp", "ndir, natom")])
  NCF_CHECK(ncerr)
