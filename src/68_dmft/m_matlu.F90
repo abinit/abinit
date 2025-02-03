@@ -4142,5 +4142,50 @@ end subroutine add_matlu
  end subroutine symmetrize_matlu
 !!***
 
+!!****f* m_matlu/ylm2jmj_matlu
+!! NAME
+!! ylm2jmj_matlu
+!!
+!! FUNCTION
+!! Transform mat from Ylm to JmJ basis or vice versa
+!!
+!! COPYRIGHT
+!! Copyright (C) 2005-2024 ABINIT group (BAmadon)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! INPUTS
+!!  matlu(natom) :: input quantity
+!!  natom :: number of atoms
+!!  option=1 go from Ylm to JmJ basis
+!!  option=2 go from JmJ to Ylm basis
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! SOURCE
+
+ subroutine ylm2jmj_matlu(matlu,natom,option,paw_dmft)
+
+!Arguments ------------------------------------
+ integer, intent(in) :: natom,option
+ type(matlu_type), intent(inout) :: matlu(natom)
+ type(paw_dmft_type), intent(in)
+!Local variables-------------------------------
+!************************************************************************
+
+ tndim_max = 2 * (2*paw_dmft%maxlpawu+1)
+
+ do iatom=1,natom
+   lpawu =
+   call abi_xgemm("n",c2,ndim,ndim,ndim,cone,mat_inp(:,:),ndim,slm2ylm(:,1:ndim), &
+                & ndim_max,czero,mat_tmp(:,1+(ispin-1)*ndim:ndim*ispin),ndim)
+
+ end do ! iatom
+
+ end subroutine ylm2jmj_matlu
+!!***
+
 END MODULE m_matlu
 !!***

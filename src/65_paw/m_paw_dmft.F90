@@ -601,6 +601,9 @@ MODULE m_paw_dmft
   complex(dpc), allocatable :: dpro(:,:,:)
   ! Exp(i(k+G).xred(iatom)) for each G,correlated atom and k
 
+  complex(dpc), allocatable :: jmj2ylm(:,:,:)
+  ! Transformation matrix from JmJ to Ylm basis for each lpawu
+
   complex(dpc), allocatable :: slm2ylm(:,:,:)
   ! Transformation matrix from real to complex harmonics for each lpawu
 
@@ -718,12 +721,13 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
 !Local variables ------------------------------------
  integer :: bdtot_index,dmft_dc,dmft_solv,dmftbandi,dmftbandf,fac,i,iatom
  integer :: iatom1,iband,icb,ig,ik,ikg,ikpt,im,im1,indproj,iproj,ir,isppol
- integer :: itypat,jm,lpawu,lpawu1,maxlpawu,mband,mbandc,mesh_size,mesh_type
- integer :: mkmem,mm,mpw,myproc,natom,nband_k,ndim,nkpt,nproc,nproju,npw
+ integer :: itypat,jc1,jj,jm,lpawu,lpawu1,maxlpawu,mband,mbandc,mesh_size,mesh_type
+ integer :: mkmem,ml1,mm,mpw,ms1,myproc,natom,nband_k,ndim,nkpt,nproc,nproju,npw
  integer :: nspinor,nsppol,nsym,ntypat,off_diag,siz_paw,siz_proj,siz_wan,use_dmft
  logical :: t2g,use_full_chipsi,verif,x2my2d
- real(dp) :: bes,besp,lstep,norm,onem,rad,rint,rstep,sumwtk
+ real(dp) :: bes,besp,invsqrt2lp1,lstep,norm,onem,rad,rint,rstep,sumwtk,xj,xmj
  integer, parameter :: mt2g(3) = (/1,2,4/)
+ integer, allocatable :: ind_msml(:,:)
  logical, allocatable :: lcycle(:),typcycle(:)
  real(dp), allocatable :: rmax(:),kpg(:,:),kpg_norm(:)
  character(len=500) :: dc_string,lda_string,message
@@ -1164,6 +1168,7 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  end do ! itypat
 
  ABI_MALLOC(paw_dmft%slm2ylm,(ndim,ndim,maxlpawu+1))
+ ABI_MALLOC(paw_dmft%jmj2ylm,(2*ndim,2*ndim,maxlpawu+1))
  ABI_MALLOC(paw_dmft%zarot,(ndim,ndim,nsym,maxlpawu+1))
 
  paw_dmft%slm2ylm(:,:,:) = czero
@@ -1183,6 +1188,43 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
        paw_dmft%slm2ylm(jm,im,lpawu+1) = -cmplx(zero,onem/sqrt2,kind=dp)
      end if
    end do ! im
+ end do ! lpawu
+
+ paw_dmft%jmj2ylm(:,:,:) = czero
+ do ll=1,maxlpawu
+   if (lcycle(ll+1)) cycle
+   ABI_MALLOC(ind_msml,(2,-ll:ll))
+   jc1 = 0
+   do ms1=1,2
+     do ml1=-ll,ll
+       jc1 = jc1 + 1
+       ind_msml(ms1,ml1) = jc1
+     end do ! ml1
+   end do ! ms1
+   invsqrt2lp1 = one / sqrt(dble(2*ll+1))
+   jc1 = 0
+   do jj=ll,ll+1
+     xj = dble(jj) - half ! xj is in {ll-0.5,ll+0.5}
+     do jm=-jj,jj-1
+       xmj = dble(jm) + half ! xmj is in {-xj,xj}
+       jc1 = jc1 + 1 ! Global index for JMJ
+       if (nint(xj+half) == ll+1) then ! if xj=ll+0.5
+         if (nint(xmj+half) == ll+1) then
+           mlms2jmj(ind_msml(1,ll),jc1) = cone   !  J=L+0.5 and m_J=L+0.5
+         else if (nint(xmj-half) == -ll-1) then
+           mlms2jmj(ind_msml(2,-ll),jc1) = cone   !  J=L+0.5 and m_J=-L-0.5
+         else
+           mlms2jmj(ind_msml(1,nint(xmj-half)),jc1) = cmplx(invsqrt2lp1*(sqrt(dble(ll)+xmj+half)),zero,kind=dp)
+           mlms2jmj(ind_msml(2,nint(xmj+half)),jc1) = cmplx(invsqrt2lp1*(sqrt(dble(ll)-xmj+half)),zero,kind=dp)
+         end if
+       end if
+       if (nint(xj+half) == ll) then  ! if xj=ll-0.5
+         mlms2jmj(ind_msml(2,nint(xmj+half)),jc1) = cmplx(invsqrt2lp1*(sqrt(dble(ll)+xmj+half)),zero,kind=dp)
+         mlms2jmj(ind_msml(1,nint(xmj-half)),jc1) = cmplx(-invsqrt2lp1*(sqrt(dble(ll)-xmj+half)),zero,kind=dp)
+       end if
+     end do ! jm
+   end do ! jj
+   ABI_FREE(ind_msml)
  end do ! lpawu
 
  do lpawu=0,maxlpawu
@@ -2124,6 +2166,7 @@ subroutine destroy_sc_dmft(paw_dmft)
  ABI_SFREE(paw_dmft%omega_lo)
  ABI_SFREE(paw_dmft%wgt_wlo)
  ABI_SFREE(paw_dmft%slm2ylm)
+ ABI_SFREE(paw_dmft%jmj2ylm)
 
  paw_dmft%nband => null()
  paw_dmft%dmft_shiftself => null()
