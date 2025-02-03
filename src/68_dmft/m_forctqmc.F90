@@ -3275,6 +3275,8 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
                             & " diagonalizes the occupation matrix"
  else if (basis == 3) then
    write(message,'(a,3x,a)') ch10,"== Switching to CTQMC basis: using Ylm basis"
+ else if (basis == 4) then
+   write(message,'(a,3x,a)') ch10,"== Switching to CTQMC basis: using JmJ basis"
  end if
  call wrtout(std_out,message,"COLL")
 
