@@ -849,7 +849,7 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
      end if ! rot_type
 
      ABI_SFREE(veeylm)
-     if (rot_type /= 2 .and. jpawu > tol10) then
+     if (rot_type >= 3 .and. jpawu > tol10) then
        ABI_FREE(veeylm2)
      end if
      veeylm2 => null()
@@ -1712,11 +1712,10 @@ subroutine vee_slm2ylm_hu(lcor,mat_inp_c,mat_out_c,paw_dmft,option,prtvol)
  if (abs(prtvol) > 2) then
    if (option == 1) then
      write(message,'(3a)') ch10,"matrix in cubic basis is changed into Ylm basis"
-     call wrtout(std_out,message,'COLL')
    else if (option == 2) then
      write(message,'(3a)') ch10,"matrix in Ylm basis is changed into cubic basis"
-     call wrtout(std_out,message,'COLL')
    end if
+   call wrtout(std_out,message,'COLL')
  end if ! prtvol>2
 
  ndim = 2*lcor + 1
@@ -1725,12 +1724,11 @@ subroutine vee_slm2ylm_hu(lcor,mat_inp_c,mat_out_c,paw_dmft,option,prtvol)
 
  if (option == 1) then
    slm2ylm(:,:) = conjg(transpose(paw_dmft%slm2ylm(1:ndim,1:ndim,lcor+1)))
-   call rotate_hu(slm2ylm(:,:),1,ndim,mat_inp_c(:,:,:,:),mat_out_c(:,:,:,:))
  else if (option == 2) then
-   ! Make copy here to prevent creation of temporary
+   ! Make copy here to prevent creation of temporary in case ndim /= ndim_max
    slm2ylm(:,:) = paw_dmft%slm2ylm(1:ndim,1:ndim,lcor+1)
-   call rotate_hu(slm2ylm(:,:),1,ndim,mat_inp_c(:,:,:,:),mat_out_c(:,:,:,:))
  end if
+ call rotate_hu(slm2ylm(:,:),1,ndim,mat_inp_c(:,:,:,:),mat_out_c(:,:,:,:))
 
  ABI_FREE(slm2ylm)
 

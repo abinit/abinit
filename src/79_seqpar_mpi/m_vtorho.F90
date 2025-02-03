@@ -1437,7 +1437,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          call timab(620,2,tsec)
          call flush_unit(std_out)
 
-
 !        ==  solve dmft loop
          call xmpi_barrier(spaceComm_distrb)
 

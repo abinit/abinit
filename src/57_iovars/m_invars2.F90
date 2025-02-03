@@ -2463,12 +2463,22 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
      call intagm(dprarr,intarr,jdtset,marr,natom,string(1:lenstr),'dmft_nominal',tread,'INT')
      if(tread==1) dtset%dmft_nominal(:)=intarr(1:natom)
    end if
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_epsilon_yukawa',tread,'DPR')
+   if(tread==1) then
+     dtset%dmft_epsilon_yukawa=dprarr(1)
+     dtset%dmft_use_yukawa_param=1
+   end if
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_fermi_step',tread,'DPR')
    if(tread==1) dtset%dmft_fermi_step=dprarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_iter',tread,'INT')
    if(tread==1) dtset%dmft_iter=intarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_kspectralfunc',tread,'INT')
    if(tread==1) dtset%dmft_kspectralfunc=intarr(1)
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_lambda_yukawa',tread,'DPR')
+   if(tread==1) then
+     dtset%dmft_lambda_yukawa=dprarr(1)
+     dtset%dmft_use_yukawa_param=1
+   end if
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_mxsf',tread,'DPR')
    if(tread==1) dtset%dmft_mxsf=dprarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_nwli',tread,'INT')

@@ -951,10 +951,10 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  else if (dmft_dc == 8) then
    dc_string = "Non-Magnetic exact"
  end if
- dc_string = trim(dc_string)//" double counting"
+ dc_string = trim(dc_string) // " double counting"
 
  lda_string = "Magnetic DFT, with "
- if (dtset%usepawu == 14) lda_string = "Non "//trim(adjustl(lda_string))
+ if (dtset%usepawu == 14) lda_string = "Non " // trim(adjustl(lda_string))
  write(message,'(2(a,1x),a)') ch10,trim(adjustl(lda_string)),trim(adjustl(dc_string))
  call wrtout([std_out,ab_out],message,'COLL')
 
@@ -1060,10 +1060,10 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
 !==  CTQMC
 !=======================
 
- paw_dmft%dmftqmc_l        = dtset%dmftqmc_l
- paw_dmft%dmftqmc_n        = dtset%dmftqmc_n
- paw_dmft%dmftqmc_seed     = dtset%dmftqmc_seed
- paw_dmft%dmftqmc_therm    = dtset%dmftqmc_therm
+ paw_dmft%dmftqmc_l     = dtset%dmftqmc_l
+ paw_dmft%dmftqmc_n     = dtset%dmftqmc_n
+ paw_dmft%dmftqmc_seed  = dtset%dmftqmc_seed
+ paw_dmft%dmftqmc_therm = dtset%dmftqmc_therm
 
  paw_dmft%dmftctqmc_basis  = dtset%dmftctqmc_basis
  paw_dmft%dmftctqmc_check  = dtset%dmftctqmc_check
@@ -1312,7 +1312,7 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
      indproj = pawtab(itypat)%lnproju(iproj)
      if (use_full_chipsi) then
        ! Precompute <Chi|Phi-Phi_tilde>
-       paw_dmft%phimtphi(1:siz_paw,iproj,itypat) = pawtab(itypat)%phi(1:siz_paw,indproj)- &
+       paw_dmft%phimtphi(1:siz_paw,iproj,itypat) = pawtab(itypat)%phi(1:siz_paw,indproj) - &
                                                  & pawtab(itypat)%tphi(1:siz_paw,indproj)
        call simp_gen(paw_dmft%phimtphi_int(iproj,itypat),pawtab(itypat)%proj(1:siz_proj)* &
                    & paw_dmft%phimtphi(1:siz_proj,iproj,itypat),paw_dmft%radgrid(itypat),r_for_intg=rint)
@@ -1345,7 +1345,7 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
    ABI_MALLOC(kpg,(3,mpw))
    ABI_MALLOC(kpg_norm,(mpw))
 
-   ik  = 0
+   ik  = 0 ! kpt index on current CPU
    ikg = 0
 
    do ikpt=1,nkpt
@@ -1396,7 +1396,7 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
        end do ! ig
 
        if (.not. typcycle(itypat)) then   ! if this type has not been visited
-         lpawu1 = lpawu
+         lpawu1 = lpawu ! physical l
          if (t2g .or. x2my2d) lpawu1 = 2
          siz_proj = paw_dmft%siz_proj(itypat)
          rint = paw_dmft%radgrid(itypat)%rad(siz_proj)
@@ -1412,7 +1412,7 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
          do ig=1,npw
            call simp_gen(bes,pawtab(itypat)%proj(1:siz_proj)*dble(paw_dmft%bessel(ig,1:siz_proj,itypat,ik)), &
                        & paw_dmft%radgrid(itypat),r_for_intg=rint)
-           paw_dmft%bessel_int(ig,itypat,ik) = bes * (j_dpc**lpawu1)
+           paw_dmft%bessel_int(ig,itypat,ik) = bes * (j_dpc**lpawu1) ! CAREFUL: we multiply by j^l AFTER simp_gen
          end do ! ig
          paw_dmft%bessel(1:npw,1:siz_wan,itypat,ik) = paw_dmft%bessel(1:npw,1:siz_wan,itypat,ik) * (j_dpc**lpawu1)
          typcycle(itypat) = .true.
@@ -1517,6 +1517,7 @@ subroutine init_dmft(cryst_struc,dmatpawu,dtset,fermie_dft,fnamei,fnametmp_app,p
    end if
  end do ! isym
 
+ ! TODO: this really should be done in init_sc_dmft
  paw_dmft%indsym => cryst_struc%indsym(4,1:nsym,1:paw_dmft%natom)
  if (paw_dmft%nspinor == 2) then
    ABI_MALLOC(paw_dmft%symrec_cart,(3,3,nsym))
