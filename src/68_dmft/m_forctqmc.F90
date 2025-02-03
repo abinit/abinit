@@ -4075,8 +4075,10 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
  call wrtout(std_out,message,"COLL")
  call print_matlu(green%occup_tau%matlu(:),natom,1)
 
- write(message,'(a,3x,a)') ch10,"== Rotating back to cubic basis"
- call wrtout(std_out,message,"COLL")
+ if (basis > 0) then
+   write(message,'(a,3x,a)') ch10,"== Rotating back to cubic basis"
+   call wrtout(std_out,message,"COLL")
+ end if
 
  ! Build back Weiss field
  do ifreq=1,nwlo

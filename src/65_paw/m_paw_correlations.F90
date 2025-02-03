@@ -120,7 +120,8 @@ CONTAINS  !=====================================================================
  subroutine pawpuxinit(dmatpuopt,exchmix,f4of2_sla,f6of2_sla,is_dfpt,jpawu,llexexch,llpawu,&
 &           nspinor,ntypat,option_interaction,pawang,pawprtvol,pawrad,pawtab,upawu,use_dmft,&
 &           useexexch,usepawu,&
-&           ucrpa,lmagCalc,dmft_orbital,dmft_dc,dmft_orbital_filepath) ! optional argument
+&           ucrpa,lmagCalc,dmft_orbital,dmft_dc,dmft_orbital_filepath,& ! optional argument
+&           dmft_use_yukawa_param,dmft_lambda_yukawa,dmft_epsilon_yukawa) ! optional argument
 
 !Arguments ---------------------------------------------
 !scalars
@@ -142,7 +143,9 @@ CONTAINS  !=====================================================================
  type(pawrad_type),intent(inout) :: pawrad(ntypat)
  type(pawtab_type),target,intent(inout) :: pawtab(ntypat)
  logical,optional,intent(in) :: lmagCalc
+ integer,optional,intent(in) :: dmft_use_yukawa_param
  integer,optional,intent(in) :: dmft_orbital(ntypat)
+ real(dp),optional,intent(in) :: dmft_epsilon_yukawa,dmft_lambda_yukawa
  character(len=fnlen),optional,intent(in) :: dmft_orbital_filepath
 !Local variables ---------------------------------------
 !scalars
@@ -250,7 +253,7 @@ CONTAINS  !=====================================================================
 
    if (use_dmft > 0) then
      if (dmft_dc == 8 .and. (f4of2_sla(itypat) >= -0.1_dp .or. &
-         & f6of2_sla(itypat) >= -0.1_dp)) then
+         & f6of2_sla(itypat) >= -0.1_dp) .and. dmft_use_yukawa_param == 0) then
        message = "dmft_dc=8 not compatible with custom f4of2 and f6of2"
        ABI_ERROR(message)
      end if
@@ -839,7 +842,7 @@ CONTAINS  !=====================================================================
          call wrtout(std_out,message,"COLL")
          meshsz = pawrad(itypat)%int_meshsz
          ABI_MALLOC(pawtab(itypat)%proj,(meshsz))
-         pawtab(itypat)%proj(1:meshsz) = pawtab(itypat)%phi(1:meshsz,pawtab(itypat)%lnproju(dmft_orbital(itypat)))
+         pawtab(itypat)%proj(:) = pawtab(itypat)%phi(1:meshsz,pawtab(itypat)%lnproju(dmft_orbital(itypat)))
        else  ! read orbital from file
          call int2char4(itypat,tag2)
          tmpfil = trim(adjustl(dmft_orbital_filepath)) // '_' // tag2
@@ -880,22 +883,27 @@ CONTAINS  !=====================================================================
        if (dmft_dc == 8) then
 
          if (dmft_orbital(itypat) > 0) then
-           message = "WARNING: You are using dmft_dc=8 while using an atomic orbital from &
-               & the PAW dataset. In our current implementation, we assume that &
-               & the projection of the orbital on [dmftbandi,dmftbandf] is the same &
-               & as the orbital itself, and this can hardly be the case with a truncated atomic &
-               & orbital. Please compute the projection of the atomic orbital with dmft_prtwan=1, &
-               & and then use this projection as your DMFT orbital with dmft_orbital=-1. This is explained &
-               & in the tutorial."
+           write(message ,'(7a)') "WARNING: You are using dmft_dc=8 while using an atomic orbital from ", &
+               & "the PAW dataset. In our current implementation, we assume that ", &
+               & "the projection of the orbital on [dmftbandi,dmftbandf] is the same ", &
+               & "as the orbital itself, and this can hardly be the case with a truncated atomic ", &
+               & "orbital. Please compute the projection of the atomic orbital with dmft_prtwan=1, ", &
+               & "and then use this projection as your DMFT orbital with dmft_orbital=-1. This is explained ",&
+               & "in the tutorial."
            ABI_WARNING(message)
          end if
 
          ABI_MALLOC(pawtab(itypat)%proj2,(meshsz))
-         pawtab(itypat)%proj2(1:meshsz) = (pawtab(itypat)%proj(1:meshsz)/int1)**2
+         pawtab(itypat)%proj2(:) = (pawtab(itypat)%proj(:)/int1)**2
 
-         ! Get correspondence U,J <-> lamb,eps
-         call get_lambda(lcur,pawrad_tmp,pawtab(itypat)%proj2(:),meshsz, &
-                       & pawtab(itypat)%upawu,pawtab(itypat)%jpawu,lambda,eps)
+         if (dmft_use_yukawa_param == 0) then
+           ! Get correspondence U,J <-> lamb,eps
+           call get_lambda(lcur,pawrad_tmp,pawtab(itypat)%proj2(:),meshsz, &
+                         & pawtab(itypat)%upawu,pawtab(itypat)%jpawu,lambda,eps)
+         else
+           lambda = dmft_lambda_yukawa
+           eps    = dmft_epsilon_yukawa
+         end if
 
          pawtab(itypat)%lambda = lambda
          pawtab(itypat)%eps = eps
@@ -930,6 +938,14 @@ CONTAINS  !=====================================================================
              & ' lpawu not equal to 0, 1, 2 or 3 is not allowed'
            ABI_ERROR(message)
          end if
+
+         write(message,'(a,6x,f9.4)') " U:",uh
+         call wrtout(std_out,message,"COLL")
+         write(message,'(a,6x,f9.4)') " J:",jh
+         call wrtout(std_out,message,"COLL")
+
+         pawtab(itypat)%upawu = uh
+         pawtab(itypat)%jpawu = jh
 
          call calc_vee(f4of2,f6of2,jh,lcur,pawang,uh,pawtab(itypat)%vee(:,:,:,:),Loc_prtvol)
 

@@ -2338,9 +2338,11 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmft_charge_prec=tol6
    dtsets(idtset)%dmft_dc=1
    dtsets(idtset)%dmft_entropy=0
+   dtsets(idtset)%dmft_epsilon_yukawa=-1.0_dp
    dtsets(idtset)%dmft_fermi_step=0.02_dp
    dtsets(idtset)%dmft_iter=10
    dtsets(idtset)%dmft_kspectralfunc=0
+   dtsets(idtset)%dmft_lambda_yukawa=-1.0_dp
    dtsets(idtset)%dmft_mxsf=0.6_dp
    dtsets(idtset)%dmft_nlambda=6
    dtsets(idtset)%dmft_nominal(:)=0
@@ -2392,6 +2394,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmft_triqs_wmax=-1.0_dp
    dtsets(idtset)%dmft_use_all_bands=0
    dtsets(idtset)%dmft_use_full_chipsi=0
+   dtsets(idtset)%dmft_use_yukawa_param=0
    dtsets(idtset)%dmft_wanorthnorm=3
    dtsets(idtset)%dmft_wanrad=-1.0_dp
    dtsets(idtset)%dmft_x2my2d=0

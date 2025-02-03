@@ -80,23 +80,23 @@ subroutine diag_occ(occ_nd_cpx,nband,occ_diag)
 
 !! Use the opposite to have zheev orders the eigenvalues by descending order.
 !! Afterwards, we multiply by -1 once again.
-  occ_nd_cpx(:,:) = -occ_nd_cpx(:,:)
+  occ_nd_cpx(:,:) = - occ_nd_cpx(:,:)
 
 !! Get diagonal occupations and associated base
 
 ! Compute the optimal working array size
   ABI_MALLOC(work,(1))
-  call zheev('V','U',nband,occ_nd_cpx(:,:),nband,occ_diag(:),work(:),-1,rwork(:),info)
+  call zheev('v','u',nband,occ_nd_cpx(:,:),nband,occ_diag(:),work(:),-1,rwork(:),info)
   lwork = int(work(1))
   ABI_FREE(work)
 
 ! Compute the eigenvalues (occ_diag) and vectors
   ABI_MALLOC(work,(lwork))
 
-  call zheev('V','U',nband,occ_nd_cpx(:,:),nband,occ_diag(:),work(:),lwork,rwork(:),info)
+  call zheev('v','u',nband,occ_nd_cpx(:,:),nband,occ_diag(:),work(:),lwork,rwork(:),info)
 
 !! Obtain the true eigenvalues of occupation matrix in descending order
-  occ_diag(:) = -occ_diag(:)
+  occ_diag(:) = - occ_diag(:)
 
   ABI_FREE(work)
 
