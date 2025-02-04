@@ -122,6 +122,11 @@ At the time of writing, the following features are **not yet supported** in GWR:
 * PAW method
 * Spinor wave-functions ([[nspinor]] = 2)
 
+Citations relevant to the minimax mesh
+
+[[cite:Azizi2023]]
+[[cite:Azizi2024]]
+
 ## GWR workflow for QP energies
 
 A typical GWR workflow with arrows denoting dependencies between the different steps
