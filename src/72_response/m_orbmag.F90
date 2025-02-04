@@ -649,6 +649,7 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
  ABI_MALLOC(orbmag_trace,(3,orbmag_nterms))
  ABI_MALLOC(chern_trace,(3,chern_nterms))
  orbmag_trace = zero
+ chern_trace = zero
  do isppol = 1, dtset%nsppol
    do nn = 1, nband_k
      orbmag_trace(1:3,1:orbmag_nterms) = orbmag_trace(1:3,1:orbmag_nterms) + &
