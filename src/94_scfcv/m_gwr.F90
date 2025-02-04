@@ -3836,8 +3836,8 @@ subroutine fit_iomega(ntau, iw_mesh, iw_wgs, cvals, alpha_r, beta_c)
 
 !Local variables-------------------------------
  integer :: ii
- real(dp) :: loss, min_loss, my_alpha_r, w0, wn, b2
- complex(dp) :: my_beta_c, zz, cfit(ntau), f0, fn
+ real(dp) :: loss, min_loss, w0, wn, b2 ! my_alpha_r,
+ complex(dp) :: my_beta_c, cfit(ntau), f0, fn ! zz,
 ! *************************************************************************
 
  min_loss = huge(one)
