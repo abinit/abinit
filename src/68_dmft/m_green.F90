@@ -1353,6 +1353,10 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
  real(dp) :: tsec(2)
  real(dp), allocatable :: eig(:),rwork(:)
  complex(dpc), allocatable :: mat_tmp(:,:),omega_fac(:),work(:)
+#ifdef HAVE_OPENMP_OFFLOAD
+ integer :: ndat
+ type(oper_type), target :: green_oper_ndat
+#endif
 ! integer, allocatable :: procb(:,:),proct(:,:)
 ! *********************************************************************
 
@@ -1766,10 +1770,40 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
  if (optnonxsum2 == 0) then
    if (paw_dmft%lchipsiortho == 1 .or. optself == 1) then
      call gather_oper(green%oper(:),green%distrib,paw_dmft,opt_ksloc=2,opt_commkpt=1)
-     do ifreq=1,green%nw
-       if (green%distrib%procf(ifreq) /= myproc) cycle
-       call sym_matlu(green%oper(ifreq)%matlu(:),paw_dmft)
-     end do
+
+     if(gpu_option==ABI_GPU_DISABLED .or. nspinor>1) then
+       do ifreq=1,green%nw
+         if (green%distrib%procf(ifreq) /= myproc) cycle
+         call sym_matlu(green%oper(ifreq)%matlu(:),paw_dmft)
+       end do
+     else if(gpu_option==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+       !FIXME: Remove those CPU-GPU transfers once gather_oper has been ported to GPU
+       ! 1) Init green_oper_ndat
+       ndat = green%distrib%nw_mem_kptparal(green%distrib%me_freq+1)
+       do ifreq=1,green%nw
+         if (green%distrib%procf(ifreq) /= myproc) cycle
+         call init_oper_ndat(paw_dmft,green_oper_ndat,ndat,nkpt=green%oper(ifreq)%nkpt,opt_ksloc=2,gpu_option=gpu_option)
+         if (green%oper(ifreq)%has_operks == 0) then
+           green_oper_ndat%paral  = 1
+           green_oper_ndat%shiftk = shift
+         end if
+         exit
+       end do
+       ! 2) Copy green%oper(:)%matlu into green_oper_ndat (CPU->GPU transfer)
+       call copy_oper_to_ndat(green%oper,green_oper_ndat,ndat,green%nw,green%distrib%proct,green%distrib%me_freq,.false.)
+
+       ! 3) Perform sym_matlu on green_oper_ndat (GPU enabled)
+       call sym_matlu(green_oper_ndat%matlu(:),paw_dmft)
+
+       ! 4) Copy back green%oper(:)%matlu from green_oper_ndat (GPU->CPU transfer)
+       call copy_oper_from_ndat(green_oper_ndat,green%oper,ndat,green%nw,green%distrib%proct,&
+       &    green%distrib%me_freq,.false.)
+       ! 5) Destroy green_oper_ndat
+       call destroy_oper(green_oper_ndat)
+#endif
+     end if
+
      call gather_oper(green%oper(:),green%distrib,paw_dmft,opt_ksloc=2)
    end if
    green%has_greenmatlu_xsum = 1
