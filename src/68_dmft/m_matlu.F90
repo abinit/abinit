@@ -76,6 +76,7 @@ MODULE m_matlu
  public :: trace_prod_matlu
  public :: xmpi_matlu
  public :: symmetrize_matlu
+ public :: ylm2jmj_matlu
 !!***
 
 !!****t* m_matlu/matlu_type
@@ -2551,6 +2552,7 @@ end subroutine add_matlu
 !! INPUTS
 !!  matlu1(natom) :: input quantity
 !!  natom :: number of atoms
+!!  paw_dmft  <type(paw_dmft_type)>= paw+dmft related data
 !!  option=1 go from Slm to Ylm basis
 !!  option=2 go from Ylm to Slm basis
 !! SIDE EFFECTS
@@ -4160,6 +4162,7 @@ end subroutine add_matlu
 !!  natom :: number of atoms
 !!  option=1 go from Ylm to JmJ basis
 !!  option=2 go from JmJ to Ylm basis
+!!  paw_dmft  <type(paw_dmft_type)>= paw+dmft related data
 !! SIDE EFFECTS
 !!
 !! NOTES
@@ -4171,18 +4174,41 @@ end subroutine add_matlu
 !Arguments ------------------------------------
  integer, intent(in) :: natom,option
  type(matlu_type), intent(inout) :: matlu(natom)
- type(paw_dmft_type), intent(in)
+ type(paw_dmft_type), intent(in) :: paw_dmft
 !Local variables-------------------------------
+ integer :: iatom,lpawu,nspinor,tndim,tndim_max
+ complex(dpc), allocatable :: mat_tmp(:,:)
+ character(len=1) :: c1,c2
 !************************************************************************
 
- tndim_max = 2 * (2*paw_dmft%maxlpawu+1)
+ nspinor = paw_dmft%nspinor
+ if (nspinor == 1) ABI_BUG("nspinor should be equal to 2")
+
+ tndim_max = nspinor * (2*paw_dmft%maxlpawu+1)
+
+ if (option == 1) then
+   c1 = "c" ; c2 = "n"
+ else
+   c1 = "n" ; c2 = "c"
+ end if
+
+ ABI_MALLOC(mat_tmp,(tndim_max,tndim_max))
 
  do iatom=1,natom
-   lpawu =
-   call abi_xgemm("n",c2,ndim,ndim,ndim,cone,mat_inp(:,:),ndim,slm2ylm(:,1:ndim), &
-                & ndim_max,czero,mat_tmp(:,1+(ispin-1)*ndim:ndim*ispin),ndim)
+   lpawu = paw_dmft%lpawu(iatom)
+   if (lpawu == -1) cycle
+   if (lpawu == 0) ABI_BUG("l should not be equal to 0")
+   tndim = nspinor * (2*lpawu+1)
+
+   call abi_xgemm("n",c2,tndim,tndim,tndim,cone,matlu(iatom)%mat(:,:,1),tndim, &
+                & paw_dmft%jmj2ylm(:,1:tndim,lpawu+1),tndim_max,czero,mat_tmp(:,1:tndim),tndim_max)
+
+   call abi_xgemm(c1,"n",tndim,tndim,tndim,cone,paw_dmft%jmj2ylm(:,1:tndim,lpawu+1), &
+                & tndim_max,mat_tmp(:,1:tndim),tndim_max,czero,matlu(iatom)%mat(:,:,1),tndim)
 
  end do ! iatom
+
+ ABI_FREE(mat_tmp)
 
  end subroutine ylm2jmj_matlu
 !!***

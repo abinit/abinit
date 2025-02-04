@@ -622,8 +622,8 @@ end subroutine vee2udens_hu
 !!  rot_mat = rotation matrix
 !!  rot_type = 0 ! keep original Slm basis
 !!           = 1 ! use the rotation matrix rot_mat from diago of dmat, green, levels..
-!!           = 2 ! rotation to the Ylm basis ! for tests
-!!           = 3 ! rotation to the JmJ Basis ! for tests
+!!           = 2 ! rotation to the Ylm basis
+!!           = 3 ! rotation to the JmJ Basis
 !!           = 4 ! same as 1 but rot_mat is applied from the Ylm basis instead of the Slm basis
 !!
 !! OUTPUT
@@ -796,7 +796,7 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
        if (rot_type == 3) then
 
 !        apply change of basis
-         call vee_ylm2jmj_hu(lpawu,veeylm2(:,:,:,:),vee_rotated(iatom)%mat(:,:,:,:),1)
+         call vee_ylm2jmj_hu(lpawu,veeylm2(:,:,:,:),vee_rotated(iatom)%mat(:,:,:,:),1,paw_dmft)
 
 !        print interaction matrix in the JMJ basis from Inglis and Julien tables
          if (pawprtvol >= 3) then
@@ -1675,12 +1675,13 @@ end subroutine vee2udensatom_hu
 !! INPUTS
 !!  lcor= angular momentum, size of the matrix is 2*lcor+1
 !!  mat_inp_c= Input matrix
+!!  paw_dmft  <type(paw_dmft_type)>= paw+dmft related data
 !!  option= 1  Change matrix from Slm to Ylm basis
 !!          2  Change matrix from Ylm to Slm basis
 !!  prtvol=printing volume
 !!
 !! OUTPUT
-!!  mat_inp_c= Output matrix in Ylm or Slm basis according to option
+!!  mat_out_c= Output matrix in Ylm or Slm basis according to option
 !!
 !! NOTES
 !!
@@ -1956,136 +1957,149 @@ end subroutine vee_ndim2tndim_hu
 !!
 !! INPUTS
 !!  lcor= angular momentum
+!!  mat_inp_c = input tensor
+!!  mat_out_c = output tensor
 !!  option=  1 matrix in |l,s,m_l,m_s> basis is changed into |l,s,j,m_j> basis
 !!           2 matrix in |l,s,j,m_j> basis is changed into |l,s,m_l,m_s> basis
+!!  paw_dmft  <type(paw_dmft_type)>= paw+dmft related data
 !!
 !! SIDE EFFECTS
-!!  mat_mlms= Input/Ouput matrix in the Ylm basis, size of the matrix is (2*lcor+1,2*lcor+1,ndij)
-!!  mat_jmj= Input/Output matrix in the J,M_J basis, size is 2*(2*lcor+1),2*(2*lcor+1)
 !!
 !! NOTES
 !!  useful only in ndij==4
 !!
 !! SOURCE
 
-subroutine vee_ylm2jmj_hu(lcor,mat_inp_c,mat_out_c,option)
+subroutine vee_ylm2jmj_hu(lcor,mat_inp_c,mat_out_c,option,paw_dmft)
 
 !Arguments ---------------------------------------------
-!scalars
  integer, intent(in) :: lcor,option
-!arrays
- complex(dpc), intent(in)  :: mat_inp_c(2*(2*lcor+1),2*(2*lcor+1),2*(2*lcor+1),2*(2*lcor+1))
- complex(dpc), intent(out) :: mat_out_c(2*(2*lcor+1),2*(2*lcor+1),2*(2*lcor+1),2*(2*lcor+1))
-
+ complex(dpc), intent(in) :: mat_inp_c(2*(2*lcor+1),2*(2*lcor+1),2*(2*lcor+1),2*(2*lcor+1))
+ complex(dpc), intent(inout) :: mat_out_c(2*(2*lcor+1),2*(2*lcor+1),2*(2*lcor+1),2*(2*lcor+1))
+ type(paw_dmft_type), intent(in) :: paw_dmft
 !Local variables ---------------------------------------
-!scalars
- integer :: ii,im,jc1,jj,jm,ll,ml1,ms1,gg,hh,gm,hm
- real(dp),parameter :: invsqrt2=one/sqrt2
- real(dp) :: invsqrt2lp1,xj,xmj
- complex(dpc) :: tmp2
+ integer :: im,jm,tndim
+ complex(dpc), allocatable :: jmj2ylm(:,:)
  character(len=500) :: message
-!arrays
- integer, allocatable :: ind_msml(:,:)
- complex(dpc),allocatable :: mlms2jmj(:,:)
-
 !*********************************************************************
 
- if (option/=1.and.option/=2) then
-   message=' option=/1 and =/2 !'
+ if (option /= 1 .and. option /= 2) then
+   message = ' option=/1 and =/2 !'
    ABI_BUG(message)
  end if
 
- if(option==1) then
-   write(message,'(3a)') ch10,&
-&   "matrix in |l,s,m_l,m_s> basis is changed into |l,s,j,m_j> basis"
-   call wrtout(std_out,message)
- else if(option==2) then
-   write(message,'(3a)') ch10,&
-&   "matrix in |l,s,j,m_j> basis is changed into |l,s,m_l,m_s> basis"
-   call wrtout(std_out,message)
+ if (lcor == 0) ABI_BUG("l should not be equal to 0")
+
+ if (option == 1) then
+   write(message,'(3a)') ch10,"matrix in |l,s,m_l,m_s> basis is changed into |l,s,j,m_j> basis"
+ else if (option == 2) then
+   write(message,'(3a)') ch10,"matrix in |l,s,j,m_j> basis is changed into |l,s,m_l,m_s> basis"
+ end if
+ call wrtout(std_out,message,"COLL")
+
+ tndim = 2 * (2*lcor+1)
+
+ ! Make copy to prevent creation of temporary in the case ndim /= ndim_max
+ ABI_MALLOC(jmj2ylm,(tndim,tndim))
+
+ if (option == 1) then
+   jmj2ylm(:,:) = paw_dmft%jmj2ylm(1:tndim,1:tndim,lcor+1)
+ else if (option == 2) then
+   jmj2ylm(:,:) = conjg(transpose(paw_dmft%jmj2ylm(1:tndim,1:tndim,lcor+1)))
  end if
 
-!--------------- Built indices + allocations
- ll=lcor
- ABI_MALLOC(mlms2jmj,(2*(2*ll+1),2*(2*ll+1)))
- mlms2jmj=czero
- ABI_MALLOC(ind_msml,(2,-ll:ll))
- mlms2jmj=czero
- jc1=0
- do ms1=1,2
-   do ml1=-ll,ll
-     jc1=jc1+1
-     ind_msml(ms1,ml1)=jc1
-   end do
+ write(message,'(3a)') ch10,"Matrix to go from |J,M_J> to |M_L,M_S>"
+ call wrtout(std_out,message,"COLL")
+ do im=1,tndim
+   write(message,'(12(1x,18(1x,"(",f7.3,",",f7.3,")")))') (jmj2ylm(im,jm),jm=1,tndim)
+   call wrtout(std_out,message,"COLL")
  end do
+
+ call rotate_hu(jmj2ylm(:,:),1,tndim,mat_inp_c(:,:,:,:),mat_out_c(:,:,:,:))
+
+ ABI_FREE(jmj2ylm)
+
+!--------------- Built indices + allocations
+ !ll=lcor
+ !ABI_MALLOC(mlms2jmj,(2*(2*ll+1),2*(2*ll+1)))
+ !mlms2jmj=czero
+ !ABI_MALLOC(ind_msml,(2,-ll:ll))
+ !mlms2jmj=czero
+ !jc1=0
+ !do ms1=1,2
+ !  do ml1=-ll,ll
+ !    jc1=jc1+1
+ !    ind_msml(ms1,ml1)=jc1
+ !  end do
+ !end do
 
 !--------------- built mlms2jmj
 !do jj=ll,ll+1    ! the physical value of j are ll-0.5,ll+0.5
 !xj(jj)=jj-0.5
- if(ll==0)then
-   message=' ll should not be equal to zero !'
-   ABI_BUG(message)
- end if
- jc1=0
- invsqrt2lp1=one/sqrt(float(2*lcor+1))
- do jj=ll,ll+1
-   xj=float(jj)-half !  xj is in {ll-0.5, ll+0.5}
-   do jm=-jj,jj-1
-     xmj=float(jm)+half  ! xmj is in {-xj,xj}
-     jc1=jc1+1           ! Global index for JMJ
-     if(nint(xj+0.5)==ll+1) then  ! if xj=ll+0.5
-       if(nint(xmj+0.5)==ll+1)  then
-         mlms2jmj(ind_msml(2,ll),jc1)=1.0   !  J=L+0.5 and m_J=L+0.5
-       else if(nint(xmj-0.5)==-ll-1) then
-         mlms2jmj(ind_msml(1,-ll),jc1)=1.0   !  J=L+0.5 and m_J=-L-0.5
-       else
-         mlms2jmj(ind_msml(2,nint(xmj-0.5)),jc1)=invsqrt2lp1*(sqrt(float(ll)+xmj+0.5))
-         mlms2jmj(ind_msml(1,nint(xmj+0.5)),jc1)=invsqrt2lp1*(sqrt(float(ll)-xmj+0.5))
-       end if
-     end if
-     if(nint(xj+0.5)==ll) then  ! if xj=ll-0.5
-       mlms2jmj(ind_msml(1,nint(xmj+0.5)),jc1)=invsqrt2lp1*(sqrt(float(ll)+xmj+0.5))
-       mlms2jmj(ind_msml(2,nint(xmj-0.5)),jc1)=-invsqrt2lp1*(sqrt(float(ll)-xmj+0.5))
-     end if
-   end do
- end do
- write(message,'(3a)') ch10,"Matrix to go from |M_L,M_S> to |J,M_J>"
- call wrtout(std_out,message,"COLL")
- do im=1,2*(ll*2+1)
-   write(message,'(12(1x,18(1x,"(",f7.3,",",f7.3,")")))') (mlms2jmj(im,jm),jm=1,2*(ll*2+1))
-   call wrtout(std_out,message,"COLL")
- end do
+ !if(ll==0)then
+ !  message=' ll should not be equal to zero !'
+ !  ABI_BUG(message)
+ !end if
+ !jc1=0
+ !invsqrt2lp1=one/sqrt(float(2*lcor+1))
+ !do jj=ll,ll+1
+ !  xj=float(jj)-half !  xj is in {ll-0.5, ll+0.5}
+ !  do jm=-jj,jj-1
+ !    xmj=float(jm)+half  ! xmj is in {-xj,xj}
+ !    jc1=jc1+1           ! Global index for JMJ
+ !    if(nint(xj+0.5)==ll+1) then  ! if xj=ll+0.5
+ !      if(nint(xmj+0.5)==ll+1)  then
+ !        mlms2jmj(ind_msml(2,ll),jc1)=1.0   !  J=L+0.5 and m_J=L+0.5
+ !      else if(nint(xmj-0.5)==-ll-1) then
+ !        mlms2jmj(ind_msml(1,-ll),jc1)=1.0   !  J=L+0.5 and m_J=-L-0.5
+ !      else
+ !        mlms2jmj(ind_msml(2,nint(xmj-0.5)),jc1)=invsqrt2lp1*(sqrt(float(ll)+xmj+0.5))
+ !        mlms2jmj(ind_msml(1,nint(xmj+0.5)),jc1)=invsqrt2lp1*(sqrt(float(ll)-xmj+0.5))
+ !      end if
+ !    end if
+ !    if(nint(xj+0.5)==ll) then  ! if xj=ll-0.5
+ !      mlms2jmj(ind_msml(1,nint(xmj+0.5)),jc1)=invsqrt2lp1*(sqrt(float(ll)+xmj+0.5))
+ !      mlms2jmj(ind_msml(2,nint(xmj-0.5)),jc1)=-invsqrt2lp1*(sqrt(float(ll)-xmj+0.5))
+ !    end if
+ !  end do
+ !end do
+ !write(message,'(3a)') ch10,"Matrix to go from |M_L,M_S> to |J,M_J>"
+ !call wrtout(std_out,message,"COLL")
+ !do im=1,2*(ll*2+1)
+ !  write(message,'(12(1x,18(1x,"(",f7.3,",",f7.3,")")))') (mlms2jmj(im,jm),jm=1,2*(ll*2+1))
+ !  call wrtout(std_out,message,"COLL")
+ !end do
 
 !--------------- compute change of basis
- do jm=1,2*(2*ll+1)
-   do im=1,2*(2*ll+1)
-     do hm=1,2*(2*ll+1)
-       do gm=1,2*(2*ll+1)
-         tmp2=czero
-         do gg=1,2*(2*ll+1)
-           do hh=1,2*(2*ll+1)
-             do ii=1,2*(2*ll+1)
-               do jj=1,2*(2*ll+1)
-                 if(option==1) then
-                   tmp2=tmp2+mat_inp_c(gg,ii,hh,jj)*CONJG(mlms2jmj(ii,im))*(mlms2jmj(jj,jm))&
-&                                                  *CONJG(mlms2jmj(gg,gm))*(mlms2jmj(hh,hm))
-                 else if(option==2) then
+! do jm=1,2*(2*ll+1)
+!   do im=1,2*(2*ll+1)
+!     do hm=1,2*(2*ll+1)
+!       do gm=1,2*(2*ll+1)
+!         tmp2=czero
+!         do gg=1,2*(2*ll+1)
+!           do hh=1,2*(2*ll+1)
+!             do ii=1,2*(2*ll+1)
+!               do jj=1,2*(2*ll+1)
+!                 if(option==1) then
+!                   tmp2=tmp2+mat_inp_c(gg,ii,hh,jj)*CONJG(mlms2jmj(ii,im))*(mlms2jmj(jj,jm))&
+!&                                                  *CONJG(mlms2jmj(gg,gm))*(mlms2jmj(hh,hm))
+!                 else if(option==2) then
 !                   tmp2=tmp2+mat_inp_c(gg,ii,hh,jj)*CONJG(mlms2jmj(ii,im))*(mlms2jmj(jj,jm))& ! inv=t*
 !&                                                  *CONJG(mlms2jmj(gg,gm))*(mlms2jmj(hh,hm)) ! inv=t*
-                   tmp2=tmp2+mat_inp_c(gg,ii,hh,jj)*(mlms2jmj(im,ii))*CONJG(mlms2jmj(jm,jj))& ! inv=t*
-&                                                  *(mlms2jmj(gm,gg))*CONJG(mlms2jmj(hm,hh)) ! inv=t*
-                 end if
-               end do
-             end do
-           end do
-         end do
-         mat_out_c(gm,im,hm,jm)=tmp2
-       end do
-     end do
-   end do
- end do
- ABI_FREE(mlms2jmj)
- ABI_FREE(ind_msml)
+!                   tmp2=tmp2+mat_inp_c(gg,ii,hh,jj)*(mlms2jmj(im,ii))*CONJG(mlms2jmj(jm,jj))& ! inv=t*
+!&                                                  *(mlms2jmj(gm,gg))*CONJG(mlms2jmj(hm,hh)) ! inv=t*
+ !                end if
+ !              end do
+!             end do
+!           end do
+!         end do
+!         mat_out_c(gm,im,hm,jm)=tmp2
+!       end do
+!     end do
+!   end do
+! end do
+! ABI_FREE(mlms2jmj)
+! ABI_FREE(ind_msml)
 
  end subroutine vee_ylm2jmj_hu
 !!***

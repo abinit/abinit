@@ -326,7 +326,7 @@ subroutine print_oper(oper,option,paw_dmft,prtopt)
  integer, intent(in) :: option,prtopt
 !Local variables-------------------------------
  integer :: ib,ib1,iband1,iband2,ikpt,isppol,mbandc,nkpt,nkptr
- character(len=100000) :: message
+ character(len=50000) :: message
  logical  :: ximag
  real(dp) :: maximag
 ! *********************************************************************
