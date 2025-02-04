@@ -276,12 +276,16 @@ def main():
     parser.add_option("--etsf", action="store_true", default=False,
                        help="Validate netcdf files produced by the tests. Requires netcdf4")
 
-    parser.add_option("-Y","--yaml-simplified-diff", dest="yaml_simplified_diff", default=False, action="store_true",
+    parser.add_option("-Y", "--yaml-simplified-diff", dest="yaml_simplified_diff", default=False, action="store_true",
                       help="Will only perform a simplified diff when comparing .abo files (based only on YAML sections)")
 
-    parser.add_option("-T","--forced-tolerance", dest="forced_tolerance", type="string", default="default",
+    parser.add_option("-T", "--forced-tolerance", dest="forced_tolerance", type="string", default="default",
                       help="[string] Force the use of fldiff comparison tool with the specified tolerance. "+
                            "Possible values are: default (from test config), high(1.e-10), medium (1.e-8), easy (1.e-5), ridiculous (1.e-2)")
+
+    parser.add_option("--abimem-level", type=int, default=0, help="Run executable with abimem-level option")
+    parser.add_option("--useylm", type=int, default=None, help="Use useylm in all the ABINIT input files")
+    parser.add_option("--gpu-option", type=int, default=None, help="Use gpu_option in all the ABINIT input files")
 
     parser.add_option("--touch", default="",
                       help=("Used in conjunction with `-m`."
@@ -400,7 +404,7 @@ def main():
 
     cprint("Running on %s -- system %s -- ncpus %s -- Python %s -- %s" % (
           gethostname(), system, ncpus_detected, platform.python_version(), _my_name),
-          'green', attrs=['underline'])
+          color='green', attrs=['underline'])
 
     # Compile the code before running the tests.
     if options.make:
@@ -628,7 +632,11 @@ def main():
                                    abimem_check=options.abimem,
                                    etsf_check=options.etsf,
                                    simplified_diff=options.yaml_simplified_diff,
-                                   forced_tolerance=options.forced_tolerance)
+                                   forced_tolerance=options.forced_tolerance,
+                                   abimem_level=options.abimem_level,
+                                   useylm=options.useylm,
+                                   gpu_option=options.gpu_option,
+                                   )
     if results is None: return 99
 
     if options.looponfail:
@@ -669,7 +677,11 @@ def main():
                                                    sub_timeout=options.sub_timeout,
                                                    pedantic=options.pedantic,
                                                    abimem_check=options.abimem,
-                                                   etsf_check=options.etsf)
+                                                   etsf_check=options.etsf,
+                                                   abimem_level=options.abimem_level,
+                                                   useylm=options.useylm,
+                                                   gpu_option=options.gpu_option,
+                                                   )
                     if results is None: return 99
 
         if count == max_iterations:

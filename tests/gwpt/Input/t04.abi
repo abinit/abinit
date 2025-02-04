@@ -1,11 +1,18 @@
+#gwpt_np_wpqbks 1 1 8 1 1 1
+
+
 # ZPR computation at the Gamma point for MgO.
- nband 12
+ nband 9
  #nband 30
  ecut 35.0
+ #prtvol 10
 
  ngkpt 4 4 4
  nshiftk 1
  shiftk 0 0 0
+
+ # TODO: Should have a default value
+ elph2_imagden 0.1 eV
 
 ##############################################
 ####                 SECTION: EPH
@@ -14,12 +21,15 @@
  eph_task 17              # GWPT computation
 
  getddb_filepath "t01_DDB"
- ddb_ngqpt 4 4 4          # The code expects to find in the DDB
+ ddb_ngqpt 1 1 1          # The code expects to find in the DDB
+ #ddb_ngqpt 2 2 2          # The code expects to find in the DDB
+ #ddb_ngqpt 4 4 4          # The code expects to find in the DDB
                           # all the IBZ q-points corresponding to a 4x4x4 q-mesh
 
- ecuteps 4
- ecutsigx 4
- tolwfr 1e-14
+ ecuteps 1
+ ecutsigx 1
+ boxcutmin 1.1
+ tolwfr 1e-8
 
  mdf_epsinf 12    # For model dielectric function
  ppmodel 2
@@ -28,8 +38,11 @@
  getdrhodb_filepath "t02_DVDB"  # FIXME: FAKE DRHODB
  getwfk_filepath "t03o_WFK"     # 4x4x4 k-mesh with 70 bands
  getden_filepath  "MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_DEN.nc"
+ getpot_filepath  "MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_POT.nc"
+
  #gstore_kzone "bz"; gstore_qzone "ibz"
  gstore_kzone "ibz"; gstore_qzone "bz"; gstore_kfilter "qprange"
+ gstore_gmode "atom"
 
  # Disable output of phonon DOS and phonon bands
  prtphdos 0

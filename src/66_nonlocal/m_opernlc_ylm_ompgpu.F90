@@ -225,18 +225,18 @@ contains
 subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fac,&
 &          dgxdt,dgxdtfac,dgxdtfac_sij,d2gxdt,d2gxdtfac,d2gxdtfac_sij,dimenl1,dimenl2,dimekbq,enl,&
 &          gx,gxfac,gxfac_sij,iatm,indlmn,itypat,lambda,mpi_enreg,natom,ndgxdt,ndgxdtfac,&
-&          nd2gxdt,nd2gxdtfac,nincat,nlmn,nspinor,nspinortot,optder,paw_opt,sij,ndat,ibeg,iend,nprojs,ntypat,ndat_enl,gpu_option)
+&          nd2gxdt,nd2gxdtfac,nincat,nlmn,nspinor,nspinortot,optder,paw_opt,sij,ndat,ibeg,iend,nprojs,ndat_enl,gpu_option)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,cplex_enl,cplex_fac,dimenl1,dimenl2,dimekbq,iatm,itypat
  integer,intent(in) :: natom,ndgxdt,ndgxdtfac,nd2gxdt,nd2gxdtfac,nincat,nspinor,nspinortot,optder,paw_opt,gpu_option
  integer,intent(inout) :: nlmn
- integer,intent(in) :: ndat,ibeg,iend,nprojs,ntypat,ndat_enl
+ integer,intent(in) :: ndat,ibeg,iend,nprojs,ndat_enl
  real(dp) :: lambda(ndat)
  type(MPI_type) , intent(in) :: mpi_enreg
 !arrays
- integer,intent(in) :: atindx1(natom),indlmn(6,nlmn,ntypat),cplex_dgxdt(ndgxdt),cplex_d2gxdt(nd2gxdt)
+ integer,intent(in) :: atindx1(natom),indlmn(6,nlmn),cplex_dgxdt(ndgxdt),cplex_d2gxdt(nd2gxdt)
  real(dp),intent(in) :: dgxdt(cplex,ndgxdt,nprojs,nspinor*ndat)
  real(dp),intent(in) :: d2gxdt(cplex,nd2gxdt,nlmn,nincat,nspinor*ndat)
  real(dp),intent(in),target :: enl(dimenl1,dimenl2,nspinortot**2,ndat_enl,dimekbq)
@@ -320,7 +320,7 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
      do ia=1,nincat
        do ilmn=1,nlmn
          do ii=1,cplex
-           iln=indlmn(5,ilmn,itypat)
+           iln=indlmn(5,ilmn)
            gxfac_(ii,ilmn+(ia-1)*nlmn+ibeg,ispinor+(idat-1)*nspinor)=&
            & enl_ptr2(iln,itypat,ispinor+shift,min(ndat_enl,idat))*gx(ii,ilmn+(ia-1)*nlmn+ibeg,ispinor+(idat-1)*nspinor)
          end do
@@ -613,7 +613,7 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
          do mu=1,ndgxdtfac
            do ii=1,cplex
              dgxdtfac_(ii,mu,ilmn+(ia-1)*nlmn+ibeg,ispinor+(idat-1)*nspinor)=&
-             &    enl_ptr2(indlmn(5,ilmn,itypat),itypat,ispinor_index,min(ndat_enl,idat))&
+             &    enl_ptr2(indlmn(5,ilmn),itypat,ispinor_index,min(ndat_enl,idat))&
              &    * dgxdt(ii,mu,ilmn+(ia-1)*nlmn+ibeg,ispinor+(idat-1)*nspinor)
            end do
          end do
@@ -984,7 +984,7 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
 
  ABI_UNUSED((/cplex,cplex_enl,cplex_fac,dimenl1,dimenl2,dimekbq,iatm,itypat,gpu_option/))
  ABI_UNUSED((/natom,ndgxdt,ndgxdtfac,nd2gxdt,nd2gxdtfac,nincat,nspinor,nspinortot,optder,paw_opt/))
- ABI_UNUSED((/nlmn,ndat,ibeg,iend,nprojs,ntypat/))
+ ABI_UNUSED((/nlmn,ndat,ibeg,iend,nprojs/))
  ABI_UNUSED((/atindx1,indlmn,cplex_dgxdt,cplex_d2gxdt/))
  ABI_UNUSED((/dgxdtfac,dgxdtfac_sij,d2gxdtfac,d2gxdtfac_sij,gxfac,gxfac_sij,dgxdt,d2gxdt,lambda,enl,gx,sij/))
  ABI_UNUSED_A(mpi_enreg)

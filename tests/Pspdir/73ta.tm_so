@@ -1,7 +1,7 @@
 pseudo Tantale spin orbite Stephane modifie coulombien r>10
   73.00000   5.00000    990913                zatom, zion, pspdat
     5    2    2    0      1046    .00000      pspcod,pspxc,lmax,lloc,mmax,r2well
-    2.508991628593723E-4  0.0125   2          r1,al,pspso 
+    2.508991628593723E-4  0.0125   2          r1,al,pspso
     0    0    0    1   2.76        l,e99.0,e99.9,nproj,rcpsp
     .00000000    .0000000000    .0000000000    .00000000   rms,ekb1,ekb2,epsatm
     1   0   0    2   3.91        l,e99.0,e99.9,nproj,rcpsp

@@ -1,6 +1,6 @@
-Hartwigsen-Goedecker-Hutter psp for Ta,  from PRB58, 3641 (1998) 
+Hartwigsen-Goedecker-Hutter psp for Ta,  from PRB58, 3641 (1998)
    73  13  010605 zatom,zion,pspdat
- 3 1   2 0 2001 0  pspcod,pspxc,lmax,lloc,mmax,r2well 
+ 3 1   2 0 2001 0  pspcod,pspxc,lmax,lloc,mmax,r2well
   0.550000    4.546236    0.779422    0.000000   0.000000 rloc, c1, c2, c3, c4
   0.421853    2.708136   -5.790959    0.947663          rs, h11s, h22s, h33s
   0.461345   -0.724853   -2.215211    0.000000          rp, h11p, h22p, h33p

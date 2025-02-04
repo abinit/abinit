@@ -77,7 +77,7 @@ CONTAINS  !=====================================================================
 !! INPUTS
 !!  dmatpuopt= select expression for the density matrix
 !!  dmft_dc= option for the double-counting scheme in DMFT
-!!  dmft_proj(ntypat)= option for the choice of the DMFT radial orbital
+!!  dmft_orbital(ntypat)= option for the choice of the DMFT radial orbital
 !!  exchmix= mixing factor for local exact-exchange
 !!  is_dfpt=true if we are running a DFPT calculation
 !!  jpawu(ntypat)= value of J
@@ -119,7 +119,7 @@ CONTAINS  !=====================================================================
  subroutine pawpuxinit(dmatpuopt,exchmix,f4of2_sla,f6of2_sla,is_dfpt,jpawu,llexexch,llpawu,&
 &           nspinor,ntypat,option_interaction,pawang,pawprtvol,pawrad,pawtab,upawu,use_dmft,&
 &           useexexch,usepawu,&
-&           ucrpa,lmagCalc,dmft_proj,dmft_dc) ! optional argument
+&           ucrpa,lmagCalc,dmft_orbital,dmft_dc) ! optional argument
 
 !Arguments ---------------------------------------------
 !scalars
@@ -141,7 +141,7 @@ CONTAINS  !=====================================================================
  type(pawrad_type),intent(inout) :: pawrad(ntypat)
  type(pawtab_type),target,intent(inout) :: pawtab(ntypat)
  logical,optional,intent(in) :: lmagCalc
- integer,optional,intent(in) :: dmft_proj(ntypat)
+ integer,optional,intent(in) :: dmft_orbital(ntypat)
 !Local variables ---------------------------------------
 !scalars
  integer :: icount,ierr,il,ilmn,ilmnp,ir,isela,iselb,itemp,itypat,iu,iup,j0lmn,jl,jlmn,jlmnp,ju,jup
@@ -153,8 +153,7 @@ CONTAINS  !=====================================================================
  logical :: compute_euijkl,compute_euij_fll,lexist
  real(dp) :: ak,eps,f4of2,f6of2,int1,intg,jh,lambda,lstep,phiint_ij,phiint_ipjp,rstep,uh,vee1,vee2
  character(len=4) :: tag
- character(len=15) :: tmpfil
- character(len=500) :: message
+ character(len=500) :: message,tmpfil
  logical :: lmagCalc_
 !arrays
  integer,ABI_CONTIGUOUS pointer :: indlmn(:,:)
@@ -828,15 +827,20 @@ CONTAINS  !=====================================================================
 
        me = xmpi_comm_rank(xmpi_world)
 
-       if (dmft_proj(itypat) > 0) then ! use atomic orbital from PAW dataset
-         write(message,'(2a,i1,a)') ch10," Using atomic orbital number ",dmft_proj(itypat)," from PAW dataset"
+       if (dmft_orbital(itypat) > 0) then ! use atomic orbital from PAW dataset
+         if (dmft_orbital(itypat) > pawtab(itypat)%nproju) then
+           write(message,*) "For atom type:",itypat,"you need to set dmft_orbital to a value", &
+                        & " lower than",pawtab(itypat)%nproju
+           ABI_ERROR(message)
+         end if
+         write(message,'(2a,i1,a)') ch10," Using atomic orbital number ",dmft_orbital(itypat)," from PAW dataset"
          call wrtout(std_out,message,"COLL")
          meshsz = pawrad(itypat)%int_meshsz
          ABI_MALLOC(pawtab(itypat)%proj,(meshsz))
-         pawtab(itypat)%proj(1:meshsz) = pawtab(itypat)%phi(1:meshsz,pawtab(itypat)%lnproju(dmft_proj(itypat)))
+         pawtab(itypat)%proj(1:meshsz) = pawtab(itypat)%phi(1:meshsz,pawtab(itypat)%lnproju(dmft_orbital(itypat)))
        else  ! read orbital from file
-         tmpfil = 'dmft_proj_'//adjustl(tag)
-         write(message,'(2a)') " Using wavefunction from file ",tmpfil
+         tmpfil = 'dmft_orbital_'//adjustl(tag)
+         write(message,'(2a)') " Using wavefunction from file ",trim(tmpfil)
          call wrtout(std_out,message,"COLL")
          inquire(file=trim(tmpfil),exist=lexist)
          if (.not. lexist) ABI_ERROR("File "//trim(tmpfil)//" does not exist !")
@@ -855,7 +859,7 @@ CONTAINS  !=====================================================================
          call xmpi_bcast(ierr,0,xmpi_world,ir)
          if (ierr /= 0) ABI_ERROR("Error when reading file "//trim(tmpfil))
          call xmpi_bcast(pawtab(itypat)%proj(:),0,xmpi_world,ierr)
-       end if ! dmft_proj
+       end if ! dmft_orbital
 
        mesh_type = pawrad(itypat)%mesh_type
        lstep = pawrad(itypat)%lstep
@@ -864,13 +868,18 @@ CONTAINS  !=====================================================================
        call pawrad_init(pawrad_tmp,meshsz,mesh_type,rstep,lstep)
        call simp_gen(int1,pawtab(itypat)%proj(1:meshsz)**2,pawrad_tmp)
 
-       write(message,'(a,f9.4)') " Squared norm of the DMFT orbital: ",int1
+       write(message,'(a,f6.4)') " Squared norm of the DMFT orbital: ",int1
        call wrtout(std_out,message,"COLL")
 
        int1 = sqrt(int1)
 
+       tmpfil = "dmft_normalized_orbital_itypat_"//trim(adjustl(tag))
+
+       write(message,'(3a)') ch10," Writing unprojected normalized orbital on file ",trim(tmpfil)
+       call wrtout(std_out,message,"COLL")
+
        if (me == 0) then
-         open(unit=505,file="dmft_normalized_orbital_itypat_"//trim(adjustl(tag)),status="unknown",form="formatted")
+         open(unit=505,file=trim(tmpfil),status="unknown",form="formatted")
          do ir=1,meshsz
            write(505,*) pawrad_tmp%rad(ir),pawtab(itypat)%proj(ir)/int1
          end do
@@ -878,6 +887,17 @@ CONTAINS  !=====================================================================
        end if ! me=0
 
        if (dmft_dc == 8) then
+
+         if (dmft_orbital(itypat) > 0) then
+           message = "WARNING: You are using dmft_dc=8 while using an atomic orbital from &
+               & the PAW dataset. In our current implementation, we assume that &
+               & the projection of the orbital on [dmftbandi,dmftbandf] is the same &
+               & as the orbital itself, and this can hardly be the case with a truncated atomic &
+               & orbital. Please compute the projection of the atomic orbital with dmft_prtwan=1, &
+               & and then use this projection as your DMFT orbital with dmft_orbital=-1. This is explained &
+               & in the tutorial."
+           ABI_WARNING(message)
+         end if
 
          ABI_MALLOC(pawtab(itypat)%proj2,(meshsz))
          pawtab(itypat)%proj2(1:meshsz) = (pawtab(itypat)%proj(1:meshsz)/int1)**2
@@ -1419,7 +1439,7 @@ CONTAINS  !=====================================================================
      write(message, '(6a)') ch10,'======= DFT+U Energy terms (in Hartree) ====',ch10,&
 &     ch10,' For Atom ',tag
    else if (pawtab%usepawu >= 10) then
-     write(message, '(6a)') ch10,'  ===   DFT+U Energy terms for the DMFT occupation matrix ==',ch10,&
+     write(message, '(6a)') ch10,'  ===   DFT+U Energy terms from the DMFT occupation matrix ==',ch10,&
 &     ch10,' For Atom ',tag
    end if
 

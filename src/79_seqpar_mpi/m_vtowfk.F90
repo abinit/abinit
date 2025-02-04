@@ -224,11 +224,12 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  integer :: bandpp_cprj,blocksize,choice,cpopt,iband,iband1
  integer :: iblock,iblocksize,ibs,idir,ierr,igs,igsc,ii,inonsc
  integer :: iorder_cprj,ipw,ispinor,ispinor_index,istwf_k,iwavef,me_g0,mgsc,my_nspinor,n1,n2,n3 !kk
- integer :: nband_k_cprj,ncols_cprj,nblockbd,ncpgr,ndat,nkpt_max,nnlout,ortalgo
+ integer :: nband_k_cprj,ncols_cprj,nblockbd,ncpgr,ndat,niter,nkpt_max,nnlout,ortalgo
  integer :: paw_opt,quit,signs,space,spaceComm,tim_nonlop,wfoptalg,wfopta10
  logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc
  real(dp) :: ar,ar_im,eshift,occblock,norm
- real(dp) :: residk,weight,cpu,wall,gflops
+ real(dp) :: max_resid,weight,cpu,wall,gflops
+ character(len=50) :: iter_name
  character(len=500) :: msg
  real(dp) :: dummy(2,1),nonlop_dum(1,1),tsec(2)
  real(dp),allocatable :: cwavef1(:,:),cwavef_x(:,:),cwavef_y(:,:),cwavefb(:,:,:)
@@ -367,7 +368,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    end if
  end if
 
- ! Carry out UP TO dtset%nline steps, or until resid for every band is < dtset%tolwfr
+ ! Carry out UP TO dtset%nline (or dtset%mdeg_filter) steps, or until resid for every band is < dtset%tolwfr
  if (prtvol/=5 .and. (prtvol>2 .or. ikpt <= nkpt_max)) then
    write(msg,'(a,i5,2x,a,3f9.5,2x,a)')' non-scf iterations; kpt # ',ikpt,', k= (',gs_hamk%kpt_k,'), band residuals:'
    call wrtout(std_out,msg,'PERS')
@@ -510,11 +511,11 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 &           mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k)
            ABI_NVTX_END_RANGE()
          else if (dtset%cprj_in_memory==1) then
-           call chebfiwf2_cprj(cg_k,dtset,eig_k,enlx_k,gs_hamk,kinpw,&
+           call chebfiwf2_cprj(cg_k,dtset,eig_k,occ_k,enlx_k,gs_hamk,&
              mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k,xg_nonlop)
          else
            ABI_NVTX_START_RANGE(NVTX_CHEBFI2)
-           call chebfiwf2(cg_k,dtset,eig_k,enlx_k,gs_hamk,kinpw,&
+           call chebfiwf2(cg_k,dtset,eig_k,occ_k,enlx_k,gs_hamk,&
 &           mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k)
            ABI_NVTX_END_RANGE()
          end if
@@ -568,12 +569,12 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !  Find largest resid over bands at this k point
 !  Note that this operation is done BEFORE rotation of bands:
 !  it would be time-consuming to recompute the residuals after.
-   if (nbdbuf>=0) then
-     residk=maxval(resid_k(1:max(1,nband_k-nbdbuf)))
+   if (nbdbuf >= 0) then
+     max_resid = maxval(resid_k(1:max(1,nband_k-nbdbuf)))
    else if (nbdbuf==-101) then
-     residk=maxval(occ_k(1:nband_k)*resid_k(1:nband_k))
+     max_resid = maxval(occ_k(1:nband_k)*resid_k(1:nband_k))
    else
-     ABI_ERROR('Bad value of nbdbuf')
+     ABI_ERROR(sjoin('Bad value of nbdbuf:', itoa(nbdbuf)))
    end if
 
 !  Print residuals
@@ -686,7 +687,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    end if
 
    if (iscf < 0) then
-     if (residk > dtset%tolwfr .and. residk < tol7) then
+     if (max_resid > dtset%tolwfr .and. max_resid < tol7) then
        if (fftcore_mixprec == 1) call wrtout(std_out, " Approaching NSCF convergence. Activating FFT in double-precision")
        ii = fftcore_set_mixprec(0)
      end if
@@ -696,7 +697,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
        call cwtime(cpu, wall, gflops, "stop")
        if (ikpt == 1 .or. mod(ikpt, 100) == 0) then
          if (inonsc == 1) call wrtout(std_out, sjoin(" k-point: [", itoa(ikpt), "/", itoa(nkpt), "], spin:", itoa(isppol)))
-         call wrtout(std_out, sjoin("   Max resid =", ftoa(residk, fmt="es13.5"), &
+         call wrtout(std_out, sjoin("   Max resid =", ftoa(max_resid, fmt="es13.5"), &
            " (exclude nbdbuf bands). One NSCF iteration cpu-time:", &
            sec2str(cpu), ", wall-time:", sec2str(wall)), do_flush=.True.)
          if (inonsc == enough) call wrtout(std_out, "   Printing residuals every mod(20) iterations...")
@@ -706,7 +707,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    ABI_NVTX_END_RANGE()
 
    ! Exit loop over inonsc if converged
-   if (residk < dtset%tolwfr) then
+   if (max_resid < dtset%tolwfr) then
      if (iscf < 0 .and. (ikpt == 1 .or. mod(ikpt, 100) == 0)) then
        call wrtout(std_out, sjoin("   NSCF loop completed after", itoa(inonsc), "iterations"))
      end if
@@ -1264,17 +1265,24 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
 !###################################################################
 
- if (iscf<=0 .and. residk > dtset%tolwfr) then
+ if (iscf<=0 .and. max_resid > dtset%tolwfr) then
    write(msg,'(2(a,i0),a,es13.5)')&
-    "Wavefunctions not converged for ikpt: ", ikpt, ", nnsclo: ",nnsclo_now,', max resid: ',residk
+    "Wavefunctions not converged for ikpt: ", ikpt, ", nnsclo: ",nnsclo_now,', max resid: ',max_resid
    ABI_WARNING(msg)
  end if
 
 !Print out eigenvalues (hartree)
+ if (mod(dtset%wfoptalg,10)==1) then
+   niter=dtset%mdeg_filter
+   iter_name='as the degree of the polynomial filter'
+ else
+   niter=dtset%nline
+   iter_name='CG line minimizations'
+ end if
  if (prtvol/=5.and.(prtvol>2 .or. ikpt<=nkpt_max)) then
-   write(msg, '(5x,a,i5,2x,a,a,a,i4,a,i4,a)' ) &
+   write(msg, '(5x,a,i5,2x,a,a,a,i4,a,i4,2a)' ) &
     'eigenvalues (hartree) for',nband_k,'bands',ch10,&
-    '              after ',inonsc,' non-SCF iterations with ',dtset%nline,' CG line minimizations'
+    '              after ',inonsc,' non-SCF iterations with ',niter,' ',trim(iter_name)
    call wrtout(std_out,msg,'PERS')
    do ii=0,(nband_k-1)/6
      write(msg, '(1p,6e12.4)' ) (eig_k(iband),iband=1+6*ii,min(6+6*ii,nband_k))
@@ -1286,9 +1294,9 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
 !Print out decomposition of eigenvalues in the non-selfconsistent case or if prtvol>=10
  if( (iscf<0 .and. (prtvol>2 .or. ikpt<=nkpt_max)) .or. prtvol>=10)then
-   write(msg, '(5x,a,i5,2x,a,a,a,i4,a,i4,a)' ) &
+   write(msg, '(5x,a,i5,2x,a,a,a,i4,a,i4,2a)' ) &
 &   ' mean kinetic energy (hartree) for ',nband_k,' bands',ch10,&
-&   '              after ',inonsc,' non-SCF iterations with ',dtset%nline,' CG line minimizations'
+&   '              after ',inonsc,' non-SCF iterations with ',niter,' ',trim(iter_name)
    call wrtout(std_out,msg,'PERS')
 
    do ii=0,(nband_k-1)/6
@@ -1297,9 +1305,9 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    end do
 
    if (gs_hamk%usepaw==0) then
-     write(msg, '(5x,a,i5,2x,a,a,a,i4,a,i4,a)' ) &
+     write(msg, '(5x,a,i5,2x,a,a,a,i4,a,i4,2a)' ) &
 &     ' mean NL+Fock-type energy (hartree) for ',nband_k,' bands',ch10,&
-&     '              after ',inonsc,' non-SCF iterations with ',dtset%nline,' CG line minimizations'
+&     '              after ',inonsc,' non-SCF iterations with ',niter,' ',trim(iter_name)
      call wrtout(std_out,msg,'PERS')
 
      do ii=0,(nband_k-1)/6
@@ -1309,10 +1317,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    end if
  end if
 
- !Hamiltonian constructor for gwls_sternheimer
- if(dtset%optdriver==RUNL_GWLS) then
-   call build_H(dtset,mpi_enreg,cpopt,cg,gs_hamk,kg_k,kinpw)
- end if
+ ! Hamiltonian constructor for gwls_sternheimer
+ if (dtset%optdriver==RUNL_GWLS) call build_H(dtset,mpi_enreg,cpopt,cg,gs_hamk,kg_k,kinpw)
 
  if (dtset%cprj_in_memory==2) nullify(cprj_cwavef_bands)
 

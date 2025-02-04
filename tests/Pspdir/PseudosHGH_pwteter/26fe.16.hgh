@@ -1,6 +1,6 @@
-Hartwigsen-Goedecker-Hutter psp for Fe,  from PRB58, 3641 (1998) 
+Hartwigsen-Goedecker-Hutter psp for Fe,  from PRB58, 3641 (1998)
    26  16  010605 zatom,zion,pspdat
- 3 1   2 0 2001 0  pspcod,pspxc,lmax,lloc,mmax,r2well 
+ 3 1   2 0 2001 0  pspcod,pspxc,lmax,lloc,mmax,r2well
   0.360000    5.392507   -0.030066    0.000000   0.000000 rloc, c1, c2, c3, c4
   0.269268   10.193723   -6.834982    0.000000          rs, h11s, h22s, h33s
   0.247686    0.145613   -5.234954    0.000000          rp, h11p, h22p, h33p

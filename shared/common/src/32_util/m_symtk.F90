@@ -991,7 +991,7 @@ end subroutine chkprimit
 !!
 !! SIDE EFFECTS
 !! Input/Output
-!! ierr= (at input) if present, will deal with error code outside of the routine. 
+!! ierr= (at input) if present, will deal with error code outside of the routine.
 !!       (at output) return 0 if no problem, 1 otherwise
 !! symrel(3,3,nsym)=symmetry operations in real space in terms
 !! of primitive translations rprimd at input and rprimd_new at output
@@ -1109,7 +1109,7 @@ end subroutine symrelrot
 !! NOTES
 !! The condition is:
 !!
-!!    $q =  O  S(q) - G$
+!!    $q =  O S(q) - G$
 !!
 !! with O being either the identity or the time reversal symmetry (= inversion in reciprocal space)
 !! and G being a primitive vector of the reciprocal lattice.
@@ -1137,6 +1137,7 @@ subroutine littlegroup_q(nsym,qpt,symq,symrec,symafm,timrev,prtvol,use_sym)
 !scalars
  integer :: ii,isign,isym,itirev,my_prtvol
  real(dp),parameter :: tol=2.d-8
+ !real(dp),parameter :: tol=tol4
  real(dp) :: reduce
  character(len=500) :: msg
 !arrays
@@ -2218,7 +2219,10 @@ subroutine symatm(indsym, natom, nsym, symrec, tnons, tolsym, typat, xred, print
  do isym=1,nsym
    do iatom=1,natom
 
-     do mu=1,3 ! Apply inverse transformation to original coordinates. Note transpose of symrec.
+     ! Apply inverse transformation to original coordinates.
+     ! Note TRANSPOSE of symrec that corresponds to symrel^{-1}
+
+     do mu=1,3
        tratom(mu) = dble(symrec(1,mu,isym))*(xred(1,iatom)-tnons(1,isym))&
 &       +dble(symrec(2,mu,isym))*(xred(2,iatom)-tnons(2,isym))&
 &       +dble(symrec(3,mu,isym))*(xred(3,iatom)-tnons(3,isym))

@@ -44,6 +44,10 @@ module m_getghc
  use m_fft,         only : fourwf
  use m_getghc_ompgpu,  only : getghc_ompgpu
 
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+ use m_abi_linalg,  only : gpu_set_to_zero
+#endif
+
 #ifdef HAVE_FFTW3_THREADS
  use m_fftw3,       only : fftw3_spawn_threads_here, fftw3_use_lib_threads
 #endif
@@ -285,6 +289,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 !Check sizes
  my_nspinor=max(1,gs_ham%nspinor/mpi_enreg%nproc_spinor)
  if (size(cwavef)<2*npw_k1*my_nspinor*ndat) then
+   !print *, size(cwavef)<2*npw_k1*my_nspinor*ndat
    ABI_BUG('wrong size for cwavef!')
  end if
  if (size(ghc)<2*npw_k2*my_nspinor*ndat) then
@@ -1532,6 +1537,7 @@ end subroutine getghc_nucdip
 !! INPUTS
 !! cwavef(2,npw_k*my_nspinor*ndat)=planewave coefficients of wavefunction.
 !! gbound_k(2*mgfft+4)=sphere boundary info
+!! gprimd(3,3)=dimensional reciprocal space primitive translations (b^-1)
 !! istwf_k=input parameter that describes the storage of wfs
 !! kg_k(3,npw_k)=G vec coordinates wrt recip lattice transl.
 !! kpt(3)=current k point

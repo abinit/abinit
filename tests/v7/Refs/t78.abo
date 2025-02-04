@@ -1,8 +1,8 @@
 
 .Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Fri 13 Sep 2024.
 - ( at 19h13 )
-  
+
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v7_t78/t78.abi
 - output file    -> t78.abo
 - root for input  files -> t78i
@@ -530,8 +530,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     117.926     117.783
  ******************************************
 
  =======================================================================
-  == Calculation of diagonal bare Coulomb interaction on ATOMIC orbitals 
-     (it is assumed that the wavefunction for the first reference 
+  == Calculation of diagonal bare Coulomb interaction on ATOMIC orbitals
+     (it is assumed that the wavefunction for the first reference
              energy in PAW atomic data is an atomic eigenvalue)
 
  Max value of the radius in atomic data file   =      2.4224
@@ -700,7 +700,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
    0.00000   0.00000   0.00000   0.13584   0.00000   0.00000   0.00000   0.00000   0.12428   0.00000
    0.00000   0.00000   0.00000   0.00000   0.41828   0.00000   0.00000   0.00000   0.00000   0.54401
 
- ---------- DFT+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA ---------------------------------------------------
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
@@ -880,8 +880,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     117.926     117.783
  ******************************************
 
  =======================================================================
-  == Calculation of diagonal bare Coulomb interaction on ATOMIC orbitals 
-     (it is assumed that the wavefunction for the first reference 
+  == Calculation of diagonal bare Coulomb interaction on ATOMIC orbitals
+     (it is assumed that the wavefunction for the first reference
              energy in PAW atomic data is an atomic eigenvalue)
 
  Max value of the radius in atomic data file   =      2.4224
@@ -1056,7 +1056,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
    0.00000   0.00000   0.00000   0.13584   0.00000   0.00000   0.00000   0.00000   0.12428   0.00000
    0.00000   0.00000   0.00000   0.00000   0.41828   0.00000   0.00000   0.00000   0.00000   0.54401
 
- ---------- DFT+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA ---------------------------------------------------
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
@@ -1237,8 +1237,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     117.926     117.783
  ******************************************
 
  =======================================================================
-  == Calculation of diagonal bare Coulomb interaction on ATOMIC orbitals 
-     (it is assumed that the wavefunction for the first reference 
+  == Calculation of diagonal bare Coulomb interaction on ATOMIC orbitals
+     (it is assumed that the wavefunction for the first reference
              energy in PAW atomic data is an atomic eigenvalue)
 
  Max value of the radius in atomic data file   =      2.4224
@@ -1398,7 +1398,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
    0.00000   0.00000   0.00000   0.13584   0.00000   0.00000   0.00000   0.00000   0.12428   0.00000
    0.00000   0.00000   0.00000   0.00000   0.41828   0.00000   0.00000   0.00000   0.00000   0.54401
 
- ---------- DFT+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA ---------------------------------------------------
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
@@ -1586,7 +1586,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
  Citation for XC functional:
   J.P.Perdew and Y.Wang, PRB 45, 13244 (1992)
 
- SCREENING: Calculation of the susceptibility and dielectric matrices 
+ SCREENING: Calculation of the susceptibility and dielectric matrices
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
@@ -1605,33 +1605,91 @@ meta: {optdriver: 3, gwcalctyp: 2, }
 
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :     4
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     1.66666667E-01  1.66666667E-01  1.66666667E-01       0.29630
      2)     5.00000000E-01  1.66666667E-01  1.66666667E-01       0.44444
      3)     5.00000000E-01  5.00000000E-01  1.66666667E-01       0.22222
      4)     5.00000000E-01  5.00000000E-01  5.00000000E-01       0.03704
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields    27 points in the full Brillouin Zone.
+     1)     1.66666667E-01  1.66666667E-01  1.66666667E-01
+     2)    -1.66666667E-01 -1.66666667E-01 -1.66666667E-01
+     3)    -1.66666667E-01  1.66666667E-01 -1.66666667E-01
+     4)     1.66666667E-01 -1.66666667E-01  1.66666667E-01
+     5)    -1.66666667E-01 -1.66666667E-01  1.66666667E-01
+     6)     1.66666667E-01  1.66666667E-01 -1.66666667E-01
+     7)     1.66666667E-01 -1.66666667E-01 -1.66666667E-01
+     8)    -1.66666667E-01  1.66666667E-01  1.66666667E-01
+     9)     5.00000000E-01  1.66666667E-01  1.66666667E-01
+    10)    -5.00000000E-01 -1.66666667E-01 -1.66666667E-01
+    11)    -5.00000000E-01  1.66666667E-01 -1.66666667E-01
+    12)     5.00000000E-01 -1.66666667E-01  1.66666667E-01
+    13)     1.66666667E-01  5.00000000E-01  1.66666667E-01
+    14)    -1.66666667E-01 -5.00000000E-01 -1.66666667E-01
+    15)     1.66666667E-01 -5.00000000E-01 -1.66666667E-01
+    16)    -1.66666667E-01  5.00000000E-01  1.66666667E-01
+    17)     1.66666667E-01  1.66666667E-01  5.00000000E-01
+    18)    -1.66666667E-01 -1.66666667E-01 -5.00000000E-01
+    19)     1.66666667E-01 -1.66666667E-01 -5.00000000E-01
+    20)    -1.66666667E-01  1.66666667E-01  5.00000000E-01
+    21)     5.00000000E-01  5.00000000E-01  1.66666667E-01
+    22)    -5.00000000E-01 -5.00000000E-01 -1.66666667E-01
+    23)     5.00000000E-01  1.66666667E-01  5.00000000E-01
+    24)    -5.00000000E-01 -1.66666667E-01 -5.00000000E-01
+    25)     1.66666667E-01  5.00000000E-01  5.00000000E-01
+    26)    -1.66666667E-01 -5.00000000E-01 -5.00000000E-01
+    27)     5.00000000E-01  5.00000000E-01  5.00000000E-01
 
 
  ==== Q-mesh for the screening function ====
  Number of points in the irreducible wedge :     4
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.03704
      2)    -3.33333333E-01 -3.33333333E-01 -3.33333333E-01       0.29630
      3)    -3.33333333E-01  0.00000000E+00 -3.33333333E-01       0.44444
      4)     0.00000000E+00 -3.33333333E-01  0.00000000E+00       0.22222
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields    27 points in the full Brillouin Zone.
+     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00
+     2)    -3.33333333E-01 -3.33333333E-01 -3.33333333E-01
+     3)     3.33333333E-01  3.33333333E-01  3.33333333E-01
+     4)     3.33333333E-01 -3.33333333E-01  3.33333333E-01
+     5)    -3.33333333E-01  3.33333333E-01 -3.33333333E-01
+     6)     3.33333333E-01  3.33333333E-01 -3.33333333E-01
+     7)    -3.33333333E-01 -3.33333333E-01  3.33333333E-01
+     8)    -3.33333333E-01  3.33333333E-01  3.33333333E-01
+     9)     3.33333333E-01 -3.33333333E-01 -3.33333333E-01
+    10)    -3.33333333E-01  0.00000000E+00 -3.33333333E-01
+    11)     3.33333333E-01  0.00000000E+00  3.33333333E-01
+    12)     3.33333333E-01  0.00000000E+00 -3.33333333E-01
+    13)    -3.33333333E-01  0.00000000E+00  3.33333333E-01
+    14)     0.00000000E+00 -3.33333333E-01 -3.33333333E-01
+    15)     0.00000000E+00  3.33333333E-01  3.33333333E-01
+    16)     0.00000000E+00  3.33333333E-01 -3.33333333E-01
+    17)     0.00000000E+00 -3.33333333E-01  3.33333333E-01
+    18)    -3.33333333E-01 -3.33333333E-01  0.00000000E+00
+    19)     3.33333333E-01  3.33333333E-01  0.00000000E+00
+    20)     3.33333333E-01 -3.33333333E-01  0.00000000E+00
+    21)    -3.33333333E-01  3.33333333E-01  0.00000000E+00
+    22)     0.00000000E+00 -3.33333333E-01  0.00000000E+00
+    23)     0.00000000E+00  3.33333333E-01  0.00000000E+00
+    24)    -3.33333333E-01  0.00000000E+00  0.00000000E+00
+    25)     3.33333333E-01  0.00000000E+00  0.00000000E+00
+    26)     0.00000000E+00  0.00000000E+00 -3.33333333E-01
+    27)     0.00000000E+00  0.00000000E+00  3.33333333E-01
 
 
  setmesh: FFT mesh size selected  =    12x   12x   12
           total number of points  =         1728
 
+
+ vcoul_init : cutoff-mode = AUXILIARY_FUNCTION
+ q-points for optical limit:   1
+     1)      0.000010    0.000020    0.000030
 
 
  ******************************************
@@ -1639,8 +1697,8 @@ meta: {optdriver: 3, gwcalctyp: 2, }
  ******************************************
 
  =======================================================================
-  == Calculation of diagonal bare Coulomb interaction on ATOMIC orbitals 
-     (it is assumed that the wavefunction for the first reference 
+  == Calculation of diagonal bare Coulomb interaction on ATOMIC orbitals
+     (it is assumed that the wavefunction for the first reference
              energy in PAW atomic data is an atomic eigenvalue)
 
  Max value of the radius in atomic data file   =      2.4224
@@ -1663,9 +1721,9 @@ meta: {optdriver: 3, gwcalctyp: 2, }
      The bare interaction (for a renorm. wfn ) =     20.8160 eV
  =======================================================================
 
- ==================================== 
- ==== Info on PAW TABulated data ==== 
- ==================================== 
+ ====================================
+ ==== Info on PAW TABulated data ====
+ ====================================
 
 
   ******************************
@@ -1815,7 +1873,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
   Compensation charge radius (if >rshp, g(r)=0) ...  1.41000013E+00
   Sigma parameter in gaussian shape function ......  1.00000000E+99
 
-- screening: taking advantage of time-reversal symmetry 
+- screening: taking advantage of time-reversal symmetry
 - Maximum band index for partially occupied states nbvw = 25
 - Remaining bands to be divided among processors   nbcw = 0
 - Number of bands treated by each node ~0
@@ -1900,7 +1958,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
    0.00000   0.00000   0.00000   0.13584   0.00000   0.00000   0.00000   0.00000   0.12428   0.00000
    0.00000   0.00000   0.00000   0.00000   0.41828   0.00000   0.00000   0.00000   0.00000   0.54401
 
- ---------- DFT+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA ---------------------------------------------------
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
@@ -1987,7 +2045,7 @@ Reading of the Wannier weights from data.plowann
   dielectric constant without local fields =   3.6728
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :      6.98  [%]
-  Heads and wings of the symmetrical epsilon^-1(G,G') 
+  Heads and wings of the symmetrical epsilon^-1(G,G')
 
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
@@ -2162,12 +2220,12 @@ meta: {optdriver: 4, gwcalctyp: 2, }
  Citation for XC functional:
   J.P.Perdew and Y.Wang, PRB 45, 13244 (1992)
 
- SIGMA: Calculation of the GW corrections 
+ SIGMA: Calculation of the GW corrections
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
 
- cRPA Calculation: Calculation of the screened Coulomb interaction (ucrpa/=0) 
+ cRPA Calculation: Calculation of the screened Coulomb interaction (ucrpa/=0)
 
 .Using double precision arithmetic ; gwpc =  8
 
@@ -2246,30 +2304,88 @@ meta: {optdriver: 4, gwcalctyp: 2, }
 
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :     4
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     1.66666667E-01  1.66666667E-01  1.66666667E-01       0.29630
      2)     5.00000000E-01  1.66666667E-01  1.66666667E-01       0.44444
      3)     5.00000000E-01  5.00000000E-01  1.66666667E-01       0.22222
      4)     5.00000000E-01  5.00000000E-01  5.00000000E-01       0.03704
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields    27 points in the full Brillouin Zone.
+     1)     1.66666667E-01  1.66666667E-01  1.66666667E-01
+     2)    -1.66666667E-01 -1.66666667E-01 -1.66666667E-01
+     3)    -1.66666667E-01  1.66666667E-01 -1.66666667E-01
+     4)     1.66666667E-01 -1.66666667E-01  1.66666667E-01
+     5)    -1.66666667E-01 -1.66666667E-01  1.66666667E-01
+     6)     1.66666667E-01  1.66666667E-01 -1.66666667E-01
+     7)     1.66666667E-01 -1.66666667E-01 -1.66666667E-01
+     8)    -1.66666667E-01  1.66666667E-01  1.66666667E-01
+     9)     5.00000000E-01  1.66666667E-01  1.66666667E-01
+    10)    -5.00000000E-01 -1.66666667E-01 -1.66666667E-01
+    11)    -5.00000000E-01  1.66666667E-01 -1.66666667E-01
+    12)     5.00000000E-01 -1.66666667E-01  1.66666667E-01
+    13)     1.66666667E-01  5.00000000E-01  1.66666667E-01
+    14)    -1.66666667E-01 -5.00000000E-01 -1.66666667E-01
+    15)     1.66666667E-01 -5.00000000E-01 -1.66666667E-01
+    16)    -1.66666667E-01  5.00000000E-01  1.66666667E-01
+    17)     1.66666667E-01  1.66666667E-01  5.00000000E-01
+    18)    -1.66666667E-01 -1.66666667E-01 -5.00000000E-01
+    19)     1.66666667E-01 -1.66666667E-01 -5.00000000E-01
+    20)    -1.66666667E-01  1.66666667E-01  5.00000000E-01
+    21)     5.00000000E-01  5.00000000E-01  1.66666667E-01
+    22)    -5.00000000E-01 -5.00000000E-01 -1.66666667E-01
+    23)     5.00000000E-01  1.66666667E-01  5.00000000E-01
+    24)    -5.00000000E-01 -1.66666667E-01 -5.00000000E-01
+    25)     1.66666667E-01  5.00000000E-01  5.00000000E-01
+    26)    -1.66666667E-01 -5.00000000E-01 -5.00000000E-01
+    27)     5.00000000E-01  5.00000000E-01  5.00000000E-01
 
 
  ==== Q-mesh for screening function ====
  Number of points in the irreducible wedge :     4
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.03704
      2)    -3.33333333E-01 -3.33333333E-01 -3.33333333E-01       0.29630
      3)    -3.33333333E-01  0.00000000E+00 -3.33333333E-01       0.44444
      4)     0.00000000E+00 -3.33333333E-01  0.00000000E+00       0.22222
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields    27 points in the full Brillouin Zone.
+     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00
+     2)    -3.33333333E-01 -3.33333333E-01 -3.33333333E-01
+     3)     3.33333333E-01  3.33333333E-01  3.33333333E-01
+     4)     3.33333333E-01 -3.33333333E-01  3.33333333E-01
+     5)    -3.33333333E-01  3.33333333E-01 -3.33333333E-01
+     6)     3.33333333E-01  3.33333333E-01 -3.33333333E-01
+     7)    -3.33333333E-01 -3.33333333E-01  3.33333333E-01
+     8)    -3.33333333E-01  3.33333333E-01  3.33333333E-01
+     9)     3.33333333E-01 -3.33333333E-01 -3.33333333E-01
+    10)    -3.33333333E-01  0.00000000E+00 -3.33333333E-01
+    11)     3.33333333E-01  0.00000000E+00  3.33333333E-01
+    12)     3.33333333E-01  0.00000000E+00 -3.33333333E-01
+    13)    -3.33333333E-01  0.00000000E+00  3.33333333E-01
+    14)     0.00000000E+00 -3.33333333E-01 -3.33333333E-01
+    15)     0.00000000E+00  3.33333333E-01  3.33333333E-01
+    16)     0.00000000E+00  3.33333333E-01 -3.33333333E-01
+    17)     0.00000000E+00 -3.33333333E-01  3.33333333E-01
+    18)    -3.33333333E-01 -3.33333333E-01  0.00000000E+00
+    19)     3.33333333E-01  3.33333333E-01  0.00000000E+00
+    20)     3.33333333E-01 -3.33333333E-01  0.00000000E+00
+    21)    -3.33333333E-01  3.33333333E-01  0.00000000E+00
+    22)     0.00000000E+00 -3.33333333E-01  0.00000000E+00
+    23)     0.00000000E+00  3.33333333E-01  0.00000000E+00
+    24)    -3.33333333E-01  0.00000000E+00  0.00000000E+00
+    25)     3.33333333E-01  0.00000000E+00  0.00000000E+00
+    26)     0.00000000E+00  0.00000000E+00 -3.33333333E-01
+    27)     0.00000000E+00  0.00000000E+00  3.33333333E-01
 
 
+
+ vcoul_init : cutoff-mode = AUXILIARY_FUNCTION
+ q-points for optical limit:   1
+     1)      0.000010    0.000020    0.000030
  setmesh: FFT mesh size selected  =    12x   12x   12
           total number of points  =         1728
 
@@ -2280,8 +2396,8 @@ meta: {optdriver: 4, gwcalctyp: 2, }
  ******************************************
 
  =======================================================================
-  == Calculation of diagonal bare Coulomb interaction on ATOMIC orbitals 
-     (it is assumed that the wavefunction for the first reference 
+  == Calculation of diagonal bare Coulomb interaction on ATOMIC orbitals
+     (it is assumed that the wavefunction for the first reference
              energy in PAW atomic data is an atomic eigenvalue)
 
  Max value of the radius in atomic data file   =      2.4224
@@ -2304,9 +2420,9 @@ meta: {optdriver: 4, gwcalctyp: 2, }
      The bare interaction (for a renorm. wfn ) =     20.8160 eV
  =======================================================================
 
- ==================================== 
- ==== Info on PAW TABulated data ==== 
- ==================================== 
+ ====================================
+ ==== Info on PAW TABulated data ====
+ ====================================
 
 
   ******************************
@@ -2535,7 +2651,7 @@ meta: {optdriver: 4, gwcalctyp: 2, }
    0.00000   0.00000   0.00000   0.13584   0.00000   0.00000   0.00000   0.00000   0.12428   0.00000
    0.00000   0.00000   0.00000   0.00000   0.41828   0.00000   0.00000   0.00000   0.00000   0.54401
 
- ---------- DFT+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA ---------------------------------------------------
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
@@ -2575,7 +2691,7 @@ Reading of the Wannier weights from data.plowann
  == Value of the angular momenta for atom 1 is :  2
  == Value of the projectors      for atom 1 is :  7
  Reconstruction of the full Brillouin Zone using data.plowann in the IBZ
- 
+
 ==== Calculation of the screened interaction ====
 
  Read K and Q mesh
@@ -2583,7 +2699,7 @@ Reading of the Wannier weights from data.plowann
 
 
  ==Calculation of the bare interaction  V m==
- 
+
 ==Definition of the orbitals==
   Only one orbital
   Orbital with l=           2 on atom           1 with spin's orientations Up-Up
@@ -2617,7 +2733,7 @@ Reading of the Wannier weights from data.plowann
 
    bare interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.2690   -0.0000
 
- 
+
  Hund coupling J2=U(m1,m2,m2,m1) for the bare interaction
  -      1      2      3      4      5
    1 10.500  0.264  0.274  0.250  0.043
@@ -2629,7 +2745,7 @@ Reading of the Wannier weights from data.plowann
 
 
  == Calculation of the screened interaction on the correlated orbital U m ==
- 
+
  = Start loop over frequency
 
  --- For frequency w =   1  -------------
@@ -2664,7 +2780,7 @@ Reading of the Wannier weights from data.plowann
 
    cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.2373    0.0000
 
- 
+
  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
    1  3.419  0.230  0.243  0.223  0.042
@@ -2705,7 +2821,7 @@ Reading of the Wannier weights from data.plowann
 
    cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.2378   -0.0012
 
- 
+
  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
    1  3.504  0.230  0.242  0.222  0.042
@@ -2746,7 +2862,7 @@ Reading of the Wannier weights from data.plowann
 
    cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.2332   -0.0063
 
- 
+
  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
    1  2.392  0.226  0.241  0.220  0.042
@@ -2787,7 +2903,7 @@ Reading of the Wannier weights from data.plowann
 
    cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.2360   -0.0083
 
- 
+
  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
    1  3.587  0.226  0.241  0.221  0.042
@@ -2795,11 +2911,11 @@ Reading of the Wannier weights from data.plowann
    3  0.241  0.091  3.134  0.092  0.184
    4  0.221  0.221  0.092  3.676  0.193
    5  0.042  0.192  0.184  0.193  3.202
- 
+
 ==Reminder of the orbitals==
   Only one orbital
   Orbital with l=           2 on atom           1 with spin's orientations Up-Up
- 
+
   -------------------------------------------------------------
             Average U and J as a function of frequency
    -------------------------------------------------------------
@@ -2812,7 +2928,7 @@ Reading of the Wannier weights from data.plowann
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      6.7605000000E+00  6.7605000000E+00  6.7605000000E+00 Bohr
               amu      5.09415000E+01  8.76200000E+01  1.59994000E+01
@@ -3223,7 +3339,7 @@ P           mkmem           4
  of the ABINIT implementation.
  For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
-- [1] Screened Coulomb interaction calculations: cRPA implementation and applications 
+- [1] Screened Coulomb interaction calculations: cRPA implementation and applications
 - to dynamical screening and self-consistency in uranium dioxide and cerium
 - B. Amadon, T. Applencourt and F. Bruneval  Phys. Rev. B 89, 125110 (2014).
 - Comment: Describes the cRPA implementation of the screened Coulomb interaction in PAW
@@ -3251,7 +3367,7 @@ P           mkmem           4
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -3263,12 +3379,12 @@ P           mkmem           4
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -3286,7 +3402,7 @@ P           mkmem           4
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016

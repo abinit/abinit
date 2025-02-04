@@ -67,6 +67,7 @@ MODULE m_matlu
  public :: chi_matlu
  public :: trace_prod_matlu
  public :: xmpi_matlu
+ public :: symmetrize_matlu
 !!***
 
 !!****t* m_matlu/matlu_type
@@ -176,31 +177,27 @@ end subroutine init_matlu
 !! INPUTS
 !!  matlu <type(matlu_type)>= density matrix in the local orbital basis and related variables
 !!  natom = number of atoms
-!!  onlynondiag = 1: set all the off-diagonal elements to 0
-!!              = 2: set the orbital off-diagonal elements to 0
-!!              = 3: set the spin off-diagonal elements to 0
-!!  maxoffdiag = maximal value of the off-diagonal elements
+!!  onlynondiag = set all the off-diagonal elements to 0
+!!  onlyimag = set the imaginary part to 0
 !!
 !! OUTPUT
 !!  matlu <type(matlu_type)>= density matrix in the local orbital basis and related variables
 !!
 !! SOURCE
 
-subroutine zero_matlu(matlu,natom,onlynondiag,maxoffdiag)
+subroutine zero_matlu(matlu,natom,onlynondiag,onlyimag)
 
 !Arguments ------------------------------------
  integer, intent(in) :: natom
  type(matlu_type), intent(inout) :: matlu(natom)
- integer, optional, intent(in) :: onlynondiag
- real(dp), optional, intent(out) :: maxoffdiag
+ integer, optional, intent(in) :: onlyimag,onlynondiag
 !Local variables-------------------------------
- integer :: iatom,im,im1,ispinor,ispinor1,isppol,lpawu,ndim,nspinor,nsppol,tndim
- real(dp) :: maxoffdiag_
+ integer :: iatom,im,im1,isppol
+ integer :: lpawu,ndim,nspinor,nsppol,tndim
 !*********************************************************************
 
  nspinor = matlu(1)%nspinor
  nsppol  = matlu(1)%nsppol
- maxoffdiag_ = zero
 
  do iatom=1,natom
    lpawu = matlu(iatom)%lpawu
@@ -208,46 +205,19 @@ subroutine zero_matlu(matlu,natom,onlynondiag,maxoffdiag)
    if (present(onlynondiag)) then
      ndim  = 2*lpawu + 1
      tndim = nspinor * ndim
-     if (onlynondiag == 1) then
-       do isppol=1,nsppol
-         do im1=1,tndim
-           do im=1,tndim
-             if (im /= im1) then
-               if (abs(matlu(iatom)%mat(im,im1,isppol)) > maxoffdiag_) &
-                 & maxoffdiag_ = abs(matlu(iatom)%mat(im,im1,isppol))
-               matlu(iatom)%mat(im,im1,isppol) = czero
-             end if
-           end do ! im
-         end do ! im1
-       end do ! isppol
-     else if (onlynondiag == 2) then
-       do isppol=1,nsppol
-         do ispinor1=1,nspinor
-           do im1=1,ndim
-             do ispinor=1,nspinor
-               do im=1,ndim
-                 if (im /= im1) then
-                   if (abs(matlu(iatom)%mat(im+(ispinor-1)*ndim,im1+(ispinor1-1)*ndim,isppol)) > maxoffdiag_) &
-                      & maxoffdiag_ = abs(matlu(iatom)%mat(im+(ispinor-1)*ndim,im1+(ispinor1-1)*ndim,isppol))
-                   matlu(iatom)%mat(im+(ispinor-1)*ndim,im1+(ispinor1-1)*ndim,isppol) = czero
-                 end if
-               end do ! im
-             end do ! ispinor
-           end do ! im1
-         end do ! ispinor1
-       end do ! isppol
-     else if (onlynondiag == 3 .and. nspinor == 2) then
-       maxoffdiag_ = maxval(abs(matlu(iatom)%mat(1:ndim,ndim+1:tndim,1)))
-       maxoffdiag_ = max(maxoffdiag_,maxval(abs(matlu(iatom)%mat(ndim+1:tndim,1:ndim,1))))
-       matlu(iatom)%mat(1:ndim,ndim+1:tndim,1) = czero
-       matlu(iatom)%mat(ndim+1:tndim,1:ndim,1) = czero
-     end if ! onlynondiag
+     do isppol=1,nsppol
+       do im1=1,tndim
+         do im=1,tndim
+           if (im /= im1) matlu(iatom)%mat(im,im1,isppol) = czero
+         end do ! im
+       end do ! im1
+     end do ! isppol
+   else if (present(onlyimag)) then
+     matlu(iatom)%mat(:,:,:) = cmplx(dble(matlu(iatom)%mat(:,:,:)),zero,kind=dp)
    else
      matlu(iatom)%mat(:,:,:) = czero
    end if ! onlynondiag
  end do ! iatom
-
- if (present(maxoffdiag)) maxoffdiag = maxoffdiag_
 
 end subroutine zero_matlu
 !!***
@@ -387,7 +357,8 @@ subroutine print_matlu(matlu,natom,prtopt,opt_diag,opt_ab_out,opt_exp,argout,com
  type(matlu_type), intent(in) :: matlu(natom)
  integer, optional, intent(in) :: opt_diag,opt_ab_out,opt_exp,argout,compl
 !Local variables-------------------------------
- integer :: arg_out,iatom,im,im1,ispinor,ispinor1,isppol,lpawu,ndim,nspinor,nsppol,optab_out,optdiag
+ integer :: arg_out,iatom,im,im1,ispinor,ispinor1,isppol,lpawu
+ integer :: ndim,nspinor,nsppol,optab_out,optdiag
  logical :: testcmplx
  complex(dpc), allocatable :: mat_nmrep(:,:)
  character(len=500) :: message
@@ -553,9 +524,9 @@ end subroutine print_matlu
  type(paw_dmft_type), intent(in) :: paw_dmft
  type(matlu_type), intent(inout) :: gloc(paw_dmft%natom)
 !Local variables-------------------------------
- integer :: at_indx,iatom,irot,isppol,lpawu,m1,m2,mu,natom
- integer :: ndim,ndim_max,nspinor,nsppol,nsym
- complex(dpc), allocatable :: gloc_tmp(:,:),gloc_tmp2(:,:),gloc_tmp3(:,:,:)
+ integer :: at_indx,iatom,irot,isppol,lpawu,mu,natom
+ integer :: ndim,ndim_max,nspinor,nsppol,nsym,nu
+ complex(dpc), allocatable :: gloc_tmp(:,:),gloc_tmp2(:,:)
  type(matlu_type), allocatable :: gloc_nmrep(:),glocsym(:)
 
  natom    = paw_dmft%natom
@@ -564,11 +535,12 @@ end subroutine print_matlu
  nsppol   = paw_dmft%nsppol
  nsym     = paw_dmft%nsym
  ABI_MALLOC(glocsym,(natom))
- ABI_MALLOC(gloc_tmp,(ndim_max,ndim_max))
 
 !=========  Case nspinor ==1 ========================
 
  if (nspinor == 1) then
+
+   ABI_MALLOC(gloc_tmp,(ndim_max,ndim_max))
 
    call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu(:),glocsym(:))
 
@@ -612,6 +584,7 @@ end subroutine print_matlu
  else
 
    !== Allocate temporary arrays
+   ABI_MALLOC(gloc_tmp,(ndim_max,4*ndim_max))
    ABI_MALLOC(gloc_nmrep,(natom))
    call init_matlu(natom,1,4,paw_dmft%lpawu(:),glocsym(:))
    call init_matlu(natom,1,4,paw_dmft%lpawu(:),gloc_nmrep(:))
@@ -620,8 +593,6 @@ end subroutine print_matlu
    ! gloc_nmrep(iatom)%mat(:,:,i) = n,mx,my,mz for i=1,2,3,4 respectively
    call chg_repr_matlu(gloc(:),gloc_nmrep(:),natom,1,1)
 
-   ABI_MALLOC(gloc_tmp3,(ndim_max,ndim_max,3))
-
   !==  Do the sum over symmetrized density matrix (in n,m repr)
    do iatom=1,natom
 
@@ -629,39 +600,32 @@ end subroutine print_matlu
      if (lpawu == 1) cycle
      ndim = 2*lpawu + 1
 
-     ABI_MALLOC(gloc_tmp2,(ndim,ndim))
+     ABI_MALLOC(gloc_tmp2,(ndim,4*ndim))
 
      do irot=1,nsym
 
        at_indx = paw_dmft%indsym(irot,iatom)
 
-       ! Symmetrize density
+       do mu=1,4 ! Symmetrize density and magnetization
 
-       call abi_xgemm("n","n",ndim,ndim,ndim,cone,gloc_nmrep(at_indx)%mat(:,:,1),ndim, &
-                    & paw_dmft%zarot(:,1:ndim,irot,lpawu+1),ndim_max,czero,gloc_tmp(:,1:ndim),ndim_max)
+         call abi_xgemm("n","n",ndim,ndim,ndim,cone,gloc_nmrep(at_indx)%mat(:,:,mu),ndim, &
+                      & paw_dmft%zarot(:,1:ndim,irot,lpawu+1),ndim_max,czero,gloc_tmp(:,1+ndim*(mu-1):ndim*mu),ndim_max)
 
-       call abi_xgemm("t","n",ndim,ndim,ndim,cone,paw_dmft%zarot(:,1:ndim,irot,lpawu+1),ndim_max,&
-                    & gloc_tmp(:,1:ndim),ndim_max,czero,gloc_tmp2(:,:),ndim)
+       end do ! mu
 
-       glocsym(iatom)%mat(:,:,1) = glocsym(iatom)%mat(:,:,1) + gloc_tmp2(:,:)
+       call abi_xgemm("t","n",ndim,4*ndim,ndim,cone,paw_dmft%zarot(:,1:ndim,irot,lpawu+1),ndim_max,&
+                    & gloc_tmp(:,1:4*ndim),ndim_max,czero,gloc_tmp2(:,:),ndim)
+
+       glocsym(iatom)%mat(:,:,1) = glocsym(iatom)%mat(:,:,1) + gloc_tmp2(:,1:ndim)
 
        ! Symmetrize magnetization
 
-       do mu=1,3
-
-         call abi_xgemm("n","n",ndim,ndim,ndim,cone,gloc_nmrep(at_indx)%mat(:,:,mu+1),ndim, &
-                      & paw_dmft%zarot(:,1:ndim,irot,lpawu+1),ndim_max,czero,gloc_tmp(:,1:ndim),ndim_max)
-
-         call abi_xgemm("t","n",ndim,ndim,ndim,cone,paw_dmft%zarot(:,1:ndim,irot,lpawu+1),ndim_max,&
-                      & gloc_tmp(:,1:ndim),ndim_max,czero,gloc_tmp3(:,1:ndim,mu),ndim_max)
-       end do ! mu
-
-       do m2=1,ndim
-         do m1=1,ndim
-           glocsym(iatom)%mat(m1,m2,2:4) = glocsym(iatom)%mat(m1,m2,2:4) + &
-                       & matmul(paw_dmft%symrec_cart(:,:,irot),gloc_tmp3(m1,m2,:))
-         end do ! m1
-       end do  ! m2
+       do nu=2,4
+         do mu=2,4
+           glocsym(iatom)%mat(:,:,mu) = glocsym(iatom)%mat(:,:,mu) + &
+             & paw_dmft%symrec_cart(mu-1,nu-1,irot)*gloc_tmp2(:,1+(nu-1)*ndim:ndim*nu)
+         end do ! mu
+       end do ! nu
 
      end do ! irot
 
@@ -671,8 +635,6 @@ end subroutine print_matlu
      glocsym(iatom)%mat(:,:,:) = glocsym(iatom)%mat(:,:,:) / dble(nsym)
 
    end do ! iatom
-
-   ABI_FREE(gloc_tmp3)
 
 !==  Compute back density matrix in upup dndn updn dnup representation
    call chg_repr_matlu(gloc(:),glocsym(:),natom,-1,1)
@@ -1300,12 +1262,12 @@ end subroutine add_matlu
    write(tag_nb_elec,'(f12.6)') traceloc(nsppol+1,iatom)
    tag_nb_elec = adjustl(tag_nb_elec)
    if (.not. present(itau)) then
-     write(message,'(8x,2a)') 'Nb of Corr. elec. from G(w) is: ',tag_nb_elec
+     write(message,'(8x,2a)') 'Nb of Corr. elec. from G(iw) is: ',tag_nb_elec
      call wrtout(std_out,message,'COLL')
    end if ! not present(itau)
    if (present(itau)) then
      if (itau == 1) then
-       write(message,'(8x,2a)') 'Nb of Corr. elec. from G(tau) is: ',tag_nb_elec
+       write(message,'(8x,2a)') 'Nb of Corr. elec. from G(tau=0-) is: ',tag_nb_elec
        call wrtout(std_out,message,'COLL')
      else if (itau == -1) then
        write(message,'(8x,2a)') 'Nb: Sum of the values of G0(tau=0-) is: ',tag_nb_elec
@@ -1330,7 +1292,7 @@ end subroutine add_matlu
     ! if(nsppol>1.and.present(itau)) then
     !   if(itau==1) then
      write(tag_nb_elec,'(f12.6)') traceloc(2,iatom) - traceloc(1,iatom)
-     write(message,'(8x,2a)') 'DMFT Cor. El. Mag: ',adjustl(tag_nb_elec)
+     write(message,'(8x,2a)') 'DMFT Corr. Elec. Mag.: ',adjustl(tag_nb_elec)
      call wrtout(std_out,message,'COLL')
     !   endif
    end do ! iatom
@@ -1526,7 +1488,7 @@ end subroutine add_matlu
 
  if (present(nsppol_imp)) nsppolimp = nsppol_imp
  if (present(checkstop)) checkstop_in = checkstop
- if (present(test)) blockdiag = test == 8
+ if (present(test)) blockdiag = (test == 8)
  if (present(opt_real)) optreal = opt_real
 
  call zero_matlu(matlu_diag(:),natom)
@@ -2166,7 +2128,7 @@ end subroutine add_matlu
  complex(dpc), intent(in) :: shift(natom)
  integer, optional, intent(in) :: signe
 !Local variables-------------------------------
- integer :: iatom,im,isppol,lpawu,ndim,nspinor,nsppol,signe_used
+ integer :: iatom,im,lpawu,ndim,nspinor,nsppol,signe_used
 ! character(len=500) :: message
 !************************************************************************
 
@@ -2182,15 +2144,13 @@ end subroutine add_matlu
    lpawu = matlu(iatom)%lpawu
    if (lpawu == -1) cycle
    ndim = nspinor * (2*lpawu+1)
-   do isppol=1,nsppol
-     do im=1,ndim
-       if (signe_used == 1) then
-         matlu(iatom)%mat(im,im,isppol) = matlu(iatom)%mat(im,im,isppol) - shift(iatom)
-       else
-         matlu(iatom)%mat(im,im,isppol) = matlu(iatom)%mat(im,im,isppol) + shift(iatom)
-       end if ! signe_used
-     end do ! im
-   end do ! isppol
+   do im=1,ndim
+     if (signe_used == 1) then
+       matlu(iatom)%mat(im,im,:) = matlu(iatom)%mat(im,im,:) - shift(iatom)
+     else
+       matlu(iatom)%mat(im,im,:) = matlu(iatom)%mat(im,im,:) + shift(iatom)
+     end if ! signe_used
+   end do ! im
  end do ! iatom
 
  end subroutine shift_matlu
@@ -2210,6 +2170,7 @@ end subroutine add_matlu
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
+!!  dmft_solv :: impurity solver
 !!  matlu(natom) :: input quantity to check
 !!  natom=number of atoms in cell.
 !!  tol : threshold. Print a warning if max(abs(imag(off diagonal elements))) > tol or
@@ -2268,19 +2229,15 @@ end subroutine add_matlu
  end if ! maximagdiag > tol
  if (maximag > tol) then
    write(message,'(3x,2a,e12.4,a,e12.4,2a)') ch10,&
-     & ' Off diag occupation matrix is complex: the imaginary part ',maximag,' is larger than',tol,ch10,&
+     & ' The off diagonal occupation matrix is complex: the imaginary part ',maximag,' is larger than',tol,ch10,&
      & "Check that your calculation is meaningful"
    ABI_WARNING(message)
- else
-   write(message,'(3x,2a,e12.4,a,e12.4,2a)') ch10,' Occupation matrix is real: the imaginary part ',maximag,' is lower than',tol
-   ABI_COMMENT(message)
  end if ! maximag > tol
  if (maxoffdiag > tol) then
    write(message,'(3x,2a,e12.4,a,e12.4,6a)') ch10,&
-    & ' Occupation matrix is non diagonal : the maximum off-diag part ',maxoffdiag,' is larger than',tol,ch10,&
-    & "The corresponding non diagonal elements will be neglected in the Weiss/Hybridization functions",ch10,&
-    & "(Except if dmft_solv=8,9, or dmft_solv=6,7 and dmftctqmc_triqs_orb_off_diag/spin_off_diag=true, &
-    & where these elements are taken into account)",ch10,"This is an approximation."
+        & ' Occupation matrix is non diagonal : the maximum off-diag part ',maxoffdiag,' is larger than',tol,ch10,&
+        & "The corresponding non diagonal elements will be neglected in the Weiss/Hybridization functions",ch10,&
+        & "(Except if dmft_solv=8,9 where these elements are taken into account)",ch10,"This is an approximation."
    ABI_WARNING(message)
  else
    write(message,'(3x,2a,e12.4,a,e12.4,2a)') ch10,' Occupation matrix is diagonal : the off-diag part ',&
@@ -2416,7 +2373,7 @@ end subroutine add_matlu
    ndim = nspinor * (2*lpawu+1)
    do isppol=1,nsppol
      call abi_xgemm("n","n",ndim,ndim,ndim,cone,matlu1(iatom)%mat(:,:,isppol),ndim,&
-                 &  matlu2(iatom)%mat(:,:,isppol),ndim,czero,matlu3(iatom)%mat(:,:,isppol),ndim)
+                  & matlu2(iatom)%mat(:,:,isppol),ndim,czero,matlu3(iatom)%mat(:,:,isppol),ndim)
    end do ! isppol
  end do ! iatom
 
@@ -2583,7 +2540,7 @@ end subroutine add_matlu
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
-!!  matlu1(natom)%(nsppol,nspinor,nspinor,ndim,ndim) :: input quantity
+!!  matlu1(natom) :: input quantity
 !!  natom :: number of atoms
 !!  option=1 go from Slm to Ylm basis
 !!  option=2 go from Ylm to Slm basis
@@ -2592,117 +2549,210 @@ end subroutine add_matlu
 !! NOTES
 !!
 !! SOURCE
- subroutine slm2ylm_matlu(matlu,natom,option,optprt)
- use defs_basis
- use defs_wvltypes
- implicit none
+
+ subroutine slm2ylm_matlu(matlu,natom,paw_dmft,option,optprt)
+
+ use m_abi_linalg, only : abi_xgemm
+ use m_paw_dmft, only : paw_dmft_type
 
 !Arguments ------------------------------------
-!scalars
  integer, intent(in) :: natom,option,optprt
-!arrays
- type(matlu_type), intent(inout) :: matlu(natom)
+ type(matlu_type), target, intent(inout) :: matlu(natom)
+ type(paw_dmft_type), target, intent(in) :: paw_dmft
 !Local variables-------------------------------
-!scalars
- integer :: iatom,im,ispinor,isppol,ispinor2
- integer :: lpawu,ll,mm,jm,ii,jj,im1,im2,ndim
+ integer :: iatom,im1,im2,ispin,ispinor1,ispinor2,isppol
+ integer :: lpawu,ndim,ndim_max,nspin,nspinor,nsppol
+ complex(dpc), pointer :: mat_out(:,:) => null(), slm2ylm(:,:) => null()
+ complex(dpc), allocatable :: mat_inp(:,:),mat_tmp(:,:)
+ complex(dpc), target, allocatable :: mat_tmp2(:,:)
+ character(len=1) :: c1,c2
  character(len=500) :: message
- real(dp) :: onem
- complex(dpc),allocatable :: slm2ylm(:,:)
- complex(dpc),allocatable :: mat_inp_c(:,:)
- complex(dpc),allocatable :: mat_out_c(:,:)
- complex(dpc) :: tmp2
- real(dp),parameter :: invsqrt2=one/sqrt2
-!arrays
 !************************************************************************
 
+ ndim_max = 2*paw_dmft%maxlpawu + 1
+ nspinor  = paw_dmft%nspinor
+ nsppol   = paw_dmft%nsppol
+ nspin    = nsppol * (nspinor**2)
+
+ if (option == 1) then
+   c1 = "n" ; c2 = "c"
+ else if (option == 2) then
+   c1 = "c" ; c2 = "n"
+ end if
+
  do iatom=1,natom
-   lpawu=matlu(iatom)%lpawu
-   if(lpawu.ne.-1) then
-     ndim=2*lpawu+1
-     ll=lpawu
-     ABI_MALLOC(slm2ylm,(2*ll+1,2*ll+1))
-     slm2ylm=czero
-     do im=1,2*ll+1
-       mm=im-ll-1;jm=-mm+ll+1
-       onem=dble((-1)**mm)
-       if (mm> 0) then
-         slm2ylm(im,im)= cmplx(onem*invsqrt2,zero,kind=dp)
-         slm2ylm(jm,im)= cmplx(invsqrt2,     zero,kind=dp)
-       end if
-       if (mm==0) then
-         slm2ylm(im,im)=cone
-       end if
-       if (mm< 0) then
-         slm2ylm(im,im)= cmplx(zero,     invsqrt2,kind=dp)
-         slm2ylm(jm,im)=-cmplx(zero,onem*invsqrt2,kind=dp)
-       end if
-     end do
-     if(optprt>2) then
-       write(message,'(2a)') ch10,"SLM2YLM matrix"
+
+   lpawu = paw_dmft%lpawu(iatom)
+   if (lpawu == -1) cycle
+   ndim = 2*lpawu + 1
+   slm2ylm => paw_dmft%slm2ylm(:,:,lpawu+1)
+
+   if (optprt > 2) then
+     write(message,'(2a)') ch10,"SLM2YLM matrix"
+     call wrtout(std_out,message,'COLL')
+     do im1=1,ndim
+       write(message,'(12(1x,9(1x,"(",f9.5,",",f9.5,")")))') (slm2ylm(im1,im2),im2=1,ndim)
        call wrtout(std_out,message,'COLL')
-       do im1=1,ll*2+1
-         write(message,'(12(1x,9(1x,"(",f9.5,",",f9.5,")")))')&
-&         (slm2ylm(im1,im2),im2=1,ll*2+1)
-         call wrtout(std_out,message,'COLL')
-       end do
-     endif
-     do isppol=1,matlu(1)%nsppol
-       do ispinor=1,matlu(1)%nspinor
-         do ispinor2=1,matlu(1)%nspinor
-           ABI_MALLOC(mat_out_c,(2*ll+1,2*ll+1))
-           ABI_MALLOC(mat_inp_c,(2*ll+1,2*ll+1))
-           mat_inp_c(:,:) = matlu(iatom)%mat(1+(ispinor-1)*ndim:ndim+(ispinor-1)*ndim,1+(ispinor2-1)*ndim:ndim+(ispinor2-1)*ndim,isppol)
-           mat_out_c=czero
+     end do ! im1
+   end if ! optprt>2
 
-           if(optprt>2) then
-             write(message,'(2a, i2, a, i2, a, i2)') ch10,"SLM input matrix, isppol=", isppol, ", ispinor=", ispinor,&
-&             ", ispinor2=", ispinor2
+   ABI_MALLOC(mat_inp,(ndim,ndim))
+   ABI_MALLOC(mat_tmp,(ndim,nspin*ndim))
+   ABI_MALLOC(mat_tmp2,(ndim,nspin*ndim))
+
+   ispin = 0
+
+   do isppol=1,nsppol
+     do ispinor2=1,nspinor
+       do ispinor1=1,nspinor
+
+         ispin = ispin + 1
+
+         ! Make copy here instead of creating a temporary when calling zgemm in order to please -fcheck
+         mat_inp(:,:) = matlu(iatom)%mat(1+(ispinor1-1)*ndim:ndim*ispinor1,1+(ispinor2-1)*ndim:ispinor2*ndim,isppol)
+
+         if (optprt > 2) then
+           write(message,'(2a,i2,a,i2,a,i2)') ch10,"SLM input matrix,&
+             & isppol=",isppol,", ispinor1=",ispinor1,", ispinor2=",ispinor2
+           call wrtout(std_out,message,'COLL')
+           do im1=1,ndim
+             write(message,'(12(1x,9(1x,"(",f9.5,",",f9.5,")")))') &
+               & (mat_inp(im1,im2),im2=1,ndim)
              call wrtout(std_out,message,'COLL')
-             do im1=1,ll*2+1
-               write(message,'(12(1x,9(1x,"(",f9.5,",",f9.5,")")))')&
-&               (mat_inp_c(im1,im2),im2=1,ll*2+1)
-               call wrtout(std_out,message,'COLL')
-             end do
-           endif
+           end do ! im1
+         end if ! optprt>2
 
-           do jm=1,2*ll+1
-             do im=1,2*ll+1
-               tmp2=czero
-               do ii=1,2*ll+1
-                 do jj=1,2*ll+1
-                   if(option==1) then
-                     tmp2=tmp2+mat_inp_c(ii,jj)*(slm2ylm(im,ii))*CONJG(slm2ylm(jm,jj))
-                   else if(option==2) then
-                     tmp2=tmp2+mat_inp_c(ii,jj)*CONJG(slm2ylm(ii,im))*(slm2ylm(jj,jm))
-                   end if
-                 end do
-               end do
-               mat_out_c(im,jm)=tmp2
-             end do
-           end do
+         call abi_xgemm("n",c2,ndim,ndim,ndim,cone,mat_inp(:,:),ndim,slm2ylm(:,1:ndim), &
+                      & ndim_max,czero,mat_tmp(:,1+(ispin-1)*ndim:ndim*ispin),ndim)
 
-           if(optprt>2) then
-             write(message,'(2a, i2, a, i2, a, i2)') ch10,"YLM output matrix, isppol=", isppol, ", ispinor=", ispinor,&
-&             ", ispinor2=", ispinor2
+       end do ! ispinor2
+     end do ! ispinor1
+   end do ! isppol
+
+   call abi_xgemm(c1,"n",ndim,ndim*nspin,ndim,cone,slm2ylm(:,1:ndim),ndim_max,mat_tmp(:,:),ndim, &
+                & czero,mat_tmp2(:,:),ndim)
+
+   ispin = 0
+
+   do isppol=1,nsppol
+     do ispinor2=1,nspinor
+       do ispinor1=1,nspinor
+
+         ispin = ispin + 1
+
+         mat_out => mat_tmp2(:,1+(ispin-1)*ndim:ndim*ispin)
+
+         matlu(iatom)%mat(1+(ispinor1-1)*ndim:ndim*ispinor1,1+(ispinor2-1)*ndim:ispinor2*ndim,isppol) = mat_out(:,:)
+
+         if (optprt > 2) then
+           write(message,'(2a,i2,a,i2,a,i2)') ch10,"YLM output matrix, isppol=",isppol,", ispinor=",ispinor1,&
+              & ", ispinor2=",ispinor2
+           call wrtout(std_out,message,'COLL')
+           do im1=1,ndim
+             write(message,'(12(1x,9(1x,"(",f9.5,",",f9.5,")")))') (mat_out(im1,im2),im2=1,ndim)
              call wrtout(std_out,message,'COLL')
-             do im1=1,ll*2+1
-               write(message,'(12(1x,9(1x,"(",f9.5,",",f9.5,")")))')&
-      &         (mat_out_c(im1,im2),im2=1,ll*2+1)
-               call wrtout(std_out,message,'COLL')
-             end do
-           endif
+           end do ! im1
+         end if ! optprt>2
 
-           matlu(iatom)%mat(1+(ispinor-1)*ndim:ndim+(ispinor-1)*ndim,1+(ispinor2-1)*ndim:ndim+(ispinor2-1)*ndim,isppol)=mat_out_c(:,:)
-           ABI_FREE(mat_out_c)
-           ABI_FREE(mat_inp_c)
-         enddo ! im
-       enddo ! ispinor
-     enddo ! isppol
-     ABI_FREE(slm2ylm)
-   endif ! lpawu
- enddo ! iatom
+       end do ! ispinor1
+     end do ! ispinor2
+   end do ! isppol
 
+   ABI_FREE(mat_inp)
+   ABI_FREE(mat_tmp)
+   ABI_FREE(mat_tmp2)
+
+ end do ! iatom
+
+ mat_out => null()
+ slm2ylm => null()
+
+ !do iatom=1,natom
+ !  lpawu=matlu(iatom)%lpawu
+ !  if(lpawu.ne.-1) then
+ !    ndim=2*lpawu+1
+ !    ll=lpawu
+ !    ABI_MALLOC(slm2ylm,(2*ll+1,2*ll+1))
+ !    slm2ylm=czero
+ !    do im=1,2*ll+1
+ !      mm=im-ll-1;jm=-mm+ll+1
+ !      onem=dble((-1)**mm)
+ !      if (mm> 0) then
+ !        slm2ylm(im,im)= cmplx(onem*invsqrt2,zero,kind=dp)
+ !        slm2ylm(jm,im)= cmplx(invsqrt2,     zero,kind=dp)
+ !      end if
+ !      if (mm==0) then
+ !        slm2ylm(im,im)=cone
+ !      end if
+ !      if (mm< 0) then
+ !        slm2ylm(im,im)= cmplx(zero,     invsqrt2,kind=dp)
+ !        slm2ylm(jm,im)=-cmplx(zero,onem*invsqrt2,kind=dp)
+ !      end if
+ !    end do
+ !    if(optprt>2) then
+ !      write(message,'(2a)') ch10,"SLM2YLM matrix"
+ !      call wrtout(std_out,message,'COLL')
+ !      do im1=1,ll*2+1
+ !        write(message,'(12(1x,9(1x,"(",f9.5,",",f9.5,")")))')&
+!&         (slm2ylm(im1,im2),im2=1,ll*2+1)
+ !        call wrtout(std_out,message,'COLL')
+ !      end do
+ !    endif
+ !    do isppol=1,matlu(1)%nsppol
+ !      do ispinor=1,matlu(1)%nspinor
+ !        do ispinor2=1,matlu(1)%nspinor
+ !          ABI_MALLOC(mat_out_c,(2*ll+1,2*ll+1))
+ !          ABI_MALLOC(mat_inp_c,(2*ll+1,2*ll+1))
+ !          mat_inp_c(:,:) = matlu(iatom)%mat(1+(ispinor-1)*ndim:ndim+(ispinor-1)*ndim,1+(ispinor2-1)*ndim:ndim+(ispinor2-1)*ndim,isppol)
+ !          mat_out_c=czero
+
+ !          if(optprt>2) then
+ !            write(message,'(2a, i2, a, i2, a, i2)') ch10,"SLM input matrix, isppol=", isppol, ", ispinor=", ispinor,&
+!&             ", ispinor2=", ispinor2
+ !            call wrtout(std_out,message,'COLL')
+ !            do im1=1,ll*2+1
+ !              write(message,'(12(1x,9(1x,"(",f9.5,",",f9.5,")")))')&
+!&               (mat_inp_c(im1,im2),im2=1,ll*2+1)
+ !              call wrtout(std_out,message,'COLL')
+ !            end do
+ !          endif
+
+  !         do jm=1,2*ll+1
+  !           do im=1,2*ll+1
+  !             tmp2=czero
+  !             do ii=1,2*ll+1
+  !               do jj=1,2*ll+1
+  !                 if(option==1) then
+  !                   tmp2=tmp2+mat_inp_c(ii,jj)*(slm2ylm(im,ii))*CONJG(slm2ylm(jm,jj))
+  !                 else if(option==2) then
+  !                   tmp2=tmp2+mat_inp_c(ii,jj)*CONJG(slm2ylm(ii,im))*(slm2ylm(jj,jm))
+  !                 end if
+  !               end do
+  !             end do
+  !             mat_out_c(im,jm)=tmp2
+  !           end do
+  !         end do
+
+  !         if(optprt>2) then
+  !           write(message,'(2a, i2, a, i2, a, i2)') ch10,"YLM output matrix, isppol=", isppol, ", ispinor=", ispinor,&
+!&             ", ispinor2=", ispinor2
+  !           call wrtout(std_out,message,'COLL')
+  !           do im1=1,ll*2+1
+  !             write(message,'(12(1x,9(1x,"(",f9.5,",",f9.5,")")))')&
+  !    &         (mat_out_c(im1,im2),im2=1,ll*2+1)
+  !             call wrtout(std_out,message,'COLL')
+  !           end do
+  !         endif
+
+  !         matlu(iatom)%mat(1+(ispinor-1)*ndim:ndim+(ispinor-1)*ndim,1+(ispinor2-1)*ndim:ndim+(ispinor2-1)*ndim,isppol)=mat_out_c(:,:)
+  !         ABI_FREE(mat_out_c)
+  !         ABI_FREE(mat_inp_c)
+  !      enddo ! im
+ !      enddo ! ispinor
+ !    enddo ! isppol
+ !    ABI_FREE(slm2ylm)
+ !  endif ! lpawu
+ !enddo ! iatom
 
  end subroutine slm2ylm_matlu
 !!***
@@ -2866,23 +2916,20 @@ end subroutine add_matlu
  integer, intent(in) :: natom
  type(matlu_type), intent(inout) :: matlu(natom)
 !Local variables-------------------------------
- integer :: iatom,im,isppol,lpawu,ndim,nspinor,nsppol
+ integer :: iatom,im,lpawu,ndim,nspinor
 ! character(len=500) :: message
 !arrays
 !************************************************************************
 
  nspinor = matlu(1)%nspinor
- nsppol  = matlu(1)%nsppol
 
  do iatom=1,natom
    lpawu = matlu(iatom)%lpawu
    if (lpawu == -1) cycle
    ndim = nspinor * (2*lpawu+1)
-   do isppol=1,nsppol
-     do im=1,ndim
-       matlu(iatom)%mat(im,im,isppol) = cone
-     end do ! im
-   end do ! isppol
+   do im=1,ndim
+     matlu(iatom)%mat(im,im,:) = cone
+   end do ! im
  end do ! iatom
 
  end subroutine identity_matlu
@@ -3921,41 +3968,32 @@ end subroutine add_matlu
 !!
 !! SOURCE
 
- subroutine trace_prod_matlu(matlu1,matlu2,natom,trace,opt_add,trace_tot)
+ subroutine trace_prod_matlu(matlu1,matlu2,natom,trace,trace_tot)
 
 !Arguments ------------------------------------
  integer, intent(in) :: natom
  type(matlu_type), intent(in) :: matlu1(natom),matlu2(natom)
  complex(dpc), intent(inout) :: trace(natom)
- integer, optional, intent(in) :: opt_add
  complex(dpc), optional, intent(out) :: trace_tot
 !Local variables-------------------------------
  integer :: iatom,isppol,lpawu,nspinor,nsppol
- complex(dpc) :: trace_tmp,trace_tmp2
 !************************************************************************
 
  nspinor = matlu1(1)%nspinor
  nsppol  = matlu1(1)%nsppol
 
- trace_tmp2 = czero
+ trace(:)  = czero
 
  do iatom=1,natom
    lpawu = matlu1(iatom)%lpawu
    if (lpawu == -1) cycle
-   trace_tmp = czero
    do isppol=1,nsppol
-     trace_tmp = trace_tmp + sum(matlu1(iatom)%mat(:,:,isppol)*transpose(matlu2(iatom)%mat(:,:,isppol)))
+     trace(iatom) = trace(iatom) + sum(matlu1(iatom)%mat(:,:,isppol)*transpose(matlu2(iatom)%mat(:,:,isppol)))
    end do ! isppol
-   if (nsppol == 1 .and. nspinor == 1) trace_tmp = trace_tmp * two
-   trace_tmp2 = trace_tmp2 + trace_tmp
-   if (present(opt_add)) then
-     trace(iatom) = trace(iatom) + trace_tmp
-   else
-     trace(iatom) = trace_tmp
-   end if
+   if (nsppol == 1 .and. nspinor == 1) trace(iatom) = trace(iatom) * two
  end do ! iatom
 
- if (present(trace_tot)) trace_tot = trace_tmp2
+ if (present(trace_tot)) trace_tot = sum(trace(:))
 
  end subroutine trace_prod_matlu
 !!***
@@ -3989,7 +4027,8 @@ end subroutine add_matlu
  type(matlu_type), intent(inout) :: matlu(natom)
  integer, optional, intent(in) :: master,option
 !Local variables-------------------------------
- integer :: iatom,ibuf,im,im1,ierr,isppol,lpawu,master_node,ndim,nspinor,nsppol,opt,siz_buf
+ integer :: iatom,ibuf,im1,ierr,isppol,lpawu
+ integer :: master_node,ndim,nspinor,nsppol,opt,siz_buf
  complex(dpc), allocatable :: buffer(:)
 !************************************************************************
 
@@ -4018,10 +4057,8 @@ end subroutine add_matlu
    ndim = nspinor * (2*lpawu+1)
    do isppol=1,nsppol
      do im1=1,ndim
-       do im=1,ndim
-         ibuf = ibuf + 1
-         buffer(ibuf) = matlu(iatom)%mat(im,im1,isppol)
-       end do ! im
+       buffer(ibuf+1:ibuf+ndim) = matlu(iatom)%mat(:,im1,isppol)
+       ibuf = ibuf + ndim
      end do ! im1
    end do ! isppol
  end do ! iatom
@@ -4039,10 +4076,8 @@ end subroutine add_matlu
    ndim = nspinor * (2*lpawu+1)
    do isppol=1,nsppol
      do im1=1,ndim
-       do im=1,ndim
-         ibuf = ibuf + 1
-         matlu(iatom)%mat(im,im1,isppol) = buffer(ibuf)
-       end do ! im
+       matlu(iatom)%mat(:,im1,isppol) = buffer(ibuf+1:ibuf+ndim)
+       ibuf = ibuf + ndim
      end do ! im1
    end do ! isppol
  end do ! iatom
@@ -4050,6 +4085,44 @@ end subroutine add_matlu
  ABI_FREE(buffer)
 
  end subroutine xmpi_matlu
+!!***
+
+!!****f* m_matlu/symmetrize_matlu
+!! NAME
+!! symmetrize_matlu
+!!
+!! FUNCTION
+!!  Symmetrizes matlu (A = (A+A^T)/2
+!!
+!! INPUTS
+!!  matlu <type(matlu_type)>= density matrix in the local orbital basis and related variables
+!!  natom = number of atoms
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+ subroutine symmetrize_matlu(matlu,natom)
+
+!Arguments ------------------------------------
+ integer, intent(in) :: natom
+ type(matlu_type), intent(inout) :: matlu(natom)
+!Local variables-------------------------------
+ integer :: iatom,isppol,lpawu,nsppol
+!************************************************************************
+
+ nsppol = matlu(1)%nsppol
+
+ do iatom=1,natom
+   lpawu = matlu(iatom)%lpawu
+   if (lpawu == -1) cycle
+   do isppol=1,nsppol
+     matlu(iatom)%mat(:,:,isppol) = half * (matlu(iatom)%mat(:,:,isppol)+ &
+         & transpose(matlu(iatom)%mat(:,:,isppol)))
+   end do ! isppol
+ end do ! iatom
+
+ end subroutine symmetrize_matlu
 !!***
 
 END MODULE m_matlu

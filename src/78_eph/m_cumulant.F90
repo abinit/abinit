@@ -33,7 +33,6 @@ module m_cumulant
  use m_dtfil
  use netcdf
 
- use defs_datatypes,   only : ebands_t
  use defs_abitypes,    only : MPI_type
  use m_io_tools,       only : open_file, file_exists, is_open
  use m_time,           only : cwtime, cwtime_report
@@ -41,7 +40,6 @@ module m_cumulant
  use m_numeric_tools,  only : simpson_cplx, arth, c2r, simpson, safe_div, simpson_int, ctrap, linfit, linspace
  use m_fstrings,       only : strcat, sjoin, itoa, ltoa, stoa, ftoa
  use m_distribfft,     only : init_distribfft_seq
- !use m_kpts,           only : kpts_timrev_from_kptopt
  use m_mpinfo,         only : destroy_mpi_enreg, initmpi_seq
  use m_fft,            only : fourdp
  use m_fftcore,        only : ngfft_seq,fftalg_isavailable
@@ -1257,10 +1255,10 @@ subroutine cumulant_kubo_transport(self, dtset, cryst)
    end if
 
    ! Compute Fermi level for different T values.
-   call ebands_get_muT_with_fd(self%ebands, self%ntemp, self%kTmesh, dtset%spinmagntarget, dtset%prtvol, self%transport_mu_e, comm)
+   call self%ebands%get_muT_with_fd(self%ntemp, self%kTmesh, dtset%spinmagntarget, dtset%prtvol, self%transport_mu_e, comm)
  end if
 
- call ebands_get_carriers(self%ebands, self%ntemp, self%kTmesh, self%transport_mu_e, self%n_ehst)
+ call self%ebands%get_carriers(self%ntemp, self%kTmesh, self%transport_mu_e, self%n_ehst)
 
 
  time_opt =0
@@ -1888,9 +1886,9 @@ subroutine cumulant_free(self)
  ABI_SFREE(self%kTmesh)
  ABI_SFREE(self%mu_e)
  ABI_SFREE(self%n_ehst)
- call destroy_mpi_enreg(self%ce_mpi_enreg)
- call ebands_free(self%ebands)
 
+ call destroy_mpi_enreg(self%ce_mpi_enreg)
+ call self%ebands%free()
  call self%spin_comm%free()
  call self%kcalc_comm%free()
  call self%wt_comm%free()
