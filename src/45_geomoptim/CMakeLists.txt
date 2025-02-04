@@ -16,6 +16,7 @@ add_library(45_geomoptim STATIC
   m_pimd.F90
   m_use_ga.F90
   m_pimd_langevin.F90
+  m_pred_langevin_pimd.F90
   m_pimd_nosehoover.F90
   m_pred_bfgs.F90
   m_pred_delocint.F90
