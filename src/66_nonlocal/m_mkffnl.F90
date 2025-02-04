@@ -63,40 +63,39 @@ contains
 !!
 !! SOURCE
 
-subroutine mkffnl_objs(cryst, psps, dimffnl, ffnl, ider, idir, kg, kpg, kpt, nkpg, npw, ylm, ylm_gr, &
+subroutine mkffnl_objs(cryst, psps, dimffnl, ffnl, ider, idir, kg_k, kpg, kpt, nkpg, npw_k, ylm_k, ylm_gr_k, &
                        comm, request) ! optional
 
 !Arguments ------------------------------------
 !scalars
  type(crystal_t),intent(in) :: cryst
  type(pseudopotential_type),intent(in) :: psps
- integer,intent(in) :: dimffnl, ider, idir, npw, nkpg
+ integer,intent(in) :: dimffnl, ider, idir, npw_k, nkpg
  integer,optional,intent(in) :: comm
  integer ABI_ASYNC, optional,intent(out):: request
 !arrays
- integer,intent(in) :: kg(3,npw)
- real(dp),intent(in) :: kpg(npw, nkpg), kpt(3)
- real(dp),intent(in) :: ylm(:,:), ylm_gr(:,:,:)
- real(dp),intent(out) :: ffnl(npw, dimffnl, psps%lmnmax, psps%ntypat)
+ integer,intent(in) :: kg_k(3,npw_k)
+ real(dp),intent(in) :: kpg(npw_k, nkpg), kpt(3), ylm_k(:,:), ylm_gr_k(:,:,:)
+ real(dp),intent(out) :: ffnl(npw_k, dimffnl, psps%lmnmax, psps%ntypat)
 !
 !!Local variables-------------------------------
  integer :: my_comm
-
 ! *************************************************************************
+
  my_comm = xmpi_comm_self; if (present(comm)) my_comm = comm
 
  if (present(request)) then
     call mkffnl(psps%dimekb, dimffnl, psps%ekb, ffnl, psps%ffspl, &
-                cryst%gmet, cryst%gprimd, ider, idir, psps%indlmn, kg, kpg, kpt, psps%lmnmax, &
-                psps%lnmax, psps%mpsang, psps%mqgrid_ff, nkpg, npw, psps%ntypat, &
-                psps%pspso, psps%qgrid_ff, cryst%rmet, psps%usepaw, psps%useylm, ylm, ylm_gr, &
+                cryst%gmet, cryst%gprimd, ider, idir, psps%indlmn, kg_k, kpg, kpt, psps%lmnmax, &
+                psps%lnmax, psps%mpsang, psps%mqgrid_ff, nkpg, npw_k, psps%ntypat, &
+                psps%pspso, psps%qgrid_ff, cryst%rmet, psps%usepaw, psps%useylm, ylm_k, ylm_gr_k, &
                 comm=comm, request=request)
 
  else
     call mkffnl(psps%dimekb, dimffnl, psps%ekb, ffnl, psps%ffspl, &
-                cryst%gmet, cryst%gprimd, ider, idir, psps%indlmn, kg, kpg, kpt, psps%lmnmax, &
-                psps%lnmax, psps%mpsang, psps%mqgrid_ff, nkpg, npw, psps%ntypat, &
-                psps%pspso, psps%qgrid_ff, cryst%rmet, psps%usepaw, psps%useylm, ylm, ylm_gr, &
+                cryst%gmet, cryst%gprimd, ider, idir, psps%indlmn, kg_k, kpg, kpt, psps%lmnmax, &
+                psps%lnmax, psps%mpsang, psps%mqgrid_ff, nkpg, npw_k, psps%ntypat, &
+                psps%pspso, psps%qgrid_ff, cryst%rmet, psps%usepaw, psps%useylm, ylm_k, ylm_gr_k, &
                 comm=comm)
  end if
 

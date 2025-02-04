@@ -925,7 +925,7 @@ character(len= 500) :: msg
      diff = zero
      if (abs(x) > tol12 .and. abs(y) > tol12) then
        diff=2*abs(x-y)/(abs(x)+abs(y))
-     end if 
+     end if
      if (diff>maxdiff) maxdiff=diff
    end do
  end do
@@ -942,7 +942,7 @@ character(len= 500) :: msg
      diff = zero
      if (abs(x) > tol12 .and. abs(y) > tol12) then
        diff=2*abs(x-y)/(abs(x)+abs(y))
-     end if 
+     end if
      if (diff>maxdiff) maxdiff=diff
    end do
  end do

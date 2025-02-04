@@ -12607,7 +12607,7 @@
   0.0000000000000000E+00  1.0069349539236502E-01 -1.0023181352939128E-01
 </exact_exchange_X_matrix>
 <exact_exchange core-core=" -4.0115110870639782E+01"/>
-<!-- Program:  atompaw - input data follows: 
+<!-- Program:  atompaw - input data follows:
 Fe 26
 XC_GGA_X_PBE+XC_GGA_C_PBE scalarrelativistic loggrid 1500
 4 3 3 0 0 0

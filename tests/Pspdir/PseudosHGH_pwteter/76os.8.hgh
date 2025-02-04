@@ -1,6 +1,6 @@
-Hartwigsen-Goedecker-Hutter psp for Os,  from PRB58, 3641 (1998) 
+Hartwigsen-Goedecker-Hutter psp for Os,  from PRB58, 3641 (1998)
    76   8  010605 zatom,zion,pspdat
- 3 1   2 0 2001 0  pspcod,pspxc,lmax,lloc,mmax,r2well 
+ 3 1   2 0 2001 0  pspcod,pspxc,lmax,lloc,mmax,r2well
   0.667000    9.440459    0.000000    0.000000   0.000000 rloc, c1, c2, c3, c4
   0.510307    2.402367    3.046706    0.000000          rs, h11s, h22s, h33s
   0.717553    0.499523    1.053284    0.000000          rp, h11p, h22p, h33p

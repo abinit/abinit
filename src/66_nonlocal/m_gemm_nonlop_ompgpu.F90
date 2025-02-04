@@ -525,7 +525,7 @@ contains
       if(transfer_vectout) then
         vectout = zero
       else
-        call gpu_set_to_zero(svectout, int(2,c_size_t) * npwout * nspinor * ndat)
+        call gpu_set_to_zero(vectout, int(2,c_size_t) * npwout * nspinor * ndat)
       end if
       if(paw_opt>0) then
         if(transfer_svectout .and. transfer_vectin) then
@@ -871,10 +871,10 @@ contains
         &         projections,&
         &         vnl_projections,&
         &         s_projections,&
-        &         iatm,indlmn_,itypat,lambda,mpi_enreg,natom_,&
+        &         iatm,indlmn_(:,:,itypat),itypat,lambda,mpi_enreg,natom_,&
         &         ndgxdt,ndgxdtfac,nd2gxdt,nd2gxdtfac,&
         &         nattyp_(itypat),nlmn,nspinor,nspinortot,optder,paw_opt,sij_typ(:,itypat),&
-        &         ndat,ibeg-1,iend,nprojs,ntypat,ndat_enl,gpu_option)
+        &         ndat,ibeg-1,iend,nprojs,ndat_enl,gpu_option)
 
         shift = shift + nattyp_(itypat)*nlmn
         iatm = iatm+nattyp_(itypat)
