@@ -721,7 +721,7 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
 !Local variables ------------------------------------
  integer :: bdtot_index,dmft_dc,dmft_solv,dmftbandi,dmftbandf,fac,i,iatom
  integer :: iatom1,iband,icb,ig,ik,ikg,ikpt,im,im1,indproj,iproj,ir,isppol
- integer :: itypat,jc1,jj,jm,lpawu,lpawu1,maxlpawu,mband,mbandc,mesh_size,mesh_type
+ integer :: itypat,jc1,jj,jm,ll,lpawu,lpawu1,maxlpawu,mband,mbandc,mesh_size,mesh_type
  integer :: mkmem,ml1,mm,mpw,ms1,myproc,natom,nband_k,ndim,nkpt,nproc,nproju,npw
  integer :: nspinor,nsppol,nsym,ntypat,off_diag,siz_paw,siz_proj,siz_wan,use_dmft
  logical :: t2g,use_full_chipsi,verif,x2my2d
@@ -1210,17 +1210,17 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
        jc1 = jc1 + 1 ! Global index for JMJ
        if (nint(xj+half) == ll+1) then ! if xj=ll+0.5
          if (nint(xmj+half) == ll+1) then
-           mlms2jmj(ind_msml(1,ll),jc1) = cone   !  J=L+0.5 and m_J=L+0.5
+           paw_dmft%jmj2ylm(ind_msml(1,ll),jc1,ll+1) = cone   !  J=L+0.5 and m_J=L+0.5
          else if (nint(xmj-half) == -ll-1) then
-           mlms2jmj(ind_msml(2,-ll),jc1) = cone   !  J=L+0.5 and m_J=-L-0.5
+           paw_dmft%jmj2ylm(ind_msml(2,-ll),jc1,ll+1) = cone   !  J=L+0.5 and m_J=-L-0.5
          else
-           mlms2jmj(ind_msml(1,nint(xmj-half)),jc1) = cmplx(invsqrt2lp1*(sqrt(dble(ll)+xmj+half)),zero,kind=dp)
-           mlms2jmj(ind_msml(2,nint(xmj+half)),jc1) = cmplx(invsqrt2lp1*(sqrt(dble(ll)-xmj+half)),zero,kind=dp)
+           paw_dmft%jmj2ylm(ind_msml(1,nint(xmj-half)),jc1,ll+1) = cmplx(invsqrt2lp1*(sqrt(dble(ll)+xmj+half)),zero,kind=dp)
+           paw_dmft%jmj2ylm(ind_msml(2,nint(xmj+half)),jc1,ll+1) = cmplx(invsqrt2lp1*(sqrt(dble(ll)-xmj+half)),zero,kind=dp)
          end if
        end if
        if (nint(xj+half) == ll) then  ! if xj=ll-0.5
-         mlms2jmj(ind_msml(2,nint(xmj+half)),jc1) = cmplx(invsqrt2lp1*(sqrt(dble(ll)+xmj+half)),zero,kind=dp)
-         mlms2jmj(ind_msml(1,nint(xmj-half)),jc1) = cmplx(-invsqrt2lp1*(sqrt(dble(ll)-xmj+half)),zero,kind=dp)
+         paw_dmft%jmj2ylm(ind_msml(2,nint(xmj+half)),jc1,ll+1) = cmplx(invsqrt2lp1*(sqrt(dble(ll)+xmj+half)),zero,kind=dp)
+         paw_dmft%jmj2ylm(ind_msml(1,nint(xmj-half)),jc1,ll+1) = cmplx(-invsqrt2lp1*(sqrt(dble(ll)-xmj+half)),zero,kind=dp)
        end if
      end do ! jm
    end do ! jj

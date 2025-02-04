@@ -47,7 +47,7 @@ MODULE m_forctqmc
  use m_matlu, only : add_matlu,checkdiag_matlu,checkreal_matlu,chi_matlu,copy_matlu,destroy_matlu, &
      & diag_matlu,diff_matlu,fac_matlu,gather_matlu,init_matlu,magmomforb_matlu,magmomfspin_matlu, &
      & magmomfzeeman_matlu,matlu_type,print_matlu,printplot_matlu,prod_matlu,rotate_matlu,shift_matlu, &
-     & slm2ylm_matlu,sym_matlu,symmetrize_matlu,xmpi_matlu,zero_matlu
+     & slm2ylm_matlu,sym_matlu,symmetrize_matlu,xmpi_matlu,ylm2jmj_matlu,zero_matlu
  use m_oper, only : destroy_oper,gather_oper,identity_oper,init_oper,inverse_oper,oper_type
  use m_paw_correlations, only : calc_vee
  use m_paw_dmft, only : paw_dmft_type
@@ -3343,6 +3343,18 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
    end do ! ifreq
  end if ! basis=1 or 2
 
+ if (basis == 4) then
+   call ylm2jmj_matlu(energy_level%matlu(:),natom,1,paw_dmft)
+   call ylm2jmj_matlu(dmat_ctqmc(:),natom,1,paw_dmft)
+   do i=2,weiss%nmoments-1
+     call ylm2jmj_matlu(weiss%moments(i)%matlu(:),natom,1,paw_dmft)
+   end do
+   do ifreq=1,nwlo
+     if (weiss%distrib%procf(ifreq) /= myproc) cycle
+     call ylm2jmj_matlu(weiss%oper(ifreq)%matlu(:),natom,1,paw_dmft)
+   end do ! ifreq
+ end if
+
  if (basis == 0) then
    do iatom=1,natom
      lpawu = paw_dmft%lpawu(iatom)
@@ -3355,6 +3367,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
    call gather_oper(weiss%oper(:),weiss%distrib,paw_dmft,opt_ksloc=2)
    rot_type_vee = 4
    if (basis == 3) rot_type_vee = 2
+   if (basis == 4) rot_type_vee = 3
    call rotatevee_hu(hu(:),paw_dmft,pawprtvol,eigvectmatlu(:),rot_type_vee, &
                    & udens_rot(:),vee_rot(:))
  end if ! basis
@@ -4093,36 +4106,49 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
 
  if (basis > 0) then
    call slm2ylm_matlu(energy_level%matlu(:),natom,paw_dmft,2,0)
-   if (basis /= 3) then
+   if (basis == 1 .or. basis == 2) then
      call rotate_matlu(energy_level%matlu(:),eigvectmatlu(:),natom,0)
+   else if (basis == 4) then
+     call ylm2jmj_matlu(energy_level%matlu(:),natom,2,paw_dmft)
    end if ! basis /= 3
    do i=2,weiss%nmoments-1
      call slm2ylm_matlu(weiss%moments(i)%matlu(:),natom,paw_dmft,2,0)
-     if (basis /= 3) then
+     if (basis == 1 .or. basis == 2) then
        call rotate_matlu(weiss%moments(i)%matlu(:),eigvectmatlu(:),natom,0)
+     else if (basis == 4) then
+       call ylm2jmj_matlu(weiss%moments(i)%matlu(:),natom,2,paw_dmft)
      end if
    end do ! i
    do i=1,green%nmoments
      call slm2ylm_matlu(green%moments(i)%matlu(:),natom,paw_dmft,2,0)
-     if (basis /= 3) then
+     if (basis == 1 .or. basis == 2) then
        call rotate_matlu(green%moments(i)%matlu(:),eigvectmatlu(:),natom,0)
+     else if (basis == 4) then
+       call ylm2jmj_matlu(green%moments(i)%matlu(:),natom,2,paw_dmft)
      end if
    end do ! i
    do ifreq=1,nwlo
      if (green%distrib%procf(ifreq) /= myproc) cycle
      call slm2ylm_matlu(weiss%oper(ifreq)%matlu(:),natom,paw_dmft,2,0)
      call slm2ylm_matlu(green%oper(ifreq)%matlu(:),natom,paw_dmft,2,0)
-     if (basis /= 3) then
+     if (basis == 1 .or. basis == 2) then
        call rotate_matlu(weiss%oper(ifreq)%matlu(:),eigvectmatlu(:),natom,0)
        call rotate_matlu(green%oper(ifreq)%matlu(:),eigvectmatlu(:),natom,0)
+     else if (basis == 4) then
+       call ylm2jmj_matlu(weiss%oper(ifreq)%matlu(:),natom,2,paw_dmft)
+       call ylm2jmj_matlu(green%oper(ifreq)%matlu(:),natom,2,paw_dmft)
      end if
    end do ! ifreq
    call slm2ylm_matlu(green%occup_tau%matlu(:),natom,paw_dmft,2,0)
-   if (basis /= 3) then
+   if (basis == 1 .or. basis == 2) then
      call rotate_matlu(green%occup_tau%matlu(:),eigvectmatlu(:),natom,0)
+   else if (basis == 4) then
+     call ylm2jmj_matlu(green%occup_tau%matlu(:),natom,2,paw_dmft)
    end if
  end if! basis > 0
 
+ ! Since we possibly neglected some off-diagonal elements and imaginary part,
+ ! the levels and hybridization might not be symmetrized anymore
  call sym_matlu(energy_level%matlu(:),paw_dmft)
  do i=2,weiss%nmoments-1
    call sym_matlu(weiss%moments(i)%matlu(:),paw_dmft)
