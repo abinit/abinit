@@ -3119,7 +3119,6 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
  real(dp),allocatable :: sc_displ_cart_re(:,:,:,:), sc_displ_cart_im(:,:,:,:)
  real(dp), ABI_CONTIGUOUS pointer :: xcart_ptr(:,:)
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:)
- complex(gwpc) :: ceikr_
  complex(gwpc),allocatable :: ur_k(:,:), ds_ur_k(:,:), pol_wfr(:,:,:), sc_ceikr_1d(:,:)
 !----------------------------------------------------------------------
 
@@ -3363,8 +3362,6 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
  sc_ngfft(4:6) = sc_ngfft(1:3)    ! No augmentation
  sc_nfft = product(sc_ngfft(1:3)) ! Total number of points in the supercell
 
- ! TODO: Implement possibility of downsampling the grid by taking the average inside
- ! mini boxes. Useful for polarons in very large supercells.
  call wrtout(std_out, " Computing polaron wavefunction in the real-space supercell...")
  call wrtout(std_out, sjoin(" Using varpeq_mesh_fact:", itoa(ds_iscale)))
  call wrtout(std_out, sjoin(" Memory required by pol_wfr:", &
