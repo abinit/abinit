@@ -1357,7 +1357,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      if (dt%useylm == 0 .and. dt%optdriver /= RUNL_GWR) then
        write(msg,'(3a)')&
         'Use of GPU is not allowed when useylm==0 !',ch10,&
-        'Action: impose uselym=1 in your input file.'
+        'Action: impose useylm=1 in your input file.'
        ABI_ERROR_NOSTOP(msg, ierr)
      end if
      if (dt%tfkinfunc>0) then
@@ -2901,7 +2901,11 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    end if
 
    if (dt%useylm == 1 .and. dt%usepaw == 0 .and. dt%nspinor == 2 .and. any(pspheads(:)%pspso /= 0)) then
-     ABI_ERROR_NOSTOP("spin-orbit (pspso /=0 ) with NC pseudos and Yml for nonlop (useyml = 1) not yet allowed.", ierr)
+     if(dt%gpu_option/=ABI_GPU_DISABLED) then
+       ABI_ERROR_NOSTOP("spin-orbit (pspso /=0 ) with NC pseudos and GPU for nonlop (gpu_option != 0) not yet allowed.", ierr)
+     else
+       ABI_ERROR_NOSTOP("spin-orbit (pspso /=0 ) with NC pseudos and Ylm for nonlop (useylm = 1) not yet allowed.", ierr)
+     end if
    end if
 
 !  optforces
