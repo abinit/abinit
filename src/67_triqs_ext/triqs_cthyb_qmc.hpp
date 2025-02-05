@@ -18,7 +18,7 @@ extern "C"{
                           int num_orbitals, int n_tau, int n_l, int n_cycles_, int cycle_length, int ntherm, int ntherm_restart,
                           int det_init_size, int det_n_operations_before_check, int ntau_delta, int nbins_histo, int rank, int nspinor,
                           int nblocks, int read_data, double beta, double move_global_prob, double imag_threshold, double det_precision_warning,
-                          double det_precision_error, double det_singular_threshold, double lam, int *block_list, int *flavor_list,
+                          double det_precision_error, double det_singular_threshold, double lam, double alpha, int *block_list, int *flavor_list,
                           int *inner_list, int *siz_list, complex<double> *ftau, complex<double> *gtau, complex<double> *gl,
                           complex<double> *udens_cmplx, complex<double> *vee_cmplx, complex<double> *levels_cmplx,
                           complex<double> *moments_self_1, complex<double> *moments_self_2, complex<double> *occ,

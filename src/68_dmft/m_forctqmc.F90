@@ -3281,7 +3281,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
  call wrtout(std_out,message,"COLL")
 
  if (basis == 1) then
-   call checkdiag_matlu(energy_level%matlu(:),natom,tol15,nondiag)
+   call checkdiag_matlu(energy_level%matlu(:),natom,tol,nondiag)
    if (.not. nondiag) then
      basis = 0
      write(message,'(a,3x,a)') ch10,"== Electronic levels are already diagonal: staying in the cubic basis"
@@ -3290,7 +3290,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
  end if ! basis=1
 
  if (basis == 2) then
-   call checkdiag_matlu(green%occup%matlu(:),natom,tol15,nondiag)
+   call checkdiag_matlu(green%occup%matlu(:),natom,tol,nondiag)
    if (.not. nondiag) then
      basis = 0
      write(message,'(a,3x,a)') ch10,"== Occupation matrix is already diagonal: staying in the cubic basis"
@@ -3368,8 +3368,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
    rot_type_vee = 4
    if (basis == 3) rot_type_vee = 2
    if (basis == 4) rot_type_vee = 3
-   call rotatevee_hu(hu(:),paw_dmft,pawprtvol,eigvectmatlu(:),rot_type_vee, &
-                   & udens_rot(:),vee_rot(:))
+   call rotatevee_hu(hu(:),paw_dmft,pawprtvol,eigvectmatlu(:),rot_type_vee,udens_rot(:),vee_rot(:))
  end if ! basis
 
  write(message,'(a,3x,a)') ch10,"== Print Energy levels in CTQMC basis"
@@ -3709,8 +3708,8 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
                         & paw_dmft%dmft_triqs_read_ctqmcdata,beta,paw_dmft%dmft_triqs_move_global_prob, &
                         & paw_dmft%dmft_triqs_imag_threshold,paw_dmft%dmft_triqs_det_precision_warning, &
                         & paw_dmft%dmft_triqs_det_precision_error,paw_dmft%dmft_triqs_det_singular_threshold,lam_list(ilam), &
-                        & block_ptr,flavor_ptr,inner_ptr,siz_ptr,ftau_ptr,gtau_ptr,gl_ptr,udens_ptr,vee_ptr,levels_ptr,mself_1_ptr, &
-                        & mself_2_ptr,occ_ptr,eu_ptr,fname_data_ptr,fname_histo_ptr)
+                        & paw_dmft%dmft_triqs_mxprob,block_ptr,flavor_ptr,inner_ptr,siz_ptr,ftau_ptr,gtau_ptr,gl_ptr,udens_ptr, &
+                        & vee_ptr,levels_ptr,mself_1_ptr,mself_2_ptr,occ_ptr,eu_ptr,fname_data_ptr,fname_histo_ptr)
 #endif
 
      call flush_unit(std_out)
@@ -3955,7 +3954,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
          do im1=1,tndim
            do im=1,tndim
              ! Do not use DOT_PRODUCT
-             green%moments(p)%matlu(iatom)%mat(im,im1,isppol) = sum(t_lp(:,p)*gl_tmp(:,im,im1,isppol))
+             green%moments(p)%matlu(iatom)%mat(im,im1,isppol) = sum(t_lp(:,p)*gl_tmp(:,im,im1,isppol)) / beta**p
            end do ! im
          end do ! im1
        end do ! isppol

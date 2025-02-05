@@ -19,8 +19,8 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool off_diag, bool move_sh
                      int n_l, int n_cycles, int cycle_length, int ntherm, int ntherm_restart, int det_init_size,
                      int det_n_operations_before_check, int ntau_delta, int nbins_histo, int rank,
                      int nspinor, int nblocks, int read_data, double beta, double move_global_prob, double imag_threshold,
-                     double det_precision_warning, double det_precision_error, double det_singular_threshold,
-                     double lam, int *block_list, int *flavor_list, int *inner_list, int *siz_list, complex<double> *ftau,
+                     double det_precision_warning, double det_precision_error, double det_singular_threshold, double lam,
+                     double alpha, int *block_list, int *flavor_list, int *inner_list, int *siz_list, complex<double> *ftau,
                      complex<double> *gtau, complex<double> *gl, complex<double> *udens_cmplx, complex<double> *vee_cmplx,
                      complex<double> *levels_cmplx, complex<double> *moments_self_1, complex<double> *moments_self_2,
                      complex<double> *occ, complex<double> *eu, char *fname_data, char *fname_histo) {
@@ -39,6 +39,13 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool off_diag, bool move_sh
 
   bool restart = (exists(qmc_data_fname) && read_data == 1);
   if (restart) therm = ntherm_restart;
+
+  // Tags for histograms
+  std::vector<string> tag_move = { "insert", "move" };
+  if (move_shift) {
+    tag_move.push_back("shift");
+    tag_move.push_back("shift_dag");
+  }
 
   // Print information about the Solver Parameters
   if (rank == 0 && verbo > 0) {
@@ -199,21 +206,12 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool off_diag, bool move_sh
     int nbins_file;
     h5_read(gr,"nbins",nbins_file);
     if (nbins_file != nbins_histo) TRIQS_RUNTIME_ERROR << "You are trying to read a configuration file generated with a different number of time bins";
-    std::vector<double> *hist;
-    string tag_move;
-    for (int i : range(nblocks)) {
-      for (int j : range(2)) {
-        if (j == 0) {
-          tag_move = "insert";
-          hist = &paramCTQMC.hist_insert[to_string(i)];
-        }
-        else {
-          tag_move = "remove";
-          hist = &paramCTQMC.hist_remove[to_string(i)];
-        }
-        *hist = std::vector<double>(nbins_histo);
-        if (rank == 0) h5_read(gr,tag_move+"_"+to_string(i),*hist);
-        mpi_broadcast(*hist,comm,0);
+    for (auto const &tag : tag_move) {
+      for (int iblock : range(nblocks)) {
+        auto &hist = paramCTQMC.hist[tag][to_string(iblock)];
+        hist = std::vector<double>(nbins_histo);
+        if (rank == 0) h5_read(gr,tag+"_"+to_string(iblock),hist);
+        mpi_broadcast(hist,comm,0);
       }
     }
     qmc_data_hfile.close();
@@ -294,41 +292,20 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool off_diag, bool move_sh
     gr = grp.create_group("histo");
     h5_write(gr,"nbins",nbins_histo);
 
-    auto hist_insert = solver.get_weight_ratio_insert();
-    auto hist_remove = solver.get_weight_ratio_remove();
+    auto hist_ = solver.get_weight_ratio();
     double step = beta / nbins_histo;
-    std::vector<double> *hist;
-    double p_local = 0.9;
-    string tag_move;
 
-    for (int i : range(nblocks)) {
-      for (int j : range(2)) {
+    for (auto const &tag : tag_move) {
+      for (int iblock : range(nblocks)) {
 
-        std::vector<int> ind_vec; // indices of unsampled bins
-        ind_vec.reserve(nbins_histo);
+        auto &hist = hist_[tag][to_string(iblock)];
 
-        if (j == 0) {
-          hist = &hist_insert[to_string(i)];
-          tag_move = "insert";
-        }
-        else {
-          tag_move = "remove";
-          hist = &hist_remove[to_string(i)];
-        }
-
+        // Normalize histogram and mix with uniform probability
         double s = 0.;
-        for (int k : range(nbins_histo)) {
-          if ((*hist)[k] < 1.e-15)
-            ind_vec.push_back(k);
-          else
-            s += (*hist)[k];
-        }
-        s *= step;
+        for (auto const &elem : hist) s += elem;
+        for (auto &elem : hist) elem = alpha * elem / s + (1. - alpha) / beta;
 
-        double x = s * (1. / p_local - 1.) / (step * double(ind_vec.size()));
-        for (auto const &ind : ind_vec) (*hist)[ind] = x;
-
-        h5_write(gr,tag_move+"_"+to_string(i),*hist);
+        h5_write(gr,tag+"_"+to_string(iblock),hist);
       }
     }
 
@@ -423,6 +400,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool off_diag, bool move_sh
         }
       }
       for (int i : range(num_orbitals+1)) {
+        // Sort by descending probabilities
         sort(histogram[i].begin(),histogram[i].end(), [](auto &left, auto &right) { return left.first > right.first; });
         for (int j : range(histogram[i].size())) {
           tie(prob,f_stateb) = histogram[i][j];
@@ -461,14 +439,12 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool off_diag, bool move_sh
       Sinf_mat = all_reduce(Sinf_mat,comm);
       MPI_Allreduce(mself2,moments_self_2,num_orbitals,MPI_C_DOUBLE_COMPLEX,MPI_SUM,comm);
 
-      for (int iflavor : range(num_orbitals))
-        moments_self_1[iflavor] = Sinf_mat(iflavor,iflavor);
+      for (int iflavor : range(num_orbitals)) moments_self_1[iflavor] = Sinf_mat(iflavor,iflavor);
 
       // Matrix product in case the off-diagonal elements are implemented someday
       Sinf_mat = Sinf_mat * Sinf_mat;
 
-      for (int iflavor : range(num_orbitals))
-        moments_self_2[iflavor] -= Sinf_mat(iflavor,iflavor);
+      for (int iflavor : range(num_orbitals)) moments_self_2[iflavor] -= Sinf_mat(iflavor,iflavor);
 
     }   // not legendre
 

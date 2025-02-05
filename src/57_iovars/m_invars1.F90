@@ -2379,6 +2379,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmft_triqs_move_double=0
    dtsets(idtset)%dmft_triqs_move_global_prob=0.0_dp
    dtsets(idtset)%dmft_triqs_move_shift=1
+   dtsets(idtset)%dmft_triqs_mxprob=0.9
    dtsets(idtset)%dmft_triqs_nbins_histo=100
    dtsets(idtset)%dmft_triqs_nleg=0
    dtsets(idtset)%dmft_triqs_nsubdivisions=1
