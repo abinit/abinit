@@ -41,7 +41,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool off_diag, bool move_sh
   if (restart) therm = ntherm_restart;
 
   // Tags for histograms
-  std::vector<string> tag_move = { "insert", "move" };
+  std::vector<string> tag_move = { "insert", "remove" };
   if (move_shift) {
     tag_move.push_back("shift");
     tag_move.push_back("shift_dag");
@@ -302,7 +302,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool off_diag, bool move_sh
 
         // Normalize histogram and mix with uniform probability
         double s = 0.;
-        for (auto const &elem : hist) s += elem;
+        for (auto const &elem : hist) s += elem * step;
         for (auto &elem : hist) elem = alpha * elem / s + (1. - alpha) / beta;
 
         h5_write(gr,tag+"_"+to_string(iblock),hist);
