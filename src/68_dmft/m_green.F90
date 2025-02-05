@@ -1771,7 +1771,7 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
    if (paw_dmft%lchipsiortho == 1 .or. optself == 1) then
      call gather_oper(green%oper(:),green%distrib,paw_dmft,opt_ksloc=2,opt_commkpt=1)
 
-     if(gpu_option==ABI_GPU_DISABLED .or. nspinor>1) then
+     if(gpu_option==ABI_GPU_DISABLED) then
        do ifreq=1,green%nw
          if (green%distrib%procf(ifreq) /= myproc) cycle
          call sym_matlu(green%oper(ifreq)%matlu(:),paw_dmft)
