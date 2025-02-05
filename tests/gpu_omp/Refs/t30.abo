@@ -17,10 +17,10 @@
 .Starting date : Fri 13 Sep 2024.
 - ( at 19h17 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v9_t01/t01.abi
-- output file    -> t01.abo
-- root for input  files -> t01i
-- root for output files -> t01o
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v9_t30/t30.abi
+- output file    -> t30.abo
+- root for input  files -> t30i
+- root for output files -> t30o
 
 - inpspheads : Reading pseudopotential header in XML form from 
 -   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_paw_pbe_std/P.xml

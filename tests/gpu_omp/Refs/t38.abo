@@ -17,10 +17,10 @@
 .Starting date : Fri  3 Jan 2025.
 - ( at 19h20 )
 
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/jzwanzig_zora/tests/TestBot_MPI1/v9_t09/t09.abi
-- output file    -> t09.abo
-- root for input  files -> t09i
-- root for output files -> t09o
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/jzwanzig_zora/tests/TestBot_MPI1/v9_t38/t38.abi
+- output file    -> t38.abo
+- root for input  files -> t38i
+- root for output files -> t38o
 
 - inpspheads : Reading pseudopotential header in XML form from
 -   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/jzwanzig_zora/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
@@ -932,7 +932,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  5.420000000000  5.420000000000  5.420000000000 bohr
               =  2.868140470558  2.868140470558  2.868140470558 angstroms
- prteigrs : about to open file t09o_DS1_EIG
+ prteigrs : about to open file t38o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.33688   Average Vxc (hartree)=  -0.46086
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband= 24, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -1720,7 +1720,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  5.420000000000  5.420000000000  5.420000000000 bohr
               =  2.868140470558  2.868140470558  2.868140470558 angstroms
- prteigrs : about to open file t09o_DS2_EIG
+ prteigrs : about to open file t38o_DS2_EIG
  Fermi (or HOMO) energy (hartree) =   0.33681   Average Vxc (hartree)=  -0.46086
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband= 24, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -2510,7 +2510,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  5.420000000000  5.420000000000  5.420000000000 bohr
               =  2.868140470558  2.868140470558  2.868140470558 angstroms
- prteigrs : about to open file t09o_DS3_EIG
+ prteigrs : about to open file t38o_DS3_EIG
  Fermi (or HOMO) energy (hartree) =   0.33681   Average Vxc (hartree)=  -0.46086
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband= 24, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -3301,7 +3301,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  5.420000000000  5.420000000000  5.420000000000 bohr
               =  2.868140470558  2.868140470558  2.868140470558 angstroms
- prteigrs : about to open file t09o_DS4_EIG
+ prteigrs : about to open file t38o_DS4_EIG
  Fermi (or HOMO) energy (hartree) =   0.32558   Average Vxc (hartree)=  -0.45837
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband= 24, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -4093,7 +4093,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  5.420000000000  5.420000000000  5.420000000000 bohr
               =  2.868140470558  2.868140470558  2.868140470558 angstroms
- prteigrs : about to open file t09o_DS5_EIG
+ prteigrs : about to open file t38o_DS5_EIG
  Fermi (or HOMO) energy (hartree) =   0.32557   Average Vxc (hartree)=  -0.45837
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband= 24, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)

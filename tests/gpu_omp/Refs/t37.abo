@@ -17,10 +17,10 @@
 .Starting date : Fri 13 Sep 2024.
 - ( at 19h14 )
 
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v8_t08/t08.abi
-- output file    -> t08.abo
-- root for input  files -> t08i
-- root for output files -> t08o
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v8_t37/t37.abi
+- output file    -> t37.abo
+- root for input  files -> t37i
+- root for output files -> t37o
 
  DATASET   11 : magnetic group, Shubnikov type III
  Fedorov space group Pm m m (# 47); Bravais oP (primitive ortho.)
@@ -404,7 +404,7 @@ force_length_stats: {min:   5.58653070E-02, max:   5.58653070E-02, mean:   5.586
  frms,max,avg= 1.6585595E+00 2.8727093E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 15.000000000000 10.000000000000 10.000000000000 bohr
               =  7.937658128850  5.291772085900  5.291772085900 angstroms
- prteigrs : about to open file t08o_DS11_EIG
+ prteigrs : about to open file t37o_DS11_EIG
  Fermi (or HOMO) energy (hartree) =  -0.31206   Average Vxc (hartree)=  -0.06377
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband=  2, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -574,7 +574,7 @@ force_length_stats: {min:   5.72604261E-02, max:   5.72604261E-02, mean:   5.726
  frms,max,avg= 1.6999786E+00 2.9444492E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 15.000000000000 10.000000000000 10.000000000000 bohr
               =  7.937658128850  5.291772085900  5.291772085900 angstroms
- prteigrs : about to open file t08o_DS12_EIG
+ prteigrs : about to open file t37o_DS12_EIG
  Fermi (or HOMO) energy (hartree) =  -0.31160   Average Vxc (hartree)=  -0.06385
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband=  2, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -744,7 +744,7 @@ force_length_stats: {min:   4.14928056E-02, max:   4.14928056E-02, mean:   4.149
  frms,max,avg= 1.2318609E+00 2.1336457E+00   9.006E-01  0.000E+00 -4.081E-09 e/A
  length scales= 15.000000000000 10.000000000000 10.000000000000 bohr
               =  7.937658128850  5.291772085900  5.291772085900 angstroms
- prteigrs : about to open file t08o_DS21_EIG
+ prteigrs : about to open file t37o_DS21_EIG
  Fermi (or HOMO) energy (hartree) =  -0.27155   Average Vxc (hartree)=  -0.06516
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband=  2, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -916,7 +916,7 @@ force_length_stats: {min:   4.37523312E-02, max:   4.37523312E-02, mean:   4.375
  frms,max,avg= 1.2989429E+00 2.2498351E+00   4.313E-01  0.000E+00  1.200E-08 e/A
  length scales= 15.000000000000 10.000000000000 10.000000000000 bohr
               =  7.937658128850  5.291772085900  5.291772085900 angstroms
- prteigrs : about to open file t08o_DS22_EIG
+ prteigrs : about to open file t37o_DS22_EIG
  Fermi (or HOMO) energy (hartree) =  -0.27065   Average Vxc (hartree)=  -0.06530
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband=  2, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -1086,7 +1086,7 @@ force_length_stats: {min:   4.14928330E-02, max:   4.14928330E-02, mean:   4.149
  frms,max,avg= 1.2318617E+00 2.1336471E+00   9.006E-01  0.000E+00  0.000E+00 e/A
  length scales= 15.000000000000 10.000000000000 10.000000000000 bohr
               =  7.937658128850  5.291772085900  5.291772085900 angstroms
- prteigrs : about to open file t08o_DS31_EIG
+ prteigrs : about to open file t37o_DS31_EIG
  Fermi (or HOMO) energy (hartree) =  -0.27155   Average Vxc (hartree)=  -0.06516
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband=  2, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -1258,7 +1258,7 @@ force_length_stats: {min:   4.37529620E-02, max:   4.37529620E-02, mean:   4.375
  frms,max,avg= 1.2989616E+00 2.2498676E+00   4.313E-01  0.000E+00  0.000E+00 e/A
  length scales= 15.000000000000 10.000000000000 10.000000000000 bohr
               =  7.937658128850  5.291772085900  5.291772085900 angstroms
- prteigrs : about to open file t08o_DS32_EIG
+ prteigrs : about to open file t37o_DS32_EIG
  Fermi (or HOMO) energy (hartree) =  -0.27065   Average Vxc (hartree)=  -0.06530
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband=  2, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)

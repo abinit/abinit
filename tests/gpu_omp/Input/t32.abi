@@ -7,7 +7,7 @@
 
 # === Datasets
 ndtset 4
-jdtset 5 6 7 8
+jdtset 1 2 3 4
 nsppol1 1  nspden1 1  nspinor1 1               ! non-magnetic
 nsppol2 1  nspden2 1  nspinor2 1               ! non-magnetic DFT+U
 nsppol3 2  nspden3 2  nspinor3 1               ! ferro-magnetic DFT+U
@@ -36,12 +36,10 @@ nband1 28 nband2 28 nband3 28 nband4 28
 nband5 60 nband6 60 nband7 60 nband8 60
 bandpp1 14 bandpp2 14 bandpp3 14 bandpp4 14
 bandpp5 30 bandpp6 30 bandpp7 30 bandpp8 30
-jpawu7 0 0 0
-upawu7 0 0 0
 occopt 7  tsmear 0.015
 
 # === SCF cycle options
-nstep 25  tolvrs 1.d-30
+nstep 30  tolvrs 1.d-30
 ecut 8. pawecutdg 10.
 diemix 0.5
 diemixmag5 -1 diemixmag6 -1  diemixmag7 -1  diemixmag8 -1
@@ -255,32 +253,26 @@ pawprtvol 3
  pp_dirpath "$ABI_PSPDIR"
  pseudos "28ni.paw, 8o.2.paw"
 
-paral_kgb 1
-npband 2
-wfoptalg  114
-# Dataset #6 doesn't converge with LOBPCG (CPU or GPU)
-wfoptalg6  111 nstep6 40
+wfoptalg  14
 gpu_option 2
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% [paral_info]
-#%% nprocs_to_test = 2
-#%% max_nprocs = 2
 #%% [files]
-#%% [NCPU_2]
 #%% files_to_test =
-#%%   t12_MPI2.abo, tolnlines = 70, tolabs = 7.000e-06, tolrel = 1.100e-00, fld_options = -medium
+#%%   t32.abo, tolnlines = 70, tolabs = 9.000e-06, tolrel = 2.000e+00, fld_options = -medium
+#%% [paral_info]
+#%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = M. Sarraute
 #%% keywords = PAW, DFTU
 #%% description =
 #%%   NiO: 2 Ni and 2 O atoms in an fcc supercell, using OpenMP GPU.
 #%%   Different combinations of nsppol/nspden/nspinor/pawspnorb are tested in the PAW+U formalism:
-#%%   5- non-collinear magnetism          nsppol/nspden/nspinor=1/4/2
-#%%   6- non-collinear magnetism DFT+U    nsppol/nspden/nspinor=1/4/2
-#%%   7- non-collinear magnetism DFT+U+SO nsppol/nspden/nspinor=1/4/2
-#%%   8- non-magnetic DFT+U+SO            nsppol/nspden/nspinor=1/1/2
+#%%   1- non-magnetic                     nsppol/nspden/nspinor=1/1/1
+#%%   2- non-magnetic DFT+U               nsppol/nspden/nspinor=1/1/1
+#%%   3- ferro-magnetic DFT+U             nsppol/nspden/nspinor=2/2/1
+#%%   4- antiferro-magnetic DFT+U         nsppol/nspden/nspinor=1/2/1
 #%%   Cut-off and k-points are unrealistic.
 #%% topics = DFT+U, spinpolarisation
 #%%<END TEST_INFO>
