@@ -27,7 +27,7 @@ MODULE TRIQS_CTQMC
      SUBROUTINE Ctqmc_triqs_run(rot_inv,leg_measure,off_diag,move_shift,move_double,measure_density_matrix,time_invariance,use_norm_as_weight, &
                               & loc_n_min,loc_n_max,seed_a,seed_b,num_orbitals,n_tau,n_l,n_cycles,cycle_length,ntherm,ntherm_restart, &
                               & det_init_size,det_n_operations_before_check,ntau_delta,nbins_histo,rank,nspinor,nblocks,read_data,beta, &
-                              & move_global_prob,imag_threshold,det_precision_warning,det_precision_error,det_singular_threshold,lam, &
+                              & move_global_prob,imag_threshold,det_precision_warning,det_precision_error,det_singular_threshold,lam,alpha, &
                               & block_list,flavor_list,inner_list,siz_list,ftau,gtau,gl,udens_cmplx,vee_cmplx,levels_cmplx,moments_self_1, &
                               & moments_self_2,occ,eu,fname_data,fname_histo) bind(c)
 
@@ -39,7 +39,7 @@ MODULE TRIQS_CTQMC
 
       INTEGER, VALUE, INTENT(IN) :: det_init_size,det_n_operations_before_check,ntau_delta,nbins_histo,rank,nspinor,nblocks,read_data
 
-      REAL(KIND=8), VALUE, INTENT(IN) :: beta,move_global_prob,imag_threshold,det_precision_warning,det_precision_error,det_singular_threshold,lam
+      REAL(KIND=8), VALUE, INTENT(IN) :: beta,move_global_prob,imag_threshold,det_precision_warning,det_precision_error,det_singular_threshold,lam,alpha
 
       TYPE(C_PTR), VALUE, INTENT(IN) :: block_list,flavor_list,inner_list,siz_list,ftau,gtau,gl,udens_cmplx,vee_cmplx,levels_cmplx
 
