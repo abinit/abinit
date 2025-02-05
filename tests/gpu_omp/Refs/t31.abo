@@ -17,10 +17,10 @@
 .Starting date : Fri  3 Jan 2025.
 - ( at 19h20 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/jzwanzig_zora/tests/TestBot_MPI1/v9_t02/t02.abi
-- output file    -> t02.abo
-- root for input  files -> t02i
-- root for output files -> t02o
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/jzwanzig_zora/tests/TestBot_MPI1/v9_t31/t31.abi
+- output file    -> t31.abo
+- root for input  files -> t31i
+- root for output files -> t31o
 
 - inpspheads : Reading pseudopotential header in XML form from 
 -   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/jzwanzig_zora/tests/Pspdir/Psdj_paw_pbe_std/P.xml

@@ -17,10 +17,10 @@
 .Starting date : Tue 21 Jan 2025.
 - ( at 15h22 )
   
-- input  file    -> /home/marc/work/abinit/abinit-git/tests/val1/gpu_omp_2spinors_t03/t03.abi
-- output file    -> t03.abo
-- root for input  files -> t03i
-- root for output files -> t03o
+- input  file    -> /home/marc/work/abinit/abinit-git/tests/val1/gpu_omp_2spinors_t32/t32.abi
+- output file    -> t32.abo
+- root for input  files -> t32i
+- root for output files -> t32o
  
  DATASET    1 : the unit cell is not primitive
 ================================================================================

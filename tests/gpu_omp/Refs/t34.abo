@@ -17,10 +17,10 @@
 .Starting date : Tue 28 Jan 2025.
 - ( at 13h27 )
   
-- input  file    -> /home/marc/work/abinit/abinit-git/tests/val1/gpu_omp_2spinors_t05/t05.abi
-- output file    -> t05.abo
-- root for input  files -> t05i
-- root for output files -> t05o
+- input  file    -> /home/marc/work/abinit/abinit-git/tests/val1/gpu_omp_2spinors_t34/t34.abi
+- output file    -> t34.abo
+- root for input  files -> t34i
+- root for output files -> t34o
  
  
  invars1: COMMENT -

@@ -262,7 +262,7 @@ gpu_option 2
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%   t04.abo, tolnlines = 70, tolabs = 7.000e-05, tolrel = 1.000e-01, fld_options = -medium
+#%%   t33.abo, tolnlines = 70, tolabs = 7.000e-05, tolrel = 1.000e-01, fld_options = -medium
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
