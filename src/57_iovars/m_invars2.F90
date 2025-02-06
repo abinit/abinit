@@ -392,6 +392,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwr_nstep',tread,'INT')
  if(tread==1) dtset%gwr_nstep=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwr_fit',tread,'INT')
+ if(tread==1) dtset%gwr_fit=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwr_tolqpe',tread,'ENE')
  if(tread==1) dtset%gwr_tolqpe=dprarr(1)
 
@@ -2292,6 +2295,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'varpeq_select', tread, 'INT')
  if (tread == 1) dtset%varpeq_select = intarr(1)
+
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'varpeq_mesh_fact', tread, 'INT')
+ if (tread == 1) dtset%varpeq_mesh_fact = intarr(1)
 
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'varpeq_mixing_factor', tread, 'DPR')
  if(tread==1) dtset%varpeq_mixing_factor = dprarr(1)
@@ -4249,10 +4255,10 @@ if (dtset%usekden==1) then
 
    ! Some required information are not filled up inside kmesh_init
    ! So doing it here, even though it is not clean
-   Kmesh%kptrlatt(:,:) =Dtset%kptrlatt(:,:)
-   Kmesh%nshift        =Dtset%nshiftk
-   ABI_MALLOC(Kmesh%shift,(3,Kmesh%nshift))
-   Kmesh%shift(:,:)    =Dtset%shiftk(:,1:Dtset%nshiftk)
+   Kmesh%kptrlatt(:,:) = Dtset%kptrlatt(:,:)
+   Kmesh%nshift = Dtset%nshiftk
+   ABI_MALLOC(Kmesh%shift, (3, Kmesh%nshift))
+   Kmesh%shift(:,:) = Dtset%shiftk(:,1:Dtset%nshiftk)
    !call Kmesh%print("K-mesh for the wavefunctions",ab_out, dtset%prtvol)
    call find_qmesh(Qmesh, Cryst, Kmesh)
 #ifdef HAVE_NETCDF

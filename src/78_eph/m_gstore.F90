@@ -3231,6 +3231,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 
  ! Open the DVDB file
  call dvdb%open_read(ngfftf, xmpi_comm_self)
+ ABI_CHECK(dvdb%has_fields("pot1", msg), msg)
 
  ! Activate parallelism over perturbations at the level of the DVDB
  call gstore%set_perts_distrib(cryst, dvdb, my_npert)
@@ -3729,8 +3730,8 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 
      ! Dump buffer
      if (iqbuf_cnt == qbuf_size) then
-       !call dump_my_gbuf()
-       call new_dump_my_gbuf(gqk, spin, iq_buf, iqbuf_cnt, my_gbuf, root_ncid, spin_ncid)
+       call dump_my_gbuf()
+       !call new_dump_my_gbuf(gqk, spin, iq_buf, iqbuf_cnt, my_gbuf, root_ncid, spin_ncid)
      end if
 
      if (print_time) then
@@ -3741,8 +3742,8 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 
    ! Dump the remainder.
    if (iqbuf_cnt /= 0) then
-     !call dump_my_gbuf()
-     call new_dump_my_gbuf(gqk, spin, iq_buf, iqbuf_cnt, my_gbuf, root_ncid, spin_ncid)
+     call dump_my_gbuf()
+     !call new_dump_my_gbuf(gqk, spin, iq_buf, iqbuf_cnt, my_gbuf, root_ncid, spin_ncid)
    end if
 
    ABI_FREE(iq_buf)

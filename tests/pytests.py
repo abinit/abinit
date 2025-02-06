@@ -3,7 +3,6 @@ from __future__ import print_function, division, absolute_import #, unicode_lite
 
 import os
 import sys
-import imp
 
 from os.path import join as pj, abspath as absp, exists as pexists, basename, splitext, isfile
 
@@ -17,11 +16,19 @@ sys.path.insert(0,pack_dir)
 import tests as abitests
 del pack_dir, x
 
+def import_module(filepath):
+    #import imp
+    #module = imp.load_source(filepath, filepath)
+    from importlib.machinery import SourceFileLoader
+    module = SourceFileLoader(filepath, filepath).load_module()
+
+    return module
+
 def tests_from_pymod(pymod_path, abenv):
 
   # Import the module
-  mod_name = basename(pymod_path).split(".py")[0] 
-  module = imp.load_source(mod_name, pymod_path)
+  mod_name = basename(pymod_path).split(".py")[0]
+  module = import_module(pymod_path)
 
   # Inspect the module and build the list of tests.
   tests = list()
@@ -32,7 +39,7 @@ def tests_from_pymod(pymod_path, abenv):
 
   suite_gen = getattr(module, "abinit_suite_generator", None)
   if suite_gen is not None:
-    for test_gen in suite_gen(): 
+    for test_gen in suite_gen():
        tests.append( PythonTest(abenv, test_gen) )
 
   assert tests
@@ -56,12 +63,12 @@ class PythonTest(object):
     assert self.info is not None
 
     # TODO: Import conditions.
-      
+
   def __str__(self):
     return "\n".join( [ str(k) + " : " + str(v) for k,v in self.__dict__.items()] )
 
   def run(self, workdir=None):
-    if workdir is None: workdir = os.path.abspath(os.curdir) 
+    if workdir is None: workdir = os.path.abspath(os.curdir)
     self.workdir = workdir
 
     print(self.info +"...",)
@@ -70,7 +77,7 @@ class PythonTest(object):
 
     #self.stderr = open(stderr_fname, "w")
     #self.stdout = open(stdout_fname, "w")
-    from StringIO import StringIO 
+    from StringIO import StringIO
     self.stdout, self.stderr = StringIO(), StringIO()
 
     sys.stdout, sys.stderr = self.stdout, self.stderr
@@ -91,7 +98,7 @@ class PythonTest(object):
     #self.stdin.close()
 
     # Reinstate stdout and stderr.
-    sys.stdout, sys.stderr = sys.__stdout__ , sys.__stderr__ 
+    sys.stdout, sys.stderr = sys.__stdout__ , sys.__stderr__
 
     #print("stdout:")
     #print(self.stdout.read())
@@ -123,10 +130,10 @@ class PythonTest(object):
         for l in diff: print(l)
         exit_status = 0
         if len(diff) != 0: exit_status = 1
-        
+
     self.exit_status = exit_status
 
-    if exit_status != 0: 
+    if exit_status != 0:
       print("FAILED")
     else:
       print("SUCCESS")
@@ -135,7 +142,7 @@ class PythonTest(object):
 
 def run_abirules_suite():
   abenv = abitests.abenv
-  import abirules 
+  import abirules
   script_dir = abenv.apath_of("abichecks/scripts/")
   scripts = [ absp(pj(script_dir,s)) for s in abirules.pyscripts ]
 
@@ -162,10 +169,9 @@ def run_buildsys_suite():
       if retval != 0 : exit_status = retval
   return exit_status
 
+
 if __name__ == "__main__":
- 
   #print 30*"=" + " buildsys_tests " + 30*"="
   #run_buildsys_suite()
-
   print(30*"=" + " abirules_tests " + 30*"=")
   run_abirules_suite()

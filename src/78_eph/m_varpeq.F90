@@ -39,13 +39,14 @@ module m_varpeq
  use m_wfd
 
  use defs_datatypes,    only : pseudopotential_type
+ use m_numeric_tools,   only : interpolate_ur
  use m_fstrings,        only : sjoin, ktoa, ftoa, strcat, ltoa, itoa
  use m_time,            only : cwtime_report, cwtime
  use m_io_tools,        only : file_exists, iomode_from_fname, open_file
  use m_pptools,         only : write_xsf
  use m_geometry,        only : xcart2xred
  use m_kpts,            only : kpts_map, kpts_timrev_from_kptopt, bzlint_t, kptrlatt_from_ngkpt
- use m_fft_mesh,        only : supercell_fft, calc_ceikr
+ use m_fft_mesh,        only : calc_ceikr
  use m_pawtab,          only : pawtab_type
  use m_gstore,          only : gstore_t, gqk_t
  use m_supercell,       only : supercell_type
@@ -69,7 +70,7 @@ module m_varpeq
 !!  polstate_t
 !!
 !! FUNCTION
-!!  Datatype defining MPI-distributed parameters of polaronic states for for a
+!!  Datatype defining MPI-distributed parameters of polaronic states for a
 !!  given spin index (if collinear magnetism i.e. nsppol 2). Local variables and
 !!  arrays start with `my_`, global have `*glob*` in their names. MPI-grid is
 !!  inherinted from a gstore%gqk object at initialization.
@@ -117,7 +118,7 @@ module m_varpeq
 
   logical(dp), allocatable :: has_prev_grad(:)
    ! (np)
-   ! Flag indicating if an electroic gradient has been computed at previous step
+   ! Flag indicating if an electronic gradient has been computed at previous step
 
   integer, allocatable :: my_states_mask(:,:)
    ! (gqk%nb, gqk%my_nk)
@@ -221,7 +222,7 @@ module m_varpeq
   contains
 
     procedure :: setup => polstate_setup
-    ! Setup optimization proccess by specifing initial electronic vector A_nk
+    ! Setup optimization process by specifing initial electronic vector A_nk
 
     procedure :: localize => polstate_localize
     ! Localize polaron at current state. From A_nk calculate:
@@ -533,7 +534,6 @@ subroutine varpeq_free(self)
 
 !Local variables-------------------------------
  integer :: my_is
-
 !----------------------------------------------------------------------
 
  ! Free allocatable arrays
@@ -586,7 +586,7 @@ end subroutine varpeq_free
 !!
 !! INPUTS
 !!  other<varpeq_t>=Varpeq datatype to compare with.
-!!  bz_mismatch [optional]=if .True. mismatch between BZ sampling is alowed
+!!  bz_mismatch [optional]=if .True. mismatch between BZ sampling is allowed
 !!    (required for comparison prior to an interpolation)
 !!
 !! OUTPUT
@@ -1109,7 +1109,7 @@ subroutine varpeq_load(self, dtfil, pselect)
 !Arguments ------------------------------------
  class(varpeq_t), target, intent(inout) :: self
  type(datafiles_type), intent(in) :: dtfil
- integer :: pselect
+ integer,intent(in) :: pselect
 
 !Local variables-------------------------------
 !scalars
@@ -1318,8 +1318,7 @@ subroutine varpeq_record(self, iter, ip, my_is)
 
 !Arguments ------------------------------------
  class(varpeq_t), target, intent(inout) :: self
- integer, intent(in) :: iter, my_is
- integer, intent(in) :: ip
+ integer, intent(in) :: iter, ip, my_is
 
 !Local variables-------------------------------
  class(polstate_t), pointer :: polstate
@@ -2132,16 +2131,13 @@ subroutine polstate_calc_pcjgrad(self, ip, ii, nstep_ort)
 
 !Arguments ------------------------------------
  class(polstate_t), intent(inout) :: self
- integer, intent(in) :: ip
- integer, intent(in) :: ii
- integer, intent(in) :: nstep_ort
+ integer, intent(in) :: ip, ii, nstep_ort
 
 !Local variables-------------------------------
  class(gqk_t), pointer :: gqk
  integer :: ierr
  !real(dp) :: eps
  complex(dp) :: beta, beta_num, beta_den
-
 !----------------------------------------------------------------------
 
  gqk => self%gqk
@@ -2842,6 +2838,8 @@ subroutine polstate_seed_a(self, mode, ip)
    call random_number(im_rand)
    self%my_a(:,:,ip) = re_rand(:,:) + j_dpc*im_rand(:,:)
    call xmpi_sum(self%my_a(:,:,ip), gqk%qpt_pert_comm%value, ierr)
+   ABI_FREE(re_rand)
+   ABI_FREE(im_rand)
  end subroutine random_
 
 end subroutine polstate_seed_a
@@ -3094,12 +3092,12 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0, ndat1 = 1
- integer :: my_rank, ib, irsp, ir, uc_idx, mpw, band, bstart ! nfft, nfftf, mgfft, mgfftf, n1, n2, n3, n4, n5, n6,
- integer :: natom, natom3, nsppol, nspinor, nspden, nkibz, mband, spin, ik, sc_nfft, cnt, nproc, num_writes, ii
+ integer :: my_rank, ib, irsp, ir, uc_idx, mpw, band, bstart, ir1, ir2, ir3, wp1, wp2, wp3, ds_nfft, idir
+ integer :: natom, natom3, nsppol, nspinor, nspden, nkibz, mband, spin, ik, sc_nfft, cnt, nproc, num_writes, ii, uc_nfft
  integer :: ik_ibz, isym_k, trev_k, npw_k, istwf_k, npw_kq_ibz, istwf_k_ibz, nkpg_k, ierr, nk, spinor, spad, nkbz, ncid
- integer :: nqibz, iq, iq_ibz, isym_q, trev_q, qptopt, uc_iat, sc_iat, nu, nqbz, ip ! icell,
+ integer :: nqibz, iq, iq_ibz, isym_q, trev_q, qptopt, uc_iat, sc_iat, nu, nqbz, ip, ds_iscale
  logical :: isirr_k, isirr_q, have_scell_q, use_displaced_scell
- real(dp) :: cpu_all, wall_all, gflops_all, spread
+ real(dp) :: cpu_all, wall_all, gflops_all, spread, kdotr
  character(len=500) :: msg
  character(len=fnlen) :: path
  type(varpeq_t) :: vpq
@@ -3107,20 +3105,21 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
  type(supercell_type), target :: scell_q, scell_k
  type(krank_t) :: krank_ibz, qrank_ibz
  complex(dp) :: a_nk, bstar_qnu, cphase, cphase_tr, c3tmp(3)
+ complex(gwpc) :: c123, c23, c3
 !arrays
- integer :: sc_ngfft(18), mapl_k(6), kptrlatt_(3,3), qptrlatt_(3,3)
+ integer :: sc_ngfft(18), ds_ngfft(18), mapl_k(6), kptrlatt_(3,3), qptrlatt_(3,3)
  integer :: units(2), work_ngfft(18), gmax(3), g0_k(3), mapl_qq(6), g0_q(3), ngqpt(3)
- integer,allocatable :: nband(:,:), wfd_istwfk(:), kg_k(:,:), sc2uc(:), gbound_k(:,:)
+ integer,allocatable :: nband(:,:), wfd_istwfk(:), kg_k(:,:), gbound_k(:,:)
  real(dp),parameter :: origin0(3) = zero
  real(dp) :: kk(3), kk_ibz(3), kk_sc(3), qq(3), qq_ibz(3), center_cart(3)
- real(dp),allocatable :: scred(:,:), kpg_k(:,:), ug_k(:,:), work(:,:,:,:), pol_rho(:), qibz(:,:)
+ real(dp),allocatable :: kpg_k(:,:), ug_k(:,:), work(:,:,:,:), pol_rhor(:), qibz(:,:)
  real(dp),allocatable :: pheigvec_qibz(:,:,:,:)
  real(dp),allocatable :: displ_cart_qbz(:,:,:,:), pheigvec_qbz(:,:,:,:)  !displ_red_qbz(:,:,:,:), displ_cart_qibz(:,:,:,:),
  real(dp),allocatable :: phfreqs_ibz(:,:), pheigvec_cart_ibz(:,:,:,:,:) !, pheigvec_cart_qbz(:,:,:,:)
  real(dp),allocatable :: sc_displ_cart_re(:,:,:,:), sc_displ_cart_im(:,:,:,:)
  real(dp), ABI_CONTIGUOUS pointer :: xcart_ptr(:,:)
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:)
- complex(gwpc),allocatable :: ur_k(:), pol_wf(:,:,:), ceikr(:)
+ complex(gwpc),allocatable :: ur_k(:,:), ds_ur_k(:,:), pol_wfr(:,:,:), sc_ceikr_1d(:,:)
 !----------------------------------------------------------------------
 
  units = [std_out, ab_out]
@@ -3250,7 +3249,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
    if (my_rank == master) then
      ! Handle spin-polarized case by writing two XSF files.
      do spin=1,nsppol
-       ! Handle muttiple polaronic states for each spin.
+       ! Handle multiple polaronic states for each spin.
        do ip=1,vpq%nstates
          write(msg, "(2(a,i0),a,es16.6)") &
            " For spin: ", spin, ": pstate: ", ip, ": maxval(abs(sc_displ_cart_re)): ", maxval(abs(sc_displ_cart_re(:,:,ip,spin)))
@@ -3315,7 +3314,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
  call wfd%print([std_out], header="Wavefunctions for varpeq_plot")
 
  if (dtset%boxcutmin >= two) then
-   call wrtout(std_out, " To reduce the size of the FFT mesh and the size of the XSF file, reduce boxcutmin from 2 to e.g. 1.1")
+   call wrtout(std_out, " To decrease the size of the FFT mesh and the size of the XSF file, reduce boxcutmin from 2 to e.g. 1.1")
  end if
 
  ABI_FREE(nband)
@@ -3338,7 +3337,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
  gmax = gmax + 4 ! FIXME: this is to account for umklapp, shouls also consider Gamma-only and istwfk
  gmax = 2*gmax + 1
  call ngfft_seq(work_ngfft, gmax)
- write(std_out,*)"work_ngfft(1:3): ",work_ngfft(1:3)
+ !write(std_out,*)"work_ngfft(1:3): ",work_ngfft(1:3)
  ABI_MALLOC(work, (2, work_ngfft(4), work_ngfft(5), work_ngfft(6)))
 
  call wrtout(std_out, sjoin(" Building supercell from ngkpt:", ltoa(vpq%ngkpt)))
@@ -3346,17 +3345,39 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
  call kptrlatt_from_ngkpt(vpq%ngkpt, kptrlatt_)
  call scell_k%init(cryst%natom, kptrlatt_, cryst%rprimd, cryst%typat, cryst%xcart, cryst%znucl, xyz_order="xyz")
 
- nkbz = product(vpq%ngkpt)
- call supercell_fft(vpq%ngkpt, ngfft, sc_nfft, sc_ngfft, sc2uc, scred)
- ABI_FREE(scred)
+ ! There are three meshes.
+ ! ngfft: mesh in the unit cell used to compute u(r) via FFT
+ ! ds_ngfft: coarse mesh used to downsample u(r). Note ngfft(1:3)/ds_ngfft(1:3) = ds_iscale
+ ! sc_ngfft: mesh in the real space supercell computed as ds_ngfft * vqp%ngkpt
+ !           the polaron wavefunction is defined on this mesh.
+
+ ds_iscale = dtset%varpeq_mesh_fact
+ ds_ngfft = ngfft
+ ds_ngfft(1:3) = ngfft(1:3) / ds_iscale
+ ABI_CHECK(all(ds_ngfft(1:6) > 0), "ds_iscale too large and ds_ngfft == 0")
+ ds_ngfft(4:6) = ds_ngfft(4:6)     ! No augmentation
+ ds_nfft =  product(ds_ngfft(1:3)) ! Total number of points in the supercell
+
+ sc_ngfft(1:3) = vpq%ngkpt(1:3) * ds_ngfft(1:3)
+ sc_ngfft(4:6) = sc_ngfft(1:3)    ! No augmentation
+ sc_nfft = product(sc_ngfft(1:3)) ! Total number of points in the supercell
 
  call wrtout(std_out, " Computing polaron wavefunction in the real-space supercell...")
+ call wrtout(std_out, sjoin(" Using varpeq_mesh_fact:", itoa(ds_iscale)))
+ call wrtout(std_out, sjoin(" Memory required by pol_wfr:", &
+             ftoa(two*sc_nfft*nspinor*vpq%nstates*nsppol*storage_size(one)/eight*b2Mb), " (Mb) <<< MEM"))
 
+ nkbz = product(vpq%ngkpt)
+ uc_nfft = wfd%nfft
  ABI_MALLOC(kg_k, (3, mpw))
  ABI_MALLOC(gbound_k, (2*wfd%mgfft+8, 2))
- ABI_MALLOC(ur_k, (wfd%nfft*nspinor))
- ABI_MALLOC(ceikr, (sc_nfft*nspinor))
- ABI_CALLOC(pol_wf, (sc_nfft*nspinor, vpq%nstates, nsppol)) ! Init output with zeros.
+ ABI_MALLOC(ur_k, (uc_nfft*nspinor, ndat1))
+ if (ds_iscale /= 1) then
+   ABI_MALLOC(ds_ur_k, (ds_nfft*nspinor, ndat1))
+ end if
+
+ ABI_CALLOC(pol_wfr, (sc_nfft*nspinor, vpq%nstates, nsppol)) ! Init output with zeros.
+ ABI_MALLOC(sc_ceikr_1d, (maxval(sc_ngfft(1:3)), 3))
 
  cnt = 0
  do spin=1,nsppol
@@ -3382,26 +3403,79 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
 
      ABI_MALLOC(ug_k, (2, npw_k*nspinor))
      kk_sc = kk * vpq%ngkpt
-     call calc_ceikr(kk_sc, sc_ngfft, sc_nfft, nspinor, ceikr)
+
+     ! Precompute 1d phases e^{ik_j R_j} on the supercell.
+     do idir=1,3
+       do ii=0,sc_ngfft(idir) - 1
+         kdotr = two_pi * (kk_sc(idir) * (ii / dble(sc_ngfft(idir))))
+         sc_ceikr_1d(ii+1, idir) = dcmplx(cos(kdotr), sin(kdotr))
+       end do
+     end do
 
      ! Phase due to the primitive translation (default: 0)
      cphase_tr = exp(-j_dpc * two_pi * dot_product(kk, dtset%varpeq_trvec))
 
+     ! Sum over bands
      do ib=1,vpq%nb_spin(spin)
        band = bstart + ib - 1
+       ! Get periodic part on the real space FFT mesh in ur_k
        call wfd%rotate_cg(band, ndat1, spin, kk_ibz, npw_k, kg_k, istwf_k, &
                           cryst, mapl_k, gbound_k, work_ngfft, work, ug_k, urs_kbz=ur_k)
-       !print *, "int_omega dr |u(r)}^2:", sum(abs(ur_k) ** 2) / wfd%nfft
+       !print *, "int_omega dr |u(r)}^2:", sum(abs(ur_k(:,1)) ** 2) / uc_nfft
 
+       ! Use linear interpolate to downsample from ngfft to ds_ngfft.
+       if (ds_iscale /= 1) then
+         call interpolate_ur(ngfft, nspinor*ndat1, ur_k, ds_ngfft, ds_ur_k)
+         !print *, "int_omega dr |ds_u(r)}^2:", sum(abs(ds_ur_k(:,1)) ** 2) / product(ds_ngfft(1:3))
+       end if
+
+       ! Accumulate for each polaron state.
        do ip=1,vpq%nstates
-         a_nk = vpq%a_spin(ib, ik, ip, spin)*cphase_tr
+         a_nk = vpq%a_spin(ib, ik, ip, spin) * cphase_tr
          do spinor=1,nspinor
            spad = (spinor - 1) * sc_nfft
-           do ir=1,sc_nfft
-             uc_idx = sc2uc(ir) + (spinor - 1) * wfd%nfft
-             irsp = ir + spad
-             pol_wf(irsp, ip, spin) = pol_wf(irsp, ip, spin) + a_nk * ur_k(uc_idx) * ceikr(irsp)
-           end do
+
+           if (ds_iscale == 1) then
+               ! Loop over the points in the R supercell without downsampling.
+               ir = 0
+               do ir3=0,sc_ngfft(3)-1
+                 ! The FFT index of the point wrapped into the unit cell.
+                 wp3 = modulo(ir3, ngfft(3))
+                 c3 = sc_ceikr_1d(ir3+1, 3)
+                 do ir2=0,sc_ngfft(2)-1
+                   wp2 = modulo(ir2, ngfft(2))
+                   c23 = sc_ceikr_1d(ir2+1, 2) * c3
+                   do ir1=0,sc_ngfft(1)-1
+                     wp1 = modulo(ir1, ngfft(1))
+                     c123 = sc_ceikr_1d(ir1+1, 1) * c23
+                     uc_idx = 1 + wp1 + wp2*ngfft(1) + wp3*ngfft(1)*ngfft(2)
+                     ir = ir + 1; irsp = ir + spad
+                     pol_wfr(irsp, ip, spin) = pol_wfr(irsp, ip, spin) + a_nk * ur_k(uc_idx,1) * c123
+                   end do
+                 end do
+               end do
+            else
+               ! Loop over the points in the supercell with downsampling
+               ir = 0
+               do ir3=0,sc_ngfft(3)-1
+                 ! The FFT index of the point wrapped into the unit cell.
+                 wp3 = modulo(ir3, ds_ngfft(3))
+                 c3 = sc_ceikr_1d(ir3+1, 3)
+                 do ir2=0,sc_ngfft(2)-1
+                   wp2 = modulo(ir2, ds_ngfft(2))
+                   c23 = sc_ceikr_1d(ir2+1, 2) * c3
+                   do ir1=0,sc_ngfft(1)-1
+                     wp1 = modulo(ir1, ds_ngfft(1))
+                     c123 = sc_ceikr_1d(ir1+1, 1) * c23
+                     uc_idx = 1 + wp1 + wp2*ds_ngfft(1) + wp3*ds_ngfft(1)*ds_ngfft(2)
+                     ir = ir + 1; irsp = ir + spad
+                     ! Note the use of the downsampled ds_ur_k here.
+                     pol_wfr(irsp, ip, spin) = pol_wfr(irsp, ip, spin) + a_nk * ds_ur_k(uc_idx,1) * c123
+                   end do
+                 end do
+               end do
+            end if
+
          end do
        end do ! ip
      end do ! ib
@@ -3414,17 +3488,18 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
  ABI_FREE(kg_k)
  ABI_FREE(work)
  ABI_FREE(ur_k)
+ ABI_SFREE(ds_ur_k)
  ABI_FREE(gbound_k)
- ABI_FREE(sc2uc)
- ABI_FREE(ceikr)
+ ABI_FREE(sc_ceikr_1d)
  call krank_ibz%free()
 
- ! Collect pol_wf on the master rank who's gonna write the polaron density in XSF format.
- call xmpi_sum_master(pol_wf, master, comm, ierr)
+ ! Collect pol_wfr on the master rank who's gonna write the polaron density in XSF format.
+ call xmpi_sum_master(pol_wfr, master, comm, ierr)
 
  if (my_rank == master) then
-   pol_wf = pol_wf / (nkbz * sqrt(cryst%ucvol))
-   ABI_MALLOC(pol_rho, (sc_nfft))
+   pol_wfr = pol_wfr / (nkbz * sqrt(cryst%ucvol))
+   ! FIXME: Here we're gonna have another big allocation
+   ABI_MALLOC(pol_rhor, (sc_nfft))
 
    ! Here decide if we are gonna write the polaron wavefunctions with_diplaced atoms or not.
    use_displaced_scell = all(kptrlatt_ == qptrlatt_) .and. have_scell_q
@@ -3438,12 +3513,13 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
          write(msg, "(2(a,i0),a,es16.6)")&
            " For spin: ", spin, ": pstate: ", ip, ": 1/N_k \sum_nk |A_nk|^2 = ", sum(abs(vpq%a_spin(:,:,ip,spin))**2) / nkbz
          call wrtout(units, msg)
-         pol_rho = abs(pol_wf(:, ip, spin))**2
-         write(msg, "(2(a,i0),a,es16.6)")" Polaron density for spin: ", spin, ": pstate: ", ip, " integrates to: ", sum(pol_rho) * cryst%ucvol/wfd%nfft
+         pol_rhor = abs(pol_wfr(:, ip, spin)) ** 2
+         write(msg, "(2(a,i0),a,es16.6)")" Polaron density for spin: ", spin, ": pstate: ", ip, &
+                                         " integrates to: ", sum(pol_rhor) * cryst%ucvol / product(ds_ngfft(1:3))
          call wrtout(units, msg)
-         write(msg, "(a,es16.6)")" maxval(abs(aimag(pol_wf))): ", maxval(abs(aimag(pol_wf(:, ip, spin))))
+         write(msg, "(a,es16.6)")" maxval(abs(aimag(pol_wfr))): ", maxval(abs(aimag(pol_wfr(:, ip, spin))))
          call wrtout(units, msg)
-         call center_and_spread(cryst, vpq%ngkpt, sc_ngfft, pol_rho, center_cart, spread, units)
+         call center_and_spread(cryst, vpq%ngkpt, sc_ngfft, pol_rhor, center_cart, spread, units)
 
          do ii=1,num_writes
            if (ii == 1) then
@@ -3461,26 +3537,27 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
              xcart_ptr => scell_q%xcart
            end if
 
-           call write_xsf(path, sc_ngfft(1), sc_ngfft(2), sc_ngfft(3), pol_rho, scell_k%rprimd, origin0, &
+           call write_xsf(path, sc_ngfft(1), sc_ngfft(2), sc_ngfft(3), pol_rhor, scell_k%rprimd, origin0, &
                           scell_k%natom, scell_k%ntypat, scell_k%typat, xcart_ptr, scell_k%znucl, 0)
          end do ! ii
        end do ! ip
      end do ! spin
 
    else
-     ! Spinor wavefunctions
+     ! Spinor wavefunctions.
      do ip=1,vpq%nstates
        write(msg, "(2(a,i0),a,es16.6)")&
          " For spin: ", spin, ": pstate: ", ip, ": 1/N_k \sum_nk |A_nk|^2 = ", sum(abs(vpq%a_spin(:,:,ip,spin))**2) / nkbz
        call wrtout(units, msg)
 
-       pol_rho(:) = abs(pol_wf(1:sc_nfft, ip, 1)) ** 2
-       pol_rho(:) = abs(pol_wf(sc_nfft+1:, ip, 1)) ** 2 + pol_rho(:)
-       write(msg, "(2(a,i0),a,es16.6)")" Polaron density for spin: ", spin, ": pstate: ", ip, " integrates to: ", sum(pol_rho) * cryst%ucvol/wfd%nfft
+       pol_rhor(:) = abs(pol_wfr(1:sc_nfft, ip, 1)) ** 2
+       pol_rhor(:) = abs(pol_wfr(sc_nfft+1:, ip, 1)) ** 2 + pol_rhor(:)
+       write(msg, "(2(a,i0),a,es16.6)")" Polaron density for spin: ", spin, ": pstate: ", ip, &
+                                       " integrates to: ", sum(pol_rhor) * cryst%ucvol / product(ds_ngfft(1:3))
        call wrtout(units, msg)
-       write(msg, "(a,es16.6)")" maxval(abs(aimag(pol_wf))): ", maxval(abs(aimag(pol_wf(:, ip, 1))))
+       write(msg, "(a,es16.6)")" maxval(abs(aimag(pol_wfr))): ", maxval(abs(aimag(pol_wfr(:, ip, 1))))
        call wrtout(units, msg)
-       call center_and_spread(cryst, vpq%ngkpt, sc_ngfft, pol_rho, center_cart, spread, units)
+       call center_and_spread(cryst, vpq%ngkpt, sc_ngfft, pol_rhor, center_cart, spread, units)
 
        spin = 1
        do ii=1,num_writes
@@ -3497,23 +3574,20 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
            xcart_ptr => scell_q%xcart
          end if
 
-         call write_xsf(path, sc_ngfft(1), sc_ngfft(2), sc_ngfft(3), pol_rho, scell_k%rprimd, origin0, &
+         call write_xsf(path, sc_ngfft(1), sc_ngfft(2), sc_ngfft(3), pol_rhor, scell_k%rprimd, origin0, &
                         scell_k%natom, scell_k%ntypat, scell_k%typat, xcart_ptr, scell_k%znucl, 0)
        end do ! ii
      end do ! ip
    end if
-   ABI_FREE(pol_rho)
+   ABI_FREE(pol_rhor)
  end if ! master
 
  call cwtime_report(" Computation of polaron wavefunction completed", cpu_all, wall_all, gflops_all, pre_str=ch10, end_str=ch10)
 
  ABI_SFREE(sc_displ_cart_re)
- ABI_FREE(pol_wf)
+ ABI_FREE(pol_wfr)
 
- call wfd%free()
- call scell_q%free()
- call scell_k%free()
- call vpq%free()
+ call wfd%free(); call scell_q%free(); call scell_k%free(); call vpq%free()
 
 contains
 integer function vid(var_name)
@@ -3587,12 +3661,12 @@ subroutine center_and_spread(prim_cryst, ncells, sc_ngfft, rhor, center_cart, sp
 
  call xcart2xred(1, prim_cryst%rprimd, center_cart, center_red)
  call wrtout(units, sjoin(" Polaron center in Cartesian coordinates: ", ltoa(center_cart), " (Bohr)"))
- call wrtout(units, sjoin(" Fractional coordinates in termso of the primitive cell:", ltoa(center_red)))
+ call wrtout(units, sjoin(" Fractional coordinates in terms of the primitive cell:", ltoa(center_red)))
  write(msg, "(a,2(es16.6,a))")" Polaron spread: ", spread, " (Bohr)", spread * Bohr_Ang, " (Ang)"
  call wrtout(units, msg)
  ! full width at half-maximum
  fwhm = (two * sqrt(two * log(two))) * spread
- write(msg, "(a,2(es16.6,a))")" Full width at half-maximum (FWHM) ", fwhm, "(Borh) ", fwhm * Bohr_Ang, " (Ang)"
+ write(msg, "(a,2(es16.6,a))")" Full width at half-maximum (FWHM) ", fwhm, " (Bohr) ", fwhm * Bohr_Ang, " (Ang)"
  call wrtout(units, msg)
 
 end subroutine center_and_spread
