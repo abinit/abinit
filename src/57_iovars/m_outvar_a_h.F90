@@ -94,9 +94,9 @@ contains
 !!
 !! SOURCE
 
-subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
-& jdtset_,marr,multivals,mxvals,ncid,ndtset,ndtset_alloc,&
-& results_out,strimg)
+subroutine outvar_a_h(choice,dmatpuflag,dtsets,iout,&
+   jdtset_,marr,multivals,mxvals,ncid,ndtset,ndtset_alloc,&
+   results_out,strimg)
 
 !Arguments ------------------------------------
 !scalars
@@ -1416,6 +1416,9 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
 
  intarr(1,:)=dtsets(:)%gwr_nstep
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gwr_nstep','INT',0)
+
+ intarr(1,:)=dtsets(:)%gwr_fit
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gwr_fit','INT',0)
 
 !gw_qlwl
  narr=3*dtsets(1)%gw_nqlwl ! default size for all datasets

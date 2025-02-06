@@ -126,7 +126,7 @@ MODULE m_fft
 
  type,public :: fftbox_plan3_t
 
-   integer :: fftalg = 112       ! The library to call.
+   integer :: fftalg = 112       ! The library to call on the CPU
    integer :: fftcache = 16      ! Cache size in kB. Only used in SG routines.
    integer :: nfft = -1          ! Total number of points in the FFT box.
    integer :: ldxyz = -1         ! Physical dimension of the array to transform
@@ -1687,8 +1687,7 @@ function fftbox_mpi_utests(fftalg, cplex, ndat, nthreads, comm_fft, unit) result
  integer :: ierr,old_nthreads,ount,iset,mpierr,nfft,me_fft
  integer :: nproc_fft,fftalga,fftalgc,n1,n2,n3,n4,n5,n6
  real(dp),parameter :: ATOL_DP=tol12
- real(dp) :: max_abserr
- real(dp) ::  ctime,wtime,gflops
+ real(dp) :: max_abserr, ctime, wtime, gflops
  character(len=500) :: msg,info,library,cplex_mode,padding_mode
  type(distribfft_type),target :: fftabs
 !arrays

@@ -951,6 +951,33 @@ class AbinitProject(NotebookWriter):
 
         return allmods
 
+    def get_program_names_dirnames(self, verbose):
+        """
+        Return list of program names and list of directories required by each program name.
+        """
+        # Find programs
+        program_paths = []
+        for path, fort_file in self.fort_files.items():
+            if fort_file.programs:
+                program_paths.append((fort_file, path))
+
+        prog_names, prog_dirnames = [], []
+        for prog_file, path in program_paths:
+            # Note include_files_in_dirs
+            allmods = self.find_allmods(path, include_files_in_dirs=True)
+            dirnames = sorted(set(mod.dirname for mod in allmods), reverse=True)
+            if verbose:
+                print("For program:", prog_file.name)
+                pprint(dirnames)
+
+            prog_name = prog_file.programs[0].name
+            if prog_name.lower() == "fold2bloch": prog_name = "fold2Bloch"
+            if prog_name.lower() == "fortran_gator": continue
+            prog_names.append(prog_name)
+            prog_dirnames.append(dirnames)
+
+        return prog_names, prog_dirnames
+
     def write_binaries_conf(self, dryrun=False, verbose=0):
         """
         Write new binaries.conf file
@@ -989,26 +1016,12 @@ class AbinitProject(NotebookWriter):
 
         print("Finding all binary dependencies...")
         start = time.time()
-        # Find programs
-        program_paths = []
-        for path, fort_file in self.fort_files.items():
-            if fort_file.programs:
-                program_paths.append((fort_file, path))
 
-        for prog_file, path in program_paths:
-            # Note include_files_in_dirs
-            allmods = self.find_allmods(path, include_files_in_dirs=True)
-            dirnames = sorted(set(mod.dirname for mod in allmods), reverse=True)
-            if verbose:
-                print("For program:", prog_file.name)
-                pprint(dirnames)
-
-            prog_name = prog_file.programs[0].name
-            if prog_name.lower() == "fold2bloch": prog_name = "fold2Bloch"
-            if prog_name.lower() == "fortran_gator": continue
+        prog_names, prog_dirnames = self.get_program_names_dirnames(verbose)
+        for prog_name, dirnames in zip(prog_names, prog_dirnames):
             config.set(prog_name, "libraries", "\n" + "\n".join(dirnames))
             # py3k
-            #config[prog_name]["libraries"] = "\n" + "\n".join(dirnames)
+            config[prog_name]["libraries"] = "\n" + "\n".join(dirnames)
 
         print("Analysis completed in %.2f [s]" % (time.time() - start))
 
@@ -1156,6 +1169,20 @@ class AbinitProject(NotebookWriter):
             #with open(cmakelist_path, "wt") as fh:
             #    fh.write(new_str)
             """
+
+            # Here we check that all binaries are listed in CmakeLists.txt
+            path = os.path.join(self.top, "src", "98_main", "CMakeLists.txt")
+            with open(path, "rt") as fh:
+                lines = [l.lstrip().rstrip() for l in fh]
+
+            prog_names, _ = self.get_program_names_dirnames(verbose)
+            errors = []
+            for prog_name in prog_names:
+                magic = "abi_build_exe(%s)" % prog_name
+                if magic not in lines:
+                    errors.append("Cannot find `%s` in %s" % (magic, path))
+            if errors:
+                raise RuntimeError("\n".join(errors))
 
     def touch_alldeps(self, verbose=0):
         """

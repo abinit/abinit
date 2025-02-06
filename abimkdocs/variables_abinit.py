@@ -6654,9 +6654,9 @@ vectors of the reciprocal lattice and the three Cartesian axis).
 
 Variable(
     abivarname="gwr_nstep",
-    varset="gw",
+    varset="gwr",
     vartype="integer",
-    topics=['GW_basic'],
+    topics=['GWR_basic'],
     dimensions="scalar",
     defaultval=50,
     mnemonics="GWR Number of self-consistent STEPs",
@@ -6666,6 +6666,22 @@ Variable(
 Maximum number of self-consistent iterations in which G and/or W are be updated
 until the quasi-particle energies are converged within [[gwr_tolqpe]].
 [[gwr_task]] defines the self-consistency type.
+""",
+),
+
+Variable(
+    abivarname="gwr_fit",
+    varset="gwr",
+    vartype="integer",
+    topics=['GWR_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="GWR FIT",
+    requires="[[optdriver]] == 6",
+    added_in_version="10.3.4",
+    text=r"""
+A non-zero value activates the fit of the polarizabily and of the inverse dielectric matrix
+in order to accelerate the convergence of the GWR results wrt the number of points in the minimax mesh.
 """,
 ),
 
@@ -6764,9 +6780,9 @@ contribution to sigma.
 
 Variable(
     abivarname="gwr_tolqpe",
-    varset="gw",
+    varset="gwr",
     vartype="real",
-    topics=['GW_basic'],
+    topics=['GWR_basic'],
     dimensions="scalar",
     defaultval=ValueWithUnit(units='eV', value=0.01),
     mnemonics="GWR TOLerance on the difference of the QP Energies",
@@ -6967,8 +6983,7 @@ Variable(
 Governs the use of a dielectric model (as explained in Sec. V of
 [[cite:Laflamme2015]] and the use of the Lanczos scheme to solve Eqs. (30) and
 (35) of the same reference at all external [[gw_freqsp]] and integration (as
-generated from [[gwls_npt_gauss_quad]]) frequencies. The different choices
-are:
+generated from [[gwls_npt_gauss_quad]]) frequencies. The different choices are:
 
   * [[gwls_correlation]] == 1: GWLS calculation **with** the dielectric model and **without** the shift Lanczos technique,
   * [[gwls_correlation]] == 2: GWLS calculation **without** the dielectric model and **without** the shift Lanczos technique,
@@ -24325,7 +24340,7 @@ Note that [[gstore_erange]] is not compatible with [[gstore_brange]].
 
 Variable(
     abivarname="gwr_np_kgts",
-    varset="gw",
+    varset="gwr",
     vartype="integer",
     topics=['GWR_expert'],
     dimensions=[4],
@@ -24351,7 +24366,7 @@ and the basic dimensions of the job computed at runtime.
 
 Variable(
     abivarname="gwr_ucsc_batch",
-    varset="gw",
+    varset="gwr",
     vartype="integer",
     topics=['GWR_expert'],
     dimensions=[2],
@@ -24368,7 +24383,7 @@ to find a good compromise betweeen memory and performance.
 
 Variable(
     abivarname="gwr_task",
-    varset="gw",
+    varset="gwr",
     vartype="string",
     topics=['GWR_basic'],
     dimensions=[1],
@@ -24400,7 +24415,7 @@ The choice is among:
 
 Variable(
     abivarname="gwr_ntau",
-    varset="gw",
+    varset="gwr",
     vartype="integer",
     topics=['GWR_basic'],
     dimensions=[1],
@@ -24415,7 +24430,7 @@ This variable defines the number of imaginary-time points in the minimax mesh.
 
 Variable(
     abivarname="gwr_chi_algo",
-    varset="gw",
+    varset="gwr",
     vartype="integer",
     topics=['GWR_basic'],
     dimensions=[1],
@@ -24435,7 +24450,7 @@ Possible values are
 
 Variable(
     abivarname="gwr_rpa_ncut",
-    varset="gw",
+    varset="gwr",
     vartype="integer",
     topics=['GWR_basic'],
     dimensions=[1],
@@ -24450,7 +24465,7 @@ Number of cutoff energies for extrapolating RPA correlation energy.
 
 Variable(
     abivarname="gwr_sigma_algo",
-    varset="gw",
+    varset="gwr",
     vartype="integer",
     topics=['GWR_basic'],
     dimensions=[1],
@@ -24470,7 +24485,7 @@ Possible values are
 
 Variable(
     abivarname="gwr_boxcutmin",
-    varset="gw",
+    varset="gwr",
     vartype="real",
     topics=['GWR_useful'],
     dimensions=[1],
@@ -24485,7 +24500,7 @@ See the corresponding input variable for the usual GS grid [[boxcutmin]].
 
 Variable(
     abivarname="gwr_max_hwtene",
-    varset="gw",
+    varset="gwr",
     vartype="real",
     topics=['GWR_useful'],
     dimensions=[1],
@@ -24501,7 +24516,7 @@ Energy window in Hartree for the empty states used in the computation of the hea
 
 Variable(
     abivarname="gwr_regterm",
-    varset="gw",
+    varset="gwr",
     vartype="real",
     topics=['GWR_expert'],
     dimensions=[1],
@@ -24903,6 +24918,28 @@ input file.
 """,
 ),
 
+Variable(
+    abivarname="varpeq_mesh_fact",
+    varset="eph",
+    vartype="integer",
+    topics=['Polaron_basic'],
+    dimensions="scalar",
+    defaultval=1,
+    mnemonics="VARiational Polaron EQuations: SCALE MESH for polaron wavefunction",
+    requires="[[eph_task]] == -13",
+    added_in_version="10.1.4",
+    text=r"""
+This variable can used to reduce the density of the real-space mesh used to represent the
+polaron wavefunction and generate the XSF file when [[eph_task]] == -13.
+This is especially useful when computing the VARPEQ equations on extra-dense k-meshes in conjunction with the
+the KERANGE trick.
+The size of the array with polaron wavefunction is indeed proportional to nkbz * nfft where
+nkbz is the number of points in the full BZ and nfft is the number of FFT points in the unit.
+This is the default behaviour when [[varpeq_mesh_fact]] is 1.
+If [[varpeq_mesh_fact]] is greater the one, the mesh in real space will be downsampled by this value along the three reduced
+direction with a significant decrease in the memory requirements.
+""",
+),
 
 Variable(
     abivarname="varpeq_tolgrs",
