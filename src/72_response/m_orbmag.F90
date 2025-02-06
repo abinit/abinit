@@ -559,7 +559,7 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
 
      ! ZTG23 Eq. 36 terms 3 and 4 and Eq. 46 term 2
      call orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gs_hamk,&
-      & ikpt,isppol,mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,pcg1_k)
+      & ikpt,isppol,mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,occ_k,orbmag_mesh,pcg1_k)
 
      ! ZTG23 Eq. 36 term 1
      call orbmag_nl_k(atindx,cprj_k,dimlmn,dterm,dtset,eig_k,ikpt,isppol,&
@@ -1244,7 +1244,7 @@ end subroutine orbmag_cc_k
 !! SOURCE
 
 subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gs_hamk,&
-    & ikpt,isppol,mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,pcg1_k)
+    & ikpt,isppol,mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,occ_k,orbmag_mesh,pcg1_k)
 
   !Arguments ------------------------------------
   !scalars
@@ -1257,14 +1257,14 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gs_hamk,&
 
   !arrays
   integer,intent(in) :: atindx(dtset%natom),dimlmn(dtset%natom)
-  real(dp),intent(in) :: cg_k(2,mcgk),eig_k(nband_k),pcg1_k(2,mcgk,3)
+  real(dp),intent(in) :: cg_k(2,mcgk),eig_k(nband_k),pcg1_k(2,mcgk,3),occ_k(nband_k)
   type(pawcprj_type),intent(in) :: cprj_k(dtset%natom,mcprjk)
 
   !Local variables -------------------------
   !scalars
   integer :: adir,bdir,choice,cpopt,gdir,ndat,nn,nnlout,np,npwsp
   integer :: paw_opt,signs,tim_getghc
-  real(dp) :: doti,dotr,epsabg
+  real(dp) :: doti,dotr,epsabg,trnrm
   complex(dpc) :: b1,bv2b,m1,m1_mu,mb,mg,mv2b,mv2b_mu,prefac_b,prefac_m
   !arrays
   real(dp) :: enlout(1),lamv(1)
@@ -1340,6 +1340,8 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gs_hamk,&
          m1_mu = m1_mu - prefac_m*CMPLX(dotr,-doti)*fermie
 
          do np = 1, nband_k
+
+           if (occ_k(np).LT.tol8) cycle
 
            bra(1:2,1:npwsp) = cg_k(1:2,(np-1)*npwsp+1:np*npwsp)
 
