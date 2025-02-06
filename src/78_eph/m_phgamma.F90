@@ -1988,9 +1988,9 @@ subroutine a2fw_init(a2f, gams, cryst, ifc, ph_intmeth, wstep, wminmax, smear, n
      end if
 
      if (do_qintp) then
-       write(ount,'(a)') ' Superconductivity: isotropic evaluation of parameters from electron-phonon coupling (interpolated) for spin ', spin
+       write(ount,'(a,i3)') ' Superconductivity: isotropic evaluation of parameters from electron-phonon coupling (interpolated) for spin ', spin
      else
-       write(ount,'(a)') ' Superconductivity: isotropic evaluation of parameters from electron-phonon coupling (coarse grid) for spin ', spin
+       write(ount,'(a,i3)') ' Superconductivity: isotropic evaluation of parameters from electron-phonon coupling (coarse grid) for spin ', spin
      endif
      write(ount,'(a,es16.6)')            ' isotropic lambda = ',lambda_iso
      write(ount,'(a,es16.6,a,es16.6,a)' )' omegalog  = ',omega_log,' (Ha) ', omega_log * Ha_K, ' (Kelvin) '
