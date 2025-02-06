@@ -9,13 +9,15 @@ import platform
 import tarfile
 import re
 import warnings
-from base64 import b64encode
 
+from base64 import b64encode
 from socket import gethostname
 from subprocess import Popen, PIPE
 from multiprocessing import Process, Queue, Lock
 from threading import Thread
-from contextlib import contextmanager
+#from contextlib import contextmanager
+
+
 
 # Handle py2, py3k differences.
 py2 = sys.version_info[0] <= 2
@@ -30,7 +32,6 @@ else:
     from configparser import ConfigParser, ParsingError as CPError
     from queue import Empty as EmptyQueueError
 
-from collections import OrderedDict
 from .jobrunner import TimeBomb
 from .tools import RestrictedShell, unzip, tail_file, pprint_table, Patcher, Editor
 from .xyaptu import xcopier
@@ -1397,7 +1398,9 @@ class BaseTest(object):
     # Possible status of the test.
     _possible_status = ["failed", "passed", "succeeded", "skipped", "disabled"]
 
+    @property
     def is_chain(self):
+        """Truf if this is an instance of ChainOfTests."""
         return False
 
     def __init__(self, test_info, abenv):
@@ -1727,8 +1730,7 @@ pp_dirpath $ABI_PSPDIR
             shutil.copy(src, dest)
             self.keep_files(dest)  # Do not remove it after the test.
         except Exception:
-            self.exceptions.append(self.Error(
-                "copying %s => %s" % (src, dest)))
+            self.exceptions.append(self.Error("copying %s => %s" % (src, dest)))
 
         for extra in self.extra_inputs:
             src = os.path.join(self.inp_dir, extra)
@@ -1914,6 +1916,12 @@ pp_dirpath $ABI_PSPDIR
                     return True
         return False
 
+    @property
+    def uses_gpu(self):
+        """1 if this test uses GPUs, 0 otherwise."""
+        gpu_key = "HAVE_GPU"
+        return 1 if gpu_key in self.need_cpp_vars else 0
+
     def run(self, build_env, runner, workdir, print_lock=None, nprocs=1, runmode="static", **kwargs):
         """
         Run the test with nprocs MPI nodes in the build environment build_env using the `JobRunner` runner.
@@ -2040,6 +2048,7 @@ pp_dirpath $ABI_PSPDIR
                 if not os.path.exists(dst):
                     os.symlink(src, dst)
 
+        #print("Setting run_etime")
         self.run_etime = 0.0
 
         if can_run:
@@ -2126,8 +2135,8 @@ pp_dirpath $ABI_PSPDIR
                 simplified_test = simplified_diff
                 is_abo = os.path.splitext(f.name)[-1] == ".abo" or os.path.splitext(f.name)[-1] == ".out"
                 if simplified_test:
-                  fld_options_sav = f.fld_options
-                  f.fld_options = "-easy"
+                    fld_options_sav = f.fld_options
+                    f.fld_options = "-easy"
 
                 fldiff_fname = os.path.join(self.workdir, f.name + ".fldiff")
                 self.keep_files(fldiff_fname)
@@ -2143,7 +2152,7 @@ pp_dirpath $ABI_PSPDIR
                 self.fld_isok = self.fld_isok and isok
 
                 if simplified_test:
-                    f.fld_options= fld_options_sav
+                    f.fld_options = fld_options_sav
 
                 if not self.exec_error and f.has_line_count_error:
                     f.do_html_diff = True
@@ -2173,7 +2182,7 @@ pp_dirpath $ABI_PSPDIR
                                                  percent_allowed_small=40,percent_allowed_large=25)
                     if st == "failed":
                         self._status = "failed"
-                        self.fld_isok= False
+                        self.fld_isok = False
                         indent = ' '*len(self.full_id)
                         msg = indent + err_msg.replace('\n','\n'+indent)
                         self.cprint(msg=msg, color=status2txtcolor[self._status])
@@ -2335,15 +2344,20 @@ pp_dirpath $ABI_PSPDIR
         """
         Load the run results from a run in a different process.
         """
-        self._status = d['status']
-        self.stdout_fname = d['stdout']
-        self._files_to_keep = d['files_to_keep']
-        self.tot_etime = d['tot_etime']
-        self.run_etime = d['run_etime']
-        self._executed = d['executed']
-        self._isok = d['isok']
-        self.exec_error = d['exec_error']
-        self.workdir = d['workdir']
+        try:
+            self._status = d['status']
+            self.stdout_fname = d['stdout']
+            self._files_to_keep = d['files_to_keep']
+            self.tot_etime = d['tot_etime']
+            self.run_etime = d['run_etime']
+            self._executed = d['executed']
+            self._isok = d['isok']
+            self.exec_error = d['exec_error']
+            self.workdir = d['workdir']
+        except KeyError as exc:
+            print("in results_load with:", type(self))
+            #print(d)
+            raise exc
 
     def results_dump(self, skipped_info=False):
         """
@@ -2403,8 +2417,7 @@ pp_dirpath $ABI_PSPDIR
                 else:
                     # real directory that should be removed
                     # At present no test copies directories so we leave this raise.
-                    raise NotImplementedError(
-                        "Found directory: %s in workdir!!" % entry)
+                    raise NotImplementedError("Found directory: %s in workdir!!" % entry)
 
     def patch(self, patcher=None):
         """
@@ -2443,8 +2456,7 @@ pp_dirpath $ABI_PSPDIR
             out_exists = os.path.isfile(out_fname)
             ref_exists = os.path.isfile(ref_fname)
 
-            hdiff_fname = os.path.abspath(os.path.join(
-                self.workdir, f.name + ".diff.html"))
+            hdiff_fname = os.path.abspath(os.path.join(self.workdir, f.name + ".diff.html"))
 
             f.hdiff_fname = hdiff_fname
 
@@ -2498,8 +2510,7 @@ pp_dirpath $ABI_PSPDIR
             out_exists = os.path.isfile(out_fname)
             ref_exists = os.path.isfile(ref_fname)
 
-            diff_fname = os.path.abspath(
-                os.path.join(self.workdir, f.name + ".diff"))
+            diff_fname = os.path.abspath(os.path.join(self.workdir, f.name + ".diff"))
 
             f.diff_fname = diff_fname
 
@@ -2813,8 +2824,7 @@ class AnaddbTest(BaseTest):
             input_gkk = os.path.join(self.workdir, self.input_gkk)  # Use output GKK of a previous run.
             if (not os.path.isfile(input_gkk)
                 and not os.path.isfile(input_gkk + '.nc')):
-                self.exceptions.append(self.Error(
-                    "%s no such GKK file: " % input_gkk))
+                self.exceptions.append(self.Error("%s no such GKK file: " % input_gkk))
 
         if (not os.path.isfile(input_gkk)
             and not os.path.isfile(input_gkk + '.nc')):
@@ -2901,8 +2911,7 @@ class MultibinitTest(BaseTest):
         if self.latt_pot and self.latt_pot.strip().lower() != 'no':
             latt_pot_fname = os.path.join(self.inp_dir, self.latt_pot)
             if not os.path.isfile(latt_pot_fname):
-                self.exceptions.append(self.Error(
-                    "%s no such lattice potential file: " % latt_pot_fname))
+                self.exceptions.append(self.Error("%s no such lattice potential file: " % latt_pot_fname))
             return latt_pot_fname
         else:
             return None
@@ -2911,8 +2920,7 @@ class MultibinitTest(BaseTest):
         if self.slc_pot and self.slc_pot.strip().lower() != 'no':
             slc_pot_fname = os.path.join(self.inp_dir, self.slc_pot)
             if not os.path.isfile(slc_pot_fname):
-                self.exceptions.append(self.Error(
-                    "%s no such slc potential file: " % slc_pot_fname))
+                self.exceptions.append(self.Error("%s no such slc potential file: " % slc_pot_fname))
             return slc_pot_fname
         else:
             return None
@@ -2921,8 +2929,7 @@ class MultibinitTest(BaseTest):
         if self.lwf_pot and self.lwf_pot.strip().lower() != 'no':
             lwf_pot_fname = os.path.join(self.inp_dir, self.lwf_pot)
             if not os.path.isfile(lwf_pot_fname):
-                self.exceptions.append(self.Error(
-                    "%s no such lwf potential file: " % lwf_pot_fname))
+                self.exceptions.append(self.Error("%s no such lwf potential file: " % lwf_pot_fname))
             return lwf_pot_fname
         else:
             return None
@@ -2931,15 +2938,13 @@ class MultibinitTest(BaseTest):
         if self.input_ddb and self.input_ddb.strip().lower() != 'no':
             iddb_fname = os.path.join(self.inp_dir, self.input_ddb)
             if not os.path.isfile(iddb_fname):
-                self.exceptions.append(self.Error(
-                    "%s no such DDB file: " % iddb_fname))
+                self.exceptions.append(self.Error("%s no such DDB file: " % iddb_fname))
             return iddb_fname
         else:
             if self.system_xml and self.system_xml.strip().lower() != 'no':
                 sys_xml_fname = os.path.join(self.inp_dir, self.system_xml)
                 if not os.path.isfile(sys_xml_fname):
-                    self.exceptions.append(self.Error(
-                        "%s no such XML file: " % sys_xml_fname))
+                    self.exceptions.append(self.Error("%s no such XML file: " % sys_xml_fname))
                 return sys_xml_fname
             else:
                 return None
@@ -2948,8 +2953,7 @@ class MultibinitTest(BaseTest):
         if self.coeff_xml and self.coeff_xml.strip().lower() != 'no':
             coeffxml_fname = os.path.join(self.inp_dir, self.coeff_xml)
             if not os.path.isfile(coeffxml_fname):
-                self.exceptions.append(self.Error(
-                    "%s no such XML file for coeffs: " % coeffxml_fname))
+                self.exceptions.append(self.Error("%s no such XML file for coeffs: " % coeffxml_fname))
         else:
             coeffxml_fname = None
         return coeffxml_fname
@@ -2958,8 +2962,7 @@ class MultibinitTest(BaseTest):
         if self.md_hist and self.md_hist.strip().lower() != 'no':
             md_hist_fname = os.path.join(self.inp_dir, self.md_hist)
             if not os.path.isfile(md_hist_fname):
-                self.exceptions.append(self.Error(
-                    "%s no such HIST file for training-set: " % md_hist_fname))
+                self.exceptions.append(self.Error("%s no such HIST file for training-set: " % md_hist_fname))
             return md_hist_fname
         else:
             return None
@@ -2968,8 +2971,7 @@ class MultibinitTest(BaseTest):
         if self.test_set and self.test_set.strip().lower() != 'no':
             test_set_fname = os.path.join(self.inp_dir, self.test_set)
             if not os.path.isfile(test_set_fname):
-                self.exceptions.append(self.Error(
-                    "%s no such HIST file for test-set: " % test_set_fname))
+                self.exceptions.append(self.Error("%s no such HIST file for test-set: " % test_set_fname))
             return test_set_fname
         else:
             return None
@@ -3009,8 +3011,7 @@ class MultibinitTest(BaseTest):
         if self.md_hist:
             md_hist_fname = os.path.join(self.inp_dir, self.md_hist)
             if not os.path.isfile(md_hist_fname):
-                self.exceptions.append(self.Error(
-                    "%s no such HIST file for training-set: " % md_hist_fname))
+                self.exceptions.append(self.Error("%s no such HIST file for training-set: " % md_hist_fname))
 
             t_stdin.write(md_hist_fname + "\n")  # 5) input for training-set
         else:
@@ -3020,8 +3021,7 @@ class MultibinitTest(BaseTest):
         if self.test_set:
             test_set_fname = os.path.join(self.inp_dir, self.test_set)
             if not os.path.isfile(test_set_fname):
-                self.exceptions.append(self.Error(
-                    "%s no such HIST file for test-set: " % test_set_fname))
+                self.exceptions.append(self.Error("%s no such HIST file for test-set: " % test_set_fname))
 
             t_stdin.write(test_set_fname + "\n")  # 6) input for test-set
         else:
@@ -3098,8 +3098,7 @@ class TdepTest(BaseTest):
 
         md_hist_fname = os.path.join(self.inp_dir, self.md_hist)
         if not os.path.isfile(md_hist_fname):
-            self.exceptions.append(self.Error(
-                "%s no such hist file: " % md_hist_fname))
+            self.exceptions.append(self.Error("%s no such hist file: " % md_hist_fname))
 
         t_stdin.write(md_hist_fname + "\n")
         t_stdin.write(self.id + "\n")       # 2) formatted output file e.g. t13.abo
@@ -3122,8 +3121,7 @@ class AimTest(BaseTest):
         t_stdin.write(self.id + "\n")     # t57
 
         # Path to the pseudopotential files.
-        psp_paths = [os.path.join(self.abenv.psps_dir, pname)
-                     for pname in self.psp_files]
+        psp_paths = [os.path.join(self.abenv.psps_dir, pname) for pname in self.psp_files]
 
         t_stdin.writelines(p + "\n" for p in psp_paths)
 
@@ -3260,8 +3258,10 @@ def do_work(qin, qout, run_func, run_func_kwargs, print_lock, kill_me, thread_mo
 
 
 def run_and_check_test(test, print_lock=None, **kwargs):
-    """Helper function to execute the test. Must be thread-safe."""
-
+    """
+    Helper function to execute the test. Must be thread-safe.
+    Return dictionary with results
+    """
     workdir = kwargs.pop("workdir")
     build_env = kwargs.pop("build_env")
     job_runner = kwargs.pop("job_runner")
@@ -3272,9 +3272,11 @@ def run_and_check_test(test, print_lock=None, **kwargs):
     testdir = os.path.abspath(os.path.join(workdir, test.suite_name + "_" + test.id))
 
     # Run the test
+    #print("Calling test.run")
     test.run(build_env, job_runner, testdir, print_lock=print_lock, nprocs=nprocs, runmode=runmode, **kwargs)
 
     # Write HTML summary
+    #print("Calling write_html_report")
     test.write_html_report()
 
     # Remove useless files in workdir.
@@ -3288,12 +3290,21 @@ def run_and_check_test(test, print_lock=None, **kwargs):
 class ChainOfTests(object):
     """
     A list of tests that should be executed together due to inter-dependencies.
-    It provides the same interface as the one given by BaseTest
+    It provides the same interface as the one given by BaseTest.
     """
     Error = BaseTestError
 
+    @property
     def is_chain(self):
+        """Truf if this is an instance of ChainOfTests."""
         return True
+
+    @property
+    def uses_gpu(self):
+        """1 if this test uses GPUs, 0 otherwise."""
+        gpu_key = "HAVE_GPU"
+        found = any(gpu_key in test.need_cpp_vars for test in self)
+        return 1 if found else 0
 
     def __init__(self, tests):
         self.tests = tuple(t for t in tests)
@@ -3453,8 +3464,7 @@ class ChainOfTests(object):
                     self._status = "passed"
                 elif all_fldstats != {"succeeded"}:
                     print(self)
-                    print("WARNING, expecting {'succeeded'} but got\n%s" % str(
-                        all_fldstats))
+                    print("WARNING, expecting {'succeeded'} but got\n%s" % str(all_fldstats))
                     self._status = "failed"
                 else:
                     self._status = "succeeded"
@@ -3546,6 +3556,16 @@ class ChainOfTests(object):
                 test.write_html_report(fh=fh, oc=oc)
 
     def run(self, build_env, runner, workdir, nprocs=1, **kwargs):
+        """
+        Run the ChainOfTests.
+
+        Args:
+            build_env:
+            runner:
+            workdir:
+            nprocs:
+            kwargs:
+        """
 
         workdir = os.path.abspath(workdir)
         if not os.path.exists(workdir):
@@ -3564,14 +3584,20 @@ class ChainOfTests(object):
     def results_load(self, d):
         """
         Load the run results from a run in a different process.
+        This need to provide the same API as in BaseTest
         """
-        self._status = d['status']
-        self._files_to_keep = d['files_to_keep']
-        self._tot_etime = d['tot_etime']
-        self._run_etime = d['run_etime']
-        self._priv_executed = d['executed']
-        self._isok = d['isok']
-        self.workdir = d['workdir']
+        try:
+            self._status = d['status']
+            self._files_to_keep = d['files_to_keep']
+            self._tot_etime = d['tot_etime']
+            self._run_etime = d['run_etime']
+            self._priv_executed = d['executed']
+            self._isok = d['isok']
+            self.workdir = d['workdir']
+        except KeyError as exc:
+            print("in results_load with:", type(self))
+            #print(d)
+            raise exc
 
     def results_dump(self):
         """
@@ -3912,8 +3938,7 @@ class AbinitTestSuite(object):
                                 .format(type(e).__name__, e)
                             )
 
-                    logger.info("{} worker(s) remaining for {} tasks."
-                                .format(proc_running, task_remaining))
+                    logger.info("{} worker(s) remaining for {} tasks.".format(proc_running, task_remaining))
                 elif msg['type'] == 'result':
                     results[msg['id']] = msg
                     task_remaining -= 1
@@ -3994,9 +4019,18 @@ class AbinitTestSuite(object):
 
             if py_nprocs == 1:
                 logger.info("Sequential version")
-                for test in self:
-                    # discard the return value because tests are directly modified
-                    run_and_check_test(test, **run_func_kwargs)
+
+                # New version based on Manager
+                manager = Manager(available_cpus=6, available_gpus=1, max_workers=4, test_suite=self, verbose=1)
+                results_list = manager.run(mpi_nprocs=1, omp_nthreads=1, **run_func_kwargs)
+
+                for test, results in zip(self, results_list):
+                    test.results_load(results)
+
+                # Old version
+                # discard the return value because tests are directly modified
+                #for test in self:
+                #    run_and_check_test(test, **run_func_kwargs)
 
             elif py_nprocs > 1:
                 logger.info("Parallel version with py_nprocs = %s" % py_nprocs)
@@ -4058,10 +4092,10 @@ class AbinitTestSuite(object):
                 try:
                     stats_suite[test.suite_name]["run_etime"] += test.run_etime
                     stats_suite[test.suite_name]["tot_etime"] += test.tot_etime
-                except AttributeError:
+                except AttributeError as exc:
+                    #print(exc)
                     print("Cannot access run_etime, tot_etime attributes of test:\n\t%s" % str(test))
-                    print("Likely due to timeout error.")
-                    print("Continuing anyway despite the error.")
+                    print("Likely due to timeout error. Continuing anyway despite the error.")
                     stats_suite[test.suite_name]["run_etime"] += 0.0
                     stats_suite[test.suite_name]["tot_etime"] += 0.0
 
@@ -4431,6 +4465,105 @@ class Results(object):
         """Save the object in pickle format."""
         with open(cpkl_fname, "wb") as fh:
             pickle.dump(self, fh, protocol=protocol)
+
+
+class Manager:
+    """
+    This object ensures that multiple MPI + OpenmMP jobs are executed without
+    exceeding a given CPU limit and GPU limit by using a queue
+    and a thread pool for parallel execution.
+    """
+    def __init__(self, available_cpus, available_gpus, max_workers, test_suite, verbose, sleep_time=1):
+        """
+        Initialize the job manager.
+
+        Args:
+            available_cpus: Number of available CPUs for MPI + OpenMP threads
+            available_gpus: Number of available GPUS.
+            max_workers: Maximum number of concurrent jobs.
+            test_suite: TestSuite instance.
+            sleep_time: Sleep time in seconds
+        """
+        self.available_cpus = available_cpus
+        self.available_gpus = available_gpus
+        self.max_workers = max_workers
+        self.test_suite = test_suite
+        self.lock = Lock()
+        self.verbose = verbose
+        self.sleep_time = sleep_time
+
+    def run(self, mpi_nprocs, omp_nthreads, **run_func_kwargs):
+        """
+        Manages TestSuite execution, ensuring CPU and GPU limits are not exceeded.
+        Assumes one MPI process per GPU.
+
+        Args:
+            mpi_nprocs:
+            omp_nthreads:
+        """
+        self.run_func_kwargs = run_func_kwargs
+
+        # Populate the queue with the tests.
+        queue = Queue()
+        for test in self.test_suite:
+            queue.put(test)
+
+        self.mpi_nprocs, self.omp_nthreads = mpi_nprocs, omp_nthreads
+        ncpus = mpi_nprocs * omp_nthreads
+
+        from concurrent.futures import ThreadPoolExecutor
+
+        with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
+            futures_and_tests = []
+            while not queue.empty():
+                test = queue.get()
+                ngpus = test.uses_gpu * mpi_nprocs
+                #print("ngpus:", ngpus, "need_cpp_vars:", test.need_cpp_vars)
+                with self.lock:
+                    can_run = self.available_cpus >= ncpus
+                    if ngpus > 0:
+                        can_run = can_run and self.available_gpus >= ngpus
+
+                    if can_run:
+                        self.available_cpus -= ncpus
+                        self.available_gpus -= ngpus
+                    else:
+                        # Requeue the test if not enough CPUs
+                        queue.put(test)
+                        time.sleep(self.sleep_time)
+                        continue
+
+                # Submit the test to the thread pool
+                future = executor.submit(self.run_one_test, test, **self.run_func_kwargs)
+                futures_and_tests.append((future, test))
+
+            # Wait for all tests to complete
+            results_list = []
+            for future, test in futures_and_tests:
+                results = future.result()
+                print("id:", results["id"])
+                print("type:", results["type"])
+                results_list.append(results)
+                #test.results_load(results)
+
+            return results_list
+
+    def run_one_test(self, test, **run_func_kwargs):
+        """
+        Executes a single test.
+        """
+        results = run_and_check_test(test, **run_func_kwargs)
+        #print("run_and_check_test results:", results)
+
+        # Release CPUs after test completion
+        with self.lock:
+            self.available_cpus += self.mpi_nprocs * self.omp_nthreads
+            ngpus = test.uses_gpu * self.mpi_nprocs
+            self.available_gpus += ngpus
+            #if self.verbose:
+            #   print(f"test {test['name']} completed. Available CPUs: {self.available_cpus}")
+
+        return results
 
 
 if __name__ == "__main__":

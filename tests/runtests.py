@@ -614,7 +614,7 @@ def main():
 
         dict_list = []
         for test in test_suite:
-            if test.is_chain():
+            if test.is_chain:
                 for child_test in test:
                     rows = get_tol_rows(child_test)
                     dict_list.extend(rows)
