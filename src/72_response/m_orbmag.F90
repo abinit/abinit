@@ -291,8 +291,8 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
  !scalars
  character(len=fnlen) :: fname
  integer :: adir,bdtot_index,buff_size,choice,cpopt,dimffnl,exchn2n3d
- integer :: iat,iatom,icg,icmplx,icprj,ider,idir,ierr
- integer :: ikg,ikg1,ikpt,ilm,indx,isppol,istwf_k,iterm,itypat,lmn2max
+ integer :: iat,iatom,icg,icprj,ider,idir,ierr
+ integer :: ikg,ikg1,ikpt,ilm,indx,isppol,istwf_k,itypat,lmn2max
  integer :: me,mcgk,mcprjk,my_lmax,my_nspinor,nband_k,nband_me,ncid,ngfft1,ngfft2,ngfft3,ngfft4
  integer :: ngfft5,ngfft6,ngnt,nl1_option,nn,nkpg,npw_k,npwsp,nproc,spaceComm
  integer,parameter :: master=0
@@ -666,7 +666,7 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
  if (me == master) then
    fname = trim(dtfil%filnam_ds(4))//'_ORBMAG.nc'
    NCF_CHECK(nctk_open_create(ncid, fname, xmpi_comm_self))
-   call orbmag_ncwrite(crystal,dtset,ebands_k,hdr,ncid,orbmag_mesh,psps,pawtab)
+   call orbmag_ncwrite(crystal,dtset,ebands_k,hdr,ncid,orbmag_mesh)
    NCF_CHECK(nf90_close(ncid))
  end if
 
@@ -748,7 +748,7 @@ subroutine sum_orbmag_mesh(chern_terms,crystal,dtset,ebands_k,mpi_enreg,orbmag_m
 
   !Local variables -------------------------
   !scalars
-  integer :: buff_size,icmplx,ierr,ikpt,isppol,iterm,nband_k
+  integer :: buff_size,ierr,ikpt,isppol,iterm,nband_k
   integer :: me,nn,nproc,spaceComm
   real(dp) :: trnrm
   real(dp),allocatable :: buffer1(:),buffer2(:)
@@ -1264,7 +1264,7 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gs_hamk,&
   !scalars
   integer :: adir,bdir,choice,cpopt,gdir,ndat,nn,nnlout,np,npwsp
   integer :: paw_opt,signs,tim_getghc
-  real(dp) :: doti,dotr,epsabg,trnrm
+  real(dp) :: doti,dotr,epsabg
   complex(dpc) :: b1,bv2b,m1,m1_mu,mb,mg,mv2b,mv2b_mu,prefac_b,prefac_m
   !arrays
   real(dp) :: enlout(1),lamv(1)
@@ -2847,7 +2847,7 @@ end subroutine local_fermie
 !!
 !! SOURCE
 
-subroutine orbmag_ncwrite(crystal,dtset,ebands,hdr,ncid,orbmag_mesh,psps,pawtab)
+subroutine orbmag_ncwrite(crystal,dtset,ebands,hdr,ncid,orbmag_mesh)
 
 !Arguments ------------------------------------
 !scalars
@@ -2857,14 +2857,12 @@ subroutine orbmag_ncwrite(crystal,dtset,ebands,hdr,ncid,orbmag_mesh,psps,pawtab)
  type(ebands_t),intent(in) :: ebands
  type(hdr_type),intent(in) :: hdr
  type(orbmag_mesh_type),intent(in) :: orbmag_mesh
- type(pseudopotential_type),intent(in) :: psps
 !arrays
- type(pawtab_type),intent(in) :: pawtab(dtset%ntypat*dtset%usepaw)
 
 #ifdef HAVE_NETCDF
 !Local variables-------------------------------
 !scalars
- integer :: itype,ncerr,fform
+ integer :: ncerr,fform
  real(dp) :: cpu,wall,gflops
  character(len=500) :: msg
 !arrays
