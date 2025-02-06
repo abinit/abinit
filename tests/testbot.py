@@ -92,6 +92,10 @@ class TestBot(object):
       "runmode"          : ("static", str),
       "keywords"         : ("", _str2list),   # String with the keywords that should be selected/ignored
       "etsf_check"       : ("no", _yesno2bool),  # yes to activate validation of netcdf files produced by Abinit.
+      # TODO: New options
+      #"available_cpus"   : (None, int),
+      #"available_gpus"   : (None, int),
+      #"max_workers"      : (None, int),
     }
 
     def __init__(self, testbot_cfg=None):
@@ -221,7 +225,7 @@ class TestBot(object):
         database = abitests.get_database()
         res_table = database.init_result_table()
         self.summary = TestBotSummary(res_table)
-        # print(self.summary)
+        #print(self.summary)
 
     @lazy__str__
     def __str__(self): pass

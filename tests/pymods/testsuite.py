@@ -15,8 +15,6 @@ from socket import gethostname
 from subprocess import Popen, PIPE
 from multiprocessing import Process, Queue, Lock
 from threading import Thread
-#from contextlib import contextmanager
-
 
 
 # Handle py2, py3k differences.
@@ -183,8 +181,7 @@ def rmrf(top, exclude_paths=None):
     Recursively remove all files and directories contained in directory top.
 
     Args:
-        exclude_paths:
-            list with the absolute paths that should be preserved
+        exclude_paths: list with the absolute paths that should be preserved
 
     Returns the list of files and the directories that have been removed.
     """
@@ -221,7 +218,7 @@ def find_abortfile(workdir):
 
     .. Note::
 
-        __LIBPAW_MPIABORFILE__ is produced if abinit uses libpaw and when we die inside libpaw.
+        __LIBPAW_MPIABORFILE__ is produced if abinit uses libpaw and execution aborts inside libpaw.
     """
     for s in ("__ABI_MPIABORTFILE__", "__LIBPAW_MPIABORFILE__"):
         path = os.path.join(workdir, s)
@@ -263,8 +260,7 @@ def extract_errinfo_from_files(workdir):
     """
     Extract information from the files produced by the code when we run tests in debug mode.
 
-    Return:
-        String with the content of the files. Empty string if no debug file is found.
+    Return: String with the content of the files. Empty string if no debug file is found.
     """
     registered_exts = {".flun", ".mocc"}
     errinfo = []
@@ -282,7 +278,9 @@ def extract_errinfo_from_files(workdir):
 
 
 class FileToTest(object):
-    """This object contains information on the output file that will be analyzed by fldiff"""
+    """
+    This object contains information on the output file that will be analyzed by fldiff
+    """
     #  atr_name,   default, conversion function. None designes mandatory attributes.
     _attrbs = [
         ("name", None, str),
@@ -345,32 +343,32 @@ class FileToTest(object):
         # Select only YAML section in the two files
         if simplified_yaml_test:
 
-          yaml_section_start = "--- !"
-          yaml_section_end = "..."
+            yaml_section_start = "--- !"
+            yaml_section_end = "..."
 
-          def make_simplified(file_in,file_out,start_string,end_string):
-              f_in=open(file_in,'r')
-              f_out=open(file_out,'w')
-              inRecordingMode = False
-              for line in f_in.readlines():
-                  if not inRecordingMode:
-                      if start_string in line:
-                          inRecordingMode = True
-                          f_out.write(line)
-                  elif end_string in line:
-                      inRecordingMode = False
-                      f_out.write(line)
-                  else:
-                      f_out.write(line)
-              f_in.close()
-              f_out.close()
+            def make_simplified(file_in,file_out,start_string,end_string):
+                f_in=open(file_in,'r')
+                f_out=open(file_out,'w')
+                inRecordingMode = False
+                for line in f_in.readlines():
+                    if not inRecordingMode:
+                        if start_string in line:
+                            inRecordingMode = True
+                            f_out.write(line)
+                    elif end_string in line:
+                        inRecordingMode = False
+                        f_out.write(line)
+                    else:
+                        f_out.write(line)
+                f_in.close()
+                f_out.close()
 
-          ref_fname_min = os.path.abspath(os.path.join(workdir, self.name + ".min_ref"))
-          out_fname_min = os.path.abspath(os.path.join(workdir, self.name + ".min"))
-          make_simplified(ref_fname,ref_fname_min,yaml_section_start,yaml_section_end)
-          make_simplified(out_fname,out_fname_min,yaml_section_start,yaml_section_end)
-          ref_fname = ref_fname_min
-          out_fname = out_fname_min
+            ref_fname_min = os.path.abspath(os.path.join(workdir, self.name + ".min_ref"))
+            out_fname_min = os.path.abspath(os.path.join(workdir, self.name + ".min"))
+            make_simplified(ref_fname,ref_fname_min,yaml_section_start,yaml_section_end)
+            make_simplified(out_fname,out_fname_min,yaml_section_start,yaml_section_end)
+            ref_fname = ref_fname_min
+            out_fname = out_fname_min
 
         opts = {
             'label': self.name,
@@ -439,8 +437,7 @@ class FileToTest(object):
                 #raise e
 
                 isok, status = False, 'failed'
-                msg = 'Internal error:\n{}: {}'.format(
-                    type(e).__name__, str(e))
+                msg = 'Internal error:\n{}: {}'.format(type(e).__name__, str(e))
                 has_line_count_error = False
 
         msg += ' [file={}]'.format(os.path.basename(ref_fname))
@@ -987,8 +984,7 @@ class CPreProcessor(object):
         Read source from filepath, call CPP with the includes and the
         options passed to the constructor.
 
-        Returns:
-            preprocessed text.
+        Returns: preprocessed text.
         """
         if self.bin is None:
             # No pre-processing, return raw string.
@@ -1084,7 +1080,9 @@ class NagBacktrace(FortranBacktrace):
 
 
 class BuildEnvironment(object):
-    """Store information on the build environment."""
+    """
+    Store information on the ABINIT build environment.
+    """
 
     def __init__(self, build_dir, cygwin_instdir=None):
         """
@@ -1095,8 +1093,8 @@ class BuildEnvironment(object):
         # Try to figure out the top level directory of the build tree.
         try:
             build_dir = find_top_build_tree(build_dir)
-        except Exception as e:
-            raise e
+        except Exception as exc:
+            raise exc
 
         self.uname = platform.uname()
         self.hostname = gethostname().split(".")[0]
@@ -1119,8 +1117,7 @@ class BuildEnvironment(object):
 
         # Check if this is a valid ABINIT build tree.
         if not (os.path.isfile(self.configh_path) and os.path.isfile(self.path_of_bin("abinit"))):
-            raise ValueError(
-                "%s is not a valid ABINIT build tree." % self.build_dir)
+            raise ValueError("%s is not a valid ABINIT build tree." % self.build_dir)
 
         # Get the list of CPP variables defined in the build.
         self.defined_cppvars = parse_configh_file(self.configh_path)
@@ -1138,8 +1135,7 @@ class BuildEnvironment(object):
     def issrctree(self):
         """True if this is a source tree."""
         configac_path = os.path.join(self.build_dir, "configure.ac")
-        abinitF90_path = os.path.join(
-            self.build_dir, "src", "98_main", "abinit.F90")
+        abinitF90_path = os.path.join(self.build_dir, "src", "98_main", "abinit.F90")
 
         return os.path.isfile(configac_path) and os.path.isfile(abinitF90_path)
 
@@ -1212,7 +1208,7 @@ def parse_configh_file(fname):
 
 def input_file_has_vars(fname, ivars, comment="#", mode="any"):
     """
-    Primitive parser that searches for the occurrence of input variables in the input file fname
+    Primitive parser that searches for the occurrence of input variables in the input file fname.
 
     Args:
         fname: Input file
@@ -1221,7 +1217,6 @@ def input_file_has_vars(fname, ivars, comment="#", mode="any"):
             if ivar[varname] is None, we have a match if varname is present
             if ivar[varname] is int, we have a match if varname is present and it has value int
         mode: "all" or "any"
-        o
     return:
         (bool, d)
         bool is True is the input file contains the specified variables
@@ -1372,9 +1367,9 @@ def make_abitests_from_inputs(input_fnames, abenv, keywords=None, need_cpp_vars=
 
 
 class NotALock:
-    '''
+    """
     NOP context manager
-    '''
+    """
 
     def __enter__(self):
         pass
@@ -1390,7 +1385,7 @@ class BaseTestError(Exception):
 class BaseTest(object):
     """
     Base class describing a single test. Tests associated to other executables should
-    sublcass BaseTest and redefine the method make_stdin.
+    subclass BaseTest and redefine the method make_stdin.
     Then change exec2cls so that the appropriate instance is returned.
     """
     Error = BaseTestError
@@ -1400,7 +1395,7 @@ class BaseTest(object):
 
     @property
     def is_chain(self):
-        """Truf if this is an instance of ChainOfTests."""
+        """True if this is an instance of ChainOfTests."""
         return False
 
     def __init__(self, test_info, abenv):
@@ -2006,8 +2001,7 @@ pp_dirpath $ABI_PSPDIR
             self.cprint(msg=msg, color=status2txtcolor[self._status])
 
         # Here we get the number of MPI nodes for test.
-        self.nprocs, self.skip_msg = self.compute_nprocs(
-            self.build_env, nprocs, runmode=runmode)
+        self.nprocs, self.skip_msg = self.compute_nprocs(self.build_env, nprocs, runmode=runmode)
 
         if self.skip_msg:
             self._status = "skipped"
@@ -2053,8 +2047,7 @@ pp_dirpath $ABI_PSPDIR
 
         if can_run:
             # Execute pre_commands in workdir.
-            rshell = RestrictedShell(
-                self.inp_dir, self.workdir, self.abenv.psps_dir)
+            rshell = RestrictedShell(self.inp_dir, self.workdir, self.abenv.psps_dir)
 
             for cmd_str in self.pre_commands:
                 rshell.execute(cmd_str)
@@ -2183,7 +2176,7 @@ pp_dirpath $ABI_PSPDIR
                     if st == "failed":
                         self._status = "failed"
                         self.fld_isok = False
-                        indent = ' '*len(self.full_id)
+                        indent = ' ' * len(self.full_id)
                         msg = indent + err_msg.replace('\n','\n'+indent)
                         self.cprint(msg=msg, color=status2txtcolor[self._status])
 
@@ -2244,8 +2237,7 @@ pp_dirpath $ABI_PSPDIR
                     if parser.error_report:
                         # TODO: Not very clean, I should introduce a new status and a setter method.
                         self._status = "failed"
-                        msg = " ".join(
-                            [self.full_id, "VALGRIND ERROR:", parser.error_report])
+                        msg = " ".join([self.full_id, "VALGRIND ERROR:", parser.error_report])
                         self.cprint(msg=msg, color=status2txtcolor["failed"])
 
                 except Exception as exc:
@@ -2260,8 +2252,8 @@ pp_dirpath $ABI_PSPDIR
                         self.cprint(msg=errout, color=status2txtcolor["failed"])
 
                     # Extract YAML error message from ABORTFILE or stdout.
-                    abort_file = os.path.join(
-                        self.workdir, "__ABI_MPIABORTFILE__")
+                    abort_file = os.path.join(self.workdir, "__ABI_MPIABORTFILE__")
+
                     if os.path.exists(abort_file):
                         with open(abort_file, "rt") as f:
                             self.cprint(msg=12 * "=" + " ABI_MPIABORTFILE " + 12 * "=")
@@ -2398,8 +2390,7 @@ pp_dirpath $ABI_PSPDIR
         keep_exts = [".flun", ".mocc"]
 
         if (self.erase_files == 1 and self.isok) or self.erase_files == 2:
-            entries = [os.path.join(self.workdir, e)
-                       for e in os.listdir(self.workdir)]
+            entries = [os.path.join(self.workdir, e) for e in os.listdir(self.workdir)]
             for entry in entries:
                 if entry in save_files:
                     continue
@@ -2467,13 +2458,11 @@ pp_dirpath $ABI_PSPDIR
                 out_opt = "-m"
                 # out_opt = "-t"   # For simple HTML table. (can get stuck)
                 # args = ["python", diffpy, out_opt, "-f " + hdiff_fname, out_fname, ref_fname ]
-                args = [diffpy, out_opt, "-j",  "-f " +
-                        hdiff_fname, out_fname, ref_fname]
+                args = [diffpy, out_opt, "-j",  "-f " + hdiff_fname, out_fname, ref_fname]
                 cmd = " ".join(args)
                 # print("Diff", cmd)
 
-                p, ret_code = self.timebomb.run(
-                    cmd, shell=True, cwd=self.workdir)
+                p, ret_code = self.timebomb.run(cmd, shell=True, cwd=self.workdir)
 
                 if ret_code != 0:
                     err_msg = "Timeout error (%s s) while executing %s, retcode = %s" % (
@@ -3000,8 +2989,7 @@ class MultibinitTest(BaseTest):
         if self.coeff_xml:
             coeffxml_fname = os.path.join(self.inp_dir, self.coeff_xml)
             if not os.path.isfile(coeffxml_fname):
-                self.exceptions.append(self.Error(
-                    "%s no such XML file for coeffs: " % coeffxml_fname))
+                self.exceptions.append(self.Error("%s no such XML file for coeffs: " % coeffxml_fname))
 
             t_stdin.write(coeffxml_fname + "\n")  # 4) input for coefficients
         else:
@@ -3296,7 +3284,7 @@ class ChainOfTests(object):
 
     @property
     def is_chain(self):
-        """Truf if this is an instance of ChainOfTests."""
+        """True if this is an instance of ChainOfTests."""
         return True
 
     @property
@@ -3657,10 +3645,8 @@ class AbinitTestSuite(object):
             )
 
         elif test_list is not None:
-            assert keywords is None, (
-                "keywords argument is not expected with test_list")
-            assert need_cpp_vars is None, (
-                "need_cpp_vars argument is not expected with test_list.")
+            assert keywords is None, ("keywords argument is not expected with test_list")
+            assert need_cpp_vars is None, ("need_cpp_vars argument is not expected with test_list.")
             self.tests = tuple(test_list)
 
     def __str__(self):
@@ -3911,10 +3897,10 @@ class AbinitTestSuite(object):
         return task_q, res_q
 
     def wait_loop(self, nprocs, ntasks, timeout, queue):
-        '''
+        """
         Wait for all tests to be done by workers. Receives tests results from
         queue and update the local tests objects.
-        '''
+        """
         results = {}
         proc_running, task_remaining = nprocs, ntasks
         try:
@@ -4015,23 +4001,21 @@ class AbinitTestSuite(object):
             ##############################
             start_time = time.time()
 
+            # THIS FLAG ACTIVATES THE NEW MANAGER
             use_manager = True
 
             if use_manager:
                 # New version based on Manager
-                manager = Manager(available_cpus=6, available_gpus=0, max_workers=6, test_suite=self, verbose=1)
-                results_list = manager.run(mpi_nprocs=1, omp_nthreads=1, **run_func_kwargs)
-
-                for test, results in zip(self, results_list):
-                    test.results_load(results)
+                manager = Manager(available_cpus=8, available_gpus=1, max_workers=6, test_suite=self, verbose=1)
+                manager.run(mpi_nprocs=nprocs, omp_nthreads=1, **run_func_kwargs)
 
             elif py_nprocs == 1:
                 logger.info("Sequential version")
 
                 # Old version
                 # discard the return value because tests are directly modified
-                #for test in self:
-                #    run_and_check_test(test, **run_func_kwargs)
+                for test in self:
+                    run_and_check_test(test, **run_func_kwargs)
 
             elif py_nprocs > 1:
                 logger.info("Parallel version with py_nprocs = %s" % py_nprocs)
@@ -4499,8 +4483,8 @@ class Manager:
         Assumes one MPI process per GPU.
 
         Args:
-            mpi_nprocs:
-            omp_nthreads:
+            mpi_nprocs: Number of MPI processes.
+            omp_nthreads: Number of OpenMP threads.
         """
         self.run_func_kwargs = run_func_kwargs
 
@@ -4512,42 +4496,63 @@ class Manager:
         self.mpi_nprocs, self.omp_nthreads = mpi_nprocs, omp_nthreads
         ncpus = mpi_nprocs * omp_nthreads
 
+        build_env = run_func_kwargs["build_env"]
+        build_with_gpu ="HAVE_GPU" in build_env.defined_cppvars
+
         from concurrent.futures import ThreadPoolExecutor
 
         with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
             futures_and_tests = []
-            while not queue.empty():
-                test = queue.get()
-                ngpus = test.uses_gpu * mpi_nprocs
-                #print("ngpus:", ngpus, "need_cpp_vars:", test.need_cpp_vars)
-                with self.lock:
-                    can_run = self.available_cpus >= ncpus
-                    if ngpus > 0:
-                        can_run = can_run and self.available_gpus >= ngpus
+            try:
+                while not queue.empty():
+                    test = queue.get()
+                    ngpus = test.uses_gpu * mpi_nprocs if build_with_gpu else 0
 
-                    if can_run:
-                        self.available_cpus -= ncpus
-                        self.available_gpus -= ngpus
-                    else:
-                        # Requeue the test if not enough CPUs
-                        queue.put(test)
-                        time.sleep(self.sleep_time)
-                        continue
+                    #print("ngpus:", ngpus, "need_cpp_vars:", test.need_cpp_vars)
+                    with self.lock:
+                        can_run = self.available_cpus >= ncpus
+                        if ngpus > 0:
+                            can_run = can_run and self.available_gpus >= ngpus
 
-                # Submit the test to the thread pool
-                future = executor.submit(self.run_one_test, test, **self.run_func_kwargs)
-                futures_and_tests.append((future, test))
+                        if can_run:
+                            self.available_cpus -= ncpus
+                            self.available_gpus -= ngpus
+                        else:
+                            # Requeue the test if not enough CPUs
+                            queue.put(test)
+                            time.sleep(self.sleep_time)
+                            continue
 
-            # Wait for all tests to complete
-            results_list = []
-            for future, test in futures_and_tests:
-                results = future.result()
-                #print("id:", results["id"])
-                #print("type:", results["type"])
-                results_list.append(results)
-                #test.results_load(results)
+                    # Submit the test to the thread pool
+                    future = executor.submit(self.run_one_test, test, **self.run_func_kwargs)
+                    futures_and_tests.append((future, test))
 
-            return results_list
+                # Wait for all tests to complete
+                results_list = []
+                for future, test in futures_and_tests:
+                    results = future.result()
+                    results_list.append(results)
+                    #test.results_load(results)
+
+                #return results_list
+
+            except KeyboardInterrupt:
+                # cancel all pending tasks and not wait for running tasks:
+                executor.shutdown(wait=False)
+                raise KeyboardInterrupt()
+
+            #except EmptyQueueError:
+            #    warnings.warn(
+            #        ("Workers have been hanging until timeout. There were {} procs"
+            #         " working on {} tasks.").format(proc_running, task_remaining)
+            #    )
+            #    self.terminate()
+            #    return None
+
+            for test, results in zip(self.test_suite, results_list):
+                test.results_load(results)
+
+            #return results_list
 
     def run_one_test(self, test, **run_func_kwargs):
         """
