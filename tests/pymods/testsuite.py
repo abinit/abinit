@@ -3919,9 +3919,8 @@ class AbinitTestSuite(object):
         proc_running, task_remaining = nprocs, ntasks
         try:
             while proc_running > 0:
-                msg = queue.get(block=True, timeout=(
-                    1 + 2 * task_remaining * timeout / proc_running
-                ))
+                msg = queue.get(block=True, timeout=(1 + 2 * task_remaining * timeout / proc_running))
+
                 if msg['type'] == 'proc_done':
                     proc_running -= 1
                     if 'error' in msg:
@@ -3929,16 +3928,15 @@ class AbinitTestSuite(object):
                         if 'task' in msg:
                             task_remaining -= 1
                             warnings.warn(
-                                'Error append in a worker on test {}:\n{}: {}'
-                                .format(msg['task'], type(e).__name__, e)
+                                'Error append in a worker on test {}:\n{}: {}'.format(msg['task'], type(e).__name__, e)
                             )
                         else:
                             warnings.warn(
-                                'Error append in a worker:\n{}: {}'
-                                .format(type(e).__name__, e)
+                                'Error append in a worker:\n{}: {}'.format(type(e).__name__, e)
                             )
 
                     logger.info("{} worker(s) remaining for {} tasks.".format(proc_running, task_remaining))
+
                 elif msg['type'] == 'result':
                     results[msg['id']] = msg
                     task_remaining -= 1
@@ -4017,15 +4015,18 @@ class AbinitTestSuite(object):
             ##############################
             start_time = time.time()
 
-            if py_nprocs == 1:
-                logger.info("Sequential version")
+            use_manager = True
 
+            if use_manager:
                 # New version based on Manager
-                manager = Manager(available_cpus=6, available_gpus=1, max_workers=4, test_suite=self, verbose=1)
+                manager = Manager(available_cpus=6, available_gpus=0, max_workers=6, test_suite=self, verbose=1)
                 results_list = manager.run(mpi_nprocs=1, omp_nthreads=1, **run_func_kwargs)
 
                 for test, results in zip(self, results_list):
                     test.results_load(results)
+
+            elif py_nprocs == 1:
+                logger.info("Sequential version")
 
                 # Old version
                 # discard the return value because tests are directly modified
@@ -4541,8 +4542,8 @@ class Manager:
             results_list = []
             for future, test in futures_and_tests:
                 results = future.result()
-                print("id:", results["id"])
-                print("type:", results["type"])
+                #print("id:", results["id"])
+                #print("type:", results["type"])
                 results_list.append(results)
                 #test.results_load(results)
 
@@ -4552,18 +4553,18 @@ class Manager:
         """
         Executes a single test.
         """
-        results = run_and_check_test(test, **run_func_kwargs)
-        #print("run_and_check_test results:", results)
-
         # Release CPUs after test completion
         with self.lock:
+            results = run_and_check_test(test, **run_func_kwargs)
+            #print("run_and_check_test results:", results)
+
             self.available_cpus += self.mpi_nprocs * self.omp_nthreads
             ngpus = test.uses_gpu * self.mpi_nprocs
             self.available_gpus += ngpus
             #if self.verbose:
             #   print(f"test {test['name']} completed. Available CPUs: {self.available_cpus}")
 
-        return results
+            return results
 
 
 if __name__ == "__main__":
