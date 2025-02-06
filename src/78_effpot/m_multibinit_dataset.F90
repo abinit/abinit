@@ -746,9 +746,13 @@ subroutine invars_multibinit_filenames_from_input_file(input_path, outdata_prefi
      !Check whether the string only contains valid keywords
      call chkvars(string)
   end if
-  call xmpi_bcast(string,master, comm, ierr)
-  call xmpi_bcast(raw_string,master, comm, ierr)
-  call xmpi_bcast(lenstr,master, comm, ierr)
+  call xmpi_bcast(string, master, comm, ierr)
+  call xmpi_bcast(raw_string, master, comm, ierr)
+  call xmpi_bcast(lenstr, master, comm, ierr)
+
+  ! Save input string in global variable so that we can access it in ntck_open_create
+  ABI_MALLOC_TYPE_SCALAR(character(len=len_trim(string)), INPUT_STRING)
+  INPUT_STRING = string(1:len_trim(string))
 
   call invars_multibinit_filenames( string=string, lenstr=lenstr, sys_fname=sys_fname, outdata_prefix=outdata_prefix)
 end subroutine invars_multibinit_filenames_from_input_file

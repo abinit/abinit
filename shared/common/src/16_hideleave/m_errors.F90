@@ -1317,6 +1317,10 @@ subroutine abinit_doctor(prefix, print_mem_report)
  do_mem_report = 1; if (present(print_mem_report)) do_mem_report = print_mem_report
  my_rank = xmpi_comm_rank(xmpi_world)
 
+ if (allocated(INPUT_STRING)) then
+   ABI_FREE_SCALAR(INPUT_STRING)
+ end if
+
 #ifdef HAVE_MEM_PROFILING
  errmsg = ""; ierr = 0
 
