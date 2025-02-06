@@ -3418,6 +3418,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
 
  ! Open the DVDB file
  call dvdb%open_read(ngfftf, xmpi_comm_self)
+ ABI_CHECK(dvdb%has_fields("pot1", msg), msg)
 
  if (pert_comm%nproc > 1) then
    ! Activate parallelism over perturbations

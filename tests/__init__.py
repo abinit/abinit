@@ -140,14 +140,12 @@ database_path = os.path.join(abenv.tests_dir, "test_suite.cpkl")
 
 
 _tsuite_dirs = [
-    # "abirules",
     "atompaw",
     "atdep",
     "bigdft",
     "bigdft_paral",
-    # "buildsys",
     "built-in",
-    # "cpu",      This directory is disabled
+    #"cpu",      This directory is disabled
     "etsf_io",
     "fast",
     "gwr",
@@ -157,11 +155,10 @@ _tsuite_dirs = [
     "libxc",
     "mpiio",
     "paral",
-    # "hpc",
+    #"hpc",
     "hpc_gpu_omp",
     "gpu_omp",
     "gpu_kokkos",
-    # "physics",
     "seq",
     "tutoatdep",
     "tutomultibinit",
@@ -186,8 +183,7 @@ _tsuite_dirs = [
 ]
 
 _tsuite_dirs.sort()
-_tsuite_dirs = tuple([os.path.join(abenv.tests_dir, dir_name)
-                      for dir_name in _tsuite_dirs])
+_tsuite_dirs = tuple([os.path.join(abenv.tests_dir, dir_name) for dir_name in _tsuite_dirs])
 
 
 def load_mod(filepath):
@@ -759,8 +755,7 @@ class AbinitTests(object):
                             start = int(match.group(1))
                             start_stop = slice(start, start+1)
                         else:
-                            raise ValueError(
-                                "Wrong or unknown argument: %s" % arg)
+                            raise ValueError("Wrong or unknown argument: %s" % arg)
 
                 if arg in self.suite_names:
                     tp = (arg, None)
@@ -768,8 +763,7 @@ class AbinitTests(object):
                     suite = self.suite_of_subsuite(arg)
                     tp = (suite.name, arg)
                 else:
-                    raise ValueError(
-                        "Wrong (suite_name|subsuite_name) : %s" % arg)
+                    raise ValueError("Wrong (suite_name|subsuite_name): `%s`. Did you remove the initial `t`?" % arg)
 
                 if tp not in d:
                     d[tp] = [start_stop]

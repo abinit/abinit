@@ -142,7 +142,7 @@ def vararg_callback(option, opt_str, value, parser):
     setattr(parser.values, option.dest, value)
 
 
-def make_abinit(num_threads, touch_patterns=None):
+def make_abinit(num_threads, touch_patterns=None, target=""):
     """
     Find the top-level directory of the build tree and issue `make -j num_threads`.
     Return: Exit status of the subprocess.
@@ -152,12 +152,13 @@ def make_abinit(num_threads, touch_patterns=None):
     if touch_patterns:
         abenv.touch_srcfiles([s.strip() for s in touch_patterns.split(",") if s])
 
-    retcode = os.system("cd %s && make -j%d" % (top, num_threads))
-    if retcode == 0 and  platform.system() == "Darwin":
-        for binary in ALL_BINARIES:
-            cmd = f"codesign -v --force --deep {top}/src/98_main/{binary}"
-            cprint("Executing: %s" % cmd, "yellow")
-            os.system(cmd)
+    retcode = os.system("cd %s && make %s -j%d" % (top, target, num_threads))
+
+    #if retcode == 0 and  platform.system() == "Darwin":
+    #    for binary in ALL_BINARIES:
+    #        cmd = f"codesign -v --force --deep {top}/src/98_main/{binary}"
+    #        cprint("Executing: %s" % cmd, "yellow")
+    #        os.system(cmd)
 
     return retcode
 
@@ -281,22 +282,26 @@ def main():
 
     parser.add_option("-T", "--forced-tolerance", dest="forced_tolerance", type="string", default="default",
                       help="[string] Force the use of fldiff comparison tool with the specified tolerance. "+
-                           "Possible values are: default (from test config), high(1.e-10), medium (1.e-8), easy (1.e-5), ridiculous (1.e-2)")
+                           "Possible values are: default (from test config), high(1.e-10), medium (1.e-8), easy (1.e-5), ridiculous (1.e-2).")
 
-    parser.add_option("--abimem-level", type=int, default=0, help="Run executable with abimem-level option")
-    parser.add_option("--useylm", type=int, default=None, help="Use useylm in all the ABINIT input files")
-    parser.add_option("--gpu-option", type=int, default=None, help="Use gpu_option in all the ABINIT input files")
+    parser.add_option("--abimem-level", type=int, default=0, help="Run executable with abimem-level option.")
+    parser.add_option("--useylm", type=int, default=None, help="Use useylm in all the ABINIT input files.")
+    parser.add_option("--gpu-option", type=int, default=None, help="Use gpu_option in all the ABINIT input files.")
+    parser.add_option("--show-exclude-builders", action="store_true", default=False,
+                      help="Show tests grouped by exclude_builders value and exit")
 
     parser.add_option("--touch", default="",
                       help=("Used in conjunction with `-m`."
                             "Touch the source files containing the given expression(s) before recompiling the code. "
                             "Use comma-separated strings *without* empty spaces to specify more than one pattern."))
+    parser.add_option("--target", default="",
+                      help="Used in conjunction with `-m` to specify the make target e.g. `abinit` to build abinit only")
 
     parser.add_option("-s", "--show-info", dest="show_info", default=False, action="store_true",
-                      help="Show information on the test suite (keywords, authors ...) and exit")
+                      help="Show information on the test suite (keywords, authors ...) and exit.")
 
     parser.add_option("-l", "--list-tests-info", dest="list_info", default=False, action="store_true",
-                      help="List the tests in test suite (echo description section in ListOfFile files) and exit")
+                      help="List the tests in test suite (echo description section in ListOfFile files) and exit.")
 
     parser.add_option("--tolerances", default=False, action="store_true",
                       help="Write csv files with tolerances of each test.")
@@ -408,7 +413,7 @@ def main():
 
     # Compile the code before running the tests.
     if options.make:
-        retcode = make_abinit(options.make, touch_patterns=options.touch)
+        retcode = make_abinit(options.make, touch_patterns=options.touch, target=options.target)
         if retcode: return retcode
 
     # Initialize info on the build. User's option has the precedence.
@@ -540,6 +545,22 @@ def main():
         cprint("No test fulfills the requirements specified by the user!", "red")
         return 99
 
+    if options.show_exclude_builders:
+        # Show excluded tests and exit.
+        from collections import defaultdict
+        d = defaultdict(list)
+        for test in test_suite:
+            for builder in test.exclude_builders:
+                d[builder].append(test)
+
+        for builder, tests in d.items():
+            print(">>> Tests excluded on builder:", builder)
+            for test in tests:
+                print(test, "\n")
+            print("")
+
+        sys.exit(0)
+
     workdir = options.workdir
     if not workdir:
         workdir = "Test_suite"
@@ -662,7 +683,7 @@ def main():
                     print("Invoking `make` because the following files have been changed:")
                     for i, path in enumerate(changed):
                         print("[%d] %s" % (i, os.path.relpath(path)))
-                    rc = make_abinit(ncpus_detected)
+                    rc = make_abinit(ncpus_detected, target=options.target)
                     if rc != 0:
                         cprint("make_abinit returned %s, tests are postponed" % rc, "red")
                         continue
