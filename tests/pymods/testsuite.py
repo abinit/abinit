@@ -1902,9 +1902,10 @@ pp_dirpath $ABI_PSPDIR
         """
         if getattr(self.build_env, "buildbot_builder", None) is None:
             return False
+
         for builder in self.exclude_builders:
             if any(c in builder for c in "*?![]{}"):
-                # Interpret builder as regex.
+                # Interpret builder string as regex.
                 m = re.compile(builder)
                 if m.match(self.build_env.buildbot_builder):
                     return True
@@ -3459,6 +3460,14 @@ class ChainOfTests(object):
                     self._status = "succeeded"
 
         return self._status
+
+    @property
+    def exclude_builders(self):
+        """Merge exclude_builders entries for all tests in the ChainOfTests"""
+        exclude_builders = []
+        for test in self:
+            exclude_builders.extend(test.exclude_builders)
+        return list(set(exclude_builders))
 
     def keep_files(self, files):
         if is_string(files):

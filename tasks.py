@@ -161,12 +161,13 @@ def make(ctx, jobs="auto", touch=False, clean=False, binary=""):
             ctx.run("cd src && make clean && cd ..", pty=True)
             ctx.run("cd shared && make clean && cd ..", pty=True)
 
-        cmd = f"make -j{jobs} {binary} | tee make.log 2> make.stderr"
+        #cmd = f"make -j{jobs} {binary} | tee make.log 2> make.stderr"
+        cmd = f"make -j{jobs} {binary}"
         cprint(f"Executing: {cmd}", color="yellow")
         result = ctx.run(cmd, pty=True)
         if not result.ok:
             cprint(f"{cmd=} failed. Aborting now!", color="red")
-            return 1
+            sys.exit(1)
 
         # TODO Check for errors in make.stderr
         #cprint("Exit code: %s" % retcode, "green" if retcode == 0 else "red")

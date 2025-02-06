@@ -2269,6 +2269,8 @@ subroutine anaddb_init(input_path, filnam)
 
  else
    ! Read input
+   string = repeat(" ", strlen)
+   raw_string = repeat(" ", strlen)
    call instrng(input_path, lenstr, 1, strlen, string, raw_string)
    ! To make case-insensitive, map characters to upper case.
    call inupper(string(1:lenstr))
