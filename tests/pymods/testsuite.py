@@ -176,7 +176,7 @@ def lazy_readlines(fname):
             return fh.readlines()
 
 
-def rmrf(top, exclude_paths=None):
+def rm_rf(top, exclude_paths=None):
     """
     Recursively remove all files and directories contained in directory top.
 
@@ -740,9 +740,10 @@ class AbinitTestInfoParser(object):
                 raise self.Error(err_msg)
 
     def generate_testinfo_nprocs(self, nprocs):
-        """Returns a record with the variables needed to handle the job with nprocs."""
+        """
+        Returns a record with the variables needed to handle the job with nprocs.
+        """
         d = {}
-
         d['yaml_test'] = self.yaml_test()
 
         # First read and parse the global options.
@@ -2332,7 +2333,7 @@ pp_dirpath $ABI_PSPDIR
         self._executed = True
         self.tot_etime = time.time() - start_time
 
-    def results_load(self, d):
+    def load_results(self, d):
         """
         Load the run results from a run in a different process.
         """
@@ -2347,11 +2348,11 @@ pp_dirpath $ABI_PSPDIR
             self.exec_error = d['exec_error']
             self.workdir = d['workdir']
         except KeyError as exc:
-            print("in results_load with:", type(self))
+            #print("in load_results with:", type(self))
             #print(d)
             raise exc
 
-    def results_dump(self, skipped_info=False):
+    def get_results(self, skipped_info=False):
         """
         Dump the run results to pass it to a different process
         """
@@ -3217,20 +3218,32 @@ def exec2class(exec_name):
     }.get(exec_name, BaseTest)
 
 
-def do_work(qin, qout, run_func, run_func_kwargs, print_lock, kill_me, thread_mode=False):
+def do_work(task_q, res_q, run_func, run_func_kwargs, print_lock, kill_me, thread_mode=False):
+    """
+    This the function used as target of the subprocss
+
+    Args:
+        task_q: Input queue with the task.
+        res_q: Output queue with the results
+        run_func: Callable to be executed.
+        run_func_kwargs: Arguments passed to run_func
+        print_lock:
+        kill_me:
+        thread_mode:
+    """
     done = {'type': 'proc_done'}
     all_done = False
     try:
-        #while not all_done and not (thread_mode and self._kill_me):
         while not all_done and not (thread_mode and kill_me):
-            test = qin.get(block=True, timeout=2)
-            if test is None:  # reached the end
+            test = task_q.get(block=True, timeout=2)
+            if test is None:
+                # reached the end
                 all_done = True
             else:
-                qout.put(run_func(test, print_lock=print_lock, **run_func_kwargs))
+                res_q.put(run_func(test, print_lock=print_lock, **run_func_kwargs))
 
     except EmptyQueueError:
-        # If that happen it is a probably a bug
+        # If that happen, it is a probably a bug
         done['error'] = RuntimeError('Task queue is unexpectedly empty.')
 
     except Exception as e:
@@ -3242,13 +3255,13 @@ def do_work(qin, qout, run_func, run_func_kwargs, print_lock, kill_me, thread_mo
             pass
 
     finally:
-        qout.put(done)
+        res_q.put(done)
 
 
 def run_and_check_test(test, print_lock=None, **kwargs):
     """
     Helper function to execute the test. Must be thread-safe.
-    Return dictionary with results
+    Return dictionary with results.
     """
     workdir = kwargs.pop("workdir")
     build_env = kwargs.pop("build_env")
@@ -3270,8 +3283,9 @@ def run_and_check_test(test, print_lock=None, **kwargs):
     # Remove useless files in workdir.
     test.clean_workdir()
 
-    d = test.results_dump()
+    d = test.get_results()
     d['type'] = 'result'
+
     return d
 
 
@@ -3289,7 +3303,7 @@ class ChainOfTests(object):
 
     @property
     def uses_gpu(self):
-        """1 if this test uses GPUs, 0 otherwise."""
+        """Return 1 if this test uses GPUs, 0 otherwise."""
         gpu_key = "HAVE_GPU"
         found = any(gpu_key in test.need_cpp_vars for test in self)
         return 1 if found else 0
@@ -3569,7 +3583,7 @@ class ChainOfTests(object):
             if test.had_timeout:
                 fail_all = True
 
-    def results_load(self, d):
+    def load_results(self, d):
         """
         Load the run results from a run in a different process.
         This need to provide the same API as in BaseTest
@@ -3583,11 +3597,11 @@ class ChainOfTests(object):
             self._isok = d['isok']
             self.workdir = d['workdir']
         except KeyError as exc:
-            print("in results_load with:", type(self))
+            #print("in load_results with:", type(self))
             #print(d)
             raise exc
 
-    def results_dump(self):
+    def get_results(self):
         """
         Dump the run results to pass it to a different process
         """
@@ -3603,6 +3617,7 @@ class ChainOfTests(object):
         }
 
     def clean_workdir(self, other_test_files=None):
+        """Remove the files produced in the self.workdir of the ChainOfTests"""
         for test in self:
             test.clean_workdir(other_test_files=self.files_to_keep)
 
@@ -3639,10 +3654,8 @@ class AbinitTestSuite(object):
         self._processes = []
 
         if inp_files is not None:
-            self.tests = make_abitests_from_inputs(
-                inp_files, abenv,
-                keywords=keywords, need_cpp_vars=need_cpp_vars
-            )
+            self.tests = make_abitests_from_inputs(inp_files, abenv,
+                keywords=keywords, need_cpp_vars=need_cpp_vars)
 
         elif test_list is not None:
             assert keywords is None, ("keywords argument is not expected with test_list")
@@ -3867,36 +3880,42 @@ class AbinitTestSuite(object):
     def start_workers(self, py_nprocs, run_func, run_func_kwargs):
         """
         Start py_nprocs new processes that will get tests from a queue and run
-        them with run_func and put the result of the run_func in an output queue.
-        Return the task/input queue (to be closed only) and the results/output queue.
+        them with run_func and put the result in an output queue.
+
+        Args:
+            py_nprocs: Number of python sub-processes to be used
+            run_func: Function to be executed
+            run_func_kwargs: Kwargs passed to run_func.
+
+        Return: the task/input queue (to be closed only) and the results/output queue.
         """
         print_lock = Lock()
-        task_q = Queue()
-        res_q = Queue()
+        task_q, res_q = Queue(), Queue()
 
+        # Fill the queue
         for test in self:
-            # fill the queue
             task_q.put(test)
 
         for _ in range(py_nprocs):
-            # one end signal for each worker
+            # One end signal for each worker
             task_q.put(None)
 
+        # Create and start subprocesses
         for i in range(py_nprocs - 1):
-            # create and start subprocesses
             p = Process(target=do_work, args=(task_q, res_q, run_func, run_func_kwargs, print_lock, self._kill_me))
             self._processes.append(p)
             p.start()
 
-        # Add the worker as a thread of the main process
+        # Add the worker as a thread of the main process.
         t = Thread(target=do_work, args=(task_q, res_q, run_func, run_func_kwargs, print_lock, self._kill_me, True))
-        # make it daemon so it will die if the main process is interrupted early
+
+        # Make it daemon so it will die if the main process is interrupted early
         t.daemon = True
         t.start()
 
         return task_q, res_q
 
-    def wait_loop(self, nprocs, ntasks, timeout, queue):
+    def wait_workers(self, nprocs, ntasks, timeout, queue):
         """
         Wait for all tests to be done by workers. Receives tests results from
         queue and update the local tests objects.
@@ -3928,7 +3947,7 @@ class AbinitTestSuite(object):
                     task_remaining -= 1
 
         except KeyboardInterrupt:
-            self.terminate()
+            self.terminate_workers()
             raise KeyboardInterrupt()
 
         except EmptyQueueError:
@@ -3936,7 +3955,7 @@ class AbinitTestSuite(object):
                 ("Workers have been hanging until timeout. There were {} procs"
                  " working on {} tasks.").format(proc_running, task_remaining)
             )
-            self.terminate()
+            self.terminate_workers()
             return None
 
         return results
@@ -3981,7 +4000,7 @@ class AbinitTestSuite(object):
                 return
 
             # Remove all stale files present in workdir (except the lock!)
-            rmrf(self.workdir, exclude_paths=self.lock.lockfile)
+            rm_rf(self.workdir, exclude_paths=self.lock.lockfile)
 
             self.nprocs = nprocs
             self.py_nprocs = py_nprocs
@@ -3993,7 +4012,7 @@ class AbinitTestSuite(object):
                 nprocs=self.nprocs,
                 runmode=runmode,
             )
-            # Add kwargs
+            # Add input kwargs
             run_func_kwargs.update(kwargs)
 
             ##############################
@@ -4002,14 +4021,22 @@ class AbinitTestSuite(object):
             start_time = time.time()
 
             # THIS FLAG ACTIVATES THE NEW MANAGER
-            use_manager = True
+            #use_new_manager = True
+            #use_new_manager = False
 
-            if use_manager:
-                # New version based on Manager
-                manager = Manager(available_cpus=8, available_gpus=1, max_workers=6, test_suite=self, verbose=0)
-                manager.run(mpi_nprocs=nprocs, omp_nthreads=1, **run_func_kwargs)
+            #if use_new_manager:
+            #    # New version based on Manager
+            #    #from tests.pymods.devtools import number_of_cpus
+            #    #ncpus_detected = max(1, number_of_cpus())
+            #    manager = Manager(available_cpus=8, available_gpus=1, max_workers=6, test_suite=self, verbose=1)
+            #    manager.run(mpi_nprocs=nprocs, omp_nthreads=1, **run_func_kwargs)
 
-            elif py_nprocs == 1:
+            #if py_nprocs < 0:
+            #    available_cpus = 8
+            #    available_gpus = 1
+            #    py_nprocs
+
+            if py_nprocs == 1:
                 logger.info("Sequential version")
 
                 # Old version
@@ -4027,7 +4054,7 @@ class AbinitTestSuite(object):
                     timeout_1test = 240.
 
                 # Wait for all tests to be done gathering results
-                results = self.wait_loop(py_nprocs, len(self.tests), timeout_1test, res_q)
+                results = self.wait_workers(py_nprocs, len(self.tests), timeout_1test, res_q)
 
                 # remove this to let python garbage collect processes and avoid
                 # Pickle to complain (it does not accept processes for security reasons)
@@ -4037,7 +4064,7 @@ class AbinitTestSuite(object):
 
                 if results is None:
                     # In principle this should not happen!
-                    print("WARNING: wait_loop returned None instead of results. Will try to continue execution!")
+                    print("WARNING: wait_workers returned None instead of results. Will try to continue execution!")
 
                 else:
                     # update local tests instances with the results of their running in a remote process
@@ -4046,9 +4073,8 @@ class AbinitTestSuite(object):
                             # This error will only happen if there is a bug
                             raise RuntimeError((
                                 "I did not get results for test {}. "
-                                "It means that some error occurred in the worker."
-                            ).format(test.full_id))
-                        test.results_load(results[test._rid])
+                                "It means that some error occurred in the worker.").format(test.full_id))
+                        test.load_results(results[test._rid])
 
             # Run completed.
             self._executed = True
@@ -4247,12 +4273,12 @@ class AbinitTestSuite(object):
 
         return Results(self)
 
-    def terminate(self):
+    def terminate_workers(self):
         """
         Kill all workers
         """
         for p in self._processes:
-            p.terminate()
+            p.terminate_workers()
         self._kill_me = True
         self._processes = []
 
@@ -4388,8 +4414,8 @@ class Results(object):
         for test in self.tests_with_status(status):
             for f in test.files_to_test:
                 #print(f"status: {status}, f.fld_status: {f.fld_status}")
-                # print(f)
-                # if status != "all" and f.fld_status != status: continue
+                #print(f)
+                #if status != "all" and f.fld_status != status: continue
 
                 out_files.append(os.path.join(test.workdir, f.name))
                 ref_fname = os.path.join(test.ref_dir, f.name)
@@ -4428,7 +4454,7 @@ class Results(object):
         return Editor().edit_files(in_files)
 
     def inspect_stderrs(self, status="failed"):
-        """Open the stderr of the tests with the give status in `Editor`."""
+        """Open the stderr of the tests with the given status in `Editor`."""
         return Editor().edit_files(self.stderr_files(status))
 
     def stderr_files(self, status="failed"):
@@ -4500,7 +4526,6 @@ class Manager:
         self.build_with_gpu ="HAVE_GPU" in build_env.defined_cppvars
 
         from concurrent.futures import ThreadPoolExecutor
-
         with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
             futures_and_tests = []
             try:
@@ -4541,16 +4566,8 @@ class Manager:
                 executor.shutdown(wait=False)
                 raise KeyboardInterrupt()
 
-            #except EmptyQueueError:
-            #    warnings.warn(
-            #        ("Workers have been hanging until timeout. There were {} procs"
-            #         " working on {} tasks.").format(proc_running, task_remaining)
-            #    )
-            #    self.terminate()
-            #    return None
-
             for test, result in zip(self.test_suite, result_list):
-                test.results_load(result)
+                test.load_results(result)
 
     def run_one_test(self, test, **run_func_kwargs):
         """
