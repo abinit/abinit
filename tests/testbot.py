@@ -5,7 +5,6 @@ import sys
 import os
 # Set ABI_PSPDIR env variable to point to the absolute path of Pspdir
 os.environ["ABI_PSPDIR"] = os.path.abspath(os.path.join(os.path.dirname(__file__), "Pspdir"))
-#print("ABI_PSPDIR:", os.environ["ABI_PSPDIR"])
 import platform
 
 from os.path import join as pj, abspath as absp, basename
@@ -17,7 +16,8 @@ logger = logging.getLogger(__name__)
 
 try:
     from ConfigParser import SafeConfigParser, NoOptionError
-except ImportError:  # The ConfigParser module has been renamed to configparser in Python 3
+except ImportError:
+    # The ConfigParser module has been renamed to configparser in Python 3
     from configparser import ConfigParser as SafeConfigParser, NoOptionError
 
 # Add the directory [...]/abinit/tests to $PYTHONPATH
