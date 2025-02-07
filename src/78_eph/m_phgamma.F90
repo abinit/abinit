@@ -1684,6 +1684,7 @@ subroutine a2fw_init(a2f, gams, cryst, ifc, ph_intmeth, wstep, wminmax, smear, n
  integer :: my_qptopt,iq_ibz,nqibz,ount,my_rank,nproc,cnt
  integer :: mu,iw,natom3,nsppol,spin,ierr,nomega,nqbz
  integer :: iene, jene, itemp, ntemp, jene_jump
+ integer :: spinfactor
  real(dp) :: cpu,wall,gflops
  real(dp) :: lambda_iso,omega,omega_log,xx,omega_min,omega_max,ww,mustar,tc_macmill
  real(dp) :: temp_el, min_temp, delta_temp, chempot, ene1, ene2, G0
@@ -1956,35 +1957,8 @@ subroutine a2fw_init(a2f, gams, cryst, ifc, ph_intmeth, wstep, wminmax, smear, n
    end do
  end do
 
- ! Logarithmic moment of alpha^2F: exp((2/\lambda) \int dw a2F(w) ln(w)/w)
- lambda_iso = a2f%get_moment(0, 0)
-
- ! Get log moment of alpha^2F.
- a2flogmom = zero
- do spin=1,nsppol
-   a2f_1d => a2f%vals(:,0,spin)
-   do iw=1,nomega
-     omega = a2f%omega(iw)
-     if (abs(omega) > EPHTK_WTOL) then
-       a2flogmom(iw) = a2flogmom(iw) + a2f_1d(iw) * log(abs(omega)) / abs(omega)
-     end if
-   end do
- end do
- call simpson_int(nomega, wstep, a2flogmom, a2flogmom_int)
- omega_log = exp((one / lambda_iso) * a2flogmom_int(nomega))
-
- mustar = 0.12
- tc_macmill = omega_log/1.2_dp * exp((-1.04_dp*(one+lambda_iso)) / (lambda_iso-mustar*(one+0.62_dp*lambda_iso)))
-
- if (my_rank == master) then
-   ount = std_out
-   write(ount,'(a,es16.6)')' isotropic new_lambda = ',lambda_iso
-   write(ount,'(a,es16.6,a,es16.6,a)' )' new_omegalog  = ',omega_log,' (Ha) ', omega_log * Ha_K, ' (Kelvin) '
-   write(ount,'(a,es16.6,a,es16.6,a)')' MacMillan Tc = ',tc_macmill,' (Ha) ', tc_macmill * Ha_K, ' (Kelvin) '
- end if
-
-#if 1
- ! print log moments of the alpha^2 F functions.
+ ! print log moments of the alpha^2 F function (for each spin, note degeneracy factor).
+ spinfactor = int(2 / nsppol / gams%nspinor)
  do spin=1,nsppol
    a2f_1d => a2f%vals(:,0,spin)
 
@@ -1995,9 +1969,9 @@ subroutine a2fw_init(a2f, gams, cryst, ifc, ph_intmeth, wstep, wminmax, smear, n
    do iw=1,nomega
      omega = a2f%omega(iw)
      if (abs(omega) > EPHTK_WTOL) then
-       a2flogmom(iw) = (two / lambda_iso) * a2f_1d(iw) * log(abs(omega)) / abs(omega)
-       ! I think this is the correct expression.
-       !a2flogmom(iw) = (one / lambda_iso) * a2f_1d(iw) * log(abs(omega)) / abs(omega)
+       !a2flogmom(iw) = (two / lambda_iso) * a2f_1d(iw) * log(abs(omega)) / abs(omega)
+       ! I (WHO??? GMATTEO?) think this is the correct expression.
+       a2flogmom(iw) = (spinfactor / lambda_iso) * a2f_1d(iw) * log(abs(omega)) / abs(omega)
      end if
    end do
    call simpson_int(nomega, wstep, a2flogmom, a2flogmom_int)
@@ -2014,21 +1988,20 @@ subroutine a2fw_init(a2f, gams, cryst, ifc, ph_intmeth, wstep, wminmax, smear, n
      end if
 
      if (do_qintp) then
-       write(ount,'(a)')' Superconductivity: isotropic evaluation of parameters from electron-phonon coupling (interpolated).'
+       write(ount,'(a,i3)') ' Superconductivity: isotropic evaluation of parameters from electron-phonon coupling (interpolated) for spin ', spin
      else
-       write(ount,'(a)')' Superconductivity: isotropic evaluation of parameters from electron-phonon coupling (coarse grid).'
+       write(ount,'(a,i3)') ' Superconductivity: isotropic evaluation of parameters from electron-phonon coupling (coarse grid) for spin ', spin
      endif
-     write(ount,'(a,es16.6)')' isotropic lambda = ',lambda_iso
+     write(ount,'(a,es16.6)')            ' isotropic lambda = ',lambda_iso
      write(ount,'(a,es16.6,a,es16.6,a)' )' omegalog  = ',omega_log,' (Ha) ', omega_log * Ha_K, ' (Kelvin) '
-     write(ount,'(a,es16.6,a,es16.6,a)')' MacMillan Tc = ',tc_macmill,' (Ha) ', tc_macmill * Ha_K, ' (Kelvin) '
-     write(ount,"(a)")'    positive moments of alpha2F:'
-     write(ount,'(a,es16.6)' )' lambda <omega^2> = ',a2f%get_moment(2, spin)
-     write(ount,'(a,es16.6)' )' lambda <omega^3> = ',a2f%get_moment(3, spin)
-     write(ount,'(a,es16.6)' )' lambda <omega^4> = ',a2f%get_moment(4, spin)
-     write(ount,'(a,es16.6)' )' lambda <omega^5> = ',a2f%get_moment(5, spin)
+     write(ount,'(a,es16.6,a,es16.6,a)') ' MacMillan Tc = ',tc_macmill,' (Ha) ', tc_macmill * Ha_K, ' (Kelvin) '
+     write(ount,"(a)")                   ' Positive moments of alpha2F:'
+     write(ount,'(a,es16.6)' )           ' lambda <omega^2> = ',a2f%get_moment(2, spin)
+     write(ount,'(a,es16.6)' )           ' lambda <omega^3> = ',a2f%get_moment(3, spin)
+     write(ount,'(a,es16.6)' )           ' lambda <omega^4> = ',a2f%get_moment(4, spin)
+     write(ount,'(a,es16.6)' )           ' lambda <omega^5> = ',a2f%get_moment(5, spin)
    end if
  end do
-#endif
 
  ! Calculate the temperature dependence of the a2f(e,e',w) integrals (G_0(T_e)
  ! as in PRL 110 016405 (2013) [[cite:Arnaud2013]])
