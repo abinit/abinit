@@ -2645,7 +2645,6 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
  !! replace v1 potential with -Z/r for distances < r_c, the
  !! classical electron radius. This is an accurate replacement
  !! with better analytic properties at r=0.
- !!if(has_nucdipmom) then
  rt=znuc*rc
  ! replace k and dk/dr at short range with Coulomb potential version
  do ii=1,mesh_size
@@ -2700,7 +2699,6 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
  LIBPAW_DEALLOCATE(z_intgd)
  LIBPAW_DEALLOCATE(zk1)
  LIBPAW_DEALLOCATE(dkdr)
-
 
 !------------------------------------------------------------------------
 !----- compute dyadics if necessary
