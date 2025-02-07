@@ -4006,7 +4006,7 @@ class AbinitTestSuite(object):
 
             if use_manager:
                 # New version based on Manager
-                manager = Manager(available_cpus=8, available_gpus=1, max_workers=6, test_suite=self, verbose=1)
+                manager = Manager(available_cpus=8, available_gpus=1, max_workers=6, test_suite=self, verbose=0)
                 manager.run(mpi_nprocs=nprocs, omp_nthreads=1, **run_func_kwargs)
 
             elif py_nprocs == 1:
@@ -4497,7 +4497,7 @@ class Manager:
         ncpus = mpi_nprocs * omp_nthreads
 
         build_env = run_func_kwargs["build_env"]
-        build_with_gpu ="HAVE_GPU" in build_env.defined_cppvars
+        self.build_with_gpu ="HAVE_GPU" in build_env.defined_cppvars
 
         from concurrent.futures import ThreadPoolExecutor
 
@@ -4506,7 +4506,7 @@ class Manager:
             try:
                 while not queue.empty():
                     test = queue.get()
-                    ngpus = test.uses_gpu * mpi_nprocs if build_with_gpu else 0
+                    ngpus = test.uses_gpu * self.mpi_nprocs if self.build_with_gpu else 0
 
                     #print("ngpus:", ngpus, "need_cpp_vars:", test.need_cpp_vars)
                     with self.lock:
@@ -4524,17 +4524,17 @@ class Manager:
                             continue
 
                     # Submit the test to the thread pool
+                    if self.verbose:
+                        print("Submitting test:", test,
+                              ", available_cpus:", self.available_cpus, ", available_gpus:", self.available_gpus)
+
                     future = executor.submit(self.run_one_test, test, **self.run_func_kwargs)
                     futures_and_tests.append((future, test))
 
                 # Wait for all tests to complete
-                results_list = []
+                result_list = []
                 for future, test in futures_and_tests:
-                    results = future.result()
-                    results_list.append(results)
-                    #test.results_load(results)
-
-                #return results_list
+                    result_list.append(future.result())
 
             except KeyboardInterrupt:
                 # cancel all pending tasks and not wait for running tasks:
@@ -4549,10 +4549,8 @@ class Manager:
             #    self.terminate()
             #    return None
 
-            for test, results in zip(self.test_suite, results_list):
-                test.results_load(results)
-
-            #return results_list
+            for test, result in zip(self.test_suite, result_list):
+                test.results_load(result)
 
     def run_one_test(self, test, **run_func_kwargs):
         """
@@ -4560,16 +4558,16 @@ class Manager:
         """
         # Release CPUs after test completion
         with self.lock:
-            results = run_and_check_test(test, **run_func_kwargs)
-            #print("run_and_check_test results:", results)
+            result = run_and_check_test(test, **run_func_kwargs)
+            #print("run_and_check_test result:", result)
 
             self.available_cpus += self.mpi_nprocs * self.omp_nthreads
-            ngpus = test.uses_gpu * self.mpi_nprocs
+            ngpus = test.uses_gpu * self.mpi_nprocs if self.build_with_gpu else 0
             self.available_gpus += ngpus
             #if self.verbose:
             #   print(f"test {test['name']} completed. Available CPUs: {self.available_cpus}")
 
-            return results
+            return result
 
 
 if __name__ == "__main__":
