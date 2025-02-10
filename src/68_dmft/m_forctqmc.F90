@@ -3556,7 +3556,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
    write(tag_at,'(i4)') iatom
    write(tag_block,'(i2)') nblocks(iatom)
    write(message,'(a,3x,6a)') ch10,"== Solving impurity model for atom ",trim(adjustl(tag_at)), &
-                            & ", which contains ",trim(adjustl(tag_block))," blocks",ch10
+                            & ", where there are ",trim(adjustl(tag_block))," blocks",ch10
    call wrtout(std_out,message,'COLL')
 
    do iblock=1,nblocks(iatom)
@@ -4104,32 +4104,30 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
  end do ! ifreq
 
  if (basis > 0) then
-   call slm2ylm_matlu(energy_level%matlu(:),natom,paw_dmft,2,0)
    if (basis == 1 .or. basis == 2) then
      call rotate_matlu(energy_level%matlu(:),eigvectmatlu(:),natom,0)
    else if (basis == 4) then
      call ylm2jmj_matlu(energy_level%matlu(:),natom,2,paw_dmft)
    end if ! basis /= 3
+   call slm2ylm_matlu(energy_level%matlu(:),natom,paw_dmft,2,0)
    do i=2,weiss%nmoments-1
-     call slm2ylm_matlu(weiss%moments(i)%matlu(:),natom,paw_dmft,2,0)
      if (basis == 1 .or. basis == 2) then
        call rotate_matlu(weiss%moments(i)%matlu(:),eigvectmatlu(:),natom,0)
      else if (basis == 4) then
        call ylm2jmj_matlu(weiss%moments(i)%matlu(:),natom,2,paw_dmft)
      end if
+     call slm2ylm_matlu(weiss%moments(i)%matlu(:),natom,paw_dmft,2,0)
    end do ! i
    do i=1,green%nmoments
-     call slm2ylm_matlu(green%moments(i)%matlu(:),natom,paw_dmft,2,0)
      if (basis == 1 .or. basis == 2) then
        call rotate_matlu(green%moments(i)%matlu(:),eigvectmatlu(:),natom,0)
      else if (basis == 4) then
        call ylm2jmj_matlu(green%moments(i)%matlu(:),natom,2,paw_dmft)
      end if
+     call slm2ylm_matlu(green%moments(i)%matlu(:),natom,paw_dmft,2,0)
    end do ! i
    do ifreq=1,nwlo
      if (green%distrib%procf(ifreq) /= myproc) cycle
-     call slm2ylm_matlu(weiss%oper(ifreq)%matlu(:),natom,paw_dmft,2,0)
-     call slm2ylm_matlu(green%oper(ifreq)%matlu(:),natom,paw_dmft,2,0)
      if (basis == 1 .or. basis == 2) then
        call rotate_matlu(weiss%oper(ifreq)%matlu(:),eigvectmatlu(:),natom,0)
        call rotate_matlu(green%oper(ifreq)%matlu(:),eigvectmatlu(:),natom,0)
@@ -4137,13 +4135,15 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
        call ylm2jmj_matlu(weiss%oper(ifreq)%matlu(:),natom,2,paw_dmft)
        call ylm2jmj_matlu(green%oper(ifreq)%matlu(:),natom,2,paw_dmft)
      end if
+     call slm2ylm_matlu(weiss%oper(ifreq)%matlu(:),natom,paw_dmft,2,0)
+     call slm2ylm_matlu(green%oper(ifreq)%matlu(:),natom,paw_dmft,2,0)
    end do ! ifreq
-   call slm2ylm_matlu(green%occup_tau%matlu(:),natom,paw_dmft,2,0)
    if (basis == 1 .or. basis == 2) then
      call rotate_matlu(green%occup_tau%matlu(:),eigvectmatlu(:),natom,0)
    else if (basis == 4) then
      call ylm2jmj_matlu(green%occup_tau%matlu(:),natom,2,paw_dmft)
    end if
+   call slm2ylm_matlu(green%occup_tau%matlu(:),natom,paw_dmft,2,0)
  end if! basis > 0
 
  ! Since we possibly neglected some off-diagonal elements and imaginary part,
