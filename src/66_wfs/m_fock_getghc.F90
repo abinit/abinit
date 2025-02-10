@@ -31,7 +31,7 @@ module m_fock_getghc
  use defs_abitypes, only : mpi_type
  use defs_datatypes, only : pseudopotential_type
  use m_time,         only : timab, time_accu
- use m_symtk,        only : matr3inv
+ use m_matrix,       only : matr3inv
  use m_cgtools,      only : dotprod_g,dotprod_g_batch_half
  use m_kg,           only : mkkpg
  use m_fftcore,      only : sphereboundary

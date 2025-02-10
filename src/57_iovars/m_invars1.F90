@@ -38,7 +38,7 @@ module m_invars1
  use m_parser,   only : intagm, intagm_img, chkint_ge, ab_dimensions, geo_t, geo_from_abivar_string
  use m_inkpts,   only : inkpts, inqpt
  use m_ingeo,    only : ingeo, invacuum
- use m_symtk,    only : mati3det
+ use m_matrix,   only : mati3det
 
 #if defined HAVE_GPU
  use m_gpu_toolbox
