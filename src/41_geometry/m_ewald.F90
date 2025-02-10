@@ -30,7 +30,7 @@ module m_ewald
 
  use m_gtermcutoff,    only : termcutoff
  use m_special_funcs,  only : abi_derfc
- use m_symtk,          only : matr3inv
+ use m_matrix,         only : matr3inv
 
  implicit none
 

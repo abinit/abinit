@@ -37,7 +37,7 @@ MODULE m_ifc
  use m_io_tools,    only : open_file
  use m_numeric_tools, only : arth
  use m_fstrings,    only : ktoa, int2char4, sjoin, itoa, ltoa, ftoa
- use m_symtk,       only : matr3inv
+ use m_matrix,      only : matr3inv
  use m_special_funcs,  only : abi_derfc
  use m_time,        only : cwtime, cwtime_report, timab
  use m_copy,        only : alloc_copy
