@@ -796,6 +796,23 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
      ABI_FREE(ghc_vectornd)
    end if
 
+   ! If only local part is applied, still we have to filter the result because of dilatmx.
+   ! Otherwise it is done when adding kinetic term.
+   if (type_calc==1) then
+     do idat=1,ndat
+       !$OMP PARALLEL DO PRIVATE(igspinor) COLLAPSE(2) IF(gemm_nonlop_use_gemm)
+       do ispinor=1,my_nspinor
+         do ig=1,npw_k2
+           igspinor=ig+npw_k2*(ispinor-1)+npw_k2*my_nspinor*(idat-1)
+           if(kinpw_k2(ig)>huge(zero)*1.d-11)then
+             ghc(re,igspinor)=zero
+             ghc(im,igspinor)=zero
+           end if
+         end do ! ig
+       end do ! ispinor
+     end do
+   end if
+
  end if ! type_calc
 
  ABI_NVTX_END_RANGE()
