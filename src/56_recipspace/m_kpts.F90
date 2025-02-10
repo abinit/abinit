@@ -32,7 +32,8 @@ module m_kpts
  use m_time,           only : timab, cwtime, cwtime_report
  use m_copy,           only : alloc_copy
  use m_numeric_tools,  only : wrap2_zero_one, interpol3d_0d
- use m_symtk,          only : mati3inv, mati3det, matr3inv, smallprim
+ use m_matrix,         only : mati3inv, mati3det, matr3inv
+ use m_symtk,          only : smallprim
  use m_fstrings,       only : sjoin, itoa, ftoa, ltoa, ktoa
  use m_numeric_tools,  only : wrap2_pmhalf
  use m_geometry,       only : metric

@@ -25,7 +25,7 @@ module m_relaxpol
  use m_errors
 
  use m_fstrings,  only : sjoin, itoa
- use m_symtk,     only : matr3inv
+ use m_matrix,    only : matr3inv
  use m_berrytk,   only : polcart
  use m_hide_lapack,   only : dzgedi, dzgefa
  use m_geometry,  only : xcart2xred

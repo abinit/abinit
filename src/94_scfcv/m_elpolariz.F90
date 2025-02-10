@@ -31,16 +31,16 @@ module m_elpolariz
  use m_dtset
  use m_dtfil
 
- use defs_datatypes, only : pseudopotential_type
- use defs_abitypes, only : MPI_type
- use m_geometry, only : metric
- use m_symtk,    only : matr3inv
- use m_hide_lapack,  only : dzgedi, dzgefa
- use m_rwwf,     only : rwwf
- use m_pawtab,   only : pawtab_type
- use m_pawrhoij, only : pawrhoij_type
- use m_pawcprj,  only : pawcprj_type
- use m_berryphase, only : berryphase
+ use defs_datatypes,   only : pseudopotential_type
+ use defs_abitypes,    only : MPI_type
+ use m_geometry,       only : metric
+ use m_matrix,         only : matr3inv
+ use m_hide_lapack,    only : dzgedi, dzgefa
+ use m_rwwf,           only : rwwf
+ use m_pawtab,         only : pawtab_type
+ use m_pawrhoij,       only : pawrhoij_type
+ use m_pawcprj,        only : pawcprj_type
+ use m_berryphase,     only : berryphase
  use m_berryphase_new, only : berryphase_new
 
  implicit none
