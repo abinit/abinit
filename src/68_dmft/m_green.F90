@@ -1262,7 +1262,7 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
                         & mbandc,green%oper(ifreq)%ks(:,:,ikpt+shift_green,isppol),mbandc,czero,mat_tmp(:,:),mbandc)
            call zheev("n","u",mbandc,mat_tmp(:,:),mbandc,eig(:),work(:),lwork,rwork(:),info)
            ! Do not use DOT_PRODUCT
-           trace_tmp = trace_tmp + sum(log(eig(:)*omega_current))*wtk*temp
+           trace_tmp = trace_tmp + sum(log(eig(:)*(paw_dmft%omega_lo(ifreq)**2)))*wtk*temp
          end if ! optself
        end do ! ikpt
      end do ! isppol
