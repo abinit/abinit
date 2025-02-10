@@ -67,6 +67,7 @@ module m_dtset
 !! that might need to take into account your modification.
 !!
 !! Variables should be declared on separated lines in order to reduce the occurence of git conflicts.
+!! The name of the variable can exceed 16 characters
 !!
 !! Since all these input variables are described in the abinit_help.html and
 !! associated html files they are not described in length here ...
@@ -327,6 +328,7 @@ type, public :: dataset_type
  integer :: gwr_chi_algo = 1
  integer :: gwr_sigma_algo = 1
  integer :: gwr_rpa_ncut = 5
+ integer :: gwr_fit = 0
  real(dp) :: gwr_boxcutmin = one
  real(dp) :: gwr_max_hwtene = -one
  real(dp) :: gwr_regterm = -one
@@ -688,6 +690,7 @@ type, public :: dataset_type
 !V
  integer :: vacnum
 
+ ! TODO len here should have len=etsfio_charlen
  character(len=fnlen) :: varpeq_aseed = "gau_energy"
  character(len=fnlen) :: varpeq_pkind = "none"
  integer :: varpeq_avg_g = 0
@@ -697,6 +700,7 @@ type, public :: dataset_type
  integer :: varpeq_nstep = 50
  integer :: varpeq_nstep_ort = 50
  integer :: varpeq_select = -1
+ integer :: varpeq_mesh_fact = 1
  real(dp) :: varpeq_mixing_factor = zero
  real(dp) :: varpeq_tolgrs = tol6
  integer :: varpeq_trvec(3) = [0, 0, 0]
@@ -1806,6 +1810,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%gwr_task             = dtin%gwr_task
  dtout%gwr_tolqpe           = dtin%gwr_tolqpe
  dtout%gwr_nstep            = dtin%gwr_nstep
+ dtout%gwr_fit              = dtin%gwr_fit
 
  dtout%hyb_mixing         = dtin%hyb_mixing
  dtout%hyb_mixing_sr      = dtin%hyb_mixing_sr
@@ -2160,6 +2165,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%varpeq_nstep       = dtin%varpeq_nstep
  dtout%varpeq_nstep_ort   = dtin%varpeq_nstep_ort
  dtout%varpeq_select      = dtin%varpeq_select
+ dtout%varpeq_mesh_fact  = dtin%varpeq_mesh_fact
  dtout%varpeq_mixing_factor = dtin%varpeq_mixing_factor
  dtout%varpeq_tolgrs      = dtin%varpeq_tolgrs
  dtout%varpeq_trvec       = dtin%varpeq_trvec
@@ -3548,7 +3554,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' gwls_list_proj_freq gwls_nseeds gwls_n_proj_freq gwls_recycle'
  list_vars=trim(list_vars)//' gwls_first_seed gwls_model_parameter gwls_npt_gauss_quad'
  list_vars=trim(list_vars)//' gwls_diel_model gwls_print_debug gwls_band_index gwls_exchange gwls_correlation'
- list_vars=trim(list_vars)//' gwr_boxcutmin gwr_chi_algo gwr_max_hwtene gwr_regterm gwr_np_kgts gwr_nstep gwr_ntau'
+ list_vars=trim(list_vars)//' gwr_boxcutmin gwr_chi_algo gwr_max_hwtene gwr_regterm gwr_np_kgts gwr_nstep gwr_ntau gwr_fit'
  list_vars=trim(list_vars)//' gwr_rpa_ncut gwr_sigma_algo gwr_task gwr_tolqpe gwr_ucsc_batch'
 !H
  list_vars=trim(list_vars)//' hmcsst hmctt hyb_mixing hyb_mixing_sr hyb_range_dft hyb_range_fock'
@@ -3701,7 +3707,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' vaclst vacnum vacuum vacwidth vcutgeo'
  list_vars=trim(list_vars)//' varpeq_avg_g varpeq_aseed varpeq_gpr_energy'
  list_vars=trim(list_vars)//' varpeq_gpr_length varpeq_interp varpeq_mixing_factor varpeq_nstates'
- list_vars=trim(list_vars)//' varpeq_nstep varpeq_nstep_ort varpeq_select varpeq_pkind'
+ list_vars=trim(list_vars)//' varpeq_nstep varpeq_nstep_ort varpeq_select varpeq_mesh_fact varpeq_pkind'
  list_vars=trim(list_vars)//' varpeq_tolgrs varpeq_translate varpeq_trvec'
  list_vars=trim(list_vars)//' vdw_nfrag vdw_supercell'
  list_vars=trim(list_vars)//' vdw_tol vdw_tol_3bt vdw_typfrag vdw_xc'

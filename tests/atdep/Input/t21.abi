@@ -22,6 +22,7 @@ nstep_max 20
 nstep_min 1
 rcut  15.1788
 #OPTIONAL_INPUT_VARIABLES
+znucl 79
 use_ideal_positions 1
 order 3 5.
 TheEnd

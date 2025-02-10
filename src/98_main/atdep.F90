@@ -50,7 +50,7 @@ program atdep
   use m_crystal,          only : crystal_t
   use m_ddb,              only : ddb_type
   use m_tdep_abitypes,    only : Qbz_type, tdep_init_crystal, tdep_init_ifc, tdep_init_ddb, tdep_write_ddb, &
-&                                tdep_destroy_qbz, tdep_destroy_ddb, tdep_ifc2phi2
+&                                tdep_destroy_qbz, tdep_ifc2phi2
   use m_tdep_phi4,        only : tdep_calc_phi4fcoeff, tdep_calc_phi4ref, tdep_write_phi4, tdep_calc_ftot4
   use m_tdep_phi3,        only : tdep_calc_phi3fcoeff, tdep_calc_phi3ref, tdep_write_phi3, tdep_calc_ftot3, &
 &                                tdep_calc_alpha_gamma, tdep_write_gruneisen
@@ -279,12 +279,6 @@ program atdep
 
  call tdep_MatchIdeal2Average(distance,Forces_MD,Invar,Lattice,MPIdata,Rlatt_cart,Rlatt4Abi,Sym,ucart)
 
-!==========================================================================================
-!============== Initialize Crystal and DDB ABINIT Datatypes ===============================
-!==========================================================================================
- call tdep_init_crystal(Crystal,Invar,Lattice,Sym)
- call tdep_init_ddb(Crystal,DDB,Invar,Lattice,MPIdata,Qbz)
-
 !#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=
 !#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=
 !#=#=#=#=#=#=#=#=#=#=#=#=#=#=# CALCULATION OF THE 2nd ORDER =#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=
@@ -323,10 +317,16 @@ program atdep
  CoeffMoore%nconst_2nd = CoeffMoore%nconst_rot2nd + CoeffMoore%nconst_dynmat + CoeffMoore%nconst_huang
 
 !==========================================================================================
-!============== Initialize the IFC Abinit datatype ========================================
+!============== Initialize Phi2 datatype ==================================================
 !==========================================================================================
  ABI_MALLOC(Phi1,(3*natom)); Phi1(:)  =0.d0
  call tdep_init_phi2(Phi2,Invar%loto,natom)
+
+!==========================================================================================
+!============== Initialize Crystal, DDB, and IFC ABINIT Datatypes =========================
+!==========================================================================================
+ call tdep_init_crystal(Crystal,Invar,Lattice,Sym)
+ call tdep_init_ddb(Crystal,DDB,Invar,Lattice,MPIdata,Qbz)
  call tdep_init_ifc(Crystal,DDB,Ifc,Invar,Lattice,MPIdata,Phi2,Rlatt4Abi,Shell2at,Sym)
 
 !==========================================================================================
@@ -587,6 +587,12 @@ program atdep
 &                          natom_unitcell,Phi2,PHdos,Qbz,Qpt,Rlatt4abi,Shell2at,Sym)
  call tdep_destroy_shell(natom,2,Shell2at)
  ABI_FREE(Rlatt4Abi)
+
+ ! Create a new DDB with the coarse q-point grid in the IBZ.
+ call DDB%free()
+ call Ifc%to_ddb(DDB,Crystal)
+ call tdep_write_ddb(DDB,Crystal,Invar)
+
  write(stdout,'(a)') ' See the dij.dat, omega.dat and eigenvectors files'
  write(stdout,'(a)') ' See also the DDB file'
 
@@ -619,6 +625,7 @@ program atdep
 
    ABI_FREE(distance)
    ABI_FREE(Rlatt_cart)
+   call DDB%free()
    call Ifc%free()
    call Crystal%free()
    call tdep_destroy_eigen2nd(Eigen2nd_path)
@@ -626,7 +633,6 @@ program atdep
    call tdep_destroy_sym(Sym)
    call tdep_destroy_qbz(Qbz)
    call tdep_destroy_qpt(Qpt)
-   call tdep_destroy_ddb(DDB)
    call tdep_destroy_invar(Invar)
    call tdep_destroy_mpidata(MPIdata)
 
@@ -667,11 +673,11 @@ program atdep
    ABI_FREE(Phi4_ref)
  end if
  call Ifc%free()
+ call DDB%free()
  call Crystal%free()
  call tdep_destroy_sym(Sym)
  call tdep_destroy_qbz(Qbz)
  call tdep_destroy_qpt(Qpt)
- call tdep_destroy_ddb(DDB)
  call tdep_destroy_invar(Invar)
  call tdep_destroy_mpidata(MPIdata)
 

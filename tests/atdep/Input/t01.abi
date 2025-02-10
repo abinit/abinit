@@ -17,6 +17,7 @@ nstep_max 20
 nstep_min 1
 rcut  11.450000000000000000000
 #OPTIONAL_INPUT_VARIABLES
+znucl 13
 use_ideal_positions 1
 readifc 2
 enunit 1

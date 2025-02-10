@@ -3430,6 +3430,19 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      call chkint_eq(0,1,cond_string,cond_values,ierr,'prtelf',dt%prtelf,1,(/0/),iout)
    end if
 
+!  prtevk
+!  Not compatible with parallelization over perturbation if netcdf doesnt have MPI
+   if (dt%prtevk==1.and.dt%paral_rf==1) then
+#ifndef HAVE_NETCDF_MPI
+     write(msg,'(8a)')ch10,&
+         'prtevk=1 (printing of EVK file) is not compatible with parallelization over',ch10, &
+&        '  perturbations when netCDF/HDF5 is not parallel (MPI)!',ch10,&
+&        'Action: suppress parallelization over perturbations (paral_rf)',ch10,&
+&        '        or link ABINIT with a MPI-compatible netCDF'
+    ABI_ERROR_NOSTOP(msg, ierr)
+#endif
+   end if
+
 !  prtfsurf only one shift allowed (gamma)
    if (dt%prtfsurf == 1) then
 
