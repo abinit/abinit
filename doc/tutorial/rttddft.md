@@ -8,7 +8,7 @@ This tutorial aims at showing how to perform a Real-Time TDDFT (RT-TDDFT) calcul
 
 !!! warning
 
-    RT-TDDFT is under active development and still experimental. It should thus be used with caution!
+    RT-TDDFT is under active development and is still experimental. It should thus be used with caution!
 
 If you have not yet done any of the basic tutorials it might be useful to do 
 at least the first three basic ones: [basic1](/tutorial/base1), [basic2](/tutorial/base2) and
@@ -36,9 +36,9 @@ Further work by Van Leeuwen [[cite:VanLeeuwen1999]] proved the existence of this
 effective potential under some rather mild approximations. 
 
 Within this framework, one ends up with the so-called time-dependent Kohn-Sham (TDKS)
-equations that have a similar form as the time-dependent Shrödinger equation
+equations that have the same form as the time-dependent Shrödinger equation
 \begin{equation}
-    i\hat{S}\partial_t \tilde{\psi}_{nk}(\vec{r},t) = \hat{H} \tilde{\psi}_{nk}(\vec{r},t),
+    i\partial_t \psi_{nk}(\vec{r},t) = \hat{H} \psi_{nk}(\vec{r},t),
 \end{equation}
 but with the Hamiltonian being now a functional of the density and the initial 
 state $\Psi^0$, $\hat{H} \equiv \hat{H}[n,\Psi^0]$.
@@ -48,14 +48,12 @@ it requires a functional that is non-local both in time and space.
 In the following, we will thus always work in the so-called _adiabatic approximation_
 which discards this dependence on the past history and consider that the Hamiltonian 
 is a functional of the density at time $t$ only.
-The operator $\hat{S}$ is the overlap operator that appears in PAW. 
-For norm-conserving pseudopotentials this operator is just the unity.
 
 In the real-time formulation of TDDFT (RT-TDDFT), the TDKS equations are numerically 
 integrated in _real-time_ by discretizing the time with a time step $\Delta t$. 
 The propagator to go from time $t$ to $t+\Delta t$ can be approximated as
 \begin{equation}
-    \hat{U}(t,t+\Delta t) = \exp\left(-i\hat{S}^{-1}\hat{H}\Delta t\right).
+    \hat{U}(t,t+\Delta t) = \exp\left(-i\hat{H}\Delta t\right).
 \end{equation}
 In the present implementation only two simple propagators are available: 
 the so-called exponential rule (ER) and exponential midpoint rule (EMR)
@@ -71,7 +69,7 @@ $t+\Delta t/2$ to evolve the orbitals at time $t$. This is solved by a
 predictor-corrector scheme. See [[cite:Castro2004]] for more information 
 on propagators for the TDKS equations including the ER and EMR propagators.
 More general information on TDDFT including its real-time formulation can be 
-found in [[cite:Ullrich2011]].
+found for instance in [[cite:Ullrich2011]].
 
 TDDFT is usually used to study the response of a system to a time-dependent perturbation. 
 In Abinit it is possible to apply an impulse external electric field that allows 
@@ -135,8 +133,7 @@ as we will need to read this file to start the following real-time calculations.
     That is because RT-TDDFT is not compatible with that option and it is thus better to generate 
     the initial orbitals without it as well.
     You may also notice that we set the variable [[istwfk]] to 1 for all $k$-points, that is 
-    because we cannot consider the orbitals to be real in RT-TDDFT. Even if the GS orbitals
-    are real, they will be multiplied by a complex phase factor during the time propagation.
+    because we cannot take advantage of time-reversal symmetry for some $k$-points in RT-TDDFT. 
 
 ## 3. Real-time TDDFT and stability
 Now that we have a set of initial orbitals we can run some time-dependent calculations.
@@ -393,7 +390,7 @@ In our case we used a time step $dt = 0.1$ au $\approx 2.4\,10^{-3}$ fs, which c
 what we are interested in. The minimum frequency that can be sampled is given by $f_{min} = f_{max}/N$.
 So the total number of steps $N$ will directly define the minimum frequency that can theoretically be accessed.
 As we are interested in energies down to the eV a 100 steps should already be enough. However this minimum frequency also defines the resolution 
-in frequency space $\Delta f = f_{min}$. This frequency step $\delta f$ needs to be small enough to accurately resolve the variations of the 
+in frequency space $\Delta f = f_{min}$. This frequency step $\Delta f$ needs to be small enough to accurately resolve the variations of the 
 conductivity and the dielectric function. In practice here, it needs to be much smaller and we need to at least perform a few thousands steps 
 (about 4000 steps should give good results).
 
