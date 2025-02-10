@@ -29,7 +29,8 @@ module m_ptgroups
  use m_io_tools,       only : open_file
  use m_fstrings,       only : sjoin
  use m_numeric_tools,  only : get_trace, cmplx_sphcart
- use m_symtk,          only : mati3inv, sg_multable
+ use m_matrix,         only : mati3inv
+ use m_symtk,          only : sg_multable
 
 ! Import group tables
  use m_ptg_C1
