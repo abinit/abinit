@@ -496,6 +496,8 @@ subroutine compute_band_energy(energies_dmft,green,paw_dmft,occ_type,ecalc_dft,f
 
  if (occ_type == " lda") then
    write(message,'(2a)') ch10,"  == Compute DFT Band Energy terms"
+ else if (present(fcalc_dft)) then
+   write(message,'(2a)') ch10,"  == Compute DFT Free Energy terms"
  else
    write(message,'(2a)') ch10,"  == Compute DMFT Band Energy terms"
  end if
@@ -588,8 +590,9 @@ subroutine compute_band_energy(energies_dmft,green,paw_dmft,occ_type,ecalc_dft,f
    !if (fcalc_dft == 3 .or. fcalc_dft == 2) write(std_out,*) "compute_band_energy totch",totch
  !end if
 
- if (present(ecalc_dft) .and. (ecalc_dft == 3 .or. ecalc_dft == 2)) &
-   & write(std_out,*) "compute_band_energy totch2",totch2
+ if (present(ecalc_dft)) then
+   if (ecalc_dft == 3 .or. ecalc_dft == 2) write(std_out,*) "compute_band_energy totch2",totch2
+ end if
 ! write(std_out,*) "compute_band_energy totch3",totch3
 
  if (occ_type == " lda") then
@@ -1258,8 +1261,8 @@ subroutine compute_trace_log_loc(green,paw_dmft,trace,opt_inv)
  integer, optional, intent(in) :: opt_inv
 !Local variables-------------------------------
  integer  :: i,iatom,ierr,ifreq,info,isppol,lpawu,lwork,natom,ndim,nmoments,nspinor,nsppol,nwlo,optinv
- real(dp) :: correction,fac,signe,temp
- complex(dpc) :: omega,trace_tmp
+ real(dp) :: correction,fac,temp
+ complex(dpc) :: trace_tmp
  real(dp), allocatable :: eig(:),rwork(:)
  complex(dpc), allocatable :: mat_temp(:,:),omega_fac(:),work(:)
 ! *********************************************************************
@@ -1276,9 +1279,6 @@ subroutine compute_trace_log_loc(green,paw_dmft,trace,opt_inv)
  trace    = zero
  ndim     = nspinor * (2*paw_dmft%maxlpawu+1)
 
- signe = one
- if (optinv == 1) signe = - one
-
  ABI_MALLOC(eig,(ndim))
  ABI_MALLOC(rwork,(3*ndim-2))
  ABI_MALLOC(work,(2*ndim-1))
@@ -1291,7 +1291,6 @@ subroutine compute_trace_log_loc(green,paw_dmft,trace,opt_inv)
 
  do ifreq=1,nwlo
    if (green%distrib%procf(ifreq) /= paw_dmft%myproc) cycle
-   omega = cmplx(zero,paw_dmft%omega_lo(ifreq),kind=dp)
    fac = temp
    if (nsppol == 1 .and. nspinor == 1) fac = fac * two
    trace_tmp = czero
@@ -1304,7 +1303,11 @@ subroutine compute_trace_log_loc(green,paw_dmft,trace,opt_inv)
        call abi_xgemm("n","c",ndim,ndim,ndim,cone,green%oper(ifreq)%matlu(iatom)%mat(:,:,isppol),ndim,&
                     & green%oper(ifreq)%matlu(iatom)%mat(:,:,isppol),ndim,czero,mat_temp(:,:),ndim)
        call zheev('n','u',ndim,mat_temp(:,:),ndim,eig(:),work(:),lwork,rwork(1:3*ndim-2),info)
-       trace_tmp = trace_tmp + signe*sum(log(eig(1:ndim)*omega))
+       if (optinv == 1) then
+         trace_tmp = trace_tmp - sum(log(eig(1:ndim)/(paw_dmft%omega_lo(ifreq)**2)))
+       else
+         trace_tmp = trace_tmp + sum(log(eig(1:ndim)*(paw_dmft%omega_lo(ifreq)**2)))
+       end if
      end do ! isppol
      if (ifreq == nwlo) then
        correction = fac * nsppol * ndim * log(two)
@@ -1384,8 +1387,8 @@ subroutine print_free_energy(energies_dmft,temp)
      & "--- Tr(Sig_imp*G_imp)     (9) (Ha.) = ",energies_dmft%emig_imp,ch10, &
      & "--- Tr(Sig*G)            (10) (Ha.) = ",energies_dmft%emig_loc,ch10, &
      & "--- F_dmft (3-4-5+6+7-8+9-10) (Ha.) = ",energies_dmft%fdmft,ch10, &
-     & "--- S_dmft = -(F_dmft-E_dmft)/(kT) = ",energies_dmft%sdmft,ch10, &
-     & "--- (-kT)*S_dmft             (Ha.) = ",-temp*energies_dmft%sdmft,ch10, &
+     & "--- S_dmft = -(F_dmft-E_dmft)/(kT)  = ",energies_dmft%sdmft,ch10, &
+     & "--- (-kT)*S_dmft             (Ha.)  = ",-temp*energies_dmft%sdmft,ch10, &
      & "-----------------------------------------------"
 
  call wrtout(std_out,message,'COLL')

@@ -3164,7 +3164,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
 !Local variables ------------------------------
  integer :: basis,i,iatom,iblock,iflavor,iflavor1,iflavor2,ifreq,ilam,ileg,im,im1,isppol,isub
  integer :: itau,itypat,iw,l,len_t,lpawu,myproc,natom,ncon,ndim,nflavor,nflavor_max,ngauss,nleg,nmoments
- integer :: nspinor,nsppol,nsub,ntau,ntau_delta,ntot,nwlo,p,rot_type_vee,tndim,unt,wdlr_size
+ integer :: nspinor,nsppol,nsub,ntau,ntau_delta,ntot,nwlo,p,rot_type_vee,tndim,unt,verbo,wdlr_size
  integer, target :: ndlr
  logical :: density_matrix,entropy,integral,leg_measure,nondiag,off_diag,rot_inv
  real(dp) :: besp,bespp,beta,dx,err,err_,fact,fact2,tau,tol,xtau,xx
@@ -3218,6 +3218,13 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
  off_diag       = paw_dmft%dmft_triqs_off_diag
  rot_inv        = (paw_dmft%dmft_solv == 7)
  tol            = paw_dmft%dmft_triqs_tol_block
+
+ if (rot_inv) then
+   write(message,'(a,3x,a)') ch10,"== Rotationally Invariant Terms Included"
+ else
+   write(message,'(a,3x,a)') ch10,"== Density-Density Terms Included"
+ end if
+ call wrtout(std_out,message,"COLL")
 
  ABI_MALLOC(block_list,(nflavor_max,natom))
  ABI_MALLOC(dmat_ctqmc,(natom))
@@ -3677,7 +3684,11 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
    udens_ptr       = C_LOC(udens_rot(iatom)%mat(:,:,1))
    vee_ptr         = C_LOC(vee_rot(iatom)%mat(:,:,:,:))
 
+   verbo = 1
+
    do ilam=1,ntot
+
+     if (ilam > 1) verbo = 0
 
      if (ilam < 10) then
        write(tag_lam,'("0",i1)') ilam
@@ -3705,7 +3716,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
                         & paw_dmft%dmftctqmc_meas,paw_dmft%dmftqmc_therm,paw_dmft%dmft_triqs_therm_restart, &
                         & paw_dmft%dmft_triqs_det_init_size,paw_dmft%dmft_triqs_det_n_operations_before_check, &
                         & ntau_delta,paw_dmft%dmft_triqs_nbins_histo,myproc,nspinor,nblocks(iatom), &
-                        & paw_dmft%dmft_triqs_read_ctqmcdata,beta,paw_dmft%dmft_triqs_move_global_prob, &
+                        & paw_dmft%dmft_triqs_read_ctqmcdata,verbo,beta,paw_dmft%dmft_triqs_move_global_prob, &
                         & paw_dmft%dmft_triqs_imag_threshold,paw_dmft%dmft_triqs_det_precision_warning, &
                         & paw_dmft%dmft_triqs_det_precision_error,paw_dmft%dmft_triqs_det_singular_threshold,lam_list(ilam), &
                         & paw_dmft%dmft_triqs_mxprob,block_ptr,flavor_ptr,inner_ptr,siz_ptr,ftau_ptr,gtau_ptr,gl_ptr,udens_ptr, &
