@@ -950,6 +950,10 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      nsym1,symrc1,timrev_kpt,dtset%wtk,wtk_folded, bz2ibz_smap, xmpi_comm_self)
    end if
 
+   write (msg, "(a,i10,a,i10,a)") " dfpt_looppert : the # of k-points has been reduced from ", &
+&      nkpt, " to ", nkpt_rbz, " using the little group " 
+   call wrtout(std_out, msg)
+
    ABI_MALLOC(doccde_rbz,(dtset%mband*nkpt_rbz*dtset%nsppol))
    ABI_MALLOC(indkpt1,(nkpt_rbz))
    ABI_MALLOC(istwfk_rbz,(nkpt_rbz))
@@ -2186,8 +2190,9 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        ABI_MALLOC(vtrial_local,(nfftf,dtset%nspden))
      end if
      vtrial_local = vtrial
-     call orbmag(cg,cg1_3,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mkmem_rbz,mpi_enreg,mpw,nfftf,ngfftf,&
-        & npwarr,occ,paw_ij,pawfgr,pawrad,pawtab,psps,rprimd,usevxctau,vtrial_local,vxctau,xred,ylm,ylmgr)
+     call orbmag(cg,cg1_3,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr0,kg,mcg,mcg1,mcprj,mkmem_rbz,&
+       & mpi_enreg,mpw,nfftf,ngfftf,paw_ij,pawfgr,pawrad,pawtab,psps,usevxctau,&
+       & vtrial_local,vxctau,ylm,ylmgr)
      if( ALLOCATED(vtrial_local) ) then
        ABI_FREE(vtrial_local)
      end if

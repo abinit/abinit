@@ -57,6 +57,7 @@
  nstep_min                1
  rcut                    7.5000000000
  ======================= Optional input variables ============================
+ znucl                  12.0000000000    8.0000000000
  order                   3    5.0000000000
  bzpath                  6
  Special q-points:  X -G -M -R -G -X -

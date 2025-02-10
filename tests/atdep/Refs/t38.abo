@@ -97,6 +97,7 @@
  nstep_min                1
  rcut                    8.3000000000
  ======================= Optional input variables ============================
+ znucl                  32.0000000000   52.0000000000
  enunit                  3 (Phonon frequencies in THz)
  use_ideal_positions     0
  USE AVERAGE POSITIONS TO COMPUTE SPECTRUM

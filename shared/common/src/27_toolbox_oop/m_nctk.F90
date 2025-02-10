@@ -66,7 +66,6 @@ MODULE m_nctk
  ! String length used for the names of dimensions and variables
  ! The maximum allowable number of characters
 
-
  ! netcdf4-hdf5 is the default
  integer,save,private :: def_cmode_for_seq_create = ior(ior(nf90_clobber, nf90_netcdf4), nf90_write)
  ! netcdf4 classic
@@ -757,7 +756,7 @@ integer function nctk_open_create(ncid, path, comm) result(ncerr)
  character(len=*),intent(in) :: path
 
 !Local variables-------------------------------
- integer :: input_len, cmode !, ii, ich
+ integer :: input_len, cmode
  character(len=strlen) :: my_string
 ! *********************************************************************
 
@@ -795,32 +794,18 @@ integer function nctk_open_create(ncid, path, comm) result(ncerr)
  ! Define the basic dimensions used in ETSF-IO files.
  NCF_CHECK(nctk_def_basedims(ncid, defmode=.True.))
 
- if (len_trim(INPUT_STRING) /= 0) then
+ ! INPUT_STRING is allocated and initialized in parsefile
+ if (allocated(INPUT_STRING)) then
    ! Write string with input.
    my_string = trim(INPUT_STRING)
    if (DTSET_IDX /= -1 .and. index(INPUT_STRING, "jdtset ") == 0) then
      my_string = "jdtset " // trim(itoa(DTSET_IDX)) // "  " // trim(INPUT_STRING)
    end if
 
-   ! Since INPUT_STRING contains many control characters at the end (likely because it's a global var)
-   ! and we want to save space on disk, we cannot use trim_len and we have to find the last alphanum char in my_string.
    input_len = len_trim(my_string)
-#if 0
-   do ii=len(my_string), 1, -1
-     ich = iachar(my_string(ii:ii))
-     select case(ich)
-     case(0:32)  ! space, tab, or control character
-       !write(std_out, *)"space/tab/control at: ",ii, "iachar: ",iachar(my_string(ii:ii)), "char:", my_string(ii:ii)
-       cycle
-     case default
-       input_len = ii !; write(std_out, *)"Exiting at ii: ",ii, "with: ",my_string(ii:ii)
-       exit
-     end select
-   end do
-#endif
-
    NCF_CHECK(nctk_def_dims(ncid, nctkdim_t("input_len", input_len)))
    NCF_CHECK(nctk_def_arrays(ncid, nctkarr_t("input_string", "c", "input_len")))
+   !print *, "input_len, strlen:", input_len, strlen
 
    if (xmpi_comm_rank(comm) == 0) then
      NCF_CHECK(nctk_set_datamode(ncid))
