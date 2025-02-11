@@ -38,8 +38,6 @@ from pymods import termcolor
 from pymods.testsuite import BuildEnvironment
 from pymods.jobrunner import TimeBomb, JobRunner, OMPEnvironment
 
-# Helper functions
-
 
 def lazy__str__(func):
     "Lazy decorator for __str__ methods"
@@ -67,26 +65,26 @@ class TestBot(object):
     """
     This object drives the execution of the abinit automatic tests:
 
-      1) Read setup options from the file testbot.cfg uploaded by the slave master on the slave.
+      1) Read setup options from the file testbot.cfg uploaded by the master on the worker.
       2) Initialize the jobrunner and other objects used to run the tests.
       3) run the tests (see the run method), and return the number of tests that failed
 
     Step 1-2 are done in the creation method.
     """
     _attrbs = {
-      # name         -->   (default, parser)
+      # name           --> (default, parser)
       "slavename"        : (None, str),
-      "type"             : ("",   str),  # "ref" if this slave is the reference slave, e.g. testf
+      "type"             : ("",   str),  # "ref" if this worker is the reference worker where all tests should pass
       "ncpus"            : (None, int),  # Max number of CPUs that can be used by TestBot
       "mpi_prefix"       : ("",   str),  # MPI runner.
       "mpirun_np"        : ("",   str),  # String used to execute `mpirun -n#NUM`
-      "omp_num_threads"  : (0,    int),  # Number of OpenMp threads to be used
-      "enable_mpi"       : (None, _yesno2bool),
-      "enable_openmp"    : (None, _yesno2bool),
+      "omp_num_threads"  : (0,    int),  # Number of OpenMP threads.
+      "enable_mpi"       : (None, _yesno2bool),  # True if MPI is activated
+      "enable_openmp"    : (None, _yesno2bool),  # Tre if OpenMP is activated
       "poe"              : ("", str),
       "poe_args"         : ("", str),
-      "with_tdirs"       : ("", _str2list),   # List of abinit test subsuites to include
-      "without_tdirs"    : ("", _str2list),   # List of abinit test subsuites to exclude
+      "with_tdirs"       : ("", _str2list),   # List of test subsuites to include.
+      "without_tdirs"    : ("", _str2list),   # List of test subsuites to exclude.
       "timeout_time"     : (900, float),      # Timeout time in seconds.
       "cygwin_dir"       : ("", str),
       "runmode"          : ("static", str),
@@ -100,7 +98,7 @@ class TestBot(object):
 
     def __init__(self, testbot_cfg=None):
 
-        # 1) Read the options specified in the testbot configuration file.
+        # Read the options specified in the testbot configuration file.
         if testbot_cfg is None:
             basedir, x = os.path.split(absp(__file__))
             testbot_cfg = pj(basedir, "testbot.cfg")
@@ -139,18 +137,16 @@ class TestBot(object):
                     print("[" + section + "]")
                     for opt in parser.options(section):
                         print(opt + " = " + parser.get(section, opt))
-                err_msg = "Mandatory option %s is not declared" % attr
-                raise ValueError(err_msg)
+                raise ValueError("Mandatory option %s is not declared" % attr)
 
             self.__dict__[attr] = parse(value)
 
         if self.with_tdirs and self.without_tdirs:
-            err_msg = "with_tdirs and without_tdirs attribute are mutually exclusive"
-            raise ValueError(err_msg)
+            raise ValueError("with_tdirs and without_tdirs attribute are mutually exclusive")
 
         system, node, release, version, machine, processor = platform.uname()
-        print("Running on %s -- slave %s -- system %s -- ncpus %s -- Python %s -- %s" % (
-            gethostname(), self.slavename, system, self.ncpus, platform.python_version(), _my_name))
+        print("Running on %s -- worker %s -- system %s -- ncpus %s -- Python %s -- %s" % (
+              gethostname(), self.slavename, system, self.ncpus, platform.python_version(), _my_name))
 
         # Set the logger level.
         # loglevel is bound to the string value obtained from the command line argument.
@@ -169,8 +165,7 @@ class TestBot(object):
         parser.read(build_examples)
 
         if self.slavename not in parser.sections():
-            err_msg = "%s is not a valid buildbot slave." % self.slavename
-            raise ValueError(err_msg)
+            raise ValueError("%s is not a valid buildbot worker." % self.slavename)
 
         # TODO
         # Consistency check
@@ -242,7 +237,7 @@ class TestBot(object):
 
     def run_tests_with_np(self, mpi_nprocs, suite_args=None, runmode="static"):
         """
-        Run the tests specified by suite_args, using mpi_nprocs MPI processors
+        Run the tests specified by suite_args, using mpi_nprocs MPI processors.
         Returns: (nfailed, npassed, nexecuted)
         """
         omp_nthreads = max(self.omp_num_threads, 1)
@@ -276,7 +271,7 @@ class TestBot(object):
 
         results = test_suite.run_tests(
             self.build_env, workdir, runner, make_html_diff=1,
-            nprocs=mpi_nprocs, py_nprocs=py_nprocs, runmode=self.runmode)
+            mpi_nprocs=mpi_nprocs, py_nprocs=py_nprocs, runmode=self.runmode)
         # Cannot use this option on the test farm because hdf5 is not thread-safe.
         # See https://www.hdfgroup.org/hdf5-quest.html#tsafe
         # etsf_check=self.etsf_check)
@@ -300,11 +295,11 @@ class TestBot(object):
     def run(self):
         """
         Run all the automatic tests depending on the environment and the options
-        specified in the testbot configuration file.
-        Return the number of failing tests (+ no. passed tests if this is the reference slave).
+        specified in the testbot.cfg configuration file.
+        Return the number of failing tests (+ no. passed tests if this is the reference worker).
         """
         # If with_tdirs and without_tdirs are not given => execute all tests.
-        # else create a list of strings with the suites to (execute|exclude).
+        # else create a list of strings with the suites to execute|exclude.
         suite_args = None
 
         # XG130410 Crude hack, to avoid paral and mpiio test directories
@@ -320,9 +315,8 @@ class TestBot(object):
             suite_args = suite_args.split()
 
         # Run tests with 1 processor
-        # print(suite_args)
-        # runmode = "static"
-        # nexecuted = 0
+        #print(suite_args)
+        #runmode, nexecuted = "static", 0
 
         if self.runmode == "static":
             # Old mode: run all available tests with 1 MPI node here,
@@ -339,7 +333,6 @@ class TestBot(object):
             # Run the parallel tests in the multi-parallel suites.
             mp_suites = abitests.multi_parallel_suites()
             mp_names = [suite.name for suite in mp_suites]
-
             suite_args = mp_names
 
             # Prune dirs.
@@ -379,13 +372,14 @@ class TestBot(object):
         # Create file to signal this condition and return 0
         if nexecuted == 0:
             print("No file found")
-            with open("__emptylist__", "w") as fh:
+            with open("__emptylist__", "wt") as fh:
                 fh.write("nfailed = %d, npassed = %d, nexecuted %d" % (nfailed, npassed, nexecuted))
                 return 0
 
-        # Status error depends on the builder type.
+        # The status error depends on the builder type.
         if self.type == "ref":
-            return nfailed + npassed  # Reference slave (all the tests must pass).
+            # Reference worker --> all the tests must pass.
+            return nfailed + npassed
         else:
             return nfailed
 
@@ -421,11 +415,11 @@ class TestBotSummary(object):
             return "/".join(str(stats[k]) for k in self._possible_status)
 
         table = [self.suite_names()]
-        row = []
+        rows = []
         for suite_name in self:
             status, stats = self.status_of_suite(suite_name)
-            row.append(stats2string(stats))
-        table.append(row)
+            rows.append(stats2string(stats))
+        table.append(rows)
 
         return table
 
@@ -469,12 +463,12 @@ class TestBotSummary(object):
 
     def status_of_suite(self, suite_name):
         """
-        suite_name : string with the name of the suite.
-        return (suite_status, stats) where
-          suite_status is one of the possile status in `_possible_status`
-          stats is a dictionary : {failed:1, passed:2, succeeded:0, skipped:0}
-        """
+        suite_name: string with the name of the suite.
 
+        return: (suite_status, stats) where
+            suite_status is one of the possile status in `_possible_status`
+            stats is a dictionary : {failed:1, passed:2, succeeded:0, skipped:0}
+        """
         # Initialize stats setting the keys to 0
         stats = dict.fromkeys(self._possible_status, 0)
 
@@ -499,10 +493,9 @@ class TestBotSummary(object):
     def json_dump(self, fname):
         """
         Save self.res_table, self.failed, self.passed in json format.
-        The file will be transferred from the slave to the buildbot master.
+        The file will be transferred from the worker to the buildbot master.
         """
         def as_ascii(s):
-            # return str(s.encode("ascii", "ignore"))
             return str(s)
 
         d = {}
@@ -515,7 +508,7 @@ class TestBotSummary(object):
             suite_name = as_ascii(suite_name)
             print("---", suite_name, self.res_table[suite_name])
             if suite_name in d:
-                # raise KeyError("Cannot overwrite key %s" % suite_name)
+                #raise KeyError("Cannot overwrite key %s" % suite_name)
                 print("Warning: About to overwrite key %s" % suite_name)
             d[suite_name] = self.res_table[suite_name]
 
@@ -529,6 +522,7 @@ def main():
     testbot_cfg = None
     if len(sys.argv) > 1:
         testbot_cfg = sys.argv[1]
+        print("Reading testbot.cfg file from: ", testbot_cfg)
 
     # Disable colors
     termcolor.enable(False)

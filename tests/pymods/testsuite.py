@@ -1,4 +1,4 @@
-from __future__ import print_function, division, absolute_import  # , unicode_literals
+from __future__ import print_function, division, absolute_import
 
 import sys
 import os
@@ -15,7 +15,6 @@ from socket import gethostname
 from subprocess import Popen, PIPE
 from multiprocessing import Process, Queue, Lock
 from threading import Thread
-
 
 # Handle py2, py3k differences.
 py2 = sys.version_info[0] <= 2
@@ -739,9 +738,9 @@ class AbinitTestInfoParser(object):
                     inp_fname, string)
                 raise self.Error(err_msg)
 
-    def generate_testinfo_nprocs(self, nprocs):
+    def generate_testinfo_nprocs(self, mpi_nprocs):
         """
-        Returns a record with the variables needed to handle the job with nprocs.
+        Returns a record with the variables needed to handle the job with mpi_nprocs.
         """
         d = {}
         d['yaml_test'] = self.yaml_test()
@@ -775,19 +774,19 @@ class AbinitTestInfoParser(object):
         # using those reported in the [CPU_nprocs] sections.
         # Set also the value of info._ismulti_paral so that we know how to create the test id
         if not d['nprocs_to_test']:
-            assert nprocs == 1
+            assert mpi_nprocs == 1
             d['_ismulti_paral'] = False
         else:
             logger.debug("multi parallel case")
-            if nprocs not in d['nprocs_to_test']:
-                err_msg = "in file: %s. nprocs = %s > not in nprocs_to_test = %s" % (
-                    self.inp_fname, nprocs, d['nprocs_to_test'])
+            if mpi_nprocs not in d['nprocs_to_test']:
+                err_msg = "in file: %s. mpi_nprocs = %s > not in nprocs_to_test = %s" % (
+                    self.inp_fname, mpi_nprocs, d['nprocs_to_test'])
                 raise self.Error(err_msg)
 
-            if nprocs > d['max_nprocs']:
+            if mpi_nprocs > d['max_nprocs']:
                 if hasattr(self, 'max_nprocs'):
-                    err_msg = "in file: %s. nprocs = %s > max_nprocs = %s" % (
-                        self.inp_fname, nprocs, self.max_nprocs)
+                    err_msg = "in file: %s. mpi_nprocs = %s > max_nprocs = %s" % (
+                        self.inp_fname, mpi_nprocs, self.max_nprocs)
                 else:
                     err_msg = "in file: %s\nmax_nprocs is not defined" % self.inp_fname
 
@@ -795,13 +794,13 @@ class AbinitTestInfoParser(object):
 
             # Redefine variables related to the number of CPUs.
             d['_ismulti_paral'] = True
-            d['nprocs_to_test'] = [nprocs]
-            d['max_nprocs'] = nprocs
+            d['nprocs_to_test'] = [mpi_nprocs]
+            d['max_nprocs'] = mpi_nprocs
 
-            d['exclude_nprocs'] = list(range(1, nprocs))
-            # print(self.inp_fname, nprocs, d['exclude_nprocs'])
+            d['exclude_nprocs'] = list(range(1, mpi_nprocs))
+            # print(self.inp_fname, mpi_nprocs, d['exclude_nprocs'])
 
-            ncpu_section = "NCPU_" + str(nprocs)
+            ncpu_section = "NCPU_" + str(mpi_nprocs)
             if not self.parser.has_section(ncpu_section):
                 raise self.Error("Cannot find section %s in %s" % (ncpu_section, self.inp_fname))
 
@@ -1400,15 +1399,14 @@ class BaseTest(object):
         return False
 
     def __init__(self, test_info, abenv):
-        logger.info("Initializing BaseTest from inp_fname: ",
-                    test_info.inp_fname)
+        logger.info("Initializing BaseTest from inp_fname: ", test_info.inp_fname)
 
         self._rid = genid()
 
         self.inp_fname = os.path.abspath(test_info.inp_fname)
         self.abenv = abenv
         self.id = test_info.make_test_id()  # The test identifier (takes into account the multi_parallel case)
-        self.nprocs = 1  # Start with 1 MPI process.
+        self.mpi_nprocs = 1  # Start with 1 MPI process.
 
         # FIXME Assumes inp_fname is in the form tests/suite_name/Input/name.in
         suite_name = os.path.dirname(self.inp_fname)
@@ -1535,7 +1533,7 @@ pp_dirpath $ABI_PSPDIR
     @property
     def full_id(self):
         """Full identifier of the test."""
-        return "[%s][%s][np=%s]" % (self.suite_name, self.id, self.nprocs)
+        return "[%s][%s][np=%s]" % (self.suite_name, self.id, self.mpi_nprocs)
 
     @property
     def bin_path(self):
@@ -1795,21 +1793,21 @@ pp_dirpath $ABI_PSPDIR
         else:
             self._files_to_keep.extend(files)
 
-    def compute_nprocs(self, build_env, nprocs, runmode):
+    def compute_nprocs(self, build_env, mpi_nprocs, runmode):
         """
-        Compute the number of MPI processes that can be used for the test from the initial guess nprocs
+        Compute the number of MPI processes that can be used for the test from the initial guess mpi_nprocs
 
-        Return: (nprocs, string)
+        Return: (mpi_nprocs, string)
 
-        where nprocs = 0 if the test cannot be executed.
+        where mpi_nprocs = 0 if the test cannot be executed.
         string contains a human-readable message explaining the reason why the test will be skipped.
 
         A test cannot be executed if:
 
           1) It requires CPP variables that are not defined in the build.
           2) The user asks for more MPI nodes than max_nprocs (this value is reported in the TEST_INFO section).
-          3) We have a multiparallel test (e.g. paral/tA.in) and nprocs is not in in nprocs_to_test
-          4) nprocs is in exclude_nprocs
+          3) We have a multiparallel test (e.g. paral/tA.in) and mpi_nprocs is not in in nprocs_to_test
+          4) mpi_nprocs is in exclude_nprocs
         """
         # !HAVE_FOO --> HAVE_FOO should not be present.
         errors = []
@@ -1835,23 +1833,21 @@ pp_dirpath $ABI_PSPDIR
         # runmode ="dynamic"
 
         if runmode == "static":
-            if nprocs > self.max_nprocs:
-                eapp("nprocs: %s > max_nprocs: %s" % (nprocs, self.max_nprocs))
+            if mpi_nprocs > self.max_nprocs:
+                eapp("mpi_nprocs: %s > max_nprocs: %s" % (mpi_nprocs, self.max_nprocs))
 
         elif runmode == "dynamic":
-            # Will select the minimum between max_nprocs and nprocs
+            # Will select the minimum between max_nprocs and mpi_nprocs
             pass
 
         else:
             raise ValueError("Wrong runmode %s" % runmode)
 
-        if self.nprocs_to_test and nprocs != self.nprocs_to_test[0]:
-            eapp("nprocs: %s != nprocs_to_test: %s" %
-                 (nprocs, self.nprocs_to_test[0]))
+        if self.nprocs_to_test and mpi_nprocs != self.nprocs_to_test[0]:
+            eapp("mpi_nprocs: %s != nprocs_to_test: %s" % (mpi_nprocs, self.nprocs_to_test[0]))
 
-        if nprocs in self.exclude_nprocs:
-            eapp("nprocs: %s in exclude_nprocs: %s" %
-                 (nprocs, self.exclude_nprocs))
+        if mpi_nprocs in self.exclude_nprocs:
+            eapp("mpi_nprocs: %s in exclude_nprocs: %s" % (mpi_nprocs, self.exclude_nprocs))
 
         if self.force_skip:
             eapp("forced to be skipped by the chain of test.")
@@ -1860,7 +1856,7 @@ pp_dirpath $ABI_PSPDIR
         if err_msg:
             real_nprocs = 0
         else:
-            real_nprocs = min(self.max_nprocs, nprocs)
+            real_nprocs = min(self.max_nprocs, mpi_nprocs)
 
         # if err_msg: print(err_msg)
         return real_nprocs, err_msg
@@ -1918,9 +1914,9 @@ pp_dirpath $ABI_PSPDIR
         gpu_key = "HAVE_GPU"
         return 1 if gpu_key in self.need_cpp_vars else 0
 
-    def run(self, build_env, runner, workdir, print_lock=None, nprocs=1, runmode="static", **kwargs):
+    def run(self, build_env, runner, workdir, print_lock=None, mpi_nprocs=1, runmode="static", **kwargs):
         """
-        Run the test with nprocs MPI nodes in the build environment build_env using the `JobRunner` runner.
+        Run the test with mpi_nprocs MPI procs in the build environment build_env using the `JobRunner` runner.
         Results are produced in the directory workdir. kwargs is used to pass additional options
 
         ================  ====================================================================
@@ -2002,7 +1998,7 @@ pp_dirpath $ABI_PSPDIR
             self.cprint(msg=msg, color=status2txtcolor[self._status])
 
         # Here we get the number of MPI nodes for test.
-        self.nprocs, self.skip_msg = self.compute_nprocs(self.build_env, nprocs, runmode=runmode)
+        self.mpi_nprocs, self.skip_msg = self.compute_nprocs(self.build_env, mpi_nprocs, runmode=runmode)
 
         if self.skip_msg:
             self._status = "skipped"
@@ -2021,15 +2017,14 @@ pp_dirpath $ABI_PSPDIR
 
         if self.skip_buildbot_builder():
             self._status = "skipped"
-            msg = self.full_id + ": Skipped: this buildbot builder has been excluded."
+            msg = self.full_id + ": Skipped: this buildbot worker has been excluded."
             self.cprint(msg=msg, color=status2txtcolor[self._status])
             can_run = False
 
         if self.use_git_submodule:
             # Create link in workdir pointing to ~abinit/tests/modules_with_data/MODULE_DIRNAME
             dst = os.path.join(self.workdir, self.use_git_submodule)
-            src = os.path.join(self.abenv.tests_dir,
-                               "modules_with_data", self.use_git_submodule)
+            src = os.path.join(self.abenv.tests_dir, "modules_with_data", self.use_git_submodule)
 
             if not os.path.exists(os.path.join(src, "README.md")):
                 self._status = "skipped"
@@ -2100,7 +2095,7 @@ pp_dirpath $ABI_PSPDIR
 
             #print("Invoking binary:", self.bin_path, "with bin_argstr", bin_argstr)
 
-            self.run_etime = runner.run(self.nprocs, self.bin_path,
+            self.run_etime = runner.run(self.mpi_nprocs, self.bin_path,
                                         stdin_fname, self.stdout_fname, self.stderr_fname,
                                         bin_argstr=bin_argstr, cwd=self.workdir)
 
@@ -2354,7 +2349,7 @@ pp_dirpath $ABI_PSPDIR
 
     def get_results(self, skipped_info=False):
         """
-        Dump the run results to pass it to a different process
+        Return the run results to pass it to a different process
         """
         return {
             'id': self._rid,
@@ -2618,7 +2613,7 @@ pp_dirpath $ABI_PSPDIR
             template = """
               <hr>
               <h1>Results of test ${self.full_id}</h1>
-                 MPI nprocs =  ${self.nprocs},
+                 MPI nprocs =  ${self.mpi_nprocs},
                  run_etime = ${sec2str(self.run_etime)} s,
                  tot_etime = ${sec2str(self.tot_etime)} s
                <br>
@@ -3220,7 +3215,7 @@ def exec2class(exec_name):
 
 def do_work(task_q, res_q, run_func, run_func_kwargs, print_lock, kill_me, thread_mode=False):
     """
-    This the function used as target of the subprocss
+    This is the function used as target of the subprocss
 
     Args:
         task_q: Input queue with the task.
@@ -3261,12 +3256,12 @@ def do_work(task_q, res_q, run_func, run_func_kwargs, print_lock, kill_me, threa
 def run_and_check_test(test, print_lock=None, **kwargs):
     """
     Helper function to execute the test. Must be thread-safe.
-    Return dictionary with results.
+    Return: dictionary with results.
     """
     workdir = kwargs.pop("workdir")
     build_env = kwargs.pop("build_env")
     job_runner = kwargs.pop("job_runner")
-    nprocs = kwargs.pop("nprocs")
+    mpi_nprocs = kwargs.pop("mpi_nprocs")
     runmode = kwargs.pop("runmode")
     #print(kwargs)
 
@@ -3274,7 +3269,7 @@ def run_and_check_test(test, print_lock=None, **kwargs):
 
     # Run the test
     #print("Calling test.run")
-    test.run(build_env, job_runner, testdir, print_lock=print_lock, nprocs=nprocs, runmode=runmode, **kwargs)
+    test.run(build_env, job_runner, testdir, print_lock=print_lock, mpi_nprocs=mpi_nprocs, runmode=runmode, **kwargs)
 
     # Write HTML summary
     #print("Calling write_html_report")
@@ -3363,8 +3358,7 @@ class ChainOfTests(object):
 
         return string, nlinks
 
-    # A lot of boilerplate code!
-    # See the doc strings of BaseTest
+    # A lot of boilerplate code! See the doc strings of BaseTest
     @property
     def id(self):
         return "-".join(test.id for test in self)
@@ -3450,6 +3444,7 @@ class ChainOfTests(object):
 
     @property
     def status(self):
+        """The status of ChainOfTests."""
         if self._status is None:
             _stats = {test.status for test in self}
             if "disabled" in _stats or "skipped" in _stats:
@@ -3557,7 +3552,7 @@ class ChainOfTests(object):
                     oc += "c"
                 test.write_html_report(fh=fh, oc=oc)
 
-    def run(self, build_env, runner, workdir, nprocs=1, **kwargs):
+    def run(self, build_env, runner, workdir, mpi_nprocs=1, **kwargs):
         """
         Run the ChainOfTests.
 
@@ -3565,7 +3560,7 @@ class ChainOfTests(object):
             build_env:
             runner:
             workdir:
-            nprocs:
+            mpi_nprocs:
             kwargs:
         """
 
@@ -3579,7 +3574,7 @@ class ChainOfTests(object):
         for test in self:
             if fail_all:
                 test.force_skip = True
-            test.run(build_env, runner, workdir=self.workdir, nprocs=nprocs, **kwargs)
+            test.run(build_env, runner, workdir=self.workdir, mpi_nprocs=mpi_nprocs, **kwargs)
             if test.had_timeout:
                 fail_all = True
 
@@ -3883,8 +3878,8 @@ class AbinitTestSuite(object):
         them with run_func and put the result in an output queue.
 
         Args:
-            py_nprocs: Number of python sub-processes to be used
-            run_func: Function to be executed
+            py_nprocs: Number of python sub-processes to be used.
+            run_func: Function to be executed.
             run_func_kwargs: Kwargs passed to run_func.
 
         Return: the task/input queue (to be closed only) and the results/output queue.
@@ -3915,32 +3910,30 @@ class AbinitTestSuite(object):
 
         return task_q, res_q
 
-    def wait_workers(self, nprocs, ntasks, timeout, queue):
+    def wait_workers(self, py_nprocs, ntests, timeout, queue):
         """
-        Wait for all tests to be done by workers. Receives tests results from
-        queue and update the local tests objects.
+        Wait for all tests to be done by workers.
+        Receives tests results from queue and update the local tests objects.
         """
         results = {}
-        proc_running, task_remaining = nprocs, ntasks
+        nprocs_running, task_remaining = py_nprocs, ntests
         try:
-            while proc_running > 0:
-                msg = queue.get(block=True, timeout=(1 + 2 * task_remaining * timeout / proc_running))
+            while nprocs_running > 0:
+                msg = queue.get(block=True, timeout=(1 + 2 * task_remaining * timeout / nprocs_running))
 
                 if msg['type'] == 'proc_done':
-                    proc_running -= 1
+                    nprocs_running -= 1
                     if 'error' in msg:
                         e = msg['error']
                         if 'task' in msg:
                             task_remaining -= 1
                             warnings.warn(
-                                'Error append in a worker on test {}:\n{}: {}'.format(msg['task'], type(e).__name__, e)
-                            )
+                                'Error append in a worker on test {}:\n{}: {}'.format(msg['task'], type(e).__name__, e))
                         else:
                             warnings.warn(
-                                'Error append in a worker:\n{}: {}'.format(type(e).__name__, e)
-                            )
+                                'Error append in a worker:\n{}: {}'.format(type(e).__name__, e))
 
-                    logger.info("{} worker(s) remaining for {} tasks.".format(proc_running, task_remaining))
+                    logger.info("{} worker(s) remaining for {} tasks.".format(nprocs_running, task_remaining))
 
                 elif msg['type'] == 'result':
                     results[msg['id']] = msg
@@ -3951,26 +3944,24 @@ class AbinitTestSuite(object):
             raise KeyboardInterrupt()
 
         except EmptyQueueError:
-            warnings.warn(
-                ("Workers have been hanging until timeout. There were {} procs"
-                 " working on {} tasks.").format(proc_running, task_remaining)
-            )
+            warnings.warn(("Workers have been hanging until timeout. There were {} procs"
+                           " working on {} tasks.").format(nprocs_running, task_remaining))
             self.terminate_workers()
             return None
 
         return results
 
     def run_tests(self, build_env, workdir, job_runner,
-                  nprocs=1, py_nprocs=1, runmode="static", **kwargs):
+                  mpi_nprocs=1, py_nprocs=1, runmode="static", **kwargs):
         """
         Execute the list of tests (main entry point for client code)
 
         Args:
-            build_env: `BuildEnv` instance with info on the build environment.
-            workdir: Working directory (string)
-            job_runner: `JobRunner` instance
-            nprocs: number of MPI processes to use for a single test.
-            py_nprocs: number of py_nprocs for tests
+            build_env: `BuildEnv` instance with info on the ABINIT build environment.
+            workdir: Working directory (string).
+            job_runner: `JobRunner` instance.
+            mpi_nprocs: number of MPI processes to use for a single test.
+            py_nprocs: number of py_nprocs for tests.
         """
         self.sanity_check()
 
@@ -4002,14 +3993,14 @@ class AbinitTestSuite(object):
             # Remove all stale files present in workdir (except the lock!)
             rm_rf(self.workdir, exclude_paths=self.lock.lockfile)
 
-            self.nprocs = nprocs
+            self.mpi_nprocs = mpi_nprocs
             self.py_nprocs = py_nprocs
 
             run_func_kwargs = dict(
                 workdir=self.workdir,
                 build_env=build_env,
                 job_runner=job_runner,
-                nprocs=self.nprocs,
+                mpi_nprocs=self.mpi_nprocs,
                 runmode=runmode,
             )
             # Add input kwargs
@@ -4029,7 +4020,7 @@ class AbinitTestSuite(object):
             #    #from tests.pymods.devtools import number_of_cpus
             #    #ncpus_detected = max(1, number_of_cpus())
             #    manager = Manager(available_cpus=8, available_gpus=1, max_workers=6, test_suite=self, verbose=1)
-            #    manager.run(mpi_nprocs=nprocs, omp_nthreads=1, **run_func_kwargs)
+            #    manager.run(mpi_nprocs=mpi_nprocs, omp_nthreads=1, **run_func_kwargs)
 
             #if py_nprocs < 0:
             #    available_cpus = 8
@@ -4209,7 +4200,7 @@ class AbinitTestSuite(object):
                 tot_etime = ${sec2str(self.tot_etime)} <br>
                 run_etime = ${sec2str(self.run_etime)} <br>
                 no_pyprocs = ${self.py_nprocs} <br>
-                no_MPI = ${self.nprocs} <br>
+                no_MPI = ${self.mpi_nprocs} <br>
                 ${str2html(str(job_runner))}
             <hr>
             """
