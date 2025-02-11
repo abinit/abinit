@@ -149,10 +149,11 @@ contains
 
 subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,ndat,&
                   prtvol,sij_opt,tim_getghc,type_calc,&
-                  kg_fft_k,kg_fft_kp,select_k,cwavef_r) ! optional arguments
+                  kg_fft_k,kg_fft_kp,select_k,cwavef_r,filter_dilatmx_loc) ! optional arguments
 
 !Arguments ------------------------------------
 !scalars
+ logical,intent(in),optional :: filter_dilatmx_loc
  integer,intent(in) :: cpopt,ndat, prtvol
  integer,intent(in) :: sij_opt,tim_getghc,type_calc
  integer,intent(in),optional :: select_k
@@ -172,6 +173,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 
 !Local variables-------------------------------
 !scalars
+ logical :: filter_dilatmx_loc_
  integer,parameter :: level=114,re=1,im=2,tim_fourwf=1
  integer :: choice,cplex,cpopt_here,i1,i2,i3,idat,idir,ierr,i0
  integer :: ig,igspinor,istwf_k_,ii,iispinor,ikpt_this_proc,ipw,ispinor,my_nspinor
@@ -370,6 +372,8 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
    nspinor1TreatedByThisProc=(mpi_enreg%me_spinor==0)
    nspinor2TreatedByThisProc=(mpi_enreg%me_spinor==1)
  end if
+
+ filter_dilatmx_loc_ = .true.; if ( present(filter_dilatmx_loc) ) filter_dilatmx_loc_ = filter_dilatmx_loc
 
 !============================================================
 ! Application of the local potential
@@ -798,8 +802,8 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 
    ! If only local part is applied, still we have to filter the result because of dilatmx.
    ! Otherwise it is done when adding kinetic term.
-   if (type_calc==1) then
-     do idat=1,ndat
+   if (type_calc==1.and.filter_dilatmx_loc_) then
+     do idat=1,ndat_
        !$OMP PARALLEL DO PRIVATE(igspinor) COLLAPSE(2) IF(gemm_nonlop_use_gemm)
        do ispinor=1,my_nspinor
          do ig=1,npw_k2
@@ -2052,7 +2056,7 @@ end subroutine getgsc
 
 subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,ndat,&
 &                 prtvol,sij_opt,tim_getghc,type_calc,&
-&                 kg_fft_k,kg_fft_kp,select_k) ! optional arguments
+&                 kg_fft_k,kg_fft_kp,select_k,filter_dilatmx_loc) ! optional arguments
 
 #ifdef HAVE_OPENMP
    use omp_lib
@@ -2060,6 +2064,7 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lamb
 
 !Arguments ------------------------------------
 !scalars
+ logical,intent(in),optional :: filter_dilatmx_loc
  integer,intent(in) :: cpopt,ndat, prtvol
  integer,intent(in) :: sij_opt,tim_getghc,type_calc
  integer,intent(in),optional :: select_k
@@ -2075,6 +2080,7 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lamb
 
 !Local variables-------------------------------
 !scalars
+ logical :: filter_dilatmx_loc_
  integer :: firstelt, firstprj, lastelt, lastprj,usegvnlxc,usegsc
  integer :: nthreads,fftalga
  integer :: ithread
@@ -2089,6 +2095,7 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lamb
  ! *************************************************************************
 
  select_k_default = 1; if ( present(select_k) ) select_k_default = select_k
+ filter_dilatmx_loc_ = .true.; if ( present(filter_dilatmx_loc) ) filter_dilatmx_loc_ = filter_dilatmx_loc
 
  spacedim     = size(cwavef  ,dim=2)/ndat
  spacedim_prj = size(cwaveprj,dim=2)/ndat
@@ -2105,7 +2112,7 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lamb
  !$omp& private(firstprj,lastprj,usegvnlxc,usegsc,fftw3_use_lib_threads_sav), &
  !$omp& shared(cwavef,ghc,gsc, gvnlxc,spacedim,spacedim_prj,ndat,kg_fft_k,kg_fft_kp,gs_ham,cwaveprj,mpi_enreg), &
  !$omp& shared(gemm_nonlop_use_gemm), &
- !$omp& firstprivate(cpopt,lambda,prtvol,sij_opt,tim_getghc,type_calc,select_k_default) &
+ !$omp& firstprivate(cpopt,lambda,prtvol,sij_opt,tim_getghc,type_calc,select_k_default,filter_dilatmx_loc_) &
  !$omp& IF(gs_ham%gpu_option==ABI_GPU_DISABLED .and. .not. gemm_nonlop_use_gemm)
  ithread = 0
  nthreads = 1
@@ -2157,13 +2164,13 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lamb
 &      ghc(:,firstelt:lastelt),gsc(:,firstelt:lastelt*usegsc),&
 &      gs_ham,gvnlxc(:,firstelt:lastelt*usegvnlxc),lambda, mpi_enreg,lastband-firstband+1,&
 &      prtvol,sij_opt,tim_getghc,type_calc,&
-&      select_k=select_k_default,kg_fft_k=kg_fft_k,kg_fft_kp=kg_fft_kp)
+&      select_k=select_k_default,kg_fft_k=kg_fft_k,kg_fft_kp=kg_fft_kp,filter_dilatmx_loc=filter_dilatmx_loc_)
      else
        call getghc(cpopt,cwavef(:,firstelt:lastelt),cwaveprj(:,firstprj:lastprj),&
 &      ghc(:,firstelt:lastelt),gsc(:,firstelt:lastelt*usegsc),&
 &      gs_ham,gvnlxc(:,firstelt:lastelt*usegvnlxc),lambda, mpi_enreg,lastband-firstband+1,&
 &      prtvol,sij_opt,tim_getghc,type_calc,&
-&      select_k=select_k_default,kg_fft_k=kg_fft_k)
+&      select_k=select_k_default,kg_fft_k=kg_fft_k,filter_dilatmx_loc=filter_dilatmx_loc_)
      end if
    else
      if (present(kg_fft_kp)) then
@@ -2171,13 +2178,13 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lamb
 &      ghc(:,firstelt:lastelt),gsc(:,firstelt:lastelt*usegsc),&
 &      gs_ham,gvnlxc(:,firstelt:lastelt*usegvnlxc),lambda, mpi_enreg,lastband-firstband+1,&
 &      prtvol,sij_opt,tim_getghc,type_calc,&
-&      select_k=select_k_default,kg_fft_kp=kg_fft_kp)
+&      select_k=select_k_default,kg_fft_kp=kg_fft_kp,filter_dilatmx_loc=filter_dilatmx_loc_)
      else
        call getghc(cpopt,cwavef(:,firstelt:lastelt),cwaveprj(:,firstprj:lastprj),&
 &      ghc(:,firstelt:lastelt),gsc(:,firstelt:lastelt*usegsc),&
 &      gs_ham,gvnlxc(:,firstelt:lastelt*usegvnlxc),lambda, mpi_enreg,lastband-firstband+1,&
 &      prtvol,sij_opt,tim_getghc,type_calc,&
-&      select_K=select_k_default)
+&      select_K=select_k_default,filter_dilatmx_loc=filter_dilatmx_loc_)
      end if
    end if
  end if
