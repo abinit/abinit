@@ -25,7 +25,7 @@ MODULE TRIQS_CTQMC
 ! =====================================================================
 
      SUBROUTINE Ctqmc_triqs_run(rot_inv,leg_measure,off_diag,move_shift,move_double,measure_density_matrix,time_invariance,use_norm_as_weight, &
-                              & loc_n_min,loc_n_max,seed_a,seed_b,num_orbitals,n_tau,n_l,n_cycles,cycle_length,ntherm,ntherm_restart, &
+                              & compute_entropy,loc_n_min,loc_n_max,seed_a,seed_b,num_orbitals,n_tau,n_l,n_cycles,cycle_length,ntherm,ntherm_restart, &
                               & det_init_size,det_n_operations_before_check,ntau_delta,nbins_histo,rank,nspinor,nblocks,read_data,verbo,beta, &
                               & move_global_prob,imag_threshold,det_precision_warning,det_precision_error,det_singular_threshold,lam,alpha, &
                               & block_list,flavor_list,inner_list,siz_list,ftau,gtau,gl,udens_cmplx,vee_cmplx,levels_cmplx,moments_self_1, &
@@ -33,7 +33,7 @@ MODULE TRIQS_CTQMC
 
       use iso_c_binding
 
-      LOGICAL, VALUE, INTENT(IN) :: rot_inv,leg_measure,off_diag,move_shift,move_double,measure_density_matrix,time_invariance,use_norm_as_weight
+      LOGICAL, VALUE, INTENT(IN) :: rot_inv,leg_measure,off_diag,move_shift,move_double,measure_density_matrix,time_invariance,use_norm_as_weight,compute_entropy
 
       INTEGER, VALUE, INTENT(IN) :: loc_n_min,loc_n_max,seed_a,seed_b,num_orbitals,n_tau,n_l,n_cycles,cycle_length,ntherm,ntherm_restart
 
