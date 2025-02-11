@@ -3176,7 +3176,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
  integer, allocatable :: nblocks(:)
  integer, target, allocatable :: block_list(:,:),flavor_list(:,:,:),flavor_tmp(:,:)
  integer, target, allocatable :: inner_list(:,:),siz_block(:,:)
- real(dp), allocatable :: adlr(:,:),bdlr(:),gl_dlr_re(:),gl_dlr_im(:)
+ real(dp), allocatable :: adlr(:,:),bdlr(:),eu_list(:),gl_dlr_re(:),gl_dlr_im(:)
  real(dp), allocatable :: jbes(:),lam_list(:),leg_array(:,:),mgreen(:),t_lp(:,:)
  real(dp), allocatable :: tpoints(:),tweights(:),wdlr(:),wdlr_beta(:)
  real(dp), allocatable :: wdlr2(:),wdlr3(:),wdlr4(:)
@@ -3276,10 +3276,10 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
    write(message,'(a,3x,a)') ch10,"== Switching to CTQMC basis: using cubic basis"
  else if (basis == 1) then
    write(message,'(a,3x,2a)') ch10,"== Switching to CTQMC basis: using basis that", &
-                            & " diagonalizes the electronic levels"
+                                & " diagonalizes the electronic levels"
  else if (basis == 2) then
    write(message,'(a,3x,2a)') ch10,"== Switching to CTQMC basis: using basis that", &
-                            & " diagonalizes the occupation matrix"
+                                & " diagonalizes the occupation matrix"
  else if (basis == 3) then
    write(message,'(a,3x,a)') ch10,"== Switching to CTQMC basis: using Ylm basis"
  else if (basis == 4) then
@@ -3292,8 +3292,10 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
    if (.not. nondiag) then
      basis = 0
      write(message,'(a,3x,a)') ch10,"== Electronic levels are already diagonal: staying in the cubic basis"
-     call wrtout(std_out,message,"COLL")
-   end if ! not nondiag
+   else
+     write(message,'(a,3x,a)') ch10,"== Switch to Ylm basis first"
+   end if ! nondiag
+   call wrtout(std_out,message,"COLL")
  end if ! basis=1
 
  if (basis == 2) then
@@ -3301,8 +3303,10 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
    if (.not. nondiag) then
      basis = 0
      write(message,'(a,3x,a)') ch10,"== Occupation matrix is already diagonal: staying in the cubic basis"
-     call wrtout(std_out,message,"COLL")
+   else
+     write(message,'(a,3x,a)') ch10,"== Switch to Ylm basis first"
    end if ! not nondiag
+   call wrtout(std_out,message,"COLL")
  end if ! basis=2
 
  call copy_matlu(green%occup%matlu(:),dmat_ctqmc(:),natom)
@@ -3328,6 +3332,17 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
    else
      matlu_pt => dmat_ctqmc(:)
    end if ! basis
+
+   if (pawprtvol >= 3) then
+     if (basis == 1) then
+       write(message,'(a,3x,a)') ch10,"== Print Energy levels in Ylm basis"
+     else
+       write(message,'(a,3x,a)') ch10,"== Print Occupation matrix in Ylm basis"
+     end if
+     call wrtout(std_out,message,"COLL")
+
+     call print_matlu(matlu_pt(:),natom,1)
+   end if ! pawprtvol>=3
 
    call find_block_structure(paw_dmft,block_list(:,:),inner_list(:,:), &
        & flavor_list(:,:,:),siz_block(:,:),nblocks(:),matlu_pt(:),natom,nflavor_max)
@@ -3509,8 +3524,9 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
  ! Gauss-Legendre grid), since we need it for the rest of the SCF calculation
  ntot = ngauss*nsub + 1
 
- if ((.not. integral) .or. (.not. entropy)) ntot = 1
+ !if ((.not. integral) .or. (.not. entropy)) ntot = 1
 
+ ABI_MALLOC(eu_list,(ntot))
  ABI_MALLOC(lam_list,(ntot)) ! scaling factors of U matrix for thermodynamic integration
  lam_list(ntot) = one
  green%integral = zero
@@ -3688,6 +3704,11 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
 
    do ilam=1,ntot
 
+     if (ilam /= ntot) then
+       write(message,'(a,3x,a,f6.4,a)') ch10,"== Thermodynamic integration for lambda= ",lam_list(ilam),ch10
+       call wrtout(std_out,message,'COLL')
+     end if
+
      if (ilam > 1) verbo = 0
 
      if (ilam < 10) then
@@ -3711,7 +3732,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
 #ifdef HAVE_TRIQS_v3_4
      call Ctqmc_triqs_run(rot_inv,leg_measure,off_diag,paw_dmft%dmft_triqs_move_shift,paw_dmft%dmft_triqs_move_double, &
                         & density_matrix,paw_dmft%dmft_triqs_time_invariance,paw_dmft%dmft_triqs_use_norm_as_weight, &
-                        & paw_dmft%dmft_triqs_loc_n_min,paw_dmft%dmft_triqs_loc_n_max,paw_dmft%dmft_triqs_seed_a, &
+                        & (ilam /= ntot),paw_dmft%dmft_triqs_loc_n_min,paw_dmft%dmft_triqs_loc_n_max,paw_dmft%dmft_triqs_seed_a, &
                         & paw_dmft%dmft_triqs_seed_b,nflavor,ntau,nleg,int(paw_dmft%dmftqmc_n/paw_dmft%nproc), &
                         & paw_dmft%dmftctqmc_meas,paw_dmft%dmftqmc_therm,paw_dmft%dmft_triqs_therm_restart, &
                         & paw_dmft%dmft_triqs_det_init_size,paw_dmft%dmft_triqs_det_n_operations_before_check, &
@@ -3726,21 +3747,21 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
      call flush_unit(std_out)
 
      if (integral .and. ilam < ntot .and. entropy) then
-       i = mod(ilam,ngauss)
-       if (i == 0) i = ngauss
+       i = mod(ilam-1,ngauss) + 1
        green%integral = green%integral + tweights(i)*dble(eu)*dx*half
-       write(tag,'(f13.6)') dble(eu)
-       write(tag2,'(f13.6)') lam_list(ilam)
-       write(message,*) "Value of Eu/lambda: ",trim(adjustl(tag))," for lambda= ",trim(adjustl(tag2))
-       call wrtout(std_out,message,'COLL')
+       eu_list(ilam) = dble(eu)
      end if ! integral and ilam<ntot and entropy
 
      if (integral .and. ilam == ntot-1 .and. entropy) then
-       write(tag,'(i4)') iatom
-       write(tag2,'(f13.6)') green%integral
-       write(message,*) "Integral of Eu/lambda for atom ",trim(adjustl(tag)),'is: ',trim(adjustl(tag2))
+       write(message,'(a,3(3x,2a),a,14x,a,3x,2a,11x,5a)') ch10,repeat("=",39),ch10,"== Summary of thermodynamic integration", &
+            & ch10,repeat("=",39),ch10,ch10,"Lambda","Eu/lambda",ch10,"┌",repeat("─",10),"┬",repeat("─",10),"┐"
        call wrtout(std_out,message,'COLL')
-       write(message,*) "Starting now the calculation for lambda=1"
+       do i=1,ntot-2
+         write(message,'(11x,a,2(2x,f6.4,2x,a),a,11x,5a)') "│",lam_list(i),"│",eu_list(i),"│",ch10,"├",repeat("─",10),"┼",repeat("─",10),"┤"
+         call wrtout(std_out,message,'COLL')
+       end do ! i
+       write(message,'(11x,2(a,2x,f6.4,2x),2a,11x,7a,3x,a,f6.4,a)') "│",lam_list(ntot-1),"│",eu_list(ntot-1),"│",ch10,"└",repeat("─",10),"┴", &
+                        & repeat("─",10),"┘",ch10,ch10,"--> Integral is: ",green%integral,ch10
        call wrtout(std_out,message,'COLL')
      end if ! integral and ilam=ntot-1 and entropy
 
@@ -4089,6 +4110,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
 
  end do ! iatom
 
+ ABI_FREE(eu_list)
  ABI_FREE(lam_list)
 
  ABI_SFREE(tweights)

@@ -14,7 +14,7 @@ using namespace mpi;
 using namespace triqs::gfs;
 
 void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool off_diag, bool move_shift, bool move_double,
-                     bool measure_density_matrix, bool time_invariance, bool use_norm_as_weight,
+                     bool measure_density_matrix, bool time_invariance, bool use_norm_as_weight, bool compute_entropy,
                      int loc_n_min, int loc_n_max, int seed_a, int seed_b, int num_orbitals, int n_tau,
                      int n_l, int n_cycles, int cycle_length, int ntherm, int ntherm_restart, int det_init_size,
                      int det_n_operations_before_check, int ntau_delta, int nbins_histo, int rank, int nspinor,
@@ -125,20 +125,27 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool off_diag, bool move_sh
     h5_read(grp,"nproc",nproc_);
     h5_read(grp,"nbins",nbins_);
 
-    if (std::abs(beta-beta_) > 1.e-15) err = 0;
-    if (gf_struct != gf_struct_) err = 1;
-    if (nproc_ != nproc) err = 2;
-    if (nbins_ != nbins_histo) err = 3;
-
-    if (err >= 0) restart = 0;
-
-    switch(err) {
-      case(0): cout << endl << "   == You are trying to read a configuration file generated at a different temperature !! File will not be read !" << endl;
-      case(1): cout << endl << "   == You are trying to read a configuration file generated with a different block structure !! File will not be read !" << endl;
-      case(2): cout << endl << "   == You are trying to read a configuration file generated with a different number of CPUs !! File will not be read !" << endl;
-      case(3): cout << endl << "   == You are trying to read a configuration file generated with a different number of bins !! File will not be read !" << endl;
-      default: cout << endl << "   == Reading previous configuration file" << endl;
+    if (std::abs(beta-beta_) > 1.e-15) {
+      restart = 0;
+      cout << "   == You are trying to read a CTQMC_DATA file generated at a different temperature !! File will not be read !" << endl;
     }
+
+    if (gf_struct != gf_struct_) {
+      restart = 0;
+      cout << "   == You are trying to read a CTQMC_DATA file generated with a different block structure !! File will not be read !" << endl;
+    }
+
+    if (nproc_ != nproc) {
+      restart = 0;
+      cout << "   == You are trying to read a CTQMC_DATA file generated with a different number of CPUs !! File will not be read !" << endl;
+    }
+
+    if (nbins_ != nbins_histo) {
+      restart = 0;
+      cout << "   == You are trying to read a CTQMC_DATA file generated with a different number of bins !! File will not be read !" << endl;
+    }
+
+    if (restart == 1) cout << "   == Reading previous CTQMC data from file" << endl;
   }
 
   MPI_Bcast(&restart,nproc,MPI_INTEGER,0,comm);
@@ -225,6 +232,11 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool off_diag, bool move_sh
   paramCTQMC.measure_G_l = leg_measure;
   paramCTQMC.n_warmup_cycles = therm;
 
+  if (compute_entropy) {
+    paramCTQMC.measure_G_l = false;
+    paramCTQMC.measure_G_tau = false;
+  }
+
   if (rank == 0 && verbo == 1) {
 
     cout << endl << "   == Key Input Parameters for the TRIQS CTHYB solver ==" << endl << endl;
@@ -257,7 +269,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool off_diag, bool move_sh
 
   solver.solve(paramCTQMC);
 
-  if (rank == 0) cout << endl << "   == Writing CTQMC configuration file ==      " << endl << endl;
+  if (rank == 0) cout << endl << "   == Writing CTQMC data on file ==      " << endl;
 
   // Write all final configurations
   auto config = solver.get_configuration();
@@ -296,8 +308,8 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool off_diag, bool move_sh
 
   if (rank == 0) {
 
-    qmc_data_hfile = {qmc_data_fname,'w'};   // very important to open in write mode, so that previous data is erased
-    group grp = qmc_data_hfile;
+    file qmc_data_hfilew = {qmc_data_fname,'w'};   // very important to open in write mode, so that previous data is erased
+    group grp = qmc_data_hfilew;
 
     h5_write(grp,"beta",beta);
     h5_write(grp,"gf_struct",gf_struct);
@@ -331,30 +343,33 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool off_diag, bool move_sh
         h5_write(gr,tag+"_"+to_string(iblock),hist);
       }
 
-    qmc_data_hfile.close();
+    qmc_data_hfilew.close();
   }
 
-  for (int iblock : range(nblocks))
-    for (int tau : range(n_tau))
-      for (int o : range(siz_list[iblock])) {
-        iflavor = flavor_list[o+iblock*num_orbitals];
-        for (int oo : range(siz_list[iblock])) {
-          iflavor1 = flavor_list[oo+iblock*num_orbitals];
-          gtau[tau+iflavor*n_tau+iflavor1*num_orbitals*n_tau] = (*solver.G_tau)[iblock].data()(tau,o,oo);
-        }
-      }
+  if (!compute_entropy) {
 
-  // Report G(l)
-  if (leg_measure)
     for (int iblock : range(nblocks))
-      for (int l : range(n_l))
+      for (int tau : range(n_tau))
         for (int o : range(siz_list[iblock])) {
           iflavor = flavor_list[o+iblock*num_orbitals];
           for (int oo : range(siz_list[iblock])) {
             iflavor1 = flavor_list[oo+iblock*num_orbitals];
-            gl[l+iflavor*n_l+iflavor1*num_orbitals*n_l] = (*solver.G_l)[iblock].data()(l,o,oo);
+            gtau[tau+iflavor*n_tau+iflavor1*num_orbitals*n_tau] = (*solver.G_tau)[iblock].data()(tau,o,oo);
           }
         }
+
+    // Report G(l)
+    if (leg_measure)
+      for (int iblock : range(nblocks))
+        for (int l : range(n_l))
+          for (int o : range(siz_list[iblock])) {
+            iflavor = flavor_list[o+iblock*num_orbitals];
+            for (int oo : range(siz_list[iblock])) {
+              iflavor1 = flavor_list[oo+iblock*num_orbitals];
+              gl[l+iflavor*n_l+iflavor1*num_orbitals*n_l] = (*solver.G_l)[iblock].data()(l,o,oo);
+            }
+          }
+  }
 
   if (measure_density_matrix) {
 
@@ -363,19 +378,21 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool off_diag, bool move_sh
     auto subspaces = h_loc_diag.n_subspaces();
     auto rho = solver.density_matrix();
 
-    complex<double> occ_tmp [num_orbitals] = {0};
+    if (!compute_entropy) {
+      complex<double> occ_tmp [num_orbitals] = {0};
 
-    for (int iblock : range(nblocks))
-      for (int o : range(siz_list[iblock])) {
-        iflavor = flavor_list[o+iblock*num_orbitals];
-        n_op = c_dag(to_string(iblock),o) * c(to_string(iblock),o);
-        if (itask == rank) occ_tmp[iflavor] = trace_rho_op(rho,n_op,h_loc_diag);
-        itask = (itask+1)%nproc;
-      }
+      for (int iblock : range(nblocks))
+        for (int o : range(siz_list[iblock])) {
+          iflavor = flavor_list[o+iblock*num_orbitals];
+          n_op = c_dag(to_string(iblock),o) * c(to_string(iblock),o);
+          if (itask == rank) occ_tmp[iflavor] = trace_rho_op(rho,n_op,h_loc_diag);
+          itask = (itask+1)%nproc;
+        }
 
-    MPI_Allreduce(occ_tmp,occ,num_orbitals,MPI_C_DOUBLE_COMPLEX,MPI_SUM,comm);
+      MPI_Allreduce(occ_tmp,occ,num_orbitals,MPI_C_DOUBLE_COMPLEX,MPI_SUM,comm);
+    }
 
-    if (rank == 0) {
+    if (rank == 0 && !compute_entropy) {
 
       ofstream occ_file;
       occ_file.open(hist_fname);
@@ -426,11 +443,13 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool off_diag, bool move_sh
       }
     }
 
-    if (itask == rank) *eu = trace_rho_op(rho,Hint,h_loc_diag);
-    mpi_broadcast(*eu,comm,itask);
-    itask = (itask+1)%nproc;
+    if (itask == rank || compute_entropy) *eu = trace_rho_op(rho,Hint,h_loc_diag);
+    if (!compute_entropy) {
+      mpi_broadcast(*eu,comm,itask);
+      itask = (itask+1)%nproc;
+    }
 
-    if (!leg_measure) { // Get moments of the self-energy
+    if (!leg_measure && !compute_entropy) { // Get moments of the self-energy
 
       many_body_operator commut,commut2,Sinf_op,S1_op;
 

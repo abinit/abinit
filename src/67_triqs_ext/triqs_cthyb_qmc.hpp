@@ -14,7 +14,7 @@ using namespace triqs_cthyb;
 extern "C"{
 
     void ctqmc_triqs_run( bool rot_inv, bool leg_measure, bool off_diag, bool move_shift, bool move_double, bool measure_density_matrix,
-                          bool time_invariance, bool use_norm_as_weight, int loc_n_min, int loc_n_max, int seed_a, int seed_b,
+                          bool time_invariance, bool use_norm_as_weight, bool compute_entropy, int loc_n_min, int loc_n_max, int seed_a, int seed_b,
                           int num_orbitals, int n_tau, int n_l, int n_cycles_, int cycle_length, int ntherm, int ntherm_restart,
                           int det_init_size, int det_n_operations_before_check, int ntau_delta, int nbins_histo, int rank, int nspinor, int nblocks,
                           int read_data, int verbo, double beta, double move_global_prob, double imag_threshold, double det_precision_warning,
