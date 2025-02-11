@@ -810,14 +810,13 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 
      call timab(922,1,tsec)
 
+     my_ikpt=mpi_enreg%my_kpttab(ikpt)
 !    Parallelism over FFT and/or bands: define sizes and tabs
      if (mpi_enreg%paral_kgb==1) then
-       my_ikpt=mpi_enreg%my_kpttab(ikpt)
        nblockbd=nband_k/(mpi_enreg%nproc_band*mpi_enreg%bandpp)
        bandpp=mpi_enreg%bandpp
        my_bandfft_kpt => bandfft_kpt(my_ikpt)
      else
-       my_ikpt=ikpt
        bandpp=mpi_enreg%bandpp
        nblockbd=nband_k/bandpp
      end if
