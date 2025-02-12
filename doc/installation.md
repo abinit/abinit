@@ -242,9 +242,9 @@ make -j 8
 
 Then ABINIT executable will be available in folder `_build_cmake/src/98_main/`. You can use it as if you had built ABINIT with the `autotools` build system.
 
-> **Important note: Assisting `CMake` build system is highly recommended**  
-> The external depndencies detection system is still under development; only `pkg-config` detection is fully operational (see note below).  
-It is strongly recommended to guide the build system by specifying the path to the libraries as follows (steps 1 and 2 above):  
+> **Important note: Assisting `CMake` build system is highly recommended**
+> The external depndencies detection system is still under development; only `pkg-config` detection is fully operational (see note below).
+It is strongly recommended to guide the build system by specifying the path to the libraries as follows (steps 1 and 2 above):
 ```bash
 PKG_CONFIG_PATH="path/to/netcdf/lib/pkgconfig:path/to/netcdf_fortran/lib/pkgconfig:path/to/libxc/lib/pkgconfig:$PKG_CONFIG_PATH" CC="my_C_compiler" CXX="my_C++_compiler" FC="my_Fortran_compiler" CPP="my_C_preprocessor" cmake -S ..
 make -j 8
@@ -284,7 +284,7 @@ To do this, simply run:
 make check
 ```
 
-> Note: make check is strictly equivalent to executing:  
+> Note: make check is strictly equivalent to executing:
   `cd tests && ~abinit_src_dir/tests/runtests.py --keywords MINIMAL --yaml-simplified-diff`
 
 

@@ -163,7 +163,7 @@ subroutine rot_cg(occ_nd,cwavef,npw,nband,blocksize,nspinor,first_bandc,nbandc,o
   real(dp), intent(inout) :: cwavef(2,npw,blocksize,nspinor)
 !Local variables-------------------------------
 !scalars
-  integer :: ispinor,n,np
+  integer :: ispinor,n
   character(len=500) :: message
 !arrays
   real(dp), allocatable :: occ_diag_red(:)
@@ -185,11 +185,8 @@ subroutine rot_cg(occ_nd,cwavef,npw,nband,blocksize,nspinor,first_bandc,nbandc,o
   ABI_MALLOC(occ_diag_red,(nbandc))
   ABI_MALLOC(occ_nd_cpx,(nbandc,nbandc))
 
-  do np=1,nbandc
-    do n=1,nbandc
-      occ_nd_cpx(n,np) = cmplx(occ_nd(1,n+first_bandc-1,np+first_bandc-1),occ_nd(2,n+first_bandc-1,np+first_bandc-1),kind=dp)
-    end do
-  end do
+  occ_nd_cpx(:,:) = cmplx(occ_nd(1,first_bandc:first_bandc+nbandc-1,first_bandc:first_bandc+nbandc-1), &
+                        & occ_nd(2,first_bandc:first_bandc+nbandc-1,first_bandc:first_bandc+nbandc-1),kind=dp)
 
 !! Get diagonal occupations and associated base
 

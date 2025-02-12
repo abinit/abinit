@@ -24,10 +24,10 @@
     prtmbm  1
 
 # Wavevector list number 1
-**************************                                                      
+**************************
      nph1l  1
-     qph1l  0.0 0.0 0.0 1.0 
-                                                                                
+     qph1l  0.0 0.0 0.0 1.0
+
 # Wave vector list no. 2
 #***********************
      nph2l  1

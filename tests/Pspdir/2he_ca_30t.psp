@@ -4,7 +4,7 @@ Helium, fhi98PP : TM-type, LDA, l=0 local
 4--- These three lines are available for giving more information, later
 5    rs=3.0
 6
-7-Here follows the cpi file from the fhi98pp code-         
+7-Here follows the cpi file from the fhi98pp code-
 0.20000000000000E+01   1
   0.0000    0.0000    0.0000   0.0000
   0.0000    .00e+00   .00e+00

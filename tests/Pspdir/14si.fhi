@@ -2,7 +2,7 @@ Si, fhi98PP : LDA PerdewWang, l=2 local
  14.000  4.000    150901              zatom,zion,pspdat
  6       7        2   2    495     0  pspcod,pspxc,lmax,lloc,mmax,r2well
  0.0     0.0     0.0                  rchrg, fchrg, qchrg
-5--- 
+5---
 6  Pseudo generated with r_cut=2.1
 7---
 0.40000000000000E+01   3

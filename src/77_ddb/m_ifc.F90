@@ -7,7 +7,7 @@
 !!  used to handle interatomic force constant sets
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2024 ABINIT group (XG,MJV,EB,MG)
+!! Copyright (C) 2011-2024 ABINIT group (XG,MJV,EB,MG,GA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -32,9 +32,7 @@ MODULE m_ifc
  use m_ddb
  use m_ddb_hdr
  use m_symkpt
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
 
  use m_io_tools,    only : open_file
  use m_numeric_tools, only : arth
@@ -49,9 +47,10 @@ MODULE m_ifc
  use m_crystal,     only : crystal_t
  use m_geometry,    only : phdispl_cart2red, normv, mkrdim
  use m_kpts,        only : kpts_ibz_from_kptrlatt, smpbz
+ use m_bz_mesh,     only : kpath_t
  use m_dynmat,      only : canct9, dist9 , ifclo9, axial9, q0dy3_apply, q0dy3_calc, asrif9, dynmat_dq, &
                            make_bigbox, canat9, chkrp9, ftifc_q2r, wght9, nanal9, gtdyn9, dymfz9, &
-                           massmult_and_breaksym, dfpt_phfrq, dfpt_prtph
+                           massmult_and_breaksym, dfpt_phfrq, dfpt_prtph, d2cart_to_red
 
  implicit none
 
@@ -205,13 +204,13 @@ MODULE m_ifc
  contains
 
     procedure :: free => ifc_free
-    ! Release memory
+    ! Release memory.
 
     procedure :: print => ifc_print
      ! Print info on the object.
 
     procedure :: fourq => ifc_fourq
-     ! Use Fourier interpolation to compute interpolated frequencies w(q) and eigenvectors e(q)
+     ! Use Fourier interpolation to compute interpolated frequencies w(q) and eigenvectors e(q).
 
     procedure :: get_dwdq => ifc_get_dwdq
     !  Compute phonon group velocities at an arbitrary q-point.
@@ -223,7 +222,7 @@ MODULE m_ifc
      ! Compute the speed of sound by averaging phonon group velocities.
 
     procedure :: write => ifc_write
-     ! Print the ifc (output, netcdf and text file)
+     ! Print the ifc (output, netcdf and text file).
 
     procedure :: outphbtrap => ifc_outphbtrap
      ! Print out phonon frequencies on regular grid for BoltzTrap code.
@@ -232,13 +231,20 @@ MODULE m_ifc
      ! Output phonon isosurface in Xcrysden format.
 
     procedure :: calcnwrite_nana_terms => ifc_calcnwrite_nana_terms
-     ! Compute phonons for q--> 0 with LO-TO
+     ! Compute phonons for q--> 0 with LO-TO.
+
+    procedure :: calcnwrite_nana_terms_qpath => ifc_calcnwrite_nana_terms_qpath
+     ! Compute phonons for q--> 0 with LO-TO from qpath_t and write results to netcdf file.
 
     procedure :: init => ifc_init
-     ! Constructor from DDB datatype
+     ! Constructor from DDB datatype.
 
     procedure :: from_file => ifc_from_file
-     ! Constructor from filename
+     ! Constructor from filename.
+
+    procedure :: to_ddb => ifc_to_ddb
+     ! Construct a DDB object.
+
  end type ifc_type
 !!***
 
@@ -1350,7 +1356,6 @@ subroutine ifc_speedofsound(ifc, crystal, qrad_tolkms, ncid, comm)
 
    ! Dump results to netcdf file.
    if (ncid /= nctk_noid) then
-#ifdef HAVE_NETCDF
      ncerr = nctk_def_arrays(ncid, [nctkarr_t("vsound", "dp", "seven, three")], defmode=.True.)
      NCF_CHECK(ncerr)
      ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "vsound_ierr"])
@@ -1366,7 +1371,6 @@ subroutine ifc_speedofsound(ifc, crystal, qrad_tolkms, ncid, comm)
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vsound_tolkms"), tolkms))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vsound"), vs))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "asnu"), asnu))
-#endif
    end if
  end if
 
@@ -1793,7 +1797,6 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid, &
    write(unit_tdep,"(1X,F20.15,5X,'Realspace cutoff (A)')") maxdist_tdep*Bohr_Ang
  end if
 
-#ifdef HAVE_NETCDF
  if (ncid /= nctk_noid) then
    ! initialize netcdf variables
    ncerr = nctk_def_dims(ncid, [nctkdim_t("natifc", SUM(atifc)), nctkdim_t("number_of_r_points_big_box", Ifc%nrpt), &
@@ -1824,7 +1827,6 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid, &
 
    NCF_CHECK(nctk_set_datamode(ncid))
  end if
-#endif
 
  ABI_MALLOC(rsiaf,(3,3,ifcout1))
  ABI_MALLOC(sriaf,(3,3,ifcout1))
@@ -1865,6 +1867,11 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid, &
        write(iout, '(a)' )
      end if
 
+     ! BEGIN DEBUG
+     !write(*,*) 'ifc_write (1) : Writing atmfrc'
+     !write(*,*) 'atmfrc         : ', Ifc%atmfrc
+     !call flush()
+     ! END DEBUG
      call ifc_getiaf(Ifc,ifcana,ifcout1,iout,ifc%zeff,ia,ra,list,dist,invdlt,&
                      detdlt,rsiaf,sriaf,vect,indngb,posngb)
 
@@ -1909,7 +1916,6 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid, &
          end do
        end do
 
-#ifdef HAVE_NETCDF
        if (ncid /= nctk_noid) then
          NCF_CHECK(nf90_put_var(ncid, vid("ifc_atoms_indices"), ia, start=[iatifc]))
          NCF_CHECK(nf90_put_var(ncid, vid("ifc_neighbours_indices"), indngb, start=[1,iatifc], count=[ifcout1,1]))
@@ -1929,7 +1935,6 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid, &
            NCF_CHECK(ncerr)
          end if
        end if
-#endif
      end if
    end if ! End the condition on atifc
  end do ! End Big loop on atoms in the unit cell, and corresponding test
@@ -1978,13 +1983,11 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid, &
  ABI_FREE(wkdist)
  ABI_FREE(wghia)
 
-#ifdef HAVE_NETCDF
 contains
  integer function vid(vname)
    character(len=*),intent(in) :: vname
    vid = nctk_idname(ncid, vname)
  end function vid
-#endif
 
 end subroutine ifc_write
 !!***
@@ -2737,19 +2740,15 @@ subroutine ifc_calcnwrite_nana_terms(ifc, crystal, nph2l, qph2l, &
 
 !Local variables-------------------------------
 !scalars
- integer :: iatom,idir,imode,iphl2
-#ifdef HAVE_NETCDF
- integer :: ncerr
-#endif
+ integer :: iatom,idir,imode,iphl2, ncerr
 !arrays
  real(dp) :: qphnrm(3),qphon(3,3)
  real(dp),allocatable :: displ_cart(:,:,:),phfrq(:),d2cart(:,:,:),eigvec(:,:,:),eigval(:)
-
 ! ************************************************************************
 
  if (nph2l == 0) return
 
- !Now treat the second list of vectors (only at the Gamma point, but can include non-analyticities)
+ ! Now treat the second list of vectors (only at the Gamma point, but can include non-analyticities)
  ABI_MALLOC(phfrq, (3*crystal%natom))
  ABI_MALLOC(displ_cart, (2, 3*crystal%natom, 3*crystal%natom))
  ABI_MALLOC(d2cart, (2, 3*ifc%mpert, 3*ifc%mpert))
@@ -2760,17 +2759,15 @@ subroutine ifc_calcnwrite_nana_terms(ifc, crystal, nph2l, qph2l, &
  qphon(:,1)=zero; qphnrm(1)=zero
 
  ! Generation of the dynamical matrix in cartesian coordinates
- ! Get d2cart using the interatomic forces and the
- ! long-range coulomb interaction through Ewald summation
+ ! Get d2cart using the interatomic forces and the long-range coulomb interaction through Ewald summation
  call gtdyn9(ifc%acell,ifc%atmfrc,ifc%dielt,ifc%dipdip, &
    ifc%dyewq0,d2cart,crystal%gmet,ifc%gprim,ifc%mpert,crystal%natom, &
    ifc%nrpt,qphnrm(1),qphon,crystal%rmet,ifc%rprim,ifc%rpt, &
    ifc%trans,crystal%ucvol,ifc%wghatm,crystal%xred,ifc%zeff,ifc%qdrp_cart,ifc%ewald_option,xmpi_comm_self)
 
-#ifdef HAVE_NETCDF
  if (present(ncid)) then
    iphl2 = 0
-   call nctk_defwrite_nonana_terms(ncid, iphl2, nph2l, qph2l, crystal%natom, phfrq, displ_cart, "define")
+   call nctk_defwrite_nonana_terms(ncid, iphl2, nph2l, qph2l, crystal%natom, phfrq, displ_cart, mode="define")
    ! Add epsinf, Born effective charges and some useful metadata.
    ncerr = nctk_def_arrays(ncid, [ &
      nctkarr_t('emacro_cart', "dp", 'number_of_cartesian_directions, number_of_cartesian_directions'), &
@@ -2789,7 +2786,6 @@ subroutine ifc_calcnwrite_nana_terms(ifc, crystal, nph2l, qph2l, &
      [ifc%asr, ifc%dipdip, ifc%symdynmat])
    NCF_CHECK(ncerr)
  end if
-#endif
 
  ! Examine every wavevector of this list
  do iphl2=1,nph2l
@@ -2819,12 +2815,10 @@ subroutine ifc_calcnwrite_nana_terms(ifc, crystal, nph2l, qph2l, &
      enddo
    endif
 
-#ifdef HAVE_NETCDF
    if(present(ncid))then
      ! Loop is not MPI-parallelized --> no need for MPI-IO API.
-     call nctk_defwrite_nonana_terms(ncid, iphl2, nph2l, qph2l, crystal%natom, phfrq, displ_cart, "write")
+     call nctk_defwrite_nonana_terms(ncid, iphl2, nph2l, qph2l, crystal%natom, phfrq, displ_cart, mode="write")
    endif
-#endif
  end do ! iphl2
 
  ABI_FREE(phfrq)
@@ -2838,4 +2832,193 @@ end subroutine ifc_calcnwrite_nana_terms
 
 !----------------------------------------------------------------------
 
+subroutine ifc_calcnwrite_nana_terms_qpath(ifc, qpath, cryst, ncid, units)
+
+!Arguments ------------------------------------
+ class(ifc_type),intent(in) :: ifc
+ integer,intent(in) :: ncid, units(:)
+ type(kpath_t),intent(in) :: qpath
+ type(crystal_t),intent(in) :: cryst
+
+!Local variables-------------------------------
+!scalars
+ integer :: iq, nq_vers, natom3, nu
+ character(len=500) :: msg
+!arrays
+ real(dp) :: phfreqs(3*cryst%natom), displ_cart(2,3,cryst%natom,3*cryst%natom)
+ real(dp),allocatable :: qvers_red(:,:), qvers_cart(:,:)
+! ************************************************************************
+
+ natom3 = 3 * cryst%natom
+ call qpath%get_versors(nq_vers, qvers_red, qvers_cart)
+
+ do iq=1,nq_vers
+   call ifc%fourq(cryst, qvers_red(:,iq), phfreqs, displ_cart, nanaqdir="reduced")
+
+   call wrtout(units, sjoin("Phonon frequencies in meV along reduced direction:", ktoa(qvers_red(:,iq)), "(reciprocal space)"))
+   if (iq == 1) then
+     call nctk_defwrite_nonana_terms(ncid, iq, nq_vers, qvers_cart, cryst%natom, phfreqs, displ_cart, mode="define")
+   end if
+   call nctk_defwrite_nonana_terms(ncid, iq, nq_vers, qvers_cart, cryst%natom, phfreqs, displ_cart, mode="write")
+
+   do nu=1,natom3
+     write(msg, "(1x,i0, es16.6)") nu, phfreqs(nu) * Ha_meV
+     call wrtout(units, msg)
+   end do
+ end do
+
+ ABI_FREE(qvers_red)
+ ABI_FREE(qvers_cart)
+
+end subroutine ifc_calcnwrite_nana_terms_qpath
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ifc/ifc_to_ddb
+!! NAME
+!! ifc_to_ddb
+!!
+!! FUNCTION
+!! Construct a DDB object from the IFC object.
+!!
+!! INPUTS
+!!  ifc = IFC object
+!!  crystal = Crystal object
+!!
+!! OUTPUT
+!!  ddb = DDB object
+!!
+!! NOTES
+!!
+!! SOURCE
+
+subroutine ifc_to_ddb(ifc, ddb, crystal)
+
+!Arguments -----------------------------------
+!scalars
+ class(ifc_type),intent(in) :: ifc
+ type(ddb_type),intent(out) :: ddb
+ type(crystal_t),intent(in) :: crystal
+
+!Local variables-------------------------------
+!scalars
+ integer :: jj,iqpt,idir1,idir2,ipert1,ipert2
+ integer :: mpert,msize
+ integer :: nqibz,nqbz
+ integer,parameter :: qptopt=1
+ integer,parameter :: nqshft=1
+ real(dp) :: qj,qptnrm
+!arrays
+ integer :: qptrlatt(3,3)
+ real(dp) :: qpt(3)
+ real(dp) :: qshft(1,3)
+ integer,allocatable :: flg(:,:,:,:)
+ real(dp),allocatable :: qibz(:,:),qbz(:,:), wtq(:)
+ real(dp),allocatable :: d2cart(:,:,:,:,:),d2red(:,:,:,:,:)
+
+! *********************************************************************
+
+  ! Initialize DDB with minimal info
+  ! ================================
+
+  ! Crystal info
+  ddb%natom  = crystal%natom
+  ddb%ntypat = crystal%ntypat
+  ddb%rprim  = ifc%rprim
+  ddb%gprim  = ifc%gprim
+  ddb%acell  = ifc%acell
+  call alloc_copy(crystal%amu, ddb%amu)
+
+  ! Block size
+  !mpert = ddb%natom + 3
+  mpert = ddb%natom + 6
+  msize = 3*mpert*3*mpert
+  ddb%mpert = mpert
+  ddb%msize = msize
+
+  ! Generate q-points
+  qshft = zero
+  qptrlatt = zero
+  qptrlatt(1,1)=ifc%ngqpt(1)
+  qptrlatt(2,2)=ifc%ngqpt(2)
+  qptrlatt(3,3)=ifc%ngqpt(3)
+
+  call kpts_ibz_from_kptrlatt(crystal,qptrlatt,qptopt,nqshft,qshft, &
+                              nqibz,qibz,wtq,nqbz,qbz)
+
+  ddb%nblok = nqibz
+  ABI_MALLOC(ddb%flg,(msize,nqibz))  ; ddb%flg = one
+  ABI_MALLOC(ddb%nrm,(3,nqibz))      ; ddb%nrm = zero ; ddb%nrm(1,:) = one
+  ABI_MALLOC(ddb%qpt,(9,nqibz))      ; ddb%qpt = zero
+  ABI_MALLOC(ddb%val,(2,msize,nqibz)); ddb%val = zero
+  ABI_MALLOC(ddb%typ,(nqibz))
+  
+  do iqpt=1,nqibz
+    ddb%typ(iqpt) = BLKTYP_d2E_ns
+    do jj = 1,3
+      qj = qibz(jj,iqpt)
+      if (abs(qj).lt.tol8) qj = zero
+      ddb%qpt(jj,iqpt) = qj
+    end do
+  end do
+
+  ABI_FREE(wtq)
+  ABI_FREE(qibz)
+  ABI_FREE(qbz)
+
+  ! Compute DDB by Fourier transform of the IFC
+  ! ===========================================
+
+  qptnrm = one
+  ABI_MALLOC(d2cart,(2,3,mpert,3,mpert))
+  ABI_MALLOC(d2red,(2,3,mpert,3,mpert))
+
+  ! Set up the flags
+  ABI_MALLOC(flg,(3,mpert,3,mpert))
+  flg = zero
+  do ipert1=1,ddb%natom
+    do ipert2=1,ddb%natom
+      do idir1=1,3
+        do idir2=1,3
+          flg(idir1,ipert1,idir2,ipert2) = one
+        end do
+      end do
+    end do
+  end do
+
+  do iqpt=1,DDB%nblok
+
+    qpt(:) = DDB%qpt(1:3,iqpt)
+
+    ! Get d2cart using the interatomic forces and the
+    ! long-range coulomb interaction through Ewald summation
+    call gtdyn9(ddb%acell,ifc%atmfrc,ifc%dielt,ifc%dipdip,ifc%dyewq0,d2cart, &
+     crystal%gmet,ddb%gprim,ddb%mpert,crystal%natom,ifc%nrpt,qptnrm,qpt,&
+     crystal%rmet,ddb%rprim,ifc%rpt,ifc%trans,crystal%ucvol, &
+     ifc%wghatm,crystal%xred,ifc%zeff,ifc%qdrp_cart,ifc%ewald_option, &
+     xmpi_comm_self)
+
+    ! Impose the acoustic sum rule
+    !asrq0 = ddb%get_asrq0(1,1,crystal%xcart)
+    !call asrq0%apply(ddb%natom, ddb%mpert, ddb%msize, crystal%xcart, d2cart)
+
+    ! Transform d2cart into reduced coordinates.
+    call d2cart_to_red(d2cart,d2red,crystal%gprimd,crystal%rprimd,ddb%mpert, &
+     crystal%natom,crystal%ntypat,crystal%typat,crystal%ucvol,crystal%zion)
+
+    call ddb%set_d2matr(iqpt, d2red, flg)
+
+  end do
+
+  ABI_FREE(d2cart)
+  ABI_FREE(d2red)
+  ABI_FREE(flg)
+
+end subroutine ifc_to_ddb
+!!***
+
+!----------------------------------------------------------------------
+
 end module m_ifc
+!!***

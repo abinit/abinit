@@ -1,4 +1,4 @@
-Titane.ion 3s2.3p6.4s0.3d2 rcd=1.65, rcs=rc0=1.25, ecut 32/54                   
+Titane.ion 3s2.3p6.4s0.3d2 rcd=1.65, rcs=rc0=1.25, ecut 32/54
    22.0000       12.0000      940000      z,zion,  pspdat (not known !)
   4         3         2   2      2001    0  pspcod,pspxc,lmax,lloc,mmax,r2well
   0  0  0   2    1.25335767631060291          l,e99.0,e99.9,nproj,rcpsp

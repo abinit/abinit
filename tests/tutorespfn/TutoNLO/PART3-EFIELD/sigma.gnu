@@ -17,7 +17,7 @@ e_Cb = 1.602176462e-19
 HaBohr3_GPa=Ha_eV/Bohr_Ang**3*e_Cb*1.0e+21
 
 
-f(x) = a*x + b 
+f(x) = a*x + b
 fit f(x) 'sigma.lst' u 1:2 via a,b
 plot "sigma.lst" u ($1*10000):($2*1e5) notitle w p pt 6 ps 2, \
    f(x/10000)*1e5 notitle w lines -1

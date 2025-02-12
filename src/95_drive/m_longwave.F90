@@ -104,13 +104,6 @@ contains
 !! PARENTS
 !!      m_driver
 !!
-!! CHILDREN
-!!      check_kxc,ddb_hdr%free,ddb_hdr%open_write,ddb_hdr_init,
-!!      dfpt_lw_doutput,ebands_free
-!!      fourdp,hdr%free,hdr%update,hdr_init,inwffil,kpgio,matr3inv,mkcore,mkrho
-!!      pawfgr_init,pspini,read_rhor,rhotoxc,setsym,setup1,symmetrize_xred
-!!      wffclose,xcdata_init
-!!
 !! SOURCE
 
 subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
@@ -119,9 +112,6 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 #ifdef FC_INTEL
 !DEC$ NOOPTIMIZE
 #endif
-
-
- implicit none
 
 !Arguments ------------------------------------
  !scalars
@@ -278,7 +268,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 
  if (dtset%lw_natopt==1) then
    d3e_pert1(natom+2)=1
-   d3e_pert2(natom+2)=1 
+   d3e_pert2(natom+2)=1
  end if
 
  perm(:)=0
@@ -294,7 +284,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
        if ( sum(perm(:)) > 0 ) rfpert(:,i1pert,:,i2pert,:,i3pert)=1
      end do
    end do
- end do 
+ end do
 
 !Do symmetry stuff
  ABI_MALLOC(irrzon,(nfftot**(1-1/dtset%nsym),2,(dtset%nspden/dtset%nsppol)-3*(dtset%nspden/4)))
@@ -325,7 +315,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  call sylwtens(indsym,mpert,natom,dtset%nsym,rfpert,symrec,dtset%symrel)
 
  write(msg,'(a,a,a,a,a)') ch10, &
-& ' The list of irreducible elements of the spatial-dispersion third-order energy derivatives is: ', ch10,& 
+& ' The list of irreducible elements of the spatial-dispersion third-order energy derivatives is: ', ch10,&
 & ' (in reduced coordinates except for strain pert.) ', ch10
  call wrtout(ab_out,msg,'COLL')
  call wrtout(std_out,msg,'COLL')
@@ -394,14 +384,14 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 & psps,rprimd,comm_mpi=mpi_enreg%comm_cell)
 
 !Initialize band structure datatype
- bstruct = ebands_from_dtset(dtset, npwarr)
+ call bstruct%from_dtset(dtset, npwarr)
 
 !Initialize PAW atomic occupancies to zero
  ABI_MALLOC(pawrhoij,(0))
 
 !Initialize header
  gscase=0
- call hdr_init(bstruct,codvsn,dtset,hdr,pawtab,gscase,psps,wvl%descr, &
+ call hdr%init(bstruct,codvsn,dtset,pawtab,gscase,psps,wvl%descr, &
 & comm_atom=mpi_enreg%comm_atom, mpi_atmtab=mpi_enreg%my_atmtab)
 
 !Update header, with evolving variables, when available
@@ -414,7 +404,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 & comm_atom=mpi_enreg%comm_atom, mpi_atmtab=mpi_enreg%my_atmtab)
 
 !Clean band structure datatype (should use it more in the future !)
- call ebands_free(bstruct)
+ call bstruct%free()
 
 !Initialize wavefunction files and wavefunctions.
  ireadwf0=1
@@ -542,18 +532,18 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 & nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,rhor,&
 & rprimd,usexcnhat,vxc,vxcavg,xccc3d,xcdata)
 
-!Set up the spherical harmonics (Ylm) and gradients at each k point 
+!Set up the spherical harmonics (Ylm) and gradients at each k point
  if (psps%useylm==1) then
    useylmgr=1; option=2 ; nylmgr=9
-   ABI_MALLOC(ylm,(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm))               
+   ABI_MALLOC(ylm,(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm))
    ABI_MALLOC(ylmgr,(dtset%mpw*dtset%mkmem,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr))
    call initylmg(gprimd,kg,dtset%kptns,dtset%mkmem,mpi_enreg,&
 &  psps%mpsang,dtset%mpw,dtset%nband,dtset%nkpt,npwarr,dtset%nsppol,option,&
-&  rprimd,ylm,ylmgr)                                   
+&  rprimd,ylm,ylmgr)
  end if
 
 !Compute nonlocal form factors ffnl1, for all atoms and all k-points.
- if (dtset%ffnl_lw == 0) then 
+ if (dtset%ffnl_lw == 0) then
    if (dtset%lw_natopt==1) then
      ider=1;dimffnl=4;dimffnl_i=2
      ABI_MALLOC(ffnl,(dtset%mkmem,dtset%mpw,dimffnl,psps%lmnmax,psps%ntypat))
@@ -572,7 +562,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
        ABI_FREE(ylmgr)
        ABI_MALLOC(ylmgr,(dtset%mpw*dtset%mkmem,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr))
      end if
-   else        
+   else
      if (dtset%lw_qdrpl==1.or.dtset%lw_flexo==3) ider=1; idir0=4; dimffnl=4
      if (dtset%lw_flexo==1.or.dtset%lw_flexo==2.or.dtset%lw_flexo==4) then
        ider=2; idir0=4; dimffnl=10
@@ -585,7 +575,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
      ABI_FREE(ylmgr)
      ABI_MALLOC(ylmgr,(dtset%mpw*dtset%mkmem,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr))
    end if
- else if (dtset%ffnl_lw == 1) then 
+ else if (dtset%ffnl_lw == 1) then
    dimffnl=0
    ABI_MALLOC(ffnl,(dtset%mkmem,dtset%mpw,dimffnl,psps%lmnmax,psps%ntypat))
  end if
@@ -665,11 +655,11 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
                    & ' and/or type-I/type-II forms are used.'
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')
- end if 
- 
+ end if
+
 !Calculate the nonvariational Ewald terms
  if (dtset%lw_flexo==1.or.dtset%lw_flexo==3.or.dtset%lw_flexo==4) then
-   call dfptlw_nv(d3etot_nv,dtset,gmet,gprimd,mpert,my_natom,rfpert,rmet,rprimd,ucvol,xred,psps%ziontypat, & 
+   call dfptlw_nv(d3etot_nv,dtset,gmet,gprimd,mpert,my_natom,rfpert,rmet,rprimd,ucvol,xred,psps%ziontypat, &
   & mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
  end if
 
@@ -833,18 +823,16 @@ subroutine dfptlw_out(blkflg_car,d3etot_car,lw_flexo,lw_qdrpl,lw_natopt,mpert,na
  use m_errors
  use m_profiling_abi
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: lw_flexo,lw_qdrpl,lw_natopt,mpert,natom
  real(dp),intent(in) :: ucvol
 !arrays
- integer,intent(in) :: blkflg_car(3,mpert,3,mpert,3,mpert) 
+ integer,intent(in) :: blkflg_car(3,mpert,3,mpert,3,mpert)
  real(dp),intent(out) :: d3etot_car(2,3,mpert,3,mpert,3,mpert)
 
 !Local variables-------------------------------
-!scalar 
+!scalar
  integer :: beta,delta,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert,istr
 !arrays
  integer,save :: idx(18)=(/1,1,2,2,3,3,3,2,3,1,2,1,2,3,1,3,1,2/)
@@ -888,7 +876,7 @@ subroutine dfptlw_out(blkflg_car,d3etot_car,lw_flexo,lw_qdrpl,lw_natopt,mpert,na
              !real part
              qdrp(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)=&
            & d3etot_car(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) + &
-           & d3etot_car(2,i3dir,i1pert,i2dir,i2pert,i1dir,i3pert) 
+           & d3etot_car(2,i3dir,i1pert,i2dir,i2pert,i1dir,i3pert)
 
              qdrp(1,i3dir,i1pert,i2dir,i2pert,i1dir,i3pert)=&
            & qdrp(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
@@ -896,7 +884,7 @@ subroutine dfptlw_out(blkflg_car,d3etot_car,lw_flexo,lw_qdrpl,lw_natopt,mpert,na
              !imaginary part
              qdrp(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)=&
            & -(d3etot_car(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) + &
-           &   d3etot_car(1,i3dir,i1pert,i2dir,i2pert,i1dir,i3pert) ) 
+           &   d3etot_car(1,i3dir,i1pert,i2dir,i2pert,i1dir,i3pert) )
 
              qdrp(2,i3dir,i1pert,i2dir,i2pert,i1dir,i3pert)=&
            & qdrp(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)

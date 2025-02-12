@@ -6,6 +6,7 @@ add_library(78_eph STATIC
   m_cumulant.F90
   m_eph_double_grid.F90
   m_ephwg.F90
+  m_eph_path.F90
   m_frohlich.F90
   m_gstore.F90
   m_gkk.F90

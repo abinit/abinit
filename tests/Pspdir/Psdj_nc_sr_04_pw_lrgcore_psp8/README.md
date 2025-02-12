@@ -10,9 +10,9 @@ These pseudodojo NC-SR v0.4 large core pseudopotentials have the same characteri
 
 * Standard accuracy
 
-They have been downloaded on September 26, 2020 from the Github directory 
+They have been downloaded on September 26, 2020 from the Github directory
 in https://github.com/abinit/pseudo_dojo/tree/master/pseudo_dojo/pseudos .
-They were NOT available on the pseudodojo Web site, because of lower accuracy than the standard small core 
+They were NOT available on the pseudodojo Web site, because of lower accuracy than the standard small core
 pseudopotentials delivered on the pseudodojo Web page.
 
 

@@ -1,8 +1,8 @@
 
- **** DERIVATIVE DATABASE ****    
+ **** DERIVATIVE DATABASE ****
 +DDB, Version number     10929
 
-  Note : temporary (transfer) database                                                                                               
+  Note : temporary (transfer) database
 
      natom         2
       nkpt       432
@@ -665,7 +665,7 @@
             0.25000000000000D+00  0.25000000000000D+00  0.25000000000000D+00
      znucl  0.13000000000000D+02  0.33000000000000D+02
       zion  0.30000000000000D+01  0.50000000000000D+01
- 
+
   Description of the potentials (KB energies)
   vrsio8 (for pseudopotentials)= 10929
   dimekb =  2       lmnmax=  2       usepaw=  0
@@ -676,10 +676,10 @@
   Atom type=    2   pspso=  1   nekb=   1
   iln lpsang iproj  ekb(:)
      1     0     1     8.3875106E-01
- 
+
  **** Database of total energy derivatives ****
  Number of data blocks=    1
-  
+
  3rd derivatives              - # elements :     189
  qpt  0.00000000E+00  0.00000000E+00  0.00000000E+00   1.0
       0.00000000E+00  0.00000000E+00  0.00000000E+00   1.0
