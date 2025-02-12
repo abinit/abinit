@@ -197,7 +197,8 @@ subroutine destroy_energy(energies_dmft,paw_dmft)
 !Local variables-------------------------------
 ! *********************************************************************
 
- paw_dmft%edmft = energies_dmft%edmft
+ paw_dmft%e_dc = energies_dmft%e_dc_tot
+ paw_dmft%e_hu = energies_dmft%e_hu_tot
 
  energies_dmft%e_hu => null()
  ABI_SFREE(energies_dmft%e_dc)
@@ -328,7 +329,11 @@ subroutine compute_energy(energies_dmft,green,paw_dmft,pawprtvol,pawtab,self,occ
 ! *********************************************************************
 
  if (part == 'both') then
-   write(message,'(2a)') ch10,"  == Compute DFT+DMFT energy terms "
+   if (occ_type == " lda") then
+     write(message,'(2a)') ch10,"  == Check: Compute DFT energy terms"
+   else
+     write(message,'(2a)') ch10,"  == Compute DFT+DMFT energy terms"
+   end if
    call wrtout(std_out,message,'COLL')
  else if (part == 'band') then
    write(message,'(2a)') ch10,"  == Compute DFT+DMFT energy terms : Band energy terms"
@@ -345,7 +350,7 @@ subroutine compute_energy(energies_dmft,green,paw_dmft,pawprtvol,pawtab,self,occ
    ABI_BUG(message)
  end if
 
- if ((paw_dmft%dmftctqmc_triqs_entropy /= 1 .or. occ_type == " lda") &
+ if ((paw_dmft%dmft_triqs_entropy /= 1 .or. occ_type == " lda") &
       & .and. (part == 'band' .or. part == 'both')) then
    call compute_band_energy(energies_dmft,green,paw_dmft,occ_type,ecalc_dft=1)
  end if
@@ -403,13 +408,13 @@ subroutine compute_energy(energies_dmft,green,paw_dmft,pawprtvol,pawtab,self,occ
        ABI_ERROR(message)
      end if
    else if (paw_dmft%dmft_solv == 2 .or. ((paw_dmft%dmft_solv == 6 .or. paw_dmft%dmft_solv == 7) &
-     & .and. (.not. paw_dmft%dmftctqmc_triqs_measure_density_matrix)) .or. paw_dmft%dmft_solv == 9) then
+     & .and. (.not. paw_dmft%dmft_triqs_measure_density_matrix)) .or. paw_dmft%dmft_solv == 9) then
      energies_dmft%e_hu => energies_dmft%e_hu_mig(:)
      energies_dmft%e_hu_tot = energies_dmft%e_hu_mig_tot
      energies_dmft%e_hu_qmc_tot = energies_dmft%e_hu_tot
    else if (paw_dmft%dmft_solv == 5 .or. paw_dmft%dmft_solv == 8 .or. &
       & ((paw_dmft%dmft_solv == 6 .or. paw_dmft%dmft_solv == 7) .and. &
-      & paw_dmft%dmftctqmc_triqs_measure_density_matrix) .and. occ_type /= " lda") then
+      & paw_dmft%dmft_triqs_measure_density_matrix) .and. occ_type /= " lda") then
      if (paw_dmft%dmft_solv == 8) then
        write(message,'(2a)') ch10,"Warning, energy is recently computed, not checked"
        call wrtout(std_out,message,'COLL')
@@ -482,12 +487,16 @@ subroutine compute_band_energy(energies_dmft,green,paw_dmft,occ_type,ecalc_dft,f
  integer, optional, intent(in) :: ecalc_dft,ecalc_dmft,fcalc_dft
 ! integer :: prtopt
 !Local variables-------------------------------
- integer :: band_index,ib,ibc,ierr,ikpt,isppol,nband_k,nkpt,nspinor,nsppol
+ integer :: band_index,ib,ibc,ikpt,isppol,nband_k,nkpt,nspinor,nsppol
  real(dp) :: beta,eig,fermie_used,occ,totch2,wtk !,totch3
  character(len=500) :: message
 ! *********************************************************************
 
- write(message,'(2a)') ch10,"  == Compute Band Energy terms for DMFT "
+ if (occ_type == " lda") then
+   write(message,'(2a)') ch10,"  == Compute DFT Band Energy terms"
+ else
+   write(message,'(2a)') ch10,"  == Compute DMFT Band Energy terms"
+ end if
  call wrtout(std_out,message,'COLL')
  beta = one / paw_dmft%temp
 
@@ -508,10 +517,6 @@ subroutine compute_band_energy(energies_dmft,green,paw_dmft,occ_type,ecalc_dft,f
  do isppol=1,nsppol
    do ikpt=1,nkpt
      nband_k = paw_dmft%nband(ikpt+(isppol-1)*nkpt)
-     if (paw_dmft%distrib%procb(ikpt) /= paw_dmft%distrib%me_kpt) then
-       band_index = band_index + nband_k
-       cycle
-     end if
      wtk = paw_dmft%wtk(ikpt)
      ibc = 0
      do ib=1,nband_k
@@ -570,17 +575,12 @@ subroutine compute_band_energy(energies_dmft,green,paw_dmft,occ_type,ecalc_dft,f
  end do ! isppol
 
  if (present(fcalc_dft)) then
-   call xmpi_sum(energies_dmft%fband_dft,paw_dmft%distrib%comm_kpt,ierr)
    energies_dmft%fband_dft = energies_dmft%fband_dft * paw_dmft%temp
    if (nsppol == 1 .and. nspinor == 1) energies_dmft%fband_dft = energies_dmft%fband_dft * two
    if (fcalc_dft == 1 .or. fcalc_dft == 4) energies_dmft%fband_dft = energies_dmft%fband_dft + &
       & fermie_used*paw_dmft%nelectval
  else
-   if (occ_type == " lda") then
-     call xmpi_sum(energies_dmft%eband_dft,paw_dmft%distrib%comm_kpt,ierr)
-     if (nsppol == 1 .and. nspinor == 1) energies_dmft%eband_dft = two * energies_dmft%eband_dft
-   end if
-   call xmpi_sum(energies_dmft%eband_dmft,paw_dmft%distrib%comm_kpt,ierr)
+   if (occ_type == " lda" .and. nsppol == 1 .and. nspinor == 1) energies_dmft%eband_dft = two * energies_dmft%eband_dft
    if (nsppol == 1 .and. nspinor == 1) energies_dmft%eband_dmft = two * energies_dmft%eband_dmft
  end if ! present(fcalc_dft)
    !if (fcalc_dft == 3 .or. fcalc_dft == 2) write(std_out,*) "compute_band_energy totch",totch
@@ -593,17 +593,17 @@ subroutine compute_band_energy(energies_dmft,green,paw_dmft,occ_type,ecalc_dft,f
  if (occ_type == " lda") then
    if (abs(energies_dmft%eband_dft-energies_dmft%eband_dmft) > tol5) then
      write(message,'(5x,3a,15x,a,f12.6,a,15x,a,5x,f12.5)') "Warning: ", &
-       & "Differences between band energy from DFT occupations",ch10, &
-       & "and DFT green function is:",energies_dmft%eband_dft-energies_dmft%eband_dmft,ch10, &
+       & "Differences between band energy with Fermi-Dirac occupations",ch10, &
+       & "and occupations from DFT Green's function is:",energies_dmft%eband_dft-energies_dmft%eband_dmft,ch10, &
        & "which is larger than",tol5
      call wrtout(std_out,message,'COLL')
      write(message,'(a)') &
-       & "   Action: increase the number of frequencies, or reduce the number of high energy dmft bands"
+       & "   Action: increase the number of frequencies, or reduce the number of high energy DMFT bands"
      call wrtout(std_out,message,'COLL')
    else
      write(message,'(3a,10x,a,f12.6,a,10x,a,5x,f12.5)')  "          ", &
-      & "Differences between band energy from DFT occupations",ch10, &
-      & "and DFT green function is:",energies_dmft%eband_dft-energies_dmft%eband_dmft,ch10, &
+      & "Differences between band energy with Fermi-Dirac occupations",ch10, &
+      & "and occupations from DFT Green's function is:",energies_dmft%eband_dft-energies_dmft%eband_dmft,ch10, &
       & "which is smaller than",tol5
      call wrtout(std_out,message,'COLL')
    end if ! tol
@@ -612,17 +612,17 @@ subroutine compute_band_energy(energies_dmft,green,paw_dmft,occ_type,ecalc_dft,f
  if (present(fcalc_dft)) then
    if (abs(energies_dmft%fband_dft-green%trace_log) > tol5) then
      write(message,'(5x,3a,15x,a,f12.6,a,15x,a,5x,f12.5)') "Warning: ", &
-       & "Differences between free energy from DFT occupations",ch10, &
-       & "and DFT green function is:",energies_dmft%fband_dft-green%trace_log,ch10, &
+       & "Differences between free energy with Fermi-Dirac occupations",ch10, &
+       & "and occupations from DFT Green's function is:",energies_dmft%fband_dft-green%trace_log,ch10, &
        & "which is larger than",tol5
      call wrtout(std_out,message,'COLL')
      write(message,'(a)') &
-       & "   Action: increase the number of frequencies, or reduce the number of high energy dmft bands"
+       & "   Action: increase the number of frequencies, or reduce the number of high energy DMFT bands"
      call wrtout(std_out,message,'COLL')
    else
      write(message,'(3a,10x,a,f12.6,a,10x,a,5x,f12.5)')  "          ", &
-      & "Differences between free energy from DFT occupations",ch10, &
-      & "and DFT green function is:",energies_dmft%fband_dft-green%trace_log,ch10, &
+      & "Differences between free energy with Fermi-Dirac occupations",ch10, &
+      & "and occupations from DFT Green's function is:",energies_dmft%fband_dft-green%trace_log,ch10, &
       & "which is smaller than",tol5
      call wrtout(std_out,message,'COLL')
    end if ! tol
@@ -666,12 +666,12 @@ subroutine compute_migdal_energy(e_hu_migdal,e_hu_migdal_tot,green,paw_dmft,self
  type(self_type), target, intent(in) :: self
 ! integer :: prtopt
 !Local variables-------------------------------
- integer :: i,ierr,ifreq,myproc,natom,nmoments,nspinor,nsppol,nwlo
- real(dp) :: beta
+ integer :: i,ierr,ifreq,j,myproc,natom,nmoments,nspinor,nsppol,nwlo
+ real(dp) :: beta,temp
  complex(dpc) :: omega
- complex(dpc), allocatable :: correction(:),integral(:),omega_inv(:),trace_moments(:,:)
+ complex(dpc), allocatable :: omega_fac(:),trace_moments(:,:),trace(:)
  type(matlu_type), allocatable :: self_nwlo_re(:)
- type(matlu_type), ABI_CONTIGUOUS pointer :: matlu_tmp(:) => null()
+ type(matlu_type), pointer :: matlu_tmp(:) => null()
  character(len=500) :: message
 ! *********************************************************************
 
@@ -690,6 +690,7 @@ subroutine compute_migdal_energy(e_hu_migdal,e_hu_migdal_tot,green,paw_dmft,self
  nspinor  = paw_dmft%nspinor
  nsppol   = paw_dmft%nsppol
  nwlo     = green%nw
+ temp     = paw_dmft%temp
 
  if (self%has_moments == 1) nmoments = self%nmoments
 
@@ -700,24 +701,19 @@ subroutine compute_migdal_energy(e_hu_migdal,e_hu_migdal_tot,green,paw_dmft,self
 ! write(std_out,*) "beta",beta
 
  ABI_MALLOC(trace_moments,(natom,nmoments))
- ABI_MALLOC(omega_inv,(nmoments))
- ABI_MALLOC(integral,(natom))
+ ABI_MALLOC(trace,(natom))
 
  e_hu_migdal(:) = zero
- integral(:) = czero
+ trace(:) = czero
 
  if (self%has_moments == 1) then
    trace_moments(:,:) = czero
-   call trace_prod_matlu(self%moments(1)%matlu(:),green%moments(1)%matlu(:),natom,trace_moments(:,1))
-   call trace_prod_matlu(self%moments(1)%matlu(:),green%moments(2)%matlu(:),natom,trace_moments(:,2))
-   call trace_prod_matlu(self%moments(2)%matlu(:),green%moments(1)%matlu(:),natom,trace_moments(:,2),opt_add=1)
-   call trace_prod_matlu(self%moments(1)%matlu(:),green%moments(3)%matlu(:),natom,trace_moments(:,3))
-   call trace_prod_matlu(self%moments(2)%matlu(:),green%moments(2)%matlu(:),natom,trace_moments(:,3),opt_add=1)
-   call trace_prod_matlu(self%moments(3)%matlu(:),green%moments(1)%matlu(:),natom,trace_moments(:,3),opt_add=1)
-   call trace_prod_matlu(self%moments(1)%matlu(:),green%moments(4)%matlu(:),natom,trace_moments(:,4))
-   call trace_prod_matlu(self%moments(2)%matlu(:),green%moments(3)%matlu(:),natom,trace_moments(:,4),opt_add=1)
-   call trace_prod_matlu(self%moments(3)%matlu(:),green%moments(2)%matlu(:),natom,trace_moments(:,4),opt_add=1)
-   call trace_prod_matlu(self%moments(4)%matlu(:),green%moments(1)%matlu(:),natom,trace_moments(:,4),opt_add=1)
+   do i=1,nmoments
+     do j=1,i
+       call trace_prod_matlu(self%moments(j)%matlu(:),green%moments(i-j+1)%matlu(:),natom,trace(:))
+       trace_moments(:,i) = trace_moments(:,i) + trace(:)
+     end do ! j
+   end do ! i
  else
    ABI_MALLOC(self_nwlo_re,(natom))
    ABI_MALLOC(matlu_tmp,(natom))
@@ -731,11 +727,6 @@ subroutine compute_migdal_energy(e_hu_migdal,e_hu_migdal_tot,green,paw_dmft,self
    if (self%distrib%procf(ifreq) /= myproc) cycle
 
    omega = cmplx(zero,paw_dmft%omega_lo(ifreq),kind=dp)
-   if (self%has_moments == 1) omega_inv(1) = cone / omega
-
-   do i=2,nmoments
-     omega_inv(i) = omega_inv(i-1) / omega
-   end do ! i
 
    if (self%has_moments == 1) then
      matlu_tmp => self%oper(ifreq)%matlu(:)
@@ -743,17 +734,27 @@ subroutine compute_migdal_energy(e_hu_migdal,e_hu_migdal_tot,green,paw_dmft,self
      call add_matlu(self%oper(ifreq)%matlu(:),self_nwlo_re(:),matlu_tmp(:),natom,-1)
    end if ! moments
 
-   call trace_prod_matlu(matlu_tmp(:),green%oper(ifreq)%matlu(:),natom,integral(:))
+   call trace_prod_matlu(matlu_tmp(:),green%oper(ifreq)%matlu(:),natom,trace(:))
 
-   do i=1,nmoments
-     integral(:) = integral(:) - trace_moments(:,i)*omega_inv(i)
-   end do ! i
-
-   e_hu_migdal(:) = e_hu_migdal(:) + dble(integral(:))*paw_dmft%wgt_wlo(ifreq)
+   e_hu_migdal(:) = e_hu_migdal(:) + dble(trace(:))*paw_dmft%wgt_wlo(ifreq)*temp*two
 
  end do ! ifreq
 
  call xmpi_sum(e_hu_migdal(:),paw_dmft%spacecomm,ierr)
+
+ ABI_MALLOC(omega_fac,(nmoments))
+
+ do i=1,nmoments
+   omega_fac(i) = czero
+   do ifreq=nwlo,1,-1 ! NEVER change the summation order and DON'T use the intrinsic SUM
+     omega_fac(i) = omega_fac(i) + cone / (paw_dmft%omega_lo(ifreq))**i
+   end do
+   omega_fac(i) = - two * temp * omega_fac(i) / (j_dpc)**i
+   if (i == 1) omega_fac(i) = omega_fac(i) + half
+   if (i == 2) omega_fac(i) = omega_fac(i) - cone/(four*temp)
+   if (i == 4) omega_fac(i) = omega_fac(i) + cone/(dble(48)*(temp**3))
+   e_hu_migdal(:) = e_hu_migdal(:) + dble(trace_moments(:,i)*omega_fac(i))
+ end do
 
  if (self%has_moments /= 1) then
    call destroy_matlu(matlu_tmp(:),natom)
@@ -761,31 +762,21 @@ subroutine compute_migdal_energy(e_hu_migdal,e_hu_migdal_tot,green,paw_dmft,self
  end if
  matlu_tmp => null()
 
- ABI_FREE(omega_inv)
- ABI_FREE(integral)
- ABI_MALLOC(correction,(natom))
-
- correction(:) = czero
- e_hu_migdal_tot = zero
-
- do i=1,nmoments
-   if (i == 1) correction(:) = correction(:) + trace_moments(:,i)*half
-   if (i == 2) correction(:) = correction(:) - trace_moments(:,i)*beta/four
-   if (i == 4) correction(:) = correction(:) + trace_moments(:,i)*(beta**3)/dble(48)
- end do ! i
+ ABI_FREE(omega_fac)
 
  if (self%has_moments == 0) then
-   call trace_prod_matlu(self_nwlo_re(:),green%occup%matlu(:),natom,correction(:))
+   call trace_prod_matlu(self_nwlo_re(:),green%occup%matlu(:),natom,trace(:))
    call destroy_matlu(self_nwlo_re(:),natom)
    ABI_FREE(self_nwlo_re)
+   e_hu_migdal(:) = e_hu_migdal(:) + dble(trace(:))
  end if
 
  ABI_FREE(trace_moments)
 
- e_hu_migdal(:) = e_hu_migdal(:)*paw_dmft%temp + dble(correction(:))*half
+ e_hu_migdal(:)  = half * e_hu_migdal(:) ! E_mig = 1/2 * Tr(Sig*G)
  e_hu_migdal_tot = sum(e_hu_migdal(:))
 
- ABI_FREE(correction)
+ ABI_FREE(trace)
 
  !xmig_1=zero
  !xmig_2=zero
@@ -1216,7 +1207,7 @@ subroutine compute_free_energy(energies_dmft,paw_dmft,green,part,self,weiss)
    call compute_trace_log_loc(weiss,paw_dmft,energies_dmft%fband_weiss,opt_inv=1)
 
    ! Integral of E_u/U
-   if (paw_dmft%dmft_integral == 1) energies_dmft%integral = green%integral
+   if (paw_dmft%dmft_triqs_compute_integral == 1) energies_dmft%integral = green%integral
 
    ! Tr(log(G_imp))
    call compute_trace_log_loc(green,paw_dmft,energies_dmft%fband_imp)
@@ -1274,7 +1265,7 @@ subroutine compute_trace_log_loc(green,paw_dmft,trace,opt_inv)
  integer, optional, intent(in) :: opt_inv
 !Local variables-------------------------------
  integer  :: i,iatom,ierr,ifreq,info,isppol,lpawu,lwork,natom,ndim,nmoments,nspinor,nsppol,nwlo,optinv
- real(dp) :: correction,fac
+ real(dp) :: correction,fac,signe,temp
  complex(dpc) :: omega,trace_tmp
  real(dp), allocatable :: eig(:),rwork(:)
  complex(dpc), allocatable :: mat_temp(:,:),omega_fac(:),work(:)
@@ -1288,8 +1279,12 @@ subroutine compute_trace_log_loc(green,paw_dmft,trace,opt_inv)
  nspinor  = paw_dmft%nspinor
  nsppol   = paw_dmft%nsppol
  nwlo     = green%nw
+ temp     = paw_dmft%temp
  trace    = zero
  ndim     = nspinor * (2*paw_dmft%maxlpawu+1)
+
+ signe = one
+ if (optinv == 1) signe = - one
 
  ABI_MALLOC(eig,(ndim))
  ABI_MALLOC(rwork,(3*ndim-2))
@@ -1301,21 +1296,10 @@ subroutine compute_trace_log_loc(green,paw_dmft,trace,opt_inv)
  ABI_MALLOC(work,(lwork))
  ABI_FREE(mat_temp)
 
- ABI_MALLOC(omega_fac,(nmoments))
-
  do ifreq=1,nwlo
    if (green%distrib%procf(ifreq) /= paw_dmft%myproc) cycle
    omega = cmplx(zero,paw_dmft%omega_lo(ifreq),kind=dp)
-   fac = paw_dmft%wgt_wlo(ifreq) * paw_dmft%temp
-   omega_fac(1) = - two * fac / omega
-   do i=2,nmoments
-     omega_fac(i) = omega_fac(i-1) / omega
-   end do ! i
-   if (ifreq == nwlo) then
-     omega_fac(1) = omega_fac(1) + half
-     omega_fac(2) = omega_fac(2) - cone/(four*paw_dmft%temp)
-     omega_fac(4) = omega_fac(4) + cone/(dble(48)*(paw_dmft%temp**3))
-   end if ! ifreq=nwlo
+   fac = temp
    if (nsppol == 1 .and. nspinor == 1) fac = fac * two
    trace_tmp = czero
    do iatom=1,natom
@@ -1327,29 +1311,40 @@ subroutine compute_trace_log_loc(green,paw_dmft,trace,opt_inv)
        call abi_xgemm("n","c",ndim,ndim,ndim,cone,green%oper(ifreq)%matlu(iatom)%mat(:,:,isppol),ndim,&
                     & green%oper(ifreq)%matlu(iatom)%mat(:,:,isppol),ndim,czero,mat_temp(:,:),ndim)
        call zheev('n','u',ndim,mat_temp(:,:),ndim,eig(:),work(:),lwork,rwork(1:3*ndim-2),info)
-       if (optinv == 0) then
-         trace_tmp = trace_tmp + sum(log(eig(1:ndim)*omega))
-       else
-         trace_tmp = trace_tmp - sum(log(eig(1:ndim)*omega))
-       end if ! optinv
+       trace_tmp = trace_tmp + signe*sum(log(eig(1:ndim)*omega))
      end do ! isppol
      if (ifreq == nwlo) then
-       correction = paw_dmft%temp * nsppol * ndim * log(two)
-       if (nsppol == 1 .and. nspinor == 1) correction = correction * two
+       correction = fac * nsppol * ndim * log(two)
        trace = trace - correction
      end if
      ABI_FREE(mat_temp)
    end do ! iatom
-   trace = trace + dble(trace_tmp)*fac + &
-         & dble(sum(green%trace_moments_log_loc(1:nmoments)*omega_fac(1:nmoments)))
+   trace = trace + dble(trace_tmp)*fac
  end do ! ifreq
 
- ABI_FREE(omega_fac)
  ABI_FREE(rwork)
  ABI_FREE(work)
  ABI_FREE(eig)
 
  call xmpi_sum(trace,paw_dmft%spacecomm,ierr)
+
+ ABI_MALLOC(omega_fac,(nmoments))
+
+ do i=1,nmoments
+   omega_fac(i) = czero
+   do ifreq=nwlo,1,-1 ! NEVER change the summation order and DON'T use the intrinsic SUM
+     omega_fac(i) = omega_fac(i) + cone / (paw_dmft%omega_lo(ifreq))**i
+   end do
+   omega_fac(i) = - two * temp * omega_fac(i) / (j_dpc)**i
+   if (i == 1) omega_fac(i) = omega_fac(i) + half
+   if (i == 2) omega_fac(i) = omega_fac(i) - cone/(four*temp)
+   if (i == 4) omega_fac(i) = omega_fac(i) + cone/(dble(48)*(temp**3))
+ end do ! i
+
+ ! Do not use dot_product
+ trace = trace + dble(sum(green%trace_moments_log_loc(1:nmoments)*omega_fac(1:nmoments)))
+
+ ABI_FREE(omega_fac)
 
 end subroutine compute_trace_log_loc
 !!***
@@ -1381,7 +1376,7 @@ subroutine print_free_energy(energies_dmft,temp)
  character(len=10000) :: message
 ! *********************************************************************
 
- write(message,'(a,5x,2a,5x,a,19(a,5x,a,2x,f18.11),a,5x,a)') ch10, &
+ write(message,'(a,5x,2a,5x,a,14(a,5x,a,2x,f18.11),a,5x,a)') ch10, &
      & "-----------------------------------------------",ch10, &
      & "--- Free Energy in DMFT (in Ha)  ",ch10, &
      & "--- E_hu                  (1) (Ha.) = ",energies_dmft%e_hu_tot,ch10, &
@@ -1395,7 +1390,6 @@ subroutine print_free_energy(energies_dmft,temp)
      & "--- E_dc - Tr(V_dc*rho)   (8) (Ha.) = ",energies_dmft%e_dcdc,ch10, &
      & "--- Tr(Sig_imp*G_imp)     (9) (Ha.) = ",energies_dmft%emig_imp,ch10, &
      & "--- Tr(Sig*G)            (10) (Ha.) = ",energies_dmft%emig_loc,ch10, &
-     & "--- F_dmft      (3-4-5+6+7-8) (Ha.) = ",energies_dmft%fdmft+energies_dmft%emig_loc-energies_dmft%emig_imp,ch10, &
      & "--- F_dmft (3-4-5+6+7-8+9-10) (Ha.) = ",energies_dmft%fdmft,ch10, &
      & "--- S_dmft = -(F_dmft-E_dmft)/(kT) = ",energies_dmft%sdmft,ch10, &
      & "--- (-kT)*S_dmft             (Ha.) = ",-temp*energies_dmft%sdmft,ch10, &

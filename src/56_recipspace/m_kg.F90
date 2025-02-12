@@ -320,12 +320,11 @@ end subroutine getmpw
 !!
 !! SOURCE
 
-subroutine mkkin (ecut,ecutsm,effmass_free,gmet,kg,kinpw,kpt,npw,idir1,idir2)
+subroutine mkkin(ecut, ecutsm, effmass_free, gmet, kg, kinpw, kpt, npw, idir1, idir2)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: npw
- integer,intent(in) :: idir1,idir2
+ integer,intent(in) :: npw, idir1,idir2
  real(dp),intent(in) :: ecut,ecutsm,effmass_free
 !arrays
  integer,intent(in) :: kg(3,npw)
@@ -336,8 +335,7 @@ subroutine mkkin (ecut,ecutsm,effmass_free,gmet,kg,kinpw,kpt,npw,idir1,idir2)
 !scalars
  integer :: ig,order
  real(dp),parameter :: break_symm=1.0d-11
- real(dp) :: ecutsm_inv,fsm,gpk1,gpk2,gpk3,htpisq,kinetic,kpg2,dkpg2,xx
- real(dp) :: d1kpg2,d2kpg2,ddfsm, dfsm
+ real(dp) :: ecutsm_inv,fsm,gpk1,gpk2,gpk3,htpisq,kinetic,kpg2,dkpg2,xx, d1kpg2,d2kpg2,ddfsm, dfsm
 !arrays
  real(dp) :: gmet_break(3,3) !, tsec(2)
 
@@ -979,127 +977,117 @@ end subroutine mkkpg
 !! OUTPUT
 !! pwind_k1(dtset%mpw)=output index of ikpt1 basis states refered to ikpt
 !!
-!! SIDE EFFECTS
-!!
-!! TODO
-!!
-!! NOTES
-!!
 !! SOURCE
 
 subroutine mkpwind_k(dk,dtset,fnkpt,fkptns,gmet,indkk_f2ibz,ikpt,ikpt1,&
 & mpi_enreg,npwarr,pwind_k1,symrec)
 
-  !Arguments ------------------------------------
-  !scalars
-  integer,intent(in) :: fnkpt,ikpt,ikpt1
-  type(dataset_type),intent(in) :: dtset
-  type(MPI_type), intent(inout) :: mpi_enreg
+!Arguments ------------------------------------
+!scalars
+integer,intent(in) :: fnkpt,ikpt,ikpt1
+type(dataset_type),intent(in) :: dtset
+type(MPI_type), intent(inout) :: mpi_enreg
 
-  !arrays
-  integer,intent(in) :: indkk_f2ibz(fnkpt,6)
-  integer,intent(in) :: npwarr(dtset%nkpt)
-  integer,intent(in) :: symrec(3,3,dtset%nsym)
-  integer,intent(out) :: pwind_k1(dtset%mpw)
-  real(dp),intent(in) :: dk(3),fkptns(3,fnkpt),gmet(3,3)
+!arrays
+integer,intent(in) :: indkk_f2ibz(fnkpt,6)
+integer,intent(in) :: npwarr(dtset%nkpt)
+integer,intent(in) :: symrec(3,3,dtset%nsym)
+integer,intent(out) :: pwind_k1(dtset%mpw)
+real(dp),intent(in) :: dk(3),fkptns(3,fnkpt),gmet(3,3)
 
-  !Local variables -------------------------
-  !scalars
-  integer :: exchn2n3d,idum1,ikg1,ikpti,ikpt1i,ipw,istwf_k,isym,isym1,jpw,npw_k,npw_k1
-  real(dp) :: ecut_eff
+!Local variables -------------------------
+!scalars
+integer :: exchn2n3d,idum1,ikg1,ikpti,ikpt1i,ipw,istwf_k,isym,isym1,jpw,npw_k,npw_k1
+real(dp) :: ecut_eff
 
-  !arrays
-  integer,allocatable :: kg_k(:,:),kg1_k(:,:)
-  real(dp) :: dg(3),dum33(3,3),kpt(3),kpt1(3),iadum(3),iadum1(3)
+!arrays
+integer,allocatable :: kg_k(:,:),kg1_k(:,:)
+real(dp) :: dg(3),dum33(3,3),kpt(3),kpt1(3),iadum(3),iadum1(3)
+! ***********************************************************************
 
-  ! ***********************************************************************
+ ikpti = indkk_f2ibz(ikpt,1)
+ ikpt1i = indkk_f2ibz(ikpt1,1)
 
-  ikpti = indkk_f2ibz(ikpt,1)
-  ikpt1i = indkk_f2ibz(ikpt1,1)
+ ecut_eff = dtset%ecut*(dtset%dilatmx)**2
+ exchn2n3d = 0 ; istwf_k = 1 ; ikg1 = 0
 
+ ! Build basis sphere of plane waves for the k-point
+ ! we avoid using the global kg data because of difficulties in parallel-ism
+ ABI_MALLOC(kg_k,(3,dtset%mpw))
+ kg_k(:,:) = 0
+ kpt(:) = dtset%kptns(:,ikpti)
+ call kpgsph(ecut_eff,exchn2n3d,gmet,ikg1,ikpt,istwf_k,kg_k,kpt,1,mpi_enreg,dtset%mpw,npw_k)
 
-  ecut_eff = dtset%ecut*(dtset%dilatmx)**2
-  exchn2n3d = 0 ; istwf_k = 1 ; ikg1 = 0
+ ! Build basis sphere of plane waves for the nearest neighbour of the k-point
+ ABI_MALLOC(kg1_k,(3,dtset%mpw))
+ kg1_k(:,:) = 0
+ kpt1(:) = dtset%kptns(:,ikpt1i)
+ call kpgsph(ecut_eff,exchn2n3d,gmet,ikg1,ikpt,istwf_k,kg1_k,kpt1,1,mpi_enreg,dtset%mpw,npw_k1)
 
-  ! Build basis sphere of plane waves for the k-point
-  ! we avoid using the global kg data because of difficulties in parallel-ism
-  ABI_MALLOC(kg_k,(3,dtset%mpw))
-  kg_k(:,:) = 0
-  kpt(:) = dtset%kptns(:,ikpti)
-  call kpgsph(ecut_eff,exchn2n3d,gmet,ikg1,ikpt,istwf_k,kg_k,kpt,1,mpi_enreg,dtset%mpw,npw_k)
+ ! Deal with symmetry transformations
 
-  ! Build basis sphere of plane waves for the nearest neighbour of the k-point
-  ABI_MALLOC(kg1_k,(3,dtset%mpw))
-  kg1_k(:,:) = 0
-  kpt1(:) = dtset%kptns(:,ikpt1i)
-  call kpgsph(ecut_eff,exchn2n3d,gmet,ikg1,ikpt,istwf_k,kg1_k,kpt1,1,mpi_enreg,dtset%mpw,npw_k1)
+ ! bra k-point k(b) and IBZ k-point kIBZ(b) related by
+ ! k(b) = alpha(b) S(b)^t kIBZ(b) + G(b)
+ ! where alpha(b), S(b) and G(b) are given by indkk_f2ibz
+ !
+ ! For the ket k-point:
+ ! k(k) = alpha(k) S(k)^t kIBZ(k) + G(k) - GBZ(k)
+ ! where GBZ(k) takes k(k) to the BZ
 
-  !        Deal with symmetry transformations
-  !
+ isym  = indkk_f2ibz(ikpt,2)
+ isym1 = indkk_f2ibz(ikpt1,2)
 
-  !        bra k-point k(b) and IBZ k-point kIBZ(b) related by
-  !        k(b) = alpha(b) S(b)^t kIBZ(b) + G(b)
-  !        where alpha(b), S(b) and G(b) are given by indkk_f2ibz
-  !
-  !        For the ket k-point:
-  !        k(k) = alpha(k) S(k)^t kIBZ(k) + G(k) - GBZ(k)
-  !        where GBZ(k) takes k(k) to the BZ
-  !
+ ! Construct transformed G vector that enters the matching condition:
+ ! alpha(k) S(k)^{t,-1} ( -G(b) - GBZ(k) + G(k) )
 
-  isym  = indkk_f2ibz(ikpt,2)
-  isym1 = indkk_f2ibz(ikpt1,2)
+ dg(:) = -indkk_f2ibz(ikpt,3:5) &
+      & - nint(-fkptns(:,ikpt) - dk(:) - tol10 + fkptns(:,ikpt1)) &
+      & + indkk_f2ibz(ikpt1,3:5)
 
-  !        Construct transformed G vector that enters the matching condition:
-  !        alpha(k) S(k)^{t,-1} ( -G(b) - GBZ(k) + G(k) )
+ iadum(:) = MATMUL(TRANSPOSE(dtset%symrel(:,:,isym1)),dg(:))
 
-  dg(:) = -indkk_f2ibz(ikpt,3:5) &
-       & - nint(-fkptns(:,ikpt) - dk(:) - tol10 + fkptns(:,ikpt1)) &
-       & + indkk_f2ibz(ikpt1,3:5)
+ dg(:) = iadum(:)
 
-  iadum(:) = MATMUL(TRANSPOSE(dtset%symrel(:,:,isym1)),dg(:))
+ ! Construct S(k)^{t,-1} S(b)^{t}
 
-  dg(:) = iadum(:)
+ dum33(:,:) = MATMUL(TRANSPOSE(dtset%symrel(:,:,isym1)),symrec(:,:,isym))
 
-  !        Construct S(k)^{t,-1} S(b)^{t}
+ !        Construct alpha(k) alpha(b)
 
-  dum33(:,:) = MATMUL(TRANSPOSE(dtset%symrel(:,:,isym1)),symrec(:,:,isym))
+ pwind_k1(:) = 0
+ npw_k = npwarr(ikpti)
+ do ipw = 1, npw_k
 
-  !        Construct alpha(k) alpha(b)
+    ! NOTE: the bra G vector is taken for the sym-related IBZ k point,
+    ! not for the FBZ k point
 
-  pwind_k1(:) = 0
-  npw_k = npwarr(ikpti)
-  do ipw = 1, npw_k
+    ! original code from initberry
+    ! iadum(:) = kg(:,kgindex(ikpti) + ipw)
 
-     !          NOTE: the bra G vector is taken for the sym-related IBZ k point,
-     !          not for the FBZ k point
+    iadum(:) = kg_k(:,ipw)
 
-     ! original code from initberry
-     ! iadum(:) = kg(:,kgindex(ikpti) + ipw)
+    ! to determine r.l.v. matchings, we transformed the bra vector
+    ! Rotation
+    iadum1(:)=0
+    do idum1=1,3
+       iadum1(:)=iadum1(:)+dum33(:,idum1)*iadum(idum1)
+    end do
+    iadum(:)=iadum1(:)
+    iadum(:) = iadum(:) + dg(:)
 
-     iadum(:) = kg_k(:,ipw)
+    do jpw = 1, npw_k1
+       iadum1(1:3) = kg1_k(1:3,jpw)
+       if ( (iadum(1) == iadum1(1)).and. &
+            &     (iadum(2) == iadum1(2)).and. &
+            &     (iadum(3) == iadum1(3)) ) then
+          pwind_k1(ipw) = jpw
+          exit
+       end if
+    end do
+ end do
 
-     !          to determine r.l.v. matchings, we transformed the bra vector
-     !          Rotation
-     iadum1(:)=0
-     do idum1=1,3
-        iadum1(:)=iadum1(:)+dum33(:,idum1)*iadum(idum1)
-     end do
-     iadum(:)=iadum1(:)
-     iadum(:) = iadum(:) + dg(:)
-
-     do jpw = 1, npw_k1
-        iadum1(1:3) = kg1_k(1:3,jpw)
-        if ( (iadum(1) == iadum1(1)).and. &
-             &     (iadum(2) == iadum1(2)).and. &
-             &     (iadum(3) == iadum1(3)) ) then
-           pwind_k1(ipw) = jpw
-           exit
-        end if
-     end do
-  end do
-
-  ABI_FREE(kg_k)
-  ABI_FREE(kg1_k)
+ ABI_FREE(kg_k)
+ ABI_FREE(kg1_k)
 
 end subroutine mkpwind_k
 !!***
@@ -1124,7 +1112,6 @@ end subroutine mkpwind_k
 !!
 !! SOURCE
 
-
 subroutine mkkpgcart(gprimd,kg,kpgcar,kpt,nkpg,npw)
 
 !Arguments ------------------------------------
@@ -1142,7 +1129,6 @@ subroutine mkkpgcart(gprimd,kg,kpgcar,kpt,nkpg,npw)
  character(len=500) :: msg
 !arrays
  real(dp),allocatable :: kpg(:,:)
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")

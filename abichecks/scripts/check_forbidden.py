@@ -165,7 +165,7 @@ def main():
     print('  - forbidden call statements not placed at the start of the line    ')
   print('---------------------------------------------------------------------')
 
-  re_srcfile = re.compile("\.([Ff]|[Ff]90|finc|h)$")
+  re_srcfile = re.compile(r"\.([Ff]|[Ff]90|finc|h)$")
 
   #Initialize counters
   file_total_count=0
@@ -256,7 +256,7 @@ def main():
                       label_before=(not (re.match('[0-9]+',line_before)==None))
                       quote_before=((line_before.find("'") != -1) or (line_before.find('"') != -1))
                       problem_before=((not nothing_before) and (not label_before) and (not quote_before))
-                      problem_after=(re.match('[^\;\:\>\<\=\+\-\*\/\!\,]*(\(.*[\)\&]+|)',line_after)==None)
+                      problem_after=(re.match(r'[^\;\:\>\<\=\+\-\*\/\!\,]*(\(.*[\)\&]+|)',line_after)==None)
                       if (not comment_before) and (problem_before or problem_after):
                         print('  Error: %s, line %d: found \"%s\" not placed at the start of the line !' \
                               % (filename,lineno,strg))

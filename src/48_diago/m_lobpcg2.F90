@@ -344,7 +344,7 @@ module m_lobpcg2
     integer :: rows_tmp, cols_tmp, nband_eff, iband_min, iband_max
     type(xgBlock_t) :: eigenBlock   !
     type(xgBlock_t) :: residuBlock,occBlock
-    double precision :: maxResidu, minResidu
+    double precision :: maxResidu, minResidu, dummy
     double precision :: dlamch,tolerance
     integer :: ierr = 0
     integer :: nrestart
@@ -493,15 +493,15 @@ module m_lobpcg2
         ! Compute AX-Lambda*BX
         call lobpcg_getResidu(lobpcg,eigenvaluesN)
 
-        ! Apply preconditioner
-        call timab(tim_pcond,1,tsec)
-        call xgBlock_apply_diag(lobpcg%W,pcond,nspinor)
-        call timab(tim_pcond,2,tsec)
-
         ! Compute residu norm here !
         call timab(tim_maxres,1,tsec)
         call xgBlock_colwiseNorm2(lobpcg%W,residuBlock)
         call timab(tim_maxres,2,tsec)
+
+        ! Apply preconditioner
+        call timab(tim_pcond,1,tsec)
+        call xgBlock_apply_diag(lobpcg%W,pcond,nspinor)
+        call timab(tim_pcond,2,tsec)
 
         call timab(tim_nbdbuf,1,tsec)
         if (nbdbuf>=0) then
@@ -518,8 +518,10 @@ module m_lobpcg2
             maxResidu = 0.0
           end if
         else if (nbdbuf==-101) then
+          call xgBlock_minmax(residuBlock,minResidu,dummy) ! Get minimum of true residuals
+          ! Compute effective residuals : res_eff = res * occ
           call xgBlock_apply_diag(residuBlock,occBlock,1,Y=residu_eff%self)
-          call xgBlock_minmax(residu_eff%self,minResidu,maxResidu)
+          call xgBlock_minmax(residu_eff%self,dummy,maxResidu) ! Get maximum of effective residuals
         else
           ABI_ERROR('Bad value of nbdbuf')
         end if
@@ -567,7 +569,8 @@ module m_lobpcg2
           if ( ierr /= 0 ) then
             ABI_COMMENT("B-orthonormalization (XW) did not work.")
           end if
-          call xg_RayleighRitz(lobpcg%X,lobpcg%AX,lobpcg%BX,eigenvalues2N,ierr,lobpcg%prtvol,tim_RR_XW,lobpcg%gpu_option,tolerance=tolerance,&
+          call xg_RayleighRitz(lobpcg%X,lobpcg%AX,lobpcg%BX,eigenvalues2N,ierr,lobpcg%prtvol,tim_RR_XW,lobpcg%gpu_option,&
+           & tolerance=tolerance,&
            & XW=lobpcg%XW,AW=lobpcg%AW,BW=lobpcg%BW,P=lobpcg%P,AP=lobpcg%AP,BP=lobpcg%BP,WP=lobpcg%WP,&
            & AWP=lobpcg%AWP,BWP=lobpcg%BWP)
           if ( ierr /= 0 ) then
@@ -596,7 +599,8 @@ module m_lobpcg2
             call xgBlock_zero(lobpcg%AP)
             call xgBlock_zero(lobpcg%BP)
             nrestart = nrestart + 1
-            call xg_RayleighRitz(lobpcg%X,lobpcg%AX,lobpcg%BX,eigenvalues2N,ierr,lobpcg%prtvol,tim_RR_XW,lobpcg%gpu_option,tolerance=tolerance,&
+            call xg_RayleighRitz(lobpcg%X,lobpcg%AX,lobpcg%BX,eigenvalues2N,ierr,lobpcg%prtvol,tim_RR_XW,lobpcg%gpu_option,&
+           & tolerance=tolerance,&
            & XW=lobpcg%XW,AW=lobpcg%AW,BW=lobpcg%BW,P=lobpcg%P,AP=lobpcg%AP,BP=lobpcg%BP,WP=lobpcg%WP,&
            & AWP=lobpcg%AWP,BWP=lobpcg%BWP)
             if ( ierr /= 0 ) then
@@ -612,14 +616,14 @@ module m_lobpcg2
       if ( compute_residu ) then
         ! Recompute AX-Lambda*BX for the last time
         call lobpcg_getResidu(lobpcg,eigenvaluesN)
-        ! Apply preconditioner
-        call timab(tim_pcond,1,tsec)
-        call xgBlock_apply_diag(lobpcg%W,pcond,nspinor)
-        call timab(tim_pcond,2,tsec)
         ! Recompute residu norm here !
         call timab(tim_maxres,1,tsec)
         call xgBlock_colwiseNorm2(lobpcg%W,residuBlock)
         call timab(tim_maxres,2,tsec)
+        ! Apply preconditioner
+        call timab(tim_pcond,1,tsec)
+        call xgBlock_apply_diag(lobpcg%W,pcond,nspinor)
+        call timab(tim_pcond,2,tsec)
 
         call timab(tim_nbdbuf,1,tsec)
         if(lobpcg%gpu_option==ABI_GPU_OPENMP) call xgBlock_copy_from_gpu(residuBlock)
@@ -636,8 +640,10 @@ module m_lobpcg2
             maxResidu = 0.0
           end if
         else if (nbdbuf==-101) then
+          call xgBlock_minmax(residuBlock,minResidu,dummy) ! Get minimum of true residuals
+          ! Compute effective residuals : res_eff = res * occ
           call xgBlock_apply_diag(residuBlock,occBlock,1,Y=residu_eff%self)
-          call xgBlock_minmax(residu_eff%self,minResidu,maxResidu)
+          call xgBlock_minmax(residu_eff%self,dummy,maxResidu) ! Get maximum of effective residuals
         else
           ABI_ERROR('Bad value of nbdbuf')
         end if

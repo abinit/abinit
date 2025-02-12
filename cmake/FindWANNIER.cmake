@@ -56,7 +56,7 @@ find_package_handle_standard_args (WANNIER
 if (WANNIER_FOUND)
   set (WANNIER_INCLUDE_DIRS ${WANNIER_INCLUDE_DIR})
 else (WANNIER_FOUND)
-  message("WANNIER nor found")
+  message(STATUS "WANNIER nor found")
 endif (WANNIER_FOUND)
 
 if(WANNIER_FOUND AND NOT TARGET abinit::wannier)

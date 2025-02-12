@@ -9579,7 +9579,7 @@
  -8.0627374409440145E-01
 </exact_exchange_X_matrix>
 <exact_exchange core-core=" -8.0403335432085981E+01"/>
-<!-- Program:  atompaw - input data follows: 
+<!-- Program:  atompaw - input data follows:
 As 33                                       ! Definition of material
 XC_GGA_X_PBE+XC_GGA_C_PBE scalarrelativistic loggrid 1500
 4 4 3 0 0 0                                 ! Max. n per angular momentum: 4s 3p 3d

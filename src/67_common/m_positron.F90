@@ -2135,11 +2135,11 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
      lmn_size = pawtab(itypat)%lmn_size
      lmn2_size = pawtab(itypat)%lmn2_size
      basis_size = pawtab(itypat)%basis_size
-     
+
      lmn_size_c=lmncmax(itypat)
      llmax=maxval(indlmncor(itypat)%value(1,1:lmn_size_c))
      l_size_max=max(l_size,2*llmax+1)
-     
+
      ABI_MALLOC(j_bessel,(mesh_size,l_size_max))
      ABI_MALLOC(ylmp,(l_size_max*l_size_max))
      ABI_MALLOC(have_intc,(l_size_max,basis_size,nphicor(itypat)))

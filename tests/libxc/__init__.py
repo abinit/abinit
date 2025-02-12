@@ -5,7 +5,7 @@ need_cpp_vars = [
 "HAVE_LIBXC",
 ]
 
-#: List of keywords that are automatically added to all the tests of this suite. 
+#: List of keywords that are automatically added to all the tests of this suite.
 keywords = [
 ]
 
@@ -39,21 +39,21 @@ inp_files = [
 "-t34.abi", # Disabled
 "-t35.abi", # Disabled
 "t41.abi",
-"t42.abi", 
-"t43.abi", 
-"t44.abi", 
-"t45.abi", 
-"t51.abi", 
-"t52.abi", 
-"t53.abi",  
-"t67.abi",  
-"t68.abi",  
-"t69.abi",  
-"t70.abi",  
-"t71.abi",  
-"t72.abi", 
-"t73.abi", 
-"t74.abi", 
-"t81.abi", 
-"t82.abi", 
+"t42.abi",
+"t43.abi",
+"t44.abi",
+"t45.abi",
+"t51.abi",
+"t52.abi",
+"t53.abi",
+"t67.abi",
+"t68.abi",
+"t69.abi",
+"t70.abi",
+"t71.abi",
+"t72.abi",
+"t73.abi",
+"t74.abi",
+"t81.abi",
+"t82.abi",
 ]
