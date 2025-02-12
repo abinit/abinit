@@ -3163,7 +3163,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
  type(hu_type), intent(inout) :: hu(paw_dmft%ntypat)
 !Local variables ------------------------------
  integer :: basis,i,iatom,iblock,iflavor,iflavor1,iflavor2,ifreq,ilam,ileg,im,im1,isppol,isub
- integer :: itau,itypat,iw,l,len_t,lpawu,myproc,natom,ncon,ndim,nflavor,nflavor_max,ngauss,nleg,nmoments
+ integer :: itau,itypat,iw,j,l,len_t,lpawu,myproc,natom,ncon,ndim,nflavor,nflavor_max,ngauss,nleg,nmoments
  integer :: nspinor,nsppol,nsub,ntau,ntau_delta,ntot,nwlo,p,rot_type_vee,tndim,unt,verbo,wdlr_size
  integer, target :: ndlr
  logical :: density_matrix,entropy,integral,leg_measure,nondiag,off_diag,rot_inv
@@ -3311,7 +3311,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
 
  call copy_matlu(green%occup%matlu(:),dmat_ctqmc(:),natom)
 
- if (basis > 0) then ! First switch to Ylm basis in all cases
+ if (basis > 0) then ! First switch to Ylm basis in every case
    call slm2ylm_matlu(energy_level%matlu(:),natom,paw_dmft,1,0)
    call slm2ylm_matlu(dmat_ctqmc(:),natom,paw_dmft,1,0)
    do i=2,weiss%nmoments-1
@@ -3351,6 +3351,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
 
    ! Make sure every process has the same rotation matrix in case of degenerate levels
    call xmpi_matlu(eigvectmatlu(:),natom,paw_dmft%spacecomm,master=0,option=2)
+
    if (basis == 1) then
      call rotate_matlu(dmat_ctqmc(:),eigvectmatlu(:),natom,1)
    else
@@ -3524,7 +3525,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
  ! Gauss-Legendre grid), since we need it for the rest of the SCF calculation
  ntot = ngauss*nsub + 1
 
- !if ((.not. integral) .or. (.not. entropy)) ntot = 1
+ if ((.not. integral) .or. (.not. entropy)) ntot = 1
 
  ABI_MALLOC(eu_list,(ntot))
  ABI_MALLOC(lam_list,(ntot)) ! scaling factors of U matrix for thermodynamic integration

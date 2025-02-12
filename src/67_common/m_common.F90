@@ -1500,10 +1500,11 @@ subroutine prtene(dtset,energies,iout,usepaw)
  else
    eent=zero
  end if
-! If DMFT is used and DMFT Entropy is not computed, then do not print
-! non interacting entropy
+! If DMFT is used and DMFT Entropy is not computed, then do not print non interacting entropy
  testdmft=(dtset%dmftcheck>=0.and.dtset%usedmft>=1.and.(sum(dtset%upawu(:,1))>=tol8.or.  &
 & sum(dtset%jpawu(:,1))>tol8).and.dtset%dmft_entropy==0)
+ if (dtset%usedmft==1.and.dtset%dmft_triqs_entropy==1.and.dtset%dmft_triqs_compute_integral==1 &
+       & .and.(dtset%dmft_solv==6.or.dtset%dmft_solv==7)) testdmft=.false.
  if(testdmft) eent=zero
 
  etotal   = etotal   + eent
