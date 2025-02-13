@@ -9,6 +9,7 @@ import platform
 import tarfile
 import re
 import warnings
+import json
 
 from base64 import b64encode
 from socket import gethostname
@@ -32,7 +33,7 @@ else:
 from .jobrunner import TimeBomb
 from .tools import RestrictedShell, unzip, tail_file, pprint_table, Patcher, Editor
 from .xyaptu import xcopier
-from .devtools import NoErrorFileLock, makeunique
+from .devtools import NoErrorFileLock, FileLock, makeunique
 from .memprof import AbimemFile
 from .termcolor import cprint
 from .fldiff import Differ as FlDiffer
@@ -3215,7 +3216,7 @@ def exec2class(exec_name):
 
 def do_work(task_q, res_q, run_func, run_func_kwargs, print_lock, kill_me, thread_mode=False):
     """
-    This is the function used as target of the subprocss
+    This is the function used as target of the subprocess
 
     Args:
         task_q: Input queue with the task.
@@ -3228,25 +3229,77 @@ def do_work(task_q, res_q, run_func, run_func_kwargs, print_lock, kill_me, threa
     """
     done = {'type': 'proc_done'}
     all_done = False
+
+    # Extract arguments from run_func_kwargs dict.
+    #print("func_kwargs", run_func_kwargs)
+    workdir = run_func_kwargs["workdir"]
+
+    build_env = run_func_kwargs["build_env"]
+    nprocs = run_func_kwargs["nprocs"]
+    mpi_nprocs = run_func_kwargs["mpi_nprocs"]
+    #omp_nthreads = run_func_kwargs["omp_nthreads"]
+    #gpus_per_mpi = run_func_kwargs["gpus_per_mpi"]
+    omp_nthreads = 1
+    #gpus_per_mpi =
+    ncpus = mpi_nprocs * omp_nthreads
+    build_with_gpu ="HAVE_GPU" in build_env.defined_cppvars
+    filepath = os.path.join(workdir, "abinit_test_suite_resources.json")
+
     try:
         while not all_done and not (thread_mode and kill_me):
             test = task_q.get(block=True, timeout=2)
+
             if test is None:
                 # reached the end
                 all_done = True
+
             else:
                 res_q.put(run_func(test, print_lock=print_lock, **run_func_kwargs))
 
+                """
+                with FileLock(filepath) as lock:
+                    with open(filepath, 'rt') as fh:
+                        data = json.load(fh)
+                        #print(data)
+
+                    can_run = data["cpus_in_use"] + ncpus <= data["available_cpus"]
+                    ngpus = test.uses_gpu * mpi_nprocs if build_with_gpu else 0
+                    if ngpus > 0:
+                        can_run = can_run and (data["gpus_in_use"] + ngpus <= data["available_gpus"])
+
+                    if not can_run:
+                        # Requeue the test if not enough CPUs
+                        print("Reinserting test", test)
+                        task_q.put(test)
+                        sleep_time = 0.1
+                        time.sleep(sleep_time)
+                    else:
+                        #if self.verbose:
+                        #    print("Submitting test:", test,
+                        #          ", available_cpus:", self.available_cpus, ", available_gpus:", self.available_gpus)
+
+                        data["cpus_in_use"] += ncpus
+                        data["gpus_in_use"] += ngpus
+
+                        with open(filepath, 'wt') as fh:
+                            json.dump(data, fh)
+
+                        res_q.put(run_func(test, print_lock=print_lock, **run_func_kwargs))
+                """
+
     except EmptyQueueError:
         # If that happen, it is a probably a bug
+        print('Task queue is unexpectedly empty.')
         done['error'] = RuntimeError('Task queue is unexpectedly empty.')
 
-    except Exception as e:
+    except Exception as exc1:
         # Any other error is reported
-        done['error'] = e
+        done['error'] = exc1
+        print("exc1", exc1)
         try:
             done['task'] = test.full_id
-        except (AttributeError, NameError):
+        except (AttributeError, NameError) as exc2:
+            print("exc2", exc2)
             pass
 
     finally:
@@ -3976,6 +4029,7 @@ class AbinitTestSuite(object):
         self.workdir = workdir
 
         # Acquire the lock file.
+
         self.lock = NoErrorFileLock(os.path.join(workdir, "__run_tests_lock__"), timeout=3)
 
         with self.lock as locked:
@@ -3992,6 +4046,17 @@ class AbinitTestSuite(object):
 
             # Remove all stale files present in workdir (except the lock!)
             rm_rf(self.workdir, exclude_paths=self.lock.lockfile)
+
+            available_cpus = 4
+            available_gpus = 0
+            data = {}
+            data["available_cpus"] = available_cpus
+            data["available_gpus"] = available_gpus
+            data["cpus_in_use"] = 0
+            data["gpus_in_use"] = 0
+            filepath = os.path.join(workdir, "abinit_test_suite_resources.json")
+            with open(filepath, 'wt') as fh:
+                json.dump(data, fh, indent=4)
 
             self.mpi_nprocs = mpi_nprocs
             self.py_nprocs = py_nprocs
@@ -4269,7 +4334,7 @@ class AbinitTestSuite(object):
         Kill all workers
         """
         for p in self._processes:
-            p.terminate_workers()
+            p.terminate()
         self._kill_me = True
         self._processes = []
 
