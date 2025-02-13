@@ -14,7 +14,7 @@ import json
 from base64 import b64encode
 from socket import gethostname
 from subprocess import Popen, PIPE
-from multiprocessing import Process, Queue, Lock
+from multiprocessing import Process, Queue, Lock, Manager, current_process
 from threading import Thread
 
 # Handle py2, py3k differences.
@@ -3234,17 +3234,6 @@ def do_work(task_q, res_q, run_func, run_func_kwargs, print_lock, kill_me, threa
     #print("func_kwargs", run_func_kwargs)
     workdir = run_func_kwargs["workdir"]
 
-    build_env = run_func_kwargs["build_env"]
-    nprocs = run_func_kwargs["nprocs"]
-    mpi_nprocs = run_func_kwargs["mpi_nprocs"]
-    #omp_nthreads = run_func_kwargs["omp_nthreads"]
-    #gpus_per_mpi = run_func_kwargs["gpus_per_mpi"]
-    omp_nthreads = 1
-    #gpus_per_mpi =
-    ncpus = mpi_nprocs * omp_nthreads
-    build_with_gpu ="HAVE_GPU" in build_env.defined_cppvars
-    filepath = os.path.join(workdir, "abinit_test_suite_resources.json")
-
     try:
         while not all_done and not (thread_mode and kill_me):
             test = task_q.get(block=True, timeout=2)
@@ -3255,37 +3244,6 @@ def do_work(task_q, res_q, run_func, run_func_kwargs, print_lock, kill_me, threa
 
             else:
                 res_q.put(run_func(test, print_lock=print_lock, **run_func_kwargs))
-
-                """
-                with FileLock(filepath) as lock:
-                    with open(filepath, 'rt') as fh:
-                        data = json.load(fh)
-                        #print(data)
-
-                    can_run = data["cpus_in_use"] + ncpus <= data["available_cpus"]
-                    ngpus = test.uses_gpu * mpi_nprocs if build_with_gpu else 0
-                    if ngpus > 0:
-                        can_run = can_run and (data["gpus_in_use"] + ngpus <= data["available_gpus"])
-
-                    if not can_run:
-                        # Requeue the test if not enough CPUs
-                        print("Reinserting test", test)
-                        task_q.put(test)
-                        sleep_time = 0.1
-                        time.sleep(sleep_time)
-                    else:
-                        #if self.verbose:
-                        #    print("Submitting test:", test,
-                        #          ", available_cpus:", self.available_cpus, ", available_gpus:", self.available_gpus)
-
-                        data["cpus_in_use"] += ncpus
-                        data["gpus_in_use"] += ngpus
-
-                        with open(filepath, 'wt') as fh:
-                            json.dump(data, fh)
-
-                        res_q.put(run_func(test, print_lock=print_lock, **run_func_kwargs))
-                """
 
     except EmptyQueueError:
         # If that happen, it is a probably a bug
@@ -3315,14 +3273,50 @@ def run_and_check_test(test, print_lock=None, **kwargs):
     build_env = kwargs.pop("build_env")
     job_runner = kwargs.pop("job_runner")
     mpi_nprocs = kwargs.pop("mpi_nprocs")
+    ##omp_nthreads = run_func_kwargs["omp_nthreads"]
     runmode = kwargs.pop("runmode")
+
+    condition = kwargs.pop("condition")
+    lock_counters = kwargs.pop("lock_counters")
+    cpu_counter = kwargs.pop("cpu_counter")
+    gpu_counter = kwargs.pop("gpu_counter")
+    max_cpus = kwargs.pop("max_cpus")
+    max_gpus = kwargs.pop("max_gpus")
+    if max_gpus == 0: max_gpus = -1
+    # FIXME
+    #omp_nthreads = kwargs.pop("omp_nthreads")
+    omp_nthreads = 1
+    ncpus = mpi_nprocs * omp_nthreads
+    build_with_gpu ="HAVE_GPU" in build_env.defined_cppvars
+    ngpus = test.uses_gpu * mpi_nprocs if build_with_gpu else 0
+    proc_name = current_process().name
     #print(kwargs)
 
-    testdir = os.path.abspath(os.path.join(workdir, test.suite_name + "_" + test.id))
+    with condition:
+        # Wait until enough resources are available
+        while cpu_counter.value + ncpus > max_cpus and gpu_counter.value + ngpus > max_gpus:
+            condition.wait()
 
-    # Run the test
+        # Reserve resources safely using a lock
+        with lock_counters:
+            cpu_counter.value += ncpus
+            gpu_counter.value += ngpus
+            print(f"[{proc_name}]: Running test with {ncpus} cores and {ngpus} GPUs. (Total CPUs used: {cpu_counter.value}/{max_cpus})")
+
+    # FIXME: run method should also receive omp_nthreads
+    # Run the test in testdir
     #print("Calling test.run")
+    testdir = os.path.abspath(os.path.join(workdir, test.suite_name + "_" + test.id))
     test.run(build_env, job_runner, testdir, print_lock=print_lock, mpi_nprocs=mpi_nprocs, runmode=runmode, **kwargs)
+
+    with condition:
+        # Release resources safely using a lock
+        with lock_counters:
+            cpu_counter.value -= ncpus
+            gpu_counter.value -= ngpus
+            print(f"[{proc_name}] Finished. (Total CPUs used: {cpu_counter.value}/{max_cpus})")
+
+        condition.notify_all()  # Notify other waiting processes
 
     # Write HTML summary
     #print("Calling write_html_report")
@@ -4029,7 +4023,6 @@ class AbinitTestSuite(object):
         self.workdir = workdir
 
         # Acquire the lock file.
-
         self.lock = NoErrorFileLock(os.path.join(workdir, "__run_tests_lock__"), timeout=3)
 
         with self.lock as locked:
@@ -4047,19 +4040,15 @@ class AbinitTestSuite(object):
             # Remove all stale files present in workdir (except the lock!)
             rm_rf(self.workdir, exclude_paths=self.lock.lockfile)
 
-            available_cpus = 4
-            available_gpus = 0
-            data = {}
-            data["available_cpus"] = available_cpus
-            data["available_gpus"] = available_gpus
-            data["cpus_in_use"] = 0
-            data["gpus_in_use"] = 0
-            filepath = os.path.join(workdir, "abinit_test_suite_resources.json")
-            with open(filepath, 'wt') as fh:
-                json.dump(data, fh, indent=4)
-
             self.mpi_nprocs = mpi_nprocs
+            #print(f"{mpi_nprocs=}")
             self.py_nprocs = py_nprocs
+
+            manager = Manager()
+            cpu_counter = manager.Value("i", 0)  # Shared counter for CPU usage
+            gpu_counter = manager.Value("i", 0)  # Shared counter for CPU usage
+            condition = manager.Condition()      # Condition variable for synchronization
+            lock_counters = manager.Lock()       # Lock to make cpu_counter updates safe
 
             run_func_kwargs = dict(
                 workdir=self.workdir,
@@ -4067,7 +4056,15 @@ class AbinitTestSuite(object):
                 job_runner=job_runner,
                 mpi_nprocs=self.mpi_nprocs,
                 runmode=runmode,
+                cpu_counter=cpu_counter,
+                gpu_counter=gpu_counter,
+                condition=condition,
+                # TODO: These parameters should be passed to testbot.py
+                max_cpus=6,
+                max_gpus=0,
+                lock_counters=lock_counters,
             )
+
             # Add input kwargs
             run_func_kwargs.update(kwargs)
 
@@ -4075,22 +4072,6 @@ class AbinitTestSuite(object):
             # And now let's run the tests
             ##############################
             start_time = time.time()
-
-            # THIS FLAG ACTIVATES THE NEW MANAGER
-            #use_new_manager = True
-            #use_new_manager = False
-
-            #if use_new_manager:
-            #    # New version based on Manager
-            #    #from tests.pymods.devtools import number_of_cpus
-            #    #ncpus_detected = max(1, number_of_cpus())
-            #    manager = Manager(available_cpus=8, available_gpus=1, max_workers=6, test_suite=self, verbose=1)
-            #    manager.run(mpi_nprocs=mpi_nprocs, omp_nthreads=1, **run_func_kwargs)
-
-            #if py_nprocs < 0:
-            #    available_cpus = 8
-            #    available_gpus = 1
-            #    py_nprocs
 
             if py_nprocs == 1:
                 logger.info("Sequential version")
