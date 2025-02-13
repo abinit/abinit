@@ -643,7 +643,7 @@ def main():
     if mpi_nprocs > 1: runmode = "dynamic"
 
     results = test_suite.run_tests(build_env, workdir, runner,
-                                   nprocs=mpi_nprocs,
+                                   mpi_nprocs=mpi_nprocs,
                                    py_nprocs=py_nprocs,
                                    runmode=runmode,
                                    erase_files=options.erase_files,
@@ -690,7 +690,7 @@ def main():
 
                     test_suite = AbinitTestSuite(test_suite.abenv, test_list=test_list)
                     results = test_suite.run_tests(build_env, workdir, runner,
-                                                   nprocs=mpi_nprocs,
+                                                   mpi_nprocs=mpi_nprocs,
                                                    py_nprocs=py_nprocs,
                                                    runmode=runmode,
                                                    erase_files=options.erase_files,
@@ -747,6 +747,9 @@ def main():
 
 
 if __name__ == "__main__":
+    #import multiprocessing
+    #multiprocessing.set_start_method("fork")  # Ensure compatibility on macOS/Linux
+
     # Check whether we are in profiling mode
     try:
         do_prof = sys.argv[1] == "prof"
