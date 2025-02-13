@@ -3301,7 +3301,7 @@ def run_and_check_test(test, print_lock=None, **kwargs):
         with lock_counters:
             cpu_counter.value += ncpus
             gpu_counter.value += ngpus
-            print(f"[{proc_name}]: Running test with {ncpus} cores and {ngpus} GPUs. (Total CPUs used: {cpu_counter.value}/{max_cpus})")
+            #print(f"[{proc_name}]: Running test with {ncpus} cores and {ngpus} GPUs. (Total CPUs used: {cpu_counter.value}/{max_cpus})")
 
     # FIXME: run method should also receive omp_nthreads
     # Run the test in testdir
@@ -3314,7 +3314,7 @@ def run_and_check_test(test, print_lock=None, **kwargs):
         with lock_counters:
             cpu_counter.value -= ncpus
             gpu_counter.value -= ngpus
-            print(f"[{proc_name}] Finished. (Total CPUs used: {cpu_counter.value}/{max_cpus})")
+            #print(f"[{proc_name}] Finished. (Total CPUs used: {cpu_counter.value}/{max_cpus})")
 
         condition.notify_all()  # Notify other waiting processes
 
@@ -4044,11 +4044,11 @@ class AbinitTestSuite(object):
             #print(f"{mpi_nprocs=}")
             self.py_nprocs = py_nprocs
 
+            # TODO: These parameters should be passed to testbot.py
+            from tests.pymods.devtools import number_of_cpus
+            max_cpus = max(1, number_of_cpus())
+            max_gpus = 2 if "HAVE_GPU" in build_env.defined_cppvars else 0
             manager = Manager()
-            cpu_counter = manager.Value("i", 0)  # Shared counter for CPU usage
-            gpu_counter = manager.Value("i", 0)  # Shared counter for CPU usage
-            condition = manager.Condition()      # Condition variable for synchronization
-            lock_counters = manager.Lock()       # Lock to make cpu_counter updates safe
 
             run_func_kwargs = dict(
                 workdir=self.workdir,
@@ -4056,13 +4056,12 @@ class AbinitTestSuite(object):
                 job_runner=job_runner,
                 mpi_nprocs=self.mpi_nprocs,
                 runmode=runmode,
-                cpu_counter=cpu_counter,
-                gpu_counter=gpu_counter,
-                condition=condition,
-                # TODO: These parameters should be passed to testbot.py
-                max_cpus=6,
-                max_gpus=0,
-                lock_counters=lock_counters,
+                max_cpus=max_cpus,
+                max_gpus=max_gpus,
+                cpu_counter=manager.Value("i", 0),  # Shared counter for CPU usage
+                gpu_counter=manager.Value("i", 0),   # Shared counter for CPU usage
+                condition=manager.Condition(),      # Condition variable for synchronization
+                lock_counters=manager.Lock(),       # Lock to make cpu_counter updates safe
             )
 
             # Add input kwargs
