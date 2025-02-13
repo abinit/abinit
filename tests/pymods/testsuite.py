@@ -2508,12 +2508,10 @@ pp_dirpath $ABI_PSPDIR
                 # out_opt = "-n"
                 # out_opt = "-c"
                 out_opt = "-u"
-                args = [diffpy, out_opt, "-j", "-f " + diff_fname, out_fname,
-                        ref_fname]
+                args = [diffpy, out_opt, "-j", "-f " + diff_fname, out_fname, ref_fname]
                 cmd = " ".join(args)
 
-                (p, ret_code) = self.timebomb.run(
-                    cmd, shell=True, cwd=self.workdir)
+                (p, ret_code) = self.timebomb.run(cmd, shell=True, cwd=self.workdir)
 
                 if ret_code != 0:
                     err_msg = "Timeout error (%s s) while executing %s, retcode = %s" % (
@@ -4047,7 +4045,7 @@ class AbinitTestSuite(object):
             # TODO: These parameters should be passed to testbot.py
             from tests.pymods.devtools import number_of_cpus
             max_cpus = max(1, number_of_cpus())
-            max_gpus = 2 if "HAVE_GPU" in build_env.defined_cppvars else 0
+            max_gpus = 1 if "HAVE_GPU" in build_env.defined_cppvars else 0
             manager = Manager()
 
             run_func_kwargs = dict(
