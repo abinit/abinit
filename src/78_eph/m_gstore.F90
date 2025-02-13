@@ -167,8 +167,8 @@ module m_gstore
 
  private
 
- character(len=fnlen),public,parameter :: GSTORE_GMODE_ATOM   = "atom"
- character(len=fnlen),public,parameter :: GSTORE_GMODE_PHONON = "phonon"
+ character(len=abi_slen),public,parameter :: GSTORE_GMODE_ATOM   = "atom"
+ character(len=abi_slen),public,parameter :: GSTORE_GMODE_PHONON = "phonon"
 
  ! Rank of the MPI Cartesian grid.
  integer,private,parameter :: ndims = 6
@@ -414,16 +414,16 @@ type, public :: gstore_t
 
   character(len=fnlen) :: wfk0_path = " "
 
-  character(len=fnlen) :: kzone = " ", qzone = " "
+  character(len=abi_slen) :: kzone = " ", qzone = " "
    ! Specifies whether k- or q-points are in the BZ or in the IBZ.
    ! Possible values are "ibz" or "bz".
    ! Note that the combination ("ibz", "ibz") is not allowed.
 
-  character(len=fnlen) :: kfilter = "none"
+  character(len=abi_slen) :: kfilter = "none"
   ! Specifies the tecnique used to filter k-points.
   ! Possible values: "none", "fs_tetra", "erange", "qprange"
 
-  character(len=fnlen) :: gmode = "none"
+  character(len=abi_slen) :: gmode = "none"
 
   real(dp),allocatable :: erange_spin(:, :)
   ! (2, nsppol)
@@ -908,10 +908,10 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
      nctkarr_t("gstore_qbz", "dp", "three, gstore_nqbz"), &
      nctkarr_t("gstore_wtq", "dp", "gstore_nqibz"), &
      nctkarr_t("gstore_kbz", "dp", "three, gstore_nkbz"), &
-     nctkarr_t("gstore_kzone", "c", "fnlen"), &
-     nctkarr_t("gstore_qzone", "c", "fnlen"), &
-     nctkarr_t("gstore_kfilter", "c", "fnlen"), &
-     nctkarr_t("gstore_gmode", "c", "fnlen"), &
+     nctkarr_t("gstore_kzone", "c", "abi_slen"), &
+     nctkarr_t("gstore_qzone", "c", "abi_slen"), &
+     nctkarr_t("gstore_kfilter", "c", "abi_slen"), &
+     nctkarr_t("gstore_gmode", "c", "abi_slen"), &
      nctkarr_t("gstore_wfk0_path", "c", "fnlen"), &
      nctkarr_t("gstore_brange_spin", "i", "two, number_of_spins"), &
      nctkarr_t("gstore_erange_spin", "dp", "two, number_of_spins"), &

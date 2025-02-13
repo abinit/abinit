@@ -79,7 +79,7 @@ module m_varpeq
 
  type, public :: polstate_t
 
-  character(len=fnlen) :: aseed = " "
+  character(len=abi_slen) :: aseed = " "
    ! Specifies the type of initial seed for charge localization A_nk
    ! Possible values: "gau_energy", "gau_length", "random", "even"
 
@@ -300,11 +300,11 @@ module m_varpeq
 
  type, public :: varpeq_t
 
-   character(len=fnlen) :: pkind = " "
+   character(len=abi_slen) :: pkind = " "
    ! Specifies the kind of polaron
    ! Possible values: "hole", "electron"
 
-   character(len=fnlen) :: aseed = " "
+   character(len=abi_slen) :: aseed = " "
    ! Specifies the type of initial seed for charge localization A_nk
    ! Possible values: "gau_energy", "gau_length", "random", "even"
 
@@ -825,8 +825,8 @@ subroutine varpeq_ncwrite(self, dtset, dtfil)
 
    ! Define arrays with results
    ncerr = nctk_def_arrays(ncid, [ &
-     nctkarr_t("varpeq_pkind", "c", "fnlen"), &
-     nctkarr_t("varpeq_aseed", "c", "fnlen"), &
+     nctkarr_t("varpeq_pkind", "c", "abi_slen"), &
+     nctkarr_t("varpeq_aseed", "c", "abi_slen"), &
      nctkarr_t("ngkpt", "int", "three"), &
      nctkarr_t("gstore_ngqpt", "int", "three"), &
      nctkarr_t("nk_spin", "int", "nsppol"), &
