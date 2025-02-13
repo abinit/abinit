@@ -3231,7 +3231,7 @@ def exec2class(exec_name):
     }.get(exec_name, BaseTest)
 
 
-def do_work(qin, qout, run_func, run_func_kwargs, print_lock, kill_me, thread_mode=False):
+def do_work(qin, qout, rank, run_func, run_func_kwargs, print_lock, kill_me, thread_mode=False):
     done = {'type': 'proc_done'}
     all_done = False
     try:
@@ -3241,7 +3241,7 @@ def do_work(qin, qout, run_func, run_func_kwargs, print_lock, kill_me, thread_mo
             if test is None:  # reached the end
                 all_done = True
             else:
-                qout.put(run_func(test, print_lock=print_lock, **run_func_kwargs))
+                qout.put(run_func(test, rank, print_lock=print_lock, **run_func_kwargs))
 
     except EmptyQueueError:
         # If that happen it is a probably a bug
@@ -3259,15 +3259,27 @@ def do_work(qin, qout, run_func, run_func_kwargs, print_lock, kill_me, thread_mo
         qout.put(done)
 
 
-def run_and_check_test(test, print_lock=None, **kwargs):
+def run_and_check_test(test, rank, print_lock=None, **kwargs):
     """Helper function to execute the test. Must be thread-safe."""
 
     workdir = kwargs.pop("workdir")
     build_env = kwargs.pop("build_env")
     job_runner = kwargs.pop("job_runner")
     nprocs = kwargs.pop("nprocs")
+    num_gpus = kwargs.pop("num_gpus")
     runmode = kwargs.pop("runmode")
     #print(kwargs)
+
+    # If there are GPUs, set which one to use for test according to worker rank,
+    # so each worker doesn't use the same GPU
+    if num_gpus > 0:
+        l = []
+        for i in range(0,num_gpus):
+            l.append(str( (i+rank) % num_gpus))
+        # NVIDIA GPUs, using CUDA
+        os.environ["CUDA_VISIBLE_DEVICES"] = ','.join(l)
+        # AMD GPUs, using ROCM ("ROCR" stands for ROCM Runtime)
+        os.environ["ROCR_VISIBLE_DEVICES"] = ','.join(l)
 
     testdir = os.path.abspath(os.path.join(workdir, test.suite_name + "_" + test.id))
 
@@ -3872,12 +3884,12 @@ class AbinitTestSuite(object):
 
         for i in range(py_nprocs - 1):
             # create and start subprocesses
-            p = Process(target=do_work, args=(task_q, res_q, run_func, run_func_kwargs, print_lock, self._kill_me))
+            p = Process(target=do_work, args=(task_q, res_q, i, run_func, run_func_kwargs, print_lock, self._kill_me))
             self._processes.append(p)
             p.start()
 
         # Add the worker as a thread of the main process
-        t = Thread(target=do_work, args=(task_q, res_q, run_func, run_func_kwargs, print_lock, self._kill_me, True))
+        t = Thread(target=do_work, args=(task_q, res_q, py_nprocs-1, run_func, run_func_kwargs, print_lock, self._kill_me, True))
         # make it daemon so it will die if the main process is interrupted early
         t.daemon = True
         t.start()
@@ -3933,7 +3945,7 @@ class AbinitTestSuite(object):
         return results
 
     def run_tests(self, build_env, workdir, job_runner,
-                  nprocs=1, py_nprocs=1, runmode="static", **kwargs):
+                  nprocs=1, py_nprocs=1, num_gpus=0, runmode="static", **kwargs):
         """
         Execute the list of tests (main entry point for client code)
 
@@ -3943,6 +3955,7 @@ class AbinitTestSuite(object):
             job_runner: `JobRunner` instance
             nprocs: number of MPI processes to use for a single test.
             py_nprocs: number of py_nprocs for tests
+            num_gpus: number of GPU for tests
         """
         self.sanity_check()
 
@@ -3976,12 +3989,14 @@ class AbinitTestSuite(object):
 
             self.nprocs = nprocs
             self.py_nprocs = py_nprocs
+            self.num_gpus = num_gpus
 
             run_func_kwargs = dict(
                 workdir=self.workdir,
                 build_env=build_env,
                 job_runner=job_runner,
                 nprocs=self.nprocs,
+                num_gpus=self.num_gpus,
                 runmode=runmode,
             )
             # Add kwargs
@@ -3996,7 +4011,7 @@ class AbinitTestSuite(object):
                 logger.info("Sequential version")
                 for test in self:
                     # discard the return value because tests are directly modified
-                    run_and_check_test(test, **run_func_kwargs)
+                    run_and_check_test(test, 0, **run_func_kwargs)
 
             elif py_nprocs > 1:
                 logger.info("Parallel version with py_nprocs = %s" % py_nprocs)
