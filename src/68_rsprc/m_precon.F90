@@ -11,14 +11,15 @@
 
 module m_precon
     
-    use defs_abitypes, only : MPI_type
+    use defs_abitypes,  only : MPI_type
     use defs_basis
     use defs_wvltypes
 
-    use m_atomdata,  only : atom_length
+    use m_atomdata,     only : atom_length
     use m_dtset
-    use m_fft,      only : fourdp
+    use m_fft,          only : fourdp
     use m_mkrho
+    use m_spacepar,     only : symrhg
     use m_paw_dmft
 
 
@@ -58,8 +59,12 @@ module m_precon
         procedure :: update => precon_update    ! Updates the precon_object according to iprcel.
         procedure :: free => precon_free        ! Dealocate arrays that are allocated in precon_init.
         procedure :: save => precon_save        ! Saves the LDOS or local polarizability contained in the precon_object in a file.
-        procedure :: apply_vc => apply_vc       ! Applies the coulomb kernel vc to an imput vector.
-        procedure :: apply_chi0 => apply_chi0   ! Applies the model chi0 operator to an imput vector.
+        procedure :: to_pauli => to_pauli       ! Basis change from the default abinit spin basis to the Pauli basis 
+                                                ! for density and potentials.
+        procedure :: from_pauli => from_pauli   ! Basis change from the Pauli basis to the default abinit spin basis 
+                                                ! for density and potentials.
+        procedure :: apply_vc => apply_vc       ! Applies the coulomb kernel vc to an input vector.
+        procedure :: apply_chi0 => apply_chi0   ! Applies the model chi0 operator to an input vector.
         procedure :: save_applied_op => save_applied_op ! Saves the application of an operator.
 
     end type precon_object
@@ -182,6 +187,7 @@ contains
             &   this%ldos)
             !update tdos
             this%tdos = sum(this%ldos(:, 1)) * this%dvol
+        write(6,*)'    chi0diel update : dvol, tdos', this%dvol, this%tdos; flush(6) !DEBUG
         end if
 
         !Local polarizability
@@ -265,7 +271,7 @@ contains
     !! get_r_vector
     !!
     !! FUNCTION
-    !! Get the vector r (in reduced coordinates) of index ifft
+    !! Get the vector r (in REDUCED coordinates) of index ifft
     !!
     !! SOURCE
     function get_r_vector(ifft, ngfft) result(r)
@@ -297,7 +303,7 @@ contains
     !! get_g_vector
     !!
     !! FUNCTION
-    !! Get the vector g (in reduced coordinates) of index ifft
+    !! Get the vector g (in REDUCED coordinates) of index ifft
     !!
     !! SOURCE
     function get_g_vector(ifft, ngfft) result(g)
@@ -346,50 +352,158 @@ contains
         integer, intent(in) :: ngfft(:)
 
         !Local variables-------------------------------
-        logical :: exist
         integer :: io, n, i
 
         ! *************************************************************************
-       
+        
+        n = size(this%ldos, 1)
+
         if (this%iprcel==202) then
             n = size(this%ldos(:, ispden))
             ! Writing the file
-            inquire(file="ldos.txt", exist=exist)
-            if (exist) then
-                open(newunit=io, file="ldos.txt", status="replace", action="write")
+            open(newunit=io, file="ldos.txt", status="replace", action="write")
                 do i=1,n
                     write (io, '(*(G0.6,:,","))') matmul(this%rprimd, get_r_vector(i, ngfft)), this%ldos(i, ispden)
                 end do
-                close(io)
-            else
-                open(newunit=io, file="ldos.txt", status="new", action="write")
-                do i=1,n
-                    write (io, '(*(G0.6,:,","))') matmul(this%rprimd, get_r_vector(i, ngfft)), this%ldos(i, ispden)
-                end do
-                close(io)
-            end if 
+            close(io)
         end if 
 
         if (this%iprcel==203) then
             n = size(this%loc_pola(:, ispden))
             ! Writing the file
-            inquire(file="loc_pola.txt", exist=exist)
-            if (exist) then
-                open(newunit=io, file="loc_pola.txt", status="replace", action="write")
+            open(newunit=io, file="loc_pola.txt", status="replace", action="write")
                 do i=1,n
                     write (io, '(*(G0.6,:,","))') matmul(this%rprimd, get_r_vector(i, ngfft)), this%loc_pola(i, ispden)
                 end do
-                close(io)
-            else
-                open(newunit=io, file="loc_pola.txt", status="new", action="write")
-                do i=1,n
-                    write (io, '(*(G0.6,:,","))') matmul(this%rprimd, get_r_vector(i, ngfft)), this%loc_pola(i, ispden)
-                end do
-                close(io)
-            end if 
+            close(io)
         end if 
 
     end subroutine precon_save
+
+    !!****f* ABINIT/to_pauli
+    !! NAME
+    !!  from_pauli
+    !!
+    !! FUNCTION
+    !!  Basis change from the default spin-basis to  the Pauli basis for potentials and densities.
+    !!
+    !! INPUT/OUTPUT
+    !!  opt                = 0 : v is a potential
+    !!                       1 : v is a density
+    !!  v(2, nfft, nspden) = On input : Potential/density in the default spin-basis.
+    !!                       On output : Potential/density in the Pauli basis.
+    !!
+    !! SOURCE
+
+    subroutine to_pauli(this, opt, v)
+        class(precon_object), intent(inout) :: this
+        !Arguments ------------------------------------
+        real(dp), intent(inout) ::  v(:, :, :)
+        integer :: opt
+        !Local variables-------------------------------
+        integer :: nspden, nfft
+        real(dp), allocatable :: temp(:)
+        
+        ! *************************************************************************
+        nspden = size(v, 3)
+        nfft = size(v, 2)
+
+        !sigma_0, ... , sigma_3 are the Pauli matrices.
+        if (opt == 0) then      !v is a potential
+            if (nspden == 2) then
+                !On input v(:, :, 1) is the spin-up potential and v(:, :, 2) is the spin-up potential.
+                !On output the entire potential is v(:, :, 1)*sigma_0 + v(:, :, 2)*sigma_3.
+                v(:, :, 1) = 0.5_dp*(v(:, :, 1) + v(:, :, 2))
+                v(:, :, 2) = v(:, :, 1) - v(:, :, 2)
+            else if (nspden == 4) then
+                !                                   v(:, :, 1)  |   v(:, :, 2)
+                !On input the entire potential is   ------------|---------------
+                !                                   v(:, :, 3)  |   v(:, :, 4)
+                !On output the entire potential is 
+                !   v(:, :, 1)*sigma_0 + v(:, :, 2)*sigma_1 + v(:, :, 3)*sigma_2  + v(:, :, 4)*sigma_3
+                v(:, :, 1) = 0.5_dp*(v(:, :, 1) + v(:, :, 4))
+                v(:, :, 4) = v(:, :, 1) - v(:, :, 4)
+                v(:, :, 2) = 0.5_dp*(v(:, :, 2) + v(:, :, 3))
+                !v(:, :, 3) = i*(v(:, :, 2) - v(:, :, 3)) :
+                ABI_MALLOC(temp, (nfft))
+                temp = (v(1, :, 2) - v(1, :, 3))
+                v(1, :, 3) = -1*(v(2, :, 2) - v(2, :, 3))  !  Re(i*) = -Im()
+                v(2, :, 3) = temp                          !  Im(i*) = Re()
+                ABI_FREE(temp)
+            end if
+
+        else if (opt == 1) then !v is a density
+            if (nspden == 2) then
+                !On input v(:, :, 1) is the total density and v(:, :, 2) is the spin-up density.
+                !On output               "                and v(:, :, 2) is the spin density.
+                v(:, :, 2) = v(:, :, 1) - 2*v(:, :, 2)
+            end if
+            !If nspden=4, the density is already given in the Pauli basis.
+        end if
+    end subroutine to_pauli
+
+    !!****f* ABINIT/from_pauli
+    !! NAME
+    !!  from_pauli
+    !!
+    !! FUNCTION
+    !!  Basis change from the Pauli basis to the default spin-basis for potentials and densities.
+    !!
+    !! INPUT/OUTPUT
+    !!  opt                = 0 : v is a potential
+    !!                       1 : v is a density
+    !!  v(2, nfft, nspden) = On input : Potential/density in the Pauli basis
+    !!                       On output : Potential/density in the default spin-basis.
+    !!
+    !! SOURCE
+
+    subroutine from_pauli(this, opt, v)
+        class(precon_object), intent(inout) :: this
+        !Arguments ------------------------------------
+        real(dp), intent(inout) ::  v(:, :, :)
+        integer :: opt
+        !Local variables-------------------------------
+        integer :: nspden, nfft
+        real(dp), allocatable :: temp(:)
+        
+        ! *************************************************************************
+        nspden = size(v, 3)
+        nfft = size(v, 2)
+
+        !sigma_0, ... , sigma_3 are the Pauli matrices.
+        if (opt == 0) then      !v is a potential
+            if (nspden == 2) then
+                !On input the entire potential is v(:, :, 1)*sigma_0 + v(:, :, 2)*sigma_3.
+                !On output v(:, :, 1) is the spin-up potential and v(:, :, 2) is the spin-up potential.
+                v(:, :, 1) = v(:, :, 1) + v(:, :, 2)
+                v(:, :, 2) = v(:, :, 1) - 2*v(:, :, 2)
+            else if (nspden == 4) then
+                !On input the entire potential is 
+                !   v(:, :, 1)*sigma_0 + v(:, :, 2)*sigma_1 + v(:, :, 3)*sigma_2  + v(:, :, 4)*sigma_3
+                !                                    v(:, :, 1)  |   v(:, :, 2)
+                !On output the entire potential is   ------------|---------------
+                !                                    v(:, :, 3)  |   v(:, :, 4)
+                v(:, :, 1) = v(:, :, 1) + v(:, :, 4)
+                v(:, :, 4) = v(:, :, 1) - 2*v(:, :, 4)
+                !v(:, :, 2) = v(:, :, 2) - i*v(:, :, 3)
+                !v(:, :, 3) = v(:, :, 2) + i* v(:, :, 3) :
+                ABI_MALLOC(temp, (nfft))
+                temp = v(3, 1, :)
+                v(1, :, 3) = v(1, :, 2) - v(2, :, 3) !  Re(i*) = -Im()
+                v(2, :, 2) = v(2, :, 2) + temp       !  Im(i*) = Re()
+                ABI_FREE(temp)
+                v(:, :, 2) = 2*v(:, :, 2) - v(:, :, 3)
+            end if
+
+        else if (opt == 1) then !v is a density
+            if (nspden == 2) then
+                !On input v(:, :, 1) is the total density and v(:, :, 2) is the spin density.
+                !On output v(:, :, 1) is the total density and v(:, :, 2) is the spin-up density.
+                v(:, :, 2) = 0.5_dp*(v(:, :, 1) + v(:, :, 2))
+            end if
+            !If nspden=4, the density is already given in the Pauli basis.
+        end if
+    end subroutine from_pauli
 
     !****f* m_precon/apply_vc
     !! NAME
@@ -405,7 +519,7 @@ contains
         class(precon_object), intent(inout) :: this
         !arrays
         integer, intent(in) :: ngfft(:)
-        real(dp), intent(inout) :: vec_g(this%nspden, 2, this%nfft)
+        real(dp), intent(inout) :: vec_g(2, this%nfft, this%nspden)
         
         !Local variables-------------------------------
         integer :: ifft, ispden
@@ -414,20 +528,17 @@ contains
         ! *************************************************************************
         
         !In the sigma_0, 1, 2, 3 basis :
-        !The sigma_0 component of the density is multiplied by 4pi/G^2
-        !and the rest is 0.
+        !   The sigma_0 component of the density is multiplied by 4pi/G^2
+        !   and the rest is 0.
+        ispden = 1
         do ifft = 2, this%nfft
             g_cart_2 = norm2(two_pi * matmul(this%gprimd, get_g_vector(ifft, ngfft)))**2
-            vec_g(1, 1, ifft) = (2*two_pi/g_cart_2) * vec_g(1, 1, ifft)
-            vec_g(1, 2, ifft) = (2*two_pi/g_cart_2) * vec_g(1, 2, ifft)
+            vec_g(:, ifft, ispden) = (2*two_pi/g_cart_2) * vec_g(:, ifft, ispden)
         end do
-        !TODO : optimize this ?
 
         do ispden = 2, this%nspden
-            vec_g(ispden, :, :) = 0
+            vec_g(:, :, ispden) = 0
         end do
-
-
 
     end subroutine apply_vc
 
@@ -541,7 +652,9 @@ contains
         !arrays
         real(dp), intent(in) :: eigen(:)
         real(dp), intent(out) :: ldos(:, :)
-        
+        !integer, intent(in) :: atindx(:), atindx1(:)
+        !cprj, dimcprj, mband_cprj TODO 
+
         !mkrho arguments
         real(dp), intent(in) :: ucvol
         type(MPI_type), intent(inout) :: mpi_enreg
@@ -555,7 +668,7 @@ contains
         
         !Local variables-------------------------------
         !scalars
-        integer :: mband, i, mcg, maxocc
+        integer :: mband, i, mcg, maxocc, nfftot
         !arrays
         real(dp), allocatable :: ldos_wheights(:)
 
@@ -581,12 +694,37 @@ contains
         paw_dmft%use_sc_dmft = 0
         call mkrho(cg, dtset, gprimd, irrzon, kg, mcg, mpi_enreg, npwarr, ldos_wheights, &
         &   paw_dmft, phnons, rhog, ldos, rprimd, 0, ucvol, wvl_den, wvl_wfs, option=0)
-        !TODO symrhg + nfftmix != dtset%nfft en PAW grille
-        !call symrhg(cplex, gprimd, irrzon, mpi_enreg, nfft, nfftot, ngfft, nspden, nsppol, &
-        !&   nsym, phnons, rhog, ldos, rprimd, symafm, symrel, tnons)
-
-
         ABI_FREE(ldos_wheights)
+        
+        !TODO nfftmix != dtset%nfft en PAW grille
+        nfftot = dtset%ngfft(1) * dtset%ngfft(2) * dtset%ngfft(3)
+        call symrhg(1, gprimd, irrzon, mpi_enreg, nfft, nfftot, dtset%ngfft, dtset%nspden, dtset%nsppol, &
+        &   dtset%nsym, phnons, rhog, ldos, rprimd, dtset%symafm, dtset%symrel, dtset%tnons)
+
+        !if (psps%usepaw==1) then
+        !    mcprj = size(cprj)
+            !Computing the rhoij equivalent for the local density of states (ldos)
+            !   Sum_{n,k} {ldos_wheight(n,k)*<Cnk|p_i><p_j|Cnk>}.
+
+            !1) Allocating pawrhoij object
+        !    pawrhoij_ldos = ..
+            !2) Computing
+        !    call pawmkrhoij(atindx, atindx1, cprj, dimcprj, dtset%istwfk, dtset%kptopt, dtset%mband, mband_cprj, &
+        !    &       mcprj, dtset%mkmem, mpi_enreg, dtset%natom, dtset%nband, dtset%nkpt, dtset%nspden, dtset%nspinor, &
+        !    &       dtset%nsppol, ldos_wheights, dtset%paral_kgb, paw_dmft, pawrhoij_ldos, dtfil%unpaw, dtset%usewvl, dtset%wtk)
+
+            !Computing the total pseudo (compensated) ldos
+        !    call pawmkrho(1, compch_fft, cplex, gprimd, idir, indsym, ipert, mpi_enreg, &
+        !    &       my_natom, natom, dtset%nspden, dtset%nsym, dtset%ntypat, dtset%paral_kgb, pawang, pawfgr, pawfgrtab, &
+        !    &       dtset%pawprtvol, pawrhoij_ldos, pawrhoij_ldos, pawtab, qpt, rhowfg, rhowfr, rhor, rprimd, dtset%symafm, &
+        !    &       symrec, dtset%typat, ucvol, dtset%usewvl, xred, pawnhat=nhat)
+        !end if
+
+        !With collinear spins the ldos is not returned in the Pauli (tot/spin) basis by mkrho.
+        if (dtset%nspden == 2) then
+            !spin = 2*up - tot
+            ldos(:, 2) = 2*ldos(:, 2) - ldos(:, 1)
+        end if
 
     end subroutine compute_ldos
 
@@ -711,46 +849,41 @@ contains
 
     end subroutine compute_loc_pola
 
-    subroutine save_applied_op(this, ngfft, optspace, vec, op_vec)
+    subroutine save_applied_op(this, ngfft, optspace, vec, op_vec, filename)
 
         !Arguments ------------------------------------
         class(precon_object), intent(in) :: this
         !scalars
         integer, intent(in) :: optspace ! 1 for real space, 2 for Fourier space
+        character(len=*), intent(in) :: filename ! Filename for the output file
         !arrays
-        real(dp), intent(in) :: vec(:), op_vec(:)
+        real(dp), intent(in) :: vec(:, :, :), op_vec(:, :, :)
         integer, intent(in) :: ngfft(:)
        
         !Local variables-------------------------------
         !scalars
-        logical :: exist
-        integer :: io, n, i
+        integer :: io, n, i, ispden
         
         ! *************************************************************************
-        n = size(vec)
+        n = size(vec, 2)
+        ispden = 1
         ! Writing the file
-        inquire(file="applied_op.txt", exist=exist)
-        if (exist) then
-            open(newunit=io, file="applied_op.txt", status="replace", action="write")
-            do i=1,n
+        open(newunit=io, file=filename, status="replace", action="write")
+            do i=1, n
                 if(optspace==1) then
-                    write (io, '(*(G0.6,:,","))') matmul(this%rprimd, get_r_vector(i, ngfft)), vec(i), op_vec(i)
+                    write (io, '(*(G0.6,:,","))') matmul(this%rprimd, get_r_vector(i, ngfft)),      &
+                    &                             vec(1, i, ispden), vec(2, i, ispden),             &
+                    &                             op_vec(1, i, ispden), op_vec(2, i, ispden)
                 else if(optspace==2) then
-                    write (io, '(*(G0.6,:,","))') matmul(this%gprimd, get_g_vector(i, ngfft)), vec(i), op_vec(i)
+                    write (io, '(*(G0.6,:,","))') two_pi*matmul(this%gprimd, get_g_vector(i, ngfft)),   &
+                    &                             vec(1, i, ispden), vec(2, i, ispden),                 &
+                    &                             op_vec(1, i, ispden), op_vec(2, i, ispden)
                 end if
             end do
-            close(io)
-        else
-            open(newunit=io, file="applied_op.txt", status="new", action="write")
-            do i=1,n
-                if(optspace==1) then
-                    write (io, '(*(G0.6,:,","))') matmul(this%rprimd, get_r_vector(i, ngfft)), vec(i), op_vec(i)
-                else if(optspace==2) then
-                    write (io, '(*(G0.6,:,","))') matmul(this%gprimd, get_g_vector(i, ngfft)), vec(i), op_vec(i)
-                end if
-            end do
-            close(io)
-        end if 
+        close(io)
+        write(6,*)'chi0diel : gprimd', this%gprimd; flush(6) !DEBUG
+
+
     end subroutine save_applied_op
 
     !****f* m_precon/apply_chi0
@@ -778,7 +911,7 @@ contains
         type(MPI_type), intent(in) :: mpi_enreg
         !arrays
         integer, intent(in) :: ngfft(:)
-        real(dp), intent(inout) :: vec_g(this%nspden, 2, this%nfft)
+        real(dp), intent(inout) :: vec_g(2, this%nfft, this%nspden)
        
         !Local variables-------------------------------
         !scalars
@@ -794,23 +927,26 @@ contains
        
         if (this%iprcel == 201) then
         !Kerker
-            vec_g(1, :, :) = (-1/(4*pi*(this%dielng)**2)) * vec_g(1, :, :)
+            ispden = 1
+            vec_g(:, :, ispden) = (-1/(4*pi*(this%dielng)**2)) * vec_g(:, :, ispden)
             do ispden = 2, this%nspden
-                vec_g(ispden, :, :) = (-1/(4*pi*(this%dielng)**2)) * vec_g(ispden, :, :)
-                !vec_g(ispden, :, :) = 0
+                vec_g(:, :, ispden) = (-1/(4*pi*(this%dielng)**2)) * vec_g(:, :, ispden)
+                !vec_g(:, :, ispden) = 0
                 ! What is best ?
             end do
         end if
         
         if (this%iprcel == 202) then
         !LDOS model
+            write(6,*)'    chi0diel apply_chi0: entering (ldos)'; flush(6) !DEBUG
 
+            cplex = 1
             ABI_MALLOC(vec_r_1, (cplex*this%nfft))    
             ABI_MALLOC(work_r, (cplex*this%nfft))
             
             !1) ifft to get (the sigma_0 component of) vec in the real space
-            cplex = 1                           ! TODO : cplex as argument ?
-            call fourdp(cplex, vec_g(1, :, :), vec_r_1, 1, mpi_enreg, this%nfft, 1, ngfft, 0)
+            ispden = 1
+            call fourdp(cplex, vec_g(:, :, ispden), vec_r_1, 1, mpi_enreg, this%nfft, 1, ngfft, 0)
 
             do ispden = 1, this%nspden
                 !2) chi0(v)(r)_ispden = -ldos_ispden(r)*v_1(r) + 1/dos * ldos_ispden(r)*integral(ldos_1(r')*v_1(r')*dr')
@@ -818,11 +954,11 @@ contains
                                 + 1/this%tdos * dot_product(this%ldos(:, 1), vec_r_1)*this%dvol * this%ldos(:, ispden)
 
                 !3) fft to get vec back in the reciprocal space
-                call fourdp(cplex, vec_g(ispden, :, :), work_r, -1, mpi_enreg, this%nfft, 1, ngfft, 0)
-            end do
+                call fourdp(cplex, vec_g(:, :, ispden), work_r, -1, mpi_enreg, this%nfft, 1, ngfft, 0)
+        end do
 
-            ABI_FREE(work_r)
-            ABI_FREE(vec_r_1)
+        ABI_FREE(work_r)
+        ABI_FREE(vec_r_1)
 
         end if
 
@@ -947,8 +1083,8 @@ contains
         !Arguments ------------------------------------
         integer, intent(in) :: n, gmres_maxiter
         real(dp), intent(in) :: gmres_rtol
-        real(dp),intent(in) :: rhs(:)
-        real(dp),intent(inout) :: est(:)
+        real(dp),intent(in) :: rhs(n)
+        real(dp),intent(inout) :: est(n)
         interface
             subroutine matvec(n_, x, y)
                 integer, intent(in) :: n_
@@ -958,18 +1094,20 @@ contains
         !Local variables-------------------------------
         integer :: its, info, m
         real(dp) :: res, del
-        real(dp), allocatable :: h(:, :), v(:)
+        real(dp), allocatable :: h(:, :), v(:, :)
 
         ! *************************************************************************
 
         m = gmres_maxiter
         ABI_MALLOC(h, (m+1, m))
-        ABI_MALLOC(v, (n*(m+1)))
+        ABI_MALLOC(v, (n, m+1))
         res = gmres_rtol
         del = 0
         its = gmres_maxiter  ! No restart
         info = 1
         call gmresm(m, n, est, rhs, matvec, psolve, dotprd, h, v, res, del, its, info)
+        ABI_FREE(h)
+        ABI_FREE(v)
 
         contains
         ! Dummy :  No preconditioning
@@ -992,8 +1130,8 @@ contains
         !Arguments ------------------------------------
         integer, intent(in) :: n, gmres_maxiter
         real(dp), intent(in) :: gmres_rtol
-        real(dp), intent(in) :: rhs(:)
-        real(dp), intent(inout) :: est(:)
+        real(dp), intent(in) :: rhs(n)
+        real(dp), intent(inout) :: est(n)
         interface
             subroutine matvec(n_, x, y)
                 integer, intent(in) :: n_
@@ -1009,8 +1147,9 @@ contains
         write(6,*)'using FGMRES'; flush(6) !DEBUG
         call call_FGMRES(n, matvec, rhs, est, gmres_maxiter, gmres_rtol)
 #else
-        write(6,*)'using gmresm'; flush(6) !DEBUG
+        write(6,*)'using gmresm, n=', n; flush(6) !DEBUG
         call call_gmresm(n, matvec, est, rhs, gmres_maxiter, gmres_rtol)
+        write(6,*)'chi0diel : gmresm done'; flush(6) !DEBUG
 #endif
       
     end subroutine linsolve
@@ -1067,6 +1206,7 @@ contains
    double precision, save :: beta
    integer, save :: j
    logical :: done   
+   write(6,*)'    chi0diel gmresm : n = ', n ; flush(6) !DEBUG
 
    if(info==2) then
       call hookstep(j,h,m,beta,del, y)
@@ -1098,13 +1238,16 @@ contains
       its = its + 1
       z = v(:,j)      
       call psolve(n, z)
-      call matvec(n,z, w)
+      write(6,*)'chi0diel : gmresm 01'; flush(6) !DEBUG
+      call matvec(n, z, w)
+      write(6,*)'chi0diel : gmresm 02'; flush(6) !DEBUG
       do i = 1, j
          h(i,j) = dotprd(n,w,v(1,i))
          w = w - h(i,j)*v(:,i)
       end do
       h(j+1,j) = dsqrt(dotprd(n,w,w))
       v(:,j+1) = w / h(j+1,j)
+      write(6,*)'chi0diel : gmresm 03'; flush(6) !DEBUG
           
       p(1) = beta
       p(2:j+1) = 0d0
@@ -1112,26 +1255,39 @@ contains
       call dgelsy(j+1,j,1,h_,m+1,p,m+1,piv,m,rank,work,4*m+1,i)
       if(i/=0) stop 'gmresm: dgelsy'
       y = p
+      write(6,*)'chi0diel : gmresm 04'; flush(6) !DEBUG
 
       p(1:j+1) = - matmul(h(1:j+1,1:j),y(1:j))
       p(1) = p(1) + beta
       res = dsqrt(dot_product(p(1:j+1),p(1:j+1)))
       if(info==1) print*, 'gmresm: it=', its,' res=', real(res)
+      write(6,*)'chi0diel : gmresm 1'; flush(6) !DEBUG
       
       done = (res<=tol .or. its==imx .or. res>res_)
       if(done .or. j==m) then
-         if(del>0d0)  call hookstep(j,h,m,beta,del, y)
+        write(6,*)'chi0diel : gmresm 2'; flush(6) !DEBUG
+        if(del>0d0)  call hookstep(j,h,m,beta,del, y)
+        write(6,*)'chi0diel : gmresm 3'; flush(6) !DEBUG
          z = matmul(v(:,1:j),y(1:j))
+        write(6,*)'chi0diel : gmresm 31'; flush(6) !DEBUG
          call psolve(n, z)
+        write(6,*)'chi0diel : gmresm 32'; flush(6) !DEBUG
          x = x + z
-         if(its==imx) info = 2
-         if(res>res_) info = 1
-         if(res<=tol) info = 0
+        write(6,*)'chi0diel : gmresm 33'; flush(6) !DEBUG
+        if(its==imx) info = 2
+        write(6,*)'chi0diel : gmresm 34'; flush(6) !DEBUG
+        if(res>res_) info = 1
+        write(6,*)'chi0diel : gmresm 35'; flush(6) !DEBUG
+        if(res<=tol) info = 0
          if(done)     return
-         if(del>0d0)  print*, 'gmres: warning! restart affects hookstep'
+        write(6,*)'chi0diel : gmresm 36'; flush(6) !DEBUG
+        if(del>0d0)  print*, 'gmres: warning! restart affects hookstep'
+        write(6,*)'chi0diel : gmresm 37'; flush(6) !DEBUG
          goto 1       ! (j==m) restart
       end if
+      write(6,*)'chi0diel : gmresm 4'; flush(6) !DEBUG
       res_ = res*stgn
+      write(6,*)'chi0diel : gmresm 5'; flush(6) !DEBUG
 
    end do   
  
