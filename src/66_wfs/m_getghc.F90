@@ -1353,7 +1353,8 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mgfft,mpi
 
  ! scale conversion from SI to atomic units,
  ! here \alpha^2 where \alpha is the fine structure constant
- scale_conversion = FineStructureConstant2
+ !scale_conversion = FineStructureConstant2
+ scale_conversion = one
 
  if (nspinortot==1) then
 
