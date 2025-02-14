@@ -825,8 +825,8 @@ subroutine varpeq_ncwrite(self, dtset, dtfil)
 
    ! Define arrays with results
    ncerr = nctk_def_arrays(ncid, [ &
-     nctkarr_t("varpeq_pkind", "c", "abi_slen"), &
-     nctkarr_t("varpeq_aseed", "c", "abi_slen"), &
+     nctkarr_t("varpeq_pkind", "c", "character_string_length"), &
+     nctkarr_t("varpeq_aseed", "c", "character_string_length"), &
      nctkarr_t("ngkpt", "int", "three"), &
      nctkarr_t("gstore_ngqpt", "int", "three"), &
      nctkarr_t("nk_spin", "int", "nsppol"), &
