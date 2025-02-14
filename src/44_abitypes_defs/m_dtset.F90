@@ -273,10 +273,10 @@ type, public :: dataset_type
 
  integer :: gstore_cplex = 2
  integer :: gstore_with_vk = 1
- character(len=fnlen) :: gstore_kzone = "ibz"
- character(len=fnlen) :: gstore_qzone = "bz"
- character(len=fnlen) :: gstore_kfilter = "none"
- character(len=fnlen) :: gstore_gmode = "phonon"
+ character(len=abi_slen) :: gstore_kzone = "ibz"
+ character(len=abi_slen) :: gstore_qzone = "bz"
+ character(len=abi_slen) :: gstore_kfilter = "none"
+ character(len=abi_slen) :: gstore_gmode = "phonon"
  integer :: gstore_brange(2, 2) = 0
  real(dp) :: gstore_erange(2, 2) = zero
 
@@ -687,22 +687,21 @@ type, public :: dataset_type
 !V
  integer :: vacnum
 
- ! TODO len here should have len=etsfio_charlen
- character(len=fnlen) :: varpeq_aseed = "gau_energy"
- character(len=fnlen) :: varpeq_pkind = "none"
- integer :: varpeq_avg_g = 0
- integer :: varpeq_translate = 0
- integer :: varpeq_interp = 0
- integer :: varpeq_nstates = 1
- integer :: varpeq_nstep = 50
- integer :: varpeq_nstep_ort = 50
- integer :: varpeq_select = -1
- integer :: varpeq_mesh_fact = 1
- real(dp) :: varpeq_mixing_factor = zero
- real(dp) :: varpeq_tolgrs = tol6
- integer :: varpeq_trvec(3) = [0, 0, 0]
- real(dp) :: varpeq_gpr_energy(2) = [zero, one]
- real(dp) :: varpeq_gpr_length(3) = [one, one, one]
+ character(len=abi_slen) :: vpq_aseed = "gau_energy"
+ character(len=abi_slen) :: vpq_pkind = "none"
+ integer :: vpq_avg_g = 0
+ integer :: vpq_interp = 0
+ integer :: vpq_mesh_fact = 1
+ integer :: vpq_nstates = 1
+ integer :: vpq_nstep = 50
+ integer :: vpq_nstep_ort = 50
+ integer :: vpq_select = -1
+ integer :: vpq_translate = 0
+ real(dp) :: vpq_mix_fact = zero
+ real(dp) :: vpq_tolgrs = tol6
+ integer :: vpq_trvec(3) = [0, 0, 0]
+ real(dp) :: vpq_gpr_energy(2) = [zero, one]
+ real(dp) :: vpq_gpr_length(3) = [one, one, one]
 
  integer :: vdw_nfrag
  integer :: vdw_df_ndpts
@@ -2142,21 +2141,21 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%useylm             = dtin%useylm
  dtout%vacnum             = dtin%vacnum
 
- dtout%varpeq_aseed       = dtin%varpeq_aseed
- dtout%varpeq_pkind       = dtin%varpeq_pkind
- dtout%varpeq_avg_g       = dtin%varpeq_avg_g
- dtout%varpeq_translate   = dtin%varpeq_translate
- dtout%varpeq_interp      = dtin%varpeq_interp
- dtout%varpeq_nstates     = dtin%varpeq_nstates
- dtout%varpeq_nstep       = dtin%varpeq_nstep
- dtout%varpeq_nstep_ort   = dtin%varpeq_nstep_ort
- dtout%varpeq_select      = dtin%varpeq_select
- dtout%varpeq_mesh_fact  = dtin%varpeq_mesh_fact
- dtout%varpeq_mixing_factor = dtin%varpeq_mixing_factor
- dtout%varpeq_tolgrs      = dtin%varpeq_tolgrs
- dtout%varpeq_trvec       = dtin%varpeq_trvec
- dtout%varpeq_gpr_energy  = dtin%varpeq_gpr_energy
- dtout%varpeq_gpr_length  = dtin%varpeq_gpr_length
+ dtout%vpq_aseed       = dtin%vpq_aseed
+ dtout%vpq_pkind       = dtin%vpq_pkind
+ dtout%vpq_avg_g       = dtin%vpq_avg_g
+ dtout%vpq_translate   = dtin%vpq_translate
+ dtout%vpq_interp      = dtin%vpq_interp
+ dtout%vpq_nstates     = dtin%vpq_nstates
+ dtout%vpq_nstep       = dtin%vpq_nstep
+ dtout%vpq_nstep_ort   = dtin%vpq_nstep_ort
+ dtout%vpq_select      = dtin%vpq_select
+ dtout%vpq_mesh_fact   = dtin%vpq_mesh_fact
+ dtout%vpq_mix_fact    = dtin%vpq_mix_fact
+ dtout%vpq_tolgrs      = dtin%vpq_tolgrs
+ dtout%vpq_trvec       = dtin%vpq_trvec
+ dtout%vpq_gpr_energy  = dtin%vpq_gpr_energy
+ dtout%vpq_gpr_length  = dtin%vpq_gpr_length
 
  dtout%vdw_df_acutmin     = dtin%vdw_df_acutmin
  dtout%vdw_df_aratio      = dtin%vdw_df_aratio
@@ -3691,10 +3690,10 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' use_oldchi'
 !V
  list_vars=trim(list_vars)//' vaclst vacnum vacuum vacwidth vcutgeo'
- list_vars=trim(list_vars)//' varpeq_avg_g varpeq_aseed varpeq_gpr_energy'
- list_vars=trim(list_vars)//' varpeq_gpr_length varpeq_interp varpeq_mixing_factor varpeq_nstates'
- list_vars=trim(list_vars)//' varpeq_nstep varpeq_nstep_ort varpeq_select varpeq_mesh_fact varpeq_pkind'
- list_vars=trim(list_vars)//' varpeq_tolgrs varpeq_translate varpeq_trvec'
+ list_vars=trim(list_vars)//' vpq_avg_g vpq_aseed vpq_gpr_energy vpq_gpr_length'
+ list_vars=trim(list_vars)//' vpq_interp vpq_mix_fact vpq_mesh_fact vpq_nstates'
+ list_vars=trim(list_vars)//' vpq_nstep vpq_nstep_ort vpq_select vpq_pkind'
+ list_vars=trim(list_vars)//' vpq_tolgrs vpq_translate vpq_trvec'
  list_vars=trim(list_vars)//' vdw_nfrag vdw_supercell'
  list_vars=trim(list_vars)//' vdw_tol vdw_tol_3bt vdw_typfrag vdw_xc'
  list_vars=trim(list_vars)//' vdw_df_acutmin vdw_df_aratio vdw_df_damax'
