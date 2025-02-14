@@ -2166,8 +2166,8 @@ end subroutine getgh1dqc_setup
 !! This codes only the DDK response for A.p, so effectively A_ipert|C>. The nuclear dipole Hamiltonian
 !! (to first order in the nuclear dipole strength) is A.p where in atomic units
 !! A.p=\alpha^2 m x (r-R)/(r-R)^3 . p. Here the components of A have been precomputed in real space
-!! by make_vectornd. The first-order DDK contribution is d A.p/dk = A_idir where idir is the
-!! direction of the DDK perturbation, or 2\pi A_idir when k is given in reduced coords as is usual
+!! by make_vectornd. The first-order DDK contribution is i[A.p,r] = A_idir where idir is the
+!! direction of the DDK perturbation, or 2\pi A_idir when A, p, and r are in reduced coords 
 !!
 !! SOURCE
 
@@ -2187,7 +2187,7 @@ subroutine getgh1ndc(cwavein,gh1ndc,gbound_k,istwf_k,kg_k,mgfft,mpi_enreg,&
 !Local variables-------------------------------
 !scalars
  integer,parameter :: tim_fourwf=1
- integer :: idat,ipw,nspinortot,shift
+ integer :: idat,ipw,iv1,iv2,nspinortot,shift
  logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc
  real(dp) :: weight=one
  !arrays
@@ -2222,8 +2222,8 @@ subroutine getgh1ndc(cwavein,gh1ndc,gbound_k,istwf_k,kg_k,mgfft,mpi_enreg,&
       & istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
       & tim_fourwf,weight,weight,gpu_option=gpu_option)
 
-    ! scale by 2\pi\alpha^2
-    gh1ndc=two_pi*FineStructureConstant2*ghc1
+    ! scale by 2\pi
+    gh1ndc=two_pi*ghc1
 
     ABI_FREE(ghc1)
 
@@ -2247,9 +2247,8 @@ subroutine getgh1ndc(cwavein,gh1ndc,gbound_k,istwf_k,kg_k,mgfft,mpi_enreg,&
          & tim_fourwf,weight,weight,gpu_option=gpu_option)
 
        do idat=1,ndat
-         do ipw=1,npw_k
-           gh1ndc(1:2,ipw+(idat-1)*npw_k)=two_pi*FineStructureConstant2*ghc1(1:2,ipw+(idat-1)*npw_k)
-         end do
+         iv1=1+(idat-1)*npw_k; iv2=npw_k+(idat-1)*npw_k
+         gh1ndc(1:2,iv1:iv2)=two_pi*ghc1(1:2,iv1:iv2)
        end do
 
        ABI_FREE(ghc1)
@@ -2265,9 +2264,8 @@ subroutine getgh1ndc(cwavein,gh1ndc,gbound_k,istwf_k,kg_k,mgfft,mpi_enreg,&
          & tim_fourwf,weight,weight,gpu_option=gpu_option)
 
        do idat=1,ndat
-         do ipw=1,npw_k
-           gh1ndc(1:2,ipw+(idat-1)*npw_k+shift)=two_pi*FineStructureConstant2*ghc2(1:2,ipw+(idat-1)*npw_k)
-         end do
+         iv1=1+(idat-1)*npw_k; iv2=npw_k+(idat-1)*npw_k
+         gh1ndc(1:2,iv1+shift:iv2+shift)=two_pi*ghc2(1:2,iv1:iv2)
        end do
 
        ABI_FREE(ghc2)
