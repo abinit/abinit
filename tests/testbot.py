@@ -213,7 +213,7 @@ class TestBot(object):
         self.targz_fnames = []
         print(self)
 
-        # Initalize the table to store the final results.
+        # Initialize the table to store the final results.
         # The table include all the abinit tests (also those that will be skipped)
         # values are initialized with None.
         # FIXME
@@ -272,7 +272,7 @@ class TestBot(object):
         results = test_suite.run_tests(
             self.build_env, workdir, runner, make_html_diff=1,
             mpi_nprocs=mpi_nprocs, py_nprocs=py_nprocs, runmode=self.runmode)
-        # Cannot use this option on the test farm because hdf5 is not thread-safe.
+        # Cannot use this option on the test farm because hdf5 is not thread/process-safe.
         # See https://www.hdfgroup.org/hdf5-quest.html#tsafe
         # etsf_check=self.etsf_check)
 
@@ -319,13 +319,14 @@ class TestBot(object):
         #runmode, nexecuted = "static", 0
 
         if self.runmode == "static":
-            # Old mode: run all available tests with 1 MPI node here,
+            # Old mode: run all available tests with 1 MPI proc here,
             # then use MPI mode in mp_suites (paral/mpiio)
             np_list = [2, 4, 10, 24, 64]
+            #nfailed, npassed, nexecuted = 0, 0 , 0
             nfailed, npassed, nexecuted = self.run_tests_with_np(1, suite_args=suite_args, runmode=self.runmode)
         else:
             # New mode: run all available tests with 2 MPI procs here,
-            # then enter the mp_suites with [4, 10, 24] CPUs
+            # then enter the mp_suites with np_list CPUs
             np_list = [4, 10, 24, 64]
             nfailed, npassed, nexecuted = self.run_tests_with_np(2, suite_args=suite_args, runmode=self.runmode)
 

@@ -1769,8 +1769,7 @@ pp_dirpath $ABI_PSPDIR
                 elif "passed" in all_fldstats:
                     self._status = "passed"
                 else:
-                    assert all_fldstats == {"succeeded"}, (
-                        "Unexpected test status: {}".format(all_fldstats))
+                    assert all_fldstats == {"succeeded"}, ("Unexpected test status: {}".format(all_fldstats))
                     self._status = "succeeded"
 
         return self._status
@@ -3229,8 +3228,8 @@ def do_work(task_q, res_q, run_func, run_func_kwargs, print_lock, kill_me, threa
     all_done = False
 
     # Extract arguments from run_func_kwargs dict.
-    #print("func_kwargs", run_func_kwargs)
     workdir = run_func_kwargs["workdir"]
+    #print("func_kwargs", run_func_kwargs)
 
     try:
         while not all_done and not (thread_mode and kill_me):
@@ -3267,11 +3266,15 @@ def run_and_check_test(test, print_lock=None, **kwargs):
     Helper function to execute the test. Must be thread-safe.
     Return: dictionary with results.
     """
+    # Extract arguments from kwargs dict.
     workdir = kwargs.pop("workdir")
     build_env = kwargs.pop("build_env")
     job_runner = kwargs.pop("job_runner")
     mpi_nprocs = kwargs.pop("mpi_nprocs")
-    ##omp_nthreads = run_func_kwargs["omp_nthreads"]
+    # FIXME
+    #omp_num_threads = kwargs.pop("omp_num_threads")
+    omp_num_threads = 1
+    omp_num_threads = max(omp_num_threads, 1)
     runmode = kwargs.pop("runmode")
 
     condition = kwargs.pop("condition")
@@ -3281,10 +3284,8 @@ def run_and_check_test(test, print_lock=None, **kwargs):
     max_cpus = kwargs.pop("max_cpus")
     max_gpus = kwargs.pop("max_gpus")
     if max_gpus == 0: max_gpus = -1
-    # FIXME
-    #omp_nthreads = kwargs.pop("omp_nthreads")
-    omp_nthreads = 1
-    ncpus = mpi_nprocs * omp_nthreads
+
+    ncpus = mpi_nprocs * omp_num_threads
     build_with_gpu ="HAVE_GPU" in build_env.defined_cppvars
     ngpus = test.uses_gpu * mpi_nprocs if build_with_gpu else 0
     proc_name = current_process().name
@@ -3301,7 +3302,7 @@ def run_and_check_test(test, print_lock=None, **kwargs):
             gpu_counter.value += ngpus
             #print(f"[{proc_name}]: Running test with {ncpus} cores and {ngpus} GPUs. (Total CPUs used: {cpu_counter.value}/{max_cpus})")
 
-    # FIXME: run method should also receive omp_nthreads
+    # FIXME: run method should also receive omp_num_threads
     # Run the test in testdir
     #print("Calling test.run")
     testdir = os.path.abspath(os.path.join(workdir, test.suite_name + "_" + test.id))
@@ -3317,7 +3318,6 @@ def run_and_check_test(test, print_lock=None, **kwargs):
         condition.notify_all()  # Notify other waiting processes
 
     # Write HTML summary
-    #print("Calling write_html_report")
     test.write_html_report()
 
     # Remove useless files in workdir.
@@ -3940,6 +3940,11 @@ class AbinitTestSuite(object):
             # One end signal for each worker
             task_q.put(None)
 
+        # After putting an object on an empty queue there may be an infinitesimal delay before
+        # the queue’s empty() method returns False. Use a while loop to check with empty()
+        while task_q.empty():
+            time.sleep(0.001)
+
         # Create and start subprocesses
         for i in range(py_nprocs - 1):
             p = Process(target=do_work, args=(task_q, res_q, run_func, run_func_kwargs, print_lock, self._kill_me))
@@ -4007,6 +4012,8 @@ class AbinitTestSuite(object):
             job_runner: `JobRunner` instance.
             mpi_nprocs: number of MPI processes to use for a single test.
             py_nprocs: number of py_nprocs for tests.
+
+        return: Results instance.
         """
         self.sanity_check()
 
@@ -4039,10 +4046,10 @@ class AbinitTestSuite(object):
             rm_rf(self.workdir, exclude_paths=self.lock.lockfile)
 
             self.mpi_nprocs = mpi_nprocs
-            #print(f"{mpi_nprocs=}")
             self.py_nprocs = py_nprocs
+            #print(f"{mpi_nprocs=}")
 
-            # TODO: These parameters should be passed to testbot.py
+            # TODO: These parameters should be passed to testbot.cfg
             from tests.pymods.devtools import number_of_cpus
             max_cpus = max(1, number_of_cpus())
             max_gpus = 1 if "HAVE_GPU" in build_env.defined_cppvars else 0
@@ -4056,10 +4063,10 @@ class AbinitTestSuite(object):
                 runmode=runmode,
                 max_cpus=max_cpus,
                 max_gpus=max_gpus,
-                cpu_counter=manager.Value("i", 0),  # Shared counter for CPU usage
-                gpu_counter=manager.Value("i", 0),   # Shared counter for CPU usage
-                condition=manager.Condition(),      # Condition variable for synchronization
-                lock_counters=manager.Lock(),       # Lock to make cpu_counter updates safe
+                cpu_counter=manager.Value("i", 0),  # Shared counter for CPU usage.
+                gpu_counter=manager.Value("i", 0),  # Shared counter for GPU usage.
+                condition=manager.Condition(),      # Condition variable for synchronization.
+                lock_counters=manager.Lock(),       # Lock to make cpu_counter updates safe.
             )
 
             # Add input kwargs
@@ -4167,10 +4174,10 @@ class AbinitTestSuite(object):
                              2 for test in executed) / len(executed))**0.5
 
                 cprint("Completed in %.2f [s]. Average time for test=%.2f [s], stdev=%.2f [s]" % (
-                    self.tot_etime, mean_etime, dev_etime), color="yellow")
+                       self.tot_etime, mean_etime, dev_etime), color="yellow")
 
                 msg = "Summary: failed=%s, succeeded=%s, passed=%s, skipped=%s, disabled=%s" % (
-                    nfail, nsucc, npass, nskip, ndisa)
+                       nfail, nsucc, npass, nskip, ndisa)
 
                 if nfail:
                     cprint(msg, color="red", attrs=['underline'])
@@ -4181,8 +4188,7 @@ class AbinitTestSuite(object):
                 if False and dev_etime > 0.0:
                     for test in self:
                         if abs(test.run_etime) > 0.0 and abs(test.run_etime - mean_etime) > 2 * dev_etime:
-                            print("%s has run_etime %.2f s" %
-                                  (test.full_id, test.run_etime))
+                            print("%s has run_etime %.2f s" % (test.full_id, test.run_etime))
 
             with open(os.path.join(self.workdir, "results.txt"), "wt") as fh:
                 pprint_table(table, out=fh)

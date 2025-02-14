@@ -571,8 +571,7 @@ class AbinitTests(object):
         all_subsuite_names = self.all_subsuite_names
         for suite_name, suite_path in self.walk_suites():
             if suite_name in all_subsuite_names:
-                print("Found suite and subsuite with the same name: %s" %
-                      suite_name)
+                print("Found suite and subsuite with the same name: %s" % suite_name)
 
     def walk_suites(self):
         """return list of (suite_name, suite_paths)"""
@@ -668,7 +667,6 @@ class AbinitTests(object):
             if with_pickle:
                 print("Saving database to %s" % database_path)
                 lock = FileLock(database_path)
-
                 lock.acquire()
 
                 with open(database_path, "wb") as fh:
@@ -682,7 +680,6 @@ class AbinitTests(object):
             # Read the database from the cpickle file.
             # Use file locking mechanism to prevent IO from other processes.
             lock = FileLock(database_path)
-
             lock.acquire()
 
             with open(database_path, "rb") as fh:
@@ -721,8 +718,7 @@ class AbinitTests(object):
                         d.pop((arg, None))  # v4- --> Remove v4
                     else:
                         # TODO
-                        raise NotImplementedError(
-                            "exclude_mode does not support subsuites")
+                        raise NotImplementedError("exclude_mode does not support subsuites")
                         suite = self.suite_of_subsuite(arg)
                         d.pop((suite.name, arg))  # gw1- --> skip tutorial/gw1
 
@@ -815,8 +811,7 @@ class AbinitTests(object):
 
         if keys or authors or ivars:
             # Create new suite whose tests contain the specified keywords.
-            with_keys, exclude_keys, with_authors, exclude_authors = 4 * \
-                (None,)
+            with_keys, exclude_keys, with_authors, exclude_authors = 4 * (None,)
 
             if keys:
                 with_keys = [k for k in keys if not k.endswith("-")]
@@ -833,8 +828,7 @@ class AbinitTests(object):
                 if "PGI" in with_keys:
                     from pymods.tools import ascii_scream
                     print(ascii_scream())
-                    print(
-                        "I really can't imagine how PGI could pass the ABINIT test suite!")
+                    print("I really can't imagine how PGI could pass the ABINIT test suite!")
                     sys.exit(1)
 
             if authors:
