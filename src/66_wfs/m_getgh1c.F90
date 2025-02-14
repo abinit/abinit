@@ -2222,8 +2222,8 @@ subroutine getgh1ndc(cwavein,gh1ndc,gbound_k,istwf_k,kg_k,mgfft,mpi_enreg,&
       & istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
       & tim_fourwf,weight,weight,gpu_option=gpu_option)
 
-    ! scale by 2\pi\alpha^2
-    gh1ndc=two_pi*FineStructureConstant2*ghc1
+    ! scale by 2\pi
+    gh1ndc=two_pi*ghc1
 
     ABI_FREE(ghc1)
 
@@ -2248,7 +2248,8 @@ subroutine getgh1ndc(cwavein,gh1ndc,gbound_k,istwf_k,kg_k,mgfft,mpi_enreg,&
 
        do idat=1,ndat
          do ipw=1,npw_k
-           gh1ndc(1:2,ipw+(idat-1)*npw_k)=two_pi*FineStructureConstant2*ghc1(1:2,ipw+(idat-1)*npw_k)
+           ! scale by 2\pi
+           gh1ndc(1:2,ipw+(idat-1)*npw_k)=two_pi*ghc1(1:2,ipw+(idat-1)*npw_k)
          end do
        end do
 
@@ -2266,7 +2267,8 @@ subroutine getgh1ndc(cwavein,gh1ndc,gbound_k,istwf_k,kg_k,mgfft,mpi_enreg,&
 
        do idat=1,ndat
          do ipw=1,npw_k
-           gh1ndc(1:2,ipw+(idat-1)*npw_k+shift)=two_pi*FineStructureConstant2*ghc2(1:2,ipw+(idat-1)*npw_k)
+           ! scale by 2\pi
+           gh1ndc(1:2,ipw+(idat-1)*npw_k+shift)=two_pi*ghc2(1:2,ipw+(idat-1)*npw_k)
          end do
        end do
 
