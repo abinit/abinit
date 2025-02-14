@@ -131,6 +131,7 @@ end subroutine mkffnl_objs
 !!       - Determine the set of coordinates (reduced or cartesians)
 !!  indlmn(6,i,ntypat)= array giving l,m,n,lm,ln,spin for i=ln  (if useylm=0)
 !!                                                     or i=lmn (if useylm=1)
+!!  [kinpw(npw)]=plane wave kinetic energy (useless here) and filter mask for dilatmx>1 (needed here)
 !!  kg(3,npw)=integer coordinates of planewaves in basis sphere for this k point.
 !!  kpg(npw,nkpg)= (k+G) components (only if useylm=1)
 !!  kpt(3)=reduced coordinates of k point
@@ -238,14 +239,14 @@ end subroutine mkffnl_objs
 subroutine mkffnl(dimekb, dimffnl, ekb, ffnl, ffspl, gmet, gprimd, ider, idir, indlmn, &
                   kg, kpg, kpt, lmnmax, lnmax, mpsang, mqgrid, nkpg, npw, ntypat, pspso, &
                   qgrid, rmet, usepaw, useylm, ylm, ylm_gr, &
-                  comm, request, ecut_in) ! optional
+                  comm, request, kinpw) ! optional
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: dimekb,dimffnl,ider,idir,lmnmax,lnmax,mpsang,mqgrid,nkpg
  integer,intent(in) :: npw,ntypat,usepaw,useylm
  integer,optional,intent(in) :: comm
- real(dp),optional,intent(in) :: ecut_in
+ real(dp),optional,intent(in) :: kinpw(:)
  integer ABI_ASYNC, optional,intent(out):: request
 !arrays
  integer,intent(in) :: indlmn(6,lmnmax,ntypat),kg(3,npw),pspso(ntypat)
@@ -273,7 +274,7 @@ subroutine mkffnl(dimekb, dimffnl, ekb, ffnl, ffspl, gmet, gprimd, ider, idir, i
  real(dp) :: rprimd(3,3),tsec(2)
  real(dp),allocatable :: dffnl_cart(:,:),dffnl_red(:,:),dffnl_tmp(:)
  real(dp),allocatable :: d2ffnl_cart(:,:),d2ffnl_red(:,:),d2ffnl_tmp(:)
- real(dp),allocatable :: kinpw(:),kpgc(:,:),kpgn(:,:),kpgnorm(:),kpgnorm_inv(:)
+ real(dp),allocatable :: kpgc(:,:),kpgn(:,:),kpgnorm(:),kpgnorm_inv(:)
  real(dp),allocatable :: wk_ffnl1(:),wk_ffnl2(:),wk_ffnl3(:),wk_ffspl(:,:)
 
 ! *************************************************************************
@@ -399,11 +400,11 @@ subroutine mkffnl(dimekb, dimffnl, ekb, ffnl, ffspl, gmet, gprimd, ider, idir, i
    end if
  end if
 
- ! Treat dilatmx>1 (if ecut_in is given)
- if (present(ecut_in)) then
-   ecutsm=zero;effmass_free=one
-   ABI_MALLOC(kinpw,(npw))
-   call mkkin(ecut_in,ecutsm,effmass_free,gmet,kg,kinpw,kpt,npw,0,0)
+ ! Treat dilatmx>1 (if kinpw is given)
+ if (present(kinpw)) then
+   if (size(kinpw)/=npw) then
+     ABI_ERROR("kinpw is not consistent with npw")
+   end if
  end if
 
  ! Need rprimd in some cases
@@ -479,7 +480,8 @@ subroutine mkffnl(dimekb, dimffnl, ekb, ffnl, ffspl, gmet, gprimd, ider, idir, i
            wk_ffspl(:,:)=ffspl(:,:,iln,itypat)
            ider_tmp = min(ider, 1)
            call splfit(qgrid,wk_ffnl2,wk_ffspl,ider_tmp,kpgnorm,wk_ffnl1,mqgrid,npw)
-           if (present(ecut_in)) then
+           ! Filter for dilatmx>1
+           if (present(kinpw)) then
              do ig=1,npw
                if(kinpw(ig)>huge(zero)*1.d-11)then
                  wk_ffnl1(ig) = zero
@@ -489,7 +491,7 @@ subroutine mkffnl(dimekb, dimffnl, ekb, ffnl, ffspl, gmet, gprimd, ider, idir, i
            end if
            if (ider == 2) then
              call splfit(qgrid,wk_ffnl3,wk_ffspl,ider,kpgnorm,wk_ffnl1,mqgrid,npw)
-             if (present(ecut_in)) then
+             if (present(kinpw)) then
                do ig=1,npw
                  if(kinpw(ig)>huge(zero)*1.d-11)then
                    wk_ffnl3(ig) = zero
@@ -746,7 +748,6 @@ subroutine mkffnl(dimekb, dimffnl, ekb, ffnl, ffspl, gmet, gprimd, ider, idir, i
  ABI_FREE(wk_ffspl)
 
  ! Optional deallocations.
- ABI_SFREE(kinpw)
  ABI_SFREE(kpgc)
  ABI_SFREE(kpgn)
  ABI_SFREE(dffnl_red)
