@@ -39,7 +39,7 @@ import tests
 abenv = tests.abenv
 abitests = tests.abitests
 
-from tests.pymods.devtools import number_of_cpus
+from tests.pymods.devtools import number_of_cpus, number_of_gpus
 from tests.pymods.tools import which, ascii_abinit, prompt
 from tests.pymods import termcolor
 from tests.pymods.termcolor import get_terminal_size, cprint
@@ -401,14 +401,16 @@ def main():
         if ncols > 100: cprint(ascii_abinit(), "green")
 
     ncpus_detected = max(1, number_of_cpus())
+    ngpus_detected = max(0, number_of_gpus())
     system, node, release, version, machine, processor = platform.uname()
 
     mpi_nprocs = options.mpi_nprocs
     omp_nthreads = options.omp_nthreads
     py_nprocs = options.py_nprocs
+    num_gpus = ngpus_detected
 
-    cprint("Running on %s -- system %s -- ncpus %s -- Python %s -- %s" % (
-          gethostname(), system, ncpus_detected, platform.python_version(), _my_name),
+    cprint("Running on %s -- system %s -- ncpus %s -- ngpus %s -- Python %s -- %s" % (
+          gethostname(), system, ncpus_detected, ngpus_detected, platform.python_version(), _my_name),
           color='green', attrs=['underline'])
 
     # Compile the code before running the tests.
@@ -645,6 +647,7 @@ def main():
     results = test_suite.run_tests(build_env, workdir, runner,
                                    mpi_nprocs=mpi_nprocs,
                                    py_nprocs=py_nprocs,
+                                   num_gpus=num_gpus,
                                    runmode=runmode,
                                    erase_files=options.erase_files,
                                    make_html_diff=options.make_html_diff,
@@ -692,6 +695,7 @@ def main():
                     results = test_suite.run_tests(build_env, workdir, runner,
                                                    mpi_nprocs=mpi_nprocs,
                                                    py_nprocs=py_nprocs,
+                                                   num_gpus=num_gpus,
                                                    runmode=runmode,
                                                    erase_files=options.erase_files,
                                                    make_html_diff=options.make_html_diff,
