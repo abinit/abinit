@@ -908,10 +908,10 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
      nctkarr_t("gstore_qbz", "dp", "three, gstore_nqbz"), &
      nctkarr_t("gstore_wtq", "dp", "gstore_nqibz"), &
      nctkarr_t("gstore_kbz", "dp", "three, gstore_nkbz"), &
-     nctkarr_t("gstore_kzone", "c", "abi_slen"), &
-     nctkarr_t("gstore_qzone", "c", "abi_slen"), &
-     nctkarr_t("gstore_kfilter", "c", "abi_slen"), &
-     nctkarr_t("gstore_gmode", "c", "abi_slen"), &
+     nctkarr_t("gstore_kzone", "c", "character_string_length"), &
+     nctkarr_t("gstore_qzone", "c", "character_string_length"), &
+     nctkarr_t("gstore_kfilter", "c", "character_string_length"), &
+     nctkarr_t("gstore_gmode", "c", "character_string_length"), &
      nctkarr_t("gstore_wfk0_path", "c", "fnlen"), &
      nctkarr_t("gstore_brange_spin", "i", "two, number_of_spins"), &
      nctkarr_t("gstore_erange_spin", "dp", "two, number_of_spins"), &
