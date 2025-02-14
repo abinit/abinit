@@ -1175,8 +1175,8 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 
      if (dt%eph_task == 13) then
        msg = "electron, hole"
-       if (.not. string_in(dt%varpeq_pkind, msg)) then
-         ABI_ERROR_NOSTOP(sjoin("Invalid varpeq_pkind: `", dt%varpeq_pkind, "`, must be among:", msg), ierr)
+       if (.not. string_in(dt%vpq_pkind, msg)) then
+         ABI_ERROR_NOSTOP(sjoin("Invalid vpq_pkind: `", dt%vpq_pkind, "`, must be among:", msg), ierr)
        end if
      end if
      !if (dt%eph_task == -4 .and. dt%occopt /= 3) then

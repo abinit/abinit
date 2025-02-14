@@ -507,7 +507,7 @@ subroutine varpeq_run(gstore, dtset, dtfil)
 
  call vpq%init(gstore, dtset)
  if (vpq%frohl_ntheta > 0) call vpq%calc_fravg(avg_g0=vpq%g0_flag)
- if (vpq%interp .or. vpq%restart) call vpq%load(dtfil, dtset%varpeq_select)
+ if (vpq%interp .or. vpq%restart) call vpq%load(dtfil, dtset%vpq_select)
  call vpq%solve()
  call vpq%print()
  call vpq%ncwrite(dtset, dtfil)
@@ -820,13 +820,13 @@ subroutine varpeq_ncwrite(self, dtset, dtfil)
    NCF_CHECK(ncerr)
    ! real
    ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: &
-     "varpeq_tolgrs", "e_frohl"])
+     "vpq_tolgrs", "e_frohl"])
    NCF_CHECK(ncerr)
 
    ! Define arrays with results
    ncerr = nctk_def_arrays(ncid, [ &
-     nctkarr_t("varpeq_pkind", "c", "character_string_length"), &
-     nctkarr_t("varpeq_aseed", "c", "character_string_length"), &
+     nctkarr_t("vpq_pkind", "c", "character_string_length"), &
+     nctkarr_t("vpq_aseed", "c", "character_string_length"), &
      nctkarr_t("ngkpt", "int", "three"), &
      nctkarr_t("gstore_ngqpt", "int", "three"), &
      nctkarr_t("nk_spin", "int", "nsppol"), &
@@ -855,14 +855,14 @@ subroutine varpeq_ncwrite(self, dtset, dtfil)
    NCF_CHECK(ncerr)
    ! real
    ncerr = nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: &
-     "varpeq_tolgrs", "e_frohl"], &
+     "vpq_tolgrs", "e_frohl"], &
      [self%tolgrs, self%e_frohl])
    NCF_CHECK(ncerr)
 
    ! Arrays
    ! character
-   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "varpeq_pkind"), self%pkind))
-   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "varpeq_aseed"), self%aseed))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vpq_pkind"), self%pkind))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vpq_aseed"), self%aseed))
    ! integer
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "cvflag_spin"), self%cvflag_spin))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ngkpt"), self%ngkpt))
@@ -1141,8 +1141,8 @@ subroutine varpeq_load(self, dtfil, pselect)
    ! Consitency check
    call self%compare(vpq_ld, bz_mismatch=self%interp)
    if (pselect > 0) then
-     ABI_CHECK(self%nstates == 1, "varpeq_pstates must be 1 if varpeq_select > 0.")
-     ABI_CHECK(pselect <= vpq_ld%nstates, "varpeq_select must be <= loaded nstates.")
+     ABI_CHECK(self%nstates == 1, "vpq_pstates must be 1 if vpq_select > 0.")
+     ABI_CHECK(pselect <= vpq_ld%nstates, "vpq_select must be <= loaded nstates.")
      single_state = .true.
    else
      ABI_CHECK(self%nstates == vpq_ld%nstates, "Diefference found in nstates.")
@@ -1391,25 +1391,25 @@ subroutine varpeq_init(self, gstore, dtset)
 
  ! Scalars
  ! character
- self%pkind = dtset%varpeq_pkind
- self%aseed = dtset%varpeq_aseed
+ self%pkind = dtset%vpq_pkind
+ self%aseed = dtset%vpq_aseed
  ! logical
  self%restart = (dtset%eph_restart /= 0)
- self%interp = (dtset%varpeq_interp /= 0)
- self%g0_flag = (dtset%varpeq_avg_g /= 0)
+ self%interp = (dtset%vpq_interp /= 0)
+ self%g0_flag = (dtset%vpq_avg_g /= 0)
  ! integer
- self%nstep = dtset%varpeq_nstep
- self%nstep_ort = dtset%varpeq_nstep_ort
+ self%nstep = dtset%vpq_nstep
+ self%nstep_ort = dtset%vpq_nstep_ort
  self%nsppol = gstore%nsppol
- self%nstates = dtset%varpeq_nstates
+ self%nstates = dtset%vpq_nstates
  self%natom3 = gstore%cryst%natom*3
  self%max_nk = maxval(gstore%glob_nk_spin)
  self%max_nq = maxval(gstore%glob_nq_spin)
  self%max_nb = maxval(gstore%brange_spin(2,:) - gstore%brange_spin(1,:)) + 1
  self%frohl_ntheta = dtset%eph_frohl_ntheta
  ! real
- self%tolgrs = dtset%varpeq_tolgrs
- self%mixing_factor = dtset%varpeq_mixing_factor
+ self%tolgrs = dtset%vpq_tolgrs
+ self%mixing_factor = dtset%vpq_mix_fact
 
  ! Static arrays
  ! integer
@@ -1450,11 +1450,11 @@ subroutine varpeq_init(self, gstore, dtset)
 
    ! Scalars
    ! character
-   polstate%aseed = dtset%varpeq_aseed
+   polstate%aseed = dtset%vpq_aseed
    ! logical
-   polstate%translate = (dtset%varpeq_translate /= 0)
+   polstate%translate = (dtset%vpq_translate /= 0)
    ! integers
-   polstate%np = dtset%varpeq_nstates
+   polstate%np = dtset%vpq_nstates
    polstate%nkbz = gstore%nkbz
    polstate%nqbz = gstore%nqbz
    ! real
@@ -1464,12 +1464,12 @@ subroutine varpeq_init(self, gstore, dtset)
    ! integer
    polstate%ngkpt(:) = dtset%ngkpt(:)
    ! real
-   polstate%gpr_energy(:) = dtset%varpeq_gpr_energy(:)
-   polstate%gpr_length(:) = dtset%varpeq_gpr_length(:)
+   polstate%gpr_energy(:) = dtset%vpq_gpr_energy(:)
+   polstate%gpr_length(:) = dtset%vpq_gpr_length(:)
 
    ! Dynamic arrays
    ! logical
-   ABI_MALLOC(polstate%has_prev_grad, (dtset%varpeq_nstates))
+   ABI_MALLOC(polstate%has_prev_grad, (dtset%vpq_nstates))
    polstate%has_prev_grad(:) = .false.
    ! integer
    ABI_MALLOC(polstate%my_states_mask, (gqk%nb, gqk%my_nk))
@@ -1484,8 +1484,8 @@ subroutine varpeq_init(self, gstore, dtset)
    endif
 
    ! real
-   ABI_MALLOC(polstate%gradres, (dtset%varpeq_nstates))
-   ABI_MALLOC(polstate%enterms, (4, dtset%varpeq_nstates))
+   ABI_MALLOC(polstate%gradres, (dtset%vpq_nstates))
+   ABI_MALLOC(polstate%enterms, (4, dtset%vpq_nstates))
 
    ABI_MALLOC(polstate%eig, (gqk%nb, gstore%ebands%nkpt))
    msg = sjoin(self%gaps%errmsg_spin(spin), &
@@ -1494,7 +1494,7 @@ subroutine varpeq_init(self, gstore, dtset)
 
    bstart = gstore%brange_spin(1, spin)
    bend = bstart + gqk%nb - 1
-   select case(dtset%varpeq_pkind)
+   select case(dtset%vpq_pkind)
    case ("electron")
      polstate%eig = &
        gstore%ebands%eig(bstart:bend, :, spin) - self%gaps%cb_min(spin)
@@ -1512,9 +1512,9 @@ subroutine varpeq_init(self, gstore, dtset)
    enddo
 
    ! complex
-   ABI_MALLOC(polstate%my_a, (gqk%nb, gqk%my_nk, dtset%varpeq_nstates))
+   ABI_MALLOC(polstate%my_a, (gqk%nb, gqk%my_nk, dtset%vpq_nstates))
    ABI_MALLOC(polstate%a_glob, (gqk%nb, gqk%glob_nk))
-   ABI_MALLOC(polstate%my_b, (gqk%my_npert, gqk%my_nq, dtset%varpeq_nstates))
+   ABI_MALLOC(polstate%my_b, (gqk%my_npert, gqk%my_nq, dtset%vpq_nstates))
    ABI_MALLOC(polstate%my_prev_b, (gqk%my_npert, gqk%my_nq))
    ABI_MALLOC(polstate%my_pc, (gqk%nb, gqk%my_nk))
    ABI_MALLOC(polstate%my_grad, (gqk%nb, gqk%my_nk))
@@ -3212,7 +3212,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
        end if
 
        ! Phase due to the primitive translation (default: 0)
-       cphase_tr = exp(+j_dpc * two_pi * dot_product(qq, dtset%varpeq_trvec))
+       cphase_tr = exp(+j_dpc * two_pi * dot_product(qq, dtset%vpq_trvec))
 
        do sc_iat=1, scell_q%natom
          uc_iat = scell_q%atom_indexing(sc_iat)
@@ -3351,7 +3351,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
  ! sc_ngfft: mesh in the real space supercell computed as ds_ngfft * vqp%ngkpt
  !           the polaron wavefunction is defined on this mesh.
 
- ds_iscale = dtset%varpeq_mesh_fact
+ ds_iscale = dtset%vpq_mesh_fact
  ds_ngfft = ngfft
  ds_ngfft(1:3) = ngfft(1:3) / ds_iscale
  ABI_CHECK(all(ds_ngfft(1:6) > 0), "ds_iscale too large and ds_ngfft == 0")
@@ -3363,7 +3363,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
  sc_nfft = product(sc_ngfft(1:3)) ! Total number of points in the supercell
 
  call wrtout(std_out, " Computing polaron wavefunction in the real-space supercell...")
- call wrtout(std_out, sjoin(" Using varpeq_mesh_fact:", itoa(ds_iscale)))
+ call wrtout(std_out, sjoin(" Using vpq_mesh_fact:", itoa(ds_iscale)))
  call wrtout(std_out, sjoin(" Memory required by pol_wfr:", &
              ftoa(two*sc_nfft*nspinor*vpq%nstates*nsppol*storage_size(one)/eight*b2Mb), " (Mb) <<< MEM"))
 
@@ -3413,7 +3413,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
      end do
 
      ! Phase due to the primitive translation (default: 0)
-     cphase_tr = exp(-j_dpc * two_pi * dot_product(kk, dtset%varpeq_trvec))
+     cphase_tr = exp(-j_dpc * two_pi * dot_product(kk, dtset%vpq_trvec))
 
      ! Sum over bands
      do ib=1,vpq%nb_spin(spin)

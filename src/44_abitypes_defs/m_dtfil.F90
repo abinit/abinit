@@ -1819,7 +1819,7 @@ subroutine iofn1(input_path, filnam, filstat, comm)
 !    Print greetings for interactive user
      write(std_out,*,err=10,iomsg=errmsg)' ABINIT ',trim(abinit_version)
      write(std_out,*,err=10,iomsg=errmsg)' '
-     write(std_out,*,err=10,iomsg=errmsg)' I am not the master. Writing log in ',fillog 
+     write(std_out,*,err=10,iomsg=errmsg)' I am not the master. Writing log in ',fillog
    else
      close(std_out, err=10, iomsg=errmsg)
      if (open_file(NULL_FILE,msg,unit=std_out,action="write") /= 0) then
