@@ -1268,55 +1268,6 @@ contains
 !### 03. Print all the input variables (V)
 !##
 
- intarr(1,:)=dtsets(:)%vpq_avg_g
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'vpq_avg_g','INT',0)
-
- intarr(1,:)=dtsets(:)%vpq_translate
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'vpq_translate','INT',0)
-
- intarr(1,:)=dtsets(:)%vpq_interp
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'vpq_interp','INT',0)
-
- intarr(1,:)=dtsets(:)%vpq_nstates
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'vpq_nstates','INT',0)
-
- intarr(1,:)=dtsets(:)%vpq_nstep
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'vpq_nstep','INT',0)
-
- intarr(1,:)=dtsets(:)%vpq_nstep_ort
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'vpq_nstep_ort','INT',0)
-
- intarr(1,:)=dtsets(:)%vpq_select
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'vpq_select','INT',0)
-
- intarr(1,:)=dtsets(:)%vpq_mesh_fact
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'vpq_mesh_fact','INT',0)
-
- dprarr(1,:)=dtsets(:)%vpq_mix_fact
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'vpq_mix_fact','DPR',0)
-
- dprarr(1,:)=dtsets(:)%vpq_tolgrs
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'vpq_tolgrs','DPR',0)
-
- intarr(1,:)=dtsets(:)%vpq_trvec(1)
- intarr(2,:)=dtsets(:)%vpq_trvec(2)
- intarr(3,:)=dtsets(:)%vpq_trvec(3)
- call prttagm(dprarr,intarr,iout,jdtset_,3,marr,3,narrm,ncid,ndtset_alloc,'vpq_trvec','INT',0)
-
- dprarr(1,:)=dtsets(:)%vpq_gpr_energy(1)
- dprarr(2,:)=dtsets(:)%vpq_gpr_energy(2)
- call prttagm(dprarr,intarr,iout,jdtset_,3,marr,2,narrm,ncid,ndtset_alloc,'vpq_gpr_energy','DPR',0)
-
- dprarr(1,:)=dtsets(:)%vpq_gpr_length(1)
- dprarr(2,:)=dtsets(:)%vpq_gpr_length(2)
- dprarr(3,:)=dtsets(:)%vpq_gpr_length(3)
- call prttagm(dprarr,intarr,iout,jdtset_,3,marr,3,narrm,ncid,ndtset_alloc,'vpq_gpr_length','DPR',0)
-
- dprarr(1,:)=dtsets(:)%vcutgeo(1)
- dprarr(2,:)=dtsets(:)%vcutgeo(2)
- dprarr(3,:)=dtsets(:)%vcutgeo(3)
- call prttagm(dprarr,intarr,iout,jdtset_,3,marr,3,narrm,ncid,ndtset_alloc,'vcutgeo','DPR',0)
-
  if(sum(dtsets(1:ndtset_alloc)%prtwant) >1)then
 !  van der Waals correction with MLWFs related variables
    if(any(dtsets(1:ndtset_alloc)%vdw_xc==10).or.any(dtsets(1:ndtset_alloc)%vdw_xc==11).or.&
@@ -1413,6 +1364,54 @@ contains
  dprarr(2,:)=dtsets(:)%vprtrb(2)
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,2,narrm,ncid,ndtset_alloc,'vprtrb','ENE',0)
 
+ intarr(1,:)=dtsets(:)%vpq_avg_g
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'vpq_avg_g','INT',0)
+
+ intarr(1,:)=dtsets(:)%vpq_translate
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'vpq_translate','INT',0)
+
+ intarr(1,:)=dtsets(:)%vpq_interp
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'vpq_interp','INT',0)
+
+ intarr(1,:)=dtsets(:)%vpq_nstates
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'vpq_nstates','INT',0)
+
+ intarr(1,:)=dtsets(:)%vpq_nstep
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'vpq_nstep','INT',0)
+
+ intarr(1,:)=dtsets(:)%vpq_nstep_ort
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'vpq_nstep_ort','INT',0)
+
+ intarr(1,:)=dtsets(:)%vpq_select
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'vpq_select','INT',0)
+
+ intarr(1,:)=dtsets(:)%vpq_mesh_fact
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'vpq_mesh_fact','INT',0)
+
+ dprarr(1,:)=dtsets(:)%vpq_mix_fact
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'vpq_mix_fact','DPR',0)
+
+ dprarr(1,:)=dtsets(:)%vpq_tolgrs
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'vpq_tolgrs','DPR',0)
+
+ intarr(1,:)=dtsets(:)%vpq_trvec(1)
+ intarr(2,:)=dtsets(:)%vpq_trvec(2)
+ intarr(3,:)=dtsets(:)%vpq_trvec(3)
+ call prttagm(dprarr,intarr,iout,jdtset_,3,marr,3,narrm,ncid,ndtset_alloc,'vpq_trvec','INT',0)
+
+ dprarr(1,:)=dtsets(:)%vpq_gpr_energy(1)
+ dprarr(2,:)=dtsets(:)%vpq_gpr_energy(2)
+ call prttagm(dprarr,intarr,iout,jdtset_,3,marr,2,narrm,ncid,ndtset_alloc,'vpq_gpr_energy','DPR',0)
+
+ dprarr(1,:)=dtsets(:)%vpq_gpr_length(1)
+ dprarr(2,:)=dtsets(:)%vpq_gpr_length(2)
+ dprarr(3,:)=dtsets(:)%vpq_gpr_length(3)
+ call prttagm(dprarr,intarr,iout,jdtset_,3,marr,3,narrm,ncid,ndtset_alloc,'vpq_gpr_length','DPR',0)
+
+ dprarr(1,:)=dtsets(:)%vcutgeo(1)
+ dprarr(2,:)=dtsets(:)%vcutgeo(2)
+ dprarr(3,:)=dtsets(:)%vcutgeo(3)
+ call prttagm(dprarr,intarr,iout,jdtset_,3,marr,3,narrm,ncid,ndtset_alloc,'vcutgeo','DPR',0)
 
 !###########################################################
 !### 03. Print all the input variables (W)
