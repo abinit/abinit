@@ -109,11 +109,11 @@ def number_of_gpus():
     num_gpus = 0
     for gpu_cmd in [ nvidia_cmd, amdgpu_cmd ]:
         try:
-            result = subprocess.run(nvidia_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            result = subprocess.run(gpu_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
             # Check if command failed (meaning it exists)
             if result.returncode != 0:
-                print("Erreur lors de l'exécution de {} :\n{}".format(gpu_cmd[1], result.stderr))
+                print("Error while executing {}:\n{}".format(gpu_cmd[1], result.stderr))
                 num_gpus = 0
 
             # Command was successful, count the lines (one per GPU) and exit
