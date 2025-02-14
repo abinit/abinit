@@ -1326,12 +1326,12 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mgfft,mpi
  integer,parameter :: tim_fourwf=1
  integer :: icmplx,idat,idir,ipw,iv1,iv2,nspinortot,shift
  logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc
- real(dp) :: scale_conversion,weight=one
+ real(dp) :: weight=one
  !arrays
  real(dp),allocatable :: cwavef1(:,:),cwavef2(:,:)
  real(dp),allocatable :: gcwavef(:,:,:),gcwavef1(:,:,:),gcwavef2(:,:,:)
  real(dp),allocatable :: ghc1(:,:),ghc2(:,:),kgkpk(:,:)
- real(dp),allocatable :: dx(:),dy(:),work(:,:,:,:)
+ real(dp),allocatable :: work(:,:,:,:)
 
 ! *********************************************************************
 
@@ -1350,11 +1350,6 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mgfft,mpi
  end if
 
  ABI_MALLOC(work,(2,n4,n5,n6*ndat))
-
- ! scale conversion from SI to atomic units,
- ! here \alpha^2 where \alpha is the fine structure constant
- !scale_conversion = FineStructureConstant2
- scale_conversion = one
 
  if (nspinortot==1) then
 
@@ -1384,27 +1379,13 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mgfft,mpi
     gcwavef = gcwavef*two_pi
 
     !  STEP2: Compute sum of (grad components of vectornd)*(grad components of cwavef)
-    ABI_MALLOC(dx,(npw_k))
-    ABI_MALLOC(dy,(npw_k))
     do idir=1,3
       call fourwf(1,vectornd(:,:,:,:,idir),gcwavef(:,:,idir),ghc1,work,gbound_k,gbound_k,&
            istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
            &     tim_fourwf,weight,weight,gpu_option=gpu_option)
 !!$OMP PARALLEL DO
-       ! DAXPY is a BLAS routine for y -> A*x + y, here x = ghc1, A = scale_conversion, and y = ghc_vectornd
-       ! should be faster than explicit loop over ipw as npw_k gets large
-      do idat=1,ndat
-        iv1=1+(idat-1)*npw_k; iv2=-1+iv1+npw_k
-        do icmplx=1,2
-          dx=ghc1(icmplx,iv1:iv2)
-          dy=ghc_vectornd(icmplx,iv1:iv2)
-          call DAXPY(npw_k,scale_conversion,dx,1,dy,1)
-          ghc_vectornd(icmplx,iv1:iv2)=dy
-        end do
-      end do
+      ghc_vectornd=ghc_vectornd+ghc1
     end do ! idir
-    ABI_FREE(dx)
-    ABI_FREE(dy)
     ABI_FREE(gcwavef)
     ABI_FREE(ghc1)
 
@@ -1445,27 +1426,17 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mgfft,mpi
        gcwavef1 = gcwavef1*two_pi
 
        !  STEP2: Compute sum of (grad components of vectornd)*(grad components of cwavef)
-       ABI_MALLOC(dx,(npw_k))
-       ABI_MALLOC(dy,(npw_k))
        do idir=1,3
-          call fourwf(1,vectornd(:,:,:,:,idir),gcwavef1(:,:,idir),ghc1,work,gbound_k,gbound_k,&
-               istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
-               &     tim_fourwf,weight,weight,gpu_option=gpu_option)
+         call fourwf(1,vectornd(:,:,:,:,idir),gcwavef1(:,:,idir),ghc1,work,gbound_k,gbound_k,&
+           & istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
+           & tim_fourwf,weight,weight,gpu_option=gpu_option)
 !!$OMP PARALLEL DO
-          ! DAXPY is a BLAS routine for y -> A*x + y, here x = ghc1, A = scale_conversion, and y = ghc_vectornd
-          ! should be faster than explicit loop over ipw as npw_k gets large
-          do idat=1,ndat
-            iv1=1+(idat-1)*npw_k; iv2=-1+iv1+npw_k
-            do icmplx=1,2
-              dx=ghc1(icmplx,iv1:iv2)
-              dy=ghc_vectornd(icmplx,iv1:iv2)
-              call DAXPY(npw_k,scale_conversion,dx,1,dy,1)
-              ghc_vectornd(icmplx,iv1:iv2)=dy
-            end do
-          end do
+         do idat=1,ndat
+           iv1=1+(idat-1)*npw_k; iv2=-1+iv1+npw_k
+           ghc_vectornd(1:2,iv1:iv2)=ghc_vectornd(1:2,iv1:iv2)+&
+             &  ghc1(1:2,iv1:iv2)
+         end do
        end do ! idir
-       ABI_FREE(dx)
-       ABI_FREE(dy)
        ABI_FREE(gcwavef1)
        ABI_FREE(ghc1)
 
@@ -1490,27 +1461,17 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mgfft,mpi
        gcwavef2 = gcwavef2*two_pi
 
        !  STEP2: Compute sum of (grad components of vectornd)*(grad components of cwavef)
-       ABI_MALLOC(dx,(npw_k))
-       ABI_MALLOC(dy,(npw_k))
        do idir=1,3
-          call fourwf(1,vectornd(:,:,:,:,idir),gcwavef2(:,:,idir),ghc2,work,gbound_k,gbound_k,&
-               istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
-               &     tim_fourwf,weight,weight,gpu_option=gpu_option)
+         call fourwf(1,vectornd(:,:,:,:,idir),gcwavef2(:,:,idir),ghc2,work,gbound_k,gbound_k,&
+           & istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
+           & tim_fourwf,weight,weight,gpu_option=gpu_option)
 !!$OMP PARALLEL DO
-          ! DAXPY is a BLAS routine for y -> A*x + y, here x = ghc1, A = scale_conversion, and y = ghc_vectornd
-          ! should be faster than explicit loop over ipw as npw_k gets large
-          do idat=1,ndat
-            iv1=1+(idat-1)*npw_k; iv2=-1+iv1+npw_k
-            do icmplx=1,2
-              dx=ghc2(icmplx,iv1:iv2)
-              dy=ghc_vectornd(icmplx,iv1+shift:iv2+shift)
-              call DAXPY(npw_k,scale_conversion,dx,1,dy,1)
-              ghc_vectornd(icmplx,iv1+shift:iv2+shift)=dy
-            end do
-          end do
+         do idat=1,ndat
+           iv1=1+(idat-1)*npw_k; iv2=-1+iv1+npw_k
+           ghc_vectornd(1:2,iv1+shift:iv2+shift)=ghc_vectornd(1:2,iv1+shift:iv2+shift)+&
+             & ghc2(1:2,iv1:iv2)
+         end do
        end do ! idir
-       ABI_FREE(dx)
-       ABI_FREE(dy)
        ABI_FREE(gcwavef2)
        ABI_FREE(ghc2)
 
