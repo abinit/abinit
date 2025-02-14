@@ -3211,13 +3211,14 @@ def exec2class(exec_name):
     }.get(exec_name, BaseTest)
 
 
-def do_work(task_q, res_q, run_func, run_func_kwargs, print_lock, kill_me, thread_mode=False):
+def do_work(task_q, res_q, rank, run_func, run_func_kwargs, print_lock, kill_me, thread_mode=False):
     """
     This is the function used as target of the subprocess
 
     Args:
         task_q: Input queue with the task.
         res_q: Output queue with the results
+        rank: Rank of the python process.
         run_func: Callable to be executed.
         run_func_kwargs: Arguments passed to run_func
         print_lock:
@@ -3240,28 +3241,28 @@ def do_work(task_q, res_q, run_func, run_func_kwargs, print_lock, kill_me, threa
                 all_done = True
 
             else:
-                res_q.put(run_func(test, print_lock=print_lock, **run_func_kwargs))
+                res_q.put(run_func(test, rank, print_lock=print_lock, **run_func_kwargs))
 
     except EmptyQueueError:
         # If that happen, it is a probably a bug
-        print('Task queue is unexpectedly empty.')
+        #print('Task queue is unexpectedly empty.')
         done['error'] = RuntimeError('Task queue is unexpectedly empty.')
 
     except Exception as exc1:
         # Any other error is reported
         done['error'] = exc1
-        print("exc1", exc1)
+        #print("exc1", exc1)
         try:
             done['task'] = test.full_id
         except (AttributeError, NameError) as exc2:
-            print("exc2", exc2)
+            #print("exc2", exc2)
             pass
 
     finally:
         res_q.put(done)
 
 
-def run_and_check_test(test, print_lock=None, **kwargs):
+def run_and_check_test(test, rank, print_lock=None, **kwargs):
     """
     Helper function to execute the test. Must be thread-safe.
     Return: dictionary with results.
@@ -3275,6 +3276,7 @@ def run_and_check_test(test, print_lock=None, **kwargs):
     #omp_num_threads = kwargs.pop("omp_num_threads")
     omp_num_threads = 1
     omp_num_threads = max(omp_num_threads, 1)
+    num_gpus = kwargs.pop("num_gpus")
     runmode = kwargs.pop("runmode")
 
     condition = kwargs.pop("condition")
@@ -3295,6 +3297,17 @@ def run_and_check_test(test, print_lock=None, **kwargs):
         # Wait until enough resources are available
         while cpu_counter.value + ncpus > max_cpus and gpu_counter.value + ngpus > max_gpus:
             condition.wait()
+
+    # If there are GPUs, set which one to use for test according to worker rank,
+    # so each worker doesn't use the same GPU
+    if num_gpus > 0:
+        l = []
+        for i in range(0,num_gpus):
+            l.append(str( (i+rank) % num_gpus))
+        # NVIDIA GPUs, using CUDA
+        os.environ["CUDA_VISIBLE_DEVICES"] = ','.join(l)
+        # AMD GPUs, using ROCM ("ROCR" stands for ROCM Runtime)
+        os.environ["ROCR_VISIBLE_DEVICES"] = ','.join(l)
 
         # Reserve resources safely using a lock
         with lock_counters:
@@ -3947,14 +3960,14 @@ class AbinitTestSuite(object):
 
         # Create and start subprocesses
         for i in range(py_nprocs - 1):
-            p = Process(target=do_work, args=(task_q, res_q, run_func, run_func_kwargs, print_lock, self._kill_me))
+            # create and start subprocesses
+            p = Process(target=do_work, args=(task_q, res_q, i, run_func, run_func_kwargs, print_lock, self._kill_me))
             self._processes.append(p)
             p.start()
 
-        # Add the worker as a thread of the main process.
-        t = Thread(target=do_work, args=(task_q, res_q, run_func, run_func_kwargs, print_lock, self._kill_me, True))
-
-        # Make it daemon so it will die if the main process is interrupted early
+        # Add the worker as a thread of the main process
+        # make it daemon so it will die if the main process is interrupted early
+        t = Thread(target=do_work, args=(task_q, res_q, py_nprocs-1, run_func, run_func_kwargs, print_lock, self._kill_me, True))
         t.daemon = True
         t.start()
 
@@ -4002,7 +4015,7 @@ class AbinitTestSuite(object):
         return results
 
     def run_tests(self, build_env, workdir, job_runner,
-                  mpi_nprocs=1, py_nprocs=1, runmode="static", **kwargs):
+                  mpi_nprocs=1, py_nprocs=1, num_gpus=0, runmode="static", **kwargs):
         """
         Execute the list of tests (main entry point for client code)
 
@@ -4012,6 +4025,7 @@ class AbinitTestSuite(object):
             job_runner: `JobRunner` instance.
             mpi_nprocs: number of MPI processes to use for a single test.
             py_nprocs: number of py_nprocs for tests.
+            num_gpus: number of GPU for tests
 
         return: Results instance.
         """
@@ -4046,6 +4060,7 @@ class AbinitTestSuite(object):
             rm_rf(self.workdir, exclude_paths=self.lock.lockfile)
 
             self.mpi_nprocs = mpi_nprocs
+            self.num_gpus = num_gpus
             self.py_nprocs = py_nprocs
             #print(f"{mpi_nprocs=}")
 
@@ -4060,6 +4075,7 @@ class AbinitTestSuite(object):
                 build_env=build_env,
                 job_runner=job_runner,
                 mpi_nprocs=self.mpi_nprocs,
+                num_gpus=self.num_gpus,
                 runmode=runmode,
                 max_cpus=max_cpus,
                 max_gpus=max_gpus,
@@ -4083,7 +4099,7 @@ class AbinitTestSuite(object):
                 # Old version
                 # discard the return value because tests are directly modified
                 for test in self:
-                    run_and_check_test(test, **run_func_kwargs)
+                    run_and_check_test(test, rank=0, **run_func_kwargs)
 
             elif py_nprocs > 1:
                 logger.info("Parallel version with py_nprocs = %s" % py_nprocs)
