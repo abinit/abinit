@@ -11,6 +11,7 @@ import re
 import warnings
 import json
 
+from pprint import pprint
 from base64 import b64encode
 from socket import gethostname
 from subprocess import Popen, PIPE
@@ -3220,7 +3221,7 @@ def do_work(task_q, res_q, rank, run_func, run_func_kwargs, print_lock, kill_me,
         res_q: Output queue with the results
         rank: Rank of the python process.
         run_func: Callable to be executed.
-        run_func_kwargs: Arguments passed to run_func
+        run_func_kwargs: kwargs passed to run_func
         print_lock:
         kill_me:
         thread_mode:
@@ -3264,7 +3265,7 @@ def do_work(task_q, res_q, rank, run_func, run_func_kwargs, print_lock, kill_me,
 
 def run_and_check_test(test, rank, print_lock=None, **kwargs):
     """
-    Helper function to execute the test. Must be thread-safe.
+    Helper function to execute the test. Must be thread- and process-safe.
     Return: dictionary with results.
     """
     # Extract arguments from kwargs dict.
@@ -3272,48 +3273,50 @@ def run_and_check_test(test, rank, print_lock=None, **kwargs):
     build_env = kwargs.pop("build_env")
     job_runner = kwargs.pop("job_runner")
     mpi_nprocs = kwargs.pop("mpi_nprocs")
-    # FIXME
-    #omp_num_threads = kwargs.pop("omp_num_threads")
-    omp_num_threads = 1
-    omp_num_threads = max(omp_num_threads, 1)
-    num_gpus = kwargs.pop("num_gpus")
+    omp_nthreads = kwargs.pop("omp_nthreads") # 0 if OMP is not used.
+    ncpus = mpi_nprocs * max(omp_nthreads, 1)
     runmode = kwargs.pop("runmode")
-
+    verbose = kwargs.pop("verbose")
     condition = kwargs.pop("condition")
     lock_counters = kwargs.pop("lock_counters")
     cpu_counter = kwargs.pop("cpu_counter")
     gpu_counter = kwargs.pop("gpu_counter")
     max_cpus = kwargs.pop("max_cpus")
     max_gpus = kwargs.pop("max_gpus")
-    if max_gpus == 0: max_gpus = -1
+    if max_gpus <= 0: max_gpus = -1
 
-    ncpus = mpi_nprocs * omp_num_threads
     build_with_gpu ="HAVE_GPU" in build_env.defined_cppvars
     ngpus = test.uses_gpu * mpi_nprocs if build_with_gpu else 0
     proc_name = current_process().name
-    #print(kwargs)
 
+    if verbose >= 2:
+        print("locals after pop:")
+        pprint(locals())
+
+    # Wait until enough resources are available
     with condition:
-        # Wait until enough resources are available
         while cpu_counter.value + ncpus > max_cpus and gpu_counter.value + ngpus > max_gpus:
             condition.wait()
-
-    # If there are GPUs, set which one to use for test according to worker rank,
-    # so each worker doesn't use the same GPU
-    if num_gpus > 0:
-        l = []
-        for i in range(0,num_gpus):
-            l.append(str( (i+rank) % num_gpus))
-        # NVIDIA GPUs, using CUDA
-        os.environ["CUDA_VISIBLE_DEVICES"] = ','.join(l)
-        # AMD GPUs, using ROCM ("ROCR" stands for ROCM Runtime)
-        os.environ["ROCR_VISIBLE_DEVICES"] = ','.join(l)
 
         # Reserve resources safely using a lock
         with lock_counters:
             cpu_counter.value += ncpus
             gpu_counter.value += ngpus
-            #print(f"[{proc_name}]: Running test with {ncpus} cores and {ngpus} GPUs. (Total CPUs used: {cpu_counter.value}/{max_cpus})")
+            if verbose:
+                print("[{}]: Running test with {} cores and {} GPUs.".format(proc_name, ncpus, ngpus))
+                print("\t(Total CPUs used: {}/{}, Total GPUs used: {}/{})".format(
+                      cpu_counter.value, max_cpus, gpu_counter.value, max_gpus))
+
+    # If there are GPUs, set which one to use for test according to worker rank,
+    # so each worker doesn't use the same GPU
+    if max_gpus > 0 and test.uses_gpu:
+        l = []
+        for i in range(0, max_gpus):
+            l.append(str( (i + rank) % max_gpus))
+        # NVIDIA GPUs, using CUDA
+        os.environ["CUDA_VISIBLE_DEVICES"] = ','.join(l)
+        # AMD GPUs, using ROCM ("ROCR" stands for ROCM Runtime)
+        os.environ["ROCR_VISIBLE_DEVICES"] = ','.join(l)
 
     # FIXME: run method should also receive omp_num_threads
     # Run the test in testdir
@@ -3321,14 +3324,18 @@ def run_and_check_test(test, rank, print_lock=None, **kwargs):
     testdir = os.path.abspath(os.path.join(workdir, test.suite_name + "_" + test.id))
     test.run(build_env, job_runner, testdir, print_lock=print_lock, mpi_nprocs=mpi_nprocs, runmode=runmode, **kwargs)
 
+    # Release resources safely using a lock
     with condition:
-        # Release resources safely using a lock
         with lock_counters:
             cpu_counter.value -= ncpus
             gpu_counter.value -= ngpus
-            #print(f"[{proc_name}] Finished. (Total CPUs used: {cpu_counter.value}/{max_cpus})")
+            if verbose:
+                print("[{}] Finished.".format(proc_name))
+                print("\t(Total CPUs used: {}/{}), Total GPUs used: {}/{})".format(
+                      cpu_counter.value, max_cpus, gpu_counter.value, max_gpus))
 
-        condition.notify_all()  # Notify other waiting processes
+        # Notify other waiting processes
+        condition.notify_all()
 
     # Write HTML summary
     test.write_html_report()
@@ -3959,9 +3966,9 @@ class AbinitTestSuite(object):
             time.sleep(0.001)
 
         # Create and start subprocesses
-        for i in range(py_nprocs - 1):
+        for rank in range(py_nprocs - 1):
             # create and start subprocesses
-            p = Process(target=do_work, args=(task_q, res_q, i, run_func, run_func_kwargs, print_lock, self._kill_me))
+            p = Process(target=do_work, args=(task_q, res_q, rank, run_func, run_func_kwargs, print_lock, self._kill_me))
             self._processes.append(p)
             p.start()
 
@@ -4015,7 +4022,8 @@ class AbinitTestSuite(object):
         return results
 
     def run_tests(self, build_env, workdir, job_runner,
-                  mpi_nprocs=1, py_nprocs=1, num_gpus=0, runmode="static", **kwargs):
+                  mpi_nprocs=1, omp_nthreads=0, max_cpus=0, max_gpus=0, py_nprocs=1,
+                  runmode="static", verbose=0, **kwargs):
         """
         Execute the list of tests (main entry point for client code)
 
@@ -4024,8 +4032,11 @@ class AbinitTestSuite(object):
             workdir: Working directory (string).
             job_runner: `JobRunner` instance.
             mpi_nprocs: number of MPI processes to use for a single test.
+            max_cpus: Max number of CPUs available.
+            max_gpus: Max number of GPUs available.
             py_nprocs: number of py_nprocs for tests.
-            num_gpus: number of GPU for tests
+            runmode:
+            verbose: Verbosity level.
 
         return: Results instance.
         """
@@ -4042,9 +4053,9 @@ class AbinitTestSuite(object):
         self.workdir = workdir
 
         # Acquire the lock file.
-        self.lock = NoErrorFileLock(os.path.join(workdir, "__run_tests_lock__"), timeout=3)
+        self.file_lock = NoErrorFileLock(os.path.join(workdir, "__run_tests_lock__"), timeout=3)
 
-        with self.lock as locked:
+        with self.file_lock as locked:
             # aquire the global file lock
             if not locked:
                 msg = (
@@ -4057,17 +4068,18 @@ class AbinitTestSuite(object):
                 return
 
             # Remove all stale files present in workdir (except the lock!)
-            rm_rf(self.workdir, exclude_paths=self.lock.lockfile)
+            rm_rf(self.workdir, exclude_paths=self.file_lock.lockfile)
+
+            # TODO: These parameters should be passed to testbot.cfg
+            #from tests.pymods.devtools import number_of_cpus
+            #max_cpus = max(1, number_of_cpus())
+            #max_gpus = 1 if "HAVE_GPU" in build_env.defined_cppvars else 0
 
             self.mpi_nprocs = mpi_nprocs
-            self.num_gpus = num_gpus
+            self.max_gpus = max_gpus
             self.py_nprocs = py_nprocs
             #print(f"{mpi_nprocs=}")
 
-            # TODO: These parameters should be passed to testbot.cfg
-            from tests.pymods.devtools import number_of_cpus
-            max_cpus = max(1, number_of_cpus())
-            max_gpus = 1 if "HAVE_GPU" in build_env.defined_cppvars else 0
             manager = Manager()
 
             run_func_kwargs = dict(
@@ -4075,7 +4087,7 @@ class AbinitTestSuite(object):
                 build_env=build_env,
                 job_runner=job_runner,
                 mpi_nprocs=self.mpi_nprocs,
-                num_gpus=self.num_gpus,
+                omp_nthreads=omp_nthreads,
                 runmode=runmode,
                 max_cpus=max_cpus,
                 max_gpus=max_gpus,
@@ -4083,6 +4095,7 @@ class AbinitTestSuite(object):
                 gpu_counter=manager.Value("i", 0),  # Shared counter for GPU usage.
                 condition=manager.Condition(),      # Condition variable for synchronization.
                 lock_counters=manager.Lock(),       # Lock to make cpu_counter updates safe.
+                verbose=verbose,
             )
 
             # Add input kwargs
