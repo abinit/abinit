@@ -276,14 +276,15 @@ class TestBot(object):
         """
         # Compute number of python processes, note that self.omp_num_threads might be zero.
         py_nprocs = self.max_cpus // (mpi_nprocs * max(self.omp_num_threads, 1))
-        assert py_nprocs > 0
+        if py_nprocs < 1:
+            raise RuntimeError("py_nprocs = %s" % py_nprocs)
 
         test_suite = abitests.select_tests(suite_args, keys=self.keywords, regenerate=False)
 
         # Create workdir.
         workdir = "TestBot_MPI" + str(mpi_nprocs)
         if self.has_openmp:
-            workdir += "_OMP" + str(self.omp_num_nthreads)
+            workdir += "_OMP" + str(self.omp_num_threads)
 
         if os.path.exists(workdir):
             raise RuntimeError("%s already exists!" % workdir)
