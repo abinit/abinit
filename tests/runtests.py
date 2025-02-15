@@ -238,7 +238,7 @@ def main():
                       ))
 
     parser.add_option("-j", "--jobs", dest="py_nprocs", type="int", default=1,
-                      help="Number of python processes.")
+                      help="Number of python processes used to run the tests")
 
     parser.add_option("--use-cache", default=False, action="store_true",
                       help=("Load database from pickle file."
@@ -406,7 +406,9 @@ def main():
 
     mpi_nprocs = options.mpi_nprocs
     omp_nthreads = options.omp_nthreads
-    py_nprocs = options.py_nprocs
+
+
+
 
     cprint("Running on %s -- system %s -- ncpus %s -- ngpus %s -- Python %s -- %s" % (
           gethostname(), system, ncpus_detected, ngpus_detected, platform.python_version(), _my_name),
@@ -570,7 +572,13 @@ def main():
     else:
         cprint("%s directory already exists. Files will be removed" % workdir, "yellow")
 
-    # Run the tested selected by the user.
+    # Run the tests selected by the user.
+    py_nprocs = options.py_nprocs
+    if py_nprocs <= 0:
+        py_nprocs = ncpus_detected // (mpi_nprocs * max(omp_nthreads, 1))
+        py_nprocs = max(py_nprocs // 2, 1)
+        print("py_nprocs has been computed automatically. py_nprocs=", py_nprocs)
+
     if omp_nthreads == 0:
         ncpus_used = mpi_nprocs * py_nprocs
         msg = ("Running %s test(s) with MPI_procs: %s, py_nprocs: %s" % (test_suite.full_length, mpi_nprocs, py_nprocs))
@@ -581,7 +589,7 @@ def main():
     cprint(msg, "yellow")
 
     if ncpus_used < 0.3 * ncpus_detected:
-        msg = ("[TIP] runtests.py is using %s CPUs but your architecture has %s CPUs (including Hyper-Threading)\n"
+        msg = ("[TIP] runtests.py is using %s CPUs but your architecture has %s CPUs (assuming x2 Hyper-Threading)\n"
               "You may want to use python processes to speed up the execution\n"
               "Use `runtests -jNUM` to run with NUM processes" % (ncpus_used, ncpus_detected))
         cprint(msg, "blue")
@@ -600,7 +608,6 @@ def main():
         sys.exit(0)
 
     if options.tolerances:
-
         def get_tol_rows(this_test):
             rows = []
             print("test:", this_test, this_test.__class__.__name__)

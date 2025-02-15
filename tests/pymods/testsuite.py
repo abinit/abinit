@@ -4070,11 +4070,6 @@ class AbinitTestSuite(object):
             # Remove all stale files present in workdir (except the lock!)
             rm_rf(self.workdir, exclude_paths=self.file_lock.lockfile)
 
-            # TODO: These parameters should be passed to testbot.cfg
-            #from tests.pymods.devtools import number_of_cpus
-            #max_cpus = max(1, number_of_cpus())
-            #max_gpus = 1 if "HAVE_GPU" in build_env.defined_cppvars else 0
-
             self.mpi_nprocs = mpi_nprocs
             self.max_gpus = max_gpus
             self.py_nprocs = py_nprocs
@@ -4109,7 +4104,6 @@ class AbinitTestSuite(object):
             if py_nprocs == 1:
                 logger.info("Sequential version")
 
-                # Old version
                 # discard the return value because tests are directly modified
                 for test in self:
                     run_and_check_test(test, rank=0, **run_func_kwargs)
