@@ -947,7 +947,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &         gmet,gprimd,ider,idir,psps%indlmn,kg_k,kpg_k,kpoint,psps%lmnmax,&
 &         psps%lnmax,psps%mpsang,psps%mqgrid_ff,nkpg,&
 &         npw_k,ntypat,psps%pspso,psps%qgrid_ff,rmet,&
-&         psps%usepaw,psps%useylm,ylm_k,ylmgr)
+&         psps%usepaw,psps%useylm,ylm_k,ylmgr,kinpw=kinpw)
        end if
 
 !      Load k-dependent part in the Hamiltonian datastructure
