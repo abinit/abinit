@@ -2069,8 +2069,10 @@ pp_dirpath $ABI_PSPDIR
             # a couple of Abinit tests in which the files file sytenx is still used (use_files_file option in TEST_INFO)
             # just to make sure we still support the legacy mode.
 
+            # FIXME: Add support for more executables
             use_files_file = self.use_files_file
-            if self.executable not in ("abinit", "anaddb", "optic", "multibinit"):  # FIXME: Add support for more executables
+            if self.executable not in ("abinit", "anaddb", "optic",
+                                       "multibinit", "atdep"):
                 use_files_file = True
 
             if use_files_file:
@@ -3105,6 +3107,29 @@ class TdepTest(BaseTest):
         t_stdin.write(self.id + "\n")       # 2) formatted output file e.g. t13.abo
 
         return t_stdin.getvalue()
+
+    def prepare_new_cli_invokation(self):
+        """Perform operations required to execute test with new CLI."""
+
+        inp_fname = os.path.basename(self.inp_fname)
+        stem = os.path.splitext(inp_fname)[0]
+        inpref = os.path.join(self.inp_dir, stem)
+
+        # Read full input in line.
+        with open(self.inp_fname, "rt") as fh:
+            lines = fh.readlines()
+
+        extra = [
+            '# Added by runtests.py\n',
+            f'output_file "{stem}.abo"\n',
+            f'indata_prefix "{inpref}"\n',
+            f'outdata_prefix "{stem}"\n',
+            '# end runtests.py section\n\n'
+            ]
+
+        path = os.path.join(self.workdir, inp_fname)
+        with open(path, "wt") as fh:
+            fh.write(''.join(extra + lines))
 
 
 class AimTest(BaseTest):

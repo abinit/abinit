@@ -486,7 +486,7 @@ program anaddb
    ! Print analysis of the real-space interatomic force constants
    ! TODO: ifc_out should not have side effects
    if (my_rank == master .and. inp%ifcout /= 0) then
-     call ifc%write(inp%ifcana, inp%atifc, inp%ifcout, inp%prt_ifc, ana_ncid)
+     call ifc%write(inp%ifcana, inp%atifc, inp%ifcout, inp%prt_ifc, ana_ncid, filnam(8))
    end if
  end if
 

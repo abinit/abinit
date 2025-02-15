@@ -421,7 +421,7 @@ contains
   type(QptBound_type), allocatable :: QptBound(:)
 
   nqpt=0
-  if (MPIdata%iam_master) open(unit=40,file=trim(Invar%output_prefix)//'qpt.dat')
+  if (MPIdata%iam_master) open(unit=40,file=trim(Invar%output_prefix)//'_qpt.dat')
   write(Invar%stdout,*) ' '
   write(Invar%stdout,*) '#############################################################################'
   write(Invar%stdout,*) '########################## Q points generation  #############################'

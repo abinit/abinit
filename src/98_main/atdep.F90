@@ -72,7 +72,7 @@ program atdep
 
   integer :: natom,natom_unitcell,ncoeff1st,ncoeff2nd,ncoeff3rd,ncoeff4th,ntotcoeff,ntotconst
   integer :: stdout,stdlog,nshell_max,ii,jj,ishell,istep,iatom
-  integer :: print_mem_report,ierr
+  integer :: print_mem_report
   double precision :: U0
   double precision, allocatable :: ucart(:,:,:),proj1st(:,:,:),proj2nd(:,:,:),proj3rd(:,:,:),proj4th(:,:,:)
   double precision, allocatable :: proj_tmp(:,:,:),Forces_TDEP(:),Fresid(:)
@@ -122,7 +122,7 @@ program atdep
 #endif
 
 ! Read input values from the input.in input file
- call tdep_read_input(Hist,Invar)
+ call tdep_read_input(args%input_path,Hist,Invar)
  call tdep_init_MPIdata(Invar,MPIdata)
  call tdep_distrib_data(Hist,Invar,MPIdata)
  call abihist_free(Hist)
@@ -529,12 +529,10 @@ program atdep
    call tdep_destroy_mpidata(MPIdata)
 
    call tdep_print_Aknowledgments(Invar)
-   call delete_file(Invar%foo,ierr)
-   call delete_file('fort.8',ierr)
    call flush_unit(stdout)
-   close(unit=stdout)
    call abinit_doctor(trim(Invar%output_prefix), print_mem_report=print_mem_report)
    call flush_unit(stdlog)
+   close(unit=stdout)
    call xmpi_end()
    stop
  end if
@@ -577,12 +575,10 @@ program atdep
 !================= Write the last informations (aknowledgments...)  =======================
 !==========================================================================================
  call tdep_print_Aknowledgments(Invar)
- call delete_file(Invar%foo,ierr)
- call delete_file('fort.8',ierr)
  call flush_unit(stdout)
- close(unit=stdout)
  call abinit_doctor(trim(Invar%output_prefix), print_mem_report=print_mem_report)
  call flush_unit(stdlog)
+ close(unit=stdout)
 100 call xmpi_end()
 
  end program atdep
