@@ -6,6 +6,7 @@ import os
 # Set ABI_PSPDIR env variable to point to the absolute path of Pspdir
 os.environ["ABI_PSPDIR"] = os.path.abspath(os.path.join(os.path.dirname(__file__), "Pspdir"))
 import platform
+import json
 
 from os.path import join as pj, abspath as absp, basename
 from socket import gethostname
@@ -414,6 +415,63 @@ class TestBot(object):
         else:
             return nfailed
 
+    def finalize(self):
+        """
+        This piece of code has been extracted from analysis9
+        """
+        fname = "testbot_summary.json"
+        with open(fname, "rt") as data_file:
+           d = json.load(data_file)
+
+        # FIXME What is this?
+        d['tag'] = sys.argv[1]
+
+        with open(fname, 'wt') as data_file:
+           json.dump(d, data_file)
+
+        try:
+            tests_status = dict(zip(d["summary_table"][0],d["summary_table"][1]))
+
+            dashline = "=========================================================================="
+            print( dashline )
+            print(     "          Serie   #failed   #passed  #succes  #skip  |   #CPU      #WALL")
+            print(dashline)
+            rtime = 0.0
+            ttime = 0.0
+            paral = ''
+            mpiio = ''
+            for t, s in sorted(tests_status.items()):
+                kt = False
+                for i in d[t].keys():
+                   if  d[t][i]['status'] != "skipped":
+                      kt = True
+                      rtime += d[t][i]['run_etime']
+                      ttime += d[t][i]['tot_etime']
+                if kt:
+                     temp = ''.join(['%5s   |' % l for l in  s.split('/') ])
+                     temp = '%15s | %10s %7.1f  | %7.1f' % (t,temp,rtime,ttime)
+                     if t == 'mpiio':
+                        mpiio = temp
+                     elif t == 'paral':
+                        paral = temp
+                     else:
+                        print(temp)
+                rtime = ttime = 0.0
+
+            print(dashline)
+            putline = 0
+            if paral != '':
+                print(paral)
+                putline=1
+            if mpiio != '':
+                print(mpiio)
+                putline=1
+            if putline == 1:
+                print(dashline)
+        except:
+            print("no results")
+            sys.exit(99)
+
 
 class TestBotSummary(object):
     """Stores the final results of the tests performed by TestBot."""
@@ -540,7 +598,7 @@ class TestBotSummary(object):
                 print("Warning: About to overwrite key %s" % suite_name)
             d[suite_name] = self.res_table[suite_name]
 
-        import json
+
         with open(fname, "wt") as fh:
             json.dump(d, fh)
 

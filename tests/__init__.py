@@ -1,15 +1,15 @@
 from __future__ import print_function, division, absolute_import  # , unicode_literals
-import logging
-from tests.pymods.devtools import FileLock
-from tests.pymods.testsuite import ChainOfTests, AbinitTestSuite
-from pprint import pprint
-from socket import gethostname
 
+import logging
 import sys
 import os
 import platform
 import re
 
+from tests.pymods.devtools import FileLock
+from tests.pymods.testsuite import ChainOfTests, AbinitTestSuite
+from pprint import pprint
+from socket import gethostname
 from tests.pymods.termcolor import cprint
 
 # Handle py2, py3k differences.
@@ -207,25 +207,19 @@ class Suite(object):
 
         module_name = os.path.join(suite_path, "__init__.py")
         module = load_mod(os.path.join(suite_path, "__init__.py"))
-        #module = imp.load_source(
-        #    module_name, os.path.join(suite_path, "__init__.py"))
 
         self.keywords = set(module.keywords)
         self.need_cpp_vars = set(module.need_cpp_vars)
 
         # Divide tests into (active|disabled).
         self.inp_paths = [p for p in module.inp_files if not p.startswith("-")]
-        self.disabled_inp_paths = [p[1:]
-                                   for p in module.inp_files if p.startswith("-")]
+        self.disabled_inp_paths = [p[1:] for p in module.inp_files if p.startswith("-")]
 
         # Use absolute paths
-        self.inp_paths = [os.path.join(suite_path, "Input", p)
-                          for p in self.inp_paths]
-        self.disabled_inp_paths = [os.path.join(
-            suite_path, "Input", p) for p in self.disabled_inp_paths]
+        self.inp_paths = [os.path.join(suite_path, "Input", p) for p in self.inp_paths]
+        self.disabled_inp_paths = [os.path.join(suite_path, "Input", p) for p in self.disabled_inp_paths]
 
-        # True if the suite contains tests that should be executed with
-        # different numbers of MPI processes
+        # True if the suite contains tests that should be executed with different numbers of MPI processes
         self.is_multi_parallel = False
         if hasattr(module, "is_multi_parallel"):
             self.is_multi_parallel = module.is_multi_parallel
@@ -340,8 +334,7 @@ class AbinitTestsDatabase(dict):
                     other = res_table[suite_name][test.id]
                     print("test\n:", test)
                     print("other:\n", other)
-                    raise ValueError(
-                        "Replicated test.id %s in suite %s" % (test.id, suite_name))
+                    raise ValueError("Replicated test.id %s in suite %s" % (test.id, suite_name))
 
                 res_table[suite_name][test.id] = {}
 
@@ -361,8 +354,7 @@ class AbinitTestsDatabase(dict):
             suite = self._suites[suite_name]
 
             if not suite.has_subsuite(subsuite_name):
-                raise ValueError("suite %s does not have subsuite %s" %
-                                 (suite_name, subsuite_name))
+                raise ValueError("suite %s does not have subsuite %s" % (suite_name, subsuite_name))
 
             sub_inputs = suite.inputs_of_subsuite(subsuite_name)
 
@@ -375,8 +367,7 @@ class AbinitTestsDatabase(dict):
         if slice_obj is None:
             return test_suite
         else:
-            logger.debug(
-                "will slice test_suite with slice_obj= %s " % slice_obj)
+            logger.debug("will slice test_suite with slice_obj= %s " % slice_obj)
             return test_suite[slice_obj]
 
     def find_unknown_wrong_keywords(self):
@@ -420,8 +411,7 @@ class AbinitTestsDatabase(dict):
             for test in suite:
                 for ius in test.inputs_used:
                     if ius not in inp2test:
-                        raise ValueError(
-                            "Input [%s] [%s] does not appear in Input2keys!" % (suite_name, ius))
+                        raise ValueError("Input [%s] [%s] does not appear in Input2keys!" % (suite_name, ius))
                     else:
                         inp2test[ius] += 1
 
@@ -438,6 +428,7 @@ class AbinitTestsDatabase(dict):
                 else:
                     ntest = inp2test[fname]
                     assert ntest == 0
+
             # inp2test = {k: inp2test[k] for k in keys} # requires py2.7
             inp2test = dict([(k, inp2test[k]) for k in keys])
 
@@ -445,8 +436,7 @@ class AbinitTestsDatabase(dict):
             for fname, ntimes in inp2test.items():
                 # if ntimes != 1:
                 if ntimes == 0:
-                    err.write("Input file %s is used %s time(s)\n" %
-                              (path2str(fname), ntimes))
+                    err.write("Input file %s is used %s time(s)\n" % (path2str(fname), ntimes))
 
         return err.getvalue()
 
@@ -485,16 +475,14 @@ class AbinitTestsDatabase(dict):
                     if o.endswith(".stdout"):
                         o = o[:-7] + ".out"
                     if o not in ref2test:
-                        err.write(
-                            "files_to_test %s does not appear in Refs!\n" % o)
+                        err.write("files_to_test %s does not appear in Refs!\n" % o)
                     else:
                         ref2test[o] += 1
 
             # At this point ref2test should contain only ones.
             for ref_fname, ntimes in ref2test.items():
                 if ntimes != 1:
-                    err.write("Ref file %s is tested %s time(s)\n" %
-                              (path2str(ref_fname), ntimes))
+                    err.write("Ref file %s is tested %s time(s)\n" % (path2str(ref_fname), ntimes))
 
         return err.getvalue()
 
@@ -560,8 +548,7 @@ class AbinitTests(object):
 
     def __init__(self):
         self.suite_names = tuple([os.path.basename(d) for d in _tsuite_dirs])
-        self.suite_paths = tuple(
-            [os.path.join(abenv.tests_dir, d) for d in _tsuite_dirs])
+        self.suite_paths = tuple([os.path.join(abenv.tests_dir, d) for d in _tsuite_dirs])
 
         self._suites = dict()
         for (suite_name, suite_path) in self.walk_suites():
@@ -596,8 +583,8 @@ class AbinitTests(object):
         for suite in self.suites:
             if suite.has_subsuite(subsuite_name):
                 return suite
-        else:
-            raise ValueError("subsuite %s not found" % subsuite_name)
+
+        raise ValueError("subsuite %s not found" % subsuite_name)
 
     @property
     def all_subsuite_names(self):
@@ -781,8 +768,7 @@ class AbinitTests(object):
         tests_todo = self._suite_args_parser(suite_args)
 
         # Load the full database.
-        database = self.get_database(
-            regenerate=regenerate, with_pickle=with_pickle)
+        database = self.get_database(regenerate=regenerate, with_pickle=with_pickle)
 
         # Extract the tests to run as specified by suite_args i.e by the string "v1[1:4] v3 ..."
         # TODO waiting for changes in the naming scheme
@@ -879,8 +865,7 @@ class AbinitTests(object):
         for suite_name in self.suite_names:
             active_tests = self.inputs_of_suite(suite_name, active=True)
             disabled_tests = self.inputs_of_suite(suite_name, active=False)
-            table.append([suite_name, str(len(active_tests)),
-                          str(len(disabled_tests))])
+            table.append([suite_name, str(len(active_tests)), str(len(disabled_tests))])
 
         # pprint_table(table)
 
@@ -891,28 +876,28 @@ class AbinitTests(object):
             desc = KNOWN_KEYWORDS[skey]
             print(skey.ljust(width), desc)
 
-        # for suite_name in self.suite_names:
-        #  suite = self.get_suite(suite_name)
-        #  print(suite_name, suite.need_cpp_vars)
+        #for suite_name in self.suite_names:
+        #   suite = self.get_suite(suite_name)
+        #   print(suite_name, suite.need_cpp_vars)
 
-        # for subsuite_name in self.all_subsuite_names:
-        #  print(subsuite_name)
+        #for subsuite_name in self.all_subsuite_names:
+        #   print(subsuite_name)
 
-        # for suite in self.multi_parallel_suites():
-        #  print(suite.name)
-        # sys.exit(0)
+        #for suite in self.multi_parallel_suites():
+        #   print(suite.name)
+        #   sys.exit(0)
 
         # list authors
         database = self.get_database(regenerate=True)
         pprint(database.authors_snames)
 
-        # TODO: add this test to chec_test_suite
+        # TODO: add this test to check_test_suite
         #chains = database.test_chains()
-        # for c in chains:
-        #    string, nlinks = c.info_on_chain()
-        #    if nlinks == 0:
-        #        print(15 * "*" + " Warning: found 0 explicit links " + 15 * "*")
-        # print(string)
+        #for c in chains:
+        #   string, nlinks = c.info_on_chain()
+        #   if nlinks == 0:
+        #       print(15 * "*" + " Warning: found 0 explicit links " + 15 * "*")
+        #print(string)
 
 
 abitests = AbinitTests()
@@ -921,23 +906,23 @@ abitests = AbinitTests()
 # Dictionary mapping test keywords to string with human-readable description.
 KNOWN_KEYWORDS = {
     # Main executables
-    "abinit": "Test abinit code.",
-    "anaddb": "Test anaddb code",
-    "atompaw": "Atompaw tests",
-    "band2eps": "Test band2eps code",
-    "cut3d": "Test cut3d code",
-    "mrgscr": "Test mrgscr code",
-    "mrggkk": "Test mrggkk code",
-    "mrgddb": "Test mrgddb code",
-    'mrgdv': "Test mrgdv code",
-    "optic": "Test optic code",
-    "lruj": "Test lruj code",
-    "aim": "Test aim code",
-    "conducti": "Test conducti code",
-    "fftprof": "Test fftprof code and low-level FFT routines",
-    "wannier90": "Test the interface with Wannier90",
-    "macroave": "Test macroave code",
-    "bigdft": "The the interface with Bigdft",
+    "abinit": "Tests related to abinit code.",
+    "anaddb": "Tests related to anaddb code",
+    "atompaw": "Tests related to atompaw code",
+    "band2eps": "Tests related to band2eps code ",
+    "cut3d": "Tests related to cut3d code",
+    "mrgscr": "Tests related to mrgscr",
+    "mrggkk": "Tests related to mrggkk code",
+    "mrgddb": "Tests related to mrgddb code",
+    'mrgdv': "Tests related to mrgdv code",
+    "optic": "Tests related to optic code",
+    "lruj": "Tests related to lruj code",
+    "aim": "Tests related to aim code",
+    "conducti": "Tests related to conducti code",
+    "fftprof": "Tests related to fftprof code and low-level FFT routines",
+    "wannier90": "Tests related to the interface with Wannier90",
+    "macroave": "Tests related to macroave code",
+    "bigdft": "Tests the interface with Bigdft",
     # Keywords describing the test.
     "NC": "Calculations with norm-conserving pseudos",
     "PAW": "Calculations with PAW datasets",
@@ -975,7 +960,7 @@ KNOWN_KEYWORDS = {
     "PBE0": "PBE0 calculations",
     "cRPA": "RPA for correlated electrons.",
     "FAILS_IFMPI": "Tests failing if MPI is used",
-    'NVT': "(N,V,T) enseble",
+    'NVT': "(N,V,T) ensemble",
     'ELASTIC': "Calculations of elastic constants",
     'INTERNAL_STRAIN': "Calculations of internal strain",
     'DFT-D3(BJ)': "DFT-D3 dispersion correction",

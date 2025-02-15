@@ -1800,8 +1800,8 @@ pp_dirpath $ABI_PSPDIR
 
         Return: (mpi_nprocs, string)
 
-        where mpi_nprocs = 0 if the test cannot be executed.
-        string contains a human-readable message explaining the reason why the test will be skipped.
+            where mpi_nprocs = 0 if the test cannot be executed.
+            string contains a human-readable message explaining the reason why the test will be skipped.
 
         A test cannot be executed if:
 
@@ -1930,16 +1930,16 @@ pp_dirpath $ABI_PSPDIR
                            default=2
         make_html_diff     True to produce diff in HTML format. Default: False.
         sub_timeout        Timeout for subprocesses.
-        abimem_check       True if abimem.mocc files should be analyzes for possible errors.
+        abimem_check       True if abimem.mocc files should be analyzed for possible errors.
                            Requires HAVE_MEM_PROFILE and `call abimem_init(2)` in main.
                            Default: False
         etsf_check         True if netcdf files should be validated. Requires netcdf4.
                            Default: False
-        simplified_diff    True if we perform a "simplified diff" when comparing files
+        simplified_diff    True to perform a "simplified diff" when comparing files
                              by using only YAML sections in abo files
         forced_tolerance   String: Force the use of fldiff tool with the specified tolerance.
                            Possible values are: default (from test config), high(1.e-10),
-                                                medium (1.e-8), easy (1.e-5), ridiculous (1.e-2)
+                           medium (1.e-8), easy (1.e-5), ridiculous (1.e-2)
         abimem_level      Run executable with abimem_level.
         useylm            Change Abinit input file to use useylm e.g. useylm 1
         gpu_option        Change Abinit input file to use gpu_option e.g. useylm 1
@@ -2152,12 +2152,11 @@ pp_dirpath $ABI_PSPDIR
                     html_max_bites = 150 * 1000
                     out_size_bites = ref_size_bites = html_max_bites
                     try:
-                        out_size_bites = os.path.getsize(
-                            os.path.join(self.workdir, f.name))
-                        ref_size_bites = os.path.getsize(
-                            os.path.join(self.ref_dir, f.name))
+                        out_size_bites = os.path.getsize(os.path.join(self.workdir, f.name))
+                        ref_size_bites = os.path.getsize(os.path.join(self.ref_dir, f.name))
                     except OSError:
                         pass
+
                     if out_size_bites >= html_max_bites or ref_size_bites >= html_max_bites:
                         f.do_html_diff = False
 
@@ -2169,7 +2168,7 @@ pp_dirpath $ABI_PSPDIR
                     abo_analysis = AboFileAnalysis(os.path.join(self.workdir,f.name),option="iterations")
                     ref_analysis = AboFileAnalysis(os.path.join(self.ref_dir,f.name),option="iterations")
                     st, err_msg, err_msg_short = abo_analysis.compare_with(ref_analysis,option="iterations", \
-                                                 percent_allowed_small=40,percent_allowed_large=25)
+                                                 percent_allowed_small=40, percent_allowed_large=25)
                     if st == "failed":
                         self._status = "failed"
                         self.fld_isok = False
@@ -2470,7 +2469,7 @@ pp_dirpath $ABI_PSPDIR
                     self.keep_files(hdiff_fname)
 
     def make_txt_diff_files(self):
-        """Generate and write diff files in txt format."""
+        """Generate and write diff files in text format."""
         assert self._executed
         if self._status in {"disabled", "skipped"}:
             return
@@ -2553,12 +2552,11 @@ pp_dirpath $ABI_PSPDIR
                 if abort_file:
                     with open(abort_file, "rt") as f:
                         abiabort_text = (
-                            12 * "=" + os.path.basename(abort_file)
-                            + 12 * "=" + 2 * "\n" + str(f.read())
+                            12 * "=" + os.path.basename(abort_file) + 12 * "=" + 2 * "\n" + str(f.read())
                         )
 
             except Exception as exc:
-                s = "Exception while trying to get info from stderr, stdout and __ABI_MPIABORTFILE\n" + \
+                s = "Exception while trying to get info from stderr, stdout and __ABI_MPIABORTFILE__\n" + \
                     str(exc)
                 stderr_text, stdout_text, abiabort_text = 3 * (s,)
 
@@ -2885,11 +2883,9 @@ class MultibinitTest(BaseTest):
         if self.spin_pot and self.spin_pot.strip().lower() != 'no':
             spin_pot_fname = os.path.join(self.inp_dir, self.spin_pot)
             if not os.path.isfile(spin_pot_fname):
-                self.exceptions.append(self.Error(
-                    "%s no such spin potential file: " % spin_pot_fname))
+                self.exceptions.append(self.Error("%s no such spin potential file: " % spin_pot_fname))
             return spin_pot_fname
-        else:
-            return None
+        return None
 
     def get_latt_pot(self):
         if self.latt_pot and self.latt_pot.strip().lower() != 'no':
@@ -2897,8 +2893,7 @@ class MultibinitTest(BaseTest):
             if not os.path.isfile(latt_pot_fname):
                 self.exceptions.append(self.Error("%s no such lattice potential file: " % latt_pot_fname))
             return latt_pot_fname
-        else:
-            return None
+        return None
 
     def get_slc_pot(self):
         if self.slc_pot and self.slc_pot.strip().lower() != 'no':
@@ -2906,8 +2901,7 @@ class MultibinitTest(BaseTest):
             if not os.path.isfile(slc_pot_fname):
                 self.exceptions.append(self.Error("%s no such slc potential file: " % slc_pot_fname))
             return slc_pot_fname
-        else:
-            return None
+        return None
 
     def get_lwf_pot(self):
         if self.lwf_pot and self.lwf_pot.strip().lower() != 'no':
@@ -2915,8 +2909,7 @@ class MultibinitTest(BaseTest):
             if not os.path.isfile(lwf_pot_fname):
                 self.exceptions.append(self.Error("%s no such lwf potential file: " % lwf_pot_fname))
             return lwf_pot_fname
-        else:
-            return None
+        return None
 
     def get_input_ddb_path(self):
         if self.input_ddb and self.input_ddb.strip().lower() != 'no':
@@ -2924,14 +2917,14 @@ class MultibinitTest(BaseTest):
             if not os.path.isfile(iddb_fname):
                 self.exceptions.append(self.Error("%s no such DDB file: " % iddb_fname))
             return iddb_fname
-        else:
-            if self.system_xml and self.system_xml.strip().lower() != 'no':
-                sys_xml_fname = os.path.join(self.inp_dir, self.system_xml)
-                if not os.path.isfile(sys_xml_fname):
-                    self.exceptions.append(self.Error("%s no such XML file: " % sys_xml_fname))
-                return sys_xml_fname
-            else:
-                return None
+
+        if self.system_xml and self.system_xml.strip().lower() != 'no':
+            sys_xml_fname = os.path.join(self.inp_dir, self.system_xml)
+            if not os.path.isfile(sys_xml_fname):
+                self.exceptions.append(self.Error("%s no such XML file: " % sys_xml_fname))
+            return sys_xml_fname
+
+        return None
 
     def get_coeff_xml(self):
         if self.coeff_xml and self.coeff_xml.strip().lower() != 'no':
@@ -2940,6 +2933,7 @@ class MultibinitTest(BaseTest):
                 self.exceptions.append(self.Error("%s no such XML file for coeffs: " % coeffxml_fname))
         else:
             coeffxml_fname = None
+
         return coeffxml_fname
 
     def get_md_hist(self):
@@ -2948,8 +2942,7 @@ class MultibinitTest(BaseTest):
             if not os.path.isfile(md_hist_fname):
                 self.exceptions.append(self.Error("%s no such HIST file for training-set: " % md_hist_fname))
             return md_hist_fname
-        else:
-            return None
+        return None
 
     def get_test_set(self):
         if self.test_set and self.test_set.strip().lower() != 'no':
@@ -2957,8 +2950,7 @@ class MultibinitTest(BaseTest):
             if not os.path.isfile(test_set_fname):
                 self.exceptions.append(self.Error("%s no such HIST file for test-set: " % test_set_fname))
             return test_set_fname
-        else:
-            return None
+        return None
 
     def make_stdin(self):
         t_stdin = StringIO()
@@ -2978,8 +2970,7 @@ class MultibinitTest(BaseTest):
                     self.exceptions.append(self.Error("%s no such XML file: " % sys_xml_fname))
                 t_stdin.write(sys_xml_fname + "\n")  # 3) input for system.xml XML
             else:
-                self.exceptions.append(self.Error(
-                    "%s no file available for the system"))
+                self.exceptions.append(self.Error("%s no file available for the system"))
 
         if self.coeff_xml:
             coeffxml_fname = os.path.join(self.inp_dir, self.coeff_xml)
@@ -3451,12 +3442,10 @@ class ChainOfTests(object):
     def listoftests(self, width=100, html=True, abslink=True):
         string = ""
         if not html:
-            string += "\n".join(test.listoftests(width, html, abslink)
-                                for test in self)
+            string += "\n".join(test.listoftests(width, html, abslink) for test in self)
             string = self.full_id + ":\n" + string
         else:
-            string += "<br>".join(test.listoftests(width,
-                                  html, abslink) for test in self)
+            string += "<br>".join(test.listoftests(width, html, abslink) for test in self)
             string = "Test Chain " + self.full_id + ":<br>" + string
         return string
 
@@ -3569,8 +3558,8 @@ class ChainOfTests(object):
             return set(keywords).issubset(self.keywords)
         elif mode == "any":
             return set(keywords).intersection(self.keywords)
-        else:
-            raise ValueError("wrong mode %s" % mode)
+
+        raise ValueError("wrong mode %s" % mode)
 
     def has_variables(self, ivars):
         for test in self:
@@ -3603,8 +3592,8 @@ class ChainOfTests(object):
             return set(authors).issubset(self._authors_snames)
         elif mode == "any":
             return set(authors).intersection(self._authors_snames)
-        else:
-            raise ValueError("wrong mode %s" % mode)
+
+        raise ValueError("wrong mode %s" % mode)
 
     def write_html_report(self):
         html_report = os.path.join(self.workdir, "test_report.html")
@@ -3628,7 +3617,6 @@ class ChainOfTests(object):
             mpi_nprocs:
             kwargs:
         """
-
         workdir = os.path.abspath(workdir)
         if not os.path.exists(workdir):
             os.mkdir(workdir)
@@ -3741,8 +3729,7 @@ class AbinitTestSuite(object):
         # FIXME: this won't work for tutorial, paral and other test suites.
         if isinstance(key, slice):
             return self.__getslice(key)
-        else:
-            raise NotImplementedError("__getitem__ expects a slice instance")
+        raise NotImplementedError("__getitem__ expects a slice instance")
 
     def __getslice(self, slice):
         start = slice.start
@@ -3890,11 +3877,11 @@ class AbinitTestSuite(object):
                 # print(save_files)
 
                 # Store stdout files only if the test failed.
-                important_status = {"failed", }
+                important_status = {"failed",}
 
                 # Special treatment for reference machines
                 if self.on_refslave:
-                    important_status = {"passed", "failed", }
+                    important_status = {"passed", "failed",}
 
                 if test.status not in important_status:
                     if isinstance(test, ChainOfTests):
@@ -3917,8 +3904,7 @@ class AbinitTestSuite(object):
                         targz.add(p, arcname=arcname)
                     except Exception as exc:
                         # Handle the case in which the output file has not been produced.
-                        warnings.warn(
-                            "exception while adding %s to tarball:\n%s" % (p, exc))
+                        warnings.warn("exception while adding %s to tarball:\n%s" % (p, exc))
                         self.exceptions.append(exc)
 
             targz.close()
@@ -3927,15 +3913,13 @@ class AbinitTestSuite(object):
             self._targz_fname = ofname
 
         except Exception as exc:
-            warnings.warn(
-                "exception while creating tarball file: %s" % str(exc))
+            warnings.warn("exception while creating tarball file: %s" % str(exc))
             self.exceptions.append(exc)
 
     def sanity_check(self):
         all_full_ids = [test.full_id for test in self]
         if len(all_full_ids) != len(set(all_full_ids)):
-            raise ValueError(
-                "Cannot have more than two tests with the same full_id")
+            raise ValueError("Cannot have more than two tests with the same full_id")
 
     def start_workers(self, py_nprocs, run_func, run_func_kwargs):
         """
@@ -4031,11 +4015,12 @@ class AbinitTestSuite(object):
             build_env: `BuildEnv` instance with info on the ABINIT build environment.
             workdir: Working directory (string).
             job_runner: `JobRunner` instance.
-            mpi_nprocs: number of MPI processes to use for a single test.
-            max_cpus: Max number of CPUs available.
-            max_gpus: Max number of GPUs available.
-            py_nprocs: number of py_nprocs for tests.
-            runmode:
+            mpi_nprocs: number of MPI processes to be used for running a single test.
+            omp_nthreads: number of OpenMP threads to be used for running a single test.
+            max_cpus: Max number of CPUs available on the system.
+            max_gpus: Max number of GPUs available on the system.
+            py_nprocs: number of python subprocesses.
+            runmode: "static" or "dynamic"
             verbose: Verbosity level.
 
         return: Results instance.
@@ -4089,7 +4074,7 @@ class AbinitTestSuite(object):
                 cpu_counter=manager.Value("i", 0),  # Shared counter for CPU usage.
                 gpu_counter=manager.Value("i", 0),  # Shared counter for GPU usage.
                 condition=manager.Condition(),      # Condition variable for synchronization.
-                lock_counters=manager.Lock(),       # Lock to make cpu_counter updates safe.
+                lock_counters=manager.Lock(),       # Lock to make cpu_counter and gpu_counter updates safe.
                 verbose=verbose,
             )
 
@@ -4476,6 +4461,7 @@ class Results(object):
         out_files, ref_files = [], []
         for test in self.tests_with_status(status):
             for f in test.files_to_test:
+                #TODO: Only a subset of files should be patched.
                 #print(f"status: {status}, f.fld_status: {f.fld_status}")
                 #print(f)
                 #if status != "all" and f.fld_status != status: continue
