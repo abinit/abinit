@@ -38,7 +38,7 @@ by concatenating in each one all the time steps or configurations (using `agrep`
 ## The aTDEP computation
 
 In a same manner as performed for ABINIT, the use of aTDEP is quite simple. 
-One has just to execute `atdep` as follows:
+One can execute `atdep` as follows:
 
 ```sh
     atdep < input.files > log
@@ -55,6 +55,16 @@ defines the root of all the output files:
 The detection of the `HIST.nc` file is performed at the beginning; so, if this
 one is absent, the code will automatically search the 3 `ASCII.dat` files.
 
+Alternatively, aTDEP can be invoked from the command line interface as
+```sh
+    atdep input.in > log
+```
+
+In this case, name of the output file, the root name for the input data files,
+and the root name for the output data files can be specified with the variables
+[[output_file@atdep|output_file]], [[indata_prefix@atdep|indata_prefix]],
+and [[outdata_prefix@atdep|outdata_prefix]], respectively.
+
 ## The input files
 
 An example of a aTDEP  calculation (in the special case where the *NetCDF* file `HIST.nc` is employed)
@@ -64,11 +74,7 @@ Let us describe briefly this [[test:v8_37]] file:
 
 {% dialog tests/v8/Input/t37.abi %}
 
-The input file format is fixed. So:
-
-1. This file begins with a `NormalMode` or `DebugMode` keyword and finishes with `TheEnd` (all the lines after are not read).
-2. All the lines between `# Unit cell definition` and `# Optional inputs` are fixed.
-3. Between `# Optional inputs` and `TheEnd`, the format is free.
+The input file format is free, but we organize the input variables by sections as follow:
 
 More details:
 
@@ -79,13 +85,13 @@ More details:
   (here, one atom A, one atom B and 3 atoms C).
 * The section `# Supercell definition` defines the multiplicity of the
   supercell with respect to the unit cell multiplicity (here, it is a simple
-  2x2x2 multiplication of the unit cell) and the temperature of the system
-  temperature(here, 495.05 K).
+  2x2x2 multiplication of the unit cell).
 * The section `# Computation details` defines the range [[nstep_max@atdep|nstep_max]]...[[nstep_min@atdep|nstep_min]]
-  of time steps or configurations (here, 100 time steps) and the
+  of time steps or configurations (here, 100 time steps), the
   cutoff radius for the pair interactions [[rcut@atdep|Rcut]] (here, all the interaction pairs
-  with a bond length larger than 7.426 bohr will not be considered).
-* The section `# Optional inputs` can define a large number of optional
+  with a bond length larger than 7.426 bohr will not be considered),
+  and the temperature of the system (here, 495.05 K).
+* The section `# Optional inputs` regroups a number of optional
   keywords (here [[ngqpt2@atdep|ngqpt2]] defining the q-point grid for the vDOS integration
   is set to 2 2 2 in order to have a test sufficiently fast, which means that
   all the thermodynamic quantities have no sense.)
@@ -100,8 +106,8 @@ from the `HIST.nc` file. In particular, the features of the supercell.
 A large number of output files are obtained after an execution of aTDEP.
 
 {% dialog tests/v8/Refs/t37.abo %}
-{% dialog tests/v8/Refs/t37omega.dat %}
-{% dialog tests/v8/Refs/t37thermo.dat %}
+{% dialog tests/v8/Refs/t37_omega.dat %}
+{% dialog tests/v8/Refs/t37_thermo.dat %}
 
 1. `*.abo` is the main output file. It includes an echo of the input variables,
    some intermediary results, the definition of the various shells of interaction,
