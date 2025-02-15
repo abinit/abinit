@@ -46,7 +46,7 @@ from tests.pymods.termcolor import get_terminal_size, cprint
 from tests.pymods.testsuite import find_top_build_tree, AbinitTestSuite, BuildEnvironment
 from tests.pymods.jobrunner import JobRunner, OMPEnvironment, TimeBomb
 
-__version__ = "0.6.0"
+__version__ = "0.7.0"
 __author__ = "Matteo Giantomassi"
 
 _my_name = os.path.basename(__file__) + "-" + __version__
@@ -215,7 +215,7 @@ def main():
                       help="Read options from configuration FILE.", metavar="FILE")
 
     parser.add_option("--force-mpirun", default=False, action="store_true",
-                      help="Force execution via mpiruner even for sequential jobs, i.e. np==1, defaults to False")
+                      help="Force execution via mpirunner even for sequential jobs, i.e. np==1, defaults to False")
 
     parser.add_option("--mpi-args", type="string", help="Options passed to mpirun.", default="")
 
@@ -268,7 +268,7 @@ def main():
 
     parser.add_option("--nag", action="store_true", help="Activate NAG mode. Option used by developers")
 
-    parser.add_option("--perf", default="", help="Use `perf` command to profile the test")
+    parser.add_option("--perf", default="", help="Use `perf` command to profile the test (Linux only)")
 
     parser.add_option("--abimem", action="store_true", default=False,
                        help=("Inspect abimem.mocc files produced by the tests. "
@@ -282,7 +282,7 @@ def main():
 
     parser.add_option("-T", "--forced-tolerance", dest="forced_tolerance", type="string", default="default",
                       help="[string] Force the use of fldiff comparison tool with the specified tolerance. "+
-                           "Possible values are: default (from test config), high(1.e-10), medium (1.e-8), easy (1.e-5), ridiculous (1.e-2).")
+                           "Possible values are: default (from test config), high (1.e-10), medium (1.e-8), easy (1.e-5), ridiculous (1.e-2).")
 
     parser.add_option("--abimem-level", type=int, default=0, help="Run executable with abimem-level option.")
     parser.add_option("--useylm", type=int, default=None, help="Use useylm in all the ABINIT input files.")
@@ -304,7 +304,7 @@ def main():
                       help="List the tests in test suite (echo description section in ListOfFile files) and exit.")
 
     parser.add_option("--tolerances", default=False, action="store_true",
-                      help="Write csv files with tolerances of each test.")
+                      help="Write csv files with the tolerances of each test.")
 
     parser.add_option("-m", "--make", dest="make", type="int", default=0,
                       help="Find the abinit build tree, and compile to code with 'make -j#NUM' before running the tests.")
@@ -369,7 +369,7 @@ def main():
                             "default=0\n") )
 
     parser.add_option("--sub-timeout", dest="sub_timeout", type="int", default=30,
-                      help="Timeout (s) for small subprocesses (fldiff.pl, python functions)")
+                      help="Timeout (s) for small subprocesses (diff.py, python functions)")
 
     parser.add_option("--with-pickle", type="int",  default=1,
                       help="Save test database in pickle format (default: True).")
@@ -407,7 +407,6 @@ def main():
     mpi_nprocs = options.mpi_nprocs
     omp_nthreads = options.omp_nthreads
     py_nprocs = options.py_nprocs
-    num_gpus = ngpus_detected
 
     cprint("Running on %s -- system %s -- ncpus %s -- ngpus %s -- Python %s -- %s" % (
           gethostname(), system, ncpus_detected, ngpus_detected, platform.python_version(), _my_name),
@@ -463,8 +462,7 @@ def main():
                     raise ValueError("use_srun and use_mpiexec are mutually exclusive")
 
                 if which("srun") is None:
-                    raise RuntimeError("Cannot locate srun in $PATH. "
-                                       "Please check your environment")
+                    raise RuntimeError("Cannot locate srun in $PATH. Please check your environment")
 
                 runner = JobRunner.srun(timebomb=timebomb, mpi_args=options.mpi_args)
 
@@ -478,8 +476,7 @@ def main():
                         use_mpiexec = False
                     elif which("mpiexec") is None:
                         raise RuntimeError(
-                            "Cannot locate neither mpirun nor mpiexec in $PATH. "
-                            "Please check your environment")
+                            "Cannot locate neither mpirun nor mpiexec in $PATH. Please check your environment")
 
                 runner = JobRunner.generic_mpi(use_mpiexec=use_mpiexec, timebomb=timebomb,
                                                mpi_args=options.mpi_args)
@@ -646,9 +643,12 @@ def main():
 
     results = test_suite.run_tests(build_env, workdir, runner,
                                    mpi_nprocs=mpi_nprocs,
+                                   omp_nthreads=omp_nthreads,
+                                   max_cpus=ncpus_detected,
+                                   max_gpus=ngpus_detected,
                                    py_nprocs=py_nprocs,
-                                   num_gpus=num_gpus,
                                    runmode=runmode,
+                                   verbose=options.verbose,
                                    erase_files=options.erase_files,
                                    make_html_diff=options.make_html_diff,
                                    sub_timeout=options.sub_timeout,
@@ -694,9 +694,12 @@ def main():
                     test_suite = AbinitTestSuite(test_suite.abenv, test_list=test_list)
                     results = test_suite.run_tests(build_env, workdir, runner,
                                                    mpi_nprocs=mpi_nprocs,
+                                                   omp_nthreads=omp_nthreads,
+                                                   max_cpus=ncpus_detected,
+                                                   max_gpus=ngpus_detected,
                                                    py_nprocs=py_nprocs,
-                                                   num_gpus=num_gpus,
                                                    runmode=runmode,
+                                                   verbose=options.verbose,
                                                    erase_files=options.erase_files,
                                                    make_html_diff=options.make_html_diff,
                                                    sub_timeout=options.sub_timeout,
