@@ -1736,7 +1736,7 @@ subroutine xmpi_sum_dp2d(xval,comm,ier,use_omp_map)
          !$OMP TARGET DATA USE_DEVICE_PTR(xval,xsum)
          call MPI_ALLREDUCE(xval,xsum,nn,my_dt,my_op,comm,ier)
          !$OMP END TARGET DATA
-         !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) MAP(to:xval,xsum)
+         !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) PRIVATE(i2,i1) MAP(to:xval,xsum)
          do i2=1,n2
            do i1=1,n1
              xval(i1,i2)=xsum(i1,i2)
@@ -1808,16 +1808,21 @@ end subroutine xmpi_sum_dp2d_c
 !!
 !! SOURCE
 
-subroutine xmpi_sum_dp3d(xval,comm,ier)
+subroutine xmpi_sum_dp3d(xval,comm,ier,use_omp_map)
 
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(inout) :: xval(:,:,:)
  integer ,intent(in) :: comm
+ logical ,intent(in), optional :: use_omp_map
  integer ,intent(out)   :: ier
 
 !Local variables-------------------
 #if defined HAVE_MPI
  integer :: my_dt,my_op,n1,n2,n3,nn,nproc_space_comm
+#ifdef HAVE_GPU_MPI
+ integer :: i1,i2,i3
+#endif
+ logical :: l_use_omp_map
  integer(kind=int64) :: ntot
  real(dp),allocatable :: xsum(:,:,:)
 #endif
@@ -1826,6 +1831,8 @@ subroutine xmpi_sum_dp3d(xval,comm,ier)
 
  ier=0
 #if defined HAVE_MPI
+ l_use_omp_map=.false.
+ if(present(use_omp_map)) l_use_omp_map=use_omp_map
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
    if (nproc_space_comm /= 1) then
@@ -1847,13 +1854,55 @@ subroutine xmpi_sum_dp3d(xval,comm,ier)
 #if defined HAVE_MPI2_INPLACE
      if (xmpi_use_inplace_operations .and. my_op == MPI_SUM) then
        if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
-       call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
+       if(.not. l_use_omp_map) then
+         call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
+       else
+#ifdef HAVE_OPENMP_OFFLOAD
+#ifdef HAVE_GPU_MPI
+         ! Proper GPU-aware call
+         !$OMP TARGET DATA USE_DEVICE_PTR(xval)
+         call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
+         !$OMP END TARGET DATA
+#else
+         !$OMP TARGET UPDATE FROM(xval)
+         call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
+         !$OMP TARGET UPDATE TO(xval)
+#endif
+#endif
+       end if ! l_use_omp_map
      else
 #endif
        ABI_STAT_MALLOC(xsum,(n1,n2,n3), ier)
        if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_dp3d')
-       call MPI_ALLREDUCE(xval,xsum,nn,my_dt,my_op,comm,ier)
-       xval (:,:,:) = xsum(:,:,:)
+       if(.not. l_use_omp_map) then
+         call MPI_ALLREDUCE(xval,xsum,nn,my_dt,my_op,comm,ier)
+         xval (:,:,:) = xsum(:,:,:)
+       else
+#ifdef HAVE_OPENMP_OFFLOAD
+         !$OMP TARGET ENTER DATA MAP(alloc:xsum)
+#ifdef HAVE_GPU_MPI
+         ! Proper GPU-aware call
+         !$OMP TARGET DATA USE_DEVICE_PTR(xval,xsum)
+         call MPI_ALLREDUCE(xval,xsum,nn,my_dt,my_op,comm,ier)
+         !$OMP END TARGET DATA
+         !$OMP TARGET TEAMS DISTRIBUTE PRIVATE(i3) MAP(to:xval,xsum)
+         do i3=1,n3
+           !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(i2,i1)
+           do i2=1,n2
+             do i1=1,n1
+               xval(i1,i2,i3)=xsum(i1,i2,i3)
+             end do
+           end do
+         end do
+#else
+         !$OMP TARGET UPDATE FROM(xval)
+         call MPI_ALLREDUCE(xval,xsum,nn,my_dt,my_op,comm,ier)
+         xval (:,:,:) = xsum(:,:,:)
+         !$OMP TARGET UPDATE TO(xval)
+#endif
+         !$OMP TARGET EXIT DATA MAP(delete:xsum)
+#endif
+       end if ! l_use_omp_map
        ABI_FREE(xsum)
 #if defined HAVE_MPI2_INPLACE
      endif
@@ -2695,16 +2744,21 @@ end subroutine xmpi_sum_c1dc
 !!
 !! SOURCE
 
-subroutine xmpi_sum_c2dc(xval,comm,ier)
+subroutine xmpi_sum_c2dc(xval,comm,ier,use_omp_map)
 
 !Arguments-------------------------
  complex(dpc), DEV_CONTARRD intent(inout) :: xval(:,:)
  integer,intent(in) :: comm
+ logical,intent(in), optional :: use_omp_map
  integer,intent(out) :: ier
 
 !Local variables-------------------
 #if defined HAVE_MPI
  integer :: my_dt,my_op,n1,n2,nn,nproc_space_comm
+#ifdef HAVE_GPU_MPI
+ integer :: i1,i2
+#endif
+ logical :: l_use_omp_map
  integer(kind=int64) :: ntot
  complex(dpc),allocatable :: xsum(:,:)
 #endif
@@ -2713,6 +2767,8 @@ subroutine xmpi_sum_c2dc(xval,comm,ier)
 
  ier=0
 #if defined HAVE_MPI
+ l_use_omp_map=.false.
+ if(present(use_omp_map)) l_use_omp_map=use_omp_map
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
    if (nproc_space_comm /= 1) then
@@ -2733,13 +2789,52 @@ subroutine xmpi_sum_c2dc(xval,comm,ier)
 #if defined HAVE_MPI2_INPLACE
      if (xmpi_use_inplace_operations .and. my_op == MPI_SUM) then
        if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
-       call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
+       if(.not. l_use_omp_map) then
+         call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
+       else
+#ifdef HAVE_OPENMP_OFFLOAD
+#ifdef HAVE_GPU_MPI
+         ! Proper GPU-aware call
+         !$OMP TARGET DATA USE_DEVICE_ADDR(xval)
+         call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
+         !$OMP END TARGET DATA
+#else
+         !$OMP TARGET UPDATE FROM(xval)
+         call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
+         !$OMP TARGET UPDATE TO(xval)
+#endif
+#endif
+       end if ! use_omp_map
      else
 #endif
        ABI_STAT_MALLOC(xsum,(n1,n2), ier)
        if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_c2dc')
-       call MPI_ALLREDUCE(xval,xsum,nn,my_dt,my_op,comm,ier)
-       xval (:,:) = xsum(:,:)
+       if(.not. l_use_omp_map) then
+         call MPI_ALLREDUCE(xval,xsum,nn,my_dt,my_op,comm,ier)
+         xval (:,:) = xsum(:,:)
+       else
+#ifdef HAVE_OPENMP_OFFLOAD
+         !$OMP TARGET ENTER DATA MAP(alloc:xsum)
+#ifdef HAVE_GPU_MPI
+         ! Proper GPU-aware call
+         !$OMP TARGET DATA USE_DEVICE_PTR(xval,xsum)
+         call MPI_ALLREDUCE(xval,xsum,nn,my_dt,my_op,comm,ier)
+         !$OMP END TARGET DATA
+         !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) PRIVATE(i2,i1) MAP(to:xval,xsum)
+         do i2=1,n2
+           do i1=1,n1
+             xval(i1,i2)=xsum(i1,i2)
+           end do
+         end do
+#else
+         !$OMP TARGET UPDATE FROM(xval)
+         call MPI_ALLREDUCE(xval,xsum,nn,my_dt,my_op,comm,ier)
+         xval (:,:) = xsum(:,:)
+         !$OMP TARGET UPDATE TO(xval)
+#endif
+         !$OMP TARGET EXIT DATA MAP(delete:xsum)
+#endif
+       end if
        ABI_FREE(xsum)
 #if defined HAVE_MPI2_INPLACE
      end if
