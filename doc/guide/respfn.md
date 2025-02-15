@@ -14,12 +14,13 @@ It will be easier to discover the present file with the help of the [[tutorial:r
 ABINIT can compute the response to different perturbations, and provide access
 to quantities that are second derivatives of total energy (2DTE) with respect
 to these perturbations. 
-Presently, they can be of four types: 
+Presently, they can be of five types: 
 
 1. phonons 
 2. static homogeneous electric field
 3. strain  
 4. magnetic field (coupling to the spin, not the orbital motion)
+5. long-wave perturbations (including magnetic field that couples to the orbital motion)
 
 The physical properties connected to 2DTE with respect to perturbations (1) and (2) are the phonon
 dynamical matrices, the dielectric tensor, and the Born effective charges,
@@ -39,7 +40,7 @@ calculation of the 2DTE and 3DTE from these 1WF is an easy computational task:
 the construction of the 2DTE with respect to perturbations j1 and j2
 involves mainly evaluating matrix elements between the 1WF of j1 and/or the 1WF of j2. 
 
-A basic introduction to the theory is given in [[cite:gonze2005]]. You might also benefit from reading the longer review [[cite:baroni2001]].
+A basic introduction to the theory is given in [[cite:Gonze2005]]. You might also benefit from reading the longer review [[cite:Baroni2001]].
 Further details are in [[cite:Gonze1997]] and [[cite:Gonze1997a]].
 
 The calculation of the 1WF for a particular perturbation is done using a
@@ -59,12 +60,21 @@ the Anaddb code. See the corresponding [[help:mrgddb]] and [[help:anaddb]].
 
 <a id="1"></a>
 ## 1 Description of perturbations
+
+Perturbations are described by two indices, **ipert** and **idir**, and possibly a wavevector. 
+The first index runs (at present) from 1 to [[natom]]+11, while the second one runs from 1 to 3.
+We also define the index of the perturbation, called *pertcase*, equal to idir + 3 * (ipert - 1).
+Accordingly, pertcase runs from 1 to 3 * (natom + 11), and will be
+needed to identify output and input files, see section 6.
   
+### 1.1 Atomic displacements / phonons
+
 The perturbation of the **phonon** type is the displacement of one atom along
 one of the axis of the unit cell, by a unit of length (in reduced coordinates).
-It is characterized by two integer numbers and one wavevector.
+It is characterized by the above-mentioned two integer numbers and one wavevector.
 The two integer numbers are the number of the moved atom, which will be noted
-**ipert**, and the number of the axis of the unit cell, which will be noted **idir**. 
+**ipert**, and the number of the axis of the unit cell, which will be noted **idir**, 
+for the direction of the displacement of the moved atom. 
 
 !!! important
 
@@ -78,6 +88,8 @@ variable [[rfatpol]]. The set of directions to be considered in one dataset of
 ABINIT is determined by the input variable [[rfdir]]. The wavevector to be
 considered in one dataset of ABINIT is determined by the input variables
 [[nqpt]], [[qpt]], and [[qptnrm]].
+
+### 1.2 Electric field (and associated change of wavevector)
 
 The perturbations of the **electric field** type are
 
@@ -111,6 +123,8 @@ envisioned for a future version of the code, at present only homogeneous
 fields are considered. So the wavevector of the electric field type
 perturbations is $\Gamma$ (q=0).
 
+### 1.3 Strain
+
 The perturbations of the **strain** type are either an uniaxial strain or a
 shear strain. The strain perturbations are considered in cartesian coordinates
 (x,y,z). They are characterized by two numbers, with *ipert* being natom + 3 for
@@ -140,16 +154,41 @@ Limitations of the present implementation (as of v5.7):
   * Symmetry is presently used to skip redundant k points in the BZ sum, 
     but not to skip redundant strain perturbations.
 
-We also define the index of the perturbation, called *pertcase*, equal to idir + 3 * (ipert - 1). 
-Accordingly, pertcase runs from 1 to 3 * (natom + 4), and will be
-needed to identify output and input files, see section 6.
+### 1.4 Zeeman magnetic field
+
+The perturbations of the **Zeeman magnetic field** type couple to the spin of the electrons,
+not to their orbital moment. They are considered in cartesian coordinates (x,y,z). 
+They are characterized by two numbers, with *ipert* being natom+5, and 
+*idir* being 1 for the x direction, 2 for the y direction and 3 for the z direction.
+Calculations for such perturbations are driven by the input variable [[rfmagn]].
+Such perturbation only have a relevance in the non-collinear-spin case, with [[nspinor]]=2.
+
+### 1.5 Long-wave type perturbations.
+
+Long-wave type perturbations are related to the long-wave formalism developed by M. Stengel,
+M. Royo, and coworkers over the years. See for example [[cite:Royo2019]].
+Also, similar quantities have been used (and implemented before) by 
+L. Baguet and M. Torrent for the specific computation of Raman spectra,
+see the section 3.2.3 of [[cite:Gonze2020]] and the section 5 of [[cite:Romero2020]].
+The description of the long-wave formalism goes beyond this introductory user guide.
+If interested, the user should read the above references, as well as the description of the 
+[[rf2_dkdk]] and [[rf2_dkde]] input variables. This formalism allows one to define
+a magnetic field that couples with the orbital motion, complementary to the one that couples to the 
+spin-magnetization.
+
+The associated values of **ipert** are [[natom]]+8 (ddq), [[natom]]+10 (dkdk) and [[natom]]+11 (dkde).
+
+The values [[natom]]+6 and [[natom]]+7 had been booked, but their implementation has been halted in 2015. They should be removed and reused.
+
+
 
 !!! summary
 
     To summarize, the perturbations are characterized by two numbers, **ipert** from
-    1 to natom + 4, and **idir**, from 1 to 3, as well as one wavevector (that is
+    1 to [[natom]] + 11, and **idir**, from 1 to 3, as well as one wavevector (that is
     gamma when a non-phonon perturbation is considered). A number called
-    **pertcase** combines *ipert* and *idir*, and runs from 1 to 3 * (natom + 4).
+    **pertcase** combines *ipert* and *idir*, and runs from 1 to 3 * ([[natom]] + 11).
+    Not all values of **ipert** in the range from 1 to [[natom]]+11 are attributed, though.
 
 The 2DTE, being derivative of the total energy with respect to two
 perturbations, will be characterized by two sets of (idir,ipert), or by two
