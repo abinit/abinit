@@ -607,7 +607,7 @@ def main():
     if "--help" in sys.argv or "-h" in sys.argv:
         # Print help and exit.
         TestBot.print_options()
-        sys.exit(0)
+        return 0
 
     # Configuration file (hardcoded or from command line)
     testbot_cfg = None

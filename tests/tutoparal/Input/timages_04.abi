@@ -13,13 +13,13 @@ natom         8
 
 ntypat        3
 
-# Species     
-#             O   N   H   
-znucl         
-              8   7   1   
+# Species
+#             O   N   H
+znucl
+              8   7   1
 
-typat         
-              1   3   3   2   3   3   3   3   
+typat
+              1   3   3   2   3   3   3   3
 
 acell         1.90000000000000e+01   9.45000000000000e+00   9.45000000000000e+00
 
@@ -92,17 +92,15 @@ dynimage      0 10*1 0   # Keep first and last images fixed
 #%% exclude_builders = scope_gnu_12.2_mpich
 #%% [files]
 #%% [NCPU_10]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   timages_04_MPI10.abo, tolnlines = 55, tolabs = 5.5e-3, tolrel = 9.3e-1, fld_options = -easy;
 #%% [paral_info]
 #%% nprocs_to_test = 10
 #%% max_nprocs = 10
 #%% [extra_info]
-#%% authors = 
-#%% keywords = 
-#%% description = 
-#%%   Hydronium ion + NH3 molecule      
-#%%   String method                    
+#%% description =
+#%%   Hydronium ion + NH3 molecule
+#%%   String method
 #%%   Moving the proton from H2O to NH3
-#%%   keeping O and H atoms fixed      
+#%%   keeping O and H atoms fixed
 #%%<END TEST_INFO>

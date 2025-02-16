@@ -22,7 +22,7 @@ else:
     from io import StringIO
 
 
-#from tests.pymods.tools import pprint_table
+
 
 logger = logging.getLogger(__name__)
 
@@ -379,7 +379,6 @@ class AbinitTestsDatabase(dict):
         for suite_name, suite in self.items():
             for test in suite:
                 for key in test.keywords:
-                    # if not key: continue
                     if key not in KNOWN_KEYWORDS:
                         unknowns.add(key)
                     if " " in key:
@@ -482,7 +481,7 @@ class AbinitTestsDatabase(dict):
             # At this point ref2test should contain only ones.
             for ref_fname, ntimes in ref2test.items():
                 if ntimes != 1:
-                    err.write("Ref file %s is tested %s time(s)\n" % (path2str(ref_fname), ntimes))
+                    err.write("Reference file %s is tested %s time(s)\n" % (path2str(ref_fname), ntimes))
 
         return err.getvalue()
 
@@ -575,8 +574,7 @@ class AbinitTests(object):
         return self._suites.values()
 
     def multi_parallel_suites(self):
-        suites = self.suites
-        return [s for s in suites if s.is_multi_parallel]
+        return [s for s in self.suites if s.is_multi_parallel]
 
     def suite_of_subsuite(self, subsuite_name):
         """Return the suite corresponding to the given subsuite."""
@@ -613,7 +611,7 @@ class AbinitTests(object):
 
     def build_database(self, with_disabled=False):
         """
-        Return an instance of TestsDatabase containing all the ABINIT automatic tests.
+        Return an instance of AbinitTestsDatabase containing all the ABINIT automatic tests.
         with_disabled specifies whether disabled tests should be included in the database.
         """
         database = AbinitTestsDatabase(self._suites)
@@ -636,7 +634,7 @@ class AbinitTests(object):
 
     def get_database(self, regenerate=False, with_pickle=False):
         """
-        Return an instance of TestsDatabase initialized from an external pickle file.
+        Return an instance of AbinitTestsDatabase initialized from an external pickle file.
 
         Args:
             regenerate:
@@ -653,26 +651,18 @@ class AbinitTests(object):
             # Use file locking mechanism to prevent IO from other processes.
             if with_pickle:
                 print("Saving database to %s" % database_path)
-                lock = FileLock(database_path)
-                lock.acquire()
-
-                with open(database_path, "wb") as fh:
-                    pickle.dump(database, fh, protocol=-1)
-
-                lock.release()
+                with FileLock(database_path):
+                    with open(database_path, "wb") as fh:
+                        pickle.dump(database, fh, protocol=-1)
 
         else:
             cprint("Loading database from: %s" % database_path, "yellow")
 
             # Read the database from the cpickle file.
             # Use file locking mechanism to prevent IO from other processes.
-            lock = FileLock(database_path)
-            lock.acquire()
-
-            with open(database_path, "rb") as fh:
-                database = pickle.load(fh)
-
-            lock.release()
+            with FileLock(database_path):
+                with open(database_path, "rb") as fh:
+                    database = pickle.load(fh)
 
         return database
 
@@ -821,7 +811,7 @@ class AbinitTests(object):
                 with_authors = [a for a in authors if not a.endswith("-")]
                 exclude_authors = [a[:-1] for a in authors if a.endswith("-")]
                 print("Extracting tests with authors = %s, without authors %s" % (
-                    with_authors, exclude_authors))
+                       with_authors, exclude_authors))
 
             tests = tests.select_tests(with_keys=with_keys,
                                        exclude_keys=exclude_keys,
@@ -831,17 +821,17 @@ class AbinitTests(object):
                                        )
         if not flat_list:
             return tests
-        else:
-            # Build flat list of tests.
-            flat = []
-            for t in tests:
-                if isinstance(t, ChainOfTests):
-                    # DO NOT use isinstance to check if ChainOfTests but rely on duck typing.
-                    # if hasattr(t, "tests"):
-                    flat.extend(t.tests)
-                else:
-                    flat.append(t)
-            return flat
+
+        # Build flat list of tests.
+        flat = []
+        for t in tests:
+            if isinstance(t, ChainOfTests):
+                # DO NOT use isinstance to check if ChainOfTests but rely on duck typing.
+                # if hasattr(t, "tests"):
+                flat.extend(t.tests)
+            else:
+                flat.append(t)
+        return flat
 
     def generate_html_listoftests(self):
         """Generate the ListOfTests files"""
@@ -852,44 +842,45 @@ class AbinitTests(object):
 
             fname = os.path.join(suite_path, "ListOfTests.html")
             print("Writing ListOfTests HTML file: ", fname)
-            with open(fname, "w") as fh:
+            with open(fname, "wt") as fh:
                 fh.write(suite.make_listoftests(width=160, html=True))
 
             fname = os.path.join(suite_path, "ListOfTests.txt")
             print("Writing ListOfTests text file: ", fname)
-            with open(fname, "w") as fh:
+            with open(fname, "wt") as fh:
                 fh.write(suite.make_listoftests(width=100, html=False))
 
-    def show_info(self):
+    def show_info(self, verbose=0):
+        """
+        Print info on the test suite.
+        """
         table = [["Suite",  "# Activated Tests", "# Disabled Tests"]]
         for suite_name in self.suite_names:
             active_tests = self.inputs_of_suite(suite_name, active=True)
             disabled_tests = self.inputs_of_suite(suite_name, active=False)
             table.append([suite_name, str(len(active_tests)), str(len(disabled_tests))])
+        from tests.pymods.tools import pprint_table
+        print("")
+        pprint_table(table)
+        print("")
 
-        # pprint_table(table)
-
-        skeys = sorted(KNOWN_KEYWORDS.keys())
         print(8 * "=" + " KEYWORDS " + 8 * "=")
         width = max([len(k) for k in KNOWN_KEYWORDS]) + 5
-        for skey in skeys:
-            desc = KNOWN_KEYWORDS[skey]
-            print(skey.ljust(width), desc)
+        for skey in sorted(KNOWN_KEYWORDS.keys()):
+            info = KNOWN_KEYWORDS[skey]
+            print(skey.ljust(width), info)
+        print("")
 
-        #for suite_name in self.suite_names:
-        #   suite = self.get_suite(suite_name)
-        #   print(suite_name, suite.need_cpp_vars)
+        if verbose:
+            for suite_name in self.suite_names:
+               suite = self.get_suite(suite_name)
+               if not suite.need_cpp_vars: continue
+               print("suite:", suite_name, "needs CPP variables:", suite.need_cpp_vars)
 
-        #for subsuite_name in self.all_subsuite_names:
-        #   print(subsuite_name)
-
-        #for suite in self.multi_parallel_suites():
-        #   print(suite.name)
-        #   sys.exit(0)
-
-        # list authors
-        database = self.get_database(regenerate=True)
-        pprint(database.authors_snames)
+            #if verbose > 1:
+            #    # list authors
+            #    database = self.get_database(regenerate=True)
+            #    pprint(database.authors_snames)
 
         # TODO: add this test to check_test_suite
         #chains = database.test_chains()
@@ -898,6 +889,26 @@ class AbinitTests(object):
         #   if nlinks == 0:
         #       print(15 * "*" + " Warning: found 0 explicit links " + 15 * "*")
         #print(string)
+
+        print("\nUse verbose > 0 to print more info.")
+
+        # This to print tests with keywords
+        """
+        database = self.get_database(regenerate=False)
+        key = 'linear electro-optical coefficient'
+        key = "UJDET"
+
+        print("Reporting tests with key:", key)
+        for suite_name, tests in database.items():
+            #print(suite_name)
+            for test in tests:
+                if key in test.keywords:
+                    try:
+                        print(test, test.inp_fname)
+                    except AttributeError:
+                        print(test, [t.inp_fname for t in test])
+        """
+
 
 
 abitests = AbinitTests()
@@ -923,9 +934,14 @@ KNOWN_KEYWORDS = {
     "wannier90": "Tests related to the interface with Wannier90",
     "macroave": "Tests related to macroave code",
     "bigdft": "Tests the interface with Bigdft",
+    'atdep': "Tests for atdep code",
+    'testtransposer': "Unit tests for transposer",
+    'ujdet': "Computation of U (legacy code)",
+    'fold2Bloch': "Tests related to fold2Bloch code.",
+    'multibinit': "Tests related to multibinit code",
     # Keywords describing the test.
     "NC": "Calculations with norm-conserving pseudos",
-    "PAW": "Calculations with PAW datasets",
+    "PAW": "PAW calculations",
     "GW": "GW calculations",
     "GWGamma": "GW calculations with vertex corrections",
     "BSE": "Bethe-Salpeter calculations",
@@ -947,7 +963,7 @@ KNOWN_KEYWORDS = {
     "IMAGES": "Parallelization over images",
     "PARTIAL_DOS": "Partial DOS",
     "RTA": "Relaxation-time approximation",
-    "DOS": "electronic DOS calculations",
+    "DOS": "Electronic DOS calculations",
     "STS": "STS calculations",
     "CTQMC": "CTQMC method for DMFT",
     "ETSF_IO": "Tests using ETSF-IO library",
@@ -960,7 +976,7 @@ KNOWN_KEYWORDS = {
     "PBE0": "PBE0 calculations",
     "cRPA": "RPA for correlated electrons.",
     "FAILS_IFMPI": "Tests failing if MPI is used",
-    'NVT': "(N,V,T) ensemble",
+    'NVT': "MD calculations with (N,V,T) ensemble",
     'ELASTIC': "Calculations of elastic constants",
     'INTERNAL_STRAIN': "Calculations of internal strain",
     'DFT-D3(BJ)': "DFT-D3 dispersion correction",
@@ -975,4 +991,44 @@ KNOWN_KEYWORDS = {
     "FOLD2BLOCH": "Fold2Bloch tests.",
     "LWF": "Lattice Wannier function tests",
     "MINIMAL": "Quick set of tests covering all abinit optdriver and executables",
+    'CC4S': "Interface betwee Abinit and CC4S code",
+    'CRPA': "Tests related to Constrained RPA",
+    'ConstrainedDFT': "Tests related to constrained DFT",
+    'EPH_OLD': "Legacy python-based EPH code for the ZPR",
+    'FATBANDS': "Computation of FATBANDS",
+    'GWR': "GW in real space and imaginary time.",
+    'Gruneisen': "Computation of Gruneisen parameters",
+    'HPC': "High-performance computing",
+    'IBTE': "Iterative Boltzmann Transport Equation",
+    'LONGWAVE': "Tests related to the longwave driver",
+    'LRUJ': "Computation of U/J with linear response",
+    'POSCAR': "Tests showing how to read POSCAR files in Abinit",
+    'POSITRON': "Positron calculation",
+    'PSML': "Tests using pseudos in PSML format",
+    'PSP8': "Tests using pseudos in PSP8 format",
+    'RMM-DIIS': "Tests using the RMM-DIIS eigenvalue solver.",
+    'TRIQS': "Interface between Abinit and TRIQS",
+    'UPF2': "Tests using pseudos in UPF2 format",
+    'Wannier90': "Interface between Abinit and Wannier90",
+    '2d-cutoff': "Coulomb cutoff for 2d materials",
+    'non-collinear': "Non-collinear magnetism",
+    'metaGGA': "Tests using metaGGA functionals",
+    'ext-fpmd': "Extended FPMD for high temperature calculations",
+    'z2pack': "Interface with z2pack",
+    'libxc': "Tests using libxc functionals",
+    'MD': "Molecular dynamics",
+    'NEB': "Nudged Elastic Band Method",
+    'CPRJ': "Tests related to the internal treatment of CPRJ projections.",
+    'LDA': "Tests using LDA",
+    "MD-MonteCarlo": "Hybrid Monte Carlo Sampling for NPT ensemble",
+    "LWF": "Lattice Wannier functions.",
+    'NONLINEAR': "Nonlinear response function calculations",
+    'spinpot': "Spin dynamics with multibinit",
+    'lattpot': "Lattice dynamics with multibinit",
+    'effpot': "Effective potentila with multibinit",
+    'Effective potential': "Effective potentila with multibinit",
+    'linear-electro-optical': "Computation of linear electro-optical coefficients",
+    'DDB_TO_NC': "Conversion of DDB file from text to netcdf and viceversa",
+    'ddb_interpolation': "Interpolation of DDB files in q-space.",
+    'pSIC': "Tests related to the polaron self-interaction correction method."
 }
