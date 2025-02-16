@@ -313,10 +313,10 @@ module m_varpeq
    ! Required to distinguish between newly created and loaded-from-disk datatype
 
    logical :: restart = .False.
-   ! Flag to check if a restart from a *VARPEQ.nc file is needed
+   ! Flag to check if a restart from a *VPQ.nc file is needed
 
    logical :: interp = .False.
-   ! Flag to check if an interpolation from a *VARPEQ.nc file is needed
+   ! Flag to check if an interpolation from a *VPQ.nc file is needed
 
    logical :: ld_flag = .False.
    ! Flag indicating if internal variables have been loaded from source
@@ -435,7 +435,7 @@ module m_varpeq
     ! Initialize object
 
     procedure :: load => varpeq_load
-    ! Load the initial electronic vector from a *VARPEQ.nc netcdf file
+    ! Load the initial electronic vector from a *VPQ.nc netcdf file
 
     procedure :: solve => varpeq_solve
     ! Solve variational polaron equations at each polaronic state for each spin
@@ -450,10 +450,10 @@ module m_varpeq
     ! Output SCF optimization final results
 
     procedure :: ncwrite => varpeq_ncwrite
-    ! Save results to a *VARPEQ.nc netcdf file
+    ! Save results to a *VPQ.nc netcdf file
 
     procedure :: ncread => varpeq_ncread
-    ! Initialize an incomplete object from a *VARPEQ.nc netcdf file
+    ! Initialize an incomplete object from a *VPQ.nc netcdf file
 
     procedure :: compare => varpeq_compare
     ! Compare basic dimensions with another instance of varpeq_t datatype
@@ -483,7 +483,7 @@ contains !=====================================================================
 !!
 !! FUNCTION
 !!  Higher-level subroutine that solves varitaional polaron equations, produces
-!!  neccessary output and writes results to a *VARPEQ.nc file.
+!!  neccessary output and writes results to a *VPQ.nc file.
 !!
 !! INPUTS
 !!  gstore<gstore_t>=Electron-phonon matrix elements and related quantities.
@@ -651,10 +651,10 @@ end subroutine varpeq_compare
 !!  varpeq_ncread
 !!
 !! FUNCTION
-!!  Reads basic dimensions of varpeq_t datatype from a *VARPEQ.nc netcdf file.
+!!  Reads basic dimensions of varpeq_t datatype from a *VPQ.nc netcdf file.
 !!
 !! INPUTS
-!!  path=Path a *VARPEQ.nc file to be read.
+!!  path=Path a *VPQ.nc file to be read.
 !!  comm=MPI communicator.
 !!  keep_open [optional]=if .True. keep the nc file handle open for further
 !!    reading. Default: .False.
@@ -680,7 +680,7 @@ subroutine varpeq_ncread(self, path, comm, keep_open)
 
  call cwtime(cpu, wall, gflops, "start")
 
- ABI_CHECK(file_exists(path), sjoin(" varpeq_ncread: cannot find *VARPEQ.nc file", path))
+ ABI_CHECK(file_exists(path), sjoin(" varpeq_ncread: cannot find *VPQ.nc file", path))
 
  NCF_CHECK(nctk_open_read(ncid, path, comm))
 
@@ -762,7 +762,7 @@ end subroutine varpeq_ncread
 !!  varpeq_ncwrite
 !!
 !! FUNCTION
-!!  Dump varpeq variables in a newly created *VARPEQ.nc netcdf file.
+!!  Dump varpeq variables in a newly created *VPQ.nc netcdf file.
 !!
 !! INPUTS
 !!  dtset<dataset_type>=All input variables for this dataset.
@@ -794,7 +794,7 @@ subroutine varpeq_ncwrite(self, dtset, dtfil)
 
  ! Create netcdf file (only master works, HDF5 + MPI-IO can be handled after
  ! by reopening the file inside ncwrite_comm)
- path = strcat(dtfil%filnam_ds(4), "_VARPEQ.nc")
+ path = strcat(dtfil%filnam_ds(4), "_VPQ.nc")
  if (my_rank == master) then
    ! Master creates the netcdf file used to store the data.
    NCF_CHECK(nctk_open_create(self%ncid, path, xmpi_comm_self))
@@ -1093,7 +1093,7 @@ end subroutine varpeq_collect
 !!
 !! FUNCTION
 !!  Load and (optionally) interpolate the initial electronic vector A_nk from
-!!  a *VARPEQ.nc netcdf file. Store result in the self%a_spin variable.
+!!  a *VPQ.nc netcdf file. Store result in the self%a_spin variable.
 !!
 !! INPUTS
 !!  dtfil<datafiles_types>=Variables related to files.
@@ -1737,7 +1737,7 @@ end subroutine polstate_free
 !!  Setup optimization process at a given polaronic state.
 !!  This routine specfifies an initial electronic vector A_nk, either by
 !!  initializaing it by a pre-determined algorithm or loading from a
-!!  *VARPEQ.nc netcdf file.
+!!  *VPQ.nc netcdf file.
 !!
 !! INPUTS
 !!  ip=Index of the polaronic state.
