@@ -381,7 +381,7 @@ def main():
     options, suite_args = parser.parse_args()
 
     if options.show_info:
-        abitests.show_info()
+        abitests.show_info(verbose=options.verbose)
         return 0
 
     # loglevel is bound to the string value obtained from the command line argument.
