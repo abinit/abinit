@@ -36,7 +36,7 @@ module m_invars2
  use defs_datatypes, only : pspheader_type
  use m_time,      only : timab
  use m_fstrings,  only : sjoin, itoa, ltoa, tolower, toupper
- use m_symtk,     only : matr3inv
+ use m_matrix,    only : matr3inv
  use m_parser,    only : intagm, intagm_img
  use m_geometry,  only : mkrdim, metric
  use m_gsphere,   only : setshells
@@ -1373,11 +1373,11 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getgam_eig2nkq',tread,'INT')
  if(tread==1) dtset%getgam_eig2nkq=intarr(1)
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getvarpeq',tread,'INT')
- if(tread==1) dtset%getvarpeq=intarr(1)
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getvpq',tread,'INT')
+ if(tread==1) dtset%getvpq=intarr(1)
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getvarpeq_filepath',tread,'KEY', key_value=key_value)
- if(tread==1) dtset%getvarpeq_filepath = key_value
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getvpq_filepath',tread,'KEY', key_value=key_value)
+ if(tread==1) dtset%getvpq_filepath = key_value
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getwfq',tread,'INT')
  if(tread==1) dtset%getwfq=intarr(1)

@@ -29,7 +29,8 @@ module m_dtset
 
  use m_fstrings,     only : inupper
  use m_numeric_tools,only : arth
- use m_symtk,        only : mati3inv, littlegroup_q, symatm
+ use m_matrix,       only : mati3inv
+ use m_symtk,        only : littlegroup_q, symatm
  use m_symkpt,       only : symkpt
  use m_geometry,     only : mkrdim, metric, littlegroup_pert, irreducible_set_pert
  use m_parser,       only : intagm, chkvars_in_string
@@ -250,7 +251,7 @@ type, public :: dataset_type
  integer :: getqps = 0
  integer :: getscr = 0
  integer :: getsuscep = 0
- integer :: getvarpeq = 0
+ integer :: getvpq = 0
  integer :: getvel = 0
  integer :: getwfk = 0
  integer :: getwfkfine = 0
@@ -1075,7 +1076,7 @@ type, public :: dataset_type
  character(len=fnlen) :: getpot_filepath = ABI_NOFILE
  character(len=fnlen) :: getscr_filepath = ABI_NOFILE
  character(len=fnlen) :: getsigeph_filepath = ABI_NOFILE
- character(len=fnlen) :: getvarpeq_filepath = ABI_NOFILE
+ character(len=fnlen) :: getvpq_filepath = ABI_NOFILE
  character(len=fnlen) :: getgstore_filepath = ABI_NOFILE
  character(len=fnlen) :: getabiwan_filepath = ABI_NOFILE
  character(len=fnlen) :: getgwan_filepath = ABI_NOFILE
@@ -1706,7 +1707,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%getkden            = dtin%getkden
  dtout%getocc             = dtin%getocc
  dtout%getpawden          = dtin%getpawden
- dtout%getvarpeq          = dtin%getvarpeq
+ dtout%getvpq          = dtin%getvpq
  dtout%getddb_filepath    = dtin%getddb_filepath
  dtout%getden_filepath    = dtin%getden_filepath
  dtout%getdvdb_filepath   = dtin%getdvdb_filepath
@@ -1717,7 +1718,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%getabiwan_filepath = dtin%getabiwan_filepath
  dtout%getgwan_filepath   = dtin%getgwan_filepath
  dtout%getscr_filepath    = dtin%getscr_filepath
- dtout%getvarpeq_filepath = dtin%getvarpeq_filepath
+ dtout%getvpq_filepath = dtin%getvpq_filepath
  dtout%getwfk_filepath    = dtin%getwfk_filepath
  dtout%getwfkfine_filepath= dtin%getwfkfine_filepath
  dtout%getwfq_filepath    = dtin%getwfq_filepath
@@ -3522,7 +3523,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' getabiwan getabiwan_filepath getgwan getgwan_filepath'
  list_vars=trim(list_vars)//' getqps getscr getscr_filepath'
  list_vars=trim(list_vars)//' getwfkfine getwfkfine_filepath getsuscep'
- list_vars=trim(list_vars)//' getvarpeq getvarpeq_filepath'
+ list_vars=trim(list_vars)//' getvpq getvpq_filepath'
  list_vars=trim(list_vars)//' getvel getwfk getwfk_filepath getwfq getwfq_filepath getxcart getxred'
  list_vars=trim(list_vars)//' get1den get1wf goprecon goprecprm'
  list_vars=trim(list_vars)//' gpu_devices gpu_kokkos_nthrd gpu_linalg_limit gpu_nl_distrib'

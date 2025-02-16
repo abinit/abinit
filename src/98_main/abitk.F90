@@ -43,7 +43,7 @@ program abitk
  use m_fstrings,       only : sjoin, strcat, basename, itoa
  use m_io_tools,       only : open_file, enforce_fortran_io
  use m_specialmsg,     only : herald
- use m_symtk,          only : matr3inv
+ use m_matrix,         only : matr3inv
  use m_numeric_tools,  only : arth
  use m_bz_mesh,        only : kpath_new, kpath_t
  use m_unittests,      only : tetra_unittests, kptrank_unittests, tetra_zinv_convergence

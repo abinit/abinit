@@ -51,7 +51,7 @@ module m_effective_potential
  use m_fstrings,       only : replace, ftoa, itoa
  use m_io_tools,       only : open_file, get_unit
  use m_dtfil,          only : isfile
- use m_symtk,          only : matr3inv
+ use m_matrix,         only : matr3inv
  use m_effpot_mpi,     only : effpot_mpi_init,effpot_mpi_type,effpot_mpi_free
  use m_abihist,        only : abihist
  use m_geometry,       only : gred2fcart,fcart2gred, xcart2xred, xred2xcart, metric

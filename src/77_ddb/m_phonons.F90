@@ -42,7 +42,8 @@ module m_phonons
  use m_krank
 
  use m_fstrings,        only : itoa, ftoa, sjoin, ltoa, ktoa, strcat, basename, replace
- use m_symtk,           only : matr3inv
+ use m_matrix,          only : matr3inv
+ use m_symtk,           only : sg_multable
  use m_time,            only : cwtime, cwtime_report
  use m_io_tools,        only : open_file
  use m_geometry,        only : mkrdim, symredcart, normv, phdispl_cart2red
@@ -3573,8 +3574,6 @@ end subroutine phstore_wait
 !!  comm= MPI communicator
 
 subroutine test_phrotation(ifc, cryst, qptopt, ngqpt, comm)
-
- use m_symtk, only : sg_multable
 
 !Arguments ------------------------------------
  type(ifc_type),intent(in) :: ifc

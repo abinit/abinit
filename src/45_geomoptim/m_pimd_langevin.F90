@@ -27,7 +27,7 @@ module m_pimd_langevin
  use m_pimd
  use m_random_zbq
 
- use m_symtk,     only : matr3inv
+ use m_matrix,    only : matr3inv
  use m_geometry,  only : xcart2xred, xred2xcart
 
 

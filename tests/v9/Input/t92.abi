@@ -52,7 +52,7 @@ pseudos = "Al.LDA-PW-paw.xml"
 #%% max_nprocs = 4
 #%% [extra_info]
 #%% authors = A. Blanchet
-#%% keywords = extended, high, temperature, fpmd, ext, dft, fermi, gas, plasma, WDM
+#%% keywords = ext-fpmd
 #%% description =
 #%%   Check Extended FPMD routines with low number of bands for
 #%%   Aluminum FCC lattice at high temperature.

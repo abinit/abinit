@@ -34,7 +34,7 @@ module m_fstab
  use m_time,           only : cwtime, cwtime_report
  use m_fstrings,       only : itoa, sjoin, ktoa
  use m_numeric_tools,  only : bisect
- use m_symtk,          only : matr3inv
+ use m_matrix,         only : matr3inv
  use m_special_funcs,  only : gaussian
  use m_kpts,           only : kpts_timrev_from_kptopt, smpbz, kpts_map
 
