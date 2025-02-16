@@ -67,8 +67,7 @@ module m_forstr
  use m_mkffnl,           only : mkffnl
  use m_mpinfo,           only : proc_distrb_cycle
  use m_nonlop,           only : nonlop
- use m_gemm_nonlop_projectors,  only : gemm_nonlop_use_gemm, &
-&                               gemm_nonlop_ikpt_this_proc_being_treated
+ use m_gemm_nonlop_projectors, only : set_gemm_nonlop_ikpt, gemm_nonlop_use_gemm
  use m_fock_getghc,      only : fock_getghc
  use m_prep_kgb,         only : prep_nonlop
  use m_paw_nhat,         only : pawmknhat
@@ -836,14 +835,13 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 
      call timab(922,1,tsec)
 
+     my_ikpt=mpi_enreg%my_kpttab(ikpt)
 !    Parallelism over FFT and/or bands: define sizes and tabs
      if (mpi_enreg%paral_kgb==1) then
-       my_ikpt=mpi_enreg%my_kpttab(ikpt)
        nblockbd=nband_k/(mpi_enreg%nproc_band*mpi_enreg%bandpp)
        bandpp=mpi_enreg%bandpp
        my_bandfft_kpt => bandfft_kpt(my_ikpt)
      else
-       my_ikpt=ikpt
        bandpp=mpi_enreg%bandpp
        nblockbd=nband_k/bandpp
      end if
@@ -1019,7 +1017,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 
 !    Setup gemm_nonlop
      if (gemm_nonlop_use_gemm) then
-       gemm_nonlop_ikpt_this_proc_being_treated = my_ikpt
+       call set_gemm_nonlop_ikpt(my_ikpt)
      end if
 
      if (usexg==1) then

@@ -33,7 +33,6 @@ module m_dfpt_nstwf
  use m_nctk
  use m_dtset
  use m_dtfil
- use m_gemm_nonlop_projectors
  use m_abi_linalg
 
  use defs_datatypes, only : pseudopotential_type
@@ -41,6 +40,7 @@ module m_dfpt_nstwf
  use m_time,     only : timab
  use m_io_tools, only : file_exists
  use m_fourier_interpol, only : transgrid
+ use m_gemm_nonlop_projectors, only : set_gemm_nonlop_ikpt, gemm_nonlop_use_gemm
  use m_geometry, only : stresssym
  use m_dynmat,   only : dfpt_sygra
  use m_mpinfo,   only : destroy_mpi_enreg, initmpi_seq, proc_distrb_cycle, proc_distrb_band, proc_distrb_nband
@@ -1207,8 +1207,7 @@ has_vectornd = (with_vectornd .EQ. 1)
 
            ! Setup gemm_nonlop
            if (gemm_nonlop_use_gemm) then
-             !set the global variable indicating to gemm_nonlop where to get its data from
-             gemm_nonlop_ikpt_this_proc_being_treated = ikpt
+             call set_gemm_nonlop_ikpt(ikpt)
            end if ! gemm_nonlop_use_gemm
 
 !          Extract ground state projected WF and derivatives in idir1 direction
