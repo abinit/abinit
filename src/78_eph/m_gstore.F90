@@ -1204,10 +1204,6 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, nproc_spin, comm_spin)
    gqk%glob_nk = gstore%glob_nk_spin(spin)
  end do
 
- write(std_out, *) "gstore_nkibz", gstore%nkibz
- write(std_out, *) "gstore_nqibz", gstore%nqibz
- write(std_out, *) "gstore_npert", gstore%cryst%natom * 3
-
  do my_is=1,gstore%my_nspins
    spin = gstore%my_spins(my_is); gqk => gstore%gqk(my_is)
 
