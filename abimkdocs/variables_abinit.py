@@ -24674,7 +24674,7 @@ equations optimization results.
 
 This variable can be used when [[eph_task]] == 13 i.e. when we solve the variational
 polaron equations.
-In this case, if [[eph_restart]] / [[varpeq_interp]] == 1, the code assumes we want to
+In this case, if [[eph_restart]] / [[vpq_interp]] == 1, the code assumes we want to
 initialize the solution by restarting/interpolating from the solution available in
 the VARPEQ.nc file.
 
@@ -24700,7 +24700,7 @@ instead of the filepath.
 ),
 
 Variable(
-    abivarname="varpeq_aseed",
+    abivarname="vpq_aseed",
     varset="eph",
     vartype="string",
     topics=['Polaron_basic'],
@@ -24722,14 +24722,14 @@ Possible values:
     $$A_{n\mathbf{k}} \sim e^{-\frac{(\varepsilon_{n\mathbf{k}} - \mu)^2}{2\sigma^2}}.$$
 
   The mean value $\mu$ and the standard deviation $\sigma$ are defined by the
-  [[varpeq_gpr_energy]] variable.
+  [[vpq_gpr_energy]] variable.
 
 - "gau_length" --> Gaussian based on the user-defined polaron localization lengths
   $a_x$, $a_y$, $a_z$:
 
     $$A_{n\mathbf{k}} \sim e^{-\frac{1}{2}(a^2_x k^2_x + a^2_y k^2_y + a^2_z k^2_z)}.$$
 
-  The value of the localization lenghts are defined by the [[varpeq_gpr_length]] variable.
+  The value of the localization lenghts are defined by the [[vpq_gpr_length]] variable.
   This option is still under development.
 
 - "random" --> Random initialization.
@@ -24741,7 +24741,7 @@ Possible values:
 
 
 Variable(
-    abivarname="varpeq_pkind",
+    abivarname="vpq_pkind",
     varset="eph",
     vartype="string",
     topics=['Polaron_basic'],
@@ -24780,7 +24780,7 @@ Possible values:
 
 
 Variable(
-    abivarname="varpeq_avg_g",
+    abivarname="vpq_avg_g",
     varset="eph",
     vartype="integer",
     topics=['Polaron_basic'],
@@ -24803,19 +24803,19 @@ The spherical mesh for the integration is controlled by the [[eph_frohl_ntheta]]
 
 Three scenarios are possible:
 
-- [[eph_frohl_ntheta]] == 0, [[varpeq_avg_g]] == 0
+- [[eph_frohl_ntheta]] == 0, [[vpq_avg_g]] == 0
 
 No integration of the electron-phonon energy, and variational polaron equations
 are solved without $g^\mathrm{avg}_\nu(0)$ corrections.
 
-- [[eph_frohl_ntheta]] > 0, [[varpeq_avg_g]] == 0
+- [[eph_frohl_ntheta]] > 0, [[vpq_avg_g]] == 0
 
 Integration of the electron-phonon energy is performed, and variational polaron
 equations are solved without $g^\mathrm{avg}_\nu(0)$ corrections.
 In this scenario, the integrated energy can be added a posteriori to the optimized
 polaron binding energy to account for the long-range effects.
 
-- [[eph_frohl_ntheta]] > 0, [[varpeq_avg_g]] != 0
+- [[eph_frohl_ntheta]] > 0, [[vpq_avg_g]] != 0
 
 Integration of the electron-phonon energy is performed, and variational polaron
 equations are solved with $g^\mathrm{avg}_\nu(0)$ corrections.
@@ -24826,7 +24826,7 @@ This option is expected to accelerate the convergence of the optimization proces
 
 
 Variable(
-    abivarname="varpeq_interp",
+    abivarname="vpq_interp",
     varset="eph",
     vartype="integer",
     topics=['Polaron_basic'],
@@ -24851,7 +24851,7 @@ and accelarate the convergence.
 
 
 Variable(
-    abivarname="varpeq_nstates",
+    abivarname="vpq_nstates",
     varset="eph",
     vartype="integer",
     topics=['Polaron_basic'],
@@ -24872,18 +24872,18 @@ previously found states during the optimization process.
     first solution is expected to reach the required tolerance during optimization.
     Imposing the orthogonalisation constraint, however, helps to find "metastable"
     polarons that are far away from the obtained polaronic configurations.
-    One then can use other features, e.g. [[varpeq_select]] or [[varpeq_nstep_ort]]
+    One then can use other features, e.g. [[vpq_select]] or [[vpq_nstep_ort]]
     to fully converge a "metastable" state without any constraints.
 
     Also, a single polaronic solution is invariant by primitive translations in a
     supercell.
-    In order to eliminiate such trivial solutions, [[varpeq_translate]] variable
+    In order to eliminiate such trivial solutions, [[vpq_translate]] variable
     can be used.
 """,
 ),
 
 Variable(
-    abivarname="varpeq_nstep",
+    abivarname="vpq_nstep",
     varset="eph",
     vartype="integer",
     topics=['Polaron_basic'],
@@ -24900,7 +24900,7 @@ variational polaron equations.
 
 
 Variable(
-    abivarname="varpeq_select",
+    abivarname="vpq_select",
     varset="eph",
     vartype="integer",
     topics=['Polaron_basic'],
@@ -24912,14 +24912,14 @@ Variable(
     text=r"""
 If non-zero, this variable selects a single polaronic state to be optimized from
 a **pre-existing** VARPEQ.nc file.
-Requires [[eph_restart]] == 1 or [[varpeq_interp]] == 1.
-Also, since a single polaronic state is selected, [[varpeq_nstates]] must be 1 in the
+Requires [[eph_restart]] == 1 or [[vpq_interp]] == 1.
+Also, since a single polaronic state is selected, [[vpq_nstates]] must be 1 in the
 input file.
 """,
 ),
 
 Variable(
-    abivarname="varpeq_mesh_fact",
+    abivarname="vpq_mesh_fact",
     varset="eph",
     vartype="integer",
     topics=['Polaron_basic'],
@@ -24935,14 +24935,14 @@ This is especially useful when computing the VARPEQ equations on extra-dense k-m
 the KERANGE trick.
 The size of the array with polaron wavefunction is indeed proportional to nkbz * nfft where
 nkbz is the number of points in the full BZ and nfft is the number of FFT points in the unit.
-This is the default behaviour when [[varpeq_mesh_fact]] is 1.
-If [[varpeq_mesh_fact]] is greater the one, the mesh in real space will be downsampled by this value along the three reduced
+This is the default behaviour when [[vpq_mesh_fact]] is 1.
+If [[vpq_mesh_fact]] is greater the one, the mesh in real space will be downsampled by this value along the three reduced
 direction with a significant decrease in the memory requirements.
 """,
 ),
 
 Variable(
-    abivarname="varpeq_tolgrs",
+    abivarname="vpq_tolgrs",
     varset="eph",
     vartype="real",
     topics=['Polaron_basic'],
@@ -24955,83 +24955,83 @@ Variable(
 This variable sets a tolerance for the electronic gradient residual in the optimization
 of the varitional polaron equations.
 When reached, the iterative process will finish for a current polaronic state and move
-to the next one, up to [[varpeq_nstates]].
+to the next one, up to [[vpq_nstates]].
 """,
 ),
 
 
 Variable(
-    abivarname="varpeq_gpr_energy",
+    abivarname="vpq_gpr_energy",
     varset="eph",
     vartype="real",
     topics=['Polaron_basic'],
     dimensions="(2)",
     defaultval=[0, 1],
     mnemonics="VARiational Polaron EQuations: Gaussian PaRameters -- electronic ENERGY",
-    requires='[[eph_task]] == 13 and [[varpeq_aseed]] == "gau_energy"',
+    requires='[[eph_task]] == 13 and [[vpq_aseed]] == "gau_energy"',
     added_in_version="10.1.4",
     text=r"""
-If [[varpeq_aseed]] == "gau_energy", this variable defines the mean value and the
-standard deviation [[varpeq_gpr_energy]](:) = $\mu$, $\sigma$ for the Gaussian function to
+If [[vpq_aseed]] == "gau_energy", this variable defines the mean value and the
+standard deviation [[vpq_gpr_energy]](:) = $\mu$, $\sigma$ for the Gaussian function to
 be used as initial seed for the vector electronic coefficients.
-See [[varpeq_aseed]] for details.
+See [[vpq_aseed]] for details.
 """,
 ),
 
 
 Variable(
-    abivarname="varpeq_gpr_length",
+    abivarname="vpq_gpr_length",
     varset="eph",
     vartype="real",
     topics=['Polaron_basic'],
     dimensions="(3)",
     defaultval=[1, 1, 1],
     mnemonics="VARiational Polaron EQuations: Gaussian PaRameters -- localization LENGTH",
-    requires='[[eph_task]] == 13 and [[varpeq_aseed]] == "gau_length"',
+    requires='[[eph_task]] == 13 and [[vpq_aseed]] == "gau_length"',
     added_in_version="10.1.4",
     text=r"""
-If [[varpeq_aseed]] == "gau_length", this variable defines the estimated polaron
+If [[vpq_aseed]] == "gau_length", this variable defines the estimated polaron
 localization lengths $a_x$, $a_y$, $a_z$ for the spread of gaussian function to be used
 as initial seed for the vector electronic coefficients.
-See [[varpeq_aseed]] for details.
+See [[vpq_aseed]] for details.
 """,
 ),
 
 Variable(
-    abivarname="varpeq_translate",
+    abivarname="vpq_translate",
     varset="eph",
     vartype="integer",
     topics=['Polaron_basic'],
     dimensions="scalar",
     defaultval=0,
     mnemonics="VARiational Polaron EQuations: TRANSLATE solutions",
-    requires='[[eph_task]] == 13 and [[varpeq_nstates]] > 1',
+    requires='[[eph_task]] == 13 and [[vpq_nstates]] > 1',
     added_in_version="10.1.4",
     text=r"""
-If non-zero and [[varpeq_nstates]] > 1, this variable activates the translation
+If non-zero and [[vpq_nstates]] > 1, this variable activates the translation
 of previously obtained polaronic solutions prior to solving variational polaron
 equations for a new one.
 This helps to eliminate trivial states that are invariant by primitie translations.
-See also [[varpeq_nstates]].
+See also [[vpq_nstates]].
 """,
 ),
 
 Variable(
-    abivarname="varpeq_nstep_ort",
+    abivarname="vpq_nstep_ort",
     varset="eph",
     vartype="integer",
     topics=['Polaron_basic'],
     dimensions="scalar",
     defaultval=50,
     mnemonics="VARiational Polaron EQuations: Number of STEPs with ORThogonalisation",
-    requires='[[eph_task]] == 13 and [[varpeq_nstates]] > 1',
+    requires='[[eph_task]] == 13 and [[vpq_nstates]] > 1',
     added_in_version="10.1.4",
     text=r"""
 This variable defines the number of optimization steps, up to which the orthogonalization
 to previous polaronic solutions is performed.
-After [[varpeq_nstep_ort]] the orthogonalization constraint is lifted, which helps to
+After [[vpq_nstep_ort]] the orthogonalization constraint is lifted, which helps to
 fully relax the polaron, while keeping it far from the previously obtained states.
-See also [[varpeq_nstates]].
+See also [[vpq_nstates]].
 """,
 ),
 
