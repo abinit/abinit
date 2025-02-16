@@ -49,7 +49,7 @@ module m_dfpt_scfcv
  use m_mpinfo
  use m_kg,       only : getcut, mkkin, kpgstr, mkkpg
  use m_fft,      only : fftpac, fourdp
- use m_symtk,     only : mati3inv
+ use m_matrix,    only : mati3inv
  use m_dynmat,    only : dfpt_sygra
  use m_occ,         only : occeig
  use m_paw_mkrho,   only : pawmkrho

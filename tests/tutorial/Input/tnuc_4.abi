@@ -84,5 +84,7 @@ pseudos="Ne.xml"
 #%% authors = J. Zwanziger
 #%% keywords = PAW
 #%% description =
+#%%   example of orbmag calculation of chemical shielding. system is
+#%%   Ne atom at center of an empty box.
 #%% topics = NMR, DFPT
 #%%<END TEST_INFO>

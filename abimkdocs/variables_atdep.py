@@ -463,4 +463,20 @@ Defines the reduced coordinates of atoms in the UNITCELL.
 """,
 ),
 
+Variable(
+    abivarname="znucl@atdep",
+    varset="atdep",
+    vartype="float",
+    topics=['aTDEP_basic'],
+    dimensions=['[[atdep:natom]]'],
+    defaultval="[[atdep:natom]]*0",
+    mnemonics="charge -Z- of the NUCLeus",
+    added_in_version="10.1.4",
+    text="""
+OPTIONAL: Gives nuclear charge for each type of atom, in order.
+Within atep, this variable is only used when writing the DDB file.
+""",
+),
+
+
 ]

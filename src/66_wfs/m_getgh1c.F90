@@ -2450,7 +2450,7 @@ subroutine getgh1c_mGGA(cwavein,dkinpw,gbound_k,gh1c_mGGA,gprimd,idir,istwf_k,kg
 
     if (nspinor2TreatedByThisProc) then
 
-      ABI_MALLOC(ghc2,(2,npw_k*ndat))
+      !ABI_MALLOC(ghc2,(2,npw_k*ndat))
 
       ! call fourwf(1,vxctaulocal(:,:,:,:,1+idir),cwavein2,ghc2,work,gbound_k,gbound_k,&
       !   & istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&

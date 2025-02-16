@@ -393,7 +393,6 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    end if
 
 !  boxcutmin
-   call chkdpr(0,0,cond_string,cond_values,ierr,'dilatmx',dt%dilatmx,1,zero,iout)
 !  if(response==1)then
 !    cond_string(1)='response' ; cond_values(1)=response
 !    call chkdpr(1,1,cond_string,cond_values,ierr,'boxcutmin',dt%boxcutmin,1,two,iout)

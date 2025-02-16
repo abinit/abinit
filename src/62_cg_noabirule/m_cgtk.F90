@@ -29,7 +29,7 @@ module m_cgtk
 
  use m_fstrings,  only : itoa, sjoin
  use defs_abitypes, only : MPI_type
- use m_symtk,     only : mati3inv
+ use m_matrix,    only : mati3inv
  use m_geometry,  only : getspinrot
  use m_crystal,   only : crystal_t
  use m_fftcore,   only : sphere

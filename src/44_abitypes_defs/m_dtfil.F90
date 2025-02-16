@@ -187,9 +187,9 @@ module m_dtfil
    ! Filename used to read GWAN.nc file.
    ! Initialize via getgwan_filepath
 
-  character(len=fnlen) :: filvarpeqin
-   ! Filename used to read VARPEQ.nc file.
-   ! Initialize via getvarpeq_filepath
+  character(len=fnlen) :: filvpqin
+   ! Filename used to read VPQ.nc file.
+   ! Initialize via getvpq_filepath
 
   character(len=fnlen) :: filstat
    ! tmp//'_STATUS'
@@ -391,6 +391,7 @@ module m_dtfil
   character(len=fnlen) :: fnameabo_app_pot
   character(len=fnlen) :: fnameabo_app_opt
   character(len=fnlen) :: fnameabo_app_opt2
+  character(len=fnlen) :: fnameabo_app_orbmag
   character(len=fnlen) :: fnameabo_app_stm
   character(len=fnlen) :: fnameabo_app_vclmb
   character(len=fnlen) :: fnameabo_app_vha
@@ -656,11 +657,11 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
                  getpath=dtset%getgwan_filepath)
  if (will_read == 0) dtfil%filgwanin = ABI_NOFILE
 
- ! According to getvarpeq_filepath, build _VARPEQ file name
- stringfile='_VARPEQ.nc'; stringvar='varpeq'
- call mkfilename(filnam, dtfil%filvarpeqin, dtset%getvarpeq, idtset, 0, jdtset_, ndtset, stringfile, stringvar, will_read, &
-                 getpath=dtset%getvarpeq_filepath)
- if (will_read == 0) dtfil%filvarpeqin = ABI_NOFILE
+ ! According to getvpq_filepath, build _VPQ file name
+ stringfile='_VPQ.nc'; stringvar='vpq'
+ call mkfilename(filnam, dtfil%filvpqin, dtset%getvpq, idtset, 0, jdtset_, ndtset, stringfile, stringvar, will_read, &
+                 getpath=dtset%getvpq_filepath)
+ if (will_read == 0) dtfil%filvpqin = ABI_NOFILE
 
  ! According to getden, build _DEN file name, referred as fildensin
  ! A default is available if getden is 0
@@ -1061,6 +1062,7 @@ subroutine dtfil_init_time(dtfil,iapp)
  dtfil%fnameabo_app_nesting=trim(filapp)//'_NEST'
  dtfil%fnameabo_app_opt=trim(filapp)//'_OPT'
  dtfil%fnameabo_app_opt2=trim(filapp)//'_OPT2'
+ dtfil%fnameabo_app_orbmag=trim(filapp)//'_ORBMAG'
  dtfil%fnameabo_app_pawden=trim(filapp)//'_PAWDEN'
  dtfil%fnameabo_app_pot=trim(filapp)//'_POT'
  dtfil%fnameabo_app_stm=trim(filapp)//'_STM'
