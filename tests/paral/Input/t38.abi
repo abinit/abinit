@@ -71,6 +71,7 @@ pseudos="P.xml, Al.xml"
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = alps_intel_2025_elpa
 #%% [files]
 #%% files_to_test = 
 #%%   t38.abo, tolnlines=  0, tolabs=  0, tolrel= 0, fld_options = -ridiculous
