@@ -22894,7 +22894,7 @@ In the first case, the code will look for a **pre-existing** SIGEPH.nc file and 
 Note that the restart in done **in-place** that is the output SIGEPH.nc is used as input of the calculation so there is no
 need to specify getsigeph or irdsigeph input variables.
 
-In the second case, the code will look for a **pre-existing** VARPEQ.nc file and continue the optimization
+In the second case, the code will look for a **pre-existing** VPQ.nc file and continue the optimization
 process from the last iteration available in the netcdf file.
 
 !!! note
@@ -24659,24 +24659,24 @@ Set to 1, an *input* DRHODB file will be read. See also [[getdrhodb]]
 ),
 
 Variable(
-    abivarname="getvarpeq_filepath",
+    abivarname="getvpq_filepath",
     varset="eph",
     vartype="string",
     topics=['Polaron_basic'],
     dimensions="scalar",
     defaultval=None,
-    mnemonics="GET the VARPEQ.nc from FILEPATH",
+    mnemonics="GET the VPQ.nc from FILEPATH",
     requires="[[eph_task]] in [13, -13]",
     added_in_version="10.1.4",
     text=r"""
-This variable defines the path of the VARPEQ.nc file with the variational polaron
+This variable defines the path of the VPQ.nc file with the variational polaron
 equations optimization results.
 
 This variable can be used when [[eph_task]] == 13 i.e. when we solve the variational
 polaron equations.
 In this case, if [[eph_restart]] / [[vpq_interp]] == 1, the code assumes we want to
 initialize the solution by restarting/interpolating from the solution available in
-the VARPEQ.nc file.
+the VPQ.nc file.
 
 If [[eph_task]] == -13, the variable is required to produce *.xsf files containing
 polaronic wavefunction and induced displacements that can be visualized with VESTA or Xcrysden.
@@ -24684,17 +24684,17 @@ polaronic wavefunction and induced displacements that can be visualized with VES
 ),
 
 Variable(
-    abivarname="getvarpeq",
+    abivarname="getvpq",
     varset="eph",
     vartype="int",
     topics=['Polaron_basic'],
     dimensions="scalar",
     defaultval=None,
-    mnemonics="GET the VARPEQ.nc from dataset",
+    mnemonics="GET the VPQ.nc from dataset",
     requires="[[eph_task]] in [13, -13]",
     added_in_version="10.1.4",
     text=r"""
-This variable is similar in spirit to [[getvarpeq_filepath]] but uses the dataset index
+This variable is similar in spirit to [[getvpq_filepath]] but uses the dataset index
 instead of the filepath.
 """,
 ),
@@ -24838,7 +24838,7 @@ Variable(
     text=r"""
 If non-zero, this variable activates the interpolation of the initial guess for
 the electronic vector in the variational polaron equations.
-In this case, the code reads a pre-existing VARPEQ.nc file and performs a linear
+In this case, the code reads a pre-existing VPQ.nc file and performs a linear
 interpolation of $A_{n\mathbf{k}}$ provided the metadata found in the netcdf file
 is compatible with the input file.
 
@@ -24911,10 +24911,9 @@ Variable(
     added_in_version="10.1.4",
     text=r"""
 If non-zero, this variable selects a single polaronic state to be optimized from
-a **pre-existing** VARPEQ.nc file.
+a **pre-existing** VPQ.nc file.
 Requires [[eph_restart]] == 1 or [[vpq_interp]] == 1.
-Also, since a single polaronic state is selected, [[vpq_nstates]] must be 1 in the
-input file.
+Also, since a single polaronic state is selected, [[vpq_nstates]] must be 1 in the input file.
 """,
 ),
 
@@ -24931,7 +24930,7 @@ Variable(
     text=r"""
 This variable can used to reduce the density of the real-space mesh used to represent the
 polaron wavefunction and generate the XSF file when [[eph_task]] == -13.
-This is especially useful when computing the VARPEQ equations on extra-dense k-meshes in conjunction with the
+This is especially useful when computing the variational polaron equations on extra-dense k-meshes in conjunction with the
 the KERANGE trick.
 The size of the array with polaron wavefunction is indeed proportional to nkbz * nfft where
 nkbz is the number of points in the full BZ and nfft is the number of FFT points in the unit.

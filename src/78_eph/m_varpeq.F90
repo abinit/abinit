@@ -1136,7 +1136,7 @@ subroutine varpeq_load(self, dtfil, pselect)
 
  ! Read A_nk from file. Only the master processor reads, then broadcasts the data
  if (my_rank == master) then
-   call vpq_ld%ncread(dtfil%filvarpeqin, xmpi_comm_self, keep_open=.False.)
+   call vpq_ld%ncread(dtfil%filvpqin, xmpi_comm_self, keep_open=.False.)
 
    ! Consitency check
    call self%compare(vpq_ld, bz_mismatch=self%interp)
@@ -3126,7 +3126,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
  my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)
 
  ! Read A_nk and B_qnu and other useful tables from file
- call vpq%ncread(dtfil%filvarpeqin, comm, keep_open=.False.)
+ call vpq%ncread(dtfil%filvpqin, comm, keep_open=.False.)
  !call wrtout(std_out, " Reading done")
 
  ! Copy important dimensions
