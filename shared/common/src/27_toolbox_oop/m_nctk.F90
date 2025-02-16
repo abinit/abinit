@@ -52,7 +52,7 @@ MODULE m_nctk
  character(len=*),public,parameter :: etsfio_file_format = "ETSF Nanoquanta"
  character(len=*),public,parameter :: etsfio_conventions = "http://www.etsf.eu/fileformats/"
 
- integer,public,parameter :: etsfio_charlen = 80
+ integer,public,parameter :: etsfio_charlen = abi_slen
  ! The value corresponding to character_string_len
 
  real,public,parameter :: etsfio_version = 3.3
