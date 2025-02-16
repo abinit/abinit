@@ -167,8 +167,8 @@ module m_gstore
 
  private
 
- character(len=fnlen),public,parameter :: GSTORE_GMODE_ATOM   = "atom"
- character(len=fnlen),public,parameter :: GSTORE_GMODE_PHONON = "phonon"
+ character(len=abi_slen),public,parameter :: GSTORE_GMODE_ATOM   = "atom"
+ character(len=abi_slen),public,parameter :: GSTORE_GMODE_PHONON = "phonon"
 
  ! Rank of the MPI Cartesian grid.
  integer,private,parameter :: ndims = 6
@@ -414,16 +414,16 @@ type, public :: gstore_t
 
   character(len=fnlen) :: wfk0_path = " "
 
-  character(len=fnlen) :: kzone = " ", qzone = " "
+  character(len=abi_slen) :: kzone = " ", qzone = " "
    ! Specifies whether k- or q-points are in the BZ or in the IBZ.
    ! Possible values are "ibz" or "bz".
    ! Note that the combination ("ibz", "ibz") is not allowed.
 
-  character(len=fnlen) :: kfilter = "none"
+  character(len=abi_slen) :: kfilter = "none"
   ! Specifies the tecnique used to filter k-points.
   ! Possible values: "none", "fs_tetra", "erange", "qprange"
 
-  character(len=fnlen) :: gmode = "none"
+  character(len=abi_slen) :: gmode = "none"
 
   real(dp),allocatable :: erange_spin(:, :)
   ! (2, nsppol)
@@ -908,10 +908,10 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
      nctkarr_t("gstore_qbz", "dp", "three, gstore_nqbz"), &
      nctkarr_t("gstore_wtq", "dp", "gstore_nqibz"), &
      nctkarr_t("gstore_kbz", "dp", "three, gstore_nkbz"), &
-     nctkarr_t("gstore_kzone", "c", "fnlen"), &
-     nctkarr_t("gstore_qzone", "c", "fnlen"), &
-     nctkarr_t("gstore_kfilter", "c", "fnlen"), &
-     nctkarr_t("gstore_gmode", "c", "fnlen"), &
+     nctkarr_t("gstore_kzone", "c", "character_string_length"), &
+     nctkarr_t("gstore_qzone", "c", "character_string_length"), &
+     nctkarr_t("gstore_kfilter", "c", "character_string_length"), &
+     nctkarr_t("gstore_gmode", "c", "character_string_length"), &
      nctkarr_t("gstore_wfk0_path", "c", "fnlen"), &
      nctkarr_t("gstore_brange_spin", "i", "two, number_of_spins"), &
      nctkarr_t("gstore_erange_spin", "dp", "two, number_of_spins"), &
@@ -1203,6 +1203,10 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, nproc_spin, comm_spin)
    gqk%glob_nq = gstore%glob_nq_spin(spin)
    gqk%glob_nk = gstore%glob_nk_spin(spin)
  end do
+
+ write(std_out, *) "gstore_nkibz", gstore%nkibz
+ write(std_out, *) "gstore_nqibz", gstore%nqibz
+ write(std_out, *) "gstore_npert", gstore%cryst%natom * 3
 
  do my_is=1,gstore%my_nspins
    spin = gstore%my_spins(my_is); gqk => gstore%gqk(my_is)
@@ -3164,7 +3168,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 !scalars
  integer,parameter :: tim_getgh1c = 1, berryopt0 = 0, ider0 = 0, idir0 = 0, LOG_MODQ = 5
  integer,parameter :: master = 0, ndat1 = 1
- integer :: my_rank,nproc,mband,nsppol,nkibz,idir,ipert, iq_bz
+ integer :: my_rank,nproc,nproc_lim,mband,nsppol,nkibz,idir,ipert, iq_bz
  integer :: cplex,natom,natom3,ipc,nspinor, nskip_tetra_kq
  integer :: bstart_k,bstart_kq,nband_k,nband_kq,band_k, in_k, im_kq !ib1,ib2, band_kq,
  integer :: ik_ibz,ikq_ibz,isym_k,isym_kq,trev_k,trev_kq
@@ -3201,6 +3205,22 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:)
  type(pawcprj_type),allocatable  :: cwaveprj0(:,:)
 !************************************************************************
+
+ ! Check MPI distribution: abort if there are any idle processes
+ ! NOTE that we have to perform this check only at the level of gstore%compute:
+ ! if gstore object is loaded from a *GSTORE.nc file, there are no calls to individual
+ ! phonons/electrons distribution, hence k/q-iBZ is not a limiting factor anymore
+ do my_is=1,gstore%my_nspins
+   gqk => gstore%gqk(my_is)
+   nproc = xmpi_comm_size(gqk%comm%value)
+   nproc_lim = min(gstore%nkibz, gstore%nqibz)
+   if (nproc > nproc_lim) then
+      write(msg, "(a,i0,a,i0,4a)") "gstore%compute: nproc=", nproc, " > min(nkibz, nqibz)=", &
+        nproc_lim, ch10, "This will lead to idle processes, which are not supported.", ch10, &
+        "Please decrese the total number of CPUs."
+      ABI_ERROR(msg)
+   endif
+ enddo
 
  units = [std_out, ab_out]
 
