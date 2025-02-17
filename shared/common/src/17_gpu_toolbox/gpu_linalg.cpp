@@ -1,7 +1,7 @@
 /* gpu_linalg.cpp */
 
 /*
- * Copyright (C) 2008-2024 ABINIT Group (MSarraute)
+ * Copyright (C) 2008-2025 ABINIT Group (MSarraute)
  * this file is distributed under the terms of the
  * gnu general public license, see ~abinit/COPYING
  * or http://www.gnu.org/copyleft/gpl.txt .
