@@ -7,7 +7,7 @@
 !!  in order to initialize pspheads(1:npsp).
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, FrD, AF, MT, FJ, MJV, MG, DRH)
+!!  Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, FrD, AF, MT, FJ, MJV, MG, DRH)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
