@@ -639,8 +639,8 @@ subroutine opernla_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,&
      if(ndgxdt>0 .and. cpopt<=3) then
        call opernla_gemm_distributed(rank,nprocs,npw,ndat,nspinor,&
        &                             ndgxdt*nprojs,&
-       &                             nprojs_blk,&
-       &                             nprojs_last_blk,&
+       &                             ndgxdt*nprojs_blk,&
+       &                             ndgxdt*nprojs_last_blk,&
        &                             ndgxdt*nprojs_my_blk,cplex,cone,&
        &                             dprojs_i,&
        &                             temp_realvec,dgxdt,gpu_option)

@@ -1154,7 +1154,7 @@ contains
       !$OMP TARGET ENTER DATA MAP(alloc:dprojs_r_tmp,dprojs_i_tmp) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
       dprojs_r_ => dprojs_r_tmp
-      dprojs_i_ => dprojs_r_tmp
+      dprojs_i_ => dprojs_i_tmp
     end if
   end if
 
