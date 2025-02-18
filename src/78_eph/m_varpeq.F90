@@ -512,11 +512,13 @@ subroutine varpeq_run(gstore, dtset, dtfil)
  call wrtout(units, sjoin(ch10, " === Variational Polaron Equations ==="))
 
  call vpq%init(gstore, dtset)
- call vpq%print_metadata(dtset)
-
  if (vpq%frohl_ntheta > 0) call vpq%calc_fravg(avg_g0=vpq%g0_flag)
  if (vpq%interp .or. vpq%restart) call vpq%load(dtfil, dtset%vpq_select)
+
+ call vpq%print_metadata(dtset)
+
  call vpq%solve()
+
  call vpq%print_results()
  call vpq%ncwrite(dtset, dtfil)
  call vpq%free()
@@ -794,8 +796,11 @@ subroutine varpeq_ncwrite(self, dtset, dtfil)
  integer :: my_rank, ncid, ncerr
  real(dp) :: cpu, wall, gflops
  real(dp), ABI_CONTIGUOUS pointer :: rpt_d5(:,:,:,:,:)
+ integer :: units(2)
 
 !----------------------------------------------------------------------
+
+ units = [std_out, ab_out]
 
  call cwtime(cpu, wall, gflops, "start")
 
@@ -805,6 +810,9 @@ subroutine varpeq_ncwrite(self, dtset, dtfil)
  ! by reopening the file inside ncwrite_comm)
  path = strcat(dtfil%filnam_ds(4), "_VPQ.nc")
  if (my_rank == master) then
+
+   call wrtout(units, sjoin(ch10, sjoin("Saving results to:", path)))
+
    ! Master creates the netcdf file used to store the data.
    NCF_CHECK(nctk_open_create(self%ncid, path, xmpi_comm_self))
    ncid = self%ncid
@@ -948,17 +956,27 @@ subroutine varpeq_print_metadata(self, dtset)
    call entry_("BvK supercell", msg)
    call entry_("Number of independent spin polarizations", itoa(self%nsppol))
    call entry_("Number of polaronic states", itoa(self%nstates))
-   call entry_("Long-range Frohlich correction", yesno(self%frohl_ntheta > 0))
    call entry_("Filtering of electronic states", yesno(self%use_filter))
    if (self%use_filter) then
      do spin=1,self%nsppol
-        !write(msg, '(a,i0,a,i0)') "Energy filter wrt band edge for spin ", &
-        !  spin, "/", self%nsppol
-       !call entry_(msg, sjoin(ftoa(self%erange_spin(spin)*Ha_eV, "es8.2"), "eV"))
+       write(msg, '(a,i0,a,i0)') "Energy filter wrt band edge for spin ", &
+         spin, "/", self%nsppol
+       call entry_(msg, sjoin(ftoa(self%erange_spin(spin)*Ha_eV, "es8.2"), "eV"))
      enddo
    endif
 
+   call title_("Long-range corrections:")
+   call entry_("Frohlich correction", yesno(self%frohl_ntheta > 0))
+   if (self%frohl_ntheta > 0) then
+     call entry_("Frohlich correction value", sjoin(ftoa(self%e_frohl*Ha_eV), "eV"))
+     call entry_("Frohlich correction included in matrix elements", yesno(self%g0_flag))
+   endif
+
    call title_("Optimization parameters:")
+
+   ! TODO change this once a support for starting from B is added
+   call entry_("Initial seed", "charge localization A_nk")
+   call entry_("Initial seed type", strseed())
 
    call entry_("Tolerance on the gradient norm", ftoa(self%tolgrs, "es8.2"))
    call entry_("Maximum number of iterations per state", itoa(self%nstep))
@@ -983,6 +1001,27 @@ subroutine varpeq_print_metadata(self, dtset)
    write(output, '(a5,a,a2,a)') "* ", trim(name), ": ", trim(val)
    call wrtout(units, output)
  end subroutine entry_
+
+ character(len=abi_slen) function strseed()
+   select case(self%aseed)
+   case ("gau_energy")
+     write(strseed, *) "Gaussian, based on the electroic energies"
+   case ("gau_length")
+     write(strseed, *) "Gaussian, based on the localizaiton length"
+   case ("random")
+     write(strseed, *) "random"
+   case ("even")
+     write(strseed, *) "even"
+   case default
+     write(strseed, *) "undefined"
+   end select
+
+   if (self%interp .or. self%restart) then
+     write(strseed, *) "loaded from file"
+   endif
+
+   strseed = adjustl(strseed)
+ end function
 
 end subroutine varpeq_print_metadata
 !!***
@@ -1012,7 +1051,6 @@ subroutine varpeq_print_results(self)
  character(len=5000) :: msg
  integer, parameter :: master = 0
  integer :: my_rank, spin, ip, ii
- real(dp) :: enpol, enel, enph, enelph, eps, grs
 !arrays
  integer :: units(2)
 
@@ -1022,50 +1060,95 @@ subroutine varpeq_print_results(self)
 
  units = [std_out, ab_out]
  if (my_rank == master) then
-   write(msg, '(a)') " "
-   call wrtout(units, msg)
-   !write(msg, '(a)') "  === Variational Polaron Equations ==="
-   call wrtout(units, msg)
-   write(msg, '(a)') repeat('-', 80)
-   call wrtout(units, msg)
-
-   ! For each spin, print the SCF history at each state
    do spin=1,self%gstore%nsppol
-     write(msg, '(a,i1,a,i1)') "  * spin: ", spin, "/", self%gstore%nsppol
-     call wrtout(units, msg)
-
-     write(msg,'(a4,a13,2a12,a13,a13,a13)') 'Step', 'E_pol', 'E_el', 'E_ph', &
-       'E_elph', 'epsilon', '||gradient||'
-     call wrtout(units, msg)
-
      do ip=1,self%nstates
-       write(msg, '(a,i2,a,i2)') "  * pstate: ", ip, "/", self%nstates
-       call wrtout(units, msg)
+       call header_(spin, ip)
 
        do ii=1,self%nstep2cv_spin(ip, spin)
-         enpol = self%scf_hist_spin(1, ii, ip, spin)
-         enel = self%scf_hist_spin(2, ii, ip, spin)
-         enph = self%scf_hist_spin(3, ii, ip, spin)
-         enelph = self%scf_hist_spin(4, ii, ip, spin)
-         eps = self%scf_hist_spin(5, ii, ip, spin)
-         grs = self%scf_hist_spin(6, ii, ip, spin)
+         call report_(spin, ip, ii, self%nstep2cv_spin(ip, spin))
 
-         write(msg,'(i4,es13.4,2es12.4,es13.4,es13.4,es13.4)') ii, enpol, enel, &
-           enph, enelph, eps, grs
-         call wrtout(units, msg)
        enddo
-       call wrtout(units, repeat('-', 80))
-       write(msg, '(a13,es17.8)') "  E_pol (eV):", enpol*Ha_eV
-       call wrtout(units, msg)
-       write(msg, '(a13,es17.8)') "  eps (eV):", eps*Ha_eV
-       call wrtout(units, msg)
-       call wrtout(units, repeat('-', 80))
      enddo
-     !write(msg, '(a)') repeat('-', 80)
-     !call wrtout(units, msg)
-
    enddo
  endif
+
+ contains
+ subroutine header_(spin, state)
+   integer, intent(in) :: spin, state
+   character(len=5000) :: sep
+
+   call wrtout(units, "")
+   if (state == 1) call wrtout(units, " Printing the optimization logs")
+
+   write(sep, "(a3,a)") "", repeat('-', 86)
+   write(msg, '(a5,a,i0,a,i0,a,i0,a,i0)') &
+     "* ", "spin ", spin, "/", self%nsppol, ", pstate ", state, "/", self%nstates
+
+   call wrtout(units, sep)
+   call wrtout(units, msg)
+   write(msg, '(a3,a)') "", "* values in the optimization log are in (a.u.)"
+   call wrtout(units, msg)
+
+   if (state > 1) then
+     write(msg, "(a3,a,i0)") "", "(o) - orthogonal all pstates < ", state
+     call wrtout(units, msg)
+   endif
+
+   call wrtout(units, sep)
+   write(msg, '(a3,a4,6a13,a5)') "", "Step", "E_pol", "E_el", "E_ph", "E_elph", &
+     "epsilon", "||grad||", ""
+   call wrtout(units, msg)
+ end subroutine header_
+
+ subroutine report_(spin, state, step, step2conv)
+   integer, intent(in) :: spin, state, step, step2conv
+   character(len=5000) :: sep
+   character(len=abi_slen) :: ort_flag
+   logical :: is_conv
+   real(dp) :: enpol, enel, enph, enelph, eps, grs
+
+   enpol = self%scf_hist_spin(1, step, state, spin)
+   enel = self%scf_hist_spin(2, step, state, spin)
+   enph = self%scf_hist_spin(3, step, state, spin)
+   enelph = self%scf_hist_spin(4, step, state, spin)
+   eps = self%scf_hist_spin(5, step, state, spin)
+   grs = self%scf_hist_spin(6, step, state, spin)
+
+   write(sep, "(a3,a)") "", repeat('-', 86)
+
+   ! for states > 1 add flag if orthogonalization is used
+   write(ort_flag, '(a)') ""
+   if ((ip > 1) .and. (step <= self%nstep_ort)) then
+     write(ort_flag, '(a)') "(o)"
+   endif
+
+   write(msg,'(a3,i4,6es13.4,a5)') &
+     "", step, enpol, enel, enph, enelph, eps, grs, trim(ort_flag)
+   call wrtout(units, msg)
+
+   if (step == step2conv) then
+
+     is_conv = (self%cvflag_spin(state, spin) == 1)
+     if (is_conv) then
+       write(msg, '(a3,a,es10.4,a,es10.4)') "", "Converged: ||grad||=", grs, &
+         " < vpq_tolgrs=", self%tolgrs
+     else
+       write(msg, '(a3,a,es10.4,a,es10.4)') "", "Unconverged: ||grad||=", grs, &
+         " > vpq_tolgrs=", self%tolgrs
+     endif
+
+     call wrtout(units, sep)
+     call wrtout(units, msg)
+
+     write(msg, '(a3,a,es17.8)') "", "E_pol (eV):", enpol*Ha_eV
+     call wrtout(units, msg)
+     write(msg, '(a3,a,es17.8)') "", "  eps (eV):", eps*Ha_eV
+     call wrtout(units, msg)
+
+     call wrtout(units, sep)
+
+   endif
+ end subroutine report_
 
 end subroutine varpeq_print_results
 !!***
@@ -1325,12 +1408,18 @@ subroutine varpeq_solve(self)
 
 !Local variables-------------------------------
  class(polstate_t), pointer :: polstate
- !logical :: ld_flag
+ character(len=5000) :: msg
  integer :: my_is, spin, ip, ii
  real(dp) :: grad_sqnorm
  real(dp) :: cpu, wall, gflops
+ integer :: units(2)
 
 !----------------------------------------------------------------------
+
+ units = [std_out, ab_out]
+
+ call wrtout(units, &
+   sjoin(ch10, "Solving the variational polaron equations for each state..."))
 
  call cwtime(cpu, wall, gflops, "start")
 
@@ -1341,6 +1430,11 @@ subroutine varpeq_solve(self)
    polstate => self%polstate(my_is)
 
    do ip=1,self%nstates
+
+     write(msg, '(a5,a,i0,a,i0,a,i0,a,i0,a)')  "* ", "spin ", spin, "/", &
+       self%nsppol, ", pstate ", ip, "/", self%nstates, "..."
+     call wrtout(units, msg)
+
      ! initialize A_nk at this state, orthogonalize to the previous ones
      ! and normalize
      call polstate%setup(ip, a_src=self%a_spin(:,:,ip,spin), load=self%ld_flag)
@@ -1375,6 +1469,7 @@ subroutine varpeq_solve(self)
        call polstate%update_a(ip)
 
      enddo
+     call wrtout(units, "   Done")
    enddo
  enddo
 
@@ -1428,10 +1523,10 @@ subroutine varpeq_record(self, iter, ip, my_is)
  enel = polstate%enterms(1, ip); enph = polstate%enterms(2, ip)
  enelph = polstate%enterms(3, ip); eps = polstate%enterms(4, ip)
 
- self%scf_hist_spin(1, iter, ip, spin) = psign*(enel + enph + enelph)
- self%scf_hist_spin(2, iter, ip, spin) = psign*enel
- self%scf_hist_spin(3, iter, ip, spin) = psign*enph
- self%scf_hist_spin(4, iter, ip, spin) = psign*enelph
+ self%scf_hist_spin(1, iter, ip, spin) = (enel + enph + enelph)
+ self%scf_hist_spin(2, iter, ip, spin) = enel
+ self%scf_hist_spin(3, iter, ip, spin) = enph
+ self%scf_hist_spin(4, iter, ip, spin) = enelph
  self%scf_hist_spin(5, iter, ip, spin) = psign*eps
  self%scf_hist_spin(6, iter, ip, spin) = polstate%gradres(ip)
  self%nstep2cv_spin(ip, spin) = iter
