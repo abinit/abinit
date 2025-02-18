@@ -59,7 +59,7 @@ module m_forstr
  use m_initylmg,         only : initylmg
  use m_xchybrid,         only : xchybrid_ncpp_cc
  use m_kg,               only : mkkpg
- use m_hamiltonian,      only : init_hamiltonian, gs_hamiltonian_type, gspot_transgrid_and_pack
+ use m_hamiltonian,      only : gs_hamiltonian_type, gs_hamiltonian_type, gspot_transgrid_and_pack !,K_H_KPRIME
  use m_electronpositron, only : electronpositron_type, electronpositron_calctype
  use m_bandfft_kpt,      only : bandfft_kpt, bandfft_kpt_type, prep_bandfft_tabs, &
 &                               bandfft_kpt_savetabs, bandfft_kpt_restoretabs
@@ -67,8 +67,7 @@ module m_forstr
  use m_mkffnl,           only : mkffnl
  use m_mpinfo,           only : proc_distrb_cycle
  use m_nonlop,           only : nonlop
- use m_gemm_nonlop_projectors,  only : gemm_nonlop_use_gemm, &
-&                               gemm_nonlop_ikpt_this_proc_being_treated
+ use m_gemm_nonlop_projectors, only : set_gemm_nonlop_ikpt, gemm_nonlop_use_gemm
  use m_fock_getghc,      only : fock_getghc
  use m_prep_kgb,         only : prep_nonlop
  use m_paw_nhat,         only : pawmknhat
@@ -766,7 +765,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
  end if
 
 !Initialize Hamiltonian (k-independent terms)
- call init_hamiltonian(gs_hamk,psps,pawtab,nspinor,nsppol,nspden,natom,&
+ call gs_hamk%init(psps,pawtab,nspinor,nsppol,nspden,natom,&
 & typat,xred,nfft,mgfft,ngfft,rprimd,nloalg,usecprj=usecprj_local,&
 & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab,&
 & paw_ij=paw_ij,ph1d=ph1d,electronpositron=electronpositron,fock=fock,&
@@ -836,14 +835,13 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 
      call timab(922,1,tsec)
 
+     my_ikpt=mpi_enreg%my_kpttab(ikpt)
 !    Parallelism over FFT and/or bands: define sizes and tabs
      if (mpi_enreg%paral_kgb==1) then
-       my_ikpt=mpi_enreg%my_kpttab(ikpt)
        nblockbd=nband_k/(mpi_enreg%nproc_band*mpi_enreg%bandpp)
        bandpp=mpi_enreg%bandpp
        my_bandfft_kpt => bandfft_kpt(my_ikpt)
      else
-       my_ikpt=ikpt
        bandpp=mpi_enreg%bandpp
        nblockbd=nband_k/bandpp
      end if
@@ -1019,7 +1017,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 
 !    Setup gemm_nonlop
      if (gemm_nonlop_use_gemm) then
-       gemm_nonlop_ikpt_this_proc_being_treated = my_ikpt
+       call set_gemm_nonlop_ikpt(my_ikpt)
      end if
 
      if (usexg==1) then
@@ -1752,7 +1750,7 @@ subroutine stress_mGGA(mggastr,cwavef,effmass_free,gbound_k,gprimd,istwf_k,kg_k,
  real(dp),allocatable :: weight_array(:),work(:,:,:,:)
  real(dp),pointer :: gcwavef_ndat(:,:,:,:),vtau_gcwavef_ndat(:,:,:,:)
  real(dp),pointer :: my_cwavef(:,:)
- 
+
 ! *********************************************************************
 
  if (nvtau/=1) then
@@ -1843,9 +1841,9 @@ subroutine stress_mGGA(mggastr,cwavef,effmass_free,gbound_k,gprimd,istwf_k,kg_k,
 &                 mpi_enreg%me_g0,mpi_enreg%comm_fft,gpu_option=gpu_option_)
      my_mggastr(mu)=my_mggastr(mu) + renorm_factor*sum(weight_array(1:ndat)*dotr(1:ndat))
    end do
- 
+
  end do ! ispinor
- 
+
 !Release memory
  if (nspinortot==2) then
    ABI_FREE(my_cwavef)
@@ -1857,7 +1855,7 @@ subroutine stress_mGGA(mggastr,cwavef,effmass_free,gbound_k,gprimd,istwf_k,kg_k,
 
 !Take into account MPI parallelism (bands, spinors)
  call xmpi_sum(my_mggastr,mpi_enreg%comm_bandspinor ,ierr)
- 
+
 !Final accumulation of stresses
  mggastr(1:6) = mggastr(1:6) + my_mggastr(1:6)
 

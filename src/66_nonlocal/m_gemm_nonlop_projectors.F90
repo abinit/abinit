@@ -63,6 +63,8 @@ module m_gemm_nonlop_projectors
 
  public :: init_gemm_nonlop
  public :: destroy_gemm_nonlop
+ public :: reset_gemm_nonlop
+ public :: set_gemm_nonlop_ikpt
  public :: prep_projectors
  public :: prep_dprojectors
  public :: refresh_projectors
@@ -536,13 +538,50 @@ contains
 
 !----------------------------------------------------------------------
 
+!!****f* m_gemm_nonlop_projectors/set_gemm_nonlop_ikpt
+!! NAME
+!! set_gemm_nonlop_ikpt
+!!
+!! FUNCTION
+!! Set the K-point upon which projectors will be computed
+!!
+!! INPUTS
+!! ikpt= K-point id
+!!
+!! SOURCE
  subroutine set_gemm_nonlop_ikpt(ikpt)
+
   integer,intent(in) :: ikpt
 
+! *************************************************************************
+
   gemm_nonlop_ikpt_this_proc_being_treated=ikpt
-  !call free_gemm_nonlop_ikpt(1, gpu_option)
-  !call free_gemm_nonlop_ikpt(2, gpu_option)
+
  end subroutine set_gemm_nonlop_ikpt
+!!***
+
+!!****f* m_gemm_nonlop_projectors/reset_gemm_nonlop
+!! NAME
+!! reset_gemm_nonlop
+!!
+!! FUNCTION
+!! Reset projectors to trigger their recomputation
+!!
+!! INPUTS
+!!
+!! SOURCE
+ subroutine reset_gemm_nonlop()
+
+! *************************************************************************
+
+  gemm_nonlop_kpt(:)%ikpt   = -1
+  gemm_nonlop_kpt(:)%choice = -1
+  gemm_nonlop_kpt(:)%idir   = -1
+
+ end subroutine reset_gemm_nonlop
+!!***
+
+!----------------------------------------------------------------------
 
 !!****f* m_gemm_nonlop_projectors/refresh_projectors
 !! NAME

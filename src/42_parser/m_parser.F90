@@ -26,9 +26,7 @@ module m_parser
  use m_errors
  use m_atomdata
  use m_xmpi
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
  use m_nctk
  !use m_nctk,      only : write_var_netcdf    ! FIXME Deprecated
 
@@ -217,14 +215,13 @@ subroutine parsefile(filnamin, lenstr, ndtset, string, comm)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: master=0, option1= 1
+ integer,parameter :: master = 0, option1 = 1
  integer :: marr,tread,lenstr_noxyz,ierr
  character(len=strlen) :: string_raw, string_with_comments
  character(len=500) :: msg
 !arrays
  integer :: intarr(1)
  real(dp) :: dprarr(1)
-
 ! *************************************************************************
 
  ! Read the input file, and store the information in a long string of characters
@@ -233,6 +230,8 @@ subroutine parsefile(filnamin, lenstr, ndtset, string, comm)
  if (xmpi_comm_rank(comm) == master) then
 
    ! strlen from defs_basis module
+   string = repeat(" ", strlen)
+   string_with_comments = repeat(" ", strlen)
    call instrng(filnamin, lenstr, option1, strlen, string, string_with_comments)
 
    ! Copy original file, without change of case
@@ -248,7 +247,7 @@ subroutine parsefile(filnamin, lenstr, ndtset, string, comm)
    ! Need string_raw to deal properly with xyz filenames
    ! TODO: This capabilty can now be implemented via the structure:"xyx:path" variable
    lenstr_noxyz = lenstr
-   call importxyz(lenstr,string_raw,string,strlen)
+   call importxyz(lenstr, string_raw, string, strlen)
 
    ! Make sure we don't have unmatched quotation marks
    if (mod(char_count(string(:lenstr), '"'), 2) /= 0) then
@@ -277,15 +276,22 @@ subroutine parsefile(filnamin, lenstr, ndtset, string, comm)
  end if
 
  ! Save input string in global variable so that we can access it in ntck_open_create
- ! XG20200720: Why not saving string ? string_raw is less processed than string ...
+ ! XG20200720: Why not saving string? string_raw is less processed than string ...
  ! MG: Because we don't want a processed string without comments.
  ! Abipy may use the commented section to extract additional metadata e.g. the pseudos md5
+
+ ! The Fortran compiler may limit the length of character string constants to a specific maximum e.g.
+ ! intel16 has a 7198 limit so we allocate INPUT_STRING here.
+ if (allocated(INPUT_STRING)) then
+   ABI_FREE_SCALAR(INPUT_STRING)
+ end if
+
+ ABI_MALLOC_TYPE_SCALAR(character(len=len_trim(string_with_comments)), INPUT_STRING)
  INPUT_STRING = trim(string_with_comments)
 
+ !write(std_out, *)"len_trim(string_with_comments):", len_trim(string_with_comments)
  !write(std_out,'(4a)')"string_with_comments", ch10, trim(string_with_comments), ch10
- !write(std_out,'(4a)')"INPUT_STRING", ch10, trim(INPUT_STRING), ch10
- !write(std_out,'(a)')string(:lenstr)
- !stop
+ !write(std_out,'(4a)')"INPUT_STRING", ch10, trim(INPUT_STRING), ch10; write(std_out,'(a)')string(:lenstr); stop
 
 end subroutine parsefile
 !!***
@@ -501,8 +507,7 @@ recursive subroutine instrng(filnam, lenstr, option, strln, string, raw_string)
  integer,intent(in) :: option,strln
  integer,intent(out) :: lenstr
  character(len=*),intent(in) :: filnam
- character(len=*),intent(out) :: string
- character(len=*),intent(out) :: raw_string
+ character(len=*),intent(out) :: string, raw_string
 
 !Local variables-------------------------------
  character :: blank=' '
@@ -3329,12 +3334,10 @@ subroutine prttagm(dprarr,intarr,iout,jdtset_,length,&
          if (narr_eff/=0) then
 
            if (print_out) write(iout,full_format) token,trim(appen),intarr(1:narr_eff,idtset)
-#ifdef HAVE_NETCDF
            if (print_netcdf) then
              call write_var_netcdf(intarr(1:narr_eff,idtset),&
 &             dprarr(1:narr_eff,idtset),marr,narr_eff,abs(ncid),typevarphys,token//appen)
            end if
-#endif
          end if
 
        end do
@@ -3468,12 +3471,10 @@ subroutine prttagm(dprarr,intarr,iout,jdtset_,length,&
            else
              if (print_out) write(iout,full_format) token,trim(appen),dprarr(1:narr_eff,idtset)*scale_factor,trim(out_unit)
            end if
-#ifdef HAVE_NETCDF
            if (print_netcdf) then
              call write_var_netcdf(intarr(1:narr_eff,idtset),dprarr(1:narr_eff,idtset),&
                marr,narr_eff,abs(ncid),'DPR',token//trim(appen))
            end if
-#endif
 
          end if
 
@@ -3716,13 +3717,11 @@ subroutine prttagm_images(dprarr_images,iout,jdtset_,length,&
                write(iout,full_format) &
 &               trim(keywd),appen,dprarr_images(1:narrm(idtset),iimage,idtset)
              end if
-#ifdef HAVE_NETCDF
              if (print_netcdf) then
                call write_var_netcdf(intarr_images(1:narrm(idtset),iimage,idtset),&
 &               dprarr_images(1:narrm(idtset),iimage,idtset),&
 &               marr,narrm(idtset),ncid,'DPR',trim(keywd)//appen)
              end if
-#endif
            else
 
              if (print_out) then
@@ -3731,14 +3730,11 @@ subroutine prttagm_images(dprarr_images,iout,jdtset_,length,&
                write(iout,full_format) &
 &               trim(keywd),dprarr_images(1:narrm(idtset),iimage,idtset)
              end if
-#ifdef HAVE_NETCDF
              if (print_netcdf) then
                call write_var_netcdf(intarr_images(1:narrm(idtset),iimage,idtset),&
 &               dprarr_images(1:narrm(idtset),iimage,idtset),&
 &               marr,narrm(idtset),abs(ncid),'DPR',trim(keywd))
              end if
-#endif
-
            end if
          end if
        end do
@@ -4382,7 +4378,6 @@ type(geo_t) function geo_from_netcdf_path(path, comm) result(new)
 
  new%fileformat = "netcdf"
 
-#ifdef HAVE_NETCDF
  if (xmpi_comm_rank(comm) == master) then
    NCF_CHECK(nctk_open_read(ncid, path, xmpi_comm_self))
 
@@ -4432,7 +4427,6 @@ type(geo_t) function geo_from_netcdf_path(path, comm) result(new)
 
    NCF_CHECK(nf90_close(ncid))
  end if
-#endif
 
  call new%bcast(master, comm)
  !call new%print_abivars(std_out)

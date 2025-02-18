@@ -11,7 +11,7 @@
 #***************
    natom 2
    ntypat 2
-   znucl 11 9 
+   znucl 11 9
    typat 1 2
 
 #SCF parameters
@@ -24,8 +24,8 @@
    pawecutdg 80.
 
    ecut  40.
-   kptopt 3 
-   ngkpt 2 2 2 
+   kptopt 3
+   ngkpt 2 2 2
    nshiftk 4
    shiftk 0.5 0.5 0.5
           0.5 0.0 0.0
@@ -57,7 +57,7 @@
 #%% [extra_info]
 #%% keywords = PAW, DFPT
 #%% authors =  P. Hermet
-#%% description = 
+#%% description =
 #%%   NaF Sodium Fluoride FCC (rocksalt structure) with 2 atoms per cell.
 #%%   Test computation of the Berry phase in PAW.
 #%%<END TEST_INFO>

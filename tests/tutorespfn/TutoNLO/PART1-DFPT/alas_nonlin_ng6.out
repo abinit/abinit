@@ -1,8 +1,8 @@
 
- Version 4.4.4  of ABINIT 
- (sequential version, prepared for a MacOSX computer) 
+ Version 4.4.4  of ABINIT
+ (sequential version, prepared for a MacOSX computer)
 
- Copyright (C) 1998-2004 ABINIT group . 
+ Copyright (C) 1998-2004 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
  Starting date : Fri 29 Apr 2005.
-  
+
 - input  file    -> alas_nonlin_ng6.in
 - output file    -> alas_nonlin_ng6.out
 - root for input  files -> alasi_nl
@@ -661,7 +661,7 @@ P newkpt: treating      5 bands with npw=     190 for ikpt=  25
 P newkpt: treating      5 bands with npw=     172 for ikpt=  26
 P newkpt: treating      5 bands with npw=     180 for ikpt=  27
 P newkpt: treating      5 bands with npw=     183 for ikpt=  28
- 
+
  setup2: Arith. and geom. avg. npw (full set) are     186.093     186.049
 
 ================================================================================
@@ -689,7 +689,7 @@ P newkpt: treating      5 bands with npw=     183 for ikpt=  28
   sigma(1 1)= -1.22633370E-09  sigma(3 2)=  0.00000000E+00
   sigma(2 2)= -1.22633370E-09  sigma(3 1)=  0.00000000E+00
   sigma(3 3)= -1.22633370E-09  sigma(2 1)=  0.00000000E+00
- 
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -757,7 +757,7 @@ P newkpt: treating      5 bands with npw=     183 for ikpt=  28
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
     1       0.000000000000      0.000000000000      0.000000000000
     2       0.000000000000      0.000000000000      0.000000000000
- 
+
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
     2      1.40754758212239     1.40754758212239     1.40754758212239
@@ -933,7 +933,7 @@ P newkpt: treating      5 bands with npw=     183 for ikpt=  28
 - newkpt: read input wf with ikpt,npw=  18     186, make ikpt,npw=  49     186
 - newkpt: read input wf with ikpt,npw=  13     186, make ikpt,npw=  50     186
 - newkpt : prtvol=0 or 1, do not print more k-points.
- 
+
 
 ================================================================================
  Non-SCF case, kpt    1 ( -0.08333 -0.16667  0.00000), residuals and eigenvalues=
@@ -1198,7 +1198,7 @@ P newkpt: treating      5 bands with npw=     183 for ikpt=  28
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
- 
+
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
     2      1.40754758212239     1.40754758212239     1.40754758212239
@@ -1381,7 +1381,7 @@ P newkpt: treating      4 bands with npw=     190 for ikpt=  48
 P newkpt: treating      4 bands with npw=     186 for ikpt=  49
 P newkpt: treating      4 bands with npw=     186 for ikpt=  50
   newkpt: prtvol=0 or 1, do not print more k-points.
- 
+
 
  ==>  initialize data related to q vector <==
 
@@ -1455,7 +1455,7 @@ P newkpt: treating      4 bands with npw=     190 for ikpt=  48
 P newkpt: treating      4 bands with npw=     186 for ikpt=  49
 P newkpt: treating      4 bands with npw=     186 for ikpt=  50
   newkpt: prtvol=0 or 1, do not print more k-points.
- 
+
 --------------------------------------------------------------------------------
 
 -inwffil : will read wavefunctions from disk file alaso_nl_DS2_WFK
@@ -1510,7 +1510,7 @@ P newkpt: treating      4 bands with npw=     190 for ikpt=  48
 P newkpt: treating      4 bands with npw=     186 for ikpt=  49
 P newkpt: treating      4 bands with npw=     186 for ikpt=  50
   newkpt: prtvol=0 or 1, do not print more k-points.
- 
+
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 P newkpt: treating      4 bands with npw=     174 for ikpt=   1
@@ -1564,7 +1564,7 @@ P newkpt: treating      4 bands with npw=     190 for ikpt=  48
 P newkpt: treating      4 bands with npw=     186 for ikpt=  49
 P newkpt: treating      4 bands with npw=     186 for ikpt=  50
   newkpt: prtvol=0 or 1, do not print more k-points.
- 
+
 
      iter   2DEtotal(Ha)       deltaE(Ha) residm    vres2
 -ETOT  1  -8.8294463693519    -8.829E+00 5.238E-01 0.000E+00
@@ -1866,7 +1866,7 @@ P newkpt: treating      4 bands with npw=     190 for ikpt=  48
 P newkpt: treating      4 bands with npw=     186 for ikpt=  49
 P newkpt: treating      4 bands with npw=     186 for ikpt=  50
   newkpt: prtvol=0 or 1, do not print more k-points.
- 
+
 --------------------------------------------------------------------------------
 
 -inwffil : will read wavefunctions from disk file alaso_nl_DS2_WFK
@@ -1921,7 +1921,7 @@ P newkpt: treating      4 bands with npw=     190 for ikpt=  48
 P newkpt: treating      4 bands with npw=     186 for ikpt=  49
 P newkpt: treating      4 bands with npw=     186 for ikpt=  50
   newkpt: prtvol=0 or 1, do not print more k-points.
- 
+
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 P newkpt: treating      4 bands with npw=     174 for ikpt=   1
@@ -1975,7 +1975,7 @@ P newkpt: treating      4 bands with npw=     190 for ikpt=  48
 P newkpt: treating      4 bands with npw=     186 for ikpt=  49
 P newkpt: treating      4 bands with npw=     186 for ikpt=  50
   newkpt: prtvol=0 or 1, do not print more k-points.
- 
+
 
      iter   2DEtotal(Ha)       deltaE(Ha) residm    vres2
 -ETOT  1  -8.8294464732055    -8.829E+00 5.238E-01 0.000E+00
@@ -2277,7 +2277,7 @@ P newkpt: treating      4 bands with npw=     190 for ikpt=  48
 P newkpt: treating      4 bands with npw=     186 for ikpt=  49
 P newkpt: treating      4 bands with npw=     186 for ikpt=  50
   newkpt: prtvol=0 or 1, do not print more k-points.
- 
+
 --------------------------------------------------------------------------------
 
 -inwffil : will read wavefunctions from disk file alaso_nl_DS2_WFK
@@ -2332,7 +2332,7 @@ P newkpt: treating      4 bands with npw=     190 for ikpt=  48
 P newkpt: treating      4 bands with npw=     186 for ikpt=  49
 P newkpt: treating      4 bands with npw=     186 for ikpt=  50
   newkpt: prtvol=0 or 1, do not print more k-points.
- 
+
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 P newkpt: treating      4 bands with npw=     174 for ikpt=   1
@@ -2386,7 +2386,7 @@ P newkpt: treating      4 bands with npw=     190 for ikpt=  48
 P newkpt: treating      4 bands with npw=     186 for ikpt=  49
 P newkpt: treating      4 bands with npw=     186 for ikpt=  50
   newkpt: prtvol=0 or 1, do not print more k-points.
- 
+
 
      iter   2DEtotal(Ha)       deltaE(Ha) residm    vres2
 -ETOT  1  -8.8294463036840    -8.829E+00 5.238E-01 0.000E+00
@@ -2721,7 +2721,7 @@ P newkpt: treating      4 bands with npw=     190 for ikpt=  48
 P newkpt: treating      4 bands with npw=     186 for ikpt=  49
 P newkpt: treating      4 bands with npw=     186 for ikpt=  50
   newkpt: prtvol=0 or 1, do not print more k-points.
- 
+
 
  ==>  initialize data related to q vector <==
 
@@ -2791,7 +2791,7 @@ P newkpt: treating      4 bands with npw=     190 for ikpt=  48
 P newkpt: treating      4 bands with npw=     186 for ikpt=  49
 P newkpt: treating      4 bands with npw=     186 for ikpt=  50
   newkpt: prtvol=0 or 1, do not print more k-points.
- 
+
 --------------------------------------------------------------------------------
 
 -inwffil : will read wavefunctions from disk file alaso_nl_DS2_WFK
@@ -2846,7 +2846,7 @@ P newkpt: treating      4 bands with npw=     190 for ikpt=  48
 P newkpt: treating      4 bands with npw=     186 for ikpt=  49
 P newkpt: treating      4 bands with npw=     186 for ikpt=  50
   newkpt: prtvol=0 or 1, do not print more k-points.
- 
+
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 P newkpt: treating      4 bands with npw=     174 for ikpt=   1
@@ -2900,7 +2900,7 @@ P newkpt: treating      4 bands with npw=     190 for ikpt=  48
 P newkpt: treating      4 bands with npw=     186 for ikpt=  49
 P newkpt: treating      4 bands with npw=     186 for ikpt=  50
   newkpt: prtvol=0 or 1, do not print more k-points.
- 
+
 
      iter   2DEtotal(Ha)       deltaE(Ha) residm    vres2
 -ETOT  1   6.9646411474401    -1.727E+01 1.905E-02 4.364E+02
@@ -3119,7 +3119,7 @@ P newkpt: treating      4 bands with npw=     190 for ikpt=  48
 P newkpt: treating      4 bands with npw=     186 for ikpt=  49
 P newkpt: treating      4 bands with npw=     186 for ikpt=  50
   newkpt: prtvol=0 or 1, do not print more k-points.
- 
+
 --------------------------------------------------------------------------------
 
 -inwffil : will read wavefunctions from disk file alaso_nl_DS2_WFK
@@ -3174,7 +3174,7 @@ P newkpt: treating      4 bands with npw=     190 for ikpt=  48
 P newkpt: treating      4 bands with npw=     186 for ikpt=  49
 P newkpt: treating      4 bands with npw=     186 for ikpt=  50
   newkpt: prtvol=0 or 1, do not print more k-points.
- 
+
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 P newkpt: treating      4 bands with npw=     174 for ikpt=   1
@@ -3228,7 +3228,7 @@ P newkpt: treating      4 bands with npw=     190 for ikpt=  48
 P newkpt: treating      4 bands with npw=     186 for ikpt=  49
 P newkpt: treating      4 bands with npw=     186 for ikpt=  50
   newkpt: prtvol=0 or 1, do not print more k-points.
- 
+
 
      iter   2DEtotal(Ha)       deltaE(Ha) residm    vres2
 -ETOT  1   39.268948956125    -5.202E+01 1.482E-01 8.541E+03
@@ -3448,7 +3448,7 @@ P newkpt: treating      4 bands with npw=     190 for ikpt=  48
 P newkpt: treating      4 bands with npw=     186 for ikpt=  49
 P newkpt: treating      4 bands with npw=     186 for ikpt=  50
   newkpt: prtvol=0 or 1, do not print more k-points.
- 
+
 --------------------------------------------------------------------------------
 
 -inwffil : will read wavefunctions from disk file alaso_nl_DS2_WFK
@@ -3503,7 +3503,7 @@ P newkpt: treating      4 bands with npw=     190 for ikpt=  48
 P newkpt: treating      4 bands with npw=     186 for ikpt=  49
 P newkpt: treating      4 bands with npw=     186 for ikpt=  50
   newkpt: prtvol=0 or 1, do not print more k-points.
- 
+
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 P newkpt: treating      4 bands with npw=     174 for ikpt=   1
@@ -3557,7 +3557,7 @@ P newkpt: treating      4 bands with npw=     190 for ikpt=  48
 P newkpt: treating      4 bands with npw=     186 for ikpt=  49
 P newkpt: treating      4 bands with npw=     186 for ikpt=  50
   newkpt: prtvol=0 or 1, do not print more k-points.
- 
+
 -loper3 : read the ddk wavefunctions from file: alaso_nl_DS3_1WF7
 
      iter   2DEtotal(Ha)       deltaE(Ha) residm    vres2
@@ -3764,7 +3764,7 @@ P newkpt: treating      4 bands with npw=     190 for ikpt=  48
 P newkpt: treating      4 bands with npw=     186 for ikpt=  49
 P newkpt: treating      4 bands with npw=     186 for ikpt=  50
   newkpt: prtvol=0 or 1, do not print more k-points.
- 
+
 --------------------------------------------------------------------------------
 
 -inwffil : will read wavefunctions from disk file alaso_nl_DS2_WFK
@@ -3819,7 +3819,7 @@ P newkpt: treating      4 bands with npw=     190 for ikpt=  48
 P newkpt: treating      4 bands with npw=     186 for ikpt=  49
 P newkpt: treating      4 bands with npw=     186 for ikpt=  50
   newkpt: prtvol=0 or 1, do not print more k-points.
- 
+
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 P newkpt: treating      4 bands with npw=     174 for ikpt=   1
@@ -3873,7 +3873,7 @@ P newkpt: treating      4 bands with npw=     190 for ikpt=  48
 P newkpt: treating      4 bands with npw=     186 for ikpt=  49
 P newkpt: treating      4 bands with npw=     186 for ikpt=  50
   newkpt: prtvol=0 or 1, do not print more k-points.
- 
+
 -loper3 : read the ddk wavefunctions from file: alaso_nl_DS3_1WF8
 
      iter   2DEtotal(Ha)       deltaE(Ha) residm    vres2
@@ -4076,7 +4076,7 @@ P newkpt: treating      4 bands with npw=     190 for ikpt=  48
 P newkpt: treating      4 bands with npw=     186 for ikpt=  49
 P newkpt: treating      4 bands with npw=     186 for ikpt=  50
   newkpt: prtvol=0 or 1, do not print more k-points.
- 
+
 --------------------------------------------------------------------------------
 
 -inwffil : will read wavefunctions from disk file alaso_nl_DS2_WFK
@@ -4131,7 +4131,7 @@ P newkpt: treating      4 bands with npw=     190 for ikpt=  48
 P newkpt: treating      4 bands with npw=     186 for ikpt=  49
 P newkpt: treating      4 bands with npw=     186 for ikpt=  50
   newkpt: prtvol=0 or 1, do not print more k-points.
- 
+
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 P newkpt: treating      4 bands with npw=     174 for ikpt=   1
@@ -4185,7 +4185,7 @@ P newkpt: treating      4 bands with npw=     190 for ikpt=  48
 P newkpt: treating      4 bands with npw=     186 for ikpt=  49
 P newkpt: treating      4 bands with npw=     186 for ikpt=  50
   newkpt: prtvol=0 or 1, do not print more k-points.
- 
+
 -loper3 : read the ddk wavefunctions from file: alaso_nl_DS3_1WF9
 
      iter   2DEtotal(Ha)       deltaE(Ha) residm    vres2
@@ -4343,12 +4343,12 @@ P newkpt: treating      4 bands with npw=     186 for ikpt=  50
 
 
  ==> Compute Derivative Database <==
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   1    1    5.5148281206    0.0000000000
    1    1   2    1    2.7574140603    0.0000000000
    1    1   3    1    2.7574140602    0.0000000000
@@ -4358,7 +4358,7 @@ P newkpt: treating      4 bands with npw=     186 for ikpt=  50
    1    1   1    4   -5.6211297748    0.0000000000
    1    1   2    4    0.0000000001    0.0000000000
    1    1   3    4    0.0000000001    0.0000000000
-  
+
    2    1   1    1    2.7574140603    0.0000000000
    2    1   2    1    5.5148281206    0.0000000000
    2    1   3    1    2.7574140604    0.0000000000
@@ -4368,7 +4368,7 @@ P newkpt: treating      4 bands with npw=     186 for ikpt=  50
    2    1   1    4    0.0000000000    0.0000000000
    2    1   2    4   -5.6211297038    0.0000000000
    2    1   3    4    0.0000000000    0.0000000000
-  
+
    3    1   1    1    2.7574140602    0.0000000000
    3    1   2    1    2.7574140604    0.0000000000
    3    1   3    1    5.5148281207    0.0000000000
@@ -4378,7 +4378,7 @@ P newkpt: treating      4 bands with npw=     186 for ikpt=  50
    3    1   1    4   -0.0000000001    0.0000000000
    3    1   2    4    0.0000000001    0.0000000000
    3    1   3    4   -5.6211297751    0.0000000000
-  
+
    1    2   1    1   -5.5148280452    0.0000000000
    1    2   2    1   -2.7574140286    0.0000000000
    1    2   3    1   -2.7574140286    0.0000000000
@@ -4388,7 +4388,7 @@ P newkpt: treating      4 bands with npw=     186 for ikpt=  50
    1    2   1    4  -44.6797542875    0.0000000000
    1    2   2    4    0.0000000000    0.0000000000
    1    2   3    4    0.0000000000    0.0000000000
-  
+
    2    2   1    1   -2.7574140210    0.0000000000
    2    2   2    1   -5.5148280452    0.0000000000
    2    2   3    1   -2.7574140242    0.0000000000
@@ -4398,7 +4398,7 @@ P newkpt: treating      4 bands with npw=     186 for ikpt=  50
    2    2   1    4    0.0000000000    0.0000000000
    2    2   2    4  -44.6797542220    0.0000000000
    2    2   3    4    0.0000000000    0.0000000000
-  
+
    3    2   1    1   -2.7574140219    0.0000000000
    3    2   2    1   -2.7574140166    0.0000000000
    3    2   3    1   -5.5148280408    0.0000000000
@@ -4408,7 +4408,7 @@ P newkpt: treating      4 bands with npw=     186 for ikpt=  50
    3    2   1    4    0.0000000000    0.0000000000
    3    2   2    4    0.0000000000    0.0000000000
    3    2   3    4  -44.6797542878    0.0000000000
-  
+
    1    4   1    1   -5.6211297960    0.0000000000
    1    4   2    1    0.0000000000    0.0000000000
    1    4   3    1   -0.0000000001    0.0000000000
@@ -4418,7 +4418,7 @@ P newkpt: treating      4 bands with npw=     186 for ikpt=  50
    1    4   1    4 -224.3269345182    0.0000000000
    1    4   2    4   74.7756447806    0.0000000000
    1    4   3    4   74.7756448387    0.0000000000
-  
+
    2    4   1    1    0.0000000017    0.0000000000
    2    4   2    1   -5.6211297038    0.0000000000
    2    4   3    1    0.0000000001    0.0000000000
@@ -4428,7 +4428,7 @@ P newkpt: treating      4 bands with npw=     186 for ikpt=  50
    2    4   1    4   74.7756448381    0.0000000000
    2    4   2    4 -224.3269343418    0.0000000000
    2    4   3    4   74.7756448387    0.0000000000
-  
+
    3    4   1    1    0.0000000007    0.0000000000
    3    4   2    1    0.0000000000    0.0000000000
    3    4   3    1   -5.6211297751    0.0000000000
@@ -4438,131 +4438,131 @@ P newkpt: treating      4 bands with npw=     186 for ikpt=  50
    3    4   1    4   74.7756448380    0.0000000000
    3    4   2    4   74.7756447806    0.0000000000
    3    4   3    4 -224.3269345123    0.0000000000
-  
-  
+
+
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   1    1    0.0974356956    0.0000000000
    1    1   2    1    0.0000000000    0.0000000000
    1    1   3    1    0.0000000000    0.0000000000
    1    1   1    2   -0.0974356947    0.0000000000
    1    1   2    2    0.0000000000    0.0000000000
    1    1   3    2    0.0000000000    0.0000000000
-  
+
    2    1   1    1    0.0000000000    0.0000000000
    2    1   2    1    0.0974356956    0.0000000000
    2    1   3    1    0.0000000000    0.0000000000
    2    1   1    2    0.0000000000    0.0000000000
    2    1   2    2   -0.0974356945    0.0000000000
    2    1   3    2    0.0000000000    0.0000000000
-  
+
    3    1   1    1    0.0000000000    0.0000000000
    3    1   2    1    0.0000000000    0.0000000000
    3    1   3    1    0.0974356956    0.0000000000
    3    1   1    2    0.0000000003    0.0000000000
    3    1   2    2    0.0000000000    0.0000000000
    3    1   3    2   -0.0974356945    0.0000000000
-  
+
    1    2   1    1   -0.0974356941    0.0000000000
    1    2   2    1    0.0000000000    0.0000000000
    1    2   3    1    0.0000000000    0.0000000000
    1    2   1    2    0.0974355882    0.0000000000
    1    2   2    2    0.0000000000    0.0000000000
    1    2   3    2    0.0000000001    0.0000000000
-  
+
    2    2   1    1    0.0000000000    0.0000000000
    2    2   2    1   -0.0974356943    0.0000000000
    2    2   3    1    0.0000000000    0.0000000000
    2    2   1    2    0.0000000000    0.0000000000
    2    2   2    2    0.0974355883    0.0000000000
    2    2   3    2    0.0000000000    0.0000000000
-  
+
    3    2   1    1   -0.0000000002    0.0000000000
    3    2   2    1    0.0000000000    0.0000000000
    3    2   3    1   -0.0974356943    0.0000000000
    3    2   1    2    0.0000000001    0.0000000000
    3    2   2    2    0.0000000000    0.0000000000
    3    2   3    2    0.0974355883    0.0000000000
-  
+
   Dielectric tensor, in cartesian coordinates,
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    4   1    4    9.9484608390    0.0000000000
    1    4   2    4   -0.0000000001    0.0000000000
    1    4   3    4   -0.0000000034    0.0000000000
-  
+
    2    4   1    4    0.0000000034    0.0000000000
    2    4   2    4    9.9484608426    0.0000000000
    2    4   3    4    0.0000000036    0.0000000000
-  
+
    3    4   1    4   -0.0000000035    0.0000000000
    3    4   2    4    0.0000000001    0.0000000000
    3    4   3    4    9.9484608392    0.0000000000
-  
+
   Effective charges, in cartesian coordinates,
-  (from electric field response) 
+  (from electric field response)
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   1    4    2.1053694162    0.0000000000
    2    1   1    4   -0.0000000057    0.0000000000
    3    1   1    4    0.0000000057    0.0000000000
    1    2   1    4   -2.1110037458    0.0000000000
    2    2   1    4   -0.0000000052    0.0000000000
    3    2   1    4    0.0000000052    0.0000000000
-  
+
    1    1   2    4    0.0000000000    0.0000000000
    2    1   2    4    2.1053694106    0.0000000000
    3    1   2    4    0.0000000000    0.0000000000
    1    2   2    4    0.0000000000    0.0000000000
    2    2   2    4   -2.1110037510    0.0000000000
    3    2   2    4    0.0000000000    0.0000000000
-  
+
    1    1   3    4    0.0000000056    0.0000000000
    2    1   3    4   -0.0000000056    0.0000000000
    3    1   3    4    2.1053694162    0.0000000000
    1    2   3    4    0.0000000052    0.0000000000
    2    2   3    4   -0.0000000052    0.0000000000
    3    2   3    4   -2.1110037458    0.0000000000
-  
+
   Effective charges, in cartesian coordinates,
-  (from phonon response) 
+  (from phonon response)
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    4   1    1    2.1053694160    0.0000000000
    2    4   1    1    0.0000000016    0.0000000000
    3    4   1    1    0.0000000072    0.0000000000
-  
+
    1    4   2    1   -0.0000000055    0.0000000000
    2    4   2    1    2.1053694089    0.0000000000
    3    4   2    1   -0.0000000072    0.0000000000
-  
+
    1    4   3    1    0.0000000059    0.0000000000
    2    4   3    1   -0.0000000016    0.0000000000
    3    4   3    1    2.1053694147    0.0000000000
-  
+
    1    4   1    2   -2.1110037459    0.0000000000
    2    4   1    2   -0.0000000015    0.0000000000
    3    4   1    2    0.0000000038    0.0000000000
-  
+
    1    4   2    2   -0.0000000052    0.0000000000
    2    4   2    2   -2.1110037496    0.0000000000
    3    4   2    2   -0.0000000038    0.0000000000
-  
+
    1    4   3    2    0.0000000053    0.0000000000
    2    4   3    2    0.0000000015    0.0000000000
    3    4   3    2   -2.1110037443    0.0000000000
-  
-  
-  
- 
+
+
+
+
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
   -7.522360E-07 -7.514525E-07 -7.511693E-07  1.641481E-03  1.641481E-03
@@ -4570,7 +4570,7 @@ P newkpt: treating      4 bands with npw=     186 for ikpt=  50
  Phonon frequencies in cm-1    :
 - -1.650967E-01 -1.649248E-01 -1.648626E-01  3.602635E+02  3.602635E+02
 -  3.602635E+02
- 
+
   Phonon at Gamma, with non-analyticity in the
   direction (cartesian coordinates)  1.00000  0.00000  0.00000
  Phonon energies in Hartree :
@@ -4579,7 +4579,7 @@ P newkpt: treating      4 bands with npw=     186 for ikpt=  50
  Phonon frequencies in cm-1    :
 - -1.649248E-01 -1.648886E-01  4.185068E-02  3.602635E+02  3.602635E+02
 -  3.931856E+02
- 
+
   Phonon at Gamma, with non-analyticity in the
   direction (cartesian coordinates)  0.00000  1.00000  0.00000
  Phonon energies in Hartree :
@@ -4588,7 +4588,7 @@ P newkpt: treating      4 bands with npw=     186 for ikpt=  50
  Phonon frequencies in cm-1    :
 - -1.650967E-01 -1.648626E-01  4.242367E-02  3.602635E+02  3.602635E+02
 -  3.931856E+02
- 
+
   Phonon at Gamma, with non-analyticity in the
   direction (cartesian coordinates)  0.00000  0.00000  1.00000
  Phonon energies in Hartree :
@@ -4695,7 +4695,7 @@ P newkpt: treating      4 bands with npw=     190 for ikpt=  48
 P newkpt: treating      4 bands with npw=     186 for ikpt=  49
 P newkpt: treating      4 bands with npw=     186 for ikpt=  50
   newkpt: prtvol=0 or 1, do not print more k-points.
- 
+
 
  getshell : finite difference formula of Marzari and Vanderbilt
             (see Marzari and Vanderbilt, PRB 56, 12847 (1997), Appendix B)
@@ -4754,7 +4754,7 @@ P newkpt: treating      4 bands with npw=     190 for ikpt=  48
 P newkpt: treating      4 bands with npw=     186 for ikpt=  49
 P newkpt: treating      4 bands with npw=     186 for ikpt=  50
   newkpt: prtvol=0 or 1, do not print more k-points.
- 
+
 -inwffil : will read wavefunctions from disk file alaso_nl_DS4_1WF10
 P newkpt: treating      4 bands with npw=     174 for ikpt=   1
 P newkpt: treating      4 bands with npw=     174 for ikpt=   2
@@ -4807,7 +4807,7 @@ P newkpt: treating      4 bands with npw=     190 for ikpt=  48
 P newkpt: treating      4 bands with npw=     186 for ikpt=  49
 P newkpt: treating      4 bands with npw=     186 for ikpt=  50
   newkpt: prtvol=0 or 1, do not print more k-points.
- 
+
 
  mv_3dte : finite difference expression of the k-point derivative
            is performed using the PEAD formulation of the third-order energy
@@ -4836,7 +4836,7 @@ P newkpt: treating      4 bands with npw=     186 for ikpt=  50
      xc     -0.722749301        0.000000000
      ddk   -26.993224671        0.000000000
      dft     0.021114968        0.000000000
- 
+
 
 
 
@@ -4850,7 +4850,7 @@ P newkpt: treating      4 bands with npw=     186 for ikpt=  50
      xc      0.361374651        0.000000000
      ddk    13.496612268        0.000000000
      dft    -0.010557632        0.000000000
- 
+
 
 -inwffil : will read wavefunctions from disk file alaso_nl_DS4_1WF11
 P newkpt: treating      4 bands with npw=     174 for ikpt=   1
@@ -4904,7 +4904,7 @@ P newkpt: treating      4 bands with npw=     190 for ikpt=  48
 P newkpt: treating      4 bands with npw=     186 for ikpt=  49
 P newkpt: treating      4 bands with npw=     186 for ikpt=  50
   newkpt: prtvol=0 or 1, do not print more k-points.
- 
+
 
  mv_3dte : finite difference expression of the k-point derivative
            is performed using the PEAD formulation of the third-order energy
@@ -4933,7 +4933,7 @@ P newkpt: treating      4 bands with npw=     186 for ikpt=  50
      xc      0.361374651        0.000000000
      ddk    13.496612392        0.000000000
      dft    -0.010557487        0.000000000
- 
+
 
 -inwffil : will read wavefunctions from disk file alaso_nl_DS4_1WF4
 P newkpt: treating      4 bands with npw=     174 for ikpt=   1
@@ -4987,7 +4987,7 @@ P newkpt: treating      4 bands with npw=     190 for ikpt=  48
 P newkpt: treating      4 bands with npw=     186 for ikpt=  49
 P newkpt: treating      4 bands with npw=     186 for ikpt=  50
   newkpt: prtvol=0 or 1, do not print more k-points.
- 
+
 -inwffil : will read wavefunctions from disk file alaso_nl_DS4_1WF10
 P newkpt: treating      4 bands with npw=     174 for ikpt=   1
 P newkpt: treating      4 bands with npw=     174 for ikpt=   2
@@ -5040,7 +5040,7 @@ P newkpt: treating      4 bands with npw=     190 for ikpt=  48
 P newkpt: treating      4 bands with npw=     186 for ikpt=  49
 P newkpt: treating      4 bands with npw=     186 for ikpt=  50
   newkpt: prtvol=0 or 1, do not print more k-points.
- 
+
 
  mv_3dte : finite difference expression of the k-point derivative
            is performed using the PEAD formulation of the third-order energy
@@ -5069,7 +5069,7 @@ P newkpt: treating      4 bands with npw=     186 for ikpt=  50
      xc     -1.448239247        0.000000000
      ddk    16.189217131        0.000000000
      dft     4.168156450        0.000000000
- 
+
 
 
 
@@ -5083,7 +5083,7 @@ P newkpt: treating      4 bands with npw=     186 for ikpt=  50
      xc      0.724119609        0.000000000
      ddk    -8.094608654        0.000000000
      dft    -2.084078479        0.000000000
- 
+
 
 -inwffil : will read wavefunctions from disk file alaso_nl_DS4_1WF11
 P newkpt: treating      4 bands with npw=     174 for ikpt=   1
@@ -5137,7 +5137,7 @@ P newkpt: treating      4 bands with npw=     190 for ikpt=  48
 P newkpt: treating      4 bands with npw=     186 for ikpt=  49
 P newkpt: treating      4 bands with npw=     186 for ikpt=  50
   newkpt: prtvol=0 or 1, do not print more k-points.
- 
+
 
  mv_3dte : finite difference expression of the k-point derivative
            is performed using the PEAD formulation of the third-order energy
@@ -5166,7 +5166,7 @@ P newkpt: treating      4 bands with npw=     186 for ikpt=  50
      xc      0.724119609        0.000000000
      ddk    -8.094608444        0.000000000
      dft    -2.084078192        0.000000000
- 
+
 
 -inwffil : will read wavefunctions from disk file alaso_nl_DS4_1WF10
 P newkpt: treating      4 bands with npw=     174 for ikpt=   1
@@ -5220,7 +5220,7 @@ P newkpt: treating      4 bands with npw=     190 for ikpt=  48
 P newkpt: treating      4 bands with npw=     186 for ikpt=  49
 P newkpt: treating      4 bands with npw=     186 for ikpt=  50
   newkpt: prtvol=0 or 1, do not print more k-points.
- 
+
 -inwffil : will read wavefunctions from disk file alaso_nl_DS4_1WF10
 P newkpt: treating      4 bands with npw=     174 for ikpt=   1
 P newkpt: treating      4 bands with npw=     174 for ikpt=   2
@@ -5273,7 +5273,7 @@ P newkpt: treating      4 bands with npw=     190 for ikpt=  48
 P newkpt: treating      4 bands with npw=     186 for ikpt=  49
 P newkpt: treating      4 bands with npw=     186 for ikpt=  50
   newkpt: prtvol=0 or 1, do not print more k-points.
- 
+
 
 
 
@@ -5285,7 +5285,7 @@ P newkpt: treating      4 bands with npw=     186 for ikpt=  50
                real part     imaginary part
      xc     -3.928133811        0.000000000
      dft   -52.492415122        0.000000000
- 
+
 
 
 
@@ -5298,7 +5298,7 @@ P newkpt: treating      4 bands with npw=     186 for ikpt=  50
                real part     imaginary part
      xc     -1.356375922        0.000000000
      dft    74.926538625        0.000000000
- 
+
 
 
  mv_3dte : finite difference expression of the k-point derivative
@@ -5328,7 +5328,7 @@ P newkpt: treating      4 bands with npw=     186 for ikpt=  50
      xc      1.950737583        0.000000000
      ddk   334.367826143        0.000000000
      dft    -3.670073596        0.000000000
- 
+
 
 
 
@@ -5342,7 +5342,7 @@ P newkpt: treating      4 bands with npw=     186 for ikpt=  50
      xc     -0.650245828        0.000000000
      ddk  -111.455942047        0.000000000
      dft     1.223361342        0.000000000
- 
+
 
 -inwffil : will read wavefunctions from disk file alaso_nl_DS4_1WF11
 P newkpt: treating      4 bands with npw=     174 for ikpt=   1
@@ -5396,7 +5396,7 @@ P newkpt: treating      4 bands with npw=     190 for ikpt=  48
 P newkpt: treating      4 bands with npw=     186 for ikpt=  49
 P newkpt: treating      4 bands with npw=     186 for ikpt=  50
   newkpt: prtvol=0 or 1, do not print more k-points.
- 
+
 
 
 
@@ -5408,7 +5408,7 @@ P newkpt: treating      4 bands with npw=     186 for ikpt=  50
                real part     imaginary part
      xc      1.964066918        0.000000000
      dft    26.246207909        0.000000000
- 
+
 
 
 
@@ -5421,7 +5421,7 @@ P newkpt: treating      4 bands with npw=     186 for ikpt=  50
                real part     imaginary part
      xc      0.678187936        0.000000000
      dft   -37.463269574        0.000000000
- 
+
 
 
  mv_3dte : finite difference expression of the k-point derivative
@@ -5451,7 +5451,7 @@ P newkpt: treating      4 bands with npw=     186 for ikpt=  50
      xc     -0.650245828        0.000000000
      ddk  -111.455944620        0.000000000
      dft     1.223357751        0.000000000
- 
+
 
 
 
@@ -5465,7 +5465,7 @@ P newkpt: treating      4 bands with npw=     186 for ikpt=  50
      xc     -0.650245861        0.000000000
      ddk  -111.455941975        0.000000000
      dft     1.223356781        0.000000000
- 
+
 
 -inwffil : will read wavefunctions from disk file alaso_nl_DS4_1WF12
 P newkpt: treating      4 bands with npw=     174 for ikpt=   1
@@ -5519,7 +5519,7 @@ P newkpt: treating      4 bands with npw=     190 for ikpt=  48
 P newkpt: treating      4 bands with npw=     186 for ikpt=  49
 P newkpt: treating      4 bands with npw=     186 for ikpt=  50
   newkpt: prtvol=0 or 1, do not print more k-points.
- 
+
 
  mv_3dte : finite difference expression of the k-point derivative
            is performed using the PEAD formulation of the third-order energy
@@ -5548,7 +5548,7 @@ P newkpt: treating      4 bands with npw=     186 for ikpt=  50
      xc      0.650245845        0.000000000
      ddk   111.455942008        0.000000000
      dft    -1.223359047        0.000000000
- 
+
 
 
  --- Third order energy calculation completed ---
@@ -5748,7 +5748,7 @@ P newkpt: treating      4 bands with npw=     186 for ikpt=  50
    3    4   3    4   1    4 -110.8828263768    0.0000000000
    3    4   3    4   2    4 -110.8828310549    0.0000000000
    3    4   3    4   3    4  332.6484901297    0.0000000000
- 
+
 
   Non-linear optical susceptibility tensor d (pm/V)
   in cartesian coordinates
@@ -5780,9 +5780,9 @@ P newkpt: treating      4 bands with npw=     186 for ikpt=  50
       3      3      1          0.000000530
       3      3      2          0.000000351
       3      3      3          0.000000801
- 
 
-  First-order change in the electronic dielectric 
+
+  First-order change in the electronic dielectric
   susceptibility tensor (Bohr^-1)
   induced by an atomic displacement
    atom  displacement
@@ -5795,7 +5795,7 @@ P newkpt: treating      4 bands with npw=     186 for ikpt=  50
     1          3        0.000000000       -0.100077870        0.000000000
                        -0.100077870        0.000000000        0.000000000
                         0.000000000        0.000000000        0.000000000
- 
+
     2          1        0.000000000        0.000000000        0.000000000
                         0.000000000        0.000000000        0.099700298
                         0.000000000        0.099700298        0.000000000
@@ -5805,11 +5805,11 @@ P newkpt: treating      4 bands with npw=     186 for ikpt=  50
     2          3        0.000000000        0.099700298        0.000000000
                         0.099700298        0.000000000        0.000000000
                         0.000000000        0.000000000        0.000000000
- 
+
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell    1.0639517752E+01  1.0639517752E+01  1.0639517752E+01 Bohr
               amu    2.69815390E+01  7.49215900E+01
@@ -6304,9 +6304,9 @@ P newkpt: treating      4 bands with npw=     186 for ikpt=  50
 - Total wall clock time (s,m,h):        509.5        8.49      0.142
 
 - For major independent code sections, cpu and wall times (sec),
-- as well as % of the total time and number of calls 
+- as well as % of the total time and number of calls
 
-- routine                 cpu     %       wall     %      number of calls 
+- routine                 cpu     %       wall     %      number of calls
 -                                                          (-1=no count)
 - fourwf(pot)          155.821  32.1    162.655  31.9         916024
 - nonlop(apply)         61.779  12.7     65.557  12.9         779512

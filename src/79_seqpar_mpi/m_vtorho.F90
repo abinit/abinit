@@ -34,7 +34,6 @@ module m_vtorho
  use m_wffile
  use m_efield
  use m_cgtools
- use m_gemm_nonlop_projectors
  use m_hdr
  use m_dtset
  use m_dtfil
@@ -56,7 +55,7 @@ module m_vtorho
  use m_pawcprj,            only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_getdim
  use m_pawfgr,             only : pawfgr_type
  use m_energies,           only : energies_type
- use m_hamiltonian,        only : init_hamiltonian, gs_hamiltonian_type, gspot_transgrid_and_pack
+ use m_hamiltonian,        only : gs_hamiltonian_type, gspot_transgrid_and_pack
  use m_bandfft_kpt,        only : bandfft_kpt, bandfft_kpt_type, bandfft_kpt_set_ikpt, &
                                   bandfft_kpt_savetabs, bandfft_kpt_restoretabs, prep_bandfft_tabs
  use m_electronpositron,   only : electronpositron_type,electronpositron_calctype
@@ -64,7 +63,7 @@ module m_vtorho
  use m_paw_correlations,   only : setnoccmmp
  use m_paw_occupancies,    only : pawmkrhoij
  use m_paw_mkrho,          only : pawmkrho
- use m_crystal,            only : crystal_init, crystal_t
+ use m_crystal,            only : crystal_t
  use m_oper,               only : oper_type,init_oper,destroy_oper
  use m_io_tools,           only : flush_unit
  use m_abi2big,            only : wvl_occ_abi2big, wvl_rho_abi2big, wvl_occopt_abi2big, wvl_eigen_abi2big
@@ -88,6 +87,8 @@ module m_vtorho
  use m_wvl_psi,            only : wvl_hpsitopsi, wvl_psitohpsi, wvl_nl_gradient
  use m_inwffil,            only : cg_from_atoms
  use m_chebfiwf,           only : chebfiwf2_blocksize
+ use m_gemm_nonlop_projectors, only : set_gemm_nonlop_ikpt, reset_gemm_nonlop, gemm_nonlop_use_gemm, &
+                                      gemm_nonlop_nblocks, gemm_nonlop_is_distributed
 
 #if defined HAVE_GPU_CUDA
  use m_manage_cuda
@@ -437,10 +438,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  integer :: occopt_bigdft
 #endif
 
-#if defined(HAVE_GPU_CUDA)
- type(gemm_nonlop_gpu_type) :: gemm_nonlop_gpu_obj
-#endif
-
 ! *********************************************************************
 
  DBG_ENTER("COLL")
@@ -608,13 +605,13 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
    if (nnsclo_now > 1) call wrtout(std_out, sjoin(" Max number of non-self-consistent loops:", itoa(nnsclo_now)))
  end if
 
-!==== Initialize most of the Hamiltonian ====
-!Allocate all arrays and initialize quantities that do not depend on k and spin.
- call init_hamiltonian(gs_hamk,psps,pawtab,dtset%nspinor,dtset%nsppol,dtset%nspden,natom,&
-& dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,&
-& paw_ij=paw_ij,ph1d=ph1d,usecprj=usecprj_local,electronpositron=electronpositron,fock=fock,&
-& comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab,&
-& nucdipmom=dtset%nucdipmom,gpu_option=dtset%gpu_option)
+ !==== Initialize most of the Hamiltonian ====
+ ! Allocate all arrays and initialize quantities that do not depend on k and spin.
+ call gs_hamk%init(psps,pawtab,dtset%nspinor,dtset%nsppol,dtset%nspden,natom,&
+  dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,&
+  paw_ij=paw_ij,ph1d=ph1d,usecprj=usecprj_local,electronpositron=electronpositron,fock=fock,&
+  comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab,&
+  nucdipmom=dtset%nucdipmom,gpu_option=dtset%gpu_option)
 
  if (dtset%cprj_in_memory==1) then
    call xg_nonlop_update_weight(xg_nonlop,ucvol) ! ucvol could have changed in mover
@@ -786,7 +783,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      ! if vectornd is present, set it up for addition to gs_hamk similarly to how it's done for
      ! vtrial. Note that it must be done for the three Cartesian directions. Also, the following
      ! code assumes explicitly and implicitly that nvloc = 1. This should eventually be generalized.
-     if(has_vectornd) then
+     if (has_vectornd) then
        call gspot_transgrid_and_pack(isppol, psps%usepaw, dtset%paral_kgb, dtset%nfft, dtset%ngfft, nfftf, &
          & dtset%nspden, gs_hamk%nvloc, 3, pawfgr, mpi_enreg, vectornd, vectornd_pac)
        call gs_hamk%load_spin(isppol, vectornd=vectornd_pac)
@@ -794,11 +791,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
      call timab(982,2,tsec)
 
-!    BIG FAT k POINT LOOP
-!    MVeithen: I had to modify the structure of this loop in order to implement MPI // of the electric field
-!    Note that the loop here differs from the similar one in berryphase_new.F90.
-!    here, ikpt_loc numbers the kpts treated by the current processor.
-!    in berryphase_new.F90, ikpt_loc ALSO includes info about value of isppol.
+     ! BIG FAT k POINT LOOP
+     ! MVeithen: I had to modify the structure of this loop in order to implement MPI // of the electric field
+     ! Note that the loop here differs from the similar one in berryphase_new.F90.
+     ! here, ikpt_loc numbers the kpts treated by the current processor.
+     ! in berryphase_new.F90, ikpt_loc ALSO includes info about value of isppol.
 
      ikpt = 0
      do while (ikpt_loc < nkpt1)
@@ -951,7 +948,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &         gmet,gprimd,ider,idir,psps%indlmn,kg_k,kpg_k,kpoint,psps%lmnmax,&
 &         psps%lnmax,psps%mpsang,psps%mqgrid_ff,nkpg,&
 &         npw_k,ntypat,psps%pspso,psps%qgrid_ff,rmet,&
-&         psps%usepaw,psps%useylm,ylm_k,ylmgr)
+&         psps%usepaw,psps%useylm,ylm_k,ylmgr,kinpw=kinpw)
        end if
 
 !      Load k-dependent part in the Hamiltonian datastructure
@@ -962,14 +959,14 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
        if(usefock_ACE/=0) then
          call gs_hamk%load_k(kpt_k=dtset%kptns(:,ikpt),istwf_k=istwf_k,npw_k=npw_k,&
-&         kinpw_k=kinpw,kg_k=kg_k,kpg_k=kpg_k,ffnl_k=ffnl,fockACE_k=fock%fockACE(ikpt,isppol),ph3d_k=ph3d,&
-&         compute_ph3d=(mpi_enreg%paral_kgb/=1.or.istep<=1),&
-&         compute_gbound=(mpi_enreg%paral_kgb/=1))
+           kinpw_k=kinpw,kg_k=kg_k,kpg_k=kpg_k,ffnl_k=ffnl,fockACE_k=fock%fockACE(ikpt,isppol),ph3d_k=ph3d,&
+           compute_ph3d=(mpi_enreg%paral_kgb/=1.or.istep<=1),&
+          compute_gbound=(mpi_enreg%paral_kgb/=1))
        else
          call gs_hamk%load_k(kpt_k=dtset%kptns(:,ikpt),istwf_k=istwf_k,npw_k=npw_k,&
-&         kinpw_k=kinpw,kg_k=kg_k,kpg_k=kpg_k,ffnl_k=ffnl,ph3d_k=ph3d,&
-&         compute_ph3d=(mpi_enreg%paral_kgb/=1.or.istep<=1),&
-&         compute_gbound=(mpi_enreg%paral_kgb/=1))
+           kinpw_k=kinpw,kg_k=kg_k,kpg_k=kpg_k,ffnl_k=ffnl,ph3d_k=ph3d,&
+           compute_ph3d=(mpi_enreg%paral_kgb/=1.or.istep<=1),&
+           compute_gbound=(mpi_enreg%paral_kgb/=1))
        end if
 
 !      Load band-FFT tabs (transposed k-dependent arrays)
@@ -1018,8 +1015,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
        ! Setup gemm_nonlop
        if (gemm_nonlop_use_gemm) then
-         !set the global variable indicating to gemm_nonlop where to get its data from
-         gemm_nonlop_ikpt_this_proc_being_treated = my_ikpt
+         call set_gemm_nonlop_ikpt(my_ikpt)
+         if(istep<=1) call reset_gemm_nonlop()
        end if
 
 #if defined HAVE_GPU_CUDA
@@ -1344,10 +1341,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      if(paw_dmft%use_dmft==1.and.psps%usepaw==1.and.dtset%nbandkss==0) then
        call timab(991,1,tsec)
 
+       ! energies%entropy is the non-interacting entropy. This is obviously
+       ! wrong in DFT+DMFT (except if U=J=0), so we set it to 0.
        if (dtset%dmftcheck>=0.and.dtset%usedmft>=1.and.(sum(pawtab(:)%upawu)>=tol8.or.  &
-&       sum(pawtab(:)%jpawu)>tol8).and.(dtset%dmft_entropy==0.or.&
-&       ((dtset%dmft_solv==6.or.dtset%dmft_solv==7).and.(dtset%dmft_integral==0 &
-&       .or.dtset%dmftctqmc_triqs_entropy==0)))) energies%entropy=zero
+&       sum(pawtab(:)%jpawu)>tol8).and.dtset%dmft_entropy==0) energies%entropy=zero
 
 !      ==  0 to a dmft calculation and do not use lda occupations
 !      ==  1 to a lda calculation with the dmft loop
@@ -1371,7 +1368,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          if(dtset%occopt/=3) then
            ABI_ERROR('occopt should be equal to 3 in dmft')
          end if
-!        ==  initialise edmft
+!        ==  initialize edmft
          if(paw_dmft%use_dmft>=1) edmft = zero
 
          !  Compute residm to check the value
@@ -1415,7 +1412,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !        ==  gather crystal structure date into data "cryst_struc"
          remove_inv=.false.
          if(dtset%nspden==4) remove_inv=.true.
-         call crystal_init(dtset%amu_orig(:,1),cryst_struc,dtset%spgroup,natom,dtset%npsp,ntypat, &
+         call cryst_struc%init(dtset%amu_orig(:,1),dtset%spgroup,natom,dtset%npsp,ntypat, &
           dtset%nsym,rprimd,dtset%typat,xred,dtset%ziontypat,dtset%znucl,1,&
           dtset%nspden==2.and.dtset%nsppol==1,remove_inv,hdr%title,&
           dtset%symrel,dtset%tnons,dtset%symafm)
@@ -1441,10 +1438,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          call xmpi_barrier(spaceComm_distrb)
 
          call dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawtab(:),dtset%pawprtvol)
-         edmft=paw_dmft%edmft
-         energies%e_paw=energies%e_paw+edmft
-         energies%e_pawdc=energies%e_pawdc+edmft
-         if (dtset%dmftctqmc_triqs_entropy == 1 .and. dtset%dmft_integral == 1) energies%entropy = paw_dmft%sdmft
+         edmft=paw_dmft%e_hu-paw_dmft%e_dc
+         energies%e_dc=paw_dmft%e_dc
+         energies%e_hu=paw_dmft%e_hu
+         if (dtset%dmft_triqs_entropy == 1 .and. dtset%dmft_triqs_compute_integral == 1 &
+            & .and. (dtset%dmft_solv == 6 .or. dtset%dmft_solv == 7)) energies%entropy = paw_dmft%sdmft
          call flush_unit(std_out)
 !        paw_dmft%occnd(:,:,:,:,:)=0.5_dp
 
@@ -1477,7 +1475,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !          endif
 !        end if
 
-         if(me_distrb==0) then
+         if(paw_dmft%myproc==0) then
            call saveocc_dmft(paw_dmft)
          end if
          call destroy_dmft(paw_dmft)

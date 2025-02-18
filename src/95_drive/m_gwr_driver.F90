@@ -21,6 +21,7 @@
 
 module m_gwr_driver
 
+ use, intrinsic :: iso_c_binding
 #ifdef HAVE_MPI2
  use mpi
 #endif
@@ -40,9 +41,8 @@ module m_gwr_driver
  use m_distribfft
  use netcdf
  use m_nctk
- use, intrinsic :: iso_c_binding
 
- use defs_datatypes,    only : pseudopotential_type, ebands_t
+ use defs_datatypes,    only : pseudopotential_type
  use defs_abitypes,     only : MPI_type
  use m_time,            only : timab
  use m_io_tools,        only : file_exists, open_file, get_unit, iomode_from_fname
@@ -334,8 +334,8 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
  call pawfgr_init(pawfgr, dtset, mgfftf, nfftf, ecut_eff, ecutdg_eff, ngfftc, ngfftf, &
                   gsqcutc_eff=gsqcutc_eff, gsqcutf_eff=gsqcutf_eff, gmet=cryst%gmet, k0=k0)
 
- call print_ngfft(ngfftc, header='Coarse FFT mesh for the wavefunctions')
- call print_ngfft(ngfftf, header='Dense FFT mesh for densities and potentials')
+ call print_ngfft([std_out], ngfftc, header='Coarse FFT mesh for the wavefunctions')
+ call print_ngfft([std_out], ngfftf, header='Dense FFT mesh for densities and potentials')
 
  ! Fake MPI_type for the sequential part.
  call initmpi_seq(mpi_enreg_seq)
@@ -672,11 +672,11 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
    end if
 
    ! Build header with new npwarr and nband.
-   owfk_ebands = ebands_from_dtset(dtset, npwarr_ik, nband=nband_iks)
+   call owfk_ebands%from_dtset(dtset, npwarr_ik, nband=nband_iks)
    owfk_ebands%eig = zero
    owfk_ebands%istwfk = istwfk_ik
    !print *, "owfk_ebands%npwarr:",  owfk_ebands%npwarr; stop
-   call hdr_init(owfk_ebands, codvsn, dtset, owfk_hdr, pawtab, 0, psps, wvl%descr)
+   call owfk_hdr%init(owfk_ebands, codvsn, dtset, pawtab, 0, psps, wvl%descr)
 
    ! Change the value of istwfk taken from dtset.
    ABI_REMALLOC(owfk_hdr%istwfk, (dtset%nkpt))
@@ -793,22 +793,21 @@ end if
    end do
    call xmpi_sum(owfk_ebands%eig, comm, ierr)
 
-   call ebands_update_occ(owfk_ebands, dtset%spinmagntarget, prtvol=dtset%prtvol, fermie_to_zero=.False.)
+   call owfk_ebands%update_occ(dtset%spinmagntarget, prtvol=dtset%prtvol, fermie_to_zero=.False.)
 
    if (my_rank == master) then
      if (write_wfk .and. iomode__ == IO_MODE_ETSF) then
-       NCF_CHECK(ebands_ncwrite_path(owfk_ebands, cryst, out_path))
+       NCF_CHECK(owfk_ebands%ncwrite_path(cryst, out_path))
        !print *, "owfk_ebands%istwfk", owfk_ebands%istwfk; stop
      end if
-     call ebands_print_gaps(owfk_ebands, ab_out, header="KS gaps after direct diagonalization")
-     call ebands_print_gaps(owfk_ebands, std_out, header="KS gaps after direct diagonalization")
+     call owfk_ebands%print_gaps(units, header="KS gaps after direct diagonalization")
      if (cc4s_task) call cc4s_write_eigens(owfk_ebands, dtfil)
    end if
 
    ABI_FREE(npwarr_ik)
    ABI_FREE(istwfk_ik)
    ABI_FREE(nband_iks)
-   call owfk_hdr%free(); call ebands_free(owfk_ebands); call hyb%free(); call diago_pool%free()
+   call owfk_hdr%free(); call owfk_ebands%free(); call hyb%free(); call diago_pool%free()
 
  else if (string_in(dtset%gwr_task, "CC4S_FROM_WFK")) then
    ! Read orbitals from an external WFK file and produce output files for CC4S.
@@ -841,7 +840,7 @@ end if
        call ugb%free()
      end do
    end do
-   call wfk_hdr%free(); call ebands_free(ks_ebands); call diago_pool%free()
+   call wfk_hdr%free(); call ks_ebands%free(); call diago_pool%free()
 
  else
    ! ====================================================
@@ -872,7 +871,7 @@ end if
      call wfk_cryst%free()
 
      ! Make sure that ef is inside the gap if semiconductor.
-     call ebands_update_occ(ks_ebands, dtset%spinmagntarget, prtvol=dtset%prtvol, fermie_to_zero=.True.)
+     call ks_ebands%update_occ(dtset%spinmagntarget, prtvol=dtset%prtvol, fermie_to_zero=.True.)
 
      ! Here we change the GS bands (Fermi level, scissors operator ...)
      ! All the modifications to ebands should be done here.
@@ -981,7 +980,7 @@ end if
  ABI_SFREE(pawfgrtab)
  ABI_SFREE(ks_paw_an)
 
- call cryst%free(); call wfk_hdr%free(); call ebands_free(ks_ebands); call destroy_mpi_enreg(mpi_enreg_seq)
+ call cryst%free(); call wfk_hdr%free(); call ks_ebands%free(); call destroy_mpi_enreg(mpi_enreg_seq)
  call gwr%free()
 
 end subroutine gwr_driver
@@ -1166,7 +1165,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
 
  if (my_rank == master) then
    call wrtout(units, " Computing oscilator matrix elements for CC4S.")
-   call print_ngfft(u_ngfft, header='FFT mesh for wavefunctions', unit=std_out)
+   call print_ngfft([std_out], u_ngfft, header='FFT mesh for wavefunctions')
 
    ! =====================
    ! Write files for CC4S

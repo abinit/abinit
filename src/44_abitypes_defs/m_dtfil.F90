@@ -393,6 +393,7 @@ module m_dtfil
   character(len=fnlen) :: fnameabo_app_pot
   character(len=fnlen) :: fnameabo_app_opt
   character(len=fnlen) :: fnameabo_app_opt2
+  character(len=fnlen) :: fnameabo_app_orbmag
   character(len=fnlen) :: fnameabo_app_stm
   character(len=fnlen) :: fnameabo_app_vclmb
   character(len=fnlen) :: fnameabo_app_vha
@@ -1065,6 +1066,7 @@ subroutine dtfil_init_time(dtfil,iapp)
  dtfil%fnameabo_app_nesting=trim(filapp)//'_NEST'
  dtfil%fnameabo_app_opt=trim(filapp)//'_OPT'
  dtfil%fnameabo_app_opt2=trim(filapp)//'_OPT2'
+ dtfil%fnameabo_app_orbmag=trim(filapp)//'_ORBMAG'
  dtfil%fnameabo_app_pawden=trim(filapp)//'_PAWDEN'
  dtfil%fnameabo_app_pot=trim(filapp)//'_POT'
  dtfil%fnameabo_app_stm=trim(filapp)//'_STM'

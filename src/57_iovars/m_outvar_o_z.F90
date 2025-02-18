@@ -234,6 +234,12 @@ contains
  intarr(1,:)=dtsets(:)%optstress
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'optstress','INT',0)
 
+ dprarr(1,:)=dtsets(:)%oracle_factor
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'oracle_factor','DPR',0)
+
+ dprarr(1,:)=dtsets(:)%oracle_min_occ
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'oracle_min_occ','DPR',0)
+
  intarr(1,:)=dtsets(:)%orbmag
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'orbmag','INT',0)
 
@@ -1265,6 +1271,58 @@ contains
 !### 03. Print all the input variables (V)
 !##
 
+#if 0
+ ! MG: The output of the varpeq variable is temporary disables as the string length is too long
+ !
+ !   The length of the name of the input variable varpeq_mixing_factor is 20
+ !   This exceeds 16 characters, the present maximum in routine prttagm
+
+
+ intarr(1,:)=dtsets(:)%varpeq_avg_g
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'varpeq_avg_g','INT',0)
+
+ intarr(1,:)=dtsets(:)%varpeq_translate
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'varpeq_translate','INT',0)
+
+ intarr(1,:)=dtsets(:)%varpeq_interp
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'varpeq_interp','INT',0)
+
+ intarr(1,:)=dtsets(:)%varpeq_nstates
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'varpeq_nstates','INT',0)
+
+ intarr(1,:)=dtsets(:)%varpeq_nstep
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'varpeq_nstep','INT',0)
+
+ intarr(1,:)=dtsets(:)%varpeq_nstep_ort
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'varpeq_nstep_ort','INT',0)
+
+ intarr(1,:)=dtsets(:)%varpeq_select
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'varpeq_select','INT',0)
+
+ intarr(1,:)=dtsets(:)%varpeq_mesh_fact
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'varpeq_mesh_fact','INT',0)
+
+ dprarr(1,:)=dtsets(:)%varpeq_mixing_factor
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'varpeq_mixing_factor','DPR',0)
+
+ dprarr(1,:)=dtsets(:)%varpeq_tolgrs
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'varpeq_tolgrs','DPR',0)
+
+ intarr(1,:)=dtsets(:)%varpeq_trvec(1)
+ intarr(2,:)=dtsets(:)%varpeq_trvec(2)
+ intarr(3,:)=dtsets(:)%varpeq_trvec(3)
+ call prttagm(dprarr,intarr,iout,jdtset_,3,marr,3,narrm,ncid,ndtset_alloc,'varpeq_trvec','INT',0)
+
+ dprarr(1,:)=dtsets(:)%varpeq_gpr_energy(1)
+ dprarr(2,:)=dtsets(:)%varpeq_gpr_energy(2)
+ call prttagm(dprarr,intarr,iout,jdtset_,3,marr,2,narrm,ncid,ndtset_alloc,'varpeq_gpr_energy','DPR',0)
+
+ dprarr(1,:)=dtsets(:)%varpeq_gpr_length(1)
+ dprarr(2,:)=dtsets(:)%varpeq_gpr_length(2)
+ dprarr(3,:)=dtsets(:)%varpeq_gpr_length(3)
+ call prttagm(dprarr,intarr,iout,jdtset_,3,marr,3,narrm,ncid,ndtset_alloc,'varpeq_gpr_length','DPR',0)
+#endif
+
  dprarr(1,:)=dtsets(:)%vcutgeo(1)
  dprarr(2,:)=dtsets(:)%vcutgeo(2)
  dprarr(3,:)=dtsets(:)%vcutgeo(3)
@@ -1273,12 +1331,12 @@ contains
  if(sum(dtsets(1:ndtset_alloc)%prtwant) >1)then
 !  van der Waals correction with MLWFs related variables
    if(any(dtsets(1:ndtset_alloc)%vdw_xc==10).or.any(dtsets(1:ndtset_alloc)%vdw_xc==11).or.&
-&   any(dtsets(1:ndtset_alloc)%vdw_xc==14))then
+      any(dtsets(1:ndtset_alloc)%vdw_xc==14))then
      intarr(1,:)=dtsets(:)%vdw_nfrag
      call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'vdw_nfrag','INT',0)
    end if !vdw_xc==10,11,14
    if(any(dtsets(1:ndtset_alloc)%vdw_xc==10).or.any(dtsets(1:ndtset_alloc)%vdw_xc==11).or.&
-&   any(dtsets(1:ndtset_alloc)%vdw_xc==14))then
+      any(dtsets(1:ndtset_alloc)%vdw_xc==14))then
      intarr(1,:)=dtsets(:)%vdw_supercell(1)
      intarr(2,:)=dtsets(:)%vdw_supercell(2)
      intarr(3,:)=dtsets(:)%vdw_supercell(3)
@@ -1500,6 +1558,9 @@ contains
 
  intarr(1,:)=dtsets(:)%x1rdm
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'x1rdm','INT',0)
+
+ intarr(1,:)=dtsets(:)%xg_nonlop_option
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'xg_nonlop_option','INT',0)
 
 !xred
  prtimg(:,:)=1

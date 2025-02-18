@@ -58,6 +58,7 @@ def check_authors(suite):
 
     return set(second_names)
 
+
 def get_allowed_cpp_vars():
     """
     Inspect the libpaw header file, the autoconf macros and config.ac
@@ -67,11 +68,11 @@ def get_allowed_cpp_vars():
     Based on ~abinit/abichecks/scripts/check-cpp-options.
     """
     import re
-    re_m4file = re.compile("\.m4$")
-    re_hdrfile = re.compile("\.h$")
+    re_m4file = re.compile(r"\.m4$")
+    re_hdrfile = re.compile(r"\.h$")
     re_acdef = re.compile("AC_DEFINE\\(")
     re_cppdef = re.compile("^([ ]?)+#([ ]?)+define [0-9A-Z_]*")
-    
+
     abidir = os.path.abspath("../")
 
     # Extract CPP options from the libPAW header files
@@ -181,7 +182,7 @@ def main():
     #    pprint(second_names)
     #else:
     #    print("OK")
-    
+
     # Add test on CPP options
     allowed_cpp_vars = get_allowed_cpp_vars()
     #print(allowed_cpp_vars)

@@ -1,8 +1,8 @@
 
- Version 4.4.4  of ABINIT 
- (sequential version, prepared for a MacOSX computer) 
+ Version 4.4.4  of ABINIT
+ (sequential version, prepared for a MacOSX computer)
 
- Copyright (C) 1998-2004 ABINIT group . 
+ Copyright (C) 1998-2004 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
  Starting date : Wed  4 May 2005.
-  
+
 - input  file    -> alas_clampedion.in
 - output file    -> alas_clampedion.out
 - root for input  files -> alasi_clampedion
@@ -1169,7 +1169,7 @@ P newkpt: treating      4 bands with npw=     190 for ikpt=  25
 P newkpt: treating      4 bands with npw=     172 for ikpt=  26
 P newkpt: treating      4 bands with npw=     180 for ikpt=  27
 P newkpt: treating      4 bands with npw=     183 for ikpt=  28
- 
+
  setup2: Arith. and geom. avg. npw (full set) are     186.093     186.049
   initberry: for direction 1, nkstr =   6, nstr = 144
   initberry: for direction 2, nkstr =   6, nstr = 144
@@ -1260,7 +1260,7 @@ P newkpt: treating      4 bands with npw=     183 for ikpt=  28
   sigma(1 1)= -1.22446709E-09  sigma(3 2)=  0.00000000E+00
   sigma(2 2)= -1.22446709E-09  sigma(3 1)=  0.00000000E+00
   sigma(3 3)= -1.22446709E-09  sigma(2 1)=  0.00000000E+00
- 
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1328,7 +1328,7 @@ P newkpt: treating      4 bands with npw=     183 for ikpt=  28
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
     1       0.000000000000      0.000000000000      0.000000000000
     2       0.000000000000      0.000000000000      0.000000000000
- 
+
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
     2      1.40754758212239     1.40754758212239     1.40754758212239
@@ -1502,7 +1502,7 @@ P newkpt: treating      4 bands with npw=     183 for ikpt=  28
 - newkpt: read input wf with ikpt,npw=  49     190, make ikpt,npw=  49     190
 - newkpt: read input wf with ikpt,npw=  50     191, make ikpt,npw=  50     191
 - newkpt : prtvol=0 or 1, do not print more k-points.
- 
+
  setup2: Arith. and geom. avg. npw (full set) are     186.093     186.049
   initberry: for direction 1, nkstr =   6, nstr = 144
   initberry: for direction 2, nkstr =   6, nstr = 144
@@ -1598,7 +1598,7 @@ initberry: COMMENT -
   sigma(1 1)=  2.54888592E-06  sigma(3 2)=  3.84370554E-06
   sigma(2 2)=  2.54888592E-06  sigma(3 1)=  3.84370554E-06
   sigma(3 3)=  2.54888592E-06  sigma(2 1)=  3.84370554E-06
- 
+
 
  Stress tensor imposing a constant potential drop across  each lattice vector:
 
@@ -1606,7 +1606,7 @@ initberry: COMMENT -
   sigma(1 1)= -8.56500283E-08  sigma(3 2)=  1.20916959E-06
   sigma(2 2)= -8.56500283E-08  sigma(3 1)=  1.20916959E-06
   sigma(3 3)= -8.56500283E-08  sigma(2 1)=  1.20916959E-06
- 
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1720,7 +1720,7 @@ initberry: COMMENT -
  rms dE/dt=  2.2614E-03; max dE/dt=  2.2614E-03; dE/dt below (all hartree)
     1      -0.002261421678     -0.002261421678     -0.002261421678
     2       0.002261421355      0.002261421355      0.002261421355
- 
+
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
     2      1.40754758212239     1.40754758212239     1.40754758212239
@@ -1941,7 +1941,7 @@ P newkpt: treating      4 bands with npw=     190 for ikpt=  48
 P newkpt: treating      4 bands with npw=     190 for ikpt=  49
 P newkpt: treating      4 bands with npw=     191 for ikpt=  50
   newkpt: prtvol=0 or 1, do not print more k-points.
- 
+
  setup2: Arith. and geom. avg. npw (full set) are     186.093     186.049
   initberry: for direction 1, nkstr =   6, nstr = 144
   initberry: for direction 2, nkstr =   6, nstr = 144
@@ -2034,7 +2034,7 @@ initberry: COMMENT -
   sigma(1 1)=  5.06970217E-06  sigma(3 2)=  7.67880111E-06
   sigma(2 2)=  5.06970217E-06  sigma(3 1)=  7.67880111E-06
   sigma(3 3)=  5.06970217E-06  sigma(2 1)=  7.67880111E-06
- 
+
 
  Stress tensor imposing a constant potential drop across  each lattice vector:
 
@@ -2042,7 +2042,7 @@ initberry: COMMENT -
   sigma(1 1)= -1.87051531E-07  sigma(3 2)=  2.42204741E-06
   sigma(2 2)= -1.87051531E-07  sigma(3 1)=  2.42204741E-06
   sigma(3 3)= -1.87051531E-07  sigma(2 1)=  2.42204741E-06
- 
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -2156,7 +2156,7 @@ initberry: COMMENT -
  rms dE/dt=  4.5189E-03; max dE/dt=  4.5189E-03; dE/dt below (all hartree)
     1      -0.004518873471     -0.004518873471     -0.004518873471
     2       0.004518884368      0.004518884368      0.004518884368
- 
+
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
     2      1.40754758212239     1.40754758212239     1.40754758212239
@@ -2377,7 +2377,7 @@ P newkpt: treating      4 bands with npw=     190 for ikpt=  48
 P newkpt: treating      4 bands with npw=     190 for ikpt=  49
 P newkpt: treating      4 bands with npw=     191 for ikpt=  50
   newkpt: prtvol=0 or 1, do not print more k-points.
- 
+
  setup2: Arith. and geom. avg. npw (full set) are     186.093     186.049
   initberry: for direction 1, nkstr =   6, nstr = 144
   initberry: for direction 2, nkstr =   6, nstr = 144
@@ -2470,7 +2470,7 @@ initberry: COMMENT -
   sigma(1 1)=  7.56102766E-06  sigma(3 2)=  1.15049228E-05
   sigma(2 2)=  7.56102766E-06  sigma(3 1)=  1.15049228E-05
   sigma(3 3)=  7.56102766E-06  sigma(2 1)=  1.15049228E-05
- 
+
 
  Stress tensor imposing a constant potential drop across  each lattice vector:
 
@@ -2478,7 +2478,7 @@ initberry: COMMENT -
   sigma(1 1)= -3.05586374E-07  sigma(3 2)=  3.63830873E-06
   sigma(2 2)= -3.05586374E-07  sigma(3 1)=  3.63830873E-06
   sigma(3 3)= -3.05586374E-07  sigma(2 1)=  3.63830873E-06
- 
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -2592,7 +2592,7 @@ initberry: COMMENT -
  rms dE/dt=  6.7723E-03; max dE/dt=  6.7723E-03; dE/dt below (all hartree)
     1      -0.006772334092     -0.006772334092     -0.006772334092
     2       0.006772340511      0.006772340511      0.006772340511
- 
+
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
     2      1.40754758212239     1.40754758212239     1.40754758212239
@@ -2813,7 +2813,7 @@ P newkpt: treating      4 bands with npw=     190 for ikpt=  48
 P newkpt: treating      4 bands with npw=     190 for ikpt=  49
 P newkpt: treating      4 bands with npw=     191 for ikpt=  50
   newkpt: prtvol=0 or 1, do not print more k-points.
- 
+
  setup2: Arith. and geom. avg. npw (full set) are     186.093     186.049
   initberry: for direction 1, nkstr =   6, nstr = 144
   initberry: for direction 2, nkstr =   6, nstr = 144
@@ -2906,7 +2906,7 @@ initberry: COMMENT -
   sigma(1 1)=  1.00225916E-05  sigma(3 2)=  1.53221807E-05
   sigma(2 2)=  1.00225916E-05  sigma(3 1)=  1.53221807E-05
   sigma(3 3)=  1.00225916E-05  sigma(2 1)=  1.53221807E-05
- 
+
 
  Stress tensor imposing a constant potential drop across  each lattice vector:
 
@@ -2914,7 +2914,7 @@ initberry: COMMENT -
   sigma(1 1)= -4.41479145E-07  sigma(3 2)=  4.85810996E-06
   sigma(2 2)= -4.41479145E-07  sigma(3 1)=  4.85810996E-06
   sigma(3 3)= -4.41479145E-07  sigma(2 1)=  4.85810996E-06
- 
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -3028,7 +3028,7 @@ initberry: COMMENT -
  rms dE/dt=  9.0218E-03; max dE/dt=  9.0218E-03; dE/dt below (all hartree)
     1      -0.009021761691     -0.009021761691     -0.009021761691
     2       0.009021768817      0.009021768817      0.009021768817
- 
+
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
     2      1.40754758212239     1.40754758212239     1.40754758212239
@@ -3249,7 +3249,7 @@ P newkpt: treating      4 bands with npw=     190 for ikpt=  48
 P newkpt: treating      4 bands with npw=     190 for ikpt=  49
 P newkpt: treating      4 bands with npw=     191 for ikpt=  50
   newkpt: prtvol=0 or 1, do not print more k-points.
- 
+
  setup2: Arith. and geom. avg. npw (full set) are     186.093     186.049
   initberry: for direction 1, nkstr =   6, nstr = 144
   initberry: for direction 2, nkstr =   6, nstr = 144
@@ -3342,7 +3342,7 @@ initberry: COMMENT -
   sigma(1 1)=  1.24540980E-05  sigma(3 2)=  1.91305427E-05
   sigma(2 2)=  1.24540980E-05  sigma(3 1)=  1.91305427E-05
   sigma(3 3)=  1.24540980E-05  sigma(2 1)=  1.91305427E-05
- 
+
 
  Stress tensor imposing a constant potential drop across  each lattice vector:
 
@@ -3350,7 +3350,7 @@ initberry: COMMENT -
   sigma(1 1)= -5.94972375E-07  sigma(3 2)=  6.08147234E-06
   sigma(2 2)= -5.94972375E-07  sigma(3 1)=  6.08147234E-06
   sigma(3 3)= -5.94972375E-07  sigma(2 1)=  6.08147234E-06
- 
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -3464,7 +3464,7 @@ initberry: COMMENT -
  rms dE/dt=  1.1267E-02; max dE/dt=  1.1267E-02; dE/dt below (all hartree)
     1      -0.011267121672     -0.011267121672     -0.011267121672
     2       0.011267129008      0.011267129008      0.011267129008
- 
+
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
     2      1.40754758212239     1.40754758212239     1.40754758212239
@@ -3685,7 +3685,7 @@ initberry: COMMENT -
 - newkpt: read input wf with ikpt,npw=  49     190, make ikpt,npw=  49     190
 - newkpt: read input wf with ikpt,npw=  50     191, make ikpt,npw=  50     191
 - newkpt : prtvol=0 or 1, do not print more k-points.
- 
+
  setup2: Arith. and geom. avg. npw (full set) are     186.093     186.049
   initberry: for direction 1, nkstr =   6, nstr = 144
   initberry: for direction 2, nkstr =   6, nstr = 144
@@ -3781,7 +3781,7 @@ initberry: COMMENT -
   sigma(1 1)= -2.58046638E-06  sigma(3 2)= -3.85257831E-06
   sigma(2 2)= -2.58046638E-06  sigma(3 1)= -3.85257831E-06
   sigma(3 3)= -2.58046638E-06  sigma(2 1)= -3.85257831E-06
- 
+
 
  Stress tensor imposing a constant potential drop across  each lattice vector:
 
@@ -3789,7 +3789,7 @@ initberry: COMMENT -
   sigma(1 1)=  6.63552785E-08  sigma(3 2)= -1.20575665E-06
   sigma(2 2)=  6.63552785E-08  sigma(3 1)= -1.20575665E-06
   sigma(3 3)=  6.63552785E-08  sigma(2 1)= -1.20575665E-06
- 
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -3903,7 +3903,7 @@ initberry: COMMENT -
  rms dE/dt=  2.2654E-03; max dE/dt=  2.2654E-03; dE/dt below (all hartree)
     1       0.002265367437      0.002265367437      0.002265367437
     2      -0.002265365337     -0.002265365337     -0.002265365337
- 
+
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
     2      1.40754758212239     1.40754758212239     1.40754758212239
@@ -4124,7 +4124,7 @@ P newkpt: treating      4 bands with npw=     190 for ikpt=  48
 P newkpt: treating      4 bands with npw=     190 for ikpt=  49
 P newkpt: treating      4 bands with npw=     191 for ikpt=  50
   newkpt: prtvol=0 or 1, do not print more k-points.
- 
+
  setup2: Arith. and geom. avg. npw (full set) are     186.093     186.049
   initberry: for direction 1, nkstr =   6, nstr = 144
   initberry: for direction 2, nkstr =   6, nstr = 144
@@ -4217,7 +4217,7 @@ initberry: COMMENT -
   sigma(1 1)= -5.18861075E-06  sigma(3 2)= -7.71393776E-06
   sigma(2 2)= -5.18861075E-06  sigma(3 1)= -7.71393776E-06
   sigma(3 3)= -5.18861075E-06  sigma(2 1)= -7.71393776E-06
- 
+
 
  Stress tensor imposing a constant potential drop across  each lattice vector:
 
@@ -4225,7 +4225,7 @@ initberry: COMMENT -
   sigma(1 1)=  1.17292542E-07  sigma(3 2)= -2.40803446E-06
   sigma(2 2)=  1.17292542E-07  sigma(3 1)= -2.40803446E-06
   sigma(3 3)=  1.17292542E-07  sigma(2 1)= -2.40803446E-06
- 
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -4339,7 +4339,7 @@ initberry: COMMENT -
  rms dE/dt=  4.5347E-03; max dE/dt=  4.5347E-03; dE/dt below (all hartree)
     1       0.004534659403      0.004534659403      0.004534659403
     2      -0.004534671599     -0.004534671599     -0.004534671599
- 
+
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
     2      1.40754758212239     1.40754758212239     1.40754758212239
@@ -4560,7 +4560,7 @@ P newkpt: treating      4 bands with npw=     190 for ikpt=  48
 P newkpt: treating      4 bands with npw=     190 for ikpt=  49
 P newkpt: treating      4 bands with npw=     191 for ikpt=  50
   newkpt: prtvol=0 or 1, do not print more k-points.
- 
+
  setup2: Arith. and geom. avg. npw (full set) are     186.093     186.049
   initberry: for direction 1, nkstr =   6, nstr = 144
   initberry: for direction 2, nkstr =   6, nstr = 144
@@ -4653,7 +4653,7 @@ initberry: COMMENT -
   sigma(1 1)= -7.82559956E-06  sigma(3 2)= -1.15840014E-05
   sigma(2 2)= -7.82559956E-06  sigma(3 1)= -1.15840014E-05
   sigma(3 3)= -7.82559956E-06  sigma(2 1)= -1.15840014E-05
- 
+
 
  Stress tensor imposing a constant potential drop across  each lattice vector:
 
@@ -4661,7 +4661,7 @@ initberry: COMMENT -
   sigma(1 1)=  1.51626041E-07  sigma(3 2)= -3.60677575E-06
   sigma(2 2)=  1.51626041E-07  sigma(3 1)= -3.60677575E-06
   sigma(3 3)=  1.51626041E-07  sigma(2 1)= -3.60677575E-06
- 
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -4775,7 +4775,7 @@ initberry: COMMENT -
  rms dE/dt=  6.8079E-03; max dE/dt=  6.8079E-03; dE/dt below (all hartree)
     1       0.006807866525      0.006807866525      0.006807866525
     2      -0.006807874857     -0.006807874857     -0.006807874857
- 
+
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
     2      1.40754758212239     1.40754758212239     1.40754758212239
@@ -4996,7 +4996,7 @@ P newkpt: treating      4 bands with npw=     190 for ikpt=  48
 P newkpt: treating      4 bands with npw=     190 for ikpt=  49
 P newkpt: treating      4 bands with npw=     191 for ikpt=  50
   newkpt: prtvol=0 or 1, do not print more k-points.
- 
+
  setup2: Arith. and geom. avg. npw (full set) are     186.093     186.049
   initberry: for direction 1, nkstr =   6, nstr = 144
   initberry: for direction 2, nkstr =   6, nstr = 144
@@ -5089,7 +5089,7 @@ initberry: COMMENT -
   sigma(1 1)= -1.04913173E-05  sigma(3 2)= -1.54628185E-05
   sigma(2 2)= -1.04913173E-05  sigma(3 1)= -1.54628185E-05
   sigma(3 3)= -1.04913173E-05  sigma(2 1)= -1.54628185E-05
- 
+
 
  Stress tensor imposing a constant potential drop across  each lattice vector:
 
@@ -5097,7 +5097,7 @@ initberry: COMMENT -
   sigma(1 1)=  1.69458666E-07  sigma(3 2)= -4.80204258E-06
   sigma(2 2)=  1.69458666E-07  sigma(3 1)= -4.80204258E-06
   sigma(3 3)=  1.69458666E-07  sigma(2 1)= -4.80204258E-06
- 
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -5211,7 +5211,7 @@ initberry: COMMENT -
  rms dE/dt=  9.0850E-03; max dE/dt=  9.0850E-03; dE/dt below (all hartree)
     1       0.009084966504      0.009084966504      0.009084966504
     2      -0.009084970190     -0.009084970190     -0.009084970190
- 
+
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
     2      1.40754758212239     1.40754758212239     1.40754758212239
@@ -5432,7 +5432,7 @@ P newkpt: treating      4 bands with npw=     190 for ikpt=  48
 P newkpt: treating      4 bands with npw=     190 for ikpt=  49
 P newkpt: treating      4 bands with npw=     191 for ikpt=  50
   newkpt: prtvol=0 or 1, do not print more k-points.
- 
+
  setup2: Arith. and geom. avg. npw (full set) are     186.093     186.049
   initberry: for direction 1, nkstr =   6, nstr = 144
   initberry: for direction 2, nkstr =   6, nstr = 144
@@ -5525,7 +5525,7 @@ initberry: COMMENT -
   sigma(1 1)= -1.31857127E-05  sigma(3 2)= -1.93503894E-05
   sigma(2 2)= -1.31857127E-05  sigma(3 1)= -1.93503894E-05
   sigma(3 3)= -1.31857127E-05  sigma(2 1)= -1.93503894E-05
- 
+
 
  Stress tensor imposing a constant potential drop across  each lattice vector:
 
@@ -5533,7 +5533,7 @@ initberry: COMMENT -
   sigma(1 1)=  1.70835436E-07  sigma(3 2)= -5.99384129E-06
   sigma(2 2)=  1.70835436E-07  sigma(3 1)= -5.99384129E-06
   sigma(3 3)=  1.70835436E-07  sigma(2 1)= -5.99384129E-06
- 
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -5647,7 +5647,7 @@ initberry: COMMENT -
  rms dE/dt=  1.1366E-02; max dE/dt=  1.1366E-02; dE/dt below (all hartree)
     1       0.011365948114      0.011365948114      0.011365948114
     2      -0.011365949579     -0.011365949579     -0.011365949579
- 
+
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
     2      1.40754758212239     1.40754758212239     1.40754758212239
@@ -5802,7 +5802,7 @@ initberry: COMMENT -
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
      acell    1.0639517752E+01  1.0639517752E+01  1.0639517752E+01 Bohr
        amu    2.69815390E+01  7.49215900E+01
@@ -6734,9 +6734,9 @@ P    mkmem35      91
 - Total wall clock time (s,m,h):        378.2        6.30      0.105
 
 - For major independent code sections, cpu and wall times (sec),
-- as well as % of the total time and number of calls 
+- as well as % of the total time and number of calls
 
-- routine                 cpu     %       wall     %      number of calls 
+- routine                 cpu     %       wall     %      number of calls
 -                                                          (-1=no count)
 - cgwf-O(npw)          106.490  44.0    166.877  44.1             -1
 - fourwf(pot)           37.700  15.6     58.817  15.6         195552

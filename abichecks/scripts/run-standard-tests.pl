@@ -1136,7 +1136,7 @@ sub dovdwkgtest {
         if ($OStype eq 'MacOS') {
                 system ("$CODE_VDWKG < $infn \xb7 $logfn ");
                 }
-        else {  
+        else {
                 $REDIRECT_ERR = "2> $errfn";
                 system ("$CODE_VDWKG < $infn > $logfn $REDIRECT_ERR");
                 $REDIRECT_ERR = '2>&1';

@@ -378,7 +378,6 @@ class FileToTest(object):
             'debug': fldebug,
         }
 
-
         if forced_tolerance == 'high':
             opts['tolerance'] = 1.01e-10
         elif forced_tolerance == 'medium':
@@ -807,6 +806,8 @@ class AbinitTestInfoParser(object):
             if not self.parser.has_section(ncpu_section):
                 raise self.Error("Cannot find section %s in %s" % (ncpu_section, self.inp_fname))
 
+            d['yaml_test'] = self.yaml_test(ytest=d['yaml_test'], sec_name=ncpu_section)
+
             for key in self.parser.options(ncpu_section):
                 if key in self.parser.defaults():
                     continue
@@ -866,21 +867,20 @@ class AbinitTestInfoParser(object):
         fnames = [f.replace(".in", ".abi") for f in fnames]
         return [os.path.join(self.inp_dir, fname) for fname in fnames]
 
-    def yaml_test(self):
-        sec_name = 'yaml_test'
-        ytest = {}
+    def yaml_test(self, ytest=None, sec_name='yaml_test'):
+
+        if ytest is None:
+            ytest = {}
 
         if self.parser.has_section(sec_name):
             scalar_key = ['file', 'yaml']
             for key in scalar_key:
                 if self.parser.has_option(sec_name, key):
                     ytest[key] = self.parser.get(sec_name, key)
-
-            if 'file' in ytest:
+            if self.parser.has_option(sec_name, 'file'):
                 val = ytest['file']
                 base = os.path.realpath(os.path.dirname(self.inp_fname))
                 ytest['file'] = os.path.join(base, val)
-
         return ytest
 
 
@@ -1902,9 +1902,10 @@ pp_dirpath $ABI_PSPDIR
         """
         if getattr(self.build_env, "buildbot_builder", None) is None:
             return False
+
         for builder in self.exclude_builders:
             if any(c in builder for c in "*?![]{}"):
-                # Interpret builder as regex.
+                # Interpret builder string as regex.
                 m = re.compile(builder)
                 if m.match(self.build_env.buildbot_builder):
                     return True
@@ -1938,6 +1939,9 @@ pp_dirpath $ABI_PSPDIR
         forced_tolerance   String: Force the use of fldiff tool with the specified tolerance.
                            Possible values are: default (from test config), high(1.e-10),
                                                 medium (1.e-8), easy (1.e-5), ridiculous (1.e-2)
+        abimem_level      Run executable with abimem_level.
+        useylm            Change Abinit input file to use useylm e.g. useylm 1
+        gpu_option        Change Abinit input file to use gpu_option e.g. useylm 1
         ================  ====================================================================
 
         .. warning:
@@ -1967,6 +1971,9 @@ pp_dirpath $ABI_PSPDIR
         self.sub_timeout = kwargs.get("sub_timeout", self.sub_timeout)
         simplified_diff = kwargs.get("simplified_diff")
         forced_tolerance = kwargs.get("forced_tolerance")
+        self.abimem_level = kwargs.get("abimem_level", 0)
+        self.useylm = kwargs.get("useylm")
+        self.gpu_option = kwargs.get("gpu_option")
 
         timeout = self.sub_timeout
         if self.build_env.has_bin("timeout") and timeout > 0.0:
@@ -2067,8 +2074,7 @@ pp_dirpath $ABI_PSPDIR
                 use_files_file = True
 
             if use_files_file:
-                self.keep_files(
-                    [self.stdin_fname, self.stdout_fname, self.stderr_fname])
+                self.keep_files([self.stdin_fname, self.stdout_fname, self.stderr_fname])
                 # Legacy mode: create files file and invoke exec with syntax: `abinit < run.files`
                 with open(self.stdin_fname, "wt") as fh:
                     fh.writelines(self.make_stdin())
@@ -2085,6 +2091,8 @@ pp_dirpath $ABI_PSPDIR
 
                 path = os.path.join(self.workdir, os.path.basename(self.inp_fname))
                 bin_argstr = path + " " + self.exec_args
+                if self.abimem_level > 0:
+                    bin_argstr += " --abimem-level %d" % self.abimem_level
                 #print("Using .abi mode with bin_argstr", bin_argstr)
 
             #print("Invoking binary:", self.bin_path, "with bin_argstr", bin_argstr)
@@ -2135,7 +2143,7 @@ pp_dirpath $ABI_PSPDIR
                 self.fld_isok = self.fld_isok and isok
 
                 if simplified_test:
-                  f.fld_options= fld_options_sav
+                    f.fld_options= fld_options_sav
 
                 if not self.exec_error and f.has_line_count_error:
                     f.do_html_diff = True
@@ -2750,8 +2758,15 @@ class AbinitTest(BaseTest):
         app = extra.append
 
         if 'output_file = "' not in line:
-            #app('output_file = "%s"' % (self.id + ".out"))
             app('output_file = "%s"' % (self.id + ".abo"))
+
+        # Add input variables to Abinit input file
+        #print(f"{self.useylm=}")
+        if self.useylm is not None and self.executable == "abinit":
+            app("useylm %d" % self.useylm)
+
+        if self.gpu_option is not None and self.executable == "abinit":
+            app("gpu_option %d" % self.gpu_option)
 
         # Prefix for input/output/temporary files
         i_prefix = self.input_prefix if self.input_prefix else self.id + "i"
@@ -3216,6 +3231,60 @@ def exec2class(exec_name):
     }.get(exec_name, BaseTest)
 
 
+def do_work(qin, qout, run_func, run_func_kwargs, print_lock, kill_me, thread_mode=False):
+    done = {'type': 'proc_done'}
+    all_done = False
+    try:
+        #while not all_done and not (thread_mode and self._kill_me):
+        while not all_done and not (thread_mode and kill_me):
+            test = qin.get(block=True, timeout=2)
+            if test is None:  # reached the end
+                all_done = True
+            else:
+                qout.put(run_func(test, print_lock=print_lock, **run_func_kwargs))
+
+    except EmptyQueueError:
+        # If that happen it is a probably a bug
+        done['error'] = RuntimeError('Task queue is unexpectedly empty.')
+
+    except Exception as e:
+        # Any other error is reported
+        done['error'] = e
+        try:
+            done['task'] = test.full_id
+        except (AttributeError, NameError):
+            pass
+
+    finally:
+        qout.put(done)
+
+
+def run_and_check_test(test, print_lock=None, **kwargs):
+    """Helper function to execute the test. Must be thread-safe."""
+
+    workdir = kwargs.pop("workdir")
+    build_env = kwargs.pop("build_env")
+    job_runner = kwargs.pop("job_runner")
+    nprocs = kwargs.pop("nprocs")
+    runmode = kwargs.pop("runmode")
+    #print(kwargs)
+
+    testdir = os.path.abspath(os.path.join(workdir, test.suite_name + "_" + test.id))
+
+    # Run the test
+    test.run(build_env, job_runner, testdir, print_lock=print_lock, nprocs=nprocs, runmode=runmode, **kwargs)
+
+    # Write HTML summary
+    test.write_html_report()
+
+    # Remove useless files in workdir.
+    test.clean_workdir()
+
+    d = test.results_dump()
+    d['type'] = 'result'
+    return d
+
+
 class ChainOfTests(object):
     """
     A list of tests that should be executed together due to inter-dependencies.
@@ -3392,6 +3461,14 @@ class ChainOfTests(object):
 
         return self._status
 
+    @property
+    def exclude_builders(self):
+        """Merge exclude_builders entries for all tests in the ChainOfTests"""
+        exclude_builders = []
+        for test in self:
+            exclude_builders.extend(test.exclude_builders)
+        return list(set(exclude_builders))
+
     def keep_files(self, files):
         if is_string(files):
             self._files_to_keep.append(files)
@@ -3480,8 +3557,7 @@ class ChainOfTests(object):
         for test in self:
             if fail_all:
                 test.force_skip = True
-            test.run(build_env, runner, workdir=self.workdir,
-                     nprocs=nprocs, **kwargs)
+            test.run(build_env, runner, workdir=self.workdir, nprocs=nprocs, **kwargs)
             if test.had_timeout:
                 fail_all = True
 
@@ -3776,39 +3852,12 @@ class AbinitTestSuite(object):
             raise ValueError(
                 "Cannot have more than two tests with the same full_id")
 
-    def start_workers(self, nprocs, runner):
+    def start_workers(self, py_nprocs, run_func, run_func_kwargs):
         """
-        Start nprocs new processes that will get tests from a queue and run
-        them with runner and put the result of the runner in an output queue.
+        Start py_nprocs new processes that will get tests from a queue and run
+        them with run_func and put the result of the run_func in an output queue.
         Return the task/input queue (to be closed only) and the results/output queue.
         """
-
-        def worker(qin, qout, print_lock, thread_mode=False):
-            done = {'type': 'proc_done'}
-            all_done = False
-            try:
-                while not all_done and not (thread_mode and self._kill_me):
-                    test = qin.get(block=True, timeout=2)
-                    if test is None:  # reached the end
-                        all_done = True
-                    else:
-                        qout.put(runner(test, print_lock=print_lock))
-
-            except EmptyQueueError:
-                # If that happen it is a probably a bug
-                done['error'] = RuntimeError('Task queue is unexpectedly empty.')
-
-            except Exception as e:
-                # Any other error is reported
-                done['error'] = e
-                try:
-                    done['task'] = test.full_id
-                except (AttributeError, NameError):
-                    pass
-
-            finally:
-                qout.put(done)
-
         print_lock = Lock()
         task_q = Queue()
         res_q = Queue()
@@ -3817,18 +3866,18 @@ class AbinitTestSuite(object):
             # fill the queue
             task_q.put(test)
 
-        for _ in range(nprocs):
+        for _ in range(py_nprocs):
             # one end signal for each worker
             task_q.put(None)
 
-        for i in range(nprocs - 1):
+        for i in range(py_nprocs - 1):
             # create and start subprocesses
-            p = Process(target=worker, args=(task_q, res_q, print_lock))
+            p = Process(target=do_work, args=(task_q, res_q, run_func, run_func_kwargs, print_lock, self._kill_me))
             self._processes.append(p)
             p.start()
 
         # Add the worker as a thread of the main process
-        t = Thread(target=worker, args=(task_q, res_q, print_lock, True))
+        t = Thread(target=do_work, args=(task_q, res_q, run_func, run_func_kwargs, print_lock, self._kill_me, True))
         # make it daemon so it will die if the main process is interrupted early
         t.daemon = True
         t.start()
@@ -3883,15 +3932,15 @@ class AbinitTestSuite(object):
 
         return results
 
-    def run_tests(self, build_env, workdir, runner, nprocs=1, py_nprocs=1,
-                  runmode="static", **kwargs):
+    def run_tests(self, build_env, workdir, job_runner,
+                  nprocs=1, py_nprocs=1, runmode="static", **kwargs):
         """
         Execute the list of tests (main entry point for client code)
 
         Args:
             build_env: `BuildEnv` instance with info on the build environment.
             workdir: Working directory (string)
-            runner: `JobRunner` instance
+            job_runner: `JobRunner` instance
             nprocs: number of MPI processes to use for a single test.
             py_nprocs: number of py_nprocs for tests
         """
@@ -3928,25 +3977,15 @@ class AbinitTestSuite(object):
             self.nprocs = nprocs
             self.py_nprocs = py_nprocs
 
-            def run_and_check_test(test, print_lock=None):
-                """Helper function to execute the test. Must be thread-safe."""
-
-                testdir = os.path.abspath(os.path.join(
-                    self.workdir, test.suite_name + "_" + test.id))
-
-                # Run the test
-                test.run(build_env, runner, testdir, print_lock=print_lock,
-                         nprocs=nprocs, runmode=runmode, **kwargs)
-
-                # Write HTML summary
-                test.write_html_report()
-
-                # Remove useless files in workdir.
-                test.clean_workdir()
-
-                d = test.results_dump()
-                d['type'] = 'result'
-                return d
+            run_func_kwargs = dict(
+                workdir=self.workdir,
+                build_env=build_env,
+                job_runner=job_runner,
+                nprocs=self.nprocs,
+                runmode=runmode,
+            )
+            # Add kwargs
+            run_func_kwargs.update(kwargs)
 
             ##############################
             # And now let's run the tests
@@ -3957,21 +3996,19 @@ class AbinitTestSuite(object):
                 logger.info("Sequential version")
                 for test in self:
                     # discard the return value because tests are directly modified
-                    run_and_check_test(test)
+                    run_and_check_test(test, **run_func_kwargs)
 
             elif py_nprocs > 1:
                 logger.info("Parallel version with py_nprocs = %s" % py_nprocs)
 
-                task_q, res_q = self.start_workers(
-                    py_nprocs, run_and_check_test)
+                task_q, res_q = self.start_workers(py_nprocs, run_and_check_test, run_func_kwargs)
 
-                timeout_1test = float(runner.timebomb.timeout)
+                timeout_1test = float(job_runner.timebomb.timeout)
                 if timeout_1test <= 0.1:
                     timeout_1test = 240.
 
                 # Wait for all tests to be done gathering results
-                results = self.wait_loop(py_nprocs, len(
-                    self.tests), timeout_1test, res_q)
+                results = self.wait_loop(py_nprocs, len(self.tests), timeout_1test, res_q)
 
                 # remove this to let python garbage collect processes and avoid
                 # Pickle to complain (it does not accept processes for security reasons)
@@ -3981,8 +4018,7 @@ class AbinitTestSuite(object):
 
                 if results is None:
                     # In principle this should not happen!
-                    print(
-                        "WARNING: wait_loop returned None instead of results. Will try to continue execution!")
+                    print("WARNING: wait_loop returned None instead of results. Will try to continue execution!")
 
                 else:
                     # update local tests instances with the results of their running in a remote process
@@ -4077,7 +4113,7 @@ class AbinitTestSuite(object):
             # Create the HTML index.
             DNS = {
                 "self": self,
-                "runner": runner,
+                "job_runner": job_runner,
                 "user_name": username,
                 "hostname": gethostname(),
                 "test_headings": ['ID', 'Status', 'run_etime (s)', 'tot_etime (s)'],
@@ -4129,7 +4165,7 @@ class AbinitTestSuite(object):
                 run_etime = ${sec2str(self.run_etime)} <br>
                 no_pyprocs = ${self.py_nprocs} <br>
                 no_MPI = ${self.nprocs} <br>
-                ${str2html(str(runner))}
+                ${str2html(str(job_runner))}
             <hr>
             """
 
@@ -4193,9 +4229,9 @@ class AbinitTestSuite(object):
         return Results(self)
 
     def terminate(self):
-        '''
+        """
         Kill all workers
-        '''
+        """
         for p in self._processes:
             p.terminate()
         self._kill_me = True

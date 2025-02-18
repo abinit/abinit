@@ -27,7 +27,6 @@ module m_dft_energy
  use m_hamiltonian
  use m_errors
  use m_xmpi
- use m_gemm_nonlop_projectors
  use m_xcdata
  use m_cgtools
  use m_dtset
@@ -67,6 +66,7 @@ module m_dft_energy
  use m_fourier_interpol, only : transgrid
  use m_prep_kgb,         only : prep_getghc, prep_nonlop
  use m_psolver,          only : psolver_rhohxc
+ use m_gemm_nonlop_projectors, only : set_gemm_nonlop_ikpt, gemm_nonlop_use_gemm
 
 #ifdef HAVE_FC_ISO_C_BINDING
  use, intrinsic :: iso_c_binding, only : c_int64_t
@@ -308,7 +308,7 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
 !Test size of kinetic energy potential Vxctau
  with_vxctau = (present(vxctau))
  if (with_vxctau) with_vxctau = (size(vxctau)>0.and.dtset%usekden/=0)
- if (with_vxctau) then 
+ if (with_vxctau) then
    if (size(vxctau)/=nfftf*dtset%nspden*4) then
      ABI_BUG("Wrong size for vxctau!")
    end if
@@ -532,7 +532,7 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
 !* Norm-conserving: Constant kleimann-Bylander energies are copied from psps to gs_hamk.
 !* PAW: Initialize the overlap coefficients and allocate the Dij coefficients.
 
- call init_hamiltonian(gs_hamk,psps,pawtab,dtset%nspinor,dtset%nsppol,dtset%nspden,&
+ call gs_hamk%init(psps,pawtab,dtset%nspinor,dtset%nsppol,dtset%nspden,&
 & dtset%natom,dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,&
 & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab,&
 & paw_ij=paw_ij,ph1d=ph1d,electronpositron=electronpositron,&
@@ -697,7 +697,7 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
 
 !    Setup gemm_nonlop
      if (gemm_nonlop_use_gemm) then
-       gemm_nonlop_ikpt_this_proc_being_treated = my_ikpt
+       call set_gemm_nonlop_ikpt(my_ikpt)
      end if
 
 #if defined HAVE_GPU_CUDA

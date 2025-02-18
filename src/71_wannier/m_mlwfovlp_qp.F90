@@ -30,7 +30,6 @@ module m_mlwfovlp_qp
  use m_dtset
  use m_dtfil
 
- use defs_datatypes,   only : ebands_t
  use defs_abitypes,    only : MPI_type
  use m_mpinfo,         only : destroy_mpi_enreg, initmpi_seq
  use m_pawtab,         only : pawtab_type
@@ -41,7 +40,7 @@ module m_mlwfovlp_qp
  use m_crystal,        only : crystal_t
  use m_kpts,           only : listkk
  use m_bz_mesh,        only : kmesh_t
- use m_ebands,         only : ebands_init, ebands_free
+ use m_ebands,         only : ebands_t
  use m_qparticles,     only : rdqps, rdgw
  use m_sort,           only : sort_dp
 
@@ -262,7 +261,7 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
    end do
  end do
 
- call ebands_init(bantot_ibz,QP_bst,Dtset%nelect,Dtset%ne_qFD,Dtset%nh_qFD,Dtset%ivalence,&
+ call QP_bst%init(bantot_ibz,Dtset%nelect,Dtset%ne_qFD,Dtset%nh_qFD,Dtset%ivalence,&
   doccde_ibz,eigen_ibz,istwfk_ibz,kibz,nband_ibz,&
   nkibz,npwarr_ibz,nsppol,Dtset%nspinor,Dtset%tphysel,Dtset%tsmear,Dtset%occopt,occfact_ibz,wtk_ibz,&
   dtset%cellcharge(1),dtset%kptopt,dtset%kptrlatt_orig,dtset%nshiftk_orig,dtset%shiftk_orig,&
@@ -503,7 +502,7 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
  call wrtout(std_out,msg,'COLL')
 
  ABI_FREE(m_ks_to_qp)
- call ebands_free(QP_bst)
+ call QP_bst%free()
  call destroy_mpi_enreg(MPI_enreg_seq)
 
  DBG_EXIT("COLL")
