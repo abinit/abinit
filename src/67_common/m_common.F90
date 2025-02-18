@@ -60,6 +60,19 @@ module m_common
  use m_kpts,              only : kpts_timrev_from_kptopt
  use m_dft_energy,        only : entropy
 
+ use m_xg,                 only : SPACE_CR,SPACE_C
+ use m_hamiltonian,        only : gs_hamiltonian_type
+ use m_chebfi2,            only : chebfi_memInfo
+ use m_lobpcg2,            only : lobpcg_memInfo
+ use m_invovl,             only : invovl_ompgpu_static_mem,invovl_ompgpu_work_mem
+ use m_gemm_nonlop_ompgpu, only : gemm_nonlop_ompgpu_static_mem,gemm_nonlop_ompgpu_work_mem
+ use m_getghc_ompgpu,      only : getghc_ompgpu_work_mem
+ use, intrinsic :: iso_c_binding, only : c_size_t
+
+#if defined(HAVE_GPU)
+ use m_gpu_toolbox
+#endif
+
  implicit none
 
  private
@@ -73,6 +86,7 @@ module m_common
                                    ! pseudopotential headers, maxval of dimensions needed in outvars
  public :: ebands_from_file        ! Build an ebands_t object from file. Supports Fortran and netcdf files
  public :: crystal_from_file       ! Build a crystal_t object from netcdf or Fortran file with Header
+ public :: get_gemm_nonlop_ompgpu_blocksize ! Set OpenMP GPU GEMM nonlop blocksize
 
 !!***
 
@@ -2069,6 +2083,190 @@ type(crystal_t) function crystal_from_file(path, comm) result(new)
  end if
 
 end function crystal_from_file
+!!***
+
+
+!!****f* ABINIT/get_gemm_nonlop_ompgpu_blocksize
+!! NAME
+!! get_gemm_nonlop_ompgpu_blocksize
+!!
+!! FUNCTION
+!!  Check GPU memory constraints for many ABINIT routines (lobpcg,chebfi,getghc)
+!!  and compute a size of GEMM nonlop block that is small enough to fit in GPU memory.
+!!  Print its estimation of memory consumption in output.
+!!
+!! INPUTS
+!!  gs_hamk          :  hamiltonian structure (used by getghc)
+!!  ndat             :  size of batching, usually matching bandpp or nblock_lobpcg
+!!  npw              :  number of planewaves
+!!  nband            :  number of bands
+!!  nspinor          :  number of spin-orbits
+!!  paral_kgb        :  1 if KGB parallelism is enabled, 0 otherwise
+!!  optfor           :  1 if forces computation is enabled, 0 otherwise
+!!  optstr           :  1 if stress computation is enabled, 0 otherwise
+!!  wfoptalg         :  Which diago algorithm if used:
+!!                                         -1: none (GEMM nonlop isn't used for diago)
+!!                                        111: CHEBFI2
+!!                                        114: LOBPCG2
+!!                                      other: Only account for getghc
+!!  gpu_option       :  If GPU is enabled (expected to be ABI_GPU_OPENMP for now)
+!!  nblk_gemm_nonlop :  if higher than 1, only print memory estimation and exit
+!!
+!! OUTPUT
+!!  nblk_gemm_nonlop :  Number of blocks to be used in GEMM nonlop
+!!
+!! SOURCE
+subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,npw,nband,nspinor,paral_kgb,&
+&                                           optfor,optstr,wfoptalg,gpu_option,nblk_gemm_nonlop)
+   implicit none
+
+   integer,intent(in)     :: ikpt,ndat,npw,nband,nspinor,paral_kgb,optfor,optstr,wfoptalg,gpu_option
+   type(gs_hamiltonian_type),intent(in) :: gs_hamk
+   integer,intent(inout)  :: nblk_gemm_nonlop
+
+   integer(kind=c_size_t) :: nonlop_smem,invovl_smem,getghc_wmem,invovl_wmem,nonlop_wmem
+   integer(kind=c_size_t) :: sum_mem,sum_bandpp_mem,sum_other_mem,free_mem
+   integer  :: icplx,space,i,ndat_try,rank,nprocs,ndgxdt
+   logical  :: print_and_exit
+   real(dp) :: localMem,chebfiMem(2),lobpcgMem(2)
+
+! *********************************************************************
+
+   free_mem=256*1e9 ! Dummy value
+#ifdef HAVE_GPU
+   if(gpu_option /= ABI_GPU_DISABLED) then
+     call gpu_get_max_mem(free_mem)
+     free_mem = 0.95 * free_mem ! Cutting 5% out to be safe
+   end if
+#else
+   ABI_UNUSED(gpu_option)
+#endif
+   rank = xmpi_comm_rank(xmpi_world); nprocs = xmpi_comm_size(xmpi_world)
+   if ( gs_hamk%istwf_k == 2 ) then ! Real only
+     space = SPACE_CR
+     icplx = 2
+   else ! complex
+     space = SPACE_C
+     icplx = 1
+   end if
+
+   ndat_try=ndat
+   ndgxdt=1
+   if(optfor>0) ndgxdt=ndgxdt+3
+   if(optstr>0) ndgxdt=ndgxdt+6
+   nonlop_smem = gemm_nonlop_ompgpu_static_mem(gs_hamk%npw_fft_k, gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%ntypat, 1)
+   getghc_wmem = getghc_ompgpu_work_mem(gs_hamk, ndat_try)
+   nonlop_wmem = gemm_nonlop_ompgpu_work_mem(gs_hamk%istwf_k, ndgxdt*ndat, gs_hamk%npw_fft_k,&
+   &               gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%ntypat, gs_hamk%lmnmax)
+
+   if(wfoptalg==111) then
+     chebfiMem = chebfi_memInfo(nband,icplx*npw*nspinor,space,paral_kgb,icplx*npw*nspinor,ndat)
+     invovl_smem = invovl_ompgpu_static_mem(gs_hamk)
+     invovl_wmem = invovl_ompgpu_work_mem(gs_hamk, ndat_try)
+   end if
+   if(wfoptalg==114) then
+     lobpcgMem = lobpcg_memInfo(nband,icplx*npw*nspinor,ndat,space)
+   end if
+   localMem  = (npw+2*npw*nspinor+2*nband)*kind(1.d0) !blockdim
+
+   print_and_exit=.false.
+   if(nblk_gemm_nonlop > 1) then
+     print_and_exit=.true.
+   else
+     nblk_gemm_nonlop=1
+     write(std_out,*) "Setting GEMM nonlop block number...", new_line('A')
+   end if
+   ! How the number of blocks is decided:
+   ! We try to divide bandpp with dividers from 1 to 20
+   ! If we fail, that means test case is too fat for given hardware, and that's it
+   ! This looks stupid but we don't actually expect to process CHEBFI with 20 blocks.
+   do i=1,20
+
+     ! Gemm nonlop static memory requirement is higher, split here
+     if(i>1 .and. .not. print_and_exit) nblk_gemm_nonlop = nblk_gemm_nonlop + 1
+     if(modulo(nprocs,nblk_gemm_nonlop)/=0) cycle
+
+     nonlop_smem = gemm_nonlop_ompgpu_static_mem(gs_hamk%npw_fft_k,gs_hamk%indlmn,gs_hamk%nattyp,gs_hamk%ntypat,nblk_gemm_nonlop)
+
+     ! Bandpp~ndat sized buffer memory requirements are higher, split there
+     sum_mem          = nonlop_smem
+     sum_bandpp_mem   = getghc_wmem
+     sum_other_mem    = nonlop_smem
+
+     if(wfoptalg>=0) then
+       sum_mem          = sum_mem+getghc_wmem
+     else
+       sum_mem          = sum_mem+nonlop_wmem
+     end if
+
+     if(wfoptalg==111) then
+       sum_mem          = sum_mem        + invovl_smem+invovl_wmem+chebfiMem(1)+chebfiMem(2)+localMem
+       sum_bandpp_mem   = sum_bandpp_mem + invovl_wmem
+       sum_other_mem    = sum_other_mem  + invovl_smem+chebfiMem(1)+chebfiMem(2)+localMem
+     end if
+
+     if(wfoptalg==114) then
+       sum_mem          = sum_mem        + lobpcgMem(1)+lobpcgMem(2)+localMem
+       sum_other_mem    = sum_other_mem  + lobpcgMem(1)+lobpcgMem(2)+localMem
+     end if
+
+     if(sum_mem < free_mem .or. print_and_exit .or. i==20) then
+       write(std_out,'(A,I3,A,I3,A,A)') "GPU memory consumption estimate using ", nblk_gemm_nonlop,&
+       &                        " blocks in GEMM nonlop for K-point ",ikpt,":"
+       write(std_out,'(A,F10.3,1x,A)') " Available memory                        : ", real(free_mem)/(1024*1024), "MiB"
+       write(std_out,*) "Memory requirements per MPI task (OpenMP GPU)"
+       write(std_out,*) "---------------------------------------------------------"
+       write(std_out,*) "GEMM nonlop projectors, gouverned by blocking"
+       write(std_out,'(A,F10.3,1x,A)') "   gemm_nonlop_ompgpu (projectors)       : ",  real(nonlop_smem,dp)/(1024*1024), "MiB"
+
+
+       write(std_out,*) "Static buffers, computed once and permanently on card"
+       ! CHEBFI2
+       if(wfoptalg==111) then
+         write(std_out,'(A,F10.3,1x,A)') "   invovl_ompgpu (mkinvovl)              : ",  real(invovl_smem,dp)/(1024*1024), "MiB"
+         write(std_out,'(A,F10.3,1x,A)') "   chebfi2                               : ",          chebfiMem(1)/(1024*1024), "MiB"
+       end if
+
+       ! LOBPCG2
+       if(wfoptalg==114) then
+         write(std_out,'(A,F10.3,1x,A)') "   lobpcg2                               : ",          lobpcgMem(1)/(1024*1024), "MiB"
+       end if
+
+       write(std_out,*) "Work buffers (sized after bandpp or nblock_lobpcg)"
+
+       ! getghc (any diago algorithm)
+       if(wfoptalg>=0) then
+         write(std_out,'(A,F10.3,1x,A)') "   getghc (inc. fourwf+gemm_nonlop)      : ",  real(getghc_wmem,dp)/(1024*1024), "MiB"
+       else
+         write(std_out,'(A,F10.3,1x,A)') "   gemm_nonlop                           : ",  real(nonlop_wmem,dp)/(1024*1024), "MiB"
+       end if
+
+       ! CHEBFI2
+       if(wfoptalg==111) then
+         write(std_out,'(A,F10.3,1x,A)') "   invovl                                : ",  real(invovl_wmem,dp)/(1024*1024), "MiB"
+         write(std_out,'(A,F10.3,1x,A)') "   chebfi2 (RR buffers)                  : ",          chebfiMem(2)/(1024*1024), "MiB"
+         write(std_out,'(A,F10.3,1x,A)') "   chebfiwf (cg,resid,eig)               : ",              localMem/(1024*1024), "MiB"
+       end if
+
+       ! LOBPCG2
+       if(wfoptalg==114) then
+         write(std_out,'(A,F10.3,1x,A)') "   lobpcg2 (RR buffers)                  : ",          lobpcgMem(2)/(1024*1024), "MiB"
+         write(std_out,'(A,F10.3,1x,A)') "   lobpcgwf (cg,resid,eig)               : ",              localMem/(1024*1024), "MiB"
+       end if
+
+       write(std_out,*) "---------------------------------------------------------"
+       write(std_out,'(A,F10.3,1x,A)') "Sum                                      : ", real(sum_mem)/(1024*1024), "MiB"
+       write(std_out,'(A)') new_line('A')
+       flush(std_out)
+       exit
+     end if
+
+   end do
+   if(sum_mem > free_mem) then
+     ABI_ERROR("It seems the test case you're trying to run is too big to run with given hardware resources !")
+   end if
+
+ end subroutine get_gemm_nonlop_ompgpu_blocksize
 !!***
 
 end module m_common

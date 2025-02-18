@@ -78,7 +78,7 @@ module m_vtorho
  use m_mkrho,              only : mkrho, prtrhomxmn
  use m_mkffnl,             only : mkffnl
  use m_mpinfo,             only : proc_distrb_cycle
- use m_common,             only : prteigrs
+ use m_common,             only : prteigrs,get_gemm_nonlop_ompgpu_blocksize
  use m_dmft,               only : dmft_solve
  use m_datafordmft,        only : datafordmft
  use m_fourier_interpol,   only : transgrid
@@ -86,7 +86,6 @@ module m_vtorho
  use m_wvl_rho,            only : wvl_mkrho
  use m_wvl_psi,            only : wvl_hpsitopsi, wvl_psitohpsi, wvl_nl_gradient
  use m_inwffil,            only : cg_from_atoms
- use m_chebfiwf,           only : chebfiwf2_blocksize
  use m_gemm_nonlop_projectors, only : set_gemm_nonlop_ikpt, reset_gemm_nonlop, gemm_nonlop_use_gemm, &
                                       gemm_nonlop_nblocks, gemm_nonlop_is_distributed
 
@@ -379,7 +378,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  integer :: mcgq,mcprj_local,mcprj_tmp,me_distrb,mkgq,mpi_comm_sphgrid
  integer :: my_nspinor,n1,n2,n3,n4,n5,n6,nband_eff,nbdbuf_eff !mwarning,
  integer :: nband_k,nband_cprj_k,nbuf,neglect_pawhat,nfftot,nkpg,nkpt1,nnsclo_now
- integer :: nproc_distrb,npw_k,nspden_rhoij,option,prtvol,nblk_gemm_nonlop,quit
+ integer :: nproc_distrb,npw_k,nspden_rhoij,option,prtvol,quit
  integer :: spaceComm_distrb,usecprj_local,usefock_ACE,usetimerev
  logical :: berryflag,computesusmat,fixed_occ,has_vectornd
  logical :: locc_test,paral_atom,remove_inv,usefock,with_vxctau
@@ -995,16 +994,13 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          end if
        end if
 
-       if(gemm_nonlop_use_gemm .and. dtset%wfoptalg == 111 .and. istep <= 1) then
+       if(gemm_nonlop_use_gemm .and. istep <= 1 .and. isppol < 2 .and. dtset%gpu_option==ABI_GPU_OPENMP) then
          gemm_nonlop_nblocks = dtset%gpu_nl_splitsize
-         ! Only compute CHEBFI number of blocks if user didn't set it themselves
-         if(gemm_nonlop_nblocks==1) then
-           call chebfiwf2_blocksize(gs_hamk,mpi_enreg%bandpp,npw_k,nband_k,dtset%nspinor,mpi_enreg%paral_kgb,&
-           &                        dtset%gpu_option,nblk_gemm_nonlop)
-           gemm_nonlop_nblocks = nblk_gemm_nonlop
-         end if
+         call get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,mpi_enreg%bandpp,npw_k,nband_k,&
+         &                        dtset%nspinor,mpi_enreg%paral_kgb,&
+         &                        0,0,dtset%wfoptalg,gs_hamk%gpu_option,gemm_nonlop_nblocks)
          gemm_nonlop_is_distributed = .false.
-         if(gemm_nonlop_nblocks > 0 .and. dtset%gpu_nl_distrib/=0) gemm_nonlop_is_distributed = .true.
+         if(gemm_nonlop_nblocks > 1 .and. dtset%gpu_nl_distrib/=0) gemm_nonlop_is_distributed = .true.
        end if
 
 !      Build inverse of overlap matrix for chebfi
