@@ -1442,6 +1442,8 @@ subroutine ddb_hdr_open_write_nc(ddb_hdr, filename, with_psps, with_dfpt_vars)
    &])
  NCF_CHECK(ncerr)
 
+NCF_CHECK(nf90_put_var(ncid_d2E, nctk_idname(ncid_d2E, 'd2E_block_types'), blktyp_d2E))
+
  ABI_FREE(blktyp_d2E)
 
  ! -----------------------
