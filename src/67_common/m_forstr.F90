@@ -67,7 +67,9 @@ module m_forstr
  use m_mkffnl,           only : mkffnl
  use m_mpinfo,           only : proc_distrb_cycle
  use m_nonlop,           only : nonlop
- use m_gemm_nonlop_projectors, only : set_gemm_nonlop_ikpt, gemm_nonlop_use_gemm
+ use m_gemm_nonlop_projectors, only : set_gemm_nonlop_ikpt, gemm_nonlop_use_gemm, &
+                                      gemm_nonlop_nblocks, gemm_nonlop_is_distributed
+ use m_common,           only : get_gemm_nonlop_ompgpu_blocksize
  use m_fock_getghc,      only : fock_getghc
  use m_prep_kgb,         only : prep_nonlop
  use m_paw_nhat,         only : pawmknhat
@@ -419,7 +421,8 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 &   mpi_enreg,psps%mpsang,dtset%mpw,my_natom,dtset%natom,dtset%nband,dtset%nfft,nfftf,dtset%ngfft,&
 &   dtset%nkpt,dtset%nloalg,npwarr,dtset%nspden,dtset%nspinor,dtset%nsppol,dtset%nsym,ntypat,&
 &   dtset%nucdipmom,occ,optfor,paw_ij,pawfgr,pawtab,ph1d,psps,rprimd,stress_needed,symrec,dtset%typat,&
-&   usecprj,dtset%usefock,usevxctau,vxctau,usexg,dtset%gpu_option,dtset%wtk,xred,ylm,ylmgr,xg_nonlop)
+&   usecprj,dtset%usefock,usevxctau,vxctau,usexg,dtset%gpu_option,dtset%gpu_nl_distrib,&
+&   dtset%gpu_nl_splitsize,dtset%wtk,xred,ylm,ylmgr,xg_nonlop)
  else if (optfor>0) then !WVL
    ABI_MALLOC(xcart,(3, dtset%natom))
    call xred2xcart(dtset%natom, rprimd, xcart, xred)
@@ -628,13 +631,14 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 &  grnl,istwfk,kg,kinstr,npsstr,kpt,mband,mcg,mcprj,mgfft,mggastr,mkmem,mpi_enreg,mpsang,&
 &  mpw,my_natom,natom,nband,nfft,nfftf,ngfft,nkpt,nloalg,npwarr,nspden,nspinor,nsppol,nsym,&
 &  ntypat,nucdipmom,occ,optfor,paw_ij,pawfgr,pawtab,ph1d,psps,rprimd,&
-&  stress_needed,symrec,typat,usecprj,usefock,usevxctau,vxctau,usexg,gpu_option,wtk,xred,ylm,ylmgr,xg_nonlop)
+&  stress_needed,symrec,typat,usecprj,usefock,usevxctau,vxctau,usexg,&
+&  gpu_option,gpu_nl_distrib,gpu_nl_splitsize,wtk,xred,ylm,ylmgr,xg_nonlop)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mband,mcg,mcprj,mgfft,mkmem,mpsang,mpw,my_natom,natom,nfft,nfftf,nkpt
  integer,intent(in) :: nspden,nsppol,nspinor,nsym,ntypat,optfor,stress_needed
- integer,intent(in) :: usecprj,usefock,usevxctau,usexg,gpu_option
+ integer,intent(in) :: usecprj,usefock,usevxctau,usexg,gpu_option,gpu_nl_distrib,gpu_nl_splitsize
  real(dp),intent(in) :: ecut,ecutsm,effmass_free
  type(electronpositron_type),pointer :: electronpositron
  type(MPI_type),intent(inout) :: mpi_enreg
@@ -1018,6 +1022,14 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 !    Setup gemm_nonlop
      if (gemm_nonlop_use_gemm) then
        call set_gemm_nonlop_ikpt(my_ikpt)
+
+       gemm_nonlop_nblocks = gpu_nl_splitsize
+       call get_gemm_nonlop_ompgpu_blocksize(my_ikpt,gs_hamk,mpi_enreg%bandpp,npw_k,nband_k,&
+       &                        nspinor,mpi_enreg%paral_kgb,&
+       &                        optfor,stress_needed,-1,gs_hamk%gpu_option,gemm_nonlop_nblocks)
+       gemm_nonlop_is_distributed = .false.
+       if(gemm_nonlop_nblocks > 1 .and. gpu_nl_distrib/=0) gemm_nonlop_is_distributed = .true.
+
      end if
 
      if (usexg==1) then

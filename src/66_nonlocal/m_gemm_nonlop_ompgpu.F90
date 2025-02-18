@@ -89,10 +89,10 @@ module m_gemm_nonlop_ompgpu
 
 contains
 
- function gemm_nonlop_ompgpu_work_mem(istwfk, ndat, npw, indlmn, nattyp, ntypat, lmnmax) result(req_mem)
+ function gemm_nonlop_ompgpu_work_mem(istwfk, ndat, ngrads, npw, indlmn, nattyp, ntypat, lmnmax) result(req_mem)
    implicit none
 
-   integer, intent(in) :: istwfk, ndat, npw, ntypat, lmnmax
+   integer, intent(in) :: istwfk, ndat, ngrads, npw, ntypat, lmnmax
    integer, intent(in) :: indlmn(:,:,:), nattyp(ntypat)
 
    integer :: nprojs, cplex, itypat
@@ -119,36 +119,32 @@ contains
    req_mem = req_mem + dp * cplex * int(nprojs, c_size_t) * int(ndat, c_size_t)  ! s_projections
    req_mem = req_mem + dp * cplex * int(nprojs, c_size_t) * int(ndat, c_size_t)  ! vnl_projections
 
+   if(ngrads>0) then
+     req_mem = req_mem + dp * cplex * int(nprojs, c_size_t) * int(ndat, c_size_t)  ! dprojections_
+     req_mem = req_mem + dp * cplex * int(nprojs, c_size_t) * int(ndat, c_size_t)  ! s_dprojections
+     req_mem = req_mem + dp * cplex * int(nprojs, c_size_t) * int(ndat, c_size_t)  ! vnl_dprojections
+   end if
+
  end function gemm_nonlop_ompgpu_work_mem
 
 !----------------------------------------------------------------------
 
- function gemm_nonlop_ompgpu_static_mem(npw, indlmn, nattyp, ntypat, nblocks,&
-     compute_grad_strain,compute_grad_atom) result(req_mem)
+ function gemm_nonlop_ompgpu_static_mem(npw, indlmn, nattyp, ntypat, nblocks, ngrads) result(req_mem)
    implicit none
 
-   integer, intent(in) :: npw, ntypat, nblocks
+   integer, intent(in) :: npw, ntypat, nblocks, ngrads
    integer, intent(in) :: indlmn(:,:,:), nattyp(ntypat)
-   logical, intent(in), optional :: compute_grad_strain,compute_grad_atom
 
-   integer :: nprojs, ngrads, itypat
-   logical :: my_compute_grad_strain,my_compute_grad_atom
+   integer :: nprojs, itypat
    integer(kind=c_size_t) :: req_mem
 
 ! *************************************************************************
-
-   my_compute_grad_strain=.false. ; if (present(compute_grad_strain)) my_compute_grad_strain=compute_grad_strain
-   my_compute_grad_atom=.false. ; if (present(compute_grad_atom)) my_compute_grad_atom=compute_grad_atom
 
    nprojs = 0
    do itypat=1,ntypat
      nprojs = nprojs + count(indlmn(3,:,itypat)>0)*nattyp(itypat)
    end do
    nprojs = nprojs / nblocks
-
-   ngrads = 0
-   if (my_compute_grad_strain) ngrads = ngrads + 6
-   if (my_compute_grad_atom)   ngrads = ngrads + 3
 
    req_mem = 0
 
