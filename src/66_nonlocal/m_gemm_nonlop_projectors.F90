@@ -199,7 +199,6 @@ contains
  subroutine init_gemm_nonlop(gpu_option)
 
   integer,intent(in) :: gpu_option
-  integer :: rank, nprocs, ierr
 
 ! *************************************************************************
 
@@ -219,13 +218,9 @@ contains
 #endif
   end if
 
+  gemm_nonlop_block_comm=xmpi_comm_null
+  gemm_nonlop_block_size=0
   gemm_nonlop_gpu_option=gpu_option
-  rank = xmpi_comm_rank(xmpi_world); nprocs = xmpi_comm_size(xmpi_world)
-  if(gemm_nonlop_block_comm/=xmpi_comm_null) call xmpi_comm_free(gemm_nonlop_block_comm)
-  if(gemm_nonlop_nblocks==0) gemm_nonlop_nblocks=nprocs
-  write(std_out,*) "Splitting on ", gemm_nonlop_nblocks
-  call xmpi_comm_split(xmpi_world, rank/(nprocs/gemm_nonlop_nblocks), rank, gemm_nonlop_block_comm, ierr)
-  if(ierr/=0) ABI_BUG("Bug split!")
 
  end subroutine init_gemm_nonlop
 !!***
@@ -597,7 +592,7 @@ contains
  &                             is_kprime,gpu_option)
   integer,intent(in) :: npw,istwf_k,nprojs,ndgxdt,nd2gxdt,gpu_option
   logical,intent(in) :: is_kprime
-  integer :: ik,rank,nprojs_blk,nprojs_my_blk,nprojs_last_blk
+  integer :: ik,rank,nprojs_blk,nprojs_my_blk,nprojs_last_blk,ierr,nprocs
   logical :: is_last_rank
 #ifdef HAVE_OPENMP_OFFLOAD
   !NOTE: Those pointers exists to be served to OpenMP TARGET directives to hide
@@ -616,6 +611,14 @@ contains
     call free_gemm_nonlop_ikpt(ik, gpu_option)
   end if
 
+  if(gemm_nonlop_is_distributed) then
+    nprocs = xmpi_comm_size(xmpi_world)
+    ! If split size has changed, reset array
+    if(gemm_nonlop_kpt(ik)%nprojs_blk /= nprojs / (nprocs/gemm_nonlop_nblocks)) then
+      call free_gemm_nonlop_ikpt(ik, gpu_option)
+    end if
+  end if
+
   nprojs_last_blk = 0
   nprojs_my_blk = 0
   nprojs_blk = 0
@@ -626,6 +629,20 @@ contains
     nprojs_my_blk = nprojs
     nprojs_blk = nprojs
     if(gemm_nonlop_is_distributed) then
+
+      if(gemm_nonlop_block_comm==xmpi_comm_null .or. gemm_nonlop_block_size>0) then
+        nprocs = xmpi_comm_size(xmpi_world)
+        if(gemm_nonlop_block_comm==xmpi_comm_null .or. gemm_nonlop_block_size*gemm_nonlop_nblocks /= nprocs) then
+          call xmpi_comm_free(gemm_nonlop_block_comm)
+          rank = xmpi_comm_rank(xmpi_world);
+          if(gemm_nonlop_nblocks==0) gemm_nonlop_nblocks=nprocs
+          write(std_out,'(A,I3,A,I3,A)'), "Splitting GEMM nonlop projectors on ",&
+          &    gemm_nonlop_nblocks, " blocks of ", nprocs/gemm_nonlop_nblocks, " MPI tasks..."
+          call xmpi_comm_split(xmpi_world, rank/(nprocs/gemm_nonlop_nblocks), rank, gemm_nonlop_block_comm, ierr)
+          if(ierr/=0) ABI_BUG("MPI_comm_split failed!")
+        end if
+      end if
+
       rank = xmpi_comm_rank(gemm_nonlop_block_comm); gemm_nonlop_block_size = xmpi_comm_size(gemm_nonlop_block_comm)
       is_last_rank = (rank==gemm_nonlop_block_size-1)
 
