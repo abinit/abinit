@@ -1354,7 +1354,7 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mgfft,mpi
 !Local variables-------------------------------
 !scalars
  integer,parameter :: tim_fourwf=1
- integer :: icmplx,idat,idir,ipw,iv1,iv2,nspinortot,shift
+ integer :: idat,idir,ipw,iv1,iv2,nspinortot,shift
  logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc
  real(dp) :: weight=one
  !arrays
@@ -1572,8 +1572,7 @@ subroutine getghc_mGGA(cwavef,ghc_mGGA,gbound_k,gprimd,istwf_k,kg_k,kpt,mgfft,mp
  integer,parameter :: tim_fourwf=1
  integer :: idat,idir,ipw,nspinortot,shift
  logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc
- real(dp) :: gp2pi1,gp2pi2,gp2pi3,kpt_cart,kg_k_cart,weight=one
- real(dp) :: scale_grad,scale_laplacian
+ real(dp) :: weight=one
 !arrays
  real(dp) :: kg_k_cart_vec(3)
  real(dp),allocatable :: cwavef1(:,:),cwavef2(:,:)
@@ -1583,11 +1582,6 @@ subroutine getghc_mGGA(cwavef,ghc_mGGA,gbound_k,gprimd,istwf_k,kg_k,kpt,mgfft,mp
  real(dp),allocatable :: work(:,:,:,:)
 
 ! *********************************************************************
-
- !JWZ debug
- scale_grad=one
- scale_laplacian=one
-
 
  ghc_mGGA(:,:)=zero
 
@@ -1635,8 +1629,7 @@ subroutine getghc_mGGA(cwavef,ghc_mGGA,gbound_k,gprimd,istwf_k,kg_k,kpt,mgfft,mp
 !!$OMP PARALLEL DO
    do idat=1,ndat
      do ipw=1,npw_k
-        ghc_mGGA(:,ipw+(idat-1)*npw_k)=ghc_mGGA(:,ipw+(idat-1)*npw_k)-&
-          & scale_laplacian*half*ghc1(:,ipw+(idat-1)*npw_k)
+        ghc_mGGA(:,ipw+(idat-1)*npw_k)=ghc_mGGA(:,ipw+(idat-1)*npw_k)-half*ghc1(:,ipw+(idat-1)*npw_k)
      end do
    end do
    ABI_FREE(lcwavef)
@@ -1649,8 +1642,7 @@ subroutine getghc_mGGA(cwavef,ghc_mGGA,gbound_k,gprimd,istwf_k,kg_k,kpt,mgfft,mp
 !!$OMP PARALLEL DO
      do idat=1,ndat
        do ipw=1,npw_k
-          ghc_mGGA(:,ipw+(idat-1)*npw_k)=ghc_mGGA(:,ipw+(idat-1)*npw_k)-&
-            & scale_grad*half*ghc1(:,ipw+(idat-1)*npw_k)
+          ghc_mGGA(:,ipw+(idat-1)*npw_k)=ghc_mGGA(:,ipw+(idat-1)*npw_k)-half*ghc1(:,ipw+(idat-1)*npw_k)
        end do
      end do
    end do ! idir
