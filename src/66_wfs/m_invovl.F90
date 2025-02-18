@@ -714,9 +714,9 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
    &                  c_loc(projs), (3-cplx)*ham%npw_k, &
    &                  c_loc(projs), (3-cplx)*ham%npw_k, czero, c_loc(current_gram_projs), invovl%nprojs)
    !$OMP END TARGET DATA
+   call xmpi_sum(invovl%gram_projs,mpi_enreg%comm_band,ierr,use_omp_map=.true.)
    !$OMP TARGET EXIT DATA MAP(from:current_gram_projs)
    !$OMP TARGET EXIT DATA MAP(delete:projs)
-   call xmpi_sum(invovl%gram_projs,mpi_enreg%comm_band,ierr)
 #endif
  else
    do iproc = 1, mpi_enreg%nproc_fft

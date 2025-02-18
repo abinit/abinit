@@ -51,7 +51,7 @@ module m_gstate
  use defs_datatypes,     only : pseudopotential_type
  use defs_abitypes,      only : MPI_type
  use m_time,             only : timab
- use m_symtk,            only : matr3inv
+ use m_matrix,           only : matr3inv
  use m_io_tools,         only : open_file
  use m_occ,              only : newocc, getnel
  use m_ddb_hdr,          only : ddb_hdr_type

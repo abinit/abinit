@@ -28,7 +28,7 @@ module m_scup_dataset
  use m_bz_mesh
 
  use m_parser, only : intagm
- use m_symtk,  only : matr3inv
+ use m_matrix, only : matr3inv
 
  implicit none
 

@@ -27,7 +27,7 @@ module m_eph_double_grid
  use m_abicore
 
  use m_numeric_tools,  only : wrap2_pmhalf
- use m_symtk,          only : mati3inv
+ use m_matrix,         only : mati3inv
  use m_crystal,        only : crystal_t
  use m_kpts,           only : kpts_timrev_from_kptopt !, listkk
  use m_fstrings,       only : itoa, sjoin

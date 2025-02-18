@@ -41,7 +41,8 @@ module m_mover
 
  use defs_abitypes,        only : MPI_type
  use m_fstrings,           only : strcat, sjoin, indent, itoa
- use m_symtk,              only : matr3inv, symmetrize_xred
+ use m_matrix,             only : matr3inv
+ use m_symtk,              only : symmetrize_xred
  use m_geometry,           only : fcart2gred, chkdilatmx, xred2xcart, metric
  use m_time,               only : abi_wtime, sec2str
  use m_exit,               only : get_start_time, have_timelimit_in, get_timelimit, enable_timelimit_in

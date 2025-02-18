@@ -30,7 +30,7 @@ module m_rttddft_propagators
                                 & prep_bandfft_tabs
  use m_dtset,               only: dataset_type
  use m_energies,            only: energies_type, energies_init, energies_copy
- use m_gemm_nonlop_projectors, only: gemm_nonlop_ikpt_this_proc_being_treated
+ use m_gemm_nonlop_projectors, only: set_gemm_nonlop_ikpt
  use m_hamiltonian,         only: gs_hamiltonian_type, gspot_transgrid_and_pack
  use m_invovl,              only: make_invovl
  use m_kg,                  only: mkkin, mkkpg
@@ -326,8 +326,7 @@ subroutine rttddft_propagator_er(dtset, ham_k, istep, mpi_enreg, psps, tdks, cal
 
       ! Setup gemm_nonlop
       if (tdks%gemm_nonlop_use_gemm) then
-         !set the global variable indicating to gemm_nonlop where to get its data from
-         gemm_nonlop_ikpt_this_proc_being_treated = my_ikpt
+         call set_gemm_nonlop_ikpt(my_ikpt)
       end if
 
       !** Compute the exp[(S^{-1})H]*cg using Taylor expansion to approximate the exponential
