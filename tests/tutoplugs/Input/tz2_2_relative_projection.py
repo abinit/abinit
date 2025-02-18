@@ -9,7 +9,7 @@ def get_projection(fb, l, typat, blist=None, fact=1.0):
     # This function was adapted from the plot_fatbands_typeview function
     e0 = fb.ebands.get_e0('fermie')
     x = np.arange(fb.nkpt)
-   
+
     mybands = range(fb.ebands.mband) if blist is None else blist
 
     eigens = np.zeros((fb.nkpt, len(mybands)))
@@ -20,7 +20,7 @@ def get_projection(fb, l, typat, blist=None, fact=1.0):
             wl_sbk = fb.get_wl_symbol(symbol) * (fact / 2)
 
             for ib, band in enumerate(mybands):
-        
+
                 eigens[:, ib] = fb.ebands.eigens[spin, :, band] - e0
                 w = wl_sbk[l, spin, band]
                 width[:, ib] += w

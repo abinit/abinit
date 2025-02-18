@@ -1,6 +1,6 @@
-Hartwigsen-Goedecker-Hutter psp for Te,  from PRB58, 3641 (1998) 
+Hartwigsen-Goedecker-Hutter psp for Te,  from PRB58, 3641 (1998)
    52   6  010605 zatom,zion,pspdat
- 3 1   2 0 2001 0  pspcod,pspxc,lmax,lloc,mmax,r2well 
+ 3 1   2 0 2001 0  pspcod,pspxc,lmax,lloc,mmax,r2well
   0.575000    9.387085    0.000000    0.000000   0.000000 rloc, c1, c2, c3, c4
   0.556456    2.046890   -0.029333   -0.881119          rs, h11s, h22s, h33s
   0.615262    1.033478   -0.481172    0.000000          rp, h11p, h22p, h33p

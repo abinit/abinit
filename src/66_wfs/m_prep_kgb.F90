@@ -419,7 +419,7 @@ subroutine prep_getghc(cwavef, gs_hamk, gvnlxc, gwavef, swavef, lambda, blocksiz
    call timab(637,3,tsec)
    call multithreaded_getghc(cpopt,ewavef_alltoall_sym,cwaveprj,gwavef_alltoall_sym,swavef_alltoall_sym,gs_hamk,&
 &   gvnlxc_alltoall_sym,lambda,mpi_enreg,bandpp_sym,prtvol,sij_opt,tim_getghc,1,&
-&   kg_fft_k=kg_k_gather_sym)
+&   kg_fft_k=kg_k_gather_sym,filter_dilatmx_loc=.false.)
    call timab(637,2,tsec)
 
    call timab(633,3,tsec)

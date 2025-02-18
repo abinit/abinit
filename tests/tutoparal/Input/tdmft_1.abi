@@ -1,6 +1,6 @@
 # SrVO3, a simple archetypal correlated material
 #
-# In this test, we compute the DFT electronic structure of SrVO3 in the first 
+# In this test, we compute the DFT electronic structure of SrVO3 in the first
 # dataset and then the orbital character of the bands for the t2g and eg
 # orbitals of the vanadium atom and the p orbitals of the oygen atoms.
 
@@ -44,7 +44,7 @@ tsmear    1200 K        # Temperature of smearing
 pawprtvol 3             # Printing additional information
 
 #First dataset specific parameters
-nstep     40            # Number of iterations for the DFT convergence   
+nstep     40            # Number of iterations for the DFT convergence
 nline     3             # Number of line minimisations
 nnsclo    3             # Number of non-self consistent loops
 tolwfr    1.0d-15       # Tolerance of the DFT convergence

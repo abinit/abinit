@@ -33,7 +33,6 @@ module m_dfpt_nstwf
  use m_nctk
  use m_dtset
  use m_dtfil
- use m_gemm_nonlop_projectors
  use m_abi_linalg
 
  use defs_datatypes, only : pseudopotential_type
@@ -41,6 +40,7 @@ module m_dfpt_nstwf
  use m_time,     only : timab
  use m_io_tools, only : file_exists
  use m_fourier_interpol, only : transgrid
+ use m_gemm_nonlop_projectors, only : set_gemm_nonlop_ikpt, gemm_nonlop_use_gemm
  use m_geometry, only : stresssym
  use m_dynmat,   only : dfpt_sygra
  use m_mpinfo,   only : destroy_mpi_enreg, initmpi_seq, proc_distrb_cycle, proc_distrb_band, proc_distrb_nband
@@ -543,7 +543,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 !Initialize most of the (1st-order) Hamiltonian
 !1) Allocate all arrays and initialize quantities that do not depend on k and spin.
 !2) Perform the setup needed for the non-local factors:
- call init_hamiltonian(gs_hamkq,psps,pawtab,nspinor,nsppol,nspden,dtset%natom,&
+ call gs_hamkq%init(psps,pawtab,nspinor,nsppol,nspden,dtset%natom,&
 & dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,ph1d=ph1d,&
 & paw_ij=paw_ij,mpi_atmtab=my_atmtab,comm_atom=my_comm_atom,mpi_spintab=mpi_enreg%my_isppoltab,&
 & usecprj=usecprj,nucdipmom=dtset%nucdipmom,gpu_option=gpu_option)
@@ -616,7 +616,7 @@ has_vectornd = (with_vectornd .EQ. 1)
    need_wf1=(.true.)
 
 !  Initialize data for NL 1st-order (j1) hamiltonian
-   call init_rf_hamiltonian(cplex,gs_hamkq,ipert1,rf_hamkq,mpi_spintab=[0,0])
+   call rf_hamkq%init(cplex,gs_hamkq,ipert1,mpi_spintab=[0,0])
 
 !  The following contributions are needed only for non-DDK perturbation:
 !  - Frozen part of 1st-order Dij
@@ -1207,8 +1207,7 @@ has_vectornd = (with_vectornd .EQ. 1)
 
            ! Setup gemm_nonlop
            if (gemm_nonlop_use_gemm) then
-             !set the global variable indicating to gemm_nonlop where to get its data from
-             gemm_nonlop_ikpt_this_proc_being_treated = ikpt
+             call set_gemm_nonlop_ikpt(ikpt)
            end if ! gemm_nonlop_use_gemm
 
 !          Extract ground state projected WF and derivatives in idir1 direction
@@ -2526,7 +2525,7 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
        if( ipert1<=dtset%natom .or. ipert1==dtset%natom+2 )then
 
 !        Initialize data for NL 1st-order hamiltonian
-         call init_rf_hamiltonian(1,gs_hamkq,ipert1,rf_hamkq)
+         call rf_hamkq%init(1,gs_hamkq,ipert1)
 
          if (((ipert <= dtset%natom).or.(ipert == dtset%natom + 2)) &
 &         .and.(ipert1 == dtset%natom+2).and. dtset%prtbbb==1) then

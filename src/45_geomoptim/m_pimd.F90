@@ -30,7 +30,7 @@ MODULE m_pimd
  use m_random_zbq
 
  use m_numeric_tools,  only : uniformrandom
- use m_symtk,          only : matr3inv
+ use m_matrix,         only : matr3inv
  use m_geometry,       only : mkradim
 
  implicit none

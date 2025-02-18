@@ -126,7 +126,7 @@ def main():
   dbex_files = list()
   for acf in os.listdir( os.path.join(home_dir, "doc/build/config-examples") ):
     if ( re.match("bb_",acf) ):
-      acf_section = re.sub("\.ac","",acf)
+      acf_section = re.sub(r"\.ac","",acf)
       if ( cnf_bex.has_section(acf_section) ):
         with open(os.path.join(home_dir, "doc/build/config-examples/"+acf), "r") as fh:
           acf_data = fh.readlines()

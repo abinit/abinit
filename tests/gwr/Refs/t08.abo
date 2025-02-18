@@ -1,5 +1,5 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.Version 10.3.4.4 of ABINIT, released Nov 2024.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2024 ABINIT group . 
@@ -14,18 +14,18 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 18 Sep 2024.
-- ( at 17h21 )
+.Starting date : Sun 26 Jan 2025.
+- ( at 09h42 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/TestBot_MPI1/gwr_t08/t08.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/TestBot_MPI1/gwr_t08/t08.abi
 - output file    -> t08.abo
 - root for input  files -> t08i
 - root for output files -> t08o
 
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Pspdir/Psdj_paw_pw_std/Li.xml
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/Pspdir/Psdj_paw_pw_std/Li.xml
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Pspdir/Psdj_paw_pw_std/F.xml
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/Pspdir/Psdj_paw_pw_std/F.xml
  DATASET    1 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
@@ -193,9 +193,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Pspdir/Psdj_paw_pw_std/Li.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Pspdir/Psdj_paw_pw_std/Li.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Pspdir/Psdj_paw_pw_std/Li.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/Pspdir/Psdj_paw_pw_std/Li.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/Pspdir/Psdj_paw_pw_std/Li.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/Pspdir/Psdj_paw_pw_std/Li.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  5 (lmn_size=  9), orbitals=   0   0   0   1   1
  Spheres core radius: rc_sph= 1.60264751
@@ -213,9 +213,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Pspdir/Psdj_paw_pw_std/F.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Pspdir/Psdj_paw_pw_std/F.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Pspdir/Psdj_paw_pw_std/F.xml
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/Pspdir/Psdj_paw_pw_std/F.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/Pspdir/Psdj_paw_pw_std/F.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/Pspdir/Psdj_paw_pw_std/F.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.40288605
@@ -301,8 +301,8 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =      2.388815982425787
- Compensation charge over fine fft grid    =      2.388829002215318
+ Compensation charge over spherical meshes =      2.388815982423068
+ Compensation charge over fine fft grid    =      2.388829002217197
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -393,28 +393,28 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  1.17988519573451E+01
-hartree             :  9.01091403028306E+00
-xc                  : -4.01101613304150E+00
+kinetic             :  1.17988519573510E+01
+hartree             :  9.01091403027747E+00
+xc                  : -4.01101613304368E+00
 Ewald energy        : -2.02305295457931E+01
 psp_core            :  1.02165789007405E+00
-local_psp           : -2.57380549664699E+01
-spherical_terms     : -3.51202393358703E+00
-total_energy        : -3.16602007011894E+01
-total_energy_eV     : -8.61517874364706E+02
+local_psp           : -2.57380549664572E+01
+spherical_terms     : -3.51202393359227E+00
+total_energy        : -3.16602007011837E+01
+total_energy_eV     : -8.61517874364552E+02
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 1, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -4.51124898695376E+00
+band_energy         : -4.51124898696025E+00
 Ewald energy        : -2.02305295457931E+01
 psp_core            :  1.02165789007405E+00
-xc_dc               : -7.76559047699863E+00
-spherical_terms     : -1.74512908140514E-01
-total_energy_dc     : -3.16602240278120E+01
-total_energy_dc_eV  : -8.61518509114388E+02
+xc_dc               : -7.76559047699220E+00
+spherical_terms     : -1.74512908140252E-01
+total_energy_dc     : -3.16602240278118E+01
+total_energy_dc_eV  : -8.61518509114382E+02
 ...
 
 
@@ -634,11 +634,11 @@ meta: {optdriver: 6, }
  For band1: 1 , band2: 2
   0.00000E+00  2.20958E-02  2.20958E-02  2.20958E-02
  For band1: 1 , band2: 3
-  0.00000E+00  4.33108E-03  4.33108E-03  1.13992E-03
+  0.00000E+00  4.33173E-03  4.33173E-03  1.13626E-03
  For band1: 1 , band2: 4
-  0.00000E+00  5.63151E-03  5.63151E-03  1.91589E-02
+  0.00000E+00  5.62613E-03  5.62613E-03  1.91588E-02
  For band1: 1 , band2: 5
-  0.00000E+00  1.78655E-02  1.78655E-02  1.13402E-03
+  0.00000E+00  1.78671E-02  1.78671E-02  1.13886E-03
 
  === KS gaps after direct diagonalization ===
  Direct band gap semiconductor
@@ -702,7 +702,7 @@ P           mkmem           1
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
           spgroup         225
-           strten1    -1.6422315265E-03 -1.6422315265E-03 -1.6422315265E-03
+           strten1    -1.6422315264E-03 -1.6422315264E-03 -1.6422315264E-03
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -827,10 +827,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          7.1  wall=          7.1
+- Proc.   0 individual time (sec): cpu=          7.1  wall=          7.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered   2 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          7.1  wall=          7.1
++Overall time at end (sec) : cpu=          7.1  wall=          7.2

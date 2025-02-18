@@ -330,8 +330,7 @@ subroutine rttddft_propagator_er(dtset, ham_k, istep, mpi_enreg, psps, tdks, cal
 
       ! Setup gemm_nonlop
       if (tdks%gemm_nonlop_use_gemm) then
-         !set the global variable indicating to gemm_nonlop where to get its data from
-         gemm_nonlop_ikpt_this_proc_being_treated = my_ikpt
+         call set_gemm_nonlop_ikpt(my_ikpt)
       end if
 
       !** Compute the exp[(S^{-1})H]*cg using Taylor expansion to approximate the exponential

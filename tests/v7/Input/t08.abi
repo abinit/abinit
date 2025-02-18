@@ -9,7 +9,7 @@ ecut 5.0
 pawecutdg 8.0
 prtden 0
 prtwf 0
-toldff 1.0d-08 
+toldff 1.0d-08
 
 #geometry
 xcart  0.0  0.0 0.0
@@ -36,7 +36,7 @@ shiftk 0.0 0.0 0.0
 #general parameters for PIMD
 amu 1.0
 pimass 1.0
-mdtemp  600.0  300.0 
+mdtemp  600.0  300.0
 optcell 0 #NVT
 dynimage 6*1
 nimage 6

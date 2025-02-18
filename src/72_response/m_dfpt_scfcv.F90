@@ -36,9 +36,7 @@ module m_dfpt_scfcv
  use m_hdr
  use m_dtfil
  use m_hamiltonian
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
 
  use defs_datatypes, only : pseudopotential_type
  use defs_abitypes, only : MPI_type
@@ -51,7 +49,7 @@ module m_dfpt_scfcv
  use m_mpinfo
  use m_kg,       only : getcut, mkkin, kpgstr, mkkpg
  use m_fft,      only : fftpac, fourdp
- use m_symtk,     only : mati3inv
+ use m_matrix,    only : mati3inv
  use m_dynmat,    only : dfpt_sygra
  use m_occ,         only : occeig
  use m_paw_mkrho,   only : pawmkrho
@@ -1462,14 +1460,12 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      ! This part is obsolete. I keep it just to maintain compatibility with the fileformat.
      if (mpi_enreg%me_g0 == 1) then
        if (dtset%iomode == IO_MODE_ETSF) then
-#ifdef HAVE_NETCDF
          NCF_CHECK(nctk_open_modify(ncid, nctk_ncify(fi1o), xmpi_comm_self))
          ncerr = nctk_def_one_array(ncid, nctkarr_t('rhog1_g0', "dp", "two"), varid=varid)
          NCF_CHECK(ncerr)
          NCF_CHECK(nctk_set_datamode(ncid))
          NCF_CHECK(nf90_put_var(ncid, varid, rhog1(:,1)))
          NCF_CHECK(nf90_close(ncid))
-#endif
        else
          ! Handle Fortran files.
          if (open_file(fi1o, msg, newunit=ncid, form='unformatted', status='old', action="readwrite") /= 0) then
@@ -2464,7 +2460,7 @@ subroutine dfpt_nselt(blkflg,cg,cg1,cplex,&
  nfftot=n1*n2*n3
 
 !Initialize Hamiltonian (k-independent terms) - NCPP only
- call init_hamiltonian(gs_hamk,psps,pawtab_dum,nspinor,nsppol,nspden,natom,&
+ call gs_hamk%init(psps,pawtab_dum,nspinor,nsppol,nspden,natom,&
 & typat,xred,nfft,mgfft,ngfft,rprimd,nloalg,ph1d=ph1d)
 
  bantot = 0
@@ -3172,7 +3168,7 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
 !1) Allocate all arrays and initialize quantities that do not depend on k and spin.
 !2) Perform the setup needed for the non-local factors:
 !3) Constant kleimann-Bylander energies are copied from psps to gs_hamk.
- call init_hamiltonian(gs_hamkq,psps,pawtab,dtset%nspinor,nsppol,nspden,dtset%natom,&
+ call gs_hamkq%init(psps,pawtab,dtset%nspinor,nsppol,nspden,dtset%natom,&
 & dtset%typat,xred,nfft,dtset%mgfft,ngfft,rprimd,dtset%nloalg,ph1d=ph1d,&
 & gpu_option=dtset%gpu_option)
 
@@ -3762,11 +3758,11 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
  end if
 
 !Initialize most of the Hamiltonian (arrays and quantities that do not depend on k + nl form factors)
- call init_hamiltonian(gs_hamkq,psps,pawtab,dtset%nspinor,nsppol,nspden,natom,&
+ call gs_hamkq%init(psps,pawtab,dtset%nspinor,nsppol,nspden,natom,&
 & dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,&
 & paw_ij=paw_ij,usecprj=usecprj,ph1d=ph1d,gpu_option=dtset%gpu_option,&
 & mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom,mpi_spintab=mpi_enreg%my_isppoltab)
- call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamkq,paw_ij1=paw_ij1fr,&
+ call rf_hamkq%init(cplex,gs_hamkq,ipert,paw_ij1=paw_ij1fr,&
 & mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom,mpi_spintab=mpi_enreg%my_isppoltab)
 
 

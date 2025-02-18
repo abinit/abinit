@@ -306,7 +306,7 @@ def main():
         if not os.path.isdir(top):
            raise ValueError("Expecting existenting directory, got %s" % top)
 
-        re_abimem = re.compile("^abimem_rank(\d+)\.mocc$")
+        re_abimem = re.compile(r"^abimem_rank(\d+)\.mocc$")
         paths = []
         for dirpath, dirnames, filenames in os.walk(top):
             for f in filenames:

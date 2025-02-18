@@ -1,6 +1,6 @@
-Hartwigsen-Goedecker-Hutter psp for Ga,  from PRB58, 3641 (1998) 
+Hartwigsen-Goedecker-Hutter psp for Ga,  from PRB58, 3641 (1998)
    31  13  010605 zatom,zion,pspdat
- 3 1   2 0 2001 0  pspcod,pspxc,lmax,lloc,mmax,r2well 
+ 3 1   2 0 2001 0  pspcod,pspxc,lmax,lloc,mmax,r2well
   0.490000    0.000000    0.000000    0.000000   0.000000 rloc, c1, c2, c3, c4
   0.384713    4.831779    4.238168    2.833238          rs, h11s, h22s, h33s
   0.586130    1.940527   -0.299738    0.000000          rp, h11p, h22p, h33p

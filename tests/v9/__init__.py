@@ -127,7 +127,7 @@ inp_files = [
     "t110.abi",
     # projWF method for lattice wannier function in anaddb (disentangle option 2)
     "t111.abi",
-    
+
     # local orbital magnetic moments calculation.
     "t112.abi", # test prt_lorbmag   printing local orbital magnetic moments in atomic spheres
 

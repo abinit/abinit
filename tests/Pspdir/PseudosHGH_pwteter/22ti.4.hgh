@@ -1,6 +1,6 @@
-Hartwigsen-Goedecker-Hutter psp for Ti,  from PRB58, 3641 (1998) 
+Hartwigsen-Goedecker-Hutter psp for Ti,  from PRB58, 3641 (1998)
    22   4  010605 zatom,zion,pspdat
- 3 1   2 0 2001 0  pspcod,pspxc,lmax,lloc,mmax,r2well 
+ 3 1   2 0 2001 0  pspcod,pspxc,lmax,lloc,mmax,r2well
   0.720000    0.000000    0.000000    0.000000   0.000000 rloc, c1, c2, c3, c4
   0.528411    1.866613    1.440233    3.658172          rs, h11s, h22s, h33s
   0.791146    0.967916    0.260687    0.000000          rp, h11p, h22p, h33p
