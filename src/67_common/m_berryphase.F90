@@ -28,7 +28,7 @@ module m_berryphase
 
  use m_geometry,     only : xred2xcart
  use m_hide_lapack,  only : dzgedi, dzgefa
- use m_symtk,        only : matr3inv
+ use m_matrix,       only : matr3inv
 
  implicit none
 

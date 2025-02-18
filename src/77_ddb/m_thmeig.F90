@@ -33,7 +33,8 @@ module m_thmeig
 
  use m_geometry,       only : mkrdim, xred2xcart, metric
  use m_symfind,        only : symfind, symlatt
- use m_symtk,          only : mati3inv, matr3inv, symatm
+ use m_matrix,         only : mati3inv, matr3inv
+ use m_symtk,          only : symatm
  use m_crystal,        only : crystal_t
  use m_io_tools,       only : open_file
  use m_dynmat,         only : asria_corr, dfpt_phfrq

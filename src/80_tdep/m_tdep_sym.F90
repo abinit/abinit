@@ -11,7 +11,8 @@ module m_tdep_sym
  use m_abicore
  use m_errors
  use m_xmpi
- use m_symtk,            only : mati3inv, symatm
+ use m_matrix,           only : mati3inv
+ use m_symtk,            only : symatm
  use m_symfind,          only : symfind, symanal, symlatt
  use m_tdep_latt,        only : Lattice_type, tdep_make_inbox
  use m_tdep_readwrite,   only : Input_type, MPI_enreg_type

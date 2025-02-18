@@ -30,7 +30,8 @@ module m_spacepar
 
  use m_time,            only : timab
  use defs_abitypes,     only : MPI_type
- use m_symtk,           only : mati3inv, sg_multable, symdet, symatm, matr3inv
+ use m_matrix,          only : mati3inv, matr3inv
+ use m_symtk,           only : sg_multable, symdet, symatm
  use m_geometry,        only : metric, normv, symredcart,wedge_basis,wedge_product
  use m_gtermcutoff,     only : termcutoff
  use m_mpinfo,          only : ptabs_fourdp

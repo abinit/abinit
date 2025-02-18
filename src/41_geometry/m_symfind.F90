@@ -26,8 +26,9 @@ module m_symfind
  use m_abicore
  use m_symlist
 
- use m_symtk,     only : chkprimit, mati3inv, matr3inv, symrelrot, symdet, symcharac, holocell, &
-                          smallprim, print_symmetries, sg_multable, symatm, symmetrize_tnons, symmetrize_xred
+ use m_matrix,    only : mati3inv, matr3inv
+ use m_symtk,     only : chkprimit, symrelrot, symdet, symcharac, holocell, symatm, &
+                         smallprim, print_symmetries, sg_multable, symmetrize_tnons, symmetrize_xred
  use m_geometry,  only : acrossb, xred2xcart
  use m_spgdata,   only : getptgroupma, symptgroup, spgdata
 

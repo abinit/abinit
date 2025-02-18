@@ -29,7 +29,8 @@ module m_dtset
 
  use m_fstrings,     only : inupper
  use m_numeric_tools,only : arth
- use m_symtk,        only : mati3inv, littlegroup_q, symatm
+ use m_matrix,       only : mati3inv
+ use m_symtk,        only : littlegroup_q, symatm
  use m_symkpt,       only : symkpt
  use m_geometry,     only : mkrdim, metric, littlegroup_pert, irreducible_set_pert
  use m_parser,       only : intagm, chkvars_in_string

@@ -29,7 +29,8 @@ MODULE m_geometry
 
  use m_io_tools,       only : open_file
  use m_numeric_tools,  only : uniformrandom, isinteger, set2unit
- use m_symtk,          only : mati3inv, mati3det, matr3inv, symdet
+ use m_matrix,         only : mati3inv, mati3det, matr3inv
+ use m_symtk,          only : symdet
  use m_hide_lapack,    only : matr3eigval
  use m_pptools,        only : prmat
  use m_numeric_tools,  only : wrap2_pmhalf
@@ -2781,7 +2782,7 @@ subroutine remove_inversion(nsym,symrel,tnons,nsym_out,symrel_out,tnons_out,pinv
 end subroutine remove_inversion
 !!***
 
-!!****f* m_symtk/reduce2primitive
+!!****f* m_geometry/reduce2primitive
 !! NAME
 !! reduce2primitive
 !!
