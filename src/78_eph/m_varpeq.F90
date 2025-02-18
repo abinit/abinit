@@ -833,11 +833,12 @@ subroutine varpeq_ncwrite(self, dtset, dtfil)
    ! Define scalars
    ! integers
    ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: &
-     "eph_task", "nkbz", "nqbz", "frohl_ntheta"])
+     "eph_task", "nkbz", "nqbz", "frohl_ntheta", "vpq_avg_g", "vpq_translate", &
+     "vpq_interp", "vpq_nstates", "vpq_nstep_ort", "vpq_select", "vpq_mesh_fact"])
    NCF_CHECK(ncerr)
    ! real
    ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: &
-     "vpq_tolgrs", "e_frohl"])
+     "vpq_tolgrs", "e_frohl", "vpq_mix_fact"])
    NCF_CHECK(ncerr)
 
    ! Define arrays with results
@@ -852,13 +853,17 @@ subroutine varpeq_ncwrite(self, dtset, dtfil)
      nctkarr_t("brange_spin", "int", "two, nsppol"), &
      nctkarr_t("cvflag_spin", "int", "nstates, nsppol"), &
      nctkarr_t("nstep2cv_spin", "int", "nstates, nsppol"), &
+     nctkarr_t("vpq_trvec", "int", "three"), &
      nctkarr_t("scf_hist_spin", "dp", "six, nstep, nstates, nsppol"), &
      nctkarr_t("kpts_spin", "dp", "three, max_nk, nsppol"), &
      nctkarr_t("qpts_spin", "dp", "three, max_nq, nsppol"), &
      nctkarr_t("cb_min_spin", "dp", "nsppol"), &
      nctkarr_t("vb_max_spin", "dp", "nsppol"), &
+     nctkarr_t("vpq_gpr_energy", "dp", "two"), &
+     nctkarr_t("vpq_gpr_length", "dp", "three"), &
      nctkarr_t("a_spin", "dp", "two, max_nb, max_nk, nstates, nsppol"), &
-     nctkarr_t("b_spin", "dp", "two, natom3, max_nq, nstates, nsppol") &
+     nctkarr_t("b_spin", "dp", "two, natom3, max_nq, nstates, nsppol"), &
+     nctkarr_t("erange_spin", "dp", "nsppol") &
    ])
    NCF_CHECK(ncerr)
 
@@ -867,13 +872,16 @@ subroutine varpeq_ncwrite(self, dtset, dtfil)
    ! Scalars
    ! integer
    ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: &
-     "eph_task", "nkbz", "nqbz", "frohl_ntheta"], &
-     [dtset%eph_task, self%gstore%nkbz, self%gstore%nqbz, self%frohl_ntheta])
+     "eph_task", "nkbz", "nqbz", "frohl_ntheta", "vpq_avg_g", "vpq_translate", &
+     "vpq_interp", "vpq_nstates", "vpq_nstep_ort", "vpq_select", "vpq_mesh_fact"], &
+     [dtset%eph_task, self%gstore%nkbz, self%gstore%nqbz, self%frohl_ntheta, &
+      dtset%vpq_avg_g, dtset%vpq_translate, dtset%vpq_interp, dtset%vpq_nstates, &
+      dtset%vpq_nstep_ort, dtset%vpq_select, dtset%vpq_mesh_fact])
    NCF_CHECK(ncerr)
    ! real
    ncerr = nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: &
-     "vpq_tolgrs", "e_frohl"], &
-     [self%tolgrs, self%e_frohl])
+     "vpq_tolgrs", "e_frohl", "vpq_mix_fact"], &
+     [self%tolgrs, self%e_frohl, dtset%vpq_mix_fact])
    NCF_CHECK(ncerr)
 
    ! Arrays
@@ -890,12 +898,16 @@ subroutine varpeq_ncwrite(self, dtset, dtfil)
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "brange_spin"), self%brange_spin))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "cvflag_spin"), self%cvflag_spin))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "nstep2cv_spin"), self%nstep2cv_spin))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vpq_trvec"), dtset%vpq_trvec))
    ! real
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "scf_hist_spin"), self%scf_hist_spin))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kpts_spin"), self%kpts_spin))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "qpts_spin"), self%qpts_spin))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "cb_min_spin"), self%gaps%cb_min))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vb_max_spin"), self%gaps%vb_max))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vpq_gpr_energy"), dtset%vpq_gpr_energy))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vpq_gpr_length"), dtset%vpq_gpr_length))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "erange_spin"), self%erange_spin))
    ! complex
    call c_f_pointer(c_loc(self%a_spin), rpt_d5, &
      [2, self%max_nb, self%max_nk, self%nstates, self%nsppol])
@@ -1944,10 +1956,7 @@ subroutine polstate_setup(self, ip, a_src, load)
 
 !Local variables-------------------------------
  real(dp) :: a_sqnorm
- !complex(dp) :: prod
  class(gqk_t), pointer :: gqk
- !integer :: my_ik, ik_ibz, ib
- !real(dp) :: eig
 !----------------------------------------------------------------------
 
  gqk => self%gqk
