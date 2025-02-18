@@ -393,6 +393,14 @@ module m_varpeq
    ! (nsppol)
    ! Energy window wrt to VBM/CBM for hole/electron polaron for each spin
 
+   integer, allocatable :: k2ibz_spin(:,:)
+   ! (max_nk, nsppol)
+   ! BZ->iBZ index table for kpoints (related to sell%gstore%kibz)
+
+   integer, allocatable :: q2ibz_spin(:,:)
+   ! (max_nq, nsppol)
+   ! BZ->iBZ index table for qpoints (related to sell%gstore%qibz)
+
    real(dp), allocatable :: scf_hist_spin(:,:,:,:)
    ! (6, nstep, nstates, nsppol)
    ! SCF optimization history at each state for each spin
@@ -557,6 +565,8 @@ subroutine varpeq_free(self)
  ! real
  ABI_SFREE(self%erange_spin)
  ABI_SFREE(self%scf_hist_spin)
+ ABI_SFREE(self%k2ibz_spin)
+ ABI_SFREE(self%q2ibz_spin)
  ABI_SFREE(self%kpts_spin)
  ABI_SFREE(self%qpts_spin)
  ! complex
@@ -826,7 +836,8 @@ subroutine varpeq_ncwrite(self, dtset, dtfil)
      nctkdim_t("nstep", self%nstep), nctkdim_t("nsppol", self%nsppol), &
      nctkdim_t("nstates", self%nstates), nctkdim_t("natom3", self%natom3), &
      nctkdim_t("max_nk", self%max_nk), nctkdim_t("max_nq", self%max_nq), &
-     nctkdim_t("max_nb", self%max_nb)], &
+     nctkdim_t("max_nb", self%max_nb), nctkdim_t("nkibz", self%gstore%nkibz), &
+     nctkdim_t("nqibz", self%gstore%nqibz)], &
      defmode=.True.)
    NCF_CHECK(ncerr)
 
@@ -854,7 +865,12 @@ subroutine varpeq_ncwrite(self, dtset, dtfil)
      nctkarr_t("cvflag_spin", "int", "nstates, nsppol"), &
      nctkarr_t("nstep2cv_spin", "int", "nstates, nsppol"), &
      nctkarr_t("vpq_trvec", "int", "three"), &
+     nctkarr_t("k2ibz_spin", "int", "max_nk, nsppol"), &
+     nctkarr_t("q2ibz_spin", "int", "max_nq, nsppol"), &
+     nctkarr_t("erange_spin", "dp", "nsppol"), &
      nctkarr_t("scf_hist_spin", "dp", "six, nstep, nstates, nsppol"), &
+     nctkarr_t("kibz", "dp", "three, nkibz"), &
+     nctkarr_t("qibz", "dp", "three, nqibz"), &
      nctkarr_t("kpts_spin", "dp", "three, max_nk, nsppol"), &
      nctkarr_t("qpts_spin", "dp", "three, max_nq, nsppol"), &
      nctkarr_t("cb_min_spin", "dp", "nsppol"), &
@@ -862,8 +878,7 @@ subroutine varpeq_ncwrite(self, dtset, dtfil)
      nctkarr_t("vpq_gpr_energy", "dp", "two"), &
      nctkarr_t("vpq_gpr_length", "dp", "three"), &
      nctkarr_t("a_spin", "dp", "two, max_nb, max_nk, nstates, nsppol"), &
-     nctkarr_t("b_spin", "dp", "two, natom3, max_nq, nstates, nsppol"), &
-     nctkarr_t("erange_spin", "dp", "nsppol") &
+     nctkarr_t("b_spin", "dp", "two, natom3, max_nq, nstates, nsppol") &
    ])
    NCF_CHECK(ncerr)
 
@@ -899,8 +914,12 @@ subroutine varpeq_ncwrite(self, dtset, dtfil)
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "cvflag_spin"), self%cvflag_spin))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "nstep2cv_spin"), self%nstep2cv_spin))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vpq_trvec"), dtset%vpq_trvec))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "k2ibz_spin"), self%k2ibz_spin))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "q2ibz_spin"), self%q2ibz_spin))
    ! real
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "scf_hist_spin"), self%scf_hist_spin))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kibz"), self%gstore%kibz))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "qibz"), self%gstore%qibz))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kpts_spin"), self%kpts_spin))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "qpts_spin"), self%qpts_spin))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "cb_min_spin"), self%gaps%cb_min))
@@ -1189,8 +1208,8 @@ subroutine varpeq_collect(self)
  class(gqk_t), pointer :: gqk
  class(polstate_t), pointer :: polstate
  integer :: ierr
- integer :: my_is, spin, my_ik, ik_glob, ip
- integer :: my_iq, iq_glob, my_pert, pert_glob
+ integer :: my_is, spin, my_ik, ik_glob, ik_ibz, ip
+ integer :: my_iq, iq_glob, iq_ibz, my_pert, pert_glob
  integer :: oc_scf, oc_a, oc_b, oc_k, oc_q
 
 !----------------------------------------------------------------------
@@ -1203,6 +1222,8 @@ subroutine varpeq_collect(self)
  ! Gather electron/phonon vectors and k/q points
  self%a_spin(:,:,:,:) = zero
  self%b_spin(:,:,:,:) = zero
+ self%k2ibz_spin(:,:) = zero
+ self%q2ibz_spin(:,:) = zero
  self%qpts_spin(:,:,:) = zero
  self%kpts_spin(:,:,:) = zero
  do my_is=1,self%gstore%my_nspins
@@ -1231,19 +1252,25 @@ subroutine varpeq_collect(self)
 
    ! k-points
    do my_ik=1,gqk%my_nk
+     ik_ibz = gqk%my_k2ibz(1, my_ik)
      ik_glob = gqk%my_kstart + my_ik - 1
      self%kpts_spin(:, ik_glob, spin) = polstate%my_kpts(:, my_ik)
+     self%k2ibz_spin(ik_glob, spin) = ik_ibz
    enddo
 
    ! q-points
    do my_iq=1,gqk%my_nq
+     iq_ibz = gqk%my_q2ibz(1, my_iq)
      iq_glob = gqk%my_qstart + my_iq - 1
      self%qpts_spin(:, iq_glob, spin) = polstate%my_qpts(:, my_iq)
+     self%q2ibz_spin(iq_glob, spin) = iq_ibz
    enddo
 
  enddo
  call xmpi_sum(self%a_spin, self%gstore%comm, ierr)
  call xmpi_sum(self%b_spin, self%gstore%comm, ierr)
+ call xmpi_sum(self%k2ibz_spin, self%gstore%comm, ierr)
+ call xmpi_sum(self%q2ibz_spin, self%gstore%comm, ierr)
  call xmpi_sum(self%kpts_spin, self%gstore%comm, ierr)
  call xmpi_sum(self%qpts_spin, self%gstore%comm, ierr)
 
@@ -1265,6 +1292,8 @@ subroutine varpeq_collect(self)
    self%nstep2cv_spin(:,spin) = self%nstep2cv_spin(:,spin) / oc_scf
    self%a_spin(:,:,:,spin) = self%a_spin(:,:,:,spin) / oc_a
    self%b_spin(:,:,:,spin) = self%b_spin(:,:,:,spin) / oc_b
+   self%k2ibz_spin(:,spin) = self%k2ibz_spin(:,spin) / oc_k
+   self%q2ibz_spin(:,spin) = self%q2ibz_spin(:,spin) / oc_q
    self%kpts_spin(:,:,spin) = self%kpts_spin(:,:,spin) / oc_k
    self%qpts_spin(:,:,spin) = self%qpts_spin(:,:,spin) / oc_q
  enddo
@@ -1629,6 +1658,8 @@ subroutine varpeq_init(self, gstore, dtset)
  ABI_MALLOC(self%cvflag_spin, (self%nstates, gstore%nsppol))
  ABI_MALLOC(self%nstep2cv_spin, (self%nstates, gstore%nsppol))
  ABI_MALLOC(self%scf_hist_spin, (6, self%nstep, self%nstates, gstore%nsppol))
+ ABI_MALLOC(self%k2ibz_spin, (self%max_nk, gstore%nsppol))
+ ABI_MALLOC(self%q2ibz_spin, (self%max_nq, gstore%nsppol))
  ! real
  ABI_MALLOC(self%kpts_spin, (3, self%max_nk, gstore%nsppol))
  ABI_MALLOC(self%qpts_spin, (3, self%max_nq, gstore%nsppol))
