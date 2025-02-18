@@ -59,14 +59,14 @@ contains
 !! INPUTS
 !!
 !! SOURCE
-subroutine opernla_gemm_distributed(rank,nprocs,npwin,ndat,nspinor,&
+subroutine opernla_gemm_distributed(rank,nprocs,npwin,ndat,&
 &                                   nprojs,nprojs_blk,nprojs_last_blk,nprojs_my_blk,cplex,beta,&
 &                                   projs_local,vectin,projections,gpu_option)
- integer,  intent(in)     :: rank,nprocs,npwin,ndat,nspinor,gpu_option
+ integer,  intent(in)     :: rank,nprocs,npwin,ndat,gpu_option
  integer,  intent(in)     :: nprojs,nprojs_blk,nprojs_last_blk,nprojs_my_blk,cplex
  complex(dpc), intent(in) :: beta
  real(dp), intent(in),  target    :: projs_local(cplex,npwin,nprojs_my_blk)
- real(dp), intent(in),  target    :: vectin(2,npwin*nspinor*ndat)
+ real(dp), intent(in),  target    :: vectin(2,npwin*ndat)
  real(dp), intent(out), target    :: projections(cplex,nprojs,ndat)
 
  !Local variables
@@ -145,13 +145,13 @@ subroutine opernla_gemm_distributed(rank,nprocs,npwin,ndat,nspinor,&
 
    if(gpu_option == ABI_GPU_DISABLED) then
      if(cplex==2) then
-       call abi_zgemm_2r('C', 'N', nprojs_cur_blk, ndat*nspinor, npwin, cone, &
+       call abi_zgemm_2r('C', 'N', nprojs_cur_blk, ndat, npwin, cone, &
        &                 work_buf, npwin,&
        &                 vectin, npwin, &
        &                 beta, &
        &                 projections(:,ibeg:iend,:), nprojs_cur_blk)
      else
-       call DGEMM('T', 'N', nprojs_cur_blk, ndat*nspinor, npwin, one, &
+       call DGEMM('T', 'N', nprojs_cur_blk, ndat, npwin, one, &
        &          work_buf, npwin, &
        &          vectin, npwin, &
        &          real(beta), &
@@ -162,7 +162,7 @@ subroutine opernla_gemm_distributed(rank,nprocs,npwin,ndat,nspinor,&
      if(cplex == 2) then
        !$OMP TARGET DATA USE_DEVICE_PTR(work_buf,vectin,projections)
        call abi_gpu_xgemm(cplex, 'C','N', &
-               nprojs_cur_blk, ndat*nspinor, npwin, cone, &
+               nprojs_cur_blk, ndat, npwin, cone, &
                c_loc(work_buf), npwin, &
                c_loc(vectin), npwin, &
                beta, &
@@ -171,7 +171,7 @@ subroutine opernla_gemm_distributed(rank,nprocs,npwin,ndat,nspinor,&
      else
        !$OMP TARGET DATA USE_DEVICE_PTR(work_buf,vectin,projections)
        call abi_gpu_xgemm(cplex, 'T', 'N', &
-       &       nprojs_cur_blk, ndat*nspinor, npwin, cone, &
+       &       nprojs_cur_blk, ndat, npwin, cone, &
        &       c_loc(work_buf), npwin, &
        &       c_loc(vectin), npwin, &
        &       beta, &
@@ -214,36 +214,47 @@ end subroutine opernla_gemm_distributed
 
 !----------------------------------------------------------------------
 
-subroutine opernl_xgemm(cplx,transa,transb,m,n,k,alpha,a,lda,b,ldb,beta,c,ldc,&
+subroutine opernl_xgemm(cplex,transa,transb,m,n,k,alpha,a,lda,b,ldb,beta,c,ldc,&
+&                       rank, nprocs,&
+&                       m_blk, m_last_blk, m_my_blk,&
 &                       gpu_option,use_distrib)
 
 !Arguments ------------------------------------
- integer,intent(in) :: cplx,lda,ldb,ldc,m,n,k,gpu_option
+ integer,intent(in) :: cplex,lda,ldb,ldc,m,n,k,gpu_option
+ integer,intent(in) :: rank,nprocs,m_blk,m_last_blk,m_my_blk
  logical,intent(in) :: use_distrib
  complex(dpc),intent(in) :: alpha,beta
  character(len=1),intent(in) :: transa,transb
- real(dp),target,intent(in) :: a(cplx*m*k),b(cplx*n*k)
- real(dp),target,intent(inout) :: c(cplx*m*n)
+ real(dp),target,intent(in) :: a(cplex*m*k),b(cplex*n*k)
+ real(dp),target,intent(inout) :: c(cplex*m*n)
 
 ! *********************************************************************
 
- ABI_UNUSED((/use_distrib/))
-
- if (gpu_option == ABI_GPU_DISABLED) then
-   if(cplx==2) then
-     call abi_zgemm_2r(transa,transb,m,n,k,alpha,&
-     &    a,lda,b,ldb,beta,c,ldc)
-   else ! cplx==1
-     call DGEMM(transa,transb,m,n,k,real(alpha),&
-     &    a,lda,b,ldb,real(beta),c,ldc)
-   end if
- else if (gpu_option == ABI_GPU_OPENMP) then
+ if(use_distrib) then
+   call opernla_gemm_distributed(rank,nprocs,k,n,&
+   &                             m,&
+   &                             m_blk,&
+   &                             m_last_blk,&
+   &                             m_my_blk,cplex,alpha,&
+   &                             a,&
+   &                             b,c,gpu_option)
+ else
+   if (gpu_option == ABI_GPU_DISABLED) then
+     if(cplex==2) then
+       call abi_zgemm_2r(transa,transb,m,n,k,alpha,&
+       &    a,lda,b,ldb,beta,c,ldc)
+     else ! cplex==1
+       call DGEMM(transa,transb,m,n,k,real(alpha),&
+       &    a,lda,b,ldb,real(beta),c,ldc)
+     end if
+   else if (gpu_option == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-   !$OMP TARGET DATA USE_DEVICE_PTR(a,b,c)
-   call abi_gpu_xgemm(cplx,transa,transb,m,n,k,alpha,&
-   &    c_loc(a),lda,c_loc(b),ldb,beta,c_loc(c),ldc)
-   !$OMP END TARGET DATA
+     !$OMP TARGET DATA USE_DEVICE_PTR(a,b,c)
+     call abi_gpu_xgemm(cplex,transa,transb,m,n,k,alpha,&
+     &    c_loc(a),lda,c_loc(b),ldb,beta,c_loc(c),ldc)
+     !$OMP END TARGET DATA
 #endif
+   end if
  end if
 
  end subroutine opernl_xgemm
@@ -421,6 +432,8 @@ subroutine opernla_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,&
  call refresh_projectors(npw,istwf_k,nprojs_all,ndgxdt,nd2gxdt,&
  &                       is_kprime,gpu_option)
  if(nprojs_all/=gemm_nonlop_kpt(ik)%nprojs) ABI_BUG("Problem")
+ nprojs_blk = nprojs
+ nprojs_last_blk = nprojs
  if(use_distrib) then
    rank=xmpi_comm_rank(gemm_nonlop_block_comm); nprocs=xmpi_comm_size(gemm_nonlop_block_comm)
    nprojs_blk      = gemm_nonlop_kpt(ik)%nprojs_blk
@@ -480,46 +493,31 @@ subroutine opernla_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,&
 
 
  if(cplex == 2) then
-   if(.not. use_distrib) then
-     if(cpopt<=1) then
-       call opernl_xgemm(cplex, 'C', 'N', nprojs, ndat*nspinor, npw, cone, &
-       &    projs, npw,&
-       &    vectin, npw, czero, gx, nprojs,&
-       &    gpu_option, use_distrib)
-     end if
+   if(cpopt<=1) then
+     call opernl_xgemm(cplex, 'C', 'N', nprojs, ndat*nspinor, npw, cone, &
+     &    projs, npw,&
+     &    vectin, npw, czero, gx, nprojs,&
+     &    rank, nprocs,&
+     &    nprojs_blk, nprojs_last_blk, nprojs_my_blk,&
+     &    gpu_option, use_distrib)
+   end if
 
-     if(ndgxdt>0 .and. cpopt<=3) then
-       call opernl_xgemm(cplex, 'C', 'N', ndgxdt*nprojs, ndat*nspinor, npw, cone, &
-       &    dprojs, npw,&
-       &    vectin, npw, czero, dgxdt, ndgxdt*nprojs,&
-       &    gpu_option, use_distrib)
-     end if
+   if(ndgxdt>0 .and. cpopt<=3) then
+     call opernl_xgemm(cplex, 'C', 'N', ndgxdt*nprojs, ndat*nspinor, npw, cone, &
+     &    dprojs, npw,&
+     &    vectin, npw, czero, dgxdt, ndgxdt*nprojs,&
+     &    rank, nprocs,&
+     &    ndgxdt*nprojs_blk, ndgxdt*nprojs_last_blk, ndgxdt*nprojs_my_blk,&
+     &    gpu_option, use_distrib)
+   end if
 
-     if(nd2gxdt>0) then
-       call opernl_xgemm(cplex, 'C', 'N', nd2gxdt*nprojs, ndat*nspinor, npw, cone, &
-       &    d2projs, npw,&
-       &    vectin, npw, czero, d2gxdt, nd2gxdt*nprojs,&
-       &    gpu_option, use_distrib)
-     end if
-   else
-     if(cpopt<=1) then
-       call opernla_gemm_distributed(rank,nprocs,npw,ndat,nspinor,&
-       &                             nprojs,&
-       &                             nprojs_blk,&
-       &                             nprojs_last_blk,&
-       &                             nprojs_my_blk,cplex,czero,&
-       &                             projs,&
-       &                             vectin,gx,gpu_option)
-     end if
-     if(ndgxdt>0 .and. cpopt<=3) then
-       call opernla_gemm_distributed(rank,nprocs,npw,ndat,nspinor,&
-       &                             ndgxdt*nprojs,&
-       &                             ndgxdt*nprojs_blk,&
-       &                             ndgxdt*nprojs_last_blk,&
-       &                             ndgxdt*nprojs_my_blk,cplex,czero,&
-       &                             dprojs,&
-       &                             vectin,dgxdt,gpu_option)
-     end if
+   if(nd2gxdt>0) then
+     call opernl_xgemm(cplex, 'C', 'N', nd2gxdt*nprojs, ndat*nspinor, npw, cone, &
+     &    d2projs, npw,&
+     &    vectin, npw, czero, d2gxdt, nd2gxdt*nprojs,&
+     &    rank, nprocs,&
+     &    nd2gxdt*nprojs_blk, nd2gxdt*nprojs_last_blk, nd2gxdt*nprojs_my_blk,&
+     &    gpu_option, use_distrib)
    end if
 
  else ! cplex==1
@@ -552,38 +550,21 @@ subroutine opernla_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,&
 #endif
      end if
    end if
-   if(.not. use_distrib) then
-     if(cpopt<=1) then
-       call opernl_xgemm(cplex, 'T', 'N', nprojs, ndat*nspinor, npw, cone, &
-       &    projs_r, npw, &
-       &    temp_realvec, npw, czero, gx, nprojs,&
-       &    gpu_option, use_distrib)
-     end if
-     if(ndgxdt>0 .and. cpopt<=3) then
-       call opernl_xgemm(cplex, 'T', 'N', ndgxdt*nprojs, ndat*nspinor, npw, cone, &
-       &    dprojs_r, npw, &
-       &    temp_realvec, npw, czero, dgxdt, ndgxdt*nprojs,&
-       &    gpu_option, use_distrib)
-     end if
-   else
-     if(cpopt<=1) then
-       call opernla_gemm_distributed(rank,nprocs,npw,ndat,nspinor,&
-       &                             nprojs,&
-       &                             nprojs_blk,&
-       &                             nprojs_last_blk,&
-       &                             nprojs_my_blk,cplex,czero,&
-       &                             projs_r,&
-       &                             temp_realvec,gx,gpu_option)
-     end if
-     if(ndgxdt>0 .and. cpopt<=3) then
-       call opernla_gemm_distributed(rank,nprocs,npw,ndat,nspinor,&
-       &                             ndgxdt*nprojs,&
-       &                             ndgxdt*nprojs_blk,&
-       &                             ndgxdt*nprojs_last_blk,&
-       &                             ndgxdt*nprojs_my_blk,cplex,czero,&
-       &                             dprojs_r,&
-       &                             temp_realvec,dgxdt,gpu_option)
-     end if
+   if(cpopt<=1) then
+     call opernl_xgemm(cplex, 'T', 'N', nprojs, ndat*nspinor, npw, cone, &
+     &    projs_r, npw, &
+     &    temp_realvec, npw, czero, gx, nprojs,&
+     &    rank, nprocs,&
+     &    nprojs_blk, nprojs_last_blk, nprojs_my_blk,&
+     &    gpu_option, use_distrib)
+   end if
+   if(ndgxdt>0 .and. cpopt<=3) then
+     call opernl_xgemm(cplex, 'T', 'N', ndgxdt*nprojs, ndat*nspinor, npw, cone, &
+     &    dprojs_r, npw, &
+     &    temp_realvec, npw, czero, dgxdt, ndgxdt*nprojs,&
+     &    rank, nprocs,&
+     &    ndgxdt*nprojs_blk, ndgxdt*nprojs_last_blk, ndgxdt*nprojs_my_blk,&
+     &    gpu_option, use_distrib)
    end if
 
    if(gpu_option == ABI_GPU_DISABLED) then
@@ -613,38 +594,21 @@ subroutine opernla_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,&
 #endif
      end if
    end if
-   if(.not. use_distrib) then
-     if(cpopt<=1) then
-       call opernl_xgemm(cplex, 'T', 'N', nprojs, ndat*nspinor, npw, cone, &
-       &    projs_i, npw, &
-       &    temp_realvec, npw, cone , gx, nprojs,&
-       &    gpu_option, use_distrib)
-     end if
-     if(ndgxdt>0) then
-       call opernl_xgemm(cplex, 'T', 'N', ndgxdt*nprojs, ndat*nspinor, npw, cone, &
-       &    dprojs_i, npw, &
-       &    temp_realvec, npw, cone , dgxdt, ndgxdt*nprojs,&
-       &    gpu_option, use_distrib)
-     end if
-   else ! use_distrib
-     if(cpopt<=1) then
-       call opernla_gemm_distributed(rank,nprocs,npw,ndat,nspinor,&
-       &                             nprojs,&
-       &                             nprojs_blk,&
-       &                             nprojs_last_blk,&
-       &                             nprojs_my_blk,cplex,cone,&
-       &                             projs_i,&
-       &                             temp_realvec,gx,gpu_option)
-     end if
-     if(ndgxdt>0 .and. cpopt<=3) then
-       call opernla_gemm_distributed(rank,nprocs,npw,ndat,nspinor,&
-       &                             ndgxdt*nprojs,&
-       &                             ndgxdt*nprojs_blk,&
-       &                             ndgxdt*nprojs_last_blk,&
-       &                             ndgxdt*nprojs_my_blk,cplex,cone,&
-       &                             dprojs_i,&
-       &                             temp_realvec,dgxdt,gpu_option)
-     end if
+   if(cpopt<=1) then
+     call opernl_xgemm(cplex, 'T', 'N', nprojs, ndat*nspinor, npw, cone, &
+     &    projs_i, npw, &
+     &    temp_realvec, npw, cone , gx, nprojs,&
+     &    rank, nprocs,&
+     &    nprojs_blk, nprojs_last_blk, nprojs_my_blk,&
+     &    gpu_option, use_distrib)
+   end if
+   if(ndgxdt>0) then
+     call opernl_xgemm(cplex, 'T', 'N', ndgxdt*nprojs, ndat*nspinor, npw, cone, &
+     &    dprojs_i, npw, &
+     &    temp_realvec, npw, cone , dgxdt, ndgxdt*nprojs,&
+     &    rank, nprocs,&
+     &    ndgxdt*nprojs_blk, ndgxdt*nprojs_last_blk, ndgxdt*nprojs_my_blk,&
+     &    gpu_option, use_distrib)
    end if
 
    ! Scale gx
