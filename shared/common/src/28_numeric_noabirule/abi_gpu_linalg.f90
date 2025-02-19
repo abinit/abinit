@@ -2869,6 +2869,8 @@ subroutine abi_gpu_xhegvd_cptr(cplx, itype, jobz, uplo, A_nrows, &
     ! Therefore, we issue a stream sync here to avoid
     !potential mistakes in calling context.
     call gpu_linalg_stream_synchronize()
+    !FIXME Free memory to help GPU memory constraint (temporary?)
+    call abi_gpu_work_finalize()
   end if
 
 #else
