@@ -2124,7 +2124,7 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,npw,nband,nspinor,
    type(gs_hamiltonian_type),intent(in) :: gs_hamk
    integer,intent(inout)  :: nblk_gemm_nonlop
 
-   integer(kind=c_size_t) :: nonlop_smem,invovl_smem,getghc_wmem,invovl_wmem,nonlop_wmem
+   integer(kind=c_size_t) :: nonlop_smem,invovl_smem,getghc_wmem,invovl_wmem,nonlop_wmem,gs_ham_smem
    integer(kind=c_size_t) :: sum_mem,sum_bandpp_mem,sum_other_mem,free_mem,localMem
    integer  :: icplx,space,i,ndat_try,rank,nprocs,ndgxdt
    logical  :: print_and_exit
@@ -2158,6 +2158,8 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,npw,nband,nspinor,
    getghc_wmem = getghc_ompgpu_work_mem(gs_hamk, ndat_try)
    nonlop_wmem = gemm_nonlop_ompgpu_work_mem(gs_hamk%istwf_k, ndat, ndgxdt, gs_hamk%npw_fft_k,&
    &               gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%ntypat, gs_hamk%lmnmax)
+   gs_ham_smem = sizeof(gs_hamk%ffnl_k) + sizeof(gs_hamk%kg_k)
+   if(associated(gs_hamk%ph3d_k)) gs_ham_smem = gs_ham_smem + sizeof(gs_hamk%ph3d_k)
 
    if(wfoptalg==111) then
      chebfiMem = chebfi_memInfo(nband,icplx*npw*nspinor,space,paral_kgb,icplx*npw*nspinor,ndat)
@@ -2189,9 +2191,9 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,npw,nband,nspinor,
      nonlop_smem = gemm_nonlop_ompgpu_static_mem(gs_hamk%npw_fft_k,gs_hamk%indlmn,gs_hamk%nattyp,gs_hamk%ntypat,nblk_gemm_nonlop, ndgxdt)
 
      ! Bandpp~ndat sized buffer memory requirements are higher, split there
-     sum_mem          = nonlop_smem
+     sum_mem          = nonlop_smem + gs_ham_smem
      sum_bandpp_mem   = getghc_wmem
-     sum_other_mem    = nonlop_smem
+     sum_other_mem    = nonlop_smem + gs_ham_smem
 
      if(wfoptalg>=0) then
        sum_mem          = sum_mem+getghc_wmem
@@ -2231,6 +2233,8 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,npw,nband,nspinor,
        if(wfoptalg==114) then
          write(std_out,'(A,F10.3,1x,A)') "   lobpcg2                               : ",    real(lobpcgMem(1))/(1024*1024), "MiB"
        end if
+
+       write(std_out,'(A,F10.3,1x,A)') "   hamiltonian arrays                    : ",      real(gs_ham_smem)/(1024*1024), "MiB"
 
        write(std_out,*) "Work buffers (sized after bandpp or nblock_lobpcg)"
 
