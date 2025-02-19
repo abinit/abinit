@@ -255,9 +255,8 @@ subroutine prcref(atindx,dielar,dielinv,&
  real(dp),allocatable :: work3(:,:),xccc3d(:),xred_wk(:,:)
  logical,allocatable :: mask(:)
 ! *************************************************************************
- write(6,*)'    prcref : entring'; flush(6) !DEBUG
- write(6,*)'    prcref : iprcel : ', dtset%iprcel; flush(6) !DEBUG
-!Compute different geometric tensor, as well as ucvol, from rprimd
+
+ !Compute different geometric tensor, as well as ucvol, from rprimd
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
 !1) Eventually take care of the forces
@@ -460,7 +459,6 @@ subroutine prcref(atindx,dielar,dielinv,&
      ABI_FREE(work2)
 
    else if (dtset%iprcel>=200 .and. dtset%iprcel<300) then
- write(6,*)'    prcref : chi0 precon'; flush(6) !DEBUG
       cplex=optreal
       call chi0diel(precon, dtset, cplex, mpi_enreg, nfftprc, ngfftprc, dtset%nspden, optreal, optres, 20, tol4, vresid, vrespc)
 !    Other choice ?
@@ -919,8 +917,7 @@ end subroutine prcref
  real(dp),allocatable :: work3(:,:),xccc3d(:),xred_wk(:,:)
  logical,allocatable :: mask(:)
 ! *************************************************************************
- write(6,*)'    prcref_PMA : entering'; flush(6) !DEBUG
- write(6,*)'    prcref_PMA : iprcel : ', dtset%iprcel; flush(6) !DEBUG
+
  if(optres==1)then
    ABI_ERROR('density mixing (optres=1) not admitted!')
  end if
@@ -1116,7 +1113,6 @@ end subroutine prcref
 
    else if (dtset%iprcel>=200 .and. dtset%iprcel<300) then
      cplex=optreal
-     write(6,*)'    prcref : iprcel=2**'; flush(6) !DEBUG
      call chi0diel(precon, dtset, cplex, mpi_enreg, nfftprc, ngfftprc, dtset%nspden, optreal, optres, 20, tol4, vresid, vrespc)
  
 !    Other choice ?
@@ -2431,10 +2427,9 @@ subroutine chi0diel_apply_adjdielmat(precon, mpi_enreg, nfft, ngfft, nspden, rho
  real(dp), intent(out) :: adjdielmat_rho_g(2, nfft, nspden)
 !Local variables-------------------------------
  integer :: ispden
- real(dp) :: temp(2, nfft, nspden)  !DEBUG
+ !real(dp) :: temp(2, nfft, nspden)                                                         !DEBUG
 
 ! *************************************************************************
- write(6,*)'    chi0diel_apply_adjdielmat: rho_g(1, 1:5, 1)', rho_g(1, 1:5, 1) ; flush(6) !DEBUG
 
  adjdielmat_rho_g = rho_g
 
@@ -2448,12 +2443,12 @@ subroutine chi0diel_apply_adjdielmat(precon, mpi_enreg, nfft, ngfft, nspden, rho
 
 !1) Applying the Coulomb kernel vc
  call precon%apply_vc(ngfft, adjdielmat_rho_g)
- !call precon%save_applied_op(ngfft, 2, rho_g, adjdielmat_rho_g, "applied_vc.txt")
+ !call precon%save_applied_op(ngfft, 2, rho_g, adjdielmat_rho_g, "applied_vc.txt")          !DEBUG
 
 !2) Applying the model chi0 operator
- !temp = adjdielmat_rho_g
+ !temp = adjdielmat_rho_g                                                                   !DEBUG
  call precon%apply_chi0(mpi_enreg, ngfft, adjdielmat_rho_g)
- !call precon%save_applied_op(ngfft, 2, temp, adjdielmat_rho_g, "applied_chi0.txt")
+ !call precon%save_applied_op(ngfft, 2, temp, adjdielmat_rho_g, "applied_chi0.txt")         !DEBUG
 
 !0.2) Basis change : Changing back to the default spin-basis
  call precon%from_pauli(1, adjdielmat_rho_g)
@@ -2465,10 +2460,9 @@ subroutine chi0diel_apply_adjdielmat(precon, mpi_enreg, nfft, ngfft, nspden, rho
  do ispden=1,nspden
    adjdielmat_rho_g(:, 1, ispden) = rho_g(:, 1, ispden)
  end do
- write(6,*)'    chi0diel_apply_adjdielmat : adjdielmat_rho_g(1, 1:5, 1)', adjdielmat_rho_g(1, 1:5, 1) ; flush(6) !DEBUG
 
 !For code validation only
- !call precon%save_applied_op(ngfft, 2, rho_g, adjdielmat_rho_g, "applied_adjdielmat.txt")
+ !call precon%save_applied_op(ngfft, 2, rho_g, adjdielmat_rho_g, "applied_adjdielmat.txt")  !DEBUG
 
 end subroutine chi0diel_apply_adjdielmat
 !!***
@@ -2514,25 +2508,22 @@ subroutine chi0diel_apply_dielmat(precon, mpi_enreg, nfft, ngfft, nspden, v_g, d
  integer :: ispden
 
 ! *************************************************************************
- write(6,*)'    chi0diel_apply_dielmat'; flush(6) !DEBUG
  
  dielmat_v_g = v_g
 
 !Components G=0 set to 0
  do ispden=1,nspden
-   adjdielmat_rho_g(:, 1, ispden) = 0
+   dielmat_v_g(:, 1, ispden) = 0
  end do
- 
+
 !0.1) Basis change : Changing to the Pauli basis for collinear and non-collinear magnetism
  call precon%to_pauli(0, dielmat_v_g)
 
 !1) Applying the model chi0 operator
  call precon%apply_chi0(mpi_enreg, ngfft, dielmat_v_g)
- write(6,*)'    chi0diel_apply_dielmat: chi0 done'; flush(6) !DEBUG
 
 !2) Applying the Coulomb kernel vc
  call precon%apply_vc(ngfft, dielmat_v_g)
- write(6,*)'    chi0diel_apply_dielmat: vc done'; flush(6) !DEBUG
 
 !0.2) Basis change : Changing back to the default spin-basis
  call precon%from_pauli(0, dielmat_v_g)
@@ -2547,7 +2538,6 @@ subroutine chi0diel_apply_dielmat(precon, mpi_enreg, nfft, ngfft, nspden, v_g, d
 
  !For code validation only 
  !call precon%save_applied_op(ngfft, 2, v_g, dielmat_v_g, "applied_dielmat.txt)
- write(6,*)'    chi0diel_apply_dielmat: done'; flush(6) !DEBUG
 
 end subroutine chi0diel_apply_dielmat
 !!***
@@ -2631,7 +2621,7 @@ subroutine chi0diel(precon, dtset, cplex, mpi_enreg, nfft, ngfft, nspden, optrea
 !The preconditioned density/potential residual vrespc = P^-1 * vresid is computed 
 !by soling the linear equation P * vrespc = vresid approximately with GMRES.
 
-!Right-hand side : rhs is vresid in the Fourier space.
+!Right-hand side : rhs is vresid (flattened) in the Fourier space.
  ABI_MALLOC(rhs, (nspden*2*nfft))
 
  do ispden = 1, nspden
@@ -2645,13 +2635,10 @@ subroutine chi0diel(precon, dtset, cplex, mpi_enreg, nfft, ngfft, nspden, optrea
      workr(:) = vresid(:, ispden)      !intent(inout) argument while vresid is intent(in).
      call fourdp(cplex, rhs(start_ispden:end_ispden), workr, -1, mpi_enreg, nfft, 1, ngfft, 0)
      ABI_FREE(workr)
-     write(6,*)'    chi0diel : initial fft' ; flush(6) !DEBUG
-     write(6,*)'    chi0diel : cplex', cplex ; flush(6) !DEBUG
 
     else
      !vresid is already given in the Fourier space.
      rhs(start_ispden:end_ispden) = vresid(:, ispden) 
-     write(6,*)'    chi0diel : no initial fft' ; flush(6) !DEBUG
     end if
 
  end do
@@ -2660,11 +2647,8 @@ subroutine chi0diel(precon, dtset, cplex, mpi_enreg, nfft, ngfft, nspden, optrea
  ABI_MALLOC(est, (nspden*2*nfft))
  est = 0
 
-        write(6,*)'    chi0diel : linsolve' ; flush(6) !DEBUG
-        write(6,*)'    chi0diel : nspden * 2 * nfft = ', nspden*2*nfft ; flush(6) !DEBUG
 !Resolution with GMRES :
  call linsolve(nspden*2*nfft, matvec, rhs, est, gmres_maxiter, gmres_rtol)
- write(6,*)'    chi0diel : linsolve done' ; flush(6) !DEBUG
 
 !Reshaping the final result :
  do ispden = 1, nspden
@@ -2681,12 +2665,9 @@ subroutine chi0diel(precon, dtset, cplex, mpi_enreg, nfft, ngfft, nspden, optrea
    end if
 
  end do
- write(6,*)'    chi0diel : reshaping done' ; flush(6) !DEBUG
 
  ABI_FREE(rhs)
- write(6,*)'    chi0diel : free rhs done' ; flush(6) !DEBUG
  ABI_FREE(est)
- write(6,*)'    chi0diel : free est done' ; flush(6) !DEBUG
 
 !Simple mixing : TODO diemixmag
  vrespc = precon%diemix * vrespc
@@ -2701,7 +2682,6 @@ subroutine chi0diel(precon, dtset, cplex, mpi_enreg, nfft, ngfft, nspden, optrea
    real(dp), pointer :: x_3d(:, :, :), y_3d(:, :, :)
 
 ! ******************************************************************************************
-   write(6,*)'    chi0diel : n_ = ', n_ ; flush(6) !DEBUG
 
    !C pointers to match the flattened arrays x and y to their 3D versions needed by
    !chi0diel_apply_adjdielmat and chi0diel_apply_dielmat
@@ -2717,8 +2697,6 @@ subroutine chi0diel(precon, dtset, cplex, mpi_enreg, nfft, ngfft, nspden, optrea
    ! We are preconditioning potential residual so P = (I-vc*chi0) = dielectric matrix.
      call chi0diel_apply_dielmat(precon, mpi_enreg, nfft, ngfft, nspden, x_3d, y_3d)
    end if
-   write(6,*)'    chi0diel : apply_(adj)dielmat done' ; flush(6) !DEBUG
-   write(6,*)'    chi0diel : shape, size(y_3d), y_3d = ', shape(y_3d), size(y_3d), y_3d(1, 1:10, 1) ; flush(6) !DEBUG
 
  end subroutine matvec ! -------------------------------------------------------------------
 

@@ -187,7 +187,8 @@ contains
             &   this%ldos)
             !update tdos
             this%tdos = sum(this%ldos(:, 1)) * this%dvol
-        write(6,*)'    chi0diel update : dvol, tdos', this%dvol, this%tdos; flush(6) !DEBUG
+        write(6,*)'chi0diel update : tdos, ldosldos(1:5, 1)', this%tdos, this%ldos(1:5, 1); flush(6) !DEBUG
+            
         end if
 
         !Local polarizability
@@ -435,7 +436,7 @@ contains
         else if (opt == 1) then !v is a density
             if (nspden == 2) then
                 !On input v(:, :, 1) is the total density and v(:, :, 2) is the spin-up density.
-                !On output               "                and v(:, :, 2) is the spin density.
+                !On output v(:, :, 1) is the total density and v(:, :, 2) is the spin density.
                 v(:, :, 2) = v(:, :, 1) - 2*v(:, :, 2)
             end if
             !If nspden=4, the density is already given in the Pauli basis.
@@ -578,37 +579,38 @@ contains
         
         ! *************************************************************************
         
-         x = (eigenval - fermie)/tsmear
-        
-         if (occopt<=2) then
-           ABI_BUG("Non-metallic occupation")
-         else if (occopt==3) then
-          !Fermi-Dirac smearing
-           delta = 1/(exp(x/2)+exp(-x/2))**2
-         else if (occopt==4) then
-          !Cold Smearing
-           a = -0.5634
-           delta = (1.5+x*(-1.5*a+x*(-1.0+a*x)))*exp(-x**2)/sqrt(pi)
-         else if (occopt==5) then
-          !Cold Smearing
-           a = -0.8165
-           delta = (1.5+x*(-1.5*a+x*(-1.0+a*x)))*exp(-x**2)/sqrt(pi)
-         else if (occopt==6) then
-          !Smering of Methfessel and Paxton
-           a = 0.0
-           delta = (1.5+x*(-1.5*a+x*(-1.0+a*x)))*exp(-x**2)/sqrt(pi)
-         else if (occopt==7) then
-          !Gaussian smearing
-           delta = exp(-x**2)/sqrt(pi)
-         else if (occopt==8) then
-          !Uniform smearing
-          ABI_BUG("LDOS preconditioning needs a smooth smearing function")
-         else if (occopt==9) then
-          !Fermi-Dirac occupation is enforced with two distinct quasi-Fermi levels
-          ABI_BUG("LDOS preconditioning not implemented for this smearing function")
-         end if
-        
-         fprim = 1/tsmear * delta
+        x = (eigenval - fermie)/tsmear
+    
+        if (occopt<=2) then
+            ABI_BUG("Non-metallic occupation")
+        else if (occopt==3) then
+        !Fermi-Dirac smearing
+            delta = exp(-abs(x))/(1+exp(-abs(x)))**2    !To avoid overflow of exp.
+        write(6,*)'chi0diel derivative_occ : x, delta', x, delta; flush(6) !DEBUG
+        else if (occopt==4) then
+        !Cold Smearing
+            a = -0.5634
+            delta = (1.5+x*(-1.5*a+x*(-1.0+a*x)))*exp(-x**2)/sqrt(pi)
+        else if (occopt==5) then
+        !Cold Smearing
+            a = -0.8165
+            delta = (1.5+x*(-1.5*a+x*(-1.0+a*x)))*exp(-x**2)/sqrt(pi)
+        else if (occopt==6) then
+        !Smering of Methfessel and Paxton
+            a = 0.0
+            delta = (1.5+x*(-1.5*a+x*(-1.0+a*x)))*exp(-x**2)/sqrt(pi)
+        else if (occopt==7) then
+        !Gaussian smearing
+            delta = exp(-x**2)/sqrt(pi)
+        else if (occopt==8) then
+        !Uniform smearing
+            ABI_BUG("LDOS preconditioning needs a smooth smearing function")
+        else if (occopt==9) then
+        !Fermi-Dirac occupation is enforced with two distinct quasi-Fermi levels
+            ABI_BUG("LDOS preconditioning not implemented for this smearing function")
+        end if
+    
+        fprim = 1/tsmear * delta
         
     end function derivative_occ
 
@@ -687,6 +689,9 @@ contains
         do i=1, mband
             ldos_wheights(i) = derivative_occ(dtset%occopt, eigen(i), fermie, dtset%tsmear) * maxocc
         end do
+        write(6,*)'chi0diel compute_ldos : mband, dtset%occopt, fermie, dtset%tsmear, maxocc', mband, dtset%occopt, fermie, dtset%tsmear, maxocc; flush(6) !DEBUG
+
+        write(6,*)'chi0diel compute_ldos : ldos_wheights', ldos_wheights(1:10); flush(6) !DEBUG
 
         !Compute ldos using mkrho with ldos_wheights in place of the occupations
         mcg = size(cg)
@@ -695,11 +700,13 @@ contains
         call mkrho(cg, dtset, gprimd, irrzon, kg, mcg, mpi_enreg, npwarr, ldos_wheights, &
         &   paw_dmft, phnons, rhog, ldos, rprimd, 0, ucvol, wvl_den, wvl_wfs, option=0)
         ABI_FREE(ldos_wheights)
+        write(6,*)'chi0diel compute_ldos : ldos before sym', ldos(1:10, 1); flush(6) !DEBUG
         
         !TODO nfftmix != dtset%nfft en PAW grille
         nfftot = dtset%ngfft(1) * dtset%ngfft(2) * dtset%ngfft(3)
         call symrhg(1, gprimd, irrzon, mpi_enreg, nfft, nfftot, dtset%ngfft, dtset%nspden, dtset%nsppol, &
         &   dtset%nsym, phnons, rhog, ldos, rprimd, dtset%symafm, dtset%symrel, dtset%tnons)
+        write(6,*)'chi0diel compute_ldos : ldos after sym', ldos(1:10, 1); flush(6) !DEBUG
 
         !if (psps%usepaw==1) then
         !    mcprj = size(cprj)
@@ -823,14 +830,12 @@ contains
                 end do
                 !ifft to get rhor0_atom in real space
                 call fourdp(1, rhog0_atom, rhor0_atom, 1, mpi_enreg, nfft, 1, dtset%ngfft, 0) ! irfft (cplex=1)
-                !write(6,*)'    compute_loc_pola : rhor0_atom', rhor0_atom; flush(6) !DEBUG
 
                 !2) Computing norm(r-r_atom)^2 (periodized with sin)
                 !TODO : better + mistake (pic dans loc_pola)
                 do ir = 1, nfft
                     r2(ir) = norm2(matmul(rprimd, 1/two_pi*sin(two_pi * (get_r_vector(ir, dtset%ngfft) - r_atom)))) ** 2
                 end do
-                !write(6,*)'    compute_loc_pola : r2', r2; flush(6) !DEBUG
 
                 !3) loc_pola = sum_atom rho_atom * |r-r_atom|^2
                 do ispden = 1, nspden
@@ -881,8 +886,6 @@ contains
                 end if
             end do
         close(io)
-        write(6,*)'chi0diel : gprimd', this%gprimd; flush(6) !DEBUG
-
 
     end subroutine save_applied_op
 
@@ -930,35 +933,37 @@ contains
             ispden = 1
             vec_g(:, :, ispden) = (-1/(4*pi*(this%dielng)**2)) * vec_g(:, :, ispden)
             do ispden = 2, this%nspden
-                vec_g(:, :, ispden) = (-1/(4*pi*(this%dielng)**2)) * vec_g(:, :, ispden)
-                !vec_g(:, :, ispden) = 0
+                !vec_g(:, :, ispden) = (-1/(4*pi*(this%dielng)**2)) * vec_g(:, :, ispden)
+                vec_g(:, :, ispden) = 0
                 ! What is best ?
             end do
         end if
         
         if (this%iprcel == 202) then
         !LDOS model
-            write(6,*)'    chi0diel apply_chi0: entering (ldos)'; flush(6) !DEBUG
+            if (abs(this%tdos) > epsilon(this%tdos)) then   !Checking that tdos is not 0.
+                cplex = 1
+                ABI_MALLOC(vec_r_1, (cplex*this%nfft))    
+                ABI_MALLOC(work_r, (cplex*this%nfft))
+                
+                !1) ifft to get (the sigma_0 component of) vec in the real space
+                ispden = 1
+                call fourdp(cplex, vec_g(:, :, ispden), vec_r_1, 1, mpi_enreg, this%nfft, 1, ngfft, 0)
 
-            cplex = 1
-            ABI_MALLOC(vec_r_1, (cplex*this%nfft))    
-            ABI_MALLOC(work_r, (cplex*this%nfft))
-            
-            !1) ifft to get (the sigma_0 component of) vec in the real space
-            ispden = 1
-            call fourdp(cplex, vec_g(:, :, ispden), vec_r_1, 1, mpi_enreg, this%nfft, 1, ngfft, 0)
+                do ispden = 1, this%nspden
+                    !2) chi0(v)(r)_ispden = -ldos_ispden(r)*v_1(r) + 1/dos * ldos_ispden(r)*integral(ldos_1(r')*v_1(r')*dr')
+                    work_r = -this%ldos(:, ispden)*vec_r_1 &
+                                    + 1/this%tdos * dot_product(this%ldos(:, 1), vec_r_1)*this%dvol * this%ldos(:, ispden)
 
-            do ispden = 1, this%nspden
-                !2) chi0(v)(r)_ispden = -ldos_ispden(r)*v_1(r) + 1/dos * ldos_ispden(r)*integral(ldos_1(r')*v_1(r')*dr')
-                work_r = -this%ldos(:, ispden)*vec_r_1 &
-                                + 1/this%tdos * dot_product(this%ldos(:, 1), vec_r_1)*this%dvol * this%ldos(:, ispden)
+                    !3) fft to get vec back in the reciprocal space
+                    call fourdp(cplex, vec_g(:, :, ispden), work_r, -1, mpi_enreg, this%nfft, 1, ngfft, 0)
+                end do
 
-                !3) fft to get vec back in the reciprocal space
-                call fourdp(cplex, vec_g(:, :, ispden), work_r, -1, mpi_enreg, this%nfft, 1, ngfft, 0)
-        end do
-
-        ABI_FREE(work_r)
-        ABI_FREE(vec_r_1)
+                ABI_FREE(work_r)
+                ABI_FREE(vec_r_1)
+            else 
+                vec_g = 0
+            end if
 
         end if
 
@@ -1022,7 +1027,6 @@ contains
         ! *************************************************************************
         
         !FGMRES initialization
-        write(6,*)'    FGMRES 1' ; flush(6) !DEBUG
 
         ABI_MALLOC(tmp, ((2*gmres_maxiter+1)*n + gmres_maxiter*(gmres_maxiter+9)/2 + 1))
         call dfgmres_init(n, est, rhs, RCI_request, ipar, dpar, tmp)
@@ -1039,13 +1043,11 @@ contains
         ! dpar(2) = 0.01          ! absolute tolerance  (DFTK default=0.01)
         
         !FGMRES iterations
-        write(6,*)'    FGMRES 2' ; flush(6) !DEBUG
         
         call dfgmres_check(n, est, rhs, RCI_request, ipar, dpar, tmp)
         call dfgmres(n, est, rhs, RCI_request, ipar, dpar, tmp)
         
         do
-        write(6,*)'    FGMRES ite = ',ipar(15) ; flush(6) !DEBUG
             if (RCI_request==-1) then
             !    maximum number of iterations is reached
                 call dfgmres_get(n, est, rhs, RCI_request, ipar, dpar, tmp, itercount)
@@ -1076,7 +1078,6 @@ contains
             end if
         !---------------------------------------------------------------------
         end do
-        write(6,*)'    FGMRES 3 - est = ', est(1:10) ; flush(6) !DEBUG
     end subroutine call_FGMRES
 
     subroutine call_gmresm(n, matvec, est, rhs, gmres_maxiter, gmres_rtol)
@@ -1114,7 +1115,7 @@ contains
         subroutine psolve(n_, x)
             integer, intent(in) :: n_
             real(dp), intent(inout) :: x
-        end subroutine
+        end subroutine psolve
         ! Dot product
         function dotprd(n_, a, b) result(c)
             integer, intent(in) :: n_
@@ -1122,7 +1123,7 @@ contains
             real(dp) :: c
             ! ***********************
             c = dot_product(a, b)
-        end function
+        end function dotprd
 
     end subroutine call_gmresm
 
@@ -1140,17 +1141,16 @@ contains
         end interface
       
         ! *************************************************************************
-        write(6,*)'    linsolve' ; flush(6) !DEBUG
         
         !TODO : dirty check of MKL availability
 #if defined HAVE_LINALG_MKL_OMATCOPY
         write(6,*)'using FGMRES'; flush(6) !DEBUG
         call call_FGMRES(n, matvec, rhs, est, gmres_maxiter, gmres_rtol)
 #else
-        write(6,*)'using gmresm, n=', n; flush(6) !DEBUG
+        write(6,*)'using gmresm'; flush(6) !DEBUG
         call call_gmresm(n, matvec, est, rhs, gmres_maxiter, gmres_rtol)
-        write(6,*)'chi0diel : gmresm done'; flush(6) !DEBUG
 #endif
+        write(6,*)'chi0diel : gmres done'; flush(6) !DEBUG
       
     end subroutine linsolve
 
@@ -1206,7 +1206,6 @@ contains
    double precision, save :: beta
    integer, save :: j
    logical :: done   
-   write(6,*)'    chi0diel gmresm : n = ', n ; flush(6) !DEBUG
 
    if(info==2) then
       call hookstep(j,h,m,beta,del, y)
@@ -1238,16 +1237,13 @@ contains
       its = its + 1
       z = v(:,j)      
       call psolve(n, z)
-      write(6,*)'chi0diel : gmresm 01'; flush(6) !DEBUG
       call matvec(n, z, w)
-      write(6,*)'chi0diel : gmresm 02'; flush(6) !DEBUG
       do i = 1, j
          h(i,j) = dotprd(n,w,v(1,i))
          w = w - h(i,j)*v(:,i)
       end do
       h(j+1,j) = dsqrt(dotprd(n,w,w))
       v(:,j+1) = w / h(j+1,j)
-      write(6,*)'chi0diel : gmresm 03'; flush(6) !DEBUG
           
       p(1) = beta
       p(2:j+1) = 0d0
@@ -1255,39 +1251,26 @@ contains
       call dgelsy(j+1,j,1,h_,m+1,p,m+1,piv,m,rank,work,4*m+1,i)
       if(i/=0) stop 'gmresm: dgelsy'
       y = p
-      write(6,*)'chi0diel : gmresm 04'; flush(6) !DEBUG
 
       p(1:j+1) = - matmul(h(1:j+1,1:j),y(1:j))
       p(1) = p(1) + beta
       res = dsqrt(dot_product(p(1:j+1),p(1:j+1)))
       if(info==1) print*, 'gmresm: it=', its,' res=', real(res)
-      write(6,*)'chi0diel : gmresm 1'; flush(6) !DEBUG
       
       done = (res<=tol .or. its==imx .or. res>res_)
       if(done .or. j==m) then
-        write(6,*)'chi0diel : gmresm 2'; flush(6) !DEBUG
         if(del>0d0)  call hookstep(j,h,m,beta,del, y)
-        write(6,*)'chi0diel : gmresm 3'; flush(6) !DEBUG
          z = matmul(v(:,1:j),y(1:j))
-        write(6,*)'chi0diel : gmresm 31'; flush(6) !DEBUG
          call psolve(n, z)
-        write(6,*)'chi0diel : gmresm 32'; flush(6) !DEBUG
          x = x + z
-        write(6,*)'chi0diel : gmresm 33'; flush(6) !DEBUG
         if(its==imx) info = 2
-        write(6,*)'chi0diel : gmresm 34'; flush(6) !DEBUG
         if(res>res_) info = 1
-        write(6,*)'chi0diel : gmresm 35'; flush(6) !DEBUG
         if(res<=tol) info = 0
          if(done)     return
-        write(6,*)'chi0diel : gmresm 36'; flush(6) !DEBUG
         if(del>0d0)  print*, 'gmres: warning! restart affects hookstep'
-        write(6,*)'chi0diel : gmresm 37'; flush(6) !DEBUG
          goto 1       ! (j==m) restart
       end if
-      write(6,*)'chi0diel : gmresm 4'; flush(6) !DEBUG
       res_ = res*stgn
-      write(6,*)'chi0diel : gmresm 5'; flush(6) !DEBUG
 
    end do   
  
