@@ -14,7 +14,7 @@
 !!  at Trinity College Dublin, headed by Dr. David O'Regan.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2024 ABINIT group (LMac)
+!!  Copyright (C) 1998-2025 ABINIT group (LMac)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
