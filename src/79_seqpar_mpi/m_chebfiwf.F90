@@ -154,11 +154,12 @@ subroutine chebfiwf2(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
  integer, parameter :: tim_nonlop = 1753
  integer :: iband,shift,space,blockdim,total_spacedim,ierr
  integer :: me_g0,me_g0_fft
- real(dp) :: localmem
+ integer(kind=c_size_t) :: localMem
  type(chebfi_t) :: chebfi
  type(xgBlock_t) :: xgx0,xgeigen,xgocc,xgresidu
  ! arrays
- real(dp) :: tsec(2),chebfiMem(2)
+ real(dp) :: tsec(2)
+ integer(kind=c_size_t) :: chebfiMem(2)
  real(dp), allocatable :: l_gvnlxc(:,:),occ_tmp(:)
 
  ! Parameters for nonlop call in NC
@@ -225,12 +226,12 @@ subroutine chebfiwf2(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
    end if
    chebfiMem = chebfi_memInfo(nband,l_icplx*l_npw*l_nspinor,space,l_mpi_enreg%paral_kgb, &
 &                             total_spacedim,l_mpi_enreg%bandpp) !blockdim
-   localMem = (l_npw+2*l_npw*l_nspinor+2*nband)*kind(1.d0) !blockdim
+   localMem = (int(2,c_size_t)*l_npw*l_nspinor*nband+3*nband)*kind(1.d0) !blockdim
    write(std_out,'(1x,A,F10.6,1x,A)') "Each MPI process calling chebfi should need around ", &
    (localMem+sum(chebfiMem))/1e9,"GB of peak memory as follows :"
-   write(std_out,'(4x,A,F10.6,1x,A)') "Permanent memory in chebfiwf : ",(localMem)/1e9,"GB"
-   write(std_out,'(4x,A,F10.6,1x,A)') "Permanent memory in m_chebfi : ",(chebfiMem(1))/1e9,"GB"
-   write(std_out,'(4x,A,F10.6,1x,A)') "Temporary memory in m_chebfi : ",(chebfiMem(2))/1e9,"GB"
+   write(std_out,'(4x,A,F10.6,1x,A)') "Permanent memory in chebfiwf : ",real(localMem)/1e9,"GB"
+   write(std_out,'(4x,A,F10.6,1x,A)') "Permanent memory in m_chebfi : ",real(chebfiMem(1))/1e9,"GB"
+   write(std_out,'(4x,A,F10.6,1x,A)') "Temporary memory in m_chebfi : ",real(chebfiMem(2))/1e9,"GB"
  end if
 
 #ifdef HAVE_OPENMP_OFFLOAD

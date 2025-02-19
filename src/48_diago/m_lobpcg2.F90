@@ -37,6 +37,7 @@ module m_lobpcg2
   use omp_lib
 #endif
   use m_xmpi
+ use, intrinsic :: iso_c_binding, only: c_size_t
 
 #if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
  use m_nvtx_data
@@ -268,35 +269,35 @@ module m_lobpcg2
     integer         , intent(in   ) :: spacedim
     integer         , intent(in   ) :: blockdim
     integer         , intent(in   ) :: space
-    double precision :: memXWP
-    double precision :: memAXWP
-    double precision :: memBXWP
-    double precision :: memAllBX0
-    double precision :: memAllAX0
-    double precision :: memeigenvalues3N
-    double precision :: membufferOrtho
-    double precision :: membufferBOrtho
-    double precision :: memsubA
-    double precision :: memsubB
-    double precision :: memsubBtmp
-    double precision :: memvec
-    double precision :: memRR
-    double precision :: maxmemTmp
-    double precision :: cplx
+    integer(kind=c_size_t) :: memXWP
+    integer(kind=c_size_t) :: memAXWP
+    integer(kind=c_size_t) :: memBXWP
+    integer(kind=c_size_t) :: memAllBX0
+    integer(kind=c_size_t) :: memAllAX0
+    integer(kind=c_size_t) :: memeigenvalues3N
+    integer(kind=c_size_t) :: membufferOrtho
+    integer(kind=c_size_t) :: membufferBOrtho
+    integer(kind=c_size_t) :: memsubA
+    integer(kind=c_size_t) :: memsubB
+    integer(kind=c_size_t) :: memsubBtmp
+    integer(kind=c_size_t) :: memvec
+    integer(kind=c_size_t) :: memRR
+    integer(kind=c_size_t) :: maxmemTmp
+    integer(kind=c_size_t) :: cplx
     integer :: nblock
-    double precision :: arraymem(2)
+    integer(kind=c_size_t) :: arraymem(2)
 
     cplx = 1 ; if ( space == SPACE_C ) cplx = 2
     nblock = neigenpairs/blockdim
 
     ! Permanent in lobpcg
-    memXWP  = cplx* kind(1.d0) * spacedim * 3*blockdim
-    memAXWP = cplx* kind(1.d0) * spacedim * 3*blockdim
-    memBXWP = cplx* kind(1.d0) * spacedim * 3*blockdim
+    memXWP  = int(cplx,c_size_t)* kind(1.d0) * spacedim * 3*blockdim
+    memAXWP = int(cplx,c_size_t)* kind(1.d0) * spacedim * 3*blockdim
+    memBXWP = int(cplx,c_size_t)* kind(1.d0) * spacedim * 3*blockdim
     if ( nblock > 1 ) then
-      memAllAX0 = cplx * kind(1.d0) * spacedim * 3*blockdim
-      memAllBX0 = cplx * kind(1.d0) * spacedim * 3*blockdim
-      membufferOrtho = cplx * kind(1.d0) * blockdim * (nblock-1) * blockdim
+      memAllAX0 = int(cplx,c_size_t) * kind(1.d0) * spacedim * 3*blockdim
+      memAllBX0 = int(cplx,c_size_t) * kind(1.d0) * spacedim * 3*blockdim
+      membufferOrtho = int(cplx,c_size_t) * kind(1.d0) * blockdim * (nblock-1) * blockdim
     else
       memAllAX0 = 0
       memAllBX0 = 0
@@ -305,11 +306,13 @@ module m_lobpcg2
     memeigenvalues3N = kind(1.d0) * 3*blockdim
 
     ! Temporary arrays
-    membufferBOrtho = cplx * kind(1.d0) * 2*blockdim * 2*blockdim ! For the moment being, only Bortho with X or WP at the same time
-    memsubA = cplx * kind(1.d0) * 3*blockdim * 3*blockdim
-    memsubB = cplx * kind(1.d0) * 3*blockdim * 3*blockdim
-    memsubBtmp = cplx * kind(1.d0) * spacedim * blockdim
-    memvec = cplx * kind(1.d0) * 3*blockdim * blockdim
+
+    ! For the moment being, only Bortho with X or WP at the same time
+    membufferBOrtho = int(cplx,c_size_t) * kind(1.d0) * 2*blockdim * 2*blockdim
+    memsubA = int(cplx,c_size_t) * kind(1.d0) * 3*blockdim * 3*blockdim
+    memsubB = int(cplx,c_size_t) * kind(1.d0) * 3*blockdim * 3*blockdim
+    memsubBtmp = int(cplx,c_size_t) * kind(1.d0) * spacedim * blockdim
+    memvec = int(cplx,c_size_t) * kind(1.d0) * 3*blockdim * blockdim
     memRR = max(memsubA+memsubB+memvec,memsubBtmp+memvec)
 
     maxmemTmp = max( membufferBOrtho,memRR,membufferOrtho )

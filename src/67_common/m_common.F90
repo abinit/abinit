@@ -2125,10 +2125,10 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,npw,nband,nspinor,
    integer,intent(inout)  :: nblk_gemm_nonlop
 
    integer(kind=c_size_t) :: nonlop_smem,invovl_smem,getghc_wmem,invovl_wmem,nonlop_wmem
-   integer(kind=c_size_t) :: sum_mem,sum_bandpp_mem,sum_other_mem,free_mem
+   integer(kind=c_size_t) :: sum_mem,sum_bandpp_mem,sum_other_mem,free_mem,localMem
    integer  :: icplx,space,i,ndat_try,rank,nprocs,ndgxdt
    logical  :: print_and_exit
-   real(dp) :: localMem,chebfiMem(2),lobpcgMem(2)
+   integer(kind=c_size_t) :: chebfiMem(2),lobpcgMem(2)
 
 ! *********************************************************************
 
@@ -2167,7 +2167,7 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,npw,nband,nspinor,
    if(wfoptalg==114) then
      lobpcgMem = lobpcg_memInfo(nband,icplx*npw*nspinor,ndat,space)
    end if
-   localMem  = (npw+2*npw*nspinor+2*nband)*kind(1.d0) !blockdim
+   localMem  = (int(2,c_size_t)*npw*nspinor*nband+3*nband)*kind(1.d0) ! cg, eig, occ, resid in chebfiwf/lobpcgwf
 
    print_and_exit=.false.
    if(nblk_gemm_nonlop > 1) then
@@ -2224,12 +2224,12 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,npw,nband,nspinor,
        ! CHEBFI2
        if(wfoptalg==111) then
          write(std_out,'(A,F10.3,1x,A)') "   invovl_ompgpu (mkinvovl)              : ",  real(invovl_smem,dp)/(1024*1024), "MiB"
-         write(std_out,'(A,F10.3,1x,A)') "   chebfi2                               : ",          chebfiMem(1)/(1024*1024), "MiB"
+         write(std_out,'(A,F10.3,1x,A)') "   chebfi2                               : ",    real(chebfiMem(1))/(1024*1024), "MiB"
        end if
 
        ! LOBPCG2
        if(wfoptalg==114) then
-         write(std_out,'(A,F10.3,1x,A)') "   lobpcg2                               : ",          lobpcgMem(1)/(1024*1024), "MiB"
+         write(std_out,'(A,F10.3,1x,A)') "   lobpcg2                               : ",    real(lobpcgMem(1))/(1024*1024), "MiB"
        end if
 
        write(std_out,*) "Work buffers (sized after bandpp or nblock_lobpcg)"
@@ -2244,14 +2244,14 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,npw,nband,nspinor,
        ! CHEBFI2
        if(wfoptalg==111) then
          write(std_out,'(A,F10.3,1x,A)') "   invovl                                : ",  real(invovl_wmem,dp)/(1024*1024), "MiB"
-         write(std_out,'(A,F10.3,1x,A)') "   chebfi2 (RR buffers)                  : ",          chebfiMem(2)/(1024*1024), "MiB"
-         write(std_out,'(A,F10.3,1x,A)') "   chebfiwf (cg,resid,eig)               : ",              localMem/(1024*1024), "MiB"
+         write(std_out,'(A,F10.3,1x,A)') "   chebfi2 (RR buffers)                  : ",    real(chebfiMem(2))/(1024*1024), "MiB"
+         write(std_out,'(A,F10.3,1x,A)') "   chebfiwf (cg,resid,eig)               : ",        real(localMem)/(1024*1024), "MiB"
        end if
 
        ! LOBPCG2
        if(wfoptalg==114) then
-         write(std_out,'(A,F10.3,1x,A)') "   lobpcg2 (RR buffers)                  : ",          lobpcgMem(2)/(1024*1024), "MiB"
-         write(std_out,'(A,F10.3,1x,A)') "   lobpcgwf (cg,resid,eig)               : ",              localMem/(1024*1024), "MiB"
+         write(std_out,'(A,F10.3,1x,A)') "   lobpcg2 (RR buffers)                  : ",    real(lobpcgMem(2))/(1024*1024), "MiB"
+         write(std_out,'(A,F10.3,1x,A)') "   lobpcgwf (cg,resid,eig)               : ",        real(localMem)/(1024*1024), "MiB"
        end if
 
        write(std_out,*) "---------------------------------------------------------"
