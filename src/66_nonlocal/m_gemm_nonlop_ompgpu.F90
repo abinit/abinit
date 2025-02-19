@@ -129,13 +129,13 @@ contains
 
 !----------------------------------------------------------------------
 
- function gemm_nonlop_ompgpu_static_mem(npw, indlmn, nattyp, ntypat, nblocks, ngrads) result(req_mem)
+ function gemm_nonlop_ompgpu_static_mem(npw, indlmn, nattyp, ntypat, mpi_block_size, ngrads) result(req_mem)
    implicit none
 
-   integer, intent(in) :: npw, ntypat, nblocks, ngrads
+   integer, intent(in) :: npw, ntypat, mpi_block_size, ngrads
    integer, intent(in) :: indlmn(:,:,:), nattyp(ntypat)
 
-   integer :: nprojs, itypat
+   integer :: nprojs, nprojs_last_blk, itypat
    integer(kind=c_size_t) :: req_mem
 
 ! *************************************************************************
@@ -144,20 +144,20 @@ contains
    do itypat=1,ntypat
      nprojs = nprojs + count(indlmn(3,:,itypat)>0)*nattyp(itypat)
    end do
-   nprojs = nprojs / nblocks
+   nprojs_last_blk = nprojs / mpi_block_size + modulo(nprojs,mpi_block_size)
 
    req_mem = 0
 
-   if(nblocks>1) then
-     req_mem = req_mem + dp * 2 * int(npw, c_size_t) * int(nprojs, c_size_t)          !projs_recv
+   if(mpi_block_size>1) then
+     req_mem = req_mem + dp * 2 * int(npw, c_size_t) * int(nprojs_last_blk, c_size_t)          !projs_recv
    end if
    ! projs or projs_r + projs_i
-   req_mem = req_mem + 2 * dp * int(npw, c_size_t) * int(nprojs, c_size_t)
+   req_mem = req_mem + 2 * dp * int(npw, c_size_t) * int(nprojs_last_blk, c_size_t)
    if(ngrads>0) then
      ! dprojs or dprojs_r + dprojs_i
-     req_mem = req_mem + 2 * dp * int(npw, c_size_t) * int(ngrads, c_size_t) * int(nprojs, c_size_t)
-     if(nblocks>1) then
-       req_mem = req_mem + dp * 2 * int(npw, c_size_t) * int(ngrads, c_size_t)*int(nprojs, c_size_t)   !dprojs_recv
+     req_mem = req_mem + 2 * dp * int(npw, c_size_t) * int(ngrads, c_size_t) * int(nprojs_last_blk, c_size_t)
+     if(mpi_block_size>1) then
+       req_mem = req_mem + dp * 2 * int(npw, c_size_t) * int(ngrads, c_size_t)*int(nprojs_last_blk, c_size_t)   !dprojs_recv
      end if
    end if
 

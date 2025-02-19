@@ -2110,19 +2110,22 @@ end function crystal_from_file
 !!                                        114: LOBPCG2
 !!                                      other: Only account for getghc
 !!  gpu_option       :  If GPU is enabled (expected to be ABI_GPU_OPENMP for now)
-!!  nblk_gemm_nonlop :  if higher than 1, only print memory estimation and exit
+!!  blocksize        :  if higher than 0, only print memory estimation and exit
 !!
 !! OUTPUT
-!!  nblk_gemm_nonlop :  Number of blocks to be used in GEMM nonlop
+!!  blocksize        :  Size of MPI tasks blocks to be used in GEMM nonlop
+!!  nblocks          :  Number of MPI blocks to be used in GEMM nonlop
 !!
 !! SOURCE
 subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,npw,nband,nspinor,paral_kgb,&
-&                                           optfor,optstr,wfoptalg,gpu_option,nblk_gemm_nonlop)
+&                                           optfor,optstr,wfoptalg,gpu_option,&
+&                                           blocksize,nblocks)
    implicit none
 
    integer,intent(in)     :: ikpt,ndat,npw,nband,nspinor,paral_kgb,optfor,optstr,wfoptalg,gpu_option
    type(gs_hamiltonian_type),intent(in) :: gs_hamk
-   integer,intent(inout)  :: nblk_gemm_nonlop
+   integer,intent(inout)  :: blocksize
+   integer,intent(out)    :: nblocks
 
    integer(kind=c_size_t) :: nonlop_smem,invovl_smem,getghc_wmem,invovl_wmem,nonlop_wmem,gs_ham_smem
    integer(kind=c_size_t) :: sum_mem,sum_bandpp_mem,sum_other_mem,free_mem,localMem
@@ -2172,10 +2175,10 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,npw,nband,nspinor,
    localMem  = (int(2,c_size_t)*npw*nspinor*nband+3*nband)*kind(1.d0) ! cg, eig, occ, resid in chebfiwf/lobpcgwf
 
    print_and_exit=.false.
-   if(nblk_gemm_nonlop > 1) then
+   if(blocksize > 1) then
      print_and_exit=.true.
    else
-     nblk_gemm_nonlop=1
+     blocksize=1
      write(std_out,*) "Setting GEMM nonlop block number...", new_line('A')
    end if
    ! How the number of blocks is decided:
@@ -2185,10 +2188,11 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,npw,nband,nspinor,
    do i=1,20
 
      ! Gemm nonlop static memory requirement is higher, split here
-     if(i>1 .and. .not. print_and_exit) nblk_gemm_nonlop = nblk_gemm_nonlop + 1
-     if(modulo(nprocs,nblk_gemm_nonlop)/=0) cycle
+     if(i>1 .and. .not. print_and_exit) blocksize = blocksize + 1
+     if(modulo(nprocs,blocksize)/=0) cycle
+     nblocks=nprocs/blocksize
 
-     nonlop_smem = gemm_nonlop_ompgpu_static_mem(gs_hamk%npw_fft_k,gs_hamk%indlmn,gs_hamk%nattyp,gs_hamk%ntypat,nblk_gemm_nonlop, ndgxdt)
+     nonlop_smem = gemm_nonlop_ompgpu_static_mem(gs_hamk%npw_fft_k,gs_hamk%indlmn,gs_hamk%nattyp,gs_hamk%ntypat,blocksize, ndgxdt)
 
      ! Bandpp~ndat sized buffer memory requirements are higher, split there
      sum_mem          = nonlop_smem + gs_ham_smem
@@ -2213,8 +2217,9 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,npw,nband,nspinor,
      end if
 
      if(sum_mem < free_mem .or. print_and_exit .or. i==20) then
-       write(std_out,'(A,I3,A,I3,A,A)') "GPU memory consumption estimate using ", nblk_gemm_nonlop,&
-       &                        " blocks in GEMM nonlop for K-point ",ikpt,":"
+       write(std_out,'(A,I3,A,I3,A,A)') "GPU memory consumption estimate using ",&
+       &                        nblocks, " blocks of ", blocksize,&
+       &                        " MPI tasks in GEMM nonlop for K-point ",ikpt,":"
        write(std_out,'(A,F10.3,1x,A)') " Available memory                        : ", real(free_mem)/(1024*1024), "MiB"
        write(std_out,*) "Memory requirements per MPI task (OpenMP GPU)"
        write(std_out,*) "---------------------------------------------------------"

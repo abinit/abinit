@@ -65,7 +65,7 @@ module m_vtowfk
  use m_fft,         only : fourwf
  use m_cgtk,        only : cgtk_fixphase
  use m_common,      only : get_gemm_nonlop_ompgpu_blocksize
- use m_gemm_nonlop_projectors, only : gemm_nonlop_nblocks, gemm_nonlop_is_distributed
+ use m_gemm_nonlop_projectors, only : gemm_nonlop_block_size, gemm_nonlop_is_distributed
 
 #if defined HAVE_YAKL
  use gator_mod
@@ -210,7 +210,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
 !Local variables-------------------------------
  logical :: has_fock,xg_diago,update_cprj
- logical :: do_subdiago,do_ortho,rotate_subvnlx,use_rmm_diis
+ logical :: do_subdiago,do_ortho,rotate_subvnlx,use_rmm_diis,is_distrib_tmp
  integer,parameter :: level=112,tim_fourwf=2,tim_nonlop_prep=11,enough=3,tim_getcprj=5
  integer,save :: nskip=0
 !     Flag use_subovl: 1 if "subovl" array is computed (see below)
@@ -223,7 +223,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  integer :: iblock,iblocksize,ibs,idir,ierr,igs,igsc,ii,inonsc
  integer :: iorder_cprj,ipw,ispinor,ispinor_index,istwf_k,iwavef,me_g0,mgsc,my_nspinor,n1,n2,n3 !kk
  integer :: nband_k_cprj,ncols_cprj,nblockbd,ncpgr,ndat,niter,nkpt_max,nnlout,ortalgo
- integer :: paw_opt,quit,signs,space,spaceComm,tim_nonlop,wfoptalg,wfopta10,nblk_gemm_nonlop_tmp
+ integer :: paw_opt,quit,signs,space,spaceComm,tim_nonlop,wfoptalg,wfopta10,nblk_gemm_nonlop,blksize_gemm_nonlop_tmp
  logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc
  real(dp) :: ar,ar_im,eshift,occblock,norm
  real(dp) :: max_resid,weight,cpu,wall,gflops
@@ -799,13 +799,13 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  ! In case of GEMM nonlop distribution + force computation,
  ! recompute distribution as projectors arrays are bigger in this case
  if(optforces==1 .and. dtset%gpu_nl_distrib==1) then
-   nblk_gemm_nonlop_tmp = gemm_nonlop_nblocks
-   gemm_nonlop_nblocks = 0
+   blksize_gemm_nonlop_tmp = gemm_nonlop_block_size; is_distrib_tmp = gemm_nonlop_is_distributed
+   gemm_nonlop_block_size = 0
    call get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,mpi_enreg%bandpp,npw_k,nband_k,&
    &                        dtset%nspinor,mpi_enreg%paral_kgb,&
-   &                        optforces,0,-1,gs_hamk%gpu_option,gemm_nonlop_nblocks)
-   gemm_nonlop_is_distributed = .false.
-   if(gemm_nonlop_nblocks > 1 .and. dtset%gpu_nl_distrib/=0) gemm_nonlop_is_distributed = .true.
+   &                        optforces,0,-1,gs_hamk%gpu_option,&
+   &                        gemm_nonlop_block_size,nblk_gemm_nonlop)
+   gemm_nonlop_is_distributed = (dtset%gpu_nl_distrib/=0 .and. nblk_gemm_nonlop > 1)
  end if
 
 !Loop over bands or blocks of bands. Note that in sequential mode iblock=iband, nblockbd=nband_k and blocksize=1
@@ -1198,9 +1198,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  end do !  End of loop on blocks
 
  if(optforces==1 .and. dtset%gpu_nl_distrib==1) then
-   gemm_nonlop_nblocks = nblk_gemm_nonlop_tmp
-   gemm_nonlop_is_distributed = .false.
-   if(gemm_nonlop_nblocks > 1 .and. dtset%gpu_nl_distrib/=0) gemm_nonlop_is_distributed = .true.
+   gemm_nonlop_block_size = blksize_gemm_nonlop_tmp
+   gemm_nonlop_is_distributed = is_distrib_tmp
  end if
 
  if (dtset%cprj_in_memory==1) then

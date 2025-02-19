@@ -68,7 +68,7 @@ module m_forstr
  use m_mpinfo,           only : proc_distrb_cycle
  use m_nonlop,           only : nonlop
  use m_gemm_nonlop_projectors, only : set_gemm_nonlop_ikpt, gemm_nonlop_use_gemm, &
-                                      gemm_nonlop_nblocks, gemm_nonlop_is_distributed
+                                      gemm_nonlop_block_size, gemm_nonlop_is_distributed
  use m_common,           only : get_gemm_nonlop_ompgpu_blocksize
  use m_fock_getghc,      only : fock_getghc
  use m_prep_kgb,         only : prep_nonlop
@@ -669,7 +669,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
  integer :: mband_cprj,me_distrb,my_ikpt,my_nspinor,nband_k,nband_cprj_k,ndat,nkpg
  integer :: nnlout,npw_k,paw_opt,signs,spaceComm
  integer :: tim_nonlop,tim_nonlop_prep,usecprj_local,use_ACE_old
- integer :: blocksize,iblock,iblocksize,ibs,nblockbd
+ integer :: blocksize,iblock,iblocksize,ibs,nblockbd,nblk_gemm_nonlop
  integer :: space,me_g0,ncols_cprj
  real(dp) :: ar,renorm_factor,dfsm,ecutsm_inv,fact_kin,fsm,htpisq,kgc1
  real(dp) :: kgc2,kgc3,kin,xx
@@ -1023,13 +1023,12 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
      if (gemm_nonlop_use_gemm) then
        call set_gemm_nonlop_ikpt(my_ikpt)
 
-       gemm_nonlop_nblocks = gpu_nl_splitsize
+       gemm_nonlop_block_size = gpu_nl_splitsize
        call get_gemm_nonlop_ompgpu_blocksize(my_ikpt,gs_hamk,mpi_enreg%bandpp,npw_k,nband_k,&
        &                        nspinor,mpi_enreg%paral_kgb,&
-       &                        optfor,stress_needed,-1,gs_hamk%gpu_option,gemm_nonlop_nblocks)
-       gemm_nonlop_is_distributed = .false.
-       if(gemm_nonlop_nblocks > 1 .and. gpu_nl_distrib/=0) gemm_nonlop_is_distributed = .true.
-
+       &                        optfor,stress_needed,-1,gs_hamk%gpu_option,&
+       &                        gemm_nonlop_block_size,nblk_gemm_nonlop)
+       gemm_nonlop_is_distributed = (gpu_nl_distrib/=0 .and. nblk_gemm_nonlop > 1)
      end if
 
      if (usexg==1) then
