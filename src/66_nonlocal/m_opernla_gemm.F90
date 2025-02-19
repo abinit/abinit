@@ -72,9 +72,6 @@ subroutine opernla_gemm_distributed(rank,nprocs,npwin,ndat,&
  !Local variables
  integer :: iblock,ibeg,iend,req(2),ierr,nprojs_cur_blk,rank_prev,rank_next
  real(dp), ABI_CONTIGUOUS pointer :: recv_buf(:,:,:), work_buf(:,:,:)
-#ifdef HAVE_GPU_MPI
- real(dp), ABI_CONTIGUOUS pointer :: recv_buf_f(:), work_buf_f(:)
-#endif
  real(dp), allocatable, target  :: projs_recv(:,:,:)
 
 ! *************************************************************************
@@ -127,14 +124,8 @@ subroutine opernla_gemm_distributed(rank,nprocs,npwin,ndat,&
 #else
 
      ! GPU-aware MPI available : pass GPU buffers to MPI
-     !$OMP TARGET DATA USE_DEVICE_PTR(work_buf,recv_buf)
-     call c_f_pointer(c_loc(work_buf), work_buf_f, [cplex*npwin*nprojs_last_blk])
-     call c_f_pointer(c_loc(recv_buf), recv_buf_f, [cplex*npwin*nprojs_last_blk])
-     call MPI_ISEND(work_buf_f,cplex*npwin*nprojs_cur_blk,MPI_DOUBLE_PRECISION,&
-     &    rank_prev,iblock,gemm_nonlop_block_comm,req(1),ierr)
-     call MPI_IRECV(recv_buf_f,cplex*npwin*nprojs_cur_blk,MPI_DOUBLE_PRECISION,&
-     &    rank_next,iblock,gemm_nonlop_block_comm,req(2),ierr)
-     !$OMP END TARGET DATA
+     call xmpi_isend(work_buf,rank_prev,iblock,gemm_nonlop_block_comm,req(1),ierr,use_omp_map=.true.)
+     call xmpi_irecv(recv_buf,rank_next,iblock,gemm_nonlop_block_comm,req(2),ierr,use_omp_map=.true.)
 
 #endif
 #endif
@@ -181,7 +172,9 @@ subroutine opernla_gemm_distributed(rank,nprocs,npwin,ndat,&
 #endif
    end if
 
-   call xmpi_waitall(req,ierr)
+   call xmpi_wait(req(1),ierr)
+   call xmpi_wait(req(2),ierr)
+   !call xmpi_waitall(req,ierr)
 
 #ifdef HAVE_OPENMP_OFFLOAD
 #ifndef HAVE_GPU_MPI

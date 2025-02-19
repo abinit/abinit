@@ -311,6 +311,8 @@ subroutine xmpi_irecv_dp3d(xval,source,tag,comm,request,ierr,use_omp_map)
 
  ierr=0
 #if defined HAVE_MPI
+ l_use_omp_map=.false.
+ if(present(use_omp_map)) l_use_omp_map=use_omp_map
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    l_use_omp_map=.false.
    if(present(use_omp_map)) l_use_omp_map=use_omp_map
