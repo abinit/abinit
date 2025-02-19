@@ -43,6 +43,7 @@ module m_chebfi2
 #ifdef HAVE_OPENMP
  use omp_lib
 #endif
+ use, intrinsic :: iso_c_binding, only: c_size_t
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
  use m_gpu_toolbox, only : CPU_DEVICE_ID, gpu_device_synchronize
@@ -389,46 +390,46 @@ function chebfi_memInfo(neigenpairs,spacedim,space,paral_kgb,total_spacedim,band
 
 !Local variables-------------------------------
 !scalars
- real(dp) :: memX
- real(dp) :: memX_next
- real(dp) :: memX_prev
- real(dp) :: memAX
- real(dp) :: memBX
+ integer(kind=c_size_t) :: memX
+ integer(kind=c_size_t) :: memX_next
+ integer(kind=c_size_t) :: memX_prev
+ integer(kind=c_size_t) :: memAX
+ integer(kind=c_size_t) :: memBX
 !Transposer variables
- real(dp) :: memX_CR
- real(dp) :: memAX_CR
- real(dp) :: memBX_CR
+ integer(kind=c_size_t) :: memX_CR
+ integer(kind=c_size_t) :: memAX_CR
+ integer(kind=c_size_t) :: memBX_CR
 !chebfi_rayleighRitz function variables
- real(dp) :: memA_und_X
- real(dp) :: memB_und_X
- real(dp) :: memEigenvalues
- real(dp) :: cplx
+ integer(kind=c_size_t) :: memA_und_X
+ integer(kind=c_size_t) :: memB_und_X
+ integer(kind=c_size_t) :: memEigenvalues
+ integer(kind=c_size_t) :: cplx
 !arrays
- real(dp) :: arraymem(2)
+ integer(kind=c_size_t) :: arraymem(2)
 
 ! *********************************************************************
  cplx = 1
  if ( space == SPACE_C ) cplx = 2 !for now only complex
 
  !Permanent in chebfi
- memX = cplx * kind(1.d0) * spacedim * neigenpairs
+ memX = int(cplx,c_size_t) * kind(1.d0) * spacedim * neigenpairs
 
  if (paral_kgb == 0) then
-   memX_next = cplx * kind(1.d0) * spacedim * neigenpairs
-   memX_prev = cplx * kind(1.d0) * spacedim * neigenpairs
+   memX_next = int(cplx,c_size_t) * kind(1.d0) * spacedim * neigenpairs
+   memX_prev = int(cplx,c_size_t) * kind(1.d0) * spacedim * neigenpairs
  else
-   memX_next = cplx * kind(1.d0) * total_spacedim * bandpp
-   memX_prev = cplx * kind(1.d0) * total_spacedim * bandpp
+   memX_next = int(cplx,c_size_t) * kind(1.d0) * total_spacedim * bandpp
+   memX_prev = int(cplx,c_size_t) * kind(1.d0) * total_spacedim * bandpp
  end if
 
- memAX = cplx * kind(1.d0) * spacedim * neigenpairs
- memBX = cplx * kind(1.d0) * spacedim * neigenpairs
+ memAX = int(cplx,c_size_t) * kind(1.d0) * spacedim * neigenpairs
+ memBX = int(cplx,c_size_t) * kind(1.d0) * spacedim * neigenpairs
 
  !Transposer colrow array
  if (paral_kgb == 1) then
-   memX_CR = cplx * kind(1.d0) * total_spacedim * bandpp
-   memAX_CR = cplx * kind(1.d0) * total_spacedim * bandpp
-   memBX_CR = cplx * kind(1.d0) * total_spacedim * bandpp
+   memX_CR = int(cplx,c_size_t) * kind(1.d0) * total_spacedim * bandpp
+   memAX_CR = int(cplx,c_size_t) * kind(1.d0) * total_spacedim * bandpp
+   memBX_CR = int(cplx,c_size_t) * kind(1.d0) * total_spacedim * bandpp
  else
    memX_CR = 0
    memAX_CR = 0
@@ -436,9 +437,9 @@ function chebfi_memInfo(neigenpairs,spacedim,space,paral_kgb,total_spacedim,band
  end if
 
  !chebfi_rayleighRitz function variables
- memA_und_X = cplx * kind(1.d0) * neigenpairs * neigenpairs
- memB_und_X = cplx * kind(1.d0) * neigenpairs * neigenpairs
- memEigenvalues = kind(1.d0) * neigenpairs
+ memA_und_X = int(cplx,c_size_t) * kind(1.d0) * neigenpairs * neigenpairs
+ memB_und_X = int(cplx,c_size_t) * kind(1.d0) * neigenpairs * neigenpairs
+ memEigenvalues = int(kind(1.d0),c_size_t) * neigenpairs
 
  arraymem(1) = memX + memX_next + memX_prev + &
                memAX + memBX + memX_CR + memAX_CR + memBX_CR
