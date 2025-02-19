@@ -131,15 +131,15 @@ module m_gemm_nonlop_projectors
  ! Public variable indicating whether we should gemm_nonlop operated in a distributed manner. Set to false by default
  ! but might be enabled by memory constraints or forced by user through parameters.
 
- integer, save, public :: gemm_nonlop_nblocks = 1
- ! Public variable indicating in how many blocks of MPI tasks should the projs arrays be ditributed.
- ! Default size 1 indicates no distribution at all.
+ integer, save :: gemm_nonlop_nblocks = 1
+ ! How many blocks of MPI tasks should the projs arrays be ditributed.
 
  integer, save, public :: gemm_nonlop_block_comm = xmpi_comm_null
  ! MPI communicator for MPI tasks processing the same gemm_nonlop block for projs array distribution
 
- integer, save :: gemm_nonlop_block_size
- ! Size of a block (ie: number of MPI tasks in gemm_nonlop_block_comm)
+ integer, save, public :: gemm_nonlop_block_size = 0
+ ! Public variable indicating size of a block (ie: number of MPI tasks in gemm_nonlop_block_comm)
+ ! Default size 0 indicates no distribution at all.
 
  integer, save, public :: gemm_nonlop_choice = -1
 
@@ -220,6 +220,7 @@ contains
 
   gemm_nonlop_block_comm=xmpi_comm_null
   gemm_nonlop_block_size=0
+  gemm_nonlop_nblocks=1
   gemm_nonlop_gpu_option=gpu_option
 
  end subroutine init_gemm_nonlop
@@ -612,9 +613,8 @@ contains
   end if
 
   if(gemm_nonlop_is_distributed) then
-    nprocs = xmpi_comm_size(xmpi_world)
     ! If split size has changed, reset array
-    if(gemm_nonlop_kpt(ik)%nprojs_blk /= nprojs / (nprocs/gemm_nonlop_nblocks)) then
+    if(gemm_nonlop_kpt(ik)%nprojs_blk /= nprojs/gemm_nonlop_block_size) then
       call free_gemm_nonlop_ikpt(ik, gpu_option)
     end if
   end if
@@ -635,15 +635,15 @@ contains
         if(gemm_nonlop_block_comm==xmpi_comm_null .or. gemm_nonlop_block_size*gemm_nonlop_nblocks /= nprocs) then
           call xmpi_comm_free(gemm_nonlop_block_comm)
           rank = xmpi_comm_rank(xmpi_world);
-          if(gemm_nonlop_nblocks==0) gemm_nonlop_nblocks=nprocs
-          write(std_out,'(A,I3,A,I3,A)'), "Splitting GEMM nonlop projectors on ",&
-          &    gemm_nonlop_nblocks, " blocks of ", nprocs/gemm_nonlop_nblocks, " MPI tasks..."
-          call xmpi_comm_split(xmpi_world, rank/(nprocs/gemm_nonlop_nblocks), rank, gemm_nonlop_block_comm, ierr)
+          gemm_nonlop_nblocks=nprocs/gemm_nonlop_block_size
+          write(std_out,'(A,I3,A,I3,A)')  "Splitting GEMM nonlop projectors on ",&
+          &    gemm_nonlop_nblocks, " blocks of ", gemm_nonlop_block_size, " MPI tasks..."
+          call xmpi_comm_split(xmpi_world, rank/gemm_nonlop_block_size, rank, gemm_nonlop_block_comm, ierr)
           if(ierr/=0) ABI_BUG("MPI_comm_split failed!")
         end if
       end if
 
-      rank = xmpi_comm_rank(gemm_nonlop_block_comm); gemm_nonlop_block_size = xmpi_comm_size(gemm_nonlop_block_comm)
+      rank = xmpi_comm_rank(gemm_nonlop_block_comm);
       is_last_rank = (rank==gemm_nonlop_block_size-1)
 
       nprojs_blk = nprojs / gemm_nonlop_block_size
@@ -689,7 +689,7 @@ contains
       nprojs_my_blk = nprojs
       nprojs_blk = nprojs
       if(gemm_nonlop_is_distributed) then
-        rank = xmpi_comm_rank(gemm_nonlop_block_comm); gemm_nonlop_block_size = xmpi_comm_size(gemm_nonlop_block_comm)
+        rank = xmpi_comm_rank(gemm_nonlop_block_comm);
         is_last_rank = (rank==gemm_nonlop_block_size-1)
 
         nprojs_blk = nprojs / gemm_nonlop_block_size
