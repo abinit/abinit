@@ -10,7 +10,7 @@
 #
 # Then should be called from the top directory  (here a list of generic filenames, ordered on the basis of the alphanumeric string)
 # developers/maintainers/change_year.sh *.ac */*.ac */*/*.ac */*/*.am */*/*/*/*.am */*/*.c */*/*/*.c */*/*.cnf */*/*.conf */*/*.cu */*/*.csh 
-# developers/maintainers/change_year.sh */*env */*/*env */*/*.finc */*/*/*/*.finc */*/*.f90 */*/*.F90 */*/*/*.F90 *.in */*.in */*/*.in 
+# developers/maintainers/change_year.sh */*env */*/*env */*/*.finc */*/*/*/*.finc */*/*.f90 */*/*.F90 */*/*/*.f90 */*/*/*.F90 *.in */*.in */*/*.in 
 # developers/maintainers/change_year.sh *.h */*/*.h */*/*/*.h */*/*/*.help */*/*.html */*/*/*.m */*/make* */*/*/*bindings*
 # developers/maintainers/change_year.sh */*/*.m4 */*/*/*.m4 */*/*/*/*.m4 */*/Makefile */*/*.pl */*/*/*.pl bindings/README fallbacks/README tests/README */*/README 
 # developers/maintainers/change_year.sh */*.sh */*/*.src */*/*/*.src */*/*/*/*.src */*/*/*.stdout */*/*.tex */*/*/*.tex */*/*.txt */*/*/*.txt */*/*_ */*/*/*_ */*/*_ext
