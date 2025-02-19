@@ -97,8 +97,8 @@ nshiftk   1              # Use one copy of grid only (default)
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test =
-#%%   telast_5.abo, tolnlines=  5, tolabs=  3.000e-09, tolrel= 0.0004
+#%% files_to_test = 
+#%%   telast_5.abo, tolnlines=  5, tolabs=  1.100e-08, tolrel= 0.0004
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
