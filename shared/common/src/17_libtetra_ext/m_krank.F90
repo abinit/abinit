@@ -147,8 +147,7 @@ type(krank_t) function krank_from_kptrlatt(nkpt, kpts, kptrlatt, compute_invrank
        ABI_ERROR("kptrlatt with zero matrix element on the diagonal!")
      end if
      if (ii /= jj .and. kptrlatt(ii, jj) /= 0) then
-       ! ABI_ERROR("kptrlatt with non-zero off-diagonal matrix elements is not supported")
-       ABI_WARNING("kptrlatt with non-zero off-diagonal matrix elements is not supported")
+       ! ABI_WARNING("kptrlatt with non-zero off-diagonal matrix elements is not supported")
        opt=1
      end if
    end do
@@ -166,10 +165,6 @@ type(krank_t) function krank_from_kptrlatt(nkpt, kpts, kptrlatt, compute_invrank
      end do
    end do
    max_linear_density = ceiling(2/min_kpt)
-   ! if (xmpi_comm_rank(xmpi_world)==0) then
-   !   write(*,*) "Trying experimental fix"
-   !   write(*,*) "max_linear_density: ", max_linear_density
-   ! end if
  else
    max_linear_density = maxval([kptrlatt(1,1), kptrlatt(2,2), kptrlatt(3,3)])
  end if
