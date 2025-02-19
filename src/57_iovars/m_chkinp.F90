@@ -1850,6 +1850,17 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      'Action: change iprcel value in input file !'
      ABI_ERROR_NOSTOP(msg, ierr)
    end if
+   if(dt%iprcel>=200 .and. dt%iprcel<300) then
+     !chi0-based preconditioning (iprcel=2**) incompatible with fft-grid parallelization.
+     cond_string(1)='iprcel' ; cond_values(1)=dt%iprcel
+     call chkint_eq(1, 1, cond_string, cond_values, ierr, 'npfft', dt%npfft, 1, [1], iout)
+     if (dt%iprcel == 202) then
+      !LDOS chi0-based preconditioning (iprcel=202) incompatible with PAW (TODO).
+      call chkint_eq(0, 1, cond_string, cond_values, ierr, 'usepaw', dt%usepaw, 1, [0], iout)
+      !LDOS chi0-based preconditioning (iprcel=202) needs a smooth smearing.
+      call chkint_eq(0, 1, cond_string, cond_values, ierr, 'occopt', dt%occopt, 5, [3, 4, 5, 6, 7], iout) 
+     end if
+   end if
 
    ! irandom
    call chkint_eq(0,0,cond_string,cond_values,ierr,'irandom',dt%irandom,3, [1,2,3], iout)
