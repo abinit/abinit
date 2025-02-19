@@ -4,7 +4,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2003-2024 ABINIT  group (MVeithen)
+!!  Copyright (C) 2003-2025 ABINIT  group (MVeithen)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1728,7 +1728,7 @@ end subroutine berryphase_new
 !! This routine updates E field variables
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2024 ABINIT  group
+!! Copyright (C) 2003-2025 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2289,7 +2289,7 @@ end subroutine update_e_field_vars
 !! Print components of electric field, displacement field and polarization in nice format
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, LBoeri, MT)
+!! Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, LBoeri, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2670,7 +2670,7 @@ end subroutine prtefield
 !! calculations
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2024 ABINIT group
+!! Copyright (C) 2004-2025 ABINIT group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2781,7 +2781,7 @@ end subroutine init_e_field_vars
 !! ddk and the response of an insulator to a homogenous electric field.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2024 ABINIT group (MVeithen).
+!! Copyright (C) 2004-2025 ABINIT group (MVeithen).
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

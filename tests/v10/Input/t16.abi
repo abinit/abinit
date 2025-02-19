@@ -86,6 +86,7 @@ pseudos="P.psp8, Al.psp8"
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = alps_intel_2025_elpa
 #%% need_cpp_vars = HAVE_DFTI
 #%% [files]
 #%% files_to_test =
