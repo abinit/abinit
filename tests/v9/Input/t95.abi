@@ -30,7 +30,7 @@ toldfe 1.e-10
 ixc -645642 # R2SCAN01 meta GGA
 usekden 1
 nc_xccc_gspace 0 # calculates model core contribution in real space. Cleaner
-#nc_xccc_gspace 1# calculates model core contribution in recip space. lots of noise ~ 1.e-5 density 
+#nc_xccc_gspace 1# calculates model core contribution in recip space. lots of noise ~ 1.e-5 density
 
  pp_dirpath "$ABI_PSPDIR"
  pseudos "29_Cu_m.upf"

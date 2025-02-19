@@ -2,7 +2,8 @@
 # 11_memory_mpi
 #
 add_library(11_memory_mpi STATIC
-  m_profiling_abi.F90)
+  m_profiling_abi.F90
+)
 
 set_target_properties(11_memory_mpi
   PROPERTIES
@@ -28,6 +29,7 @@ target_link_libraries(11_memory_mpi
   PRIVATE
   abinit::02_clib
   abinit::10_defs
-  MPI::MPI_Fortran)
+  MPI::MPI_Fortran
+)
 
 add_library(abinit::11_memory_mpi ALIAS 11_memory_mpi)

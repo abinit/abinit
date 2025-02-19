@@ -47,7 +47,7 @@ Variable(
     mnemonics="ANGLE alpha",
     added_in_version="before_v9",
     text=r"""
-This angle has to be defined if the bravais lattice is monoclinic. That is to say if [[atdep:brav]](1)=2. 
+This angle has to be defined if the bravais lattice is monoclinic. That is to say if [[atdep:brav]](1)=2.
 """,
 ),
 
@@ -121,7 +121,7 @@ Variable(
     mnemonics="Brillouin Zone PATH",
     added_in_version="before_v9",
     text=r"""
-OPTIONAL: Defines the path in the Brillouin Zone for the phonon spectrum calculation. The first value defines the number of special points used in the path. The other values define the special points of the BZ (only the letters fixed by convention for the present lattice are allowed: L, X, M... and G for $\Gamma$). 
+OPTIONAL: Defines the path in the Brillouin Zone for the phonon spectrum calculation. The first value defines the number of special points used in the path. The other values define the special points of the BZ (only the letters fixed by convention for the present lattice are allowed: L, X, M... and G for $\Gamma$).
 """,
 ),
 
@@ -185,8 +185,8 @@ $$ \text{rprimd}_{i,j}=\sum_{k=1}^3 \text{acell_unitcell}_i * \text{multiplicity
 
 For example:
 
-- for a fcc lattice: rprim = ( 0 1/2 1/2 ; 1/2 0 1/2 ; 1/2 1/2 0) and acell = (a a a). If the SUPERCELL is rprimd = (3a 0 0 ; 0 3a 0 ; 0 0 3a), the multiplicity = ( -3 3 3 ; 3 -3 3 ; 3 3 -3) 
-- for a bcc lattice: rprim = ( -1/2 1/2 1/2 ; 1/2 -1/2 1/2 ; 1/2 1/2 -1/2) and acell = (a a a). If the SUPERCELL is rprimd = (3a 0 0 ; 0 3a 0 ; 0 0 3a), the multiplicity = ( 0 3 3 ; 3 0 3 ; 3 3 0) 
+- for a fcc lattice: rprim = ( 0 1/2 1/2 ; 1/2 0 1/2 ; 1/2 1/2 0) and acell = (a a a). If the SUPERCELL is rprimd = (3a 0 0 ; 0 3a 0 ; 0 0 3a), the multiplicity = ( -3 3 3 ; 3 -3 3 ; 3 3 -3)
+- for a bcc lattice: rprim = ( -1/2 1/2 1/2 ; 1/2 -1/2 1/2 ; 1/2 1/2 -1/2) and acell = (a a a). If the SUPERCELL is rprimd = (3a 0 0 ; 0 3a 0 ; 0 0 3a), the multiplicity = ( 0 3 3 ; 3 0 3 ; 3 3 0)
 """,
 ),
 
@@ -298,7 +298,7 @@ Variable(
     mnemonics="ORDER for the IFC",
     added_in_version="before_v9",
     text="""
-OPTIONAL: Defines at which order the calculation of the IFCs is performed. If the first value [[atdep:order]](1)=3, that turns on a third order calculation and the second value [[atdep:order]](2) defines the cutoff radius. 
+OPTIONAL: Defines at which order the calculation of the IFCs is performed. If the first value [[atdep:order]](1)=3, that turns on a third order calculation and the second value [[atdep:order]](2) defines the cutoff radius.
 """,
 ),
 
@@ -462,5 +462,21 @@ Variable(
 Defines the reduced coordinates of atoms in the UNITCELL.
 """,
 ),
+
+Variable(
+    abivarname="znucl@atdep",
+    varset="atdep",
+    vartype="float",
+    topics=['aTDEP_basic'],
+    dimensions=['[[atdep:natom]]'],
+    defaultval="[[atdep:natom]]*0",
+    mnemonics="charge -Z- of the NUCLeus",
+    added_in_version="10.1.4",
+    text="""
+OPTIONAL: Gives nuclear charge for each type of atom, in order.
+Within atep, this variable is only used when writing the DDB file.
+""",
+),
+
 
 ]

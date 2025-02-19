@@ -51,11 +51,11 @@ module m_effective_potential
  use m_fstrings,       only : replace, ftoa, itoa
  use m_io_tools,       only : open_file, get_unit
  use m_dtfil,          only : isfile
- use m_symtk,          only : matr3inv
+ use m_matrix,         only : matr3inv
  use m_effpot_mpi,     only : effpot_mpi_init,effpot_mpi_type,effpot_mpi_free
  use m_abihist,        only : abihist
  use m_geometry,       only : gred2fcart,fcart2gred, xcart2xred, xred2xcart, metric
- use m_crystal,        only : crystal_t, crystal_init
+ use m_crystal,        only : crystal_t
  !use m_anaddb_dataset, only : anaddb_dataset_type, anaddb_dtset_free, outvars_anaddb, invars9
 
  implicit none
@@ -257,7 +257,7 @@ subroutine effective_potential_init(crystal,eff_pot,energy,ifcs,ncoeff,nqpt,comm
 
 !1-Fill the crystal
 !Warning znucl is dimension with ntypat = nspsp hence alchemy is not supported here
- call crystal_init(crystal%amu,eff_pot%crystal,crystal%space_group,crystal%natom,&
+ call eff_pot%crystal%init(crystal%amu,crystal%space_group,crystal%natom,&
 &                  crystal%npsp,crystal%ntypat,crystal%nsym,crystal%rprimd,&
 &                  crystal%typat,crystal%xred,crystal%zion,crystal%znucl,&
 &                  crystal%timrev,.FALSE.,.FALSE.,crystal%title,&

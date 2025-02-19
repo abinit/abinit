@@ -46,11 +46,6 @@ if(ABINIT_ENABLE_CRPA_OPTIM)
   set(HAVE_CRPA_OPTIM 1)
 endif()
 
-option(ABINIT_ENABLE_LONG_LINES "Enable to have long lines in fortran source code (default: no)" OFF)
-if(ABINIT_ENABLE_LONG_LINES)
-  set(HAVE_FC_LONG_LINES 1)
-endif()
-
 option(ABINIT_ENABLE_MPI_IO_DEFAULT "Enable to use MPI I/O as default I/O library (default: no)" OFF)
 if(ABINIT_ENABLE_MPI_IO_DEFAULT)
   set(HAVE_MPI_IO_DEFAULT 1)
@@ -96,7 +91,7 @@ if(ABINIT_ENABLE_GPU_CUDA)
     # if you want to use nvc++ you need at least cmake 3.22.0
     #
     # the following will make target like CUDA::cublas and CUDA::cufft available
-    message("Using CUDAToolkit macros")
+    message(STATUS "Using CUDAToolkit macros")
     find_package(CUDAToolkit REQUIRED)
 
   endif()

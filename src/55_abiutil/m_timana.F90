@@ -1135,9 +1135,6 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1764) = 'chebfi2_barrier               '
  names(1765) = 'chebfi2_copy                  '
 
- names(1769) = 'chebfi2_X_NP@init             '
- names(1770) = 'chebfi2_AX_BX@init            '
-
  names(1779) = 'chebfi2(other)                '
 
  names(1780)='ctgk_rotate'; basic(1780) = 1

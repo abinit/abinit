@@ -32,9 +32,7 @@ MODULE m_results_gs
  use m_stream_string
  use m_pair_list
  use m_nctk
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
 
  use m_io_tools,      only : file_exists
  use m_fstrings,      only : sjoin
@@ -691,14 +689,9 @@ integer function results_gs_ncwrite(res, ncid, ecut, pawecutdg) result(ncerr)
 
 !Arguments ------------------------------------
 !scalars
+ class(results_gs_type),intent(in) :: res
  integer,intent(in) :: ncid
  real(dp),intent(in) :: ecut,pawecutdg
- class(results_gs_type),intent(in) :: res
-
-!Local variables-------------------------------
-!scalars
-#ifdef HAVE_NETCDF
-
 ! *************************************************************************
 
  ! ==============================================
@@ -756,13 +749,8 @@ integer function results_gs_ncwrite(res, ncid, ecut, pawecutdg) result(ncerr)
 ! Add energies
  call energies_ncwrite(res%energies, ncid)
 
-#else
- ABI_ERROR("netcdf support is not activated.")
-#endif
-
 contains
  integer function vid(vname)
-
    character(len=*),intent(in) :: vname
    vid = nctk_idname(ncid, vname)
  end function vid

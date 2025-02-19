@@ -160,7 +160,7 @@ subroutine calc_vhxc_me(Wfd, Mflags, Mels, Cryst, Dtset, nfftf, ngfftf, &
  real(dp) :: tmp_xc(2,Wfd%nspinor**2),tmp_xcval(2,Wfd%nspinor**2)
  real(dp) :: tmp_H(2,Wfd%nspinor**2),tmp_U(2,Wfd%nspinor**2)
  real(dp) :: tmp_h0ij(2,Wfd%nspinor**2),tmp_sigcx(2,Wfd%nspinor**2)
- real(dp) :: dijU(2),strsxc(6),kpt(3),vxc1ab(2),vxc1ab_val(2)
+ real(dp) :: dijU(2),kpt(3),vxc1ab(2),vxc1ab_val(2)
  real(dp),allocatable :: kxc_(:,:),xccc3d_(:),vxc_val(:,:),vxc_val_hybrid(:,:)
  real(dp),allocatable :: kinpw(:),veffh0(:,:)
  complex(dpc) :: tmp(3)
@@ -227,7 +227,7 @@ subroutine calc_vhxc_me(Wfd, Mflags, Mels, Cryst, Dtset, nfftf, ngfftf, &
    end if
  end do
 
- option = 0 ! Only exc, vxc, strsxc
+ option = 0 ! Only exc, vxc
  nkxc   = 0 ! No computation of XC kernel
  n3xccc_= 0 ! No core
  nk3xc  = 0 ! k3xc not needed
@@ -241,7 +241,7 @@ subroutine calc_vhxc_me(Wfd, Mflags, Mels, Cryst, Dtset, nfftf, ngfftf, &
 
  call rhotoxc(bigexc_val,bigsxc_val,kxc_,MPI_enreg_seq,nfftf,ngfftf,&
               nhat,Wfd%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,nmxc,n3xccc_,option,rhor,Cryst%rprimd,&
-              strsxc,usexcnhat,vxc_val,vxcval_avg,xccc3d_,xcdata,taur=taur)
+              usexcnhat,vxc_val,vxcval_avg,xccc3d_,xcdata,taur=taur)
 
  ! FABIEN's development
  ! Hybrid functional treatment
@@ -276,12 +276,12 @@ subroutine calc_vhxc_me(Wfd, Mflags, Mels, Cryst, Dtset, nfftf, ngfftf, &
    if(ixc_sigma<0)then
      call rhotoxc(bigexc_hybrid_val,dum,kxc_,MPI_enreg_seq,nfftf,ngfftf,&
                   nhat,Wfd%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,nmxc,n3xccc_,option,rhor,Cryst%rprimd,&
-                  strsxc,usexcnhat,vxc_val_hybrid,vxcval_hybrid_avg,xccc3d_,xcdata_hybrid,xc_funcs=xc_funcs_hybrid)
+                  usexcnhat,vxc_val_hybrid,vxcval_hybrid_avg,xccc3d_,xcdata_hybrid,xc_funcs=xc_funcs_hybrid)
      call libxc_functionals_end(xc_functionals=xc_funcs_hybrid)
    else
      call rhotoxc(bigexc_hybrid_val,dum,kxc_,MPI_enreg_seq,nfftf,ngfftf,&
                   nhat,Wfd%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,nmxc,n3xccc_,option,rhor,Cryst%rprimd,&
-                  strsxc,usexcnhat,vxc_val_hybrid,vxcval_hybrid_avg,xccc3d_,xcdata_hybrid)
+                  usexcnhat,vxc_val_hybrid,vxcval_hybrid_avg,xccc3d_,xcdata_hybrid)
    end if
 
  endif

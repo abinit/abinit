@@ -30,7 +30,8 @@ module m_spacepar
 
  use m_time,            only : timab
  use defs_abitypes,     only : MPI_type
- use m_symtk,           only : mati3inv, sg_multable, symdet, symatm, matr3inv
+ use m_matrix,          only : mati3inv, matr3inv
+ use m_symtk,           only : sg_multable, symdet, symatm
  use m_geometry,        only : metric, normv, symredcart,wedge_basis,wedge_product
  use m_gtermcutoff,     only : termcutoff
  use m_mpinfo,          only : ptabs_fourdp
@@ -759,7 +760,7 @@ end subroutine hartre
 !!  npw=number of planewaves of the vector
 !!  nspinor=number of spinor components
 !!  vect(2,npw*nspinor)=vector
-!!  vect1(2,npw*nspinor*use_ndo)=vector1 (=vector in most of the cases)
+!!  vect1(2,npw*nspinor)=vector1 (=vector in most of the cases)
 !!  use_ndo = says if vect=/vect1
 !!
 !! OUTPUT

@@ -60,6 +60,7 @@
  nstep_min                1
  rcut                   10.7200000000
  ======================= Optional input variables ============================
+ znucl                  92.0000000000
  use_ideal_positions     1
  tolmotif               0.05000
  tolinbox               0.01000

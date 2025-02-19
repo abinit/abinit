@@ -155,7 +155,7 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
  use m_inwffil,     only : inwffil
  use m_fft,         only : fourdp
  use m_ioarr,       only : read_rhor
- use m_hamiltonian, only : gs_hamiltonian_type, init_hamiltonian
+ use m_hamiltonian, only : gs_hamiltonian_type
  use m_pawdij,      only : pawdij, pawdijfr, symdij
  use m_pawfgr,      only : pawfgr_type
  use m_pawfgrtab,   only : pawfgrtab_type
@@ -293,7 +293,7 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
 !2) Perform the setup needed for the non-local factors:
 !* Norm-conserving: Constant kleimann-Bylander energies are copied from psps to gs_hamk.
 !* PAW: Initialize the overlap coefficients and allocate the Dij coefficients.
- call init_hamiltonian(gs_hamkq,psps,pawtab,dtset%nspinor,dtset%nsppol,dtset%nspden,natom,&
+ call gs_hamkq%init(psps,pawtab,dtset%nspinor,dtset%nsppol,dtset%nspden,natom,&
 & dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,&
 & usecprj=usecprj,ph1d=ph1d,nucdipmom=dtset%nucdipmom,paw_ij=paw_ij0,&
 & gpu_option=dtset%gpu_option)
@@ -652,7 +652,8 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
                      call pawdij(cplex,dtset%enunit,gprimd,i2pert,natom,dtset%natom,&
 &                     nfftf,nfftotf,dtset%nspden,psps%ntypat,paw_an1_i2pert,paw_ij1_i2pert,pawang,&
 &                     pawfgrtab,dtset%pawprtvol,pawrad,pawrhoij1_i2pert,dtset%pawspnorb,pawtab,&
-&                     dtset%pawxcdev,qphon,dtset%spnorbscl,ucvol,dtset%cellcharge(1),vtrial1_tmp,vxc1_i2pert,xred,&
+&                     dtset%pawxcdev,qphon,dtset%spnorbscl,ucvol,dtset%cellcharge(1),&
+&                     vtrial1_tmp,vxc1_i2pert,xred,dtset%znucl,&
 &                     mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
                      if (has_dijfr>0) then
                        ABI_FREE(vtrial1_tmp)

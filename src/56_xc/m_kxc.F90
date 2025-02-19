@@ -400,7 +400,6 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
  character(len=500) :: message
  type(xcdata_type) :: xcdata
 !arrays
- real(dp) :: strsxc(6)
  real(dp) :: dum(0)
  real(dp),parameter   :: dummyvgeo(3)=zero
  real(dp),allocatable :: kxcr(:,:),rhog(:,:),rhorcut(:,:),vhartree(:)
@@ -488,7 +487,7 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
 
    call hartre(1,gsqcut,3,0,mpi_enreg,nfft,ngfft,1,zero,rhog,rprimd,dummyvgeo,vhartree)
    call rhotoxc(bigexc,bigsxc,kxcr,mpi_enreg,nfft,ngfft,dum,0,dum,0,nkxc,nk3xc,non_magnetic_xc,n3xccc,&
-&   optionrhoxc,rhorcut,rprimd,strsxc,1,vxc,vxcavg,xccc3d,xcdata,vhartr=vhartree)
+&   optionrhoxc,rhorcut,rprimd,1,vxc,vxcavg,xccc3d,xcdata,vhartr=vhartree)
 
 !  DEBUG
 !  fx for tests.
@@ -543,7 +542,7 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
 
    call hartre(1,gsqcut,3,0,mpi_enreg,nfft,ngfft,1,zero,rhog,rprimd,dummyvgeo,vhartree)
    call rhotoxc(bigexc,bigsxc,kxcr,mpi_enreg,nfft,ngfft,dum,0,dum,0,nkxc,nk3xc,non_magnetic_xc,n3xccc,&
-&   optionrhoxc,rhorcut,rprimd,strsxc,1,vxc,vxcavg,xccc3d,xcdata,vhartr=vhartree)
+&   optionrhoxc,rhorcut,rprimd,1,vxc,vxcavg,xccc3d,xcdata,vhartr=vhartree)
 
    kxcr(:,2) = 0.5_dp*kxcr(:,2)
 
@@ -1006,7 +1005,7 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
  type(xcdata_type) :: xcdata
  type(MPI_type) :: MPI_enreg_seq
 !arrays
- real(dp) :: qphon(3),strsxc(6),dum(0)
+ real(dp) :: qphon(3),dum(0)
  real(dp),parameter   :: dummyvgeo(3)=zero
  real(dp),allocatable :: kxcpw_g(:,:),kxcr(:,:),phas(:,:,:)
  real(dp),allocatable :: rhog(:,:),vhartr(:),kxcpw_r(:,:),vxclda(:,:)
@@ -1087,7 +1086,7 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
  call rhotoxc(bigexc,bigsxc,kxcr,MPI_enreg_seq,nfft_tot,ngfft,&
 & dum,0,dum,0,nkxc,nk3xc,non_magnetic_xc,&
 & n3xccc,option,rhor,Cryst%rprimd,&
-& strsxc,1,vxclda,vxcavg,xccc3d,xcdata,vhartr=vhartr)
+& 1,vxclda,vxcavg,xccc3d,xcdata,vhartr=vhartr)
 
  ABI_FREE(rhog)
  ABI_FREE(vhartr)
@@ -1262,7 +1261,7 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
  type(MPI_type) :: MPI_enreg_seq
  type(xcdata_type) :: xcdata
 !arrays
- real(dp) :: qpg(3),qpgp(3),qphon(3),strsxc(6),q_point(3),dum(0)
+ real(dp) :: qpg(3),qpgp(3),qphon(3),q_point(3),dum(0)
  real(dp),parameter   :: dummyvgeo(3)=zero
  real(dp),allocatable :: kxcr(:,:)
  real(dp),allocatable :: rhog(:,:),vhartr(:),vxclda(:,:)
@@ -1399,7 +1398,7 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
  call rhotoxc(bigexc,bigsxc,kxcr,MPI_enreg_seq,nfft,ngfft,&
 & dum,0,dum,0,nkxc,nk3xc,non_magnetic_xc,&
 & n3xccc,option,my_rhor,Cryst%rprimd,&
-& strsxc,1,vxclda,vxcavg,xccc3d,xcdata,vhartr=vhartr)
+& 1,vxclda,vxcavg,xccc3d,xcdata,vhartr=vhartr)
 
 !Check for extreme (NaN) values
 !do ir=1,nfft

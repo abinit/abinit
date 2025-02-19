@@ -3,8 +3,8 @@ Niobium, fhi98PP : TM-type, LDA, l=0 local
  6       7       2   0    539     0 pspcod,pspxc,lmax,lloc,mmax,r2well
 4--- These three lines are available for giving more information, later
 5    vps: Nb 4d 3s2 5p0, rs=rp=2.8, rd=2.5
-6    ups 5p: Nb 4d3 5s0.75 5p0.25 
-7-Here follows the cpi file from the fhi98pp code-   
+6    ups 5p: Nb 4d3 5s0.75 5p0.25
+7-Here follows the cpi file from the fhi98pp code-
 5.00000E+00 3
   0.0000    0.0000    0.0000   0.0000
   0.0000    .00e+00   .00e+00
