@@ -2,7 +2,7 @@
 """
 Script for running the parallel tests of the test suite with different number of MPI nodes.
 Note: This script is just a small wrapper around runtests.py. It receives a list of paral
-tests, register them and run all of them in parallel using distinct subprocesses. 
+tests, register them and run all of them in parallel using distinct subprocesses.
 The user is responsible for providing a list of tests that do not cause an excessive overload of the OS.
 """
 from __future__ import print_function, division, absolute_import #, unicode_literals
@@ -20,7 +20,7 @@ def str_examples():
       Usage example (assuming the script is executed within a build tree):
       \n
       runparal.py 1        => Run paral[1] with 1,2,4,10 MPI nodes
-      runparal.py 1:3      => To select both test 1 and 2 
+      runparal.py 1:3      => To select both test 1 and 2
       runparal.py 1:3  4   => Same as above but add test number 4
     """
     return examples
@@ -71,7 +71,7 @@ def main():
     retcode = max([p.returncode for p in processes])
 
     print("Final return code %s" % retcode)
-    return retcode 
+    return retcode
 
 
 if __name__ == "__main__":

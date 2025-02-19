@@ -69,6 +69,7 @@
  nstep_min                1
  rcut                   15.1788000000
  ======================= Optional input variables ============================
+ znucl                  79.0000000000
  use_ideal_positions     1
  order                   4    5.0000000000    5.0000000000
  USE IDEAL POSITIONS TO COMPUTE SPECTRUM

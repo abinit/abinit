@@ -31,19 +31,18 @@ module m_ddb
  use m_ddb_hdr
  use m_dtset
  use m_nctk
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
 
  use m_io_tools,       only : iomode_from_fname
  use defs_datatypes,   only : pseudopotential_type
  use m_fstrings,       only : sjoin, itoa, ktoa, endswith
  use m_numeric_tools,  only : mkherm
- use m_symtk,          only : mati3inv, matr3inv, littlegroup_q, symatm
+ use m_matrix,         only : mati3inv, matr3inv
+ use m_symtk,          only : littlegroup_q, symatm
  use m_io_tools,       only : get_unit
  use m_copy,           only : alloc_copy
  use m_geometry,       only : phdispl_cart2red, mkrdim, xred2xcart, metric
- use m_crystal,        only : crystal_t, crystal_init
+ use m_crystal,        only : crystal_t
  use m_dynmat,         only : cart29, d2sym3, cart39, d3sym, chneu9, asria_calc, asria_corr, asrprs, dfpt_phfrq, sytens
  use m_pawtab,         only : pawtab_type, pawtab_nullify, pawtab_free
  use m_psps,           only : psps_copy, psps_free
@@ -146,6 +145,7 @@ module m_ddb
   !      (5 => 2nd-order derivatives of eigenvalues)
   !      (33 => long wave third order derivatives of total energy)
   !      (85 => Molecular Berry curvature, 2nd-order derivative)
+  ! See m_ddb_hdr for the definition of various block types
 
   real(dp),allocatable :: amu(:)
   ! amu(ntypat)
@@ -580,8 +580,7 @@ subroutine ddb_copy(iddb, oddb)
 !Arguments -------------------------------
 !array
  class(ddb_type),intent(in) :: iddb
- type(ddb_type),intent(out) :: oddb
-
+ class(ddb_type),intent(out) :: oddb
 ! ************************************************************************
 
  ! Copy dimensions and static variables.
@@ -2053,10 +2052,10 @@ subroutine rdddb9(ddb,ddb_hdr,unddb,&
 !   and
 !    the allocation allocate(kpt(3,nkpt)) is strange
 !scalars
+ class(ddb_type),intent(inout) :: ddb
  integer,intent(in) :: unddb,mband,mpert,msize,msym
  integer,intent(inout) :: natom,nkpt,nsym,ntypat
  real(dp),intent(out) :: ucvol
- type(ddb_type),intent(inout) :: ddb
  type(ddb_hdr_type),intent(inout) :: ddb_hdr
  integer,optional,intent(in) :: raw
 !arrays
@@ -2608,7 +2607,7 @@ subroutine ddb_read_txt(ddb, filename, ddb_hdr, crystal, comm, prtvol, raw)
  !end do
 
  !! Warning znucl is dimensioned with ntypat = nspsp hence alchemy is not supported here
- !call crystal_init(ddb%amu,Crystal,space_group,natom,npsp,ntypat,nsym,rprimd,typat,xred,&
+ !call crystal%init(ddb%amu,space_group,natom,npsp,ntypat,nsym,rprimd,typat,xred,&
  !  zion,znucl,timrev,use_antiferro,.FALSE.,title,&
  !  symrel=symrel(:,:,1:nsym),tnons=tnons(:,1:nsym),symafm=symafm(1:nsym))
 
@@ -2807,7 +2806,6 @@ logical function ddb_can_merge_blocks(ddb1, ddb2, iblok1, iblok2) result(can_mer
  integer :: nq, ii, blktyp
  real(dp),parameter :: qtol=2.0d-8
  real(dp) :: diff
-
 ! ************************************************************************
 
   can_merge = .false.
@@ -2865,7 +2863,7 @@ subroutine ddb_merge_blocks(ddb1, ddb2, iblok1, iblok2)
 !Arguments -------------------------------
 !array
  class(ddb_type),intent(inout) :: ddb1
- type(ddb_type),intent(inout) :: ddb2
+ class(ddb_type),intent(inout) :: ddb2
  integer,intent(in) :: iblok1
  integer,intent(in) :: iblok2
 
@@ -3498,8 +3496,8 @@ integer function ddb_get_etotal(ddb, etotal) result(iblok)
 
 !Arguments -------------------------------
 !scalars
- real(dp),intent(out) :: etotal
  class(ddb_type),intent(in) :: ddb
+ real(dp),intent(out) :: etotal
 
 !Local variables -------------------------
 !scalars
@@ -5094,8 +5092,6 @@ subroutine ddb_write_nc(ddb, ddb_hdr, filename, comm, with_psps)
    if (xmpi_comm_rank(comm) /= master) return
  end if
 
-#ifdef HAVE_NETCDF
-
  ! =====================
  ! Header and dimensions
  ! =====================
@@ -5255,10 +5251,6 @@ subroutine ddb_write_nc(ddb, ddb_hdr, filename, comm, with_psps)
 
    end if
  end do
-
-#else
- ABI_ERROR("NETCDF support required to write DDB.nc file.")
-#endif
 
 end subroutine ddb_write_nc
 !!***
@@ -6691,19 +6683,18 @@ subroutine dtqdrp(blkval,ddb_version,lwsym,mpert,natom,lwtens)
 !!
 !! SOURCE
 
- subroutine ddb_lw_copy(ddb,ddb_lw,mpert,natom,ntypat)
+ subroutine ddb_lw_copy(ddb, ddb_lw, mpert, natom, ntypat)
 
 !Arguments -------------------------------
 !scalars
+ class(ddb_type),intent(inout) :: ddb
+ class(ddb_type),intent(out) :: ddb_lw
  integer,intent(in) :: mpert,natom,ntypat
 !arrays
- type(ddb_type),intent(inout) :: ddb
- type(ddb_type),intent(out) :: ddb_lw
 
 !Local variables -------------------------
 !scalars
  integer :: ii,nblok,nsize,cnt
-
 ! *********************************************************************
 
  call ddb%copy(ddb_lw)
@@ -6801,7 +6792,7 @@ subroutine symdm9(ddb, dynmat, gprimd, indsym, mpert, natom, nqpt, nsym, rfmeth,
 
 !Arguments -------------------------------
 !scalars
- type(ddb_type),intent(in) :: ddb
+ class(ddb_type),intent(in) :: ddb
  integer,intent(in) :: mpert,natom,nqpt,nsym,rfmeth,comm
 !arrays
  integer,intent(in) :: indsym(4,nsym,natom),symrec(3,3,nsym),symrel(3,3,nsym)

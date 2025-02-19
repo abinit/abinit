@@ -39,7 +39,8 @@ module m_nucprop
   use m_paw_nmr,    only : make_efg_onsite,make_fc_paw
   use m_paral_atom, only : get_my_atmtab,free_my_atmtab
   use m_special_funcs,  only : abi_derfc
-  use m_symtk,          only : matr3inv, matpointsym
+  use m_matrix,         only : matr3inv
+  use m_symtk,         only : matpointsym
   use m_fft,           only : fourdp
 
   implicit none

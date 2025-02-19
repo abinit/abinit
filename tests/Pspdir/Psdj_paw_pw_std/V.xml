@@ -1556,7 +1556,7 @@
   5.8235112309274746E-95  3.1659836357109957E-96  1.6602746767708185E-97
   0.0000000000000000E+00  0.0000000000000000E+00  0.0000000000000000E+00
   0.0000000000000000E+00  0.0000000000000000E+00  0.0000000000000000E+00
-  0.0000000000000000E+00  
+  0.0000000000000000E+00
 </pseudo_valence_density>
 <zero_potential grid="log1" rc=" 2.1999999999999984">
  -8.2913818592040112E-01 -8.2913818599065370E-01 -8.2913818620528512E-01
@@ -7707,7 +7707,7 @@
   0.0000000000000000E+00  1.2862176823973451E-01 -2.0945872450476458E-01
 </exact_exchange_X_matrix>
 <exact_exchange core-core=" -3.4749067948387847E+01"/>
-<!-- Program:  atompaw - input data follows: 
+<!-- Program:  atompaw - input data follows:
 V 23                                       ! Definition of material
 XC_LDA_X+XC_LDA_C_PW scalarrelativistic loggrid  587 200.0 2.2
 4 3 3 0 0 0                                 ! Max. n per angular momentum: 4s 3p 3d

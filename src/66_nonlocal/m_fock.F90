@@ -41,7 +41,7 @@ module m_fock
  use defs_abitypes,     only : MPI_type
  use m_time,            only : timab
  use m_fstrings,        only : itoa, ftoa, sjoin
- use m_symtk,           only : mati3inv, matr3inv
+ use m_matrix,          only : mati3inv, matr3inv
  use m_fftcore,         only : sphereboundary
  use m_fft,             only : zerosym, fourwf
  use m_kg,              only : ph1d3d, getph

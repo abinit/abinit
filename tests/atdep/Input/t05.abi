@@ -17,6 +17,7 @@ nstep_max 20
 nstep_min 1
 rcut 7.5    
 #OPTIONAL_INPUT_VARIABLES
+znucl 12 8
 use_ideal_positions 1
 dielec_constant 3
 born_charge 1.75 -1.75
@@ -33,7 +34,6 @@ TheEnd
 #%% files_to_test = 
 #%%   t05.abo, tolnlines = 1, tolabs = 2.e-3, tolrel = 1.e-4, fld_options = -medium;
 #%%   t05omega.dat, tolnlines = 5, tolabs = 2.e-3, tolrel = 1.e-4, fld_options = -medium;
-#%%   t05thermo.dat, tolnlines = 5, tolabs = 2.e-3, tolrel = 1.e-4, fld_options = -medium;
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]

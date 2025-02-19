@@ -5955,7 +5955,7 @@
   0.0000000000000000E+00 -8.9093373050543198E-02 -4.5524977540647903E-02
 </exact_exchange_X_matrix>
 <exact_exchange core-core=" -5.2700240846708965E+01"/>
-<!-- Program:  atompaw - input data follows: 
+<!-- Program:  atompaw - input data follows:
 Ni 28                                       ! Definition of material
 GGA-PBE scalarrelativistic loggrid 700     ! All-electrons calc.: GGA+scalar-relativstic - log.grid with 2000 pts
 4 4 3 0 0 0                                 ! Max. n per angular momentum: 4s 3p 3d

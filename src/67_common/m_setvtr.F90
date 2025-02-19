@@ -170,7 +170,7 @@ contains
 !!  [electronpositron <type(electronpositron_type)>]=quantities for the electron-positron annihilation (optional argument)
 !!  [vxc_hybcomp(nfft,nspden)= compensation xc potential (Hartree) in case of hybrids] Optional output
 !!       i.e. difference between the hybrid Vxc at fixed density and the auxiliary Vxc at fixed density
-!!  [vxctau(nfftf,dtset%nspden,4*dtset%usekden)]=derivative of XC energy density with respect to
+!!  [vxctau(nfftf,dtset%nspden,4*usevxctau)]=derivative of XC energy density with respect to
 !!    kinetic energy density (metaGGA cases) (optional output)
 !!  xccc3d(n3xccc)=3D core electron density for XC core correction, bohr^-3
 !!  [xcctau3d(n3xccc*usekden)]=3D core electron kinetic energy density for XC core correction, bohr^-3
@@ -220,7 +220,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
  real(dp),intent(inout) :: rhor(nfft,dtset%nspden),vhartr(nfft),vpsp(nfft)
  real(dp),intent(inout),optional :: taur(nfft,dtset%nspden*dtset%usekden)
  real(dp),intent(inout) :: vtrial(nfft,dtset%nspden),vxc(nfft,dtset%nspden)
- real(dp),intent(out),optional :: vxctau(nfft,dtset%nspden,4*dtset%usekden)
+ real(dp),intent(out),optional :: vxctau(:,:,:) !vxctau(nfft,dtset%nspden,4*usevxctau)
  real(dp),intent(out),optional :: vxc_hybcomp(:,:) ! (nfft,nspden)
  real(dp),intent(inout) :: xccc3d(n3xccc)
  real(dp),intent(inout),optional ::xcctau3d(n3xccc*dtset%usekden)
@@ -258,8 +258,14 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
 
  call timab(91,1,tsec)
 
-!Check that usekden is not 0 if want to use vxctau
- with_vxctau = (present(vxctau).and.present(taur).and.(dtset%usekden/=0))
+!Test size of kinetic energy potential Vxctau
+ with_vxctau = (present(vxctau).and.present(taur))
+ if (with_vxctau) with_vxctau = (size(vxctau)>0.and.dtset%usekden/=0)
+ if (with_vxctau) then
+   if (size(vxctau)/=nfft*dtset%nspden*4) then
+     ABI_BUG("Wrong size for vxctau!")
+   end if
+ end if
 
 !Check if we're in hybrid norm conserving pseudopotential with a core correction
  is_hybrid_ncpp=(dtset%usepaw==0 .and. n3xccc/=0 .and. &
@@ -542,7 +548,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
          call hartre(1,gsqcut,dtset%icutcoul,psps%usepaw,mpi_enreg,nfft,ngfft,&
                      &dtset%nkpt,dtset%rcut,rhog,rprimd,dtset%vcutgeo,vhartr)
        end if
-       
+
 !      >>>> Exchange-correlation potential
        call xcdata_init(xcdata,dtset=dtset)
        if(mod(dtset%fockoptmix,100)==11)then
@@ -569,12 +575,12 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
          if(.not.is_hybrid_ncpp .or. mod(dtset%fockoptmix,100)==11)then
            call rhotoxc(energies%e_xc,energies%entropy_xc,kxc,mpi_enreg,nfft,ngfft,&
 &           nhat,psps%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,&
-&           option_eff,rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,&
+&           option_eff,rhor,rprimd,usexcnhat,vxc,vxcavg,xccc3d,xcdata,strsxc=strsxc,&
 &           taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_,xcctau3d=xcctau3d,grho1_over_rho1=rpnrm)
          else
 !          Only when is_hybrid_ncpp, and moreover, the xc functional is not the auxiliary xc functional, then call xchybrid_ncpp_cc
            call xchybrid_ncpp_cc(dtset,energies%e_xc,energies%entropy_xc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,&
-&           strsxc,vxcavg,xccc3d,vxc=vxc)
+&                                strsxc,vxcavg,xccc3d,vxc=vxc)
          end if
 
 !        Possibly compute energies%e_hybcomp_E0
@@ -583,11 +589,11 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
            if(.not.is_hybrid_ncpp)then
              call rhotoxc(energies%e_hybcomp_E0,dum,kxc,mpi_enreg,nfft,ngfft,&
 &             nhat,psps%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,&
-&             option_eff,rhor,rprimd,strsxc,usexcnhat,vxc_hybcomp,vxcavg,xccc3d,xcdatahyb,&
-&             taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
+&             option_eff,rhor,rprimd,usexcnhat,vxc_hybcomp,vxcavg,xccc3d,xcdatahyb,&
+&             strsxc=strsxc,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
            else
              call xchybrid_ncpp_cc(dtset,energies%e_hybcomp_E0,dum,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,&
-&             strsxc,vxcavg,xccc3d,vxc=vxc_hybcomp)
+&                                  strsxc,vxcavg,xccc3d,vxc=vxc_hybcomp)
            end if
 
 !          Combine hybrid and auxiliary quantities
@@ -601,7 +607,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
        else if (ipositron==2) then
          call rhotoxc(energies%e_xc,energies%entropy_xc,kxc,mpi_enreg,nfft,ngfft,&
 &         nhat,psps%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,&
-&         option_eff,rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,&
+&         option_eff,rhor,rprimd,usexcnhat,vxc,vxcavg,xccc3d,xcdata,strsxc=strsxc,&
 &         taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_,&
 &         electronpositron=electronpositron)
        end if

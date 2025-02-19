@@ -88,7 +88,7 @@ write(unit,'')
 
 ato = ucvol*dchidtau*Bohr_Ang**2;
 alo = ato*(1-(wlo**2 - wto**2)/(cfausth*wto**2))
-mes = ' Raman polarizability (A^2):' 
+mes = ' Raman polarizability (A^2):'
 write(unit,mes)
 mes = '                         ato = ' + string(ato)
 write(unit,mes)

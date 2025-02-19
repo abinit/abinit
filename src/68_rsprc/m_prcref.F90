@@ -225,7 +225,7 @@ subroutine prcref(atindx,dielar,dielinv,&
 !arrays
  integer :: qprtrb(3)
  integer,allocatable :: indpw_prc(:)
- real(dp) :: dummy6(6),dummy7(6),gprimd(3,3),qphon(3),rmet(3,3),strsxc(6)
+ real(dp) :: dummy6(6),dummy7(6),gprimd(3,3),qphon(3),rmet(3,3)
  real(dp) :: vmean(dtset%nspden),vprtrb(2)
  real(dp),allocatable :: dummy(:),dummy1(:),dummy2(:),dummy3(:),dummy4(:),dummy5(:),dummy8(:),dummy9(:)
  real(dp),allocatable :: dyfrlo_indx(:,:,:),dyfrx2(:,:,:)
@@ -625,7 +625,7 @@ subroutine prcref(atindx,dielar,dielinv,&
      call xcdata_init(xcdata,dtset=dtset)
      nk3xc=1 ; non_magnetic_xc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
      call rhotoxc(bigexc,bigsxc,kxc,mpi_enreg,nfft,ngfft,&
-&     work,0,work,0,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,rhor_wk,rprimd,strsxc,1,&
+&     work,0,work,0,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,rhor_wk,rprimd,1,&
 &     vxc_wk,vxcavg,xccc3d,xcdata,vhartr=vhartr_wk)
      ABI_FREE(xccc3d)
 
@@ -862,7 +862,7 @@ end subroutine prcref
 !arrays
  integer :: qprtrb(3)
  integer,allocatable :: indpw_prc(:)
- real(dp) :: dummy6(6),gprimd(3,3),qphon(3),rmet(3,3),strsxc(6)
+ real(dp) :: dummy6(6),gprimd(3,3),qphon(3),rmet(3,3)
  real(dp) :: vmean(dtset%nspden),vprtrb(2)
  real(dp),allocatable :: dummy_in(:)
  real(dp) :: dummy_out1(0),dummy_out2(0),dummy_out3(0),dummy_out4(0),dummy_out5(0),dummy_out6(0),dummy_out7(0)
@@ -1248,7 +1248,7 @@ end subroutine prcref
    nk3xc=1 ; non_magnetic_xc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
    ABI_MALLOC(work,(0))
    call rhotoxc(bigexc,bigsxc,kxc,mpi_enreg,nfft,ngfft,&
-&   work,0,work,0,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,rhor_wk,rprimd,strsxc,1,&
+&   work,0,work,0,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,rhor_wk,rprimd,1,&
 &   vxc_wk,vxcavg,xccc3d,xcdata,vhartr=vhartr_wk)
    ABI_FREE(work)
    ABI_FREE(xccc3d)

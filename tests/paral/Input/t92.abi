@@ -1,7 +1,7 @@
 # Testing CTQMC options
 #
 # == Convergency and starting
-# DATASET 1: LDA 
+# DATASET 1: LDA
 # DATASET 2: DMFT
 ndtset 2
 jdtset 1 2
@@ -20,8 +20,8 @@ occopt 3 tsmear 0.00173918086
 diemix 0.1
 
 ##### PHYSICAL PARAMETERS
-natom 1 ntypat  1 typat  1  
-znucl  58.0 
+natom 1 ntypat  1 typat  1
+znucl  58.0
 xred  0.d0   0.d0   0.d0
 acell   3*9.1274
 rprim 0.0 1/2 1/2
@@ -32,7 +32,7 @@ rprim 0.0 1/2 1/2
 paral_kgb 0
 fftalg 112 # Needed to preserve the old behaviour.
 kptopt 4
-kptrlatt 4 0 0 0 4 0 0 0 4 
+kptrlatt 4 0 0 0 4 0 0 0 4
 nshiftk 4
 shiftk 1/2 1/2 1/2
        1/2 0.0 0.0
@@ -42,7 +42,7 @@ shiftk 1/2 1/2 1/2
 # == LDA+DMFT
 usedmft1 0
 usedmft2 1
-dmftbandi 5 
+dmftbandi 5
 dmftbandf 17
 dmft_nwlo 100
 dmft_nwli 10000
@@ -54,7 +54,7 @@ dmft_occnd_imag 0
 
 # == CTQMC
 dmft_solv 5 # CTQMC
-dmftqmc_l 50 
+dmftqmc_l 50
 dmftqmc_n 3.d7
 dmftqmc_therm 10000
 # In general the correct value for dmftctqmc_basis is 1 (the default)
@@ -75,7 +75,7 @@ dmft_dc 1
 
 
 # == DFT+U
-usepawu1    1  
+usepawu1    1
 usepawu     10
 dmatpuopt  1   # choose expression of the density matrix
 lpawu   3   # U on d-orbitals of Ni, no U on oxygen
@@ -83,6 +83,7 @@ upawu1  0.00     # values in Hartree
 upawu2  6 eV     # values in Hartree
 jpawu  0.0000  # values in Hartree
 
+use_yaml 1
 
  pp_dirpath "$ABI_PSPDIR"
  pseudos "58ce.paw"
@@ -95,11 +96,13 @@ jpawu  0.0000  # values in Hartree
 #%% nprocs_to_test = 4,10
 #%% max_nprocs = 10
 #%% [NCPU_4]
-#%% files_to_test = 
-#%%   t92_MPI4.abo,   tolnlines=  178, tolabs=  0.03, tolrel= 0.03, fld_options = -medium
+#%% files_to_test =
+#%%   t92_MPI4.abo, use_yaml = yes , tolnlines=  178, tolabs=  0.03, tolrel= 0.03, fld_options = -medium
+#%% file = ./t92_MPI4.yaml
 #%% [NCPU_10]
-#%% files_to_test = 
-#%%   t92_MPI10.abo, tolnlines=   178, tolabs=  0.06, tolrel= 0.05, fld_options = -medium
+#%% files_to_test =
+#%%   t92_MPI10.abo, use_yaml = yes, tolnlines=   178, tolabs=  0.06, tolrel= 0.05, fld_options = -medium
+#%% file = ./t92_MPI10.yaml
 #%% [extra_info]
 #%% authors = J. Bieder, B. Amadon
 #%% keywords = DMFT, CTQMC

@@ -81,9 +81,8 @@ contains
     real(dp) :: pimd_etotal(1),pimd_stressin(3,3,1),pimd_xred(3,ab_mover%natom,1)
     real(dp) :: pimd_xred_next(3,ab_mover%natom,1),pimd_xred_prev(3,ab_mover%natom,1)
     real(dp) :: pimd_forces(3,ab_mover%natom,1),pimd_vel(3,ab_mover%natom,1)
-    
+
     ! *********************************************************************
-    
     ! Initialize arrays
     ihist_prev=0
     ucvol=zero
@@ -107,7 +106,6 @@ contains
     pimd_xred_prev=zero
     pimd_forces=zero
     pimd_vel=zero
-    
     ! Get last positions
     call hist2var(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
     fcart(:,:)=hist%fcart(:,:,hist%ihist)
@@ -116,7 +114,7 @@ contains
     vel_cell  =hist%vel_cell(:,:,hist%ihist)
     etotal    =hist%etot(hist%ihist)
     call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
-    
+
     ! Set PIMD corresponding variables
     pimd_etotal(1)=etotal
     pimd_stressin(1,1,1)=strten(1)
@@ -137,7 +135,7 @@ contains
     endif
     pimd_forces(:,:,1)=fcart(:,:)
     pimd_vel(:,:,1)=vel(:,:)
-    
+
     ! Compute next values
     if(pimd_param%optcell==0) then
       call pimd_langevin_nvt(pimd_etotal,pimd_forces,itime,ab_mover%natom,pimd_param,&
@@ -149,7 +147,7 @@ contains
       & 0,rprimd,rprimd_next,rprimd_prev,pimd_stressin,1,pimd_vel,vel_cell,ucvol,&
       & pimd_xred,pimd_xred_next,pimd_xred_prev)
     endif
-    
+
     ! Update hist
     hist%ihist = abihist_findIndex(hist,+1)
     call var2hist(acell,hist,ab_mover%natom,rprimd_next,pimd_xred_next(:,:,1),zDEBUG)
