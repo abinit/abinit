@@ -24679,7 +24679,8 @@ initialize the solution by restarting/interpolating from the solution available 
 the VPQ.nc file.
 
 If [[eph_task]] == -13, the variable is required to produce *.xsf files containing
-polaronic wavefunction and induced displacements that can be visualized with VESTA or Xcrysden.
+polaronic wavefunction and induced displacements that can be visualized with a crystal
+visualisation software like VESTA or Xcrysden.
 """,
 ),
 
@@ -24706,7 +24707,7 @@ Variable(
     topics=['Polaron_basic'],
     dimensions="scalar",
     defaultval="gau_energy",
-    mnemonics="VARiational Polaron EQuations: A_nk-coefficients SEED",
+    mnemonics="Variational Polaron eQuations: A_nk-coefficients SEED",
     requires="[[eph_task]] == 13",
     added_in_version="10.1.4",
     text=r"""
@@ -24716,10 +24717,10 @@ equations.
 
 Possible values:
 
-- "gau_energy" --> Gaussian based on the electronic eigenergies
+- "gau_energy" --> Gaussian based on the electronic eigenenergies
   $\varepsilon_{n\mathbf{k}}$:
 
-    $$A_{n\mathbf{k}} \sim e^{-\frac{(\varepsilon_{n\mathbf{k}} - \mu)^2}{2\sigma^2}}.$$
+    $$A_{n\mathbf{k}} \sim e^{\displaystyle -\frac{(\varepsilon_{n\mathbf{k}} - \mu)^2}{2\sigma^2}}.$$
 
   The mean value $\mu$ and the standard deviation $\sigma$ are defined by the
   [[vpq_gpr_energy]] variable.
@@ -24727,10 +24728,9 @@ Possible values:
 - "gau_length" --> Gaussian based on the user-defined polaron localization lengths
   $a_x$, $a_y$, $a_z$:
 
-    $$A_{n\mathbf{k}} \sim e^{-\frac{1}{2}(a^2_x k^2_x + a^2_y k^2_y + a^2_z k^2_z)}.$$
+    $$A_{n\mathbf{k}} \sim e^{\displaystyle -\frac{1}{2}(a^2_x k^2_x + a^2_y k^2_y + a^2_z k^2_z)}.$$
 
-  The value of the localization lenghts are defined by the [[vpq_gpr_length]] variable.
-  This option is still under development.
+  The values of the localization lengths are defined by the [[vpq_gpr_length]] variable.
 
 - "random" --> Random initialization.
 
@@ -24744,10 +24744,10 @@ Variable(
     abivarname="vpq_pkind",
     varset="eph",
     vartype="string",
-    topics=['Polaron_basic'],
+    topics=['Polaron_compulsory'],
     dimensions="scalar",
     defaultval="None",
-    mnemonics="VARiational Polaron EQuations: Polaron KIND",
+    mnemonics="Variational Polaron eQuations: Polaron KIND",
     requires="[[eph_task]] == 13",
     added_in_version="10.1.4",
     text=r"""
@@ -24763,7 +24763,7 @@ Possible values:
 !!! important
 
     The "electron"/"hole" option requires exclusively conduction/valence manifold
-    provided in the GSTORE.nc file required to setup the variational polaron
+    provided in the GSTORE.nc file required to set up the variational polaron
     equations calculation.
     Intermixing conduction and valence states will lead to erroneous results.
 
@@ -24772,9 +24772,6 @@ Possible values:
     If the "hole" option is chosen, valence states are flipped, so one always
     deals with the minimization problem, regardless of the polaron kind.
 
-    Also, the polaron binding and localized state energy $E_p$ and $\varepsilon$
-    are positive in case of a hole polaron, and negatie in case of an electron
-    polaron.
 """,
 ),
 
@@ -24786,40 +24783,40 @@ Variable(
     topics=['Polaron_basic'],
     dimensions="scalar",
     defaultval=0,
-    mnemonics="VARiational Polaron EQuations: AVeraGe matrix-elements at Gamma",
+    mnemonics="Variational Polaron eQuations: AVeraGe matrix-elements at Gamma",
     requires="[[eph_task]] == 13",
     added_in_version="10.1.4",
     text=r"""
-If non-zero, this variable activates the correction to the the electron-phonon
+If non-zero, this variable activates the correction to the electron-phonon
 matrix elements' Fröhlich divergence.
-In this sense correction terms $g^\mathrm{avg}_\nu(0)$ are added to the matrix
+In this sense, correction terms $g^\mathrm{avg}_\nu(0)$ are added to the matrix
 elements at $\mathbf{q} = \Gamma$:
 
 $$ g^\mathrm{corr}_{nn\nu}(\mathbf{k}, 0) = g_{nn\nu}(\mathbf{k}, 0) + g^\mathrm{avg}_\nu(0). $$
 
 These correction terms are computed from spherical integration of the long-range
-electron-phonon contribution to the polaron enregy around $\Gamma$-point.
+electron-phonon contribution to the polaron energy around the $\Gamma$-point.
 The spherical mesh for the integration is controlled by the [[eph_frohl_ntheta]] variable.
 
 Three scenarios are possible:
 
-- [[eph_frohl_ntheta]] == 0, [[vpq_avg_g]] == 0
+- eph_frohl_ntheta == 0, [[vpq_avg_g]] == 0
 
-No integration of the electron-phonon energy, and variational polaron equations
-are solved without $g^\mathrm{avg}_\nu(0)$ corrections.
+  No integration of the electron-phonon energy, and variational polaron equations
+  are solved without $g^\mathrm{avg}_\nu(0)$ corrections.
 
-- [[eph_frohl_ntheta]] > 0, [[vpq_avg_g]] == 0
+- eph_frohl_ntheta > 0, [[vpq_avg_g]] == 0
 
-Integration of the electron-phonon energy is performed, and variational polaron
-equations are solved without $g^\mathrm{avg}_\nu(0)$ corrections.
-In this scenario, the integrated energy can be added a posteriori to the optimized
-polaron binding energy to account for the long-range effects.
+  Integration of the electron-phonon energy is performed, and variational polaron
+  equations are solved without $g^\mathrm{avg}_\nu(0)$ corrections.
+  In this scenario, the integrated energy can be added *a posteriori* to the optimized
+  polaron binding energy to account for long-range effects.
 
-- [[eph_frohl_ntheta]] > 0, [[vpq_avg_g]] != 0
+- eph_frohl_ntheta > 0, [[vpq_avg_g]] != 0
 
-Integration of the electron-phonon energy is performed, and variational polaron
-equations are solved with $g^\mathrm{avg}_\nu(0)$ corrections.
-This option is expected to accelerate the convergence of the optimization process.
+  Integration of the electron-phonon energy is performed, and variational polaron
+  equations are solved with $g^\mathrm{avg}_\nu(0)$ corrections.
+  This option is expected to accelerate the convergence of the optimization process.
 
 """,
 ),
@@ -24832,20 +24829,22 @@ Variable(
     topics=['Polaron_basic'],
     dimensions="scalar",
     defaultval=0,
-    mnemonics="VARiational Polaron EQuations: INTERPolation",
+    mnemonics="Variational Polaron eQuations: INTERPolation",
     requires="[[eph_task]] == 13",
     added_in_version="10.1.4",
     text=r"""
 If non-zero, this variable activates the interpolation of the initial guess for
 the electronic vector in the variational polaron equations.
 In this case, the code reads a pre-existing VPQ.nc file and performs a linear
-interpolation of $A_{n\mathbf{k}}$ provided the metadata found in the netcdf file
+interpolation of $A_{n\mathbf{k}}$, provided the metadata found in the NetCDF file
 is compatible with the input file.
 
-With this feature, if a polaronic solution is obtained for a certain $\mathbf{k}$-grid,
-it can then be read and interpolated to be used as a starting point for different grids.
-This option is expected to lead the optimization proccess to the same polaronic configuration
-and accelarate the convergence.
+!!! note
+
+    With this feature, if a polaronic solution is obtained for a certain $\mathbf{k}$-grid,
+    it can then be read and interpolated to be used as a starting point for different grids.
+    This option is expected to lead the optimization process to the same polaronic configuration
+    and accelerate the convergence.
 """,
 ),
 
@@ -24857,27 +24856,27 @@ Variable(
     topics=['Polaron_basic'],
     dimensions="scalar",
     defaultval=1,
-    mnemonics="VARiational Polaron EQuations: Number of polaronic STATES",
+    mnemonics="Variational Polaron eQuations: Number of polaronic STATES",
     requires="[[optdriver]] == 7 and [[eph_task]] == 13",
     added_in_version="10.1.4",
     text=r"""
-This variables specifies the number of polaronic states to be found by solving the
+This variable specifies the number of polaronic states to be found by solving the
 variational polaron equations.
-Each new state if found by imposing the orthogonalisation constraint to the all
+Each new state is found by imposing the orthogonalization constraint to all
 previously found states during the optimization process.
 
 !!! important
 
-    Since polaronic solutions are not necessarly orthogonal to each other, only the
+    Since polaronic solutions are not necessarily orthogonal to each other, only the
     first solution is expected to reach the required tolerance during optimization.
-    Imposing the orthogonalisation constraint, however, helps to find "metastable"
+    Imposing the orthogonalization constraint, however, helps to find "metastable"
     polarons that are far away from the obtained polaronic configurations.
-    One then can use other features, e.g. [[vpq_select]] or [[vpq_nstep_ort]]
+    One can then use other features, e.g., [[vpq_select]] or [[vpq_nstep_ort]],
     to fully converge a "metastable" state without any constraints.
 
-    Also, a single polaronic solution is invariant by primitive translations in a
+    Also, a single polaronic solution is invariant under primitive translations in a
     supercell.
-    In order to eliminiate such trivial solutions, [[vpq_translate]] variable
+    In order to eliminate such trivial solutions, the [[vpq_translate]] variable
     can be used.
 """,
 ),
@@ -24889,7 +24888,7 @@ Variable(
     topics=['Polaron_basic'],
     dimensions="scalar",
     defaultval=50,
-    mnemonics="VARiational Polaron EQuations: Number of iteration STEPs",
+    mnemonics="Variational Polaron eQuations: Number of iteration STEPs",
     requires="[[optdriver]] == 7 and [[eph_task]] == 13",
     added_in_version="10.1.4",
     text=r"""
@@ -24906,14 +24905,15 @@ Variable(
     topics=['Polaron_basic'],
     dimensions="scalar",
     defaultval=-1,
-    mnemonics="VARiational Polaron EQuations: SELECT polaronic state",
+    mnemonics="Variational Polaron eQuations: SELECT polaronic state",
     requires="[[eph_task]] == 13",
     added_in_version="10.1.4",
     text=r"""
 If non-zero, this variable selects a single polaronic state to be optimized from
 a **pre-existing** VPQ.nc file.
-Requires [[eph_restart]] == 1 or [[vpq_interp]] == 1.
-Also, since a single polaronic state is selected, [[vpq_nstates]] must be 1 in the input file.
+It requires [[eph_restart]] == 1 or [[vpq_interp]] == 1.
+Additionally, since a single polaronic state is selected, [[vpq_nstates]] must be 1
+in the input file.
 """,
 ),
 
@@ -24924,7 +24924,7 @@ Variable(
     topics=['Polaron_basic'],
     dimensions="scalar",
     defaultval=1,
-    mnemonics="VARiational Polaron EQuations: SCALE MESH for polaron wavefunction",
+    mnemonics="Variational Polaron eQuations: SCALE MESH for polaron wavefunction",
     requires="[[eph_task]] == -13",
     added_in_version="10.1.4",
     text=r"""
@@ -24947,14 +24947,14 @@ Variable(
     topics=['Polaron_basic'],
     dimensions="scalar",
     defaultval=1e-6,
-    mnemonics="VARiational Polaron EQuations: TOLerance on the Gradient ReSidual",
+    mnemonics="Variational Polaron eQuations: TOLerance on the Gradient ReSidual",
     requires="[[eph_task]] == 13",
     added_in_version="10.1.4",
     text=r"""
 This variable sets a tolerance for the electronic gradient residual in the optimization
-of the varitional polaron equations.
-When reached, the iterative process will finish for a current polaronic state and move
-to the next one, up to [[vpq_nstates]].
+of the variational polaron equations.
+When reached, the iterative process will terminate for the current polaronic state and move
+to the next one, up to [[vpq_nstates]]
 """,
 ),
 
@@ -24966,14 +24966,30 @@ Variable(
     topics=['Polaron_basic'],
     dimensions="(2)",
     defaultval=[0, 1],
-    mnemonics="VARiational Polaron EQuations: Gaussian PaRameters -- electronic ENERGY",
+    mnemonics="Variational Polaron eQuations: Gaussian PaRameters -- electronic ENERGY",
     requires='[[eph_task]] == 13 and [[vpq_aseed]] == "gau_energy"',
     added_in_version="10.1.4",
     text=r"""
 If [[vpq_aseed]] == "gau_energy", this variable defines the mean value and the
-standard deviation [[vpq_gpr_energy]](:) = $\mu$, $\sigma$ for the Gaussian function to
-be used as initial seed for the vector electronic coefficients.
+standard deviation as [[vpq_gpr_energy]](:) = $\mu$, $\sigma$ for the Gaussian function to
+be used as the initial seed for the electronic vector coefficients.
 See [[vpq_aseed]] for details.
+""",
+),
+
+Variable(
+    abivarname="vpq_trvec",
+    varset="eph",
+    vartype="real",
+    topics=['Polaron_basic'],
+    dimensions="(3)",
+    defaultval=[0, 0, 0],
+    mnemonics="Variational Polaron eQuations: TRanslation VECtor",
+    requires='[[eph_task]] == -13',
+    added_in_version="10.1.4",
+    text=r"""
+This variable specifies the translation vector (in unit cell basis) to be applied
+to the polaronic solution before visualisation with [[eph_task]] == -13.
 """,
 ),
 
@@ -24985,13 +25001,13 @@ Variable(
     topics=['Polaron_basic'],
     dimensions="(3)",
     defaultval=[1, 1, 1],
-    mnemonics="VARiational Polaron EQuations: Gaussian PaRameters -- localization LENGTH",
+    mnemonics="Variational Polaron eQuations: Gaussian PaRameters -- localization LENGTH",
     requires='[[eph_task]] == 13 and [[vpq_aseed]] == "gau_length"',
     added_in_version="10.1.4",
     text=r"""
 If [[vpq_aseed]] == "gau_length", this variable defines the estimated polaron
-localization lengths $a_x$, $a_y$, $a_z$ for the spread of gaussian function to be used
-as initial seed for the vector electronic coefficients.
+localization lengths $a_x$, $a_y$, $a_z$ for the spread of the Gaussian function to be used
+as the initial seed for the electronic vector coefficients.
 See [[vpq_aseed]] for details.
 """,
 ),
@@ -25003,14 +25019,14 @@ Variable(
     topics=['Polaron_basic'],
     dimensions="scalar",
     defaultval=0,
-    mnemonics="VARiational Polaron EQuations: TRANSLATE solutions",
+    mnemonics="Variational Polaron eQuations: TRANSLATE solutions",
     requires='[[eph_task]] == 13 and [[vpq_nstates]] > 1',
     added_in_version="10.1.4",
     text=r"""
 If non-zero and [[vpq_nstates]] > 1, this variable activates the translation
-of previously obtained polaronic solutions prior to solving variational polaron
+of previously obtained polaronic solutions prior to solving the variational polaron
 equations for a new one.
-This helps to eliminate trivial states that are invariant by primitie translations.
+This helps to eliminate trivial states that are invariant under primitive translations.
 See also [[vpq_nstates]].
 """,
 ),
@@ -25022,15 +25038,36 @@ Variable(
     topics=['Polaron_basic'],
     dimensions="scalar",
     defaultval=50,
-    mnemonics="VARiational Polaron EQuations: Number of STEPs with ORThogonalisation",
+    mnemonics="Variational Polaron eQuations: Number of STEPs with ORThogonalisation",
     requires='[[eph_task]] == 13 and [[vpq_nstates]] > 1',
     added_in_version="10.1.4",
     text=r"""
-This variable defines the number of optimization steps, up to which the orthogonalization
-to previous polaronic solutions is performed.
-After [[vpq_nstep_ort]] the orthogonalization constraint is lifted, which helps to
-fully relax the polaron, while keeping it far from the previously obtained states.
-See also [[vpq_nstates]].
+This variable defines the number of optimization steps up to which the orthogonalization
+to previous polaronic solutions is enforced.
+After [[vpq_nstep_ort]], the orthogonalization constraint is lifted, allowing the
+polaron to fully relax while maintaining a distance from the previously obtained states.
+See also [[vpq_nstates]]
+""",
+),
+
+Variable(
+    abivarname="vpq_mix_fact",
+    varset="eph",
+    vartype="real",
+    topics=['Polaron_expert'],
+    dimensions="scalar",
+    defaultval=0.,
+    mnemonics="Variational Polaron eQuations: MIXing FACTor",
+    requires='[[eph_task]] == 13',
+    added_in_version="10.1.4",
+    text=r"""
+This variable defines the mixing factor $\alpha$ for vibrational coefficients
+$B_{\mathbf{q}\nu}$ during the optimization process, i.e., for the $n$-th step:
+
+$$ B^{(n)}_{\mathbf{q}\nu} \leftarrow (1 - \alpha) B^{(n)}_{\mathbf{q}\nu} + \alpha B^{(n-1)}_{\mathbf{q}\nu}. $$
+
+In certain cases, mixing may be useful to facilitate the convergence of optimization.
+
 """,
 ),
 
