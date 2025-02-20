@@ -2063,6 +2063,7 @@ end subroutine get_kpt_fullbz
 !!  option= Flag defining what will be printed of iout: 0 for k points, anything else for q points.
 !!    Also, for q points, if the Gamma point is present, place it first in the list.
 !!  shiftk(3,nshiftk) = vectors that will be used to determine the shifts from (0. 0. 0.).
+!!  prtout=write info to the output and log files.
 !!
 !! OUTPUT
 !!  nkpt = number of k points
@@ -2084,12 +2085,13 @@ end subroutine get_kpt_fullbz
 !!
 !! SOURCE
 
-subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsampling)
+subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsampling,prtout)
 
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: brav,iout,mkpt,nshiftk,option
  integer,intent(out) :: nkpt
+ logical, optional, intent(in) :: prtout
 !arrays
  integer,intent(in) :: kptrlatt(3,3)
  integer,optional,intent(in) :: downsampling(3)
@@ -2100,6 +2102,7 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
 !scalars
  integer,parameter :: prtvol=0
  integer :: dividedown,ii,ikshft,jj,kk,nkpout,nkptlatt,nn,proddown
+ logical :: prtout_
  real(dp) :: shift
  character(len=500) :: msg
 !arrays
@@ -2117,7 +2120,14 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
 !write(std_out,*)' smpbz : downsampling(:)=',downsampling(:)
 !ENDDEBUG
 
- if(option/=0) call wrtout(iout,'       Homogeneous q point set in the B.Z.  ')
+ prtout_ = .true.
+ if (present(prtout)) then
+    prtout_ = prtout
+ end if
+
+ if (option/=0) then
+   if (prtout_) call wrtout(iout,'       Homogeneous q point set in the B.Z.  ')
+ end if
 
  if(abs(brav)/=1)then
 !  Only generate Monkhorst-Pack lattices
@@ -2586,17 +2596,19 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
      end do
    end if
 
-   write(msg,'(a,i8)')' Grid q points  : ',nkpt
-   call wrtout(iout,msg)
-   nkpout=nkpt
-   if(nkpt>80)then
-     call wrtout(iout,' greater than 80, so only write 20 of them ')
-     nkpout=20
-   end if
-   do ii=1,nkpout
-     write(msg, '(1x,i2,a2,3es16.8)' )ii,') ',spkpt(1,ii),spkpt(2,ii),spkpt(3,ii)
+   if (prtout_) then
+     write(msg,'(a,i8)')' Grid q points  : ',nkpt
      call wrtout(iout,msg)
-   end do
+     nkpout=nkpt
+     if(nkpt>80)then
+       call wrtout(iout,' greater than 80, so only write 20 of them ')
+       nkpout=20
+     end if
+     do ii=1,nkpout
+       write(msg, '(1x,i2,a2,3es16.8)' )ii,') ',spkpt(1,ii),spkpt(2,ii),spkpt(3,ii)
+       call wrtout(iout,msg)
+     end do
+   end if
  end if
 
 end subroutine smpbz

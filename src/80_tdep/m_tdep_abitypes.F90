@@ -159,7 +159,7 @@ contains
 !LOTO Keep the correct definition of the Lattice
 !LOTO  call ifc_init(Ifc,Crystal,DDB,1,asr,symdynmat,dipdip,&
   rfmeth,ngqpt_in,nqshft,q1shft,dielt,zeff,qdrp_cart,nsphere,rifcsph,&
-  prtsrlr,enunit,XMPI_WORLD)
+  prtsrlr,enunit,XMPI_WORLD, prtout=.false.)
 
   ABI_FREE(q1shft)
   ABI_FREE(qdrp_cart)
@@ -184,7 +184,7 @@ contains
 !   Write the Phi2.dat file
     if (Invar%debug.and.MPIdata%iam_master) then
       write(Invar%stdout,'(a)') ' See the Phi2.dat file corresponding to the ifc_in.dat file'
-      open(unit=55,file=trim(Invar%output_prefix)//'Phi2.dat')
+      open(unit=55,file=trim(Invar%output_prefix)//'_Phi2.dat')
       do iatom=1,3*Invar%natom
         write(55,'(10000(f10.6,1x))') Phi2%SR(iatom,:)
       end do
@@ -307,8 +307,8 @@ contains
     Qbz%qibz_cart(:,iq_ibz)=matmul(Crystal%gprimd,Qbz%qibz(:,iq_ibz))
   end do
   if (MPIdata%iam_master) then
-    open(unit=40,file=trim(Invar%output_prefix)//'qbz.dat')
-    open(unit=41,file=trim(Invar%output_prefix)//'iqbz.dat')
+    open(unit=40,file=trim(Invar%output_prefix)//'_qbz.dat')
+    open(unit=41,file=trim(Invar%output_prefix)//'_iqbz.dat')
     do iq_ibz=1,Qbz%nqbz
       write(40,'(i4,7(1x,f10.6))') iq_ibz,Qbz%qbz(1:3,iq_ibz),Qbz%wtq(iq_ibz),Qbz%qbz_cart(1:3,iq_ibz)
     end do
@@ -376,10 +376,10 @@ subroutine tdep_read_ifc(Ifc,Invar,natom_unitcell)
   end if
   if (Invar%readifc==1) then
     write(Invar%stdout,'(a)') ' Read the IFC from ifc_in.dat'
-    open(unit=40,file=trim(Invar%input_prefix)//'ifc_in.dat')
+    open(unit=40,file=trim(Invar%input_prefix)//'_ifc_in.dat')
   else if (Invar%readifc==2) then
     write(Invar%stdout,'(a)') ' Read the IFC from ifc_out.dat'
-    open(unit=40,file=trim(Invar%output_prefix)//'ifc_out.dat')
+    open(unit=40,file=trim(Invar%output_prefix)//'_ifc_out.dat')
   end if
   read(40,*) string
   read(40,*) string
@@ -479,29 +479,29 @@ subroutine tdep_write_ifc(Crystal,Ifc,Invar,natom_unitcell,unitfile)
   prt_ifc = 1
   if (unitfile.eq.0) then
     write(Invar%stdout,'(a)') ' Write the IFC of TDEP in ifc_out.dat (and ifc_out.nc)'
-    open(unit=77,file=trim(Invar%output_prefix)//'ifc_out.dat')
+    open(unit=77,file=trim(Invar%output_prefix)//'_ifc_out.dat')
   else if (unitfile.eq.1) then
     write(Invar%stdout,'(a)') ' Write in ifc_check.dat (and ifc_check.nc) the IFC read previously'
-    open(unit=77,file=trim(Invar%output_prefix)//'ifc_check.dat')
+    open(unit=77,file=trim(Invar%output_prefix)//'_ifc_check.dat')
   else if (unitfile.eq.2) then
     write(Invar%stdout,'(a)') ' Write in ifc_ddb.dat (and ifc_ddb.nc) the IFC read from DDB file'
-    open(unit=77,file=trim(Invar%output_prefix)//'ifc_ddb.dat')
+    open(unit=77,file=trim(Invar%output_prefix)//'_ifc_ddb.dat')
   else
     write(message, '(a,i3,a)' )&
 &   ' The value of unitfile ',unitfile,' is not allowed.'
     ABI_ERROR(message)
   end if
   if (unitfile.eq.0) then
-    NCF_CHECK_MSG(nctk_open_create(ncid, trim(Invar%output_prefix)//"ifc_out.nc", xmpi_comm_self), "Creating ifc_out.nc")
+    NCF_CHECK_MSG(nctk_open_create(ncid, trim(Invar%output_prefix)//"_ifc_out.nc", xmpi_comm_self), "Creating ifc_out.nc")
   else if (unitfile.eq.1) then
-    NCF_CHECK_MSG(nctk_open_create(ncid, trim(Invar%output_prefix)//"ifc_check.nc", xmpi_comm_self), "Creating ifc_check.nc")
+    NCF_CHECK_MSG(nctk_open_create(ncid, trim(Invar%output_prefix)//"_ifc_check.nc", xmpi_comm_self), "Creating ifc_check.nc")
   else if (unitfile.eq.2) then
-    NCF_CHECK_MSG(nctk_open_create(ncid, trim(Invar%output_prefix)//"ifc_ddb.nc", xmpi_comm_self), "Creating ifc_ddb.nc")
+    NCF_CHECK_MSG(nctk_open_create(ncid, trim(Invar%output_prefix)//"_ifc_ddb.nc", xmpi_comm_self), "Creating ifc_ddb.nc")
   end if
   NCF_CHECK(nctk_def_basedims(ncid))
   NCF_CHECK(nctk_defnwrite_ivars(ncid, ["anaddb_version"], [1]))
   NCF_CHECK(crystal%ncwrite(ncid))
-  call ifc%write(ifcana,atifc,ifcout,prt_ifc,ncid,77)
+  call ifc%write(ifcana,atifc,ifcout,prt_ifc,ncid,Invar%output_prefix,77)
   close(77)
   write(Invar%stdout,'(a)') ' ------- achieved'
 

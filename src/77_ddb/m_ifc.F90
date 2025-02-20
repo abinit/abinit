@@ -338,6 +338,7 @@ end subroutine ifc_free
 !! [Ifc_coarse]=Optional.
 !! [dipquad] = if 1, atmfrc has been build without dipole-quadrupole part
 !! [quadquad] = if 1, atmfrc has been build without quadrupole-quadrupole part
+!! prtout=write info to the output and log files.
 !!
 !! OUTPUT
 !! Ifc<ifc_type>=Object containing the dynamical matrix and the IFCs.
@@ -348,7 +349,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
   rfmeth,ngqpt_in,nqshft,q1shft,dielt,zeff,qdrp_cart,nsphere,rifcsph,&
   prtsrlr,enunit, & ! TODO: TO BE REMOVED
   comm, &
-  Ifc_coarse,dipquad,quadquad) ! Optional
+  Ifc_coarse,dipquad,quadquad,prtout) ! Optional
 
 !Arguments ------------------------------------
  class(ifc_type),intent(inout) :: Ifc
@@ -358,6 +359,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  type(ddb_type),intent(in) :: ddb
  type(ifc_type),optional,intent(in) :: Ifc_coarse
  integer,optional,intent(in) :: dipquad, quadquad
+ logical, optional, intent(in) :: prtout
 
 !arrays
  integer,intent(in) :: ngqpt_in(3)
@@ -374,6 +376,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  integer :: mpert,iout,iqpt,mqpt,nsym,ntypat,iq_ibz,iq_bz,ii,natom
  integer :: nqbz,option,plus,sumg0,irpt,irpt_new
  integer :: nprocs,my_rank,my_ierr,ierr
+ logical :: prtout_
  real(dp),parameter :: qphnrm=one
  real(dp) :: xval,cpu,wall,gflops,rcut_min
  real(dp) :: r_inscribed_sphere,toldist
@@ -398,6 +401,10 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
 
  mpert = ddb%mpert
  iout = ab_out
+ prtout_ = .true.
+ if (present(prtout)) then
+    prtout_ = prtout
+ end if
 
  rprim = ddb%rprim; gprim = ddb%gprim
 
@@ -455,7 +462,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  if (Ifc%brav==3) mqpt=mqpt/4
 
  ABI_MALLOC(qbz,(3,mqpt))
- call smpbz(Ifc%brav,ab_out,qptrlatt,mqpt,nqbz,nqshft,option,q1shft,qbz)
+ call smpbz(Ifc%brav,ab_out,qptrlatt,mqpt,nqbz,nqshft,option,q1shft,qbz,prtout=prtout_)
 
  ! Find the irreducible zone (qibz)
  ABI_MALLOC(ibz2bz, (nqbz))
@@ -539,7 +546,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
 
  if (Ifc%dipdip==1.or.Ifc%dipquad==1.or.Ifc%quadquad==1) then
    ! Take off the dipole-dipole part of the dynamical matrix
-   call wrtout(std_out, " Will extract the dipole-dipole part for every wavevector")
+   if (prtout_) call wrtout(std_out, " Will extract the dipole-dipole part for every wavevector")
    ABI_MALLOC(dyew,(2,3,natom,3,natom))
 
    do iqpt=1,nqbz
@@ -621,7 +628,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
 
  ! The interatomic forces have been calculated
  write(msg, '(2a)')ch10,' The interatomic forces have been obtained '
- call wrtout([std_out, ab_out], msg,'COLL')
+ if (prtout_) call wrtout([std_out, ab_out], msg,'COLL')
  call cwtime_report(" ifc_init1", cpu, wall, gflops)
 
  ! Apply cutoff on ifc if needed
@@ -700,7 +707,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
    ! Check that the starting values are well reproduced.
    write(msg, '(2a)' )' mkifc9 : now check that the starting values ',&
      ' are reproduced after the use of interatomic forces '
-   call wrtout(std_out, msg)
+   if (prtout_) call wrtout(std_out, msg)
    do iqpt=1,nqbz
      qpt(:)=Ifc%qbz(:,iqpt)
      call ifc%fourq(Crystal,qpt,phfrq,displ_cart,out_eigvec=eigvec)
@@ -1674,16 +1681,20 @@ end subroutine corsifc9
 !!  2) the code is unreadable and horrible - 3/4 different file formats for the
 !!  same stuff. We should make different subroutines, even if it duplicates some code
 !!
+!!  3) The name of the output files should respect the conventions of the code.
+!!     This routine should take a file prefix as argument.
+!!
 !! SOURCE
 
-subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid, &
-                                                    unit_out) ! optional arguments
+subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid,prefix,&
+                     unit_out) ! optional arguments
 
 !Arguments -------------------------------
 !scalars
  class(ifc_type),intent(inout) :: Ifc
  integer,intent(in) :: ifcout,ifcana,prt_ifc,ncid
  integer,optional,intent(in) :: unit_out
+ character(*),intent(in) :: prefix
 !arrays
  integer,intent(in) :: atifc(Ifc%natom)
 
@@ -1694,6 +1705,7 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid, &
  integer :: unit_ifc, unit_tdep
  real(dp) :: detdlt
  real(dp) :: maxdist_tdep
+ character(len=fnlen) :: filename
  character(len=500) :: message
  character(len=4) :: str1, str2
 !arrays
@@ -1775,17 +1787,19 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid, &
 
  ! set up file for real space ifc output, if required
  if (prt_ifc == 1) then
-   if (open_file('ifcinfo.out', message, newunit=unit_ifc, status="replace") /= 0) then
+   filename = trim(prefix)//'_ifcinfo.dat'
+   if (open_file(trim(filename), message, newunit=unit_ifc, status="replace") /= 0) then
      ABI_ERROR(message)
    end if
    write(iout, '(a,a)' )ch10,&
-&   '  NOTE: Open file ifcinfo.out, for the output of interatomic force constants. This is because prt_ifc==1. '
+&   '  NOTE: Open file _ifcinfo.dat, for the output of interatomic force constants. This is because prt_ifc==1. '
 
-   if (open_file('outfile.forceconstants_ABINIT', message, newunit=unit_tdep, status="replace") /= 0) then
+   filename = trim(prefix)//'_forceconstants.dat'
+   if (open_file(trim(filename), message, newunit=unit_tdep, status="replace") /= 0) then
      ABI_ERROR(message)
    end if
    write(iout, '(a,a,a)' )ch10,&
-&   '  NOTE: Open file outfile.forceconstants_ABINIT, for the output of interatomic force',&
+&   '  NOTE: Open file _forceconstants.dat, for the output of interatomic force',&
 &   ' constants in TDEP format. This is because prt_ifc==1. '
    ! Print necessary stuff for TDEP
    write(unit_tdep,"(1X,I10,15X,'How many atoms per unit cell')") Ifc%natom
@@ -1959,7 +1973,8 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid, &
    close(unit_ifc)
    close(unit_tdep)
 
-   if (open_file('infile.lotosplitting_ABINIT', message, newunit=unit_tdep, status="replace") /= 0) then
+   filename = trim(prefix)//'_lotosplitting.dat'
+   if (open_file(trim(filename), message, newunit=unit_tdep, status="replace") /= 0) then
      ABI_ERROR(message)
    end if
    write(unit_tdep,'(3es28.16)') dielt(:,1)

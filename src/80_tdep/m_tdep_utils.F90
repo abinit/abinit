@@ -372,7 +372,7 @@ contains
   end do
   if (.not.ok) then
     if (MPIdata%iam_master) then
-      open(unit=31,file=trim(Invar%output_prefix)//'xred_average.xyz')
+      open(unit=31,file=trim(Invar%output_prefix)//'_xred_average.xyz')
       do iatom=1,Invar%natom
         write(31,'(a,1x,3(f10.6,1x))') 'C',xred_center(:,iatom)
         write(31,'(a,1x,3(f10.6,1x))') 'I',xred_ideal (:,iatom)
@@ -513,7 +513,7 @@ contains
 ! WARNING: VERY IMPORTANT: The positions are displayed/sorted (and used in the following)
 ! according to ideal positions xred_ideal.
   if (MPIdata%iam_master) then
-    open(unit=31,file=trim(Invar%output_prefix)//'xred_average.xyz')
+    open(unit=31,file=trim(Invar%output_prefix)//'_xred_average.xyz')
     write(31,'(i4)') Invar%natom*2
     write(31,'(i4)') 1
 !   --> In reduced coordinates
@@ -763,8 +763,8 @@ contains
   write(Invar%stdout,'(a)') ' '
   write(Invar%stdout,'(a)') ' See the etotMDvsTDEP.dat & fcartMDvsTDEP.dat files'
   if (MPIdata%iam_master) then
-    open(unit=32,file=trim(Invar%output_prefix)//'etotMDvsTDEP.dat')
-    open(unit=33,file=trim(Invar%output_prefix)//'fcartMDvsTDEP.dat')
+    open(unit=32,file=trim(Invar%output_prefix)//'_etotMDvsTDEP.dat')
+    open(unit=33,file=trim(Invar%output_prefix)//'_fcartMDvsTDEP.dat')
     write(32,'(a)') '#   Istep      U_MD(Ha)         U_TDEP(Ha)'
     write(33,'(a)') '# Forces_MD(Ha/bohr) Forces_TDEP(Ha/bohr)'
     do istep=1,Invar%nstep_tot
