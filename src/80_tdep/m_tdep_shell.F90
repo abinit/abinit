@@ -142,7 +142,7 @@ contains
   ABI_MALLOC(Shell1at%ncoeff_prev,(Shell1at%nshell)); Shell1at%ncoeff_prev(:)=zero
   write(Invar%stdout,*) ' Number of shells=',Shell1at%nshell
   write(Invar%stdout,*) '============================================================================'
-  if (MPIdata%iam_master) open(unit=16,file=trim(Invar%output_prefix)//'nbcoeff-phi1.dat')
+  if (MPIdata%iam_master) open(unit=16,file=trim(Invar%output_prefix)//'_nbcoeff-phi1.dat')
   ncoeff_prev=0
   do ishell=1,Shell1at%nshell
     ncoeff=0
@@ -292,7 +292,7 @@ contains
   ABI_MALLOC(Shell2at%ncoeff_prev,(Shell2at%nshell)); Shell2at%ncoeff_prev(:)=zero
   write(Invar%stdout,*) ' Number of shells=',Shell2at%nshell
   write(Invar%stdout,*) '============================================================================'
-  if (MPIdata%iam_master) open(unit=16,file=trim(Invar%output_prefix)//'nbcoeff-phi2.dat')
+  if (MPIdata%iam_master) open(unit=16,file=trim(Invar%output_prefix)//'_nbcoeff-phi2.dat')
   ncoeff_prev=0
   do ishell=1,Shell2at%nshell
     ncoeff=0
@@ -651,7 +651,7 @@ contains
   ABI_MALLOC(Shell3at%ncoeff_prev,(Shell3at%nshell)); Shell3at%ncoeff_prev(:)=zero
   write(Invar%stdout,*) 'Number of shells=',Shell3at%nshell
   write(Invar%stdout,*) '============================================================================'
-  if (MPIdata%iam_master) open(unit=16,file=trim(Invar%output_prefix)//'nbcoeff-phi3.dat')
+  if (MPIdata%iam_master) open(unit=16,file=trim(Invar%output_prefix)//'_nbcoeff-phi3.dat')
   ncoeff_prev=0
   do ishell=1,Shell3at%nshell
     ncoeff=0
@@ -1147,7 +1147,7 @@ contains
   ABI_MALLOC(Shell4at%ncoeff_prev,(Shell4at%nshell)); Shell4at%ncoeff_prev(:)=zero
   write(Invar%stdout,*) 'Number of shells=',Shell4at%nshell
   write(Invar%stdout,*) '============================================================================'
-  if (MPIdata%iam_master) open(unit=16,file=trim(Invar%output_prefix)//'nbcoeff-phi4.dat')
+  if (MPIdata%iam_master) open(unit=16,file=trim(Invar%output_prefix)//'_nbcoeff-phi4.dat')
   ncoeff_prev=0
   do ishell=1,Shell4at%nshell
     ncoeff=0
