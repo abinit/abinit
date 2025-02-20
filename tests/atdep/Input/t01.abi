@@ -26,6 +26,7 @@ TheEnd
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = atdep
+#%% exclude_builders = alps_intel_2025_elpa
 #%% md_hist = t01
 #%% [files]
 #%% files_to_test = 
