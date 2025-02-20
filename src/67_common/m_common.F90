@@ -2118,18 +2118,18 @@ end function crystal_from_file
 !!
 !! SOURCE
 subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,npw,nband,nspinor,paral_kgb,&
-&                                           optfor,optstr,wfoptalg,gpu_option,&
+&                                           npband,optfor,optstr,wfoptalg,gpu_option,&
 &                                           blocksize,nblocks)
    implicit none
 
-   integer,intent(in)     :: ikpt,ndat,npw,nband,nspinor,paral_kgb,optfor,optstr,wfoptalg,gpu_option
+   integer,intent(in)     :: ikpt,ndat,npw,nband,nspinor,paral_kgb,npband,optfor,optstr,wfoptalg,gpu_option
    type(gs_hamiltonian_type),intent(in) :: gs_hamk
    integer,intent(inout)  :: blocksize
    integer,intent(out)    :: nblocks
 
    integer(kind=c_size_t) :: nonlop_smem,invovl_smem,getghc_wmem,invovl_wmem,nonlop_wmem,gs_ham_smem
    integer(kind=c_size_t) :: sum_mem,sum_bandpp_mem,sum_other_mem,free_mem,localMem
-   integer  :: icplx,space,i,ndat_try,rank,nprocs,ndgxdt
+   integer  :: icplx,space,i,ndat_try,rank,nprocs,ndgxdt,blockdim
    logical  :: print_and_exit
    integer(kind=c_size_t) :: chebfiMem(2),lobpcgMem(2)
 
@@ -2154,6 +2154,7 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,npw,nband,nspinor,
    end if
 
    ndat_try=ndat
+   blockdim=npband*ndat
    ndgxdt=0
    if(optfor>0) ndgxdt=ndgxdt+3
    if(optstr>0) ndgxdt=ndgxdt+6
@@ -2165,12 +2166,12 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,npw,nband,nspinor,
    if(associated(gs_hamk%ph3d_k)) gs_ham_smem = gs_ham_smem + sizeof(gs_hamk%ph3d_k)
 
    if(wfoptalg==111) then
-     chebfiMem = chebfi_memInfo(nband,icplx*npw*nspinor,space,paral_kgb,icplx*npw*nspinor,ndat)
+     chebfiMem = chebfi_memInfo(nband,icplx*npw*nspinor,space,paral_kgb,icplx*npw*nspinor,blockdim)
      invovl_smem = invovl_ompgpu_static_mem(gs_hamk)
      invovl_wmem = invovl_ompgpu_work_mem(gs_hamk, ndat_try)
    end if
    if(wfoptalg==114) then
-     lobpcgMem = lobpcg_memInfo(nband,icplx*npw*nspinor,ndat,space)
+     lobpcgMem = lobpcg_memInfo(nband,icplx*npw*nspinor,blockdim,space)
    end if
    localMem  = (int(2,c_size_t)*npw*nspinor*nband+3*nband)*kind(1.d0) ! cg, eig, occ, resid in chebfiwf/lobpcgwf
 
