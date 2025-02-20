@@ -9,7 +9,7 @@
 !!  Boese and Handy , J. Chem. Phys. 114, 5497 (2001) [[cite:Boese2001]] for HCTH-407.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2002-2024 ABINIT group (XG,LG)
+!!  Copyright (C) 2002-2025 ABINIT group (XG,LG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

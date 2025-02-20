@@ -1,4 +1,4 @@
-## Copyright (C) 2019-2024 ABINIT group (Yann Pouillon. MTorrent)
+## Copyright (C) 2019-2025 ABINIT group (Yann Pouillon. MTorrent)
 
 #
 # openMP support for Steredeg
