@@ -2175,7 +2175,9 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,npw,nband,nspinor,
    localMem  = (int(2,c_size_t)*npw*nspinor*nband+3*nband)*kind(1.d0) ! cg, eig, occ, resid in chebfiwf/lobpcgwf
 
    print_and_exit=.false.
+   nblocks=0
    if(blocksize > 1) then
+     nblocks=max(1,nprocs/blocksize)
      print_and_exit=.true.
    else
      blocksize=1
@@ -2190,7 +2192,7 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,npw,nband,nspinor,
      ! Gemm nonlop static memory requirement is higher, split here
      if(i>1 .and. .not. print_and_exit) blocksize = blocksize + 1
      if(modulo(nprocs,blocksize)/=0) cycle
-     nblocks=nprocs/blocksize
+     if(i>1) nblocks=nprocs/blocksize
 
      nonlop_smem = gemm_nonlop_ompgpu_static_mem(gs_hamk%npw_fft_k,gs_hamk%indlmn,gs_hamk%nattyp,gs_hamk%ntypat,blocksize, ndgxdt)
 

@@ -1028,7 +1028,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
        &                        nspinor,mpi_enreg%paral_kgb,&
        &                        optfor,stress_needed,-1,gs_hamk%gpu_option,&
        &                        gemm_nonlop_block_size,nblk_gemm_nonlop)
-       gemm_nonlop_is_distributed = (gpu_nl_distrib/=0 .and. nblk_gemm_nonlop > 1)
+       gemm_nonlop_is_distributed = (gpu_nl_distrib/=0 .and. nblk_gemm_nonlop > 0)
      end if
 
      if (usexg==1) then
