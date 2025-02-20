@@ -111,7 +111,6 @@ xred+  12*0.0
 #%%   NaI with a sligthly expanded lattice, to allow self-localisation of a hole polaron, using pSIC technique.
 #%%   Realistic ecut and reasonable k point sampling, but small cell of only 8 atoms for testing.
 #%%   The present test at a set of decreasing I-I interatomic distances
-#%%
 #%%   Parallelism until 12 procs is quite efficient. However, setting npband 2 does not bring noticeable improvement.
 #%%   Although this is still subject for further investigation, the hypothesis is that the density/xc/potential part
 #%%   is not improved with npband 2, while it is actually a major contribution, even with 32 bands.
