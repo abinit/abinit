@@ -613,9 +613,17 @@ contains
   end if
 
   if(gemm_nonlop_is_distributed) then
-    ! If split size has changed, reset array
-    if(gemm_nonlop_kpt(ik)%nprojs_blk /= nprojs/gemm_nonlop_block_size) then
+    ! If split size has changed, reset array and init MPI communicator
+    if(gemm_nonlop_block_comm==xmpi_comm_null .or. gemm_nonlop_kpt(ik)%nprojs_blk /= nprojs/gemm_nonlop_block_size) then
       call free_gemm_nonlop_ikpt(ik, gpu_option)
+      nprocs = xmpi_comm_size(xmpi_world)
+      if(gemm_nonlop_block_comm/=xmpi_comm_null) call xmpi_comm_free(gemm_nonlop_block_comm)
+      rank = xmpi_comm_rank(xmpi_world);
+      gemm_nonlop_nblocks=nprocs/gemm_nonlop_block_size
+      write(std_out,'(A,I3,A,I3,A)')  "Splitting GEMM nonlop projectors on ",&
+      &    gemm_nonlop_nblocks, " blocks of ", gemm_nonlop_block_size, " MPI tasks..."
+      call xmpi_comm_split(xmpi_world, rank/gemm_nonlop_block_size, rank, gemm_nonlop_block_comm, ierr)
+      if(ierr/=0) ABI_BUG("MPI_comm_split failed!")
     end if
   end if
 
@@ -629,19 +637,6 @@ contains
     nprojs_my_blk = nprojs
     nprojs_blk = nprojs
     if(gemm_nonlop_is_distributed) then
-
-      if(gemm_nonlop_block_comm==xmpi_comm_null .or. gemm_nonlop_block_size>0) then
-        nprocs = xmpi_comm_size(xmpi_world)
-        if(gemm_nonlop_block_comm==xmpi_comm_null .or. gemm_nonlop_block_size*gemm_nonlop_nblocks /= nprocs) then
-          call xmpi_comm_free(gemm_nonlop_block_comm)
-          rank = xmpi_comm_rank(xmpi_world);
-          gemm_nonlop_nblocks=nprocs/gemm_nonlop_block_size
-          write(std_out,'(A,I3,A,I3,A)')  "Splitting GEMM nonlop projectors on ",&
-          &    gemm_nonlop_nblocks, " blocks of ", gemm_nonlop_block_size, " MPI tasks..."
-          call xmpi_comm_split(xmpi_world, rank/gemm_nonlop_block_size, rank, gemm_nonlop_block_comm, ierr)
-          if(ierr/=0) ABI_BUG("MPI_comm_split failed!")
-        end if
-      end if
 
       rank = xmpi_comm_rank(gemm_nonlop_block_comm);
       is_last_rank = (rank==gemm_nonlop_block_size-1)
