@@ -805,7 +805,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    &                        dtset%nspinor,mpi_enreg%paral_kgb,&
    &                        optforces,0,-1,gs_hamk%gpu_option,&
    &                        gemm_nonlop_block_size,nblk_gemm_nonlop)
-   gemm_nonlop_is_distributed = (dtset%gpu_nl_distrib/=0 .and. nblk_gemm_nonlop > 1)
+   gemm_nonlop_is_distributed = (dtset%gpu_nl_distrib/=0 .and. nblk_gemm_nonlop > 0)
  end if
 
 !Loop over bands or blocks of bands. Note that in sequential mode iblock=iband, nblockbd=nband_k and blocksize=1
