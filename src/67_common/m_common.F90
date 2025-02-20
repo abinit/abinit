@@ -2188,7 +2188,7 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,npw,nband,nspinor,
    ! We try to divide bandpp with dividers from 1 to 20
    ! If we fail, that means test case is too fat for given hardware, and that's it
    ! This looks stupid but we don't actually expect to process CHEBFI with 20 blocks.
-   do i=1,20
+   do i=1,nprocs
 
      ! Gemm nonlop static memory requirement is higher, split here
      if(i>1 .and. .not. print_and_exit) blocksize = blocksize + 1
@@ -2219,61 +2219,64 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,npw,nband,nspinor,
        sum_other_mem    = sum_other_mem  + lobpcgMem(1)+lobpcgMem(2)+localMem
      end if
 
-     if(sum_mem < free_mem .or. print_and_exit .or. i==20) then
-       write(std_out,'(A,I3,A,I3,A,A)') "GPU memory consumption estimate using ",&
-       &                        nblocks, " blocks of ", blocksize,&
-       &                        " MPI tasks in GEMM nonlop for K-point ",ikpt,":"
-       write(std_out,'(A,F10.3,1x,A)') " Available memory                        : ", real(free_mem)/(1024*1024), "MiB"
-       write(std_out,*) "Memory requirements per MPI task (OpenMP GPU)"
-       write(std_out,*) "---------------------------------------------------------"
-       write(std_out,*) "GEMM nonlop projectors, gouverned by blocking"
-       write(std_out,'(A,F10.3,1x,A)') "   gemm_nonlop_ompgpu (projectors)       : ",  real(nonlop_smem,dp)/(1024*1024), "MiB"
-
-
-       write(std_out,*) "Static buffers, computed once and permanently on card"
-       ! CHEBFI2
-       if(wfoptalg==111) then
-         write(std_out,'(A,F10.3,1x,A)') "   invovl_ompgpu (mkinvovl)              : ",  real(invovl_smem,dp)/(1024*1024), "MiB"
-         write(std_out,'(A,F10.3,1x,A)') "   chebfi2                               : ",    real(chebfiMem(1))/(1024*1024), "MiB"
-       end if
-
-       ! LOBPCG2
-       if(wfoptalg==114) then
-         write(std_out,'(A,F10.3,1x,A)') "   lobpcg2                               : ",    real(lobpcgMem(1))/(1024*1024), "MiB"
-       end if
-
-       write(std_out,'(A,F10.3,1x,A)') "   hamiltonian arrays                    : ",      real(gs_ham_smem)/(1024*1024), "MiB"
-
-       write(std_out,*) "Work buffers (sized after bandpp or nblock_lobpcg)"
-
-       ! getghc (any diago algorithm)
-       if(wfoptalg>=0) then
-         write(std_out,'(A,F10.3,1x,A)') "   getghc (inc. fourwf+gemm_nonlop)      : ",  real(getghc_wmem,dp)/(1024*1024), "MiB"
-       else
-         write(std_out,'(A,F10.3,1x,A)') "   gemm_nonlop                           : ",  real(nonlop_wmem,dp)/(1024*1024), "MiB"
-       end if
-
-       ! CHEBFI2
-       if(wfoptalg==111) then
-         write(std_out,'(A,F10.3,1x,A)') "   invovl                                : ",  real(invovl_wmem,dp)/(1024*1024), "MiB"
-         write(std_out,'(A,F10.3,1x,A)') "   chebfi2 (RR buffers)                  : ",    real(chebfiMem(2))/(1024*1024), "MiB"
-         write(std_out,'(A,F10.3,1x,A)') "   chebfiwf (cg,resid,eig)               : ",        real(localMem)/(1024*1024), "MiB"
-       end if
-
-       ! LOBPCG2
-       if(wfoptalg==114) then
-         write(std_out,'(A,F10.3,1x,A)') "   lobpcg2 (RR buffers)                  : ",    real(lobpcgMem(2))/(1024*1024), "MiB"
-         write(std_out,'(A,F10.3,1x,A)') "   lobpcgwf (cg,resid,eig)               : ",        real(localMem)/(1024*1024), "MiB"
-       end if
-
-       write(std_out,*) "---------------------------------------------------------"
-       write(std_out,'(A,F10.3,1x,A)') "Sum                                      : ", real(sum_mem)/(1024*1024), "MiB"
-       write(std_out,'(A)') new_line('A')
-       flush(std_out)
-       exit
-     end if
+     if(sum_mem < free_mem .or. print_and_exit) exit
 
    end do
+   if(nblocks==0) then
+     write(std_out,'(A,A,I3,A)') "GPU memory consumption estimate without ",&
+     &                        "distribution in GEMM nonlop for K-point ",ikpt,":"
+   else
+     write(std_out,'(A,I3,A,I3,A,I3,A)') "GPU memory consumption estimate using ",&
+     &                        nblocks, " blocks of ", blocksize,&
+     &                        " MPI tasks in GEMM nonlop for K-point ",ikpt,":"
+   end if
+   write(std_out,'(A,F10.3,1x,A)') " Available memory                        : ", real(free_mem)/(1024*1024), "MiB"
+   write(std_out,*) "Memory requirements per MPI task (OpenMP GPU)"
+   write(std_out,*) "---------------------------------------------------------"
+   write(std_out,*) "GEMM nonlop projectors, gouverned by blocking"
+   write(std_out,'(A,F10.3,1x,A)') "   gemm_nonlop_ompgpu (projectors)       : ",  real(nonlop_smem,dp)/(1024*1024), "MiB"
+
+
+   write(std_out,*) "Static buffers, computed once and permanently on card"
+   ! CHEBFI2
+   if(wfoptalg==111) then
+     write(std_out,'(A,F10.3,1x,A)') "   invovl_ompgpu (mkinvovl)              : ",  real(invovl_smem,dp)/(1024*1024), "MiB"
+     write(std_out,'(A,F10.3,1x,A)') "   chebfi2                               : ",    real(chebfiMem(1))/(1024*1024), "MiB"
+   end if
+
+   ! LOBPCG2
+   if(wfoptalg==114) then
+     write(std_out,'(A,F10.3,1x,A)') "   lobpcg2                               : ",    real(lobpcgMem(1))/(1024*1024), "MiB"
+   end if
+
+   write(std_out,'(A,F10.3,1x,A)') "   hamiltonian arrays                    : ",      real(gs_ham_smem)/(1024*1024), "MiB"
+
+   write(std_out,*) "Work buffers (sized after bandpp or nblock_lobpcg)"
+
+   ! getghc (any diago algorithm)
+   if(wfoptalg>=0) then
+     write(std_out,'(A,F10.3,1x,A)') "   getghc (inc. fourwf+gemm_nonlop)      : ",  real(getghc_wmem,dp)/(1024*1024), "MiB"
+   else
+     write(std_out,'(A,F10.3,1x,A)') "   gemm_nonlop                           : ",  real(nonlop_wmem,dp)/(1024*1024), "MiB"
+   end if
+
+   ! CHEBFI2
+   if(wfoptalg==111) then
+     write(std_out,'(A,F10.3,1x,A)') "   invovl                                : ",  real(invovl_wmem,dp)/(1024*1024), "MiB"
+     write(std_out,'(A,F10.3,1x,A)') "   chebfi2 (RR buffers)                  : ",    real(chebfiMem(2))/(1024*1024), "MiB"
+     write(std_out,'(A,F10.3,1x,A)') "   chebfiwf (cg,resid,eig)               : ",        real(localMem)/(1024*1024), "MiB"
+   end if
+
+   ! LOBPCG2
+   if(wfoptalg==114) then
+     write(std_out,'(A,F10.3,1x,A)') "   lobpcg2 (RR buffers)                  : ",    real(lobpcgMem(2))/(1024*1024), "MiB"
+     write(std_out,'(A,F10.3,1x,A)') "   lobpcgwf (cg,resid,eig)               : ",        real(localMem)/(1024*1024), "MiB"
+   end if
+
+   write(std_out,*) "---------------------------------------------------------"
+   write(std_out,'(A,F10.3,1x,A)') "Sum                                      : ", real(sum_mem)/(1024*1024), "MiB"
+   write(std_out,'(A)') new_line('A')
+   flush(std_out)
    if(sum_mem > free_mem) then
      ABI_ERROR("It seems the test case you're trying to run is too big to run with given hardware resources !")
    end if
