@@ -17,6 +17,6 @@ BTO.DDB
 #%%   iw_cp BTO.DDB BTO.DDB;
 #%% [extra_info]
 #%% authors = G. Antonius
-#%% keywords = NC, DFPT, DDB
+#%% keywords = NC, DFPT, DDB_TO_NC
 #%% description = Convert a DDB file from text to netcdf format.
 #%%<END TEST_INFO>

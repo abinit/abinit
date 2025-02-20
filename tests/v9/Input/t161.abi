@@ -15,6 +15,6 @@ t160o.ddb.nc
 #%% [shell]
 #%% [extra_info]
 #%% authors = G. Antonius
-#%% keywords = NC, DFPT, DDB
+#%% keywords = NC, DFPT, DDB_TO_NC
 #%% description = Convert a DDB file from netcdf to text format.
 #%%<END TEST_INFO>
