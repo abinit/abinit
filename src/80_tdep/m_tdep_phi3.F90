@@ -649,8 +649,8 @@ subroutine tdep_calc_alpha_gamma(distance,Eigen2nd,Invar,Lattice,MPIdata,Phi3_re
   ABI_FREE(tmp)
 
   if (MPIdata%iam_master) then
-    open(unit=20,file=trim(Invar%output_prefix)//'thermo3.dat')
-    open(unit=21,file=trim(Invar%output_prefix)//'alpha_gamma.dat')
+    open(unit=20,file=trim(Invar%output_prefix)//'_thermo3.dat')
+    open(unit=21,file=trim(Invar%output_prefix)//'_alpha_gamma.dat')
     write(20,'(a)')'#   T(K)    C_v(k_B/fu)        Gamma     alpha_v*10^6(K^-1)   E_th(eV)                       P_th(GPa)'
     write(20,'(a,72x,a)')'#',' ----------------------------------------------'
     write(20,'(a,72x,a)')'#','  {sum G_i.U_iV}  {int G.C_v/V dT}    {G.U/V}'
@@ -855,8 +855,8 @@ subroutine tdep_write_gruneisen(distance,Eigen2nd,Invar,Phi3_ref,Qpt,Rlatt_cart,
   nmode=3*Invar%natom_unitcell
   ABI_MALLOC(Gruneisen,(3*Invar%natom_unitcell,3,3)); Gruneisen(:,:,:)=czero
   ABI_MALLOC(Grun_mean,(3*Invar%natom_unitcell))    ; Grun_mean(:)    =czero
-  open(unit=53,file=trim(Invar%output_prefix)//'gruneisen.dat')
-  open(unit=54,file=trim(Invar%output_prefix)//'gruneisen-ij.dat')
+  open(unit=53,file=trim(Invar%output_prefix)//'_gruneisen.dat')
+  open(unit=54,file=trim(Invar%output_prefix)//'_gruneisen-ij.dat')
 
   do iqpt=1,Qpt%nqpt
 
