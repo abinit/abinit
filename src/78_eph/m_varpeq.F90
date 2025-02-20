@@ -1052,7 +1052,7 @@ subroutine varpeq_print_metadata(self, dtset)
    endif
 
    strseed = adjustl(strseed)
- end function
+ end function strseed
 
 end subroutine varpeq_print_metadata
 !!***
