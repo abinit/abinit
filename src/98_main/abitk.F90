@@ -3,7 +3,7 @@
 !! abitk
 !!
 !! FUNCTION
-!!  Command line interface to perform very basic post-processing of output files (mainly netcdf files).
+!!  Command line interface to perform very post-processing of output files (mainly netcdf files).
 !!  Use `abitk --help` to get list of possible commands.
 !!
 !! COPYRIGHT
@@ -151,6 +151,12 @@ program abitk
  !  call get_path_cryst(path, cryst, comm)
  !  call prt_cif(brvltt, ciffname, natom, nsym, ntypat, rprimd, spgaxor, spgroup, spgorig, symrel, tnon, typat, xred, znucl)
 
+ !case ("ibz_tables")
+ !  call get_command_argument(2, path)
+ !  call parse_kargs(kptopt, kptrlatt, nshiftk, shiftk, chksymbreak)
+ !  ABI_CHECK(any(kptrlatt /= 0), "kptrlatt or ngkpt must be specified")
+ !  call get_path_cryst(path, cryst, comm)
+
  case ("hdr_print")
    ABI_CHECK(nargs > 1, "FILE argument is required.")
    call get_command_argument(2, path)
@@ -160,14 +166,14 @@ program abitk
    call hdr%echo(fform, rdwr, unit=std_out)
 
  case ("ibz")
-   ! Print list of kpoints in the IBZ with the corresponding weights
+   ! Print list of k-points in the IBZ with the corresponding weights
    call get_path_cryst(path, cryst, comm)
 
    call parse_kargs(kptopt, kptrlatt, nshiftk, shiftk, chksymbreak)
    ABI_CHECK(any(kptrlatt /= 0), "kptrlatt or ngkpt must be specified")
 
    call kpts_ibz_from_kptrlatt(cryst, kptrlatt, kptopt, nshiftk, shiftk, nkibz, kibz, wtk, nkbz, kbz, &
-      new_kptrlatt=new_kptrlatt, new_shiftk=new_shiftk)
+                               new_kptrlatt=new_kptrlatt, new_shiftk=new_shiftk)
    new_nshiftk = size(new_shiftk, dim=2)
 
    write(std_out, "(/, a)")" Input_kptrlatt | New_kptrlatt"
@@ -347,7 +353,7 @@ program abitk
    do spin=1,ebands%nsppol
      do itemp=1,ntemp
        write(std_out, "(a, 2f16.2, 2e16.2)")&
-        " T (K), mu_e (eV), nh, ne", kTmesh(itemp) / kb_HaK, mu_e(itemp) * Ha_eV, &
+         " T (K), mu_e (eV), nh, ne", kTmesh(itemp) / kb_HaK, mu_e(itemp) * Ha_eV, &
         n_ehst(2,spin,itemp) / cryst%ucvol / Bohr_cm**3, &
         n_ehst(1,spin,itemp) / cryst%ucvol / Bohr_cm**3
      end do
@@ -572,6 +578,7 @@ end subroutine get_path_ebands
 !! get_path_cryst
 !!
 !! FUNCTION
+!!  Build a crystal object from a filepath.
 !!
 !! INPUTS
 !!
