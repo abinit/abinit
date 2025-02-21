@@ -1099,7 +1099,7 @@ end subroutine getghc_ompgpu
 !! SIDE EFFECTS
 !!
 !! NOTES
-!! this code is a copied, simplied version of getghc_mGGA (see below) and should eventually be
+!! this code is a copied, simplified version of getghc_mGGA (see below) and should eventually be
 !! integrated into that code, to simplify maintenance
 !!
 !! SOURCE
@@ -1121,14 +1121,14 @@ subroutine getghc_nucdip_ompgpu(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mg
 !Local variables-------------------------------
 !scalars
  integer,parameter :: tim_fourwf=1
- integer :: icmplx,idat,idir,ipw,iv1,iv2,nspinortot,shift
+ integer :: idat,idir,ipw,iv1,iv2,nspinortot,shift
  logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc
- real(dp) :: scale_conversion,weight=one
+ real(dp) :: weight=one
  !arrays
  real(dp),allocatable :: cwavef1(:,:),cwavef2(:,:)
  real(dp),allocatable :: gcwavef(:,:,:),gcwavef1(:,:,:),gcwavef2(:,:,:)
  real(dp),allocatable :: ghc1(:,:),ghc2(:,:),kgkpk(:,:)
- real(dp),allocatable :: dx(:),dy(:)
+ real(dp),allocatable :: work_(:,:,:,:)
 
 ! *********************************************************************
 
@@ -1146,9 +1146,7 @@ subroutine getghc_nucdip_ompgpu(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mg
    nspinor2TreatedByThisProc=(mpi_enreg%me_spinor==1)
  end if
 
- ! scale conversion from SI to atomic units,
- ! here \alpha^2 where \alpha is the fine structure constant
- scale_conversion = FineStructureConstant2
+ ABI_MALLOC(work_,(2,n4,n5,n6*ndat))
 
  if (nspinortot==1) then
 
@@ -1178,27 +1176,13 @@ subroutine getghc_nucdip_ompgpu(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mg
     gcwavef = gcwavef*two_pi
 
     !  STEP2: Compute sum of (grad components of vectornd)*(grad components of cwavef)
-    ABI_MALLOC(dx,(npw_k))
-    ABI_MALLOC(dy,(npw_k))
     do idir=1,3
-      call fourwf(1,vectornd(:,:,:,:,idir),gcwavef(:,:,idir),ghc1,work,gbound_k,gbound_k,&
+      call fourwf(1,vectornd(:,:,:,:,idir),gcwavef(:,:,idir),ghc1,work_,gbound_k,gbound_k,&
            istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
            &     tim_fourwf,weight,weight,gpu_option=gpu_option)
 !!$OMP PARALLEL DO
-       ! DAXPY is a BLAS routine for y -> A*x + y, here x = ghc1, A = scale_conversion, and y = ghc_vectornd
-       ! should be faster than explicit loop over ipw as npw_k gets large
-      do idat=1,ndat
-        iv1=1+(idat-1)*npw_k; iv2=-1+iv1+npw_k
-        do icmplx=1,2
-          dx=ghc1(icmplx,iv1:iv2)
-          dy=ghc_vectornd(icmplx,iv1:iv2)
-          call DAXPY(npw_k,scale_conversion,dx,1,dy,1)
-          ghc_vectornd(icmplx,iv1:iv2)=dy
-        end do
-      end do
+      ghc_vectornd=ghc_vectornd+ghc1
     end do ! idir
-    ABI_FREE(dx)
-    ABI_FREE(dy)
     ABI_FREE(gcwavef)
     ABI_FREE(ghc1)
 
@@ -1239,27 +1223,17 @@ subroutine getghc_nucdip_ompgpu(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mg
        gcwavef1 = gcwavef1*two_pi
 
        !  STEP2: Compute sum of (grad components of vectornd)*(grad components of cwavef)
-       ABI_MALLOC(dx,(npw_k))
-       ABI_MALLOC(dy,(npw_k))
        do idir=1,3
-          call fourwf(1,vectornd(:,:,:,:,idir),gcwavef1(:,:,idir),ghc1,work,gbound_k,gbound_k,&
-               istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
-               &     tim_fourwf,weight,weight,gpu_option=gpu_option)
+         call fourwf(1,vectornd(:,:,:,:,idir),gcwavef1(:,:,idir),ghc1,work_,gbound_k,gbound_k,&
+           & istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
+           & tim_fourwf,weight,weight,gpu_option=gpu_option)
 !!$OMP PARALLEL DO
-          ! DAXPY is a BLAS routine for y -> A*x + y, here x = ghc1, A = scale_conversion, and y = ghc_vectornd
-          ! should be faster than explicit loop over ipw as npw_k gets large
-          do idat=1,ndat
-            iv1=1+(idat-1)*npw_k; iv2=-1+iv1+npw_k
-            do icmplx=1,2
-              dx=ghc1(icmplx,iv1:iv2)
-              dy=ghc_vectornd(icmplx,iv1:iv2)
-              call DAXPY(npw_k,scale_conversion,dx,1,dy,1)
-              ghc_vectornd(icmplx,iv1:iv2)=dy
-            end do
-          end do
+         do idat=1,ndat
+           iv1=1+(idat-1)*npw_k; iv2=-1+iv1+npw_k
+           ghc_vectornd(1:2,iv1:iv2)=ghc_vectornd(1:2,iv1:iv2)+&
+             &  ghc1(1:2,iv1:iv2)
+         end do
        end do ! idir
-       ABI_FREE(dx)
-       ABI_FREE(dy)
        ABI_FREE(gcwavef1)
        ABI_FREE(ghc1)
 
@@ -1284,27 +1258,17 @@ subroutine getghc_nucdip_ompgpu(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mg
        gcwavef2 = gcwavef2*two_pi
 
        !  STEP2: Compute sum of (grad components of vectornd)*(grad components of cwavef)
-       ABI_MALLOC(dx,(npw_k))
-       ABI_MALLOC(dy,(npw_k))
        do idir=1,3
-          call fourwf(1,vectornd(:,:,:,:,idir),gcwavef2(:,:,idir),ghc2,work,gbound_k,gbound_k,&
-               istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
-               &     tim_fourwf,weight,weight,gpu_option=gpu_option)
+         call fourwf(1,vectornd(:,:,:,:,idir),gcwavef2(:,:,idir),ghc2,work_,gbound_k,gbound_k,&
+           & istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
+           & tim_fourwf,weight,weight,gpu_option=gpu_option)
 !!$OMP PARALLEL DO
-          ! DAXPY is a BLAS routine for y -> A*x + y, here x = ghc1, A = scale_conversion, and y = ghc_vectornd
-          ! should be faster than explicit loop over ipw as npw_k gets large
-          do idat=1,ndat
-            iv1=1+(idat-1)*npw_k; iv2=-1+iv1+npw_k
-            do icmplx=1,2
-              dx=ghc2(icmplx,iv1:iv2)
-              dy=ghc_vectornd(icmplx,iv1+shift:iv2+shift)
-              call DAXPY(npw_k,scale_conversion,dx,1,dy,1)
-              ghc_vectornd(icmplx,iv1+shift:iv2+shift)=dy
-            end do
-          end do
+         do idat=1,ndat
+           iv1=1+(idat-1)*npw_k; iv2=-1+iv1+npw_k
+           ghc_vectornd(1:2,iv1+shift:iv2+shift)=ghc_vectornd(1:2,iv1+shift:iv2+shift)+&
+             & ghc2(1:2,iv1:iv2)
+         end do
        end do ! idir
-       ABI_FREE(dx)
-       ABI_FREE(dy)
        ABI_FREE(gcwavef2)
        ABI_FREE(ghc2)
 
@@ -1315,6 +1279,8 @@ subroutine getghc_nucdip_ompgpu(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mg
     ABI_FREE(kgkpk)
 
  end if ! nspinortot
+
+ ABI_FREE(work_)
 
 end subroutine getghc_nucdip_ompgpu
 !!***
@@ -1361,7 +1327,7 @@ subroutine getghc_mGGA_ompgpu(cwavef,ghc_mGGA,gbound_k,gprimd,istwf_k,kg_k,kpt,m
 !scalars
  integer,intent(in) :: istwf_k,mgfft,my_nspinor,ndat,npw_k,nvloc,n4,n5,n6,gpu_option
  type(MPI_type),intent(in) :: mpi_enreg
-!arrays
+!arrays 
  integer,intent(in) :: gbound_k(2*mgfft+4),kg_k(3,npw_k),ngfft(18)
  real(dp),intent(in) :: gprimd(3,3),kpt(3)
  real(dp),intent(inout) :: cwavef(2,npw_k*my_nspinor*ndat)
@@ -1373,17 +1339,19 @@ subroutine getghc_mGGA_ompgpu(cwavef,ghc_mGGA,gbound_k,gprimd,istwf_k,kg_k,kpt,m
  integer,parameter :: tim_fourwf=1
  integer :: idat,idir,ipw,nspinortot,shift
  logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc
- real(dp) :: gp2pi1,gp2pi2,gp2pi3,kpt_cart,kg_k_cart,weight=one
+ real(dp) :: weight=one
 !arrays
+ real(dp) :: kg_k_cart_vec(3)
  real(dp),allocatable :: cwavef1(:,:),cwavef2(:,:)
  real(dp),allocatable :: gcwavef(:,:,:),gcwavef1(:,:,:),gcwavef2(:,:,:)
  real(dp),allocatable :: ghc1(:,:),ghc2(:,:)
  real(dp),allocatable :: lcwavef(:,:),lcwavef1(:,:),lcwavef2(:,:)
- real(dp),allocatable :: work(:,:,:,:)
+ real(dp),allocatable :: work_(:,:,:,:)
 
 ! *********************************************************************
 
  ghc_mGGA(:,:)=zero
+
  if (nvloc/=1) return
 
  nspinortot=min(2,(1+mpi_enreg%paral_spinor)*my_nspinor)
@@ -1397,7 +1365,7 @@ subroutine getghc_mGGA_ompgpu(cwavef,ghc_mGGA,gbound_k,gprimd,istwf_k,kg_k,kpt,m
    nspinor2TreatedByThisProc=(mpi_enreg%me_spinor==1)
  end if
 
- ABI_MALLOC(work,(2,n4,n5,n6*ndat))
+ ABI_MALLOC(work_,(2,n4,n5,n6*ndat))
 
  if (nspinortot==1) then
 
@@ -1408,49 +1376,40 @@ subroutine getghc_mGGA_ompgpu(cwavef,ghc_mGGA,gbound_k,gprimd,istwf_k,kg_k,kpt,m
    ABI_MALLOC(gcwavef,(2,npw_k*ndat,3))
    ABI_MALLOC(lcwavef,(2,npw_k*ndat))
 !!$OMP PARALLEL DO
+   gcwavef = zero; lcwavef = zero
    do idat=1,ndat
      do ipw=1,npw_k
-       gcwavef(:,ipw+(idat-1)*npw_k,1:3)=zero
-       lcwavef(:,ipw+(idat-1)*npw_k)  =zero
+       ! convert k + G from reduced coords to Cartesian
+       kg_k_cart_vec = two_pi*MATMUL(gprimd,kpt(1:3)+kg_k(1:3,ipw))
+       ! form \grad\psi = i(k + G) \psi in Cartesian frame
+       gcwavef(1,ipw+(idat-1)*npw_k,1:3)=  cwavef(2,ipw+(idat-1)*npw_k)*kg_k_cart_vec(1:3)
+       gcwavef(2,ipw+(idat-1)*npw_k,1:3)= -cwavef(1,ipw+(idat-1)*npw_k)*kg_k_cart_vec(1:3)
+       ! form \nabla^2\psi = -|k + G|^2 \psi
+       lcwavef(1:2,ipw+(idat-1)*npw_k)=&
+         &lcwavef(1:2,ipw+(idat-1)*npw_k)-cwavef(1:2,ipw+(idat-1)*npw_k)*DOT_PRODUCT(kg_k_cart_vec,kg_k_cart_vec)
      end do
    end do
-   do idir=1,3
-     gp2pi1=gprimd(idir,1)*two_pi
-     gp2pi2=gprimd(idir,2)*two_pi
-     gp2pi3=gprimd(idir,3)*two_pi
-     kpt_cart=gp2pi1*kpt(1)+gp2pi2*kpt(2)+gp2pi3*kpt(3)
-!    Multiplication by 2pi i (G+k)_idir for gradient
-!    Multiplication by -(2pi (G+k)_idir )**2 for Laplacian
-     do idat=1,ndat
-       do ipw=1,npw_k
-         kg_k_cart=gp2pi1*kg_k(1,ipw)+gp2pi2*kg_k(2,ipw)+gp2pi3*kg_k(3,ipw)+kpt_cart
-         gcwavef(1,ipw+(idat-1)*npw_k,idir)= cwavef(2,ipw+(idat-1)*npw_k)*kg_k_cart
-         gcwavef(2,ipw+(idat-1)*npw_k,idir)=-cwavef(1,ipw+(idat-1)*npw_k)*kg_k_cart
-         lcwavef(1,ipw+(idat-1)*npw_k)=lcwavef(1,ipw+(idat-1)*npw_k)-cwavef(1,ipw+(idat-1)*npw_k)*kg_k_cart**2
-         lcwavef(2,ipw+(idat-1)*npw_k)=lcwavef(2,ipw+(idat-1)*npw_k)-cwavef(2,ipw+(idat-1)*npw_k)*kg_k_cart**2
-       end do
-     end do
-   end do ! idir
 !  STEP2: Compute (vxctaulocal)*(Laplacian of cwavef) and add it to ghc
-   call fourwf(1,vxctaulocal(:,:,:,:,1),lcwavef,ghc1,work,gbound_k,gbound_k,&
+   call fourwf(1,vxctaulocal(:,:,:,:,1),lcwavef,ghc1,work_,gbound_k,gbound_k,&
 &   istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
 &   tim_fourwf,weight,weight,gpu_option=gpu_option)
 !!$OMP PARALLEL DO
    do idat=1,ndat
      do ipw=1,npw_k
-       ghc_mGGA(:,ipw+(idat-1)*npw_k)=ghc_mGGA(:,ipw+(idat-1)*npw_k)-half*ghc1(:,ipw+(idat-1)*npw_k)
+        ghc_mGGA(:,ipw+(idat-1)*npw_k)=ghc_mGGA(:,ipw+(idat-1)*npw_k)-half*ghc1(:,ipw+(idat-1)*npw_k)
      end do
    end do
    ABI_FREE(lcwavef)
 !  STEP3: Compute sum of (grad components of vxctaulocal)*(grad components of cwavef)
+!  note: since grad cwavef is in Cart frame, evidently grad vxc is also
    do idir=1,3
-     call fourwf(1,vxctaulocal(:,:,:,:,1+idir),gcwavef(:,:,idir),ghc1,work,gbound_k,gbound_k,&
+     call fourwf(1,vxctaulocal(:,:,:,:,1+idir),gcwavef(:,:,idir),ghc1,work_,gbound_k,gbound_k,&
      istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
 &     tim_fourwf,weight,weight,gpu_option=gpu_option)
 !!$OMP PARALLEL DO
      do idat=1,ndat
        do ipw=1,npw_k
-         ghc_mGGA(:,ipw+(idat-1)*npw_k)=ghc_mGGA(:,ipw+(idat-1)*npw_k)-half*ghc1(:,ipw+(idat-1)*npw_k)
+          ghc_mGGA(:,ipw+(idat-1)*npw_k)=ghc_mGGA(:,ipw+(idat-1)*npw_k)-half*ghc1(:,ipw+(idat-1)*npw_k)
        end do
      end do
    end do ! idir
@@ -1479,32 +1438,22 @@ subroutine getghc_mGGA_ompgpu(cwavef,ghc_mGGA,gbound_k,gprimd,istwf_k,kg_k,kpt,m
 !    STEP1: Compute grad of cwavef and Laplacian of cwavef
      ABI_MALLOC(gcwavef1,(2,npw_k*ndat,3))
      ABI_MALLOC(lcwavef1,(2,npw_k*ndat))
+     gcwavef1 = zero; lcwavef1 = zero
 !!$OMP PARALLEL DO
-     do idat=1,ndat
-       do ipw=1,npw_k
-         gcwavef1(:,ipw+(idat-1)*npw_k,1:3)=zero
-         lcwavef1(:,ipw+(idat-1)*npw_k)=zero
-       end do
-     end do
-     do idir=1,3
-       gp2pi1=gprimd(idir,1)*two_pi
-       gp2pi2=gprimd(idir,2)*two_pi
-       gp2pi3=gprimd(idir,3)*two_pi
-       kpt_cart=gp2pi1*kpt(1)+gp2pi2*kpt(2)+gp2pi3*kpt(3)
-!      Multiplication by 2pi i (G+k)_idir for gradient
-!      Multiplication by -(2pi (G+k)_idir )**2 for Laplacian
-       do idat=1,ndat
-         do ipw=1,npw_k
-           kg_k_cart=gp2pi1*kg_k(1,ipw)+gp2pi2*kg_k(2,ipw)+gp2pi3*kg_k(3,ipw)+kpt_cart
-           gcwavef1(1,ipw+(idat-1)*npw_k,idir)= cwavef1(2,ipw+(idat-1)*npw_k)*kg_k_cart
-           gcwavef1(2,ipw+(idat-1)*npw_k,idir)=-cwavef1(1,ipw+(idat-1)*npw_k)*kg_k_cart
-           lcwavef1(1,ipw+(idat-1)*npw_k)=lcwavef1(1,ipw+(idat-1)*npw_k)-cwavef1(1,ipw+(idat-1)*npw_k)*kg_k_cart**2
-           lcwavef1(2,ipw+(idat-1)*npw_k)=lcwavef1(2,ipw+(idat-1)*npw_k)-cwavef1(2,ipw+(idat-1)*npw_k)*kg_k_cart**2
-         end do
-       end do
-     end do ! idir
+      do idat=1,ndat
+        do ipw=1,npw_k
+          ! convert k + G from reduced coords to Cartesian
+          kg_k_cart_vec = two_pi*MATMUL(gprimd,kpt(1:3)+kg_k(1:3,ipw))
+          ! form \grad\psi = i(k + G) \psi in Cartesian frame
+          gcwavef1(1,ipw+(idat-1)*npw_k,1:3)=  cwavef1(2,ipw+(idat-1)*npw_k)*kg_k_cart_vec(1:3)
+          gcwavef1(2,ipw+(idat-1)*npw_k,1:3)= -cwavef1(1,ipw+(idat-1)*npw_k)*kg_k_cart_vec(1:3)
+          ! form \nabla^2\psi = -|k + G|^2 \psi
+          lcwavef1(1:2,ipw+(idat-1)*npw_k)=&
+            &lcwavef1(1:2,ipw+(idat-1)*npw_k)-cwavef1(1:2,ipw+(idat-1)*npw_k)*DOT_PRODUCT(kg_k_cart_vec,kg_k_cart_vec)
+        end do
+      end do
 !    STEP2: Compute (vxctaulocal)*(Laplacian of cwavef) and add it to ghc
-     call fourwf(1,vxctaulocal(:,:,:,:,1),lcwavef1,ghc1,work,gbound_k,gbound_k,&
+     call fourwf(1,vxctaulocal(:,:,:,:,1),lcwavef1,ghc1,work_,gbound_k,gbound_k,&
 &     istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
 &     tim_fourwf,weight,weight,gpu_option=gpu_option)
 !!$OMP PARALLEL DO
@@ -1516,7 +1465,7 @@ subroutine getghc_mGGA_ompgpu(cwavef,ghc_mGGA,gbound_k,gprimd,istwf_k,kg_k,kpt,m
      ABI_FREE(lcwavef1)
 !    STEP3: Compute (grad components of vxctaulocal)*(grad components of cwavef)
      do idir=1,3
-       call fourwf(1,vxctaulocal(:,:,:,:,1+idir),gcwavef1(:,:,idir),ghc1,work,gbound_k,gbound_k,&
+       call fourwf(1,vxctaulocal(:,:,:,:,1+idir),gcwavef1(:,:,idir),ghc1,work_,gbound_k,gbound_k,&
        istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
 &      tim_fourwf,weight,weight,gpu_option=gpu_option)
 !!$OMP PARALLEL DO
@@ -1540,31 +1489,21 @@ subroutine getghc_mGGA_ompgpu(cwavef,ghc_mGGA,gbound_k,gprimd,istwf_k,kg_k,kpt,m
      ABI_MALLOC(gcwavef2,(2,npw_k*ndat,3))
      ABI_MALLOC(lcwavef2,(2,npw_k*ndat))
 !!$OMP PARALLEL DO
+     gcwavef2 = zero; lcwavef2 = zero
      do idat=1,ndat
        do ipw=1,npw_k
-         gcwavef2(:,ipw+(idat-1)*npw_k,1:3)=zero
-         lcwavef2(:,ipw+(idat-1)*npw_k)  =zero
+         ! convert k + G from reduced coords to Cartesian
+         kg_k_cart_vec = two_pi*MATMUL(gprimd,kpt(1:3)+kg_k(1:3,ipw))
+         ! form \grad\psi = i(k + G) \psi in Cartesian frame
+         gcwavef2(1,ipw+(idat-1)*npw_k,1:3)=  cwavef2(2,ipw+(idat-1)*npw_k)*kg_k_cart_vec(1:3)
+         gcwavef2(2,ipw+(idat-1)*npw_k,1:3)= -cwavef2(1,ipw+(idat-1)*npw_k)*kg_k_cart_vec(1:3)
+         ! form \nabla^2\psi = -|k + G|^2 \psi
+         lcwavef2(1:2,ipw+(idat-1)*npw_k)=&
+           &lcwavef2(1:2,ipw+(idat-1)*npw_k)-cwavef2(1:2,ipw+(idat-1)*npw_k)*DOT_PRODUCT(kg_k_cart_vec,kg_k_cart_vec)
        end do
      end do
-     do idir=1,3
-       gp2pi1=gprimd(idir,1)*two_pi
-       gp2pi2=gprimd(idir,2)*two_pi
-       gp2pi3=gprimd(idir,3)*two_pi
-       kpt_cart=gp2pi1*kpt(1)+gp2pi2*kpt(2)+gp2pi3*kpt(3)
-!      Multiplication by 2pi i (G+k)_idir for gradient
-!      Multiplication by -(2pi (G+k)_idir )**2 for Laplacian
-       do idat=1,ndat
-         do ipw=1,npw_k
-           kg_k_cart=gp2pi1*kg_k(1,ipw)+gp2pi2*kg_k(2,ipw)+gp2pi3*kg_k(3,ipw)+kpt_cart
-           gcwavef2(1,ipw+(idat-1)*npw_k,idir)= cwavef2(2,ipw+(idat-1)*npw_k)*kg_k_cart
-           gcwavef2(2,ipw+(idat-1)*npw_k,idir)=-cwavef2(1,ipw+(idat-1)*npw_k)*kg_k_cart
-           lcwavef2(1,ipw+(idat-1)*npw_k)=lcwavef2(1,ipw+(idat-1)*npw_k)-cwavef2(1,ipw+(idat-1)*npw_k)*kg_k_cart**2
-           lcwavef2(2,ipw+(idat-1)*npw_k)=lcwavef2(2,ipw+(idat-1)*npw_k)-cwavef2(2,ipw+(idat-1)*npw_k)*kg_k_cart**2
-         end do
-       end do
-     end do ! idir
 !    STEP2: Compute (vxctaulocal)*(Laplacian of cwavef) and add it to ghc
-     call fourwf(1,vxctaulocal(:,:,:,:,1),lcwavef2,ghc2,work,gbound_k,gbound_k,&
+     call fourwf(1,vxctaulocal(:,:,:,:,1),lcwavef2,ghc2,work_,gbound_k,gbound_k,&
 &     istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
 &     tim_fourwf,weight,weight,gpu_option=gpu_option)
 !!$OMP PARALLEL DO
@@ -1580,7 +1519,7 @@ subroutine getghc_mGGA_ompgpu(cwavef,ghc_mGGA,gbound_k,gprimd,istwf_k,kg_k,kpt,m
      ABI_FREE(lcwavef2)
 !    STEP3: Compute sum of (grad components of vxctaulocal)*(grad components of cwavef)
      do idir=1,3
-       call fourwf(1,vxctaulocal(:,:,:,:,1+idir),gcwavef2(:,:,idir),ghc2,work,gbound_k,gbound_k,&
+       call fourwf(1,vxctaulocal(:,:,:,:,1+idir),gcwavef2(:,:,idir),ghc2,work_,gbound_k,gbound_k,&
        istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
 &      tim_fourwf,weight,weight,gpu_option=gpu_option)
 !!$OMP PARALLEL DO
@@ -1605,7 +1544,7 @@ subroutine getghc_mGGA_ompgpu(cwavef,ghc_mGGA,gbound_k,gprimd,istwf_k,kg_k,kpt,m
 
  end if ! nspinortot
 
- ABI_FREE(work)
+ ABI_FREE(work_)
 
 end subroutine getghc_mGGA_ompgpu
 !!***
