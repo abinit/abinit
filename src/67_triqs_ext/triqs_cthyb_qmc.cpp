@@ -13,14 +13,13 @@ using namespace h5;
 using namespace mpi;
 using namespace triqs::gfs;
 
-void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool off_diag, bool move_shift, bool move_double,
-                     bool measure_density_matrix, bool time_invariance, bool use_norm_as_weight, bool compute_entropy,
-                     int loc_n_min, int loc_n_max, int seed_a, int seed_b, int num_orbitals, int n_tau,
-                     int n_l, int n_cycles, int cycle_length, int ntherm, int ntherm_restart, int det_init_size,
-                     int det_n_operations_before_check, int ntau_delta, int nbins_histo, int rank, int nspinor,
-                     int nblocks, int read_data, int verbo, double beta, double move_global_prob, double imag_threshold,
+void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_double, bool measure_density_matrix,
+                     bool time_invariance, bool use_norm_as_weight, bool compute_entropy, int loc_n_min, int loc_n_max,
+                     int seed_a, int seed_b, int num_orbitals, int n_tau, int n_l, int n_cycles, int cycle_length,
+                     int ntherm, int ntherm_restart, int det_init_size, int det_n_operations_before_check, int ntau_delta,
+                     int rank, int nblocks, int read_data, int verbo, double beta, double move_global_prob, double imag_threshold,
                      double det_precision_warning, double det_precision_error, double det_singular_threshold, double lam,
-                     double alpha, int *block_list, int *flavor_list, int *inner_list, int *siz_list, complex<double> *ftau,
+                     double pauli_prob, int *block_list, int *flavor_list, int *inner_list, int *siz_list, complex<double> *ftau,
                      complex<double> *gtau, complex<double> *gl, complex<double> *udens_cmplx, complex<double> *vee_cmplx,
                      complex<double> *levels_cmplx, complex<double> *moments_self_1, complex<double> *moments_self_2,
                      complex<double> *occ, complex<double> *eu, char *fname_data, char *fname_histo) {
@@ -29,16 +28,9 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool off_diag, bool move_sh
   string qmc_data_fname = string(fname_data);
   string hist_fname = string(fname_histo);
   auto comm = MPI_COMM_WORLD;
-  int iflavor,iflavor1,nproc;
+  int iflavor, iflavor1, nproc;
   MPI_Comm_size(comm,&nproc);
-  int itask = 0; int therm = ntherm;
-
-  // Tags for histograms
-  std::vector<string> tag_move = { "insert", "remove" };
-  if (move_shift) {
-    tag_move.push_back("shift");
-    tag_move.push_back("shift_dag");
-  }
+  int itask = 0, therm = ntherm;
 
   // Hamiltonian definition
   many_body_op_t H;
@@ -99,14 +91,12 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool off_diag, bool move_sh
   many_body_op_t hloc0;
   paramCTQMC.h_loc0 = hloc0;
   paramCTQMC.max_time = -1;
-  paramCTQMC.measure_weight_ratio = true;
   paramCTQMC.random_name = "";
   paramCTQMC.random_seed = seed_a + rank * seed_b;
   paramCTQMC.length_cycle = cycle_length;
   paramCTQMC.time_invariance = time_invariance;
-  paramCTQMC.nbins_histo = nbins_histo;
 
-  int restart = (exists(qmc_data_fname) && read_data == 1) ? 1 : 0;
+  int restart = (exists(qmc_data_fname) && read_data == 1 ? 1 : 0);
 
   file qmc_data_hfile;
 
@@ -123,32 +113,28 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool off_diag, bool move_sh
     h5_read(grp,"beta",beta_);
     h5_read(grp,"gf_struct",gf_struct_);
     h5_read(grp,"nproc",nproc_);
-    h5_read(grp,"nbins",nbins_);
 
     if (std::abs(beta-beta_) > 1.e-15) {
       restart = 0;
-      cout << "   == You are trying to read a CTQMC_DATA file generated at a different temperature !! File will not be read !" << endl;
+      cout << endl << "   == You are trying to read a CTQMC_DATA file generated at a different temperature !! File will not be read !" << endl;
     }
 
     if (gf_struct != gf_struct_) {
       restart = 0;
-      cout << "   == You are trying to read a CTQMC_DATA file generated with a different block structure !! File will not be read !" << endl;
+      cout << endl << "   == You are trying to read a CTQMC_DATA file generated with a different block structure !! File will not be read !" << endl;
     }
 
     if (nproc_ != nproc) {
       restart = 0;
-      cout << "   == You are trying to read a CTQMC_DATA file generated with a different number of CPUs !! File will not be read !" << endl;
+      cout << endl << "   == You are trying to read a CTQMC_DATA file generated with a different number of CPUs !! File will not be read !" << endl;
     }
 
-    if (nbins_ != nbins_histo) {
-      restart = 0;
-      cout << "   == You are trying to read a CTQMC_DATA file generated with a different number of bins !! File will not be read !" << endl;
-    }
+    if (restart == 0) qmc_data_hfile.close();
 
-    if (restart == 1) cout << "   == Reading previous CTQMC data from file" << endl;
+    if (restart == 1) cout << endl << "   == Reading previous CTQMC data from file" << endl;
   }
 
-  MPI_Bcast(&restart,nproc,MPI_INTEGER,0,comm);
+  MPI_Bcast(&restart,1,MPI_INTEGER,0,comm);
 
   if (restart == 1) {
 
@@ -196,23 +182,6 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool off_diag, bool move_sh
       paramCTQMC.initial_configuration.insert(tau,op);
     }
 
-    // Read binned time histogram
-    if (rank == 0) {
-      group grp = qmc_data_hfile;
-      group gr = grp.open_group("histo");
-      for (auto const &tag : tag_move)
-        for (int iblock : range(nblocks)) {
-          auto &hist = paramCTQMC.hist[tag][to_string(iblock)];
-          hist = std::vector<double>(nbins_histo);
-          h5_read(gr,tag+"_"+to_string(iblock),hist);
-        }
-    }
-    for (auto const &tag : tag_move)
-      for (int iblock : range(nblocks)) {
-        auto &hist = paramCTQMC.hist[tag][to_string(iblock)];
-        if (rank != 0) hist = std::vector<double>(nbins_histo);
-        mpi_broadcast(hist,comm,0);
-      }
     if (rank == 0) qmc_data_hfile.close();
   }
 
@@ -264,7 +233,6 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool off_diag, bool move_sh
     cout << "   Det sing. threshold   = " << det_singular_threshold << endl;
     cout << "   Time invariance       = " << time_invariance << endl;
     cout << "   Ntau delta            = " << ntau_delta << endl;
-    cout << "   Nbins histo           = " << nbins_histo << endl;
   }
 
   solver.solve(paramCTQMC);
@@ -314,7 +282,6 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool off_diag, bool move_sh
     h5_write(grp,"beta",beta);
     h5_write(grp,"gf_struct",gf_struct);
     h5_write(grp,"nproc",nproc);
-    h5_write(grp,"nbins",nbins_histo);
 
     group gr = grp.create_group("config");
 
@@ -323,25 +290,6 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool off_diag, bool move_sh
     h5_write(gr,"block",block_index_list_tot);
     h5_write(gr,"inner",inner_index_list_tot);
     h5_write(gr,"dagger",is_dagger_list_tot);
-
-    // Write all histograms
-    gr = grp.create_group("histo");
-
-    auto hist_ = solver.get_weight_ratio();
-    double step = beta / nbins_histo;
-
-    for (auto const &tag : tag_move)
-      for (int iblock : range(nblocks)) {
-
-        auto &hist = hist_[tag][to_string(iblock)];
-
-        // Normalize histogram and mix with uniform probability
-        double s = 0.;
-        for (auto const &elem : hist) s += elem * step;
-        for (auto &elem : hist) elem = alpha * elem / s + (1. - alpha) / beta;
-
-        h5_write(gr,tag+"_"+to_string(iblock),hist);
-      }
 
     qmc_data_hfilew.close();
   }
