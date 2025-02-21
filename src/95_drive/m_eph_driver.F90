@@ -538,6 +538,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    if (cryst%compare(dvdb%cryst, header=" Comparing WFK crystal with DVDB crystal") /= 0) then
      ABI_ERROR("Crystal structure from WFK and DVDB do not agree! Check messages above!")
    end if
+   dvdb%prtvol = dtset%prtvol
    if (dtset%prtvol > 10) dvdb%debug = .True.
 
    ! This to symmetrize the DFPT potentials.
