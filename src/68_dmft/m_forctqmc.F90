@@ -3273,7 +3273,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
  call print_matlu(weiss%oper(1)%matlu(:),natom,1)
 
  if (basis == 0) then
-   write(message,'(a,3x,a)') ch10,"== Switching to CTQMC basis: using cubic basis"
+   write(message,'(a,3x,a)') ch10,"== Switching to CTQMC basis: staying in cubic basis"
  else if (basis == 1) then
    write(message,'(a,3x,2a)') ch10,"== Switching to CTQMC basis: using basis that", &
                                 & " diagonalizes the electronic levels"
@@ -3293,7 +3293,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
      basis = 0
      write(message,'(a,3x,a)') ch10,"== Electronic levels are already diagonal: staying in the cubic basis"
    else
-     write(message,'(a,3x,a)') ch10,"== Switch to Ylm basis first"
+     write(message,'(a,3x,a)') ch10,"== Switching to Ylm basis first"
    end if ! nondiag
    call wrtout(std_out,message,"COLL")
  end if ! basis=1
@@ -3304,7 +3304,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
      basis = 0
      write(message,'(a,3x,a)') ch10,"== Occupation matrix is already diagonal: staying in the cubic basis"
    else
-     write(message,'(a,3x,a)') ch10,"== Switch to Ylm basis first"
+     write(message,'(a,3x,a)') ch10,"== Switching to Ylm basis first"
    end if ! not nondiag
    call wrtout(std_out,message,"COLL")
  end if ! basis=2
@@ -3376,7 +3376,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
      if (weiss%distrib%procf(ifreq) /= myproc) cycle
      call ylm2jmj_matlu(weiss%oper(ifreq)%matlu(:),natom,1,paw_dmft)
    end do ! ifreq
- end if
+ end if ! basis=4
 
  if (basis == 0) then
    do iatom=1,natom
@@ -3458,11 +3458,6 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
      ABI_WARNING(message)
    end if ! err>tol
  end if ! not off_diag
-
- nmoments = weiss%nmoments - 2
-
- ! Inverse Fourier transform of the hybridization
- call fourier_inv(paw_dmft,nmoments,ntau_delta,ftau(:),weiss%oper(:),weiss%moments(2:nmoments+1))
 
  call identity_oper(green%moments(1),2)
  do i=2,green%nmoments
@@ -3567,6 +3562,11 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
 
  call find_block_structure(paw_dmft,block_list(:,:),inner_list(:,:),flavor_list(:,:,:), &
                & siz_block(:,:),nblocks(:),energy_level%matlu(:),natom,nflavor_max,hyb=weiss)
+
+ nmoments = weiss%nmoments - 2
+
+  ! Inverse Fourier transform of the hybridization
+ call fourier_inv(paw_dmft,nmoments,ntau_delta,ftau(:),weiss%oper(:),weiss%moments(2:nmoments+1))
 
  ! Solve impurity model for each atom
  do iatom=1,natom
@@ -3731,17 +3731,16 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
      call flush_unit(std_out)
 
 #ifdef HAVE_TRIQS_v3_4
-     call Ctqmc_triqs_run(rot_inv,leg_measure,off_diag,paw_dmft%dmft_triqs_move_shift,paw_dmft%dmft_triqs_move_double, &
+     call Ctqmc_triqs_run(rot_inv,leg_measure,paw_dmft%dmft_triqs_move_shift,paw_dmft%dmft_triqs_move_double, &
                         & density_matrix,paw_dmft%dmft_triqs_time_invariance,paw_dmft%dmft_triqs_use_norm_as_weight, &
                         & (ilam /= ntot),paw_dmft%dmft_triqs_loc_n_min,paw_dmft%dmft_triqs_loc_n_max,paw_dmft%dmft_triqs_seed_a, &
                         & paw_dmft%dmft_triqs_seed_b,nflavor,ntau,nleg,int(paw_dmft%dmftqmc_n/paw_dmft%nproc), &
                         & paw_dmft%dmftctqmc_meas,paw_dmft%dmftqmc_therm,paw_dmft%dmft_triqs_therm_restart, &
                         & paw_dmft%dmft_triqs_det_init_size,paw_dmft%dmft_triqs_det_n_operations_before_check, &
-                        & ntau_delta,paw_dmft%dmft_triqs_nbins_histo,myproc,nspinor,nblocks(iatom), &
-                        & paw_dmft%dmft_triqs_read_ctqmcdata,verbo,beta,paw_dmft%dmft_triqs_move_global_prob, &
+                        & ntau_delta,myproc,nblocks(iatom),paw_dmft%dmft_triqs_read_ctqmcdata,verbo,beta,paw_dmft%dmft_triqs_move_global_prob, &
                         & paw_dmft%dmft_triqs_imag_threshold,paw_dmft%dmft_triqs_det_precision_warning, &
                         & paw_dmft%dmft_triqs_det_precision_error,paw_dmft%dmft_triqs_det_singular_threshold,lam_list(ilam), &
-                        & paw_dmft%dmft_triqs_mxprob,block_ptr,flavor_ptr,inner_ptr,siz_ptr,ftau_ptr,gtau_ptr,gl_ptr,udens_ptr, &
+                        & paw_dmft%dmft_triqs_pauli_prob,block_ptr,flavor_ptr,inner_ptr,siz_ptr,ftau_ptr,gtau_ptr,gl_ptr,udens_ptr, &
                         & vee_ptr,levels_ptr,mself_1_ptr,mself_2_ptr,occ_ptr,eu_ptr,fname_data_ptr,fname_histo_ptr)
 #endif
 
@@ -3923,8 +3922,10 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
      do iflavor1=1,nflavor
        do iflavor=1,nflavor
          do itau=1,ntau
-           gtau_leg(itau,iflavor,iflavor1) = sum(gl(:,iflavor,iflavor1)*leg_array(:,itau)) * &
-                       & sqrt(dble(2*ileg-1)) / beta
+           do ileg=1,nleg
+             gtau_leg(itau,iflavor,iflavor1) = gtau_leg(itau,iflavor,iflavor1) + &
+                & gl(ileg,iflavor,iflavor1)*leg_array(ileg,itau)*sqrt(dble(2*ileg-1))/beta
+           end do ! ileg
          end do ! itau
        end do ! iflavor
      end do ! iflavor1

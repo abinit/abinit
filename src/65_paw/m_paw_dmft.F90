@@ -478,8 +478,8 @@ MODULE m_paw_dmft
   real(dp) :: dmft_triqs_move_global_prob
   ! TRIQS CTQMC: Proposal probability for the global move
 
-  real(dp) :: dmft_triqs_mxprob
-  ! TRIQS CTQMC: Mixing for the proposal distribution
+  real(dp) :: dmft_triqs_pauli_prob
+  ! TRIQS CTQMC: Probability for proposing Pauli-aware insert and remove
 
   real(dp) :: dmft_triqs_tol_block
   ! TRIQS CTQMC: Off-diagonal elements below this threshold are set to 0
@@ -1123,7 +1123,7 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  paw_dmft%dmft_triqs_nsubdivisions                 = dtset%dmft_triqs_nsubdivisions
  paw_dmft%dmft_triqs_tol_block                     = dtset%dmft_triqs_tol_block
  paw_dmft%dmft_triqs_read_ctqmcdata                = dtset%dmft_triqs_read_ctqmcdata
- paw_dmft%dmft_triqs_mxprob                        = dtset%dmft_triqs_mxprob
+ paw_dmft%dmft_triqs_pauli_prob                    = dtset%dmft_triqs_pauli_prob
 
 !==============================
 !==  Variables for DMFT itself
