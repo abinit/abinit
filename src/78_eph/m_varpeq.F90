@@ -721,7 +721,7 @@ subroutine varpeq_ncread(self, path, comm, keep_open)
 
  ! Read data
  ! Static arrays
- NCF_CHECK(nf90_get_var(ncid, vid("varpeq_pkind"), self%pkind))
+ NCF_CHECK(nf90_get_var(ncid, vid("vpq_pkind"), self%pkind))
  NCF_CHECK(nf90_get_var(ncid, vid("ngkpt"), self%ngkpt))
 
  ! Allocatable arrays
@@ -1719,7 +1719,7 @@ subroutine varpeq_init(self, gstore, dtset)
 
    ABI_MALLOC(polstate%eig, (gqk%nb, gstore%ebands%nkpt))
    msg = sjoin(self%gaps%errmsg_spin(spin), &
-     ". VarPEq is incompatible with metals and needs CBM/VBM for electron/hole polaron calculations.")
+     "VarPEq is incompatible with metals and requires band gap.")
    ABI_CHECK(self%gaps%ierr(spin) == 0, msg)
 
    bstart = gstore%brange_spin(1, spin)
