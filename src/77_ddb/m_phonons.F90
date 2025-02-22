@@ -8,7 +8,7 @@
 !! as well as the central phdos_init
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2024 ABINIT group (XG, MG, MJV, GMR)
+!! Copyright (C) 1999-2025 ABINIT group (XG, MG, MJV, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -724,6 +724,7 @@ end subroutine phdos_malloc
 !! dos_qshift(3, nqshift)=Shift of the q-mesh.
 !! prefix=Prefix for PHBIZ output file. Empty string to deactivate output.
 !! comm=MPI communicator.
+!! prtout=write info to the output and log files.
 !!
 !! OUTPUT
 !! phdos<phdos_t>=Container with phonon DOS, IDOS and atom-projected DOS.
@@ -741,7 +742,7 @@ end subroutine phdos_malloc
 !! SOURCE
 
 subroutine phdos_init(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_ngqpt, nqshft, dos_qshift, prefix, &
-                      wminmax, count_wminmax, comm, dos_maxmode)
+                      wminmax, count_wminmax, comm, dos_maxmode, prtout)
 
 !Arguments -------------------------------
 !scalars
@@ -752,6 +753,7 @@ subroutine phdos_init(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_n
  type(crystal_t),intent(in) :: crystal
  type(ifc_type),intent(in) :: ifc
  integer, optional, intent(in) :: dos_maxmode
+ logical, optional, intent(in) :: prtout
 !arrays
  integer,intent(in) :: dos_ngqpt(3)
  integer,intent(out) :: count_wminmax(2)
@@ -774,6 +776,7 @@ subroutine phdos_init(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_n
 !arrays
  integer :: in_qptrlatt(3,3),new_qptrlatt(3,3), units(2)
  integer :: dos_maxmode_
+ logical :: prtout_
  integer,allocatable :: bz2ibz_smap(:,:), bz2ibz(:)
  real(dp) :: veloc(3), speedofsound(3),speedofsound_(3)
  real(dp) :: displ(2*3*Crystal%natom*3*Crystal%natom)
@@ -791,6 +794,10 @@ subroutine phdos_init(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_n
 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
  units = [std_out, ab_out]
+ prtout_ = .true.
+ if (present(prtout)) then
+    prtout_ = prtout
+ end if
 
  ! Consistency check.
  if (all(prtdos /= [1, 2])) then
@@ -817,15 +824,15 @@ subroutine phdos_init(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_n
  nomega = phdos%nomega
 
  veloc_1q = zero
-! TODO: add input variable and adapt these directions to be read in from input file
+ ! TODO: add input variable and adapt these directions to be read in from input file
  if (phdos%n_normal_vec_dmm >= 7) then
-   phdos%normal_vec_dmm(:,1) = (/one, zero, zero/)
-   phdos%normal_vec_dmm(:,2) = (/zero, one, zero/)
-   phdos%normal_vec_dmm(:,3) = (/zero, zero, one/)
-   phdos%normal_vec_dmm(:,4) = (/one, one, zero/)
-   phdos%normal_vec_dmm(:,5) = (/one, zero, one/)
-   phdos%normal_vec_dmm(:,6) = (/zero, one, one/)
-   phdos%normal_vec_dmm(:,7) = (/one, one, one/)
+   phdos%normal_vec_dmm(:,1) = [one, zero, zero]
+   phdos%normal_vec_dmm(:,2) = [zero, one, zero]
+   phdos%normal_vec_dmm(:,3) = [zero, zero, one]
+   phdos%normal_vec_dmm(:,4) = [one, one, zero]
+   phdos%normal_vec_dmm(:,5) = [one, zero, one]
+   phdos%normal_vec_dmm(:,6) = [zero, one, one]
+   phdos%normal_vec_dmm(:,7) = [one, one, one]
  end if
  ABI_MALLOC(gvals_wtq, (nomega))
  ABI_MALLOC(xvals, (nomega))
@@ -844,7 +851,7 @@ subroutine phdos_init(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_n
     ' phdos_init: calculating phonon DOS using tetrahedron method:', ch10, &
     '    frequency step    [meV] = ',phdos%omega_step * Ha_meV, ", nomega = ",phdos%nomega
  end if
- call wrtout(std_out, msg)
+ if (prtout_) call wrtout(std_out, msg)
 
  ! This call will set %nqibz and IBZ and BZ arrays
  in_qptrlatt = 0; in_qptrlatt(1, 1) = dos_ngqpt(1); in_qptrlatt(2, 2) = dos_ngqpt(2); in_qptrlatt(3, 3) = dos_ngqpt(3)
@@ -861,9 +868,9 @@ subroutine phdos_init(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_n
 
  if (my_rank == master) then
    write(msg, "(3a, i0)")" DOS ngqpt: ", trim(ltoa(dos_ngqpt)), ", qptopt: ", my_qptopt
-   call wrtout(std_out, msg)
+   if (prtout_) call wrtout(std_out, msg)
    write(msg, "(2(a, i0))")" Number of q-points in the IBZ: ", phdos%nqibz, ", number of MPI processes: ", nprocs
-   call wrtout(std_out, msg)
+   if (prtout_) call wrtout(std_out, msg)
  end if
  !call cwtime_report(" kpts_ibz_from_kptrlatt", cpu, wall, gflops)
 
@@ -889,7 +896,7 @@ subroutine phdos_init(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_n
    full_eigvec = zero
  end if ! tetra
 
- ABI_SFREE(bz2ibz_smap)
+ ABI_FREE(bz2ibz_smap)
  ABI_FREE(new_shiftq)
 
  ! MPI Sum over irreducible q-points then sync the following integrals:
@@ -917,7 +924,6 @@ subroutine phdos_init(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_n
    if (wminmax(1) < phdos%omega(1)) count_wminmax(1) = count_wminmax(1) + 1
    wminmax(2) = max(wminmax(2), maxval(phfrq))
    if (wminmax(2) > phdos%omega(nomega)) count_wminmax(2) = count_wminmax(2) + 1
-
 
    normq = sum(qibz(:,iq_ibz) ** 2)
    if (normq < max_smallq .and. normq > tol6) then
@@ -1047,18 +1053,18 @@ subroutine phdos_init(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_n
    write (msg,'(a,E20.10,3a,F16.4,2a)') &
        ' Average speed of sound partial sums: ', third*sum(speedofsound), ' (at units)',ch10, &
        '-                                   = ', third*sum(speedofsound) * Bohr_Ang * 1.d-13 / Time_Sec, ' [km/s]',ch10
-   call wrtout(units, msg)
+   if (prtout_) call wrtout(units, msg)
 
    ! Debye frequency = vs * (6 pi^2 natom / ucvol)**1/3
    debyefreq = third*sum(speedofsound) * (six*pi**2/crystal%ucvol)**(1./3.)
    write (msg,'(a,E20.10,3a,E20.10,a)') &
       ' Debye frequency from partial sums: ', debyefreq, ' (Ha)',ch10, &
       '-                                 = ', debyefreq*Ha_THz, ' (THz)'
-   call wrtout(units, msg)
+   if (prtout_) call wrtout(units, msg)
 
    ! Debye temperature = hbar * Debye frequency / kb
    write (msg,'(a,E20.10,2a)') '-Debye temperature from partial sums: ', debyefreq*Ha_K, ' (K)', ch10
-   call wrtout(units, msg)
+   if (prtout_) call wrtout(units, msg)
  end if
 
  if (prtdos == 2) then
@@ -1223,31 +1229,8 @@ subroutine phdos_init(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_n
    call xmpi_sum(phdos%pjdos_int, comm, ierr)
  end if
 
-! for dmm phdos need to normalize by q point integration element
+ ! for dmm phdos need to normalize by q point integration element
  phdos%phdos_dmm = phdos%phdos_dmm * two_pi**3 / crystal%ucvol
-
-#if 0
- !my_nsym = crystal%nsym; if (my_qptopt == 3) my_nsym = 1
- !ABI_MALLOC(work_msqd, (phdos%nomega, 3, 3, crystal%natom))
- !work_msqd = phdos%msqd_dos_atom
- !phdos%msqd_dos_atom = zero
- !do iat=1,natom
- !  do isym=1,my_nsym
- !    jat = crystal%indsym(4,isym,iat)
- !    do io=1,phdos%nomega
- !        phdos%msqd_dos_atom(io,:,:,jat) = phdos%msqd_dos_atom(io,:,:,jat) + &
- !          matmul(transpose(symcart(:,:,isym)), matmul(work_msqd(io,:,:,iat), symcart(:,:,isym)))
- !    end do
- !  end do
- !end do
- !ABI_FREE(work_msqd)
- !phdos%msqd_dos_atom = phdos%msqd_dos_atom / my_nsym
-#endif
-
- ! normalize by mass and factor of 2, now added in the printout to agree with harmonic_thermo
- ! do iat=1, natom
- !   phdos%msqd_dos_atom(:,:,:,iat) = phdos%msqd_dos_atom(:,:,:,iat) * invmass(iat) * half
- ! end do ! iat
 
  ! ===============================
  ! === Compute Integrated PDOS ===

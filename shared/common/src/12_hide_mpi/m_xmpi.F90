@@ -7,7 +7,7 @@
 !!  and a set of generic interfaces wrapping the most commonly used MPI primitives.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2024 ABINIT group (MG, MB, XG, YP, MT)
+!! Copyright (C) 2009-2025 ABINIT group (MG, MB, XG, YP, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -5035,7 +5035,7 @@ end subroutine xmpio_create_coldistr_from_fp3blocks
 !! xmpi_distrib_2d
 !!
 !! FUNCTION
-!!  Try to optimally distribute nprocs in a 2d grid of shape (n1, n2) given a problem of dimension (n1, n2).
+!!  Try to optimally distribute nprocs in a 2d grid of shape (n1, n2) given a problem of dimension (size1, size2).
 !!  Use order string to define priorities:
 !!      "12" or "21" if both dimensions should be optimized (if not possibile the first one gets optimized)
 !!      "1" or "2" to optimize only one dimension.
@@ -5098,7 +5098,7 @@ subroutine balance_1()
  ! Try to find n1 x n2 = nprocs so that only size1 is multiple of n1. Allow for some load imbalance.
  do ii=nprocs,1,-1
    imod1 = mod(size1, ii)
-   if ((imod1 == 0 .or. imod1 >= nprocs / 2) .and. mod(nprocs, ii) == 0) then
+   if ((imod1 == 0 .or. imod1 >= nprocs / 2) .and. mod(nprocs, ii) == 0 .and. size2 >= (nprocs/ii)) then
      n1 = ii; n2 = nprocs / ii; ierr = 0; exit
    end if
  end do
@@ -5113,7 +5113,7 @@ subroutine balance_2()
  ! Try to find n1 x n2 = nprocs so that only size2 is multiple of n2. Allow for some load imbalance.
  do ii=nprocs,1,-1
    imod2 = mod(size2, ii)
-   if ((imod2 == 0 .or. imod2 >= nprocs / 2) .and. mod(nprocs, ii) == 0) then
+   if ((imod2 == 0 .or. imod2 >= nprocs / 2) .and. mod(nprocs, ii) == 0 .and. size1 >= (nprocs/ii)) then
      n2 = ii; n1 = nprocs / ii; ierr = 0; exit
    end if
  end do

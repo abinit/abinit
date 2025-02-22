@@ -7,7 +7,7 @@
 !!  to store results from GS calculations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2024 ABINIT group (MT)
+!! Copyright (C) 2008-2025 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

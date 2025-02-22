@@ -1,10 +1,15 @@
 # coding: utf-8
 from __future__ import print_function, division, unicode_literals, absolute_import
-from abimkdocs.variables import ValueWithUnit, MultipleValue, Range
+
+try:
+    from abimkdocs.variables import ValueWithUnit, MultipleValue, Range
+except ImportError:
+    # This is needed for importing this module within Abipy.
+    from abipy.abio.abivar_database.variables import ValueWithUnit, MultipleValue, Range
 
 executable = "anaddb"
 
-#from abipy.abio.abivar_database.variables import ValueWithUnit, MultipleValue, Range, ValueWithConditions
+
 ValueWithConditions = dict
 Variable = dict
 

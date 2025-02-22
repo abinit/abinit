@@ -110,7 +110,7 @@
 !!     Be careful when using c_f_pointer because there's no type checking.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2024 ABINIT group (MG)
+!! Copyright (C) 1999-2025 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -431,7 +431,7 @@ module m_gwr
 
    logical, allocatable :: itreat_ikibz(:)
    ! (nkibz)
-   ! True if this MPI rank treat ik_ibz
+   ! True if this MPI rank treats ik_ibz
 
    logical, allocatable :: itreat_iqibz(:)
    ! (nqibz)

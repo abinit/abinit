@@ -6,7 +6,7 @@
 !!   object and procedures dealing with input/output filenames
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2024 ABINIT group (XG, MT)
+!!  Copyright (C) 2008-2025 ABINIT group (XG, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -85,13 +85,13 @@ module m_dtfil
    !    >0: index of an image
 
   integer :: ireadddb
-   ! ireadddb non-zero  if the ddb file must be read
+   ! ireadddb non-zero if the ddb file must be read
 
   integer :: ireadden
-   ! ireadden non-zero  if the den file must be read
+   ! ireadden non-zero if the den file must be read
 
   integer :: ireadkden
-   ! ireadkden non-zero  if the kden file must be read
+   ! ireadkden non-zero if the kden file must be read
 
   integer :: ireadwf
    ! if(optdriver/=1), that is, no response-function computation,
@@ -1116,7 +1116,7 @@ end subroutine dtfil_init_time
 !! SOURCE
 
 subroutine fappnd(filapp,filnam,iapp,&
-&                 suff) ! optional argument
+                  suff) ! optional argument
 
 !Arguments ------------------------------------
 !scalars
@@ -1131,7 +1131,6 @@ subroutine fappnd(filapp,filnam,iapp,&
  character(len=3) :: suffixe
  character(len=8) :: nchar
  character(len=500) :: msg
-
 ! *************************************************************************
 
  if(iapp==0)then

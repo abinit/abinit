@@ -3,7 +3,12 @@ from __future__ import print_function, division, unicode_literals, absolute_impo
 
 executable = "atdep"
 
-from abimkdocs.variables import ValueWithUnit, MultipleValue, Range
+try:
+    from abimkdocs.variables import ValueWithUnit, MultipleValue, Range
+except ImportError:
+    # This is needed for importing this module within Abipy
+    from abipy.abio.abivar_database.variables import ValueWithUnit, MultipleValue, Range
+
 ValueWithConditions = dict
 
 Variable=dict
@@ -114,14 +119,29 @@ OPTIONAL: Defines the length of the Brillouin Zone for the phonon spectrum calcu
 Variable(
     abivarname="bzpath@atdep",
     varset="atdep",
-    vartype="integer+letter",
+    vartype="integer",
     topics=['aTDEP_expert'],
-    dimensions="'[[atdep:bzpath]](1)'+1",
+    dimensions="1",
     defaultval="0",
     mnemonics="Brillouin Zone PATH",
     added_in_version="before_v9",
     text=r"""
-OPTIONAL: Defines the path in the Brillouin Zone for the phonon spectrum calculation. The first value defines the number of special points used in the path. The other values define the special points of the BZ (only the letters fixed by convention for the present lattice are allowed: L, X, M... and G for $\Gamma$).
+OPTIONAL: Defines the number of special points used in the path in the Brillouin Zone for the phonon spectrum calculation.
+""",
+),
+
+Variable(
+    abivarname="special_qpt@atdep",
+    varset="atdep",
+    vartype="letter",
+    topics=['aTDEP_expert'],
+    dimensions="'[[atdep:bzpath]](1)'",
+    defaultval="0",
+    mnemonics="SPECIAL Q-PoinTs",
+    added_in_version="10.4",
+    text=r"""
+OPTIONAL: Defines the path in the Brillouin Zone for the phonon spectrum calculation.
+The values define the special points of the BZ (only the letters fixed by convention for the present lattice are allowed: L, X, M... and G for $\Gamma$).
 """,
 ),
 
@@ -471,11 +491,92 @@ Variable(
     dimensions=['[[atdep:natom]]'],
     defaultval="[[atdep:natom]]*0",
     mnemonics="charge -Z- of the NUCLeus",
-    added_in_version="10.1.4",
+    added_in_version="10.4",
     text="""
 OPTIONAL: Gives nuclear charge for each type of atom, in order.
 Within atep, this variable is only used when writing the DDB file.
 """,
+),
+
+Variable(
+    abivarname="debug_mode@atdep",
+    varset="atdep",
+    vartype="integer",
+    topics=['aTDEP_expert'],
+    dimensions="scalar",
+    defaultval="0",
+    mnemonics="DEBUG MODE",
+    added_in_version="10.4",
+    text="""
+OPTIONAL: A non-zero value activates debug mode for atdep. 
+""",
+),
+
+
+Variable(
+    abivarname="output_file@atdep",
+    varset="atdep",
+    vartype="string",
+    topics=['Control_useful'],
+    dimensions="scalar",
+    defaultval="",
+    mnemonics="OUTPUT FILE",
+    added_in_version="10.4",
+    text=r"""
+This variable specifies the name of the output file when atdep is invoked with the new syntax:
+
+    atdep run.in > run.log 2> run.err
+
+instead of the legacy mode based on the files file. Example:
+
+    output_file = "run.out"
+""",
+),
+
+Variable(
+    abivarname="indata_prefix@atdep",
+    varset="atdep",
+    vartype="string",
+    topics=['Control_useful'],
+    dimensions="scalar",
+    defaultval="",
+    mnemonics="INput DATA PREFIX",
+    added_in_version="10.4",
+    text=r"""
+Prefix for input files, in particular for the HIST.nc file.
+This variable is used when atdep is executed with the new syntax:
+
+    atdep run.abi > run.log 2> run.err &
+
+instead of the legacy mode based on the files file. Example:
+
+    indata_prefix = "in"
+
+which tells atdep to look for a file called "in_HIST.nc".
+"""
+),
+
+Variable(
+    abivarname="outdata_prefix@atdep",
+    varset="atdep",
+    vartype="string",
+    topics=['Control_useful'],
+    dimensions="scalar",
+    defaultval="atdep",
+    mnemonics="OUTput DATA PREFIX",
+    added_in_version="10.4",
+    text=r"""
+Prefix for output files.
+This variable is used when atdep is executed with the new syntax:
+
+    atdep run.abi > run.log 2> run.err &
+
+instead of the legacy mode based on the files file. Example:
+
+    outdata_prefix = "run"
+
+which tells atdep to construct output file names like "run_DDB".
+"""
 ),
 
 
