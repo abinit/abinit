@@ -17,6 +17,9 @@ LiF_eph_varpeq/dfpto_DS5_POT3.nc
 LiF_eph_varpeq/dfpto_DS5_POT4.nc
 LiF_eph_varpeq/dfpto_DS5_POT6.nc
 
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = mrgdv

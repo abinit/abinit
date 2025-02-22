@@ -26,10 +26,9 @@
  nstep   100
 
 # Files
- getden_filepath
- "LiF_eph_varpeq/gso_DEN.nc"  # Read the precomputed DEN stored in git submodule
-                              # NOTE: for the input parameters used to prodcue
-                              # the DEN file, consult the LiF_eph_varpeq/gs.abi
+ getden_filepath "LiF_eph_varpeq/gso_DEN.nc" # Read the precomputed DEN stored in git submodule
+                                             # NOTE: for the input parameters used to prodcue
+                                             # the DEN file, consult the LiF_eph_varpeq/gs.abi
 
 # Pseudopotentials
  pp_dirpath "$ABI_PSPDIR/Psdj_nc_sr_05_pbe_std_psp8"
@@ -48,6 +47,9 @@
        0.5  0.0  0.5
        0.5  0.5  0.0
 
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
