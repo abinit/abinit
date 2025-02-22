@@ -584,6 +584,7 @@ subroutine get_path_ebands_cryst(path, ebands, cryst, comm, argpos)
 !Arguments ----------------------------
 !Local variables-----------------------
  integer :: nargs, apos
+!*******************************************************
 
  apos = 2; if (present(argpos)) apos = argpos
  nargs = command_argument_count()
@@ -618,6 +619,7 @@ subroutine get_path_ebands(path, ebands, comm)
 !Arguments ----------------------------
 !Local variables-----------------------
  integer :: nargs
+!*******************************************************
 
  nargs = command_argument_count()
  ABI_CHECK(nargs > 1, "FILE argument is required.")
@@ -651,6 +653,7 @@ subroutine get_path_cryst(path, cryst, comm)
 !Arguments ----------------------------
 !Local variables-----------------------
  integer :: nargs
+!*******************************************************
 
  nargs = command_argument_count()
  ABI_CHECK(nargs > 1, "FILE argument is required.")
@@ -675,12 +678,11 @@ end subroutine get_path_cryst
 subroutine parse_skw_params(params)
 
 !Arguments ----------------------------
-!Local variables-----------------------
  real(dp),intent(out) :: params(4)
 
+!Local variables-----------------------
  integer :: lpratio
  real(dp) :: rcut, rsigma
-
 !*******************************************************
 
  ABI_CHECK(get_arg("lpratio", lpratio, msg, default=5) == 0, msg)

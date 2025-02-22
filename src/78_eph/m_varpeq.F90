@@ -589,6 +589,7 @@ subroutine varpeq_free(self)
    do my_is=1,self%gstore%my_nspins
      call self%polstate(my_is)%free()
    enddo
+   ABI_SFREE(self%polstate)
    self%gstore => null()
  endif
 
@@ -1939,6 +1940,8 @@ subroutine polstate_free(self)
  ABI_SFREE(self%my_prev_b)
  ABI_SFREE(self%my_pc)
  ABI_SFREE(self%my_grad)
+ ABI_SFREE(self%my_pcgrad)
+ ABI_SFREE(self%my_prev_pcgrad)
  ABI_SFREE(self%my_prev_grad)
  ABI_SFREE(self%my_pcjgrad)
  ABI_SFREE(self%my_prev_pcjgrad)
@@ -2436,7 +2439,7 @@ subroutine polstate_calc_grad(self, ip)
 
  gqk => self%gqk
 
- ABI_MALLOC(gq_gathered, (gqk%my_npert, gqk%nb, gqk%nb, gqk%glob_nk))
+ !ABI_MALLOC(gq_gathered, (gqk%my_npert, gqk%nb, gqk%nb, gqk%glob_nk))
 
  ! Scattering-dependent part
  self%my_grad(:, :) = zero
@@ -2517,6 +2520,8 @@ subroutine polstate_calc_grad(self, ip)
      endif ! Backward scattering
 
    enddo
+
+   ABI_FREE(gq_gathered)
  enddo
  call xmpi_sum(self%my_grad, gqk%qpt_pert_comm%value, ierr)
  self%my_grad(:, :) = -two/(one*self%nkbz*self%nqbz) * self%my_grad(:, :)
@@ -2531,7 +2536,7 @@ subroutine polstate_calc_grad(self, ip)
    enddo
  enddo
 
- ABI_FREE(gq_gathered)
+ !ABI_FREE(gq_gathered)
 
 end subroutine polstate_calc_grad
 !!***
@@ -3080,7 +3085,6 @@ subroutine polstate_gather(self, mode, ip)
 
 !Local variables-------------------------------
  class(gqk_t), pointer :: gqk
-
 !----------------------------------------------------------------------
 
  gqk => self%gqk
