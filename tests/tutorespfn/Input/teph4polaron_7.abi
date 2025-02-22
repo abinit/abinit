@@ -1,0 +1,84 @@
+# LiF: visualization of a small hole polaron computed on a 3x3x3 k/q-grid.
+# Multiple polaronic states.
+
+ optdriver  7   # Electron-phonon driver
+ eph_task  -13  # Activate the Variational Polaron Equations visualization
+
+ vpq_mesh_fact 2  # >1 decreases the resolution of the polaron wavefunction
+                  # *xsf file and reduces memory requirements
+                  # (default: 1)
+
+# Variational Polaron Equations results from the previous run
+ getvpq_filepath "teph4polaron_6o_VPQ.nc"
+
+# Electron-phonon matrix elements
+ getgstore_filepath "teph4polaron_3o_DS1_GSTORE.nc" # 3x3x3 k/q-mesh
+
+# Wavefunction
+# Read the WFK file from the preparatory run
+ getwfk_filepath "teph4polaron_2o_DS1_WFK"  # 3x3x3 k-mesh
+
+ ngkpt    3 3 3  # These parameters have to consistent with the WFK file
+
+ kptopt   1
+ nshiftk  1
+ shiftk   0 0 0
+ nband    6
+ ecut     30
+
+# Phonons
+ ddb_ngqpt  3 3 3          # This has to be consistent with the DDB file
+ getddb_filepath
+ "LiF_eph_varpeq/out_DDB"  # Read the precomputed DDB stored in git submodule
+                           # NOTE: for the input parameters used to prodcue
+                           # the DDB file, consult the LiF_eph_varpeq/dfpt.abi
+
+# Scattering potentials
+ getdvdb_filepath
+ "teph4polaron_1_DVDB"  # Read the DVDB file from the preparatory run
+
+# Pseudopotentials
+ pp_dirpath "$ABI_PSPDIR/Psdj_nc_sr_05_pbe_std_psp8"
+ pseudos "Li.psp8, F.psp8"
+
+# Structure
+ natom   2
+ ntypat  2
+ typat   1 2
+ znucl   3 9
+ xred    0.0  0.0  0.0
+         0.5  0.5  0.5
+
+ acell 3*7.675
+ rprim 0.0  0.5  0.5
+       0.5  0.0  0.5
+       0.5  0.5  0.0
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% exclude_builders = eos_nvhpc_*
+#%% test_chain = teph4polaron_1.abi, teph4polaron_2.abi, teph4polaron_3.abi,
+#%%              teph4polaron_4.abi, teph4polaron_5.abi, teph4polaron_6.abi,
+#%%              teph4polaron_7.abi, teph4polaron_8.abi, teph4polaron_9.abi,
+#%%              teph4polaron_10.abi, teph4polaron_11.abi
+#%% [files]
+#%% use_git_submodule = LiF_eph_varpeq
+#%% files_to_test =
+#%%   teph4polaron_7.abo, tolnlines = 50, tolabs = 1e-5, tolrel = 1e-3;
+#%%   teph4polaron_7o_pstate_1_POLARON.xsf, tolnlines = 0, tolabs = 1e-5, tolrel = 1e-3;
+#%%   teph4polaron_7o_pstate_2_POLARON.xsf, tolnlines = 0, tolabs = 1e-5, tolrel = 1e-3;
+#%%   teph4polaron_7o_pstate_3_POLARON.xsf, tolnlines = 0, tolabs = 1e-5, tolrel = 1e-3;
+#%%   teph4polaron_7o_pstate_1_POLARON_DISPL_VECTORS.xsf, tolnlines = 0, tolabs = 1e-5, tolrel = 1e-3;
+#%%   teph4polaron_7o_pstate_2_POLARON_DISPL_VECTORS.xsf, tolnlines = 0, tolabs = 1e-5, tolrel = 1e-3;
+#%%   teph4polaron_7o_pstate_3_POLARON_DISPL_VECTORS.xsf, tolnlines = 0, tolabs = 1e-5, tolrel = 1e-3
+#%% [paral_info]
+#%% max_nprocs = 10
+#%% [extra_info]
+#%% authors = V. Vasilchenko
+#%% keywords = DFPT, EPH, POLARON
+#%% description =
+#%%   LiF, Fm-3m space group.
+#%%   Visualization of a small hole polaron computed on a 3x3x3 k/q-grid.
+#%%   Multiple polaronic states.
+#%%<END TEST_INFO>
