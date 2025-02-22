@@ -13,3 +13,4 @@
 [submodule "tests/modules_with_data/LiF_eph_varpeq"]
 	path = tests/modules_with_data/LiF_eph_varpeq
 	url = https://github.com/abinit/LiF_eph_varpeq.git
+	branch = main
