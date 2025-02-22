@@ -10,7 +10,7 @@
 !!  to compute the matrix elements: <k+q| dvscf_{idir, ipert, qpt} |k>.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2024 ABINIT group (MG, GA)
+!! Copyright (C) 2009-2025 ABINIT group (MG, GA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -49,7 +49,8 @@ module m_dvdb
  use m_time,          only : cwtime, cwtime_report, sec2str, timab
  use m_io_tools,      only : open_file, file_exists, delete_file
  use m_numeric_tools, only : wrap2_pmhalf, vdiff_t, vdiff_eval, vdiff_print, l2int
- use m_symtk,         only : mati3inv, matr3inv, littlegroup_q
+ use m_matrix,        only : mati3inv, matr3inv
+ use m_symtk,         only : littlegroup_q
  use m_geometry,      only : littlegroup_pert, irreducible_set_pert, mkradim, xcart2xred
  use m_dynmat,        only : canat9, get_bigbox_and_weights
  use m_copy,          only : alloc_copy

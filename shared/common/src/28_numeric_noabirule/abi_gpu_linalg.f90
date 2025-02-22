@@ -7,9 +7,9 @@
 !!  Interfaces of GPU subroutines wrapper
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2011-2024 ABINIT group (FDahm ))
+!!  Copyright (C) 2011-2025 ABINIT group (FDahm ))
 !!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~ABINIT/Infos/copyright
+!!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! SOURCE

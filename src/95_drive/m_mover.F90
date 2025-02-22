@@ -6,7 +6,7 @@
 !! Move ion or change acell according to forces and stresses
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, SE, FLambert,MT)
+!!  Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, SE, FLambert,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -41,7 +41,8 @@ module m_mover
 
  use defs_abitypes,        only : MPI_type
  use m_fstrings,           only : strcat, sjoin, indent, itoa
- use m_symtk,              only : matr3inv, symmetrize_xred
+ use m_matrix,             only : matr3inv
+ use m_symtk,              only : symmetrize_xred
  use m_geometry,           only : fcart2gred, chkdilatmx, xred2xcart, metric
  use m_time,               only : abi_wtime, sec2str
  use m_exit,               only : get_start_time, have_timelimit_in, get_timelimit, enable_timelimit_in

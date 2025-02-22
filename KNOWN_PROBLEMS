@@ -16,7 +16,7 @@ The present revision ABINITv10.3.4 is for developments
 ================================================================
 0. Platforms
 
-For ABINITv10.3.4, list closed on 2024 12 YY
+For ABINITv10.3.4, list closed on 2025 02 20
 after installation and successful tests for the standard set of platforms,
 as mentioned on
 https://bbportal.abinit.org/#/status
@@ -47,9 +47,12 @@ GNU 13.2 with OpenMP : several libxc tests are disactivated (34,35)
 GNU 13.2 with OpenMP : several tutorespfn/tlw tests are disactivated (4,5,6,7)
 GNU 13.2 with OpenMP : several v10#10-19 are disactivated, as well as v4#32-34
 
-Intel Ifort compiler (presently tested : 16.0, 2025-OneAPI)
+Intel Ifort compiler (presently tested : 16.0, 2023-OneAPI, 2025-OneAPI)
 Ifort 16.0 is mostly OK, except for test paral#30 (Paral KGB), tutoparal/tgswvl#1, v4#32,33,34, and gpu_omp#03 , that are disactivated.
-2025-oneAPI is mostly OK, except for one problem in DMFT, the numerical inaccuracy for v7#28 and 29 is very large.
+2025-oneAPI is mostly OK, except for : one problem in DMFT (the numerical inaccuracy for v7#28 and 29 is very large) ; 
+   many cprj_in_memory tests are disactivated (v10#10-13,16,19 as well as paral 35, 38-40, 48, 49), 
+   many atdep tests are disactivated (atdep#1,16,21,28,35,38, tutoatdep#atdep1_1);  one test for GWR is disactivated (paral#78).
+2023-oneAPI (using CMAKE build system) is OK except unitary#fftgw_02, unitary#fftgw_03, v8#16.
 
 NAG Compiler (presently tested : 7.2 - sequential only)
 NAG 7.2, ABINIT sequential : tmulti6_1, v9#83-87 are disactivated.

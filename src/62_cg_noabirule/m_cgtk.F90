@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2024 ABINIT group (MG)
+!!  Copyright (C) 2008-2025 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,7 +29,7 @@ module m_cgtk
 
  use m_fstrings,  only : itoa, sjoin
  use defs_abitypes, only : MPI_type
- use m_symtk,     only : mati3inv
+ use m_matrix,    only : mati3inv
  use m_geometry,  only : getspinrot
  use m_crystal,   only : crystal_t
  use m_fftcore,   only : sphere

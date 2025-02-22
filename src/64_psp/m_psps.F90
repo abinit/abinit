@@ -7,7 +7,7 @@
 !!  pseudopotential_type object.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2024 ABINIT group (XG,DC,MG)
+!!  Copyright (C) 2014-2025 ABINIT group (XG,DC,MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -33,7 +33,7 @@ module m_psps
 
  use m_fstrings,      only : itoa, sjoin, yesno, atoi
  use m_io_tools,      only : open_file
- use m_symtk,         only : matr3inv
+ use m_matrix,        only : matr3inv
  use defs_datatypes,  only : pspheader_type, pseudopotential_type, pseudopotential_gth_type, nctab_t
  use m_paw_numeric,   only : paw_spline
  use m_pawrad,        only : pawrad_type, pawrad_init, pawrad_free, simp_gen

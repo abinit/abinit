@@ -6,7 +6,7 @@
 !!  DFPT long-wave calculation of spatial dispersion properties
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2019-2024 ABINIT group (MR, MS)
+!!  Copyright (C) 2019-2025 ABINIT group (MR, MS)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -46,7 +46,8 @@ module m_longwave
  use m_drivexc,     only : check_kxc
  use m_rhotoxc,     only : rhotoxc
  use m_ioarr,       only : read_rhor
- use m_symtk,       only : matr3inv,symmetrize_xred
+ use m_matrix,      only : matr3inv
+ use m_symtk,       only : symmetrize_xred
  use m_kg,          only : kpgio
  use m_inwffil,     only : inwffil
  use m_spacepar,    only : setsym
@@ -785,7 +786,7 @@ end subroutine longwave
 !!  Write the relevant spatial-dispersion quantities in Cartesian coordinates
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2022-2024 ABINIT group (MR)
+!!  Copyright (C) 2022-2025 ABINIT group (MR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

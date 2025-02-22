@@ -6,7 +6,7 @@
 !!  This module gathers routines to compute the Ewald energy and its derivatives
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2024 ABINIT group (DCA, XG, JJC, GMR)
+!!  Copyright (C) 2014-2025 ABINIT group (DCA, XG, JJC, GMR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -30,7 +30,7 @@ module m_ewald
 
  use m_gtermcutoff,    only : termcutoff
  use m_special_funcs,  only : abi_derfc
- use m_symtk,          only : matr3inv
+ use m_matrix,         only : matr3inv
 
  implicit none
 

@@ -6,7 +6,7 @@
 !!  IO routines for GKK files
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2024 ABINIT group (MVer)
+!!  Copyright (C) 2008-2025 ABINIT group (MVer)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -32,7 +32,8 @@ module m_iogkk
  use defs_abitypes,     only : MPI_type
  use m_numeric_tools,   only : wrap2_pmhalf
  use m_io_tools,        only : open_file, get_unit
- use m_symtk,           only : mati3inv, littlegroup_q
+ use m_matrix,          only : mati3inv
+ use m_symtk,           only : littlegroup_q
  use m_geometry,        only : phdispl_cart2red, littlegroup_pert
  use m_crystal,         only : crystal_t
  use m_ifc,             only : ifc_type
@@ -976,7 +977,7 @@ end subroutine prt_gkk_yambo
 !! then maps them into the FS kpt states
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2024 ABINIT group (JPCroc) based on conducti
+!! Copyright (C) 2002-2025 ABINIT group (JPCroc) based on conducti
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

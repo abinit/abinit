@@ -6,7 +6,7 @@
 !!  Structure and functions to create a double grid mapping
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2024 ABINIT group (HM)
+!!  Copyright (C) 2008-2025 ABINIT group (HM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,7 +27,7 @@ module m_eph_double_grid
  use m_abicore
 
  use m_numeric_tools,  only : wrap2_pmhalf
- use m_symtk,          only : mati3inv
+ use m_matrix,         only : mati3inv
  use m_crystal,        only : crystal_t
  use m_kpts,           only : kpts_timrev_from_kptopt !, listkk
  use m_fstrings,       only : itoa, sjoin

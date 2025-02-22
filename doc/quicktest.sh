@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright (C) 2013-2024 ABINIT group (Yann Pouillon)
+# Copyright (C) 2013-2025 ABINIT group (Yann Pouillon)
 #
 # This file is part of the Abinit Documentation software package. For license
 # information, please see the COPYING file in the top-level directory of

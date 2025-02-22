@@ -6,7 +6,7 @@
 !!  Initialization of wavefunctions.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, AR, MB, MVer, ZL, MB, TD, MG)
+!!  Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, AR, MB, MVer, ZL, MB, TD, MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -42,7 +42,7 @@ module m_inwffil
  use m_io_tools, only : file_exists, get_unit
  use m_geometry, only : getspinrot
  use m_pptools,  only : prmat
- use m_symtk,    only : matr3inv, mati3inv
+ use m_matrix,   only : matr3inv, mati3inv
  use m_cgtools,  only : cg_envlop, pw_orthon
  use m_fftcore,  only : kpgsph, sphere, sphereboundary
  use m_pawrhoij, only : pawrhoij_type, pawrhoij_copy, pawrhoij_io

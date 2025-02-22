@@ -7,7 +7,7 @@
 !! the linear and non-linear optical responses in the RPA.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2024 ABINIT group (SSharma,MVer,VRecoules,YG,NAP)
+!! Copyright (C) 2002-2025 ABINIT group (SSharma,MVer,VRecoules,YG,NAP)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -58,7 +58,7 @@ program optic
  use m_build_info,     only : abinit_version
  use m_specialmsg,     only : specialmsg_getcount, herald
  use m_time ,          only : asctime, timein
- use m_symtk,          only : mati3inv, matr3inv
+ use m_matrix,         only : mati3inv, matr3inv
  use m_geometry,       only : metric
  use m_io_tools,       only : flush_unit, open_file, file_exists, get_unit
  use m_numeric_tools,  only : c2r

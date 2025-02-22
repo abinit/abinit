@@ -10,7 +10,7 @@
 !!  inv_s_projs = - (s_projs^-1 + projs'*projs)^-1
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2024 ABINIT group (AL)
+!! Copyright (C) 2013-2025 ABINIT group (AL)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -714,9 +714,9 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
    &                  c_loc(projs), (3-cplx)*ham%npw_k, &
    &                  c_loc(projs), (3-cplx)*ham%npw_k, czero, c_loc(current_gram_projs), invovl%nprojs)
    !$OMP END TARGET DATA
+   call xmpi_sum(invovl%gram_projs,mpi_enreg%comm_band,ierr,use_omp_map=.true.)
    !$OMP TARGET EXIT DATA MAP(from:current_gram_projs)
    !$OMP TARGET EXIT DATA MAP(delete:projs)
-   call xmpi_sum(invovl%gram_projs,mpi_enreg%comm_band,ierr)
 #endif
  else
    do iproc = 1, mpi_enreg%nproc_fft

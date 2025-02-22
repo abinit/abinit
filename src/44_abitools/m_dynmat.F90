@@ -6,7 +6,7 @@
 !!  This module provides low-level tools to operate on the dynamical matrix
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2024 ABINIT group (XG, JCC, MJV, NH, RC, MVeithen, MM, MG, MT, DCA)
+!!  Copyright (C) 2014-2025 ABINIT group (XG, JCC, MJV, NH, RC, MVeithen, MM, MG, MT, DCA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -33,7 +33,8 @@ module m_dynmat
 
  use m_fstrings,        only : itoa, sjoin
  use m_numeric_tools,   only : wrap2_pmhalf, mkherm
- use m_symtk,           only : mati3inv, matr3inv, littlegroup_q
+ use m_matrix,          only : mati3inv, matr3inv
+ use m_symtk,           only : littlegroup_q
  use m_cgtools,         only : fxphas_seq
  use m_ewald,           only : ewald9
  use m_time,            only : timab

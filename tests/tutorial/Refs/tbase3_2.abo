@@ -2,7 +2,7 @@
 .Version 10.2.2.3 of ABINIT, released Sep 2024.
 .(sequential version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2024 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -25,7 +25,7 @@
 
 --- !BUG
 src_file: m_kpts.F90
-src_line: 1764
+src_line: 1765
 mpi_rank: 0
 message: |
     The argument nkpt = 2, does not match

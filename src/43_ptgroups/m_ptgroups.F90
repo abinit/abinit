@@ -7,7 +7,7 @@
 !!  character tables of the 32 point groups.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2024 ABINIT group (MG)
+!! Copyright (C) 2010-2025 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,7 +29,8 @@ module m_ptgroups
  use m_io_tools,       only : open_file
  use m_fstrings,       only : sjoin
  use m_numeric_tools,  only : get_trace, cmplx_sphcart
- use m_symtk,          only : mati3inv, sg_multable
+ use m_matrix,         only : mati3inv
+ use m_symtk,          only : sg_multable
 
 ! Import group tables
  use m_ptg_C1

@@ -80,6 +80,6 @@ prteig  0
 #%% post_commands = ww_cp t73o_1WF13 t76i_1WF13
 #%% [extra_info]
 #%% authors = E. Bousquet
-#%% keywords = DFPT, ddk, non-collinear, SOC
+#%% keywords = DFPT, non-collinear, SOC
 #%% description = DFPT in non-collinear magnetism: ddk with ixcrot=2
 #%%<END TEST_INFO>

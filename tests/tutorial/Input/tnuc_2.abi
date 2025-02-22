@@ -66,5 +66,6 @@ prteig 0
 #%% authors = J. Zwanziger
 #%% keywords = PAW
 #%% description =
+#%%   Computation of the Fermi contact term at the atomic sites in SnO2
 #%% topics = EFG, SmartSymm
 #%%<END TEST_INFO>

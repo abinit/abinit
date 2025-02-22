@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, AR, DRH, MB, XW, MT)
+!!  Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, AR, DRH, MB, XW, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -31,7 +31,6 @@ module m_dfpt_vtorho
  use m_hamiltonian
  use m_wfk
  use m_cgtools
- use m_gemm_nonlop_projectors
  use m_dtset
  use m_dtfil
  use m_ompgpu_utils
@@ -59,6 +58,7 @@ module m_dfpt_vtorho
  use m_dfpt_fef,    only : dfptff_gradberry, dfptff_gbefd
  use m_mpinfo,      only : proc_distrb_cycle,proc_distrb_nband
  use m_fourier_interpol, only : transgrid
+ use m_gemm_nonlop_projectors, only : set_gemm_nonlop_ikpt, gemm_nonlop_use_gemm
 
 #if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
  use m_nvtx_data
@@ -650,8 +650,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 
      ! Setup gemm_nonlop
      if (gemm_nonlop_use_gemm) then
-       !set the global variable indicating to gemm_nonlop where to get its data from
-       gemm_nonlop_ikpt_this_proc_being_treated = ikpt
+       call set_gemm_nonlop_ikpt(ikpt)
      end if ! gemm_nonlop_use_gemm
 
      ! Free some memory before calling dfpt_vtowfk

@@ -6,7 +6,7 @@
 !! Module containing the definition of the crystal_t data type and methods used to handle it.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2024 ABINIT group (MG, YP, MJV, GA)
+!!  Copyright (C) 2008-2025 ABINIT group (MG, YP, MJV, GA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -34,7 +34,8 @@ module m_crystal
  use m_numeric_tools,  only : set2unit
  use m_hide_lapack,    only : matrginv
  use m_fstrings,       only : int2char10, sjoin, yesno, itoa, strcat
- use m_symtk,          only : mati3inv, sg_multable, symatm, print_symmetries
+ use m_matrix,         only : mati3inv
+ use m_symtk,          only : sg_multable, symatm, print_symmetries
  use m_spgdata,        only : spgdata
  use m_geometry,       only : metric, xred2xcart, xcart2xred, remove_inversion, getspinrot, symredcart, normv
  use m_io_tools,       only : open_file

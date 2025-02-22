@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GM, AR, MB, MT, AM)
+!!  Copyright (C) 1998-2025 ABINIT group (DCA, XG, GM, AR, MB, MT, AM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -36,7 +36,6 @@ module m_d2frnl
  use m_wfk
  use m_dtset
  use m_dtfil
- use m_gemm_nonlop_projectors
 
 
  use defs_datatypes, only : pseudopotential_type
@@ -60,6 +59,7 @@ module m_d2frnl
  use m_mkffnl,   only : mkffnl
  use m_nonlop,   only : nonlop
  use m_paw_occupancies, only : pawaccrhoij
+ use m_gemm_nonlop_projectors, only : set_gemm_nonlop_ikpt, gemm_nonlop_use_gemm
 
 #if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
  use m_nvtx_data
@@ -633,8 +633,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
 
      ! Setup gemm_nonlop
      if (gemm_nonlop_use_gemm) then
-       !set the global variable indicating to gemm_nonlop where to get its data from
-       gemm_nonlop_ikpt_this_proc_being_treated = ikpt
+       call set_gemm_nonlop_ikpt(ikpt)
      end if ! gemm_nonlop_use_gemm
 
 

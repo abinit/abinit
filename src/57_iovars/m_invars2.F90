@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2024 ABINIT group (XG)
+!!  Copyright (C) 1999-2025 ABINIT group (XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -36,7 +36,7 @@ module m_invars2
  use defs_datatypes, only : pspheader_type
  use m_time,      only : timab
  use m_fstrings,  only : sjoin, itoa, ltoa, tolower, toupper
- use m_symtk,     only : matr3inv
+ use m_matrix,    only : matr3inv
  use m_parser,    only : intagm, intagm_img
  use m_geometry,  only : mkrdim, metric
  use m_gsphere,   only : setshells
