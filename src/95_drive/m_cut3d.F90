@@ -6,7 +6,7 @@
 !!  This module the predures used by cut3d
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2024 ABINIT group (XG,MVerstraete,GMR,RC,LSI,JFB,MCote,MB)
+!! Copyright (C) 2008-2025 ABINIT group (XG,MVerstraete,GMR,RC,LSI,JFB,MCote,MB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -36,7 +36,7 @@ MODULE m_cut3d
  use defs_abitypes,      only : MPI_type
  use m_io_tools,         only : get_unit, iomode_from_fname, open_file, file_exists, read_string
  use m_numeric_tools,    only : interpol3d_0d
- use m_symtk,            only : matr3inv
+ use m_matrix,           only : matr3inv
  use m_fstrings,         only : int2char10, sjoin, itoa
  use m_geometry,         only : xcart2xred, metric
  use m_special_funcs,    only : jlspline_t, jlspline_new, jlspline_free, jlspline_integral

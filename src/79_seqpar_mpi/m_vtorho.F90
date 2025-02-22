@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, MF, AR, MM, MT, FJ, MB, MT, TR)
+!!  Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, MF, AR, MM, MT, FJ, MB, MT, TR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -34,7 +34,6 @@ module m_vtorho
  use m_wffile
  use m_efield
  use m_cgtools
- use m_gemm_nonlop_projectors
  use m_hdr
  use m_dtset
  use m_dtfil
@@ -88,6 +87,8 @@ module m_vtorho
  use m_wvl_psi,            only : wvl_hpsitopsi, wvl_psitohpsi, wvl_nl_gradient
  use m_inwffil,            only : cg_from_atoms
  use m_chebfiwf,           only : chebfiwf2_blocksize
+ use m_gemm_nonlop_projectors, only : set_gemm_nonlop_ikpt, reset_gemm_nonlop, gemm_nonlop_use_gemm, &
+                                      gemm_nonlop_nblocks, gemm_nonlop_is_distributed
 
 #if defined HAVE_GPU_CUDA
  use m_manage_cuda
@@ -435,10 +436,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  real(dp) :: rdum2(0,0),rdum4(0,0,0,0)
 #if defined HAVE_BIGDFT
  integer :: occopt_bigdft
-#endif
-
-#if defined(HAVE_GPU_CUDA)
- type(gemm_nonlop_gpu_type) :: gemm_nonlop_gpu_obj
 #endif
 
 ! *********************************************************************
@@ -951,7 +948,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &         gmet,gprimd,ider,idir,psps%indlmn,kg_k,kpg_k,kpoint,psps%lmnmax,&
 &         psps%lnmax,psps%mpsang,psps%mqgrid_ff,nkpg,&
 &         npw_k,ntypat,psps%pspso,psps%qgrid_ff,rmet,&
-&         psps%usepaw,psps%useylm,ylm_k,ylmgr)
+&         psps%usepaw,psps%useylm,ylm_k,ylmgr,kinpw=kinpw)
        end if
 
 !      Load k-dependent part in the Hamiltonian datastructure
@@ -1018,8 +1015,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
        ! Setup gemm_nonlop
        if (gemm_nonlop_use_gemm) then
-         !set the global variable indicating to gemm_nonlop where to get its data from
-         gemm_nonlop_ikpt_this_proc_being_treated = my_ikpt
+         call set_gemm_nonlop_ikpt(my_ikpt)
+         if(istep<=1) call reset_gemm_nonlop()
        end if
 
 #if defined HAVE_GPU_CUDA

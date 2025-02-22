@@ -7,7 +7,7 @@
 !!  when initialized this is a subtype of multibinit_dtset_type
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2024 ABINIT group (AM)
+!!  Copyright (C) 2014-2025 ABINIT group (AM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,7 +28,7 @@ module m_scup_dataset
  use m_bz_mesh
 
  use m_parser, only : intagm
- use m_symtk,  only : matr3inv
+ use m_matrix, only : matr3inv
 
  implicit none
 

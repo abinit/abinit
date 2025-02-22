@@ -9,7 +9,7 @@
 !!  Main entry point for client code that needs to read the DDB data.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2024 ABINIT group (MJV, XG, MT, MM, MVeithen, MG, PB, JCC, SP, GA, MMignolet)
+!! Copyright (C) 2011-2025 ABINIT group (MJV, XG, MT, MM, MVeithen, MG, PB, JCC, SP, GA, MMignolet)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -37,7 +37,8 @@ module m_ddb
  use defs_datatypes,   only : pseudopotential_type
  use m_fstrings,       only : sjoin, itoa, ktoa, endswith
  use m_numeric_tools,  only : mkherm
- use m_symtk,          only : mati3inv, matr3inv, littlegroup_q, symatm
+ use m_matrix,         only : mati3inv, matr3inv
+ use m_symtk,          only : littlegroup_q, symatm
  use m_io_tools,       only : get_unit
  use m_copy,           only : alloc_copy
  use m_geometry,       only : phdispl_cart2red, mkrdim, xred2xcart, metric

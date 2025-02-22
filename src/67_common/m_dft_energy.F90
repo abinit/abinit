@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, AR, MB, MT, EB)
+!!  Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, AR, MB, MT, EB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,7 +27,6 @@ module m_dft_energy
  use m_hamiltonian
  use m_errors
  use m_xmpi
- use m_gemm_nonlop_projectors
  use m_xcdata
  use m_cgtools
  use m_dtset
@@ -67,6 +66,7 @@ module m_dft_energy
  use m_fourier_interpol, only : transgrid
  use m_prep_kgb,         only : prep_getghc, prep_nonlop
  use m_psolver,          only : psolver_rhohxc
+ use m_gemm_nonlop_projectors, only : set_gemm_nonlop_ikpt, gemm_nonlop_use_gemm
 
 #ifdef HAVE_FC_ISO_C_BINDING
  use, intrinsic :: iso_c_binding, only : c_int64_t
@@ -697,7 +697,7 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
 
 !    Setup gemm_nonlop
      if (gemm_nonlop_use_gemm) then
-       gemm_nonlop_ikpt_this_proc_being_treated = my_ikpt
+       call set_gemm_nonlop_ikpt(my_ikpt)
      end if
 
 #if defined HAVE_GPU_CUDA

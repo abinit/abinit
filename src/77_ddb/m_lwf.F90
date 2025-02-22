@@ -8,7 +8,7 @@
 !! as well as the central mkphdos
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2024 ABINIT group (HeXu)
+!! Copyright (C) 1999-2025 ABINIT group (HeXu)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -52,7 +52,7 @@ module m_lwf
  use m_krank
 
  use m_fstrings,        only : itoa, ftoa, sjoin, ltoa, ktoa, strcat, basename, replace
- use m_symtk,           only : matr3inv
+ use m_matrix,          only : matr3inv
  use m_time,            only : cwtime, cwtime_report
  use m_io_tools,        only : open_file
  use m_geometry,        only : mkrdim, symredcart, normv, phdispl_cart2red

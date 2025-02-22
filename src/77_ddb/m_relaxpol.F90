@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2024 ABINIT group (MVeithen)
+!!  Copyright (C) 1999-2025 ABINIT group (MVeithen)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -25,7 +25,7 @@ module m_relaxpol
  use m_errors
 
  use m_fstrings,  only : sjoin, itoa
- use m_symtk,     only : matr3inv
+ use m_matrix,    only : matr3inv
  use m_berrytk,   only : polcart
  use m_hide_lapack,   only : dzgedi, dzgefa
  use m_geometry,  only : xcart2xred

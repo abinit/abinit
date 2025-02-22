@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2005-2024 ABINIT group (XG, NSAI, MKV)
+!!  Copyright (C) 2005-2025 ABINIT group (XG, NSAI, MKV)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -31,16 +31,16 @@ module m_elpolariz
  use m_dtset
  use m_dtfil
 
- use defs_datatypes, only : pseudopotential_type
- use defs_abitypes, only : MPI_type
- use m_geometry, only : metric
- use m_symtk,    only : matr3inv
- use m_hide_lapack,  only : dzgedi, dzgefa
- use m_rwwf,     only : rwwf
- use m_pawtab,   only : pawtab_type
- use m_pawrhoij, only : pawrhoij_type
- use m_pawcprj,  only : pawcprj_type
- use m_berryphase, only : berryphase
+ use defs_datatypes,   only : pseudopotential_type
+ use defs_abitypes,    only : MPI_type
+ use m_geometry,       only : metric
+ use m_matrix,         only : matr3inv
+ use m_hide_lapack,    only : dzgedi, dzgefa
+ use m_rwwf,           only : rwwf
+ use m_pawtab,         only : pawtab_type
+ use m_pawrhoij,       only : pawrhoij_type
+ use m_pawcprj,        only : pawcprj_type
+ use m_berryphase,     only : berryphase
  use m_berryphase_new, only : berryphase_new
 
  implicit none

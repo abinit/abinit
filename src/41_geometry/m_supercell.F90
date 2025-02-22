@@ -7,7 +7,7 @@
 !! Container type is defined, and destruction, print subroutines as well as the central supercell_init
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2024 ABINIT group (MJV, DJA)
+!! Copyright (C) 2010-2025 ABINIT group (MJV, DJA)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,7 +27,7 @@ module m_supercell
  use m_errors
  use m_abicore
 
- use m_symtk,         only : matr3inv
+ use m_matrix,        only : matr3inv
  use m_copy,          only : alloc_copy
  use m_io_tools,      only : open_file
  use m_fstrings,      only : int2char4, write_num, itoa, sjoin

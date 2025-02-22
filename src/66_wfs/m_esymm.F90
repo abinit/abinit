@@ -7,7 +7,7 @@
 !! the irreducible representations associated to electronic eigenstates.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2024 ABINIT group (MG)
+!!  Copyright (C) 2008-2025 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,7 +27,8 @@ MODULE m_esymm
  use m_errors
 
  use m_io_tools,       only : file_exists
- use m_symtk,          only : matr3inv, sg_multable, symrelrot, littlegroup_q
+ use m_matrix,         only : matr3inv
+ use m_symtk,          only : sg_multable, symrelrot, littlegroup_q
  use m_symfind,        only : symbrav
  use m_fstrings,       only : int2char10, itoa, sjoin
  use m_numeric_tools,  only : print_arr, set2unit, get_trace

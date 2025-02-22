@@ -8,7 +8,7 @@
 !! from the Kubo-Greenwood formula.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2002-2024 ABINIT group (VRecoules, PGhosh, SMazevet, SM, SVinko, NBrouwer)
+!!  Copyright (C) 2002-2025 ABINIT group (VRecoules, PGhosh, SMazevet, SM, SVinko, NBrouwer)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -35,7 +35,7 @@ module m_conducti
  use defs_abitypes,  only : MPI_type
  use m_io_tools,     only : open_file, close_unit, get_unit
  use m_fstrings,     only : sjoin
- use m_symtk,        only : matr3inv
+ use m_matrix,       only : matr3inv
  use m_hide_lapack,  only : jacobi
  use m_occ,          only : getnel
  use m_geometry,     only : metric

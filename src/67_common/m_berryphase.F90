@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2024 ABINIT  group (NSAI,XG,MKV)
+!! Copyright (C) 2000-2025 ABINIT  group (NSAI,XG,MKV)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,7 +28,7 @@ module m_berryphase
 
  use m_geometry,     only : xred2xcart
  use m_hide_lapack,  only : dzgedi, dzgefa
- use m_symtk,        only : matr3inv
+ use m_matrix,       only : matr3inv
 
  implicit none
 

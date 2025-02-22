@@ -6,7 +6,7 @@
 !!  Subdriver for DFPT calculations.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2024 ABINIT group (XG, DRH, MT, MKV, GA)
+!!  Copyright (C) 1999-2025 ABINIT group (XG, DRH, MT, MKV, GA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -45,7 +45,8 @@ module m_respfn_driver
  use defs_abitypes, only : MPI_type
  use m_time,        only : timab
  use m_fstrings,    only : strcat, endswith
- use m_symtk,       only : matr3inv, littlegroup_q, symmetrize_xred
+ use m_matrix,      only : matr3inv
+ use m_symtk,       only : littlegroup_q, symmetrize_xred
  use m_fft,         only : zerosym, fourdp
  use m_kpts,        only : symkchk
  use m_geometry,    only : irreducible_set_pert, symredcart

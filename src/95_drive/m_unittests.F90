@@ -6,7 +6,7 @@
 !! Module to implement unit tests
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2024 ABINIT group (HM)
+!! Copyright (C) 1999-2025 ABINIT group (HM)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -41,7 +41,7 @@ module m_unittests
  use m_fstrings,        only : ltoa, itoa, sjoin, strcat
  use m_numeric_tools,   only : linspace, ctrap, simpson_int
  use m_special_funcs,   only : gaussian
- use m_symtk,           only : matr3inv
+ use m_matrix,          only : matr3inv
  use m_io_tools,        only : open_file
  use m_kpts,            only : kpts_ibz_from_kptrlatt, listkk
  use m_geometry,        only : normv

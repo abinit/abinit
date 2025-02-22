@@ -11,7 +11,8 @@ module m_tdep_sym
  use m_abicore
  use m_errors
  use m_xmpi
- use m_symtk,            only : mati3inv, symatm
+ use m_matrix,           only : mati3inv
+ use m_symtk,            only : symatm
  use m_symfind,          only : symfind, symanal, symlatt
  use m_tdep_latt,        only : Lattice_type, tdep_make_inbox
  use m_tdep_readwrite,   only : Input_type, MPI_enreg_type
@@ -143,7 +144,7 @@ contains
   ABI_MALLOC(Sym%S_ref,(3,3,Sym%nsym,2)) ; Sym%S_ref(:,:,:,1)=real(Sym%symrel(:,:,1:Sym%nsym))
   ABI_MALLOC(Sym%S_inv,(3,3,Sym%nsym,2)) ; Sym%S_inv(:,:,:,1)=zero
   ABI_MALLOC(tmp1,(3,3)); tmp1(:,:)=0.d0
-  if (MPIdata%iam_master) open(unit=75,file=trim(Invar%output_prefix)//'sym.dat')
+  if (MPIdata%iam_master) open(unit=75,file=trim(Invar%output_prefix)//'_sym.dat')
   do isym=1,Sym%nsym
     if (MPIdata%iam_master) then
       write(75,*) ' '
@@ -238,7 +239,7 @@ contains
   end do
 ! Write the Indsym of the atoms included in the (reference) unitcell (i.e.: the motif)
   if (Invar%debug.and.MPIdata%iam_master) then
-    open(unit=40,file=trim(Invar%output_prefix)//'Indsym-unitcell.dat')
+    open(unit=40,file=trim(Invar%output_prefix)//'_Indsym-unitcell.dat')
     do iatom=1,Invar%natom_unitcell
       write(40,*) '=========================================='
       write(40,'(a,i4,a,3(f10.5,1x))') 'For iatom=',iatom,' with xred (supercell)=',xred_ideal(:,iatom)
@@ -272,7 +273,7 @@ contains
     end do
   end do
   if (Invar%debug.and.MPIdata%iam_master) then
-    open(unit=40,file=trim(Invar%output_prefix)//'Indsym-supercell.dat')
+    open(unit=40,file=trim(Invar%output_prefix)//'_Indsym-supercell.dat')
     do iatom=1,Invar%natom
       write(40,*) '=========================================='
       write(40,'(a,i4,a,3(f10.5,1x))') 'For iatom=',iatom,' with xred (supercell)=',xred_ideal(:,iatom)
@@ -304,7 +305,7 @@ contains
     end do
   end do
   if (Invar%debug.and.MPIdata%iam_master) then
-    open(unit=40,file=trim(Invar%output_prefix)//'Indsym-2atoms.dat')
+    open(unit=40,file=trim(Invar%output_prefix)//'_Indsym-2atoms.dat')
     do iatom=1,Invar%natom
       write(40,*) '=========================================='
       write(40,'(a,i4,a,3(f10.5,1x))') 'For iatom=',iatom,' with xred (supercell)=',xred_ideal(:,iatom)

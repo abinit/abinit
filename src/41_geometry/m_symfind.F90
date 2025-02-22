@@ -6,7 +6,7 @@
 !!  Symmetry finder high-level API.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2000-2024 ABINIT group (XG, RC)
+!!  Copyright (C) 2000-2025 ABINIT group (XG, RC)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -26,8 +26,9 @@ module m_symfind
  use m_abicore
  use m_symlist
 
- use m_symtk,     only : chkprimit, mati3inv, matr3inv, symrelrot, symdet, symcharac, holocell, &
-                          smallprim, print_symmetries, sg_multable, symatm, symmetrize_tnons, symmetrize_xred
+ use m_matrix,    only : mati3inv, matr3inv
+ use m_symtk,     only : chkprimit, symrelrot, symdet, symcharac, holocell, symatm, &
+                         smallprim, print_symmetries, sg_multable, symmetrize_tnons, symmetrize_xred
  use m_geometry,  only : acrossb, xred2xcart
  use m_spgdata,   only : getptgroupma, symptgroup, spgdata
 

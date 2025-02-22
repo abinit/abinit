@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2024 ABINIT group ()
+!!  Copyright (C) 2008-2025 ABINIT group ()
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -33,7 +33,6 @@ module m_dfpt_nstwf
  use m_nctk
  use m_dtset
  use m_dtfil
- use m_gemm_nonlop_projectors
  use m_abi_linalg
 
  use defs_datatypes, only : pseudopotential_type
@@ -41,6 +40,7 @@ module m_dfpt_nstwf
  use m_time,     only : timab
  use m_io_tools, only : file_exists
  use m_fourier_interpol, only : transgrid
+ use m_gemm_nonlop_projectors, only : set_gemm_nonlop_ikpt, gemm_nonlop_use_gemm
  use m_geometry, only : stresssym
  use m_dynmat,   only : dfpt_sygra
  use m_mpinfo,   only : destroy_mpi_enreg, initmpi_seq, proc_distrb_cycle, proc_distrb_band, proc_distrb_nband
@@ -108,7 +108,7 @@ contains
 !!  - on-site contributions.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2024 ABINIT group (MT, AM)
+!! Copyright (C) 2010-2025 ABINIT group (MT, AM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -194,6 +194,7 @@ contains
 !!  ucvol=unit cell volume in bohr**3.
 !!  usecprj= 1 if cprj, cprjq arrays are stored in memory
 !!  usepaw= 0 for non paw calculation; =1 for paw calculation
+!!  usevxctau=1 if if XC functional depends on kinetic energy density
 !!  usexcnhat= -PAW only- flag controling use of compensation density in Vxc
 !!  useylmgr1= 1 if ylmgr1 array is allocated
 !!  vectornd(with_vectornd*nfftf,3)=nuclear dipole moment vector potential
@@ -202,6 +203,7 @@ contains
 !!  vtrial(nfftf,nspden)=GS potential (Hartree).
 !!  vtrial1(cplex*nfftf,nspden)= RF 1st-order potential (Hartree).
 !!  vxc(nfftf,nspden)=XC GS potential
+!!  vxctau(nfftf,nspden,4*usevxctau)=derivative of e_xc with respect to kinetic energy density, for mGGA
 !!  with_vectornd = 1 if vectornd allocated
 !!  wtk_rbz(nkpt_rbz)=weight assigned to each k point in the reduced BZ
 !!  xccc3d1(cplex*n3xccc)=3D change in core charge density, see n3xccc
@@ -232,14 +234,14 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 &                  nkpt_rbz,nkxc,npwarr,npwar1,nspden,nspinor,nsppol,nsym1,n3xccc,occkq,occ_rbz,&
 &                  paw_an,paw_an1,paw_ij,paw_ij1,pawang,pawang1,pawfgr,pawfgrtab,pawrad,pawrhoij,&
 &                  pawrhoij1,pawtab,phnons1,ph1d,ph1df,psps,rhog,rhor,rhor1,rmet,rprimd,symaf1,symrc1,symrl1,tnons1,&
-&                  ucvol,usecprj,usepaw,usexcnhat,useylmgr1,vectornd,vhartr1,vpsp1,vtrial,vtrial1,vxc,&
+&                  ucvol,usecprj,usepaw,usevxctau,usexcnhat,useylmgr1,vectornd,vhartr1,vpsp1,vtrial,vtrial1,vxc,vxctau,&
 &                  with_vectornd,wtk_rbz,xccc3d1,xred,ylm,ylm1,ylmgr1)
 
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: cplex,idir,ipert,mgfftf,mkmem,mkqmem,mk1mem,mpert,mpw,mpw1
  integer,intent(in) :: ncpgr,nfftf,nkpt_rbz,nkxc,nspden,nspinor,nsppol,nsym1
- integer,intent(in) :: n3xccc,usecprj,usepaw,usexcnhat,useylmgr1
+ integer,intent(in) :: n3xccc,usecprj,usepaw,usevxctau,usexcnhat,useylmgr1
  integer,intent(in) :: mband_mem_rbz,with_vectornd
  real(dp),intent(in) :: gsqcut,ucvol
  real(dp),intent(out) :: eovl1
@@ -281,6 +283,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  real(dp),intent(inout) :: d2nl(2,3,mpert,3,mpert)
  real(dp),intent(inout) :: d2lo(2,3,mpert,3,mpert),d2ovl(2,3,mpert,3,mpert*usepaw)
  real(dp),intent(inout) :: vectornd(with_vectornd*nfftf,3)
+ real(dp),intent(inout) :: vxctau(nfftf,dtset%nspden,4*usevxctau)
  type(pawcprj_type),intent(in) :: cprj(dtset%natom,nspinor*mband_mem_rbz*mkmem*nsppol*usecprj)
  type(pawcprj_type),intent(in) :: cprjq(dtset%natom,nspinor*mband_mem_rbz*mkqmem*nsppol*usecprj)
  type(paw_an_type),intent(in) :: paw_an(:)
@@ -313,7 +316,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  real(dp) :: arg,doti,dotr,dot1i,dot1r,dot2i,dot2r,dot3i,dot3r,elfd_fact,invocc,lambda,wtk_k
  logical :: force_recompute,has_dcwf,has_dcwf2,has_drho,has_ddk_file,has_vectornd
  logical :: is_metal,is_metal_or_qne0,need_ddk_file,need_pawij10
- logical :: need_wfk,need_wf1,nmxc,paral_atom,qne0,t_exist,use_ompgpu
+ logical :: need_wfk,need_wf1,nmxc,paral_atom,qne0,t_exist,use_ompgpu,with_vxctau
  character(len=500) :: msg
  character(len=fnlen) :: fiwfddk(3)
  complex(dpc), parameter :: cminusone  = (-1._dp,0._dp)
@@ -346,6 +349,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  real(dp),allocatable,target :: gvnlx1_tmp(:,:)
  real(dp),allocatable :: occ_k(:),occ_kq(:),ph3d(:,:,:),ph3d1(:,:,:),rhotmp(:,:),rocceig(:,:)
  real(dp),allocatable :: vectornd_pac(:,:,:,:,:),vectornd_pac_idir(:,:,:,:)
+ real(dp),allocatable :: vxctaulocal(:,:,:,:,:)
  real(dp),allocatable :: ylm_k(:,:),ylm1_k(:,:),ylmgr1_k(:,:,:),vtmp1(:,:),vxc10(:,:)
  real(dp),allocatable,target :: work(:,:,:),e1kb_work(:,:,:,:)
  real(dp),pointer :: e1kbfr(:,:,:,:,:),e1kb_ptr(:,:,:,:)
@@ -544,13 +548,17 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 !1) Allocate all arrays and initialize quantities that do not depend on k and spin.
 !2) Perform the setup needed for the non-local factors:
  call gs_hamkq%init(psps,pawtab,nspinor,nsppol,nspden,dtset%natom,&
-& dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,ph1d=ph1d,&
-& paw_ij=paw_ij,mpi_atmtab=my_atmtab,comm_atom=my_comm_atom,mpi_spintab=mpi_enreg%my_isppoltab,&
-& usecprj=usecprj,nucdipmom=dtset%nucdipmom,gpu_option=gpu_option)
-has_vectornd = (with_vectornd .EQ. 1)
+&  dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,ph1d=ph1d,&
+&  paw_ij=paw_ij,mpi_atmtab=my_atmtab,comm_atom=my_comm_atom,mpi_spintab=mpi_enreg%my_isppoltab,&
+&  usecprj=usecprj,nucdipmom=dtset%nucdipmom,gpu_option=gpu_option)
+ has_vectornd = (with_vectornd .EQ. 1)
  if(has_vectornd) then
     ABI_MALLOC(vectornd_pac,(dtset%ngfft(4),dtset%ngfft(5),dtset%ngfft(6),gs_hamkq%nvloc,3))
     ABI_MALLOC(vectornd_pac_idir,(dtset%ngfft(4),dtset%ngfft(5),dtset%ngfft(6),gs_hamkq%nvloc))
+ end if
+ with_vxctau = ( usevxctau > 0 )
+ if(with_vxctau) then
+    ABI_MALLOC(vxctaulocal,(dtset%ngfft(4),dtset%ngfft(5),dtset%ngfft(6),gs_hamkq%nvloc,4))
  end if
 
 !Variables common to all perturbations
@@ -870,6 +878,13 @@ has_vectornd = (with_vectornd .EQ. 1)
        call gs_hamkq%load_spin(isppol, vectornd=vectornd_pac)
        vectornd_pac_idir(:,:,:,:)=vectornd_pac(:,:,:,:,idir)
        call rf_hamkq%load_spin(isppol, vectornd=vectornd_pac_idir)
+     end if   
+     !! add vxctau for mGGA to GS hamiltonian and RF hamiltonian
+     if (with_vxctau) then
+       call gspot_transgrid_and_pack(isppol, psps%usepaw, dtset%paral_kgb, dtset%nfft, dtset%ngfft, nfftf, &
+         dtset%nspden, gs_hamkq%nvloc, 4, pawfgr, mpi_enreg, vxctau, vxctaulocal)
+       call gs_hamkq%load_spin(isppol, vxctaulocal=vxctaulocal)
+       call rf_hamkq%load_spin(isppol, vxctaulocal=vxctaulocal)
      end if
 
 !    Initialize accumulation of density
@@ -1207,8 +1222,7 @@ has_vectornd = (with_vectornd .EQ. 1)
 
            ! Setup gemm_nonlop
            if (gemm_nonlop_use_gemm) then
-             !set the global variable indicating to gemm_nonlop where to get its data from
-             gemm_nonlop_ikpt_this_proc_being_treated = ikpt
+             call set_gemm_nonlop_ikpt(ikpt)
            end if ! gemm_nonlop_use_gemm
 
 !          Extract ground state projected WF and derivatives in idir1 direction
@@ -2057,8 +2071,11 @@ has_vectornd = (with_vectornd .EQ. 1)
    ABI_FREE(cs1c_tmp)
  end if
  call gs_hamkq%free()
- if (has_vectornd) then
+ if(allocated(vectornd_pac)) then
    ABI_FREE(vectornd_pac)
+ end if
+ if(allocated(vxctaulocal)) then
+   ABI_FREE(vxctaulocal)
  end if
 
 !In case of parallelism, sum over processors
@@ -2222,7 +2239,7 @@ end subroutine dfpt_nstpaw
 !! Only for norm-conserving pseudopotentials (no PAW)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2024 ABINIT group (XG,AR,MB,MVer,MT, MVeithen)
+!! Copyright (C) 1999-2025 ABINIT group (XG,AR,MB,MVer,MT, MVeithen)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

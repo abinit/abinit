@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2024 ABINIT group (XG, AR, DRH, MB, MVer,XW, MT, GKA)
+!!  Copyright (C) 1999-2025 ABINIT group (XG, AR, DRH, MB, MVer,XW, MT, GKA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -565,8 +565,8 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
        if( (ipert .EQ. natom+1) .AND. (ASSOCIATED(rf_hamkq%vxctaulocal)) ) then
          ABI_MALLOC(ghc_vxctau,(2,npw1_k*nspinor))
          ! ndat hard-coded as 1
-         call getgh1c_mGGA(cwave1,rf_hamkq%dkinpw_k,gs_hamkq%gbound_k,ghc_vxctau,gs_hamkq%gprimd,idir,gs_hamkq%istwf_k,&
-              & gs_hamkq%kg_k,kinpw1,gs_hamkq%mgfft,mpi_enreg,nspinor,gs_hamkq%n4,gs_hamkq%n5,&
+         call getgh1c_mGGA(cwave1,gs_hamkq%gbound_k,ghc_vxctau,gs_hamkq%gmet,gs_hamkq%gprimd,idir,gs_hamkq%istwf_k,&
+              & gs_hamkq%kg_k,gs_hamkq%kpt_k,gs_hamkq%mgfft,mpi_enreg,nspinor,gs_hamkq%n4,gs_hamkq%n5,&
               & gs_hamkq%n6,1,gs_hamkq%ngfft,npw_k,gs_hamkq%nvloc,rf_hamkq%vxctaulocal,gs_hamkq%gpu_option)
 !        There is an additional factor of 4 with respect to the bare matrix element
          evxctau1_k(iband)=two*energy_factor*(DOT_PRODUCT(cwave0(1,1:npw_k*nspinor),ghc_vxctau(1,1:npw_k*nspinor))+&
@@ -599,12 +599,12 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
          enl1_k(iband)=two*energy_factor*scprod
        end if
 
-       !      Removal of the 1st-order kinetic energy from the 1st-order non-local part.
+       ! Removal of the 1st-order kinetic energy, dipole, and vxctau1 from the 1st-order non-local part.
+       ! note that in getgh1c, the "nonlocal" piece, gvnlx1, contains also first order
+       ! kinetic, nuclear dipole, and vxctau1
        if(ipert==natom+1 .or. ipert==natom+3 .or. ipert==natom+4) then
-         enl1_k(iband)=enl1_k(iband)-ek1_k(iband)
+         enl1_k(iband)=enl1_k(iband)-ek1_k(iband)-end1_k(iband)-evxctau1_k(iband)
        end if
-       ! enl1_k still contains first order nuclear dipole, first order vxctau1 in addition to
-       ! first order nonlocal
 
 !      Accumulate 1st-order density (only at the last inonsc)
 !      Accumulate zero-order potential part of the 2nd-order total energy

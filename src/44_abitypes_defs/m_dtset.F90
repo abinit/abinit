@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 1992-2024 ABINIT group (XG, MG, FJ, DCA, MT)
+!! Copyright (C) 1992-2025 ABINIT group (XG, MG, FJ, DCA, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,7 +29,8 @@ module m_dtset
 
  use m_fstrings,      only : inupper
  use m_numeric_tools, only : arth
- use m_symtk,         only : mati3inv, littlegroup_q, symatm
+ use m_matrix,        only : mati3inv
+ use m_symtk,         only : littlegroup_q, symatm
  use m_symkpt,        only : symkpt
  use m_geometry,      only : mkrdim, metric, littlegroup_pert, irreducible_set_pert
  use m_parser,        only : intagm, chkvars_in_string
