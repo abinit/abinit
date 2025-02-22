@@ -3,11 +3,11 @@
 !! abitk
 !!
 !! FUNCTION
-!!  Command line interface to perform very basic post-processing of output files (mainly netcdf files).
+!!  Command line interface to perform very post-processing of output files (mainly netcdf files).
 !!  Use `abitk --help` to get list of possible commands.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2024 ABINIT group (MG)
+!! Copyright (C) 2013-2025 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -58,7 +58,7 @@ program abitk
 !Local variables-----------------------
 !scalars
  integer,parameter :: master = 0
- integer :: ii, nargs, comm, my_rank, nprocs, prtvol, fform, rdwr, prtebands, spin
+ integer :: ii, nargs, comm, my_rank, nprocs, prtvol, fform, rdwr, prtebands, spin, ncid, ncerr
  integer :: kptopt, nshiftk, new_nshiftk, chksymbreak, nkibz, nkbz, intmeth, lenr !occopt,
  integer :: ndivsm, abimem_level, ierr, ntemp, ios, itemp, use_symmetries, ltetra
  real(dp) :: spinmagntarget, extrael, doping, step, broad, abimem_limit_mb, fs_ewin !, tolsym, tsmear
@@ -75,10 +75,10 @@ program abitk
  type(kpath_t) :: kpath
 !arrays
  integer :: kptrlatt(3,3), new_kptrlatt(3,3), ngqpt(3)
+ integer, allocatable :: bz2ibz(:,:)
  real(dp) :: skw_params(4), tmesh(3)
- real(dp),allocatable :: bounds(:,:), kTmesh(:), mu_e(:)
+ real(dp),allocatable :: bounds(:,:), kTmesh(:), mu_e(:), n_ehst(:,:,:)
  real(dp),allocatable :: shiftk(:,:), new_shiftk(:,:), wtk(:), kibz(:,:), kbz(:,:)
- real(dp),allocatable :: n_ehst(:,:,:)
 !*******************************************************
 
  ! Change communicator for I/O (mandatory!)
@@ -160,14 +160,15 @@ program abitk
    call hdr%echo(fform, rdwr, unit=std_out)
 
  case ("ibz")
-   ! Print list of kpoints in the IBZ with the corresponding weights
+   ! Print list of k-points in the IBZ with the corresponding weights
    call get_path_cryst(path, cryst, comm)
 
    call parse_kargs(kptopt, kptrlatt, nshiftk, shiftk, chksymbreak)
    ABI_CHECK(any(kptrlatt /= 0), "kptrlatt or ngkpt must be specified")
 
-   call kpts_ibz_from_kptrlatt(cryst, kptrlatt, kptopt, nshiftk, shiftk, nkibz, kibz, wtk, nkbz, kbz, &
-      new_kptrlatt=new_kptrlatt, new_shiftk=new_shiftk)
+   call kpts_ibz_from_kptrlatt(cryst, kptrlatt, kptopt, nshiftk, shiftk, & ! in
+                               nkibz, kibz, wtk, nkbz, kbz,              & ! out
+                               new_kptrlatt=new_kptrlatt, new_shiftk=new_shiftk, bz2ibz=bz2ibz) ! out
    new_nshiftk = size(new_shiftk, dim=2)
 
    write(std_out, "(/, a)")" Input_kptrlatt | New_kptrlatt"
@@ -188,6 +189,65 @@ program abitk
    do ii=1,nkibz
      write(std_out, "(3(es11.4),a,es11.4)") kibz(:, ii), " # wtk ", wtk(ii)
    end do
+
+   NCF_CHECK(nctk_open_create(ncid, "KMESH.nc", comm))
+   NCF_CHECK(cryst%ncwrite(ncid))
+
+   ncerr = nctk_def_dims(ncid, [ &
+     nctkdim_t("nkibz", nkibz), nctkdim_t("nkbz", nkbz), &
+     nctkdim_t("nshiftk", nshiftk), nctkdim_t("new_nshiftk", new_nshiftk) &
+   ], defmode=.True.)
+   NCF_CHECK(ncerr)
+
+   ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: &
+     "kptopt" &
+   ])
+   NCF_CHECK(ncerr)
+
+   !ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: &
+   !  "wr_step", &
+   !])
+   !NCF_CHECK(ncerr)
+
+   ! Define arrays with results.
+   ncerr = nctk_def_arrays(ncid, [ &
+     nctkarr_t("kptrlatt", "int", "three, three"), &
+     nctkarr_t("new_kptrlatt", "int", "three, three"), &
+     nctkarr_t("shiftk", "dp", "three, nshiftk"), &
+     nctkarr_t("new_shiftk", "dp", "three, new_nshiftk"), &
+     nctkarr_t("kibz", "dp", "three, nkibz"), &
+     nctkarr_t("bz2ibz", "int", "six, nkbz"), &
+     nctkarr_t("wtk", "dp", "nkibz"), &
+     nctkarr_t("kbz", "dp", "three, nkbz") &
+   ])
+   NCF_CHECK(ncerr)
+
+   ! ==========
+   ! Write data
+   ! ==========
+   NCF_CHECK(nctk_set_datamode(ncid))
+   ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: &
+     "kptopt"], &
+     [kptopt])
+   NCF_CHECK(ncerr)
+
+   !ncerr = nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: &
+   !  "wr_step", "ecuteps", "ecut", "ecutsigx", "gwr_boxcutmin", &
+   !  [gwr%wr_step, dtset%ecuteps, dtset%ecut, dtset%ecutsigx, dtset%gwr_boxcutmin, &
+   !  ])
+   !NCF_CHECK(ncerr)
+
+   NCF_CHECK(nf90_put_var(ncid, vid("kptrlatt"), kptrlatt))
+   NCF_CHECK(nf90_put_var(ncid, vid("new_kptrlatt"), new_kptrlatt))
+   NCF_CHECK(nf90_put_var(ncid, vid("shiftk"), shiftk))
+   NCF_CHECK(nf90_put_var(ncid, vid("new_shiftk"), new_shiftk))
+   NCF_CHECK(nf90_put_var(ncid, vid("kibz"), kibz))
+   NCF_CHECK(nf90_put_var(ncid, vid("wtk"), wtk))
+   NCF_CHECK(nf90_put_var(ncid, vid("kbz"), kbz))
+   NCF_CHECK(nf90_put_var(ncid, vid("bz2ibz"), bz2ibz))
+   NCF_CHECK(nf90_close(ncid))
+
+   ABI_FREE(bz2ibz)
 
  !case ("testkgrid")
    !call get_path_cryst(path, cryst, comm)
@@ -347,7 +407,7 @@ program abitk
    do spin=1,ebands%nsppol
      do itemp=1,ntemp
        write(std_out, "(a, 2f16.2, 2e16.2)")&
-        " T (K), mu_e (eV), nh, ne", kTmesh(itemp) / kb_HaK, mu_e(itemp) * Ha_eV, &
+         " T (K), mu_e (eV), nh, ne", kTmesh(itemp) / kb_HaK, mu_e(itemp) * Ha_eV, &
         n_ehst(2,spin,itemp) / cryst%ucvol / Bohr_cm**3, &
         n_ehst(1,spin,itemp) / cryst%ucvol / Bohr_cm**3
      end do
@@ -572,6 +632,7 @@ end subroutine get_path_ebands
 !! get_path_cryst
 !!
 !! FUNCTION
+!!  Build a crystal object from a filepath.
 !!
 !! INPUTS
 !!
@@ -629,6 +690,11 @@ subroutine parse_skw_params(params)
 
 end subroutine parse_skw_params
 !!***
+
+integer function vid(vname)
+  character(len=*),intent(in) :: vname
+  vid = nctk_idname(ncid, vname)
+end function vid
 
 end program abitk
 !!***

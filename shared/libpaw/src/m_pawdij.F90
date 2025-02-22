@@ -8,7 +8,7 @@
 !!         VNL = Sum_ij [ Dij |pi><pj| ],  with pi, pj= projectors
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2024 ABINIT group (MT, FJ, BA, JWZ)
+!! Copyright (C) 2013-2025 ABINIT group (MT, FJ, BA, JWZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2707,12 +2707,12 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
    gs1=size(pawang%gntselect,1)
    gs2=size(pawang%gntselect,2)
    ngnt=size(pawang%realgnt)
-   LIBPAW_ALLOCATE(dyadic,(2,3,3,gs2))
-   ! dyadic(1,:,:,:) : (1 - 3\hat{r}\hat{r})
-   ! dyadic(2,:,:,:) : (1 - \hat{r}\hat{r})
-   call make_dyadic(one,three,dyadic(1,1:3,1:3,1:gs2),pawang%gntselect,&
+   LIBPAW_ALLOCATE(dyadic,(3,3,gs2,2))
+   ! dyadic(:,:,:,1) : (1 - 3\hat{r}\hat{r})
+   ! dyadic(:,:,:,2) : (1 - \hat{r}\hat{r})
+   call make_dyadic(one,three,dyadic(1:3,1:3,1:gs2,1),pawang%gntselect,&
            gs1,gs2,gs2,ngnt,pawang%realgnt)
-   call make_dyadic(one,one,dyadic(2,1:3,1:3,1:gs2),pawang%gntselect,&
+   call make_dyadic(one,one,dyadic(1:3,1:3,1:gs2,2),pawang%gntselect,&
            gs1,gs2,gs2,ngnt,pawang%realgnt)
  end if
 
@@ -2766,8 +2766,8 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
      do mdir=1,3
        if (abs(nucdipmom(mdir))<tol8) cycle
        do sdir=1,3
-         me1=nucdipmom(mdir)*dijnd_rad(1,kln)*dyadic(1,mdir,sdir,klm)
-         me2=nucdipmom(mdir)*dijnd_rad(2,kln)*dyadic(2,mdir,sdir,klm)
+         me1=nucdipmom(mdir)*dijnd_rad(1,kln)*dyadic(mdir,sdir,klm,1)
+         me2=nucdipmom(mdir)*dijnd_rad(2,kln)*dyadic(mdir,sdir,klm,2)
          sme = half*(me1+me2)
          select case(sdir)
          case(1) !Sx operator
