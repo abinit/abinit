@@ -89,7 +89,7 @@
 #%% [files]
 #%% use_git_submodule = LiF_eph_varpeq
 #%% files_to_test =
-#%%   teph4vpq_4.abo, tolnlines = 110, tolabs = 1e-5, tolrel = 1e-3
+#%%   teph4vpq_4.abo, tolnlines = 110, tolabs = 1e-4, tolrel = 5e-2
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]

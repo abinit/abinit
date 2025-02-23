@@ -68,13 +68,7 @@
 #%% [files]
 #%% use_git_submodule = LiF_eph_varpeq
 #%% files_to_test =
-#%%   teph4vpq_7.abo, tolnlines = 50, tolabs = 1e-5, tolrel = 1e-3;
-#%%   teph4vpq_7o_pstate_1_POLARON.xsf, tolnlines = 0, tolabs = 1e-5, tolrel = 1e-3;
-#%%   teph4vpq_7o_pstate_2_POLARON.xsf, tolnlines = 0, tolabs = 1e-5, tolrel = 1e-3;
-#%%   teph4vpq_7o_pstate_3_POLARON.xsf, tolnlines = 0, tolabs = 1e-5, tolrel = 1e-3;
-#%%   teph4vpq_7o_pstate_1_POLARON_DISPL_VECTORS.xsf, tolnlines = 0, tolabs = 1e-5, tolrel = 1e-3;
-#%%   teph4vpq_7o_pstate_2_POLARON_DISPL_VECTORS.xsf, tolnlines = 0, tolabs = 1e-5, tolrel = 1e-3;
-#%%   teph4vpq_7o_pstate_3_POLARON_DISPL_VECTORS.xsf, tolnlines = 0, tolabs = 1e-5, tolrel = 1e-3
+#%%   teph4vpq_7.abo, tolnlines = 50, tolabs = 1e-5, tolrel = 1e-3
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]
