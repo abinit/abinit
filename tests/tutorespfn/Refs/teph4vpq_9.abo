@@ -1,8 +1,8 @@
 
-.Version 10.3.4.6 of ABINIT, released Nov 2024.
+.Version 10.3.4.7 of ABINIT, released Dec 2025.
 .(MPI version, prepared for a aarch64_darwin23.5.0_gnu14.2 computer) 
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,28 +14,28 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 22 Feb 2025.
-- ( at 17h43 )
+.Starting date : Sun 23 Feb 2025.
+- ( at 12h24 )
   
-- input  file    -> /Users/vvas/local/src/abinit/build/Test_suite/tutorespfn_teph4polaron_1-teph4polaron_2-teph4polaron_3-teph4polaron_4-teph4polaron_5-teph4polaron_6-teph4polaron_7-teph4polaron_8-teph4polaron_9-teph4polaron_10-teph4polaron_11/teph4polaron_9.abi
-- output file    -> teph4polaron_9.abo
-- root for input  files -> teph4polaron_9i
-- root for output files -> teph4polaron_9o
+- input  file    -> /Users/vvas/local/src/abinit/build/Test_suite/tutorespfn_teph4vpq_1-teph4vpq_2-teph4vpq_3-teph4vpq_4-teph4vpq_5-teph4vpq_6-teph4vpq_7-teph4vpq_8-teph4vpq_9-teph4vpq_10/teph4vpq_9.abi
+- output file    -> teph4vpq_9.abo
+- root for input  files -> teph4vpq_9i
+- root for output files -> teph4vpq_9o
 
  Symmetries : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need of the present run
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       5
-     lnmax =       5     mgfft =      16  mpssoang =       3    mqgrid =    3001
+     lnmax =       5     mgfft =      30  mpssoang =       3    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       2
     occopt =       1   xclevel =       2
 -    mband =           6        mffmem =           1         mkmem =          84
-       mpw =         905          nfft =        4096          nkpt =          84
+       mpw =         905          nfft =       27000          nkpt =          84
 ================================================================================
-P This job should need less than                      10.465 Mbytes of memory.
+P This job should need less than                      17.590 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      6.962 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
+_ WF disk file :      6.962 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
 ================================================================================
 
 --------------------------------------------------------------------------------
@@ -51,11 +51,10 @@ _ WF disk file :      6.962 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
  -outvars: echo values of preprocessed input variables --------
             acell      7.6750000000E+00  7.6750000000E+00  7.6750000000E+00 Bohr
               amu      6.94100000E+00  1.89984032E+01
-        boxcutmin      1.10000000E+00
         ddb_ngqpt        3    3    3
              ecut      3.00000000E+01 Hartree
-   eph_ngqpt_fine       13   13   13
-         eph_task          11
+ eph_frohl_ntheta          32
+         eph_task          13
 -          fftalg         312
            istwfk        2    0    0    0    0    0    0    0    0    0
                          0    0    0    0    0    0    0    0    0    0
@@ -120,7 +119,7 @@ _ WF disk file :      6.962 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 P           mkmem          84
             natom           2
             nband           6
-            ngfft          16      16      16
+            ngfft          30      30      30
              nkpt          84
              nsym          48
            ntypat           2
@@ -155,6 +154,9 @@ P           mkmem          84
                        0  0 -1   1  0 -1   0  1 -1       0  0  1  -1  0  1   0 -1  1
                       -1  1  0  -1  0  1  -1  0  0       1 -1  0   1  0 -1   1  0  0
             typat      1  2
+        vpq_avg_g           1
+        vpq_nstep         100
+       vpq_tolgrs      1.0000000000E-07
               wtk        0.00046    0.00364    0.00364    0.00364    0.00364    0.00364
                          0.00364    0.00273    0.01092    0.01092    0.01092    0.01092
                          0.01092    0.01092    0.01092    0.01092    0.01092    0.01092
@@ -187,23 +189,22 @@ iteration_state: {dtset: 1, }
 dimensions: {natom: 2, nkpt: 84, mband: 6, nsppol: 1, nspinor: 1, nspden: 1, mpw: 905, }
 cutoff_energies: {ecut:  30.0, pawecutdg:  -1.0, }
 electrons: {nelect:   1.00000000E+01, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
-meta: {optdriver: 7, eph_task: 11, }
+meta: {optdriver: 7, eph_task: 13, }
 ...
 
- mkfilename: getwfk from: teph4polaron_8o_WFK
+ mkfilename: getwfk from: teph4vpq_2o_DS4_WFK
 
  mkfilename: getddb from: LiF_eph_varpeq/out_DDB
 
- mkfilename: getdvdb from: teph4polaron_1_DVDB
+ mkfilename: getgstore from: teph4vpq_8o_GSTORE.nc
 
  Exchange-correlation functional for the present dataset will be:
   GGA: Perdew-Burke-Ernzerhof functional - ixc=11
  Citation for XC functional:
   J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
 
-- Reading GS states from WFK file: teph4polaron_8o_WFK
+- Reading GS states from WFK file: teph4vpq_2o_DS4_WFK
 - Reading DDB from file: LiF_eph_varpeq/out_DDB
-- Reading DVDB from file: teph4polaron_1_DVDB
 
 
 
@@ -303,7 +304,7 @@ meta: {optdriver: 7, eph_task: 11, }
 -                                 =     0.1185102008E+02 (THz)
 -Debye temperature from partial sums:     0.5687585851E+03 (K)
 
-- Writing phonon DOS to netcdf file: teph4polaron_9o_PHDOS.nc
+- Writing phonon DOS to netcdf file: teph4vpq_9o_PHDOS.nc
 
 --- Pseudopotential description ------------------------------------------------
 - pspini: atom type   1  psp file is /Users/vvas/local/src/abinit/tests/Pspdir/Psdj_nc_sr_05_pbe_std_psp8/Li.psp8
@@ -338,6 +339,9 @@ meta: {optdriver: 7, eph_task: 11, }
    7.61971847E+01                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
 
+ Computing variational polaron equations from pre-existent GSTORE file: teph4vpq_8o_GSTORE.nc
+ Initializing gstore object from: teph4vpq_8o_GSTORE.nc 
+
  === Gstore parameters ===
  kzone: bz
  kfilter: erange
@@ -365,39 +369,74 @@ P Number of CPUs for parallelism over perturbations: 1
 P Number of perturbations treated by this CPU: 6
 P Number of CPUs for parallelism over q-points: 1
 P Number of CPUs for parallelism over k-points: 1
- Cannot find all IBZ q-points in the DVDB --> Activating Fourier interpolation.
- 
- gstore_completed: 1
- gstore_done_qbz_spin: 597
- gqk%nb: 1
- gqk%glob_nq: 597
- gqk%glob_nk: 89
- E-PH matrix elements:
-    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
- |g(k,q)|^2 in Ha^2 for iq: 1 ik: 1 mode: 4
-    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
-     1     1     4     1     1     9.777767E-20
- |g(k,q)|^2 in Ha^2 for iq: 1 ik: 1 mode: 6
-    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
-     1     1     6     1     1     2.949707E-21
- |g(k,q)|^2 in Ha^2 for iq: 1 ik: 89 mode: 4
-    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
-     1    89     4     1     1     1.208143E-19
- |g(k,q)|^2 in Ha^2 for iq: 1 ik: 89 mode: 6
-    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
-     1    89     6     1     1     3.425978E-21
- |g(k,q)|^2 in Ha^2 for iq: 597 ik: 1 mode: 4
-    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
-   597     1     4     1     1     1.113755E-04
- |g(k,q)|^2 in Ha^2 for iq: 597 ik: 1 mode: 6
-    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
-   597     1     6     1     1     1.097834E-04
- |g(k,q)|^2 in Ha^2 for iq: 597 ik: 89 mode: 4
-    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
-   597    89     4     1     1     1.202732E-04
- |g(k,q)|^2 in Ha^2 for iq: 597 ik: 89 mode: 6
-    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
-   597    89     6     1     1     1.168999E-04
+
+  === Variational Polaron Equations ===
+
+ Polaron:
+   * Polaron kind: electron
+   * BvK supercell: 13x13x13
+   * Number of independent spin polarizations: 1
+   * Number of polaronic states: 1
+   * Filtering of electronic states: yes
+   * Energy filter wrt band edge for spin 1/1: 1.00E+00 eV
+
+ Long-range corrections:
+   * Frohlich correction: yes
+   * Frohlich correction value: -2.138092E-01 eV
+   * Frohlich correction included in matrix elements: yes
+
+ Optimization parameters:
+   * Initial seed: charge localization A_nk
+   * Initial seed type: Gaussian, based on the electroic energies
+   * Tolerance on the gradient norm: 1.00E-07
+   * Maximum number of iterations per state: 100
+
+ Solving the variational polaron equations for each state...
+   * spin 1/1, pstate 1/1...
+   Done
+
+ Printing the optimization logs
+   --------------------------------------------------------------------------------------
+   * spin 1/1, pstate 1/1
+   * values in the optimization log are in (a.u.)
+   --------------------------------------------------------------------------------------
+   Step        E_pol         E_el         E_ph       E_elph      epsilon     ||grad||
+      1   4.7876E-03   2.3556E-02   1.8769E-02  -3.7538E-02  -1.3981E-02   6.4305E-04
+      2  -8.8819E-03   6.3270E-03   1.5209E-02  -3.0418E-02  -2.4091E-02   1.5125E-04
+      3  -9.2615E-03   6.6493E-03   1.5911E-02  -3.1822E-02  -2.5172E-02   3.5453E-05
+      4  -9.3029E-03   6.2189E-03   1.5522E-02  -3.1043E-02  -2.4825E-02   1.8284E-05
+      5  -9.3166E-03   5.9386E-03   1.5255E-02  -3.0510E-02  -2.4572E-02   1.0095E-05
+      6  -9.3232E-03   5.7221E-03   1.5045E-02  -3.0091E-02  -2.4369E-02   7.2587E-06
+      7  -9.3266E-03   5.5681E-03   1.4895E-02  -2.9789E-02  -2.4221E-02   5.3395E-06
+      8  -9.3287E-03   5.4503E-03   1.4779E-02  -2.9558E-02  -2.4108E-02   4.1072E-06
+      9  -9.3299E-03   5.3585E-03   1.4688E-02  -2.9377E-02  -2.4018E-02   3.1503E-06
+     10  -9.3306E-03   5.2856E-03   1.4616E-02  -2.9232E-02  -2.3947E-02   2.5170E-06
+     11  -9.3311E-03   5.2274E-03   1.4558E-02  -2.9117E-02  -2.3890E-02   2.0019E-06
+     12  -9.3314E-03   5.1799E-03   1.4511E-02  -2.9023E-02  -2.3843E-02   1.6346E-06
+     13  -9.3316E-03   5.1412E-03   1.4473E-02  -2.8946E-02  -2.3805E-02   1.3282E-06
+     14  -9.3318E-03   5.1092E-03   1.4441E-02  -2.8882E-02  -2.3773E-02   1.1017E-06
+     15  -9.3319E-03   5.0827E-03   1.4415E-02  -2.8829E-02  -2.3747E-02   9.0799E-07
+     16  -9.3320E-03   5.0606E-03   1.4393E-02  -2.8785E-02  -2.3724E-02   7.6145E-07
+     17  -9.3320E-03   5.0421E-03   1.4374E-02  -2.8748E-02  -2.3706E-02   6.3375E-07
+     18  -9.3320E-03   5.0265E-03   1.4359E-02  -2.8717E-02  -2.3691E-02   5.3551E-07
+     19  -9.3321E-03   5.0134E-03   1.4345E-02  -2.8691E-02  -2.3677E-02   4.4884E-07
+     20  -9.3321E-03   5.0022E-03   1.4334E-02  -2.8669E-02  -2.3666E-02   3.8126E-07
+     21  -9.3321E-03   4.9929E-03   1.4325E-02  -2.8650E-02  -2.3657E-02   3.2119E-07
+     22  -9.3321E-03   4.9849E-03   1.4317E-02  -2.8634E-02  -2.3649E-02   2.7384E-07
+     23  -9.3321E-03   4.9781E-03   1.4310E-02  -2.8620E-02  -2.3642E-02   2.3156E-07
+     24  -9.3321E-03   4.9723E-03   1.4304E-02  -2.8609E-02  -2.3637E-02   1.9793E-07
+     25  -9.3321E-03   4.9674E-03   1.4300E-02  -2.8599E-02  -2.3632E-02   1.6784E-07
+     26  -9.3321E-03   4.9632E-03   1.4295E-02  -2.8591E-02  -2.3627E-02   1.4373E-07
+     27  -9.3321E-03   4.9596E-03   1.4292E-02  -2.8584E-02  -2.3624E-02   1.2213E-07
+     28  -9.3321E-03   4.9566E-03   1.4289E-02  -2.8577E-02  -2.3621E-02   1.0471E-07
+     29  -9.3321E-03   4.9540E-03   1.4286E-02  -2.8572E-02  -2.3618E-02   8.9121E-08
+   --------------------------------------------------------------------------------------
+   Converged: ||grad||=8.9121E-08 < vpq_tolgrs=1.0000E-07
+   E_pol (eV):  -2.53940098E-01
+     eps (eV):  -6.42684921E-01
+   --------------------------------------------------------------------------------------
+
+ Saving results to: teph4vpq_9o_VPQ.nc
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -405,11 +444,10 @@ P Number of CPUs for parallelism over k-points: 1
  -outvars: echo values of variables after computation  --------
             acell      7.6750000000E+00  7.6750000000E+00  7.6750000000E+00 Bohr
               amu      6.94100000E+00  1.89984032E+01
-        boxcutmin      1.10000000E+00
         ddb_ngqpt        3    3    3
              ecut      3.00000000E+01 Hartree
-   eph_ngqpt_fine       13   13   13
-         eph_task          11
+ eph_frohl_ntheta          32
+         eph_task          13
            etotal      0.0000000000E+00
             fcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -420,7 +458,7 @@ P Number of CPUs for parallelism over k-points: 1
 P           mkmem          84
             natom           2
             nband           6
-            ngfft          16      16      16
+            ngfft          30      30      30
              nkpt          84
              nsym          48
            ntypat           2
@@ -457,6 +495,9 @@ P           mkmem          84
                        0  0 -1   1  0 -1   0  1 -1       0  0  1  -1  0  1   0 -1  1
                       -1  1  0  -1  0  1  -1  0  0       1 -1  0   1  0 -1   1  0  0
             typat      1  2
+        vpq_avg_g           1
+        vpq_nstep         100
+       vpq_tolgrs      1.0000000000E-07
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.0307175380E+00  2.0307175380E+00  2.0307175380E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -559,10 +600,10 @@ P           mkmem          84
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         56.5  wall=         56.8
+- Proc.   0 individual time (sec): cpu=          8.4  wall=          8.5
 
 ================================================================================
 
  Calculation completed.
-.Delivered   1 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         56.5  wall=         56.8
+.Delivered   0 WARNINGs and   4 COMMENTs to log file.
++Overall time at end (sec) : cpu=          8.4  wall=          8.5

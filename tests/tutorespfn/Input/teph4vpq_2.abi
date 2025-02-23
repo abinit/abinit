@@ -1,11 +1,16 @@
 # LiF: non-SCF computation of groundstate wavefunctions
-# (preparatory run for VarPEq hole polaron calculations)
+# (preparatory run for VarPEq polaron calculations)
 
- ndtset 3
+ ndtset 4
 
-# DTSET 1-3: Gamma-centred k-meshes from 3x3x3 to 5x5x5
- ngkpt:   3 3 3
- ngkpt+   1 1 1
+# DTSET 1-3: Gamma-centred k-meshes from 3x3x3 to 5x5x5 (for small hole polaron)
+ ngkpt1  3 3 3
+ ngkpt2  4 4 4
+ ngkpt3  5 5 5
+
+# DTSET 4: Gamma-centred k-meshes from 13x13x13 (for large electron polaron)
+ ngkpt4  13 13 13
+
  nshiftk  1
  shiftk   0.0  0.0  0.0
 
@@ -54,14 +59,14 @@
 #%% [setup]
 #%% executable = abinit
 #%% exclude_builders = eos_nvhpc_*
-#%% test_chain = teph4polaron_1.abi, teph4polaron_2.abi, teph4polaron_3.abi,
-#%%              teph4polaron_4.abi, teph4polaron_5.abi, teph4polaron_6.abi,
-#%%              teph4polaron_7.abi, teph4polaron_8.abi, teph4polaron_9.abi,
-#%%              teph4polaron_10.abi, teph4polaron_11.abi
+#%% test_chain = teph4vpq_1.abi, teph4vpq_2.abi, teph4vpq_3.abi,
+#%%              teph4vpq_4.abi, teph4vpq_5.abi, teph4vpq_6.abi,
+#%%              teph4vpq_7.abi, teph4vpq_8.abi, teph4vpq_9.abi,
+#%%              teph4vpq_10.abi
 #%% [files]
 #%% use_git_submodule = LiF_eph_varpeq
 #%% files_to_test =
-#%%   teph4polaron_2.abo, tolnlines = 70, tolabs = 1e-5, tolrel = 1e-3
+#%%   teph4vpq_2.abo, tolnlines = 70, tolabs = 1e-5, tolrel = 1e-3
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]
@@ -69,6 +74,6 @@
 #%% keywords = DFPT, EPH, POLARON
 #%% description =
 #%%   LiF, Fm-3m space group.
-#%%   Preparatory run for VarPEq calculations (hole polaron).
+#%%   Preparatory run for VarPEq calculations.
 #%%   Non-SCF computation of groundstate wavefunctions.
 #%%<END TEST_INFO>

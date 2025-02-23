@@ -1,18 +1,31 @@
-# LiF: computation of a large electron polaron on 13x13x13 k/q-grids
-# with long-range Frohlich correction.
+# LiF: computation of a small hole polaron on 3x3x3 k/q-grid with long-range
+# Frohlich correction. Multiple polaronic states.
 
  optdriver  7   # Electron-phonon driver
  eph_task   13  # Activate the Variational Polaron Equations solver
 
 # Variational Polaron Equations parameters
- vpq_pkind  "electron"  # Electron polaron
- vpq_tolgrs  1e-7       # Tolerance on the gradient norm
- vpq_nstep   100        # Maximum number of optimization steps
+ vpq_pkind  "hole"  # Hole polaron
+ vpq_tolgrs  1e-7   # Tolerance on the gradient norm
+
+ # Optimization for multiple polaronic states
+
+ # For state > 1, the optimization is perormed with orthogonalization constraint
+ # wrt all previous polaronic states.
+ # NOTE that after vpq_nstep_ort the constraint is lifted, as the final polaron
+ # is not necessarily orthogonal to the previous ones.
+ # The orthogonalization process helps brining the next solution far away from
+ # all the previous one before its optimization.
+
+ vpq_nstates     3     # 3 states
+ vpq_nstep       100   # Maximum number of optimization steps
+ vpq_nstep_ort   30    # Maximum number of steps for which the orthogonalization
+                       # constraint is applied
+ vpq_translate   1     # Take into account the translational invariance
 
  # these parameters are default but given here explicitly for clarity
  vpq_aseed      "gau_energy"  # Initial charge localization is Guassian-like
  vpq_gpr_energy  0. 1.        # Gaussian parameters for initial charge
- vpq_nstates     1            # Number of polaronic states
 
 # Frohlich correction
  eph_frohl_ntheta  32   # Number of divisions for the spherical integration of
@@ -25,14 +38,14 @@
  vpq_avg_g  1  # Apply Frohlich correction to e-ph coupling
 
 
-# Electron-phonon matrix elements (with energy filtering)
- getgstore_filepath  "teph4polaron_9o_GSTORE.nc" # 13x13x13 k/q-mesh
+# Electron-phonon matrix elements
+ getgstore_filepath "teph4vpq_3o_DS1_GSTORE.nc" # 3x3x3 k/q-mesh
 
 # Wavefunction
 # Read the WFK file from the preparatory run
- getwfk_filepath  "teph4polaron_8o_WFK"  # 13x13x13 k-mesh
+ getwfk_filepath "teph4vpq_2o_DS1_WFK"  # 3x3x3 k-mesh
 
- ngkpt    13 13 13  # These parameters have to consistent with the WFK file
+ ngkpt    3 3 3  # These parameters have to consistent with the WFK file
 
  kptopt   1
  nshiftk  1
@@ -71,14 +84,14 @@
 #%% [setup]
 #%% executable = abinit
 #%% exclude_builders = eos_nvhpc_*
-#%% test_chain = teph4polaron_1.abi, teph4polaron_2.abi, teph4polaron_3.abi,
-#%%              teph4polaron_4.abi, teph4polaron_5.abi, teph4polaron_6.abi,
-#%%              teph4polaron_7.abi, teph4polaron_8.abi, teph4polaron_9.abi,
-#%%              teph4polaron_10.abi, teph4polaron_11.abi
+#%% test_chain = teph4vpq_1.abi, teph4vpq_2.abi, teph4vpq_3.abi,
+#%%              teph4vpq_4.abi, teph4vpq_5.abi, teph4vpq_6.abi,
+#%%              teph4vpq_7.abi, teph4vpq_8.abi, teph4vpq_9.abi,
+#%%              teph4vpq_10.abi
 #%% [files]
 #%% use_git_submodule = LiF_eph_varpeq
 #%% files_to_test =
-#%%   teph4polaron_10.abo, tolnlines = 60, tolabs = 1e-5, tolrel = 1e-3
+#%%   teph4vpq_6.abo, tolnlines = 80, tolabs = 1e-5, tolrel = 1e-3
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]
@@ -86,7 +99,7 @@
 #%% keywords = DFPT, EPH, POLARON
 #%% description =
 #%%   LiF, Fm-3m space group.
-#%%   Computation of a large electron polaron on 13x13x13 k/q-grid
-#%%   via Variational Polaron Equations with long-range Frohlich
-#%%   correction and energy filtering.
+#%%   Computation of a small hole polaron on 3x3x3 k/q-grid
+#%%   via Variational Polaron Equations with long-range Frohlich correction.
+#%%   Multiple polaronic states.
 #%%<END TEST_INFO>
