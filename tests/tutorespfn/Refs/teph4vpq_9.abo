@@ -1,6 +1,6 @@
 
 .Version 10.3.4.7 of ABINIT, released Dec 2025.
-.(MPI version, prepared for a aarch64_darwin23.5.0_gnu14.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -15,9 +15,9 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Sun 23 Feb 2025.
-- ( at 14h43 )
+- ( at 16h11 )
   
-- input  file    -> /Users/vvas/local/src/abinit/build/Test_suite/tutorespfn_teph4vpq_1-teph4vpq_2-teph4vpq_3-teph4vpq_4-teph4vpq_5-teph4vpq_6-teph4vpq_7-teph4vpq_8-teph4vpq_9-teph4vpq_10/teph4vpq_9.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/vvasilchenko_varpeq_nosym/tests/TestBot_MPI1/tutorespfn_teph4vpq_1-teph4vpq_2-teph4vpq_3-teph4vpq_4-teph4vpq_5-teph4vpq_6-teph4vpq_7-teph4vpq_8-teph4vpq_9-teph4vpq_10/teph4vpq_9.abi
 - output file    -> teph4vpq_9.abo
 - root for input  files -> teph4vpq_9i
 - root for output files -> teph4vpq_9o
@@ -43,7 +43,7 @@ _ WF disk file :      6.962 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
@@ -55,7 +55,7 @@ _ WF disk file :      6.962 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
              ecut      3.00000000E+01 Hartree
  eph_frohl_ntheta          32
          eph_task          13
--          fftalg         312
+-          fftalg         512
            istwfk        2    0    0    0    0    0    0    0    0    0
                          0    0    0    0    0    0    0    0    0    0
                          0    0    0    0    0    0    0    0    0    0
@@ -307,8 +307,8 @@ meta: {optdriver: 7, eph_task: 13, }
 - Writing phonon DOS to netcdf file: teph4vpq_9o_PHDOS.nc
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /Users/vvas/local/src/abinit/tests/Pspdir/Psdj_nc_sr_05_pbe_std_psp8/Li.psp8
-- pspatm: opening atomic psp file    /Users/vvas/local/src/abinit/tests/Pspdir/Psdj_nc_sr_05_pbe_std_psp8/Li.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/vvasilchenko_varpeq_nosym/tests/Pspdir/Psdj_nc_sr_05_pbe_std_psp8/Li.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/vvasilchenko_varpeq_nosym/tests/Pspdir/Psdj_nc_sr_05_pbe_std_psp8/Li.psp8
 - Li    ONCVPSP-3.2.3.1  r_core=   1.40824   1.10935
 -  3.00000   3.00000    170503                znucl, zion, pspdat
     8   11    1    4       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -321,8 +321,8 @@ meta: {optdriver: 7, eph_task: 13, }
              1   -2.250662   -0.474685
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /Users/vvas/local/src/abinit/tests/Pspdir/Psdj_nc_sr_05_pbe_std_psp8/F.psp8
-- pspatm: opening atomic psp file    /Users/vvas/local/src/abinit/tests/Pspdir/Psdj_nc_sr_05_pbe_std_psp8/F.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/vvasilchenko_varpeq_nosym/tests/Pspdir/Psdj_nc_sr_05_pbe_std_psp8/F.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/vvasilchenko_varpeq_nosym/tests/Pspdir/Psdj_nc_sr_05_pbe_std_psp8/F.psp8
 - F     ONCVPSP-3.2.3.1  r_core=   1.30942   1.45782   1.60379
 -  9.00000   7.00000    170504                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -410,13 +410,13 @@ P Number of CPUs for parallelism over k-points: 1
       7  -9.3266E-03   5.5681E-03   1.4895E-02  -2.9789E-02  -2.4221E-02   5.3395E-06
       8  -9.3287E-03   5.4503E-03   1.4779E-02  -2.9558E-02  -2.4108E-02   4.1072E-06
       9  -9.3299E-03   5.3585E-03   1.4688E-02  -2.9377E-02  -2.4018E-02   3.1503E-06
-     10  -9.3306E-03   5.2856E-03   1.4616E-02  -2.9232E-02  -2.3947E-02   2.5170E-06
+     10  -9.3306E-03   5.2856E-03   1.4616E-02  -2.9232E-02  -2.3947E-02   2.5171E-06
      11  -9.3311E-03   5.2274E-03   1.4558E-02  -2.9117E-02  -2.3890E-02   2.0019E-06
      12  -9.3314E-03   5.1799E-03   1.4511E-02  -2.9023E-02  -2.3843E-02   1.6346E-06
      13  -9.3316E-03   5.1412E-03   1.4473E-02  -2.8946E-02  -2.3805E-02   1.3282E-06
      14  -9.3318E-03   5.1092E-03   1.4441E-02  -2.8882E-02  -2.3773E-02   1.1017E-06
      15  -9.3319E-03   5.0827E-03   1.4415E-02  -2.8829E-02  -2.3747E-02   9.0799E-07
-     16  -9.3320E-03   5.0606E-03   1.4393E-02  -2.8785E-02  -2.3724E-02   7.6145E-07
+     16  -9.3320E-03   5.0606E-03   1.4393E-02  -2.8785E-02  -2.3724E-02   7.6146E-07
      17  -9.3320E-03   5.0421E-03   1.4374E-02  -2.8748E-02  -2.3706E-02   6.3375E-07
      18  -9.3320E-03   5.0265E-03   1.4359E-02  -2.8717E-02  -2.3691E-02   5.3551E-07
      19  -9.3321E-03   5.0134E-03   1.4345E-02  -2.8691E-02  -2.3677E-02   4.4884E-07
@@ -432,8 +432,8 @@ P Number of CPUs for parallelism over k-points: 1
      29  -9.3321E-03   4.9540E-03   1.4286E-02  -2.8572E-02  -2.3618E-02   8.9121E-08
    --------------------------------------------------------------------------------------
    Converged: ||grad||=8.9121E-08 < vpq_tolgrs=1.0000E-07
-   E_pol (eV):  -2.53940098E-01
-     eps (eV):  -6.42684921E-01
+   E_pol (eV):  -2.53940094E-01
+     eps (eV):  -6.42684892E-01
    --------------------------------------------------------------------------------------
 
  Saving results to: teph4vpq_9o_VPQ.nc
@@ -451,7 +451,7 @@ P Number of CPUs for parallelism over k-points: 1
            etotal      0.0000000000E+00
             fcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         312
+-          fftalg         512
               ixc          11
          kptrlatt       13    0    0      0   13    0      0    0   13
           kptrlen      7.05515791E+01
@@ -600,10 +600,10 @@ P           mkmem          84
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          8.3  wall=          8.4
+- Proc.   0 individual time (sec): cpu=         17.4  wall=         17.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          8.3  wall=          8.4
++Overall time at end (sec) : cpu=         17.4  wall=         17.4

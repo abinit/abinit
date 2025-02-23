@@ -1,6 +1,6 @@
 
 .Version 10.3.4.7 of ABINIT, released Dec 2025.
-.(MPI version, prepared for a aarch64_darwin23.5.0_gnu14.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -15,9 +15,9 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Sun 23 Feb 2025.
-- ( at 14h42 )
+- ( at 16h09 )
   
-- input  file    -> /Users/vvas/local/src/abinit/build/Test_suite/tutorespfn_teph4vpq_1-teph4vpq_2-teph4vpq_3-teph4vpq_4-teph4vpq_5-teph4vpq_6-teph4vpq_7-teph4vpq_8-teph4vpq_9-teph4vpq_10/teph4vpq_8.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/vvasilchenko_varpeq_nosym/tests/TestBot_MPI1/tutorespfn_teph4vpq_1-teph4vpq_2-teph4vpq_3-teph4vpq_4-teph4vpq_5-teph4vpq_6-teph4vpq_7-teph4vpq_8-teph4vpq_9-teph4vpq_10/teph4vpq_8.abi
 - output file    -> teph4vpq_8.abo
 - root for input  files -> teph4vpq_8i
 - root for output files -> teph4vpq_8o
@@ -43,7 +43,7 @@ _ WF disk file :      6.962 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
@@ -56,7 +56,7 @@ _ WF disk file :      6.962 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
              ecut      3.00000000E+01 Hartree
    eph_ngqpt_fine       13   13   13
          eph_task          11
--          fftalg         312
+-          fftalg         512
            istwfk        2    0    0    0    0    0    0    0    0    0
                          0    0    0    0    0    0    0    0    0    0
                          0    0    0    0    0    0    0    0    0    0
@@ -306,8 +306,8 @@ meta: {optdriver: 7, eph_task: 11, }
 - Writing phonon DOS to netcdf file: teph4vpq_8o_PHDOS.nc
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /Users/vvas/local/src/abinit/tests/Pspdir/Psdj_nc_sr_05_pbe_std_psp8/Li.psp8
-- pspatm: opening atomic psp file    /Users/vvas/local/src/abinit/tests/Pspdir/Psdj_nc_sr_05_pbe_std_psp8/Li.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/vvasilchenko_varpeq_nosym/tests/Pspdir/Psdj_nc_sr_05_pbe_std_psp8/Li.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/vvasilchenko_varpeq_nosym/tests/Pspdir/Psdj_nc_sr_05_pbe_std_psp8/Li.psp8
 - Li    ONCVPSP-3.2.3.1  r_core=   1.40824   1.10935
 -  3.00000   3.00000    170503                znucl, zion, pspdat
     8   11    1    4       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -320,8 +320,8 @@ meta: {optdriver: 7, eph_task: 11, }
              1   -2.250662   -0.474685
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /Users/vvas/local/src/abinit/tests/Pspdir/Psdj_nc_sr_05_pbe_std_psp8/F.psp8
-- pspatm: opening atomic psp file    /Users/vvas/local/src/abinit/tests/Pspdir/Psdj_nc_sr_05_pbe_std_psp8/F.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/vvasilchenko_varpeq_nosym/tests/Pspdir/Psdj_nc_sr_05_pbe_std_psp8/F.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/vvasilchenko_varpeq_nosym/tests/Pspdir/Psdj_nc_sr_05_pbe_std_psp8/F.psp8
 - F     ONCVPSP-3.2.3.1  r_core=   1.30942   1.45782   1.60379
 -  9.00000   7.00000    170504                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -376,16 +376,16 @@ P Number of CPUs for parallelism over k-points: 1
     iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
  |g(k,q)|^2 in Ha^2 for iq: 1 ik: 1 mode: 4
     iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
-     1     1     4     1     1     9.777767E-20
+     1     1     4     1     1     5.990915E-21
  |g(k,q)|^2 in Ha^2 for iq: 1 ik: 1 mode: 6
     iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
-     1     1     6     1     1     2.949707E-21
+     1     1     6     1     1     4.823706E-22
  |g(k,q)|^2 in Ha^2 for iq: 1 ik: 89 mode: 4
     iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
-     1    89     4     1     1     1.208143E-19
+     1    89     4     1     1     1.288018E-20
  |g(k,q)|^2 in Ha^2 for iq: 1 ik: 89 mode: 6
     iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
-     1    89     6     1     1     3.425978E-21
+     1    89     6     1     1     8.743398E-22
  |g(k,q)|^2 in Ha^2 for iq: 597 ik: 1 mode: 4
     iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
    597     1     4     1     1     1.113755E-04
@@ -413,7 +413,7 @@ P Number of CPUs for parallelism over k-points: 1
            etotal      0.0000000000E+00
             fcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         312
+-          fftalg         512
               ixc          11
          kptrlatt       13    0    0      0   13    0      0    0   13
           kptrlen      7.05515791E+01
@@ -559,10 +559,10 @@ P           mkmem          84
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         56.7  wall=         57.0
+- Proc.   0 individual time (sec): cpu=         93.3  wall=         93.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         56.7  wall=         57.0
++Overall time at end (sec) : cpu=         93.3  wall=         93.3

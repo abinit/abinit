@@ -3665,7 +3665,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
                                          " integrates to: ", sum(pol_rhor) * cryst%ucvol / product(ds_ngfft(1:3))
          call wrtout(units, msg)
          write(msg, "(a,es16.6)")" maxval(abs(aimag(pol_wfr))): ", maxval(abs(aimag(pol_wfr(:, ip, spin))))
-         call wrtout(units, msg)
+         call wrtout(std_out, msg)
          call center_and_spread(cryst, vpq%ngkpt, sc_ngfft, pol_rhor, center_cart, spread, units)
 
          do ii=1,num_writes
