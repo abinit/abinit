@@ -3785,10 +3785,10 @@ subroutine center_and_spread(prim_cryst, ncells, sc_ngfft, rhor, center_cart, sp
 
  !center_cart = matmul(sc_rprimd, center_cart)
  center_cart = center_cart * num_cells * prim_cryst%ucvol / (one*nfft)
- r2_mean = r2_mean * num_cells * prim_cryst%ucvol / (one*nfft)
- spread = sqrt(r2_mean - dot_product(center_cart, center_cart))
- write(msg, "(a,2(es16.6,a))")" Polaron spread: ", spread, " (Bohr)", spread * Bohr_Ang, " (Ang)"
- call wrtout(units, msg)
+ !r2_mean = r2_mean * num_cells * prim_cryst%ucvol / (one*nfft)
+ !spread = sqrt(r2_mean - dot_product(center_cart, center_cart))
+ !write(msg, "(a,2(es16.6,a))")" Polaron spread: ", spread, " (Bohr)", spread * Bohr_Ang, " (Ang)"
+ !call wrtout(units, msg)
 
  ! Compute = \int (r - center_cart)^2 rhor dr = <r^2> - <r>^2
  spread = zero
