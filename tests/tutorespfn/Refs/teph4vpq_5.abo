@@ -1,8 +1,8 @@
 
-.Version 10.3.4.6 of ABINIT, released Nov 2024.
+.Version 10.3.4.7 of ABINIT, released Dec 2025.
 .(MPI version, prepared for a aarch64_darwin23.5.0_gnu14.2 computer) 
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,13 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 22 Feb 2025.
-- ( at 17h42 )
+.Starting date : Sun 23 Feb 2025.
+- ( at 12h23 )
   
-- input  file    -> /Users/vvas/local/src/abinit/build/Test_suite/tutorespfn_teph4polaron_1-teph4polaron_2-teph4polaron_3-teph4polaron_4-teph4polaron_5-teph4polaron_6-teph4polaron_7-teph4polaron_8-teph4polaron_9-teph4polaron_10-teph4polaron_11/teph4polaron_4.abi
-- output file    -> teph4polaron_4.abo
-- root for input  files -> teph4polaron_4i
-- root for output files -> teph4polaron_4o
+- input  file    -> /Users/vvas/local/src/abinit/build/Test_suite/tutorespfn_teph4vpq_1-teph4vpq_2-teph4vpq_3-teph4vpq_4-teph4vpq_5-teph4vpq_6-teph4vpq_7-teph4vpq_8-teph4vpq_9-teph4vpq_10/teph4vpq_5.abi
+- output file    -> teph4vpq_5.abo
+- root for input  files -> teph4vpq_5i
+- root for output files -> teph4vpq_5o
 
  DATASET    1 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
@@ -168,7 +168,6 @@ P           mkmem3         10
                        0  0 -1   1  0 -1   0  1 -1       0  0  1  -1  0  1   0 -1  1
                       -1  1  0  -1  0  1  -1  0  0       1 -1  0   1  0 -1   1  0  0
             typat      1  2
-        vpq_avg_g           1
        vpq_tolgrs      1.0000000000E-05
               wtk1       0.03704    0.29630    0.22222    0.44444
               wtk2       0.01563    0.12500    0.06250    0.09375    0.37500    0.18750
@@ -204,18 +203,18 @@ electrons: {nelect:   1.00000000E+01, charge:   0.00000000E+00, occopt:   1.0000
 meta: {optdriver: 7, eph_task: 13, }
 ...
 
- mkfilename: getwfk from: teph4polaron_2o_DS1_WFK
+ mkfilename: getwfk from: teph4vpq_2o_DS1_WFK
 
  mkfilename: getddb from: LiF_eph_varpeq/out_DDB
 
- mkfilename: getgstore from: teph4polaron_3o_DS1_GSTORE.nc
+ mkfilename: getgstore from: teph4vpq_3o_DS1_GSTORE.nc
 
  Exchange-correlation functional for the present dataset will be:
   GGA: Perdew-Burke-Ernzerhof functional - ixc=11
  Citation for XC functional:
   J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
 
-- Reading GS states from WFK file: teph4polaron_2o_DS1_WFK
+- Reading GS states from WFK file: teph4vpq_2o_DS1_WFK
 - Reading DDB from file: LiF_eph_varpeq/out_DDB
 
 
@@ -316,7 +315,7 @@ meta: {optdriver: 7, eph_task: 13, }
 -                                 =     0.1185102008E+02 (THz)
 -Debye temperature from partial sums:     0.5687585851E+03 (K)
 
-- Writing phonon DOS to netcdf file: teph4polaron_4o_DS1_PHDOS.nc
+- Writing phonon DOS to netcdf file: teph4vpq_5o_DS1_PHDOS.nc
 
 --- Pseudopotential description ------------------------------------------------
 - pspini: atom type   1  psp file is /Users/vvas/local/src/abinit/tests/Pspdir/Psdj_nc_sr_05_pbe_std_psp8/Li.psp8
@@ -351,8 +350,8 @@ meta: {optdriver: 7, eph_task: 13, }
    7.61971847E+01                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
 
- Computing variational polaron equations from pre-existent GSTORE file: teph4polaron_3o_DS1_GSTORE.nc
- Initializing gstore object from: teph4polaron_3o_DS1_GSTORE.nc 
+ Computing variational polaron equations from pre-existent GSTORE file: teph4vpq_3o_DS1_GSTORE.nc
+ Initializing gstore object from: teph4vpq_3o_DS1_GSTORE.nc 
 
  === Gstore parameters ===
  kzone: bz
@@ -394,7 +393,7 @@ P Number of CPUs for parallelism over k-points: 1
  Long-range corrections:
    * Frohlich correction: yes
    * Frohlich correction value: 9.265067E-01 eV
-   * Frohlich correction included in matrix elements: yes
+   * Frohlich correction included in matrix elements: no
 
  Optimization parameters:
    * Initial seed: charge localization A_nk
@@ -412,51 +411,30 @@ P Number of CPUs for parallelism over k-points: 1
    * values in the optimization log are in (a.u.)
    --------------------------------------------------------------------------------------
    Step        E_pol         E_el         E_ph       E_elph      epsilon     ||grad||
-      1  -3.0118E-03   4.1093E-02   4.4105E-02  -8.8210E-02   4.7117E-02   1.0900E-02
-      2  -2.4528E-02   1.9417E-02   4.3945E-02  -8.7891E-02   6.8473E-02   2.2198E-03
-      3  -3.9895E-02   3.0152E-03   4.2910E-02  -8.5819E-02   8.2804E-02   4.9899E-03
-      4  -4.1219E-02   1.7941E-03   4.3013E-02  -8.6026E-02   8.4232E-02   3.2342E-03
-      5  -4.3429E-02   5.7133E-04   4.4000E-02  -8.8000E-02   8.7429E-02   1.8175E-03
-      6  -4.7595E-02   2.6635E-03   5.0259E-02  -1.0052E-01   9.7854E-02   4.6156E-03
-      7  -5.2013E-02   5.3655E-03   5.7378E-02  -1.1476E-01   1.0939E-01   6.3385E-03
-      8  -5.6356E-02   8.0023E-03   6.4359E-02  -1.2872E-01   1.2072E-01   6.1036E-03
-      9  -6.1355E-02   1.0870E-02   7.2225E-02  -1.4445E-01   1.3358E-01   2.7021E-03
-     10  -6.3184E-02   1.1570E-02   7.4754E-02  -1.4951E-01   1.3794E-01   4.1324E-03
-     11  -6.9063E-02   1.5656E-02   8.4719E-02  -1.6944E-01   1.5378E-01   6.5822E-03
-     12  -7.5399E-02   2.2493E-02   9.7892E-02  -1.9578E-01   1.7329E-01   3.7146E-03
-     13  -7.6048E-02   2.4094E-02   1.0014E-01  -2.0028E-01   1.7619E-01   2.3119E-03
-     14  -7.6484E-02   2.6017E-02   1.0250E-01  -2.0500E-01   1.7899E-01   3.8701E-04
-     15  -7.6489E-02   2.6203E-02   1.0269E-01  -2.0538E-01   1.7918E-01   2.9740E-04
-     16  -7.6495E-02   2.6384E-02   1.0288E-01  -2.0576E-01   1.7937E-01   5.8608E-05
-     17  -7.6495E-02   2.6413E-02   1.0291E-01  -2.0582E-01   1.7940E-01   4.1064E-05
-     18  -7.6496E-02   2.6449E-02   1.0294E-01  -2.0589E-01   1.7944E-01   4.5160E-05
-     19  -7.6499E-02   2.6426E-02   1.0293E-01  -2.0585E-01   1.7942E-01   6.9919E-05
-     20  -7.6504E-02   2.6408E-02   1.0291E-01  -2.0582E-01   1.7942E-01   1.6567E-04
-     21  -7.6524E-02   2.6393E-02   1.0292E-01  -2.0583E-01   1.7944E-01   2.8985E-04
-     22  -7.6587E-02   2.6434E-02   1.0302E-01  -2.0604E-01   1.7961E-01   3.2632E-04
-     23  -7.6771E-02   2.6522E-02   1.0329E-01  -2.0658E-01   1.8006E-01   5.2643E-04
-     24  -7.7070E-02   2.6540E-02   1.0361E-01  -2.0722E-01   1.8068E-01   6.7279E-04
-     25  -7.7399E-02   2.6568E-02   1.0397E-01  -2.0793E-01   1.8137E-01   5.2144E-04
-     26  -7.7402E-02   2.6586E-02   1.0399E-01  -2.0798E-01   1.8139E-01   3.8771E-04
-     27  -7.7485E-02   2.6715E-02   1.0420E-01  -2.0840E-01   1.8168E-01   7.3990E-04
-     28  -7.7588E-02   2.6682E-02   1.0427E-01  -2.0854E-01   1.8186E-01   2.9923E-04
-     29  -7.7616E-02   2.6588E-02   1.0420E-01  -2.0841E-01   1.8182E-01   2.7317E-04
-     30  -7.7633E-02   2.6620E-02   1.0425E-01  -2.0850E-01   1.8189E-01   1.2044E-04
-     31  -7.7633E-02   2.6648E-02   1.0428E-01  -2.0856E-01   1.8191E-01   5.7835E-05
-     32  -7.7636E-02   2.6711E-02   1.0435E-01  -2.0869E-01   1.8198E-01   9.0984E-05
-     33  -7.7637E-02   2.6646E-02   1.0428E-01  -2.0857E-01   1.8192E-01   5.3464E-05
-     34  -7.7637E-02   2.6617E-02   1.0425E-01  -2.0851E-01   1.8189E-01   4.7310E-05
-     35  -7.7638E-02   2.6658E-02   1.0430E-01  -2.0859E-01   1.8193E-01   1.9031E-05
-     36  -7.7638E-02   2.6661E-02   1.0430E-01  -2.0860E-01   1.8194E-01   1.8077E-05
-     37  -7.7638E-02   2.6652E-02   1.0429E-01  -2.0858E-01   1.8193E-01   1.9269E-05
-     38  -7.7638E-02   2.6654E-02   1.0429E-01  -2.0858E-01   1.8193E-01   7.3431E-06
+      1   3.9426E-02   4.1093E-02   1.6678E-03  -3.3357E-03  -3.7758E-02   1.0825E-02
+      2   6.4833E-03   8.9971E-03   2.5138E-03  -5.0276E-03  -3.9695E-03   3.9569E-03
+      3  -5.6105E-04   2.9733E-03   3.5343E-03  -7.0687E-03   4.0954E-03   4.2857E-03
+      4  -6.2709E-03   3.0025E-03   9.2735E-03  -1.8547E-02   1.5544E-02   4.7424E-03
+      5  -1.3082E-02   6.3770E-03   1.9459E-02  -3.8919E-02   3.2542E-02   5.8569E-03
+      6  -1.8489E-02   9.9588E-03   2.8448E-02  -5.6896E-02   4.6937E-02   2.9883E-03
+      7  -1.9466E-02   1.0686E-02   3.0152E-02  -6.0304E-02   4.9618E-02   2.1338E-03
+      8  -2.0963E-02   1.2372E-02   3.3335E-02  -6.6670E-02   5.4298E-02   3.4373E-03
+      9  -2.4655E-02   1.5817E-02   4.0472E-02  -8.0944E-02   6.5127E-02   5.4693E-03
+     10  -3.0121E-02   2.1236E-02   5.1357E-02  -1.0271E-01   8.1478E-02   6.0508E-03
+     11  -3.3628E-02   2.5343E-02   5.8971E-02  -1.1794E-01   9.2599E-02   2.3212E-03
+     12  -3.3824E-02   2.5256E-02   5.9080E-02  -1.1816E-01   9.2904E-02   1.4547E-03
+     13  -3.3975E-02   2.6177E-02   6.0151E-02  -1.2030E-01   9.4126E-02   3.1391E-04
+     14  -3.3979E-02   2.6254E-02   6.0233E-02  -1.2047E-01   9.4212E-02   1.7864E-04
+     15  -3.3981E-02   2.6367E-02   6.0348E-02  -1.2070E-01   9.4329E-02   2.7798E-05
+     16  -3.3981E-02   2.6371E-02   6.0352E-02  -1.2070E-01   9.4333E-02   1.9595E-05
+     17  -3.3981E-02   2.6383E-02   6.0364E-02  -1.2073E-01   9.4345E-02   6.4483E-06
    --------------------------------------------------------------------------------------
-   Converged: ||grad||=7.3431E-06 < vpq_tolgrs=1.0000E-05
-   E_pol (eV):  -2.11263475E+00
-     eps (eV):   4.95056023E+00
+   Converged: ||grad||=6.4483E-06 < vpq_tolgrs=1.0000E-05
+   E_pol (eV):  -9.24669898E-01
+     eps (eV):   2.56727077E+00
    --------------------------------------------------------------------------------------
 
- Saving results to: teph4polaron_4o_DS1_VPQ.nc
+ Saving results to: teph4vpq_5o_DS1_VPQ.nc
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -471,18 +449,18 @@ electrons: {nelect:   1.00000000E+01, charge:   0.00000000E+00, occopt:   1.0000
 meta: {optdriver: 7, eph_task: 13, }
 ...
 
- mkfilename: getwfk from: teph4polaron_2o_DS2_WFK
+ mkfilename: getwfk from: teph4vpq_2o_DS2_WFK
 
  mkfilename: getddb from: LiF_eph_varpeq/out_DDB
 
- mkfilename: getgstore from: teph4polaron_3o_DS2_GSTORE.nc
+ mkfilename: getgstore from: teph4vpq_3o_DS2_GSTORE.nc
 
  Exchange-correlation functional for the present dataset will be:
   GGA: Perdew-Burke-Ernzerhof functional - ixc=11
  Citation for XC functional:
   J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
 
-- Reading GS states from WFK file: teph4polaron_2o_DS2_WFK
+- Reading GS states from WFK file: teph4vpq_2o_DS2_WFK
 - Reading DDB from file: LiF_eph_varpeq/out_DDB
 
 
@@ -583,11 +561,11 @@ meta: {optdriver: 7, eph_task: 13, }
 -                                 =     0.1185102008E+02 (THz)
 -Debye temperature from partial sums:     0.5687585851E+03 (K)
 
-- Writing phonon DOS to netcdf file: teph4polaron_4o_DS2_PHDOS.nc
+- Writing phonon DOS to netcdf file: teph4vpq_5o_DS2_PHDOS.nc
 --------------------------------------------------------------------------------
 
- Computing variational polaron equations from pre-existent GSTORE file: teph4polaron_3o_DS2_GSTORE.nc
- Initializing gstore object from: teph4polaron_3o_DS2_GSTORE.nc 
+ Computing variational polaron equations from pre-existent GSTORE file: teph4vpq_3o_DS2_GSTORE.nc
+ Initializing gstore object from: teph4vpq_3o_DS2_GSTORE.nc 
 
  === Gstore parameters ===
  kzone: bz
@@ -629,7 +607,7 @@ P Number of CPUs for parallelism over k-points: 1
  Long-range corrections:
    * Frohlich correction: yes
    * Frohlich correction value: 6.948800E-01 eV
-   * Frohlich correction included in matrix elements: yes
+   * Frohlich correction included in matrix elements: no
 
  Optimization parameters:
    * Initial seed: charge localization A_nk
@@ -647,36 +625,45 @@ P Number of CPUs for parallelism over k-points: 1
    * values in the optimization log are in (a.u.)
    --------------------------------------------------------------------------------------
    Step        E_pol         E_el         E_ph       E_elph      epsilon     ||grad||
-      1   8.3660E-03   4.1216E-02   3.2850E-02  -6.5700E-02   2.4484E-02   6.7249E-03
-      2  -1.1421E-02   2.1332E-02   3.2752E-02  -6.5505E-02   4.4173E-02   2.2814E-03
-      3  -2.5459E-02   8.0735E-03   3.3532E-02  -6.7064E-02   5.8991E-02   2.1507E-03
-      4  -3.0169E-02   6.8859E-03   3.7055E-02  -7.4109E-02   6.7223E-02   2.2299E-03
-      5  -3.8189E-02   8.5199E-03   4.6709E-02  -9.3419E-02   8.4899E-02   5.3800E-03
-      6  -4.7130E-02   1.1792E-02   5.8923E-02  -1.1785E-01   1.0605E-01   7.4602E-03
-      7  -6.5630E-02   1.9804E-02   8.5434E-02  -1.7087E-01   1.5106E-01   7.5459E-03
-      8  -7.5874E-02   2.5872E-02   1.0175E-01  -2.0349E-01   1.7762E-01   2.4648E-03
-      9  -7.6675E-02   2.8618E-02   1.0529E-01  -2.1059E-01   1.8197E-01   4.2756E-04
-     10  -7.6696E-02   2.8843E-02   1.0554E-01  -2.1108E-01   1.8224E-01   2.2148E-04
-     11  -7.6705E-02   2.9110E-02   1.0582E-01  -2.1163E-01   1.8252E-01   1.3192E-04
-     12  -7.6743E-02   2.8988E-02   1.0573E-01  -2.1146E-01   1.8247E-01   1.0164E-04
-     13  -7.6746E-02   2.9082E-02   1.0583E-01  -2.1166E-01   1.8257E-01   9.5006E-05
-     14  -7.6754E-02   2.9176E-02   1.0593E-01  -2.1186E-01   1.8268E-01   1.1921E-04
-     15  -7.6757E-02   2.9033E-02   1.0579E-01  -2.1158E-01   1.8255E-01   5.2975E-05
-     16  -7.6758E-02   2.8987E-02   1.0575E-01  -2.1149E-01   1.8250E-01   6.9300E-05
-     17  -7.6760E-02   2.9060E-02   1.0582E-01  -2.1164E-01   1.8258E-01   3.6268E-05
-     18  -7.6761E-02   2.9061E-02   1.0582E-01  -2.1164E-01   1.8258E-01   2.1247E-05
-     19  -7.6761E-02   2.9046E-02   1.0581E-01  -2.1161E-01   1.8257E-01   3.1984E-05
-     20  -7.6761E-02   2.9053E-02   1.0581E-01  -2.1163E-01   1.8258E-01   1.4751E-05
-     21  -7.6761E-02   2.9063E-02   1.0582E-01  -2.1165E-01   1.8259E-01   1.3284E-05
-     22  -7.6761E-02   2.9062E-02   1.0582E-01  -2.1165E-01   1.8258E-01   1.0372E-05
-     23  -7.6762E-02   2.9056E-02   1.0582E-01  -2.1164E-01   1.8258E-01   5.9849E-06
+      1   4.0194E-02   4.1216E-02   1.0219E-03  -2.0438E-03  -3.9172E-02   6.7018E-03
+      2   9.9479E-03   1.0974E-02   1.0258E-03  -2.0517E-03  -8.9221E-03   3.2854E-03
+      3   2.2892E-03   4.9879E-03   2.6987E-03  -5.3975E-03   4.0954E-04   2.8712E-03
+      4  -7.4104E-05   1.7821E-03   1.8562E-03  -3.7124E-03   1.9303E-03   1.8148E-03
+      5  -3.3864E-03   2.2820E-03   5.6685E-03  -1.1337E-02   9.0549E-03   1.7012E-03
+      6  -6.7263E-03   4.6297E-03   1.1356E-02  -2.2712E-02   1.8082E-02   3.0347E-03
+      7  -1.2920E-02   8.6135E-03   2.1533E-02  -4.3067E-02   3.4453E-02   5.3263E-03
+      8  -2.2793E-02   1.4246E-02   3.7040E-02  -7.4079E-02   5.9833E-02   7.5004E-03
+      9  -3.7043E-02   2.2447E-02   5.9490E-02  -1.1898E-01   9.6532E-02   6.3043E-03
+     10  -4.3526E-02   2.6989E-02   7.0515E-02  -1.4103E-01   1.1404E-01   2.0086E-03
+     11  -4.4049E-02   2.8400E-02   7.2448E-02  -1.4490E-01   1.1650E-01   5.1766E-04
+     12  -4.4088E-02   2.8837E-02   7.2924E-02  -1.4585E-01   1.1701E-01   2.2805E-04
+     13  -4.4110E-02   2.9100E-02   7.3210E-02  -1.4642E-01   1.1732E-01   3.0447E-04
+     14  -4.4342E-02   2.9082E-02   7.3425E-02  -1.4685E-01   1.1777E-01   3.2098E-04
+     15  -4.4425E-02   2.8712E-02   7.3137E-02  -1.4627E-01   1.1756E-01   4.9805E-04
+     16  -4.4592E-02   2.8488E-02   7.3080E-02  -1.4616E-01   1.1767E-01   7.0112E-04
+     17  -4.4731E-02   2.8972E-02   7.3703E-02  -1.4741E-01   1.1843E-01   3.4035E-04
+     18  -4.4780E-02   2.9219E-02   7.3999E-02  -1.4800E-01   1.1878E-01   3.1580E-04
+     19  -4.4853E-02   2.8987E-02   7.3840E-02  -1.4768E-01   1.1869E-01   3.2168E-04
+     20  -4.4882E-02   2.8975E-02   7.3857E-02  -1.4771E-01   1.1874E-01   1.6976E-04
+     21  -4.4899E-02   2.9079E-02   7.3978E-02  -1.4796E-01   1.1888E-01   1.6316E-04
+     22  -4.4904E-02   2.9054E-02   7.3958E-02  -1.4792E-01   1.1886E-01   9.0604E-05
+     23  -4.4908E-02   2.9006E-02   7.3914E-02  -1.4783E-01   1.1882E-01   1.1904E-04
+     24  -4.4912E-02   2.9032E-02   7.3944E-02  -1.4789E-01   1.1886E-01   7.3316E-05
+     25  -4.4914E-02   2.9057E-02   7.3971E-02  -1.4794E-01   1.1888E-01   4.2184E-05
+     26  -4.4915E-02   2.9057E-02   7.3971E-02  -1.4794E-01   1.1889E-01   5.1774E-05
+     27  -4.4915E-02   2.9045E-02   7.3960E-02  -1.4792E-01   1.1888E-01   3.3058E-05
+     28  -4.4916E-02   2.9046E-02   7.3962E-02  -1.4792E-01   1.1888E-01   1.9116E-05
+     29  -4.4916E-02   2.9054E-02   7.3970E-02  -1.4794E-01   1.1889E-01   1.7522E-05
+     30  -4.4916E-02   2.9055E-02   7.3971E-02  -1.4794E-01   1.1889E-01   1.5298E-05
+     31  -4.4916E-02   2.9048E-02   7.3964E-02  -1.4793E-01   1.1888E-01   1.0075E-05
+     32  -4.4916E-02   2.9049E-02   7.3965E-02  -1.4793E-01   1.1888E-01   7.0569E-06
    --------------------------------------------------------------------------------------
-   Converged: ||grad||=5.9849E-06 < vpq_tolgrs=1.0000E-05
-   E_pol (eV):  -2.08878676E+00
-     eps (eV):   4.96823008E+00
+   Converged: ||grad||=7.0569E-06 < vpq_tolgrs=1.0000E-05
+   E_pol (eV):  -1.22222880E+00
+     eps (eV):   3.23492120E+00
    --------------------------------------------------------------------------------------
 
- Saving results to: teph4polaron_4o_DS2_VPQ.nc
+ Saving results to: teph4vpq_5o_DS2_VPQ.nc
 
 ================================================================================
 == DATASET  3 ==================================================================
@@ -691,18 +678,18 @@ electrons: {nelect:   1.00000000E+01, charge:   0.00000000E+00, occopt:   1.0000
 meta: {optdriver: 7, eph_task: 13, }
 ...
 
- mkfilename: getwfk from: teph4polaron_2o_DS3_WFK
+ mkfilename: getwfk from: teph4vpq_2o_DS3_WFK
 
  mkfilename: getddb from: LiF_eph_varpeq/out_DDB
 
- mkfilename: getgstore from: teph4polaron_3o_DS3_GSTORE.nc
+ mkfilename: getgstore from: teph4vpq_3o_DS3_GSTORE.nc
 
  Exchange-correlation functional for the present dataset will be:
   GGA: Perdew-Burke-Ernzerhof functional - ixc=11
  Citation for XC functional:
   J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
 
-- Reading GS states from WFK file: teph4polaron_2o_DS3_WFK
+- Reading GS states from WFK file: teph4vpq_2o_DS3_WFK
 - Reading DDB from file: LiF_eph_varpeq/out_DDB
 
 
@@ -803,11 +790,11 @@ meta: {optdriver: 7, eph_task: 13, }
 -                                 =     0.1185102008E+02 (THz)
 -Debye temperature from partial sums:     0.5687585851E+03 (K)
 
-- Writing phonon DOS to netcdf file: teph4polaron_4o_DS3_PHDOS.nc
+- Writing phonon DOS to netcdf file: teph4vpq_5o_DS3_PHDOS.nc
 --------------------------------------------------------------------------------
 
- Computing variational polaron equations from pre-existent GSTORE file: teph4polaron_3o_DS3_GSTORE.nc
- Initializing gstore object from: teph4polaron_3o_DS3_GSTORE.nc 
+ Computing variational polaron equations from pre-existent GSTORE file: teph4vpq_3o_DS3_GSTORE.nc
+ Initializing gstore object from: teph4vpq_3o_DS3_GSTORE.nc 
 
  === Gstore parameters ===
  kzone: bz
@@ -849,7 +836,7 @@ P Number of CPUs for parallelism over k-points: 1
  Long-range corrections:
    * Frohlich correction: yes
    * Frohlich correction value: 5.559040E-01 eV
-   * Frohlich correction included in matrix elements: yes
+   * Frohlich correction included in matrix elements: no
 
  Optimization parameters:
    * Initial seed: charge localization A_nk
@@ -867,30 +854,43 @@ P Number of CPUs for parallelism over k-points: 1
    * values in the optimization log are in (a.u.)
    --------------------------------------------------------------------------------------
    Step        E_pol         E_el         E_ph       E_elph      epsilon     ||grad||
-      1   1.1721E-02   4.1203E-02   2.9481E-02  -5.8962E-02   1.7760E-02   4.2553E-03
-      2  -3.2540E-03   2.3921E-02   2.7175E-02  -5.4349E-02   3.0429E-02   1.3215E-03
-      3  -1.5984E-02   1.0806E-02   2.6789E-02  -5.3579E-02   4.2773E-02   2.3608E-03
-      4  -2.0425E-02   7.4643E-03   2.7889E-02  -5.5778E-02   4.8314E-02   1.8825E-03
-      5  -2.8038E-02   4.2196E-03   3.2258E-02  -6.4516E-02   6.0296E-02   2.0607E-03
-      6  -3.9061E-02   7.8994E-03   4.6961E-02  -9.3922E-02   8.6022E-02   4.2915E-03
-      7  -5.6764E-02   1.6430E-02   7.3195E-02  -1.4639E-01   1.2996E-01   6.3241E-03
-      8  -7.4777E-02   2.4965E-02   9.9742E-02  -1.9948E-01   1.7452E-01   2.6110E-03
-      9  -7.6411E-02   2.8724E-02   1.0513E-01  -2.1027E-01   1.8154E-01   4.8920E-04
-     10  -7.6460E-02   2.9204E-02   1.0566E-01  -2.1133E-01   1.8212E-01   1.7364E-04
-     11  -7.6467E-02   2.9451E-02   1.0592E-01  -2.1184E-01   1.8238E-01   2.3520E-05
-     12  -7.6467E-02   2.9482E-02   1.0595E-01  -2.1190E-01   1.8242E-01   2.4970E-05
-     13  -7.6468E-02   2.9522E-02   1.0599E-01  -2.1198E-01   1.8246E-01   3.2201E-05
-     14  -7.6469E-02   2.9461E-02   1.0593E-01  -2.1186E-01   1.8240E-01   1.2318E-05
-     15  -7.6469E-02   2.9491E-02   1.0596E-01  -2.1192E-01   1.8243E-01   1.2993E-05
-     16  -7.6469E-02   2.9496E-02   1.0596E-01  -2.1193E-01   1.8243E-01   1.1125E-05
-     17  -7.6469E-02   2.9472E-02   1.0594E-01  -2.1188E-01   1.8241E-01   4.5749E-06
+      1   3.7184E-02   4.1203E-02   4.0187E-03  -8.0374E-03  -3.3165E-02   4.2513E-03
+      2   1.0181E-02   1.1892E-02   1.7116E-03  -3.4232E-03  -8.4692E-03   2.5431E-03
+      3   1.9780E-03   5.6217E-03   3.6437E-03  -7.2873E-03   1.6657E-03   2.3931E-03
+      4  -3.1539E-03   2.7978E-03   5.9518E-03  -1.1904E-02   9.1057E-03   1.5737E-03
+      5  -8.8380E-03   4.8870E-03   1.3725E-02  -2.7450E-02   2.2563E-02   2.4807E-03
+      6  -1.8314E-02   9.7838E-03   2.8098E-02  -5.6196E-02   4.6412E-02   4.4325E-03
+      7  -3.1237E-02   1.6564E-02   4.7801E-02  -9.5601E-02   7.9037E-02   5.0799E-03
+      8  -4.3432E-02   2.3200E-02   6.6631E-02  -1.3326E-01   1.1006E-01   3.8119E-03
+      9  -4.9462E-02   2.8017E-02   7.7479E-02  -1.5496E-01   1.2694E-01   1.5448E-03
+     10  -5.0051E-02   2.8549E-02   7.8599E-02  -1.5720E-01   1.2865E-01   6.8692E-04
+     11  -5.0174E-02   2.9171E-02   7.9344E-02  -1.5869E-01   1.2952E-01   1.7109E-04
+     12  -5.0185E-02   2.9321E-02   7.9506E-02  -1.5901E-01   1.2969E-01   1.3042E-04
+     13  -5.0211E-02   2.9497E-02   7.9707E-02  -1.5941E-01   1.2992E-01   2.2399E-04
+     14  -5.0404E-02   2.9291E-02   7.9695E-02  -1.5939E-01   1.3010E-01   1.7224E-04
+     15  -5.0508E-02   2.9516E-02   8.0024E-02  -1.6005E-01   1.3053E-01   3.6894E-04
+     16  -5.0747E-02   2.9626E-02   8.0373E-02  -1.6075E-01   1.3112E-01   3.0282E-04
+     17  -5.0769E-02   2.9416E-02   8.0185E-02  -1.6037E-01   1.3095E-01   1.5464E-04
+     18  -5.0808E-02   2.9362E-02   8.0170E-02  -1.6034E-01   1.3098E-01   2.9650E-04
+     19  -5.0921E-02   2.9418E-02   8.0339E-02  -1.6068E-01   1.3126E-01   1.7078E-04
+     20  -5.0946E-02   2.9488E-02   8.0434E-02  -1.6087E-01   1.3138E-01   1.3023E-04
+     21  -5.0972E-02   2.9505E-02   8.0476E-02  -1.6095E-01   1.3145E-01   1.5563E-04
+     22  -5.0985E-02   2.9454E-02   8.0439E-02  -1.6088E-01   1.3142E-01   6.3885E-05
+     23  -5.0989E-02   2.9467E-02   8.0456E-02  -1.6091E-01   1.3144E-01   8.1484E-05
+     24  -5.0996E-02   2.9492E-02   8.0488E-02  -1.6098E-01   1.3148E-01   5.7857E-05
+     25  -5.0996E-02   2.9476E-02   8.0472E-02  -1.6094E-01   1.3147E-01   2.1701E-05
+     26  -5.0997E-02   2.9446E-02   8.0443E-02  -1.6089E-01   1.3144E-01   3.9819E-05
+     27  -5.0999E-02   2.9473E-02   8.0472E-02  -1.6094E-01   1.3147E-01   1.5610E-05
+     28  -5.0999E-02   2.9481E-02   8.0480E-02  -1.6096E-01   1.3148E-01   1.5848E-05
+     29  -5.0999E-02   2.9483E-02   8.0482E-02  -1.6096E-01   1.3148E-01   1.9982E-05
+     30  -5.0999E-02   2.9477E-02   8.0476E-02  -1.6095E-01   1.3148E-01   6.5055E-06
    --------------------------------------------------------------------------------------
-   Converged: ||grad||=4.5749E-06 < vpq_tolgrs=1.0000E-05
-   E_pol (eV):  -2.08083454E+00
-     eps (eV):   4.96364780E+00
+   Converged: ||grad||=6.5055E-06 < vpq_tolgrs=1.0000E-05
+   E_pol (eV):  -1.38776504E+00
+     eps (eV):   3.57762868E+00
    --------------------------------------------------------------------------------------
 
- Saving results to: teph4polaron_4o_DS3_VPQ.nc
+ Saving results to: teph4vpq_5o_DS3_VPQ.nc
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -973,7 +973,6 @@ P           mkmem3         10
                        0  0 -1   1  0 -1   0  1 -1       0  0  1  -1  0  1   0 -1  1
                       -1  1  0  -1  0  1  -1  0  0       1 -1  0   1  0 -1   1  0  0
             typat      1  2
-        vpq_avg_g           1
        vpq_tolgrs      1.0000000000E-05
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.0307175380E+00  2.0307175380E+00  2.0307175380E+00
@@ -1077,10 +1076,10 @@ P           mkmem3         10
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         23.7  wall=         23.8
+- Proc.   0 individual time (sec): cpu=         23.9  wall=         24.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and  10 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         23.7  wall=         23.8
++Overall time at end (sec) : cpu=         23.9  wall=         24.0
