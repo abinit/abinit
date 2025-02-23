@@ -6,7 +6,7 @@
 
 # Variational Polaron Equations parameters
  vpq_pkind  "hole"  # Hole polaron
- vpq_tolgrs  1e-7   # Tolerance on the gradient norm
+ vpq_tolgrs  1e-5   # Tolerance on the gradient norm
 
  # Optimization for multiple polaronic states
 
@@ -91,7 +91,7 @@
 #%% [files]
 #%% use_git_submodule = LiF_eph_varpeq
 #%% files_to_test =
-#%%   teph4vpq_6.abo, tolnlines = 80, tolabs = 1e-5, tolrel = 1e-3
+#%%   teph4vpq_6.abo, tolnlines = 250, tolabs = 1e-5, tolrel = 1e-3
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]

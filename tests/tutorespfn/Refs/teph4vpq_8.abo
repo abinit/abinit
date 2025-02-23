@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Sun 23 Feb 2025.
-- ( at 12h24 )
+- ( at 14h42 )
   
 - input  file    -> /Users/vvas/local/src/abinit/build/Test_suite/tutorespfn_teph4vpq_1-teph4vpq_2-teph4vpq_3-teph4vpq_4-teph4vpq_5-teph4vpq_6-teph4vpq_7-teph4vpq_8-teph4vpq_9-teph4vpq_10/teph4vpq_8.abi
 - output file    -> teph4vpq_8.abo
@@ -559,10 +559,10 @@ P           mkmem          84
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         56.4  wall=         56.8
+- Proc.   0 individual time (sec): cpu=         56.7  wall=         57.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         56.4  wall=         56.8
++Overall time at end (sec) : cpu=         56.7  wall=         57.0

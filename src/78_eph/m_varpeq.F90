@@ -3784,8 +3784,8 @@ subroutine center_and_spread(prim_cryst, ncells, sc_ngfft, rhor, center_cart, sp
  end do
 
  !center_cart = matmul(sc_rprimd, center_cart)
- center_cart = center_cart * num_cells * prim_cryst%ucvol / nfft
- r2_mean = r2_mean * num_cells * prim_cryst%ucvol / nfft
+ center_cart = center_cart * num_cells * prim_cryst%ucvol / (one*nfft)
+ r2_mean = r2_mean * num_cells * prim_cryst%ucvol / (one*nfft)
  spread = sqrt(r2_mean - dot_product(center_cart, center_cart))
  write(msg, "(a,2(es16.6,a))")" Polaron spread: ", spread, " (Bohr)", spread * Bohr_Ang, " (Ang)"
  call wrtout(units, msg)
@@ -3804,7 +3804,7 @@ subroutine center_and_spread(prim_cryst, ncells, sc_ngfft, rhor, center_cart, sp
      end do
    end do
  end do
- spread = sqrt(spread * num_cells * prim_cryst%ucvol / nfft)
+ spread = sqrt(spread * num_cells * prim_cryst%ucvol / (one*nfft))
 
  call xcart2xred(1, prim_cryst%rprimd, center_cart, center_red)
  call wrtout(units, sjoin(" Polaron center in Cartesian coordinates: ", ltoa(center_cart), " (Bohr)"))
