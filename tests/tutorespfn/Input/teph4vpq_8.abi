@@ -8,7 +8,7 @@
 
 # Electron-phonon matrix elements parameters
  gstore_cplex  2     # Complex e-ph matrix elements   (mandatory for VarPEq)
- gstore_kzone  "bz"  # Use full BZ for k and q meshed (mandstory for VarPEq)
+ gstore_kzone  "bz"  # Use full BZ for k and q meshed (mandatory for VarPEq)
  gstore_qzone  "bz"
  gstore_erange 0. 1.0 eV  # Activate the energy filtering
                           # Here, only the electronic states in 1.0 eV window
@@ -29,7 +29,7 @@
 # Phonons
  getddb_filepath
  "LiF_eph_varpeq/out_DDB"  # Read the precomputed DDB stored in git submodule
-                           # NOTE: for the input parameters used to prodcue
+                           # NOTE: for the input parameters used to produce
                            # the DDB file, consult the LiF_eph_varpeq/dfpt.abi
 
 # Scattering potentials

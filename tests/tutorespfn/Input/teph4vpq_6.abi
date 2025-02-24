@@ -10,7 +10,7 @@
 
  # Optimization for multiple polaronic states
 
- # For state > 1, the optimization is perormed with orthogonalization constraint
+ # For state > 1, the optimization is performed with orthogonalization constraint
  # wrt all previous polaronic states.
  # NOTE that after vpq_nstep_ort the constraint is lifted, as the final polaron
  # is not necessarily orthogonal to the previous ones.
@@ -45,7 +45,7 @@
 # Read the WFK file from the preparatory run
  getwfk_filepath "teph4vpq_2o_DS1_WFK"  # 3x3x3 k-mesh
 
- ngkpt    3 3 3  # These parameters have to consistent with the WFK file
+ ngkpt    3 3 3  # These parameters have to be consistent with the WFK file
 
  kptopt   1
  nshiftk  1
@@ -57,7 +57,7 @@
  ddb_ngqpt  3 3 3          # This has to be consistent with the DDB file
  getddb_filepath
  "LiF_eph_varpeq/out_DDB"  # Read the precomputed DDB stored in git submodule
-                           # NOTE: for the input parameters used to prodcue
+                           # NOTE: for the input parameters used to produce
                            # the DDB file, consult the LiF_eph_varpeq/dfpt.abi
 
 # Pseudopotentials
