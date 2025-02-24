@@ -159,13 +159,7 @@ _tsuite_dirs = [
     "hpc_gpu_omp",
     "gpu_omp",
     "gpu_kokkos",
-<<<<<<< HEAD
-    # "physics",
     "rttddft",
-||||||| d853ee07bb
-    # "physics",
-=======
->>>>>>> develop
     "seq",
     "tutoatdep",
     "tutomultibinit",

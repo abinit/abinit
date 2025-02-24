@@ -252,8 +252,7 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
  !1) Various initializations & checks (MPI, PW, FFT, PSP, Symmetry ...)
  call first_setup(codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad,pawtab,psps,psp_gencond,tdks)
 
- !2) Deals with restart
- !FB: @MT Is this the proper way to read a file in abinit..?
+ !2) Deals with restart and setup some basic variables and filenames
  tdks%first_step = 1
  tdks%fname_tdener = dtfil%fnameabo_td_ener
  tdks%fname_wfk0 = dtfil%fnamewffk
@@ -346,10 +345,6 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
                & tdks%unpaw,tdks%xred,tdks%ylm,tdks%ylmgr)
  end if
  ABI_MALLOC(tdks%occ,(dtset%mband*dtset%nkpt*dtset%nsppol))
-
- !FB: That should be all for now but there were few more initializations in
- !g_state.F90 in particular related to electric field, might want to check it out
- !once we reach the point of including external electric field
 
  !Keep some additional stuff in memory within the tdks object
  tdks%unpaw  = dtfil%unpaw
@@ -620,7 +615,7 @@ subroutine first_setup(codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad,pawtab,psps,
  if (dtset%paral_kgb/=0) then
    call xmpi_sum(npwarr_,mpi_enreg%comm_bandfft,ierr)
  end if
- bstruct = ebands_from_dtset(dtset, npwarr_)
+ call bstruct%from_dtset(dtset, npwarr_)
  ABI_FREE(npwarr_)
  call unpack_eneocc(dtset%nkpt,dtset%nsppol,bstruct%mband,bstruct%nband,dtset%occ_orig(:,1),bstruct%occ,val=zero)
 
@@ -701,7 +696,6 @@ subroutine first_setup(codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad,pawtab,psps,
  tdks%indsym(:,:,:)=0
  tdks%symrec(:,:,:)=0
 
- !FB TODO: Should symmetry be used when ions are moving? Modify if Ehrenfest dynamics
  !Do symmetry stuff if nsym>1
  if (dtset%nsym>1) then
    call setsym(tdks%indsym,tdks%irrzon,dtset%iscf,dtset%natom, &
@@ -712,7 +706,7 @@ subroutine first_setup(codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad,pawtab,psps,
    !Make sure dtset%iatfix does not break symmetry
    call fixsym(dtset%iatfix,tdks%indsym,dtset%natom,dtset%nsym)
  else
-   !The symrec array is used by initberry even in case nsym = 1 - FB: @MT Needed ?
+   !The symrec array is used by initberry even in case nsym = 1
    tdks%symrec(:,:,1) = 0
    tdks%symrec(1,1,1) = 1 ; tdks%symrec(2,2,1) = 1 ; tdks%symrec(3,3,1) = 1
  end if
@@ -720,7 +714,6 @@ subroutine first_setup(codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad,pawtab,psps,
  !** Initialize and eventually symmetrize reduced atomic coordinates
  ABI_MALLOC(tdks%xred,(3,dtset%natom,dtset%nimage))
  tdks%xred = dtset%xred_orig
- !FB: Should we?
  !Eventually symmetrize atomic coordinates over space group elements
  call symmetrize_xred(dtset%natom,dtset%nsym,dtset%symrel,dtset%tnons,tdks%xred, &
                     & indsym=tdks%indsym)

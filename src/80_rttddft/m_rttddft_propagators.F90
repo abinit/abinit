@@ -31,7 +31,7 @@ module m_rttddft_propagators
  use m_dtset,                  only: dataset_type
  use m_energies,               only: energies_type, energies_init, energies_copy
  use m_errors,                 only: msg_hndl
- use m_gemm_nonlop_projectors, only: gemm_nonlop_ikpt_this_proc_being_treated
+ use m_gemm_nonlop_projectors, only: set_gemm_nonlop_ikpt
  use m_hamiltonian,            only: gs_hamiltonian_type, gspot_transgrid_and_pack
  use m_invovl,                 only: make_invovl
  use m_kg,                     only: mkkin, mkkpg
