@@ -1835,7 +1835,7 @@ subroutine print_wannier(paw_dmft,istep)
    nflavor = (2*lpawu+1) * paw_dmft%nspinor * paw_dmft%nsppol
    call int2char4(iatom,tag_at)
    ABI_CHECK((tag_at(1:1)/='#'),'Bug: string length too short!')
-   tmpfil = trim(paw_dmft%filapp)//'Wannier_functions_iatom'//trim(tag_at)//'_'//tag_iter
+   tmpfil = trim(paw_dmft%filapp)//'_Wannier_functions_iatom'//trim(tag_at)//'_'//tag_iter
    if (open_file(tmpfil,message,newunit=unt) /= 0) ABI_ERROR(message)
    write(unt,'(4a)') "# Radial part of projective Wannier functions, after orthonormalization, for each flavor.", &
        & ch10,"# First column is the radius (bohr) and the other columns correspond to the radial part of flavor i,", &

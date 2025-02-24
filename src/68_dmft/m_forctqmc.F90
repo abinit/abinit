@@ -3164,14 +3164,14 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
 !Local variables ------------------------------
  integer :: basis,i,iatom,iblock,iflavor,iflavor1,iflavor2,ifreq,ilam,ileg,im,im1,isppol,isub
  integer :: itau,itypat,iw,j,l,len_t,lpawu,myproc,natom,ncon,ndim,nflavor,nflavor_max,ngauss,nleg,nmoments
- integer :: nspinor,nsppol,nsub,ntau,ntau_delta,ntot,nwlo,p,rot_type_vee,tndim,unt,verbo,wdlr_size
+ integer :: nspinor,nsppol,nsub,ntau,ntau_delta,ntot,nwlo,p,read_data,rot_type_vee,tndim,unt,verbo,wdlr_size
  integer, target :: ndlr
  logical :: density_matrix,entropy,integral,leg_measure,nondiag,off_diag,rot_inv
  real(dp) :: besp,bespp,beta,dx,err,err_,fact,fact2,tau,tol,xtau,xx
  complex(dpc) :: mself_1,mself_2,occ_tmp,u_nl
  complex(dpc), target :: eu
  type(oper_type), target :: energy_level
- type(c_ptr) :: block_ptr,eu_ptr,flavor_ptr,fname_data_ptr,fname_histo_ptr,ftau_ptr,gl_ptr,gtau_ptr
+ type(c_ptr) :: block_ptr,eu_ptr,flavor_ptr,fname_data_ptr,fname_dataw_ptr,fname_histo_ptr,ftau_ptr,gl_ptr,gtau_ptr
  type(c_ptr) :: inner_ptr,levels_ptr,mself_1_ptr,mself_2_ptr,ndlr_ptr,occ_ptr,siz_ptr,udens_ptr,vee_ptr,wdlr_ptr
  integer, allocatable :: nblocks(:)
  integer, target, allocatable :: block_list(:,:),flavor_list(:,:,:),flavor_tmp(:,:)
@@ -3193,9 +3193,9 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
  character(len=2) :: tag_block,tag_block3,tag_lam
  character(len=4) :: tag_at
  character(len=13) :: tag,tag2
- character(len=500) :: tag_block2,tag_lam2
+ character(len=500) :: stringfile,tag_block2,tag_lam2
  character(len=10000) :: message
- character(len=fnlen), target :: fname_data,fname_histo
+ character(len=fnlen), target :: fname_data,fname_dataw,fname_histo
 ! ************************************************************************
 
  basis          = paw_dmft%dmftctqmc_basis
@@ -3630,7 +3630,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
 
    if (myproc == 0 .and. off_diag) then
 
-     if (open_file(trim(paw_dmft%filapp)//"Hybridization_offdiag_iatom"//tag_at//".dat",message,newunit=unt) /= 0) ABI_ERROR(message)
+     if (open_file(trim(paw_dmft%filapp)//"_Hybridization_offdiag_iatom"//tag_at//".dat",message,newunit=unt) /= 0) ABI_ERROR(message)
      write(unt,'(6a)') "# Off-diagonal components of Delta(tau) in the CTQMC basis",ch10, &
                      & "# Columns are ordered this way:",ch10, &
                      & "# Imaginary Time     ((Re(Delta_{ij}) Im(Delta_{ij}),i=1,2*(2*l+1)),j=1,2*(2*l+1)) where the", &
@@ -3646,7 +3646,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
 
    if (myproc == 0) then
 
-     if (open_file(trim(paw_dmft%filapp)//"Hybridization_diag_iatom"//tag_at//".dat",message,newunit=unt) /= 0) ABI_ERROR(message)
+     if (open_file(trim(paw_dmft%filapp)//"_Hybridization_diag_iatom"//tag_at//".dat",message,newunit=unt) /= 0) ABI_ERROR(message)
      write(unt,'(5a)') "# Diagonal components of Delta(tau) in the CTQMC basis",ch10, &
                      & "# Columns are ordered this way:",ch10, &
                      & "# Imaginary Time     (Delta_{ii},i=1,2*(2*l+1))"
@@ -3688,6 +3688,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
    eu_ptr          = C_LOC(eu)
    flavor_ptr      = C_LOC(flavor_tmp(:,:))
    fname_data_ptr  = C_LOC(fname_data)
+   fname_dataw_ptr = C_LOC(fname_dataw)
    fname_histo_ptr = C_LOC(fname_histo)
    ftau_ptr        = C_LOC(ftau(iatom)%mat(:,:,:))
    gl_ptr          = C_LOC(gl(:,:,:))
@@ -3720,9 +3721,21 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
      tag_lam2 = ""
      if (ilam /= ntot) tag_lam2 = "_ilam" // tag_lam
 
-     fname_data = trim(adjustl(paw_dmft%filapp)) // "_CTQMC_DATA_iatom" // tag_at // trim(adjustl(tag_lam2)) // ".h5"
+     read_data = paw_dmft%dmft_triqs_read_ctqmcdata
+     stringfile = "_iatom" // tag_at // trim(adjustl(tag_lam2)) // ".h5"
+     if (paw_dmft%idmftloop == 1) then
+       read_data = 0
+       if (paw_dmft%dmft_triqs_read_ctqmcdata == 1 .and. paw_dmft%ireadctqmcdata == 1) read_data = 1
+       fname_data = trim(adjustl(paw_dmft%filctqmcdatain)) // stringfile
+     else
+       fname_data = trim(adjustl(paw_dmft%filapp)) // "_CTQMC_DATA" // stringfile
+     end if
      len_t = len(trim(adjustl(fname_data))) + 1
      fname_data(len_t:len_t) = c_null_char
+
+     fname_dataw = trim(adjustl(paw_dmft%filapp)) // "_CTQMC_DATA" // stringfile
+     len_t = len(trim(adjustl(fname_dataw))) + 1
+     fname_dataw(len_t:len_t) = c_null_char
 
      fname_histo = trim(adjustl(paw_dmft%filapp)) // "_CTQMC_HISTOGRAM_iatom" // tag_at // trim(adjustl(tag_lam2)) // ".dat"
      len_t = len(trim(adjustl(fname_histo))) + 1
@@ -3737,11 +3750,11 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
                         & paw_dmft%dmft_triqs_seed_b,nflavor,ntau,nleg,int(paw_dmft%dmftqmc_n/paw_dmft%nproc), &
                         & paw_dmft%dmftctqmc_meas,paw_dmft%dmftqmc_therm,paw_dmft%dmft_triqs_therm_restart, &
                         & paw_dmft%dmft_triqs_det_init_size,paw_dmft%dmft_triqs_det_n_operations_before_check, &
-                        & ntau_delta,myproc,nblocks(iatom),paw_dmft%dmft_triqs_read_ctqmcdata,verbo,beta,paw_dmft%dmft_triqs_move_global_prob, &
+                        & ntau_delta,myproc,nblocks(iatom),read_data,verbo,beta,paw_dmft%dmft_triqs_move_global_prob, &
                         & paw_dmft%dmft_triqs_imag_threshold,paw_dmft%dmft_triqs_det_precision_warning, &
                         & paw_dmft%dmft_triqs_det_precision_error,paw_dmft%dmft_triqs_det_singular_threshold,lam_list(ilam), &
                         & paw_dmft%dmft_triqs_pauli_prob,block_ptr,flavor_ptr,inner_ptr,siz_ptr,ftau_ptr,gtau_ptr,gl_ptr,udens_ptr, &
-                        & vee_ptr,levels_ptr,mself_1_ptr,mself_2_ptr,occ_ptr,eu_ptr,fname_data_ptr,fname_histo_ptr)
+                        & vee_ptr,levels_ptr,mself_1_ptr,mself_2_ptr,occ_ptr,eu_ptr,fname_data_ptr,fname_dataw_ptr,fname_histo_ptr)
 #endif
 
      call flush_unit(std_out)
@@ -3769,7 +3782,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
 
    if (myproc == 0 .and. off_diag) then
 
-     if (open_file(trim(paw_dmft%filapp)//"Gtau_offdiag_iatom"//tag_at//".dat",message,newunit=unt) /= 0) ABI_ERROR(message)
+     if (open_file(trim(paw_dmft%filapp)//"_Gtau_offdiag_iatom"//tag_at//".dat",message,newunit=unt) /= 0) ABI_ERROR(message)
      write(unt,'(6a)') "# Off-diagonal components of sampled G(tau) in the CTQMC basis",ch10, &
                      & "# Columns are ordered this way:",ch10, &
                      & "# Imaginary Time     ((Re(G_{ij}) Im(G_{ij}),i=1,2*(2*l+1)),j=1,2*(2*l+1)) where the", &
@@ -3784,7 +3797,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
 
    if (myproc == 0) then
 
-     if (open_file(trim(paw_dmft%filapp)//"Gtau_diag_iatom"//tag_at//".dat",message,newunit=unt) /= 0) ABI_ERROR(message)
+     if (open_file(trim(paw_dmft%filapp)//"_Gtau_diag_iatom"//tag_at//".dat",message,newunit=unt) /= 0) ABI_ERROR(message)
      write(unt,'(5a)') "# Diagonal components of sampled G(tau) in the CTQMC basis",ch10, &
                      & "# Columns are ordered this way:",ch10, &
                      & "# Imaginary Time     (G_{ii},i=1,2*(2*l+1))"
@@ -3932,7 +3945,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
 
      if (myproc == 0 .and. off_diag) then
 
-       if (open_file(trim(paw_dmft%filapp)//"Gtau_offdiag_Legendre_iatom"//tag_at//".dat",message,newunit=unt) /= 0) ABI_ERROR(message)
+       if (open_file(trim(paw_dmft%filapp)//"_Gtau_offdiag_Legendre_iatom"//tag_at//".dat",message,newunit=unt) /= 0) ABI_ERROR(message)
        write(unt,'(6a)') "# Off-diagonal components of Legendre-sampled G(tau) in the CTQMC basis",ch10, &
                        & "# Columns are ordered this way:",ch10, &
                        & "# Imaginary Time     ((Re(G_{ij}) Im(G_{ij}),i=1,2*(2*l+1)),j=1,2*(2*l+1)) where the", &
@@ -3947,7 +3960,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
 
      if (myproc == 0) then
 
-       if (open_file(trim(paw_dmft%filapp)//"Gtau_diag_Legendre_iatom"//tag_at//".dat",message,newunit=unt) /= 0) ABI_ERROR(message)
+       if (open_file(trim(paw_dmft%filapp)//"_Gtau_diag_Legendre_iatom"//tag_at//".dat",message,newunit=unt) /= 0) ABI_ERROR(message)
        write(unt,'(5a)') "# Diagonal components of Legendre-sampled G(tau) in the CTQMC basis",ch10, &
                        & "# Columns are ordered this way:",ch10, &
                        & "# Imaginary Time     (G_{ii},i=1,2*(2*l+1))"
@@ -4071,7 +4084,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
 
      if (myproc == 0 .and. off_diag) then
 
-       if (open_file(trim(paw_dmft%filapp)//"Gtau_offdiag_DLR_iatom"//tag_at//".dat",message,newunit=unt) /= 0) ABI_ERROR(message)
+       if (open_file(trim(paw_dmft%filapp)//"_Gtau_offdiag_DLR_iatom"//tag_at//".dat",message,newunit=unt) /= 0) ABI_ERROR(message)
        write(unt,'(6a)') "# Off-diagonal components of DLR fit of G(tau) in the CTQMC basis",ch10, &
                        & "# Columns are ordered this way:",ch10, &
                        & "# Imaginary Time     ((Re(G_{ij}) Im(G_{ij}),i=1,2*(2*l+1)),j=1,2*(2*l+1)) where the", &
@@ -4087,7 +4100,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
 
      if (myproc == 0) then
 
-       if (open_file(trim(paw_dmft%filapp)//"Gtau_diag_DLR_iatom"//tag_at//".dat",message,newunit=unt) /= 0) ABI_ERROR(message)
+       if (open_file(trim(paw_dmft%filapp)//"_Gtau_diag_DLR_iatom"//tag_at//".dat",message,newunit=unt) /= 0) ABI_ERROR(message)
        write(unt,'(5a)') "# Diagonal components of DLR fit of G(tau) in the CTQMC basis",ch10, &
                        & "# Columns are ordered this way:",ch10, &
                        & "# Imaginary Time     (G_{ii},i=1,2*(2*l+1))"

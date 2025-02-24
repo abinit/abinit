@@ -21,7 +21,7 @@ extern "C"{
                           double det_singular_threshold, double lam, double pauli_prob, int *block_list, int *flavor_list, int *inner_list, int *siz_list,
                           complex<double> *ftau, complex<double> *gtau, complex<double> *gl, complex<double> *udens_cmplx, complex<double> *vee_cmplx,
                           complex<double> *levels_cmplx, complex<double> *moments_self_1, complex<double> *moments_self_2, complex<double> *occ,
-                          complex<double> *eu, char *fname_data, char *fname_histo ) ;
+                          complex<double> *eu, char *fname_data, char *fname_dataw, char *fname_histo ) ;
 
     many_body_op_t init_Hamiltonian( h_scalar_t *eps, int nflavor, h_scalar_t *udens, int *block_list,
                                      int *inner_list, double lambda);

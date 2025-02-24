@@ -29,7 +29,7 @@ MODULE TRIQS_CTQMC
                               & ntherm_restart,det_init_size,det_n_operations_before_check,ntau_delta,rank,nblocks,read_data,verbo,beta, &
                               & move_global_prob,imag_threshold,det_precision_warning,det_precision_error,det_singular_threshold,lam,pauli_prob, &
                               & block_list,flavor_list,inner_list,siz_list,ftau,gtau,gl,udens_cmplx,vee_cmplx,levels_cmplx,moments_self_1, &
-                              & moments_self_2,occ,eu,fname_data,fname_histo) bind(c)
+                              & moments_self_2,occ,eu,fname_data,fname_dataw,fname_histo) bind(c)
 
       use iso_c_binding
 
@@ -43,7 +43,7 @@ MODULE TRIQS_CTQMC
 
       TYPE(C_PTR), VALUE, INTENT(IN) :: block_list,flavor_list,inner_list,siz_list,ftau,gtau,gl,udens_cmplx,vee_cmplx,levels_cmplx
 
-      TYPE(C_PTR), VALUE, INTENT(IN) :: moments_self_1,moments_self_2,occ,eu,fname_data,fname_histo
+      TYPE(C_PTR), VALUE, INTENT(IN) :: moments_self_1,moments_self_2,occ,eu,fname_data,fname_dataw,fname_histo
 
     end subroutine Ctqmc_triqs_run
 

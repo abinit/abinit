@@ -22,10 +22,11 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
                      double pauli_prob, int *block_list, int *flavor_list, int *inner_list, int *siz_list, complex<double> *ftau,
                      complex<double> *gtau, complex<double> *gl, complex<double> *udens_cmplx, complex<double> *vee_cmplx,
                      complex<double> *levels_cmplx, complex<double> *moments_self_1, complex<double> *moments_self_2,
-                     complex<double> *occ, complex<double> *eu, char *fname_data, char *fname_histo) {
+                     complex<double> *occ, complex<double> *eu, char *fname_data, char *fname_dataw, char *fname_histo) {
 
   int ndim = num_orbitals / 2;
-  string qmc_data_fname = string(fname_data);
+  string qmc_data_fname  = string(fname_data);
+  string qmc_data_fnamew = string(fname_dataw);
   string hist_fname = string(fname_histo);
   auto comm = MPI_COMM_WORLD;
   int iflavor, iflavor1, nproc;
@@ -95,6 +96,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
   paramCTQMC.random_seed = seed_a + rank * seed_b;
   paramCTQMC.length_cycle = cycle_length;
   paramCTQMC.time_invariance = time_invariance;
+  paramCTQMC.pauli_prob = pauli_prob;
 
   int restart = (exists(qmc_data_fname) && read_data == 1 ? 1 : 0);
 
@@ -131,7 +133,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
 
     if (restart == 0) qmc_data_hfile.close();
 
-    if (restart == 1) cout << endl << "   == Reading previous CTQMC data from file" << endl;
+    if (restart == 1) cout << endl << "   == Reading CTQMC data from file " << qmc_data_fname << endl;
   }
 
   MPI_Bcast(&restart,1,MPI_INTEGER,0,comm);
@@ -237,7 +239,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
 
   solver.solve(paramCTQMC);
 
-  if (rank == 0) cout << endl << "   == Writing CTQMC data on file ==      " << endl;
+  if (rank == 0) cout << endl << "   == Writing CTQMC data on file " << qmc_data_fnamew << endl;
 
   // Write all final configurations
   auto config = solver.get_configuration();
@@ -276,7 +278,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
 
   if (rank == 0) {
 
-    file qmc_data_hfilew = {qmc_data_fname,'w'};   // very important to open in write mode, so that previous data is erased
+    file qmc_data_hfilew = {qmc_data_fnamew,'w'};   // very important to open in write mode, so that previous data is erased
     group grp = qmc_data_hfilew;
 
     h5_write(grp,"beta",beta);

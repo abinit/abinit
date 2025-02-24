@@ -236,6 +236,7 @@ type, public :: dataset_type
  integer :: ga_fitness
  integer :: ga_n_rules
  integer :: getabiwan = 0
+ integer :: getctqmcdata = 0
  integer :: getgwan = 0
  integer :: getcell = 0
  integer :: getddb = 0
@@ -253,6 +254,7 @@ type, public :: dataset_type
  integer :: getpawden = 0
  integer :: getqps = 0
  integer :: getscr = 0
+ integer :: getself = 0
  integer :: getsuscep = 0
  integer :: getvarpeq = 0
  integer :: getvel = 0
@@ -1706,6 +1708,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%getbsreso          = dtin%getbsreso
  dtout%getbscoup          = dtin%getbscoup
  dtout%getcell            = dtin%getcell
+ dtout%getctqmcdata       = dtin%getctqmcdata
  dtout%getddb             = dtin%getddb
  dtout%getdvdb            = dtin%getdvdb
  dtout%getabiwan          = dtin%getabiwan
@@ -1739,6 +1742,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%getwfq_filepath    = dtin%getwfq_filepath
  dtout%getqps             = dtin%getqps
  dtout%getscr             = dtin%getscr
+ dtout%getself            = dtin%getself
  dtout%getsuscep          = dtin%getsuscep
  dtout%getvel             = dtin%getvel
  dtout%getwfk             = dtin%getwfk
@@ -3530,13 +3534,13 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' f4of2_sla f6of2_sla'
 !G
  list_vars=trim(list_vars)//' ga_algor ga_fitness ga_n_rules ga_opt_percent ga_rules'
- list_vars=trim(list_vars)//' genafm geoopt getbscoup getbseig getbsreso getcell'
+ list_vars=trim(list_vars)//' genafm geoopt getbscoup getbseig getbsreso getcell getctqmcdata'
  list_vars=trim(list_vars)//' getddb getddb_filepath getden_filepath getddk'
  list_vars=trim(list_vars)//' getdelfd getdkdk getdkde getden getkden getdvdb getdrhodb getdvdb_filepath getdrhodb_filepath'
  list_vars=trim(list_vars)//' getefmas getkerange_filepath getgam_eig2nkq'
  list_vars=trim(list_vars)//' gethaydock getocc getpawden getpot_filepath getsigeph_filepath getgstore_filepath'
  list_vars=trim(list_vars)//' getabiwan getabiwan_filepath getgwan getgwan_filepath'
- list_vars=trim(list_vars)//' getqps getscr getscr_filepath'
+ list_vars=trim(list_vars)//' getqps getscr getscr_filepath getself'
  list_vars=trim(list_vars)//' getwfkfine getwfkfine_filepath getsuscep'
  list_vars=trim(list_vars)//' getvarpeq getvarpeq_filepath'
  list_vars=trim(list_vars)//' getvel getwfk getwfk_filepath getwfq getwfq_filepath getxcart getxred'
