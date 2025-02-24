@@ -100,7 +100,6 @@ tolwfr_diago 1d-30
 #%%   NaI with a sligthly expanded lattice, to allow self-localisation of a hole polaron, using pSIC technique.
 #%%   Realistic ecut and reasonable k point sampling, but small cell of only 8 atoms for testing.
 #%%   The present test starts from a reasonable I-I interatomic distance, and search for the optimized polaron geometry, without constraint.
-#%%
 #%%   Parallelism until 12 procs is quite efficient. However, setting npband 2 does not bring noticeable improvement.
 #%%   Although this is still subject for further investigation, the hypothesis is that the density/xc/potential part
 #%%   is not improved with npband 2, while it is actually a major contribution, even with 32 bands.

@@ -6,7 +6,7 @@
 !!  Procedures for computing densities from KS orbitals.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, LSI, AR, MB, MT, SM, VR, FJ)
+!!  Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, LSI, AR, MB, MT, SM, VR, FJ)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -437,6 +437,81 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 &                npw_k,1,n4,n5,n6,1,tim_fourwf,weight,weight_i,&
 &                weight_array_r=weight_t(1:nband_occ),weight_array_i=weight_t(1:nband_occ),&
 &                gpu_option=gpu_option)
+               if(dtset%nspinor==2)then
+                 if(dtset%nspden==1) then
+                   ! We need only the total density : accumulation continues on top of rhoaug
+                   call fourwf(1,rhoaug,cwavef(:,1:nband_occ*npw_k,2),dummy,wfraug(:,:,:,1:n6*nband_occ),&
+&                      gbound,gbound,istwf_k,kg_k,kg_k,dtset%mgfft,mpi_enreg,nband_occ,dtset%ngfft,&
+&                      npw_k,1,n4,n5,n6,1,tim_fourwf,weight,weight_i,&
+&                      weight_array_r=weight_t(1:nband_occ),weight_array_i=weight_t(1:nband_occ),&
+&                      gpu_option=gpu_option)
+                 else if(dtset%nspden==4) then
+                   ! Build the four components of rho. We use only norm quantities and, so fourwf.
+                   ! $\sum_{n} f_n \Psi^{* \alpha}_n \Psi^{\alpha}_n =\rho^{\alpha \alpha}$
+                   ! $\sum_{n} f_n (\Psi^{1}+\Psi^{2})^*_n (\Psi^{1}+\Psi^{2})_n=rho+m_x$
+                   ! $\sum_{n} f_n (\Psi^{1}-i \Psi^{2})^*_n (\Psi^{1}-i \Psi^{2})_n=rho+m_y$
+                   if(gpu_option == ABI_GPU_KOKKOS) then
+#if defined HAVE_GPU && defined HAVE_YAKL
+                     ABI_MALLOC_MANAGED(cwavef_x, (/2,npw_k*ndat/))
+                     ABI_MALLOC_MANAGED(cwavef_y, (/2,npw_k*ndat/))
+                     ABI_MALLOC_MANAGED(cwavefb_x,(/2,npw_k*ndat*paw_dmft%use_sc_dmft/))
+                     ABI_MALLOC_MANAGED(cwavefb_y,(/2,npw_k*ndat*paw_dmft%use_sc_dmft/))
+#endif
+                   else
+                     ABI_MALLOC(cwavef_x,(2,npw_k*ndat))
+                     ABI_MALLOC(cwavef_y,(2,npw_k*ndat))
+                     ABI_MALLOC(cwavefb_x,(2,npw_k*ndat*paw_dmft%use_sc_dmft))
+                     ABI_MALLOC(cwavefb_y,(2,npw_k*ndat*paw_dmft%use_sc_dmft))
+                   end if
+                   ! $(\Psi^{1}+\Psi^{2})$
+                   cwavef_x(:,:)=cwavef(:,1:npw_k*nband_occ,1)+cwavef(:,1:npw_k*nband_occ,2)
+                   ! $(\Psi^{1}-i \Psi^{2})$
+                   cwavef_y(1,:)=cwavef(1,1:npw_k*nband_occ,1)+cwavef(2,1:npw_k*nband_occ,2)
+                   cwavef_y(2,:)=cwavef(2,1:npw_k*nband_occ,1)-cwavef(1,1:npw_k*nband_occ,2)
+                   if(use_nondiag_occup_dmft==1) then
+                     cwavefb_x(:,:)=cwavefb(:,1:npw_k*nband_occ,1)+cwavefb(:,1:npw_k*nband_occ,2)
+                     cwavefb_y(1,:)=cwavefb(1,1:npw_k*nband_occ,1)+cwavefb(2,1:npw_k*nband_occ,2)
+                     cwavefb_y(2,:)=cwavefb(2,1:npw_k*nband_occ,1)-cwavefb(1,1:npw_k*nband_occ,2)
+                   end if
+#ifdef HAVE_OPENMP_OFFLOAD
+                   !$OMP TARGET UPDATE FROM(rhoaug) IF(gpu_option==ABI_GPU_OPENMP)
+#endif
+                   rhoaug_up(:,:,:)=rhoaug(:,:,:) !Already computed
+                   call fourwf(1,rhoaug_down,cwavef(:,1:nband_occ*npw_k,2),dummy,wfraug,gbound,gbound,&
+                     &                     istwf_k,kg_k,kg_k,dtset%mgfft,mpi_enreg,nband_occ,dtset%ngfft,&
+                     &                     npw_k,1,n4,n5,n6,1,tim_fourwf,weight,weight_i,&
+                     &                     weight_array_r=weight_t(1:nband_occ),weight_array_i=weight_t(1:nband_occ),&
+                     &                     use_ndo=use_nondiag_occup_dmft,fofginb=cwavefb(:,1:nband_occ*npw_k,2),&
+                     &                     gpu_option=gpu_option)
+
+                   call fourwf(1,rhoaug_mx,cwavef_x,dummy,wfraug,gbound,gbound,&
+                     &                     istwf_k,kg_k,kg_k,dtset%mgfft,mpi_enreg,nband_occ,dtset%ngfft,&
+                     &                     npw_k,1,n4,n5,n6,1,tim_fourwf,weight,weight_i,&
+                     &                     weight_array_r=weight_t(1:nband_occ),weight_array_i=weight_t(1:nband_occ),&
+                     &                     use_ndo=use_nondiag_occup_dmft,fofginb=cwavefb_x,&
+                     &                     gpu_option=gpu_option)
+
+                   call fourwf(1,rhoaug_my,cwavef_y,dummy,wfraug,gbound,gbound,&
+                     &                     istwf_k,kg_k,kg_k,dtset%mgfft,mpi_enreg,nband_occ,dtset%ngfft,&
+                     &                     npw_k,1,n4,n5,n6,1,tim_fourwf,weight,weight_i,&
+                     &                     weight_array_r=weight_t(1:nband_occ),weight_array_i=weight_t(1:nband_occ),&
+                     &                     use_ndo=use_nondiag_occup_dmft,fofginb=cwavefb_y,&
+                     &                     gpu_option=gpu_option)
+                   if(gpu_option == ABI_GPU_KOKKOS) then
+#if defined HAVE_GPU && defined HAVE_YAKL
+                     ABI_FREE_MANAGED(cwavef_x)
+                     ABI_FREE_MANAGED(cwavef_y)
+                     ABI_FREE_MANAGED(cwavefb_x)
+                     ABI_FREE_MANAGED(cwavefb_y)
+#endif
+                   else
+                     ABI_FREE(cwavef_x)
+                     ABI_FREE(cwavef_y)
+                     ABI_FREE(cwavefb_x)
+                     ABI_FREE(cwavefb_y)
+                   end if
+                 end if
+               end if
              end if
              ABI_FREE(weight_t)
 
@@ -544,6 +619,9 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
                          cwavefb_y(1,:)=cwavefb(1,1:npw_k,1)+cwavefb(2,1:npw_k,2)
                          cwavefb_y(2,:)=cwavefb(2,1:npw_k,1)-cwavefb(1,1:npw_k,2)
                        end if
+#ifdef HAVE_OPENMP_OFFLOAD
+                       !$OMP TARGET UPDATE FROM(rhoaug) IF(gpu_option==ABI_GPU_OPENMP)
+#endif
                        rhoaug_up(:,:,:)=rhoaug(:,:,:) !Already computed
                        call fourwf(1,rhoaug_down,cwavef(:,:,2),dummy,wfraug,gbound,gbound,&
                          &                     istwf_k,kg_k,kg_k,dtset%mgfft,mpi_enreg,1,dtset%ngfft,&
