@@ -113,6 +113,9 @@ subroutine rttddft(codvsn,dtfil,dtset,mpi_enreg,pawang,pawrad,pawtab,psps)
                  & ch10,'---------------------------------------------------------------------------',ch10
  call wrtout(ab_out,msg)
  if (do_write_log) call wrtout(std_out,msg)
+ write(msg,'(7a)') ch10,' RT-TDDFT is under active development and should thus be used with caution ',&
+                 & ch10,'---------------------------------------------------------------------------',ch10
+ if (do_write_log) call wrtout(std_out,msg)
 
  !** 1) Initialization: create main tdks (Time-Dependent Kohn-Sham) object
  write(msg,'(3a)') ch10,'---------------------------   Initialization   ----------------------------',ch10
