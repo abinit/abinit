@@ -32,7 +32,7 @@
 
 # Files
  getden_filepath "LiF_eph_varpeq/gso_DEN.nc" # Read the precomputed DEN stored in git submodule
-                                             # NOTE: for the input parameters used to prodcue
+                                             # NOTE: for the input parameters used to produce
                                              # the DEN file, consult the LiF_eph_varpeq/gs.abi
 
 # Pseudopotentials

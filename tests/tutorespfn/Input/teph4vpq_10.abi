@@ -31,7 +31,7 @@
  ddb_ngqpt  3 3 3          # This has to be consistent with the DDB file
  getddb_filepath
  "LiF_eph_varpeq/out_DDB"  # Read the precomputed DDB stored in git submodule
-                           # NOTE: for the input parameters used to prodcue
+                           # NOTE: for the input parameters used to produce
                            # the DDB file, consult the LiF_eph_varpeq/dfpt.abi
 
 # Scattering potentials
