@@ -2,7 +2,7 @@
 # k/q-grids in a dataset mode. The results are stored in GSTORE.nc NetCDF file
 # (preparatory run for VarPEq hole polaron calculations)
 
-# NOTE that dataset mode is uded only for the tutorial
+# NOTE that dataset mode is used only for the tutorial
 # In production, it is advisable to compute each GSTORE file in a separate run
 
  ndtset 3
@@ -12,7 +12,7 @@
 
 # Electron-phonon matrix elements parameters
  gstore_cplex  2     # Complex e-ph matrix elements   (mandatory for VarPEq)
- gstore_kzone  "bz"  # Use full BZ for k and q meshed (mandstory for VarPEq)
+ gstore_kzone  "bz"  # Use full BZ for k and q meshes (mandatory for VarPEq)
  gstore_qzone  "bz"
  gstore_brange 3 5  # Bands participating in the hole polaron formation:
                     # from 3 to 5 (triply degenerate valence band maximum)
@@ -36,7 +36,7 @@
 # Phonons
  getddb_filepath
  "LiF_eph_varpeq/out_DDB"  # Read the precomputed DDB stored in git submodule
-                           # NOTE: for the input parameters used to prodcue
+                           # NOTE: for the input parameters used to produce
                            # the DDB file, consult the LiF_eph_varpeq/dfpt.abi
 
 # Scattering potentials

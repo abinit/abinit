@@ -507,6 +507,7 @@ program abitk
  ABI_SFREE(wtk)
  ABI_SFREE(kbz)
  ABI_SFREE(new_shiftk)
+ ABI_SFREE(shiftk)
 
  call abinit_doctor("__abitk")
 
