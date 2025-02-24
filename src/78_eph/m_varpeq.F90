@@ -1162,10 +1162,10 @@ subroutine varpeq_print_results(self)
 
      is_conv = (self%cvflag_spin(state, spin) == 1)
      if (is_conv) then
-       write(msg, '(a3,a,es10.4,a,es10.4)') "", "Converged: ||grad||=", grs, &
+       write(msg, '(a3,a,es11.4,a,es11.4)') "", "Converged: ||grad||=", grs, &
          " < vpq_tolgrs=", self%tolgrs
      else
-       write(msg, '(a3,a,es10.4,a,es10.4)') "", "Unconverged: ||grad||=", grs, &
+       write(msg, '(a3,a,es11.4,a,es11.4)') "", "Unconverged: ||grad||=", grs, &
          " > vpq_tolgrs=", self%tolgrs
      endif
 
