@@ -636,19 +636,21 @@ contains
     nprojs_last_blk = nprojs
     nprojs_my_blk = nprojs
     nprojs_blk = nprojs
-    if(gemm_nonlop_is_distributed) then
 
-      rank = xmpi_comm_rank(gemm_nonlop_block_comm);
-      is_last_rank = (rank==gemm_nonlop_block_size-1)
-
+    if(gemm_nonlop_block_size > 1) then
       nprojs_blk = nprojs / gemm_nonlop_block_size
       nprojs_last_blk = nprojs_blk + modulo(nprojs,nprojs_blk)
       gemm_nonlop_kpt(ik)%nprojs_blk = nprojs_blk
       gemm_nonlop_kpt(ik)%nprojs_last_blk = nprojs_last_blk
-      if(is_last_rank) then
-        nprojs_my_blk = nprojs_last_blk
-      else
-        nprojs_my_blk = nprojs_blk
+
+      if(gemm_nonlop_is_distributed) then
+        rank = xmpi_comm_rank(gemm_nonlop_block_comm);
+        is_last_rank = (rank==gemm_nonlop_block_size-1)
+        if(is_last_rank) then
+          nprojs_my_blk = nprojs_last_blk
+        else
+          nprojs_my_blk = nprojs_blk
+        end if
       end if
     end if
 
@@ -683,18 +685,21 @@ contains
       nprojs_last_blk = nprojs
       nprojs_my_blk = nprojs
       nprojs_blk = nprojs
-      if(gemm_nonlop_is_distributed) then
-        rank = xmpi_comm_rank(gemm_nonlop_block_comm);
-        is_last_rank = (rank==gemm_nonlop_block_size-1)
 
+      if(gemm_nonlop_block_size > 1) then
         nprojs_blk = nprojs / gemm_nonlop_block_size
         nprojs_last_blk = nprojs_blk + modulo(nprojs,nprojs_blk)
         gemm_nonlop_kpt(ik)%nprojs_blk = nprojs_blk
         gemm_nonlop_kpt(ik)%nprojs_last_blk = nprojs_last_blk
-        if(is_last_rank) then
-          nprojs_my_blk = nprojs_last_blk
-        else
-          nprojs_my_blk = nprojs_blk
+
+        if(gemm_nonlop_is_distributed) then
+          rank = xmpi_comm_rank(gemm_nonlop_block_comm);
+          is_last_rank = (rank==gemm_nonlop_block_size-1)
+          if(is_last_rank) then
+            nprojs_my_blk = nprojs_last_blk
+          else
+            nprojs_my_blk = nprojs_blk
+          end if
         end if
       end if
       if(istwf_k <= 1) then
@@ -727,7 +732,7 @@ contains
   if (nprojs>0) gemm_nonlop_kpt(ik)%npw = npw
   if (ndgxdt>0) gemm_nonlop_kpt(ik)%ngrads = ndgxdt
   if (nd2gxdt>0) gemm_nonlop_kpt(ik)%ngrads2 = nd2gxdt
-  if(gemm_nonlop_is_distributed) then
+  if(gemm_nonlop_block_size > 1) then
     if(nprojs_blk>0) gemm_nonlop_kpt(ik)%nprojs_blk = nprojs_blk
     if(nprojs_last_blk>0) gemm_nonlop_kpt(ik)%nprojs_last_blk = nprojs_last_blk
   end if
@@ -849,7 +854,7 @@ contains
   shift = 0
   lmn_beg = 1
 
-  if(gemm_nonlop_is_distributed) then
+  if(gemm_nonlop_block_size > 1) then
     is_last_rank = (iblock==gemm_nonlop_block_size)
     nprojs_my_blk=gemm_nonlop_kpt(ik)%nprojs_blk
     if(is_last_rank) nprojs_my_blk=gemm_nonlop_kpt(ik)%nprojs_last_blk
@@ -866,7 +871,7 @@ contains
 
       ! In distributed mode, loops are skipped until reach the section
       ! of "ilmn" to be stored by local rank
-      if(gemm_nonlop_is_distributed) then
+      if(gemm_nonlop_block_size > 1) then
         if(shift_do+nlmn < ibeg) then
           shift_do = shift_do + nlmn
           iaph3d = iaph3d + 1
@@ -986,7 +991,7 @@ contains
       end if
 
       iaph3d = iaph3d + 1
-      if(gemm_nonlop_is_distributed) then
+      if(gemm_nonlop_block_size > 1) then
         shift = shift + nlmn - (lmn_beg-1)
         shift_do = shift_do + nlmn
         if(shift_do >= iend - 1) exit
@@ -994,7 +999,7 @@ contains
         shift = shift + nlmn
       end if
     end do
-    if(gemm_nonlop_is_distributed .and. shift_do >= iend - 1) exit
+    if(gemm_nonlop_block_size > 1 .and. shift_do >= iend - 1) exit
   end do
 
 
@@ -1143,7 +1148,7 @@ contains
   shift = 0 ; shift_grad = 0; shift_grad2 = 0
   lmn_beg = 1
 
-  if(gemm_nonlop_is_distributed) then
+  if(gemm_nonlop_block_size > 1) then
     is_last_rank = (iblock==gemm_nonlop_block_size)
     nprojs_my_blk=gemm_nonlop_kpt(ik)%nprojs_blk
     if(is_last_rank) nprojs_my_blk=gemm_nonlop_kpt(ik)%nprojs_last_blk
@@ -1178,7 +1183,7 @@ contains
 
       ! In distributed mode, loops are skipped until reach the section
       ! of "ilmn" to be stored by local rank
-      if(gemm_nonlop_is_distributed) then
+      if(gemm_nonlop_block_size > 1) then
         if(shift_do+nlmn < ibeg) then
           shift_do = shift_do + nlmn
           iaph3d = iaph3d + 1
@@ -1664,7 +1669,7 @@ contains
       shift_grad2 = shift_grad2 + ngrads2*nlmn_o
       shift_grad  = shift_grad  + ngrads*nlmn_o
 
-      if(gemm_nonlop_is_distributed) then
+      if(gemm_nonlop_block_size > 1) then
         shift = shift + nlmn - (lmn_beg-1)
         shift_do = shift_do + nlmn
         if(shift_do >= iend - 1) exit
@@ -1673,11 +1678,11 @@ contains
       end if
 
     end do
-    if(gemm_nonlop_is_distributed .and. shift_do >= iend - 1) exit
+    if(gemm_nonlop_block_size > 1 .and. shift_do >= iend - 1) exit
   end do
 
   ! Filling dprojs by extracting values from dprojs_tmp
-  if(gemm_nonlop_is_distributed .and. ngrads>0) then
+  if(gemm_nonlop_block_size > 1 .and. ngrads>0) then
     shift_grad = lmn_grad_beg
     if(istwf_k <= 1) then
 #ifdef HAVE_OPENMP_OFFLOAD
