@@ -549,10 +549,19 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
      call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamkq,idir,lambda,mpi_enreg,ndat,nnlout,&
 &     paw_opt,signs,svectout_dum,tim_nonlop,cwave,gvnlx1_,iatom_only=ipert)
      if (sij_opt==1) then
-!$OMP PARALLEL DO
-       do ipw=1,npw1*my_nspinor*ndat
-         gs1c(:,ipw)=zero
-       end do
+       if(gs_hamkq%gpu_option/=ABI_GPU_OPENMP) then
+         !$OMP PARALLEL DO
+         do ipw=1,npw1*my_nspinor*ndat
+           gs1c(:,ipw)=zero
+         end do
+       else
+#ifdef HAVE_OPENMP_OFFLOAD
+         !$OMP TARGET PARALLEL DO MAP(to:gs1c)
+         do ipw=1,npw1*my_nspinor*ndat
+           gs1c(:,ipw)=zero
+         end do
+#endif
+       end if
      end if
    end if
 
@@ -940,21 +949,30 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
  has_nd1=( (ipert .EQ. natom+1) .AND. ASSOCIATED(rf_hamkq%vectornd) )
 
  if (has_nd1) then
-   if(gs_hamkq%gpu_option==ABI_GPU_OPENMP) then
-     ABI_BUG("Not implemented for OpenMP GPU (gpu_option==2")
-   end if
    ABI_MALLOC(gh1ndc,(2,npw*my_nspinor*ndat))
+#ifdef HAVE_OPENMP_OFFLOAD
+   if(gs_hamkq%gpu_option==ABI_GPU_OPENMP) call ompgpu_enter_map_alloc(gh1ndc,2*npw*my_nspinor*ndat)
+#endif
    call getgh1ndc(cwave,gh1ndc,gs_hamkq%gbound_k,gs_hamkq%istwf_k,gs_hamkq%kg_k,&
      & gs_hamkq%mgfft,mpi_enreg,ndat,gs_hamkq%ngfft,npw,gs_hamkq%nvloc,&
      & gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,my_nspinor,rf_hamkq%vectornd,&
      & gs_hamkq%gpu_option)
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET TEAMS DISTRIBUTE &
+   !$OMP& MAP(to:gvnlx1_,gh1ndc) PRIVATE(ispinor) &
+   !$OMP& IF(gs_hamkq%gpu_option==ABI_GPU_OPENMP)
+#endif
    do ispinor=1,my_nspinor*ndat
+     !$OMP PARALLEL DO PRIVATE(ipw,ipws)
      do ipw=1,npw
        ipws=ipw+npw*(ispinor-1)
        gvnlx1_(1,ipws)=gvnlx1_(1,ipws)+gh1ndc(1,ipws)
        gvnlx1_(2,ipws)=gvnlx1_(2,ipws)+gh1ndc(2,ipws)
      end do
    end do
+#ifdef HAVE_OPENMP_OFFLOAD
+   if(gs_hamkq%gpu_option==ABI_GPU_OPENMP) call ompgpu_exit_map_delete(gh1ndc,2*npw*my_nspinor*ndat)
+#endif
    ABI_FREE(gh1ndc)
  end if
 
@@ -2215,65 +2233,147 @@ subroutine getgh1ndc(cwavein,gh1ndc,gbound_k,istwf_k,kg_k,mgfft,mpi_enreg,&
 
  if (nspinortot==1) then
 
-    ABI_MALLOC(ghc1,(2,npw_k*ndat))
+   ABI_MALLOC(ghc1,(2,npw_k*ndat))
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET ENTER DATA MAP(alloc:ghc1) IF(gpu_option==ABI_GPU_OPENMP)
+#endif
 
-    ! apply vector potential in direction ipert to input wavefunction
-    call fourwf(1,vectornd,cwavein,ghc1,work,gbound_k,gbound_k,&
-      & istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
-      & tim_fourwf,weight,weight,gpu_option=gpu_option)
+   ! apply vector potential in direction ipert to input wavefunction
+   call fourwf(1,vectornd,cwavein,ghc1,work,gbound_k,gbound_k,&
+     & istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
+     & tim_fourwf,weight,weight,gpu_option=gpu_option)
 
-    ! scale by 2\pi
-    gh1ndc=two_pi*ghc1
+   ! scale by 2\pi
+   if(gpu_option==ABI_GPU_DISABLED) then
+     gh1ndc=two_pi*ghc1
+   else if(gpu_option==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO MAP(to:gh1ndc,ghc1) PRIVATE(ipw)
+     do ipw=1,npw_k*ndat
+       gh1ndc(1,ipw)=two_pi*ghc1(1,ipw)
+       gh1ndc(2,ipw)=two_pi*ghc1(2,ipw)
+     end do
+#endif
+   end if
 
-    ABI_FREE(ghc1)
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET EXIT DATA MAP(delete:ghc1) IF(gpu_option==ABI_GPU_OPENMP)
+#endif
+   ABI_FREE(ghc1)
 
  else ! nspinortot==2
 
-    ABI_MALLOC(cwavein1,(2,npw_k*ndat))
-    ABI_MALLOC(cwavein2,(2,npw_k*ndat))
-    do idat=1,ndat
-       do ipw=1,npw_k
-          cwavein1(1:2,ipw+(idat-1)*npw_k)=cwavein(1:2,ipw+(idat-1)*my_nspinor*npw_k)
-          cwavein2(1:2,ipw+(idat-1)*npw_k)=cwavein(1:2,ipw+(idat-1)*my_nspinor*npw_k+shift)
+   if (nspinor1TreatedByThisProc) then
+
+     ABI_MALLOC(cwavein1,(2,npw_k*ndat))
+     ABI_MALLOC(ghc1,(2,npw_k*ndat))
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET ENTER DATA MAP(alloc:ghc1,cwavein1) IF(gpu_option==ABI_GPU_OPENMP)
+#endif
+
+     if(gpu_option==ABI_GPU_DISABLED) then
+       do idat=1,ndat
+         do ipw=1,npw_k
+           cwavein1(1:2,ipw+(idat-1)*npw_k)=cwavein(1:2,ipw+(idat-1)*my_nspinor*npw_k)
+         end do
        end do
-    end do
+     else if(gpu_option==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+       !$OMP TARGET TEAMS DISTRIBUTE MAP(to:cwavein1,cwavein) PRIVATE(idat)
+       do idat=1,ndat
+         !$OMP PARALLEL DO PRIVATE(ipw)
+         do ipw=1,npw_k
+           cwavein1(1:2,ipw+(idat-1)*npw_k)=cwavein(1:2,ipw+(idat-1)*my_nspinor*npw_k)
+         end do
+       end do
+#endif
+     end if
 
-    if (nspinor1TreatedByThisProc) then
+     call fourwf(1,vectornd,cwavein1,ghc1,work,gbound_k,gbound_k,&
+       & istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
+       & tim_fourwf,weight,weight,gpu_option=gpu_option)
 
-       ABI_MALLOC(ghc1,(2,npw_k*ndat))
-
-       call fourwf(1,vectornd,cwavein1,ghc1,work,gbound_k,gbound_k,&
-         & istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
-         & tim_fourwf,weight,weight,gpu_option=gpu_option)
-
+     if(gpu_option==ABI_GPU_DISABLED) then
        do idat=1,ndat
          iv1=1+(idat-1)*npw_k; iv2=npw_k+(idat-1)*npw_k
          gh1ndc(1:2,iv1:iv2)=two_pi*ghc1(1:2,iv1:iv2)
        end do
+     else if(gpu_option==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+       !$OMP TARGET TEAMS DISTRIBUTE MAP(to:gh1ndc,ghc1) PRIVATE(idat)
+       do idat=1,ndat
+         !$OMP PARALLEL DO PRIVATE(ipw)
+         do ipw=1,npw_k
+           gh1ndc(1,ipw+(idat-1)*npw_k)=two_pi*ghc1(1,ipw+(idat-1)*npw_k)
+           gh1ndc(2,ipw+(idat-1)*npw_k)=two_pi*ghc1(2,ipw+(idat-1)*npw_k)
+         end do
+       end do
+#endif
+     end if
 
-       ABI_FREE(ghc1)
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET EXIT DATA MAP(delete:ghc1,cwavein1) IF(gpu_option==ABI_GPU_OPENMP)
+#endif
+     ABI_FREE(ghc1)
+     ABI_FREE(cwavein1)
 
-    end if ! end spinor 1
+   end if ! end spinor 1
 
-    if (nspinor2TreatedByThisProc) then
+   if (nspinor2TreatedByThisProc) then
 
-       ABI_MALLOC(ghc2,(2,npw_k*ndat))
+     ABI_MALLOC(cwavein2,(2,npw_k*ndat))
+     ABI_MALLOC(ghc2,(2,npw_k*ndat))
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET ENTER DATA MAP(alloc:ghc2,cwavein2) IF(gpu_option==ABI_GPU_OPENMP)
+#endif
 
-       call fourwf(1,vectornd,cwavein2,ghc2,work,gbound_k,gbound_k,&
-         & istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
-         & tim_fourwf,weight,weight,gpu_option=gpu_option)
+     if(gpu_option==ABI_GPU_DISABLED) then
+       do idat=1,ndat
+         do ipw=1,npw_k
+           cwavein2(1:2,ipw+(idat-1)*npw_k)=cwavein(1:2,ipw+(idat-1)*my_nspinor*npw_k+shift)
+         end do
+       end do
+     else if(gpu_option==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+       !$OMP TARGET TEAMS DISTRIBUTE MAP(to:cwavein2,cwavein) PRIVATE(idat)
+       do idat=1,ndat
+         !$OMP PARALLEL DO PRIVATE(ipw)
+         do ipw=1,npw_k
+           cwavein2(1:2,ipw+(idat-1)*npw_k)=cwavein(1:2,ipw+(idat-1)*my_nspinor*npw_k+shift)
+         end do
+       end do
+#endif
+     end if
 
+     call fourwf(1,vectornd,cwavein2,ghc2,work,gbound_k,gbound_k,&
+       & istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
+       & tim_fourwf,weight,weight,gpu_option=gpu_option)
+
+     if(gpu_option==ABI_GPU_DISABLED) then
        do idat=1,ndat
          iv1=1+(idat-1)*npw_k; iv2=npw_k+(idat-1)*npw_k
          gh1ndc(1:2,iv1+shift:iv2+shift)=two_pi*ghc2(1:2,iv1:iv2)
        end do
+     else if(gpu_option==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+       !$OMP TARGET TEAMS DISTRIBUTE MAP(to:gh1ndc,ghc2) PRIVATE(idat)
+       do idat=1,ndat
+         !$OMP PARALLEL DO PRIVATE(ipw)
+         do ipw=1,npw_k
+           gh1ndc(1,ipw+(idat-1)*npw_k+shift)=two_pi*ghc2(1,ipw+(idat-1)*npw_k)
+           gh1ndc(2,ipw+(idat-1)*npw_k+shift)=two_pi*ghc2(2,ipw+(idat-1)*npw_k)
+         end do
+       end do
+#endif
+     end if
 
-       ABI_FREE(ghc2)
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET EXIT DATA MAP(delete:ghc2,cwavein2) IF(gpu_option==ABI_GPU_OPENMP)
+#endif
+     ABI_FREE(ghc2)
+     ABI_FREE(cwavein2)
 
-    end if ! end spinor 2
-
-    ABI_FREE(cwavein1)
-    ABI_FREE(cwavein2)
+   end if ! end spinor 2
 
  end if ! nspinortot
 

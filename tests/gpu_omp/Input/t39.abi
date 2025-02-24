@@ -1,0 +1,118 @@
+# Polaron effective mass for triply degenerate bands in cubic materials in CaO.
+
+ndtset     5
+
+ kptopt    1
+ kptrlatt -2  2  2      # In cartesian coordinates, this grid is simple cubic
+           2 -2  2
+           2  2 -2
+   tolvrs  1.0d-10
+     nqpt  1
+      qpt  3*0.0
+
+# Ground state calculation
+  #Restore the default parameters for the ground state part,
+  #i.e. override the common parameters defined for the effective mass datasets.
+  tolwfr1  0.0d0
+    nqpt1  0
+   nband1  8
+  nbdbuf1  0
+
+# RF calculation of ddk
+  rfelfd2  2
+  kptopt2  2
+  tolwfr2  1.0d-10
+  getwfk2 -1
+    iscf2 -3
+   nband2  8
+  nbdbuf2  0
+
+# RF calculation of phonons and electric field perturbation
+  rfphon3  1
+  rfelfd3  3
+  kptopt3  2
+  tolvrs3  1.0d-8
+  getwfk3  1
+  getddk3  2
+   nband3  8
+  nbdbuf3  0
+
+# Non-SCF at the specific points where we want to have the effective mass, including the conduction bands
+    iscf4 -2
+  getden4  1
+  kptopt4  0        # K-points can be specified in any way one want, they just need to be present in the
+    nkpt4  1        # ground state calc. too.
+     kpt4  0.00 0.00 0.00   # Gamma
+  tolwfr4  1.0d-10  # Must use tolwfr for non-self-consistent calculations.
+    nqpt4  0
+
+# Response Function calculation : d/dk  at the specific points, with added bands.
+  rfelfd5  2         # Activate the calculation of the d/dk perturbation (required for effective mass calc.)
+    iscf5 -2
+   nstep5 10
+  getden5  1
+  getwfk5  4
+  get1wf5  2
+  kptopt5  0        # Here one perform a GS calculation for the K-points for which the effective mass is sought.
+    nkpt5  1
+     kpt5  0.00 0.00 0.00   # Gamma
+  tolwfr5   1.0d-10  # Must use tolwfr for non-self-consistent calculations.
+
+    efmas5        1     # Triggers the calculation of effective mass tensors for the specified k-points.
+    efmas_bands5  6 9   # The range of bands for which the effective mass tensors will be computed, for each k-point.
+efmas_calc_dirs5  1
+   efmas_n_dirs5  7
+   efmas_ntheta5  100
+     efmas_dirs5
+              1 0 0
+              0 1 0
+              0 0 1
+              1 1 1
+              0 1 1
+              1 0 1
+              1 1 0
+      prtefmas5   1
+
+gpu_option 2
+
+#######################################################################
+acell 3*9.136
+xred
+   0.0000000000    0.0000000000    0.0000000000
+   0.5000000000    0.5000000000    0.5000000000
+rprim
+  0.0 0.5 0.5
+  0.5 0.0 0.5
+  0.5 0.5 0.0
+typat 1 2
+natom 2
+ntypat 2
+znucl 20 8
+nband 12
+nbdbuf 2
+diemac 6
+ ecut 30               # Underconverged ecut.
+nstep 100
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "Psdj_nc_sr_04_pbe_std_psp8/Ca.psp8, O.psp8"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% exclude_builders = eos_nvhpc_23.9_elpa
+#%% [shell]
+#%% post_commands =
+#%% [files]
+#%% files_to_test =
+#%%   t39.abo, tolnlines = 10, tolabs = 5.5e-7, tolrel = 5.0e-4, fld_options=-medium;
+##%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = M. Sarraute
+#%% keywords = NC, DFPT
+#%% description =
+#%%  CaO polaron effective mass on GPU along different direction: 100,110,111.
+#%%  Method available only for cubic materials.
+#%% topics =
+#%%<END TEST_INFO>

@@ -1340,12 +1340,12 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    call chkint_eq(0,0,cond_string,cond_values,ierr,'gpu_option',dt%gpu_option,4, &
    &        (/ABI_GPU_DISABLED,ABI_GPU_LEGACY,ABI_GPU_OPENMP,ABI_GPU_KOKKOS/),iout)
    if (dt%gpu_option/=ABI_GPU_DISABLED) then
-     if (dt%nspinor==2) then
-       write(msg,'(3a)')&
-&       'Use of GPU is not allowed when nspinor==2 !',ch10,&
-&       'Action: impose gpu_option=0 in your input file.'
-       ABI_ERROR_NOSTOP(msg, ierr)
-     end if
+!     if (dt%nspinor==2) then
+!       write(msg,'(3a)')&
+!&       'Use of GPU is not allowed when nspinor==2 !',ch10,&
+!&       'Action: impose gpu_option=0 in your input file.'
+!       ABI_ERROR_NOSTOP(msg, ierr)
+!     end if
 !    if (dt%optdriver==RUNL_GSTATE.and.mod(dt%wfoptalg,10)/=4) then
 !    write(msg,'(6a)') ch10,&
 !    &       ' chkinp : ERROR -',ch10,&
@@ -1357,7 +1357,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      if (dt%useylm == 0 .and. dt%optdriver /= RUNL_GWR) then
        write(msg,'(3a)')&
         'Use of GPU is not allowed when useylm==0 !',ch10,&
-        'Action: impose uselym=1 in your input file.'
+        'Action: impose useylm=1 in your input file.'
        ABI_ERROR_NOSTOP(msg, ierr)
      end if
      if (dt%tfkinfunc>0) then
@@ -2901,7 +2901,11 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    end if
 
    if (dt%useylm == 1 .and. dt%usepaw == 0 .and. dt%nspinor == 2 .and. any(pspheads(:)%pspso /= 0)) then
-     ABI_ERROR_NOSTOP("spin-orbit (pspso /=0 ) with NC pseudos and Yml for nonlop (useyml = 1) not yet allowed.", ierr)
+     if(dt%gpu_option/=ABI_GPU_DISABLED) then
+       ABI_ERROR_NOSTOP("spin-orbit (pspso /=0 ) with NC pseudos and GPU for nonlop (gpu_option != 0) not yet allowed.", ierr)
+     else
+       ABI_ERROR_NOSTOP("spin-orbit (pspso /=0 ) with NC pseudos and Ylm for nonlop (useylm = 1) not yet allowed.", ierr)
+     end if
    end if
 
 !  optforces
