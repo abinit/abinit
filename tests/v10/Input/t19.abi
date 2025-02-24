@@ -30,7 +30,7 @@ mdeg_filter 8
 
 # bands and spinors
 nband  8
-nbdbuf 2
+nbdbuf 4
 
 toldff 1.0d-6
 
