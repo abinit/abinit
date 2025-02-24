@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2024 ABINIT group (XG, DRH, MB, XW, MT, SPr, MJV)
+!!  Copyright (C) 1999-2025 ABINIT group (XG, DRH, MB, XW, MT, SPr, MJV)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2824,13 +2824,17 @@ subroutine dfpt_prtene(berryopt,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrn
  else if(ipert==natom+1) then
    write(msg, '(a,es17.8,a,es17.8,a,es17.8)' ) &
 &     '     kin1=',ek1,   '  Hartree=',ehart1,'     xc=',exc1
-   if (has_nd) then
+   if (has_nd .and. (.not.with_vxctau) ) then
       write(msg, '(a,es17.8,a,es17.8,a,es17.8,a,es17.8)' ) &
            &     '     kin1=',ek1,   '  Hartree=',ehart1,'     xc=',exc1,'  nclr dpl1=',end1
    end if
-   if (with_vxctau) then
+   if (with_vxctau .and. (.not.has_nd) ) then
       write(msg, '(a,es17.8,a,es17.8,a,es17.8,a,es17.8)' ) &
            &     '     kin1=',ek1,   '  Hartree=',ehart1,'     xc=',exc1,'  evxctau1=',evxctau1
+   end if
+   if (with_vxctau .and. has_nd ) then
+      write(msg, '(a,es17.8,a,es17.8,a,es17.8,a,es17.8,a,es17.8)' ) &
+           &     '     kin1=',ek1,   '  Hartree=',ehart1,'     xc=',exc1,'  evxctau1=',evxctau1,'  nclr dpl1=',end1
    end if
  else if(ipert==natom+2) then
    write(msg, '(a,es17.8,a,es17.8,a,es17.8)' ) &
@@ -2865,11 +2869,11 @@ subroutine dfpt_prtene(berryopt,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrn
    if(ipert>=1.and.ipert<=natom)then
      erelax=ek0+edocc+eeig0+eloc0+elpsp1+ehart1+exc1+enl0+enl1+epaw1
   else if(ipert==natom+1.or.ipert==natom+2)then
-     ! JWZ: end0 and evxctau0 are included as "local" in getghc, while
-     ! JWZ: end1 and evxctau1 are included in gvnlx1 (non local) in getgh1c
-     ! JWZ: therefore, in erelax, end0 and evxctau0 are added in explicitly while
-     ! JWZ: end1 and evxctau1 are already present in enl1
-     erelax=ek0+edocc+eeig0+eloc0+ek1+ehart1+exc1+enl0+enl1+epaw1+end0+evxctau0
+     ! NOTE: end0 and evxctau0 are included as "local" in getghc, while
+     !   end1 and evxctau1 are included in gvnlx1 (non local) in getgh1c
+     !   but in dfpt_vtowfk, end1 and evxctau1 have been subtracted from enl1,
+     !   at the same point where ek1 is subtracted from enl1, leaving enl1 "pure"
+     erelax=ek0+edocc+eeig0+eloc0+ek1+ehart1+exc1+enl0+enl1+epaw1+end0+end1+evxctau0+evxctau1
    else if(ipert==natom+3.or.ipert==natom+4)then
      erelax=ek0+edocc+eeig0+eloc0+ek1+elpsp1+ehart1+exc1+enl0+enl1+epaw1
    else if(ipert==natom+5)then
@@ -2972,7 +2976,7 @@ subroutine dfpt_prtene(berryopt,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrn
    call wrtout(iout,msg)
    call wrtout(std_out,msg)
    write(msg, '(a,es20.10,a)' ) &
-&   '    (  non-var. 2DEtotal :',0.5_dp*(ek1+enl1_effective)+eovl1,' Ha)'
+&   '    (  non-var. 2DEtotal :',0.5_dp*(ek1+enl1_effective+end1+evxctau1)+eovl1,' Ha)'
    call wrtout(iout,msg)
    call wrtout(std_out,msg)
 

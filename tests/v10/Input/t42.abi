@@ -1,0 +1,101 @@
+# test DDK and orbital magnetism response with nuclear dipole moment and nspinor 2
+# AlP solid together with R2SCAN mgga
+
+ixc -497498
+usekden 1
+
+# unconverged, use ecut at least 20 for convergence
+ecut 5
+pawecutdg 10
+
+# limit steps to speed test
+nstep 10
+
+#nuclear magnetic dipole moment on Al site
+#size 1 in a.u. along x axis
+nucdipmom
+3*0.0 1.00000 0.0 0.0
+
+# Lamb shielding is contained in the PAW sets
+
+# bands and spinors
+nband 8
+nspinor 2
+pawspnorb 1
+
+ndtset 2
+
+tolvrs1 1.0D-18
+prtwf1 1
+
+tolwfr2 1.0D-20
+getwfk2 -1
+rfddk2 1
+rfdir2 1 1 1
+iscf2 -3
+orbmag2 2
+
+istwfk *1
+
+kptopt 3
+nsym 1
+symrel 1 0 0 0 1 0 0 0 1
+symmorphi 0
+
+# severely unconverged, use 8 8 8 at least
+# for convergence
+ngkpt 3*2
+nshiftk 4
+shiftk 3*1/2
+1/2 0 0
+0 1/2 0
+0 0 1/2
+
+
+prtwf 0
+prteig 0
+prtden 0
+
+optforces 0
+optstress 0
+pawcpxocc 2
+usexcnhat 0
+
+paral_atom 0
+paral_kgb 0
+
+
+acell    3*10.3008969711
+
+rprim    0.000000000000000   0.500000000000000   0.500000000000000
+         0.500000000000000   0.000000000000000   0.500000000000000
+         0.500000000000000   0.500000000000000   0.000000000000000
+
+natom    2
+ntypat   2
+typat    1 2
+znucl    15 13
+xred     0.250000000000000   0.250000000000000   0.250000000000000
+         0.000000000000000   0.000000000000000   0.000000000000000
+
+pp_dirpath="$ABI_PSPDIR"
+pseudos="P.GGA_X_PBE+GGA_C_PBE.xml,Al.GGA_X_PBE+GGA_C_PBE.xml"
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test =
+#%%   t42.abo, tolnlines= 18, tolabs=  5.0e-9, tolrel= 1.1
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = J. Zwanziger
+#%% keywords = PAW
+#%% description = Orbital magnetism with nspinor 2 and mGGA
+#%% topics = NMR, MagField
+#%%<END TEST_INFO>
+

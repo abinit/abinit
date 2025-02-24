@@ -2,7 +2,7 @@
 """
 Script to plot the phonon band structure and compare with the LWF phonon band structure.
  COPYRIGHT
- Copyright (C) 1999-2024 ABINIT group (HeXu)
+ Copyright (C) 1999-2025 ABINIT group (HeXu)
  This file is distributed under the terms of the
  GNU General Public Licence, see ~abinit/COPYING
  or http://www.gnu.org/copyleft/gpl.txt .

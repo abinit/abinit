@@ -7,7 +7,7 @@
 !!    optical conductivity, X spectroscopy, linear susceptibility, ...
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2024 ABINIT group (SM,VR,FJ,MT,NB,PGhosh)
+!! Copyright (C) 2018-2025 ABINIT group (SM,VR,FJ,MT,NB,PGhosh)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -774,7 +774,7 @@ CONTAINS  !=====================================================================
 !!  Matrix elements = <Phi_core|Nabla|Phi_j>
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2024 ABINIT group (SM,MT,NB)
+!! Copyright (C) 2005-2025 ABINIT group (SM,MT,NB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1750,7 +1750,7 @@ CONTAINS  !=====================================================================
 !!        and Gvec_ij= Int[S_limi S_ljmj vec(r)/r dOmega] (Gaunt coefficients)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2021-2024 ABINIT group (NBrouwer,MT)
+!! Copyright (C) 2021-2025 ABINIT group (NBrouwer,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

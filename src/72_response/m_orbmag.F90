@@ -7,7 +7,7 @@
 !!  used to handle orbital magnetization
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2024 ABINIT group (JWZ)
+!! Copyright (C) 2011-2025 ABINIT group (JWZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -208,7 +208,7 @@ CONTAINS  !=====================================================================
 !! wavefunctions and DDK wavefuntions.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2024 ABINIT  group
+!! Copyright (C) 2003-2025 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -857,7 +857,7 @@ end subroutine sum_orbmag_mesh
 !! make NL(1) term at k
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2024 ABINIT  group
+!! Copyright (C) 2003-2025 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -953,7 +953,7 @@ end subroutine orbmag_nl1_k
 !! make NL term at k
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2024 ABINIT  group
+!! Copyright (C) 2003-2025 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1058,7 +1058,7 @@ end subroutine orbmag_nl_k
 !! computes <P_c du/dk|H + E*S|P_c du/dk> term in orbital magnetism
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2024 ABINIT  group
+!! Copyright (C) 2003-2025 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1204,7 +1204,7 @@ end subroutine orbmag_cc_k
 !! orbmag_vv_k
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2024 ABINIT  group
+!! Copyright (C) 2003-2025 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1390,7 +1390,7 @@ end subroutine orbmag_vv_k
 !! compute Pc|cg1> from |cg1> and |cg>
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2024 ABINIT  group
+!! Copyright (C) 2003-2025 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1525,7 +1525,7 @@ end subroutine make_pcg1
 !! add core electron contribution to the orbital magnetic moment
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2024 ABINIT  group
+!! Copyright (C) 2003-2025 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1594,7 +1594,7 @@ end subroutine lamb_core
 !! Onsite part of matrix element <u_n|dp>a_ij<dp|u_m>
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2024 ABINIT  group
+!! Copyright (C) 2003-2025 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1698,7 +1698,7 @@ end subroutine txt_me
 !! Onsite part of matrix element <u_n|a_ij|u_m>
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2024 ABINIT  group
+!! Copyright (C) 2003-2025 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1797,7 +1797,7 @@ end subroutine tt_me
 !! Transfer pawtab%sij to dterm, as complex, solely for convenience
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2024 ABINIT  group
+!! Copyright (C) 2003-2025 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1865,7 +1865,7 @@ end subroutine dterm_qij
 !! Compute onsite <A0.AN>
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2024 ABINIT  group
+!! Copyright (C) 2003-2025 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1992,7 +1992,7 @@ end subroutine dterm_BM
 !! Compute onsite <L_R/2>
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2024 ABINIT  group
+!! Copyright (C) 2003-2025 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2103,7 +2103,7 @@ end subroutine dterm_LR
 !! Only printing. This routine outputs orbmag terms to the normal abi out file
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2024 ABINIT  group
+!! Copyright (C) 2003-2025 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2270,7 +2270,7 @@ end subroutine orbmag_output
 !! free space in dterm_type
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2024 ABINIT  group
+!! Copyright (C) 2003-2025 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2339,7 +2339,7 @@ end subroutine dterm_free
 !! allocate space in dterm_type
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2024 ABINIT  group
+!! Copyright (C) 2003-2025 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2571,7 +2571,7 @@ end subroutine orbmag_mesh_free
 !! transfer paw_ij to dterm%aij in more convenient format
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2024 ABINIT  group
+!! Copyright (C) 2003-2025 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2648,7 +2648,7 @@ end subroutine dterm_aij
 !! this is a driver to compute different onsite terms, in convenient (complex) format
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2024 ABINIT  group
+!! Copyright (C) 2003-2025 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2738,7 +2738,7 @@ end subroutine make_d
 !! estimate Fermi energy as max value of all occupied bands/kpts
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2024 ABINIT  group
+!! Copyright (C) 2003-2025 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

@@ -84,7 +84,6 @@ tests/TestBot_MPI*/*
 /autom4te.cache
 /_build*
 /build
-/configure
 /config.dump
 /config.dump.in
 /config.h
