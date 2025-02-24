@@ -1418,8 +1418,9 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
           dtset%symrel,dtset%tnons,dtset%symafm)
 
 !        ==  allocate paw_dmft%chipsi and paw_dmft%eigen_dft
-         call init_dmft(cryst_struc,dmatpawu(:,:,:,:),dtset,energies%e_fermie,dtfil%filnam_ds(3), &
-                      & dtfil%fnameabo_app,paw_dmft,pawtab(:))
+         call init_dmft(cryst_struc,dmatpawu(:,:,:,:),dtset,energies%e_fermie,dtfil%filctqmcdatain, &
+                      & dtfil%filselfin,dtfil%filnam_ds(3),dtfil%fnameabo_app,dtfil%ireadctqmcdata, &
+                      & dtfil%ireadself,paw_dmft,pawtab(:))
          call print_dmft(paw_dmft,dtset%pawprtvol)
 
 !        ==  compute chipsi

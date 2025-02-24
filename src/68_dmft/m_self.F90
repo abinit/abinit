@@ -517,7 +517,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
  real(dp) :: fermie_read,x_r,x_i,xtemp
  logical :: lexist,nondiaglevels,prtself
  character(len=30000) :: message ! Big buffer to avoid buffer overflow.
- character(len=fnlen) :: tmpfil,tmpfil2,tmpfilrot,tmpmatrot
+ character(len=fnlen) :: stringfile,tmpfil,tmpfil2,tmpfilrot,tmpmatrot
  character(len=1) :: tag_is
  character(len=3) :: self_iter
  character(len=4) :: chtemp
@@ -734,14 +734,24 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
          if (present(opt_char)) then
            tmpfil = trim(paw_dmft%filapp)//'Self_ra-omega_iatom'//trim(tag_at)//'_isppol'//tag_is//opt_char
          else
-           tmpfil = trim(paw_dmft%filapp)//'Self-omega_iatom'//trim(tag_at)//'_isppol'//tag_is
+           stringfile = "_iatom" // trim(tag_at) // '_isppol' // tag_is
+           if (optrw == 1 .and. paw_dmft%idmftloop == 0) then
+             tmpfil = trim(paw_dmft%filselfin) // stringfile
+             iexist2 = paw_dmft%ireadself
+           else
+             tmpfil = trim(paw_dmft%filapp) // '_Self-omega' // stringfile
+           end if
          end if ! opt_char
        end if ! w_type
        if (optrw == 2) tmpfil2 = trim(tmpfil)//"_"//self_iter
 
-       if (optrw == 1) write(message,'(3a)') ch10,"  == Read self function and Fermi Level on file ",trim(tmpfil)
-       if (optrw == 2) write(message,'(3a)') ch10,"  == Write self function and Fermi Level on file ",trim(tmpfil)
-       call wrtout(std_out,message,'COLL')
+       if (optrw == 1 .and. iexist2 == 1) then
+         write(message,'(3a)') ch10,"  == Read self function and Fermi Level on file ",trim(tmpfil)
+         call wrtout(std_out,message,'COLL')
+       else if (optrw == 2) then
+         write(message,'(3a)') ch10,"  == Write self function and Fermi Level on file ",trim(tmpfil)
+         call wrtout(std_out,message,'COLL')
+       end if
            !unitselffunc_arr(iall)=300+iall-1
        unitselffunc_arr(iall) = get_unit()
        ABI_CHECK(unitselffunc_arr(iall) > 0, "Cannot find free IO unit!")
@@ -778,7 +788,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
        if (optrw == 1) then
 !           write(std_out,*) "3"
          inquire(file=trim(tmpfil),exist=lexist,recl=nrecl)
-         if (.not. lexist) then
+         if (.not. lexist .and. (paw_dmft%ireadself == 1 .or. paw_dmft%idmftloop > 0)) then
 !           write(std_out,*) "4"
            iexist2 = 0
            write(message,'(4x,a,i5,3a)') "File number",unitselffunc_arr(iall),&
@@ -1046,8 +1056,8 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
              !write(6,*) "read selfhdc",self%hdc%matlu(1)%mat(1,1,1,1,1)
        else if (readimagonly == 1 .and. (.not. present(opt_hdc))) then
          self%hdc%matlu(iatom)%mat(:,:,isppol) = czero
-       else
-         write(std_out,*) "     self%hdc fixed in kramerskronig_self"
+       !else
+       !  write(std_out,*) "     self%hdc fixed in kramerskronig_self"
        end if ! optrw
        close(unitselffunc_arr(iall))
        if (optrw == 2 .and. prtself) close(unitselffunc_arr2(iall))
@@ -1074,10 +1084,10 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
      if (readimagonly == 1 .or. present(opt_stop)) then
        if (readimagonly == 1) message = "Self file does not exist or is incomplete: check the number of self data in file"
        ABI_ERROR(message)
-     else
+     else if (paw_dmft%ireadself == 1 .or. paw_dmft%idmftloop > 0) then
        ABI_WARNING(message)
      end if ! readimagonly=1 or present(opt_stop)
-     if (iexist2 == 0) then
+     if (iexist2 == 0 .and. (paw_dmft%ireadself == 1 .or. paw_dmft%idmftloop > 0)) then
        write(message,'(4x,2a)') "File does not exist"
        call wrtout(std_out,message,'COLL')
      end if ! iexist2=0

@@ -335,6 +335,12 @@ MODULE m_paw_dmft
   integer :: ientropy
   ! activate evaluation of terms for alternative calculation of entropy in DMFT
 
+  integer :: ireadctqmcdata
+  ! Internal flag to indicate if an input CTQMC_DATA file must be read
+
+  integer :: ireadself
+  ! Internal flag to indicate if an input self file must be read
+
   integer :: lchipsiortho
   ! =0 <Chi|Psi> is not orthonormalized
   ! =1 <Chi|Psi> is orthonormalized
@@ -523,8 +529,14 @@ MODULE m_paw_dmft
   character(len=fnlen) :: filapp
   ! Output file name
 
+  character(len=fnlen) :: filctqmcdatain
+  ! Input file name for CTQMC_DATA file
+
   character(len=fnlen) :: filnamei
   ! Input file name
+
+  character(len=fnlen) :: filselfin
+  ! Input file name for self file
 
   integer, allocatable :: bandc_proc(:)
   ! Proc index (on comm_band) for each correlated band in DMFT (for kgb paral)
@@ -1499,8 +1511,12 @@ end subroutine init_sc_dmft
 !!  dmatpawu = fixed occupation matrix of correlated orbitals
 !!  dtset <type(dataset_type)> = all input variables for this dataset
 !!  fermie_dft = DFT Fermi level
+!!  filctqmcdatain = input file name for CTQMC_DATA file
+!!  filselfin = input file name for self file
 !!  fnamei = input file name
 !!  fnametmp_app = header for the output filename
+!!  ireadctqmcdata = flag to read CTQMC_DATA input file at first iteration
+!!  ireadself = flag to read self input file at first iteration
 !!  paw_dmft <type(paw_dmft_type)>= paw+dmft related data
 !! pawtab(ntypat*usepaw) <type(pawtab_type)>=paw tabulated starting data
 !!
@@ -1514,14 +1530,15 @@ end subroutine init_sc_dmft
 !! described in the  RMP paper written by
 !! G.Kotliar,  S.Y.Savrasov, K.Haule, V.S.Oudovenko, O.Parcollet, C.A.Marianetti.
 
-subroutine init_dmft(cryst_struc,dmatpawu,dtset,fermie_dft,fnamei,fnametmp_app,paw_dmft,pawtab)
+subroutine init_dmft(cryst_struc,dmatpawu,dtset,fermie_dft,filctqmcdatain,filselfin,fnamei,fnametmp_app,ireadctqmcdata,ireadself,paw_dmft,pawtab)
 
 !Arguments ------------------------------------
  real(dp), intent(in) :: fermie_dft
  type(dataset_type), intent(in) :: dtset
  type(paw_dmft_type), intent(inout) :: paw_dmft
  type(crystal_t), target, intent(in) :: cryst_struc
- character(len=fnlen), intent(in) :: fnamei,fnametmp_app
+ character(len=fnlen), intent(in) :: filctqmcdatain,filselfin,fnamei,fnametmp_app
+ integer, intent(in) :: ireadctqmcdata,ireadself
  real(dp), target, intent(in) :: dmatpawu(:,:,:,:)
  type(pawtab_type), intent(in) :: pawtab(dtset%ntypat)
 !Local variables ------------------------------------
@@ -1573,8 +1590,12 @@ subroutine init_dmft(cryst_struc,dmatpawu,dtset,fermie_dft,fnamei,fnametmp_app,p
    end do ! irot
  end if ! nspinor=2
 
- paw_dmft%filapp   = fnametmp_app
- paw_dmft%filnamei = fnamei
+ paw_dmft%filapp         = fnametmp_app
+ paw_dmft%filnamei       = fnamei
+ paw_dmft%filselfin      = filselfin
+ paw_dmft%filctqmcdatain = filctqmcdatain
+ paw_dmft%ireadctqmcdata = ireadctqmcdata
+ paw_dmft%ireadself      = ireadself
 
  ! Write orbital on file
  if (paw_dmft%myproc == 0) then

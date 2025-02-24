@@ -1322,6 +1322,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getabiwan',tread,'INT')
  if(tread==1) dtset%getabiwan=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getctqmcdata',tread,'INT')
+ if(tread==1) dtset%getctqmcdata=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getgwan',tread,'INT')
  if(tread==1) dtset%getgwan=intarr(1)
 
@@ -1372,6 +1375,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getgam_eig2nkq',tread,'INT')
  if(tread==1) dtset%getgam_eig2nkq=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getself',tread,'INT')
+ if(tread==1) dtset%getself=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getvarpeq',tread,'INT')
  if(tread==1) dtset%getvarpeq=intarr(1)
