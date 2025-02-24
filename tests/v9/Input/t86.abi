@@ -36,7 +36,6 @@ randomseed=111111 # for testing only
 #%% [setup]
 #%% executable = multibinit
 #%% need_cpp_vars = HAVE_NETCDF
-#%% exclude_builders = .*_nag_7.[012]_.*
 #%% spin_pot = t83.nc
 #%% latt_pot = t83.nc
 #%% slc_pot = t83.nc

@@ -101,7 +101,6 @@ diemac 13.0
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = scope_gnu_10.2_paral
 #%% test_chain =  tlw_1.abi, tlw_2.abi, tlw_3.abi
 #%% [files]
 #%% files_to_test =

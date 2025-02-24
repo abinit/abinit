@@ -114,7 +114,6 @@ pseudos "Si-GGA.psp8, O-GGA.psp8"
 #%% [setup]
 #%% executable = abinit
 #%% need_cpp_vars = HAVE_LINALG_SCALAPACK
-#%% exclude_builders = eos_nvhpc_23.9_elpa, eos_gnu_13.2_mpich, alps_intel_2025_elpa
 #%% [paral_info]
 #%% nprocs_to_test = 4
 #%% max_nprocs = 4

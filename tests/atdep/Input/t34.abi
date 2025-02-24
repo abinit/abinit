@@ -34,7 +34,6 @@ enunit 1
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = atdep
-#%% exclude_builders = bob_gnu_13.2_openmp, atlas_gnu_14.2_openmp
 #%% md_hist = t34
 #%% [files]
 #%% files_to_test = 

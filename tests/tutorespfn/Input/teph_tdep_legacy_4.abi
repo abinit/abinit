@@ -138,7 +138,6 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = [^s][^c][^o].*
 #%% [files]
 #%% files_to_test =
 #%%   teph_tdep_legacy_4.abo,  tolnlines= 1000, tolabs=  0.002, tolrel=  1.0e-03

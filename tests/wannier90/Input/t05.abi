@@ -89,7 +89,6 @@ shiftk
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = eos_gnu_13.2_serial
 #%% [files]
 #%% files_to_test = t05.abo, tolnlines=  64,   tolabs=  1.1e-4,   tolrel=  1.1
 #%% extra_inputs = t05o_DS1_w90.win
