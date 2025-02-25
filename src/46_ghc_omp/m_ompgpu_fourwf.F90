@@ -7,7 +7,7 @@
 !!   in the chain of dependencies.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2000-2024 ABINIT group (MT)
+!!  Copyright (C) 2000-2025 ABINIT group (MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -187,11 +187,11 @@ subroutine ompgpu_fourdp(cplex,ngfft,ldx,ldy,ldz,ndat,isign,fofg,fofr)
 end subroutine ompgpu_fourdp
 
 subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
-&  kg_kin,kg_kout,mgfft,ndat,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
+&  kg_kin,kg_kout,mgfft,me_g0,ndat,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: cplex,istwf_k,ldx,ldy,ldz,ndat,npwin,npwout,option,mgfft
+ integer,intent(in) :: cplex,istwf_k,ldx,ldy,ldz,me_g0,ndat,npwin,npwout,option,mgfft
  real(dp),intent(in) :: weight_i(ndat),weight_r(ndat)
 !arrays
  integer,intent(in) :: gboundin(2*mgfft+8,2),gboundout(2*mgfft+8,2)
@@ -203,17 +203,11 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: me_g0=1,ndat1=1
- integer :: nx,ny,nz,fftalg,fftalga,fftalgc,fftcache,dat,ptg,ptr,ptgin,ptgout,nthreads
  character(len=500) :: msg
 
  real(dp) :: xnorm,one
 
- integer rc
-
- !Local integer
- integer n1,n2,n3,nfft_tot,i,offset
-
+ integer :: n1,n2,n3,nfft_tot,npwmin
  integer :: cfft_size
  integer :: shift_inv1,shift_inv2,shift_inv3
  integer :: i1,i2,i3,ipw,idat;
@@ -225,6 +219,7 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
  real(dp), ABI_CONTIGUOUS pointer :: fofr_amdref(:,:,:,:)
 #endif
 
+ npwmin=1; if(me_g0==1 .and. istwf_k==2) npwmin=2
  n1=ngfft(1);
  n2=ngfft(2);
  n3=ngfft(3);
@@ -341,11 +336,19 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
 
    if(istwf_k > 1) then
      !!$OMP TARGET TEAMS LOOP &
+     if (istwf_k==2 .and. me_g0==1) then
+       !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO &
+       !$OMP& PRIVATE(idat) MAP(to:work_gpu,fofgin)
+       do idat = 1, ndat
+         work_gpu(1, 1, 1, 1+n3*(idat-1)) = fofgin(1, (1 + npwin*(idat-1)))
+         work_gpu(2, 1, 1, 1+n3*(idat-1)) = zero
+       end do
+     end if
      !$OMP TARGET TEAMS DISTRIBUTE &
      !$OMP& PRIVATE(idat) MAP(to:work_gpu,kg_kin,fofgin)
      do idat = 1, ndat
        !$OMP PARALLEL DO PRIVATE(ipw,i1,i2,i3,i1inv,i2inv,i3inv)
-       do ipw = 1, npwin
+       do ipw = npwmin, npwin
          i1=kg_kin(1,ipw); if(i1<0)i1=i1+n1;
          i2=kg_kin(2,ipw); if(i2<0)i2=i2+n2;
          i3=kg_kin(3,ipw); if(i3<0)i3=i3+n3;
@@ -466,12 +469,20 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
 
    one=1
    xnorm=one/dble(n1*n2*n3)
+   if (istwf_k==2 .and. me_g0==1) then
+     !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO &
+     !$OMP& PRIVATE(idat) MAP(to:work_gpu,fofgout)
+     do idat = 1, ndat
+       fofgout (1, 1 + npwout*(idat-1)) = work_gpu(1, 1, 1, 1+n3*(idat-1)) * xnorm
+       fofgout (2, 1 + npwout*(idat-1)) = zero
+     end do
+   end if
    !!$OMP TARGET TEAMS LOOP &
    !$OMP TARGET TEAMS DISTRIBUTE &
    !$OMP& PRIVATE(idat) MAP(to:work_gpu,kg_kout,fofgout)
    do idat = 1, ndat
      !$OMP PARALLEL DO PRIVATE(ipw,i1,i2,i3)
-     do ipw = 1, npwout
+     do ipw = npwmin, npwout
        i1=kg_kout(1,ipw); if(i1<0)i1=i1+n1; i1=i1+1
        i2=kg_kout(2,ipw); if(i2<0)i2=i2+n2; i2=i2+1
        i3=kg_kout(3,ipw); if(i3<0)i3=i3+n3; i3=i3+1

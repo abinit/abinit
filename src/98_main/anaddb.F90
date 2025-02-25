@@ -6,7 +6,7 @@
 !! Main routine for analysis of the interatomic force constants and associated properties.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2024 ABINIT group (XG,DCA,JCC,CL,XW,GA,MR)
+!! Copyright (C) 1999-2025 ABINIT group (XG,DCA,JCC,CL,XW,GA,MR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -486,7 +486,7 @@ program anaddb
    ! Print analysis of the real-space interatomic force constants
    ! TODO: ifc_out should not have side effects
    if (my_rank == master .and. inp%ifcout /= 0) then
-     call ifc%write(inp%ifcana, inp%atifc, inp%ifcout, inp%prt_ifc, ana_ncid)
+     call ifc%write(inp%ifcana, inp%atifc, inp%ifcout, inp%prt_ifc, ana_ncid, filnam(8))
    end if
  end if
 

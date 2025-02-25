@@ -1,4 +1,5 @@
-# Test for the calculation of Frohlich ZPR in hexagonal ZrS2 - mp - 1186. Really underconverged calculation, for testing purposes.
+# Test for the calculation of Frohlich ZPR in hexagonal ZrS2 - mp - 1186.
+# Really underconverged calculation, for testing purposes.
 
   ndtset 6
 
@@ -131,10 +132,10 @@ nstep  20
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
-#%% authors = B.Guster taken after v8/t57
+#%% authors = B. Guster
 #%% keywords = DFPT, EPH
 #%% description =
 #%%  ZrS2 effective mass tensor at \Gamma. Also compute the Frohlich average of the effective mass
-#%%  and also the Frohlich ZPR from the general formula.
+#%%  and also the Frohlich ZPR from the general formula. Taken after v8/t57
 #%% topics = EffectiveMass
 #%%<END TEST_INFO>

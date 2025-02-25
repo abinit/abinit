@@ -168,7 +168,4 @@ timopt        -3  # Get timing information of the run in the *.abo (output) file
 #%% nprocs_to_test = 64
 #%% [extra_info]
 #%% authors = F. Bottin, J. Bieder
-#%% keywords =
-#%% description =
 #%%<END TEST_INFO>
-
