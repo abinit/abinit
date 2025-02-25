@@ -11,9 +11,9 @@ This tutorial aims at showing how to perform a Real-Time TDDFT (RT-TDDFT) calcul
     RT-TDDFT is under active development and should thus be used with caution!
 
 If you have not yet done any of the basic tutorials it might be useful to do 
-at least the first three basic ones: [basic1](/tutorial/base1), [basic2](/tutorial/base2) and
+at least the first three: [basic1](/tutorial/base1), [basic2](/tutorial/base2) and
 [basic3](/tutorial/base3).
-It could also be useful that you know how to do PAW calculations using Abinit. 
+It could also be useful that you know about PAW calculations using Abinit. 
 If you are interested you can follow the first two tutorials on PAW: 
 [PAW1](/tutorial/paw1) and [PAW2](/tutorial/paw2).
 
@@ -170,7 +170,7 @@ energy as well as some energy contributions. You should find that the total ener
 contributions remain constant. This is to be expected as we started from the ground state orbitals
  which are *stationary states*.
 If we do not perturb the system then running a time-dependent calculation does not make much sense.
-Various type of time-dependent perturbations can be applied such as an external electric field which will
+Various type of perturbations could be applied such as an external electric field which will
 be discussed in the following. But let us stay in that special stationary case for now to study the 
 stability of the integration.
 
@@ -243,8 +243,10 @@ This perturbation will generate a time-dependent macroscopic current density
                  - \frac{N\vec{A}(t)}{\Omega},
 \end{equation}
 with $w_k$ the weight of the $k$-point, $f_{nk}$ the occupations, $N$ the total number of electrons and 
-$\Omega$ the volume of the simulation cell. In practice, the expression used to compute the current density 
-is slightly different due to some subtleties related to gauge invariance and the non locality of the PAW transformation.
+$\Omega$ the volume of the simulation cell. In practice, the expressions for the Hamiltonian and the current 
+density include additional term coming from PAW that we do not include here for clarity. Moreover, there 
+are some subtleties related to gauge invariance and the non locality of the PAW transformation that we decide 
+not to discuss here for simplicity.
 
 The application of an external electric field is set by switching the value of the variable [[td_ef_type]] to 1.
 This will trigger the application of an impulse external electric field $\vec{E}(t) = \vec{E}_0\delta(t-t_0)$.
@@ -266,7 +268,7 @@ the field is switched on.
     in response functions as such a perturbation is exciting all frequencies equally.
 
 In order to launch the next calculation with the electric field, you should first copy the input *trttddft_4.abi*
-and run Abinit again. From now on the calculations will take more time and, if you can it may be better to run 
+and run Abinit again. From now on the calculations will take more time and, if you can, it may be better to run 
 in parallel. That is because we have to work now in the full Brillouin zone. Indeed the application of the 
 time-dependent electric field will break some symmetries and we thus cannot make use of them to reduce the
 number of $k$-points. 
@@ -319,7 +321,7 @@ We now run similar calculations keeping [[ecut]] constant and varying the value 
 You can maybe try 2 2 2, 4 4 4, 6 6 6 and 8 8 8 to start. You can use a lower value of [[ecut]] if you 
 wish to decrease the computation time. You should find that the current density is significantly 
 impacted by the value of [[ngkpt]] and that the previous value of 6 6 6 is not enough 
-to converge the current density. The following figure shows the current density obtained with 
+to converge it. The following figure shows the current density obtained with 
 larger number of $k$-points.
 
 ![Convergence of the induced current density with respect to ngkpt](rttddft_assets/cv_kpt.png)
@@ -404,8 +406,8 @@ conductivity and the dielectric function. In practice here, it needs to be much 
 Now, we can launch our final calculation using [[ntime]] 4000 and [[ngkpt]] 12 12 12 to ensure good convergence.
 Unfortunately, this is now quite a long calculation that can take several hours even if running on several cores.
 The dielectric function obtained after running such calculation is presented on the following figure. 
-It is compared to the results from [[cite:Botti2004]] obtained using linear-response TDDFT (LR-TDDFT) in the LDA approximation 
-(Linear-Response Time-Dependent LDA -- LR-TDLDA) and to experimental results from [[cite:Edwards1985]].
+It is compared to the results from [[cite:Botti2004]] obtained using linear-response TDDFT (LR-TDDFT) in the 
+LDA approximation  and to experimental results from [[cite:Edwards1985]].
 
 ![Dielectric function of Diamond computed with RT-TDDFT using Abinit compared to LR-TDDFT and experiment](rttddft_assets/dielectric_final.png)
 
