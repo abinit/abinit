@@ -38,6 +38,11 @@ target_link_libraries(33_xc_lowlevel
   abinit::28_numeric_noabirule
   )
 
+target_link_libraries(33_xc_lowlevel
+  PUBLIC
+  abinit::32_util
+  )
+
 if(OpenMP_FOUND)
   target_link_libraries(33_xc_lowlevel
     PUBLIC
