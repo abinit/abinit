@@ -30,6 +30,7 @@ order 4 5. 5.
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = atdep
+#%% exclude_hosts = alps_intel_2025_elpa
 #%% md_hist = t35
 #%% [files]
 #%% files_to_test = 
