@@ -36,10 +36,6 @@ target_compile_definitions(33_xc_lowlevel
 target_link_libraries(33_xc_lowlevel
   PUBLIC
   abinit::28_numeric_noabirule
-  )
-
-target_link_libraries(33_xc_lowlevel
-  PUBLIC
   abinit::32_util
   )
 
