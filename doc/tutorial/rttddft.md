@@ -8,7 +8,7 @@ This tutorial aims at showing how to perform a Real-Time TDDFT (RT-TDDFT) calcul
 
 !!! warning
 
-    RT-TDDFT is under active development and is still experimental. It should thus be used with caution!
+    RT-TDDFT is under active development and should thus be used with caution!
 
 If you have not yet done any of the basic tutorials it might be useful to do 
 at least the first three basic ones: [basic1](/tutorial/base1), [basic2](/tutorial/base2) and

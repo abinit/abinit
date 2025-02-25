@@ -3649,10 +3649,9 @@ Variable(
     mnemonics="Delta Time for ELEctrons",
     added_in_version="10",
     text=r"""
-Used for controlling the electron time step. If [[optdriver]] is 9, then
-real-time TDDFT [[topic:RTTDDFT]] is used. The parameter [[dtele]] is 
-the time step, in atomic units of time, used to integrate the time-dependent 
-Kohn-Sham equations (One atomic time unit is 2.418884e-17 seconds).
+Defines the electron time step in atomic units of time, used to integrate the time-dependent
+Kohn-Sham equations in real-time TDDFT [[topic:RTTDDFT]] if [optdriver]] is 9.
+(One atomic time unit is 2.418884e-17 seconds).
 One should also set the number of time steps to be performed using the 
 parameter [[ntime]].
 
@@ -14048,7 +14047,7 @@ The choice is among:
   * 6 --> GW real space imaginary time driver (GWR), using the [[cite:Liu2016]] algorithm, routine *gwr_driver*, see [[gwr_task]].
   * 7 --> electron-phonon coupling (EPH), see also [[eph_task]] input variable.
   * 8 --> Post-processing of WFK file, routine *wfk_analyze*. See also [[wfk_task]] input variable.
-  * 9 --> Real-time TDDDFT calculation, routine *rttddft_driver*
+  * 9 --> Real-time TDDDFT calculation (RTTDDFT), routine *rttddft_driver*
   * 10 --> longwave response functions (LONGWAVE), routine *longwave*. See also [[lw_flexo]],  [[lw_qdrpl]] or [[lw_natopt]] input variables.
   * 66 --> GW using Lanczos-Sternheimer, see input variables whose name start with `gwls_*`.
   * 99 --> Bethe-Salpeter calculation (BSE), routine *bethe_salpeter*
@@ -22571,12 +22570,12 @@ Variable(
     mnemonics="Time-Dependent Electric Field TYPE",
     added_in_version="10",
     text=r"""
-This variable controls the type of external electric field to apply. 
+This variable controls the type of external electric field to apply in RT-TDDFT.
 As of now, only impulse electric field are implemented, [[td_ef_type]] is 1.
-Moreover, the response to such impulse electric field can only 
-be performed within the PAW approach (see [[topic:PAW]]).
+Moreover, the response to such impulse electric field can only be performed 
+within the PAW approach (see [[topic:PAW]]).
 The intensity of the Dirac pulse as well as the time at which it is 
-applied are controlled by the parameters [[td_ef_tzero]] and [[td_ef_ezero]].
+applied are controlled by the parameters [[td_ef_ezero]] and [[td_ef_tzero]].
 If [[td_ef_type]] is 0, no electric field is applied.
 """,
 ),
@@ -22588,11 +22587,12 @@ Variable(
     vartype="integer",
     defaultval=0.0,
     dimensions="scalar",
-    requires="[[optdriver]] is 9",
+    requires="[[optdriver]] is 9 and [[td_ef_type]] is not 0",
     mnemonics="Time-Dependent Electric Field TZERO",
     added_in_version="10",
     text=r"""
-This variable controls the time (in atomic units) at which the external electric field is applied (see [[td_ef_type]]).
+This variable controls the time (in atomic units) at which the external 
+electric field is applied (see [[td_ef_type]]).
 """,
 ),
 
@@ -22603,11 +22603,12 @@ Variable(
     vartype="integer",
     defaultval=0.1,
     dimensions="scalar",
-    requires="[[optdriver]] is 9",
+    requires="[[optdriver]] is 9 and [[td_ef_type]] is not 0",
     mnemonics="Time-Dependent Electric Field EZERO",
     added_in_version="10",
     text=r"""
-This variable is the intensity (in atomic units) of the external electric field applied (see [[td_ef_type]]). 
+This variable is the intensity (in atomic units) of the external 
+electric field applied (see [[td_ef_type]]). 
 """,
 ),
 
@@ -22618,11 +22619,30 @@ Variable(
     vartype="integer",
     defaultval=[1.0, 0.0, 0.0],
     dimensions=[3],
-    requires="[[optdriver]] is 9",
+    requires="[[optdriver]] is 9 and [[td_ef_type]] is not 0",
     mnemonics="Time-Dependent Electric Field POLarization",
     added_in_version="10",
     text=r"""
-This variable is the polarization vector (direction) of the external electric field applied (see [[td_ef_type]]). 
+This variable is the polarization vector (direction) of the external 
+electric field applied (see [[td_ef_type]]). 
+""",
+),
+
+Variable(
+    abivarname="td_ef_induced_vecpot",
+    varset="rttddft",
+    topics=['RTTDDFT_expert'],
+    vartype="integer",
+    defaultval=0,
+    dimensions="scalar",
+    requires="[[optdriver]] is 9 and [[td_ef_type]] is not 0",
+    mnemonics="Time-Dependent Electric Field INDUCED VECtor POTential",
+    added_in_version="10",
+    text=r"""
+This variable controls wether we include the induced vector potential in the 
+Hamiltonian so that the total vector potential applied is the sum of the vector
+potential associated with the external electric field and the vector potential 
+induced by the current density.
 """,
 ),
 
@@ -22638,8 +22658,8 @@ Variable(
     added_in_version="10",
     text=r"""
 This variable controls the order of the Taylor expansion used to approximate the exponential 
-of an operator in the propagator. The default value of 4 is usually a good choice that ensure 
-good stability and acceptable computation time.
+of an operator in the propagator for RT-TDDFT. The default value of 4 is usually a good choice 
+that ensures good stability and acceptable computation time.
 """,
 ),
 
@@ -22655,11 +22675,12 @@ Variable(
     added_in_version="10",
     text=r"""
 This variable controls the propagation algorithm used to integrate the time-dependent
-Kohn-Sham equations. At present only the exponential rule, [[td_propagator]] is 0, 
-and the exponential mid-point rule, [[td_propagator]] is 1, propagators are implemented.
+Kohn-Sham equations in real-time TDDFT. At present only the exponential rule, 
+[[td_propagator]] is 0, and the exponential mid-point rule, [[td_propagator]] is 1, 
+propagators are implemented.
 Both are based on a Taylor expansion of the exponential of an operator which order is
 controlled by the [[td_exp_order]] parameter. In case of [[td_propagator]] equal to 1
-the code uses a predictor-corrector schemes associated with two parameters [[td_scnmax]] 
+the code uses a predictor-corrector scheme associated with two parameters [[td_scnmax]] 
 and [[td_scthr]].
 """,
 ),
@@ -22704,7 +22725,7 @@ Variable(
     varset="rttddft",
     topics=['RTTDDFT_expert'],
     vartype="integer",
-    defaultval=0,
+    defaultval=6,
     dimensions="scalar",
     requires="[[optdriver]] is 9 and [[td_propagator]] is 1",
     mnemonics="Time-Dependent Self-Consistent NMAX",

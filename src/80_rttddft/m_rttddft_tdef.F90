@@ -213,16 +213,16 @@ subroutine tdef_update(tdef,dtset,mpi_enreg,time,rprimd,gprimd,kg,mpsang,npwarr,
    !Pulse with sin^2 shape:
    !E(t) = E0*cos(w*(t-t0))*sin^2(pi*(t-t0)/tau)
    !A(t) = -(E0/2w)*sin(w*(t-t0))+E0/(4*(2pi/tau+w))*sin((2pi/tau+w)*(t-t0))+E0/(4(2pi/taur-w))*sin((2pi/tau-w)*(t-t0))
-   case(2)
-      if (time >= tdef%ef_tzero+tdef%ef_tau) then
-         tdef%efield(:) = zero
-      else if (time >= tdef%ef_tzero) then
-         t = time-tdef%ef_tzero
-         tdef%efield(:) = tdef%ef_ezero*cos(tdef%ef_omega*t)*sin(pi*t/tdef%ef_tau)**2
-         tdef%vecpot_ext(:) = tdef%ef_ezero*(-sin(tdef%ef_omega*t)/(two*tdef%ef_omega) &
-                                           & +sin(tdef%ef_sin_a*t)/(four*tdef%ef_sin_a) &
-                                           & +sin(tdef%ef_sin_b*t)/(four*tdef%ef_sin_b))
-      end if
+!  case(2)
+!     if (time >= tdef%ef_tzero+tdef%ef_tau) then
+!        tdef%efield(:) = zero
+!     else if (time >= tdef%ef_tzero) then
+!        t = time-tdef%ef_tzero
+!        tdef%efield(:) = tdef%ef_ezero*cos(tdef%ef_omega*t)*sin(pi*t/tdef%ef_tau)**2
+!        tdef%vecpot_ext(:) = tdef%ef_ezero*(-sin(tdef%ef_omega*t)/(two*tdef%ef_omega) &
+!                                          & +sin(tdef%ef_sin_a*t)/(four*tdef%ef_sin_a) &
+!                                          & +sin(tdef%ef_sin_b*t)/(four*tdef%ef_sin_b))
+!     end if
    case default
       write(msg,"(a)") "Unknown electric field type - check the value of td_ef_type"
       ABI_ERROR(msg)

@@ -91,6 +91,6 @@ prtcurrent 1      # Print current
 #%% keywords = RTTDDFT
 #%% description = 
 #%%   Diamond, LDA, PAW
-#%%   Tests RT-TDDFT with time-dependent electric field
+#%%   Tests RT-TDDFT with time-dependent electric field and induced vector potential
 #%% topics = RTTDDFT
 #%%<END TEST_INFO>
