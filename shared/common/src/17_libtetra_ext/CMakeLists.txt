@@ -29,6 +29,12 @@ target_include_directories(17_libtetra_ext
   ${CMAKE_CURRENT_BINARY_DIR}/modules
   )
 
+target_include_directories(17_libtetra_ext
+  PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/modules>
+  $<INSTALL_INTERFACE:include/libpaw>
+  )
+
 target_compile_definitions(17_libtetra_ext
   PRIVATE
   HAVE_CONFIG_H)

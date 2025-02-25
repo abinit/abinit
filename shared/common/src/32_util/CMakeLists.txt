@@ -24,6 +24,12 @@ target_include_directories(32_util
   ${CMAKE_CURRENT_BINARY_DIR}/modules
   )
 
+target_include_directories(32_util
+  PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/modules>
+  $<INSTALL_INTERFACE:include/libpaw>
+  )
+
 target_compile_definitions(32_util
   PRIVATE
   HAVE_CONFIG_H)
