@@ -26,11 +26,6 @@ target_include_directories(17_libtetra_ext
   ${CMAKE_BINARY_DIR}
   ${CMAKE_SOURCE_DIR}/shared/common/src/incs
   PUBLIC
-  ${CMAKE_CURRENT_BINARY_DIR}/modules
-  )
-
-target_include_directories(17_libtetra_ext
-  PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/modules>
   $<INSTALL_INTERFACE:include/libpaw>
   )
