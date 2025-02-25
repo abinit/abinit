@@ -28,6 +28,7 @@ enunit 3
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = atdep
+#%% exclude_hosts = alps_intel_2025_elpa
 #%% md_hist = tatdep1_1
 #%% [files]
 #%% files_to_test = 
