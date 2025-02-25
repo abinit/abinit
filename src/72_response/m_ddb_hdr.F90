@@ -7,7 +7,7 @@
 !!  to handle the header of the DDB files.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2024 ABINIT group (GA, MJV, XG, MT, MM, MVeithen, MG, PB, JCC, MMignolet)
+!! Copyright (C) 2011-2025 ABINIT group (GA, MJV, XG, MT, MM, MVeithen, MG, PB, JCC, MMignolet)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1441,6 +1441,8 @@ subroutine ddb_hdr_open_write_nc(ddb_hdr, filename, with_psps, with_dfpt_vars)
    nctkarr_t('d2E_block_types', "i", 'number_of_d2E_blocks') &
    &])
  NCF_CHECK(ncerr)
+
+NCF_CHECK(nf90_put_var(ncid_d2E, nctk_idname(ncid_d2E, 'd2E_block_types'), blktyp_d2E))
 
  ABI_FREE(blktyp_d2E)
 
