@@ -1448,9 +1448,9 @@ contains
             do idir=1,3
               do ipw=1,npw
                 dprojs_(1, ipw, shift_grad+(ilmn-1)*ngrads+igrad+idir) = &
-                &     +projs(2, ipw, shift+ilmn)*kpg(ipw,idir)*two_pi
+                &     +projs(2, ipw, shift+ilmn-lmn_beg+1)*kpg(ipw,idir)*two_pi
                 dprojs_(2, ipw, shift_grad+(ilmn-1)*ngrads+igrad+idir) = &
-                &     -projs(1, ipw, shift+ilmn)*kpg(ipw,idir)*two_pi
+                &     -projs(1, ipw, shift+ilmn-lmn_beg+1)*kpg(ipw,idir)*two_pi
               end do
             end do
           end do
@@ -1465,9 +1465,9 @@ contains
             do idir=1,3
               do ipw=1,npw
                 dprojs_r_(1, ipw, shift_grad+(ilmn-1)*ngrads+igrad+idir) = &
-                &     +projs_i(1, ipw, shift+ilmn)*kpg(ipw,idir)*two_pi
+                &     +projs_i(1, ipw, shift+ilmn-lmn_beg+1)*kpg(ipw,idir)*two_pi
                 dprojs_i_(1, ipw, shift_grad+(ilmn-1)*ngrads+igrad+idir) = &
-                &     -projs_r(1, ipw, shift+ilmn)*kpg(ipw,idir)*two_pi
+                &     -projs_r(1, ipw, shift+ilmn-lmn_beg+1)*kpg(ipw,idir)*two_pi
               end do
             end do
           end do
@@ -1504,9 +1504,9 @@ contains
           !$OMP PARALLEL DO PRIVATE(ipw)
           do ipw=1,npw
             dprojs_(1, ipw, shift_grad+ilmn) = &
-            &      projs(2, ipw, shift+ilmn)*kpg(ipw,idir_pert)*two_pi
+            &      projs(2, ipw, shift+ilmn-lmn_beg+1)*kpg(ipw,idir_pert)*two_pi
             dprojs_(2, ipw, shift_grad+ilmn) = &
-            &     -projs(1, ipw, shift+ilmn)*kpg(ipw,idir_pert)*two_pi
+            &     -projs(1, ipw, shift+ilmn-lmn_beg+1)*kpg(ipw,idir_pert)*two_pi
           end do
         end do
       end if
@@ -1561,9 +1561,9 @@ contains
           do idir=1,6
             do ipw=1,npw
               d2projs(1, ipw, shift_grad2+(ilmn-1)*ngrads2+idir) = &
-              &     -projs(1, ipw, shift+ilmn)*kpg(ipw,idir+3)*two_pi2
+              &     -projs(1, ipw, shift+ilmn-lmn_beg+1)*kpg(ipw,idir+3)*two_pi2
               d2projs(2, ipw, shift_grad2+(ilmn-1)*ngrads2+idir) = &
-              &     -projs(2, ipw, shift+ilmn)*kpg(ipw,idir+3)*two_pi2
+              &     -projs(2, ipw, shift+ilmn-lmn_beg+1)*kpg(ipw,idir+3)*two_pi2
             end do
           end do
         end do
