@@ -157,7 +157,7 @@ contains
  real(dp),allocatable :: gx(:,:,:,:)
  real(dp),allocatable :: vgx(:,:,:),vdgxdt(:,:,:)
  real(dp), pointer :: kpg_(:,:),ph3d_(:,:,:)
- real(dp), allocatable :: temp_realvec(:)
+ real(dp), allocatable :: temp_realvec_r(:),temp_realvec_i(:)
  real(dp) :: d2gxdt_dum_in(1,1,1,1,1)
 
 ! *********************************************************************
@@ -419,7 +419,11 @@ contains
    end if
 
    if (cplex /= 2) then
-     ABI_MALLOC(temp_realvec,(npw_k*nspinor*ndat))
+     ABI_MALLOC(temp_realvec_r,(npw_k*nspinor*ndat))
+     ABI_MALLOC(temp_realvec_i,(npw_k*nspinor*ndat))
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET ENTER DATA MAP(alloc:temp_realvec_r,temp_realvec_i) IF (l_gpu_option==ABI_GPU_OPENMP)
+#endif
    end if
 
    call opernla_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,&
@@ -429,8 +433,16 @@ contains
    &       -1,0,cpopt,&
    &       nprojs,&
    &       cwavef,&
-   &       temp_realvec,&
+   &       temp_realvec_r,temp_realvec_i,&
    &       l_gpu_option,.false.)
+
+   if (cplex /= 2) then
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET EXIT DATA MAP(delete:temp_realvec_r,temp_realvec_i) IF (l_gpu_option==ABI_GPU_OPENMP)
+#endif
+     ABI_FREE(temp_realvec_r)
+     ABI_FREE(temp_realvec_i)
+   end if
 
 #ifdef HAVE_OPENMP_OFFLOAD
    !$OMP TARGET UPDATE FROM(vgx,vdgxdt) IF (l_gpu_option==ABI_GPU_OPENMP)
