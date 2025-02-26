@@ -210,13 +210,13 @@ end subroutine opernla_gemm_distributed
 subroutine opernl_xgemm(cplex,transa,transb,nprojs,ndat,npwin,alpha,a,lda,b,ldb,beta,c,ldc,&
 &                       rank, nprocs,&
 &                       nprojs_blk, nprojs_last_blk, nprojs_my_blk,&
-&                       iblock, nblocks,&
+&                       iblock,&
 &                       gpu_option,use_distrib,use_sliced_gemms)
 
 !Arguments ------------------------------------
  integer,intent(in) :: cplex,lda,ldb,ldc,nprojs,ndat,npwin,gpu_option
  integer,intent(in) :: rank,nprocs,nprojs_blk,nprojs_last_blk,nprojs_my_blk
- integer,intent(in) :: iblock,nblocks
+ integer,intent(in) :: iblock
  logical,intent(in) :: use_distrib,use_sliced_gemms
  complex(dpc),intent(in) :: alpha,beta
  character(len=1),intent(in) :: transa,transb
@@ -368,7 +368,7 @@ subroutine opernla_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,&
 &       iatom_only,atom_proj_shift,cpopt,&
 &       nprojs,&
 &       vectin,&
-&       temp_realvec,&
+&       temp_realvec_r,temp_realvec_i,&
 &       gpu_option,use_distrib)
 
 !Arguments ------------------------------------
@@ -390,7 +390,7 @@ subroutine opernla_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,&
  real(dp),target,intent(inout) :: d2gxdt(cplex,nd2gxdt,nprojs,ndat*nspinor)
  real(dp),target,intent(inout) :: dgxdt(cplex,ndgxdt*nprojs,ndat*nspinor)
  real(dp),target,intent(inout) :: gx(cplex,nprojs,ndat*nspinor)
- real(dp),target,intent(inout) :: temp_realvec(:)
+ real(dp),target,intent(inout) :: temp_realvec_r(:),temp_realvec_i(:)
 
 !Local variables-------------------------------
  integer :: idat,ierr,i,ik,nprojs_all
@@ -533,8 +533,7 @@ subroutine opernla_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,&
        &    projs, npw,&
        &    vectin, npw, czero, gx, nprojs,&
        &    rank, nprocs,&
-       &    nprojs_blk, nprojs_last_blk, nprojs_my_blk,&
-       &    i, nblocks,&
+       &    nprojs_blk, nprojs_last_blk, nprojs_my_blk, i,&
        &    gpu_option, use_distrib, use_sliced_gemms)
      end if
 
@@ -543,8 +542,7 @@ subroutine opernla_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,&
        &    dprojs, npw,&
        &    vectin, npw, czero, dgxdt, ndgxdt*nprojs,&
        &    rank, nprocs,&
-       &    ndgxdt*nprojs_blk, ndgxdt*nprojs_last_blk, ndgxdt*nprojs_my_blk,&
-       &    i, nblocks,&
+       &    ndgxdt*nprojs_blk, ndgxdt*nprojs_last_blk, ndgxdt*nprojs_my_blk, i,&
        &    gpu_option, use_distrib, use_sliced_gemms)
      end if
 
@@ -553,8 +551,7 @@ subroutine opernla_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,&
        &    d2projs, npw,&
        &    vectin, npw, czero, d2gxdt, nd2gxdt*nprojs,&
        &    rank, nprocs,&
-       &    nd2gxdt*nprojs_blk, nd2gxdt*nprojs_last_blk, nd2gxdt*nprojs_my_blk,&
-       &    i, nblocks,&
+       &    nd2gxdt*nprojs_blk, nd2gxdt*nprojs_last_blk, nd2gxdt*nprojs_my_blk, i,&
        &    gpu_option, use_distrib, use_sliced_gemms)
      end if
    end do
@@ -563,13 +560,13 @@ subroutine opernla_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,&
 
    ! only compute real part of gx = P^* psi => gx_r = P_r^T psi_r + P_i^T psi_i
    if(gpu_option == ABI_GPU_DISABLED) then
-     temp_realvec(1:npw*nspinor*ndat) = vectin(1,1:npw*nspinor*ndat)
+     temp_realvec_r(1:npw*nspinor*ndat) = vectin(1,1:npw*nspinor*ndat)
    else if(gpu_option == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
      !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO &
-     !$OMP& MAP(to:temp_realvec,vectin) PRIVATE(i)
+     !$OMP& MAP(to:temp_realvec_r,vectin) PRIVATE(i)
      do i=1, npw*nspinor*ndat
-       temp_realvec(i) = vectin(1,i)
+       temp_realvec_r(i) = vectin(1,i)
      end do
 #endif
    end if
@@ -577,45 +574,28 @@ subroutine opernla_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,&
    if(istwf_k == 2 .and. mpi_enreg%me_g0_fft == 1) then
      if(gpu_option == ABI_GPU_DISABLED) then
        do idat=1, ndat*nspinor
-         temp_realvec(1+(idat-1)*npw) = temp_realvec(1+(idat-1)*npw)/2
+         temp_realvec_r(1+(idat-1)*npw) = temp_realvec_r(1+(idat-1)*npw)/2
        end do
      else if(gpu_option == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
        !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO &
-       !$OMP& MAP(to:temp_realvec) PRIVATE(idat)
+       !$OMP& MAP(to:temp_realvec_r) PRIVATE(idat)
        do idat=1, ndat*nspinor
-         temp_realvec(1+(idat-1)*npw) = temp_realvec(1+(idat-1)*npw)/2
+         temp_realvec_r(1+(idat-1)*npw) = temp_realvec_r(1+(idat-1)*npw)/2
        end do
 #endif
      end if
    end if
-   if(cpopt<=1) then
-     call opernl_xgemm(cplex, 'T', 'N', nprojs, ndat*nspinor, npw, cone, &
-     &    projs_r, npw, &
-     &    temp_realvec, npw, czero, gx, nprojs,&
-     &    rank, nprocs,&
-     &    nprojs_blk, nprojs_last_blk, nprojs_my_blk,&
-     &    iblock, nblocks,&
-     &    gpu_option, use_distrib, use_sliced_gemms)
-   end if
-   if(ndgxdt>0 .and. cpopt<=3) then
-     call opernl_xgemm(cplex, 'T', 'N', ndgxdt*nprojs, ndat*nspinor, npw, cone, &
-     &    dprojs_r, npw, &
-     &    temp_realvec, npw, czero, dgxdt, ndgxdt*nprojs,&
-     &    rank, nprocs,&
-     &    ndgxdt*nprojs_blk, ndgxdt*nprojs_last_blk, ndgxdt*nprojs_my_blk,&
-     &    iblock, nblocks,&
-     &    gpu_option, use_distrib, use_sliced_gemms)
-   end if
 
+   ! Same with imaginary part
    if(gpu_option == ABI_GPU_DISABLED) then
-     temp_realvec(1:npw*nspinor*ndat) = vectin(2,1:npw*nspinor*ndat)
+     temp_realvec_i(1:npw*nspinor*ndat) = vectin(2,1:npw*nspinor*ndat)
    else if(gpu_option == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
      !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO &
-     !$OMP& MAP(to:temp_realvec,vectin) PRIVATE(i)
+     !$OMP& MAP(to:temp_realvec_i,vectin) PRIVATE(i)
      do i=1, npw*nspinor*ndat
-       temp_realvec(i) = vectin(2,i)
+       temp_realvec_i(i) = vectin(2,i)
      end do
 #endif
    end if
@@ -623,36 +603,82 @@ subroutine opernla_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,&
    if(istwf_k == 2 .and. mpi_enreg%me_g0_fft == 1) then
      if(gpu_option == ABI_GPU_DISABLED) then
        do idat=1, ndat*nspinor
-         temp_realvec(1+(idat-1)*npw) = zero
+         temp_realvec_i(1+(idat-1)*npw) = zero
        end do
      else if(gpu_option == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
        !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO &
-       !$OMP& MAP(to:temp_realvec) PRIVATE(idat)
+       !$OMP& MAP(to:temp_realvec_i) PRIVATE(idat)
        do idat=1, ndat*nspinor
-         temp_realvec(1+(idat-1)*npw) = zero
+         temp_realvec_i(1+(idat-1)*npw) = zero
        end do
 #endif
      end if
    end if
-   if(cpopt<=1) then
-     call opernl_xgemm(cplex, 'T', 'N', nprojs, ndat*nspinor, npw, cone, &
-     &    projs_i, npw, &
-     &    temp_realvec, npw, cone , gx, nprojs,&
-     &    rank, nprocs,&
-     &    nprojs_blk, nprojs_last_blk, nprojs_my_blk,&
-     &    iblock, nblocks,&
-     &    gpu_option, use_distrib, use_sliced_gemms)
-   end if
-   if(ndgxdt>0) then
-     call opernl_xgemm(cplex, 'T', 'N', ndgxdt*nprojs, ndat*nspinor, npw, cone, &
-     &    dprojs_i, npw, &
-     &    temp_realvec, npw, cone , dgxdt, ndgxdt*nprojs,&
-     &    rank, nprocs,&
-     &    ndgxdt*nprojs_blk, ndgxdt*nprojs_last_blk, ndgxdt*nprojs_my_blk,&
-     &    iblock, nblocks,&
-     &    gpu_option, use_distrib, use_sliced_gemms)
-   end if
+
+   do i=1,nblocks
+
+     if(use_sliced_gemms .and. i>1) then
+       call prep_projectors(npw,lmnmax,ntypat,indlmn,nattyp,istwf_k,&
+       &                    ucvol,ffnl,ph3d,dimffnl,matblk,&
+       &                    nprojs_last_blk,is_kprime,gpu_option,i)
+       gemm_nonlop_kpt(ik)%ikpt=gemm_nonlop_ikpt_this_proc_being_treated
+       if(choice>1 .and. ndgxdt>0) then
+         call prep_dprojectors(npw,lmnmax,ntypat,indlmn,nattyp,istwf_k,&
+         &                    ucvol,ffnl,ph3d,kpg,nkpg,dimffnl,matblk,&
+         &                    nprojs_last_blk,ndgxdt,nd2gxdt,choice,signs,idir,&
+         &                    is_kprime,gpu_option,i)
+         gemm_nonlop_kpt(ik)%choice = choice
+         gemm_nonlop_kpt(ik)%idir = idir
+       end if
+     end if
+
+     nprojs_cur_blk=nprojs
+     if(use_sliced_gemms) then
+       if(i<nblocks) then
+         nprojs_cur_blk=nprojs_blk
+       else
+         nprojs_cur_blk=nprojs_last_blk
+       end if
+     end if
+
+     ! Real part
+     if(cpopt<=1) then
+       call opernl_xgemm(cplex, 'T', 'N', nprojs_cur_blk, ndat*nspinor, npw, cone, &
+       &    projs_r, npw, &
+       &    temp_realvec_r, npw, czero, gx, nprojs,&
+       &    rank, nprocs,&
+       &    nprojs_blk, nprojs_last_blk, nprojs_my_blk, i,&
+       &    gpu_option, use_distrib, use_sliced_gemms)
+     end if
+     if(ndgxdt>0 .and. cpopt<=3) then
+       call opernl_xgemm(cplex, 'T', 'N', ndgxdt*nprojs_cur_blk, ndat*nspinor, npw, cone, &
+       &    dprojs_r, npw, &
+       &    temp_realvec_r, npw, czero, dgxdt, ndgxdt*nprojs,&
+       &    rank, nprocs,&
+       &    ndgxdt*nprojs_blk, ndgxdt*nprojs_last_blk, ndgxdt*nprojs_my_blk, i,&
+       &    gpu_option, use_distrib, use_sliced_gemms)
+     end if
+
+     ! Imaginary part
+     if(cpopt<=1) then
+       call opernl_xgemm(cplex, 'T', 'N', nprojs_cur_blk, ndat*nspinor, npw, cone, &
+       &    projs_i, npw, &
+       &    temp_realvec_i, npw, cone , gx, nprojs,&
+       &    rank, nprocs,&
+       &    nprojs_blk, nprojs_last_blk, nprojs_my_blk, i,&
+       &    gpu_option, use_distrib, use_sliced_gemms)
+     end if
+     if(ndgxdt>0) then
+       call opernl_xgemm(cplex, 'T', 'N', ndgxdt*nprojs_cur_blk, ndat*nspinor, npw, cone, &
+       &    dprojs_i, npw, &
+       &    temp_realvec_i, npw, cone , dgxdt, ndgxdt*nprojs,&
+       &    rank, nprocs,&
+       &    ndgxdt*nprojs_blk, ndgxdt*nprojs_last_blk, ndgxdt*nprojs_my_blk, i,&
+       &    gpu_option, use_distrib, use_sliced_gemms)
+     end if
+
+   end do
 
    ! Scale gx
    if(cpopt<=1) then
