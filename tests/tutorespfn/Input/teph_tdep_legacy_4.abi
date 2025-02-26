@@ -138,7 +138,7 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_hosts = alps_nag_7.2_serial
+#%% exclude_builders = alps_nag_7.2_serial
 #%% [files]
 #%% files_to_test =
 #%%   teph_tdep_legacy_4.abo,  tolnlines= 1000, tolabs=  0.002, tolrel=  1.0e-03

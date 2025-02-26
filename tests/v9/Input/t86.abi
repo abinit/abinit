@@ -35,7 +35,7 @@ randomseed=111111 # for testing only
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = multibinit
-#%% exclude_hosts = alps_nag_7.2_serial
+#%% exclude_builders = alps_nag_7.2_serial
 #%% need_cpp_vars = HAVE_NETCDF
 #%% spin_pot = t83.nc
 #%% latt_pot = t83.nc
