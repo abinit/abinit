@@ -451,8 +451,8 @@ subroutine opernlb_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
  end if
 
  if(gemm_nonlop_block_size>1) then
-   projs_beg=1; projs_end=nprojs_my_blk;
-   dprojs_beg=1; dprojs_end=max(1,nprojs_my_blk*ndgxdt)
+   projs_beg=1; projs_end=nprojs_last_blk;
+   dprojs_beg=1; dprojs_end=max(1,nprojs_last_blk*ndgxdt)
  end if
 
  if(istwf_k == 1) then
