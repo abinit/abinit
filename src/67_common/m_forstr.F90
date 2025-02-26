@@ -67,7 +67,7 @@ module m_forstr
  use m_mkffnl,           only : mkffnl
  use m_mpinfo,           only : proc_distrb_cycle
  use m_nonlop,           only : nonlop
- use m_gemm_nonlop_projectors, only : set_gemm_nonlop_ikpt, gemm_nonlop_use_gemm, &
+ use m_gemm_nonlop_projectors, only : set_gemm_nonlop_ikpt, reset_gemm_nonlop, gemm_nonlop_use_gemm, &
                                       gemm_nonlop_block_size, gemm_nonlop_is_distributed
  use m_common,           only : get_gemm_nonlop_ompgpu_blocksize
  use m_fock_getghc,      only : fock_getghc
@@ -1022,6 +1022,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 !    Setup gemm_nonlop
      if (gemm_nonlop_use_gemm) then
        call set_gemm_nonlop_ikpt(my_ikpt)
+       call reset_gemm_nonlop()
 
        gemm_nonlop_block_size = gpu_nl_splitsize
        call get_gemm_nonlop_ompgpu_blocksize(my_ikpt,gs_hamk,mpi_enreg%bandpp,npw_k,nband_k,&
