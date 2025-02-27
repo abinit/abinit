@@ -38,7 +38,6 @@ module m_gstate
  use m_efield
  use m_ddb
  use m_bandfft_kpt
- use m_invovl
  use m_gemm_nonlop_projectors
  use m_xg_nonlop
  use m_wfk
@@ -431,10 +430,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    ABI_MALLOC(kg,(0,0))
    npwarr(:) = 0
    npwtot(:) = 0
- end if
-
- if((dtset%wfoptalg == 1 .or. dtset%wfoptalg == 111) .and. psps%usepaw == 1 .and. dtset%cprj_in_memory==0) then
-   call init_invovl(dtset%nkpt)
  end if
 
  ! Handling GEMM nonlop use
@@ -1785,10 +1780,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  if (dtset%usewvl == 0 .and. dtset%tfkinfunc /= 2 .and. dtset%optdriver /= RUNL_GWLS) then
 !  Plane-wave case
    call bandfft_kpt_destroy_array(bandfft_kpt,mpi_enreg)
- end if
-
- if((dtset%wfoptalg == 1 .or. dtset%wfoptalg == 111)  .and. psps%usepaw == 1 .and. dtset%cprj_in_memory==0) then
-   call destroy_invovl(dtset%nkpt,dtset%gpu_option)
  end if
 
 !Clean gemm_nonlop work spaces
