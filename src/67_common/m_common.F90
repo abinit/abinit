@@ -2118,18 +2118,19 @@ end function crystal_from_file
 !!
 !! SOURCE
 subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,npw,nband,nspinor,paral_kgb,&
-&                                           npband,optfor,optstr,wfoptalg,gpu_option,&
+&                                           npband,optfor,optstr,wfoptalg,gpu_option,use_distrib,&
 &                                           blocksize,nblocks)
    implicit none
 
    integer,intent(in)     :: ikpt,ndat,npw,nband,nspinor,paral_kgb,npband,optfor,optstr,wfoptalg,gpu_option
+   logical,intent(in)     :: use_distrib
    type(gs_hamiltonian_type),intent(in) :: gs_hamk
    integer,intent(inout)  :: blocksize
    integer,intent(out)    :: nblocks
 
    integer(kind=c_size_t) :: nonlop_smem,invovl_smem,getghc_wmem,invovl_wmem,nonlop_wmem,gs_ham_smem
    integer(kind=c_size_t) :: sum_mem,sum_bandpp_mem,sum_other_mem,free_mem,localMem
-   integer  :: icplx,space,i,ndat_try,rank,nprocs,ndgxdt,blockdim
+   integer  :: icplx,space,i,ndat_try,rank,nprocs,ndgxdt,blockdim,max_slices
    logical  :: print_and_exit
    integer(kind=c_size_t) :: chebfiMem(2),lobpcgMem(2)
 
@@ -2184,15 +2185,16 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,npw,nband,nspinor,
      blocksize=1
      write(std_out,*) "Setting GEMM nonlop block number...", new_line('A')
    end if
+
+   max_slices=max(100,nprocs*2); if(use_distrib) max_slices=nprocs
    ! How the number of blocks is decided:
-   ! We try to divide bandpp with dividers from 1 to 20
+   ! We try to divide bandpp with dividers from 1 to max_slices (#MPI tasks if in distributed mode, magical value otherwise)
    ! If we fail, that means test case is too fat for given hardware, and that's it
-   ! This looks stupid but we don't actually expect to process CHEBFI with 20 blocks.
    do i=1,nprocs
 
      ! Gemm nonlop static memory requirement is higher, split here
      if(i>1 .and. .not. print_and_exit) blocksize = blocksize + 1
-     if(modulo(nprocs,blocksize)/=0) cycle
+     if(modulo(nprocs,blocksize)/=0 .and. use_distrib) cycle
      if(i>1) nblocks=nprocs/blocksize
 
      nonlop_smem = gemm_nonlop_ompgpu_static_mem(gs_hamk%npw_fft_k,gs_hamk%indlmn,gs_hamk%nattyp,gs_hamk%ntypat,blocksize, ndgxdt)
@@ -2222,13 +2224,16 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,npw,nband,nspinor,
      if(sum_mem < free_mem .or. print_and_exit) exit
 
    end do
-   if(nblocks==0) then
+   if(blocksize==1) then
      write(std_out,'(A,A,I3,A)') "GPU memory consumption estimate without ",&
      &                        "distribution in GEMM nonlop for K-point ",ikpt,":"
-   else
+   else if(use_distrib) then
      write(std_out,'(A,I3,A,I3,A,I3,A)') "GPU memory consumption estimate using ",&
      &                        nblocks, " blocks of ", blocksize,&
      &                        " MPI tasks in GEMM nonlop for K-point ",ikpt,":"
+   else
+     write(std_out,'(A,I3,A,I3,A)') "GPU memory consumption estimate using ",&
+       &                        blocksize, " slices in GEMM nonlop for K-point ",ikpt,":"
    end if
    write(std_out,'(A,F10.3,1x,A)') " Available memory                        : ", real(free_mem)/(1024*1024), "MiB"
    write(std_out,*) "Memory requirements per MPI task (OpenMP GPU)"
