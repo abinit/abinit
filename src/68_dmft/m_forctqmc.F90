@@ -4074,9 +4074,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
          do im1=1,tndim
            do im=1,tndim
              ! Do not use DOT_PRODUCT
-             green%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol) = &
-               & green%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol) + &
-               & sum(gl_dlr(:,im,im1,isppol)*adlr_iw(:,ifreq))
+             green%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol) = sum(gl_dlr(:,im,im1,isppol)*adlr_iw(:,ifreq))
            end do ! im
          end do ! im1
        end do ! isppol
