@@ -136,6 +136,9 @@ MODULE m_paw_dmft
   integer :: dmft_blockdiag
   ! Block diagonalize Hamiltonian in the local basis
 
+  integer :: dmft_broyden_niter
+  ! Number of previous iterations involved in Broyden mixing of self-energy
+
   integer :: dmft_dc
   ! Type of double counting used in DMFT
 
@@ -1034,6 +1037,7 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  paw_dmft%dmft_test            = dtset%dmft_test
  paw_dmft%dmft_x2my2d          = dtset%dmft_x2my2d
  paw_dmft%dmft_use_full_chipsi = dtset%dmft_use_full_chipsi
+ paw_dmft%dmft_broyden_niter   = dtset%dmft_broyden_niter
 
  ! for entropy (alternate external calculation)
  paw_dmft%ientropy = 0

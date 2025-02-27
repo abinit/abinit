@@ -1836,7 +1836,7 @@ subroutine integrate_green(green,paw_dmft,prtopt,opt_ksloc,opt_after_solver,opt_
 !    because [G_{k}^{n_1,n_2}(iomega_n)]*= G_{k}^{n_2,n_1}(-iomega_n)
    do isppol=1,nsppol
      do ikpt=1,nkpt
-       green%occup%ks(:,:,ikpt,isppol) = (green%occup%ks(:,:,ikpt,isppol) + &
+       green%occup%ks(:,:,ikpt,isppol) = (green%occup%ks(:,:,ikpt,isppol)+ &
           & conjg(transpose(green%occup%ks(:,:,ikpt,isppol)))) * half
      end do ! ikpt
    end do ! isppol

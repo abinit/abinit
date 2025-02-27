@@ -130,6 +130,7 @@ type, public :: dataset_type
  integer :: dipquad = 1
  integer :: dmatpuopt
  integer :: dmatudiag
+ integer :: dmft_broyden_niter
  integer :: dmft_dc
  integer :: dmft_entropy
  integer :: dmft_iter
@@ -1526,6 +1527,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%dipquad            = dtin%dipquad
  dtout%dmatpuopt          = dtin%dmatpuopt
  dtout%dmatudiag          = dtin%dmatudiag
+ dtout%dmft_broyden_niter = dtin%dmft_broyden_niter
  dtout%dmft_dc            = dtin%dmft_dc
  dtout%dmft_entropy       = dtin%dmft_entropy
  dtout%dmft_charge_prec   = dtin%dmft_charge_prec
@@ -3489,7 +3491,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' dmft_triqs_nleg dmft_triqs_nsubdivisions dmft_triqs_ntau_delta dmft_triqs_off_diag dmft_triqs_read_ctqmcdata'
  list_vars=trim(list_vars)//' dmft_triqs_seed_a dmft_triqs_seed_b dmft_triqs_therm_restart'
  list_vars=trim(list_vars)//' dmft_triqs_time_invariance dmft_triqs_tol_block dmft_triqs_use_norm_as_weight dmft_triqs_wmax dmftcheck'
- list_vars=trim(list_vars)//' dmftqmc_l dmftqmc_n dmftqmc_seed dmftqmc_therm dmft_charge_prec dmft_dc'
+ list_vars=trim(list_vars)//' dmftqmc_l dmftqmc_n dmftqmc_seed dmftqmc_therm dmft_charge_prec dmft_broyden_niter dmft_dc'
  list_vars=trim(list_vars)//' dmft_entropy dmft_epsilon_yukawa dmft_fermi_step'
  list_vars=trim(list_vars)//' dmft_iter dmft_kspectralfunc dmft_lambda_yukawa dmft_mxsf dmft_nlambda dmft_nominal dmft_nwli dmft_nwlo'
  list_vars=trim(list_vars)//' dmft_occnd_imag dmft_orbital dmft_orbital_filepath dmft_prt_maxent dmft_prtself dmft_prtwan dmft_read_occnd'
