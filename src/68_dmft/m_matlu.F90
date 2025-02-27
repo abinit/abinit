@@ -892,7 +892,7 @@ end subroutine print_matlu
        end do ! irot
 
        do irot=1,nsym
-         call abi_xgemm("t","n",ndim,ndim*4*nsppol,ndim,cone,zarot(:,1:ndim,irot,lpawu+1),ndim_max,&
+         call abi_zgemm_2dd("t","n",ndim,ndim*4*nsppol,ndim,cone,zarot(:,1:ndim,irot,lpawu+1),ndim_max,&
                       & gloc_tmp3(:,:,:,irot),ndim,czero,gloc_tmp4(:,:,:,irot),ndim)
 
        end do ! irot

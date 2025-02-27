@@ -1185,7 +1185,7 @@ subroutine upfold_oper(oper,paw_dmft,procb,iproc,gpu_option)
 
        if(l_gpu_option == ABI_GPU_DISABLED) then
 
-         call abi_xgemm("c","n",mbandc,ndat*ndim,ndim,cone,paw_dmft%chipsi(:,:,ik,isppol,iatom),&
+         call abi_zgemm_2dd("c","n",mbandc,ndat*ndim,ndim,cone,paw_dmft%chipsi(:,:,ik,isppol,iatom),&
                       & ndim,oper%matlu(iatom)%mat(:,:,(isppol-1)*ndat+1:isppol*ndat),ndim,czero,mat_temp(:,:),mbandc)
 
          do idat=1,ndat
