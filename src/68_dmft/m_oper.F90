@@ -166,7 +166,7 @@ subroutine init_oper(paw_dmft,oper,nkpt,wtk,shiftk,opt_ksloc)
  type(oper_type), intent(inout) :: oper
  real(dp), target, optional :: wtk(paw_dmft%nkpt)
 !Local variables ------------------------------------
- integer :: optksloc,ndat_
+ integer :: optksloc
 !************************************************************************
 
  DBG_ENTER("COLL")
@@ -177,7 +177,6 @@ subroutine init_oper(paw_dmft,oper,nkpt,wtk,shiftk,opt_ksloc)
  !if(optksloc/=3) then
     ! FIXME: empty line!
  !endif
- ndat_=1;
 
  oper%has_operks    = 0
  oper%has_opermatlu = 0
@@ -192,7 +191,7 @@ subroutine init_oper(paw_dmft,oper,nkpt,wtk,shiftk,opt_ksloc)
  oper%nsppol  = paw_dmft%nsppol
  oper%paral   = 0
  oper%shiftk  = 0
- oper%ndat    = ndat_
+ oper%ndat    = 1
 
  if (present(shiftk)) oper%shiftk = shiftk
 
@@ -213,7 +212,7 @@ subroutine init_oper(paw_dmft,oper,nkpt,wtk,shiftk,opt_ksloc)
 ! ===================
  if (optksloc == 1 .or. optksloc == 3) then
 
-   ABI_MALLOC(oper%ks,(oper%mbandc,oper%mbandc,oper%nkpt,oper%nsppol*ndat_))
+   ABI_MALLOC(oper%ks,(oper%mbandc,oper%mbandc,oper%nkpt,oper%nsppol))
    oper%has_operks  = 1
    oper%ks(:,:,:,:) = czero
 
@@ -225,7 +224,7 @@ subroutine init_oper(paw_dmft,oper,nkpt,wtk,shiftk,opt_ksloc)
  if (optksloc == 2 .or. optksloc == 3) then
    ABI_MALLOC(oper%matlu,(oper%natom))
    oper%has_opermatlu = 1
-   call init_matlu(oper%natom,oper%nspinor,oper%nsppol*ndat_,paw_dmft%lpawu(:),oper%matlu(:))
+   call init_matlu(oper%natom,oper%nspinor,oper%nsppol,paw_dmft%lpawu(:),oper%matlu(:))
  end if ! optksloc=2 or optksloc=3
 
  DBG_EXIT("COLL")
