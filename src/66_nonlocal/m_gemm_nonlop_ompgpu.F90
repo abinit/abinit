@@ -129,11 +129,12 @@ contains
 
 !----------------------------------------------------------------------
 
- function gemm_nonlop_ompgpu_static_mem(npw, indlmn, nattyp, ntypat, mpi_block_size, ngrads) result(req_mem)
+ function gemm_nonlop_ompgpu_static_mem(npw, indlmn, nattyp, ntypat, mpi_block_size, ngrads, use_distrib) result(req_mem)
    implicit none
 
    integer, intent(in) :: npw, ntypat, mpi_block_size, ngrads
    integer, intent(in) :: indlmn(:,:,:), nattyp(ntypat)
+   logical, intent(in) :: use_distrib
 
    integer :: nprojs, nprojs_last_blk, itypat
    integer(kind=c_size_t) :: req_mem
@@ -148,7 +149,7 @@ contains
 
    req_mem = 0
 
-   if(mpi_block_size>1) then
+   if(mpi_block_size>1 .and. use_distrib) then
      req_mem = req_mem + dp * 2 * int(npw, c_size_t) * int(nprojs_last_blk, c_size_t)          !projs_recv
    end if
    ! projs or projs_r + projs_i
@@ -156,7 +157,7 @@ contains
    if(ngrads>0) then
      ! dprojs or dprojs_r + dprojs_i
      req_mem = req_mem + 2 * dp * int(npw, c_size_t) * int(ngrads, c_size_t) * int(nprojs_last_blk, c_size_t)
-     if(mpi_block_size>1) then
+     if(mpi_block_size>1 .and. use_distrib) then
        req_mem = req_mem + dp * 2 * int(npw, c_size_t) * int(ngrads, c_size_t)*int(nprojs_last_blk, c_size_t)   !dprojs_recv
      end if
    end if

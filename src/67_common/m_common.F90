@@ -2159,7 +2159,7 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,npw,nband,nspinor,
    ndgxdt=0
    if(optfor>0) ndgxdt=ndgxdt+3
    if(optstr>0) ndgxdt=ndgxdt+6
-   nonlop_smem = gemm_nonlop_ompgpu_static_mem(gs_hamk%npw_fft_k, gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%ntypat, 1, ndgxdt)
+   nonlop_smem = gemm_nonlop_ompgpu_static_mem(gs_hamk%npw_fft_k, gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%ntypat, 1, ndgxdt, use_distrib)
    getghc_wmem = getghc_ompgpu_work_mem(gs_hamk, ndat_try)
    nonlop_wmem = gemm_nonlop_ompgpu_work_mem(gs_hamk%istwf_k, ndat, ndgxdt, gs_hamk%npw_fft_k,&
    &               gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%ntypat, gs_hamk%lmnmax)
@@ -2197,7 +2197,7 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,npw,nband,nspinor,
      if(modulo(nprocs,blocksize)/=0 .and. use_distrib) cycle
      if(i>1) nblocks=nprocs/blocksize
 
-     nonlop_smem = gemm_nonlop_ompgpu_static_mem(gs_hamk%npw_fft_k,gs_hamk%indlmn,gs_hamk%nattyp,gs_hamk%ntypat,blocksize, ndgxdt)
+     nonlop_smem = gemm_nonlop_ompgpu_static_mem(gs_hamk%npw_fft_k,gs_hamk%indlmn,gs_hamk%nattyp,gs_hamk%ntypat,blocksize, ndgxdt, use_distrib)
 
      ! Bandpp~ndat sized buffer memory requirements are higher, split there
      sum_mem          = nonlop_smem + gs_ham_smem
