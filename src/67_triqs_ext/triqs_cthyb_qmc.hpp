@@ -17,11 +17,11 @@ extern "C"{
                           bool use_norm_as_weight, bool compute_entropy, int loc_n_min, int loc_n_max, int seed_a, int seed_b, int num_orbitals,
                           int n_tau, int n_l, int n_cycles_, int cycle_length, int ntherm, int ntherm_restart, int det_init_size,
                           int det_n_operations_before_check, int ntau_delta, int rank, int nblocks, int read_data, int verbo, double beta,
-                          double move_global_prob, double imag_threshold, double det_precision_warning, double det_precision_error,
-                          double det_singular_threshold, double lam, double pauli_prob, int *block_list, int *flavor_list, int *inner_list, int *siz_list,
-                          complex<double> *ftau, complex<double> *gtau, complex<double> *gl, complex<double> *udens_cmplx, complex<double> *vee_cmplx,
-                          complex<double> *levels_cmplx, complex<double> *moments_self_1, complex<double> *moments_self_2, complex<double> *occ,
-                          complex<double> *eu, char *fname_data, char *fname_dataw, char *fname_histo ) ;
+                          double imag_threshold, double det_precision_warning, double det_precision_error, double det_singular_threshold, double lam,
+                          double pauli_prob, int *block_list, int *flavor_list, int *inner_list, int *siz_list, complex<double> *ftau, complex<double> *gtau,
+                          complex<double> *gl, complex<double> *udens_cmplx, complex<double> *vee_cmplx, complex<double> *levels_cmplx,
+                          complex<double> *moments_self_1, complex<double> *moments_self_2, complex<double> *occ, complex<double> *eu, char *fname_data,
+                          char *fname_dataw, char *fname_histo ) ;
 
     many_body_op_t init_Hamiltonian( h_scalar_t *eps, int nflavor, h_scalar_t *udens, int *block_list,
                                      int *inner_list, double lambda);

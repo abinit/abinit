@@ -230,10 +230,6 @@ MODULE m_paw_dmft
   ! [nlocmin,nlocmax]
   ! are taken into account.
 
-  integer :: dmft_triqs_nbins_histo
-  ! TRIQS CTQMC: Number of bins for the histogram of P(k')/P(k)
-  ! in imaginary time.
-
   integer :: dmft_triqs_nleg
   ! TRIQS CTQMC: Nb of Legendre polynomials used for the
   ! Green's function (Phys. Rev. B 84, 075145) [[cite:Boehnke2011]].
@@ -483,9 +479,6 @@ MODULE m_paw_dmft
 
   real(dp) :: dmft_triqs_lambda
   ! TRIQS CTQMC: Cutoff for the real frequency grid for the DLR fit
-
-  real(dp) :: dmft_triqs_move_global_prob
-  ! TRIQS CTQMC: Proposal probability for the global move
 
   real(dp) :: dmft_triqs_pauli_prob
   ! TRIQS CTQMC: Probability for proposing Pauli-aware insert and remove
@@ -1124,7 +1117,6 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  paw_dmft%dmft_triqs_use_norm_as_weight            = (dtset%dmft_triqs_use_norm_as_weight == 1)
  paw_dmft%dmft_triqs_leg_measure                   = (dtset%dmft_triqs_leg_measure == 1)
  paw_dmft%dmft_triqs_off_diag                      = (off_diag == 1)
- paw_dmft%dmft_triqs_move_global_prob              = dtset%dmft_triqs_move_global_prob
  paw_dmft%dmft_triqs_imag_threshold                = dtset%dmft_triqs_imag_threshold
  paw_dmft%dmft_triqs_det_precision_warning         = dtset%dmft_triqs_det_precision_warning
  paw_dmft%dmft_triqs_det_precision_error           = dtset%dmft_triqs_det_precision_error
@@ -1132,7 +1124,6 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  paw_dmft%dmft_triqs_epsilon                       = dtset%dmft_triqs_epsilon
  paw_dmft%dmft_triqs_lambda                        = dtset%dmft_triqs_wmax / dtset%tsmear
  paw_dmft%dmft_triqs_ntau_delta                    = dtset%dmft_triqs_ntau_delta
- paw_dmft%dmft_triqs_nbins_histo                   = dtset%dmft_triqs_nbins_histo
  paw_dmft%dmft_triqs_entropy                       = dtset%dmft_triqs_entropy
  paw_dmft%dmft_triqs_compute_integral              = dtset%dmft_triqs_compute_integral
  paw_dmft%dmft_triqs_gaussorder                    = dtset%dmft_triqs_gaussorder
