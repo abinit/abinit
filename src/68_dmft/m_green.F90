@@ -983,7 +983,7 @@ subroutine compute_green_batched_core(green,paw_dmft,self,optself,optlog)
 
  use m_abi_linalg, only : abi_xgemm
  use m_matlu, only : add_matlu,sym_matlu
- use m_oper, only : downfold_oper,inverse_oper,upfold_oper_batched
+ use m_oper, only : downfold_oper,inverse_oper,upfold_oper
  use m_time, only : timab
 
 !Arguments ------------------------------------
@@ -1115,7 +1115,7 @@ subroutine compute_green_batched_core(green,paw_dmft,self,optself,optlog)
      call add_matlu(self%hdc%matlu(:),self%oper(ifreq)%matlu(:),green%oper(ifreq)%matlu(:),natom,-1)
    end do
    call copy_oper_to_ndat(green%oper,green_oper_ndat,ndat,green%nw,green%distrib%proct,green%distrib%me_freq,.false.)
-   call upfold_oper_batched(green_oper_ndat,paw_dmft,procb=green%distrib%procb(:),iproc=me_kpt,gpu_option=gpu_option)
+   call upfold_oper(green_oper_ndat,paw_dmft,procb=green%distrib%procb(:),iproc=me_kpt,gpu_option=gpu_option)
  end if ! optself
 
  ks => green_oper_ndat%ks
