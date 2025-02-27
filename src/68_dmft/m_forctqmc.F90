@@ -3750,11 +3750,11 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
                         & paw_dmft%dmft_triqs_seed_b,nflavor,ntau,nleg,int(paw_dmft%dmftqmc_n/paw_dmft%nproc), &
                         & paw_dmft%dmftctqmc_meas,paw_dmft%dmftqmc_therm,paw_dmft%dmft_triqs_therm_restart, &
                         & paw_dmft%dmft_triqs_det_init_size,paw_dmft%dmft_triqs_det_n_operations_before_check, &
-                        & ntau_delta,myproc,nblocks(iatom),read_data,verbo,beta,paw_dmft%dmft_triqs_move_global_prob, &
-                        & paw_dmft%dmft_triqs_imag_threshold,paw_dmft%dmft_triqs_det_precision_warning, &
-                        & paw_dmft%dmft_triqs_det_precision_error,paw_dmft%dmft_triqs_det_singular_threshold,lam_list(ilam), &
-                        & paw_dmft%dmft_triqs_pauli_prob,block_ptr,flavor_ptr,inner_ptr,siz_ptr,ftau_ptr,gtau_ptr,gl_ptr,udens_ptr, &
-                        & vee_ptr,levels_ptr,mself_1_ptr,mself_2_ptr,occ_ptr,eu_ptr,fname_data_ptr,fname_dataw_ptr,fname_histo_ptr)
+                        & ntau_delta,myproc,nblocks(iatom),read_data,verbo,beta,paw_dmft%dmft_triqs_imag_threshold, &
+                        & paw_dmft%dmft_triqs_det_precision_warning,paw_dmft%dmft_triqs_det_precision_error, &
+                        & paw_dmft%dmft_triqs_det_singular_threshold,lam_list(ilam),paw_dmft%dmft_triqs_pauli_prob,block_ptr, &
+                        & flavor_ptr,inner_ptr,siz_ptr,ftau_ptr,gtau_ptr,gl_ptr,udens_ptr,vee_ptr,levels_ptr,mself_1_ptr, &
+                        & mself_2_ptr,occ_ptr,eu_ptr,fname_data_ptr,fname_dataw_ptr,fname_histo_ptr)
 #endif
 
      call flush_unit(std_out)

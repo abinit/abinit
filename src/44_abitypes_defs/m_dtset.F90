@@ -158,7 +158,6 @@ type, public :: dataset_type
  integer :: dmft_triqs_measure_density_matrix
  integer :: dmft_triqs_move_double
  integer :: dmft_triqs_move_shift
- integer :: dmft_triqs_nbins_histo
  integer :: dmft_triqs_nleg
  integer :: dmft_triqs_nsubdivisions
  integer :: dmft_triqs_ntau_delta
@@ -835,7 +834,6 @@ type, public :: dataset_type
  real(dp) :: dmft_triqs_det_singular_threshold
  real(dp) :: dmft_triqs_epsilon
  real(dp) :: dmft_triqs_imag_threshold
- real(dp) :: dmft_triqs_move_global_prob
  real(dp) :: dmft_triqs_pauli_prob
  real(dp) :: dmft_triqs_tol_block
  real(dp) :: dmft_triqs_wmax
@@ -1572,10 +1570,8 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%dmft_triqs_loc_n_max = dtin%dmft_triqs_loc_n_max
  dtout%dmft_triqs_measure_density_matrix = dtin%dmft_triqs_measure_density_matrix
  dtout%dmft_triqs_move_double = dtin%dmft_triqs_move_double
- dtout%dmft_triqs_move_global_prob = dtin%dmft_triqs_move_global_prob
  dtout%dmft_triqs_move_shift = dtin%dmft_triqs_move_shift
  dtout%dmft_triqs_pauli_prob = dtin%dmft_triqs_pauli_prob
- dtout%dmft_triqs_nbins_histo = dtin%dmft_triqs_nbins_histo
  dtout%dmft_triqs_nleg = dtin%dmft_triqs_nleg
  dtout%dmft_triqs_nsubdivisions = dtin%dmft_triqs_nsubdivisions
  dtout%dmft_triqs_ntau_delta = dtin%dmft_triqs_ntau_delta
@@ -3487,7 +3483,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' dmft_triqs_entropy dmft_triqs_epsilon dmft_triqs_gaussorder dmft_triqs_imag_threshold'
  list_vars=trim(list_vars)//' dmft_triqs_leg_measure dmft_triqs_loc_n_min dmft_triqs_loc_n_max'
  list_vars=trim(list_vars)//' dmft_triqs_measure_density_matrix dmft_triqs_move_double'
- list_vars=trim(list_vars)//' dmft_triqs_move_global_prob dmft_triqs_move_shift dmft_triqs_pauli_prob dmft_triqs_nbins_histo'
+ list_vars=trim(list_vars)//' dmft_triqs_move_shift dmft_triqs_pauli_prob'
  list_vars=trim(list_vars)//' dmft_triqs_nleg dmft_triqs_nsubdivisions dmft_triqs_ntau_delta dmft_triqs_off_diag dmft_triqs_read_ctqmcdata'
  list_vars=trim(list_vars)//' dmft_triqs_seed_a dmft_triqs_seed_b dmft_triqs_therm_restart'
  list_vars=trim(list_vars)//' dmft_triqs_time_invariance dmft_triqs_tol_block dmft_triqs_use_norm_as_weight dmft_triqs_wmax dmftcheck'

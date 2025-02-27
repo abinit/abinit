@@ -17,7 +17,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
                      bool time_invariance, bool use_norm_as_weight, bool compute_entropy, int loc_n_min, int loc_n_max,
                      int seed_a, int seed_b, int num_orbitals, int n_tau, int n_l, int n_cycles, int cycle_length,
                      int ntherm, int ntherm_restart, int det_init_size, int det_n_operations_before_check, int ntau_delta,
-                     int rank, int nblocks, int read_data, int verbo, double beta, double move_global_prob, double imag_threshold,
+                     int rank, int nblocks, int read_data, int verbo, double beta, double imag_threshold,
                      double det_precision_warning, double det_precision_error, double det_singular_threshold, double lam,
                      double pauli_prob, int *block_list, int *flavor_list, int *inner_list, int *siz_list, complex<double> *ftau,
                      complex<double> *gtau, complex<double> *gl, complex<double> *udens_cmplx, complex<double> *vee_cmplx,
@@ -193,7 +193,6 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
   paramCTQMC.use_norm_as_weight = use_norm_as_weight;
   paramCTQMC.det_init_size = det_init_size;
   paramCTQMC.det_n_operations_before_check = det_n_operations_before_check;
-  paramCTQMC.move_global_prob = move_global_prob;
   paramCTQMC.imag_threshold = imag_threshold;
   paramCTQMC.det_precision_warning = det_precision_warning;
   paramCTQMC.det_precision_error = det_precision_error;
@@ -228,7 +227,6 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
     cout << "   N max                 = " << loc_n_max << endl;
     cout << "   Det init size         = " << det_init_size << endl;
     cout << "   Det N ops. bef. check = " << det_n_operations_before_check << endl;
-    cout << "   Global moves prob.    = " << scientific << move_global_prob << endl;
     cout << "   Imaginary Threshold   = " << imag_threshold << endl;
     cout << "   Det Precision warning = " << det_precision_warning << endl;
     cout << "   Det Precision error   = " << det_precision_error << endl;

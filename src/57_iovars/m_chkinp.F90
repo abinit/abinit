@@ -885,8 +885,6 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
      call chkdpr(0,1,cond_string,cond_values,ierr,'dmft_triqs_pauli_prob',dt%dmft_triqs_pauli_prob,-1,one,iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
-     call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_triqs_nbins_histo',dt%dmft_triqs_nbins_histo,1,iout)
-     cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
      call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_triqs_nsubdivisions',dt%dmft_triqs_nsubdivisions,1,iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
      call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_triqs_ntau_delta',dt%dmft_triqs_ntau_delta,1,iout)
@@ -910,8 +908,6 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      call chkdpr(0,1,cond_string,cond_values,ierr,'dmft_triqs_epsilon',dt%dmft_triqs_epsilon,1,zero,iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
      call chkdpr(0,1,cond_string,cond_values,ierr,'dmft_triqs_imag_threshold',dt%dmft_triqs_imag_threshold,1,zero,iout)
-     cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
-     call chkdpr(0,1,cond_string,cond_values,ierr,'dmft_triqs_move_global_prob',dt%dmft_triqs_move_global_prob,1,zero,iout)
      if (dt%dmft_triqs_time_invariance == 1) then
        cond_string(1)='dmft_triqs_time_invariance' ; cond_values(1)=dt%dmft_triqs_time_invariance
        call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_triqs_measure_density_matrix',dt%dmft_triqs_measure_density_matrix,1,(/1/),iout)
