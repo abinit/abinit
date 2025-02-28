@@ -239,7 +239,9 @@ subroutine get_xclevel(ixc, xclevel, usefock)
 
  xclevel=0 ; if(present(usefock)) usefock=0
  if( ( 1<=ixc .and. ixc<=10).or.(30<=ixc .and. ixc<=39).or.(ixc==50) )xclevel=1 ! LDA
+ if ( ( ixc==51) ) xclevel=1 ! temperature-dependant LDA functionals (TLDA)
  if( (11<=ixc .and. ixc<=19).or.(23<=ixc .and. ixc<=29).or. ixc==1402000)xclevel=2 ! GGA
+ if ( ( ixc==60) ) xclevel=2 ! temperature-dependant GGA functionals (TGGA)
  if( 20<=ixc .and. ixc<=22 )xclevel=3 ! ixc for TDDFT kernel tests
  if(present(usefock))then
    if( ixc>=40 .and. ixc<=42 )usefock=1 ! Hartree-Fock or internal hybrid functionals

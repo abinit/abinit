@@ -73,7 +73,8 @@ contains
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!!  enxc= exchange correlation energy
+!!  bigexc= exchange correlation energy
+!!  bigsxc= exchange correlation entropy energy (for finite-temperature xc functionals)
 !!  grxc= correction to the forces
 !!  strsxc(6)= exchange correlation contribution to stress tensor
 !!  vxc= exchange correlation potential
@@ -90,14 +91,14 @@ contains
 !!
 !! SOURCE
 
-subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,strsxc,&
+subroutine xchybrid_ncpp_cc(dtset,bigexc,bigsxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,strsxc,&
 &                           vxcavg,xccc3d,vxc,grxc,xcccrc,xccc1d,xred,n1xccc,optstr)
 
 !Arguments -------------------------------------------------------------
 !scalars
  integer,intent(in) :: nfft,n3xccc
  integer,optional,intent(in) :: n1xccc,optstr
- real(dp),intent(out) :: enxc,vxcavg
+ real(dp),intent(out) :: bigexc,vxcavg,bigsxc
  type(dataset_type),intent(in) :: dtset
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
@@ -110,7 +111,7 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
 !Local variables -------------------------------------------------------
 !scalars
  integer :: ixc_gga,libxc_gga_initialized,ndim,nkxc,n3xccc_null,option,optstr_loc,usexcnhat
- real(dp) :: enxc_corr,ucvol,vxcavg_corr
+ real(dp) :: bigexc_corr,ucvol,vxcavg_corr,bigsxc_corr
  character(len=500) :: msg
  type(xcdata_type) :: xcdata_gga,xcdata_hybrid
  logical :: calcgrxc,nmxc
@@ -164,7 +165,7 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
    option=0 ! XC only
    ABI_MALLOC(xccc3d_null,(n3xccc_null))
 !  Compute Vxc^Hybrid(rho_val)
-   call rhotoxc(enxc,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,nmxc,&
+   call rhotoxc(bigexc,bigsxc,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,nmxc,&
 &   n3xccc_null,option,rhor,rprimd,usexcnhat,vxc,vxcavg,xccc3d_null,xcdata_hybrid,&
 &   strsxc=strsxc)
 
@@ -176,30 +177,32 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
 
 !Add Vxc^GGA(rho_core+rho_val)
    if (ixc_gga<0) then
-     call rhotoxc(enxc_corr,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,nmxc,&
+     call rhotoxc(bigexc_corr,bigsxc_corr,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,nmxc,&
 &     n3xccc,option,rhor,rprimd,usexcnhat,vxc_corr,vxcavg_corr,xccc3d,xcdata_gga,&
 &     xc_funcs=xc_funcs_gga,strsxc=strsxc_corr)
    else
-     call rhotoxc(enxc_corr,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,nmxc,&
+     call rhotoxc(bigexc_corr,bigsxc_corr,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,nmxc,&
 &     n3xccc,option,rhor,rprimd,usexcnhat,vxc_corr,vxcavg_corr,xccc3d,xcdata_gga,&
 &     strsxc=strsxc_corr)
    end if
-   enxc=enxc+enxc_corr
+   bigexc=bigexc+bigexc_corr
+   bigsxc=bigsxc+bigsxc_corr
    vxc(:,:)=vxc(:,:)+vxc_corr(:,:)
    vxcavg=vxcavg+vxcavg_corr
    strsxc(:)=strsxc(:)+strsxc_corr(:)
 
 !Substract Vxc^GGA(rho_val)
    if (ixc_gga<0) then
-     call rhotoxc(enxc_corr,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,nmxc,&
+     call rhotoxc(bigexc_corr,bigsxc_corr,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,nmxc,&
 &     n3xccc_null,option,rhor,rprimd,usexcnhat,vxc_corr,vxcavg_corr,xccc3d_null,xcdata_gga,&
 &     xc_funcs=xc_funcs_gga,strsxc=strsxc_corr)
    else
-     call rhotoxc(enxc_corr,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,nmxc,&
+     call rhotoxc(bigexc_corr,bigsxc_corr,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,nmxc,&
 &     n3xccc_null,option,rhor,rprimd,usexcnhat,vxc_corr,vxcavg_corr,xccc3d_null,xcdata_gga,&
 &     strsxc=strsxc_corr)
    end if
-   enxc=enxc-enxc_corr
+   bigexc=bigexc-bigexc_corr
+   bigsxc=bigsxc-bigsxc_corr
    vxc(:,:)=vxc(:,:)-vxc_corr(:,:)
    vxcavg=vxcavg-vxcavg_corr
    strsxc(:)=strsxc(:)-strsxc_corr(:)
@@ -224,11 +227,11 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
 &   ngfft(3),option,rprimd,dtset%typat,ucvol,vxc_corr,xcccrc,xccc1d,xccc3d_null,xred)
 !Add Vxc^GGA(rho_core+rho_val)
    if (ixc_gga<0) then
-     call rhotoxc(enxc_corr,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,nmxc,&
+     call rhotoxc(bigexc_corr,bigsxc_corr,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,nmxc,&
 &     n3xccc,option,rhor,rprimd,usexcnhat,vxc_corr,vxcavg_corr,xccc3d_null,xcdata_gga,&
 &     strsxc=strsxc_corr,xc_funcs=xc_funcs_gga)
    else
-     call rhotoxc(enxc_corr,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,nmxc,&
+     call rhotoxc(bigexc_corr,bigsxc_corr,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,nmxc,&
 &     n3xccc,option,rhor,rprimd,usexcnhat,vxc_corr,vxcavg_corr,xccc3d_null,xcdata_gga,&
 &     strsxc=strsxc_corr)
    end if
@@ -248,11 +251,11 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
 !calculate Vxc^GGA(rho_core+rho_val)
    option=0
    if (ixc_gga<0) then
-     call rhotoxc(enxc_corr,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,nmxc,&
+     call rhotoxc(bigexc_corr,bigsxc_corr,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,nmxc,&
 &     n3xccc,option,rhor,rprimd,usexcnhat,vxc,vxcavg_corr,xccc3d,xcdata_gga,&
 &     strsxc=strsxc_corr,xc_funcs=xc_funcs_gga)
    else
-     call rhotoxc(enxc_corr,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,nmxc,&
+     call rhotoxc(bigexc_corr,bigsxc_corr,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,nmxc,&
 &     n3xccc,option,rhor,rprimd,usexcnhat,vxc,vxcavg_corr,xccc3d,xcdata_gga,&
 &     strsxc=strsxc_corr)
    end if

@@ -321,7 +321,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
  integer :: comm_grid,ifft,ispden,ncpgr,occopt_,optgr,optgr2,option,optnc,optstr,optstr2,iorder_cprj,ctocprj_choice
  integer :: idir,iatom,unpaw,mcgbz,usexg
  integer,allocatable :: dimcprj(:)
- real(dp) ::dum,dum1,ucvol_
+ real(dp) ::dum,dum1,dum2,ucvol_
  logical :: apply_residual
 !arrays
  real(dp),parameter :: k0(3)=(/zero,zero,zero/)
@@ -515,7 +515,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 &        (dtset%ixc==41.or.dtset%ixc==42.or.libxc_functionals_is_hybrid())) then
          ABI_MALLOC(vxc_hf,(nfftf,dtset%nspden))
 !compute Vxc^GGA(rho_val)
-         call xchybrid_ncpp_cc(dtset,dum,mpi_enreg,nfftf,ngfftf,n3xccc,rhor,rprimd,strdum,dum1,xccc3d,vxc=vxc_hf,optstr=1)
+         call xchybrid_ncpp_cc(dtset,dum,dum2,mpi_enreg,nfftf,ngfftf,n3xccc,rhor,rprimd,strdum,dum1,xccc3d,vxc=vxc_hf,optstr=1)
        end if
      end if
    end if
@@ -1632,7 +1632,7 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
 
 !  To be adjusted for the call to rhotoxc
    nk3xc=1
-   call rhotoxc(energy,kxc_cur,mpi_enreg,nfft,ngfft,&
+   call rhotoxc(energy,dum,kxc_cur,mpi_enreg,nfft,ngfft,&
 &   nhat,usepaw,nhatgr,nhatgrdim,nkxc_cur,nk3xc,non_magnetic_xc,n3xccc,option,&
 &   rhor0,rprimd,usexcnhat,vresid,vxcavg,xccc3d,xcdata,vhartr=vhres,&
 &   xcctau3d=xcctau3d)  !vresid=work space

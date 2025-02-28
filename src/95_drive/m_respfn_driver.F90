@@ -237,9 +237,9 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  logical :: has_full_piezo,has_allddk,is_dfpt=.true.,non_magnetic_xc
  logical :: paral_atom,qeq0,use_nhat_gga,call_pawinit
  real(dp) :: boxcut,compch_fft,compch_sph,cpus,ecore,ecut_eff,ecutdg_eff,ecutf
- real(dp) :: eei,eew,ehart,eii,ek,enl,entropy,enxc
- real(dp) :: epaw,epawdc,etot,evdw,fermie,fermih,gsqcut,gsqcut_eff,gsqcutc_eff,qphnrm,residm
- real(dp) :: ucvol,vxcavg
+ real(dp) :: eei,eew,ehart,eii,ek,enl,entropy,bigexc,bigsxc
+ real(dp) :: epaw,epawdc,spaw,etot,evdw,fermie,fermih,gsqcut,gsqcut_eff,gsqcutc_eff,qphnrm,residm
+ real(dp) :: ucvol,vxcavg,el_temp
  character(len=500) :: msg
  type(ebands_t) :: bstruct
  type(hdr_type) :: hdr,hdr_fine,hdr0,hdr_den
@@ -317,6 +317,9 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 !Option input variables
  iscf=dtset%iscf
 
+!Get electronic temperature from dtset
+ el_temp=merge(dtset%tphysel,dtset%tsmear,dtset%tphysel>tol8.and.dtset%occopt/=3.and.dtset%occopt/=9)
+
 !Respfn input variables
  asr=dtset%asr   ; chneut=dtset%chneut ; rfdir(1:3)=dtset%rfdir(1:3)
  rfddk=dtset%rfddk   ; rfelfd=dtset%rfelfd ; rfmagn=dtset%rfmagn
@@ -340,8 +343,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
 !LIKELY TO BE TAKEN AWAY
  initialized=0
- ek=zero ; ehart=zero ; enxc=zero ; eei=zero ; enl=zero
- eii=zero ; eew=zero ; ecore=zero
+ ek=zero ; ehart=zero ; bigexc=zero ; eei=zero ; enl=zero
+ eii=zero ; eew=zero ; ecore=zero ; bigsxc=zero
 
 !Set up for iterations
  call setup1(dtset%acell_orig(1:3,1),bantot,dtset,&
@@ -957,7 +960,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 &    xccc3d,dtset%xc_denpos,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
  end if
 
- call rhotoxc(enxc,kxc,mpi_enreg,nfftf,ngfftf,&
+ call rhotoxc(bigexc,bigsxc,kxc,mpi_enreg,nfftf,ngfftf,&
 & nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,rhor,&
 & rprimd,usexcnhat,vxc,vxcavg,xccc3d,xcdata,&
 & taur=taur,vhartr=vhartr,vxctau=vxctau,xcctau3d=xcctau3d)
@@ -986,7 +989,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    cplex=1;ipert=0;option=1
    nzlmopt=0;if (dtset%pawnzlm>0) nzlmopt=-1
 
-   call pawdenpot(compch_sph,epaw,epawdc,ipert,dtset%ixc,my_natom,natom,dtset%nspden,&
+   call pawdenpot(compch_sph,el_temp,epaw,epawdc,spaw,ipert,dtset%ixc,my_natom,natom,dtset%nspden,&
 &   ntypat,dtset%nucdipmom,nzlmopt,option,paw_an,paw_an,paw_ij,pawang,dtset%pawprtvol,&
 &   pawrad,pawrhoij,dtset%pawspnorb,pawtab,dtset%pawxcdev,&
 &   dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,dtset%xc_taupos,ucvol,psps%znuclpsp, &
@@ -1127,7 +1130,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    call dfpt_eltfrhar(eltfrhar,rprimd,gsqcut,mpi_enreg,nfftf,ngfftf,rhog)
 
 !  Calculate the xc part of the elastic tensor
-   call dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfftf,&
+   call dfpt_eltfrxc(atindx,dtset,eltfrxc,bigexc,gsqcut,kxc,mpi_enreg,mgfftf,&
 &   nattyp,nfftf,ngfftf,ngfftf,nhat,nkxc,n3xccc,pawtab,ph1df,psps,rhor,rprimd,&
 &   usexcnhat,vxc,xccc3d,xred)
 
