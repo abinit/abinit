@@ -96,15 +96,6 @@ module m_sigmaph
  include 'mpif.h'
 #endif
 
- ! Tables for degenerated KS states.
- !type bids_t
- !  integer, allocatable :: vals(:)
- !end type bids_t
-
- !type degtab_t
- !  type(bids_t), allocatable :: bids(:)
- !end type degtab_t
-
  ! Store the weights in single or double precision
  integer,private,parameter :: DELTAW_KIND = dp
  !integer,private,parameter :: DELTAW_KIND = sp
@@ -456,7 +447,7 @@ module m_sigmaph
    ! For each point of the angular mesh, gives the weight
    ! of the corresponding point on an unitary sphere (Frohlich self-energy)
 
-  real(dp),allocatable :: frohl_deltas_sphcorr(:, :, :, :)
+  real(dp),allocatable :: frohl_deltas_sphcorr(:,:,:,:)
    ! (2, ntemp, max_nbcalc, natom3))
    ! Integration of the imaginary part inside the small sphere around Gamma
    ! computed numerically with the Frohlich model by Verdi and angular integration.

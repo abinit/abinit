@@ -37,7 +37,6 @@ MODULE m_ddk
  use m_cgtools
  use m_hamiltonian
  use m_initylmg
- use m_ebands
  use m_pawcprj
  use m_getgh1c
  use netcdf
