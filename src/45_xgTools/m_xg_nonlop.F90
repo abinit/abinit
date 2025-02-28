@@ -144,8 +144,7 @@ module m_xg_nonlop
    type(xg_t),pointer :: ph3d_gather_k
 
    ! non paw only:
-   type(xg_t) :: ekb_all
-   type(xgBlock_t),allocatable :: ekb(:)
+   type(xg_t) :: ekb
    ! end non paw only
 
    ! paw only:
@@ -424,6 +423,7 @@ contains
   integer :: itypat, ilmn, iln, nlmn, nlmn_max, ntypat
   real(dp),pointer :: ekb_(:)
   real(dp) :: tsec(2)
+  type(xgBlock_t) :: ekb_itypat
 
 ! *************************************************************************
 
@@ -436,14 +436,13 @@ contains
   ntypat   = xg_nonlop%ntypat
   nlmn_max = xg_nonlop%nlmn_max
 
-  call xg_init(xg_nonlop%ekb_all,SPACE_R,nlmn_max,ntypat,xmpi_comm_self)
-  ABI_MALLOC(xg_nonlop%ekb,(ntypat))
+  call xg_init(xg_nonlop%ekb,SPACE_R,nlmn_max,ntypat,xmpi_comm_self)
 
   do itypat=1,ntypat
 
     nlmn=xg_nonlop%nlmn_ntypat(itypat)
-    call xg_setBlock(xg_nonlop%ekb_all,xg_nonlop%ekb(itypat),nlmn,1,fcol=itypat)
-    call xgBlock_reverseMap_1D(xg_nonlop%ekb(itypat),ekb_)
+    call xg_setBlock(xg_nonlop%ekb,ekb_itypat,nlmn,1,fcol=itypat)
+    call xgBlock_reverseMap_1D(ekb_itypat,ekb_)
     do ilmn=1,nlmn
       iln=xg_nonlop%indlmn(5,ilmn,itypat)
       ekb_(ilmn) = ekb(iln,itypat)
@@ -670,10 +669,7 @@ contains
     ABI_ERROR('Not implemented with paw=True.')
   end if
 
-  if (allocated(xg_nonlop%ekb)) then
-    ABI_FREE(xg_nonlop%ekb)
-  end if
-  call xg_free(xg_nonlop%ekb_all)
+  call xg_free(xg_nonlop%ekb)
 
  end subroutine xg_nonlop_destroy_ekb
 !!***
@@ -1916,20 +1912,20 @@ subroutine xg_nonlop_getcprj_deriv(xg_nonlop,X,cprjX,work_mpi,option)
  end subroutine xg_nonlop_apply_prj
 !!***
 
- subroutine xg_nonlop_apply_diag(xg_nonlop,diag,cprjin,cprjout)
+ subroutine xg_nonlop_apply_diag(xg_nonlop,diag_op,cprjin,cprjout)
 
    type(xg_nonlop_t), intent(in) :: xg_nonlop
-   type(xgBlock_t), intent(in), target :: diag(:)
+   type(xgBlock_t), intent(in) :: diag_op
    type(xgBlock_t), intent(in) :: cprjin
    type(xgBlock_t), intent(inout) :: cprjout
 
+   logical :: loop_over_atoms
    integer :: ia, iband, cprjdim, shift_itypat, iatom, itypat, nattyp, nlmn, shift
    integer :: space_cprj, cplex, nlmn_max
-   integer :: nspinor, nrows, ncols, nrows_diag, ncols_diag
+   integer :: nspinor, nrows, ncols
 
    type(xg_t)        :: cprjin_nlmn_max,cprjout_nlmn_max
-   type(xgBlock_t) :: cprjin_nlmn,cprjout_nlmn
-   type(xgBlock_t),pointer :: diag_
+   type(xgBlock_t) :: cprjin_nlmn,cprjout_nlmn,diag_op_iatom
    real(dp),pointer :: cprjin_nlmn_(:,:),cprjout_nlmn_(:,:)
    real(dp),pointer :: cprjin_(:,:),cprjout_(:,:)
    real(dp) :: tsec(2)
@@ -1961,6 +1957,13 @@ subroutine xg_nonlop_getcprj_deriv(xg_nonlop,X,cprjX,work_mpi,option)
    call xgBlock_reverseMap(cprjin ,cprjin_ )
    call xgBlock_reverseMap(cprjout,cprjout_)
 
+   if (cols(diag_op) == xg_nonlop%ntypat) then
+     loop_over_atoms = .false.
+   else if (cols(diag_op) == xg_nonlop%natom) then
+     loop_over_atoms = .true.
+   else
+     ABI_ERROR('wrong cols for diag_op!')
+   end if
    shift = 0
    shift_itypat = 0
    do itypat=1,xg_nonlop%ntypat
@@ -1970,27 +1973,19 @@ subroutine xg_nonlop_getcprj_deriv(xg_nonlop,X,cprjX,work_mpi,option)
      call xg_setBlock(cprjout_nlmn_max,cprjout_nlmn,nlmn,ncols)
      call xgBlock_reverseMap(cprjin_nlmn ,cprjin_nlmn_ )
      call xgBlock_reverseMap(cprjout_nlmn,cprjout_nlmn_)
+     if (.not.loop_over_atoms) then
+       call xgBlock_setBlock(diag_op,diag_op_iatom,nlmn,1,fcol=itypat)
+     end if
      do ia=1,nattyp
-       if (size(diag)==xg_nonlop%ntypat) then
-         diag_ => diag(itypat)
-       else if (size(diag)==xg_nonlop%natom) then
+       if (loop_over_atoms) then
          iatom = ia + shift_itypat
-         diag_ => diag(iatom)
-       else
-         ABI_ERROR('wrong size of diag!')
-       end if
-       call xgBlock_getsize(diag_,nrows_diag,ncols_diag)
-       if (nrows_diag/=nlmn) then
-         ABI_ERROR('nrows_A/=nlmn')
-       end if
-       if (ncols_diag/=1) then
-         ABI_ERROR('ncols_diag/=1')
+         call xgBlock_setBlock(diag_op,diag_op_iatom,nlmn,1,fcol=iatom)
        end if
        ! Copy cprj of ONE atom for ALL bands from cprjin to cprin_nlmn
        do iband=1,ncols
          cprjin_nlmn_(1:cplex*nlmn,iband) = cprjin_(1+shift:cplex*nlmn+shift,iband)
        end do
-       call xgBlock_apply_diag(cprjin_nlmn,diag_,1,Y=cprjout_nlmn)
+       call xgBlock_apply_diag(cprjin_nlmn,diag_op_iatom,1,Y=cprjout_nlmn)
        do iband=1,ncols
          cprjout_(1+shift:cplex*nlmn+shift,iband) = cprjout_(1+shift:cplex*nlmn+shift,iband) &
          & + cprjout_nlmn_(1:cplex*nlmn,iband)
@@ -2446,7 +2441,7 @@ end subroutine xg_nonlop_colwiseXAX
 subroutine xg_nonlop_colwiseXDX(xg_nonlop,diag,cprj,cprj_work,res)
 
    type(xg_nonlop_t), intent(in) :: xg_nonlop
-   type(xgBlock_t), intent(in) :: cprj,diag(:)
+   type(xgBlock_t), intent(in) :: cprj,diag
    type(xgBlock_t), intent(inout) :: cprj_work,res
 
    integer :: ncols,space_diag,space_res
@@ -2458,7 +2453,7 @@ subroutine xg_nonlop_colwiseXDX(xg_nonlop,diag,cprj,cprj_work,res)
    if (ncols/=xg_nonlop%nspinor*rows(res)) then
      ABI_ERROR('Wrong cols for cprj or res.')
    end if
-   space_diag = space(diag(1))
+   space_diag = space(diag)
    space_res = space(res)
    if (space_diag==SPACE_C) then
      if (space_res/=SPACE_C) then
@@ -2522,7 +2517,7 @@ subroutine xg_nonlop_colwiseXHX(xg_nonlop,cprj,cprj_work,res)
    if (xg_nonlop%paw) then
      call xg_nonlop_colwiseXAX(xg_nonlop,xg_nonlop%Dij,cprj,cprj_work,res_mpi)
    else
-     call xg_nonlop_colwiseXDX(xg_nonlop,xg_nonlop%ekb,cprj,cprj_work,res_mpi)
+     call xg_nonlop_colwiseXDX(xg_nonlop,xg_nonlop%ekb%self,cprj,cprj_work,res_mpi)
    end if
 
    call xgBlock_mpi_sum(res,comm=xg_nonlop%comm_band)
@@ -2548,7 +2543,7 @@ subroutine xg_nonlop_getXAX(xg_nonlop,Aij,cprj_left,cprj_right,cprj_work,res,blo
 subroutine xg_nonlop_getXDX(xg_nonlop,diag,cprj_left,cprj_right,cprj_work,res,blocksize)
 
    type(xg_nonlop_t), intent(in) :: xg_nonlop
-   type(xgBlock_t), intent(in) :: cprj_left,cprj_right,diag(:)
+   type(xgBlock_t), intent(in) :: cprj_left,cprj_right,diag
    type(xgBlock_t), intent(inout) :: cprj_work,res
    integer,intent(in) :: blocksize
 
@@ -2594,7 +2589,7 @@ subroutine xg_nonlop_getXHX(xg_nonlop,cprj_left,cprj_right,cprj_work,res,blocksi
    if (xg_nonlop%paw) then
      call xg_nonlop_getXAX(xg_nonlop,xg_nonlop%Dij,cprj_left,cprj_right,cprj_work,res,blocksize)
    else
-     call xg_nonlop_getXDX(xg_nonlop,xg_nonlop%ekb,cprj_left,cprj_right,cprj_work,res,blocksize)
+     call xg_nonlop_getXDX(xg_nonlop,xg_nonlop%ekb%self,cprj_left,cprj_right,cprj_work,res,blocksize)
    end if
 
    call timab(tim_getXHX,2,tsec)
@@ -2646,7 +2641,7 @@ subroutine xg_nonlop_getXHX(xg_nonlop,cprj_left,cprj_right,cprj_work,res,blocksi
    use iso_c_binding
 
    type(xg_nonlop_t), intent(in) :: xg_nonlop
-   type(xgBlock_t), intent(in) :: cprjin,diag(:)
+   type(xgBlock_t), intent(in) :: cprjin,diag
    type(xgBlock_t), intent(inout) :: Xin,cprj_work,work_mpi
    type(xgBlock_t), optional, intent(inout) :: Xout
 
@@ -2692,7 +2687,7 @@ subroutine xg_nonlop_getXHX(xg_nonlop,cprj_left,cprj_right,cprj_work,res,blocksi
    if (xg_nonlop%paw) then
      call xg_nonlop_getAX(xg_nonlop,xg_nonlop%Dij,Xin,cprjin,cprj_work,work_mpi,Xout)
    else
-     call xg_nonlop_getDX(xg_nonlop,xg_nonlop%ekb,Xin,cprjin,cprj_work,work_mpi,Xout)
+     call xg_nonlop_getDX(xg_nonlop,xg_nonlop%ekb%self,Xin,cprjin,cprj_work,work_mpi,Xout)
    end if
 
  end subroutine xg_nonlop_getHX
@@ -2936,7 +2931,7 @@ subroutine xg_nonlop_forces_stress(xg_nonlop,Xin,cprjin,cprj_work,eigen,forces,s
    if (xg_nonlop%paw) then
      call xg_nonlop_apply_Aij(xg_nonlop,xg_nonlop%Dij,cprjin,cprj_work)
    else
-     call xg_nonlop_apply_diag(xg_nonlop,xg_nonlop%ekb,cprjin,cprj_work)
+     call xg_nonlop_apply_diag(xg_nonlop,xg_nonlop%ekb%self,cprjin,cprj_work)
    end if
 
    call timab(tim_fst_start,2,tsec)
