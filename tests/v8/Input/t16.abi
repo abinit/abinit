@@ -23,8 +23,8 @@ spin_dt=1e-16 s
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = multibinit
+#%% exclude_builders = eos_intel_2023_cmake
 #%% need_cpp_vars = HAVE_XML
-#%% exclude_builders = .*_nag_7.[01]_.*, .*_intel_2023_.*
 #%% spin_pot = t16.xml
 #%% exec_args = --F03
 #%% [files]

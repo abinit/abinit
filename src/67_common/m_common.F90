@@ -58,6 +58,7 @@ module m_common
  use defs_datatypes,      only : pspheader_type
  use m_pspheads,          only : inpspheads, pspheads_comm
  use m_kpts,              only : kpts_timrev_from_kptopt
+ use m_dft_energy,        only : entropy
 
  implicit none
 
@@ -1465,17 +1466,17 @@ subroutine prtene(dtset,energies,iout,usepaw)
 !scalars
  integer,intent(in) :: iout,usepaw
  type(dataset_type),intent(in) :: dtset
- type(energies_type),intent(in) :: energies
+ type(energies_type),intent(inout) :: energies
 
 !Local variables-------------------------------
 !scalars
  integer :: ipositron,optdc
- logical :: directE_avail,testdmft
- real(dp) :: eent,enevalue,etotal,etotaldc,exc_semilocal
+ logical :: directE_avail,testdmft,write_entropy=.false.,write_totalxc=.false.
+ real(dp) :: eent,enevalue,etotal,etotaldc,exc_semilocal,el_temp
  ! Do not modify the length of these strings
  character(len=14) :: eneName
  character(len=500) :: info,msg
- type(yamldoc_t) :: edoc, dc_edoc
+ type(yamldoc_t) :: edoc,dc_edoc,sdoc,ftxcdoc
 !arrays
  !character(len=10) :: EPName(1:2)=(/"Positronic","Electronic"/)
 
@@ -1489,17 +1490,9 @@ subroutine prtene(dtset,energies,iout,usepaw)
  if (abs(energies%e_ewald)<1.e-15_dp.and.abs(energies%e_hartree)<1.e-15_dp) ipositron=1
  call energies_eval_eint(energies,dtset,usepaw,optdc,etotal,etotaldc)
 
-!Here, treat the case of metals
-!In re-smeared case the free energy is defined with tphysel
- if(dtset%occopt>=3 .and. dtset%occopt<=8)then
-   if (abs(dtset%tphysel) < tol10) then
-     eent=-dtset%tsmear * energies%entropy
-   else
-     eent=-dtset%tphysel * energies%entropy
-   end if
- else
-   eent=zero
- end if
+ call entropy(dtset,energies)
+ eent=energies%e_entropy
+
 ! If DMFT is used and DMFT Entropy is not computed, then do not print
 ! non interacting entropy
  testdmft=(dtset%dmftcheck>=0.and.dtset%usedmft>=1.and.(sum(dtset%upawu(:,1))>=tol8.or.  &
@@ -1527,10 +1520,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
      edoc = yamldoc_open('EnergyTerms', info=trim(adjustl(info)), &
                          width=20, real_fmt='(es21.14)')
      call edoc%add_real('kinetic', energies%e_kinetic)
-     if(abs(energies%e_extfpmd)>tiny(0.0_dp)) then
-       call edoc%add_real('kinetic_extfpmd',energies%e_extfpmd)
-       call edoc%add_real('total_kinetic',energies%e_extfpmd+energies%e_kinetic)
-     end if
+     if(abs(energies%e_extfpmd)>tiny(zero)) call edoc%add_real('extfpmd',energies%e_extfpmd)
      if (ipositron/=1) then
        exc_semilocal=energies%e_xc+energies%e_hybcomp_E0-energies%e_hybcomp_v0+energies%e_hybcomp_v
        ! XG20181025 This should NOT be a part of the semilocal XC energy, but treated separately.
@@ -1629,7 +1619,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
                           width=20, real_fmt="(es21.14)")
    call dc_edoc%add_real('band_energy', energies%e_eigenvalues)
    if(abs(energies%e_extfpmd)>tiny(0.0_dp)) then
-     call dc_edoc%add_real('kinetic_extfpmd_dc',energies%edc_extfpmd)
+     call dc_edoc%add_real('extfpmd_dc',energies%edc_extfpmd)
    end if
    if (ipositron/=1) then
      !write(msg, '(2(a,es21.14,a),a,es21.14)' ) &
@@ -1735,9 +1725,46 @@ subroutine prtene(dtset,energies,iout,usepaw)
    call edoc%add_real('monopole_correction_eV', energies%e_monopole*Ha_eV)
  end if
 
+!======== In case other sources of entropies than the non-interacting entropy =========
+!============= of the Kohn-Sham states come into play, print the details ==============
+ if(abs(energies%entropy)>tiny(zero).and.abs(energies%entropy-energies%entropy_ks)>tiny(zero)) then
+   write_entropy=.true.
+   sdoc = yamldoc_open('EntropyTerms', info='Components of total entropy', &
+   & width=20, real_fmt="(es21.14)") ! in kB units
+   call sdoc%add_real('noninteracting',energies%entropy_ks) ! Noninteracting entropy = Entropy of the Kohn-Sham states
+   if(abs(energies%entropy_xc)>tiny(zero)) call sdoc%add_real('xc',energies%entropy_xc)
+   if(usepaw==1.and.abs(energies%entropy_paw)>tiny(zero)) call sdoc%add_real('spherical_terms',energies%entropy_paw)
+   if(abs(energies%entropy_extfpmd)>tiny(zero)) call sdoc%add_real('extfpmd',energies%entropy_extfpmd)
+   call sdoc%add_real('total_entropy',energies%entropy) ! Total entropy energy
+ end if
+
+!======== In case finite-temperature exchange-correlation functionals are used =========
+!=================== write the total exchange-correlation components ===================
+ if(abs(energies%entropy_xc)>tiny(zero)) then
+   write_totalxc=.true.
+   el_temp=merge(dtset%tphysel,dtset%tsmear,dtset%tphysel>tol8.and.dtset%occopt/=3.and.dtset%occopt/=9)
+   ftxcdoc = yamldoc_open('FTXCEnergyTerms', info='Components of total xc energy in Hartree', &
+   & width=20, real_fmt="(es21.14)")
+   if(usepaw==1) then
+     ! For now, only finite-temperature xc functionals contribute to entropy_paw.
+     ! We may introduce 'energies%entropy_pawxc' in the future.
+     call ftxcdoc%add_real('xc',energies%e_xc)
+     call ftxcdoc%add_real('spherical_terms_xc',energies%e_pawxc)
+     call ftxcdoc%add_real('internal_xc',energies%e_xc+energies%e_pawxc)
+     call ftxcdoc%add_real('-kT*entropy_xc',-el_temp*(energies%entropy_xc+energies%entropy_paw))
+     call ftxcdoc%add_real('free_xc',energies%e_xc+energies%e_pawxc-el_temp*(energies%entropy_xc+energies%entropy_paw))
+   else
+     call ftxcdoc%add_real('internal_xc',energies%e_xc)
+     call ftxcdoc%add_real('-kT*entropy_xc',-el_temp*energies%entropy_xc)
+     call ftxcdoc%add_real('free_xc',energies%e_xc-el_temp*energies%entropy_xc)
+   end if
+ end if
+
  ! Write components of total energies in Yaml format.
  call edoc%write_and_free(iout)
- if (optdc >= 1) call dc_edoc%write_and_free(iout)
+ if(optdc >= 1) call dc_edoc%write_and_free(iout)
+ if(write_entropy) call sdoc%write_and_free(iout)
+ if(write_totalxc) call ftxcdoc%write_and_free(iout)
 
 end subroutine prtene
 !!***

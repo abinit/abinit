@@ -36,7 +36,7 @@ mdeg_filter 8
 
 # bands and spinors
 nband  16
-nbdbuf  4
+nbdbuf  8
 
 tolvrs 1.0D-20
 
@@ -88,7 +88,7 @@ pseudos="P.psp8, Al.psp8"
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% need_cpp_vars = !HAVE_DFTI
+#%% need_cpp_vars = HAVE_FFTW3
 #%% [files]
 #%% files_to_test =
 #%%   t37.abo, tolnlines=  0, tolabs=  0, tolrel= 0, fld_options = -ridiculous

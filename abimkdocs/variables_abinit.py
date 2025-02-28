@@ -9102,6 +9102,11 @@ same data, from Ceperley-Alder, and are rather similar, at least for spin-unpola
 The choice between the non-spin-polarized and spin-polarized case is governed
 by the value of [[nsppol]] (see below).
 
+Finite-temperature exchange-correlation free energy functionals require the
+electronic temperature which is taken from the [[tsmear]] if [[occopt]]=3
+or 9 (Fermi-Dirac), or from [[tphysel]] otherwise. Use of [[occopt]]=3 is
+recommended to have a physical meaning of the temperature.
+
 **Native ABINIT XC functionals**
 
 NOTE: in the implementation of the spin-dependence of these functionals, and
@@ -9148,7 +9153,10 @@ The value [[ixc]] = 10 is used internally: gives the difference between
   * 40 --> Hartree-Fock
   * 41 --> PBE0, [[cite:Adamo1999]].
   * 42 --> PBE0-1/3, [[cite:Guido2013]].
-  * 50 --> IIT temperature-dependent Free Energy functional of [[cite:Ichimaru1987]] (designed for warm dense matter). The electronic temperature is taken from the [[tsmear]] if [[occopt]]=3 or 9 (Fermi-Dirac), from [[tphysel]] otherwise.
+
+  * 50 --> IIT temperature-dependent free energy functional of [[cite:Ichimaru1987]] (designed for warm dense matter).
+  * 51 --> corrected KSDT, LDA temperature-dependent free energy functional: Karasiev, Sjostrom, Dufty, & Trickey [[cite:Karasiev2014]].
+  * 60 --> KDT16, GGA temperature-dependant free energy functional (PBE parametrization) : Karasiev, Dufty, Trickey [[cite:Karasiev2018]].
 
 **ETSF Lib XC functionals**
 
@@ -9198,11 +9206,18 @@ This means having [[usekden]] = 1.
   * 030 --> XC_LDA_C_VWN_3  Vosko, Wilk, & Nussair (3) [[cite:Vosko1980]]
   * 031 --> XC_LDA_C_VWN_4  Vosko, Wilk, & Nussair (4) [[cite:Vosko1980]]
 
-==LDA temperature-dependent functionals== (do not forget to add a minus sign, as discussed above)
-  The electronic temperature is taken from the [[tsmear]] if [[occopt]]=3 or 9 (Fermi-Dirac), from [[tphysel]] otherwise.
-  Use of [[occopt]]=3 is recommended to have a physical meaning of the temperature.
-  As these functionals do not provide Kxc (2nd derivative of Exc), a SCF mixing
-  of the potential is automatically selected ([[iscf]]<10).
+==LibXC temperature-dependent functionals== (do not forget to add a minus sign, as discussed above)
+
+!!! warning
+    LibXC does not provide the xc entropy or xc internal energy yet.
+    In order to compute accurate equation of state data, prefer the use of native
+    finite-temperature exchange-correlation free energy functionals
+    [[ixc]]=51 or 60, which include these quantities.
+    Apart from total internal energy and total entropy, the other quantities are
+    correct (total free energy, density, stresses, forces, ...).
+
+  Some of the following functionals do not provide Kxc (2nd derivative of Exc). If this is the case,
+  a SCF mixing of the potential is automatically selected ([[iscf]]<10).
 
   * 259 --> XC_LDA_XC_KSDT, LDA T-dependent functional: Karasiev, Sjostrom, Dufty, & Trickey [[cite:Karasiev2014]]
   * 318 --> XC_LDA_XC_CORRKSDT, corrected KSDT by Karasiev, Dufty, & Trickey [[cite:Karasiev2018]]
