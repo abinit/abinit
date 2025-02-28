@@ -864,6 +864,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  end if ! iscf>0
 
 ! Initializing precon-object for chi0 based preconditioning
+! TODO : utiliser nfftmix
  call precon%init(dtset, atindx1, cg, eigen, results_gs%fermie, gprimd, &
  &   irrzon, kg, nattyp, npwarr, phnons, rhor, rprimd, ucvol, xred)
  
@@ -2480,7 +2481,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  ABI_FREE(intgden0)
 
 !Deallocate precon-object 
- call precon%save(ngfft, 1)   ! For validation only - TODO : delete
+ !call precon%save(ngfft, 1)   !DEBUG
  call precon%free()
 
  if(allocated(vectornd)) then

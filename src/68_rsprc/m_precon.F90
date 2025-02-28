@@ -933,9 +933,7 @@ contains
             ispden = 1
             vec_g(:, :, ispden) = (-1/(4*pi*(this%dielng)**2)) * vec_g(:, :, ispden)
             do ispden = 2, this%nspden
-                !vec_g(:, :, ispden) = (-1/(4*pi*(this%dielng)**2)) * vec_g(:, :, ispden)
                 vec_g(:, :, ispden) = 0
-                ! What is best ?
             end do
         end if
         
