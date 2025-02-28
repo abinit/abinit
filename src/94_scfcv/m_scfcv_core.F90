@@ -105,7 +105,7 @@ module m_scfcv_core
  use m_mkrho,            only : mkrho
  use m_rhotov,           only : rhotov
  use m_forces,           only : fresid, forces
- use m_dft_energy,       only : energy
+ use m_dft_energy,       only : energy, entropy
  use m_initylmg,         only : initylmg
  use m_rhotoxc,          only : rhotoxc
  use m_drivexc,          only : check_kxc, xc_need_kden
@@ -340,9 +340,9 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  integer :: my_quit,quitsum_request,timelimit_exit,usecg,wfmixalg,with_vectornd
  integer ABI_ASYNC :: quitsum_async
  real(dp) :: boxcut,compch_fft,compch_sph,deltae,diecut,diffor,ecut
- real(dp) :: ecutf,ecutsus,edum,elast,etotal,evxc,fermie,fermih,gsqcut,hyb_mixing,hyb_mixing_sr
+ real(dp) :: ecutf,ecutsus,edum,sdum,elast,etotal,evxc,fermie,fermih,gsqcut,hyb_mixing,hyb_mixing_sr
  real(dp) :: maxfor,res2,residm,ucvol,ucvol_local,val_max
- real(dp) :: val_min,vxcavg,vxcavg_dum
+ real(dp) :: val_min,vxcavg,vxcavg_dum,el_temp
  real(dp) :: zion,wtime_step,now,prev,esum,enonlocalpsp !MRM
  character(len=10) :: tag
  character(len=500) :: MY_NAME = "scfcv_core"
@@ -456,6 +456,9 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 & dtset%berryopt == 14 .or. &
 & dtset%berryopt == 16 .or. &
 & dtset%berryopt == 17)
+
+!Get electronic temperature from dtset
+ el_temp=merge(dtset%tphysel,dtset%tsmear,dtset%tphysel>tol8.and.dtset%occopt/=3.and.dtset%occopt/=9)
 
 !Get FFT grid(s) sizes (be careful !)
 !See NOTES in the comments at the beginning of this file.
@@ -1443,13 +1446,14 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
      call paw_ij_reset_flags(paw_ij,self_consistent=.true.) ! Force the recomputation of Dij
      option=0;if (dtset%iscf>0.and.dtset%iscf<10.and.nstep>0) option=1
      ABI_NVTX_START_RANGE(NVTX_SCFCV_PAWDENPOT)
-     call pawdenpot(compch_sph,energies%e_paw,energies%e_pawdc,ipert,dtset%ixc,my_natom,dtset%natom,&
-&     dtset%nspden,psps%ntypat,dtset%nucdipmom,nzlmopt,option,paw_an,paw_an,paw_ij,pawang,dtset%pawprtvol,pawrad,&
-&     pawrhoij,dtset%pawspnorb,pawtab,dtset%pawxcdev,dtset%spnorbscl,dtset%xclevel,&
+     call pawdenpot(compch_sph,el_temp,energies%e_paw,energies%e_pawdc,energies%entropy_paw,&
+&     ipert,dtset%ixc,my_natom,dtset%natom,dtset%nspden,psps%ntypat,dtset%nucdipmom,nzlmopt,&
+&     option,paw_an,paw_an,paw_ij,pawang,dtset%pawprtvol,pawrad,pawrhoij,dtset%pawspnorb,&
+&     pawtab,dtset%pawxcdev,dtset%spnorbscl,dtset%xclevel,&
 &     dtset%xc_denpos,dtset%xc_taupos,ucvol,psps%znuclpsp,&
 &     comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
 &     hyb_mixing=hyb_mixing,hyb_mixing_sr=hyb_mixing_sr,&
-&     electronpositron=electronpositron,vpotzero=vpotzero)
+&     electronpositron=electronpositron,vpotzero=vpotzero,epaw_xc=energies%e_pawxc)
      ABI_NVTX_END_RANGE()
 
 !    Correct the average potential with the calculated constant vpotzero
@@ -1629,7 +1633,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
      ! CP: occopt 9 not available with Thomas Fermi functionals
      ABI_WARNING('THOMAS FERMI')
      call vtorhotf(dtset,energies%e_kinetic,energies%e_nlpsp_vfock,&
-&     energies%entropy,energies%e_fermie,gprimd,grnl,irrzon,mpi_enreg,&
+&     energies%entropy_ks,energies%e_fermie,gprimd,grnl,irrzon,mpi_enreg,&
 &     dtset%natom,nfftf,dtset%nspden,dtset%nsppol,dtset%nsym,phnons,&
 &     rhog,rhor,rprimd,ucvol,vtrial)
 
@@ -1640,7 +1644,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 !  Recursion method
    if(dtset%userec==1)then
      call vtorhorec(dtset,&
-&     energies%e_kinetic,energies%e_nlpsp_vfock,energies%entropy,energies%e_eigenvalues,&
+&     energies%e_kinetic,energies%e_nlpsp_vfock,energies%entropy_ks,energies%e_eigenvalues,&
 &     energies%e_fermie,grnl,initialized,irrzon,nfftf,phnons,&
 &     rhog,rhor,vtrial,rec_set,istep-nstep,rprimd,gprimd)
      residm=zero
@@ -1758,7 +1762,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
        nk3xc=1
        if(dtset%icoulomb==0 .and. dtset%usewvl==0) then
          non_magnetic_xc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
-         call rhotoxc(edum,kxc,mpi_enreg,nfftf,&
+         call rhotoxc(edum,sdum,kxc,mpi_enreg,nfftf,&
 &         ngfftf,nhat,psps%usepaw,nhatgr,0,nkxc,nk3xc,non_magnetic_xc,n3xccc,&
 &         optxc,rhor,rprimd,0,vxc,vxcavg_dum,xccc3d,xcdata,&
 &         add_tfw=tfw_activated,taur=taur,vhartr=vhartr,vxctau=vxctau,xcctau3d=xcctau3d)
@@ -1890,13 +1894,13 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
        call paw_an_reset_flags(paw_an) ! Force the recomputation of on-site potentials
        option=2
        ABI_NVTX_START_RANGE(NVTX_SCFCV_PAWDENPOT)
-       call pawdenpot(compch_sph,energies%e_paw,energies%e_pawdc,ipert,&
-&       dtset%ixc,my_natom,dtset%natom,dtset%nspden,&
+       call pawdenpot(compch_sph,el_temp,energies%e_paw,energies%e_pawdc,&
+&       energies%entropy_paw,ipert,dtset%ixc,my_natom,dtset%natom,dtset%nspden,&
 &       psps%ntypat,dtset%nucdipmom,nzlmopt,option,paw_an,paw_an,&
 &       paw_ij,pawang,dtset%pawprtvol,pawrad,pawrhoij,dtset%pawspnorb,&
 &       pawtab,dtset%pawxcdev,dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,dtset%xc_taupos,ucvol,psps%znuclpsp,&
 &       hyb_mixing=hyb_mixing,hyb_mixing_sr=hyb_mixing_sr,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
-&       electronpositron=electronpositron)
+&       electronpositron=electronpositron,epaw_xc=energies%e_pawxc)
        ABI_NVTX_END_RANGE()
      end if
 
@@ -2603,24 +2607,7 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 
  if (optene>-1) then
 
-!  Add the contribution of extfpmd to the entropy
-   if(associated(extfpmd)) then
-     energies%entropy=energies%entropy+extfpmd%entropy
-   end if
-
-!  When the finite-temperature VG broadening scheme is used,
-!  the total entropy contribution "tsmear*entropy" has a meaning,
-!  and gather the two last terms of Eq.8 of VG paper
-!  Warning : might have to be changed for fixed moment calculations
-   if(dtset%occopt>=3 .and. dtset%occopt<=8) then
-     if (abs(dtset%tphysel) < tol10) then
-       energies%e_entropy = - dtset%tsmear * energies%entropy
-     else
-       energies%e_entropy = - dtset%tphysel * energies%entropy
-     end if
-   else
-     energies%e_entropy = zero
-   end if
+   call entropy(dtset,energies)
 
 !  Turn it into an electric enthalpy, refer to Eq.(33) of Suppl. of Nat. Phys. paper (5,304,2009) [[cite:Stengel2009]],
 !    the missing volume is added here
