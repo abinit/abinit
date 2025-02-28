@@ -1786,7 +1786,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 
 !  ixc
    call chkint(0,0,cond_string,cond_values,ierr,&
-&   'ixc',dt%ixc,34,(/0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,20,21,22,23,24,26,27,31,32,33,34,35,40,41,42,50/),-1,0,iout) ! One of the values, or negative
+&   'ixc',dt%ixc,36,(/0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,20,21,22,23,24,26,27,31,32,33,34,35,40,41,42,50,51,60/),-1,0,iout) ! One of the values, or negative
    if(dt%iscf==-1)then
      cond_string(1)='iscf' ; cond_values(1)=dt%iscf
 !    Make sure that ixc is 1, 7, 8, 20, 21 or 22  (native functionals only for TDDFT - LibXC functionals have not been tested !)
@@ -1796,7 +1796,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      cond_string(1)='response' ; cond_values(1)=response
 !    Make sure that ixc is between 0 and 9, or 11, 12, 14, 15, 23 or 24 or negative
      call chkint(1,1,cond_string,cond_values,ierr,&
-&     'ixc',dt%ixc,16,(/0,1,2,3,4,5,6,7,8,9,11,12,14,15,23,24/),-1,0,iout)
+&     'ixc',dt%ixc,17,(/0,1,2,3,4,5,6,7,8,9,11,12,14,15,23,24,51/),-1,0,iout)
    end if
    if(nspden/=1)then
      cond_string(1)='nspden' ; cond_values(1)=nspden

@@ -42,7 +42,6 @@ prteig 0
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = bob_gnu_13.2_openmp
 #%% [files]
 #%% files_to_test = 
 #%%   t35.abo, tolnlines = 20, tolabs = 4.5e-5, tolrel = 6.5e-6

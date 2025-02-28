@@ -21,8 +21,8 @@ randomseed=111111 # for testing only
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = multibinit
+#%% exclude_builders = alps_nag_7.2_serial
 #%% need_cpp_vars = HAVE_NETCDF
-#%% exclude_builders = .*_nag_7.[012]_.*
 #%% lwf_pot = tmulti6_1.nc
 #%% exec_args = --F03
 #%% [files]
