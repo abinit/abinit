@@ -22,7 +22,7 @@ mdeg_filter 8
 
 # bands and spinors
 nband  8
-nbdbuf 2
+nbdbuf 4
 
 tolvrs 1.0D-20
 
