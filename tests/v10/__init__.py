@@ -33,6 +33,8 @@ inp_files = [
     "t21.abi" ,  # test npt_langevin MD algorithm (PIMD implementation)
     "t22.abi" ,  # test finite-temperature exchange-correlation functionals, and calculation of Sxc (NC case)
     "t23.abi" ,  # test finite-temperature exchange-correlation functionals, and calculation of Sxc (PAW case)
+    "t24.abi" ,  # same as v10[10], with dilatxm>1, istwfk>1 (with DFTI).
+    "t25.abi" ,  # same as v10[10], with dilatxm>1, istwfk>1 (without DFTI).
     "t40.abi" ,  # test orbmag calculation when using spatial symmetries for GS nuclear dipole
     "t41.abi" ,  # test orbmag calculation using R2SCAN mGGA
     "t42.abi" ,  # test orbmag calculation using R2SCAN mGGA, nspinor 2, zora
