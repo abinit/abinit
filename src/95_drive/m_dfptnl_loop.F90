@@ -232,7 +232,7 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
  integer :: option,optene,optfr,optorth,pert1case,pert2case,pert3case
  integer :: qphase_rhoij,rdwrpaw,second_idir,timrev,usexcnhat
  logical :: non_magnetic_xc
- real(dp) :: dummy_real,dummy_real2, dummy_real3, ecut_eff
+ real(dp) :: dummy_real,dummy_real2,dummy_real3,dummy_real4,ecut_eff,el_temp
  character(len=500) :: message
  character(len=fnlen) :: fiden1i,fiwf1i,fiwf2i,fiwf3i,fiwfddk,fnamewff(5)
  type(gs_hamiltonian_type) :: gs_hamkq
@@ -336,6 +336,9 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
  end if
 
  mcg=mpw*nspinor*mband*mkmem*nsppol
+
+!Get electronic temperature from dtset
+ el_temp=merge(dtset%tphysel,dtset%tsmear,dtset%tphysel>tol8.and.dtset%occopt/=3.and.dtset%occopt/=9)
 
 !Allocations/initializations for PAW only
  if(psps%usepaw==1) then
@@ -628,8 +631,8 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
 
 !                    Computation of "on-site" first-order potentials, first-order densities
                      option=1
-                     call pawdenpot(dummy_real,dummy_real2,dummy_real3,i2pert,dtset%ixc,natom,dtset%natom,&
-&                     nspden,psps%ntypat,dtset%nucdipmom,&
+                     call pawdenpot(dummy_real,el_temp,dummy_real2,dummy_real3,dummy_real4,&
+&                     i2pert,dtset%ixc,natom,dtset%natom,nspden,psps%ntypat,dtset%nucdipmom,&
 &                     0,option,paw_an1_i2pert,paw_an0,paw_ij1_i2pert,pawang,&
 &                     dtset%pawprtvol,pawrad,pawrhoij1_i2pert,dtset%pawspnorb,pawtab,dtset%pawxcdev,&
 &                     dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,dtset%xc_taupos,ucvol,psps%znuclpsp, &
