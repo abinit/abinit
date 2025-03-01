@@ -41,8 +41,9 @@ module m_vtorho
  use m_ompgpu_utils
  use m_xg_nonlop
  use m_ebands
+ use m_crystal
 
- use defs_datatypes,       only : pseudopotential_type, ebands_t
+ use defs_datatypes,       only : pseudopotential_type
  use defs_abitypes,        only : MPI_type
  use m_fstrings,           only : sjoin, itoa
  use m_time,               only : timab
@@ -65,7 +66,6 @@ module m_vtorho
  use m_paw_correlations,   only : setnoccmmp
  use m_paw_occupancies,    only : pawmkrhoij
  use m_paw_mkrho,          only : pawmkrho
- use m_crystal,            only : crystal_init, crystal_t
  use m_results_gs,         only : results_gs_type, results_gs_ncwrite
  use m_oper,               only : oper_type,init_oper,destroy_oper
  use m_io_tools,           only : flush_unit
