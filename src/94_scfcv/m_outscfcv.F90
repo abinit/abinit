@@ -256,7 +256,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  integer, allocatable :: isort(:)
  integer, pointer :: my_atmtab(:)
  real(dp) :: tsec(2),nt_ntone_norm(nspden),rhomag(2,nspden)
- real(dp),allocatable :: eigen2(:)
+ real(dp),allocatable :: efg(:,:,:),eigen2(:)
  real(dp),allocatable :: elfr_down(:,:),elfr_up(:,:),intgden(:,:)
  real(dp),allocatable :: rhor_paw(:,:),rhor_paw_core(:,:),rhor_paw_val(:,:),vpaw(:,:),vwork(:,:)
  real(dp),allocatable :: rhor_n_one(:,:),rhor_nt_one(:,:),ps_norms(:,:,:)
@@ -1261,8 +1261,13 @@ if (dtset%prt_lorbmag==1) then
 
 !Optionally provide output for electric field gradient calculation
  if (dtset%nucefg > 0) then
+
+   if(allocated(efg)) then
+     ABI_FREE(efg)
+   end if
+   ABI_MALLOC(efg,(3,3,natom))
    call timab(1176,1,tsec)
-   call calc_efg(mpi_enreg,my_natom,natom,nfft,ngfft,nhat,nspden,dtset%nsym,dtset%nucefg,&
+   call calc_efg(efg,mpi_enreg,my_natom,natom,nfft,ngfft,nhat,nspden,dtset%nsym,dtset%nucefg,&
 &   ntypat,paw_an,pawang,pawrad,pawrhoij,pawtab,&
 &   dtset%ptcharge,dtset%quadmom,rhor,rprimd,dtset%symrel,&
 &   dtset%tnons,dtset%typat,ucvol,psps%usepaw,xred,psps%zionpsp,&
@@ -1363,6 +1368,10 @@ if (dtset%prt_lorbmag==1) then
  end if
 
  call timab(1154,2,tsec)
+
+ if(allocated(efg)) then
+   ABI_FREE(efg)
+ end if
 
  ABI_SFREE_PTR(elfr)
  ABI_SFREE_PTR(grhor)
