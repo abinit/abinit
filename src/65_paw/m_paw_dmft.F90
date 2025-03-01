@@ -841,14 +841,10 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  paw_dmft%dmft_nominal => dtset%dmft_nominal(:)
  paw_dmft%npwarr => npwarr(:)
 
-!  Spin related variables and check
- paw_dmft%nsppol      => dtset%nsppol
- paw_dmft%nspinor     => dtset%nspinor
- paw_dmft%nspden      => dtset%nspden
 ! TODO: Make it work for usedmdft = -1 (interface with Wannier90 needs spinor
 ! generalization)
- if(nspinor==2.and.nspden==1.and.use_dmft==10) then
-   message = ' nspinor==2 and nspden =1 and usedmft=10 is not implemented yet'
+ if(nspinor==2.and.dtset%nspden==1.and.use_dmft==10) then
+   message = ' nspinor==2 and nspden=1 and usedmft=10 is not implemented yet'
    ABI_ERROR(message)
  endif
 
@@ -893,7 +889,7 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  bdtot_index = 1
  do isppol=1,nsppol
    do ikpt=1,nkpt
-     nband_k = nband(ikpt+(isppol-1)*nkpt)
+     nband_k = paw_dmft%nband(ikpt+(isppol-1)*nkpt)
      do iband=1,nband_k
        paw_dmft%occnd(1,iband,iband,ikpt,isppol) = occ(bdtot_index)
        bdtot_index = bdtot_index + 1

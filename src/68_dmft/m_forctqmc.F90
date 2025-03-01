@@ -331,7 +331,6 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
      ! Diagonalize atomic levels
      ! =================================================================
      call init_oper(paw_dmft,level_diag,opt_ksloc=2)
-     call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu,level_diag)
 
      ! Diagonalize atomic levels (opt_real is necessary, because
      ! rotation must be real in order for the occupations and Green's
@@ -375,7 +374,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
        !  write(6,*) size(hu(itypat)%udens)
        !  write(6,*) udens_atoms(iatom)%value
        !  write(6,*) hu(itypat)%udens
-       udens_atoms(iatom)%value=hu(itypat)%udens
+       udens_atoms(iatom)%mat(:,:,1)=hu(itypat)%udens(:,:)
        vee_rotated(iatom)%mat(:,:,:,:) = hu(itypat)%veeslm2(:,:,:,:)
      end do ! iatom
    end if ! opt_diag=0 or 1
