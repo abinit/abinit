@@ -64,4 +64,6 @@ inp_files = [
 #GS with distributed/sliced GEMM nonlop
 "t42.abi", # test CHEBFI (istwfk==1, npband==2, paral_kgb==1, gpu_nl_splitsize=2, gpu_nl_distrib=1)
 "t43.abi", # test CHEBFI (istwfk==2, npband==2, paral_kgb==1, gpu_nl_splitsize=2, gpu_nl_distrib=1)
+"t44.abi", # test CHEBFI (istwfk==1, npband==1, paral_kgb==1, gpu_nl_splitsize=4)
+"t45.abi", # test CHEBFI (istwfk==2, npband==1, paral_kgb==1, gpu_nl_splitsize=4)
 ]
