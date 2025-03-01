@@ -61,14 +61,14 @@ contains
 !! INPUTS
 !!
 !! SOURCE
-subroutine opernlb_gemm_distributed(rank,nprocs,npwout,ndat,&
+subroutine opernlb_gemm_distributed(rank,nprocs,npw,ndat,&
 &                                   nprojs,nprojs_blk,nprojs_last_blk,nprojs_my_blk,cplex,&
 &                                   projs_local,projections,vectout,gpu_option)
- integer,  intent(in)     :: rank,nprocs,npwout,ndat,gpu_option
+ integer,  intent(in)     :: rank,nprocs,npw,ndat,gpu_option
  integer,  intent(in)     :: nprojs,nprojs_blk,nprojs_last_blk,nprojs_my_blk,cplex
- real(dp), intent(in),  target    :: projs_local(cplex,npwout,nprojs_my_blk)
+ real(dp), intent(in),  target    :: projs_local(cplex,npw,nprojs_my_blk)
  real(dp), intent(in),  target    :: projections(cplex,nprojs,ndat)
- real(dp), intent(out), target    :: vectout(cplex,npwout*ndat)
+ real(dp), intent(out), target    :: vectout(cplex,npw*ndat)
 
  !Local variables
  integer :: iblock,ibeg,iend,req(2),ierr,nprojs_cur_blk,rank_prev,rank_next
@@ -78,7 +78,7 @@ subroutine opernlb_gemm_distributed(rank,nprocs,npwout,ndat,&
 
 ! *************************************************************************
 
- ABI_MALLOC(projs_recv, (cplex, npwout, nprojs_last_blk))
+ ABI_MALLOC(projs_recv, (cplex, npw, nprojs_last_blk))
 #ifdef HAVE_OPENMP_OFFLOAD
  !$OMP TARGET ENTER DATA MAP(alloc:projs_recv) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
@@ -100,14 +100,14 @@ subroutine opernlb_gemm_distributed(rank,nprocs,npwout,ndat,&
    if(modulo(iblock,2)==1) then
 !    XG20241028 : This coding confused the gnu_8.5 compiler of buda2_gnu_8.5_cuda, wrt the contiguous character of the target. 
 !    It declared an error. Make it simple !
-!    work_buf => projs_local(1:cplex,1:npwout,1:nprojs_last_blk)
-!    recv_buf => projs_recv(1:cplex,1:npwout,1:nprojs_last_blk)
+!    work_buf => projs_local(1:cplex,1:npw,1:nprojs_last_blk)
+!    recv_buf => projs_recv(1:cplex,1:npw,1:nprojs_last_blk)
      work_buf => projs_local
      recv_buf => projs_recv
    else
 !    XG20241028 : Same as above
-!    work_buf => projs_recv(1:cplex,1:npwout,1:nprojs_last_blk)
-!    recv_buf => projs_local(1:cplex,1:npwout,1:nprojs_last_blk)
+!    work_buf => projs_recv(1:cplex,1:npw,1:nprojs_last_blk)
+!    recv_buf => projs_local(1:cplex,1:npw,1:nprojs_last_blk)
      work_buf => projs_recv
      recv_buf => projs_recv
    end if
@@ -139,27 +139,27 @@ subroutine opernlb_gemm_distributed(rank,nprocs,npwout,ndat,&
 
    if(gpu_option == ABI_GPU_DISABLED) then
      if(cplex==2) then
-       call abi_zgemm_2r('N', 'N', npwout, ndat, nprojs_cur_blk, cone, &
-       &                 work_buf, npwout, &
+       call abi_zgemm_2r('N', 'N', npw, ndat, nprojs_cur_blk, cone, &
+       &                 work_buf, npw, &
        &                 projections(:,ibeg:iend,:), nprojs_cur_blk,&
        &                 beta, &
-       &                 vectout, npwout)
+       &                 vectout, npw)
      else
-       call DGEMM('N', 'N', npwout, ndat, nprojs_cur_blk, one, &
-       &          work_buf, npwout, &
+       call DGEMM('N', 'N', npw, ndat, nprojs_cur_blk, one, &
+       &          work_buf, npw, &
        &          projections(:,ibeg:iend,:), nprojs_cur_blk, &
        &          real(beta), &
-       &          vectout, npwout)
+       &          vectout, npw)
      end if
    else if(gpu_option == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
      !$OMP TARGET DATA USE_DEVICE_PTR(work_buf,vectout,projections)
      call abi_gpu_xgemm(cplex, 'N','N', &
-     &                  npwout, ndat, nprojs_cur_blk, cone, &
-     &                  c_loc(work_buf), npwout, &
+     &                  npw, ndat, nprojs_cur_blk, cone, &
+     &                  c_loc(work_buf), npw, &
      &                  c_loc(projections(1,ibeg,1)), nprojs, &
      &                  beta, &
-     &                  c_loc(vectout), npwout)
+     &                  c_loc(vectout), npw)
      !$OMP END TARGET DATA
 #endif
    end if
@@ -181,11 +181,11 @@ subroutine opernlb_gemm_distributed(rank,nprocs,npwout,ndat,&
 
  if(modulo(iblock,2)==1) then
    if(gpu_option == ABI_GPU_DISABLED) then
-     call DCOPY(cplex*npwout*nprojs_cur_blk, recv_buf, 1, work_buf, 1)
+     call DCOPY(cplex*npw*nprojs_cur_blk, recv_buf, 1, work_buf, 1)
    else if(gpu_option == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
      !$OMP TARGET DATA USE_DEVICE_PTR(work_buf,recv_buf)
-     call copy_gpu_to_gpu(c_loc(work_buf), c_loc(recv_buf), INT(cplex, c_size_t)*npwout*nprojs_last_blk*dp)
+     call copy_gpu_to_gpu(c_loc(work_buf), c_loc(recv_buf), INT(cplex, c_size_t)*npw*nprojs_last_blk*dp)
      !$OMP END TARGET DATA
 #endif
    end if
@@ -201,21 +201,21 @@ end subroutine opernlb_gemm_distributed
 
 !----------------------------------------------------------------------
 
-subroutine opernl_xgemm(cplex,transa,transb,m,n,k,alpha,a,lda,b,ldb,beta,c,ldc,&
+subroutine opernlb_xgemm(cplex,transa,transb,npw,ndat,nprojs,alpha,a,lda,b,ldb,beta,c,ldc,&
 &                       rank, nprocs,&
 &                       k_blk, k_last_blk, k_my_blk,&
 &                       iblock,&
 &                       gpu_option,use_distrib,use_sliced_gemms)
 
 !Arguments ------------------------------------
- integer,intent(in) :: cplex,lda,ldb,ldc,m,n,k,gpu_option
+ integer,intent(in) :: cplex,lda,ldb,ldc,npw,ndat,nprojs,gpu_option
  integer,intent(in) :: rank,nprocs,k_blk,k_last_blk,k_my_blk
  integer,intent(in) :: iblock
  logical,intent(in) :: use_distrib,use_sliced_gemms
  complex(dpc),intent(in) :: alpha,beta
  character(len=1),intent(in) :: transa,transb
- real(dp),target,intent(in) :: a(cplex,lda,k), b(cplex,ldb,n)
- real(dp),target,intent(inout) :: c(cplex,ldc,n)
+ real(dp),target,intent(in) :: a(cplex,lda,nprojs), b(cplex,ldb,ndat)
+ real(dp),target,intent(inout) :: c(cplex,ldc,ndat)
 
  integer :: ibeg
 ! *********************************************************************
@@ -223,8 +223,8 @@ subroutine opernl_xgemm(cplex,transa,transb,m,n,k,alpha,a,lda,b,ldb,beta,c,ldc,&
  if(use_sliced_gemms) ibeg = 1 + (iblock-1)*k_blk
 
  if(use_distrib) then
-   call opernlb_gemm_distributed(rank,nprocs,m,n,&
-   &                             k,&
+   call opernlb_gemm_distributed(rank,nprocs,npw,ndat,&
+   &                             nprojs,&
    &                             k_blk,&
    &                             k_last_blk,&
    &                             k_my_blk,cplex,&
@@ -233,23 +233,23 @@ subroutine opernl_xgemm(cplex,transa,transb,m,n,k,alpha,a,lda,b,ldb,beta,c,ldc,&
  else
    if (gpu_option == ABI_GPU_DISABLED) then
      if(cplex==2) then
-       call abi_zgemm_2r(transa,transb,m,n,k,alpha,&
+       call abi_zgemm_2r(transa,transb,npw,ndat,nprojs,alpha,&
        &    a,lda,b,ldb,beta,c,ldc)
      else ! cplex==1
-       call DGEMM(transa,transb,m,n,k,real(alpha),&
+       call DGEMM(transa,transb,npw,ndat,nprojs,real(alpha),&
        &    a,lda,b,ldb,real(beta),c,ldc)
      end if
    else if (gpu_option == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
      !$OMP TARGET DATA USE_DEVICE_PTR(a,b,c)
-     call abi_gpu_xgemm(cplex,transa,transb,m,n,k,alpha,&
+     call abi_gpu_xgemm(cplex,transa,transb,npw,ndat,nprojs,alpha,&
      &    c_loc(a),lda,c_loc(b(1,ibeg,1)),ldb,beta,c_loc(c),ldc)
      !$OMP END TARGET DATA
 #endif
    end if
  end if
 
- end subroutine opernl_xgemm
+ end subroutine opernlb_xgemm
 
 !----------------------------------------------------------------------
 
@@ -520,20 +520,20 @@ subroutine opernlb_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
        end if
 
        if(choice==1 .or. choice==7) then
-         call opernl_xgemm(cplex, 'N', 'N', npw, ndat*nspinor, nprojs_cur_blk, cone, &
+         call opernlb_xgemm(cplex, 'N', 'N', npw, ndat*nspinor, nprojs_cur_blk, cone, &
          &    projs, npw,&
          &    gxfac_sij, nprojs, beta, svectout, npw,&
          &    rank, nprocs,&
          &    nprojs_blk, nprojs_last_blk, nprojs_my_blk, i,&
          &    gpu_option, use_distrib, use_sliced_gemms)
        else if(choice==2) then
-         call opernl_xgemm(cplex, 'N', 'N', npw, ndat*nspinor, nprojs_cur_blk, cone, &
+         call opernlb_xgemm(cplex, 'N', 'N', npw, ndat*nspinor, nprojs_cur_blk, cone, &
          &    dprojs, npw, &
          &    gxfac_sij, nprojs, beta, svectout, npw,&
          &    rank, nprocs,&
          &    nprojs_blk, nprojs_last_blk, nprojs_my_blk, i,&
          &    gpu_option, use_distrib, use_sliced_gemms)
-         call opernl_xgemm(cplex, 'N', 'N', npw, ndat*nspinor, nprojs_cur_blk, cone, &
+         call opernlb_xgemm(cplex, 'N', 'N', npw, ndat*nspinor, nprojs_cur_blk, cone, &
          &    projs, npw, &
          &    dgxdtfac_sij, nprojs, cone, svectout, npw,&
          &    rank, nprocs,&
@@ -558,33 +558,33 @@ subroutine opernlb_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
 #endif
            end if
          end if
-         call opernl_xgemm(cplex, 'N', 'N', npw, ndat*nspinor, nprojs_cur_blk, cone, &
+         call opernlb_xgemm(cplex, 'N', 'N', npw, ndat*nspinor, nprojs_cur_blk, cone, &
          &    projs, npw, &
          &    dgxdtfac_sij, nprojs, beta, svectout, npw,&
          &    rank, nprocs,&
          &    nprojs_blk, nprojs_last_blk, nprojs_my_blk, i,&
          &    gpu_option, use_distrib, use_sliced_gemms)
-         call opernl_xgemm(cplex, 'N', 'N', npw, ndat*nspinor, nprojs_cur_blk, cone, &
+         call opernlb_xgemm(cplex, 'N', 'N', npw, ndat*nspinor, nprojs_cur_blk, cone, &
          &    dprojs, npw, &
          &    gxfac_sij, nprojs, cone, svectout, npw,&
          &    rank, nprocs,&
          &    nprojs_blk, nprojs_last_blk, nprojs_my_blk, i,&
          &    gpu_option, use_distrib, use_sliced_gemms)
        else if(choice==5) then
-         call opernl_xgemm(cplex, 'N', 'N', npw, ndat*nspinor, nprojs_cur_blk, cone, &
+         call opernlb_xgemm(cplex, 'N', 'N', npw, ndat*nspinor, nprojs_cur_blk, cone, &
          &    projs, npw, &
          &    dgxdtfac_sij, nprojs, beta, svectout, npw,&
          &    rank, nprocs,&
          &    nprojs_blk, nprojs_last_blk, nprojs_my_blk, i,&
          &    gpu_option, use_distrib, use_sliced_gemms)
-         call opernl_xgemm(cplex, 'N', 'N', npw, ndat*nspinor, nprojs_cur_blk, cone, &
+         call opernlb_xgemm(cplex, 'N', 'N', npw, ndat*nspinor, nprojs_cur_blk, cone, &
          &    dprojs, npw, &
          &    gxfac_sij, nprojs, cone, svectout, npw,&
          &    rank, nprocs,&
          &    nprojs_blk, nprojs_last_blk, nprojs_my_blk, i,&
          &    gpu_option, use_distrib, use_sliced_gemms)
        else if(choice==51) then
-         call opernl_xgemm(cplex, 'N', 'N', npw, ndat*nspinor, nprojs_cur_blk, cone, &
+         call opernlb_xgemm(cplex, 'N', 'N', npw, ndat*nspinor, nprojs_cur_blk, cone, &
          &    projs, npw, &
          &    dgxdtfac_sij, nprojs, beta, svectout, npw,&
          &    rank, nprocs,&
@@ -624,13 +624,13 @@ subroutine opernlb_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
          end if
        end if
 
-       call opernl_xgemm(cplex, 'N', 'N', npw, ndat*nspinor, nprojs_cur_blk, cone, &
+       call opernlb_xgemm(cplex, 'N', 'N', npw, ndat*nspinor, nprojs_cur_blk, cone, &
        &    projs_r, npw, &
        &    gxfac_sij, nprojs, beta, temp_realvec_r, npw,&
        &    rank, nprocs,&
        &    nprojs_blk, nprojs_last_blk, nprojs_my_blk, i,&
        &    gpu_option, use_distrib, use_sliced_gemms)
-       call opernl_xgemm(cplex, 'N', 'N', npw, ndat*nspinor, nprojs_cur_blk, cone, &
+       call opernlb_xgemm(cplex, 'N', 'N', npw, ndat*nspinor, nprojs_cur_blk, cone, &
        &    projs_i, npw,&
        &    gxfac_sij, nprojs, beta, temp_realvec_i, npw,&
        &    rank, nprocs,&
@@ -704,20 +704,20 @@ subroutine opernlb_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
        end if
 
        if(choice==1 .or. choice==7) then
-         call opernl_xgemm(cplex_fac, 'N', 'N', npw, ndat*nspinor, nprojs_cur_blk, cone, &
+         call opernlb_xgemm(cplex_fac, 'N', 'N', npw, ndat*nspinor, nprojs_cur_blk, cone, &
          &    projs, npw, &
          &    gxfac, nprojs, beta, vectout, npw,&
          &    rank, nprocs,&
          &    nprojs_blk, nprojs_last_blk, nprojs_my_blk, i,&
          &    gpu_option, use_distrib, use_sliced_gemms)
        else if(choice==2) then
-         call opernl_xgemm(cplex_fac, 'N', 'N', npw, ndat*nspinor, nprojs_cur_blk, cone, &
+         call opernlb_xgemm(cplex_fac, 'N', 'N', npw, ndat*nspinor, nprojs_cur_blk, cone, &
          &    dprojs, npw, &
          &    gxfac, nprojs, beta, vectout, npw,&
          &    rank, nprocs,&
          &    nprojs_blk, nprojs_last_blk, nprojs_my_blk, i,&
          &    gpu_option, use_distrib, use_sliced_gemms)
-         call opernl_xgemm(cplex_fac, 'N', 'N', npw, ndat*nspinor, nprojs_cur_blk, cone, &
+         call opernlb_xgemm(cplex_fac, 'N', 'N', npw, ndat*nspinor, nprojs_cur_blk, cone, &
          &    projs, npw, &
          &    dgxdtfac, nprojs, cone, vectout, npw,&
          &    rank, nprocs,&
@@ -742,33 +742,33 @@ subroutine opernlb_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
 #endif
            end if
          end if
-         call opernl_xgemm(cplex_fac, 'N', 'N', npw, ndat*nspinor, nprojs_cur_blk, cone, &
+         call opernlb_xgemm(cplex_fac, 'N', 'N', npw, ndat*nspinor, nprojs_cur_blk, cone, &
          &    projs, npw, &
          &    dgxdtfac, nprojs, beta, vectout, npw,&
          &    rank, nprocs,&
          &    nprojs_blk, nprojs_last_blk, nprojs_my_blk, i,&
          &    gpu_option, use_distrib, use_sliced_gemms)
-         call opernl_xgemm(cplex_fac, 'N', 'N', npw, ndat*nspinor, nprojs_cur_blk, cone, &
+         call opernlb_xgemm(cplex_fac, 'N', 'N', npw, ndat*nspinor, nprojs_cur_blk, cone, &
          &    dprojs, npw, &
          &    gxfac, nprojs, cone, vectout, npw,&
          &    rank, nprocs,&
          &    nprojs_blk, nprojs_last_blk, nprojs_my_blk, i,&
          &    gpu_option, use_distrib, use_sliced_gemms)
        else if(choice==5) then
-         call opernl_xgemm(cplex_fac, 'N', 'N', npw, ndat*nspinor, nprojs_cur_blk, cone, &
+         call opernlb_xgemm(cplex_fac, 'N', 'N', npw, ndat*nspinor, nprojs_cur_blk, cone, &
          &    projs, npw, &
          &    dgxdtfac, nprojs, beta, vectout, npw,&
          &    rank, nprocs,&
          &    nprojs_blk, nprojs_last_blk, nprojs_my_blk, i,&
          &    gpu_option, use_distrib, use_sliced_gemms)
-         call opernl_xgemm(cplex_fac, 'N', 'N', npw, ndat*nspinor, nprojs_cur_blk, cone, &
+         call opernlb_xgemm(cplex_fac, 'N', 'N', npw, ndat*nspinor, nprojs_cur_blk, cone, &
          &    dprojs, npw, &
          &    gxfac, nprojs, cone, vectout, npw,&
          &    rank, nprocs,&
          &    nprojs_blk, nprojs_last_blk, nprojs_my_blk, i,&
          &    gpu_option, use_distrib, use_sliced_gemms)
        else if(choice==51) then
-         call opernl_xgemm(cplex_fac, 'N', 'N', npw, ndat*nspinor, nprojs_cur_blk, cone, &
+         call opernlb_xgemm(cplex_fac, 'N', 'N', npw, ndat*nspinor, nprojs_cur_blk, cone, &
          &    projs, npw, &
          &    dgxdtfac, nprojs, beta, vectout, npw,&
          &    rank, nprocs,&
@@ -807,13 +807,13 @@ subroutine opernlb_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
          end if
        end if
 
-       call opernl_xgemm(cplex_fac, 'N', 'N', npw, ndat*nspinor, nprojs_cur_blk, cone, &
+       call opernlb_xgemm(cplex_fac, 'N', 'N', npw, ndat*nspinor, nprojs_cur_blk, cone, &
        &        projs_r, npw, &
        &        gxfac, nprojs, beta, temp_realvec_r, npw,&
        &        rank, nprocs,&
        &        nprojs_blk, nprojs_last_blk, nprojs_my_blk, i,&
        &        gpu_option, use_distrib, use_sliced_gemms)
-       call opernl_xgemm(cplex_fac, 'N', 'N', npw, ndat*nspinor, nprojs_cur_blk, cone, &
+       call opernlb_xgemm(cplex_fac, 'N', 'N', npw, ndat*nspinor, nprojs_cur_blk, cone, &
        &        projs_i, npw, &
        &        gxfac, nprojs, beta, temp_realvec_i, npw,&
        &        rank, nprocs,&
