@@ -1266,6 +1266,7 @@ if (dtset%prt_lorbmag==1) then
      ABI_FREE(efg)
    end if
    ABI_MALLOC(efg,(3,3,natom))
+   efg=zero
    call timab(1176,1,tsec)
    call calc_efg(efg,mpi_enreg,my_natom,natom,nfft,ngfft,nhat,nspden,dtset%nsym,dtset%nucefg,&
 &   ntypat,paw_an,pawang,pawrad,pawrhoij,pawtab,&
@@ -1364,6 +1365,20 @@ if (dtset%prt_lorbmag==1) then
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "intgden"), intgden))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ratsph"), dtset%ratsph))
    end if
+
+   if(allocated(efg)) then
+     ! write EFG tensors to GSR if available
+     ncerr = nctk_def_dims(ncid, [ &
+       nctkdim_t("ndir",3),&
+       nctkdim_t("natom",dtset%natom)],defmode=.True.)
+     NCF_CHECK(ncerr) 
+     ncerr = nctk_def_arrays(ncid, [&
+       nctkarr_t("efg", "dp", "ndir, ndir, natom")])
+     NCF_CHECK(ncerr)
+     NCF_CHECK(nctk_set_datamode(ncid))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "efg"), efg))
+   end if
+
    NCF_CHECK(nf90_close(ncid))
  end if
 
