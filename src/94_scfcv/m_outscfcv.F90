@@ -1370,12 +1370,15 @@ if (dtset%prt_lorbmag==1) then
      ! write EFG tensors to GSR if available
      ncerr = nctk_def_dims(ncid, [ &
        nctkdim_t("ndir",3),&
-       nctkdim_t("natom",dtset%natom)],defmode=.True.)
+       nctkdim_t("natom",dtset%natom),&
+       nctkdim_t("ntypat",dtset%ntypat)],defmode=.True.)
      NCF_CHECK(ncerr) 
      ncerr = nctk_def_arrays(ncid, [&
+       nctkarr_t("quadmom", "dp", "ntypat"),&
        nctkarr_t("efg", "dp", "ndir, ndir, natom")])
      NCF_CHECK(ncerr)
      NCF_CHECK(nctk_set_datamode(ncid))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "quadmom"), dtset%quadmom))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "efg"), efg))
    end if
 
