@@ -6447,6 +6447,26 @@ For an expert use of ABINIT on [[GPU]], some additional keywords can be used. Se
 ),
 
 Variable(
+    abivarname="gpu_thread_limit",
+    varset="paral",
+    vartype="integer",
+    topics=['parallelism_expert'],
+    dimensions="scalar",
+    defaultval="Minimum between 4 and number of [[OPENMP]] threads, if GPU is enabled, 0 otherwise.",
+    mnemonics="GPU: Thread Limit",
+    requires="[[gpu_option]] /= 0 ",
+    added_in_version="10.4",
+    text=r"""
+When using GPU acceleration, some parts still runs on CPU and are parallelised using MPI distribution or OpenMP threads.
+Usually, GPU runs with one MPI task per GPU, which limits MPI-based parallelism, but with more OpenMP threads per tasks,
+which favors OpenMP parallelism.
+However, some OpenMP regions tend to be significantly slower with a high number of threads (OMP_NUM_THREADS env variable),
+hence ABINIT limit the number of threads in those select regions, to 4 threads by default, if GPU is enabled.
+This parameter allows to change this limit, for tuning purposes.
+""",
+),
+
+Variable(
     abivarname="gw_customnfreqsp",
     varset="gw",
     vartype="integer",

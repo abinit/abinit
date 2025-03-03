@@ -118,7 +118,7 @@ CONTAINS  !=====================================================================
 subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
 &          my_natom,natom,nfft,ngfft,nhatgrdim,nspden,ntypat,pawang,pawfgrtab,&
 &          pawgrnhat,pawnhat,pawrhoij,pawrhoij0,pawtab,qphon,rprimd,ucvol,usewvl,xred,&
-&          mpi_atmtab,comm_atom,comm_fft,mpi_comm_wvl,me_g0,paral_kgb,distribfft) ! optional arguments
+&          mpi_atmtab,comm_atom,comm_fft,mpi_comm_wvl,me_g0,paral_kgb,distribfft,gpu_thread_limit) ! optional arguments
 
  implicit none
 
@@ -127,7 +127,7 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
  integer,intent(in) :: cplex,ider,idir,ipert,izero,my_natom,natom,nfft
  integer,intent(in)  :: usewvl
  integer,intent(in) :: nhatgrdim,nspden,ntypat
- integer,optional,intent(in) :: me_g0,comm_atom,comm_fft,mpi_comm_wvl,paral_kgb
+ integer,optional,intent(in) :: me_g0,comm_atom,comm_fft,mpi_comm_wvl,paral_kgb,gpu_thread_limit
  real(dp),intent(in) :: ucvol
  real(dp),intent(inout) :: compch_fft
  type(distribfft_type),optional,intent(in),target :: distribfft
@@ -611,7 +611,8 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
 !----- Computation of compensation charge over real space grid
  if (compute_nhat.and.ipert==0) then
    nfftot=PRODUCT(ngfft(1:3))
-   call mean_fftr(pawnhat,tmp_compch_fft,nfft,nfftot,1,mpi_comm_sphgrid)
+   call mean_fftr(pawnhat,tmp_compch_fft,nfft,nfftot,1,&
+   &    mpi_comm_sphgrid=mpi_comm_sphgrid,gpu_thread_limit=gpu_thread_limit)
    compch_fft = tmp_compch_fft(1)
    compch_fft=compch_fft*ucvol
  end if

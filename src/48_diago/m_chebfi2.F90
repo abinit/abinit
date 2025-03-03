@@ -103,13 +103,14 @@ module m_chebfi2
    logical :: paw
    integer :: eigenProblem   !1 (A*x = (lambda)*B*x), 2 (A*B*x = (lambda)*x), 3 (B*A*x = (lambda)*x)
 
-   ! when GPU is enabled, currently OpenMP is not fully supported, abinit is launched
+   ! when GPU with Kokkos is enabled, currently OpenMP is not fully supported, abinit is launched
    ! with OMP_NUM_THREADS=1, but we may locally increase the number of OpenMP threads
    ! wherever it is safe to do; in that case we use gpu_kokkos_nthrd to specify
    ! the number of OpenMP threads. This value is controlled by dtset variable
    ! dtset%gpu_kokkos_nthrd
    integer :: gpu_option
-   integer :: gpu_kokkos_nthrd = 1 ! only used if gpu is enabled, number of OpenMP threads used
+   integer :: gpu_kokkos_nthrd = 1 ! only used if GPU Kokkos is enabled, number of OpenMP threads used
+   integer :: gpu_thread_limit = 1 ! only used if GPU is enabled, max number of OpenMP threads used in sensitive areas
 
    !ARRAYS
    type(xgBlock_t) :: X
@@ -180,7 +181,7 @@ module m_chebfi2
 
 subroutine chebfi_init(chebfi,neigenpairs,spacedim,tolerance,ecut,paral_kgb,bandpp, &
                        ndeg_filter,nbdbuf,space,eigenProblem,spacecom,me_g0,me_g0_fft,paw,comm_rows,comm_cols, &
-                       oracle,oracle_factor,oracle_min_occ,gpu_option,gpu_kokkos_nthrd)
+                       oracle,oracle_factor,oracle_min_occ,gpu_option,gpu_kokkos_nthrd,gpu_thread_limit)
 
  implicit none
 
@@ -207,6 +208,7 @@ subroutine chebfi_init(chebfi,neigenpairs,spacedim,tolerance,ecut,paral_kgb,band
  real(dp)      , intent(in   ) :: oracle_min_occ
  type(chebfi_t), intent(inout) :: chebfi
  integer       , intent(in   ), optional :: gpu_kokkos_nthrd
+ integer       , intent(in   ), optional :: gpu_thread_limit
 
  ! Local variables-------------------------------
  real(dp)                      :: tsec(2)
@@ -240,11 +242,10 @@ subroutine chebfi_init(chebfi,neigenpairs,spacedim,tolerance,ecut,paral_kgb,band
  chebfi%oracle_factor = oracle_factor
  chebfi%oracle_min_occ = oracle_min_occ
 
- if (present(gpu_kokkos_nthrd)) then
-    chebfi%gpu_kokkos_nthrd = gpu_kokkos_nthrd
- else
-    chebfi%gpu_kokkos_nthrd = 1
- end if
+ chebfi%gpu_kokkos_nthrd = 1
+ if (present(gpu_kokkos_nthrd)) chebfi%gpu_kokkos_nthrd = gpu_kokkos_nthrd
+ chebfi%gpu_thread_limit = 0
+ if (present(gpu_thread_limit)) chebfi%gpu_thread_limit = gpu_thread_limit
 
  call chebfi_allocateAll(chebfi)
 
@@ -560,7 +561,8 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,eigen,occ,residu,nspinor)
 
    call timab(tim_transpose,1,tsec)
    call xgTransposer_constructor(chebfi%xgTransposerX,chebfi%X,chebfi%xXColsRows,nspinor,&
-     STATE_LINALG,TRANS_ALL2ALL,chebfi%comm_rows,chebfi%comm_cols,0,0,chebfi%me_g0_fft,gpu_option=chebfi%gpu_option)
+     STATE_LINALG,TRANS_ALL2ALL,chebfi%comm_rows,chebfi%comm_cols,0,0,chebfi%me_g0_fft,&
+     gpu_option=chebfi%gpu_option,gpu_thread_limit=chebfi%gpu_thread_limit)
 
    call xgTransposer_copyConstructor(chebfi%xgTransposerAX,chebfi%xgTransposerX,chebfi%AX%self,chebfi%xAXColsRows,STATE_LINALG)
    call xgTransposer_copyConstructor(chebfi%xgTransposerBX,chebfi%xgTransposerX,chebfi%BX%self,chebfi%xBXColsRows,STATE_LINALG)
