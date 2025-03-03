@@ -696,7 +696,8 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
 
 !    Setup gemm_nonlop
      if (gemm_nonlop_use_gemm) then
-       call set_gemm_nonlop_ikpt(my_ikpt)
+       call set_gemm_nonlop_ikpt(my_ikpt,gs_hamk%npw_k,gs_hamk%istwf_k,gs_hamk%indlmn,&
+       &    gs_hamk%ntypat,gs_hamk%nattyp,gs_hamk%gpu_option)
      end if
 
 #if defined HAVE_GPU_CUDA
