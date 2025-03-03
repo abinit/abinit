@@ -539,19 +539,38 @@ contains
 !! set_gemm_nonlop_ikpt
 !!
 !! FUNCTION
-!! Set the K-point upon which projectors will be computed
+!! Set the K-point upon which projectors will be computed and
+!! pre-allocate projectors buffers.
 !!
 !! INPUTS
 !! ikpt= K-point id
+!! npw= number of plane-wave
+!! istwf_k=option parameter that describes the storage of wfs
+!! indlmn(6,nlmn)= array giving l,m,n,lm,ln,s for i=lmn
+!! ntypat=number of atoms types
+!! nattyp(ntypat)=number of atoms of each type
+!! gpu_option=which variant of GEMM nonlop is used
 !!
 !! SOURCE
- subroutine set_gemm_nonlop_ikpt(ikpt)
+ subroutine set_gemm_nonlop_ikpt(ikpt,npw,istwf_k,indlmn,ntypat,nattyp,gpu_option)
 
-  integer,intent(in) :: ikpt
+  integer,intent(in) :: ikpt,istwf_k,npw,ntypat,gpu_option
+  integer,intent(in) :: indlmn(:,:,:), nattyp(ntypat)
+
+  integer :: nprojs, itypat
 
 ! *************************************************************************
 
   gemm_nonlop_ikpt_this_proc_being_treated=ikpt
+
+  nprojs=0
+  do itypat=1,ntypat
+    nprojs = nprojs + count(indlmn(3,:,itypat)>0)*nattyp(itypat)
+  end do
+  ! Call a "dummy" refresh of projectors buffers
+  ! This is mostly a work-around in GPU workloads to ensure there
+  ! is a buffer allocated in GPU memory.
+  call refresh_projectors(npw,istwf_k,nprojs,0,0,.false.,gpu_option)
 
  end subroutine set_gemm_nonlop_ikpt
 !!***
