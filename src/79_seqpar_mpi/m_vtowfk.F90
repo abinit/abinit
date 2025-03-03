@@ -222,7 +222,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  integer :: bandpp_cprj,blocksize,choice,cpopt,iband,iband1
  integer :: iblock,iblocksize,ibs,idir,ierr,igs,igsc,ii,inonsc
  integer :: iorder_cprj,ipw,ispinor,ispinor_index,istwf_k,iwavef,me_g0,mgsc,my_nspinor,n1,n2,n3 !kk
- integer :: nband_k_cprj,ncols_cprj,nblockbd,ncpgr,ndat,niter,nkpt_max,nnlout,ortalgo
+ integer :: nband_k_cprj,ncols_cprj,nblockbd,ncpgr,ndat,niter,nkpt_max,nnlout,ortalgo,ndat_fft
  integer :: paw_opt,quit,signs,space,spaceComm,tim_nonlop,wfoptalg,wfopta10,nblk_gemm_nonlop,blksize_gemm_nonlop_tmp
  logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc
  real(dp) :: ar,ar_im,eshift,occblock,norm
@@ -731,12 +731,13 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
  ndat=1;if (mpi_enreg%paral_kgb==1) ndat=mpi_enreg%bandpp
  if(iscf>0 .and. fixed_occ)  then
+   ndat_fft=ndat; if(mpi_enreg%paral_kgb==0) ndat_fft=blocksize
    if(dtset%gpu_option==ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
-     ABI_MALLOC_MANAGED(wfraug,(/2,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6*MAX(blocksize,ndat)/))
+     ABI_MALLOC_MANAGED(wfraug,(/2,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6*ndat_fft/))
 #endif
    else
-     ABI_MALLOC(wfraug,(2,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6*MAX(blocksize,ndat)))
+     ABI_MALLOC(wfraug,(2,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6*ndat_fft))
    end if
  end if
 
