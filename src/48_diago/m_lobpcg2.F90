@@ -93,6 +93,7 @@ module m_lobpcg2
     integer :: me_g0                         ! =1 if the processor have G=0 (linalg representation)
     integer :: me_g0_fft                     ! =1 if the processor have G=0 (fft_representation)
     integer :: gpu_option                    ! Which GPU version is used (0=none)
+    integer :: gpu_thread_limit              ! When GPU is enabled, how many CPU threads to use in sensitive areas
     double precision :: tolerance            ! Tolerance on the residu to stop the minimization
     integer :: prtvol
     type(xgBlock_t) :: AllX0 ! Block of initial and final solution.
@@ -174,7 +175,8 @@ module m_lobpcg2
 
 
   subroutine lobpcg_init(lobpcg, neigenpairs, spacedim, blockdim, tolerance, nline, &
-&      space, spacecom, paral_kgb, comm_rows, comm_cols, me_g0, me_g0_fft, gpu_option)
+&      space, spacecom, paral_kgb, comm_rows, comm_cols, me_g0, me_g0_fft, gpu_option, &
+&      gpu_thread_limit)
 
     type(lobpcg_t)  , intent(inout) :: lobpcg
     integer         , intent(in   ) :: neigenpairs
@@ -189,6 +191,7 @@ module m_lobpcg2
     integer         , intent(in   ) :: me_g0
     integer         , intent(in   ) :: me_g0_fft
     integer         , intent(in   ) :: gpu_option
+    integer,optional, intent(in   ) :: gpu_thread_limit
     double precision :: tsec(2)
 
     call timab(tim_init,1,tsec)
@@ -209,6 +212,8 @@ module m_lobpcg2
     lobpcg%me_g0       = me_g0
     lobpcg%me_g0_fft   = me_g0_fft
     lobpcg%gpu_option  = gpu_option
+    lobpcg%gpu_thread_limit  = 0
+    if(present(gpu_thread_limit)) lobpcg%gpu_thread_limit  = gpu_thread_limit
 
     call lobpcg_allocateAll(lobpcg,space,me_g0)
     call timab(tim_init,2,tsec)
@@ -425,7 +430,7 @@ module m_lobpcg2
       call timab(tim_transpose,1,tsec)
       call xgTransposer_constructor(lobpcg%xgTransposerX,lobpcg%X,lobpcg%XColsRows,nspinor,&
         STATE_LINALG,TRANS_ALL2ALL,lobpcg%comm_rows,lobpcg%comm_cols,0,0,lobpcg%me_g0_fft,&
-        gpu_option=lobpcg%gpu_option)
+        gpu_option=lobpcg%gpu_option,gpu_thread_limit=lobpcg%gpu_thread_limit)
       call xgTransposer_copyConstructor(lobpcg%xgTransposerAX,lobpcg%xgTransposerX,&
         lobpcg%AX,lobpcg%AXColsRows,STATE_LINALG)
       call xgTransposer_copyConstructor(lobpcg%xgTransposerBX,lobpcg%xgTransposerX,&

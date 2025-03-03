@@ -1405,6 +1405,9 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 !#endif
    end if
 
+!  gpu_thread_limit
+   call chkint_ge(0,0,cond_string,cond_values,ierr,'gpu_thread_limit',dt%gpu_thread_limit,0,iout)
+
    ! RT-TDDFT
    if (dt%optdriver == RUNL_RTTDDFT) then
      ! getwfk / getwfk_filepath / irdwfk

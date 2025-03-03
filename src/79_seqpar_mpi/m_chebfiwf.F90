@@ -263,7 +263,8 @@ subroutine chebfiwf2(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
 &                 l_mpi_enreg%comm_bandspinorfft,me_g0,me_g0_fft,l_paw,&
 &                 l_mpi_enreg%comm_spinorfft,l_mpi_enreg%comm_band,&
 &                 dtset%chebfi_oracle,dtset%oracle_factor,dtset%oracle_min_occ,&
-&                 l_gs_hamk%gpu_option,gpu_kokkos_nthrd=dtset%gpu_kokkos_nthrd)
+&                 l_gs_hamk%gpu_option,gpu_kokkos_nthrd=dtset%gpu_kokkos_nthrd,&
+&                 gpu_thread_limit=dtset%gpu_thread_limit)
  ABI_NVTX_END_RANGE()
 
 !################    RUUUUUUUN    #####################################

@@ -106,6 +106,7 @@ module m_xgTransposer
     integer :: me_g0_fft
     integer :: gpu_option = ABI_GPU_DISABLED
     integer :: gpu_kokkos_nthrd = 1
+    integer :: gpu_thread_limit = 1
     real(dp), ABI_CONTIGUOUS pointer:: buffer(:,:) => null()
   end type xgTransposer_t
 
@@ -125,7 +126,7 @@ module m_xgTransposer
 !! xgTransposer_constructor
 
   subroutine xgTransposer_constructor(xgTransposer,xgBlock_linalg,xgBlock_colsrows,nspinor,&
-      state,algo,comm_rows,comm_cols,ncpu_cols,ncpu_rows,me_g0_fft,gpu_option)
+      state,algo,comm_rows,comm_cols,ncpu_cols,ncpu_rows,me_g0_fft,gpu_option,gpu_thread_limit)
 
     type(xgTransposer_t)   , intent(inout) :: xgTransposer
     type(xgBlock_t), target, intent(in   ) :: xgBlock_linalg
@@ -136,7 +137,7 @@ module m_xgTransposer
     integer                , intent(in   ) :: state
     integer                , intent(in   ) :: algo
     integer                , intent(in   ) :: me_g0_fft
-    integer , optional     , intent(in   ) :: gpu_option
+    integer , optional     , intent(in   ) :: gpu_option,gpu_thread_limit
     integer :: commLinalg
     integer :: ncols
     integer :: nrows
@@ -161,6 +162,8 @@ module m_xgTransposer
     xgTransposer%me_g0_fft = me_g0_fft
     xgTransposer%gpu_option = ABI_GPU_DISABLED
     if(present(gpu_option)) xgTransposer%gpu_option = gpu_option
+    xgTransposer%gpu_thread_limit = 1
+    if(present(gpu_thread_limit)) xgTransposer%gpu_thread_limit = gpu_thread_limit
     commLinalg = comm(xgBlock_linalg)
     xgTransposer%mpiData(MPI_LINALG)%comm = commLinalg
     xgTransposer%mpiData(MPI_LINALG)%rank = xmpi_comm_rank(commLinalg)
@@ -983,7 +986,7 @@ module m_xgTransposer
     type(xgTransposer_t), intent(inout) :: xgTransposer
     double precision    , intent(inout) :: bufferMess(:,:)
     double precision, pointer :: bufferOrdered(:,:) => null()
-    integer :: nrowsColsRows
+    integer :: nrowsColsRows,nthreads_bak
     integer :: ncolsColsRows
     integer :: tos,toe,froms,frome
     integer :: col, icpu
@@ -1026,6 +1029,11 @@ module m_xgTransposer
        call xomp_set_num_threads(xgTransposer%gpu_kokkos_nthrd)
     end if
 #endif
+
+    if (xgTransposer%gpu_option /= ABI_GPU_DISABLED .and. xgTransposer%gpu_thread_limit /= 0) then
+      nthreads_bak=xomp_get_num_threads(open_parallel=.True.)
+      call xomp_set_num_threads(min(xgTransposer%gpu_thread_limit,nthreads_bak))
+    end if
 
     select case (xgTransposer%state)
     case (STATE_LINALG)
@@ -1073,6 +1081,10 @@ module m_xgTransposer
       !$OMP TARGET UPDATE TO(bufferMess) if(xgTransposer%gpu_option == ABI_GPU_OPENMP)
 #endif
     end select
+
+    if (xgTransposer%gpu_option /= ABI_GPU_DISABLED .and. xgTransposer%gpu_thread_limit /= 0) then
+      call xomp_set_num_threads(nthreads_bak)
+    end if
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS) && defined(HAVE_YAKL)
     ! if gpu enable restore OpenMP num threads to 1
