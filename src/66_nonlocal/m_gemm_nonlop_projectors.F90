@@ -627,7 +627,8 @@ contains
 #endif
 
   ik=1; if(is_kprime) ik=2
-  if(gemm_nonlop_kpt(ik)%ikpt/=gemm_nonlop_ikpt_this_proc_being_treated) then
+  if(gemm_nonlop_kpt(ik)%ikpt/=gemm_nonlop_ikpt_this_proc_being_treated &
+  &   .or. npw/=gemm_nonlop_kpt(ik)%npw .or. nprojs/=gemm_nonlop_kpt(ik)%nprojs) then
     call free_gemm_nonlop_ikpt(ik, gpu_option)
   end if
 
@@ -646,51 +647,31 @@ contains
     end if
   end if
 
-  nprojs_last_blk = 0
-  nprojs_my_blk = 0
-  nprojs_blk = 0
+  nprojs_last_blk = nprojs
+  nprojs_my_blk = nprojs
+  nprojs_blk = nprojs
   rank = 0; is_last_rank = .true.
-  if(npw/=gemm_nonlop_kpt(ik)%npw .or. nprojs/=gemm_nonlop_kpt(ik)%nprojs) then
-    call free_gemm_nonlop_ikpt(ik, gpu_option)
-    nprojs_last_blk = nprojs
-    nprojs_my_blk = nprojs
-    nprojs_blk = nprojs
 
-    if(gemm_nonlop_block_size > 1) then
-      nprojs_blk = nprojs / gemm_nonlop_block_size
-      nprojs_last_blk = nprojs_blk + modulo(nprojs,nprojs_blk)
-      gemm_nonlop_kpt(ik)%nprojs_blk = nprojs_blk
-      gemm_nonlop_kpt(ik)%nprojs_last_blk = nprojs_last_blk
+  if(gemm_nonlop_block_size > 1) then
+    nprojs_blk = nprojs / gemm_nonlop_block_size
+    nprojs_last_blk = nprojs_blk + modulo(nprojs,nprojs_blk)
 
-      if(gemm_nonlop_is_distributed) then
-        rank = xmpi_comm_rank(gemm_nonlop_block_comm);
-        is_last_rank = (rank==gemm_nonlop_block_size-1)
-        if(is_last_rank) then
-          nprojs_my_blk = nprojs_last_blk
-        else
-          nprojs_my_blk = nprojs_blk
-        end if
+    if(gemm_nonlop_is_distributed) then
+      rank = xmpi_comm_rank(gemm_nonlop_block_comm);
+      is_last_rank = (rank==gemm_nonlop_block_size-1)
+      if(is_last_rank) then
+        nprojs_my_blk = nprojs_last_blk
+      else
+        nprojs_my_blk = nprojs_blk
       end if
-    end if
-
-    if(istwf_k <= 1) then
-      ABI_MALLOC(gemm_nonlop_kpt(ik)%projs, (2, npw, nprojs_last_blk))
-#ifdef HAVE_OPENMP_OFFLOAD
-      gemm_nonlop_kpt_projs_ompptr => gemm_nonlop_kpt(ik)%projs
-      !$OMP TARGET ENTER DATA MAP(alloc:gemm_nonlop_kpt_projs_ompptr) IF(gpu_option==ABI_GPU_OPENMP)
-#endif
-    else
-      ABI_MALLOC(gemm_nonlop_kpt(ik)%projs_r, (1, npw, nprojs_last_blk))
-      ABI_MALLOC(gemm_nonlop_kpt(ik)%projs_i, (1, npw, nprojs_last_blk))
-#ifdef HAVE_OPENMP_OFFLOAD
-      gemm_nonlop_kpt_projs_r_ompptr => gemm_nonlop_kpt(ik)%projs_r
-      gemm_nonlop_kpt_projs_i_ompptr => gemm_nonlop_kpt(ik)%projs_i
-      !$OMP TARGET ENTER DATA MAP(alloc:gemm_nonlop_kpt_projs_r_ompptr) IF(gpu_option==ABI_GPU_OPENMP)
-      !$OMP TARGET ENTER DATA MAP(alloc:gemm_nonlop_kpt_projs_i_ompptr) IF(gpu_option==ABI_GPU_OPENMP)
-#endif
     end if
   end if
 
+
+  ! Allocation of buffers for 1st and 2nd order derivatives of projectors
+  ! NOTE: those are allocated, if needed, before regular projectors buffers
+  !       for optimization purposes, regarding GPU memory pool.
+  if(nprojs>0) then
   if(ndgxdt>0) then
     if(npw/=gemm_nonlop_kpt(ik)%npw .or. nprojs/=gemm_nonlop_kpt(ik)%nprojs &
     &    .or. ndgxdt /= gemm_nonlop_kpt(ik)%ngrads .or. nd2gxdt /=  gemm_nonlop_kpt(ik)%ngrads2) then
@@ -701,26 +682,7 @@ contains
       ABI_SFREE(gemm_nonlop_kpt(ik)%d2projs)
       gemm_nonlop_kpt(ik)%ngrads = -1
       gemm_nonlop_kpt(ik)%ngrads2 = -1
-      nprojs_last_blk = nprojs
-      nprojs_my_blk = nprojs
-      nprojs_blk = nprojs
 
-      if(gemm_nonlop_block_size > 1) then
-        nprojs_blk = nprojs / gemm_nonlop_block_size
-        nprojs_last_blk = nprojs_blk + modulo(nprojs,nprojs_blk)
-        gemm_nonlop_kpt(ik)%nprojs_blk = nprojs_blk
-        gemm_nonlop_kpt(ik)%nprojs_last_blk = nprojs_last_blk
-
-        if(gemm_nonlop_is_distributed) then
-          rank = xmpi_comm_rank(gemm_nonlop_block_comm);
-          is_last_rank = (rank==gemm_nonlop_block_size-1)
-          if(is_last_rank) then
-            nprojs_my_blk = nprojs_last_blk
-          else
-            nprojs_my_blk = nprojs_blk
-          end if
-        end if
-      end if
       if(istwf_k <= 1) then
         ABI_MALLOC(gemm_nonlop_kpt(ik)%dprojs, (2, npw, nprojs_last_blk*ndgxdt))
 #ifdef HAVE_OPENMP_OFFLOAD
@@ -746,6 +708,29 @@ contains
       end if
     end if
   end if
+
+
+  ! Allocation of projectors buffers
+  if(npw/=gemm_nonlop_kpt(ik)%npw .or. nprojs/=gemm_nonlop_kpt(ik)%nprojs) then
+    if(istwf_k <= 1) then
+      ABI_MALLOC(gemm_nonlop_kpt(ik)%projs, (2, npw, nprojs_last_blk))
+#ifdef HAVE_OPENMP_OFFLOAD
+      gemm_nonlop_kpt_projs_ompptr => gemm_nonlop_kpt(ik)%projs
+      !$OMP TARGET ENTER DATA MAP(alloc:gemm_nonlop_kpt_projs_ompptr) IF(gpu_option==ABI_GPU_OPENMP)
+#endif
+    else
+      ABI_MALLOC(gemm_nonlop_kpt(ik)%projs_r, (1, npw, nprojs_last_blk))
+      ABI_MALLOC(gemm_nonlop_kpt(ik)%projs_i, (1, npw, nprojs_last_blk))
+#ifdef HAVE_OPENMP_OFFLOAD
+      gemm_nonlop_kpt_projs_r_ompptr => gemm_nonlop_kpt(ik)%projs_r
+      gemm_nonlop_kpt_projs_i_ompptr => gemm_nonlop_kpt(ik)%projs_i
+      !$OMP TARGET ENTER DATA MAP(alloc:gemm_nonlop_kpt_projs_r_ompptr) IF(gpu_option==ABI_GPU_OPENMP)
+      !$OMP TARGET ENTER DATA MAP(alloc:gemm_nonlop_kpt_projs_i_ompptr) IF(gpu_option==ABI_GPU_OPENMP)
+#endif
+    end if
+  end if
+  end if
+
 
   if (nprojs>0) gemm_nonlop_kpt(ik)%nprojs = nprojs
   if (nprojs>0) gemm_nonlop_kpt(ik)%npw = npw
