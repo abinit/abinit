@@ -1014,7 +1014,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
        ! Setup gemm_nonlop
        if (gemm_nonlop_use_gemm) then
-         call set_gemm_nonlop_ikpt(my_ikpt,gs_hamk%npw_k,gs_hamk%istwf_k,gs_hamk%indlmn,&
+         call set_gemm_nonlop_ikpt(my_ikpt,gs_hamk%npw_fft_k,gs_hamk%istwf_k,gs_hamk%indlmn,&
          &    gs_hamk%ntypat,gs_hamk%nattyp,gs_hamk%gpu_option)
          if(istep<=1) call reset_gemm_nonlop()
        end if
