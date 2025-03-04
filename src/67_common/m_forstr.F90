@@ -1021,7 +1021,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 
 !    Setup gemm_nonlop
      if (gemm_nonlop_use_gemm) then
-       call set_gemm_nonlop_ikpt(my_ikpt,gs_hamk%npw_k,gs_hamk%istwf_k,gs_hamk%indlmn,&
+       call set_gemm_nonlop_ikpt(my_ikpt,gs_hamk%npw_fft_k,gs_hamk%istwf_k,gs_hamk%indlmn,&
        &    gs_hamk%ntypat,gs_hamk%nattyp,gs_hamk%gpu_option)
        call reset_gemm_nonlop()
 
