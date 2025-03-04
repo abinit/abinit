@@ -84,6 +84,7 @@ prtcurrent 1      # Print current
 #%%   t05.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -ridiculous;
 #%%   t05o_DS2_TDENER, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -ridiculous;
 #%%   t05o_DS2_TDCURRENT, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -ridiculous;
+#%%   t05o_DS2_TDEFIELD, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -ridiculous;
 #%% [paral_info]
 #%% max_nprocs = 8
 #%% [extra_info]
