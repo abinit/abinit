@@ -341,6 +341,7 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
                ilslm=ils*ils+ils+mm+1
                if (pawang%gntselect(ilslm,klm)>0) then
                  ro_ql(1)=ro(1)*pawtab(itypat)%qijl(ilslm,klmn)
+                 !$OMP PARALLEL DO PRIVATE(ic)
                  do ic=1,nfgd
                    pawnhat_atm(ic)=pawnhat_atm(ic)+ro_ql(1)*pawfgrtab(iatom)%gylm(ic,ilslm)
                  end do
@@ -353,6 +354,7 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
                ilslm=ils*ils+ils+mm+1
                if (pawang%gntselect(ilslm,klm)>0) then
                  ro_ql(1:2)=ro(1:2)*pawtab(itypat)%qijl(ilslm,klmn)
+                 !$OMP PARALLEL DO PRIVATE(ic,jc)
                  do ic=1,nfgd
                    jc=2*ic-1
                    pawnhat_atm(jc:jc+1)=pawnhat_atm(jc:jc+1)+ro_ql(1:2)*pawfgrtab(iatom)%gylm(ic,ilslm)
@@ -481,11 +483,13 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
 !    Add the contribution of the atom to the compensation charge
      if (compute_nhat) then
        if (cplex==1) then
+         !$OMP PARALLEL DO PRIVATE(kc)
          do ic=1,nfgd
            kc=pawfgrtab(iatom)%ifftsph(ic)
            pawnhat(kc,ispden)=pawnhat(kc,ispden)+pawnhat_atm(ic)
          end do
        else
+         !$OMP PARALLEL DO PRIVATE(jc)
          do ic=1,nfgd
            jc=2*ic-1;kc=2*pawfgrtab(iatom)%ifftsph(ic)-1
            pawnhat(kc:kc+1,ispden)=pawnhat(kc:kc+1,ispden)+pawnhat_atm(jc:jc+1)
@@ -494,11 +498,13 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
      end if
      if (compute_grad) then
        if (cplex==1) then
+         !$OMP PARALLEL DO PRIVATE(kc)
          do ic=1,nfgd
            kc=pawfgrtab(iatom)%ifftsph(ic)
            pawgrnhat(kc,ispden,1:3)=pawgrnhat(kc,ispden,1:3)+pawgrnhat_atm(ic,1:3)
          end do
        else
+         !$OMP PARALLEL DO PRIVATE(jc,ii)
          do ic=1,nfgd
            jc=2*ic-1;kc=2*pawfgrtab(iatom)%ifftsph(ic)-1
            do ii=1,3
