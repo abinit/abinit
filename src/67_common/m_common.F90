@@ -2175,7 +2175,7 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,nband,nspinor,para
      invovl_wmem = invovl_ompgpu_work_mem(gs_hamk, ndat_try)
    end if
    if(wfoptalg==114) then
-     lobpcgMem = lobpcg_memInfo(nband,icplx*npw*nspinor,blockdim,space)
+     lobpcgMem = lobpcg_memInfo(nband,icplx*npw*nspinor,space,paral_kgb,blockdim)
    end if
    localMem  = (int(2,c_size_t)*npw*nspinor*nband+3*nband)*kind(1.d0) ! cg, eig, occ, resid in chebfiwf/lobpcgwf
 

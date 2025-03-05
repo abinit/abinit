@@ -399,6 +399,7 @@ function chebfi_memInfo(neigenpairs,spacedim,space,paral_kgb,total_spacedim,band
  integer(kind=c_size_t) :: memX_CR
  integer(kind=c_size_t) :: memAX_CR
  integer(kind=c_size_t) :: memBX_CR
+ integer(kind=c_size_t) :: mem_sendrecv_CR
 !chebfi_rayleighRitz function variables
  integer(kind=c_size_t) :: memA_und_X
  integer(kind=c_size_t) :: memB_und_X
@@ -430,6 +431,7 @@ function chebfi_memInfo(neigenpairs,spacedim,space,paral_kgb,total_spacedim,band
    memX_CR = int(cplx,c_size_t) * kind(1.d0) * total_spacedim * bandpp
    memAX_CR = int(cplx,c_size_t) * kind(1.d0) * total_spacedim * bandpp
    memBX_CR = int(cplx,c_size_t) * kind(1.d0) * total_spacedim * bandpp
+   mem_sendrecv_CR = int(cplx,c_size_t) * kind(1.d0) * total_spacedim * bandpp
  else
    memX_CR = 0
    memAX_CR = 0
@@ -442,7 +444,7 @@ function chebfi_memInfo(neigenpairs,spacedim,space,paral_kgb,total_spacedim,band
  memEigenvalues = int(kind(1.d0),c_size_t) * neigenpairs
 
  arraymem(1) = memX + memX_next + memX_prev + &
-               memAX + memBX + memX_CR + memAX_CR + memBX_CR
+               memAX + memBX + memX_CR + memAX_CR + memBX_CR + mem_sendrecv_CR
  arraymem(2) = memA_und_X + memB_und_X + memEigenvalues
 
 end function chebfi_memInfo
