@@ -263,15 +263,17 @@ module m_lobpcg2
   end subroutine lobpcg_allocateAll
 
 
-  function lobpcg_memInfo(neigenpairs, spacedim, blockdim, space) result(arraymem)
+  function lobpcg_memInfo(neigenpairs, spacedim, space, paral_kgb, blockdim) result(arraymem)
 
     integer         , intent(in   ) :: neigenpairs
     integer         , intent(in   ) :: spacedim
     integer         , intent(in   ) :: blockdim
     integer         , intent(in   ) :: space
+    integer         , intent(in   ) :: paral_kgb
     integer(kind=c_size_t) :: memXWP
     integer(kind=c_size_t) :: memAXWP
     integer(kind=c_size_t) :: memBXWP
+    integer(kind=c_size_t) :: mem_xgTransposer
     integer(kind=c_size_t) :: memAllBX0
     integer(kind=c_size_t) :: memAllAX0
     integer(kind=c_size_t) :: memeigenvalues3N
@@ -294,10 +296,17 @@ module m_lobpcg2
     memXWP  = int(cplx,c_size_t)* kind(1.d0) * spacedim * 3*blockdim
     memAXWP = int(cplx,c_size_t)* kind(1.d0) * spacedim * 3*blockdim
     memBXWP = int(cplx,c_size_t)* kind(1.d0) * spacedim * 3*blockdim
+    if(paral_kgb > 1) then
+      ! xgtransposer *_ColRows buffers for X, AX, BX, W, AW, BW + internal send/recvbuf
+      mem_xgTransposer = int(cplx,c_size_t)* kind(1.d0) * spacedim * 7*blockdim
+    else
+      mem_xgTransposer = 0
+    end if
     if ( nblock > 1 ) then
       memAllAX0 = int(cplx,c_size_t) * kind(1.d0) * spacedim * 3*blockdim
       memAllBX0 = int(cplx,c_size_t) * kind(1.d0) * spacedim * 3*blockdim
       membufferOrtho = int(cplx,c_size_t) * kind(1.d0) * blockdim * (nblock-1) * blockdim
+      mem_xgTransposer = mem_xgTransposer + int(cplx,c_size_t) * kind(1.d0) * spacedim * 3*blockdim
     else
       memAllAX0 = 0
       memAllBX0 = 0
@@ -317,7 +326,7 @@ module m_lobpcg2
 
     maxmemTmp = max( membufferBOrtho,memRR,membufferOrtho )
 
-    arraymem(1) = memXWP+memAXWP+memBXWP+memAllAX0+memAllBX0+memeigenvalues3N
+    arraymem(1) = memXWP+memAXWP+memBXWP+memAllAX0+memAllBX0+memeigenvalues3N+mem_xgTransposer
     arraymem(2) = maxmemTmp
 
   end function lobpcg_memInfo
