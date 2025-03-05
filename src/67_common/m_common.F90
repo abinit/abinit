@@ -2117,12 +2117,12 @@ end function crystal_from_file
 !!  nblocks          :  Number of MPI blocks to be used in GEMM nonlop
 !!
 !! SOURCE
-subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,npw,nband,nspinor,paral_kgb,&
+subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,nband,nspinor,paral_kgb,&
 &                                           npband,optfor,optstr,wfoptalg,gpu_option,use_distrib,&
 &                                           blocksize,nblocks)
    implicit none
 
-   integer,intent(in)     :: ikpt,ndat,npw,nband,nspinor,paral_kgb,npband,optfor,optstr,wfoptalg,gpu_option
+   integer,intent(in)     :: ikpt,ndat,nband,nspinor,paral_kgb,npband,optfor,optstr,wfoptalg,gpu_option
    logical,intent(in)     :: use_distrib
    type(gs_hamiltonian_type),intent(in) :: gs_hamk
    integer,intent(inout)  :: blocksize
@@ -2130,7 +2130,7 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,npw,nband,nspinor,
 
    integer(kind=c_size_t) :: nonlop_smem,invovl_smem,getghc_wmem,invovl_wmem,nonlop_wmem,gs_ham_smem
    integer(kind=c_size_t) :: sum_mem,sum_bandpp_mem,sum_other_mem,free_mem,localMem
-   integer  :: icplx,space,i,ndat_try,rank,nprocs,ndgxdt,blockdim,max_slices
+   integer  :: icplx,space,i,ndat_try,rank,nprocs,ndgxdt,blockdim,max_slices,npw,npw_fft
    logical  :: print_and_exit
    integer(kind=c_size_t) :: chebfiMem(2),lobpcgMem(2)
 
@@ -2154,17 +2154,20 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,npw,nband,nspinor,
      icplx = 1
    end if
 
+   npw=gs_hamk%npw_k
+   npw_fft=gs_hamk%npw_fft_k
    ndat_try=ndat
    blockdim=npband*ndat
    ndgxdt=0
    if(optfor>0) ndgxdt=ndgxdt+3
    if(optstr>0) ndgxdt=ndgxdt+6
-   nonlop_smem = gemm_nonlop_ompgpu_static_mem(gs_hamk%npw_fft_k, gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%ntypat, 1, ndgxdt, use_distrib)
+   nonlop_smem = gemm_nonlop_ompgpu_static_mem(npw_fft, gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%ntypat, 1, ndgxdt, use_distrib)
    getghc_wmem = getghc_ompgpu_work_mem(gs_hamk, ndat_try)
-   nonlop_wmem = gemm_nonlop_ompgpu_work_mem(gs_hamk%istwf_k, ndat, ndgxdt, gs_hamk%npw_fft_k,&
+   nonlop_wmem = gemm_nonlop_ompgpu_work_mem(gs_hamk%istwf_k, ndat, ndgxdt, npw_fft,&
    &               gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%ntypat, gs_hamk%lmnmax)
-   gs_ham_smem = sizeof(gs_hamk%ffnl_k) + sizeof(gs_hamk%kg_k)
-   if(associated(gs_hamk%ph3d_k)) gs_ham_smem = gs_ham_smem + sizeof(gs_hamk%ph3d_k)
+   gs_ham_smem = int(2,c_size_t)*npw_fft*size(gs_hamk%ffnl_k,dim=3)*size(gs_hamk%ffnl_k,dim=4) + int(3,c_size_t)*npw_fft
+   if(associated(gs_hamk%ph3d_k)) gs_ham_smem = gs_ham_smem + int(2,c_size_t) * npw_fft * gs_hamk%matblk
+   gs_ham_smem = gs_ham_smem*dp
 
    if(wfoptalg==111) then
      chebfiMem = chebfi_memInfo(nband,icplx*npw*nspinor,space,paral_kgb,icplx*npw*nspinor,blockdim)
@@ -2197,7 +2200,7 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,npw,nband,nspinor,
      if(modulo(nprocs,blocksize)/=0 .and. use_distrib) cycle
      if(i>1) nblocks=nprocs/blocksize
 
-     nonlop_smem = gemm_nonlop_ompgpu_static_mem(gs_hamk%npw_fft_k,gs_hamk%indlmn,gs_hamk%nattyp,gs_hamk%ntypat,blocksize, ndgxdt, use_distrib)
+     nonlop_smem = gemm_nonlop_ompgpu_static_mem(npw_fft,gs_hamk%indlmn,gs_hamk%nattyp,gs_hamk%ntypat,blocksize, ndgxdt, use_distrib)
 
      ! Bandpp~ndat sized buffer memory requirements are higher, split there
      sum_mem          = nonlop_smem + gs_ham_smem
