@@ -199,7 +199,7 @@ contains
  if (size(ffnl,1)/=npw_k.or.size(ffnl,3)/=lmnmax) then
    ABI_BUG('Incorrect size for ffnl!')
  end if
- if (size(ph3d)>0) then
+ if (size(ph3d,dim=1)>0) then
    if (size(ph3d,2)/=npw_k) then
      ABI_BUG('Incorrect size for ph3d!')
    end if

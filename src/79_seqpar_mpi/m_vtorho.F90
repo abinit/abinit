@@ -380,6 +380,9 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  integer :: nband_k,nband_cprj_k,nbuf,neglect_pawhat,nfftot,nkpg,nkpt1,nnsclo_now
  integer :: nproc_distrb,npw_k,nspden_rhoij,option,prtvol,quit,nblk_gemm_nonlop
  integer :: spaceComm_distrb,usecprj_local,usefock_ACE,usetimerev
+#if defined HAVE_GPU_CUDA
+ integer(c_int64_t)   :: ph3d_size
+#endif
  logical :: berryflag,computesusmat,fixed_occ,has_vectornd
  logical :: locc_test,paral_atom,remove_inv,usefock,with_vxctau
  logical :: do_last_ortho,wvlbigdft=.false.,do_invS
@@ -1022,12 +1025,15 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 #if defined HAVE_GPU_CUDA
        if (dtset%gpu_option==ABI_GPU_LEGACY .or. dtset%gpu_option==ABI_GPU_KOKKOS) then
          if (mpi_enreg%paral_kgb==1) then
+           ph3d_size=INT(size(my_bandfft_kpt%ph3d_gather,dim=1),c_int64_t) &
+             &       * size(my_bandfft_kpt%ph3d_gather,dim=2) * size(my_bandfft_kpt%ph3d_gather,dim=3)
            call gpu_update_ffnl_ph3d( &
-             & my_bandfft_kpt%ph3d_gather, INT(size(my_bandfft_kpt%ph3d_gather),c_int64_t), &
+             & my_bandfft_kpt%ph3d_gather, ph3d_size, &
              & my_bandfft_kpt%ffnl_gather, INT(size(my_bandfft_kpt%ffnl_gather),c_int64_t) )
          else
+           ph3d_size=INT(size(ph3d,dim=1),c_int64_t)*size(ph3d,dim=2)*size(ph3d,dim=3)
            call gpu_update_ffnl_ph3d( &
-             & ph3d, INT(size(ph3d),c_int64_t), &
+             & ph3d, ph3d_size, &
              & ffnl, INT(size(ffnl),c_int64_t) )
          end if
        end if
