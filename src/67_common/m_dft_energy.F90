@@ -703,7 +703,7 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
 #if defined HAVE_GPU_CUDA
      if (dtset%gpu_option==ABI_GPU_LEGACY .or. dtset%gpu_option==ABI_GPU_KOKKOS) then
        call gpu_update_ffnl_ph3d( &
-         & ph3d, INT(size(ph3d),c_int64_t), &
+         & ph3d, INT(size(ph3d,dim=1),c_int64_t)*size(ph3d,dim=2)*size(ph3d,dim=3), &
          & ffnl, INT(size(ffnl),c_int64_t) )
      end if
 #endif
