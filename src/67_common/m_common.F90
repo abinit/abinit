@@ -2209,6 +2209,11 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,nband,nspinor,para
      ! Gemm nonlop static memory requirement is higher, split here
      if(i>1 .and. .not. print_and_exit) blocksize = blocksize + 1
      if(modulo(nprocs,blocksize)/=0 .and. use_distrib) cycle
+     !FIXME : Skipping uneven blocksize <=5 if using MPI distrib, as the amount of GPU per node is even usually
+     !For example, with 3 nodes of 4 GPU, we don't want to have a blocksize of 3 as
+     !it would generate 4 comms-block, with 2 inter-node comms.
+     !While using a blocksize of 4 would generate 3 comms, one for each node, leading to less MPI comms
+     if(i>1 .and. modulo(blocksize,2)/=0 .and. use_distrib .and. .not. print_and_exit) cycle
      if(i>1) nblocks=nprocs/blocksize
 
      nonlop_smem = gemm_nonlop_ompgpu_static_mem(npw_fft,gs_hamk%indlmn,gs_hamk%nattyp,gs_hamk%ntypat,blocksize, ndgxdt, use_distrib)
