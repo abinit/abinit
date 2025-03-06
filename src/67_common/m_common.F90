@@ -2130,7 +2130,7 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,nband,nspinor,para
 
    integer(kind=c_size_t) :: nonlop_smem,invovl_smem,getghc_wmem,invovl_wmem,nonlop_wmem,gs_ham_smem
    integer(kind=c_size_t) :: sum_mem,sum_bandpp_mem,sum_other_mem,free_mem,localMem
-   integer  :: icplx,space,i,ndat_try,rank,nprocs,ndgxdt,blockdim,max_slices,npw,npw_fft
+   integer  :: icplx,space,i,ndat_try,rank,nprocs,ndgxdt,blockdim,max_slices,npw,npw_fft,signs
    logical  :: print_and_exit
    integer(kind=c_size_t) :: chebfiMem(2),lobpcgMem(2)
 
@@ -2168,10 +2168,14 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,nband,nspinor,para
    ndgxdt=0
    if(optfor>0) ndgxdt=ndgxdt+3
    if(optstr>0) ndgxdt=ndgxdt+6
+   signs=2
+   !wfoptalg==-1 means we're in forstr
+   if(wfoptalg==-1) signs=1
+
    nonlop_smem = gemm_nonlop_ompgpu_static_mem(npw_fft, gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%ntypat, 1, ndgxdt, use_distrib)
    getghc_wmem = getghc_ompgpu_work_mem(gs_hamk, ndat_try)
    nonlop_wmem = gemm_nonlop_ompgpu_work_mem(gs_hamk%istwf_k, ndat, ndgxdt, npw_fft,&
-   &               gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%ntypat, gs_hamk%lmnmax)
+   &               gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%ntypat, gs_hamk%lmnmax, signs, wfoptalg)
    gs_ham_smem = int(2,c_size_t)*npw_fft*size(gs_hamk%ffnl_k,dim=3)*size(gs_hamk%ffnl_k,dim=4) + int(3,c_size_t)*npw_fft
    if(associated(gs_hamk%ph3d_k)) gs_ham_smem = gs_ham_smem + int(2,c_size_t) * npw_fft * gs_hamk%matblk
    gs_ham_smem = gs_ham_smem*dp

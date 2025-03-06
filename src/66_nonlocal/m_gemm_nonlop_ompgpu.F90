@@ -89,10 +89,10 @@ module m_gemm_nonlop_ompgpu
 
 contains
 
- function gemm_nonlop_ompgpu_work_mem(istwfk, ndat, ngrads, npw, indlmn, nattyp, ntypat, lmnmax) result(req_mem)
+ function gemm_nonlop_ompgpu_work_mem(istwfk, ndat, ngrads, npw, indlmn, nattyp, ntypat, lmnmax, signs, wfoptalg) result(req_mem)
    implicit none
 
-   integer, intent(in) :: istwfk, ndat, ngrads, npw, ntypat, lmnmax
+   integer, intent(in) :: istwfk, ndat, ngrads, npw, ntypat, lmnmax, signs, wfoptalg
    integer, intent(in) :: indlmn(:,:,:), nattyp(ntypat)
 
    integer :: nprojs, cplex, itypat
@@ -109,8 +109,8 @@ contains
    req_mem = 0
 
    if(cplex == 1) then
-     req_mem = req_mem + dp * npw * ndat ! temp_realvec_r
-     req_mem = req_mem + dp * npw * ndat ! temp_realvec_i
+     req_mem = req_mem + dp * int(npw, c_size_t) * ndat ! temp_realvec_r
+     req_mem = req_mem + dp * int(npw, c_size_t) * ndat ! temp_realvec_i
    end if
 
    req_mem = req_mem + dp * lmnmax * (lmnmax+1)/2 * ntypat  ! sij_typ
@@ -119,10 +119,24 @@ contains
    req_mem = req_mem + dp * cplex * int(nprojs, c_size_t) * int(ndat, c_size_t)  ! s_projections
    req_mem = req_mem + dp * cplex * int(nprojs, c_size_t) * int(ndat, c_size_t)  ! vnl_projections
 
+   ! Not in a place where vectin, vectout, svectout, enlout are allocated
+   if(wfoptalg<0) then
+     req_mem = req_mem + dp * cplex * int(npw, c_size_t) * int(ndat, c_size_t)  ! vectin
+     if(signs==2) then
+       req_mem = req_mem + dp * cplex * int(npw, c_size_t) * int(ndat, c_size_t)  ! vectout
+       req_mem = req_mem + dp * cplex * int(npw, c_size_t) * int(ndat, c_size_t)  ! svectout
+     end if
+     if(signs==1) then
+       req_mem = req_mem + dp * cplex * nprojs * int(ndat, c_size_t)  ! enlout (overestimate)
+     end if
+   end if
+
    if(ngrads>0) then
-     req_mem = req_mem + dp * cplex * int(nprojs, c_size_t) * int(ndat, c_size_t)  ! dprojections_
-     req_mem = req_mem + dp * cplex * int(nprojs, c_size_t) * int(ndat, c_size_t)  ! s_dprojections
-     req_mem = req_mem + dp * cplex * int(nprojs, c_size_t) * int(ndat, c_size_t)  ! vnl_dprojections
+     req_mem = req_mem + dp * cplex * ngrads * int(nprojs, c_size_t) * int(ndat, c_size_t)  ! dprojections_
+     if(signs==2) then
+       req_mem = req_mem + dp * cplex * ngrads * int(nprojs, c_size_t) * int(ndat, c_size_t)  ! s_dprojections
+       req_mem = req_mem + dp * cplex * ngrads * int(nprojs, c_size_t) * int(ndat, c_size_t)  ! vnl_dprojections
+     end if
    end if
 
  end function gemm_nonlop_ompgpu_work_mem
