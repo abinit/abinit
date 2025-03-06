@@ -4,7 +4,7 @@
 # Dataset 3: one-shot G0W0 calculation in real-space and imaginary-time.
 # Dataset 4: RPA energy calculation within ACFDT
 
-ndtset      4
+ndtset 4
 timopt 1
 iomode 1
 istwfk *1
@@ -73,10 +73,10 @@ freqspmax3 5 eV
 ################################
 # Dataset 4: RPA energy
 ################################
-optdriver4  6        # Activate GWR code
+optdriver4  6              # Activate GWR code
 gwr_task4 "RPA_ENERGY"     # Compute RPA energy.
 getden4 1
-getwfk4 2 # WFK file with empty states
+getwfk4 2                  # WFK file with empty states
 gwr_ntau4   6
 gwr_boxcutmin4  1.1
 nband4      30
