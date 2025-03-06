@@ -24414,21 +24414,22 @@ Variable(
 Select the task to be performed when [[optdriver]] == 6 i.e. GWR code.
 The choice is among:
 
-* HDIAGO --> direct diagonalization of the KS Hamiltonian to produce [[nband]] eigenvectors
-* HDIAGO_FULL --> direct diagonalization of the KS Hamiltonian for maximum number of eigenvectors defined by [[ecut]]
-* G0W0 -->  one-shot GW
-* G0V -->
-* EGEW -->
-* EGW0 -->
-* G0EW -->
+* HDIAGO --> direct diagonalization of the KS Hamiltonian to produce [[nband]] eigenvectors.
+* HDIAGO_FULL --> direct diagonalization of the KS Hamiltonian for maximum number of eigenvectors defined by [[ecut]].
+* G0W0 -->  one-shot GW.
+* G0V --> one-shot Hartree-Fock with KS eigenstates.
+* EGEW --> energy-only self-consistent GW (update energies both in G and in W).
+* EGW0 --> energy-only self-consistent GW (update energies in G only).
+* G0EW --> energy-only self-consistent GW (update energies in W only).
+* CHI0 --> Compute irreducibile polarizability G0G0.
 * RPA_ENERGY --> Compute RPA correlation energy within the ACFDT framework.
 * CC4S --> Read density from file, diagonalize the KS Hamiltonian and produce output files required by CC4S.
-* CC4S_FULL --> Same as CC4S but compute maximum number of eigenvectors according to [[ecut]]
+* CC4S_FULL --> Same as CC4S but compute maximum number of eigenvectors according to [[ecut]].
 * CC4S_FROM_WFK --> Same as CC4S but read single particle orbitals from an external WFK file.
 
 !!! important
 
-    At the time of writing, PAW is not supported by the GWR code.
+    At the time of writing, PAW and metallic systems are not supported by the GWR code.
 """,
 ),
 

@@ -82,5 +82,3 @@ pseudos "H.psp8"
 #%% keywords = NC, CC4S
 #%% description = Hartree-Fock with time-reversal, then CC4S output
 #%%<END TEST_INFO>
-
-

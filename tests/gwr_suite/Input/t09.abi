@@ -8,7 +8,7 @@ iomode 1
 ngkpt     1 1 1              # Number of grid points for k-point generation
 nshiftk   1
 shiftk    0 0 0              # Mesh centered on gamma
-#istwfk    *1                 # Required (for the time being)
+#istwfk    *1                # Required (for the time being)
 
 # Definition of the unit cell: fcc
 acell 3*7.7034756             # Lattice constants (in atomic units)

@@ -9,8 +9,6 @@ We discuss the technical details related to the implementation, the associated i
 as well as the pros and cons with respect to the conventional GW implementation formulated
 in Fourier-space and real-frequency domain that in what follows will be referred to as conventional or legacy GW code.
 
-WARNING: THIS TUTORIAL IS WORK IN PROGRESS! IT IS NOT YET COMPLETE...
-
 ## Why a new GW code?
 
 The conventional GW code has quartic scaling with the number of atoms whereas GWR scales cubically.
@@ -37,15 +35,19 @@ in certain parts of the algorithm.
 More specifically, GWR uses Parallel BLAS (PBLAS) to distribute the memory required to store the Green's functions and $W$,
 and this allows one to tackle larger systems if enough computing nodes are available.
 
+Limitations: metallic systems are not supported.
+Temperature effects at the electronic level are not taken into account as we work
+with the T=0 formalism.
+
 Select the task to be performed when [[optdriver]] == 6 i.e. GWR code.
 while [[gwr_task]] defines the task to be performed.
 
 ### Requirements
 
 First of all, one should mention that the GWR code requires an ABINIT build with Scalapack enabled.
-Moreover, a significant fraction of the computing time is spent in doing FFTs thus we **strongly**
-recommend to use optimized vendor-provided FFT libraries such as MKL-DFTI or FFTW3 instead of the internal FFT version
-shipped with ABINIT.
+Moreover, a significant fraction of the computing time is spent in performing FFTs thus we **strongly**
+recommend to use optimized vendor-provided FFT libraries such as MKL-DFTI or FFTW3 instead
+of the internal FFT version shipped with ABINIT.
 
 Note that single-precision is the default mode as in the conventional $GW$ code.
 To run computations in double-precision, one has to configure with  `--enable-gw-dpc="yes"` when
@@ -123,9 +125,7 @@ At the time of writing, the following features are **not yet supported** in GWR:
 * Spinor wave-functions ([[nspinor]] = 2)
 
 Citations relevant to the minimax mesh
-
-[[cite:Azizi2023]]
-[[cite:Azizi2024]]
+[[cite:Azizi2023]], [[cite:Azizi2024]]
 
 ## GWR workflow for QP energies
 

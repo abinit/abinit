@@ -34,8 +34,8 @@ nband2     30        # Number of (occ + empty) bands
 ################################
 optdriver3  6        # Activate GWR code
 gwr_task3 "G0W0"     # One-shot calculation
-#gwr_chi_algo3  2     # Compute Chi with convolutions in the BZ 
-gwr_sigma_algo3  2   # Compute Sigma with convolutions in the BZ 
+#gwr_chi_algo3  2    # Compute Chi with convolutions in the BZ
+gwr_sigma_algo3  2   # Compute Sigma with convolutions in the BZ
 getden3 1
 getwfk3 2            # WFK file with empty states
 
