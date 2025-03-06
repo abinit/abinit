@@ -2140,7 +2140,14 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,nband,nspinor,para
 #ifdef HAVE_GPU
    if(gpu_option /= ABI_GPU_DISABLED) then
      call gpu_get_max_mem(free_mem)
-     free_mem = 0.95 * free_mem ! Cutting 5% out to be safe
+     ! NOTE: Cutting 10% out to be safe
+     ! I computed this value using the memory allocation summary that
+     ! NVHPC provides after a GPU out-of-memory crash, on a run NVIDIA A100 with 80GB.
+     ! 8.5% is the amount of memory that wasn't reported allocated nor freed.
+     ! I add extra 1.5% to account for minor buffers eventually allocated.
+     ! This amount may either be hidden allocations for CUDA/cuBLAS/cuFFT/cuSOLVER,
+     ! or memory allocated outside ABINIT.
+     free_mem = 0.9 * free_mem
    end if
 #else
    ABI_UNUSED(gpu_option)
