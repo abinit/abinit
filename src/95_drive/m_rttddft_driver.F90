@@ -139,7 +139,7 @@ subroutine rttddft(codvsn,dtfil,dtset,mpi_enreg,pawang,pawrad,pawtab,psps)
 
  do istep = tdks%first_step, tdks%first_step+tdks%ntime-1
 
-   call cwtime(cpu, wall, gflops, "start")
+   call cwtime(cpu,wall,gflops,"start")
 
    !*** Perform electronic step ***
    !Compute new WF at time t and energy contribution at time t-dt
