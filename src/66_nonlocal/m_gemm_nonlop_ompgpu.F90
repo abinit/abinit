@@ -581,7 +581,8 @@ contains
     kpgout_ => kpgout
   end if
 
-  !$OMP TARGET ENTER DATA MAP(to:kpgin_,kpgout_)
+  !$OMP TARGET ENTER DATA MAP(to:kpgin_)  if(nkpgin_  > 0)
+  !$OMP TARGET ENTER DATA MAP(to:kpgout_) if(nkpgout_ > 0)
 
   ! Allocate and copy GPU buffers if user doesn't manage them
   !$OMP TARGET ENTER DATA MAP(to:vectin)      IF(transfer_vectin)
@@ -1207,7 +1208,8 @@ contains
     !$OMP TARGET EXIT DATA MAP(delete:enlout)
   end if
 
-  !$OMP TARGET EXIT DATA MAP(delete:kpgin_,kpgout_)
+  !$OMP TARGET EXIT DATA MAP(delete:kpgin_)  if(nkpgin_  > 0)
+  !$OMP TARGET EXIT DATA MAP(delete:kpgout_) if(nkpgout_ > 0)
 
   if (nkpgin<nkpgin_) then
     ABI_FREE(kpgin_)
