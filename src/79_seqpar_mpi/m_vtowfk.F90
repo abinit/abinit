@@ -799,7 +799,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
  ! In case of GEMM nonlop distribution + force computation,
  ! recompute distribution as projectors arrays are bigger in this case
- if(optforces==1 .and. dtset%gpu_nl_distrib==1) then
+ if(optforces==1 .and. gs_hamk%gpu_option==ABI_GPU_OPENMP) then
    blksize_gemm_nonlop_tmp = gemm_nonlop_block_size; is_distrib_tmp = gemm_nonlop_is_distributed
    gemm_nonlop_block_size = dtset%gpu_nl_splitsize
    call get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,mpi_enreg%bandpp,nband_k,&
