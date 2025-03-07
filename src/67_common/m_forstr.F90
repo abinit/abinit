@@ -335,6 +335,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 ! *************************************************************************
 
  call timab(910,1,tsec)
+ ABI_NVTX_START_RANGE(NVTX_FORSTR)
  call timab(911,1,tsec)
 
 !Do nothing if nothing is required
@@ -541,6 +542,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 
 
  call timab(914,2,tsec)
+ ABI_NVTX_END_RANGE()
  call timab(910,2,tsec)
 
 end subroutine forstr
