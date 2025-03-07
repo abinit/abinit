@@ -2152,6 +2152,13 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,nband,nspinor,para
 #else
    ABI_UNUSED(gpu_option)
 #endif
+
+   if(gpu_option /= ABI_GPU_OPENMP) then
+     ! No distribution is attempted outside of OpenMP GPU. User is already warned in chkinp
+     blocksize=1; nblocks=0;
+     return
+   end if
+
    rank = xmpi_comm_rank(xmpi_world); nprocs = xmpi_comm_size(xmpi_world)
    if ( gs_hamk%istwf_k == 2 ) then ! Real only
      space = SPACE_CR
