@@ -291,7 +291,7 @@ contains
    rfstrs(1:2)=0
    rfmagn(1:2)=1
    call ddb%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, omega=omega)
-   if (lblok /= 0 ) then
+   if (iblok /= 0 ) then
      call mp_macmagsus(barmagsus,ddb%val,&
    & 0,iblok,invbarmagsus,invhmat,macmagsus,magpen,magsus,mpatpol,mpdir,mpert,mpopt,&
    & natom,nblok,ndim,nmdir,prtopt,prtvol,ucvol)
@@ -2354,6 +2354,7 @@ contains
  if (omegaflag == 3) then
    ABI_MALLOC(coeffs,(2,nwcalc))
  end if
+ nblok= ddb%nblok
 
 !For linear interpolation detect the w=0 Hessians and Berry curvatures
  if (omegaflag == 2) then
@@ -2505,7 +2506,7 @@ contains
 
      !Alternative calculation
      genzeff_tr(1:natom*3,:)= fmzeff_tr(:,:)
-     genzeff_tr(natom*3:natom*3+ndim,:)= zfield(:,(natom+2)*3-2:(natom+2)*3,iw)
+     genzeff_tr(natom*3+1:natom*3+ndim,:)= zfield(:,(natom+2)*3-2:(natom+2)*3,iw)
      ri_genelsus(:,:,iw)=-matmul(magphongreen,genzeff_tr)
 
      !Another alternative
