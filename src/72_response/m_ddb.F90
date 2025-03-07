@@ -1198,9 +1198,9 @@ subroutine ddb_get_block(ddb, iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rfty
          do ipert2=1,mpert
            if (worki(ipert2,2)==1 .and. ok==1 )then
              do idir1=1,3
-               if (ipert1>natom+11.and.ipert1<=2*natom+11.and.mpdir(idir1)==0) cycle
+               if (ipert1>natom+11.and.ipert1<=2*natom+11.and.mpdir_(idir1)==0) cycle
                do idir2=1,3
-                 if (ipert2>natom+11.and.ipert2<=2*natom+11.and.mpdir(idir2)==0) cycle
+                 if (ipert2>natom+11.and.ipert2<=2*natom+11.and.mpdir_(idir2)==0) cycle
 
                  if (nder == 2) then
                    index=idir1+ 3*((ipert1-1)+mpert*((idir2-1)+3*(ipert2-1)))
