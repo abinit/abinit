@@ -26,7 +26,7 @@ module m_nvtx_data
 
   implicit none
 
-  integer, parameter :: NUMBER_OF_NVTX_REGIONS = 95
+  integer, parameter :: NUMBER_OF_NVTX_REGIONS = 99
   character(len=32), dimension(NUMBER_OF_NVTX_REGIONS) :: nvtx_names
   integer          , dimension(NUMBER_OF_NVTX_REGIONS) :: nvtx_ids
 
@@ -125,6 +125,10 @@ module m_nvtx_data
   integer, parameter :: NVTX_GETGSC = 93
   integer, parameter :: NVTX_DFPT_ACCRHO = 94
   integer, parameter :: NVTX_DFPT_MKRHO = 95
+  integer, parameter :: NVTX_MAKE_INVOVL = 96
+  integer, parameter :: NVTX_FORSTR = 97
+  integer, parameter :: NVTX_FORCES = 98
+  integer, parameter :: NVTX_STRESS = 99
 
 contains
 
@@ -229,7 +233,12 @@ contains
          & "DFPT_WFKFERMI", &
          & "GETGSC", &
          & "DFPT_ACCRHO", &
-         & "DFPT_MKRHO" &
+         & "DFPT_MKRHO", &
+         & "MAKE_INVOVL", &
+         & "FORSTR", &
+         & "FORCES", &
+         & "STRESS" &
+
          ]
 
     nvtx_ids(1) = NVTX_MAIN_COMPUTATION
@@ -327,6 +336,10 @@ contains
     nvtx_ids(93)= NVTX_GETGSC
     nvtx_ids(94)= NVTX_DFPT_ACCRHO
     nvtx_ids(95)= NVTX_DFPT_MKRHO
+    nvtx_ids(96)= NVTX_MAKE_INVOVL
+    nvtx_ids(97)= NVTX_FORSTR
+    nvtx_ids(98)= NVTX_FORCES
+    nvtx_ids(99)= NVTX_STRESS
 
   end subroutine nvtx_init
 
