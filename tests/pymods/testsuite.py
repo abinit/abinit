@@ -3299,7 +3299,7 @@ def run_and_check_test(test, rank, print_lock=None, **kwargs):
     gpu_counter = kwargs.pop("gpu_counter")
     max_cpus = kwargs.pop("max_cpus")
     max_gpus = kwargs.pop("max_gpus")
-    if max_gpus <= 0: max_gpus = -1
+    if max_gpus <= 0: max_gpus = 0
 
     build_with_gpu ="HAVE_GPU" in build_env.defined_cppvars
     ngpus = test.uses_gpu * mpi_nprocs if build_with_gpu else 0
@@ -3311,7 +3311,7 @@ def run_and_check_test(test, rank, print_lock=None, **kwargs):
 
     # Wait until enough resources are available
     with condition:
-        while cpu_counter.value + ncpus > max_cpus and gpu_counter.value + ngpus > max_gpus:
+        while cpu_counter.value + ncpus > max_cpus or gpu_counter.value + ngpus > max_gpus:
             condition.wait()
 
         # Reserve resources safely using a lock
