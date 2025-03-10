@@ -5,6 +5,8 @@
 
 ndtset 3
 timopt 1
+iomode 1
+istwfk *1
 #ndtset 1; jdtset 3
 #nsym 1 kptopt 3
 
@@ -111,6 +113,7 @@ pseudos "Si-GGA.psp8, O-GGA.psp8"
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = alps_intel_2025_elpa, eos_gnu_13.2_mpich, eos_nvhpc_23.9_elpa
 #%% need_cpp_vars = HAVE_LINALG_SCALAPACK
 #%% [paral_info]
 #%% nprocs_to_test = 4

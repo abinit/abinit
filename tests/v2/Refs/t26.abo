@@ -1,8 +1,8 @@
 
-.Version 9.11.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2022 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Jul 2023.
-- ( at 11h59 )
-  
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v2_t26-t27-t28/t26.abi
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h08 )
+
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v2_t26-t27-t28/t26.abi
 - output file    -> t26.abo
 - root for input  files -> t26i
 - root for output files -> t26o
@@ -240,10 +240,10 @@ _ WF disk file :      0.045 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -253,7 +253,7 @@ _ WF disk file :      0.045 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
            chneut           0
              ecut      2.50000000E+00 Hartree
            enunit           2
--          fftalg         312
+-          fftalg         512
            getden1          0
            getden2          1
            getden3          1
@@ -1236,8 +1236,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/13al.981214.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/13al.981214.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/13al.981214.fhi
 - Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
 - 13.00000   3.00000    981214                znucl, zion, pspdat
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1263,13 +1263,13 @@ tolerances: {tolvrs: 1.00E-13, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -2.0700755653827    -2.070E+00 1.134E-04 1.410E-01
+ ETOT  1  -2.0700755653828    -2.070E+00 1.134E-04 1.410E-01
  ETOT  2  -2.0702780293941    -2.025E-04 3.145E-12 8.059E-03
- ETOT  3  -2.0702873635130    -9.334E-06 2.202E-07 1.744E-05
+ ETOT  3  -2.0702873635131    -9.334E-06 2.202E-07 1.744E-05
  ETOT  4  -2.0702873764626    -1.295E-08 3.539E-10 4.120E-08
- ETOT  5  -2.0702873765050    -4.243E-11 1.212E-12 1.374E-10
- ETOT  6  -2.0702873765052    -1.452E-13 3.291E-15 1.691E-12
- ETOT  7  -2.0702873765052    -7.994E-15 8.073E-17 3.800E-15
+ ETOT  5  -2.0702873765050    -4.241E-11 1.212E-12 1.374E-10
+ ETOT  6  -2.0702873765051    -1.559E-13 3.291E-15 1.691E-12
+ ETOT  7  -2.0702873765051     9.326E-15 8.074E-17 3.801E-15
 
  At SCF step    7       vres2   =  3.80E-15 < tolvrs=  1.00E-13 =>converged.
 
@@ -1289,7 +1289,7 @@ lattice_vectors:
 lattice_lengths: [   5.37401,    5.37401,    5.37401, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.0974400E+02
-convergence: {deltae: -7.994E-15, res2:  3.800E-15, residm:  8.073E-17, diffor: null, }
+convergence: {deltae:  9.326E-15, res2:  3.801E-15, residm:  8.074E-17, diffor: null, }
 etotal    :  -2.07028738E+00
 entropy   :   0.00000000E+00
 fermie    :   2.68859112E-01
@@ -1313,7 +1313,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   41.930E-18; max=  80.733E-18
+ Mean square residual over all n,k,spin=   41.931E-18; max=  80.735E-18
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -1350,18 +1350,18 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  8.30383461928506E-01
-hartree             :  3.41929237032999E-03
-xc                  : -8.02816375145711E-01
+kinetic             :  8.30383461928583E-01
+hartree             :  3.41929237033801E-03
+xc                  : -8.02816375145749E-01
 Ewald energy        : -2.71472096493581E+00
 psp_core            :  3.72610088794390E-02
-local_psp           :  1.04283675799889E-01
-non_local_psp       :  4.78279142786552E-01
-internal            : -2.06391075831681E+00
-'-kT*entropy'       : -6.37661818836000E-03
-total_energy        : -2.07028737650517E+00
-total_energy_eV     : -5.63353845025944E+01
-band_energy         :  3.73848506069962E-01
+local_psp           :  1.04283675799723E-01
+non_local_psp       :  4.78279142786697E-01
+internal            : -2.06391075831678E+00
+'-kT*entropy'       : -6.37661818835896E-03
+total_energy        : -2.07028737650514E+00
+total_energy_eV     : -5.63353845025937E+01
+band_energy         :  3.73848506069953E-01
 ...
 
 
@@ -1436,7 +1436,7 @@ lattice_vectors:
 lattice_lengths: [   5.37401,    5.37401,    5.37401, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.0974400E+02
-convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  2.685E-23, diffor:  0.000E+00, }
+convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  2.686E-23, diffor:  0.000E+00, }
 etotal    :  -2.07028738E+00
 entropy   :   0.00000000E+00
 fermie    :   2.68859112E-01
@@ -1456,7 +1456,7 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   50.470E-25; max=  26.854E-24
+ Mean square residual over all n,k,spin=   50.482E-25; max=  26.860E-24
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
 
@@ -1521,7 +1521,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
 ================================================================================
  prteigrs : about to open file t26o_DS3_EIG
  Non-SCF case, kpt    1 ( -0.00000  0.75000  0.00000), residuals and eigenvalues=
-  3.27E-25  2.68E-23  9.10E-24  9.69E-23
+  3.27E-25  2.68E-23  9.09E-24  9.69E-23
  -6.0635E-02  4.1706E-01  6.9457E-01  6.9457E-01
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
@@ -1537,7 +1537,7 @@ lattice_vectors:
 lattice_lengths: [   5.37401,    5.37401,    5.37401, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.0974400E+02
-convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  2.685E-23, diffor:  0.000E+00, }
+convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  2.686E-23, diffor:  0.000E+00, }
 etotal    :  -2.07028738E+00
 entropy   :   0.00000000E+00
 fermie    :   2.68859112E-01
@@ -1557,7 +1557,7 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   50.470E-25; max=  26.854E-24
+ Mean square residual over all n,k,spin=   50.482E-25; max=  26.860E-24
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
 
@@ -1621,7 +1621,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -1663,12 +1663,12 @@ tolerances: {tolvrs: 1.00E-10, }
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   814.78773717566      7.977E+02 1.740E-02 9.965E+05
  ETOT  2   273.32196089209     -5.415E+02 1.948E-02 3.328E+05
- ETOT  3  0.21927357245513     -2.731E+02 2.595E-03 8.997E+00
- ETOT  4  0.21148335899450     -7.790E-03 9.316E-07 2.031E-02
- ETOT  5  0.21145603542785     -2.732E-05 2.664E-08 3.129E-04
- ETOT  6  0.21145572050679     -3.149E-07 1.324E-10 9.134E-08
- ETOT  7  0.21145572035082     -1.560E-10 7.741E-14 2.144E-10
- ETOT  8  0.21145572035051     -3.126E-13 1.558E-16 5.209E-13
+ ETOT  3  0.21927357245799     -2.731E+02 2.595E-03 8.997E+00
+ ETOT  4  0.21148335899743     -7.790E-03 9.316E-07 2.031E-02
+ ETOT  5  0.21145603543073     -2.732E-05 2.664E-08 3.129E-04
+ ETOT  6  0.21145572050976     -3.149E-07 1.324E-10 9.134E-08
+ ETOT  7  0.21145572035387     -1.559E-10 7.741E-14 2.144E-10
+ ETOT  8  0.21145572035345     -4.228E-13 1.558E-16 5.209E-13
 
  At SCF step    8       vres2   =  5.21E-13 < tolvrs=  1.00E-10 =>converged.
 ================================================================================
@@ -1692,9 +1692,9 @@ tolerances: {tolvrs: 1.00E-10, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.2114557204E+00 Ha. Also 2DEtotal=    0.575400277585E+01 eV
+ 2DEtotal=    0.2114557204E+00 Ha. Also 2DEtotal=    0.575400277593E+01 eV
     (2DErelax=   -1.6844578298E+01 Ha. 2DEnonrelax=    1.7056034019E+01 Ha)
-    (  non-var. 2DEtotal :    2.1145571594E-01 Ha)
+    (  non-var. 2DEtotal :    2.1145571595E-01 Ha)
 
 ================================================================================
 
@@ -1702,38 +1702,38 @@ tolerances: {tolvrs: 1.00E-10, }
 
 
  ==> Compute Derivative Database <==
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   1    1         0.2114557159        -0.0000000000
    1    1   2    1         0.1312914838         0.0000000000
    1    1   3    1         0.0801642322        -0.0000000000
-  
+
    2    1   1    1         0.1312914838         0.0000000000
    2    1   2    1         0.2114557159         0.0000000000
    2    1   3    1         0.0801642322         0.0000000000
-  
+
    3    1   1    1         0.0801642322        -0.0000000000
    3    1   2    1         0.0801642322         0.0000000000
    3    1   3    1         0.1603284644         0.0000000000
-  
-  
+
+
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   1    1         0.0055515396        -0.0000000000
    1    1   2    1         0.0000000000         0.0000000000
    1    1   3    1         0.0000000000         0.0000000000
-  
+
    2    1   1    1         0.0000000000         0.0000000000
    2    1   2    1         0.0055515396        -0.0000000000
    2    1   3    1         0.0000000000         0.0000000000
-  
+
    3    1   1    1         0.0000000000         0.0000000000
    3    1   2    1         0.0000000000         0.0000000000
    3    1   3    1         0.0090922080        -0.0000000000
@@ -1792,7 +1792,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -1832,19 +1832,19 @@ tolerances: {tolvrs: 1.00E-10, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  1.90307948271951E-03 -3.332E+00 2.220E-03 1.921E+00
- ETOT  2  5.01116867495099E-05 -1.853E-03 9.942E-07 3.890E-02
- ETOT  3  1.11337748531781E-06 -4.900E-05 8.248E-08 3.930E-05
- ETOT  4  1.01982996358885E-06 -9.355E-08 1.028E-10 2.032E-07
- ETOT  5  1.01917441597266E-06 -6.555E-10 7.905E-13 6.800E-10
- ETOT  6  1.01917286166042E-06 -1.554E-12 1.269E-15 6.674E-13
+-ETOT  1  1.90307948560253E-03 -3.332E+00 2.220E-03 1.921E+00
+ ETOT  2  5.01116896263198E-05 -1.853E-03 9.942E-07 3.890E-02
+ ETOT  3  1.11337961605784E-06 -4.900E-05 8.248E-08 3.930E-05
+ ETOT  4  1.01983279421347E-06 -9.355E-08 1.028E-10 2.031E-07
+ ETOT  5  1.01917730610523E-06 -6.555E-10 7.906E-13 6.793E-10
+ ETOT  6  1.01917573402943E-06 -1.573E-12 1.267E-15 6.649E-13
 
- At SCF step    6       vres2   =  6.67E-13 < tolvrs=  1.00E-10 =>converged.
+ At SCF step    6       vres2   =  6.65E-13 < tolvrs=  1.00E-10 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   50.186E-17; max=  12.687E-16
+ Mean square residual over all n,k,spin=   50.115E-17; max=  12.672E-16
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -1861,9 +1861,9 @@ tolerances: {tolvrs: 1.00E-10, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.1019172861E-05 Ha. Also 2DEtotal=    0.277331039342E-04 eV
+ 2DEtotal=    0.1019175732E-05 Ha. Also 2DEtotal=    0.277331820711E-04 eV
     (2DErelax=   -3.3340530176E+00 Ha. 2DEnonrelax=    3.3340540367E+00 Ha)
-    (  non-var. 2DEtotal :    9.8343248567E-07 Ha)
+    (  non-var. 2DEtotal :    9.8349724986E-07 Ha)
 
 ================================================================================
 
@@ -1871,68 +1871,68 @@ tolerances: {tolvrs: 1.00E-10, }
 
 
  ==> Compute Derivative Database <==
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
-   1    1   1    1         0.0000009834         0.0000000000
+
+   1    1   1    1         0.0000009835         0.0000000000
    1    1   2    1         0.0000004917         0.0000000000
    1    1   3    1         0.0000004917         0.0000000000
    1    1   2    3         0.0000000000         0.0000000000
    1    1   3    3         0.0000000000         0.0000000000
-  
+
    2    1   1    1         0.0000004917         0.0000000000
-   2    1   2    1         0.0000009834         0.0000000000
+   2    1   2    1         0.0000009835         0.0000000000
    2    1   3    1         0.0000004917         0.0000000000
    2    1   1    3         0.0000000000         0.0000000000
    2    1   3    3         0.0000000000         0.0000000000
-  
+
    3    1   1    1         0.0000004917         0.0000000000
    3    1   2    1         0.0000004917         0.0000000000
-   3    1   3    1         0.0000009834         0.0000000000
+   3    1   3    1         0.0000009835         0.0000000000
    3    1   1    3         0.0000000000         0.0000000000
    3    1   2    3         0.0000000000         0.0000000000
-  
+
    1    3   2    1         0.0000000000         0.0000000000
    1    3   3    1         0.0000000000         0.0000000000
-  
+
    2    3   1    1         0.0000000000         0.0000000000
    2    3   3    1         0.0000000000         0.0000000000
-  
+
    3    3   1    1         0.0000000000         0.0000000000
    3    3   2    1         0.0000000000         0.0000000000
-  
-  
+
+
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   1    1         0.0000000341         0.0000000000
    1    1   2    1         0.0000000000         0.0000000000
-   1    1   3    1         0.0000000000         0.0000000000
-  
+   1    1   3    1        -0.0000000000         0.0000000000
+
    2    1   1    1         0.0000000000         0.0000000000
    2    1   2    1         0.0000000341         0.0000000000
    2    1   3    1         0.0000000000         0.0000000000
-  
-   3    1   1    1         0.0000000000         0.0000000000
+
+   3    1   1    1        -0.0000000000         0.0000000000
    3    1   2    1         0.0000000000         0.0000000000
    3    1   3    1         0.0000000341         0.0000000000
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
-   8.324042E-07  8.324047E-07  8.324064E-07
+   8.324316E-07  8.324322E-07  8.324338E-07
  Phonon energies in meV     :
--  2.265087E-02  2.265089E-02  2.265093E-02
+-  2.265162E-02  2.265163E-02  2.265168E-02
  Phonon frequencies in cm-1    :
--  1.826916E-01  1.826917E-01  1.826921E-01
+-  1.826976E-01  1.826977E-01  1.826981E-01
  Phonon frequencies in Thz     :
--  5.476957E-03  5.476960E-03  5.476971E-03
+-  5.477137E-03  5.477140E-03  5.477151E-03
  Phonon energies in Kelvin  :
--  2.628521E-01  2.628523E-01  2.628528E-01
+-  2.628608E-01  2.628610E-01  2.628615E-01
 
 ================================================================================
 == DATASET  6 ==================================================================
@@ -1995,7 +1995,7 @@ lattice_vectors:
 lattice_lengths: [   5.37401,    5.37401,    5.37401, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.0974400E+02
-convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  2.685E-23, diffor:  0.000E+00, }
+convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  2.686E-23, diffor:  0.000E+00, }
 etotal    :  -2.07028738E+00
 entropy   :   0.00000000E+00
 fermie    :   2.68859112E-01
@@ -2015,7 +2015,7 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   50.470E-25; max=  26.854E-24
+ Mean square residual over all n,k,spin=   50.482E-25; max=  26.860E-24
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
 
@@ -2079,7 +2079,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -2119,13 +2119,13 @@ tolerances: {tolvrs: 1.00E-10, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   14.547750352360     -1.273E+00 2.022E-02 5.214E+03
- ETOT  2   1.5203668140111     -1.303E+01 1.802E-03 5.617E-01
- ETOT  3   1.5188189188827     -1.548E-03 1.490E-06 1.008E-02
- ETOT  4   1.5187999266220     -1.899E-05 2.630E-08 8.095E-05
- ETOT  5   1.5187997297081     -1.969E-07 3.860E-10 3.605E-07
- ETOT  6   1.5187997289973     -7.108E-10 1.042E-12 3.247E-10
- ETOT  7   1.5187997289968     -4.565E-13 1.806E-15 1.676E-12
+-ETOT  1   14.547750352363     -1.273E+00 2.022E-02 5.214E+03
+ ETOT  2   1.5203668140141     -1.303E+01 1.802E-03 5.617E-01
+ ETOT  3   1.5188189188856     -1.548E-03 1.490E-06 1.008E-02
+ ETOT  4   1.5187999266249     -1.899E-05 2.630E-08 8.095E-05
+ ETOT  5   1.5187997297109     -1.969E-07 3.860E-10 3.605E-07
+ ETOT  6   1.5187997290001     -7.108E-10 1.042E-12 3.247E-10
+ ETOT  7   1.5187997289996     -5.080E-13 1.806E-15 1.676E-12
 
  At SCF step    7       vres2   =  1.68E-12 < tolvrs=  1.00E-10 =>converged.
 ================================================================================
@@ -2149,7 +2149,7 @@ tolerances: {tolvrs: 1.00E-10, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.1518799729E+01 Ha. Also 2DEtotal=    0.413286424322E+02 eV
+ 2DEtotal=    0.1518799729E+01 Ha. Also 2DEtotal=    0.413286424323E+02 eV
     (2DErelax=   -1.4302177887E+01 Ha. 2DEnonrelax=    1.5820977616E+01 Ha)
     (  non-var. 2DEtotal :    1.5187997107E+00 Ha)
 
@@ -2159,38 +2159,38 @@ tolerances: {tolvrs: 1.00E-10, }
 
 
  ==> Compute Derivative Database <==
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   1    1         1.5187997107         0.0000000000
    1    1   2    1         1.4203960246         0.0000000000
    1    1   3    1         0.0984036861         0.0000000000
-  
+
    2    1   1    1         1.4203960246         0.0000000000
    2    1   2    1         1.5187997107         0.0000000000
    2    1   3    1         0.0984036861         0.0000000000
-  
+
    3    1   1    1         0.0984036861         0.0000000000
    3    1   2    1         0.0984036861         0.0000000000
    3    1   3    1         0.1968073721         0.0000000000
-  
-  
+
+
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   1    1         0.0068146597         0.0000000000
    1    1   2    1         0.0000000000         0.0000000000
    1    1   3    1         0.0000000000         0.0000000000
-  
+
    2    1   1    1         0.0000000000         0.0000000000
    2    1   2    1         0.0068146597         0.0000000000
    2    1   3    1         0.0000000000         0.0000000000
-  
+
    3    1   1    1         0.0000000000         0.0000000000
    3    1   2    1         0.0000000000         0.0000000000
    3    1   3    1         0.0983653757         0.0000000000
@@ -2268,7 +2268,7 @@ lattice_vectors:
 lattice_lengths: [   5.37401,    5.37401,    5.37401, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.0974400E+02
-convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  2.685E-23, diffor:  0.000E+00, }
+convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  2.686E-23, diffor:  0.000E+00, }
 etotal    :  -2.07028738E+00
 entropy   :   0.00000000E+00
 fermie    :   2.68859112E-01
@@ -2288,7 +2288,7 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   50.470E-25; max=  26.854E-24
+ Mean square residual over all n,k,spin=   50.482E-25; max=  26.860E-24
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
 
@@ -2352,7 +2352,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -2388,13 +2388,13 @@ tolerances: {tolvrs: 1.00E-10, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   52.291416140532      3.047E+01 4.539E-02 2.523E+04
- ETOT  2   2.0196010090978     -5.027E+01 1.040E-02 1.148E+02
- ETOT  3   1.7820112275060     -2.376E-01 4.480E-05 1.027E-01
- ETOT  4   1.7817773441930     -2.339E-04 2.502E-07 5.356E-05
- ETOT  5   1.7817772187865     -1.254E-07 1.649E-10 2.664E-07
- ETOT  6   1.7817772181193     -6.672E-10 8.506E-13 2.761E-09
- ETOT  7   1.7817772181137     -5.560E-12 8.212E-16 1.630E-11
+-ETOT  1   52.291416140537      3.047E+01 4.539E-02 2.523E+04
+ ETOT  2   2.0196010091006     -5.027E+01 1.040E-02 1.148E+02
+ ETOT  3   1.7820112275088     -2.376E-01 4.480E-05 1.027E-01
+ ETOT  4   1.7817773441957     -2.339E-04 2.502E-07 5.356E-05
+ ETOT  5   1.7817772187893     -1.254E-07 1.649E-10 2.664E-07
+ ETOT  6   1.7817772181220     -6.673E-10 8.506E-13 2.761E-09
+ ETOT  7   1.7817772181166     -5.461E-12 8.212E-16 1.630E-11
 
  At SCF step    7       vres2   =  1.63E-11 < tolvrs=  1.00E-10 =>converged.
 ================================================================================
@@ -2418,7 +2418,7 @@ tolerances: {tolvrs: 1.00E-10, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.1781777218E+01 Ha. Also 2DEtotal=    0.484846238351E+02 eV
+ 2DEtotal=    0.1781777218E+01 Ha. Also 2DEtotal=    0.484846238352E+02 eV
     (2DErelax=   -2.0035286623E+01 Ha. 2DEnonrelax=    2.1817063841E+01 Ha)
     (  non-var. 2DEtotal :    1.7817779011E+00 Ha)
 
@@ -2445,12 +2445,12 @@ tolerances: {tolvrs: 1.00E-10, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  0.25740837914341     -4.435E+00 3.398E-03 7.634E+00
- ETOT  2  0.22641128228102     -3.100E-02 2.199E-05 1.102E-01
- ETOT  3  0.22604314234082     -3.681E-04 1.244E-07 1.249E-04
- ETOT  4  0.22604293292849     -2.094E-07 2.754E-10 2.971E-07
- ETOT  5  0.22604293218856     -7.399E-10 1.381E-12 1.096E-09
- ETOT  6  0.22604293218527     -3.289E-12 5.233E-15 4.081E-12
+-ETOT  1  0.25740837914633     -4.435E+00 3.398E-03 7.634E+00
+ ETOT  2  0.22641128228394     -3.100E-02 2.199E-05 1.102E-01
+ ETOT  3  0.22604314234374     -3.681E-04 1.244E-07 1.249E-04
+ ETOT  4  0.22604293293142     -2.094E-07 2.754E-10 2.971E-07
+ ETOT  5  0.22604293219147     -7.399E-10 1.381E-12 1.096E-09
+ ETOT  6  0.22604293218818     -3.292E-12 5.233E-15 4.081E-12
 
  At SCF step    6       vres2   =  4.08E-12 < tolvrs=  1.00E-10 =>converged.
 ================================================================================
@@ -2474,7 +2474,7 @@ tolerances: {tolvrs: 1.00E-10, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.2260429322E+00 Ha. Also 2DEtotal=    0.615094099653E+01 eV
+ 2DEtotal=    0.2260429322E+00 Ha. Also 2DEtotal=    0.615094099661E+01 eV
     (2DErelax=   -4.4666391125E+00 Ha. 2DEnonrelax=    4.6926820447E+00 Ha)
     (  non-var. 2DEtotal :    2.2604297599E-01 Ha)
 
@@ -2484,38 +2484,38 @@ tolerances: {tolvrs: 1.00E-10, }
 
 
  ==> Compute Derivative Database <==
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
-   1    1   1    1         1.7817779209         0.0000000000
+
+   1    1   1    1         1.7817779210         0.0000000000
    1    1   2    1         0.1130214880         0.0000000000
    1    1   3    1         0.1130214880         0.0000000000
-  
+
    2    1   1    1         0.1130214880         0.0000000000
    2    1   2    1         0.2260429760         0.0000000000
    2    1   3    1         0.1130214880         0.0000000000
-  
+
    3    1   1    1         0.1130214880         0.0000000000
    3    1   2    1         0.1130214880         0.0000000000
    3    1   3    1         0.2260429760         0.0000000000
-  
-  
+
+
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   1    1         0.0347614421         0.0000000000
    1    1   2    1        -0.0269344693        -0.0000000000
    1    1   3    1        -0.0269344693        -0.0000000000
-  
+
    2    1   1    1        -0.0269344693        -0.0000000000
    2    1   2    1         0.0347614421         0.0000000000
    2    1   3    1         0.0269344693         0.0000000000
-  
+
    3    1   1    1        -0.0269344693        -0.0000000000
    3    1   2    1         0.0269344693         0.0000000000
    3    1   3    1         0.0347614421         0.0000000000
@@ -2593,7 +2593,7 @@ lattice_vectors:
 lattice_lengths: [   5.37401,    5.37401,    5.37401, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.0974400E+02
-convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  2.685E-23, diffor:  0.000E+00, }
+convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  2.686E-23, diffor:  0.000E+00, }
 etotal    :  -2.07028738E+00
 entropy   :   0.00000000E+00
 fermie    :   2.68859112E-01
@@ -2613,7 +2613,7 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   50.470E-25; max=  26.853E-24
+ Mean square residual over all n,k,spin=   50.482E-25; max=  26.860E-24
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
 
@@ -2677,7 +2677,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -2714,12 +2714,12 @@ tolerances: {tolvrs: 1.00E-10, }
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   300.73768440072      2.758E+02 5.640E-02 1.915E+05
- ETOT  2   70.750232261994     -2.300E+02 3.444E-02 4.468E+04
- ETOT  3  0.63155612736374     -7.012E+01 3.430E-03 1.400E+00
- ETOT  4  0.62893330038909     -2.623E-03 1.002E-06 1.085E-02
- ETOT  5  0.62891435910521     -1.894E-05 1.072E-08 6.525E-06
- ETOT  6  0.62891434326533     -1.584E-08 3.891E-12 1.988E-08
- ETOT  7  0.62891434323005     -3.528E-11 3.716E-14 6.991E-11
+ ETOT  2   70.750232262000     -2.300E+02 3.444E-02 4.468E+04
+ ETOT  3  0.63155612736658     -7.012E+01 3.430E-03 1.400E+00
+ ETOT  4  0.62893330039201     -2.623E-03 1.002E-06 1.085E-02
+ ETOT  5  0.62891435910801     -1.894E-05 1.072E-08 6.525E-06
+ ETOT  6  0.62891434326810     -1.584E-08 3.891E-12 1.988E-08
+ ETOT  7  0.62891434323286     -3.525E-11 3.716E-14 6.991E-11
 
  At SCF step    7       vres2   =  6.99E-11 < tolvrs=  1.00E-10 =>converged.
 ================================================================================
@@ -2743,7 +2743,7 @@ tolerances: {tolvrs: 1.00E-10, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.6289143432E+00 Ha. Also 2DEtotal=    0.171136296087E+02 eV
+ 2DEtotal=    0.6289143432E+00 Ha. Also 2DEtotal=    0.171136296088E+02 eV
     (2DErelax=   -2.4312083149E+01 Ha. 2DEnonrelax=    2.4940997492E+01 Ha)
     (  non-var. 2DEtotal :    6.2891311651E-01 Ha)
 
@@ -2770,13 +2770,13 @@ tolerances: {tolvrs: 1.00E-10, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   77.041178789000      6.458E+01 3.878E-02 4.826E+04
- ETOT  2   18.334270573020     -5.871E+01 1.268E-02 1.117E+04
- ETOT  3  0.80521501099192     -1.753E+01 8.956E-04 1.783E+00
- ETOT  4  0.80206787597293     -3.147E-03 9.810E-07 4.374E-03
- ETOT  5  0.80206005529978     -7.821E-06 5.418E-09 3.411E-06
- ETOT  6  0.80206004814811     -7.152E-09 7.210E-12 1.852E-08
- ETOT  7  0.80206004811445     -3.366E-11 2.777E-14 5.026E-11
+-ETOT  1   77.041178789004      6.458E+01 3.878E-02 4.826E+04
+ ETOT  2   18.334270573024     -5.871E+01 1.268E-02 1.117E+04
+ ETOT  3  0.80521501099478     -1.753E+01 8.956E-04 1.783E+00
+ ETOT  4  0.80206787597586     -3.147E-03 9.810E-07 4.374E-03
+ ETOT  5  0.80206005530259     -7.821E-06 5.418E-09 3.411E-06
+ ETOT  6  0.80206004815099     -7.152E-09 7.210E-12 1.852E-08
+ ETOT  7  0.80206004811732     -3.368E-11 2.777E-14 5.026E-11
 
  At SCF step    7       vres2   =  5.03E-11 < tolvrs=  1.00E-10 =>converged.
 ================================================================================
@@ -2800,7 +2800,7 @@ tolerances: {tolvrs: 1.00E-10, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.8020600481E+00 Ha. Also 2DEtotal=    0.218251638480E+02 eV
+ 2DEtotal=    0.8020600481E+00 Ha. Also 2DEtotal=    0.218251638481E+02 eV
     (2DErelax=   -1.1660342561E+01 Ha. 2DEnonrelax=    1.2462402609E+01 Ha)
     (  non-var. 2DEtotal :    8.0205930056E-01 Ha)
 
@@ -2810,38 +2810,38 @@ tolerances: {tolvrs: 1.00E-10, }
 
 
  ==> Compute Derivative Database <==
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   1    1         0.6289131165         0.0000000000
    1    1   2    1         0.3144565583         0.0000000000
    1    1   3    1         0.3144565583         0.0000000000
-  
+
    2    1   1    1         0.3144565583         0.0000000000
    2    1   2    1         0.8020593129         0.0000000000
    2    1   3    1         0.6001555185        -0.0000000000
-  
+
    3    1   1    1         0.3144565583         0.0000000000
    3    1   2    1         0.6001555185        -0.0000000000
    3    1   3    1         0.8020593129         0.0000000000
-  
-  
+
+
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   1    1         0.0376647601        -0.0000000000
    1    1   2    1         0.0000000000         0.0000000000
    1    1   3    1         0.0000000000        -0.0000000000
-  
+
    2    1   1    1         0.0000000000         0.0000000000
    2    1   2    1         0.0178795136         0.0000000000
    2    1   3    1         0.0038972564        -0.0000000000
-  
+
    3    1   1    1         0.0000000000        -0.0000000000
    3    1   2    1         0.0038972564        -0.0000000000
    3    1   3    1         0.0178795136         0.0000000000
@@ -2903,7 +2903,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
 ================================================================================
  prteigrs : about to open file t26o_DS12_EIG
  Non-SCF case, kpt    1 (  0.25000  0.25000  0.25000), residuals and eigenvalues=
-  3.28E-25  2.68E-23  9.81E-23  8.94E-24
+  3.27E-25  2.68E-23  9.81E-23  8.94E-24
  -6.0635E-02  4.1706E-01  6.9457E-01  6.9457E-01
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
@@ -2919,7 +2919,7 @@ lattice_vectors:
 lattice_lengths: [   5.37401,    5.37401,    5.37401, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.0974400E+02
-convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  2.685E-23, diffor:  0.000E+00, }
+convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  2.686E-23, diffor:  0.000E+00, }
 etotal    :  -2.07028738E+00
 entropy   :   0.00000000E+00
 fermie    :   2.68859112E-01
@@ -2939,7 +2939,7 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   50.470E-25; max=  26.853E-24
+ Mean square residual over all n,k,spin=   50.482E-25; max=  26.860E-24
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
 
@@ -3003,7 +3003,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -3038,13 +3038,13 @@ tolerances: {tolvrs: 1.00E-10, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   21.504637915842      6.383E+00 2.671E-02 6.223E+03
- ETOT  2   1.1959770191482     -2.031E+01 6.528E-03 3.150E+02
- ETOT  3  0.11141149345433     -1.085E+00 2.022E-04 1.692E-02
- ETOT  4  0.11138662786121     -2.487E-05 2.520E-08 3.251E-05
- ETOT  5  0.11138655297459     -7.489E-08 9.114E-11 9.638E-08
- ETOT  6  0.11138655276744     -2.071E-10 2.671E-13 2.080E-10
- ETOT  7  0.11138655276708     -3.624E-13 5.264E-16 8.821E-13
+-ETOT  1   21.504637915845      6.383E+00 2.671E-02 6.223E+03
+ ETOT  2   1.1959770191512     -2.031E+01 6.528E-03 3.150E+02
+ ETOT  3  0.11141149345732     -1.085E+00 2.022E-04 1.692E-02
+ ETOT  4  0.11138662786411     -2.487E-05 2.520E-08 3.251E-05
+ ETOT  5  0.11138655297748     -7.489E-08 9.114E-11 9.638E-08
+ ETOT  6  0.11138655277036     -2.071E-10 2.671E-13 2.080E-10
+ ETOT  7  0.11138655276996     -4.032E-13 5.264E-16 8.821E-13
 
  At SCF step    7       vres2   =  8.82E-13 < tolvrs=  1.00E-10 =>converged.
 ================================================================================
@@ -3068,7 +3068,7 @@ tolerances: {tolvrs: 1.00E-10, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.1113865528E+00 Ha. Also 2DEtotal=    0.303098224419E+01 eV
+ 2DEtotal=    0.1113865528E+00 Ha. Also 2DEtotal=    0.303098224427E+01 eV
     (2DErelax=   -1.5009822532E+01 Ha. 2DEnonrelax=    1.5121209084E+01 Ha)
     (  non-var. 2DEtotal :    1.1138645745E-01 Ha)
 
@@ -3095,14 +3095,14 @@ tolerances: {tolvrs: 1.00E-10, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   14.654094246128      2.332E+00 1.122E-02 4.192E+03
- ETOT  2   1.0202084835254     -1.363E+01 1.133E-02 1.702E+02
- ETOT  3  0.43501150252731     -5.852E-01 3.738E-04 1.614E-01
- ETOT  4  0.43447422018708     -5.373E-04 3.221E-07 2.899E-03
- ETOT  5  0.43446699674261     -7.223E-06 4.385E-09 3.691E-06
- ETOT  6  0.43446698835076     -8.392E-09 1.086E-11 1.411E-08
- ETOT  7  0.43446698831952     -3.124E-11 2.769E-14 3.006E-10
- ETOT  8  0.43446698831870     -8.153E-13 3.044E-16 8.201E-13
+-ETOT  1   14.654094246131      2.332E+00 1.122E-02 4.192E+03
+ ETOT  2   1.0202084835283     -1.363E+01 1.133E-02 1.702E+02
+ ETOT  3  0.43501150253011     -5.852E-01 3.738E-04 1.614E-01
+ ETOT  4  0.43447422018990     -5.373E-04 3.221E-07 2.899E-03
+ ETOT  5  0.43446699674551     -7.223E-06 4.385E-09 3.691E-06
+ ETOT  6  0.43446698835359     -8.392E-09 1.086E-11 1.411E-08
+ ETOT  7  0.43446698832233     -3.126E-11 2.769E-14 3.006E-10
+ ETOT  8  0.43446698832154     -7.851E-13 3.044E-16 8.201E-13
 
  At SCF step    8       vres2   =  8.20E-13 < tolvrs=  1.00E-10 =>converged.
 ================================================================================
@@ -3126,7 +3126,7 @@ tolerances: {tolvrs: 1.00E-10, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.4344669883E+00 Ha. Also 2DEtotal=    0.118224479936E+02 eV
+ 2DEtotal=    0.4344669883E+00 Ha. Also 2DEtotal=    0.118224479937E+02 eV
     (2DErelax=   -1.1887237884E+01 Ha. 2DEnonrelax=    1.2321704872E+01 Ha)
     (  non-var. 2DEtotal :    4.3446691385E-01 Ha)
 
@@ -3136,38 +3136,38 @@ tolerances: {tolvrs: 1.00E-10, }
 
 
  ==> Compute Derivative Database <==
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   1    1         0.1113864633         0.0000000000
    1    1   2    1         0.0556932317         0.0000000000
    1    1   3    1         0.0556932317         0.0000000000
-  
+
    2    1   1    1         0.0556932317         0.0000000000
    2    1   2    1         0.4344669050         0.0000000000
    2    1   3    1         0.3787736733         0.0000000000
-  
+
    3    1   1    1         0.0556932317         0.0000000000
    3    1   2    1         0.3787736733         0.0000000000
    3    1   3    1         0.4344669050         0.0000000000
-  
-  
+
+
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   1    1         0.0262308638         0.0000000000
    1    1   2    1         0.0000000000        -0.0000000000
    1    1   3    1         0.0000000000        -0.0000000000
-  
+
    2    1   1    1         0.0000000000        -0.0000000000
    2    1   2    1         0.0038568720         0.0000000000
    2    1   3    1         0.0000000000         0.0000000000
-  
+
    3    1   1    1         0.0000000000        -0.0000000000
    3    1   2    1         0.0000000000         0.0000000000
    3    1   3    1         0.0038568720         0.0000000000
@@ -3186,7 +3186,7 @@ tolerances: {tolvrs: 1.00E-10, }
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      7.6000000000E+00  7.6000000000E+00  7.6000000000E+00 Bohr
               amu      2.69600000E+01
@@ -3196,10 +3196,10 @@ tolerances: {tolvrs: 1.00E-10, }
            enunit           2
            etotal1    -2.0702873765E+00
            etotal4     2.1145572035E-01
-           etotal5     1.0191728617E-06
+           etotal5     1.0191757340E-06
            etotal7     1.5187997290E+00
            etotal9     2.2604293219E-01
-           etotal11    8.0206004811E-01
+           etotal11    8.0206004812E-01
            etotal13    4.3446698832E-01
             fcart1    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart4     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -3208,7 +3208,7 @@ tolerances: {tolvrs: 1.00E-10, }
             fcart9     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart11    0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart13    0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         312
+-          fftalg         512
            getden1          0
            getden2          1
            getden3          1
@@ -4175,7 +4175,7 @@ P          mk1mem13        32
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -4191,7 +4191,7 @@ P          mk1mem13        32
 - Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997a
 -
-- [4] Ab initio pseudopotentials for electronic structure calculations of poly-atomic systems, 
+- [4] Ab initio pseudopotentials for electronic structure calculations of poly-atomic systems,
 - using density-functional theory.
 - M. Fuchs and, M. Scheffler, Comput. Phys. Commun. 119, 67 (1999).
 - Comment: Some pseudopotential generated using the FHI code were used.
@@ -4204,12 +4204,12 @@ P          mk1mem13        32
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -4227,15 +4227,15 @@ P          mk1mem13        32
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          3.6  wall=          3.8
+- Proc.   0 individual time (sec): cpu=          2.6  wall=          7.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered  44 WARNINGs and  79 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.6  wall=          3.8
++Overall time at end (sec) : cpu=          2.6  wall=          7.1

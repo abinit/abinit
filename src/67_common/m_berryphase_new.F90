@@ -1,11 +1,10 @@
-!!****m* ABINIT/m_berryphase_new
-!! NAME
+!!****m* ABINIT/m_berryphase_new !! NAME
 !!  m_berryphase_new
 !!
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2003-2022 ABINIT  group (MVeithen)
+!!  Copyright (C) 2003-2025 ABINIT  group (MVeithen)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -156,18 +155,19 @@ contains
 !!
 !! SOURCE
 
-subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
-&  gprimd,hdr,indlmn,kg,lmnmax,mband,mcg,mcprj,&
+subroutine berryphase_new(atindx1,cg,cg13,cprj,dtefield,dtfil,dtset,psps,&
+&  gprimd,hdr,indlmn,kg,lmnmax,mband,mcg,mcg13,mcprj,&
 &  mkmem,mpi_enreg,mpw,my_natom,natom,npwarr,nsppol,ntypat,&
 &  nkpt,calc_pol_ddk,pawrhoij,pawtab,pel,pelev,pion,ptot,red_ptot,pwind,&  !!REC
 &  pwind_alloc,pwnsfac,&
-&  rprimd,typat,ucvol,unit_out,usecprj,usepaw,xred,zion)
+&  rprimd,save_cg13,typat,ucvol,unit_out,usecprj,usepaw,xred,zion)
 
 !Arguments ------------------------------------
- integer, intent(in) :: lmnmax,mband,mcg,mcprj,mkmem,mpw,my_natom,natom,nkpt
+ integer, intent(in) :: lmnmax,mband,mcg,mcg13,mcprj,mkmem,mpw,my_natom,natom,nkpt
  integer, intent(in) :: nsppol,ntypat,calc_pol_ddk
  integer, intent(in) :: pwind_alloc,unit_out,usecprj,usepaw
  real(dp), intent(in) :: ucvol
+ logical,intent(in) :: save_cg13
  type(MPI_type), intent(in) :: mpi_enreg
  type(datafiles_type), intent(in) :: dtfil
  type(dataset_type), intent(in) :: dtset
@@ -184,6 +184,7 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
  real(dp), intent(inout) :: xred(3,natom)
  real(dp), intent(out) :: pel(3),pelev(3),pion(3)
  real(dp), intent(out) :: ptot(3),red_ptot(3) !!REC
+ real(dp),intent(out) :: cg13(2,mcg13,3)
  type(pawrhoij_type), intent(in) :: pawrhoij(my_natom*usepaw)
  type(pawtab_type),intent(in) :: pawtab(ntypat*usepaw)
  type(pawcprj_type),intent(in) ::  cprj(natom,mcprj*usecprj)
@@ -193,7 +194,7 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
  integer :: iatom,iband,icg,icg1,idir,idum,ikpt1i_sp
  integer :: ierr,ifor,ikg,ikpt,ikpt1,ikpt_loc!,ikpt2,ikpt2i,npw_k2, itrs
  integer :: icp1, icp2,icpgr_offset,iproc
-! integer :: ii ! appears commented out below in a debug section
+ !! integer :: ii ! appears commented out below in a debug section
  integer :: inibz,ikpt1i
  integer :: isppol,istr,itypat,jband,jkpt,jkstr,jsppol
  integer :: det_inv_smat, det_smat, inv_smat
@@ -296,13 +297,28 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
    ABI_BUG(message)
  end if
 
+ if (save_cg13 .AND. (ddkflag /= 1) ) then
+   message = ' cg13 output requested but ddkflag not set '
+   ABI_BUG(message)
+ end if
+
+ if (save_cg13 .AND. (mcg13 /= mcg) ) then
+   message = ' cg13 output requested but mcg13 /= mcg '
+   ABI_BUG(message)
+ end if
+
+ if (save_cg13 .AND. (size(cg13) /= 2*mcg13*3 ) ) then
+   message = ' cg13 output requested but cg13 size incorrect '
+   ABI_BUG(message)
+ end if
+
 ! useful flags for various efield possibilities
  efield_flag = ( dtset%berryopt == 4 .or. dtset%berryopt == 6 .or. dtset%berryopt == 7 .or. &
 & dtset%berryopt ==14 .or. dtset%berryopt ==16 .or. dtset%berryopt ==17 )
  calc_epaw3_force = ( efield_flag .and. dtset%optforces /= 0 .and. usepaw == 1 )
  calc_epaw3_stress = ( efield_flag .and. dtset%optstress /= 0  .and. usepaw == 1 )
 
- mcg1_k = mpw*mband
+ mcg1_k = mpw*mband*dtset%nspinor
  shiftbd = 1
  if (ddkflag==1) then
    ABI_MALLOC(cg1,(2,mcg))
@@ -346,7 +362,7 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
 !allocate(dtm(2,dtefield%fnkpt*nsppol))
  ABI_MALLOC(dtm_mult,(2,dtefield%fnkpt*nsppol,berrystep))
  ABI_MALLOC(cg1_k,(2,mcg1_k))
-
+ 
  if (usepaw == 1) then ! cprj allocation
    ncpgr = cprj(1,1)%ncpgr
    if ( calc_epaw3_force ) then
@@ -423,7 +439,6 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
 
    end if ! end check on efield
  end if
-
 !!=======================================
 !! code to test orthonormality of cg_k
 !!=======================================
@@ -1036,7 +1051,6 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
      end if
 
    end do   ! close loop over ifor
-
 !  MPI communicate stuff between everyone
    if (nproc>1) then
      count = 2*dtefield%fnkpt*nsppol*berrystep
@@ -1110,22 +1124,26 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
 &     nkpt,npwarr,nsppol,&
 &     occ_dum,response,dtfil%unwff2,wfs,wvl)
 
+     if (save_cg13) then
+       cg13(1:2,1:mcg13,idir) = cg1(1:2,1:mcg)
+     end if
+
      ABI_FREE(resid)
    end if  ! ddkflag == 1
 ! end of ddk part for this idir
-
-
+    
+   
 !  ===========================================================================
 !  Compute the Berry phase polarization
 !  ===========================================================================
-
+     
    if (polflag == 1) then
-
+    
 !    Compute the electronic Berry phase
-
+    
      polb_mult(:,:)=zero
      do istep = 1,berrystep
-
+    
        if(berrystep==1) then
          write(message,'(a,a)')ch10,&
 &         ' Compute the electronic contribution to polarization'
@@ -1604,7 +1622,8 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
 
  end do    ! Close loop over idir
 
-!!REC start
+
+ !!REC start
  if (dtset%berrysav == 1) then
    if(mpi_enreg%me==0)then
      if (open_file('POLSAVE',message,newunit=unt,status='UNKNOWN') /= 0) then
@@ -1620,6 +1639,7 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
 !-------------------------------------------------
 !   Compute polarization in cartesian coordinates
 !-------------------------------------------------
+ !if (all(dtset%rfdir(:) == 1) .AND. (calc_pol_ddk .NE. 2)) then
  if (all(dtset%rfdir(:) == 1)) then
 
    if(usepaw.ne.1) then
@@ -1708,7 +1728,7 @@ end subroutine berryphase_new
 !! This routine updates E field variables
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2022 ABINIT  group
+!! Copyright (C) 2003-2025 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1820,12 +1840,12 @@ subroutine update_e_field_vars(atindx,atindx1,cg,dimcprj,dtefield,dtfil,dtset,&
   !Local variables -------------------------
   !scalars
   character(len=500) :: message
-  integer :: ctocprj_choice,iatom,ii,iorder_cprj,mcprj,my_nspinor,ncpgr
+  integer :: ctocprj_choice,iatom,ii,iorder_cprj,mcg13,mcprj,my_nspinor,ncpgr
   integer :: optberry,usecprj
-  logical :: calc_epaw3_force, calc_epaw3_stress, efield
+  logical :: calc_epaw3_force, calc_epaw3_stress, efield, save_cg13
   !arrays
   real(dp) :: efield_test_cart(3),red_efield1(3)
-  real(dp),allocatable :: ph1d(:,:)
+  real(dp),allocatable :: cg13(:,:,:),ph1d(:,:)
   type(pawcprj_type),allocatable :: cprj(:,:)
 
   ! *************************************************************************
@@ -1881,12 +1901,17 @@ subroutine update_e_field_vars(atindx,atindx1,cg,dimcprj,dtefield,dtfil,dtset,&
   if ( efield ) then ! compute polarization and if necessary store cprj in efield
      optberry=1
      pel_cg(:) = zero;pelev=zero
-     call berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,gprimd,hdr,psps%indlmn,kg,&
-          &   psps%lmnmax,dtset%mband,mcg,mcprj,dtset%mkmem,mpi_enreg,dtset%mpw,my_natom,&
+
+     mcg13 = 0
+     save_cg13 = .FALSE.
+     ABI_MALLOC(cg13,(2,mcg13,3))
+     call berryphase_new(atindx1,cg,cg13,cprj,dtefield,dtfil,dtset,psps,gprimd,hdr,psps%indlmn,kg,&
+          &   psps%lmnmax,dtset%mband,mcg,mcg13,mcprj,dtset%mkmem,mpi_enreg,dtset%mpw,my_natom,&
           &   dtset%natom,npwarr,dtset%nsppol,psps%ntypat,dtset%nkpt,optberry,pawrhoij,pawtab,&
           &   pel_cg,pelev,pion,ptot,red_ptot,pwind,&
-          &   pwind_alloc,pwnsfac,rprimd,dtset%typat,ucvol,&
+          &   pwind_alloc,pwnsfac,rprimd,save_cg13,dtset%typat,ucvol,&
           &   unit_out,usecprj,psps%usepaw,xred,psps%ziontypat)
+     ABI_FREE(cg13)
 
      dtefield%red_ptot1(:)=red_ptot(:)
 
@@ -2264,7 +2289,7 @@ end subroutine update_e_field_vars
 !! Print components of electric field, displacement field and polarization in nice format
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, LBoeri, MT)
+!! Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, LBoeri, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2645,7 +2670,7 @@ end subroutine prtefield
 !! calculations
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2022 ABINIT group
+!! Copyright (C) 2004-2025 ABINIT group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2756,7 +2781,7 @@ end subroutine init_e_field_vars
 !! ddk and the response of an insulator to a homogenous electric field.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2022 ABINIT group (MVeithen).
+!! Copyright (C) 2004-2025 ABINIT group (MVeithen).
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

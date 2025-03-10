@@ -9,6 +9,7 @@ t62o_DS6_DDB
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = mrgddb
+#%% exclude_builders = eos_nvhpc_23.9_elpa
 #%% test_chain = t62.abi, t63.abi, t64.abi, t65.abi
 #%% [files]
 #%% files_to_test =
@@ -16,7 +17,7 @@ t62o_DS6_DDB
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [shell]
-#%% post_commands = 
+#%% post_commands =
 #%%  ww_cp t63_out_DDB t65o_DS20_DDB;
 #%% [extra_info]
 #%% authors = O. Nadeau

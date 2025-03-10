@@ -46,24 +46,9 @@ if(ABINIT_ENABLE_CRPA_OPTIM)
   set(HAVE_CRPA_OPTIM 1)
 endif()
 
-option(ABINIT_ENABLE_LONG_LINES "Enable to have long lines in fortran source code (default: no)" OFF)
-if(ABINIT_ENABLE_LONG_LINES)
-  set(HAVE_FC_LONG_LINES 1)
-endif()
-
-option(ABINIT_ENABLE_MPI_IO "Enable to have MPI I/O support (default: no)" OFF)
-if(ABINIT_ENABLE_MPI_IO)
-  set(HAVE_MPI_IO 1)
-endif()
-
 option(ABINIT_ENABLE_MPI_IO_DEFAULT "Enable to use MPI I/O as default I/O library (default: no)" OFF)
 if(ABINIT_ENABLE_MPI_IO_DEFAULT)
   set(HAVE_MPI_IO_DEFAULT 1)
-endif()
-
-option(ABINIT_ENABLE_MPI_INPLACE "Enable the use of MPI_IN_PLACE (default: no)" OFF)
-if(ABINIT_ENABLE_MPI_INPLACE)
-  set(HAVE_MPI2_INPLACE 1)
 endif()
 
 option(ABINIT_ENABLE_PARALLEL_HDF5 "Enable the use of parallel HDF5 (default: no)" OFF)
@@ -89,7 +74,6 @@ if(ABINIT_ENABLE_PYTHON_INVOCATION)
   set(DO_BUILD_67_PYTHON_INVOCATION_EXT ON)
 endif()
 
-
 option (ABINIT_ENFORCE_CUDA_AWARE_MPI "Some MPI cuda-aware implementation are not well detected; use this variable to enforce if you that your MPI implementation is Cuda-aware." OFF)
 
 option(ABINIT_ENABLE_GPU_CUDA "Enable GPU build (using Nvidia CUDA backend, default OFF)" OFF)
@@ -107,7 +91,7 @@ if(ABINIT_ENABLE_GPU_CUDA)
     # if you want to use nvc++ you need at least cmake 3.22.0
     #
     # the following will make target like CUDA::cublas and CUDA::cufft available
-    message("Using CUDAToolkit macros")
+    message(STATUS "Using CUDAToolkit macros")
     find_package(CUDAToolkit REQUIRED)
 
   endif()
@@ -121,19 +105,61 @@ if(ABINIT_ENABLE_GPU_CUDA)
   set(HAVE_GPU 1)
   set(HAVE_GPU_SERIAL 1)
 
-  # check nvtx library is available
-  if (TARGET CUDA::nvToolsExt)
-    set(HAVE_GPU_CUDA10 1)
-    set(HAVE_GPU_NVTX_V3 1)
-  endif()
+endif()
+
+option(ABINIT_ENABLE_GPU_HIP "Enable GPU build (using AMD HIP backend, default OFF)" OFF)
+if(ABINIT_ENABLE_GPU_HIP)
+
+  find_package(HIP)
+  find_package(hipfft)
+  find_package(rocfft)
+  find_package(rocblas)
+  find_package(hipblas)
+  find_package(hipsolver)
+
+  set(HAVE_GPU_HIP 1)
+
+  set(HAVE_GPU 1)
+  set(HAVE_GPU_SERIAL 1)
+
+  add_compile_definitions("__HIP_PLATFORM_AMD__")
 
 endif()
 
-if (ABINIT_ENABLE_GPU_CUDA)
+option(ABINIT_ENABLE_GPU_MARKERS "Enable GPU markers for profiling (requires CUDA or ROCM/HIP, default OFF)" OFF)
+if(ABINIT_ENABLE_GPU_MARKERS)
+
+  if(ABINIT_ENABLE_GPU_CUDA)
+    # check nvtx library is available
+    if (TARGET CUDA::nvToolsExt)
+      set(HAVE_GPU_CUDA10 1)
+      set(HAVE_GPU_MARKERS 1)
+    endif()
+  endif()
+
+  if(ABINIT_ENABLE_GPU_HIP)
+    # ROCTX: ROC tracer library similar in use to NVTX for CUDA
+    find_library(ROCTX
+      NAMES libroctx64.so
+      HINTS ${ROCM_ROOT}/roctracer/lib ${ROCM_PATH}/roctracer/lib ${ROCM_HOME}/roctracer/lib
+      REQUIRED)
+
+    # check roctx library is available
+    if (EXISTS ${ROCTX})
+      set(HAVE_GPU_MARKERS 1)
+    endif()
+  endif()
+endif()
+
+if (ABINIT_ENABLE_GPU_CUDA OR ABINIT_ENABLE_GPU_HIP)
   set(DO_BUILD_17_GPU_TOOLBOX TRUE)
-  set(DO_BUILD_46_MANAGE_CUDA TRUE)
 else()
   set(DO_BUILD_17_GPU_TOOLBOX FALSE)
+endif()
+
+if (ABINIT_ENABLE_GPU_CUDA)
+  set(DO_BUILD_46_MANAGE_CUDA TRUE)
+else()
   set(DO_BUILD_46_MANAGE_CUDA FALSE)
 endif()
 

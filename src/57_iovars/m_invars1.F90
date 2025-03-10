@@ -1,4 +1,3 @@
-! CP modified
 !!****m* ABINIT/m_invars1
 !! NAME
 !!  m_invars1
@@ -7,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, AR, MKV, FF, MM)
+!! Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, AR, MKV, FF, MM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -39,9 +38,9 @@ module m_invars1
  use m_parser,   only : intagm, intagm_img, chkint_ge, ab_dimensions, geo_t, geo_from_abivar_string
  use m_inkpts,   only : inkpts, inqpt
  use m_ingeo,    only : ingeo, invacuum
- use m_symtk,    only : mati3det
+ use m_matrix,   only : mati3det
 
-#if defined HAVE_GPU_CUDA
+#if defined HAVE_GPU
  use m_gpu_toolbox
 #endif
 
@@ -110,11 +109,11 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
 !Local variables-------------------------------
 !scalars
  integer :: i1,i2,idtset,ii,jdtset,marr,multiplicity,tjdtset,tread,treadh,treadm
- integer :: tread_pseudos,cnt,tread_geo,treads
+ integer :: tread_pseudos,cnt,tread_geo,tread_gpu_option,treads
  integer :: idev,gpu_option
  real(dp) :: cpus
  character(len=500) :: msg
- character(len=fnlen) :: pp_dirpath
+ character(len=fnlen) :: pp_dirpath,gpu_option_string
  character(len=20*fnlen) :: pseudos_string ! DO NOT decrease len
  character(len=len(string)) :: geo_string
  type(geo_t) :: geo
@@ -556,11 +555,8 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
  end do
 
  ! GPU related parameters
-
  dtsets(:)%gpu_option=ABI_GPU_DISABLED
- dtsets(:)%gpu_use_nvtx=0
-
-#if defined HAVE_GPU_CUDA && defined HAVE_GPU_CUDA_DP
+#if defined HAVE_GPU
  call Get_ndevice(idev)
  if (idev>0) then
    do i1=1,ndtset_alloc
@@ -574,15 +570,27 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
  gpu_option=ABI_GPU_DISABLED
  do idtset=1,ndtset_alloc
    jdtset=dtsets(idtset)%jdtset ; if(ndtset==0)jdtset=0
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gpu_option',tread,'INT')
-   if(tread==1)dtsets(idtset)%gpu_option=intarr(1)
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gpu_use_nvtx',tread,'INT')
-   if(tread==1)dtsets(idtset)%gpu_use_nvtx=intarr(1)
+
+   gpu_option_string = "" ; intarr(1)=0
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),"gpu_option",tread_gpu_option,'INT_OR_KEY',&
+&              key_value=gpu_option_string)
+   if (tread_gpu_option==1) then
+     if (len(trim(gpu_option_string))>0) then
+       call inupper(gpu_option_string)
+       if (trim(gpu_option_string)=="GPU_DISABLED") dtsets(idtset)%gpu_option=ABI_GPU_DISABLED
+       if (trim(gpu_option_string)=="GPU_LEGACY")   dtsets(idtset)%gpu_option=ABI_GPU_LEGACY
+       if (trim(gpu_option_string)=="GPU_KOKKOS")   dtsets(idtset)%gpu_option=ABI_GPU_KOKKOS
+       if (trim(gpu_option_string)=="GPU_OPENMP")   dtsets(idtset)%gpu_option=ABI_GPU_OPENMP
+     else
+       dtsets(idtset)%gpu_option=intarr(1)
+     end if
+   end if
+
    if (dtsets(idtset)%gpu_option/=ABI_GPU_DISABLED) gpu_option=dtsets(idtset)%gpu_option
  end do
 
  if (gpu_option/=ABI_GPU_DISABLED) then
-#if defined HAVE_GPU_CUDA && defined HAVE_GPU_CUDA_DP
+#if defined HAVE_GPU
    if (idev<=0) then
      write(msg,'(5a)')&
 &     'Input variable gpu_option is on (/=0),',ch10,&
@@ -594,11 +602,12 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
 #if !defined HAVE_OPENMP_OFFLOAD
      write(msg,'(7a)')&
 &     'Input variable gpu_option is set to use OpenMP GPU backend but abinit hasn''t been built',ch10,&
-&     'with OpenMP GPU offloading enabled !',ch10,&
+&     'with OpenMP GPU offloading enabled!',ch10,&
 &     'Action: change the input variable gpu_option',ch10,&
 &     '        or re-compile ABINIT with OpenMP GPU offloading enabled.'
      ABI_ERROR(msg)
 #endif
+#if defined HAVE_OPENMP_OFFLOAD
      if(xomp_get_num_devices() == 0) then
        write(msg,'(13a)')&
 &       'Input variable gpu_option is set to use OpenMP GPU backend ',ch10,&
@@ -607,14 +616,15 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
 &       'or if there are inconsistencies between GPU driver and compiler ',ch10,&
 &       'as to which CUDA version is supported.',ch10,&
 &       'Action: check the value OMP_TARGET_OFFLOAD is not set to DISABLED,',ch10,&
-&       '        otherwise make sure CUDA version you use is supported by BOTH your driver and compiler.'
+&       '        otherwise make sure CUDA/HIP version you use is supported by BOTH your driver and compiler.'
        ABI_ERROR(msg)
      end if
+#endif
    else if(gpu_option==ABI_GPU_KOKKOS) then
 #if !defined HAVE_KOKKOS || !defined HAVE_YAKL
      write(msg,'(7a)')&
 &     'Input variable gpu_option is set to use Kokkos backend but abinit hasn''t been built',ch10,&
-&     'with Kokkos and/or YAKL dependencies enabled !',ch10,&
+&     'with Kokkos and/or YAKL dependencies enabled!',ch10,&
 &     'Action: change the input variable gpu_option',ch10,&
 &     '        or re-compile ABINIT with BOTH Kokkos and YAKL enabled.'
      ABI_ERROR(msg)
@@ -622,10 +632,10 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    end if
 #else
    write(msg,'(7a)')&
-&   'Input variable gpu_option is on but ABINIT hasn''t been built',ch10,&
-&   'with (double precision) gpu mode enabled !',ch10,&
+&   'Input variable gpu_option is on',ch10,&
+&   'but ABINIT hasn''t been built with GPU mode enabled!',ch10,&
 &   'Action: change the input variable gpu_option',ch10,&
-&   '        or re-compile ABINIT with double-precision Cuda enabled.'
+&   '        or re-compile ABINIT with GPU enabled.'
    ABI_ERROR(msg)
 #endif
  end if
@@ -634,15 +644,18 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
 !gpu_option=ABI_GPU_UNKNOWN means undetermined
  do idtset=1,ndtset_alloc
    if (dtsets(idtset)%gpu_option==ABI_GPU_UNKNOWN) then
-#if defined HAVE_OPENMP_OFFLOAD
-     dtsets(idtset)%gpu_option=ABI_GPU_OPENMP
-#elif defined HAVE_KOKKOS && defined HAVE_YAKL
-     dtsets(idtset)%gpu_option=ABI_GPU_KOKKOS
-#elif defined HAVE_GPU_CUDA
-     dtsets(idtset)%gpu_option=ABI_GPU_LEGACY
-#else
+     !FIXME We may want to have GPU enabled by default if a GPU device is available.
+     !      Now, we use CPU to stay safe, as some code section aren't checked for GPU use yet.
+
+!#if defined HAVE_OPENMP_OFFLOAD
+!     dtsets(idtset)%gpu_option=ABI_GPU_OPENMP
+!#elif defined HAVE_KOKKOS && defined HAVE_YAKL
+!     dtsets(idtset)%gpu_option=ABI_GPU_KOKKOS
+!#elif defined HAVE_GPU_CUDA
+!     dtsets(idtset)%gpu_option=ABI_GPU_LEGACY
+!#else
      dtsets(idtset)%gpu_option=ABI_GPU_DISABLED
-#endif
+!#endif
    end if
  end do
 
@@ -661,6 +674,9 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    ABI_MALLOC(dtsets(idtset)%constraint_kind,(mxntypat))
    ABI_MALLOC(dtsets(idtset)%corecs,(mxntypat))
    ABI_MALLOC(dtsets(idtset)%densty,(mxntypat,4))
+   ABI_MALLOC(dtsets(idtset)%dmft_nominal,(mxnatom))
+   ABI_MALLOC(dtsets(idtset)%dmft_orbital,(mxntypat))
+   ABI_MALLOC(dtsets(idtset)%dmft_shiftself,(mxnatom))
    ABI_MALLOC(dtsets(idtset)%dynimage,(mxnimage))
    ABI_MALLOC(dtsets(idtset)%iatfix,(3,mxnatom))
    ABI_MALLOC(dtsets(idtset)%f4of2_sla,(mxntypat))
@@ -796,6 +812,7 @@ subroutine invars1m(dmatpuflag, dtsets, iout, lenstr, mband_upper_, mx,&
  dtsets(0)%npfft=1
  dtsets(0)%npband=1
  dtsets(0)%bandpp=1
+ dtsets(0)%nblock_lobpcg=1
 
  symafm_(:,0)=1
  symrel_(:,:,:,0)=0
@@ -1029,6 +1046,7 @@ subroutine indefo1(dtset)
  dtset%natsph=0
  dtset%natsph_extra=0
  dtset%natvshift=0
+ dtset%nblock_lobpcg=1
  dtset%nconeq=0
  dtset%ndynimage=1
  dtset%ne_qFD=zero
@@ -1534,6 +1552,17 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    vel=dtset%vel_orig(1:3,1:natom,iimage)
    vel_cell=dtset%vel_cell_orig(1:3,1:3,iimage)
    xred=dtset%xred_orig(1:3,1:natom,iimage)
+
+! if getxred or getxcart we need to import xred before entering ingeo.
+! NB: xred/cart might be re-updated at runtime after running source dtset
+!   call intagm(dprarr,intarr,source_dtset,marr,3,string(1:lenstr),'getxred',tread,'INT')
+!   if (tread==1 .or. tread_geo==1)
+!     source_dtset =
+!     if (== -1) source_dtset = jdtset-1
+!   end if
+!   call intagm(dprarr,intarr,source_dtset,marr,3,string(1:lenstr),'getxcart',tread_geo,'INT')
+!
+
    ABI_MALLOC(chrgat,(natom))
    ABI_MALLOC(iatfix,(3,natom))
    ABI_MALLOC(nucdipmom,(3,natom))
@@ -1635,7 +1664,14 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'kptopt',tread,'INT')
  if(tread==1) dtset%kptopt=intarr(1)
 
+ ! In EPH we may want to change qptopt when generating the IBZ for phonons and DFPT potentials.
+ ! Typical example: we have a DDB/DDVB with q/-q and we want to reintroduce TR for testing purposes.
+ ! For this reason, the default value of qptopt is set to zero if RUNL_EPH.
+ ! EPH will use this value as sentinel to understand if qptopt should be set equal to kptopt
+ ! or if it should be taken from the input file.
+
  dtset%qptopt=1
+ if (dtset%optdriver == RUNL_EPH) dtset%qptopt = 0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'qptopt',tread,'INT')
  if(tread==1) dtset%qptopt=intarr(1)
 
@@ -1940,10 +1976,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    end do
  end if
 
- ! CP modified
- !if (occopt==0 .or. occopt==1 .or. (occopt>=3 .and. occopt<=8) ) then
  if (occopt==0 .or. occopt==1 .or. (occopt>=3 .and. occopt<=9) ) then
- ! End CP modified
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nband',tnband,'INT')
    ! Note: mband_upper is initialized, not nband
    if(tnband==1) mband_upper=intarr(1)
@@ -2116,9 +2149,18 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  if(tread==1) dtset%constraint_kind(1:dtset%ntypat)=intarr(1:dtset%ntypat)
 
 !Some special cases are not compatible with GPU implementation
- if (dtset%optdriver/=0) dtset%gpu_option=ABI_GPU_DISABLED  ! GPU only compatible with GS
+ if (dtset%optdriver/=RUNL_GSTATE .and. dtset%optdriver/=RUNL_RESPFN) then
+   dtset%gpu_option=ABI_GPU_DISABLED  ! GPU only compatible with GS and RESPFN
+ end if
+ if (dtset%optdriver==RUNL_RESPFN .and. dtset%gpu_option/=ABI_GPU_OPENMP) then
+   dtset%gpu_option=ABI_GPU_DISABLED  ! RESPFN on GPU only implemented with OpenMP
+ end if
  if (dtset%tfkinfunc/=0) dtset%gpu_option=ABI_GPU_DISABLED  ! Recursion method has its own GPU impl
- if (dtset%nspinor/=1)   dtset%gpu_option=ABI_GPU_DISABLED  ! nspinor=2 not yet GPU compatible
+ if (dtset%nspinor/=1) then
+   if (dtset%gpu_option/=ABI_GPU_DISABLED .and. dtset%gpu_option/=ABI_GPU_OPENMP) then
+     dtset%gpu_option=ABI_GPU_DISABLED  ! nspinor=2 not supported outside of CPU and OpenMP GPU
+   end if
+ end if
 
  ABI_FREE(nband)
  ABI_FREE(ratsph)
@@ -2263,23 +2305,24 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%cd_frqim_method=1
    dtsets(idtset)%cd_full_grid=0
    dtsets(idtset)%cellcharge(:)=zero
+   dtsets(idtset)%chebfi_oracle=0
    dtsets(idtset)%chempot(:,:,:)=zero
    dtsets(idtset)%chkdilatmx=1
    dtsets(idtset)%chkexit=0
+   dtsets(idtset)%chkparal=1
    dtsets(idtset)%chksymbreak=1
    dtsets(idtset)%chksymtnons=1
-   dtsets(idtset)%chneut=1      
+   dtsets(idtset)%chneut=1
    dtsets(idtset)%cineb_start=7
    dtsets(idtset)%corecs(:) = zero
-   dtsets(idtset)%cprj_update_lvl=0
+   dtsets(idtset)%cprj_in_memory=0
+   dtsets(idtset)%cprj_update_lvl=3
 !  D
    dtsets(idtset)%ddamp=0.1_dp
    dtsets(idtset)%delayperm=0
    dtsets(idtset)%densfor_pred=2
    if (dtsets(idtset)%paral_kgb>0.and.idtset>0) dtsets(idtset)%densfor_pred=6 ! Recommended for band-FFT parallelism
    dtsets(idtset)%dfpt_sciss=zero
-   dtsets(idtset)%invol_blk_sliced=1
-   if(dtsets(idtset)%gpu_option/=ABI_GPU_DISABLED) dtsets(idtset)%invol_blk_sliced=0
    dtsets(idtset)%diecut=2.2_dp
    dtsets(idtset)%dielng=1.0774841_dp
    dtsets(idtset)%diemac=1.0d6
@@ -2296,43 +2339,81 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmatpuopt=2
    if (size(dtsets(idtset)%dmatpawu,4)>0) dtsets(idtset)%dmatpawu=-10._dp
    dtsets(idtset)%dmatudiag=0
+   dtsets(idtset)%dmft_charge_prec=tol6
+   dtsets(idtset)%dmft_dc=1
    dtsets(idtset)%dmft_entropy=0
-   dtsets(idtset)%dmft_dc  =1
-   dtsets(idtset)%dmft_iter=0
+   dtsets(idtset)%dmft_fermi_step=0.02_dp
+   dtsets(idtset)%dmft_iter=10
    dtsets(idtset)%dmft_kspectralfunc=0
+   dtsets(idtset)%dmft_mxsf=0.6_dp
    dtsets(idtset)%dmft_nlambda=6
+   dtsets(idtset)%dmft_nominal(:)=0
    dtsets(idtset)%dmft_nwli=0
    dtsets(idtset)%dmft_nwlo=0
-   dtsets(idtset)%dmft_mxsf=0.3_dp
    dtsets(idtset)%dmft_occnd_imag=1
+   dtsets(idtset)%dmft_orbital(:)=1
+   dtsets(idtset)%dmft_prt_maxent=1
+   dtsets(idtset)%dmft_prtwan=0
    dtsets(idtset)%dmft_read_occnd=0
-   dtsets(idtset)%dmft_rslf=0
+   dtsets(idtset)%dmft_rslf=1
+   dtsets(idtset)%dmft_shiftself(:)=0.0_dp
    dtsets(idtset)%dmft_solv=5
    if(dtsets(idtset)%ucrpa>0.and.dtsets(idtset)%usedmft==1) dtsets(idtset)%dmft_solv=0
    dtsets(idtset)%dmft_t2g=0
-!  dtsets(idtset)%dmft_x2my2d=0
+   dtsets(idtset)%dmft_test=0
    dtsets(idtset)%dmft_tolfreq=tol4
    dtsets(idtset)%dmft_tollc=tol5
-   dtsets(idtset)%dmft_charge_prec=tol6
+   dtsets(idtset)%dmft_triqs_compute_integral=1
+   dtsets(idtset)%dmft_triqs_det_init_size=100
+   dtsets(idtset)%dmft_triqs_det_n_operations_before_check=10000
+   dtsets(idtset)%dmft_triqs_det_precision_error=1.0d-5
+   dtsets(idtset)%dmft_triqs_det_precision_warning=1.0d-8
+   dtsets(idtset)%dmft_triqs_det_singular_threshold=-1.0_dp
+   dtsets(idtset)%dmft_triqs_entropy=0
+   dtsets(idtset)%dmft_triqs_epsilon=1.0d-6
+   dtsets(idtset)%dmft_triqs_gaussorder=0
+   dtsets(idtset)%dmft_triqs_imag_threshold=1.0d-13
+   dtsets(idtset)%dmft_triqs_leg_measure=0
+   dtsets(idtset)%dmft_triqs_loc_n_min=0
+   dtsets(idtset)%dmft_triqs_loc_n_max=huge(0)
+   dtsets(idtset)%dmft_triqs_measure_density_matrix=1
+   dtsets(idtset)%dmft_triqs_move_double=0
+   dtsets(idtset)%dmft_triqs_move_global_prob=0.0_dp
+   dtsets(idtset)%dmft_triqs_move_shift=1
+   dtsets(idtset)%dmft_triqs_nbins_histo=100
+   dtsets(idtset)%dmft_triqs_nleg=0
+   dtsets(idtset)%dmft_triqs_nsubdivisions=1
+   dtsets(idtset)%dmft_triqs_ntau_delta=0
+   dtsets(idtset)%dmft_triqs_off_diag=-1
+   dtsets(idtset)%dmft_triqs_seed_a=34788
+   dtsets(idtset)%dmft_triqs_seed_b=928374
+   dtsets(idtset)%dmft_triqs_therm_restart=1000
+   dtsets(idtset)%dmft_triqs_time_invariance=1
+   dtsets(idtset)%dmft_triqs_tol_block=tol15
+   dtsets(idtset)%dmft_triqs_use_norm_as_weight=0
+   dtsets(idtset)%dmft_triqs_wmax=-1.0_dp
+   dtsets(idtset)%dmft_use_all_bands=0
+   dtsets(idtset)%dmft_use_full_chipsi=0
    dtsets(idtset)%dmft_wanorthnorm=3
+   dtsets(idtset)%dmft_wanrad=-1.0_dp
+   dtsets(idtset)%dmft_x2my2d=0
    dtsets(idtset)%dmftbandi=0
    dtsets(idtset)%dmftbandf=0
    dtsets(idtset)%dmftcheck=0
-   dtsets(idtset)%dmftctqmc_basis =1
-   dtsets(idtset)%dmftctqmc_check =0
+   dtsets(idtset)%dmftctqmc_basis=1
+   dtsets(idtset)%dmftctqmc_check=0
+   dtsets(idtset)%dmftctqmc_config=0
    dtsets(idtset)%dmftctqmc_correl=0
-   dtsets(idtset)%dmftctqmc_grnns =0
-   dtsets(idtset)%dmftctqmc_config =0
-   dtsets(idtset)%dmftctqmc_meas  =1
-   dtsets(idtset)%dmftctqmc_mrka  =0
-   dtsets(idtset)%dmftctqmc_mov   =0
-   dtsets(idtset)%dmftctqmc_order =0
-   dtsets(idtset)%dmftctqmc_triqs_nleg=30
+   dtsets(idtset)%dmftctqmc_gmove=0
+   dtsets(idtset)%dmftctqmc_grnns=0
+   dtsets(idtset)%dmftctqmc_meas=1
+   dtsets(idtset)%dmftctqmc_mrka=0
+   dtsets(idtset)%dmftctqmc_mov=0
+   dtsets(idtset)%dmftctqmc_order=0
    dtsets(idtset)%dmftqmc_l=0
    dtsets(idtset)%dmftqmc_n=0.0_dp
    dtsets(idtset)%dmftqmc_seed=jdtset
-   dtsets(idtset)%dmftqmc_therm=1000
-   dtsets(idtset)%dmftctqmc_gmove = dtsets(idtset)%dmftqmc_therm / 10
+   dtsets(idtset)%dmftqmc_therm=0
    dtsets(idtset)%dosdeltae=0.0
    dtsets(idtset)%dtion=100.0_dp
    dtsets(idtset)%dtele=0.1_dp
@@ -2378,6 +2459,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%fock_icutcoul=3
    dtsets(idtset)%freqim_alpha=five
    dtsets(idtset)%friction=0.001_dp
+   dtsets(idtset)%frictionbar=0.001_dp
    dtsets(idtset)%frzfermi=0
    dtsets(idtset)%fxcartfactor=one ! Should be adjusted to the H2 conversion factor
 !  G
@@ -2385,9 +2467,10 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%ga_fitness =1
    dtsets(idtset)%ga_opt_percent =0.2_dp
    dtsets(idtset)%ga_rules(:) =1
+   dtsets(idtset)%geoopt = "none"
    dtsets(idtset)%goprecon =0
    dtsets(idtset)%goprecprm(:)=0
-   dtsets(idtset)%gpu_devices=(/-1,-1,-1,-1,-1/)
+   dtsets(idtset)%gpu_devices=(/-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1/)
    dtsets(idtset)%gpu_kokkos_nthrd=xomp_get_num_threads(open_parallel=.true.)
    dtsets(idtset)%gpu_linalg_limit=2000000
    dtsets(idtset)%gpu_nl_distrib=0
@@ -2443,6 +2526,10 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%imgwfstor=0
    dtsets(idtset)%intxc=0
    ! if (dtsets(idtset)%paral_kgb>0.and.idtset>0) dtsets(idtset)%intxc=0
+   dtsets(idtset)%invovl_blksliced=1
+   if(dtsets(idtset)%gpu_option/=ABI_GPU_DISABLED.and.dtsets(idtset)%gpu_option/=ABI_GPU_LEGACY) then
+     if (dtsets(idtset)%usepaw==1) dtsets(idtset)%invovl_blksliced=0
+   end if
    dtsets(idtset)%ionmov=0
    dtsets(idtset)%densfor_pred=2
    if (dtsets(idtset)%paral_kgb>0.and.idtset>0) dtsets(idtset)%densfor_pred=6 ! Recommended for band-FFT parallelism
@@ -2496,6 +2583,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%magcon_lambda = 0.01_dp
    dtsets(idtset)%mband = -1
    dtsets(idtset)%mdtemp(:)=300.0_dp
+   dtsets(idtset)%mdeg_filter = 6
    dtsets(idtset)%mdwall=10000_dp
    dtsets(idtset)%mep_mxstep=100._dp
    dtsets(idtset)%mep_solver=0
@@ -2503,6 +2591,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%mgfft = -1
    dtsets(idtset)%mgfftdg = -1
    dtsets(idtset)%mixesimgf(:)=zero
+   dtsets(idtset)%moldyn = "none"
    dtsets(idtset)%mpw = -1
    dtsets(idtset)%mqgrid=0
    dtsets(idtset)%mqgriddg=0
@@ -2538,13 +2627,14 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
 !
    !nline
    dtsets(idtset)%nline=4
-
+   !For Chebyshev filtering algo, nline is the degree of the Chebyshev polynomial
+   if (mod(dtsets(idtset)%wfoptalg,10) == 1) then
+     dtsets(idtset)%nline = dtsets(idtset)%mdeg_filter
+   end if
+   !Specific value for wavelets
    if(dtsets(idtset)%usewvl==1 .and. .not. wvl_bigdft) then
-     if(dtsets(idtset)%usepaw==1) then
-       dtsets(idtset)%nline=4
-     else
-       dtsets(idtset)%nline=2
-     end if
+     if(dtsets(idtset)%usepaw==1) dtsets(idtset)%nline=4
+     if(dtsets(idtset)%usepaw/=1) dtsets(idtset)%nline=2
    end if
 
 !  nloalg is also a special case
@@ -2580,6 +2670,8 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    if(dtsets(idtset)%usedmft>0) dtsets(idtset)%optforces=0
    dtsets(idtset)%optstress=1
    dtsets(idtset)%optnlxccc=1
+   dtsets(idtset)%oracle_factor=0.1_dp
+   dtsets(idtset)%oracle_min_occ=0.0001_dp
    dtsets(idtset)%orbmag=0
    if (dtsets(idtset)%usepaw==0) then
      dtsets(idtset)%ortalg=2
@@ -2793,6 +2885,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%write_files = "default"
 !  X
    dtsets(idtset)%xclevel  = 0
+   dtsets(idtset)%xg_nonlop_option  = 0
    dtsets(idtset)%xc_denpos = tol14
    dtsets(idtset)%xc_taupos = tol14
    dtsets(idtset)%xc_tb09_c = 99.99_dp

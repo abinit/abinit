@@ -89,6 +89,6 @@
 #%%    C-diamond, Bulk, 2 atoms, paral_kgb, with PAW.
 #%%    Test of ground state with different occs(7 and 0),
 #%%    and also ionmov 2. Only with 4 procs.
-#%%    Same of test R:test the automatic parallelisation
+#%%    Similar to test paral_22 but test the automatic parallelisation
 #%% topics = parallelism
 #%%<END TEST_INFO>

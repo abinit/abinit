@@ -153,9 +153,9 @@ devoted to the building of the PAW atomic data, for a complete understanding of 
 
 ```
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /Users/torrentm/WORK/ABINIT/GIT/beauty/tests//Psps_for_tests/Pseudodojo_paw_pw_standard/C.xml
-- pspatm: opening atomic psp file    /Users/torrentm/WORK/ABINIT/GIT/beauty/tests//Psps_for_tests/Pseudodojo_paw_pw_standard/C.xml
-- pspatm : Reading pseudopotential header in XML form from /Users/torrentm/WORK/ABINIT/GIT/beauty/tests//Psps_for_tests/Pseudodojo_paw_pw_standard/C.xml
+- pspini: atom type   1  psp file is /Users/torrentm/WORK/ABINIT/GIT/beauty/tests//Pspdir/Pseudodojo_paw_pw_standard/C.xml
+- pspatm: opening atomic psp file    /Users/torrentm/WORK/ABINIT/GIT/beauty/tests//Pspdir/Pseudodojo_paw_pw_standard/C.xml
+- pspatm : Reading pseudopotential header in XML form from /Users/torrentm/WORK/ABINIT/GIT/beauty/tests//Pspdir/Pseudodojo_paw_pw_standard/C.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.50736703
@@ -176,10 +176,10 @@ devoted to the building of the PAW atomic data, for a complete understanding of 
 
 * After the SCF cycle section:
   The value of the integrated compensation charge evaluated by two different
-  numerical methodologies:   
+  numerical methodologies:
   1. computed in the _augmentation regions_
-     on the "spherical" grid,  
-  2. computed in the whole simulation cell on the "FFT" grid...  
+     on the "spherical" grid,
+  2. computed in the whole simulation cell on the "FFT" grid...
   A discussion on these two values will be done in a forthcoming section.
 
 ```
@@ -245,7 +245,7 @@ total_energy_dc_eV  : -3.13643013418624E+02
 !!! Note
     The PAW total energy is not the equal to the one obtained in the Norm-Conserving PseudoPotential case.
     This is due to the arbitrary modification of the energy reference during the pseudopotential
-    construction.  
+    construction.
     In PAW, comparing total energies computed with different atomic datasets is more meaningful: most of
     the parts of the energy are calculated exactly, and in general you should be
     able to compare numbers for (valence) *energies* between different PAW potentials or different codes.
@@ -277,16 +277,16 @@ You should obtain the following _total energy_ values (see *tpaw1_2.abo*):
 	etotal8    -1.2069642342E+01
 	etotal9    -1.2073328672E+01
 
-Although it is already quite obvious from these data, 
+Although it is already quite obvious from these data,
 by further increasing the value of [[ecut]] and obtaining a better estimation of the asymptotic
 limit, you can check that the etotal convergence (at the 1 mHartree level, that is 0.5 mHartree per atom) is not
 achieved for $e_{cut} = 14$ Hartree.
 
 ###3.b. Projector Augmented-Wave case###
 
-Use the same input file as in section **3.a**.  
+Use the same input file as in section **3.a**.
 Again, modify the last line of *tpaw1_2.abi*, replacing the *PseudosTM_pwteter/6c.pspnc* file
-by *Pseudodojo_paw_pw_standard/C.xml*.  
+by *Pseudodojo_paw_pw_standard/C.xml*.
 Run the code again and open the ABINIT output file (_.abo_). You should obtain the values:
 
 	etotal1    -1.1404460615E+01
@@ -299,7 +299,7 @@ Run the code again and open the ABINIT output file (_.abo_). You should obtain t
 	etotal8    -1.1527104066E+01
 	etotal9    -1.1527236307E+01
 
- 
+
 You can check that:
 
 The _etotal_ convergence (at 1 mHartree) is achieved for _$14 \le e_{cut} \le 16$ Hartree_
@@ -313,12 +313,12 @@ compared to a similar calculation with a NCPP**.
 In a NCPP calculation, the _plane wave_ density grid should be (at least) twice bigger
 than the wavefunctions grid, in each direction.
 In a PAW calculation, the _plane wave_ density grid is tunable
-thanks to the input variable [[pawecutdg]] (PAW: ECUT for Double Grid).  
+thanks to the input variable [[pawecutdg]] (PAW: ECUT for Double Grid).
 This is mainly needed to allow the mapping of densities and potentials, located
-in the augmentation regions (spheres), onto the global FFT grid.  
+in the augmentation regions (spheres), onto the global FFT grid.
 The number of points of the Fourier grid located in the spheres must be large
 enough to preserve a minimal accuracy. It is determined from the cut-off energy
-[[pawecutdg]].  
+[[pawecutdg]].
 One of the most sensitive objects affected by this "grid
 transfer" is the compensation charge density; its integral over the
 augmentation regions (on spherical grids) must cancel with its integral over
@@ -344,7 +344,7 @@ Launch ABINIT with these files; you should obtain the values (file *tpaw1_3.abo*
 	etotal10   -1.1518752752E+01
 
 We see that the variation of the energy with respect to the [[pawecutdg]] parameter is well
-below the 1 mHa level.  
+below the 1 mHa level.
 In principle, it should be sufficient to choose
 pawecutdg = 12 Ha in order to obtain an energy change lower than 1 mHa.
 In practice, it is better to keep a security margin. Here, for pawecutdg = 24 Ha
@@ -374,26 +374,26 @@ over a radial grid does not use the same scheme as integration over a FFT grid).
 
 Given these basic insights in the effects of [[pawecutdg]], HOW TO PROCEED IN PRACTICE ?
 In particular, how to combine the convergence study with respect to [[ecut]] and the one with respect to
-[[pawecutdg]] ? 
+[[pawecutdg]] ?
 
 Strictly speaking, when testing the convergence of some property with respect to [[ecut]], [[pawecutdg]] has to remain
 constant to obtain consistent results. However, there is the constraint that [[pawecutdg]]
-must be higher or equal to [[ecut]]. Also, it must be realized that 
+must be higher or equal to [[ecut]]. Also, it must be realized that
 increasing [[pawecutdg]] slightly changes the CPU execution time, but above
-all it is memory-consumiing so one is interested to keep it small. 
+all it is memory-consumiing so one is interested to keep it small.
 Note that, if [[ecut]] is already high, there might be no need for a higher [[pawecutdg]].
 
 Different people have different tricks, of course.
 The following recipe might do the work. First consider the case where [[ecut]] and [[pawecutdg]] are equal to each others,
 and perform a convergence study on the target property (e.g. the total energy) keeping this constraint.
-You will be determine that some energy value, for which [[ecut]]=[[pawecutdg]], meet your tolerance. 
+You will be determine that some energy value, for which [[ecut]]=[[pawecutdg]], meet your tolerance.
 Below this energy, the convergence criterion is not met.
 But will this lack of convergence come because of the detrimental effect of [[ecut]] or the one of [[pawecutdg]] ?
 If it is due to [[ecut]], in any case you cannot set [[pawecutdg]] to a lower value than [[ecut]]...
-Thus, one has to test the other hypothesis. So, fix [[pawecutdg]] to that satisfying value, possibly increased by some small security margin, 
+Thus, one has to test the other hypothesis. So, fix [[pawecutdg]] to that satisfying value, possibly increased by some small security margin,
 and REDO a convergence study only for [[ecut]], starting with a much lower value.
 
-So, for example, let us modify *tpaw1_2.abi* file, increasing both [[ecut]] and [[pawecutdg]] concurrently from 8Ha to 24 Ha by step of 2Ha.    
+So, for example, let us modify *tpaw1_2.abi* file, increasing both [[ecut]] and [[pawecutdg]] concurrently from 8Ha to 24 Ha by step of 2Ha.
 The following values are obtained:
 
            etotal1    -1.1408113469E+01
@@ -409,7 +409,7 @@ The following values are obtained:
 One can check again that the _etotal_ convergence (at the 1 mHartree level)
 is achieved for $14 \le e_{cut} \le 16$ Ha, with similar value for [[pawecutdg]].
 But is this convergence limited by [[ecut]] or [[pawecutdg]] ?
-The second step is thus to fix [[pawecutdg]] to a slightly higher value than 16 Ha, let us say 18 Ha, and explore the effect of [[ecut]] only. 
+The second step is thus to fix [[pawecutdg]] to a slightly higher value than 16 Ha, let us say 18 Ha, and explore the effect of [[ecut]] only.
 The highest value of [[ecut]] to be tested is 18 Ha, of course (and we already have the value for [[ecut]]=[[pawecutdg]]=18 Ha).
 The following values are obtained (for [[ecut]] going from 8 Ha to 18 Ha by steps of 2 Ha, and for [[pawecutdg]] fixed to 18 Ha):
 
@@ -420,7 +420,7 @@ The following values are obtained (for [[ecut]] going from 8 Ha to 18 Ha by step
            etotal5    -1.1526651588E+01
            etotal6    -1.1526927373E+01
 
-This indicates that [[ecut]] 14 or lower is not sufficient to reach the tolerance criterion. 
+This indicates that [[ecut]] 14 or lower is not sufficient to reach the tolerance criterion.
 One should stick to [[ecut]] 16 and [[pawecutdg]] 18 (or may be 16 if memory problems might be present).
 
 
@@ -439,7 +439,7 @@ Launch the code with these files; you should obtain the *tpaw1_4.abo* and the DO
     abinit tpaw1_4.abi >& log
 
 You can plot the DOS file; for this purpose, use a graphical tool
-and plot column 3 with respect to column 2.  
+and plot column 3 with respect to column 2.
 Example: if you use the |xmgrace| tool, launch:
 
     xmgrace -block tpaw1_4o_DOS -bxy 1:2
@@ -457,7 +457,7 @@ Now, edit the *tpaw1_4.abi* file, comment the "prtdos 1" line, and uncomment (or
 [[natsph]]=1, [[iatsph]]=1 select the first carbon atom as
 the center of projection, and [[ratsph]]=1.51 sets the radius of the projection area to 1.51
 atomic units (this is exactly the radius of the PAW augmentation regions:
-generally the best choice).  
+generally the best choice).
 [[pawprtdos]]=1 is specific to PAW.
 With this option, ABINIT should compute all the contributions to the projected DOS.
 
@@ -492,7 +492,7 @@ You should get this:
 ![Projected DOS - 4 proj](paw1_assets/DOS-4proj.jpg)
 
 As you can see, the smooth PW contribution and the PS on-site contribution are close. At basis completeness,
-they should cancel; we could approximate the DOS by the AE on-site part taken alone.  
+they should cancel; we could approximate the DOS by the AE on-site part taken alone.
 That's exactly the purpose of the [[pawprtdos]] = 2 option: in that case, only the AE
 on-site contribution is computed and given as a good approximation of the
 total projected DOS. The main advantage of this option is that the computing time is
@@ -548,7 +548,7 @@ Adding the DOS obtained in the previous section to the comparison, you
 immediately see that the superposition of the plane wave part DOS (PW) and the PS
 on-site DOS depends on the completeness of the partial wave basis!
 
-Now, you can have a look at the 3 output files (one for each PAW dataset).  
+Now, you can have a look at the 3 output files (one for each PAW dataset).
 A way to estimate the completeness of the partial wave basis is to compare
 derivatives of total energy; if you look at the stress tensor:
 
@@ -566,14 +566,14 @@ You can compare other results in the 3 output files: total energy, eigenvalues, 
 
 !!! Note
     The CPU time increases with the size of the partial wave basis. This is why it is
-    not recommended to use systematically high-precision PAW datasets.  
+    not recommended to use systematically high-precision PAW datasets.
     If you want to learn how to generate PAW datasets with different *partial wave* basis,
     you might follow the [tutorial on generating PAW datasets (PAW2)](/tutorial/paw2).
 
 ## 7. Checking the validity of PAW results
 
 The validity of our computation has to be checked
-by comparison, on known structures, with known results.  
+by comparison, on known structures, with known results.
 In the case of diamond, lots of computations and experimental results exist.
 
 !!! important
@@ -646,10 +646,10 @@ function while generating the PAW dataset (see [tutorial on generating PAW datas
 
 The use of an efficient **mixing scheme** in the self-consistent loop is a crucial
 point to minimize the number of steps to achieve convergence.
-This mixing can be done on the potential or on the density.  
+This mixing can be done on the potential or on the density.
 By default, in a Norm-Conserving PseudoPotential calculation, the mixing is done on the potential;
 but, for technical reasons, this choice is not optimal for PAW calculations.
-Thus, by default, the mixing is done on the density when PAW is activated.  
+Thus, by default, the mixing is done on the density when PAW is activated.
 
 The mixing scheme can be controlled by the [[iscf]] variable (see the different options of this input variable).
 To compare both schemes, you can edit the *tpaw1_1.abi* file and try [[iscf]] = 7
@@ -659,7 +659,7 @@ final _total energy_ is the same but the way to reach it is completely different
 Now, have a look at the end of the file and focus on the `Components of total
 free energy`; the total energy is decomposed according to two different schemes (`direct` and `double counting`);
 at very high convergence of the SCF cycle the potential/density
-residual is very small and these two values should be the same.  
+residual is very small and these two values should be the same.
 But it has been observed that
 the converged value was reached more rapidly by the `direct` energy, when the
 mixing is on the potential, and by the `double counting` energy when the mixing
@@ -700,7 +700,7 @@ $D_{ij}$ or _partial waves occupancies_ $\rho_{ij}$.
 
 Looking at the [[varset:paw|PAW variable set]], you can find the description
 of additional input keywords related to PAW.
-They are to be used when tuning the computation, in order to gain accuracy or save CPU time.  
+They are to be used when tuning the computation, in order to gain accuracy or save CPU time.
 
 See also descriptions of these variables and input file examples in the [[topic:PAW|PAW topic]] page.
 

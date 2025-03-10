@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2022 ABINIT group (XG, GMR, AR, MKV, MT, FJ, MB)
+!!  Copyright (C) 1998-2025 ABINIT group (XG, GMR, AR, MKV, MT, FJ, MB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -42,6 +42,7 @@ module m_scfcv_core
  use m_dtfil
  use m_distribfft
  use m_extfpmd
+ use m_xg_nonlop
 
  use m_nonlop,           only : nonlop_counter
  use defs_datatypes,     only : pseudopotential_type
@@ -65,6 +66,7 @@ module m_scfcv_core
  use m_pawrad,           only : pawrad_type
  use m_pawtab,           only : pawtab_type,pawtab_get_lsize
  use m_paw_an,           only : paw_an_type, paw_an_init, paw_an_free, paw_an_nullify, paw_an_reset_flags
+ use m_pawxc,            only : pawxc_get_usekden
  use m_pawfgrtab,        only : pawfgrtab_type, pawfgrtab_init, pawfgrtab_free
  use m_pawrhoij,         only : pawrhoij_type
  use m_pawcprj,          only : pawcprj_type, pawcprj_alloc, pawcprj_copy, pawcprj_get, pawcprj_lincom, &
@@ -103,10 +105,10 @@ module m_scfcv_core
  use m_mkrho,            only : mkrho
  use m_rhotov,           only : rhotov
  use m_forces,           only : fresid, forces
- use m_dft_energy,       only : energy
+ use m_dft_energy,       only : energy, entropy
  use m_initylmg,         only : initylmg
  use m_rhotoxc,          only : rhotoxc
- use m_drivexc,          only : check_kxc
+ use m_drivexc,          only : check_kxc, xc_need_kden
  use m_odamix,           only : odamix
  use m_common,           only : scprqt, prtene
  use m_fourier_interpol, only : transgrid
@@ -117,7 +119,7 @@ module m_scfcv_core
  use m_psolver,          only : psolver_rhohxc
  use m_paw2wvl,          only : paw2wvl_ij, wvl_cprjreorder
 
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
  use m_nvtx_data
 #endif
 
@@ -261,7 +263,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 &  initialized,irrzon,itimes,kg,mcg,mcprj,mpi_enreg,my_natom,nattyp,ndtpawuj,nfftf,npwarr,occ,&
 &  paw_dmft,pawang,pawfgr,pawrad,pawrhoij,pawtab,phnons,psps,pwind,&
 &  pwind_alloc,pwnsfac,rec_set,resid,results_gs,rhog,rhor,rprimd,&
-&  scf_history,symrec,taug,taur,wffnew,wvl,xred,xred_old,ylm,ylmgr,conv_retcode)
+&  scf_history,symrec,taug,taur,wffnew,wvl,xg_nonlop,xred,xred_old,ylm,ylmgr,conv_retcode)
 
 !Arguments ------------------------------------
 !scalars
@@ -313,13 +315,14 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  type(pawtab_type), intent(inout) :: pawtab(psps%ntypat*psps%usepaw)
  type(paw_dmft_type), intent(inout) :: paw_dmft
  type(pawcprj_type),pointer, intent(inout) :: cprj(:,:)
+ type(xg_nonlop_t),intent(inout) :: xg_nonlop
 !Local variables -------------------------
 !scalars
  integer,parameter :: level=110,response=0,cplex1=1
  integer :: afford,bantot,choice
  integer :: computed_forces,cplex,cplex_hf,ctocprj_choice,dbl_nnsclo,dielop,dielstrt,dimdmat
- integer :: forces_needed,errid,has_vxctau,has_dijhat,has_dijnd,has_dijU,has_vhartree,has_dijfock
- integer :: history_size,usefock
+ integer :: forces_needed,errid,has_dijhat,has_dijnd,has_dijU,has_vhartree,has_dijfock
+ integer :: history_size
  integer :: iatom,ider,idir,ierr,ii,ikpt,impose_dmat,denpot
  integer :: initialized0,iorder_cprj,ipert,ipositron,isave_den,isave_kden,iscf10,ispden
  integer :: ispmix,istep,istep_fock_outer,istep_mix,istep_updatedfock,itypat,izero,lmax_diel,lpawumax,mband_cprj
@@ -333,13 +336,13 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  integer :: quit_sum,rdwrpaw,shft,spaceComm,spaceComm_fft,spaceComm_wvl,spaceComm_grid
  integer :: spare_mem
  integer :: stress_needed,sz1,sz2,tim_mkrho,unit_out
- integer :: usecprj,usexcnhat,use_hybcomp
+ integer :: usecprj,usevxctau,usevxctau_paw,usexcnhat,use_hybcomp
  integer :: my_quit,quitsum_request,timelimit_exit,usecg,wfmixalg,with_vectornd
  integer ABI_ASYNC :: quitsum_async
  real(dp) :: boxcut,compch_fft,compch_sph,deltae,diecut,diffor,ecut
- real(dp) :: ecutf,ecutsus,edum,elast,etotal,evxc,fermie,fermih,gsqcut,hyb_mixing,hyb_mixing_sr ! CP added fermih
+ real(dp) :: ecutf,ecutsus,edum,sdum,elast,etotal,evxc,fermie,fermih,gsqcut,hyb_mixing,hyb_mixing_sr
  real(dp) :: maxfor,res2,residm,ucvol,ucvol_local,val_max
- real(dp) :: val_min,vxcavg,vxcavg_dum
+ real(dp) :: val_min,vxcavg,vxcavg_dum,el_temp
  real(dp) :: zion,wtime_step,now,prev,esum,enonlocalpsp !MRM
  character(len=10) :: tag
  character(len=500) :: MY_NAME = "scfcv_core"
@@ -368,7 +371,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  integer,allocatable :: l_size_atm(:)
  integer,allocatable :: indsym_dum(:,:,:),symrec_dum(:,:,:), rmm_diis_status(:,:,:)
  logical,pointer :: lmselect_ep(:,:)
- real(dp) :: dielar(7),dphase(3),dummy2(6),favg(3),gmet(3,3),gprimd(3,3)
+ real(dp) :: dielar(7),dphase(3),favg(3),gmet(3,3),gprimd(3,3)
  real(dp) :: kpt_diel(3),pel(3),pel_cg(3),pelev(3),pion(3),ptot(3),qpt(3),red_ptot(3) !!REC
  real(dp) :: rhodum(1),rmet(3,3),strscondft(6),strsxc(6),strten(6),tollist(12)
  real(dp) :: tsec(2),vnew_mean(dtset%nspden),vres_mean(dtset%nspden)
@@ -403,10 +406,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 
 ! *********************************************************************
 
-!DEBUG
-!write(std_out,'(a,5i4)')' scfcv_core, enter : itimes(1:2)=',itimes(1:2)
-!ENDDEBUG
-
+ !write(std_out,'(a,5i4)')' scfcv_core, enter : itimes(1:2)=',itimes(1:2)
  DBG_ENTER("COLL")
 
  call timab(1440,1,tsec)
@@ -457,6 +457,9 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 & dtset%berryopt == 16 .or. &
 & dtset%berryopt == 17)
 
+!Get electronic temperature from dtset
+ el_temp=merge(dtset%tphysel,dtset%tsmear,dtset%tphysel>tol8.and.dtset%occopt/=3.and.dtset%occopt/=9)
+
 !Get FFT grid(s) sizes (be careful !)
 !See NOTES in the comments at the beginning of this file.
  ngfft(:)=dtset%ngfft(:)
@@ -476,7 +479,6 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
 !Fock: be sure that the pointer is initialized to Null.
- usefock=dtset%usefock
  nullify(fock)
 
 !Special care in case of WVL
@@ -520,8 +522,6 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  !if ((dtset%nstep==0 .or. dtset%iscf < 0) .and. dtset%plowan_compute==0) then
    energies%e_fermie = results_gs%energies%e_fermie
    results_gs%fermie = results_gs%energies%e_fermie
-   !write(std_out,*)"in scfcv_core: results_gs%fermie: ",results_gs%fermie
-! CP added for occopt 9
    energies%e_fermih = results_gs%energies%e_fermih
    results_gs%fermih = results_gs%energies%e_fermih
 ! End CP addition
@@ -540,11 +540,8 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  if(wvlbigdft) energies%e_corepsp = zero
  if(dtset%icutcoul.ne.3) energies%e_corepsp = zero
 
-
  fermie=energies%e_fermie
- ! CP added
  fermih=energies%e_fermih
- ! End CP added
  isave_den=0; isave_kden=0 !initial index of density protection file
  optres=merge(0,1,dtset%iscf<10)
  usexcnhat=0!;mcprj=0
@@ -629,7 +626,8 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  ABI_MALLOC(vtrial,(nfftf,dtset%nspden))
  ABI_MALLOC(vpsp,(nfftf))
  ABI_MALLOC(vxc,(nfftf,dtset%nspden))
- ABI_MALLOC(vxctau,(nfftf,dtset%nspden,4*dtset%usekden))
+ usevxctau=merge(1,0,xc_need_kden(dtset%ixc))
+ ABI_MALLOC(vxctau,(nfftf,dtset%nspden,4*usevxctau))
 
  wfmixalg=dtset%fockoptmix/100
  use_hybcomp=0
@@ -654,12 +652,12 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  n1xccc=0;if (psps%n1xccc/=0) n1xccc=psps%n1xccc
  n3xccc=0;if (psps%n1xccc/=0) n3xccc=nfftf
  ABI_MALLOC(xccc3d,(n3xccc))
+ ABI_MALLOC(xcctau3d,(nfftf*dtset%usekden))
 
 !Allocations/initializations for PAW only
  lpawumax=-1
  if(psps%usepaw==1) then
 !  Variables/arrays related to the fine FFT grid
-   ABI_MALLOC(xcctau3d,(nfftf*dtset%usekden))
    ABI_MALLOC(nhat,(nfftf,dtset%nspden*psps%usepaw))
    if (nstep==0) nhat=zero
    ABI_MALLOC(pawfgrtab,(my_natom))
@@ -683,17 +681,18 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
    call paw_ij_nullify(paw_ij)
    has_dijhat=0;if (dtset%iscf==22) has_dijhat=1
    has_vhartree=0; if (dtset%prtvha > 0 .or. dtset%prtvclmb > 0) has_vhartree=1
-   has_dijfock=0; if (usefock==1) has_dijfock=1
+   has_dijfock=0; if (dtset%usefock == 1) has_dijfock=1
    has_dijnd=0;if(any(abs(dtset%nucdipmom)>tol8)) has_dijnd=1
    has_dijU=merge(0,1,dtset%usepawu>0) !Be careful on this!
-   has_vxctau=dtset%usekden
+   usevxctau_paw=pawxc_get_usekden(dtset%ixc)
    call paw_an_init(paw_an,dtset%natom,dtset%ntypat,0,0,dtset%nspden,&
 &   cplex,dtset%pawxcdev,dtset%typat,pawang,pawtab,has_vxc=1,&
-&   has_vxctau=has_vxctau,has_vxc_ex=1,has_vhartree=has_vhartree,&
+&   has_vxctau=usevxctau_paw,has_vxc_ex=1,has_vhartree=has_vhartree,&
 &   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
    call paw_ij_init(paw_ij,cplex,dtset%nspinor,dtset%nsppol,dtset%nspden,&
 &   dtset%pawspnorb,dtset%natom,dtset%ntypat,dtset%typat,pawtab,&
-&   has_dij=1,has_dijfock=has_dijfock,has_dijhartree=1,has_dijnd=has_dijnd,has_dijso=1,has_dijhat=has_dijhat,&
+&   has_dij=1,has_dijfock=has_dijfock,has_dijhartree=1,has_dijnd=has_dijnd,has_dijso=1,&
+&   has_dijhat=has_dijhat,&
 &   has_dijU=has_dijU,has_pawu_occ=1,has_exexch_pot=1,nucdipmom=dtset%nucdipmom,&
 &   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
    if(dtset%usewvl==1) then
@@ -713,10 +712,14 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
      end if
    end if
 
+   if (dtset%cprj_in_memory==1.and.psps%usepaw==1) then
+     call xg_nonlop_init_cplex_alldij(xg_nonlop,paw_ij)
+   end if
+
 !  Allocation of projected WF (optional)
    if (usecprj==1) then
      iorder_cprj=0
-     if (usefock==1) then
+     if (dtset%usefock==1) then
        ctocprj_choice = 1
        if (dtset%optforces == 1) then
         ctocprj_choice = 2; ! ncpgr = 3
@@ -743,7 +746,6 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
    ABI_MALLOC(dimcprj,(0))
    ABI_MALLOC(dimcprj_srt,(0))
    ABI_MALLOC(nhat,(0,0))
-   ABI_MALLOC(xcctau3d,(0))
    ABI_MALLOC(paw_ij,(0))
    ABI_MALLOC(paw_an,(0))
    ABI_MALLOC(pawfgrtab,(0))
@@ -757,7 +759,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
    dielar(5)=dtset%diegap;dielar(6)=dtset%dielam
    dielar(7)=dtset%diemix;if (dtset%iscf>=10) dielar(7)=dtset%diemixmag
    ABI_MALLOC(nvresid,(nfftf,dtset%nspden))
-   ABI_MALLOC(nvtauresid,(nfftf,dtset%nspden*dtset%usekden))
+   ABI_MALLOC(nvtauresid,(nfftf,dtset%nspden*usevxctau))
    if (nstep==0) then
     nvresid=zero
     nvtauresid=zero
@@ -1036,7 +1038,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
          if (quitsum_async > 0) then
            write(msg,"(3a)")"Approaching time limit ",trim(sec2str(get_timelimit())),". Will exit istep loop in scfcv_core."
            ABI_COMMENT(msg)
-           call wrtout(ab_out, msg, "COLL")
+           call wrtout(ab_out, msg)
            timelimit_exit = 1
            exit
          end if
@@ -1059,9 +1061,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 
      if (dtset%usewvl == 0) then
 !      Get cut-off for g-vectors
-       if (psps%usepaw==1) then
-         call wrtout(std_out,' FFT (fine) grid used in SCF cycle:','COLL')
-       end if
+       if (psps%usepaw==1) call wrtout(std_out,' FFT (fine) grid used in SCF cycle:')
        call getcut(boxcut,ecutf,gmet,gsqcut,dtset%iboxcut,std_out,k0,ngfftf)
 
 !      Compute structure factor phases and large sphere cut-off (gsqcut):
@@ -1138,7 +1138,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
      end if
      if (initialized/=0.and.dtset%usewvl == 0.and.ipositron/=1) then
        ! In some cases cprj are kept in memory, so we have to update them before the call of vtorho
-       if (dtset%cprj_in_memory/=0) then
+       if (dtset%cprj_in_memory==2) then
          iatom=0
          idir=0
          iorder_cprj=0
@@ -1177,13 +1177,13 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 
    !Initialize/Update data in the case of an Exact-exchange (Hartree-Fock) or hybrid XC calculation
    hyb_mixing=zero;hyb_mixing_sr=zero
-   if (usefock==1) then
+   if (dtset%usefock==1) then
      call timab(1443,1,tsec)
      if (istep==1) then
        ! Initialize data_type fock for the calculation
-       cplex_hf=cplex
-       if (psps%usepaw==1) cplex_hf=dtset%pawcpxocc
+       cplex_hf=cplex; if (psps%usepaw==1) cplex_hf=dtset%pawcpxocc
        call fock_init(atindx,cplex_hf,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,pawang,pawfgr,pawtab,rprimd)
+
        if (fock%fock_common%usepaw==1) then
          optcut_hf = 0 ! use rpaw to construct local_pawfgrtab
          optgr0_hf = 0; optgr1_hf = 0; optgr2_hf = 0 ! dont need gY terms locally
@@ -1274,9 +1274,10 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 &                         rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,option=1)
              end if
            end if
-         end if
-       end if
+         end if ! false
 !ENDDEBUG
+
+       end if
 
        call timab(1445,1,tsec)
 
@@ -1327,8 +1328,8 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 &     kxc,maxfor,mcg,mcprj,mgfftf,mpi_enreg,my_natom,n3xccc,nattyp,nfftf,ngfftf,ngrvdw,nhat,&
 &     nkxc,npwarr,nvresid,occ,optres,paw_ij,pawang,pawfgr,pawfgrtab,&
 &     pawrad,pawrhoij,pawtab,ph1df,ph1d,psps,rhog,rhor,rmet,rprimd,&
-&     stress_needed,strscondft,strsxc,symrec,ucvol,usecprj,vhartr,vpsp,vxc,vxctau,&
-&     xccc3d,xcctau3d,xred,ylm,ylmgr)
+&     stress_needed,strscondft,strsxc,symrec,ucvol,usecprj,usevxctau,vhartr,vpsp,vxc,vxctau,&
+&     xccc3d,xcctau3d,xred,ylm,ylmgr,xg_nonlop)
      ipositron=electronpositron_calctype(electronpositron)
    end if
 
@@ -1445,13 +1446,14 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
      call paw_ij_reset_flags(paw_ij,self_consistent=.true.) ! Force the recomputation of Dij
      option=0;if (dtset%iscf>0.and.dtset%iscf<10.and.nstep>0) option=1
      ABI_NVTX_START_RANGE(NVTX_SCFCV_PAWDENPOT)
-     call pawdenpot(compch_sph,energies%e_paw,energies%e_pawdc,ipert,dtset%ixc,my_natom,dtset%natom,&
-&     dtset%nspden,psps%ntypat,dtset%nucdipmom,nzlmopt,option,paw_an,paw_an,paw_ij,pawang,dtset%pawprtvol,pawrad,&
-&     pawrhoij,dtset%pawspnorb,pawtab,dtset%pawxcdev,dtset%spnorbscl,dtset%xclevel,&
+     call pawdenpot(compch_sph,el_temp,energies%e_paw,energies%e_pawdc,energies%entropy_paw,&
+&     ipert,dtset%ixc,my_natom,dtset%natom,dtset%nspden,psps%ntypat,dtset%nucdipmom,nzlmopt,&
+&     option,paw_an,paw_an,paw_ij,pawang,dtset%pawprtvol,pawrad,pawrhoij,dtset%pawspnorb,&
+&     pawtab,dtset%pawxcdev,dtset%spnorbscl,dtset%xclevel,&
 &     dtset%xc_denpos,dtset%xc_taupos,ucvol,psps%znuclpsp,&
 &     comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
 &     hyb_mixing=hyb_mixing,hyb_mixing_sr=hyb_mixing_sr,&
-&     electronpositron=electronpositron,vpotzero=vpotzero)
+&     electronpositron=electronpositron,vpotzero=vpotzero,epaw_xc=energies%e_pawxc)
      ABI_NVTX_END_RANGE()
 
 !    Correct the average potential with the calculated constant vpotzero
@@ -1460,7 +1462,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 !    vpotzero(2) = -1/ucvol sum_ij rho_ij gamma_ij
      write(msg,'(a,f14.6,2x,f14.6)') &
 &     ' average electrostatic smooth potential [Ha] , [eV]',SUM(vpotzero(:)),SUM(vpotzero(:))*Ha_eV
-     call wrtout(std_out,msg,'COLL')
+     call wrtout(std_out, msg)
      vtrial(:,:)=vtrial(:,:)+SUM(vpotzero(:))
      if(option/=1)then
 !      Fix the direct total energy (non-zero only for charged systems)
@@ -1503,7 +1505,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
      call pawdij(cplex,dtset%enunit,gprimd,ipert,my_natom,dtset%natom,nfftf,nfftotf,&
 &     dtset%nspden,psps%ntypat,paw_an,paw_ij,pawang,pawfgrtab,dtset%pawprtvol,&
 &     pawrad,pawrhoij,dtset%pawspnorb,pawtab,dtset%pawxcdev,k0,dtset%spnorbscl,&
-&     ucvol_local,dtset%cellcharge(1),vtrial,vxc,xred,&
+&     ucvol_local,dtset%cellcharge(1),vtrial,vxc,xred,dtset%znucl,&
 &     natvshift=dtset%natvshift,atvshift=dtset%atvshift,fatvshift=fatvshift,&
 &     comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
 &     mpi_comm_grid=spaceComm_grid,&
@@ -1548,7 +1550,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 
    if(dtset%iscf>=0)then
      write(msg, '(a,a,i4)' )ch10,' ITER STEP NUMBER  ',istep
-     call wrtout(std_out,msg,'COLL')
+     call wrtout(std_out,msg)
    end if
 
 !  The next flag says whether the xred have to be changed in the current iteration
@@ -1608,7 +1610,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
    call timab(1451,1,tsec)
 !  Compute the density from the trial potential
    if (dtset%tfkinfunc==0) then
-     if(VERBOSE) call wrtout(std_out,'*. Compute the density from the trial potential (vtorho)',"COLL")
+     if(VERBOSE) call wrtout(std_out,'*. Compute the density from the trial potential (vtorho)')
 
      ABI_NVTX_START_RANGE(NVTX_VTORHO)
 
@@ -1622,8 +1624,8 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 &     computed_forces,optres,paw_dmft,paw_ij,pawang,pawfgr,pawfgrtab,&
 &     pawrhoij,pawtab,phnons,phnonsdiel,ph1d,ph1ddiel,psps,fock,&
 &     pwind,pwind_alloc,pwnsfac,resid,residm,rhog,rhor,rmet,rprimd,&
-&     susmat,symrec,taug,taur,nvtauresid,ucvol_local,usecprj,wffnew,with_vectornd,&
-&     vectornd,vtrial,vxctau,wvl,xred,ylm,ylmgr,ylmdiel, rmm_diis_status)
+&     susmat,symrec,taug,taur,nvtauresid,ucvol_local,usecprj,usevxctau,wffnew,with_vectornd,&
+&     vectornd,vtrial,vxctau,wvl,xg_nonlop,xred,ylm,ylmgr,ylmdiel, rmm_diis_status)
 
      ABI_NVTX_END_RANGE()
 
@@ -1631,7 +1633,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
      ! CP: occopt 9 not available with Thomas Fermi functionals
      ABI_WARNING('THOMAS FERMI')
      call vtorhotf(dtset,energies%e_kinetic,energies%e_nlpsp_vfock,&
-&     energies%entropy,energies%e_fermie,gprimd,grnl,irrzon,mpi_enreg,&
+&     energies%entropy_ks,energies%e_fermie,gprimd,grnl,irrzon,mpi_enreg,&
 &     dtset%natom,nfftf,dtset%nspden,dtset%nsppol,dtset%nsym,phnons,&
 &     rhog,rhor,rprimd,ucvol,vtrial)
 
@@ -1642,7 +1644,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 !  Recursion method
    if(dtset%userec==1)then
      call vtorhorec(dtset,&
-&     energies%e_kinetic,energies%e_nlpsp_vfock,energies%entropy,energies%e_eigenvalues,&
+&     energies%e_kinetic,energies%e_nlpsp_vfock,energies%entropy_ks,energies%e_eigenvalues,&
 &     energies%e_fermie,grnl,initialized,irrzon,nfftf,phnons,&
 &     rhog,rhor,vtrial,rec_set,istep-nstep,rprimd,gprimd)
      residm=zero
@@ -1680,7 +1682,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
      if (dtset%iscf==22) optene = -1
 
 !    Add the Fock contribution to E_xc and E_xcdc if required
-     if (usefock==1) then
+     if (dtset%usefock==1) then
        energies%e_fockdc=two*energies%e_fock
      end if
 
@@ -1703,7 +1705,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 &     nattyp,nfftf,ngfftf,ngrvdw,nhat,nkxc,psps%ntypat,nvresid,n1xccc,n3xccc,&
 &     optene,computed_forces,optres,pawang,pawfgrtab,pawrad,pawrhoij,pawtab,&
 &     ph1df,red_ptot,psps,rhog,rhor,rmet,rprimd,symrec,synlgr,ucvol,&
-&     psps%usepaw,vhartr,vpsp,vxc,vxctau,wvl%descr,wvl%den,xccc3d,xred)
+&     psps%usepaw,usevxctau,vhartr,vpsp,vxc,vxctau,wvl%descr,wvl%den,xccc3d,xred)
     !if (wvlbigdft) energies_copy(energies,energies_wvl) ! TO BE ACTIVATED LATER
    end if
    call timab(1452,2,tsec)
@@ -1760,9 +1762,9 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
        nk3xc=1
        if(dtset%icoulomb==0 .and. dtset%usewvl==0) then
          non_magnetic_xc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
-         call rhotoxc(edum,kxc,mpi_enreg,nfftf,&
+         call rhotoxc(edum,sdum,kxc,mpi_enreg,nfftf,&
 &         ngfftf,nhat,psps%usepaw,nhatgr,0,nkxc,nk3xc,non_magnetic_xc,n3xccc,&
-&         optxc,rhor,rprimd,dummy2,0,vxc,vxcavg_dum,xccc3d,xcdata,&
+&         optxc,rhor,rprimd,0,vxc,vxcavg_dum,xccc3d,xcdata,&
 &         add_tfw=tfw_activated,taur=taur,vhartr=vhartr,vxctau=vxctau,xcctau3d=xcctau3d)
        else if(.not. wvlbigdft) then
 !        WVL case:
@@ -1812,7 +1814,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 !  ----------------------------------------------------------------------
 
    call timab(1457,1,tsec)
-   if(VERBOSE) call wrtout(std_out,'*. Compute the new potential from the trial density',"COLL")
+   if(VERBOSE) call wrtout(std_out,'*. Compute the new potential from the trial density')
 
 !  Set XC computation flag
    optxc=1
@@ -1867,10 +1869,9 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
      call rhotov(constrained_dft,dtset,energies,gprimd,grcondft,gsqcut,intgres,istep,&
 &     kxc,mpi_enreg,nfftf,ngfftf,nhat,nhatgr,nhatgrdim,nkxc,nvresid,n3xccc,&
 &     optene,optres,optxc,pawang,pawrad,pawrhoij,pawtab,&
-&     rhog,rhor,rprimd,strscondft,strsxc,ucvol_local,psps%usepaw,usexcnhat,&
-&     vhartr,vnew_mean,vpsp,vres_mean,res2,vtrial,vxcavg,vxc,wvl,xccc3d,xred,&
-&     electronpositron=electronpositron,taur=taur,vxctau=vxctau,vtauresid=nvtauresid,&
-&     vxc_hybcomp=vxc_hybcomp,add_tfw=tfw_activated,xcctau3d=xcctau3d)
+&     rhog,rhor,rprimd,strscondft,strsxc,taur,ucvol_local,psps%usepaw,usexcnhat,usevxctau,&
+&     vhartr,vnew_mean,vpsp,vres_mean,res2,vtrial,vxcavg,vxc,vxctau,nvtauresid,wvl,xccc3d,xcctau3d,xred,&
+&     electronpositron=electronpositron,vxc_hybcomp=vxc_hybcomp,add_tfw=tfw_activated)
      ABI_NVTX_END_RANGE()
 
    end if
@@ -1883,7 +1884,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 
    if (dtset%iscf<10) then
 
-     if(VERBOSE) call wrtout(std_out,'Check exit criteria in case of potential mixing',"COLL")
+     if(VERBOSE) call wrtout(std_out,'Check exit criteria in case of potential mixing')
 
 !    If the potential mixing is required, compute the total energy here
 !    PAW: has to compute here spherical terms
@@ -1893,18 +1894,18 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
        call paw_an_reset_flags(paw_an) ! Force the recomputation of on-site potentials
        option=2
        ABI_NVTX_START_RANGE(NVTX_SCFCV_PAWDENPOT)
-       call pawdenpot(compch_sph,energies%e_paw,energies%e_pawdc,ipert,&
-&       dtset%ixc,my_natom,dtset%natom,dtset%nspden,&
+       call pawdenpot(compch_sph,el_temp,energies%e_paw,energies%e_pawdc,&
+&       energies%entropy_paw,ipert,dtset%ixc,my_natom,dtset%natom,dtset%nspden,&
 &       psps%ntypat,dtset%nucdipmom,nzlmopt,option,paw_an,paw_an,&
 &       paw_ij,pawang,dtset%pawprtvol,pawrad,pawrhoij,dtset%pawspnorb,&
 &       pawtab,dtset%pawxcdev,dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,dtset%xc_taupos,ucvol,psps%znuclpsp,&
 &       hyb_mixing=hyb_mixing,hyb_mixing_sr=hyb_mixing_sr,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
-&       electronpositron=electronpositron)
+&       electronpositron=electronpositron,epaw_xc=energies%e_pawxc)
        ABI_NVTX_END_RANGE()
      end if
 
 !    Add the Fock contribution to E_xc and E_xcdc if required
-     if (usefock==1) energies%e_fockdc=two*energies%e_fock
+     if (dtset%usefock==1) energies%e_fockdc=two*energies%e_fock
 
      ABI_NVTX_START_RANGE(NVTX_SCFCV_ETOTFOR)
      if (.not.wvlbigdft) then
@@ -1916,7 +1917,8 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 &       nattyp,nfftf,ngfftf,ngrvdw,nhat,nkxc,dtset%ntypat,nvresid,n1xccc, &
 &       n3xccc,0,computed_forces,optres,pawang,pawfgrtab,pawrad,pawrhoij,&
 &       pawtab,ph1df,red_ptot,psps,rhog,rhor,rmet,rprimd,symrec,synlgr,ucvol,&
-&       psps%usepaw,vhartr,vpsp,vxc,vxctau,wvl%descr,wvl%den,xccc3d,xred)
+&       psps%usepaw,usevxctau,vhartr,vpsp,vxc,vxctau,wvl%descr,wvl%den,xccc3d,xred)
+!&       xcctau3d=xcctau3d)
      end if
      ABI_NVTX_END_RANGE()
 
@@ -1957,7 +1959,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
        do ispden=1,dtset%nspden
          vtrial(:,ispden)=vtrial(:,ispden)+nvresid(:,ispden)+vres_mean(ispden)
        end do
-       !if (dtset%usekden==1) then
+       !if (usevxctau==1) then
        !  do ispden=1,dtset%nspden
        !    vxctau(:,ispden,1)=vxctau(:,ispden,1)+nvtauresid(:,ispden)
        !  end do
@@ -1975,7 +1977,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
    call timab(1458,1,tsec)
    if (dtset%iscf<10 .and. dtset%iscf>0 .and. .not. wvlbigdft) then
 
-     if(VERBOSE) call wrtout(std_out,'*. Mix the potential (if required) - Check exit criteria',"COLL")
+     if(VERBOSE) call wrtout(std_out,'*. Mix the potential (if required) - Check exit criteria')
 
 !    Precondition the residual and forces, then determine the new vtrial
 !    (Warning: the (H)xc potential may have been subtracted from vtrial)
@@ -1998,7 +2000,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 !  END MINIMIZATION ITERATIONS
 !  ######################################################################
 
-   if(VERBOSE) call wrtout(std_out,'*. END MINIMIZATION ITERATIONS',"COLL")
+   if(VERBOSE) call wrtout(std_out,'*. END MINIMIZATION ITERATIONS')
 
 !  The initialisation of the gstate run should be done when this point is reached
    initialized=1
@@ -2074,7 +2076,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
    if (dtset%usekden/=0) call ab7_mixing_deallocate(mix_mgga)
  end if
 
- if (usefock==1)then
+ if (dtset%usefock==1)then
    if(wfmixalg/=0) call scf_history_free(scf_history_wf)
  end if
 
@@ -2097,7 +2099,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 &   occ,optene,paw_dmft,paw_ij,pawang,pawfgr,pawfgrtab,pawrhoij,pawtab,&
 &   phnons,ph1d,psps,resid,rhog,rhor,rprimd,strsxc,symrec,taug,taur,usexcnhat,&
 &   vhartr,vtrial,vpsp,vxc,wvl%wfs,wvl%descr,wvl%den,wvl%e,xccc3d,xred,ylm,&
-&   add_tfw=tfw_activated,vxctau=vxctau)
+&   add_tfw=tfw_activated,vxctau=vxctau,xcctau3d=xcctau3d)
 
    if (nhatgrdim>0)  then
      ABI_FREE(nhatgr)
@@ -2145,6 +2147,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 & dtset%userid .EQ. 1 )
 
  if(ANY(ABS(dtset%nucdipmom)>tol8)) recompute_cprj=.TRUE.
+ if(dtset%berryopt == -2 .AND. dtset%orbmag /= 0) recompute_cprj=.TRUE.
 
  if (recompute_cprj) then
    usecprj=1
@@ -2160,6 +2163,9 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
      else if (forces_needed == 0 .and. stress_needed /= 0) then
        ncpgr = 6 ; ctocprj_choice = 3
      end if
+   end if
+   if (dtset%berryopt == -2 .AND. dtset%orbmag /= 0) then
+     ncpgr=3; ctocprj_choice=5
    end if
    call pawcprj_alloc(cprj_local,ncpgr,dimcprj)
    cprj=> cprj_local
@@ -2214,17 +2220,17 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 !SHOULD CLEAN THE ARGS OF THIS ROUTINE
  call afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 & deltae,diffor,dtefield,dtfil,dtset,eigen,electronpositron,elfr,&
-& energies,etotal,favg,fcart,fock,forold,grchempottn,grcondft,&
+& energies,etotal,extfpmd,favg,fcart,fock,forold,grchempottn,grcondft,&
 & gred,gresid,grewtn,grhf,grhor,grvdw,&
-& grxc,gsqcut,hdr,extfpmd,indsym,intgres,irrzon,istep,istep_fock_outer,istep_mix,&
+& grxc,gsqcut,hdr,indsym,intgres,irrzon,istep,istep_fock_outer,istep_mix,&
 & kg,kxc,lrhor,maxfor,mcg,mcprj,mgfftf,&
 & moved_atm_inside,mpi_enreg,my_natom,n3xccc,nattyp,nfftf,ngfft,ngfftf,ngrvdw,nhat,&
 & nkxc,npwarr,nvresid,occ,optres,paw_an,paw_ij,pawang,pawfgr,&
 & pawfgrtab,pawrad,pawrhoij,pawtab,pel,pel_cg,ph1d,ph1df,phnons,pion,prtfor,&
 & prtxml,psps,pwind,pwind_alloc,pwnsfac,res2,resid,residm,results_gs,&
 & rhog,rhor,rprimd,stress_needed,strscondft,strsxc,strten,symrec,synlgr,taug,&
-& taur,tollist,usecprj,vhartr,vpsp,vtrial,vxc,vxctau,vxcavg,wvl,&
-& xccc3d,xcctau3d,xred,ylm,ylmgr,dtset%cellcharge(1)*SUM(vpotzero(:)),conv_retcode)
+& taur,tollist,usecprj,usevxctau,vhartr,vpsp,vtrial,vxc,vxctau,vxcavg,wvl,&
+& xccc3d,xcctau3d,xred,ylm,ylmgr,dtset%cellcharge(1)*SUM(vpotzero(:)),conv_retcode,xg_nonlop)
 
 !Before leaving the present routine, save the current value of xred.
  xred_old(:,:)=xred(:,:)
@@ -2359,8 +2365,8 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  ABI_FREE(dimcprj)
 
 
-! Deallocate exact exchange data at the end of the calculation
- if (usefock==1) then
+ ! Deallocate exact exchange data at the end of the calculation
+ if (dtset%usefock==1) then
    if (fock%fock_common%use_ACE/=0) call fock_ACE_destroy(fock%fockACE)
    call fock_common_destroy(fock%fock_common)
    call fock_BZ_destroy(fock%fock_BZ)
@@ -2455,12 +2461,14 @@ end subroutine scfcv_core
 !!  symrec(3,3,nsym)=symmetry operations in reciprocal space
 !!  ucvol=unit cell volume
 !!  usepaw= 0 for non paw calculation; =1 for paw calculation
+!!  usevxctau=1 if if XC functional depends on kinetic energy density
 !!  vhartr(nfft)=array for holding Hartree potential
 !!  vpsp(nfft)=array for holding local psp
 !!  vxc(nfft,nspden)=array for holding XC potential
-!!  vxctau(nfftf,dtset%nspden,4*usekden)]=derivative of XC energy density wrt
+!!  vxctau(nfftf,dtset%nspden,4*usevxctau)]=derivative of XC energy density wrt
 !!      kinetic energy density (metaGGA cases)
 !!  xccc3d(n3xccc)=3D core electron density for XC core correction, bohr^-3
+!!  xcctau3d(n3xccc)=3D core electron kinetic energy density for XC core correction, Ha / bohr^-3 (TODO: check unit)
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
 !!
 !! OUTPUT
@@ -2532,12 +2540,13 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 &  grxc,gsqcut,extfpmd,indsym,kxc,maxfor,mgfft,mpi_enreg,my_natom,nattyp,&
 &  nfft,ngfft,ngrvdw,nhat,nkxc,ntypat,nvresid,n1xccc,n3xccc,optene,optforces,optres,&
 &  pawang,pawfgrtab,pawrad,pawrhoij,pawtab,ph1d,red_ptot,psps,rhog,rhor,rmet,rprimd,&
-&  symrec,synlgr,ucvol,usepaw,vhartr,vpsp,vxc,vxctau,wvl,wvl_den,xccc3d,xred)
+&  symrec,synlgr,ucvol,usepaw,usevxctau,vhartr,vpsp,vxc,vxctau,wvl,wvl_den,xccc3d,xred)
+!&  xcctau3d)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: my_natom,mgfft,n1xccc,n3xccc,nfft,ngrvdw,nkxc,ntypat,optene,optforces
- integer,intent(in) :: optres,usepaw
+ integer,intent(in) :: optres,usepaw,usevxctau
  real(dp),intent(in) :: gsqcut
  real(dp),intent(inout) :: elast,ucvol
  real(dp),intent(out) :: deltae,diffor,etotal,maxfor
@@ -2560,8 +2569,9 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
  real(dp),intent(in) :: ph1d(2,3*(2*mgfft+1)*dtset%natom),red_ptot(3)
  real(dp),intent(in) :: rhog(2,nfft),rhor(nfft,dtset%nspden),rmet(3,3)
  real(dp),intent(in) :: vhartr(nfft),vpsp(nfft),vxc(nfft,dtset%nspden)
- real(dp),intent(in) :: vxctau(nfft,dtset%nspden,4*dtset%usekden)
+ real(dp),intent(in) :: vxctau(nfft,dtset%nspden,4*usevxctau)
  real(dp),intent(in) :: xccc3d(n3xccc)
+ !real(dp),intent(in),optional :: xcctau3d(n3xccc)
  real(dp),intent(inout) :: forold(3,dtset%natom),grnl(3*dtset%natom)
  real(dp),intent(inout) :: nhat(nfft,dtset%nspden*psps%usepaw)
  real(dp),intent(inout),target :: nvresid(nfft,dtset%nspden)
@@ -2597,24 +2607,7 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 
  if (optene>-1) then
 
-!  Add the contribution of extfpmd to the entropy
-   if(associated(extfpmd)) then
-     energies%entropy=energies%entropy+extfpmd%entropy
-   end if
-
-!  When the finite-temperature VG broadening scheme is used,
-!  the total entropy contribution "tsmear*entropy" has a meaning,
-!  and gather the two last terms of Eq.8 of VG paper
-!  Warning : might have to be changed for fixed moment calculations
-   if(dtset%occopt>=3 .and. dtset%occopt<=8) then
-     if (abs(dtset%tphysel) < tol10) then
-       energies%e_entropy = - dtset%tsmear * energies%entropy
-     else
-       energies%e_entropy = - dtset%tphysel * energies%entropy
-     end if
-   else
-     energies%e_entropy = zero
-   end if
+   call entropy(dtset,energies)
 
 !  Turn it into an electric enthalpy, refer to Eq.(33) of Suppl. of Nat. Phys. paper (5,304,2009) [[cite:Stengel2009]],
 !    the missing volume is added here
@@ -2692,7 +2685,6 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 &           + energies%e_hybcomp_E0 - energies%e_hybcomp_v0 + energies%e_hybcomp_v &
 &           + energies%e_constrained_dft + energies%e_ewald &
 &           + energies%e_chempot + energies%e_vdw_dftd
-
 !    +two*energies%e_fock-energies%e_fock0 ! The Fock energy is already included in the non-local one
 !    +energies%e_nlpsp_vfock - energies%e_fock0
 
@@ -2703,7 +2695,7 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 !    if (usepaw==1) etotal = etotal + energies%e_paw + energies%e_nlpsp_vfock - energies%e_fock0
 !    XG 20181025 So, the following is giving a non-variational expression ...
      if (usepaw==1) etotal = etotal + energies%e_paw + energies%e_fock
-
+     if (dtset%usedmft/=0) etotal = etotal + energies%e_hu - energies%e_dc
    end if
 
 !  Compute total (free) energy by double-counting scheme
@@ -2714,6 +2706,7 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 &     + energies%e_hybcomp_E0 - energies%e_hybcomp_v0 + energies%e_constrained_dft
      etotal = etotal + energies%e_ewald + energies%e_chempot + energies%e_vdw_dftd
      if (usepaw/=0) etotal = etotal + energies%e_pawdc
+     if (dtset%usedmft/=0) etotal = etotal + energies%e_hu - energies%e_dc
    end if
 
 !  Additional stuff for electron-positron
@@ -2735,11 +2728,11 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
    end if
 
 !  Add the extfpmd energy contribution to the internal energy
-   if(associated(extfpmd)) then
+   if (associated(extfpmd)) then
      energies%e_extfpmd=extfpmd%e_kinetic
      energies%edc_extfpmd=extfpmd%edc_kinetic
-     if(optene==0) etotal=etotal+energies%e_extfpmd
-     if(optene==1) etotal=etotal+energies%edc_extfpmd
+     if (optene==0) etotal=etotal+energies%e_extfpmd
+     if (optene==1) etotal=etotal+energies%edc_extfpmd
    end if
 
 !  Compute energy residual
@@ -2803,7 +2796,7 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
    call forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,forold,gred,grchempottn,grcondft,gresid,grewtn,&
 &   grhf,grnl,grvdw,grxc,gsqcut,indsym,maxfor,mgfft,mpi_enreg,&
 &   n1xccc,n3xccc,nattyp,nfft,ngfft,ngrvdw,ntypat,pawrad,pawtab,&
-&   ph1d,psps,rhog,rhor,rprimd,symrec,synlgr,dtset%usefock,resid,vxc,vxctau,wvl,wvl_den,xred,&
+&   ph1d,psps,rhog,rhor,rprimd,symrec,synlgr,dtset%usefock,usevxctau,resid,vxc,vxctau,wvl,wvl_den,xred,&
 &   electronpositron=electronpositron)
    if (apply_residual) then
      ABI_FREE(resid)

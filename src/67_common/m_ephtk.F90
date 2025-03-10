@@ -6,7 +6,7 @@
 !!  Helper functions common to e-ph calculations.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2022 ABINIT group (MG)
+!!  Copyright (C) 2008-2025 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -33,7 +33,7 @@ module m_ephtk
 
  use m_fstrings,     only : itoa, sjoin, ltoa, ftoa, ktoa
  use m_bz_mesh,      only : isamek
- use defs_datatypes, only : ebands_t
+ use m_fftcore,      only : get_kg
 
  implicit none
 
@@ -45,6 +45,8 @@ module m_ephtk
  public :: ephtk_gam_atm2qnu          ! Compute phonon linewidths from gamma matrix in reduced coordinates.
  public :: ephtk_gkknu_from_atm       ! Transform the gkk matrix elements from (atom, red_direction) basis to phonon-mode basis.
  public :: ephtk_update_ebands        ! Update ebands according to dtset%occopt, tsmear, mbpt_sciss, eph_fermie, eph_extrael
+ public :: ephtk_get_mpw_gmax
+ public :: ephtk_v1atm_to_vqnu        !  Receive potentials in atomic representation and return potential in phonon representation
 !!***
 
  real(dp),public,parameter :: EPHTK_WTOL = tol6
@@ -79,9 +81,7 @@ subroutine ephtk_set_phmodes_skip(natom, eph_phrange, phmodes_skip)
  integer,allocatable,intent(out) :: phmodes_skip(:)
 
 !Local variables ------------------------------
-!scalars
  integer :: natom3
-
 ! *************************************************************************
 
  ! Setup a mask to skip accumulating the contribution of certain phonon modes.
@@ -97,8 +97,7 @@ subroutine ephtk_set_phmodes_skip(natom, eph_phrange, phmodes_skip)
      ABI_ERROR('Invalid range for eph_phrange. Should be between [1, 3*natom] and eph_modes(2) > eph_modes(1)')
    end if
    if (all(eph_phrange > 0)) then
-      call wrtout(std_out, sjoin(" Including phonon modes between [", &
-                   itoa(eph_phrange(1)), ',', itoa(eph_phrange(2)), "]"))
+      call wrtout(std_out, sjoin(" Including phonon modes between [", itoa(eph_phrange(1)), ',', itoa(eph_phrange(2)), "]"))
       phmodes_skip = 1
       phmodes_skip(eph_phrange(1):eph_phrange(2)) = 0
    else if (all(eph_phrange < 0)) then
@@ -144,14 +143,13 @@ subroutine ephtk_set_pertables(natom, my_npert, pert_table, my_pinfo, comm)
 !Arguments ------------------------------------
  integer,intent(in) :: natom, my_npert, comm
 !arrays
- integer,allocatable :: pert_table(:,:), my_pinfo(:,:)
+ integer,allocatable,intent(out) :: pert_table(:,:), my_pinfo(:,:)
 
 !Local variables ------------------------------
 !scalars
  integer :: iatom, idir, pertcase, bstart, bstop, ii, ip, natom3, my_rank, nproc
 !arrays
  integer :: all_pinfo(3, natom*3)
-
 ! *************************************************************************
 
  my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)
@@ -216,7 +214,6 @@ subroutine ephtk_mkqtabs(cryst, nqibz, qibz, nqbz, qbz, qirredtofull, qpttoqpt)
 !arrays
  integer :: g0(3)
  real(dp) :: qirr(3), tmp_qpt(3)
-
 ! *************************************************************************
 
  qrank = krank_new(nqbz, qbz)
@@ -296,7 +293,6 @@ subroutine ephtk_gam_atm2qnu(natom3, displ_red, gam_atm, gam_qnu)
  integer :: nu
  character(len=500) :: msg
  real(dp) :: zgemm_tmp_mat(2,natom3,natom3), gam_now(2,natom3,natom3)
-
 ! *********************************************************************
 
  call zgemm('c','n',natom3, natom3, natom3, cone, displ_red, natom3, gam_atm, natom3, czero, zgemm_tmp_mat, natom3)
@@ -352,9 +348,7 @@ subroutine ephtk_gkknu_from_atm(nb1, nb2, nk, natom, gkq_atm, phfrq, displ_red, 
  real(dp),intent(out) :: gkq_nu(2,nb1,nb2,nk,3*natom)
 
 !Local variables-------------------------
-!scalars
  integer :: nu,ipc
-
 ! *************************************************************************
 
  gkq_nu = zero
@@ -375,6 +369,13 @@ subroutine ephtk_gkknu_from_atm(nb1, nb2, nk, natom, gkq_atm, phfrq, displ_red, 
    end do
 
    gkq_nu(:,:,:,:,nu) = gkq_nu(:,:,:,:,nu) / sqrt(two * phfrq(nu))
+
+   ! Perform the transformation using array operations
+   !gkq_nu(1,:,:,:,nu) = sum(gkq_atm(1,:,:,:,:) * displ_red(1,:,nu) - gkq_atm(2,:,:,:,:) * displ_red(2,:,nu), dim=5)
+   !gkq_nu(2,:,:,:,nu) = sum(gkq_atm(1,:,:,:,:) * displ_red(2,:,nu) + gkq_atm(2,:,:,:,:) * displ_red(1,:,nu), dim=5)
+   !! Apply the normalization factor
+   !factor = one / sqrt(two * phfrq(nu))
+   !gkq_nu(:,:,:,:,nu) = gkq_nu(:,:,:,:,nu) * factor
  end do
 
 end subroutine ephtk_gkknu_from_atm
@@ -407,7 +408,6 @@ subroutine ephtk_update_ebands(dtset, ebands, header)
  real(dp),parameter :: nholes = zero
  character(len=500) :: msg
  integer :: unts(2)
-
 ! *************************************************************************
 
  unts = [std_out, ab_out]
@@ -419,13 +419,13 @@ subroutine ephtk_update_ebands(dtset, ebands, header)
    "   From WFK file: occopt = ",ebands%occopt,", tsmear = ",ebands%tsmear,ch10,&
    "   From input:    occopt = ",dtset%occopt,", tsmear = ",dtset%tsmear,ch10
    call wrtout(unts, msg)
-   call ebands_set_scheme(ebands, dtset%occopt, dtset%tsmear, dtset%spinmagntarget, dtset%prtvol)
+   call ebands%set_scheme(dtset%occopt, dtset%tsmear, dtset%spinmagntarget, dtset%prtvol)
 
    if (abs(dtset%mbpt_sciss) > tol6) then
      ! Apply the scissor operator
      call wrtout(unts, sjoin(" Applying scissors operator to the conduction states with value: ", &
                  ftoa(dtset%mbpt_sciss * Ha_eV, fmt="(f6.2)"), " (eV)"))
-     call ebands_apply_scissors(ebands, dtset%mbpt_sciss)
+     call ebands%apply_scissors(dtset%mbpt_sciss)
    end if
  end if
 
@@ -433,24 +433,145 @@ subroutine ephtk_update_ebands(dtset, ebands, header)
  if (dtset%eph_fermie /= zero) then
    ABI_CHECK(dtset%eph_extrael == zero, "eph_fermie and eph_extrael are mutually exclusive")
    call wrtout(unts, sjoin(" Fermi level set by the user at:", ftoa(dtset%eph_fermie * Ha_eV, fmt="(f6.2)"), " (eV)"))
-   call ebands_set_fermie(ebands, dtset%eph_fermie, msg)
+   call ebands%set_fermie(dtset%eph_fermie, msg)
    call wrtout(unts, msg)
 
  else if (abs(dtset%eph_extrael) > zero) then
    call wrtout(unts, sjoin(" Adding eph_extrael:", ftoa(dtset%eph_extrael), "to input nelect:", ftoa(ebands%nelect)))
-   call ebands_set_scheme(ebands, dtset%occopt, dtset%tsmear, dtset%spinmagntarget, dtset%prtvol, update_occ=.False.)
-   call ebands_set_extrael(ebands, dtset%eph_extrael, nholes, dtset%spinmagntarget, msg)
+   call ebands%set_scheme(dtset%occopt, dtset%tsmear, dtset%spinmagntarget, dtset%prtvol, update_occ=.False.)
+   call ebands%set_extrael(dtset%eph_extrael, nholes, dtset%spinmagntarget, msg)
    call wrtout(unts, msg)
  end if
 
  ! Recompute occupations. This is needed if WFK files have been produced in a NSCF run
  ! since occ are set to zero, and fermie is taken from the previous density.
  if (dtset%kptopt > 0) then
-   call ebands_update_occ(ebands, dtset%spinmagntarget, prtvol=dtset%prtvol)
-   call ebands_print(ebands, header=header, prtvol=dtset%prtvol)
+   call ebands%update_occ(dtset%spinmagntarget, prtvol=dtset%prtvol)
+   call ebands%print([std_out], header=header, prtvol=dtset%prtvol)
  end if
 
 end subroutine ephtk_update_ebands
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ephtk/ephtk_get_mpw_gmax
+!! NAME
+!!  ephtk_get_mpw_gmax
+!!
+!! FUNCTION
+!! mpw is the maximum number of plane-waves over k and k+q where k and k+q are in the BZ.
+!! we also need the max components of the G-spheres (k, k+q) in order to allocate the workspace array work
+!! used to symmetrize the wavefunctions in G-space.
+!! Note that we loop over the full BZ instead of the IBZ(k)
+!! This part is slow for very dense meshes, should try to use a geometrical approach...
+!!
+!! INPUTS
+!!
+!! SOURCE
+
+subroutine ephtk_get_mpw_gmax(nkpt, kpts, ecut, gmet, mpw, gmax, comm, init_with_zero)
+
+!Arguments ------------------------------------
+ integer,intent(in) :: nkpt
+ integer,intent(out) :: mpw, gmax(3)
+ real(dp),intent(in) :: ecut, kpts(3,nkpt), gmet(3,3)
+ integer,intent(in) :: comm
+ logical,optional,intent(in) :: init_with_zero
+
+!Local variables ------------------------------
+ integer,parameter :: istwfk1 = 1
+ integer :: ik,i1,i2,i3,cnt,ipw,ii,onpw,my_mpw,my_gmax(3),ierr, my_rank, nprocs
+ real(dp) :: kk(3), kq(3)
+ integer,allocatable :: gtmp(:,:)
+ logical :: init_with_zero__
+! *************************************************************************
+
+ my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
+
+ init_with_zero__ = .True.; if (present(init_with_zero)) init_with_zero__ = init_with_zero
+
+ if (init_with_zero__) then
+   mpw = 0; gmax = 0
+ end if
+
+ cnt = 0
+ do ik=1,nkpt
+   kk = kpts(:, ik)
+   do i3=-1,1
+     do i2=-1,1
+       do i1=-1,1
+         cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! MPI parallelism inside comm
+         kq = kk + half * [i1, i2, i3]
+         ! TODO: g0 umklapp here can enter into play gmax may not be large enough!
+         call get_kg(kq, istwfk1, 1.1_dp * ecut, gmet, onpw, gtmp)
+         mpw = max(mpw, onpw)
+         do ipw=1,onpw
+           do ii=1,3
+             gmax(ii) = max(gmax(ii), abs(gtmp(ii, ipw)))
+           end do
+         end do
+         ABI_FREE(gtmp)
+       end do
+     end do
+   end do
+ end do
+
+ my_mpw = mpw; call xmpi_max(my_mpw, mpw, comm, ierr)
+ my_gmax = gmax; call xmpi_max(my_gmax, gmax, comm, ierr)
+
+end subroutine ephtk_get_mpw_gmax
+!!***
+
+!!****f* m_epthk/ephtk_v1atm_to_vqnu
+!! NAME
+!!  ephtk_v1atm_to_vqnu
+!!
+!! FUNCTION
+!!  Receive potentials in atomic representation and return potential in phonon representation
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+pure subroutine ephtk_v1atm_to_vqnu(cplex, nfft, nspden, natom3, v1_atm, displ_red, v1_qnu)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: cplex, nfft, nspden, natom3
+!arrays
+ real(dp),intent(in) :: v1_atm(cplex, nfft, nspden, natom3)
+ real(dp),intent(out) :: v1_qnu(2, nfft, nspden, natom3)
+ real(dp),intent(in) :: displ_red(2, natom3, natom3)
+
+!Local variables-------------------------------
+!scalars
+ integer :: nu, ip, ispden
+!************************************************************************
+
+ do nu=1,natom3
+   ! v1_qnu = \sum_{ka} phdispl{ka}(q,nu) D_{ka,q} V_scf(r)
+   ! NOTE: prefactor 1/sqrt(2 w(q,nu)) is not included in the potentials.
+   ! v1_qnu(2, nfft, nspden, natom3), v1_atm(cplex, nfft, nspden, natom3)
+   v1_qnu(:, :, :, nu) = zero
+   do ip=1,natom3
+     do ispden=1,nspden
+       if (cplex == 2) then
+         v1_qnu(1, :, ispden, nu) = v1_qnu(1, :, ispden, nu) + &
+           displ_red(1,ip,nu) * v1_atm(1,:,ispden,ip) - displ_red(2,ip,nu) * v1_atm(2,:,ispden,ip)
+         v1_qnu(2, :, ispden, nu) = v1_qnu(2, :, ispden, nu) + &
+           displ_red(2,ip,nu) * v1_atm(1,:,ispden,ip) + displ_red(1,ip,nu) * v1_atm(2,:,ispden,ip)
+       else
+         ! Gamma point. d(q) = d(-q)* --> d is real.
+         v1_qnu(1, :, ispden, nu) = v1_qnu(1, :, ispden, nu) + displ_red(1,ip,nu) * v1_atm(1,:,ispden,ip)
+       end if
+     end do
+   end do
+ end do
+
+end subroutine ephtk_v1atm_to_vqnu
 !!***
 
 end module m_ephtk

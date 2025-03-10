@@ -8,6 +8,7 @@ t57o_DS6_DDB
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = mrgddb
+#%% exclude_builders = eos_nvhpc_23.9_elpa
 #%% need_cpp_vars = HAVE_NETCDF_MPI
 #%% test_chain = t57.abi, t58.abi, t59.abi, t60.abi, t61.abi
 #%% [files]
@@ -16,7 +17,7 @@ t57o_DS6_DDB
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [shell]
-#%% post_commands = 
+#%% post_commands =
 #%%  ww_cp t58_out_DDB t60o_DS20_DDB;
 #%%  ww_cp t58_out_DDB t61o_DS20_DDB;
 #%% [extra_info]

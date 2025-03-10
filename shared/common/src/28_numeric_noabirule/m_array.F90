@@ -7,7 +7,7 @@
 !!   and helper functions to print/write the array in different formats.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2022 ABINIT group (MG)
+!!  Copyright (C) 2008-2025 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -94,9 +94,7 @@ subroutine array2_gwpc_free(Array)
 
 ! *********************************************************************
 
- if (allocated(Array%vals)) then
-   ABI_FREE(Array%vals)
- end if
+ ABI_SFREE(Array%vals)
 
 end subroutine array2_gwpc_free
 !!***

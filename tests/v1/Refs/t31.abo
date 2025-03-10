@@ -1,8 +1,8 @@
 
-.Version 9.11.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2022 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Jul 2023.
-- ( at 11h58 )
-  
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v1_t31-t32/t31.abi
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h07 )
+
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v1_t31-t32/t31.abi
 - output file    -> t31.abo
 - root for input  files -> t31i
 - root for output files -> t31o
@@ -58,10 +58,10 @@ _ WF disk file :      0.266 Mbytes ; DEN or POT disk file :      0.697 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -71,7 +71,7 @@ _ WF disk file :      0.266 Mbytes ; DEN or POT disk file :      0.697 Mbytes.
            diemix      3.33333333E-01
              ecut      1.40000000E+01 Hartree
            enunit           2
--          fftalg         312
+-          fftalg         512
             intxc           1
               kpt      2.50000000E-01  2.50000000E-01  2.50000000E-01
            kptopt           0
@@ -131,8 +131,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     14.000   => boxcut(ratio)=   2.17692
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/50sn.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/50sn.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/50sn.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/50sn.pspnc
 -  Troullier-Martins psp for element  Sn        Thu Oct 27 17:43:32 EDT 1994
 - 50.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -234,7 +234,7 @@ tolerances: {tolwfr: 1.00E-16, }
  kpt#   1, nband=  4, wtk=  1.00000, kpt=  0.2500  0.2500  0.2500 (reduced coord)
  -10.31704   -3.42843   -3.38304   -3.38303
 
- ETOT  7  -4.5438911826920    -9.341E-10 1.002E-12 1.793E-07
+ ETOT  7  -4.5438911826919    -9.340E-10 1.002E-12 1.793E-07
 
  prteigrs : about to open file t31o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.12432   Average Vxc (hartree)=  -0.11601
@@ -246,7 +246,7 @@ tolerances: {tolwfr: 1.00E-16, }
  kpt#   1, nband=  4, wtk=  1.00000, kpt=  0.2500  0.2500  0.2500 (reduced coord)
  -10.31721   -3.42843   -3.38304   -3.38304
 
- ETOT  8  -4.5438911826964    -4.443E-12 1.666E-14 7.681E-09
+ ETOT  8  -4.5438911826964    -4.466E-12 1.666E-14 7.681E-09
 
  prteigrs : about to open file t31o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.12432   Average Vxc (hartree)=  -0.11601
@@ -279,7 +279,7 @@ lattice_vectors:
 lattice_lengths: [  12.00000,   12.00000,   12.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.7280000E+03
-convergence: {deltae: -4.443E-12, res2:  7.681E-09, residm:  1.666E-14, diffor: null, }
+convergence: {deltae: -4.466E-12, res2:  7.681E-09, residm:  1.666E-14, diffor: null, }
 etotal    :  -4.54389118E+00
 entropy   :   0.00000000E+00
 fermie    :  -1.24322748E-01
@@ -342,16 +342,16 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  1.03585959567633E+00
-hartree             :  8.70446299542988E-01
-xc                  : -2.22553424543551E+00
+kinetic             :  1.03585959567636E+00
+hartree             :  8.70446299543016E-01
+xc                  : -2.22553424543553E+00
 Ewald energy        : -1.89153165298711E+00
 psp_core            :  1.01620290935999E-01
-local_psp           : -2.49431084367663E+00
-non_local_psp       :  5.95593732475304E-02
+local_psp           : -2.49431084367667E+00
+non_local_psp       :  5.95593732475331E-02
 total_energy        : -4.54389118269640E+00
 total_energy_eV     : -1.23645567190421E+02
-band_energy         : -1.00805566787295E+00
+band_energy         : -1.00805566787304E+00
 ...
 
 
@@ -365,7 +365,7 @@ band_energy         : -1.00805566787295E+00
  core charge xc contribution to reduced grads
     1       0.000000000000      0.000000000000      0.000000000000
  residual contribution to red. grads
-    1      -0.000000000000      0.000000000000     -0.000000000000
+    1      -0.000000000000     -0.000000000000     -0.000000000000
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  3.09541470E-06  sigma(3 2)=  0.00000000E+00
@@ -379,7 +379,7 @@ band_energy         : -1.00805566787295E+00
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      1.2000000000E+01  1.2000000000E+01  1.2000000000E+01 Bohr
               amu      1.18710000E+02
@@ -389,7 +389,7 @@ band_energy         : -1.00805566787295E+00
            enunit           2
            etotal     -4.5438911827E+00
             fcart     -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
--          fftalg         312
+-          fftalg         512
             intxc           1
               kpt      2.50000000E-01  2.50000000E-01  2.50000000E-01
            kptopt           0
@@ -457,7 +457,7 @@ P           mkmem           1
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -469,12 +469,12 @@ P           mkmem           1
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -492,7 +492,7 @@ P           mkmem           1
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -507,15 +507,15 @@ P           mkmem           1
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          1.1  wall=          1.2
+- Proc.   0 individual time (sec): cpu=          0.8  wall=          2.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered   9 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.1  wall=          1.2
++Overall time at end (sec) : cpu=          0.8  wall=          2.0

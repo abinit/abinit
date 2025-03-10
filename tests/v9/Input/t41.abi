@@ -51,7 +51,7 @@ rprim     -0.5  0.5  0.5
            0.5  0.5 -0.5
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "Pseudodojo_paw_pbe_standard/Fe.xml"
+ pseudos "Psdj_paw_pbe_std/Fe.xml"
  ixc 11   # Imposing use of internal PBE for portability purposes
 
 #%%<BEGIN TEST_INFO>
@@ -67,7 +67,7 @@ rprim     -0.5  0.5  0.5
 #%% keywords = PAW, DFPT
 #%% description =
 #%%   BCC iron, ferromagnetic, GGA, PAW.
-#%%   Test DFPT phonon q=0.5 . 
-#%%   Works with pseudo Pseudodojo_paw_pbe_standard/Fe.xml , where usexcnhat=0 . See test v9#42 for the usexcnhat==1 case.
+#%%   Test DFPT phonon q=0.5 .
+#%%   Works with pseudo Psdj_paw_pbe_std/Fe.xml , where usexcnhat=0 . See test v9#42 for the usexcnhat==1 case.
 #%% topics = PAW
 #%%<END TEST_INFO>

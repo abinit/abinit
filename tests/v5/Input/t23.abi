@@ -73,19 +73,19 @@ diemac 9.0
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
-#%%   t23.abo, tolnlines = 0, tolabs = 2.000e-07, tolrel = 2.000e-07, fld_options = -easy
+#%% files_to_test =
+#%%   t23.abo, tolnlines = 0, tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options = -easy
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = X. Wang
 #%% keywords = NC, DFPT, FAILS_IFMPI
-#%% description = 
+#%% description =
 #%%   AlAs in Zincblende structure.
 #%%   Test calculation of the Born effective charge and dielectric constant
 #%%   tensor at finite electric fields.
-#%%   The first dataset is for normal ground-state calculation at zero electric field. 
-#%%   The second dataset is for ground-state calculation at finite electric field. 
+#%%   The first dataset is for normal ground-state calculation at zero electric field.
+#%%   The second dataset is for ground-state calculation at finite electric field.
 #%%   The final datasetis the linear-response calculation at finite electric field.
 #%% topics = Berry
 #%%<END TEST_INFO>

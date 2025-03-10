@@ -1,8 +1,8 @@
 
-.Version 9.11.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2022 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Jul 2023.
-- ( at 12h03 )
-  
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v6_t50-t51-t52-t53/t50.abi
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h11 )
+
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v6_t50-t51-t52-t53/t50.abi
 - output file    -> t50.abo
 - root for input  files -> t50i
 - root for output files -> t50o
@@ -178,10 +178,10 @@ _ WF disk file :      0.025 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -190,7 +190,7 @@ _ WF disk file :      0.025 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
           bdeigrf           4
            diemac      2.00000000E+00
              ecut      8.00000000E+00 Hartree
--          fftalg         312
+-          fftalg         512
    getgam_eig2nkq1          0
    getgam_eig2nkq2          2
    getgam_eig2nkq3          2
@@ -364,8 +364,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.13006
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.fakesmooth
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.fakesmooth
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/02he.fakesmooth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/02he.fakesmooth
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -377,8 +377,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with 
-  definition in PRB44, 8503 (1991). 
+  so that the KB energies are not consistent with
+  definition in PRB44, 8503 (1991).
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=    3.14159265
          --- l  ekb(1:nproj) -->
@@ -403,16 +403,16 @@ tolerances: {tolvrs: 1.00E-18, }
  ETOT  3  -1.6363976072540    -1.150E-05 3.873E-06 1.864E-05
  ETOT  4  -1.6363976145895    -7.336E-09 2.611E-10 8.217E-09
  ETOT  5  -1.6363976146008    -1.125E-11 3.637E-12 1.108E-11
- ETOT  6  -1.6363976146008    -2.243E-14 6.225E-15 5.859E-15
- ETOT  7  -1.6363976146008     4.441E-16 3.616E-18 5.404E-18
- ETOT  8  -1.6363976146008     0.000E+00 3.562E-21 5.724E-21
+ ETOT  6  -1.6363976146008    -2.087E-14 6.224E-15 5.837E-15
+ ETOT  7  -1.6363976146008    -2.220E-16 3.599E-18 5.261E-18
+ ETOT  8  -1.6363976146008    -1.554E-15 3.463E-21 5.378E-21
 
- At SCF step    8       vres2   =  5.72E-21 < tolvrs=  1.00E-18 =>converged.
+ At SCF step    8       vres2   =  5.38E-21 < tolvrs=  1.00E-18 =>converged.
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)= -1.61395454E-03  sigma(3 2)=  2.70299104E-13
+  sigma(1 1)= -1.61395454E-03  sigma(3 2)=  2.70299674E-13
   sigma(2 2)= -1.61395454E-03  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)= -1.61395454E-03  sigma(2 1)= -2.70297990E-13
+  sigma(3 3)= -1.61395454E-03  sigma(2 1)= -2.70292708E-13
 
 
 --- !ResultsGS
@@ -425,14 +425,14 @@ lattice_vectors:
 lattice_lengths: [   3.72391,    3.72391,    3.72391, ]
 lattice_angles: [109.471, 109.471, 109.471, ] # degrees, (23, 13, 12)
 lattice_volume:   3.9753500E+01
-convergence: {deltae:  0.000E+00, res2:  5.724E-21, residm:  3.562E-21, diffor: null, }
+convergence: {deltae: -1.554E-15, res2:  5.378E-21, residm:  3.463E-21, diffor: null, }
 etotal    :  -1.63639761E+00
 entropy   :   0.00000000E+00
 fermie    :   9.74722111E-02
 cartesian_stress_tensor: # hartree/bohr^3
-- [ -1.61395454E-03,  -2.70297990E-13,   0.00000000E+00, ]
-- [ -2.70297990E-13,  -1.61395454E-03,   2.70299104E-13, ]
-- [  0.00000000E+00,   2.70299104E-13,  -1.61395454E-03, ]
+- [ -1.61395454E-03,  -2.70292708E-13,   0.00000000E+00, ]
+- [ -2.70292708E-13,  -1.61395454E-03,   2.70299674E-13, ]
+- [  0.00000000E+00,   2.70299674E-13,  -1.61395454E-03, ]
 pressure_GPa:   4.7484E+01
 xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00, He]
@@ -449,10 +449,10 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   13.346E-22; max=  35.616E-22
+ Mean square residual over all n,k,spin=   12.991E-22; max=  34.629E-22
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
- rms dE/dt=  3.0134E-15; max dE/dt=  3.7375E-15; dE/dt below (all hartree)
+ rms dE/dt=  3.0520E-15; max dE/dt=  3.7705E-15; dE/dt below (all hartree)
     1       0.000000000000      0.000000000000     -0.000000000000
 
  cartesian coordinates (angstrom) at end:
@@ -478,28 +478,28 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  9.50484580615350E-01
-hartree             :  6.68269809427603E-02
-xc                  : -6.91334105466826E-01
+kinetic             :  9.50484580615259E-01
+hartree             :  6.68269809427300E-02
+xc                  : -6.91334105466807E-01
 Ewald energy        : -1.69266672070162E+00
 psp_core            :  1.58053638225052E-01
-local_psp           : -4.27761988215510E-01
+local_psp           : -4.27761988215410E-01
 non_local_psp       :  0.00000000000000E+00
-total_energy        : -1.63639761460079E+00
-total_energy_eV     : -4.45286436384905E+01
-band_energy         : -2.46330520968814E-01
+total_energy        : -1.63639761460080E+00
+total_energy_eV     : -4.45286436384906E+01
+band_energy         : -2.46330520968576E-01
 ...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)= -1.61395454E-03  sigma(3 2)=  2.70299104E-13
+  sigma(1 1)= -1.61395454E-03  sigma(3 2)=  2.70299674E-13
   sigma(2 2)= -1.61395454E-03  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)= -1.61395454E-03  sigma(2 1)= -2.70297990E-13
+  sigma(3 3)= -1.61395454E-03  sigma(2 1)= -2.70292708E-13
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  4.7484E+01 GPa]
-- sigma(1 1)= -4.74841741E+01  sigma(3 2)=  7.95247286E-09
+- sigma(1 1)= -4.74841741E+01  sigma(3 2)=  7.95248964E-09
 - sigma(2 2)= -4.74841741E+01  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)= -4.74841741E+01  sigma(2 1)= -7.95244008E-09
+- sigma(3 3)= -4.74841741E+01  sigma(2 1)= -7.95228467E-09
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -534,7 +534,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -563,17 +563,17 @@ tolerances: {tolvrs: 1.00E-08, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  9.28397649329789E-02 -9.246E+00 3.161E-02 2.115E+01
- ETOT  2  2.56988837659122E-05 -9.281E-02 2.441E-04 1.063E-02
- ETOT  3  3.77741784518548E-08 -2.566E-05 1.501E-07 3.143E-05
- ETOT  4  1.31690391924622E-09 -3.646E-08 2.871E-10 6.705E-09
+-ETOT  1  9.28397649302983E-02 -9.246E+00 3.161E-02 2.115E+01
+ ETOT  2  2.56988810551917E-05 -9.281E-02 2.441E-04 1.063E-02
+ ETOT  3  3.77714570731769E-08 -2.566E-05 1.501E-07 3.143E-05
+ ETOT  4  1.31423938398711E-09 -3.646E-08 2.871E-10 6.705E-09
 
  At SCF step    4       vres2   =  6.71E-09 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   11.298E-11; max=  28.709E-11
+ Mean square residual over all n,k,spin=   11.298E-11; max=  28.711E-11
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -590,9 +590,9 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.1316903919E-08 Ha. Also 2DEtotal=    0.358347780533E-07 eV
+ 2DEtotal=    0.1314239384E-08 Ha. Also 2DEtotal=    0.357622723616E-07 eV
     (2DErelax=   -9.3387736467E+00 Ha. 2DEnonrelax=    9.3387736480E+00 Ha)
-    (  non-var. 2DEtotal :   -1.3413542632E-07 Ha)
+    (  non-var. 2DEtotal :   -1.3413855271E-07 Ha)
 
 
 --------------------------------------------------------------------------------
@@ -615,10 +615,10 @@ tolerances: {tolvrs: 1.00E-08, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  9.28397649343378E-02 -9.246E+00 3.161E-02 2.115E+01
- ETOT  2  2.56988838138739E-05 -9.281E-02 2.441E-04 1.063E-02
- ETOT  3  3.77741891099959E-08 -2.566E-05 1.501E-07 3.143E-05
- ETOT  4  1.31696609173559E-09 -3.646E-08 2.731E-10 6.705E-09
+-ETOT  1  9.28397649316643E-02 -9.246E+00 3.161E-02 2.115E+01
+ ETOT  2  2.56988811173642E-05 -9.281E-02 2.441E-04 1.063E-02
+ ETOT  3  3.77715050348115E-08 -2.566E-05 1.501E-07 3.143E-05
+ ETOT  4  1.31426958205338E-09 -3.646E-08 2.731E-10 6.705E-09
 
  At SCF step    4       vres2   =  6.71E-09 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
@@ -642,9 +642,9 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.1316966092E-08 Ha. Also 2DEtotal=    0.358364698528E-07 eV
+ 2DEtotal=    0.1314269582E-08 Ha. Also 2DEtotal=    0.357630940928E-07 eV
     (2DErelax=   -9.3387736468E+00 Ha. 2DEnonrelax=    9.3387736481E+00 Ha)
-    (  non-var. 2DEtotal :   -1.3413572653E-07 Ha)
+    (  non-var. 2DEtotal :   -1.3413851185E-07 Ha)
 
 
 --------------------------------------------------------------------------------
@@ -667,17 +667,17 @@ tolerances: {tolvrs: 1.00E-08, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  9.28397649358228E-02 -9.246E+00 3.161E-02 2.115E+01
- ETOT  2  2.56988840163785E-05 -9.281E-02 2.441E-04 1.063E-02
- ETOT  3  3.77744004964597E-08 -2.566E-05 1.501E-07 3.143E-05
- ETOT  4  1.31712774020798E-09 -3.646E-08 2.842E-10 6.705E-09
+-ETOT  1  9.28397649331423E-02 -9.246E+00 3.161E-02 2.115E+01
+ ETOT  2  2.56988813216452E-05 -9.281E-02 2.441E-04 1.063E-02
+ ETOT  3  3.77717022104207E-08 -2.566E-05 1.501E-07 3.143E-05
+ ETOT  4  1.31447031037624E-09 -3.646E-08 2.841E-10 6.705E-09
 
  At SCF step    4       vres2   =  6.71E-09 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   11.308E-11; max=  28.416E-11
+ Mean square residual over all n,k,spin=   11.308E-11; max=  28.415E-11
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -694,11 +694,11 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.1317127740E-08 Ha. Also 2DEtotal=    0.358408685315E-07 eV
+ 2DEtotal=    0.1314470310E-08 Ha. Also 2DEtotal=    0.357685561882E-07 eV
     (2DErelax=   -9.3387736469E+00 Ha. 2DEnonrelax=    9.3387736482E+00 Ha)
-    (  non-var. 2DEtotal :   -1.3413554889E-07 Ha)
+    (  non-var. 2DEtotal :   -1.3413830935E-07 Ha)
 
- Components of second-order derivatives of the electronic energy, EIGR2D.
+ Components of second-order derivatives of the electronic energy, EIGR2D, in Ha unit.
  For automatic tests, printing the matrix for the first k-point, first band, first atom.
    1   1   1   1   -3.9942356688E+00    0.0000000000E+00
    1   1   2   1    1.3314118896E+00    0.0000000000E+00
@@ -709,7 +709,7 @@ tolerances: {tolvrs: 1.00E-08, }
    3   1   1   1    1.3314118896E+00    0.0000000000E+00
    3   1   2   1    1.3314118896E+00    0.0000000000E+00
    3   1   3   1   -3.9942356689E+00    0.0000000000E+00
- 
+
  Components of second-order derivatives of the electronic energy, EIGI2D.
  For automatic tests, printing the matrix for the first k-point, first band, first atom.
    1   1   1   1    0.0000000000E+00    0.0000000000E+00
@@ -727,38 +727,38 @@ tolerances: {tolvrs: 1.00E-08, }
 
 
  ==> Compute Derivative Database <==
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   1    1        -0.0000001341         0.0000000000
    1    1   2    1         0.0000000447         0.0000000000
    1    1   3    1         0.0000000447         0.0000000000
-  
+
    2    1   1    1         0.0000000447         0.0000000000
    2    1   2    1        -0.0000001341         0.0000000000
    2    1   3    1         0.0000000447         0.0000000000
-  
+
    3    1   1    1         0.0000000447         0.0000000000
    3    1   2    1         0.0000000447         0.0000000000
    3    1   3    1        -0.0000001341         0.0000000000
-  
-  
+
+
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   1    1         0.0000000000         0.0000000000
    1    1   2    1         0.0000000000         0.0000000000
    1    1   3    1         0.0000000000         0.0000000000
-  
+
    2    1   1    1         0.0000000000         0.0000000000
    2    1   2    1         0.0000000000         0.0000000000
    2    1   3    1         0.0000000000         0.0000000000
-  
+
    3    1   1    1         0.0000000000         0.0000000000
    3    1   2    1         0.0000000000         0.0000000000
    3    1   3    1         0.0000000000         0.0000000000
@@ -770,9 +770,9 @@ tolerances: {tolvrs: 1.00E-08, }
 -  0.000000E+00  0.000000E+00  0.000000E+00
 ================================================================================
 
- ---- T=0 shift of eigenenergies due to electron-phonon interation at q ---- 
- Warning : the total shift must be computed through anaddb,                  
- here, only the contribution of one q point is printed.                      
+ ---- T=0 shift of eigenenergies due to electron-phonon interation at q ----
+ Warning : the total shift must be computed through anaddb,
+ here, only the contribution of one q point is printed.
  Print first the electronic eigenvalues, then the q-dependent Fan shift of eigenvalues.
  Phonons at gamma, also compute the Diagonal Debye-Waller shift of eigenvalues.
 
@@ -838,8 +838,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      8.000   => boxcut(ratio)=   1.91566
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.fakesmooth
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.fakesmooth
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/02he.fakesmooth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/02he.fakesmooth
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -851,8 +851,8 @@ meta: {optdriver: 1, rfphon: 1, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with 
-  definition in PRB44, 8503 (1991). 
+  so that the KB energies are not consistent with
+  definition in PRB44, 8503 (1991).
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=    3.14159265
          --- l  ekb(1:nproj) -->
@@ -861,7 +861,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -890,18 +890,18 @@ tolerances: {tolvrs: 1.00E-08, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   9.3598593204130     -1.076E+01 7.982E-02 3.423E+03
- ETOT  2   3.5701172550388     -5.790E+00 3.369E-02 3.533E+02
- ETOT  3   2.8820926978452     -6.880E-01 1.939E-03 3.597E-02
- ETOT  4   2.8820345090154     -5.819E-05 5.907E-08 1.382E-04
- ETOT  5   2.8820342966764     -2.123E-07 7.704E-10 3.620E-09
+-ETOT  1   9.3598593204117     -1.076E+01 7.982E-02 3.423E+03
+ ETOT  2   3.5701172550368     -5.790E+00 3.369E-02 3.533E+02
+ ETOT  3   2.8820926978430     -6.880E-01 1.939E-03 3.597E-02
+ ETOT  4   2.8820345090132     -5.819E-05 5.907E-08 1.382E-04
+ ETOT  5   2.8820342966742     -2.123E-07 7.704E-10 3.620E-09
 
  At SCF step    5       vres2   =  3.62E-09 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   17.244E-11; max=  77.036E-11
+ Mean square residual over all n,k,spin=   17.246E-11; max=  77.036E-11
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -943,11 +943,11 @@ tolerances: {tolvrs: 1.00E-08, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   1.4084760796814     -8.835E+00 3.258E-02 3.960E+01
- ETOT  2   1.2792766749648     -1.292E-01 3.103E-04 2.484E-02
- ETOT  3   1.2792064096315     -7.027E-05 3.570E-07 1.572E-04
- ETOT  4   1.2792061883789     -2.213E-07 1.359E-09 1.076E-07
- ETOT  5   1.2792061882196     -1.593E-10 8.684E-13 1.685E-10
+-ETOT  1   1.4084760796792     -8.835E+00 3.258E-02 3.960E+01
+ ETOT  2   1.2792766749628     -1.292E-01 3.103E-04 2.484E-02
+ ETOT  3   1.2792064096294     -7.027E-05 3.570E-07 1.572E-04
+ ETOT  4   1.2792061883768     -2.213E-07 1.359E-09 1.076E-07
+ ETOT  5   1.2792061882175     -1.593E-10 8.684E-13 1.685E-10
 
  At SCF step    5       vres2   =  1.68E-10 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
@@ -996,18 +996,18 @@ tolerances: {tolvrs: 1.00E-08, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   1.4084760797317     -8.835E+00 3.258E-02 3.960E+01
- ETOT  2   1.2792766750144     -1.292E-01 3.103E-04 2.484E-02
- ETOT  3   1.2792064096812     -7.027E-05 3.570E-07 1.572E-04
- ETOT  4   1.2792061884285     -2.213E-07 1.359E-09 1.076E-07
- ETOT  5   1.2792061882693     -1.593E-10 8.684E-13 1.685E-10
+-ETOT  1   1.4084760797295     -8.835E+00 3.258E-02 3.960E+01
+ ETOT  2   1.2792766750123     -1.292E-01 3.103E-04 2.484E-02
+ ETOT  3   1.2792064096791     -7.027E-05 3.570E-07 1.572E-04
+ ETOT  4   1.2792061884264     -2.213E-07 1.359E-09 1.076E-07
+ ETOT  5   1.2792061882671     -1.593E-10 8.684E-13 1.685E-10
 
  At SCF step    5       vres2   =  1.68E-10 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   25.196E-14; max=  86.840E-14
+ Mean square residual over all n,k,spin=   25.197E-14; max=  86.840E-14
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -1024,11 +1024,11 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.1279206188E+01 Ha. Also 2DEtotal=    0.348089706251E+02 eV
+ 2DEtotal=    0.1279206188E+01 Ha. Also 2DEtotal=    0.348089706250E+02 eV
     (2DErelax=   -8.9646363971E+00 Ha. 2DEnonrelax=    1.0243842585E+01 Ha)
     (  non-var. 2DEtotal :    1.2792063541E+00 Ha)
 
- Components of second-order derivatives of the electronic energy, EIGR2D.
+ Components of second-order derivatives of the electronic energy, EIGR2D, in Ha unit.
  For automatic tests, printing the matrix for the first k-point, first band, first atom.
    1   1   1   1   -3.6318984340E+00    0.0000000000E+00
    1   1   2   1    6.8414367685E-01    0.0000000000E+00
@@ -1039,7 +1039,7 @@ tolerances: {tolvrs: 1.00E-08, }
    3   1   1   1    6.8414367684E-01    0.0000000000E+00
    3   1   2   1    1.2419207352E+00    0.0000000000E+00
    3   1   3   1   -2.6102084538E+00    0.0000000000E+00
- 
+
  Components of second-order derivatives of the electronic energy, EIGI2D.
  For automatic tests, printing the matrix for the first k-point, first band, first atom.
    1   1   1   1    0.0000000000E+00    0.0000000000E+00
@@ -1057,41 +1057,41 @@ tolerances: {tolvrs: 1.00E-08, }
 
 
  ==> Compute Derivative Database <==
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   1    1         2.8820388655         0.0000000000
-   1    1   2    1        -0.6389772213        -0.0000000000
+   1    1   2    1        -0.6389772213         0.0000000000
    1    1   3    1        -0.6389772213        -0.0000000000
-  
-   2    1   1    1        -0.6389777699         0.0000000000
+
+   2    1   1    1        -0.6389777699        -0.0000000000
    2    1   2    1         1.2792063475         0.0000000000
-   2    1   3    1        -0.0012519787        -0.0000000000
-  
+   2    1   3    1        -0.0012519787         0.0000000000
+
    3    1   1    1        -0.6389777700         0.0000000000
-   3    1   2    1        -0.0012519787         0.0000000000
+   3    1   2    1        -0.0012519787        -0.0000000000
    3    1   3    1         1.2792063476         0.0000000000
-  
-  
+
+
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   1    1         0.1382319490        -0.0000000000
-   1    1   2    1        -0.0000000633        -0.0000000000
-   1    1   3    1        -0.0000000633         0.0000000000
-  
+   1    1   2    1        -0.0000000633         0.0000000000
+   1    1   3    1        -0.0000000633        -0.0000000000
+
    2    1   1    1        -0.0000000040        -0.0000000000
-   2    1   2    1         0.1559378162        -0.0000000000
+   2    1   2    1         0.1559378162         0.0000000000
    2    1   3    1         0.0866864194         0.0000000000
-  
-   3    1   1    1        -0.0000000040        -0.0000000000
+
+   3    1   1    1        -0.0000000040         0.0000000000
    3    1   2    1         0.0866864194        -0.0000000000
-   3    1   3    1         0.1559378162         0.0000000000
+   3    1   3    1         0.1559378162        -0.0000000000
 
   Phonon wavevector (reduced coordinates) :  0.50000  0.00000  0.00000
  Phonon energies in Hartree :
@@ -1100,9 +1100,9 @@ tolerances: {tolvrs: 1.00E-08, }
 -  6.761567E+02  9.552945E+02  1.265611E+03
 ================================================================================
 
- ---- T=0 shift of eigenenergies due to electron-phonon interation at q ---- 
- Warning : the total shift must be computed through anaddb,                  
- here, only the contribution of one q point is printed.                      
+ ---- T=0 shift of eigenenergies due to electron-phonon interation at q ----
+ Warning : the total shift must be computed through anaddb,
+ here, only the contribution of one q point is printed.
  Print first the electronic eigenvalues, then the q-dependent Fan shift of eigenvalues.
 
  Eigenvalues (hartree) for nkpt=   8  k points:
@@ -1168,7 +1168,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -1197,18 +1197,18 @@ tolerances: {tolvrs: 1.00E-08, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   1.4084760796215     -8.835E+00 3.258E-02 3.960E+01
- ETOT  2   1.2792766749045     -1.292E-01 3.103E-04 2.484E-02
- ETOT  3   1.2792064095712     -7.027E-05 3.570E-07 1.572E-04
- ETOT  4   1.2792061883186     -2.213E-07 1.359E-09 1.076E-07
- ETOT  5   1.2792061881593     -1.593E-10 1.053E-12 1.685E-10
+-ETOT  1   1.4084760796193     -8.835E+00 3.258E-02 3.960E+01
+ ETOT  2   1.2792766749025     -1.292E-01 3.103E-04 2.484E-02
+ ETOT  3   1.2792064095691     -7.027E-05 3.570E-07 1.572E-04
+ ETOT  4   1.2792061883165     -2.213E-07 1.359E-09 1.076E-07
+ ETOT  5   1.2792061881572     -1.593E-10 1.053E-12 1.685E-10
 
  At SCF step    5       vres2   =  1.68E-10 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   32.024E-14; max=  10.529E-13
+ Mean square residual over all n,k,spin=   32.029E-14; max=  10.533E-13
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -1225,7 +1225,7 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.1279206188E+01 Ha. Also 2DEtotal=    0.348089706221E+02 eV
+ 2DEtotal=    0.1279206188E+01 Ha. Also 2DEtotal=    0.348089706220E+02 eV
     (2DErelax=   -8.9646363971E+00 Ha. 2DEnonrelax=    1.0243842585E+01 Ha)
     (  non-var. 2DEtotal :    1.2792063540E+00 Ha)
 
@@ -1250,11 +1250,11 @@ tolerances: {tolvrs: 1.00E-08, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   9.3598593204579     -1.076E+01 7.982E-02 3.423E+03
- ETOT  2   3.5701172550499     -5.790E+00 3.369E-02 3.533E+02
- ETOT  3   2.8820926978486     -6.880E-01 1.939E-03 3.597E-02
- ETOT  4   2.8820345090188     -5.819E-05 8.092E-08 1.382E-04
- ETOT  5   2.8820342966799     -2.123E-07 7.704E-10 3.620E-09
+-ETOT  1   9.3598593204566     -1.076E+01 7.982E-02 3.423E+03
+ ETOT  2   3.5701172550479     -5.790E+00 3.369E-02 3.533E+02
+ ETOT  3   2.8820926978464     -6.880E-01 1.939E-03 3.597E-02
+ ETOT  4   2.8820345090166     -5.819E-05 8.097E-08 1.382E-04
+ ETOT  5   2.8820342966776     -2.123E-07 7.704E-10 3.620E-09
 
  At SCF step    5       vres2   =  3.62E-09 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
@@ -1303,18 +1303,18 @@ tolerances: {tolvrs: 1.00E-08, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   1.4084760797221     -8.835E+00 3.258E-02 3.960E+01
- ETOT  2   1.2792766750037     -1.292E-01 3.103E-04 2.484E-02
- ETOT  3   1.2792064096705     -7.027E-05 3.570E-07 1.572E-04
- ETOT  4   1.2792061884178     -2.213E-07 1.359E-09 1.076E-07
- ETOT  5   1.2792061882586     -1.592E-10 1.090E-12 1.685E-10
+-ETOT  1   1.4084760797200     -8.835E+00 3.258E-02 3.960E+01
+ ETOT  2   1.2792766750016     -1.292E-01 3.103E-04 2.484E-02
+ ETOT  3   1.2792064096684     -7.027E-05 3.570E-07 1.572E-04
+ ETOT  4   1.2792061884157     -2.213E-07 1.359E-09 1.076E-07
+ ETOT  5   1.2792061882565     -1.593E-10 1.091E-12 1.685E-10
 
  At SCF step    5       vres2   =  1.68E-10 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   35.954E-14; max=  10.898E-13
+ Mean square residual over all n,k,spin=   35.970E-14; max=  10.913E-13
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -1331,11 +1331,11 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.1279206188E+01 Ha. Also 2DEtotal=    0.348089706248E+02 eV
+ 2DEtotal=    0.1279206188E+01 Ha. Also 2DEtotal=    0.348089706247E+02 eV
     (2DErelax=   -8.9646363971E+00 Ha. 2DEnonrelax=    1.0243842585E+01 Ha)
     (  non-var. 2DEtotal :    1.2792063541E+00 Ha)
 
- Components of second-order derivatives of the electronic energy, EIGR2D.
+ Components of second-order derivatives of the electronic energy, EIGR2D, in Ha unit.
  For automatic tests, printing the matrix for the first k-point, first band, first atom.
    1   1   1   1   -2.6102084539E+00    0.0000000000E+00
    1   1   2   1    6.8414367689E-01    0.0000000000E+00
@@ -1346,7 +1346,7 @@ tolerances: {tolvrs: 1.00E-08, }
    3   1   1   1    1.2419207352E+00    0.0000000000E+00
    3   1   2   1    6.8414367687E-01    0.0000000000E+00
    3   1   3   1   -2.6102084539E+00    0.0000000000E+00
- 
+
  Components of second-order derivatives of the electronic energy, EIGI2D.
  For automatic tests, printing the matrix for the first k-point, first band, first atom.
    1   1   1   1    0.0000000000E+00    0.0000000000E+00
@@ -1364,39 +1364,39 @@ tolerances: {tolvrs: 1.00E-08, }
 
 
  ==> Compute Derivative Database <==
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   1    1         1.2792063474         0.0000000000
-   1    1   2    1        -0.6389777699        -0.0000000000
+   1    1   2    1        -0.6389777699         0.0000000000
    1    1   3    1        -0.0012519787        -0.0000000000
-  
-   2    1   1    1        -0.6389772212         0.0000000000
+
+   2    1   1    1        -0.6389772212        -0.0000000000
    2    1   2    1         2.8820388655         0.0000000000
-   2    1   3    1        -0.6389772213        -0.0000000000
-  
+   2    1   3    1        -0.6389772213         0.0000000000
+
    3    1   1    1        -0.0012519787         0.0000000000
-   3    1   2    1        -0.6389777700         0.0000000000
+   3    1   2    1        -0.6389777700        -0.0000000000
    3    1   3    1         1.2792063475         0.0000000000
-  
-  
+
+
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
-   1    1   1    1         0.1559378162        -0.0000000000
+
+   1    1   1    1         0.1559378162         0.0000000000
    1    1   2    1        -0.0000000040         0.0000000000
    1    1   3    1         0.0866864194         0.0000000000
-  
-   2    1   1    1        -0.0000000633        -0.0000000000
+
+   2    1   1    1        -0.0000000633         0.0000000000
    2    1   2    1         0.1382319490        -0.0000000000
-   2    1   3    1        -0.0000000633        -0.0000000000
-  
-   3    1   1    1         0.0866864194        -0.0000000000
+   2    1   3    1        -0.0000000633         0.0000000000
+
+   3    1   1    1         0.0866864194         0.0000000000
    3    1   2    1        -0.0000000040        -0.0000000000
    3    1   3    1         0.1559378162         0.0000000000
 
@@ -1407,9 +1407,9 @@ tolerances: {tolvrs: 1.00E-08, }
 -  6.761567E+02  9.552945E+02  1.265611E+03
 ================================================================================
 
- ---- T=0 shift of eigenenergies due to electron-phonon interation at q ---- 
- Warning : the total shift must be computed through anaddb,                  
- here, only the contribution of one q point is printed.                      
+ ---- T=0 shift of eigenenergies due to electron-phonon interation at q ----
+ Warning : the total shift must be computed through anaddb,
+ here, only the contribution of one q point is printed.
  Print first the electronic eigenvalues, then the q-dependent Fan shift of eigenvalues.
 
  Eigenvalues (hartree) for nkpt=   8  k points:
@@ -1475,7 +1475,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -1504,18 +1504,18 @@ tolerances: {tolvrs: 1.00E-08, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   9.3598593341752     -1.076E+01 7.982E-02 3.423E+03
- ETOT  2   3.5701172726916     -5.790E+00 3.369E-02 3.533E+02
- ETOT  3   2.8820927160322     -6.880E-01 1.939E-03 3.597E-02
- ETOT  4   2.8820345272021     -5.819E-05 5.907E-08 1.382E-04
- ETOT  5   2.8820343148632     -2.123E-07 7.704E-10 3.620E-09
+-ETOT  1   9.3598593341741     -1.076E+01 7.982E-02 3.423E+03
+ ETOT  2   3.5701172726896     -5.790E+00 3.369E-02 3.533E+02
+ ETOT  3   2.8820927160299     -6.880E-01 1.939E-03 3.597E-02
+ ETOT  4   2.8820345271999     -5.819E-05 5.907E-08 1.382E-04
+ ETOT  5   2.8820343148609     -2.123E-07 7.704E-10 3.620E-09
 
  At SCF step    5       vres2   =  3.62E-09 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   17.401E-11; max=  77.036E-11
+ Mean square residual over all n,k,spin=   17.400E-11; max=  77.036E-11
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -1557,18 +1557,18 @@ tolerances: {tolvrs: 1.00E-08, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   9.3598593342016     -1.076E+01 7.982E-02 3.423E+03
- ETOT  2   3.5701172726969     -5.790E+00 3.369E-02 3.533E+02
- ETOT  3   2.8820927160347     -6.880E-01 1.939E-03 3.597E-02
- ETOT  4   2.8820345272048     -5.819E-05 5.907E-08 1.382E-04
- ETOT  5   2.8820343148658     -2.123E-07 7.704E-10 3.620E-09
+-ETOT  1   9.3598593342003     -1.076E+01 7.982E-02 3.423E+03
+ ETOT  2   3.5701172726949     -5.790E+00 3.369E-02 3.533E+02
+ ETOT  3   2.8820927160325     -6.880E-01 1.939E-03 3.597E-02
+ ETOT  4   2.8820345272025     -5.819E-05 5.907E-08 1.382E-04
+ ETOT  5   2.8820343148636     -2.123E-07 7.704E-10 3.620E-09
 
  At SCF step    5       vres2   =  3.62E-09 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   17.349E-11; max=  77.036E-11
+ Mean square residual over all n,k,spin=   17.352E-11; max=  77.036E-11
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -1585,7 +1585,7 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.2882034315E+01 Ha. Also 2DEtotal=    0.784241420395E+02 eV
+ 2DEtotal=    0.2882034315E+01 Ha. Also 2DEtotal=    0.784241420394E+02 eV
     (2DErelax=   -1.7241317479E+01 Ha. 2DEnonrelax=    2.0123351794E+01 Ha)
     (  non-var. 2DEtotal :    2.8820389049E+00 Ha)
 
@@ -1610,18 +1610,18 @@ tolerances: {tolvrs: 1.00E-08, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   1.4084760982687     -8.835E+00 3.258E-02 3.960E+01
- ETOT  2   1.2792766937558     -1.292E-01 3.103E-04 2.484E-02
- ETOT  3   1.2792064284226     -7.027E-05 3.570E-07 1.572E-04
- ETOT  4   1.2792062071700     -2.213E-07 1.359E-09 1.076E-07
- ETOT  5   1.2792062070107     -1.592E-10 8.684E-13 1.685E-10
+-ETOT  1   1.4084760982665     -8.835E+00 3.258E-02 3.960E+01
+ ETOT  2   1.2792766937537     -1.292E-01 3.103E-04 2.484E-02
+ ETOT  3   1.2792064284205     -7.027E-05 3.570E-07 1.572E-04
+ ETOT  4   1.2792062071678     -2.213E-07 1.359E-09 1.076E-07
+ ETOT  5   1.2792062070086     -1.592E-10 8.684E-13 1.685E-10
 
  At SCF step    5       vres2   =  1.68E-10 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   25.208E-14; max=  86.840E-14
+ Mean square residual over all n,k,spin=   25.209E-14; max=  86.840E-14
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -1638,11 +1638,11 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.1279206207E+01 Ha. Also 2DEtotal=    0.348089711351E+02 eV
+ 2DEtotal=    0.1279206207E+01 Ha. Also 2DEtotal=    0.348089711350E+02 eV
     (2DErelax=   -8.9646363784E+00 Ha. 2DEnonrelax=    1.0243842585E+01 Ha)
     (  non-var. 2DEtotal :    1.2792063728E+00 Ha)
 
- Components of second-order derivatives of the electronic energy, EIGR2D.
+ Components of second-order derivatives of the electronic energy, EIGR2D, in Ha unit.
  For automatic tests, printing the matrix for the first k-point, first band, first atom.
    1   1   1   1   -3.6318984129E+00    0.0000000000E+00
    1   1   2   1    2.2636113290E+00    0.0000000000E+00
@@ -1653,7 +1653,7 @@ tolerances: {tolvrs: 1.00E-08, }
    3   1   1   1    6.8414369402E-01    0.0000000000E+00
    3   1   2   1    6.8414369405E-01    0.0000000000E+00
    3   1   3   1   -2.6102084364E+00    0.0000000000E+00
- 
+
  Components of second-order derivatives of the electronic energy, EIGI2D.
  For automatic tests, printing the matrix for the first k-point, first band, first atom.
    1   1   1   1    0.0000000000E+00    0.0000000000E+00
@@ -1671,41 +1671,41 @@ tolerances: {tolvrs: 1.00E-08, }
 
 
  ==> Compute Derivative Database <==
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   1    1         2.8820388860         0.0000000000
    1    1   2    1        -1.6040833829        -0.0000000000
    1    1   3    1        -0.6389772027        -0.0000000000
-  
+
    2    1   1    1        -1.6040833829         0.0000000000
    2    1   2    1         2.8820388860         0.0000000000
    2    1   3    1        -0.6389772027        -0.0000000000
-  
+
    3    1   1    1        -0.6389777516         0.0000000000
    3    1   2    1        -0.6389777516         0.0000000000
    3    1   3    1         1.2792063685         0.0000000000
-  
-  
+
+
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
-   1    1   1    1         0.1559378205         0.0000000000
+
+   1    1   1    1         0.1559378205        -0.0000000000
    1    1   2    1        -0.0866864234         0.0000000000
    1    1   3    1        -0.0000000000         0.0000000000
-  
+
    2    1   1    1        -0.0866864234        -0.0000000000
    2    1   2    1         0.1559378205         0.0000000000
    2    1   3    1        -0.0000000000         0.0000000000
-  
+
    3    1   1    1         0.0000000594        -0.0000000000
-   3    1   2    1         0.0000000594        -0.0000000000
-   3    1   3    1         0.1382320717        -0.0000000000
+   3    1   2    1         0.0000000594         0.0000000000
+   3    1   3    1         0.1382320717         0.0000000000
 
   Phonon wavevector (reduced coordinates) :  0.50000  0.50000  0.00000
  Phonon energies in Hartree :
@@ -1714,9 +1714,9 @@ tolerances: {tolvrs: 1.00E-08, }
 -  6.761567E+02  9.552950E+02  1.265611E+03
 ================================================================================
 
- ---- T=0 shift of eigenenergies due to electron-phonon interation at q ---- 
- Warning : the total shift must be computed through anaddb,                  
- here, only the contribution of one q point is printed.                      
+ ---- T=0 shift of eigenenergies due to electron-phonon interation at q ----
+ Warning : the total shift must be computed through anaddb,
+ here, only the contribution of one q point is printed.
  Print first the electronic eigenvalues, then the q-dependent Fan shift of eigenvalues.
 
  Eigenvalues (hartree) for nkpt=   8  k points:
@@ -1782,7 +1782,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -1811,18 +1811,18 @@ tolerances: {tolvrs: 1.00E-08, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   1.4084760796113     -8.835E+00 3.258E-02 3.960E+01
- ETOT  2   1.2792766748934     -1.292E-01 3.103E-04 2.484E-02
- ETOT  3   1.2792064095601     -7.027E-05 3.570E-07 1.572E-04
- ETOT  4   1.2792061883074     -2.213E-07 1.359E-09 1.076E-07
- ETOT  5   1.2792061881482     -1.592E-10 9.792E-13 1.685E-10
+-ETOT  1   1.4084760796092     -8.835E+00 3.258E-02 3.960E+01
+ ETOT  2   1.2792766748912     -1.292E-01 3.103E-04 2.484E-02
+ ETOT  3   1.2792064095579     -7.027E-05 3.570E-07 1.572E-04
+ ETOT  4   1.2792061883053     -2.213E-07 1.359E-09 1.076E-07
+ ETOT  5   1.2792061881460     -1.593E-10 9.789E-13 1.685E-10
 
  At SCF step    5       vres2   =  1.68E-10 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   31.155E-14; max=  97.918E-14
+ Mean square residual over all n,k,spin=   31.154E-14; max=  97.893E-14
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -1839,7 +1839,7 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.1279206188E+01 Ha. Also 2DEtotal=    0.348089706218E+02 eV
+ 2DEtotal=    0.1279206188E+01 Ha. Also 2DEtotal=    0.348089706217E+02 eV
     (2DErelax=   -8.9646363971E+00 Ha. 2DEnonrelax=    1.0243842585E+01 Ha)
     (  non-var. 2DEtotal :    1.2792063540E+00 Ha)
 
@@ -1864,11 +1864,11 @@ tolerances: {tolvrs: 1.00E-08, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   1.4084760796615     -8.835E+00 3.258E-02 3.960E+01
- ETOT  2   1.2792766749429     -1.292E-01 3.103E-04 2.484E-02
- ETOT  3   1.2792064096096     -7.027E-05 3.570E-07 1.572E-04
- ETOT  4   1.2792061883570     -2.213E-07 1.359E-09 1.076E-07
- ETOT  5   1.2792061881977     -1.593E-10 8.684E-13 1.685E-10
+-ETOT  1   1.4084760796594     -8.835E+00 3.258E-02 3.960E+01
+ ETOT  2   1.2792766749407     -1.292E-01 3.103E-04 2.484E-02
+ ETOT  3   1.2792064096074     -7.027E-05 3.570E-07 1.572E-04
+ ETOT  4   1.2792061883548     -2.213E-07 1.359E-09 1.076E-07
+ ETOT  5   1.2792061881955     -1.593E-10 8.684E-13 1.685E-10
 
  At SCF step    5       vres2   =  1.68E-10 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
@@ -1917,18 +1917,18 @@ tolerances: {tolvrs: 1.00E-08, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   9.3598593205155     -1.076E+01 7.982E-02 3.423E+03
- ETOT  2   3.5701172550634     -5.790E+00 3.369E-02 3.533E+02
- ETOT  3   2.8820926978504     -6.880E-01 1.939E-03 3.597E-02
- ETOT  4   2.8820345090206     -5.819E-05 5.907E-08 1.382E-04
- ETOT  5   2.8820342966817     -2.123E-07 7.704E-10 3.620E-09
+-ETOT  1   9.3598593205141     -1.076E+01 7.982E-02 3.423E+03
+ ETOT  2   3.5701172550614     -5.790E+00 3.369E-02 3.533E+02
+ ETOT  3   2.8820926978483     -6.880E-01 1.939E-03 3.597E-02
+ ETOT  4   2.8820345090184     -5.819E-05 5.907E-08 1.382E-04
+ ETOT  5   2.8820342966794     -2.123E-07 7.704E-10 3.620E-09
 
  At SCF step    5       vres2   =  3.62E-09 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   17.452E-11; max=  77.036E-11
+ Mean square residual over all n,k,spin=   17.451E-11; max=  77.036E-11
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -1945,11 +1945,11 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.2882034297E+01 Ha. Also 2DEtotal=    0.784241415447E+02 eV
+ 2DEtotal=    0.2882034297E+01 Ha. Also 2DEtotal=    0.784241415446E+02 eV
     (2DErelax=   -1.7241317497E+01 Ha. 2DEnonrelax=    2.0123351794E+01 Ha)
     (  non-var. 2DEtotal :    2.8820388867E+00 Ha)
 
- Components of second-order derivatives of the electronic energy, EIGR2D.
+ Components of second-order derivatives of the electronic energy, EIGR2D, in Ha unit.
  For automatic tests, printing the matrix for the first k-point, first band, first atom.
    1   1   1   1   -2.6102084539E+00    0.0000000000E+00
    1   1   2   1    1.2419207351E+00    0.0000000000E+00
@@ -1960,7 +1960,7 @@ tolerances: {tolvrs: 1.00E-08, }
    3   1   1   1    6.8414367692E-01    0.0000000000E+00
    3   1   2   1    6.8414367691E-01    0.0000000000E+00
    3   1   3   1   -3.6318984340E+00    0.0000000000E+00
- 
+
  Components of second-order derivatives of the electronic energy, EIGI2D.
  For automatic tests, printing the matrix for the first k-point, first band, first atom.
    1   1   1   1    0.0000000000E+00    0.0000000000E+00
@@ -1978,38 +1978,38 @@ tolerances: {tolvrs: 1.00E-08, }
 
 
  ==> Compute Derivative Database <==
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   1    1         1.2792063474         0.0000000000
    1    1   2    1        -0.0012519786        -0.0000000000
    1    1   3    1        -0.6389777699        -0.0000000000
-  
+
    2    1   1    1        -0.0012519786         0.0000000000
    2    1   2    1         1.2792063475         0.0000000000
    2    1   3    1        -0.6389777699        -0.0000000000
-  
+
    3    1   1    1        -0.6389772212         0.0000000000
    3    1   2    1        -0.6389772213         0.0000000000
    3    1   3    1         2.8820388655         0.0000000000
-  
-  
+
+
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
-   1    1   1    1         0.1559378162        -0.0000000000
-   1    1   2    1         0.0866864195        -0.0000000000
+
+   1    1   1    1         0.1559378162         0.0000000000
+   1    1   2    1         0.0866864195         0.0000000000
    1    1   3    1        -0.0000000040         0.0000000000
-  
-   2    1   1    1         0.0866864195        -0.0000000000
-   2    1   2    1         0.1559378162        -0.0000000000
+
+   2    1   1    1         0.0866864195         0.0000000000
+   2    1   2    1         0.1559378162         0.0000000000
    2    1   3    1        -0.0000000040         0.0000000000
-  
+
    3    1   1    1        -0.0000000633        -0.0000000000
    3    1   2    1        -0.0000000633        -0.0000000000
    3    1   3    1         0.1382319490        -0.0000000000
@@ -2021,9 +2021,9 @@ tolerances: {tolvrs: 1.00E-08, }
 -  6.761567E+02  9.552945E+02  1.265611E+03
 ================================================================================
 
- ---- T=0 shift of eigenenergies due to electron-phonon interation at q ---- 
- Warning : the total shift must be computed through anaddb,                  
- here, only the contribution of one q point is printed.                      
+ ---- T=0 shift of eigenenergies due to electron-phonon interation at q ----
+ Warning : the total shift must be computed through anaddb,
+ here, only the contribution of one q point is printed.
  Print first the electronic eigenvalues, then the q-dependent Fan shift of eigenvalues.
 
  Eigenvalues (hartree) for nkpt=   8  k points:
@@ -2089,7 +2089,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -2118,18 +2118,18 @@ tolerances: {tolvrs: 1.00E-08, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   9.3598593341921     -1.076E+01 1.012E-01 3.423E+03
- ETOT  2   3.5701172726978     -5.790E+00 4.127E-02 3.533E+02
- ETOT  3   2.8820927160338     -6.880E-01 1.939E-03 3.597E-02
- ETOT  4   2.8820345272039     -5.819E-05 8.092E-08 1.382E-04
- ETOT  5   2.8820343148649     -2.123E-07 7.704E-10 3.620E-09
+-ETOT  1   9.3598593341907     -1.076E+01 1.012E-01 3.423E+03
+ ETOT  2   3.5701172726958     -5.790E+00 4.127E-02 3.533E+02
+ ETOT  3   2.8820927160317     -6.880E-01 1.939E-03 3.597E-02
+ ETOT  4   2.8820345272016     -5.819E-05 8.097E-08 1.382E-04
+ ETOT  5   2.8820343148627     -2.123E-07 7.704E-10 3.620E-09
 
  At SCF step    5       vres2   =  3.62E-09 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   21.998E-11; max=  77.036E-11
+ Mean square residual over all n,k,spin=   21.991E-11; max=  77.036E-11
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -2146,7 +2146,7 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.2882034315E+01 Ha. Also 2DEtotal=    0.784241420395E+02 eV
+ 2DEtotal=    0.2882034315E+01 Ha. Also 2DEtotal=    0.784241420394E+02 eV
     (2DErelax=   -1.7241317479E+01 Ha. 2DEnonrelax=    2.0123351794E+01 Ha)
     (  non-var. 2DEtotal :    2.8820389049E+00 Ha)
 
@@ -2171,18 +2171,18 @@ tolerances: {tolvrs: 1.00E-08, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   1.4084760982087     -8.835E+00 3.258E-02 3.960E+01
- ETOT  2   1.2792766936955     -1.292E-01 3.103E-04 2.484E-02
- ETOT  3   1.2792064283623     -7.027E-05 3.570E-07 1.572E-04
- ETOT  4   1.2792062071097     -2.213E-07 1.359E-09 1.076E-07
- ETOT  5   1.2792062069504     -1.593E-10 8.709E-13 1.685E-10
+-ETOT  1   1.4084760982066     -8.835E+00 3.258E-02 3.960E+01
+ ETOT  2   1.2792766936933     -1.292E-01 3.103E-04 2.484E-02
+ ETOT  3   1.2792064283602     -7.027E-05 3.570E-07 1.572E-04
+ ETOT  4   1.2792062071076     -2.213E-07 1.359E-09 1.076E-07
+ ETOT  5   1.2792062069482     -1.593E-10 8.712E-13 1.685E-10
 
  At SCF step    5       vres2   =  1.68E-10 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   31.232E-14; max=  87.089E-14
+ Mean square residual over all n,k,spin=   31.234E-14; max=  87.124E-14
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -2224,18 +2224,18 @@ tolerances: {tolvrs: 1.00E-08, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   9.3598593342449     -1.076E+01 1.012E-01 3.423E+03
- ETOT  2   3.5701172727085     -5.790E+00 4.127E-02 3.533E+02
- ETOT  3   2.8820927160392     -6.880E-01 1.939E-03 3.597E-02
- ETOT  4   2.8820345272092     -5.819E-05 8.224E-08 1.382E-04
- ETOT  5   2.8820343148703     -2.123E-07 7.704E-10 3.620E-09
+-ETOT  1   9.3598593342435     -1.076E+01 1.012E-01 3.423E+03
+ ETOT  2   3.5701172727065     -5.790E+00 4.127E-02 3.533E+02
+ ETOT  3   2.8820927160370     -6.880E-01 1.939E-03 3.597E-02
+ ETOT  4   2.8820345272070     -5.819E-05 8.246E-08 1.382E-04
+ ETOT  5   2.8820343148680     -2.123E-07 7.704E-10 3.620E-09
 
  At SCF step    5       vres2   =  3.62E-09 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   21.923E-11; max=  77.036E-11
+ Mean square residual over all n,k,spin=   21.915E-11; max=  77.036E-11
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -2256,7 +2256,7 @@ tolerances: {tolvrs: 1.00E-08, }
     (2DErelax=   -1.7241317479E+01 Ha. 2DEnonrelax=    2.0123351794E+01 Ha)
     (  non-var. 2DEtotal :    2.8820389049E+00 Ha)
 
- Components of second-order derivatives of the electronic energy, EIGR2D.
+ Components of second-order derivatives of the electronic energy, EIGR2D, in Ha unit.
  For automatic tests, printing the matrix for the first k-point, first band, first atom.
    1   1   1   1   -3.6318984129E+00    0.0000000000E+00
    1   1   2   1    6.8414369403E-01    0.0000000000E+00
@@ -2267,7 +2267,7 @@ tolerances: {tolvrs: 1.00E-08, }
    3   1   1   1    2.2636113289E+00    0.0000000000E+00
    3   1   2   1    6.8414369409E-01    0.0000000000E+00
    3   1   3   1   -3.6318984130E+00    0.0000000000E+00
- 
+
  Components of second-order derivatives of the electronic energy, EIGI2D.
  For automatic tests, printing the matrix for the first k-point, first band, first atom.
    1   1   1   1    0.0000000000E+00    0.0000000000E+00
@@ -2285,41 +2285,41 @@ tolerances: {tolvrs: 1.00E-08, }
 
 
  ==> Compute Derivative Database <==
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   1    1         2.8820388860         0.0000000000
-   1    1   2    1        -0.6389772026        -0.0000000000
+   1    1   2    1        -0.6389772026         0.0000000000
    1    1   3    1        -1.6040833830        -0.0000000000
-  
-   2    1   1    1        -0.6389777515         0.0000000000
+
+   2    1   1    1        -0.6389777515        -0.0000000000
    2    1   2    1         1.2792063684         0.0000000000
-   2    1   3    1        -0.6389777515        -0.0000000000
-  
-   3    1   1    1        -1.6040833830         0.0000000000
-   3    1   2    1        -0.6389772027         0.0000000000
+   2    1   3    1        -0.6389777515         0.0000000000
+
+   3    1   1    1        -1.6040833830        -0.0000000000
+   3    1   2    1        -0.6389772027        -0.0000000000
    3    1   3    1         2.8820388860         0.0000000000
-  
-  
+
+
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
-   1    1   1    1         0.1559378205         0.0000000000
-   1    1   2    1         0.0000000000         0.0000000000
-   1    1   3    1        -0.0866864234         0.0000000000
-  
+
+   1    1   1    1         0.1559378205        -0.0000000000
+   1    1   2    1         0.0000000000        -0.0000000000
+   1    1   3    1        -0.0866864234        -0.0000000000
+
    2    1   1    1         0.0000000594         0.0000000000
-   2    1   2    1         0.1382320717         0.0000000000
+   2    1   2    1         0.1382320717        -0.0000000000
    2    1   3    1         0.0000000594         0.0000000000
-  
-   3    1   1    1        -0.0866864234        -0.0000000000
-   3    1   2    1        -0.0000000000         0.0000000000
-   3    1   3    1         0.1559378205        -0.0000000000
+
+   3    1   1    1        -0.0866864234         0.0000000000
+   3    1   2    1        -0.0000000000        -0.0000000000
+   3    1   3    1         0.1559378205         0.0000000000
 
   Phonon wavevector (reduced coordinates) :  0.50000  0.00000  0.50000
  Phonon energies in Hartree :
@@ -2328,9 +2328,9 @@ tolerances: {tolvrs: 1.00E-08, }
 -  6.761567E+02  9.552950E+02  1.265611E+03
 ================================================================================
 
- ---- T=0 shift of eigenenergies due to electron-phonon interation at q ---- 
- Warning : the total shift must be computed through anaddb,                  
- here, only the contribution of one q point is printed.                      
+ ---- T=0 shift of eigenenergies due to electron-phonon interation at q ----
+ Warning : the total shift must be computed through anaddb,
+ here, only the contribution of one q point is printed.
  Print first the electronic eigenvalues, then the q-dependent Fan shift of eigenvalues.
 
  Eigenvalues (hartree) for nkpt=   8  k points:
@@ -2396,7 +2396,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -2425,18 +2425,18 @@ tolerances: {tolvrs: 1.00E-08, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   1.4084760981489     -8.835E+00 3.258E-02 3.960E+01
- ETOT  2   1.2792766936353     -1.292E-01 3.103E-04 2.484E-02
- ETOT  3   1.2792064283021     -7.027E-05 3.570E-07 1.572E-04
- ETOT  4   1.2792062070494     -2.213E-07 1.359E-09 1.076E-07
- ETOT  5   1.2792062068902     -1.592E-10 9.664E-13 1.685E-10
+-ETOT  1   1.4084760981467     -8.835E+00 3.258E-02 3.960E+01
+ ETOT  2   1.2792766936331     -1.292E-01 3.103E-04 2.484E-02
+ ETOT  3   1.2792064283000     -7.027E-05 3.570E-07 1.572E-04
+ ETOT  4   1.2792062070473     -2.213E-07 1.359E-09 1.076E-07
+ ETOT  5   1.2792062068880     -1.593E-10 9.660E-13 1.685E-10
 
  At SCF step    5       vres2   =  1.68E-10 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   31.066E-14; max=  96.638E-14
+ Mean square residual over all n,k,spin=   31.064E-14; max=  96.605E-14
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -2453,7 +2453,7 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.1279206207E+01 Ha. Also 2DEtotal=    0.348089711318E+02 eV
+ 2DEtotal=    0.1279206207E+01 Ha. Also 2DEtotal=    0.348089711317E+02 eV
     (2DErelax=   -8.9646363783E+00 Ha. 2DEnonrelax=    1.0243842585E+01 Ha)
     (  non-var. 2DEtotal :    1.2792063727E+00 Ha)
 
@@ -2478,11 +2478,11 @@ tolerances: {tolvrs: 1.00E-08, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   9.3598593342478     -1.076E+01 7.982E-02 3.423E+03
- ETOT  2   3.5701172727111     -5.790E+00 3.369E-02 3.533E+02
- ETOT  3   2.8820927160361     -6.880E-01 1.939E-03 3.597E-02
- ETOT  4   2.8820345272061     -5.819E-05 5.907E-08 1.382E-04
- ETOT  5   2.8820343148671     -2.123E-07 7.704E-10 3.620E-09
+-ETOT  1   9.3598593342465     -1.076E+01 7.982E-02 3.423E+03
+ ETOT  2   3.5701172727091     -5.790E+00 3.369E-02 3.533E+02
+ ETOT  3   2.8820927160338     -6.880E-01 1.939E-03 3.597E-02
+ ETOT  4   2.8820345272038     -5.819E-05 5.907E-08 1.382E-04
+ ETOT  5   2.8820343148648     -2.123E-07 7.704E-10 3.620E-09
 
  At SCF step    5       vres2   =  3.62E-09 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
@@ -2531,18 +2531,18 @@ tolerances: {tolvrs: 1.00E-08, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   9.3598593342744     -1.076E+01 7.982E-02 3.423E+03
- ETOT  2   3.5701172727164     -5.790E+00 3.369E-02 3.533E+02
- ETOT  3   2.8820927160389     -6.880E-01 1.939E-03 3.597E-02
- ETOT  4   2.8820345272088     -5.819E-05 5.907E-08 1.382E-04
- ETOT  5   2.8820343148698     -2.123E-07 7.704E-10 3.620E-09
+-ETOT  1   9.3598593342730     -1.076E+01 7.982E-02 3.423E+03
+ ETOT  2   3.5701172727144     -5.790E+00 3.369E-02 3.533E+02
+ ETOT  3   2.8820927160366     -6.880E-01 1.939E-03 3.597E-02
+ ETOT  4   2.8820345272065     -5.819E-05 5.907E-08 1.382E-04
+ ETOT  5   2.8820343148677     -2.123E-07 7.704E-10 3.620E-09
 
  At SCF step    5       vres2   =  3.62E-09 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   17.314E-11; max=  77.036E-11
+ Mean square residual over all n,k,spin=   17.317E-11; max=  77.036E-11
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -2563,7 +2563,7 @@ tolerances: {tolvrs: 1.00E-08, }
     (2DErelax=   -1.7241317479E+01 Ha. 2DEnonrelax=    2.0123351794E+01 Ha)
     (  non-var. 2DEtotal :    2.8820389049E+00 Ha)
 
- Components of second-order derivatives of the electronic energy, EIGR2D.
+ Components of second-order derivatives of the electronic energy, EIGR2D, in Ha unit.
  For automatic tests, printing the matrix for the first k-point, first band, first atom.
    1   1   1   1   -2.6102084365E+00    0.0000000000E+00
    1   1   2   1    6.8414369407E-01    0.0000000000E+00
@@ -2574,7 +2574,7 @@ tolerances: {tolvrs: 1.00E-08, }
    3   1   1   1    6.8414369410E-01    0.0000000000E+00
    3   1   2   1    2.2636113289E+00    0.0000000000E+00
    3   1   3   1   -3.6318984130E+00    0.0000000000E+00
- 
+
  Components of second-order derivatives of the electronic energy, EIGI2D.
  For automatic tests, printing the matrix for the first k-point, first band, first atom.
    1   1   1   1    0.0000000000E+00    0.0000000000E+00
@@ -2592,41 +2592,41 @@ tolerances: {tolvrs: 1.00E-08, }
 
 
  ==> Compute Derivative Database <==
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   1    1         1.2792063683         0.0000000000
-   1    1   2    1        -0.6389777515        -0.0000000000
-   1    1   3    1        -0.6389777515         0.0000000000
-  
-   2    1   1    1        -0.6389772026         0.0000000000
+   1    1   2    1        -0.6389777515         0.0000000000
+   1    1   3    1        -0.6389777515        -0.0000000000
+
+   2    1   1    1        -0.6389772026        -0.0000000000
    2    1   2    1         2.8820388860         0.0000000000
-   2    1   3    1        -1.6040833830        -0.0000000000
-  
-   3    1   1    1        -0.6389772026        -0.0000000000
-   3    1   2    1        -1.6040833830         0.0000000000
+   2    1   3    1        -1.6040833830         0.0000000000
+
+   3    1   1    1        -0.6389772026         0.0000000000
+   3    1   2    1        -1.6040833830        -0.0000000000
    3    1   3    1         2.8820388860         0.0000000000
-  
-  
+
+
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
-   1    1   1    1         0.1382320717        -0.0000000000
-   1    1   2    1         0.0000000594        -0.0000000000
-   1    1   3    1         0.0000000594         0.0000000000
-  
+
+   1    1   1    1         0.1382320717         0.0000000000
+   1    1   2    1         0.0000000594         0.0000000000
+   1    1   3    1         0.0000000594        -0.0000000000
+
    2    1   1    1         0.0000000000        -0.0000000000
-   2    1   2    1         0.1559378205        -0.0000000000
+   2    1   2    1         0.1559378205         0.0000000000
    2    1   3    1        -0.0866864234        -0.0000000000
-  
-   3    1   1    1         0.0000000000        -0.0000000000
-   3    1   2    1        -0.0866864234        -0.0000000000
-   3    1   3    1         0.1559378205         0.0000000000
+
+   3    1   1    1         0.0000000000         0.0000000000
+   3    1   2    1        -0.0866864234         0.0000000000
+   3    1   3    1         0.1559378205        -0.0000000000
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.50000  0.50000
  Phonon energies in Hartree :
@@ -2635,9 +2635,9 @@ tolerances: {tolvrs: 1.00E-08, }
 -  6.761567E+02  9.552950E+02  1.265611E+03
 ================================================================================
 
- ---- T=0 shift of eigenenergies due to electron-phonon interation at q ---- 
- Warning : the total shift must be computed through anaddb,                  
- here, only the contribution of one q point is printed.                      
+ ---- T=0 shift of eigenenergies due to electron-phonon interation at q ----
+ Warning : the total shift must be computed through anaddb,
+ here, only the contribution of one q point is printed.
  Print first the electronic eigenvalues, then the q-dependent Fan shift of eigenvalues.
 
  Eigenvalues (hartree) for nkpt=   8  k points:
@@ -2702,8 +2702,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      8.000   => boxcut(ratio)=   1.89816
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.fakesmooth
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.fakesmooth
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/02he.fakesmooth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/02he.fakesmooth
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2715,8 +2715,8 @@ meta: {optdriver: 1, rfphon: 1, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with 
-  definition in PRB44, 8503 (1991). 
+  so that the KB energies are not consistent with
+  definition in PRB44, 8503 (1991).
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=    3.14159265
          --- l  ekb(1:nproj) -->
@@ -2725,7 +2725,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -2754,18 +2754,18 @@ tolerances: {tolvrs: 1.00E-08, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   2.4326657776161     -1.275E+01 4.896E-02 4.295E+02
- ETOT  2   1.1901503785925     -1.243E+00 5.927E-03 6.417E+00
- ETOT  3   1.1693707329147     -2.078E-02 5.967E-05 2.078E-03
- ETOT  4   1.1693670301446     -3.703E-06 1.409E-08 4.883E-08
- ETOT  5   1.1693670301023     -4.223E-11 5.044E-12 1.436E-10
+-ETOT  1   2.4326657776134     -1.275E+01 4.896E-02 4.295E+02
+ ETOT  2   1.1901503785894     -1.243E+00 5.927E-03 6.417E+00
+ ETOT  3   1.1693707329117     -2.078E-02 5.956E-05 2.078E-03
+ ETOT  4   1.1693670301415     -3.703E-06 1.409E-08 4.883E-08
+ ETOT  5   1.1693670300992     -4.227E-11 5.047E-12 1.436E-10
 
  At SCF step    5       vres2   =  1.44E-10 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   71.235E-14; max=  50.436E-13
+ Mean square residual over all n,k,spin=   71.232E-14; max=  50.466E-13
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -2807,18 +2807,18 @@ tolerances: {tolvrs: 1.00E-08, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   2.4326657776475     -1.275E+01 4.896E-02 4.295E+02
- ETOT  2   1.1901503786418     -1.243E+00 5.927E-03 6.417E+00
- ETOT  3   1.1693707329651     -2.078E-02 5.967E-05 2.078E-03
- ETOT  4   1.1693670301951     -3.703E-06 1.185E-08 4.883E-08
- ETOT  5   1.1693670301528     -4.225E-11 5.044E-12 1.436E-10
+-ETOT  1   2.4326657776447     -1.275E+01 4.896E-02 4.295E+02
+ ETOT  2   1.1901503786388     -1.243E+00 5.927E-03 6.417E+00
+ ETOT  3   1.1693707329621     -2.078E-02 5.956E-05 2.078E-03
+ ETOT  4   1.1693670301920     -3.703E-06 1.183E-08 4.883E-08
+ ETOT  5   1.1693670301497     -4.227E-11 5.047E-12 1.436E-10
 
  At SCF step    5       vres2   =  1.44E-10 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   71.339E-14; max=  50.436E-13
+ Mean square residual over all n,k,spin=   71.336E-14; max=  50.466E-13
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -2835,7 +2835,7 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.1169367030E+01 Ha. Also 2DEtotal=    0.318200951307E+02 eV
+ 2DEtotal=    0.1169367030E+01 Ha. Also 2DEtotal=    0.318200951306E+02 eV
     (2DErelax=   -1.4014230160E+01 Ha. 2DEnonrelax=    1.5183597190E+01 Ha)
     (  non-var. 2DEtotal :    1.1693663369E+00 Ha)
 
@@ -2860,18 +2860,18 @@ tolerances: {tolvrs: 1.00E-08, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   2.4326657776789     -1.275E+01 4.896E-02 4.295E+02
- ETOT  2   1.1901503786914     -1.243E+00 5.927E-03 6.417E+00
- ETOT  3   1.1693707330157     -2.078E-02 5.967E-05 2.078E-03
- ETOT  4   1.1693670302456     -3.703E-06 1.392E-08 4.883E-08
- ETOT  5   1.1693670302034     -4.217E-11 5.044E-12 1.436E-10
+-ETOT  1   2.4326657776762     -1.275E+01 4.896E-02 4.295E+02
+ ETOT  2   1.1901503786884     -1.243E+00 5.927E-03 6.417E+00
+ ETOT  3   1.1693707330126     -2.078E-02 5.956E-05 2.078E-03
+ ETOT  4   1.1693670302426     -3.703E-06 1.392E-08 4.883E-08
+ ETOT  5   1.1693670302003     -4.221E-11 5.047E-12 1.436E-10
 
  At SCF step    5       vres2   =  1.44E-10 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   71.241E-14; max=  50.436E-13
+ Mean square residual over all n,k,spin=   71.238E-14; max=  50.466E-13
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -2888,11 +2888,11 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.1169367030E+01 Ha. Also 2DEtotal=    0.318200951321E+02 eV
+ 2DEtotal=    0.1169367030E+01 Ha. Also 2DEtotal=    0.318200951320E+02 eV
     (2DErelax=   -1.4014230160E+01 Ha. 2DEnonrelax=    1.5183597190E+01 Ha)
     (  non-var. 2DEtotal :    1.1693663370E+00 Ha)
 
- Components of second-order derivatives of the electronic energy, EIGR2D.
+ Components of second-order derivatives of the electronic energy, EIGR2D, in Ha unit.
  For automatic tests, printing the matrix for the first k-point, first band, first atom.
    1   1   1   1   -5.3473413311E+00    0.0000000000E+00
    1   1   2   1    1.7824470935E+00    0.0000000000E+00
@@ -2903,7 +2903,7 @@ tolerances: {tolvrs: 1.00E-08, }
    3   1   1   1    1.7824470935E+00    0.0000000000E+00
    3   1   2   1    1.7824470935E+00    0.0000000000E+00
    3   1   3   1   -5.3473413311E+00    0.0000000000E+00
- 
+
  Components of second-order derivatives of the electronic energy, EIGI2D.
  For automatic tests, printing the matrix for the first k-point, first band, first atom.
    1   1   1   1    0.0000000000E+00    0.0000000000E+00
@@ -2921,41 +2921,41 @@ tolerances: {tolvrs: 1.00E-08, }
 
 
  ==> Compute Derivative Database <==
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   1    1         1.1693662696         0.0000000000
-   1    1   2    1        -0.3897887804        -0.0000000000
+   1    1   2    1        -0.3897887804         0.0000000000
    1    1   3    1        -0.3897887805        -0.0000000000
-  
-   2    1   1    1        -0.3897887804         0.0000000000
+
+   2    1   1    1        -0.3897887804        -0.0000000000
    2    1   2    1         1.1693662696         0.0000000000
-   2    1   3    1        -0.3897887805        -0.0000000000
-  
+   2    1   3    1        -0.3897887805         0.0000000000
+
    3    1   1    1        -0.3897887805         0.0000000000
-   3    1   2    1        -0.3897887805         0.0000000000
+   3    1   2    1        -0.3897887805        -0.0000000000
    3    1   3    1         1.1693662697         0.0000000000
-  
-  
+
+
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   1    1         0.0843242281        -0.0000000000
-   1    1   2    1        -0.0000000039         0.0000000000
-   1    1   3    1        -0.0000000039         0.0000000000
-  
-   2    1   1    1        -0.0000000039        -0.0000000000
-   2    1   2    1         0.0843242281         0.0000000000
+   1    1   2    1        -0.0000000039        -0.0000000000
+   1    1   3    1        -0.0000000039        -0.0000000000
+
+   2    1   1    1        -0.0000000039         0.0000000000
+   2    1   2    1         0.0843242281        -0.0000000000
    2    1   3    1        -0.0000000039         0.0000000000
-  
-   3    1   1    1        -0.0000000039        -0.0000000000
+
+   3    1   1    1        -0.0000000039         0.0000000000
    3    1   2    1        -0.0000000039        -0.0000000000
-   3    1   3    1         0.0843242281        -0.0000000000
+   3    1   3    1         0.0843242281         0.0000000000
 
   Phonon wavevector (reduced coordinates) :  0.50000  0.50000  0.50000
  Phonon energies in Hartree :
@@ -2964,9 +2964,9 @@ tolerances: {tolvrs: 1.00E-08, }
 -  7.461210E+02  7.461210E+02  7.461210E+02
 ================================================================================
 
- ---- T=0 shift of eigenenergies due to electron-phonon interation at q ---- 
- Warning : the total shift must be computed through anaddb,                  
- here, only the contribution of one q point is printed.                      
+ ---- T=0 shift of eigenenergies due to electron-phonon interation at q ----
+ Warning : the total shift must be computed through anaddb,
+ here, only the contribution of one q point is printed.
  Print first the electronic eigenvalues, then the q-dependent Fan shift of eigenvalues.
 
  Eigenvalues (hartree) for nkpt=   8  k points:
@@ -3001,7 +3001,7 @@ tolerances: {tolvrs: 1.00E-08, }
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      4.3000000000E+00  4.3000000000E+00  4.3000000000E+00 Bohr
               amu      4.00260200E+00
@@ -3009,7 +3009,7 @@ tolerances: {tolvrs: 1.00E-08, }
            diemac      2.00000000E+00
              ecut      8.00000000E+00 Hartree
            etotal1    -1.6363976146E+00
-           etotal2     1.3171277402E-09
+           etotal2     1.3144703104E-09
            etotal3     1.2792061883E+00
            etotal4     1.2792061883E+00
            etotal5     1.2792062070E+00
@@ -3026,7 +3026,7 @@ tolerances: {tolvrs: 1.00E-08, }
             fcart7     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart8     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart9     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         312
+-          fftalg         512
    getgam_eig2nkq1          0
    getgam_eig2nkq2          2
    getgam_eig2nkq3          2
@@ -3138,7 +3138,7 @@ P          mk1mem           8
           smdelta9          1
           spgroup           1
            strten1    -1.6139545439E-03 -1.6139545439E-03 -1.6139545439E-03
-                       2.7029910398E-13  0.0000000000E+00 -2.7029798979E-13
+                       2.7029967445E-13  0.0000000000E+00 -2.7029270769E-13
            strten2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -3203,7 +3203,7 @@ P          mk1mem           8
 - Strong suggestion to cite this paper in your publications.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#ponce2014
 -
-- [2] Temperature dependence of the electronic structure of semiconductors and insulators 
+- [2] Temperature dependence of the electronic structure of semiconductors and insulators
 - S. Ponce, Y. Gillet, J. Laflamme Janssen, A. Marini, M. Verstraete and X. Gonze. J. Chem. Phys. 143, 102813 (2015)
 - Comment: the temperature-dependence of the electronic structure is computed (or the zero-point renormalisation).
 - Strong suggestion to cite this paper in your publications.
@@ -3221,7 +3221,7 @@ P          mk1mem           8
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -3244,12 +3244,12 @@ P          mk1mem           8
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -3267,15 +3267,15 @@ P          mk1mem           8
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          2.4  wall=          2.5
+- Proc.   0 individual time (sec): cpu=          1.4  wall=          1.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered  14 WARNINGs and  49 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.4  wall=          2.5
++Overall time at end (sec) : cpu=          1.4  wall=          1.5

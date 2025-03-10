@@ -143,6 +143,9 @@
 /* Define to 1 if you are using the Nvidia nvhpc compiler. */
 #cmakedefine FC_NVHPC 1
 
+/* Define to 1 if you are using the CRAY Fortran compiler. */
+#cmakedefine FC_CRAY 1
+
 /* Define to 1 if you want to enable memory profiling. */
 #cmakedefine HAVE_MEM_PROFILING @HAVE_MEM_PROFILING@
 
@@ -327,6 +330,9 @@
 /* Define to 1 if you want to perform single-precision Cuda calculations. */
 #cmakedefine HAVE_GPU_CUDA_SP @HAVE_GPU_CUDA_SP@
 
+/* Define to 1 if you have the HIP library. */
+#cmakedefine HAVE_GPU_HIP @HAVE_GPU_HIP@
+
 /* Define to 1 if Kokkos is enabled */
 #cmakedefine HAVE_KOKKOS @HAVE_KOKKOS@
 
@@ -349,7 +355,7 @@
 /* TODO #cmakedefine HAVE_GPU_MPI */
 
 /* Define to 1 if you have library nvtx (v3). */
-#cmakedefine HAVE_GPU_NVTX_V3 @HAVE_GPU_NVTX_V3@
+#cmakedefine HAVE_GPU_MARKERS @HAVE_GPU_MARKERS@
 
 /* Define to 1 if you have a serial GPU library. */
 #cmakedefine HAVE_GPU_SERIAL @HAVE_GPU_SERIAL@
@@ -359,6 +365,9 @@
 
 /* Define to 1 if you want to activate support for OpenMP GPU offload. */
 #cmakedefine HAVE_OPENMP_OFFLOAD @HAVE_OPENMP_OFFLOAD@
+
+/* Define to 1 if you want to activate support for OpenMP GPU offload. */
+#cmakedefine HAVE_OPENMP_OFFLOAD_DATASTRUCTURE @HAVE_OPENMP_OFFLOAD_DATASTRUCTURE@
 
 /* Set to 1 if OpenMP has a working implementation of COLLAPSE. */
 #cmakedefine HAVE_OMP_COLLAPSE @HAVE_OMP_COLLAPSE@
@@ -414,6 +423,9 @@
 
 /* Define to 1 if your MPI library supports MPI_TYPE_CREATE_STRUCT. */
 #cmakedefine HAVE_MPI_TYPE_CREATE_STRUCT @HAVE_MPI_TYPE_CREATE_STRUCT@
+
+/* Define to 1 if your MPI library has buggy interfaces (mishandling scalars). */
+#cmakedefine HAVE_MPI_BUGGY_INTERFACES @HAVE_MPI_BUGGY_INTERFACES@
 
 /* Define to 1 if you want to activate possibility to call python scripts
    externally by invoking a python interpreter. */

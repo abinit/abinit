@@ -6,7 +6,7 @@
 !!  This module provides routines to read the Bethe-Salpeter Hamiltonian from file
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2022 ABINIT group (MG)
+!!  Copyright (C) 2008-2025 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -155,14 +155,13 @@ subroutine exc_read_bshdr(funt,Bsp,fform,ierr)
  ierr=0
 
  ! Read the header and perform consistency checks.
- call hdr_fort_read(hdr, funt, fform, rewind=.True.)
+ call hdr%fort_read(funt, fform, rewind=.True.)
  ABI_CHECK(fform /= 0, "hdr_fort_read returned fform == 0")
 
  read(funt, err=10, iomsg=errmsg) nreh_read, nkbz_read
-
  call Hdr%free()
 
- if (ANY(nreh_read/=BSp%nreh)) then
+ if (ANY(nreh_read /= BSp%nreh)) then
    call wrtout(std_out,"Wrong number of e-h transitions","COLL")
    ierr = ierr + 1
  end if
@@ -277,7 +276,7 @@ end subroutine exc_skip_bshdr_mpio
 !!  eig_fname=The name of the file storing the excitonic eigenvectors.
 !!  hsize=Size of the Hamiltonian.
 !!  nvec=Number of excitonic states to analyze.
-!!  vec_idx(nvec)=List with the indeces of the excitonic states sorted in ascending order.
+!!  vec_idx(nvec)=List with the indices of the excitonic states sorted in ascending order.
 !!  [Bsp]<excparam>=Structure storing the parameters of the run. If present the
 !!    routine will perform additional consistency checks to make sure that
 !!    the content of the file is consistent with the present run.
@@ -1076,7 +1075,7 @@ function offset_in_file(row_glob,col_glob,size_glob,nsblocks,sub_block,bsize_elm
    jj = col_glob
    if (ii>size_glob(1)/2) ii = ii - size_glob(1)/2 ! Wrap the index.
    if (jj>size_glob(2)/2) jj = jj - size_glob(2)/2
-   if (jj<ii) then ! Exchange the indeces since the symmetric element is read.
+   if (jj<ii) then ! Exchange the indices since the symmetric element is read.
      swap = jj
      jj   = ii
      ii   = swap
@@ -1223,7 +1222,7 @@ end subroutine exc_read_rblock_fio
 !!  Bsp<excparam>=Structure storing the parameters of the run.
 !!  eig_fname=The name of the file storing the excitonic eigenvectors.
 !!  nvec=Number of excitonic states to analyze.
-!!  vec_idx(nvec)=List with the indeces of the excitonic states sorted in ascending order.
+!!  vec_idx(nvec)=List with the indices of the excitonic states sorted in ascending order.
 !!  out_fname=The name of the file where the results are written.
 !!
 !! OUTPUT

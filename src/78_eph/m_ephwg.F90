@@ -8,7 +8,7 @@
 !!  involving delta functions. Different approaches are available.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2022 ABINIT group (MG, HM)
+!!  Copyright (C) 2008-2025 ABINIT group (MG, HM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -31,9 +31,7 @@ module m_ephwg
  use m_dtset
  use m_htetra
  use m_nctk
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
  use m_crystal
  use m_ifc
  use m_lgroup
@@ -41,9 +39,8 @@ module m_ephwg
  use m_eph_double_grid
  use m_krank
 
- use defs_datatypes,    only : ebands_t
  use m_time,            only : cwtime, cwtime_report
- use m_symtk,           only : matr3inv
+ use m_matrix,          only : matr3inv
  use m_numeric_tools,   only : arth, inrange, wrap2_pmhalf
  use m_special_funcs,   only : gaussian
  use m_fstrings,        only : strcat, ltoa, itoa, ftoa, ktoa, sjoin
@@ -380,7 +377,7 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm, skip_mapping)
 
    krank = krank_from_kptrlatt(self%nibz, self%ibz, self%kptrlatt, compute_invrank=.False.)
 
-   if (kpts_map("symrel", self%timrev, cryst, krank, self%nq_k, self%lgk%ibz, indkk) /= 0) then
+   if (kpts_map("symrel", self%kptopt, cryst, krank, self%nq_k, self%lgk%ibz, indkk) /= 0) then
      ABI_ERROR("At least one of the points in IBZ(k) could not be generated from a symmetrical one.")
    end if
 
@@ -399,7 +396,7 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm, skip_mapping)
 
    krank = krank_from_kptrlatt(self%nibz, self%ibz, self%kptrlatt, compute_invrank=.False.)
 
-   if (kpts_map("symrel", self%timrev, cryst, krank, self%nq_k, self%lgk%ibz, indkk) /= 0) then
+   if (kpts_map("symrel", self%kptopt, cryst, krank, self%nq_k, self%lgk%ibz, indkk) /= 0) then
      ABI_ERROR("At least one of the points in IBZ(k) + q could not be generated from a symmetrical one.")
    end if
    call krank%free()

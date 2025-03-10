@@ -6,7 +6,7 @@
 !! This module contains (low-level) procedures to parse and validate input files.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2022 ABINIT group (XG, MJV, MT)
+!! Copyright (C) 2008-2025 ABINIT group (XG, MJV, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -26,15 +26,13 @@ module m_parser
  use m_errors
  use m_atomdata
  use m_xmpi
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
  use m_nctk
  !use m_nctk,      only : write_var_netcdf    ! FIXME Deprecated
 
  use m_io_tools,  only : open_file
  use m_fstrings,  only : sjoin, strcat, itoa, inupper, ftoa, tolower, toupper, next_token, &
-                         endswith, char_count, find_digit !, startswith,
+                         endswith, char_count, find_digit, replace !, startswith,
  use m_geometry,  only : xcart2xred, det3r, mkrdim
 
  implicit none
@@ -111,7 +109,7 @@ module m_parser
  !public :: chkint_prt
 
  public :: prttagm             ! Print the content of intarr or dprarr.
- public :: prttagm_images      ! Extension to prttagm to include the printing of images information.
+ public :: prttagm_images      ! Extension to prttagm to include the printing of images  information.
  public :: chkvars_in_string   ! Analyze variable names in string. Abort if name is not recognized.
  public :: get_acell_rprim     ! Get acell and rprim from string
 
@@ -175,8 +173,7 @@ module m_parser
 
  public :: geo_from_abivar_string   ! Build object form abinit variable
  public :: geo_from_poscar_path     ! Build object from POSCAR filepath.
-
- public :: intagm_img   !  Read input file variables according to images path definition (1D array)
+ public :: intagm_img               ! Read input file variables according to images path definition (1D array)
 
  interface intagm_img
    module procedure intagm_img_1D
@@ -218,14 +215,13 @@ subroutine parsefile(filnamin, lenstr, ndtset, string, comm)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: master=0, option1= 1
+ integer,parameter :: master = 0, option1 = 1
  integer :: marr,tread,lenstr_noxyz,ierr
  character(len=strlen) :: string_raw, string_with_comments
  character(len=500) :: msg
 !arrays
  integer :: intarr(1)
  real(dp) :: dprarr(1)
-
 ! *************************************************************************
 
  ! Read the input file, and store the information in a long string of characters
@@ -234,6 +230,8 @@ subroutine parsefile(filnamin, lenstr, ndtset, string, comm)
  if (xmpi_comm_rank(comm) == master) then
 
    ! strlen from defs_basis module
+   string = repeat(" ", strlen)
+   string_with_comments = repeat(" ", strlen)
    call instrng(filnamin, lenstr, option1, strlen, string, string_with_comments)
 
    ! Copy original file, without change of case
@@ -242,11 +240,14 @@ subroutine parsefile(filnamin, lenstr, ndtset, string, comm)
    ! To make case-insensitive, map characters of string to upper case.
    call inupper(string(1:lenstr))
 
+   ! Make sure double quotation marks are used to enclose strings.
+   !string = replace(string(1:lenstr), "'", '"')
+
    ! Might import data from xyz file(s) into string
    ! Need string_raw to deal properly with xyz filenames
    ! TODO: This capabilty can now be implemented via the structure:"xyx:path" variable
    lenstr_noxyz = lenstr
-   call importxyz(lenstr,string_raw,string,strlen)
+   call importxyz(lenstr, string_raw, string, strlen)
 
    ! Make sure we don't have unmatched quotation marks
    if (mod(char_count(string(:lenstr), '"'), 2) /= 0) then
@@ -275,12 +276,22 @@ subroutine parsefile(filnamin, lenstr, ndtset, string, comm)
  end if
 
  ! Save input string in global variable so that we can access it in ntck_open_create
- ! XG20200720: Why not saving string ? string_raw is less processed than string ...
+ ! XG20200720: Why not saving string? string_raw is less processed than string ...
  ! MG: Because we don't want a processed string without comments.
  ! Abipy may use the commented section to extract additional metadata e.g. the pseudos md5
- INPUT_STRING = string_with_comments
 
- !write(std_out,'(a)')string(:lenstr)
+ ! The Fortran compiler may limit the length of character string constants to a specific maximum e.g.
+ ! intel16 has a 7198 limit so we allocate INPUT_STRING here.
+ if (allocated(INPUT_STRING)) then
+   ABI_FREE_SCALAR(INPUT_STRING)
+ end if
+
+ ABI_MALLOC_TYPE_SCALAR(character(len=len_trim(string_with_comments)), INPUT_STRING)
+ INPUT_STRING = trim(string_with_comments)
+
+ !write(std_out, *)"len_trim(string_with_comments):", len_trim(string_with_comments)
+ !write(std_out,'(4a)')"string_with_comments", ch10, trim(string_with_comments), ch10
+ !write(std_out,'(4a)')"INPUT_STRING", ch10, trim(INPUT_STRING), ch10; write(std_out,'(a)')string(:lenstr); stop
 
 end subroutine parsefile
 !!***
@@ -485,7 +496,7 @@ end subroutine inread
 !! OUTPUT
 !!  lenstr=actual number of character in string
 !!  string*(strln)=preprocessed string of character
-!!  raw_string=string without any preprocessine (comments are included.
+!!  raw_string=string without any preprocessing (comments are included)
 !!
 !! SOURCE
 
@@ -496,8 +507,7 @@ recursive subroutine instrng(filnam, lenstr, option, strln, string, raw_string)
  integer,intent(in) :: option,strln
  integer,intent(out) :: lenstr
  character(len=*),intent(in) :: filnam
- character(len=*),intent(out) :: string
- character(len=*),intent(out) :: raw_string
+ character(len=*),intent(out) :: string, raw_string
 
 !Local variables-------------------------------
  character :: blank=' '
@@ -1032,6 +1042,7 @@ end subroutine incomprs
 !!   'ENE'=>real(dp) (expect a "energy", identify Ha, hartree, eV, Ry, meV, Rydberg, K, Kelvin)
 !!   'LOG'=>integer, but read logical variable T,F,.true., or .false.
 !!   'KEY'=>character, returned in key_value
+!!   'INT_OR_KEY'=>integer scalar (returned in intarr(1)) or character (returned in key_value)
 !!
 !! OUTPUT
 !!  intarr(1:narr), dprarr(1:narr)
@@ -1043,7 +1054,7 @@ end subroutine incomprs
 !!           ds_input = 0 => value was found which is not specific to jdtset
 !!           ds_input > 0 => value was found which is specific to jdtset
 !!   one could add more information, eg whether a ? or a : was used, etc...
-!!   [key_value]=Stores the value of key if typevarphys=="KEY".
+!!   [key_value]=Stores the value of key if typevarphys=="KEY" or typevarphys=="INT_OR_KEY".
 !!      The string must be large enough to contain the output. fnlen is OK in many cases
 !!      except when reading a list of files. The routine aborts if key_value cannot store the output.
 !!      Output string is left justified.
@@ -1121,7 +1132,7 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
 !Local variables-------------------------------
  character(len=1), parameter :: blank=' '
 !scalars
- integer :: b1,b2,b3,cs1len,cslen,dozens,ier,itoken,itoken1,itoken2,itoken2_1colon
+ integer :: b1,b2,b3,cs1len,cslen,dozens,ier,ii,itoken,itoken1,itoken2,itoken2_1colon
  integer :: itoken2_1plus,itoken2_1times,itoken2_2colon,itoken2_2plus
  integer :: itoken2_2times,itoken2_colon,itoken2_plus,itoken2_times
  integer :: itoken_1colon,itoken_1plus,itoken_1times,itoken_2colon,itoken_2plus
@@ -1230,17 +1241,18 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
      end if
 
      ! Use the metacharacter for the units, and save in cs1 and itoken1
-     write(appen,'(i1)')dozens
+     write(appen,'(i0)')dozens
      cs1=blank//token(1:toklen)//trim(appen)//'?'//blank
+     cs1len=toklen+len(trim(appen))+3
      ! Map token to all upper case (make case-insensitive):
      call inupper(cs1)
      ! Absolute index of blank//token//blank in string:
-     itoken1=index(string,cs1(1:cslen))
+     itoken1=index(string,cs1(1:cs1len))
      ! Look for another occurence of the same token in string, if so, leaves:
-     itoken2=index(string,cs1(1:cslen), BACK=.true. )
+     itoken2=index(string,cs1(1:cs1len), BACK=.true. )
      if(itoken1/=itoken2)then
        write(msg, '(7a)' )&
-       'There are two occurences of the keyword "',cs1(1:cslen),'" in the input file.',ch10,&
+       'There are two occurences of the keyword "',cs1(1:cs1len),'" in the input file.',ch10,&
        'This is confusing, so it has been forbidden.',ch10,&
        'Action: remove one of the two occurences.'
        ABI_ERROR(msg)
@@ -1248,7 +1260,7 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
 
      if(itoken/=0 .and. itoken1/=0)then
        write(msg, '(9a)' )&
-       'The keywords: "',cs(1:cslen),'" and: "',cs1(1:cslen),'"',ch10,&
+       'The keywords: "',cs(1:cslen),'" and: "',cs1(1:cs1len),'"',ch10,&
        'cannot be used together in the input file.',ch10,&
        'Action: remove one of the two keywords.'
        ABI_ERROR(msg)
@@ -1258,6 +1270,7 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
        opttoken=1
        itoken=itoken1
        cs=cs1
+       cslen=cs1len
        ds_input_=jdtset
      end if
 
@@ -1536,18 +1549,18 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
  if(typevarphys=='DPR' .or. typevarphys=='LEN' .or. typevarphys=='ENE' .or. &
     typevarphys=='BFI' .or. typevarphys=='TIM') typevar='DPR'
 
- if (typevarphys=='KEY') then
+ if (typevarphys=='KEY' .or. typevarphys=='INT_OR_KEY') then
    ! Consistency check for keyword (no multidataset, no series)
    if (opttoken>=2) then
-     write(msg, '(9a)' )&
-       'For the keyword "',cs(1:cslen),'", of KEY type,',ch10,&
+     write(msg, '(10a)' )&
+       'For the keyword "',cs(1:cslen),'", of ',trim(typevarphys),' type,',ch10,&
        'a series has been defined in the input file.',ch10,&
        'This is forbidden.',ch10,'Action: check your input file.'
      ABI_ERROR(msg)
    end if
    if (narr>=2) then
-     write(msg, '(9a)' )&
-       'For the keyword "',cs(1:cslen),'", of KEY type,',ch10,&
+     write(msg, '(10a)' )&
+       'For the keyword "',cs(1:cslen),'", of ',trim(typevarphys),' type,',ch10,&
        'the number of data requested is larger than 1.',ch10,&
        'This is forbidden.',ch10,'Action: check your input file.'
      ABI_ERROR(msg)
@@ -1561,19 +1574,31 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
    ! Absolute location in string of blank which follows token:
    b1 = itoken + cslen - 1
 
-   if (typevarphys == 'KEY') then
+   if (typevarphys == 'KEY'  .or. typevarphys=='INT_OR_KEY') then
      ! In case of typevarphys='KEY', the chain of character will be returned in cs.
-     ABI_CHECK(present(key_value), "typevarphys == KEY requires optional argument key_value")
-     b2 = index(string(b1+1:), '"')
-     ABI_CHECK(b2 /= 0, sjoin('Cannot find first " defining string for token:', token))
-     b2 = b1 + b2 + 1
-     b3 = index(string(b2:), '"')
-     ABI_CHECK(b3 /= 0, sjoin('Cannot find second " defining string for token:', token))
-     b3 = b3 + b2 - 2
-     if ((b3 - b2 + 1) > len(key_value)) then
-       ABI_ERROR("Len of key_value too small to contain value parsed from file")
+     ABI_CHECK(present(key_value), "typevarphys == KEY or INT_OR_KEY requires optional argument key_value")
+     if (typevarphys == 'INT_OR_KEY') then
+       ABI_CHECK(narr==1, "typevarphys == INT_OR_KEY requires narr==1")
      end if
-     key_value = adjustl(string(b2:b3))
+     b2 = index(string(b1+1:), '"')
+     b3=0 ; do ii=b1,b1+b2-1 ; if (string(ii:ii)/=blank) b3=1 ; end do
+     if (typevarphys == 'KEY') then
+       ABI_CHECK(b2 /= 0, sjoin('Cannot find first " defining string for token:', token))
+       ABI_CHECK(b3 == 0, sjoin('There are chars between token name and first " for token:', token))
+     end if
+     if (typevarphys == 'KEY' .or. (b2/=0.and.b3==0)) then
+       b2 = b1 + b2 + 1
+       b3 = index(string(b2:), '"')
+       ABI_CHECK(b3 /= 0, sjoin('Cannot find second " defining string for token:', token))
+       b3 = b3 + b2 - 2
+       if ((b3 - b2 + 1) > len(key_value)) then
+         ABI_ERROR("Len of key_value too small to contain value parsed from file")
+       end if
+       key_value = adjustl(string(b2:b3))
+     else if (typevarphys == 'INT_OR_KEY') then
+       ! Read the scalar that follows the blank
+       call inarray(b1,cs,dprarr,intarr,marr,narr,string,'INT')
+     endif
 
    else
      ! Read the array (or eventual scalar) that follows the blank
@@ -3146,7 +3171,7 @@ end subroutine chkint_prt
 
 subroutine prttagm(dprarr,intarr,iout,jdtset_,length,&
                     marr,narr,narrm,ncid,ndtset_alloc,token,typevarphys,use_narrm,&
-                    firstchar,forceprint)  ! optional
+                    firstchar,forceprint,strarr)  ! optional
 
 !Arguments ------------------------------------
 !scalars
@@ -3160,6 +3185,7 @@ subroutine prttagm(dprarr,intarr,iout,jdtset_,length,&
  integer,intent(in) :: jdtset_(0:ndtset_alloc)
  integer,intent(in) :: narrm(0:ndtset_alloc)
  real(dp),intent(in) :: dprarr(marr,0:ndtset_alloc)
+ character(len=fnlen),intent(in),optional :: strarr(marr,0:ndtset_alloc)
 
 !Local variables-------------------------------
 !character(len=*), parameter :: long_beg     ='(a,a16,a,1x,(t22,'
@@ -3180,6 +3206,7 @@ subroutine prttagm(dprarr,intarr,iout,jdtset_,length,&
  character(len=*), parameter :: f_wtk        ='6f11.5)'
  character(len=*), parameter :: f_atvshift   ='5f11.5)'
  character(len=*), parameter :: f_kptrlatt   ='3(3i5,2x))'
+ character(len=*), parameter :: f_str        ='2x,a'
 !scalars
  integer :: iarr,idtset,jdtset,multi,ndtset_eff,narr_eff
  logical :: print_netcdf,print_out
@@ -3190,6 +3217,7 @@ subroutine prttagm(dprarr,intarr,iout,jdtset_,length,&
  character(len=4) :: appen
  character(len=8) :: out_unit
  character(len=50) :: format_dp,format_int,full_format
+ character(len=48) :: format_str
  character(len=500) :: msg
 
 ! *************************************************************************
@@ -3300,12 +3328,10 @@ subroutine prttagm(dprarr,intarr,iout,jdtset_,length,&
          if (narr_eff/=0) then
 
            if (print_out) write(iout,full_format) token,trim(appen),intarr(1:narr_eff,idtset)
-#ifdef HAVE_NETCDF
            if (print_netcdf) then
              call write_var_netcdf(intarr(1:narr_eff,idtset),&
 &             dprarr(1:narr_eff,idtset),marr,narr_eff,abs(ncid),typevarphys,token//appen)
            end if
-#endif
          end if
 
        end do
@@ -3439,20 +3465,100 @@ subroutine prttagm(dprarr,intarr,iout,jdtset_,length,&
            else
              if (print_out) write(iout,full_format) token,trim(appen),dprarr(1:narr_eff,idtset)*scale_factor,trim(out_unit)
            end if
-#ifdef HAVE_NETCDF
            if (print_netcdf) then
              call write_var_netcdf(intarr(1:narr_eff,idtset),dprarr(1:narr_eff,idtset),&
                marr,narr_eff,abs(ncid),'DPR',token//trim(appen))
            end if
-#endif
 
          end if
 
        end do
      end if
 
+!  ###########################################################
+!  ### 04. Treatment of strings 'STR'
+
+   else if(typevarphys=='STR')then
+      if (.not. present(strarr)) then
+         write(msg,'(a,a)') 'typevarphys equal STR but no strarr given!',ch10
+            ABI_ERROR(msg)
+      end if
+
+!    Determine whether the different non-default occurences are all equal
+
+     if (use_narrm==0) then ! use of scalar 'narr' instead of array 'narrm'
+       if(ndtset_alloc>1)then
+         do idtset=1,ndtset_alloc
+           do iarr=1,narr
+             if(strarr(iarr,1)/=strarr(iarr,idtset))multi=1
+           end do
+         end do
+       end if
+     else
+!      If the sizes of the arrays are different we can not compare them
+!      So we have to assume they are different
+       multi=1
+     end if
+
+!    If they are all equal, then determine whether they are equal to the default
+     if(multi==0)then
+       print_out=.false.
+       do iarr=1,narr
+         if (trim(strarr(iarr,1))/=trim(strarr(iarr,0))) print_out=.true.
+       end do
+       print_netcdf=print_out
+     end if
+
+     if (present(forceprint)) then
+       if (forceprint==1.or.forceprint==3) print_out=.true.
+       if (forceprint==1.or.forceprint==2) print_netcdf=.true.
+     end if
+
+     print_out = .TRUE.
+
+!    Print only if the values differ from the default
+     if (print_out.or.print_netcdf.or.(ncid<0))then
+       ndtset_eff=ndtset_alloc
+       if((multi==0).or.(ncid<0)) ndtset_eff=1
+       do idtset=1,ndtset_eff
+
+!        Initialize the character in the first column
+         first_column=' ';if (present(firstchar)) first_column=firstchar
+!        Initialize the format
+         format_str=f_str
+!        Initialize the dataset number string, and print
+         if((multi==0).or.(ncid<0))then
+           appen=' '
+         else
+           jdtset=jdtset_(idtset)
+           call appdig(jdtset,'',appen)
+         end if
+         full_format='("'//first_column//trim(format_1)//trim(format_str)//")"
+
+!        narr_eff could be narr or narrm(idtset)
+!        It depends if the size is variable for different datasets
+         if (use_narrm==0)then
+           narr_eff=narr
+         else
+           narr_eff=narrm(idtset)
+         end if
+
+         if (narr_eff/=0) then
+
+           if (print_out) write(iout,full_format) token,trim(appen),(trim(strarr(iarr,idtset)),iarr=1,narr_eff)
+!#ifdef HAVE_NETCDF
+!           if (print_netcdf) then
+!             call write_var_netcdf(intarr(1:narr_eff,idtset),&
+!&             dprarr(1:narr_eff,idtset),marr,narr_eff,abs(ncid),typevarphys,token//appen)
+!           end if
+!#endif
+         end if
+
+       end do
+     end if !(print==1)
+
 !    ###########################################################
-!    ### 04. The type is neither 'INT' nor 'DPR','ENE','LEN','BFI','TIM'
+!    ### 05. The type is neither 'INT' nor 'DPR', 'STR', 'ENE','LEN','BFI','TIM'
    else
      ABI_BUG('Disallowed typevarphys = '//TRIM(typevarphys))
    end if
@@ -3605,13 +3711,11 @@ subroutine prttagm_images(dprarr_images,iout,jdtset_,length,&
                write(iout,full_format) &
 &               trim(keywd),appen,dprarr_images(1:narrm(idtset),iimage,idtset)
              end if
-#ifdef HAVE_NETCDF
              if (print_netcdf) then
                call write_var_netcdf(intarr_images(1:narrm(idtset),iimage,idtset),&
 &               dprarr_images(1:narrm(idtset),iimage,idtset),&
 &               marr,narrm(idtset),ncid,'DPR',trim(keywd)//appen)
              end if
-#endif
            else
 
              if (print_out) then
@@ -3620,14 +3724,11 @@ subroutine prttagm_images(dprarr_images,iout,jdtset_,length,&
                write(iout,full_format) &
 &               trim(keywd),dprarr_images(1:narrm(idtset),iimage,idtset)
              end if
-#ifdef HAVE_NETCDF
              if (print_netcdf) then
                call write_var_netcdf(intarr_images(1:narrm(idtset),iimage,idtset),&
 &               dprarr_images(1:narrm(idtset),iimage,idtset),&
 &               marr,narrm(idtset),abs(ncid),'DPR',trim(keywd))
              end if
-#endif
-
            end if
          end if
        end do
@@ -4271,7 +4372,6 @@ type(geo_t) function geo_from_netcdf_path(path, comm) result(new)
 
  new%fileformat = "netcdf"
 
-#ifdef HAVE_NETCDF
  if (xmpi_comm_rank(comm) == master) then
    NCF_CHECK(nctk_open_read(ncid, path, xmpi_comm_self))
 
@@ -4321,7 +4421,6 @@ type(geo_t) function geo_from_netcdf_path(path, comm) result(new)
 
    NCF_CHECK(nf90_close(ncid))
  end if
-#endif
 
  call new%bcast(master, comm)
  !call new%print_abivars(std_out)

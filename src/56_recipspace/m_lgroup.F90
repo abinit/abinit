@@ -18,7 +18,7 @@
 !! than the irredubile zone defined by the point group of the crystal. The two zones coincide when q=0
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2022 ABINIT group (MG)
+!!  Copyright (C) 2008-2025 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -445,7 +445,7 @@ subroutine lgroup_print(self, title, unit, prtvol)
   ' Time-reversal flag (0: No, 1: Yes) .... ', self%input_timrev, ch10
  call wrtout(my_unt, msg)
 
- if (my_prtvol /= 0) then
+ if (my_prtvol > 1) then
    do ii=1,self%nsym_lg
      call wrtout(std_out, sjoin("lgsym2glob:", ltoa(self%lgsym2glob(:, ii))))
    end do

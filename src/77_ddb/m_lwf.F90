@@ -8,7 +8,7 @@
 !! as well as the central mkphdos
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2021 ABINIT group (HeXu)
+!! Copyright (C) 1999-2025 ABINIT group (HeXu)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -33,6 +33,7 @@
 
 module m_lwf
 
+ use, intrinsic :: iso_c_binding
  use defs_basis
  use m_errors
  use m_xmpi
@@ -42,19 +43,16 @@ module m_lwf
  use m_cgtools
  use m_crystal
  use m_nctk
- use, intrinsic :: iso_c_binding
  use m_atprj
  use m_sortph
  use m_ddb
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
  use m_supercell
  use m_dtset
  use m_krank
 
  use m_fstrings,        only : itoa, ftoa, sjoin, ltoa, ktoa, strcat, basename, replace
- use m_symtk,           only : matr3inv
+ use m_matrix,          only : matr3inv
  use m_time,            only : cwtime, cwtime_report
  use m_io_tools,        only : open_file
  use m_geometry,        only : mkrdim, symredcart, normv, phdispl_cart2red
@@ -62,28 +60,28 @@ module m_lwf
  use m_bz_mesh,         only : isamek, make_path, kpath_t, kpath_new
  use m_ifc,             only : ifc_type
  use m_anaddb_dataset,  only : anaddb_dataset_type
-! use m_kpts,            only : get_kpt_full_bz, 
+! use m_kpts,            only : get_kpt_full_bz,
  use m_kpts,            only : kpts_ibz_from_kptrlatt, get_full_kgrid
 
  use m_special_funcs,   only : bose_einstein
  use m_sort,            only : sort_dp
  use m_symfind,         only : symanal
  use m_scdm_math,       only : build_Rgrid
- use m_wannier_builder,            only : WannierBuilder_t
+ use m_wannier_builder,            only : WannierBuilder_witheigen_t
  use m_wann_netcdf,     only : IOWannNC
 
 
  implicit none
 
  type LatticeWannier
-    type(WannierBuilder_t):: scdm
+    type(WannierBuilder_witheigen_t):: scdm
     type(ifc_type), pointer:: ifc
     type(crystal_t), pointer:: crystal
     integer:: qptrlatt(3, 3)
     real(dp):: shiftq(3)
     integer:: nqibz
     real(dp), allocatable:: qibz(:, :), qweights(:)
-    integer:: nR
+    integer:: nR, natom
     integer, allocatable:: Rlist(:, :)
     real(dp), allocatable:: eigenvalues(:, :)         ! iband, iqpt
     complex(dp), allocatable:: eigenvectors(:,:, :)  ! ibasis, iband, iqpt
@@ -96,7 +94,7 @@ module m_lwf
     procedure:: prepare_qpoints
     procedure:: prepare_Rlist
     procedure:: get_ifc_eigens
-    procedure:: run_all 
+    procedure:: run_all
     procedure:: write_lwf_nc
     procedure:: print_Rlist
     procedure :: write_bands
@@ -117,8 +115,8 @@ contains
     integer:: isym
     ! TODO: add exclude_bands
     integer:: exclude_bands(0)
-    
-    character(len = 500):: msg
+
+    character(len = 500+dtset%lwf_nwann*10):: msg
     real(dp):: mu, sigma
 
     self%ifc => ifc
@@ -140,30 +138,31 @@ contains
     ! prepare eigen values and eigen vectors
 
     call self%get_ifc_eigens(ifc, crystal)
-    
+
     ! set mu and sigma from cm^-1 to eigenvalue
     if(dtset%lwfflag == 1 .or. dtset%lwfflag == 2) then
       mu = freq_to_eigenval(dtset%lwf_mu/Ha_cmm1)
       sigma = freq_to_eigenval(dtset%lwf_sigma/Ha_cmm1)
     end if
 
-    ! set up scdm 
+    ! set up scdm
 
-    call self%scdm%initialize(evals = self%eigenvalues,  psi = self%eigenvectors, &
+    call self%scdm%initialize(  &
          & kpts = self%qibz, kweights = self%qweights, Rlist = self%Rlist, &
-         & nwann = dtset%lwf_nwann, disentangle_func_type = dtset%lwf_disentangle, &
+         & nwann = dtset%lwf_nwann, nbasis=self%natom*3, nband=self%natom*3, disentangle_func_type = dtset%lwf_disentangle, &
          & mu = mu, sigma = sigma, exclude_bands = exclude_bands, &
          & project_to_anchor = (dtset%lwf_anchor_proj > 0 ), method = dtset%lwfflag)
+    call self%scdm%set_eigen(evals = self%eigenvalues,  psi = self%eigenvectors)
 
      if(dtset%lwfflag == 1) then
         write(msg, '(a)')  ' Constructing LWF with SCDM-k method.'
-        call wrtout([ab_out, std_out], msg ) 
+        call wrtout([ab_out, std_out], msg )
         write(msg, '(a, i0)')  ' Number of LWF: ', dtset%lwf_nwann
-        call wrtout([ab_out, std_out], msg ) 
+        call wrtout([ab_out, std_out], msg )
         write(msg, '(a, 3f8.5)')  ' Anchor Points q-point: ', &
              & dtset%lwf_anchor_qpt(1), dtset%lwf_anchor_qpt(2), dtset%lwf_anchor_qpt(3)
         !write(msg, '(2a) ') 'Anchor points band indices: ', trim(ltoa(self%scdm%anchor_ibands))
-        call wrtout([ab_out, std_out], msg ) 
+        call wrtout([ab_out, std_out], msg )
 
        if(dtset%lwf_anchor_iband(1) > 0) then
          call self%scdm%set_anchor( dtset%lwf_anchor_qpt, dtset%lwf_anchor_iband)
@@ -174,12 +173,12 @@ contains
     else if(dtset%lwfflag == 2) then
     ! TODO: projected lattice wannier function
        write(msg, '(a)')  ' Constructing LWF with projected wannier function method.'
-       call wrtout([ab_out, std_out], msg ) 
+       call wrtout([ab_out, std_out], msg )
        call self%scdm%set_disp_projector(dtset%lwf_projector)
        write(msg, '(2a)')  ' The projectors: ', trim(ltoa(dtset%lwf_projector))
-       call wrtout([ab_out, std_out], msg ) 
+       call wrtout([ab_out, std_out], msg )
     end if
-   
+
     end subroutine initialize
 
   subroutine finalize(self)
@@ -343,6 +342,7 @@ contains
     integer:: iatom, iband, i3
     complex(dp):: phase
     natom = crystal%natom
+    self%natom = natom
     natom3 = natom*3
     ABI_MALLOC(self%eigenvalues, (natom3, self%nqibz))
     ABI_MALLOC(self%eigenvectors, (natom3, natom3, self%nqibz))
@@ -370,25 +370,18 @@ contains
   subroutine write_lwf_nc(self, prefix)
     class(LatticeWannier), intent(inout):: self
     character(len=*), intent(in) ::  prefix
-    character(len=500) :: msg 
-#ifdef HAVE_NETCDF
+    character(len=500) :: msg
     type(IOWannNC):: ncfile
     call self%scdm%create_ncfile(trim(prefix)//"_lwf.nc", ncfile)
     call self%scdm%write_wann_netcdf(ncfile, wannR_unit='dimensionless', HwannR_unit='Ha')
     !NCF_CHECK(self%crystal%ncwrite(ncfile%ncid))
     call self%scdm%close_ncfile(ncfile)
-    write(msg, '(a)')  ' LWF construction finished.' 
-    call wrtout([ab_out, std_out], msg) 
+    write(msg, '(a)')  ' LWF construction finished.'
+    call wrtout([ab_out, std_out], msg)
     write(msg, '(a)')  ' LWF coefficients and Hamiltonian writen to file: '//trim(prefix)//"_lwf.nc ."
-    call wrtout([ab_out, std_out], msg) 
-
-#else
-    ABI_UNUSED_A(self)
-    ABI_UNUSED(prefix)
-    NETCDF_NOTENABLED_ERROR()
-#endif
+    call wrtout([ab_out, std_out], msg)
   end subroutine write_lwf_nc
-  
+
 
   subroutine run_all(self, prefix, dtset)
     class(LatticeWannier), intent(inout):: self
@@ -457,7 +450,7 @@ contains
   end subroutine write_bands
 
   subroutine write_phfrq(path,nlwf,nqpts,phfreq)
-    
+
     !Arguments ------------------------------------
     !scalars
     integer,intent(in) :: nqpts, nlwf
@@ -465,22 +458,22 @@ contains
     !arrays
     !real(dp),intent(in) :: qpoints(3,nqpts)
     real(dp),intent(in) :: phfreq(nlwf,nqpts)
-    
+
     !Local variables-------------------------------
     !scalars
     integer :: nphmodes, iq, iunit
     !real(dp) :: dummy
     character(len=300) :: formt
     character(len=500) :: msg
-    
+
     ! *************************************************************************
-   
+
     nphmodes = nlwf
     !dummy = qpoints(1,1); dummy = weights(1)
     if (open_file(path, msg, newunit=iunit, form="formatted", status="unknown", action="write") /= 0) then
       ABI_ERROR(msg)
     end if
-   
+
     write (iunit, '(a)')  '# ABINIT generated LWF phonon band structure file. All in Ha atomic units'
     write (iunit, '(a)')  '# '
     write (iunit, '(a,i0)')  '# number_of_qpoints ', nqpts

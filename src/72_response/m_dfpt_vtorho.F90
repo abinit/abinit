@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, AR, DRH, MB, XW, MT)
+!!  Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, AR, DRH, MB, XW, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -17,6 +17,9 @@
 #endif
 
 #include "abi_common.h"
+
+! nvtx related macro definition
+#include "nvtx_macros.h"
 
 module m_dfpt_vtorho
 
@@ -30,6 +33,7 @@ module m_dfpt_vtorho
  use m_cgtools
  use m_dtset
  use m_dtfil
+ use m_ompgpu_utils
 
 
  use defs_datatypes, only : pseudopotential_type
@@ -54,6 +58,11 @@ module m_dfpt_vtorho
  use m_dfpt_fef,    only : dfptff_gradberry, dfptff_gbefd
  use m_mpinfo,      only : proc_distrb_cycle,proc_distrb_nband
  use m_fourier_interpol, only : transgrid
+ use m_gemm_nonlop_projectors, only : set_gemm_nonlop_ikpt, gemm_nonlop_use_gemm
+
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+ use m_nvtx_data
+#endif
 
  implicit none
 
@@ -157,10 +166,12 @@ contains
 !!  ucvol=unit cell volume in bohr**3.
 !!  usecprj= 1 if cprj, cprjq, cprj1 arrays are stored in memory
 !!  useylmgr1= 1 if ylmgr1 array is allocated
+!!  usevxctau=1 if if XC functional depends on kinetic energy density
 !!  ddk<wfk_t)=struct info DDK file
 !!  vectornd(with_vectornd*nfftf,nspden,3)=nuclear dipole moment vector potential
 !!  vtrial(nfftf,nspden)=GS Vtrial(r).
 !!  vtrial1(cplex*nfftf,nspden)=INPUT RF Vtrial(r).
+!!  vxctau(nfftf,nspden,4*usevxctau)=derivative of e_xc wrt kin energy density, for mGGA
 !!  with_vectornd = 1 if vectornd allocated
 !!  wtk_rbz(nkpt_rbz)=weight assigned to each k point.
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
@@ -185,6 +196,8 @@ contains
 !!  end1=1st-order nuclear dipole energy part of 2nd-order total energy
 !!  enl0=0th-order nonlocal pseudopot. part of 2nd-order total energy.
 !!  enl1=1st-order nonlocal pseudopot. part of 2nd-order total energy.
+!!  evxctau0=0th-order energy from vxctau
+!!  evxctau1=1st-order energy from vxctau
 !!  gh1c_set(2,mpw1*nspinor*mband_mem*mk1mem*nsppol*dim_eig2rf)= set of <G|H^{(1)}|nK>
 !!  gh0c1_set(2,mpw1*nspinor*mband_mem*mk1mem*nsppol*dim_eig2rf)= set of <G|H^{(0)}|\Psi^{(1)}>
 !!      The wavefunction is orthogonal to the active space (for metals). It is not
@@ -210,24 +223,24 @@ contains
 subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 & dim_eig2rf,doccde_rbz,docckqde,dtefield,dtfil,dtset,qphon,&
 & edocc,eeig0,eigenq,eigen0,eigen1,ek0,ek1,eloc0,end0,end1,enl0,enl1,&
-& fermie1,gh0c1_set,gh1c_set,gmet,gprimd,idir,indsy1,&
+& evxctau0,evxctau1,fermie1,gh0c1_set,gh1c_set,gmet,gprimd,idir,indsy1,&
 & ipert,irrzon1,istwfk_rbz,kg,kg1,kpt_rbz,mband,mband_mem,&
 & mkmem,mkqmem,mk1mem,mpi_enreg,mpw,mpw1,my_natom,&
 & natom,nband_rbz,ncpgr,nfftf,nhat1,nkpt_rbz,npwarr,npwar1,nres2,nspden,&
 & nsppol,nsym1,ntypat,nvresid1,occkq,occ_rbz,optres,&
 & paw_ij,paw_ij1,pawang,pawang1,pawfgr,pawfgrtab,pawrhoij,pawrhoij1,pawtab,&
 & phnons1,ph1d,prtvol,psps,pwindall,qmat,resid,residm,rhog1,rhor1,rmet,rprimd,symaf1,symrc1,symrl1,tnons1,ucvol,&
-& usecprj,useylmgr1,ddk_f,vectornd,vtrial,vtrial1,with_vectornd,wtk_rbz,xred,ylm,ylm1,ylmgr1,cg1_out)
+& usecprj,useylmgr1,usevxctau,ddk_f,vectornd,vtrial,vtrial1,vxctau,with_vectornd,wtk_rbz,xred,ylm,ylm1,ylmgr1,cg1_out)
 
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: cplex,dbl_nnsclo,dim_eig2rf,idir,ipert,mband,mk1mem,mkmem
  integer,intent(in) :: mband_mem
  integer,intent(in) :: mkqmem,mpw,mpw1,my_natom,natom,ncpgr,nfftf,nkpt_rbz,nspden
- integer,intent(in) :: nsppol,nsym1,ntypat,optres,prtvol,usecprj,useylmgr1,with_vectornd
+ integer,intent(in) :: nsppol,nsym1,ntypat,optres,prtvol,usecprj,useylmgr1,usevxctau,with_vectornd
  integer,optional,intent(in) :: cg1_out
  real(dp),intent(in) :: fermie1,ucvol
- real(dp),intent(out) :: edocc,eeig0,ek0,ek1,eloc0,end0,end1,enl0,enl1,nres2,residm
+ real(dp),intent(out) :: edocc,eeig0,ek0,ek1,eloc0,end0,end1,enl0,enl1,evxctau0,evxctau1,nres2,residm
  type(MPI_type),intent(in) :: mpi_enreg
  type(datafiles_type),intent(in) :: dtfil
  type(dataset_type),intent(in) :: dtset
@@ -267,6 +280,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  real(dp),intent(in) :: tnons1(3,nsym1)
  real(dp),intent(in),target :: vtrial(nfftf,nspden)
  real(dp),intent(inout),target :: vtrial1(cplex*nfftf,nspden)
+ real(dp),intent(inout) :: vxctau(nfftf,dtset%nspden,4*usevxctau)
  real(dp),intent(in) :: wtk_rbz(nkpt_rbz),xred(3,natom)
  real(dp),intent(in) :: ylm(mpw*mkmem,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(in) :: ylm1(mpw1*mk1mem,psps%mpsang*psps%mpsang*psps%useylm)
@@ -290,36 +304,40 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  integer :: iband,nlines_done,ibdkpt,ibg,ibg1,ibgq,icg,icg1,icgq,ierr
  integer :: ii,ikg,ikg1,ikpt,ilm,index1,ispden,iscf_mod,isppol,istwf_k
  integer :: mbd2kpsp,mbdkpsp,mcgq,mcgq_disk,mcprjq
- integer :: mcprjq_disk,me,n1,n2,n3,n4,n5,n6,nband_k,nband_kq,nddir,nkpg,nkpg1
+ integer :: mcprjq_disk,me,n1,n2,n3,n4,n5,n6,nband_k,nband_kq,nkpg,nkpg1
  integer :: nband_eff
  integer :: nnsclo_now,npw1_k,npw_k,nspden_rhoij,qphase_rhoij,spaceworld,test_dot
  integer :: nband_me
- logical :: has_vectornd,paral_atom,qne0
+ logical :: has_vectornd,paral_atom,qne0,with_vxctau
  real(dp) :: arg,wtk_k
  type(gs_hamiltonian_type) :: gs_hamkq
  type(rf_hamiltonian_type) :: rf_hamkq,rf_hamk_dir2
 !arrays
  integer,allocatable :: kg1_k(:,:),kg_k(:,:)
  integer, pointer :: my_atmtab(:)
- real(dp) :: kpoint(3),kpq(3),rhodum(1)
+ real(dp) :: kpoint(3),kpq(3)
  real(dp) :: tsec(2)
- real(dp),allocatable :: buffer1(:),cgrvtrial(:,:)
+ real(dp),allocatable :: buffer1(:)
  real(dp),allocatable :: ddkinpw(:),dkinpw(:),dkinpw2(:)
  real(dp),allocatable :: doccde_k(:),doccde_kq(:)
  real(dp),allocatable :: edocc_k(:),eeig0_k(:),eig0_k(:),eig0_kq(:),eig1_k(:)
  real(dp),allocatable :: ek0_k(:),ek1_k(:),eloc0_k(:),end0_k(:),end1_k(:),enl0_k(:),enl1_k(:)
+ real(dp),allocatable :: evxctau0_k(:),evxctau1_k(:)
  real(dp),allocatable :: ffnl1(:,:,:,:),ffnl1_test(:,:,:,:),ffnlk(:,:,:,:)
  real(dp),allocatable :: grad_berry(:,:,:),kinpw1(:),kpg1_k(:,:)
  real(dp),allocatable :: kpg_k(:,:),occ_k(:),occ_kq(:)
  real(dp),allocatable :: ph3d(:,:,:),ph3d1(:,:,:),resid_k(:)
  real(dp),allocatable :: rho1wfg(:,:),rho1wfr(:,:),rhoaug1(:,:,:,:),rocceig(:,:)
  real(dp),allocatable :: vectornd_pac(:,:,:,:,:),vectornd_pac_idir(:,:,:,:),vlocal(:,:,:,:),vlocal1(:,:,:,:)
+ real(dp),allocatable :: vxctaulocal(:,:,:,:,:)
  real(dp),allocatable :: ylm1_k(:,:),ylm_k(:,:),ylmgr1_k(:,:,:)
  type(pawrhoij_type),pointer :: pawrhoij1_unsym(:)
 
 ! *********************************************************************
 
  DBG_ENTER('COLL')
+
+ ABI_NVTX_START_RANGE(NVTX_DFPT_VTORHO)
 
 !Keep track of total time spent in this routine
  call timab(121,1,tsec)
@@ -348,6 +366,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 
  edocc=zero ; eeig0=zero ; ek0=zero  ; ek1=zero
  eloc0=zero ; end0=zero  ; end1=zero ; enl0=zero ; enl1=zero
+ evxctau0=zero; evxctau1=zero
  bdtot_index=0
  bd2tot_index=0
  ibg=0;icg=0
@@ -410,15 +429,15 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 !* Norm-conserving: Constant kleimann-Bylander energies are copied from psps to gs_hamk.
 !* PAW: Initialize the overlap coefficients and allocate the Dij coefficients.
 
- call init_hamiltonian(gs_hamkq,psps,pawtab,dtset%nspinor,nsppol,nspden,natom,&
+ call gs_hamkq%init(psps,pawtab,dtset%nspinor,nsppol,nspden,natom,&
 & dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,&
 & paw_ij=paw_ij,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab,&
 & usecprj=usecprj,ph1d=ph1d,nucdipmom=dtset%nucdipmom,gpu_option=dtset%gpu_option)
 
- call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamkq,has_e1kbsc=.true.,paw_ij1=paw_ij1,&
+ call rf_hamkq%init(cplex,gs_hamkq,ipert,has_e1kbsc=.true.,paw_ij1=paw_ij1,&
 & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab)
  if ((ipert==natom+10.and.idir>3).or.ipert==natom+11) then
-   call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamk_dir2,has_e1kbsc=.true.,paw_ij1=paw_ij1,&
+   call rf_hamk_dir2%init(cplex,gs_hamkq,ipert,has_e1kbsc=.true.,paw_ij1=paw_ij1,&
 &   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab)
  end if
 
@@ -441,6 +460,11 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  ABI_MALLOC(rhoaug1,(cplex*n4,n5,n6,gs_hamkq%nvloc))
  ABI_MALLOC(vlocal,(n4,n5,n6,gs_hamkq%nvloc))
  ABI_MALLOC(vlocal1,(cplex*n4,n5,n6,gs_hamkq%nvloc))
+
+ with_vxctau = ( usevxctau > 0 )
+ if(with_vxctau) then
+    ABI_MALLOC(vxctaulocal,(n4,n5,n6,gs_hamkq%nvloc,4))
+ end if
 
  has_vectornd = (with_vectornd .EQ. 1)
  if(has_vectornd) then
@@ -484,17 +508,19 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 ! Note that it must be done for the three Cartesian directions. Also, the following
 ! code assumes explicitly and implicitly that nvloc = 1. This should eventually be generalized.
    if(has_vectornd) then
-     do nddir = 1, 3
-       ABI_MALLOC(cgrvtrial,(dtset%nfft,dtset%nspden))
-       call transgrid(1,mpi_enreg,dtset%nspden,-1,0,0,dtset%paral_kgb,pawfgr,&
-         & rhodum,rhodum,cgrvtrial,vectornd(:,:,nddir))
-       call fftpac(isppol,mpi_enreg,dtset%nspden,n1,n2,n3,n4,n5,n6,dtset%ngfft,&
-         & cgrvtrial,vectornd_pac(:,:,:,1,nddir),2)
-       ABI_FREE(cgrvtrial)
-     end do
+     call gspot_transgrid_and_pack(isppol, psps%usepaw, dtset%paral_kgb, dtset%nfft, dtset%ngfft, nfftf, &
+       & dtset%nspden, gs_hamkq%nvloc, 3, pawfgr, mpi_enreg, vectornd, vectornd_pac)
      call gs_hamkq%load_spin(isppol, vectornd=vectornd_pac)
      vectornd_pac_idir(:,:,:,:)=vectornd_pac(:,:,:,:,idir)
      call rf_hamkq%load_spin(isppol, vectornd=vectornd_pac_idir)
+   end if
+
+   !! add vxctau for mGGA to GS hamiltonian and RF hamiltonian
+   if (with_vxctau) then
+     call gspot_transgrid_and_pack(isppol, psps%usepaw, dtset%paral_kgb, dtset%nfft, dtset%ngfft, nfftf, &
+                                   dtset%nspden, gs_hamkq%nvloc, 4, pawfgr, mpi_enreg, vxctau, vxctaulocal)
+     call gs_hamkq%load_spin(isppol, vxctaulocal=vxctaulocal)
+     call rf_hamkq%load_spin(isppol, vxctaulocal=vxctaulocal)
    end if
 
    call timab(125,1,tsec)
@@ -544,6 +570,8 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
      ABI_MALLOC(end1_k,(nband_k))
      ABI_MALLOC(enl0_k,(nband_k))
      ABI_MALLOC(enl1_k,(nband_k))
+     ABI_MALLOC(evxctau0_k,(nband_k))
+     ABI_MALLOC(evxctau1_k,(nband_k))
      ABI_MALLOC(occ_k,(nband_k))
      ABI_MALLOC(occ_kq,(nband_k))
      ABI_MALLOC(resid_k,(nband_k))
@@ -556,6 +584,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
      eeig0_k(:)=zero ; ek0_k(:)=zero  ; ek1_k(:)=zero
      eloc0_k(:)=zero ; end0_k(:)=zero ; end1_k(:)=zero
      enl0_k(:)=zero ; enl1_k(:)=zero
+     evxctau0_k(:)=zero; evxctau1_k(:)=zero
      occ_k(:)=occ_rbz(1+bdtot_index:nband_k+bdtot_index)
      occ_kq(:)=occkq(1+bdtot_index:nband_k+bdtot_index)
      doccde_k(:)=doccde_rbz(1+bdtot_index:nband_k+bdtot_index)
@@ -619,6 +648,11 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
        end if
      end if
 
+     ! Setup gemm_nonlop
+     if (gemm_nonlop_use_gemm) then
+       call set_gemm_nonlop_ikpt(ikpt)
+     end if ! gemm_nonlop_use_gemm
+
      ! Free some memory before calling dfpt_vtowfk
      ABI_FREE(ylm_k)
      ABI_FREE(ylm1_k)
@@ -630,7 +664,8 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
      nband_kq = nband_k  !Note that the calculation only works for same number of bands on all K points.
 !    Note that dfpt_vtowfk is called with kpoint, while kpt is used inside vtowfk3
      call dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dim_eig2rf,dtfil,&
-&     dtset,edocc_k,eeig0_k,eig0_k,eig0_kq,eig1_k,ek0_k,ek1_k,eloc0_k,end0_k,end1_k,enl0_k,enl1_k,fermie1,&
+          &     dtset,edocc_k,eeig0_k,eig0_k,eig0_kq,eig1_k,ek0_k,ek1_k,eloc0_k,end0_k,end1_k,enl0_k,enl1_k,&
+          &     evxctau0_k,evxctau1_k,fermie1,&
 &     ffnl1,ffnl1_test,gh0c1_set,gh1c_set,grad_berry,gs_hamkq,ibg,ibgq,ibg1,icg,icgq,icg1,idir,ikpt,ipert,isppol,&
 &     mband,mband_mem,mcgq,mcprjq,mkmem,mk1mem,mpi_enreg,mpw,mpw1,natom,nband_k,ncpgr,nnsclo_now,&
 &     npw_k,npw1_k,dtset%nspinor,nsppol,n4,n5,n6,occ_k,pawrhoij1_unsym,prtvol,psps,resid_k,&
@@ -651,16 +686,12 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
      end if
      ABI_FREE(ffnlk)
      ABI_FREE(ffnl1)
-     if (allocated(ffnl1_test)) then
-       ABI_FREE(ffnl1_test)
-     end if
+     ABI_SFREE(ffnl1_test)
      ABI_FREE(eig0_k)
      ABI_FREE(eig0_kq)
      ABI_FREE(rocceig)
      ABI_FREE(ph3d)
-     if (allocated(ph3d1)) then
-       ABI_FREE(ph3d1)
-     end if
+     ABI_SFREE(ph3d1)
 
 !    Save eigenvalues (hartree), residuals (hartree**2)
      eigen1 (1+bd2tot_index : 2*nband_k**2+bd2tot_index) = eig1_k(:)
@@ -679,6 +710,8 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
          end1=end1+wtk_k*occ_k(iband)*end1_k(iband)
          enl0=enl0+wtk_k*occ_k(iband)*enl0_k(iband)
          enl1=enl1+wtk_k*occ_k(iband)*enl1_k(iband)
+         evxctau0=evxctau0+wtk_k*occ_k(iband)*evxctau0_k(iband)
+         evxctau1=evxctau1+wtk_k*occ_k(iband)*evxctau1_k(iband)
        end do
      end if
 
@@ -694,6 +727,8 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
      ABI_FREE(end1_k)
      ABI_FREE(enl0_k)
      ABI_FREE(enl1_k)
+     ABI_FREE(evxctau0_k)
+     ABI_FREE(evxctau1_k)
 
 !    Keep track of total number of bands (all k points so far, even for k points not treated by me)
      bdtot_index=bdtot_index+nband_k
@@ -754,10 +789,10 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  ABI_FREE(rhoaug1)
  ABI_FREE(vlocal)
  ABI_FREE(vlocal1)
- if(has_vectornd) then
-   ABI_FREE(vectornd_pac)
-   ABI_FREE(vectornd_pac_idir)
- end if
+
+ ABI_SFREE(vxctaulocal)
+ ABI_SFREE(vectornd_pac)
+ ABI_SFREE(vectornd_pac_idir)
 
  call timab(124,2,tsec)
 
@@ -774,13 +809,13 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
    ! TODO: Avoid packing rhor1 in buffer
 
 !  Compute buffer size
-   buffer_size=9+mbd2kpsp+mbdkpsp
+   buffer_size=11+mbd2kpsp+mbdkpsp
    if (iscf_mod>0) then
      buffer_size=buffer_size+cplex*dtset%nfft*nspden
    end if
    ABI_MALLOC(buffer1,(buffer_size))
 
-!  Pack rhor1,edocc,eeig0,ek0,ek1,eloc0,end0,end1,enl0,enl1,eigen1,resid
+!  Pack rhor1,edocc,eeig0,ek0,ek1,eloc0,end0,end1,enl0,enl1,evxctau0,evxctau1,eigen1,resid
    if (iscf_mod>0) then
      index1=cplex*dtset%nfft*nspden
      if (psps%usepaw==0) then
@@ -796,7 +831,8 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
    buffer1(index1+5)=eloc0;buffer1(index1+6)=enl0
    buffer1(index1+7)=enl1
    buffer1(index1+8)=end0;buffer1(index1+9)=end1
-   index1=index1+9
+   buffer1(index1+10)=evxctau0;buffer1(index1+11)=evxctau1
+   index1=index1+11
    bdtot_index=0;bd2tot_index=0
    do isppol=1,nsppol
      do ikpt=1,nkpt_rbz
@@ -832,7 +868,8 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
    eloc0=buffer1(index1+5);enl0=buffer1(index1+6)
    enl1=buffer1(index1+7)
    end0=buffer1(index1+8);end1=buffer1(index1+9)
-   index1=index1+9
+   evxctau0=buffer1(index1+10);evxctau1=buffer1(index1+11)
+   index1=index1+11
    bdtot_index=0;bd2tot_index=0
    do isppol=1,nsppol
      do ikpt=1,nkpt_rbz
@@ -922,6 +959,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  end if ! iscf>0
 
  call timab(121,2,tsec)
+ ABI_NVTX_END_RANGE()
 
  DBG_EXIT('COLL')
 

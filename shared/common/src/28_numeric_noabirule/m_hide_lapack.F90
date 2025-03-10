@@ -23,7 +23,7 @@
 !!  If efficiency is a concern, then the F77 call should be used
 !!
 !! COPYRIGHT
-!! Copyright (C) 1992-2022 ABINIT group (MG, GMR, XG)
+!! Copyright (C) 1992-2025 ABINIT group (MG, GMR, XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -52,12 +52,10 @@ MODULE m_hide_lapack
  use m_xmpi
  use m_errors
  use m_slk
-
  use m_linalg_interfaces
 
  use m_time,       only : cwtime
  use m_fstrings,   only : firstchar
- !use m_slk,        only : matrix_scalapack, processor_scalapack
 
  implicit none
 

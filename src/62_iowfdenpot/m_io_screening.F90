@@ -7,7 +7,7 @@
 !!  _SCR and _SUSC file as well as methods used to read/write/echo.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2022 ABINIT group (MG)
+!! Copyright (C) 2008-2025 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -22,6 +22,7 @@
 
 MODULE m_io_screening
 
+ use, intrinsic :: iso_c_binding
  use defs_basis
  use m_abicore
 #if defined HAVE_MPI2
@@ -32,17 +33,18 @@ MODULE m_io_screening
  use m_nctk
  use m_errors
  use m_dtset
- use, intrinsic :: iso_c_binding
  use netcdf
  use m_hdr
  use m_sort
+ use m_crystal
 
  use m_gwdefs,          only : em1params_t, GW_TOLQ
  use m_fstrings,        only : sjoin, itoa, endswith, replace_ch0
  use m_copy,            only : alloc_copy
  use m_io_tools,        only : open_file, file_exists, iomode2str
  use m_numeric_tools,   only : print_arr, remove_copies, imax_loc
- use m_bz_mesh,         only : isequalk
+ use m_bz_mesh,         only : isequalk, kmesh_t
+ use m_gsphere,         only : gsphere_t
 
  implicit none
 
@@ -53,9 +55,9 @@ MODULE m_io_screening
  include 'mpif.h'
 #endif
 
- character(len=nctk_slen),public,parameter :: e_ncname="dielectric_function"
- character(len=nctk_slen),public,parameter :: em1_ncname="inverse_dielectric_function"
- character(len=nctk_slen),public,parameter :: chi0_ncname="polarizability"
+ character(len=nctk_slen),public,parameter :: e_ncname = "dielectric_function"
+ character(len=nctk_slen),public,parameter :: em1_ncname = "inverse_dielectric_function"
+ character(len=nctk_slen),public,parameter :: chi0_ncname = "polarizability"
 
  public :: ncname_from_id       ! return the name of the netcdf variable from the id
 
@@ -221,7 +223,6 @@ MODULE m_io_screening
     ! The abinit header.
 
   contains
-
     procedure :: from_file => hscr_from_file    ! Read the header from file.
     procedure :: print => hscr_print            ! Print the SCR-related part of the header.
     procedure :: bcast => hscr_bcast            ! Broadcast the header.
@@ -238,22 +239,13 @@ MODULE m_io_screening
  integer,public,parameter :: HSCR_LATEST_HEADFORM = HSCR_KNOWN_HEADFORMS(size_hscr_known_headforms)
  ! The latest headform used when writing.
 
-! public :: hscr_from_file       ! Read the header from file.
  public :: hscr_io              ! I/O of the header (read/write/echo).
- !public :: hscr_fort_read
- !public :: hscr_fort_write
- !public :: hscr_ncwread
- !public :: hscr_ncwrite
- !public :: hscr_echo            ! I/O of the header (read/write/echo).
 
  public :: hscr_new             ! Create header.
-! public :: hscr_print           ! Print the SCR-related part of the header.
-! public :: hscr_bcast           ! Broadcast the header.
-! public :: hscr_free            ! Free the header.
- !public :: hscr_copy            ! Copy the SCR|SUSC header.
  public :: hscr_merge           ! Merge two or more headers.
  public :: write_screening      ! Write a q-slice of the matrix in G-space.
  public :: read_screening       ! Read the content of the (SCR|SUSC) file placed after the header.
+ public :: get_hscr_qmesh_gsph
 
 ! =====================
 ! Tools used in mrgscr
@@ -262,7 +254,6 @@ MODULE m_io_screening
  public :: ioscr_qrecover       ! Recover q-points from a corrupted file produced e.g. from an interrupted run
  public :: ioscr_wmerge         ! Produce new file by merging the frequencies stored in other files.
  public :: ioscr_wremove        ! Produce new file by removing selected frequencies in the initial file.
- !public :: ioscr_nc2fort       ! Convert a netcdf file to a Fortran file. TODO
 
 CONTAINS  !================================================================================================
 !!***
@@ -320,7 +311,6 @@ subroutine hscr_from_file(hscr, path, fform, comm)
  integer,parameter :: rdwr5 = 5, master = 0
  integer :: unt,my_rank,ierr
  character(len=500) :: msg
-
 ! *************************************************************************
 
  my_rank = xmpi_comm_rank(comm)
@@ -431,9 +421,9 @@ subroutine hscr_io(hscr, fform, rdwr, unt, comm, master, iomode)
    !if (my_rank == master) then
      ! Read the abinit header, rewinding of the file (if any) is done here.
      if (iomode==IO_MODE_FORTRAN) then
-       call hdr_fort_read(hscr%hdr, unt, fform, rewind=(rdwr==1))
+       call hscr%hdr%fort_read(unt, fform, rewind=(rdwr==1))
      else if (iomode==IO_MODE_ETSF) then
-       call hdr_ncread(hscr%hdr, unt, fform)
+       call hscr%hdr%ncread(unt, fform)
      end if
 
      ! Reset the variables absent in old versions.
@@ -820,7 +810,7 @@ end subroutine hscr_print
 !!
 !! SOURCE
 
-type(hscr_t) function hscr_new(varname,dtset,ep,hdr_abinit,ikxc,test_type,tordering,titles,ngvec,gvec) result(hscr)
+type(hscr_t) function hscr_new(varname, dtset,ep,hdr_abinit,ikxc,test_type,tordering,titles,ngvec,gvec) result(hscr)
 
 !Arguments ------------------------------------
 !scalars
@@ -854,7 +844,7 @@ type(hscr_t) function hscr_new(varname,dtset,ep,hdr_abinit,ikxc,test_type,torder
  end if
 
  ! Copy the abinit header.
- call hdr_copy(hdr_abinit, Hscr%Hdr)
+ call hdr_abinit%copy(Hscr%Hdr)
 
  ! Initialize quantities related to the screening file
  hscr%id         =id
@@ -1076,7 +1066,6 @@ subroutine hscr_copy(Hscr_in, Hscr_cp)
 !scalars
  class(hscr_t),intent(in) :: Hscr_in
  class(hscr_t),intent(inout) :: Hscr_cp
-
 ! *************************************************************************
 
  !@hscr_t
@@ -1105,7 +1094,7 @@ subroutine hscr_copy(Hscr_in, Hscr_cp)
  Hscr_cp%zcut     = Hscr_in%zcut
 
  ! Copy the abinit Header
- call hdr_copy(Hscr_in%Hdr,Hscr_cp%Hdr)
+ call Hscr_in%Hdr%copy(Hscr_cp%Hdr)
 
  Hscr_cp%titles(:) = Hscr_in%titles(:)
 
@@ -1167,7 +1156,7 @@ subroutine hscr_merge(Hscr_in, Hscr_out)
  ! Initial copy of the header ===
  ! If multiple headers, select the header containing q-->0 so that we copy also heads and wings
  ii = imax_loc(Hscr_in(:)%nqlwl)
- call hscr_copy(Hscr_in(ii),Hscr_out)
+ call Hscr_in(ii)%copy(Hscr_out)
  if (nhds==1) return
 
  ! Check consistency of the abinit Headers.
@@ -1398,7 +1387,7 @@ end subroutine write_screening
 !! SOURCE
 
 subroutine read_screening(varname,fname,npweA,nqibzA,nomegaA,epsm1,iomode,comm, &
-& iqiA) ! Optional
+                          iqiA) ! Optional
 
 !Arguments ------------------------------------
 !scalars
@@ -1455,7 +1444,7 @@ subroutine read_screening(varname,fname,npweA,nqibzA,nomegaA,epsm1,iomode,comm, 
    sc_mode = xmpio_collective
 
    ! Master reads the header via Fortran IO then bcast the data.
-   call hscr_from_file(hscr, fname, fform, comm)
+   call hscr%from_file(fname, fform, comm)
 
    ! Open the file with MPI-IO
    call MPI_FILE_OPEN(comm, fname, MPI_MODE_RDONLY, xmpio_info ,mpi_fh, mpi_err)
@@ -1718,11 +1707,11 @@ subroutine hscr_mpio_skip(mpio_fh, fform, offset)
 !scalars
  integer :: bsize_frm,mpi_type_frm
 #ifdef HAVE_MPI_IO
- integer :: ierr,isk,nqlwl
+ integer :: ierr,isk
  !character(len=500) :: msg
 !arrays
  integer(kind=MPI_OFFSET_KIND) :: fmarker,positloc
- integer :: statux(MPI_STATUS_SIZE)
+ integer :: nqlwl(1),statux(MPI_STATUS_SIZE)
 #endif
 
 ! *************************************************************************
@@ -1744,13 +1733,13 @@ subroutine hscr_mpio_skip(mpio_fh, fform, offset)
    ! read nqlwl from the 2d record.
    positloc  = offset + bsize_frm + 9*xmpi_bsize_int
    call MPI_FILE_READ_AT(mpio_fh,positloc,nqlwl,1,MPI_INTEGER,statux,ierr)
-   call wrtout(std_out, sjoin("nqlwl = ",itoa(nqlwl)))
+   call wrtout(std_out, sjoin("nqlwl = ",itoa(nqlwl(1))))
 
    do isk=1,5
      call xmpio_read_frm(mpio_fh,offset,xmpio_single,fmarker,ierr)
    end do
 
-   if (nqlwl>0) then  ! skip qlwl
+   if (nqlwl(1)>0) then  ! skip qlwl
      call xmpio_read_frm(mpio_fh,offset,xmpio_single,fmarker,ierr)
    end if
 
@@ -1819,7 +1808,7 @@ subroutine ioscr_qmerge(nfiles, filenames, hscr_files, fname_out, ohscr)
 
  ! Merge the headers creating the full list of q-points.
  call hscr_merge(Hscr_files(1:nfiles), ohscr)
- call hscr_print(ohscr, header='Header of the final file', unit=std_out, prtvol=1)
+ call ohscr%print(header='Header of the final file', unit=std_out, prtvol=1)
 
  ! For each q to be merged, save the index of the file where q is stored as well as its sequential index.
  ! Useful to do the merge point-by-point thus avoiding the allocation of the entire epsm1 array.
@@ -1955,7 +1944,7 @@ subroutine ioscr_qrecover(ipath, nqrec, fname_out)
  end if
 
  ! Read header.
- call hscr_from_file(hscr, ipath, ifform, comm)
+ call hscr%from_file(ipath, ifform, comm)
  ABI_CHECK(ifform /= 0, sjoin("fform = 0 while reading:", ipath))
 
  if (nqrec < 1 .or. nqrec > hscr%nqibz) then
@@ -1963,7 +1952,7 @@ subroutine ioscr_qrecover(ipath, nqrec, fname_out)
  end if
 
  ! Copy header
- call hscr_copy(hscr, hscr_recov)
+ call hscr%copy(hscr_recov)
 
  ! Change dimensions and arrays associated to nqibz.
  hscr_recov%nqibz = nqrec
@@ -1971,7 +1960,7 @@ subroutine ioscr_qrecover(ipath, nqrec, fname_out)
  ABI_MALLOC(hscr_recov%qibz, (3,nqrec))
  hscr_recov%qibz = hscr%qibz(:,1:nqrec)
 
- call hscr_print(hscr_recov,header="Header of the new SCR file",unit=std_out,prtvol=1)
+ call hscr_recov%print(header="Header of the new SCR file",unit=std_out,prtvol=1)
 
  ! Write the header of the recovered file.
  fform1 = hscr%fform
@@ -2190,7 +2179,7 @@ subroutine ioscr_wmerge(nfiles, filenames, hscr_file, freqremax, fname_out, ohsc
  write(std_out,'(2(a,i0),2a)') ' ',nfreqre,' real, and ',nfreqim,' imaginary.',ch10
 
  ! Copy old header
- call hscr_copy(Hscr_file(1),ohscr)
+ call Hscr_file(1)%copy(ohscr)
 
  ! TODO: hscr_wmerge
  ! Then modify entries for new frequency grid
@@ -2203,7 +2192,7 @@ subroutine ioscr_wmerge(nfiles, filenames, hscr_file, freqremax, fname_out, ohsc
  npwe4mJ = ohscr%npwe*ohscr%nJ
 
  ! Print new header for info
- call hscr_print(ohscr,header='Header of the final file',unit=std_out,prtvol=1)
+ call ohscr%print(header='Header of the final file',unit=std_out,prtvol=1)
 
  if (file_exists(fname_out)) then
    ABI_ERROR(sjoin("Cannot overwrite existing file:", fname_out))
@@ -2340,7 +2329,7 @@ subroutine ioscr_wremove(inpath, ihscr, fname_out, nfreq_tot, freq_indx, ohscr)
  if (all(freq_indx == 0)) ABI_ERROR("all(freq_indx == 0)")
 
  ! Copy the old header
- call hscr_copy(ihscr, ohscr)
+ call ihscr%copy(ohscr)
 
  ! Then modify entries for new frequency grid.
  ohscr%nomega = nfreq_tot
@@ -2354,7 +2343,7 @@ subroutine ioscr_wremove(inpath, ihscr, fname_out, nfreq_tot, freq_indx, ohscr)
  npwe4mJ = ohscr%npwe*ohscr%nJ
 
  ! Print new header for info
- call hscr_print(ohscr,header='Header of the final file',unit=std_out,prtvol=1)
+ call ohscr%print(header='Header of the final file',unit=std_out,prtvol=1)
 
  ! Open output file.
  if (endswith(fname_out, ".nc")) then
@@ -2417,5 +2406,87 @@ subroutine ioscr_wremove(inpath, ihscr, fname_out, nfreq_tot, freq_indx, ohscr)
 end subroutine ioscr_wremove
 !!***
 
-END MODULE m_io_screening
+!!****f* m_io_screening/get_hscr_qmesh_gsph
+!! NAME
+!! get_hscr_qmesh_gsph
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine get_hscr_qmesh_gsph(w_fname, dtset, cryst, hscr, qmesh, gsph_c, qlwl, comm)
+
+!Arguments ------------------------------------
+!scalars
+ character(len=*),intent(inout) :: w_fname
+ type(dataset_type),intent(inout) :: dtset
+ type(crystal_t),intent(in) :: cryst
+ type(hscr_t),intent(out) :: hscr
+ type(kmesh_t),intent(out) :: qmesh
+ type(gsphere_t),intent(out) :: gsph_c
+ real(dp),allocatable,intent(out) :: qlwl(:,:)
+ integer,intent(in) :: comm
+
+!Local variables-------------------------------
+!scalars
+ integer,parameter :: master = 0
+ integer :: my_rank, fform, npwe_file, nqlwl, ierr
+ character(len=500) :: msg
+
+! *************************************************************************
+
+ my_rank = xmpi_comm_rank(comm) !; nprocs = xmpi_comm_size(comm)
+
+ if (my_rank == master) then
+   ! Read dimensions from the external file.
+   if (.not. file_exists(w_fname)) then
+     w_fname = nctk_ncify(w_fname)
+     ABI_COMMENT(sjoin("File not found. Will try netcdf file: ", w_fname))
+   end if
+   ! Master reads npw and nqlwl from the SCR file.
+   call wrtout(std_out, sjoin('Testing file: ', w_fname))
+   call hscr%from_file(w_fname, fform, xmpi_comm_self); if (dtset%prtvol > 0) call Hscr%print()
+
+   ! Have to change %npweps if it was larger than dim on disk.
+   npwe_file = Hscr%npwe
+   nqlwl     = Hscr%nqlwl
+
+   if (dtset%npweps > npwe_file) then
+     write(msg,'(2(a,i0),2a,i0)')&
+      "The number of G-vectors stored on file (",npwe_file,") is smaller than dtset%npweps: ",dtset%npweps,ch10,&
+      "Calculation will proceed with the maximum available set, npwe_file: ",npwe_file
+     ABI_WARNING(msg)
+     dtset%npweps = npwe_file
+   else if (Dtset%npweps < npwe_file) then
+     write(msg,'(2(a,i0),2a,i0)')&
+      "The number of G-vectors stored on file (",npwe_file,") is larger than dtset%npweps: ",dtset%npweps,ch10,&
+      "Calculation will proceed with dtset%npweps: ",dtset%npweps
+     ABI_COMMENT(msg)
+   end if
+ end if
+
+ call xmpi_bcast(w_fname, master, comm, ierr)
+ call Hscr%bcast(master, my_rank, comm)
+ call xmpi_bcast(dtset%npweps, master, comm, ierr)
+ call xmpi_bcast(nqlwl, master, comm, ierr)
+
+ if (nqlwl > 0) then
+   ABI_MALLOC(qlwl, (3, nqlwl))
+   qlwl = Hscr%qlwl
+ end if
+
+ ! Init qmesh from the SCR file.
+ call Qmesh%init(cryst, Hscr%nqibz, Hscr%qibz, Dtset%kptopt)
+
+ ! The G-sphere for W and Sigma_c is initialized from the g-vectors found in the SCR file.
+ call Gsph_c%init(cryst, dtset%npweps, gvec=Hscr%gvec)
+
+end subroutine get_hscr_qmesh_gsph
+!!***
+
+end module m_io_screening
 !!***

@@ -1,0 +1,84 @@
+#   Si in diamond structure; 2 special points; low ecut.
+
+ ndtset 4
+
+ nband 6
+
+ wfoptalg1      114 # lobpcg (MPI+OpenMP)
+ wfoptalg2      114 # lobpcg (MPI+OpenMP)
+
+ nblock_lobpcg1   2 # so bandpp = 3
+ bandpp2          3 # so nblock_lobpcg = 2
+
+ wfoptalg3        4 # lobpcg (MPI only)
+ wfoptalg4        4 # lobpcg (MPI only)
+
+ nblock_lobpcg3   2 # so bandpp = 3
+ bandpp4          3 # so nblock_lobpcg = 2
+
+ acell 3*10.26311
+ diemac 12.0d0
+ ecut 5.8
+ enunit 2
+ intxc 1
+ kptopt 0
+ kpt   1 1 1     1 2 2   kptnrm 4
+ natom  2
+ nkpt  2
+ nline 3
+ nstep 10
+ nsym  24   ntypat  1
+ occ 4*2.0d0 2*0.0d0 occopt  0
+ rprim   0 .5 .5  .5 0 .5  .5 .5 0
+ symrel
+  1  0  0   0  1  0   0  0  1
+  0  1 -1   1  0 -1   0  0 -1
+  0 -1  1   0 -1  0   1 -1  0
+ -1  0  0  -1  0  1  -1  1  0
+  0  1  0   0  0  1   1  0  0
+  1  0 -1   0  0 -1   0  1 -1
+  0 -1  0   1 -1  0   0 -1  1
+ -1  0  1  -1  1  0  -1  0  0
+  0  0  1   1  0  0   0  1  0
+  0  0 -1   0  1 -1   1  0 -1
+  1 -1  0   0 -1  1   0 -1  0
+ -1  1  0  -1  0  0  -1  0  1
+  1  0 -1   0  1 -1   0  0 -1
+  0  1  0   1  0  0   0  0  1
+ -1  0  1  -1  0  0  -1  1  0
+  0 -1  0   0 -1  1   1 -1  0
+ -1  1  0  -1  0  1  -1  0  0
+  1 -1  0   0 -1  0   0 -1  1
+  0  0 -1   1  0 -1   0  1 -1
+  0  0  1   0  1  0   1  0  0
+  0 -1  1   1 -1  0   0 -1  0
+ -1  0  0  -1  1  0  -1  0  1
+  1  0  0   0  0  1   0  1  0
+  0  1 -1   0  0 -1   1  0 -1
+ timopt -1
+ tnons 72*0.0
+ tolmxf 1.0d-4
+ tolwfr 1.0d-20
+ typat  1 1
+ wtk   1 3
+ xred 3*0.00d0 3*0.25d0
+ znucl 14
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "14si.psp"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% need_cpp_vars = HAVE_FFTW3 or HAVE_DFTI
+#%% [files]
+#%% files_to_test =
+#%%   t205.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = L. Baguet
+#%% references =
+#%% keywords =
+#%% description = Simple input (from fast/t03) to test nblock_lobpcg variable
+#%%<END TEST_INFO>

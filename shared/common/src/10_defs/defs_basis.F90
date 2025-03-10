@@ -7,7 +7,7 @@
 !! physical constants, as well as associated datatypes and methods.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2022 ABINIT group (HM, XG,XW, EB)
+!! Copyright (C) 2000-2025 ABINIT group (HM, XG,XW, EB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -82,9 +82,9 @@ module defs_basis
  integer, parameter :: fnlen=264     ! maximum length of file name variables
  integer, parameter :: strlen=2000000 ! maximum length of input string
 
- ! The input file used to run the code, set by parsefile.
+ ! The input file used to run the code, allocated and set by parsefile.
  ! It will be added to the netcdf files in ntck_open_create
- character(len=strlen), save :: INPUT_STRING = ""
+ character(len=:), allocatable, save :: INPUT_STRING
 
  integer, parameter :: md5_slen = 32 ! lenght of strings storing the pseudos' md5 checksum.
  character(len=md5_slen),parameter :: md5_none = "None"
@@ -328,6 +328,7 @@ module defs_basis
  integer,public,parameter :: WFK_TASK_OPTICS_FULLBZ = 7
  integer,public,parameter :: WFK_TASK_KPTS_ERANGE= 8
  integer,public,parameter :: WFK_TASK_CHECK_SYMTAB = 9
+ integer,public,parameter :: WFK_TASK_WANNIER = 10
 
 ! Flags defining the method used for performing IO (input variable iomode)
  integer, parameter, public :: IO_MODE_FORTRAN_MASTER = -1
@@ -521,7 +522,7 @@ subroutine print_kinds(unit)
 
  write(my_unt,'(a)')' DATA TYPE INFORMATION: '
 
- write(my_unt,'(a,/,2(a,i6,/),2(a,e15.8e3,/),a,e15.8e3)')&
+ write(my_unt,'(a,/,2(a,i6,/),2(a,e16.8e3,/),a,e16.8e3)')&
    ' REAL:      Data type name: REAL(DP) ',&
    '            Kind value: ',KIND(0.0_dp),&
    '            Precision:  ',PRECISION(0.0_dp),&
@@ -578,10 +579,12 @@ integer pure function str2wfktask(str) result(wfk_task)
    wfk_task = WFK_TASK_DDK_DIAGO
  case ("wfk_kpts_erange")
    wfk_task = WFK_TASK_KPTS_ERANGE
- case ("optics_fullbz")
+ case ("optics_fullbz", "wfk_optics_fullbz")
    wfk_task = WFK_TASK_OPTICS_FULLBZ
  case ("check_symtab")
    wfk_task = WFK_TASK_CHECK_SYMTAB
+case ("wannier")
+   wfk_task = WFK_TASK_WANNIER
  case default
    wfk_task = WFK_TASK_NONE
  end select

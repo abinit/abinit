@@ -7,7 +7,7 @@
 !! Module with datatype and tools for the anharmonics terms
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2022 ABINIT group (AM)
+!! Copyright (C) 2010-2025 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -479,7 +479,10 @@ subroutine anharmonics_terms_setStrainPhononCoupling(anharmonics_terms,natom,pho
 
 ! 1-Do some check
   do ii=1,6
-    if(natom /= size(phonon_strain(ii)%atmfrc,2).or.&
+!PROBLEM eos_gnu_13.2_openmpi
+!   if(natom /= size(phonon_strain(ii)%atmfrc,2).or.&
+    if( &
+!ENDPROBLEM
 &      phonon_strain(ii)%nrpt < 0)then
       write(msg, '(a)' )&
 &        ' natom or/and nrpt have not the same size than phonon_strain array. '

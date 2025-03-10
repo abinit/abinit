@@ -10,7 +10,7 @@
 !!  inv_s_projs = - (s_projs^-1 + projs'*projs)^-1
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2022 ABINIT group (AL)
+!! Copyright (C) 2013-2025 ABINIT group (AL)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -33,13 +33,14 @@ MODULE m_invovl
  use m_xmpi
  use m_xomp
  use m_abicore
+ use m_abi_linalg
 
  use defs_abitypes, only : mpi_type
  use m_time,        only : timab
  use m_hamiltonian, only : gs_hamiltonian_type
  use m_bandfft_kpt, only : bandfft_kpt_get_ikpt
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_axpby
- use m_gemm_nonlop, only : gemm_nonlop_use_gemm
+ use m_gemm_nonlop_projectors, only : gemm_nonlop_use_gemm
  use m_nonlop,      only : nonlop
  use m_prep_kgb,    only : prep_nonlop
 
@@ -47,7 +48,7 @@ MODULE m_invovl
  use, intrinsic :: iso_c_binding, only : c_ptr, c_int32_t, c_int64_t, c_float, c_double, c_size_t, c_loc
 #endif
 
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
  use m_nvtx_data
 #endif
 
@@ -170,20 +171,18 @@ end type invovl_kpt_type
 
  type(invovl_kpt_type), public,save,allocatable, target :: invovl_kpt(:)
 #ifdef HAVE_OPENMP_OFFLOAD
- real(dp), pointer :: current_gram_projs(:,:,:)
- real(dp), pointer :: current_inv_sij(:,:,:,:)
- real(dp), pointer :: current_inv_s_approx(:,:,:,:)
+ real(dp), ABI_CONTIGUOUS pointer :: current_gram_projs(:,:,:)
+ real(dp), ABI_CONTIGUOUS pointer :: current_inv_sij(:,:,:,:)
+ real(dp), ABI_CONTIGUOUS pointer :: current_inv_s_approx(:,:,:,:)
  real(dp),allocatable, target :: proj_ompgpu(:,:,:)
  real(dp),allocatable, target :: sm1proj_ompgpu(:,:,:)
  real(dp),allocatable, target :: PtPsm1proj_ompgpu(:,:,:)
-
  !Module variable keeping track of which K-point data is so=tored on GPU
  integer, save :: current_ikpt_in_gpu=-1
  integer, save :: gpu_initialized=0
-
 #endif
 
-#if defined(HAVE_FC_ISO_C_BINDING) && defined(HAVE_GPU_CUDA)
+#if defined(HAVE_GPU_CUDA)
 
  !> this interface is only useful when gpu is enabled
  !! these functions are defined in 46_manage_gpu/gpu_apply_invovl_inner.cu
@@ -331,9 +330,9 @@ CONTAINS
   end if
 
   if(current_ikpt_in_gpu /= -1) then
-    !$OMP TARGET EXIT DATA MAP(release:current_gram_projs)
-    !$OMP TARGET EXIT DATA MAP(release:current_inv_sij)
-    !$OMP TARGET EXIT DATA MAP(release:current_inv_s_approx)
+    !$OMP TARGET EXIT DATA MAP(delete:current_gram_projs)
+    !$OMP TARGET EXIT DATA MAP(delete:current_inv_sij)
+    !$OMP TARGET EXIT DATA MAP(delete:current_inv_s_approx)
   end if
 
   current_gram_projs   => invovl_kpt(ikpt)%gram_projs
@@ -397,15 +396,15 @@ CONTAINS
   if(gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
     if(gpu_initialized==1 .and. current_ikpt_in_gpu == ikpt) then
-      !$OMP TARGET EXIT DATA MAP(release:current_gram_projs)
-      !$OMP TARGET EXIT DATA MAP(release:current_inv_sij)
-      !$OMP TARGET EXIT DATA MAP(release:current_inv_s_approx)
+      !$OMP TARGET EXIT DATA MAP(delete:current_gram_projs)
+      !$OMP TARGET EXIT DATA MAP(delete:current_inv_sij)
+      !$OMP TARGET EXIT DATA MAP(delete:current_inv_s_approx)
       nullify(current_gram_projs)
       nullify(current_inv_sij)
       nullify(current_inv_s_approx)
       current_ikpt_in_gpu = -1
       !FIXME Smater buffer management ?
-      !!$OMP TARGET EXIT DATA MAP(release:proj_ompgpu,sm1proj_ompgpu,PtPsm1proj_ompgpu)
+      !!$OMP TARGET EXIT DATA MAP(delete:proj_ompgpu,sm1proj_ompgpu,PtPsm1proj_ompgpu)
       ABI_FREE(proj_ompgpu)
       ABI_FREE(sm1proj_ompgpu)
       ABI_FREE(PtPsm1proj_ompgpu)
@@ -493,10 +492,12 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
 
  integer :: itypat, ilmn, nlmn, jlmn, ia, iaph3d, shift
  integer :: il, ilm, jlm, ipw, info, ierr, cplx
- integer :: ikpt_this_proc
+ integer :: ikpt_this_proc,cplex_dij
  logical :: parity
  real(dp) :: tsec(2)
+#if defined(HAVE_FC_ISO_C_BINDING) && defined(HAVE_GPU_CUDA)
  character(len=500) :: message
+#endif
  character :: blas_transpose
 
  type(invovl_kpt_type), pointer :: invovl
@@ -556,15 +557,28 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
  shift = 0
  do itypat = 1, ham%ntypat
    nlmn = count(ham%indlmn(3,:,itypat)>0)
+   if (size(ham%sij(:,itypat))==ham%lmnmax*(ham%lmnmax+1)/2) then
+     cplex_dij = 1
+   else if (size(ham%sij(:,itypat))==ham%lmnmax*(ham%lmnmax+1)) then
+     cplex_dij = 2
+   else
+     ABI_ERROR('sij size not recognize')
+   end if
    !! unpack ham%sij into inv_sij
    do jlmn = 1, nlmn
-     invovl%inv_sij(1, jlmn, jlmn, itypat) = ham%sij(jlmn*(jlmn-1)/2 + jlmn, itypat)
-     jlm=ham%indlmn(4,jlmn, itypat)
+     if (cplex_dij==1) then
+       invovl%inv_sij(1, jlmn, jlmn, itypat) = ham%sij(jlmn*(jlmn-1)/2 + jlmn, itypat)
+     else
+       invovl%inv_sij(1, jlmn, jlmn, itypat) = ham%sij(jlmn*(jlmn-1) + 2*jlmn-1, itypat)
+     end if
      do ilmn = 1, jlmn-1
-       ilm=ham%indlmn(4,ilmn, itypat)
-       if (ilm == jlm) then ! sparsity check
+       if (cplex_dij==1) then
          invovl%inv_sij(1, ilmn, jlmn, itypat) = ham%sij(jlmn*(jlmn-1)/2 + ilmn, itypat)
          invovl%inv_sij(1, jlmn, ilmn, itypat) = ham%sij(jlmn*(jlmn-1)/2 + ilmn, itypat)
+       else
+         invovl%inv_sij(1, ilmn, jlmn, itypat) = ham%sij(jlmn*(jlmn-1) + 2*ilmn-1, itypat)
+         invovl%inv_sij(1, jlmn, ilmn, itypat) = ham%sij(jlmn*(jlmn-1) + 2*ilmn-1, itypat)
+
        end if
      end do
    end do
@@ -626,8 +640,8 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
        atom_projs(1,1,:) = atom_projs(1,1,:) / sqrt2
        atom_projs(2,1,:) = zero
      end if
-     if(ham%istwf_k == 2) then
-       atom_projs(:,:,:) = atom_projs(:,:,:)*sqrt2
+     if(ham%istwf_k > 1) then
+       atom_projs(:,:,:) = atom_projs(:,:,:) * sqrt2
      end if
 
 
@@ -691,17 +705,18 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
 #ifdef HAVE_OPENMP_OFFLOAD
    ! compute gram_projs in one GEMM, only one FFT proc expected in GPU mode
    slice_size = array_nprojs_pp(1)
-   !$OMP TARGET ENTER DATA MAP(alloc:invovl%gram_projs)
+   current_gram_projs   => invovl%gram_projs
+   !$OMP TARGET ENTER DATA MAP(alloc:current_gram_projs)
    !$OMP TARGET ENTER DATA MAP(to:projs)
 
-   !$OMP TARGET DATA USE_DEVICE_PTR(invovl%gram_projs,projs)
+   !$OMP TARGET DATA USE_DEVICE_PTR(current_gram_projs,projs)
    call abi_gpu_xgemm(cplx, blas_transpose,'N', invovl%nprojs, slice_size, (3-cplx)*ham%npw_k, cone, &
    &                  c_loc(projs), (3-cplx)*ham%npw_k, &
-   &                  c_loc(projs), (3-cplx)*ham%npw_k, czero, c_loc(invovl%gram_projs), invovl%nprojs)
+   &                  c_loc(projs), (3-cplx)*ham%npw_k, czero, c_loc(current_gram_projs), invovl%nprojs)
    !$OMP END TARGET DATA
-   !$OMP TARGET EXIT DATA MAP(from:invovl%gram_projs)
-   !$OMP TARGET EXIT DATA MAP(release:projs)
-   call xmpi_sum(invovl%gram_projs,mpi_enreg%comm_band,ierr)
+   call xmpi_sum(invovl%gram_projs,mpi_enreg%comm_band,ierr,use_omp_map=.true.)
+   !$OMP TARGET EXIT DATA MAP(from:current_gram_projs)
+   !$OMP TARGET EXIT DATA MAP(delete:projs)
 #endif
  else
    do iproc = 1, mpi_enreg%nproc_fft
@@ -754,8 +769,9 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
  end if
 #endif
 
- write(message,*) 'Invovl built'
- call wrtout(std_out,message,'COLL')
+! LB-10/06/24: This message is too verbose on some cases (for example many k-points)
+! write(message,*) 'Invovl built'
+! call wrtout(std_out,message,'COLL')
 
 end subroutine make_invovl
 !!***
@@ -787,7 +803,7 @@ subroutine apply_invovl(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_enreg, 
   real(dp), intent(inout), target :: cwavef(2, npw*nspinor*ndat) ! TODO should be in, fix nonlop
   type(mpi_type) :: mpi_enreg
   real(dp), intent(inout), target :: sm1cwavef(2, npw*nspinor*ndat)
-  type(pawcprj_type), intent(inout) :: cwaveprj(ham%natom,nspinor*ndat)
+  type(pawcprj_type), intent(inout) :: cwaveprj(:,:)
 
   real(dp),allocatable, target :: proj(:,:,:), sm1proj(:,:,:), PtPsm1proj(:,:,:)
 
@@ -879,12 +895,12 @@ subroutine apply_invovl(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_enreg, 
   call timab(timer_apply_inv_ovl_opernla, 1, tsec)
 
   ! cwaveprj may be dummy or unused if gemm nonlop is turned on
-  if((.not. gemm_nonlop_use_gemm) .or. cwaveprj(1,1)%nlmn/=0) then
+  if((.not. gemm_nonlop_use_gemm) .or. size(cwaveprj) > 1) then
     ABI_MALLOC(cwaveprj_in, (ham%natom,nspinor*ndat))
     call pawcprj_alloc(cwaveprj_in,0,ham%dimcprj)
   else
     ABI_MALLOC(cwaveprj_in, (1,1))
-    call pawcprj_alloc(cwaveprj_in,0,(/0/))
+    call pawcprj_alloc(cwaveprj_in,0,(/1/))
   end if
   ABI_NVTX_END_RANGE()
 
@@ -981,7 +997,7 @@ subroutine apply_invovl(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_enreg, 
   call timab(timer_apply_inv_ovl_opernlb, 2, tsec)
 
   ABI_NVTX_START_RANGE(NVTX_INVOVL_POST2)
-  if(cwaveprj(1,1)%nlmn/=0) then
+  if(size(cwaveprj) > 1) then
     ! copy PtPSm1proj to cwaveprj(:,:)
     do idat=1, ndat*nspinor
       shift = 0
@@ -1250,7 +1266,7 @@ end subroutine apply_block
    do itypat=1,ham%ntypat
      nprojs = nprojs + count(ham%indlmn(3,:,itypat)>0)*ham%nattyp(itypat)
    end do
-   cplx = 2; if(ham%istwf_k == 2) cplx = 1
+   cplx = 2; if(ham%istwf_k > 1) cplx = 1
 
    req_mem = 0
    req_mem = req_mem + dp * cplx * int(nprojs, c_size_t) * int(nprojs, c_size_t)                       ! gram_projs
@@ -1279,7 +1295,7 @@ end subroutine apply_block
 
 subroutine apply_invovl_ompgpu(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_enreg, nspinor, block_sliced)
 
-#if defined(HAVE_FC_ISO_C_BINDING) && defined(HAVE_GPU_CUDA)
+#if defined(HAVE_FC_ISO_C_BINDING) && defined(HAVE_GPU)
   use, intrinsic :: iso_c_binding
 #endif
 
@@ -1290,13 +1306,13 @@ subroutine apply_invovl_ompgpu(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_
   integer, intent(in) :: npw, ndat
   integer, intent(in) :: nspinor
   integer, intent(in) :: block_sliced
-  real(dp), intent(inout) :: cwavef(2, npw*nspinor*ndat) ! TODO should be in, fix nonlop
+  real(dp), intent(inout), target :: cwavef(2, npw*nspinor*ndat) ! TODO should be in, fix nonlop
   type(mpi_type) :: mpi_enreg
-  real(dp), intent(inout) :: sm1cwavef(2, npw*nspinor*ndat)
+  real(dp), intent(inout), target :: sm1cwavef(2, npw*nspinor*ndat)
   type(pawcprj_type), intent(inout) :: cwaveprj(:,:)
   logical :: transfer_omp_args
 
-  real(dp),ABI_CONTIGUOUS pointer :: proj(:,:,:),sm1proj(:,:,:),PtPsm1proj(:,:,:)
+  real(dp), ABI_CONTIGUOUS pointer :: proj(:,:,:),sm1proj(:,:,:),PtPsm1proj(:,:,:)
 
   integer :: idat, iatom, icplx, iproj, nprojs, nlmn, shift
   real(dp) :: tsec(2)
@@ -1363,8 +1379,9 @@ subroutine apply_invovl_ompgpu(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_
   !multiply by S^1
   ABI_NVTX_START_RANGE(NVTX_INVOVL_INNER)
   call solve_inner_ompgpu(invovl, ham, cplx, mpi_enreg, proj, ndat*nspinor, sm1proj, PtPsm1proj, block_sliced)
-  !$OMP TARGET TEAMS LOOP MAP(to:sm1proj,PtPsm1proj)
+  !$OMP TARGET TEAMS DISTRIBUTE MAP(to:sm1proj,PtPsm1proj)
   do idat  =1, ndat*nspinor
+    !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(iproj,icplx)
     do iproj = 1, nprojs
       do icplx = 1, cplx
         sm1proj(icplx,iproj,idat) = - sm1proj(icplx,iproj,idat)
@@ -1390,7 +1407,7 @@ subroutine apply_invovl_ompgpu(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_
   call timab(timer_apply_inv_ovl_opernlb, 2, tsec)
   if (ham%istwf_k==2) mpi_enreg%me_g0=old_me_g0
 
-  if(cwaveprj(1,1)%nlmn/=0) then
+  if(size(cwaveprj) > 1) then
     ABI_MALLOC(cwaveprj_in, (ham%natom,nspinor*ndat))
     call pawcprj_alloc(cwaveprj_in,0,ham%dimcprj)
     !$OMP TARGET UPDATE FROM(PtPsm1proj,proj)
@@ -1416,19 +1433,15 @@ subroutine apply_invovl_ompgpu(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_
     ABI_FREE(cwaveprj_in)
   end if
 
-  !$OMP TARGET PARALLEL DO PRIVATE(iproj) MAP(to:cwavef,sm1cwavef)
-  do iproj=1, ndat*nspinor*npw
-    sm1cwavef(1,iproj) = cwavef(1,iproj) + sm1cwavef(1,iproj)
-    sm1cwavef(2,iproj) = cwavef(2,iproj) + sm1cwavef(2,iproj)
-  end do
+  call abi_gpu_xaxpy(1, 2*npw*nspinor*ndat, cone, cwavef, 1, sm1cwavef, 1)
 
   if(transfer_omp_args) then
     !$OMP TARGET UPDATE FROM(sm1cwavef,cwavef)
-    !$OMP TARGET EXIT DATA MAP(release:sm1cwavef,cwavef)
+    !$OMP TARGET EXIT DATA MAP(delete:sm1cwavef,cwavef)
   end if
 
-  !$OMP TARGET EXIT DATA MAP(release:gvnlxc)
-  !$OMP TARGET EXIT DATA MAP(release:proj,sm1proj,PtPsm1proj)
+  !$OMP TARGET EXIT DATA MAP(delete:gvnlxc)
+  !$OMP TARGET EXIT DATA MAP(delete:proj,sm1proj,PtPsm1proj)
 
 end subroutine apply_invovl_ompgpu
 !!***
@@ -1449,10 +1462,10 @@ subroutine solve_inner_ompgpu(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj,
  implicit none
 
  integer,intent(in) :: ndat,cplx
- type(invovl_kpt_type), intent(in) :: invovl
+ type(invovl_kpt_type), intent(in), target :: invovl
  real(dp), intent(inout) :: proj(cplx, invovl%nprojs,ndat)
- real(dp), intent(inout) :: sm1proj(cplx, invovl%nprojs, ndat)
- real(dp), intent(inout) :: PtPsm1proj(cplx, invovl%nprojs, ndat)
+ real(dp), intent(inout), target :: sm1proj(cplx, invovl%nprojs, ndat)
+ real(dp), intent(inout), target :: PtPsm1proj(cplx, invovl%nprojs, ndat)
  type(mpi_type), intent(in) :: mpi_enreg
  type(gs_hamiltonian_type),intent(in) :: ham
  integer, intent(in) :: block_sliced
@@ -1464,28 +1477,48 @@ subroutine solve_inner_ompgpu(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj,
  character(len=500) :: message
 
  real(dp), parameter :: precision = 1e-16 ! maximum relative error. TODO: use tolwfr ?
- real(dp) :: convergence_rate
+ real(dp) :: convergence_rate,sum_tmp
  integer :: additional_steps_to_take,idat,iproj,icplx
  integer :: Ptsize(3)
+#ifdef HAVE_GPU_HIP
+ type(c_ptr) :: sm1proj_amdcopy,PtPsm1proj_amdcopy
+#endif
+
 ! *************************************************************************
 
  Ptsize(1) = cplx
  Ptsize(2) = invovl%nprojs
  Ptsize(3) = ndat
  nprojs = invovl%nprojs
+#if defined HAVE_GPU_HIP  && defined FC_LLVM
+ !FIXME Work-around for AOMP v15.0.3 (AMD Flang fork)
+ sm1proj_amdref => sm1proj
+ PtPsm1proj_amdref => PtPsm1proj
+#endif
+
  !$OMP TARGET ENTER DATA MAP(alloc:errs,precondresid,resid,normprojs)
- !$OMP TARGET TEAMS DISTRIBUTE MAP(to:normprojs,proj) PRIVATE(idat)
+
+ !FIXME LLVM has trouble with performing team reduction (AOMP 15.0.2)
+#ifdef FC_LLVM
+ !$OMP TARGET UPDATE FROM(proj)
+#else
+ !$OMP TARGET TEAMS DISTRIBUTE MAP(to:normprojs,proj) PRIVATE(idat,sum_tmp)
+#endif
  do idat = 1,ndat
-  normprojs(idat)=0
-  !$OMP PARALLEL DO COLLAPSE(2) REDUCTION(+:normprojs(idat)) PRIVATE(iproj,icplx)
+  sum_tmp=0
+#ifndef FC_LLVM
+  !$OMP PARALLEL DO COLLAPSE(2) REDUCTION(+:sum_tmp) PRIVATE(iproj,icplx)
+#endif
   do iproj = 1,nprojs
     do icplx = 1,cplx
-      normprojs(idat) = normprojs(idat) + proj(icplx,iproj,idat)**2
+      sum_tmp = sum_tmp + proj(icplx,iproj,idat)**2
     end do
   end do
-  !$OMP END PARALLEL DO
+  normprojs(idat)=sum_tmp
  end do
+#ifndef FC_LLVM
  !$OMP TARGET UPDATE FROM(normprojs)
+#endif
 
  ibeg = 1
  iend = nprojs
@@ -1503,14 +1536,26 @@ subroutine solve_inner_ompgpu(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj,
 
    ! compute matrix multiplication : PtPsm1proj(:,:,1) = invovl%gram * sm1proj(:,:,1)
    ABI_NVTX_START_RANGE(NVTX_INVOVL_INNER_GEMM)
+#if defined HAVE_GPU_HIP && defined FC_LLVM
+   !$OMP TARGET DATA USE_DEVICE_PTR(current_gram_projs, sm1proj_amdref, PtPsm1proj_amdref)
    call abi_gpu_xgemm(cplx, 'N', 'N', nprojs, ndat, nlmntot_this_proc, cone, &
-                invovl%gram_projs, nprojs,&
-                sm1proj, nlmntot_this_proc, czero, &
-                PtPsm1proj, nprojs)
+                c_loc(current_gram_projs), nprojs,&
+                c_loc(sm1proj_amdref), nlmntot_this_proc, czero, &
+                c_loc(PtPsm1proj_amdref), nprojs)
+   !$OMP END TARGET DATA
+#else
+   !$OMP TARGET DATA USE_DEVICE_PTR(current_gram_projs, sm1proj, PtPsm1proj)
+   call abi_gpu_xgemm(cplx, 'N', 'N', nprojs, ndat, nlmntot_this_proc, cone, &
+                c_loc(current_gram_projs), nprojs,&
+                c_loc(sm1proj), nlmntot_this_proc, czero, &
+                c_loc(PtPsm1proj), nprojs)
+   !$OMP END TARGET DATA
+#endif
 
-   !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) &
-   !$OMP& PRIVATE(idat,iproj,icplx) MAP(to:proj,resid,PtPsm1proj)
+   !$OMP TARGET TEAMS DISTRIBUTE &
+   !$OMP& PRIVATE(idat) MAP(to:proj,resid,PtPsm1proj)
    do idat =1, ndat
+     !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(iproj,icplx)
      do iproj =1, nprojs
        do icplx = 1,cplx
          resid(icplx, iproj, idat) = proj(icplx, iproj, idat) - resid(icplx, iproj, idat) - PtPsm1proj(icplx, iproj, idat)
@@ -1519,20 +1564,27 @@ subroutine solve_inner_ompgpu(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj,
    end do
 
    ! exit check
-   !$OMP TARGET TEAMS DISTRIBUTE MAP(to:errs,resid) PRIVATE(idat)
+#ifdef FC_LLVM
+   !FIXME LLVM has trouble with performing team reduction (v16.0.0 from AMD ROCm 5.6.0)
+   !$OMP TARGET UPDATE FROM(resid)
+   errs = SUM(SUM(resid**2, 1),1)
+#else
+   !$OMP TARGET TEAMS DISTRIBUTE MAP(to:errs,resid) PRIVATE(idat,sum_tmp)
    do idat = 1,ndat
-     errs(idat)=0
-     !$OMP PARALLEL DO COLLAPSE(2) REDUCTION(+:errs(idat)) PRIVATE(iproj,icplx)
+     sum_tmp=0
+     !$OMP PARALLEL DO COLLAPSE(2) REDUCTION(+:sum_tmp) PRIVATE(iproj,icplx)
      do iproj = 1,nprojs
        do icplx = 1,cplx
-         errs(idat) = errs(idat) + resid(icplx,iproj,idat)**2
+         sum_tmp = sum_tmp + resid(icplx,iproj,idat)**2
        end do
      end do
-     !$OMP END PARALLEL DO
+     errs(idat)=sum_tmp
    end do
+   !$OMP TARGET UPDATE FROM(errs)
+#endif
+
    ABI_NVTX_END_RANGE()
 
-   !$OMP TARGET UPDATE FROM(errs)
    maxerr = sqrt(MAXVAL(errs/normprojs))
    if(maxerr < precision .or. additional_steps_to_take == 1) then
      exit
@@ -1551,9 +1603,10 @@ subroutine solve_inner_ompgpu(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj,
    ! add preconditionned residual
    call apply_block_ompgpu(ham, cplx, invovl%inv_s_approx, nprojs, ndat, resid, precondresid, block_sliced)
 
-   !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) &
-   !$OMP& PRIVATE(idat,iproj,icplx) MAP(to:sm1proj,precondresid)
+   !$OMP TARGET TEAMS DISTRIBUTE &
+   !$OMP& PRIVATE(idat) MAP(to:sm1proj,precondresid)
    do idat =1, ndat
+     !$OMP PARALLEL DO PRIVATE(iproj,icplx) COLLAPSE(2)
      do iproj =1, nprojs
        do icplx = 1,cplx
          sm1proj(icplx, iproj, idat) = sm1proj(icplx, iproj, idat) + precondresid(icplx, iproj, idat)
@@ -1561,7 +1614,7 @@ subroutine solve_inner_ompgpu(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj,
      end do
    end do
  end do
- !$OMP TARGET EXIT DATA MAP(release:errs,resid,precondresid,normprojs)
+ !$OMP TARGET EXIT DATA MAP(delete:errs,resid,precondresid,normprojs)
 
  if(maxerr >= precision .and. maxerr >= 1e-10) then
    write(message, *) 'In invovl, max error was', maxerr, ' after 30 iterations'
@@ -1590,12 +1643,13 @@ subroutine apply_block_ompgpu(ham, cplx, mat, nprojs, ndat, x, y, block_sliced)
   implicit none
 
   integer,intent(in) :: ndat, nprojs, cplx
-  real(dp), intent(inout) :: x(cplx, nprojs, ndat), y(cplx, nprojs, ndat)
+  real(dp), intent(inout), target :: x(cplx, nprojs, ndat), y(cplx, nprojs, ndat)
   type(gs_hamiltonian_type),intent(in) :: ham
-  real(dp), intent(in) :: mat(cplx, ham%lmnmax, ham%lmnmax, ham%ntypat)
+  real(dp), intent(in), target :: mat(cplx, ham%lmnmax, ham%lmnmax, ham%ntypat)
   integer, intent(in) :: block_sliced
 
   integer :: nlmn, shift, itypat, idat
+  real(dp), ABI_CONTIGUOUS pointer :: x_ptr(:, :, :), y_ptr(:, :, :), mat_ptr(:,:,:)
 
 ! *************************************************************************
 
@@ -1632,17 +1686,20 @@ subroutine apply_block_ompgpu(ham, cplx, mat, nprojs, ndat, x, y, block_sliced)
     shift = 1
     do itypat=1, ham%ntypat
       nlmn = count(ham%indlmn(3,:,itypat)>0)
+      x_ptr => x(:, shift:shift+nlmn*ham%nattyp(itypat)-1, :)
+      y_ptr => y(:, shift:shift+nlmn*ham%nattyp(itypat)-1, :)
+      mat_ptr => mat(:, :, :, itypat)
       !! apply mat to all atoms at once, all idat at once
       ! perform natom multiplications of size nlmn
       ! be careful here matrix extracted from x and y are not memory contiguous
       ! ==> so in the GPU version we will need to adapt leading dimension
-      !$OMP TARGET DATA USE_DEVICE_PTR(mat,x,y)
+      !$OMP TARGET DATA USE_DEVICE_PTR(mat_ptr,x_ptr,y_ptr)
       call abi_gpu_xgemm_strided(cplx, 'N','N', &
               nlmn, ham%nattyp(itypat), nlmn, cone, &
-              c_loc(mat(:, :, :, itypat)), ham%lmnmax, 0, &
-              c_loc(x(:, shift:shift+nlmn*ham%nattyp(itypat)-1, :)), nlmn, nprojs, &
+              c_loc(mat_ptr), ham%lmnmax, 0, &
+              c_loc(x_ptr), nlmn, nprojs, &
               czero, &
-              c_loc(y(:, shift:shift+nlmn*ham%nattyp(itypat)-1, :)), nlmn, nprojs, ndat)
+              c_loc(y_ptr), nlmn, nprojs, ndat)
       !$OMP END TARGET DATA
       shift = shift + nlmn*ham%nattyp(itypat)
     end do
@@ -1651,7 +1708,7 @@ subroutine apply_block_ompgpu(ham, cplx, mat, nprojs, ndat, x, y, block_sliced)
 
 end subroutine apply_block_ompgpu
 !!***
-#endif // HAVE_OPENMP_OFFLOAD
+#endif
 
 end MODULE m_invovl
 !!***

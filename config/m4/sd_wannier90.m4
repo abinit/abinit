@@ -1,4 +1,4 @@
-## Copyright (C) 2019-2022 ABINIT group (Yann Pouillon)
+## Copyright (C) 2019-2025 ABINIT group (Yann Pouillon)
 
 #
 # Maximally-Localized Wannier Functions library (Wannier90)
@@ -83,12 +83,13 @@ AC_DEFUN([SD_WANNIER90_INIT], [
   # Declare environment variables
   AC_ARG_VAR([WANNIER90_CPPFLAGS], [C preprocessing flags for Wannier90.])
   AC_ARG_VAR([WANNIER90_FCFLAGS], [Fortran flags for Wannier90.])
+  AC_ARG_VAR([WANNIER90_FFLAGS], [Fortran flags for Wannier90 (better use WANNIER90_FCFLAGS).])
   AC_ARG_VAR([WANNIER90_LDFLAGS], [Linker flags for Wannier90.])
   AC_ARG_VAR([WANNIER90_LIBS], [Library flags for Wannier90.])
 
   # Detect use of environment variables
   if test "${sd_wannier90_enable}" = "yes" -o "${sd_wannier90_enable}" = "auto"; then
-    tmp_wannier90_vars="${WANNIER90_CPPFLAGS}${WANNIER90_FCFLAGS}${WANNIER90_LDFLAGS}${WANNIER90_LIBS}"
+    tmp_wannier90_vars="${WANNIER90_CPPFLAGS}${WANNIER90_FFLAGS}${WANNIER90_FCFLAGS}${WANNIER90_LDFLAGS}${WANNIER90_LIBS}"
     if test "${sd_wannier90_init}" = "def" -a ! -z "${tmp_wannier90_vars}"; then
       sd_wannier90_enable="yes"
       sd_wannier90_init="env"
@@ -125,6 +126,7 @@ AC_DEFUN([SD_WANNIER90_INIT], [
         sd_wannier90_ldflags="${sd_wannier90_ldflags_def}"
         sd_wannier90_libs="${sd_wannier90_libs_def}"
         test ! -z "${WANNIER90_CPPFLAGS}" && sd_wannier90_cppflags="${WANNIER90_CPPFLAGS}"
+        test ! -z "${WANNIER90_FFLAGS}" && sd_wannier90_fcflags="${WANNIER90_FFLAGS}"
         test ! -z "${WANNIER90_FCFLAGS}" && sd_wannier90_fcflags="${WANNIER90_FCFLAGS}"
         test ! -z "${WANNIER90_LDFLAGS}" && sd_wannier90_ldflags="${WANNIER90_LDFLAGS}"
         test ! -z "${WANNIER90_LIBS}" && sd_wannier90_libs="${WANNIER90_LIBS}"

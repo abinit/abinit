@@ -7,16 +7,16 @@
 !!  Interfaces of GPU subroutines wrapper
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2011-2022 ABINIT group (FDahm ))
+!!  Copyright (C) 2011-2025 ABINIT group (FDahm ))
 !!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~ABINIT/Infos/copyright
+!!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! SOURCE
 
 !!***
 
-#ifndef HAVE_GPU_CUDA
+#ifndef HAVE_GPU
 
 !!****f* m_abi_gpu_linalg/gpu_device_synchronize
 !! NAME
@@ -32,7 +32,7 @@
 !!  None
 !!
 !! SIDE EFFECTS
-!!   WARNING! : this routine is a dummy one when HAVE_GPU_CUDA is not enabled
+!!   WARNING! : this routine is a dummy one when HAVE_GPU is not enabled
 !!   the correct one is in 17_gpu_toolbox/dev_spec.cu
 !!
 !! SOURCE
@@ -58,7 +58,7 @@ end subroutine gpu_device_synchronize
 !!  None
 !!
 !! SIDE EFFECTS
-!!   WARNING! : this routine is a dummy one when HAVE_GPU_CUDA is not enabled
+!!   WARNING! : this routine is a dummy one when HAVE_GPU is not enabled
 !!   the correct one is in 17_gpu_toolbox/dev_spec.cu
 !!
 !! SOURCE
@@ -90,7 +90,7 @@ end subroutine check_gpu_mem
 !!  gpu_ptr= C_PTR on gpu memory location that has been allocated
 !!
 !! SIDE EFFECTS
-!!   WARNING! : this routine is a dummy one when HAVE_GPU_CUDA is not enabled
+!!   WARNING! : this routine is a dummy one when HAVE_GPU is not enabled
 !!   the correct one is in 17_gpu_toolbox/dev_spec.cu
 !!
 !! SOURCE
@@ -122,7 +122,7 @@ end subroutine alloc_on_gpu
 !!  dtab = fortran tab which will contains data
 !!
 !! SIDE EFFECTS
-!!   WARNING! : this routine is a dummy one when HAVE_GPU_CUDA is not enabled
+!!   WARNING! : this routine is a dummy one when HAVE_GPU is not enabled
 !!   the correct one is in 17_gpu_toolbox/dev_spec.cu
 !!
 !! SOURCE
@@ -160,7 +160,7 @@ end subroutine copy_from_gpu
 !!  gpu_ptr= C_PTR on gpu memory location
 !!
 !! SIDE EFFECTS
-!!   WARNING! : this routine is a dummy one when HAVE_GPU_CUDA is not enabled
+!!   WARNING! : this routine is a dummy one when HAVE_GPU is not enabled
 !!   the correct one is in 17_gpu_toolbox/dev_spec.cu
 !!
 !! SOURCE
@@ -233,7 +233,7 @@ end subroutine copy_gpu_to_gpu
 !!  gpu_ptr= C_PTR on gpu memory location that has been allocated
 !!
 !! SIDE EFFECTS
-!!   WARNING! : this routine is a dummy one when HAVE_GPU_CUDA is not enabled
+!!   WARNING! : this routine is a dummy one when HAVE_GPU is not enabled
 !!   the correct one is in 17_gpu_toolbox/dev_spec.cu
 !!
 !! SOURCE
@@ -264,7 +264,7 @@ end subroutine dealloc_on_gpu
 !!  gpu_ptr= C_PTR on gpu memory location
 !!
 !! SIDE EFFECTS
-!!   WARNING! : this routine is a dummy one when HAVE_GPU_CUDA is not enabled
+!!   WARNING! : this routine is a dummy one when HAVE_GPU is not enabled
 !!   the correct one is in 17_gpu_toolbox/dev_spec.cu
 !!
 !! PARENTS
@@ -300,7 +300,7 @@ end subroutine gpu_memset
 !!  is_allocate= logical(c_bool) : true (if allocated), false (if not allocated)
 !!
 !! SIDE EFFECTS
-!!   WARNING! : this routine is a dummy one when HAVE_GPU_CUDA is not enabled
+!!   WARNING! : this routine is a dummy one when HAVE_GPU is not enabled
 !!   the correct one is in 17_gpu_toolbox/dev_spec.cu
 !!
 !! PARENTS
@@ -334,7 +334,7 @@ end subroutine gpu_allocated_impl
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!!   WARNING! : this routine is a dummy one when HAVE_GPU_CUDA is not enabled
+!!   WARNING! : this routine is a dummy one when HAVE_GPU is not enabled
 !!   the correct one is in 17_gpu_toolbox/dev_spec.cu
 !!
 !! PARENTS
@@ -367,7 +367,7 @@ end subroutine gpu_managed_ptr_status
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!!   WARNING! : this routine is a dummy one when HAVE_GPU_CUDA is not enabled
+!!   WARNING! : this routine is a dummy one when HAVE_GPU is not enabled
 !!   the correct one is in 17_gpu_toolbox/gpu_linalg.cu
 !!
 !! SOURCE
@@ -390,7 +390,7 @@ end subroutine gpu_linalg_init
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!!   WARNING! : this routine is a dummy one when HAVE_GPU_CUDA is not enabled
+!!   WARNING! : this routine is a dummy one when HAVE_GPU is not enabled
 !!   the correct one is in 17_gpu_toolbox/gpu_linalg.cu
 !!
 !! SOURCE
@@ -428,7 +428,7 @@ end subroutine gpu_linalg_shutdown
 !!
 !!
 !! SIDE EFFECTS
-!!   WARNING! : this routine is a dummy one when HAVE_GPU_CUDA is not enabled
+!!   WARNING! : this routine is a dummy one when HAVE_GPU is not enabled
 !!   the correct one is in 17_gpu_toolbox/gpu_linalg.cu
 !!
 !! SOURCE
@@ -501,7 +501,7 @@ end subroutine gpu_xgemm
 !!  b_gpu
 !!
 !! SIDE EFFECTS
-!!   WARNING! : this routine is a dummy one when HAVE_GPU_CUDA is not enabled
+!!   WARNING! : this routine is a dummy one when HAVE_GPU is not enabled
 !!   the correct one is in 17_gpu_toolbox/gpu_linalg.cu
 !!
 !! SOURCE
@@ -740,6 +740,96 @@ end subroutine gpu_xsygvd_bufferSize
 
 #endif
 
+!------------------------------------------------------------------------------
+!                         gpu_set_to_zero
+!------------------------------------------------------------------------------
+!!****f* m_abi_gpu_linalg/gpu_set_to_zero
+!! NAME
+!!  gpu_set_to_zero
+!!
+!! FUNCTION
+!!  Set array content to zero
+!!
+!! INPUTS
+!!  size = size of array
+!!
+!! OUTPUT
+!!  array  = array to be set to zero
+!!
+!! SOURCE
+subroutine gpu_set_to_zero(array, sizea)
+ use, intrinsic :: iso_c_binding
+ integer(c_size_t),intent(in)  :: sizea
+ real(dp),target,intent(out) :: array(sizea)
+
+! *********************************************************************
+
+#if defined HAVE_OPENMP_OFFLOAD
+ integer(c_size_t)  :: i
+
+#if defined HAVE_GPU_CUDA
+ !$OMP TARGET DATA USE_DEVICE_PTR(array)
+ call gpu_memset(c_loc(array), 0, sizea*dp)
+ !$OMP END TARGET DATA
+#elif defined HAVE_GPU_HIP
+ !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(i) MAP(to:array)
+ do i=1,sizea
+   array(i)=zero
+ end do
+#endif
+
+#endif
+
+end subroutine gpu_set_to_zero
+!!***
+
+!------------------------------------------------------------------------------
+!                         gpu_copy
+!------------------------------------------------------------------------------
+!!****f* m_abi_gpu_linalg/gpu_copy
+!! NAME
+!!  gpu_copy
+!!
+!! FUNCTION
+!!  Copy array content on GPU to another
+!!
+!! INPUTS
+!!  src  = array to be copied
+!!  size = size of src and dest
+!!
+!! OUTPUT
+!!  dest = array to be set
+!!
+!! SOURCE
+subroutine gpu_copy(dest, src, sizea)
+ use, intrinsic :: iso_c_binding
+ integer(c_size_t),intent(in)  :: sizea
+ real(dp),target,intent(in)  :: src(sizea)
+ real(dp),target,intent(out) :: dest(sizea)
+
+! *********************************************************************
+
+#if defined HAVE_OPENMP_OFFLOAD
+ integer(c_size_t)  :: i
+
+#if defined HAVE_GPU_CUDA
+ !$OMP TARGET DATA USE_DEVICE_PTR(dest,src)
+ call copy_gpu_to_gpu(c_loc(dest), c_loc(src), sizea*dp)
+ !$OMP END TARGET DATA
+#elif defined HAVE_GPU_HIP
+ !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(i) MAP(to:src,dest)
+ do i=1,sizea
+   dest(i)=src(i)
+ end do
+#endif
+
+#else
+ ! Make testfarm happy
+ ABI_UNUSED((/src,dest/))
+#endif
+
+end subroutine gpu_copy
+!!***
 
 !------------------------------------------------------------------------------
 !                         abi_gpu_xgemm
@@ -2577,6 +2667,36 @@ subroutine abi_gpu_work_resizeC(array,array_managed,current_dim,asked_dim)
 end subroutine abi_gpu_work_resizeC
 !!***
 
+!!****f* m_abi_gpu_linalg/abi_gpu_work_resizeCptr
+!!
+!! NAME
+!! abi_gpu_work_resizeCptr
+
+subroutine abi_gpu_work_resizeCptr(array,current_dim,asked_dim)
+
+  type(c_ptr), intent(inout) :: array
+  integer(c_size_t), intent(inout)  :: current_dim
+  integer(c_size_t), intent(in   )  :: asked_dim
+
+! *************************************************************************
+
+  if ( current_dim < asked_dim  ) then
+    if(current_dim == 0) then
+      call dealloc_on_gpu(array)
+    end if
+    current_dim = asked_dim
+    call alloc_on_gpu(array, asked_dim)
+  end if
+
+#ifndef HAVE_GPU
+  ! Unused if GPU code disabled
+  ABI_UNUSED(array)
+  ABI_UNUSED((/current_dim,asked_dim/))
+#endif
+
+end subroutine abi_gpu_work_resizeCptr
+!!***
+
 subroutine abi_gpu_work_finalize()
 
 #ifdef HAVE_GPU
@@ -2612,11 +2732,16 @@ subroutine abi_gpu_work_finalize()
     end if
 #endif
 
+    if(gpu_work_len > 0) then
+      call dealloc_on_gpu(gpu_work)
+    end if
+
   end if
 
   i_work_len = 0
   r_work_len = 0
   c_work_len = 0
+  gpu_work_len = 0
 
 #endif
 
@@ -2696,30 +2821,39 @@ subroutine abi_gpu_xhegvd_cptr(cplx, itype, jobz, uplo, A_nrows, &
                  bufferSize)
 
   select case(cplx)
+
   case (1)
-
-    ! resize work array if needed
-    call abi_gpu_work_resize(r_work,r_work_managed,r_work_len,bufferSize)
-
-    ! retrieve work pointer to use
+    ! resize work array if needed and retrieve work pointer to use
     if(abi_linalg_gpu_mode == ABI_GPU_LEGACY &
           .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
+      call abi_gpu_work_resize(r_work,r_work_managed,r_work_len,bufferSize)
       gpu_ptr = c_loc(r_work_managed)
     else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_GET_MAPPED_PTR
+      call abi_gpu_work_resize(r_work,r_work_managed,r_work_len,bufferSize)
       gpu_ptr = xomp_get_mapped_ptr(c_loc(r_work))
+#else
+      call abi_gpu_work_resizeCptr(gpu_work,gpu_work_len,INT(1,c_size_t)*bufferSize*dp)
+      gpu_ptr = gpu_work
+#endif
     end if
+
   case (2)
-
-    ! resize work array if needed
-    call abi_gpu_work_resize(c_work,c_work_managed,c_work_len,bufferSize)
-
-    ! retrieve work pointer to use
+    ! resize work array if needed and retrieve work pointer to use
     if(abi_linalg_gpu_mode == ABI_GPU_LEGACY &
           .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
+      call abi_gpu_work_resize(c_work,c_work_managed,c_work_len,bufferSize)
       gpu_ptr = c_loc(c_work_managed)
     else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_GET_MAPPED_PTR
+      call abi_gpu_work_resize(c_work,c_work_managed,c_work_len,bufferSize)
       gpu_ptr = xomp_get_mapped_ptr(c_loc(c_work))
+#else
+      call abi_gpu_work_resizeCptr(gpu_work,gpu_work_len,INT(2,c_size_t)*bufferSize*dp)
+      gpu_ptr = gpu_work
+#endif
     end if
+
   end select
 
   ! and compute (finally)
@@ -2991,30 +3125,39 @@ subroutine abi_gpu_xheevd_cptr(cplx, jobz, uplo, A_nrows, &
                  bufferSize)
 
   select case(cplx)
+
   case (1)
-
-    ! resize work array if needed
-    call abi_gpu_work_resize(r_work,r_work_managed,r_work_len,bufferSize)
-
-    ! retrieve work pointer to use
+    ! resize work array if needed and retrieve work pointer to use
     if(abi_linalg_gpu_mode == ABI_GPU_LEGACY &
           .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
+      call abi_gpu_work_resize(r_work,r_work_managed,r_work_len,bufferSize)
       gpu_ptr = c_loc(r_work_managed)
     else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_GET_MAPPED_PTR
+      call abi_gpu_work_resize(r_work,r_work_managed,r_work_len,bufferSize)
       gpu_ptr = xomp_get_mapped_ptr(c_loc(r_work))
+#else
+      call abi_gpu_work_resizeCptr(gpu_work,gpu_work_len,INT(1,c_size_t)*bufferSize*dp)
+      gpu_ptr = gpu_work
+#endif
     end if
+
   case (2)
-
-    ! resize work array if needed
-    call abi_gpu_work_resize(c_work,c_work_managed,c_work_len,bufferSize)
-
-    ! retrieve work pointer to use
+    ! resize work array if needed and retrieve work pointer to use
     if(abi_linalg_gpu_mode == ABI_GPU_LEGACY &
           .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
+      call abi_gpu_work_resize(c_work,c_work_managed,c_work_len,bufferSize)
       gpu_ptr = c_loc(c_work_managed)
     else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_GET_MAPPED_PTR
+      call abi_gpu_work_resize(c_work,c_work_managed,c_work_len,bufferSize)
       gpu_ptr = xomp_get_mapped_ptr(c_loc(c_work))
+#else
+      call abi_gpu_work_resizeCptr(gpu_work,gpu_work_len,INT(2,c_size_t)*bufferSize*dp)
+      gpu_ptr = gpu_work
+#endif
     end if
+
   end select
 
   ! and compute (finally)
@@ -3257,30 +3400,39 @@ subroutine abi_gpu_xpotrf_cptr(cplx, uplo, A_nrows, &
                  bufferSize)
 
   select case(cplx)
+
   case (1)
-
-    ! resize work array if needed
-    call abi_gpu_work_resize(r_work,r_work_managed,r_work_len,bufferSize)
-
-    ! retrieve work pointer to use
+    ! resize work array if needed and retrieve work pointer to use
     if(abi_linalg_gpu_mode == ABI_GPU_LEGACY &
           .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
+      call abi_gpu_work_resize(r_work,r_work_managed,r_work_len,bufferSize)
       gpu_ptr = c_loc(r_work_managed)
     else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_GET_MAPPED_PTR
+      call abi_gpu_work_resize(r_work,r_work_managed,r_work_len,bufferSize)
       gpu_ptr = xomp_get_mapped_ptr(c_loc(r_work))
+#else
+      call abi_gpu_work_resizeCptr(gpu_work,gpu_work_len,INT(1,c_size_t)*bufferSize*dp)
+      gpu_ptr = gpu_work
+#endif
     end if
+
   case (2)
-
-    ! resize work array if needed
-    call abi_gpu_work_resize(c_work,c_work_managed,c_work_len,bufferSize)
-
-    ! retrieve work pointer to use
+    ! resize work array if needed and retrieve work pointer to use
     if(abi_linalg_gpu_mode == ABI_GPU_LEGACY &
           .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
+      call abi_gpu_work_resize(c_work,c_work_managed,c_work_len,bufferSize)
       gpu_ptr = c_loc(c_work_managed)
     else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_GET_MAPPED_PTR
+      call abi_gpu_work_resize(c_work,c_work_managed,c_work_len,bufferSize)
       gpu_ptr = xomp_get_mapped_ptr(c_loc(c_work))
+#else
+      call abi_gpu_work_resizeCptr(gpu_work,gpu_work_len,INT(1,c_size_t)*bufferSize*dp)
+      gpu_ptr = gpu_work
+#endif
     end if
+
   end select
 
   ! and compute (finally)
@@ -3444,9 +3596,6 @@ subroutine abi_gpu_xpotrf_2z(cplx, uplo, A_nrows, &
 end subroutine abi_gpu_xpotrf_2z
 !!***
 
-
-
-
 !!****f* m_abi_linalg/gpu_xorthonormalize
 !! NAME
 !!  gpu_xorthonormalize
@@ -3493,7 +3642,7 @@ subroutine gpu_xorthonormalize(blockvectorx_gpu,blockvectorbx_gpu,blocksize,spac
 !arrays
  type(c_ptr),intent(inout) :: blockvectorbx_gpu, blockvectorx_gpu, sqgram_gpu
 !Local variables-------------------------------
-#if defined HAVE_GPU_CUDA
+#if defined HAVE_GPU
  integer :: ierr,info
  real(dp),    dimension(:,:),allocatable, target :: d_sqgram
  complex(dpc),dimension(:,:),allocatable, target :: z_sqgram
@@ -3506,7 +3655,8 @@ subroutine gpu_xorthonormalize(blockvectorx_gpu,blockvectorbx_gpu,blocksize,spac
  character(len=500) :: message
 
 ! *********************************************************************
-#if defined HAVE_GPU_CUDA
+
+#if defined HAVE_GPU
  if (present(tim_xortho).and.present(timopt)) then
    if(abs(timopt)==3) then
      call timab(tim_xortho,1,tsec)
@@ -3559,7 +3709,7 @@ subroutine gpu_xorthonormalize(blockvectorx_gpu,blockvectorbx_gpu,blocksize,spac
  return
 
 #else
- message='  This routine is not allowed when Cuda is disabled !'
+ message='  This routine is not allowed when running on GPU is disabled !'
  ABI_BUG(message)
  if (.false.) then
    write(std_out,*) blocksize,vectsize,spaceComm,x_cplx
