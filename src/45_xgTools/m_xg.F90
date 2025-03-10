@@ -5706,12 +5706,12 @@ contains
 #ifdef HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
       select case(xgBlock%space)
       case (SPACE_R,SPACE_CR)
-        byte_count = fact * xgBlock%ldim * xgBlock%cols * dp
+        byte_count = int(fact, c_size_t) * xgBlock%ldim * xgBlock%cols * dp
         !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock%vecR)
         call gpu_memset(c_loc(xgBlock%vecR), 0, byte_count)
         !$OMP END TARGET DATA
       case (SPACE_C)
-        byte_count = xgBlock%ldim * xgBlock%cols * 2 * dpc ! Note the factor 2, needed here!
+        byte_count = int(xgBlock%ldim, c_size_t) * xgBlock%cols * 2 * dpc ! Note the factor 2, needed here!
         !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock%vecC)
         call gpu_memset(c_loc(xgBlock%vecC), 0, byte_count)
         !$OMP END TARGET DATA
