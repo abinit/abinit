@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2022 ABINIT group ()
+!! Copyright (C) 1999-2025 ABINIT group ()
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -304,7 +304,7 @@ subroutine barevcoul(rcut,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev,short
      if (ABS(check)>tol6) then
        vcut%pdir(ii)=1
        if (check<zero) then  ! use Rozzi's method.
-         vcut%hcyl=ABS(check)*SQRT(SUM(Cryst%rprimd(:,ii)**2))
+         vcut%hcyl=ABS(check)*NORM2(Cryst%rprimd(:,ii))
          opt_cylinder=2
        end if
      end if
@@ -351,10 +351,7 @@ subroutine barevcoul(rcut,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev,short
      bz_plane=l2norm(b1.x.b2)
      dx=(xx(2)-xx(1))
      integ=yy(2)*dx*3.0/2.0
-
-     do ii=3,npt-2
-       integ=integ+yy(ii)*dx
-     end do
+     integ=integ + SUM(yy(3:npt-2))*dx
      integ=integ+yy(npt-1)*dx*3.0/2.0
      write(std_out,*)' simple integral',integ
      q0_volsph=(two_pi)**3/(nkpt_bz*ucvol)
@@ -455,9 +452,7 @@ subroutine barevcoul(rcut,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev,short
      dx=(xx(2)-xx(1))
      ! integ = \int dr r f(r)
      integ=xx(2)*yy(2)*dx*3.0/2.0
-     do ii=3,npt-2
-       integ=integ+xx(ii)*yy(ii)*dx
-     end do
+     integ=integ + DOT_PRODUCT(xx(3:npt-2),yy(3:npt-2))*dx
      integ=integ+xx(npt-1)*yy(npt-1)*dx*3.0/2.0
      write(std_out,*)' simple integral',integ
      q0_vol=bz_plane*pi*xx(npt)**2

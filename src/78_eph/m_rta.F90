@@ -14,7 +14,7 @@
 !!  can be easily included once an appropriate model is added to the ab-initio e-ph scattering rates.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2022 ABINIT group (HM, MG)
+!!  Copyright (C) 2008-2025 ABINIT group (HM, MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -48,11 +48,9 @@ module m_rta
  use m_dtset
  use m_dtfil
  use m_krank
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
 
- use defs_datatypes,   only : pseudopotential_type, ebands_t
+ use defs_datatypes,   only : pseudopotential_type
  use m_io_tools,       only : open_file
  use m_time,           only : cwtime, cwtime_report
  use m_crystal,        only : crystal_t
@@ -139,14 +137,15 @@ type,public :: rta_t
    ! Number of bands included in self-energy matrix elements for each k-point in kcalc.
    ! Depends on spin because all degenerate states should be included when symmetries are used.
 
-  !integer,allocatable :: kcalc2ibz(:,:)
+  integer,allocatable :: kcalc2ibz(:,:)
    !kcalc2ibz(nkcalc, 6))
    ! Mapping ikcalc --> IBZ as reported by listkk.
 
   integer,allocatable :: kcalc2ebands(:,:)
+   ! (6, nkcalc)
    ! Mapping ikcalc --> ebands IBZ
-   ! Note that this array is not necessarily equation to kcalc2ibz computed in sigmaph
-   ! because we may have used sigma_nkpt to downsample the initial nkpt mesh.
+   ! Note that this array is not necessarily equal to kcalc2ibz computed in sigmaph
+   ! because we may have used sigma_ngkpt to downsample the initial nkpt mesh.
    ! This array is computed in get_ebands and is equal to kcalc2ibz if sigma_nkpt == ngkpt
 
    real(dp),allocatable :: kTmesh(:)
@@ -298,13 +297,13 @@ subroutine rta_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
 !Local variables ------------------------------
  type(rta_t) :: rta
 !arrays
- integer :: unts(2)
+ integer :: units(2)
 
 ! *************************************************************************
 
- unts = [std_out, ab_out]
- call wrtout(unts, ch10//' Entering transport RTA computation driver.')
- call wrtout(unts, sjoin("- Reading carrier lifetimes from:", dtfil%filsigephin), newlines=1, do_flush=.True.)
+ units = [std_out, ab_out]
+ call wrtout(units, ch10//' Entering transport RTA computation driver.')
+ call wrtout(units, sjoin("- Reading carrier lifetimes from:", dtfil%filsigephin), newlines=1, do_flush=.True.)
 
  ! Initialize RTA object
  rta = rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, comm)
@@ -350,7 +349,7 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, 
 
 !Local variables ------------------------------
  integer,parameter :: sppoldbl1 = 1, master = 0
- integer :: ierr, spin, nprocs, my_rank, timrev, ik_ibz, ib, irta, itemp, ndat, nsppol, idat, mband, ikpt
+ integer :: ierr, spin, nprocs, my_rank, ik_ibz, ib, irta, itemp, ndat, nsppol, idat, mband, ikpt
  real(dp) :: cpu, wall, gflops
  character(len=500) :: msg
  character(len=fnlen) :: wfk_fname_dense
@@ -360,7 +359,7 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, 
  type(sigmaph_t) :: sigmaph
  type(krank_t) :: krank
 !arrays
- integer :: kptrlatt(3,3), unts(2), sigma_ngkpt(3)
+ integer :: kptrlatt(3,3), units(2), sigma_ngkpt(3)
  integer,allocatable :: indkk(:,:)
  real(dp) :: extrael_fermie(2), sigma_erange(2)
  real(dp),allocatable :: values_bksd(:,:,:,:), vals_bsd(:,:,:), tmp_array4(:,:,:,:), tmp_array5(:,:,:,:,:)
@@ -368,7 +367,7 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, 
 !************************************************************************
 
  call cwtime(cpu, wall, gflops, "start")
- unts = [std_out, ab_out]
+ units = [std_out, ab_out]
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
 
@@ -401,7 +400,7 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, 
  call alloc_copy(sigmaph%bstart_ks, new%bstart_ks)
  call alloc_copy(sigmaph%bstop_ks, new%bstop_ks)
  call alloc_copy(sigmaph%nbcalc_ks, new%nbcalc_ks)
- !call alloc_copy(sigmaph%kcalc2ibz, new%kcalc2ibz)
+ call alloc_copy(sigmaph%kcalc2ibz, new%kcalc2ibz)
 
  new%bmin = minval(sigmaph%bstart_ks); new%bmax = maxval(sigmaph%bstop_ks)
  !new%bmin = 1; new%bmax = ebands%mband ! This for debugging purposes, results should not change
@@ -411,11 +410,11 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, 
  nsppol = new%nsppol
 
  ABI_MALLOC(new%eminmax_spin, (2, nsppol))
- new%eminmax_spin = ebands_get_minmax(ebands, "eig")
+ new%eminmax_spin = ebands%get_minmax("eig")
 
  if (new%assume_gap) then
    ! Get gaps
-   new%gaps = ebands_get_gaps(ebands, ierr)
+   new%gaps = ebands%get_gaps(ierr)
    if (ierr /= 0) then
      do spin=1, nsppol
        ABI_WARNING(trim(new%gaps%errmsg_spin(spin)))
@@ -425,7 +424,7 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, 
      !ABI_ERROR("ebands_get_gaps returned non-zero exit status. See above warning messages...")
      ABI_WARNING("ebands_get_gaps returned non-zero exit status. See above warning messages...")
    end if
-   if (my_rank == master) call new%gaps%print(unit=std_out); call new%gaps%print(unit=ab_out)
+   if (my_rank == master) call new%gaps%print(units)
  end if
 
  ! =================================================
@@ -438,17 +437,17 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, 
  !
  if (any(dtset%sigma_ngkpt /= 0)) then
    ! If integrals are computed with the sigma_ngkpt k-mesh, we need to downsample ebands.
-   !call wrtout(unts, sjoin(" SIGMAPH file used sigma_ngkpt:", ltoa(sigma_ngkpt)))
-   call wrtout(unts, sjoin(" Computing integrals with downsampled sigma_ngkpt:", ltoa(dtset%sigma_ngkpt)))
+   !call wrtout(units, sjoin(" SIGMAPH file used sigma_ngkpt:", ltoa(sigma_ngkpt)))
+   call wrtout(units, sjoin(" Computing integrals with downsampled sigma_ngkpt:", ltoa(dtset%sigma_ngkpt)))
    kptrlatt = 0
    kptrlatt(1,1) = dtset%sigma_ngkpt(1); kptrlatt(2,2) = dtset%sigma_ngkpt(2); kptrlatt(3,3) = dtset%sigma_ngkpt(3)
 
-   tmp_ebands = ebands_downsample(ebands, cryst, kptrlatt, dtset%sigma_nshiftk, dtset%sigma_shiftk)
+   tmp_ebands = ebands%downsample(cryst, kptrlatt, dtset%sigma_nshiftk, dtset%sigma_shiftk)
    new%ebands = sigmaph%get_ebands(cryst, tmp_ebands, [new%bmin, new%bmax], &
                                    new%kcalc2ebands, new%linewidths, new%vbks, xmpi_comm_self)
-   call ebands_free(tmp_ebands)
+   call tmp_ebands%free()
  else
-   !call wrtout(unts, sjoin(" Computing integrals with SIGEPH k-mesh:", ebands_kmesh2str(ebands))
+   !call wrtout(units, sjoin(" Computing integrals with SIGEPH k-mesh:", ebands_kmesh2str(ebands))
    new%ebands = sigmaph%get_ebands(cryst, ebands, [new%bmin, new%bmax], &
                                    new%kcalc2ebands, new%linewidths, new%vbks, xmpi_comm_self)
    kptrlatt = new%ebands%kptrlatt
@@ -466,14 +465,14 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, 
    wfk_fname_dense = trim(dtfil%fnameabi_wfkfine)
    ABI_CHECK(nctk_try_fort_or_ncfile(wfk_fname_dense, msg) == 0, msg)
 
-   call wrtout(unts, " EPH double grid interpolation: will read energies from: "//trim(wfk_fname_dense), newlines=1)
+   call wrtout(units, " EPH double grid interpolation: will read energies from: "//trim(wfk_fname_dense), newlines=1)
    mband = new%ebands%mband
 
    !ebands_dense = wfk_read_ebands(wfk_fname_dense, comm)
 
    tmp_ebands = wfk_read_ebands(wfk_fname_dense, comm)
-   ebands_dense = ebands_chop(tmp_ebands, 1, mband)
-   call ebands_free(tmp_ebands)
+   ebands_dense = tmp_ebands%chop(1, mband)
+   call tmp_ebands%free()
    if (my_rank == master) then
      write(std_out, *)" Using kptrlatt: ", ebands_dense%kptrlatt
      write(std_out, *)"       shiftk: ", ebands_dense%shiftk
@@ -517,7 +516,7 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, 
    ! HERE we re-malloc new%ebands and %linewidths on the fine k-mesh.
    ! The call must be executed here, once klinterp has been built.
    ! After this point we can use new%ebands to allocate stuff.
-   call ebands_move_alloc(ebands_dense, new%ebands)
+   call ebands_dense%move_alloc(new%ebands)
 
    ! Unlinke the ebands stored in SIGEPH, the eigens read from WFK_FINE have not been
    ! shifted with the scissors operator or updated according to extrael_fermie so do it now.
@@ -568,21 +567,20 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, 
 
  if (any(dtset%transport_ngkpt /= 0)) then
    ! Perform further downsampling (usefull for debugging purposes)
-   call wrtout(unts, " Downsampling the k-mesh before computing transport:")
-   call wrtout(unts, sjoin(" Using transport_ngkpt: ", ltoa(dtset%transport_ngkpt)))
+   call wrtout(units, " Downsampling the k-mesh before computing transport:")
+   call wrtout(units, sjoin(" Using transport_ngkpt: ", ltoa(dtset%transport_ngkpt)))
    kptrlatt = 0
    kptrlatt(1, 1) = dtset%transport_ngkpt(1)
    kptrlatt(2, 2) = dtset%transport_ngkpt(2)
    kptrlatt(3, 3) = dtset%transport_ngkpt(3)
-   tmp_ebands = ebands_downsample(new%ebands, cryst, kptrlatt, 1, [zero, zero, zero])
+   tmp_ebands = new%ebands%downsample(cryst, kptrlatt, 1, [zero, zero, zero])
 
    ! Map the points of the downsampled bands to dense ebands
-   timrev = kpts_timrev_from_kptopt(ebands%kptopt)
    ABI_MALLOC(indkk, (6, tmp_ebands%nkpt))
 
    krank = krank_from_kptrlatt(new%ebands%nkpt, new%ebands%kptns, new%ebands%kptrlatt, compute_invrank=.False.)
 
-   if (kpts_map("symrec", timrev, cryst, krank, tmp_ebands%nkpt, tmp_ebands%kptns, indkk) /= 0) then
+   if (kpts_map("symrec", ebands%kptopt, cryst, krank, tmp_ebands%nkpt, tmp_ebands%kptns, indkk) /= 0) then
      write(msg, '(3a)' ) &
        "Error while downsampling ebands in the transport driver",ch10, &
        "The k-point could not be generated from a symmetrical one."
@@ -611,7 +609,7 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, 
    !print *, "linewidth_mrta", maxval(abs(new%linewidths(:,:,:,:,2)))
 
    ABI_FREE(indkk)
-   call ebands_move_alloc(tmp_ebands, new%ebands)
+   call tmp_ebands%move_alloc(new%ebands)
  end if
 
  ! Same doping case as in sigmaph file.
@@ -637,7 +635,7 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, 
    end if
 
    ! Compute Fermi level for different T values.
-   call ebands_get_muT_with_fd(ebands, new%ntemp, new%kTmesh, dtset%spinmagntarget, dtset%prtvol, new%transport_mu_e, comm)
+   call ebands%get_muT_with_fd(new%ntemp, new%kTmesh, dtset%spinmagntarget, dtset%prtvol, new%transport_mu_e, comm)
  end if
 
  ! TODO: Implement possible change of sigma_erange, useful for convergence studies
@@ -682,14 +680,12 @@ subroutine compute_rta(self, cryst, dtset, dtfil, comm)
  integer,parameter :: nvecs0 = 0, master = 0
  integer :: nsppol, nkibz, ib, ik_ibz, iw, spin, ii, jj, itemp, irta, itens, iscal, cnt
  integer :: ntens, edos_intmeth, ifermi, iel, nvals, my_rank
-#ifdef HAVE_NETCDF
  integer :: ncid
-#endif
  !character(len=500) :: msg
  character(len=fnlen) :: path
  real(dp) :: emin, emax, edos_broad, edos_step, max_occ, kT, Tkelv, linewidth, fact0, cpu, wall, gflops
 !arrays
- integer :: unts(2)
+ integer :: units(2)
  real(dp) :: vr(3), dummy_vecs(1,1,1,1,1), work_33(3,3), S_33(3,3), mat33(3,3)
  real(dp),allocatable :: vv_tens(:,:,:,:,:,:,:), out_valsdos(:,:,:,:), dummy_dosvecs(:,:,:,:,:)
  real(dp),allocatable :: out_tensdos(:,:,:,:,:,:), tau_vals(:,:,:,:,:), l0inv_33nw(:,:,:)
@@ -698,7 +694,7 @@ subroutine compute_rta(self, cryst, dtset, dtfil, comm)
 
  call cwtime(cpu, wall, gflops, "start")
  my_rank = xmpi_comm_rank(comm)
- unts = [std_out, ab_out]
+ units = [std_out, ab_out]
 
  ! Basic dimensions
  nsppol = self%ebands%nsppol; nkibz = self%ebands%nkpt
@@ -781,7 +777,7 @@ subroutine compute_rta(self, cryst, dtset, dtfil, comm)
  !  Note how we compute the DOS only between [emin, emax] to save time and memory
  !  this implies that IDOS and edos%ifermi are ill-defined
 
- self%edos = ebands_get_edos_matrix_elements(self%ebands, cryst, self%bsize, &
+ self%edos = self%ebands%get_edos_matrix_elements(cryst, self%bsize, &
                                              nvals, tau_vals, nvecs0, dummy_vecs, ntens, vv_tens, &
                                              edos_intmeth, edos_step, edos_broad, &
                                              out_valsdos, dummy_dosvecs, out_tensdos, comm, &
@@ -987,13 +983,11 @@ subroutine compute_rta(self, cryst, dtset, dtfil, comm)
    call self%print_rta_txt_files(cryst, dtset, dtfil)
 
    ! Creates the netcdf file used to store the results of the calculation.
-#ifdef HAVE_NETCDF
    path = strcat(dtfil%filnam_ds(4), "_RTA.nc")
-   call wrtout(unts, ch10//sjoin("- Writing RTA transport results to:", path))
+   call wrtout(units, ch10//sjoin("- Writing RTA transport results to:", path))
    NCF_CHECK(nctk_open_create(ncid, path , xmpi_comm_self))
    call self%rta_ncwrite(cryst, dtset, ncid)
    NCF_CHECK(nf90_close(ncid))
-#endif
  end if
 
  call cwtime_report(" compute_rta", cpu, wall, gflops)
@@ -1112,7 +1106,7 @@ subroutine compute_rta_mobility(self, cryst, comm)
 
  ! Compute (e/h) carriers per unit cell at the different temperatures.
  ABI_CALLOC(self%n_ehst, (2, self%nsppol, self%ntemp))
- call ebands_get_carriers(self%ebands, self%ntemp, self%kTmesh, self%transport_mu_e, self%n_ehst)
+ call self%ebands%get_carriers(self%ntemp, self%kTmesh, self%transport_mu_e, self%n_ehst)
 
  ! Compute conductivity_mu i.e. results in which lifetimes have been computed in a consistent way
  ! with the same the Fermi level. In all the other cases, indeed, we assume that tau does not depend on ef.
@@ -1227,22 +1221,26 @@ subroutine rta_ncwrite(self, cryst, dtset, ncid)
 
  call cwtime(cpu, wall, gflops, "start")
 
-#ifdef HAVE_NETCDF
  ! Write to netcdf file
  NCF_CHECK(cryst%ncwrite(ncid))
- NCF_CHECK(ebands_ncwrite(self%ebands, ncid))
+ NCF_CHECK(self%ebands%ncwrite(ncid))
  NCF_CHECK(self%edos%ncwrite(ncid))
 
  !nctk_copy from sigeph?
  !    nctkarr_t("eph_ngqpt_fine", "int", "three"), &
 
  ncerr = nctk_def_dims(ncid, [ &
-    nctkdim_t("ntemp", self%ntemp), nctkdim_t("nrta", self%nrta), nctkdim_t("nsppol", self%nsppol)], defmode=.True.)
+    nctkdim_t("ntemp", self%ntemp), nctkdim_t("nrta", self%nrta), nctkdim_t("nsppol", self%nsppol), &
+    nctkdim_t("nkcalc", self%nkcalc), nctkdim_t("nkibz", self%ebands%nkpt) &
+ ], defmode=.True.)
  NCF_CHECK(ncerr)
 
  ncerr = nctk_def_arrays(ncid, [ &
     nctkarr_t('transport_ngkpt', "int", "three"), &
     nctkarr_t('sigma_erange', "dp", "two"), &
+    nctkarr_t("kcalc2ibz", "int", "nkcalc, six"), &
+    nctkarr_t("kcalc2ebands", "int", "six, nkcalc"), &
+    nctkarr_t("kibz", "dp", "three, nkibz"), &
     nctkarr_t('kTmesh', "dp", "ntemp"), &
     nctkarr_t('transport_mu_e', "dp", "ntemp"), &
     nctkarr_t('n_ehst', "dp", "two, nsppol, ntemp"), &
@@ -1286,6 +1284,9 @@ subroutine rta_ncwrite(self, cryst, dtset, ncid)
 
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "transport_ngkpt"), dtset%transport_ngkpt))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "sigma_erange"), dtset%sigma_erange))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kcalc2ibz"), self%kcalc2ibz))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kcalc2ebands"), self%kcalc2ebands))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kibz"), self%ebands%kptns))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kTmesh"), self%kTmesh))
  if (self%assume_gap) then
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vb_max"), self%gaps%vb_max))
@@ -1317,7 +1318,6 @@ subroutine rta_ncwrite(self, cryst, dtset, ncid)
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "mobility_mu"), self%mobility_mu))
  !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "conductivity_mu"), self%conductivity_mu))
  !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "resistivity_mu"), self%resistivity_mu))
-#endif
 
  call cwtime_report(" rta_ncwrite", cpu, wall, gflops)
 
@@ -1350,14 +1350,14 @@ subroutine print_rta_txt_files(self, cryst, dtset, dtfil)
 !Local variables --------------------------------
  integer :: itemp, spin, irta, ii, nsp
  character(len=500) :: msg, pre, rta_type
- integer :: unts(2)
+ integer :: units(2)
  character(len=2) :: components(3)
  real(dp) :: mat33(3,3) ! work33(3,3),
 
 !************************************************************************
 
- unts = [std_out, ab_out]
- call wrtout(unts, ch10//' Transport (RTA) calculation results:', newlines=1)
+ units = [std_out, ab_out]
+ call wrtout(units, ch10//' Transport (RTA) calculation results:', newlines=1)
  components = ["xx", "yy", "zz"]
 
  do irta=1,self%nrta
@@ -1367,12 +1367,12 @@ subroutine print_rta_txt_files(self, cryst, dtset, dtfil)
    if (self%assume_gap) then
      ! SemiConductor
      do ii=1,3
-       call wrtout(unts, sjoin(" Cartesian component of", rta_type, "mobility tensor:", components(ii)))
+       call wrtout(units, sjoin(" Cartesian component of", rta_type, "mobility tensor:", components(ii)))
        write(msg, "(a16,a32,a32)") 'Temperature [K]', 'e/h density [cm^-3]', 'e/h mobility [cm^2/Vs]'
-       call wrtout(unts, msg)
+       call wrtout(units, msg)
 
        do spin=1,self%nsppol
-         if (self%nsppol == 2) call wrtout(unts, sjoin(" For spin:", stoa(spin)), newlines=1)
+         if (self%nsppol == 2) call wrtout(units, sjoin(" For spin:", stoa(spin)), newlines=1)
 
          do itemp=1,self%ntemp
            write(msg,"(f16.2,2e16.2,2f16.2)") &
@@ -1381,10 +1381,10 @@ subroutine print_rta_txt_files(self, cryst, dtset, dtfil)
              self%n_ehst(2, spin, itemp) / cryst%ucvol / Bohr_cm**3, &
              self%mobility_mu(ii, ii, 1, spin, itemp, irta), &
              self%mobility_mu(ii, ii, 2, spin, itemp, irta)
-           call wrtout(unts, msg)
+           call wrtout(units, msg)
          end do ! itemp
        end do ! spin
-       call wrtout(unts, ch10)
+       call wrtout(units, ch10)
      end do ! ii
 
    else
@@ -1392,13 +1392,13 @@ subroutine print_rta_txt_files(self, cryst, dtset, dtfil)
      do ii=1,2
        if (ii == 1) msg = sjoin(" Conductivity [Siemens cm^-1] using ", rta_type, "approximation")
        if (ii == 2) msg = sjoin(" Resistivity [micro-Ohm cm] using ", rta_type, "approximation")
-       call wrtout(unts, msg)
+       call wrtout(units, msg)
 
        nsp = self%nsppol; if (ii == 2) nsp = 1
        do spin=1,nsp
-         if (nsp == 2) call wrtout(unts, sjoin(" For spin:", stoa(spin)), newlines=1)
+         if (nsp == 2) call wrtout(units, sjoin(" For spin:", stoa(spin)), newlines=1)
          write(msg, "(4a16)") 'Temperature (K)', 'xx', 'yy', 'zz'
-         call wrtout(unts, msg)
+         call wrtout(units, msg)
          do itemp=1,self%ntemp
            if (ii == 1) then
              mat33 = self%conductivity(:,:,itemp,spin,irta)
@@ -1406,10 +1406,10 @@ subroutine print_rta_txt_files(self, cryst, dtset, dtfil)
              mat33 = self%resistivity(:,:,itemp,irta)
            end if
            write(msg,"(f16.2,3e16.6)") self%kTmesh(itemp) / kb_HaK, mat33(1,1), mat33(2,2), mat33(3,3)
-           call wrtout(unts, msg)
+           call wrtout(units, msg)
          end do !itemp
        end do !spin
-       call wrtout(unts, ch10)
+       call wrtout(units, ch10)
      end do
    end if
 
@@ -1538,7 +1538,7 @@ subroutine rta_free(self)
  ABI_SFREE(self%bstart_ks)
  ABI_SFREE(self%bstop_ks)
  ABI_SFREE(self%nbcalc_ks)
- !ABI_SFREE(self%kcalc2ibz)
+ ABI_SFREE(self%kcalc2ibz)
  ABI_SFREE(self%kcalc2ebands)
  ABI_SFREE(self%kTmesh)
  ABI_SFREE(self%eminmax_spin)
@@ -1561,7 +1561,7 @@ subroutine rta_free(self)
  ABI_SFREE(self%conductivity_mu)
  ABI_SFREE(self%n_ehst)
 
- call ebands_free(self%ebands)
+ call self%ebands%free()
  call self%gaps%free()
  call self%edos%free()
 
@@ -1605,19 +1605,17 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
 
 !Local variables ------------------------------
  integer,parameter :: master = 0
- integer :: spin, ikcalc, nkcalc, nbsum, nbcalc, itemp, iter, ierr
+ integer :: spin, ikcalc, nkcalc, nbsum, nbcalc, itemp, iter, ierr, bsize
  integer :: nkibz, nsppol, band_k, ik_ibz, bmin, bmax, band_sum, ntemp, ii, jj, iq_sum, btype, nsp
  integer :: ikq_ibz, isym_kq, trev_kq, cnt, tag, nprocs, receiver, my_rank, isym, itime, isym_lgk
-#ifdef HAVE_NETCDF
  integer :: ncid, grp_ncid, ncerr
-#endif
  real(dp) :: kT, mu_e, e_nk, dfde_nk, tau_nk, lw_nk, max_adiff, cpu, wall, gflops, btype_fact, abs_tol, rtmp
  logical :: send_data
  character(len=500) :: msg
  character(len=fnlen) :: path
  type(rta_t) :: ibte
 !arrays
- integer :: unts(2), dims(4)
+ integer :: units(2), dims(4)
  logical,allocatable :: converged(:)
  real(dp) :: vec3(3), sym_vec(3), mat33(3,3), f_kq(3), work33(3,3)
  real(dp) :: fsum_eh(3,2,ebands%nsppol), max_adiff_spin(ebands%nsppol)
@@ -1656,10 +1654,10 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
 ! *************************************************************************
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
- unts = [std_out, ab_out]
+ units = [std_out, ab_out]
 
- call wrtout(unts, ch10//' Entering IBTE driver.')
- call wrtout(unts, sjoin("- Reading SERTA lifetimes and e-ph scattering operator from:", &
+ call wrtout(units, ch10//' Entering IBTE driver.')
+ call wrtout(units, sjoin("- Reading SERTA lifetimes and e-ph scattering operator from:", &
              dtfil%filsigephin), newlines=1, do_flush=.True.)
 
  ! Initialize IBTE object
@@ -1685,7 +1683,6 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
  end do
 
  call cwtime(cpu, wall, gflops, "start")
-#ifdef HAVE_NETCDF
  ! Master reads and sends data to the rank treating (ikcalc, spin).
  if (my_rank == master) then
    NCF_CHECK(nctk_open_read(ncid, dtfil%filsigephin, xmpi_comm_self))
@@ -1771,7 +1768,7 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
  if (my_rank == master) then
    NCF_CHECK(nf90_close(ncid))
  end if
-#endif
+
  call cwtime_report(" sigeph IO", cpu, wall, gflops)
 
  ! Solve the linearized BTE with B = 0.
@@ -1788,6 +1785,7 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
 
  !call ibte%solve_ibte(solver_type=1)
 
+ bsize = bmax - bmin + 1
  ABI_CALLOC(fkn_in, (3, nkibz, bmin:bmax, nsppol))
  ABI_CALLOC(fkn_out, (3, nkibz, bmin:bmax, nsppol))
  ABI_CALLOC(fkn_serta, (3, nkibz, bmin:bmax, nsppol))
@@ -1812,9 +1810,33 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
  if (abs_tol <= zero) then
    rtmp = minval(ibte%n_ehst, mask=ibte%n_ehst > zero) * ibte%nsppol
    abs_tol = 1e-20 * rtmp / cryst%ucvol / Bohr_cm**3
-   call wrtout(std_out, " Input ibte_abs_tol <= zero ==> computing abs tolerance from carrier density")
+   call wrtout(std_out, " Input ibte_abs_tol <= zero ==> computing abs tolerance from minimal carrier density over all T")
    call wrtout(std_out, " using: abs_tol = 1e-20 * e_density (in cm**-3)")
    call wrtout(std_out, sjoin(" abs_tol:", ftoa(abs_tol), " from carrier_density:", ftoa(rtmp / cryst%ucvol / Bohr_cm**3)))
+ end if
+
+ if (my_rank == master) then
+   path = strcat(dtfil%filnam_ds(4), "_RTA.nc")
+   call wrtout(units, ch10//sjoin("- Writing IBTE transport results to:", path))
+   NCF_CHECK(nctk_open_modify(ncid, path , xmpi_comm_self))
+
+   ncerr = nctk_def_dims(ncid, [ &
+      nctkdim_t("nkibz", nkibz), nctkdim_t("bsize", bsize), nctkdim_t("nkcalc", ibte%nkcalc) &
+   ], defmode=.True.)
+   NCF_CHECK(ncerr)
+
+   ncerr = nctk_def_arrays(ncid, [ &
+     nctkarr_t('fkn_out_sigma', "dp", "three, nkibz, bsize, nsppol, ntemp"), &
+     nctkarr_t('ibte_sigma', "dp", "three, three, two, nsppol, ntemp"), &
+     nctkarr_t('ibte_mob', "dp", "three, three, two, nsppol, ntemp"), &
+     nctkarr_t("kcalc2ibz", "int", "nkcalc, six"), &
+     nctkarr_t("kcalc2ebands", "int", "six, nkcalc"), &
+     nctkarr_t("kibz", "dp", "three, nkibz"), &
+     nctkarr_t('ibte_rho', "dp", "three, three, ntemp") &
+   ], defmode=.True.)
+   NCF_CHECK(ncerr)
+
+   NCF_CHECK(nctk_set_datamode(ncid))
  end if
 
  cnt = 0
@@ -1930,6 +1952,11 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
      end do ! spin
 
      call xmpi_sum(fkn_out, comm, ierr)
+     ! Write fnk_out_sigma to disk.
+     if (my_rank == master) then
+       NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "fkn_out_sigma"), fkn_out, start=[1,1,1,1,itemp]))
+     end if
+
      do spin=1,nsppol
        max_adiff_spin(spin) = maxval(abs(fkn_out(:,:,:,spin) - fkn_in(:,:,:,spin)))
      end do
@@ -1989,12 +2016,12 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
    if (ibte%assume_gap) then
      ! SemiConductor
      do ii=1,3
-       call wrtout(unts, sjoin(" Cartesian component of IBTE mobility tensor:", components(ii)))
+       call wrtout(units, sjoin(" Cartesian component of IBTE mobility tensor:", components(ii)))
        write(msg, "(a16,2(a32),a16)") 'Temperature [K]', 'e/h density [cm^-3]', 'e/h mobility [cm^2/Vs]', "Converged"
-       call wrtout(unts, msg)
+       call wrtout(units, msg)
 
        do spin=1,ibte%nsppol
-         if (ibte%nsppol == 2) call wrtout(unts, sjoin(" For spin:", stoa(spin)), newlines=1)
+         if (ibte%nsppol == 2) call wrtout(units, sjoin(" For spin:", stoa(spin)), newlines=1)
 
          do itemp=1,ibte%ntemp
            write(msg,"(f16.2,2e16.2,2f16.2,a16)") &
@@ -2003,10 +2030,10 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
              ibte%n_ehst(2, spin, itemp) / cryst%ucvol / Bohr_cm **3, &
              ibte_mob(ii, ii, 1, spin, itemp), ibte_mob(ii, ii, 2, spin, itemp), &
              yesno(converged(itemp))
-           call wrtout(unts, msg)
+           call wrtout(units, msg)
          end do ! itemp
        end do ! spin
-       call wrtout(unts, ch10)
+       call wrtout(units, ch10)
      end do ! ii
 
    else
@@ -2014,13 +2041,13 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
      do ii=1,2
        if (ii == 1) msg = " Conductivity [Siemens cm^-1] using IBTE"
        if (ii == 2) msg = " Resistivity [micro-Ohm cm] using IBTE"
-       call wrtout(unts, msg)
+       call wrtout(units, msg)
 
        nsp = ibte%nsppol; if (ii == 2) nsp = 1
        do spin=1,nsp
-         if (ibte%nsppol == 2) call wrtout(unts, sjoin(" For spin:", stoa(spin)), newlines=1)
+         if (ibte%nsppol == 2) call wrtout(units, sjoin(" For spin:", stoa(spin)), newlines=1)
          write(msg, "(5a16)") 'Temperature (K)', 'xx', 'yy', 'zz', "Converged"
-         call wrtout(unts, msg)
+         call wrtout(units, msg)
          do itemp=1,ibte%ntemp
            if (ii == 1) then
              mat33 = sum(ibte_sigma(:,:,:,spin,itemp), dim=3)
@@ -2029,10 +2056,10 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
            end if
            write(msg,"(f16.2,3e16.6,a16)") &
              ibte%kTmesh(itemp) / kb_HaK, mat33(1,1), mat33(2,2), mat33(3,3), yesno(converged(itemp))
-           call wrtout(unts, msg)
+           call wrtout(units, msg)
          end do ! itemp
        end do ! spin
-       call wrtout(unts, ch10)
+       call wrtout(units, ch10)
      end do ! ii
    end if
 
@@ -2046,26 +2073,19 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
    ! Print IBTE results to stdout and other external txt files (for the test suite)
    !call ibte%print_rta_txt_files(cryst, dtset, dtfil)
    ! Creates the netcdf file used to store the results of the calculation.
-#ifdef HAVE_NETCDF
-   path = strcat(dtfil%filnam_ds(4), "_RTA.nc")
-   call wrtout(unts, ch10//sjoin("- Writing IBTE transport results to:", path))
-   NCF_CHECK(nctk_open_modify(ncid, path , xmpi_comm_self))
-
-   ncerr = nctk_def_arrays(ncid, [ &
-     nctkarr_t('ibte_sigma', "dp", "three, three, two, nsppol, ntemp"), &
-     nctkarr_t('ibte_mob', "dp", "three, three, two, nsppol, ntemp"), &
-     nctkarr_t('ibte_rho', "dp", "three, three, ntemp") &
-   ], defmode=.True.)
-   NCF_CHECK(ncerr)
+   !path = strcat(dtfil%filnam_ds(4), "_RTA.nc")
+   !call wrtout(units, ch10//sjoin("- Writing IBTE transport results to:", path))
+   !NCF_CHECK(nctk_open_modify(ncid, path , xmpi_comm_self))
 
    ! Write data.
    NCF_CHECK(nctk_set_datamode(ncid))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ibte_sigma"), ibte_sigma))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ibte_mob"), ibte_mob))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ibte_rho"), ibte_rho))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kcalc2ibz"), ibte%kcalc2ibz))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kcalc2ebands"), ibte%kcalc2ebands))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kibz"), ibte%ebands%kptns))
    NCF_CHECK(nf90_close(ncid))
-#endif
-
  end if ! master
 
  ! Free memory

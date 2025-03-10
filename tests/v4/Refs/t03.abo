@@ -1,8 +1,8 @@
 
-.Version 9.11.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2022 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Jul 2023.
-- ( at 12h00 )
-  
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v4_t03/t03.abi
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h09 )
+
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v4_t03/t03.abi
 - output file    -> t03.abo
 - root for input  files -> t03i
 - root for output files -> t03o
@@ -58,10 +58,10 @@ _ WF disk file :      0.025 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -70,7 +70,7 @@ _ WF disk file :      0.025 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
            diemac      1.20000000E+01
              ecut      5.80000000E+00 Hartree
            enunit           2
--          fftalg         312
+-          fftalg         512
               ixc           3
            jdtset        1    2
               kpt      1.00000000E+00  1.00000000E+00  1.00000000E+00
@@ -150,8 +150,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      5.800   => boxcut(ratio)=   2.01347
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.phoney_mod
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.phoney_mod
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/14si.phoney_mod
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/14si.phoney_mod
 - 2 bohr rc 15 hartree ec psp for silicon 8 November 1991 (new)
 - 14.00000   4.00000    980710                znucl, zion, pspdat
     5    3    2    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -187,10 +187,10 @@ tolerances: {tolwfr: 1.00E-14, }
  ETOT  2  -7.8973458227620    -4.210E-03 2.816E-07 1.141E-01
  ETOT  3  -7.8974618480452    -1.160E-04 6.319E-07 1.424E-03
  ETOT  4  -7.8974628250347    -9.770E-07 7.250E-09 3.224E-05
- ETOT  5  -7.8974628927322    -6.770E-08 7.058E-10 2.814E-07
- ETOT  6  -7.8974628932097    -4.775E-10 3.732E-12 1.421E-09
- ETOT  7  -7.8974628932114    -1.719E-12 1.376E-14 4.587E-12
- ETOT  8  -7.8974628932114     8.882E-16 5.427E-15 5.919E-14
+ ETOT  5  -7.8974628927321    -6.770E-08 7.058E-10 2.814E-07
+ ETOT  6  -7.8974628932097    -4.776E-10 3.732E-12 1.421E-09
+ ETOT  7  -7.8974628932114    -1.742E-12 1.375E-14 4.587E-12
+ ETOT  8  -7.8974628932114    -8.882E-16 5.427E-15 5.919E-14
 
  At SCF step    8   max residual=  5.43E-15 < tolwfr=  1.00E-14 =>converged.
 
@@ -210,7 +210,7 @@ lattice_vectors:
 lattice_lengths: [   7.32987,    7.32987,    7.32987, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7846693E+02
-convergence: {deltae:  8.882E-16, res2:  5.919E-14, residm:  5.427E-15, diffor: null, }
+convergence: {deltae: -8.882E-16, res2:  5.919E-14, residm:  5.427E-15, diffor: null, }
 etotal    :  -7.89746289E+00
 entropy   :   0.00000000E+00
 fermie    :   1.98837850E-01
@@ -277,16 +277,16 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  3.03676771680504E+00
-hartree             :  5.59362807721279E-01
-xc                  : -2.37986188354357E+00
+kinetic             :  3.03676771680502E+00
+hartree             :  5.59362807721272E-01
+xc                  : -2.37986188354358E+00
 Ewald energy        : -8.31456383429187E+00
 psp_core            : -1.04593088893961E-01
-local_psp           : -2.42111286459759E+00
-non_local_psp       :  1.72653825358926E+00
-total_energy        : -7.89746289321141E+00
-total_energy_eV     : -2.14900894307282E+02
-band_energy         :  3.57683115845174E-01
+local_psp           : -2.42111286459753E+00
+non_local_psp       :  1.72653825358920E+00
+total_energy        : -7.89746289321144E+00
+total_energy_eV     : -2.14900894307283E+02
+band_energy         :  3.57683115845176E-01
 ...
 
 
@@ -327,8 +327,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      5.800   => boxcut(ratio)=   2.01347
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.phoney_mod
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.phoney_mod
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/14si.phoney_mod
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/14si.phoney_mod
 - 2 bohr rc 15 hartree ec psp for silicon 8 November 1991 (new)
 - 14.00000   4.00000    980710                znucl, zion, pspdat
     5    3    2    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -362,9 +362,9 @@ tolerances: {tolwfr: 1.00E-14, }
  ETOT  1  -7.8931360945333    -7.893E+00 1.624E-03 2.851E+00
  ETOT  2  -7.8973458227622    -4.210E-03 2.816E-07 1.141E-01
  ETOT  3  -7.8974618480454    -1.160E-04 6.319E-07 1.424E-03
- ETOT  4  -7.8974628250348    -9.770E-07 7.250E-09 3.224E-05
- ETOT  5  -7.8974628927323    -6.770E-08 7.058E-10 2.814E-07
- ETOT  6  -7.8974628932099    -4.776E-10 3.732E-12 1.421E-09
+ ETOT  4  -7.8974628250349    -9.770E-07 7.250E-09 3.224E-05
+ ETOT  5  -7.8974628927324    -6.770E-08 7.058E-10 2.814E-07
+ ETOT  6  -7.8974628932099    -4.775E-10 3.732E-12 1.421E-09
  ETOT  7  -7.8974628932116    -1.728E-12 1.383E-14 4.587E-12
  ETOT  8  -7.8974628932116    -8.882E-16 5.428E-15 5.917E-14
 
@@ -413,7 +413,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   31.208E-16; max=  54.276E-16
+ Mean square residual over all n,k,spin=   31.209E-16; max=  54.276E-16
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -453,16 +453,16 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 2, }
 comment             : Components of total free energy in Hartree
-kinetic             :  3.03676771681658E+00
-hartree             :  5.59362807723702E-01
-xc                  : -2.37986188354317E+00
+kinetic             :  3.03676771681660E+00
+hartree             :  5.59362807723693E-01
+xc                  : -2.37986188354316E+00
 Ewald energy        : -8.31456383429187E+00
 psp_core            : -1.04593088893961E-01
-local_psp           : -2.42111286465570E+00
-non_local_psp       :  1.72653825363283E+00
-total_energy        : -7.89746289321158E+00
+local_psp           : -2.42111286465588E+00
+non_local_psp       :  1.72653825363298E+00
+total_energy        : -7.89746289321159E+00
 total_energy_eV     : -2.14900894307287E+02
-band_energy         :  3.57683115845464E-01
+band_energy         :  3.57683115845445E-01
 ...
 
 
@@ -478,7 +478,7 @@ band_energy         :  3.57683115845464E-01
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      1.0366000000E+01  1.0366000000E+01  1.0366000000E+01 Bohr
               amu      2.80855000E+01
@@ -491,7 +491,7 @@ band_energy         :  3.57683115845464E-01
                       -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart2    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
--          fftalg         312
+-          fftalg         512
               ixc           3
            jdtset        1    2
               kpt      1.00000000E+00  1.00000000E+00  1.00000000E+00
@@ -581,7 +581,7 @@ P           mkmem           2
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -593,12 +593,12 @@ P           mkmem           2
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -616,7 +616,7 @@ P           mkmem           2
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -631,15 +631,15 @@ P           mkmem           2
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          0.7  wall=          0.8
+- Proc.   0 individual time (sec): cpu=          0.7  wall=          0.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered  16 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          0.7  wall=          0.8
++Overall time at end (sec) : cpu=          0.7  wall=          0.7

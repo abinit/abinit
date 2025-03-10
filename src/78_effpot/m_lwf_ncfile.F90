@@ -11,7 +11,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2020 ABINIT group (hexu)
+!! Copyright (C) 2001-2025 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -151,7 +151,7 @@ contains
          &         self%lwf_masses_id, NF90_DOUBLE, "lwf_masses", "LWF MASSES", "dimensionless")
 
 
-    ! Lattice 
+    ! Lattice
     call ab_define_var(self%ncid, [self%three, self%natom_id], &
          &         latt_rvec_id, NF90_INT, "lattice_rvec", "R-vectors for LATTICE ", "dimensionless")
 
@@ -179,7 +179,7 @@ contains
 
 
     ! define vars for lwf lattice displacement mapping in the format of a COO matrix.
-    call ab_define_var(self%ncid, [id_nnz], id_map_idisp, & 
+    call ab_define_var(self%ncid, [id_nnz], id_map_idisp, &
          & NF90_INT, "lwf_latt_map_id_displacement", &
          & "LWF lattice mapping coefficient COO matrix displacement id",  "dimensionless")
 
@@ -206,7 +206,7 @@ contains
     ncerr=nf90_enddef(self%ncid)
 
 
-    
+
     ncerr=nf90_put_var(self%ncid, zion_id, [supercell%lattice%zion], &
          &      start=[1], count=[supercell%lattice%natom])
     NCF_CHECK_MSG(ncerr, "Error when writting zion in lattice history file.")
@@ -277,9 +277,9 @@ contains
     !if(self%write_traj==1) then
        call ab_define_var(self%ncid, (/ self%nlwf, self%ntime /), &
             &         self%lwf_id, NF90_DOUBLE, "lwf", "lwf amplitude", "dimensionless")
-        
+
         ncerr=nf90_def_var_deflate(self%ncid, self%lwf_id, shuffle=1, deflate=1, deflate_level=2)
-        NCF_CHECK_MSG(ncerr, "Error when defining delfating for variable lwf")
+        NCF_CHECK_MSG(ncerr, "Error when defining deflating for variable lwf")
 
     !endif
 

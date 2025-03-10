@@ -19,6 +19,9 @@ nsppol8 1  nspden8 1  nspinor8 2               ! non-magnetic DFT+U+SO
 # === Structure and cell
 natom 4 ntypat 2 typat 1 1 2 2
 spinat 0 0 1   0 0 -1   0 0 0   0 0 0
+spinat1 12*0.0  chkprim1 0
+spinat2 12*0.0  chkprim2 0
+spinat8 12*0.0  chkprim8 0
 znucl  28.0 8.0
 xred 0 0 0
     0.0 0.0 0.5
@@ -252,14 +255,14 @@ pawprtvol 3
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t16.abo, tolnlines = 30, tolabs = 9.000e-02, tolrel = 2.000e-02, fld_options = -medium
 #%% [paral_info]
 #%% max_nprocs = 3
 #%% [extra_info]
 #%% authors = M. Torrent
-#%% keywords = PAW, DFTU 
-#%% description = 
+#%% keywords = PAW, DFTU
+#%% description =
 #%%   NiO: 2 Ni and 2 O atoms in an fcc supercell.
 #%%   Different combinations of nsppol/nspden/nspinor/pawspnorb are tested in the PAW+U formalism:
 #%%   1- non-magnetic                     nsppol/nspden/nspinor=1/1/1

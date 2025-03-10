@@ -12,11 +12,15 @@ keywords = [
 
 #: List of input files
 inp_files = [
-"-t01.abi", # disabled for now
-"-t02.abi", # disabled for now
-"-t03.abi", # disabled for now
-"-t04.abi", # disabled for now
-"-t05.abi", # disabled for now
-"-t06.abi", # disabled for now
-"-t07.abi", # disabled for now
+"t01.abi",
+"t02.abi",
+"t03.abi",
+"t04.abi",
+"t05.abi",
+"t06.abi",
+"t07.abi",
+"t08.abi",
+"t09.abi",
+"t10.abi" ,  # test Gamma-only HF with time-reversal symmetry (real wavefunctions)
+"t11.abi" ,  # test Gamma-only HF without time-reversal symmetry (complex wavefunctions)
 ]

@@ -6,7 +6,7 @@
 !!  This module contains procedures to solve the Dyson equation to find QP energies.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2022 ABINIT group (MG)
+!! Copyright (C) 2008-2025 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -58,8 +58,14 @@ MODULE m_dyson_solver
  type, public :: sigma_pade_t
 
     integer :: npts
+    ! Number of points
+
     character(len=1) :: branch_cut
+
     complex(dp),pointer :: zmesh(:) => null(), sigc_cvals(:) => null()
+    ! pointer to input mesh and values.
+
+    !real(d) :: wmax = -one
 
  contains
 
@@ -130,7 +136,7 @@ CONTAINS  !====================================================================
 !!     %sigxcme(ib1:ib2,jkibz,io,is)= Sigma_xc as a function of frequency.
 !!     %sigcme4sd (ib1:ib2,jkibz,io,is)= Diagonal matrix elements of \Sigma_c  at frequencies around the KS eigenvalue
 !!     %sigxcme4sd(ib1:ib2,jkibz,io,is)= Diagonal matrix elements of \Sigma_xc at frequencies around the KS eigenvalue
-!!    where ib1 and ib2 are the band indeces included in the GW calculation for this k-point.
+!!    where ib1 and ib2 are the band indices included in the GW calculation for this k-point.
 !!
 !! SOURCE
 
@@ -762,13 +768,24 @@ subroutine sigma_pade_init(self, npts, zmesh, sigc_cvals, branch_cut)
  complex(dp),target,intent(in) :: zmesh(npts), sigc_cvals(npts)
  character(len=*),intent(in) :: branch_cut
 
+!Local variables-------------------------------
+!scalars
+! integer :: ii
 ! *************************************************************************
 
  self%npts = npts
- self%branch_cut = branch_cut
 
- self%zmesh => zmesh
- self%sigc_cvals => sigc_cvals
+ ! Select first points according to wmax.
+ !if (wmax > zero) then
+ !  do ii=1,npts
+ !    if (real(zmesh(ii)) > wmax) exit
+ !  end do
+ !  self%npts = ii-1
+ !end if
+
+ self%branch_cut = branch_cut
+ self%zmesh => zmesh(1:self%npts)
+ self%sigc_cvals => sigc_cvals(1:self%npts)
 
 end subroutine sigma_pade_init
 !!***
@@ -792,7 +809,6 @@ subroutine sigma_pade_eval(self, zz, val, dzdval)
  complex(dp),intent(in) :: zz
  complex(dp),intent(out) :: val
  complex(dp),optional,intent(out) :: dzdval
-
 ! *************************************************************************
 
  ! if zz in 2 or 3 quadrant, avoid branch cut in the complex plane using Sigma(-iw) = Sigma(iw)*.
@@ -837,7 +853,6 @@ subroutine sigma_pade_qp_solve(self, e0, v_meanf, sigx, z_guess, zsc, msg, ierr)
  logical :: converged
  complex(dpc) :: ctdpc, dct, dsigc, sigc
  character(len=500) :: msg
-
 ! *************************************************************************
 
  ! Use Newton-Rapson to find the root of:
@@ -846,13 +861,13 @@ subroutine sigma_pade_qp_solve(self, e0, v_meanf, sigx, z_guess, zsc, msg, ierr)
 
  iter = 0; converged = .FALSE.; ctdpc = cone
  zsc = z_guess
- do while (ABS(ctdpc) > NR_ABS_ROOT_ERR .or. iter < NR_MAX_NITER)
+ do while (abs(ctdpc) > NR_ABS_ROOT_ERR .or. iter < NR_MAX_NITER)
    iter = iter + 1
 
    call self%eval(zsc, sigc, dzdval=dsigc)
    ctdpc = e0 - v_meanf + sigx + sigc - zsc
 
-   if (ABS(ctdpc) < NR_ABS_ROOT_ERR) then
+   if (Abs(ctdpc) < NR_ABS_ROOT_ERR) then
      converged=.TRUE.; EXIT
    end if
    dct = dsigc - one
@@ -863,7 +878,7 @@ subroutine sigma_pade_qp_solve(self, e0, v_meanf, sigx, z_guess, zsc, msg, ierr)
  if (.not. converged) then
    write(msg,'(a,i0,3a,f8.4,a,f8.4)')&
      'Newton-Raphson method not converged after ',NR_MAX_NITER,' iterations. ',ch10,&
-     'Absolute Error = ',ABS(ctdpc),' > ',NR_ABS_ROOT_ERR
+     'Absolute Error: ',abs(ctdpc),' > ',NR_ABS_ROOT_ERR
    ierr = 1
  end if
 

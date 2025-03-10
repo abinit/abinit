@@ -21,7 +21,8 @@ target_include_directories(32_util
   ${CMAKE_BINARY_DIR}
   ${CMAKE_SOURCE_DIR}/shared/common/src/incs
   PUBLIC
-  ${CMAKE_CURRENT_BINARY_DIR}/modules
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/modules>
+  $<INSTALL_INTERFACE:include/libpaw>
   )
 
 target_compile_definitions(32_util

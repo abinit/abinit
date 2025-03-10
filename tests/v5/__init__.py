@@ -4,7 +4,7 @@
 need_cpp_vars = [
 ]
 
-#: List of keywords that are automatically added to all the tests of this suite. 
+#: List of keywords that are automatically added to all the tests of this suite.
 keywords = [
 ]
 
@@ -29,7 +29,7 @@ inp_files = [
 "t16.abi",
 "t17.abi",
 "t18.abi",
-"t19.abi", 
+"t19.abi",
 "t20.abi",
 "t21.abi",
 "t22.abi",
@@ -38,7 +38,7 @@ inp_files = [
 "t25.abi",
 "t26.abi",
 "t27.abi",
-"t28.abi", 
+"t28.abi",
 "t29.abi",
 "t30.abi",
 "t31.abi",
@@ -87,10 +87,10 @@ inp_files = [
 "t78.abi",
 "t79.abi",
 "t80.abi",
-"t81.abi", 
+"t81.abi",
 "t82.abi",
 "t83.abi",
-"t84.abi", 
+"t84.abi",
 "t85.abi",
 "t86.abi",
 "t87.abi",
@@ -105,5 +105,5 @@ inp_files = [
 "t96.abi",
 "t97.abi",
 "t98.abi",
-"t99.abi", 
+"t99.abi",
 ]

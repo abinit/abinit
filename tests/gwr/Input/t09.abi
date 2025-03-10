@@ -1,0 +1,64 @@
+# LiF. Interface with CC4S code (NC pseudos)
+# Use CC4S_FROM_WFK to read the orbitals from an external file produced with istwfk 2 (real orbitals)
+
+# Number of datasets: 2-step calculation
+ndtset 2
+iomode 1
+
+ngkpt     1 1 1              # Number of grid points for k-point generation
+nshiftk   1
+shiftk    0 0 0              # Mesh centered on gamma
+#istwfk    *1                 # Required (for the time being)
+
+# Definition of the unit cell: fcc
+acell 3*7.7034756             # Lattice constants (in atomic units)
+
+rprim 0.0 0.5 0.5             # FCC primitive vectors
+      0.5 0.0 0.5             # (to be scaled by acell)
+      0.5 0.5 0.0
+
+ntypat 2                      # Number of species
+znucl  3 9                    # Z number of each species
+natom  2                      # Number of atoms
+typat  1 2                    # Type of each atom (index in znucl)
+xred   0.00    0.00    0.00   # Reduced coordinates of atom 1
+       0.50   -0.50   -0.50   # Reduced coordinates of atom 2
+
+# Definition of the plane-wave basis set
+ecut 15.0                     # Kinetic energy cut-off, in Hartree
+
+####################
+# Dataset 1: SCF run
+####################
+nband1  20                   # Number of bands
+tolwfr1 1.0d-12              # Tolerance to stop SCF cycles
+
+###########################################
+# Dataset 2: CC4S interface
+###########################################
+optdriver2  6        # Activate GWR code
+gwr_task2 "CC4S_FROM_WFK"
+nband2     10         # Number of (occ + empty) bands
+ecuteps2   4
+getwfk2   -1
+getden2   -1
+
+pp_dirpath "$ABI_PSPDIR/Psdj_nc_sr_04_pw_std_psp8"
+pseudos "Li.psp8, F.upf"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% exclude_builders = eos_nvhpc_23.9_elpa
+#%% [files]
+#%% files_to_test =
+#%%   t09.abo, tolnlines = 10, tolabs = 2.0e-2, tolrel = 5.0e-1;
+#%% [paral_info]
+#%% max_nprocs = 8
+#%% [extra_info]
+#%% authors = M. Giantomassi
+#%% keywords = NC, CC4S
+#%% description =
+#%%   LiF. Interface with CC4S code with NC pseudos.
+#%%   Use CC4S_FROM_WFK to read the orbitals from an external file produced with istwfk 2 (real orbitals)
+#%%<END TEST_INFO>

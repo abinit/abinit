@@ -16,16 +16,19 @@ subroutine xmpi_land_log0d(xval, comm)
  logical,intent(inout) :: xval
  integer,intent(in) :: comm
 
-#ifdef HAVE_MPI
 !Local variables-------------------------------
  integer :: ierr
- logical :: out_val
+#if defined HAVE_MPI
+ logical :: out_val(1)
+#endif
 
 ! *************************************************************************
 
+ ierr=0
+#if defined HAVE_MPI
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
-   call MPI_ALLREDUCE(xval, out_val, 1, MPI_LOGICAL, MPI_LAND, comm, ierr)
-   xval = out_val
+   call MPI_ALLREDUCE([xval], out_val, 1, MPI_LOGICAL, MPI_LAND, comm, ierr)
+   xval = out_val(1)
  end if
 #endif
 
@@ -126,7 +129,7 @@ subroutine xmpi_lor_log2d(xval,comm)
    !This product of dimensions can be greater than a 32bit integer
    !We use a INT64 to store it. If it is too large, we switch to an
    !alternate routine because MPI<4 doesnt handle 64 bit counts.
-   ntot=int(n1*n2,kind=int64)
+   ntot=int(n1,kind=int64)*n2
 
    if (ntot<=xmpi_maxint32_64) then
      call MPI_ALLREDUCE(xval,xsum,n1*n2,MPI_LOGICAL,MPI_LOR,comm,ierr)
@@ -185,7 +188,7 @@ subroutine xmpi_lor_log3d(xval,comm)
    n2 = size(xval,2)
    n3 = size(xval,3)
 
-!  #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
+!  #if defined HAVE_MPI2_INPLACE
 !  call MPI_ALLREDUCE(MPI_IN_PLACE,xval,n1*n2*n3,MPI_LOGICAL,MPI_LOR,comm,ierr)
 !  #else
    ABI_STAT_MALLOC(xsum,(n1,n2,n3), ierr)
@@ -194,7 +197,7 @@ subroutine xmpi_lor_log3d(xval,comm)
    !This product of dimensions can be greater than a 32bit integer
    !We use a INT64 to store it. If it is too large, we switch to an
    !alternate routine because MPI<4 doesnt handle 64 bit counts.
-   ntot=int(n1*n2*n3,kind=int64)
+   ntot=int(n1,kind=int64)*n2*n3
 
    if (ntot<=xmpi_maxint32_64) then
      call MPI_ALLREDUCE(xval,xsum,n1*n2*n3,MPI_LOGICAL,MPI_LOR,comm,ierr)

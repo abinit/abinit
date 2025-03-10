@@ -7,7 +7,7 @@
 !!  It also defines generic interfaces for single or double precision FFTs.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2022 ABINIT group (MG, MM, GZ, MT, MF, XG, PT, FF)
+!! Copyright (C) 2009-2025 ABINIT group (MG, MM, GZ, MT, MF, XG, PT, FF)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -19,6 +19,9 @@
 #endif
 
 #include "abi_common.h"
+
+! nvtx related macro definition
+#include "nvtx_macros.h"
 
 MODULE m_fft
 
@@ -50,11 +53,11 @@ MODULE m_fft
  use m_distribfft,    only : distribfft_type, init_distribfft, destroy_distribfft
 
 #if defined HAVE_GPU_CUDA
- ! MG: Had to comment this line to avoid "Ambiguous reference to c_ptr on buda2 with CUDA
- !use m_manage_cuda
+ use m_manage_cuda
 #endif
- use, intrinsic :: iso_c_binding
  use m_ompgpu_fourwf
+
+ use, intrinsic :: iso_c_binding
 
  implicit none
 
@@ -123,7 +126,7 @@ MODULE m_fft
 
  type,public :: fftbox_plan3_t
 
-   integer :: fftalg = 112       ! The library to call.
+   integer :: fftalg = 112       ! The library to call on the CPU
    integer :: fftcache = 16      ! Cache size in kB. Only used in SG routines.
    integer :: nfft = -1          ! Total number of points in the FFT box.
    integer :: ldxyz = -1         ! Physical dimension of the array to transform
@@ -1684,8 +1687,7 @@ function fftbox_mpi_utests(fftalg, cplex, ndat, nthreads, comm_fft, unit) result
  integer :: ierr,old_nthreads,ount,iset,mpierr,nfft,me_fft
  integer :: nproc_fft,fftalga,fftalgc,n1,n2,n3,n4,n5,n6
  real(dp),parameter :: ATOL_DP=tol12
- real(dp) :: max_abserr
- real(dp) ::  ctime,wtime,gflops
+ real(dp) :: max_abserr, ctime, wtime, gflops
  character(len=500) :: msg,info,library,cplex_mode,padding_mode
  type(distribfft_type),target :: fftabs
 !arrays
@@ -1740,7 +1742,7 @@ function fftbox_mpi_utests(fftalg, cplex, ndat, nthreads, comm_fft, unit) result
    ngfft(12)=ngfft(2)/nproc_fft    ! n2proc
    ngfft(13)=ngfft(3)/nproc_fft    ! n3proc
 
-   !call print_ngfft(ngfft,"ngfft for MPI-fourdp",unit=std_out,mode_paral="COLL",prtvol=0)
+   !call print_ngfft([std_out], ngfft, header="ngfft for MPI-fourdp", prtvol=0)
 
    ! Allocate arrays, fill fofr with random numbers and keep a copy.
    nfft = (n1 * n2 * n3) / nproc_fft
@@ -1917,7 +1919,7 @@ function fftu_mpi_utests(fftalg, ecut, rprimd, ndat, nthreads, comm_fft, paral_k
    !ngfft(4:6) = ngfft(1:3)
    n4 = ngfft(4); n5 = ngfft(5); n6 = ngfft(6)
 
-   call print_ngfft(ngfft,"ngfft for MPI-fourwf",unit=std_out,mode_paral="COLL",prtvol=0)
+   call print_ngfft([std_out], ngfft, header="ngfft for MPI-fourwf", prtvol=0)
 
    ! Compute FFT distribution tables.
    call init_distribfft(fftabs,"c",nproc_fft,n2,n3)
@@ -2244,11 +2246,17 @@ end function fftu_mpi_utests
 !!         (needed only when option=1)
 !! weight_i=weight to be used for the accumulation of the density in real space
 !!         (needed only when option=1 and (fftalg=4 and fftalgc/=0))
+!! [weight_array_r]= -- optional -- same as weight_r when ndat>1
+!!                   weight_array_r(i)=weight_r to be used for band i
+!!                   at present only used for the GPU version
+!! [weight_array_i]= -- optional -- same as weight_i when ndat>1
+!!                   weight_array_i(i)=weight_i to be used for band i
+!!                   at present only used for the GPU version
 !! [fofginb(2,npwin)]=holds second input wavefunction in G vector basis sphere.
 !!                 (intent(in) but the routine sphere can modify it for another iflag)
 !!                 (for non diagonal occupation)
 !! [use_ndo] = use non diagonal occupations.
-!! [gpu_option] = GPU implementation to use, i.e. cuda, openMP, ... (0=not using GPU)  
+!! [gpu_option] = GPU implementation to use, i.e. cuda, openMP, ... (0=not using GPU)
 !!
 !! OUTPUT
 !!  (see side effects)
@@ -2281,7 +2289,7 @@ end function fftu_mpi_utests
 subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
                   kg_kin,kg_kout,mgfft,mpi_enreg,ndat,ngfft,npwin,npwout,n4,n5,n6,option,&
                   tim_fourwf,weight_r,weight_i, &
-                  gpu_option,use_ndo,fofginb) ! Optional arguments
+                  weight_array_r,weight_array_i,gpu_option,use_ndo,fofginb) ! Optional arguments
 
 !Arguments ------------------------------------
 !scalars
@@ -2289,6 +2297,7 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
  integer,intent(in) :: tim_fourwf
  integer,intent(in),optional :: gpu_option,use_ndo
  real(dp),intent(in) :: weight_r,weight_i
+ real(dp),intent(in),optional,target :: weight_array_r(ndat),weight_array_i(ndat)
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: gboundin(2*mgfft+8,2),gboundout(2*mgfft+8,2)
@@ -2314,7 +2323,7 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
  real(dp) :: tsec(2)
  real(dp),allocatable :: work1(:,:,:,:),work2(:,:,:,:),work3(:,:,:,:)
  real(dp),allocatable :: work4(:,:,:,:),work_sum(:,:,:,:)
- real(dp) :: weight_array_r(ndat), weight_array_i(ndat)
+ real(dp),pointer :: weight_ptr_r(:),weight_ptr_i(:)
 
 ! *************************************************************************
 
@@ -2332,7 +2341,7 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
  me_fft=ngfft(11)
  nproc_fft=ngfft(10)
 
- comm_fft = mpi_enreg%comm_fft; me_g0 = mpi_enreg%me_g0
+ comm_fft = mpi_enreg%comm_fft; me_g0 = mpi_enreg%me_g0_fft
  paral_kgb = mpi_enreg%paral_kgb
 
  !if (ndat/=1) then
@@ -2349,36 +2358,56 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
  !  ABI_ERROR("Option 0 is buggy when fftalgc ==0 is used!")
  !end if
 
-!Cuda version of fourwf
+!GPU version of fourwf
  gpu_option_=ABI_GPU_DISABLED
  if (PRESENT(gpu_option)) gpu_option_=gpu_option
 
- if(option==1) then
-   weight_array_r(:)=weight_r
-   weight_array_i(:)=weight_i
+ !If processing gamma-point, disable GPU, except OpenMP (not supported on other variants)
+ if(me_g0==1 .and. istwf_k>1 .and. gpu_option_/=ABI_GPU_OPENMP) then
+   gpu_option_=ABI_GPU_DISABLED
  end if
- if(gpu_option_==ABI_GPU_LEGACY) then
+
+ if(gpu_option_/=ABI_GPU_DISABLED) then
+   if (present(weight_array_r)) then
+     weight_ptr_r => weight_array_r
+   else
+     ABI_MALLOC(weight_ptr_r,(ndat))
+     weight_ptr_r(:)=weight_r
+   end if
+   if (present(weight_array_i)) then
+     weight_ptr_i => weight_array_i
+   else
+     ABI_MALLOC(weight_ptr_i,(ndat))
+     weight_ptr_i(:)=weight_i
+   end if
+   if(gpu_option_==ABI_GPU_LEGACY) then
 #if defined HAVE_GPU_CUDA
-   call gpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
-     kg_kin,kg_kout,mgfft,mpi_enreg,ndat,ngfft,npwin,npwout,n4,n5,n6,option,&
-     paral_kgb,tim_fourwf,weight_array_r,weight_array_i) !,&
-!  &  use_ndo,fofginb)
+     call gpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
+       kg_kin,kg_kout,mgfft,mpi_enreg,ndat,ngfft,npwin,npwout,n4,n5,n6,option,&
+       paral_kgb,tim_fourwf,weight_ptr_r,weight_ptr_i) !,use_ndo,fofginb)
 #endif
-   call timab(840+tim_fourwf,2,tsec); return
- else if(gpu_option_==ABI_GPU_KOKKOS) then
-#if defined HAVE_GPU_CUDA
-   call gpu_fourwf_managed(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
-     kg_kin,kg_kout,mgfft,mpi_enreg,ndat,ngfft,npwin,npwout,n4,n5,n6,option,&
-     paral_kgb,tim_fourwf,weight_array_r,weight_array_i) !,&
-!  &  use_ndo,fofginb)
+   else if(gpu_option_==ABI_GPU_KOKKOS) then
+#if defined HAVE_GPU_CUDA && defined HAVE_YAKL
+     call gpu_fourwf_managed(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
+       kg_kin,kg_kout,mgfft,mpi_enreg,ndat,ngfft,npwin,npwout,n4,n5,n6,option,&
+       paral_kgb,tim_fourwf,weight_ptr_r,weight_ptr_i) !,use_ndo,fofginb)
 #endif
-   call timab(840+tim_fourwf,2,tsec); return
- else if(gpu_option_==ABI_GPU_OPENMP) then
-   call ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
-     kg_kin,kg_kout,mgfft,ndat,ngfft,npwin,npwout,n4,n5,n6,option,&
-     weight_array_r,weight_array_i)
-   call timab(840+tim_fourwf,2,tsec); return
- end if
+   else if(gpu_option_==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+     call ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
+       kg_kin,kg_kout,mgfft,me_g0,ndat,ngfft,npwin,npwout,n4,n5,n6,option,&
+       weight_ptr_r,weight_ptr_i) !,use_ndo,fofginb)
+#endif
+   end if
+   if (.not.present(weight_array_r)) then
+     ABI_FREE(weight_ptr_r)
+   end if
+   if (.not.present(weight_array_i)) then
+     ABI_FREE(weight_ptr_i)
+   end if
+   call timab(840+tim_fourwf,2,tsec)
+   return
+ end if ! GPU
 
  if ((fftalgc < 0 .or. fftalgc > 2)) then
    write(msg, '(a,i0,5a)' )&
@@ -2946,11 +2975,12 @@ end subroutine fourwf
 !!
 !! SOURCE
 
-subroutine fourdp(cplex, fofg, fofr, isign, mpi_enreg, nfft, ndat, ngfft, tim_fourdp)
+subroutine fourdp(cplex, fofg, fofr, isign, mpi_enreg, nfft, ndat, ngfft, tim_fourdp, gpu_option)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,isign,nfft,ndat,tim_fourdp
+ integer,intent(in),optional :: gpu_option
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
@@ -2961,7 +2991,7 @@ subroutine fourdp(cplex, fofg, fofr, isign, mpi_enreg, nfft, ndat, ngfft, tim_fo
  integer :: fftalg,fftalga,fftalgb,fftcache,i1,i2,i3,base,idat
  integer :: n1,n1half1,n1halfm,n2,n2half1,n3,n4
  integer :: n4half1,n5,n5half1,n6 !nd2proc,nd3proc,i3_local,i2_local,
- integer :: comm_fft,nproc_fft,me_fft
+ integer :: comm_fft,nproc_fft,me_fft,gpu_option_
  real(dp) :: xnorm
  character(len=500) :: msg
 !arrays
@@ -2973,7 +3003,7 @@ subroutine fourdp(cplex, fofg, fofr, isign, mpi_enreg, nfft, ndat, ngfft, tim_fo
 
 ! *************************************************************************
 
- ABI_CHECK(ndat == 1, "ndat != 1 should be tested")
+ !ABI_CHECK(ndat == 1, "ndat != 1 should be tested")
 
  ! Keep track of timing
  call timab(1260+tim_fourdp,1,tsec)
@@ -2982,11 +3012,21 @@ subroutine fourdp(cplex, fofg, fofr, isign, mpi_enreg, nfft, ndat, ngfft, tim_fo
    fourdp_counter = fourdp_counter + ndat
  end if
 
+ ! GPU version of fourdp
+ gpu_option_=ABI_GPU_DISABLED
+ if (PRESENT(gpu_option)) gpu_option_=gpu_option
+
  n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)
  n4=ngfft(4); n5=ngfft(5); n6=ngfft(6)
  me_fft=ngfft(11); nproc_fft=ngfft(10)
  comm_fft = mpi_enreg%comm_fft
  !write(std_out,*)"fourdp, nx,ny,nz,nfft =",n1,n2,n3,nfft
+
+ ! Run fourdp with OpenMP GPU if requested, on CPU otherwise
+ if(gpu_option_==ABI_GPU_OPENMP) then
+   call ompgpu_fourdp(cplex,ngfft,n4,n5,n6,ndat,isign,fofg,fofr)
+   goto 100
+ end if
 
  fftcache=ngfft(8)
  fftalg  =ngfft(7); fftalga =fftalg/100; fftalgb =mod(fftalg,100)/10
@@ -3161,7 +3201,7 @@ subroutine fourdp(cplex, fofg, fofr, isign, mpi_enreg, nfft, ndat, ngfft, tim_fo
 
  ! Here, one calls the complex-to-complex FFT subroutine
  if( (fftalgb==0 .or. cplex==2) .and. fftalga/=4 )then
-   ABI_CHECK(ndat == 1, "ndat must be 1")
+   !ABI_CHECK(ndat == 1, "ndat must be 1")
 
    ABI_MALLOC(work1, (2,n4,n5,n6,ndat))
    ABI_MALLOC(work2, (2,n4,n5,n6,ndat))
@@ -4094,9 +4134,8 @@ end subroutine fftmpi_u
 !!
 !! SOURCE
 
-subroutine zerosym(array,cplex,n1,n2,n3,&
-&                  ig1,ig2,ig3,comm_fft,distribfft) ! Optional arguments
-
+subroutine zerosym(array,cplex,n1,n2,n3, &
+                   ig1,ig2,ig3,comm_fft,distribfft) ! Optional arguments
 
 !Arguments ------------------------------------
 !scalars
@@ -4114,8 +4153,6 @@ subroutine zerosym(array,cplex,n1,n2,n3,&
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
 
 ! **********************************************************************
-
- DBG_ENTER("COLL")
 
  me_fft=0;nproc_fft=1
  if (present(comm_fft)) then
@@ -4231,8 +4268,6 @@ subroutine zerosym(array,cplex,n1,n2,n3,&
    ABI_FREE(fftn2_distrib)
    ABI_FREE(ffti2_local)
  end if
-
- DBG_EXIT("COLL")
 
 end subroutine zerosym
 !!***
@@ -4750,7 +4785,6 @@ subroutine uplan_init(uplan, npw, nspinor, batch_size, ngfft, istwfk, kg_k, kind
  uplan%ngfft = ngfft
  uplan%mgfft = maxval(ngfft(1:3))
  uplan%nfft  = product(ngfft(1:3))
- !uplan%ldxyz = product(plan%embed)
  uplan%kg_k => kg_k
 
  ABI_MALLOC(uplan%gbound, (2 * uplan%mgfft + 8, 2))
@@ -4812,13 +4846,12 @@ subroutine uplan_execute_gr_spc(uplan, ndat, ug, ur, isign, iscale)
  integer,optional,intent(in) :: isign, iscale
 
 !Local variables-------------------------------
- integer :: isign__, iscale__
- integer :: nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache
+ integer :: isign__, iscale__, nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache
 
 ! *************************************************************************
 
  ABI_CHECK_ILEQ(ndat, uplan%batch_size, "ndat > batch_size!")
- ABI_CHECK_IEQ(sp, uplan%kind, "Incosistent kind!")
+ ABI_CHECK_IEQ(sp, uplan%kind, "Inconsistent kind!")
 
  isign__ = +1; if (present(isign)) isign__ = isign
  iscale__ = 0; if (present(iscale)) iscale__ = iscale
@@ -4870,13 +4903,12 @@ subroutine uplan_execute_gr_dpc(uplan, ndat, ug, ur, isign, iscale)
  integer,optional,intent(in) :: isign, iscale
 
 !Local variables-------------------------------
- integer :: isign__, iscale__
- integer :: nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache
+ integer :: isign__, iscale__, nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache
 
 ! *************************************************************************
 
  ABI_CHECK_ILEQ(ndat, uplan%batch_size, "ndat > batch_size!")
- ABI_CHECK_IEQ(dp, uplan%kind, "Incosistent kind!")
+ ABI_CHECK_IEQ(dp, uplan%kind, "Inconsistent kind!")
 
  isign__ = +1; if (present(isign)) isign__ = isign
  iscale__ = 0; if (present(iscale)) iscale__ = iscale
@@ -4928,13 +4960,12 @@ subroutine uplan_execute_rg_spc(uplan, ndat, ur, ug, isign, iscale)
  integer,optional,intent(in) :: isign, iscale
 
 !Local variables-------------------------------
- integer :: isign__, iscale__
- integer :: nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache
+ integer :: isign__, iscale__, nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache
 
 ! *************************************************************************
 
  ABI_CHECK_ILEQ(ndat, uplan%batch_size, "ndat > batch_size!")
- ABI_CHECK_IEQ(sp, uplan%kind, "Incosistent kind!")
+ ABI_CHECK_IEQ(sp, uplan%kind, "Inconsistent kind!")
 
  isign__ = -1; if (present(isign)) isign__ = isign
  iscale__ = 1; if (present(iscale)) iscale__ = iscale
@@ -4984,12 +5015,11 @@ subroutine uplan_execute_rg_dpc(uplan, ndat, ur, ug, isign, iscale)
  integer,optional,intent(in) :: isign, iscale
 
 !Local variables-------------------------------
- integer :: isign__, iscale__
- integer :: nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache
+ integer :: isign__, iscale__, nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache
 ! *************************************************************************
 
  ABI_CHECK_ILEQ(ndat, uplan%batch_size, "ndat > batch_size!")
- ABI_CHECK_IEQ(dp, uplan%kind, "Incosistent kind!")
+ ABI_CHECK_IEQ(dp, uplan%kind, "Inconsistent kind!")
 
  isign__ = -1; if (present(isign)) isign__ = isign
  iscale__ = 1; if (present(iscale)) iscale__ = iscale

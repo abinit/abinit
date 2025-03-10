@@ -1,4 +1,4 @@
-## Copyright (C) 2019-2022 ABINIT group (Yann Pouillon)
+## Copyright (C) 2019-2025 ABINIT group (Yann Pouillon)
 
 #
 # YAKL library (Yet Another Kernel Launcher)
@@ -78,18 +78,21 @@ AC_DEFUN([SD_YAKL_INIT], [
       else
         sd_yakl_enable="yes"
         sd_yakl_init="dir"
+        test -d "${withval}/lib" && sd_yakl_libdir="${withval}/lib"
+        test -d "${withval}/lib64" && sd_yakl_libdir="${withval}/lib64"
       fi],
     [ sd_yakl_enable="${sd_yakl_enable_def}"; sd_yakl_init="def"])
 
   # Declare environment variables
   AC_ARG_VAR([YAKL_CPPFLAGS], [C preprocessing flags for YAKL.])
   AC_ARG_VAR([YAKL_FCFLAGS], [Fortran flags for YAKL.])
+  AC_ARG_VAR([YAKL_FFLAGS], [Fortran flags for YAKL (better use YAKL_FCFLAGS).])
   AC_ARG_VAR([YAKL_LDFLAGS], [Linker flags for YAKL.])
   AC_ARG_VAR([YAKL_LIBS], [Library flags for YAKL.])
 
   # Detect use of environment variables
   if test "${sd_yakl_enable}" = "yes" -o "${sd_yakl_enable}" = "auto"; then
-    tmp_yakl_vars="${YAKL_CPPFLAGS}${YAKL_FCFLAGS}${YAKL_LDFLAGS}${YAKL_LIBS}"
+    tmp_yakl_vars="${YAKL_CPPFLAGS}${YAKL_FFLAGS}${YAKL_FCFLAGS}${YAKL_LDFLAGS}${YAKL_LIBS}"
     if test "${sd_yakl_init}" = "def" -a ! -z "${tmp_yakl_vars}"; then
       sd_yakl_enable="yes"
       sd_yakl_init="env"
@@ -118,7 +121,7 @@ AC_DEFUN([SD_YAKL_INIT], [
         sd_yakl_cppflags="-I${with_yakl}/include"
         sd_yakl_fcflags="${sd_yakl_fcflags_def} -I${with_yakl}/include"
         sd_yakl_ldflags="${sd_yakl_ldflags_def}"
-        sd_yakl_libs="-L${with_yakl}/lib64 ${sd_yakl_libs_def} -lstdc++ -ldl -L${with_gpu}/lib64 -lcudart"
+        sd_yakl_libs="-L${sd_yakl_libdir} ${sd_yakl_libs_def} -lstdc++ -ldl -L${with_gpu}/lib64 -lcudart"
         ;;
 
       env)
@@ -344,7 +347,7 @@ AC_DEFUN([_SD_YAKL_CHECK_CONFIG], [
   fi
 
   # Environment variables conflict with --with-* options
-  tmp_yakl_vars="${YAKL_CPPFLAGS}${YAKL_CFLAGS}${YAKL_FCFLAGS}${YAKL_LDFLAGS}${YAKL_LIBS}"
+  tmp_yakl_vars="${YAKL_CPPFLAGS}${YAKL_CFLAGS}${YAKL_FFLAGS}${YAKL_FCFLAGS}${YAKL_LDFLAGS}${YAKL_LIBS}"
   tmp_yakl_invalid="no"
   if test ! -z "${tmp_yakl_vars}" -a ! -z "${with_yakl}"; then
     case "${sd_yakl_policy}" in

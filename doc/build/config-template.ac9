@@ -526,7 +526,7 @@
 #enable_mpi_io="yes"
 
 # Enable MPI-IO mode in Abinit (use MPI I/O as default I/O library,
-# change the default values of iomode)   
+# change the default values of iomode)
 # Beware that not all the features of Abinit support MPI I/O,
 # This options is mainly used by developers for debugging purposes.
 #
@@ -677,7 +677,7 @@
 
 # Supported libraries:
 #
-#   * AOCL      : AMD Optimizing CPU Libraries
+#   * aocl      : AMD Optimizing CPU Libraries
 #                 https://developer.amd.com/amd-aocl/
 #
 #   * atlas     : Automatically Tuned Linear Algebra Software
@@ -705,6 +705,11 @@
 #
 #   * none      : just check user-specified libraries, do not try to
 #                 detect their type
+#
+#
+#   * nvpl      : Nvidia Performance Library (NVPL)
+#                 (only for ARM processors)
+#                 https://docs.nvidia.com/nvpl/
 #
 #   * openblas  : OpenBLAS - An Optimized BLAS Library
 #                 https://www.openblas.net/
@@ -735,7 +740,7 @@
 #   * with_linalg_incs and with_linalg_libs systematically override the
 #     contents of with_linalg
 #
-#   * in order to enable SCALAPACK, you might have to specify -lscalapack 
+#   * in order to enable SCALAPACK, you might have to specify -lscalapack
 #     or use another appropriate syntax for your system.
 #
 #  Additional information might be obtained from
@@ -786,6 +791,7 @@
 #   * dfti          : native MKL FFT library
 #   * fftw3         : serial FFTW3 library
 #   * fftw3-threads : threaded FFTW3 library
+#   * nvpl          : NVPL: Nvidia Performance Library (only for ARM)
 #   * pfft          : MPI-parallel PFFT library (for maintainers only)
 #   * goedecker     : Abinit internal FFT
 #
@@ -795,7 +801,7 @@
 #     exclusive
 #
 
-# The following lines relate to a generic FFT library (e.g. they are used for dfti) 
+# The following lines relate to a generic FFT library (e.g. they are used for dfti)
 
 # Install prefix for the FFT library
 #
@@ -827,7 +833,7 @@
 
                        # ------------------------------ #
 
-# The following lines relate specifically to the FFTW3 library 
+# The following lines relate specifically to the FFTW3 library
 
 # Install prefix for the FFTW3 library
 #
@@ -855,7 +861,7 @@
 
                        # ------------------------------ #
 
-# The following lines relate specifically to the PFFT library 
+# The following lines relate specifically to the PFFT library
 
 # Install prefix for the PFFT library
 #
@@ -1114,7 +1120,7 @@
 #NETCDF_LIBS="-L/usr/local/lib/netcdf -lnetcdf"
 
 # Enable Netcdf mode in Abinit (use netcdf as default I/O library,
-# change the default values of accesswff)   
+# change the default values of accesswff)
 #
 #enable_netcdf_default="no"
 
@@ -1185,6 +1191,10 @@
 # Select the 2.0 version of TRIQS
 #
 #enable_triqs_v2_0="yes"
+
+# Select the complex version of TRIQS
+#
+#enable_triqs_complex="yes"
 
 # C++ flags for the TRIQS library (default is unset)
 #
@@ -1390,17 +1400,9 @@
 #
 # Uncomment the following lines at your own risks
 
-# Enable BSE unpacking (gmatteo)
-#
-#enable_bse_unpacked="yes"
-
 # Enable optimized cRPA build for ifort <=17 (routerovitch)
 #
 #enable_crpa_optim="yes"
-
-# Enable exports (pouillon)
-#
-#enable_exports="yes"
 
 # Enable double precision for GW calculations (gmatteo)
 #
@@ -1429,6 +1431,10 @@
 # Enable ZDOTC and ZDOTU bugfix (gmatteo)
 #
 #enable_zdot_bugfix="yes"
+
+# Activate workaround for buggy MPI interfaces (not having interfaces for scalars)
+#
+#enable_mpi_interfaces_bugfix="yes"
 
 # -------------------------------------------------------------------------- #
 # Maintainer options                                                         #

@@ -6,7 +6,7 @@
 !! This module deals with rank objects for hashing k-point vector lists
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2022 ABINIT group (MVer, HM, MG)
+!! Copyright (C) 2010-2025 ABINIT group (MVer, HM, MG)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,6 +29,8 @@ module m_krank
  use defs_basis
  use m_abicore
  use m_errors
+
+ use m_fstrings, only : itoa, sjoin
 
  implicit none
 
@@ -132,25 +134,41 @@ type(krank_t) function krank_from_kptrlatt(nkpt, kpts, kptrlatt, compute_invrank
 
 !Local variables -------------------------
 !scalars
- integer :: ii, jj, max_linear_density
+ integer :: ii, jj, ikpt, max_linear_density, opt=0
  logical :: compute_invrank_
+ real(dp) :: min_kpt
 
 ! *********************************************************************
 
+ opt=0
  do jj=1,3
    do ii=1,3
      if (ii == jj .and. kptrlatt(ii, ii) == 0) then
        ABI_ERROR("kptrlatt with zero matrix element on the diagonal!")
      end if
      if (ii /= jj .and. kptrlatt(ii, jj) /= 0) then
-       ABI_ERROR("kptrlatt with non-zero off-diagonal matrix elements is not supported")
+       ! ABI_WARNING("kptrlatt with non-zero off-diagonal matrix elements is not supported")
+       opt=1
      end if
    end do
  end do
 
  compute_invrank_ = .True.; if (present(compute_invrank)) compute_invrank_ = compute_invrank
 
- max_linear_density = maxval([kptrlatt(1,1), kptrlatt(2,2), kptrlatt(3,3)])
+ min_kpt = 1
+ if (opt == 1) then
+   do ikpt=1,nkpt
+     do ii=1,3
+       if (abs(kpts(ii,ikpt)) < min_kpt .and. abs(kpts(ii,ikpt)) /= 0) then
+         min_kpt = abs(kpts(ii,ikpt)) ! used as tmp variable
+       end if
+     end do
+   end do
+   max_linear_density = ceiling(2/min_kpt)
+ else
+   max_linear_density = maxval([kptrlatt(1,1), kptrlatt(2,2), kptrlatt(3,3)])
+ end if
+
  new = krank_new(nkpt, kpts, max_linear_density=max_linear_density, compute_invrank=compute_invrank_)
 
 end function krank_from_kptrlatt
@@ -171,7 +189,8 @@ end function krank_from_kptrlatt
 !!
 !! SOURCE
 
-type(krank_t) function krank_new(nkpt, kpts, nsym, symrec, time_reversal, max_linear_density, compute_invrank) result(new)
+type(krank_t) function krank_new(nkpt, kpts, &
+                                 nsym, symrec, time_reversal, max_linear_density, compute_invrank) result(new)
 
 !Arguments ------------------------------------
 !scalars
@@ -238,7 +257,6 @@ type(krank_t) function krank_new(nkpt, kpts, nsym, symrec, time_reversal, max_li
 
    do ikpt=1,nkpt
      irank = new%get_rank(kpts(:,ikpt))
-
      if (irank > new%max_rank .or. irank < new%min_rank) then
        write(msg,'(a,2i0)')" rank above max_rank or below min_rank, ikpt, rank ", ikpt, irank
        ABI_ERROR(msg)
@@ -301,7 +319,6 @@ integer function get_rank(krank, kpt) result(rank)
  character(len=500) :: msg
 !arrays
  real(dp) :: redkpt(3)
-
 ! *************************************************************************
 
  ! wrap to [0, 1[ -> replaced call to wrap2_zero2one inline, to encapsulate this module
@@ -510,7 +527,7 @@ end subroutine krank_print
 !! Use symmetries to map input kptn2 to the list of k-points used to generate krank_t.
 !! Similar to listkk but, unlike listkk, this algo does not try to minimize the distance
 !! Mainly used to map two set of k-points associated to the same grid (e.g. BZ --> IBZ, IBZ(q) --> IBZ etc.
-!! Must faster than listkk for dense meshes
+!! Must be faster than listkk for dense meshes
 !! although this routine requires the allocation of temporary array of shape (2, self%min_rank:self%max_rank)
 !! Returns indirect indexing list indkk.
 !!
@@ -650,13 +667,14 @@ end subroutine krank_get_mapping
 !!
 !! SOURCE
 
-subroutine get_ibz2bz(nibz, nbz, bz2ibz, ibz2bz, ierr)
+subroutine get_ibz2bz(nibz, nbz, bz2ibz, ibz2bz, err_msg, ierr)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nibz, nbz
  integer,intent(in) :: bz2ibz(6, nbz)
  integer,intent(out) :: ierr
+ character(len=*),intent(out) :: err_msg
 !arrays
  integer,allocatable,intent(out) :: ibz2bz(:)
 
@@ -681,6 +699,10 @@ subroutine get_ibz2bz(nibz, nbz, bz2ibz, ibz2bz, ierr)
  end do
 
  ierr = merge(0, 1, cnt == nibz)
+ err_msg = ""
+ if (ierr /= 0) then
+   err_msg = sjoin("The number of points in the IBZ computed from symmetry table is: ", itoa(cnt), " while it should be: ", itoa(nibz))
+ end if
 
 end subroutine get_ibz2bz
 !!***

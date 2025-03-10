@@ -5,7 +5,6 @@ add_library(69_wfdesc STATIC
   m_wfd_optic.F90
   m_io_kss.F90
   m_oscillators.F90
-  m_wfd.F90
   )
 
 set_target_properties(69_wfdesc

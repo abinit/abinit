@@ -7,7 +7,7 @@
 !!  Unlike the procedures in m_cgtools, the routines declared in this module can use mpi_type.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2022 ABINIT group (XG, BA, MT, DRH, DCA, GMR, MJV, JWZ)
+!!  Copyright (C) 2008-2025 ABINIT group (XG, BA, MT, DRH, DCA, GMR, MJV, JWZ)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -30,7 +30,8 @@ module m_spacepar
 
  use m_time,            only : timab
  use defs_abitypes,     only : MPI_type
- use m_symtk,           only : mati3inv, sg_multable, symdet, symatm, matr3inv
+ use m_matrix,          only : mati3inv, matr3inv
+ use m_symtk,           only : sg_multable, symdet, symatm
  use m_geometry,        only : metric, normv, symredcart,wedge_basis,wedge_product
  use m_gtermcutoff,     only : termcutoff
  use m_mpinfo,          only : ptabs_fourdp
@@ -66,7 +67,7 @@ contains
 !! make_vectornd
 !!
 !! FUNCTION
-!! For nuclear dipole moments m, compute vector potential A(r) = (m x (r-R))/|r-R|^3
+!! For nuclear dipole moments m, compute vector potential A(r) = \alpha^2(m x (r-R))/|r-R|^3
 !! in r space. This is done by computing A(G) followed by FFT.
 !!
 !! NOTES
@@ -149,7 +150,8 @@ subroutine make_vectornd(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,nspden,nu
  n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)
  nproc_fft = mpi_enreg%nproc_fft; me_fft = mpi_enreg%me_fft
 
- prefac = -four_pi*j_dpc/(ucvol*two_pi)
+ ! the two_pi in the denominator arises from using G.G=2\pi gmet below
+ prefac = -four_pi*j_dpc*FineStructureConstant2/(ucvol*two_pi)
 
  ! Get the distrib associated with this fft_grid
  call ptabs_fourdp(mpi_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
@@ -545,8 +547,8 @@ end subroutine mkunitpawspherepot
 !! SOURCE
 
 subroutine hartre(cplex,gsqcut,icutcoul,izero,mpi_enreg,nfft,ngfft,nkpt,&
-                 &rcut,rhog,rprimd,vcutgeo,vhartr,&
-                 &qpt) ! Optional arguments
+                  rcut,rhog,rprimd,vcutgeo,vhartr,&
+                  qpt) ! Optional arguments
 
 !Arguments ------------------------------------
 !scalars
@@ -759,7 +761,7 @@ end subroutine hartre
 !!  npw=number of planewaves of the vector
 !!  nspinor=number of spinor components
 !!  vect(2,npw*nspinor)=vector
-!!  vect1(2,npw*nspinor*use_ndo)=vector1 (=vector in most of the cases)
+!!  vect1(2,npw*nspinor)=vector1 (=vector in most of the cases)
 !!  use_ndo = says if vect=/vect1
 !!
 !! OUTPUT
@@ -1478,7 +1480,7 @@ end subroutine hartrestr
 !! put total density in first half of rhor array and spin up in second half
 !! If (nspden=2 and nsppol=2) the density is transformed as  (up,down) => (up+down,up)
 !! If (nspden=2 and nsppol=1) anti-ferromagnetic symmetry operations
-!!  must be used, such as to transform (2*up) => (up+down,up)
+!! must be used, such as to transform (2*up) => (up+down,up)
 !! In spin-polarized, and if there is no symmetry to be
 !! applied on the system, only the total density is generated in G space
 !!
@@ -2626,7 +2628,7 @@ end subroutine setsym
 !!  The calculation is performed in reduced reciprocal space coordinates.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2021-2022 ABINIT group (FIXME: add author)
+!!  Copyright (C) 2021-2025 ABINIT group (FIXME: add author)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

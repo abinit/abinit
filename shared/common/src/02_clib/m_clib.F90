@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2022 ABINIT group (MG)
+!! Copyright (C) 2009-2025 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -33,7 +33,9 @@ MODULE m_clib
  public :: clib_print_mallinfo
  public :: clib_ulimit_stack    ! Set stack size limit to maximum allowed value.
  public :: clib_getpid
- !public :: clib_usleep         ! Suspend calling thread for microseconds of clock time
+ public :: clib_sleep           ! Sleep for a certain number of seconds.
+ public :: clib_setenv
+ public :: clib_mkdir_if_needed
 
 
 !FIXME the interfaces below have been commented out since abilint
@@ -42,14 +44,14 @@ MODULE m_clib
 ! ===================================================
 ! ==== Fortran-bindings declared in fsi_posix.c ====
 ! ===================================================
-! interface
-!   subroutine clib_mkdir(path, ierr)
-!     import
-!     character(len=*),intent(in) :: path
-!     integer(c_int),intent(out) :: ierr
-!   end subroutine clib_mkdir
-! end interface
-!
+
+ interface
+    subroutine c_mkdir_if_needed(path, ierr) bind(C, name="c_mkdir_if_needed")
+      import
+      character(kind=c_char), dimension(*), intent(in) :: path
+      integer(c_int),intent(out) :: ierr
+    end subroutine c_mkdir_if_needed
+ end interface
 
  interface
    integer(c_int) function c_rename(oldname, newname) bind(C, name='rename')
@@ -74,13 +76,20 @@ MODULE m_clib
  end interface
 
  interface
-   ! pid_t getpid().
    ! The type of pid_t data is a signed integer type (signed int or we can say int).
    function clib_getpid() bind(C, name='getpid')
      import
      integer(c_int) :: clib_getpid
    end function clib_getpid
  end interface
+
+ interface
+   subroutine clib_sleep(seconds) bind(C, name="sleep")
+     import
+     integer(c_int), value :: seconds  ! This is unsigned int in C
+   end subroutine clib_sleep
+ end interface
+
 
 ! =================================================
 ! ==== Fortran-bindings declared in mallinfo.c ====
@@ -126,34 +135,23 @@ MODULE m_clib
    end subroutine
  end interface
 
-  !interface
-  !  ! suspend calling thread for microseconds of clock time
-  !  ! uses unistd.h for Fortran standard compliant sleep.
-  !  ! sleep() is a GNU extension, not standard Fortran
-  !  subroutine usleep(us) bind(C)
-  !    import
-  !    integer(c_int), value :: us
-  !  end subroutine usleep
-  !end interface
-
-  !interface
-  !  ! int usleep(useconds_t useconds)
-  !  function clib_usleep(useconds) bind(c, name='usleep')
-  !    import
-  !    integer(kind=c_int32_t), value :: useconds
-  !    integer(kind=c_int)            :: c_usleep
-  !  end function clib_usleep
-  !end interface
+ interface
+   integer(C_INT) function setenv(name, value, overwrite) bind(C, name="setenv")
+     import
+     character(kind=c_char),intent(in) :: name(*), value(*)
+     integer(c_int),intent(in) :: overwrite
+   end function
+ end interface
 
 ! ==========================================
 ! ==== Fortran-bindings for file_lock.c ====
 ! ==========================================
 
  !interface
- !  function lock_file(path) bind(C)
+ !  function lock_file(filepath) bind(C)
  !    import
  !    implicit none
- !    character(kind=c_char),intent(in) :: path(*)
+ !    character(kind=c_char),intent(in) :: filepath(*)
  !    integer(c_int) :: lock_file
  !  end function lock_file
  !end interface
@@ -166,7 +164,6 @@ MODULE m_clib
  !    integer(c_int) unlock_fd
  !  end function unlock_fd
  !end interface
-
 
 contains
 !!***
@@ -215,22 +212,65 @@ end subroutine clib_print_mallinfo
 !! FUNCTION
 !!  Rename a file with a new name using the rename function from C stdlib
 !!
-!! INPUTS
-!!
-!! OUTPUT
-!!
 !! SOURCE
 
 integer function clib_rename(old_fname, new_fname) result(ierr)
 
 !Arguments ------------------------------------
  character(len=*),intent(in) :: old_fname, new_fname
-
 ! *********************************************************************
 
  ierr = c_rename(trim(old_fname)//c_null_char, trim(new_fname)//c_null_char)
 
 end function clib_rename
+!!***
+
+!!****f* m_clib/clib_mkdir
+!! NAME
+!!  clib_mkdir
+!!
+!! FUNCTION
+!!  Create a directory if it does not exist. Return 0 on success.
+!!
+!! SOURCE
+
+subroutine clib_mkdir_if_needed(dirpath, ierr)
+
+!Arguments ------------------------------------
+ character(len=*),intent(in) :: dirpath
+ integer,intent(out) :: ierr
+! *********************************************************************
+
+ call c_mkdir_if_needed(trim(dirpath)//c_null_char, ierr)
+
+end subroutine clib_mkdir_if_needed
+!!***
+
+!!****f* m_clib/clib_setenv
+!! NAME
+!!  clib_setenv
+!!
+!! FUNCTION
+!!       The setenv() function adds the variable name to the environment
+!!       with the value value, if name does not already exist.  If name
+!!       does exist in the environment, then its value is changed to value
+!!       if overwrite is nonzero; if overwrite is zero, then the value of
+!!       name is not changed (and setenv() returns a success status).
+!!       This function makes copies of the strings pointed to by name and
+!!       value (by contrast with putenv(3)).
+!!
+!! SOURCE
+
+integer function clib_setenv(name, value, overwrite) result(ierr)
+
+!Arguments ------------------------------------
+ character(len=*) ,intent(in) :: name, value
+ integer(C_INT), intent(in) :: overwrite
+! *********************************************************************
+
+ ierr = setenv(trim(name)//C_NULL_CHAR, trim(value)//C_NULL_CHAR, overwrite)
+
+end function clib_setenv
 !!***
 
 END MODULE m_clib

@@ -6,7 +6,7 @@
 !! Main routine for conducting Density-Functional Theory calculations or Many-Body Perturbation Theory calculations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, MKV, MT)
+!! Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, MKV, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -67,8 +67,6 @@
 #endif
 
 #include "abi_common.h"
-
-! nvtx related macro definition
 #include "nvtx_macros.h"
 
 program abinit
@@ -113,12 +111,15 @@ program abinit
  use m_out_spg_anal,  only : out_spg_anal
  use m_driver,        only : driver
 
-#ifdef HAVE_GPU_CUDA
+#ifdef HAVE_GPU
  use m_gpu_toolbox
+#endif
+
+#ifdef HAVE_GPU_CUDA
  use m_manage_cuda
 #endif
 
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
  use m_nvtx_data
 #endif
 
@@ -157,7 +158,6 @@ program abinit
  integer :: mu,natom,ncomment,ncomment_paw,ndtset
  integer :: ndtset_alloc,nexit,nexit_paw,nfft,nkpt,npsp
  integer :: nsppol,nwarning,nwarning_paw,prtvol,timopt,gpu_option
- logical :: use_nvtx
  integer,allocatable :: nband(:),npwtot(:)
  real(dp) :: etotal, tcpui, twalli
  real(dp) :: strten(6),tsec(2)
@@ -181,13 +181,12 @@ program abinit
  character(len=8) :: strdat
  character(len=10) :: strtime
  character(len=13) :: warn_fmt
- integer :: gpu_devices(5)
+ integer :: gpu_devices(12)
 
 !******************************************************************
 
 !0) Change communicator for I/O (mandatory!)
  call abi_io_redirect(new_io_comm=xmpi_world)
- !call xlf_set_sighandler()
 
 !------------------------------------------------------------------------------
 
@@ -254,6 +253,9 @@ program abinit
    call wrtout([std_out, ab_out], msg)
  end if
 
+ msg=' abinit : after writing the name of files '
+ call wrtout(std_out,msg,'PERS')
+
  ! Test if the netcdf library supports MPI-IO
  call nctk_test_mpiio()
 
@@ -290,8 +292,7 @@ program abinit
  ABI_MALLOC(results_out, (0:ndtset_alloc))
 
  ! Initialize results_out datastructure
- call init_results_out(dtsets,1,1,mpi_enregs, mx%natom, mx%mband_upper, mx%nkpt,npsp,&
-  mx%nsppol, mx%ntypat, results_out)
+ call init_results_out(dtsets,1,1,mpi_enregs, mx%natom, mx%mband_upper, mx%nkpt,npsp, mx%nsppol, mx%ntypat, results_out)
 
  ! Gather contributions to results_out from images of the cell, if needed
  test_img = (mx%nimage/=1.and.maxval(dtsets(:)%npimage)>1)
@@ -343,14 +344,14 @@ program abinit
 
 !------------------------------------------------------------------------------
 
-!13) Perform additional checks on input data
+ ! 13) Perform additional checks on input data
 
  call chkinp(dtsets, ab_out, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads, xmpi_world)
 
  ! Check whether the string only contains valid keywords
  call chkvars(string)
 
-!At this stage, all the information from the "files" file and "input" file have been read and checked.
+ ! At this stage, all the information from the "files" file and "input" file have been read and checked.
 
 !------------------------------------------------------------------------------
 
@@ -364,14 +365,12 @@ program abinit
 
 !Activate GPU is required
  gpu_option=ABI_GPU_DISABLED
- use_nvtx=.false.
  gpu_devices(:)=-1
  do ii=1,ndtset_alloc
    if (dtsets(ii)%gpu_option/=ABI_GPU_DISABLED) then
      gpu_option=dtsets(ii)%gpu_option
      gpu_devices(:)=dtsets(ii)%gpu_devices(:)
    end if
-   if (dtsets(ii)%gpu_use_nvtx==1) use_nvtx=.true.
  end do
 #ifdef HAVE_GPU
  call setdevice_cuda(gpu_devices,gpu_option)
@@ -382,8 +381,9 @@ program abinit
  end if
 #endif
 
-#ifdef HAVE_GPU_NVTX_V3
- NVTX_INIT(use_nvtx)
+!Enable GPU markers (NVTX/ROCTX) if required
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+ NVTX_INIT()
 #endif
 
 !------------------------------------------------------------------------------
@@ -428,9 +428,9 @@ program abinit
      call wrtout([std_out, ab_out], msg)
    else
      ! Echo input to output file on unit ab_out, and to log file on unit std_out.
-     ! (Well, this might make sense for outvars, but not so much for out_spg_anal 
+     ! (Well, this might make sense for outvars, but not so much for out_spg_anal
      !  so there is only one call to the latter, for both units)
-     ! both 
+     ! both
      choice=2
      do ii=1,2
        if(ii==1)iounit=ab_out
@@ -600,8 +600,7 @@ program abinit
  print_mem_report = 1
  do ii=1,ndtset_alloc
    if ((dtsets(ii)%usewvl == 1) .or. (dtsets(ii)%icoulomb > 0)) then
-     print_mem_report = 0
-     exit
+     print_mem_report = 0; exit
    end if
  end do
 

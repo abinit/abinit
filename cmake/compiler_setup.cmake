@@ -25,6 +25,24 @@ elseif(CMAKE_Fortran_COMPILER_ID MATCHES "ARMClang")
       "$<$<AND:$<COMPILE_LANGUAGE:Fortran>,$<CONFIG:Debug>>:-fbacktrace;-finit-real=nan;-Wimplicit;-Wall;-Wextra>")
   endif()
 
+elseif(CMAKE_Fortran_COMPILER_ID MATCHES "Cray")
+
+  # debug flags
+  if (ABI_DEBUG_FLAVOR MATCHES "enhanced")
+    add_compile_options(
+      "$<$<AND:$<COMPILE_LANGUAGE:Fortran>,$<CONFIG:Debug>>:-O0;-eD>")
+    add_link_options(
+      "$<$<AND:$<COMPILE_LANGUAGE:Fortran>,$<CONFIG:Debug>>:-O0;-eD>")
+    add_link_options(
+      "$<$<AND:$<LINK_LANGUAGE:Fortran>,$<CONFIG:Debug>>:-O0;-eD>")
+  elseif (ABI_DEBUG_FLAVOR MATCHES "paranoid")
+    add_compile_options(
+      "$<$<AND:$<COMPILE_LANGUAGE:Fortran>,$<CONFIG:Debug>>:-eD;-hbounds>")
+  elseif (ABI_DEBUG_FLAVOR MATCHES "naughty")
+    add_compile_options(
+      "$<$<AND:$<COMPILE_LANGUAGE:Fortran>,$<CONFIG:Debug>>:-eD;-hbounds>")
+  endif()
+
 elseif(CMAKE_Fortran_COMPILER_ID MATCHES "Clang")
 
   # debug flags
@@ -114,7 +132,7 @@ elseif(CMAKE_Fortran_COMPILER_ID MATCHES "NVHPC") # NVFORTRAN
 
   # TODO : improve
   add_compile_options(
-    "$<$<COMPILE_LANGUAGE:Fortran>:-Mextend;-Mpreprocess;-Mfree;-tp=px;-traceback;-Minfo=mp,accel,par,pfo>")
+    "$<$<COMPILE_LANGUAGE:Fortran>:-Mextend;-Mpreprocess;-Mfree;-Minfo=mp,accel,par,pfo>")
 
   # debug flags
   add_compile_options(
@@ -199,11 +217,11 @@ elseif(CMAKE_C_COMPILER_ID MATCHES "GNU")
       )
   elseif (ABI_OPTIM_FLAVOR MATCHES "standard")
     add_compile_options(
-      "$<$<AND:$<COMPILE_LANGUAGE:C>,$<CONFIG:Release>>:-fno-backtrace;-Wno-maybe-uninitialized;-O2;-mtune=native;-march=native>"
+      "$<$<AND:$<COMPILE_LANGUAGE:C>,$<CONFIG:Release>>:-fno-backtrace;-Wno-maybe-uninitialized;-O2;-march=native>"
       )
   elseif (ABI_OPTIM_FLAVOR MATCHES "aggressive")
     add_compile_options(
-      "$<$<AND:$<COMPILE_LANGUAGE:C>,$<CONFIG:Release>>:-fno-backtrace;-Wno-maybe-uninitialized;-O3;-mtune=native;-march=native>"
+      "$<$<AND:$<COMPILE_LANGUAGE:C>,$<CONFIG:Release>>:-fno-backtrace;-Wno-maybe-uninitialized;-O3;-march=native>"
       )
   endif()
 
@@ -303,11 +321,11 @@ elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
       )
   elseif (ABI_OPTIM_FLAVOR MATCHES "standard")
     add_compile_options(
-      "$<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CONFIG:Release>>:-fno-backtrace;-Wno-maybe-uninitialized;-O2;-mtune=native;-march=native>"
+      "$<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CONFIG:Release>>:-fno-backtrace;-Wno-maybe-uninitialized;-O2;-march=native>"
       )
   elseif (ABI_OPTIM_FLAVOR MATCHES "aggressive")
     add_compile_options(
-      "$<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CONFIG:Release>>:-fno-backtrace;-Wno-maybe-uninitialized;-O3;-mtune=native;-march=native>"
+      "$<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CONFIG:Release>>:-fno-backtrace;-Wno-maybe-uninitialized;-O3;-march=native>"
       )
   endif()
 

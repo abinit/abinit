@@ -6,7 +6,7 @@
 !!  Initialize MPI parameters and datastructures for parallel execution
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2022 ABINIT group (FJ, MT, FD)
+!!  Copyright (C) 1999-2025 ABINIT group (FJ, MT, FD)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -135,7 +135,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    prtvol = dtsets(idtset)%prtvol
 
 !  Read parallel input parameters
-   marr=max(5,dtsets(idtset)%npsp,dtsets(idtset)%nimage)
+   marr=max(12,dtsets(idtset)%npsp,dtsets(idtset)%nimage)
    ABI_MALLOC(intarr,(marr))
    ABI_MALLOC(dprarr,(marr))
    nkpt  =dtsets(idtset)%nkpt
@@ -200,8 +200,8 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    if(tread0==1) dtsets(idtset)%pw_unbal_thresh=dprarr(1)
    mpi_enregs(idtset)%pw_unbal_thresh=dtsets(idtset)%pw_unbal_thresh
 
-   call intagm(dprarr,intarr,jdtset,marr,5,string(1:lenstr),'gpu_devices',tread0,'INT')
-   if(tread0==1) dtsets(idtset)%gpu_devices(1:5)=intarr(1:5)
+   call intagm(dprarr,intarr,jdtset,marr,12,string(1:lenstr),'gpu_devices',tread0,'INT')
+   if(tread0==1) dtsets(idtset)%gpu_devices(1:12)=intarr(1:12)
 
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gpu_kokkos_nthrd',tread0,'INT')
    if(tread0==1) dtsets(idtset)%gpu_kokkos_nthrd=intarr(1)
@@ -278,14 +278,16 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
        end if
      end if
    end if
-     
+
    if ((optdriver/=RUNL_GSTATE.and.optdriver/=RUNL_GWLS.and.optdriver/=RUNL_RTTDDFT).and. &
 &   (dtsets(idtset)%np_spkpt/=1   .or.dtsets(idtset)%npband/=1.or.dtsets(idtset)%npfft/=1.or. &
 &   dtsets(idtset)%npspinor/=1.or.dtsets(idtset)%bandpp/=1)) then
 !&   .or.(dtsets(idtset)%iscf<0)) then
      dtsets(idtset)%np_spkpt=1 ; dtsets(idtset)%npspinor=1 ; dtsets(idtset)%npfft=1
-     dtsets(idtset)%npband=1; dtsets(idtset)%bandpp=1  ; dtsets(idtset)%nphf=1
+     dtsets(idtset)%npband=1; dtsets(idtset)%nphf=1
      dtsets(idtset)%paral_kgb=0
+     if(optdriver/=RUNL_RESPFN) dtsets(idtset)%bandpp=1
+     dtsets(idtset)%wfoptalg=0
      ABI_COMMENT('For non ground state calculations, set bandpp, npfft, npband, npspinor, np_spkpt and nphf to 1')
    end if
 
@@ -294,11 +296,71 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
      if (dtsets(idtset)%usepaw==0) dtsets(idtset)%wfoptalg=0
      if (dtsets(idtset)%usepaw/=0) dtsets(idtset)%wfoptalg=10
      if ((optdriver==RUNL_GSTATE.or.optdriver==RUNL_GWLS).and.dtsets(idtset)%paral_kgb/=0) dtsets(idtset)%wfoptalg=114
+#ifndef HAVE_DFTI
      if (mod(dtsets(idtset)%wfoptalg,10)==4) then
        do iikpt=1,dtsets(idtset)%nkpt
          if (any(abs(dtsets(idtset)%kpt(:,iikpt))>tol8)) dtsets(idtset)%istwfk(iikpt)=1
        end do
      end if
+#else
+     if (mod(dtsets(idtset)%wfoptalg,10)==4.and.dtsets(idtset)%wfoptalg/=114) then
+       do iikpt=1,dtsets(idtset)%nkpt
+         if (any(abs(dtsets(idtset)%kpt(:,iikpt))>tol8)) dtsets(idtset)%istwfk(iikpt)=1
+       end do
+     end if
+#endif
+   end if
+
+   if (dtsets(idtset)%wfoptalg==114.or.dtsets(idtset)%wfoptalg==14.or.dtsets(idtset)%wfoptalg==4) then !if LOBPCG
+     if (dtsets(idtset)%autoparal==0) then
+       !Nband might have different values for different kpoint, but not bandpp.
+       !In this case, we just use the largest nband (mband_upper), and the input will probably fail
+       !at the bandpp check later on
+       if(tread(8)==1) then
+         ! check if nblock_lobpcg is read from the input, if so error msg
+         call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nblock_lobpcg',tread0,'INT')
+         if (tread0==1) then
+           write(msg,'(3a)') 'Both bandpp and nblock_lobpcg are defined for the same dataset, this is confusing.',ch10,&
+             'Change the input to keep only nblock_lobpcg (preferably) or bandpp.'
+           ABI_ERROR(msg)
+         end if
+         if (mod(mband_upper,dtsets(idtset)%bandpp*dtsets(idtset)%npband)==0) then
+           dtsets(idtset)%nblock_lobpcg=mband_upper/(dtsets(idtset)%bandpp*dtsets(idtset)%npband)
+         else
+           write(msg,'(5a)') 'mband_upper( =max_{kpt}(nband) ) should be a mutltiple of npband*bandpp.',ch10,&
+             'Change nband, npband or bandpp in the input.',ch10,&
+             'A simpler solution is to use nblock_lobpcg instead of bandpp.'
+           ABI_ERROR(msg)
+         end if
+       else
+         if (mod(mband_upper,dtsets(idtset)%nblock_lobpcg*dtsets(idtset)%npband)==0) then
+           dtsets(idtset)%bandpp=mband_upper/(dtsets(idtset)%nblock_lobpcg*dtsets(idtset)%npband)
+         else
+           write(msg,'(3a)') 'mband_upper( =max_{kpt}(nband) ) should be a mutltiple of nblock_lobpcg*npband.',ch10,&
+             'Change nband, npband or nblock_lobpcg in the input.'
+           ABI_ERROR(msg)
+         end if
+       end if
+     else ! autoparal /= 0
+       ! check if nblock_lobpcg is read from the input, if so error msg
+       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nblock_lobpcg',tread0,'INT')
+       if (tread0==1) then
+         write(msg,'(3a)') 'When using autoparal, nblock_lobpcg is automatically set, so it cannot be in the input.',ch10,&
+           'Change the input to keep only autoparal or nblock_lobpcg.'
+         ABI_ERROR(msg)
+       end if
+       dtsets(idtset)%nblock_lobpcg=mband_upper/(dtsets(idtset)%bandpp*dtsets(idtset)%npband)
+     end if
+   end if
+
+   ! Warning when using different number of bands for different kpoints (occopt=2)
+   if ( dtsets(idtset)%occopt==2 .and. dtsets(idtset)%nkpt>1 .and. &
+     & ((dtsets(idtset)%bandpp > 1) .or. (dtsets(idtset)%npband > 1)) ) then
+     write(msg, '(4a)' ) &
+       'When working with blocks of bands (bandpp>1 or npband>1),'&
+      &' the number of bands should be the same for every kpoints.',ch10,&
+      &' The run will most probably fail on a other check. If it does not fail, ignore this message.'
+     ABI_WARNING(msg)
    end if
 
    dtsets(idtset)%densfor_pred=2
@@ -352,16 +414,13 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    else if (dtsets(idtset)%npfft>1.and.usepaw==1) then
      dtsets(idtset)%pawmixdg=1
    end if
-     
+
 !  Cycle if the processor is not used
    if (mpi_enregs(idtset)%me<0.or.iexit>0) then
      ABI_FREE(intarr)
      ABI_FREE(dprarr)
      cycle
    end if
-
-   ! Set cprj_in_memory to zero if paral_kgb has been activated by autoparal
-   if (dtsets(idtset)%paral_kgb/=0) dtsets(idtset)%cprj_in_memory = 0
 
    response=0
    if (dtsets(idtset)%rfddk/=0 .or. dtsets(idtset)%rf2_dkdk/=0 .or. dtsets(idtset)%rf2_dkde/=0 .or. &
@@ -378,6 +437,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 !    --IF CUDA AND RECURSION:ONLY BAND PARALLELISATION
    if(dtsets(idtset)%tfkinfunc==2 .and. nproc/=1)then
      dtsets(idtset)%npband = dtsets(idtset)%npband*dtsets(idtset)%np_spkpt*dtsets(idtset)%npspinor*dtsets(idtset)%npfft
+     dtsets(idtset)%bandpp=1
      dtsets(idtset)%np_spkpt = 1
      dtsets(idtset)%npfft = 1
      dtsets(idtset)%npspinor = 1
@@ -431,7 +491,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
        end if
      else if(dtsets(idtset)%np_spkpt*dtsets(idtset)%npfft*dtsets(idtset)%npband*dtsets(idtset)%npspinor < nproc)then
        write(msg,'(a,5i6,4a)')&
-       'np_spkpt,npband,npspinor,npfft,nproc=',&
+       'np_spkpt,npfft,npband,npspinor,nproc=',&
 &      dtsets(idtset)%np_spkpt,dtsets(idtset)%npfft,dtsets(idtset)%npband,dtsets(idtset)%npspinor,nproc,ch10,&
        'The number of processors must not be greater than npfft*npband*np_spkpt*npspinor ',ch10,&
        'when npfft or np_spkpt or npband or npspinor are chosen manually in the input file.'
@@ -499,9 +559,15 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    !When using chebfi, the number of blocks is equal to the number of processors
    if((dtsets(idtset)%wfoptalg == 1) .or. (dtsets(idtset)%wfoptalg == 111)) then
      !Nband might have different values for different kpoint, but not bandpp.
-     !In this case, we just use the largest nband, and the input will probably fail
+     !In this case, we just use the largest nband (mband_upper), and the input will probably fail
      !at the bandpp check later on
      dtsets(idtset)%bandpp = mband_upper / dtsets(idtset)%npband
+     if(tread(8)==1) then
+       write(msg, '(a,i8,3a)' ) &
+       'bandpp has been internally set to ',dtsets(idtset)%bandpp,'.',ch10,&
+       'Indeed, there is no need to specify bandpp in the input when using chebfi (wfoptalg=1,111).'
+       ABI_COMMENT(msg)
+     end if
    end if
 
    !Check parallelization in case of RTTDDFT
@@ -786,6 +852,21 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
              ABI_ERROR(msg)
            end if
 
+           if((dtsets(idtset)%cprj_in_memory/=0)) then
+             if (mpi_enregs(idtset)%nproc_spinor/=1) then
+               write(msg,'(3a,i0)') &
+               'If cprj_in_memory/=0, the number of processors for spinors, npspinor, must be 1',ch10,&
+               'However, npspinor=',mpi_enregs(idtset)%nproc_spinor
+               ABI_ERROR(msg)
+             end if
+             if(mpi_enregs(idtset)%nproc_fft/=1)then
+               write(msg,'(3a,i0)') &
+               'If cprj_in_memory/=0, the number of FFT processors, npfft, must be 1',ch10,&
+               'However, npfft=',mpi_enregs(idtset)%nproc_fft
+               ABI_ERROR(msg)
+             end if
+           end if
+
            if(modulo(dtsets(idtset)%ngfft(2),mpi_enregs(idtset)%nproc_fft)/=0)then
              write(msg,'(3a,i0,a,i0)') &
              'The number of FFT processors, npfft, should be a multiple of ngfft(2).',ch10,&
@@ -987,6 +1068,11 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
        if ((vectsize*blocksize**2)>=dtsets(idtset)%gpu_linalg_limit) then
          if (.not.wfoptalg_read) then
            dtsets(idtset)%wfoptalg=14
+           if (tread(8)==1) then ! bandpp read, so set nblock_lobpcg
+             dtsets(idtset)%nblock_lobpcg=mband_upper/(dtsets(idtset)%bandpp*dtsets(idtset)%npband)
+           else ! bandpp set by nblock_lobpcg
+             dtsets(idtset)%bandpp=mband_upper/(dtsets(idtset)%nblock_lobpcg*dtsets(idtset)%npband)
+           end if
            if (.not.fftalg_read) then
              dtsets(idtset)%ngfft(7) = fftalg_for_npfft(dtsets(idtset)%npfft)
              if (usepaw==1) dtsets(idtset)%ngfftdg(7) = fftalg_for_npfft(dtsets(idtset)%npfft)
@@ -1330,7 +1416,7 @@ end subroutine mpi_setup
          if (mpi_enreg%me==0) then
            inquire(file=trim(filden),exist=file_found)
            if (file_found) then
-             call hdr_read_from_fname(hdr0,filden,ii,xmpi_comm_self)
+             call hdr0%from_fname(filden,ii,xmpi_comm_self)
              idum3(1:2)=hdr0%ngfft(2:3);if (file_found) idum3(3)=1
              call hdr0%free()
              ABI_WARNING("Cannot find filden "//filden)
@@ -1351,7 +1437,11 @@ end subroutine mpi_setup
    end if
 
 !  >> banddp level
-   bpp_min=max(1,dtset%bandpp)
+   if (tread(8)==1) then
+     bpp_min = dtset%bandpp
+   else
+     bpp_min = 1
+   end if
    bpp_max=mband
    if (wf_algo_global==ALGO_LOBPCG_OLD) bpp_max=max(4,nint(mband/10.)) ! reasonable bandpp max
    if (tread(8)==1) bpp_max=dtset%bandpp

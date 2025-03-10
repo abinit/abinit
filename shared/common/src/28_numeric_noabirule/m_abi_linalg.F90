@@ -7,9 +7,9 @@
 !!  with support of different external library (scalapack, elpa, plasma, magma, ... )
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2022 ABINIT group (LNguyen,FDahm,MT)
+!!  Copyright (C) 2012-2025 ABINIT group (LNguyen,FDahm,MT)
 !!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~ABINIT/Infos/copyright
+!!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! SOURCE
@@ -36,7 +36,7 @@ module m_abi_linalg
  use plasma, except_dp => dp, except_sp => sp
 #endif
 
-#if defined HAVE_GPU_CUDA
+#if defined HAVE_GPU
  use m_gpu_toolbox
 #endif
 
@@ -121,15 +121,17 @@ module m_abi_linalg
  integer,                       allocatable,save,private,target :: i_work(:)
  real(kind=c_double),           allocatable,save,private,target :: r_work(:)
  complex(kind=c_double_complex),allocatable,save,private,target :: c_work(:)
+ type(c_ptr),save,private :: gpu_work
 
  !FIXME *_managed arrays are only used with YAKL, in place of previous ones
  integer(kind=c_int32_t),        ABI_CONTIGUOUS pointer,save,private :: i_work_managed(:) => null()
  real(kind=c_double),            ABI_CONTIGUOUS pointer,save,private :: r_work_managed(:) => null()
  complex(kind=c_double_complex), ABI_CONTIGUOUS pointer,save,private :: c_work_managed(:) => null()
 
+ integer, save, private :: i_work_len = 0
  integer, save, private :: r_work_len = 0
  integer, save, private :: c_work_len = 0
- integer, save, private :: i_work_len = 0
+ integer(c_size_t), save, private :: gpu_work_len = 0
 #endif
 
 !----------------------------------------------------------------------
@@ -140,6 +142,9 @@ module m_abi_linalg
  public :: abi_linalg_finalize      ! CleanuUp routine
  public :: abi_linalg_work_allocate ! Allocate work arrays
  !----------------------------------------------------------------------
+
+ public :: gpu_set_to_zero
+ public :: gpu_copy
 
 !BLAS INTERFACE
  !public :: abi_zgemm
@@ -324,7 +329,7 @@ module m_abi_linalg
  public :: ortho_reim
  !----------------------------------------------------------------------
 
-#ifdef HAVE_GPU_CUDA
+#ifdef HAVE_GPU
 
   interface
 
@@ -511,7 +516,7 @@ CONTAINS  !===========================================================
 !******************************************************************
 
 !Use only abi_linalg in case of GS calculations
- abi_linalg_in_use=(optdriver==RUNL_GSTATE.or.optdriver==RUNL_GWLS)
+ abi_linalg_in_use=(optdriver==RUNL_GSTATE.or.optdriver==RUNL_GWLS.or.optdriver==RUNL_RESPFN)
 
  max_eigen_pb_size_eff=0
  lapack_single_precision=.false.
@@ -611,7 +616,7 @@ CONTAINS  !===========================================================
 #endif
 #endif
 
-#ifdef HAVE_GPU_CUDA
+#ifdef HAVE_GPU
 !Cublas initialization
  if (gpu_option/=ABI_GPU_DISABLED) call gpu_linalg_init()
  abi_linalg_gpu_mode = gpu_option !FIXME Add a check for this
@@ -889,7 +894,7 @@ CONTAINS  !===========================================================
 #endif
 #endif
 
-#ifdef HAVE_GPU_CUDA
+#ifdef HAVE_GPU
  if (gpu_option/=ABI_GPU_DISABLED) then
    call abi_gpu_work_finalize()
    call gpu_linalg_shutdown()

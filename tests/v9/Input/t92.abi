@@ -1,22 +1,18 @@
 # Al at high temperature using the Extended FPMD model
-ndtset 5
+ndtset 6
 
 useextfpmd1 1
-nband1 50
-
 useextfpmd2 2
-nband2 50
-
 useextfpmd3 3
-nband3 50
-
 useextfpmd4 4
-nband4 50
+useextfpmd5 5
+extfpmd_nband5 8192
+useextfpmd6 1
+extfpmd_nbdbuf6 0
+nband6 50
 
-useextfpmd5 1
-extfpmd_nbdbuf5 10
-nband5 60
-
+nband 60
+extfpmd_nbdbuf 10
 extfpmd_nbcut 10
 
 dipdip 0
@@ -56,7 +52,7 @@ pseudos = "Al.LDA-PW-paw.xml"
 #%% max_nprocs = 4
 #%% [extra_info]
 #%% authors = A. Blanchet
-#%% keywords = extended, high, temperature, fpmd, ext, dft, fermi, gas, plasma, WDM
+#%% keywords = ext-fpmd
 #%% description =
 #%%   Check Extended FPMD routines with low number of bands for
 #%%   Aluminum FCC lattice at high temperature.

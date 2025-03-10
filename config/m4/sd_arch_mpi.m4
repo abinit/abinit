@@ -1,4 +1,4 @@
-## Copyright (C) 2019-2022 ABINIT group (Yann Pouillon)
+## Copyright (C) 2019-2025 ABINIT group (Yann Pouillon)
 
 #
 # MPI detection with Steredeg
@@ -104,6 +104,7 @@ AC_DEFUN([SD_MPI_INIT], [
   AC_ARG_VAR([MPI_CFLAGS], [C flags for MPI.])
   AC_ARG_VAR([MPI_CXXFLAGS], [C++ flags for MPI.])
   AC_ARG_VAR([MPI_FCFLAGS], [Fortran flags for MPI.])
+  AC_ARG_VAR([MPI_FFLAGS], [Fortran flags for MPI (better use MPI_FCFLAGS).])
   AC_ARG_VAR([MPI_LDFLAGS], [Linker flags for MPI.])
   AC_ARG_VAR([MPI_LIBS], [Library flags for MPI.])
 
@@ -117,7 +118,7 @@ AC_DEFUN([SD_MPI_INIT], [
     fi
     if test "${sd_mpi_enable_fc}" = "yes"; then
       tmp_compil_vars="${tmp_compil_vars}${FC}"
-      tmp_mpi_vars="${tmp_mpi_vars}${MPI_FCFLAGS}"
+      tmp_mpi_vars="${tmp_mpi_vars}${MPI_FFLAGS}${MPI_FCFLAGS}"
     fi
     if test "${sd_mpi_init}" = "def" -o "${sd_mpi_init}" = "yon"; then
       if test "${tmp_compil_vars}${tmp_mpi_vars}" != ""; then
@@ -175,6 +176,7 @@ AC_DEFUN([SD_MPI_INIT], [
           test "${MPI_CXXFLAGS}" != "" && sd_mpi_cxxflags="${MPI_CXXFLAGS}"
         fi
         if test "${sd_mpi_enable_fc}" = "yes"; then
+          test "${MPI_FFLAGS}" != "" && sd_mpi_fcflags="${MPI_FFLAGS}"
           test "${MPI_FCFLAGS}" != "" && sd_mpi_fcflags="${MPI_FCFLAGS}"
         fi
         test "${MPI_LDFLAGS}" != "" && sd_mpi_ldflags="${MPI_LDFLAGS}"

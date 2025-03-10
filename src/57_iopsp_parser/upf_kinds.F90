@@ -31,4 +31,4 @@ MODULE upf_kinds
 
 subroutine foo()
 end subroutine foo
-END MODULE
+END MODULE upf_kinds

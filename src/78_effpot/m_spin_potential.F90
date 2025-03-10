@@ -23,7 +23,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2022 ABINIT group (TO, hexu)
+!! Copyright (C) 2001-2025 ABINIT group (TO, hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -425,14 +425,9 @@ contains
     ! test
     dS(:)=Snew(:)-S(:, ispin)
     S(:, ispin)= S(:, ispin)+ dS
-
-       if (.not. self%csr_mat_ready) then
-          call spmat_convert(self%coeff_coo, self%bilinear_csr_mat)
-          self%csr_mat_ready=.True.
-       endif
-       call self%bilinear_csr_mat%mv_select_row(3, [3*ispin-2, 3*ispin-1, 3*ispin], S, tmp)
-       deltaE=deltaE-dot_product(tmp, dS ) *2.0
-
+    call self%prepare_csr_matrix()
+    call self%bilinear_csr_mat%mv_select_row(3, [3*ispin-2, 3*ispin-1, 3*ispin], S, tmp)
+    deltaE=deltaE-dot_product(tmp, dS ) *2.0
     if(self%has_external_hfield) then
        deltaE=deltaE - dot_product(self%external_hfield(:, ispin), dS)*self%ms(ispin)
     end if

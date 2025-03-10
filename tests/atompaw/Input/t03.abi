@@ -40,10 +40,10 @@ default                                     ! All parameters set to default for 
 #%% [extra_info]
 #%% authors = M. Torrent
 #%% keywords = PAW
-#%% description = 
+#%% description =
 #%%   Generation of an atomic data file (pseudopotential file) from ATOMPAW for Nickel
 #%%   Same file as the one used in tutorial#paw2 , Bloechl's flavor.
 #%%   One difference : the number of points is 2000 here, while it is 495
-#%%   in the file Ni.GGA-PBE-paw.abinit.bloechl . This is coherent with the
+#%%   in the file Ni.PBE-paw.abinit.bloechl . This is coherent with the
 #%%   content of the tutorials ...
 #%%<END TEST_INFO>

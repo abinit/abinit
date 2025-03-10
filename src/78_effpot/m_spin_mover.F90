@@ -19,7 +19,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2022 ABINIT group (hexu)
+!! Copyright (C) 2001-2025 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -487,7 +487,7 @@ contains
        Ri = cross(S_in(:,i),Htmp)
        dSdt = -self%gamma_L(i)*(Ri+self%damping(i)* cross(S_in(:,i), Ri))
        Ri=S_in(:,i)+dSdt*self%dt
-       Ri=Ri/sqrt(Ri(1)*Ri(1)+Ri(2)*Ri(2)+Ri(3)*Ri(3))
+       Ri=Ri/norm2(Ri)
        self%Stmp2(:,i)=Ri
     end do
     call self%mps%allgatherv_dp2d(self%Stmp2, 3, buffer=self%buffer)
@@ -502,7 +502,7 @@ contains
        Ri = cross(S_in(:,i),Htmp)
        dSdt = -self%gamma_L(i)*(Ri+self%damping(i)* cross(S_in(:,i), Ri))
        Ri=S_in(:,i)+dSdt*self%dt
-       Ri=Ri/sqrt(Ri(1)*Ri(1)+Ri(2)*Ri(2)+Ri(3)*Ri(3))
+       Ri=Ri/norm2(Ri)
        self%Stmp(:,i)=Ri
     end do
     call self%mps%allgatherv_dp2d(self%Stmp, 3, buffer=self%buffer)
@@ -552,7 +552,7 @@ contains
        !Ri = cross(S_in(:,i),Htmp)
        !dSdt = -self%gamma_L(i)*(Ri+self%damping(i)* cross(S_in(:,i), Ri))
        Ri=S_in(:,i)!+dSdt*self%dt
-       Ri=Ri/sqrt(Ri(1)*Ri(1)+Ri(2)*Ri(2)+Ri(3)*Ri(3))
+       Ri=Ri/norm2(Ri)
        self%Stmp(:,i)=Ri
     end do
     call self%mps%allgatherv_dp2d(self%Stmp2, 3, buffer=self%buffer)
@@ -650,7 +650,8 @@ contains
     type(hash_table_t),optional, intent(inout) :: energy_table
     if(present(displacement) .or. present(lwf) .or. present(strain)) then
        ABI_BUG("Monte Carlo only implemented for spin.")
-       call self%spin_mc%run_MC(self%rng, effpot, S_in, etot)
+    else
+       call self%spin_mc%run_MC(self%rng, effpot, S_in, etot, bfield=self%Htmp)
     end if
     call energy_table%put(self%label, etot)
   end subroutine spin_mover_t_run_one_step_MC

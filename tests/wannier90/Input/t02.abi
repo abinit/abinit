@@ -2,7 +2,7 @@
 
 
 #First dataset : SC run with kpoints in the IBZ
-  nband    26    
+  nband    26
   nstep  30
  irdwfk 0
  prtwant 2
@@ -34,7 +34,7 @@ istwfk 8*1
  pawecutdg 20.0
 # pawecutdg 40.00             ! This is also too low
  ixc 1
- natom  2  
+ natom  2
  ntypat  2
  rprim   0 .5 .5  .5 0 .5  .5 .5 0
  xred 3*0.00d0 3*0.25d0
@@ -48,7 +48,7 @@ istwfk 8*1
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t02.abo, tolnlines = 15, tolabs = 3.50e-02, tolrel = 9.50e-01
 #%% extra_inputs = t02o_w90.win
 #%% [paral_info]

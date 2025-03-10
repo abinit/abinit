@@ -1,6 +1,6 @@
 # -*- Autoconf -*-
 #
-# Copyright (C) 2005-2022 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2025 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -66,10 +66,10 @@ Core build parameters
   * debugging         : ${abi_debug_flavor}
   * optimizations     : ${abi_optim_flavor}
 
-  * OpenMP enabled    : ${abi_openmp_enable} (collapse: ${tmp_omp_collapse}; GPU offload: ${tmp_omp_gpu_offload})
   * MPI    enabled    : ${abi_mpi_enable} (flavor: ${abi_mpi_flavor})
   * MPI    in-place   : ${abi_mpi_inplace_enable}
   * MPI-IO enabled    : ${abi_mpi_io_enable}
+  * OpenMP enabled    : ${abi_openmp_enable} (collapse: ${tmp_omp_collapse}; GPU offload: ${tmp_omp_gpu_offload})
   * GPU    enabled    : ${abi_gpu_enable} (flavor: ${abi_gpu_flavor})
 
   * LibXML2 enabled   : ${abi_libxml2_enable}

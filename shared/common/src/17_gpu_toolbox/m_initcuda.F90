@@ -7,7 +7,7 @@
 !!  and the functions needed to extract them
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2009-2022 ABINIT group (MMancini, MT, FDahm)
+!!  Copyright (C) 2009-2025 ABINIT group (MMancini, MT, FDahm)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -112,7 +112,7 @@ CONTAINS !===========================================================
 !arrays
  integer :: vers(0:1)
 ! *********************************************************************
-#if defined HAVE_GPU_CUDA
+#if defined HAVE_GPU
  write(msg,'(a,80a)')' ',('_',ii=1,80)
  call wrtout(std_out,msg,'PERS')
  write(msg,'(a25,a25,a31,a)')  '________________________',&
@@ -130,12 +130,12 @@ CONTAINS !===========================================================
  write (msg,formatdev)&
        & '  Device             ',device,' : ',name(1:lenname)
  call wrtout(std_out,msg,'PERS')
- write (msg,'(a,2(i1,a),a,i6,a,a,a,f7.1,a,a,a,i4,a,i4,4a,2(a,i7,2a),a,i7,a)')&
+ write (msg,'(a,2(i1,a),a,i9,a,a,a,f7.1,a,a,a,i9,a,i9,4a,2(a,i9,2a),a,i9,a)')&
        & ' Revision number:                   ',vers(0),'.',vers(1),ch10, &
        & ' Total amount of global memory: ',nint(globalmem),' Mbytes',ch10, &
        & ' Clock rate:                    ',clockRate,' GHz',ch10, &
        & ' Number of processors/cores:    ',nprocs,'/',ncores,ch10, &
-       & ' Max GFLOPS:                    ',trim(gflops_stg),ch10, &
+       & ' Max FP64 GFLOPS:               ',trim(gflops_stg),ch10, &
        & ' Total  constant memory:        ',constmem,' bytes',ch10, &
        & ' Shared memory per block:       ',sharemem,' bytes',ch10, &
        & ' Number of registers per block: ',regist,ch10
@@ -173,7 +173,7 @@ CONTAINS !===========================================================
  real(sp) :: locmax
 ! *********************************************************************
  gpuinfo%ndevice = 0
-#if defined HAVE_GPU_CUDA
+#if defined HAVE_GPU
 !--Initialization
  if(device>-1)then
    !--Get the number of device for this proc
@@ -204,7 +204,7 @@ CONTAINS !===========================================================
 !scalars
  integer,intent(out) :: ndevice
 ! *********************************************************************
-#if defined HAVE_GPU_CUDA
+#if defined HAVE_GPU
 !--Get the number of device for this proc
  call c_get_ndevice(ndevice)
 #endif
@@ -238,7 +238,7 @@ subroutine Get_Mem_Dev(device,max_mem_dev)
  real(sp),intent(out) :: max_mem_dev
 !Local variables ------------------------------
 ! *********************************************************************
-#if defined HAVE_GPU_CUDA
+#if defined HAVE_GPU
  call get_GPU_max_mem(device,max_mem_dev)
 #endif
 end subroutine Get_Mem_Dev
@@ -262,7 +262,7 @@ end subroutine Get_Mem_Dev
 !scalars
  type(devGPU_type),intent(inout) :: gpuinfo
 ! *********************************************************************
-#if defined HAVE_GPU_CUDA
+#if defined HAVE_GPU
  if (allocated(gpuinfo%maxmemdev))  then
    ABI_FREE(gpuinfo%maxmemdev)
  end if
@@ -280,8 +280,8 @@ end subroutine Get_Mem_Dev
 !! Detect and activate a GPU device from current CPU core
 !!
 !! INPUTS
-!!  gpu_devices(5)= list of GPU devices to choose on one node (in case of multiple devices);
-!!                  if set to 5*-1, will choose the devices by order of performances.
+!!  gpu_devices(12)= list of GPU devices to choose on one node (in case of multiple devices);
+!!                   if set to 20*-1, will choose the devices by order of performances.
 !!
 !! SIDE EFFECTS
 !!  gpu_option= which GPU implementation is used (None, CUDA, OpenMP, Kokkos)
@@ -299,7 +299,7 @@ end subroutine Get_Mem_Dev
 !scalars
  integer,intent(inout) :: gpu_option
 !arrays
- integer, intent(in) :: gpu_devices_node(5)
+ integer, intent(in) :: gpu_devices_node(12)
 !Local variables ------------------------------
 !scalars
  integer :: device,ii,jj,me,nb_devices,nproc
@@ -315,10 +315,10 @@ end subroutine Get_Mem_Dev
  nproc=xmpi_comm_size(xmpi_world)
  me=xmpi_comm_rank(xmpi_world)
 
-#if defined HAVE_GPU_CUDA
+#if defined HAVE_GPU
  device=-1
  call c_get_ndevice(nb_devices)
- nb_devices=min(nb_devices,5)
+ !nb_devices=min(nb_devices,20)
  if(nb_devices>0) then
    if(nb_devices==1) then
      device=0
@@ -415,24 +415,26 @@ end subroutine Get_Mem_Dev
 
  if (gpu_option==ABI_GPU_DISABLED) return
 
-#if defined HAVE_GPU_CUDA
+#if defined HAVE_GPU
 
  ! Closing YAKL and Kokkos if opened
- if (gpu_option==ABI_GPU_KOKKOS .or. gpu_option==ABI_GPU_LEGACY) then
+ if (gpu_option==ABI_GPU_KOKKOS) then
 #ifdef HAVE_YAKL
    call gator_finalize()
    write(std_out,*)'yakl gator finalized'
 #endif
-
 #ifdef HAVE_KOKKOS
    ! finalize kokkos
    call kokkos_finalize()
    write(std_out,*)'kokkos finalized'
 #endif
+ !kokkos_finalize already reset GPU context
+ !if (gpu_option/=ABI_GPU_KOKKOS) call unset_dev()
  end if
 
- ! kokkos_finalize already reset GPU context
- !if (gpu_option/=ABI_GPU_KOKKOS) call unset_dev()
+ if (gpu_option==ABI_GPU_LEGACY) then
+   call unset_dev()
+ end if
 
 #endif
  end subroutine unsetdevice_cuda
@@ -461,13 +463,13 @@ end subroutine Get_Mem_Dev
 !scalars
  integer :: ii,nproc
  character(len=500) :: msg
-#if defined HAVE_GPU_CUDA
+#if defined HAVE_GPU
  integer :: constmem,gflops,jj,lenname,nprocs,ncores,regist,sharemem
  real(sp) :: clockRate,globalmem
  character(len=20) :: name
 #endif
 !arrays
-#if defined HAVE_GPU_CUDA
+#if defined HAVE_GPU
  integer :: vers(0:1)
  integer,allocatable :: isort(:)
  real(dp),allocatable :: flops(:),mem(:)
@@ -487,7 +489,7 @@ end subroutine Get_Mem_Dev
  write(msg,'(a,i2,a)') ch10,nb_devices,' GPU device(s) have been detected on the current node:'
  call wrtout(std_out,msg,'PERS')
 
-#if defined HAVE_GPU_CUDA
+#if defined HAVE_GPU
 !Check device(s) properties
  ABI_MALLOC(flops,(nb_devices))
  ABI_MALLOC(mem,  (nb_devices))

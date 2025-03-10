@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2022 ABINIT group (XG)
+!!  Copyright (C) 2008-2025 ABINIT group (XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -26,6 +26,7 @@ module m_afterscfloop
  use m_energies
  use m_errors
  use m_abicore
+ use m_ebands
  use m_efield
  use m_ab7_mixing
  use m_hdr
@@ -37,8 +38,9 @@ module m_afterscfloop
  use defs_abitypes,      only : mpi_type
  use m_time,             only : timab
  use m_xmpi,             only : xmpi_sum, xmpi_comm_rank,xmpi_comm_size
+ use m_berryphase_new,   only : berryphase_new
  use m_geometry,         only : xred2xcart, metric
- use m_crystal,          only : prtposcar
+ use m_crystal,          only : crystal_t,prtposcar
  use m_results_gs ,      only : results_gs_type
  use m_electronpositron, only : electronpositron_type, electronpositron_calctype, exchange_electronpositron
  use m_paw_dmft,         only : paw_dmft_type
@@ -60,6 +62,7 @@ module m_afterscfloop
  use m_spin_current,     only : spin_current
  use m_mkrho,            only : mkrho, prtrhomxmn
  use m_elpolariz,        only : elpolariz
+ use m_orbmag,           only : orbmag
  use m_nonlop_test,      only : nonlop_test
  use m_common,           only : scprqt
  use m_xctk,             only : xcden
@@ -67,6 +70,7 @@ module m_afterscfloop
  use m_wvl_rho,          only : wvl_mkrho
  use m_wvl_psi,          only : wvl_psitohpsi, wvl_tail_corrections
  use m_fourier_interpol, only : transgrid
+ use m_xg_nonlop,        only : xg_nonlop_t
 
 #ifdef HAVE_BIGDFT
  use m_abi2big
@@ -187,10 +191,11 @@ contains
 !!  symrec(3,3,nsym)=symmetries in reciprocal space, reduced coordinates
 !!  tollist(12)=list of tolerances
 !!  usecprj=1 if cprj datastructure has been allocated
+!!  usevxctau=1 if kinetic energy density contribution has to be included (mGGA)
 !!  vhartr(nfftf)=Hartree potential
 !!  vpsp(nfftf)=array for holding local psp
 !!  vxc(nfftf,nspden)=exchange-correlation potential (hartree) in real space
-!!  vxctau(nfft,nspden,4*usekden)=(only for meta-GGA) derivative of XC energy density
+!!  vxctau(nfft,nspden,4*usevxctau)=(only for meta-GGA) derivative of XC energy density
 !!                                wrt kinetic energy density (depsxcdtau)
 !!  vxcavg=vxc average
 !!  xccc3d(n3xccc)=3D core electron density for XC core correction, bohr^-3
@@ -273,23 +278,23 @@ contains
 
 subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 & deltae,diffor,dtefield,dtfil,dtset,eigen,electronpositron,elfr,&
-& energies,etotal,favg,fcart,fock,forold,grchempottn,grcondft,&
+& energies,etotal,extfpmd,favg,fcart,fock,forold,grchempottn,grcondft,&
 & gred,gresid,grewtn,grhf,grhor,grvdw,&
-& grxc,gsqcut,hdr,extfpmd,indsym,intgres,irrzon,istep,istep_fock_outer,istep_mix,&
+& grxc,gsqcut,hdr,indsym,intgres,irrzon,istep,istep_fock_outer,istep_mix,&
 & kg,kxc,lrhor,maxfor,mcg,mcprj,mgfftf,&
 & moved_atm_inside,mpi_enreg,my_natom,n3xccc,nattyp,nfftf,ngfft,ngfftf,ngrvdw,nhat,&
 & nkxc,npwarr,nvresid,occ,optres,paw_an,paw_ij,pawang,pawfgr,&
 & pawfgrtab,pawrad,pawrhoij,pawtab,pel,pel_cg,ph1d,ph1df,phnons,pion,prtfor,prtxml,&
 & psps,pwind,pwind_alloc,pwnsfac,res2,resid,residm,results_gs,&
 & rhog,rhor,rprimd,stress_needed,strscondft,strsxc,strten,symrec,synlgr,taug,&
-& taur,tollist,usecprj,vhartr,vpsp,vtrial,vxc,vxctau,vxcavg,wvl,&
-& xccc3d,xcctau3d,xred,ylm,ylmgr,qvpotzero,conv_retcode)
+& taur,tollist,usecprj,usevxctau,vhartr,vpsp,vtrial,vxc,vxctau,vxcavg,wvl,&
+& xccc3d,xcctau3d,xred,ylm,ylmgr,qvpotzero,conv_retcode,xg_nonlop)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: istep,istep_fock_outer,istep_mix
  integer,intent(in) :: mcg,mcprj,mgfftf,moved_atm_inside,my_natom,n3xccc,nfftf,ngrvdw,nkxc
- integer,intent(in) :: optres,prtfor,prtxml,pwind_alloc,stress_needed,usecprj
+ integer,intent(in) :: optres,prtfor,prtxml,pwind_alloc,stress_needed,usecprj,usevxctau
  integer,intent(inout) :: computed_forces
  real(dp),intent(in) :: cpus,deltae,gsqcut,res2,residm
  real(dp),intent(in) :: qvpotzero
@@ -300,14 +305,15 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  type(efield_type),intent(inout) :: dtefield
  type(electronpositron_type),pointer :: electronpositron
  type(energies_type),intent(inout) :: energies
- type(hdr_type),intent(inout) :: hdr
  type(extfpmd_type),pointer,intent(inout) :: extfpmd
+ type(hdr_type),intent(inout) :: hdr
  type(pawang_type),intent(in) :: pawang
  type(pawfgr_type),intent(in) :: pawfgr
  type(pseudopotential_type),intent(in) :: psps
  type(results_gs_type),intent(inout) :: results_gs
  type(wvl_data),intent(inout) :: wvl
  type(fock_type),pointer, intent(inout) :: fock
+ type(xg_nonlop_t), intent(inout) :: xg_nonlop
 !arrays
  integer,intent(in) :: atindx(dtset%natom),atindx1(dtset%natom)
  integer,intent(in) :: indsym(4,dtset%nsym,dtset%natom)
@@ -337,7 +343,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  real(dp),intent(inout) :: ph1df(2,3*(2*mgfftf+1)*dtset%natom),pion(3)
  real(dp),intent(inout) :: rprimd(3,3)
  real(dp),intent(inout) :: rhog(2,nfftf),rhor(nfftf,dtset%nspden),strsxc(6)
- real(dp),intent(inout) :: vhartr(nfftf),vxc(nfftf,dtset%nspden),vxctau(nfftf,dtset%nspden,4*dtset%usekden)
+ real(dp),intent(inout) :: vhartr(nfftf),vxc(nfftf,dtset%nspden),vxctau(nfftf,dtset%nspden,4*usevxctau)
  real(dp),intent(inout) :: xccc3d(n3xccc),xcctau3d(n3xccc*dtset%usekden),xred(3,dtset%natom)
  real(dp),intent(inout) :: favg(3),fcart(3,dtset%natom),gred(3,dtset%natom)
  real(dp),intent(inout) :: gresid(3,dtset%natom),grhf(3,dtset%natom)
@@ -355,13 +361,15 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 !Local variables-------------------------------
 !scalars
  integer,parameter :: response=0
- integer :: bantot,bufsz,choice,cplex,ierr,ifft,igrad,ishift,ispden,nfftotf,ngrad
- integer :: optcut,optfor,optgr0,optgr1,optgr2,optrad,quit,shft
+ integer :: bantot,bufsz,calc_pol_ddk,choice,cplex,ierr,ifft,igrad,ishift,ispden
+ integer :: mcg1_3,nfftotf,ngrad,optcut,optfor,optgr0,optgr1,optgr2,optrad,quit,shft
  integer :: spaceComm_fft,tim_mkrho
- logical :: test_gylmgr,test_nfgd,test_rfgd
- logical :: wvlbigdft=.false.
+ logical :: save_cg1_3,test_gylmgr,test_nfgd,test_rfgd
+ logical :: remove_inv=.false.,wvlbigdft=.false.
  real(dp) :: c_fermi,dtaur,dtaurzero,ucvol
  character(len=500) :: message
+ type(crystal_t) :: crystal
+ type(ebands_t) :: ebands_k
  type(paw_dmft_type) :: paw_dmft
 #if defined HAVE_BIGDFT
  integer :: ia,ii,mband_cprj
@@ -369,10 +377,10 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  real(dp) :: dum,eexctx,eh,ekin,eloc,enl,eproj,esicdc,evxc,exc,ucvol_local
 #endif
 !arrays
- real(dp) :: gmet(3,3),gprimd(3,3),pelev(3),rmet(3,3),tsec(2)
+ real(dp) :: gmet(3,3),gprimd(3,3),pelev(3),ptot(3),red_ptot(3),rmet(3,3),tsec(2)
  real(dp) :: dmatdum(0,0,0,0)
- real(dp),allocatable :: mpibuf(:,:),qphon(:),rhonow(:,:,:),sqnormgrhor(:,:)
- real(dp),allocatable :: tauwfg(:,:),tauwfr(:,:)
+ real(dp),allocatable :: cg1_3(:,:,:),doccde(:),mpibuf(:,:),qphon(:),rhonow(:,:,:),sqnormgrhor(:,:)
+ real(dp),allocatable :: tauwfg(:,:),tauwfr(:,:),vtrial_local(:,:)
 #if defined HAVE_BIGDFT
  integer,allocatable :: dimcprj_srt(:)
  real(dp),allocatable :: hpsi_tmp(:),xcart(:,:)
@@ -388,6 +396,20 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 !Compute different geometric tensor, as well as ucvol, from rprimd
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
  nfftotf=product(ngfftf(1:3))
+ 
+ call crystal%init(dtset%amu_orig(:,1),dtset%spgroup,dtset%natom,dtset%npsp,&
+& psps%ntypat,dtset%nsym,rprimd,dtset%typat,xred,dtset%ziontypat,dtset%znucl,1,&
+& dtset%nspden==2.and.dtset%nsppol==1,remove_inv,psps%title,&
+& symrel=dtset%symrel,tnons=dtset%tnons,symafm=dtset%symafm)
+
+ ABI_MALLOC(doccde,(dtset%mband*dtset%nkpt*dtset%nsppol))
+ doccde=zero
+ call ebands_k%init(hdr%bantot,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,&
+& doccde,eigen,hdr%istwfk,hdr%kptns,hdr%nband,&
+& hdr%nkpt,hdr%npwarr,hdr%nsppol,hdr%nspinor,hdr%tphysel,hdr%tsmear,hdr%occopt,hdr%occ,hdr%wtk,&
+& hdr%cellcharge, hdr%kptopt, hdr%kptrlatt_orig, hdr%nshiftk_orig, hdr%shiftk_orig, &
+& hdr%kptrlatt, hdr%nshiftk, hdr%shiftk)
+ ABI_FREE(doccde)
 
 !MPI FFT communicator
  spaceComm_fft=mpi_enreg%comm_fft
@@ -517,10 +539,10 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  call timab(252,1,tsec)
 
 !----------------------------------------------------------------------
-!Polarization Calculation
+!Polarization Calculation, but not orbital magnetism
 !----------------------------------------------------------------------
 
- if(dtset%berryopt/=0)then
+ if(dtset%berryopt/=0 .AND. dtset%orbmag == 0)then
    call elpolariz(atindx1,cg,cprj,dtefield,dtfil,dtset,etotal,energies%e_elecfield,gprimd,hdr,&
 &   kg,dtset%mband,mcg,mcprj,dtset%mkmem,mpi_enreg,dtset%mpw,my_natom,dtset%natom,nattyp,dtset%nkpt,&
 &   npwarr,dtset%nsppol,psps%ntypat,pawrhoij,pawtab,pel,pel_cg,pelev,pion,&
@@ -529,6 +551,36 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 
  call timab(252,2,tsec)
  call timab(253,1,tsec)
+
+!----------------------------------------------------------------------
+!Orbital magnetization calculation using PEAD DDK wavefunctions
+!----------------------------------------------------------------------
+
+ if (dtset%berryopt == -2 .AND. dtset%orbmag /= 0) then
+   save_cg1_3 = .TRUE.
+   mcg1_3 = mcg
+   ABI_MALLOC(cg1_3,(2,mcg1_3,3))
+
+   calc_pol_ddk = 2
+   call berryphase_new(atindx1,cg,cg1_3,cprj,dtefield,dtfil,dtset,psps,&
+       &  gprimd,hdr,psps%indlmn,kg,psps%lmnmax,dtset%mband,mcg,mcg1_3,mcprj,&
+       &  dtset%mkmem,mpi_enreg,dtset%mpw,my_natom,dtset%natom,npwarr,dtset%nsppol,psps%ntypat,&
+       &  dtset%nkpt,calc_pol_ddk,pawrhoij,pawtab,pel,pelev,pion,ptot,red_ptot,pwind,&  !!REC
+       &  pwind_alloc,pwnsfac,rprimd,save_cg1_3,dtset%typat,ucvol,ab_out,&
+       &  usecprj,psps%usepaw,xred,psps%ziontypat)
+
+   if ( .NOT. ALLOCATED(vtrial_local)) then
+     ABI_MALLOC(vtrial_local,(nfftf,dtset%nspden))
+   end if
+   vtrial_local = vtrial
+   call orbmag(cg,cg1_3,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg1_3,&
+      & mcprj,dtset%mkmem,mpi_enreg,dtset%mpw,nfftf,ngfftf,paw_ij,pawfgr,&
+      & pawrad,pawtab,psps,usevxctau,vtrial_local,vxctau,ylm,ylmgr)
+
+   ABI_FREE(vtrial_local)
+   ABI_FREE(cg1_3)
+
+ end if
 
 !----------------------------------------------------------------------
 !Gradient and Laplacian of the Density Calculation
@@ -641,13 +693,13 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
    if (psps%usepaw==0) then
      call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,&
 &     npwarr,occ,paw_dmft,phnons,taug,taur,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,&
-&     extfpmd=extfpmd,option=1)
+&     option=1,extfpmd=extfpmd)
    else
      ABI_MALLOC(tauwfg,(2,dtset%nfft))
      ABI_MALLOC(tauwfr,(dtset%nfft,dtset%nspden))
      call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,&
 &     npwarr,occ,paw_dmft,phnons,tauwfg,tauwfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,&
-&     extfpmd=extfpmd,option=1)
+&     option=1,extfpmd=extfpmd)
      call transgrid(1,mpi_enreg,dtset%nspden,+1,1,1,dtset%paral_kgb,pawfgr,tauwfg,taug,tauwfr,taur)
      ABI_FREE(tauwfg)
      ABI_FREE(tauwfr)
@@ -919,7 +971,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 &   npwarr,dtset%ntypat,nvresid,occ,optfor,optres,&
 &   paw_ij,pawang,pawfgr,pawfgrtab,pawrad,pawrhoij,pawtab,ph1d,ph1df,&
 &   psps,rhog,rhor,rprimd,stress_needed,strscondft,strsxc,strten,symrec,synlgr,&
-&   ucvol,usecprj,vhartr,vpsp,vxc,vxctau,wvl,xccc3d,xcctau3d,xred,ylm,ylmgr,qvpotzero)
+&   ucvol,usecprj,usevxctau,vhartr,vpsp,vxc,vxctau,wvl,xccc3d,xcctau3d,xred,ylm,ylmgr,qvpotzero,xg_nonlop)
  end if
 
  ! Init values with MAGIC_UNDEF if not computed.
@@ -936,14 +988,6 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 !print a warning to the output file (non-dummy arguments: dtset%nstep,
 !residm, diffor - infos from tollist have been saved inside )
  choice=3
- ! CP modified
- !call scprqt(choice,cpus,deltae,diffor,dtset,&
-!& eigen,etotal,favg,fcart,energies%e_fermie,dtfil%fnameabo_app_eig,dtfil%filnam_ds(1),&
-!& 1,dtset%iscf,istep,istep_fock_outer,istep_mix,dtset%kptns,maxfor,&
-!& moved_atm_inside,mpi_enreg,dtset%nband,dtset%nkpt,&
-!& dtset%nstep,occ,optres,prtfor,prtxml,quit,&
-!& res2,resid,residm,response,tollist,psps%usepaw,vxcavg,dtset%wtk,xred,conv_retcode,&
-!& electronpositron=electronpositron, fock=fock)
  call scprqt(choice,cpus,deltae,diffor,dtset,&
 & eigen,etotal,favg,fcart,energies%e_fermie,energies%e_fermih,&
 & dtfil%fnameabo_app_eig,dtfil%filnam_ds(1),&
@@ -952,7 +996,6 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 & dtset%nstep,occ,optres,prtfor,prtxml,quit,&
 & res2,resid,residm,response,tollist,psps%usepaw,vxcavg,dtset%wtk,xred,conv_retcode,&
 & electronpositron=electronpositron, fock=fock)
- ! End CP modified
 
 !output POSCAR and FORCES files, VASP style, for PHON code and friends.
  if (dtset%prtposcar == 1) then
@@ -990,23 +1033,13 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 !Update the content of the header (evolving variables)
  bantot=hdr%bantot
  if (dtset%positron==0) then
-   ! CP modified
-   !call hdr%update(bantot,etotal,energies%e_fermie,residm,rprimd,occ,&
-   !  pawrhoij,xred,dtset%amu_orig(:,1),&
-   !  comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
    call hdr%update(bantot,etotal,energies%e_fermie,energies%e_fermih,residm,rprimd,occ,&
      pawrhoij,xred,dtset%amu_orig(:,1),&
      comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
-   ! End CP modified
  else
-   ! CP modified
-   !call hdr%update(bantot,electronpositron%e0,energies%e_fermie,residm,rprimd,occ,&
-   !  pawrhoij,xred,dtset%amu_orig(:,1),&
-   !  comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
    call hdr%update(bantot,electronpositron%e0,energies%e_fermie,energies%e_fermih,residm,rprimd,occ,&
      pawrhoij,xred,dtset%amu_orig(:,1),&
      comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
-   ! End CP modified
  end if
 
 #ifdef HAVE_LOTF
@@ -1064,9 +1097,8 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  results_gs%vxcavg     =vxcavg
  if (ngrvdw>0) results_gs%grvdw(1:3,1:ngrvdw)=grvdw(1:3,1:ngrvdw)
  if (associated(extfpmd)) then
-   results_gs%entropy_extfpmd=extfpmd%entropy
    results_gs%nelect_extfpmd=extfpmd%nelect
-   results_gs%shiftfactor_extfpmd=extfpmd%shiftfactor
+   results_gs%extfpmd_eshift=extfpmd%eshift
  end if
 
  results_gs%intgres(:,:)=zero
@@ -1088,6 +1120,9 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 &   dtset%nloalg,npwarr,dtset%nspden,dtset%nspinor,dtset%nsppol,dtset%ntypat,paw_ij,&
 &   pawtab,ph1d,psps,rprimd,dtset%typat,xred)
  end if
+
+ call crystal%free()
+ call ebands_k%free()
 
  call timab(257,2,tsec)
  call timab(250,2,tsec)

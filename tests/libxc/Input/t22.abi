@@ -69,12 +69,11 @@ toldfe 1.0d-8          # Total energy difference to achieve
 # 7- Pseudopotentials
 # -----------------------------------------------------
  pp_dirpath "$ABI_PSPDIR"
- pseudos "Pseudodojo_paw_pw_standard/Al.xml"
+ pseudos "Psdj_paw_pw_std/Al.xml"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = graphene_gnu_11.2_macports
 #%% [files]
 #%% files_to_test =
 #%%   t22.abo, tolnlines=  0, tolabs= 0.000, tolrel=  0.000, fld_options = -medium

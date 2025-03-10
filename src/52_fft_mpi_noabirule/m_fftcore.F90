@@ -8,7 +8,7 @@
 !!  inside a sphere or to count them.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2022 ABINIT group (SG, XG, AR, MG, MT)
+!!  Copyright (C) 2014-2025 ABINIT group (SG, XG, AR, MG, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -397,7 +397,6 @@ pure subroutine ngfft_seq(ngfft, n123)
 
 !Local variables-------------------------------
  integer :: fftalg
-
 ! *************************************************************************
 
  ! Default for sequential case.
@@ -434,46 +433,43 @@ end subroutine ngfft_seq
 !!  Print the content of ngfft(18) in explicative format.
 !!
 !! INPUTS
+!!  units: Unit numbers
 !!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft.
 !!  [unit]=unit number for output (defaults to std_out).
 !!  [prtvol]=verbosity level (defaults to 0).
-!!  [mode_paral]=either "COLL" or "PERS" ("COLL" is default).
 !!
 !! OUTPUT
 !!  Only writing
 !!
 !! SOURCE
 
-subroutine print_ngfft(ngfft, header, unit, mode_paral, prtvol)
+subroutine print_ngfft(units, ngfft, header, prtvol)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in),optional :: prtvol,unit
+ integer,intent(in) :: units(:)
+ integer,intent(in),optional :: prtvol
  character(len=*),intent(in),optional :: header
- character(len=4),intent(in),optional :: mode_paral
 !arrays
  integer,intent(in) :: ngfft(18)
 
 !Local variables-------------------------------
- integer :: my_unt,my_prtvol
- character(len=4) :: my_mode
+ integer :: my_prtvol
  character(len=500) :: msg
-
 ! *************************************************************************
 
- my_prtvol=0;       if (PRESENT(prtvol    )) my_prtvol=prtvol
- my_unt   =std_out; if (PRESENT(unit      )) my_unt   =unit
- my_mode  ='COLL';  if (PRESENT(mode_paral)) my_mode  =mode_paral
+ my_prtvol=0; if (PRESENT(prtvol)) my_prtvol=prtvol
 
- msg=ch10//' ==== FFT mesh description (ngfft) ==== '
+ msg = ch10//' ==== FFT mesh description (ngfft) ==== '
  if (PRESENT(header)) msg=ch10//' ==== '//TRIM(ADJUSTL(header))//' ==== '
- call wrtout(my_unt,msg,my_mode)
+ call wrtout(units, msg)
+
  write(msg,'(2(a,3i5,a),a,i5,2a,i5)')&
   '  FFT mesh divisions ........................ ',ngfft(1),ngfft(2),ngfft(3),ch10,&
   '  Augmented FFT divisions ................... ',ngfft(4),ngfft(5),ngfft(6),ch10,&
   '  FFT algorithm ............................. ',ngfft(7),ch10,&
   '  FFT cache size ............................ ',ngfft(8)
- call wrtout(my_unt,msg,my_mode)
+ call wrtout(units, msg)
 
  if (my_prtvol > 0) then
    write(msg,'(6(a,i5,a),a,4i5)')&
@@ -484,7 +480,7 @@ subroutine print_ngfft(ngfft, header, unit, mode_paral, prtvol)
     '  No of xy planes in G space treated by me .. ',ngfft(13),ch10,&
     '  MPI communicator for FFT .................. ',ngfft(14),ch10,&
     '  Value of ngfft(15:18) ..................... ',ngfft(15:18)
-   call wrtout(my_unt,msg,my_mode)
+   call wrtout(units, msg)
  end if
 
 end subroutine print_ngfft
@@ -696,12 +692,12 @@ end subroutine bound
 !!   other ngfft slots are used for parallelism see ~abinit/doc/variables/vargs.htm#ngfft
 !! [ngfftc(1:18)]= -optional- value of ngfft for the "coarse" grid
 !! [unit] = -optional-  output unit number (DEFAULT std_out)
-!! [gpu_option] = GPU implementation to use, i.e. cuda, openMP, ... (0=not using GPU)  
+!! [gpu_option] = GPU implementation to use, i.e. cuda, openMP, ... (0=not using GPU)
 !!
 !! SOURCE
 
 subroutine getng(boxcutmin, chksymtnons, ecut, gmet, kpt, me_fft, mgfft, nfft, ngfft, &
-                nproc_fft, nsym,paral_fft, symrel, tnons, &
+                nproc_fft, nsym, paral_fft, symrel, tnons, &
                 ngfftc, unit, gpu_option) ! optional
 
  use defs_fftdata,  only : mg
@@ -965,10 +961,10 @@ subroutine getng(boxcutmin, chksymtnons, ecut, gmet, kpt, me_fft, mgfft, nfft, n
        nn=nn/valpow
        npower(3,ipower)=npower(3,ipower)+1
      end do
-     if(nn/=1)then
-       ABI_ERROR(sjoin("nproc_fft: ", itoa(nn), "is not a multiple of 2, 3, 5, 7 or 11"))
-     endif
    enddo
+   if(nn/=1)then
+     ABI_ERROR(sjoin("nproc_fft: ", itoa(nproc_fft), "is not a multiple of 2, 3, 5, 7 or 11"))
+   endif
    npower(2,:)=npower(3,:)
 
 !  Then examine tnons
@@ -1004,7 +1000,7 @@ subroutine getng(boxcutmin, chksymtnons, ecut, gmet, kpt, me_fft, mgfft, nfft, n
            end if
          endif
        else
-         write(msg, '(a,i12,5a)' ) &
+         write(msg, '(5a,i12,2a,9i12,2a,3f10.7,2a)' ) &
           'Chksymtnons=1 . Found potentially symmetry-breaking value of tnons, ', ch10,&
 &         '   which is neither a rational fraction in 1/8th nor in 1/12th (1/9th and 1/10th are tolerated also) :', ch10,&
 &         '   for the symmetry number ',isym,ch10,&
@@ -1219,7 +1215,7 @@ subroutine getng(boxcutmin, chksymtnons, ecut, gmet, kpt, me_fft, mgfft, nfft, n
    ngfft(13)=ngfft(3)/nproc_fft
  end if
 
- call print_ngfft(ngfft,header="FFT mesh",unit=ount,mode_paral="COLL")
+ call print_ngfft([ount], ngfft, header="FFT mesh")
 
 end subroutine getng
 !!***
@@ -1558,10 +1554,15 @@ subroutine sphere(cg, ndat, npw, cfft, n1, n2, n3, n4, n5, n6, kg_k, istwf_k, if
 !arrays
  integer :: identity(3,3)
  integer :: i1inver(n1),i2inver(n2),i3inver(n3)
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
+
+ if (n4 < 1) ABI_BUG('Wrong n4!')
+ if (n5 < 1) ABI_BUG('Wrong n5!')
+ if (n6 < 1) ABI_BUG('Wrong n6!')
+ if (ndat < 1) ABI_BUG('Wrong ndat!')
+ if (npw < 1) ABI_BUG('Wrong npw!')
 
  ! In the case of special k-points, invariant under time-reversal,
  ! but not Gamma, initialize the inverse coordinates.
@@ -3942,8 +3943,7 @@ end subroutine indfftrisc
 !!
 !! SOURCE
 
-
-subroutine kpgsph(ecut,exchn2n3d,gmet,ikg,ikpt,istwf_k,kg,kpt,mkmem,mpi_enreg,mpw,npw)
+subroutine kpgsph(ecut, exchn2n3d, gmet, ikg, ikpt, istwf_k, kg, kpt, mkmem, mpi_enreg, mpw, npw)
 
 !Arguments ------------------------------------
 !scalars
@@ -4271,6 +4271,7 @@ subroutine kpgsph(ecut,exchn2n3d,gmet,ikg,ikpt,istwf_k,kg,kpt,mkmem,mpi_enreg,mp
  ABI_FREE(array_ipw)
 
 !Take care of the me_g0 flag
+ mpi_enreg%me_g0_fft=mpi_enreg%me_g0
  if(mpi_enreg%paral_kgb==1.and.mpi_enreg%nproc_band>0) then
    if(mpi_enreg%me_band==0.and.mpi_enreg%me_g0==1) then
 !    In this case, the processors had the 0 G vector before the new distribution, and still keeps it
@@ -4326,7 +4327,6 @@ end subroutine kpgsph
 !! SOURCE
 
 subroutine kpgcount(ecut,exchn2n3d,gmet,istwfk,kpt,ngmax,ngmin,nkpt)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -4419,36 +4419,42 @@ end subroutine kpgcount
 !!  npw_k=Total number of G-vectors in the full G-sphere.
 !!  kg_k(3,npw_k) list of G-vectors allocated by the routine.
 !!
+!! SIDE EFFECTS
+!!  [mpw]: Used to to compute the maximum number of PWs when looping over multiple k-points.
+!!  [gmax(3)]: Max G-component when looping over multiple k-points.
+!!
 !! SOURCE
 
-subroutine get_kg(kpoint, istwf_k, ecut, gmet, npw_k, kg_k, kin_sorted)
+subroutine get_kg(kpoint, istwf_k, ecut, gmet, npw_k, kg_k, &
+                  kin_sorted, mpw, gmax) ! optional
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: istwf_k
  integer,intent(out) :: npw_k
  real(dp),intent(in) :: ecut
+ integer,optional,intent(inout) :: mpw
 !arrays
  integer,allocatable,intent(out) :: kg_k(:,:)
  real(dp),intent(in) :: gmet(3,3),kpoint(3)
  logical,optional,intent(in) :: kin_sorted
+ integer,optional,intent(inout) :: gmax(3)
 
 !Local variables-------------------------------
 !scalars
  integer,parameter :: mkmem_ = 1, exchn2n3d0 = 0, ikg0 = 0
- integer :: npw_k_test, ig, ig_sort
+ integer :: npw_k_test, ipw, ii
  type(MPI_type) :: MPI_enreg_seq
 !arrays
  integer :: kg_dum(3, 0)
- integer,allocatable :: iperm(:), iwork(:,:)
- real(dp),allocatable :: kin_kg(:)
+ integer,allocatable :: iwork(:,:)
 
 ! *********************************************************************
 
  call initmpi_seq(MPI_enreg_seq)
 
  ! Calculate the number of G-vectors for this k-point.
- call kpgsph(ecut,exchn2n3d0, gmet, ikg0, 0, istwf_k, kg_dum, kpoint, 0, MPI_enreg_seq, 0, npw_k)
+ call kpgsph(ecut, exchn2n3d0, gmet, ikg0, 0, istwf_k, kg_dum, kpoint, 0, MPI_enreg_seq, 0, npw_k)
 
  ! Allocate and calculate the set of G-vectors.
  ABI_MALLOC(kg_k,(3,npw_k))
@@ -4458,26 +4464,20 @@ subroutine get_kg(kpoint, istwf_k, ecut, gmet, npw_k, kg_k, kin_sorted)
 
  if (present(kin_sorted)) then
    if (kin_sorted) then
-     ABI_MALLOC(kin_kg, (npw_k))
-     ABI_MALLOC(iperm, (npw_k))
-     iperm = [(ig, ig=1,npw_k)]
-     do ig=1,npw_k
-       kin_kg(ig) = half * normv(kpoint + kg_k(:, ig), gmet, "G") ** 2
-     end do
-
-     call sort_dp(npw_k, kin_kg, iperm, tol14)
-     ABI_FREE(kin_kg)
-
-     ABI_MALLOC(iwork, (3, npw_k))
-     iwork = kg_k
-     do ig=1,npw_k
-       ig_sort = iperm(ig)
-       kg_k(:,ig) = iwork(:,ig_sort)
-     end do
-
+     call sort_gvecs(npw_k, kpoint, gmet, kg_k, iwork)
+     kg_k = iwork
      ABI_FREE(iwork)
-     ABI_FREE(iperm)
    end if
+ end if
+
+ if (present(mpw)) mpw = max(mpw, npw_k)
+
+ if (present(gmax)) then
+   do ipw=1,npw_k
+     do ii=1,3
+       gmax(ii) = max(gmax(ii), abs(kg_k(ii,ipw)))
+     end do
+   end do
  end if
 
 end subroutine get_kg
