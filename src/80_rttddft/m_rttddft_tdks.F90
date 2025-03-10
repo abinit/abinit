@@ -319,6 +319,7 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
  !Init vector potential and associated constants
  if (dtset%td_ef_type/=0 .or. dtset%prtcurrent/=0) then
     ABI_MALLOC(tdks%current,(3,dtset%nsppol))
+    tdks%current = zero
  end if
  call tdks%tdef%init(dtset%td_ef_type,dtset%td_ef_pol,dtset%td_ef_ezero,dtset%td_ef_tzero, &
                    & dtset%td_ef_lambda,dtset%td_ef_tau,dtset%td_ef_induced_vecpot,dtset%nkpt,dtset%kptns)

@@ -115,7 +115,6 @@ subroutine tdef_init(tdef,td_ef_type,td_ef_pol,td_ef_ezero,td_ef_tzero,td_ef_lam
    ABI_ERROR("Wrong value of td_ef_type")
  end if
 
-
  tdef%ef_type  = td_ef_type
  tdef%ef_ezero = td_ef_pol*td_ef_ezero
  tdef%ef_tau   = td_ef_tau
@@ -131,11 +130,11 @@ subroutine tdef_init(tdef,td_ef_type,td_ef_pol,td_ef_ezero,td_ef_tzero,td_ef_lam
     ABI_ERROR("Wrong value of td_ef_induced_vecpot")
  end if
  
- tdef%efield = 0.0_dp
- tdef%vecpot = 0.0_dp
- tdef%vecpot_ext = 0.0_dp
- tdef%vecpot_ind = 0.0_dp
- tdef%vecpot_red = 0.0_dp
+ tdef%efield = zero
+ tdef%vecpot = zero
+ tdef%vecpot_ext = zero
+ tdef%vecpot_ind = zero
+ tdef%vecpot_red = zero
  
  ABI_MALLOC(tdef%kpa,(3,nkpt))
  tdef%kpa = kpts
@@ -190,7 +189,6 @@ subroutine tdef_update(tdef,dtset,mpi_enreg,time,rprimd,gprimd,kg,mpsang,npwarr,
 
  !Local variables-------------------------------
  character(len=500) :: msg
- real(dp)           :: t
  integer            :: i
  real(dp)           :: tmp(3)
 
@@ -230,10 +228,12 @@ subroutine tdef_update(tdef,dtset,mpi_enreg,time,rprimd,gprimd,kg,mpsang,npwarr,
 
  !Induced vector potential
  !Should deal with sppol?! How?
+ !d^2A_ind/dt^2 = 4piJ(t)
+ !A_ind(t+dt) = 2*A_ind(t) - A_ind(t-dt) + 4*pi*dt**2*J(t)
  if (tdef%induced_vecpot) then
    tmp = tdef%vecpot_ind(:,1)
    tdef%vecpot_ind(:,1) = 2*tdef%vecpot_ind(:,1) - tdef%vecpot_ind(:,2) + four*pi*(dtset%dtele**2)*current(:,1)
-   tdef%vecpot_ind(:,2) = tmp
+   tdef%vecpot_ind(:,2) = tmp ! t - dt
    tdef%vecpot = tdef%vecpot_ext + tdef%vecpot_ind(:,1)
  else
     tdef%vecpot = tdef%vecpot_ext
