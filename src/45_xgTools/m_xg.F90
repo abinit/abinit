@@ -410,7 +410,6 @@ contains
     integer                   :: l_gpu_option,fact
 #if defined HAVE_GPU
     integer(kind=c_int32_t), parameter :: izero = 0
-    integer(kind=c_size_t)             :: size_bytes
 #endif
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD && !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
     complex(dpc), pointer :: xg__vecC(:,:)
@@ -5502,7 +5501,6 @@ contains
   subroutine xgBlock_copy_from_gpu(xgBlock)
     type(xgBlock_t), target, intent(in   ) :: xgBlock
 #if defined(HAVE_GPU) && defined(HAVE_OPENMP_OFFLOAD)
-    integer(c_size_t) :: size
     complex(dpc), ABI_CONTIGUOUS pointer :: xgBlock__vecC(:,:)
     real(dp), ABI_CONTIGUOUS pointer :: xgBlock__vecR(:,:)
 
