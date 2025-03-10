@@ -3311,7 +3311,14 @@ def run_and_check_test(test, rank, print_lock=None, **kwargs):
 
     # Wait until enough resources are available
     with condition:
-        while cpu_counter.value + ncpus > max_cpus or gpu_counter.value + ngpus > max_gpus:
+        # Blocking if:
+        # - test overflow the number of CPU available
+        # - test asks for less or the maximum GPU available and overflow the number of GPU available
+        # - test asks for more than the maximum GPU available but one GPU test is running
+        # The latter condition on GPU is to allow multi-GPU tests to run on single-GPU hosts, one at a time
+        while cpu_counter.value + ncpus > max_cpus \
+                or (max_gpus >= ngpus and gpu_counter.value + ngpus > max_gpus) \
+                or (max_gpus < ngpus and gpu_counter.value > 0):
             condition.wait()
 
         # Reserve resources safely using a lock
