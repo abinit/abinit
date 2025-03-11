@@ -220,7 +220,7 @@ module m_slice
 !! SOURCE
 
 subroutine sliceAll_init(sliceAll,neigenpairs,spacedim,tolerance,ecut,paral_kgb,&
-&                        bandpp,mdeg_filter,nbdbuf,space,eigenProblem,spacecom,me_g0,me_g0_fft,&
+&                        bandpp,mdeg_filter,space,eigenProblem,spacecom,me_g0,me_g0_fft,&
 &                        paw,comm_rows,comm_cols,nslice,npband,ramp,balance,&
 &                        nbdbuf,oracle,oracle_factor,oracle_min_occ,gpu_option,gpu_kokkos_nthrd)
 
@@ -1739,9 +1739,9 @@ subroutine slice_allocateAll(sliceAll,slice)
     integer :: me_g0,me_g0_fft,comm_rows,comm_cols
     integer :: gpu_option,gpu_kokkos_nthrd
     integer :: nbdbuf, oracle
-    integer :: oracle_factor, oracle_min_occ
     logical :: paw
     real(dp) :: tolerance,ecut
+    real(dp) :: oracle_factor, oracle_min_occ
 
     ! *********************************************************************
     
