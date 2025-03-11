@@ -992,7 +992,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          end if
        end if
 
-       if(gemm_nonlop_use_gemm .and. dtset%wfoptalg == 111 .and. istep <= 1) then
+       if(gemm_nonlop_use_gemm .and. (dtset%wfoptalg == 111 .or. dtset%wfoptalg == 112) .and. istep <= 1) then
          gemm_nonlop_nblocks = dtset%gpu_nl_splitsize
          ! Only compute CHEBFI number of blocks if user didn't set it themselves
          if(gemm_nonlop_nblocks==1) then
@@ -1006,7 +1006,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 !      Build inverse of overlap matrix for chebfi
        if (dtset%cprj_in_memory==0) then
-         if(psps%usepaw == 1 .and. (dtset%wfoptalg == 1 .or. dtset%wfoptalg == 111) .and. istep <= 1) then
+         if(psps%usepaw == 1 .and. (dtset%wfoptalg == 1 .or. dtset%wfoptalg == 111 .or. dtset%wfoptalg == 112) &
+&           .and. istep <= 1) then
             ABI_NVTX_START_RANGE(NVTX_INVOVL)
             call make_invovl(gs_hamk, dimffnl, ffnl, ph3d, mpi_enreg)
             ABI_NVTX_END_RANGE()
