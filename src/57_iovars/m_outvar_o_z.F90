@@ -1099,6 +1099,9 @@ contains
  dprarr(1,:)=dtsets(:)%tolcum
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'tolcum','DPR',0)
 
+ dprarr(1,:)=dtsets(:)%tolfilter
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'tolfilter','DPR',0)
+
  dprarr(1,:)=dtsets(:)%toldfe
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'toldfe','ENE',0)
 

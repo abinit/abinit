@@ -433,7 +433,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    npwtot(:) = 0
  end if
 
- if((dtset%wfoptalg == 1 .or. dtset%wfoptalg == 111) .and. psps%usepaw == 1 .and. dtset%cprj_in_memory==0) then
+ if((dtset%wfoptalg == 1 .or. dtset%wfoptalg == 2 .or. dtset%wfoptalg == 111 .or. dtset%wfoptalg == 112) &
+&   .and. psps%usepaw == 1 .and. dtset%cprj_in_memory==0) then
    call init_invovl(dtset%nkpt)
  end if
 
@@ -1787,7 +1788,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    call bandfft_kpt_destroy_array(bandfft_kpt,mpi_enreg)
  end if
 
- if((dtset%wfoptalg == 1 .or. dtset%wfoptalg == 111)  .and. psps%usepaw == 1 .and. dtset%cprj_in_memory==0) then
+ if((dtset%wfoptalg == 1 .or. dtset%wfoptalg == 2 .or. dtset%wfoptalg == 111 .or. dtset%wfoptalg == 112)  &
+&    .and. psps%usepaw == 1 .and. dtset%cprj_in_memory==0) then
    call destroy_invovl(dtset%nkpt,dtset%gpu_option)
  end if
 

@@ -1064,6 +1064,7 @@ subroutine indefo1(dtset)
  dtset%npspalch=0
  dtset%npspinor=1
  dtset%np_slk=1000000
+ dtset%nslice=1
  dtset%nqptdm=0
  dtset%nspden=1
  dtset%nspinor=1
