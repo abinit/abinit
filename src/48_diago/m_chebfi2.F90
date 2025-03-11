@@ -8,7 +8,7 @@
 !! It mainly defines a 'chebfi' datatypes and associated methods.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2025 ABINIT group (BS, L. Baguet)
+!! Copyright (C) 2018-2025 ABINIT group (BS, L. Baguet, I. Lygatsika)
 !! This file is distributed under the terms of the
 !! gnu general public license, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -59,21 +59,24 @@ module m_chebfi2
 !Several (private) parameters
 !-------------------------------------------------
 
- integer, parameter :: tim_init         = 1751
- integer, parameter :: tim_free         = 1752
- !                                        1753 is used by chebfi2_nonlop
- integer, parameter :: tim_getAX_BX     = 1754
- integer, parameter :: tim_invovl       = 1755
- integer, parameter :: tim_residu       = 1756
- integer, parameter :: tim_RR           = 1757
- integer, parameter :: tim_transpose    = 1758
- integer, parameter :: tim_RR_q         = 1759
- integer, parameter :: tim_postinvovl   = 1760
- integer, parameter :: tim_swap         = 1761
- integer, parameter :: tim_amp_f        = 1762
- integer, parameter :: tim_oracle       = 1763
- integer, parameter :: tim_barrier      = 1764
- integer, parameter :: tim_copy         = 1765
+ integer, parameter :: tim_init               = 1751
+ integer, parameter :: tim_free               = 1752
+ !                                              1753 is used by chebfi2_nonlop
+ integer, parameter :: tim_getAX_BX           = 1754
+ integer, parameter :: tim_invovl             = 1755
+ integer, parameter :: tim_residu             = 1756
+ integer, parameter :: tim_RR                 = 1757
+ integer, parameter :: tim_transpose          = 1758
+ integer, parameter :: tim_RR_q               = 1759
+ integer, parameter :: tim_postinvovl         = 1760
+ integer, parameter :: tim_swap               = 1761
+ integer, parameter :: tim_amp_f              = 1762
+ integer, parameter :: tim_oracle             = 1763
+ integer, parameter :: tim_barrier            = 1764
+ integer, parameter :: tim_copy               = 1765
+ integer, parameter :: tim_sliceAll_transpose = 2194
+ integer, parameter :: tim_sliceAll_getAX_BX  = 2195
+ integer, parameter :: tim_sliceAll_RR_q      = 2196
 
 !Public 'chebfi' datatype
 !-------------------------------------------------
@@ -87,8 +90,8 @@ module m_chebfi2
    integer :: nbdbuf                        ! Number of bands in the buffer
    integer :: spacecom                      ! Communicator for MPI
    integer :: oracle                        ! Option to compute ndeg_filter from residuals
-   real(dp) :: tolerance            ! Tolerance on the residu to stop the minimization
-   real(dp) :: ecut                 ! Ecut for Chebfi oracle
+   real(dp) :: tolerance                    ! Tolerance on the residu to stop the minimization
+   real(dp) :: ecut                         ! Ecut for Chebfi oracle
    real(dp) :: oracle_factor                ! factor used to decrease residuals
    real(dp) :: oracle_min_occ               ! threshold on occupancies used for nbdbuf=-101
 
@@ -143,6 +146,8 @@ module m_chebfi2
  public :: chebfi_free
  public :: chebfi_memInfo
  public :: chebfi_run
+ public :: chebfi_RayleighValues   ! FIXME IL used in m_slice
+ public :: chebfi_swapInnerBuffers ! FIXME IL used in m_slice
 
  CONTAINS  !========================================================================================
 !!***
@@ -552,6 +557,13 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,eigen,occ,residu,nspinor)
  lambda_plus = chebfi%ecut
  chebfi%X = X0
 
+ ! IML Debug rayleighRitzQuotients in GPU
+ !write(std_out,*) 'TRACE enter Rayleigh Values'
+ !call chebfi_RayleighValues(chebfi,X0,DivResults%self,residu,getAX_BX,nspinor)
+ !write(std_out,*) 'DivResults='
+ !call xgBlock_print(DivResults%self, std_out)
+ !write(std_out,*) 'TRACE finish Rayleigh Values'
+
  ! Transpose
  if (chebfi%paral_kgb == 1) then
 
@@ -941,6 +953,153 @@ subroutine chebfi_swapInnerBuffers(chebfi,spacedim,neigenpairs)
   call xgBlock_setBlock(chebfi%X_swap,     chebfi%X_next,     spacedim, neigenpairs) !X_next = X_swap
 
 end subroutine chebfi_swapInnerBuffers
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_chebfi/chebfi_RayleighValues
+!! NAME
+!! chebfi_RayleighValues
+!!
+!! FUNCTION
+!! Compute Rayleigh values and residuals from current Hamiltonian.
+!! Assumes eigenvectors are stored in X0.
+!! Uses bandpp parallelisation for bands.
+!!
+!! SIDE EFFECTS
+!! Stores results in eigen and resid
+!! 
+!! SOURCE
+
+subroutine chebfi_RayleighValues(chebfi,X0,DivResults,residu,getAX_BX,nspinor)
+
+ use, intrinsic :: iso_c_binding
+
+ !Arguments ------------------------------------
+ type(chebfi_t), intent(inout) :: chebfi
+ type(xgBlock_t), intent(in) :: X0
+ type(xgBlock_t), intent(inout) :: DivResults
+ type(xgBlock_t), intent(inout) :: residu
+ integer,         intent(in) :: nspinor
+ interface
+     subroutine getAX_BX(X,AX,BX)
+        use m_xg, only : xgBlock_t
+        type(xgBlock_t), intent(inout) :: X
+        type(xgBlock_t), intent(inout) :: AX
+        type(xgBlock_t), intent(inout) :: BX
+    end subroutine getAX_BX
+ end interface
+ 
+ !Local variables-------------------------------
+ integer :: neigenpairs
+ integer :: spacedim
+ real(dp) :: maxeig, mineig
+ ! arrays
+ real(dp) :: tsec(2)
+
+! *********************************************************************
+
+ if (chebfi%gpu_option/=ABI_GPU_DISABLED) then
+ !   ABI_BUG("Rayleigh Values not implemented on GPU")
+    ABI_WARNING("Rayleigh Values not implemented on GPU")
+ end if
+ 
+ spacedim = chebfi%spacedim
+ neigenpairs = chebfi%neigenpairs
+ chebfi%X = X0 
+
+!********************* Apply transposition *****
+ if (chebfi%paral_kgb == 1) then
+
+   call xgTransposer_constructor(chebfi%xgTransposerX,chebfi%X,chebfi%xXColsRows,nspinor,&
+     STATE_LINALG,TRANS_ALL2ALL,chebfi%comm_rows,chebfi%comm_cols,0,0,chebfi%me_g0_fft,gpu_option=chebfi%gpu_option)
+
+   call xgTransposer_copyConstructor(chebfi%xgTransposerAX,chebfi%xgTransposerX,chebfi%AX%self,chebfi%xAXColsRows,STATE_LINALG)
+   call xgTransposer_copyConstructor(chebfi%xgTransposerBX,chebfi%xgTransposerX,chebfi%BX%self,chebfi%xBXColsRows,STATE_LINALG)
+
+   chebfi%xgTransposerX%gpu_kokkos_nthrd  = chebfi%gpu_kokkos_nthrd
+   chebfi%xgTransposerAX%gpu_kokkos_nthrd = chebfi%gpu_kokkos_nthrd
+   chebfi%xgTransposerBX%gpu_kokkos_nthrd = chebfi%gpu_kokkos_nthrd
+
+   call timab(tim_sliceAll_transpose,1,tsec)
+   ABI_NVTX_START_RANGE(NVTX_SLICEALL_TRANSPOSE)
+   call xgTransposer_transpose(chebfi%xgTransposerX,STATE_COLSROWS)
+   chebfi%xgTransposerAX%state = STATE_COLSROWS
+   chebfi%xgTransposerBX%state = STATE_COLSROWS
+   ABI_NVTX_END_RANGE()
+   call timab(tim_sliceAll_transpose,2,tsec)
+ else
+   call xgBlock_setBlock(chebfi%X,chebfi%xXColsRows,spacedim,neigenpairs)         !use xXColsRows instead of X notion
+   call xgBlock_setBlock(chebfi%AX%self,chebfi%xAXColsRows,spacedim,neigenpairs)  !use xAXColsRows instead of AX notion
+   call xgBlock_setBlock(chebfi%BX%self,chebfi%xBXColsRows,spacedim,neigenpairs)
+ end if
+
+ call timab(tim_sliceAll_getAX_BX,1,tsec)
+ ABI_NVTX_START_RANGE(NVTX_SLICEALL_GET_AX_BX)
+ call getAX_BX(chebfi%xXColsRows,chebfi%xAXColsRows,chebfi%xBXColsRows)
+ call xgBlock_zero_im_g0(chebfi%xAXColsRows)
+ call xgBlock_zero_im_g0(chebfi%xBXColsRows)
+ ABI_NVTX_END_RANGE()
+ call timab(tim_sliceAll_getAX_BX,2,tsec)
+
+ if (chebfi%paral_kgb == 1) then
+   call xmpi_barrier(chebfi%spacecom)
+ end if
+
+!********************* Compute Rayleigh quotients for every band *****
+ call timab(tim_sliceAll_RR_q, 1, tsec)
+ call chebfi_rayleighRitzQuotients(chebfi,maxeig,mineig,DivResults)
+ call timab(tim_sliceAll_RR_q, 2, tsec)
+
+!********************* Compute Residuals, see oracle *****
+ ! TODO IL 20/01/2025 ymax has not been tested on GPU
+ !Compute residu here, use X_next as a work space
+ ! X_next = S|Psi>
+ call xgBlock_copy(chebfi%xBXColsRows,chebfi%X_next)
+ ! X_next = - eig * S|Psi>
+ call xgBlock_ymax(chebfi%X_next,DivResults,0,1)
+ ! X_next = H|Psi> - eig * S|Psi>
+ call xgBlock_add(chebfi%X_next,chebfi%xAXColsRows)
+ ! resid = |X_next|^2
+ call xgBlock_colwiseNorm2(chebfi%X_next,residu,comm_loc=xmpi_comm_null)
+
+!********************* Apply transposition *****
+ call timab(tim_sliceAll_transpose,1,tsec)
+ ABI_NVTX_START_RANGE(NVTX_SLICEALL_TRANSPOSE)
+ if (chebfi%paral_kgb == 1) then
+   call xmpi_barrier(chebfi%spacecom)
+
+   call xgTransposer_transpose(chebfi%xgTransposerX, STATE_LINALG)
+   call xgTransposer_transpose(chebfi%xgTransposerAX,STATE_LINALG)
+   call xgTransposer_transpose(chebfi%xgTransposerBX,STATE_LINALG)
+
+   if (xmpi_comm_size(chebfi%spacecom) == 1) then !only one MPI proc reset buffers to right addresses (because of X-Xcolwise swaps)
+     call xgBlock_setBlock(chebfi%xXColsRows,  chebfi%X,       spacedim, neigenpairs)
+     call xgBlock_setBlock(chebfi%xAXColsRows, chebfi%AX%self, spacedim, neigenpairs)
+     call xgBlock_setBlock(chebfi%xBXColsRows, chebfi%BX%self, spacedim, neigenpairs)
+   end if
+ else
+   call xgBlock_setBlock(chebfi%xXColsRows,  chebfi%X,       spacedim, neigenpairs)
+   call xgBlock_setBlock(chebfi%xAXColsRows, chebfi%AX%self, spacedim, neigenpairs)
+   call xgBlock_setBlock(chebfi%xBXColsRows, chebfi%BX%self, spacedim, neigenpairs)
+ end if
+ ABI_NVTX_END_RANGE()
+ call timab(tim_sliceAll_transpose,2,tsec)
+
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
+   if (chebfi%gpu_option==ABI_GPU_KOKKOS) then
+     call gpu_device_synchronize()
+   end if
+#endif
+
+ ! Free transposers
+ if (chebfi%paral_kgb == 1) then
+   call xgTransposer_free(chebfi%xgTransposerX)
+   call xgTransposer_free(chebfi%xgTransposerAX)
+   call xgTransposer_free(chebfi%xgTransposerBX)
+ end if
+
+end subroutine chebfi_RayleighValues
 !!***
 
 !----------------------------------------------------------------------
