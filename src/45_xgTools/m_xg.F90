@@ -16,7 +16,7 @@
 !! only these types to perfom calculations.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2016-2025 ABINIT group (J. Bieder, MS, L. Baguet)
+!!  Copyright (C) 2016-2025 ABINIT group (J. Bieder, MS, L. Baguet, I. Lygatsika)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -202,7 +202,7 @@ module m_xg
   private :: getClocC
   private :: checkResize
 
-  public :: xg_init
+  public :: xg_init ! IL-10/03/25: on GPU- Contains OMP call to free/allocate memory on GPU
   public :: xg_set ! LB-06/03/24: Be careful, this routine is not used (so not tested)
   public :: xg_get ! LB-06/03/24: Be careful, this routine is not used (so not tested)
   public :: xg_setBlock
@@ -212,16 +212,19 @@ module m_xg
 
   public :: xgBlock_setBlock
   public :: xgBlock_set ! LB-06/03/24: Be careful, this routine is not used (so not tested)
-  public :: xgBlock_map
+  public :: xgBlock_map ! IL-10/03/25: on GPU- Contains safe OMP call with target presence check
   public :: xgBlock_map_1d
   public :: xgBlock_reverseMap
   public :: xgBlock_reverseMap_1d
   public :: xgBlock_prefetch_async
   public :: xgBlock_get ! LB-06/03/24: Be careful, this routine is not used (so not tested)
-  public :: xgBlock_copy
+  public :: xgBlock_copy ! IL-10/03/25: on GPU- Contains hidden one-way OMP calls (implicit H2D or D2H) 
   public :: xgBlock_partialcopy
+  public :: xgBlock_permuteCols
   public :: xgBlock_pack
   public :: xgBlock_getSize
+  public :: xgBlock_get_gpu_option
+  public :: xgBlock_get_communicator
 
   public :: xgBlock_check
   public :: xgBlock_check_gpu_option
@@ -289,10 +292,10 @@ module m_xg
   public :: xgBlock_reshape_spinor
   public :: xgBlock_free_reshape
   public :: xgBlock_print
-  public :: xgBlock_getId
+  public :: xgBlock_getid
   public :: xgBlock_get_im_g0
-  public :: xgBlock_copy_from_gpu
-  public :: xgBlock_copy_to_gpu
+  public :: xgBlock_copy_from_gpu ! TODO IL-10/03/25: on GPU- Contains unsafe OMP call to copy memory from GPU
+  public :: xgBlock_copy_to_gpu ! TODO IL-10/03/25: on GPU- Contains unsafe OMP call to copy memory to GPU
   public :: xg_finalize
 
 contains
@@ -1578,6 +1581,65 @@ contains
     call timab(tim_partialcopy,2,tsec)
 
   end subroutine xgBlock_partialcopy
+!!***
+
+!!****f* m_xg/xgBlock_permuteCols
+!!
+!! NAME
+!! xgBlock_permuteCols
+!! 
+!! FUNCTION
+!! Sequential in-place permute columns of xgBlock according to index permutation pcol.
+!! Performs the swap M(i,j) = M(i,perm(j)) for j=1,m using LAPACK.
+!! Checks memory location before applying LAPACK on CPU /!\
+!! 
+  subroutine xgBlock_permuteCols(xgBlock, rows, cols, pcol)
+
+    type(xgBlock_t), intent(inout) :: xgBlock
+    integer        , intent(in) :: rows,cols
+    integer        , intent(in) :: pcol(cols)
+
+    logical :: forwrd = .true.
+
+#if defined HAVE_OPENMP_OFFLOAD && !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
+    complex(dpc), ABI_CONTIGUOUS pointer :: xgBlock__vecC(:,:)
+    real(dp), ABI_CONTIGUOUS pointer :: xgBlock__vecR(:,:)
+#endif
+
+    ! Memory check: xgBlock should not have a target mapped to GPU
+#if defined(HAVE_OPENMP_OFFLOAD)
+    select case(xgBlock%space)
+    case (SPACE_R,SPACE_CR)
+        xgBlock__vecR => xgBlock%vecR
+        ABI_CHECK(xomp_target_is_present(c_loc(xgBlock__vecR)), "Cannot use data mapped to device by OpenMP")
+    case (SPACE_C)
+        xgBlock__vecC => xgBlock%vecC
+        ABI_CHECK(xomp_target_is_present(c_loc(xgBlock__vecC)), "Cannot use data mapped to device by OpenMP")
+    end select
+#endif
+
+    ! Operand check: gpu_option of xgBlock should be disabled
+    if (xgBlock%gpu_option/=ABI_GPU_DISABLED) then
+        ABI_ERROR("Not implemented for xgBlock on GPU")
+        ! Will need to write cuda kernel as in dlapmt
+    end if
+
+    ! Size check
+    if (size(pcol,dim=1)/=cols) then
+        ABI_ERROR("Permutation size must be equal to number of columns")
+    end if
+
+    ! LAPACK calls
+    select case(xgBlock%space)
+    case (SPACE_R)
+        call dlapmt(forwrd, rows, cols, xgBlock%vecR, xgBlock%LDim, pcol)
+    case (SPACE_CR)
+        call dlapmt(forwrd, 2*rows, cols, xgBlock%vecR, xgBlock%LDim, pcol)
+    case (SPACE_C)
+        call zlapmt(forwrd, rows, cols, xgBlock%vecC, xgBlock%LDim, pcol)
+    end select
+
+  end subroutine xgBlock_permuteCols
 !!***
 
   !!****f* m_xg/xgBlock_pack
@@ -3212,6 +3274,10 @@ contains
   !!
   !! NAME
   !! xgBlock_ymax
+  !! 
+  !! FUNCTION
+  !! TODO IL-10/03/2025 Be careful, GPU version not tested
+  
   subroutine xgBlock_ymax(xgBlockA, da, shift, nblocks)
 
     type(xgBlock_t), intent(inout) :: xgBlockA
@@ -3221,10 +3287,15 @@ contains
     integer :: iblock,ncols,irow,nrows,fact
     double precision :: tsec(2)
 
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+    complex(dpc), ABI_CONTIGUOUS pointer :: xgBlockA__vecC(:,:),da__vecC(:,:)
+    real(dp), ABI_CONTIGUOUS pointer :: xgBlockA__vecR(:,:),da__vecR(:,:)
+#endif
+
     call timab(tim_ymax,1,tsec)
 
-    if (xgBlockA%gpu_option/=ABI_GPU_DISABLED) then
-      ABI_ERROR('Not implemented for GPU')
+    if (xgBlockA%gpu_option==ABI_GPU_KOKKOS) then
+      ABI_ERROR('Not implemented for GPU Kokkos')
     end if
     call xgBlock_check_gpu_option(xgBlockA,da)
 
@@ -3242,42 +3313,89 @@ contains
     end if
 
     fact = 1 ; if (xgBlockA%space==SPACE_CR) fact = 2
+    
+    if (xgBlockA%gpu_option==ABI_GPU_DISABLED) then
 
-    if (space(da)==SPACE_R) then
-      select case(xgBlockA%space)
-      case (SPACE_R,SPACE_CR)
-        !$omp parallel do collapse(2) shared(da,xgBlockA) private(irow,iblock)
-        do iblock = 1, ncols
-          do irow = 1, fact*nrows
-            xgBlockA%vecR(irow,iblock) = - da%vecR(iblock+shift,1) &
-             & * xgBlockA%vecR(irow,iblock)
-          end do
-        end do
-        !$omp end parallel do
-      case (SPACE_C)
-        !$omp parallel do collapse(2) shared(da,xgBlockA) private(irow,iblock)
-        do iblock = 1, ncols
-          do irow = 1, nrows
-            xgBlockA%vecC(irow,iblock) = - da%vecR(iblock+shift,1) &
-             & * xgBlockA%vecC(irow,iblock)
-          end do
-        end do
-        !$omp end parallel do
-      end select
-    else if (space(da)==SPACE_C) then
-      if (xgBlockA%space/=SPACE_C) then
-        ABI_ERROR('If space(da)=SPACE_C, space(xgBlockA) has to be SPACE_C')
-      end if
-      !$omp parallel do collapse(2) shared(da,xgBlockA) private(irow,iblock)
-      do iblock = 1, ncols
-        do irow = 1, nrows
-          xgBlockA%vecC(irow,iblock) = - da%vecC(iblock+shift,1) &
-           & * xgBlockA%vecC(irow,iblock)
-        end do
-      end do
-      !$omp end parallel do
-    else
-      ABI_ERROR('Only SPACE_R or SPACE_C (for da) are implemented.')
+        if (space(da)==SPACE_R) then
+            select case(xgBlockA%space)
+            case (SPACE_R,SPACE_CR)
+                !$omp parallel do collapse(2) shared(da,xgBlockA) private(irow,iblock)
+                do iblock = 1, ncols
+                    do irow = 1, fact*nrows
+                        xgBlockA%vecR(irow,iblock) = - da%vecR(iblock+shift,1) * xgBlockA%vecR(irow,iblock)
+                    end do
+                end do
+                !$omp end parallel do
+            case (SPACE_C)
+                !$omp parallel do collapse(2) shared(da,xgBlockA) private(irow,iblock)
+                do iblock = 1, ncols
+                    do irow = 1, nrows
+                        xgBlockA%vecC(irow,iblock) = - da%vecR(iblock+shift,1) * xgBlockA%vecC(irow,iblock)
+                    end do
+                end do
+                !$omp end parallel do
+            end select
+        else if (space(da)==SPACE_C) then
+            if (xgBlockA%space/=SPACE_C) then
+                ABI_ERROR('If space(da)=SPACE_C, space(xgBlockA) has to be SPACE_C')
+            end if
+            !$omp parallel do collapse(2) shared(da,xgBlockA) private(irow,iblock)
+            do iblock = 1, ncols
+                do irow = 1, nrows
+                    xgBlockA%vecC(irow,iblock) = - da%vecC(iblock+shift,1) * xgBlockA%vecC(irow,iblock)
+                end do
+            end do
+            !$omp end parallel do
+        else
+            ABI_ERROR('Only SPACE_R or SPACE_C (for da) are implemented.')
+        end if
+    
+    else if (xgBlockA%gpu_option==ABI_GPU_OPENMP) then
+
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+
+        if (space(da)==SPACE_R) then
+            select case(xgBlockA%space)
+            case (SPACE_R,SPACE_CR)
+                xgBlockA__vecR => xgBlockA%vecR
+                da__vecR => da%vecR
+                !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) &
+                !$OMP& MAP(to:xgBlockA__vecR,da__vecR)
+                do iblock = 1, ncols
+                    do irow = 1, fact*nrows
+                        xgBlockA__vecR(irow,iblock) = - da__vecR(iblock+shift,1) * xgBlockA__vecR(irow,iblock)
+                    end do
+                end do
+            case (SPACE_C)
+                xgBlockA__vecC => xgBlockA%vecC
+                da__vecR => da%vecR
+                !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) &
+                !$OMP& MAP(to:xgBlockA__vecC,da__vecR)
+                do iblock = 1, ncols
+                    do irow = 1, nrows
+                        xgBlockA__vecC(irow,iblock) = - da__vecR(iblock+shift,1) * xgBlockA__vecC(irow,iblock)
+                    end do
+                end do
+            end select
+        else if (space(da)==SPACE_C) then
+            if (xgBlockA%space/=SPACE_C) then
+                ABI_ERROR('If space(da)=SPACE_C, space(xgBlockA) has to be SPACE_C')
+            end if
+            xgBlockA__vecC => xgBlockA%vecC
+            da__vecC => da%vecC
+            !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) &
+            !$OMP& MAP(to:xgBlockA__vecC,da__vecC)
+            do iblock = 1, ncols
+                do irow = 1, nrows
+                    xgBlockA__vecC(irow,iblock) = - da__vecC(iblock+shift,1) * xgBlockA__vecC(irow,iblock)
+                end do
+            end do
+        else
+            ABI_ERROR('Only SPACE_R or SPACE_C (for da) are implemented.')
+        end if
+
+#endif
+
     end if
 
     call timab(tim_ymax,2,tsec)
@@ -5418,6 +5536,42 @@ contains
     end if
 
   end subroutine xgBlock_getSize
+  !!***
+
+  !!****f* m_xg/xgBlock_get_gpu_option
+  !!
+  !! NAME
+  !! xgBlock_get_gpu_option
+  !! 
+  !! FUNCTION
+  !! Getter routine for private variable of xgBlock type
+
+  subroutine xgBlock_get_gpu_option(xgBlock, gpu_option)
+
+    type(xgBlock_t)  , intent(in   ) :: xgBlock
+    integer          , intent(  out) :: gpu_option
+
+    gpu_option = xgBlock%gpu_option
+
+  end subroutine xgBlock_get_gpu_option
+  !!***
+
+  !!****f* m_xg/xgBlock_get_communicator
+  !!
+  !! NAME
+  !! xgBlock_get_communicator
+  !! 
+  !! FUNCTION
+  !! Getter routine for private variable of xgBlock type
+
+  subroutine xgBlock_get_communicator(xgBlock, comm)
+
+    type(xgBlock_t)  , intent(in   ) :: xgBlock
+    integer          , intent(  out) :: comm
+
+    comm = xgBlock%spacedim_comm
+
+  end subroutine xgBlock_get_communicator
   !!***
 
   !!****f* m_xg/xgBlock_check
