@@ -26,7 +26,7 @@ module m_nvtx_data
 
   implicit none
 
-  integer, parameter :: NUMBER_OF_NVTX_REGIONS = 95
+  integer, parameter :: NUMBER_OF_NVTX_REGIONS = 119
   character(len=32), dimension(NUMBER_OF_NVTX_REGIONS) :: nvtx_names
   integer          , dimension(NUMBER_OF_NVTX_REGIONS) :: nvtx_ids
 
@@ -125,6 +125,30 @@ module m_nvtx_data
   integer, parameter :: NVTX_GETGSC = 93
   integer, parameter :: NVTX_DFPT_ACCRHO = 94
   integer, parameter :: NVTX_DFPT_MKRHO = 95
+  integer, parameter :: NVTX_SLICEALL_DOS = 96
+  integer, parameter :: NVTX_SLICEALL_MERGE = 97
+  integer, parameter :: NVTX_SLICEALL_PERMUTE_COLS = 98
+  integer, parameter :: NVTX_SLICEALL_INIT_ASYNC_BUFFER = 99
+  integer, parameter :: NVTX_SLICEALL_FREE_ASYNC_BUFFER = 100
+  integer, parameter :: NVTX_SLICEALL_TRANSPOSE = 101
+  integer, parameter :: NVTX_SLICEALL_GET_AX_BX = 102
+  integer, parameter :: NVTX_SLICES_NONLOP = 103
+  integer, parameter :: NVTX_SLICE_GET_AX_BX = 104
+  integer, parameter :: NVTX_SLICE_GET_BM1X = 105
+  integer, parameter :: NVTX_SLICE_CORE = 106
+  integer, parameter :: NVTX_SLICE_NEXT_ORDER = 107
+  integer, parameter :: NVTX_SLICE_RR = 108
+  integer, parameter :: NVTX_SLICE_RRQ = 109
+  integer, parameter :: NVTX_SLICE_INVOVL_POST3 = 110
+  integer, parameter :: NVTX_SLICE_TRANSPOSE = 111
+  integer, parameter :: NVTX_SLICE_SWAP_BUF = 112
+  integer, parameter :: NVTX_SLICE_EXPANSION = 113
+  integer, parameter :: NVTX_SLICE_INIT = 114
+  integer, parameter :: NVTX_SLICE_RUN = 115
+  integer, parameter :: NVTX_SLICE_COPY = 116
+  integer, parameter :: NVTX_SLICE_FREE = 117
+  integer, parameter :: NVTX_SLICEALL_INIT = 118
+  integer, parameter :: NVTX_SLICEALL_SPLIT = 119
 
 contains
 
@@ -229,7 +253,31 @@ contains
          & "DFPT_WFKFERMI", &
          & "GETGSC", &
          & "DFPT_ACCRHO", &
-         & "DFPT_MKRHO" &
+         & "DFPT_MKRHO", &
+         & "SLICES_DOS", &
+         & "SLICES_MERGE", &
+         & "SLICES_PERMUTE_COLS", &
+         & "SLICES_AINIT", &
+         & "SLICES_AFREE", &
+         & "TRANSPOSE", &
+         & "GET_AX_BX", &
+         & "SLICES_NONLOP", &
+         & "GET_AX_BX", &
+         & "GET_BM1X", &
+         & "SLICE_CORE", &
+         & "NEXT_ORDER", &
+         & "RAYLRITZ", &
+         & "RAYLRITZ_Q", &
+         & "INVOVL_POST3", &
+         & "TRANSPOSE", &
+         & "SWAP_BUF", &
+         & "CHEBY_EXPANSION", &
+         & "SLICE_INIT", &
+         & "SLICE_RUN", &
+         & "SLICE_COPY", &
+         & "SLICE_FREE", &
+         & "SLICEALL_INIT", &
+         & "SLICEALL_SPLIT" &
          ]
 
     nvtx_ids(1) = NVTX_MAIN_COMPUTATION
@@ -327,6 +375,30 @@ contains
     nvtx_ids(93)= NVTX_GETGSC
     nvtx_ids(94)= NVTX_DFPT_ACCRHO
     nvtx_ids(95)= NVTX_DFPT_MKRHO
+    nvtx_ids(96)= NVTX_SLICEALL_DOS
+    nvtx_ids(97)= NVTX_SLICEALL_MERGE
+    nvtx_ids(98)= NVTX_SLICEALL_PERMUTE_COLS
+    nvtx_ids(99)= NVTX_SLICEALL_INIT_ASYNC_BUFFER
+    nvtx_ids(100)= NVTX_SLICEALL_FREE_ASYNC_BUFFER
+    nvtx_ids(101)= NVTX_SLICEALL_TRANSPOSE
+    nvtx_ids(102)= NVTX_SLICEALL_GET_AX_BX
+    nvtx_ids(103)= NVTX_SLICES_NONLOP
+    nvtx_ids(104)= NVTX_SLICE_GET_AX_BX
+    nvtx_ids(105)= NVTX_SLICE_GET_BM1X
+    nvtx_ids(106)= NVTX_SLICE_CORE
+    nvtx_ids(107)= NVTX_SLICE_NEXT_ORDER
+    nvtx_ids(108)= NVTX_SLICE_RR
+    nvtx_ids(109)= NVTX_SLICE_RRQ
+    nvtx_ids(110)= NVTX_SLICE_INVOVL_POST3
+    nvtx_ids(111)= NVTX_SLICE_TRANSPOSE
+    nvtx_ids(112)= NVTX_SLICE_SWAP_BUF
+    nvtx_ids(113)= NVTX_SLICE_EXPANSION
+    nvtx_ids(114)= NVTX_SLICE_INIT
+    nvtx_ids(115)= NVTX_SLICE_RUN
+    nvtx_ids(116)= NVTX_SLICE_COPY
+    nvtx_ids(117)= NVTX_SLICE_FREE
+    nvtx_ids(118)= NVTX_SLICEALL_INIT
+    nvtx_ids(119)= NVTX_SLICEALL_SPLIT
 
   end subroutine nvtx_init
 
