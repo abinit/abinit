@@ -165,6 +165,12 @@ contains
 
    if(mpi_block_size>1 .and. use_distrib) then
      req_mem = req_mem + dp * 2 * int(npw, c_size_t) * int(nprojs_last_blk, c_size_t)          !projs_recv
+#ifdef HAVE_GPU_MPI
+     if(ngrads==0) then
+       ! Add a suspected internal buffer for GPU-aware MPI (no derivatives)
+       req_mem = req_mem + dp * 2 * int(npw, c_size_t) * int(nprojs_last_blk, c_size_t)          !projs_recv
+     end if
+#endif
    end if
    ! projs or projs_r + projs_i
    req_mem = req_mem + 2 * dp * int(npw, c_size_t) * int(nprojs_last_blk, c_size_t)
@@ -173,6 +179,10 @@ contains
      req_mem = req_mem + 2 * dp * int(npw, c_size_t) * int(ngrads, c_size_t) * int(nprojs_last_blk, c_size_t)
      if(mpi_block_size>1 .and. use_distrib) then
        req_mem = req_mem + dp * 2 * int(npw, c_size_t) * int(ngrads, c_size_t)*int(nprojs_last_blk, c_size_t)   !dprojs_recv
+#ifdef HAVE_GPU_MPI
+       ! Add a suspected internal buffer for GPU-aware MPI (with derivatives)
+       req_mem = req_mem + dp * 2 * int(npw, c_size_t) * int(ngrads, c_size_t)*int(nprojs_last_blk, c_size_t)   !dprojs_recv
+#endif
      end if
    end if
 
