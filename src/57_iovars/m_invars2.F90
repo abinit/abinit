@@ -2814,6 +2814,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    if (tread_alt==1.and.tread/=1) dtset%nline = dtset%mdeg_filter
  end if
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nslice',tread,'INT')
+ if(tread==1) dtset%nslice=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nblock_lobpcg',tread,'INT')
  if(tread==1) dtset%nblock_lobpcg=intarr(1)
 
@@ -2825,6 +2828,12 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nstep',tread,'INT')
  if(tread==1) dtset%nstep=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nstep_mixed',tread,'INT')
+ if(tread==1) dtset%nstep_mixed=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'balfilter',tread,'INT')
+ if(tread==1) dtset%balfilter=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ntime',tread,'INT')
  if(tread==1) dtset%ntime=intarr(1)
@@ -3547,6 +3556,9 @@ if (dtset%usekden==1) then
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'tolcum',tread,'DPR',ds_input)
  if(tread==1) dtset%tolcum=dprarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'tolfilter',tread,'DPR')
+ if(tread==1) dtset%tolfilter=dprarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'focktoldfe',tread,'DPR')
  if(tread==1) dtset%focktoldfe=dprarr(1)
