@@ -109,7 +109,7 @@ subroutine opernlb_gemm_distributed(rank,nprocs,npw,ndat,&
 !    work_buf => projs_recv(1:cplex,1:npw,1:nprojs_last_blk)
 !    recv_buf => projs_local(1:cplex,1:npw,1:nprojs_last_blk)
      work_buf => projs_recv
-     recv_buf => projs_recv
+     recv_buf => projs_local
    end if
 
    if(gpu_option == ABI_GPU_DISABLED) then
