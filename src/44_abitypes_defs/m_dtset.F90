@@ -85,6 +85,7 @@ type, public :: dataset_type
  integer :: auxc_ixc
  integer :: awtr = 1
 !B
+ integer :: balfilter
  integer :: bandpp
  integer :: bdeigrf
  integer :: berryopt
@@ -481,10 +482,12 @@ type, public :: dataset_type
  integer :: nscforder
  integer :: nshiftk
  integer :: nshiftk_orig  ! original number of shifts given in input (changed in inkpts, the actual value is nshiftk)
+ integer :: nslice = 1
  integer :: nspden
  integer :: nspinor
  integer :: nsppol
  integer :: nstep
+ integer :: nstep_mixed
  integer :: nsym
  integer :: ntime
  integer :: ntimimage
@@ -925,6 +928,7 @@ type, public :: dataset_type
  real(dp) :: tl_radius
  real(dp) :: tolcum = zero
  real(dp) :: toldfe
+ real(dp) :: tolfilter = 1.1_dp
  real(dp) :: tolmxde
  real(dp) :: toldff
  real(dp) :: tolimg
@@ -1491,6 +1495,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%auxc_scal          = dtin%auxc_scal
  dtout%awtr               = dtin%awtr
  dtout%bandpp             = dtin%bandpp
+ dtout%balfilter          = dtin%balfilter
  dtout%bdeigrf            = dtin%bdeigrf
  dtout%berryopt           = dtin%berryopt
  dtout%berrysav           = dtin%berrysav
@@ -1946,10 +1951,12 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%nscforder          = dtin%nscforder
  dtout%nshiftk            = dtin%nshiftk
  dtout%nshiftk_orig       = dtin%nshiftk_orig
+ dtout%nslice             = dtin%nslice
  dtout%nspden             = dtin%nspden
  dtout%nspinor            = dtin%nspinor
  dtout%nsppol             = dtin%nsppol
  dtout%nstep              = dtin%nstep
+ dtout%nstep_mixed        = dtin%nstep_mixed
  dtout%nsym               = dtin%nsym
  dtout%ntime              = dtin%ntime
  dtout%ntimimage          = dtin%ntimimage
@@ -2306,6 +2313,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%td_maxene          = dtin%td_maxene
  dtout%tolcum             = dtin%tolcum
  dtout%toldfe             = dtin%toldfe
+ dtout%tolfilter          = dtin%tolfilter
  dtout%tolmxde            = dtin%tolmxde
  dtout%toldff             = dtin%toldff
  dtout%tolimg             = dtin%tolimg
@@ -3434,7 +3442,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' algalch amu analyze_anh_pot angdeg asr atvshift autoparal'
  list_vars=trim(list_vars)//' auxc_ixc auxc_scal awtr'
 !B
- list_vars=trim(list_vars)//' bandpp bdberry bdeigrf bdgw berryopt berrysav berrystep bfield bmass'
+ list_vars=trim(list_vars)//' balfilter bandpp bdberry bdeigrf bdgw berryopt berrysav berrystep bfield bmass'
  list_vars=trim(list_vars)//' boxcenter boxcutmin brav brvltt builtintest'
  list_vars=trim(list_vars)//' bound_SPCoupling bound_anhaStrain bound_cell bound_cutoff bound_EFS bound_factors'
  list_vars=trim(list_vars)//' bound_maxCoeff bound_model bound_penalty bound_rangePower bound_step bound_temp'
@@ -3599,7 +3607,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' npfft nphf nph1l npimage np_spkpt npkpt nppert npsp npspinor'
  list_vars=trim(list_vars)//' npulayit npvel npwkss'
  list_vars=trim(list_vars)//' np_slk nqpt nqptdm nqfd nscforder nshiftk nshiftq nqshft'
- list_vars=trim(list_vars)//' nspden nspinor nsppol nstep nsym'
+ list_vars=trim(list_vars)//' nslice nspden nspinor nsppol nstep nstep_mixed nsym'
  list_vars=trim(list_vars)//' ntime ntimimage ntypalch ntypat nucdipmom nucefg nucfc nwfshist nzchempot'
 !O
  list_vars=trim(list_vars)//' objaat objbat objaax objbax objan objbn objarf'
@@ -3680,7 +3688,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' td_exp_order td_maxene td_mexcit td_scnmax td_prtstr td_restart td_propagator td_scthr'
  list_vars=trim(list_vars)//' tfkinfunc temperature test_effpot test_prt_ph tfw_toldfe tim1rev timopt'
  list_vars=trim(list_vars)//' tmesh tmpdata_prefix transport_ngkpt'
- list_vars=trim(list_vars)//' tl_nprccg tl_radius tnons tolcum toldfe tolmxde toldff tolimg tolmxf tolrde tolrff tolsym'
+ list_vars=trim(list_vars)//' tl_nprccg tl_radius tnons tolcum toldfe tolfilter tolmxde toldff tolimg tolmxf tolrde tolrff tolsym'
  list_vars=trim(list_vars)//' tolvrs tolwfr tolwfr_diago tphysel ts_option tsmear typat'
 !U
  list_vars=trim(list_vars)//' ucrpa ucrpa_bands ucrpa_window udtset upawu usepead usedmatpu '
