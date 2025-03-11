@@ -633,10 +633,10 @@ contains
   end if
 
   if(gemm_nonlop_is_distributed) then
+    nprocs = xmpi_comm_size(xmpi_world)
     ! If split size has changed, reset array and init MPI communicator
-    if(gemm_nonlop_block_comm==xmpi_comm_null .or. gemm_nonlop_kpt(ik)%nprojs_blk /= nprojs/gemm_nonlop_block_size) then
+    if(gemm_nonlop_block_comm==xmpi_comm_null .or. gemm_nonlop_nblocks /= nprocs/gemm_nonlop_block_size) then
       call free_gemm_nonlop_ikpt(ik, gpu_option)
-      nprocs = xmpi_comm_size(xmpi_world)
       if(gemm_nonlop_block_comm/=xmpi_comm_null) call xmpi_comm_free(gemm_nonlop_block_comm)
       rank = xmpi_comm_rank(xmpi_world);
       gemm_nonlop_nblocks=nprocs/gemm_nonlop_block_size
