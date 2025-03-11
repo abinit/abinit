@@ -2337,7 +2337,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      call chkint_eq(1,2,cond_string,cond_values,ierr,'npfft',dt%npfft,1,(/1/),iout)
    end if
 #ifdef HAVE_OPENMP
-   if (dt%wfoptalg==114 .or. dt%wfoptalg==1 .or. dt%wfoptalg==111) then
+   if (dt%wfoptalg==114 .or. dt%wfoptalg==1 .or. dt%wfoptalg==111 .or. dt%wfoptalg==112) then
      if ( nthreads > 1 ) then
        if ( dt%npfft > 1 ) then
          write(msg,'(4a,i4,a,i4,a)') "Using LOBPCG algorithm (wfoptalg=114), the FFT parallelization is not ",&
@@ -2360,7 +2360,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    end if
 #endif
    !Not yet implemented
-   if (dt%wfoptalg==111 .and. dt%npfft > 1) then
+   if ((dt%wfoptalg==111 .or. dt%wfoptalg==112) .and. dt%npfft > 1) then
      write(msg,'(5a,i3,5a)') "The FFT parallelization (npfft>1) is not compatible ",&
 &      "with Chebyshev filtering algorithm (wfoptalg=111)!",ch10,&
 &      "Please use multithreading instead (export OMP_NUM_THREADS=...)",&
@@ -4153,10 +4153,10 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 !  wfoptalg
 !  Must be greater or equal to 0
    call chkint_ge(0,0,cond_string,cond_values,ierr,'wfoptalg',dt%wfoptalg,0,iout)
-!  wfoptalg==0,1,4,10,14 or 114 if PAW
+!  wfoptalg==0,1,2,4,10,12,14 or 114 if PAW
    if (usepaw==1) then
      cond_string(1)='usepawu' ; cond_values(1)=dt%usepawu
-     call chkint_eq(0,1,cond_string,cond_values,ierr,'wfoptalg',dt%wfoptalg,7,(/0,1,4,10,14,111,114/),iout)
+     call chkint_eq(0,1,cond_string,cond_values,ierr,'wfoptalg',dt%wfoptalg,10,(/0,1,2,4,10,12,14,111,112,114/),iout)
    end if
 !  wfoptalg/=114 if PAW+Fock
    if (usepaw==1 .and. dt%usefock==1) then
@@ -4172,7 +4172,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    end if
 
    ! Chebyshev
-   if(dt%wfoptalg == 1 .or. dt%wfoptalg == 111) then
+   if(dt%wfoptalg == 1 .or. dt%wfoptalg == 111 .or. dt%wfoptalg == 112) then
      if(dt%nspinor > 1 .and. dt%wfoptalg == 1) then
        msg='Nspinor > 1 not yet compatible with wfoptalg 1. Use chebfi V2 instead (wfoptalg=111).'
        ABI_ERROR_NOSTOP(msg, ierr)
@@ -4274,11 +4274,11 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 
 !  bandFFT
    if(dt%paral_kgb==1.and.dt%optdriver==RUNL_GSTATE) then
-     if (mod(dt%wfoptalg,10) /= 4 .and. mod(dt%wfoptalg,10) /= 1) then
+     if (mod(dt%wfoptalg,10) /= 4 .and. mod(dt%wfoptalg,10) /= 2 .and. mod(dt%wfoptalg,10) /= 1) then
        write(msg,'(a,i0,a,a,a,a)')&
 &       'The value of wfoptalg is found to be ',dt%wfoptalg,ch10,&
 &       'This is not allowed in the case of band-FFT parallelization.',ch10,&
-&       'Action: put wfoptalg = 4, 14 or 114 in your input file'
+&       'Action: put wfoptalg = 4, 14 or 112, 114 in your input file'
        ABI_ERROR_NOSTOP(msg,ierr)
      end if
 !    Make sure all nband are equal
