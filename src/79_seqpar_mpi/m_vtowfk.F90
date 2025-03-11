@@ -56,6 +56,7 @@ module m_vtowfk
  use m_chebfiwf,    only : chebfiwf2
  use m_chebfiwf_cprj,only : chebfiwf2_cprj
  use m_lobpcgwf_cprj,only : lobpcgwf2_cprj
+ use m_slicewf,     only : slicewf
  use m_spacepar,    only : meanvalue_g
  use m_chebfi,      only : chebfi
  use m_rmm_diis,    only : rmm_diis
@@ -217,6 +218,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  integer :: use_subovl=0
  integer :: use_subvnlx=0
  integer :: use_totvnlx=0
+ integer :: nstep_mixed
  integer :: bandpp_cprj,blocksize,choice,cpopt,iband,iband1
  integer :: iblock,iblocksize,ibs,idir,ierr,igs,igsc,ii,inonsc
  integer :: iorder_cprj,ipw,ispinor,ispinor_index,istwf_k,iwavef,me_g0,mgsc,my_nspinor,n1,n2,n3 !kk
@@ -275,7 +277,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  nkpt_max=50; if(xmpi_paral==1)nkpt_max=-1
 
  wfoptalg=mod(dtset%wfoptalg,100); wfopta10=mod(wfoptalg,10)
- xg_diago = dtset%wfoptalg == 114 .or. dtset%wfoptalg == 111
+ xg_diago = dtset%wfoptalg == 114 .or. dtset%wfoptalg == 112 .or. dtset%wfoptalg == 111
  istwf_k=gs_hamk%istwf_k
  has_fock=(associated(gs_hamk%fockcommon))
  quit=0
@@ -517,6 +519,30 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
          end if
        end if
 
+!    =========================================================================
+!    ============ MINIMIZATION OF BANDS: SPECTRUM SLICING == =================
+!    =========================================================================
+       else if (wfopta10 == 2) then
+         nstep_mixed = dtset%nstep_mixed ! below which perform chebfi
+         write(std_out,'(a,i0)') 'running vtowfk for nstep_mixed=', nstep_mixed
+         if ( xg_diago .and. dtset%cprj_in_memory /= 1 ) then
+            if (istep > nstep_mixed) then
+                write(std_out,'(a,i0)') 'entering slicewf'
+                !ABI_NVTX_START_RANGE(NVTX_SPESLI)
+                call slicewf(cg_k,dtset,eig_k,occ_k,enlx_k,gs_hamk,kinpw,mpi_enreg,&
+&                             nband_k,npw_k,my_nspinor,prtvol,resid_k)
+                !ABI_NVTX_END_RANGE()
+            else
+                write(std_out,'(a,i0)') 'entering chebfiwf2'
+                ABI_NVTX_START_RANGE(NVTX_CHEBFI2)
+                call chebfiwf2(cg_k,dtset,eig_k,occ_k,enlx_k,gs_hamk,kinpw,&
+&                              mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k)
+                ABI_NVTX_END_RANGE()
+            end if
+         else
+            ABI_ERROR("(not xg_diago and dtset%cprj_in_memory=1) not implemented for slicewf")
+         end if
+     
 !      =========================================================================
 !      ======== MINIMIZATION OF BANDS: CONJUGATE GRADIENT (Teter et al.) =======
 !      =========================================================================
