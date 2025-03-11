@@ -403,7 +403,7 @@ subroutine slicewf(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
 &                   l_mpi_enreg%comm_bandspinorfft,me_g0,me_g0_fft,l_paw,&
 &                   l_mpi_enreg%comm_spinorfft,l_mpi_enreg%comm_band,&
 &                   nslice,npband,dtset%tolfilter,dtset%balfilter,&
-&                   dtset%nbdbuf,0,dtset%oracle_factor,dtset%oracle_min_cc,& ! oracle=0
+&                   dtset%nbdbuf,0,dtset%oracle_factor,dtset%oracle_min_occ,& ! oracle=0
 &                   l_gs_hamk%gpu_option,gpu_kokkos_nthrd=dtset%gpu_kokkos_nthrd)
  ABI_NVTX_END_RANGE()
 
