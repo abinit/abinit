@@ -529,13 +529,13 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
             if (istep > nstep_mixed) then
                 write(std_out,'(a,i0)') 'entering slicewf'
                 !ABI_NVTX_START_RANGE(NVTX_SPESLI)
-                call slicewf(cg_k,dtset,eig_k,occ_k,enlx_k,gs_hamk,kinpw,mpi_enreg,&
+                call slicewf(cg_k,dtset,eig_k,occ_k,enlx_k,gs_hamk,mpi_enreg,&
 &                             nband_k,npw_k,my_nspinor,prtvol,resid_k)
                 !ABI_NVTX_END_RANGE()
             else
                 write(std_out,'(a,i0)') 'entering chebfiwf2'
                 ABI_NVTX_START_RANGE(NVTX_CHEBFI2)
-                call chebfiwf2(cg_k,dtset,eig_k,occ_k,enlx_k,gs_hamk,kinpw,&
+                call chebfiwf2(cg_k,dtset,eig_k,occ_k,enlx_k,gs_hamk,&
 &                              mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k)
                 ABI_NVTX_END_RANGE()
             end if
