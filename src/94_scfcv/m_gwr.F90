@@ -5942,7 +5942,7 @@ end if
      sigc_e0(band, ikcalc, spin) = sigc_e0__
      ze0_kcalc(band, ikcalc, spin) = z_e0
 
-     ! IMPORTANT: Here we update qp_ebands%eig with the new enes obtained with the linearized QP equation
+     ! IMPORTANT: Here we update qp_ebands%eig with the new ones obtained with the linearized QP equation
      gwr%qp_ebands%eig(band, ik_ibz, spin) = real(qp_ene)
 
      ! Compute Spectral function using linear mesh **centered** around KS e0.
