@@ -94,7 +94,6 @@ rprim
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = eos_gnu_13.2_serial
 #%% [files]
 #%% files_to_test = 
 #%%   t05.abo,      tolnlines = 58, tolabs = 1.1e+1, tolrel = 1.1e+0, fld_options = -easy

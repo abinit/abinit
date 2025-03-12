@@ -528,6 +528,7 @@ module m_lobpcg2
         call timab(tim_nbdbuf,2,tsec)
         if ( maxResidu < lobpcg%tolerance ) then
           compute_residu = .false.
+          ABI_NVTX_END_RANGE()
           exit
         end if
 
@@ -575,6 +576,7 @@ module m_lobpcg2
            & AWP=lobpcg%AWP,BWP=lobpcg%BWP)
           if ( ierr /= 0 ) then
             ABI_WARNING("RayleighRitz (XW) did not work, but continue anyway.")
+            ABI_NVTX_END_RANGE()
             exit
           end if
         else
@@ -587,6 +589,7 @@ module m_lobpcg2
            & AWP=lobpcg%AWP,BWP=lobpcg%BWP,XWP=lobpcg%XWP%self)
             if ( ierr /= 0 ) then
               ABI_WARNING("RayleighRitz (XWP) did not work, but continue anyway.")
+              ABI_NVTX_END_RANGE()
               exit
             end if
           else
@@ -605,6 +608,7 @@ module m_lobpcg2
            & AWP=lobpcg%AWP,BWP=lobpcg%BWP)
             if ( ierr /= 0 ) then
               ABI_WARNING("RayleighRitz (XWP) did not work, but continue anyway.")
+              ABI_NVTX_END_RANGE()
               exit
             end if
           end if

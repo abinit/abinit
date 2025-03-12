@@ -82,7 +82,6 @@ jpawu2  0.5   eV
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = eos_gnu_13.2_mpich
 #%% [files]
 #%% files_to_test =
 #%%                  t83.abo,  tolnlines = 0, tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options=-medium ;

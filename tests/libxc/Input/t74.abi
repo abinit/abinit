@@ -184,7 +184,6 @@ ecut  6.0         # Maximal kinetic energy cut-off, in Hartree
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = eos_gnu_13.2_mpich
 #%% [files]
 #%% files_to_test =
 #%%   t74.abo, tolnlines=  12, tolabs= 0.005, tolrel=  0.0003, fld_options = -easy

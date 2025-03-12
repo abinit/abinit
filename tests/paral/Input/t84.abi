@@ -99,7 +99,6 @@ iomode 1
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = eos_gnu_13.2_mpich
 #%% [files]
 #%% files_to_test =
 #%%   t84.abo, tolnlines =  3, tolabs =5.0e-1, tolrel = 5.0e-1, fld_options=-medium ;

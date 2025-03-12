@@ -260,9 +260,9 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,grcondft,gsqcut,intgres,
  end if
 
  if (ipositron/=1) then
-!  if metaGGA, save current value of vxctau potential
+   !  if metaGGA, save current value of vxctau potential
    if (with_vxctau) vtauresid(:,:)=vxctau(:,:,1)
-!  Compute xc potential (separate up and down if spin-polarized)
+   !  Compute xc potential (separate up and down if spin-polarized)
    if (dtset%icoulomb == 0 .and. dtset%usewvl == 0) then
 
 !    >>>> Hartree potential
@@ -290,25 +290,27 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,grcondft,gsqcut,intgres,
      call timab(941,1,tsec)
      if (ipositron==0) then
        if(.not.is_hybrid_ncpp .or. mod(dtset%fockoptmix,100)==11)then
-         call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
+         call rhotoxc(energies%e_xc,energies%entropy_xc,kxc,mpi_enreg,nfft,ngfft,&
 &         nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,optxc,&
 &         rhor,rprimd,usexcnhat,vxc,vxcavg,xccc3d,xcdata,strsxc=strsxc,&
 &         taur=taur,vhartr=vhartr,vxctau=vxctau_,add_tfw=add_tfw_,xcctau3d=xcctau3d)
          if(mod(dtset%fockoptmix,100)==11)then
            energies%e_xc=energies%e_xc*dtset%auxc_scal
+           energies%entropy_xc=energies%entropy_xc*dtset%auxc_scal
            vxc(:,:)=vxc(:,:)*dtset%auxc_scal
          end if
        else
-         call xchybrid_ncpp_cc(dtset,energies%e_xc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,&
+         call xchybrid_ncpp_cc(dtset,energies%e_xc,energies%entropy_xc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,&
 &                              strsxc,vxcavg,xccc3d,vxc=vxc)
        end if
      else
-       call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
+       call rhotoxc(energies%e_xc,energies%entropy_xc,kxc,mpi_enreg,nfft,ngfft,&
 &       nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,optxc,&
 &       rhor,rprimd,usexcnhat,vxc,vxcavg,xccc3d,xcdata,&
 &       strsxc=strsxc,taur=taur,vhartr=vhartr,vxctau=vxctau_,add_tfw=add_tfw_,&
 &       electronpositron=electronpositron,xcctau3d=xcctau3d)
      end if
+     
      call timab(941,2,tsec)
    elseif (.not. wvlbigdft) then
 !    Use the free boundary solver.
@@ -334,7 +336,7 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,grcondft,gsqcut,intgres,
    end if
  else
    call timab(944,1,tsec)
-   energies%e_hartree=zero;energies%e_xc=zero
+   energies%e_hartree=zero;energies%e_xc=zero;energies%entropy_xc=zero
    call rhohxcpositron(electronpositron,gprimd,kxc,mpi_enreg,nfft,ngfft,nhat,nkxc,dtset%nspden,n3xccc,&
 &   dtset%paral_kgb,rhor,strsxc,ucvol,usexcnhat,usepaw,vhartr,vxc,vxcavg,xccc3d,dtset%xc_denpos)
    call timab(944,2,tsec)

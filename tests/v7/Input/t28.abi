@@ -93,7 +93,6 @@ jpawu  0.0000  # values in Hartree
 #%% [setup]
 #%% executable = abinit
 #%% test_chain = t28.abi, t29.abi
-#%% exclude_builders = alps_intel_2025_oneAPI
 #%% [files]
 #%% files_to_test =
 ###%%                  t28.abo,      tolnlines =7, tolabs =2.0e-6 , tolrel = 1.4e-05, fld_options=-medium ;
