@@ -223,7 +223,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  integer :: iblock,iblocksize,ibs,idir,ierr,igs,igsc,ii,inonsc
  integer :: iorder_cprj,ipw,ispinor,ispinor_index,istwf_k,iwavef,me_g0,mgsc,my_nspinor,n1,n2,n3 !kk
  integer :: nband_k_cprj,ncols_cprj,nblockbd,ncpgr,ndat,niter,nkpt_max,nnlout,ortalgo,ndat_fft
- integer :: paw_opt,quit,signs,space,spaceComm,tim_nonlop,wfoptalg,wfopta10,nblk_gemm_nonlop,blksize_gemm_nonlop_tmp
+ integer :: paw_opt,quit,signs,space,spaceComm,tim_nonlop,wfoptalg,wfopta10
+ integer :: gpu_option_tmp,nblk_gemm_nonlop,blksize_gemm_nonlop_tmp
  logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc
  real(dp) :: ar,ar_im,eshift,occblock,norm
  real(dp) :: max_resid,weight,cpu,wall,gflops
@@ -799,14 +800,19 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
  ! In case of GEMM nonlop distribution + force computation,
  ! recompute distribution as projectors arrays are bigger in this case
+ gpu_option_tmp=gs_hamk%gpu_option
  if(optforces==1 .and. gs_hamk%gpu_option==ABI_GPU_OPENMP) then
    blksize_gemm_nonlop_tmp = gemm_nonlop_block_size; is_distrib_tmp = gemm_nonlop_is_distributed
    gemm_nonlop_block_size = dtset%gpu_nl_splitsize
    call get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,mpi_enreg%bandpp,nband_k,&
    &                        dtset%nspinor,mpi_enreg%paral_kgb,mpi_enreg%nproc_band,&
    &                        optforces,0,-1,gs_hamk%gpu_option,(dtset%gpu_nl_distrib/=0),&
-   &                        gemm_nonlop_block_size,nblk_gemm_nonlop)
+   &                        gemm_nonlop_block_size,nblk_gemm_nonlop,warn_on_fail=.true.)
    gemm_nonlop_is_distributed = (dtset%gpu_nl_distrib/=0 .and. nblk_gemm_nonlop > 0)
+   if(nblk_gemm_nonlop==-1) then
+     gs_hamk%gpu_option=ABI_GPU_DISABLED
+     ABI_WARNING("GPU has been disabled for forces computation during SCF step due to memory constraints.")
+   end if
  end if
 
 !Loop over bands or blocks of bands. Note that in sequential mode iblock=iband, nblockbd=nband_k and blocksize=1
@@ -1200,7 +1206,9 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    ABI_NVTX_END_RANGE()
  end do !  End of loop on blocks
 
- if(optforces==1 .and. dtset%gpu_nl_distrib==1) then
+ ! restore safe value related to GEMM nonlop slicing and GPU in case of forces compute
+ if(optforces==1 .and. gpu_option_tmp==ABI_GPU_OPENMP) then
+   gs_hamk%gpu_option = gpu_option_tmp
    gemm_nonlop_block_size = blksize_gemm_nonlop_tmp
    gemm_nonlop_is_distributed = is_distrib_tmp
  end if

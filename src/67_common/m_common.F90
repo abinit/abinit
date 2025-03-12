@@ -2119,11 +2119,12 @@ end function crystal_from_file
 !! SOURCE
 subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,nband,nspinor,paral_kgb,&
 &                                           npband,optfor,optstr,wfoptalg,gpu_option,use_distrib,&
-&                                           blocksize,nblocks)
+&                                           blocksize,nblocks,warn_on_fail)
    implicit none
 
    integer,intent(in)     :: ikpt,ndat,nband,nspinor,paral_kgb,npband,optfor,optstr,wfoptalg,gpu_option
    logical,intent(in)     :: use_distrib
+   logical,intent(in),optional  :: warn_on_fail
    type(gs_hamiltonian_type),intent(in) :: gs_hamk
    integer,intent(inout)  :: blocksize
    integer,intent(out)    :: nblocks
@@ -2131,12 +2132,13 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,nband,nspinor,para
    integer(kind=c_size_t) :: nonlop_smem,invovl_smem,getghc_wmem,invovl_wmem,nonlop_wmem,gs_ham_smem
    integer(kind=c_size_t) :: sum_mem,sum_bandpp_mem,sum_other_mem,free_mem,localMem
    integer  :: icplx,space,i,ndat_try,rank,nprocs,ndgxdt,blockdim,max_slices,npw,npw_fft,signs
-   logical  :: print_and_exit
+   logical  :: print_and_exit,l_warn_on_fail
    integer(kind=c_size_t) :: chebfiMem(2),lobpcgMem(2)
 
 ! *********************************************************************
 
    free_mem=256*1e9 ! Dummy value
+   l_warn_on_fail=.false.;if(present(warn_on_fail)) l_warn_on_fail=warn_on_fail
 #ifdef HAVE_GPU
    if(gpu_option /= ABI_GPU_DISABLED) then
      call gpu_get_max_mem(free_mem)
@@ -2309,7 +2311,11 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,nband,nspinor,para
    write(std_out,'(A)') new_line('A')
    flush(std_out)
    if(sum_mem > free_mem) then
-     ABI_ERROR("It seems the test case you're trying to run is too big to run with given hardware resources !")
+     if(l_warn_on_fail) then
+       ABI_WARNING("It seems the test case you're trying to run is too big to run with given GPU resources !")
+     else
+       ABI_ERROR("It seems the test case you're trying to run is too big to run with given GPU resources !")
+     end if
    end if
 
  end subroutine get_gemm_nonlop_ompgpu_blocksize
