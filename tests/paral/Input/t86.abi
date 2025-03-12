@@ -94,7 +94,6 @@ bandpp2 8
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = scope_gnu_12.2_mpich
 #%% [files]
 #%% [paral_info]
 #%% nprocs_to_test = 4

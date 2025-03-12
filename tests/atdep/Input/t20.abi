@@ -38,7 +38,6 @@ enunit 1
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = atdep
-#%% exclude_builders = bob_gnu_13.2_openmp
 #%% md_hist = t20
 #%% [files]
 #%% files_to_test = 

@@ -95,7 +95,7 @@ contains
 !!  [xccctau3d(n3xccc)]=3D core electron kinetic energy density for XC core correction (bohr^-3)
 !!
 !! OUTPUT
-!!  enxc=returned exchange and correlation energy (hartree).
+!!  bigexc=returned exchange and correlation energy (hartree).
 !!  vxc(nfft,xcdata%nspden)=xc potential
 !!    (spin up in first half and spin down in second half if xcdata%nspden=2)
 !!    (v^11, v^22, Re[V^12], Im[V^12] if xcdata%nspden=4)
@@ -154,7 +154,7 @@ contains
 !!                  k3xc(:,4)= d3Exc/drho_dn drho_dn drho_dn
 !!
 !! === Additional optional output ===
-!!  [exc_vdw_out]= vdW-DF contribution to enxc (hartree)
+!!  [exc_vdw_out]= vdW-DF contribution to bigexc (hartree)
 !!  [vxctau(nfft,xcdata%nspden,4*xcdata%usekden)]=(only for meta-GGA)=
 !!    vxctau(:,:,1): derivative of XC energy density with respect to kinetic energy density (depsxcdtau).
 !!    vxctau(:,:,2:4): gradient of vxctau (gvxctau)
@@ -209,8 +209,10 @@ contains
 !! *Hybrid GGA
 !!   41 means PBE0-1/4                                     xcpbe
 !!   42 means PBE0-1/3                                     xcpbe
-!! *Other
-!!   50 means IIT xc                                       xciit
+!! *Temperature-dependant exchange-correlation functionals
+!!   50 means IIT xc (TLDA functional)                     xciit
+!!   51 means KSDT xc (TLDA functional)                    xcksdt
+!!   60 means KDT16 xc (PBE TGGA functional)               xckdt16
 !!
 !! NOTE: please update echo_xc_name.F90 if you add new functional (apart from libxc)
 !!
@@ -222,10 +224,19 @@ contains
 !!   rho ---> means density
 !!   tau ---> means kinetic energy density
 !!   exc ---> means exchange-correlation energy density per particle
-!!   epsxc ---> means rho*exc == exchange-correlation energy density
+!!   rhoexc ---> means rho*exc == exchange-correlation energy density
 !!   vxc ---> means exchange-correlation potential
-!!   bigexc ---> means exchange-correlation energy E_xc (for the moment it is named "enxc")
+!!   bigexc ---> means exchange-correlation energy E_xc
+!!   bigsxc ---> means exchange-correlation entropy S_xc (zero when standard xc functionals are used)
 !!   m_norm ---> means norm of magnetization
+!!
+!! In the case where finite-temperature exchange-correlation functionals are used:
+!!   exc_b ---> means exchange-correlation free energy density per particle
+!!   rhoexc ---> means rho*exc == exchange-correlation free energy density
+!!   bigexc ---> means exchange-correlation internal energy E_xc
+!!   bigsxc ---> means exchange-correlation entropy S_xc
+!!   tsxc_b ---> means exchange-correlation entropy energy density per particle
+!!   rhotsxc --> means rho*tsxc == exchange-correlation entropy energy density
 !!
 !!   g... --> means gradient of something (e.g. : grho --> means gradient of electron density)
 !!   g...2 -> means square norm of gradient of something (e.g. : grho2 -> means square norm of gradient of electron density)
@@ -244,7 +255,7 @@ contains
 !!
 !! SOURCE
 
-subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
+subroutine rhotoxc(bigexc,bigsxc,kxc,mpi_enreg,nfft,ngfft, &
 & nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,option, &
 & rhor,rprimd,usexcnhat,vxc,vxcavg,xccc3d,xcdata, &
 & add_tfw,exc_vdw_out,grho1_over_rho1,electronpositron,k3xc,strsxc,taur,vhartr,vxctau,xc_funcs,xcctau3d) ! optional arguments
@@ -255,7 +266,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
  integer,intent(in) :: usexcnhat
  logical,intent(in) :: non_magnetic_xc
  logical,intent(in),optional :: add_tfw
- real(dp),intent(out) :: enxc,vxcavg
+ real(dp),intent(out) :: bigexc,vxcavg,bigsxc
  real(dp),intent(out),optional :: exc_vdw_out,grho1_over_rho1
  type(MPI_type),intent(in) :: mpi_enreg
  type(electronpositron_type),pointer,optional :: electronpositron
@@ -281,7 +292,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
  integer :: n3xctau,order,usefxc,nproc_fft,comm_fft,usegradient,usekden,uselaplacian
  logical :: compute_stress,my_add_tfw
  real(dp),parameter :: mot=-one/3.0_dp
- real(dp) :: coeff,divshft,doti,dstrsxc,dvdn,dvdz,epsxc,exc_str,factor,m_norm_min,s1,s2,s3
+ real(dp) :: coeff,divshft,doti,dstrsxc,dvdn,dvdz,rhoexc,rhotsxc,exc_str,factor,m_norm_min,s1,s2,s3
  real(dp) :: strdiag,strsxc1_tot,strsxc2_tot,strsxc3_tot,strsxc4_tot
  real(dp) :: strsxc5_tot,strsxc6_tot,ucvol
  real(dp) :: deltae_vdw,exc_vdw
@@ -293,7 +304,8 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
  real(dp) :: tsec(2),vxcmean(4)
  real(dp),allocatable :: d2rhonow(:,:,:)
  real(dp),allocatable :: d2vxc_b(:,:),depsxc(:,:),depsxc_apn(:,:),dvxc_apn(:),dvxc_b(:,:)
- real(dp),allocatable :: exc_b(:),fxc_b(:),fxc_apn(:),grho2_apn(:),grho2_b_updn(:,:),lrhonow(:,:),lrho_b_updn(:,:)
+ real(dp),allocatable :: exc_b(:),tsxc_b(:),fxc_b(:),fxc_apn(:),grho2_apn(:),grho2_b_updn(:,:)
+ real(dp),allocatable :: lrhonow(:,:),lrho_b_updn(:,:)
  real(dp),allocatable :: m_norm(:),nhat_up(:),rho_b_updn(:,:),rho_b(:),rhonow_apn(:,:,:)
  real(dp),allocatable :: tau_b_updn(:,:),vxc_apn(:,:),vxcgr_apn(:),vxcgrho_b_updn(:,:),vxcrho_b_updn(:,:)
  real(dp),allocatable :: vxc_b_apn(:),vxc_ep(:),vxctau_b_updn(:,:),vxclrho_b_updn(:,:)
@@ -432,8 +444,10 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
  usefxc=0;if (ixc==50) usefxc=1
 
 !Initializations
- enxc=zero
- epsxc=zero
+ bigexc=zero
+ bigsxc=zero
+ rhoexc=zero
+ rhotsxc=zero
  vxc(:,:)=zero
  vxcavg=zero
  if (compute_stress) then
@@ -731,6 +745,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 
 !      Allocation of mandatory arguments of drivexc
        ABI_MALLOC(exc_b,(npts))
+       ABI_MALLOC(tsxc_b,(npts))
        ABI_MALLOC(rho_b,(npts))
        ABI_MALLOC(rho_b_updn,(npts,nspden_updn))
        ABI_MALLOC(vxcrho_b_updn,(npts,nspden_updn))
@@ -793,10 +808,9 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
            call libxc_functionals_init(auxc_ixc,nspden,xc_functionals=xc_funcs_auxc)
          end if
          call drivexc(auxc_ixc,order,npts,nspden_updn,usegradient,0,0,&
-&          rho_b_updn,exc_b,vxcrho_b_updn,nvxcgrho,0,0,ndvxc,nd2vxc, &
+&          rho_b_updn,exc_b,tsxc_b,vxcrho_b_updn,nvxcgrho,0,0,ndvxc,nd2vxc,xcdata%tphysel, &
 &          grho2_updn=grho2_b_updn,vxcgrho=vxcgrho_b_updn,dvxc=dvxc_b, &
-&          fxcT=fxc_b,hyb_mixing=xcdata%hyb_mixing,el_temp=xcdata%tphysel,&
-&          xc_funcs=xc_funcs_auxc)
+&          fxcT=fxc_b,hyb_mixing=xcdata%hyb_mixing,xc_funcs=xc_funcs_auxc)
 !        Transfer the xc kernel
          if (nkxc_eff==1.and.ndvxc==15) then
            kxc(ifft:ifft+npts-1,1)=half*(dvxc_b(1:npts,1)+dvxc_b(1:npts,9)+dvxc_b(1:npts,10))
@@ -821,23 +835,23 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
        if (present(xc_funcs)) then
          call drivexc(ixc,order,npts,nspden_updn,&
 &          usegradient,uselaplacian,usekden,&
-&          rho_b_updn,exc_b,vxcrho_b_updn,&
-&          nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc, &
+&          rho_b_updn,exc_b,tsxc_b,vxcrho_b_updn,&
+&          nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc,xcdata%tphysel, &
 &          grho2_updn=grho2_b_updn,vxcgrho=vxcgrho_b_updn,&
 &          lrho_updn=lrho_b_updn,vxclrho=vxclrho_b_updn,&
 &          tau_updn=tau_b_updn,vxctau=vxctau_b_updn,&
-&          dvxc=dvxc_b,d2vxc=d2vxc_b,el_temp=xcdata%tphysel,fxcT=fxc_b,&
+&          dvxc=dvxc_b,d2vxc=d2vxc_b,fxcT=fxc_b,&
 &          hyb_mixing=xcdata%hyb_mixing,&
 &          xc_funcs=xc_funcs)
        else
          call drivexc(ixc,order,npts,nspden_updn,&
 &          usegradient,uselaplacian,usekden,&
-&          rho_b_updn,exc_b,vxcrho_b_updn,&
-&          nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc, &
+&          rho_b_updn,exc_b,tsxc_b,vxcrho_b_updn,&
+&          nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc,xcdata%tphysel, &
 &          grho2_updn=grho2_b_updn,vxcgrho=vxcgrho_b_updn,&
 &          lrho_updn=lrho_b_updn,vxclrho=vxclrho_b_updn,&
 &          tau_updn=tau_b_updn,vxctau=vxctau_b_updn,&
-&          dvxc=dvxc_b,d2vxc=d2vxc_b,el_temp=xcdata%tphysel,fxcT=fxc_b,&
+&          dvxc=dvxc_b,d2vxc=d2vxc_b,fxcT=fxc_b,&
 &          hyb_mixing=xcdata%hyb_mixing)
        end if
 
@@ -871,11 +885,12 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 &                   vxcgrho_b_updn,nvxcgrho,grho2_b_updn)
        end if
 
-!      Accumulate enxc, strsxc and store vxc (and eventually kxc)
+!      Accumulate bigexc, bigsxc, strsxc and store vxc (and eventually kxc)
        dstrsxc=zero
        do ipts=ifft,ifft+npts-1
          indx=ipts-ifft+1
-         epsxc=epsxc+rho_b(indx)*exc_b(indx)  !will be normalized with respect to the volume later to get enxc ("bigexc").
+         rhoexc=rhoexc+rho_b(indx)*exc_b(indx)    ! Will be normalized with respect to the volume later to get bigexc.
+         rhotsxc=rhotsxc+rho_b(indx)*tsxc_b(indx) ! Will be normalized with respect to the volume later to get bigsxc.
          depsxc(ipts,1)=vxcrho_b_updn(indx,1)
          if (nspden_updn==2) depsxc(ipts,2)=vxcrho_b_updn(indx,2)
          exc_str=exc_b(indx);if(usefxc==1) exc_str=fxc_b(indx)
@@ -1173,6 +1188,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
        end if
 
        ABI_FREE(exc_b)
+       ABI_FREE(tsxc_b)
        ABI_FREE(rho_b)
        ABI_FREE(rho_b_updn)
        ABI_FREE(grho2_b_updn)
@@ -1289,9 +1305,10 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
      ABI_ERROR(message)
    end if
 #endif
-!  Normalize enxc, strsxc and vxc
+!  Normalize bigexc, bigsxc, strsxc and vxc
    divshft=one/dble(xcdata%intxc+1)
-   enxc=epsxc*ucvol/dble(nfftot)*divshft
+   bigexc=rhoexc*ucvol/dble(nfftot)*divshft
+   bigsxc=rhotsxc*ucvol/dble(nfftot)*divshft/xcdata%tphysel
    vxc=vxc*divshft
    if (compute_stress) strsxc(:)=strsxc(:)/dble(nfftot)*divshft
    if (with_vxctau) vxctau=vxctau*divshft
@@ -1300,9 +1317,10 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 !  Reduction in case of FFT distribution
    if (nproc_fft>1)then
      call timab(48,1,tsec)
-     call xmpi_sum(enxc,comm_fft ,ierr)
+     call xmpi_sum(bigexc,comm_fft,ierr)
+     call xmpi_sum(bigsxc,comm_fft,ierr)
      if (compute_stress) then
-       call xmpi_sum(strsxc,comm_fft ,ierr)
+       call xmpi_sum(strsxc,comm_fft,ierr)
      end if
      if (present(grho1_over_rho1))  then
        call xmpi_sum(grho1_over_rho1,comm_fft ,ierr)
@@ -1356,9 +1374,9 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
      if(nspden>=2) vxc(:,2)=factor*vhartr(:)
 
 !    Compute corresponding xc energy and stress as well as vxcavg
-     call dotprod_vn(1,rhor,enxc,doti,nfft,nfftot,1,1,vxc,ucvol,mpi_comm_sphgrid=comm_fft)
-     enxc=half*enxc
-     if (compute_stress) strsxc(1:3)=-enxc/ucvol
+     call dotprod_vn(1,rhor,bigexc,doti,nfft,nfftot,1,1,vxc,ucvol,mpi_comm_sphgrid=comm_fft)
+     bigexc=half*bigexc
+     if (compute_stress) strsxc(1:3)=-bigexc/ucvol
 
 !    Compute average of vxc (one component only).
      call mean_fftr(vxc,vxcmean,nfft,nfftot,1,mpi_comm_sphgrid=comm_fft)
@@ -1379,7 +1397,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 !Add van der Waals terms
 #if defined DEV_YP_VDWXC
  if ( (xcdata%vdw_xc > 0) .and. (xcdata%vdw_xc < 10) .and. (xc_vdw_status()) ) then
-   enxc = enxc + exc_vdw + deltae_vdw
+   bigexc = bigexc + exc_vdw + deltae_vdw
    do ispden=1,nspden
      vxc(:,ispden) = vxc(:,ispden) + decdrho_vdw(:,ispden)
    end do
@@ -1394,6 +1412,11 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
  end if
 #endif
  if ( present(exc_vdw_out) ) exc_vdw_out = exc_vdw
+
+!In case we have an entropy associated with XC contribution
+!(e.g. using finite-temperature exchange-correlation functionals),
+!we retrieve exchange-correlation internal energy bigexc using entropy bigsxc
+ if(abs(bigsxc)>tiny(zero)) bigexc=bigexc+xcdata%tphysel*bigsxc
 
  call timab(81,2,tsec)
 

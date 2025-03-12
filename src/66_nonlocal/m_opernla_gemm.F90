@@ -391,8 +391,22 @@ subroutine opernla_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,&
  real(dp), ABI_CONTIGUOUS pointer :: d2projs(:,:,:)
 
  ik=1; if(is_kprime) ik=2
- ABI_UNUSED(cplex_dgxdt)
- ABI_UNUSED(cplex_d2gxdt)
+
+ cplex_dgxdt(:)  = 0 ; if (cplex == 1) cplex_dgxdt(:)  = 1
+ cplex_d2gxdt(:) = 0 ; if (cplex == 1) cplex_d2gxdt(:) = 1
+ ! When istwf_k > 1, gx derivatives can be real or pure imaginary
+ ! cplex_dgxdt(i)  = 1 if dgxdt(1,i,:,:)  is real, 2 if it is pure imaginary
+ ! cplex_d2gxdt(i) = 1 if d2gxdt(1,i,:,:) is real, 2 if it is pure imaginary
+ if(ndgxdt > 0 .and. cplex==1) then
+  if (choice==5.or.choice==51) cplex_dgxdt(:) = 2
+  if (choice==54.and.signs==1) cplex_dgxdt(4:6) = 2
+  !if (choice==54.and.signs==2) cplex_dgxdt(:)   = 2
+  if (choice==55.and.signs==1) cplex_dgxdt(7:9) = 2
+ end if
+ if(nd2gxdt > 0 .and. cplex==1) then
+   if (choice==54) cplex_d2gxdt(:) = 2
+   if (choice==55.and.signs==1) cplex_d2gxdt(1:18)= 2
+ end if
 
  nprojs_all=nprojs
  if(iatom_only>0) then

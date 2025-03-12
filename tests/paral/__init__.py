@@ -22,6 +22,8 @@ inp_files = [
 "t07.abi",
 "t08.abi",
 "t09.abi",
+"t19.abi", # test cprj_in_memory=1 (dilatmx>1,PAW,istwfk>1,DFTI)
+"t20.abi", # test cprj_in_memory=1 (dilatmx>1,PAW,istwfk>1,no DFTI)
 "t21.abi",
 "t22.abi",
 "-t23.abi", # disabled

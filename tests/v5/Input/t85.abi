@@ -132,7 +132,6 @@ znucl        13
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = eos_gnu_13.2_serial
 #%% test_chain = t85.abi, t86.abi, t87.abi, t88.abi, t89.abi, t90.abi, t91.abi, t92.abi, t93.abi, t94.abi, t95.abi
 #%% [files]
 #%% files_to_test = t85.abo, tolnlines= 56, tolabs=  3.000e-02, tolrel=  6.000e-03, fld_options=-easy

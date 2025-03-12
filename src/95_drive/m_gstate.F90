@@ -903,16 +903,16 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 & (dtset%iscf>0 .or. dtset%iscf==-3) .and. dtset%positron/=1 ) then
 
    ABI_MALLOC(doccde,(dtset%mband*dtset%nkpt*dtset%nsppol))
-!  Warning : ideally, results_gs%entropy should not be set up here XG 20011007
+!  Warning : ideally, results_gs%entropy_ks should not be set up here XG 20011007
 !  Do not take into account the possible STM bias
-   call newocc(doccde,eigen,results_gs%energies%entropy,&
+   call newocc(doccde,eigen,results_gs%energies%entropy_ks,&
 &   results_gs%energies%e_fermie,results_gs%energies%e_fermih,dtset%ivalence,&
 &   dtset%spinmagntarget,dtset%mband,dtset%nband,&
 &   dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%nkpt,dtset%nspinor,dtset%nsppol,occ,&
 &   dtset%occopt,dtset%prtvol,dtset%tphysel,dtset%tsmear,dtset%wtk,&
 &   extfpmd=extfpmd)
    if (dtset%dmftcheck>=0.and.dtset%usedmft>=1.and.(sum(args_gs%upawu(:))>=tol8.or.  &
-&   sum(args_gs%jpawu(:))>tol8).and.dtset%dmft_entropy==0) results_gs%energies%entropy=zero
+&   sum(args_gs%jpawu(:))>tol8).and.dtset%dmft_entropy==0) results_gs%energies%entropy_ks=zero
 
    if(associated(extfpmd)) then
 !    Get nelect to build density
