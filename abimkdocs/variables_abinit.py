@@ -263,7 +263,7 @@ Using anaddb is indeed the recommended approach if you want to analyze the break
 Running different DFPT calculations from scratch just to change [[asr]] is indeed a waste of time as
 you can compute the DDB only once and then use anaddb.
 
-Anyhow, this input variable is used in different contexts in ABINIT, in addition of being used in ANADDB :
+Anyhow, this input variable is used in different contexts in ABINIT, in addition of being used in ANADDB:
 [[optdriver]]=1 (phonon calculations), [[optdriver]]=7 (electron-phonon calculations) and
 [[optdriver]]=10 (longwave calculations).
 For [[optdriver]]=1, it does not modify the self-consistent calculations, neither the DDB generation, but only the echo in the main output file
@@ -1533,17 +1533,17 @@ Variable(
     text=r"""
 For the Chebyshev Filtering algorithm, it is possible to estimate the degree of the polynom needed to reach a given precision on the wave-functions.
 Indeed, as explained in [[cite:Levitt2015]], after the application of the Chebyshev polynomial of order $n$ (noted $T_n(x)$) followed by a Rayleigh-Ritz procedure,
-the residual $r_i^n$ of the band $i$ can be estimated as :
+the residual $r_i^n$ of the band $i$ can be estimated as:
 
   $\|r_i^n\| \approx \|r_i\| \ / \ T_n(\lambda_i^{eff})$
 
 where $r_i$ is the residual before applying the Chebyshev polynomial, and $\lambda_i^{eff}=(\lambda_i - c)/r$ where $\lambda_i$ is the Rayleigh quotient of the band $i$, $r$ the filter radius and $c$ filter center.
-There are two possible scenarii :
+There are two possible scenarii:
 
-  * [[chebfi_oracle]] = 0 : the default value. The order of the polynom, or degree, is equal to [[mdeg_filter]] (or [[nline]],
+  * [[chebfi_oracle]] = 0: the default value. The order of the polynom, or degree, is equal to [[mdeg_filter]] (or [[nline]],
   depending on which one is used in the input) for every SCF step.
 
-  * [[chebfi_oracle]] > 0 : the square residuals $\|r_i\|^2$ are computed at the beginning of the algorithm, which adds a small time overhead (which could be negligible).
+  * [[chebfi_oracle]] > 0: the square residuals $\|r_i\|^2$ are computed at the beginning of the algorithm, which adds a small time overhead (which could be negligible).
   The degree of the polynom $n_i$ is estimated individually for every band, as explained below.
   Then the maximum value over all bands is taken.
   Indeed, for an efficient parallelism it is necessary to apply the same degree to every bands.
@@ -1692,7 +1692,7 @@ driven by workflows developed for earlier versions of ABINIT.
 The default value of [[chkparal]], will enforce some basic relevance of the input variables related to parallelism,
 thus hopefully preventing some users to loose computing power.
 
-The following relevances and adequacies are checked at present if [[chkparal]]=1 :
+The following relevances and adequacies are checked at present if [[chkparal]]=1:
 the input variable [[autoparal]] is relevant only for [[optdriver]]=1 calculations (ground-state);
 the input variable [[paral_kgb]] is relevant only for [[optdriver]]=1 calculations (ground-state) or for [[optdriver]]=66 (Laczos-Sternheimer GW).
 
@@ -1837,7 +1837,7 @@ Using anaddb is indeed the recommended approach if you want to analyze the break
 Running different DFPT calculations from scratch just to change [[chneut]] is indeed a waste of time as
 you can compute the DDB only once and then use anaddb.
 
-Anyhow, this input variable is used in different contexts in ABINIT, in addition of being used in ANADDB :
+Anyhow, this input variable is used in different contexts in ABINIT, in addition of being used in ANADDB:
 [[optdriver]]=1 (phonon calculations), [[optdriver]]=7 (electron-phonon calculations) and
 [[optdriver]]=10 (longwave calculations).
 For [[optdriver]]=1, it does not modify the self-consistent calculations, neither the DDB generation, but only the echo in the main output file
@@ -1986,17 +1986,17 @@ If [[cprj_in_memory]] = 2, "cprj" coefficients are stored in memory during the w
 
 For now, [[cprj_in_memory]] = 1 is implemented only in the following context:
 
-* [[optdriver]] = 0 : ground-state computation. If optdriver/=0, [[cprj_in_memory]] is set to 0 automatically.
+* [[optdriver]] = 0: ground-state computation. If optdriver/=0, [[cprj_in_memory]] is set to 0 automatically.
 
-* [[wfoptalg]] = 10,114 or 111 : using Congugate Gradient algorithm (PAW only), LOBPCG (PAW or NC) or Chebyshev filtering (PAW or NC)
+* [[wfoptalg]] = 10,114 or 111: using Congugate Gradient algorithm (PAW only), LOBPCG (PAW or NC) or Chebyshev filtering (PAW or NC)
 
-* [[rmm_diis]] = 0 : without the use of rmm_diis algorithm
+* [[rmm_diis]] = 0: without the use of rmm_diis algorithm
 
-* [[berryopt]] = 0 : without finite electric-field
+* [[berryopt]] = 0: without finite electric-field
 
-* [[usefock]] = 0 : without Fock exchange term in the functional
+* [[usefock]] = 0: without Fock exchange term in the functional
 
-* [[nucdipmom]] = 0 : without nuclear dipolar moments
+* [[nucdipmom]] = 0: without nuclear dipolar moments
 
 For [[cprj_in_memory]] = 2, see [[cprj_update_lvl]] for a fine tuning of "cprj" updates (i.e. when they are computed directly from wavefunctions).
 
@@ -2025,15 +2025,15 @@ In principle, there is no need to compute "cprj" coefficients directly from the 
 However, numerical errors can accumulate and lead to a significant difference between "cprj" coefficients and wave-functions.
 One can update the "cprj" coefficients from time to time, computing them directly from the wave-functions, in different places in the code:
 
-* A : at the beginning of the run, or after the move of atoms
+* A: at the beginning of the run, or after the move of atoms
 
-* B : after wave-functions orthogonalization
+* B: after wave-functions orthogonalization
 
-* C : before the subspace diagonalization
+* C: before the subspace diagonalization
 
-* D : at the end of an iteration in the conjugate gradient algorithm
+* D: at the end of an iteration in the conjugate gradient algorithm
 
-* E : at the beginning of the conjugate gradient algorithm
+* E: at the beginning of the conjugate gradient algorithm
 
 The update is done depending on the [[cprj_update_lvl]] value according to the following table:
 
@@ -2985,10 +2985,10 @@ Variable(
 
 Value of double counting used for DMFT (so, only relevant for [[usedmft]]=1)..
 
-   * 1 : corresponds to the "Full Localized Limit" double counting (to be used with [[usepawu]]=10).
-   * 2 : corresponds to the "Around Mean Field" double counting (this is not yet in production).
-   * 5 : the calculation is done without magnetism in the J term (cf [[cite:Park2015]] and [[cite:Chen2016a]]), to be used with [[usepawu]]=14.
-   * 6 : this option is in development.
+   * 1: corresponds to the "Full Localized Limit" double counting (to be used with [[usepawu]]=10).
+   * 2: corresponds to the "Around Mean Field" double counting (this is not yet in production).
+   * 5: the calculation is done without magnetism in the J term (cf [[cite:Park2015]] and [[cite:Chen2016a]]), to be used with [[usepawu]]=14.
+   * 6: this option is in development.
 """,
 ),
 
@@ -4789,9 +4789,9 @@ Also, one can count several datasets separately in one run.
 
 For now, this feature is available only in the following context:
 
-* [[optdriver]] = 0 : ground-state computation
+* [[optdriver]] = 0: ground-state computation
 
-* [[paral_kgb]] = 0 : simple parallelization over k-points
+* [[paral_kgb]] = 0: simple parallelization over k-points
 
 If the counting is activated, a little report is written in abinit output.
 Here an example:
@@ -9137,7 +9137,7 @@ The value [[ixc]] = 10 is used internally: gives the difference between
 
   * 50 --> IIT temperature-dependent free energy functional of [[cite:Ichimaru1987]] (designed for warm dense matter).
   * 51 --> corrected KSDT, LDA temperature-dependent free energy functional: Karasiev, Sjostrom, Dufty, & Trickey [[cite:Karasiev2014]].
-  * 60 --> KDT16, GGA temperature-dependant free energy functional (PBE parametrization) : Karasiev, Dufty, Trickey [[cite:Karasiev2018]].
+  * 60 --> KDT16, GGA temperature-dependant free energy functional (PBE parametrization): Karasiev, Dufty, Trickey [[cite:Karasiev2018]].
 
 **ETSF Lib XC functionals**
 
@@ -11358,7 +11358,7 @@ irrespective of the value of [[nbdbuf]].
 
 With [[nbdbuf]] = -101, the bands in the buffer are automatically defined through their occupancies.
 The convergence criteria is normally $resid < tolwfr$, which means that the squared band residual should be lower than [[tolwfr]].
-With [[nbdbuf]] = -101, the convergence criteria becomes : $resid * occ < tolwfr$, where $occ$ is the band occupancy.
+With [[nbdbuf]] = -101, the convergence criteria becomes: $resid * occ < tolwfr$, where $occ$ is the band occupancy.
 In that case, bands with null occupation numbers are completely ignored and bands with partial band occupancies are converged according to a modified criteria, equal to $tolwfr/occ$.
 This functionality is still experimental and has not been tested on many systems yet.
 
@@ -11959,7 +11959,7 @@ Variable(
     requires="[[nqpt]] == 1 and [[kptopt]] >= 0",
     added_in_version="before_v9",
     text=r"""
-WARNING : Only used if [[nqpt]] = 1. If [[nqpt]]=0 (which is the default value of [[nqpt]]), no reading of [[ngqpt]] is done,
+WARNING: Only used if [[nqpt]] = 1. If [[nqpt]]=0 (which is the default value of [[nqpt]]), no reading of [[ngqpt]] is done,
 and the default value of [[ngqpt]] is kept.
 
 Similar to [[ngkpt]], but for the q-wavevector. At variance with [[ngkpt]], note that only one q point is selected per dataset
@@ -12184,7 +12184,7 @@ Variable(
 Allows to choose the algorithm for non-local operator application.
 The default value is [[nloc_alg]] = 4, and the meaning of this variable depends on [[useylm]].
 
-For [[useylm]] = 0 :
+For [[useylm]] = 0:
 
   On super-scalar architectures, [[nloc_alg]] = 4 is the best.
   More detailed explanations:
@@ -12197,7 +12197,7 @@ For [[useylm]] = 0 :
      been coded. This should be especially efficient on scalar and super-scalar
      machines. This has been confirmed by tests.
 
-For [[useylm]] = 1 :
+For [[useylm]] = 1:
 
 With spherical harmonics, the computation of the scalar product between a wave function $\psi$ and the projector $p_{a,nlm}$ writes:
 
@@ -12323,7 +12323,7 @@ $$ H_{non-local}|\psi> = \sum_a\sum_{ij} |p_{a,i}> D_{a,ij} <p_{a,i}|\psi> $$
 The index "a" stands for atoms ([[natom]]), while "i" and "j" indices run over the set of available projectors of the pseudo-potential.
 $e_{a,ij}$ and $D_{a,ij}$ are scalars.
 In the PAW formalism ([[usepaw]] = 1), the overlap operator has the same structure than $H_{non-local}$.
-The most time-consuming parts of the computation of non-local terms are :
+The most time-consuming parts of the computation of non-local terms are:
 
 * the computation of $<p_{a,i}|\psi>$ for every "a" and "i"
 
@@ -12342,11 +12342,11 @@ Also, one can count several datasets separately in one run.
 
 For now, this feature is available only in the following context:
 
-* [[useylm]] = 1 : use of spherical harmonics
+* [[useylm]] = 1: use of spherical harmonics
 
-* [[optdriver]] = 0 : ground-state computation
+* [[optdriver]] = 0: ground-state computation
 
-* [[paral_kgb]] = 0 : simple parallelization over k-points
+* [[paral_kgb]] = 0: simple parallelization over k-points
 
 If the counting is activated, a little report is written in abinit output.
 Here an example:
@@ -13085,7 +13085,7 @@ Variable(
     characteristics=['[[INPUT_ONLY]]'],
     added_in_version="before_v9",
     text=r"""
-WARNING : Only used if [[nqpt]] = 1. If [[nqpt]]=0 (which is the default value of [[nqpt]]), no reading of [[nshiftq]] is done,
+WARNING: Only used if [[nqpt]] = 1. If [[nqpt]]=0 (which is the default value of [[nqpt]]), no reading of [[nshiftq]] is done,
 and the default value of [[nshiftq]] is kept.
 
 This parameter gives the number of shifted grids to be used concurrently to
@@ -13865,7 +13865,7 @@ each k point, and possibly for each spin -- the total number of elements is
 the sum of [[nband]](ikpt) over all k points and spins. The k point weights
 [[wtk]] ([[nkpt]]) are NOT automatically normalized under this option.
 
-  * [[occopt]] = 3 to 8 :
+  * [[occopt]] = 3 to 8:
 Metallic occupation of levels, using different occupation schemes (see below).
 See the review of the different possibilities in [[cite:Santos2023]], that
 delivers a nice pedagogical explanation of these.
@@ -17417,7 +17417,7 @@ Variable(
     characteristics=['[[INPUT_ONLY]]'],
     added_in_version="before_v9",
     text=r"""
-WARNING : Only used if [[nqpt]] = 1. If [[nqpt]]=0 (which is the default value of [[nqpt]]), no reading of [[qpt]] is done,
+WARNING: Only used if [[nqpt]] = 1. If [[nqpt]]=0 (which is the default value of [[nqpt]]), no reading of [[qpt]] is done,
 and the default value of [[qpt]], namely the null vector, is kept.
 
 Combined with [[qptnrm]], define the q vector [[qptn]](1:3) in the case
@@ -17508,7 +17508,7 @@ Variable(
     characteristics=['[[INPUT_ONLY]]'],
     added_in_version="before_v9",
     text=r"""
-WARNING : Only used if [[nqpt]] = 1. If [[nqpt]]=0 (which is the default value of [[nqpt]]), no reading of [[qptopt]] is done,
+WARNING: Only used if [[nqpt]] = 1. If [[nqpt]]=0 (which is the default value of [[nqpt]]), no reading of [[qptopt]] is done,
 and the default value of [[qptopt]] is kept.
 
 Controls the set up to generate the Q point [[qptn]](1:3) to be used for the
@@ -17560,7 +17560,7 @@ Variable(
     excludes="[[ngqpt]]",
     added_in_version="before_v9",
     text=r"""
-WARNING : Only used if [[nqpt]] = 1. If [[nqpt]]=0 (which is the default value of [[nqpt]]), no reading of [[qptrlatt]] is done,
+WARNING: Only used if [[nqpt]] = 1. If [[nqpt]]=0 (which is the default value of [[nqpt]]), no reading of [[qptrlatt]] is done,
 and the default value of [[qptrlatt]] is kept.
 
 This input variable is used only when [[qptopt]] is positive. It partially
@@ -17658,7 +17658,7 @@ In case of PAW, [[ratsph]] radius has to be greater or equal to PAW radius of
 considered atom type (which is read from the PAW dataset file; see **rc_sph** or **r_paw**).
 In case of constrained DFT, note that the sphere for different atoms are not allowed to overlap.
 
-When [[prtdos]] = 3 or 4 :
+When [[prtdos]] = 3 or 4:
 
 Provides the radius of the spheres around the [[natsph]] atoms of indices
 [[iatsph]], in which the local DOS and its angular-momentum projections will
@@ -18577,7 +18577,7 @@ However, this default can also break symmetry, if the 111 direction
 is not an axis of rotation. This happens e.g. in tetragonal or hexagonal systems.
 Abinit will complain about this breaking, and
 you should adapt [[shiftk]].
-Easy back-up : use [[nshiftk]] = 1 and [[shiftk]] 0.0 0.0 0.0,
+Easy back-up: use [[nshiftk]] = 1 and [[shiftk]] 0.0 0.0 0.0,
 to get a non-shifted Monkhorst-Pack grid, which will be compatible with all
 symmetries, and is necessary for some features such as k-point interpolation.
 
@@ -18631,7 +18631,7 @@ Variable(
     characteristics=['[[INPUT_ONLY]]'],
     added_in_version="before_v9",
     text=r"""
-WARNING : Only used if [[nqpt]] = 1. If [[nqpt]]=0 (which is the default value of [[nqpt]]), no reading of [[shiftq]] is done,
+WARNING: Only used if [[nqpt]] = 1. If [[nqpt]]=0 (which is the default value of [[nqpt]]), no reading of [[shiftq]] is done,
 and the default value of [[shiftq]] is kept.
 
 It is used only when [[qptopt]] >= 0, and must be defined if [[nshiftq]] is larger than 1.
@@ -19303,7 +19303,7 @@ in the following cases:
 Also in the case [[nsppol]] = 2, [[nspinor]] = 1, [[nspden]] = 2  they might simply yield better accuracy (or faster convergence),
 but there is no automatic gain of CPU time or memory, although it is not as clear cut as in the above cases.
 
-IMPORTANT : The meaning of [[symafm]] is different in the [[nspden]] = 2 case (collinear magnetism),
+IMPORTANT: The meaning of [[symafm]] is different in the [[nspden]] = 2 case (collinear magnetism),
 and in the [[nspden]] = 4 case (non-collinear magnetism, with explicit treatment of magnetization as a vector).
 Indeed in the first case, it is supposed that the magnetization vector is not affected by the real space symmetry operations
 (so-called black and white symmetry groups).
@@ -22170,7 +22170,7 @@ or other quantities that are density-dependent is performed before this replacem
 
 It has been observed that the SCF cycle of the Tran-Blaha mGGA can be quite
 hard to make converge, for systems for which there is some vacuum. In this
-case, setting first [[xc_taupos]] to 1.0e-7 ... 1.0e-6 , and increasing if necessary [[xc_denpos]]
+case, setting first [[xc_taupos]] to 1.0e-7 ... 1.0e-6, and increasing if necessary [[xc_denpos]]
 has been seen to allow good convergence. Of course, this will affect the numerical results somehow,
 and one should play a bit with this value to avoid incorrect calculations.
 """,
@@ -25202,7 +25202,7 @@ Variable(
     topics=['TuningSpeedMem_expert'],
     dimensions="scalar",
     defaultval="0.1",
-    mnemonics="ORACLE in chebyshev filtering algorithm : FACTOR",
+    mnemonics="ORACLE in chebyshev filtering algorithm: FACTOR",
     characteristics=['[[DEVELOP]]'],
     added_in_version="10.3.4",
     requires="[[wfoptalg]] == 111 and [[chebfi_oracle]] == 2",
@@ -25218,7 +25218,7 @@ Variable(
     topics=['TuningSpeedMem_expert'],
     dimensions="scalar",
     defaultval="0.0001",
-    mnemonics="ORACLE in chebyshev filtering algorithm : MINimal OCCupancy",
+    mnemonics="ORACLE in chebyshev filtering algorithm: MINimal OCCupancy",
     characteristics=['[[DEVELOP]]'],
     added_in_version="10.3.4",
     requires="[[wfoptalg]] == 111 and [[chebfi_oracle]] > 0 and [[nbdbuf]] = -101",

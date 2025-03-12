@@ -4,36 +4,48 @@ authors: MG
 
 # An overview of the GWR code
 
-This page provides a quick introduction to the new GWR driver of ABINIT
-We discuss the technical details related to the implementation, the associated input variables.
-as well as the pros and cons with respect to the conventional GW implementation formulated
-in Fourier-space and real-frequency domain that in what follows will be referred to as conventional or legacy GW code.
+This page offers a concise introduction to the new GWR driver in ABINIT.
+We outline the technical details of its implementation, the relevant input variables,
+and compare its advantages and limitations against the conventional GW approach,
+which is formulated in Fourier space and the real-frequency domain.
+In the following, we will refer to this traditional approach as the conventional or legacy GW code.
 
 ## Why a new GW code?
 
-The conventional GW code has quartic scaling with the number of atoms whereas GWR scales cubically.
-The legacy GW code computes the self-energy matrix elements by performing an expensive convolution in the frequency domain,
-(by default with the plasmon-pole approximation that makes calculations much faster altough approximated and without the possibility
-of accessing the spectral function $A(\omega)$) whereas GWR computes the self-energy matrix elements in the KS representation
-in imaginary-time followed by an analytic continuation (AC) to the real-frequency axis.
-The GWR + AC approach makes it possible to have access the full frequency dependence of $\Sigma$ and $A$
-at a much reduced cost althugh the accuracy of the results now depends on the AC step.
+The conventional GW code exhibits quartic scaling with the number of atoms, whereas GWR achieves cubic scaling.
+In the legacy GW approach, self-energy matrix elements in the KS representation are computed via an expensive convolution
+in the frequency domain [[cite:Golze2019]] — by default using the plasmon-pole approximation [[cite:Giantomassi2011]],
+which significantly accelerates calculations but introduces approximations and prevents direct access to the spectral function $A(\omega)$).
+In contrast, GWR evaluates the self-energy matrix elements using imaginary time,
+followed by an analytic continuation (AC) to the real-frequency axis.
+The AC approach enables access to the full frequency dependence of $\Sigma$ and $A$
+at a substantially reduced computational cost, though the accuracy of the results now depends on the effectiveness of the AC step.
 
-The conventional GW code presents quartic scaling with the number of $\qq$-points whereas GWR has linear scaling.
-The legacy GW code can parallelize the computation over the [[nband]] states using MPI but other datastructures
-such as the screened interaction $W$ is not MPI-distributed.
-As a consequence the maximum number of MPI processes that can used is limited by [[nband]] and the workload is not
-equally distributed when the number of MPI processes does not divide [[nband]].
-Most importantly, the $\Sigma$ computation in the legacy version is rather memory-demanding as one has to store in memory
-both the wavefunctions (whose memory scales with the number of MPI processes) as well as $W$ (non scalable portion).
-This renders $\Sigma$-alculations with the conventional implementation rather memory demanding,
-especially when one has to deal with large [[npweps]] and/or
-computations beyond the plasmom-pole approximation for which the code has to store in memory the $W$ matrix for several frequencies.
+The frequency dependence of the self-energy \Sigma(\omega) requires numerical integration over a range of energies.
+Traditionally, these calculations use uniform energy grids or plasmon-pole approximations.
+However, uniform grids become computationally expensive because they require many points
+to accurately capture sharp features in in the Green's function G(\omega), and the screened interaction W(\omega) .
+The minimax mesh is an adaptive energy grid that places points non-uniformly,
+concentrating them where they are most needed, leading to higher accuracy with fewer points.
 
-In the GWR code, on the contrary, most of the datastructures are MPI distributed although this leads to many more MPI communications
-in certain parts of the algorithm.
-More specifically, GWR uses Parallel BLAS (PBLAS) to distribute the memory required to store the Green's functions and $W$,
-and this allows one to tackle larger systems if enough computing nodes are available.
+The conventional GW code exhibits quartic scaling with the number of ￼$\qq$-points, whereas GWR achieves linear scaling.
+In the legacy GW implementation, parallelization is available over the [[nband]] states using MPI; however,
+key data structures, such as the screened interaction $W$, are not MPI-distributed.
+As a result, the maximum number of usable MPI processes is constrained by [[nband]],
+and the workload becomes imbalanced when the number of MPI processes does not evenly divide [[nband]].
+
+More critically, self-energy calculations in the legacy GW code are highly memory-intensive,
+as they require storing both the wavefunctions (whose memory footprint scales with the number of MPI processes)
+and $W$￼(a non-scalable portion).
+This memory requirement becomes particularly problematic for large [[npweps]] values or calculations
+beyond the plasmon-pole approximation, where the full $W$ matrix must be stored for multiple frequencies.
+Consequently, conventional GW calculations can be prohibitively demanding in terms of memory, especially for complex systems.
+
+In contrast, the GWR code distributes most data structures across MPI processes,
+which enables handling larger systems when sufficient computing nodes are available.
+However, this distribution comes at the cost of increased MPI communication in certain parts of the algorithm.
+More specifically, GWR leverages Parallel BLAS (PBLAS) to efficiently distribute the memory required
+for storing the Green’s functions and $W$, significantly improving scalability compared to the legacy implementation.
 
 Limitations: metallic systems are not supported.
 Temperature effects at the electronic level are not taken into account as we work
