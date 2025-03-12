@@ -75,7 +75,6 @@ prtden 0  prteig 0  prtwf 0
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = eos_nvhpc_23.9_elpa
 #%% [files]
 #%% files_to_test = t05.abo, tolnlines = 50, tolabs = 5.e-4, tolrel = 6.e-2
 #%% [paral_info]

@@ -26,7 +26,6 @@ randomseed=111111 # for testing only
 #%% [setup]
 #%% executable = multibinit
 #%% need_cpp_vars = HAVE_XML
-#%% exclude_builders = .*_nag_7.[01]_.*
 #%% spin_pot = t81.xml
 #%% exec_args = --F03
 #%% [files]
