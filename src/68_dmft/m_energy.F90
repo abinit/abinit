@@ -355,8 +355,7 @@ subroutine compute_energy(energies_dmft,green,paw_dmft,pawprtvol,pawtab,self,occ
    ABI_BUG(message)
  end if
 
- if ((paw_dmft%dmft_triqs_entropy /= 1 .or. occ_type == " lda") &
-      & .and. (part == 'band' .or. part == 'both')) then
+ if (part == 'band' .or. part == 'both') then
    call compute_band_energy(energies_dmft,green,paw_dmft,occ_type,ecalc_dft=1)
  end if
 ! == Compute Band Energy Alternative version: two steps
@@ -1366,7 +1365,6 @@ end subroutine compute_trace_log_loc
 subroutine print_free_energy(energies_dmft,temp)
 
 !Arguments ------------------------------------
-!type
  type(energy_type), intent(in) :: energies_dmft
  real(dp), intent(in) :: temp
 !Local variables-------------------------------

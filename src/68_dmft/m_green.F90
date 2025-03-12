@@ -147,6 +147,9 @@
   real(dp) :: charge_ks
   ! Total charge computed from ks orbitals
 
+  real(dp) :: ekin_imp
+  ! Kinetic energy of the impurity
+
   real(dp) :: integral
   ! Integral of the interaction energy divided by U
 
