@@ -839,7 +839,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
 
        if (optrw == 2) then
 
-         write(message,'(11a,5i5,2x,e25.17e3)') "# DFT+DMFT self-energy for each frequency",ch10, &
+         write(message,'(11a,4i5,i6,2x,e25.17e3)') "# DFT+DMFT self-energy for each frequency",ch10, &
                            & "# Columns are ordered this way:",ch10, &
                            & "# Frequency (Ha)  ((((Re(Sigma(im,im1,ispinor,ispinor1)) ", &
                            & "Im(Sigma(im,im1,ispinor,ispinor1)),im=1,2*l+1),im1=1,2*l+1),", &
