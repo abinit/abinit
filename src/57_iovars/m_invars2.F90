@@ -2462,6 +2462,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
      dtset%dmft_iter=-1
      dtset%dmft_broyden_niter=7
      dtset%dmft_mxsf=1.0_dp
+     if (dtset%dmft_solv==6) dtset%dmft_triqs_pauli_prob = 1.0_dp
    end if
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_broyden_niter',tread,'INT')
    if(tread==1) dtset%dmft_broyden_niter=intarr(1)
