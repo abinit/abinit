@@ -321,7 +321,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
  integer :: comm_grid,ifft,ispden,ncpgr,occopt_,optgr,optgr2,option,optnc,optstr,optstr2,iorder_cprj,ctocprj_choice
  integer :: idir,iatom,unpaw,mcgbz,usexg
  integer,allocatable :: dimcprj(:)
- real(dp) ::dum,dum1,ucvol_
+ real(dp) ::dum,dum1,dum2,ucvol_
  logical :: apply_residual
 !arrays
  real(dp),parameter :: k0(3)=(/zero,zero,zero/)
@@ -515,7 +515,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 &        (dtset%ixc==41.or.dtset%ixc==42.or.libxc_functionals_is_hybrid())) then
          ABI_MALLOC(vxc_hf,(nfftf,dtset%nspden))
 !compute Vxc^GGA(rho_val)
-         call xchybrid_ncpp_cc(dtset,dum,mpi_enreg,nfftf,ngfftf,n3xccc,rhor,rprimd,strdum,dum1,xccc3d,vxc=vxc_hf,optstr=1)
+         call xchybrid_ncpp_cc(dtset,dum,dum2,mpi_enreg,nfftf,ngfftf,n3xccc,rhor,rprimd,strdum,dum1,xccc3d,vxc=vxc_hf,optstr=1)
        end if
      end if
    end if
@@ -1632,7 +1632,7 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
 
 !  To be adjusted for the call to rhotoxc
    nk3xc=1
-   call rhotoxc(energy,kxc_cur,mpi_enreg,nfft,ngfft,&
+   call rhotoxc(energy,dum,kxc_cur,mpi_enreg,nfft,ngfft,&
 &   nhat,usepaw,nhatgr,nhatgrdim,nkxc_cur,nk3xc,non_magnetic_xc,n3xccc,option,&
 &   rhor0,rprimd,usexcnhat,vresid,vxcavg,xccc3d,xcdata,vhartr=vhres,&
 &   xcctau3d=xcctau3d)  !vresid=work space
@@ -1785,6 +1785,11 @@ subroutine stress_mGGA(mggastr,cwavef,effmass_free,gbound_k,gprimd,istwf_k,kg_k,
  ABI_MALLOC(vtau_gcwavef,(2,npw_k*ndat,3))
  call c_f_pointer(c_loc(gcwavef(1,1,1)),gcwavef_ndat,[2,npw_k,ndat,3])
  call c_f_pointer(c_loc(vtau_gcwavef(1,1,1)),vtau_gcwavef_ndat,[2,npw_k,ndat,3])
+#ifdef HAVE_OPENMP_OFFLOAD
+ !$OMP TARGET ENTER DATA MAP(alloc:gcwavef,vtau_gcwavef,dotr,doti) IF(gpu_option_==ABI_GPU_OPENMP)
+ !$OMP TARGET ENTER DATA MAP(alloc:my_cwavef) IF(gpu_option_==ABI_GPU_OPENMP .and. nspinortot==2)
+ !$OMP TARGET ENTER DATA MAP(to:cwavef) IF(gpu_option_==ABI_GPU_OPENMP)
+#endif
 
 !Loop over spinors (if any)
  do ispinor=1,my_nspinor
@@ -1792,17 +1797,43 @@ subroutine stress_mGGA(mggastr,cwavef,effmass_free,gbound_k,gprimd,istwf_k,kg_k,
 !  Select spinor component of WF
    if (nspinortot==2) then
      if (ispinor==1.and.nspinor1TreatedByThisProc) then
-       do idat=1,ndat
-         do ipw=1,npw_k
-           my_cwavef(1:2,ipw+(idat-1)*npw_k)=cwavef(1:2,ipw+(idat-1)*my_nspinor*npw_k)
+       if(gpu_option_==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+         !$OMP TARGET TEAMS DISTRIBUTE MAP(to:my_cwavef,cwavef) PRIVATE(idat)
+         do idat=1,ndat
+           !$OMP PARALLEL DO PRIVATE(ipw)
+           do ipw=1,npw_k
+             my_cwavef(1,ipw+(idat-1)*npw_k)=cwavef(1,ipw+(idat-1)*my_nspinor*npw_k)
+             my_cwavef(2,ipw+(idat-1)*npw_k)=cwavef(2,ipw+(idat-1)*my_nspinor*npw_k)
+           end do
          end do
-       end do
+#endif
+       else
+         do idat=1,ndat
+           do ipw=1,npw_k
+             my_cwavef(1:2,ipw+(idat-1)*npw_k)=cwavef(1:2,ipw+(idat-1)*my_nspinor*npw_k)
+           end do
+         end do
+       end if ! gpu_option_
      else if (ispinor==2.and.nspinor2TreatedByThisProc) then
-       do idat=1,ndat
-         do ipw=1,npw_k
-           my_cwavef(1:2,ipw+(idat-1)*npw_k)=cwavef(1:2,ipw+(idat-1)*my_nspinor*npw_k+npw_k)
+       if(gpu_option_==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+         !$OMP TARGET TEAMS DISTRIBUTE MAP(to:my_cwavef,cwavef) PRIVATE(idat)
+         do idat=1,ndat
+           !$OMP PARALLEL DO PRIVATE(ipw)
+           do ipw=1,npw_k
+             my_cwavef(1,ipw+(idat-1)*npw_k)=cwavef(1,ipw+(idat-1)*my_nspinor*npw_k+npw_k)
+             my_cwavef(2,ipw+(idat-1)*npw_k)=cwavef(2,ipw+(idat-1)*my_nspinor*npw_k+npw_k)
+           end do
          end do
-       end do
+#endif
+       else
+         do idat=1,ndat
+           do ipw=1,npw_k
+             my_cwavef(1:2,ipw+(idat-1)*npw_k)=cwavef(1:2,ipw+(idat-1)*my_nspinor*npw_k+npw_k)
+           end do
+         end do
+       end if ! gpu_option_
      else
        cycle
      end if
@@ -1816,14 +1847,28 @@ subroutine stress_mGGA(mggastr,cwavef,effmass_free,gbound_k,gprimd,istwf_k,kg_k,
      kpt_cart=gp2pi1*kpt(1)+gp2pi2*kpt(2)+gp2pi3*kpt(3)
 
 !    Compute grad of WF (multiplication by 2pi i (G+k)_idir in reciprocal space)
-!$OMP PARALLEL DO COLLAPSE(2) PRIVATE(idat,ipw,kg_k_cart)
-     do idat=1,ndat
-       do ipw=1,npw_k
-         kg_k_cart=gp2pi1*kg_k(1,ipw)+gp2pi2*kg_k(2,ipw)+gp2pi3*kg_k(3,ipw)+kpt_cart
-         gcwavef(1,ipw+(idat-1)*npw_k,idir)= my_cwavef(2,ipw+(idat-1)*npw_k)*kg_k_cart
-         gcwavef(2,ipw+(idat-1)*npw_k,idir)=-my_cwavef(1,ipw+(idat-1)*npw_k)*kg_k_cart
+     if(gpu_option_==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+       !$OMP TARGET TEAMS DISTRIBUTE MAP(to:my_cwavef,gcwavef) PRIVATE(idat)
+       do idat=1,ndat
+         !$OMP PARALLEL DO PRIVATE(ipw,kg_k_cart)
+         do ipw=1,npw_k
+           kg_k_cart=gp2pi1*kg_k(1,ipw)+gp2pi2*kg_k(2,ipw)+gp2pi3*kg_k(3,ipw)+kpt_cart
+           gcwavef(1,ipw+(idat-1)*npw_k,idir)= my_cwavef(2,ipw+(idat-1)*npw_k)*kg_k_cart
+           gcwavef(2,ipw+(idat-1)*npw_k,idir)=-my_cwavef(1,ipw+(idat-1)*npw_k)*kg_k_cart
+         end do
        end do
-     end do
+#endif
+     else
+       !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(idat,ipw,kg_k_cart)
+       do idat=1,ndat
+         do ipw=1,npw_k
+           kg_k_cart=gp2pi1*kg_k(1,ipw)+gp2pi2*kg_k(2,ipw)+gp2pi3*kg_k(3,ipw)+kpt_cart
+           gcwavef(1,ipw+(idat-1)*npw_k,idir)= my_cwavef(2,ipw+(idat-1)*npw_k)*kg_k_cart
+           gcwavef(2,ipw+(idat-1)*npw_k,idir)=-my_cwavef(1,ipw+(idat-1)*npw_k)*kg_k_cart
+         end do
+       end do
+     end if
 
 !    Compute vxctaulocal*(grad of WF) in reciprocal space
      call fourwf(1,vxctaulocal(:,:,:,:,1),gcwavef(:,:,idir),vtau_gcwavef(:,:,idir), &
@@ -1839,11 +1884,18 @@ subroutine stress_mGGA(mggastr,cwavef,effmass_free,gbound_k,gprimd,istwf_k,kg_k,
      call dotprod_g_batch_full(dotr,doti,istwf_k,npw_k,ndat,1, &
 &                 gcwavef_ndat(:,:,:,ia),vtau_gcwavef_ndat(:,:,:,ib), &
 &                 mpi_enreg%me_g0,mpi_enreg%comm_fft,gpu_option=gpu_option_)
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET UPDATE FROM(dotr,doti) IF(gpu_option_==ABI_GPU_OPENMP)
+#endif
      my_mggastr(mu)=my_mggastr(mu) + renorm_factor*sum(weight_array(1:ndat)*dotr(1:ndat))
    end do
 
  end do ! ispinor
 
+#ifdef HAVE_OPENMP_OFFLOAD
+ !$OMP TARGET EXIT DATA MAP(delete:cwavef,gcwavef,vtau_gcwavef,dotr,doti) IF(gpu_option_==ABI_GPU_OPENMP)
+ !$OMP TARGET EXIT DATA MAP(delete:my_cwavef) IF(gpu_option_==ABI_GPU_OPENMP .and. nspinortot==2)
+#endif
 !Release memory
  if (nspinortot==2) then
    ABI_FREE(my_cwavef)

@@ -81,7 +81,7 @@ module m_dft_energy
  private
 !!***
 
- public :: energy
+ public :: energy,entropy
 !!***
 
 contains
@@ -89,20 +89,20 @@ contains
 
 !!****f* ABINIT/energy
 !! NAME
-!! energy
+!!  energy
 !!
 !! FUNCTION
-!! Compute electronic energy terms
-!! energies%e_eigenvalues, ek and enl from arbitrary (orthonormal) provided wf,
-!! ehart, enxc, and eei from provided density and potential,
-!! energies%e_eigenvalues=Sum of the eigenvalues - Band energy (Hartree)
-!! energies%e_zeeman=Zeeman spin energy from applied magnetic field -m.B
-!! ek=kinetic energy, ehart=Hartree electron-electron energy,
-!! enxc,enxcdc=exchange-correlation energies, eei=local pseudopotential energy,
-!! enl=nonlocal pseudopotential energy
-!! Also, compute new density from provided wfs, after the evaluation
-!! of ehart, enxc, and eei.
-!! WARNING XG180913 : At present, Fock energy not computed !
+!!  Compute electronic energy terms
+!!  energies%e_eigenvalues, ek and enl from arbitrary (orthonormal) provided wf,
+!!  ehart, enxc, and eei from provided density and potential,
+!!  energies%e_eigenvalues=Sum of the eigenvalues - Band energy (Hartree)
+!!  energies%e_zeeman=Zeeman spin energy from applied magnetic field -m.B
+!!  ek=kinetic energy, ehart=Hartree electron-electron energy,
+!!  enxc,enxcdc=exchange-correlation energies, eei=local pseudopotential energy,
+!!  enl=nonlocal pseudopotential energy
+!!  Also, compute new density from provided wfs, after the evaluation
+!!  of ehart, enxc, and eei.
+!!  WARNING XG180913 : At present, Fock energy not computed !
 !!
 !! NOTE that this routine is callned in m_scfcv_core only when nstep == 0
 !!
@@ -357,7 +357,6 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
  ipositron=electronpositron_calctype(electronpositron)
  add_tfw_=.false.;if (present(add_tfw)) add_tfw_=add_tfw
  non_magnetic_xc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
-
  if (ipositron/=1) then
 
    if (dtset%icoulomb == 0) then
@@ -369,14 +368,14 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
 !    to be adjusted for the call to rhotoxc
      nk3xc=1
      if (ipositron==0) then
-       call rhotoxc(energies%e_xc,kxc, &
+       call rhotoxc(energies%e_xc,energies%entropy_xc,kxc, &
 &       mpi_enreg,nfftf,ngfftf,nhat,psps%usepaw,nhatgr,nhatgrdim, &
 &       nkxc,nk3xc,non_magnetic_xc,n3xccc,option,rhor,rprimd, &
 &       usexcnhat,vxc,vxcavg,xccc3d,xcdata,taur=taur,vhartr=vhartr, &
 &       vxctau=vxctau_,exc_vdw_out=energies%e_xc_vdw,add_tfw=add_tfw_, &
 &       xcctau3d=xcctau3d,strsxc=strsxc)
      else
-       call rhotoxc(energies%e_xc,kxc, &
+       call rhotoxc(energies%e_xc,energies%entropy_xc,kxc, &
 &       mpi_enreg,nfftf,ngfftf,nhat,psps%usepaw,nhatgr,nhatgrdim, &
 &       nkxc,nk3xc,non_magnetic_xc,n3xccc,option,rhor,rprimd, &
 &       usexcnhat,vxc,vxcavg,xccc3d,xcdata, &
@@ -835,15 +834,17 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
    if (psps%usepaw==1) etotal=etotal + energies%e_pawdc
  end if
  etotal = etotal + energies%e_ewald + energies%e_chempot + energies%e_vdw_dftd
+
 !Add the contribution of extfpmd to the entropy
  if(associated(extfpmd)) then
-   energies%entropy=energies%entropy+extfpmd%entropy
    energies%e_extfpmd=extfpmd%e_kinetic
    energies%edc_extfpmd=extfpmd%edc_kinetic
    if(optene==0.or.optene==2) etotal=etotal+energies%e_extfpmd
    if(optene==1.or.optene==3) etotal=etotal+energies%edc_extfpmd
  end if
- if(dtset%occopt>=3 .and. dtset%occopt<=8) etotal=etotal-dtset%tsmear*energies%entropy
+
+ call entropy(dtset,energies)
+ etotal=etotal+energies%e_entropy
 
 !Additional stuff for electron-positron
  if (dtset%positron/=0) then
@@ -943,10 +944,10 @@ end subroutine energy
 
 !!****f* ABINIT/mkresi
 !! NAME
-!! mkresi
+!!  mkresi
 !!
 !! FUNCTION
-!! Make residuals from knowledge of wf in G space and application of Hamiltonian.
+!!  Make residuals from knowledge of wf in G space and application of Hamiltonian.
 !!
 !! INPUTS
 !!  cg(2,mcg)=<G|Cnk>=Fourier coefficients of wavefunction
@@ -1091,6 +1092,69 @@ subroutine mkresi(cg,eig_k,gs_hamk,icg,ikpt,isppol,mcg,mpi_enreg,nband,prtvol,re
 
 end subroutine mkresi
 !!***
+
+!!****f* ABINIT/entropy
+!! NAME
+!!  entropy
+!!
+!! FUNCTION
+!!  Compute electronic entropy terms
+!!  This subroutine returns the total entropy and entropy energy. In the most
+!!  common case, at finite temperature, the electronic entropy is mainly constitued
+!!  of the non-interacting entropy (entropy_ks). Finite-temperature exchange-correlation
+!!  functionals or other methods may introduce additional entropy terms.
+!! 
+!! NOTE
+!!  (A. Blanchet): Should DMFT entropy be also added here?
+!!
+!! INPUTS
+!!  dtset <type(dataset_type)>=all input variables for this dataset
+!!   | occopt=option for occupancies
+!!   | tsmear=smearing energy or temperature (if metal)
+!!   | tphysel=electornic temperature for particular values of occopt
+!!  energies <type(energies_type)>=all part of total energy.
+!!   | entropy_ks(IN)=non-interacting entropy of the kohn-sham states
+!!   | entropy_paw(IN)=entropy due to paw corrections (for finite-temperature xc functionals)
+!!   | entropy_xc(IN)=exchange-correlation entropy (fro finite-temperature xc functionals)
+!!   | entropy_extfpmd(IN)=entropy of extfpmd model
+!!
+!! OUTPUT
+!!  energies <type(energies_type)>=all part of total energy.
+!!   | entropy(OUT)=total entropy
+!!   | e_entropy(OUT)=total entropy energy (hartree units)
+!!
+!! SOURCE
+subroutine entropy(dtset,energies)
+!Arguments ------------------------------------
+!scalars
+ type(dataset_type),intent(in) :: dtset
+ type(energies_type),intent(inout) :: energies
+
+! *************************************************************************
+
+!In case we have other sources of entropy than kohn-sham states occupation,
+!we sum all entropy terms. %entropy is now total entropy.
+!Examples of other sources of entropy: finite-temperature xc functionals, extfpmd, ...
+ energies%entropy=energies%entropy_ks
+ if(abs(energies%entropy_paw)>tiny(zero))     energies%entropy=energies%entropy+energies%entropy_paw
+ if(abs(energies%entropy_xc)>tiny(zero))      energies%entropy=energies%entropy+energies%entropy_xc
+ if(abs(energies%entropy_extfpmd)>tiny(zero)) energies%entropy=energies%entropy+energies%entropy_extfpmd
+
+!When the finite-temperature VG broadening scheme is used,
+!the total entropy contribution "tsmear*entropy" has a meaning,
+!and gather the two last terms of Eq.8 of VG paper
+!Warning : might have to be changed for fixed moment calculations
+ if(dtset%occopt>=3 .and. dtset%occopt<=8) then
+   if (abs(dtset%tphysel) < tol10) then
+     energies%e_entropy = - dtset%tsmear * energies%entropy
+   else
+     energies%e_entropy = - dtset%tphysel * energies%entropy
+   end if
+ else
+   energies%e_entropy = zero
+ end if
+
+end subroutine entropy
 
 end module m_dft_energy
 !!***
