@@ -1,0 +1,42 @@
+# Crystalline silicon. Preparatory run for GWR code
+# Dataset 1: ground state calculation to get the density
+# Dataset 2: band structure calculation along a k-path
+
+# Include geometry and pseudos
+include "gwr_include.abi"
+
+ndtset 2
+
+# Definition of the k-point grid
+# IMPORTANT: GWR requires Gamma-centered k-meshes
+
+nshiftk 1
+shiftk  0.0 0.0 0.0
+
+###########################################
+# Dataset 2: Direct diago with empty states
+###########################################
+optdriver  6        # Activate GWR code
+gwr_task "HDIAGO"   # Direct diagonalization
+nband     40        # Number of (occ + empty) bands
+getden_filepath "tgwr_1o_DS1_DEN"             # Density file
+
+ngkpt1   2 2 2
+ngkpt2   4 4 4
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = tgwr_1.abi, tgwr_2.abi, tgwr_3.abi
+#%% [files]
+#%% files_to_test =
+#%%   tgwr_2.abo, tolnlines = 25, tolabs = 1.1e-3, tolrel = 3.0e-3, fld_options = -medium;
+#%% [paral_info]
+#%% max_nprocs = 12
+#%% [extra_info]
+#%% authors = M. Giantomassi
+#%% keywords = NC, GWR
+#%% description =
+#%%  Crystalline silicon
+#%%  Calculation of the GW corrections with GWR code.
+#%%<END TEST_INFO>
