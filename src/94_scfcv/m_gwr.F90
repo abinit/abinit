@@ -6013,7 +6013,7 @@ end if
        call ydoc%add_int('gwr_scf_iteration', gwr%scf_iteration)
        call ydoc%add_string('gwr_task', gwr%dtset%gwr_task)
 
-       ! Compute gaps assumim KS band indices.
+       ! Compute gaps assuming KS band indices.
        band_val = gwr%ks_vbik(ik_ibz, spin)
        nbc = gwr%bstop_ks(ikcalc, spin) - gwr%bstart_ks(ikcalc, spin) + 1
        ib1 = gwr%bstart_ks(ikcalc, spin); ib2 = gwr%bstop_ks(ikcalc, spin)

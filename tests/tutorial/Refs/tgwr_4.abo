@@ -15,32 +15,16 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Thu 13 Mar 2025.
-- ( at 17h14 )
+- ( at 17h48 )
 
-- input  file    -> /Users/giantomassi/git_repos/abinit/_build/tests/Test_suite/tutorial_tgwr_1-tgwr_2-tgwr_3/tgwr_2.abi
-- output file    -> tgwr_2.abo
-- root for input  files -> tgwr_2i
-- root for output files -> tgwr_2o
+- input  file    -> /Users/giantomassi/git_repos/abinit/_build/tests/Test_suite/tutorial_tgwr_1-tgwr_2-tgwr_3-tgwr_4/tgwr_4.abi
+- output file    -> tgwr_4.abo
+- root for input  files -> tgwr_4i
+- root for output files -> tgwr_4o
 
- DATASET    1 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
+ Symmetries : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
- Values of the parameters that define the memory need for DATASET  1.
-     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       6
-     lnmax =       6     mgfft =      24  mpssoang =       3    mqgrid =    3001
-     natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
-    occopt =       1   xclevel =       2
--    mband =         100        mffmem =           1         mkmem =           3
-       mpw =         206          nfft =       13824          nkpt =           3
-================================================================================
-P This job should need less than                       6.261 Mbytes of memory.
-  Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.945 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
-================================================================================
-
- DATASET    2 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
-================================================================================
- Values of the parameters that define the memory need for DATASET  2.
+ Values of the parameters that define the memory need of the present run
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       6
      lnmax =       6     mgfft =      24  mpssoang =       3    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
@@ -67,16 +51,17 @@ _ WF disk file :      5.068 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
  -outvars: echo values of preprocessed input variables --------
             acell      1.0260000000E+01  1.0260000000E+01  1.0260000000E+01 Bohr
               amu      2.80855000E+01
+             bdgw           4       5       4       5
              ecut      1.00000000E+01 Hartree
+          ecuteps      6.00000000E+00 Hartree
+         ecutsigx      2.00000000E+01 Hartree
 -          fftalg         312
-           istwfk1       2    3    7
-           istwfk2       2    0    3    0    0    0    7    0
+    gwr_boxcutmin      1.10000000E+00
+         gwr_ntau           6
+   gwr_sigma_algo           2
+           istwfk        2    0    3    0    0    0    7    0
               ixc          11
-           jdtset        1    2
-              kpt1     0.00000000E+00  0.00000000E+00  0.00000000E+00
-                       5.00000000E-01  0.00000000E+00  0.00000000E+00
-                       5.00000000E-01  5.00000000E-01  0.00000000E+00
-              kpt2     0.00000000E+00  0.00000000E+00  0.00000000E+00
+              kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
                        2.50000000E-01  0.00000000E+00  0.00000000E+00
                        5.00000000E-01  0.00000000E+00  0.00000000E+00
                        2.50000000E-01  2.50000000E-01  0.00000000E+00
@@ -84,39 +69,19 @@ _ WF disk file :      5.068 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
                       -2.50000000E-01  2.50000000E-01  0.00000000E+00
                        5.00000000E-01  5.00000000E-01  0.00000000E+00
                       -2.50000000E-01  5.00000000E-01  2.50000000E-01
-         kptrlatt1       2    0    0      0    2    0      0    0    2
-         kptrlatt2       4    0    0      0    4    0      0    0    4
-          kptrlen1     1.45098311E+01
-          kptrlen2     2.90196623E+01
-P           mkmem1          3
-P           mkmem2          8
+            kptgw      0.00000000E+00  0.00000000E+00  0.00000000E+00
+                       5.00000000E-01  0.00000000E+00  0.00000000E+00
+         kptrlatt        4    0    0      0    4    0      0    0    4
+          kptrlen      2.90196623E+01
+P           mkmem           8
             natom           2
-            nband1        100
-            nband2        100
-           ndtset           2
+            nband         100
             ngfft          24      24      24
-             nkpt1          3
-             nkpt2          8
+             nkpt           8
+           nkptgw           2
              nsym          48
            ntypat           1
-              occ1     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000
-              occ2     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+              occ      2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
@@ -187,8 +152,7 @@ P           mkmem2          8
                        0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
                        0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
             typat      1  1
-              wtk1       0.12500    0.50000    0.37500
-              wtk2       0.01563    0.12500    0.06250    0.09375    0.37500    0.18750
+              wtk        0.01563    0.12500    0.06250    0.09375    0.37500    0.18750
                          0.04688    0.09375
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        1.3573395400E+00  1.3573395400E+00  1.3573395400E+00
@@ -200,9 +164,7 @@ P           mkmem2          8
 
 ================================================================================
 
- chkinp: Checking input parameters for consistency, jdtset=   1.
-
- chkinp: Checking input parameters for consistency, jdtset=   2.
+ chkinp: Checking input parameters for consistency.
 
 ================================================================================
 == DATASET  1 ==================================================================
@@ -211,11 +173,13 @@ P           mkmem2          8
 
 --- !DatasetInfo
 iteration_state: {dtset: 1, }
-dimensions: {natom: 2, nkpt: 3, mband: 100, nsppol: 1, nspinor: 1, nspden: 1, mpw: 206, }
+dimensions: {natom: 2, nkpt: 8, mband: 100, nsppol: 1, nspinor: 1, nspden: 1, mpw: 415, }
 cutoff_energies: {ecut:  10.0, pawecutdg:  -1.0, }
 electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 6, }
 ...
+
+ mkfilename: getwfk from: tgwr_2o_DS2_WFK
 
  mkfilename: getden from: tgwr_1o_DS1_DEN
 
@@ -254,54 +218,237 @@ meta: {optdriver: 6, }
 )     Maximum=    9.3483E-02  at reduced coord.    0.1250    0.1250    0.6250
 )     Minimum=    1.3691E-03  at reduced coord.    0.0000    0.0000    0.0000
    Integrated=    8.0000E+00
+- Reading GS states from WFK file: tgwr_2o_DS2_WFK
+  Mapping kBZ --> kIBZ
+ Legend: bz = TS(ibz) + g0 where isym is the index of the symrec operation S and itim is 1 if TR is used.
+        BZ                                       IBZ                                       ibz  isym  itim  g0
+     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]     1     1     0  [0, 0, 0]
+     2  [ 2.5000E-01,  0.0000E+00,  0.0000E+00]  [ 2.5000E-01,  0.0000E+00,  0.0000E+00]     2     1     0  [0, 0, 0]
+     3  [-2.5000E-01, -2.5000E-01, -2.5000E-01]  [ 2.5000E-01,  0.0000E+00,  0.0000E+00]     2     5     0  [0, 0, 0]
+     4  [ 0.0000E+00,  2.5000E-01,  0.0000E+00]  [ 2.5000E-01,  0.0000E+00,  0.0000E+00]     2     7     0  [0, 0, 0]
+     5  [ 0.0000E+00,  0.0000E+00,  2.5000E-01]  [ 2.5000E-01,  0.0000E+00,  0.0000E+00]     2     3     0  [0, 0, 0]
+     6  [ 0.0000E+00, -2.5000E-01,  0.0000E+00]  [ 2.5000E-01,  0.0000E+00,  0.0000E+00]     2     8     0  [0, 0, 0]
+     7  [-2.5000E-01,  0.0000E+00,  0.0000E+00]  [ 2.5000E-01,  0.0000E+00,  0.0000E+00]     2     2     0  [0, 0, 0]
+     8  [ 0.0000E+00,  0.0000E+00, -2.5000E-01]  [ 2.5000E-01,  0.0000E+00,  0.0000E+00]     2     4     0  [0, 0, 0]
+     9  [ 2.5000E-01,  2.5000E-01,  2.5000E-01]  [ 2.5000E-01,  0.0000E+00,  0.0000E+00]     2     6     0  [0, 0, 0]
+    10  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]     3     1     0  [0, 0, 0]
+    11  [ 5.0000E-01,  5.0000E-01,  5.0000E-01]  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]     3     5     0  [1, 1, 1]
+    12  [ 0.0000E+00,  0.0000E+00,  5.0000E-01]  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]     3     3     0  [0, 0, 0]
+    13  [ 0.0000E+00,  5.0000E-01,  0.0000E+00]  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]     3     7     0  [0, 0, 0]
+    14  [ 2.5000E-01,  2.5000E-01,  0.0000E+00]  [ 2.5000E-01,  2.5000E-01,  0.0000E+00]     4     1     0  [0, 0, 0]
+    15  [ 0.0000E+00,  2.5000E-01,  2.5000E-01]  [ 2.5000E-01,  2.5000E-01,  0.0000E+00]     4    17     0  [0, 0, 0]
+    16  [ 0.0000E+00, -2.5000E-01, -2.5000E-01]  [ 2.5000E-01,  2.5000E-01,  0.0000E+00]     4    18     0  [0, 0, 0]
+    17  [ 2.5000E-01,  0.0000E+00,  2.5000E-01]  [ 2.5000E-01,  2.5000E-01,  0.0000E+00]     4    10     0  [0, 0, 0]
+    18  [-2.5000E-01,  0.0000E+00, -2.5000E-01]  [ 2.5000E-01,  2.5000E-01,  0.0000E+00]     4     9     0  [0, 0, 0]
+    19  [-2.5000E-01, -2.5000E-01,  0.0000E+00]  [ 2.5000E-01,  2.5000E-01,  0.0000E+00]     4     2     0  [0, 0, 0]
+    20  [ 5.0000E-01,  2.5000E-01,  0.0000E+00]  [ 5.0000E-01,  2.5000E-01,  0.0000E+00]     5     1     0  [0, 0, 0]
+prtvol = 0, max 20 points are written
 
- === KS gaps after direct diagonalization ===
+
+  Mapping qBZ --> qIBZ
+ Legend: bz = TS(ibz) + g0 where isym is the index of the symrec operation S and itim is 1 if TR is used.
+        BZ                                       IBZ                                       ibz  isym  itim  g0
+     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]     1     1     0  [0, 0, 0]
+     2  [ 2.5000E-01,  0.0000E+00,  0.0000E+00]  [ 2.5000E-01,  0.0000E+00,  0.0000E+00]     2     1     0  [0, 0, 0]
+     3  [-2.5000E-01, -2.5000E-01, -2.5000E-01]  [ 2.5000E-01,  0.0000E+00,  0.0000E+00]     2     5     0  [0, 0, 0]
+     4  [ 0.0000E+00,  2.5000E-01,  0.0000E+00]  [ 2.5000E-01,  0.0000E+00,  0.0000E+00]     2     7     0  [0, 0, 0]
+     5  [ 0.0000E+00,  0.0000E+00,  2.5000E-01]  [ 2.5000E-01,  0.0000E+00,  0.0000E+00]     2     3     0  [0, 0, 0]
+     6  [ 0.0000E+00, -2.5000E-01,  0.0000E+00]  [ 2.5000E-01,  0.0000E+00,  0.0000E+00]     2     8     0  [0, 0, 0]
+     7  [-2.5000E-01,  0.0000E+00,  0.0000E+00]  [ 2.5000E-01,  0.0000E+00,  0.0000E+00]     2     2     0  [0, 0, 0]
+     8  [ 0.0000E+00,  0.0000E+00, -2.5000E-01]  [ 2.5000E-01,  0.0000E+00,  0.0000E+00]     2     4     0  [0, 0, 0]
+     9  [ 2.5000E-01,  2.5000E-01,  2.5000E-01]  [ 2.5000E-01,  0.0000E+00,  0.0000E+00]     2     6     0  [0, 0, 0]
+    10  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]     3     1     0  [0, 0, 0]
+    11  [ 5.0000E-01,  5.0000E-01,  5.0000E-01]  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]     3     5     0  [1, 1, 1]
+    12  [ 0.0000E+00,  0.0000E+00,  5.0000E-01]  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]     3     3     0  [0, 0, 0]
+    13  [ 0.0000E+00,  5.0000E-01,  0.0000E+00]  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]     3     7     0  [0, 0, 0]
+    14  [ 2.5000E-01,  2.5000E-01,  0.0000E+00]  [ 2.5000E-01,  2.5000E-01,  0.0000E+00]     4     1     0  [0, 0, 0]
+    15  [ 0.0000E+00,  2.5000E-01,  2.5000E-01]  [ 2.5000E-01,  2.5000E-01,  0.0000E+00]     4    17     0  [0, 0, 0]
+    16  [ 0.0000E+00, -2.5000E-01, -2.5000E-01]  [ 2.5000E-01,  2.5000E-01,  0.0000E+00]     4    18     0  [0, 0, 0]
+    17  [ 2.5000E-01,  0.0000E+00,  2.5000E-01]  [ 2.5000E-01,  2.5000E-01,  0.0000E+00]     4    10     0  [0, 0, 0]
+    18  [-2.5000E-01,  0.0000E+00, -2.5000E-01]  [ 2.5000E-01,  2.5000E-01,  0.0000E+00]     4     9     0  [0, 0, 0]
+    19  [-2.5000E-01, -2.5000E-01,  0.0000E+00]  [ 2.5000E-01,  2.5000E-01,  0.0000E+00]     4     2     0  [0, 0, 0]
+    20  [ 5.0000E-01,  2.5000E-01,  0.0000E+00]  [ 5.0000E-01,  2.5000E-01,  0.0000E+00]     5     1     0  [0, 0, 0]
+prtvol = 0, max 20 points are written
+
+
+
+ === Kohn-Sham gaps and band edges from IBZ mesh ===
  Indirect band gap semiconductor
  Fundamental gap:     0.599 (eV)
-   VBM:     4.664 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-   CBM:     5.263 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
+   VBM:    -0.300 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     0.300 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
  Direct gap:         2.433 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 
 
-================================================================================
-== DATASET  2 ==================================================================
--   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+- Optimizing MPI grid with mem_per_cpu_mb: 2.048000E+03 [Mb]
+- Use `abinit run.abi --mem-per-cpu=4G` to set mem_per_cpu_mb in the submission script
+- np_k  np_g  np_t  np_s  memb_per_cpu    efficiency       speedup
+-    1     1     1     1   2.27705E+03   1.00000E+00   1.00000E+00
+-
+- Selected MPI grid:
+- np_k  np_g  np_t  np_s  memb_per_cpu    efficiency       speedup
+-    1     1     1     1   2.27705E+03   1.00000E+00   1.00000E+00
 
+- Resident memory in Mb for G(g,g',+/-tau) and chi(g,g',tau):
+- G_k(g,g,tau): 504.6
+- Chi_q(g,g,tau): 29.3
+- u_k(g,b): 5.1
+- Temporary memory allocated inside the tau loops:
+- G_k(r,g): 1400.6
+- chi_q(r,g): 337.5
+- FFT uc_batch_size: 1
+- FFT sc_batch_size: 1
+ ==== Info on the gwr_t object ====
 
---- !DatasetInfo
-iteration_state: {dtset: 2, }
-dimensions: {natom: 2, nkpt: 8, mband: 100, nsppol: 1, nspinor: 1, nspden: 1, mpw: 415, }
-cutoff_energies: {ecut:  10.0, pawecutdg:  -1.0, }
-electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
-meta: {optdriver: 6, }
+--- !GWR_params
+iteration_state: {dtset: 1, }
+gwr_task: G0W0
+nband: 100
+ntau: 6
+ngkpt: [4, 4, 4, ]
+ngqpt: [4, 4, 4, ]
+chi_algo: supercell
+sigma_algo: 'BZ-convolutions'
+nkibz: 8
+nqibz: 8
+inclvkb: 2
+q0: [  1.00000000E-05,   2.00000000E-05,   3.00000000E-05, ]
+gw_icutcoul: 6
+green_mpw: 415
+tchi_mpw: 200
+g_ngfft: [12, 12, 12, 12, 12, 12, ]
+gwr_boxcutmin:   1.10000000E+00
+P gwr_np_kgts: [1, 1, 1, 1, ]
+P np_kibz: [1, 1, 1, 1, 1, 1, 1, 1, ]
+P np_qibz: [1, 1, 1, 1, 1, 1, 1, 1, ]
+min_transition_energy_eV:   2.20247744E-02
+max_transition_energy_eV:   3.84181232E+00
+eratio:   1.74431404E+02
+ft_max_err_t2w_cos:   3.39269547E-02
+ft_max_err_w2t_cos:   4.27492521E-03
+ft_max_err_t2w_sin:   1.00974389E+00
+cosft_duality_error:   4.08855664E-04
+Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(omega)
+    1 1.16987E-01   3.20191E-01   8.71836E-03   1.84660E-02
+    2 8.20298E-01   1.25063E+00   3.30978E-02   3.36974E-02
+    3 3.19454E+00   3.95048E+00   8.75746E-02   8.49211E-02
+    4 1.01456E+01   1.10178E+01   2.40282E-01   2.55119E-01
+    5 2.85210E+01   2.82127E+01   7.50121E-01   9.22624E-01
+    6 7.50861E+01   7.27575E+01   2.97572E+00   4.74388E+00
 ...
 
- mkfilename: getden from: tgwr_1o_DS1_DEN
 
- Exchange-correlation functional for the present dataset will be:
-  GGA: Perdew-Burke-Ernzerhof functional - ixc=11
- Citation for XC functional:
-  J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
+ Computing chi0 head and wings with inclvkb: 2
+ Using KS orbitals and KS energies...
 
-.Using double precision arithmetic; gwpc =  8
 
-- Reading GS density from: tgwr_1o_DS1_DEN
+ Computing diagonal matrix elements of Sigma_x
+ Using KS orbitals and KS energies...
 
 
 
---------------------------------------------------------------------------------
+ Building Green's functions from KS orbitals and KS energies...
 
- Total charge density [el/Bohr^3]
-)     Maximum=    9.3483E-02  at reduced coord.    0.1250    0.1250    0.6250
-)     Minimum=    1.3691E-03  at reduced coord.    0.0000    0.0000    0.0000
-   Integrated=    8.0000E+00
 
- === KS gaps after direct diagonalization ===
+
+ Building correlated screening Wc ...
+
+--- !EMACRO_WITHOUT_LOCAL_FIELDS
+iteration_state: {dtset: 1, }
+'epsilon_{iw, q -> Gamma}(0,0)': !Tabular |
+      8.71836225E-03    2.50376497E+01    1.10561443E-17
+      3.30977747E-02    2.33832214E+01   -3.48205170E-18
+      8.75745907E-02    1.67431215E+01    3.29138151E-19
+      2.40282194E-01    6.20395399E+00    4.08983971E-18
+      7.50120590E-01    1.73095370E+00   -1.34185436E-19
+      2.97572274E+00    1.05039254E+00   -8.49339007E-22
+...
+
+
+--- !EMACRO_WITH_LOCAL_FIELDS
+iteration_state: {dtset: 1, }
+'epsilon_{iw, q -> Gamma}(0,0)': !Tabular |
+      8.71836225E-03    4.38692201E-02    0.00000000E+00
+      3.30977747E-02    4.68368909E-02    0.00000000E+00
+      8.75745907E-02    6.45846281E-02    0.00000000E+00
+      2.40282194E-01    1.69038931E-01    0.00000000E+00
+      7.50120590E-01    5.83685288E-01    0.00000000E+00
+      2.97572274E+00    9.52210320E-01    0.00000000E+00
+...
+
+
+
+ Building Sigma_c with convolutions in k-space:
+================================================================================
+ QP results (energies in eV)
+ Notations:
+     E0: Kohn-Sham energy
+     <VxcDFT>: Matrix elements of Vxc[n_val] without non-linear core correction (if any)
+     SigX: Matrix elements of Sigma_x
+     SigC(E0): Matrix elements of Sigma_c at E0
+     Z: Renormalization factor
+     E-E0: Difference between the QP and the KS energy.
+     E-Eprev: Difference between QP energy at iteration i and i-1
+     E: Quasi-particle energy
+     Occ(E): Occupancy of QP state
+
+
+
+--- !GWR_SelfEnergy_ee
+iteration_state: {dtset: 1, }
+kpoint     : [   0.000,    0.000,    0.000, ]
+spin       : 1
+gwr_scf_iteration: 1
+gwr_task   : G0W0
+QP_VBM_band: 4
+QP_CBM_band: 5
+KS_gap     :    2.433
+QP_gap     :    2.985
+Delta_QP_KS:    0.552
+data: !Tabular |
+     Band       E0 <VxcDFT>     SigX SigC(E0)        Z     E-E0  E-Eprev        E   Occ(E)
+        2   -0.300  -11.415  -12.944    0.872    0.778   -0.511   -0.511   -0.810    2.000
+        3   -0.300  -11.415  -12.944    0.872    0.778   -0.511   -0.511   -0.810    2.000
+        4   -0.300  -11.415  -12.944    0.872    0.778   -0.511   -0.511   -0.810    2.000
+        5    2.133   -9.958   -5.688   -4.214    0.777    0.041    0.041    2.174    0.000
+        6    2.133   -9.958   -5.688   -4.214    0.777    0.041    0.041    2.174    0.000
+        7    2.133   -9.958   -5.688   -4.214    0.777    0.041    0.041    2.174    0.000
+...
+
+
+--- !GWR_SelfEnergy_ee
+iteration_state: {dtset: 1, }
+kpoint     : [   0.500,    0.000,    0.000, ]
+spin       : 1
+gwr_scf_iteration: 1
+gwr_task   : G0W0
+QP_VBM_band: 4
+QP_CBM_band: 5
+KS_gap     :    2.732
+QP_gap     :    3.326
+Delta_QP_KS:    0.594
+data: !Tabular |
+     Band       E0 <VxcDFT>     SigX SigC(E0)        Z     E-E0  E-Eprev        E   Occ(E)
+        3   -1.539  -11.116  -13.167    1.284    0.769   -0.588   -0.588   -2.127    2.000
+        4   -1.539  -11.116  -13.167    1.284    0.769   -0.588   -0.588   -2.127    2.000
+        5    1.194  -10.005   -5.845   -4.150    0.784    0.006    0.006    1.199    0.000
+...
+
+
+ === Kohn-Sham gaps and band edges from IBZ mesh ===
  Indirect band gap semiconductor
  Fundamental gap:     0.599 (eV)
-   VBM:     4.664 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-   CBM:     5.263 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
+   VBM:    -0.300 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     0.300 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
  Direct gap:         2.433 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+
+
+ === QP gaps and band edges taking into account Sigma_nk corrections for 2 k-points ===
+ Indirect band gap semiconductor
+ Fundamental gap:     1.110 (eV)
+   VBM:    -0.810 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     0.300 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
+ Direct gap:         2.761 (eV) at k: [ 2.5000E-01,  0.0000E+00,  0.0000E+00]
 
 
 == END DATASET(S) ==============================================================
@@ -310,22 +457,20 @@ meta: {optdriver: 6, }
  -outvars: echo values of variables after computation  --------
             acell      1.0260000000E+01  1.0260000000E+01  1.0260000000E+01 Bohr
               amu      2.80855000E+01
+             bdgw           4       5       4       5
              ecut      1.00000000E+01 Hartree
-           etotal1     0.0000000000E+00
-           etotal2     0.0000000000E+00
-            fcart1     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-            fcart2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+          ecuteps      6.00000000E+00 Hartree
+         ecutsigx      2.00000000E+01 Hartree
+           etotal      0.0000000000E+00
+            fcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
 -          fftalg         312
-           istwfk1       2    3    7
-           istwfk2       2    0    3    0    0    0    7    0
+    gwr_boxcutmin      1.10000000E+00
+         gwr_ntau           6
+   gwr_sigma_algo           2
+           istwfk        2    0    3    0    0    0    7    0
               ixc          11
-           jdtset        1    2
-              kpt1     0.00000000E+00  0.00000000E+00  0.00000000E+00
-                       5.00000000E-01  0.00000000E+00  0.00000000E+00
-                       5.00000000E-01  5.00000000E-01  0.00000000E+00
-              kpt2     0.00000000E+00  0.00000000E+00  0.00000000E+00
+              kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
                        2.50000000E-01  0.00000000E+00  0.00000000E+00
                        5.00000000E-01  0.00000000E+00  0.00000000E+00
                        2.50000000E-01  2.50000000E-01  0.00000000E+00
@@ -333,39 +478,19 @@ meta: {optdriver: 6, }
                       -2.50000000E-01  2.50000000E-01  0.00000000E+00
                        5.00000000E-01  5.00000000E-01  0.00000000E+00
                       -2.50000000E-01  5.00000000E-01  2.50000000E-01
-         kptrlatt1       2    0    0      0    2    0      0    0    2
-         kptrlatt2       4    0    0      0    4    0      0    0    4
-          kptrlen1     1.45098311E+01
-          kptrlen2     2.90196623E+01
-P           mkmem1          3
-P           mkmem2          8
+            kptgw      0.00000000E+00  0.00000000E+00  0.00000000E+00
+                       5.00000000E-01  0.00000000E+00  0.00000000E+00
+         kptrlatt        4    0    0      0    4    0      0    0    4
+          kptrlen      2.90196623E+01
+P           mkmem           8
             natom           2
-            nband1        100
-            nband2        100
-           ndtset           2
+            nband         100
             ngfft          24      24      24
-             nkpt1          3
-             nkpt2          8
+             nkpt           8
+           nkptgw           2
              nsym          48
            ntypat           1
-              occ1     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000
-              occ2     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+              occ      2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
@@ -387,9 +512,7 @@ P           mkmem2          8
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
           spgroup         227
-           strten1     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+           strten      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
                        0 -1  1   0 -1  0   1 -1  0       0  1 -1   0  1  0  -1  1  0
@@ -440,8 +563,7 @@ P           mkmem2          8
                        0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
                        0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
             typat      1  1
-              wtk1       0.12500    0.50000    0.37500
-              wtk2       0.01563    0.12500    0.06250    0.09375    0.37500    0.18750
+              wtk        0.01563    0.12500    0.06250    0.09375    0.37500    0.18750
                          0.04688    0.09375
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        1.3573395400E+00  1.3573395400E+00  1.3573395400E+00
@@ -545,15 +667,15 @@ P           mkmem2          8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          1.3  wall=          1.4
+- Proc.   0 individual time (sec): cpu=         52.6  wall=         52.7
 
 ================================================================================
 
  Calculation completed.
-.Delivered   0 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.3  wall=          1.4
+.Delivered   0 WARNINGs and   8 COMMENTs to log file.
++Overall time at end (sec) : cpu=         52.6  wall=         52.7
 - [ALL OK] MEMORY CONSUMPTION REPORT FOR C CODE:
--   There were 60 allocations and 60 deallocations in C code
+-   There were 40 allocations and 40 deallocations in C code
 - [ALL OK] MEMORY CONSUMPTION REPORT FOR FORTRAN CODE:
--   There were 715168 allocations and 715168 deallocations in Fortran
+-   There were 2431859 allocations and 2431859 deallocations in Fortran
 -   Remaining memory at the end of the calculation is 0

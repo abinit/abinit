@@ -305,7 +305,7 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
  ! Some variables need to be initialized/nullify at start
  usexcnhat = 0
  call energies_init(KS_energies)
- 
+
 !Get electronic temperature from dtset
  el_temp=merge(dtset%tphysel,dtset%tsmear,dtset%tphysel>tol8.and.dtset%occopt/=3.and.dtset%occopt/=9)
 
