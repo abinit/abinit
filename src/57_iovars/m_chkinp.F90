@@ -720,6 +720,8 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
        call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_wanorthnorm',dt%dmft_wanorthnorm,2,(/2,3/),iout)
        cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
        call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_broyden_niter',dt%dmft_broyden_niter,0,iout)
+       cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
+       call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_broyden_scheme',dt%dmft_broyden_scheme,2,(/1,2/),iout)
        if(dt%getwfk==0.and.dt%irdwfk==0.and.dt%irdden==0.and.dt%getden==0.and.dt%ucrpa==0) then
          write(msg,'(3a,i3,a,i3,a,i3,a,i3,a)' )&
          'When usedmft==1, A WFK file or a DEN file has to be read. In the current calculation:',ch10, &

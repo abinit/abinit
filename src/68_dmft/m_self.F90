@@ -1930,9 +1930,9 @@ subroutine mix_broyden(self,self_new,paw_dmft)
  type(paw_dmft_type), intent(in) :: paw_dmft
 !Local variables-------------------------------
  integer :: buf_size,dim_self,dim_self_id,iatom,ierr,k,l,lpawu,m,myproc,n
- integer :: natom,ncid,nspinor,nsppol,nwlo,var_residue_id,var_self_id
+ integer :: natom,ncid,nspinor,nsppol,nwlo,scheme,var_residue_id,var_self_id
  real(dp) :: alpha,w0
- real(dp), allocatable :: beta(:,:),buffer(:),buffer_new(:),c(:),norm(:)
+ real(dp), allocatable :: beta(:,:),buffer(:),buffer_new(:),c(:),norm(:),weight(:)
  real(dp), target, allocatable :: buffer2(:),buffer3(:),buffer4(:)
  character(len=3) :: tag_iter
  character(len=fnlen) :: filename
@@ -1947,6 +1947,7 @@ subroutine mix_broyden(self,self_new,paw_dmft)
  nspinor  = paw_dmft%nspinor
  nsppol   = paw_dmft%nsppol
  nwlo     = self%nw
+ scheme   = paw_dmft%dmft_broyden_scheme
  w0       = 0.01_dp
 
  call write_tag(m)
@@ -1989,6 +1990,9 @@ subroutine mix_broyden(self,self_new,paw_dmft)
  ABI_MALLOC(buffer_new,(buf_size))
  ABI_MALLOC(c,(m-l))
  ABI_MALLOC(norm,(m-l))
+ ABI_MALLOC(weight,(m-l))
+
+ if (scheme == 1) weight(:) = one
 
  call fill_buffer(1)
 
@@ -2005,12 +2009,12 @@ subroutine mix_broyden(self,self_new,paw_dmft)
    NCF_CHECK(nf90_put_var(ncid,var_residue_id,buffer(:)))
 
    do k=1,m-l
-     call read_buffer(2,k)
+     call read_buffer(2,k,get_weight=scheme==2)
      norm(k) = norm2(buffer2(:))
      c(k) = dot_product(buffer2(:),buffer(:)) / norm(k)
      do n=1,k-1
        call read_buffer(3,n)
-       beta(k,n) = dot_product(buffer3(:),buffer2(:)) / (norm(k)*norm(n))
+       beta(k,n) = weight(k) * weight(n) * dot_product(buffer3(:),buffer2(:)) / (norm(k)*norm(n))
      end do ! n
    end do ! k
 
@@ -2018,7 +2022,7 @@ subroutine mix_broyden(self,self_new,paw_dmft)
      do n=k+1,m-l
        beta(k,n) = beta(n,k)
      end do ! n
-     beta(k,k) = one + w0**2
+     beta(k,k) = weight(k)**2 + w0**2
    end do ! k
 
    if (m-l > 0) then
@@ -2030,7 +2034,7 @@ subroutine mix_broyden(self,self_new,paw_dmft)
      call read_buffer(3,n,read_self=1)
      buffer2(:) = (alpha*buffer2(:)+buffer3(:)) / norm(n)
      do k=1,m-l
-       buffer_new(:) = buffer_new(:) - c(k)*beta(k,n)*buffer2(:)
+       buffer_new(:) = buffer_new(:) - weight(k)*weight(n)*c(k)*beta(k,n)*buffer2(:)
      end do ! k
    end do ! n
 
@@ -2049,6 +2053,7 @@ subroutine mix_broyden(self,self_new,paw_dmft)
  ABI_FREE(buffer_new)
  ABI_FREE(c)
  ABI_FREE(norm)
+ ABI_FREE(weight)
 
  contains
 
@@ -2162,11 +2167,12 @@ subroutine mix_broyden(self,self_new,paw_dmft)
 
  end subroutine fill_buffer
 
- subroutine read_buffer(option,iter,read_self)
+ subroutine read_buffer(option,iter,read_self,get_weight)
 
  !Arguments ------------------------------------
   integer, intent(in) :: option,iter
   integer, optional, intent(in) :: read_self
+  logical, optional, intent(in) :: get_weight
  !Local variables ------------------------------
   integer :: i,var_id
   real(dp), pointer :: pt(:) => null(), pt2(:) => null()
@@ -2188,6 +2194,9 @@ subroutine mix_broyden(self,self_new,paw_dmft)
    if (i == 0) pt2 => buffer4(:)
    NCF_CHECK(nf90_get_var(ncid,var_id,pt2(:)))
    if (i == 0) pt(:) = pt(:) - pt2(:)
+   if (present(get_weight)) then
+     if (get_weight .and. i == 0) weight(iter) = one / norm2(pt2(:))
+   end if
  end do ! i
 
  pt => null()
