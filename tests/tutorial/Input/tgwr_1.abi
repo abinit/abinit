@@ -1,19 +1,20 @@
 # Crystalline silicon. Preparatory run for GWR code
-# Dataset 1: ground state calculation to get the density
+# Dataset 1: ground state calculation to compute the density
 # Dataset 2: band structure calculation along a k-path
 
 # Include geometry and pseudos
 include "gwr_include.abi"
 
 ndtset 2
-istwfk *1
+#istwfk *1
 
 ####################
 # Dataset 1: SCF run
 ####################
 nband1  6
-ngkpt1   2 2 2
+
 # Definition of the k-point grid
+ngkpt1  2 2 2
 nshiftk1 1
 shiftk1  0.0 0.0 0.0
 tolvrs1 1.e-8
@@ -55,7 +56,7 @@ diemac  12.0      # Although this is not mandatory, it is worth to
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = tgwr_1.abi, tgwr_2.abi, tgwr_3.abi
+#%% test_chain = tgwr_1.abi, tgwr_2.abi, tgwr_3.abi, tgwr_4.abi
 #%% need_cpp_vars = HAVE_LINALG_SCALAPACK
 #%% exclude_builders = eos_nvhpc_23.9_elpa
 #%% [shell]

@@ -3777,8 +3777,10 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 [[ecutsigx]] determines the cut-off energy of the planewave set used to
-generate the exchange part of the self-energy operator. For norm-conserving
-calculations, it is pointless to have [[ecutsigx]] bigger than 4*[[ecut]],
+generate the exchange part of the self-energy operator.
+Theoretically, we need [[ecutsigx]] = 4 [[ecut]] to have an exact treatment of $\Sigma_x$.
+
+For norm-conserving calculations, it is pointless to have [[ecutsigx]] bigger than 4 * [[ecut]],
 while for PAW calculations, the maximal useful value is [[pawecutdg]]. Thus,
 if you do not care about CPU time, please use these values. If you want to
 spare some CPU time, you might try to use a value between [[ecut]] and these upper limits.
@@ -6701,9 +6703,10 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 When [[optdriver]] = 3, [[gw_qlwl]] defines the set of q-points around Gamma
+in reduced coordinates of the reciprocal lattice
 that are considered during the evaluation of the non-analytical behaviour of
-the dielectric matrix. Optical spectra (with and without non-local field
-effects) are evaluated for each direction specified by [[gw_qlwl]].
+the dielectric matrix. Optical spectra (with and without non-local field effects)
+are evaluated for each direction specified by [[gw_qlwl]].
 """,
 ),
 
@@ -6718,8 +6721,8 @@ Variable(
     requires="[[optdriver]] == 4",
     added_in_version="before_v9",
     text=r"""
-[[gw_qprange]] is active only when [[nkptgw]] is equal to zero (default
-value). This variable simplifies the specification of the list of kpoints and
+[[gw_qprange]] is active only when [[nkptgw]] is equal to zero (default value).
+This variable simplifies the specification of the list of kpoints and
 of the bands to be used for the computation of the quasi-particle corrections.
 The possible values are:
 
@@ -6756,8 +6759,7 @@ Variable(
     requires="[[optdriver]] == 4 and [[usepaw]] == 1",
     added_in_version="before_v9",
     text=r"""
-Only available for PAW and relevant if [[optdriver]] = 4 that is, sigma
-calculations.
+Only available for PAW and relevant if [[optdriver]] = 4 that is, sigma calculations.
 
 Theoretical introduction: GW calculations performed on top of electronic
 calculations relying when the frozen-core approximation is used to separate
@@ -24445,6 +24447,7 @@ Variable(
     added_in_version="9.6.2",
     text=r"""
 This variable defines the number of imaginary-time points in the minimax mesh.
+Possible values are: [6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34].
 """,
 ),
 
@@ -24489,7 +24492,7 @@ Variable(
     vartype="integer",
     topics=['GWR_basic'],
     dimensions=[1],
-    defaultval=12,
+    defaultval=1,
     mnemonics="GWR SIGMA ALGOrithm.",
     requires="[[optdriver]] == 6",
     added_in_version="9.6.2",
@@ -24498,7 +24501,7 @@ This input variable selects the algorithm used to compute the self-energy in the
 Possible values are
 
 * 0 --> Automatic selection.
-* 1 --> Use supercell.
+* 1 --> Use real-space supercell.
 * 2 --> Use convolutions in the BZ.
 """,
 ),
@@ -24514,7 +24517,16 @@ Variable(
     requires="[[optdriver]] == 6",
     added_in_version="9.6.2",
     text=r"""
-See the corresponding input variable for the usual GS grid [[boxcutmin]].
+This variable defines the FFT mesh used to represent the polarizability, the screened interaction $W$
+and the self-energy $\Sigma$.
+The role is very similar to that of [[boxcutmin]], which is used in the case of GS calculations.
+
+In principle, setting [[gwr_boxcutmin]] = 2 ensures an exact treatment of the product of two many-body functions
+such as $G G$ or $G W$.
+However, this choice significantly increase computational cost and memory requirements.
+
+In practice, it is recommended to start with a smaller value, such as 1.1, and then gradually increase it
+to monitor the stability of the results.
 """,
 ),
 

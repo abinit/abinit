@@ -191,3 +191,17 @@ Note that single-precision is the default mode as in the conventional $GW$ code.
 To run computations in double-precision, one has to configure with  `--enable-gw-dpc="yes"` when
 the command line interface is used or `enable_gw_dpc="yes"` when `--with-config-file=FILE` is used
 to specify the configuration options via an external FILE.
+
+
+### MPI parallelization
+
+The GWR code employs a 4D MPI Cartesian grid to distribute both workload and memory over
+$\kk$-points, $(\gg, \gg')$ components, the points of the minimax mesh and collinear spins.
+
+The user can specify the number of MPI-processes for the different dimensions using the input variable [[gwr_np_kgts]],
+although this is completely optional as the code will try to find an optimal distribution at runtime on the basis
+on the number of MPI processes allocated.
+
+The scalability of the different levels depends of the dimensions of the problem at hand.
+
+Ideally the total number of MPI processes should be a multiple of [[gwr_ntau]] * [[nsppol]].
