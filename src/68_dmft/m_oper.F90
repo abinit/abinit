@@ -1253,7 +1253,11 @@ subroutine gather_oper(oper,distrib,paw_dmft,opt_ksloc,master,opt_diag,opt_commk
    end do ! iatom
 
    siz_buf = siz_buf * (nspinor**2) * nsppol
-   recvcounts(:) = siz_buf * merge(distrib%nw_mem_kptparal(:),distrib%nw_mem(:),optcommkpt==1)
+   if (optcommkpt == 1) then
+     recvcounts(:) = siz_buf * distrib%nw_mem_kptparal(:)
+   else
+     recvcounts(:) = siz_buf * distrib%nw_mem(:)
+   end if
    displs(1) = 0
    do irank=2,nproc2
      displs(irank) = displs(irank-1) + recvcounts(irank-1)
