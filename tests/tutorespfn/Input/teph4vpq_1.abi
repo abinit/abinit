@@ -1,0 +1,44 @@
+teph4vpq_1_DVDB
+16
+LiF_eph_varpeq/dfpto_DS1_POT7.nc
+LiF_eph_varpeq/dfpto_DS1_POT8.nc
+LiF_eph_varpeq/dfpto_DS1_POT9.nc
+LiF_eph_varpeq/dfpto_DS2_POT1.nc
+LiF_eph_varpeq/dfpto_DS2_POT10.nc
+LiF_eph_varpeq/dfpto_DS2_POT4.nc
+LiF_eph_varpeq/dfpto_DS3_POT1.nc
+LiF_eph_varpeq/dfpto_DS3_POT2.nc
+LiF_eph_varpeq/dfpto_DS3_POT4.nc
+LiF_eph_varpeq/dfpto_DS3_POT5.nc
+LiF_eph_varpeq/dfpto_DS4_POT1.nc
+LiF_eph_varpeq/dfpto_DS4_POT4.nc
+LiF_eph_varpeq/dfpto_DS5_POT1.nc
+LiF_eph_varpeq/dfpto_DS5_POT3.nc
+LiF_eph_varpeq/dfpto_DS5_POT4.nc
+LiF_eph_varpeq/dfpto_DS5_POT6.nc
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = mrgdv
+#%% exclude_builders = eos_nvhpc_*
+#%% test_chain = teph4vpq_1.abi, teph4vpq_2.abi, teph4vpq_3.abi,
+#%%              teph4vpq_4.abi, teph4vpq_5.abi, teph4vpq_6.abi,
+#%%              teph4vpq_7.abi, teph4vpq_8.abi, teph4vpq_9.abi,
+#%%              teph4vpq_10.abi
+#%% [files]
+#%% use_git_submodule = LiF_eph_varpeq
+#%% files_to_test =
+#%%   teph4vpq_1.stdout, tolnlines= 0, tolabs=  0, tolrel=  0
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = V. Vasilchenko
+#%% keywords = DFPT, EPH, POLARON
+#%% description =
+#%%   LiF, Fm-3m space group.
+#%%   Preparatory run for VarPEq calculations.
+#%%   Merge precomputed DFPT POT files stored in the LiF_eph_varpeq git submodule.
+#%%<END TEST_INFO>
