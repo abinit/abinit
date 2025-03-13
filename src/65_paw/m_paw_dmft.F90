@@ -139,6 +139,10 @@ MODULE m_paw_dmft
   integer :: dmft_broyden_niter
   ! Number of previous iterations involved in Broyden mixing of self-energy
 
+  integer :: dmft_broyden_scheme
+  ! =1 : weights are set to 1 (Pulay mixing)
+  ! =2 : weights are set to the inverse square root of the residu
+
   integer :: dmft_dc
   ! Type of double counting used in DMFT
 
@@ -1030,6 +1034,7 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  paw_dmft%dmft_x2my2d          = dtset%dmft_x2my2d
  paw_dmft%dmft_use_full_chipsi = dtset%dmft_use_full_chipsi
  paw_dmft%dmft_broyden_niter   = dtset%dmft_broyden_niter
+ paw_dmft%dmft_broyden_scheme  = dtset%dmft_broyden_scheme
 
  ! for entropy (alternate external calculation)
  paw_dmft%ientropy = 0

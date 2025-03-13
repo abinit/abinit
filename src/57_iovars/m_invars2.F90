@@ -2466,6 +2466,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    end if
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_broyden_niter',tread,'INT')
    if(tread==1) dtset%dmft_broyden_niter=intarr(1)
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_broyden_scheme',tread,'INT')
+   if(tread==1) dtset%dmft_broyden_scheme=intarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_dc',tread,'INT')
    if(tread==1) dtset%dmft_dc=intarr(1)
 ! XG20220322 - Should not impose dmft_dc on the flight. Should check in m_chkinp, and possibly stop.
