@@ -1079,9 +1079,7 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
    call wrtout(std_out,message,'COLL')
  end if ! option=123
 
- ! option for downfold_oper
- option = 1
- if (diag == 1) option = 3
+ option = merge(3,1,diag==1) ! option for downfold_oper
 
 ! ====================================================
 ! Upfold self-energy and double counting  Self_imp -> self(k)
@@ -1131,8 +1129,7 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
 
  shift = green%distrib%shiftk
  mkmem = green%distrib%nkpt_mem(green%distrib%me_kpt+1)
- shift_green = shift
- if (green%oper(1)%has_operks == 0) shift_green = 0
+ shift_green = merge(0,shift,green%oper(1)%has_operks==0)
 
  do ifreq=1,green%nw
    !if(present(iii)) write(6,*) ch10,'ifreq  self', ifreq,self%oper(ifreq)%matlu(1)%mat(1,1,1,1,1)
@@ -1557,8 +1554,7 @@ subroutine integrate_green(green,paw_dmft,prtopt,opt_ksloc,opt_after_solver,opt_
 
  optself = 1
  if (present(opt_self)) optself = opt_self
- option = 1 ! option for downfold_oper
- if (optself == 0) option = 3
+ option = merge(3,1,optself==0) ! option for downfold_oper
 
 ! Initialize spaceComm, myproc, and master
  !spacecomm=paw_dmft%spacecomm
@@ -1574,8 +1570,7 @@ subroutine integrate_green(green,paw_dmft,prtopt,opt_ksloc,opt_after_solver,opt_
  nsppol  = paw_dmft%nsppol
  temp    = paw_dmft%temp
 
- nmoments = 1
- if (green%has_moments == 1) nmoments = green%nmoments
+ nmoments = merge(green%nmoments,1,green%has_moments==1)
 
 ! Initialize green%oper before calculation (important for xmpi_sum)
 ! allocate(charge_loc_old(paw_dmft%natom,paw_dmft%nsppol+1))
@@ -1847,8 +1842,7 @@ subroutine integrate_green(green,paw_dmft,prtopt,opt_ksloc,opt_after_solver,opt_
                !write(std_out,*) "occup%ks ik2 AA",green%occup%ks(1,2,1,3)
    if (optfilloccnd == 1) then
      band_index = 0
-     fac = one
-     if (nsppol == 1 .and. nspinor == 1) fac = two
+     fac = merge(two,one,nsppol==1.and.nspinor==1)
      do isppol=1,nsppol
        do ikpt=1,nkpt
          do ib1=1,mbandc
@@ -3454,11 +3448,7 @@ subroutine newton(green,self,paw_dmft,x_input,x_precision,max_iter,&
      xold = x_input
      if (option == 1) then
        if (dmft_test == 1) then
-         if (Fxprime < 0) then
-           x_input = x_input - sign(one,Fx)*step
-         else
-           x_input = x_input - sign(one,Fx)*min(step,abs(Fx/Fxprime))
-         end if
+         x_input = x_input - sign(one,Fx)*merge(step,min(step,abs(Fx/Fxprime)),Fxprime<0)
        else
          x_input = x_input - Fx/Fxprime
        end if ! dmft_test
@@ -3528,9 +3518,7 @@ subroutine newton(green,self,paw_dmft,x_input,x_precision,max_iter,&
 
    if (abs(Fx) < abs(Fxoptimum) .or. (iter == 1 .and. dmft_test == 1)) then
      Fxoptimum = Fx
-     x_optimum = x_input
-     if (dmft_test == 1) x_optimum = xold
-
+     x_optimum = merge(xold,x_input,dmft_test==1)
    end if ! abs(Fx)<abs(Fxoptimum)
 
 
@@ -3712,8 +3700,7 @@ subroutine compute_nb_elec(green,self,paw_dmft,Fx,nb_elec_x,fermie,Fxprime)
 
      mkmem = green%distrib%nkpt_mem(green%distrib%me_kpt+1)
      shift = green%distrib%shiftk
-     nmoments = 1
-     if (green%has_moments == 1) nmoments = green%nmoments
+     nmoments = merge(green%nmoments,1,green%has_moments==1)
 
      mbandc  = paw_dmft%mbandc
      nkpt    = paw_dmft%nkpt
@@ -3737,8 +3724,7 @@ subroutine compute_nb_elec(green,self,paw_dmft,Fx,nb_elec_x,fermie,Fxprime)
      do ifreq=1,green%nw
        if (green%distrib%proct(ifreq) /= green%distrib%me_freq) cycle
        omega = cmplx(zero,green%omega(ifreq),kind=dp)
-       fac = two * paw_dmft%wgt_wlo(ifreq) * temp
-       if (nsppol == 1 .and. nspinor == 1) fac = fac * two
+       fac = two * paw_dmft%wgt_wlo(ifreq) * merge(two*temp,temp,nsppol==1.and.nspinor==1)
 
        call add_matlu(self%hdc%matlu(:),self%oper(ifreq)%matlu(:),oper_tmp%matlu(:),paw_dmft%natom,-1)
        call upfold_oper(oper_tmp,paw_dmft)

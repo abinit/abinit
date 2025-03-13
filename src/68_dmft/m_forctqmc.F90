@@ -3530,9 +3530,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
 
  ! ntot is total number of lambda pts, + 1 is because we add the case lambda = 1 (which has no reason to be included in the
  ! Gauss-Legendre grid), since we need it for the rest of the SCF calculation
- ntot = ngauss*nsub + 1
-
- if ((.not. integral) .or. (.not. entropy)) ntot = 1
+ ntot = merge(ngauss*nsub+1,1,integral.and.entropy)
 
  ABI_MALLOC(eu_list,(ntot))
  ABI_MALLOC(lam_list,(ntot)) ! scaling factors of U matrix for thermodynamic integration
@@ -3622,8 +3620,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
          tag_block2 = trim(tag_block2) // "  x"
        end do ! iflavor2
        write(tag_block,'(i2)') flavor_list(iflavor1,iblock,iatom)
-       i = 2
-       if (flavor_list(iflavor1,iblock,iatom) >= 10) i = 1
+       i = merge(1,2,flavor_list(iflavor1,iblock,iatom)>=10)
        tag_block2 = trim(tag_block2) // repeat(" ",i) // trim(adjustl(tag_block))
        do iflavor2=iflavor1+1,siz_block(iblock,iatom)
          tag_block2 = trim(tag_block2) // "  x"
@@ -4038,8 +4035,6 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
 
      gtau_dlr(:,:,:) = czero
 
-     nmoments = 1
-     if (density_matrix) nmoments = 3
      ABI_MALLOC(moment_fit,(nmoments))
 
      adlr_fit => adlr(:,:)
@@ -4051,15 +4046,13 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
          do im=1,tndim
            iflavor = im + (isppol-1)*ndim
 
-           ncon = 1
-           if (density_matrix) then
-             ncon = 3
-             if (iflavor == iflavor1) ncon = 4
-           end if
+           ncon = merge(merge(4,3,iflavor==iflavor1),1,density_matrix)
 
            if (nsppol == 1 .and. nspinor == 1) gtau(:,iflavor,iflavor1) = &
              & (gtau(:,iflavor,iflavor1)+gtau(:,iflavor+ndim,iflavor1+ndim)) * half
            bdlr(1:ntau) = dble(gtau(:,iflavor,iflavor1))
+
+           nmoments = merge(3,1,density_matrix)
            do i=1,nmoments
              moment_fit(i) = dble(green%moments(i)%matlu(iatom)%mat(im,im1,isppol))
            end do ! i
@@ -4539,11 +4532,7 @@ function k_it(tau,omega)
  real(dp) :: k_it
 ! *********************************************************************
 
- if (omega >= 0) then
-   k_it = -exp(-tau*omega) / (one+exp(-omega))
- else
-   k_it = -exp((one-tau)*omega) / (one+exp(omega))
- end if
+ k_it = merge(-exp(-tau*omega)/(one+exp(-omega)),-exp((one-tau)*omega)/(one+exp(omega)),omega>=0)
 
 end function k_it
 !!***
@@ -4644,9 +4633,7 @@ subroutine fit_dlr(m,n,fun,con,jac,jac_con,x)
  maxiter = 10000
  meq = m   ! all constraints are equality constraints here
  la  = max(m,1)
- x(:)  = zero
- xl(:) = zero
- xu(:) = zero
+ x(:)  = zero ; xl(:) = zero ; xu(:) = zero
  xl(:) = xl(:) / zero  ! set lower and upper bounds to NaN (very important, this is how slsqp recognizes that no bounds should be applied)
  xu(:) = xu(:) / zero
 
@@ -4759,8 +4746,7 @@ subroutine fourier_inv(paw_dmft,nmoments,ntau,matlu_tau,oper_freq,moments)
 
  itau = 1
  do i=0,nproc-1
-   ntau_proc = ratio
-   if (i < residu) ntau_proc = ratio + 1
+   ntau_proc = merge(ratio+1,ratio,i<residu)
    recvcounts(i+1) = ntau_proc
    if (myproc == i) itaub = itau
    itau = itau + ntau_proc

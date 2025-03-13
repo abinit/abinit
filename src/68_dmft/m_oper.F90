@@ -1184,8 +1184,7 @@ subroutine gather_oper(oper,distrib,paw_dmft,opt_ksloc,master,opt_diag,opt_commk
    end do ! irank
    if (nproc > nproc_freq*nproc_kpt) recvcounts(nproc_freq*nproc_kpt+1:nproc) = 0
 
-   recvcounts(:) = mbandc * recvcounts(:)
-   if (.not. diag) recvcounts(:) = recvcounts(:) * mbandc
+   recvcounts(:) = recvcounts(:) * merge(mbandc,mbandc**2,diag)
    displs(1) = 0
    do irank=2,nproc
      displs(irank) = displs(irank-1) + recvcounts(irank-1)
@@ -1239,14 +1238,8 @@ subroutine gather_oper(oper,distrib,paw_dmft,opt_ksloc,master,opt_diag,opt_commk
  else if (opt_ksloc == 2) then
 
    nproc_freq = nproc / nkpt
-
-   if (optcommkpt == 1) then
-     myproc2 = distrib%me_freq
-     nproc2  = nproc_freq + 1
-   else
-     myproc2 = myproc
-     nproc2  = nproc
-   end if
+   myproc2 = merge(distrib%me_freq,myproc,optcommkpt==1)
+   nproc2  = merge(nproc_freq+1,nproc,optcommkpt==1)
 
    ABI_MALLOC(recvcounts,(nproc2))
    ABI_MALLOC(displs,(nproc2))
@@ -1260,22 +1253,14 @@ subroutine gather_oper(oper,distrib,paw_dmft,opt_ksloc,master,opt_diag,opt_commk
    end do ! iatom
 
    siz_buf = siz_buf * (nspinor**2) * nsppol
-   if (optcommkpt == 1) then
-     recvcounts(:) = siz_buf * distrib%nw_mem_kptparal(:)
-   else if (optcommkpt == 0) then
-     recvcounts(:) = siz_buf * distrib%nw_mem(:)
-   end if ! optcommkpt
+   recvcounts(:) = siz_buf * merge(distrib%nw_mem_kptparal(:),distrib%nw_mem(:),optcommkpt==1)
    displs(1) = 0
    do irank=2,nproc2
      displs(irank) = displs(irank-1) + recvcounts(irank-1)
    end do ! irank
 
    if (optcommkpt == 1 .and. recvcounts(myproc2+1) == 0) then
-     if (nproc_freq > 1) then
-       siz_buf = siz_buf * distrib%nw_mem_kptparal(mod(paw_dmft%myproc,nproc_freq)+1)
-     else
-       siz_buf = siz_buf * nw
-     end if
+     siz_buf = siz_buf * merge(nw,distrib%nw_mem_kptparal(mod(paw_dmft%myproc,nproc_freq)+1),nproc_freq<=1)
    else
      siz_buf = recvcounts(myproc2+1)
    end if
@@ -1391,8 +1376,7 @@ subroutine gather_oper_ks(oper,distrib,paw_dmft,opt_diag)
  ABI_MALLOC(recvcounts,(nproc))
  ABI_MALLOC(displs,(nproc))
 
- recvcounts(:) = mbandc * distrib%nkpt_mem(:)
- if (.not. diag) recvcounts(:) = recvcounts(:) * mbandc
+ recvcounts(:) = distrib%nkpt_mem(:) * merge(mbandc,mbandc**2,diag)
 
  displs(1) = 0
  do irank=2,nproc

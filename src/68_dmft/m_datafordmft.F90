@@ -179,8 +179,7 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
 
 ! Init parallelism
  paral_kgb = mpi_enreg%paral_kgb
- comm_kpt  = mpi_enreg%comm_cell
- if (paral_kgb == 1) comm_kpt = mpi_enreg%comm_kpt
+ comm_kpt = merge(mpi_enreg%comm_kpt,mpi_enreg%comm_cell,paral_kgb==1)
  comm_band = mpi_enreg%comm_band
  me_kpt  = mpi_enreg%me_kpt
  me_band = mpi_enreg%me_band
@@ -391,8 +390,7 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
          do iatom=1,natom
            lpawu = paw_dmft%lpawu(iatom)
            if (lpawu == -1) cycle
-           lpawu1 = lpawu
-           if (t2g .or. x2my2d) lpawu1 = 2
+           lpawu1 = merge(2,lpawu,t2g.or.x2my2d)
            itypat = paw_dmft%typat(iatom)
            ndim = 2*lpawu + 1
            nproju = pawtab(itypat)%nproju
@@ -678,8 +676,7 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
  if (present(nbandkss)) then
    if ((me_kpt == 0 .and. nbandkss /= 0) .or. (paw_dmft%dmft_kspectralfunc == 1)) then
 !     opt_renorm=1 ! if ucrpa==1, no need for individual orthonormalization
-     opt_renorm = 3
-     if (dtset%ucrpa >= 1 .or. paw_dmft%dmft_kspectralfunc == 1) opt_renorm = 2
+     opt_renorm = merge(2,3,dtset%ucrpa>=1.or.paw_dmft%dmft_kspectralfunc==1)
      call chipsi_renormalization(paw_dmft,opt=opt_renorm)
      if (paw_dmft%myproc == 0) then
        call chipsi_print(paw_dmft,pawtab(:))

@@ -1002,8 +1002,7 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  paw_dmft%nelectval = dble(dtset%nelect)
 
  if (.not. paw_dmft%dmft_use_all_bands) then
-   fac = 1
-   if (nsppol == 1 .and. nspinor == 1) fac = 2
+   fac = merge(2,1,nsppol==1.and.nspinor==1)
    paw_dmft%nelectval = dble(dtset%nelect-(dmftbandi-1)*nsppol*fac)
  end if ! not use_all_bands
 
@@ -1041,12 +1040,8 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
 !==  Choose solver
 !=======================
 
- paw_dmft%dmft_solv = dmft_solv
- paw_dmft%dmft_blockdiag = 0
- if (dmft_solv == -2) then
-   paw_dmft%dmft_solv = 2
-   paw_dmft%dmft_blockdiag = 1
- end if ! dmft_solv=-2
+ paw_dmft%dmft_solv = merge(2,dmft_solv,dmft_solv==-2)
+ paw_dmft%dmft_blockdiag = merge(1,0,dmft_solv==-2)
 
 !  0: DFT, no solver
 !  1: DFT+U
@@ -1061,12 +1056,10 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
 !==  Frequencies
 !=======================
 
- paw_dmft%dmft_log_freq = 1 ! use logarithmic frequencies.
- if (dmft_solv == 6 .or. dmft_solv == 7 .or. dmft_solv == 9) paw_dmft%dmft_log_freq = 0 ! do not use logarithmic frequencies.
+ paw_dmft%dmft_log_freq = merge(0,1,dmft_solv==6.or.dmft_solv==7.or.dmft_solv==9)
 
  paw_dmft%dmft_nwli = dtset%dmft_nwli
- paw_dmft%dmft_nwlo = dtset%dmft_nwli
- if (paw_dmft%dmft_log_freq == 1) paw_dmft%dmft_nwlo = dtset%dmft_nwlo
+ paw_dmft%dmft_nwlo = merge(dtset%dmft_nwlo,dtset%dmft_nwli,paw_dmft%dmft_log_freq==1)
  paw_dmft%dmft_nwr = 800
 
  paw_dmft%dmft_rslf = dtset%dmft_rslf
@@ -2616,8 +2609,7 @@ subroutine init_paral_dmft(paw_dmft,distrib,nfreq)
  if (nproc_freq < nproc) distrib%nw_mem(nproc_freq+1:nproc) = 0
  ifreq = 1
  do irank=0,nproc_freq-1
-   nfreq_proc = deltaw
-   if (irank < residu) nfreq_proc = nfreq_proc + 1
+   nfreq_proc = merge(deltaw+1,deltaw,irank<residu)
    distrib%nw_mem(irank+1) = nfreq_proc
    distrib%procf(ifreq:ifreq+nfreq_proc-1) = irank
    ifreq = ifreq + nfreq_proc
@@ -2644,8 +2636,7 @@ subroutine init_paral_dmft(paw_dmft,distrib,nfreq)
 
    ikpt = 1
    do irank=0,nproc_kpt-1
-     nkpt_proc = deltakpt
-     if (irank < residu) nkpt_proc = nkpt_proc + 1
+     nkpt_proc = merge(deltakpt+1,deltakpt,irank<residu)
      distrib%nkpt_mem(irank+1) = nkpt_proc
      distrib%procb(ikpt:ikpt+nkpt_proc-1) = irank
      if (myproc == irank) distrib%shiftk = ikpt - 1
@@ -2673,8 +2664,7 @@ subroutine init_paral_dmft(paw_dmft,distrib,nfreq)
 
    ifreq = 1
    do irank=0,nproc_freq-1
-     nfreq_proc = deltaw
-     if (irank < residu) nfreq_proc = nfreq_proc + 1
+     nfreq_proc = merge(deltaw+1,deltaw,irank<residu)
      if (nfreq_proc > 0) distrib%proct(ifreq:ifreq+nfreq_proc-1) = irank
      ifreq = ifreq + nfreq_proc
      distrib%nw_mem_kptparal(irank+1) = nfreq_proc
