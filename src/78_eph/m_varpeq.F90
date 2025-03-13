@@ -523,7 +523,8 @@ subroutine varpeq_run(gstore, dtset, dtfil)
  if (vpq%frohl_ntheta > 0) call vpq%calc_fravg(avg_g0=vpq%g0_flag)
  if (vpq%interp .or. vpq%restart) call vpq%load(dtfil, dtset%vpq_select)
 
- call vpq%print_metadata(dtset)
+!call vpq%print_metadata(dtset)
+ call vpq%print_metadata()
 
  call vpq%solve()
 
@@ -959,16 +960,17 @@ end subroutine varpeq_ncwrite
 !!
 !! SOURCE
 
-subroutine varpeq_print_metadata(self, dtset)
+!subroutine varpeq_print_metadata(self, dtset)
+ subroutine varpeq_print_metadata(self)
 
 !Arguments ------------------------------------
  class(varpeq_t), target, intent(inout) :: self
- type(dataset_type), intent(in) :: dtset
+!type(dataset_type), intent(in) :: dtset
 
 !Local variables-------------------------------
 !scalars
  character(len=abi_slen) :: msg
- character(len=abi_slen) :: use_frohl = "no"
+!character(len=abi_slen) :: use_frohl = "no"
  integer :: spin, my_rank
  integer, parameter :: master = 0
 !arrays
