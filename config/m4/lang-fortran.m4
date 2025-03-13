@@ -1563,7 +1563,7 @@ AC_DEFUN([ABI_PROG_FC],[
       fi
     fi
   fi
-  AC_PROG_FC([ ftn mpiifort mpifort mpif90 nagfor ifort gfortran ])
+  AC_PROG_FC([ ftn mpiifx mpiifort mpifort mpif90 nagfor ifort gfortran ])
 
   # Fail if no Fortran compiler is available
   if test "${FC}" = ""; then
