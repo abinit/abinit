@@ -530,18 +530,8 @@ subroutine compute_band_energy(energies_dmft,green,paw_dmft,occ_type,ecalc_dft,f
        if (present(fcalc_dft)) then
          if (fcalc_dft == 1 .or. fcalc_dft == 3) fermie_used = paw_dmft%fermie_dft
          if (fcalc_dft == 2 .or. fcalc_dft == 4) fermie_used = paw_dmft%fermie ! only for B3 terms
-         if ((eig-fermie_used) >= zero) then
-           energies_dmft%fband_dft = energies_dmft%fband_dft - &
-             & log(one+exp(-beta*(eig-fermie_used)))*wtk
-         else
-           energies_dmft%fband_dft = energies_dmft%fband_dft &
-            & + (beta*(eig-fermie_used)-log(one+exp(beta*(eig-fermie_used))))*wtk
-           !if (fcalc_dft == 3 .or. fcalc_dft == 2) &
-                   ! subtract fermi level, (useful to directly count the number of electrons)
-           !   & energies_dmft%fband_dft = energies_dmft%fband_dft - beta*fermie_used*wtk
-             !totch = totch + wtk
-           !end if
-         end if ! eig-fermie_used>=0
+         energies_dmft%fband_dft = energies_dmft%fband_dft + wtk*merge(-log(one+exp(-beta*(eig-fermie_used))), &
+              & (beta*(eig-fermie_used)-log(one+exp(beta*(eig-fermie_used)))),(eig-fermie_used)>=zero)
        else
          if (occ_type == " lda") then ! usual calculation: total non interacting energy
            fermie_used = paw_dmft%fermie_dft
@@ -1291,8 +1281,7 @@ subroutine compute_trace_log_loc(green,paw_dmft,trace,opt_inv)
 
  do ifreq=1,nwlo
    if (green%distrib%procf(ifreq) /= paw_dmft%myproc) cycle
-   fac = temp
-   if (nsppol == 1 .and. nspinor == 1) fac = fac * two
+   fac = merge(temp*two,temp,nsppol==1.and.nspinor==1)
    trace_tmp = czero
    do iatom=1,natom
      lpawu = paw_dmft%lpawu(iatom)
@@ -1303,11 +1292,13 @@ subroutine compute_trace_log_loc(green,paw_dmft,trace,opt_inv)
        call abi_xgemm("n","c",ndim,ndim,ndim,cone,green%oper(ifreq)%matlu(iatom)%mat(:,:,isppol),ndim,&
                     & green%oper(ifreq)%matlu(iatom)%mat(:,:,isppol),ndim,czero,mat_temp(:,:),ndim)
        call zheev('n','u',ndim,mat_temp(:,:),ndim,eig(:),work(:),lwork,rwork(1:3*ndim-2),info)
+
        if (optinv == 1) then
          trace_tmp = trace_tmp - sum(log(eig(1:ndim)/(paw_dmft%omega_lo(ifreq)**2)))
        else
          trace_tmp = trace_tmp + sum(log(eig(1:ndim)*(paw_dmft%omega_lo(ifreq)**2)))
        end if
+
      end do ! isppol
      if (ifreq == nwlo) then
        correction = fac * nsppol * ndim * log(two)

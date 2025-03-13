@@ -420,8 +420,7 @@ subroutine dc_self(charge_loc,hdc,hu,paw_dmft,pawtab,occ_matlu)
    ndim   = 2*lpawu + 1
    itypat = paw_dmft%typat(iatom)
    upawu  = hu(itypat)%upawu
-   jpawu  = hu(itypat)%jpawu
-   if (dmft_dc == 4) jpawu = zero
+   jpawu = merge(zero,hu(itypat)%jpawu,dmft_dc==4)
 
    if (dmft_dc == 8) then
      if (mod(iatomc,paw_dmft%nproc) /= paw_dmft%myproc) cycle
@@ -728,11 +727,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
 !      ===========================
 
        if (self%w_type == "real") then
-         if (optrw == 1) then
-           tmpfil = trim(paw_dmft%filnamei)//'Self_ra-omega_iatom'//trim(tag_at)//'_isppol'//tag_is
-         else
-           tmpfil = trim(paw_dmft%filapp)//'Self_ra-omega_iatom'//trim(tag_at)//'_isppol'//tag_is
-         end if ! optrw
+         tmpfil = trim(merge(paw_dmft%filnamei,paw_dmft%filapp,optrw==1))//'Self_ra-omega_iatom'//trim(tag_at)//'_isppol'//tag_is
        else
          if (present(opt_char)) then
            tmpfil = trim(paw_dmft%filapp)//'Self_ra-omega_iatom'//trim(tag_at)//'_isppol'//tag_is//opt_char
@@ -915,12 +910,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
                !MGNAG Runtime Error: wrtout_cpp.f90, line 896: Buffer overflow on output
                !Is it possible to rewrite the code below to avoid such a long message
                !What about Netcdf binary files ?
-
-           if (nspinor == 1) then
-             string_format = '(2x,393(e25.17e3,2x))'
-           else
-             string_format = '(2x,393(e18.10e3,2x))'
-           end if
+           string_format = merge('(2x,393(e25.17e3,2x))','(2x,393(e18.10e3,2x))',nspinor==1)
            write(message,string_format) self%omega(ifreq),&
                & ((((dble(self%oper(ifreq)%matlu(iatom)%mat(im+(ispinor-1)*ndim,im1+(ispinor1-1)*ndim,isppol)),&
                & aimag(self%oper(ifreq)%matlu(iatom)%mat(im+(ispinor-1)*ndim,im1+(ispinor1-1)*ndim,isppol)),&

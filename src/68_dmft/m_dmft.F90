@@ -142,15 +142,9 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
  !  part3 = "band"
  !end if
 
- opt_moments = 0
- if (paw_dmft%dmft_solv == 6 .or. paw_dmft%dmft_solv == 7) opt_moments = 1
- if (dmft_test == 1) then
-   prtopt = 2
-   opt_diff = 1
- else
-   prtopt = 0
-   opt_diff = 0
- end if
+ opt_moments = merge(1,0,paw_dmft%dmft_solv==6.or.paw_dmft%dmft_solv==7)
+ prtopt = merge(2,0,dmft_test==1)
+ opt_diff = merge(1,0,dmft_test==1)
 
  if (check == 1) then
    write(message,'(2a)') ch10,' DMFT Checks are enabled '
@@ -204,10 +198,8 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
  !    natomcor=natomcor+1
  !  end if
  !end do
- opt_renorm = paw_dmft%dmft_wanorthnorm
-!if(natomcor>1) opt_renorm=2 ! if number of atoms is larger than one, one must use a new orthogonalization scheme.
- if (paw_dmft%nspinor == 2 .and. (paw_dmft%dmft_solv == 8 .or. paw_dmft%dmft_solv == 9)) opt_renorm = 2 ! necessary to use hybri_limit in qmc_prep_ctqmc
-                                                                ! ought to be  generalized  in the  future
+ opt_renorm = merge(2,paw_dmft%dmft_wanorthnorm,paw_dmft%nspinor==2.and.(paw_dmft%dmft_solv==8.or.paw_dmft%dmft_solv==9))
+
  if (paw_dmft%dmft_solv /= -1) then
    call chipsi_renormalization(paw_dmft,opt=opt_renorm)
    if (paw_dmft%dmft_prtwan == 1) then
@@ -890,7 +882,7 @@ subroutine dyson(green,paw_dmft,self,weiss,opt_weissself)
  nsppol   = paw_dmft%nsppol
  nspinor  = paw_dmft%nspinor
  triqs    = (paw_dmft%dmft_solv == 6) .or. (paw_dmft%dmft_solv == 7)
- weissinv = 1
+ weissinv = merge(0,1,paw_dmft%dmft_solv==2.or.triqs)
 
  if (opt_weissself == 1) then
    write(message,'(2a)') ch10,"  ===  Use Dyson's Equation => weiss"
@@ -901,7 +893,6 @@ subroutine dyson(green,paw_dmft,self,weiss,opt_weissself)
  end if ! opt_weisself
 
 !call xmpi_barrier(spaceComm)
- if (paw_dmft%dmft_solv == 2 .or. triqs) weissinv = 0
 
  ABI_MALLOC(greeninv,(natom))
  call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu(:),greeninv(:))

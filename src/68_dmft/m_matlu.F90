@@ -2157,11 +2157,7 @@ end subroutine add_matlu
    if (lpawu == -1) cycle
    ndim = nspinor * (2*lpawu+1)
    do im=1,ndim
-     if (signe_used == 1) then
-       matlu(iatom)%mat(im,im,:) = matlu(iatom)%mat(im,im,:) - shift(iatom)
-     else
-       matlu(iatom)%mat(im,im,:) = matlu(iatom)%mat(im,im,:) + shift(iatom)
-     end if ! signe_used
+     matlu(iatom)%mat(im,im,:) = matlu(iatom)%mat(im,im,:) + merge(-shift(iatom),shift(iatom),signe_used==1)
    end do ! im
  end do ! iatom
 
