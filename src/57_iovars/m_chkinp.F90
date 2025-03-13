@@ -539,7 +539,10 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 !  cprj_in_memory
    if (dt%cprj_in_memory/=0) then
      if (dt%optdriver/=RUNL_GSTATE) then
-       ABI_ERROR_NOSTOP('cprj_in_memory/=0 is implemented only for ground state (optdriver=0).',ierr)
+       write(msg,'(a)') 'cprj_in_memory/=0 is implemented only for ground state (optdriver=0).&
+         & cprj_in_memory is set to 0 for this dataset.'
+       ABI_WARNING(msg)
+       dt%cprj_in_memory=0
      else
        if (dt%useylm /= 1) then
          ABI_ERROR_NOSTOP('cprj_in_memory/=0 requires the input variable "useylm" to be 1',ierr)
