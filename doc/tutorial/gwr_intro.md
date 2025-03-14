@@ -15,26 +15,31 @@ In the following, we will refer to this traditional approach as the **convention
 In the legacy GW approach, self-energy matrix elements in the KS representation are computed via an expensive convolution
 in the frequency domain [[cite:Golze2019]] — by default using the plasmon-pole approximation [[cite:Giantomassi2011]],
 which significantly accelerates calculations but introduces approximations and prevents direct access to the spectral function $A(\omega)$).
-In contrast, GWR evaluates the self-energy matrix elements using imaginary time,
+
+The conventional GW code exhibits quartic scaling with the number of atoms, whereas GWR achieves cubic scaling.
+
+In contrast, the GWR code evaluates the self-energy matrix elements using imaginary time and minimax meshes.
+that are adaptive energy grids that place points non-uniformly, concentrating them where they are most needed,
+leading to higher accuracy with fewer points.
+This approach was proposed for the first time in ... and then implmented
+Citations relevant to the minimax mesh [[cite:Azizi2023]], [[cite:Azizi2024]]
+
 followed by an analytic continuation (AC) to the real-frequency axis.
 The AC approach enables access to the full frequency dependence of $\Sigma$ and $A$
 at a substantially reduced computational cost, though the accuracy of the results now depends on the effectiveness of the AC step.
-
-The conventional GW code exhibits quartic scaling with the number of atoms, whereas GWR achieves cubic scaling.
 
 The frequency dependence of the self-energy $\Sigma(\omega)$ requires numerical integration over a range of energies.
 Traditionally, these calculations use uniform energy grids or plasmon-pole approximations.
 However, uniform grids become computationally expensive because they require many points
 to accurately capture sharp features in in the Green's function $G(\omega)$, and the screened interaction $W(\omega)$.
-The minimax mesh is an adaptive energy grid that places points non-uniformly,
-concentrating them where they are most needed, leading to higher accuracy with fewer points.
 
 The conventional GW code exhibits quartic scaling with the number of $\qq$-points, whereas GWR achieves linear scaling.
-In the legacy GW implementation, parallelization is available over the [[nband]] states using MPI; however,
-key data structures, such as the screened interaction $W$, are not MPI-distributed.
-As a result, the maximum number of usable MPI processes is constrained by [[nband]],
-and the workload becomes imbalanced when the number of MPI processes does not evenly divide [[nband]].
 
+The two codes strongly differ also at the level of the parallelization.
+In the legacy GW code, MPI parallelization is available over the [[nband]] states; however,
+key data structures, such as the screened interaction $W$, are not MPI-distributed.
+As a result, the maximum number of usable MPI processes is limited by [[nband]],
+and the workload becomes imbalanced when the number of MPI processes does not evenly divide [[nband]].
 More critically, self-energy calculations in the legacy GW code are highly memory-intensive,
 as they require storing both the wavefunctions (whose memory footprint scales with the number of MPI processes)
 and $W$ (a non-scalable portion).
@@ -42,7 +47,7 @@ This memory requirement becomes particularly problematic for large [[npweps]] va
 beyond the plasmon-pole approximation, where the full $W$ matrix must be stored for multiple frequencies.
 Consequently, conventional GW calculations can be prohibitively demanding in terms of memory, especially for complex systems.
 
-In contrast, the GWR code distributes most data structures across MPI processes,
+In contrast, the $GWR$ code distributes most data structures across MPI processes,
 which enables handling larger systems when sufficient computing nodes are available.
 However, this distribution comes at the cost of increased MPI communication in certain parts of the algorithm.
 More specifically, GWR leverages Parallel BLAS (PBLAS) to efficiently distribute the memory required
@@ -51,6 +56,19 @@ for storing the Green’s functions and $W$, significantly improving scalability
 Limitations: metallic systems are not supported.
 Temperature effects at the electronic level are not taken into account as we work
 with the T = 0 formalism.
+Only $\Gamma$-centered $\kk$-meshes are supported in GWR, e.g.:
+
+* [[ngkpt]] 4 4 4
+* [[nshiftk]] 1
+* [[shiftk]] 0 0 0
+
+!!! important
+
+    At the time of writing, the following features are **not yet supported** in GWR:
+
+    * PAW method
+    * Metallic systems as the our minimax meshes assume systems with an energy gap
+    * Spinor wave-functions ([[nspinor]] = 2)
 
 Select the task to be performed when [[optdriver]] == 6 i.e. GWR code.
 while [[gwr_task]] defines the task to be performed.
@@ -79,10 +97,12 @@ with $\Theta$ the Heaviside step-function, and
 \qquad (\tau < 0).
 \end{equation}
 
-For simplicity, in all the equations we assume a spin-unpolarized semiconductor with scalar wavefunctions
-(i.e. [[nsppol]] = 1 with [[nspinor]] = 1) and the Fermi level $\mu$ is set to zero.
-At the level of the implementation this means that the initial KS eigenvalues produced by the NSCF part of ABINIT
-are shifted with respect to $\mu$ at zero temperature that is now located at mid-gap.
+!!! important
+
+    For simplicity, in all the equations we assume a spin-unpolarized semiconductor with scalar wavefunctions
+    (i.e. [[nsppol]] = 1 with [[nspinor]] = 1) and the Fermi level $\mu$ is set to zero.
+    At the level of the implementation, this means that the initial KS eigenvalues produced by the NSCF part of ABINIT
+    are shifted with respect to the value of $\mu$ at zero temperature that is now located at mid-gap.
 
 The GWR code constructs the Green's function from the KS wavefunctions and eigenvalues stored
 in the WFK file specified via [[getwfk_filepath]] or [[getwfk]] when using multi-dataset mode.
@@ -96,47 +116,43 @@ When computing the KS Green's function $G^0$, the number of bands included in th
     Clearly, it does not make any sense to ask for more bands than the ones available in the WFK file.
 
 Note that GWR also needs the GS density produced by a previous GS SCF run.
-The location of the density file can be specified via [[getden_filepath]].
+The location of the density file can be specified via [[getden_filepath]] or [[getden]].
 
 The imaginary axis is sampled using a minimax mesh with [[gwr_ntau]] points.
 The other piece of information required for the selection of the minimax mesh
 is the ratio between the **fundamental** gap and the maximum transition energy i.e.
 the differerence between the highest KS eigenvalue for the empty states that, in turns, depends
 on the value of [[nband]] and the energy of the lowest occupied state.
-Citations relevant to the minimax mesh [[cite:Azizi2023]], [[cite:Azizi2024]]
 
 The irreducible polarizability is computed in real space in the supercell using
 
 \begin{equation}
-\chi(\rr,\RR', \tau) = G(\rr, \RR', i\tau) G^*(\rr, \RR', -i\tau)
+\chi(\rr,\RR', i\tau) = G(\rr, \RR', i\tau) G^*(\rr, \RR', -i\tau)
 \end{equation}
 
 and then immediately transformed to Fourier space.
+
+\begin{equation}
+\chi_\kk(\bg, \bg') =
+\sum_{\rr\in\mcC} e^{-i(\kk+\bg)\rr} \chi(\rr, \GG' = \kk+\bg')
+\end{equation}
+
 The cutoff energy for the polarizability is given by [[ecuteps]]
-while [[ecutsigx]] defines the number of g-vectors for the exchange part of the self-energy.
+while [[ecutsigx]] defines the number of $\gg$-vectors for the exchange part of the self-energy
+that is computed using the standard summation over occupied states:
 
-!!! note
+\begin{equation}\label{eq:Sigma_x}
+\Sigma_x(\rr_1,\rr_2)= -\sum_\kk^\BZ
+\sum_\nu^\text{occ} \Psi_{n\kk}(\rr_1){\Psi^\*_{n\kk}}(\rr_2)\,v(\rr_1,\rr_2)
+\end{equation}
 
-    Only $\Gamma$-centered $\kk$-meshes are supported in GWR, e.g.:
-
-    * [[ngkpt]] 4 4 4
-    * [[nshiftk]] 1
-    * [[shiftk]] 0 0 0
-
-
-As concerns the treatment of the long-wavelenght limit, we have the following input variables:
+As concerns the treatment of the long-wavelenght limit $\qq \rightarrow 0$ in the polarizability,
+we have the following input variables:
 
 [[inclvkb]],
 [[gw_qlwl]],
 [[gwr_max_hwtene]]
 
-!!! important
-
-    At the time of writing, the following features are **not yet supported** in GWR:
-
-    * Metallic systems as the our minimax meshes assumes systems with an energy gap
-    * PAW method
-    * Spinor wave-functions ([[nspinor]] = 2)
 
 ## GWR workflow for QP energies
 
@@ -184,7 +200,7 @@ The following physical properties can be computed:
 
 The GWR code requires an ABINIT build with Scalapack enabled.
 Moreover, a significant fraction of the computing time is spent in performing FFTs thus we **strongly**
-recommend to use optimized vendor-provided FFT libraries such as MKL-DFTI or FFTW3 instead
+recommend to use vendor-optimized FFT libraries such as MKL-DFTI or FFTW3 instead
 of the internal FFT version shipped with ABINIT.
 
 Note that single-precision is the default mode as in the conventional $GW$ code.
@@ -192,11 +208,10 @@ To run computations in double-precision, one has to configure with  `--enable-gw
 the command line interface is used or `enable_gw_dpc="yes"` when `--with-config-file=FILE` is used
 to specify the configuration options via an external FILE.
 
-
 ### MPI parallelization
 
 The GWR code employs a 4D MPI Cartesian grid to distribute both workload and memory over
-$\kk$-points, $(\gg, \gg')$ components, the points of the minimax mesh and collinear spins.
+collinear spins, points of the minimax mesh, $(\gg, \gg')$ components, and $\kk$-points.
 
 The user can specify the number of MPI-processes for the different dimensions using the input variable [[gwr_np_kgts]],
 although this is completely optional as the code will try to find an optimal distribution at runtime on the basis
@@ -204,4 +219,6 @@ on the number of MPI processes allocated.
 
 The scalability of the different levels depends of the dimensions of the problem at hand.
 
-Ideally the total number of MPI processes should be a multiple of [[gwr_ntau]] * [[nsppol]].
+Ideally the total number of MPI processes should be a multiple of [[gwr_ntau]] * [[nsppol]] as the parallelism
+over minimax points and spin is rather efficient (few communications required).
+On the contrary, the parallelism over $\gg$-vectors and $\kk$-points is much more network intensive

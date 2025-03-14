@@ -22,7 +22,7 @@ This tutorial should take about 2 hours.
 *Before beginning, you might consider creating a different subdirectory to work in. Why not create Work_gwr?*
 
 The file *tgwr_1.abi* is the input file for the first step:
-a KS SCF run followed by a band structure calculation along a $\kk$-path.
+a KS SCF run followed by a band structure calculation along a high-symmetry $\kk$-path.
 Copy it to the working directory with:
 
 ```sh
@@ -43,7 +43,7 @@ so that we have some time to discuss the input while ABINIT is running.
 
 The first dataset produces the density file that is then used to compute
 the band structure in the second dataset.
-Since all the input files of this tutorial will use the same geometry, pseudos and [[ecut]],
+Since all the input files of this tutorial use the same geometry, pseudos and [[ecut]],
 we declare these variables in an external file that will be included in all the other input files.
 
 ```
@@ -53,7 +53,7 @@ include "gwr_include.abi"
 
 {% dialog tests/tutorial/Input/gwr_include.abi %}
 
-If you open the file, you will notice that we are using NC pseudos taken
+If you open the include file, you will notice that we are using NC pseudos taken
 from the standard scalar-relativistic table of the PseudoDojo.
 For GW calculations, we strongly recommend using pseudos from the stringent table
 as they have closed-shells treated as valence that are important for a correct description of exchange effects [[cite:Setten2018]].
@@ -63,7 +63,8 @@ For efficiency reasons, we are using underconverged parameters:
 a 2x2x2 $\Gamma$-centered $\kk$-mesh and a cutoff energy [[ecut]] of XXX
 that is slightly smaller that the recommended value
 
-At this point, it is a very good idea to have a look at the electronic band structure to understand
+At this point, the calculation should have completed and
+it is time to have a look at the electronic band structure to understand
 to position of the band edges.
 
 !!! tip
@@ -85,8 +86,7 @@ The KS fundamental band gap is XXX that is strongly underestimanted wrt experime
     Similarly to the conventional $GW$ code, also $GWR$ can compute QP corrections only
     for the $\kk$-points belonging to the mesh found in the WFK file.
     Before running $GW$ calculations is always a good idea to analyze carefully the KS band
-    structure to understand the location of the band edges and select the most appropriate
-    $\kk$-mesh
+    structure to understand the location of the band edges and select the most appropriate $\kk$-mesh
 
 
 ### Generation of the WFK file with empty states
