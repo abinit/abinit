@@ -126,14 +126,12 @@ AC_DEFUN([SD_NETCDF_INIT], [
         ;;
 
       dir)
-    #    sd_netcdf_cppflags="${sd_netcdf_cppflags_def} -I${sd_netcdf_prefix}/include"
-    #    sd_netcdf_cppflags="test_cpp"
-    #    sd_netcdf_cflags="${sd_netcdf_cflags_def}"
-    #    sd_netcdf_cxxflags="${sd_netcdf_cxxflags_def}"
-    #    sd_netcdf_fcflags="${sd_netcdf_fcflags_def} -I${sd_netcdf_prefix}/include"
-    #    sd_netcdf_fcflags="test_fcflags"
-    #    sd_netcdf_ldflags="${sd_netcdf_ldflags_def}"
-    #    sd_netcdf_libs="-L${sd_netcdf_prefix}/lib ${sd_netcdf_libs_def} ${sd_netcdf_libs}"
+        sd_netcdf_cppflags="${sd_netcdf_cppflags_def} -I${sd_netcdf_prefix}/include"
+        sd_netcdf_cflags="${sd_netcdf_cflags_def}"
+        sd_netcdf_cxxflags="${sd_netcdf_cxxflags_def}"
+        sd_netcdf_fcflags="${sd_netcdf_fcflags_def} -I${sd_netcdf_prefix}/include"
+        sd_netcdf_ldflags="${sd_netcdf_ldflags_def}"
+        sd_netcdf_libs="-L${sd_netcdf_prefix}/lib ${sd_netcdf_libs_def} ${sd_netcdf_libs}"
         ;;
 
       env)
@@ -429,18 +427,19 @@ AC_DEFUN([_SD_NETCDF_CHECK_CONFIG], [
     fi
   fi
 
-  if test "${sd_netcdf_init}" = "dir" ; then
-    sd_netcdf_ncconfig="${sd_netcdf_prefix}/bin/nc-config"
-    AC_MSG_CHECKING([for nc-config binary])
-    if test -x "${sd_netcdf_ncconfig}" ; then
-      sd_netcdf_fcflags=$($sd_netcdf_ncconfig --cflags)
-      sd_netcdf_libs=$($sd_netcdf_ncconfig --libs)
-      sd_netcdf_cppflags=$($sd_netcdf_ncconfig --cflags)
-      AC_MSG_RESULT([${sd_netcdf_ncconfig}])
-    else
-      AC_MSG_ERROR([nc-config binary not found or cannot be executed : ${sd_netcdf_ncconfig}])
-    fi
-  fi
+  # This could have side effects if "nc-config --cflags" contains compiler options
+  #if test "${sd_netcdf_init}" = "dir" ; then
+  #  sd_netcdf_ncconfig="${sd_netcdf_prefix}/bin/nc-config"
+  #  AC_MSG_CHECKING([for nc-config binary])
+  #  if test -x "${sd_netcdf_ncconfig}" ; then
+  #    sd_netcdf_fcflags=$($sd_netcdf_ncconfig --cflags)
+  #    sd_netcdf_libs=$($sd_netcdf_ncconfig --libs)
+  #    sd_netcdf_cppflags=$($sd_netcdf_ncconfig --cflags)
+  #    AC_MSG_RESULT([${sd_netcdf_ncconfig}])
+  #  else
+  #    AC_MSG_ERROR([nc-config binary not found or cannot be executed : ${sd_netcdf_ncconfig}])
+  #  fi
+  #fi
 
   # Implicit status overrides everything
   if test "${sd_netcdf_status}" = "implicit"; then
