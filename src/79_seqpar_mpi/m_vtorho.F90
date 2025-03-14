@@ -369,7 +369,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: level=111,tim_mkrho=2
+! integer,parameter :: level=111
+ integer,parameter :: tim_mkrho=2
  !integer,save :: nwarning=0
  integer :: bdtot_index,counter,cplex,cplex_rhoij,dimffnl,enunit,iband,iband1,ibdkpt
  integer :: ibg,icg,ider,idir,ierr,ifft,ifor,ifor1,ii,ikg,ikpt
@@ -378,12 +379,12 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  integer :: mcgq,mcprj_local,mcprj_tmp,me_distrb,mkgq,mpi_comm_sphgrid
  integer :: my_nspinor,n1,n2,n3,n4,n5,n6,nband_eff,nbdbuf_eff !mwarning,
  integer :: nband_k,nband_cprj_k,nbuf,neglect_pawhat,nfftot,nkpg,nkpt1,nnsclo_now
- integer :: nproc_distrb,npw_k,nspden_rhoij,option,prtvol,nblk_gemm_nonlop
+ integer :: nproc_distrb,npw_k,nspden_rhoij,option,prtvol,nblk_gemm_nonlop,quit
  integer :: spaceComm_distrb,usecprj_local,usefock_ACE,usetimerev
  logical :: berryflag,computesusmat,fixed_occ,has_vectornd
  logical :: locc_test,paral_atom,remove_inv,usefock,with_vxctau
  logical :: do_last_ortho,wvlbigdft=.false.,do_invS
- real(dp) :: dmft_dftocc
+ integer :: dmft_dftocc
  real(dp) :: edmft,ebandlda,ebanddmft,ebandldatot,ekindmft,ekindmft2,ekinlda
  real(dp) :: min_occ,vxcavg_dum,strsxc(6)
  character(len=500) :: msg
@@ -986,9 +987,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          if(dtset%paral_kgb==0) then
            call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp,gs_hamk%ffnl_k,gs_hamk%ph3d_k)
          else if(istwf_k==1) then
-           call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp,gs_hamk%ffnl_k,gs_hamk%ph3d_k,kg_k_gather=bandfft_kpt(my_ikpt)%kg_k_gather)
+           call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp,gs_hamk%ffnl_k,gs_hamk%ph3d_k,&
+             kg_k_gather=bandfft_kpt(my_ikpt)%kg_k_gather)
          else
-           call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp,gs_hamk%ffnl_k,gs_hamk%ph3d_k,kg_k_gather=bandfft_kpt(my_ikpt)%kg_k_gather_sym)
+           call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp,gs_hamk%ffnl_k,gs_hamk%ph3d_k,&
+             kg_k_gather=bandfft_kpt(my_ikpt)%kg_k_gather_sym)
          end if
        end if
 
@@ -1865,12 +1868,17 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
  if(iscf>=0)then
    bdtot_index=1
+   quit=0
    do isppol=1,dtset%nsppol
      do ikpt=1,dtset%nkpt
        min_occ=two
        nband_k=dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
        do iband=1,nband_k
-         if(occ(bdtot_index)<min_occ)min_occ=occ(bdtot_index)
+         ! if ndbbuf_eff<=0, compute min_occ as usual
+         ! if nbdbuf_eff>0, compute min_occ only for bands not in the buffer
+         if (nbdbuf_eff<=0.or.iband<=nband_k-nbdbuf_eff) then
+           if(occ(bdtot_index)<min_occ)min_occ=occ(bdtot_index)
+         end if
          bdtot_index=bdtot_index+1
        end do
        if(min_occ>0.01_dp .and. .not. associated(extfpmd))then
@@ -1879,18 +1887,20 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
              'For k-point number: ',ikpt,',',ch10,&
              'The minimal occupation factor is: ',min_occ,'.',ch10,&
              'An adequate monitoring of convergence requires it to be  at most 0.01_dp.',ch10,&
-             'Action: increase slightly the number of bands.'
+             'Action: increase slightly the number of bands (or decrease nbdbuf).'
          else
            write(msg, '(a,i0,3a,i0,a,f7.3,5a)' )&
              'For k-point number: ',ikpt,', and',ch10,&
              'for spin polarization: ',isppol, ' the minimal occupation factor is: ',min_occ,'.',ch10,&
              'An adequate monitoring of convergence requires it to be at most 0.01_dp.',ch10,&
-             'Action: increase slightly the number of bands.'
+             'Action: increase slightly the number of bands (or decrease nbdbuf).'
          end if
          ABI_WARNING(msg)
+         quit=1
          exit ! It is enough if one lack of adequate occupation is identified, so exit.
        end if
      end do
+     if (quit==1) exit
    end do
  end if
 

@@ -88,13 +88,13 @@ module m_dtfil
    ! ireadctqmcdata non-zero if the ctqmcdata file must be read
 
   integer :: ireadddb
-   ! ireadddb non-zero  if the ddb file must be read
+   ! ireadddb non-zero if the ddb file must be read
 
   integer :: ireadden
-   ! ireadden non-zero  if the den file must be read
+   ! ireadden non-zero if the den file must be read
 
   integer :: ireadkden
-   ! ireadkden non-zero  if the kden file must be read
+   ! ireadkden non-zero if the kden file must be read
 
   integer :: ireadself
    ! ireadself non-zero if the self file must be read
@@ -203,9 +203,9 @@ module m_dtfil
    ! Filename used to read GWAN.nc file.
    ! Initialize via getgwan_filepath
 
-  character(len=fnlen) :: filvarpeqin
-   ! Filename used to read VARPEQ.nc file.
-   ! Initialize via getvarpeq_filepath
+  character(len=fnlen) :: filvpqin
+   ! Filename used to read VPQ.nc file.
+   ! Initialize via getvpq_filepath
 
   character(len=fnlen) :: filstat
    ! tmp//'_STATUS'
@@ -673,11 +673,11 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
                  getpath=dtset%getgwan_filepath)
  if (will_read == 0) dtfil%filgwanin = ABI_NOFILE
 
- ! According to getvarpeq_filepath, build _VARPEQ file name
- stringfile='_VARPEQ.nc'; stringvar='varpeq'
- call mkfilename(filnam, dtfil%filvarpeqin, dtset%getvarpeq, idtset, 0, jdtset_, ndtset, stringfile, stringvar, will_read, &
-                 getpath=dtset%getvarpeq_filepath)
- if (will_read == 0) dtfil%filvarpeqin = ABI_NOFILE
+ ! According to getvpq_filepath, build _VPQ file name
+ stringfile='_VPQ.nc'; stringvar='vpq'
+ call mkfilename(filnam, dtfil%filvpqin, dtset%getvpq, idtset, 0, jdtset_, ndtset, stringfile, stringvar, will_read, &
+                 getpath=dtset%getvpq_filepath)
+ if (will_read == 0) dtfil%filvpqin = ABI_NOFILE
 
  ! According to getden, build _DEN file name, referred as fildensin
  ! A default is available if getden is 0
@@ -1150,7 +1150,7 @@ end subroutine dtfil_init_time
 !! SOURCE
 
 subroutine fappnd(filapp,filnam,iapp,&
-&                 suff) ! optional argument
+                  suff) ! optional argument
 
 !Arguments ------------------------------------
 !scalars
@@ -1165,7 +1165,6 @@ subroutine fappnd(filapp,filnam,iapp,&
  character(len=3) :: suffixe
  character(len=8) :: nchar
  character(len=500) :: msg
-
 ! *************************************************************************
 
  if(iapp==0)then
