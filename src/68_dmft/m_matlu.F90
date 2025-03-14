@@ -3960,6 +3960,8 @@ end subroutine add_matlu
 !!  natom=number of atoms in cell.
 !!  opt_add = if present, add the result to trace
 !!  trace_tot = if present, computes the trace over all atoms
+!!  iatom = if present, only computes the contribution of iatom
+!!          if <=0, add all contributions as usual
 !!
 !! OUTPUT
 !!  trace(natom) :: Tr(matlu1*matlu2) for each atom
@@ -3970,15 +3972,16 @@ end subroutine add_matlu
 !!
 !! SOURCE
 
- subroutine trace_prod_matlu(matlu1,matlu2,natom,trace,trace_tot)
+ subroutine trace_prod_matlu(matlu1,matlu2,natom,trace,trace_tot,iatom)
 
 !Arguments ------------------------------------
  integer, intent(in) :: natom
  type(matlu_type), intent(in) :: matlu1(natom),matlu2(natom)
  complex(dpc), intent(inout) :: trace(natom)
  complex(dpc), optional, intent(out) :: trace_tot
+ integer, optional, intent(in) :: iatom
 !Local variables-------------------------------
- integer :: iatom,isppol,lpawu,nspinor,nsppol
+ integer :: ia1,ia2,iatom_,isppol,lpawu,nspinor,nsppol
 !************************************************************************
 
  nspinor = matlu1(1)%nspinor
@@ -3986,13 +3989,20 @@ end subroutine add_matlu
 
  trace(:)  = czero
 
- do iatom=1,natom
-   lpawu = matlu1(iatom)%lpawu
+ ia1 = 1 ; ia2 = natom
+ if (present(iatom)) then
+   if (iatom > 0) then
+     ia1 = iatom ; ia2 = iatom
+   end if
+ end if ! present(iatom)
+
+ do iatom_=ia1,ia2
+   lpawu = matlu1(iatom_)%lpawu
    if (lpawu == -1) cycle
    do isppol=1,nsppol
-     trace(iatom) = trace(iatom) + sum(matlu1(iatom)%mat(:,:,isppol)*transpose(matlu2(iatom)%mat(:,:,isppol)))
+     trace(iatom_) = trace(iatom_) + sum(matlu1(iatom_)%mat(:,:,isppol)*transpose(matlu2(iatom_)%mat(:,:,isppol)))
    end do ! isppol
-   if (nsppol == 1 .and. nspinor == 1) trace(iatom) = trace(iatom) * two
+   if (nsppol == 1 .and. nspinor == 1) trace(iatom_) = trace(iatom_) * two
  end do ! iatom
 
  if (present(trace_tot)) trace_tot = sum(trace(:))

@@ -4054,7 +4054,7 @@ subroutine compute_moments_ks(green,self,paw_dmft,opt_self,opt_log,opt_quick_res
  integer :: optlog,optquickrestart,optself,shift
  real(dp) :: dum,mu
  complex(dpc) :: trace_tmp
- type(oper_type) :: oper_tmp,oper_tmp2
+ type(oper_type) :: oper(2)
  real(dp), allocatable :: trace_loc(:,:)
  character(len=500) :: message
 !************************************************************************
@@ -4142,43 +4142,45 @@ subroutine compute_moments_ks(green,self,paw_dmft,opt_self,opt_log,opt_quick_res
  end if ! optlog=1 and optquickrestart=1
 
  if (optself == 1) then
-   call init_oper(paw_dmft,oper_tmp,nkpt=mkmem,shiftk=shift,opt_ksloc=1)
-   call init_oper(paw_dmft,oper_tmp2,nkpt=mkmem,shiftk=shift,opt_ksloc=1)
-   call prod_oper(green%moments(2),self%moments(2),oper_tmp,1)
+   do i=1,2
+     call init_oper(paw_dmft,oper(1),nkpt=mkmem,shiftk=shift,opt_ksloc=1)
+   end do
+   call prod_oper(green%moments(2),self%moments(2),oper(1),1)
    if (optlog == 1 .and. optquickrestart == 0) then
-     call trace_oper(oper_tmp,dum,trace_loc(:,:),1,trace_ks_cmplx=trace_tmp)
+     call trace_oper(oper(1),dum,trace_loc(:,:),1,trace_ks_cmplx=trace_tmp)
      green%trace_moments_log_ks(3) = green%trace_moments_log_ks(3) + trace_tmp
    end if
-   call prod_oper(self%moments(2),green%moments(2),oper_tmp2,1)
-   oper_tmp2%ks(:,:,:,:) = oper_tmp2%ks(:,:,:,:) + oper_tmp%ks(:,:,:,:)
-   green%moments(4)%ks(:,:,:,:) = oper_tmp2%ks(:,:,:,:) + green%moments(4)%ks(:,:,:,:)
-   call prod_oper(oper_tmp2,green%moments(2),oper_tmp,1)
-   call prod_oper(green%moments(3),self%moments(2),oper_tmp2,1)
+   call prod_oper(self%moments(2),green%moments(2),oper(2),1)
+   oper(2)%ks(:,:,:,:) = oper(2)%ks(:,:,:,:) + oper(1)%ks(:,:,:,:)
+   green%moments(4)%ks(:,:,:,:) = oper(2)%ks(:,:,:,:) + green%moments(4)%ks(:,:,:,:)
+   call prod_oper(oper(2),green%moments(2),oper(1),1)
+   call prod_oper(green%moments(3),self%moments(2),oper(2),1)
    if (optlog == 1 .and. optquickrestart == 0) then
-     call trace_oper(oper_tmp2,dum,trace_loc(:,:),1,trace_ks_cmplx=trace_tmp)
+     call trace_oper(oper(2),dum,trace_loc(:,:),1,trace_ks_cmplx=trace_tmp)
      green%trace_moments_log_ks(4) = green%trace_moments_log_ks(4) + trace_tmp
    end if
-   oper_tmp2%ks(:,:,:,:) = oper_tmp2%ks(:,:,:,:) + oper_tmp%ks(:,:,:,:)
-   call prod_oper(green%moments(2),self%moments(3),oper_tmp,1)
+   oper(2)%ks(:,:,:,:) = oper(2)%ks(:,:,:,:) + oper(1)%ks(:,:,:,:)
+   call prod_oper(green%moments(2),self%moments(3),oper(1),1)
    if (optlog == 1 .and. optquickrestart == 0) then
-     call trace_oper(oper_tmp,dum,trace_loc(:,:),1,trace_ks_cmplx=trace_tmp)
+     call trace_oper(oper(1),dum,trace_loc(:,:),1,trace_ks_cmplx=trace_tmp)
      green%trace_moments_log_ks(4) = green%trace_moments_log_ks(4) + trace_tmp
    end if
-   oper_tmp2%ks(:,:,:,:) = oper_tmp2%ks(:,:,:,:) + oper_tmp%ks(:,:,:,:)
-   call prod_oper(self%moments(3),green%moments(2),oper_tmp,1)
-   oper_tmp2%ks(:,:,:,:) = oper_tmp2%ks(:,:,:,:) + oper_tmp%ks(:,:,:,:)
-   call prod_oper(self%moments(2),self%moments(2),oper_tmp,1)
+   oper(2)%ks(:,:,:,:) = oper(2)%ks(:,:,:,:) + oper(1)%ks(:,:,:,:)
+   call prod_oper(self%moments(3),green%moments(2),oper(1),1)
+   oper(2)%ks(:,:,:,:) = oper(2)%ks(:,:,:,:) + oper(1)%ks(:,:,:,:)
+   call prod_oper(self%moments(2),self%moments(2),oper(1),1)
    if (optlog == 1 .and. optquickrestart == 0) then
-     call trace_oper(oper_tmp,dum,trace_loc(:,:),1,trace_ks_cmplx=trace_tmp)
+     call trace_oper(oper(1),dum,trace_loc(:,:),1,trace_ks_cmplx=trace_tmp)
      green%trace_moments_log_ks(4) = green%trace_moments_log_ks(4) + trace_tmp*half
    end if
-   oper_tmp2%ks(:,:,:,:) = oper_tmp2%ks(:,:,:,:) + oper_tmp%ks(:,:,:,:)
-   green%moments(5)%ks(:,:,:,:) = oper_tmp2%ks(:,:,:,:) + green%moments(5)%ks(:,:,:,:)
+   oper(2)%ks(:,:,:,:) = oper(2)%ks(:,:,:,:) + oper(1)%ks(:,:,:,:)
+   green%moments(5)%ks(:,:,:,:) = oper(2)%ks(:,:,:,:) + green%moments(5)%ks(:,:,:,:)
    do i=2,self%nmoments
      green%moments(i+1)%ks(:,:,:,:) = green%moments(i+1)%ks(:,:,:,:) + self%moments(i)%ks(:,:,:,:)
    end do ! i
-   call destroy_oper(oper_tmp)
-   call destroy_oper(oper_tmp2)
+   do i=1,2
+     call destroy_oper(oper(i))
+   end do
  end if ! optself>=1
 
  if (optlog == 1 .and. optquickrestart == 0) then
@@ -4321,8 +4323,7 @@ subroutine compute_moments_loc(green,self,energy_level,weiss,option,opt_log)
  complex(dpc) :: trace
  integer, allocatable :: lpawu(:)
  complex(dpc), allocatable :: trace_loc(:)
- type(matlu_type), allocatable :: matlu(:),matlu2(:),matlu3(:)
- type(matlu_type), allocatable :: matlu4(:),matlu5(:),matlu6(:)
+ type(matlu_type), allocatable :: matlu(:,:)
 !************************************************************************
 
  optlog = 0
@@ -4335,25 +4336,17 @@ subroutine compute_moments_loc(green,self,energy_level,weiss,option,opt_log)
  ABI_MALLOC(trace_loc,(natom))
 
  ABI_MALLOC(lpawu,(natom))
- ABI_MALLOC(matlu,(natom))
- ABI_MALLOC(matlu2,(natom))
- ABI_MALLOC(matlu3,(natom))
- ABI_MALLOC(matlu4,(natom))
- ABI_MALLOC(matlu5,(natom))
- ABI_MALLOC(matlu6,(natom))
+ ABI_MALLOC(matlu,(natom,6))
 
  lpawu(:) = energy_level%matlu(:)%lpawu ! to prevent the creation of a temporary array when calling init_matlu
 
- call init_matlu(natom,nspinor,nsppol,lpawu(:),matlu(:))
- call init_matlu(natom,nspinor,nsppol,lpawu(:),matlu2(:))
- call init_matlu(natom,nspinor,nsppol,lpawu(:),matlu3(:))
- call init_matlu(natom,nspinor,nsppol,lpawu(:),matlu4(:))
- call init_matlu(natom,nspinor,nsppol,lpawu(:),matlu5(:))
- call init_matlu(natom,nspinor,nsppol,lpawu(:),matlu6(:))
+ do i=1,6
+   call init_matlu(natom,nspinor,nsppol,lpawu(:),matlu(:,i))
+ end do
 
  if (option == 0) then
-   call add_matlu(green%moments(2)%matlu(:),energy_level%matlu(:),matlu(:),natom,-1)
-   call add_matlu(matlu(:),self%moments(1)%matlu(:),weiss%moments(1)%matlu(:),natom,-1)
+   call add_matlu(green%moments(2)%matlu(:),energy_level%matlu(:),matlu(:,1),natom,-1)
+   call add_matlu(matlu(:,1),self%moments(1)%matlu(:),weiss%moments(1)%matlu(:),natom,-1)
  else
    call add_matlu(green%moments(2)%matlu(:),energy_level%matlu(:),self%moments(1)%matlu(:),natom,-1)
  end if ! option
@@ -4363,125 +4356,117 @@ subroutine compute_moments_loc(green,self,energy_level,weiss,option,opt_log)
    do i=2,green%nmoments-1
      call trace_matlu(weiss%moments(i)%matlu(:),natom,itau=0,trace=weiss%trace_moments_log_loc(i))
    end do ! i
-   call prod_matlu(energy_level%matlu(:),energy_level%matlu(:),matlu(:),natom)
-   call trace_matlu(matlu(:),natom,itau=0,trace=trace)
+   call prod_matlu(energy_level%matlu(:),energy_level%matlu(:),matlu(:,1),natom)
+   call trace_matlu(matlu(:,1),natom,itau=0,trace=trace)
    weiss%trace_moments_log_loc(2) = weiss%trace_moments_log_loc(2) + trace*half
    call trace_prod_matlu(energy_level%matlu(:),weiss%moments(2)%matlu(:),natom,trace_loc(:),trace_tot=trace)
    weiss%trace_moments_log_loc(3) = weiss%trace_moments_log_loc(3) + trace
-   call trace_prod_matlu(energy_level%matlu(:),matlu(:),natom,trace_loc(:),trace_tot=trace)
+   call trace_prod_matlu(energy_level%matlu(:),matlu(:,1),natom,trace_loc(:),trace_tot=trace)
    weiss%trace_moments_log_loc(3) = weiss%trace_moments_log_loc(3) + trace*third
    call trace_prod_matlu(energy_level%matlu(:),weiss%moments(3)%matlu(:),natom,trace_loc(:),trace_tot=trace)
    weiss%trace_moments_log_loc(4) = weiss%trace_moments_log_loc(4) + trace
    call trace_prod_matlu(weiss%moments(2)%matlu(:),weiss%moments(2)%matlu(:),natom,trace_loc(:),trace_tot=trace)
    weiss%trace_moments_log_loc(4) = weiss%trace_moments_log_loc(4) + trace*half
-   call trace_prod_matlu(weiss%moments(2)%matlu(:),matlu(:),natom,trace_loc(:),trace_tot=trace)
+   call trace_prod_matlu(weiss%moments(2)%matlu(:),matlu(:,1),natom,trace_loc(:),trace_tot=trace)
    weiss%trace_moments_log_loc(4) = weiss%trace_moments_log_loc(4) + trace
-   call trace_prod_matlu(matlu(:),matlu(:),natom,trace_loc(:),trace_tot=trace)
+   call trace_prod_matlu(matlu(:,1),matlu(:,1),natom,trace_loc(:),trace_tot=trace)
    weiss%trace_moments_log_loc(4) = weiss%trace_moments_log_loc(4) + trace*quarter
 
    call trace_matlu(green%moments(2)%matlu(:),natom,itau=0,trace=green%trace_moments_log_loc(1))
  end if ! optlog=1
 
- call prod_matlu(green%moments(2)%matlu(:),green%moments(2)%matlu(:),matlu(:),natom) ! matlu=m0m0
+ call prod_matlu(green%moments(2)%matlu(:),green%moments(2)%matlu(:),matlu(:,1),natom) ! matlu=m0m0
 
- call add_matlu(green%moments(3)%matlu(:),matlu(:),matlu2(:),natom,-1) ! matlu2=m1
+ call add_matlu(green%moments(3)%matlu(:),matlu(:,1),matlu(:,2),natom,-1) ! matlu2=m1
 
  if (optlog == 1) then
-   call trace_matlu(matlu2(:),natom,itau=0,trace=green%trace_moments_log_loc(2))
-   call trace_matlu(matlu(:),natom,itau=0,trace=trace)
+   call trace_matlu(matlu(:,2),natom,itau=0,trace=green%trace_moments_log_loc(2))
+   call trace_matlu(matlu(:,1),natom,itau=0,trace=trace)
    green%trace_moments_log_loc(2) = green%trace_moments_log_loc(2) + half*trace
  end if ! optlog
 
  if (option == 0) then
-   call add_matlu(matlu2(:),self%moments(2)%matlu(:),weiss%moments(2)%matlu(:),natom,-1)
+   call add_matlu(matlu(:,2),self%moments(2)%matlu(:),weiss%moments(2)%matlu(:),natom,-1)
  else if (option == 1) then
-   call add_matlu(matlu2(:),weiss%moments(2)%matlu(:),self%moments(2)%matlu(:),natom,-1)
+   call add_matlu(matlu(:,2),weiss%moments(2)%matlu(:),self%moments(2)%matlu(:),natom,-1)
  end if ! option
 
- call prod_matlu(green%moments(2)%matlu(:),matlu(:),matlu3(:),natom) ! matlu3=m0m0m0
- call add_matlu(green%moments(4)%matlu(:),matlu3(:),matlu(:),natom,-1) ! matlu=green%moments(4)-m0m0m0
+ call prod_matlu(green%moments(2)%matlu(:),matlu(:,1),matlu(:,3),natom) ! matlu3=m0m0m0
+ call add_matlu(green%moments(4)%matlu(:),matlu(:,3),matlu(:,1),natom,-1) ! matlu=green%moments(4)-m0m0m0
 
  if (optlog == 1) then
-   call trace_matlu(matlu3(:),natom,itau=0,trace=trace)
+   call trace_matlu(matlu(:,3),natom,itau=0,trace=trace)
    green%trace_moments_log_loc(3) = trace * third
  end if ! optlog
 
- call prod_matlu(green%moments(2)%matlu(:),matlu2(:),matlu4(:),natom) ! matlu4=m0m1
- call prod_matlu(matlu2(:),green%moments(2)%matlu(:),matlu5(:),natom) ! matlu5=m1m0
+ call prod_matlu(green%moments(2)%matlu(:),matlu(:,2),matlu(:,4),natom) ! matlu4=m0m1
+ call prod_matlu(matlu(:,2),green%moments(2)%matlu(:),matlu(:,5),natom) ! matlu5=m1m0
 
- call add_matlu(matlu4(:),matlu5(:),matlu6(:),natom,1) ! matlu6=m0m1+m1m0
+ call add_matlu(matlu(:,4),matlu(:,5),matlu(:,6),natom,1) ! matlu6=m0m1+m1m0
 
  if (optlog == 1) then
-   call trace_matlu(matlu4(:),natom,itau=0,trace=trace)
+   call trace_matlu(matlu(:,4),natom,itau=0,trace=trace)
    green%trace_moments_log_loc(3) = trace + green%trace_moments_log_loc(3)
  end if ! optlog
 
- call add_matlu(matlu(:),matlu6(:),matlu5(:),natom,-1) ! matlu5=m2
+ call add_matlu(matlu(:,1),matlu(:,6),matlu(:,5),natom,-1) ! matlu5=m2
 
  if (optlog == 1) then
-   call trace_matlu(matlu5(:),natom,itau=0,trace=trace)
+   call trace_matlu(matlu(:,5),natom,itau=0,trace=trace)
    green%trace_moments_log_loc(3) = trace + green%trace_moments_log_loc(3)
  end if ! optlog
 
  if (option == 0) then
-   call add_matlu(matlu5(:),self%moments(3)%matlu(:),weiss%moments(3)%matlu(:),natom,-1)
+   call add_matlu(matlu(:,5),self%moments(3)%matlu(:),weiss%moments(3)%matlu(:),natom,-1)
  else if (option == 1) then
-   call add_matlu(matlu5(:),weiss%moments(3)%matlu(:),self%moments(3)%matlu(:),natom,-1)
+   call add_matlu(matlu(:,5),weiss%moments(3)%matlu(:),self%moments(3)%matlu(:),natom,-1)
  end if ! option
 
- call prod_matlu(green%moments(2)%matlu(:),matlu3(:),matlu(:),natom) ! matlu=m0m0m0m0
- call prod_matlu(matlu6(:),green%moments(2)%matlu(:),matlu3(:),natom) ! matlu3 = m0m1m0+m1m0m0
- call prod_matlu(green%moments(2)%matlu(:),matlu4(:),matlu6(:),natom) ! matlu6 = m0m0m1
- call add_matlu(matlu3(:),matlu6(:),matlu4(:),natom,1) ! matlu4 = m0m1m0+m1m0m0+m0m0m1
+ call prod_matlu(green%moments(2)%matlu(:),matlu(:,3),matlu(:,1),natom) ! matlu=m0m0m0m0
+ call prod_matlu(matlu(:,6),green%moments(2)%matlu(:),matlu(:,3),natom) ! matlu3 = m0m1m0+m1m0m0
+ call prod_matlu(green%moments(2)%matlu(:),matlu(:,4),matlu(:,6),natom) ! matlu6 = m0m0m1
+ call add_matlu(matlu(:,3),matlu(:,6),matlu(:,4),natom,1) ! matlu4 = m0m1m0+m1m0m0+m0m0m1
 
  if (optlog == 1) then
-   call trace_matlu(matlu4(:),natom,itau=0,trace=trace)
+   call trace_matlu(matlu(:,4),natom,itau=0,trace=trace)
    green%trace_moments_log_loc(4) = trace * third
-   call trace_matlu(matlu(:),natom,itau=0,trace=trace)
+   call trace_matlu(matlu(:,1),natom,itau=0,trace=trace)
    green%trace_moments_log_loc(4) = green%trace_moments_log_loc(4) + trace*quarter
  end if ! optlog
 
- call add_matlu(matlu(:),matlu4(:),matlu3(:),natom,1) ! matlu3 = m0m1m0+m1m0m0+m0m0m1+m0m0m0m0
+ call add_matlu(matlu(:,1),matlu(:,4),matlu(:,3),natom,1) ! matlu3 = m0m1m0+m1m0m0+m0m0m1+m0m0m0m0
 
- call prod_matlu(green%moments(2)%matlu(:),matlu5(:),matlu(:),natom) ! matlu=m0m2
- call prod_matlu(matlu5(:),green%moments(2)%matlu(:),matlu4(:),natom) ! matlu4=m2m0
- call add_matlu(matlu(:),matlu4(:),matlu5(:),natom,1) ! matlu5=m0m2+m2m0
- call prod_matlu(matlu2(:),matlu2(:),matlu(:),natom) ! matlu=m1m1
- call add_matlu(matlu(:),matlu5(:),matlu2(:),natom,1) ! matlu2=m1m1+m0m2+m2m0
+ call prod_matlu(green%moments(2)%matlu(:),matlu(:,5),matlu(:,1),natom) ! matlu=m0m2
+ call prod_matlu(matlu(:,5),green%moments(2)%matlu(:),matlu(:,4),natom) ! matlu4=m2m0
+ call add_matlu(matlu(:,1),matlu(:,4),matlu(:,5),natom,1) ! matlu5=m0m2+m2m0
+ call prod_matlu(matlu(:,2),matlu(:,2),matlu(:,1),natom) ! matlu=m1m1
+ call add_matlu(matlu(:,1),matlu(:,5),matlu(:,2),natom,1) ! matlu2=m1m1+m0m2+m2m0
 
  if (optlog == 1) then
-   call trace_matlu(matlu2(:),natom,itau=0,trace=trace)
+   call trace_matlu(matlu(:,2),natom,itau=0,trace=trace)
    green%trace_moments_log_loc(4) = green%trace_moments_log_loc(4) + trace*half
  end if ! optlog
 
- call add_matlu(green%moments(5)%matlu(:),matlu2(:),matlu(:),natom,-1)
- call add_matlu(matlu(:),matlu3(:),matlu2(:),natom,-1) ! matlu2=m3
+ call add_matlu(green%moments(5)%matlu(:),matlu(:,2),matlu(:,1),natom,-1)
+ call add_matlu(matlu(:,1),matlu(:,3),matlu(:,2),natom,-1) ! matlu2=m3
 
  if (optlog == 1) then
-   call trace_matlu(matlu2(:),natom,itau=0,trace=trace)
+   call trace_matlu(matlu(:,2),natom,itau=0,trace=trace)
    green%trace_moments_log_loc(4) = green%trace_moments_log_loc(4) + trace
  end if ! optlog
 
  if (option == 0) then
-   call add_matlu(matlu2(:),self%moments(4)%matlu(:),weiss%moments(4)%matlu(:),natom,-1)
+   call add_matlu(matlu(:,2),self%moments(4)%matlu(:),weiss%moments(4)%matlu(:),natom,-1)
  else if (option == 1) then
-   call add_matlu(matlu2(:),weiss%moments(4)%matlu(:),self%moments(4)%matlu(:),natom,-1)
+   call add_matlu(matlu(:,2),weiss%moments(4)%matlu(:),self%moments(4)%matlu(:),natom,-1)
  end if ! option
 
- call destroy_matlu(matlu(:),natom)
- call destroy_matlu(matlu2(:),natom)
- call destroy_matlu(matlu3(:),natom)
- call destroy_matlu(matlu4(:),natom)
- call destroy_matlu(matlu5(:),natom)
- call destroy_matlu(matlu6(:),natom)
+ do i=1,6
+   call destroy_matlu(matlu(:,i),natom)
+ end do
 
  ABI_FREE(lpawu)
  ABI_FREE(matlu)
- ABI_FREE(matlu2)
- ABI_FREE(matlu3)
- ABI_FREE(matlu4)
- ABI_FREE(matlu5)
- ABI_FREE(matlu6)
  ABI_FREE(trace_loc)
 
 end subroutine compute_moments_loc
