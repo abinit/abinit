@@ -2460,14 +2460,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
      dtset%dmftctqmc_basis=-1
      dtset%dmft_dc=0
      dtset%dmft_iter=-1
-     dtset%dmft_broyden_niter=7
-     dtset%dmft_mxsf=1.0_dp
      if (dtset%dmft_solv==6) dtset%dmft_triqs_pauli_prob = 1.0_dp
    end if
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_broyden_niter',tread,'INT')
-   if(tread==1) dtset%dmft_broyden_niter=intarr(1)
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_broyden_scheme',tread,'INT')
-   if(tread==1) dtset%dmft_broyden_scheme=intarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_dc',tread,'INT')
    if(tread==1) dtset%dmft_dc=intarr(1)
 ! XG20220322 - Should not impose dmft_dc on the flight. Should check in m_chkinp, and possibly stop.
@@ -2612,6 +2606,10 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
          dtset%dmft_triqs_time_invariance = 0
          dtset%dmft_triqs_move_double = 1
        end if
+       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_broyden_niter',tread,'INT')
+       if(tread==1) dtset%dmft_triqs_broyden_niter=intarr(1)
+       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_broyden_scheme',tread,'INT')
+       if(tread==1) dtset%dmft_triqs_broyden_scheme=intarr(1)
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_compute_integral',tread,'INT')
        if(tread==1) dtset%dmft_triqs_compute_integral=intarr(1)
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_det_init_size',tread,'INT')
@@ -2645,14 +2643,16 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
        if(tread==1) dtset%dmft_triqs_move_double=intarr(1)
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_move_shift',tread,'INT')
        if(tread==1) dtset%dmft_triqs_move_shift=intarr(1)
-       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_pauli_prob',tread,'DPR')
-       if(tread==1) dtset%dmft_triqs_pauli_prob=dprarr(1)
+       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_mxhyb',tread,'DPR')
+       if(tread==1) dtset%dmft_triqs_mxhyb=dprarr(1)
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_nleg',tread,'INT')
        if(tread==1) dtset%dmft_triqs_nleg=intarr(1)
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_nsubdivisions',tread,'INT')
        if(tread==1) dtset%dmft_triqs_nsubdivisions=intarr(1)
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_ntau_delta',tread,'INT')
        if(tread==1) dtset%dmft_triqs_ntau_delta=intarr(1)
+       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_pauli_prob',tread,'DPR')
+       if(tread==1) dtset%dmft_triqs_pauli_prob=dprarr(1)
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_read_ctqmcdata',tread,'INT')
        if(tread==1) dtset%dmft_triqs_read_ctqmcdata=intarr(1)
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_seed_a',tread,'INT')
