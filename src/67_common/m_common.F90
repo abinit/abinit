@@ -2053,17 +2053,22 @@ type(crystal_t) function crystal_from_file(path, comm) result(new)
 
 !Local variables-------------------------------
 !scalars
- integer :: fform
+ integer :: fform, ncid
  type(hdr_type) :: hdr
-
 ! *************************************************************************
 
- ! Assume file with Abinit header
- ! TODO: Should add routine to read crystal from structure without hdr
- call hdr%from_fname(path, fform, comm)
- ABI_CHECK(fform /= 0, "fform == 0")
- new = hdr%get_crystal()
- call hdr%free()
+ if (endswith(path, ".nc")) then
+   NCF_CHECK(nctk_open_read(ncid, path, comm))
+   call new%ncread(ncid)
+   NCF_CHECK(nf90_close(ncid))
+ else
+   ! Assume file with Abinit header
+   ! TODO: Should add routine to read crystal from structure without hdr
+   call hdr%from_fname(path, fform, comm)
+   ABI_CHECK(fform /= 0, "fform == 0")
+   new = hdr%get_crystal()
+   call hdr%free()
+ end if
 
 end function crystal_from_file
 !!***

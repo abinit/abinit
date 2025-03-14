@@ -126,12 +126,12 @@ AC_DEFUN([SD_NETCDF_FORTRAN_INIT], [
         ;;
 
       dir)
-      #  sd_netcdf_fortran_cppflags="${sd_netcdf_fortran_cppflags_def} -I${sd_netcdf_fortran_prefix}/include"
-      #  sd_netcdf_fortran_cflags="${sd_netcdf_fortran_cflags_def}"
-      #  sd_netcdf_fortran_cxxflags="${sd_netcdf_fortran_cxxflags_def}"
-      #  sd_netcdf_fortran_fcflags="${sd_netcdf_fortran_fcflags_def} -I${sd_netcdf_fortran_prefix}/include"
-      #  sd_netcdf_fortran_ldflags="${sd_netcdf_fortran_ldflags_def}"
-      #  sd_netcdf_fortran_libs="-L${sd_netcdf_fortran_prefix}/lib ${sd_netcdf_fortran_libs_def} ${sd_netcdf_fortran_libs}"
+        sd_netcdf_fortran_cppflags="${sd_netcdf_fortran_cppflags_def} -I${sd_netcdf_fortran_prefix}/include"
+        sd_netcdf_fortran_cflags="${sd_netcdf_fortran_cflags_def}"
+        sd_netcdf_fortran_cxxflags="${sd_netcdf_fortran_cxxflags_def}"
+        sd_netcdf_fortran_fcflags="${sd_netcdf_fortran_fcflags_def} -I${sd_netcdf_fortran_prefix}/include"
+        sd_netcdf_fortran_ldflags="${sd_netcdf_fortran_ldflags_def}"
+        sd_netcdf_fortran_libs="-L${sd_netcdf_fortran_prefix}/lib ${sd_netcdf_fortran_libs_def} ${sd_netcdf_fortran_libs}"
         ;;
 
       env)
@@ -448,18 +448,19 @@ AC_DEFUN([_SD_NETCDF_FORTRAN_CHECK_CONFIG], [
     fi
   fi
 
-  if test "${sd_netcdf_fortran_init}" = "dir" ; then
-    sd_netcdf_fortran_nfconfig="${sd_netcdf_fortran_prefix}/bin/nf-config"
-    AC_MSG_CHECKING([for nf-config binary])
-    if test -x "${sd_netcdf_fortran_nfconfig}" ; then
-      sd_netcdf_fortran_fcflags=$($sd_netcdf_fortran_nfconfig --fflags)
-      sd_netcdf_fortran_libs=$($sd_netcdf_fortran_nfconfig --flibs)
-      sd_netcdf_fortran_cppflags=$($sd_netcdf_fortran_nfconfig --fflags)
-      AC_MSG_RESULT([${sd_netcdf_fortran_nfconfig}])
-    else
-      AC_MSG_ERROR([nf-config binary not found or cannot be executed : ${sd_netcdf_fortran_nfconfig}])
-    fi
-  fi
+  # This could have side effects if "nf-config --fflags" contains compiler options
+  #if test "${sd_netcdf_fortran_init}" = "dir" ; then
+  #  sd_netcdf_fortran_nfconfig="${sd_netcdf_fortran_prefix}/bin/nf-config"
+  #  AC_MSG_CHECKING([for nf-config binary])
+  #  if test -x "${sd_netcdf_fortran_nfconfig}" ; then
+  #    sd_netcdf_fortran_fcflags=$($sd_netcdf_fortran_nfconfig --fflags)
+  #    sd_netcdf_fortran_libs=$($sd_netcdf_fortran_nfconfig --flibs)
+  #    sd_netcdf_fortran_cppflags=$($sd_netcdf_fortran_nfconfig --fflags)
+  #    AC_MSG_RESULT([${sd_netcdf_fortran_nfconfig}])
+  #  else
+  #    AC_MSG_ERROR([nf-config binary not found or cannot be executed : ${sd_netcdf_fortran_nfconfig}])
+  #  fi
+  #fi
 
   # Implicit status overrides everything
   if test "${sd_netcdf_fortran_status}" = "implicit"; then

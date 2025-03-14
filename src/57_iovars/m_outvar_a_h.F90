@@ -1236,8 +1236,8 @@ subroutine outvar_a_h(choice,dmatpuflag,dtsets,iout,&
  intarr(1,:)=dtsets(:)%getsuscep
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'getsuscep','INT',0)
 
- intarr(1,:)=dtsets(:)%getvarpeq
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'getvarpeq','INT',0)
+ intarr(1,:)=dtsets(:)%getvpq
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'getvpq','INT',0)
 
  intarr(1,:)=dtsets(:)%getvel
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'getvel','INT',0)
