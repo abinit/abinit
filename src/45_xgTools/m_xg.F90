@@ -1601,21 +1601,17 @@ contains
 
     logical :: forwrd = .true.
 
-#if defined HAVE_OPENMP_OFFLOAD && !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
-    complex(dpc), ABI_CONTIGUOUS pointer :: xgBlock__vecC(:,:)
-    real(dp), ABI_CONTIGUOUS pointer :: xgBlock__vecR(:,:)
-#endif
-
-    ! Memory check: xgBlock should not have a target mapped to GPU
+    ! OpenMP region query: detect OpenMP target region must be CPU
 #if defined(HAVE_OPENMP_OFFLOAD)
-    select case(xgBlock%space)
-    case (SPACE_R,SPACE_CR)
-        xgBlock__vecR => xgBlock%vecR
-        ABI_CHECK(xomp_target_is_present(c_loc(xgBlock__vecR)), "Cannot use data mapped to device by OpenMP")
-    case (SPACE_C)
-        xgBlock__vecC => xgBlock%vecC
-        ABI_CHECK(xomp_target_is_present(c_loc(xgBlock__vecC)), "Cannot use data mapped to device by OpenMP")
-    end select
+    ! returns true if the current task is executing on the host device; otherwise, it returns false
+    ABI_CHECK(xomp_is_initial_device(), "Must execute on host (CPU) to use xgBlock_permuteCols")
+    !select case(xgBlock%space)
+    !case (SPACE_R,SPACE_CR)
+    !    ! this checks if target exists in GPU but not useful to know current device
+    !    ABI_CHECK(xomp_target_is_present(c_loc(xgBlock%vecR)), "Cannot use data mapped to device by OpenMP")
+    !case (SPACE_C)
+    !    ABI_CHECK(xomp_target_is_present(c_loc(xgBlock%vecC)), "Cannot use data mapped to device by OpenMP")
+    !end select
 #endif
 
     ! Operand check: gpu_option of xgBlock should be disabled
