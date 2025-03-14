@@ -322,8 +322,7 @@ related to the inverse of the microscopic dielectric matrix by means of:
 \ee_M^{\text{LF}}(\ww) = \lim_{\qq \rightarrow 0} \dfrac{1}{\ee^{-1}_{0 0}(\qq,\ww)}
 \end{equation}
 
-The optical absorption spectrum -- the quantity one can compare with experiments -- is
-given by the imaginary part.
+The optical absorption spectrum -- the quantity one can compare with experiments -- is given by the imaginary part.
 
 Note that the equation above differs from
 

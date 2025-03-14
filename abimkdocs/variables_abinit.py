@@ -6776,8 +6776,7 @@ the core electrons in the reference atomic configuration that are calculated
 during the generation of the PAW setup. This is a good approximation provided
 that the core wave functions are strictly localized inside the PAW spheres.
 
-[[gw_sigxcore]] defines the approximation used to evaluate the core
-contribution to sigma.
+[[gw_sigxcore]] defines the approximation used to evaluate the core contribution to sigma.
 
   * [[gw_sigxcore]] = 0, standard approach, the core contribution is approximated with vxc.
   * [[gw_sigxcore]] = 1, the core term is approximated with the Fock operator inside the PAW spheres.
@@ -6796,9 +6795,9 @@ Variable(
     requires="[[optdriver]] == 6",
     added_in_version="9.6.2",
     text=r"""
-Sets a tolerance for absolute differences of QP energies between to consecutive iterations
+Sets a tolerance for absolute differences of QP energies between two consecutive iterations
 that will cause the self-consistent GWR cycle to stop.
-Can be specified in Ha (the default), Ry, eV or Kelvin, since **gwr_tolqpe** has
+It can be specified in Ha (the default), Ry, eV or Kelvin, since **gwr_tolqpe** has
 the [[ENERGY]] characteristics (1 Ha = 27.2113845 eV)
 """,
 ),
