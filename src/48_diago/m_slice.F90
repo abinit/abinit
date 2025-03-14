@@ -198,6 +198,7 @@ module m_slice
     public :: sliceAll_split
     public :: sliceAll_merge
     public :: slice_blockCopy
+    public :: slice_findOptimalNumMpiProcs
     public :: slice_init
     public :: slice_run
     public :: slice_free
@@ -2357,7 +2358,8 @@ end function pad_size
 !! 
 !! FUNCTION
 !! Read from A deep copy to B, given column ranges.
-!! Handles GPU / CPU data location by calling xgBlock_copy.
+!! Handles GPU / CPU data location by calling xgBlock_copy as well as
+!! enter data map OpenMP ranges for execution on CPU or GPU.
 !! 
 !! SOURCE
 
@@ -2375,6 +2377,7 @@ subroutine slice_blockCopy(A_in,B_out,a1,b1,a2,b2)
     integer :: nrowsA,ncolsA
     integer :: nrowsB,ncolsB
     integer :: a2_,b2_
+    logical :: on_host 
     integer :: gpua,gpub ! gpu_options
     integer :: ncolsA_block, ncolsB_block
     type(xgBlock_t) :: A_block, B_block
@@ -2390,9 +2393,15 @@ subroutine slice_blockCopy(A_in,B_out,a1,b1,a2,b2)
     if (nrowsA/=nrowsB) ABI_ERROR("A and B should have the same number of rows")
 
     ! DEBUG print gpu_option of in/out objects
+    ! OMP query: are we on CPU or not?
     call xgBlock_get_gpu_option(A_in ,gpua)
     call xgBlock_get_gpu_option(B_out,gpub)
-    write(std_out,'(a,i0,a,i0)') 'Memcopy: Read from GPU ',gpua,' Write to GPU ',gpub
+    on_host = xomp_is_initial_device()
+    write(std_out,'(a,i0,a,i0,a,i0)') 'Memcopy: gpu_optionA ',gpua,' gpu_optionB ',gpub, ' on_host ', on_host
+    !! IML 14/03 TODO decide whether we perform actions of copy from to gpu in here ..
+    ! first detect cases of incompatiblity
+    ! print on_host has no point because only the CPU prints anyway .. always true
+    ! ..
 
     ! Get last index in block
     a2_ = ncolsA
@@ -2406,7 +2415,7 @@ subroutine slice_blockCopy(A_in,B_out,a1,b1,a2,b2)
 
     ! Deep copy from X to Y
     ! ============================
-    ! xgBlock_copy will do 
+    ! xgBlock_copy will do FIXME also depends on on_host!! 
     ! if A CPU and B GPU then: copy from B GPU to B CPU, copy from A CPU to B CPU
     ! so the copy is performed on CPU if one of A and B is on CPU.
     call xgBlock_setBlock(A_in ,A_block,rows=nrowsA,cols=ncolsA_block,fcol=a1)
@@ -2416,6 +2425,73 @@ subroutine slice_blockCopy(A_in,B_out,a1,b1,a2,b2)
     call timab(tim_slice_Acopy,2,tsec)
 
 end subroutine slice_blockCopy
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_slice/slice_findOptimalNumMpiProcs
+!! NAME
+!! slice_findOptimalNumMpiProcs
+!! 
+!! FUNCTION
+!! Distributes 'nproc' number of MPI processes across 'nslice' slices from 
+!! given parameters: number of vectors 'nvec' and filter degree 'ndeg' per slice.
+!! The distribution is optimal in theory, in the sense that is it obtained as 
+!! the solution to the discrete optimisation problem under constraint:
+!! 
+!!     min_{x(1),..,x(s)} max_{1,..,s}   nvec(i) * ndeg(i) / x(i)
+!!     x(1) + .. + x(s) = nproc
+!! 
+!! where x(i) is the unknown number of MPI processes used by i-th slice.
+!! The cost function to be minimised represents the operation count of 
+!! the polynomial filtering, which is 'ndeg' Hamiltonian applications 
+!! applied to 'nvec/x' vectors using the MPI band distribution.
+!!
+!! SOURCE
+
+subroutine slice_findOptimalNumMpiProcs(nproc,nslice,idx,ndeg,nproc_opt)
+
+    implicit none
+
+    !Arguments ------------------------------------
+    integer,          intent(in   ) :: nproc
+    integer,          intent(in   ) :: nslice
+    integer, pointer, intent(in   ) :: idx(:,:)
+    integer, pointer, intent(in   ) :: ndeg(:)
+    integer, pointer, intent(inout) :: nproc_opt(:)
+    
+    !Local variables-------------------------------
+    integer :: i
+    integer :: i_most_charged
+    real(dp) :: sum_tot
+    integer, allocatable :: nvec(:)
+
+! *********************************************************************
+
+    ABI_MALLOC(nvec, (nslice))
+    nvec(:) = (/ (idx(i,2) - idx(i,1) + 1, i=1,nslice) /)
+    sum_tot = dot_product(nvec,ndeg)
+
+    write(std_out,*) 'DEBUG find optimal num of mpi'
+    write(std_out,*) 'nvec=', nvec(:)
+    write(std_out,*) 'ndeg=', ndeg(:)
+    write(std_out,*) 'sum_tot=', sum_tot
+    
+    ! for all slices, initialize to floor
+    nproc_opt(1:nslice) = (/ (max(floor(nproc*nvec(i)*ndeg(i)/sum_tot),1), i=1,nslice) /)
+    
+    ! find max charged slice
+    i_most_charged = maxloc( (/ (nvec(i)*ndeg(i), i=1,nslice) /), dim=1)
+    write(std_out,*) 'most charged slice is', i_most_charged
+    ! add remainder in max charge slice to sum to nproc
+    nproc_opt(i_most_charged) = nproc - sum(nproc_opt(1:nslice)) + nproc_opt(i_most_charged)
+
+    if (allocated(nvec)) ABI_FREE(nvec)
+   
+    ! must also assure that nvec divides nproc_opt!
+    ! possibly add pad ?
+ 
+end subroutine slice_findOptimalNumMpiProcs
 !!***
 
 !----------------------------------------------------------------------

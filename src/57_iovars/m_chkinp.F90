@@ -577,6 +577,11 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      end if
    end if
 
+!  spectrum slicing
+   if (dt%wfoptalg/=112 .and. dt%paral_slice/=0) then
+       ABI_ERROR_NOSTOP("paral_slice is useful only for Spectrum Slicing (wfoptalg=112).", ierr)
+   end if
+
 !  d3e_pert1_atpol
    call chkint_ge(0,0,cond_string,cond_values,ierr,'d3e_pert1_atpol(1)',dt%d3e_pert1_atpol(1),1,iout)
    cond_string(1)='natom' ; cond_values(1)=natom

@@ -380,20 +380,23 @@ subroutine slicewf(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
 ! blocking communications.
 !######################################################################
 
- ! Various parameters stored per slice
  npband = l_mpi_enreg%nproc_band
  nslice = dtset%nslice
- ABI_MALLOC(pband, (nband)); pband_ptr => pband
- ABI_MALLOC(idx, (nslice,2)); idx_ptr => idx                   ! idx in overlapping mem
- ABI_MALLOC(idx_ovlp, (nslice,2)); idx_ovlp_ptr => idx_ovlp    ! idx in overlap-free mem
- ABI_MALLOC(idx_merge, (nslice,2)); idx_merge_ptr => idx_merge ! converged idx in overlap-free mem
- ABI_MALLOC(ndeg, (nslice)); ndeg_ptr => ndeg
- ABI_MALLOC(sbound, (nslice,4)); sbound_ptr => sbound
- ABI_MALLOC(npbandSlice, (nslice)); npbandSlice_ptr => npbandSlice
+
+ ! Memory allocations of size depending on fixed nslice
+ ABI_MALLOC(pband, (nband)); pband_ptr => pband                     ! band permutation
+ ABI_MALLOC(idx, (nslice,2)); idx_ptr => idx                        ! idx in overlapping mem
+ ABI_MALLOC(idx_ovlp, (nslice,2)); idx_ovlp_ptr => idx_ovlp         ! idx in overlap-free mem
+ ABI_MALLOC(idx_merge, (nslice,2)); idx_merge_ptr => idx_merge      ! converged idx in overlap-free mem
+ ABI_MALLOC(ndeg, (nslice)); ndeg_ptr => ndeg                       ! filter degree per slice
+ ABI_MALLOC(sbound, (nslice,4)); sbound_ptr => sbound               ! eigenvalue bounds per slice
+ ABI_MALLOC(npbandSlice, (nslice)); npbandSlice_ptr => npbandSlice  ! number of mpi processes per slice
+
+ ! Initialize values
  pband(:) = (/(iband, iband=1,nband)/)
- npbandSlice(:) = (/(npband, islice=1,nslice)/) ! TODO distribute for parallel slice loop
-                                              ! according to slice load balance option
-                                              ! currently is sequential
+ if (dtset%paral_slice == 0) then
+    npbandSlice(:) = (/(npband, islice=1,nslice)/)                 
+ end if
 
  ! ************ Initialize spectrum slicing workspace: Rayleigh values and residuals
  write(std_out,'(a)') '1) Init sliceAll'
@@ -418,6 +421,18 @@ subroutine slicewf(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
  ABI_NVTX_START_RANGE(NVTX_SLICEALL_SPLIT)
  call sliceAll_split(sliceAll,idx_ptr,ndeg_ptr,sbound_ptr,pband_ptr,npbandSlice_ptr)
  ABI_NVTX_END_RANGE()
+
+ ! ************ Distribute MPI procs across slices
+ if (dtset%paral_slice == 1) then
+    call slice_findOptimalNumMpiProcs(npband,nslice,idx_ptr,ndeg_ptr,npbandSlice_ptr)
+    write(std_out,*) ' ==== paral_slice option detected'
+    write(std_out,*) 'optimal num mpi procs:'
+    write(std_out,*) npbandSlice(:)
+    write(std_out,*) ' '
+    
+    ! reset for the moment because not implemented
+    npbandSlice(:) = (/(npband, islice=1,nslice)/)                 
+ end if
 
  ! data transfer? H2D D2H just to accelerate one AX
  ! TODO: deactivate all that, perform entirely on CPU
