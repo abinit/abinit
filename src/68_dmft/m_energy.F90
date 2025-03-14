@@ -637,6 +637,7 @@ end subroutine compute_band_energy
 !!  green  <type(green_type)>= green function data
 !!  paw_dmft  <type(paw_dmft_type)>= paw+dmft related data
 !!  self  <type(self_type)>= self energy function data
+!!  iatom = if present, only computes the contribution of this atom
 !!
 !! OUTPUT
 !!  e_hu_migdal(natom)= Migdal energy for each atom.
@@ -644,7 +645,7 @@ end subroutine compute_band_energy
 !!
 !! SOURCE
 
-subroutine compute_migdal_energy(e_hu_migdal,e_hu_migdal_tot,green,paw_dmft,self)
+subroutine compute_migdal_energy(e_hu_migdal,e_hu_migdal_tot,green,paw_dmft,self,iatom)
 
 !#ifdef FC_INTEL
 !DEC$ NOOPTIMIZE
@@ -656,9 +657,10 @@ subroutine compute_migdal_energy(e_hu_migdal,e_hu_migdal_tot,green,paw_dmft,self
  real(dp), intent(out) :: e_hu_migdal_tot
  real(dp), intent(inout) :: e_hu_migdal(paw_dmft%natom)
  type(self_type), target, intent(in) :: self
+ integer, optional, intent(in) :: iatom
 ! integer :: prtopt
 !Local variables-------------------------------
- integer :: i,ierr,ifreq,j,myproc,natom,nmoments,nspinor,nsppol,nwlo
+ integer :: i,iatom_,ierr,ifreq,j,myproc,natom,nmoments,nspinor,nsppol,nwlo
  real(dp) :: beta,temp
  complex(dpc) :: omega
  complex(dpc), allocatable :: omega_fac(:),trace_moments(:,:),trace(:)
@@ -685,6 +687,11 @@ subroutine compute_migdal_energy(e_hu_migdal,e_hu_migdal_tot,green,paw_dmft,self
  temp     = paw_dmft%temp
 
  if (self%has_moments == 1) nmoments = self%nmoments
+ iatom_ = 0
+ if (present(iatom)) then
+   iatom_ = iatom
+   if (self%has_moments == 0) ABI_BUG("You should not be here")
+ end if
 
  if (green%nw /= self%nw) then
    message = 'self and green do not contain the same number of frequencies'
@@ -702,7 +709,7 @@ subroutine compute_migdal_energy(e_hu_migdal,e_hu_migdal_tot,green,paw_dmft,self
    trace_moments(:,:) = czero
    do i=1,nmoments
      do j=1,i
-       call trace_prod_matlu(self%moments(j)%matlu(:),green%moments(i-j+1)%matlu(:),natom,trace(:))
+       call trace_prod_matlu(self%moments(j)%matlu(:),green%moments(i-j+1)%matlu(:),natom,trace(:),iatom=iatom_)
        trace_moments(:,i) = trace_moments(:,i) + trace(:)
      end do ! j
    end do ! i
@@ -726,7 +733,7 @@ subroutine compute_migdal_energy(e_hu_migdal,e_hu_migdal_tot,green,paw_dmft,self
      call add_matlu(self%oper(ifreq)%matlu(:),self_nwlo_re(:),matlu_tmp(:),natom,-1)
    end if ! moments
 
-   call trace_prod_matlu(matlu_tmp(:),green%oper(ifreq)%matlu(:),natom,trace(:))
+   call trace_prod_matlu(matlu_tmp(:),green%oper(ifreq)%matlu(:),natom,trace(:),iatom=iatom_)
 
    e_hu_migdal(:) = e_hu_migdal(:) + dble(trace(:))*paw_dmft%wgt_wlo(ifreq)*temp*two
 
@@ -1250,7 +1257,8 @@ subroutine compute_trace_log_loc(green,paw_dmft,trace,opt_inv)
  real(dp), intent(out) :: trace
  integer, optional, intent(in) :: opt_inv
 !Local variables-------------------------------
- integer  :: i,iatom,ierr,ifreq,info,isppol,lpawu,lwork,natom,ndim,nmoments,nspinor,nsppol,nwlo,optinv
+ integer :: i,iatom,ierr,ifreq,info,isppol,lpawu,lwork,natom,ndim
+ integer :: nmoments,nspinor,nsppol,nwlo,optinv
  real(dp) :: correction,fac,temp
  complex(dpc) :: trace_tmp
  real(dp), allocatable :: eig(:),rwork(:)
