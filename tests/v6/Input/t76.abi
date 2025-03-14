@@ -78,7 +78,6 @@ iatprj_bs 1 2
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = anaddb
-#%% exclude_builders = eos_gnu_13.2_serial
 #%% test_chain = t72.abi, t73.abi, t74.abi, t75.abi, t76.abi
 #%% input_ddb = t73.ddb.out 
 #%% input_gkk = t74o

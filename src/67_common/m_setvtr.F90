@@ -236,13 +236,13 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
  integer :: coredens_method,coretau_method,mpi_comm_sphgrid,nk3xc
  integer :: iatom,ifft,ipositron,ispden,nfftot
  integer :: optatm,optdyfr,opteltfr,optgr,option,option_eff,optn,optn2,optstr,optv,vloc_method
- real(dp) :: doti,e_xcdc_vxctau,ebb,ebn,evxc,ucvol_local,rpnrm
+ real(dp) :: doti,e_xcdc_vxctau,ebb,ebn,evxc,ucvol_local,rpnrm,dum
  logical :: add_tfw_,is_hybrid_ncpp,non_magnetic_xc,with_vxctau,wvlbigdft,lewald
- real(dp), allocatable :: xcart(:,:)
  character(len=500) :: message
  type(constrained_dft_t) :: constrained_dft
  type(xcdata_type) :: xcdata,xcdatahyb
-!arrays
+ !arrays
+ real(dp),allocatable :: xcart(:,:)
  real(dp),parameter :: identity(1:4)=(/1._dp,1._dp,0._dp,0._dp/)
  real(dp) :: dummy6(6),tsec(2)
  real(dp) :: grewtn_fake(3,1)
@@ -573,13 +573,13 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
 
 !        Compute energies%e_xc and associated quantities
          if(.not.is_hybrid_ncpp .or. mod(dtset%fockoptmix,100)==11)then
-           call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
+           call rhotoxc(energies%e_xc,energies%entropy_xc,kxc,mpi_enreg,nfft,ngfft,&
 &           nhat,psps%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,&
 &           option_eff,rhor,rprimd,usexcnhat,vxc,vxcavg,xccc3d,xcdata,strsxc=strsxc,&
 &           taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_,xcctau3d=xcctau3d,grho1_over_rho1=rpnrm)
          else
 !          Only when is_hybrid_ncpp, and moreover, the xc functional is not the auxiliary xc functional, then call xchybrid_ncpp_cc
-           call xchybrid_ncpp_cc(dtset,energies%e_xc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,&
+           call xchybrid_ncpp_cc(dtset,energies%e_xc,energies%entropy_xc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,&
 &                                strsxc,vxcavg,xccc3d,vxc=vxc)
          end if
 
@@ -587,25 +587,25 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
          if(mod(dtset%fockoptmix,100)==11)then
 !          This call to rhotoxc uses the hybrid xc functional
            if(.not.is_hybrid_ncpp)then
-             call rhotoxc(energies%e_hybcomp_E0,kxc,mpi_enreg,nfft,ngfft,&
+             call rhotoxc(energies%e_hybcomp_E0,dum,kxc,mpi_enreg,nfft,ngfft,&
 &             nhat,psps%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,&
 &             option_eff,rhor,rprimd,usexcnhat,vxc_hybcomp,vxcavg,xccc3d,xcdatahyb,&
 &             strsxc=strsxc,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
            else
-             call xchybrid_ncpp_cc(dtset,energies%e_hybcomp_E0,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,&
+             call xchybrid_ncpp_cc(dtset,energies%e_hybcomp_E0,dum,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,&
 &                                  strsxc,vxcavg,xccc3d,vxc=vxc_hybcomp)
            end if
 
 !          Combine hybrid and auxiliary quantities
            energies%e_xc=energies%e_xc*dtset%auxc_scal
+           energies%entropy_xc=energies%entropy_xc*dtset%auxc_scal
            energies%e_hybcomp_E0=energies%e_hybcomp_E0-energies%e_xc
            vxc(:,:)=vxc(:,:)*dtset%auxc_scal
            vxc_hybcomp(:,:)=vxc_hybcomp(:,:)-vxc(:,:)
-
          end if
 
        else if (ipositron==2) then
-         call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
+         call rhotoxc(energies%e_xc,energies%entropy_xc,kxc,mpi_enreg,nfft,ngfft,&
 &         nhat,psps%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,&
 &         option_eff,rhor,rprimd,usexcnhat,vxc,vxcavg,xccc3d,xcdata,strsxc=strsxc,&
 &         taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_,&
