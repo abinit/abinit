@@ -4,6 +4,7 @@
 #   DS1: GS calculation to create initial WFK          #
 #   DS2: RT-TDDFT calculation using the ER propagator  # 
 #   DS3: RT-TDDFT calculation using the EMR propagator # 
+#   Check stability of integration                     #
 ########################################################
 
 ndtset 3
@@ -13,7 +14,7 @@ optdriver 9      # RT-TDDFT
 dtele 0.01       # Electronic timestep
 getwfk1 0        # Don't read wavefunctions for GS
 getwfk  1        # Initial wavefunctions
-ntime 6          # Number of steps
+ntime 10         # Number of steps
 td_exp_order 4   # Order of the Taylor expansion used to approximate the exponential
 td_propagator2 0 # Propagator (0: ER, 1: EMR)
 td_propagator3 1 # Propagator (0: ER, 1: EMR)

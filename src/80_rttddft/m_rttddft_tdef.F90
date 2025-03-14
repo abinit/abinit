@@ -28,6 +28,7 @@ module m_rttddft_tdef
  use m_dtset,        only: dataset_type
  use m_errors,       only: msg_hndl
  use m_initylmg,     only: initylmg
+ use m_xmpi,         only: xmpi_bcast
 
  implicit none
 
@@ -47,7 +48,7 @@ module m_rttddft_tdef
    real(dp) :: ef_ezero(3)   !E_0 = |E_0|*polarization
    real(dp) :: vecpot(3)     !total vector potential
    real(dp) :: vecpot_ext(3) !external vector potential
-   real(dp) :: vecpot_ind(3,2) !induced vector potential at t and t-dt
+   real(dp) :: vecpot_ind(3,3) !induced vector potential at t and t-dt
    real(dp) :: vecpot_red(3) !total vector potential in reduced coord. (in reciprocal space)
    real(dp) :: ef_tzero      !time at which elec field is switched on
    real(dp) :: ef_omega      !angular freq. of TD elec field
@@ -63,6 +64,7 @@ module m_rttddft_tdef
 
    procedure :: init => tdef_init
    procedure :: update => tdef_update
+   procedure :: restart => tdef_restart
 
  end type tdef_type
 !!***
@@ -168,7 +170,7 @@ end subroutine tdef_init
 !!  [tdef = updated tdef structure]
 !!
 !! SOURCE
-subroutine tdef_update(tdef,dtset,mpi_enreg,time,rprimd,gprimd,kg,mpsang,npwarr,ylm,ylmgr,current)
+subroutine tdef_update(tdef,dtset,mpi_enreg,time,rprimd,gprimd,kg,mpsang,npwarr,ylm,ylmgr,current,update_vecpot_ind)
 
  implicit none
 
@@ -186,11 +188,12 @@ subroutine tdef_update(tdef,dtset,mpi_enreg,time,rprimd,gprimd,kg,mpsang,npwarr,
  real(dp),           intent(in)    :: current(:,:)
  real(dp),           intent(out)   :: ylm(:,:)
  real(dp),           intent(out)   :: ylmgr(:,:,:)
+ logical, optional,  intent(in)    :: update_vecpot_ind
 
  !Local variables-------------------------------
  character(len=500) :: msg
  integer            :: i
- real(dp)           :: tmp(3)
+ logical            :: lvecpot_ind
 
 ! ***********************************************************************
 
@@ -226,17 +229,20 @@ subroutine tdef_update(tdef,dtset,mpi_enreg,time,rprimd,gprimd,kg,mpsang,npwarr,
       ABI_ERROR(msg)
  end select
 
+ lvecpot_ind = .true.
+ if (present(update_vecpot_ind)) lvecpot_ind = update_vecpot_ind
+
  !Induced vector potential
  !Should deal with sppol?! How?
  !d^2A_ind/dt^2 = 4piJ(t)
  !A_ind(t+dt) = 2*A_ind(t) - A_ind(t-dt) + 4*pi*dt**2*J(t)
- if (tdef%induced_vecpot) then
-   tmp = tdef%vecpot_ind(:,1)
-   tdef%vecpot_ind(:,1) = 2*tdef%vecpot_ind(:,1) - tdef%vecpot_ind(:,2) + four*pi*(dtset%dtele**2)*current(:,1)
-   tdef%vecpot_ind(:,2) = tmp ! t - dt
+ if (tdef%induced_vecpot .and. lvecpot_ind) then
+   tdef%vecpot_ind(:,3) = tdef%vecpot_ind(:,2) ! t - 2dt
+   tdef%vecpot_ind(:,2) = tdef%vecpot_ind(:,1) ! t - dt
+   tdef%vecpot_ind(:,1) = 2*tdef%vecpot_ind(:,2) - tdef%vecpot_ind(:,3) + four*pi*(dtset%dtele**2)*current(:,1) ! t
    tdef%vecpot = tdef%vecpot_ext + tdef%vecpot_ind(:,1)
  else
-    tdef%vecpot = tdef%vecpot_ext
+   tdef%vecpot = tdef%vecpot_ext
  end if
 
  tdef%vecpot_red = matmul(transpose(rprimd),tdef%vecpot)
@@ -253,6 +259,51 @@ subroutine tdef_update(tdef,dtset,mpi_enreg,time,rprimd,gprimd,kg,mpsang,npwarr,
  end if
 
 end subroutine tdef_update
+!!***
+
+!!****f* m_rttddft/tdef_restart
+!!
+!! NAME
+!!  tdef_restart
+!!
+!! FUNCTION
+!!  Update some values for restart of calculation with TD electric field
+!!  Essentially needed if we account for induced vector potential
+!!
+!! INPUTS
+!!  [tdef = tdef structure to update]
+!!  mpi_enreg = MPI communicators structure
+!!  restart_unit = unit of restart file to read
+!!
+!! OUTPUT
+!!  [tdef = updated tdef structure]
+!!
+!! SOURCE
+subroutine tdef_restart(tdef,mpi_enreg,restart_unit)
+
+ implicit none
+
+ !Arguments ------------------------------------
+ !scalars
+ class(tdef_type),   intent(inout) :: tdef
+ type(MPI_type),     intent(inout) :: mpi_enreg
+ integer,            intent(in)    :: restart_unit
+
+ !Local variables-------------------------------
+ integer :: ierr
+
+! ***********************************************************************
+
+ if (tdef%induced_vecpot) then
+      if (mpi_enreg%me == 0) then
+         read(restart_unit,*) tdef%vecpot_ind(:,2)
+         read(restart_unit,*) tdef%vecpot_ind(:,1)
+      end if
+ end if
+ !Send to all procs
+ call xmpi_bcast(tdef%vecpot_ind,0,mpi_enreg%comm_world,ierr)
+
+end subroutine tdef_restart
 !!***
 
 end module m_rttddft_tdef
