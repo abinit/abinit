@@ -181,11 +181,10 @@ end function kpts_timrev_from_kptopt
 !!
 !! INPUTS
 !!  cryst<crystal_t> = crystalline structure with info on symmetries and time-reversal.
-!!  kptopt=option for the generation of k points
-!!    (defines whether spatial symmetries and/or time-reversal can be used)
+!!  kptopt=option for the generation of k points (defines whether spatial symmetries and/or time-reversal can be used)
 !!  kptrlatt(3,3)=integer coordinates of the primitive vectors of the
-!!   lattice reciprocal to the k point lattice to be generated here
-!!   If diagonal, the three values are the Monkhorst-Pack usual values, in case of simple cubic.
+!!    lattice reciprocal to the k point lattice to be generated here
+!!    If diagonal, the three values are the Monkhorst-Pack usual values, in case of simple cubic.
 !!  nshiftk= number of shift vectors in the repeated cell
 !!  shiftk(3,nshiftk) = vectors that will be used to determine the shifts from (0. 0. 0.).
 !!
@@ -201,8 +200,9 @@ end function kpts_timrev_from_kptopt
 !!
 !! SOURCE
 
-subroutine kpts_ibz_from_kptrlatt(cryst, kptrlatt, kptopt, nshiftk, shiftk, nkibz, kibz, wtk, nkbz, kbz, &
-                                  new_kptrlatt, new_shiftk, bz2ibz)  ! Optional
+subroutine kpts_ibz_from_kptrlatt(cryst, kptrlatt, kptopt, nshiftk, shiftk, &  ! in
+                                  nkibz, kibz, wtk, nkbz, kbz, &               ! out
+                                  new_kptrlatt, new_shiftk, bz2ibz)            ! out Optional
 
 !Arguments ------------------------------------
 !scalars

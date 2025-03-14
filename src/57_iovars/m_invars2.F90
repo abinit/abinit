@@ -1373,11 +1373,11 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getgam_eig2nkq',tread,'INT')
  if(tread==1) dtset%getgam_eig2nkq=intarr(1)
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getvarpeq',tread,'INT')
- if(tread==1) dtset%getvarpeq=intarr(1)
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getvpq',tread,'INT')
+ if(tread==1) dtset%getvpq=intarr(1)
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getvarpeq_filepath',tread,'KEY', key_value=key_value)
- if(tread==1) dtset%getvarpeq_filepath = key_value
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getvpq_filepath',tread,'KEY', key_value=key_value)
+ if(tread==1) dtset%getvpq_filepath = key_value
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getwfq',tread,'INT')
  if(tread==1) dtset%getwfq=intarr(1)
@@ -2269,50 +2269,50 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    ABI_ERROR("gstore_erange and gstore_kfilter are mutually exclusive!")
  end if
 
- call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'varpeq_aseed', tread, 'KEY', key_value=key_value)
- if (tread == 1) dtset%varpeq_aseed = tolower(trim(key_value))
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'vpq_aseed', tread, 'KEY', key_value=key_value)
+ if (tread == 1) dtset%vpq_aseed = tolower(trim(key_value))
 
- call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'varpeq_pkind', tread, 'KEY', key_value=key_value)
- if (tread == 1) dtset%varpeq_pkind = tolower(trim(key_value))
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'vpq_pkind', tread, 'KEY', key_value=key_value)
+ if (tread == 1) dtset%vpq_pkind = tolower(trim(key_value))
 
- call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'varpeq_avg_g', tread, 'INT')
- if (tread == 1) dtset%varpeq_avg_g = intarr(1)
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'vpq_avg_g', tread, 'INT')
+ if (tread == 1) dtset%vpq_avg_g = intarr(1)
 
- call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'varpeq_translate', tread, 'INT')
- if (tread == 1) dtset%varpeq_translate = intarr(1)
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'vpq_translate', tread, 'INT')
+ if (tread == 1) dtset%vpq_translate = intarr(1)
 
- call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'varpeq_interp', tread, 'INT')
- if (tread == 1) dtset%varpeq_interp = intarr(1)
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'vpq_interp', tread, 'INT')
+ if (tread == 1) dtset%vpq_interp = intarr(1)
 
- call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'varpeq_nstates', tread, 'INT')
- if (tread == 1) dtset%varpeq_nstates = intarr(1)
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'vpq_nstates', tread, 'INT')
+ if (tread == 1) dtset%vpq_nstates = intarr(1)
 
- call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'varpeq_nstep', tread, 'INT')
- if (tread == 1) dtset%varpeq_nstep = intarr(1)
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'vpq_nstep', tread, 'INT')
+ if (tread == 1) dtset%vpq_nstep = intarr(1)
 
- call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'varpeq_nstep_ort', tread, 'INT')
- if (tread == 1) dtset%varpeq_nstep_ort = intarr(1)
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'vpq_nstep_ort', tread, 'INT')
+ if (tread == 1) dtset%vpq_nstep_ort = intarr(1)
 
- call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'varpeq_select', tread, 'INT')
- if (tread == 1) dtset%varpeq_select = intarr(1)
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'vpq_select', tread, 'INT')
+ if (tread == 1) dtset%vpq_select = intarr(1)
 
- call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'varpeq_mesh_fact', tread, 'INT')
- if (tread == 1) dtset%varpeq_mesh_fact = intarr(1)
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'vpq_mesh_fact', tread, 'INT')
+ if (tread == 1) dtset%vpq_mesh_fact = intarr(1)
 
- call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'varpeq_mixing_factor', tread, 'DPR')
- if(tread==1) dtset%varpeq_mixing_factor = dprarr(1)
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'vpq_mix_fact', tread, 'DPR')
+ if(tread==1) dtset%vpq_mix_fact = dprarr(1)
 
- call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'varpeq_tolgrs', tread, 'DPR')
- if(tread==1) dtset%varpeq_tolgrs = dprarr(1)
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'vpq_tolgrs', tread, 'DPR')
+ if(tread==1) dtset%vpq_tolgrs = dprarr(1)
 
- call intagm(dprarr, intarr, jdtset, marr, 3, string(1:lenstr), 'varpeq_trvec', tread, 'INT')
- if (tread == 1) dtset%varpeq_trvec = intarr(1:3)
+ call intagm(dprarr, intarr, jdtset, marr, 3, string(1:lenstr), 'vpq_trvec', tread, 'INT')
+ if (tread == 1) dtset%vpq_trvec = intarr(1:3)
 
- call intagm(dprarr, intarr, jdtset, marr, 2, string(1:lenstr), 'varpeq_gpr_energy', tread, 'DPR')
- if (tread == 1) dtset%varpeq_gpr_energy = dprarr(1:2)
+ call intagm(dprarr, intarr, jdtset, marr, 2, string(1:lenstr), 'vpq_gpr_energy', tread, 'DPR')
+ if (tread == 1) dtset%vpq_gpr_energy = dprarr(1:2)
 
- call intagm(dprarr, intarr, jdtset, marr, 3, string(1:lenstr), 'varpeq_gpr_length', tread, 'DPR')
- if (tread == 1) dtset%varpeq_gpr_length = dprarr(1:3)
+ call intagm(dprarr, intarr, jdtset, marr, 3, string(1:lenstr), 'vpq_gpr_length', tread, 'DPR')
+ if (tread == 1) dtset%vpq_gpr_length = dprarr(1:3)
 
  call intagm(dprarr,intarr,jdtset,marr,ntypat,string(1:lenstr),'lambsig',tread,'DPR')
  if(tread==1) dtset%lambsig(1:ntypat)=dprarr(1:ntypat)
