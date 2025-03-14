@@ -1059,7 +1059,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 
 !  In case of the use of a GPU (Cuda), some defaults can change
 !  according to a threshold on matrix sizes
-   if (dtsets(idtset)%gpu_option/=ABI_GPU_DISABLED.or.dtsets(idtset)%gpu_option==ABI_GPU_UNKNOWN) then
+   if (dtsets(idtset)%gpu_option==ABI_GPU_LEGACY) then
      if (optdriver==RUNL_GSTATE.or.optdriver==RUNL_GWLS) then
        vectsize=dtsets(idtset)%mpw*dtsets(idtset)%nspinor/dtsets(idtset)%npspinor
        if (all(dtsets(idtset)%istwfk(:)==2)) vectsize=2*vectsize
