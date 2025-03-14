@@ -2795,7 +2795,7 @@ subroutine xmpi_sum_c2dc(xval,comm,ier,use_omp_map)
 #ifdef HAVE_OPENMP_OFFLOAD
 #ifdef HAVE_GPU_MPI
          ! Proper GPU-aware call
-         !$OMP TARGET DATA USE_DEVICE_ADDR(xval)
+         !$OMP TARGET DATA USE_DEVICE_PTR(xval)
          call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
          !$OMP END TARGET DATA
 #else

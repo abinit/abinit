@@ -89,10 +89,10 @@ module m_gemm_nonlop_ompgpu
 
 contains
 
- function gemm_nonlop_ompgpu_work_mem(istwfk, ndat, npw, indlmn, nattyp, ntypat, lmnmax) result(req_mem)
+ function gemm_nonlop_ompgpu_work_mem(istwfk, ndat, ngrads, npw, indlmn, nattyp, ntypat, lmnmax, signs, wfoptalg) result(req_mem)
    implicit none
 
-   integer, intent(in) :: istwfk, ndat, npw, ntypat, lmnmax
+   integer, intent(in) :: istwfk, ndat, ngrads, npw, ntypat, lmnmax, signs, wfoptalg
    integer, intent(in) :: indlmn(:,:,:), nattyp(ntypat)
 
    integer :: nprojs, cplex, itypat
@@ -109,8 +109,8 @@ contains
    req_mem = 0
 
    if(cplex == 1) then
-     req_mem = req_mem + dp * npw * ndat ! temp_realvec_r
-     req_mem = req_mem + dp * npw * ndat ! temp_realvec_i
+     req_mem = req_mem + dp * int(npw, c_size_t) * ndat ! temp_realvec_r
+     req_mem = req_mem + dp * int(npw, c_size_t) * ndat ! temp_realvec_i
    end if
 
    req_mem = req_mem + dp * lmnmax * (lmnmax+1)/2 * ntypat  ! sij_typ
@@ -119,49 +119,70 @@ contains
    req_mem = req_mem + dp * cplex * int(nprojs, c_size_t) * int(ndat, c_size_t)  ! s_projections
    req_mem = req_mem + dp * cplex * int(nprojs, c_size_t) * int(ndat, c_size_t)  ! vnl_projections
 
+   ! Not in a place where vectin, vectout, svectout, enlout are allocated
+   if(wfoptalg<0) then
+     req_mem = req_mem + dp * cplex * int(npw, c_size_t) * int(ndat, c_size_t)  ! vectin
+     if(signs==2) then
+       req_mem = req_mem + dp * cplex * int(npw, c_size_t) * int(ndat, c_size_t)  ! vectout
+       req_mem = req_mem + dp * cplex * int(npw, c_size_t) * int(ndat, c_size_t)  ! svectout
+     end if
+     if(signs==1) then
+       req_mem = req_mem + dp * cplex * nprojs * int(ndat, c_size_t)  ! enlout (overestimate)
+     end if
+   end if
+
+   if(ngrads>0) then
+     req_mem = req_mem + dp * cplex * ngrads * int(nprojs, c_size_t) * int(ndat, c_size_t)  ! dprojections_
+     if(signs==2) then
+       req_mem = req_mem + dp * cplex * ngrads * int(nprojs, c_size_t) * int(ndat, c_size_t)  ! s_dprojections
+       req_mem = req_mem + dp * cplex * ngrads * int(nprojs, c_size_t) * int(ndat, c_size_t)  ! vnl_dprojections
+     end if
+   end if
+
  end function gemm_nonlop_ompgpu_work_mem
 
 !----------------------------------------------------------------------
 
- function gemm_nonlop_ompgpu_static_mem(npw, indlmn, nattyp, ntypat, nblocks,&
-     compute_grad_strain,compute_grad_atom) result(req_mem)
+ function gemm_nonlop_ompgpu_static_mem(npw, indlmn, nattyp, ntypat, mpi_block_size, ngrads, use_distrib) result(req_mem)
    implicit none
 
-   integer, intent(in) :: npw, ntypat, nblocks
+   integer, intent(in) :: npw, ntypat, mpi_block_size, ngrads
    integer, intent(in) :: indlmn(:,:,:), nattyp(ntypat)
-   logical, intent(in), optional :: compute_grad_strain,compute_grad_atom
+   logical, intent(in) :: use_distrib
 
-   integer :: nprojs, ngrads, itypat
-   logical :: my_compute_grad_strain,my_compute_grad_atom
+   integer :: nprojs, nprojs_last_blk, itypat
    integer(kind=c_size_t) :: req_mem
 
 ! *************************************************************************
-
-   my_compute_grad_strain=.false. ; if (present(compute_grad_strain)) my_compute_grad_strain=compute_grad_strain
-   my_compute_grad_atom=.false. ; if (present(compute_grad_atom)) my_compute_grad_atom=compute_grad_atom
 
    nprojs = 0
    do itypat=1,ntypat
      nprojs = nprojs + count(indlmn(3,:,itypat)>0)*nattyp(itypat)
    end do
-   nprojs = nprojs / nblocks
-
-   ngrads = 0
-   if (my_compute_grad_strain) ngrads = ngrads + 6
-   if (my_compute_grad_atom)   ngrads = ngrads + 3
+   nprojs_last_blk = nprojs / mpi_block_size + modulo(nprojs,mpi_block_size)
 
    req_mem = 0
 
-   if(nblocks>1) then
-     req_mem = req_mem + dp * 2 * int(npw, c_size_t) * int(nprojs, c_size_t)          !projs_recv
+   if(mpi_block_size>1 .and. use_distrib) then
+     req_mem = req_mem + dp * 2 * int(npw, c_size_t) * int(nprojs_last_blk, c_size_t)          !projs_recv
+#ifdef HAVE_GPU_MPI
+     if(ngrads==0) then
+       ! Add a suspected internal buffer for GPU-aware MPI (no derivatives)
+       req_mem = req_mem + dp * 2 * int(npw, c_size_t) * int(nprojs_last_blk, c_size_t)          !projs_recv
+     end if
+#endif
    end if
    ! projs or projs_r + projs_i
-   req_mem = req_mem + 2 * dp * int(npw, c_size_t) * int(nprojs, c_size_t)
+   req_mem = req_mem + 2 * dp * int(npw, c_size_t) * int(nprojs_last_blk, c_size_t)
    if(ngrads>0) then
      ! dprojs or dprojs_r + dprojs_i
-     req_mem = req_mem + 2 * dp * int(npw, c_size_t) * int(ngrads, c_size_t) * int(nprojs, c_size_t)
-     if(nblocks>1) then
-       req_mem = req_mem + dp * 2 * int(npw, c_size_t) * int(ngrads, c_size_t)*int(nprojs, c_size_t)   !dprojs_recv
+     req_mem = req_mem + 2 * dp * int(npw, c_size_t) * int(ngrads, c_size_t) * int(nprojs_last_blk, c_size_t)
+     if(mpi_block_size>1 .and. use_distrib) then
+       req_mem = req_mem + dp * 2 * int(npw, c_size_t) * int(ngrads, c_size_t)*int(nprojs_last_blk, c_size_t)   !dprojs_recv
+#ifdef HAVE_GPU_MPI
+       ! Add a suspected internal buffer for GPU-aware MPI (with derivatives)
+       req_mem = req_mem + dp * 2 * int(npw, c_size_t) * int(ngrads, c_size_t)*int(nprojs_last_blk, c_size_t)   !dprojs_recv
+#endif
      end if
    end if
 
@@ -570,7 +591,8 @@ contains
     kpgout_ => kpgout
   end if
 
-  !$OMP TARGET ENTER DATA MAP(to:kpgin_,kpgout_)
+  !$OMP TARGET ENTER DATA MAP(to:kpgin_)  if(nkpgin_  > 0)
+  !$OMP TARGET ENTER DATA MAP(to:kpgout_) if(nkpgout_ > 0)
 
   ! Allocate and copy GPU buffers if user doesn't manage them
   !$OMP TARGET ENTER DATA MAP(to:vectin)      IF(transfer_vectin)
@@ -811,7 +833,7 @@ contains
     &       iatom_only,atom_proj_shift,cpopt,&
     &       nprojs,&
     &       vectin,&
-    &       temp_realvec_r,&
+    &       temp_realvec_r,temp_realvec_i,&
     &       gpu_option,gemm_nonlop_is_distributed)
 
     if(cpopt >= 0) then
@@ -1196,7 +1218,8 @@ contains
     !$OMP TARGET EXIT DATA MAP(delete:enlout)
   end if
 
-  !$OMP TARGET EXIT DATA MAP(delete:kpgin_,kpgout_)
+  !$OMP TARGET EXIT DATA MAP(delete:kpgin_)  if(nkpgin_  > 0)
+  !$OMP TARGET EXIT DATA MAP(delete:kpgout_) if(nkpgout_ > 0)
 
   if (nkpgin<nkpgin_) then
     ABI_FREE(kpgin_)

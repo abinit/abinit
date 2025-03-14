@@ -516,6 +516,8 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
  !! S^-1 = 1 + P inv_s_projs P', with
  !! inv_s_projs = - (D^-1 + P'*P)^-1
 
+ ABI_NVTX_START_RANGE(NVTX_MAKE_INVOVL)
+
  if(ham%istwf_k == 1) then
    cplx = 2
    blas_transpose = 'c'
@@ -772,6 +774,8 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
 ! LB-10/06/24: This message is too verbose on some cases (for example many k-points)
 ! write(message,*) 'Invovl built'
 ! call wrtout(std_out,message,'COLL')
+
+ ABI_NVTX_END_RANGE()
 
 end subroutine make_invovl
 !!***
