@@ -324,7 +324,7 @@ subroutine rttddft_propagator_er(dtset, ham_k, istep, mpi_enreg, psps, tdks, cal
       end if
 
       !** Build inverse of overlap matrix
-      if(psps%usepaw == 1 .and. istep <= tdks%first_step) then
+      if(psps%usepaw == 1 .and. istep <= tdks%first_step .or. tdks%tdef%ef_type/=0) then
          call make_invovl(ham_k,dimffnl,ffnl,ph3d,mpi_enreg)
       end if
 
@@ -333,7 +333,7 @@ subroutine rttddft_propagator_er(dtset, ham_k, istep, mpi_enreg, psps, tdks, cal
          call set_gemm_nonlop_ikpt(my_ikpt)
       end if
 
-      !** Compute the exp[(S^{-1})H]*cg using Taylor expansion to approximate the exponential
+      !** Compute the exp[-i(S^{-1})H]*cg using Taylor expansion to approximate the exponential
       cg => tdks%cg(:,icg+1:icg+nband_k*npw_k*my_nspinor)
       ! Compute properties "on-the-fly" if required
       if (lcalc_properties) then
@@ -480,8 +480,9 @@ subroutine rttddft_propagator_emr(dtset, ham_k, istep, mpi_enreg, psps, tdks)
  ! estimate psi(t+dt/2) = (psi(t)+psi(t+dt))/2
  tdks%cg(:,:) = 0.5_dp*(tdks%cg(:,:)+cg(:,:))
  ! update electric field and vector potential to t+dt/2
+ ! We decide here not to update the induced vector potential to t+dt/2 for simplicity
  call tdks%tdef%update(dtset,mpi_enreg,(istep-0.5_dp)*tdks%dt,tdks%rprimd,tdks%gprimd,tdks%kg, &
-                     & psps%mpsang,tdks%npwarr,tdks%ylm,tdks%ylmgr,tdks%current)
+                     & psps%mpsang,tdks%npwarr,tdks%ylm,tdks%ylmgr,tdks%current,update_vecpot_ind=.false.)
  ! calc associated density at t+dt/2
  call rttddft_calc_density(dtset,mpi_enreg,psps,tdks)
  ! go back to time t ..

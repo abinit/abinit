@@ -127,9 +127,11 @@ subroutine rttddft(codvsn,dtfil,dtset,mpi_enreg,pawang,pawrad,pawtab,psps)
  !Compute initial electronic density
  call rttddft_calc_density(dtset,mpi_enreg,psps,tdks)
 
- !Compute current at t=0 (or t-dt)
- if (dtset%prtcurrent/=0) then
+ !Compute current at t=0 (or t-dt) and update vector potential accordingly
+ if (dtset%prtcurrent/=0 .or. tdks%tdef%induced_vecpot) then
    call rttddft_calc_current(tdks,dtset,dtfil,psps,mpi_enreg)
+   call tdks%tdef%update(dtset,mpi_enreg,(tdks%first_step-1)*dtset%dtele,tdks%rprimd,tdks%gprimd,tdks%kg, &
+                       & psps%mpsang,tdks%npwarr,tdks%ylm,tdks%ylmgr,tdks%current)
  end if
 
  !** 2) Propagation loop
@@ -156,7 +158,7 @@ subroutine rttddft(codvsn,dtfil,dtset,mpi_enreg,pawang,pawrad,pawtab,psps)
    call rttddft_calc_density(dtset,mpi_enreg,psps,tdks)
 
    !Compute current at t
-   if (dtset%prtcurrent/=0) then
+   if (dtset%prtcurrent/=0 .or. tdks%tdef%induced_vecpot) then
       call rttddft_calc_current(tdks,dtset,dtfil,psps,mpi_enreg)
    end if
 

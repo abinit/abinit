@@ -2,20 +2,24 @@
 # Automatic test for ABINIT:                             #
 #    C 2 atoms, Diamond, LDA, PAW -- test TD Elec. Field #
 #   DS1: GS calculation to create initial WFK            #
-#   DS2: RT-TDDFT with Immpulsional TDEF with induced    #
-#        vector potential                                #
+#   DS2: RT-TDDFT with Immpulsional TDEF                 #
+#   DS3: RT-TDDFT with Immpulsional TDEF -- restart      #
+#   Test Impulse TD Electric field and restart           #
+#   without induced vector potential                     #
 ##########################################################
 
-ndtset 2
+ndtset 3
+
+optdriver1 0 # Ground-state
+optdriver 9  # RT-TDDFT
 
 # RT-TDDFT section
-optdriver2 9
 getwfk2 -1         # Read initial orbitals from the first dataset
-dtele  0.10        # Electronic time step
-ntime  150         # Maximum number or time step
+dtele  0.1         # Electronic time step
+ntime  75          # Maximum number or time step
 td_ef_type 1       # Impulse electric field
 td_ef_tzero 0.3    # applied at time tzero
-td_ef_induced_vecpot 1 # Include induced vector potential 
+td_restart3 1      # DS3 restart trajectory from DS2
 
 #Definition of the unit cell
 acell 3*3.53 angstrom  # Lengths of the primitive vectors (equilibrium volume)
@@ -92,6 +96,6 @@ prtcurrent 1      # Print current
 #%% keywords = RTTDDFT
 #%% description = 
 #%%   Diamond, LDA, PAW
-#%%   Tests RT-TDDFT with time-dependent electric field and induced vector potential
+#%%   Tests RT-TDDFT with time-dependent electric field
 #%% topics = RTTDDFT
 #%%<END TEST_INFO>
