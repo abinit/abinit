@@ -27,7 +27,6 @@ MODULE m_self
 
  use m_datafordmft, only : compute_levels
  use m_fstrings, only : int2char4
- use m_hide_lapack, only : matrginv
  use m_hu, only : hu_type
  use m_io_tools, only : get_unit
  use m_matlu, only : copy_matlu,destroy_matlu,diag_matlu,fac_matlu,init_matlu,matlu_type,print_matlu, &
@@ -37,8 +36,6 @@ MODULE m_self
  use m_paw_exactDC, only : compute_exactDC
  use m_pawtab, only : pawtab_type
  use m_xmpi, only : xmpi_bcast,xmpi_sum
-
- use netcdf
 
  implicit none
 
@@ -1441,39 +1438,34 @@ subroutine new_self(self,self_new,paw_dmft)
  nspinor = paw_dmft%nspinor
  nsppol  = paw_dmft%nsppol
 
- if (paw_dmft%dmft_broyden_niter > 0) then
-   call mix_broyden(self,self_new,paw_dmft)
- else
-   do ifreq=1,self%nw
-     do iatom=1,natom
-       lpawu = paw_dmft%lpawu(iatom)
-       if (lpawu == -1) cycle
-       self%oper(ifreq)%matlu(iatom)%mat(:,:,:) = (one-alpha)*self%oper(ifreq)%matlu(iatom)%mat(:,:,:) + &
-           & alpha*self_new%oper(ifreq)%matlu(iatom)%mat(:,:,:)
-       !  warning: self_new is the recent self-energy, which is mixed with self
-       !  to give self= mixed self energy. self_new is deallocated just after.
-     end do ! iatom
-   end do ! ifreq
-
+ do ifreq=1,self%nw
    do iatom=1,natom
      lpawu = paw_dmft%lpawu(iatom)
      if (lpawu == -1) cycle
-     self%hdc%matlu(iatom)%mat(:,:,:) = (one-alpha)*self%hdc%matlu(iatom)%mat(:,:,:) + &
-         & alpha*self_new%hdc%matlu(iatom)%mat(:,:,:)
+     self%oper(ifreq)%matlu(iatom)%mat(:,:,:) = (one-alpha)*self%oper(ifreq)%matlu(iatom)%mat(:,:,:) + &
+         & alpha*self_new%oper(ifreq)%matlu(iatom)%mat(:,:,:)
+       !  warning: self_new is the recent self-energy, which is mixed with self
+       !  to give self= mixed self energy. self_new is deallocated just after.
    end do ! iatom
+ end do ! ifreq
 
-   if (self%has_moments == 1) then
-     do i=1,self%nmoments
-       do iatom=1,natom
-         lpawu = paw_dmft%lpawu(iatom)
-         if (lpawu == -1) cycle
-         self%moments(i)%matlu(iatom)%mat(:,:,:) = (one-alpha)*self%moments(i)%matlu(iatom)%mat(:,:,:) + &
-             & alpha*self_new%moments(i)%matlu(iatom)%mat(:,:,:)
-       end do ! iatom
-     end do ! i
-   end if ! moments
+ do iatom=1,natom
+   lpawu = paw_dmft%lpawu(iatom)
+   if (lpawu == -1) cycle
+   self%hdc%matlu(iatom)%mat(:,:,:) = (one-alpha)*self%hdc%matlu(iatom)%mat(:,:,:) + &
+       & alpha*self_new%hdc%matlu(iatom)%mat(:,:,:)
+ end do ! iatom
 
- end if ! broyden
+ if (self%has_moments == 1) then
+   do i=1,self%nmoments
+     do iatom=1,natom
+       lpawu = paw_dmft%lpawu(iatom)
+       if (lpawu == -1) cycle
+       self%moments(i)%matlu(iatom)%mat(:,:,:) = (one-alpha)*self%moments(i)%matlu(iatom)%mat(:,:,:) + &
+           & alpha*self_new%moments(i)%matlu(iatom)%mat(:,:,:)
+     end do ! iatom
+   end do ! i
+ end if ! moments
 
  !if(opt_mix==1) then
  !endif
@@ -1903,308 +1895,6 @@ subroutine selfreal2imag_self(selfr,self,filapp,paw_dmft)
  call destroy_self(selftempmatsub)
 
 end subroutine selfreal2imag_self
-!!***
-
-!!****f* m_self/mix_broyden
-!! NAME
-!! mix_broyden
-!!
-!! FUNCTION
-!!  Apply Broyden mixing on self-energy
-!!
-!! INPUTS
-!!  self = input self on imaginary axis
-!!  self_new = output self on imaginary axis
-!!  paw_dmft <type(paw_dmft_type)>= paw+dmft related data
-!!
-!! OUTPUT
-!!  self = new self
-!!
-!! SOURCE
-
-subroutine mix_broyden(self,self_new,paw_dmft)
-
-!Arguments ------------------------------------
- type(self_type), intent(inout) :: self
- type(self_type), intent(in) :: self_new
- type(paw_dmft_type), intent(in) :: paw_dmft
-!Local variables-------------------------------
- integer :: buf_size,dim_self,dim_self_id,iatom,ierr,k,l,lpawu,m,myproc,n
- integer :: natom,ncid,nspinor,nsppol,nwlo,scheme,var_residue_id,var_self_id
- real(dp) :: alpha,w0
- real(dp), allocatable :: beta(:,:),buffer(:),buffer_new(:),c(:),norm(:),weight(:)
- real(dp), target, allocatable :: buffer2(:),buffer3(:),buffer4(:)
- character(len=3) :: tag_iter
- character(len=fnlen) :: filename
-! *********************************************************************
-
- alpha    = paw_dmft%dmft_mxsf
- filename = trim(paw_dmft%filapp) // "_BROYDEN_DATA.nc"
- m        = paw_dmft%idmftloop
- l        = max(1,m-paw_dmft%dmft_broyden_niter)
- myproc   = paw_dmft%myproc
- natom    = paw_dmft%natom
- nspinor  = paw_dmft%nspinor
- nsppol   = paw_dmft%nsppol
- nwlo     = self%nw
- scheme   = paw_dmft%dmft_broyden_scheme
- w0       = 0.01_dp
-
- call write_tag(m)
-
- buf_size = 0
-
- do iatom=1,natom
-   lpawu = paw_dmft%lpawu(iatom)
-   if (lpawu == -1) cycle
-   buf_size = buf_size + (2*lpawu+1)**2
- end do ! iatom
-
- buf_size = buf_size * (nspinor)**2 * nsppol * (nwlo+1+self%nmoments) * 2
-
- if (myproc == 0) then
-
-   if (m == 1) then
-     NCF_CHECK(nf90_create(trim(filename),NF90_CLOBBER,ncid))
-     NCF_CHECK(nf90_def_dim(ncid,"dim_self",buf_size,dim_self_id))
-   else
-     NCF_CHECK(nf90_open(trim(filename),NF90_WRITE,ncid))
-     NCF_CHECK(nf90_inq_dimid(ncid,"dim_self",dim_self_id))
-     NCF_CHECK(nf90_inquire_dimension(ncid,dim_self_id,len=dim_self))
-     if (dim_self /= buf_size) ABI_ERROR("Inconsistency when writing Broyden file !")
-     NCF_CHECK(nf90_redef(ncid))
-   end if ! idmftloop=1
-
-   NCF_CHECK(nf90_def_var(ncid,"self_"//tag_iter,NF90_DOUBLE,dim_self_id,var_self_id))
-   NCF_CHECK(nf90_def_var(ncid,"residue_"//tag_iter,NF90_DOUBLE,dim_self_id,var_residue_id))
-
-   NCF_CHECK(nf90_enddef(ncid))
-
- end if ! myproc=0
-
- ABI_MALLOC(beta,(m-l,m-l))
- ABI_MALLOC(buffer,(buf_size))
- ABI_MALLOC(buffer2,(buf_size))
- ABI_MALLOC(buffer3,(buf_size))
- ABI_MALLOC(buffer4,(buf_size))
- ABI_MALLOC(buffer_new,(buf_size))
- ABI_MALLOC(c,(m-l))
- ABI_MALLOC(norm,(m-l))
- ABI_MALLOC(weight,(m-l))
-
- if (scheme == 1) weight(:) = one
-
- call fill_buffer(1)
-
- if (myproc == 0) then
-   NCF_CHECK(nf90_put_var(ncid,var_self_id,buffer_new(:)))
- end if
-
- call fill_buffer(2)
-
- buffer_new(:) = buffer_new(:) + alpha*buffer(:)
-
- if (myproc == 0) then
-
-   NCF_CHECK(nf90_put_var(ncid,var_residue_id,buffer(:)))
-
-   do k=1,m-l
-     call read_buffer(2,k,get_weight=scheme==2)
-     norm(k) = norm2(buffer2(:))
-     c(k) = dot_product(buffer2(:),buffer(:)) / norm(k)
-     do n=1,k-1
-       call read_buffer(3,n)
-       beta(k,n) = weight(k) * weight(n) * dot_product(buffer3(:),buffer2(:)) / (norm(k)*norm(n))
-     end do ! n
-   end do ! k
-
-   do k=1,m-l
-     do n=k+1,m-l
-       beta(k,n) = beta(n,k)
-     end do ! n
-     beta(k,k) = weight(k)**2 + w0**2
-   end do ! k
-
-   if (m-l > 0) then
-     call matrginv(beta(:,:),m-l,m-l)
-   end if
-
-   do n=1,m-l
-     call read_buffer(2,n)
-     call read_buffer(3,n,read_self=1)
-     buffer2(:) = (alpha*buffer2(:)+buffer3(:)) / norm(n)
-     do k=1,m-l
-       buffer_new(:) = buffer_new(:) - weight(k)*weight(n)*c(k)*beta(k,n)*buffer2(:)
-     end do ! k
-   end do ! n
-
-   NCF_CHECK(nf90_close(ncid))
-
- end if ! myproc=0
-
- call xmpi_bcast(buffer_new(:),0,paw_dmft%spacecomm,ierr)
- call fill_buffer(3)
-
- ABI_FREE(beta)
- ABI_FREE(buffer)
- ABI_FREE(buffer2)
- ABI_FREE(buffer3)
- ABI_FREE(buffer4)
- ABI_FREE(buffer_new)
- ABI_FREE(c)
- ABI_FREE(norm)
- ABI_FREE(weight)
-
- contains
-
- subroutine write_tag(iter)
-
- !Arguments ------------------------------------
-  integer, intent(in) :: iter
- !Local variables ------------------------------
- ! ************************************************************************
-
- if (iter < 10) then
-   write(tag_iter,'("00",i1)') iter
- else if (iter >= 10 .and. iter < 100) then
-   write(tag_iter,'("0",i2)') iter
- else if (iter >= 100 .and. iter < 1000) then
-   write(tag_iter,'(i3)') iter
- else
-   ABI_ERROR("Broyden mixing cannot be used with more than 1000 iterations !")
- end if ! idmftloop
-
- end subroutine write_tag
-
- subroutine fill_buffer(option)
-
- !Arguments ------------------------------------
-  integer, intent(in) :: option
- !Local variables ------------------------------
-  integer :: i,ibuf,ifreq,im,im1,isppol,tndim
- ! ************************************************************************
-
- ibuf = 1
-
- do ifreq=1,nwlo
-   do iatom=1,natom
-     lpawu = paw_dmft%lpawu(iatom)
-     if (lpawu == -1) cycle
-     tndim = nspinor * (2*lpawu+1)
-     do isppol=1,nsppol
-       do im1=1,tndim
-         do im=1,tndim
-           if (option == 1) then
-             buffer_new(ibuf)   = dble(self%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol))
-             buffer_new(ibuf+1) = aimag(self%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol))
-           else if (option == 2) then
-             buffer(ibuf) = dble(self_new%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol)- &
-                               & self%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol))
-             buffer(ibuf+1) = aimag(self_new%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol)- &
-                                  & self%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol))
-           else if (option == 3) then
-             self%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol) = &
-                    & cmplx(buffer_new(ibuf),buffer_new(ibuf+1),kind=dp)
-           end if
-           ibuf = ibuf + 2
-         end do ! im
-       end do ! im1
-     end do ! isppol
-   end do ! iatom
- end do ! ifreq
-
- do iatom=1,natom
-   lpawu = paw_dmft%lpawu(iatom)
-   if (lpawu == -1) cycle
-   tndim = nspinor * (2*lpawu+1)
-   do isppol=1,nsppol
-     do im1=1,tndim
-       do im=1,tndim
-         if (option == 1) then
-           buffer_new(ibuf)   = dble(self%hdc%matlu(iatom)%mat(im,im1,isppol))
-           buffer_new(ibuf+1) = aimag(self%hdc%matlu(iatom)%mat(im,im1,isppol))
-         else if (option == 2) then
-           buffer(ibuf) = dble(self_new%hdc%matlu(iatom)%mat(im,im1,isppol)- &
-                             & self%hdc%matlu(iatom)%mat(im,im1,isppol))
-           buffer(ibuf+1) = aimag(self_new%hdc%matlu(iatom)%mat(im,im1,isppol)- &
-                                & self%hdc%matlu(iatom)%mat(im,im1,isppol))
-         else if (option == 3) then
-           self%hdc%matlu(iatom)%mat(im,im1,isppol) = &
-                  & cmplx(buffer_new(ibuf),buffer_new(ibuf+1),kind=dp)
-         end if
-         ibuf = ibuf + 2
-       end do ! im
-     end do ! im1
-   end do ! isppol
- end do ! iatom
-
- do i=1,self%nmoments
-   do iatom=1,natom
-     lpawu = paw_dmft%lpawu(iatom)
-     if (lpawu == -1) cycle
-     tndim = nspinor * (2*lpawu+1)
-     do isppol=1,nsppol
-       do im1=1,tndim
-         do im=1,tndim
-           if (option == 1) then
-             buffer_new(ibuf)   = dble(self%moments(i)%matlu(iatom)%mat(im,im1,isppol))
-             buffer_new(ibuf+1) = aimag(self%moments(i)%matlu(iatom)%mat(im,im1,isppol))
-           else if (option == 2) then
-             buffer(ibuf) = dble(self_new%moments(i)%matlu(iatom)%mat(im,im1,isppol)- &
-                               & self%moments(i)%matlu(iatom)%mat(im,im1,isppol))
-             buffer(ibuf+1) = aimag(self_new%moments(i)%matlu(iatom)%mat(im,im1,isppol)- &
-                                  & self%moments(i)%matlu(iatom)%mat(im,im1,isppol))
-           else if (option == 3) then
-             self%moments(i)%matlu(iatom)%mat(im,im1,isppol) = &
-                    & cmplx(buffer_new(ibuf),buffer_new(ibuf+1),kind=dp)
-           end if
-           ibuf = ibuf + 2
-         end do ! im
-       end do ! im1
-     end do ! isppol
-   end do ! iatom
- end do ! i
-
- end subroutine fill_buffer
-
- subroutine read_buffer(option,iter,read_self,get_weight)
-
- !Arguments ------------------------------------
-  integer, intent(in) :: option,iter
-  integer, optional, intent(in) :: read_self
-  logical, optional, intent(in) :: get_weight
- !Local variables ------------------------------
-  integer :: i,var_id
-  real(dp), pointer :: pt(:) => null(), pt2(:) => null()
-  character(len=7) :: tag
- ! ************************************************************************
-
- tag = "residue"
- if (present(read_self)) tag = "self   "
- if (option == 2) then
-   pt => buffer2(:)
- else if (option == 3) then
-   pt => buffer3(:)
- end if
- pt2 => pt(:)
-
- do i=1,0,-1
-   call write_tag(l-1+iter+i)
-   NCF_CHECK(nf90_inq_varid(ncid,trim(tag)//"_"//tag_iter,var_id))
-   if (i == 0) pt2 => buffer4(:)
-   NCF_CHECK(nf90_get_var(ncid,var_id,pt2(:)))
-   if (i == 0) pt(:) = pt(:) - pt2(:)
-   if (present(get_weight)) then
-     if (get_weight .and. i == 0) weight(iter) = one / norm2(pt2(:))
-   end if
- end do ! i
-
- pt => null()
- pt2 => null()
-
- end subroutine read_buffer
-
-end subroutine mix_broyden
 !!***
 
 END MODULE m_self

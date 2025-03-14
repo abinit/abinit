@@ -2339,8 +2339,6 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmatpuopt=2
    if (size(dtsets(idtset)%dmatpawu,4)>0) dtsets(idtset)%dmatpawu=-10._dp
    dtsets(idtset)%dmatudiag=0
-   dtsets(idtset)%dmft_broyden_niter=0
-   dtsets(idtset)%dmft_broyden_scheme=1
    dtsets(idtset)%dmft_charge_prec=tol6
    dtsets(idtset)%dmft_dc=1
    dtsets(idtset)%dmft_entropy=0
@@ -2368,6 +2366,8 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmft_test=0
    dtsets(idtset)%dmft_tolfreq=tol4
    dtsets(idtset)%dmft_tollc=tol5
+   dtsets(idtset)%dmft_triqs_broyden_niter=0
+   dtsets(idtset)%dmft_triqs_broyden_scheme=1
    dtsets(idtset)%dmft_triqs_compute_integral=1
    dtsets(idtset)%dmft_triqs_det_init_size=100
    dtsets(idtset)%dmft_triqs_det_n_operations_before_check=10000
@@ -2384,6 +2384,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmft_triqs_measure_density_matrix=1
    dtsets(idtset)%dmft_triqs_move_double=0
    dtsets(idtset)%dmft_triqs_move_shift=1
+   dtsets(idtset)%dmft_triqs_mxhyb=1.0_dp
    dtsets(idtset)%dmft_triqs_nleg=0
    dtsets(idtset)%dmft_triqs_nsubdivisions=1
    dtsets(idtset)%dmft_triqs_ntau_delta=0

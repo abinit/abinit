@@ -136,13 +136,6 @@ MODULE m_paw_dmft
   integer :: dmft_blockdiag
   ! Block diagonalize Hamiltonian in the local basis
 
-  integer :: dmft_broyden_niter
-  ! Number of previous iterations involved in Broyden mixing of self-energy
-
-  integer :: dmft_broyden_scheme
-  ! =1 : weights are set to 1 (Pulay mixing)
-  ! =2 : weights are set to the inverse square root of the residu
-
   integer :: dmft_dc
   ! Type of double counting used in DMFT
 
@@ -204,6 +197,13 @@ MODULE m_paw_dmft
 
   integer :: dmft_test
   ! Correct some bugs and activates some optimizations, should alway be set to 1
+
+  integer :: dmft_triqs_broyden_niter
+  ! Number of previous iterations involved in Broyden mixing of hybridization
+
+  integer :: dmft_triqs_broyden_scheme
+  ! =1 : weights are set to 1 (Pulay mixing)
+  ! =2 : weights are set to the inverse square root of the residu
 
   integer :: dmft_triqs_compute_integral
   ! Only relevant when dmft_triqs_entropy=1.
@@ -483,6 +483,9 @@ MODULE m_paw_dmft
 
   real(dp) :: dmft_triqs_lambda
   ! TRIQS CTQMC: Cutoff for the real frequency grid for the DLR fit
+
+  real(dp) :: dmft_triqs_mxhyb
+  ! TRIQS CTQMC: Mixing parameter for mixing of the hybridization
 
   real(dp) :: dmft_triqs_pauli_prob
   ! TRIQS CTQMC: Probability for proposing Pauli-aware insert and remove
@@ -1033,8 +1036,6 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  paw_dmft%dmft_test            = dtset%dmft_test
  paw_dmft%dmft_x2my2d          = dtset%dmft_x2my2d
  paw_dmft%dmft_use_full_chipsi = dtset%dmft_use_full_chipsi
- paw_dmft%dmft_broyden_niter   = dtset%dmft_broyden_niter
- paw_dmft%dmft_broyden_scheme  = dtset%dmft_broyden_scheme
 
  ! for entropy (alternate external calculation)
  paw_dmft%ientropy = 0
@@ -1129,6 +1130,9 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  paw_dmft%dmft_triqs_tol_block                     = dtset%dmft_triqs_tol_block
  paw_dmft%dmft_triqs_read_ctqmcdata                = dtset%dmft_triqs_read_ctqmcdata
  paw_dmft%dmft_triqs_pauli_prob                    = dtset%dmft_triqs_pauli_prob
+ paw_dmft%dmft_triqs_broyden_niter                 = dtset%dmft_triqs_broyden_niter
+ paw_dmft%dmft_triqs_broyden_scheme                = dtset%dmft_triqs_broyden_scheme
+ paw_dmft%dmft_triqs_mxhyb                         = dtset%dmft_triqs_mxhyb
 
 !==============================
 !==  Variables for DMFT itself
