@@ -260,6 +260,9 @@ contains
  intarr(1,:)=dtsets(:)%paral_rf
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'paral_rf','INT',0)
 
+ intarr(1,:)=dtsets(:)%paral_slice
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'paral_slice','INT',0)
+
  intarr(1,:)=dtsets(:)%pawcpxocc
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'pawcpxocc','INT',0)
 

@@ -1711,6 +1711,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ionmov',tread,'INT')
  if(tread==1) dtset%ionmov=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'paral_slice',tread,'INT')
+ if(tread==1) dtset%paral_slice=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'intxc',tread,'INT')
  if(tread==1) dtset%intxc=intarr(1)
 
