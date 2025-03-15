@@ -4449,7 +4449,6 @@ The choice is among:
 !!! important
 
     At the time of writing ( |today| ), PAW is not supported by the EPH code.
-    Also [[useylm]] must be set to 0 (default for NC pseudos).
 """,
 ),
 
