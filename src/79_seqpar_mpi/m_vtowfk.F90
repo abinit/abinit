@@ -64,6 +64,8 @@ module m_vtowfk
  use m_cgprj,       only : cprj_rotate,xg_cprj_copy,XG_TO_CPRJ
  use m_fft,         only : fourwf
  use m_cgtk,        only : cgtk_fixphase
+ use m_common,      only : get_gemm_nonlop_ompgpu_blocksize
+ use m_gemm_nonlop_projectors, only : gemm_nonlop_block_size, gemm_nonlop_is_distributed
 
 #if defined HAVE_YAKL
  use gator_mod
@@ -208,7 +210,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
 !Local variables-------------------------------
  logical :: has_fock,xg_diago,update_cprj
- logical :: do_subdiago,do_ortho,rotate_subvnlx,use_rmm_diis
+ logical :: do_subdiago,do_ortho,rotate_subvnlx,use_rmm_diis,is_distrib_tmp
  integer,parameter :: level=112,tim_fourwf=2,tim_nonlop_prep=11,enough=3,tim_getcprj=5
  integer,save :: nskip=0
 !     Flag use_subovl: 1 if "subovl" array is computed (see below)
@@ -220,8 +222,9 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  integer :: bandpp_cprj,blocksize,choice,cpopt,iband,iband1
  integer :: iblock,iblocksize,ibs,idir,ierr,igs,igsc,ii,inonsc
  integer :: iorder_cprj,ipw,ispinor,ispinor_index,istwf_k,iwavef,me_g0,mgsc,my_nspinor,n1,n2,n3 !kk
- integer :: nband_k_cprj,ncols_cprj,nblockbd,ncpgr,ndat,niter,nkpt_max,nnlout,ortalgo
+ integer :: nband_k_cprj,ncols_cprj,nblockbd,ncpgr,ndat,niter,nkpt_max,nnlout,ortalgo,ndat_fft
  integer :: paw_opt,quit,signs,space,spaceComm,tim_nonlop,wfoptalg,wfopta10
+ integer :: gpu_option_tmp,nblk_gemm_nonlop,blksize_gemm_nonlop_tmp
  logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc
  real(dp) :: ar,ar_im,eshift,occblock,norm
  real(dp) :: max_resid,weight,cpu,wall,gflops
@@ -729,12 +732,13 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
  ndat=1;if (mpi_enreg%paral_kgb==1) ndat=mpi_enreg%bandpp
  if(iscf>0 .and. fixed_occ)  then
+   ndat_fft=ndat; if(mpi_enreg%paral_kgb==0) ndat_fft=blocksize
    if(dtset%gpu_option==ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
-     ABI_MALLOC_MANAGED(wfraug,(/2,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6*MAX(blocksize,ndat)/))
+     ABI_MALLOC_MANAGED(wfraug,(/2,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6*ndat_fft/))
 #endif
    else
-     ABI_MALLOC(wfraug,(2,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6*MAX(blocksize,ndat)))
+     ABI_MALLOC(wfraug,(2,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6*ndat_fft))
    end if
  end if
 
@@ -794,6 +798,23 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    call xg_init(cprj_work,xg_nonlop%space_cprj,xg_nonlop%cprjdim,ncols_cprj,comm=xg_nonlop%comm_band)
  end if
 
+ ! In case of GEMM nonlop distribution + force computation,
+ ! recompute distribution as projectors arrays are bigger in this case
+ gpu_option_tmp=gs_hamk%gpu_option
+ if(optforces==1 .and. gs_hamk%gpu_option==ABI_GPU_OPENMP) then
+   blksize_gemm_nonlop_tmp = gemm_nonlop_block_size; is_distrib_tmp = gemm_nonlop_is_distributed
+   gemm_nonlop_block_size = dtset%gpu_nl_splitsize
+   call get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,mpi_enreg%bandpp,nband_k,&
+   &                        dtset%nspinor,mpi_enreg%paral_kgb,mpi_enreg%nproc_band,&
+   &                        optforces,0,-1,gs_hamk%gpu_option,(dtset%gpu_nl_distrib/=0),&
+   &                        gemm_nonlop_block_size,nblk_gemm_nonlop,warn_on_fail=.true.)
+   gemm_nonlop_is_distributed = (dtset%gpu_nl_distrib/=0 .and. nblk_gemm_nonlop > 0)
+   if(nblk_gemm_nonlop==-1) then
+     gs_hamk%gpu_option=ABI_GPU_DISABLED
+     ABI_WARNING("GPU has been disabled for forces computation during SCF step due to memory constraints.")
+   end if
+ end if
+
 !Loop over bands or blocks of bands. Note that in sequential mode iblock=iband, nblockbd=nband_k and blocksize=1
  do iblock=1,nblockbd
    occblock=maxval(occ_k(1+(iblock-1)*blocksize:iblock*blocksize))
@@ -805,7 +826,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
      call meanvalue_g(ar,kinpw,0,istwf_k,mpi_enreg,npw_k,my_nspinor,&
 &     cg(:,1+(iband-1)*npw_k*my_nspinor+icg:iband*npw_k*my_nspinor+icg),&
-&     cg(:,1+(iband-1)*npw_k*my_nspinor+icg:iband*npw_k*my_nspinor+icg),0)
+&     cg(:,1+(iband-1)*npw_k*my_nspinor+icg:iband*npw_k*my_nspinor+icg),0,&
+&     gpu_thread_limit=dtset%gpu_thread_limit)
 
      ek_k(iband)=ar
      if(ANY(ABS(dtset%nucdipmom)>tol8)) then
@@ -824,7 +846,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
        do iband1=1,nband_k
          call meanvalue_g(ar,kinpw,0,istwf_k,mpi_enreg,npw_k,my_nspinor,&
 &         cg(:,1+(iband -1)*npw_k*my_nspinor+icg:iband *npw_k*my_nspinor+icg),&
-&         cg(:,1+(iband1-1)*npw_k*my_nspinor+icg:iband1*npw_k*my_nspinor+icg),paw_dmft%use_dmft,ar_im=ar_im)
+&         cg(:,1+(iband1-1)*npw_k*my_nspinor+icg:iband1*npw_k*my_nspinor+icg),&
+&         paw_dmft%use_dmft,ar_im=ar_im,gpu_thread_limit=dtset%gpu_thread_limit)
          ek_k_nd(1,iband,iband1)=ar
          ek_k_nd(2,iband,iband1)=ar_im
        end do
@@ -1182,6 +1205,13 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    end if
    ABI_NVTX_END_RANGE()
  end do !  End of loop on blocks
+
+ ! restore safe value related to GEMM nonlop slicing and GPU in case of forces compute
+ if(optforces==1 .and. gpu_option_tmp==ABI_GPU_OPENMP) then
+   gs_hamk%gpu_option = gpu_option_tmp
+   gemm_nonlop_block_size = blksize_gemm_nonlop_tmp
+   gemm_nonlop_is_distributed = is_distrib_tmp
+ end if
 
  if (dtset%cprj_in_memory==1) then
 

@@ -43,6 +43,7 @@ module m_chebfi2
 #ifdef HAVE_OPENMP
  use omp_lib
 #endif
+ use, intrinsic :: iso_c_binding, only: c_size_t
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
  use m_gpu_toolbox, only : CPU_DEVICE_ID, gpu_device_synchronize
@@ -102,13 +103,14 @@ module m_chebfi2
    logical :: paw
    integer :: eigenProblem   !1 (A*x = (lambda)*B*x), 2 (A*B*x = (lambda)*x), 3 (B*A*x = (lambda)*x)
 
-   ! when GPU is enabled, currently OpenMP is not fully supported, abinit is launched
+   ! when GPU with Kokkos is enabled, currently OpenMP is not fully supported, abinit is launched
    ! with OMP_NUM_THREADS=1, but we may locally increase the number of OpenMP threads
    ! wherever it is safe to do; in that case we use gpu_kokkos_nthrd to specify
    ! the number of OpenMP threads. This value is controlled by dtset variable
    ! dtset%gpu_kokkos_nthrd
    integer :: gpu_option
-   integer :: gpu_kokkos_nthrd = 1 ! only used if gpu is enabled, number of OpenMP threads used
+   integer :: gpu_kokkos_nthrd = 1 ! only used if GPU Kokkos is enabled, number of OpenMP threads used
+   integer :: gpu_thread_limit = 1 ! only used if GPU is enabled, max number of OpenMP threads used in sensitive areas
 
    !ARRAYS
    type(xgBlock_t) :: X
@@ -179,7 +181,7 @@ module m_chebfi2
 
 subroutine chebfi_init(chebfi,neigenpairs,spacedim,tolerance,ecut,paral_kgb,bandpp, &
                        ndeg_filter,nbdbuf,space,eigenProblem,spacecom,me_g0,me_g0_fft,paw,comm_rows,comm_cols, &
-                       oracle,oracle_factor,oracle_min_occ,gpu_option,gpu_kokkos_nthrd)
+                       oracle,oracle_factor,oracle_min_occ,gpu_option,gpu_kokkos_nthrd,gpu_thread_limit)
 
  implicit none
 
@@ -206,6 +208,7 @@ subroutine chebfi_init(chebfi,neigenpairs,spacedim,tolerance,ecut,paral_kgb,band
  real(dp)      , intent(in   ) :: oracle_min_occ
  type(chebfi_t), intent(inout) :: chebfi
  integer       , intent(in   ), optional :: gpu_kokkos_nthrd
+ integer       , intent(in   ), optional :: gpu_thread_limit
 
  ! Local variables-------------------------------
  real(dp)                      :: tsec(2)
@@ -239,11 +242,10 @@ subroutine chebfi_init(chebfi,neigenpairs,spacedim,tolerance,ecut,paral_kgb,band
  chebfi%oracle_factor = oracle_factor
  chebfi%oracle_min_occ = oracle_min_occ
 
- if (present(gpu_kokkos_nthrd)) then
-    chebfi%gpu_kokkos_nthrd = gpu_kokkos_nthrd
- else
-    chebfi%gpu_kokkos_nthrd = 1
- end if
+ chebfi%gpu_kokkos_nthrd = 1
+ if (present(gpu_kokkos_nthrd)) chebfi%gpu_kokkos_nthrd = gpu_kokkos_nthrd
+ chebfi%gpu_thread_limit = 0
+ if (present(gpu_thread_limit)) chebfi%gpu_thread_limit = gpu_thread_limit
 
  call chebfi_allocateAll(chebfi)
 
@@ -389,46 +391,48 @@ function chebfi_memInfo(neigenpairs,spacedim,space,paral_kgb,total_spacedim,band
 
 !Local variables-------------------------------
 !scalars
- real(dp) :: memX
- real(dp) :: memX_next
- real(dp) :: memX_prev
- real(dp) :: memAX
- real(dp) :: memBX
+ integer(kind=c_size_t) :: memX
+ integer(kind=c_size_t) :: memX_next
+ integer(kind=c_size_t) :: memX_prev
+ integer(kind=c_size_t) :: memAX
+ integer(kind=c_size_t) :: memBX
 !Transposer variables
- real(dp) :: memX_CR
- real(dp) :: memAX_CR
- real(dp) :: memBX_CR
+ integer(kind=c_size_t) :: memX_CR
+ integer(kind=c_size_t) :: memAX_CR
+ integer(kind=c_size_t) :: memBX_CR
+ integer(kind=c_size_t) :: mem_sendrecv_CR
 !chebfi_rayleighRitz function variables
- real(dp) :: memA_und_X
- real(dp) :: memB_und_X
- real(dp) :: memEigenvalues
- real(dp) :: cplx
+ integer(kind=c_size_t) :: memA_und_X
+ integer(kind=c_size_t) :: memB_und_X
+ integer(kind=c_size_t) :: memEigenvalues
+ integer(kind=c_size_t) :: cplx
 !arrays
- real(dp) :: arraymem(2)
+ integer(kind=c_size_t) :: arraymem(2)
 
 ! *********************************************************************
  cplx = 1
  if ( space == SPACE_C ) cplx = 2 !for now only complex
 
  !Permanent in chebfi
- memX = cplx * kind(1.d0) * spacedim * neigenpairs
+ memX = int(cplx,c_size_t) * kind(1.d0) * spacedim * neigenpairs
 
  if (paral_kgb == 0) then
-   memX_next = cplx * kind(1.d0) * spacedim * neigenpairs
-   memX_prev = cplx * kind(1.d0) * spacedim * neigenpairs
+   memX_next = int(cplx,c_size_t) * kind(1.d0) * spacedim * neigenpairs
+   memX_prev = int(cplx,c_size_t) * kind(1.d0) * spacedim * neigenpairs
  else
-   memX_next = cplx * kind(1.d0) * total_spacedim * bandpp
-   memX_prev = cplx * kind(1.d0) * total_spacedim * bandpp
+   memX_next = int(cplx,c_size_t) * kind(1.d0) * total_spacedim * bandpp
+   memX_prev = int(cplx,c_size_t) * kind(1.d0) * total_spacedim * bandpp
  end if
 
- memAX = cplx * kind(1.d0) * spacedim * neigenpairs
- memBX = cplx * kind(1.d0) * spacedim * neigenpairs
+ memAX = int(cplx,c_size_t) * kind(1.d0) * spacedim * neigenpairs
+ memBX = int(cplx,c_size_t) * kind(1.d0) * spacedim * neigenpairs
 
  !Transposer colrow array
  if (paral_kgb == 1) then
-   memX_CR = cplx * kind(1.d0) * total_spacedim * bandpp
-   memAX_CR = cplx * kind(1.d0) * total_spacedim * bandpp
-   memBX_CR = cplx * kind(1.d0) * total_spacedim * bandpp
+   memX_CR = int(cplx,c_size_t) * kind(1.d0) * total_spacedim * bandpp
+   memAX_CR = int(cplx,c_size_t) * kind(1.d0) * total_spacedim * bandpp
+   memBX_CR = int(cplx,c_size_t) * kind(1.d0) * total_spacedim * bandpp
+   mem_sendrecv_CR = int(cplx,c_size_t) * kind(1.d0) * total_spacedim * bandpp
  else
    memX_CR = 0
    memAX_CR = 0
@@ -436,12 +440,12 @@ function chebfi_memInfo(neigenpairs,spacedim,space,paral_kgb,total_spacedim,band
  end if
 
  !chebfi_rayleighRitz function variables
- memA_und_X = cplx * kind(1.d0) * neigenpairs * neigenpairs
- memB_und_X = cplx * kind(1.d0) * neigenpairs * neigenpairs
- memEigenvalues = kind(1.d0) * neigenpairs
+ memA_und_X = int(cplx,c_size_t) * kind(1.d0) * neigenpairs * neigenpairs
+ memB_und_X = int(cplx,c_size_t) * kind(1.d0) * neigenpairs * neigenpairs
+ memEigenvalues = int(kind(1.d0),c_size_t) * neigenpairs
 
  arraymem(1) = memX + memX_next + memX_prev + &
-               memAX + memBX + memX_CR + memAX_CR + memBX_CR
+               memAX + memBX + memX_CR + memAX_CR + memBX_CR + mem_sendrecv_CR
  arraymem(2) = memA_und_X + memB_und_X + memEigenvalues
 
 end function chebfi_memInfo
@@ -557,7 +561,8 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,eigen,occ,residu,nspinor)
 
    call timab(tim_transpose,1,tsec)
    call xgTransposer_constructor(chebfi%xgTransposerX,chebfi%X,chebfi%xXColsRows,nspinor,&
-     STATE_LINALG,TRANS_ALL2ALL,chebfi%comm_rows,chebfi%comm_cols,0,0,chebfi%me_g0_fft,gpu_option=chebfi%gpu_option)
+     STATE_LINALG,TRANS_ALL2ALL,chebfi%comm_rows,chebfi%comm_cols,0,0,chebfi%me_g0_fft,&
+     gpu_option=chebfi%gpu_option,gpu_thread_limit=chebfi%gpu_thread_limit)
 
    call xgTransposer_copyConstructor(chebfi%xgTransposerAX,chebfi%xgTransposerX,chebfi%AX%self,chebfi%xAXColsRows,STATE_LINALG)
    call xgTransposer_copyConstructor(chebfi%xgTransposerBX,chebfi%xgTransposerX,chebfi%BX%self,chebfi%xBXColsRows,STATE_LINALG)
