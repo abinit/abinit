@@ -215,6 +215,9 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gpu_nl_splitsize',tread0,'INT')
    if(tread0==1) dtsets(idtset)%gpu_nl_splitsize=intarr(1)
 
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gpu_thread_limit',tread0,'INT')
+   if(tread0==1) dtsets(idtset)%gpu_thread_limit=intarr(1)
+
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nphf',tread0,'INT')
    if(tread0==1) dtsets(idtset)%nphf=intarr(1)
 
@@ -1059,7 +1062,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 
 !  In case of the use of a GPU (Cuda), some defaults can change
 !  according to a threshold on matrix sizes
-   if (dtsets(idtset)%gpu_option/=ABI_GPU_DISABLED.or.dtsets(idtset)%gpu_option==ABI_GPU_UNKNOWN) then
+   if (dtsets(idtset)%gpu_option==ABI_GPU_LEGACY) then
      if (optdriver==RUNL_GSTATE.or.optdriver==RUNL_GWLS) then
        vectsize=dtsets(idtset)%mpw*dtsets(idtset)%nspinor/dtsets(idtset)%npspinor
        if (all(dtsets(idtset)%istwfk(:)==2)) vectsize=2*vectsize

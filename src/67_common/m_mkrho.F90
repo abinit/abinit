@@ -1220,9 +1220,9 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
 
        ! ia1,ia2 sets range of loop over atoms:
        ia2=ia1+nattyp(itypat)-1
-       ii=0
-       jtemp=0
 
+       !$OMP PARALLEL DO &
+       !$OMP& PRIVATE(i3,i2,i1,ig3,ig2,ig1,ii,jj,gsquar,fact,sfr,sfi,fact0,rhoat,aa,bb,cc,dd,gmag,diff)
        do i3=1,n3
          ig3=i3-(i3/id3)*n3-1
          do i2=1,n2
@@ -1231,7 +1231,7 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
              do i1=1,n1
 
                ig1=i1-(i1/id1)*n1-1
-               ii=ii+1
+               ii=i1+n1*(ffti2_local(i2)-1+(n2/nproc_fft)*(i3-1))
                gsquar=dble(ig1*ig1)*gmet(1,1)+dble(ig2*ig2)*gmet(2,2)+&
                       dble(ig3*ig3)*gmet(3,3)+dble(2*ig1*ig2)*gmet(1,2)+&
                       dble(2*ig2*ig3)*gmet(2,3)+dble(2*ig3*ig1)*gmet(3,1)
@@ -1290,8 +1290,6 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
                    rhog(im,ii)=rhog(im,ii)+sfi*rhoat
                  end if
 
-               else
-                 jtemp=jtemp+1
                end if
 
              end do ! i1
@@ -1332,7 +1330,6 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
        ! ia1,ia2 sets range of loop over atoms:
        ia2=ia1+nattyp(itypat)-1
        ii=0
-       jtemp=0
        do i3=1,n3
          ig3=i3-(i3/id3)*n3-1
          do i2=1,n2
@@ -1396,8 +1393,6 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
                  ! Multiply structure factor times rhoat (atomic density in reciprocal space)
                  rhog(re,ii)=rhog(re,ii)+sfr*rhoat
                  rhog(im,ii)=rhog(im,ii)+sfi*rhoat
-               else
-                 jtemp=jtemp+1
                end if
 
              end do ! i1

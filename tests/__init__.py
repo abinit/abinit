@@ -1030,5 +1030,6 @@ KNOWN_KEYWORDS = {
     'linear-electro-optical': "Computation of linear electro-optical coefficients",
     'DDB_TO_NC': "Conversion of DDB file from text to netcdf and viceversa",
     'ddb_interpolation': "Interpolation of DDB files in q-space.",
-    'pSIC': "Tests related to the polaron self-interaction correction method."
+    'pSIC': "Tests related to the polaron self-interaction correction method.",
+    'POLARON': "Tests related to the variational polaron equations."
 }

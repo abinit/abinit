@@ -531,7 +531,7 @@ contains
     &       iatom_only,atom_proj_shift,cpopt,&
     &       nprojs,&
     &       vectin,&
-    &       temp_realvec_r,&
+    &       temp_realvec_r,temp_realvec_i,&
     &       gpu_option,gemm_nonlop_is_distributed)
 
     if(cpopt >= 0) then

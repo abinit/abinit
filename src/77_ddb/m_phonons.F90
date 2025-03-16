@@ -824,15 +824,15 @@ subroutine phdos_init(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_n
  nomega = phdos%nomega
 
  veloc_1q = zero
-! TODO: add input variable and adapt these directions to be read in from input file
+ ! TODO: add input variable and adapt these directions to be read in from input file
  if (phdos%n_normal_vec_dmm >= 7) then
-   phdos%normal_vec_dmm(:,1) = (/one, zero, zero/)
-   phdos%normal_vec_dmm(:,2) = (/zero, one, zero/)
-   phdos%normal_vec_dmm(:,3) = (/zero, zero, one/)
-   phdos%normal_vec_dmm(:,4) = (/one, one, zero/)
-   phdos%normal_vec_dmm(:,5) = (/one, zero, one/)
-   phdos%normal_vec_dmm(:,6) = (/zero, one, one/)
-   phdos%normal_vec_dmm(:,7) = (/one, one, one/)
+   phdos%normal_vec_dmm(:,1) = [one, zero, zero]
+   phdos%normal_vec_dmm(:,2) = [zero, one, zero]
+   phdos%normal_vec_dmm(:,3) = [zero, zero, one]
+   phdos%normal_vec_dmm(:,4) = [one, one, zero]
+   phdos%normal_vec_dmm(:,5) = [one, zero, one]
+   phdos%normal_vec_dmm(:,6) = [zero, one, one]
+   phdos%normal_vec_dmm(:,7) = [one, one, one]
  end if
  ABI_MALLOC(gvals_wtq, (nomega))
  ABI_MALLOC(xvals, (nomega))
@@ -896,7 +896,7 @@ subroutine phdos_init(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_n
    full_eigvec = zero
  end if ! tetra
 
- ABI_SFREE(bz2ibz_smap)
+ ABI_FREE(bz2ibz_smap)
  ABI_FREE(new_shiftq)
 
  ! MPI Sum over irreducible q-points then sync the following integrals:
@@ -924,7 +924,6 @@ subroutine phdos_init(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_n
    if (wminmax(1) < phdos%omega(1)) count_wminmax(1) = count_wminmax(1) + 1
    wminmax(2) = max(wminmax(2), maxval(phfrq))
    if (wminmax(2) > phdos%omega(nomega)) count_wminmax(2) = count_wminmax(2) + 1
-
 
    normq = sum(qibz(:,iq_ibz) ** 2)
    if (normq < max_smallq .and. normq > tol6) then
@@ -1230,31 +1229,8 @@ subroutine phdos_init(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_n
    call xmpi_sum(phdos%pjdos_int, comm, ierr)
  end if
 
-! for dmm phdos need to normalize by q point integration element
+ ! for dmm phdos need to normalize by q point integration element
  phdos%phdos_dmm = phdos%phdos_dmm * two_pi**3 / crystal%ucvol
-
-#if 0
- !my_nsym = crystal%nsym; if (my_qptopt == 3) my_nsym = 1
- !ABI_MALLOC(work_msqd, (phdos%nomega, 3, 3, crystal%natom))
- !work_msqd = phdos%msqd_dos_atom
- !phdos%msqd_dos_atom = zero
- !do iat=1,natom
- !  do isym=1,my_nsym
- !    jat = crystal%indsym(4,isym,iat)
- !    do io=1,phdos%nomega
- !        phdos%msqd_dos_atom(io,:,:,jat) = phdos%msqd_dos_atom(io,:,:,jat) + &
- !          matmul(transpose(symcart(:,:,isym)), matmul(work_msqd(io,:,:,iat), symcart(:,:,isym)))
- !    end do
- !  end do
- !end do
- !ABI_FREE(work_msqd)
- !phdos%msqd_dos_atom = phdos%msqd_dos_atom / my_nsym
-#endif
-
- ! normalize by mass and factor of 2, now added in the printout to agree with harmonic_thermo
- ! do iat=1, natom
- !   phdos%msqd_dos_atom(:,:,:,iat) = phdos%msqd_dos_atom(:,:,:,iat) * invmass(iat) * half
- ! end do ! iat
 
  ! ===============================
  ! === Compute Integrated PDOS ===
