@@ -1016,10 +1016,10 @@ subroutine incomprs(string,length)
        string(length:length)=blank
      end if
    end if
- end if
 
- ! remove trailing characters left from the recursive string shifts
- string(length:stringlen)=blank
+   ! remove trailing characters left from the recursive string shifts
+   string(length:stringlen)=blank
+ end if
 
 end subroutine incomprs
 !!***
