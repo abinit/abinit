@@ -1,0 +1,92 @@
+# LiF: computation of a large electron polaron on 13x13x13 k/q-grids
+# with long-range Frohlich correction.
+
+ optdriver  7   # Electron-phonon driver
+ eph_task   13  # Activate the Variational Polaron Equations solver
+
+# Variational Polaron Equations parameters
+ vpq_pkind  "electron"  # Electron polaron
+ vpq_tolgrs  1e-7       # Tolerance on the gradient norm
+ vpq_nstep   100        # Maximum number of optimization steps
+
+ # these parameters are default but given here explicitly for clarity
+ vpq_aseed      "gau_energy"  # Initial charge localization is Guassian-like
+ vpq_gpr_energy  0. 1.        # Gaussian parameters for initial charge
+ vpq_nstates     1            # Number of polaronic states
+
+# Frohlich correction
+ eph_frohl_ntheta  32   # Number of divisions for the spherical integration of
+                        # the long-range part of electron-phonon energy.
+                        # Non-zero value activates the computation of Frohlich
+                        # corrections.
+                        # ntheta=32 gives the optimal number of divisions for the
+                        # spherical integration.
+
+ vpq_avg_g  1  # Apply Frohlich correction to e-ph coupling
+
+
+# Electron-phonon matrix elements (with energy filtering)
+ getgstore_filepath  "teph4vpq_8o_GSTORE.nc" # 13x13x13 k/q-mesh
+
+# Wavefunction
+# Read the WFK file from the preparatory run
+ getwfk_filepath  "teph4vpq_2o_DS4_WFK"  # 13x13x13 k-mesh
+
+ ngkpt    13 13 13  # These parameters have to consistent with the WFK file
+
+ kptopt   1
+ nshiftk  1
+ shiftk   0 0 0
+ nband    6
+ ecut     30
+
+# Phonons
+ ddb_ngqpt  3 3 3          # This has to be consistent with the DDB file
+ getddb_filepath
+ "LiF_eph_varpeq/out_DDB"  # Read the precomputed DDB stored in git submodule
+                           # NOTE: for the input parameters used to produce
+                           # the DDB file, consult the LiF_eph_varpeq/dfpt.abi
+
+# Pseudopotentials
+ pp_dirpath "$ABI_PSPDIR/Psdj_nc_sr_05_pbe_std_psp8"
+ pseudos "Li.psp8, F.psp8"
+
+# Structure
+ natom   2
+ ntypat  2
+ typat   1 2
+ znucl   3 9
+ xred    0.0  0.0  0.0
+         0.5  0.5  0.5
+
+ acell 3*7.675
+ rprim 0.0  0.5  0.5
+       0.5  0.0  0.5
+       0.5  0.5  0.0
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% exclude_builders = eos_nvhpc_*
+#%% test_chain = teph4vpq_1.abi, teph4vpq_2.abi, teph4vpq_3.abi,
+#%%              teph4vpq_4.abi, teph4vpq_5.abi, teph4vpq_6.abi,
+#%%              teph4vpq_7.abi, teph4vpq_8.abi, teph4vpq_9.abi,
+#%%              teph4vpq_10.abi
+#%% [files]
+#%% use_git_submodule = LiF_eph_varpeq
+#%% files_to_test =
+#%%   teph4vpq_9.abo, tolnlines = 60, tolabs = 1e-4, tolrel = 5e-2
+#%% [paral_info]
+#%% max_nprocs = 10
+#%% [extra_info]
+#%% authors = V. Vasilchenko
+#%% keywords = DFPT, EPH, POLARON
+#%% description =
+#%%   LiF, Fm-3m space group.
+#%%   Computation of a large electron polaron on 13x13x13 k/q-grid
+#%%   via Variational Polaron Equations with long-range Frohlich
+#%%   correction and energy filtering.
+#%%<END TEST_INFO>
