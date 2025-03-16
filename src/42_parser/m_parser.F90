@@ -1015,10 +1015,10 @@ subroutine incomprs(string,length)
        length=lcut+1
        string(length:length)=blank
      end if
+     ! remove trailing characters left from the recursive string shifts
+     string(length:stringlen)=blank
    end if
 
-   ! remove trailing characters left from the recursive string shifts
-   string(length:stringlen)=blank
  end if
 
 end subroutine incomprs
