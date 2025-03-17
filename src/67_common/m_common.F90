@@ -354,7 +354,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
      end if
 
      ydoc = yamldoc_open('BeginCycle')
-!    If wfoptalg=1 or 111, we should write mdeg_filter
+!    If wfoptalg=1 or 111 or 112, we should write mdeg_filter
      call ydoc%add_ints("iscf, nstep, nline, wfoptalg", &
                         [dtset%iscf, dtset%nstep, dtset%nline, dtset%wfoptalg], dict_key="solver")
      call ydoc%add_reals("tolwfr, toldff, toldfe, tolvrs, tolrff", & ! , vdw_df_threshold", &
@@ -2107,6 +2107,7 @@ end function crystal_from_file
 !!  wfoptalg         :  Which diago algorithm if used:
 !!                                         -1: none (GEMM nonlop isn't used for diago)
 !!                                        111: CHEBFI2
+!!                                        112: SLICE
 !!                                        114: LOBPCG2
 !!                                      other: Only account for getghc
 !!  gpu_option       :  If GPU is enabled (expected to be ABI_GPU_OPENMP for now)
@@ -2189,7 +2190,7 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,nband,nspinor,para
    if(associated(gs_hamk%ph3d_k)) gs_ham_smem = gs_ham_smem + int(2,c_size_t) * npw_fft * gs_hamk%matblk
    gs_ham_smem = gs_ham_smem*dp
 
-   if(wfoptalg==111) then
+   if(wfoptalg==111 .or. wfoptalg==112) then
      chebfiMem = chebfi_memInfo(nband,icplx*npw*nspinor,space,paral_kgb,icplx*npw*nspinor,blockdim)
      invovl_smem = invovl_ompgpu_static_mem(gs_hamk)
      invovl_wmem = invovl_ompgpu_work_mem(gs_hamk, ndat_try)
@@ -2238,7 +2239,7 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,nband,nspinor,para
        sum_mem          = sum_mem+nonlop_wmem
      end if
 
-     if(wfoptalg==111) then
+     if(wfoptalg==111 .or. wfoptalg==112) then
        sum_mem          = sum_mem        + invovl_smem+invovl_wmem+chebfiMem(1)+chebfiMem(2)+localMem
        sum_bandpp_mem   = sum_bandpp_mem + invovl_wmem
        sum_other_mem    = sum_other_mem  + invovl_smem+chebfiMem(1)+chebfiMem(2)+localMem
@@ -2271,8 +2272,8 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,nband,nspinor,para
 
 
    write(std_out,*) "Static buffers, computed once and permanently on card"
-   ! CHEBFI2
-   if(wfoptalg==111) then
+   ! CHEBFI2 or SLICE
+   if(wfoptalg==111 .or. wfoptalg==112) then
      write(std_out,'(A,F10.3,1x,A)') "   invovl_ompgpu (mkinvovl)              : ",  real(invovl_smem,dp)/(1024*1024), "MiB"
      write(std_out,'(A,F10.3,1x,A)') "   chebfi2                               : ",    real(chebfiMem(1))/(1024*1024), "MiB"
    end if
@@ -2293,8 +2294,8 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,nband,nspinor,para
      write(std_out,'(A,F10.3,1x,A)') "   gemm_nonlop                           : ",  real(nonlop_wmem,dp)/(1024*1024), "MiB"
    end if
 
-   ! CHEBFI2
-   if(wfoptalg==111) then
+   ! CHEBFI2 or SLICE
+   if(wfoptalg==111 .or. wfoptalg==112) then
      write(std_out,'(A,F10.3,1x,A)') "   invovl                                : ",  real(invovl_wmem,dp)/(1024*1024), "MiB"
      write(std_out,'(A,F10.3,1x,A)') "   chebfi2 (RR buffers)                  : ",    real(chebfiMem(2))/(1024*1024), "MiB"
      write(std_out,'(A,F10.3,1x,A)') "   chebfiwf (cg,resid,eig)               : ",        real(localMem)/(1024*1024), "MiB"
