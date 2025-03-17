@@ -432,19 +432,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    npwtot(:) = 0
  end if
 
-<<<<<<< HEAD
- if((dtset%wfoptalg == 1 .or. dtset%wfoptalg == 2 .or. dtset%wfoptalg == 111 .or. dtset%wfoptalg == 112) &
-&   .and. psps%usepaw == 1 .and. dtset%cprj_in_memory==0) then
-   call init_invovl(dtset%nkpt)
- end if
-
-||||||| 5d1f404834
- if((dtset%wfoptalg == 1 .or. dtset%wfoptalg == 111) .and. psps%usepaw == 1 .and. dtset%cprj_in_memory==0) then
-   call init_invovl(dtset%nkpt)
- end if
-
-=======
->>>>>>> b0ce911c839e1b66fff11ed1ac0204776b6ad9fc
  ! Handling GEMM nonlop use
  ! Not enabled by default for CPU and CUDA implementations
  ! Enabled if using OpenMP GPU offload (only implementation)
@@ -1795,19 +1782,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    call bandfft_kpt_destroy_array(bandfft_kpt,mpi_enreg)
  end if
 
-<<<<<<< HEAD
- if((dtset%wfoptalg == 1 .or. dtset%wfoptalg == 2 .or. dtset%wfoptalg == 111 .or. dtset%wfoptalg == 112)  &
-&    .and. psps%usepaw == 1 .and. dtset%cprj_in_memory==0) then
-   call destroy_invovl(dtset%nkpt,dtset%gpu_option)
- end if
-
-||||||| 5d1f404834
- if((dtset%wfoptalg == 1 .or. dtset%wfoptalg == 111)  .and. psps%usepaw == 1 .and. dtset%cprj_in_memory==0) then
-   call destroy_invovl(dtset%nkpt,dtset%gpu_option)
- end if
-
-=======
->>>>>>> b0ce911c839e1b66fff11ed1ac0204776b6ad9fc
 !Clean gemm_nonlop work spaces
  if(gemm_nonlop_use_gemm) then
    call destroy_gemm_nonlop(dtset%gpu_option)
