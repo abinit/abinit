@@ -180,7 +180,6 @@ subroutine slicewf(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
  integer, pointer :: idx_merge_ptr(:,:) => NULL()
  integer, pointer :: ndeg_ptr(:) => NULL()
  integer, pointer :: npbandSlice_ptr(:) => NULL()
- real(dp) :: tsec(2),chebfiMem(2)
  real(dp), target, allocatable :: sbound(:,:)
  real(dp), pointer :: sbound_ptr(:,:) => NULL()
  ! Parameters for nonlop call in NC
