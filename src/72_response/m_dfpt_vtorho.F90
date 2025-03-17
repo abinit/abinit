@@ -650,7 +650,8 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 
      ! Setup gemm_nonlop
      if (gemm_nonlop_use_gemm) then
-       call set_gemm_nonlop_ikpt(ikpt)
+       call set_gemm_nonlop_ikpt(ikpt,gs_hamkq%npw_fft_k,gs_hamkq%istwf_k,gs_hamkq%indlmn,&
+       &    gs_hamkq%ntypat,gs_hamkq%nattyp,gs_hamkq%gpu_option)
      end if ! gemm_nonlop_use_gemm
 
      ! Free some memory before calling dfpt_vtowfk

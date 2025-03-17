@@ -1369,6 +1369,18 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 !  gpu_kokkos_nthrd
    call chkint_ge(0,0,cond_string,cond_values,ierr,'gpu_kokkos_nthrd',dt%gpu_kokkos_nthrd,1,iout)
 
+!  gpu_nl_distrib
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'gpu_nl_distrib',dt%gpu_nl_distrib,2,(/0,1/),iout)
+   if (dt%gpu_option/=ABI_GPU_OPENMP .and. dt%gpu_nl_distrib==1) then
+     ABI_WARNING('gpu_nl_distrib is ignored outside of OpenMP GPU (gpu_option 2)!')
+   end if
+
+!  gpu_nl_splitsize
+   call chkint_ge(0,0,cond_string,cond_values,ierr,'gpu_nl_splitsize',dt%gpu_nl_splitsize,1,iout)
+   if (dt%gpu_option/=ABI_GPU_OPENMP .and. dt%gpu_nl_splitsize/=0) then
+     ABI_WARNING('gpu_nl_splitsize is ignored outside of OpenMP GPU (gpu_option 2)!')
+   end if
+
 !  gpu_option
    call chkint_eq(0,0,cond_string,cond_values,ierr,'gpu_option',dt%gpu_option,4, &
    &        (/ABI_GPU_DISABLED,ABI_GPU_LEGACY,ABI_GPU_OPENMP,ABI_GPU_KOKKOS/),iout)
@@ -1425,6 +1437,9 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 !     ierr=ierr+1
 !#endif
    end if
+
+!  gpu_thread_limit
+   call chkint_ge(0,0,cond_string,cond_values,ierr,'gpu_thread_limit',dt%gpu_thread_limit,0,iout)
 
    ! RT-TDDFT
    if (dt%optdriver == RUNL_RTTDDFT) then

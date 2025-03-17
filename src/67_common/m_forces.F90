@@ -19,6 +19,9 @@
 
 #include "abi_common.h"
 
+! nvtx related macro definition
+#include "nvtx_macros.h"
+
 module m_forces
 
  use defs_basis
@@ -47,6 +50,10 @@ module m_forces
  use m_xchybrid,         only : xchybrid_ncpp_cc
  use m_mkcore,           only : mkcore, mkcore_alt
  use m_mkcore_wvl,       only : mkcore_wvl
+
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+ use m_nvtx_data
+#endif
 
  implicit none
 
@@ -223,6 +230,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
 ! *************************************************************************
 
  call timab(69,1,tsec)
+ ABI_NVTX_START_RANGE(NVTX_FORCES)
 
 !Save input value of forces
  ABI_MALLOC(fin,(3,dtset%natom))
@@ -626,6 +634,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
    end if
  end if
 
+ ABI_NVTX_END_RANGE()
  call timab(69,2,tsec)
 
 end subroutine forces
