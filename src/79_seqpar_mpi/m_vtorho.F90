@@ -78,7 +78,7 @@ module m_vtorho
  use m_mkrho,              only : mkrho, prtrhomxmn
  use m_mkffnl,             only : mkffnl
  use m_mpinfo,             only : proc_distrb_cycle
- use m_common,             only : prteigrs
+ use m_common,             only : prteigrs,get_gemm_nonlop_ompgpu_blocksize
  use m_dmft,               only : dmft_solve
  use m_datafordmft,        only : datafordmft
  use m_fourier_interpol,   only : transgrid
@@ -86,9 +86,8 @@ module m_vtorho
  use m_wvl_rho,            only : wvl_mkrho
  use m_wvl_psi,            only : wvl_hpsitopsi, wvl_psitohpsi, wvl_nl_gradient
  use m_inwffil,            only : cg_from_atoms
- use m_chebfiwf,           only : chebfiwf2_blocksize
  use m_gemm_nonlop_projectors, only : set_gemm_nonlop_ikpt, reset_gemm_nonlop, gemm_nonlop_use_gemm, &
-                                      gemm_nonlop_nblocks, gemm_nonlop_is_distributed
+                                      gemm_nonlop_block_size, gemm_nonlop_is_distributed
 
 #if defined HAVE_GPU_CUDA
  use m_manage_cuda
@@ -379,8 +378,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  integer :: mcgq,mcprj_local,mcprj_tmp,me_distrb,mkgq,mpi_comm_sphgrid
  integer :: my_nspinor,n1,n2,n3,n4,n5,n6,nband_eff,nbdbuf_eff !mwarning,
  integer :: nband_k,nband_cprj_k,nbuf,neglect_pawhat,nfftot,nkpg,nkpt1,nnsclo_now
- integer :: nproc_distrb,npw_k,nspden_rhoij,option,prtvol,nblk_gemm_nonlop,quit
+ integer :: nproc_distrb,npw_k,nspden_rhoij,option,prtvol,quit,nblk_gemm_nonlop
  integer :: spaceComm_distrb,usecprj_local,usefock_ACE,usetimerev
+#if defined HAVE_GPU_CUDA
+ integer(c_int64_t)   :: ph3d_size
+#endif
  logical :: berryflag,computesusmat,fixed_occ,has_vectornd
  logical :: locc_test,paral_atom,remove_inv,usefock,with_vxctau
  logical :: do_last_ortho,wvlbigdft=.false.,do_invS
@@ -995,42 +997,41 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          end if
        end if
 
-       if(gemm_nonlop_use_gemm .and. dtset%wfoptalg == 111 .and. istep <= 1) then
-         gemm_nonlop_nblocks = dtset%gpu_nl_splitsize
-         ! Only compute CHEBFI number of blocks if user didn't set it themselves
-         if(gemm_nonlop_nblocks==1) then
-           call chebfiwf2_blocksize(gs_hamk,mpi_enreg%bandpp,npw_k,nband_k,dtset%nspinor,mpi_enreg%paral_kgb,&
-           &                        dtset%gpu_option,nblk_gemm_nonlop)
-           gemm_nonlop_nblocks = nblk_gemm_nonlop
-         end if
-         gemm_nonlop_is_distributed = .false.
-         if(gemm_nonlop_nblocks > 0 .and. dtset%gpu_nl_distrib/=0) gemm_nonlop_is_distributed = .true.
+       if(gemm_nonlop_use_gemm .and. istep <= 1 .and. isppol < 2 .and. dtset%gpu_option==ABI_GPU_OPENMP) then
+         gemm_nonlop_block_size = dtset%gpu_nl_splitsize
+         call get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,mpi_enreg%bandpp,nband_k,&
+         &                        dtset%nspinor,mpi_enreg%paral_kgb,mpi_enreg%nproc_band,&
+         &                        0,0,dtset%wfoptalg,gs_hamk%gpu_option,(dtset%gpu_nl_distrib/=0),&
+         &                        gemm_nonlop_block_size,nblk_gemm_nonlop)
+         gemm_nonlop_is_distributed = (dtset%gpu_nl_distrib/=0 .and. nblk_gemm_nonlop > 0)
        end if
 
 !      Build inverse of overlap matrix for chebfi
        if (dtset%cprj_in_memory==0) then
          if(psps%usepaw == 1 .and. (dtset%wfoptalg == 1 .or. dtset%wfoptalg == 111) .and. istep <= 1) then
-            ABI_NVTX_START_RANGE(NVTX_INVOVL)
             call make_invovl(gs_hamk, dimffnl, ffnl, ph3d, mpi_enreg)
-            ABI_NVTX_END_RANGE()
          end if
        end if
 
        ! Setup gemm_nonlop
        if (gemm_nonlop_use_gemm) then
-         call set_gemm_nonlop_ikpt(my_ikpt)
+         call set_gemm_nonlop_ikpt(my_ikpt,gs_hamk%npw_fft_k,gs_hamk%istwf_k,gs_hamk%indlmn,&
+         &    gs_hamk%ntypat,gs_hamk%nattyp,gs_hamk%gpu_option)
          if(istep<=1) call reset_gemm_nonlop()
        end if
 
 #if defined HAVE_GPU_CUDA
        if (dtset%gpu_option==ABI_GPU_LEGACY .or. dtset%gpu_option==ABI_GPU_KOKKOS) then
          if (mpi_enreg%paral_kgb==1) then
+           ph3d_size=INT(size(my_bandfft_kpt%ph3d_gather,dim=1),c_int64_t) &
+             &       * size(my_bandfft_kpt%ph3d_gather,dim=2) * size(my_bandfft_kpt%ph3d_gather,dim=3)
            call gpu_update_ffnl_ph3d( &
-             & my_bandfft_kpt%ph3d_gather, INT(size(my_bandfft_kpt%ph3d_gather),c_int64_t), &
+             & my_bandfft_kpt%ph3d_gather, ph3d_size, &
              & my_bandfft_kpt%ffnl_gather, INT(size(my_bandfft_kpt%ffnl_gather),c_int64_t) )
          else
+           ph3d_size=INT(size(ph3d,dim=1),c_int64_t)*size(ph3d,dim=2)*size(ph3d,dim=3)
            call gpu_update_ffnl_ph3d( &
-             & ph3d, INT(size(ph3d),c_int64_t), &
+             & ph3d, ph3d_size, &
              & ffnl, INT(size(ffnl),c_int64_t) )
          end if
        end if

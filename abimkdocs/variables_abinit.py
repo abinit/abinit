@@ -6355,18 +6355,21 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="GPU: Non-Local operator, DISTRIBute projections",
-    requires="[[use_gemm_nonlop]] == 1 and [[gpu_option]] == 2 ([[OPENMP_OFFLOAD]])",
+    requires="[[gpu_option]] == 2 ([[OPENMP_OFFLOAD]])",
     added_in_version="9.12",
     text=r"""
 When using GPU acceleration, the wave-function projections ($<\tilde{p}_i|\Psi_{nk}> (used
 in the non-local operator) are all stored on all GPU devices.
-[[gpu_nl_distrib]] forces the distribution of these projections on several GPU devices. This
-uses less memory per GPU but requires communications beween GPU devices. These communication
-penalize the execution time.
-[[gpu_nl_splitsize]] defines the number of blocks used to split the projections.
+[[gpu_nl_distrib]] enable the distribution of these projections in slices on several GPU devices.
+This uses less memory per GPU but requires communications beween GPU devices. These communications
+may penalize the execution time, especially if splitting size is higher than the amount of GPU per node
+or if GPU-aware MPI wasn't enabled at compile time.
+By default, the projections splitting size is automatically set by ABINIT after assessing GPU memory
+consumption. One may force a specific splitting size by setting [[gpu_nl_splitsize]].
 In standard executions, the distribution is only needed on large use cases to address
-the high memory needs. Therefore ABINIT uses the "distributed mode" automatically
-when needed.
+the high memory needs.
+It is recommended to use it with a GPU-aware MPI and enable its use when compiling ABINIT
+(`--enable-mpi-gpu-aware`).
 """,
 ),
 
@@ -6378,17 +6381,21 @@ Variable(
     dimensions="scalar",
     defaultval=1,
     mnemonics="GPU: Non-Local operator SPLITing SIZE",
-    requires="[[use_gemm_nonlop]] == 1 and [[gpu_option]] == 2 ([[OPENMP_OFFLOAD]])",
+    requires="[[gpu_option]] == 2 ([[OPENMP_OFFLOAD]])",
     added_in_version="9.12",
     text=r"""
-Only relevant when [[gpu_nl_distrib]] = 1.
 When using GPU acceleration, the wave-function projections ($<\tilde{p}_i|\Psi_{nk}> (used
 in the non-local operator) are all stored on all GPU devices.
-[[gpu_nl_splitsize]] defines the number of blocks used to split these projections
-on several GPU devices.
+[[gpu_nl_splitsize]] defines the number of slices used to split these projections to
+save GPU memory usage.
+By default, each task recomputes all projection slices when computing non-local operator.
+When [[gpu_nl_distrib]] is set to 1, projections slices are distributed among MPI tasks and
+computed only once per tasks, to be shared between MPI tasks when computing non-local operator.
 In standard executions, the distribution is only needed on large use cases to address
-the high memory needs. Therefore ABINIT uses the "distributed mode" automatically
-when needed.
+the high memory needs. ABINIT automatically assess memory consumption and enable splitting
+to fit in memory if needed.
+As its heuristic to assess memory may be error-prone, user may to use this parameter to force a
+specific splitting size.
 """,
 ),
 
@@ -6436,6 +6443,26 @@ GPU programming models available in ABINIT:
   on CPU (see [[gpu_kokkos_nthrd]]).
 
 For an expert use of ABINIT on [[GPU]], some additional keywords can be used. See [[gpu_nl_distrib]], [[gpu_nl_splitsize]].
+""",
+),
+
+Variable(
+    abivarname="gpu_thread_limit",
+    varset="paral",
+    vartype="integer",
+    topics=['parallelism_expert'],
+    dimensions="scalar",
+    defaultval="Minimum between 4 and number of [[OPENMP]] threads, if GPU is enabled, 0 otherwise.",
+    mnemonics="GPU: Thread Limit",
+    requires="[[gpu_option]] /= 0 ",
+    added_in_version="10.4",
+    text=r"""
+When using GPU acceleration, some parts still runs on CPU and are parallelised using MPI distribution or OpenMP threads.
+Usually, GPU runs with one MPI task per GPU, which limits MPI-based parallelism, but with more OpenMP threads per tasks,
+which favors OpenMP parallelism.
+However, some OpenMP regions tend to be significantly slower with a high number of threads (OMP_NUM_THREADS env variable),
+hence ABINIT limit the number of threads in those select regions, to 4 threads by default, if GPU is enabled.
+This parameter allows to change this limit, for tuning purposes.
 """,
 ),
 

@@ -26,6 +26,7 @@ module m_spacepar
  use m_abicore
  use m_errors
  use m_xmpi
+ use m_xomp
  use m_sort
 
  use m_time,            only : timab
@@ -769,11 +770,13 @@ end subroutine hartre
 !!
 !! SOURCE
 
-subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,use_ndo,ar_im)
+subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,use_ndo,ar_im, &
+&    gpu_thread_limit)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: filter,istwf_k,npw,nspinor,use_ndo
+ integer,intent(in),optional :: gpu_thread_limit
  real(dp),intent(out) :: ar
  real(dp),intent(out),optional :: ar_im
  type(MPI_type),intent(in) :: mpi_enreg
@@ -783,7 +786,7 @@ subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,u
 
 !Local variables-------------------------------
 !scalars
- integer :: i1,ierr,ipw,jpw,me_g0
+ integer :: i1,ierr,ipw,jpw,me_g0,nthreads_bak,l_gpu_thread_limit
  character(len=500) :: message
 !arrays
 
@@ -807,6 +810,13 @@ subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,u
 
  ar=zero
  if(present(ar_im)) ar_im=zero
+
+ l_gpu_thread_limit=0; if(present(gpu_thread_limit)) l_gpu_thread_limit=gpu_thread_limit
+
+ if(l_gpu_thread_limit /= 0) then
+   nthreads_bak=xomp_get_num_threads(open_parallel=.True.)
+   call xomp_set_num_threads(min(l_gpu_thread_limit,nthreads_bak))
+ end if
 
 !Normal storage mode
  if(istwf_k==1)then
@@ -947,6 +957,10 @@ subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,u
    if(present(ar_im))then
      call xmpi_sum(ar_im,mpi_enreg%comm_bandspinorfft,ierr)
    end if
+ end if
+
+ if(l_gpu_thread_limit /= 0) then
+   call xomp_set_num_threads(nthreads_bak)
  end if
 
 end subroutine meanvalue_g
