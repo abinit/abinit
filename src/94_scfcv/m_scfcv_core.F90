@@ -482,8 +482,9 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 !Fock: be sure that the pointer is initialized to Null.
  nullify(fock)
 
-!If Chebishev Filtering algo is used, init invovl routine structure
- if((dtset%wfoptalg == 1 .or. dtset%wfoptalg == 111) .and. psps%usepaw == 1 .and. dtset%cprj_in_memory==0) then
+!If Chebishev Filtering or Slicing algo is used, init invovl routine structure
+ if((dtset%wfoptalg == 1 .or. dtset%wfoptalg == 111 .or. dtset%wfoptalg == 112) .and. psps%usepaw == 1 &
+&   .and. dtset%cprj_in_memory==0) then
    call init_invovl(dtset%nkpt)
  end if
 
@@ -2072,7 +2073,8 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  ABI_FREE(rmm_diis_status)
  ABI_SFREE(nhatgr)
 
- if((dtset%wfoptalg == 1 .or. dtset%wfoptalg == 111)  .and. psps%usepaw == 1 .and. dtset%cprj_in_memory==0) then
+ if((dtset%wfoptalg == 1 .or. dtset%wfoptalg == 111 .or. dtset%wfoptalg == 112)  .and. psps%usepaw == 1 &
+&     .and. dtset%cprj_in_memory==0) then
    call destroy_invovl(dtset%nkpt,dtset%gpu_option)
  end if
 
