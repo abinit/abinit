@@ -1222,7 +1222,8 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 
            ! Setup gemm_nonlop
            if (gemm_nonlop_use_gemm) then
-             call set_gemm_nonlop_ikpt(ikpt)
+             call set_gemm_nonlop_ikpt(ikpt,gs_hamkq%npw_fft_k,gs_hamkq%istwf_k,gs_hamkq%indlmn,&
+             &    gs_hamkq%ntypat,gs_hamkq%nattyp,gs_hamkq%gpu_option)
            end if ! gemm_nonlop_use_gemm
 
 !          Extract ground state projected WF and derivatives in idir1 direction

@@ -410,7 +410,6 @@ contains
     integer                   :: l_gpu_option,fact
 #if defined HAVE_GPU
     integer(kind=c_int32_t), parameter :: izero = 0
-    integer(kind=c_size_t)             :: size_bytes
 #endif
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD && !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
     complex(dpc), pointer :: xg__vecC(:,:)
@@ -5489,7 +5488,6 @@ contains
   subroutine xgBlock_copy_from_gpu(xgBlock)
     type(xgBlock_t), target, intent(in   ) :: xgBlock
 #if defined(HAVE_GPU) && defined(HAVE_OPENMP_OFFLOAD)
-    integer(c_size_t) :: size
     complex(dpc), ABI_CONTIGUOUS pointer :: xgBlock__vecC(:,:)
     real(dp), ABI_CONTIGUOUS pointer :: xgBlock__vecR(:,:)
 
@@ -5693,12 +5691,12 @@ contains
 #ifdef HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
       select case(xgBlock%space)
       case (SPACE_R,SPACE_CR)
-        byte_count = fact * xgBlock%ldim * xgBlock%cols * dp
+        byte_count = int(fact, c_size_t) * xgBlock%ldim * xgBlock%cols * dp
         !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock%vecR)
         call gpu_memset(c_loc(xgBlock%vecR), 0, byte_count)
         !$OMP END TARGET DATA
       case (SPACE_C)
-        byte_count = xgBlock%ldim * xgBlock%cols * 2 * dpc ! Note the factor 2, needed here!
+        byte_count = int(xgBlock%ldim, c_size_t) * xgBlock%cols * 2 * dpc ! Note the factor 2, needed here!
         !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock%vecC)
         call gpu_memset(c_loc(xgBlock%vecC), 0, byte_count)
         !$OMP END TARGET DATA
