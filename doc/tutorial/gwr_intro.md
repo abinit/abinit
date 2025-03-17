@@ -12,37 +12,39 @@ In the following, we will refer to this traditional approach as the **convention
 
 ## Why a new GW code?
 
-In the legacy GW approach, one uses the Lehmann representation of the Green's function in the frequency domain
+In the legacy GW code, one uses the Lehmann representation of the Green's function in the frequency domain
 to compute the irreducible polarizability, as explained in the [MBPT notes](/doc/theory/mbt).
 Then the self-energy matrix elements in the KS representation are computed via an expensive convolution
 in the frequency domain [[cite:Golze2019]] — by default using the plasmon-pole approximation [[cite:Giantomassi2011]],
-which significantly accelerates calculations but introduces approximations and prevents direct access to the spectral function $A(\omega)$.
+which significantly accelerates calculations but introduces approximations and prevents direct access
+to the spectral function $A_\nk(\omega)$.
 The conventional GW code exhibits quartic scaling with the number of atoms in the unit cell
-and quadratic scaling with the number of $\kk$-points.
+and quadratic scaling with the number of $\kk$-points and the computation of the polarizability
+with the Adler-Wiser expression represents the most CPU-demanding part.
 
 In contrast, the GWR code achieves cubic scaling with [[natom]] and linear scaling in the number of $\kk$-points
 by computing the polarizability and the self-energy in the real-space supercell associated to the $\kk$-mesh.
-FFTs are used to transform quantities from the supercell representation to Fourier space whenever needed.
-For instance the equation for W (a convolution between $\ee^-1$ and the bare Coulomb interaction is best solved in Fourier space.
-As concerns the frequency dependence, GWR evaluates the $G$, $W$ and $\Sigma$ along the imaginary axis using minimax meshes
-that are adaptive grids that place points non-uniformly, concentrating them where they are most needed,
-leading to higher accuracy with fewer points.
-This approach was proposed for the first time in ... and then implemented
-Citations relevant to the minimax mesh [[cite:Azizi2023]], [[cite:Azizi2024]]
+FFTs are used to transform quantities from the supercell to Fourier space whenever needed.
+For instance, the equation for W (a convolution between $\ee^-1$ and the bare Coulomb interaction is best solved in Fourier space.
+As concerns the frequency dependence, GWR evaluates the $G$, $W$ and $\Sigma$ along the imaginary axis
+using minimax meshes that are adaptive grids that place points non-uniformly, concentrating them where they are most needed,
+leading to higher accuracy with fewer points (CITATIONS)
+ABINIT uses to the minimax mesh provided by the GreenX library (see e.g. [[cite:Azizi2023]], [[cite:Azizi2024]]).
 
-followed by an analytic continuation (AC) to the real-frequency axis.
+In the last step of a GWR calculation, the self-energy in imaginary time is transformed to imaginary frequency
+followed by an analytic continuation (AC) to the real-frequency axis where QP corrections are obtained
+by solving the linear version of the QP equation.
 The AC approach enables access to the full frequency dependence of $\Sigma$ and $A$
-at a substantially reduced computational cost, though the accuracy of the results now depends on the effectiveness of the AC step.
+at a substantially reduced computational cost, though the accuracy of the results now depends on the accuracy of the AC.
 
 The frequency dependence of the self-energy $\Sigma(\omega)$ requires numerical integration over a range of energies.
 Traditionally, these calculations use uniform energy grids or plasmon-pole approximations.
 However, uniform grids become computationally expensive because they require many points
 to accurately capture sharp features in in the Green's function $G(\omega)$, and the screened interaction $W(\omega)$.
-
 The conventional GW code exhibits quartic scaling with the number of $\qq$-points, whereas GWR achieves linear scaling.
 
-The two codes strongly differ also at the level of the MPI parallelization.
-In the legacy GW code, MPI parallelization is available over the [[nband]] states; however,
+The two codes strongly differ at the level of the MPI parallelization.
+In the legacy GW code, MPI parallelization is available over the [[nband]] states and [[nsppol]]; however,
 key data structures, such as the screened interaction $W$, are not MPI-distributed.
 As a result, the maximum number of usable MPI processes is limited by [[nband]],
 and the workload becomes imbalanced when the number of MPI processes does not evenly divide [[nband]].
@@ -60,10 +62,6 @@ However, this distribution comes at the cost of increased MPI communication in c
 More specifically, GWR leverages Parallel BLAS (PBLAS) to efficiently distribute the memory required
 for storing the Green’s functions and $W$, significantly improving scalability compared to the legacy implementation.
 
-* [[ngkpt]] 4 4 4
-* [[nshiftk]] 1
-* [[shiftk]] 0 0 0
-
 !!! important
 
     At the time of writing, the following features are **not yet supported** in GWR:
@@ -76,6 +74,10 @@ for storing the Green’s functions and $W$, significantly improving scalability
 
 Select the task to be performed when [[optdriver]] == 6 i.e. GWR code.
 while [[gwr_task]] defines the task to be performed.
+
+* [[ngkpt]] 4 4 4
+* [[nshiftk]] 1
+* [[shiftk]] 0 0 0
 
 ## Formalism
 
@@ -116,7 +118,6 @@ with Scalapack (see section below).
 When computing the KS Green's function $G^0$, the number of bands included
 in the sum over states is controlled by [[nband]].
 Clearly, it does not make any sense to ask for more bands than the ones available in the WFK file.
-
 Note that GWR also needs the GS density produced by a previous GS SCF run.
 The location of the density file can be specified via [[getden_filepath]] or [[getden]].
 
@@ -124,9 +125,9 @@ The imaginary axis is sampled using a minimax mesh with [[gwr_ntau]] points.
 The other piece of information required for the selection of the minimax mesh
 is the ratio between the **fundamental** gap and the maximum transition energy i.e.
 the differerence between the highest KS eigenvalue for the empty states that, in turns, depends
-on the value of [[nband]] and the energy of the lowest occupied state.
+on the value of [[nband]] used and the energy of the lowest occupied state.
 
-The irreducible polarizability is computed in real space in the supercell using
+The irreducible polarizability is computed in the real-space supercell using
 
 \begin{equation}
 \chi(\rr,\RR', i\tau) = G(\rr, \RR', i\tau) G^*(\rr, \RR', -i\tau)
@@ -140,20 +141,22 @@ and then immediately transformed to Fourier space.
 \end{equation}
 
 The cutoff energy for the polarizability is given by [[ecuteps]]
-while [[ecutsigx]] defines the number of $\gg$-vectors for the exchange part of the self-energy
-that is computed using the standard summation over occupied states:
-
-\begin{equation}\label{eq:Sigma_x}
-\Sigma_x(\rr_1,\rr_2)= -\sum_\kk^\BZ
-\sum_\nu^\text{occ} \Psi_{n\kk}(\rr_1){\Psi^\*_{n\kk}}(\rr_2)\,v(\rr_1,\rr_2)
-\end{equation}
-
 As concerns the treatment of the long-wavelenght limit $\qq \rightarrow 0$ in the polarizability,
 we have the following input variables:
 
 [[inclvkb]],
 [[gw_qlwl]],
 [[gwr_max_hwtene]]
+
+The exchange part of the self-energy is computed using the standard sum over occupied states:
+
+\begin{equation}\label{eq:Sigma_x}
+\Sigma_x(\rr_1,\rr_2)= -\sum_\kk^\BZ
+\sum_\nu^\text{occ} \Psi_{n\kk}(\rr_1){\Psi^\*_{n\kk}}(\rr_2)\,v(\rr_1,\rr_2)
+\end{equation}
+
+while [[ecutsigx]] defines the number of $\gg$-vectors for
+
 
 ## Real-space vs convolutions in the BZ
 
