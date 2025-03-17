@@ -1174,12 +1174,13 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
       end do
     end if
     if (optder>=2) then
-      !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(4) &
-      !$OMP& PRIVATE(idat,ia,ilmn,mu) MAP(to:d2gxdtfac,d2gxdtfac_) &
+      !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(3) &
+      !$OMP& PRIVATE(idat,ia) MAP(to:d2gxdtfac,d2gxdtfac_) &
       !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
       do idat=1,ndat
         do ispinor=1,nspinor
           do ia=1,nincat
+            !$OMP PARALLEL DO PRIVATE(ilmn,mu)
             do ilmn=1,nlmn
               do mu=1,nd2gxdtfac
                 d2gxdtfac(1,mu,ilmn+(ia-1)*nlmn+ibeg,ispinor,idat)=&
