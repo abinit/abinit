@@ -265,7 +265,6 @@ contains
          & "SLICES_PERMUTE_COLS", &
          & "SLICES_AINIT", &
          & "SLICES_AFREE", &
-         & "TRANSPOSE", &
          & "GET_AX_BX", &
          & "SLICES_NONLOP", &
          & "GET_AX_BX", &
