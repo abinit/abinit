@@ -2010,7 +2010,7 @@ subroutine xg_nonlop_getcprj_deriv(xg_nonlop,X,cprjX,work_mpi,option)
    type(xg_t)        :: cprjin_nlmn_max,cprjout_nlmn_max
    type(xg_t),target :: Aij_complex
    type(xgBlock_t) :: cprjin_nlmn,cprjout_nlmn
-   type(xgBlock_t) :: Aij_iatom
+   type(xgBlock_t) :: Aij_iatom,Aij_iatom_
    real(dp),pointer :: cprjin_nlmn_(:,:),cprjout_nlmn_(:,:)
    real(dp),pointer :: cprjin_(:,:),cprjout_(:,:)
    real(dp) :: tsec(2)
@@ -2138,7 +2138,9 @@ subroutine xg_nonlop_getcprj_deriv(xg_nonlop,X,cprjX,work_mpi,option)
        ! if needed, transfer real matrix to a complex one
        if (aij_r2c) then
          call xgBlock_r2c(Aij_iatom,Aij_complex%self,nspinor)
-         Aij_iatom = Aij_complex%self
+         Aij_iatom_ = Aij_complex%self
+       else
+         Aij_iatom_ = Aij_iatom
        end if
        ! Copy cprj of ONE atom for ALL bands from cprjin to cprin_nlmn
        !call timab(tim_apply_Aij_copy,1,tsec)
@@ -2160,7 +2162,7 @@ subroutine xg_nonlop_getcprj_deriv(xg_nonlop,X,cprjX,work_mpi,option)
 
        !call timab(tim_apply_Aij_gemm,1,tsec)
 !       call xgBlock_gemm('n','n',1.0d0,Aij_,cprjin_nlmn,0.d0,cprjout_nlmn,timing=.false.)
-       call xgBlock_gemm('n','n',1.0d0,Aij_iatom,cprjin_nlmn,0.d0,cprjout_nlmn)
+       call xgBlock_gemm('n','n',1.0d0,Aij_iatom_,cprjin_nlmn,0.d0,cprjout_nlmn)
        !call timab(tim_apply_Aij_gemm,2,tsec)
 
        !call timab(tim_apply_Aij_copy,1,tsec)
