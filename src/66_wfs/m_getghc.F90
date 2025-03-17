@@ -45,7 +45,7 @@ module m_getghc
  use m_fft,         only : fourwf
 
  use m_ompgpu_fourwf,      only : ompgpu_fourwf_work_mem
- use m_gemm_nonlop_ompgpu, only : gemm_nonlop_ompgpu_work_mem
+ use m_gemm_nonlop,        only : gemm_nonlop_ompgpu_work_mem
 
 #if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
  use m_nvtx_data

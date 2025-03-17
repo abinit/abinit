@@ -22,7 +22,6 @@ sources = [
  "m_cgprj.F90",
  "m_contract.F90",
  "m_fock.F90",
- "m_gemm_nonlop_ompgpu.F90",
  "m_gemm_nonlop_gpu.F90",
  "m_gemm_nonlop_projectors.F90",
  "m_gemm_nonlop.F90",
