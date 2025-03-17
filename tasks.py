@@ -252,6 +252,7 @@ def abichecks(ctx):
 
 @task
 def robodoc(ctx):
+    """Build robodoc documentation."""
     with cd(ABINIT_ROOTDIR):
         result = ctx.run("./mkrobodoc.sh", pty=True)
 
@@ -711,3 +712,87 @@ def which(cmd):
             if is_exe(exe_file):
                 return exe_file
     return None
+
+
+@task
+def official_release(ctx: Context, new_version) -> None:
+    """
+    Build new officiale release ...
+
+    Example usage:
+
+        invoke official-release 10.2.4
+    """
+    # Set variables
+    github_user = "gonzex"
+    github_repo = "abinit"
+    github_url = f"git@github.com:{github_user}/{github_repo}.git"
+    #github_token = "YOUR_GITHUB_TOKEN"  # Replace with your GitHub token
+
+    run_kwargs = dict(pty=True, echo=True)
+    def _run(command):
+        return cxt.run(command, **run_kwargs)
+
+    with cd(ABINIT_ROOTDIR):
+        # The version in .current_version is updated manually.
+        # Here we check that the value stored in the file is equal to the command line
+        with open(".current_version", "rt") as fh:
+            old_version = fh.read()
+
+        if old_version != new_version:
+            raise ValueError(f"{old_version=} != {new_version=}")
+
+        # Step 1: Checkout master and merge changes
+        #_run(f"git commit -a -m 'v{version}'")
+        _run("git checkout master")
+        -run("git merge develop")
+        -run("./config/scripts/makemake")
+        _run(f"git tag -a {version} -m 'v{version}'")
+        -run("git add -f configure")
+        _run("git push origin master")
+
+        # Step 2: Push to GitHub
+        _run(f"git remote add abinit {github_url} || echo 'Remote already exists'")
+        _run("git push -u abinit master --tags")
+        _run("git checkout develop")
+
+        # Step 3: Ensure 'configure' is ignored in develop branch
+        #_run("echo 'configure' >> .gitignore")
+        #_run("git add .gitignore")
+        #_run("git commit -m 'Ignore configure script in develop branch' || echo 'No changes to commit'")
+        #_run("git push origin develop")
+        #_run("git rm --cached configure || echo 'File not tracked' ")
+        #_run("git commit -m 'Remove configure from tracking in develop' || echo 'No changes to commit'")
+        #_run("git push origin develop")
+
+        # Step 3: Create a new release
+        #release_tag = input("Enter the release tag: ")
+        #release_title = input("Enter the release title: ")
+        #release_description = input("Enter the release description: ")
+
+        #release_data = {
+        #    "tag_name": release_tag,
+        #    "name": release_title,
+        #    "body": release_description,
+        #    "draft": False,
+        #    "prerelease": False
+        #}
+
+        #headers = {
+        #    "Authorization": f"token {github_token}",
+        #    "Accept": "application/vnd.github.v3+json"
+        #}
+
+        #import requests
+        #import json
+        #response = requests.post(
+        #    f"https://api.github.com/repos/{github_user}/{github_repo}/releases",
+        #    headers=headers,
+        #    data=json.dumps(release_data)
+        #)
+
+        #if response.status_code == 201:
+        #    print("Release created successfully!")
+        #else:
+        #    print(f"Failed to create release: {response.text}")
+

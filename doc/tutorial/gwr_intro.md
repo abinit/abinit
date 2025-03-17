@@ -23,13 +23,13 @@ and quadratic scaling with the number of $\kk$-points and the computation of the
 with the Adler-Wiser expression represents the most CPU-demanding part.
 
 In contrast, the GWR code achieves cubic scaling with [[natom]] and linear scaling in the number of $\kk$-points
-by computing the polarizability and the self-energy in the real-space supercell associated to the $\kk$-mesh.
+by computing the polarizability and the self-energy in the real-space supercell associated to the $\kk$-mesh [[cite:Liu2016]]
 FFTs are used to transform quantities from the supercell to Fourier space whenever needed.
 For instance, the equation for W (a convolution between $\ee^-1$ and the bare Coulomb interaction is best solved in Fourier space.
 As concerns the frequency dependence, GWR evaluates the $G$, $W$ and $\Sigma$ along the imaginary axis
 using minimax meshes that are adaptive grids that place points non-uniformly, concentrating them where they are most needed,
 leading to higher accuracy with fewer points (CITATIONS)
-ABINIT uses to the minimax mesh provided by the GreenX library (see e.g. [[cite:Azizi2023]], [[cite:Azizi2024]]).
+ABINIT uses to the minimax mesh provided by the GreenX library ([[cite:Azizi2023]], [[cite:Azizi2024]]).
 
 In the last step of a GWR calculation, the self-energy in imaginary time is transformed to imaginary frequency
 followed by an analytic continuation (AC) to the real-frequency axis where QP corrections are obtained
@@ -37,30 +37,25 @@ by solving the linear version of the QP equation.
 The AC approach enables access to the full frequency dependence of $\Sigma$ and $A$
 at a substantially reduced computational cost, though the accuracy of the results now depends on the accuracy of the AC.
 
+Although GWR exhibits better scaling with the number of atoms, it should be noted that the legacy implementation
+makes better use of symmetries.
+Consequently, the legacy implementation is still competitive and can be faster than GWR in the case of highly symmetric systems.
+
 The frequency dependence of the self-energy $\Sigma(\omega)$ requires numerical integration over a range of energies.
 Traditionally, these calculations use uniform energy grids or plasmon-pole approximations.
 However, uniform grids become computationally expensive because they require many points
 to accurately capture sharp features in in the Green's function $G(\omega)$, and the screened interaction $W(\omega)$.
 The conventional GW code exhibits quartic scaling with the number of $\qq$-points, whereas GWR achieves linear scaling.
 
-The two codes strongly differ at the level of the MPI parallelization.
-In the legacy GW code, MPI parallelization is available over the [[nband]] states and [[nsppol]]; however,
-key data structures, such as the screened interaction $W$, are not MPI-distributed.
-As a result, the maximum number of usable MPI processes is limited by [[nband]],
-and the workload becomes imbalanced when the number of MPI processes does not evenly divide [[nband]].
-More critically, self-energy calculations in the legacy GW code are highly memory-intensive,
-as they require storing both the wavefunctions (whose memory footprint scales with the number of MPI processes)
-and $W$ (a non-scalable portion).
-This memory requirement becomes particularly problematic for large [[npweps]] values or calculations
-beyond the plasmon-pole approximation, where the full $W$ matrix must be stored for multiple frequencies.
-Consequently, conventional GW calculations can be prohibitively demanding in terms of memory, especially for large systems
-or systems with few symmetries.
+## Input variables
 
-In contrast, the GWR code distributes most data structures across MPI processes,
-which enables handling larger systems when sufficient computing nodes are available.
-However, this distribution comes at the cost of increased MPI communication in certain parts of the algorithm.
-More specifically, GWR leverages Parallel BLAS (PBLAS) to efficiently distribute the memory required
-for storing the Green’s functions and $W$, significantly improving scalability compared to the legacy implementation.
+To enter the GWR driver of ABINIT, one has to set [[optdriver]] to 6,
+and then use [[gwr_task]] to specify the task to be performed.
+Currently, one can perform a direct diagonalization with ScaLAPACK to generate a WFK with empty states,
+and this feature can also be used by other GW codes that are able to read ABINIT’s WFK file
+It is possible to compute GW corrections using the one-shot method or different types of self-consistency on energies.
+Finally, one can compute total energies at the RPA level.
+
 
 !!! important
 
@@ -70,10 +65,7 @@ for storing the Green’s functions and $W$, significantly improving scalability
     * Metallic systems as the our minimax meshes assume systems with an energy gap
     * Spinor wave-functions ([[nspinor]] = 2)
     * Temperature effects at the electronic level are not taken into account as we work with the T = 0 formalism.
-    * Only $\Gamma$-centered $\kk$-meshes are supported in GWR, e.g.:
-
-Select the task to be performed when [[optdriver]] == 6 i.e. GWR code.
-while [[gwr_task]] defines the task to be performed.
+    * Only $\Gamma$-centered $\kk$-meshes are supported in GWR
 
 * [[ngkpt]] 4 4 4
 * [[nshiftk]] 1
@@ -178,7 +170,7 @@ the irreducible wedge defined by the little group of the $\kk$$ point.
 In the best case scenario, both the CBM and the VBM are located at the $\Gamma$ point; hence the BZ summation
 can be replaced by a much faster symmetrized sum over the wavevectors of the IBZ.
 
-
+<!--
 ## GWR workflow for QP energies
 
 A typical GWR workflow with arrows denoting dependencies between the different steps
@@ -209,6 +201,7 @@ The following physical properties can be computed:
 * Real and imaginary parts of the e-ph self-energy (**eph_task 4**) that gives access to:
 
     * Zero-point renormalization of the band gap
+-->
 
 ## Tricks to accelerate the computation and reduce the memory requirements
 
@@ -240,6 +233,25 @@ the command line interface is used or `enable_gw_dpc="yes"` when `--with-config-
 to specify the configuration options via an external FILE.
 
 ### MPI parallelization
+
+The two codes strongly differ at the level of the MPI parallelization.
+In the legacy GW code, MPI parallelization is available over the [[nband]] states and [[nsppol]]; however,
+key data structures, such as the screened interaction $W$, are not MPI-distributed.
+As a result, the maximum number of usable MPI processes is limited by [[nband]],
+and the workload becomes imbalanced when the number of MPI processes does not evenly divide [[nband]].
+More critically, self-energy calculations in the legacy GW code are highly memory-intensive,
+as they require storing both the wavefunctions (whose memory footprint scales with the number of MPI processes)
+and $W$ (a non-scalable portion).
+This memory requirement becomes particularly problematic for large [[npweps]] values or calculations
+beyond the plasmon-pole approximation, where the full $W$ matrix must be stored for multiple frequencies.
+Consequently, conventional GW calculations can be prohibitively demanding in terms of memory, especially for large systems
+or systems with few symmetries.
+
+In contrast, the GWR code distributes most data structures across MPI processes,
+which enables handling larger systems when sufficient computing nodes are available.
+However, this distribution comes at the cost of increased MPI communication in certain parts of the algorithm.
+More specifically, GWR leverages Parallel BLAS (PBLAS) to efficiently distribute the memory required
+for storing the Green’s functions and $W$, significantly improving scalability compared to the legacy implementation.
 
 The GWR code employs a 4D MPI Cartesian grid to distribute both workload and memory over
 collinear spins, points of the minimax mesh, $(\gg, \gg')$ components, and $\kk$-points.
