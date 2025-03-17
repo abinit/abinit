@@ -148,8 +148,10 @@ module m_chebfi2
  public :: chebfi_free
  public :: chebfi_memInfo
  public :: chebfi_run
- public :: chebfi_RayleighValues   ! FIXME IL used in m_slice
- public :: chebfi_swapInnerBuffers ! FIXME IL used in m_slice
+ public :: chebfi_RayleighValues      ! IL used in m_slice
+ public :: chebfi_swapInnerBuffers    ! IL used in m_slice
+ public :: chebfi_mpiTranspose        ! IL used in m_slice
+ public :: chebfi_getAX_BX            ! IL used in m_slice
 
  CONTAINS  !========================================================================================
 !!***
@@ -458,6 +460,131 @@ end function chebfi_memInfo
 
 !----------------------------------------------------------------------
 
+!!****f* m_chebfi2/chebfi_mpiTranspose
+!! NAME
+!! chebfi_mpiTranspose
+!!
+!! FUNCTION
+!! From MPI Row distribution (plane waves) to MPI Column distribution (bands) (target_mpi_distr='COL')
+!! or the inverse (target_mpi_distr='ROW'). Applies MPI A2A communication if paral_kgb==1.
+!!
+!! SOURCE
+
+subroutine chebfi_mpiTranspose(chebfi,nspinor,target_mpi_distr)
+
+ implicit none
+
+!Arguments ------------------------------------
+ type(chebfi_t)    , intent(inout) :: chebfi
+ character(len=500), intent(in   ) :: target_mpi_distr
+ integer           , intent(in   ) :: nspinor
+ 
+! *********************************************************************
+
+ select case(target_mpi_distr)
+ case('COL')  
+
+    ! Target MPI distribution is Column: each MPI contains all plane-waves and part of bands
+    if (chebfi%paral_kgb == 1 .and. use_subcomm .eq. .false.) then
+
+        call xgTransposer_constructor(chebfi%xgTransposerX,chebfi%X,chebfi%xXColsRows,nspinor,&
+            STATE_LINALG,TRANS_ALL2ALL,chebfi%comm_rows,chebfi%comm_cols,0,0,chebfi%me_g0_fft,gpu_option=chebfi%gpu_option)
+
+        call xgTransposer_copyConstructor(chebfi%xgTransposerAX,chebfi%xgTransposerX,chebfi%AX%self,chebfi%xAXColsRows,STATE_LINALG)
+        call xgTransposer_copyConstructor(chebfi%xgTransposerBX,chebfi%xgTransposerX,chebfi%BX%self,chebfi%xBXColsRows,STATE_LINALG)
+
+        chebfi%xgTransposerX%gpu_kokkos_nthrd  = chebfi%gpu_kokkos_nthrd
+        chebfi%xgTransposerAX%gpu_kokkos_nthrd = chebfi%gpu_kokkos_nthrd
+        chebfi%xgTransposerBX%gpu_kokkos_nthrd = chebfi%gpu_kokkos_nthrd
+
+        call timab(tim_transpose,1,tsec)
+        ABI_NVTX_START_RANGE(NVTX_CHEBFI2_TRANSPOSE)
+        call xgTransposer_transpose(chebfi%xgTransposerX,STATE_COLSROWS)
+        chebfi%xgTransposerAX%state = STATE_COLSROWS
+        chebfi%xgTransposerBX%state = STATE_COLSROWS
+        ABI_NVTX_END_RANGE()
+        call timab(tim_transpose,2,tsec)
+    else
+        call xgBlock_setBlock(chebfi%X,chebfi%xXColsRows,chebfi%spacedim,chebfi%neigenpairs)         !use xXColsRows instead of X notion
+        call xgBlock_setBlock(chebfi%AX%self,chebfi%xAXColsRows,chebfi%spacedim,chebfi%neigenpairs)  !use xAXColsRows instead of AX notion
+        call xgBlock_setBlock(chebfi%BX%self,chebfi%xBXColsRows,chebfi%spacedim,chebfi%neigenpairs)  !use xBXColsRows instead of BX notion
+    end if
+ case('ROW')
+    
+    ! Target MPI distribution is Row: every MPI contains all bands and part of plane-waves
+    
+    call timab(tim_transpose,1,tsec)
+    ABI_NVTX_START_RANGE(NVTX_CHEBFI2_TRANSPOSE)
+    if (chebfi%paral_kgb == 1 .and. use_subcomm .eq. .false.) then
+        call xmpi_barrier(chebfi%spacecom)
+
+        call xgTransposer_transpose(chebfi%xgTransposerX, STATE_LINALG)
+        call xgTransposer_transpose(chebfi%xgTransposerAX,STATE_LINALG)
+        call xgTransposer_transpose(chebfi%xgTransposerBX,STATE_LINALG)
+
+        !only one MPI proc reset buffers to right addresses (because of X-Xcolwise swaps)
+        if (xmpi_comm_size(chebfi%spacecom) == 1) then 
+            call xgBlock_setBlock(chebfi%xXColsRows,  chebfi%X,       chebfi%spacedim, chebfi%neigenpairs)
+            call xgBlock_setBlock(chebfi%xAXColsRows, chebfi%AX%self, chebfi%spacedim, chebfi%neigenpairs)
+            call xgBlock_setBlock(chebfi%xBXColsRows, chebfi%BX%self, chebfi%spacedim, chebfi%neigenpairs)
+        end if
+    else
+        call xgBlock_setBlock(chebfi%xXColsRows,  chebfi%X,       chebfi%spacedim, chebfi%neigenpairs)
+        call xgBlock_setBlock(chebfi%xAXColsRows, chebfi%AX%self, chebfi%spacedim, chebfi%neigenpairs)
+        call xgBlock_setBlock(chebfi%xBXColsRows, chebfi%BX%self, chebfi%spacedim, chebfi%neigenpairs)
+    end if
+    ABI_NVTX_END_RANGE()
+    call timab(tim_transpose,2,tsec)
+ end select 
+
+end subroutine chebfi_mpiTranspose
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_chebfi2/chebfi_getAX_BX
+!! NAME
+!! chebfi_getAX_BX
+!!
+!! FUNCTION
+!! Wrapper for getAX_BX call on chebfi type object.
+!! It uses x*XColsRows workspace of chebfi.
+!!
+!! SOURCE
+
+subroutine chebfi_getAX_BX(chebfi, getAX_BX)
+
+ implicit none
+
+ !Arguments ------------------------------------
+ type(chebfi_t) , intent(inout) :: chebfi
+ interface
+     subroutine getAX_BX(X,AX,BX)
+        use m_xg, only : xgBlock_t
+        type(xgBlock_t), intent(inout) :: X
+        type(xgBlock_t), intent(inout) :: AX
+        type(xgBlock_t), intent(inout) :: BX
+    end subroutine getAX_BX
+ end interface
+ 
+ !Local variables-------------------------------
+ real(dp) :: tsec(2)
+
+! *********************************************************************
+
+ call timab(tim_getAX_BX,1,tsec)
+ ABI_NVTX_START_RANGE(NVTX_CHEBFI2_GET_AX_BX)
+ call getAX_BX(chebfi%xXColsRows,chebfi%xAXColsRows,chebfi%xBXColsRows)
+ call xgBlock_zero_im_g0(chebfi%xAXColsRows)
+ call xgBlock_zero_im_g0(chebfi%xBXColsRows)
+ ABI_NVTX_END_RANGE()
+ call timab(tim_getAX_BX,2,tsec)
+
+end subroutine chebfi_free
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_chebfi2/chebfi_run
 !! NAME
 !! chebfi_run
@@ -709,7 +836,8 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,eigen,occ,residu,nspinor)
    call xgTransposer_transpose(chebfi%xgTransposerAX,STATE_LINALG)
    call xgTransposer_transpose(chebfi%xgTransposerBX,STATE_LINALG)
 
-   if (xmpi_comm_size(chebfi%spacecom) == 1) then !only one MPI proc reset buffers to right addresses (because of X-Xcolwise swaps)
+   !only one MPI proc reset buffers to right addresses (because of X-Xcolwise swaps)
+   if (xmpi_comm_size(chebfi%spacecom) == 1) then 
      call xgBlock_setBlock(chebfi%xXColsRows,  chebfi%X,       spacedim, neigenpairs)
      call xgBlock_setBlock(chebfi%xAXColsRows, chebfi%AX%self, spacedim, neigenpairs)
      call xgBlock_setBlock(chebfi%xBXColsRows, chebfi%BX%self, spacedim, neigenpairs)
@@ -722,11 +850,13 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,eigen,occ,residu,nspinor)
  ABI_NVTX_END_RANGE()
  call timab(tim_transpose,2,tsec)
 
+ ! Apply Rayleigh-Ritz
  ABI_NVTX_START_RANGE(NVTX_CHEBFI2_RR)
- call xg_RayleighRitz(chebfi%X,chebfi%AX%self,chebfi%BX%self,chebfi%eigenvalues,ierr,0,tim_RR,chebfi%gpu_option,&
- &    solve_ax_bx=.true.)
+ call xg_RayleighRitz(chebfi%X,chebfi%AX%self,chebfi%BX%self,chebfi%eigenvalues,ierr,0,tim_RR,&
+&                     chebfi%gpu_option,solve_ax_bx=.true.)
  ABI_NVTX_END_RANGE()
 
+ ! Compute residual
  call timab(tim_residu, 1, tsec)
  if (chebfi%paw) then
    call xgBlock_colwiseCymax(chebfi%AX%self,chebfi%eigenvalues,chebfi%BX%self,chebfi%AX%self)
@@ -833,6 +963,75 @@ subroutine chebfi_rayleighRitzQuotients(chebfi,maxeig,mineig,DivResults)
 end subroutine chebfi_rayleighRitzQuotients
 !!***
 
+!----------------------------------------------------------------------
+
+!!****f* m_chebfi2/chebfi_computeResiduals
+!! NAME
+!! chebfi_computeResiduals
+!!
+!! FUNCTION
+!! Computes eigenvector residuals when eigenvectors are MPI distributed
+!! on rows or columns.
+!! 
+!! SIDE EFFECTS
+!! X_next contains residuals if MPI distribution is COLS
+!!        then the norm is stored to residu
+!! residuals contains residuals if MPI distribution is ROWS
+!!
+!! SOURCE
+
+subroutine chebfi_computeResiduals(chebfi,residu,mpi_distr)
+
+ implicit none
+
+!Arguments ------------------------------------
+ real(dp), intent(inout) :: maxeig
+ real(dp), intent(inout) :: mineig
+ type(chebfi_t), intent(inout) :: chebfi
+ type(xgBlock_t), intent(inout) :: DivResults
+
+!Local variables-------------------------------
+!scalars
+ type(xg_t)::Results1
+ type(xg_t)::Results2
+!arrays
+ integer :: maxeig_pos(2)
+ integer :: mineig_pos(2)
+ integer :: space_res
+ real(dp) :: sec(2)
+
+! *********************************************************************
+
+ ! TODO verify with chebfi%xgTransposer%state = STATE_LINALG
+ ! we are in linalg representation, colsrows
+ ! STATE_COLSROWS cross check
+ ! possibly add getters if they are private variables
+
+ call timab(tim_residu, 1, tsec)
+ if (mpi_distr == 'COL') then
+    ! TODO IL 20/01/2025 ymax has not been tested on GPU
+    if (chebfi%paw) then
+        call xgBlock_copy(chebfi%xBXColsRows,chebfi%X_next)     ! X_next = S|Psi>
+    else
+        call xgBlock_copy(chebfi%xXColsRows,chebfi%X_next)      ! X_next = |Psi>
+    end if
+    call xgBlock_ymax(chebfi%X_next,DivResults,0,1)             ! X_next = - eig * S|Psi>
+    call xgBlock_add(chebfi%X_next,chebfi%xAXColsRows)          ! X_next = H|Psi> - eig * S|Psi>
+    call xgBlock_colwiseNorm2(chebfi%X_next,residu,comm_loc=xmpi_comm_null) ! resid = |X_next|^2
+ else if (mpi_distr == 'ROW') then
+    ! chebfi%AX=AX-eig*BX
+    if (chebfi%paw) then
+        call xgBlock_colwiseCymax(chebfi%AX%self,chebfi%eigenvalues,chebfi%BX%self,chebfi%AX%self)
+    else
+        call xgBlock_colwiseCymax(chebfi%AX%self,chebfi%eigenvalues,chebfi%X,chebfi%AX%self)
+    end if
+    ! residu=|AX-eig*BX|^2 (this is norm squared!)
+    call xgBlock_colwiseNorm2(chebfi%AX%self, residu)
+ end if
+ call timab(tim_residu, 2, tsec)
+
+end subroutine chebfi_computeResiduals
+!!***
 !----------------------------------------------------------------------
 
 !!****f* m_chebfi2/chebfi_computeNextOrderChebfiPolynom
@@ -971,12 +1170,14 @@ end subroutine chebfi_swapInnerBuffers
 !! Assumes eigenvectors are stored in X0.
 !! Uses bandpp parallelisation for bands.
 !!
+!! Rename Rayleigh Values as Rayleigh Values and residuals?
+!! 
 !! SIDE EFFECTS
 !! Stores results in eigen and resid
 !! 
 !! SOURCE
 
-subroutine chebfi_RayleighValues(chebfi,X0,DivResults,residu,getAX_BX,nspinor)
+subroutine chebfi_RayleighValues(chebfi,X0,DivResults,residu,getAX_BX,nspinor,use_subcomm)
 
  use, intrinsic :: iso_c_binding
 
@@ -986,6 +1187,7 @@ subroutine chebfi_RayleighValues(chebfi,X0,DivResults,residu,getAX_BX,nspinor)
  type(xgBlock_t), intent(inout) :: DivResults
  type(xgBlock_t), intent(inout) :: residu
  integer,         intent(in) :: nspinor
+ logical, optional, intent(in) :: use_subcomm
  interface
      subroutine getAX_BX(X,AX,BX)
         use m_xg, only : xgBlock_t
@@ -998,11 +1200,15 @@ subroutine chebfi_RayleighValues(chebfi,X0,DivResults,residu,getAX_BX,nspinor)
  !Local variables-------------------------------
  integer :: neigenpairs
  integer :: spacedim
+ logical :: use_subcomm_
  real(dp) :: maxeig, mineig
  ! arrays
  real(dp) :: tsec(2)
 
 ! *********************************************************************
+
+ use_subcomm_ = .false.
+ if (present(use_subcomm)) use_subcomm_ = use_subcomm
 
  if (chebfi%gpu_option/=ABI_GPU_DISABLED) then
  !   ABI_BUG("Rayleigh Values not implemented on GPU")
@@ -1014,83 +1220,27 @@ subroutine chebfi_RayleighValues(chebfi,X0,DivResults,residu,getAX_BX,nspinor)
  chebfi%X = X0 
 
 !********************* Apply transposition *****
- if (chebfi%paral_kgb == 1) then
+! only if chebfi is not a subcommunicator?? FIXME
+ call timab(tim_sliceAll_transpose,1,tsec)
+ subroutine chebfi_MPITranspose(chebfi,nspinor,'COL')
+ call timab(tim_sliceAll_transpose,2,tsec)
 
-   call xgTransposer_constructor(chebfi%xgTransposerX,chebfi%X,chebfi%xXColsRows,nspinor,&
-     STATE_LINALG,TRANS_ALL2ALL,chebfi%comm_rows,chebfi%comm_cols,0,0,chebfi%me_g0_fft,gpu_option=chebfi%gpu_option)
+ ! Compute AX and BX
+ call chebfi_getAX_BX(chebfi,getAX_BX)
 
-   call xgTransposer_copyConstructor(chebfi%xgTransposerAX,chebfi%xgTransposerX,chebfi%AX%self,chebfi%xAXColsRows,STATE_LINALG)
-   call xgTransposer_copyConstructor(chebfi%xgTransposerBX,chebfi%xgTransposerX,chebfi%BX%self,chebfi%xBXColsRows,STATE_LINALG)
-
-   chebfi%xgTransposerX%gpu_kokkos_nthrd  = chebfi%gpu_kokkos_nthrd
-   chebfi%xgTransposerAX%gpu_kokkos_nthrd = chebfi%gpu_kokkos_nthrd
-   chebfi%xgTransposerBX%gpu_kokkos_nthrd = chebfi%gpu_kokkos_nthrd
-
-   call timab(tim_sliceAll_transpose,1,tsec)
-   ABI_NVTX_START_RANGE(NVTX_CHEBFI2_TRANSPOSE)
-   call xgTransposer_transpose(chebfi%xgTransposerX,STATE_COLSROWS)
-   chebfi%xgTransposerAX%state = STATE_COLSROWS
-   chebfi%xgTransposerBX%state = STATE_COLSROWS
-   ABI_NVTX_END_RANGE()
-   call timab(tim_sliceAll_transpose,2,tsec)
- else
-   call xgBlock_setBlock(chebfi%X,chebfi%xXColsRows,spacedim,neigenpairs)         !use xXColsRows instead of X notion
-   call xgBlock_setBlock(chebfi%AX%self,chebfi%xAXColsRows,spacedim,neigenpairs)  !use xAXColsRows instead of AX notion
-   call xgBlock_setBlock(chebfi%BX%self,chebfi%xBXColsRows,spacedim,neigenpairs)
- end if
-
- call timab(tim_sliceAll_getAX_BX,1,tsec)
- ABI_NVTX_START_RANGE(NVTX_SLICEALL_GET_AX_BX)
- call getAX_BX(chebfi%xXColsRows,chebfi%xAXColsRows,chebfi%xBXColsRows)
- call xgBlock_zero_im_g0(chebfi%xAXColsRows)
- call xgBlock_zero_im_g0(chebfi%xBXColsRows)
- ABI_NVTX_END_RANGE()
- call timab(tim_sliceAll_getAX_BX,2,tsec)
-
- if (chebfi%paral_kgb == 1) then
-   call xmpi_barrier(chebfi%spacecom)
- end if
-
-!********************* Compute Rayleigh quotients for every band *****
+!********************* Compute Rayleigh quotients for every band (requires COL) *****
  call timab(tim_sliceAll_RR_q, 1, tsec)
  call chebfi_rayleighRitzQuotients(chebfi,maxeig,mineig,DivResults)
  call timab(tim_sliceAll_RR_q, 2, tsec)
 
-!********************* Compute Residuals, see oracle *****
- ! TODO IL 20/01/2025 ymax has not been tested on GPU
- !Compute residu here, use X_next as a work space
- ! X_next = S|Psi>
- call xgBlock_copy(chebfi%xBXColsRows,chebfi%X_next)
- ! X_next = - eig * S|Psi>
- call xgBlock_ymax(chebfi%X_next,DivResults,0,1)
- ! X_next = H|Psi> - eig * S|Psi>
- call xgBlock_add(chebfi%X_next,chebfi%xAXColsRows)
- ! resid = |X_next|^2
- call xgBlock_colwiseNorm2(chebfi%X_next,residu,comm_loc=xmpi_comm_null)
+!********************* Compute Residuals, save to X_next *****
+ call chebfi_computeResiduals(chebfi,residu,'COL')
 
 !********************* Apply transposition *****
  call timab(tim_sliceAll_transpose,1,tsec)
- ABI_NVTX_START_RANGE(NVTX_CHEBFI2_TRANSPOSE)
- if (chebfi%paral_kgb == 1) then
-   call xmpi_barrier(chebfi%spacecom)
-
-   call xgTransposer_transpose(chebfi%xgTransposerX, STATE_LINALG)
-   call xgTransposer_transpose(chebfi%xgTransposerAX,STATE_LINALG)
-   call xgTransposer_transpose(chebfi%xgTransposerBX,STATE_LINALG)
-
-   if (xmpi_comm_size(chebfi%spacecom) == 1) then !only one MPI proc reset buffers to right addresses (because of X-Xcolwise swaps)
-     call xgBlock_setBlock(chebfi%xXColsRows,  chebfi%X,       spacedim, neigenpairs)
-     call xgBlock_setBlock(chebfi%xAXColsRows, chebfi%AX%self, spacedim, neigenpairs)
-     call xgBlock_setBlock(chebfi%xBXColsRows, chebfi%BX%self, spacedim, neigenpairs)
-   end if
- else
-   call xgBlock_setBlock(chebfi%xXColsRows,  chebfi%X,       spacedim, neigenpairs)
-   call xgBlock_setBlock(chebfi%xAXColsRows, chebfi%AX%self, spacedim, neigenpairs)
-   call xgBlock_setBlock(chebfi%xBXColsRows, chebfi%BX%self, spacedim, neigenpairs)
- end if
- ABI_NVTX_END_RANGE()
+ subroutine chebfi_MPITranspose(chebfi,nspinor,'ROW')
  call timab(tim_sliceAll_transpose,2,tsec)
-
+ 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
    if (chebfi%gpu_option==ABI_GPU_KOKKOS) then
      call gpu_device_synchronize()
