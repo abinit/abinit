@@ -2396,8 +2396,11 @@ subroutine slice_blockCopy(A_in,B_out,a1,b1,a2,b2)
     ! OMP query: are we on CPU or not?
     call xgBlock_get_gpu_option(A_in ,gpua)
     call xgBlock_get_gpu_option(B_out,gpub)
-    on_host = xomp_is_initial_device()
-    write(std_out,'(a,i0,a,i0,a,i0)') 'Memcopy: gpu_optionA ',gpua,' gpu_optionB ',gpub, ' on_host ', on_host
+    write(std_out,'(a,i0,a,i0,a,i0)') 'Memcopy: gpu_optionA ',gpua,' gpu_optionB ',gpub
+    if (gpua==ABI_GPU_OPENMP .or. gpub==ABI_GPU_OPENMP) then 
+        on_host = xomp_is_initial_device()
+        write(std_out,*) 'Memcopy: on_host', on_host
+    end if
     !! IML 14/03 TODO decide whether we perform actions of copy from to gpu in here ..
     ! first detect cases of incompatiblity
     ! print on_host has no point because only the CPU prints anyway .. always true
