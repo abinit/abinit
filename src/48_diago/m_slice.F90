@@ -191,14 +191,16 @@ module m_slice
     ! Public methods associated to 'slice' datatype
     !-------------------------------------------------
     public :: sliceAll_init
-    public :: sliceAll_initOverlapFree
+    public :: sliceAll_initOverlapFree ! IL 17/03 rename
     public :: sliceAll_free
-    public :: sliceAll_freeOverlapFree
+    public :: sliceAll_freeOverlapFree ! IL 17/03 rename
     public :: sliceAll_dos
     public :: sliceAll_split
     public :: sliceAll_merge
     public :: slice_blockCopy
     public :: slice_findOptimalNumMpiProcs
+    !public :: slice_colorMPI          ! to be implemented
+    public :: sliceAll_run
     public :: slice_init
     public :: slice_run
     public :: slice_free
@@ -800,11 +802,15 @@ subroutine sliceAll_split(sliceAll,idxAll,ndegAll,sboundAll,pband,npbandSlice)
         write(std_out,*) '    after overlap', k1,k2
 
         ! Add padding for MPI efficiency
+        ! Nvec divides npband
         if (npband > 1) then
             nv_pad = pad_size(nvec,npband)
             call shift_indices(spos,neigenpairs,nv_pad,k1,k2,nvec)
         end if
         write(std_out,*) '    after     pad', k1,k2
+
+        ! TODO nvec is multiple of bandpp
+         
 
         ! Oscillations **********************************************
         !                                         IML 29/01/2025
@@ -832,6 +838,7 @@ subroutine sliceAll_split(sliceAll,idxAll,ndegAll,sboundAll,pband,npbandSlice)
         ! FIXME impose fixed ndeg to test speed
         !ndeg = 62
 
+        ! TODO IL 17/03/2025 clean this part and remove
         ! Compare max f(lambda_out) (oscillations) vs. f(l-w),f(u+w) (approximation)
         ! For first slice situation is quite different, ndeg not tuned for the moment
         !write(std_out,*) ' '
@@ -936,6 +943,159 @@ subroutine sliceAll_split(sliceAll,idxAll,ndegAll,sboundAll,pband,npbandSlice)
     call timab(tim_sliceAll_split,2,tsec)
 
 end subroutine sliceAll_split
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_slice/sliceAll_run
+!! NAME
+!! sliceAll_run
+!! 
+!! FUNCTION
+!! Wrapper for slice_run call depending on parallelisation option:
+!! 
+!! paral_slice=
+!! 0    'npband' MPI processes call slice_run() sequentially
+!! 1    'npband_slice' MPI processes call slice_run() in parallel
+!! 
+
+subroutine sliceAll_run(sliceAll)
+
+    implicit none
+    
+    type(sliceAll_t), intent(inout) :: sliceAll
+ 
+    if (sliceAll%paral_slice == 0) then
+
+        ! 'npband' MPIs call slice_run() sequentially 
+        do islice=1,nslice
+    
+            write(std_out,'(a,i0)') '5) Diago slice ',islice
+    
+            ! Allocate slice memory, on GPU
+            ABI_NVTX_START_RANGE(NVTX_SLICE_INIT)
+            write(std_out,*) 'TRACE slice_init'
+            call slice_init(sliceAll,slice,islice)
+            ABI_NVTX_END_RANGE()
+    
+            !write(std_out,*) 'slice%xgx0'
+            !ierr = slice_unitTest(slice%xgx0)
+    
+            ! Asynchronous copy: read from X_safe write to X_slice
+            ! TODO do not use this and use pointer to xgx0
+            
+
+            ABI_NVTX_START_RANGE(NVTX_SLICE_COPY)
+            j1 = idx_ovlp(islice,1)
+            j2 = idx_ovlp(islice,2)
+            nband_slice = j2 - j1 + 1
+            write(std_out,*) 'TRACE slice_blockCopy'
+            call xgBlock_copy_from_gpu(slice%xgx0)
+            call slice_blockCopy(sliceAll%xgx0_ovlp,slice%xgx0,j1,1,j2,nband_slice) 
+            call xgBlock_copy_to_gpu(slice%xgx0)
+            ABI_NVTX_END_RANGE()
+
+            !write(std_out,*) 'sliceAll%xgx0_ovlp'
+            !ierr = slice_unitTest(sliceAll%xgx0_ovlp)
+            !write(std_out,*) 'slice%xgx0'
+            !ierr = slice_unitTest(slice%xgx0)
+    
+            ! Run
+            ABI_NVTX_START_RANGE(NVTX_SLICE_RUN)
+            write(std_out,*) 'TRACE slice_run'
+            call slice_run(slice,getghc_gsc1,getBm1X,nspinor) 
+            ABI_NVTX_END_RANGE() 
+
+            !write(std_out,*) 'slice%xgx0'
+            !ierr = slice_unitTest(slice%xgx0)
+    
+            ! Asynchronous copy: read from X_slice write to X_safe
+            ABI_NVTX_START_RANGE(NVTX_SLICE_COPY)
+            write(std_out,*) 'TRACE slice_blockCopy'
+            call xgBlock_reshape(slice%xgeigen, (/1,nband_slice/))
+            call xgBlock_reshape(slice%xgresidu, (/1,nband_slice/))
+            call xgBlock_copy_from_gpu(slice%xgx0)
+            call xgBlock_copy_from_gpu(slice%xgeigen)
+            call xgBlock_copy_from_gpu(slice%xgresidu)
+            call slice_blockCopy(slice%xgx0,sliceAll%xgx0_ovlp,1,j1,nband_slice,j2)
+            call slice_blockCopy(slice%xgeigen,sliceAll%xgeigen_ovlp,1,j1,nband_slice,j2)
+            call slice_blockCopy(slice%xgresidu,sliceAll%xgresidu_ovlp,1,j1,nband_slice,j2)
+            ABI_NVTX_END_RANGE()
+    
+            !write(std_out,*) 'sliceAll%xgx0_ovlp'
+            !ierr = slice_unitTest(sliceAll%xgx0_ovlp)
+            !write(std_out,*) 'slice%xgx0'
+            !ierr = slice_unitTest(slice%xgx0)
+
+            ! Clean slice memory
+            ABI_NVTX_START_RANGE(NVTX_SLICE_FREE)
+            write(std_out,*) 'TRACE slice_free'
+            call slice_free(slice)
+            ABI_NVTX_END_RANGE()
+
+        end do
+
+    else if (sliceAll%paral_slice == 1) then
+
+        ! 'npband_slice' MPIs call slice_run() in parallel
+        
+        ! First create subcommunicator
+        ! use function of 12_hide_mpi
+        ! integer :: ntasks, input_comm, output_comm
+        ! logical :: idle_proc
+        ! Given input communicator, create a new communicator
+        ! with number of procs multiple of certain number of 'ntasks'
+        ! Use all procs if ntasks >= input_nprocs.
+        ! ntasks=number of tasks.
+        call xmpi_comm_multiple_of(ntasks, input_comm, idle_proc, output_comm)
+        ! idle_proc=True if this proc is idle(not used)
+        ! in this case, output_comm contains all the idle procs.
+        ! verify that idle procs are the ones of other slices.
+
+        ! my_rank=0,1,2,3,4,5,6(=npband-1)
+        ! slice=1,2,3
+        ! slice1=0,1,2
+        ! slice2=3,4
+        ! slice3=5,6
+        ! npband_slice = npband_slice/bandpp
+        ! color=0,0,0,1,1,2,2
+        ! shift_col=my_rank*bandpp
+        ! color=nband/
+        ! idle_proc = color == 1 ! use this to check that mpi in other slices are idle
+        ! call xmpi_comm_split(input_comm, color, my_rank, output_comm, ierr)
+        
+
+        ! here we initialize slice with slice_init
+        ! but all workspaces of slice are already transposed!
+
+        ! then define slice_init using this communicator
+        ! this is a column communicator
+        ! also activate use_mpi_split in all routines
+        ! this option will not use transposition in some points
+
+        ! MPI column distribution: Example npband = 3
+        ! c1 c2 c3                 // nband = bandpp * npband
+        ! each ci, i=1,2,3, is a block of size bandpp.
+
+        ! Split communicator to slices:
+        ! comm_col    = {c1 c2 c3} // use all MPI
+        ! comm_slice1 = {c1 c2   } // npband_slice1 = 2
+        ! comm_slice2 = {      c3} // npband_slice2 = 1
+    
+        ! MPI row distribution: (after transpose)
+        ! row=    slice1=     slice2=
+        !   r1         r1     
+        !   r2         r2
+        !   r3                     r3
+
+    
+
+        ! TODO slice split: must use multiples of bandpp
+        !! when dividing nband to slices
+
+    end if
+
+end subroutine sliceAll_run
 !!***
 
 !----------------------------------------------------------------------
@@ -1365,44 +1525,18 @@ subroutine slice_run_bandpass(chebfi,slice,X0,getAX_BX,getBm1X,eigen,occ,residu,
  alow = (low - center) / radius          ! scaled filter support low
  bupp = (upp - center) / radius          ! scaled filter support upp
 
- ! Transpose
- if (chebfi%paral_kgb == 1) then
-
-   call xgTransposer_constructor(chebfi%xgTransposerX,chebfi%X,chebfi%xXColsRows,nspinor,&
-     STATE_LINALG,TRANS_ALL2ALL,chebfi%comm_rows,chebfi%comm_cols,0,0,chebfi%me_g0_fft,gpu_option=gpu_option)
-
-   call xgTransposer_copyConstructor(chebfi%xgTransposerAX,chebfi%xgTransposerX,chebfi%AX%self,chebfi%xAXColsRows,STATE_LINALG)
-   call xgTransposer_copyConstructor(chebfi%xgTransposerBX,chebfi%xgTransposerX,chebfi%BX%self,chebfi%xBXColsRows,STATE_LINALG)
-
-   chebfi%xgTransposerX%gpu_kokkos_nthrd  = chebfi%gpu_kokkos_nthrd
-   chebfi%xgTransposerAX%gpu_kokkos_nthrd = chebfi%gpu_kokkos_nthrd
-   chebfi%xgTransposerBX%gpu_kokkos_nthrd = chebfi%gpu_kokkos_nthrd
-
-   write(std_out,*) 'TRACE start MPI Transpose'
-   call timab(tim_slice2_transpose,1,tsec)
-   ABI_NVTX_START_RANGE(NVTX_SLICE_TRANSPOSE)
-   call xgTransposer_transpose(chebfi%xgTransposerX,STATE_COLSROWS)
-   chebfi%xgTransposerAX%state = STATE_COLSROWS
-   chebfi%xgTransposerBX%state = STATE_COLSROWS
-   ABI_NVTX_END_RANGE()
-   call timab(tim_slice2_transpose,2,tsec)
-   write(std_out,*) 'TRACE finished MPI Transpose'
-
- else
-   call xgBlock_setBlock(chebfi%X, chebfi%xXColsRows, spacedim, neigenpairs)         !use xXColsRows instead of X notion
-   call xgBlock_setBlock(chebfi%AX%self, chebfi%xAXColsRows, spacedim, neigenpairs)  !use xAXColsRows instead of AX notion
-   call xgBlock_setBlock(chebfi%BX%self, chebfi%xBXColsRows, spacedim, neigenpairs)
+ ! Transpose MPI: bands are now distributed over MPI columns
+ ! Do not transpose if we are in sub communicator. 
+ ! We assume that sub communicator is already transposed.
+ if (use_subcomm_ .eq. .false.) then
+    write(std_out,*) 'TRACE start MPI Transpose'
+    call chebfi_mpiTranspose(chebfi,nspinor,'COL')
+    write(std_out,*) 'TRACE finished MPI Transpose'
  end if
 
- write(std_out,*) 'TRACE start Hamiltonian application (hopefuly on GPU)'
  ! AX_next=A*X -> 1 Hamiltonian application
- call timab(tim_slice2_getAX_BX,1,tsec)
- ABI_NVTX_START_RANGE(NVTX_SLICE_GET_AX_BX)
- call getAX_BX(chebfi%xXColsRows,chebfi%xAXColsRows,chebfi%xBXColsRows)
- call xgBlock_zero_im_g0(chebfi%xAXColsRows)
- call xgBlock_zero_im_g0(chebfi%xBXColsRows)
- ABI_NVTX_END_RANGE()
- call timab(tim_slice2_getAX_BX,2,tsec)
+ write(std_out,*) 'TRACE start Hamiltonian application'
+ call chebfi_getAX_BX(chebfi, getAX_BX)
  write(std_out,*) 'TRACE finished Hamiltonian application'
 
  ! B-orthonormalize X, BX and AX
@@ -1435,12 +1569,10 @@ subroutine slice_run_bandpass(chebfi,slice,X0,getAX_BX,getBm1X,eigen,occ,residu,
  ABI_NVTX_START_RANGE(NVTX_SLICE_CORE)
  do iline = 0, nline - 1  
 
-    !write(std_out,*) 'TRACE start next order'
     ! X_next=2/r*(AX_next-c*X_next)-X_prev, -> iline+1 Hamiltonian applications
     ABI_NVTX_START_RANGE(NVTX_SLICE_NEXT_ORDER)
     call slice_computeNextOrderChebfiPolynom(chebfi, iline, center, one_over_r, two_over_r, getBm1X)
     ABI_NVTX_END_RANGE()
-    !write(std_out,*) 'TRACE finished next order'
 
     ! xXColsRows=X_next
     call timab(tim_slice2_swap,1,tsec)
@@ -1469,14 +1601,9 @@ subroutine slice_run_bandpass(chebfi,slice,X0,getAX_BX,getBm1X,eigen,occ,residu,
     ABI_NVTX_END_RANGE()
     call timab(tim_slice2_expansion,2,tsec)
 
-    call timab(tim_slice2_getAX_BX,1,tsec)
-    ABI_NVTX_START_RANGE(NVTX_SLICE_GET_AX_BX)
-    call getAX_BX(chebfi%xXColsRows,chebfi%xAXColsRows,chebfi%xBXColsRows)
-    call xgBlock_zero_im_g0(chebfi%xAXColsRows)
-    call xgBlock_zero_im_g0(chebfi%xBXColsRows)
-    ABI_NVTX_END_RANGE()
-    call timab(tim_slice2_getAX_BX,2,tsec)
-
+    ! Apply A and B to X
+    call chebfi_getAX_BX(chebfi, getAX_BX)
+    
  end do ! end iline
  ABI_NVTX_END_RANGE()
  write(std_out,*) 'TRACE finished Slice core'
@@ -1487,34 +1614,16 @@ subroutine slice_run_bandpass(chebfi,slice,X0,getAX_BX,getBm1X,eigen,occ,residu,
    call timab(tim_slice2_barrier,2,tsec)
  end if
 
- ! Free work space
+ ! Free Chebyshev expansion workspace
  call xg_free(ChebyExpansion)
 
- ! Transpose back (MPI)
- call timab(tim_slice2_transpose,1,tsec)
- ABI_NVTX_START_RANGE(NVTX_SLICE_TRANSPOSE)
- if (chebfi%paral_kgb == 1) then
-   call xmpi_barrier(chebfi%spacecom)
-
-   call xgTransposer_transpose(chebfi%xgTransposerX, STATE_LINALG)
-   call xgTransposer_transpose(chebfi%xgTransposerAX,STATE_LINALG)
-   call xgTransposer_transpose(chebfi%xgTransposerBX,STATE_LINALG)
-
-   if (xmpi_comm_size(chebfi%spacecom) == 1) then 
-     !only one MPI proc reset buffers to right addresses (because of X-Xcolwise swaps)
-     call xgBlock_setBlock(chebfi%xXColsRows,  chebfi%X,       spacedim, neigenpairs)
-     call xgBlock_setBlock(chebfi%xAXColsRows, chebfi%AX%self, spacedim, neigenpairs)
-     call xgBlock_setBlock(chebfi%xBXColsRows, chebfi%BX%self, spacedim, neigenpairs)
-   end if
- else
-   call xgBlock_setBlock(chebfi%xXColsRows,  chebfi%X,       spacedim, neigenpairs)
-   call xgBlock_setBlock(chebfi%xAXColsRows, chebfi%AX%self, spacedim, neigenpairs)
-   call xgBlock_setBlock(chebfi%xBXColsRows, chebfi%BX%self, spacedim, neigenpairs)
- end if
- ABI_NVTX_END_RANGE()
- call timab(tim_slice2_transpose,2,tsec)
+ ! Transpose back (MPI) where each MPI has all bands
+ write(std_out,*) 'TRACE start MPI Transpose'
+ call chebfi_mpiTranspose(chebfi,nspinor,'ROW')
+ write(std_out,*) 'TRACE finished MPI Transpose'
 
  ! Get eigenvectors from X
+ write(std_out,*) 'TRACE start Rayleigh-Ritz'
  ABI_NVTX_START_RANGE(NVTX_SLICE_RR)
  !call xg_Borthonormalize(chebfi%X,chebfi%BX%self,ierr,1,gpu_option,AX=chebfi%AX%self)
  call xg_RayleighRitz(chebfi%X,chebfi%AX%self,chebfi%BX%self,chebfi%eigenvalues,ierr,0,&
@@ -1523,17 +1632,10 @@ subroutine slice_run_bandpass(chebfi,slice,X0,getAX_BX,getBm1X,eigen,occ,residu,
  if ( ierr /= 0 ) then
     ABI_WARNING("RayleighRitz did not work, but continue anyway.")
  end if
+ write(std_out,*) 'TRACE end Rayleigh-Ritz'
 
- ! chebfi%AX=AX-eig*BX
- call timab(tim_slice2_residu, 1, tsec)
- if (chebfi%paw) then
-   call xgBlock_colwiseCymax(chebfi%AX%self,chebfi%eigenvalues,chebfi%BX%self,chebfi%AX%self)
- else
-   call xgBlock_colwiseCymax(chebfi%AX%self,chebfi%eigenvalues,chebfi%X,chebfi%AX%self)
- end if
- ! residu=|AX-eig*BX|^2 (norm squared!)
- call xgBlock_colwiseNorm2(chebfi%AX%self, residu)
- call timab(tim_slice2_residu, 2, tsec)
+ ! Compute colwise residuals
+ subroutine chebfi_computeResiduals(chebfi,residu,'COL')
 
  ! Store modified chebfi workspace X result to slice
  call timab(tim_slice2_copy, 1, tsec)
@@ -1546,6 +1648,7 @@ subroutine slice_run_bandpass(chebfi,slice,X0,getAX_BX,getBm1X,eigen,occ,residu,
    end if
 #endif
 
+ ! Free transposer objects
  if (chebfi%paral_kgb == 1) then
    call xgTransposer_free(chebfi%xgTransposerX)
    call xgTransposer_free(chebfi%xgTransposerAX)
@@ -1740,6 +1843,7 @@ subroutine slice_allocateAll(sliceAll,slice)
     integer :: me_g0,me_g0_fft,comm_rows,comm_cols
     integer :: gpu_option,gpu_kokkos_nthrd
     integer :: nbdbuf, oracle
+    integer  :: total_spacedim, ierr
     logical :: paw
     real(dp) :: tolerance,ecut
     real(dp) :: oracle_factor, oracle_min_occ
@@ -1772,13 +1876,32 @@ subroutine slice_allocateAll(sliceAll,slice)
   
     call slice_free(slice)
 
-    ! Every slice MPI proc has entire space
+    ! With current def each xg is distributed along spacecom=plane-wave MPI distr
+    ! TODO Every slice MPI proc has entire space
     ! FIXME EW,RW devrait être alloués exactement comme xgx0 et xgresidu in chebfiwf 
     write(std_out,'(a,i0)') '-----> Allocating slice result memory nband_slice=', nband
     call xg_init(slice%XW,space,spacedim,nband,spacecom,me_g0=me_g0,gpu_option=gpu_option)
+        
+    ! TODO each column MPI has all rows and bandpp columns
+    ! The subcomm_band should be defined outside this function. So in 
+    ! slice_init 
+    call xg_init(slice%XW,space,total_spacedim,bandpp,subcomm_band,&
+&                me_g0=me_g0,gpu_option=gpu_option)
+    
     call xg_init(slice%EW,SPACE_R,1,nband,spacecom,me_g0=me_g0,gpu_option=gpu_option)
     call xg_init(slice%RW,SPACE_R,1,nband,spacecom,me_g0=me_g0,gpu_option=gpu_option)
     call xg_init(slice%OCCW,SPACE_R,nband,1,gpu_option=gpu_option)! fill with zero
+
+    ! Get total number of rows that are distributed along MPI processes
+    total_spacedim = spacedim
+    if (paral_kgb == 1) then
+        call xmpi_sum(total_spacedim,spacecom,ierr)
+    end if
+    if (paral_slice == 0) then
+        ! the communicator of chebfi is the large one
+    else if (paral_slice == 1) then
+        ! the communicator of chebfi is the subcomm one
+    end if
 
     ! Every slice MPI proc has a part (bandpp) of this space
     write(std_out,'(a,i0)') '-----> Allocating slice working memory bandpp=', bandpp

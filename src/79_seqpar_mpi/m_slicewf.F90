@@ -160,6 +160,7 @@ subroutine slicewf(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
  integer :: nband_slice,nband_merge,merge_option
  integer :: spacedim,spacecom,gpu_option
  integer :: me_g0,me_g0_fft
+ integer :: my_rank, my_color ! for MPI
  integer(kind=c_size_t) :: localMem
  type(sliceAll_t) :: sliceAll
  type(slice_t) :: slice
@@ -326,7 +327,18 @@ subroutine slicewf(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
     write(std_out,*) ' '
     
     ! reset for the moment because not implemented
-    npbandSlice(:) = (/(npband, islice=1,nslice)/)                 
+    npbandSlice(:) = (/(npband, islice=1,nslice)/)
+ else if (dtset%paral_slice == 2) then
+    
+    ! Equal distribution
+    npbandSlice(:) = (/(npband/nslice, islice=1,nslice)/)
+    
+    ! TODO color mpi rank
+    if (xmpi_comm_size(comm_cols)>1) then
+        my_rank = xmpi_comm_rank(comm_cols)
+        my_color = my_rank / npband_slice
+   end if
+                   
  end if
 
  ! data transfer? H2D D2H just to accelerate one AX
@@ -345,26 +357,43 @@ subroutine slicewf(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
 
  !ierr = slice_unitTest(xgx0)
 
- ! ************ Allocate asynchronous memory buffer (always on CPU)
+ ! ************ Allocate parallel-safe memory buffer on CPU.
  ABI_NVTX_START_RANGE(NVTX_SLICEALL_INIT_ASYNC_BUFFER)
  call sliceAll_initOverlapFree(sliceAll)
  ABI_NVTX_END_RANGE()
 
  !ierr = slice_unitTest(sliceALl%xgx0_ovlp)
  
- ! Copy from PART OF cg to PART OF overlap-free mem 
- ! this buffer allows asyncrhonous read/write between slices
- ! ---------------------------------------------> race condition
- write(std_out,'(a)') '4) Copy to safe buffer (overlap-free memory space)'
+ ! Copy range of cg to range of memory buffer.
+ ! Assumes that cg is distributed on MPI rows (so each MPI has all bands).
+ ! FIXME if cg is distributed on MPI columns, the problem is that
+ ! we have to communicate between MPI columns.
+ write(std_out,'(a)') '4) Copy to buffer (parallel safe memory space)'
+
+ ! Define index range in buffer
+ idx_ovlp(1:nslice,1) = (/ (1 + idx(islice,2) - idx(islice,1) + 1, islice=1,nslice) /)
+ idx_ovlp(1:nslice,2) = idx_ovlp(1:nslice,1) + 1
+
+ ! TODO use pointers.
+ ! This command is executed on every MPI process, containing its own rows of xgx0 and all cols.
+ ! Since no communication takes place, we can read and write to the MPI part independently of others.
+ call xgBlock_setBlock(xgx0,spacedim,nband_slice,fcol=i1)
+
+ if (use_subcomm_) then
+    ! each mpi has the bands it has to copy. Can do in parallel
+ else
+    ! all mpis have all bands
+ end if
+
  j1 = 1
  ! TODO: MPI distribute over columns
  do islice=1,nslice
     ABI_NVTX_START_RANGE(NVTX_SLICE_COPY)
-    i1 = idx(islice,1)        ! start read from cg
+    i1 = idx(islice,1)        ! start read range from cg
     i2 = idx(islice,2)        ! end
     nband_slice = i2 - i1 + 1
     j2 = j1 + nband_slice - 1
-    idx_ovlp(islice,1) = j1   ! start copy to overlap-free mem
+    idx_ovlp(islice,1) = j1   ! start write range to buffer
     idx_ovlp(islice,2) = j2   ! end
     call slice_blockCopy(xgx0,sliceAll%xgx0_ovlp,i1,j1,i2,j2)
     j1 = j2 + 1
@@ -376,72 +405,12 @@ subroutine slicewf(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
 !######################################################################
 
  ! ************** Diagonalize each slice (sequential or parallel TODO)
- do islice=1,nslice
-    
-    write(std_out,'(a,i0)') '5) Diago slice ',islice
-    
-    ! Allocate slice memory, on GPU
-    ABI_NVTX_START_RANGE(NVTX_SLICE_INIT)
-    write(std_out,*) 'TRACE slice_init'
-    call slice_init(sliceAll,slice,islice)
-    ABI_NVTX_END_RANGE()
-    
-    !write(std_out,*) 'slice%xgx0'
-    !ierr = slice_unitTest(slice%xgx0)
-    
-    ! Asynchronous copy: read from X_safe write to X_slice
-    ABI_NVTX_START_RANGE(NVTX_SLICE_COPY)
-    j1 = idx_ovlp(islice,1)
-    j2 = idx_ovlp(islice,2)
-    nband_slice = j2 - j1 + 1
-    write(std_out,*) 'TRACE slice_blockCopy'
-    call xgBlock_copy_from_gpu(slice%xgx0)
-    call slice_blockCopy(sliceAll%xgx0_ovlp,slice%xgx0,j1,1,j2,nband_slice) 
-    call xgBlock_copy_to_gpu(slice%xgx0)
-    ABI_NVTX_END_RANGE()
-
-    !write(std_out,*) 'sliceAll%xgx0_ovlp'
-    !ierr = slice_unitTest(sliceAll%xgx0_ovlp)
-    !write(std_out,*) 'slice%xgx0'
-    !ierr = slice_unitTest(slice%xgx0)
-    
-    ! Run
-    ABI_NVTX_START_RANGE(NVTX_SLICE_RUN)
-    write(std_out,*) 'TRACE slice_run'
-    call slice_run(slice,getghc_gsc1,getBm1X,nspinor) 
-    ABI_NVTX_END_RANGE() 
-
-    !write(std_out,*) 'slice%xgx0'
-    !ierr = slice_unitTest(slice%xgx0)
-    
-    ! Asynchronous copy: read from X_slice write to X_safe
-    ABI_NVTX_START_RANGE(NVTX_SLICE_COPY)
-    write(std_out,*) 'TRACE slice_blockCopy'
-    call xgBlock_reshape(slice%xgeigen, (/1,nband_slice/))
-    call xgBlock_reshape(slice%xgresidu, (/1,nband_slice/))
-    call xgBlock_copy_from_gpu(slice%xgx0)
-    call xgBlock_copy_from_gpu(slice%xgeigen)
-    call xgBlock_copy_from_gpu(slice%xgresidu)
-    call slice_blockCopy(slice%xgx0,sliceAll%xgx0_ovlp,1,j1,nband_slice,j2)
-    call slice_blockCopy(slice%xgeigen,sliceAll%xgeigen_ovlp,1,j1,nband_slice,j2)
-    call slice_blockCopy(slice%xgresidu,sliceAll%xgresidu_ovlp,1,j1,nband_slice,j2)
-    ABI_NVTX_END_RANGE()
-    
-    !write(std_out,*) 'sliceAll%xgx0_ovlp'
-    !ierr = slice_unitTest(sliceAll%xgx0_ovlp)
-    !write(std_out,*) 'slice%xgx0'
-    !ierr = slice_unitTest(slice%xgx0)
-
-    ! Clean slice memory
-    ABI_NVTX_START_RANGE(NVTX_SLICE_FREE)
-    write(std_out,*) 'TRACE slice_free'
-    call slice_free(slice)
-    ABI_NVTX_END_RANGE()
-
- end do
+ ! Internally treat the case of parallel slices
+ ! TODO add member variable paral_slice to sliceAll
+ call sliceAll_run(sliceAll,dtset%paral_slice,use_subcomm_)
 
  ! ================
- ! TODO semaine 27-31 janvier
+ ! TODO IL 31/01/2025
  ! * diagnostic de convergence en utilisant residual ratio (r_i/r_i^n > ramp)
  ! * Plot residuals in a slice and see where they are large?
  ! ================
