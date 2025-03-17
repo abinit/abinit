@@ -997,29 +997,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          end if
        end if
 
-<<<<<<< HEAD
-       if(gemm_nonlop_use_gemm .and. (dtset%wfoptalg == 111 .or. dtset%wfoptalg == 112) .and. istep <= 1) then
-         gemm_nonlop_nblocks = dtset%gpu_nl_splitsize
-         ! Only compute CHEBFI number of blocks if user didn't set it themselves
-         if(gemm_nonlop_nblocks==1) then
-           call chebfiwf2_blocksize(gs_hamk,mpi_enreg%bandpp,npw_k,nband_k,dtset%nspinor,mpi_enreg%paral_kgb,&
-           &                        dtset%gpu_option,nblk_gemm_nonlop)
-           gemm_nonlop_nblocks = nblk_gemm_nonlop
-         end if
-         gemm_nonlop_is_distributed = .false.
-         if(gemm_nonlop_nblocks > 0 .and. dtset%gpu_nl_distrib/=0) gemm_nonlop_is_distributed = .true.
-||||||| 5d1f404834
-       if(gemm_nonlop_use_gemm .and. dtset%wfoptalg == 111 .and. istep <= 1) then
-         gemm_nonlop_nblocks = dtset%gpu_nl_splitsize
-         ! Only compute CHEBFI number of blocks if user didn't set it themselves
-         if(gemm_nonlop_nblocks==1) then
-           call chebfiwf2_blocksize(gs_hamk,mpi_enreg%bandpp,npw_k,nband_k,dtset%nspinor,mpi_enreg%paral_kgb,&
-           &                        dtset%gpu_option,nblk_gemm_nonlop)
-           gemm_nonlop_nblocks = nblk_gemm_nonlop
-         end if
-         gemm_nonlop_is_distributed = .false.
-         if(gemm_nonlop_nblocks > 0 .and. dtset%gpu_nl_distrib/=0) gemm_nonlop_is_distributed = .true.
-=======
        if(gemm_nonlop_use_gemm .and. istep <= 1 .and. isppol < 2 .and. dtset%gpu_option==ABI_GPU_OPENMP) then
          gemm_nonlop_block_size = dtset%gpu_nl_splitsize
          call get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,mpi_enreg%bandpp,nband_k,&
@@ -1027,21 +1004,12 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          &                        0,0,dtset%wfoptalg,gs_hamk%gpu_option,(dtset%gpu_nl_distrib/=0),&
          &                        gemm_nonlop_block_size,nblk_gemm_nonlop)
          gemm_nonlop_is_distributed = (dtset%gpu_nl_distrib/=0 .and. nblk_gemm_nonlop > 0)
->>>>>>> b0ce911c839e1b66fff11ed1ac0204776b6ad9fc
        end if
 
-!      Build inverse of overlap matrix for chebfi
+!      Build inverse of overlap matrix for chebfi or slice
        if (dtset%cprj_in_memory==0) then
-<<<<<<< HEAD
          if(psps%usepaw == 1 .and. (dtset%wfoptalg == 1 .or. dtset%wfoptalg == 111 .or. dtset%wfoptalg == 112) &
 &           .and. istep <= 1) then
-            ABI_NVTX_START_RANGE(NVTX_INVOVL)
-||||||| 5d1f404834
-         if(psps%usepaw == 1 .and. (dtset%wfoptalg == 1 .or. dtset%wfoptalg == 111) .and. istep <= 1) then
-            ABI_NVTX_START_RANGE(NVTX_INVOVL)
-=======
-         if(psps%usepaw == 1 .and. (dtset%wfoptalg == 1 .or. dtset%wfoptalg == 111) .and. istep <= 1) then
->>>>>>> b0ce911c839e1b66fff11ed1ac0204776b6ad9fc
             call make_invovl(gs_hamk, dimffnl, ffnl, ph3d, mpi_enreg)
          end if
        end if
