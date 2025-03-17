@@ -1620,7 +1620,7 @@ subroutine slice_computeNextOrderChebfiPolynom(chebfi,ideg,center,one_over_r,two
 
  !write(std_out,*) 'TRACE start postinvovl'
  call timab(tim_slice2_postinvovl, 1, tsec)
- ABI_NVTX_START_RANGE(NVTX_SLICE_INVOVL_POST3)
+ ABI_NVTX_START_RANGE(NVTX_INVOVL_POST3)
  call xgBlock_scale(chebfi%xXColsRows, center, 1) !scale by center
 
  !(B-1 * A * Psi^i-1 - c * Psi^i-1)
