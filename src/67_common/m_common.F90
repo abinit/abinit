@@ -66,7 +66,7 @@ module m_common
  use m_lobpcg2,            only : lobpcg_memInfo
  use m_invovl,             only : invovl_ompgpu_static_mem,invovl_ompgpu_work_mem
  use m_gemm_nonlop_ompgpu, only : gemm_nonlop_ompgpu_static_mem,gemm_nonlop_ompgpu_work_mem
- use m_getghc_ompgpu,      only : getghc_ompgpu_work_mem
+ use m_getghc,      only : getghc_ompgpu_work_mem
  use, intrinsic :: iso_c_binding, only : c_size_t
 
 #if defined(HAVE_GPU)
