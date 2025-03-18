@@ -15,12 +15,12 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Tue 18 Mar 2025.
-- ( at 17h27 )
+- ( at 17h30 )
   
-- input  file    -> /tmp/abinit/opt/Test_suite/rttddft_t05/t05.abi
-- output file    -> t05.abo
-- root for input  files -> t05i
-- root for output files -> t05o
+- input  file    -> /tmp/abinit/opt/Test_suite/rttddft_t06/t06.abi
+- output file    -> t06.abo
+- root for input  files -> t06i
+- root for output files -> t06o
 
 - inpspheads : Reading pseudopotential header in XML form from 
 -   /cea/home/abinit/abinit/REPOSITORY/BRIEUC/abinit/gitlab/tests/Pspdir/Psdj_paw_pw_std/C.xml
@@ -543,7 +543,7 @@ meta: {optdriver: 9, }
 
 -------------------    Reading initial wavefunctions    -------------------
 
--inwffil : will read wavefunctions from disk file t05o_DS1_WFK
+-inwffil : will read wavefunctions from disk file t06o_DS1_WFK
 
 -------------------------   Starting propagation   ------------------------
 
@@ -559,7 +559,7 @@ Integrated density (ie. total nb of electrons) =       8.0000048834
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.25    0.25
+- Time - cpu, wall (sec):    0.24    0.24
 
 
 --- Iteration 2
@@ -593,7 +593,7 @@ Integrated density (ie. total nb of electrons) =       8.0004963100
 --- Iteration 4
 
 Total energy =     -11.478290 Ha
-Integrated density (ie. total nb of electrons) =       8.0004960705
+Integrated density (ie. total nb of electrons) =       8.0004835099
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -606,8 +606,8 @@ Integrated density (ie. total nb of electrons) =       8.0004960705
 
 --- Iteration 5
 
-Total energy =     -11.478292 Ha
-Integrated density (ie. total nb of electrons) =       8.0004958310
+Total energy =     -11.479272 Ha
+Integrated density (ie. total nb of electrons) =       8.0004580995
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -615,27 +615,13 @@ Integrated density (ie. total nb of electrons) =       8.0004958310
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.17    0.17
+- Time - cpu, wall (sec):    0.16    0.16
 
 
 --- Iteration 6
 
-Total energy =     -11.478294 Ha
-Integrated density (ie. total nb of electrons) =       8.0004955949
-
- Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
- Eigenvalues (hartree) for nkpt=  32  k points:
- kpt#   1, nband=  8, wtk=  0.03125, kpt= -0.2500  0.5000  0.0000 (reduced coord)
-  -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
- prteigrs : prtvol=0 or 1, do not print more k-points.
-
-- Time - cpu, wall (sec):    0.17    0.17
-
-
---- Iteration 7
-
-Total energy =     -11.478296 Ha
-Integrated density (ie. total nb of electrons) =       8.0004953638
+Total energy =     -11.481121 Ha
+Integrated density (ie. total nb of electrons) =       8.0004197411
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -646,10 +632,10 @@ Integrated density (ie. total nb of electrons) =       8.0004953638
 - Time - cpu, wall (sec):    0.16    0.17
 
 
---- Iteration 8
+--- Iteration 7
 
-Total energy =     -11.478298 Ha
-Integrated density (ie. total nb of electrons) =       8.0004951366
+Total energy =     -11.483635 Ha
+Integrated density (ie. total nb of electrons) =       8.0003678281
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -657,13 +643,27 @@ Integrated density (ie. total nb of electrons) =       8.0004951366
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.17    0.17
+- Time - cpu, wall (sec):    0.16    0.16
+
+
+--- Iteration 8
+
+Total energy =     -11.486575 Ha
+Integrated density (ie. total nb of electrons) =       8.0003023873
+
+ Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
+ Eigenvalues (hartree) for nkpt=  32  k points:
+ kpt#   1, nband=  8, wtk=  0.03125, kpt= -0.2500  0.5000  0.0000 (reduced coord)
+  -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
+ prteigrs : prtvol=0 or 1, do not print more k-points.
+
+- Time - cpu, wall (sec):    0.16    0.16
 
 
 --- Iteration 9
 
-Total energy =     -11.478300 Ha
-Integrated density (ie. total nb of electrons) =       8.0004949105
+Total energy =     -11.489701 Ha
+Integrated density (ie. total nb of electrons) =       8.0002253545
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -671,13 +671,13 @@ Integrated density (ie. total nb of electrons) =       8.0004949105
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.17    0.17
+- Time - cpu, wall (sec):    0.16    0.16
 
 
 --- Iteration 10
 
-Total energy =     -11.478301 Ha
-Integrated density (ie. total nb of electrons) =       8.0004946839
+Total energy =     -11.492786 Ha
+Integrated density (ie. total nb of electrons) =       8.0001410822
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -690,8 +690,8 @@ Integrated density (ie. total nb of electrons) =       8.0004946839
 
 --- Iteration 11
 
-Total energy =     -11.478303 Ha
-Integrated density (ie. total nb of electrons) =       8.0004944573
+Total energy =     -11.495622 Ha
+Integrated density (ie. total nb of electrons) =       8.0000554346
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -699,13 +699,27 @@ Integrated density (ie. total nb of electrons) =       8.0004944573
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.16    0.17
+- Time - cpu, wall (sec):    0.16    0.16
 
 
 --- Iteration 12
 
-Total energy =     -11.478305 Ha
-Integrated density (ie. total nb of electrons) =       8.0004942323
+Total energy =     -11.498026 Ha
+Integrated density (ie. total nb of electrons) =       7.9999740232
+
+ Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
+ Eigenvalues (hartree) for nkpt=  32  k points:
+ kpt#   1, nband=  8, wtk=  0.03125, kpt= -0.2500  0.5000  0.0000 (reduced coord)
+  -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
+ prteigrs : prtvol=0 or 1, do not print more k-points.
+
+- Time - cpu, wall (sec):    0.16    0.16
+
+
+--- Iteration 13
+
+Total energy =     -11.499849 Ha
+Integrated density (ie. total nb of electrons) =       7.9999008539
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -716,24 +730,10 @@ Integrated density (ie. total nb of electrons) =       8.0004942323
 - Time - cpu, wall (sec):    0.16    0.17
 
 
---- Iteration 13
-
-Total energy =     -11.478307 Ha
-Integrated density (ie. total nb of electrons) =       8.0004940092
-
- Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
- Eigenvalues (hartree) for nkpt=  32  k points:
- kpt#   1, nband=  8, wtk=  0.03125, kpt= -0.2500  0.5000  0.0000 (reduced coord)
-  -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
- prteigrs : prtvol=0 or 1, do not print more k-points.
-
-- Time - cpu, wall (sec):    0.17    0.17
-
-
 --- Iteration 14
 
-Total energy =     -11.478309 Ha
-Integrated density (ie. total nb of electrons) =       8.0004937868
+Total energy =     -11.500992 Ha
+Integrated density (ie. total nb of electrons) =       7.9998381995
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -746,8 +746,8 @@ Integrated density (ie. total nb of electrons) =       8.0004937868
 
 --- Iteration 15
 
-Total energy =     -11.478310 Ha
-Integrated density (ie. total nb of electrons) =       8.0004935640
+Total energy =     -11.501409 Ha
+Integrated density (ie. total nb of electrons) =       7.9997873878
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -755,13 +755,13 @@ Integrated density (ie. total nb of electrons) =       8.0004935640
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.16    0.17
+- Time - cpu, wall (sec):    0.16    0.16
 
 
 --- Iteration 16
 
-Total energy =     -11.478312 Ha
-Integrated density (ie. total nb of electrons) =       8.0004933408
+Total energy =     -11.501101 Ha
+Integrated density (ie. total nb of electrons) =       7.9997495342
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -769,13 +769,13 @@ Integrated density (ie. total nb of electrons) =       8.0004933408
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.17    0.17
+- Time - cpu, wall (sec):    0.16    0.16
 
 
 --- Iteration 17
 
-Total energy =     -11.478314 Ha
-Integrated density (ie. total nb of electrons) =       8.0004931186
+Total energy =     -11.500113 Ha
+Integrated density (ie. total nb of electrons) =       7.9997255796
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -783,13 +783,13 @@ Integrated density (ie. total nb of electrons) =       8.0004931186
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.16    0.17
+- Time - cpu, wall (sec):    0.16    0.16
 
 
 --- Iteration 18
 
-Total energy =     -11.478316 Ha
-Integrated density (ie. total nb of electrons) =       8.0004928982
+Total energy =     -11.498529 Ha
+Integrated density (ie. total nb of electrons) =       7.9997157955
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -802,8 +802,8 @@ Integrated density (ie. total nb of electrons) =       8.0004928982
 
 --- Iteration 19
 
-Total energy =     -11.478317 Ha
-Integrated density (ie. total nb of electrons) =       8.0004926793
+Total energy =     -11.496462 Ha
+Integrated density (ie. total nb of electrons) =       7.9997193460
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -816,8 +816,8 @@ Integrated density (ie. total nb of electrons) =       8.0004926793
 
 --- Iteration 20
 
-Total energy =     -11.478319 Ha
-Integrated density (ie. total nb of electrons) =       8.0004924607
+Total energy =     -11.494048 Ha
+Integrated density (ie. total nb of electrons) =       7.9997342877
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -825,13 +825,13 @@ Integrated density (ie. total nb of electrons) =       8.0004924607
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.17    0.17
+- Time - cpu, wall (sec):    0.16    0.16
 
 
 --- Iteration 21
 
-Total energy =     -11.478321 Ha
-Integrated density (ie. total nb of electrons) =       8.0004922421
+Total energy =     -11.491434 Ha
+Integrated density (ie. total nb of electrons) =       7.9997579375
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -839,13 +839,13 @@ Integrated density (ie. total nb of electrons) =       8.0004922421
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.17    0.17
+- Time - cpu, wall (sec):    0.16    0.16
 
 
 --- Iteration 22
 
-Total energy =     -11.478322 Ha
-Integrated density (ie. total nb of electrons) =       8.0004920244
+Total energy =     -11.488766 Ha
+Integrated density (ie. total nb of electrons) =       7.9997873032
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -858,8 +858,8 @@ Integrated density (ie. total nb of electrons) =       8.0004920244
 
 --- Iteration 23
 
-Total energy =     -11.478324 Ha
-Integrated density (ie. total nb of electrons) =       8.0004918088
+Total energy =     -11.486184 Ha
+Integrated density (ie. total nb of electrons) =       7.9998193593
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -872,8 +872,8 @@ Integrated density (ie. total nb of electrons) =       8.0004918088
 
 --- Iteration 24
 
-Total energy =     -11.478326 Ha
-Integrated density (ie. total nb of electrons) =       8.0004915955
+Total energy =     -11.483813 Ha
+Integrated density (ie. total nb of electrons) =       7.9998511568
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -881,13 +881,13 @@ Integrated density (ie. total nb of electrons) =       8.0004915955
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.17    0.17
+- Time - cpu, wall (sec):    0.16    0.17
 
 
 --- Iteration 25
 
-Total energy =     -11.478327 Ha
-Integrated density (ie. total nb of electrons) =       8.0004913839
+Total energy =     -11.481762 Ha
+Integrated density (ie. total nb of electrons) =       7.9998798834
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -895,13 +895,13 @@ Integrated density (ie. total nb of electrons) =       8.0004913839
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.16    0.17
+- Time - cpu, wall (sec):    0.16    0.16
 
 
 --- Iteration 26
 
-Total energy =     -11.478329 Ha
-Integrated density (ie. total nb of electrons) =       8.0004911733
+Total energy =     -11.480111 Ha
+Integrated density (ie. total nb of electrons) =       7.9999029794
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -909,13 +909,13 @@ Integrated density (ie. total nb of electrons) =       8.0004911733
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.17    0.17
+- Time - cpu, wall (sec):    0.16    0.16
 
 
 --- Iteration 27
 
-Total energy =     -11.478330 Ha
-Integrated density (ie. total nb of electrons) =       8.0004909642
+Total energy =     -11.478911 Ha
+Integrated density (ie. total nb of electrons) =       7.9999183128
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -923,13 +923,13 @@ Integrated density (ie. total nb of electrons) =       8.0004909642
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.16    0.17
+- Time - cpu, wall (sec):    0.16    0.16
 
 
 --- Iteration 28
 
-Total energy =     -11.478332 Ha
-Integrated density (ie. total nb of electrons) =       8.0004907574
+Total energy =     -11.478182 Ha
+Integrated density (ie. total nb of electrons) =       7.9999243159
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -942,8 +942,8 @@ Integrated density (ie. total nb of electrons) =       8.0004907574
 
 --- Iteration 29
 
-Total energy =     -11.478334 Ha
-Integrated density (ie. total nb of electrons) =       8.0004905531
+Total energy =     -11.477917 Ha
+Integrated density (ie. total nb of electrons) =       7.9999199965
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -951,13 +951,13 @@ Integrated density (ie. total nb of electrons) =       8.0004905531
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.17    0.17
+- Time - cpu, wall (sec):    0.16    0.17
 
 
 --- Iteration 30
 
-Total energy =     -11.478335 Ha
-Integrated density (ie. total nb of electrons) =       8.0004903502
+Total energy =     -11.478080 Ha
+Integrated density (ie. total nb of electrons) =       7.9999048566
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -970,8 +970,8 @@ Integrated density (ie. total nb of electrons) =       8.0004903502
 
 --- Iteration 31
 
-Total energy =     -11.478337 Ha
-Integrated density (ie. total nb of electrons) =       8.0004901474
+Total energy =     -11.478614 Ha
+Integrated density (ie. total nb of electrons) =       7.9998788623
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -984,8 +984,8 @@ Integrated density (ie. total nb of electrons) =       8.0004901474
 
 --- Iteration 32
 
-Total energy =     -11.478338 Ha
-Integrated density (ie. total nb of electrons) =       8.0004899451
+Total energy =     -11.479447 Ha
+Integrated density (ie. total nb of electrons) =       7.9998425655
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -998,8 +998,8 @@ Integrated density (ie. total nb of electrons) =       8.0004899451
 
 --- Iteration 33
 
-Total energy =     -11.478340 Ha
-Integrated density (ie. total nb of electrons) =       8.0004897452
+Total energy =     -11.480493 Ha
+Integrated density (ie. total nb of electrons) =       7.9997972890
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1007,13 +1007,13 @@ Integrated density (ie. total nb of electrons) =       8.0004897452
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.17    0.17
+- Time - cpu, wall (sec):    0.16    0.16
 
 
 --- Iteration 34
 
-Total energy =     -11.478341 Ha
-Integrated density (ie. total nb of electrons) =       8.0004895499
+Total energy =     -11.481664 Ha
+Integrated density (ie. total nb of electrons) =       7.9997451464
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1026,8 +1026,8 @@ Integrated density (ie. total nb of electrons) =       8.0004895499
 
 --- Iteration 35
 
-Total energy =     -11.478343 Ha
-Integrated density (ie. total nb of electrons) =       8.0004893591
+Total energy =     -11.482874 Ha
+Integrated density (ie. total nb of electrons) =       7.9996887556
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1040,8 +1040,8 @@ Integrated density (ie. total nb of electrons) =       8.0004893591
 
 --- Iteration 36
 
-Total energy =     -11.478344 Ha
-Integrated density (ie. total nb of electrons) =       8.0004891702
+Total energy =     -11.484040 Ha
+Integrated density (ie. total nb of electrons) =       7.9996307631
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1054,8 +1054,8 @@ Integrated density (ie. total nb of electrons) =       8.0004891702
 
 --- Iteration 37
 
-Total energy =     -11.478346 Ha
-Integrated density (ie. total nb of electrons) =       8.0004889801
+Total energy =     -11.485090 Ha
+Integrated density (ie. total nb of electrons) =       7.9995734754
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1068,8 +1068,8 @@ Integrated density (ie. total nb of electrons) =       8.0004889801
 
 --- Iteration 38
 
-Total energy =     -11.478347 Ha
-Integrated density (ie. total nb of electrons) =       8.0004887876
+Total energy =     -11.485965 Ha
+Integrated density (ie. total nb of electrons) =       7.9995187978
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1082,8 +1082,8 @@ Integrated density (ie. total nb of electrons) =       8.0004887876
 
 --- Iteration 39
 
-Total energy =     -11.478349 Ha
-Integrated density (ie. total nb of electrons) =       8.0004885949
+Total energy =     -11.486617 Ha
+Integrated density (ie. total nb of electrons) =       7.9994683951
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1096,8 +1096,8 @@ Integrated density (ie. total nb of electrons) =       8.0004885949
 
 --- Iteration 40
 
-Total energy =     -11.478351 Ha
-Integrated density (ie. total nb of electrons) =       8.0004884050
+Total energy =     -11.487017 Ha
+Integrated density (ie. total nb of electrons) =       7.9994237887
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1110,8 +1110,8 @@ Integrated density (ie. total nb of electrons) =       8.0004884050
 
 --- Iteration 41
 
-Total energy =     -11.478352 Ha
-Integrated density (ie. total nb of electrons) =       8.0004882192
+Total energy =     -11.487150 Ha
+Integrated density (ie. total nb of electrons) =       7.9993861916
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1124,8 +1124,22 @@ Integrated density (ie. total nb of electrons) =       8.0004882192
 
 --- Iteration 42
 
-Total energy =     -11.478354 Ha
-Integrated density (ie. total nb of electrons) =       8.0004880354
+Total energy =     -11.487015 Ha
+Integrated density (ie. total nb of electrons) =       7.9993561707
+
+ Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
+ Eigenvalues (hartree) for nkpt=  32  k points:
+ kpt#   1, nband=  8, wtk=  0.03125, kpt= -0.2500  0.5000  0.0000 (reduced coord)
+  -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
+ prteigrs : prtvol=0 or 1, do not print more k-points.
+
+- Time - cpu, wall (sec):    0.17    0.17
+
+
+--- Iteration 43
+
+Total energy =     -11.486624 Ha
+Integrated density (ie. total nb of electrons) =       7.9993334347
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1136,24 +1150,10 @@ Integrated density (ie. total nb of electrons) =       8.0004880354
 - Time - cpu, wall (sec):    0.16    0.16
 
 
---- Iteration 43
-
-Total energy =     -11.478355 Ha
-Integrated density (ie. total nb of electrons) =       8.0004878494
-
- Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
- Eigenvalues (hartree) for nkpt=  32  k points:
- kpt#   1, nband=  8, wtk=  0.03125, kpt= -0.2500  0.5000  0.0000 (reduced coord)
-  -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
- prteigrs : prtvol=0 or 1, do not print more k-points.
-
-- Time - cpu, wall (sec):    0.17    0.17
-
-
 --- Iteration 44
 
-Total energy =     -11.478356 Ha
-Integrated density (ie. total nb of electrons) =       8.0004876581
+Total energy =     -11.486006 Ha
+Integrated density (ie. total nb of electrons) =       7.9993169797
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1161,13 +1161,13 @@ Integrated density (ie. total nb of electrons) =       8.0004876581
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.17    0.17
+- Time - cpu, wall (sec):    0.16    0.16
 
 
 --- Iteration 45
 
-Total energy =     -11.478358 Ha
-Integrated density (ie. total nb of electrons) =       8.0004874618
+Total energy =     -11.485203 Ha
+Integrated density (ie. total nb of electrons) =       7.9993055486
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1180,8 +1180,8 @@ Integrated density (ie. total nb of electrons) =       8.0004874618
 
 --- Iteration 46
 
-Total energy =     -11.478359 Ha
-Integrated density (ie. total nb of electrons) =       8.0004872642
+Total energy =     -11.484271 Ha
+Integrated density (ie. total nb of electrons) =       7.9992981165
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1194,8 +1194,8 @@ Integrated density (ie. total nb of electrons) =       8.0004872642
 
 --- Iteration 47
 
-Total energy =     -11.478361 Ha
-Integrated density (ie. total nb of electrons) =       8.0004870702
+Total energy =     -11.483268 Ha
+Integrated density (ie. total nb of electrons) =       7.9992941081
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1208,8 +1208,8 @@ Integrated density (ie. total nb of electrons) =       8.0004870702
 
 --- Iteration 48
 
-Total energy =     -11.478362 Ha
-Integrated density (ie. total nb of electrons) =       8.0004868832
+Total energy =     -11.482253 Ha
+Integrated density (ie. total nb of electrons) =       7.9992932549
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1222,8 +1222,8 @@ Integrated density (ie. total nb of electrons) =       8.0004868832
 
 --- Iteration 49
 
-Total energy =     -11.478364 Ha
-Integrated density (ie. total nb of electrons) =       8.0004867040
+Total energy =     -11.481279 Ha
+Integrated density (ie. total nb of electrons) =       7.9992952424
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1231,13 +1231,13 @@ Integrated density (ie. total nb of electrons) =       8.0004867040
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.16    0.17
+- Time - cpu, wall (sec):    0.16    0.16
 
 
 --- Iteration 50
 
-Total energy =     -11.478365 Ha
-Integrated density (ie. total nb of electrons) =       8.0004865309
+Total energy =     -11.480388 Ha
+Integrated density (ie. total nb of electrons) =       7.9992994076
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1302,19 +1302,19 @@ meta: {optdriver: 9, }
 
 -------------------   Reading wavefunctions for restart  ------------------
 
--inwffil : will read wavefunctions from disk file t05o_DS2_50_WFK
+-inwffil : will read wavefunctions from disk file t06o_DS2_50_WFK
 
 -------------------    Reading initial wavefunctions    -------------------
 
--inwffil : will read wavefunctions from disk file t05o_DS1_WFK
+-inwffil : will read wavefunctions from disk file t06o_DS1_WFK
 
 -------------------------   Starting propagation   ------------------------
 
 
 --- Iteration 51
 
-Total energy =     -11.478366 Ha
-Integrated density (ie. total nb of electrons) =       8.0004863612
+Total energy =     -11.479618 Ha
+Integrated density (ie. total nb of electrons) =       7.9993046780
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1327,8 +1327,8 @@ Integrated density (ie. total nb of electrons) =       8.0004863612
 
 --- Iteration 52
 
-Total energy =     -11.478368 Ha
-Integrated density (ie. total nb of electrons) =       8.0004861920
+Total energy =     -11.478995 Ha
+Integrated density (ie. total nb of electrons) =       7.9993097719
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1336,13 +1336,13 @@ Integrated density (ie. total nb of electrons) =       8.0004861920
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.17    0.17
+- Time - cpu, wall (sec):    0.16    0.16
 
 
 --- Iteration 53
 
-Total energy =     -11.478369 Ha
-Integrated density (ie. total nb of electrons) =       8.0004860211
+Total energy =     -11.478541 Ha
+Integrated density (ie. total nb of electrons) =       7.9993135013
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1355,8 +1355,8 @@ Integrated density (ie. total nb of electrons) =       8.0004860211
 
 --- Iteration 54
 
-Total energy =     -11.478370 Ha
-Integrated density (ie. total nb of electrons) =       8.0004858472
+Total energy =     -11.478266 Ha
+Integrated density (ie. total nb of electrons) =       7.9993149713
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1369,8 +1369,8 @@ Integrated density (ie. total nb of electrons) =       8.0004858472
 
 --- Iteration 55
 
-Total energy =     -11.478372 Ha
-Integrated density (ie. total nb of electrons) =       8.0004856709
+Total energy =     -11.478168 Ha
+Integrated density (ie. total nb of electrons) =       7.9993135724
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1383,8 +1383,8 @@ Integrated density (ie. total nb of electrons) =       8.0004856709
 
 --- Iteration 56
 
-Total energy =     -11.478373 Ha
-Integrated density (ie. total nb of electrons) =       8.0004854937
+Total energy =     -11.478232 Ha
+Integrated density (ie. total nb of electrons) =       7.9993088541
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1392,13 +1392,13 @@ Integrated density (ie. total nb of electrons) =       8.0004854937
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.17    0.17
+- Time - cpu, wall (sec):    0.16    0.16
 
 
 --- Iteration 57
 
-Total energy =     -11.478374 Ha
-Integrated density (ie. total nb of electrons) =       8.0004853174
+Total energy =     -11.478436 Ha
+Integrated density (ie. total nb of electrons) =       7.9993004711
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1406,13 +1406,13 @@ Integrated density (ie. total nb of electrons) =       8.0004853174
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.17    0.17
+- Time - cpu, wall (sec):    0.16    0.17
 
 
 --- Iteration 58
 
-Total energy =     -11.478376 Ha
-Integrated density (ie. total nb of electrons) =       8.0004851433
+Total energy =     -11.478747 Ha
+Integrated density (ie. total nb of electrons) =       7.9992883037
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1425,8 +1425,8 @@ Integrated density (ie. total nb of electrons) =       8.0004851433
 
 --- Iteration 59
 
-Total energy =     -11.478377 Ha
-Integrated density (ie. total nb of electrons) =       8.0004849712
+Total energy =     -11.479132 Ha
+Integrated density (ie. total nb of electrons) =       7.9992726516
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1439,8 +1439,8 @@ Integrated density (ie. total nb of electrons) =       8.0004849712
 
 --- Iteration 60
 
-Total energy =     -11.478378 Ha
-Integrated density (ie. total nb of electrons) =       8.0004848000
+Total energy =     -11.479554 Ha
+Integrated density (ie. total nb of electrons) =       7.9992542818
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1453,8 +1453,8 @@ Integrated density (ie. total nb of electrons) =       8.0004848000
 
 --- Iteration 61
 
-Total energy =     -11.478380 Ha
-Integrated density (ie. total nb of electrons) =       8.0004846287
+Total energy =     -11.479976 Ha
+Integrated density (ie. total nb of electrons) =       7.9992342206
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1467,8 +1467,8 @@ Integrated density (ie. total nb of electrons) =       8.0004846287
 
 --- Iteration 62
 
-Total energy =     -11.478381 Ha
-Integrated density (ie. total nb of electrons) =       8.0004844571
+Total energy =     -11.480364 Ha
+Integrated density (ie. total nb of electrons) =       7.9992134081
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1481,8 +1481,8 @@ Integrated density (ie. total nb of electrons) =       8.0004844571
 
 --- Iteration 63
 
-Total energy =     -11.478382 Ha
-Integrated density (ie. total nb of electrons) =       8.0004842855
+Total energy =     -11.480691 Ha
+Integrated density (ie. total nb of electrons) =       7.9991924699
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1495,8 +1495,8 @@ Integrated density (ie. total nb of electrons) =       8.0004842855
 
 --- Iteration 64
 
-Total energy =     -11.478383 Ha
-Integrated density (ie. total nb of electrons) =       8.0004841143
+Total energy =     -11.480935 Ha
+Integrated density (ie. total nb of electrons) =       7.9991717522
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1509,8 +1509,8 @@ Integrated density (ie. total nb of electrons) =       8.0004841143
 
 --- Iteration 65
 
-Total energy =     -11.478385 Ha
-Integrated density (ie. total nb of electrons) =       8.0004839437
+Total energy =     -11.481082 Ha
+Integrated density (ie. total nb of electrons) =       7.9991515342
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1518,13 +1518,13 @@ Integrated density (ie. total nb of electrons) =       8.0004839437
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.16    0.16
+- Time - cpu, wall (sec):    0.16    0.17
 
 
 --- Iteration 66
 
-Total energy =     -11.478386 Ha
-Integrated density (ie. total nb of electrons) =       8.0004837740
+Total energy =     -11.481127 Ha
+Integrated density (ie. total nb of electrons) =       7.9991322005
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1537,8 +1537,8 @@ Integrated density (ie. total nb of electrons) =       8.0004837740
 
 --- Iteration 67
 
-Total energy =     -11.478387 Ha
-Integrated density (ie. total nb of electrons) =       8.0004836063
+Total energy =     -11.481070 Ha
+Integrated density (ie. total nb of electrons) =       7.9991142468
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1551,8 +1551,8 @@ Integrated density (ie. total nb of electrons) =       8.0004836063
 
 --- Iteration 68
 
-Total energy =     -11.478388 Ha
-Integrated density (ie. total nb of electrons) =       8.0004834419
+Total energy =     -11.480918 Ha
+Integrated density (ie. total nb of electrons) =       7.9990981769
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1565,8 +1565,8 @@ Integrated density (ie. total nb of electrons) =       8.0004834419
 
 --- Iteration 69
 
-Total energy =     -11.478389 Ha
-Integrated density (ie. total nb of electrons) =       8.0004832812
+Total energy =     -11.480685 Ha
+Integrated density (ie. total nb of electrons) =       7.9990844236
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1574,13 +1574,13 @@ Integrated density (ie. total nb of electrons) =       8.0004832812
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.17    0.17
+- Time - cpu, wall (sec):    0.16    0.16
 
 
 --- Iteration 70
 
-Total energy =     -11.478391 Ha
-Integrated density (ie. total nb of electrons) =       8.0004831222
+Total energy =     -11.480387 Ha
+Integrated density (ie. total nb of electrons) =       7.9990733367
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1593,8 +1593,8 @@ Integrated density (ie. total nb of electrons) =       8.0004831222
 
 --- Iteration 71
 
-Total energy =     -11.478392 Ha
-Integrated density (ie. total nb of electrons) =       8.0004829609
+Total energy =     -11.480046 Ha
+Integrated density (ie. total nb of electrons) =       7.9990651605
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1602,13 +1602,13 @@ Integrated density (ie. total nb of electrons) =       8.0004829609
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.17    0.17
+- Time - cpu, wall (sec):    0.16    0.17
 
 
 --- Iteration 72
 
-Total energy =     -11.478393 Ha
-Integrated density (ie. total nb of electrons) =       8.0004827933
+Total energy =     -11.479686 Ha
+Integrated density (ie. total nb of electrons) =       7.9990599290
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1616,13 +1616,13 @@ Integrated density (ie. total nb of electrons) =       8.0004827933
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.16    0.17
+- Time - cpu, wall (sec):    0.16    0.16
 
 
 --- Iteration 73
 
-Total energy =     -11.478394 Ha
-Integrated density (ie. total nb of electrons) =       8.0004826182
+Total energy =     -11.479330 Ha
+Integrated density (ie. total nb of electrons) =       7.9990573386
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1630,13 +1630,13 @@ Integrated density (ie. total nb of electrons) =       8.0004826182
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.17    0.17
+- Time - cpu, wall (sec):    0.16    0.16
 
 
 --- Iteration 74
 
-Total energy =     -11.478395 Ha
-Integrated density (ie. total nb of electrons) =       8.0004824383
+Total energy =     -11.478999 Ha
+Integrated density (ie. total nb of electrons) =       7.9990567378
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1644,13 +1644,13 @@ Integrated density (ie. total nb of electrons) =       8.0004824383
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.16    0.17
+- Time - cpu, wall (sec):    0.16    0.16
 
 
 --- Iteration 75
 
-Total energy =     -11.478397 Ha
-Integrated density (ie. total nb of electrons) =       8.0004822593
+Total energy =     -11.478712 Ha
+Integrated density (ie. total nb of electrons) =       7.9990572932
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1663,8 +1663,8 @@ Integrated density (ie. total nb of electrons) =       8.0004822593
 
 --- Iteration 76
 
-Total energy =     -11.478398 Ha
-Integrated density (ie. total nb of electrons) =       8.0004820863
+Total energy =     -11.478483 Ha
+Integrated density (ie. total nb of electrons) =       7.9990582265
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1672,13 +1672,13 @@ Integrated density (ie. total nb of electrons) =       8.0004820863
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.17    0.17
+- Time - cpu, wall (sec):    0.16    0.17
 
 
 --- Iteration 77
 
-Total energy =     -11.478399 Ha
-Integrated density (ie. total nb of electrons) =       8.0004819208
+Total energy =     -11.478323 Ha
+Integrated density (ie. total nb of electrons) =       7.9990589399
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1691,8 +1691,8 @@ Integrated density (ie. total nb of electrons) =       8.0004819208
 
 --- Iteration 78
 
-Total energy =     -11.478400 Ha
-Integrated density (ie. total nb of electrons) =       8.0004817602
+Total energy =     -11.478236 Ha
+Integrated density (ie. total nb of electrons) =       7.9990589484
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1705,8 +1705,8 @@ Integrated density (ie. total nb of electrons) =       8.0004817602
 
 --- Iteration 79
 
-Total energy =     -11.478402 Ha
-Integrated density (ie. total nb of electrons) =       8.0004816001
+Total energy =     -11.478224 Ha
+Integrated density (ie. total nb of electrons) =       7.9990577203
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1719,8 +1719,8 @@ Integrated density (ie. total nb of electrons) =       8.0004816001
 
 --- Iteration 80
 
-Total energy =     -11.478403 Ha
-Integrated density (ie. total nb of electrons) =       8.0004814372
+Total energy =     -11.478283 Ha
+Integrated density (ie. total nb of electrons) =       7.9990546133
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1728,13 +1728,13 @@ Integrated density (ie. total nb of electrons) =       8.0004814372
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.17    0.17
+- Time - cpu, wall (sec):    0.16    0.16
 
 
 --- Iteration 81
 
-Total energy =     -11.478404 Ha
-Integrated density (ie. total nb of electrons) =       8.0004812709
+Total energy =     -11.478401 Ha
+Integrated density (ie. total nb of electrons) =       7.9990489996
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1747,8 +1747,8 @@ Integrated density (ie. total nb of electrons) =       8.0004812709
 
 --- Iteration 82
 
-Total energy =     -11.478405 Ha
-Integrated density (ie. total nb of electrons) =       8.0004811033
+Total energy =     -11.478565 Ha
+Integrated density (ie. total nb of electrons) =       7.9990405054
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1761,8 +1761,8 @@ Integrated density (ie. total nb of electrons) =       8.0004811033
 
 --- Iteration 83
 
-Total energy =     -11.478406 Ha
-Integrated density (ie. total nb of electrons) =       8.0004809364
+Total energy =     -11.478761 Ha
+Integrated density (ie. total nb of electrons) =       7.9990291900
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1770,13 +1770,13 @@ Integrated density (ie. total nb of electrons) =       8.0004809364
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.17    0.17
+- Time - cpu, wall (sec):    0.16    0.16
 
 
 --- Iteration 84
 
-Total energy =     -11.478407 Ha
-Integrated density (ie. total nb of electrons) =       8.0004807716
+Total energy =     -11.478973 Ha
+Integrated density (ie. total nb of electrons) =       7.9990155494
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1789,8 +1789,8 @@ Integrated density (ie. total nb of electrons) =       8.0004807716
 
 --- Iteration 85
 
-Total energy =     -11.478407 Ha
-Integrated density (ie. total nb of electrons) =       8.0004806082
+Total energy =     -11.479188 Ha
+Integrated density (ie. total nb of electrons) =       7.9990003522
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1803,8 +1803,8 @@ Integrated density (ie. total nb of electrons) =       8.0004806082
 
 --- Iteration 86
 
-Total energy =     -11.478407 Ha
-Integrated density (ie. total nb of electrons) =       8.0004804454
+Total energy =     -11.479392 Ha
+Integrated density (ie. total nb of electrons) =       7.9989844184
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1817,8 +1817,8 @@ Integrated density (ie. total nb of electrons) =       8.0004804454
 
 --- Iteration 87
 
-Total energy =     -11.478407 Ha
-Integrated density (ie. total nb of electrons) =       8.0004802830
+Total energy =     -11.479575 Ha
+Integrated density (ie. total nb of electrons) =       7.9989684582
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1831,8 +1831,8 @@ Integrated density (ie. total nb of electrons) =       8.0004802830
 
 --- Iteration 88
 
-Total energy =     -11.478408 Ha
-Integrated density (ie. total nb of electrons) =       8.0004801217
+Total energy =     -11.479728 Ha
+Integrated density (ie. total nb of electrons) =       7.9989530344
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1845,8 +1845,8 @@ Integrated density (ie. total nb of electrons) =       8.0004801217
 
 --- Iteration 89
 
-Total energy =     -11.478408 Ha
-Integrated density (ie. total nb of electrons) =       8.0004799628
+Total energy =     -11.479846 Ha
+Integrated density (ie. total nb of electrons) =       7.9989386239
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1859,8 +1859,8 @@ Integrated density (ie. total nb of electrons) =       8.0004799628
 
 --- Iteration 90
 
-Total energy =     -11.478409 Ha
-Integrated density (ie. total nb of electrons) =       8.0004798072
+Total energy =     -11.479923 Ha
+Integrated density (ie. total nb of electrons) =       7.9989256939
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1873,8 +1873,8 @@ Integrated density (ie. total nb of electrons) =       8.0004798072
 
 --- Iteration 91
 
-Total energy =     -11.478410 Ha
-Integrated density (ie. total nb of electrons) =       8.0004796551
+Total energy =     -11.479959 Ha
+Integrated density (ie. total nb of electrons) =       7.9989146994
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1887,8 +1887,8 @@ Integrated density (ie. total nb of electrons) =       8.0004796551
 
 --- Iteration 92
 
-Total energy =     -11.478411 Ha
-Integrated density (ie. total nb of electrons) =       8.0004795060
+Total energy =     -11.479954 Ha
+Integrated density (ie. total nb of electrons) =       7.9989059829
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1901,8 +1901,8 @@ Integrated density (ie. total nb of electrons) =       8.0004795060
 
 --- Iteration 93
 
-Total energy =     -11.478412 Ha
-Integrated density (ie. total nb of electrons) =       8.0004793587
+Total energy =     -11.479910 Ha
+Integrated density (ie. total nb of electrons) =       7.9988996436
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1915,8 +1915,8 @@ Integrated density (ie. total nb of electrons) =       8.0004793587
 
 --- Iteration 94
 
-Total energy =     -11.478413 Ha
-Integrated density (ie. total nb of electrons) =       8.0004792120
+Total energy =     -11.479831 Ha
+Integrated density (ie. total nb of electrons) =       7.9988954896
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1929,8 +1929,8 @@ Integrated density (ie. total nb of electrons) =       8.0004792120
 
 --- Iteration 95
 
-Total energy =     -11.478414 Ha
-Integrated density (ie. total nb of electrons) =       8.0004790650
+Total energy =     -11.479724 Ha
+Integrated density (ie. total nb of electrons) =       7.9988931298
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1938,13 +1938,13 @@ Integrated density (ie. total nb of electrons) =       8.0004790650
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.17    0.17
+- Time - cpu, wall (sec):    0.16    0.17
 
 
 --- Iteration 96
 
-Total energy =     -11.478415 Ha
-Integrated density (ie. total nb of electrons) =       8.0004789168
+Total energy =     -11.479593 Ha
+Integrated density (ie. total nb of electrons) =       7.9988921496
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1952,13 +1952,13 @@ Integrated density (ie. total nb of electrons) =       8.0004789168
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.16    0.16
+- Time - cpu, wall (sec):    0.16    0.17
 
 
 --- Iteration 97
 
-Total energy =     -11.478416 Ha
-Integrated density (ie. total nb of electrons) =       8.0004787676
+Total energy =     -11.479448 Ha
+Integrated density (ie. total nb of electrons) =       7.9988922450
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1971,8 +1971,8 @@ Integrated density (ie. total nb of electrons) =       8.0004787676
 
 --- Iteration 98
 
-Total energy =     -11.478417 Ha
-Integrated density (ie. total nb of electrons) =       8.0004786180
+Total energy =     -11.479293 Ha
+Integrated density (ie. total nb of electrons) =       7.9988932235
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1985,8 +1985,8 @@ Integrated density (ie. total nb of electrons) =       8.0004786180
 
 --- Iteration 99
 
-Total energy =     -11.478418 Ha
-Integrated density (ie. total nb of electrons) =       8.0004784690
+Total energy =     -11.479135 Ha
+Integrated density (ie. total nb of electrons) =       7.9988949002
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1994,13 +1994,13 @@ Integrated density (ie. total nb of electrons) =       8.0004784690
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.16    0.16
+- Time - cpu, wall (sec):    0.17    0.17
 
 
 --- Iteration 100
 
-Total energy =     -11.478419 Ha
-Integrated density (ie. total nb of electrons) =       8.0004783221
+Total energy =     -11.478979 Ha
+Integrated density (ie. total nb of electrons) =       7.9988970026
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -2264,10 +2264,10 @@ P           mkmem          32
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         20.7  wall=         20.7
+- Proc.   0 individual time (sec): cpu=         20.6  wall=         20.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered   6 WARNINGs and  10 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         20.7  wall=         20.7
++Overall time at end (sec) : cpu=         20.6  wall=         20.7

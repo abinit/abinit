@@ -323,9 +323,14 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
  end if
  call tdks%tdef%init(dtset%td_ef_type,dtset%td_ef_pol,dtset%td_ef_ezero,dtset%td_ef_tzero, &
                    & dtset%td_ef_lambda,dtset%td_ef_tau,dtset%td_ef_induced_vecpot,dtset%nkpt,dtset%kptns)
- if (dtset%td_restart /=0 ) call tdks%tdef%restart(mpi_enreg, tdks%tdrestart_unit)
- call tdks%tdef%update(dtset,mpi_enreg,(tdks%first_step-1)*dtset%dtele,tdks%rprimd,tdks%gprimd,tdks%kg, &
-                     & psps%mpsang,tdks%npwarr,tdks%ylm,tdks%ylmgr,tdks%current)
+ if (dtset%td_restart /=0) then
+    call tdks%tdef%restart(mpi_enreg, tdks%tdrestart_unit)
+    call tdks%tdef%update(dtset,mpi_enreg,(tdks%first_step-1)*dtset%dtele,tdks%rprimd,tdks%gprimd,tdks%kg, &
+                        & psps%mpsang,tdks%npwarr,tdks%ylm,tdks%ylmgr,tdks%current,update_vecpot_ind=.false.)
+ else
+    call tdks%tdef%update(dtset,mpi_enreg,(tdks%first_step-1)*dtset%dtele,tdks%rprimd,tdks%gprimd,tdks%kg, &
+                        & psps%mpsang,tdks%npwarr,tdks%ylm,tdks%ylmgr,tdks%current)
+ end if
 
  !7) Keep initial cg and cproj in memory for occupations
  !Keep initial wavefunction in memory

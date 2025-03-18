@@ -11,7 +11,7 @@ ndtset 3
 
 optdriver1 0     # GS
 optdriver 9      # RT-TDDFT
-dtele 0.01       # Electronic timestep
+dtele 0.04       # Electronic timestep
 getwfk2  1       # Initial wavefunctions
 ntime 10         # Number of steps
 td_exp_order 4   # Order of the Taylor expansion used to approximate the exponential
@@ -38,7 +38,7 @@ chkprim 0
 
 # K-points and occupations
 kptopt 1
-ngkpt 2 2 2 # Not converged
+ngkpt 2 2 2
 nshiftk 1
 shiftk 0 0 0
 istwfk *1
@@ -47,11 +47,11 @@ tsmear 300 K
 nband 24
 
 # Convergence parameters
-ecut 15       # Not converged
-tolvrs 1.d-4  # May not be sufficient
-nstep 50 
+ecut 16
+tolvrs 1.d-4
+nstep 20 
 
-pp_dirpath "$ABI_PSPDIR/Psdj_nc_sr_04_pbe_std_psp8/"
+pp_dirpath "$ABI_PSPDIR/Psdj_nc_sr_04_pbe_std_psp8"
 pseudos "Al.psp8"
   
 # Printing parameters

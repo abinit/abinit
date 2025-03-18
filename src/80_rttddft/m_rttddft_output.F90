@@ -762,9 +762,9 @@ subroutine prt_restart(dtfil, dtset, istep, mpi_enreg, tdks)
     call wrtout(tdks%tdrestart_unit,msg)
  end if
  if (dtset%td_ef_induced_vecpot /= 0) then
-   write(msg,'(3(f14.8,1X))') tdks%tdef%vecpot_ind(:,3)
+   write(msg,*) tdks%tdef%vecpot_ind(:,2)
    call wrtout(tdks%tdrestart_unit,msg)
-   write(msg,'(3(f14.8,1X))') tdks%tdef%vecpot_ind(:,2)
+   write(msg,*) tdks%tdef%vecpot_ind(:,1)
    call wrtout(tdks%tdrestart_unit,msg)
  end if
 

@@ -11,10 +11,10 @@ keywords = [
 
 #: List of input files
 inp_files = [
-"t01.abi", # Tests ER and EMR propagator in PAW (Ni FCC nonmagnetic)
+"t01.abi", # Tests ER and EMR propagator in PAW (Ni FCC)
 "t02.abi", # Tests ER and EMR propagator in NC (Al FCC)
 "t03.abi", # Tests restart capabilities in stationary case (Al FCC NC)
-"t04.abi", # Tests restart capabilities in non stationary case (Ni FCC nonmagnetic PAW)
-"t05.abi", # Tests Impulsional TD electric field without induced potential vector (Diamond 1 atom PAW)
-"t06.abi", # Tests Impulsional TD electric field with induced potential vector (Diamon 1 atom PAW)
+"t04.abi", # Tests restart capabilities in non stationary case (Ni FCC PAW)
+"t05.abi", # Tests Impulsional TD electric field without induced potential vector (C Diamond 1 atom PAW)
+"t06.abi", # Tests Impulsional TD electric field with induced potential vector (C Diamond 1 atom PAW)
 ]
