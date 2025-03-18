@@ -253,7 +253,6 @@ contains
   real(dp),pointer :: ffnlin_(:,:,:,:),ffnlout_(:,:,:,:)
   real(dp),pointer :: ph3din_(:,:,:),ph3dout_(:,:,:)
   real(dp), ABI_CONTIGUOUS pointer :: enl_(:,:,:,:,:)
-  real(dp), pointer :: enl_ptr(:,:,:,:)
   real(dp), ABI_CONTIGUOUS pointer :: sij_(:,:)
   real(dp), ABI_CONTIGUOUS pointer :: kpgin_(:,:),kpgout_(:,:)
   logical :: nld_on_gpu
@@ -373,7 +372,6 @@ contains
           end if
         end do
       end do
-      enl_ptr     => enl_(:,:,:,:,1)
     else
       ABI_MALLOC(enl_,(0,0,0,0,0))
     end if
@@ -387,7 +385,6 @@ contains
     nattyp_     => nattyp
     ffnlin_     => ffnlin
     ffnlout_    => ffnlout
-    enl_ptr     => enl(:,:,:,:)
     enl_(1:dimenl1,1:dimenl2,1:nspinortot**2,1:dimekbq,1:1)        => enl(:,:,:,:)
     if(use_enl_ndat) then
       enl_   => enl_ndat
@@ -832,59 +829,20 @@ contains
         id2beg = d2shift+1
         id2end = d2shift+nattyp_(itypat)*nlmn*ngrads2
 
-        if(gpu_option==ABI_GPU_DISABLED) then
-          do idat = 1,ndat
-            if(use_enl_ndat) enl_ptr => enl_(:,:,:,idat,:)
-            !FIXME This if exists so compilers won't implicitly copy arrays
-            !      Copies are unavoidable with nspinor==2
-            if(nspinor==1) then
-              call opernlc_ylm(atindx1_,cplex,cplex_dgxdt,cplex_d2gxdt,&
-              &         cplex_enl,cplex_fac,&
-              &         dprojections    (:, idbeg:idend,   idat),&
-              &         vnl_dprojections(:, idfbeg:idfend, idat),&
-              &         s_dprojections  (:, idfbeg:idfend, idat),&
-              &         d2projections   (:, id2beg:id2end, idat),&
-              &         d2gxdt_dum_out,d2gxdt_dum_out2,&
-              &         dimenl1,dimenl2_,dimekbq,enl_ptr,&
-              &         projections    (:, ibeg:iend, idat),&
-              &         vnl_projections(:, ibeg:iend, idat),&
-              &         s_projections  (:, ibeg:iend, idat),&
-              &         iatm,indlmn_(:,:,itypat),itypat,lambda(idat),mpi_enreg,natom_,&
-              &         ndgxdt,ndgxdtfac,nd2gxdt,nd2gxdtfac,&
-              &         nattyp_(itypat),nlmn,nspinor,nspinortot,optder,paw_opt,sij_typ(:,itypat))
-            else
-              call opernlc_ylm(atindx1_,cplex,cplex_dgxdt,cplex_d2gxdt,&
-              &         cplex_enl,cplex_fac,&
-              &         dprojections(:, idbeg:idend, 1+nspinor*(idat-1):nspinor*idat),&
-              &         vnl_dprojections(:, idfbeg:idfend, 1+nspinor*(idat-1):nspinor*idat),&
-              &         s_dprojections(:, idfbeg:idfend, 1+nspinor*(idat-1):nspinor*idat),&
-              &         d2projections(:, id2beg:id2end, 1+nspinor*(idat-1):nspinor*idat),&
-              &         d2gxdt_dum_out,d2gxdt_dum_out2,&
-              &         dimenl1,dimenl2_,dimekbq,enl_ptr,&
-              &         projections(:, ibeg:iend, 1+nspinor*(idat-1):nspinor*idat),&
-              &         vnl_projections(:, ibeg:iend,1+nspinor*(idat-1):nspinor*idat),&
-              &         s_projections(:, ibeg:iend,1+nspinor*(idat-1):nspinor*idat),&
-              &         iatm,indlmn_(:,:,itypat),itypat,lambda(idat),mpi_enreg,natom_,&
-              &         ndgxdt,ndgxdtfac,nd2gxdt,nd2gxdtfac,&
-              &         nattyp_(itypat),nlmn,nspinor,nspinortot,optder,paw_opt,sij_typ(:,itypat))
-            end if
-          end do
-        else if(gpu_option==ABI_GPU_OPENMP) then
-          call opernlc_ylm_ompgpu(atindx1_,cplex,cplex_dgxdt,cplex_d2gxdt,&
-          &         cplex_enl,cplex_fac,&
-          &         dprojections,&
-          &         vnl_dprojections,&
-          &         s_dprojections,&
-          &         d2projections,d2gxdt_dum_out,d2gxdt_dum_out2,&
-          &         dimenl1,dimenl2_,dimekbq,enl_,&
-          &         projections,&
-          &         vnl_projections,&
-          &         s_projections,&
-          &         iatm,indlmn_(:,:,itypat),itypat,lambda,mpi_enreg,natom_,&
-          &         ndgxdt,ndgxdtfac,nd2gxdt,nd2gxdtfac,&
-          &         nattyp_(itypat),nlmn,nspinor,nspinortot,optder,paw_opt,sij_typ(:,itypat),&
-          &         ndat,ibeg-1,iend,nprojs,ndat_enl,gpu_option)
-        end if
+        call opernlc_ylm_ompgpu(atindx1_,cplex,cplex_dgxdt,cplex_d2gxdt,&
+        &         cplex_enl,cplex_fac,&
+        &         dprojections,&
+        &         vnl_dprojections,&
+        &         s_dprojections,&
+        &         d2projections,d2gxdt_dum_out,d2gxdt_dum_out2,&
+        &         dimenl1,dimenl2_,dimekbq,enl_,&
+        &         projections,&
+        &         vnl_projections,&
+        &         s_projections,&
+        &         iatm,indlmn_(:,:,itypat),itypat,lambda,mpi_enreg,natom_,&
+        &         ndgxdt,ndgxdtfac,nd2gxdt,nd2gxdtfac,&
+        &         nattyp_(itypat),nlmn,nspinor,nspinortot,optder,paw_opt,sij_typ(:,itypat),&
+        &         ndat,ibeg-1,iend,nprojs,ndat_enl,gpu_option)
 
         shift = shift + nattyp_(itypat)*nlmn
         dshift = dshift + nattyp_(itypat)*nlmn*ngrads
