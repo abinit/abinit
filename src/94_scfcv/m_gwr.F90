@@ -431,7 +431,7 @@ module m_gwr
 
    logical, allocatable :: itreat_ikibz(:)
    ! (nkibz)
-   ! True if this MPI rank treat ik_ibz
+   ! True if this MPI rank treats ik_ibz
 
    logical, allocatable :: itreat_iqibz(:)
    ! (nqibz)

@@ -1688,7 +1688,7 @@ subroutine crystal_ncread(cryst, ncid)
  NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "time_reversal"), cryst%timrev))
  NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "use_antiferromagnetic_symmetries"), use_antiferro))
  cryst%use_antiferro = .False.
- if (use_antiferro/=0) cryst%use_antiferro = .True.
+ if (use_antiferro /= 0) cryst%use_antiferro = .True.
 
  ! -----------
  ! read arrays
@@ -1700,7 +1700,6 @@ subroutine crystal_ncread(cryst, ncid)
  NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "reduced_atom_positions"), cryst%xred))
  NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "atomic_numbers"), cryst%znucl(1:cryst%ntypat)))
  NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "atomic_mass_units"), cryst%amu))
-
  NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "symafm"), cryst%symafm))
  NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "symrel_cart"), cryst%symrel_cart))
  NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "indsym"), cryst%indsym))
@@ -1718,9 +1717,9 @@ subroutine crystal_ncread(cryst, ncid)
  ! Complete initialization
  ! -----------------------
 
- call Cryst%compute_geometry()
- call Cryst%index_atoms()
- call Cryst%compute_sym()
+ call cryst%compute_geometry()
+ call cryst%index_atoms()
+ call cryst%compute_sym()
 
 end subroutine crystal_ncread
 !!***

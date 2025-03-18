@@ -19,6 +19,9 @@
 
 #include "abi_common.h"
 
+! nvtx related macro definition
+#include "nvtx_macros.h"
+
 module m_stress
 
  use defs_basis
@@ -44,6 +47,10 @@ module m_stress
  use m_atm2fft,          only : atm2fft
  use m_mklocl,           only : mklocl_recipspace
  use m_mkcore,           only : mkcore, mkcore_alt
+
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+ use m_nvtx_data
+#endif
 
  implicit none
 
@@ -225,6 +232,7 @@ contains
 ! *************************************************************************
 
  call timab(37,1,tsec)
+ ABI_NVTX_START_RANGE(NVTX_STRESS)
 
 !Compute different geometric tensor, as well as ucvol, from rprimd
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
@@ -726,6 +734,7 @@ contains
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,  message,'COLL')
  end if
+ ABI_NVTX_END_RANGE()
  call timab(37,2,tsec)
 
 end subroutine stress

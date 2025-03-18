@@ -193,7 +193,7 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
 
  call lobpcg_init(lobpcg,nband,l_npw*l_nspinor,blockdim,dtset%tolwfr_diago,dtset%nline,&
    space,l_mpi_enreg%comm_bandspinorfft,l_paral_kgb,l_mpi_enreg%comm_spinorfft,l_mpi_enreg%comm_band,&
-   me_g0,me_g0_fft,gs_hamk%gpu_option)
+   me_g0,me_g0_fft,gs_hamk%gpu_option,gpu_thread_limit=dtset%gpu_thread_limit)
 
  ! Run lobpcg
  call lobpcg_run(lobpcg,xgx0,getghc_gsc1,xg_precond,xgeigen,xgocc,xgresidu,prtvol,nspinor,isppol,ikpt,inonsc,istep,nbdbuf)
