@@ -130,8 +130,6 @@ subroutine rttddft(codvsn,dtfil,dtset,mpi_enreg,pawang,pawrad,pawtab,psps)
  !Compute current at t=0 (or t-dt) and update vector potential accordingly
  if (dtset%prtcurrent/=0 .or. tdks%tdef%induced_vecpot) then
    call rttddft_calc_current(tdks,dtset,dtfil,psps,mpi_enreg)
-   call tdks%tdef%update(dtset,mpi_enreg,(tdks%first_step-1)*dtset%dtele,tdks%rprimd,tdks%gprimd,tdks%kg, &
-                       & psps%mpsang,tdks%npwarr,tdks%ylm,tdks%ylmgr,tdks%current)
  end if
 
  !** 2) Propagation loop

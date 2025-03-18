@@ -11,7 +11,7 @@ ndtset 3
 
 optdriver1 0     # GS
 optdriver 9      # RT-TDDFT
-dtele 0.01       # Electronic timestep
+dtele 0.04       # Electronic timestep
 getwfk1 0        # Don't read wavefunctions for GS
 getwfk  1        # Initial wavefunctions
 ntime 10         # Number of steps
@@ -42,19 +42,19 @@ chkprim 0
 
 # K-points and occupations
 kptopt 1
-ngkpt 2 2 2 # Not converged
+ngkpt 2 2 2
 nshiftk 1
 shiftk 0 0 0
 istwfk *1
 occopt 3
 tsmear 300 K
-nband 48
+nband 42
 
 # Convergence parameters
-ecut 20       # Not converged
-pawecutdg 30
-tolvrs 1.d-4  # not sufficient
-nstep 50 
+ecut 8
+pawecutdg 16
+tolvrs 1.d-4
+nstep 20 
 
 pp_dirpath "$ABI_PSPDIR/Psdj_paw_pbe_std"
 pseudos "Ni.xml"

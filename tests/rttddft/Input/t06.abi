@@ -1,11 +1,11 @@
 ##########################################################
 # Automatic test for ABINIT:                             #
-#    C 2 atoms, Diamond, LDA, PAW                        #
+#    C 2 atoms, Diamond, LDA, PAW -- test TD Elec. Field #
 #   DS1: GS calculation to create initial WFK            #
 #   DS2: RT-TDDFT with Impulsional TDEF                  #
 #   DS3: RT-TDDFT with Impulsional TDEF -- restart       #
 #   Test Impulse TD Electric field and restart           #
-#   without induced vector potential                     #
+#   with induced vector potential                        #
 ##########################################################
 
 ndtset 3
@@ -20,6 +20,7 @@ ntime  50          # Maximum number or time step
 td_ef_type 1       # Impulse electric field
 td_ef_tzero 0.3    # applied at time tzero
 td_restart3 1      # DS3 restart trajectory from DS2
+td_ef_induced_vecpot 1 # Include induced vector potential 
 
 #Definition of the unit cell
 acell 3*3.53 angstrom  # Lengths of the primitive vectors (equilibrium volume)
@@ -85,10 +86,10 @@ prtcurrent 1      # Print current
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%   t05.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -ridiculous;
-#%%   t05o_DS2_TDENER, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -ridiculous;
-#%%   t05o_DS2_TDCURRENT, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -ridiculous;
-#%%   t05o_DS2_TDEFIELD, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -ridiculous;
+#%%   t06.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -ridiculous;
+#%%   t06o_DS2_TDENER, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -ridiculous;
+#%%   t06o_DS2_TDCURRENT, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -ridiculous;
+#%%   t06o_DS2_TDEFIELD, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -ridiculous;
 #%% [paral_info]
 #%% max_nprocs = 8
 #%% [extra_info]
@@ -96,6 +97,6 @@ prtcurrent 1      # Print current
 #%% keywords = RTTDDFT
 #%% description = 
 #%%   Diamond, LDA, PAW
-#%%   Tests RT-TDDFT with time-dependent electric field
+#%%   Tests RT-TDDFT with time-dependent electric field and induced vector potential
 #%% topics = RTTDDFT
 #%%<END TEST_INFO>

@@ -48,7 +48,7 @@ module m_rttddft_tdef
    real(dp) :: ef_ezero(3)   !E_0 = |E_0|*polarization
    real(dp) :: vecpot(3)     !total vector potential
    real(dp) :: vecpot_ext(3) !external vector potential
-   real(dp) :: vecpot_ind(3,3) !induced vector potential at t and t-dt
+   real(dp) :: vecpot_ind(3,2) !induced vector potential at t and t-dt
    real(dp) :: vecpot_red(3) !total vector potential in reduced coord. (in reciprocal space)
    real(dp) :: ef_tzero      !time at which elec field is switched on
    real(dp) :: ef_omega      !angular freq. of TD elec field
@@ -194,6 +194,7 @@ subroutine tdef_update(tdef,dtset,mpi_enreg,time,rprimd,gprimd,kg,mpsang,npwarr,
  character(len=500) :: msg
  integer            :: i
  logical            :: lvecpot_ind
+ real(dp)           :: tmp(3)
 
 ! ***********************************************************************
 
@@ -236,11 +237,13 @@ subroutine tdef_update(tdef,dtset,mpi_enreg,time,rprimd,gprimd,kg,mpsang,npwarr,
  !Should deal with sppol?! How?
  !d^2A_ind/dt^2 = 4piJ(t)
  !A_ind(t+dt) = 2*A_ind(t) - A_ind(t-dt) + 4*pi*dt**2*J(t)
- if (tdef%induced_vecpot .and. lvecpot_ind) then
-   tdef%vecpot_ind(:,3) = tdef%vecpot_ind(:,2) ! t - 2dt
-   tdef%vecpot_ind(:,2) = tdef%vecpot_ind(:,1) ! t - dt
-   tdef%vecpot_ind(:,1) = 2*tdef%vecpot_ind(:,2) - tdef%vecpot_ind(:,3) + four*pi*(dtset%dtele**2)*current(:,1) ! t
-   tdef%vecpot = tdef%vecpot_ext + tdef%vecpot_ind(:,1)
+ if (tdef%induced_vecpot) then
+    if (lvecpot_ind) then
+      tmp = tdef%vecpot_ind(:,2) ! t - 2dt
+      tdef%vecpot_ind(:,2) = tdef%vecpot_ind(:,1) ! t - dt
+      tdef%vecpot_ind(:,1) = 2*tdef%vecpot_ind(:,2) - tmp(:) + four*pi*(dtset%dtele**2)*current(:,1) ! t
+    end if
+    tdef%vecpot = tdef%vecpot_ext + tdef%vecpot_ind(:,1)
  else
    tdef%vecpot = tdef%vecpot_ext
  end if
