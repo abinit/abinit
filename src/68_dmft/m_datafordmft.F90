@@ -894,8 +894,7 @@ subroutine chipsi_print(paw_dmft,pawtab)
    ndim = paw_dmft%nspinor * (2*lpawu+1)
    do isppol=1,paw_dmft%nsppol
      do im=1,ndim
-       energy_level%matlu(iatom)%mat(im,im,isppol) = energy_level%matlu(iatom)%mat(im,im,isppol) &
-          & - paw_dmft%fermie
+       energy_level%matlu(iatom)%mat(im,im,isppol) = energy_level%matlu(iatom)%mat(im,im,isppol) - paw_dmft%fermie
      end do ! im
    end do ! isppol
    energy_level%matlu(iatom)%mat(:,:,:) = energy_level%matlu(iatom)%mat(:,:,:) - hdc%matlu(iatom)%mat(:,:,:)
