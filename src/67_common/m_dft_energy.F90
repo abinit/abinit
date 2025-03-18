@@ -696,13 +696,14 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
 
 !    Setup gemm_nonlop
      if (gemm_nonlop_use_gemm) then
-       call set_gemm_nonlop_ikpt(my_ikpt)
+       call set_gemm_nonlop_ikpt(my_ikpt,gs_hamk%npw_fft_k,gs_hamk%istwf_k,gs_hamk%indlmn,&
+       &    gs_hamk%ntypat,gs_hamk%nattyp,gs_hamk%gpu_option)
      end if
 
 #if defined HAVE_GPU_CUDA
      if (dtset%gpu_option==ABI_GPU_LEGACY .or. dtset%gpu_option==ABI_GPU_KOKKOS) then
        call gpu_update_ffnl_ph3d( &
-         & ph3d, INT(size(ph3d),c_int64_t), &
+         & ph3d, INT(size(ph3d,dim=1),c_int64_t)*size(ph3d,dim=2)*size(ph3d,dim=3), &
          & ffnl, INT(size(ffnl),c_int64_t) )
      end if
 #endif

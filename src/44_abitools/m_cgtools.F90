@@ -40,6 +40,7 @@ module m_cgtools
  use m_abicore
  use m_errors
  use m_xmpi
+ use m_xomp
  use m_abi_linalg
 
  use m_fstrings,      only : toupper, itoa, sjoin
@@ -1966,24 +1967,30 @@ end subroutine sqnorm_v
 !!
 !! SOURCE
 
-subroutine mean_fftr(arraysp,meansp,nfft,nfftot,nspden,mpi_comm_sphgrid)
+subroutine mean_fftr(arraysp,meansp,nfft,nfftot,nspden,mpi_comm_sphgrid,gpu_thread_limit)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfft,nfftot,nspden
- integer,intent(in),optional:: mpi_comm_sphgrid
+ integer,intent(in),optional:: mpi_comm_sphgrid,gpu_thread_limit
 !arrays
  real(dp),intent(in) :: arraysp(nfft,nspden)
  real(dp),intent(out) :: meansp(nspden)
 
 !Local variables-------------------------------
 !scalars
- integer :: ierr,ifft,ispden,nproc_sphgrid
+ integer :: ierr,ifft,ispden,nproc_sphgrid,l_gpu_thread_limit,nthreads_bak
  real(dp) :: invnfftot,tmean
 
 ! *************************************************************************
 
+ l_gpu_thread_limit=0; if(present(gpu_thread_limit)) l_gpu_thread_limit=gpu_thread_limit
  invnfftot=one/(dble(nfftot))
+
+ if(l_gpu_thread_limit /= 0) then
+   nthreads_bak=xomp_get_num_threads(open_parallel=.True.)
+   call xomp_set_num_threads(min(l_gpu_thread_limit,nthreads_bak))
+ end if
 
  do ispden=1,nspden
    tmean=zero
@@ -2001,6 +2008,10 @@ subroutine mean_fftr(arraysp,meansp,nfft,nfftot,nspden,mpi_comm_sphgrid)
    if(nproc_sphgrid>1) then
      call xmpi_sum(meansp,nspden,mpi_comm_sphgrid,ierr)
    end if
+ end if
+
+ if(l_gpu_thread_limit /= 0) then
+   call xomp_set_num_threads(nthreads_bak)
  end if
 
 end subroutine mean_fftr

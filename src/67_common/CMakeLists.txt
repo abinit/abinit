@@ -61,6 +61,7 @@ target_link_libraries(67_common
   abinit::16_hideleave
   abinit::44_abitools
   abinit::46_ghc_omp
+  abinit::48_diago
   abinit::52_fft_mpi_noabirule
   abinit::56_io_mpi
   abinit::56_mixing

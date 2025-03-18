@@ -89,6 +89,8 @@ module defs_basis
  integer, parameter :: md5_slen = 32 ! lenght of strings storing the pseudos' md5 checksum.
  character(len=md5_slen),parameter :: md5_none = "None"
 
+ integer, parameter :: abi_slen=80 ! maximum length of string variables
+
 !Some constants:
 
 ! UNIX unit numbers: standard input, standard output, ab_out, and a number for temporary access to a file.
