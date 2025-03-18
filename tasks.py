@@ -7,8 +7,6 @@ Example:
     invoke --list
 
 Can be executed everywhere inside the Abinit directory, including build directories.
-
-Use: `pip install invoke --user` to install invoke package.
 """
 from __future__ import annotations
 
@@ -20,7 +18,7 @@ from contextlib import contextmanager
 try:
     from invoke import task
 except ImportError:
-    raise ImportError("Cannot import invoke package. Use `pip install invoke --user`")
+    raise ImportError("Cannot import invoke package. Use `pip install invoke`")
 
 from tests.pymods.testsuite import find_top_build_tree
 from tests.pymods.devtools import number_of_cpus
@@ -252,6 +250,7 @@ def abichecks(ctx):
 
 @task
 def robodoc(ctx):
+    """Build robodoc documentation."""
     with cd(ABINIT_ROOTDIR):
         result = ctx.run("./mkrobodoc.sh", pty=True)
 
@@ -711,3 +710,108 @@ def which(cmd):
             if is_exe(exe_file):
                 return exe_file
     return None
+
+
+def get_current_branch():
+    import subprocess
+    try:
+        # Run git command to get the current branch
+        branch = subprocess.check_output(["git", "rev-parse", "--abbrev-ref", "HEAD"]).strip().decode("utf-8")
+        return branch
+    except subprocess.CalledProcessError:
+        raise RuntimeError("Not inside a Git repository.")
+
+
+@task
+def official_release(ctx: Context, new_version, dry_run=True) -> None:
+    """
+    Build new officiale release ...
+
+    Example usage:
+
+        invoke official-release 10.2.4
+    """
+    # Set variables
+    github_user = "gonzex"
+    github_repo = "abinit"
+    github_url = f"git@github.com:{github_user}/{github_repo}.git"
+    #github_token = "YOUR_GITHUB_TOKEN"  # Replace with your GitHub token
+
+    _run_kwargs = dict(pty=True, echo=True)
+    def _run(command):
+        return ctx.run(command, **_run_kwargs)
+
+    current_branch = get_current_branch()
+    if current_branch != "develop":
+        raise RuntimeError(f"You are on the '{current_branch}' branch, not 'develop'.")
+
+    with cd(ABINIT_ROOTDIR):
+        # The version in .current_version is updated manually.
+        # Here we check that the value stored in the file is equal to the command line argument.
+        with open(".current_version", "rt") as fh:
+            old_version = fh.read().strip()
+
+        if old_version != new_version:
+            raise ValueError(f"{old_version=} != {new_version=}")
+
+        # Step 1: Checkout master and merge changes
+        _run("git checkout master")
+        _run("git merge develop")
+        _run("./config/scripts/makemake")
+        # install-sh config.guess config.sub
+        _run("git add -f configure")
+
+        if not dry_run:
+            _run(f"git commit -a -m 'v{version}'")
+            _run(f"git tag -a {version} -m 'v{version}'")
+            _run("git push origin master")
+
+        # Step 2: Push to GitHub
+        _run(f"git remote add abinit {github_url} || echo 'Remote already exists'")
+        if not dry_run:
+            _run("git push -u abinit master --tags")
+
+        _run("git checkout develop")
+        #_run("git merge trunk")
+        #_run("git push --tags")
+
+        # Step 3: Ensure 'configure' is ignored in develop branch
+        #_run("echo 'configure' >> .gitignore")
+        #_run("git add .gitignore")
+        #_run("git commit -m 'Ignore configure script in develop branch' || echo 'No changes to commit'")
+        #_run("git push origin develop")
+        #_run("git rm --cached configure || echo 'File not tracked' ")
+        #_run("git commit -m 'Remove configure from tracking in develop' || echo 'No changes to commit'")
+        #_run("git push origin develop")
+
+        # Step 3: Create a new release
+        #release_tag = input("Enter the release tag: ")
+        #release_title = input("Enter the release title: ")
+        #release_description = input("Enter the release description: ")
+
+        #release_data = {
+        #    "tag_name": release_tag,
+        #    "name": release_title,
+        #    "body": release_description,
+        #    "draft": False,
+        #    "prerelease": False
+        #}
+
+        #headers = {
+        #    "Authorization": f"token {github_token}",
+        #    "Accept": "application/vnd.github.v3+json"
+        #}
+
+        #import requests
+        #import json
+        #response = requests.post(
+        #    f"https://api.github.com/repos/{github_user}/{github_repo}/releases",
+        #    headers=headers,
+        #    data=json.dumps(release_data)
+        #)
+
+        #if response.status_code == 201:
+        #    print("Release created successfully!")
+        #else:
+        #    print(f"Failed to create release: {response.text}")
+
