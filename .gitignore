@@ -77,9 +77,6 @@ CMakeCache.txt
 install_manifest.txt
 cmake_install.cmake
 tests/TestBot_MPI*/*
-/.abilint
-/abilint.log
-/abilint.out
 /aclocal.m4
 /autom4te.cache
 /_build*
@@ -93,7 +90,6 @@ tests/TestBot_MPI*/*
 /config.pc
 /config.sh
 /config.status
-/configure~
 /directories.dot
 /dump_fb_version.py
 /stamp-h1
@@ -355,7 +351,5 @@ venv
 # VSC
 .vscode/
 
-/home/users/lmacenul/abinit/build
 # R language
 .Rhistory
-
