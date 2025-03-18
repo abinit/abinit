@@ -785,8 +785,8 @@ def official_release(ctx: Context, new_version: str, dry_run: bool = True) -> No
             _run("git push -u abinit master --tags")
 
         _run("git checkout develop")
-        #_run("git merge trunk")
-        #_run("git push --tags")
+        _run("git merge master")
+        _run("git push --tags")
 
         # Step 3: Ensure 'configure' is ignored in develop branch
         #_run("echo 'configure' >> .gitignore")
