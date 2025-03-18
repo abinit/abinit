@@ -330,7 +330,8 @@ subroutine rttddft_propagator_er(dtset, ham_k, istep, mpi_enreg, psps, tdks, cal
 
       ! Setup gemm_nonlop
       if (tdks%gemm_nonlop_use_gemm) then
-         call set_gemm_nonlop_ikpt(my_ikpt)
+        call set_gemm_nonlop_ikpt(my_ikpt,ham_k%npw_fft_k,ham_k%istwf_k,ham_k%indlmn,&
+        &    ham_k%ntypat,ham_k%nattyp,ham_k%gpu_option)
       end if
 
       !** Compute the exp[-i(S^{-1})H]*cg using Taylor expansion to approximate the exponential

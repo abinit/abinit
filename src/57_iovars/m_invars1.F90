@@ -2475,6 +2475,10 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%gpu_linalg_limit=2000000
    dtsets(idtset)%gpu_nl_distrib=0
    dtsets(idtset)%gpu_nl_splitsize=1
+   dtsets(idtset)%gpu_thread_limit=0
+   if(dtsets(idtset)%gpu_option/=ABI_GPU_DISABLED) then
+     dtsets(idtset)%gpu_thread_limit=min(4,xomp_get_num_threads(open_parallel=.true.))
+   end if
    if (dtsets(idtset)%gw_customnfreqsp/=0) dtsets(idtset)%gw_freqsp(:) = zero
    if ( dtsets(idtset)%gw_nqlwl > 0 ) then
      dtsets(idtset)%gw_qlwl(:,:)=zero

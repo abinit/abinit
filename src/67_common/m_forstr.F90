@@ -67,7 +67,9 @@ module m_forstr
  use m_mkffnl,           only : mkffnl
  use m_mpinfo,           only : proc_distrb_cycle
  use m_nonlop,           only : nonlop
- use m_gemm_nonlop_projectors, only : set_gemm_nonlop_ikpt, gemm_nonlop_use_gemm
+ use m_gemm_nonlop_projectors, only : set_gemm_nonlop_ikpt, reset_gemm_nonlop, gemm_nonlop_use_gemm, &
+                                      gemm_nonlop_block_size, gemm_nonlop_is_distributed
+ use m_common,           only : get_gemm_nonlop_ompgpu_blocksize
  use m_fock_getghc,      only : fock_getghc
  use m_prep_kgb,         only : prep_nonlop
  use m_paw_nhat,         only : pawmknhat
@@ -333,6 +335,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 ! *************************************************************************
 
  call timab(910,1,tsec)
+ ABI_NVTX_START_RANGE(NVTX_FORSTR)
  call timab(911,1,tsec)
 
 !Do nothing if nothing is required
@@ -419,7 +422,8 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 &   mpi_enreg,psps%mpsang,dtset%mpw,my_natom,dtset%natom,dtset%nband,dtset%nfft,nfftf,dtset%ngfft,&
 &   dtset%nkpt,dtset%nloalg,npwarr,dtset%nspden,dtset%nspinor,dtset%nsppol,dtset%nsym,ntypat,&
 &   dtset%nucdipmom,occ,optfor,paw_ij,pawfgr,pawtab,ph1d,psps,rprimd,stress_needed,symrec,dtset%typat,&
-&   usecprj,dtset%usefock,usevxctau,vxctau,usexg,dtset%gpu_option,dtset%wtk,xred,ylm,ylmgr,xg_nonlop)
+&   usecprj,dtset%usefock,usevxctau,vxctau,usexg,dtset%gpu_option,dtset%gpu_nl_distrib,&
+&   dtset%gpu_nl_splitsize,dtset%wtk,xred,ylm,ylmgr,xg_nonlop)
  else if (optfor>0) then !WVL
    ABI_MALLOC(xcart,(3, dtset%natom))
    call xred2xcart(dtset%natom, rprimd, xcart, xred)
@@ -538,6 +542,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 
 
  call timab(914,2,tsec)
+ ABI_NVTX_END_RANGE()
  call timab(910,2,tsec)
 
 end subroutine forstr
@@ -628,13 +633,14 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 &  grnl,istwfk,kg,kinstr,npsstr,kpt,mband,mcg,mcprj,mgfft,mggastr,mkmem,mpi_enreg,mpsang,&
 &  mpw,my_natom,natom,nband,nfft,nfftf,ngfft,nkpt,nloalg,npwarr,nspden,nspinor,nsppol,nsym,&
 &  ntypat,nucdipmom,occ,optfor,paw_ij,pawfgr,pawtab,ph1d,psps,rprimd,&
-&  stress_needed,symrec,typat,usecprj,usefock,usevxctau,vxctau,usexg,gpu_option,wtk,xred,ylm,ylmgr,xg_nonlop)
+&  stress_needed,symrec,typat,usecprj,usefock,usevxctau,vxctau,usexg,&
+&  gpu_option,gpu_nl_distrib,gpu_nl_splitsize,wtk,xred,ylm,ylmgr,xg_nonlop)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mband,mcg,mcprj,mgfft,mkmem,mpsang,mpw,my_natom,natom,nfft,nfftf,nkpt
  integer,intent(in) :: nspden,nsppol,nspinor,nsym,ntypat,optfor,stress_needed
- integer,intent(in) :: usecprj,usefock,usevxctau,usexg,gpu_option
+ integer,intent(in) :: usecprj,usefock,usevxctau,usexg,gpu_option,gpu_nl_distrib,gpu_nl_splitsize
  real(dp),intent(in) :: ecut,ecutsm,effmass_free
  type(electronpositron_type),pointer :: electronpositron
  type(MPI_type),intent(inout) :: mpi_enreg
@@ -665,7 +671,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
  integer :: mband_cprj,me_distrb,my_ikpt,my_nspinor,nband_k,nband_cprj_k,ndat,nkpg
  integer :: nnlout,npw_k,paw_opt,signs,spaceComm
  integer :: tim_nonlop,tim_nonlop_prep,usecprj_local,use_ACE_old
- integer :: blocksize,iblock,iblocksize,ibs,nblockbd
+ integer :: blocksize,iblock,iblocksize,ibs,nblockbd,nblk_gemm_nonlop
  integer :: space,me_g0,ncols_cprj
  real(dp) :: ar,renorm_factor,dfsm,ecutsm_inv,fact_kin,fsm,htpisq,kgc1
  real(dp) :: kgc2,kgc3,kin,xx
@@ -1017,7 +1023,22 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 
 !    Setup gemm_nonlop
      if (gemm_nonlop_use_gemm) then
-       call set_gemm_nonlop_ikpt(my_ikpt)
+       call set_gemm_nonlop_ikpt(my_ikpt,gs_hamk%npw_fft_k,gs_hamk%istwf_k,gs_hamk%indlmn,&
+       &    gs_hamk%ntypat,gs_hamk%nattyp,gs_hamk%gpu_option)
+       call reset_gemm_nonlop()
+
+       if(gs_hamk%gpu_option==ABI_GPU_OPENMP) then
+         gemm_nonlop_block_size = gpu_nl_splitsize
+         call get_gemm_nonlop_ompgpu_blocksize(my_ikpt,gs_hamk,mpi_enreg%bandpp,nband_k,&
+         &                        nspinor,mpi_enreg%paral_kgb,mpi_enreg%nproc_band,&
+         &                        optfor,stress_needed,-1,gs_hamk%gpu_option,(gpu_nl_distrib/=0),&
+         &                        gemm_nonlop_block_size,nblk_gemm_nonlop,warn_on_fail=.true.)
+         gemm_nonlop_is_distributed = (gpu_nl_distrib/=0 .and. nblk_gemm_nonlop > 0)
+         if(nblk_gemm_nonlop==-1) then
+           gs_hamk%gpu_option=ABI_GPU_DISABLED
+           ABI_WARNING("GPU has been disabled for forces and stress computation due to memory constraints.")
+         end if
+       end if
      end if
 
      if (usexg==1) then

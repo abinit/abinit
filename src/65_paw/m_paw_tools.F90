@@ -207,7 +207,7 @@ subroutine chkpawovlp(natom,ntypat,pawovlp,pawtab,rmet,typat,xred,nremit)
          write(message, '(3a,i5,a)' ) trim(message),ch10,&
 &         '   There are ', iovl(ii),' pairs of overlapping atoms.'
        end if
-       write(message, '(3a,i3,a,i3,a)' ) trim(message),ch10,&
+       write(message, '(3a,i4,a,i4,a)' ) trim(message),ch10,&
         '   The maximum overlap percentage is obtained for the atoms ',iamax(ii),' and ',ibmax(ii),'.'
        write(message, '(2a,2(a,i3),a,f9.5)' ) trim(message),ch10,&
 &       '    | Distance between atoms ',iamax(ii),' and ',ibmax(ii),' is  : ',sqrt(norm2_min(ii))
