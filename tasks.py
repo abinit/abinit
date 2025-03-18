@@ -61,7 +61,7 @@ import platform
 SYSTEM = platform.system()
 
 
-def which_vim():
+def which_vim() -> str:
     """
     Find vim in $PATH
     """
@@ -71,7 +71,7 @@ def which_vim():
     raise RuntimeError("Cannot find vim in $PATH!")
 
 
-def which_differ():
+def which_differ() -> str:
     """
     Find differ in $PATH
     """
@@ -126,7 +126,7 @@ def cd(path):
         os.chdir(cwd)
 
 
-def list_from_string(string, type=int):
+def list_from_string(string, type=int) -> list[str]:
     if "," in string:
         return [type(s) for s in string.split(",")]
     return [type(s) for s in string.split(" ")]
@@ -747,7 +747,7 @@ def official_release(ctx: Context, new_version: str, dry_run: bool = True) -> No
     #github_token = "YOUR_GITHUB_TOKEN"  # Replace with your GitHub token
 
     _run_kwargs = dict(pty=True, echo=True)
-    def _run(command):
+    def _run(command: str):
         return ctx.run(command, **_run_kwargs)
 
     current_branch = get_current_branch()
@@ -780,7 +780,7 @@ def official_release(ctx: Context, new_version: str, dry_run: bool = True) -> No
             _run("git push origin master")
 
         # Step 2: Push to GitHub
-        _run(f"git remote add abinit {github_url} || echo 'Remote already exists'")
+        _run(f"git remote add abinit {github_url} || echo 'Remote already exists but this is not critical'")
         if not dry_run:
             _run("git push -u abinit master --tags")
 
@@ -792,10 +792,9 @@ def official_release(ctx: Context, new_version: str, dry_run: bool = True) -> No
         #_run("echo 'configure' >> .gitignore")
         #_run("git add .gitignore")
         #_run("git commit -m 'Ignore configure script in develop branch' || echo 'No changes to commit'")
-        #_run("git push origin develop")
-        #_run("git rm --cached configure || echo 'File not tracked' ")
-        #_run("git commit -m 'Remove configure from tracking in develop' || echo 'No changes to commit'")
-        #_run("git push origin develop")
+        _run("git rm --cached configure")
+        _run("git commit -a -m 'Remove configure files from tracking in develop'")
+        _run("git push origin develop")
 
         # Step 3: Create a new release
         #release_tag = input("Enter the release tag: ")
