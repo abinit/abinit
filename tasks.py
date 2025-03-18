@@ -751,11 +751,11 @@ def official_release(ctx: Context, new_version: str, dry_run: bool = True) -> No
         return ctx.run(command, **_run_kwargs)
 
     current_branch = get_current_branch()
-    if current_branch != "develop" and not dry_run:
+    if current_branch != "develop":
         raise RuntimeError(f"You are on the '{current_branch}' branch, not 'develop'.")
 
     old_tags = get_git_tags()
-    if new_version in old_tags:
+    if new_version in old_tags and not dry_run:
         raise RuntimeError(f"{new_version=} is already in {old_tags=}")
 
     with cd(ABINIT_ROOTDIR):
