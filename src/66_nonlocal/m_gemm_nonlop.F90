@@ -43,7 +43,7 @@ module m_gemm_nonlop
 
  use defs_abitypes, only : MPI_type
  use m_opernlc_ylm, only : opernlc_ylm
- use m_opernlc_ylm_ompgpu, only : opernlc_ylm_ompgpu
+ use m_opernlc_ylm_allwf, only : opernlc_ylm_allwf
  use m_opernla_gemm, only : opernla_gemm
  use m_opernlb_gemm, only : opernlb_gemm
  use m_opernld_ylm_allwf, only : opernld_ylm_allwf
@@ -829,7 +829,7 @@ contains
         id2beg = d2shift+1
         id2end = d2shift+nattyp_(itypat)*nlmn*ngrads2
 
-        call opernlc_ylm_ompgpu(atindx1_,cplex,cplex_dgxdt,cplex_d2gxdt,&
+        call opernlc_ylm_allwf(atindx1_,cplex,cplex_dgxdt,cplex_d2gxdt,&
         &         cplex_enl,cplex_fac,&
         &         dprojections,&
         &         vnl_dprojections,&
