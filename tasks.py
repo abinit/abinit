@@ -744,7 +744,6 @@ def official_release(ctx: Context, new_version: str, dry_run: bool = True) -> No
     github_user = "gonzex"
     github_repo = "abinit"
     github_url = f"git@github.com:{github_user}/{github_repo}.git"
-    #github_token = "YOUR_GITHUB_TOKEN"  # Replace with your GitHub token
 
     _run_kwargs = dict(pty=True, echo=True)
     def _run(command: str):
@@ -757,6 +756,17 @@ def official_release(ctx: Context, new_version: str, dry_run: bool = True) -> No
     old_tags = get_git_tags()
     if new_version in old_tags and not dry_run:
         raise RuntimeError(f"{new_version=} is already in {old_tags=}")
+
+    # List of files that should be added to master and then removed in develop
+    configure_paths = [
+        "configure",
+        'config/gnu/compile',
+        'config/gnu/config.guess',
+        'config/gnu/config.sub',
+        'config/gnu/install-sh',
+        'config/gnu/missing',
+        'config/gnu/depcomp',
+    ]
 
     with cd(ABINIT_ROOTDIR):
         # The version in .current_version is updated manually.
@@ -771,8 +781,9 @@ def official_release(ctx: Context, new_version: str, dry_run: bool = True) -> No
         _run("git checkout master")
         _run("git merge develop")
         _run("./config/scripts/makemake")
-        # install-sh config.guess config.sub
-        _run("git add -f configure")
+
+        for path in configure_paths:
+            _run(f"git add -f {path}")
 
         if not dry_run:
             _run(f"git commit -a -m 'v{version}'")
@@ -788,42 +799,8 @@ def official_release(ctx: Context, new_version: str, dry_run: bool = True) -> No
         _run("git merge master")
         _run("git push --tags")
 
-        # Step 3: Ensure 'configure' is ignored in develop branch
-        #_run("echo 'configure' >> .gitignore")
-        #_run("git add .gitignore")
-        #_run("git commit -m 'Ignore configure script in develop branch' || echo 'No changes to commit'")
-        _run("git rm --cached configure")
+        # Step 3: Ensure 'configure_paths' are ignored in develop branch
+        for path in configure_paths:
+            _run(f"git rm --cached {path}")
         _run("git commit -a -m 'Remove configure files from tracking in develop'")
         _run("git push origin develop")
-
-        # Step 3: Create a new release
-        #release_tag = input("Enter the release tag: ")
-        #release_title = input("Enter the release title: ")
-        #release_description = input("Enter the release description: ")
-
-        #release_data = {
-        #    "tag_name": release_tag,
-        #    "name": release_title,
-        #    "body": release_description,
-        #    "draft": False,
-        #    "prerelease": False
-        #}
-
-        #headers = {
-        #    "Authorization": f"token {github_token}",
-        #    "Accept": "application/vnd.github.v3+json"
-        #}
-
-        #import requests
-        #import json
-        #response = requests.post(
-        #    f"https://api.github.com/repos/{github_user}/{github_repo}/releases",
-        #    headers=headers,
-        #    data=json.dumps(release_data)
-        #)
-
-        #if response.status_code == 201:
-        #    print("Release created successfully!")
-        #else:
-        #    print(f"Failed to create release: {response.text}")
-
