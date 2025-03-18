@@ -732,7 +732,7 @@ def get_git_tags() -> list[str]:
 
 
 @task
-def official_release(ctx: Context, new_version, dry_run=True) -> None:
+def official_release(ctx: Context, new_version: str, dry_run: bool = True) -> None:
     """
     Build new officiale release ...
 
@@ -751,7 +751,7 @@ def official_release(ctx: Context, new_version, dry_run=True) -> None:
         return ctx.run(command, **_run_kwargs)
 
     current_branch = get_current_branch()
-    if current_branch != "develop":
+    if current_branch != "develop" and not dry_run:
         raise RuntimeError(f"You are on the '{current_branch}' branch, not 'develop'.")
 
     old_tags = get_git_tags()
