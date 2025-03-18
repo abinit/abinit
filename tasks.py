@@ -712,6 +712,19 @@ def which(cmd):
     return None
 
 
+<<<<<<< HEAD
+=======
+def get_current_branch():
+    import subprocess
+    try:
+        # Run git command to get the current branch
+        branch = subprocess.check_output(["git", "rev-parse", "--abbrev-ref", "HEAD"]).strip().decode("utf-8")
+        return branch
+    except subprocess.CalledProcessError:
+        raise RuntimeError("Not inside a Git repository.")
+
+
+>>>>>>> develop
 @task
 def official_release(ctx: Context, new_version, dry_run=True) -> None:
     """
@@ -731,21 +744,25 @@ def official_release(ctx: Context, new_version, dry_run=True) -> None:
     def _run(command):
         return cxt.run(command, **_run_kwargs)
 
+    current_branch = get_current_branch()
+    if current_branch != "develop":
+        raise RuntimeError(f"You are on the '{current_branch}' branch, not 'develop'.")
+
     with cd(ABINIT_ROOTDIR):
         # The version in .current_version is updated manually.
         # Here we check that the value stored in the file is equal to the command line argument.
         with open(".current_version", "rt") as fh:
-            old_version = fh.read()
+            old_version = fh.read().strip()
 
         if old_version != new_version:
             raise ValueError(f"{old_version=} != {new_version=}")
 
         # Step 1: Checkout master and merge changes
         _run("git checkout master")
-        -run("git merge develop")
-        -run("./config/scripts/makemake")
+        _run("git merge develop")
+        _run("./config/scripts/makemake")
         # install-sh config.guess config.sub
-        -run("git add -f configure")
+        _run("git add -f configure")
 
         if not dry_run:
             _run(f"git commit -a -m 'v{version}'")
@@ -754,8 +771,8 @@ def official_release(ctx: Context, new_version, dry_run=True) -> None:
 
         # Step 2: Push to GitHub
         _run(f"git remote add abinit {github_url} || echo 'Remote already exists'")
-        if not dry_run
-        _run("git push -u abinit master --tags")
+        if not dry_run:
+            _run("git push -u abinit master --tags")
 
         _run("git checkout develop")
         #_run("git merge trunk")
