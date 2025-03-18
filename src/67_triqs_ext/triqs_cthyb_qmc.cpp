@@ -14,15 +14,15 @@ using namespace mpi;
 using namespace triqs::gfs;
 
 void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_double, bool measure_density_matrix,
-                     bool time_invariance, bool use_norm_as_weight, bool compute_entropy, int loc_n_min, int loc_n_max,
-                     int seed_a, int seed_b, int num_orbitals, int n_tau, int n_l, int n_cycles, int cycle_length,
+                     bool time_invariance, bool use_norm_as_weight, bool compute_entropy, bool compute_z0, int loc_n_min,
+                     int loc_n_max, int seed_a, int seed_b, int num_orbitals, int n_tau, int n_l, int n_cycles, int cycle_length,
                      int ntherm, int ntherm_restart, int det_init_size, int det_n_operations_before_check, int ntau_delta,
                      int rank, int nblocks, int read_data, int verbo, double beta, double imag_threshold,
-                     double det_precision_warning, double det_precision_error, double det_singular_threshold, double lam,
-                     double pauli_prob, int *block_list, int *flavor_list, int *inner_list, int *siz_list, complex<double> *ftau,
-                     complex<double> *gtau, complex<double> *gl, complex<double> *udens_cmplx, complex<double> *vee_cmplx,
-                     complex<double> *levels_cmplx, complex<double> *moments_self_1, complex<double> *moments_self_2,
-                     complex<double> *occ, complex<double> *eu, char *fname_data, char *fname_dataw, char *fname_histo) {
+                     double det_precision_warning, double det_precision_error, double det_singular_threshold, double lam_u,
+                     double lam_delta, double pauli_prob, int *block_list, int *flavor_list, int *inner_list, int *siz_list,
+                     complex<double> *ftau, complex<double> *gtau, complex<double> *gl, complex<double> *udens_cmplx, complex<double> *vee_cmplx,
+                     complex<double> *levels_cmplx, complex<double> *moments_self_1, complex<double> *moments_self_2, complex<double> *occ,
+                     complex<double> *eu, double *z0, char *fname_data, char *fname_dataw, char *fname_histo) {
 
   int ndim = num_orbitals / 2;
   string qmc_data_fname  = string(fname_data);
@@ -64,11 +64,11 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
 
   // Init Hamiltonian Basic terms
   if (!rot_inv) {
-    H    = init_Hamiltonian(levels,num_orbitals,udens,block_list,inner_list,lam);
+    H    = init_Hamiltonian(levels,num_orbitals,udens,block_list,inner_list,lam_u);
     Hint = init_Hamiltonian(levels_zero,num_orbitals,udens,block_list,inner_list,double(1));
   }
   else {
-    H    = init_fullHamiltonian(levels,num_orbitals,vee,block_list,inner_list,lam);
+    H    = init_fullHamiltonian(levels,num_orbitals,vee,block_list,inner_list,lam_u);
     Hint = init_fullHamiltonian(levels_zero,num_orbitals,vee,block_list,inner_list,double(1));
   }
 
@@ -82,7 +82,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
         iflavor = flavor_list[o+iblock*num_orbitals];
         for (int oo : range(siz_list[iblock])) {
           iflavor1 = flavor_list[oo+iblock*num_orbitals];
-          solver.Delta_tau()[iblock][tau](o,oo) = ftau[iflavor+iflavor1*num_orbitals+tau*num_orbitals*num_orbitals];
+          solver.Delta_tau()[iblock][tau](o,oo) = lam_delta * ftau[iflavor+iflavor1*num_orbitals+tau*num_orbitals*num_orbitals];
         }
       }
 
@@ -227,7 +227,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
     cout << "   N max                 = " << loc_n_max << endl;
     cout << "   Det init size         = " << det_init_size << endl;
     cout << "   Det N ops. bef. check = " << det_n_operations_before_check << endl;
-    cout << "   Imaginary Threshold   = " << imag_threshold << endl;
+    cout << "   Imaginary Threshold   = " << scientific << imag_threshold << endl;
     cout << "   Det Precision warning = " << det_precision_warning << endl;
     cout << "   Det Precision error   = " << det_precision_error << endl;
     cout << "   Det sing. threshold   = " << det_singular_threshold << endl;
@@ -319,9 +319,16 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
           }
   }
 
+  auto h_loc_diag = solver.h_loc_diagonalization();
+
+  if (compute_z0) {
+    *z0 = partition_function(h_loc_diag, beta);
+    auto shift = h_loc_diag.get_gs_energy();
+    *z0 = - log(*z0) / beta + shift;
+  }
+
   if (measure_density_matrix) {
 
-    auto h_loc_diag = solver.h_loc_diagonalization();
     many_body_operator n_op;
     auto subspaces = h_loc_diag.n_subspaces();
     auto rho = solver.density_matrix();

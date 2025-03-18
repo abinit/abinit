@@ -156,6 +156,9 @@
   real(dp) :: trace_log
   ! Tr(log(G)) in KS space
 
+  real(dp) :: z0
+  ! This is -log(Z0)
+
   !integer, allocatable :: procb(:,:)
 
   !integer, allocatable :: proct(:,:)
@@ -4143,7 +4146,7 @@ subroutine compute_moments_ks(green,self,paw_dmft,opt_self,opt_log,opt_quick_res
 
  if (optself == 1) then
    do i=1,2
-     call init_oper(paw_dmft,oper(1),nkpt=mkmem,shiftk=shift,opt_ksloc=1)
+     call init_oper(paw_dmft,oper(i),nkpt=mkmem,shiftk=shift,opt_ksloc=1)
    end do
    call prod_oper(green%moments(2),self%moments(2),oper(1),1)
    if (optlog == 1 .and. optquickrestart == 0) then

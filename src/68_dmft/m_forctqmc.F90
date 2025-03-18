@@ -37,6 +37,7 @@ MODULE m_forctqmc
 
  use m_crystal, only : crystal_t
  use m_datafordmft, only : compute_levels,hybridization_asymptotic_coefficient
+ use m_energy, only : compute_migdal_energy
  use m_fstrings, only : int2char4
  use m_green, only : compute_moments_loc,copy_green,destroy_green,green_type, &
     & init_green,int_fct,occup_green_tau,print_green
@@ -3164,20 +3165,22 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
 !Local variables ------------------------------
  integer :: basis,i,iatom,iblock,iflavor,iflavor1,iflavor2,ifreq,ilam,ileg,im,im1,integral,isppol,isub
  integer :: itau,itypat,iw,j,l,len_t,lpawu,myproc,natom,ncon,ndim,nflavor,nflavor_max,ngauss,nleg,nmoments
- integer :: nspinor,nsppol,nsub,ntau,ntau_delta,ntau_fit,ntot,nwlo,p,read_data,rot_type_vee,tndim,unt,verbo,wdlr_size
+ integer :: nspinor,nsppol,nsub,ntau,ntau_delta,ntau_fit,ntot,nwlo,p,pad_elam,pad_lambda,read_data,rot_type_vee
+ integer :: tndim,unt,verbo,wdlr_size
  integer, target :: ndlr
  logical :: density_matrix,entropy,leg_measure,nondiag,off_diag,rot_inv
- real(dp) :: besp,bespp,beta,dx,err,err_,fact,fact2,tau,tol,xtau,xx
+ real(dp) :: besp,bespp,beta,dx,elam,emig_tot,err,err_,fact,fact2,tau,tol,xtau,xx
+ real(dp), target :: z0
  complex(dpc) :: mself_1,mself_2,occ_tmp,u_nl
  complex(dpc), target :: eu
  type(oper_type), target :: energy_level
  type(self_type) :: hybmwdhyb
  type(c_ptr) :: block_ptr,eu_ptr,flavor_ptr,fname_data_ptr,fname_dataw_ptr,fname_histo_ptr,ftau_ptr,gl_ptr,gtau_ptr
- type(c_ptr) :: inner_ptr,levels_ptr,mself_1_ptr,mself_2_ptr,ndlr_ptr,occ_ptr,siz_ptr,udens_ptr,vee_ptr,wdlr_ptr
+ type(c_ptr) :: inner_ptr,levels_ptr,mself_1_ptr,mself_2_ptr,ndlr_ptr,occ_ptr,siz_ptr,udens_ptr,vee_ptr,wdlr_ptr,z0_ptr
  integer, allocatable :: nblocks(:)
  integer, target, allocatable :: block_list(:,:),flavor_list(:,:,:),flavor_tmp(:,:)
  integer, target, allocatable :: inner_list(:,:),siz_block(:,:)
- real(dp), allocatable :: bdlr(:),elam_list(:),gl_dlr_re(:),gl_dlr_im(:)
+ real(dp), allocatable :: bdlr(:),elam_list(:),emig(:),gl_dlr_re(:),gl_dlr_im(:)
  real(dp), allocatable :: jbes(:),lam_list(:),leg_array(:,:),moment_fit(:),t_lp(:,:)
  real(dp), allocatable :: tpoints(:),tweights(:),wdlr(:),wdlr_beta(:,:)
  real(dp), target, allocatable :: adlr(:,:),adlr_hyb(:,:),wdlr_tmp(:)
@@ -3195,6 +3198,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
  character(len=2) :: tag_block,tag_block3,tag_lam
  character(len=4) :: tag_at
  character(len=13) :: tag,tag2
+ character(len=14) :: tag_elam,tag_lambda
  character(len=500) :: stringfile,tag_block2,tag_lam2
  character(len=10000) :: message
  character(len=fnlen), target :: fname_data,fname_dataw,fname_histo
@@ -3269,6 +3273,15 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
  end do ! ifreq
 
  call zero_matlu(weiss%moments(1)%matlu(:),natom)
+
+ write(tag_at,'(i4)') paw_dmft%dmft_triqs_broyden_niter
+ write(message,'(a,3x,3a)') ch10,"== Broyden mixing of the hybridization, using ", &
+                         & trim(adjustl(tag_at))," previous iterations"
+ call wrtout(std_out,message,"COLL")
+
+ ! Do it here such that we mix hybridization functions in the same basis (the
+ ! basis is not fixed if we use basis=1 or 2)
+ call mix_broyden(weiss,paw_dmft)
 
  write(message,'(a,3x,a)') ch10,"== Print Delta(iw) for first frequency in cubic basis"
  call wrtout(std_out,message,"COLL")
@@ -3408,10 +3421,10 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
  call wrtout(std_out,message,"COLL")
  call print_matlu(weiss%oper(1)%matlu(:),natom,1)
 
- ! Possibly set the imaginary part and off-diagonal elements to 0. This is
- ! extremely important to do it explicitly instead of simply sending the real
- ! part or the diagonal elements to TRIQS since this will modify the electronic levels
- ! and hybridization that will be used for Dyson's equation.
+ ! Possibly set the imaginary part and off-diagonal elements to 0 now that we
+ ! are in the CTQMC basis. This is extremely important to do it explicitly instead of
+ ! simply sending the real part or the diagonal elements to TRIQS since this modifies
+ ! the electronic levels and hybridization that are used in Dyson's equation later.
 
 #ifndef HAVE_TRIQS_COMPLEX
  write(message,'(a,3x,2a)') ch10,"== The imaginary part of Delta(tau) and the ", &
@@ -3461,14 +3474,6 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
    end if ! err>tol
  end if ! not off_diag
 
- call identity_oper(green%moments(1),2)
- do i=2,green%nmoments
-   call zero_matlu(green%moments(i)%matlu(:),natom)
- end do ! i
- do ifreq=1,nwlo
-   call zero_matlu(green%oper(ifreq)%matlu(:),natom)
- end do ! ifreq
-
  ! Prepare DLR frequencies
  if (.not. leg_measure) then
    wdlr_size = 1000 ! make sure this is big enough
@@ -3497,6 +3502,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
 
    if (entropy) then
      ABI_MALLOC(adlr_hyb,(ndlr,ntau_delta))
+     ABI_MALLOC(emig,(natom))
      call initialize_self(hybmwdhyb,paw_dmft,opt_moments=1)
      do itau=1,ntau_delta
        do iw=1,ndlr
@@ -3522,7 +3528,6 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
    call wrtout(std_out,message,"COLL")
    write(message,'(3x,1000(e10.3,2x))') wdlr_beta(:,1)
    call wrtout(std_out,message,"COLL")
-
  end if ! not leg_measure
 
  ! ntot is total number of lambda pts, + 1 is because we add the case lambda = 1 (which has no reason to be included in the
@@ -3533,6 +3538,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
  ABI_MALLOC(lam_list,(ntot)) ! scaling factors of U matrix for thermodynamic integration
  lam_list(ntot) = one
  green%integral = zero
+ green%ekin_imp = zero
 
  ! Prepare Gauss-Legendre quadrature for thermodynamic integration over U
  if (integral > 0 .and. entropy) then
@@ -3569,8 +3575,6 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
 
  call find_block_structure(paw_dmft,block_list(:,:),inner_list(:,:),flavor_list(:,:,:), &
                & siz_block(:,:),nblocks(:),energy_level%matlu(:),natom,nflavor_max,hyb=weiss)
-
- call mix_broyden(weiss,paw_dmft)
 
  nmoments = weiss%nmoments - 2
 
@@ -3678,22 +3682,10 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
 
      call fit_dlr(2)
 
-     do ifreq=1,nwlo
-       do isppol=1,nsppol
-         do im1=1,tndim
-           do im=1,tndim
-             hybmwdhyb%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol) = energy_level%matlu(iatom)%mat(im,im1,isppol) + &
-               & sum(gl_dlr_hyb(:,im,im1,isppol)*(two*j_dpc*paw_dmft%omega_lo(ifreq)-wdlr_beta(:,1))/ &
-               & (j_dpc*paw_dmft%omega_lo(ifreq)-wdlr_beta(:,1))**2)
-           end do ! im
-         end do ! im1
-       end do ! isppol
-     end do ! ifreq
-
      if (open_file(trim(paw_dmft%filapp)//"_Hybridization_offdiag_DLR_iatom"//tag_at//".dat",message,newunit=unt) /= 0) ABI_ERROR(message)
      write(unt,'(6a)') "# Off-diagonal components of DLR fit of Delta(tau) in the CTQMC basis",ch10, &
                      & "# Columns are ordered this way:",ch10, &
-                     & "# Imaginary Time     ((Re(G_{ij}) Im(G_{ij}),i=1,2*(2*l+1)),j=1,2*(2*l+1)) where the", &
+                     & "# Imaginary Time     ((Re(Delta_{ij}) Im(Delta_{ij}),i=1,2*(2*l+1)),j=1,2*(2*l+1)) where the", &
                      & " leftmost index varies first"
      do itau=1,ntau_delta
        write(unt,'(2x,393(e18.10e3,2x))') beta*dble(itau-1)/dble(ntau_delta-1), &
@@ -3704,14 +3696,13 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
      if (open_file(trim(paw_dmft%filapp)//"_Hybridization_diag_DLR_iatom"//tag_at//".dat",message,newunit=unt) /= 0) ABI_ERROR(message)
      write(unt,'(5a)') "# Diagonal components of DLR fit of Delta(tau) in the CTQMC basis",ch10, &
                      & "# Columns are ordered this way:",ch10, &
-                     & "# Imaginary Time     (G_{ii},i=1,2*(2*l+1))"
+                     & "# Imaginary Time     (Delta_{ii},i=1,2*(2*l+1))"
      do itau=1,ntau_delta
        write(unt,'(2x,393(e25.17e3,2x))') beta*dble(itau-1)/dble(ntau_delta-1),(dble(ftau_dlr(itau,im,im)),im=1,nflavor)
      end do ! itau
      close(unt)
 
      ABI_FREE(ftau_dlr)
-     ABI_FREE(gl_dlr_hyb)
      ABI_FREE(gl_dlr_im)
      ABI_FREE(gl_dlr_re)
      ABI_FREE(bdlr)
@@ -3762,17 +3753,23 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
    siz_ptr         = C_LOC(siz_block(:,iatom))
    udens_ptr       = C_LOC(udens_rot(iatom)%mat(:,:,1))
    vee_ptr         = C_LOC(vee_rot(iatom)%mat(:,:,:,:))
+   z0_ptr          = C_LOC(z0)
 
    verbo = 1
 
    do ilam=1,ntot
 
      if (ilam /= ntot) then
-       write(message,'(a,3x,a,f6.4,a)') ch10,"== Thermodynamic integration for lambda= ",lam_list(ilam),ch10
+       if (integral == 1) then
+         tag = "interaction"
+       else if (integral == 2) then
+         tag = "hybridization"
+       end if ! integral
+       write(message,'(a,3x,a,f6.4,a)') ch10,"== Thermodynamic integration over " // trim(tag) // " for lambda= ",lam_list(ilam),ch10
        call wrtout(std_out,message,'COLL')
-     end if
+     end if ! ilam/=ntot
 
-     if (ilam > 1) verbo = 0
+     if (ilam == 2) verbo = 0
 
      if (ilam < 10) then
        write(tag_lam,'("0",i1)') ilam
@@ -3807,18 +3804,29 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
 #ifdef HAVE_TRIQS_v3_4
      call Ctqmc_triqs_run(rot_inv,leg_measure,paw_dmft%dmft_triqs_move_shift,paw_dmft%dmft_triqs_move_double, &
                         & density_matrix,paw_dmft%dmft_triqs_time_invariance,paw_dmft%dmft_triqs_use_norm_as_weight, &
-                        & (ilam /= ntot),paw_dmft%dmft_triqs_loc_n_min,paw_dmft%dmft_triqs_loc_n_max,paw_dmft%dmft_triqs_seed_a, &
-                        & paw_dmft%dmft_triqs_seed_b,nflavor,ntau,nleg,int(paw_dmft%dmftqmc_n/paw_dmft%nproc), &
-                        & paw_dmft%dmftctqmc_meas,paw_dmft%dmftqmc_therm,paw_dmft%dmft_triqs_therm_restart, &
-                        & paw_dmft%dmft_triqs_det_init_size,paw_dmft%dmft_triqs_det_n_operations_before_check, &
-                        & ntau_delta,myproc,nblocks(iatom),read_data,verbo,beta,paw_dmft%dmft_triqs_imag_threshold, &
-                        & paw_dmft%dmft_triqs_det_precision_warning,paw_dmft%dmft_triqs_det_precision_error, &
-                        & paw_dmft%dmft_triqs_det_singular_threshold,lam_list(ilam),paw_dmft%dmft_triqs_pauli_prob,block_ptr, &
-                        & flavor_ptr,inner_ptr,siz_ptr,ftau_ptr,gtau_ptr,gl_ptr,udens_ptr,vee_ptr,levels_ptr,mself_1_ptr, &
-                        & mself_2_ptr,occ_ptr,eu_ptr,fname_data_ptr,fname_dataw_ptr,fname_histo_ptr)
+                        & (ilam/=ntot.and.integral==1),(ilam==1.and.integral==2),paw_dmft%dmft_triqs_loc_n_min, &
+                        & paw_dmft%dmft_triqs_loc_n_max,paw_dmft%dmft_triqs_seed_a,paw_dmft%dmft_triqs_seed_b,nflavor, &
+                        & ntau,nleg,int(paw_dmft%dmftqmc_n/paw_dmft%nproc),paw_dmft%dmftctqmc_meas,paw_dmft%dmftqmc_therm, &
+                        & paw_dmft%dmft_triqs_therm_restart,paw_dmft%dmft_triqs_det_init_size, &
+                        & paw_dmft%dmft_triqs_det_n_operations_before_check,ntau_delta,myproc,nblocks(iatom),read_data,verbo, &
+                        & beta,paw_dmft%dmft_triqs_imag_threshold,paw_dmft%dmft_triqs_det_precision_warning, &
+                        & paw_dmft%dmft_triqs_det_precision_error,paw_dmft%dmft_triqs_det_singular_threshold,merge(lam_list(ilam),one,integral==1), &
+                        & merge(lam_list(ilam)**2,one,integral==2),paw_dmft%dmft_triqs_pauli_prob,block_ptr,flavor_ptr,inner_ptr,siz_ptr, &
+                        & ftau_ptr,gtau_ptr,gl_ptr,udens_ptr,vee_ptr,levels_ptr,mself_1_ptr,mself_2_ptr,occ_ptr,eu_ptr,z0_ptr, &
+                        & fname_data_ptr,fname_dataw_ptr,fname_histo_ptr)
 #endif
 
      call flush_unit(std_out)
+
+     if (ilam == ntot) then
+       do isppol=1,nsppol
+         if (nsppol == 1 .and. nspinor == 1) then
+           green%oper_tau(1)%matlu(iatom)%mat(:,:,isppol) = (gtau(1,1:ndim,1:ndim)+gtau(1,ndim+1:2*ndim,ndim+1:2*ndim)) * half
+         else
+           green%oper_tau(1)%matlu(iatom)%mat(:,:,isppol) = gtau(1,1+(isppol-1)*ndim:tndim+(isppol-1)*ndim,1+(isppol-1)*ndim:tndim+(isppol-1)*ndim)
+         end if
+       end do ! isppol
+     end if ! ilam=ntot
 
      if ((.not. leg_measure) .and. density_matrix .and. ((entropy .and. integral == 2) .or. ilam == ntot)) then
 
@@ -3842,8 +3850,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
 
          end do ! im
 
-         ! Use matmul in prevision of the day where the off-diagonal density
-         ! matrix will be available
+         ! Use matmul in prevision of the day where the off-diagonal density matrix will be available
          green%moments(3)%matlu(iatom)%mat(:,:,isppol) = green%moments(3)%matlu(iatom)%mat(:,:,isppol) + &
            & matmul(green%moments(2)%matlu(iatom)%mat(:,:,isppol),green%moments(2)%matlu(iatom)%mat(:,:,isppol))
 
@@ -3852,6 +3859,8 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
      end if ! not leg and ((entropy and integral=2) or ilam=ntot)
 
      if (density_matrix .and. ((entropy .and. integral == 2) .or. ilam == ntot)) then
+
+       green%ecorr_qmc(iatom) = dble(eu)
 
        do isppol=1,nsppol
          do im=1,tndim
@@ -3883,20 +3892,48 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
 
        call fit_dlr(1)
 
-       do ifreq=1,nwlo
-         do isppol=1,nsppol
-           do im1=1,tndim
-             do im=1,tndim
-               ! Do not use DOT_PRODUCT
-               green%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol) = sum(gl_dlr(:,im,im1,isppol)*adlr_iw(:,ifreq))
-             end do ! im
-           end do ! im1
-         end do ! isppol
-       end do ! ifreq
+       if (entropy) then
+
+         call compute_migdal_energy(emig(:),emig_tot,green,paw_dmft,self,iatom=iatom,hyb=weiss)
+         elam = two * emig_tot
+         call compute_migdal_energy(emig(:),emig_tot,green,paw_dmft,hybmwdhyb,iatom=iatom)
+         emig_tot = abs(two*emig_tot-elam)
+
+         write(message,'(a,3x,a,es10.3)') ch10,"== The difference between the true Tr(Delta*G) and the value from the fit is: ",emig_tot
+         call wrtout(std_out,message,"COLL")
+
+         elam = two * elam
+
+         if (ilam == ntot) then
+
+           hybmwdhyb%moments(1)%matlu(iatom)%mat(:,:,:) = energy_level%matlu(iatom)%mat(:,:,:)
+           do i=2,weiss%nmoments-1
+             hybmwdhyb%moments(i)%matlu(iatom)%mat(:,:,:) = dble(i) * hybmwdhyb%moments(i)%matlu(iatom)%mat(:,:,:)
+           end do ! i
+
+           do ifreq=1,nwlo
+             do isppol=1,nsppol
+               do im1=1,tndim
+                 do im=1,tndim
+                   hybmwdhyb%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol) = energy_level%matlu(iatom)%mat(im,im1,isppol) + &
+                     & sum(gl_dlr_hyb(:,im,im1,isppol)*(two*j_dpc*paw_dmft%omega_lo(ifreq)-wdlr_beta(:,1))/ &
+                     & (j_dpc*paw_dmft%omega_lo(ifreq)-wdlr_beta(:,1))**2)
+                 end do ! im
+               end do ! im1
+             end do ! isppol
+           end do ! ifreq
+
+           call compute_migdal_energy(emig(:),emig_tot,green,paw_dmft,hybmwdhyb,iatom=iatom)
+
+           green%ekin_imp = two * emig_tot
+
+         end if ! ilam=ntot
+
+       end if ! entropy
 
        if (myproc == 0 .and. off_diag) then
 
-         if (open_file(trim(paw_dmft%filapp)//"_Gtau_offdiag_DLR_iatom"//tag_at//".dat",message,newunit=unt) /= 0) ABI_ERROR(message)
+         if (open_file(trim(paw_dmft%filapp)//"_Gtau_offdiag_DLR_iatom"//tag_at//trim(adjustl(tag_lam2))//".dat",message,newunit=unt) /= 0) ABI_ERROR(message)
          write(unt,'(6a)') "# Off-diagonal components of DLR fit of G(tau) in the CTQMC basis",ch10, &
                          & "# Columns are ordered this way:",ch10, &
                          & "# Imaginary Time     ((Re(G_{ij}) Im(G_{ij}),i=1,2*(2*l+1)),j=1,2*(2*l+1)) where the", &
@@ -3908,16 +3945,37 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
          end do ! itau
          close(unt)
 
+         if (open_file(trim(paw_dmft%filapp)//"_Gtau_offdiag_iatom"//tag_at//trim(adjustl(tag_lam2))//".dat",message,newunit=unt) /= 0) ABI_ERROR(message)
+         write(unt,'(6a)') "# Off-diagonal components of binned G(tau) in the CTQMC basis",ch10, &
+                         & "# Columns are ordered this way:",ch10, &
+                         & "# Imaginary Time     ((Re(G_{ij}) Im(G_{ij}),i=1,2*(2*l+1)),j=1,2*(2*l+1)) where the", &
+                         & " leftmost index varies first"
+
+         do itau=1,ntau
+           write(unt,'(2x,393(e18.10e3,2x))') beta*dble(itau-1)/dble(ntau-1), &
+              & ((dble(gtau(itau,im,im1)),aimag(gtau(itau,im,im1)),im=1,nflavor),im1=1,nflavor)
+         end do ! itau
+         close(unt)
+
        end if ! myproc
 
        if (myproc == 0) then
 
-         if (open_file(trim(paw_dmft%filapp)//"_Gtau_diag_DLR_iatom"//tag_at//".dat",message,newunit=unt) /= 0) ABI_ERROR(message)
+         if (open_file(trim(paw_dmft%filapp)//"_Gtau_diag_DLR_iatom"//tag_at//trim(adjustl(tag_lam2))//".dat",message,newunit=unt) /= 0) ABI_ERROR(message)
          write(unt,'(5a)') "# Diagonal components of DLR fit of G(tau) in the CTQMC basis",ch10, &
                          & "# Columns are ordered this way:",ch10, &
                          & "# Imaginary Time     (G_{ii},i=1,2*(2*l+1))"
          do itau=1,ntau
            write(unt,'(2x,393(e25.17e3,2x))') beta*dble(itau-1)/dble(ntau-1),(dble(gtau_dlr(itau,im,im)),im=1,nflavor)
+         end do ! itau
+         close(unt)
+
+         if (open_file(trim(paw_dmft%filapp)//"_Gtau_diag_iatom"//tag_at//trim(adjustl(tag_lam2))//".dat",message,newunit=unt) /= 0) ABI_ERROR(message)
+         write(unt,'(5a)') "# Diagonal components of binned G(tau) in the CTQMC basis",ch10, &
+                         & "# Columns are ordered this way:",ch10, &
+                         & "# Imaginary Time     (G_{ii},i=1,2*(2*l+1))"
+         do itau=1,ntau
+           write(unt,'(2x,393(e25.17e3,2x))') beta*dble(itau-1)/dble(ntau-1),(dble(gtau(itau,im,im)),im=1,nflavor)
          end do ! itau
          close(unt)
 
@@ -3933,21 +3991,37 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
      end if ! (entropy and integral=2) or ilam=ntot
 
      if (integral > 0 .and. ilam < ntot .and. entropy) then
+       if (integral == 1) elam = dble(eu)
        i = mod(ilam-1,ngauss) + 1
-       green%integral = green%integral + tweights(i)*dble(eu)*dx*half
-       elam_list(ilam) = dble(eu)
+       green%integral = green%integral + tweights(i)*elam*dx*half
+       elam_list(ilam) = elam
      end if ! integral and ilam<ntot and entropy
 
      if (integral > 0 .and. ilam == ntot-1 .and. entropy) then
-       write(message,'(a,3(3x,2a),a,14x,a,3x,2a,11x,5a)') ch10,repeat("=",39),ch10,"== Summary of thermodynamic integration", &
-            & ch10,repeat("=",39),ch10,ch10,"Lambda","Eu/lambda",ch10,"┌",repeat("─",10),"┬",repeat("─",10),"┐"
+       write(message,'(a,3(3x,2a),a,12x,a,6x,2a,7x,5a)') ch10,repeat("=",39),ch10,"== Summary of thermodynamic integration", &
+            & ch10,repeat("=",39),ch10,ch10,"Lambda","<dH/dlambda>",ch10,"┌",repeat("─",14),"┬",repeat("─",14),"┐"
        call wrtout(std_out,message,'COLL')
        do i=1,ntot-2
-         write(message,'(11x,a,2(2x,f6.4,2x,a),a,11x,5a)') "│",lam_list(i),"│",elam_list(i),"│",ch10,"├",repeat("─",10),"┼",repeat("─",10),"┤"
+         write(tag_lambda,'(f14.4)') lam_list(i)
+         write(tag_elam,'(f14.4)') elam_list(i)
+         tag_lambda = adjustl(tag_lambda)
+         tag_elam = adjustl(tag_elam)
+         pad_lambda = (14-len_trim(tag_lambda)) / 2
+         pad_elam = (14-len_trim(tag_elam)) / 2
+         write(message,'(7x,a,2(4a),a,7x,5a)') "│",repeat(" ",pad_lambda),trim(tag_lambda),repeat(" ",14-pad_lambda-len_trim(tag_lambda)),"│", &
+                                             & repeat(" ",pad_elam),trim(tag_elam),repeat(" ",14-pad_elam-len_trim(tag_elam)),"│",ch10, &
+                                             & "├",repeat("─",14),"┼",repeat("─",14),"┤"
          call wrtout(std_out,message,'COLL')
        end do ! i
-       write(message,'(11x,2(a,2x,f6.4,2x),2a,11x,7a,3x,a,f6.4,a)') "│",lam_list(ntot-1),"│",elam_list(ntot-1),"│",ch10,"└",repeat("─",10),"┴", &
-                        & repeat("─",10),"┘",ch10,ch10,"--> Integral is: ",green%integral,ch10
+       write(tag_lambda,'(f14.4)') lam_list(ntot-1)
+       write(tag_elam,'(f14.4)') elam_list(ntot-1)
+       tag_lambda = adjustl(tag_lambda)
+       tag_elam = adjustl(tag_elam)
+       pad_lambda = (14-len_trim(tag_lambda)) / 2
+       pad_elam = (14-len_trim(tag_elam)) / 2
+       write(message,'(7x,2(4a),2a,7x,7a,3x,a,f10.4,a)') "│",repeat(" ",pad_lambda),trim(tag_lambda),repeat(" ",14-pad_lambda-len_trim(tag_lambda)), &
+                                                       & "│",repeat(" ",pad_elam),trim(tag_elam),repeat(" ",14-pad_elam-len_trim(tag_elam)),"│",ch10, &
+                                                       & "└",repeat("─",14),"┴",repeat("─",14),"┘",ch10,ch10,"--> Integral is: ",green%integral,ch10
        call wrtout(std_out,message,'COLL')
      end if ! integral and ilam=ntot-1 and entropy
 
@@ -3955,40 +4029,10 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
 
    ABI_FREE(flavor_tmp)
    ABI_FREE(levels_ctqmc)
-
-   do isppol=1,nsppol
-     if (nsppol == 1 .and. nspinor == 1) then
-       green%oper_tau(1)%matlu(iatom)%mat(:,:,isppol) = (gtau(1,1:ndim,1:ndim)+gtau(1,ndim+1:2*ndim,ndim+1:2*ndim)) * half
-     else
-       green%oper_tau(1)%matlu(iatom)%mat(:,:,isppol) = gtau(1,1+(isppol-1)*ndim:tndim+(isppol-1)*ndim,1+(isppol-1)*ndim:tndim+(isppol-1)*ndim)
-     end if
-   end do ! isppol
-
-   if (density_matrix) then
-
-     green%ecorr_qmc(iatom) = dble(eu)
-
-     ABI_SFREE(moments_self_1)
-     ABI_SFREE(moments_self_2)
-
-     do isppol=1,nsppol
-       do im=1,tndim
-         iflavor = im + (isppol-1)*ndim
-
-         if (nsppol == 1 .and. nspinor == 1) then
-           occ_tmp = (occ(iflavor)+occ(iflavor+ndim)) * half
-         else
-           occ_tmp = occ(iflavor)
-         end if
-
-         green%oper_tau(1)%matlu(iatom)%mat(im,im,isppol) = occ_tmp - cone
-
-       end do ! im
-     end do ! isppol
-
-     ABI_FREE(occ)
-
-   end if ! density_matrix
+   ABI_SFREE(gl_dlr_hyb)
+   ABI_SFREE(moments_self_1)
+   ABI_SFREE(moments_self_2)
+   ABI_SFREE(occ)
 
    if (leg_measure) then
 
@@ -4271,6 +4315,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
  ABI_SFREE(adlr)
  ABI_SFREE(adlr_hyb)
  ABI_SFREE(adlr_iw)
+ ABI_SFREE(emig)
  ABI_SFREE(wdlr)
  ABI_SFREE(wdlr_beta)
 
@@ -4285,20 +4330,21 @@ subroutine fit_dlr(option)
 !Arguments ------------------------------------
  integer, intent(in) :: option
 !Local variables ------------------------------
+ integer :: shift
  complex(dpc), pointer :: data_dlr_fit(:,:,:) => null()
  complex(dpc), pointer :: data_fit(:) => null()
- complex(dpc), pointer :: gl_fit(:,:,:,:) => null()
+ complex(dpc), pointer :: gl_dlr_fit(:,:,:,:) => null()
  type(green_type), pointer :: green_fit => null()
 ! ************************************************************************
 
  if (option == 1) then
-   ntau_fit  = ntau ; adlr_fit => adlr(:,:)
-   data_dlr_fit => gtau_dlr(:,:,:) ; gl_fit => gl_dlr(:,:,:,:)
+   ntau_fit  = ntau ; adlr_fit => adlr(:,:) ; shift = 0
+   data_dlr_fit => gtau_dlr(:,:,:) ; gl_dlr_fit => gl_dlr(:,:,:,:)
    green_fit => green
  else if (option == 2) then
    ntau_fit  = ntau_delta ; adlr_fit => adlr_hyb(:,:)
-   data_dlr_fit => ftau_dlr(:,:,:) ; gl_fit => gl_dlr_hyb(:,:,:,:) ;
-   green_fit => weiss ; nmoments = weiss%nmoments - 2
+   data_dlr_fit => ftau_dlr(:,:,:) ; gl_dlr_fit => gl_dlr_hyb(:,:,:,:)
+   green_fit => weiss ; ncon = 3 ; nmoments = weiss%nmoments - 2 ; shift = 1
  end if ! option
 
  do isppol=1,nsppol
@@ -4318,41 +4364,40 @@ subroutine fit_dlr(option)
          data_fit => ftau(iatom)%mat(iflavor,iflavor1,:)
        end if
 
-       bdlr(1:ntau) = dble(data_fit(:))
+       bdlr(1:ntau_fit) = dble(data_fit(:))
 
        do i=1,nmoments
-         moment_fit(i) = dble(green_fit%moments(i)%matlu(iatom)%mat(im,im1,isppol))
+         moment_fit(i) = dble(green_fit%moments(i+shift)%matlu(iatom)%mat(im,im1,isppol))
        end do ! i
 
        call slsqp_wrapper(ncon,ndlr,lsq_g,con_moments,jac_lsq_g,jac_con_moments,gl_dlr_re(:))
 
        if (density_matrix .and. option == 1) ncon = 3
 
-       bdlr(1:ntau) = aimag(data_fit(:))
+       bdlr(1:ntau_fit) = aimag(data_fit(:))
        do i=1,nmoments
-         moment_fit(i) = aimag(green_fit%moments(i)%matlu(iatom)%mat(im,im1,isppol))
+         moment_fit(i) = aimag(green_fit%moments(i+shift)%matlu(iatom)%mat(im,im1,isppol))
        end do ! i
        call slsqp_wrapper(ncon,ndlr,lsq_g,con_moments,jac_lsq_g,jac_con_moments,gl_dlr_im(:))
 
-       gl_fit(:,im,im1,isppol) = cmplx(gl_dlr_re(:),gl_dlr_im(:),kind=dp)
+       gl_dlr_fit(:,im,im1,isppol) = cmplx(gl_dlr_re(:),gl_dlr_im(:),kind=dp)
 
        ! Do not use DOT_PRODUCT
        if (option == 1) then
-         green%moments(1)%matlu(iatom)%mat(im,im1,isppol) = sum(gl_dlr(:,im,im1,isppol))
+         green%moments(1)%matlu(iatom)%mat(im,im1,isppol) = sum(gl_dlr_fit(:,im,im1,isppol))
          do i=2,green%nmoments
-           green_fit%moments(i)%matlu(iatom)%mat(im,im1,isppol) = sum(gl_dlr(:,im,im1,isppol)*wdlr_beta(:,i-1))
+           green%moments(i)%matlu(iatom)%mat(im,im1,isppol) = sum(gl_dlr_fit(:,im,im1,isppol)*wdlr_beta(:,i-1))
          end do ! i
        else if (option == 2) then
-         hybmwdhyb%moments(1)%matlu(iatom)%mat(im,im1,isppol) = energy_level%matlu(iatom)%mat(im,im1,isppol)
-         hybmwdhyb%moments(2)%matlu(iatom)%mat(im,im1,isppol) = two * sum(gl_dlr_hyb(:,im,im1,isppol))
-         do i=3,weiss%nmoments-1
-           hybmwdhyb%moments(i)%matlu(iatom)%mat(im,im1,isppol) = dble(i) * sum(gl_dlr_hyb(:,im,im1,isppol)*wdlr_beta(:,i-2))
-         end do
+         hybmwdhyb%moments(2)%matlu(iatom)%mat(im,im1,isppol) = sum(gl_dlr_fit(:,im,im1,isppol))
+         do i=2,hybmwdhyb%nmoments-1
+           hybmwdhyb%moments(i+1)%matlu(iatom)%mat(im,im1,isppol) = sum(gl_dlr_fit(:,im,im1,isppol)*wdlr_beta(:,i-1))
+         end do ! i
        end if ! option
 
        do itau=1,ntau_fit
          ! Do not use DOT_PRODUCT
-         data_dlr_fit(itau,iflavor,iflavor1) = sum(gl_fit(:,im,im1,isppol)*adlr_fit(:,itau))
+         data_dlr_fit(itau,iflavor,iflavor1) = sum(gl_dlr_fit(:,im,im1,isppol)*adlr_fit(:,itau))
        end do ! itau
        if (nsppol == 1 .and. nspinor == 1) data_dlr_fit(:,iflavor+ndim,iflavor1+ndim) = data_dlr_fit(:,iflavor,iflavor1)
 
@@ -4360,9 +4405,24 @@ subroutine fit_dlr(option)
    end do ! im1
  end do ! isppol
 
+ do ifreq=1,nwlo
+   do isppol=1,nsppol
+     do im1=1,tndim
+       do im=1,tndim
+         ! Do not use DOT_PRODUCT
+         if (option == 1) then
+           green%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol) = sum(gl_dlr_fit(:,im,im1,isppol)*adlr_iw(:,ifreq))
+         else if (option == 2) then
+           hybmwdhyb%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol) = sum(gl_dlr_fit(:,im,im1,isppol)*adlr_iw(:,ifreq))
+         end if ! option
+       end do ! im
+     end do ! im1
+   end do ! isppol
+ end do ! ifreq
+
  data_dlr_fit => null()
  data_fit => null()
- gl_fit => null()
+ gl_dlr_fit => null()
  green_fit => null()
 
 end subroutine fit_dlr
