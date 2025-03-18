@@ -32,7 +32,7 @@ module m_gemm_nonlop_gpu
 
  use m_abi_linalg  ! copy_on_gpu, copy_from_gpu, alloc_on_gpu, dealloc_on_gpu, gpu_memset, gpu_allocated
  use defs_abitypes, only : MPI_type
- use m_opernlc_ylm_ompgpu, only : opernlc_ylm_ompgpu
+ use m_opernlc_ylm_allwf, only : opernlc_ylm_allwf
  use m_pawcprj, only : pawcprj_type
  use m_gemm_nonlop_projectors
  use m_hamiltonian, only : KPRIME_H_K, K_H_KPRIME, K_H_K, KPRIME_H_KPRIME
@@ -555,7 +555,7 @@ module m_gemm_nonlop_gpu
           call copy_from_gpu(  projections_cpu, gemm_nonlop_gpu_data%projections_gpu, &
             &              INT(cplex,     c_size_t) * nprojs * nspinor*ndat * dp)
 
-          call opernlc_ylm_ompgpu(atindx1, cplex, cplex_dgxdt, cplex_d2gxdt,&
+          call opernlc_ylm_allwf(atindx1, cplex, cplex_dgxdt, cplex_d2gxdt,&
             &                  cplex_enl, cplex_fac, &
             &                  dgxdt_dum_in, dgxdt_dum_out, dgxdt_dum_out2, &
             &                  d2gxdt_dum_in, d2gxdt_dum_out, d2gxdt_dum_out2, &

@@ -1,6 +1,6 @@
-!!****m* ABINIT/m_opernlc_ylm_ompgpu
+!!****m* ABINIT/m_opernlc_ylm_allwf
 !! NAME
-!!  m_opernlc_ylm_ompgpu
+!!  m_opernlc_ylm_allwf
 !!
 !! FUNCTION
 !!
@@ -22,7 +22,7 @@
 
 #include "abi_common.h"
 
-module m_opernlc_ylm_ompgpu
+module m_opernlc_ylm_allwf
 
  use defs_basis
  use m_errors
@@ -38,7 +38,7 @@ module m_opernlc_ylm_ompgpu
  private
 !!***
 
- public :: opernlc_ylm_ompgpu
+ public :: opernlc_ylm_allwf
 !!***
 
 ! Work buffers to be used when iphase==2
@@ -53,7 +53,7 @@ contains
 
 !----------------------------------------------------------------------
 
-!!****f* m_opernlc_ylm_ompgpu/alloc_work_arrays
+!!****f* m_opernlc_ylm_allwf/alloc_work_arrays
 !! NAME
 !! alloc_work_arrays
 !!
@@ -106,7 +106,7 @@ contains
 
 !----------------------------------------------------------------------
 
-!!****f* m_opernlc_ylm_ompgpu/destroy_work_arrays
+!!****f* m_opernlc_ylm_allwf/destroy_work_arrays
 !! NAME
 !! destroy_work_arrays
 !!
@@ -148,9 +148,9 @@ contains
 
 !----------------------------------------------------------------------
 
-!!****f* ABINIT/opernlc_ylm_ompgpu
+!!****f* ABINIT/opernlc_ylm_allwf
 !! NAME
-!! opernlc_ylm_ompgpu
+!! opernlc_ylm_allwf
 !!
 !! FUNCTION
 !! * Operate with the non-local part of the hamiltonian,
@@ -238,7 +238,7 @@ contains
 !!
 !! SOURCE
 
-subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fac,&
+subroutine opernlc_ylm_allwf(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fac,&
 &          dgxdt,dgxdtfac,dgxdtfac_sij,d2gxdt,d2gxdtfac,d2gxdtfac_sij,dimenl1,dimenl2,dimekbq,enl,&
 &          gx,gxfac,gxfac_sij,iatm,indlmn,itypat,lambda,mpi_enreg,natom,ndgxdt,ndgxdtfac,&
 &          nd2gxdt,nd2gxdtfac,nincat,nlmn,nspinor,nspinortot,optder,paw_opt,sij,ndat,ibeg,iend,nprojs,ndat_enl,gpu_option)
@@ -1360,8 +1360,8 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
    end do
  end if
 
-end subroutine opernlc_ylm_ompgpu
+end subroutine opernlc_ylm_allwf
 !!***
 
-end module m_opernlc_ylm_ompgpu
+end module m_opernlc_ylm_allwf
 !!***
