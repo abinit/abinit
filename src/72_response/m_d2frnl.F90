@@ -633,7 +633,8 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
 
      ! Setup gemm_nonlop
      if (gemm_nonlop_use_gemm) then
-       call set_gemm_nonlop_ikpt(ikpt)
+       call set_gemm_nonlop_ikpt(ikpt,gs_ham%npw_fft_k,gs_ham%istwf_k,gs_ham%indlmn,&
+       &    gs_ham%ntypat,gs_ham%nattyp,gs_ham%gpu_option)
      end if ! gemm_nonlop_use_gemm
 
 

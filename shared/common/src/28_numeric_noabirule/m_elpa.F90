@@ -234,6 +234,8 @@ subroutine elpa_func_allocate(elpa_hdl,gpu,blacs_ctx)
  if(l_gpu==1) then
 #if defined HAVE_GPU_CUDA
    varname="nvidia-gpu"
+#elif defined HAVE_GPU_HIP
+   varname="amd-gpu"
 #else
    ABI_BUG("Requested unsupported GPU model with ELPA!")
 #endif
