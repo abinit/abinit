@@ -13,6 +13,7 @@ from __future__ import annotations
 import os
 import sys
 import webbrowser
+import subprocess
 
 from contextlib import contextmanager
 try:
@@ -712,19 +713,24 @@ def which(cmd):
     return None
 
 
-<<<<<<< HEAD
-=======
-def get_current_branch():
-    import subprocess
+def get_current_branch() -> str:
+    """Run git command to get the current branch"""
     try:
-        # Run git command to get the current branch
-        branch = subprocess.check_output(["git", "rev-parse", "--abbrev-ref", "HEAD"]).strip().decode("utf-8")
-        return branch
+        return subprocess.check_output(["git", "rev-parse", "--abbrev-ref", "HEAD"]).strip().decode("utf-8")
     except subprocess.CalledProcessError:
-        raise RuntimeError("Not inside a Git repository.")
+        raise RuntimeError("Not inside a git repository or an error occurred")
 
 
->>>>>>> develop
+def get_git_tags() -> list[str]:
+    """Run git command to list tags"""
+    try:
+        tags = subprocess.check_output(["git", "tag"]).decode("utf-8").split("\n")
+        # Remove empty strings from the list
+        return [tag for tag in tags if tag]
+    except subprocess.CalledProcessError:
+        raise RuntimeError("Not inside a git repository or an error occurred")
+
+
 @task
 def official_release(ctx: Context, new_version, dry_run=True) -> None:
     """
@@ -742,11 +748,15 @@ def official_release(ctx: Context, new_version, dry_run=True) -> None:
 
     _run_kwargs = dict(pty=True, echo=True)
     def _run(command):
-        return cxt.run(command, **_run_kwargs)
+        return ctx.run(command, **_run_kwargs)
 
     current_branch = get_current_branch()
     if current_branch != "develop":
         raise RuntimeError(f"You are on the '{current_branch}' branch, not 'develop'.")
+
+    old_tags = get_git_tags()
+    if new_version in old_tags:
+        raise RuntimeError(f"{new_version=} is already in {old_tags=}")
 
     with cd(ABINIT_ROOTDIR):
         # The version in .current_version is updated manually.
