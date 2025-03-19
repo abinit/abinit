@@ -4,14 +4,15 @@ authors: MG
 
 # First tutorial on GWR (GW in real-space and imaginary time)
 
-## The quasi-particle band structure of Silicon in the GW approximation.
+## The quasi-particle band structure of Silicon in the one-shot GW approximation.
 
 This tutorial aims at showing how to calculate self-energy corrections to the
 DFT Kohn-Sham (KS) eigenvalues in the one-shot GW approximation using the GWR code
 
 The user should be familiarized with the four basic tutorials of ABINIT,
 see the [tutorial home page](/tutorial),
-and is strongly encouraged to read the [introduction to the GWR code](/tutorial/gwr_intro) before running these examples.
+and is strongly encouraged to read the [introduction to the GWR code](/tutorial/gwr_intro)
+before running these examples.
 
 This tutorial should take about 2 hours.
 
@@ -43,7 +44,7 @@ so that we have some time to discuss the input while ABINIT is running.
 
 The first dataset produces the density file that is then used to compute
 the band structure in the second dataset.
-Since all the input files of this tutorial use the same geometry, pseudos and [[ecut]],
+Since all the input files of this tutorial use the same crystalline structure, pseudos and [[ecut]],
 we declare these variables in an external file that will be included in all the other input files
 using the syntax:
 
@@ -56,14 +57,21 @@ If you open the include file:
 
 {% dialog tests/tutorial/Input/gwr_include.abi %}
 
-you will notice that we are using NC pseudos taken from the standard scalar-relativistic table of the PseudoDojo.
+you will notice that we are using norm-conserving pseudos taken from the standard scalar-relativistic table of the PseudoDojo.
 For GW calculations, we strongly recommend using pseudos from the stringent table
 as they have closed-shells treated as valence that are important for a correct description of exchange effects [[cite:Setten2018]].
-In the case of silicon, there is no difference between the standard and the stringent version.
+In the case of silicon, there is no difference between the standard version and the stringent version of the pseudo,
+but if we consider Ga, you will see that the stringent version includes the 3spd states in valence while the standard pseudos
+only the 3d states.
+Since we are using scalar-relativistic (SR) pseudos, we cannot treat SOC and [[nspinor]] must be 1 (default).
+To include SOC, one should use fully-relativistic (FR) pseudos and use [[nspinor]] 2 in all the input files
+and select the appropriate value of [[nspden]] (4 or 1) depending on whether the system is magnetic or not.
 
 For efficiency reasons, we are using underconverged parameters:
-the cutoff energy [[ecut]] is XXX that is slightly smaller that the recommended value.
-a 2x2x2 $\Gamma$-centered $\kk$-mesh and
+the cutoff energy [[ecut]] is XXX that is slightly smaller that the recommended value reported in the PseudoDojo table
+Also, the density is computed with 2x2x2 $\Gamma$-centered $\kk$-mesh.
+In real life, one should compute the KS density with a much denser mesh so that we have an accurate density
+to compute KS states and eigenvalues for the GWR part.
 
 At this point, the calculation should have completed and
 we can have a look at the electronic band structure to understand
@@ -85,12 +93,12 @@ the position of the band edges.
 
 Silicon is an indirect band gap semiconductor:
 The CBM is located at the $\Gamma$ point
-The KS fundamental band gap is XXX that is strongly underestimanted wrt experiment.
+The KS fundamental band gap is XXX that is strongly underestimated wrt experiment.
 
 !!! important
 
     Similarly to the conventional GW code, also GWR can compute QP corrections only
-    for the $\kk$-points belonging to the mesh found in the WFK file.
+    for the $\kk$-points belonging to the mesh used to generate the WFK file.
     Before running GW calculations is always a good idea to analyze carefully the KS band
     structure to understand the location of the band edges and select the most appropriate $\kk$-mesh.
 
@@ -98,8 +106,8 @@ The KS fundamental band gap is XXX that is strongly underestimanted wrt experime
 ### Generation of the WFK file with empty states
 
 In the second input file, we use the density computed previously (tgwr\_1o\_DS1\_DEN)
-to generate WFK files with empty states and two different $\Gamma$-centered $\kk$-meshes:
-with [[ngkpt]] = 2x2x2 and 4x4x4.
+to generate two WFK files with two different $\Gamma$-centered $\kk$-meshes ([[ngkpt]] = 2x2x2 and 4x4x4)
+so that we can perform convergence studies wrt the BZ sampling in the last part of this tutorial.
 
 Start the job in background with:
 
@@ -109,14 +117,17 @@ abinit tgwr_2.abi > tgwr_2.log 2> err &
 
 {% dialog tests/tutorial/Input/tgwr_2.abi %}
 
-Note that here we are using the specialized [[gwr_task]] = "HDIAGO" to perform the **direct diagonalization**
+Note that here we are using [[gwr_task]] = "HDIAGO" to perform a **direct diagonalization**
 of the KS Hamiltonian constructed from the DEN file.
 This procedure differs from the one used in the other GW tutorials in which the WFK file
 is generated by performing an **iterative diagonalization** in which only the applications of the Hamiltoniana is required.
-The reason is that the **direct diagonalization** outperforms iterative methods when many empty states are required,
+The reason is that the direct diagonalization outperforms iterative methods when many empty states are required,
 especially if one can take advantage of ScalaPack to distribute the Hamiltonian matrix.
 
-Here we ask for 100 states as in the previous GW tutorial, we found that [[nband]] = 100 can be considered converged within 30 meV.
+Here we ask for 100 states as in the previous GW tutorial [[nband]] = 100 was considered converged within 30 meV.
+Cleary, when studying new systems a good value of [[nband]] is not given to you
+so one has to plan this calculation in advance and ask for a reasonably-large number of states
+so that we do not have to repeat the WFK generation several times just to increase the number of bands.
 
 !!! important
 
@@ -126,19 +137,16 @@ Here we ask for 100 states as in the previous GW tutorial, we found that [[nband
     of things worth keeping in mind when choosing the number of MPI processes for this step.
     Ideally the total number of cores should be a multiple of [[nkpt]] * [[nsppol]] to avoid load imbalance.
 
-    In order to compute **all** the eigenvectors of the KS Hamiltonian, one can use:
-
-    gwr_task "HDIAGO_FULL"
-
+    In order to compute **all** the eigenvectors of the KS Hamiltonian, one can use gwr_task "HDIAGO_FULL".
     In this case the value of [[nband]] is automatically set to the total number of plawewaves
-    for that particular $\kk-point$.
+    for that particular $\kk$-point.
     No stopping criterion such as [[tolwfr]] or the number of iterations [[nstep]] are required when Scalapack is used.
 
 
 ### Our first GWR calculation
 
-For our first GWR run, we use a minimalistic input file so that we can discuss
-the most important input variables.
+For our first GWR run, we use a minimalistic input file that
+performs a GWR calculation using the DEN and the WFK file produced previously.
 First of all, you may want to start immediately the computation by issuing:
 
 ```sh
@@ -149,24 +157,21 @@ with the following input file:
 
 {% dialog tests/tutorial/Input/tgwr_3.abi %}
 
-We use [[optdriver]] 6 to enter the GWR code and
-the value of [[gwr_task]] indicates that we are performing a one-shot calculation
-with a 6-point minimax mesh ([[gwr_ntau]] = 6).
-This is the minimum number of points one can use at present, and, clearly, it should be subject to convergence studies.
-
-The third input file performs a GWR calculation using the DEN and the WFK file produced previously.
 The input file contains some variables that have the same meaning as in the conventional GW code
 and other variables that are specific to GWR.
-Let us start from the GWR-specific variables whose name starts with *gwr_*.
 
-[[gwr_boxcutmin]] is set to 1.1 in order to accelerate the calculation,
-This is one of the parameters that should be subject to convergence studies.
-Please take some time to read the variable description.
+We use [[optdriver]] 6 to enter the GWR code and [[gwr_task]] activates a one-shot calculation.
+We ask for a minimax mesh with [[gwr_ntau]] = 6 points.
+This is the minimum number of points one can use at present, and, clearly, it should be subject to convergence studies.
 
 [[getden_filepath]] specifies the density file used to compute $v_{xc}(\rr)$,
 while [[getwfk_filepath]] specifies the WFK file with empty states.
 Note that the $\kk$-mesh specified in the input via [[ngkpt]], [[nshiftk]] and [[shiftk]] must
 agree with the one found in the WFK file.
+
+[[gwr_boxcutmin]] is set to 1.1 in order to accelerate the calculation,
+This is one of the parameters that should be subject to convergence studies.
+Please take some time to read the variable description.
 
 Now, let us turn our attention to the variables that are also used in the legacy GW code.
 In the [first GW tutorial](/tutorial/gw1), we have already performed convergence studies,
@@ -174,13 +179,8 @@ and we found that [[nband]] = 100 can be considered converged within 30 mev, whi
 Also ecuteps = 6.0 can be considered converged within 10 meV.
 We will not repeat these convergence studies here and we just use these values for our calculation so that
 we can focus on the analysis of the output file and the post-processing of the results.
-Note that, as discussed in [[cite:Setten2017]], the convergence study for $\kk$-points the number
-of bands and the cutoff energies can be decoupled in the sense that one can start from
-a reasonaby coarse $\kk$-mesh to find the converged values of [[nband]], [[ecuteps]], [[ecutsigx]]
-and then fix these values and look at the convergence with respect to the BZ mesh.
 
 The cutoff of the polarizability and $W$ is defined by [[ecuteps]] as in the conventional GW code
-
 The cutoff for the exchange part of the self-energy is defined by [[ecutsigx]].
 Theoretically, we need [[ecutsigx]] = 4 [[ecut]] to have an exact treatment of $\Sigma_x$.
 The computation of the exchange is relatively fast as only occupied states are involved.
@@ -284,3 +284,28 @@ data: !Tabular |
 ```
 
 The meaning of the different columns should be self-explanatory.
+
+
+### Convergence study
+
+As discussed in [[cite:Setten2017]], the convergence study for the $\kk$-mesh, the number
+of bands and the cutoff energies can be decoupled in the sense that one can start from
+a reasonaby coarse $\kk$-mesh to find the converged values of [[nband]], [[ecuteps]], [[ecutsigx]]
+and then fix these values and look at the convergence with respect to the BZ mesh.
+
+The recomended procedure to converge GWR calculations is as follows.
+
+In the first step, we suggest fixing the [[ngkpt]] $\kk$-mesh in the WFK file
+as well as [[gwr_ntau]] and perform a convergence studies with respect to [[nband]] and [[ecuteps]].
+Note that [[gwr_ntau]] = 6 may be too small and give unphysical results.
+
+After this step, one should start to converge with respect to
+[[gwr_boxcutmin]],
+
+Next one should start to increase [[gwr_ntau]].
+Finally, one can start to monitor the convergence with the BZ sampling.
+
+
+!!! important
+
+    We strongly recommend avoiding multidatasets for these kind of calculations.

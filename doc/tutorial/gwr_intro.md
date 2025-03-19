@@ -6,56 +6,62 @@ authors: MG
 
 This page offers a concise introduction to the new GWR driver of ABINIT.
 We outline the technical details of its implementation, the relevant input variables,
-and compare its advantages and limitations against the conventional GW approach,
-which is formulated in Fourier space and the real-frequency domain.
-In the following, we will refer to this traditional approach as the **conventional** or **legacy** GW code of ABINIT.
+and compare its advantages and limitations against the conventional GW approach formulated
+in Fourier space and the real-frequency domain.
+In the following, we will refer to this traditional approach as the **conventional** or **standard** GW code of ABINIT.
 
 ## Why a new GW code?
 
-In the legacy GW code, one uses the Lehmann representation of the Green's function in the frequency domain
+In the standard GW code, one uses the Lehmann representation of the Green's function in the frequency domain
 to compute the irreducible polarizability, as explained in the [MBPT notes](/doc/theory/mbt).
 Then the self-energy matrix elements in the KS representation are computed via an expensive convolution
 in the frequency domain [[cite:Golze2019]] — by default using the plasmon-pole approximation [[cite:Giantomassi2011]],
 which significantly accelerates calculations but introduces approximations and prevents direct access
 to the spectral function $A_\nk(\omega)$.
 The conventional GW code exhibits quartic scaling with the number of atoms in the unit cell
-and quadratic scaling with the number of $\kk$-points and the computation of the polarizability
+and quadratic scaling with the number of $\kk$-points, and the computation of the polarizability
 with the Adler-Wiser expression represents the most CPU-demanding part.
 
 In contrast, the GWR code achieves cubic scaling with [[natom]] and linear scaling in the number of $\kk$-points
-by computing the polarizability and the self-energy in the real-space supercell associated to the $\kk$-mesh [[cite:Liu2016]]
+by computing the polarizability and the self-energy in the real-space supercell associated to the $\kk$-mesh [[cite:Liu2016]].
 FFTs are used to transform quantities from the supercell to Fourier space whenever needed.
-For instance, the equation for W (a convolution between $\ee^-1$ and the bare Coulomb interaction is best solved in Fourier space.
-As concerns the frequency dependence, GWR evaluates the $G$, $W$ and $\Sigma$ along the imaginary axis
+For instance, $W$ (a convolution between $\ee^-1$ and the bare Coulomb interaction) is best solved in Fourier space.
+As concerns the frequency dependence, GWR evaluates $G$, $W$ and $\Sigma$ along the imaginary axis
 using minimax meshes that are adaptive grids that place points non-uniformly, concentrating them where they are most needed,
-leading to higher accuracy with fewer points (CITATIONS)
+leading to higher accuracy with fewer points (CITATIONS NEEDED)
 ABINIT uses to the minimax mesh provided by the GreenX library ([[cite:Azizi2023]], [[cite:Azizi2024]]).
 
 In the last step of a GWR calculation, the self-energy in imaginary time is transformed to imaginary frequency
-followed by an analytic continuation (AC) to the real-frequency axis where QP corrections are obtained
+followed by an analytic continuation (AC) to the real-frequency axis where the QP corrections are obtained
 by solving the linear version of the QP equation.
-The AC approach enables access to the full frequency dependence of $\Sigma$ and $A$
-at a substantially reduced computational cost, though the accuracy of the results now depends on the accuracy of the AC.
+The AC approach enables access to the full frequency dependence of $\Sigma_\nk$ and $A_\nk$
+at a substantially reduced computational cost with respect to e.g. the countour deformation method,
+though the accuracy of the results now depends on the accuracy of the AC algorithm.
 
-Although GWR exhibits better scaling with the number of atoms, it should be noted that the legacy implementation
-makes better use of symmetries.
-Consequently, the legacy implementation is still competitive and can be faster than GWR in the case of highly symmetric systems.
+!!! important
 
+    Although GWR exhibits better scaling with [[natom]], it should be noted that the standard implementation
+    makes better use of symmetries to reduce the number of points in the BZ summation (see [[symchi]] and [[symsigma]])
+    Consequently, the standard code is still competitive and can be faster than GWR in the case of highly symmetric systems.
+
+<!--
 The frequency dependence of the self-energy $\Sigma(\omega)$ requires numerical integration over a range of energies.
 Traditionally, these calculations use uniform energy grids or plasmon-pole approximations.
 However, uniform grids become computationally expensive because they require many points
 to accurately capture sharp features in in the Green's function $G(\omega)$, and the screened interaction $W(\omega)$.
-The conventional GW code exhibits quartic scaling with the number of $\qq$-points, whereas GWR achieves linear scaling.
+-->
 
 ## Input variables
 
-To enter the GWR driver of ABINIT, one has to set [[optdriver]] to 6,
-and then use [[gwr_task]] to specify the task to be performed.
-Currently, one can perform a direct diagonalization with ScaLAPACK to generate a WFK with empty states,
-and this feature can also be used by other GW codes that are able to read ABINIT’s WFK file
+To enter the GWR driver of ABINIT, one has to use [[optdriver]] = 6,
+and then select the computation to be performed via [[gwr_task]].
+
+Note that it is possible to perform a direct diagonalization with ScaLAPACK to generate a WFK with empty states,
+and this feature can also be used by other many-body codes that are able to read ABINIT’s WFK file
+
 It is possible to compute GW corrections using the one-shot method or different types of self-consistency on energies.
 Finally, one can compute total energies at the RPA level.
-
+TODO: Mention interface with CC4S
 
 !!! important
 
@@ -63,7 +69,6 @@ Finally, one can compute total energies at the RPA level.
 
     * PAW method
     * Metallic systems as the our minimax meshes assume systems with an energy gap
-    * Spinor wave-functions ([[nspinor]] = 2)
     * Temperature effects at the electronic level are not taken into account as we work with the T = 0 formalism.
     * Only $\Gamma$-centered $\kk$-meshes are supported in GWR
 
@@ -95,6 +100,8 @@ with $\Theta$ the Heaviside step-function, and
 \qquad (\tau < 0).
 \end{equation}
 
+In these notes, we use $\rr$ to indicate points in the unit cell, and $\RR$ to denote points in the supercell.
+
 !!! important
 
     For simplicity, in all the equations we assume a spin-unpolarized semiconductor with scalar wavefunctions
@@ -106,11 +113,12 @@ The GWR code constructs the Green's function from the KS wavefunctions and eigen
 in the WFK file specified via [[getwfk_filepath]] or [[getwfk]] in multi-dataset mode.
 This WFK file is usually produced by performing a NSCF calculation including empty states and the GWR driver
 provides a specialized option to perform a **direct diagonalization** of the KS Hamiltonian in parallel
-with Scalapack (see section below).
-When computing the KS Green's function $G^0$, the number of bands included
-in the sum over states is controlled by [[nband]].
+with Scalapack.
+
+When computing the KS Green's function $G^0$, the number of bands is controlled by [[nband]].
 Clearly, it does not make any sense to ask for more bands than the ones available in the WFK file.
-Note that GWR also needs the GS density produced by a previous GS SCF run.
+Note that GWR also needs the GS density produced by a previous GS SCF run in order to compute
+the matrix elements of $v_\xc[n]$.
 The location of the density file can be specified via [[getden_filepath]] or [[getden]].
 
 The imaginary axis is sampled using a minimax mesh with [[gwr_ntau]] points.
@@ -133,6 +141,8 @@ and then immediately transformed to Fourier space.
 \end{equation}
 
 The cutoff energy for the polarizability is given by [[ecuteps]]
+
+As discussed in the [MBPT notes](/doc/theory/mbt),
 As concerns the treatment of the long-wavelenght limit $\qq \rightarrow 0$ in the polarizability,
 we have the following input variables:
 
@@ -140,15 +150,15 @@ we have the following input variables:
 [[gw_qlwl]],
 [[gwr_max_hwtene]]
 
-The exchange part of the self-energy is computed using the standard sum over occupied states:
+The exchange part of $\Sigma$ is computed using the standard sum over occupied states
+similarly to what is done in the conventional code.
 
 \begin{equation}\label{eq:Sigma_x}
 \Sigma_x(\rr_1,\rr_2)= -\sum_\kk^\BZ
 \sum_\nu^\text{occ} \Psi_{n\kk}(\rr_1){\Psi^\*_{n\kk}}(\rr_2)\,v(\rr_1,\rr_2)
 \end{equation}
 
-while [[ecutsigx]] defines the number of $\gg$-vectors for
-
+[[ecutsigx]] defines the number of $\bg$-vectors in the sum.
 
 ## Real-space vs convolutions in the BZ
 
@@ -160,8 +170,8 @@ of the QP results to obtain e.g. a band structure along a high-symmetry $\kk$-pa
 
 It should be noted, however, that in several applications one is mainly interested in the QP corrections
 at the band edges that are usually located at high-symmetry $\kk$-points.
-In this case, it is more advantageous to use an alternative formulation that evaluates the matrix elements of
-$\Sigma_\kk$ in terms of convolutions in the BZ according to
+In this case, it is more advantageous to use an alternative formulation in which the matrix elements of
+$\Sigma_\kk$ are obtained in terms of convolutions in the BZ according to
 
 where $G_\qq(\rr,\rr')$ and $W_\qq(\rr,\rr')$ are now defined in the unit cell.
 
@@ -169,6 +179,8 @@ In this formalism, one can take advantage of the symmetries of the system to red
 the irreducible wedge defined by the little group of the $\kk$$ point.
 In the best case scenario, both the CBM and the VBM are located at the $\Gamma$ point; hence the BZ summation
 can be replaced by a much faster symmetrized sum over the wavevectors of the IBZ.
+Clearly this approach is not very efficient in terms of operations if all the $\kk$-points are wanterd
+as, in this case, one recovers the quadratic scaling with the BZ sampling
 
 <!--
 ## GWR workflow for QP energies
@@ -235,11 +247,11 @@ to specify the configuration options via an external FILE.
 ### MPI parallelization
 
 The two codes strongly differ at the level of the MPI parallelization.
-In the legacy GW code, MPI parallelization is available over the [[nband]] states and [[nsppol]]; however,
+In the standard GW code, MPI parallelization is available over the [[nband]] states and [[nsppol]]; however,
 key data structures, such as the screened interaction $W$, are not MPI-distributed.
 As a result, the maximum number of usable MPI processes is limited by [[nband]],
 and the workload becomes imbalanced when the number of MPI processes does not evenly divide [[nband]].
-More critically, self-energy calculations in the legacy GW code are highly memory-intensive,
+More critically, self-energy calculations in the standard GW code are highly memory-intensive,
 as they require storing both the wavefunctions (whose memory footprint scales with the number of MPI processes)
 and $W$ (a non-scalable portion).
 This memory requirement becomes particularly problematic for large [[npweps]] values or calculations
@@ -251,7 +263,7 @@ In contrast, the GWR code distributes most data structures across MPI processes,
 which enables handling larger systems when sufficient computing nodes are available.
 However, this distribution comes at the cost of increased MPI communication in certain parts of the algorithm.
 More specifically, GWR leverages Parallel BLAS (PBLAS) to efficiently distribute the memory required
-for storing the Green’s functions and $W$, significantly improving scalability compared to the legacy implementation.
+for storing the Green’s functions and $W$, significantly improving scalability compared to the standard implementation.
 
 The GWR code employs a 4D MPI Cartesian grid to distribute both workload and memory over
 collinear spins, points of the minimax mesh, $(\gg, \gg')$ components, and $\kk$-points.

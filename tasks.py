@@ -777,11 +777,12 @@ def official_release(ctx: Context, new_version: str, dry_run: bool = True) -> No
         if old_version != new_version:
             raise ValueError(f"{old_version=} != {new_version=}")
 
-        # Step 1: Checkout master and merge changes
+        # Step 1: Checkout master, merge changes and run makemake
         _run("git checkout master")
         _run("git merge develop")
         _run("./config/scripts/makemake")
 
+        # Add files required by configure.
         for path in configure_paths:
             _run(f"git add -f {path}")
 
@@ -799,7 +800,7 @@ def official_release(ctx: Context, new_version: str, dry_run: bool = True) -> No
         _run("git merge master")
         _run("git push --tags")
 
-        # Step 3: Ensure 'configure_paths' are ignored in develop branch
+        # Step 3: Ensure 'configure_paths' are ignored in develop branch and commit changes.
         for path in configure_paths:
             _run(f"git rm --cached {path}")
         _run("git commit -a -m 'Remove configure files from tracking in develop'")
