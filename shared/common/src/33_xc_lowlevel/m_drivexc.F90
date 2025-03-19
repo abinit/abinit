@@ -1479,7 +1479,7 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
 !>>>>> XC entropy energy density 'tsxc' is needed to retrieve
 !>>>>> the proper internal energy E_xc
 
-!>>>>> Ichimaru,Iyetomi,Tanaka,  XC at finite temp (e- gaz)
+!>>>>> Ichimaru-Iyetomi-Tanaka, TLDA (no spin-pol) (IIT)
  else if (ixc==50) then
    if (order**2 <= 1) then
      call xciit(exc,tsxc,npts,order,rspts,el_temp,vxcrho(:,1))
@@ -1487,7 +1487,7 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
      call xciit(exc,tsxc,npts,order,rspts,el_temp,vxcrho(:,1),dvxc=dvxc)
    end if
 
-!>>>>> Karasiev-Sjostrom-Dufty-Trickey TLDA (no spin-pol) (KSDT)
+!>>>>> Karasiev-Sjostrom-Dufty-Trickey, TLDA (no spin-pol) (KSDT)
  else if (ixc==51) then
    if (order**2 <= 1) then
      call xcksdt(exc,tsxc,npts,order,rhotot,rspts,el_temp,vxcrho(:,1))
@@ -1495,7 +1495,7 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
      call xcksdt(exc,tsxc,npts,order,rhotot,rspts,el_temp,vxcrho(:,1),dvxc=dvxc)
    end if
 
-!>>>>> Karasiev-Dufty-Trickey TGGA (KDT16)
+!>>>>> Karasiev-Dufty-Trickey, TGGA (no spin-pol) (KDT16)
  else if(ixc==60) then
    if(nvxcgrho /= 3 )then 
      write(message, '(3a,i0,a,i0)')&
