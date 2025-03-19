@@ -8,7 +8,7 @@
 !! pure plane waves.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2024 ABINIT group (A. Blanchet)
+!! Copyright (C) 2018-2025 ABINIT group (A. Blanchet)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -563,12 +563,13 @@ contains
   !!  this=extfpmd_type object concerned
   !!
   !! SOURCE
-  subroutine compute_entropy(this,fermie,tsmear,nkpt,nsppol,nspinor,wtk,nband)
+  subroutine compute_entropy(this,entropy_extfpmd,fermie,tsmear,nkpt,nsppol,nspinor,wtk,nband)
     ! Arguments -------------------------------
     ! Scalars
     class(extfpmd_type),intent(inout) :: this
     integer,intent(in) :: nkpt,nsppol,nspinor
     real(dp),intent(in) :: fermie,tsmear
+    real(dp),intent(out) :: entropy_extfpmd
     ! Arrays
     integer,intent(in) :: nband(nkpt*nsppol)
     real(dp),intent(in) :: wtk(nkpt)
@@ -698,6 +699,7 @@ contains
       ABI_FREE(gamma_hybrid_tf)
     end if
     ABI_FREE(valuesent)
+    entropy_extfpmd=this%entropy
   end subroutine compute_entropy
   !!***
 

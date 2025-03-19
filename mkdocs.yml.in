@@ -18,7 +18,13 @@ use_directory_urls: True
 #pages:  # TODO Should be replaced by nav but then the search plugin does not work (bug?)
 nav:
 - User Guides:
-    #- NewUser: guide/new_user.md
+    - Installation:
+        - HowTo: installation.md
+        - MacOS: INSTALL_MacOS.md
+        - Ubuntu: INSTALL_Ubuntu.md
+        - CentOS: INSTALL_CentOS.md
+        - EasyBuild: INSTALL_EasyBuild.md
+        - GPUs: INSTALL_gpu.md
     - NewUser: index.md
     - Abinit: guide/abinit.md
     - Abitk: guide/abitk.md
@@ -33,13 +39,7 @@ nav:
     - Optic: guide/optic.md
     - Respfn: guide/respfn.md
     - Spacegroup: guide/spacegroup.md
-    - Installation:
-        - HowTo: installation.md
-        - MacOS: INSTALL_MacOS.md
-        - Ubuntu: INSTALL_Ubuntu.md
-        - CentOS: INSTALL_CentOS.md
-        - EasyBuild: INSTALL_EasyBuild.md
-        - GPUs: INSTALL_gpu.md
+
 # The topics should be declared both in this file and in abimkdocs/variables.py
 - Topics:
     - Features: topics/features.md
@@ -115,6 +115,7 @@ nav:
     - topics/Phonons.md
     - topics/PhononBands.md
     - topics/PhononWidth.md
+    - topics/Polaron.md
     - topics/PortabilityNonRegression.md
     - topics/positron.md
     - topics/printing.md
@@ -213,6 +214,7 @@ nav:
         - elastic: tutorial/elastic.md
         - nonlinear : tutorial/nlo.md
         - lattice_wannier : tutorial/lattice_wannier.md
+        - quadrupoles : tutorial/lw_quad.md
         - eph_intro : tutorial/eph_intro.md
         - eph for mobilities : tutorial/eph4mob.md
         - eph for zero-point renormalization : tutorial/eph4zpr.md
@@ -239,6 +241,8 @@ nav:
     - Pre/Post processing: faq/pre_and_post_processing.md
     - Ground state: faq/ground_state.md
     - DFPT: faq/dfpt.md
+    - Troubleshooting (old-dokuwiki): faq/Troubleshooting.md
+    - Tuning (old-dokuwiki) : faq/tuning_abinit.md
     #- GW and BSE faq/gw_and_bse.md
     #- EPH: faq/eph.md
 - Theory:
@@ -297,6 +301,7 @@ markdown_extensions:
   - markdown.extensions.sane_lists
   - markdown.extensions.attr_list
   - pymdownx.arithmatex:
+        generic: true
         #inline_syntax: ['dollar']
         #block_syntax:  ['dollar', 'begin']
   - pymdownx.betterem:
@@ -306,6 +311,11 @@ markdown_extensions:
   - pymdownx.details
   - pymdownx.inlinehilite
   - pymdownx.mark
+  #- pymdownx.highlight:
+  #    anchor_linenums: true
+  #    line_spans: __span
+  #    pygments_lang_class: true
+  #- pymdownx.snippets
   - pymdownx.smartsymbols:
         registered: false
         copyright: false
@@ -338,7 +348,7 @@ plugins:
     - abimkdocs
     - search:
           separator: '[\s\-\.]+'
-          min_search_length: 2
+          #min_search_length: 2
           #prebuild_index: true  # Should test whether this makes search faster.
 
 extra_css:
@@ -348,6 +358,8 @@ extra_css:
 
 extra_javascript:
     - extra_javascript/abidocs.js
+    #- extra_javascript/mathjax.js
+    #- https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js
 
 copyright: Copyright &copy; 2020-2024 The Abinit Group
 

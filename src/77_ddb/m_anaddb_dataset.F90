@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2024 ABINIT group (XG,JCC,CL,MVeithen,XW,MJV)
+!!  Copyright (C) 2014-2025 ABINIT group (XG,JCC,CL,MVeithen,XW,MJV)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -26,7 +26,7 @@ module m_anaddb_dataset
 
  use m_fstrings,  only : next_token, rmquotes, sjoin, inupper, ltoa, itoa, basename
  use m_clib,      only : clib_mkdir_if_needed
- use m_symtk,     only : mati3det
+ use m_matrix,    only : mati3det
  use m_parser,    only : intagm, chkvars_in_string, instrng
  use m_ddb,       only : DDB_QTOL
 
@@ -2228,9 +2228,8 @@ subroutine anaddb_init(input_path, filnam)
 
 !Local variables-------------------------
 !scalars
- integer:: lenstr, marr, jdtset, tread, i1 !, ierr
- character(len=strlen):: string, raw_string, fname
- !character(len=fnlen) :: dirpath
+ integer:: lenstr, marr, jdtset, tread, i1, ierr
+ character(len=strlen):: string, raw_string, fname, dirpath
 !arrays
  integer, allocatable:: intarr(:)
  real(dp), allocatable:: dprarr(:)
@@ -2270,6 +2269,8 @@ subroutine anaddb_init(input_path, filnam)
 
  else
    ! Read input
+   string = repeat(" ", strlen)
+   raw_string = repeat(" ", strlen)
    call instrng(input_path, lenstr, 1, strlen, string, raw_string)
    ! To make case-insensitive, map characters to upper case.
    call inupper(string(1:lenstr))
@@ -2324,12 +2325,12 @@ subroutine anaddb_init(input_path, filnam)
    write(std_out, "(2a)")'- Root name for output files set to: ', trim(filnam(8))
  endif
 
- !i1 = index(filnam(8), "/")
- !if (i1 > 0) then
- !  dirpath = filnam(8)(1:i1-1)
- !  call clib_mkdir_if_needed(dirpath, ierr)
- !  ABI_CHECK(ierr == 0, sjoin("Error", itoa(ierr), "while trying to create directory", dirpath))
- !end if
+ i1 = index(filnam(8), "/", back=.True.)
+ if (i1 > 0) then
+   dirpath = filnam(8)(1:i1-1)
+   call clib_mkdir_if_needed(dirpath, ierr)
+   ABI_CHECK(ierr == 0, sjoin("Error", itoa(ierr), "while trying to create directory", dirpath))
+ end if
 
 end subroutine anaddb_init
 !!***

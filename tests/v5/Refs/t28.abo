@@ -1,8 +1,8 @@
 
-.Version 9.11.2 of ANADDB 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ANADDB, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Jul 2023.
-- ( at 12h01 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h10 )
   
 
 ================================================================================
@@ -81,7 +81,7 @@
 
  Calculation of the interatomic forces 
 
--begin at tcpu      0.026  and twall      0.035 sec
+-begin at tcpu      0.025  and twall      0.055 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -243,7 +243,7 @@
      1       -6.539144E-04       -1.165411E-06
      2       -2.434677E-03       -8.313193E-06
      3        4.809391E-04        4.341807E-06
-     4        4.899704E-04        3.219403E-08
+     4        4.899704E-04        3.219399E-08
      5       -2.068770E-04       -1.197674E-06
 
  Kpt number     14, with reduced coordinates :    2.500000E-01    0.000000E+00    0.000000E+00
@@ -278,7 +278,7 @@
      1       -6.539144E-04       -1.165411E-06
      2       -2.434677E-03       -8.313193E-06
      3        4.809391E-04        4.341807E-06
-     4        4.899704E-04        3.219403E-08
+     4        4.899704E-04        3.219399E-08
      5       -2.068770E-04       -1.197674E-06
 
  Kpt number     19, with reduced coordinates :    5.000000E-01    2.500000E-01    5.000000E-01
@@ -383,6 +383,6 @@
 
 ================================================================================
 
-+Total cpu time      0.229  and wall time      0.248 sec
++Total cpu time      0.194  and wall time      0.224 sec
 
  anaddb : the run completed succesfully.

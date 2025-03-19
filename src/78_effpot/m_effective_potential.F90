@@ -9,7 +9,7 @@
 !! Contain also routine to evaluate the energy,forces and stresses
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2024 ABINIT group (AM)
+!! Copyright (C) 2010-2025 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -51,11 +51,11 @@ module m_effective_potential
  use m_fstrings,       only : replace, ftoa, itoa
  use m_io_tools,       only : open_file, get_unit
  use m_dtfil,          only : isfile
- use m_symtk,          only : matr3inv
+ use m_matrix,         only : matr3inv
  use m_effpot_mpi,     only : effpot_mpi_init,effpot_mpi_type,effpot_mpi_free
  use m_abihist,        only : abihist
  use m_geometry,       only : gred2fcart,fcart2gred, xcart2xred, xred2xcart, metric
- use m_crystal,        only : crystal_t, crystal_init
+ use m_crystal,        only : crystal_t
  !use m_anaddb_dataset, only : anaddb_dataset_type, anaddb_dtset_free, outvars_anaddb, invars9
 
  implicit none
@@ -257,7 +257,7 @@ subroutine effective_potential_init(crystal,eff_pot,energy,ifcs,ncoeff,nqpt,comm
 
 !1-Fill the crystal
 !Warning znucl is dimension with ntypat = nspsp hence alchemy is not supported here
- call crystal_init(crystal%amu,eff_pot%crystal,crystal%space_group,crystal%natom,&
+ call eff_pot%crystal%init(crystal%amu,crystal%space_group,crystal%natom,&
 &                  crystal%npsp,crystal%ntypat,crystal%nsym,crystal%rprimd,&
 &                  crystal%typat,crystal%xred,crystal%zion,crystal%znucl,&
 &                  crystal%timrev,.FALSE.,.FALSE.,crystal%title,&
@@ -519,7 +519,7 @@ subroutine effective_potential_free(eff_pot)
 ! Free others datatypes
    call anharmonics_terms_free(eff_pot%anharmonics_terms)
    call harmonics_terms_free(eff_pot%harmonics_terms)
-   call destroy_supercell(eff_pot%supercell)
+   call eff_pot%supercell%free()
    call eff_pot%crystal%free()
    call effective_potential_freempi(eff_pot)
    call polynomial_conf_free(eff_pot%confinement)
@@ -676,19 +676,18 @@ end if
    end if
  end do
 
- call init_supercell(eff_pot%crystal%natom, &
+ call supercell%init(eff_pot%crystal%natom, &
 &   (/ncell(1),0,0,  0,ncell(2),0,  0,0,ncell(3)/),&
 &   eff_pot%crystal%rprimd,&
 &   eff_pot%crystal%typat,&
 &   eff_pot%crystal%xcart,&
-&   eff_pot%crystal%znucl,&
-&   supercell)
+&   eff_pot%crystal%znucl)
 
 !set variables
  natom_uc = eff_pot%crystal%natom
 
 !1 Store the information of the supercell of the reference structure into effective potential
- call copy_supercell(supercell,eff_pot%supercell)
+ call supercell%copy(eff_pot%supercell)
 !2 Initialisation of new mpi over supercell
  call effective_potential_initmpi(eff_pot,comm)
 
@@ -775,7 +774,7 @@ end if
 !     !  if (abs(max2) < abs(max2_cell)) max2 = max2_cell
 !     !  if (abs(max3) < abs(max3_cell)) max3 = max3_cell
 !!    !  If the cell is smaller, we redifine new cell to take into acount all atoms
-!     !  call destroy_supercell(supercell)
+!     !  call supercell%free()
 !     !  call init_supercell(natom_uc,(/(max1-min1+1),0,0,  0,(max2-min2+1),0,  0,0,(max3-min3+1)/),&
 !&    !                      eff_pot%crystal%rprimd,eff_pot%crystal%typat,&
 !&    !                      eff_pot%crystal%xcart,eff_pot%crystal%znucl,supercell)
@@ -1116,16 +1115,12 @@ end if
    call harmonics_terms_applySumRule(asr,eff_pot%harmonics_terms%ifcs,natom_uc)
  end if
 
-
-
- write(msg, '(a,(80a),a)' ) ch10,&
-&   ('=',ii=1,80)
+ write(msg, '(a,(80a),a)' ) ch10,('=',ii=1,80)
  call wrtout(ab_out,msg,'COLL')
  call wrtout(std_out,msg,'COLL')
 
 ! Free suppercell
- call destroy_supercell(supercell)
-
+ call supercell%free()
 
 end subroutine effective_potential_generateDipDip
 !!***
@@ -1451,14 +1446,14 @@ subroutine effective_potential_setSupercell(eff_pot,comm,ncell,supercell)
    ABI_ERROR(' You should at least set ncell of supercell type')
  end if
 
- call destroy_supercell(eff_pot%supercell)
+ call eff_pot%supercell%free()
 
  if(present(supercell))then
-   call copy_supercell(supercell,eff_pot%supercell)
+   call supercell%copy(eff_pot%supercell)
  else
-   call init_supercell(eff_pot%crystal%natom, (/ncell(1),0,0,  0,ncell(2),0,  0,0,ncell(3)/), &
-&                      eff_pot%crystal%rprimd,eff_pot%crystal%typat,eff_pot%crystal%xcart,&
-&                      eff_pot%crystal%znucl, eff_pot%supercell)
+   call eff_pot%supercell%init(eff_pot%crystal%natom, (/ncell(1),0,0,  0,ncell(2),0,  0,0,ncell(3)/), &
+                      eff_pot%crystal%rprimd,eff_pot%crystal%typat,eff_pot%crystal%xcart,&
+                      eff_pot%crystal%znucl)
  end if
 
 !Initialisation of new mpi over supercell
@@ -2743,6 +2738,7 @@ endif
         strten(alpha) = strten(alpha) * (1 - strain_tmp(alpha)**2)/ ucvol
      end if
   end do
+
 ! write(*,*) "--- STRTEN after /ucvol  --- "
 ! write(*,*) strten(:)
 ! Redistribute the residuale of the forces

@@ -108,7 +108,7 @@ focus only on [[ecut]] and [[acell]]. This is because
 * the boxcut value (see [[boxcutmin]]) is automatically chosen larger than 2 by ABINIT, see the determination of the
   input variable [[ngfft]] by preprocessing
 
-* we are using [[ionmov]] = 2 for the determination of the geometry.
+* we are using [[geoopt]] "bfgs" for the determination of the geometry.
 
 ## 3 The convergence in ecut (II)
 

@@ -6,7 +6,7 @@
 !!  Functions to compute optical matrix elements using the wavefunction descriptor.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2024 ABINIT group (MG)
+!!  Copyright (C) 2008-2025 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -26,11 +26,12 @@ module m_wfd_optic
  use m_abicore
  use m_xmpi
 
- use defs_datatypes,      only : ebands_t, pseudopotential_type
+ use defs_datatypes,      only : pseudopotential_type
  use m_hide_lapack,       only : matrginv
  use m_bz_mesh,           only : kmesh_t
  use m_crystal,           only : crystal_t
  use m_vkbr,              only : vkbr_t, vkbr_free, vkbr_init, nc_ihr_comm
+ use m_ebands,            only : ebands_t
  use m_wfd,               only : wfdgw_t, wave_t
  use m_pawtab,            only : pawtab_type
  use m_pawcprj,           only : pawcprj_type, pawcprj_alloc, pawcprj_free

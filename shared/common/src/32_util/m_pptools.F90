@@ -6,7 +6,7 @@
 !!  Helper functions used for post-processing.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2024 ABINIT group (MG, ZL, MJV, BXu)
+!! Copyright (C) 2002-2025 ABINIT group (MG, ZL, MJV, BXu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -36,6 +36,7 @@ MODULE m_pptools
  private
 
  public :: prmat                ! print real(dp) matrices in an attractive format.
+ public :: write_xsf            ! Open file and Write a generic array in the XSF format (XCrysden format)
  public :: printxsf             ! Write a generic array in the XSF format (XCrysden format)
  public :: print_fofr_ri        ! Print the [real, imaginary] part of an array
  public :: print_fofr_xyzri     ! Print the Cartesian coordinates and the [real,imaginary] part of an array
@@ -65,8 +66,7 @@ CONTAINS  !===========================================================
 !!
 !! SOURCE
 
-subroutine prmat (mat, ni, nj, mi, unitm)
-
+subroutine prmat(mat, ni, nj, mi, unitm)
 
 !Arguments ------------------------------------
 !scalars
@@ -77,38 +77,74 @@ subroutine prmat (mat, ni, nj, mi, unitm)
 
 !Local variables-------------------------------
 !scalars
- character(len=1000)    :: message
+ character(len=1000)    :: msg
  integer,parameter      :: nline=10
  integer                :: ii,jj,jstart,jstop,unitn
 
 ! *************************************************************************
 
- if (present(unitm)) then ! standard printing to std_out
-   unitn=unitm
- else
-   unitn=std_out
- end if
+ unitn = std_out; if (present(unitm)) unitn = unitm
 
- do  jstart = 1, nj, nline
+ do jstart = 1, nj, nline
    jstop = min(nj, jstart+nline-1)
-   write(message, '(3x,10(i4,8x))' ) (jj,jj=jstart,jstop)
-   call wrtout(unitn,message,'COLL')
+   write(msg, '(3x,10(i4,8x))' ) (jj,jj=jstart,jstop)
+   call wrtout(unitn,msg)
  end do
 
  do ii = 1,ni
    do jstart= 1, nj, nline
      jstop = min(nj, jstart+nline-1)
      if (jstart==1) then
-       write(message, '(i3,1p,10e12.4)' ) ii, (mat(ii,jj),jj=jstart,jstop)
-       call wrtout(unitn,message,'COLL')
+       write(msg, '(i3,1p,10e12.4)' ) ii, (mat(ii,jj),jj=jstart,jstop)
+       call wrtout(unitn,msg)
      else
-       write(message, '(3x,1p,10e12.4)' )    (mat(ii,jj),jj=jstart,jstop)
-       call wrtout(unitn,message,'COLL')
+       write(msg, '(3x,1p,10e12.4)' )    (mat(ii,jj),jj=jstart,jstop)
+       call wrtout(unitn,msg)
      end if
    end do
  end do
 
 end subroutine prmat
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_pptools/write_xsf
+!! NAME
+!! write_xsf
+!!
+!! FUNCTION
+!! Open file and write a generic array in the XSF format (XCrysden format)
+!! See printxsf for the meaning of the arguments.
+!!
+!! OUTPUT
+!! Only write
+!!
+!! SOURCE
+
+subroutine write_xsf(filepath, n1, n2, n3, datagrid, basis, origin, natom, ntypat, typat, xcart, znucl, realrecip)
+
+!Arguments ------------------------------------
+!scalars
+ character(len=*),intent(in) :: filepath
+ integer,intent(in) :: n1, n2, n3, realrecip, natom, ntypat
+!arrays
+ integer,intent(in) :: typat(natom)
+ real(dp),intent(in) :: basis(3,3), datagrid(n1*n2*n3), origin(3), xcart(3,natom), znucl(ntypat)
+
+!Local variables-------------------------------
+ integer :: ount
+ character(len=500) :: msg
+! *************************************************************************
+
+ if (open_file(filepath, msg, newunit=ount, form='formatted', status='unknown', action="write") /= 0) then
+   ABI_ERROR(msg)
+ end if
+
+ call printxsf(n1, n2, n3, datagrid, basis, origin, natom, ntypat, typat, xcart, znucl, ount, realrecip)
+ close(ount)
+
+end subroutine write_xsf
 !!***
 
 !----------------------------------------------------------------------
@@ -121,33 +157,28 @@ end subroutine prmat
 !! Write a generic array in the XSF format (XCrysden format)
 !!
 !! INPUTS
+!! n1, n2, n3=grid size along x, y, z
+!! datagrid(n1*n2*n3) = datagrid values stored using the fortran convention
 !! basis(3,3) = basis vectors of the direct real lattice or of the reciprocal lattice (fortran convention)
 !!              (Bohr units if realrecip=0, Bohr^-1 if realrecip=1, see below)
+!! origin(3) = origin of the grid
+!! ount   = unit number of the output file (already open by the caller, not closed here!)
 !! realrecip = 0  for a plot in real space
 !!             1  for a plot in reciprocal space
-!! nunit   = unit number of the output file (already open by the caller, not closed here!)
-!! n1=grid size along x
-!! n2=grid size along y
-!! n3=grid size along z
-!! origin(3) = origin of the grid
-!! datagrid(n1*n2*n3) = datagrid values stored using the fortran convention
 !!
 !! OUTPUT
 !! Only write
 !!
 !! SOURCE
 
-subroutine printxsf(n1,n2,n3,datagrid,basis,origin,natom,ntypat,typat,xcart,znucl,nunit,realrecip)
-
+subroutine printxsf(n1, n2, n3, datagrid, basis, origin, natom, ntypat, typat, xcart, znucl, ount, realrecip)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: n1,n2,n3,nunit,realrecip
- integer,intent(in) :: natom,ntypat
+ integer,intent(in) :: n1, n2, n3, ount, realrecip, natom, ntypat
 !arrays
  integer,intent(in) :: typat(natom)
- real(dp),intent(in) :: basis(3,3),datagrid(n1*n2*n3),origin(3)
- real(dp),intent(in) :: xcart(3,natom), znucl(ntypat)
+ real(dp),intent(in) :: basis(3,3), datagrid(n1*n2*n3), origin(3), xcart(3,natom), znucl(ntypat)
 
 !Local variables-------------------------------
 !scalars
@@ -158,81 +189,70 @@ subroutine printxsf(n1,n2,n3,datagrid,basis,origin,natom,ntypat,typat,xcart,znuc
 
 ! *************************************************************************
 
- DBG_ENTER("COLL")
-
- if (all(realrecip/= [0,1])) then
+ if (all(realrecip /= [0, 1])) then
    ABI_BUG(sjoin('The argument realrecip should be 0 or 1, received:', itoa(realrecip)))
  end if
 
-!conversion between ABINIT default units and XCrysden units
- fact=Bohr_Ang; if (realrecip ==1) fact=one/fact  !since we are in reciprocal space
+ ! conversion between ABINIT default units and XCrysden units
+ fact = Bohr_Ang; if (realrecip == 1) fact=one/fact ! since we are in reciprocal space
 
-!TODO insert crystalline structure and dummy atoms in case of reciprocal space
-!need to convert basis too
-
- write(nunit,'(1X,A)')  'DIM-GROUP'
- write(nunit,*) '3  1'
- write(nunit,'(1X,A)') 'PRIMVEC'
+ ! TODO insert crystalline structure and dummy atoms in case of reciprocal space need to convert basis too
+ write(ount,'(1X,A)')  'DIM-GROUP'
+ write(ount,*) '3  1'
+ write(ount,'(1X,A)') 'PRIMVEC'
  do iy = 1,3
-   write(nunit,'(3(ES17.10,2X))') (Bohr_Ang*basis(ix,iy), ix=1,3)
- end do
-!
-!generate translated coordinates to fit origin shift
-!
- do iatom = 1,natom
-   tau (:,iatom) = xcart(:,iatom) - origin(:)
+   write(ount,'(3(ES17.10,2X))') (Bohr_Ang*basis(ix,iy), ix=1,3)
  end do
 
- write(nunit,'(1X,A)') 'PRIMCOORD'
- write(nunit,*) natom, ' 1'
+ ! generate translated coordinates to fit origin shift
  do iatom = 1,natom
-   write(nunit,'(i9,3(3X,ES17.10))') NINT(znucl(typat(iatom))), &  ! WARNING alchemy not supported by XCrysden
-     Bohr_Ang*tau(1,iatom), &
-     Bohr_Ang*tau(2,iatom), &
-     Bohr_Ang*tau(3,iatom)
- end do
- write(nunit,'(1X,A)') 'ATOMS'
- do iatom = 1,natom
-   write(nunit,'(i9,3(3X,ES17.10))') NINT(znucl(typat(iatom))), & ! WARNING alchemy not supported by XCrysden
-     Bohr_Ang*tau(1,iatom), &
-     Bohr_Ang*tau(2,iatom), &
-     Bohr_Ang*tau(3,iatom)
+   tau(:,iatom) = xcart(:,iatom) - origin(:)
  end do
 
- write(nunit,'(a)')' BEGIN_BLOCK_DATAGRID3D'
- write(nunit,'(a)')' datagrid'
- write(nunit,'(a)')' DATAGRID_3D_DENSITY'
-!NOTE: XCrysden uses aperiodical data grid
- write(nunit,*)n1+1,n2+1,n3+1
- write(nunit,*)origin
- write(nunit,*)basis(:,1)*fact
- write(nunit,*)basis(:,2)*fact
- write(nunit,*)basis(:,3)*fact
+ write(ount,'(1X,A)') 'PRIMCOORD'
+ write(ount,*) natom, ' 1'
+ do iatom = 1,natom
+   write(ount,'(i9,3(3X,ES17.10))') NINT(znucl(typat(iatom))), &  ! WARNING alchemy not supported by XCrysden
+     Bohr_Ang*tau(1,iatom), Bohr_Ang*tau(2,iatom), Bohr_Ang*tau(3,iatom)
+ end do
+ write(ount,'(1X,A)') 'ATOMS'
+ do iatom = 1,natom
+   write(ount,'(i9,3(3X,ES17.10))') NINT(znucl(typat(iatom))), & ! WARNING alchemy not supported by XCrysden
+     Bohr_Ang*tau(1,iatom), Bohr_Ang*tau(2,iatom), Bohr_Ang*tau(3,iatom)
+ end do
+
+ write(ount,'(a)')' BEGIN_BLOCK_DATAGRID3D'
+ write(ount,'(a)')' datagrid'
+ write(ount,'(a)')' DATAGRID_3D_DENSITY'
+ ! NOTE: XCrysden uses aperiodical data grid
+ write(ount,*)n1+1,n2+1,n3+1
+ write(ount,*)origin
+ write(ount,*)basis(:,1)*fact
+ write(ount,*)basis(:,2)*fact
+ write(ount,*)basis(:,3)*fact
 
  nslice=1
  do iz=1,n3
    do iy=1,n2
-     write(nunit,'(8es16.8)') datagrid(1+n1*(nslice-1):n1+n1*(nslice-1)),datagrid(1+n1*(nslice-1))
-     nslice=nslice+1
+     write(ount,'(8es16.8)') datagrid(1+n1*(nslice-1):n1+n1*(nslice-1)),datagrid(1+n1*(nslice-1))
+     nslice = nslice+1
    end do
    nsym=nslice-n2
-   write (nunit,'(8es16.8)') datagrid(1+n1*(nsym-1):n1+n1*(nsym-1)),datagrid(1+n1*(nsym-1))
+   write(ount,'(8es16.8)') datagrid(1+n1*(nsym-1):n1+n1*(nsym-1)),datagrid(1+n1*(nsym-1))
  end do
 
-!Now write upper plane
- nslice=1
+ ! Now write upper plane
+ nslice = 1
  do iy=1,n2
-   write (nunit,'(8es16.8)') datagrid(1+n1*(nslice-1):n1+n1*(nslice-1)),datagrid(1+n1*(nslice-1))
+   write(ount,'(8es16.8)') datagrid(1+n1*(nslice-1):n1+n1*(nslice-1)),datagrid(1+n1*(nslice-1))
    nslice=nslice+1
  end do
 
- nsym=nslice-n2
- write (nunit,'(8es16.8)') datagrid(1+n1*(nsym-1):n1+n1*(nsym-1)),datagrid(1+n1*(nsym-1))
+ nsym = nslice-n2
+ write(ount,'(8es16.8)') datagrid(1+n1*(nsym-1):n1+n1*(nsym-1)),datagrid(1+n1*(nsym-1))
 
- write (nunit,'(a)')' END_DATAGRID_3D'
- write (nunit,'(a)')' END_BLOCK_DATAGRID3D'
-
- DBG_EXIT("COLL")
+ write(ount,'(a)')' END_DATAGRID_3D'
+ write(ount,'(a)')' END_BLOCK_DATAGRID3D'
 
 end subroutine printxsf
 !!***
@@ -260,9 +280,7 @@ end subroutine printxsf
 !!
 !! SOURCE
 
-
 subroutine print_fofr_ri(ri_mode,nx,ny,nz,ldx,ldy,ldz,fofr,unit)
-
 
 !Arguments -----------------------------------------------
 !scalars
@@ -273,9 +291,7 @@ subroutine print_fofr_ri(ri_mode,nx,ny,nz,ldx,ldy,ldz,fofr,unit)
  real(dp),intent(in) :: fofr(2,ldx,ldy,ldz)
 
 !Local variables-------------------------------
-!scalars
  integer :: ount,ix,iy,iz
-!arrays
 
 ! *************************************************************************
 
@@ -341,9 +357,7 @@ end subroutine print_fofr_ri
 !!
 !! SOURCE
 
-
 subroutine print_fofr_xyzri(ri_mode,nx,ny,nz,ldx,ldy,ldz,fofr,rprimd,conv_fact,unit)
-
 
 !Arguments -----------------------------------------------
 !scalars
@@ -432,7 +446,6 @@ end subroutine print_fofr_xyzri
 
 subroutine print_fofr_cube(nx,ny,nz,ldx,ldy,ldz,fofr,rprimd,natom,znucl_atom,xcart,unit)
 
-
 !Arguments -----------------------------------------------
 !scalars
  integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,natom
@@ -446,7 +459,6 @@ subroutine print_fofr_cube(nx,ny,nz,ldx,ldy,ldz,fofr,rprimd,natom,znucl_atom,xca
 !scalars
  integer,parameter :: cplx=2
  integer :: ount,ix,iy,iz,iatom
-!arrays
 
 ! *************************************************************************
 
@@ -530,8 +542,7 @@ end subroutine print_fofr_cube
 !! SOURCE
 
 subroutine printbxsf(eigen,ewind,fermie,gprimd,kptrlatt,mband,&
-& nkptirred,kptirred,nsym,use_afm,symrec,symafm,use_tr,nsppol,shiftk,nshiftk,fname,ierr)
-
+                    nkptirred,kptirred,nsym,use_afm,symrec,symafm,use_tr,nsppol,shiftk,nshiftk,fname,ierr)
 
 !Arguments ------------------------------------
 !scalars
@@ -878,7 +889,6 @@ subroutine printvtk(eigen,v_surf,ewind,fermie,gprimd,kptrlatt,mband,&
      end do !ik1
    end do !ik2
  end do !ik3
-
 
  if (ierr/=0) then
    ABI_FREE(fulltoirred)

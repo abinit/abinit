@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2024 ABINIT group (MG, FB, BG)
+!! Copyright (C) 1999-2025 ABINIT group (MG, FB, BG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -66,18 +66,14 @@ subroutine cmod_qpg(nq, iq, q, npwvec, gvec, gprimd, qplusg)
 
 !Local variables ------------------------------
 !scalars
- integer :: ig,ii
+ integer :: ig
 !arrays
  real(dp) :: gmet(3,3),gpq(3)
 
 !************************************************************************
 
  ! Compute reciprocal space metrics
- do ii=1,3
-   gmet(ii,:)=gprimd(1,ii)*gprimd(1,:)+&
-              gprimd(2,ii)*gprimd(2,:)+&
-              gprimd(3,ii)*gprimd(3,:)
- end do
+ gmet = MATMUL(TRANSPOSE(gprimd),gprimd)
 
  if (ALL(ABS(q(:,iq)) < tol3)) then
    ! Treat q as if it were zero except when G=0

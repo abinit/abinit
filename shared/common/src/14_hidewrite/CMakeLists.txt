@@ -20,7 +20,8 @@ add_library(14_hidewrite STATIC
   m_specialmsg.F90
   # generated sources
   ${CMAKE_CURRENT_BINARY_DIR}/m_build_info.F90
-  ${CMAKE_CURRENT_BINARY_DIR}/m_optim_dumper.F90)
+  ${CMAKE_CURRENT_BINARY_DIR}/m_optim_dumper.F90
+)
 
 set_target_properties(14_hidewrite
   PROPERTIES
@@ -47,6 +48,7 @@ target_link_libraries(14_hidewrite
   abinit::10_defs
   abinit::11_memory_mpi
   abinit::12_hide_mpi
-  MPI::MPI_Fortran)
+  MPI::MPI_Fortran
+)
 
 add_library(abinit::14_hidewrite ALIAS 14_hidewrite)

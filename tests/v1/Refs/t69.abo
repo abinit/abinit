@@ -1,8 +1,8 @@
 
-.Version 9.11.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Jul 2023.
-- ( at 11h58 )
-  
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v1_t69/t69.abi
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h08 )
+
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v1_t69/t69.abi
 - output file    -> t69.abo
 - root for input  files -> t69i
 - root for output files -> t69o
@@ -114,10 +114,10 @@ _ WF disk file :      0.142 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -132,7 +132,7 @@ _ WF disk file :      0.142 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
            diemac      1.00000000E+00
            diemix      5.00000000E-01
              ecut      3.50000000E+00 Hartree
--          fftalg         312
+-          fftalg         512
            getden1          0
            getden2          1
            getden3          1
@@ -239,8 +239,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      3.500   => boxcut(ratio)=   2.11083
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/12mg.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/12mg.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/12mg.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/12mg.pspnc
 -  Troullier-Martins psp for element  Mg        Thu Oct 27 17:30:49 EDT 1994
 - 12.00000   2.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -277,8 +277,8 @@ tolerances: {tolwfr: 1.00E-16, }
  ETOT  4  -1.0358734994528    -2.584E-06 3.545E-10 1.138E-04
  ETOT  5  -1.0358736058079    -1.064E-07 5.018E-11 3.674E-06
  ETOT  6  -1.0358736058669    -5.899E-11 5.822E-14 6.790E-08
- ETOT  7  -1.0358736058678    -9.290E-13 7.289E-16 1.301E-09
- ETOT  8  -1.0358736058678     1.776E-14 1.973E-17 3.450E-11
+ ETOT  7  -1.0358736058678    -9.286E-13 7.289E-16 1.301E-09
+ ETOT  8  -1.0358736058678     1.865E-14 1.973E-17 3.450E-11
 
  At SCF step    8   max residual=  1.97E-17 < tolwfr=  1.00E-16 =>converged.
 
@@ -298,7 +298,7 @@ lattice_vectors:
 lattice_lengths: [  17.99900,   18.00000,   18.00100, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   5.8320000E+03
-convergence: {deltae:  1.776E-14, res2:  3.450E-11, residm:  1.973E-17, diffor: null, }
+convergence: {deltae:  1.865E-14, res2:  3.450E-11, residm:  1.973E-17, diffor: null, }
 etotal    :  -1.03587361E+00
 entropy   :   0.00000000E+00
 fermie    :  -1.68038719E-01
@@ -349,16 +349,16 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  2.25047264233701E-01
-hartree             :  2.75418242894013E-01
-xc                  : -5.55864192969576E-01
+kinetic             :  2.25047264233695E-01
+hartree             :  2.75418242894003E-01
+xc                  : -5.55864192969569E-01
 Ewald energy        : -3.15255274834323E-01
 psp_core            : -5.29471358028214E-04
-local_psp           : -9.33940535442832E-01
-non_local_psp       :  2.69250361609229E-01
+local_psp           : -9.33940535442802E-01
+non_local_psp       :  2.69250361609208E-01
 total_energy        : -1.03587360586782E+00
 total_energy_eV     : -2.81875543197115E+01
-band_energy         : -3.36077438019794E-01
+band_energy         : -3.36077438019782E-01
 ...
 
 
@@ -416,7 +416,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -1, paral_kgb: 0, }
   2.9430E-02  6.1943E-02  6.1949E-02  6.1954E-02
 
 
- *** TDDFT : computation of excited states *** 
+ *** TDDFT : computation of excited states ***
  Splitting of  10 states in   1 occupied states, and   9 unoccupied states,
  giving     9 excitations.
 
@@ -438,7 +438,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -1, paral_kgb: 0, }
   Sum of osc. strength :     1.971787E+00
 
   TDDFT singlet excitation energies (at most 20 of them are printed),
-  and corresponding total energies.                
+  and corresponding total energies.
   Excit#   (Ha)    and    (eV)    total energy (Ha)    major contributions
    1    1.63652E-01   4.45321E+00   -8.722213E-01    1.00(  1->  5)  0.00(  1->  6)
    2    1.64513E-01   4.47663E+00   -8.713605E-01    0.93(  1->  2)  0.07(  1->  8)
@@ -466,7 +466,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -1, paral_kgb: 0, }
     (-8)->  3.306E+06, (-10)->  1.217E+08, (-12)->  4.490E+09, (-14)->  1.657E+11
 
   TDDFT triplet excitation energies (at most 20 of them are printed),
-  and corresponding total energies.                
+  and corresponding total energies.
   Excit#   (Ha)    and    (eV)    total energy (Ha)    major contributions
    1    1.03456E-01   2.81518E+00   -9.324178E-01    1.00(  1->  2)  0.00(  1->  8)
    2    1.03457E-01   2.81520E+00   -9.324171E-01    1.00(  1->  3)  0.00(  1->  9)
@@ -579,7 +579,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -1, paral_kgb: 0, }
   2.9430E-02  6.1943E-02  6.1949E-02  6.1954E-02
 
 
- *** TDDFT : computation of excited states *** 
+ *** TDDFT : computation of excited states ***
  Splitting of  10 states in   1 occupied states, and   9 unoccupied states,
  giving     9 excitations.
 
@@ -601,7 +601,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -1, paral_kgb: 0, }
   Sum of osc. strength :     1.971787E+00
 
   TDDFT singlet excitation energies (at most 20 of them are printed),
-  and corresponding total energies.                
+  and corresponding total energies.
   Excit#   (Ha)    and    (eV)    total energy (Ha)    major contributions
    1    1.63652E-01   4.45321E+00   -8.722213E-01    1.00(  1->  5)  0.00(  1->  6)
    2    1.64513E-01   4.47663E+00   -8.713605E-01    0.93(  1->  2)  0.07(  1->  8)
@@ -629,7 +629,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -1, paral_kgb: 0, }
     (-8)->  3.306E+06, (-10)->  1.217E+08, (-12)->  4.490E+09, (-14)->  1.657E+11
 
   TDDFT triplet excitation energies (at most 20 of them are printed),
-  and corresponding total energies.                
+  and corresponding total energies.
   Excit#   (Ha)    and    (eV)    total energy (Ha)    major contributions
    1    1.03456E-01   2.81518E+00   -9.324178E-01    1.00(  1->  2)  0.00(  1->  8)
    2    1.03457E-01   2.81520E+00   -9.324171E-01    1.00(  1->  3)  0.00(  1->  9)
@@ -742,7 +742,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -1, paral_kgb: 0, }
   2.9430E-02  6.1943E-02  6.1949E-02  6.1954E-02
 
 
- *** TDDFT : computation of excited states *** 
+ *** TDDFT : computation of excited states ***
  Splitting of  10 states in   1 occupied states, and   9 unoccupied states,
  giving     9 excitations.
 
@@ -761,7 +761,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -1, paral_kgb: 0, }
   Sum of osc. strength :     1.964154E+00
 
   TDDFT singlet excitation energies (at most 20 of them are printed),
-  and corresponding total energies.                
+  and corresponding total energies.
   Excit#   (Ha)    and    (eV)    total energy (Ha)    major contributions
    1    1.63652E-01   4.45321E+00   -8.722213E-01    1.00(  1->  5)  0.00(  1->  6)
    2    1.70484E-01   4.63910E+00   -8.653898E-01    1.00(  1->  2)  0.00(  1->  4)
@@ -783,7 +783,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -1, paral_kgb: 0, }
     (-8)->  2.752E+06, (-10)->  9.469E+07, (-12)->  3.258E+09, (-14)->  1.121E+11
 
   TDDFT triplet excitation energies (at most 20 of them are printed),
-  and corresponding total energies.                
+  and corresponding total energies.
   Excit#   (Ha)    and    (eV)    total energy (Ha)    major contributions
    1    1.04197E-01   2.83535E+00   -9.316766E-01    1.00(  1->  2)  0.00(  1->  3)
    2    1.04198E-01   2.83536E+00   -9.316760E-01    1.00(  1->  3)  0.00(  1->  2)
@@ -890,7 +890,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -1, paral_kgb: 0, }
   2.9430E-02  6.1943E-02  6.1949E-02  6.1954E-02
 
 
- *** TDDFT : computation of excited states *** 
+ *** TDDFT : computation of excited states ***
  Splitting of  10 states in   1 occupied states, and   9 unoccupied states,
  giving     9 excitations.
 
@@ -909,7 +909,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -1, paral_kgb: 0, }
   Sum of osc. strength :     1.964154E+00
 
   TDDFT singlet excitation energies (at most 20 of them are printed),
-  and corresponding total energies.                
+  and corresponding total energies.
   Excit#   (Ha)    and    (eV)    total energy (Ha)    major contributions
    1    1.63652E-01   4.45321E+00   -8.722213E-01    1.00(  1->  5)  0.00(  1->  6)
    2    1.70484E-01   4.63910E+00   -8.653898E-01    1.00(  1->  2)  0.00(  1->  4)
@@ -931,7 +931,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -1, paral_kgb: 0, }
     (-8)->  2.752E+06, (-10)->  9.469E+07, (-12)->  3.258E+09, (-14)->  1.121E+11
 
   TDDFT triplet excitation energies (at most 20 of them are printed),
-  and corresponding total energies.                
+  and corresponding total energies.
   Excit#   (Ha)    and    (eV)    total energy (Ha)    major contributions
    1    1.04197E-01   2.83535E+00   -9.316766E-01    1.00(  1->  2)  0.00(  1->  3)
    2    1.04198E-01   2.83536E+00   -9.316760E-01    1.00(  1->  3)  0.00(  1->  2)
@@ -996,7 +996,7 @@ force_length_stats: {min: null, max: null, mean: null, }
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      1.7999000000E+01  1.8000000000E+01  1.8001000000E+01 Bohr
               amu      2.43050000E+01
@@ -1011,7 +1011,7 @@ force_length_stats: {min: null, max: null, mean: null, }
              ecut      3.50000000E+00 Hartree
            etotal1    -1.0358736059E+00
             fcart1    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
--          fftalg         312
+-          fftalg         512
            getden1          0
            getden2          1
            getden3          1
@@ -1113,7 +1113,7 @@ P           mkmem           1
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -1125,12 +1125,12 @@ P           mkmem           1
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -1148,7 +1148,7 @@ P           mkmem           1
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -1163,15 +1163,15 @@ P           mkmem           1
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          1.7  wall=          1.9
+- Proc.   0 individual time (sec): cpu=          1.5  wall=          1.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered  24 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.7  wall=          1.9
++Overall time at end (sec) : cpu=          1.5  wall=          1.5

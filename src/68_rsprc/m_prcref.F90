@@ -6,7 +6,7 @@
 !!  Routines to precondition residual potential (or density) and forces.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, MT, PMA)
+!!  Copyright (C) 1998-2025 ABINIT group (DCA, XG, MT, PMA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -216,7 +216,7 @@ subroutine prcref(atindx,dielar,dielinv,&
  integer :: coredens_method,cplex,dielop,iatom,ier,ifft,ii,index,ipw1
  integer :: ipw2,iq,iq0,ispden,klmn,kmix,n1,n2,n3,n3xccc,nfftot,nk3xc,optatm
  integer :: optdyfr,opteltfr,optgr,option,optn,optn2,optstr,optv,vloc_method
- real(dp) :: ai,ar,diemix,diemixmag,eei,enxc
+ real(dp) :: ai,ar,diemix,diemixmag,eei,bigexc,bigsxc
  real(dp) :: mixfac
  real(dp) :: mixfac_eff,mixfacmag,ucvol,vxcavg
  logical :: computediel,non_magnetic_xc
@@ -225,7 +225,7 @@ subroutine prcref(atindx,dielar,dielinv,&
 !arrays
  integer :: qprtrb(3)
  integer,allocatable :: indpw_prc(:)
- real(dp) :: dummy6(6),dummy7(6),gprimd(3,3),qphon(3),rmet(3,3),strsxc(6)
+ real(dp) :: dummy6(6),dummy7(6),gprimd(3,3),qphon(3),rmet(3,3)
  real(dp) :: vmean(dtset%nspden),vprtrb(2)
  real(dp),allocatable :: dummy(:),dummy1(:),dummy2(:),dummy3(:),dummy4(:),dummy5(:),dummy8(:),dummy9(:)
  real(dp),allocatable :: dyfrlo_indx(:,:,:),dyfrx2(:,:,:)
@@ -624,8 +624,8 @@ subroutine prcref(atindx,dielar,dielinv,&
 !    Prepare the call to rhotoxc
      call xcdata_init(xcdata,dtset=dtset)
      nk3xc=1 ; non_magnetic_xc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
-     call rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft,&
-&     work,0,work,0,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,rhor_wk,rprimd,strsxc,1,&
+     call rhotoxc(bigexc,bigsxc,kxc,mpi_enreg,nfft,ngfft,&
+&     work,0,work,0,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,rhor_wk,rprimd,1,&
 &     vxc_wk,vxcavg,xccc3d,xcdata,vhartr=vhartr_wk)
      ABI_FREE(xccc3d)
 
@@ -853,7 +853,7 @@ end subroutine prcref
  integer :: coredens_method,cplex,dielop,iatom,ier,ifft,ii,index,ipw1
  integer :: ipw2,ispden,klmn,kmix,n1,n2,n3,n3xccc,nfftot,nk3xc,optatm
  integer :: optdyfr,opteltfr,optgr,option,optn,optn2,optstr,optv,vloc_method
- real(dp) :: ai,ar,diemix,diemixmag,eei,enxc
+ real(dp) :: ai,ar,diemix,diemixmag,eei,bigexc,bigsxc
  real(dp) :: mixfac
  real(dp) :: mixfac_eff,mixfacmag,ucvol,vxcavg
  logical :: computediel,non_magnetic_xc
@@ -862,7 +862,7 @@ end subroutine prcref
 !arrays
  integer :: qprtrb(3)
  integer,allocatable :: indpw_prc(:)
- real(dp) :: dummy6(6),gprimd(3,3),qphon(3),rmet(3,3),strsxc(6)
+ real(dp) :: dummy6(6),gprimd(3,3),qphon(3),rmet(3,3)
  real(dp) :: vmean(dtset%nspden),vprtrb(2)
  real(dp),allocatable :: dummy_in(:)
  real(dp) :: dummy_out1(0),dummy_out2(0),dummy_out3(0),dummy_out4(0),dummy_out5(0),dummy_out6(0),dummy_out7(0)
@@ -1247,8 +1247,8 @@ end subroutine prcref
    call xcdata_init(xcdata,dtset=dtset)
    nk3xc=1 ; non_magnetic_xc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
    ABI_MALLOC(work,(0))
-   call rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft,&
-&   work,0,work,0,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,rhor_wk,rprimd,strsxc,1,&
+   call rhotoxc(bigexc,bigsxc,kxc,mpi_enreg,nfft,ngfft,&
+&   work,0,work,0,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,rhor_wk,rprimd,1,&
 &   vxc_wk,vxcavg,xccc3d,xcdata,vhartr=vhartr_wk)
    ABI_FREE(work)
    ABI_FREE(xccc3d)
@@ -2955,7 +2955,7 @@ end subroutine cgpr
 !! first bracket the minimum then perform the minimization
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2024 ABINIT group (DCA, XG, MT)
+!! Copyright (C) 1998-2025 ABINIT group (DCA, XG, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

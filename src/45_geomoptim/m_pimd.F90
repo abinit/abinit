@@ -7,7 +7,7 @@
 !!  Path-Integral Molecular Dynamics (PIMD) implementation.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2024 ABINIT group (GG,MT)
+!! Copyright (C) 2010-2025 ABINIT group (GG,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -30,7 +30,7 @@ MODULE m_pimd
  use m_random_zbq
 
  use m_numeric_tools,  only : uniformrandom
- use m_symtk,          only : matr3inv
+ use m_matrix,         only : matr3inv
  use m_geometry,       only : mkradim
 
  implicit none
@@ -90,10 +90,10 @@ MODULE m_pimd
   integer  :: use_qtb
   integer  :: qtb_file_unit
   real(dp) :: adpimd_gamma
-  real(dp) :: vis
+  real(dp) :: friction
   real(dp) :: bmass
   real(dp) :: dtion
-  real(dp) :: friction
+  real(dp) :: frictionbar
 ! Arrays
   integer ,pointer  :: typat(:)      ! This pointer is associated with dtset%typat
   real(dp),pointer :: amu(:)         ! This pointer is associated with dtset%%amu_orig(:,1)
@@ -132,7 +132,7 @@ CONTAINS !===========================================================
 !!
 !! SOURCE
 
-subroutine pimd_init(dtset,pimd_param,is_master)
+subroutine pimd_init(dtset,pimd_param,is_master,force_imgmov)
 
  implicit none
 
@@ -141,16 +141,22 @@ subroutine pimd_init(dtset,pimd_param,is_master)
  logical,intent(in) :: is_master
  type(dataset_type),target,intent(in) :: dtset
  type(pimd_type),intent(inout) :: pimd_param
+ integer,optional,intent(in) :: force_imgmov
 !Local variables-------------------------------
 !scalars
- integer :: ierr
+ integer :: ierr,imgmov
  character(len=200) :: msg
 
 !************************************************************************
+ if(present(force_imgmov)) then
+   imgmov=force_imgmov
+ else
+   imgmov=dtset%imgmov
+ end if
 
  call pimd_nullify(pimd_param)
 
- if((dtset%imgmov==9).or.(dtset%imgmov==10).or.(dtset%imgmov==13))then
+ if((imgmov==9).or.(imgmov==10).or.(imgmov==13))then
    pimd_param%adpimd      = dtset%adpimd
    pimd_param%constraint  = dtset%pimd_constraint
    pimd_param%irandom     = dtset%irandom
@@ -159,10 +165,10 @@ subroutine pimd_init(dtset,pimd_param,is_master)
    pimd_param%optcell     = dtset%optcell
    pimd_param%pitransform = dtset%pitransform
    pimd_param%adpimd_gamma= dtset%adpimd_gamma
-   pimd_param%vis         = dtset%vis
+   pimd_param%friction    = dtset%friction
    pimd_param%bmass       = dtset%bmass
    pimd_param%dtion       = dtset%dtion
-   pimd_param%friction    = dtset%friction
+   pimd_param%frictionbar = dtset%frictionbar
    pimd_param%mdtemp      =>dtset%mdtemp
    pimd_param%pimass      =>dtset%pimass
    pimd_param%strtarget   =>dtset%strtarget
@@ -170,13 +176,13 @@ subroutine pimd_init(dtset,pimd_param,is_master)
    pimd_param%qmass       =>dtset%qmass
    pimd_param%typat       =>dtset%typat
    pimd_param%wtatcon     =>dtset%wtatcon
-   if(dtset%imgmov==10)then
+   if(imgmov==10)then
      pimd_param%use_qtb=1
      if(is_master)then
        call pimd_init_qtb(dtset,pimd_param%qtb_file_unit)
      end if
    end if
-   if(dtset%imgmov==13)then
+   if(imgmov==13)then
      ABI_MALLOC(pimd_param%zeta_prev,(3,dtset%natom,dtset%nimage,dtset%nnos))
      ABI_MALLOC(pimd_param%zeta     ,(3,dtset%natom,dtset%nimage,dtset%nnos))
      ABI_MALLOC(pimd_param%zeta_next,(3,dtset%natom,dtset%nimage,dtset%nnos))
@@ -237,10 +243,10 @@ subroutine pimd_nullify(pimd_param)
  pimd_param%traj_unit    = -1
  pimd_param%use_qtb      =  0
  pimd_param%adpimd_gamma = one
- pimd_param%vis          = zero
+ pimd_param%friction     = zero
  pimd_param%bmass        = zero
  pimd_param%dtion        = zero
- pimd_param%friction     = zero
+ pimd_param%frictionbar  = zero
  nullify(pimd_param%mdtemp)
  nullify(pimd_param%pimass)
  nullify(pimd_param%strtarget)
@@ -495,7 +501,7 @@ function pimd_temperature(mass,vel)
  real(dp),intent(in) :: mass(:,:),vel(:,:,:)
 !Local variables-------------------------------
 !scalars
- integer :: iatom,idir,iimage,imass,natom,natom_mass,ndir,nimage,nmass
+ integer :: iatom,iimage,imass,natom,natom_mass,ndir,nimage,nmass
  real(dp) :: v2
  character(len=500) :: msg
 !arrays
@@ -514,14 +520,12 @@ function pimd_temperature(mass,vel)
  end if
 
  v2=zero
- do iimage=1,nimage
-   imass=min(nmass,iimage)
-   do iatom=1,natom
-     do idir=1,3
-       v2=v2+vel(idir,iatom,iimage)*vel(idir,iatom,iimage)*mass(iatom,imass)
-     end do
-   end do
- end do
+do iimage = 1, nimage
+  imass = min(nmass, iimage)
+  do iatom = 1, natom
+    v2 = v2 + sum(vel(:, iatom, iimage)**2) * mass(iatom, imass)
+  end do
+end do
  pimd_temperature=v2/(dble(3*natom*nimage)*kb_HaK)
 
 end function pimd_temperature
@@ -1702,18 +1706,13 @@ function pimd_diff_stress(stress_pimd,stress_target)
  real(dp) :: pimd_diff_stress(3,3)
 !Local variables-------------------------------
 !scalars
- integer :: ii,jj
 !arrays
  real(dp) :: stress_pimd2(3,3)
 
 !************************************************************************
 
 !Choice: the primitive estimator for pressure is chosen
- do ii=1,3
-   do jj=1,3
-     stress_pimd2(ii,jj)=stress_pimd(1,ii,jj)
-   end do
- end do
+ stress_pimd2(:,:) = stress_pimd(1, :, :)
 
 !+stress_target instead of - because it is translated from stress to pressure tensor
  pimd_diff_stress(1,1)=stress_pimd2(1,1)+stress_target(1)

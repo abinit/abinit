@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2014-2024 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2014-2025 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -102,7 +102,9 @@ AC_DEFUN([ABI_INFO_TRIGGERS_CHANGED],[
             trig_chgs += "  AC_MSG_NOTICE([  * removed feature trigger for %s])\n" % pkg
 
     if ( trig_chgs == "" ):
-        trig_chgs = "AC_MSG_NOTICE([no change in feature triggers to report])"
+        trig_chgs = """\
+  AC_MSG_NOTICE([])
+  AC_MSG_NOTICE([no change in feature triggers to report])"""
     else:
         trig_chgs = """\
   AC_MSG_NOTICE([])

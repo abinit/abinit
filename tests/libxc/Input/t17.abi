@@ -4,7 +4,7 @@
 ndtset 18
 
 # (S)LDAs X + different correlations
-ixc1  -1003
+#ixc1 -1003 ! Not portable from libxc v6 to v7 (LDA_C_RPA modified)
 ixc2  -1012
 ixc3  -1024
 
@@ -62,14 +62,14 @@ prteig 0
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t17.abo, tolnlines = 24, tolabs = 1.1e-1, tolrel = 8.0e-5, fld_options = -medium
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = Unknown
-#%% keywords = 
-#%% description = 
+#%% keywords =
+#%% description =
 #%%   Isolated Helium atom
 #%%   Test functionals from libXC 1.1 that were untested before ABINIT v6.12 (libxc 1.0.0.1 was used).
 #%%   This is to check the portability for different platform.

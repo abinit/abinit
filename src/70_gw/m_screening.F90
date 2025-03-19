@@ -7,7 +7,7 @@
 !!  with the inverse dielectric matrix as well as related methods.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2024 ABINIT group (MG)
+!! Copyright (C) 2008-2025 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1525,8 +1525,8 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
    ABI_FREE(kxcg_mat)
    do io=1,nomega
      write(msg,'(a,i4,a,2f9.4,a)')' Symmetrical epsilon^-1(G,G'') at the ',io,' th omega',omega(io)*Ha_eV,' [eV]'
-     call wrtout(std_out,msg)
-     call print_arr(chi0(:,:,io),mode_paral='PERS')
+     call wrtout(std_out, msg)
+     call print_arr([std_out], chi0(:,:,io))
    end do
 
  CASE (2)
@@ -1541,7 +1541,7 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
    do io=1,nomega
      if (omega_distrb(io) == my_rank) then
        call atddft_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0(:,:,io),fxc_ADA,option_test,my_nqlwl,dim_wing,omega(io),&
-&        chi0_head(:,:,io),chi0_lwing(:,io,:),chi0_uwing(:,io,:),tmp_lf,tmp_nlf,tmp_eelf,comm)
+                            chi0_head(:,:,io),chi0_lwing(:,io,:),chi0_uwing(:,io,:),tmp_lf,tmp_nlf,tmp_eelf,comm)
 
        ! Store results.
        epsm_lf(io,:) = tmp_lf
@@ -1553,7 +1553,7 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
    do io=1,nomega
      write(msg,'(a,i4,a,2f9.4,a)')' Symmetrical epsilon^-1(G,G'') at the ',io,' th omega',omega(io)*Ha_eV,' [eV]'
      call wrtout(std_out,msg)
-     call print_arr(chi0(:,:,io),mode_paral='PERS')
+     call print_arr([std_out], chi0(:,:,io))
    end do
 
  CASE (4)
@@ -1637,7 +1637,7 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
    do io=1,nomega
      write(msg,'(a,i4,a,2f9.4,a)')' Symmetrical epsilon^-1(G,G'') at the ',io,' th omega',omega(io)*Ha_eV,' [eV]'
      call wrtout(std_out,msg)
-     call print_arr(chi0(:,:,io),mode_paral='PERS')
+     call print_arr([std_out], chi0(:,:,io))
    end do
 
  CASE(5)
@@ -1683,7 +1683,7 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
    do io=1,nomega
      write(msg,'(a,i4,a,2f9.4,a)')' Symmetrical epsilon^-1(G,G'') at the ',io,' th omega',omega(io)*Ha_eV,' [eV]'
      call wrtout(std_out,msg)
-     call print_arr(chi0(:,:,io),mode_paral='PERS')
+     call print_arr([std_out], chi0(:,:,io))
    end do
 
 CASE(6)
@@ -1761,7 +1761,7 @@ CASE(6)
    do io=1,nomega
      write(msg,'(a,i4,a,2f9.4,a)')' Symmetrical epsilon^-1(G,G'') at the ',io,' th omega',omega(io)*Ha_eV,' [eV]'
      call wrtout(std_out,msg)
-     call print_arr(chi0(:,:,io),mode_paral='PERS')
+     call print_arr([std_out], chi0(:,:,io))
    end do
 
  CASE (7)
@@ -1848,7 +1848,7 @@ CASE(6)
    do io=1,nomega
      write(msg,'(a,i4,a,2f9.4,a)')' Symmetrical epsilon^-1(G,G'') at the ',io,' th omega',omega(io)*Ha_eV,' [eV]'
      call wrtout(std_out,msg)
-     call print_arr(chi0(:,:,io),mode_paral='PERS')
+     call print_arr([std_out], chi0(:,:,io))
    end do
 
  CASE DEFAULT
@@ -2023,7 +2023,7 @@ subroutine rpa_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0,my_nqlwl,dim_wing,chi0_head,ch
 
    if (prtvol > 0) then
      call wrtout(std_out,' Symmetrical epsilon(G,G'') ')
-     call print_arr(chi0, unit=std_out)
+     call print_arr([std_out], chi0)
    end if
    !
    ! === Invert tepsilon and calculate macroscopic dielectric constant ===
@@ -2037,7 +2037,7 @@ subroutine rpa_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0,my_nqlwl,dim_wing,chi0_head,ch
 
    if (prtvol > 0) then
      call wrtout(std_out," Symmetrical epsilon^-1(G,G'')")
-     call print_arr(chi0, unit=std_out)
+     call print_arr([std_out], chi0)
    end if
    !
    ! Save wings of e^-1 overwriting input values.
@@ -2223,7 +2223,7 @@ subroutine atddft_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0,kxcg_mat,option_test,my_nql
  if (prtvol > 0) then
    write(msg,'(a,2f9.4,a)')' Symmetrical epsilon^-1(G,G'') at omega',omega*Ha_eV,' [eV]'
    call wrtout(std_out,msg)
-   call print_arr(chi0,unit=std_out)
+   call print_arr([std_out], chi0)
  end if
 
 end subroutine atddft_symepsm1
@@ -2399,7 +2399,7 @@ subroutine atddft_hyb_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0,kxcg_mat,kxcg_mat_sr,op
  if (prtvol > 0) then
    write(msg,'(a,2f9.4,a)')' Symmetrical epsilon^-1(G,G'') at omega',omega*Ha_eV,' [eV]'
    call wrtout(std_out,msg)
-   call print_arr(chi0,unit=std_out)
+   call print_arr([std_out], chi0)
  end if
 
 end subroutine atddft_hyb_symepsm1
@@ -2533,7 +2533,7 @@ subroutine mkem1_q0(npwe,n1,n2,nomega,Cryst,Vcp,gvec,chi0_head,chi0_lwing,chi0_u
    end do
 
    write(std_out,*)" espilon head"
-   call print_arr(eps_head(:,:,iw))
+   call print_arr([std_out], eps_head(:,:,iw))
    !
    ! Construct the body of the symmetrized epsilon then invert it.
    do ig2=1,npwe-1
@@ -2566,7 +2566,7 @@ subroutine mkem1_q0(npwe,n1,n2,nomega,Cryst,Vcp,gvec,chi0_head,chi0_lwing,chi0_u
    end do !jdir
 
    call wrtout(std_out, "espilon^1 head after block inversion")
-   call print_arr(chi0_head(:,:,iw))
+   call print_arr([std_out], chi0_head(:,:,iw))
    !
    ! Change the body but do not add the corrections due to the head and the wings.
    ! since they can be obtained on the fly from eps_body and the wings of eps^{-1}.
@@ -3140,7 +3140,7 @@ subroutine lwl_write(path, cryst, vcp, npwe, nomega, gvec, chi0, chi0_head, chi0
  if (prtvol > 0 .and. my_rank == master) then
    call wrtout(std_out, "head of chi0")
    do iw=1,nomega
-     call print_arr(chi0_head(:,:,iw),max_r=3,max_c=3)
+     call print_arr([std_out], chi0_head(:,:,iw), max_r=3, max_c=3)
    end do
 
    do iw=1,nomega
@@ -3153,14 +3153,14 @@ subroutine lwl_write(path, cryst, vcp, npwe, nomega, gvec, chi0, chi0_head, chi0
        wng = chi0_uwing(ii,iw,:)
        wtest(ii) = - vdotw(GW_Q0_DEFAULT,wng,cryst%gmet,"G") * Vcp%vcqlwl_sqrt(1,1) * Vcp%vcqlwl_sqrt(ii,1)
      end do
-     call print_arr(wtest,max_r=9,unit=std_out)
+     call print_arr([std_out], wtest,max_r=9)
 
      call wrtout(std_out, "symmetrized e_G0 via tensor")
      do ii=1,npwe
        wng = chi0_lwing(ii,iw,:)
        wtest(ii) = - vdotw(GW_Q0_DEFAULT,wng,cryst%gmet,"G") * Vcp%vcqlwl_sqrt(1,1) * Vcp%vcqlwl_sqrt(ii,1)
      end do
-     call print_arr(wtest,max_r=9,unit=std_out)
+     call print_arr([std_out], wtest,max_r=9)
    end do
  end if
 
@@ -3223,7 +3223,7 @@ subroutine lwl_write(path, cryst, vcp, npwe, nomega, gvec, chi0, chi0_head, chi0
        wtest(ii) = em1_00*vdotw(GW_Q0_DEFAULT/length,wng,cryst%gmet,"G")
      end do
      wtest(1) = em1_00
-     call print_arr(wtest,max_r=9,unit=std_out)
+     call print_arr([std_out], wtest,max_r=9)
 
      call wrtout(std_out, "symmetrized e^-1_G0 via tensor")
      do ii=1,npwe
@@ -3231,7 +3231,7 @@ subroutine lwl_write(path, cryst, vcp, npwe, nomega, gvec, chi0, chi0_head, chi0
        wtest(ii) = em1_00*vdotw(GW_Q0_DEFAULT/length,wng,cryst%gmet,"G")
      end do
      wtest(1) = em1_00
-     call print_arr(wtest,max_r=9,unit=std_out)
+     call print_arr([std_out], wtest,max_r=9)
    end do !iw
  end if
 

@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2024 ABINIT group (AM)
+!! Copyright (C) 2010-2025 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2486,7 +2486,8 @@ subroutine fit_polynomial_coeff_solve(coefficients,fcart_coeffs,fcart_diff,energ
 !scalar
  integer :: ia,itime,icoeff,jcoeff,icoeff_tmp,jcoeff_tmp,mu,LDA,LDB,LDX,LDAF,N,NRHS
  real(dp):: efact,ffact,sfact,ftmpA,stmpA,ftmpB,stmpB,etmpA,etmpB,fmu,fnu,smu,snu,emu,enu
- integer :: INFO,ITER
+ integer :: INFO
+!integer :: ITER ! Only needed if DSGESV is used
  real(dp):: RCOND
  real(dp):: fcart_coeffs_tmp(3,natom,ntime)
  real(dp),allocatable:: AF(:,:),BERR(:),FERR(:),WORK(:),C(:),R(:)
@@ -2589,6 +2590,8 @@ subroutine fit_polynomial_coeff_solve(coefficients,fcart_coeffs,fcart_diff,energ
  end do ! End loop icoeff
 
 !2-Solve Ax=B
+
+!== Three different LAPACK routines are possible ==
 !OLD VERSION..
 ! call dgesvx(FACT,TRANS,N,NRHS,A,LDA,AF,LDAF,IPIV,EQUED,R,C,B,LDB,coefficients,LDX,&
  !RCOND,FERR,BERR,WORK,IWORK,INFO)
@@ -2597,6 +2600,18 @@ subroutine fit_polynomial_coeff_solve(coefficients,fcart_coeffs,fcart_diff,energ
 !   coefficients = zero
 ! end if
 
+!VERSION PRIOR TO 20240817. However test multibinit multi_l_6_1 fails on the new reference machine (eos).
+!call DSGESV(N,NRHS,A,LDA,IPIV,B,LDB,coefficients,LDX,WORK,SWORK,ITER,INFO)
+
+!Other routine, activated on 20240817, together with the change of reference machine
+ call dgesv(N,NRHS,A,LDA,IPIV,B,LDB,INFO)
+ coefficients = B(:,NRHS)
+!==================================================
+
+ !U is nonsingular
+ if (INFO==N+2) then
+   coefficients = zero
+ end if
 
  if(nbound>0 .and. (.not. ignore_bound))  then
    block
@@ -3558,9 +3573,9 @@ subroutine fit_polynomial_printSystemFiles(eff_pot,hist)
 
 !Create new supercell corresponding to the MD
  ncell = (/2,2,2/)
- call init_supercell(eff_pot%crystal%natom, (/ncell(1),0,0,  0,ncell(2),0,  0,0,ncell(3)/),&
-&                    eff_pot%crystal%rprimd,eff_pot%crystal%typat,&
-&                    eff_pot%crystal%xcart,eff_pot%crystal%znucl, supercell)
+ call supercell%init(eff_pot%crystal%natom, (/ncell(1),0,0,  0,ncell(2),0,  0,0,ncell(3)/),&
+                     eff_pot%crystal%rprimd,eff_pot%crystal%typat,&
+                     eff_pot%crystal%xcart,eff_pot%crystal%znucl)
 
 !allocation of array
  ABI_MALLOC(xcart,(3,supercell%natom))
@@ -3737,7 +3752,7 @@ subroutine fit_polynomial_printSystemFiles(eff_pot,hist)
  ABI_FREE(typat_order_uc)
  ABI_FREE(xcart)
  ABI_FREE(fcart)
- call destroy_supercell(supercell)
+ call supercell%free()
 
 end subroutine fit_polynomial_printSystemFiles
 !!***

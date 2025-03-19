@@ -21,6 +21,7 @@ variables/files.md
 variables/geo.md
 variables/gstate.md
 variables/gw.md
+variables/gwr.md
 variables/internal.md
 variables/paral.md
 variables/paw.md
@@ -102,6 +103,7 @@ topics/Planewaves.md
 topics/Phonons.md
 topics/PhononBands.md
 topics/PhononWidth.md
+topics/Polaron.md
 topics/PortabilityNonRegression.md
 topics/positron.md
 topics/printing.md

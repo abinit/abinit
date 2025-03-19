@@ -18,7 +18,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2024 ABINIT group (hexu)
+!! Copyright (C) 2001-2025 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -210,7 +210,7 @@
      real(dp), intent(out) :: Snew(3)
      call rng%rand_normal_array(Snew, 3)
      Snew(:)=Sold(:) + Snew(:)*angle
-     Snew(:)=Snew(:)/sqrt(Snew(1)*Snew(1)+Snew(2)*Snew(2)+Snew(3)*Snew(3))
+     Snew(:)=Snew(:)/norm2(Snew)
    end subroutine move_angle
 
    !----------------------------------------------------------------------
@@ -229,7 +229,7 @@
      type(rng_t), intent(inout) :: rng
      real(dp), intent(out) :: Snew(3)
      call rng%rand_normal_array(Snew, 3)
-     Snew(:)=Snew(:)/sqrt(Snew(1)*Snew(1)+Snew(2)*Snew(2)+Snew(3)*Snew(3))
+     Snew(:)=Snew(:)/norm2(Snew)
    end subroutine move_uniform
 
    !----------------------------------------------------------------------

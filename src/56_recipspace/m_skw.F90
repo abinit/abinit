@@ -6,7 +6,7 @@
 !!  Shankland-Koelling-Wood Fourier interpolation scheme.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2024 ABINIT group (MG)
+!! Copyright (C) 2008-2025 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,9 +28,7 @@ module m_skw
  use m_crystal
  use m_sort
  use m_nctk
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
 
  use m_fstrings,       only : itoa, sjoin, ktoa, yesno, ftoa
  use m_special_funcs,  only : abi_derfc
@@ -453,13 +451,11 @@ integer function skw_ncwrite(self, ncid, prefix) result(ncerr)
  integer,intent(in) :: ncid
  character(len=*),optional,intent(in) :: prefix
 
-#ifdef HAVE_NETCDF
 !Local variables-------------------------------
 !scalars
  character(len=500) :: prefix_
 !arrays
  real(dp),allocatable :: real_coefs(:,:,:,:)
-
 ! *************************************************************************
 
  prefix_ = "skw"; if (present(prefix)) prefix_ = trim(prefix)
@@ -494,8 +490,6 @@ contains
     character(len=len_trim(prefix_) + len_trim(istr)+1) :: ostr
     ostr = trim(prefix_) // trim(istr)
   end function pre
-
-#endif
 
 end function skw_ncwrite
 !!***

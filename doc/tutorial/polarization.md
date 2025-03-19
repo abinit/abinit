@@ -51,7 +51,7 @@ been previously obtained, and that the corresponding convergence studies have be
 We will adopt the following set of generic parameters:
 ```
 acell   3*7.2728565836E+00
-ecut    5    
+ecut    5
 ecutsm  0.5
 dilatmx 1.05
 nband   4 (=number of occupied bands)
@@ -83,7 +83,7 @@ further, you might refresh your memory concerning the other variables:
 Note as well that the pseudopotentials used here are freely available
 from [[http://www.pseudo-dojo.org|Pseudo Dojo]]. The ones chosen here for P and Al
 use the Perdew-Wang parameterization of the local density approximation (LDA); this is
-done to facilitate comparison of the results of this tutorial with those of 
+done to facilitate comparison of the results of this tutorial with those of
 [Non-linear properties](/tutorial/nlo).
 
 ## 2 Berry phase calculation of polarization in zero field
@@ -185,7 +185,7 @@ would be enough to make an ordinary vector vanish. But a lattice-valued vector
 does not have to vanish: the lattice just has to transform into itself under
 the tetrahedral point group. The ionic phase corresponds actually to a
 lattice-valued vector (-3/4 -3/4 -3/4). Concerning the electronic phase, it
-does not exactly vanish, unless the sampling of k points becomes continuous. 
+does not exactly vanish, unless the sampling of k points becomes continuous.
 
 If you go further in the file you will find the final results in cartesian
 coordinates. You can collect them for the different values of $\tau$.
@@ -230,8 +230,8 @@ Actually, the file *tpolarization_2.abi*
 not only leads to the computation of the Born effective charges, but also the
 computation of the piezoelectric constants (see later).
 You can review how to use DFPT in the
-[tutorial Response-function 1](/tutorial/rf1) and 
-[tutorial Response-function 2](/tutorial/rf2) tutorials. 
+[tutorial Response-function 1](/tutorial/rf1) and
+[tutorial Response-function 2](/tutorial/rf2) tutorials.
 
 !!! note
     An interesting feature of *tpolarization_2.abi* is the use of `berryopt2 -2` in
@@ -319,7 +319,7 @@ For this purpose, have a look at the files
 
 In these input files the finite strain is applied by multiplying the $e_4$ (Voigt notation)
 strain tensor by the (dimensionless) unit cell vectors:
-$$ 
+$$
    \left[\begin{matrix}
    1 & 0 & 0 \\\
    0 & 1 & e_4/2 \\\
@@ -339,10 +339,10 @@ $$
 $$
 Don't forget that in the input file, vectors are read in as rows of numbers, not columns!
 
-Notice how in the relaxed ion case, the input file includes [[ionmov]] = 2 and [[optcell]] = 0, in
+Notice how in the relaxed ion case, the input file includes [[geoopt]] "bfgs" and [[optcell]] = 0, in
 order to relax the ion positions at fixed cell geometry. These calculations
 should give the following final results (obtained by taking finite difference
-expressions of the strains for different electric fields): 
+expressions of the strains for different electric fields):
 $-0.6427~C/m^2$ for the clamped ion case, and $0.1310~C/m^2$ for the relaxed ion case.
 
 For example, the clamped ion piezoelectric constant was obtained from *tpolarization_4.abo*:
@@ -351,7 +351,7 @@ For example, the clamped ion piezoelectric constant was obtained from *tpolariza
 ....
  Polarization in cartesian coordinates (C/m^2):
      Total: -0.162420887E+01  -0.162587046E+01  -0.162587046E+01
-....    
+....
 == DATASET  3 ==========================================================
      ...
  Polarization in cartesian coordinates (C/m^2):
@@ -380,7 +380,7 @@ As general parameters, one has to specify [[nband]], [[nbdbuf]] and [[kptopt]]:
             kptopt         1
 
 As a first step (dataset 11), the code must perform a Berry phase calculation
-in zero electric field. For that purpose, 
+in zero electric field. For that purpose,
 it is necessary to set the values of [[berryopt]]:
 
             berryopt11     -1
@@ -417,11 +417,11 @@ more exhaustive calculations over a larger set of fields.
 
 Various quantities can be extracted from the finite
 field calculation at clamped ions using finite difference techniques: the Born
-effective charge $Z^*$ can be extracted from the difference in forces at 
+effective charge $Z^*$ can be extracted from the difference in forces at
 different electric fields, the optical dielectric
-constant can be deduced from the polarizations at different fields, 
+constant can be deduced from the polarizations at different fields,
 and the clamped ion
-piezoelectric tensor can be deduced from the stress tensor at different fields. 
+piezoelectric tensor can be deduced from the stress tensor at different fields.
 As an illustration
 we will focus here on the computation of $Z^*$.
 
@@ -472,7 +472,7 @@ This value is similar to the value reported from DFPT. If you do calculations
 for more electric fields, fitting them with the general expression of the
 force above (including the $E^2$ term), you can find the $d\chi/d\tau$ term.
 From the given input file *tpolarization_6.abi*, using all the fields,
-you should find $d\chi/d\tau$ for Al of  = -0.0295. 
+you should find $d\chi/d\tau$ for Al of  = -0.0295.
 
 Going back to the output file, you can also look at the evolution of the
 polarization with the field.
@@ -529,15 +529,15 @@ $$
 \epsilon_{11}/\epsilon_0 = 1+ \chi^{(1)}_{11} = 6.5166.
 $$
 
-This value is a bit over the value of 6.463 obtained by DFPT from *tpolarization_3.abi*. 
+This value is a bit over the value of 6.463 obtained by DFPT from *tpolarization_3.abi*.
 Typically, finite field calculations converge with
 the density of the k point grid more slowly than DFPT calculations.
 
 If you do calculations for more electric fields, fitting them with the general
 expression of the polarization above (including the $E^2$ term) you can find the non-
-linear optical susceptibility $\chi^{(2)}/4\pi$ (in atomic units). 
-For *tpolarization_6.abi* you should find $\chi^{(2)}/4\pi = 2.5427$, so 
-in SI units $\chi^{(2)} = 62.14~\mathrm{pm/V}$ and $d_{36} = 15.54~\mathrm{pm/V}$. 
+linear optical susceptibility $\chi^{(2)}/4\pi$ (in atomic units).
+For *tpolarization_6.abi* you should find $\chi^{(2)}/4\pi = 2.5427$, so
+in SI units $\chi^{(2)} = 62.14~\mathrm{pm/V}$ and $d_{36} = 15.54~\mathrm{pm/V}$.
 The relationship between the $\chi^{(2)}_{ijk}$ tensor and the $d_{ij}$ tensor (the
 quantity reported by `abinit` in a nonlinear optics DFPT computation) involves
 a variety of symmetries and is explained in detail in the book [[cite:Boyd2020]].
@@ -552,7 +552,7 @@ conditions of strain, stress, field, and so forth are discussed in depth in
 
 ![](polarization_assets/tpolarization_6_stress.png)
 
-You can modify the previous input file to perform a finite field 
+You can modify the previous input file to perform a finite field
 calculation combined with ion relaxation, similarly to how
 *tpolarization_5.abi* was modified from *tpolarization_4.abi*, giving access to the
 the relaxed ion proper piezoelectric constant.

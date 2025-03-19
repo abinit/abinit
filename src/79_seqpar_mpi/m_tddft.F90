@@ -6,7 +6,7 @@
 !!  Routines for computing excitation energies within TDDFT
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2024 ABINIT group (XG, JYR, MB, MBELAND, SHAMEL)
+!! Copyright (C) 1999-2025 ABINIT group (XG, JYR, MB, MBELAND, SHAMEL)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -32,12 +32,11 @@ module m_tddft
  use m_sort
  use m_dtset
  use m_dtfil
- use m_xmpi, only : xmpi_bcast,xmpi_gatherv,xmpi_scatterv
  use iso_c_binding, only : c_ptr,c_loc,c_f_pointer
 
  use defs_abitypes, only : MPI_type
  use m_io_tools, only : get_unit
- use m_symtk,    only : matr3inv
+ use m_matrix,   only : matr3inv
  use m_time,     only : timab
  use m_fftcore,  only : sphereboundary
  use m_spacepar, only : hartre

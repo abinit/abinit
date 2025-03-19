@@ -1,8 +1,8 @@
 
-.Version 9.11.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Jul 2023.
-- ( at 12h08 )
-  
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v8_t55/t55.abi
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h14 )
+
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v8_t55/t55.abi
 - output file    -> t55.abo
 - root for input  files -> t55i
 - root for output files -> t55o
@@ -75,10 +75,10 @@ _ WF disk file :      0.179 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -86,7 +86,7 @@ _ WF disk file :      0.179 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
               amu      2.43050000E+01  1.59994000E+01
            diemac      6.00000000E+00
              ecut      3.00000000E+01 Hartree
--          fftalg         312
+-          fftalg         512
            getden1          0
            getden2          1
            getden3          1
@@ -243,8 +243,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     30.000   => boxcut(ratio)=   2.14352
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Mg-sp-gw.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Mg-sp-gw.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Mg-sp-gw.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Mg-sp-gw.psp8
 - Mg    ONCVPSP  r_core=  1.16  1.56
 - 12.00000  10.00000    150902                znucl, zion, pspdat
     8   11    1    4       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -257,8 +257,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              1   -6.605901   -2.664074
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/O.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/O.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/O.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/O.psp8
 - O     ONCVPSP  r_core=  1.36  1.46  1.26
 -  8.00000   6.00000    151103                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -292,16 +292,16 @@ tolerances: {tolvrs: 1.00E-22, }
  ETOT  4  -76.032590354534    -1.183E-03 3.270E-05 7.569E-03
  ETOT  5  -76.032591300618    -9.461E-07 4.407E-08 4.851E-04
  ETOT  6  -76.032591496835    -1.962E-07 5.762E-09 1.395E-05
- ETOT  7  -76.032591499879    -3.043E-09 1.948E-10 3.440E-07
- ETOT  8  -76.032591499928    -4.913E-11 1.440E-12 2.817E-08
- ETOT  9  -76.032591499937    -9.521E-12 3.916E-13 2.012E-11
- ETOT 10  -76.032591499938    -1.037E-12 1.917E-16 1.198E-13
- ETOT 11  -76.032591499938     4.121E-13 8.370E-19 1.103E-16
- ETOT 12  -76.032591499938    -4.690E-13 9.193E-22 1.646E-18
- ETOT 13  -76.032591499940    -1.933E-12 1.652E-23 3.665E-21
- ETOT 14  -76.032591499940    -1.279E-13 2.325E-26 6.850E-23
+ ETOT  7  -76.032591499879    -3.044E-09 1.948E-10 3.440E-07
+ ETOT  8  -76.032591499928    -4.907E-11 1.440E-12 2.817E-08
+ ETOT  9  -76.032591499937    -9.535E-12 3.916E-13 2.012E-11
+ ETOT 10  -76.032591499938    -9.521E-13 1.917E-16 1.198E-13
+ ETOT 11  -76.032591499938     3.126E-13 8.370E-19 1.103E-16
+ ETOT 12  -76.032591499938    -4.547E-13 9.194E-22 1.646E-18
+ ETOT 13  -76.032591499940    -1.947E-12 1.652E-23 3.671E-21
+ ETOT 14  -76.032591499940    -9.948E-14 2.274E-26 6.903E-23
 
- At SCF step   14       vres2   =  6.85E-23 < tolvrs=  1.00E-22 =>converged.
+ At SCF step   14       vres2   =  6.90E-23 < tolvrs=  1.00E-22 =>converged.
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  1.61554058E-03  sigma(3 2)=  0.00000000E+00
@@ -319,7 +319,7 @@ lattice_vectors:
 lattice_lengths: [   5.68264,    5.68264,    5.68264, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.2975864E+02
-convergence: {deltae: -1.279E-13, res2:  6.850E-23, residm:  2.325E-26, diffor: null, }
+convergence: {deltae: -9.948E-14, res2:  6.903E-23, residm:  2.274E-26, diffor: null, }
 etotal    :  -7.60325915E+01
 entropy   :   0.00000000E+00
 fermie    :   1.65675690E-01
@@ -346,7 +346,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   84.433E-28; max=  23.253E-27
+ Mean square residual over all n,k,spin=   84.459E-28; max=  22.743E-27
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.500000000000      0.500000000000      0.500000000000
@@ -388,7 +388,7 @@ Ewald energy        : -4.69303700643459E+01
 psp_core            :  1.90126569223953E+00
 local_psp           : -6.42389313151317E+01
 non_local_psp       : -2.06156934029011E+01
-total_energy        : -7.60325914999404E+01
+total_energy        : -7.60325914999403E+01
 total_energy_eV     : -2.06895203317545E+03
 band_energy         : -1.29734553139316E+01
 ...
@@ -439,8 +439,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
 ================================================================================
  prteigrs : about to open file t55o_DS2_EIG
  Non-SCF case, kpt    1 (  0.00000  0.00000  0.00000), residuals and eigenvalues=
-  1.94E-23  7.29E-24  1.21E-23  1.47E-23  2.48E-23  2.60E-23  9.00E-23  3.77E-23
-  8.81E-23  5.87E-23  9.68E-23  4.06E-23
+  1.94E-23  7.30E-24  1.21E-23  1.47E-23  2.48E-23  2.60E-23  9.00E-23  3.77E-23
+  8.81E-23  5.88E-23  9.68E-23  4.06E-23
  -2.5090E+00 -1.2797E+00 -1.2797E+00 -1.2797E+00 -4.6211E-01  1.6568E-01
   1.6568E-01  1.6568E-01  3.2926E-01  7.4525E-01  7.4525E-01  7.4525E-01
 
@@ -477,7 +477,7 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   37.889E-24; max=  90.021E-24
+ Mean square residual over all n,k,spin=   37.890E-24; max=  90.020E-24
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.500000000000      0.500000000000      0.500000000000
@@ -526,8 +526,8 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=     30.000   => boxcut(ratio)=   2.14352
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Mg-sp-gw.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Mg-sp-gw.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Mg-sp-gw.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Mg-sp-gw.psp8
 - Mg    ONCVPSP  r_core=  1.16  1.56
 - 12.00000  10.00000    150902                znucl, zion, pspdat
     8   11    1    4       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -540,8 +540,8 @@ meta: {optdriver: 1, rfelfd: 2, }
              1   -6.605901   -2.664074
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/O.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/O.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/O.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/O.psp8
 - O     ONCVPSP  r_core=  1.36  1.46  1.26
 -  8.00000   6.00000    151103                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -558,7 +558,7 @@ meta: {optdriver: 1, rfelfd: 2, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   3
@@ -590,29 +590,29 @@ tolerances: {tolwfr: 1.00E-22, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -45.305494203515     -4.531E+01 1.664E-02 0.000E+00
- ETOT  2  -45.308683947586     -3.190E-03 5.277E-06 0.000E+00
+-ETOT  1  -45.305494187115     -4.531E+01 1.664E-02 0.000E+00
+ ETOT  2  -45.308683947576     -3.190E-03 5.278E-06 0.000E+00
  ETOT  3  -45.308684640874     -6.933E-07 1.185E-09 0.000E+00
- ETOT  4  -45.308684641099     -2.254E-10 6.384E-13 0.000E+00
- ETOT  5  -45.308684641100     -9.237E-14 3.486E-16 0.000E+00
- ETOT  6  -45.308684641100      2.842E-14 1.574E-19 0.000E+00
- ETOT  7  -45.308684641099      1.421E-14 1.485E-22 0.000E+00
- ETOT  8  -45.308684641100     -4.263E-14 5.750E-23 0.000E+00
+ ETOT  4  -45.308684641099     -2.255E-10 6.384E-13 0.000E+00
+ ETOT  5  -45.308684641099     -1.208E-13 3.486E-16 0.000E+00
+ ETOT  6  -45.308684641099      5.684E-14 1.574E-19 0.000E+00
+ ETOT  7  -45.308684641099     -2.842E-14 1.485E-22 0.000E+00
+ ETOT  8  -45.308684641099      1.421E-14 5.753E-23 0.000E+00
 
  At SCF step    8   max residual=  5.75E-23 < tolwfr=  1.00E-22 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   20.183E-24; max=  57.502E-24
+ Mean square residual over all n,k,spin=   20.186E-24; max=  57.532E-24
  dfpt_looppert : ek2=    5.8681353568E+01
           f-sum rule ratio=    1.5279875991E+00
  prteigrs : about to open file t55t_1WF1_EIG
  Expectation of eigenvalue derivatives (hartree) for nkpt=   1  k points:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband= 12, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-   0.00000    0.00000    0.00000    0.00000    0.00000    0.00000   -0.00000   -0.00000
-  -0.00000    0.00000   -0.00000   -0.00000
+  -0.00000   -0.00000   -0.00000   -0.00000    0.00000    0.00000   -0.00000   -0.00000
+   0.00000    0.00000   -0.00000   -0.00000
 
  Eight components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -647,29 +647,29 @@ tolerances: {tolwfr: 1.00E-22, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -45.305019022761     -4.531E+01 1.729E-02 0.000E+00
+-ETOT  1  -45.305019022715     -4.531E+01 1.729E-02 0.000E+00
  ETOT  2  -45.308683734677     -3.665E-03 3.618E-06 0.000E+00
- ETOT  3  -45.308684639521     -9.048E-07 1.597E-09 0.000E+00
- ETOT  4  -45.308684639856     -3.358E-10 4.726E-13 0.000E+00
- ETOT  5  -45.308684639857     -1.634E-13 3.486E-16 0.000E+00
- ETOT  6  -45.308684639857      2.842E-14 1.574E-19 0.000E+00
- ETOT  7  -45.308684639857     -2.132E-14 1.485E-22 0.000E+00
- ETOT  8  -45.308684639857      2.132E-14 7.283E-23 0.000E+00
+ ETOT  3  -45.308684639520     -9.048E-07 1.597E-09 0.000E+00
+ ETOT  4  -45.308684639856     -3.358E-10 4.725E-13 0.000E+00
+ ETOT  5  -45.308684639856     -1.776E-13 3.486E-16 0.000E+00
+ ETOT  6  -45.308684639856      3.553E-14 1.574E-19 0.000E+00
+ ETOT  7  -45.308684639856     -4.263E-14 1.485E-22 0.000E+00
+ ETOT  8  -45.308684639856      3.553E-14 7.283E-23 0.000E+00
 
  At SCF step    8   max residual=  7.28E-23 < tolwfr=  1.00E-22 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   32.820E-24; max=  72.835E-24
+ Mean square residual over all n,k,spin=   32.826E-24; max=  72.826E-24
  dfpt_looppert : ek2=    5.8681353568E+01
           f-sum rule ratio=    1.5279875990E+00
  prteigrs : about to open file t55t_1WF1_EIG
  Expectation of eigenvalue derivatives (hartree) for nkpt=   1  k points:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband= 12, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-   0.00000    0.00000    0.00000    0.00000   -0.00000    0.00000    0.00000    0.00000
-  -0.00000    0.00000   -0.00000   -0.00000
+   0.00000    0.00000    0.00000    0.00000    0.00000   -0.00000    0.00000    0.00000
+  -0.00000   -0.00000   -0.00000   -0.00000
 
  Eight components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -704,28 +704,28 @@ tolerances: {tolwfr: 1.00E-22, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -45.305482613620     -4.531E+01 1.664E-02 0.000E+00
- ETOT  2  -45.308683944806     -3.201E-03 5.279E-06 0.000E+00
+-ETOT  1  -45.305482629947     -4.531E+01 1.664E-02 0.000E+00
+ ETOT  2  -45.308683944815     -3.201E-03 5.279E-06 0.000E+00
  ETOT  3  -45.308684638397     -6.936E-07 1.185E-09 0.000E+00
- ETOT  4  -45.308684638622     -2.254E-10 6.391E-13 0.000E+00
- ETOT  5  -45.308684638622     -1.066E-13 3.486E-16 0.000E+00
- ETOT  6  -45.308684638622      2.132E-14 1.574E-19 0.000E+00
- ETOT  7  -45.308684638622     -7.105E-15 1.484E-22 0.000E+00
- ETOT  8  -45.308684638622     -7.105E-15 9.860E-23 0.000E+00
+ ETOT  4  -45.308684638622     -2.255E-10 6.391E-13 0.000E+00
+ ETOT  5  -45.308684638622     -7.105E-15 3.486E-16 0.000E+00
+ ETOT  6  -45.308684638622     -1.421E-14 1.574E-19 0.000E+00
+ ETOT  7  -45.308684638622     -4.263E-14 1.484E-22 0.000E+00
+ ETOT  8  -45.308684638622      8.527E-14 9.860E-23 0.000E+00
 
  At SCF step    8   max residual=  9.86E-23 < tolwfr=  1.00E-22 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   29.163E-24; max=  98.600E-24
+ Mean square residual over all n,k,spin=   29.160E-24; max=  98.602E-24
  dfpt_looppert : ek2=    5.8681353568E+01
           f-sum rule ratio=    1.5279875990E+00
  prteigrs : about to open file t55t_1WF1_EIG
  Expectation of eigenvalue derivatives (hartree) for nkpt=   1  k points:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband= 12, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.00000    0.00000    0.00000    0.00000   -0.00000   -0.00000    0.00000    0.00000
+   0.00000    0.00000    0.00000    0.00000    0.00000   -0.00000    0.00000    0.00000
    0.00000    0.00000    0.00000    0.00000
 
  Eight components of 2nd-order total energy (hartree) are
@@ -746,7 +746,7 @@ tolerances: {tolwfr: 1.00E-22, }
 
  K-point ( 0.000, 0.000, 0.000) | band =     5
  Effective mass tensor:
-              2.3573940649              0.0000010041              0.0000010040
+              2.3573940648              0.0000010041              0.0000010040
               0.0000010041              2.3573940648              0.0000010040
               0.0000010040              0.0000010040              2.3573940648
  Effective mass tensor eigenvalues:
@@ -754,7 +754,7 @@ tolerances: {tolwfr: 1.00E-22, }
  Angular average effective mass 1/(<1/m>)=   2.3573940648
  Angular average effective mass for Frohlich model (<m**0.5>)**2=   2.3573940648
  Effective masses along directions: (cart. coord. / red. coord. -> eff. mass)
-    1:   1.000000  0.000000  0.000000 /   0.000000  0.707107  0.707107 ->   2.3573940649
+    1:   1.000000  0.000000  0.000000 /   0.000000  0.707107  0.707107 ->   2.3573940648
     2:   0.000000  1.000000  0.000000 /   0.707107  0.000000  0.707107 ->   2.3573940648
     3:   0.000000  0.000000  1.000000 /   0.707107  0.707107  0.000000 ->   2.3573940648
     4:   0.577350  0.577350  0.577350 /   0.577350  0.577350  0.577350 ->   2.3573960729
@@ -762,7 +762,7 @@ tolerances: {tolwfr: 1.00E-22, }
     6:   0.707107  0.000000  0.707107 /   0.408248  0.816497  0.408248 ->   2.3573950688
     7:   0.707107  0.707107  0.000000 /   0.408248  0.408248  0.816497 ->   2.3573950689
 
- COMMENTS: 
+ COMMENTS:
  - At k-point ( 0.000, 0.000, 0.000), bands     6 through     8
    are DEGENERATE (effective mass tensor is therefore not defined).
    See Section IIIB Eqs. (67)-(70) and Appendix E of PRB 93 205147 (2016).
@@ -789,7 +789,7 @@ tolerances: {tolwfr: 1.00E-22, }
 
  K-point ( 0.000, 0.000, 0.000) | band =     7
  Transport equivalent effective mass tensor:
-             -3.1894767439             -0.0000016144             -0.0000016329
+             -3.1894767440             -0.0000016144             -0.0000016329
              -0.0000016144             -3.1890831716             -0.0000016442
              -0.0000016329             -0.0000016442             -3.1905074395
  Transport equivalent effective mass tensor eigenvalues:
@@ -809,7 +809,7 @@ tolerances: {tolwfr: 1.00E-22, }
  Transport equivalent effective mass tensor:
              -9.0215626454             -0.0000009690             -0.0000009175
              -0.0000009690             -9.0219564841             -0.0000008886
-             -0.0000009175             -0.0000008886             -9.0182691420
+             -0.0000009175             -0.0000008886             -9.0182691421
  Transport equivalent effective mass tensor eigenvalues:
              -9.0219564867             -9.0215626433             -9.0182691416
  Angular average effective mass 1/(<1/m>)=  -3.7966529324
@@ -821,7 +821,7 @@ tolerances: {tolwfr: 1.00E-22, }
     4:   0.577350  0.577350  0.577350 /   0.577350  0.577350  0.577350 ->  -3.8256918901
     5:   0.000000  0.707107  0.707107 /   0.816497  0.408248  0.408248 ->  -6.1814476287
     6:   0.707107  0.000000  0.707107 /   0.408248  0.816497  0.408248 ->  -6.1814476278
-    7:   0.707107  0.707107  0.000000 /   0.408248  0.408248  0.816497 ->  -6.1814476279
+    7:   0.707107  0.707107  0.000000 /   0.408248  0.408248  0.816497 ->  -6.1814476280
 
  Angular average effective mass for Frohlich model, averaged over degenerate bands.
  Value of     (<<m**0.5>>)**2 =     1.923346E+00
@@ -871,7 +871,7 @@ tolerances: {tolwfr: 1.00E-22, }
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      8.0364717690E+00  8.0364717690E+00  8.0364717690E+00 Bohr
               amu      2.43050000E+01  1.59994000E+01
@@ -883,7 +883,7 @@ tolerances: {tolwfr: 1.00E-22, }
                       -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         312
+-          fftalg         512
            getden1          0
            getden2          1
            getden3          1
@@ -1047,7 +1047,7 @@ P          mk1mem3          1
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -1075,12 +1075,12 @@ P          mk1mem3          1
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -1098,15 +1098,15 @@ P          mk1mem3          1
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          9.8  wall=         10.0
+- Proc.   0 individual time (sec): cpu=          4.5  wall=          4.6
 
 ================================================================================
 
  Calculation completed.
 .Delivered   3 WARNINGs and   9 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          9.8  wall=         10.0
++Overall time at end (sec) : cpu=          4.5  wall=          4.6

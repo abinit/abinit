@@ -6,7 +6,7 @@
 !!  Poisson solver
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR,TRangel).
+!!  Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR,TRangel).
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -333,11 +333,7 @@ subroutine psolver_rhohxc(enhartr, enxc, envxc, icoulomb, ixc, &
    ABI_MALLOC(rhonow,(nfft,nspden))
 !  copy rhor into rhonow:
 !  ABINIT convention is followed: (ispin=1: for spin up + spin down)
-   do ispin=1,nspden
-     do ifft=1,nfft
-       rhonow(ifft,ispin)=abs(rhor(ifft,ispin))+1.0d-20
-     end do
-   end do
+   rhonow(1:nfft,1:nspden)=abs(rhor(1:nfft,1:nspden))+1.0d-20
 
    if(usewvl==1) then
      call H_potential(datacode,&
@@ -350,9 +346,7 @@ subroutine psolver_rhohxc(enhartr, enxc, envxc, icoulomb, ixc, &
 &     zero,sumpion)
    end if
 !
-   do ifft=1,nfft
-     vhartr(ifft)=rhonow(ifft,1)
-   end do
+   vhartr(1:nfft)=rhonow(1:nfft,1)
 !  write(*,*)'erase me psolver_rhohxc l350, set vhartr=0'
 !  vhartr=zero ; enhartr=zero
 !
@@ -363,18 +357,12 @@ subroutine psolver_rhohxc(enhartr, enxc, envxc, icoulomb, ixc, &
 !  Add n_c here:
    if(n3xccc>0 .and. add_n_c_here) then
      do ispin=1,nspden
-       do ifft=1,nfft
-         rhonow(ifft,ispin)=rhonow(ifft,ispin)+xccc3d(ifft)
-       end do
+       rhonow(:,ispin)=rhonow(:,ispin)+xccc3d(:)
      end do
    end if
 !  Remove \hat{n} here:
    if(test_nhat .and. rest_hat_n_here) then
-     do ispin=1,nspden
-       do ifft=1,nfft
-         rhonow(ifft,ispin)=rhonow(ifft,ispin)-nhat(ifft,ispin)
-       end do
-     end do
+     rhonow(1:nfft,1:nspden)=rhonow(1:nfft,1:nspden)-nhat(1:nfft,1:nspden)
    end if
 
 !  Make the density positive everywhere (but do not care about gradients)
@@ -419,9 +407,7 @@ subroutine psolver_rhohxc(enhartr, enxc, envxc, icoulomb, ixc, &
 !  NC case: here we optimize memory, and we reuse vhartree to store rhor:
 
 !  We save total rhor in vhartr
-   do ifft=1,nfft
-     vhartr(ifft)  = rhor(ifft, 1)
-   end do
+   vhartr(1:nfft)  = rhor(1:nfft, 1)
 
 !  In non-wavelet case, we change the rhor values.
    if (nspden == 2) then

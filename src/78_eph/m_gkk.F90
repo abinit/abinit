@@ -5,7 +5,7 @@
 !!  Tools for the computation of electron-phonon coupling matrix elements (gkk)
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2024 ABINIT group (GKA, MG)
+!!  Copyright (C) 2008-2025 ABINIT group (GKA, MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -43,7 +43,7 @@ module m_gkk
  use m_fstrings,       only : itoa, sjoin, ktoa, ltoa, strcat
  use m_symtk,          only : littlegroup_q
  use m_fftcore,        only : get_kg
- use defs_datatypes,   only : ebands_t, pseudopotential_type
+ use defs_datatypes,   only : pseudopotential_type
  use m_crystal,        only : crystal_t
  use m_bz_mesh,        only : findqg0
  use m_cgtools,        only : dotprod_g
@@ -135,24 +135,25 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  character(len=500) :: msg, what
  character(len=fnlen) :: fname, gkkfilnam
 !arrays
- integer :: g0_k(3),symq(4,2,cryst%nsym)
+ integer :: g0_k(3),symq(4,2,cryst%nsym), units(2)
  integer,allocatable :: kg_k(:,:),kg_kq(:,:),nband(:,:),nband_kq(:,:),wfd_istwfk(:)
+ real(dp) :: ylmgr_kq_dum(1,1,1) ! ylmgr_k_dum(1,1,1),
  real(dp) :: kk(3),kq(3),qpt(3),phfrq(3*cryst%natom),dvdb_qdamp(1)
  real(dp),allocatable :: displ_cart(:,:,:),displ_red(:,:,:), eigens_kq(:,:,:)
- real(dp),allocatable :: grad_berry(:,:),kinpw1(:),kpg1_k(:,:),kpg_k(:,:),dkinpw(:)
- real(dp),allocatable :: ffnlk(:,:,:,:),ffnl1(:,:,:,:),ph3d(:,:,:),ph3d1(:,:,:)
+ real(dp),allocatable :: grad_berry(:,:),kinpw_kq(:),kpg_kq(:,:),kpg_k(:,:),dkinpw(:)
+ real(dp),allocatable :: ffnl_k(:,:,:,:),ffnl_kq(:,:,:,:),ph3d_k(:,:,:),ph3d_kq(:,:,:)
  real(dp),allocatable :: v1scf(:,:,:,:),gkk(:,:,:,:,:), bras(:,:,:),kets(:,:,:),h1_kets(:,:,:)
- real(dp),allocatable :: ph1d(:,:),vlocal(:,:,:,:),vlocal1(:,:,:,:,:)
- real(dp),allocatable :: ylm_kq(:,:),ylm_k(:,:),ylmgr_kq(:,:,:)
+ real(dp),allocatable :: ph1d(:,:),vlocal(:,:,:,:),vlocal1(:,:,:,:,:), ylm_kq(:,:),ylm_k(:,:)
  real(dp),allocatable :: dummy_vtrial(:,:),gvnlx1(:,:), gs1c(:,:), gkq_atm(:,:,:,:)
  logical,allocatable :: bks_mask(:,:,:),bks_mask_kq(:,:,:),keep_ur(:,:,:),keep_ur_kq(:,:,:)
  type(pawcprj_type),allocatable  :: cwaveprj0(:,:) !natom,nspinor*usecprj)
-
 !************************************************************************
+
+ units = [std_out, ab_out]
 
  what = "(GKK files)"; if (dtset%eph_task == -2) what = "GKQ file"
  write(msg, '(3a)') " Computation of electron-phonon coupling matrix elements ", trim(what), ch10
- call wrtout([std_out, ab_out], msg, do_flush=.True.)
+ call wrtout(units, msg, do_flush=.True.)
 
  if (psps%usepaw == 1) then
    ABI_ERROR("PAW not implemented")
@@ -215,7 +216,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
    dtset%nloalg,dtset%prtvol,dtset%pawprtvol,comm)
  ABI_FREE(wfd_istwfk)
 
- call wfd_k%print(header="Wavefunctions on the k-points grid",mode_paral='PERS')
+ call wfd_k%print([std_out], header="Wavefunctions on the k-points grid")
 
  ABI_MALLOC(wfd_istwfk, (nkpt_kq))
  wfd_istwfk = 1
@@ -225,7 +226,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
    dtset%nloalg,dtset%prtvol,dtset%pawprtvol,comm)
  ABI_FREE(wfd_istwfk)
 
- call wfd_kq%print(header="Wavefunctions on the q-shifted k-points grid",mode_paral='PERS')
+ call wfd_kq%print([std_out], header="Wavefunctions on the q-shifted k-points grid")
 
  ABI_FREE(nband)
  ABI_FREE(bks_mask)
@@ -252,9 +253,9 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  ABI_MALLOC(kg_kq, (3, mpw))
 
  ! Spherical Harmonics for useylm==1.
+ ! TODO: These arrays should be allocated with npw_k and npw_kq
  ABI_MALLOC(ylm_k,(mpw, psps%mpsang*psps%mpsang*psps%useylm))
  ABI_MALLOC(ylm_kq,(mpw, psps%mpsang*psps%mpsang*psps%useylm))
- ABI_MALLOC(ylmgr_kq,(mpw, 3, psps%mpsang*psps%mpsang*psps%useylm*useylmgr1))
 
  ! TODO FOR PAW
  usecprj = 0
@@ -275,7 +276,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  !* Norm-conserving: Constant kleimann-Bylander energies are copied from psps to gs_hamk.
  !* PAW: Initialize the overlap coefficients and allocate the Dij coefficients.
 
- call init_hamiltonian(gs_hamkq,psps,pawtab,nspinor,nsppol,nspden,natom,&
+ call gs_hamkq%init(psps,pawtab,nspinor,nsppol,nspden,natom,&
    dtset%typat,cryst%xred,nfft,mgfft,ngfft,cryst%rprimd,dtset%nloalg,&
    usecprj=usecprj,ph1d=ph1d,nucdipmom=dtset%nucdipmom,gpu_option=dtset%gpu_option,&
    comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab)
@@ -332,7 +333,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
      NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating GKQ file")
      NCF_CHECK(cryst%ncwrite(ncid))
      ! Write bands on k mesh.
-     NCF_CHECK(ebands_ncwrite(ebands_k, ncid))
+     NCF_CHECK(ebands_k%ncwrite(ncid))
      ncerr = nctk_def_dims(ncid, [nctkdim_t('number_of_phonon_modes', natom3)], defmode=.True.)
      NCF_CHECK(ncerr)
      ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: &
@@ -410,7 +411,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
 
      ! GKA: This little block used to be right after the perturbation loop
      ! Prepare application of the NL part.
-     call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamkq,has_e1kbsc=.true.)
+     call rf_hamkq%init(cplex,gs_hamkq,ipert,has_e1kbsc=.true.)
      call rf_hamkq%load_spin(spin,vlocal1=vlocal1(:,:,:,:,ipc),with_nonlocal=.true.)
 
      do ik=1,nkpt
@@ -448,8 +449,8 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
        ! This call is not optimal because there are quantities in out that do not depend on idir,ipert
        call getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,kk,kq,idir,ipert,&    ! In
          cryst%natom,cryst%rmet,cryst%gprimd,cryst%gmet,istwf_k,&            ! In
-         npw_k,npw_kq,useylmgr1,kg_k,ylm_k,kg_kq,ylm_kq,ylmgr_kq,&           ! In
-         dkinpw,nkpg,nkpg1,kpg_k,kpg1_k,kinpw1,ffnlk,ffnl1,ph3d,ph3d1)       ! Out
+         npw_k,npw_kq,useylmgr1,kg_k,ylm_k,kg_kq,ylm_kq,ylmgr_kq_dum,&       ! In
+         dkinpw,nkpg,nkpg1,kpg_k,kpg_kq,kinpw_kq,ffnl_k,ffnl_kq,ph3d_k,ph3d_kq)       ! Out
 
        ! Calculate dvscf * psi_k, results stored in h1_kets on the k+q sphere.
        ! Compute H(1) applied to GS wavefunction Psi(0)
@@ -459,19 +460,19 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
          eshift = eig0nk - dtset%dfpt_sciss
 
          call getgh1c(berryopt0,kets(:,:,ib2),cwaveprj0,h1_kets(:,:,ib2),&
-                      grad_berry,gs1c,gs_hamkq,gvnlx1,idir,ipert,eshift,mpi_enreg,optlocal,&
+                      grad_berry,gs1c,gs_hamkq,gvnlx1,idir,ipert,(/eshift/),mpi_enreg,1,optlocal,&
                       optnl,opt_gvnlx1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
        end do
 
-       ABI_FREE(kinpw1)
-       ABI_FREE(kpg1_k)
+       ABI_FREE(kinpw_kq)
        ABI_FREE(kpg_k)
+       ABI_FREE(kpg_kq)
        ABI_FREE(dkinpw)
-       ABI_FREE(ffnlk)
-       ABI_FREE(ffnl1)
-       ABI_FREE(ph3d)
+       ABI_FREE(ffnl_k)
+       ABI_FREE(ffnl_kq)
        ABI_FREE(gs1c)
-       ABI_SFREE(ph3d1)
+       ABI_FREE(ph3d_k)
+       ABI_SFREE(ph3d_kq)
 
        ! Calculate elphmat(j,i) = <psi_{k+q,j}|dvscf_q*psi_{k,i}> for this perturbation.
        ! The array eig1_k contains:
@@ -523,7 +524,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
      if (i_am_master) then
        NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating GKK file")
        NCF_CHECK(cryst%ncwrite(ncid))
-       NCF_CHECK(ebands_ncwrite(ebands_k, ncid))
+       NCF_CHECK(ebands_k%ncwrite(ncid))
        call gkk_ncwrite(gkk2d, qpt, 1.0_dp,  ncid)
        NCF_CHECK(nf90_close(ncid))
      end if
@@ -534,7 +535,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
 
  call cwtime(cpu, wall, gflops, "stop")
  write(msg, '(2a)') " Computation of gkq matrix elements with ", trim(what)
- call wrtout([std_out, ab_out], msg, do_flush=.True.)
+ call wrtout(units, msg, do_flush=.True.)
  call wrtout(std_out, sjoin("cpu-time:", sec2str(cpu), ",wall-time:", sec2str(wall)), do_flush=.True.)
 
  if (dtset%eph_task == -2 .and. i_am_master) then
@@ -559,7 +560,6 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  ABI_FREE(kg_kq)
  ABI_FREE(ylm_k)
  ABI_FREE(ylm_kq)
- ABI_FREE(ylmgr_kq)
 
  call gs_hamkq%free()
  call wfd_k%free()
@@ -596,9 +596,8 @@ subroutine ncwrite_v1qnu(dvdb, dtset, ifc, out_ncpath)
  use m_bz_mesh, only : kpath_t, kpath_new
 
 !Arguments ------------------------------------
-!scalars
+ class(dvdb_t),intent(inout) :: dvdb
  type(dataset_type),target,intent(in) :: dtset
- type(dvdb_t),intent(inout) :: dvdb
  type(ifc_type),intent(in) :: ifc
  character(len=*),intent(in) :: out_ncpath
 
@@ -609,13 +608,13 @@ subroutine ncwrite_v1qnu(dvdb, dtset, ifc, out_ncpath)
  integer :: iq, nu, iatom, ii, jj, kk
  real(dp) :: inv_qepsq, qtau, phre, phim, rtmp
  logical :: with_lr_model
+ type(kpath_t) :: qpath
 !arrays
- integer :: ngfft(18)
+ integer :: ngfft(18), units(2)
  real(dp) :: phfreqs(dvdb%natom3),qpt(3)
  real(dp) :: displ_cart(2,3, dvdb%cryst%natom, dvdb%natom3), displ_red(2,dvdb%natom3,dvdb%natom3)
  real(dp),allocatable :: v1scf(:,:,:,:), v1_qnu(:,:,:,:), v1lr_atm(:,:,:,:), v1lr_qnu(:,:,:,:)
- type(kpath_t) :: qpath
- real(dp) :: bounds(3,6), qpt_red(3), qpt_cart(3),  glr(3), values(dvdb%natom3)
+ real(dp) :: bounds(3,6), qpt_red(3), qpt_cart(3), glr(3), values(dvdb%natom3)
 
 !************************************************************************
 
@@ -641,6 +640,8 @@ subroutine ncwrite_v1qnu(dvdb, dtset, ifc, out_ncpath)
  bounds(:, 6) = tol3 * [+0.50000,  +0.25000, +0.75000] !  # W
 
  qpath = kpath_new(bounds, dvdb%cryst%gprimd, dtset%ndivsm)
+
+ units = [std_out, ab_out]
 
  do iq=1,qpath%npts
    qpt_red = qpath%points(:, iq)
@@ -677,9 +678,9 @@ subroutine ncwrite_v1qnu(dvdb, dtset, ifc, out_ncpath)
  qpt = dtset%qptn
 
  call wrtout(std_out, sjoin(" Writing Delta V_{q,nu)(r) potentials to file:", out_ncpath), do_flush=.True.)
- call wrtout([std_out, ab_out], sjoin(ch10, "- Results stored in: ", out_ncpath))
+ call wrtout(units, sjoin(ch10, "- Results stored in: ", out_ncpath))
  call wrtout(std_out, sjoin(" Using qpt:", ktoa(qpt)))
- !call wrtout([std_out, ab_out], " Use `abiopen.py out_V1QAVG.nc -e` to visualize results")
+ !call wrtout(units, " Use `abiopen.py out_V1QAVG.nc -e` to visualize results")
  call dvdb%print(unit=std_out)
 
  ! Define FFT mesh
@@ -687,11 +688,11 @@ subroutine ncwrite_v1qnu(dvdb, dtset, ifc, out_ncpath)
  nfft = product(ngfft(1:3))
 
  if (dtset%eph_task == -16) then
-   call wrtout([std_out, ab_out], " Assuming q-point already in the DVDB file. No interpolation.")
+   call wrtout(units, " Assuming q-point already in the DVDB file. No interpolation.")
    interpolated = 0
 
  else if (dtset%eph_task == +16) then
-   call wrtout([std_out, ab_out], " Using Fourier interpolation.")
+   call wrtout(units, " Using Fourier interpolation.")
     comm_rpt = xmpi_comm_self
     call dvdb%ftinterp_setup(dtset%ddb_ngqpt, qptopt1, 1, dtset%ddb_shiftq, nfft, ngfft, comm_rpt)
     interpolated = 1
@@ -756,7 +757,7 @@ subroutine ncwrite_v1qnu(dvdb, dtset, ifc, out_ncpath)
    call dvdb%ftinterp_qpt(qpt, nfft, ngfft, v1scf, dvdb%comm_rpt)
  end if
 
- ! Compute scattering potential in phonon representations instead ot atomic one.
+ ! Compute scattering potential the in phonon representations instead ot atomic one.
  ! v1_qnu = \sum_{ka} phdispl{ka}(q,nu) D_{ka,q} V_scf(r)
  ! NOTE: prefactor 1/sqrt(2 w(q,nu)) is not included in the potentials saved to file.
  ! v1_qnu(2, nfft, nspden, natom3), v1scf(cplex, nfft, nspden, natom3)

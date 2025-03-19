@@ -1,8 +1,8 @@
 
-.Version 9.11.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Jul 2023.
-- ( at 11h59 )
-  
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v3_t11/t11.abi
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h08 )
+
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v3_t11/t11.abi
 - output file    -> t11.abo
 - root for input  files -> t11i
 - root for output files -> t11o
@@ -91,10 +91,10 @@ _ WF disk file :      0.048 Mbytes ; DEN or POT disk file :      0.096 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -106,7 +106,7 @@ _ WF disk file :      0.048 Mbytes ; DEN or POT disk file :      0.096 Mbytes.
            diemac      1.00000000E+00
            diemix      3.33333333E-01
              ecut      7.00000000E+00 Hartree
--          fftalg         312
+-          fftalg         512
            getwfk1          0
            getwfk2          1
            getwfk3          1
@@ -265,8 +265,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      7.000   => boxcut(ratio)=   2.01510
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -306,12 +306,12 @@ tolerances: {tolvrs: 1.00E-15, }
  ETOT  7  -8.7940635632437    -1.118E-07 3.743E-09 6.087E-06
  ETOT  8  -8.7940635656235    -2.380E-09 1.912E-10 1.474E-06
  ETOT  9  -8.7940635661934    -5.699E-10 1.648E-11 4.169E-08
- ETOT 10  -8.7940635662131    -1.967E-11 1.154E-12 5.207E-10
- ETOT 11  -8.7940635662133    -1.936E-13 4.877E-15 2.425E-11
- ETOT 12  -8.7940635662133    -4.619E-14 4.678E-16 2.626E-13
- ETOT 13  -8.7940635662133     2.309E-14 6.284E-19 1.039E-13
- ETOT 14  -8.7940635662133     1.776E-14 5.488E-20 2.669E-14
- ETOT 15  -8.7940635662133     1.776E-15 6.917E-19 3.993E-16
+ ETOT 10  -8.7940635662131    -1.966E-11 1.154E-12 5.207E-10
+ ETOT 11  -8.7940635662133    -1.972E-13 4.877E-15 2.425E-11
+ ETOT 12  -8.7940635662133    -4.086E-14 4.678E-16 2.626E-13
+ ETOT 13  -8.7940635662133     2.487E-14 6.284E-19 1.039E-13
+ ETOT 14  -8.7940635662133     1.243E-14 5.488E-20 2.669E-14
+ ETOT 15  -8.7940635662133     1.066E-14 6.917E-19 3.993E-16
 
  At SCF step   15       vres2   =  3.99E-16 < tolvrs=  1.00E-15 =>converged.
 
@@ -331,7 +331,7 @@ lattice_vectors:
 lattice_lengths: [  10.00000,    6.00000,    6.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   3.6000000E+02
-convergence: {deltae:  1.776E-15, res2:  3.993E-16, residm:  6.917E-19, diffor: null, }
+convergence: {deltae:  1.066E-14, res2:  3.993E-16, residm:  6.917E-19, diffor: null, }
 etotal    :  -8.79406357E+00
 entropy   :   0.00000000E+00
 fermie    :   2.00655425E-01
@@ -381,8 +381,8 @@ force_length_stats: {min:   3.49371115E-02, max:   3.49371115E-02, mean:   3.493
  frms,max,avg= 2.0170951E-02 3.4937112E-02   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -1.79653835637939    -0.00000000000000    -0.00000000000000
-    2      1.79653835637939    -0.00000000000000    -0.00000000000000
+    1     -1.79653835637952    -0.00000000000000    -0.00000000000000
+    2      1.79653835637952    -0.00000000000000    -0.00000000000000
  frms,max,avg= 1.0372319E+00 1.7965384E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.000000000000  6.000000000000  6.000000000000 bohr
               =  5.291772085900  3.175063251540  3.175063251540 angstroms
@@ -398,14 +398,14 @@ force_length_stats: {min:   3.49371115E-02, max:   3.49371115E-02, mean:   3.493
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  2.67339807379687E+00
-hartree             :  5.35705286522085E-01
+kinetic             :  2.67339807379688E+00
+hartree             :  5.35705286522087E-01
 xc                  : -3.35764409813797E+00
 Ewald energy        : -7.74556193811080E+00
 psp_core            :  6.37275476174552E-02
-local_psp           : -2.86663908679086E+00
-non_local_psp       :  1.90295064888991E+00
-total_energy        : -8.79406356621331E+00
+local_psp           : -2.86663908679087E+00
+non_local_psp       :  1.90295064888992E+00
+total_energy        : -8.79406356621330E+00
 total_energy_eV     : -2.39298639389471E+02
 band_energy         : -3.16865476044512E-01
 ...
@@ -469,11 +469,11 @@ tolerances: {tolvrs: 1.00E-15, }
  ETOT  3  -8.7940285745839    -2.582E-08 1.293E-09 1.149E-07
  ETOT  4  -8.7940285746428    -5.886E-11 2.408E-12 7.721E-10
  ETOT  5  -8.7940285746436    -8.544E-13 1.015E-13 2.964E-11
- ETOT  6  -8.7940285746437    -2.665E-14 8.736E-16 6.309E-12
- ETOT  7  -8.7940285746437     0.000E+00 4.685E-16 1.145E-13
- ETOT  8  -8.7940285746436     2.309E-14 1.272E-18 1.761E-14
+ ETOT  6  -8.7940285746436    -2.487E-14 8.736E-16 6.309E-12
+ ETOT  7  -8.7940285746437    -7.105E-15 4.685E-16 1.145E-13
+ ETOT  8  -8.7940285746436     2.132E-14 1.272E-18 1.761E-14
  ETOT  9  -8.7940285746437    -4.086E-14 2.766E-19 2.044E-15
- ETOT 10  -8.7940285746436     2.487E-14 1.782E-20 8.080E-17
+ ETOT 10  -8.7940285746436     2.842E-14 1.782E-20 8.080E-17
 
  At SCF step   10       vres2   =  8.08E-17 < tolvrs=  1.00E-15 =>converged.
 
@@ -493,7 +493,7 @@ lattice_vectors:
 lattice_lengths: [  10.00000,    6.00000,    6.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   3.6000000E+02
-convergence: {deltae:  2.487E-14, res2:  8.080E-17, residm:  1.782E-20, diffor: null, }
+convergence: {deltae:  2.842E-14, res2:  8.080E-17, residm:  1.782E-20, diffor: null, }
 etotal    :  -8.79402857E+00
 entropy   :   0.00000000E+00
 fermie    :   2.00605576E-01
@@ -543,8 +543,8 @@ force_length_stats: {min:   3.50460720E-02, max:   3.50460720E-02, mean:   3.504
  frms,max,avg= 2.0233859E-02 3.5046072E-02   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -1.80214133027713    -0.00000000000000    -0.00000000000000
-    2      1.80214133027713    -0.00000000000000    -0.00000000000000
+    1     -1.80214133027716    -0.00000000000000    -0.00000000000000
+    2      1.80214133027716    -0.00000000000000    -0.00000000000000
  frms,max,avg= 1.0404668E+00 1.8021413E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.000000000000  6.000000000000  6.000000000000 bohr
               =  5.291772085900  3.175063251540  3.175063251540 angstroms
@@ -561,15 +561,15 @@ force_length_stats: {min:   3.50460720E-02, max:   3.50460720E-02, mean:   3.504
 iteration_state     : {dtset: 2, }
 comment             : Components of total free energy in Hartree
 kinetic             :  2.67359523104731E+00
-hartree             :  5.36086321342030E-01
-xc                  : -3.35772491289225E+00
+hartree             :  5.36086321342029E-01
+xc                  : -3.35772491289224E+00
 Ewald energy        : -7.74501385898507E+00
 psp_core            :  6.37275476174552E-02
 local_psp           : -2.86771429828395E+00
 non_local_psp       :  1.90301539551083E+00
-total_energy        : -8.79402857464364E+00
+total_energy        : -8.79402857464365E+00
 total_energy_eV     : -2.39297687220437E+02
-band_energy         : -3.17013730665049E-01
+band_energy         : -3.17013730665047E-01
 ...
 
 
@@ -629,13 +629,13 @@ tolerances: {tolvrs: 1.00E-15, }
  ETOT  1  -8.7940977985310    -8.794E+00 2.573E-13 1.904E-03
  ETOT  2  -8.7940984231365    -6.246E-07 6.325E-15 8.024E-05
  ETOT  3  -8.7940984488954    -2.576E-08 1.290E-09 1.151E-07
- ETOT  4  -8.7940984489540    -5.866E-11 2.462E-12 7.431E-10
- ETOT  5  -8.7940984489548    -8.189E-13 9.211E-14 1.364E-11
- ETOT  6  -8.7940984489549    -2.132E-14 2.957E-16 6.758E-12
- ETOT  7  -8.7940984489549    -5.329E-15 4.143E-16 1.082E-13
- ETOT  8  -8.7940984489549    -5.329E-15 2.348E-18 2.293E-14
- ETOT  9  -8.7940984489549    -4.619E-14 2.290E-19 1.501E-15
- ETOT 10  -8.7940984489548     8.527E-14 8.854E-21 7.037E-17
+ ETOT  4  -8.7940984489540    -5.867E-11 2.462E-12 7.431E-10
+ ETOT  5  -8.7940984489548    -8.082E-13 9.211E-14 1.364E-11
+ ETOT  6  -8.7940984489549    -3.197E-14 2.957E-16 6.758E-12
+ ETOT  7  -8.7940984489549    -3.553E-15 4.143E-16 1.082E-13
+ ETOT  8  -8.7940984489549    -8.882E-15 2.348E-18 2.293E-14
+ ETOT  9  -8.7940984489549    -3.908E-14 2.290E-19 1.501E-15
+ ETOT 10  -8.7940984489548     8.171E-14 8.854E-21 7.037E-17
 
  At SCF step   10       vres2   =  7.04E-17 < tolvrs=  1.00E-15 =>converged.
 
@@ -655,7 +655,7 @@ lattice_vectors:
 lattice_lengths: [  10.00000,    6.00000,    6.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   3.6000000E+02
-convergence: {deltae:  8.527E-14, res2:  7.037E-17, residm:  8.854E-21, diffor: null, }
+convergence: {deltae:  8.171E-14, res2:  7.037E-17, residm:  8.854E-21, diffor: null, }
 etotal    :  -8.79409845E+00
 entropy   :   0.00000000E+00
 fermie    :   2.00705205E-01
@@ -705,8 +705,8 @@ force_length_stats: {min:   3.48284153E-02, max:   3.48284153E-02, mean:   3.482
  frms,max,avg= 2.0108195E-02 3.4828415E-02   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -1.79094897308438    -0.00000000000000    -0.00000000000000
-    2      1.79094897308438    -0.00000000000000    -0.00000000000000
+    1     -1.79094897308435    -0.00000000000000    -0.00000000000000
+    2      1.79094897308435    -0.00000000000000    -0.00000000000000
  frms,max,avg= 1.0340049E+00 1.7909490E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.000000000000  6.000000000000  6.000000000000 bohr
               =  5.291772085900  3.175063251540  3.175063251540 angstroms
@@ -722,16 +722,16 @@ force_length_stats: {min:   3.48284153E-02, max:   3.48284153E-02, mean:   3.482
 --- !EnergyTerms
 iteration_state     : {dtset: 3, }
 comment             : Components of total free energy in Hartree
-kinetic             :  2.67320121059532E+00
-hartree             :  5.35324719606639E-01
-xc                  : -3.35756339479339E+00
+kinetic             :  2.67320121059531E+00
+hartree             :  5.35324719606638E-01
+xc                  : -3.35756339479338E+00
 Ewald energy        : -7.74610925281216E+00
 psp_core            :  6.37275476174552E-02
-local_psp           : -2.86556535246154E+00
+local_psp           : -2.86556535246153E+00
 non_local_psp       :  1.90288607329283E+00
 total_energy        : -8.79409844895484E+00
 total_energy_eV     : -2.39299588597141E+02
-band_energy         : -3.16717426771841E-01
+band_energy         : -3.16717426771837E-01
 ...
 
 
@@ -778,7 +778,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -813,14 +813,14 @@ tolerances: {tolvrs: 1.00E-06, }
 -ETOT  1   171.95153839328      3.333E+01 6.522E-02 2.294E+05
  ETOT  2   23.329546084013     -1.486E+02 1.233E-01 1.676E+04
  ETOT  3   13.298266523648     -1.003E+01 1.098E-02 3.088E+03
- ETOT  4   10.895426276539     -2.403E+00 5.901E-04 1.249E+01
+ ETOT  4   10.895426276540     -2.403E+00 5.901E-04 1.249E+01
  ETOT  5   10.885192632049     -1.023E-02 3.915E-05 2.680E+00
- ETOT  6   10.883064175222     -2.128E-03 9.337E-07 2.339E-01
+ ETOT  6   10.883064175221     -2.128E-03 9.337E-07 2.339E-01
  ETOT  7   10.882858398874     -2.058E-04 2.135E-07 3.169E-02
  ETOT  8   10.882834999902     -2.340E-05 4.583E-08 3.096E-03
  ETOT  9   10.882832473330     -2.527E-06 2.460E-10 5.652E-05
  ETOT 10   10.882832415811     -5.752E-08 1.816E-11 1.270E-06
- ETOT 11   10.882832416396      5.852E-10 4.021E-12 2.327E-06
+ ETOT 11   10.882832416396      5.854E-10 4.021E-12 2.327E-06
  ETOT 12   10.882832414473     -1.923E-09 1.367E-12 3.349E-09
 
  At SCF step   12       vres2   =  3.35E-09 < tolvrs=  1.00E-06 =>converged.
@@ -837,7 +837,7 @@ tolerances: {tolvrs: 1.00E-06, }
  loc psp =  -1.22806857E+02  Hartree=   5.47282297E+01     xc=  -1.31397882E+01
  note that "loc psp" includes a xc core correction that could be resolved
  7,8,9: eventually, occupation + non-local contributions
-    edocc=   7.02606202E-26     enl0=   5.02584168E+01   enl1=  -1.32671488E+02
+    edocc=   7.01674293E-26     enl0=   5.02584168E+01   enl1=  -1.32671488E+02
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -1.27739164E+02
  10,11,12 Non-relaxation  contributions : frozen-wavefunctions and Ewald
@@ -855,122 +855,122 @@ tolerances: {tolvrs: 1.00E-06, }
 
 
  ==> Compute Derivative Database <==
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   1    1        10.8828234932         0.0000000000
-   1    1   2    1        -0.0000000000         0.0000000000
+   1    1   2    1         0.0000000000         0.0000000000
    1    1   3    1         0.0000000000         0.0000000000
    1    1   1    2       -10.8828212681        -0.0000000000
    1    1   2    2         0.0000000000         0.0000000000
    1    1   3    2         0.0000000000         0.0000000000
    1    1   2    4         0.0000000000         0.0000000000
    1    1   3    4         0.0000000000         0.0000000000
-  
-   2    1   1    1        -0.0000000000         0.0000000000
+
+   2    1   1    1         0.0000000000         0.0000000000
    2    1   3    1        -0.0000000000         0.0000000000
    2    1   1    2         0.0000000000         0.0000000000
    2    1   3    2         0.0000000000        -0.0000000000
    2    1   1    4         0.0000000000         0.0000000000
    2    1   3    4         0.0000000000         0.0000000000
-  
+
    3    1   1    1         0.0000000000         0.0000000000
    3    1   2    1        -0.0000000000         0.0000000000
    3    1   1    2         0.0000000000         0.0000000000
    3    1   2    2         0.0000000000        -0.0000000000
    3    1   1    4         0.0000000000         0.0000000000
    3    1   2    4         0.0000000000         0.0000000000
-  
+
    1    2   1    1       -10.8828212681         0.0000000000
    1    2   2    1         0.0000000000        -0.0000000000
    1    2   3    1         0.0000000000        -0.0000000000
    1    2   1    2        10.8828234932         0.0000000000
-   1    2   2    2        -0.0000000000         0.0000000000
-   1    2   3    2         0.0000000000         0.0000000000
+   1    2   2    2         0.0000000000         0.0000000000
+   1    2   3    2        -0.0000000000         0.0000000000
    1    2   2    4         0.0000000000         0.0000000000
    1    2   3    4         0.0000000000         0.0000000000
-  
+
    2    2   1    1         0.0000000000        -0.0000000000
    2    2   3    1         0.0000000000         0.0000000000
-   2    2   1    2        -0.0000000000         0.0000000000
+   2    2   1    2         0.0000000000         0.0000000000
    2    2   3    2        -0.0000000000         0.0000000000
    2    2   1    4         0.0000000000         0.0000000000
    2    2   3    4         0.0000000000         0.0000000000
-  
+
    3    2   1    1         0.0000000000        -0.0000000000
    3    2   2    1         0.0000000000         0.0000000000
-   3    2   1    2         0.0000000000         0.0000000000
+   3    2   1    2        -0.0000000000         0.0000000000
    3    2   2    2        -0.0000000000         0.0000000000
    3    2   1    4         0.0000000000         0.0000000000
    3    2   2    4         0.0000000000         0.0000000000
-  
+
    1    4   2    1         0.0000000000         0.0000000000
    1    4   3    1         0.0000000000         0.0000000000
    1    4   2    2         0.0000000000         0.0000000000
    1    4   3    2         0.0000000000         0.0000000000
    1    4   2    4         0.0000000000         0.0000000000
    1    4   3    4         0.0000000000         0.0000000000
-  
+
    2    4   1    1         0.0000000000         0.0000000000
    2    4   3    1         0.0000000000         0.0000000000
    2    4   1    2         0.0000000000         0.0000000000
    2    4   3    2         0.0000000000         0.0000000000
    2    4   1    4         0.0000000000         0.0000000000
    2    4   3    4         0.0000000000         0.0000000000
-  
+
    3    4   1    1         0.0000000000         0.0000000000
    3    4   2    1         0.0000000000         0.0000000000
    3    4   1    2         0.0000000000         0.0000000000
    3    4   2    2         0.0000000000         0.0000000000
    3    4   1    4         0.0000000000         0.0000000000
    3    4   2    4         0.0000000000         0.0000000000
-  
-  
+
+
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   1    1         0.1088282349         0.0000000000
-   1    1   2    1        -0.0000000000         0.0000000000
+   1    1   2    1         0.0000000000         0.0000000000
    1    1   3    1         0.0000000000         0.0000000000
    1    1   1    2        -0.1088282127        -0.0000000000
    1    1   2    2         0.0000000000         0.0000000000
    1    1   3    2         0.0000000000         0.0000000000
-  
-   2    1   1    1        -0.0000000000         0.0000000000
+
+   2    1   1    1         0.0000000000         0.0000000000
    2    1   3    1        -0.0000000000         0.0000000000
    2    1   1    2         0.0000000000         0.0000000000
    2    1   3    2         0.0000000000        -0.0000000000
-  
+
    3    1   1    1         0.0000000000         0.0000000000
    3    1   2    1        -0.0000000000         0.0000000000
    3    1   1    2         0.0000000000         0.0000000000
    3    1   2    2         0.0000000000        -0.0000000000
-  
+
    1    2   1    1        -0.1088282127         0.0000000000
    1    2   2    1         0.0000000000        -0.0000000000
    1    2   3    1         0.0000000000        -0.0000000000
    1    2   1    2         0.1088282349         0.0000000000
-   1    2   2    2        -0.0000000000         0.0000000000
-   1    2   3    2         0.0000000000         0.0000000000
-  
+   1    2   2    2         0.0000000000         0.0000000000
+   1    2   3    2        -0.0000000000         0.0000000000
+
    2    2   1    1         0.0000000000        -0.0000000000
    2    2   3    1         0.0000000000         0.0000000000
-   2    2   1    2        -0.0000000000         0.0000000000
+   2    2   1    2         0.0000000000         0.0000000000
    2    2   3    2        -0.0000000000         0.0000000000
-  
+
    3    2   1    1         0.0000000000        -0.0000000000
    3    2   2    1         0.0000000000         0.0000000000
-   3    2   1    2         0.0000000000         0.0000000000
+   3    2   1    2        -0.0000000000         0.0000000000
    3    2   2    2        -0.0000000000         0.0000000000
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
-   0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  6.592517E-07
+   0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  6.592516E-07
    2.061886E-03
  Phonon frequencies in cm-1    :
 -  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  1.446890E-01
@@ -980,7 +980,7 @@ tolerances: {tolvrs: 1.00E-06, }
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      1.0000000000E+01  6.0000000000E+00  6.0000000000E+00 Bohr
               amu      2.80855000E+01
@@ -1002,7 +1002,7 @@ tolerances: {tolvrs: 1.00E-06, }
                        3.4828415312E-02 -0.0000000000E+00 -0.0000000000E+00
             fcart4     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         312
+-          fftalg         512
            getwfk1          0
            getwfk2          1
            getwfk3          1
@@ -1164,7 +1164,7 @@ P          mk1mem           1
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -1187,12 +1187,12 @@ P          mk1mem           1
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -1210,15 +1210,15 @@ P          mk1mem           1
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          1.8  wall=          1.9
+- Proc.   0 individual time (sec): cpu=          1.2  wall=          1.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered  41 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.8  wall=          1.9
++Overall time at end (sec) : cpu=          1.2  wall=          1.3

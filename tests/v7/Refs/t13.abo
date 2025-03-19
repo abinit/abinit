@@ -1,8 +1,8 @@
 
-.Version 9.11.4 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 11 Nov 2023.
-- ( at 12h25 )
-  
-- input  file    -> /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk_develop/tests/TestBot_MPI1/v7_t13/t13.abi
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h12 )
+
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v7_t13/t13.abi
 - output file    -> t13.abo
 - root for input  files -> t13i
 - root for output files -> t13o
@@ -474,10 +474,10 @@ _ WF disk file :      0.061 Mbytes ; DEN or POT disk file :      0.008 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -511,7 +511,7 @@ _ WF disk file :      0.061 Mbytes ; DEN or POT disk file :      0.008 Mbytes.
             acell74    8.0010000000E+00  5.0000000000E+00  6.0000000000E+00 Bohr
               amu      1.20110000E+01
              ecut      2.00000000E+00 Hartree
--          fftalg         312
+-          fftalg         512
            istwfk11      0    0    0    0    0    0    0    0    0    0
                          0    0    0    0    0    0    0    0    0    0
                          0    0    0    0    0    0    0    0    0    0
@@ -2577,8 +2577,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk_develop/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk_develop/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3131,8 +3131,8 @@ Ewald energy        : -4.53967596716904E+00
 psp_core            :  2.96289129484057E-02
 local_psp           : -2.41077404370641E+00
 non_local_psp       :  1.23495548779713E+00
-total_energy        : -5.33718650400835E+00
-total_energy_eV     : -1.45232230692983E+02
+total_energy        : -5.33718650400834E+00
+total_energy_eV     : -1.45232230692982E+02
 band_energy         : -5.70378608611314E-01
 ...
 
@@ -3345,7 +3345,7 @@ tolerances: {tolwfr: 1.00E-08, }
  ETOT  2  -5.2970655474020    -5.124E-02 6.047E-03 1.863E-01
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  1.27217970E-03  sigma(3 2)=  8.87488985E-11
+  sigma(1 1)=  1.27217970E-03  sigma(3 2)=  8.87488984E-11
   sigma(2 2)=  1.27217958E-03  sigma(3 1)=  3.61288638E-11
   sigma(3 3)=  1.27897299E-03  sigma(2 1)= -1.53123317E-06
 
@@ -3371,8 +3371,8 @@ entropy   :   0.00000000E+00
 fermie    :   1.00459560E-01
 cartesian_stress_tensor: # hartree/bohr^3
 - [  1.27217970E-03,  -1.53123317E-06,   3.61288638E-11, ]
-- [ -1.53123317E-06,   1.27217958E-03,   8.87488985E-11, ]
-- [  3.61288638E-11,   8.87488985E-11,   1.27897299E-03, ]
+- [ -1.53123317E-06,   1.27217958E-03,   8.87488984E-11, ]
+- [  3.61288638E-11,   8.87488984E-11,   1.27897299E-03, ]
 pressure_GPa:  -3.7495E+01
 xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00,  C]
@@ -3425,14 +3425,14 @@ Ewald energy        : -3.66773683804773E+00
 psp_core            :  1.48126048449018E-02
 local_psp           : -3.34115447561653E+00
 non_local_psp       :  1.22777528509701E+00
-total_energy        : -5.29706554740205E+00
+total_energy        : -5.29706554740204E+00
 total_energy_eV     : -1.44140483941938E+02
 band_energy         : -1.13365444183394E+00
 ...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  1.27217970E-03  sigma(3 2)=  8.87488985E-11
+  sigma(1 1)=  1.27217970E-03  sigma(3 2)=  8.87488984E-11
   sigma(2 2)=  1.27217958E-03  sigma(3 1)=  3.61288638E-11
   sigma(3 3)=  1.27897299E-03  sigma(2 1)= -1.53123317E-06
 
@@ -3493,7 +3493,7 @@ tolerances: {tolwfr: 1.00E-08, }
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  1.29046568E-03  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  1.28135453E-03  sigma(3 1)= -1.82200293E-15
+  sigma(2 2)=  1.28135453E-03  sigma(3 1)= -1.82216336E-15
   sigma(3 3)=  1.28135453E-03  sigma(2 1)=  3.18868506E-10
 
 
@@ -3517,9 +3517,9 @@ etotal    :  -5.30094686E+00
 entropy   :   0.00000000E+00
 fermie    :   3.06831349E-02
 cartesian_stress_tensor: # hartree/bohr^3
-- [  1.29046568E-03,   3.18868506E-10,  -1.82200293E-15, ]
+- [  1.29046568E-03,   3.18868506E-10,  -1.82216336E-15, ]
 - [  3.18868506E-10,   1.28135453E-03,   0.00000000E+00, ]
-- [ -1.82200293E-15,   0.00000000E+00,   1.28135453E-03, ]
+- [ -1.82216336E-15,   0.00000000E+00,   1.28135453E-03, ]
 pressure_GPa:  -3.7788E+01
 xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00,  C]
@@ -3580,13 +3580,13 @@ band_energy         : -1.13596321599136E+00
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  1.29046568E-03  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  1.28135453E-03  sigma(3 1)= -1.82200293E-15
+  sigma(2 2)=  1.28135453E-03  sigma(3 1)= -1.82216336E-15
   sigma(3 3)=  1.28135453E-03  sigma(2 1)=  3.18868506E-10
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -3.7788E+01 GPa]
 - sigma(1 1)=  3.79668048E+01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  3.76987454E+01  sigma(3 1)= -5.36051680E-11
-- sigma(3 3)=  3.76987454E+01  sigma(2 1)=  9.38143375E-06
+- sigma(2 2)=  3.76987454E+01  sigma(3 1)= -5.36098880E-11
+- sigma(3 3)=  3.76987454E+01  sigma(2 1)=  9.38143377E-06
 
 ================================================================================
 == DATASET 24 ==================================================================
@@ -3853,7 +3853,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 iteration_state     : {dtset: 31, }
 comment             : Components of total free energy in Hartree
 kinetic             :  1.45702321038745E+00
-hartree             :  7.99337790111936E-01
+hartree             :  7.99337790111935E-01
 xc                  : -1.45377317807299E+00
 Ewald energy        : -2.91124119847748E+00
 psp_core            :  7.40611727211122E-03
@@ -3993,13 +3993,13 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 iteration_state     : {dtset: 32, }
 comment             : Components of total free energy in Hartree
 kinetic             :  1.44255295303766E+00
-hartree             :  7.86637474108259E-01
+hartree             :  7.86637474108258E-01
 xc                  : -1.44865959321886E+00
 Ewald energy        : -2.91124119838763E+00
 psp_core            :  7.40611727039905E-03
 local_psp           : -4.30516413505018E+00
 non_local_psp       :  1.19437622844796E+00
-total_energy        : -5.23409215379239E+00
+total_energy        : -5.23409215379238E+00
 total_energy_eV     : -1.42426890755459E+02
 band_energy         : -1.49549165780250E+00
 ...
@@ -4012,7 +4012,7 @@ band_energy         : -1.49549165780250E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -1.7444E+01 GPa]
 - sigma(1 1)=  1.69068963E+01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  1.77119113E+01  sigma(3 1)=  4.02416938E-06
+- sigma(2 2)=  1.77119113E+01  sigma(3 1)=  4.02416937E-06
 - sigma(3 3)=  1.77119113E+01  sigma(2 1)= -4.02424987E-06
 
 ================================================================================
@@ -4428,7 +4428,7 @@ local_psp           : -3.11233970602069E+00
 non_local_psp       :  1.20434657394747E+00
 total_energy        : -5.34023820809597E+00
 total_energy_eV     : -1.45315271784338E+02
-band_energy         : -8.00963236170020E-01
+band_energy         : -8.00963236170019E-01
 ...
 
 
@@ -4567,7 +4567,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 iteration_state     : {dtset: 42, }
 comment             : Components of total free energy in Hartree
 kinetic             :  1.66313201370196E+00
-hartree             :  5.48645802928923E-01
+hartree             :  5.48645802928922E-01
 xc                  : -1.61221592776318E+00
 Ewald energy        : -4.03211744425749E+00
 psp_core            :  2.44372730325827E-02
@@ -4714,7 +4714,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 iteration_state     : {dtset: 43, }
 comment             : Components of total free energy in Hartree
 kinetic             :  1.66313201370196E+00
-hartree             :  5.48645802928923E-01
+hartree             :  5.48645802928922E-01
 xc                  : -1.61221592776318E+00
 Ewald energy        : -4.03211744425749E+00
 psp_core            :  2.44372730325827E-02
@@ -4861,15 +4861,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 iteration_state     : {dtset: 44, }
 comment             : Components of total free energy in Hartree
 kinetic             :  1.66874371252411E+00
-hartree             :  5.49240270265437E-01
+hartree             :  5.49240270265436E-01
 xc                  : -1.61300846227194E+00
 Ewald energy        : -4.03211073783492E+00
 psp_core            :  2.44370267806750E-02
-local_psp           : -3.15477449306983E+00
+local_psp           : -3.15477449306982E+00
 non_local_psp       :  1.21686910290702E+00
-total_energy        : -5.34060358069945E+00
+total_energy        : -5.34060358069944E+00
 total_energy_eV     : -1.45325214078503E+02
-band_energy         : -8.25898317851429E-01
+band_energy         : -8.25898317851428E-01
 ...
 
 
@@ -5016,7 +5016,7 @@ local_psp           : -2.30689499932176E+00
 non_local_psp       :  1.22859479044488E+00
 total_energy        : -5.33294638605901E+00
 total_energy_eV     : -1.45116851215851E+02
-band_energy         : -5.14267455830490E-01
+band_energy         : -5.14267455830491E-01
 ...
 
 
@@ -5310,7 +5310,7 @@ local_psp           : -2.30842800344230E+00
 non_local_psp       :  1.22833864470165E+00
 total_energy        : -5.33849426585141E+00
 total_energy_eV     : -1.45267816702492E+02
-band_energy         : -5.18985005079967E-01
+band_energy         : -5.18985005079966E-01
 ...
 
 
@@ -5869,7 +5869,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 iteration_state     : {dtset: 63, }
 comment             : Components of total free energy in Hartree
 kinetic             :  1.50883871919843E+00
-hartree             :  5.52960761302236E-01
+hartree             :  5.52960761302234E-01
 xc                  : -1.51975134198498E+00
 Ewald energy        : -3.58969909656249E+00
 psp_core            :  1.47560810650063E-02
@@ -6009,7 +6009,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 iteration_state     : {dtset: 64, }
 comment             : Components of total free energy in Hartree
 kinetic             :  1.50883871919843E+00
-hartree             :  5.52960761302236E-01
+hartree             :  5.52960761302234E-01
 xc                  : -1.51975134198498E+00
 Ewald energy        : -3.58969909656249E+00
 psp_core            :  1.47560810650063E-02
@@ -6435,7 +6435,7 @@ Ewald energy        : -3.72589339849698E+00
 psp_core            :  1.78166151073533E-02
 local_psp           : -3.39099707242218E+00
 non_local_psp       :  1.19810954725065E+00
-total_energy        : -5.33035291515110E+00
+total_energy        : -5.33035291515111E+00
 total_energy_eV     : -1.45046279283447E+02
 band_energy         : -1.03294695399644E+00
 ...
@@ -6575,7 +6575,7 @@ Ewald energy        : -3.72589339849698E+00
 psp_core            :  1.78166151073533E-02
 local_psp           : -3.39099707242218E+00
 non_local_psp       :  1.19810954725065E+00
-total_energy        : -5.33035291515110E+00
+total_energy        : -5.33035291515111E+00
 total_energy_eV     : -1.45046279283447E+02
 band_energy         : -1.03294695399644E+00
 ...
@@ -6593,7 +6593,7 @@ band_energy         : -1.03294695399644E+00
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell11    5.0001000000E+00  5.0000000000E+00  4.9999000000E+00 Bohr
             acell12    5.0001000000E+00  5.0000000000E+00  4.9999000000E+00 Bohr
@@ -6681,7 +6681,7 @@ band_energy         : -1.03294695399644E+00
             fcart72   -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart73   -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart74   -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
--          fftalg         312
+-          fftalg         512
            istwfk11      0    0    0    0    0    0    0    0    0    0
                          0    0    0    0    0    0    0    0    0    0
                          0    0    0    0    0    0    0    0    0    0
@@ -8038,15 +8038,15 @@ P           mkmem74        40
            strten21    1.3040943203E-03  1.2632887472E-03  1.2981354704E-03
                       -4.1886744976E-06 -7.0678693382E-07  2.3804815296E-06
            strten22    1.2721796977E-03  1.2721795752E-03  1.2789729917E-03
-                       8.8748898509E-11  3.6128863800E-11 -1.5312331729E-06
+                       8.8748898417E-11  3.6128863752E-11 -1.5312331729E-06
            strten23    1.2904656818E-03  1.2813545283E-03  1.2813545283E-03
-                       0.0000000000E+00 -1.8220029325E-15  3.1886850565E-10
+                       0.0000000000E+00 -1.8221633637E-15  3.1886850623E-10
            strten24    1.2914196091E-03  1.2914196091E-03  1.2914196091E-03
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten31    5.8006893063E-04  5.8017357902E-04  5.6419076160E-04
                       -2.7550369932E-05 -3.1806215228E-06  5.6208362139E-06
            strten32    5.7465382200E-04  6.0201573012E-04  6.0201573012E-04
-                       0.0000000000E+00  1.3677876011E-10 -1.3678149585E-10
+                       0.0000000000E+00  1.3677875994E-10 -1.3678149587E-10
            strten33    5.9101658750E-04  5.9101658750E-04  5.9101658750E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten34    5.9101658750E-04  5.9101658750E-04  5.9101658750E-04
@@ -8748,7 +8748,7 @@ P           mkmem74        40
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -8760,12 +8760,12 @@ P           mkmem74        40
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -8783,7 +8783,7 @@ P           mkmem74        40
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -8798,15 +8798,15 @@ P           mkmem74        40
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          9.9  wall=         12.5
+- Proc.   0 individual time (sec): cpu=          5.4  wall=          5.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered  59 WARNINGs and  65 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          9.9  wall=         12.5
++Overall time at end (sec) : cpu=          5.4  wall=          5.5

@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h17 )
-  
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/libxc_t03/t03.in
-- output file    -> t03.out
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h01 )
+
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/libxc_t03/t03.abi
+- output file    -> t03.abo
 - root for input  files -> t03i
 - root for output files -> t03o
-
 
  DATASET    1 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -34,11 +33,10 @@
 -    mband =           6        mffmem =           1         mkmem =           1
        mpw =        3743          nfft =       64000          nkpt =           1
 ================================================================================
-P This job should need less than                      21.397 Mbytes of memory.
+P This job should need less than                      21.661 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.345 Mbytes ; DEN or POT disk file :      0.490 Mbytes.
 ================================================================================
-
 
  DATASET    2 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -51,11 +49,10 @@ _ WF disk file :      0.345 Mbytes ; DEN or POT disk file :      0.490 Mbytes.
 -    mband =           6        mffmem =           1         mkmem =           1
        mpw =        3743          nfft =       64000          nkpt =           1
 ================================================================================
-P This job should need less than                      21.397 Mbytes of memory.
+P This job should need less than                      21.661 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.345 Mbytes ; DEN or POT disk file :      0.490 Mbytes.
 ================================================================================
-
 
  DATASET    3 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -68,7 +65,7 @@ _ WF disk file :      0.345 Mbytes ; DEN or POT disk file :      0.490 Mbytes.
 -    mband =           6        mffmem =           1         mkmem =           1
        mpw =        3743          nfft =       64000          nkpt =           1
 ================================================================================
-P This job should need less than                      21.397 Mbytes of memory.
+P This job should need less than                      21.661 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.345 Mbytes ; DEN or POT disk file :      0.490 Mbytes.
 ================================================================================
@@ -77,10 +74,10 @@ _ WF disk file :      0.345 Mbytes ; DEN or POT disk file :      0.490 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -90,7 +87,7 @@ _ WF disk file :      0.345 Mbytes ; DEN or POT disk file :      0.490 Mbytes.
            diemix      3.33333333E-01
              ecut      1.80000000E+01 Hartree
            enunit           2
--          fftalg         312
+-          fftalg         512
            istwfk        1
               ixc1    -106131
               ixc2    -106132
@@ -173,8 +170,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     18.000   => boxcut(ratio)=   2.09440
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/08o.6.blyp.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/08o.6.blyp.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/08o.6.blyp.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/08o.6.blyp.hgh
 - Goedecker pseudopotential for O
 -  8.00000   6.00000     70301                znucl, zion, pspdat
    10   18    1    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -195,8 +192,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with 
-  definition in PRB44, 8503 (1991). 
+  so that the KB energies are not consistent with
+  definition in PRB44, 8503 (1991).
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=    0.12265823
          --- l  ekb(1:nproj) -->
@@ -204,8 +201,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              1    0.000000
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/08o.6.bp.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/08o.6.bp.hgh
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/08o.6.bp.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/08o.6.bp.hgh
 - Goedecker pseudopotential for O
 -  8.00000   6.00000     70301                znucl, zion, pspdat
    10   19    1    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -226,8 +223,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with 
-  definition in PRB44, 8503 (1991). 
+  so that the KB energies are not consistent with
+  definition in PRB44, 8503 (1991).
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=    0.13322981
          --- l  ekb(1:nproj) -->
@@ -235,8 +232,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              1    0.000000
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/08o.6.olyp.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/08o.6.olyp.hgh
+- pspini: atom type   3  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/08o.6.olyp.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/08o.6.olyp.hgh
 - Goedecker pseudopotential for O
 -  8.00000   6.00000     70301                znucl, zion, pspdat
    10   25    1    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -257,8 +254,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with 
-  definition in PRB44, 8503 (1991). 
+  so that the KB energies are not consistent with
+  definition in PRB44, 8503 (1991).
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=    0.16810484
          --- l  ekb(1:nproj) -->
@@ -280,17 +277,17 @@ tolerances: {toldfe: 1.00E-08, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -14.882836724323    -1.488E+01 3.949E-02 8.056E+02
- ETOT  2  -15.042589992479    -1.598E-01 1.121E-07 6.440E+02
- ETOT  3  -15.052451047214    -9.861E-03 1.443E-05 4.519E+02
- ETOT  4  -15.055817000994    -3.366E-03 4.681E-06 2.142E+02
- ETOT  5  -15.057376129039    -1.559E-03 5.382E-06 2.406E+01
- ETOT  6  -15.057404785569    -2.866E-05 6.178E-08 8.376E+00
+ ETOT  1  -14.882836627310    -1.488E+01 3.949E-02 8.056E+02
+ ETOT  2  -15.042589994676    -1.598E-01 1.121E-07 6.440E+02
+ ETOT  3  -15.052451033869    -9.861E-03 1.443E-05 4.519E+02
+ ETOT  4  -15.055816997003    -3.366E-03 4.681E-06 2.142E+02
+ ETOT  5  -15.057376128766    -1.559E-03 5.382E-06 2.406E+01
+ ETOT  6  -15.057404785608    -2.866E-05 6.178E-08 8.376E+00
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  6.83346936E-04  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  6.83346936E-04  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  6.83346936E-04  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  6.83346908E-04  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  6.83346908E-04  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  6.83346908E-04  sigma(2 1)=  0.00000000E+00
 
 
  scprqt:  WARNING -
@@ -311,11 +308,11 @@ lattice_volume:   1.0000000E+03
 convergence: {deltae: -2.866E-05, res2:  8.376E+00, residm:  6.178E-08, diffor: null, }
 etotal    :  -1.50574048E+01
 entropy   :   0.00000000E+00
-fermie    :  -2.80486223E-01
+fermie    :  -2.80486234E-01
 cartesian_stress_tensor: # hartree/bohr^3
-- [  6.83346936E-04,   0.00000000E+00,   0.00000000E+00, ]
-- [  0.00000000E+00,   6.83346936E-04,   0.00000000E+00, ]
-- [  0.00000000E+00,   0.00000000E+00,   6.83346936E-04, ]
+- [  6.83346908E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   6.83346908E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   6.83346908E-04, ]
 pressure_GPa:  -2.0105E+01
 xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00,  O]
@@ -327,12 +324,12 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
-    1        2.00000          5.17305065
+    1        2.00000          5.17305066
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   26.442E-09; max=  61.779E-09
+ Mean square residual over all n,k,spin=   26.442E-09; max=  61.780E-09
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -365,30 +362,30 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  9.28650072902209E+00
-hartree             :  7.90297253533720E+00
-xc                  : -3.07623798904863E+00
+kinetic             :  9.28650080013677E+00
+hartree             :  7.90297258791630E+00
+xc                  : -3.07623800162318E+00
 Ewald energy        : -5.10713546306510E+00
 psp_core            :  7.35949376581425E-04
-local_psp           : -2.58443999808369E+01
-non_local_psp       :  1.81101189760295E+00
-internal            : -1.50265523216118E+01
-'-kT*entropy'       : -3.08524639573013E-02
-total_energy        : -1.50574047855691E+01
-total_energy_eV     : -4.09732821555523E+02
-band_energy         : -2.90728510057740E+00
+local_psp           : -2.58444000998697E+01
+non_local_psp       :  1.81101190547747E+00
+internal            : -1.50265523216509E+01
+'-kT*entropy'       : -3.08524639573002E-02
+total_energy        : -1.50574047856082E+01
+total_energy_eV     : -4.09732821556585E+02
+band_energy         : -2.90728516871517E+00
 ...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  6.83346936E-04  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  6.83346936E-04  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  6.83346936E-04  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  6.83346908E-04  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  6.83346908E-04  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  6.83346908E-04  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -2.0105E+01 GPa]
-- sigma(1 1)=  2.01047576E+01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  2.01047576E+01  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  2.01047576E+01  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  2.01047568E+01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  2.01047568E+01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  2.01047568E+01  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -414,8 +411,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     18.000   => boxcut(ratio)=   2.09440
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/08o.6.blyp.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/08o.6.blyp.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/08o.6.blyp.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/08o.6.blyp.hgh
 - Goedecker pseudopotential for O
 -  8.00000   6.00000     70301                znucl, zion, pspdat
    10   18    1    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -436,8 +433,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with 
-  definition in PRB44, 8503 (1991). 
+  so that the KB energies are not consistent with
+  definition in PRB44, 8503 (1991).
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=    0.12265823
          --- l  ekb(1:nproj) -->
@@ -445,8 +442,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              1    0.000000
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/08o.6.bp.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/08o.6.bp.hgh
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/08o.6.bp.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/08o.6.bp.hgh
 - Goedecker pseudopotential for O
 -  8.00000   6.00000     70301                znucl, zion, pspdat
    10   19    1    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -467,8 +464,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with 
-  definition in PRB44, 8503 (1991). 
+  so that the KB energies are not consistent with
+  definition in PRB44, 8503 (1991).
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=    0.13322981
          --- l  ekb(1:nproj) -->
@@ -476,8 +473,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              1    0.000000
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/08o.6.olyp.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/08o.6.olyp.hgh
+- pspini: atom type   3  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/08o.6.olyp.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/08o.6.olyp.hgh
 - Goedecker pseudopotential for O
 -  8.00000   6.00000     70301                znucl, zion, pspdat
    10   25    1    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -498,8 +495,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with 
-  definition in PRB44, 8503 (1991). 
+  so that the KB energies are not consistent with
+  definition in PRB44, 8503 (1991).
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=    0.16810484
          --- l  ekb(1:nproj) -->
@@ -521,22 +518,22 @@ tolerances: {toldfe: 1.00E-08, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -14.971699896287    -1.497E+01 4.916E-02 5.462E+02
- ETOT  2  -15.084030532272    -1.123E-01 1.171E-07 7.113E+02
- ETOT  3  -15.089348103602    -5.318E-03 3.530E-06 5.575E+02
- ETOT  4  -15.095186812293    -5.839E-03 1.028E-05 2.052E+02
- ETOT  5  -15.096796574581    -1.610E-03 5.315E-06 2.661E+01
- ETOT  6  -15.096839081499    -4.251E-05 1.724E-07 7.425E+00
+ ETOT  1  -14.971714899818    -1.497E+01 4.916E-02 5.461E+02
+ ETOT  2  -15.084028837497    -1.123E-01 1.171E-07 7.113E+02
+ ETOT  3  -15.089345973559    -5.317E-03 3.529E-06 5.575E+02
+ ETOT  4  -15.095186066044    -5.840E-03 1.028E-05 2.053E+02
+ ETOT  5  -15.096796547222    -1.610E-03 5.318E-06 2.661E+01
+ ETOT  6  -15.096839081600    -4.253E-05 1.725E-07 7.429E+00
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  6.73476607E-04  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  6.73476607E-04  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  6.73476607E-04  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  6.73478507E-04  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  6.73478507E-04  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  6.73478507E-04  sigma(2 1)=  0.00000000E+00
 
 
  scprqt:  WARNING -
   nstep=    6 was not enough SCF cycles to converge;
-  maximum energy difference=  4.251E-05 exceeds toldfe=  1.000E-08
+  maximum energy difference=  4.253E-05 exceeds toldfe=  1.000E-08
 
 
 --- !ResultsGS
@@ -549,14 +546,14 @@ lattice_vectors:
 lattice_lengths: [  10.00000,   10.00000,   10.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.0000000E+03
-convergence: {deltae: -4.251E-05, res2:  7.425E+00, residm:  1.724E-07, diffor: null, }
+convergence: {deltae: -4.253E-05, res2:  7.429E+00, residm:  1.725E-07, diffor: null, }
 etotal    :  -1.50968391E+01
 entropy   :   0.00000000E+00
-fermie    :  -2.85728992E-01
+fermie    :  -2.85728895E-01
 cartesian_stress_tensor: # hartree/bohr^3
-- [  6.73476607E-04,   0.00000000E+00,   0.00000000E+00, ]
-- [  0.00000000E+00,   6.73476607E-04,   0.00000000E+00, ]
-- [  0.00000000E+00,   0.00000000E+00,   6.73476607E-04, ]
+- [  6.73478507E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   6.73478507E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   6.73478507E-04, ]
 pressure_GPa:  -1.9814E+01
 xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00,  O]
@@ -568,12 +565,12 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
-    1        2.00000          5.18629965
+    1        2.00000          5.18629893
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   74.709E-09; max=  17.245E-08
+ Mean square residual over all n,k,spin=   74.746E-09; max=  17.254E-08
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -601,35 +598,35 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Fermi (or HOMO) energy (eV) =  -7.77508   Average Vxc (eV)=  -2.11679
  Eigenvalues (   eV  ) for nkpt=   1  k points:
  kpt#   1, nband=  6, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
- -24.15714   -7.94084   -7.94084   -7.94084   -0.36410    4.64515
+ -24.15714   -7.94083   -7.94083   -7.94083   -0.36410    4.64514
 
 --- !EnergyTerms
 iteration_state     : {dtset: 2, }
 comment             : Components of total free energy in Hartree
-kinetic             :  9.29279700184526E+00
-hartree             :  7.92481792227776E+00
-xc                  : -3.11724233195383E+00
+kinetic             :  9.29279226847678E+00
+hartree             :  7.92481477228104E+00
+xc                  : -3.11724157193024E+00
 Ewald energy        : -5.10713546306510E+00
 psp_core            :  7.99378834143592E-04
-local_psp           : -2.58662079818414E+01
-non_local_psp       :  1.80618485636160E+00
-internal            : -1.50659866175415E+01
-'-kT*entropy'       : -3.08524639572954E-02
-total_energy        : -1.50968390814988E+01
-total_energy_eV     : -4.10805883319314E+02
-band_energy         : -2.94279884174352E+00
+local_psp           : -2.58662002862202E+01
+non_local_psp       :  1.80618428398137E+00
+internal            : -1.50659866176422E+01
+'-kT*entropy'       : -3.08524639573003E-02
+total_energy        : -1.50968390815995E+01
+total_energy_eV     : -4.10805883322055E+02
+band_energy         : -2.94279825800546E+00
 ...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  6.73476607E-04  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  6.73476607E-04  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  6.73476607E-04  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  6.73478507E-04  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  6.73478507E-04  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  6.73478507E-04  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -1.9814E+01 GPa]
-- sigma(1 1)=  1.98143625E+01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  1.98143625E+01  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  1.98143625E+01  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  1.98144184E+01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  1.98144184E+01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  1.98144184E+01  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  3 ==================================================================
@@ -655,8 +652,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     18.000   => boxcut(ratio)=   2.09440
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/08o.6.blyp.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/08o.6.blyp.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/08o.6.blyp.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/08o.6.blyp.hgh
 - Goedecker pseudopotential for O
 -  8.00000   6.00000     70301                znucl, zion, pspdat
    10   18    1    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -677,8 +674,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with 
-  definition in PRB44, 8503 (1991). 
+  so that the KB energies are not consistent with
+  definition in PRB44, 8503 (1991).
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=    0.12265823
          --- l  ekb(1:nproj) -->
@@ -686,8 +683,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              1    0.000000
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/08o.6.bp.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/08o.6.bp.hgh
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/08o.6.bp.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/08o.6.bp.hgh
 - Goedecker pseudopotential for O
 -  8.00000   6.00000     70301                znucl, zion, pspdat
    10   19    1    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -708,8 +705,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with 
-  definition in PRB44, 8503 (1991). 
+  so that the KB energies are not consistent with
+  definition in PRB44, 8503 (1991).
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=    0.13322981
          --- l  ekb(1:nproj) -->
@@ -717,8 +714,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              1    0.000000
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/08o.6.olyp.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/08o.6.olyp.hgh
+- pspini: atom type   3  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/08o.6.olyp.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/08o.6.olyp.hgh
 - Goedecker pseudopotential for O
 -  8.00000   6.00000     70301                znucl, zion, pspdat
    10   25    1    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -739,8 +736,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with 
-  definition in PRB44, 8503 (1991). 
+  so that the KB energies are not consistent with
+  definition in PRB44, 8503 (1991).
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=    0.16810484
          --- l  ekb(1:nproj) -->
@@ -762,17 +759,17 @@ tolerances: {toldfe: 1.00E-08, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -14.904225025222    -1.490E+01 2.431E-02 1.474E+03
- ETOT  2  -15.069421413162    -1.652E-01 2.101E-07 5.144E+02
- ETOT  3  -15.083015977962    -1.359E-02 2.596E-05 3.564E+02
- ETOT  4  -15.085616812581    -2.601E-03 2.721E-06 1.886E+02
- ETOT  5  -15.087129223035    -1.512E-03 3.212E-06 2.546E+01
- ETOT  6  -15.087216343715    -8.712E-05 1.224E-07 3.665E+00
+ ETOT  1  -14.904225024430    -1.490E+01 2.431E-02 1.474E+03
+ ETOT  2  -15.069421413213    -1.652E-01 2.101E-07 5.144E+02
+ ETOT  3  -15.083015978042    -1.359E-02 2.596E-05 3.564E+02
+ ETOT  4  -15.085616812619    -2.601E-03 2.721E-06 1.886E+02
+ ETOT  5  -15.087129223051    -1.512E-03 3.212E-06 2.546E+01
+ ETOT  6  -15.087216343714    -8.712E-05 1.224E-07 3.665E+00
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  6.67834909E-04  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  6.67834909E-04  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  6.67834909E-04  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  6.67834910E-04  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  6.67834910E-04  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  6.67834910E-04  sigma(2 1)=  0.00000000E+00
 
 
  scprqt:  WARNING -
@@ -795,9 +792,9 @@ etotal    :  -1.50872163E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.81545730E-01
 cartesian_stress_tensor: # hartree/bohr^3
-- [  6.67834909E-04,   0.00000000E+00,   0.00000000E+00, ]
-- [  0.00000000E+00,   6.67834909E-04,   0.00000000E+00, ]
-- [  0.00000000E+00,   0.00000000E+00,   6.67834909E-04, ]
+- [  6.67834910E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   6.67834910E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   6.67834910E-04, ]
 pressure_GPa:  -1.9648E+01
 xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00,  O]
@@ -847,25 +844,25 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 3, }
 comment             : Components of total free energy in Hartree
-kinetic             :  9.32062878881928E+00
-hartree             :  7.95322422346395E+00
-xc                  : -3.12550114626220E+00
+kinetic             :  9.32062878679316E+00
+hartree             :  7.95322422192560E+00
+xc                  : -3.12550114588417E+00
 Ewald energy        : -5.10713546306510E+00
 psp_core            :  1.00862905745594E-03
-local_psp           : -2.58957371826687E+01
-non_local_psp       :  1.79714827089748E+00
-internal            : -1.50563638797579E+01
-'-kT*entropy'       : -3.08524639573014E-02
-total_energy        : -1.50872163437152E+01
-total_energy_eV     : -4.10544035307699E+02
-band_energy         : -2.92811849123236E+00
+local_psp           : -2.58957371792101E+01
+non_local_psp       :  1.79714827062634E+00
+internal            : -1.50563638797568E+01
+'-kT*entropy'       : -3.08524639572986E-02
+total_energy        : -1.50872163437141E+01
+total_energy_eV     : -4.10544035307671E+02
+band_energy         : -2.92811849047887E+00
 ...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  6.67834909E-04  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  6.67834909E-04  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  6.67834909E-04  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  6.67834910E-04  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  6.67834910E-04  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  6.67834910E-04  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -1.9648E+01 GPa]
 - sigma(1 1)=  1.96483781E+01  sigma(3 2)=  0.00000000E+00
@@ -874,7 +871,7 @@ band_energy         : -2.92811849123236E+00
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      1.0000000000E+01  1.0000000000E+01  1.0000000000E+01 Bohr
               amu      1.59994000E+01  1.59994000E+01  1.59994000E+01
@@ -883,12 +880,12 @@ band_energy         : -2.92811849123236E+00
              ecut      1.80000000E+01 Hartree
            enunit           2
            etotal1    -1.5057404786E+01
-           etotal2    -1.5096839081E+01
+           etotal2    -1.5096839082E+01
            etotal3    -1.5087216344E+01
             fcart1    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart2    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart3    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
--          fftalg         312
+-          fftalg         512
            istwfk        1
               ixc1    -106131
               ixc2    -106132
@@ -908,11 +905,11 @@ P           mkmem           1
            occopt           7
             prtwf           0
           spgroup         221
-           strten1     6.8334693579E-04  6.8334693579E-04  6.8334693579E-04
+           strten1     6.8334690793E-04  6.8334690793E-04  6.8334690793E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten2     6.7347660713E-04  6.7347660713E-04  6.7347660713E-04
+           strten2     6.7347850707E-04  6.7347850707E-04  6.7347850707E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten3     6.6783490924E-04  6.6783490924E-04  6.6783490924E-04
+           strten3     6.6783491005E-04  6.6783491005E-04  6.6783491005E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
                       -1  0  0   0  1  0   0  0 -1       1  0  0   0 -1  0   0  0  1
@@ -985,7 +982,7 @@ P           mkmem           1
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -997,12 +994,12 @@ P           mkmem           1
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -1020,7 +1017,7 @@ P           mkmem           1
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -1035,15 +1032,15 @@ P           mkmem           1
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          2.9  wall=          3.0
+- Proc.   0 individual time (sec): cpu=          1.7  wall=          1.7
 
 ================================================================================
 
  Calculation completed.
-.Delivered  15 WARNINGs and  12 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.9  wall=          3.0
+.Delivered  12 WARNINGs and  13 COMMENTs to log file.
++Overall time at end (sec) : cpu=          1.7  wall=          1.7

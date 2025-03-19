@@ -6,7 +6,7 @@
 !!  Tools for the management of a set of Fermi surface k-points
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2024 ABINIT group (MG, MVer)
+!!  Copyright (C) 2008-2025 ABINIT group (MG, MVer)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -34,8 +34,7 @@ module m_fstab
  use m_time,           only : cwtime, cwtime_report
  use m_fstrings,       only : itoa, sjoin, ktoa
  use m_numeric_tools,  only : bisect
- use m_symtk,          only : matr3inv
- use defs_datatypes,   only : ebands_t
+ use m_matrix,         only : matr3inv
  use m_special_funcs,  only : gaussian
  use m_kpts,           only : kpts_timrev_from_kptopt, smpbz, kpts_map
 
@@ -193,7 +192,6 @@ subroutine fstab_free(fstab)
 
 !Arguments ------------------------------------
  class(fstab_t),intent(inout) :: fstab
-
 ! ************************************************************************
 
  ! integer
@@ -258,7 +256,7 @@ subroutine fstab_init(fstab, ebands, cryst, dtset, comm)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: option0 = 0, brav1 = 1, bcorr0 = 0
- integer :: nkfs,spin,band,nband_k,i1,i2,ib,blow,ik_bz,ik_ibz,nkibz,timrev
+ integer :: nkfs,spin,band,nband_k,i1,i2,ib,blow,ik_bz,ik_ibz,nkibz
  integer :: ik,mkpt,nkbz,ierr, nene,ifermi
  real(dp),parameter :: max_occ1 = one
  real(dp) :: elow,ehigh,ebis,enemin,enemax,deltaene,cpu,wall,gflops
@@ -303,12 +301,11 @@ subroutine fstab_init(fstab, ebands, cryst, dtset, comm)
 
  ! Find correspondence BZ --> IBZ
  ! Note that we use symrel so these tables can be used to symmetrize wavefunctions.
- timrev = kpts_timrev_from_kptopt(ebands%kptopt)
  ABI_MALLOC(indkk, (6, nkbz))
 
  krank = krank_from_kptrlatt(ebands%nkpt, ebands%kptns, kptrlatt, compute_invrank=.False.)
 
- if (kpts_map("symrel", timrev, cryst, krank, nkbz, kbz, indkk) /= 0) then
+ if (kpts_map("symrel", ebands%kptopt, cryst, krank, nkbz, kbz, indkk) /= 0) then
    write(msg, '(10a)' ) &
    'The WFK file cannot be used to start the present calculation ',ch10, &
    'It was asked that the wavefunctions be accurate, but',ch10, &

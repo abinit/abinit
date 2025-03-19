@@ -1,8 +1,8 @@
 
-.Version 9.11.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Jul 2023.
-- ( at 11h59 )
-  
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v2_t52/t52.abi
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h08 )
+
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v2_t52/t52.abi
 - output file    -> t52.abo
 - root for input  files -> t52i
 - root for output files -> t52o
@@ -442,10 +442,10 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -477,7 +477,7 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
             acell26    7.0000000000E+00  7.0000000000E+00  7.0000000000E+00 Bohr
               amu      2.43050000E+01
              ecut      3.00000000E+00 Hartree
--          fftalg         312
+-          fftalg         512
             intxc           1
            istwfk        2
            jdtset        1    2    3    4    5    6    7    8    9   10
@@ -1181,8 +1181,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.00055
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/12mg.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/12mg.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/12mg.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/12mg.pspnc
 -  Troullier-Martins psp for element  Mg        Thu Oct 27 17:30:49 EDT 1994
 - 12.00000   2.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1282,13 +1282,13 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  6.76902110186178E-02
-hartree             :  3.26862943899768E-02
+kinetic             :  6.76902110186167E-02
+hartree             :  3.26862943899765E-02
 xc                  : -5.53671220504655E-01
 Ewald energy        : -7.03946368471893E-01
 psp_core            : -6.17381653795181E-03
-local_psp           : -2.12784664205795E-01
-non_local_psp       :  1.97927179503160E-01
+local_psp           : -2.12784664205794E-01
+non_local_psp       :  1.97927179503161E-01
 total_energy        : -1.17827238480854E+00
 total_energy_eV     : -3.20624221546628E+01
 band_energy         : -3.37376495007945E-01
@@ -1414,15 +1414,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 2, }
 comment             : Components of total free energy in Hartree
-kinetic             :  6.76918548158039E-02
-hartree             :  3.29505547794694E-02
+kinetic             :  6.76918548158034E-02
+hartree             :  3.29505547794691E-02
 xc                  : -5.53530789726814E-01
 Ewald energy        : -7.02767899501083E-01
 psp_core            : -6.15014313252932E-03
 local_psp           : -2.14762013508088E-01
 non_local_psp       :  1.99097888740671E-01
 total_energy        : -1.17747054753257E+00
-total_energy_eV     : -3.20406030527531E+01
+total_energy_eV     : -3.20406030527532E+01
 band_energy         : -3.37438808797278E-01
 ...
 
@@ -1546,13 +1546,13 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 3, }
 comment             : Components of total free energy in Hartree
-kinetic             :  6.85216425899229E-02
+kinetic             :  6.85216425899230E-02
 hartree             :  3.35765409071112E-02
 xc                  : -5.53579483828947E-01
 Ewald energy        : -7.01440351840160E-01
 psp_core            : -6.12673998113107E-03
 local_psp           : -2.17037154393140E-01
-non_local_psp       :  1.98934777822585E-01
+non_local_psp       :  1.98934777822584E-01
 total_energy        : -1.17715076872376E+00
 total_energy_eV     : -3.20319014288363E+01
 band_energy         : -3.38023959503470E-01
@@ -1678,7 +1678,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 4, }
 comment             : Components of total free energy in Hartree
-kinetic             :  6.85216425899230E-02
+kinetic             :  6.85216425899229E-02
 hartree             :  3.35765409071112E-02
 xc                  : -5.53579483828947E-01
 Ewald energy        : -7.01440351840160E-01
@@ -1810,13 +1810,13 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 5, }
 comment             : Components of total free energy in Hartree
-kinetic             :  6.43220556739365E-02
-hartree             :  3.43007161428292E-02
-xc                  : -5.64818344937363E-01
+kinetic             :  6.43220556739375E-02
+hartree             :  3.43007161428295E-02
+xc                  : -5.64818344937364E-01
 Ewald energy        : -7.28949609499743E-01
 psp_core            : -7.00198854986408E-03
-local_psp           : -1.95063634703107E-01
-non_local_psp       :  1.96433193939209E-01
+local_psp           : -1.95063634703110E-01
+non_local_psp       :  1.96433193939210E-01
 total_energy        : -1.20077761193410E+00
 total_energy_eV     : -3.26748205288330E+01
 band_energy         : -3.38312713270226E-01
@@ -1942,16 +1942,16 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 6, }
 comment             : Components of total free energy in Hartree
-kinetic             :  6.43220556739365E-02
-hartree             :  3.43007161428292E-02
+kinetic             :  6.43220556739375E-02
+hartree             :  3.43007161428295E-02
 xc                  : -5.64818344937363E-01
 Ewald energy        : -7.28949609499743E-01
 psp_core            : -7.00198854986408E-03
-local_psp           : -1.95063634703107E-01
-non_local_psp       :  1.96433193939209E-01
+local_psp           : -1.95063634703110E-01
+non_local_psp       :  1.96433193939210E-01
 total_energy        : -1.20077761193410E+00
 total_energy_eV     : -3.26748205288330E+01
-band_energy         : -3.38312713270226E-01
+band_energy         : -3.38312713270227E-01
 ...
 
 
@@ -2081,12 +2081,12 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 7, }
 comment             : Components of total free energy in Hartree
-kinetic             :  3.65527060186944E-02
+kinetic             :  3.65527060186943E-02
 hartree             :  7.86020911395402E-03
 xc                  : -5.75683473215209E-01
 Ewald energy        : -8.14573491773756E-01
 psp_core            : -9.10075711004774E-03
-local_psp           : -7.51922477135603E-02
+local_psp           : -7.51922477135605E-02
 non_local_psp       :  1.88184151243905E-01
 total_energy        : -1.24195290343602E+00
 total_energy_eV     : -3.37952571914390E+01
@@ -2213,12 +2213,12 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 8, }
 comment             : Components of total free energy in Hartree
-kinetic             :  6.07793246332857E-02
-hartree             :  4.13562878259141E-02
-xc                  : -5.80107526356487E-01
+kinetic             :  6.07793246332861E-02
+hartree             :  4.13562878259143E-02
+xc                  : -5.80107526356488E-01
 Ewald energy        : -7.59334279415939E-01
 psp_core            : -8.08519994825340E-03
-local_psp           : -1.81833000010759E-01
+local_psp           : -1.81833000010760E-01
 non_local_psp       :  1.98435509973313E-01
 total_energy        : -1.22878888329893E+00
 total_energy_eV     : -3.34370459863478E+01
@@ -2345,13 +2345,13 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 9, }
 comment             : Components of total free energy in Hartree
-kinetic             :  3.77036281674481E-02
-hartree             :  8.44323622546091E-03
-xc                  : -5.75070406730883E-01
+kinetic             :  3.77036281674479E-02
+hartree             :  8.44323622546081E-03
+xc                  : -5.75070406730882E-01
 Ewald energy        : -8.10656422708749E-01
 psp_core            : -9.00255670696810E-03
-local_psp           : -8.00667433401558E-02
-non_local_psp       :  1.88733638620063E-01
+local_psp           : -8.00667433401547E-02
+non_local_psp       :  1.88733638620062E-01
 total_energy        : -1.23991562647378E+00
 total_energy_eV     : -3.37398200659905E+01
 band_energy         : -3.12980191707034E-01
@@ -2477,13 +2477,13 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 10, }
 comment             : Components of total free energy in Hartree
-kinetic             :  3.77036281674482E-02
-hartree             :  8.44323622546091E-03
-xc                  : -5.75070406730883E-01
+kinetic             :  3.77036281674480E-02
+hartree             :  8.44323622546082E-03
+xc                  : -5.75070406730882E-01
 Ewald energy        : -8.10656422708749E-01
 psp_core            : -9.00255670696810E-03
-local_psp           : -8.00667433401558E-02
-non_local_psp       :  1.88733638620063E-01
+local_psp           : -8.00667433401551E-02
+non_local_psp       :  1.88733638620062E-01
 total_energy        : -1.23991562647378E+00
 total_energy_eV     : -3.37398200659905E+01
 band_energy         : -3.12980191707034E-01
@@ -2616,16 +2616,16 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 11, }
 comment             : Components of total free energy in Hartree
-kinetic             :  5.74371287570398E-02
-hartree             :  2.76338039576949E-02
+kinetic             :  5.74371287570404E-02
+hartree             :  2.76338039576954E-02
 xc                  : -5.64665780907434E-01
 Ewald energy        : -7.43577908961787E-01
 psp_core            : -7.27308941763409E-03
-local_psp           : -1.70461680977181E-01
+local_psp           : -1.70461680977182E-01
 non_local_psp       :  1.95870966566798E-01
 total_energy        : -1.20503656098250E+00
 total_energy_eV     : -3.27907124262292E+01
-band_energy         : -3.32165345653517E-01
+band_energy         : -3.32165345653518E-01
 ...
 
 
@@ -2748,13 +2748,13 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 12, }
 comment             : Components of total free energy in Hartree
-kinetic             :  6.72810654238677E-02
-hartree             :  3.32420757953172E-02
+kinetic             :  6.72810654238667E-02
+hartree             :  3.32420757953167E-02
 xc                  : -5.52938014289365E-01
 Ewald energy        : -7.03214038859153E-01
 psp_core            : -6.12673998113107E-03
-local_psp           : -2.12972850262394E-01
-non_local_psp       :  1.97581804140412E-01
+local_psp           : -2.12972850262392E-01
+non_local_psp       :  1.97581804140411E-01
 total_energy        : -1.17714669803245E+00
 total_energy_eV     : -3.20317906596924E+01
 band_energy         : -3.36896527819612E-01
@@ -2887,13 +2887,13 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 13, }
 comment             : Components of total free energy in Hartree
-kinetic             :  9.75659714747197E-02
-hartree             :  1.01199514314247E-01
-xc                  : -6.55271628415122E-01
+kinetic             :  9.75659714747217E-02
+hartree             :  1.01199514314249E-01
+xc                  : -6.55271628415123E-01
 Ewald energy        : -8.01872832369719E-01
 psp_core            : -1.22534799622621E-02
-local_psp           : -2.95538376103555E-01
-non_local_psp       :  2.70636469232952E-01
+local_psp           : -2.95538376103559E-01
+non_local_psp       :  2.70636469232953E-01
 total_energy        : -1.29553436182874E+00
 total_energy_eV     : -3.52532828235420E+01
 band_energy         : -3.66186131332097E-01
@@ -3019,15 +3019,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 14, }
 comment             : Components of total free energy in Hartree
-kinetic             :  9.75912685147109E-02
-hartree             :  1.01219506325062E-01
+kinetic             :  9.75912685147110E-02
+hartree             :  1.01219506325063E-01
 xc                  : -6.55287432385208E-01
 Ewald energy        : -8.01872832369717E-01
 psp_core            : -1.22534799622621E-02
-local_psp           : -2.95621912760738E-01
+local_psp           : -2.95621912760739E-01
 non_local_psp       :  2.70693689752924E-01
 total_energy        : -1.29553119288523E+00
-total_energy_eV     : -3.52531965922036E+01
+total_energy_eV     : -3.52531965922037E+01
 band_energy         : -3.66186061227888E-01
 ...
 
@@ -3158,13 +3158,13 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 15, }
 comment             : Components of total free energy in Hartree
-kinetic             :  5.74020317825731E-02
-hartree             :  2.76233505329132E-02
-xc                  : -5.64653152829242E-01
+kinetic             :  5.74020317825745E-02
+hartree             :  2.76233505329140E-02
+xc                  : -5.64653152829243E-01
 Ewald energy        : -7.43577908961787E-01
 psp_core            : -7.27308941763409E-03
-local_psp           : -1.70410202762673E-01
-non_local_psp       :  1.95852739546269E-01
+local_psp           : -1.70410202762676E-01
+non_local_psp       :  1.95852739546270E-01
 total_energy        : -1.20503623210958E+00
 total_energy_eV     : -3.27907034771419E+01
 band_energy         : -3.32165364944527E-01
@@ -3290,13 +3290,13 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 16, }
 comment             : Components of total free energy in Hartree
-kinetic             :  9.38811207109599E-02
-hartree             :  7.27337007021430E-02
+kinetic             :  9.38811207109607E-02
+hartree             :  7.27337007021433E-02
 xc                  : -6.83391779122824E-01
 Ewald energy        : -8.98210366283568E-01
 psp_core            : -1.60826924504690E-02
 local_psp           : -2.00647480180867E-01
-non_local_psp       :  2.97319344072551E-01
+non_local_psp       :  2.97319344072550E-01
 total_energy        : -1.33439815255207E+00
 total_energy_eV     : -3.63108203511693E+01
 band_energy         : -3.25199816147541E-01
@@ -3422,8 +3422,8 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 17, }
 comment             : Components of total free energy in Hartree
-kinetic             :  9.38675407899643E-02
-hartree             :  7.27208349415924E-02
+kinetic             :  9.38675407899651E-02
+hartree             :  7.27208349415929E-02
 xc                  : -6.83386169158040E-01
 Ewald energy        : -8.98210366283572E-01
 psp_core            : -1.60826924504690E-02
@@ -3431,7 +3431,7 @@ local_psp           : -2.00631194238828E-01
 non_local_psp       :  2.97320022307509E-01
 total_energy        : -1.33440202409184E+00
 total_energy_eV     : -3.63109257011241E+01
-band_energy         : -3.25199796533142E-01
+band_energy         : -3.25199796533141E-01
 ...
 
 
@@ -3561,16 +3561,16 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 18, }
 comment             : Components of total free energy in Hartree
-kinetic             :  9.38669894002189E-02
-hartree             :  7.27211661630182E-02
+kinetic             :  9.38669894002172E-02
+hartree             :  7.27211661630172E-02
 xc                  : -6.83386187097252E-01
 Ewald energy        : -8.98210366283613E-01
 psp_core            : -1.60826924504690E-02
-local_psp           : -2.00630710897423E-01
-non_local_psp       :  2.97319898043226E-01
-total_energy        : -1.33440190312229E+00
+local_psp           : -2.00630710897422E-01
+non_local_psp       :  2.97319898043227E-01
+total_energy        : -1.33440190312230E+00
 total_energy_eV     : -3.63109224093753E+01
-band_energy         : -3.25199796927850E-01
+band_energy         : -3.25199796927851E-01
 ...
 
 
@@ -3700,9 +3700,9 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 19, }
 comment             : Components of total free energy in Hartree
-kinetic             :  4.40659496104423E-02
-hartree             :  5.05410024735161E-03
-xc                  : -7.63712210101396E-01
+kinetic             :  4.40659496104425E-02
+hartree             :  5.05410024735164E-03
+xc                  : -7.63712210101395E-01
 Ewald energy        : -1.23015896872650E+00
 psp_core            : -3.21653849009381E-02
 local_psp           :  1.70746039339974E-01
@@ -3832,15 +3832,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 20, }
 comment             : Components of total free energy in Hartree
-kinetic             :  1.25038904432998E-01
-hartree             :  1.87541680871326E-02
+kinetic             :  1.25038904432995E-01
+hartree             :  1.87541680871322E-02
 xc                  : -9.35346661217155E-01
 Ewald energy        : -1.56521744779333E+00
 psp_core            : -6.43307698018762E-02
-local_psp           :  2.99072481710310E-01
-non_local_psp       :  7.10201500753287E-01
+local_psp           :  2.99072481710308E-01
+non_local_psp       :  7.10201500753294E-01
 total_energy        : -1.41182782382863E+00
-total_energy_eV     : -3.84177888584294E+01
+total_energy_eV     : -3.84177888584293E+01
 band_energy         :  2.78285422671568E-01
 ...
 
@@ -3964,13 +3964,13 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 21, }
 comment             : Components of total free energy in Hartree
-kinetic             :  8.99332133491552E-02
-hartree             :  1.18150662605814E-02
+kinetic             :  8.99332133491546E-02
+hartree             :  1.18150662605813E-02
 xc                  : -8.56460369655299E-01
 Ewald energy        : -1.43359401357615E+00
 psp_core            : -4.82480773514071E-02
-local_psp           :  2.55447531977612E-01
-non_local_psp       :  4.95198469207222E-01
+local_psp           :  2.55447531977611E-01
+non_local_psp       :  4.95198469207223E-01
 total_energy        : -1.48590817978828E+00
 total_energy_eV     : -4.04336178609329E+01
 band_energy         :  6.07502009203977E-02
@@ -4103,15 +4103,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 22, }
 comment             : Components of total free energy in Hartree
-kinetic             :  1.81295691209662E-02
-hartree             :  7.28308519312836E-04
+kinetic             :  1.81295691209666E-02
+hartree             :  7.28308519312860E-04
 xc                  : -6.00500965339135E-01
 Ewald energy        : -9.09808362377261E-01
 psp_core            : -1.20620193378518E-02
-local_psp           :  1.80728877346432E-02
+local_psp           :  1.80728877346428E-02
 non_local_psp       :  1.85505369883160E-01
 total_energy        : -1.29993521179617E+00
-total_energy_eV     : -3.53730360413158E+01
+total_energy_eV     : -3.53730360413159E+01
 band_energy         : -2.84845051952831E-01
 ...
 
@@ -4242,13 +4242,13 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 23, }
 comment             : Components of total free energy in Hartree
-kinetic             :  2.98438899240213E-02
-hartree             :  3.19161979749211E-03
+kinetic             :  2.98438899240224E-02
+hartree             :  3.19161979749222E-03
 xc                  : -7.05154500440856E-01
 Ewald energy        : -1.14621551852845E+00
 psp_core            : -2.41240386757036E-02
-local_psp           :  1.41672940136928E-01
-non_local_psp       :  2.59393007103478E-01
+local_psp           :  1.41672940136930E-01
+non_local_psp       :  2.59393007103475E-01
 total_energy        : -1.44139260068309E+00
 total_energy_eV     : -3.92222873501513E+01
 band_energy         : -1.94734303768908E-01
@@ -4374,13 +4374,13 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 24, }
 comment             : Components of total free energy in Hartree
-kinetic             :  1.82095713383506E-02
-hartree             :  7.80842138597116E-04
-xc                  : -5.99246746369803E-01
+kinetic             :  1.82095713383501E-02
+hartree             :  7.80842138597091E-04
+xc                  : -5.99246746369802E-01
 Ewald energy        : -9.06466577406487E-01
 psp_core            : -1.19341358042263E-02
-local_psp           :  1.56460162856440E-02
-non_local_psp       :  1.85459095882057E-01
+local_psp           :  1.56460162856438E-02
+non_local_psp       :  1.85459095882058E-01
 total_energy        : -1.29755193393587E+00
 total_energy_eV     : -3.53081837526142E+01
 band_energy         : -2.85593294689532E-01
@@ -4513,15 +4513,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 25, }
 comment             : Components of total free energy in Hartree
-kinetic             :  3.82807655864983E-02
-hartree             :  3.77587363893314E-03
+kinetic             :  3.82807655865000E-02
+hartree             :  3.77587363893334E-03
 xc                  : -7.32234661637501E-01
-Ewald energy        : -8.95337028800308E-01
+Ewald energy        : -8.95337028800306E-01
 psp_core            : -2.47934746907416E-02
-local_psp           : -2.32175906343737E-02
-non_local_psp       :  4.43990524353599E-01
+local_psp           : -2.32175906343752E-02
+non_local_psp       :  4.43990524353598E-01
 total_energy        : -1.18953559218389E+00
-total_energy_eV     : -3.23689096140484E+01
+total_energy_eV     : -3.23689096140483E+01
 band_energy         : -1.77620894412817E-01
 ...
 
@@ -4652,12 +4652,12 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 26, }
 comment             : Components of total free energy in Hartree
-kinetic             :  3.72632424111078E-02
-hartree             :  7.83576086013695E-03
+kinetic             :  3.72632424111077E-02
+hartree             :  7.83576086013691E-03
 xc                  : -5.75838722318006E-01
 Ewald energy        : -8.15130207723119E-01
 psp_core            : -9.11309672035269E-03
-local_psp           : -7.42844113339393E-02
+local_psp           : -7.42844113339389E-02
 non_local_psp       :  1.86580892932092E-01
 total_energy        : -1.24268654189208E+00
 total_energy_eV     : -3.38152205090814E+01
@@ -4677,7 +4677,7 @@ band_energy         : -3.12025490776030E-01
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell1     7.0000000000E+00  8.0000000000E+00  9.0000000000E+00 Bohr
             acell2     7.0000000000E+00  8.0000000000E+00  9.0000000000E+00 Bohr
@@ -4759,7 +4759,7 @@ band_energy         : -3.12025490776030E-01
             fcart24   -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart25   -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart26   -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
--          fftalg         312
+-          fftalg         512
             intxc           1
            istwfk        2
            jdtset        1    2    3    4    5    6    7    8    9   10
@@ -5466,7 +5466,7 @@ P           mkmem           1
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -5478,12 +5478,12 @@ P           mkmem           1
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -5501,7 +5501,7 @@ P           mkmem           1
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -5516,15 +5516,15 @@ P           mkmem           1
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         16.6  wall=         17.6
+- Proc.   0 individual time (sec): cpu=         11.7  wall=         11.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered  26 WARNINGs and  51 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         16.6  wall=         17.6
++Overall time at end (sec) : cpu=         11.7  wall=         11.8
