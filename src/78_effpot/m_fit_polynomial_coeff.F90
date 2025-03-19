@@ -2487,7 +2487,7 @@ subroutine fit_polynomial_coeff_solve(coefficients,fcart_coeffs,fcart_diff,energ
  integer :: ia,itime,icoeff,jcoeff,icoeff_tmp,jcoeff_tmp,mu,LDA,LDB,LDX,LDAF,N,NRHS
  real(dp):: efact,ffact,sfact,ftmpA,stmpA,ftmpB,stmpB,etmpA,etmpB,fmu,fnu,smu,snu,emu,enu
  integer :: INFO
-!integer :: ITER ! Only needed if DSGESV is used
+ integer :: ITER ! Only needed if DSGESV is used
  real(dp):: RCOND
  real(dp):: fcart_coeffs_tmp(3,natom,ntime)
  real(dp),allocatable:: AF(:,:),BERR(:),FERR(:),WORK(:),C(:),R(:)
