@@ -2632,7 +2632,12 @@ subroutine ibte_calc_tensors(self, cryst, itemp, kT, mu_e, fk, onsager, sigma_eh
 ! sigma_eh = max_occ * sigma_eh / cryst%ucvol
  fsum_eh = fsum_eh / cryst%ucvol
 
-!max_occ = two / (self%nspinor * self%nsppol)
+ max_occ = two / (self%nspinor * self%nsppol)
+ !Take into account spin degeneracy for all Onsager coefficient:
+ sigma_eh= max_occ * sigma_eh
+
+
+
 ! fact0 = max_occ * (siemens_SI / Bohr_meter / cryst%ucvol) / 100
 ! fact = 100**3 / e_Cb
 ! sigma_eh = fact0 * sigma_eh
