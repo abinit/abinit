@@ -13,7 +13,7 @@ In the following, we will refer to this traditional approach as the **convention
 ## Why a new GW code?
 
 In the standard GW code, one uses the Lehmann representation of the Green's function in the frequency domain
-to compute the irreducible polarizability, as explained in the [MBPT notes](/doc/theory/mbt).
+to compute the irreducible polarizability, as explained in the [MBPT notes](/theory/mbt).
 Then the self-energy matrix elements in the KS representation are computed via an expensive convolution
 in the frequency domain [[cite:Golze2019]] — by default using the plasmon-pole approximation [[cite:Giantomassi2011]],
 which significantly accelerates calculations but introduces approximations and prevents direct access
@@ -75,6 +75,15 @@ TODO: Mention interface with CC4S
 * [[ngkpt]] 4 4 4
 * [[nshiftk]] 1
 * [[shiftk]] 0 0 0
+
+
+The $\kk$-points and the band range for the QP corrections can be specified in different ways.
+Here we set them explicitly using [[nkptgw]], [[kptgw]] and [[bdgw]]
+
+Explicitly via [[nkptgw]], [[kptgw]] and [[bdgw]]
+Implicitly via [[gw_qprange]]
+
+For the spectral function, we have the following variables [[nfreqsp]], [[freqspmax]]
 
 ## Formalism
 
@@ -142,9 +151,10 @@ and then immediately transformed to Fourier space.
 
 The cutoff energy for the polarizability is given by [[ecuteps]]
 
-As discussed in the [MBPT notes](/doc/theory/mbt),
+As discussed in [cite:Baroni1986]
 As concerns the treatment of the long-wavelenght limit $\qq \rightarrow 0$ in the polarizability,
 we have the following input variables:
+See also [this section](/theory/bse/#5-matrix-elements-of-the-dipole-operator) of the BSE notes.
 
 [[inclvkb]],
 [[gw_qlwl]],
@@ -153,34 +163,39 @@ we have the following input variables:
 The exchange part of $\Sigma$ is computed using the standard sum over occupied states
 similarly to what is done in the conventional code.
 
+![](mbt_assets/self_x_mel.svg)
+
 \begin{equation}\label{eq:Sigma_x}
 \Sigma_x(\rr_1,\rr_2)= -\sum_\kk^\BZ
 \sum_\nu^\text{occ} \Psi_{n\kk}(\rr_1){\Psi^\*_{n\kk}}(\rr_2)\,v(\rr_1,\rr_2)
 \end{equation}
 
-[[ecutsigx]] defines the number of $\bg$-vectors in the sum.
+The number of $\bg$-vectors in the sum is defined by [[ecutsigx]]
 
 ## Real-space vs convolutions in the BZ
 
 So far we have discussed the GWR equations used to compute the polarizability
 and the self-energy in the real-space supercell.
 This is the recommended approach if one needs to compute QP corrections for all the $\kk$-points in the IBZ.
-This is the typical scenario for self-consistent calculations or if one needs to perform some kind of interpolation
-of the QP results to obtain e.g. a band structure along a high-symmetry $\kk$-path.
+This is the typical scenario for self-consistent GWR calculations or if one needs to perform some kind of interpolation
+of the QP corrections to obtain e.g. a band structure along a high-symmetry $\kk$-path.
 
 It should be noted, however, that in several applications one is mainly interested in the QP corrections
 at the band edges that are usually located at high-symmetry $\kk$-points.
 In this case, it is more advantageous to use an alternative formulation in which the matrix elements of
 $\Sigma_\kk$ are obtained in terms of convolutions in the BZ according to
 
-where $G_\qq(\rr,\rr')$ and $W_\qq(\rr,\rr')$ are now defined in the unit cell.
+where $G_\qq(\rr,\rr')$ and $W_\qq(\rr,\rr')$ are now quantities defined in the unit cell.
 
 In this formalism, one can take advantage of the symmetries of the system to reduce the BZ summation to
 the irreducible wedge defined by the little group of the $\kk$$ point.
 In the best case scenario, both the CBM and the VBM are located at the $\Gamma$ point; hence the BZ summation
 can be replaced by a much faster symmetrized sum over the wavevectors of the IBZ.
-Clearly this approach is not very efficient in terms of operations if all the $\kk$-points are wanterd
-as, in this case, one recovers the quadratic scaling with the BZ sampling
+Clearly this approach is not very efficient in terms of operations if all the $\kk$-points are wanted
+as, in this case, one recovers the quadratic scaling with the BZ sampling.
+
+The input variable [[gwr_sigma_algo]] allows one to select the algorithm to be used.
+[[gwr_chi_algo]] has a similar meeaning but only for the polarizability.
 
 <!--
 ## GWR workflow for QP energies
