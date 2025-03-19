@@ -24471,8 +24471,13 @@ Variable(
     requires="[[optdriver]] == 6",
     added_in_version="9.6.2",
     text=r"""
-This variable defines the number of imaginary-time points in the minimax mesh.
+This variable defines the number of points in the minimax mesh.
 Possible values are: [6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34].
+
+The other piece of information required for the selection of the minimax mesh
+is the ratio between the **fundamental** gap and the maximum transition energy i.e.
+the differerence between the highest KS eigenvalue for the empty states that, in turns, depends
+on the value of [[nband]] used and the energy of the lowest occupied state.
 """,
 ),
 
@@ -24487,12 +24492,16 @@ Variable(
     requires="[[optdriver]] == 6",
     added_in_version="9.6.2",
     text=r"""
-This input variable selects the algorithm used to compute the polarizability in the GWR code.
+This variable is similar in spirit to [[gwr_sigma_algo]].
+It selects the algorithm used to compute the polarizability in the GWR code.
 Possible values are
 
 * 0 --> Automatic selection.
-* 1 --> Use supercell.
-* 2 --> Use convolutions in the BZ.
+* 1 --> Compute $\chi$ in the real-space supercell
+* 2 --> Compute $\chi$ using convolutions in the BZ.
+
+[[gwr_chi_algo]] 2 is slower than 1 although it is significantly less memory demanding
+
 """,
 ),
 
@@ -24526,8 +24535,16 @@ This input variable selects the algorithm used to compute the self-energy in the
 Possible values are
 
 * 0 --> Automatic selection.
-* 1 --> Use real-space supercell.
-* 2 --> Use convolutions in the BZ.
+* 1 --> Compute $\Sigma$ in the real-space supercell
+* 2 --> Compute $\Sigma$ using convolutions in the BZ.
+
+[[gwr_sigma_algo]] 1 is the most efficient approach when one needs to compute QP corrections for all the $\kk$-points, e.g.
+when performing self-consistent calculations or if one needs to interpolate the QP corrections to obtain QP band structure
+along an arbitrary $\kk$-path.
+[[gwr_sigma_algo]] 2 is faster than 1 if we only need to compute QP corrections at the band edges that are ideally located
+at high-symmetry $\kk$-points as the code can exploit symmetries.
+In the best case scenario, both the CBM and the VBM are located at the $\Gamma$ point; hence the BZ summation
+can be replaced by a much faster symmetrized sum over the wavevectors of the IBZ.
 """,
 ),
 

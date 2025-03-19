@@ -61,8 +61,8 @@ you will notice that we are using norm-conserving pseudos taken from the standar
 For GW calculations, we strongly recommend using pseudos from the stringent table
 as they have closed-shells treated as valence that are important for a correct description of exchange effects [[cite:Setten2018]].
 In the case of silicon, there is no difference between the standard version and the stringent version of the pseudo,
-but if we consider Ga, you will see that the stringent version includes the 3spd states in valence while the standard pseudos
-only the 3d states.
+but if we consider e.g.. Ga, you will see that the stringent version includes the 3spd states in valence
+while the standard pseudos only the 3d states.
 Since we are using scalar-relativistic (SR) pseudos, we cannot treat SOC and [[nspinor]] must be 1 (default).
 To include SOC, one should use fully-relativistic (FR) pseudos and use [[nspinor]] 2 in all the input files
 and select the appropriate value of [[nspden]] (4 or 1) depending on whether the system is magnetic or not.
@@ -73,9 +73,8 @@ Also, the density is computed with 2x2x2 $\Gamma$-centered $\kk$-mesh.
 In real life, one should compute the KS density with a much denser mesh so that we have an accurate density
 to compute KS states and eigenvalues for the GWR part.
 
-At this point, the calculation should have completed and
-we can have a look at the electronic band structure to understand
-the position of the band edges.
+At this point, the calculation should have completed and we can have a look
+at the electronic band structure to understand the position of the band edges.
 
 !!! tip
 
@@ -108,6 +107,7 @@ The KS fundamental band gap is XXX that is strongly underestimated wrt experimen
 In the second input file, we use the density computed previously (tgwr\_1o\_DS1\_DEN)
 to generate two WFK files with two different $\Gamma$-centered $\kk$-meshes ([[ngkpt]] = 2x2x2 and 4x4x4)
 so that we can perform convergence studies wrt the BZ sampling in the last part of this tutorial.
+Let us recall that shifted $\kk$-meshes are not supported by GWR.
 
 Start the job in background with:
 
@@ -125,9 +125,9 @@ The reason is that the direct diagonalization outperforms iterative methods when
 especially if one can take advantage of ScalaPack to distribute the Hamiltonian matrix.
 
 Here we ask for 100 states as in the previous GW tutorial [[nband]] = 100 was considered converged within 30 meV.
-Cleary, when studying new systems a good value of [[nband]] is not given to you
+Cleary, when studying new systems a good value of [[nband]] is not known in advance
 so one has to plan this calculation in advance and ask for a reasonably-large number of states
-so that we do not have to repeat the WFK generation several times just to increase the number of bands.
+so that we do not have to repeat the WFK generation several times just to increase the number of bands in the WFK file.
 
 !!! important
 
@@ -140,7 +140,7 @@ so that we do not have to repeat the WFK generation several times just to increa
     In order to compute **all** the eigenvectors of the KS Hamiltonian, one can use gwr_task "HDIAGO_FULL".
     In this case the value of [[nband]] is automatically set to the total number of plawewaves
     for that particular $\kk$-point.
-    No stopping criterion such as [[tolwfr]] or the number of iterations [[nstep]] are required when Scalapack is used.
+    No stopping criterion such as [[tolwfr]] or the number of iterations [[nstep]] are not required when Scalapack is used.
 
 
 ### Our first GWR calculation
@@ -163,15 +163,14 @@ and other variables that are specific to GWR.
 We use [[optdriver]] 6 to enter the GWR code and [[gwr_task]] activates a one-shot calculation.
 We ask for a minimax mesh with [[gwr_ntau]] = 6 points.
 This is the minimum number of points one can use at present, and, clearly, it should be subject to convergence studies.
-
 [[getden_filepath]] specifies the density file used to compute $v_{xc}(\rr)$,
 while [[getwfk_filepath]] specifies the WFK file with empty states.
 Note that the $\kk$-mesh specified in the input via [[ngkpt]], [[nshiftk]] and [[shiftk]] must
 agree with the one found in the WFK file.
 
 [[gwr_boxcutmin]] is set to 1.1 in order to accelerate the calculation,
-This is one of the parameters that should be subject to convergence studies.
-Please take some time to read the variable description.
+This is one of the parameters that should be subject to convergence studies as discussed
+Please take some time to read the variable description before proceeding.
 
 Now, let us turn our attention to the variables that are also used in the legacy GW code.
 In the [first GW tutorial](/tutorial/gw1), we have already performed convergence studies,
@@ -187,8 +186,6 @@ The computation of the exchange is relatively fast as only occupied states are i
 
 The $\kk$-points and the band range for the QP corrections can be specified in different ways.
 Here we set them explicitly using [[nkptgw]], [[kptgw]] and [[bdgw]]
-
-Explicitly via
 Implicitly via [[gw_qprange]]
 
 For the spectral function, we have the following variables [[nfreqsp]], [[freqspmax]]
@@ -200,8 +197,6 @@ We can now have a look at the main output file:
 {% dialog tests/tutorial/Refs/tgwr_3.abo %}
 
 First of all, we find a section that summarizes
-
-
 The most important GWR parameters are summarized in this Yaml document
 
 ```yaml
@@ -285,27 +280,56 @@ data: !Tabular |
 
 The meaning of the different columns should be self-explanatory.
 
+### Analyzing GWR results with AbiPy
 
-### Convergence study
+```python
 
-As discussed in [[cite:Setten2017]], the convergence study for the $\kk$-mesh, the number
-of bands and the cutoff energies can be decoupled in the sense that one can start from
-a reasonaby coarse $\kk$-mesh to find the converged values of [[nband]], [[ecuteps]], [[ecutsigx]]
-and then fix these values and look at the convergence with respect to the BZ mesh.
+```
 
-The recomended procedure to converge GWR calculations is as follows.
+### Convergence study HOWTO
 
-In the first step, we suggest fixing the [[ngkpt]] $\kk$-mesh in the WFK file
-as well as [[gwr_ntau]] and perform a convergence studies with respect to [[nband]] and [[ecuteps]].
-Note that [[gwr_ntau]] = 6 may be too small and give unphysical results.
+As discussed in [[cite:Setten2017]], the convergence study for
+the $\kk$-mesh, number of bands, and cutoff energies can be decoupled.
+This means one can start with a relatively coarse $\kk$-mesh to determine
+the converged values of [[nband]], [[ecuteps]], and [[ecutsigx]],
+then fix these values and refine the Brillouin zone (BZ) sampling.
+The recommended procedure for converging GWR calculations is therefore as follows:
 
-After this step, one should start to converge with respect to
-[[gwr_boxcutmin]],
+1) Initial Convergence Tests
 
-Next one should start to increase [[gwr_ntau]].
-Finally, one can start to monitor the convergence with the BZ sampling.
+- Fix the [[ngkpt]] $\kk$-mesh in the WFK file.
+- Set an initial value for [[gwr_ntau]].
+- Perform convergence studies on [[nband]], [[ecuteps]], and [[ecutsigx]].
+- Be aware that [[gwr_ntau]] = 6 may be too small, potentially leading to unphysical results,
+  such as renormalization factors $Z$ below 0.6. If this occurs, increase [[gwr_ntau]].
+
+2) Refining [[gwr_boxcutmin]]
+
+- After determining converged values for [[nband]], [[ecuteps]], and [[ecutsigx]], begin refining [[gwr_boxcutmin]].
+- Increase it gradually (e.g., 1.1, 1.2, 1.3) to control memory usage and CPU time, which scale rapidly with this parameter.
+
+Once the results are converged with respect to [[gwr_boxcutmin]], converge wrt [[gwr_ntau]]
+Finally, refine the BZ sampling to ensure full convergence.
 
 
 !!! important
 
-    We strongly recommend avoiding multidatasets for these kind of calculations.
+    We strongly recommend avoiding multidatasets for running convergence studies.
+
+### GWR calculations with two different BZ meshes.
+
+In this part of the tutorial, we run two GWR calculations with two different BZ meshes.
+This allows us to simulate a typical convergence study and discuss some technical aspects
+
+You may want to start immediately the computation by issuing:
+
+```sh
+abinit tgwr_4.abi > tgwr_4.log 2> err &
+```
+
+with the following input file:
+
+{% dialog tests/tutorial/Input/tgwr_4.abi %}
+{% dialog tests/tutorial/Refs/tgwr_4.abo %}
+
+### How to analyze multiple GWR.nc files with GwrRobot
