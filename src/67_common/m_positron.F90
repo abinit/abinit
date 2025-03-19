@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2024 ABINIT group (GJ, MT, JW)
+!!  Copyright (C) 1998-2025 ABINIT group (GJ, MT, JW)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -72,6 +72,7 @@ module m_positron
  use m_prep_kgb,    only : prep_fourwf
  use m_fft,         only : fourwf, fourdp
  use m_cgprj,       only : ctocprj
+ use m_xg_nonlop,   only : xg_nonlop_t
 
  implicit none
 
@@ -153,10 +154,11 @@ contains
 !!  symrec(3,3,nsym)=symmetries in reciprocal space, reduced coordinates
 !!  ucvol=unit cell volume in bohr**3.
 !!  usecprj= 1 if cprj array is stored in memory
+!!  usevxctau=1 if kinetic energy density contribution has to be included (mGGA)
 !!  vhartr(nfftf)=array for holding Hartree potential
 !!  vpsp(nfftf)=array for holding local psp
 !!  vxc(nfftf,nspden)=exchange-correlation potential (hartree) in real space
-!!  vxctau(nfft,nspden,4*usekden)=(only for meta-GGA) derivative of XC energy density
+!!  vxctau(nfft,nspden,4*usevxctau)=(only for meta-GGA) derivative of XC energy density
 !!                                wrt kinetic energy density (depsxcdtau)
 !!  xccc3d(n3xccc)=3D core electron density for XC core correction, bohr^-3
 !!  xcctau3d(n3xccc*usekden)=(only for meta-GGA): 3D core electron kinetic energy density for XC core correction
@@ -183,13 +185,13 @@ subroutine setup_positron(atindx,atindx1,cg,cprj,dtefield,dtfil,dtset,ecore,eige
 &          grcondft,grewtn,grvdw,gsqcut,hdr,extfpmd,ifirst_gs,indsym,istep,istep_mix,kg,&
 &          kxc,maxfor,mcg,mcprj,mgfft,mpi_enreg,my_natom,n3xccc,nattyp,nfft,ngfft,ngrvdw,nhat,nkxc,npwarr,nvresid,occ,optres,&
 &          paw_ij,pawang,pawfgr,pawfgrtab,pawrad,pawrhoij,pawtab,ph1d,ph1dc,psps,rhog,rhor,&
-&          rmet,rprimd,stress_needed,strscondft,strsxc,symrec,ucvol,usecprj,vhartr,vpsp,vxc,vxctau,&
-&          xccc3d,xcctau3d,xred,ylm,ylmgr)
+&          rmet,rprimd,stress_needed,strscondft,strsxc,symrec,ucvol,usecprj,usevxctau,vhartr,vpsp,vxc,vxctau,&
+&          xccc3d,xcctau3d,xred,ylm,ylmgr,xg_nonlop)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: forces_needed,ifirst_gs,istep,mcg,mcprj,mgfft,my_natom,n3xccc,nfft
- integer,intent(in) :: ngrvdw,nkxc,optres,stress_needed,usecprj
+ integer,intent(in) :: ngrvdw,nkxc,optres,stress_needed,usecprj,usevxctau
  integer,intent(inout) :: istep_mix
  real(dp),intent(in) :: ecore,etotal,gsqcut,maxfor,ucvol
  type(efield_type),intent(in) :: dtefield
@@ -204,6 +206,7 @@ subroutine setup_positron(atindx,atindx1,cg,cprj,dtefield,dtfil,dtset,ecore,eige
  type(pawfgr_type),intent(in) :: pawfgr
  type(pseudopotential_type), intent(in) :: psps
  type(fock_type),pointer, intent(inout) :: fock
+ type(xg_nonlop_t), intent(inout) :: xg_nonlop
 !arrays
  integer,intent(in) :: atindx(dtset%natom),atindx1(dtset%natom),indsym(4,dtset%nsym,dtset%natom)
  integer,intent(in) :: kg(3,dtset%mpw*dtset%mkmem),nattyp(dtset%natom),ngfft(18)
@@ -212,7 +215,7 @@ subroutine setup_positron(atindx,atindx1,cg,cprj,dtefield,dtfil,dtset,ecore,eige
  real(dp),intent(in) :: grewtn(3,dtset%natom),grvdw(3,ngrvdw),kxc(nfft,nkxc)
  real(dp),intent(in) :: ph1d(2,3*(2*mgfft+1)*dtset%natom),ph1dc(2,(3*(2*dtset%mgfft+1)*dtset%natom)*dtset%usepaw)
  real(dp),intent(in) :: rmet(3,3),strscondft(6),strsxc(6),vhartr(nfft),vpsp(nfft),vxc(nfft,dtset%nspden)
- real(dp),intent(in) :: vxctau(nfft,dtset%nspden,4*dtset%usekden)
+ real(dp),intent(in) :: vxctau(nfft,dtset%nspden,4*usevxctau)
  real(dp),intent(in) :: ylm(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(in) :: ylmgr(dtset%mpw*dtset%mkmem,3,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(inout) :: cg(2,mcg)
@@ -384,7 +387,7 @@ subroutine setup_positron(atindx,atindx1,cg,cprj,dtefield,dtfil,dtset,ecore,eige
 &       extfpmd,indsym,kg,kxc,maxfor_dum,mcg,mcprj,mgfft,mpi_enreg,my_natom,n3xccc0,nattyp,nfft,ngfft,&
 &       ngrvdw,nhat,nkxc,npwarr,dtset%ntypat,nvresid,occ,optfor,optres,paw_ij,pawang,pawfgr,&
 &       pawfgrtab,pawrad,pawrhoij,pawtab,ph1dc,ph1d,psps,rhog,rhor,rprimd,optstr,strscondft,strsxc,str_tmp,symrec,&
-&       synlgr_dum,ucvol,usecprj,vhartr,vpsp,vxc,vxctau,wvl,xccc3d,xcctau3d,xred,ylm,ylmgr,0.0_dp)
+&       synlgr_dum,ucvol,usecprj,usevxctau,vhartr,vpsp,vxc,vxctau,wvl,xccc3d,xcctau3d,xred,ylm,ylmgr,0.0_dp,xg_nonlop)
        electronpositron%calctype=icalctype
        if (optfor>0) electronpositron%gred_ep(:,:)=gred_tmp(:,:)
        if (optstr>0) electronpositron%stress_ep(:)=str_tmp(:)
@@ -813,7 +816,7 @@ subroutine setup_positron(atindx,atindx1,cg,cprj,dtefield,dtfil,dtset,ecore,eige
    end if
 
    ! In some cases cprj are kept in memory, so we have to update them before the call of vtorho
-   if (dtset%cprj_in_memory/=0) then
+   if (dtset%cprj_in_memory==2) then
      iatom=0
      call wrtout(std_out,' Computing cprj from wavefunctions (positron)')
      call ctocprj(atindx,cg,1,cprj,gmet,gprimd,iatom,0,&
@@ -2132,11 +2135,11 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
      lmn_size = pawtab(itypat)%lmn_size
      lmn2_size = pawtab(itypat)%lmn2_size
      basis_size = pawtab(itypat)%basis_size
-     
+
      lmn_size_c=lmncmax(itypat)
      llmax=maxval(indlmncor(itypat)%value(1,1:lmn_size_c))
      l_size_max=max(l_size,2*llmax+1)
-     
+
      ABI_MALLOC(j_bessel,(mesh_size,l_size_max))
      ABI_MALLOC(ylmp,(l_size_max*l_size_max))
      ABI_MALLOC(have_intc,(l_size_max,basis_size,nphicor(itypat)))

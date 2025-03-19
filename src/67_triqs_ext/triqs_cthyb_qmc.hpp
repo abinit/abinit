@@ -2,39 +2,34 @@
 #include "config.h"
 #endif
 
-#ifndef __TRIQS_CTHYB_QMC_H__ 
+#ifndef __TRIQS_CTHYB_QMC_H__
 #define __TRIQS_CTHYB_QMC_H__
 
-#include <iostream>
 #include <complex>
-#include <triqs/operators/many_body_operator.hpp>
-#include <triqs/utility/real_or_complex.hpp>  //ADDED for compatibility with TRIQS 1.4
+#include <triqs_cthyb/config.hpp>
 
 using namespace std;
-//using triqs::utility::many_body_operator; //COMMENTED: Not relevant with TRIQS 1.4
-using triqs::operators::many_body_operator_generic; //ADDED Instead
+using namespace triqs_cthyb;
 
 extern "C"{
 
-    void ctqmc_triqs_run( bool rot_inv, bool leg_measure, bool hist, bool wrt_files, bool tot_not,
-                          int n_orbitals, int n_freq, int n_tau, int n_l, int n_cycles_, int cycle_length, int ntherm, int verbo,int seed,  
-                          double beta_,
-                          double *epsi, double *umat_ij, double *umat_ijkl, std::complex<double> *delta_iw_ptr, std::complex<double> *g_iw_ptr, double *g_tau, double *gl,
-#if defined HAVE_TRIQS_v1_4
-                          MPI_Fint *MPI_world_ptr );
-#else
-			  int rank );
-#endif
+    void ctqmc_triqs_run( bool rot_inv, bool leg_measure, bool off_diag, bool move_shift, bool move_double, bool measure_density_matrix,
+                          bool time_invariance, bool use_norm_as_weight, int loc_n_min, int loc_n_max, int seed_a, int seed_b,
+                          int num_orbitals, int n_tau, int n_l, int n_cycles_, int cycle_length, int ntherm, int ntherm_restart,
+                          int det_init_size, int det_n_operations_before_check, int ntau_delta, int nbins_histo, int rank, int nspinor,
+                          int iatom, int ilam, int nblocks, double beta, double move_global_prob, double imag_threshold,
+                          double det_precision_warning, double det_precision_error, double det_singular_threshold, double lam,
+                          int *block_list, int *flavor_list, int *inner_list, int *siz_list, complex<double> *ftau, complex<double> *gtau,
+                          complex<double> *gl, complex<double> *udens_cmplx, complex<double> *vee_cmplx, complex<double> *levels_cmplx,
+                          complex<double> *moments_self_1, complex<double> *moments_self_2, complex<double> *occ, complex<double> *eu ) ;
 
-//COMMENTED: Class name changed in TRIQS 1.4
-//    many_body_operator<double> init_Hamiltonian( double *eps, int nflavor, double *U );
-//    many_body_operator<double> init_fullHamiltonian( double *eps, int nflavor, double *U );
-//    many_body_operator<double> init_fullHamiltonianUpDown( double *eps, int nflavor, double *U );
+    many_body_op_t init_Hamiltonian( h_scalar_t *eps, int nflavor, h_scalar_t *udens, int *block_list,
+                                     int *inner_list, double lambda);
 
-//ADDED Instead
-    many_body_operator_generic<double> init_Hamiltonian( double *eps, int nflavor, double *U );
-    many_body_operator_generic<double> init_fullHamiltonian( double *eps, int nflavor, double *U );
-    many_body_operator_generic<double> init_fullHamiltonianUpDown( double *eps, int nflavor, double *U );
+    many_body_op_t init_fullHamiltonian( h_scalar_t *eps, int nflavor, h_scalar_t *vee, int *block_list,
+                                         int *inner_list, double lambda);
+
+    void build_dlr(int wdlr_size, int *ndlr, double *wdlr, double lam, double eps);
 }
 
 #endif

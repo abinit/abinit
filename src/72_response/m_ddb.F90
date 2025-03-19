@@ -9,7 +9,7 @@
 !!  Main entry point for client code that needs to read the DDB data.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2024 ABINIT group (MJV, XG, MT, MM, MVeithen, MG, PB, JCC, SP, GA, MMignolet)
+!! Copyright (C) 2011-2025 ABINIT group (MJV, XG, MT, MM, MVeithen, MG, PB, JCC, SP, GA, MMignolet)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -31,19 +31,18 @@ module m_ddb
  use m_ddb_hdr
  use m_dtset
  use m_nctk
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
 
  use m_io_tools,       only : iomode_from_fname
  use defs_datatypes,   only : pseudopotential_type
  use m_fstrings,       only : sjoin, itoa, ktoa, endswith
  use m_numeric_tools,  only : mkherm
- use m_symtk,          only : mati3inv, matr3inv, littlegroup_q, symatm
+ use m_matrix,         only : mati3inv, matr3inv
+ use m_symtk,          only : littlegroup_q, symatm
  use m_io_tools,       only : get_unit
  use m_copy,           only : alloc_copy
  use m_geometry,       only : phdispl_cart2red, mkrdim, xred2xcart, metric
- use m_crystal,        only : crystal_t, crystal_init
+ use m_crystal,        only : crystal_t
  use m_dynmat,         only : cart29, d2sym3, cart39, d3sym, chneu9, asria_calc, asria_corr, asrprs, dfpt_phfrq, sytens
  use m_pawtab,         only : pawtab_type, pawtab_nullify, pawtab_free
  use m_psps,           only : psps_copy, psps_free
@@ -146,6 +145,7 @@ module m_ddb
   !      (5 => 2nd-order derivatives of eigenvalues)
   !      (33 => long wave third order derivatives of total energy)
   !      (85 => Molecular Berry curvature, 2nd-order derivative)
+  ! See m_ddb_hdr for the definition of various block types
 
   real(dp),allocatable :: amu(:)
   ! amu(ntypat)
@@ -517,7 +517,7 @@ subroutine ddb_init(ddb, dtset, nblok, mpert, &
 
  ! TODO: Allocate d2eig here instead of leaving it to the calling routine.
  if (with_d2eig_) then
-    call ddb%malloc_d2eig(ddb%nband, ddb%nkpt)
+    call ddb%malloc_d2eig(ddb%nband*ddb%nsppol, ddb%nkpt)
  end if
 
  if (present(kpt)) then
@@ -580,8 +580,7 @@ subroutine ddb_copy(iddb, oddb)
 !Arguments -------------------------------
 !array
  class(ddb_type),intent(in) :: iddb
- type(ddb_type),intent(out) :: oddb
-
+ class(ddb_type),intent(out) :: oddb
 ! ************************************************************************
 
  ! Copy dimensions and static variables.
@@ -1179,7 +1178,7 @@ subroutine ddb_set_brav(ddb, brav)
 ! *************************************************************************
 
  ! Renormalize rprim to possibly satisfy the constraint abs(rprim(1,2))=half when abs(brav)/=1
- ! This section is needed to preserver the behaviour of the old implementation.
+ ! This section is needed to preserve the behaviour of the old implementation.
  if (abs(brav)/=1 .and. abs(abs(ddb%rprim(1,2))-half)>tol10) then
    if(abs(ddb%rprim(1,2))<tol6)then
      write(msg, '(a,i0,7a)' )&
@@ -1971,12 +1970,7 @@ subroutine ddb_read_d2eig_txt(ddb, unddb, iblok)
   iblok_eig2d = 1
   if (present(iblok)) iblok_eig2d = iblok
 
-   ! GA: Here, nband should really be nband * nsppol.
-   !     but this is the responsibility of the calling routine
-   !     see thmeig and merge_ddb
-   !     FIXME This is inconsistent with ddb_malloc_d2eig...
-   !     I think I should change this with ddb%nband * ddb%nsppol
-  call ddb%read_block_txt(iblok_eig2d,ddb%nband,ddb%mpert,ddb%msize,ddb%nkpt,unddb,&
+  call ddb%read_block_txt(iblok_eig2d,ddb%nband*ddb%nsppol,ddb%mpert,ddb%msize,ddb%nkpt,unddb,&
                       ddb%eig2dval(:,:,:,:),ddb%kpt(:,:))
 
 end subroutine ddb_read_d2eig_txt
@@ -2058,10 +2052,10 @@ subroutine rdddb9(ddb,ddb_hdr,unddb,&
 !   and
 !    the allocation allocate(kpt(3,nkpt)) is strange
 !scalars
+ class(ddb_type),intent(inout) :: ddb
  integer,intent(in) :: unddb,mband,mpert,msize,msym
  integer,intent(inout) :: natom,nkpt,nsym,ntypat
  real(dp),intent(out) :: ucvol
- type(ddb_type),intent(inout) :: ddb
  type(ddb_hdr_type),intent(inout) :: ddb_hdr
  integer,optional,intent(in) :: raw
 !arrays
@@ -2613,7 +2607,7 @@ subroutine ddb_read_txt(ddb, filename, ddb_hdr, crystal, comm, prtvol, raw)
  !end do
 
  !! Warning znucl is dimensioned with ntypat = nspsp hence alchemy is not supported here
- !call crystal_init(ddb%amu,Crystal,space_group,natom,npsp,ntypat,nsym,rprimd,typat,xred,&
+ !call crystal%init(ddb%amu,space_group,natom,npsp,ntypat,nsym,rprimd,typat,xred,&
  !  zion,znucl,timrev,use_antiferro,.FALSE.,title,&
  !  symrel=symrel(:,:,1:nsym),tnons=tnons(:,1:nsym),symafm=symafm(1:nsym))
 
@@ -2706,7 +2700,7 @@ subroutine ddb_read_nc(ddb, filename, ddb_hdr, crystal, comm, prtvol, raw)
    ! Copy dimensions from header and allocate arrays
    call ddb%malloc(ddb_hdr%msize, ddb_hdr%nblok, ddb_hdr%natom, &
                    ddb_hdr%ntypat, ddb_hdr%mpert,&
-                   ddb_hdr%nkpt, ddb_hdr%mband)
+                   ddb_hdr%nkpt, ddb_hdr%mband*ddb_hdr%nsppol)
 
    ! Copy arrays from header
    ddb%typ(:) = ddb_hdr%typ(:)
@@ -2812,7 +2806,6 @@ logical function ddb_can_merge_blocks(ddb1, ddb2, iblok1, iblok2) result(can_mer
  integer :: nq, ii, blktyp
  real(dp),parameter :: qtol=2.0d-8
  real(dp) :: diff
-
 ! ************************************************************************
 
   can_merge = .false.
@@ -2870,7 +2863,7 @@ subroutine ddb_merge_blocks(ddb1, ddb2, iblok1, iblok2)
 !Arguments -------------------------------
 !array
  class(ddb_type),intent(inout) :: ddb1
- type(ddb_type),intent(inout) :: ddb2
+ class(ddb_type),intent(inout) :: ddb2
  integer,intent(in) :: iblok1
  integer,intent(in) :: iblok2
 
@@ -3503,8 +3496,8 @@ integer function ddb_get_etotal(ddb, etotal) result(iblok)
 
 !Arguments -------------------------------
 !scalars
- real(dp),intent(out) :: etotal
  class(ddb_type),intent(in) :: ddb
+ real(dp),intent(out) :: etotal
 
 !Local variables -------------------------
 !scalars
@@ -3573,8 +3566,8 @@ integer function ddb_get_dielt_zeff(ddb, crystal, rftyp, chneut, selectz, dielt,
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: rftyp,chneut,selectz
  class(ddb_type),intent(inout) :: ddb
+ integer,intent(in) :: rftyp,chneut,selectz
  type(crystal_t),intent(in) :: crystal
 !arrays
  real(dp),intent(out) :: dielt(3,3),zeff(3,3,crystal%natom)
@@ -3582,13 +3575,15 @@ integer function ddb_get_dielt_zeff(ddb, crystal, rftyp, chneut, selectz, dielt,
 
 !Local variables -------------------------
 !scalars
- integer :: ii
+ integer :: ii, units(2)
  character(len=500) :: msg
 !arrays
  integer :: rfelfd(4),rfphon(4),rfstrs(4)
  real(dp) :: qphnrm(3),qphon(3,3), my_zeff_raw(3,3,crystal%natom)
 
 ! *********************************************************************
+
+ units = [std_out, ab_out]
 
  ! Look for the Gamma Block in the DDB
  qphon(:,1)=zero
@@ -3608,13 +3603,13 @@ integer function ddb_get_dielt_zeff(ddb, crystal, rftyp, chneut, selectz, dielt,
  if (iblok /= 0) then
    write(msg, '(2a,(80a),4a)' ) ch10,('=',ii=1,80),ch10,ch10,&
    ' Dielectric Tensor and Effective Charges ',ch10
-   call wrtout([std_out, ab_out], msg)
+   call wrtout(units, msg)
 
    ! Make the imaginary part of the Gamma block vanish
    write(msg, '(5a)'  ) ch10,&
    ' anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,',ch10,&
    '   and impose the ASR on the effective charges ',ch10
-   call wrtout([std_out, ab_out], msg)
+   call wrtout(units, msg)
 
    ! Extrac Zeff before enforcing sum rule.
    call dtech9(ddb%val, dielt, iblok, ddb%mpert, ddb%natom, ddb%nblok, my_zeff_raw, unit=dev_null)
@@ -3624,7 +3619,6 @@ integer function ddb_get_dielt_zeff(ddb, crystal, rftyp, chneut, selectz, dielt,
 
    ! Extraction of the dielectric tensor and the effective charges
    call dtech9(ddb%val, dielt, iblok, ddb%mpert, ddb%natom, ddb%nblok, zeff)
-
  end if ! iblok not found
 
  if (present(zeff_raw)) zeff_raw = my_zeff_raw
@@ -4785,14 +4779,14 @@ subroutine ddb_write(ddb, ddb_hdr, filename, with_psps, comm)
 
 ! ************************************************************************
 
-  call ddb_hdr%get_iomode(filename, 2, iomode, filename_)
+ call ddb_hdr%get_iomode(filename, 2, iomode, filename_)
 
-  if (iomode==IO_MODE_ETSF) then
-    call ddb%write_nc(ddb_hdr, filename_, comm=comm, with_psps=with_psps)
-  else if (iomode==IO_MODE_FORTRAN) then
-    call ddb%write_txt(ddb_hdr, filename_, with_psps=with_psps, comm=comm)
-    ddb_hdr%mpert = ddb%mpert  ! Text format doesnt know about mpert.
-  end if
+ if (iomode==IO_MODE_ETSF) then
+   call ddb%write_nc(ddb_hdr, filename_, comm=comm, with_psps=with_psps)
+ else if (iomode==IO_MODE_FORTRAN) then
+   call ddb%write_txt(ddb_hdr, filename_, with_psps=with_psps, comm=comm)
+   ddb_hdr%mpert = ddb%mpert  ! Text format doesnt know about mpert.
+ end if
 
 end subroutine ddb_write
 !!***
@@ -5098,8 +5092,6 @@ subroutine ddb_write_nc(ddb, ddb_hdr, filename, comm, with_psps)
    if (xmpi_comm_rank(comm) /= master) return
  end if
 
-#ifdef HAVE_NETCDF
-
  ! =====================
  ! Header and dimensions
  ! =====================
@@ -5259,10 +5251,6 @@ subroutine ddb_write_nc(ddb, ddb_hdr, filename, comm, with_psps)
 
    end if
  end do
-
-#else
- ABI_ERROR("NETCDF support required to write DDB.nc file.")
-#endif
 
 end subroutine ddb_write_nc
 !!***
@@ -6239,7 +6227,6 @@ subroutine merge_ddb(nddb, filenames, outfile, dscrpt, chkopt)
    if (ddb_hdr%with_psps>0 .or. ddb_hdr%psps%usepaw > 0) then
      iddb_psps = iddb
    end if
-
  end do
 
  ddb%nsppol = nsppol
@@ -6264,8 +6251,8 @@ subroutine merge_ddb(nddb, filenames, outfile, dscrpt, chkopt)
 
  call ddb_hdr%free()  ! GA: why do I need this? Try to remove
  call ddb_hdr%open_read(filenames(1), comm, &
-                          matom=matom,mtypat=mtypat,mband=mband,mkpt=mkpt,&
-                          msym=msym,dimekb=dimekb,lmnmax=lmnmax,usepaw=usepaw)
+                        matom=matom,mtypat=mtypat,mband=mband,mkpt=mkpt,&
+                        msym=msym,dimekb=dimekb,lmnmax=lmnmax,usepaw=usepaw)
  call ddb_hdr%close()
  ddb_hdr%mpert = mpert
  ddb_hdr%msize = msize
@@ -6696,19 +6683,18 @@ subroutine dtqdrp(blkval,ddb_version,lwsym,mpert,natom,lwtens)
 !!
 !! SOURCE
 
- subroutine ddb_lw_copy(ddb,ddb_lw,mpert,natom,ntypat)
+ subroutine ddb_lw_copy(ddb, ddb_lw, mpert, natom, ntypat)
 
 !Arguments -------------------------------
 !scalars
+ class(ddb_type),intent(inout) :: ddb
+ class(ddb_type),intent(out) :: ddb_lw
  integer,intent(in) :: mpert,natom,ntypat
 !arrays
- type(ddb_type),intent(inout) :: ddb
- type(ddb_type),intent(out) :: ddb_lw
 
 !Local variables -------------------------
 !scalars
  integer :: ii,nblok,nsize,cnt
-
 ! *********************************************************************
 
  call ddb%copy(ddb_lw)
@@ -6806,7 +6792,7 @@ subroutine symdm9(ddb, dynmat, gprimd, indsym, mpert, natom, nqpt, nsym, rfmeth,
 
 !Arguments -------------------------------
 !scalars
- type(ddb_type),intent(in) :: ddb
+ class(ddb_type),intent(in) :: ddb
  integer,intent(in) :: mpert,natom,nqpt,nsym,rfmeth,comm
 !arrays
  integer,intent(in) :: indsym(4,nsym,natom),symrec(3,3,nsym),symrel(3,3,nsym)
@@ -6920,31 +6906,26 @@ subroutine symdm9(ddb, dynmat, gprimd, indsym, mpert, natom, nqpt, nsym, rfmeth,
    end if
  end do ! iblok
 
-! Check if all the information relatives to the q points sampling are found in the DDB;
-! if not => stop message
+! Check if all the information relatives to the q points sampling are found in the DDB if not => stop message
  nqmiss = 0
  do iqpt=1,nqpt
    if (qtest(iqpt,1)==0) then
      nqmiss = nqmiss + 1
      qmiss_(nqmiss) = iqpt
-     write(msg, '(3a)' )&
-      ' symdm9: the bloks found in the DDB are characterized',ch10,&
-      '  by the following wavevectors :'
+     write(msg, '(3a)' )' symdm9: the bloks found in the DDB are characterized',ch10,'  by the following wavevectors :'
      call wrtout(std_out,msg)
      do iblok=1,ddb%nblok
        write(msg, '(a,4d20.12)')' ',ddb%qpt(1,iblok),ddb%qpt(2,iblok),ddb%qpt(3,iblok),ddb%nrm(1,iblok)
        call wrtout(std_out,msg)
      end do
-     write(msg, '(a,a,a,i0,a,a,a,3es16.6,a,a,a,a)' )&
-      'Information is missing in the DDB.',ch10,&
-      'The dynamical matrix number ',iqpt,' cannot be built,',ch10,&
-      'since no block with qpt:',spqpt(1:3,iqpt),ch10,&
-      'has been found.',ch10,&
-      'Action: add the required block in the DDB, or modify the q-mesh your input file.'
-     if (.not.allow_qmiss) then
+     write(msg, '(3a,i0,3a,3es16.6,3a)' )&
+       'Information is missing in the DDB file.',ch10,&
+       'The dynamical matrix with iqpt= ',iqpt,' cannot be built,',ch10,&
+       'since no block with qpt: ',spqpt(1:3,iqpt), ' has been found.',ch10,&
+       'Action: add the required block in the DDB, or modify the q-mesh your input file.'
+     if (.not. allow_qmiss) then
        ABI_ERROR(msg)
      else
-       !continue
        ABI_COMMENT(msg)
      end if
    end if
@@ -7058,7 +7039,6 @@ subroutine symdm9(ddb, dynmat, gprimd, indsym, mpert, natom, nqpt, nsym, rfmeth,
 
  ABI_FREE(ddd)
  ABI_FREE(qtest)
-
 
  call xmpi_sum(dynmat, comm, ierr)
 

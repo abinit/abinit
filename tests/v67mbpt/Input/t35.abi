@@ -80,7 +80,7 @@ bs_interp_rl_nb   1 # First-neighbour
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = Y. Gillet
-#%% keywords = NC, GW, BSE
+#%% keywords = NC, GW, BSE, MINIMAL
 #%% description =
 #%%   Silicon: Solution of the Bethe-Salpeter equation (BSE) with the interpolation technique
 #%%   In t31, preparation, BSE equation with Model dielectric function and Haydock (only resonant + W + v), then full BSE

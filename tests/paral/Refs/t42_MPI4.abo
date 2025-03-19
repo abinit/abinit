@@ -1,8 +1,8 @@
 
-.Version 6.15.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu4.4 computer) 
+.Version 6.15.2 of ABINIT
+.(MPI version, prepared for a x86_64_linux_gnu4.4 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Fri 10 Aug 2012.
 - ( at  7h19 )
-  
+
 - input  file    -> /home/buildbot/ABINIT/testf_gcc44/trunk_6.15.2-private/tests/paral/Input/tT.in
 - output file    -> tT4.out
 - root for input  files -> tT.i
@@ -42,10 +42,10 @@ P This job should need less than                       1.590 Mbytes of memory.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
+- outvars: echo of selected default values
 -   accesswff0 =  0 , fftalg0 =112 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -134,8 +134,8 @@ fine grid =   12 12 12
          ecut(hartree)=      5.000   => boxcut(ratio)=   1.67231
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/testf_gcc44/trunk_6.15.2-private/tests/Psps_for_tests/PseudosHGH_pwteter/2he.2.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/testf_gcc44/trunk_6.15.2-private/tests/Psps_for_tests/PseudosHGH_pwteter/2he.2.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/testf_gcc44/trunk_6.15.2-private/tests/Pspdir/PseudosHGH_pwteter/2he.2.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/testf_gcc44/trunk_6.15.2-private/tests/Pspdir/PseudosHGH_pwteter/2he.2.hgh
 - Hartwigsen-Goedecker-Hutter psp for Hydrogen,  from PRB58, 3641 (1998) paper
 -  2.00000   2.00000    991006                znucl, zion, pspdat
     3    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -146,8 +146,8 @@ fine grid =   12 12 12
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with 
-  definition in PRB44, 8503 (1991). 
+  so that the KB energies are not consistent with
+  definition in PRB44, 8503 (1991).
   However, this does not influence the results obtained hereafter.
  pspatm : epsatm=   -0.00346443
          --- l  ekb(1:nproj) -->
@@ -160,7 +160,7 @@ fine grid =   12 12 12
 
 ================================================================================
 
-=== [ionmov=12] Isokinetic ensemble molecular dynamics                      
+=== [ionmov=12] Isokinetic ensemble molecular dynamics
 ================================================================================
 
 --- Iteration: (1/2) Internal Cycle: (1/1)
@@ -391,7 +391,7 @@ fine grid =   12 12 12
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      7.1287592924E+00  7.1287592924E+00  7.1287592924E+00 Bohr
               amu      4.00260200E+00
@@ -464,8 +464,8 @@ P           mkmem           1
 
 ================================================================================
 
- Test the timer : 
-  a combined call timab(*,1,tsec) + timab(*,2,tsec) is 
+ Test the timer :
+  a combined call timab(*,1,tsec) + timab(*,2,tsec) is
 - CPU time =    6.9883E-07 sec,    Wall time =    6.9673E-07 sec
 
 - Total cpu        time (s,m,h):         10.3        0.17      0.003
@@ -473,7 +473,7 @@ P           mkmem           1
 -
 - For major independent code sections, cpu and wall times (sec),
 -  as well as % of the time and number of calls for node 0-
-- routine                        cpu     %       wall     %      number of calls 
+- routine                        cpu     %       wall     %      number of calls
 - fourdp                         1.131  10.9      1.134  11.0          24222
 - timing timab                   0.136   1.3      0.136   1.3             14
 - invars2                        0.117   1.1      0.117   1.1              1
@@ -497,9 +497,9 @@ P           mkmem           1
 - subtotal                       1.452  14.1      1.456  14.1
 
 - For major independent code sections, cpu and wall times (sec),
-- as well as % of the total time and number of calls 
+- as well as % of the total time and number of calls
 
-- routine                         cpu     %       wall     %      number of calls 
+- routine                         cpu     %       wall     %      number of calls
 -                                                                  (-1=no count)
 - fourdp                         4.613  44.6      4.562  44.1          96888
 - timing timab                   0.545   5.3      0.543   5.3             56
@@ -525,7 +525,7 @@ P           mkmem           1
 
  Partitioning of abinit
 - abinit                        10.332 100.0     10.333 100.0              4
- 
+
 - abinit(1)                      0.068   0.7      0.068   0.7              4
 - abinit(2)                      0.136   1.3      0.137   1.3              4
 - indefo+macroin+invars2m        0.461   4.5      0.460   4.5              4
@@ -539,7 +539,7 @@ P           mkmem           1
 
  Partitioning of driver
 - driver                         8.584  83.1      8.585  83.1              4
- 
+
 - gstateimg                      8.580  83.0      8.581  83.0              4
 - driver(aft. select case)       0.003   0.0      0.003   0.0              4
 
@@ -547,7 +547,7 @@ P           mkmem           1
 
  Partitioning of gstateimg+gstate
 - gstateimg                      8.580  83.0      8.581  83.0              4
- 
+
 - gstate->kpgsph                 0.009   0.1      0.009   0.1              8
 - gstate(pspini)                 0.003   0.0      0.002   0.0              4
 - gstate(...scfcv)               8.567  82.9      8.566  82.9              4
@@ -557,7 +557,7 @@ P           mkmem           1
 
  Partitioning of scfcv_core
 - scfcv                          8.561  82.9      8.562  82.9              8
- 
+
 - scfcv(iniloop, setvtr  )       0.054   0.5      0.054   0.5             28
 - scfcv(vtorho(f))               8.452  81.8      8.452  81.8             28
 - scfcv(etotfor)                 0.003   0.0      0.003   0.0             56
@@ -571,21 +571,21 @@ P           mkmem           1
 
  Partitioning of rhotov
 - rhotov                         0.007   0.1      0.006   0.1             28
- 
+
 - rhotov(rhohxc)                 0.007   0.1      0.006   0.1             28
 
 - subtotal                       0.007   0.1      0.006   0.1
 
  Partitioning of newvtr
 - newvtr                         0.005   0.0      0.004   0.0             20
- 
+
 - newvtr(call prcref_PMA)        0.004   0.0      0.002   0.0             20
 
 - subtotal                       0.005   0.0      0.004   0.0
 
  Partitioning of  fourdp (upwards partitioning)
 - fourdp                         4.613  44.6      4.562  44.1          96888
- 
+
 - fourdp%(other)                 0.014   0.1      0.006   0.1            120
 - fourdp%rec%rho                 4.599  44.5      4.556  44.1          96768
 
@@ -593,25 +593,25 @@ P           mkmem           1
 
  Partitioning of afterscfloop
 - afterscfloop                   0.030   0.3      0.031   0.3              8
- 
+
 - afterscfloop(forstr)           0.030   0.3      0.031   0.3              8
 
 - subtotal                       0.030   0.3      0.031   0.3
 
  Partitioning of forstr
 - forstr                         0.030   0.3      0.031   0.3              8
- 
+
 - forstr(stress)                 0.030   0.3      0.031   0.3              8
 
 - subtotal                       0.030   0.3      0.031   0.3
 
  Partitioning of outscfcv
 - outscfcv                       0.000   0.0      0.000   0.0              8
- 
+
 
 - subtotal                       0.000   0.0      0.000   0.0
 -
--Synchronisation (=leave_test) and MPI calls 
+-Synchronisation (=leave_test) and MPI calls
 - communic.MPI                   0.054   0.5      0.058   0.6            396
 -
 - scfcv :synchro                 0.002   0.0      0.003   0.0              8
@@ -625,7 +625,7 @@ P           mkmem           1
 - status                         0.000   0.0      0.001   0.0            373
 
 
- Detailed analysis of some time consuming routines 
+ Detailed analysis of some time consuming routines
                                   tcpu    ncalls  tcpu/ncalls    ndata tcpu/ncalls/ndata
                                  (sec)                (msec)              (microsec)
 - fourwf%(pot)                   0.000         0
@@ -665,7 +665,7 @@ P           mkmem           1
  M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
  Computer Phys. Comm. 180, 2582-2615 (2009).
  Comment : the third generic paper describing the ABINIT project.
- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+ Note that a version of this paper, that is not formatted for Computer Phys. Comm.
  is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
  The licence allows the authors to put it on the Web.
 
@@ -684,7 +684,7 @@ P           mkmem           1
 
  And optionally :
 
- [4] First-principles computation of material properties : the ABINIT software project. 
+ [4] First-principles computation of material properties : the ABINIT software project.
  X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
  M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
  Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7

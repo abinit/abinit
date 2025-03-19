@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2024 ABINIT group (AM)
+!!  Copyright (C) 2008-2025 ABINIT group (AM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -62,7 +62,8 @@ module m_mover_effpot
  use m_mover,            only : mover
  use m_io_tools,         only : get_unit, open_file
  use m_symfind
- use m_symtk,            only: matr3inv,symatm,mati3inv
+ use m_matrix,           only: matr3inv,mati3inv
+ use m_symtk,            only: symatm
  implicit none
 
  private

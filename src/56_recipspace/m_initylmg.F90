@@ -7,7 +7,7 @@
 !! over a set of (reciprocal space) (k+G) vectors
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2024 ABINIT group (FJ, MT)
+!!  Copyright (C) 1998-2025 ABINIT group (FJ, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -406,17 +406,17 @@ end subroutine initylmg
 !!
 !! SOURCE
 
-subroutine initylmg_k(npw, mpsang, optder, rprimd, gprimd, kpt, kg, ylm, ylm_gr)
+subroutine initylmg_k(npw_k, mpsang, optder, rprimd, gprimd, kpt, kg_k, ylm_k, ylm_gr_k)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: mpsang, npw, optder
+ integer,intent(in) :: mpsang, npw_k, optder
 !arrays
  real(dp),intent(in) :: kpt(3)
- integer,intent(in) :: kg(3,npw)
+ integer,intent(in) :: kg_k(3,npw_k)
  real(dp),intent(in) :: gprimd(3,3), rprimd(3,3)
- real(dp),intent(out) :: ylm(npw, mpsang*mpsang)
- real(dp),intent(out) :: ylm_gr(npw, 3+6*(optder/2), mpsang*mpsang)
+ real(dp),intent(out) :: ylm_k(npw_k, mpsang*mpsang)
+ real(dp),intent(out) :: ylm_gr_k(npw_k, 3+6*(optder/2), mpsang*mpsang)
 
 !Local variables ------------------------------
 !scalars
@@ -424,16 +424,15 @@ subroutine initylmg_k(npw, mpsang, optder, rprimd, gprimd, kpt, kg, ylm, ylm_gr)
  integer :: npwarr__(nkpt_1), nband__(nkpt_1 * nsppol_1)
  real(dp) :: kptns__(3,nkpt_1)
  type(MPI_type) :: seq_mpi_enreg
-
 !*****************************************************************
 
  call initmpi_seq(seq_mpi_enreg)
- npwarr__(1) = npw
+ npwarr__(1) = npw_k
  kptns__(:,1) = kpt
  nband__ = 1 ! Not used in sequential
 
- call initylmg(gprimd, kg, kptns__, nkpt_1, seq_mpi_enreg, mpsang, npw, &
-               nband__, nkpt_1, npwarr__, nsppol_1, optder, rprimd, ylm, ylm_gr)
+ call initylmg(gprimd, kg_k, kptns__, nkpt_1, seq_mpi_enreg, mpsang, npw_k, &
+               nband__, nkpt_1, npwarr__, nsppol_1, optder, rprimd, ylm_k, ylm_gr_k)
 
  call destroy_mpi_enreg(seq_mpi_enreg)
 

@@ -7,7 +7,7 @@
 !!  the time-dependent Kohn-Sham equations in RT-TDDFT
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2021-2024 ABINIT group (FB)
+!!  Copyright (C) 2021-2025 ABINIT group (FB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -24,23 +24,21 @@ module m_rttddft_tdks
 
  use defs_basis
  use defs_abitypes,      only: MPI_type
- use defs_datatypes,     only: pseudopotential_type, ebands_t
+ use defs_datatypes,     only: pseudopotential_type
  use defs_wvltypes,      only: wvl_data, nullify_wvl_data
-
  use libxc_functionals,  only: libxc_functionals_get_hybridparams
- use m_bandfft_kpt,      only: bandfft_kpt, bandfft_kpt_init1, &
-                             & bandfft_kpt_destroy_array
+ use m_bandfft_kpt,      only: bandfft_kpt, bandfft_kpt_init1, bandfft_kpt_destroy_array
  use m_cgprj,            only: ctocprj
  use m_common,           only: setup1
  use m_dtfil,            only: datafiles_type
  use m_dtset,            only: dataset_type
- use m_ebands,           only: ebands_from_dtset, ebands_free, unpack_eneocc
+ use m_ebands,           only: ebands_t, unpack_eneocc
  use m_energies,         only: energies_type, energies_init
  use m_errors,           only: msg_hndl, assert
  use m_extfpmd,          only: extfpmd_type
- use m_gemm_nonlop,      only: init_gemm_nonlop, destroy_gemm_nonlop
+ use m_gemm_nonlop_projectors, only: init_gemm_nonlop, destroy_gemm_nonlop
  use m_geometry,         only: fixsym
- use m_hdr,              only: hdr_type, hdr_init
+ use m_hdr,              only: hdr_type
  use m_initylmg,         only: initylmg
  use m_invovl,           only: init_invovl, destroy_invovl
  use m_io_tools,         only: open_file
@@ -65,6 +63,7 @@ module m_rttddft_tdks
  use m_paw_sphharm,      only: setsym_ylm
  use m_pawtab,           only: pawtab_type, pawtab_get_lsize
  use m_paw_tools,        only: chkpawovlp
+ use m_pawxc,            only: pawxc_get_usekden
  use m_pspini,           only: pspini
  use m_profiling_abi,    only: abimem_record
  use m_spacepar,         only: setsym
@@ -72,6 +71,7 @@ module m_rttddft_tdks
  use m_symtk,            only: symmetrize_xred
  use m_wffile,           only: wffile_type, WffClose
  use m_xmpi,             only: xmpi_bcast, xmpi_sum
+ use m_drivexc,          only: xc_need_kden
 
  implicit none
 
@@ -212,8 +212,6 @@ contains
 !! SOURCE
 subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawtab, psps)
 
- implicit none
-
  !Arguments ------------------------------------
  !scalars
  class(tdks_type),           intent(inout)        :: tdks
@@ -273,8 +271,7 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
  else
    if (mpi_enreg%me == 0) then
       if (open_file('TD_RESTART', msg, newunit=tdks%tdrestart_unit, status='unknown', form='formatted') /= 0) then
-         write(msg,'(a,a,a)') 'Error while trying to open file TD_RESTART.'
-         ABI_ERROR(msg)
+        ABI_ERROR( 'Error while trying to open file TD_RESTART.')
       end if
    end if
  end if
@@ -288,7 +285,7 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
  !calc occupation number with metallic occupation using the previously read WF
  if (dtset%occopt>=3.and.dtset%occopt<=9) then  ! allowing for occopt 9
    ABI_MALLOC(doccde,(dtset%mband*dtset%nkpt*dtset%nsppol))
-   call newocc(doccde,tdks%eigen0,tdks%energies%entropy,tdks%energies%e_fermie, &
+   call newocc(doccde,tdks%eigen0,tdks%energies%entropy_ks,tdks%energies%e_fermie, &
              & tdks%energies%e_fermih,dtset%ivalence,dtset%spinmagntarget,     &
              & dtset%mband,dtset%nband,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD, &
              & dtset%nkpt,dtset%nspinor,dtset%nsppol,tdks%occ0,dtset%occopt,   &
@@ -354,8 +351,6 @@ end subroutine tdks_init
 !! SOURCE
 subroutine tdks_free(tdks,dtset,mpi_enreg,psps)
 
- implicit none
-
  !Arguments ------------------------------------
  !scalars
  class(tdks_type),           intent(inout) :: tdks
@@ -370,8 +365,8 @@ subroutine tdks_free(tdks,dtset,mpi_enreg,psps)
    if (psps%usepaw ==1) then
       call destroy_invovl(dtset%nkpt,dtset%gpu_option)
    end if
-   if(tdks%gemm_nonlop_use_gemm) then
-      call destroy_gemm_nonlop(dtset%nkpt)
+   if(tdks%gemm_nonlop_use_gemm .and. dtset%gpu_option==ABI_GPU_DISABLED) then
+      call destroy_gemm_nonlop(dtset%gpu_option)
    end if
 
    !Call type destructors
@@ -473,8 +468,6 @@ end subroutine tdks_free
 !! SOURCE
 subroutine first_setup(codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad,pawtab,psps,psp_gencond,tdks)
 
- implicit none
-
  !Arguments ------------------------------------
  !scalars
  character(len=8),           intent(in)    :: codvsn
@@ -547,23 +540,14 @@ subroutine first_setup(codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad,pawtab,psps,
                       & mpi_enreg,dtset%mpw,dtset%nband,dtset%nkpt,tdks%npwarr,   &
                       & dtset%nsppol)
 
- !** Use efficient BLAS calls for computing the non local potential
- if(dtset%use_gemm_nonlop == 1 .and. dtset%gpu_option/=ABI_GPU_DISABLED) then
+ !** Use efficient BLAS calls for computing the non local potential (No GPU yet)
+ if(dtset%use_gemm_nonlop == 1 .and. dtset%gpu_option==ABI_GPU_DISABLED) then
    ! set global variable
    tdks%gemm_nonlop_use_gemm = .true.
-   call init_gemm_nonlop(dtset%nkpt)
+   call init_gemm_nonlop(dtset%gpu_option)
  else
    tdks%gemm_nonlop_use_gemm = .false.
  end if
-
- !** TODO: uncomment when gemm_nonlop can be used on GPU
- ! if(dtset%use_gemm_nonlop == 1 .and. dtset%gpu_option/=ABI_GPU_DISABLED) then
- !   ! set global variable
- !   tdks%gemm_nonlop_use_gemm_gpu = .true.
- !   !call init_gemm_nonlop_gpu(dtset%nkpt)
- ! else
- !   tdks%gemm_nonlop_use_gemm_gpu = .false.
- ! end if
 
  !** Setup the Ylm for each k point
  if (psps%useylm==1) then
@@ -610,7 +594,7 @@ subroutine first_setup(codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad,pawtab,psps,
  if (dtset%paral_kgb/=0) then
    call xmpi_sum(npwarr_,mpi_enreg%comm_bandfft,ierr)
  end if
- bstruct = ebands_from_dtset(dtset, npwarr_)
+ call bstruct%from_dtset(dtset, npwarr_)
  ABI_FREE(npwarr_)
  call unpack_eneocc(dtset%nkpt,dtset%nsppol,bstruct%mband,bstruct%nband,dtset%occ_orig(:,1),bstruct%occ,val=zero)
 
@@ -630,11 +614,11 @@ subroutine first_setup(codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad,pawtab,psps,
 
  !** Initialize header
  gscase=0
- call hdr_init(bstruct,codvsn,dtset,tdks%hdr,pawtab,gscase,psps,tdks%wvl%descr,&
-             & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+ call tdks%hdr%init(bstruct,codvsn,dtset,pawtab,gscase,psps,tdks%wvl%descr,&
+                    comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
 
  !Clean band structure datatype
- call ebands_free(bstruct)
+ call bstruct%free()
 
  !** PW basis set: test if the problem is ill-defined.
  npwmin=minval(tdks%hdr%npwarr(:))
@@ -749,8 +733,6 @@ end subroutine first_setup
 !! SOURCE
 subroutine second_setup(dtset, mpi_enreg, pawang, pawrad, pawtab, psps, psp_gencond, tdks)
 
- implicit none
-
  !Arguments ------------------------------------
  !scalars
  integer,                    intent(in)    :: psp_gencond
@@ -775,7 +757,7 @@ subroutine second_setup(dtset, mpi_enreg, pawang, pawrad, pawtab, psps, psp_genc
  integer             :: ncpgr
  integer             :: optcut, optgr0, optgr1, optgr2, optrad
  integer             :: stress_needed
- integer             :: use_hybcomp
+ integer             :: use_hybcomp, usevxctau
  real(dp)            :: gsqcut_shp
  real(dp)            :: hyb_range_fock
  real(dp),parameter  :: k0(3)=(/zero,zero,zero/)
@@ -796,10 +778,8 @@ subroutine second_setup(dtset, mpi_enreg, pawang, pawrad, pawtab, psps, psp_genc
  !FB: Needed because paw_dmft is required in mkrho
  !PAW related operations
  !Initialize paw_dmft, even if neither dmft not paw are used
- call init_sc_dmft(dtset%nbandkss,dtset%dmftbandi,dtset%dmftbandf,                 &
-                 & dtset%dmft_read_occnd,dtset%mband,dtset%nband,dtset%nkpt,       &
-                 & dtset%nspden,dtset%nspinor,dtset%nsppol,tdks%occ0,dtset%usedmft,&
-                 & tdks%paw_dmft,dtset%usedmft,dtset%dmft_solv,mpi_enreg)
+ call init_sc_dmft(dtset,psps%mpsang,tdks%paw_dmft)
+
 
  !*** Main PAW initialization ***
  tdks%mcprj=0;tdks%mband_cprj=0
@@ -867,7 +847,7 @@ subroutine second_setup(dtset, mpi_enreg, pawang, pawrad, pawtab, psps, psp_genc
    has_dijnd=0;if(any(abs(dtset%nucdipmom)>tol8)) has_dijnd=1
    has_dijfock=0
    has_dijU=merge(0,1,dtset%usepawu>0) !Be careful on this!
-   has_vxctau=dtset%usekden
+   has_vxctau=pawxc_get_usekden(dtset%ixc)
    call paw_an_init(tdks%paw_an,dtset%natom,dtset%ntypat,0,0,dtset%nspden,        &
                   & cplex,dtset%pawxcdev,dtset%typat,pawang,pawtab,has_vxc=1,     &
                   & has_vxctau=has_vxctau,has_vxc_ex=1,has_vhartree=has_vhartree, &
@@ -939,7 +919,8 @@ subroutine second_setup(dtset, mpi_enreg, pawang, pawrad, pawtab, psps, psp_genc
     tdks%xcctau3d=zero
  endif
  !For mGGA
- ABI_MALLOC(tdks%vxctau,(tdks%nfftf,dtset%nspden,4*dtset%usekden))
+ usevxctau=merge(1,0,xc_need_kden(dtset%ixc))
+ ABI_MALLOC(tdks%vxctau,(tdks%nfftf,dtset%nspden,4*usevxctau))
  tdks%vxctau=zero
  !For hybrid functionals
  use_hybcomp=0
@@ -1022,8 +1003,6 @@ end subroutine second_setup
 !!
 !! SOURCE
 subroutine read_wfk(dtfil, dtset, ecut_eff, fname_wfk, mpi_enreg, tdks)
-
- implicit none
 
  !Arguments ------------------------------------
  !scalars

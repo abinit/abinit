@@ -1,8 +1,8 @@
 
-.Version 9.3.4 of ABINIT 
+.Version 10.3.4.7 of ABINIT, released Dec 2025.
 .(MPI version, prepared for a x86_64_linux_gnu10.2 computer) 
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat  9 Jan 2021.
-- ( at 07h05 )
+.Starting date : Thu 27 Feb 2025.
+- ( at 18h19 )
   
-- input  file    -> /home/buildbot/ABINIT/scope_gnu_10.2_s64/trunk_beauty/tests/TestBot_MPI64/tutoparal_tmbt_1_MPI64-tmbt_2_MPI64-tmbt_3_MPI64/tmbt_2.abi
+- input  file    -> /home/buildbot/ABINIT3/scope_gnu_10.2_s64/trunk__gonze2/tests/TestBot_MPI64/tutoparal_tmbt_1_MPI64-tmbt_2_MPI64-tmbt_3_MPI64/tmbt_2.abi
 - output file    -> tmbt_2_MPI64.abo
 - root for input  files -> tmbt_2_MPI64i
 - root for output files -> tmbt_2_MPI64o
-
 
  Symmetries : space group P3_2 2 1 (#154); Bravais hP (primitive hexag.)
 ================================================================================
@@ -34,7 +33,7 @@
 -    mband =          50        mffmem =           1         mkmem =           1
        mpw =        7899          nfft =      174960          nkpt =           9
 ================================================================================
-P This job should need less than                      58.993 Mbytes of memory.
+P This job should need less than                      63.971 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :     54.240 Mbytes ; DEN or POT disk file :      1.337 Mbytes.
 ================================================================================
@@ -43,10 +42,10 @@ _ WF disk file :     54.240 Mbytes ; DEN or POT disk file :      1.337 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
+- outvars: echo of selected default values
 -   iomode0 =  3 , fftalg0 =312 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -164,8 +163,8 @@ meta: {optdriver: 3, gwcalctyp: 0, }
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  1.20000000E+02 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_s64/trunk_beauty/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Si.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_s64/trunk_beauty/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Si.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/scope_gnu_10.2_s64/trunk__gonze2/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/Si.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/scope_gnu_10.2_s64/trunk__gonze2/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/Si.psp8
 - Si    ONCVPSP-3.3.0  r_core=   1.60303   1.72197   1.91712
 - 14.00000   4.00000    171102                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -179,8 +178,8 @@ meta: {optdriver: 3, gwcalctyp: 0, }
              2   -2.124804   -0.444604
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_s64/trunk_beauty/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/O.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_s64/trunk_beauty/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/O.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/scope_gnu_10.2_s64/trunk__gonze2/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/O.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/scope_gnu_10.2_s64/trunk__gonze2/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/O.psp8
 - O     ONCVPSP-3.3.0  r_core=   1.35509   1.45563   1.35509
 -  8.00000   6.00000    171101                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -236,6 +235,10 @@ meta: {optdriver: 3, gwcalctyp: 0, }
  setmesh: FFT mesh size selected  =    32x   32x   45
           total number of points  =        46080
 
+
+ vcoul_init : cutoff-mode = AUXILIARY_FUNCTION
+ q-points for optical limit:   1
+     1)      0.000010    0.000020    0.000030
 
 - screening: taking advantage of time-reversal symmetry 
 - Maximum band index for partially occupied states nbvw = 24
@@ -577,109 +580,115 @@ P           mkmem           1
 
  Test the timer : 
   a combined call timab(*,1,tsec) + timab(*,2,tsec) is 
-- CPU time =    7.3721E-07 sec,    Wall time =    7.3710E-07 sec
+- CPU time =    6.3758E-05 sec,    Wall time =    6.3760E-05 sec
 
-- Total cpu        time (s,m,h):       4258.1       70.97      1.183
-- Total wall clock time (s,m,h):       4258.2       70.97      1.183
+- Total cpu        time (s,m,h):       5054.8       84.25      1.404
+- Total wall clock time (s,m,h):       5055.3       84.25      1.404
 -
 - For major independent code sections, cpu and wall times (sec),
--  as well as % of the time and number of calls for node 0-
--<BEGIN_TIMER mpi_nprocs = 64, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =           66.5, wall_time =           66.5
+-  as well as % of the time and number of calls for node 0
 -
-- routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
--                                                                  (-1=no count)
-- pspini                         0.841   0.0      0.841   0.0              1      -1.00        1.00       1.00
-- ewald                          0.699   0.0      0.699   0.0              1      -1.00        1.00       1.00
-- wfd_read_wfk                   0.452   0.0      0.452   0.0              1      -1.00        1.00       1.00
-- timing timab                   0.143   0.0      0.143   0.0             14      -1.00        1.00       1.00
-- xc:pot/=fourdp                 0.085   0.0      0.085   0.0              1      -1.00        1.00       1.00
-- invars2                        0.044   0.0      0.044   0.0              1      -1.00        1.00       1.00
-- fourdp                         0.036   0.0      0.036   0.0              5      -1.00        1.00       1.00
-- mkcore                         0.035   0.0      0.035   0.0              1      -1.00        1.00       1.00
-- mkffnl                         0.026   0.0      0.026   0.0              9      -1.00        1.00       1.00
-- symrhg(no FFT)                 0.020   0.0      0.020   0.0              1      -1.00        1.00       1.00
-- abinit(2)                      0.011   0.0      0.011   0.0              1      -1.00        1.00       1.00
-- others (118)                   0.003   0.0      0.002   0.0             -1      -1.00        1.01       1.01
+-<BEGIN_TIMER mpi_nprocs = 64, omp_nthreads = 1, mpi_rank = 0>
+- cpu_time =           78.9, wall_time =           79.0
+-
+- routine                                    cpu     %          wall   %        number of calls Gflops    Speedup Efficacity
+-                                                                                (-1=no count)
+- pspini                                    0.820   0.0         0.820   0.0              1      -1.00        1.00       1.00
+- ewald                                     0.595   0.0         0.595   0.0              1      -1.00        1.00       1.00
+- wfd_read_wfk                              0.527   0.0         0.527   0.0              1      -1.00        1.00       1.00
+- timing timab                              0.143   0.0         0.143   0.0              3      -1.00        1.00       1.00
+- xc:pot/=fourdp                            0.071   0.0         0.071   0.0              1      -1.00        1.00       1.00
+- get_dtsets_pspheads                       0.069   0.0         0.069   0.0              1      -1.00        1.00       1.00
+- abinit(chkinp,chkvars)                    0.047   0.0         0.047   0.0              1      -1.00        1.00       1.00
+- mkffnl                                    0.029   0.0         0.029   0.0              9      -1.00        1.00       1.00
+- mkcore                                    0.028   0.0         0.028   0.0              1      -1.00        1.00       1.00
+- abinit(outvars)                           0.021   0.0         0.021   0.0              1      -1.00        1.00       1.00
+- fourdp                                    0.021   0.0         0.021   0.0              5      -1.00        1.00       1.00
+- abinit(after driver)                      0.017   0.0         0.017   0.0              1      -1.00        1.00       1.00
+- abinit(init,iofn1,herald)                 0.015   0.0         0.016   0.0              1      -1.00        0.93       0.93
+- symrhg(no FFT)                            0.012   0.0         0.012   0.0              1      -1.00        1.00       1.00
+- others (145)                              0.005   0.0         0.005   0.0             -1      -1.00        1.11       1.11
 -<END_TIMER>
 -
-- subtotal                       2.396   0.1      2.396   0.1                                  1.00       1.00
+- subtotal                                  2.421   0.0         2.421   0.0                                  1.00       1.00
 
 - For major independent code sections, cpu and wall times (sec),
 - as well as % of the total time and number of calls 
 
 -<BEGIN_TIMER mpi_nprocs = 64, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =        4258.1, wall_time =        4258.2
+- cpu_time =        5054.8, wall_time =        5055.3
 -
-- routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
--                                                                  (-1=no count)
-- pspini                        52.015   1.2     52.013   1.2             64      -1.00        1.00       1.00
-- ewald                         38.789   0.9     38.787   0.9             64      -1.00        1.00       1.00
-- wfd_read_wfk                  28.876   0.7     28.890   0.7             64      -1.00        1.00       1.00
-- timing timab                   9.205   0.2      9.205   0.2            894      -1.00        1.00       1.00
-- xc:pot/=fourdp                 4.503   0.1      4.503   0.1             64      -1.00        1.00       1.00
-- invars2                        3.435   0.1      3.435   0.1             64      -1.00        1.00       1.00
-- mkcore                         1.856   0.0      1.856   0.0             64      -1.00        1.00       1.00
-- fourdp                         1.668   0.0      1.669   0.0            320      -1.00        1.00       1.00
-- mkffnl                         1.618   0.0      1.614   0.0            576      -1.00        1.00       1.00
-- symrhg(no FFT)                 0.928   0.0      0.929   0.0             64      -1.00        1.00       1.00
-- abinit(2)                      0.768   0.0      0.768   0.0             64      -1.00        1.00       1.00
-- kpgsph                         0.184   0.0      0.184   0.0           3081      -1.00        1.00       1.00
-- others (117)                   0.000   0.0      0.000   0.0             -1      -1.00        0.00       0.00
+- routine                                    cpu     %          wall   %        number of calls Gflops    Speedup Efficacity
+-                                                                                (-1=no count)
+- pspini                                   57.838   1.1        57.840   1.1             64      -1.00        1.00       1.00
+- ewald                                    40.681   0.8        40.682   0.8             64      -1.00        1.00       1.00
+- wfd_read_wfk                             33.706   0.7        33.709   0.7             64      -1.00        1.00       1.00
+- timing timab                              8.976   0.2         8.976   0.2            192      -1.00        1.00       1.00
+- xc:pot/=fourdp                            5.919   0.1         5.920   0.1             64      -1.00        1.00       1.00
+- get_dtsets_pspheads                       5.600   0.1         5.600   0.1             64      -1.00        1.00       1.00
+- abinit(chkinp,chkvars)                    2.123   0.0         2.123   0.0             64      -1.00        1.00       1.00
+- fourdp                                    2.106   0.0         2.106   0.0            320      -1.00        1.00       1.00
+- mkffnl                                    2.013   0.0         2.010   0.0            576      -1.00        1.00       1.00
+- mkcore                                    1.994   0.0         1.993   0.0             64      -1.00        1.00       1.00
+- symrhg(no FFT)                            1.102   0.0         1.102   0.0             64      -1.00        1.00       1.00
+- abinit(init,iofn1,herald)                 0.447   0.0         0.466   0.0             64      -1.00        0.96       0.96
+- abinit(outvars)                           0.425   0.0         0.425   0.0             64      -1.00        1.00       1.00
+- kpgsph                                    0.284   0.0         0.257   0.0           3081      -1.00        1.11       1.11
+- abinit(after driver)                      0.021   0.0         0.020   0.0             64      -1.00        1.03       1.03
+- others (144)                              0.000   0.0         0.000   0.0             -1      -1.00        0.00       0.00
 -<END_TIMER>
 
-- subtotal                     143.846   3.4    143.853   3.4                                  1.00       1.00
+- subtotal                                163.233   3.2       163.229   3.2                                  1.00       1.00
 
  Partitioning of abinit
-- abinit                      4258.121 100.0   4258.200 100.0             64                   1.00       1.00
+- abinit                                 5054.769 100.0      5055.283 100.0             64                   1.00       1.00
  
-- abinit(1)                      1.415   0.0      1.451   0.0             64                   0.98       0.98
-- indefo+macroin+invars2m        3.950   0.1      3.950   0.1             64                   1.00       1.00
-- abinit(4)                      6.114   0.1      6.144   0.1             64                   1.00       1.00
-- abinit(5)                      1.754   0.0      1.754   0.0             64                   1.00       1.00
-- driver                      4240.651  99.6   4240.695  99.6             64                   1.00       1.00
-- timing timab                   9.205   0.2      9.205   0.2            894                   1.00       1.00
+- get_dtsets_pspheads                       5.600   0.1         5.600   0.1             64                   1.00       1.00
+- abinit(chkinp,chkvars)                    2.123   0.0         2.123   0.0             64                   1.00       1.00
+- driver                                 5035.893  99.6      5036.340  99.6             64                   1.00       1.00
+- timing timab                              8.976   0.2         8.976   0.2            192                   1.00       1.00
+- (other)                                   1.280   0.0         1.328   0.0             -1                   0.96       0.96
 
-- subtotal                    4258.121 100.0   4258.200 100.0                                  1.00       1.00
+- subtotal                               5054.769 100.0      5055.283 100.0                                  1.00       1.00
 
  Partitioning of driver
-- driver                      4240.651  99.6   4240.695  99.6             64                   1.00       1.00
+- driver                                 5035.893  99.6      5036.340  99.6             64                   1.00       1.00
  
-- screening                   4240.115  99.6   4240.160  99.6             64                   1.00       1.00
+- screening                              5035.081  99.6      5035.528  99.6             64                   1.00       1.00
 
-- subtotal                    4240.651  99.6   4240.695  99.6                                  1.00       1.00
+- subtotal                               5035.893  99.6      5036.340  99.6                                  1.00       1.00
 
  Partitioning of screening
-- screening                   4240.115  99.6   4240.160  99.6             64                   1.00       1.00
+- screening                              5035.081  99.6      5035.528  99.6             64                   1.00       1.00
  
-- screening(init1)              69.436   1.6     69.433   1.6             64                   1.00       1.00
-- screening(wfs)                33.366   0.8     33.391   0.8             64                   1.00       1.00
-- screening(1)                   1.422   0.0      1.423   0.0             64                   1.00       1.00
-- screening(density)            12.097   0.3     12.103   0.3             64                   1.00       1.00
-- screening(2)                  48.249   1.1     48.249   1.1             64                   1.00       1.00
-- screening(cchi0q0)           580.933  13.6    580.929  13.6             64                   1.00       1.00
-- screening(cchi0)            3227.287  75.8   3227.207  75.8            512                   1.00       1.00
-- screening(q-loop,end)        261.159   6.1    261.157   6.1            576                   1.00       1.00
-- screening(wrt scr files)       1.072   0.0      1.085   0.0            576                   0.99       0.99
+- screening(init1)                         76.221   1.5        76.241   1.5             64                   1.00       1.00
+- screening(wfs)                           39.902   0.8        39.960   0.8             64                   1.00       1.00
+- screening(1)                              1.893   0.0         1.893   0.0             64                   1.00       1.00
+- screening(density)                       14.388   0.3        14.392   0.3             64                   1.00       1.00
+- screening(2)                             52.132   1.0        52.133   1.0             64                   1.00       1.00
+- screening(cchi0q0)                      716.083  14.2       716.142  14.2             64                   1.00       1.00
+- screening(cchi0)                       3840.981  76.0      3841.245  76.0            512                   1.00       1.00
+- screening(q-loop,end)                   286.433   5.7       286.449   5.7            576                   1.00       1.00
+- screening(wrt scr files)                  1.028   0.0         1.047   0.0            576                   0.98       0.98
 
-- subtotal                    4235.031  99.5   4234.987  99.5                                  1.00       1.00
+- subtotal                               5029.085  99.5      5029.529  99.5                                  1.00       1.00
 
- Partitioning of  fourdp (upwards partitioning)
-- fourdp                         1.668   0.0      1.669   0.0            320                   1.00       1.00
+ Partitioning of fourdp (upwards partitioning)
+- fourdp                                    2.106   0.0         2.106   0.0            320                   1.00       1.00
  
-- fourdp%(other)                 1.412   0.0      1.413   0.0            256                   1.00       1.00
+- fourdp%(other)                            1.807   0.0         1.807   0.0            256                   1.00       1.00
 
-- subtotal                       1.668   0.0      1.669   0.0                                  1.00       1.00
+- subtotal                                  2.106   0.0         2.106   0.0                                  1.00       1.00
 -
 -Synchronisation (=leave_test) and MPI calls 
-- communic.MPI                   0.087   0.0      0.087   0.0             64                   1.00       1.00
+- communic.MPI                              0.130   0.0         0.130   0.0             64                   1.00       1.00
 -
-- subtotal                       0.000   0.0      0.000   0.0                                  0.00       0.00
+- subtotal                                  0.000   0.0         0.000   0.0                                  0.00       0.00
 
  Additional information
-- timana(1)                      0.004   0.0      0.004   0.0             64                   0.99       0.99
-- total timab                    9.213   0.2      9.212   0.2       12333263                   1.00       1.00
-- cchi0                       3227.246  75.8   3227.171  75.8            512                   1.00       1.00
+- timana(1)                                 0.004   0.0         0.004   0.0             64                   1.05       1.05
+- total timab                               9.551   0.2         9.551   0.2         153225                   1.00       1.00
+- cchi0                                  3840.895  76.0      3841.163  76.0            512                   1.00       1.00
 
 
  Detailed analysis of some time consuming routines 
@@ -687,12 +696,13 @@ P           mkmem           1
                                  (sec)                (msec)              (microsec)
 - fourwf%(pot)                   0.000         0
 - fourwf%(den)                   0.000         0
-- fourdp                         1.668       320       5.213    174960       0.030
+- fourdp                         2.106       320       6.580    174960       0.038
 - nonlop(apply)                  0.000         0
 - nonlop(forces)                 0.000         0
 - nonlop(forstr)                 0.000         0
 - projbd                         0.000         0
-- xc:pot/=fourdp                 4.503        64      70.358    174960       0.402
+- xc:pot/=fourdp                 5.919        64      92.489    174960       0.529
+- RayleighRitz@diago             0.000         0
 
 ================================================================================
 
@@ -778,10 +788,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         66.5  wall=         66.5
+- Proc.   0 individual time (sec): cpu=         79.0  wall=         79.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=       4259.2  wall=       4259.2
++Overall time at end (sec) : cpu=       5055.8  wall=       5056.3

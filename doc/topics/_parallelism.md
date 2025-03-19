@@ -21,8 +21,11 @@ export OMP_NUM_THREADS=4
 mpirun -n 10 abinit run.abi > log 2> err   
 ```
 
-In the latter, the standard output of the application is redirected to `log` while `err` collects the standard error.
 The command *mpirun* might possibly be replaced by *mpiexec* depending on your system.
+In the latter, the standard output of the application is redirected to `log` while `err` collects the standard error.
+Note that the control of output in the parallel case needs to be adapted, as for massively parallel runs, 
+one cannot afford to have some of the output files that are usually created, see 
+the [[help:abinit#control-of-output-in-the-parallel-cas|abinit help file]] for more explanation and how to change the default behavior (_LOG/_NOLOG files).
 
 * For ground-state calculations, the code has been parallelized (MPI-based parallelism) 
   on the k-points, the spins, the spinor components, the bands, and the FFT grid and plane wave coefficients. 

@@ -69,7 +69,7 @@
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
-#%% keywords = GW
+#%% keywords = GW, MINIMAL
 #%% authors = R. Shaltaf
 #%% description =
 #%%   Test on splitting screening calculation using nqptdm and qptdm

@@ -7,9 +7,9 @@
 !!  with support of different external library (scalapack, elpa, plasma, magma, ... )
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2024 ABINIT group (LNguyen,FDahm,MT)
+!!  Copyright (C) 2012-2025 ABINIT group (LNguyen,FDahm,MT)
 !!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~ABINIT/Infos/copyright
+!!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! SOURCE
@@ -142,6 +142,9 @@ module m_abi_linalg
  public :: abi_linalg_finalize      ! CleanuUp routine
  public :: abi_linalg_work_allocate ! Allocate work arrays
  !----------------------------------------------------------------------
+
+ public :: gpu_set_to_zero
+ public :: gpu_copy
 
 !BLAS INTERFACE
  !public :: abi_zgemm
@@ -513,7 +516,7 @@ CONTAINS  !===========================================================
 !******************************************************************
 
 !Use only abi_linalg in case of GS calculations
- abi_linalg_in_use=(optdriver==RUNL_GSTATE.or.optdriver==RUNL_GWLS)
+ abi_linalg_in_use=(optdriver==RUNL_GSTATE.or.optdriver==RUNL_GWLS.or.optdriver==RUNL_RESPFN)
 
  max_eigen_pb_size_eff=0
  lapack_single_precision=.false.

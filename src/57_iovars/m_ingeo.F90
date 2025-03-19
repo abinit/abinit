@@ -6,7 +6,7 @@
 !! Initialize geometry variables for the ABINIT code.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2024 ABINIT group (XG, RC)
+!!  Copyright (C) 1998-2025 ABINIT group (XG, RC)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,8 +28,9 @@ module m_ingeo
  use m_sort
  use m_dtset
 
- use m_symtk,      only : mati3inv, chkorthsy, symrelrot, mati3det, chkprimit, &
-&                         symmetrize_rprimd, symmetrize_tnons,symmetrize_xred, symatm
+ use m_matrix,     only : mati3inv, mati3det
+ use m_symtk,      only : chkorthsy, symrelrot, chkprimit, symatm, &
+&                         symmetrize_rprimd, symmetrize_tnons,symmetrize_xred
  use m_spgbuilder, only : gensymspgr, gensymshub, gensymshub4
  use m_symfind,    only : symfind, symfind_expert, symanal, symlatt
  use m_geometry,   only : mkradim, mkrdim, xcart2xred, xred2xcart, randomcellpos, metric, reduce2primitive
@@ -387,8 +388,11 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,field_red,&
  !This should not be printed if randomcellpos did nothing - it contains garbage. Spurious output anyway
  !end if
 
- if (tread_geo == 0) then
+ if (tread_geo /= 0) then
+   txcart = 0; txrandom = 0; txred = 1
+   xred_read = geo%xred
 
+ else
    call intagm(dprarr,intarr,jdtset,marr,3*natrd,string(1:lenstr),'xred',txred,'DPR')
    if (txred==1 .and. txrandom == 0) xred_read(:,1:natrd) = reshape(dprarr(1:3*natrd) , [3, natrd])
    call intagm_img(xred_read,iimage,jdtset,lenstr,nimage,3,natrd,string,"xred",txred,'DPR')
@@ -406,9 +410,14 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,field_red,&
      if (txcart==1 .and. txrandom==0) xcart_read(:,1:natrd) = reshape(dprarr(1:3*natrd), [3, natrd])
    end if
 
- else
-   txcart = 0; txrandom = 0; txred = 1
-   xred_read = geo%xred
+   !TODO: Might initialize xred from getxred/xcart: NOT POSSIBLE YET. NEEDS INTER DTSET COMMUNICATION AT INVARS1 TIME
+!   if (txred+txcart+txrandom==0) then
+!     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getxred',txred,'INT')
+!     if (txred==1 .and. txrandom==0) xred_read(:,1:natrd) = 
+!
+!     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getxcart',txcart,'INT')
+!     if (txcart==1 .and. txrandom==0) xcart_read(:,1:natrd) =
+!   end if
  end if
 
  if (txred + txcart + txrandom == 0) then

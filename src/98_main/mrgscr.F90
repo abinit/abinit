@@ -7,7 +7,7 @@
 !! can be used to perform a sigma calculation.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2024 ABINIT group (RS, MG, MS)
+!! Copyright (C) 2005-2025 ABINIT group (RS, MG, MS)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -262,10 +262,10 @@ program mrgscr
 
  kptopt=1
  call Kmesh%init(Cryst,HScr0%Hdr%nkpt,Hscr0%Hdr%kptns,kptopt)
- call Kmesh%print("K-mesh for the wavefunctions",prtvol=prtvol)
+ call Kmesh%print([std_out], header="K-mesh for the wavefunctions", prtvol=prtvol)
 
- call find_qmesh(Qmesh,Cryst,Kmesh)
- call qmesh%print("Q-mesh for the screening function",prtvol=prtvol)
+ call find_qmesh(Qmesh, Cryst, Kmesh)
+ call qmesh%print([std_out], header="Q-mesh for the screening function", prtvol=prtvol)
 
  ABI_MALLOC(foundq,(Qmesh%nibz))
  foundq(:)=0
@@ -278,8 +278,7 @@ program mrgscr
 
  if (ANY(foundq==0)) then
    write(msg,'(6a)')ch10,&
-    ' File ',TRIM(fname),' is not complete ',ch10,&
-    ' The following q-points are missing:'
+    ' File ',TRIM(fname),' is not complete ',ch10,' The following q-points are missing:'
    call wrtout(std_out, msg)
    ii=0
    do iqibz=1,Qmesh%nibz
@@ -293,8 +292,7 @@ program mrgscr
 
  if (ANY(foundq>1)) then
    write(msg,'(6a)')ch10,&
-    ' File ',TRIM(fname),' is overcomplete ',ch10,&
-    ' The following q-points are present more than once:'
+    ' File ',TRIM(fname),' is overcomplete ',ch10,' The following q-points are present more than once:'
    call wrtout(std_out, msg)
    ii=0
    do iqibz=1,Qmesh%nibz
@@ -307,8 +305,7 @@ program mrgscr
  end if
 
  if (ALL(foundq==1)) then
-   write(msg,'(5a)')ch10,&
-    '.File ',TRIM(fname),' contains a complete list of q-points ',ch10
+   write(msg,'(5a)')ch10,'.File ',TRIM(fname),' contains a complete list of q-points ',ch10
    call wrtout(std_out, msg)
  end if
 
@@ -325,7 +322,6 @@ program mrgscr
    write(std_out,'(a)')         '  or remove imaginary frequencies               (= 5) ?'
    write(std_out,'(a)')         '  or calculate a model screening                (= 6) ?'
    !write(std_out,'(a)')         '  or interpolate the screening in k-space       (= 8) ?'
-   !write(std_out,'(a)')         '  or convert a netcd file to Fortran            (= 9) ?'
    read(std_in,*)choice
 
    select case(choice)
@@ -582,7 +578,7 @@ program mrgscr
      call Gsphere%free()
 
    case(3)
-       ! Extract dielectric function and plasmon-pole stuff --------------------------
+     ! Extract dielectric function and plasmon-pole stuff --------------------------
      ABI_CHECK(iomode==IO_MODE_FORTRAN, "netcdf output not coded")
      write(std_out,'(a)') ' 3 => Calculation of dielectric function and plasmon-pole model'
 
@@ -890,12 +886,10 @@ program mrgscr
                  end if
                end do
                ! First output the iomega = 0 point
-               write(unt_dump2,'(f8.2,4x,4es16.8)') AIMAG(omega(1))*Ha_eV,em1_ppm(1),&
-                 Er%epsm1(ig1,ig2,1,iqibz)
+               write(unt_dump2,'(f8.2,4x,4es16.8)') AIMAG(omega(1))*Ha_eV,em1_ppm(1), Er%epsm1(ig1,ig2,1,iqibz)
                ! Then the rest
                do iomega=nfreqre+1,nfreq_tot
-                 write(unt_dump2,'(f8.2,4x,4es16.8)') AIMAG(omega(iomega))*Ha_eV,em1_ppm(iomega),&
-                   Er%epsm1(ig1,ig2,iomega,iqibz)
+                 write(unt_dump2,'(f8.2,4x,4es16.8)') AIMAG(omega(iomega))*Ha_eV,em1_ppm(iomega),Er%epsm1(ig1,ig2,iomega,iqibz)
                end do
                write(unt_dump,*)
                write(unt_dump,*)
@@ -903,8 +897,7 @@ program mrgscr
                write(unt_dump2,*)
              end do ! Empty
              ABI_FREE(em1_ppm)
-             close(unt_dump)
-             close(unt_dump2)
+             close(unt_dump); close(unt_dump2)
 
            end do ! ppmodel
          end do ! iqibz
@@ -1238,13 +1231,6 @@ program mrgscr
      ! Model screening -------------------------------------------------------------
      ABI_ERROR("Model screening has been removed")
 
-   !case(9)
-   !  TODO
-   !  ! netcdf --> Fortran converter -------------------------------------------------------------
-   !  call prompt(' Enter the name of the final output Fortran file: ',fname_out)
-   !  ! fname_out extension should be consistent with filenames(1)
-   !  call ioscr_nc2fort(filenames(1), fname_out)
-
    case default
      ! Bail if choice is wrong
      write(std_out,*) ' Invalid choice! Exiting...'
@@ -1260,9 +1246,7 @@ program mrgscr
 
  write(std_out, '(a,a,a,f13.1,a,f13.1)' )  '-',ch10,'- Proc.   0 individual time (sec): cpu=',tsec(1),'  wall=',tsec(2)
 
- ! =====================
- ! ==== Free memory ====
- ! =====================
+ ! Free memory
  ABI_FREE(filenames)
  ABI_SFREE(kxcg)
  ABI_SFREE(foundq)
@@ -1281,7 +1265,6 @@ program mrgscr
  ABI_FREE(Hscr_file)
 
  call flush_unit(std_out)
-
  call abinit_doctor("__mrgscr")
 
  100 call xmpi_end()

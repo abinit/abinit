@@ -6,7 +6,7 @@
 !!  Routines to compute the macroscopic dielectric function in the Bethe-Salpeter code.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2024 ABINIT and EXC groups (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, M.Giantomassi, Y. Gillet)
+!! Copyright (C) 2009-2025 ABINIT and EXC groups (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, M.Giantomassi, Y. Gillet)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -21,10 +21,10 @@
 
 MODULE m_exc_spectra
 
+ use, intrinsic :: iso_c_binding
  use defs_basis
  use m_bs_defs
  use m_abicore
- use, intrinsic :: iso_c_binding
  use m_xmpi
  use m_errors
  use netcdf
@@ -32,7 +32,7 @@ MODULE m_exc_spectra
  use m_ebands
  use m_hdr
 
- use defs_datatypes,    only : pseudopotential_type, ebands_t
+ use defs_datatypes,    only : pseudopotential_type
  use m_io_tools,        only : open_file
  use m_fstrings,        only : toupper, strcat, sjoin, int2char4
  use m_numeric_tools,   only : simpson_int, simpson_cplx
@@ -172,8 +172,8 @@ subroutine build_spectra(BSp,BS_files,Cryst,Kmesh,KS_BSt,QP_BSt,Psps,Pawtab,Wfd,
      ost_fname = strcat(BS_files%out_basename,prefix,"_EXC_OST")
 
      !TODO for RPA
-     call ebands_copy(KS_BST, EPBSt)
-     call ebands_copy(QP_BST, EP_QPBSt)
+     call KS_BST%copy(EPBSt)
+     call QP_BST%copy(EP_QPBSt)
 
      if (BS_files%in_eig /= BSE_NOFILE) then
        filbseig = strcat(BS_files%in_eig,prefix)
@@ -256,14 +256,14 @@ subroutine build_spectra(BSp,BS_files,Cryst,Kmesh,KS_BSt,QP_BSt,Psps,Pawtab,Wfd,
      path = strcat(BS_files%out_basename, strcat(prefix,"_MDF.nc"))
      NCF_CHECK_MSG(nctk_open_create(ncid, path, xmpi_comm_self), sjoin("Creating MDF file:", path))
      NCF_CHECK(cryst%ncwrite(ncid))
-     NCF_CHECK(ebands_ncwrite(QP_BSt, ncid))
+     NCF_CHECK(QP_BSt%ncwrite(ncid))
      ! Write dielectric functions.
      call mdfs_ncwrite(ncid, Bsp, eps_exc,eps_rpanlf,eps_gwnlf)
      NCF_CHECK(nf90_close(ncid))
 
      !TODO
-     call ebands_free(EPBSt)
-     call ebands_free(EP_QPBSt)
+     call EPBSt%free()
+     call EP_QPBSt%free()
    end do
 
    ABI_FREE(eps_rpanlf)

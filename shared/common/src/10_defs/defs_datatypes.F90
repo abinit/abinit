@@ -25,7 +25,7 @@
 !! * pspheader_type: for norm-conserving pseudopotentials, the header of the file
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2024 ABINIT group (XG)
+!! Copyright (C) 2001-2025 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -61,7 +61,7 @@ module defs_datatypes
 !!
 !! SOURCE
 
- type ebands_t
+ type ebands_base_t
 
   integer :: bantot                ! Total number of bands (sum(nband(:))
   integer :: ivalence              ! Highest valence band index (useful when occopt=9 only)
@@ -153,7 +153,7 @@ module defs_datatypes
   real(dp),allocatable :: shiftk(:,:)
   ! shiftk(3, nshiftk)
 
- end type ebands_t
+ end type ebands_base_t
 !!***
 
 !----------------------------------------------------------------------

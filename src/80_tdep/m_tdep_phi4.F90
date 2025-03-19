@@ -115,7 +115,7 @@ subroutine tdep_calc_phi4fcoeff(CoeffMoore,Invar,proj,Shell4at,Sym,ucart)
   integer :: icoeff,isym,iatshell,itrans,counter
   integer :: mu,nu,xi,zeta,alpha,beta,gama,delta,iindex_l,iindex_h
   integer :: ncoeff_prev_l,ncoeff_prev_h
-  double precision :: temp
+  double precision :: temp,SSSS_tmp(81),proj_tmp(81)
   double precision, allocatable :: SSSS_proj(:,:,:,:,:)
   type(Constraints_type) :: Const
 
@@ -198,8 +198,11 @@ subroutine tdep_calc_phi4fcoeff(CoeffMoore,Invar,proj,Shell4at,Sym,ucart)
           do nu=1,3
             do xi=1,3
               do zeta=1,3
+                SSSS_tmp(:)=Const%Sprod(isym,itrans)%SSSS(mu,:,nu,xi,zeta)
                 do icoeff=1,ncoeff
-                  SSSS_proj(mu,nu,xi,zeta,icoeff)=DDOT(81,Const%Sprod(isym,itrans)%SSSS(mu,:,nu,xi,zeta),1,proj(:,icoeff,ishell),1)
+                  proj_tmp(:)=proj(:,icoeff,ishell)
+!                 SSSS_proj(mu,nu,xi,zeta,icoeff)=DDOT(81,Const%Sprod(isym,itrans)%SSSS(mu,:,nu,xi,zeta),1,proj(:,icoeff,ishell),1)
+                  SSSS_proj(mu,nu,xi,zeta,icoeff)=DDOT(81,SSSS_tmp,1,proj_tmp,1)
                 end do
               end do
             end do

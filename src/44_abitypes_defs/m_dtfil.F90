@@ -6,7 +6,7 @@
 !!   object and procedures dealing with input/output filenames
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2024 ABINIT group (XG, MT)
+!!  Copyright (C) 2008-2025 ABINIT group (XG, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -85,13 +85,13 @@ module m_dtfil
    !    >0: index of an image
 
   integer :: ireadddb
-   ! ireadddb non-zero  if the ddb file must be read
+   ! ireadddb non-zero if the ddb file must be read
 
   integer :: ireadden
-   ! ireadden non-zero  if the den file must be read
+   ! ireadden non-zero if the den file must be read
 
   integer :: ireadkden
-   ! ireadkden non-zero  if the kden file must be read
+   ! ireadkden non-zero if the kden file must be read
 
   integer :: ireadwf
    ! if(optdriver/=1), that is, no response-function computation,
@@ -176,8 +176,20 @@ module m_dtfil
    ! Initialize via getsigeph_filepath
 
   character(len=fnlen) :: filgstorein
-   ! Filename used to read GSTOR.ncE file.
+   ! Filename used to read GSTORE.nc file.
    ! Initialize via getgstore_filepath
+
+  character(len=fnlen) :: filabiwanin
+   ! Filename used to read ABIWAN.nc file.
+   ! Initialize via getabiwan_filepath
+
+  character(len=fnlen) :: filgwanin
+   ! Filename used to read GWAN.nc file.
+   ! Initialize via getgwan_filepath
+
+  character(len=fnlen) :: filvpqin
+   ! Filename used to read VPQ.nc file.
+   ! Initialize via getvpq_filepath
 
   character(len=fnlen) :: filstat
    ! tmp//'_STATUS'
@@ -379,6 +391,7 @@ module m_dtfil
   character(len=fnlen) :: fnameabo_app_pot
   character(len=fnlen) :: fnameabo_app_opt
   character(len=fnlen) :: fnameabo_app_opt2
+  character(len=fnlen) :: fnameabo_app_orbmag
   character(len=fnlen) :: fnameabo_app_stm
   character(len=fnlen) :: fnameabo_app_vclmb
   character(len=fnlen) :: fnameabo_app_vha
@@ -600,17 +613,17 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  ! According to getddb, build _DDB file name, referred as filddbsin
  stringfile='_DDB'; stringvar='ddb'
  call mkfilename(filnam,filddbsin,dtset%getddb,idtset,dtset%irdddb,jdtset_,ndtset,stringfile,stringvar,will_read, &
-                  getpath=dtset%getddb_filepath)
+                 getpath=dtset%getddb_filepath)
 
  ! According to getpot, build _POT file name
  stringfile='_POT'; stringvar='pot'
  call mkfilename(filnam, dtfil%filpotin, 0, idtset, 0, jdtset_, ndtset, stringfile, stringvar, will_read, &
-                  getpath=dtset%getpot_filepath)
+                 getpath=dtset%getpot_filepath)
 
  ! According to getdvdb, build _DVDB file name
  stringfile='_DVDB'; stringvar='dvdb'
  call mkfilename(filnam,dtfil%fildvdbin,dtset%getdvdb,idtset,dtset%irddvdb,jdtset_,ndtset,stringfile,stringvar,will_read, &
-                  getpath=dtset%getdvdb_filepath)
+                 getpath=dtset%getdvdb_filepath)
  if (will_read == 0) dtfil%fildvdbin = ABI_NOFILE
 
  ! According to getdrhodb, build _DRHODB file name
@@ -631,6 +644,24 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  call mkfilename(filnam, dtfil%filgstorein, 0, idtset, 0, jdtset_, ndtset, stringfile, stringvar, will_read, &
                  getpath=dtset%getgstore_filepath)
  if (will_read == 0) dtfil%filgstorein = ABI_NOFILE
+
+ ! According to getabiwan_filepath, build _ABIWAN file name
+ stringfile='_ABIWAN.nc'; stringvar='abiwan'
+ call mkfilename(filnam, dtfil%filabiwanin, dtset%getabiwan, idtset, 0, jdtset_, ndtset, stringfile, stringvar, will_read, &
+                 getpath=dtset%getabiwan_filepath)
+ if (will_read == 0) dtfil%filabiwanin = ABI_NOFILE
+
+ ! According to getgwan_filepath, build _GWAN file name
+ stringfile='_GWAN.nc'; stringvar='gwan'
+ call mkfilename(filnam, dtfil%filgwanin, dtset%getgwan, idtset, 0, jdtset_, ndtset, stringfile, stringvar, will_read, &
+                 getpath=dtset%getgwan_filepath)
+ if (will_read == 0) dtfil%filgwanin = ABI_NOFILE
+
+ ! According to getvpq_filepath, build _VPQ file name
+ stringfile='_VPQ.nc'; stringvar='vpq'
+ call mkfilename(filnam, dtfil%filvpqin, dtset%getvpq, idtset, 0, jdtset_, ndtset, stringfile, stringvar, will_read, &
+                 getpath=dtset%getvpq_filepath)
+ if (will_read == 0) dtfil%filvpqin = ABI_NOFILE
 
  ! According to getden, build _DEN file name, referred as fildensin
  ! A default is available if getden is 0
@@ -1031,6 +1062,7 @@ subroutine dtfil_init_time(dtfil,iapp)
  dtfil%fnameabo_app_nesting=trim(filapp)//'_NEST'
  dtfil%fnameabo_app_opt=trim(filapp)//'_OPT'
  dtfil%fnameabo_app_opt2=trim(filapp)//'_OPT2'
+ dtfil%fnameabo_app_orbmag=trim(filapp)//'_ORBMAG'
  dtfil%fnameabo_app_pawden=trim(filapp)//'_PAWDEN'
  dtfil%fnameabo_app_pot=trim(filapp)//'_POT'
  dtfil%fnameabo_app_stm=trim(filapp)//'_STM'
@@ -1084,7 +1116,7 @@ end subroutine dtfil_init_time
 !! SOURCE
 
 subroutine fappnd(filapp,filnam,iapp,&
-&                 suff) ! optional argument
+                  suff) ! optional argument
 
 !Arguments ------------------------------------
 !scalars
@@ -1099,7 +1131,6 @@ subroutine fappnd(filapp,filnam,iapp,&
  character(len=3) :: suffixe
  character(len=8) :: nchar
  character(len=500) :: msg
-
 ! *************************************************************************
 
  if(iapp==0)then
@@ -1520,7 +1551,8 @@ end subroutine isfile
 !! iofn1
 !!
 !! FUNCTION
-!! Begin by eventual redefinition of unit std_in and std_out
+!! Define values of do_write_log and do_write_status parameters
+!! Eventual redefinition of unit std_in and std_out
 !! Then, print greetings for interactive user.
 !! Next, read filenames from unit std_in, AND check that new
 !! output file does not already exist.
@@ -1569,10 +1601,10 @@ subroutine iofn1(input_path, filnam, filstat, comm)
  real(dp),allocatable :: dprarr(:)
 !*************************************************************************
 
- ! NOTE: In this routine it's very important to perform tests
+ ! NOTE: In this routine it is very important to perform tests
  ! on possible IO errors (err=10, iomsg) because we are initializing the IO stuff
- ! It there's some problem with the hardware or some misconfiguration,
- ! it's very likely that the code will crash here and we should try to give useful error messages.
+ ! If there is some problem with the hardware or some misconfiguration,
+ ! it is very likely that the code will crash here and we should try to give useful error messages.
 
  blank = ' '; tmpfil = ''
 
@@ -1759,7 +1791,7 @@ subroutine iofn1(input_path, filnam, filstat, comm)
 
    do i1=3,5
      ! Create input/output/temporary directories if they don't exist yet.
-     ii = index(filnam(i1), "/")
+     ii = index(filnam(i1), "/", back=.True.)
      if (ii > 0) then
        dirpath = filnam(i1)(1:ii-1)
        call clib_mkdir_if_needed(dirpath, ierr)
@@ -1785,6 +1817,10 @@ subroutine iofn1(input_path, filnam, filstat, comm)
      if (open_file(fillog,msg,unit=std_out,status='unknown',action="write") /= 0) then
        ABI_ERROR(msg)
      end if
+!    Print greetings for interactive user
+     write(std_out,*,err=10,iomsg=errmsg)' ABINIT ',trim(abinit_version)
+     write(std_out,*,err=10,iomsg=errmsg)' '
+     write(std_out,*,err=10,iomsg=errmsg)' I am not the master. Writing log in ',fillog
    else
      close(std_out, err=10, iomsg=errmsg)
      if (open_file(NULL_FILE,msg,unit=std_out,action="write") /= 0) then

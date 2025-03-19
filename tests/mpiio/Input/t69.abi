@@ -99,6 +99,7 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% need_cpp_vars = HAVE_NETCDF_MPI
 #%% [files]
 #%% [paral_info]
 #%% nprocs_to_test = 2, 4

@@ -50,7 +50,8 @@ class WikiLinkExtension(Extension):
 
         super(WikiLinkExtension, self).__init__(*args, **kwargs)
 
-    def extendMarkdown(self, md, md_globals):
+    def extendMarkdown(self, md):
+    #def extendMarkdown(self, md, md_globals):
         self.md = md
 
         # append to end of inline patterns
@@ -58,7 +59,10 @@ class WikiLinkExtension(Extension):
         wikilinkPattern.md = md
         #md.inlinePatterns.add('wikilink', wikilinkPattern, "<not_strong")
         # This needed to treat [[ngfft]](1:3) before []() markdown syntax
-        md.inlinePatterns.add('wikilink', wikilinkPattern, "<link")
+        # 160 is the priority of link!
+        md.inlinePatterns.register(wikilinkPattern, 'wikilink', 161)
+        #md.inlinePatterns.register('wikilink', wikilinkPattern, "<link")
+        #md.inlinePatterns.add('wikilink', wikilinkPattern, "<link")
 
 
 class WikiLinks(Pattern):

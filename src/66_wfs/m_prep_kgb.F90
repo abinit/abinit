@@ -7,7 +7,7 @@
 !!  or to perform the FFT of the wavefunctions when the orbitals are distributed in linalg mode (paral_kgb = 1).
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2024 ABINIT group (FBottin,MT,GZ,MD,FDahm)
+!!  Copyright (C) 1998-2025 ABINIT group (FBottin,MT,GZ,MD,FDahm)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -189,10 +189,10 @@ subroutine prep_getghc(cwavef, gs_hamk, gvnlxc, gwavef, swavef, lambda, blocksiz
    ABI_BUG('wrong size for gwavef!')
  end if
  local_gvnlxc = .false.
- if (size(gvnlxc)==0) then
+ if (size(gvnlxc)<=1) then
    local_gvnlxc = .true.
  end if
- if ((.not.local_gvnlxc).and.size(gvnlxc)<mcg) then
+ if ((.not.local_gvnlxc).and.(size(gvnlxc)<mcg)) then
    ABI_BUG('wrong size for gvnlxc!')
  end if
  if (sij_opt==1) then
@@ -419,7 +419,7 @@ subroutine prep_getghc(cwavef, gs_hamk, gvnlxc, gwavef, swavef, lambda, blocksiz
    call timab(637,3,tsec)
    call multithreaded_getghc(cpopt,ewavef_alltoall_sym,cwaveprj,gwavef_alltoall_sym,swavef_alltoall_sym,gs_hamk,&
 &   gvnlxc_alltoall_sym,lambda,mpi_enreg,bandpp_sym,prtvol,sij_opt,tim_getghc,1,&
-&   kg_fft_k=kg_k_gather_sym)
+&   kg_fft_k=kg_k_gather_sym,filter_dilatmx_loc=.false.)
    call timab(637,2,tsec)
 
    call timab(633,3,tsec)
@@ -1322,7 +1322,7 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
        call ompgpu_fourwf    (1,rhoaug,&
 &       cwavef_alltoall1,&
 &       dummy,wfraug,gbound_,gbound_,&
-&       istwf_k_,kg_k_gather,kg_k_gather,mgfft,bandpp,&
+&       istwf_k_,kg_k_gather,kg_k_gather,mgfft,mpi_enreg%me_g0_fft,bandpp,&
 &       ngfft,ndatarecv,1,n4,n5,n6,option_fourwf,&
 &       weight_t,weight_t)
 #endif
@@ -1446,7 +1446,7 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
        call ompgpu_fourwf(1,rhoaug,&
 &       ewavef_alltoall_sym,&
 &       dummy,wfraug,gbound_,gbound_,&
-&       istwf_k_,kg_k_gather_sym,kg_k_gather_sym,mgfft,bandpp_sym,&
+&       istwf_k_,kg_k_gather_sym,kg_k_gather_sym,mgfft,mpi_enreg%me_g0_fft,bandpp_sym,&
 &       ngfft,ndatarecv_tot,1,n4,n5,n6,option_fourwf,&
 &       weight1_t,weight2_t)
 #endif

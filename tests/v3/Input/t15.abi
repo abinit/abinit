@@ -51,14 +51,14 @@
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
-#%%   t15.abo, tolnlines = 0, tolabs = 1.000e-10, tolrel = 1.000e-10, fld_options = -easy
+#%% files_to_test =
+#%%   t15.abo, tolnlines = 0, tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options = -easy
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = Unknown
-#%% keywords = NC, DFPT 
-#%% description = 
+#%% keywords = NC, DFPT
+#%% description =
 #%%     Fe FCC, spin-polarized (ferro), with only the Gamma point.
 #%%     Test spin-polarized GS and RF calculation, at varying occupation
 #%%     number (occopt=4). Check acoustic sum rule.

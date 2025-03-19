@@ -6,7 +6,7 @@
 !!  Helper functions used in the optic code
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2024 ABINIT group (SSharma,MVer,VRecoules,TD,YG, NAP)
+!! Copyright (C) 2002-2025 ABINIT group (SSharma,MVer,VRecoules,TD,YG, NAP)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -39,11 +39,9 @@ module m_optic_tools
  use m_linalg_interfaces
  use m_xmpi
  use m_nctk
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
+ use m_ebands
 
- use defs_datatypes,    only : ebands_t
  use m_numeric_tools,   only : c2r
  use m_io_tools,        only : open_file
  use m_crystal,         only : crystal_t
@@ -245,9 +243,7 @@ integer, intent(in) :: prtlincompmatrixelements
 integer,parameter :: master=0
 integer :: isp,i,j,isym,lx,ly,ik,ist1,ist2,iw,nkpt
 integer :: my_rank, nproc, my_k1, my_k2, ierr, fout1, mband, nsppol
-#ifdef HAVE_NETCDF
 integer :: ncerr
-#endif
 logical :: do_linewidth
 real(dp) :: deltav1v2, ha2ev, tmpabs, renorm_factor,emin,emax
 real(dp) :: ene,abs_eps,re_eps
@@ -530,7 +526,6 @@ complex(dpc), allocatable :: chi(:,:), matrix_elements(:,:,:,:), renorm_eigs(:,:
    ! close output file
    close(fout1)
 
-#ifdef HAVE_NETCDF
    if (ncid /= nctk_noid) then
      ncerr = nf90_put_var(ncid, nctk_idname(ncid, "linopt_epsilon"), c2r(eps), start=[1, 1, icomp, itemp])
      NCF_CHECK(ncerr)
@@ -551,8 +546,6 @@ complex(dpc), allocatable :: chi(:,:), matrix_elements(:,:,:,:), renorm_eigs(:,:
      NCF_CHECK(ncerr)
      write(std_out, '(a)') 'Writing linopt matrix elements done.'
    endif
-
-#endif
  end if ! rank == master
 
  ABI_FREE(chi)
@@ -801,13 +794,13 @@ complex(dpc), allocatable :: intra2w(:), intra1w(:), intra1wS(:),chi2tot(:)
                    px(ist1,ist2,lx,ly,lz)=f1*pmat(ist1,ist2,ik,lx,isp)
                    py(ist2,ist1,lx,ly,lz)=f2*pmat(ist2,ist1,ik,lx,isp)
                    pz(ist2,ist1,lx,ly,lz)=f3*pmat(ist2,ist1,ik,lx,isp)
-                 end do
-               end do
-             end do ! end loop over states
+                 end do ! lz=1,3
+               end do ! ly=1,3
+             end do ! lx=1,3
            end if
-         end do
+         end do ! ist2=1,nband_sum
        end if
-     end do
+     end do ! ist1=1,nband_sum
 
      ! calculate the energy window and \Delta_nm
      do ist1=1,nband_sum
@@ -1089,13 +1082,13 @@ complex(dpc), allocatable :: intra2w(:), intra1w(:), intra1wS(:),chi2tot(:)
                intra2w(iw)=intra2w(iw)+(ks_ebands%wtk(ik)*(b24/(wmn-2._dp*w))) ! Intra(2w) from eta
                intra1w(iw)=intra1w(iw)+(ks_ebands%wtk(ik)*((b21_22)/(wmn-w))) ! Intra(1w) from eta
                intra1wS(iw)=intra1wS(iw)+(ks_ebands%wtk(ik)*((b31_32)/(wmn-w))) ! Intra(1w) from sigma
-             end do
+             end do ! iw=1,nmesh
            end if
-         end do ! istm
+         end do ! istm=1,nband_sum (conduction states)
        end if
-     end do ! istn
-   end do  ! spins
- end do ! k-points
+     end do ! istn=1,nband_sum (valence states)
+   end do ! isp=1,ks_ebands%nsppol (spins)
+ end do ! ik=my_k1,my_k2 (k-points)
 
  call xmpi_sum(inter2w,comm,ierr)
  call xmpi_sum(inter1w,comm,ierr)
@@ -1113,14 +1106,12 @@ complex(dpc), allocatable :: intra2w(:), intra1w(:), intra1wS(:),chi2tot(:)
      count4 = [2, nmesh, 1, 1]
      ABI_MALLOC(chi2tot, (nmesh))
      chi2tot = inter2w + inter1w + intra2w + intra1w + intra1wS
-#ifdef HAVE_NETCDF
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "shg_inter2w"), c2r(inter2w), start=start4, count=count4))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "shg_inter1w"), c2r(inter1w), start=start4, count=count4))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "shg_intra2w"), c2r(intra2w), start=start4, count=count4))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "shg_intra1w"), c2r(intra1w), start=start4, count=count4))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "shg_intra1wS"), c2r(intra1wS), start=start4, count=count4))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "shg_chi2tot"), c2r(chi2tot), start=start4, count=count4))
-#endif
      ABI_FREE(chi2tot)
    end if
 
@@ -1676,12 +1667,10 @@ subroutine linelop(icomp, itemp, nband_sum, cryst, ks_ebands, &
      count4 = [2, nmesh, 1, 1]
      ABI_MALLOC(chi2tot, (nmesh))
      chi2tot = chi + eta + sigma
-#ifdef HAVE_NETCDF
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "leo_chi"), c2r(chi), start=start4, count=count4))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "leo_eta"), c2r(eta), start=start4, count=count4))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "leo_sigma"), c2r(sigma), start=start4, count=count4))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "leo_chi2tot"), c2r(chi2tot), start=start4, count=count4))
-#endif
      ABI_FREE(chi2tot)
    end if
 
@@ -2238,14 +2227,12 @@ character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
      count4 = [2, nmesh, 1, 1]
      ABI_MALLOC(chi2tot, (nmesh))
      chi2tot = chiw + chi2w + etaw + eta2w + sigmaw
-#ifdef HAVE_NETCDF
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "leo2_chi2tot"), c2r(chi2tot), start=start4, count=count4))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "leo2_chiw"), c2r(chiw), start=start4, count=count4))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "leo2_etaw"), c2r(etaw), start=start4, count=count4))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "leo2_chi2w"), c2r(chi2w), start=start4, count=count4))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "leo2_eta2w"), c2r(eta2w), start=start4, count=count4))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "leo2_sigmaw"), c2r(sigmaw), start=start4, count=count4))
-#endif
      ABI_FREE(chi2tot)
    end if
 
