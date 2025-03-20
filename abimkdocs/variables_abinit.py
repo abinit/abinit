@@ -5083,10 +5083,9 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 [[freqspmax]] sets the maximum real frequency used to calculate the spectral
-function from the GW Green's function. [[freqspmin]], [[freqspmax]] and
-[[nfreqsp]] define the spacing of an equidistant frequency mesh along the real
-axis. Alternatively, the variables [[gw_customnfreqsp]] and [[gw_freqsp]] can
-be used to make a user-defined grid.
+function $A_\nk(\ww)$ from the GW Green's function.
+[[freqspmin]], [[freqspmax]] and [[nfreqsp]] define the spacing of an equidistant frequency mesh along the real axis.
+Alternatively, the variables [[gw_customnfreqsp]] and [[gw_freqsp]] can be used to make a user-defined grid.
 """,
 ),
 
@@ -5103,8 +5102,8 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 [[freqspmin]] sets the minimum real frequency used to calculate the spectral
-function from the GW Green's function. [[freqspmin]] is set to -[[freqspmax]]
-if left undefined. [[freqspmin]], [[freqspmax]], and [[nfreqsp]] define the
+function from the GW Green's function.
+[[freqspmin]] is set to -[[freqspmax]] if left undefined. [[freqspmin]], [[freqspmax]], and [[nfreqsp]] define the
 spacing of an equidistant frequency mesh along the real axis. Alternatively,
 the variables [[gw_customnfreqsp]] and [[gw_freqsp]] can be used to make a user-defined grid.
 """,
@@ -6714,6 +6713,8 @@ Variable(
     text=r"""
 A non-zero value activates the fit of the polarizabily and of the inverse dielectric matrix
 in order to accelerate the convergence of the GWR results wrt the number of points in the minimax mesh.
+
+NOTE: This feature is still under development
 """,
 ),
 
@@ -6748,28 +6749,30 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 [[gw_qprange]] is active only when [[nkptgw]] is equal to zero (default value).
-This variable simplifies the specification of the list of kpoints and
-of the bands to be used for the computation of the quasi-particle corrections.
+This variable simplifies the specification of the list of $\kk$-points and
+of the band range to be used for the computation of the QP corrections.
 The possible values are:
 
-  * 0 --> Compute the QP corrections only for the fundamental and the direct gap
-  * +num --> Compute the QP corrections for all the k-points in the irreducible zone,
-     and include `num` bands above and below the Fermi level.
-  * -num --> Compute the QP corrections for all the k-points in the irreducible zone.
-     Include all occupied states and `num` empty states.
+  * 0 --> Compute QP corrections only for the fundamental and the direct gap
+  * +NUM --> Compute the QP corrections for all the $\kk$-points in the IBZ,
+     and include `NUM` bands above and below the Fermi level.
+  * -NUM --> Compute QP corrections for all the $\kk$-points in the IBZ.
+     Include all occupied states and `NUM` empty states.
 
-The default value is 0 and is very handy for one-shot calculations. It is
-important to stress, however, that the position of the direct/fundamental
-gaps is deduced from the energies computed on the k-mesh used for the WFK
-file. Therefore the computed gaps might differ from the correct ones that can
-only be obtained with an appropriate sampling of the irreducible zone.
+The default value is 0 and is very handy for one-shot calculations.
+It is important to stress, however, that the position of the direct/fundamental
+gaps is deduced from the energies computed on the $\kk$-mesh associated to the WFK file.
+Therefore the computed gaps might differ from the **True** ones that can
+only be obtained with an appropriate sampling of the IBZ.
+
 Positive values are useful if we do not know the position of the GW HOMO, LOMO
 and we want to investigate the effect of the GW corrections on the states
-close to the gap Negative values are usually used for self-consistent
-calculations Note that, in the case of self-consistency or [[symsigma]] == 1, the
-code might change the bands range so that all the degenerate states are
-included. Note also that [[kptgw]], and [[bdgw]] are ignored when this options
-is used. If you want to select manually the list of k-points and bands, you
+close to the gap.
+Negative values are usually used for self-consistent calculations Note that,
+in the case of self-consistency or [[symsigma]] == 1, the code might change the bands range
+so that all the degenerate states are included.
+Note also that [[kptgw]], and [[bdgw]] are ignored when this options is used.
+If you want to select manually the list of $\kk$-points and bands, you
 have to provide the three variables [[nkptgw]], [[kptgw]], and [[bdgw]].
 """,
 ),
@@ -11865,7 +11868,7 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 [[nfreqsp]] defines the number of real frequencies used to calculate the
-spectral function of the GW Green's function.
+spectral function $A_nk(\ww)$ of the GW Green's function.
 """,
 ),
 
@@ -14065,9 +14068,9 @@ The choice is among:
   * 3 --> susceptibility and dielectric matrix calculation (SCR), routine *screening*
   * 4 --> self-energy calculation (SIG), routine *sigma*.
   * 5 --> non-linear response functions (NONLINEAR), using the 2n+1 theorem, routine *nonlinear*.
-  * 6 --> GW real space imaginary time driver (GWR), using the [[cite:Liu2016]] algorithm, routine *gwr_driver*, see [[gwr_task]].
-  * 7 --> electron-phonon coupling (EPH), see also [[eph_task]] input variable.
-  * 8 --> Post-processing of WFK file, routine *wfk_analyze*. See also [[wfk_task]] input variable.
+  * 6 --> GW real space imaginary time driver (GWR), using the [[cite:Liu2016]] algorithm, routine *gwr_driver*, see also [[gwr_task]].
+  * 7 --> electron-phonon coupling (EPH), see also [[eph_task]].
+  * 8 --> post-processing of WFK file, routine *wfk_analyze*. See also [[wfk_task]] input variable.
   * 10 --> longwave response functions (LONGWAVE), routine *longwave*. See also [[lw_flexo]],  [[lw_qdrpl]] or [[lw_natopt]] input variables.
   * 66 --> GW using Lanczos-Sternheimer, see input variables whose name start with `gwls_*`.
   * 99 --> Bethe-Salpeter calculation (BSE), routine *bethe_salpeter*
@@ -24395,9 +24398,9 @@ Variable(
     requires="[[optdriver]] == 6",
     added_in_version="9.6.2",
     text=r"""
-This variable defines the Cartesian grid of MPI processors used for GWR calculations.
-If not specified in the input, the code will generate this grid automatically using the total number of processors
-and the basic dimensions of the job computed at runtime.
+This variable defines the 4D Cartesian grid of MPI processors used for GWR calculations.
+If not specified in the input, the code will generate this grid automatically using
+the total number of MPI processors and the basic dimensions of the job computed at runtime.
 
 !!! important
 
@@ -24541,6 +24544,7 @@ Possible values are
 [[gwr_sigma_algo]] 1 is the most efficient approach when one needs to compute QP corrections for all the $\kk$-points, e.g.
 when performing self-consistent calculations or if one needs to interpolate the QP corrections to obtain QP band structure
 along an arbitrary $\kk$-path.
+
 [[gwr_sigma_algo]] 2 is faster than 1 if we only need to compute QP corrections at the band edges that are ideally located
 at high-symmetry $\kk$-points as the code can exploit symmetries.
 In the best case scenario, both the CBM and the VBM are located at the $\Gamma$ point; hence the BZ summation
@@ -24560,15 +24564,13 @@ Variable(
     added_in_version="9.6.2",
     text=r"""
 This variable defines the FFT mesh used to represent the polarizability, the screened interaction $W$
-and the self-energy $\Sigma$.
-The role is very similar to that of [[boxcutmin]], which is used in the case of GS calculations.
+and the self-energy $\Sigma$ in the GWR code.
+The role is very similar to that of [[boxcutmin]], which is has a meaning only in the case of GS/DFPT calculations.
 
-In principle, setting [[gwr_boxcutmin]] = 2 ensures an exact treatment of the product of two many-body functions
-such as $G G$ or $G W$.
+In principle, setting [[gwr_boxcutmin]] = 2 ensures an exact treatment of products such as $G G$ or $G W$.
 However, this choice significantly increase computational cost and memory requirements.
-
-In practice, it is recommended to start with a smaller value, such as 1.1, and then gradually increase it
-to monitor the stability of the results.
+In practice, it is recommended to start with a smaller value, such as 1.1, and then gradually
+increase it (1.2, 1.3, etc.) in order to monitor the stability of the results.
 """,
 ),
 
@@ -24584,6 +24586,7 @@ Variable(
     added_in_version="9.8.0",
     text=r"""
 Energy window in Hartree for the empty states used in the computation of the head/wings of the polarizability.
+The default value (-1.0) instructs the code to use all [nband]] states.
 """,
 ),
 
@@ -24844,8 +24847,7 @@ Possible values:
 !!! note
 
     If the "hole" option is chosen, valence states are flipped, so one always
-    deals with the minimization problem, regardless of the polaron kind.
-
+    deals with a minimization problem, regardless of the polaron kind.
 """,
 ),
 
@@ -24868,7 +24870,7 @@ elements at $\mathbf{q} = \Gamma$:
 
 $$ g^\mathrm{corr}_{nn\nu}(\mathbf{k}, 0) = g_{nn\nu}(\mathbf{k}, 0) + g^\mathrm{avg}_\nu(0). $$
 
-These correction terms are computed from spherical integration of the long-range
+These correction terms are computed from a pherical integration of the long-range
 electron-phonon contribution to the polaron energy around the $\Gamma$-point.
 The spherical mesh for the integration is controlled by the [[eph_frohl_ntheta]] variable.
 
@@ -25004,13 +25006,13 @@ Variable(
     text=r"""
 This variable can used to reduce the density of the real-space mesh used to represent the
 polaron wavefunction and generate the XSF file when [[eph_task]] == -13.
-This is especially useful when computing the variational polaron equations on extra-dense k-meshes in conjunction with the
+This is especially useful when computing the variational polaron equations on extra-dense $\kk$-meshes in conjunction with the
 the KERANGE trick.
 The size of the array with polaron wavefunction is indeed proportional to nkbz * nfft where
-nkbz is the number of points in the full BZ and nfft is the number of FFT points in the unit.
+nkbz is the number of points in the full BZ and nfft is the number of FFT points in the unit cell.
 This is the default behaviour when [[vpq_mesh_fact]] is 1.
-If [[vpq_mesh_fact]] is greater the one, the mesh in real space will be downsampled by this value along the three reduced
-direction with a significant decrease in the memory requirements.
+If [[vpq_mesh_fact]] is greater than one, the mesh in real space will be downsampled by this value along the three reduced
+direction with a significant decrease in memory requirements.
 """,
 ),
 
@@ -25120,7 +25122,7 @@ This variable defines the number of optimization steps up to which the orthogona
 to previous polaronic solutions is enforced.
 After [[vpq_nstep_ort]], the orthogonalization constraint is lifted, allowing the
 polaron to fully relax while maintaining a distance from the previously obtained states.
-See also [[vpq_nstates]]
+See also [[vpq_nstates]].
 """,
 ),
 
@@ -25141,7 +25143,6 @@ $B_{\mathbf{q}\nu}$ during the optimization process, i.e., for the $n$-th step:
 $$ B^{(n)}_{\mathbf{q}\nu} \leftarrow (1 - \alpha) B^{(n)}_{\mathbf{q}\nu} + \alpha B^{(n-1)}_{\mathbf{q}\nu}. $$
 
 In certain cases, mixing may be useful to facilitate the convergence of optimization.
-
 """,
 ),
 
@@ -25156,8 +25157,8 @@ Variable(
     requires="[[eph_task]] == 18",
     added_in_version="10.1.4",
     text=r"""
-This variable defines whether one should fix the k-point or the q-point when computing the e-ph matrix elements
-g(k,q) along either a q-path or k-path ([[eph_task]] == 18].
+This variable defines whether one should fix the $\kk$-point or the $\qq$-point when computing the e-ph matrix elements
+g(k,q) along either a $\qq$-path or a $\kk$-path ([[eph_task]] == 18].
 Use "k" to fix the k-point or "q" to fix the q-point.
 
 The other piece of information is given by [[eph_fix_wavevec]] that specifies the reduced coordinates of the wavevector.
@@ -25176,10 +25177,10 @@ Variable(
     added_in_version="10.1.4",
     text=r"""
 This variable defines the wavevector in reduced coordinates of the reciprocal lattice
-that should be fixed when computing the e-ph matrix elements g(k,q) along either a q-path or k-path ([[eph_task]] == 18].
-The other piece of information is given by [[eph_fix_korq]] that specifies whether one should fix the k-point or the q-point.
+that should be fixed when computing the e-ph matrix elements g(k,q) along either a $\qq$-path or $\kk$-path ([[eph_task]] == 18].
+The other piece of information is given by [[eph_fix_korq]] that specifies whether one should fix the $\kk$-point or the $\qq$-point.
 
-To compute e-ph matrix as a function of the q-point:
+To compute e-ph matrix as a function of the $\qq$-point, start from this template:
 
 ```
    optdriver 7
@@ -25207,7 +25208,7 @@ To compute e-ph matrix as a function of the q-point:
       0.5    0.25   0.75
 ```
 
-To compute e-ph matrix as a function of the k-point:
+To compute e-ph matrix as a function of the $\kk$-point, start from this template:
 
 ```
    optdriver 7
@@ -25240,11 +25241,10 @@ Variable(
     requires="[[eph_task]] == 18",
     added_in_version="10.1.4",
     text=r"""
-
 This variable defines the first and the last band that should be included when computing the e-ph matrix elements
-g(k,q) along either a q-path or k-path ([[eph_task]] == 18].
+g(k,q) along either a $\qq$-path or $\kk$-path when [[eph_task]] == 18.
 One can use these two variables to select the band range of interest and skip, for instance, low-energy states.
-If not specied all bands from 1 up to [[nband]] are included,
+If not specified, all bands from 1 up to [[nband]] are included.
 If specified in input, eph_path_brange(2) must be <= [[nband]].
 """,
 ),
