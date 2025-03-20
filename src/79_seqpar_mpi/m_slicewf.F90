@@ -4,13 +4,13 @@
 !!
 !! FUNCTION
 !! This module contains a routine updating the whole wave functions at a given k-point,
-!! using the Chebyshev filtering method (2021 implementation using xG abstraction layer)
-!! for a given spin-polarization, from a fixed hamiltonian
-!! but might also simply compute eigenvectors and eigenvalues at this k point.
-!! it will also update the matrix elements of the hamiltonian.
+!! using the Spectrum Slicing method (2021 implementation using xG abstraction layer)
+!! for a given spin-polarization, from a fixed Hamiltonian but might also simply compute 
+!! eigenvectors and eigenvalues at this k point. it will also update the matrix elements 
+!! of the Hamiltonian.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2025 ABINIT group (BS, I. Lygatsika)
+!! Copyright (C) 2018-2025 ABINIT group (BS, IML)
 !! This file is distributed under the terms of the
 !! gnu general public license, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -269,14 +269,7 @@ subroutine slicewf(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
 
  !ierr = slice_unitTest(xgx0)
 
-!################### ASYNCHRONOUS MEMORY BUFFER #######################
-! cg cannot be modified (read/write) in parallel by multiple MPI
-! processes due to converged vectors overlapping between neighbor slices.
-! The purpose of the buffer is to safely read/write overlap data without 
-! blocking communications.
-!######################################################################
-
- npband = l_mpi_enreg%nproc_band
+ npband = l_mpi_enreg%nproc_band ! number of all MPI processes used for bands
  nslice = dtset%nslice
 
  ! Memory allocations of size depending on fixed nslice
@@ -294,16 +287,17 @@ subroutine slicewf(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
     npbandSlice(:) = (/(npband, islice=1,nslice)/)                 
  end if
 
- ! ************ Initialize spectrum slicing workspace: Rayleigh values and residuals
+ ! *********** Initialize spectrum slicing datatype
  write(std_out,'(a)') '1) Init sliceAll'
  ABI_NVTX_START_RANGE(NVTX_SLICEALL_INIT)
  call sliceAll_init(sliceAll,nband,spacedim,dtset%tolwfr_diago,dtset%ecut,&
-&                   dtset%paral_kgb,l_mpi_enreg%bandpp,dtset%mdeg_filter,space,1,&
-&                   l_mpi_enreg%comm_bandspinorfft,me_g0,me_g0_fft,l_paw,&
+&                   dtset%paral_kgb,dtset%paral_slice,l_mpi_enreg%bandpp,dtset%mdeg_filter,&
+&                   space,1,l_mpi_enreg%comm_bandspinorfft,me_g0,me_g0_fft,l_paw,&
 &                   l_mpi_enreg%comm_spinorfft,l_mpi_enreg%comm_band,&
 &                   nslice,npband,dtset%tolfilter,dtset%balfilter,&
 &                   dtset%nbdbuf,0,dtset%oracle_factor,dtset%oracle_min_occ,& ! oracle=0
-&                   l_gs_hamk%gpu_option,gpu_kokkos_nthrd=dtset%gpu_kokkos_nthrd)
+&                   l_gs_hamk%gpu_option,gpu_kokkos_nthrd=dtset%gpu_kokkos_nthrd,&
+&                   gpu_thread_limit=dtset%gpu_thread_limit)
  ABI_NVTX_END_RANGE()
 
  ! ************ Compute Density Of States (DOS)
@@ -318,27 +312,30 @@ subroutine slicewf(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
  call sliceAll_split(sliceAll,idx_ptr,ndeg_ptr,sbound_ptr,pband_ptr,npbandSlice_ptr)
  ABI_NVTX_END_RANGE()
 
- ! ************ Distribute MPI procs across slices
- if (dtset%paral_slice == 1) then
-    call slice_findOptimalNumMpiProcs(npband,nslice,idx_ptr,ndeg_ptr,npbandSlice_ptr)
+ ! ************ Associate MPI processes to slices
+ if (dtset%paral_slice==0) then
+
+     npbandSlice(:) = (/(npband, islice=1,nslice)/) ! each slice uses all MPI processes
+     bandpp = nband_ovlp/npband                     ! each MPI process has equal 'bandpp' bands
+
+ else if (dtset%paral_slice==1) then
+
+     npbandSlice(:) = nband_slice(1:nslice)/bandpp  ! each slice uses some MPI processes
+     bandpp = nband_ovlp/npband                     ! each MPI process has equal 'bandpp' bands
+
+     call sliceAll_default_paral(sliceAll)
+
+ else if (dtset%paral_slice==2) then ! each slice uses some MPI processes of optimal block
+    call sliceAll_balanced_paral(npband,nslice,idx_ptr,ndeg_ptr,npbandSlice_ptr) ! fixme return bandpp
     write(std_out,*) ' ==== paral_slice option detected'
     write(std_out,*) 'optimal num mpi procs:'
     write(std_out,*) npbandSlice(:)
     write(std_out,*) ' '
-    
-    ! reset for the moment because not implemented
-    npbandSlice(:) = (/(npband, islice=1,nslice)/)
- else if (dtset%paral_slice == 2) then
-    
-    ! Equal distribution
-    npbandSlice(:) = (/(npband/nslice, islice=1,nslice)/)
-    
-    ! TODO color mpi rank
-    if (xmpi_comm_size(comm_cols)>1) then
-        my_rank = xmpi_comm_rank(comm_cols)
-        my_color = my_rank / npband_slice
-   end if
-                   
+    bandpp =
+    ABI_BUG('different bandpp per slice not implemented')
+    ! TODO Requires redistribution of bands across MPI processes
+    ! define non-uniform subcommunicators..
+    ! comm_rows and comm_cols do not have the same size
  end if
 
  ! data transfer? H2D D2H just to accelerate one AX
@@ -350,16 +347,24 @@ subroutine slicewf(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
 ! !$OMP TARGET EXIT DATA MAP(delete:cg) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
 !#endif
 
- ! Permute eigenvectors in RR quotient-increasing order (implemented on CPU only)
+ ! Permute eigenvectors (=xgx0 columns) in Rayleigh quotient-increasing order.
+ ! Features: * implemented on CPU only
+ !           * assumes that each MPI process has all xgx0 columns 
  ABI_NVTX_START_RANGE(NVTX_SLICEALL_PERMUTE_COLS)
  call xgBlock_permuteCols(xgx0,spacedim,nband,pband_ptr)
  ABI_NVTX_END_RANGE()
 
  !ierr = slice_unitTest(xgx0)
 
+ ! should implement a transposition for xgx0
+ ! actually xgx0 has been transposed in DOS previously
+ if (dtset%paral_slice) then
+     call transpose(xgx0)
+ end if
+
  ! ************ Allocate parallel-safe memory buffer on CPU.
  ABI_NVTX_START_RANGE(NVTX_SLICEALL_INIT_ASYNC_BUFFER)
- call sliceAll_initOverlapFree(sliceAll)
+ call sliceAll_allocBuffer(sliceAll)
  ABI_NVTX_END_RANGE()
 
  !ierr = slice_unitTest(sliceALl%xgx0_ovlp)
@@ -385,21 +390,7 @@ subroutine slicewf(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
     ! all mpis have all bands
  end if
 
- j1 = 1
- ! TODO: MPI distribute over columns
- do islice=1,nslice
-    ABI_NVTX_START_RANGE(NVTX_SLICE_COPY)
-    i1 = idx(islice,1)        ! start read range from cg
-    i2 = idx(islice,2)        ! end
-    nband_slice = i2 - i1 + 1
-    j2 = j1 + nband_slice - 1
-    idx_ovlp(islice,1) = j1   ! start write range to buffer
-    idx_ovlp(islice,2) = j2   ! end
-    call slice_blockCopy(xgx0,sliceAll%xgx0_ovlp,i1,j1,i2,j2)
-    j1 = j2 + 1
-    ABI_NVTX_END_RANGE()
- end do
- write(std_out,*) 'end 4)'
+ call sliceAll_copyToBuffer(xgx0,sliceAll)
  
 !################    RUUUUUUUN    #####################################
 !######################################################################
@@ -630,6 +621,7 @@ subroutine getBm1X(X,Bm1X)
 
 ! *********************************************************************
 
+ ! working bandpp will be equal to blockdim
  call xgBlock_getSize(X,spacedim,blockdim)
 
  if(l_paw) then
@@ -644,11 +636,6 @@ subroutine getBm1X(X,Bm1X)
      ABI_MALLOC(cwaveprj_next, (l_gs_hamk%natom,l_nspinor*blockdim))
      call pawcprj_alloc(cwaveprj_next,0,l_gs_hamk%dimcprj)
    end if
-
-   ! IML 17/10 workaround for spectrum slicing when bandpp (abinit) =/= bandpp_slice
-   ! 18/10 delete this if the modifs in 66_wfs/m_prep_kgb works in lines
-   ! 703, 707, 741 for bandpp = blocksize, by default =/= mpi_enreg%bandpp
-   !l_mpi_enreg%bandpp = blockdim
 
    ABI_NVTX_START_RANGE(NVTX_INVOVL)
    call apply_invovl(l_gs_hamk, ghc_filter(:,:), gsm1hc_filter(:,:), cwaveprj_next(:,:), &
