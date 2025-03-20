@@ -524,7 +524,7 @@ subroutine sliceAll_copyToBuffer(xgx0,sliceAll)
     case(1)
         ! Every MPI has bandpp bands. In that case simply copy
         ! all bands in process to the buffer. Parallel copy.
-        call xgBlock_copy(xgx0,sliceAll%xgx0_ovlp)
+        call xgBlock_copy(xgx0,sliceAll%X_buffer)
         ! FIXME will not work because xgx0 has size m and
         !! buffer has size m+extra?
     end select
@@ -1081,6 +1081,9 @@ subroutine sliceAll_run(sliceAll)
     select case(sliceAll%paral_slice)
     case(0) ! 'npband' MPIs call slice_run() sequentially 
 
+        ! We have to copy to buffer sequentially in all-col MPI distr
+        call sliceAll_copyToBuffer(xgx0,sliceAll)
+        
         do islice=1,nslice
     
             write(std_out,'(a,i0)') '5) Diago slice ',islice
