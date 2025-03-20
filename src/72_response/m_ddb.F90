@@ -2423,14 +2423,18 @@ subroutine ddb_from_file(ddb, filename, ddb_hdr, crystal, comm, prtvol, raw)
  end if
 
  ! Print out info on the crystal
- if (prtvol_ >= 0) then
+ if (prtvol_ >= -1) then
 
-   call ddb_hdr%crystal%print(unit=ab_out)
    call ddb_hdr%crystal%print(unit=std_out)
+   if (prtvol_ >= 0) then
+     call ddb_hdr%crystal%print(unit=ab_out)
+   end if
 
    write(msg, '(2a,i0,a)' )ch10,' DDB file with ',ddb%nblok,' blocks has been read.'
    call wrtout(std_out,msg)
-   call wrtout(ab_out,msg)
+   if (prtvol_ >= 0) then
+     call wrtout(ab_out,msg)
+   end if
 
  end if
 
@@ -6164,7 +6168,7 @@ subroutine merge_ddb(nddb, filenames, outfile, dscrpt, chkopt)
  integer :: nblok, iblok, iblok1, iblok2
  integer :: comm
  logical :: eig2d, can_merge
- integer,parameter :: prtvol=0
+ integer,parameter :: prtvol=-1
  character(len=500) :: msg
  type(ddb_type) :: ddb, ddb2
  type(ddb_hdr_type) :: ddb_hdr, ddb_hdr2
@@ -6285,9 +6289,6 @@ subroutine merge_ddb(nddb, filenames, outfile, dscrpt, chkopt)
      ! Compare the current DDB and input DDB information.
      ! In case of an inconsistency, halt the execution.
      call wrtout(std_out, ' compare the current and input DDB information')
-
-
-     ! GA: Maybe the problem is that we are comparing uninitialized pawtab
      call ddb_hdr%compare(ddb_hdr2)
 
    else
