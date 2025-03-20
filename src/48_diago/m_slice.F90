@@ -65,7 +65,7 @@ module m_slice
 
     private
 
-    ! Several (private) parameter:s
+    ! Several (private) parameters
     !-------------------------------------------------
     integer, parameter :: tim_sliceAll_dos          = 2161
     integer, parameter :: tim_sliceAll_init         = 2162
@@ -87,6 +87,12 @@ module m_slice
     integer, parameter :: tim_slice2_expansion      = 2181
     integer, parameter :: tim_slice_blockCopy       = 2182
     integer, parameter :: tim_slice_Acopy           = 2185
+
+    ! Options for parallelism level on slices
+    !-------------------------------------------------
+    integer, parameter :: SLICE_SEQ           = 0 ! diago on npband     MPI block bandpp
+    integer, parameter :: SLICE_PARAL_STATIC  = 1 ! diago on npband_sub MPI block bandpp
+    integer, parameter :: SLICE_PARAL_DYNAMIC = 2 ! diago on npband_sub MPI block bandpp_sub
 
     ! Public 'slice' datatype
     ! Parameters specific to current slice, manages isolated slice memory
@@ -2078,6 +2084,7 @@ subroutine slice_allocateAll(sliceAll,slice)
     if (paral_kgb == 1) then
         call xmpi_sum(total_spacedim,spacecom,ierr)
     end if
+    ! TODO paral_slice values should be encoded
     if (paral_slice == 0) then
         ! the communicator of chebfi is the large one
     else if (paral_slice == 1) then
