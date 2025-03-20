@@ -76,7 +76,7 @@ Also, the density is computed with a 2x2x2 $\Gamma$-centered $\kk$-mesh.
 In real life, one should compute the KS density with a much denser $\kk$-mesh so that we have an accurate $n(\rr)$
 to compute KS states and eigenvalues for the GWR part.
 
-At this point, the calculation should have completed and we can have a look
+At this point, the calculation should have completed, and we can have a look
 at the electronic band structure to understand the position of the band edges.
 
 !!! tip
@@ -194,7 +194,8 @@ The $\kk$-points and the band range for the QP corrections are set expliclty [[n
 Alternatively, one can use [[gw_qprange]]
 
 For the spectral function, we have the following variables [[nfreqsp]], [[freqspmax]]
-[[inclvkb]] == 2, [[symsigma]]
+
+TODO: Mention [[inclvkb]] == 2, [[symsigma]]
 
 We can now have a look at the main output file:
 
@@ -286,14 +287,14 @@ The meaning of the different columns should be self-explanatory.
 
 The run has produced several text files:
 
-tgwr\_3o\_SIGC\_IT
-Diagonal elements of Sigma_c(i tau, +/-) in atomic units
+tgwr\_3o\_SIGC\_IT:
+Diagonal elements of $\Sigma_c(i tau)$ in atomic units
 
 tgwr\_3o\_SIGXC\_IW
-Diagonal elements of Sigma_xc(i omega) in eV units
+Diagonal elements of $Sigma_\xc(i \omega)$ in eV units
 
 tgwr\_3o\_SIGXC\_RW
-Diagonal elements of Sigma_xc(omega) in eV units and spectral function A(omega)
+Diagonal elements of $\Sigma_\xc(\omega)$ in eV units and spectral function $A(\omega)$
 
 Finally, we have a netcdf file named tgwr\_3o\_GWR.nc that stores the same data
 in binary format and that be easily post-processed with AbiPy as discussed in the next section.
@@ -317,8 +318,11 @@ df = gwr.get_dataframe_sk(spin=spin, kpoint=kpoint)
 print(df)
 
 gwr.plot_sigma_imag_axis(kpoint=kpoint)
+
 gwr.plot_sigma_real_axis(kpoint=kpoint)
+
 gwr.plot_spectral_functions()
+
 gwr.plot_qps_vs_e0(with_fields="all")
 ```
 
@@ -374,7 +378,8 @@ The output file is reported here for your convenience:
 
 {% dialog tests/tutorial/Refs/tgwr_4.abo %}
 
-To analyze multiple GWR.nc files we can use the GwrRobot and the following python script
+To analyze multiple GWR.nc files we can use the `GwrRobot`
+and the following python script
 
 ```python
 #!/usr/bin/env python
@@ -387,6 +392,7 @@ filepaths = [
 
 robot = GwrRobot.from_files(filepaths)
 print(robot)
+
 df_gaps = robot.get_dirgaps_dataframe()
 print(df_gaps)
 
@@ -398,22 +404,43 @@ spin = 0
 
 In the last part of the tutorial, we explain how to interpolate the QP corrections
 along an arbitrary $\kk$-path using the star-function method discussed in
-[this section](eph_intro#) of the EPH intro.
+[this section](tutorial/eph_intro/#star-function-interpolation-of-the-ks-eigenvalues) of the EPH intro.
 
-<!--
-{% dialog tests/tutorial/Input/tgwr_4.abi %}
-{% dialog tests/tutorial/Refs/tgwr_4.abo %}
--->
+First of all, we need to compute QP corrections for all the $\kk$-points in the IBZ.
+This is what is done in the following input:
 
-Note the use [[gwr_qprange]] = -NUM to compute QP corrections for all the $\kk$-points in the IBZ.
+{% dialog tests/tutorial/Input/tgwr_5.abi %}
+
+Note the use [[gw_qprange]] = -NUM to compute QP corrections for all the $\kk$-points in the IBZ.
 and [[gwr_sigma_algo]] 1 to use the supercell algorithm for $\Sigma_\nk$
+
+Run the calculation with:
+
+```sh
+abinit tgwr_5.abi > tgwr_5.log 2> err &
+```
+
+The output file is reported here for your convenience:
+
+{% dialog tests/tutorial/Refs/tgwr_5.abo %}
+
+Now use the following AbiPy script to read the GWR results and interpolate the QP corrections
 
 ```python
 #!/usr/bin/env python
 from abipy.electrons.gwr import GwrFile
 
 gwr = GwrFile("tgwr_5o_GWR.nc")
-ebands_kpath = "tgwr_1o_DS2_GSR.nc"
-r = gwr.intepolate(ebands_kpath)
+r = gwr.intepolate(ebands_kpath="tgwr_1o_DS2_GSR.nc")
+
 r.ebands_kpath.plot()
+
+from abipy.electrons.ebands import ElectronBandsPlotter
+plotter = ElectronBandsPlotter()
+#plotter.add_ebands("KS bands", "tgwr_1o_DS2_GSR.nc")
+plotter.add_ebands("KS bands", r.ks_ebands_kpath)
+plotter.add_ebands("GW bands", r.qp_ebands_kpath)
+
+plotter.gridplot()
+plotter.combiplot()
 ```
