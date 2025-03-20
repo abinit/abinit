@@ -212,6 +212,8 @@ subroutine slicewf(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
  spacecom = l_mpi_enreg%comm_bandspinorfft
  gpu_option = dtset%gpu_option
  blockdim=l_mpi_enreg%nproc_band*l_mpi_enreg%bandpp
+ npband = l_mpi_enreg%nproc_band
+ nslice = dtset%nslice
  !for debug
  l_useria=dtset%useria
 
@@ -258,19 +260,66 @@ subroutine slicewf(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
 !   write(std_out,'(4x,A,F10.6,1x,A)') "Temporary memory in m_slice : ",real(sliceMem(2))/1e9,"GB"
 ! end if
 
- ! Two senarios: (choose one of the two)
- ! 1)Send cg (synchronous mem) to GPU and point xgBlock to cg 
-!#ifdef HAVE_OPENMP_OFFLOAD
-! !$OMP TARGET ENTER DATA MAP(to:cg) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
-!#endif
- !call xgBlock_map(xgx0,cg,space,spacedim,nband,comm=spacecom,me_g0=me_g0,gpu_option=gpu_option)
- ! 2) Point xgBlock to cg, on CPU always
- call xgBlock_map(xgx0,cg,space,spacedim,nband,comm=spacecom,me_g0=me_g0,gpu_option=ABI_GPU_DISABLED)
+ ! Prepare vectors for DOS calculation on CPU or GPU
+ option_dos = USE_CPU ! hardcoded for the moment
+ ! todo define this private variable 
+ select case(option_dos)
+ case(USE_CPU)
+     gpu_option_dos = ABI_GPU_DISABLED
+ case(USE_GPU)
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+    !$OMP TARGET ENTER DATA MAP(to:cg) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
+#endif
+    gpu_option_dos = dtset%gpu_option
+    ABI_ERROR("DOS on GPU not implemented")
+ case(default) 
+     ABI_ERROR("Invalid DOS option")
+ end select
 
- !ierr = slice_unitTest(xgx0)
+ ! todo add test to check that we are in target enter data map AND xgBlock has gpu_option ON
 
- npband = l_mpi_enreg%nproc_band ! number of all MPI processes used for bands
- nslice = dtset%nslice
+ ! Initialize xgBlock (xgx0) pointing to cg memory space
+ call xgBlock_map(xgx0,cg,space,spacedim,nband,comm=spacecom,me_g0=me_g0,gpu_option=gpu_option_dos)
+
+ ! TODO two choices for these variables: 
+ ! either we do these computations in all MPI or we
+
+ ! essentially, there is a structure called 'sliceFactory' that is responsible
+ ! for partitioning the spectrum, assigning vector indices to slices, 
+ ! assigning MPI processes to slices, creating the subcommunicators knowing
+ ! the vector indices of each slice. This object also creates the buffer where
+ ! all slice workers will read and write after all.
+ 
+ ! factory shares objects when possible
+ ! When the type or size of subblocks is determined at runtime.
+ ! Runtime-defined block construction
+
+ ! sliceFactory_divide()
+ 
+ ! sliceFactory_create() 
+ ! this function holds instances of sliceBlock = {}
+ ! that contain some information such as degrees and index_ranges
+ ! it also operates to holds instances of commBlock
+
+
+ ! Factory Pattern
+ ! factory handles runtime creation of blocks based on dynamic input
+ ! Runtime-defined block construction
+ ! When managing the lifecycle of child objects through the parent
+
+ ! sliceFactory_divide()
+ ! sliceFactor_conquer()
+
+
+ ! parallel_slice
+
+
+ ! factory: it is extendable but not modifiable
+ ! builder: allows step-by-step construction, allows multiple parameters 
+
+ ! that holds all objects not using the paral_slice communicators
+
+
 
  ! Memory allocations of size depending on fixed nslice
  ABI_MALLOC(pband, (nband)); pband_ptr => pband                     ! band permutation
@@ -306,11 +355,53 @@ subroutine slicewf(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
  call sliceAll_dos(sliceAll,xgx0,getghc_gsc1,nspinor)
  ABI_NVTX_END_RANGE()
 
+ ! after this run each MPI has ALL bands
+ ! print a message that says how many bands each MPI has
+
  ! ************ Partition spectrum into slices
  write(std_out,'(a,i0,a)') '3) Partition spectrum into ',nslice,' slices'
  ABI_NVTX_START_RANGE(NVTX_SLICEALL_SPLIT)
- call sliceAll_split(sliceAll,idx_ptr,ndeg_ptr,sbound_ptr,pband_ptr,npbandSlice_ptr)
+ call sliceAll_eigenvector_split(sliceAll,idx_ptr,ndeg_ptr,sbound_ptr,pband_ptr,npbandSlice_ptr)
  ABI_NVTX_END_RANGE()
+ ! this operation needs to have the distribution: each MPI has ALL bands
+ ! the output of this function should be some kind of index set, named 
+ ! !!!!!!!  block_range 
+
+ ! multiple communicators being created globally: one for each value of color
+ ! this is why we don't need separate variables comm1, comm2, .., commNslice
+ ! if for example processes numbered n1,..,n2 do not need to communicate at all
+ ! we must provide mpi_undefined to color.
+ ! color = (rank > 5) ? MPI_UNDEFINED : 0
+ ! this will make the newcomm to be mpi_comm_null. Then we can check in the code
+ ! if newcomm == mpi_comm_null, in that case we don't execute some part.
+
+ ! this can be useful to redistribute and have various bandpp per slice.
+ ! starting from all-rows distribution, we create communicator between ranks
+ ! that need to exchange information (not sure if useful).
+
+ program block_number_calculator
+  implicit none
+  integer :: block_size, index, block_number
+
+  ! Input block size and index
+  print *, 'Enter block size:'
+  read *, block_size
+
+  if (block_size <= 0) then
+     print *, 'Error: Block size must be greater than 0.'
+     stop
+  end if
+
+  print *, 'Enter index:'
+  read *, index
+
+  ! Calculate block number (1-based)
+  block_number = (index - 1) / block_size + 1
+
+  print *, 'The index', index, 'falls into block number', block_number
+
+end program block_number_calculator
+
 
  ! ************ Associate MPI processes to slices
  if (dtset%paral_slice==0) then
@@ -338,14 +429,16 @@ subroutine slicewf(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
     ! comm_rows and comm_cols do not have the same size
  end if
 
- ! data transfer? H2D D2H just to accelerate one AX
- ! TODO: deactivate all that, perform entirely on CPU
-
  ! cg not needed on GPU for slice_run, copy (update D2H) then delete from GPU to free space
-!#ifdef HAVE_OPENMP_OFFLOAD
-! !$OMP TARGET UPDATE FROM(cg) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
-! !$OMP TARGET EXIT DATA MAP(delete:cg) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
-!#endif
+ if (option_dos == RUN_ON_GPU)
+#ifdef HAVE_OPENMP_OFFLOAD
+ !$OMP TARGET UPDATE FROM(cg) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
+ !$OMP TARGET EXIT DATA MAP(delete:cg) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
+#endif
+ end if
+ ! in the future all this should be offloaded on GPU
+ ! one the computation is done, just before sliceAll_run, we delete cg from GPU
+ ! and only work with the buffer (offloaded on GPU) for sliceAll_run.
 
  ! Permute eigenvectors (=xgx0 columns) in Rayleigh quotient-increasing order.
  ! Features: * implemented on CPU only
@@ -353,22 +446,15 @@ subroutine slicewf(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
  ABI_NVTX_START_RANGE(NVTX_SLICEALL_PERMUTE_COLS)
  call xgBlock_permuteCols(xgx0,spacedim,nband,pband_ptr)
  ABI_NVTX_END_RANGE()
-
- !ierr = slice_unitTest(xgx0)
-
- ! should implement a transposition for xgx0
- ! actually xgx0 has been transposed in DOS previously
- if (dtset%paral_slice) then
-     call transpose(xgx0)
- end if
+ ! this function needs all-cols MPI distribution
+ ! actually add the MPI check somewhere in or out the call
 
  ! ************ Allocate parallel-safe memory buffer on CPU.
  ABI_NVTX_START_RANGE(NVTX_SLICEALL_INIT_ASYNC_BUFFER)
  call sliceAll_allocBuffer(sliceAll)
  ABI_NVTX_END_RANGE()
+ ! this function uses the output of sliceAll_
 
- !ierr = slice_unitTest(sliceALl%xgx0_ovlp)
- 
  ! Copy range of cg to range of memory buffer.
  ! Assumes that cg is distributed on MPI rows (so each MPI has all bands).
  ! FIXME if cg is distributed on MPI columns, the problem is that
@@ -376,6 +462,7 @@ subroutine slicewf(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
  write(std_out,'(a)') '4) Copy to buffer (parallel safe memory space)'
 
  ! Define index range in buffer
+ 
  idx_ovlp(1:nslice,1) = (/ (1 + idx(islice,2) - idx(islice,1) + 1, islice=1,nslice) /)
  idx_ovlp(1:nslice,2) = idx_ovlp(1:nslice,1) + 1
 
@@ -390,15 +477,13 @@ subroutine slicewf(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
     ! all mpis have all bands
  end if
 
+ ! treat buffer internally in sliceAll_run
  call sliceAll_copyToBuffer(xgx0,sliceAll)
  
 !################    RUUUUUUUN    #####################################
 !######################################################################
-
- ! ************** Diagonalize each slice (sequential or parallel TODO)
- ! Internally treat the case of parallel slices
- ! TODO add member variable paral_slice to sliceAll
- call sliceAll_run(sliceAll,dtset%paral_slice,use_subcomm_)
+ 
+ call sliceAll_run(sliceAll,dtset%paral_slice)
 
  ! ================
  ! TODO IL 31/01/2025
