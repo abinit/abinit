@@ -8,7 +8,7 @@
 !! It mainly defines a 'chebfi' datatypes and associated methods.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2025 ABINIT group (BS, L. Baguet, I. Lygatsika)
+!! Copyright (C) 2018-2025 ABINIT group (BS, L. Baguet, IML)
 !! This file is distributed under the terms of the
 !! gnu general public license, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -488,10 +488,13 @@ subroutine chebfi_mpiTranspose(chebfi,nspinor,target_mpi_distr)
     if (chebfi%paral_kgb == 1 .and. use_subcomm .eq. .false.) then
 
         call xgTransposer_constructor(chebfi%xgTransposerX,chebfi%X,chebfi%xXColsRows,nspinor,&
-            STATE_LINALG,TRANS_ALL2ALL,chebfi%comm_rows,chebfi%comm_cols,0,0,chebfi%me_g0_fft,gpu_option=chebfi%gpu_option)
+            STATE_LINALG,TRANS_ALL2ALL,chebfi%comm_rows,chebfi%comm_cols,0,0,chebfi%me_g0_fft,&
+            gpu_option=chebfi%gpu_option,gpu_thread_limit=chebfi%gpu_thread_limit)
 
-        call xgTransposer_copyConstructor(chebfi%xgTransposerAX,chebfi%xgTransposerX,chebfi%AX%self,chebfi%xAXColsRows,STATE_LINALG)
-        call xgTransposer_copyConstructor(chebfi%xgTransposerBX,chebfi%xgTransposerX,chebfi%BX%self,chebfi%xBXColsRows,STATE_LINALG)
+        call xgTransposer_copyConstructor(chebfi%xgTransposerAX,chebfi%xgTransposerX,chebfi%AX%self,&
+            chebfi%xAXColsRows,STATE_LINALG)
+        call xgTransposer_copyConstructor(chebfi%xgTransposerBX,chebfi%xgTransposerX,chebfi%BX%self,&
+            chebfi%xBXColsRows,STATE_LINALG)
 
         chebfi%xgTransposerX%gpu_kokkos_nthrd  = chebfi%gpu_kokkos_nthrd
         chebfi%xgTransposerAX%gpu_kokkos_nthrd = chebfi%gpu_kokkos_nthrd
