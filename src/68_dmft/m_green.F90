@@ -157,7 +157,7 @@
   ! Tr(log(G)) in KS space
 
   real(dp) :: z0
-  ! This is -log(Z0)
+  ! This is -T*log(Z0)
 
   !integer, allocatable :: procb(:,:)
 
