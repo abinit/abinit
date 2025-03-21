@@ -167,7 +167,7 @@ and other variables specific to GWR.
 
 We use [[optdriver]] 6 to enter the GWR code and [[gwr_task]] activates a one-shot GW calculation.
 We ask for a minimax mesh with [[gwr_ntau]] = 6 points, the minimum number of points one can use.
-Clearly, this parameter should be subject to carefully convergence studies.
+Clearly, this parameter should be subject to carefull convergence studies.
 [[getden_filepath]] specifies the density file used to compute $v_{xc}[n](\rr)$,
 while [[getwfk_filepath]] specifies the WFK file with empty states used to build the Green's function.
 Keep in mind that the $\kk$-mesh specified in the input via [[ngkpt]], [[nshiftk]] and [[shiftk]] must
@@ -178,7 +178,7 @@ This is another parameter that should be subject to convergence studies as syste
 such as 3d or 4f electrons may require larger values (denser FFT meshes).
 Please take some time to read the variable description of [[gwr_boxcutmin]] before proceeding.
 
-Now, let us turn our attention to the variables that are also used in the legacy GW code.
+Now, let us turn our attention to the variables that are also used in the conventional GW code.
 In the [first GW tutorial](/tutorial/gw1), we have already performed convergence studies,
 and [[nband]] = 100 was found to give results converged within 30 mev, which is fair to compare with experimental accuracy.
 Also ecuteps = 6.0 can be considered converged within 10 meV.
@@ -285,22 +285,21 @@ data: !Tabular |
 
 The meaning of the different columns should be self-explanatory.
 
-The run has produced several text files:
+The job has produced three text files:
 
 tgwr\_3o\_SIGC\_IT:
-Diagonal elements of $\Sigma_c(i tau)$ in atomic units
+Diagonal elements of $\Sigma_c(i \tau)$ in atomic units
 
-tgwr\_3o\_SIGXC\_IW
-Diagonal elements of $Sigma_\xc(i \omega)$ in eV units
+tgwr\_3o\_SIGXC\_IW:
+Diagonal elements of $\Sigma_\xc(i \omega)$ in eV units
 
-tgwr\_3o\_SIGXC\_RW
-Diagonal elements of $\Sigma_\xc(\omega)$ in eV units and spectral function $A(\omega)$
+tgwr\_3o\_SIGXC\_RW:
+Diagonal elements of $\Sigma_\xc(\omega)$ in eV units and spectral function $A_\nk(\omega)$
 
 Finally, we have a netcdf file named tgwr\_3o\_GWR.nc that stores the same data
-in binary format and that be easily post-processed with AbiPy as discussed in the next section.
+in binary format and that can be easily post-processed with AbiPy as discussed in the next section.
 
-
-### Analyzing GWR.nc results
+### Analyzing the GWR.nc file with AbiPy
 
 ```python
 !#/usr/bin/env python
@@ -309,10 +308,10 @@ from abipy.electrons.gwr import GwrFile
 gwr = GwrFile("tgwr_3o_GWR.nc")
 print(gwr)
 
-kpoint = (0, 0, 0)
 spin = 0
-df_gaps = gwr.get_dirgaps_dataframe()
-print(df_gaps)
+kpoint = (0, 0, 0)
+df_dirgaps = gwr.get_dirgaps_dataframe()
+print(df_dirgaps)
 
 df = gwr.get_dataframe_sk(spin=spin, kpoint=kpoint)
 print(df)
@@ -323,7 +322,7 @@ gwr.plot_sigma_real_axis(kpoint=kpoint)
 
 gwr.plot_spectral_functions()
 
-gwr.plot_qps_vs_e0(with_fields="all")
+#gwr.plot_qps_vs_e0(with_fields="all")
 ```
 
 ### Convergence study HOWTO
@@ -333,17 +332,17 @@ the $\kk$-mesh, [[nband], and the cutoff energies can be decoupled.
 This means that one can start with a relatively coarse $\kk$-mesh to determine
 the converged values of [[nband]], [[ecuteps]], and [[ecutsigx]],
 then fix these values, and refine the BZ sampling.
-The recommended procedure for converging GWR calculations is therefore as follows:
+The recommended procedure for converging GWR calculations is as follows:
 
 1) Initial convergence tests
 
-- Fix the [[ngkpt]] $\kk$-mesh in the WFK file to a resaonable value and produce "enough" [[nband]] states
+- Fix the [[ngkpt]] $\kk$-mesh in the WFK file to a resonable value and produce "enough" [[nband]] states
 - Set an initial value for [[gwr_ntau]] in the GWR run.
 - Perform convergence studies on [[nband]], [[ecuteps]], and [[ecutsigx]].
 
 Be aware that [[gwr_ntau]] = 6 may be too small, potentially leading to unphysical results
 such as renormalization factors $Z$ below 0.6.
-If this occurs, increase [[gwr_ntau]] to fix the problem.
+If this occurs, increase [[gwr_ntau]] in order to fix the problem.
 If the number of [[nband]] states in the WFK file is not enough,
 go back to point 1) and produce a new WFK with more bands else proceeed with the next step.
 
@@ -355,8 +354,8 @@ go back to point 1) and produce a new WFK with more bands else proceeed with the
 Once the results are converged with respect to [[gwr_boxcutmin]], you may start to increase [[gwr_ntau]]
 while adjusting the number of MPI processes accordingly (you are not using multidatasets, right?)
 Finally, refine the BZ sampling to ensure full convergence.
-Note that, due to cancellations of errors, QP gaps that are differences between QP energies
-are usually muche easier to convergence than the absolute QP values.
+Note that, due to cancellations of errors, QP gaps (differences between QP energies)
+are usually muche easier to convergence than the QP values.
 
 ### GWR calculations with two different BZ meshes.
 
@@ -378,8 +377,7 @@ The output file is reported here for your convenience:
 
 {% dialog tests/tutorial/Refs/tgwr_4.abo %}
 
-To analyze multiple GWR.nc files we can use the `GwrRobot`
-and the following python script
+To analyze multiple GWR.nc files we can use the `GwrRobot`, and the following python script
 
 ```python
 #!/usr/bin/env python
@@ -391,18 +389,18 @@ filepaths = [
 ]
 
 robot = GwrRobot.from_files(filepaths)
-print(robot)
+#print(robot)
 
-df_gaps = robot.get_dirgaps_dataframe()
-print(df_gaps)
+df_dirgaps = robot.get_dirgaps_dataframe()
+print(df_dirgaps)
 
 kpoint = (0, 0, 0)
 spin = 0
 ```
 
-### How to compute an interpolate band structure with GWR
+### How to compute an interpolated band structure with GWR
 
-In the last part of the tutorial, we explain how to interpolate the QP corrections
+In this last part of the tutorial, we discuss how to interpolate the QP corrections
 along an arbitrary $\kk$-path using the star-function method discussed in
 [this section](tutorial/eph_intro/#star-function-interpolation-of-the-ks-eigenvalues) of the EPH intro.
 
@@ -411,8 +409,8 @@ This is what is done in the following input:
 
 {% dialog tests/tutorial/Input/tgwr_5.abi %}
 
-Note the use [[gw_qprange]] = -NUM to compute QP corrections for all the $\kk$-points in the IBZ.
-and [[gwr_sigma_algo]] 1 to use the supercell algorithm for $\Sigma_\nk$
+Note the use [[gw_qprange]] = `-NUM` to compute QP corrections for all the $\kk$-points in the IBZ.
+and [[gwr_sigma_algo]] 1 to use the supercell algorithm for $\Sigma_\nk$ (the most efficient one in this particular case).
 
 Run the calculation with:
 
