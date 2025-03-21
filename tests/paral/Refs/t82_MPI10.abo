@@ -3,7 +3,7 @@
  a software platform designed for the construction and use of second-principles models
                    for lattice, spin and electron degrees of freedom.
 
-.Version 10.1.4.5 of MULTIBINIT 
+.Version 10.0.0.3 of MULTIBINIT 
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -32,8 +32,8 @@
 
 
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h36 )
+.Starting date : Fri 21 Mar 2025.
+- ( at 05h22 )
   
 - The starting date is more than 2 years after the initial release
 - of this version of ABINIT, namely Jul 2022.
@@ -45,7 +45,7 @@
 ================================================================================
 
  Read the information in the reference structure in 
--/home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/paral/Input/t82_sys.xml
+-/home/buildbot/ABINIT3/eos_gnu_13.2_mpich/xuhe_merge_newbound/tests/paral/Input/t82_sys.xml
  to initialize the multibinit input
 
 ================================================================================
@@ -61,6 +61,8 @@
  fit_generateCoeff  1
  fit_initializeDat  0
         fit_cutoff  3.80000000E+00
+       fit_droprat  0.00000000E+00
+       fit_min_bou  0.00000000E+00
         fit_option  0
          fit_iatom  -1
         fit_ncoeff  2
@@ -71,6 +73,7 @@
     fit_anhaStrain  0
     fit_SPCoupling  1
       fit_SPC_maxS  1
+     fit_max_nbody        999
      fit_nfixcoeff  2
       fit_fixcoeff          1      2
  Miscellaneous information :
@@ -96,8 +99,8 @@ dipdip_range         1         1         1
 
 ================================================================================
 
--Opening the file /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/paral/Input/t82_sys.xml
--Reading the file /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/paral/Input/t82_sys.xml with Fortran
+-Opening the file /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/xuhe_merge_newbound/tests/paral/Input/t82_sys.xml
+-Reading the file /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/xuhe_merge_newbound/tests/paral/Input/t82_sys.xml with Fortran
 
  Bound for ifc SR:
 
@@ -116,131 +119,3 @@ dipdip_range         1         1         1
 
  Impose acoustic sum rule on total ifc
 
-================================================================================
-
- This effective potential contains :
-  - Reference energy:       -173.5221724034
-  - Number of types of atoms:    3
-  - Number of atoms:     5
-  - Number of cells:    21
-  - Number of qpoints:    1
-  - Primitive vectors (unit:Bohr):
-    7.426520    0.000000    0.000000
-    0.000000    7.426520    0.000000
-    0.000000    0.000000    7.426520
-  - acell (unit:Bohr):
-    1.000000    1.000000    1.000000
-  - Dielectric tensor:
-    1.000000    0.000000    0.000000
-    0.000000    1.000000    0.000000
-    0.000000    0.000000    1.000000
-  - Elastic tensor (unit:10^2GPa):
-    3.128144    1.018257    1.018257    0.000000    0.000000    0.000000
-    1.018253    3.128149    1.018253    0.000000    0.000000   -0.000000
-    1.018255    1.018255    3.128127   -0.000000   -0.000000   -0.000000
-   -0.000000   -0.000001   -0.000001    0.654090    0.000000    0.000000
-   -0.000003   -0.000000   -0.000003    0.000000    0.654092    0.000000
-   -0.000001   -0.000001    0.000000    0.000000    0.000000    0.654094
-  - Atoms   1
-    - atomic number:   38.0000
-    - atomic mass:   87.6200
-    - cartesian position:    0.000000    0.000000    0.000000
-    - Effective charges:
-      0.000000    0.000000    0.000000
-      0.000000    0.000000    0.000000
-      0.000000    0.000000    0.000000
-  - Atoms   2
-    - atomic number:   44.0000
-    - atomic mass:  101.0700
-    - cartesian position:    3.713260    3.713260    3.713260
-    - Effective charges:
-      0.000000    0.000000    0.000000
-      0.000000    0.000000    0.000000
-      0.000000    0.000000    0.000000
-  - Atoms   3
-    - atomic number:    8.0000
-    - atomic mass:   15.9994
-    - cartesian position:    0.000000    3.713260    3.713260
-    - Effective charges:
-      0.000000    0.000000    0.000000
-      0.000000    0.000000    0.000000
-      0.000000    0.000000    0.000000
-  - Atoms   4
-    - atomic number:    8.0000
-    - atomic mass:   15.9994
-    - cartesian position:    3.713260    0.000000    3.713260
-    - Effective charges:
-      0.000000    0.000000    0.000000
-      0.000000    0.000000    0.000000
-      0.000000    0.000000    0.000000
-  - Atoms   5
-    - atomic number:    8.0000
-    - atomic mass:   15.9994
-    - cartesian position:    3.713260    3.713260    0.000000
-    - Effective charges:
-      0.000000    0.000000    0.000000
-      0.000000    0.000000    0.000000
-      0.000000    0.000000    0.000000
-
- Read the coefficients of the polynomial fit from XML and perform some checks
-
--Opening the file /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/paral/Input/t82_coeffs.xml
--Reading the file /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/paral/Input/t82_coeffs.xml with Fortran
-
-================================================================================
-
--Reading the training-set file :
--/home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/paral/Input/t81_HIST
-
-
---------------------------------------------------------------------------------
-
- Starting Fit process
-
---------------------------------------------------------------------------------
-
- The coefficients present in the effective potential will be used for the fit
-
- The coefficients for the fit will be generated with all cross terms
-
- 60 coefficients generated 
-
-
- Goal function values at the begining of the fit process (eV^2/A^2):
-   Energy          :   4.0372993354979415E-05
-   Forces+Stresses :   7.4805078532501797E-03
-   Forces          :   7.3678370383271812E-03
-   Stresses        :   1.1267081492299897E-04
-
- N   Selecting          MSDE              MSDFS              MSDF              MSDS
-    Coefficient      (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)
- 3     3           9.8269214433E-06  3.9567592281E-03  3.8455245457E-03  1.1123468238E-04
- 4     4           1.0210073957E-05  3.7452864193E-03  3.6335882956E-03  1.1169812362E-04
-
- Fitted coefficients at the end of the fit process:
- 1 =>   1.8804979988E+00 (Ru_x-O1_x)^2(Ru_y-O1_y)^2
- 2 =>   1.2571058361E-01 (Sr_x-Ru_x)^4
- 3 =>  -5.8288686787E-01 (Sr_x-O1_x)^1(Sr_y-O1_y)^1(Ru_x-O1_x)^1(Ru_y-O1_y)^1
- 4 =>   9.0098977360E-02 (Ru_x-O1_x)^1(Ru_y-O1_y)^1(O1_x-O2_x)^1
-
- Goal function values at the end of the fit process (eV^2/A^2):
-   Energy          :   1.0210073957240299E-05
-   Forces+Stresses :   3.7452864192510358E-03
-   Forces          :   3.6335882956341505E-03
-   Stresses        :   1.1169812361688500E-04
-
-
-================================================================================
-
- Generation of the xml file for the model in t82_MPI10_model.xml
-
-================================================================================
-
--
-- Proc.   0 individual time (sec): cpu=          1.4  wall=          1.4
-
-================================================================================
-
-+Total cpu time     14.071  and wall time     14.072 sec
-
- multibinit : the run completed succesfully.
