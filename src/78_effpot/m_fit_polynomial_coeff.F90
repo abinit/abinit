@@ -1430,7 +1430,6 @@ contains
 
          ! at least n_remaining terms should be kept. It reduces to a percentage everytime, but should be larger than 40*ncoeff_to_select.
          ! if ncoeff_to_select*10>ncoeff_tot, use ncoeff_tot
-         print *, "n_remaining:----------------------", n_remaining
          n_remaining = max(ceiling(n_remaining * remaining_rate), min(ncoeff_to_select*40, ncoeff_tot) )
          ! FIXME: Crashes here when fixcoeff.
          ! check size of coeff. and order are correctly set.
@@ -1451,11 +1450,6 @@ contains
          !  end if
          !end do
 
-         if(my_rank==0) then
-           do i=1, min(30,size(allorder))
-             print *, "index=", i, "icoeff=", allorder(i), "  GF=", allgf(i)
-           end do
-         end if
        end BLOCK
 
        BLOCK ! add selected terms
@@ -2642,9 +2636,9 @@ subroutine fit_polynomial_coeff_solve(coefficients,fcart_coeffs,fcart_diff,energ
      call DSGESV(N-nbound,1,A(nbound+1:, nbound+1:),LDA-nbound,IPIV,B(nbound+1:, :),LDB,coefficients(nbound+1:), &
        &     LDX-nbound,WORK,SWORK,ITER,INFO)
      coefficients(:nbound)=0.0_dp
-   else
+   !else !nbounds ==0
      !FIXME: fails on EOS
-     call DSGESV(N,NRHS,A,LDA,IPIV,B,LDB,coefficients,LDX,WORK,SWORK,ITER,INFO)
+     !call DSGESV(N,NRHS,A,LDA,IPIV,B,LDB,coefficients,LDX,WORK,SWORK,ITER,INFO)
    end if
 
    !other routine
