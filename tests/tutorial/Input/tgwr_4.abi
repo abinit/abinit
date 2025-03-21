@@ -18,7 +18,7 @@ getwfk_filepath "tgwr_2o_DS2_WFK"     # WFK file with empty states. Must be cons
 gwr_ntau   6         # Number of imaginary-time points
 gwr_boxcutmin  1.1   # This should be subject to convergence studies
 #gwr_sigma_algo 1    # Use supercell for Sigma
-gwr_sigma_algo 2    # Use convolutions in the BZ for Sigma
+gwr_sigma_algo 2     # Use convolutions in the BZ for Sigma
 #gw_icutcoul3   16   # Monte-Carlo integration in the mini-Brillouin zone for Full Coulomb interaction.
 #gw_icutcoul3   0    # Spherical cutoff
 #gwr_ucsc_batch3 3 5

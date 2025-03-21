@@ -35,12 +35,19 @@ cp ../tgwr_1.abi .
 You may want to immediately start the job in background with:
 
 ```sh
-abinit tgwr_1.abi > tgwr_1.log 2> err &
+mpirun -n 1 tgwr_1.abi > tgwr_1.log 2> err &
 ```
 
 so that we have some time to discuss the input while ABINIT is running.
 
 {% dialog tests/tutorial/Input/tgwr_1.abi %}
+
+!!! tip
+
+    All the input files of this tutorial can be executed in parallel by just
+    changing increasing the value of n in `mpirun -n`.
+    Clearly the size of the problem is very small so do not expect great performance
+    if you start to use dozens of MPI processes.
 
 The first dataset produces the KS density file that is then used to compute the band structure in the second dataset.
 Since all the input files of this tutorial use the same crystalline structure, pseudos and [[ecut]],
@@ -60,8 +67,9 @@ you will notice that we are using norm-conserving (NC) pseudos taken from
 the standard scalar-relativistic table of the [PseudoDojo](https://www.pseudo-dojo.org/).
 
 For GW calculations, we strongly recommend using NC pseudos from the **stringent table**
-as these pseudos have closed-shells treated as valence states and this is important for a correct
-description of the matrix elements of the exchange part of the self-energy [[cite:Setten2018]].
+as these pseudos have closed-shells treated as valence states.
+This is important for a correct description of the matrix elements of the exchange part of the self-energy
+that are rather sensitive to the overlap between the wavefunctions [[cite:Setten2018]].
 In the special case of silicon, there is no difference between the standard version and the stringent version of the pseudo,
 but if we consider e.g. Ga, you will notice that the stringent version includes all the 3spd states in valence
 besides the outermost 4sp electrons whereas the standard pseudo for Ga designed for GS calculations includes only the 3d states.
@@ -75,6 +83,10 @@ the cutoff energy [[ecut]] is set to XXX that is slightly smaller that the recom
 Also, the density is computed with a 2x2x2 $\Gamma$-centered $\kk$-mesh.
 In real life, one should compute the KS density with a much denser $\kk$-mesh so that we have an accurate $n(\rr)$
 to compute KS states and eigenvalues for the GWR part.
+
+One last comment related to MPI parallelism.
+In the input we use [[paral_kgb]] 1 to activate the k-point/band/FFT parallelisation
+and [[autoparal]] 1 to let ABINIT find an optimal distribution with [[npfft]] 1.
 
 At this point, the calculation should have completed, and we can have a look
 at the electronic band structure to understand the position of the band edges.
@@ -116,7 +128,7 @@ Let us recall that shifted $\kk$-meshes are not supported by GWR.
 Let's start the job in background with:
 
 ```sh
-abinit tgwr_2.abi > tgwr_2.log 2> err &
+mpirun -n 1 tgwr_2.abi > tgwr_2.log 2> err &
 ```
 
 {% dialog tests/tutorial/Input/tgwr_2.abi %}
@@ -132,6 +144,12 @@ Here we are asking for 100 states as in the previous GW tutorial as [[nband]] = 
 Cleary, when studying new systems the "converged" value of [[nband]] is not known in advance
 so one has to plan this calculation in advance and ask for a reasonably large number of states
 to avoid repeating the WFK generation several times just to increase [[nband]].
+
+Note that [[paral_kgb]] is only available in the GS part.
+The GWR code uses its own distribution that depends on the value of [[gwr_task]].
+When "HDIAGO" is used, the distribution is done automatically at runtime and the user has no controll on it.
+Please read the note below to understand how to provide a good number of MPI processes that lead to
+an efficient distribution of the workload.
 
 !!! important
 
@@ -155,19 +173,19 @@ performs a GWR calculation using the DEN and the WFK file produced previously.
 First of all, you may want to start immediately the computation by issuing:
 
 ```sh
-abinit tgwr_3.abi > tgwr_3.log 2> err &
+mpirun -n 1 tgwr_3.abi > tgwr_3.log 2> err &
 ```
 
 with the following input file:
 
 {% dialog tests/tutorial/Input/tgwr_3.abi %}
 
-The input file contains some variables whose meaning is the same as in the conventional GW code,
+This input file contains some variables whose meaning is the same as in the conventional GW code,
 and other variables specific to GWR.
 
 We use [[optdriver]] 6 to enter the GWR code and [[gwr_task]] activates a one-shot GW calculation.
 We ask for a minimax mesh with [[gwr_ntau]] = 6 points, the minimum number of points one can use.
-Clearly, this parameter should be subject to carefull convergence studies.
+Clearly, this parameter should be subject to convergence studies.
 [[getden_filepath]] specifies the density file used to compute $v_{xc}[n](\rr)$,
 while [[getwfk_filepath]] specifies the WFK file with empty states used to build the Green's function.
 Keep in mind that the $\kk$-mesh specified in the input via [[ngkpt]], [[nshiftk]] and [[shiftk]] must
@@ -320,7 +338,7 @@ gwr.plot_sigma_imag_axis(kpoint=kpoint)
 
 gwr.plot_sigma_real_axis(kpoint=kpoint)
 
-gwr.plot_spectral_functions()
+gwr.plot_spectral_function(kpoint=kpoint)
 
 #gwr.plot_qps_vs_e0(with_fields="all")
 ```
@@ -366,7 +384,7 @@ AbiPy to analyze the results.
 You may want to start immediately the computation by issuing:
 
 ```sh
-abinit tgwr_4.abi > tgwr_4.log 2> err &
+mpirun -n 1 tgwr_4.abi > tgwr_4.log 2> err &
 ```
 
 with the following input file:
@@ -402,7 +420,7 @@ spin = 0
 
 In this last part of the tutorial, we discuss how to interpolate the QP corrections
 along an arbitrary $\kk$-path using the star-function method discussed in
-[this section](tutorial/eph_intro/#star-function-interpolation-of-the-ks-eigenvalues) of the EPH intro.
+[this section](tutorial/eph_intro/#star-function-interpolation-of-the-ks-eigenvalues) of the EPH introduction.
 
 First of all, we need to compute QP corrections for all the $\kk$-points in the IBZ.
 This is what is done in the following input:
@@ -410,12 +428,13 @@ This is what is done in the following input:
 {% dialog tests/tutorial/Input/tgwr_5.abi %}
 
 Note the use [[gw_qprange]] = `-NUM` to compute QP corrections for all the $\kk$-points in the IBZ.
-and [[gwr_sigma_algo]] 1 to use the supercell algorithm for $\Sigma_\nk$ (the most efficient one in this particular case).
+and [[gwr_sigma_algo]] 1 to use the supercell algorithm for $\Sigma_\nk$
+(the most efficient one in this particular case).
 
 Run the calculation with:
 
 ```sh
-abinit tgwr_5.abi > tgwr_5.log 2> err &
+mpirun -n 1 tgwr_5.abi > tgwr_5.log 2> err &
 ```
 
 The output file is reported here for your convenience:
@@ -431,7 +450,7 @@ from abipy.electrons.gwr import GwrFile
 gwr = GwrFile("tgwr_5o_GWR.nc")
 r = gwr.intepolate(ebands_kpath="tgwr_1o_DS2_GSR.nc")
 
-r.ebands_kpath.plot()
+r.ks_ebands_kpath.plot()
 
 from abipy.electrons.ebands import ElectronBandsPlotter
 plotter = ElectronBandsPlotter()
