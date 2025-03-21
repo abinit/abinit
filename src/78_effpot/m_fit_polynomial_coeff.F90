@@ -1250,11 +1250,11 @@ contains
      do icoeff=1,my_ncoeff
        if(isbanned(my_coeffindexes(icoeff)) .or. &
          & isselected(my_coeffindexes(icoeff))  )then
-         gf_values(:,icoeff) = huge(0.0_dp)/5
+         gf_values(:,icoeff) = huge(0.0_dp)/(my_ncoeff+100)
          cycle
        endif
        if(any(list_coeffs==my_coeffindexes(icoeff)) .or. singular_coeffs(icoeff) == 1)then
-          gf_values(:,icoeff) = huge(0.0_dp)/5
+          gf_values(:,icoeff) = huge(0.0_dp)/(my_ncoeff+100)
           cycle
        endif
        !if(nbancoeff >= 1)then
@@ -1328,7 +1328,7 @@ contains
            end if
          end if
        else!In this case the matrix is singular.
-         gf_values(:,icoeff) = huge(0.0_dp)/5
+         gf_values(:,icoeff) = huge(0.0_dp)/(my_ncoeff+100)
          isbanned(my_coeffindexes(icoeff))=.True.
          singular_coeffs(icoeff) = 1
          write(message, '(a)') ' The matrix is singular...'
@@ -1355,7 +1355,7 @@ contains
      if(need_prt_GF_csv)close(unit_GF_val)
 
 !    find the best coeff on each CPU
-     mingf(:)  = huge(0.0_dp)
+     mingf(:)  = huge(0.0_dp)/5.0_dp
      index_min = 0
      do icoeff=1,my_ncoeff
        !if(gf_values(1,icoeff) > huge(0.0_dp)/5-1.0) cycle
@@ -1369,7 +1369,6 @@ contains
 
 !    MPI GATHER THE BEST COEFF ON EACH CPU
      if(nproc > 1)then
-       !print *, "DEBUG==================> ", "after mingf on this cpu found. nproc=", nproc
        buffGF(1,1) = index_min
        buffGF(2:5,1) =  mingf(:)
        call xmpi_barrier(comm)
@@ -1453,7 +1452,7 @@ contains
        end BLOCK
 
        BLOCK ! add selected terms
-               
+
          integer :: i
          integer :: ind_select
          integer :: nselected_this_cycle
@@ -1462,7 +1461,7 @@ contains
          i=0
          do while(nselected_this_cycle<ncoeff_this_cycle)
            i=i+1
-           !do while( isbanned(allorder(i))  .or. isselected(allorder(i)))  
+           !do while( isbanned(allorder(i))  .or. isselected(allorder(i)))
            !  i=i+1
            !enddo
            index_min = allorder(i)
@@ -1808,7 +1807,7 @@ contains
            call wrtout(std_out,message,'COLL')
          end if
      endif
-     
+
      block
        real(dp) :: weights1(ntime)
        weights1(:) = one
@@ -2538,7 +2537,7 @@ subroutine fit_polynomial_coeff_solve(coefficients,fcart_coeffs,fcart_diff,energ
        jcoeff_tmp = list_coeffs(jcoeff)
        enu = energy_coeffs(jcoeff_tmp,itime)
        if(fit_on(3))then
-         etmpA =  emu*enu/(sqomega(itime)**(1.0/2.0)) 
+         etmpA =  emu*enu/(sqomega(itime)**(1.0/2.0))
          A(icoeff,jcoeff) = A(icoeff,jcoeff) + efact*etmpA* weights(itime)
        endif
      end do
@@ -2554,7 +2553,7 @@ subroutine fit_polynomial_coeff_solve(coefficients,fcart_coeffs,fcart_diff,energ
          do jcoeff=1,ncoeff_fit
            jcoeff_tmp = list_coeffs(jcoeff)
            fnu = fcart_coeffs(mu,ia,jcoeff_tmp,itime)
-           ftmpA =  fmu*fnu 
+           ftmpA =  fmu*fnu
            if(fit_on(1))A(icoeff,jcoeff) = A(icoeff,jcoeff) + ffact*ftmpA* weights(itime)
          end do
          if(fit_on(1))then
@@ -2692,7 +2691,7 @@ end subroutine fit_polynomial_coeff_solve
 !!
 !! INPUTS
 !! hist<type(abihist)> = The history of the MD (or snapshot of DFT
-!! temperature: a scalar, the temperature in K, which is a factor to tune how much the forces 
+!! temperature: a scalar, the temperature in K, which is a factor to tune how much the forces
 !!              are taken into account in the fit
 !! ntime: a scalar, the number of time steps
 !! natom: a scalar, the number of atoms
@@ -2709,7 +2708,7 @@ subroutine get_weight_from_hist(hist, temperature, ntime, natom, weights, comm)
   integer, intent(in) :: comm
   real(dp), allocatable, intent(out) :: weights(:)
   integer :: itime, iatom
-  ! Boltzmann constant in Ha/K 
+  ! Boltzmann constant in Ha/K
   real(dp), parameter :: kb = 3.166815d-6
   real(dp) :: average_forces(ntime)
   character(len=ntime*100) :: msg
@@ -2742,12 +2741,12 @@ subroutine get_weight_from_hist(hist, temperature, ntime, natom, weights, comm)
         weights(itime) = exp(-average_forces(itime)/(kb*temperature))
         if (weights(itime)< 0.001) then
           weights(itime) = 0.001
-        endif 
+        endif
       end do
       ! normalize the weight
       weights = weights/sum(weights)* ntime
   end if
-  ! For each time, print the average forces, the energy, the weight, 
+  ! For each time, print the average forces, the energy, the weight,
   ! the maximum of axial stress, and maximum of shear stress
   ! first write the header of the table
   ! write a separator
@@ -2769,7 +2768,7 @@ endif
 end subroutine  get_weight_from_hist
 !!***
 
-  
+
 !!****f* m_fit_polynomial_coeff/fit_polynomial_coeff_computeGF
 !!
 !! NAME
@@ -2856,7 +2855,7 @@ subroutine fit_polynomial_coeff_computeGF(coefficients,energy_coeffs,energy_diff
    emu = zero
    do icoeff=1,ncoeff_fit
      icoeff_tmp = list_coeffs(icoeff)
-     emu = emu + coefficients(icoeff)*energy_coeffs(icoeff_tmp,itime) 
+     emu = emu + coefficients(icoeff)*energy_coeffs(icoeff_tmp,itime)
    end do
 !   uncomment the next line to be consistent with the definition of the goal function
    etmp = etmp + (energy_diff(itime)-emu)**2* weights(itime)/(sqomega(itime)**(1.0/2.0))
