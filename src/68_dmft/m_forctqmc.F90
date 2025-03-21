@@ -3523,6 +3523,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
  lam_list(ntot) = one
  green%integral = zero
  green%ekin_imp = zero
+ green%z0       = zero
 
  ! Prepare Gauss-Legendre quadrature for thermodynamic integration over U
  if (integral > 0 .and. entropy) then
@@ -4060,8 +4061,8 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
            elam = four * emig_tot
          else
            call compute_migdal_energy(emig(:),emig_tot,green,paw_dmft,hybmwdhyb,iatom=iatom)
-           green%ekin_imp = two * emig_tot
-           if (integral == 2) green%z0 = z0
+           green%ekin_imp = green%ekin_imp + two*emig_tot
+           if (integral == 2) green%z0 = green%z0 + z0
          end if ! ilam=ntot
 
        end if ! entropy

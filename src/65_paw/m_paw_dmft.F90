@@ -163,6 +163,9 @@ MODULE m_paw_dmft
   integer :: dmft_nwr
   ! Number of real frequencies
 
+  integer :: dmft_optim
+  ! Corrects some bugs and optimizes the code
+
   integer :: dmft_prgn
   ! Specify the way of printing the green function.
   !  =1   print green
@@ -194,9 +197,6 @@ MODULE m_paw_dmft
 
   integer :: dmft_t2g
   ! Only use t2g orbitals
-
-  integer :: dmft_test
-  ! Correct some bugs and activates some optimizations, should alway be set to 1
 
   integer :: dmft_triqs_broyden_niter
   ! Number of previous iterations involved in Broyden mixing of hybridization
@@ -1033,7 +1033,7 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  paw_dmft%dmft_prtwan          = dtset%dmft_prtwan
  paw_dmft%dmft_wanrad          = dtset%dmft_wanrad
  paw_dmft%dmft_t2g             = dtset%dmft_t2g
- paw_dmft%dmft_test            = dtset%dmft_test
+ paw_dmft%dmft_optim           = dtset%dmft_optim
  paw_dmft%dmft_x2my2d          = dtset%dmft_x2my2d
  paw_dmft%dmft_use_full_chipsi = dtset%dmft_use_full_chipsi
 

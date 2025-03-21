@@ -84,6 +84,7 @@ CONTAINS  !=====================================================================
  ABI_MALLOC(u_outside,(meshsz))
 
  if (lambda == zero) then
+
    do k=0,2*lpawu+1,2
      u_inside(1) = zero
      do ir=2,meshsz
@@ -185,19 +186,21 @@ CONTAINS  !=====================================================================
 !!  proj2 = u(r)**2 where u(r) is the atomic orbital multiplied by r
 !!  meshsz = size of the radial mesh
 !!  upawu,jpawu = parameters for Slater integrals
+!!  yukawa_param = if set to 1, search for lambda and epsilon yielding the values closest to u and j
+!!                 if set to 2, search for lambda yielding u, and set epsilon to 1
 !!
 !! OUTPUT
 !!  lambda,epsilon = parameters of the corresponding Yukawa potential
 !!
 !! SOURCE
 
- subroutine get_lambda(lpawu,pawrad,proj2,meshsz,upawu,jpawu,lambda,eps)
+ subroutine get_lambda(lpawu,pawrad,proj2,meshsz,upawu,jpawu,lambda,eps,yukawa_param)
 
  use m_brentq, only : brentq
  use m_hybrd, only : hybrd
 
 !Arguments ------------------------------------
- integer, intent(in) :: lpawu,meshsz
+ integer, intent(in) :: lpawu,meshsz,yukawa_param
  real(dp), intent(in) :: upawu,jpawu
  real(dp), intent(out) :: lambda,eps
  real(dp), intent(in) :: proj2(meshsz)
@@ -234,6 +237,11 @@ CONTAINS  !=====================================================================
  ! Initial values for lambda and epsilon
  lmb_eps(1) = lmb_temp
  lmb_eps(2) = one
+
+ lambda = lmb_temp
+ eps    = one
+
+ if (yukawa_param == 2) return
 
  if (lpawu > 0) then
 
