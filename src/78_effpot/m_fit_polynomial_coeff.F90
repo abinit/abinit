@@ -2643,6 +2643,7 @@ subroutine fit_polynomial_coeff_solve(coefficients,fcart_coeffs,fcart_diff,energ
        &     LDX-nbound,WORK,SWORK,ITER,INFO)
      coefficients(:nbound)=0.0_dp
    else
+     !FIXME: fails on EOS
      call DSGESV(N,NRHS,A,LDA,IPIV,B,LDB,coefficients,LDX,WORK,SWORK,ITER,INFO)
    end if
 
