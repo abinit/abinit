@@ -1373,7 +1373,7 @@ contains
        buffGF(2:5,1) =  mingf(:)
        call xmpi_barrier(comm)
        call xmpi_allgatherv(buffGF,5,gf_mpi,buffsize,buffdisp, comm, ierr)
-       mingf(:)    = huge(0.0_dp)
+       mingf(:)    = huge(0.0_dp)/5.0_dp
        index_min= 0
        do icoeff=1,nproc
          if(gf_mpi(2,icoeff) > huge(0.0_dp)/5-1) cycle
