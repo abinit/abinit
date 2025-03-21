@@ -6,7 +6,9 @@
 include "gwr_include.abi"
 
 ndtset 2
-#istwfk *1
+paral_kgb 1   # Activate spin/k-point/band/FFT
+autoparal 1   # Automatic selection of np* variables.
+npfft 1       #
 
 ####################
 # Dataset 1: SCF run
@@ -28,6 +30,7 @@ tolwfr2     1e-20
 iscf2      -2   # NSCF run
 
 # K-path in reduced coordinates:
+# Generate using `abistruct.py kpath gwr_include.abi`
 ndivsm2 5
 kptopt2 -11
 kptbounds2

@@ -1,9 +1,16 @@
-# Crystalline silicon. Preparatory run for GWR code
+#  Calculation WFK files with empty states with direct diagonalization
 
 # Include geometry and pseudos
 include "gwr_include.abi"
 
 ndtset 2
+
+ngkpt1   2 2 2
+ngkpt2   4 4 4
+# Definition of the k-point grid
+# IMPORTANT: GWR requires Gamma-centered k-meshes
+nshiftk 1
+shiftk  0.0 0.0 0.0
 
 ###########################################
 # Direct diago with empty states
@@ -11,15 +18,7 @@ ndtset 2
 optdriver  6                         # Activate GWR code
 gwr_task "HDIAGO"                    # Direct diagonalization
 nband     100                        # Number of (occ + empty) bands
-getden_filepath "tgwr_1o_DS1_DEN"    # Density file
-
-# Definition of the k-point grid
-# IMPORTANT: GWR requires Gamma-centered k-meshes
-nshiftk 1
-shiftk  0.0 0.0 0.0
-
-ngkpt1   2 2 2
-ngkpt2   4 4 4
+getden_filepath "tgwr_1o_DS1_DEN"    # Density file used to build H[n]
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
@@ -34,6 +33,5 @@ ngkpt2   4 4 4
 #%% authors = M. Giantomassi
 #%% keywords = NC, GWR
 #%% description =
-#%%  Crystalline silicon
-#%%  Calculation of the GW corrections with GWR code.
+#%%  Calculation WFK files with empty states with direct diagonalization
 #%%<END TEST_INFO>

@@ -1,3 +1,5 @@
+#  Calculation of the GW corrections with GWR code.
+
 # Definition of the k-point grid
 # IMPORTANT: GWR requires Gamma-centered k-meshes
 ngkpt   2 2 2
