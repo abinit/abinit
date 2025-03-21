@@ -32,8 +32,8 @@
 
 
 
-.Starting date : Wed 19 Mar 2025.
-- ( at 22h32 )
+.Starting date : Fri 21 Mar 2025.
+- ( at 11h10 )
   
 - The starting date is more than 2 years after the initial release
 - of this version of ABINIT, namely Jul 2022.
@@ -119,3 +119,131 @@ dipdip_range         1         1         1
 
  Impose acoustic sum rule on total ifc
 
+================================================================================
+
+ This effective potential contains :
+  - Reference energy:       -173.5221724034
+  - Number of types of atoms:    3
+  - Number of atoms:     5
+  - Number of cells:    21
+  - Number of qpoints:    1
+  - Primitive vectors (unit:Bohr):
+    7.426520    0.000000    0.000000
+    0.000000    7.426520    0.000000
+    0.000000    0.000000    7.426520
+  - acell (unit:Bohr):
+    1.000000    1.000000    1.000000
+  - Dielectric tensor:
+    1.000000    0.000000    0.000000
+    0.000000    1.000000    0.000000
+    0.000000    0.000000    1.000000
+  - Elastic tensor (unit:10^2GPa):
+    3.128144    1.018257    1.018257    0.000000    0.000000    0.000000
+    1.018253    3.128149    1.018253    0.000000    0.000000   -0.000000
+    1.018255    1.018255    3.128127   -0.000000   -0.000000   -0.000000
+   -0.000000   -0.000001   -0.000001    0.654090    0.000000    0.000000
+   -0.000003   -0.000000   -0.000003    0.000000    0.654092    0.000000
+   -0.000001   -0.000001    0.000000    0.000000    0.000000    0.654094
+  - Atoms   1
+    - atomic number:   38.0000
+    - atomic mass:   87.6200
+    - cartesian position:    0.000000    0.000000    0.000000
+    - Effective charges:
+      0.000000    0.000000    0.000000
+      0.000000    0.000000    0.000000
+      0.000000    0.000000    0.000000
+  - Atoms   2
+    - atomic number:   44.0000
+    - atomic mass:  101.0700
+    - cartesian position:    3.713260    3.713260    3.713260
+    - Effective charges:
+      0.000000    0.000000    0.000000
+      0.000000    0.000000    0.000000
+      0.000000    0.000000    0.000000
+  - Atoms   3
+    - atomic number:    8.0000
+    - atomic mass:   15.9994
+    - cartesian position:    0.000000    3.713260    3.713260
+    - Effective charges:
+      0.000000    0.000000    0.000000
+      0.000000    0.000000    0.000000
+      0.000000    0.000000    0.000000
+  - Atoms   4
+    - atomic number:    8.0000
+    - atomic mass:   15.9994
+    - cartesian position:    3.713260    0.000000    3.713260
+    - Effective charges:
+      0.000000    0.000000    0.000000
+      0.000000    0.000000    0.000000
+      0.000000    0.000000    0.000000
+  - Atoms   5
+    - atomic number:    8.0000
+    - atomic mass:   15.9994
+    - cartesian position:    3.713260    3.713260    0.000000
+    - Effective charges:
+      0.000000    0.000000    0.000000
+      0.000000    0.000000    0.000000
+      0.000000    0.000000    0.000000
+
+ Read the coefficients of the polynomial fit from XML and perform some checks
+
+-Opening the file /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/xuhe_merge_newbound/tests/paral/Input/t82_coeffs.xml
+-Reading the file /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/xuhe_merge_newbound/tests/paral/Input/t82_coeffs.xml with Fortran
+
+================================================================================
+
+-Reading the training-set file :
+-/home/buildbot/ABINIT3/eos_gnu_13.2_mpich/xuhe_merge_newbound/tests/paral/Input/t81_HIST
+
+
+--------------------------------------------------------------------------------
+
+ Starting Fit process
+
+--------------------------------------------------------------------------------
+
+ The coefficients present in the effective potential will be used for the fit
+
+ The coefficients for the fit will be generated with all cross terms
+
+ 48 coefficients generated 
+
+
+ Goal function values at the begining of the fit process (eV^2/A^2):
+   Energy          :   4.0372993354979415E-05
+   Forces+Stresses :   7.5067033726555418E-03
+   Forces          :   7.3678370383271812E-03
+   Stresses        :   1.3886633432835989E-04
+
+ N   Selecting          MSDE              MSDFS              MSDF              MSDS
+    Coefficient      (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)
+ 3     3           9.8851791905E-06  4.0004273293E-03  3.8455525640E-03  1.5487476525E-04
+ 4     4           1.0270958345E-05  3.7876615934E-03  3.6336166528E-03  1.5404494059E-04
+
+ Fitted coefficients at the end of the fit process:
+ 1 =>   1.8768470385E+00 (Ru_x-O1_x)^2(Ru_y-O1_y)^2
+ 2 =>   1.2509409318E-01 (Sr_x-Ru_x)^4
+ 3 =>  -5.8315773504E-01 (Sr_x-O1_x)^1(Sr_y-O1_y)^1(Ru_x-O1_x)^1(Ru_y-O1_y)^1
+ 4 =>   9.0373985824E-02 (Ru_x-O1_x)^1(Ru_y-O1_y)^1(O1_x-O2_x)^1
+
+ Goal function values at the end of the fit process (eV^2/A^2):
+   Energy          :   1.0270958344973537E-05
+   Forces+Stresses :   3.7876615934242233E-03
+   Forces          :   3.6336166528331505E-03
+   Stresses        :   1.5404494059107258E-04
+
+
+================================================================================
+
+ Generation of the xml file for the model in t82_MPI1_model.xml
+
+================================================================================
+
+-
+- Proc.   0 individual time (sec): cpu=          1.0  wall=          1.0
+
+================================================================================
+
++Total cpu time      1.038  and wall time      1.040 sec
+
+ multibinit : the run completed succesfully.

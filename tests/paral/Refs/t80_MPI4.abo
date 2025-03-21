@@ -33,7 +33,7 @@
 
 
 .Starting date : Fri 21 Mar 2025.
-- ( at 05h17 )
+- ( at 11h29 )
   
 - The starting date is more than 2 years after the initial release
 - of this version of ABINIT, namely Jul 2022.
@@ -1641,10 +1641,10 @@
 ================================================================================
 
 -
-- Proc.   0 individual time (sec): cpu=          1.4  wall=          1.4
+- Proc.   0 individual time (sec): cpu=          1.6  wall=          1.6
 
 ================================================================================
 
-+Total cpu time      5.660  and wall time      5.661 sec
++Total cpu time      6.477  and wall time      6.479 sec
 
  multibinit : the run completed succesfully.
