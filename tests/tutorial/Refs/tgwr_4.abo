@@ -1,5 +1,5 @@
 
-.Version 10.3.6.4 of ABINIT, released Feb 2025.
+.Version 10.3.6.1 of ABINIT, released Feb 2025.
 .(MPI version, prepared for a aarch64_darwin23.6.0_gnu14.2 computer)
 
 .Copyright (C) 1998-2025 ABINIT group .
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 13 Mar 2025.
-- ( at 17h48 )
+.Starting date : Fri 21 Mar 2025.
+- ( at 15h26 )
 
-- input  file    -> /Users/giantomassi/git_repos/abinit/_build/tests/Test_suite/tutorial_tgwr_1-tgwr_2-tgwr_3-tgwr_4/tgwr_4.abi
+- input  file    -> /Users/giantomassi/git_repos/abinit/_build/tests/Test_suite/tutorial_tgwr_1-tgwr_2-tgwr_3-tgwr_4-tgwr_5/tgwr_4.abi
 - output file    -> tgwr_4.abo
 - root for input  files -> tgwr_4i
 - root for output files -> tgwr_4o
@@ -26,16 +26,16 @@
 ================================================================================
  Values of the parameters that define the memory need of the present run
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       6
-     lnmax =       6     mgfft =      24  mpssoang =       3    mqgrid =    3001
+     lnmax =       6     mgfft =      20  mpssoang =       3    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
     occopt =       1   xclevel =       2
 -    mband =         100        mffmem =           1         mkmem =           8
-       mpw =         415          nfft =       13824          nkpt =           8
+       mpw =         303          nfft =        8000          nkpt =           8
 ================================================================================
-P This job should need less than                      10.534 Mbytes of memory.
+P This job should need less than                       7.344 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      5.068 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
+_ WF disk file :      3.701 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
 
 --------------------------------------------------------------------------------
@@ -52,7 +52,7 @@ _ WF disk file :      5.068 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
             acell      1.0260000000E+01  1.0260000000E+01  1.0260000000E+01 Bohr
               amu      2.80855000E+01
              bdgw           4       5       4       5
-             ecut      1.00000000E+01 Hartree
+             ecut      8.00000000E+00 Hartree
           ecuteps      6.00000000E+00 Hartree
          ecutsigx      2.00000000E+01 Hartree
 -          fftalg         312
@@ -76,7 +76,7 @@ _ WF disk file :      5.068 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 P           mkmem           8
             natom           2
             nband         100
-            ngfft          24      24      24
+            ngfft          20      20      20
              nkpt           8
            nkptgw           2
              nsym          48
@@ -173,8 +173,8 @@ P           mkmem           8
 
 --- !DatasetInfo
 iteration_state: {dtset: 1, }
-dimensions: {natom: 2, nkpt: 8, mband: 100, nsppol: 1, nspinor: 1, nspden: 1, mpw: 415, }
-cutoff_energies: {ecut:  10.0, pawecutdg:  -1.0, }
+dimensions: {natom: 2, nkpt: 8, mband: 100, nsppol: 1, nspinor: 1, nspden: 1, mpw: 303, }
+cutoff_energies: {ecut:   8.0, pawecutdg:  -1.0, }
 electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 6, }
 ...
@@ -215,8 +215,8 @@ meta: {optdriver: 6, }
 --------------------------------------------------------------------------------
 
  Total charge density [el/Bohr^3]
-)     Maximum=    9.3483E-02  at reduced coord.    0.1250    0.1250    0.6250
-)     Minimum=    1.3691E-03  at reduced coord.    0.0000    0.0000    0.0000
+)     Maximum=    8.5879E-02  at reduced coord.    0.1000    0.1000    0.7000
+)     Minimum=    2.2671E-03  at reduced coord.    0.0000    0.0000    0.0000
    Integrated=    8.0000E+00
 - Reading GS states from WFK file: tgwr_2o_DS2_WFK
   Mapping kBZ --> kIBZ
@@ -274,27 +274,27 @@ prtvol = 0, max 20 points are written
 
  === Kohn-Sham gaps and band edges from IBZ mesh ===
  Indirect band gap semiconductor
- Fundamental gap:     0.599 (eV)
-   VBM:    -0.300 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-   CBM:     0.300 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
- Direct gap:         2.433 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Fundamental gap:     0.731 (eV)
+   VBM:    -0.365 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     0.365 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
+ Direct gap:         2.564 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 
 
 - Optimizing MPI grid with mem_per_cpu_mb: 2.048000E+03 [Mb]
 - Use `abinit run.abi --mem-per-cpu=4G` to set mem_per_cpu_mb in the submission script
 - np_k  np_g  np_t  np_s  memb_per_cpu    efficiency       speedup
--    1     1     1     1   2.27705E+03   1.00000E+00   1.00000E+00
+-    1     1     1     1   1.66209E+03   1.00000E+00   1.00000E+00
 -
 - Selected MPI grid:
 - np_k  np_g  np_t  np_s  memb_per_cpu    efficiency       speedup
--    1     1     1     1   2.27705E+03   1.00000E+00   1.00000E+00
+-    1     1     1     1   1.66209E+03   1.00000E+00   1.00000E+00
 
 - Resident memory in Mb for G(g,g',+/-tau) and chi(g,g',tau):
-- G_k(g,g,tau): 504.6
+- G_k(g,g,tau): 269.0
 - Chi_q(g,g,tau): 29.3
-- u_k(g,b): 5.1
+- u_k(g,b): 3.7
 - Temporary memory allocated inside the tau loops:
-- G_k(r,g): 1400.6
+- G_k(r,g): 1022.6
 - chi_q(r,g): 337.5
 - FFT uc_batch_size: 1
 - FFT sc_batch_size: 1
@@ -314,27 +314,27 @@ nqibz: 8
 inclvkb: 2
 q0: [  1.00000000E-05,   2.00000000E-05,   3.00000000E-05, ]
 gw_icutcoul: 6
-green_mpw: 415
+green_mpw: 303
 tchi_mpw: 200
 g_ngfft: [12, 12, 12, 12, 12, 12, ]
 gwr_boxcutmin:   1.10000000E+00
 P gwr_np_kgts: [1, 1, 1, 1, ]
 P np_kibz: [1, 1, 1, 1, 1, 1, 1, 1, ]
 P np_qibz: [1, 1, 1, 1, 1, 1, 1, 1, ]
-min_transition_energy_eV:   2.20247744E-02
-max_transition_energy_eV:   3.84181232E+00
-eratio:   1.74431404E+02
-ft_max_err_t2w_cos:   3.39269547E-02
-ft_max_err_w2t_cos:   4.27492521E-03
-ft_max_err_t2w_sin:   1.00974389E+00
-cosft_duality_error:   4.08855664E-04
+min_transition_energy_eV:   2.68469788E-02
+max_transition_energy_eV:   3.84873348E+00
+eratio:   1.43358160E+02
+ft_max_err_t2w_cos:   2.79679357E-02
+ft_max_err_w2t_cos:   2.50443578E-03
+ft_max_err_t2w_sin:   6.96478850E-01
+cosft_duality_error:   6.61373946E-04
 Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(omega)
-    1 1.16987E-01   3.20191E-01   8.71836E-03   1.84660E-02
-    2 8.20298E-01   1.25063E+00   3.30978E-02   3.36974E-02
-    3 3.19454E+00   3.95048E+00   8.75746E-02   8.49211E-02
-    4 1.01456E+01   1.10178E+01   2.40282E-01   2.55119E-01
-    5 2.85210E+01   2.82127E+01   7.50121E-01   9.22624E-01
-    6 7.50861E+01   7.27575E+01   2.97572E+00   4.74388E+00
+    1 1.34054E-01   3.61087E-01   1.03240E-02   2.17954E-02
+    2 8.80593E-01   1.27324E+00   3.86484E-02   3.85317E-02
+    3 3.17736E+00   3.70788E+00   9.94117E-02   9.28738E-02
+    4 9.49621E+00   9.81587E+00   2.61136E-01   2.63523E-01
+    5 2.55112E+01   2.42367E+01   7.63888E-01   8.78522E-01
+    6 6.49081E+01   6.09635E+01   2.74813E+00   4.07532E+00
 ...
 
 
@@ -356,24 +356,24 @@ Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(o
 --- !EMACRO_WITHOUT_LOCAL_FIELDS
 iteration_state: {dtset: 1, }
 'epsilon_{iw, q -> Gamma}(0,0)': !Tabular |
-      8.71836225E-03    2.50376497E+01    1.10561443E-17
-      3.30977747E-02    2.33832214E+01   -3.48205170E-18
-      8.75745907E-02    1.67431215E+01    3.29138151E-19
-      2.40282194E-01    6.20395399E+00    4.08983971E-18
-      7.50120590E-01    1.73095370E+00   -1.34185436E-19
-      2.97572274E+00    1.05039254E+00   -8.49339007E-22
+      1.03240476E-02    2.33538854E+01   -8.61498988E-20
+      3.86484197E-02    2.14220887E+01   -4.19526464E-19
+      9.94117420E-02    1.46680573E+01    7.20679336E-20
+      2.61135802E-01    5.46312496E+00   -3.10136381E-20
+      7.63887974E-01    1.69487097E+00    4.87101530E-20
+      2.74813318E+00    1.05814926E+00   -5.84256384E-21
 ...
 
 
 --- !EMACRO_WITH_LOCAL_FIELDS
 iteration_state: {dtset: 1, }
 'epsilon_{iw, q -> Gamma}(0,0)': !Tabular |
-      8.71836225E-03    4.38692201E-02    0.00000000E+00
-      3.30977747E-02    4.68368909E-02    0.00000000E+00
-      8.75745907E-02    6.45846281E-02    0.00000000E+00
-      2.40282194E-01    1.69038931E-01    0.00000000E+00
-      7.50120590E-01    5.83685288E-01    0.00000000E+00
-      2.97572274E+00    9.52210320E-01    0.00000000E+00
+      1.03240476E-02    4.70585671E-02    0.00000000E+00
+      3.86484197E-02    5.11150153E-02    0.00000000E+00
+      9.94117420E-02    7.35946009E-02    0.00000000E+00
+      2.61135802E-01    1.91618979E-01    0.00000000E+00
+      7.63887974E-01    5.96076130E-01    0.00000000E+00
+      2.74813318E+00    9.45292852E-01    0.00000000E+00
 ...
 
 
@@ -402,17 +402,17 @@ gwr_scf_iteration: 1
 gwr_task   : G0W0
 QP_VBM_band: 4
 QP_CBM_band: 5
-KS_gap     :    2.433
-QP_gap     :    2.985
-Delta_QP_KS:    0.552
+KS_gap     :    2.564
+QP_gap     :    3.251
+Delta_QP_KS:    0.687
 data: !Tabular |
      Band       E0 <VxcDFT>     SigX SigC(E0)        Z     E-E0  E-Eprev        E   Occ(E)
-        2   -0.300  -11.415  -12.944    0.872    0.778   -0.511   -0.511   -0.810    2.000
-        3   -0.300  -11.415  -12.944    0.872    0.778   -0.511   -0.511   -0.810    2.000
-        4   -0.300  -11.415  -12.944    0.872    0.778   -0.511   -0.511   -0.810    2.000
-        5    2.133   -9.958   -5.688   -4.214    0.777    0.041    0.041    2.174    0.000
-        6    2.133   -9.958   -5.688   -4.214    0.777    0.041    0.041    2.174    0.000
-        7    2.133   -9.958   -5.688   -4.214    0.777    0.041    0.041    2.174    0.000
+        2   -0.365  -11.316  -13.041    0.922    0.761   -0.612   -0.612   -0.977    2.000
+        3   -0.365  -11.316  -13.041    0.922    0.761   -0.612   -0.612   -0.977    2.000
+        4   -0.365  -11.316  -13.041    0.922    0.761   -0.612   -0.612   -0.977    2.000
+        5    2.199  -10.039   -5.660   -4.277    0.766    0.076    0.076    2.274    0.000
+        6    2.199  -10.039   -5.660   -4.277    0.766    0.076    0.076    2.274    0.000
+        7    2.199  -10.039   -5.660   -4.277    0.766    0.076    0.076    2.274    0.000
 ...
 
 
@@ -424,31 +424,31 @@ gwr_scf_iteration: 1
 gwr_task   : G0W0
 QP_VBM_band: 4
 QP_CBM_band: 5
-KS_gap     :    2.732
-QP_gap     :    3.326
-Delta_QP_KS:    0.594
+KS_gap     :    2.803
+QP_gap     :    3.503
+Delta_QP_KS:    0.700
 data: !Tabular |
      Band       E0 <VxcDFT>     SigX SigC(E0)        Z     E-E0  E-Eprev        E   Occ(E)
-        3   -1.539  -11.116  -13.167    1.284    0.769   -0.588   -0.588   -2.127    2.000
-        4   -1.539  -11.116  -13.167    1.284    0.769   -0.588   -0.588   -2.127    2.000
-        5    1.194  -10.005   -5.845   -4.150    0.784    0.006    0.006    1.199    0.000
+        3   -1.577  -11.054  -13.243    1.345    0.758   -0.639   -0.639   -2.216    2.000
+        4   -1.577  -11.054  -13.243    1.345    0.758   -0.639   -0.639   -2.216    2.000
+        5    1.226  -10.086   -5.832   -4.173    0.772    0.061    0.061    1.287    0.000
 ...
 
 
  === Kohn-Sham gaps and band edges from IBZ mesh ===
  Indirect band gap semiconductor
- Fundamental gap:     0.599 (eV)
-   VBM:    -0.300 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-   CBM:     0.300 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
- Direct gap:         2.433 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Fundamental gap:     0.731 (eV)
+   VBM:    -0.365 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     0.365 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
+ Direct gap:         2.564 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 
 
  === QP gaps and band edges taking into account Sigma_nk corrections for 2 k-points ===
  Indirect band gap semiconductor
- Fundamental gap:     1.110 (eV)
-   VBM:    -0.810 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-   CBM:     0.300 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
- Direct gap:         2.761 (eV) at k: [ 2.5000E-01,  0.0000E+00,  0.0000E+00]
+ Fundamental gap:     1.342 (eV)
+   VBM:    -0.977 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     0.365 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
+ Direct gap:         2.813 (eV) at k: [ 2.5000E-01,  0.0000E+00,  0.0000E+00]
 
 
 == END DATASET(S) ==============================================================
@@ -458,7 +458,7 @@ data: !Tabular |
             acell      1.0260000000E+01  1.0260000000E+01  1.0260000000E+01 Bohr
               amu      2.80855000E+01
              bdgw           4       5       4       5
-             ecut      1.00000000E+01 Hartree
+             ecut      8.00000000E+00 Hartree
           ecuteps      6.00000000E+00 Hartree
          ecutsigx      2.00000000E+01 Hartree
            etotal      0.0000000000E+00
@@ -485,7 +485,7 @@ data: !Tabular |
 P           mkmem           8
             natom           2
             nband         100
-            ngfft          24      24      24
+            ngfft          20      20      20
              nkpt           8
            nkptgw           2
              nsym          48
@@ -667,15 +667,15 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         52.6  wall=         52.7
+- Proc.   0 individual time (sec): cpu=         53.4  wall=         53.5
 
 ================================================================================
 
  Calculation completed.
-.Delivered   0 WARNINGs and   8 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         52.6  wall=         52.7
+.Delivered   1 WARNINGs and   7 COMMENTs to log file.
++Overall time at end (sec) : cpu=         53.4  wall=         53.5
 - [ALL OK] MEMORY CONSUMPTION REPORT FOR C CODE:
 -   There were 40 allocations and 40 deallocations in C code
 - [ALL OK] MEMORY CONSUMPTION REPORT FOR FORTRAN CODE:
--   There were 2431859 allocations and 2431859 deallocations in Fortran
+-   There were 2212329 allocations and 2212329 deallocations in Fortran
 -   Remaining memory at the end of the calculation is 0
