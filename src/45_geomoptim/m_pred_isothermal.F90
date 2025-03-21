@@ -122,6 +122,7 @@ subroutine pred_isothermal(ab_mover,hist,itime,mttk_vars,ntime,zDEBUG,iexit)
  real(dp) :: xred(3,ab_mover%natom),xred_next(3,ab_mover%natom)
  real(dp) :: vel(3,ab_mover%natom)
  real(dp) :: strten(6),work(lwork)
+ real(dp) :: maskstr(3,3)
 
 !***************************************************************************
 !Beginning of executable session
@@ -229,16 +230,16 @@ subroutine pred_isothermal(ab_mover,hist,itime,mttk_vars,ntime,zDEBUG,iexit)
      call isopress(ab_mover%amass,ab_mover%bmass,ab_mover%dtion,ekin,ab_mover%iatfix,&
 &     ktemp,mttk_vars,ab_mover%natom,ab_mover%nnos,ab_mover%qmass,&
 &     strten,ab_mover%strtarget,ucvol,vel,vlogv)
-   else if (ab_mover%optcell==2) then
+   else if (ab_mover%optcell>=2) then
 !    Next half step for extended variables
      call isostress(ab_mover%amass,ab_mover%bmass,ab_mover%dtion,ekin,ab_mover%iatfix,&
 &     ktemp,mttk_vars,ab_mover%natom,ab_mover%nnos,&
-&     ab_mover%qmass,strten,ab_mover%strtarget,ucvol,vel)
+&     ab_mover%qmass,strten,ab_mover%strtarget,ucvol,vel, ab_mover%optcell)
    end if
 
    if(itime==2) massvol=ekin+etotal
 
-   if (ab_mover%optcell==2) then
+   if (ab_mover%optcell>=2) then
 !    Evolution of cell and volume
      acell_next(:)=acell(:)
      ucvol_next=ucvol
@@ -460,12 +461,13 @@ subroutine pred_isothermal(ab_mover,hist,itime,mttk_vars,ntime,zDEBUG,iexit)
 !  %%% BEGIN sub case optcell=2 Isothermal-Isenthalpic
 !  %%%       Ensemble (full cell deformation)
 !  %%%
- else if (ab_mover%optcell==2) then
+ else if (ab_mover%optcell>=2 .and. ab_mover%optcell<=9) then
+
    acell_next=acell
 !  Fisrt half step for extended variables
    call isostress(ab_mover%amass,ab_mover%bmass,ab_mover%dtion,ekin,ab_mover%iatfix,&
 &   ktemp,mttk_vars,ab_mover%natom,ab_mover%nnos,&
-&   ab_mover%qmass,strten,ab_mover%strtarget,ucvol,vel)
+&   ab_mover%qmass,strten,ab_mover%strtarget,ucvol,vel, ab_mover%optcell)
 !  Half velocity step
    do idim=1,3
      fcart_m(idim,:)=fcart(idim,:)/ab_mover%amass(:)
@@ -494,6 +496,15 @@ subroutine pred_isothermal(ab_mover,hist,itime,mttk_vars,ntime,zDEBUG,iexit)
      mttk_ubox(:,idim)=mttk_ubox(:,idim)*mttk_alc(:)**2
    end do
    rprimd_next(:,:)=matmul(mttk_vt,mttk_ubox)
+   ! maks the rprimd next
+   call optcell_mask_tensor(ab_mover%optcell,maskstr)
+
+   print *, "========================maskstr"
+   call print_matrix_33(maskstr, " maskstr")
+   rprimd_next(:,:)= rprimd_next(:,:)*maskstr(:,:)+rprimd(:,:)*(one-maskstr(:,:))
+   call print_matrix_33(rprimd_next, " rprimd_next")
+
+
    do idim=1,3
      rprim_next(idim,:)=rprimd_next(idim,:)/acell(:)
    end do
@@ -520,7 +531,7 @@ subroutine pred_isothermal(ab_mover,hist,itime,mttk_vars,ntime,zDEBUG,iexit)
  else
    write(message, '(a,i12,a,a)' )&
 &   '  Disallowed value for optcell=',ab_mover%optcell,ch10,&
-&   '  Allowed values with ionmov==13 : 0 to 2.'
+&   '  Allowed values with ionmov==13 : 0 to 9.'
    ABI_BUG(message)
  end if
 
@@ -885,6 +896,54 @@ end subroutine isopress
 
 !----------------------------------------------------------------------
 
+
+
+!! optcell_mask_tensor
+!!***f* ABINIT/optcell_mask_tensor
+!! NAME
+!! optcell_mask_tensor
+!!
+!! FUNCTION
+!! returns the mask for the optcell variable in the tensor format
+!!
+!! INPUTS
+!!  optcell: integer, the value of optcell. 0 to 9. 0 is the default value
+!!    4 , 5, and 6 are allowed only.
+!!
+!! OUTPUT
+!!  mask: integer, the mask tensor for the stress
+!!
+!! SOURCE
+subroutine optcell_mask_tensor(optcell, mask)
+  implicit none
+  integer, intent(in) :: optcell
+  real(dp), intent(out) :: mask(3,3)
+  mask(:,:) = zero
+  select case (optcell)
+  case (0, 1, 2,3)
+    mask(:,:) = one
+  case (4) ! only relax a
+    mask(:, 1) = one
+  case (5) ! only relax b
+    mask(:,2) = one
+  case (6) ! only relax c
+    mask(:,3) = one
+  case (7) ! relax b and c
+    mask(:,2) = one
+    mask(:,3) = one
+  case (8) ! relax a and c
+    mask(:,1) = one
+    mask(:,3) = one
+  case (9) ! relax a and b
+    mask(:,1) = one
+    mask(:,2) = one
+  case default
+    ABI_BUG('optcell_mask_tensor: only optcell=4-9 are allowed for isostress.')
+  end select
+  end subroutine optcell_mask_tensor
+!!***
+
+
 !!****f* ABINIT/isostress
 !! NAME
 !! isostress
@@ -912,14 +971,14 @@ end subroutine isopress
 !! SOURCE
 
  subroutine isostress(amass,bmass,dtion,ekin,iatfix,ktemp,mttk_vars,natom,nnos,&
-   & qmass,strten,strtarget,ucvol,vel)
+   & qmass,strten,strtarget,ucvol,vel, optcell)
 
  use m_linalg_interfaces
  implicit none
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: natom,nnos
+ integer,intent(in) :: natom,nnos,optcell
  real(dp),intent(in) :: dtion,ktemp,ucvol,bmass
  real(dp),intent(out) :: ekin
  type(mttk_type) :: mttk_vars
@@ -937,9 +996,11 @@ end subroutine isopress
 !character(len=500) :: message
 !arrays
  real(dp) :: akin(3,3),expdiag(3),gboxg(3,3),identity(3,3),press(3,3)
+ real(dp) ::  maskten(3,3)
  real(dp) :: prtarget(3,3),tvtemp(3,3),uv(3),vboxg(3,3),veig(3),vtemp(3,3)
  real(dp) :: work(lwork)
  real(dp),allocatable :: glogs(:),vlogs(:),xlogs(:)
+
 
 !***************************************************************************
 !Beginning of executable session
@@ -969,6 +1030,9 @@ end subroutine isopress
  do idir=1,3
    identity(idir,idir)=one
  end do
+
+ ! set the mask for the stress
+ call optcell_mask_tensor(optcell, maskten)
 
 !write(std_out,*) 'isostress 02'
 !##########################################################
@@ -1008,13 +1072,17 @@ end subroutine isopress
    end do
  end do
 !Compute the pressure: from Voigt to tensor notation+kinetic energy
+
  do idir=1,3
    press(idir,idir)=-strten(idir)
    prtarget(idir,idir)=-strtarget(idir)
  end do
+
+
  press(3,2)=-strten(4); press(1,3)=-strten(5); press(2,1)=-strten(6)
- prtarget(3,2)=-strtarget(4); prtarget(1,3)=-strtarget(5); prtarget(2,1)=-strtarget(6)
  press(2,3)=press(3,2); press(3,1)=press(1,3); press(1,2)=press(2,1)
+
+ prtarget(3,2)=-strtarget(4); prtarget(1,3)=-strtarget(5); prtarget(2,1)=-strtarget(6)
  prtarget(2,3)=prtarget(3,2); prtarget(3,1)=prtarget(1,3); prtarget(1,2)=prtarget(2,1)
 !Update the forces
  glogs(1)=(two*ekin+two*akinb-gnd2kt)/qmass(1)
@@ -1098,6 +1166,9 @@ end subroutine isopress
 !Update box velocity
  alocal=exp(-dtion/eight*vlogs(1))
  vboxg(:,:)=vboxg(:,:)*alocal**2+dtion/four*gboxg(:,:)*alocal
+
+ ! apply the mask to the box velocity
+ vboxg(:,:)=vboxg(:,:)*maskten(:,:)
 !Compute the box kinetic energy
  akinb=zero
  do idir=1,3
@@ -1158,6 +1229,18 @@ end subroutine isopress
 
 end subroutine isostress
 !!***
+
+
+subroutine print_matrix_33(mat, name)
+  implicit none
+  real(dp), intent(in) :: mat(3,3)
+  character(len=*), intent(in) :: name
+  write(std_out,*) 'Matrix ', trim(name), ":"
+  write(std_out,*) mat(1,1), mat(2,1), mat(3,1)
+  write(std_out,*) mat(1,2), mat(2,2), mat(3,2)
+  write(std_out,*) mat(1,3), mat(2,3), mat(3,3)
+end subroutine print_matrix_33
+
 
 !----------------------------------------------------------------------
 
