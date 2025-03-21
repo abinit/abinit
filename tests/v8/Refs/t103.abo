@@ -32,8 +32,8 @@
 
 
 
-.Starting date : Wed 19 Mar 2025.
-- ( at 22h43 )
+.Starting date : Fri 21 Mar 2025.
+- ( at 11h21 )
   
 - The starting date is more than 2 years after the initial release
 - of this version of ABINIT, namely Jul 2022.
@@ -206,3 +206,154 @@
  Impose acoustic sum rule on total ifc
 
 ================================================================================
+
+================================================================================
+
+ There is no file for the coefficients from polynomial fitting
+
+================================================================================
+
+-Reading the training-set file :
+-/home/buildbot/ABINIT3/eos_gnu_13.2_mpich/xuhe_merge_newbound/tests/v8/Input/t103_HIST
+
+
+================================================================================
+
+  Starting Fit Iterations  
+  -----------------------  
+  Select in total fit_ncoeff =   6 coefficients
+  In   1 iterations
+  Over   3 irreducible atoms
+  Selecting   2 coefficients per atom in each iteration
+
+
+--------------------------------------------------------------------------------
+
+ Start Iteration (  1/  1)
+
+
+--------------------------------------------------------------------------------
+
+ Starting Fit process
+
+--------------------------------------------------------------------------------
+
+ The coefficients for the fit around atom  1: Sr, will be generated
+
+ 307 coefficients generated 
+
+
+ Goal function values at the begining of the fit process (eV^2/A^2):
+   Energy          :   4.0372994902680415E-05
+   Forces+Stresses :   7.5067033726562843E-03
+   Forces          :   7.3678370383277398E-03
+   Stresses        :   1.3886633432854463E-04
+
+ N   Selecting          MSDE              MSDFS              MSDF              MSDS
+    Coefficient      (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)
+ 1     101         3.6528623273E-05  7.2018357897E-03  7.0615824545E-03  1.4025333516E-04
+ 2     175         3.5766248111E-05  7.1214697031E-03  6.9812489461E-03  1.4022075696E-04
+
+ Fitted coefficients at the end of the fit process:
+ 101 =>  -4.4454433738E-02 (Sr_x-O1_x)^1(Sr_y-O1_y[0 -1 0])^1(Sr_y-O3_y[-1 -1 0])^1
+ 175 =>  -1.5298512372E-02 (Sr_y-O1_y)^2(Sr_x-O2_x[-1 0 -1])^1
+
+ Goal function values at the end of the fit process (eV^2/A^2):
+   Energy          :   3.5766248111311094E-05
+   Forces+Stresses :   7.1214697030681107E-03
+   Forces          :   6.9812489461099506E-03
+   Stresses        :   1.4022075695816036E-04
+
+
+--------------------------------------------------------------------------------
+
+ Starting Fit process
+
+--------------------------------------------------------------------------------
+
+ The coefficients present in the effective potential will be used for the fit
+
+ The coefficients for the fit around atom  2: Ru, will be generated
+
+ 52 coefficients generated 
+
+
+ Goal function values at the begining of the fit process (eV^2/A^2):
+   Energy          :   4.0372994902680415E-05
+   Forces+Stresses :   7.5067033726562843E-03
+   Forces          :   7.3678370383277398E-03
+   Stresses        :   1.3886633432854463E-04
+
+ N   Selecting          MSDE              MSDFS              MSDF              MSDS
+    Coefficient      (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)
+ 3     5           2.6091848546E-05  6.2591383162E-03  6.1165467372E-03  1.4259157896E-04
+ 4     4           2.4636002617E-05  6.0493750302E-03  5.9065417917E-03  1.4283323856E-04
+
+ Fitted coefficients at the end of the fit process:
+ 1 =>  -4.4696083340E-02 (Sr_x-O1_x)^1(Sr_y-O1_y[0 -1 0])^1(Sr_y-O3_y[-1 -1 0])^1
+ 2 =>  -1.1793060932E-02 (Sr_y-O1_y)^2(Sr_x-O2_x[-1 0 -1])^1
+ 5 =>  -1.2658673227E-01 (Ru_x-O1_x)^1(Ru_y-O2_y)^1(Ru_y-O1_y[1 0 0])^1
+ 4 =>   8.1079519889E-02 (Ru_x-O1_x)^1(Ru_y-O2_y)^1(Ru_y-O1_y)^1
+
+ Goal function values at the end of the fit process (eV^2/A^2):
+   Energy          :   2.4636002616547494E-05
+   Forces+Stresses :   6.0493750302188986E-03
+   Forces          :   5.9065417916631113E-03
+   Stresses        :   1.4283323855578703E-04
+
+
+--------------------------------------------------------------------------------
+
+ Starting Fit process
+
+--------------------------------------------------------------------------------
+
+ The coefficients present in the effective potential will be used for the fit
+
+ The coefficients for the fit around atom  3: O1, will be generated
+
+ 552 coefficients generated 
+
+
+ Goal function values at the begining of the fit process (eV^2/A^2):
+   Energy          :   4.0372994902680415E-05
+   Forces+Stresses :   7.5067033726562843E-03
+   Forces          :   7.3678370383277398E-03
+   Stresses        :   1.3886633432854463E-04
+
+ N   Selecting          MSDE              MSDFS              MSDF              MSDS
+    Coefficient      (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)
+ 5     23          1.9838679882E-05  5.4243316782E-03  5.2797368458E-03  1.4459483233E-04
+ 6     130         1.3555927878E-05  4.9149849176E-03  4.7673648414E-03  1.4762007623E-04
+
+ Fitted coefficients at the end of the fit process:
+ 1 =>  -4.6208957369E-02 (Sr_x-O1_x)^1(Sr_y-O1_y[0 -1 0])^1(Sr_y-O3_y[-1 -1 0])^1
+ 2 =>  -8.1213346890E-03 (Sr_y-O1_y)^2(Sr_x-O2_x[-1 0 -1])^1
+ 3 =>  -1.5367979433E-01 (Ru_x-O1_x)^1(Ru_y-O2_y)^1(Ru_y-O1_y[1 0 0])^1
+ 4 =>   9.1211788646E-02 (Ru_x-O1_x)^1(Ru_y-O2_y)^1(Ru_y-O1_y)^1
+ 23 =>   1.4311558252E-01 (O1_x-Ru_x)^1(O1_y-Ru_y[-1 0 0])^1(O1_x-O2_x[-1 1 0])^1
+ 130 =>   7.9762479019E-02 (O1_y-Ru_y)^1(O1_x-Sr_x)^1(O1_z-Sr_z[0 1 1])^1
+
+ Goal function values at the end of the fit process (eV^2/A^2):
+   Energy          :   1.3555927878486114E-05
+   Forces+Stresses :   4.9149849176047629E-03
+   Forces          :   4.7673648413730117E-03
+   Stresses        :   1.4762007623175122E-04
+
+
+================================================================================
+
+ Generation of the xml file for the model in t103_sys.xml
+
+ Generation of the xml file for the fitted polynomial in t103_coeffs.xml
+
+================================================================================
+
+-
+- Proc.   0 individual time (sec): cpu=          2.8  wall=          2.8
+
+================================================================================
+
++Total cpu time      2.840  and wall time      2.841 sec
+
+ multibinit : the run completed succesfully.
