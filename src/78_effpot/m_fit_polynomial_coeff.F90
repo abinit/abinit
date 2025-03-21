@@ -2607,47 +2607,57 @@ subroutine fit_polynomial_coeff_solve(coefficients,fcart_coeffs,fcart_diff,energ
    coefficients = zero
  end if
 
- if(nbound>0 .and. (.not. ignore_bound))  then
-   block
-     real(dp) :: bl(N), bu(N), w(N)
-     integer :: istate(N+1), loopa
-     real(dp) :: AC(N-nbound,N-nbound),BC(n-nbound,1)
-     AC=A(nbound+1:, nbound+1:)
-     BC=B(nbound+1:, :)
-     ! first fit without any bounding term to get some reference values.
-     call DSGESV(N-nbound,NRHS,AC,LDA-nbound,IPIV,BC,LDB,coefficients(nbound+1:), &
-       &     LDX-nbound,WORK,SWORK,ITER,INFO)
-     bl=-1.0_dp
-     bu=1.0_dp
-     ! constrain the terms to be around the fitted values
-     bl(nbound+1:)=coefficients(nbound+1:)-abs(coefficients(nbound+1:))*0.1
-     bu(nbound+1:)=coefficients(nbound+1:)+abs(coefficients(nbound+1:))*0.1
-     ! constrain the bounding terms
-     bl(:nbound) = min_bound_coeff
-     bu(:nbound) = 1e5_dp
-     coefficients(:nbound)=0.0_dp
-     !istate(N+1) = nbound
-     CALL bvls(key=0, m=N, n=N, a=A, b=B, bl=bl, bu=bu, x=coefficients, istate&
-       &=istate, loopa=loopa, w=w)
-   end block
- else
-   if(nbound>0 .and. ignore_bound) then
+ if(nbound>0)  then
+   if (.not. ignore_bound) then
+       block
+         real(dp) :: bl(N), bu(N), w(N)
+         integer :: istate(N+1), loopa
+         real(dp) :: AC(N-nbound,N-nbound),BC(n-nbound,1)
+         AC=A(nbound+1:, nbound+1:)
+         BC=B(nbound+1:, :)
+         ! first fit without any bounding term to get some reference values.
+         call DSGESV(N-nbound,NRHS,AC,LDA-nbound,IPIV,BC,LDB,coefficients(nbound+1:), &
+           &     LDX-nbound,WORK,SWORK,ITER,INFO)
+         bl=-1.0_dp
+         bu=1.0_dp
+         ! constrain the terms to be around the fitted values
+         bl(nbound+1:)=coefficients(nbound+1:)-abs(coefficients(nbound+1:))*0.1
+         bu(nbound+1:)=coefficients(nbound+1:)+abs(coefficients(nbound+1:))*0.1
+         ! constrain the bounding terms
+         bl(:nbound) = min_bound_coeff
+         bu(:nbound) = 1e5_dp
+         coefficients(:nbound)=0.0_dp
+         !istate(N+1) = nbound
+         CALL bvls(key=0, m=N, n=N, a=A, b=B, bl=bl, bu=bu, x=coefficients, istate&
+           &=istate, loopa=loopa, w=w)
+       end block
+     else ! ignore_bound
+       call DSGESV(N-nbound,1,A(nbound+1:, nbound+1:),LDA-nbound,IPIV,B(nbound+1:, :),LDB,coefficients(nbound+1:), &
+        &     LDX-nbound,WORK,SWORK,ITER,INFO)
+       coefficients(:nbound)=0.0_dp
+       if (INFO==N+2) then
+         coefficients = zero
+       end if
 
-     call DSGESV(N-nbound,1,A(nbound+1:, nbound+1:),LDA-nbound,IPIV,B(nbound+1:, :),LDB,coefficients(nbound+1:), &
-       &     LDX-nbound,WORK,SWORK,ITER,INFO)
-     coefficients(:nbound)=0.0_dp
-   !else !nbounds ==0
+       if(any(abs(coefficients)>1.0E10))then
+        INFO = 1
+        coefficients = zero
+       end if
+     info_out = INFO
+    end if  !ignore_bound
+ end if  ! nbound> 0
+
      !FIXME: fails on EOS
      !call DSGESV(N,NRHS,A,LDA,IPIV,B,LDB,coefficients,LDX,WORK,SWORK,ITER,INFO)
-   end if
+   !end if
 
    !other routine
    ! call dgesv(N,NRHS,A,LDA,IPIV,B,LDB,INFO)
    ! coefficients = B(:,NRHS)
    !U is nonsingular
-   if (INFO==N+2) then
-     coefficients = zero
-   end if
+   !if (INFO==N+2) then
+   !  coefficients = zero
+   !end if
 
    if(any(abs(coefficients)>1.0E10))then
      INFO = 1
@@ -2656,7 +2666,6 @@ subroutine fit_polynomial_coeff_solve(coefficients,fcart_coeffs,fcart_diff,energ
 
    info_out = INFO
 
-end if
  ABI_FREE(AF)
  ABI_FREE(IPIV)
  ABI_FREE(R)
