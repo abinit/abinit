@@ -460,7 +460,7 @@ subroutine prcref(atindx,dielar,dielinv,&
 
    else if (dtset%iprcel>=200 .and. dtset%iprcel<300) then
       cplex=optreal
-      call chi0diel(precon, dtset, cplex, mpi_enreg, nfftprc, ngfftprc, dtset%nspden, optreal, optres, 20, tol4, vresid, vrespc)
+      call chi0diel(precon, dtset, cplex, mgfft, mpi_enreg, nfftprc, ngfftprc, dtset%nspden, optreal, optres, 20, tol4, vresid, vrespc)
 !    Other choice ?
  
    else
@@ -1113,7 +1113,7 @@ end subroutine prcref
 
    else if (dtset%iprcel>=200 .and. dtset%iprcel<300) then
      cplex=optreal
-     call chi0diel(precon, dtset, cplex, mpi_enreg, nfftprc, ngfftprc, dtset%nspden, optreal, optres, 20, tol4, vresid, vrespc)
+     call chi0diel(precon, dtset, cplex, mgfft, mpi_enreg, nfftprc, ngfftprc, dtset%nspden, optreal, optres, 20, tol4, vresid, vrespc)
  
 !    Other choice ?
    else
@@ -2414,13 +2414,14 @@ end subroutine dieltcel
 !!
 !! SOURCE
 
-subroutine chi0diel_apply_adjdielmat(precon, mpi_enreg, nfft, ngfft, nspden, rho_g, adjdielmat_rho_g)
+subroutine chi0diel_apply_adjdielmat(precon, dtset, mgfft, mpi_enreg, nfft, ngfft, nspden, rho_g, adjdielmat_rho_g)
 
 !Arguments ------------------------------------
 !scalars
  type(precon_object) :: precon
+ type(dataset_type),intent(in) :: dtset
  type(MPI_type),intent(in) :: mpi_enreg
- integer :: nfft, nspden
+ integer :: mgfft, nfft, nspden
 !arrays
  integer, intent(in) :: ngfft(:)
  real(dp), intent(in) :: rho_g(2, nfft, nspden)
@@ -2447,7 +2448,7 @@ subroutine chi0diel_apply_adjdielmat(precon, mpi_enreg, nfft, ngfft, nspden, rho
 
 !2) Applying the model chi0 operator
  !temp = adjdielmat_rho_g                                                                   !DEBUG
- call precon%apply_chi0(mpi_enreg, ngfft, adjdielmat_rho_g)
+ call precon%apply_chi0(mgfft, mpi_enreg, ngfft, adjdielmat_rho_g)
  !call precon%save_applied_op(ngfft, 2, temp, adjdielmat_rho_g, "applied_chi0.txt")         !DEBUG
 
 !0.2) Basis change : Changing back to the default spin-basis
@@ -2492,13 +2493,14 @@ end subroutine chi0diel_apply_adjdielmat
 !!
 !! SOURCE
 
-subroutine chi0diel_apply_dielmat(precon, mpi_enreg, nfft, ngfft, nspden, v_g, dielmat_v_g)
+subroutine chi0diel_apply_dielmat(precon, dtset, mgfft, mpi_enreg, nfft, ngfft, nspden, v_g, dielmat_v_g)
 
 !Arguments ------------------------------------
 !scalars
  type(precon_object) :: precon
+ type(dataset_type),intent(in) :: dtset
  type(MPI_type),intent(in) :: mpi_enreg
- integer :: nfft, nspden
+ integer :: mgfft, nfft, nspden
 !arrays
  integer, intent(in) :: ngfft(:)
  real(dp), intent(in) ::  v_g(2, nfft, nspden)
@@ -2520,7 +2522,7 @@ subroutine chi0diel_apply_dielmat(precon, mpi_enreg, nfft, ngfft, nspden, v_g, d
  call precon%to_pauli(0, dielmat_v_g)
 
 !1) Applying the model chi0 operator
- call precon%apply_chi0(mpi_enreg, ngfft, dielmat_v_g)
+ call precon%apply_chi0(mgfft, mpi_enreg, ngfft, dielmat_v_g)
 
 !2) Applying the Coulomb kernel vc
  call precon%apply_vc(ngfft, dielmat_v_g)
@@ -2563,7 +2565,7 @@ end subroutine chi0diel_apply_dielmat
 !!  gprimd        = Reciprocal space metric tensor in bohr**-2.
 !!  nspden        = Number of spin-density components.
 !!  optreal       = 1: vresid is given in the REAL space.
-!                   2: vresid is given in the RECIPROCAL space.
+!!                  2: vresid is given in the RECIPROCAL space.
 !!  optres        = 0: the array vresid contains a potential residual.
 !!                  1: the array vresid contains a density residual.
 !!  gmres_maxiter = Maximum number of (non-restarted) iterations for the GMRES.
@@ -2579,13 +2581,13 @@ end subroutine chi0diel_apply_dielmat
 !!
 !! SOURCE
 
-subroutine chi0diel(precon, dtset, cplex, mpi_enreg, nfft, ngfft, nspden, optreal, &
+subroutine chi0diel(precon, dtset, cplex, mgfft, mpi_enreg, nfft, ngfft, nspden, optreal, &
 &   optres, gmres_maxiter, gmres_rtol, vresid, vrespc)
 
 !Arguments ------------------------------------
  type(precon_object) :: precon
 !scalars
- integer,intent(in) :: cplex, nfft, nspden, optreal, optres, gmres_maxiter
+ integer,intent(in) :: cplex, mgfft, nfft, nspden, optreal, optres, gmres_maxiter
  real(dp), intent(in) :: gmres_rtol
  type(MPI_type),intent(in) :: mpi_enreg
  type(dataset_type),intent(in) :: dtset
@@ -2692,10 +2694,10 @@ subroutine chi0diel(precon, dtset, cplex, mpi_enreg, nfft, ngfft, nspden, optrea
 
    if (optres==1) then
    ! We are preconditioning density residual so P = (I-chi0*vc) = adjoint dielectric matrix.
-     call chi0diel_apply_adjdielmat(precon, mpi_enreg, nfft, ngfft, nspden, x_3d, y_3d)
+     call chi0diel_apply_adjdielmat(precon, dtset, mgfft, mpi_enreg, nfft, ngfft, nspden, x_3d, y_3d)
    else if (optres==0) then
    ! We are preconditioning potential residual so P = (I-vc*chi0) = dielectric matrix.
-     call chi0diel_apply_dielmat(precon, mpi_enreg, nfft, ngfft, nspden, x_3d, y_3d)
+     call chi0diel_apply_dielmat(precon, dtset, mgfft, mpi_enreg, nfft, ngfft, nspden, x_3d, y_3d)
    end if
 
  end subroutine matvec ! -------------------------------------------------------------------
