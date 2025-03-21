@@ -10,7 +10,8 @@
 #include "abi_common.h"
 
 module m_precon
-    
+
+    use iso_c_binding   
     use defs_abitypes,  only : MPI_type
     use defs_basis
     use defs_wvltypes
@@ -33,7 +34,7 @@ module m_precon
     public :: linsolve
 
     type, public :: precon_object
-        integer  :: iprcel, nspden
+        integer  :: iprcel, mband, nspden
         real(dp) :: dielng, diemix
         !Geometry :
         real(dp) :: gprimd(3, 3), rprimd(3, 3)
@@ -53,6 +54,9 @@ module m_precon
         real(dp), pointer :: rhor(:, :)
         !For ffts :
         integer  :: nfft
+        !For Kxc :
+        integer :: ixc
+        real(dp), pointer :: kxc(:, :)
 
     contains
         procedure :: init => precon_init        ! Initializes the precon_object.
@@ -123,7 +127,7 @@ contains
         this%rprimd = rprimd
         this%ucvol  = ucvol
         !Pointers
-        this%atindx1=> atindx1 
+        this%atindx1 => atindx1 
         this%cg     => cg
         this%eigen  => eigen
         this%fermie => fermie
@@ -187,13 +191,14 @@ contains
             &   this%ldos)
             !update tdos
             this%tdos = sum(this%ldos(:, 1)) * this%dvol
+            ! TODO : More options to control when the ldos is updated
         write(6,*)'chi0diel update : tdos, ldosldos(1:5, 1)', this%tdos, this%ldos(1:5, 1); flush(6) !DEBUG
             
         end if
 
         !Local polarizability
         if (this%iprcel == 203) then
-            if (istep == 1) then    ! TODO : More option to control when the ldos is updated
+            if (istep == 1) then    
                 call compute_loc_pola(dtset, this%atindx1, this%gprimd, this%nattyp, this%nfft, this%nspden, &
                 &   mpi_enreg, this%rhor, this%rprimd, this%xred, &
                 &   this%loc_pola)
@@ -348,7 +353,7 @@ contains
     subroutine precon_save(this, ngfft, ispden)
 
         !Arguments ------------------------------------
-        class(precon_object), intent(inout) :: this
+        class(precon_object), intent(in) :: this
         integer :: ispden
         integer, intent(in) :: ngfft(:)
 
@@ -397,7 +402,7 @@ contains
     !! SOURCE
 
     subroutine to_pauli(this, opt, v)
-        class(precon_object), intent(inout) :: this
+        class(precon_object), intent(in) :: this
         !Arguments ------------------------------------
         real(dp), intent(inout) ::  v(:, :, :)
         integer :: opt
@@ -412,7 +417,7 @@ contains
         !sigma_0, ... , sigma_3 are the Pauli matrices.
         if (opt == 0) then      !v is a potential
             if (nspden == 2) then
-                !On input v(:, :, 1) is the spin-up potential and v(:, :, 2) is the spin-up potential.
+                !On input v(:, :, 1) is the spin-up potential and v(:, :, 2) is the spin-down potential.
                 !On output the entire potential is v(:, :, 1)*sigma_0 + v(:, :, 2)*sigma_3.
                 v(:, :, 1) = 0.5_dp*(v(:, :, 1) + v(:, :, 2))
                 v(:, :, 2) = v(:, :, 1) - v(:, :, 2)
@@ -475,7 +480,7 @@ contains
         if (opt == 0) then      !v is a potential
             if (nspden == 2) then
                 !On input the entire potential is v(:, :, 1)*sigma_0 + v(:, :, 2)*sigma_3.
-                !On output v(:, :, 1) is the spin-up potential and v(:, :, 2) is the spin-up potential.
+                !On output v(:, :, 1) is the spin-up potential and v(:, :, 2) is the spin-down potential.
                 v(:, :, 1) = v(:, :, 1) + v(:, :, 2)
                 v(:, :, 2) = v(:, :, 1) - 2*v(:, :, 2)
             else if (nspden == 4) then
@@ -542,6 +547,63 @@ contains
         end do
 
     end subroutine apply_vc
+
+    !****f* m_precon/apply_kxc
+    !! NAME
+    !! apply_kxc
+    !!
+    !! FUNCTION
+    !!
+    !! INPUTS
+    !!
+    !! SOURCE
+    subroutine apply_kxc(this, mpi_enreg, ngfft, vec_g)
+        !Arguments ------------------------------------
+        class(precon_object), intent(inout) :: this
+        !scalars
+        type(MPI_type),intent(in) :: mpi_enreg
+        integer :: optreal
+        !arrays
+        integer, intent(in) :: ngfft(:)
+        real(dp), intent(inout) :: vec_g(2, this%nfft, this%nspden)
+        
+        !Local variables-------------------------------
+        !scalars
+        integer :: cplex, ifft, ispden, n3xccc, nhat1, nhat1dim, nhat1gr, nhat1grdim, nkxc, option, usexcnhat
+        logical :: non_magnetic_xc
+        !arrays
+        real(dp) :: qphon(3)
+        real(dp), allocatable :: Kxc_vec_r(:, :)
+        
+        ! *************************************************************************
+        
+        call from_pauli(this, 1, vec_g)
+
+        cplex = 1   ! Input vector is real in real (direct) space.
+        usexcnhat = 0   !
+        nhat1 = 0       !
+        nhat1dim = 0    ! PAW
+        nhat1gr = 0     !
+        nhat1grdim = 0  !
+        non_magnetic_xc = .false.
+        nkxc = size(this%kxc, 2)
+        option = 2  ! Treats only density change (no core_correction)
+        n3xccc = 0  !   -> Core-correction set to 0.
+        xccc3d1 = 0 !
+        !qphon = 
+        ! TODO ifft for vec_g ... or input/output in real space 
+        ! and rewrite to_pauli/from_pauli in real space also.
+        ABI_MALLOC(Kxc_vec_r, (this%nfft, this%nspden))
+        call dfpt_mkvxc(cplex, this%ixc ,this%kxc, mpi_enreg, this%nfft, ngfft, nhat1, nhat1dim, &
+        &               nhat1gr, nhat1grdim, nkxc, non_magnetic_xc, this%nspden, n3xccc, option, &
+        &               qphon, vec_r, this%rprimd, usexcnhat, Kxc_vec_r, xccc3d1)
+        
+        vec_r = Kxc_vec_r
+        ABI_FREE(Kxc_vec_r)
+
+        call to_pauli(this, 0, vec_g)
+
+    end subroutine apply_kxc
 
     !****f* m_precon/derivative_occ
     !! NAME
@@ -889,12 +951,12 @@ contains
 
     end subroutine save_applied_op
 
-    !****f* m_precon/apply_chi0
+!****f* m_precon/apply_chi0_ldos
     !! NAME
-    !! apply_chi0
+    !! apply_chi0_ldos
     !!
     !! FUNCTION
-    !! Applies the model chi0 operator to the vector vec_g (in place)
+    !! Applies the ldos-model chi0 operator to the vector vec_g (in place).
     !!
     !! INPUTS
     !!  mpi_enreg    = Information about MPI parallelization.
@@ -906,7 +968,7 @@ contains
     !!                         When nspden > 1 vec_g is in the Pauli basis.
     !!
     !! SOURCE
-    subroutine apply_chi0(this, mpi_enreg, ngfft, vec_g)
+    subroutine apply_chi0_ldos(this, mpi_enreg, ngfft, vec_g)
 
         !Arguments ------------------------------------
         class(precon_object), intent(in) :: this
@@ -920,53 +982,72 @@ contains
         !scalars
         integer :: cplex
         integer :: ispden
-        integer :: i, i_g
         !arrays
         real(dp), allocatable :: work_r(:), vec_r_1(:)
-        real(dp), allocatable :: work_g(:, :), vec_g_saved(:, :)
-        real(dp) :: g(3)
+        real(dp), allocatable :: work_g(:, :)
         
         ! *************************************************************************
        
-        if (this%iprcel == 201) then
-        !Kerker
+        if (abs(this%tdos) > epsilon(this%tdos)) then   !Checking that tdos is not 0.
+            cplex = 1
+            ABI_MALLOC(vec_r_1, (cplex*this%nfft))    
+            ABI_MALLOC(work_r, (cplex*this%nfft))
+            
+            !1) ifft to get (the sigma_0 component of) vec in the real space
             ispden = 1
-            vec_g(:, :, ispden) = (-1/(4*pi*(this%dielng)**2)) * vec_g(:, :, ispden)
-            do ispden = 2, this%nspden
-                vec_g(:, :, ispden) = 0
+            call fourdp(cplex, vec_g(:, :, ispden), vec_r_1, 1, mpi_enreg, this%nfft, 1, ngfft, 0)
+
+            do ispden = 1, this%nspden
+                !2) chi0(v)(r)_ispden = -ldos_ispden(r)*v_1(r) + 1/dos * ldos_ispden(r)*integral(ldos_1(r')*v_1(r')*dr')
+                work_r = -this%ldos(:, ispden)*vec_r_1 &
+                                + 1/this%tdos * dot_product(this%ldos(:, 1), vec_r_1)*this%dvol * this%ldos(:, ispden)
+
+                !3) fft to get vec back in the reciprocal space
+                call fourdp(cplex, vec_g(:, :, ispden), work_r, -1, mpi_enreg, this%nfft, 1, ngfft, 0)
             end do
+
+            ABI_FREE(work_r)
+            ABI_FREE(vec_r_1)
+        else 
+            vec_g = 0
         end if
+
+    end subroutine apply_chi0_ldos
+
+    !****f* m_precon/apply_chi0_locpola
+    !! NAME
+    !! apply_chi0_ldos
+    !!
+    !! FUNCTION
+    !! Applies the local polarizability model chi0 operator to the vector vec_g (in place).
+    !! TODO
+    !!
+    !! INPUTS
+    !!  mpi_enreg    = Information about MPI parallelization.
+    !!  ngfft        = Contain all needed information about 3D FFT, see ~abinit/doc/variables/gstate/#ngfft.
+    !!  ispden       = Index of spin-density component.
+    !!
+    !! SIDE EFFECTS
+    !!  vec_g (nspden, 2, :) = Vector (in G-space) to which the model chi0 operator is applied (in place).
+    !!                         When nspden > 1 vec_g is in the Pauli basis.
+    !!
+    !! SOURCE
+    subroutine apply_chi0_locpola(this, mpi_enreg, ngfft, vec_g)
+
+        !Arguments ------------------------------------
+        class(precon_object), intent(in) :: this
+        !scalars
+        type(MPI_type), intent(in) :: mpi_enreg
+        !arrays
+        integer, intent(in) :: ngfft(:)
+        real(dp), intent(inout) :: vec_g(2, this%nfft, this%nspden)
+       
+        !Local variables-------------------------------
+        !scalars
+        !arrays
         
-        if (this%iprcel == 202) then
-        !LDOS model
-            if (abs(this%tdos) > epsilon(this%tdos)) then   !Checking that tdos is not 0.
-                cplex = 1
-                ABI_MALLOC(vec_r_1, (cplex*this%nfft))    
-                ABI_MALLOC(work_r, (cplex*this%nfft))
-                
-                !1) ifft to get (the sigma_0 component of) vec in the real space
-                ispden = 1
-                call fourdp(cplex, vec_g(:, :, ispden), vec_r_1, 1, mpi_enreg, this%nfft, 1, ngfft, 0)
-
-                do ispden = 1, this%nspden
-                    !2) chi0(v)(r)_ispden = -ldos_ispden(r)*v_1(r) + 1/dos * ldos_ispden(r)*integral(ldos_1(r')*v_1(r')*dr')
-                    work_r = -this%ldos(:, ispden)*vec_r_1 &
-                                    + 1/this%tdos * dot_product(this%ldos(:, 1), vec_r_1)*this%dvol * this%ldos(:, ispden)
-
-                    !3) fft to get vec back in the reciprocal space
-                    call fourdp(cplex, vec_g(:, :, ispden), work_r, -1, mpi_enreg, this%nfft, 1, ngfft, 0)
-                end do
-
-                ABI_FREE(work_r)
-                ABI_FREE(vec_r_1)
-            else 
-                vec_g = 0
-            end if
-
-        end if
-
-        if (this%iprcel == 203) then
-        !Local polarizability model
+        ! *************************************************************************
+       
         ! TODO : spin
         !    ABI_MALLOC(work_g, (2, this%nfft))
         !    ABI_MALLOC(vec_g_saved, (2, this%nfft))
@@ -995,6 +1076,234 @@ contains
         !        vec_g = vec_g + work_g
 
         !    end do
+
+    end subroutine apply_chi0_locpola
+
+    !****f* m_precon/apply_chi0_mag
+    !! NAME
+    !! apply_chi0_mag
+    !!
+    !! FUNCTION
+    !! Applies the model ... of the chi0 operator to the vector vec_g
+    !!
+    !! INPUTS
+    !!  mpi_enreg    = Information about MPI parallelization.
+    !!  ngfft        = Contain all needed information about 3D FFT, see ~abinit/doc/variables/gstate/#ngfft.
+    !!  ispden       = Index of spin-density component.
+    !!  vec_g (2, :, nspden)      = Vector (in G-space) to which the model chi0 operator is applied.
+    !!                              When nspden > 1 vec_g is in the Pauli basis.
+    !!
+    !! OuTPUTS
+    !!  chi0_vec_g (2, :, nspden) = ...
+    !!                              When nspden > 1 chi0_vec_g is in the Pauli basis.
+    !!
+    !! SOURCE
+    ! TODO : Name 
+    subroutine apply_chi0_mag(this, dtset, mgfft, mpi_enreg, ngfft, vec_g)
+
+        !Arguments ------------------------------------
+        class(precon_object), intent(in) :: this
+        !scalars
+        type(dataset_type),intent(in) :: dtset
+        type(MPI_type), intent(in) :: mpi_enreg
+        integer,intent(in) :: mgfft
+        !arrays
+        integer, intent(in) :: ngfft(:) 
+        real(dp), intent(inout) :: vec_g(2, this%nfft, dtset%nspden)
+       
+        !Local variables-------------------------------
+        !scalars
+        integer :: cplex
+        integer :: ispden, istwf_k, maxocc, mcg, ndat, nfftot, npw_k, option, tim_fourwf
+        integer :: i_eigen_1, i_eigen_2, i_cg, ikpt, iband
+        integer :: n4, n5, n6
+        real(dp) :: fp, eigenval
+        integer :: dummy_int
+        real(dp) :: dummy_real
+        !arrays
+        integer :: gbound(2*mgfft+8,2)
+        integer :: kg_k(3)
+        real(dp), allocatable :: weights(:), vec_r_spin(:), chi0_vec_r(:, :)
+        real(dp), allocatable, target :: rho_ii(:, :, :)
+        type(c_ptr) :: rho_ii_c
+        real(dp), pointer :: rho_ii_1d(:)
+
+        !dummy mkrho arguments
+        type(paw_dmft_type)     :: paw_dmft
+        type(wvl_wf_type)       :: wvl_wfs
+        type(wvl_denspot_type)  :: wvl_den
+        !dummy fourwfk arguments
+        real(dp), allocatable ::  dummy_denpot(:, :, :), dummy_fofgout(:, :)
+        
+        ! *************************************************************************
+       
+        !chi0_spin restricted to eigenvalues variations :
+        !   chi0_spin = sum_i fi' <rhoii|vec> |rhoii>
+
+        if (dtset%nsppol /= 2) then
+            ABI_BUG("Preconditioner ... (iprcel=2..) can only be used with nsppol=2")
+        end if
+
+        n4 = ngfft(4)
+        n5 = ngfft(5)
+        n6 = ngfft(6)
+        if (this%nfft /= n4*n5*n6) then
+            ABI_BUG("Mismatch nfft != n4*n5*n6")
+        end if
+
+        !1) Computing vec_r_spin = spin component of the input vector in real space.
+        ABI_MALLOC(vec_r_spin, (this%nfft))
+        call fourdp(1, vec_g(:, :, 2), vec_r_spin, 1, mpi_enreg, this%nfft, 1, ngfft, 0)
+        
+        !2) Computing the weights = fi' * <rhoii, vec_spin>
+        ABI_MALLOC(weights, (size(this%eigen)))
+        maxocc = two / (dtset%nsppol * dtset%nspinor)   !Maximum number of occupations (1 or 2)
+        
+        !Allocating the array that will contain rho_ii
+        ABI_MALLOC(rho_ii, (n4, n5, n6))
+
+        !Allocating dummy arrays
+        ABI_MALLOC(dummy_denpot,(0,n5,n6))
+        ABI_MALLOC(dummy_fofgout,(2,0))
+
+        do ikpt = 1, dtset%nkpt ! TODO : what if mpi paral ???
+
+            istwf_k = dtset%istwfk(ikpt) ! Option parameter that describes the storage of wfs at this kpt.
+            kg_k = this%kg(:, ikpt)     ! Reduced plane-wave coordinate of this kpt. TODO : Check
+            npw_k = this%npwarr(ikpt)   ! Number of plane-wave at this kpt.
+            call sphereboundary(gbound, istwf_k, kg_k, mgfft, npw_k)    ! Computes gbound.
+
+            do iband = 1, dtset%mband
+
+                !Indices
+                i_eigen_1 = iband + (ikpt-1)*dtset%mband                         ! index of (iband, ikpt, isppol=1) in eigen array
+                i_eigen_2 = iband + (ikpt-1)*dtset%mband + dtset%mband*dtset%nkpt  ! index of (iband, ikpt, isppol=2) in eigen array
+                i_cg = (iband-1)*dtset%mpw + (ikpt-1)*dtset%mband*dtset%mpw        ! index of (ikpt, iband, isppol=1) in cg array
+                
+                !2.1) Computing f'(eig_i - fermie).
+                eigenval = (this%eigen(i_eigen_1)+this%eigen(i_eigen_2))/2    !Mean of up/down
+                fp = derivative_occ(dtset%occopt, eigenval, this%fermie, dtset%tsmear) * maxocc
+
+                if (abs(fp) > tol14) then
+                    !2.2) Computing rho_ii = |psi_i|^2 using fourwf (if fp is not 0).
+                    
+                    !Input parameters for fourwf :
+                    option = 0      ! FFT from reciprocal to direct space.
+                    ndat = 1        ! Only one FFT TODO : Do them all in once ? 
+                    tim_fourwf = 0
+                    call fourwf(dummy_int, dummy_denpot, this%cg(:, i_cg:i_cg+npw_k-1), dummy_fofgout, rho_ii,  &
+                    &           gbound, gbound, istwf_k, kg_k, kg_k, mgfft, mpi_enreg, ndat, ngfft, npw_k, &
+                    &           dummy_int, n4, n5, n6, option, tim_fourwf, dummy_real, dummy_real)
+
+                    !Using c_pointer to reshape vec_r_spin to match the shape of rho_ii
+                    rho_ii_c = c_loc(rho_ii)
+                    call c_f_pointer(rho_ii_c, rho_ii_1d, shape=[this%nfft])    ! TODO : chack that the array will be read in the right order
+
+                    weights(i_eigen_1) =  fp * maxocc * dot_product(rho_ii_1d, vec_r_spin_3d) * this%dvol
+
+                else
+                    weights(i_eigen_1) = 0
+                end if
+                weights(i_eigen_2) = 0
+            end do
+        end do
+
+        ABI_FREE(rho_ii)
+        ABI_FREE(vec_r_spin)
+        ABI_FREE(dummy_denpot)
+        ABI_FREE(dummy_fofgout)
+        
+        !3) Computing chi0 * vec using mkrho with custom wheights in place of the occupations.
+        ! In place : vec_g = chi0 * vec_g
+        ABI_MALLOC(chi0_vec_r, (this%nfft, dtset%nspden))
+        mcg = size(this%cg, 2)
+        paw_dmft%use_dmft = 0
+        paw_dmft%use_sc_dmft = 0
+        call mkrho(this%cg, dtset, this%gprimd, this%irrzon, this%kg, mcg, mpi_enreg, this%npwarr, weights, &
+        &   paw_dmft, this%phnons, vec_g, chi0_vec_r, this%rprimd, 0, this%ucvol, wvl_den, wvl_wfs, option=0)
+        !TODO copy of mpi_enreg for inout
+        ABI_FREE(weights)
+        
+        ! TODO :  nfftmix != this%nfft en PAW grille
+        nfftot = ngfft(1) * ngfft(2) * ngfft(3)
+        call symrhg(1, this%gprimd, this%irrzon, mpi_enreg, this%nfft, nfftot, ngfft, dtset%nspden, dtset%nsppol, &
+        &   dtset%nsym, this%phnons, vec_g, chi0_vec_r, this%rprimd, dtset%symafm, dtset%symrel, dtset%tnons)
+        ! TODO : PAW
+
+        ABI_FREE(chi0_vec_r)    ! TODO : save that ?
+
+        !Basis change : With collinear spins the ldos is not returned in the Pauli (tot/spin) basis by mkrho.
+        if (dtset%nspden == 2) then
+            call to_pauli(this, 0, vec_g)
+            !This model only acts on the spin component.
+            vec_g(:, :,  1) = 0
+        end if
+
+    end subroutine apply_chi0_mag
+
+    !****f* m_precon/apply_chi0
+    !! NAME
+    !! apply_chi0
+    !!
+    !! FUNCTION
+    !! Applies the model chi0 operator to the vector vec_g (in place)
+    !!
+    !! INPUTS
+    !!  mpi_enreg    = Information about MPI parallelization.
+    !!  ngfft        = Contain all needed information about 3D FFT, see ~abinit/doc/variables/gstate/#ngfft.
+    !!  ispden       = Index of spin-density component.
+    !!
+    !! SIDE EFFECTS
+    !!  vec_g (nspden, 2, :) = Vector (in G-space) to which the model chi0 operator is applied (in place).
+    !!                         When nspden > 1 vec_g is in the Pauli basis.
+    !!
+    !! SOURCE
+    subroutine apply_chi0(this, dtset, mgfft, mpi_enreg, ngfft, vec_g)
+
+        !Arguments ------------------------------------
+        class(precon_object), intent(in) :: this
+        !scalars
+        type(dataset_type),intent(in) :: dtset
+        type(MPI_type), intent(in) :: mpi_enreg
+        integer, intent(in) :: mgfft
+        !arrays
+        integer, intent(in) :: ngfft(:)
+        real(dp), intent(inout) :: vec_g(2, this%nfft, this%nspden)
+       
+        !Local variables-------------------------------
+        !scalars
+        integer :: cplex
+        integer :: ispden
+        integer :: i, i_g
+        !arrays
+        real(dp), allocatable :: work_r(:), vec_r_1(:)
+        real(dp), allocatable :: work_g(:, :), vec_g_saved(:, :)
+        real(dp) :: g(3)
+        
+        ! *************************************************************************
+       
+        !Kerker
+        if (this%iprcel == 201) then
+            ispden = 1
+            vec_g(:, :, ispden) = (-1/(4*pi*(this%dielng)**2)) * vec_g(:, :, ispden)
+            do ispden = 2, this%nspden
+                vec_g(:, :, ispden) = 0
+            end do
+        end if
+        
+        !LDOS model
+        if (this%iprcel == 202) then
+            call apply_chi0_ldos(this, mpi_enreg, ngfft, vec_g)
+        end if
+
+        !Deigvals (name?) model
+        if (this%iprcel == 203) then
+            call apply_chi0_mag(this, dtset, mgfft, mpi_enreg, ngfft, vec_g)
+        end if
+
+        !Local polarizability model - Not implemented
+        if (this%iprcel == 204) then
+            call apply_chi0_locpola(this, mpi_enreg, ngfft, vec_g)
         end if
 
     end subroutine apply_chi0
