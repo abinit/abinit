@@ -9796,3 +9796,48 @@ abstract = {We describe the following new features which significantly enhance t
   url = {https://link.aps.org/doi/10.1103/PhysRevB.90.054115}
 }
 
+@article{Ceriotti2014,
+title = {i-PI: A Python interface for ab initio path integral molecular dynamics simulations},
+journal = {Computer Physics Communications},
+volume = {185},
+number = {3},
+pages = {1019-1026},
+year = {2014},
+issn = {0010-4655},
+doi = {https://doi.org/10.1016/j.cpc.2013.10.027},
+url = {https://www.sciencedirect.com/science/article/pii/S001046551300372X},
+author = {Michele Ceriotti and Joshua More and David E. Manolopoulos},
+keywords = {Path integral, Molecular dynamics, },
+abstract = {Recent developments in path integral methodology have significantly reduced the computational expense of including quantum mechanical effects in the nuclear motion in ab initio molecular dynamics simulations. However, the implementation of these developments requires a considerable programming effort, which has hindered their adoption. Here we describe i-PI, an interface written in Python that has been designed to minimise the effort required to bring state-of-the-art path integral techniques to an electronic structure program. While it is best suited to first principles calculations and path integral molecular dynamics, i-PI can also be used to perform classical molecular dynamics simulations, and can just as easily be interfaced with an empirical forcefield code. To give just one example of the many potential applications of the interface, we use it in conjunction with the CP2K electronic structure package to showcase the importance of nuclear quantum effects in high-pressure water.
+Program summary
+Program title: i-PI Catalogue identifier: AERN_v1_0 Program summary URL: http://cpc.cs.qub.ac.uk/summaries/AERN_v1_0.html Program obtainable from: CPC Program Library, Queen’s University, Belfast, N. Ireland Licensing provisions: GNU General Public License, version 3 No. of lines in distributed program, including test data, etc.: 138626 No. of bytes in distributed program, including test data, etc.: 3128618 Distribution format: tar.gz Programming language: Python. Computer: Multiple architectures. Operating system: Linux, Mac OSX, Windows. RAM: Less than 256 Mb Classification: 7.7. External routines: NumPy Nature of problem: Bringing the latest developments in the modelling of nuclear quantum effects with path integral molecular dynamics to ab initio electronic structure programs with minimal implementational effort. Solution method: State-of-the-art path integral molecular dynamics techniques are implemented in a Python interface. Any electronic structure code can be patched to receive the atomic coordinates from the Python interface, and to return the forces and energy that are used to integrate the equations of motion. Restrictions: This code only deals with distinguishable particles. It does not include fermonic or bosonic exchanges between equivalent nuclei, which can become important at very low temperatures. Running time: Depends dramatically on the nature of the simulation being performed. A few minutes for short tests with empirical force fields, up to several weeks for production calculations with ab initio forces. The examples provided with the code run in less than an hour.}
+}
+
+@article{HjorthLarsen2017,
+  title = {The atomic simulation environment—a Python library for working with atoms},
+  volume = {29},
+  ISSN = {1361-648X},
+  url = {http://dx.doi.org/10.1088/1361-648X/aa680e},
+  DOI = {10.1088/1361-648x/aa680e},
+  number = {27},
+  journal = {Journal of Physics: Condensed Matter},
+  publisher = {IOP Publishing},
+  author = {Hjorth Larsen,  Ask and Jørgen Mortensen,  Jens and Blomqvist,  Jakob and Castelli,  Ivano E and Christensen,  Rune and Dułak,  Marcin and Friis,  Jesper and Groves,  Michael N and Hammer,  Bjørk and Hargus,  Cory and Hermes,  Eric D and Jennings,  Paul C and Bjerre Jensen,  Peter and Kermode,  James and Kitchin,  John R and Leonhard Kolsbjerg,  Esben and Kubal,  Joseph and Kaasbjerg,  Kristen and Lysgaard,  Steen and Bergmann Maronsson,  Jón and Maxson,  Tristan and Olsen,  Thomas and Pastewka,  Lars and Peterson,  Andrew and Rostgaard,  Carsten and Schiøtz,  Jakob and Sch\"{u}tt,  Ole and Strange,  Mikkel and Thygesen,  Kristian S and Vegge,  Tejs and Vilhelmsen,  Lasse and Walter,  Michael and Zeng,  Zhenhua and Jacobsen,  Karsten W},
+  year = {2017},
+  month = jun,
+  pages = {273002}
+}
+
+@article{Yu2024,
+  title = {Systematic assessment of various universal machine‐learning interatomic potentials},
+  volume = {2},
+  ISSN = {2940-9497},
+  url = {http://dx.doi.org/10.1002/mgea.58},
+  DOI = {10.1002/mgea.58},
+  number = {3},
+  journal = {Materials Genome Engineering Advances},
+  publisher = {Wiley},
+  author = {Yu,  Haochen and Giantomassi,  Matteo and Materzanini,  Giuliana and Wang,  Junjie and Rignanese,  Gian‐Marco},
+  year = {2024},
+  month = jul
+}
