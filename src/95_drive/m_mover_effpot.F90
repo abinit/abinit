@@ -107,7 +107,7 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
 !scalar
  integer, intent(in) :: option,comm
 !array
- type(multibinit_dtset_type),intent(in) :: inp
+ type(multibinit_dtset_type),intent(inout) :: inp
  type(effective_potential_type),intent(inout)  :: effective_potential
  character(len=fnlen),intent(in) :: filnam(15)
  type(abihist),optional,intent(inout):: hist
@@ -577,7 +577,7 @@ ABI_FREE(xcart)
      call mover(scfcv_args,ab_xfh,acell,effective_potential%crystal%amu,dtfil,electronpositron,&
 &     rhog,rhor,dtset%rprimd_orig,vel,vel_cell,xred,xred_old,&
 &     effective_potential=effective_potential,filename_ddb=filnam(3),&
-&     verbose=verbose,writeHIST=writeHIST,scup_dtset=scup_inp,sc_size=sc_size(:),efield=inp%efield(:))
+&     verbose=verbose,writeHIST=writeHIST,scup_dtset=scup_inp,sc_size=sc_size(:),multibinit_dtset=inp)
      INQUIRE(FILE='MD_anharmonic_terms_energy.dat',OPENED=file_opened,number=unit_out)
      if(file_opened) close(unit_out)
    else if(option== -1.or.option==-2)then
