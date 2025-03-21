@@ -3,10 +3,12 @@
 # Include geometry and pseudos
 include "gwr_include.abi"
 
-ndtset 2
+ndtset 3
 
 ngkpt1   2 2 2
 ngkpt2   4 4 4
+ngkpt3   6 6 6
+
 # Definition of the k-point grid
 # IMPORTANT: GWR requires Gamma-centered k-meshes
 nshiftk 1

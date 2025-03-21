@@ -6,9 +6,10 @@
 include "gwr_include.abi"
 
 ndtset 2
-paral_kgb 1   # Activate spin/k-point/band/FFT
-autoparal 1   # Automatic selection of np* variables.
-npfft 1       #
+
+#paral_kgb 1   # Activate spin/k-point/band/FFT
+#autoparal 1   # Automatic selection of np* variables.
+#npfft 1       #
 
 ####################
 # Dataset 1: SCF run
@@ -16,16 +17,21 @@ npfft 1       #
 nband1  6
 
 # Definition of the k-point grid
-ngkpt1  2 2 2
-nshiftk1 1
+#ngkpt1   2 2 2
+ngkpt1   4 4 4
+nshiftk1 4
 shiftk1  0.0 0.0 0.0
-tolvrs1 1.e-8
+         0.0 0.5 0.5
+         0.5 0.0 0.5
+         0.5 0.5 0.0
+tolvrs1 1.e-12
 
 #######################################
 # Dataset 2: Band structure calculation
 #######################################
 getden2    -1
-nband2      8
+nband2      12
+nbdbuf2     4
 tolwfr2     1e-20
 iscf2      -2   # NSCF run
 

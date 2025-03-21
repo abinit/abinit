@@ -1,4 +1,5 @@
-ecut 10.0          # Maximal kinetic energy cut-off, in Hartree
+ecut 8.0          # Maximal kinetic energy cut-off, in Hartree
+                  # NB: Too small. Use ~16 for production
 
 # Definition of the unit cell: fcc
 acell  3*10.26         # Experimental lattice constants in Bohr
@@ -17,5 +18,6 @@ xred
       0.0  0.0  0.0
       0.25 0.25 0.25
 
+# PBE pseudos from the PseudoDojo (scalar relativistic)
 pp_dirpath "$ABI_PSPDIR"
 pseudos "Psdj_nc_sr_04_pbe_std_psp8/Si.psp8"
