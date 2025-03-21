@@ -763,7 +763,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 
                call rot_cg(paw_dmft%occnd(:,:,:,ikpt,isppol), cwavef_rot, npw_k, nband_k, blocksize,&
 &                          dtset%nspinor, paw_dmft%include_bands(1), paw_dmft%mbandc, occ_diag,&
-&                          paw_dmft%dmft_test)
+&                          paw_dmft%dmft_optim)
                do ib=1,blocksize
                  cwavef(:, 1+(ib-1)*npw_k:ib*npw_k, :) = cwavef_rot(:, :, ib, :)
                end do

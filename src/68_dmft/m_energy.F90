@@ -916,7 +916,7 @@ subroutine compute_dftu_energy(energies_dmft,green,paw_dmft,pawtab,renorm)
  real(dp), optional, intent(in) :: renorm(:)
 ! integer :: prtopt
 !Local variables-------------------------------
- integer :: dmft_test,iatom,idijeff,im,im1,ims,ims1,ispinor,ispinor1,isppol,itypat
+ integer :: dmft_optim,iatom,idijeff,im,im1,ims,ims1,ispinor,ispinor1,isppol,itypat
  integer :: lpawu,lpawu1,ndim,ndim1,nocc,nsploop,prt_pawuenergy
  real(dp) :: e_dc,e_dc_for_s,e_dcdc,e_dcdc_for_s,e_ee,edftumdc,edftumdc_for_s
  real(dp) :: edftumdcdc,edftumdcdc_for_s,e_ee_for_s,jpawu,upawu,xe1,xe2
@@ -941,7 +941,7 @@ subroutine compute_dftu_energy(energies_dmft,green,paw_dmft,pawtab,renorm)
  t2g        = (paw_dmft%dmft_t2g == 1)
  x2my2d     = (paw_dmft%dmft_x2my2d == 1)
 
- dmft_test = paw_dmft%dmft_test
+ dmft_optim = paw_dmft%dmft_optim
 
  isppol   = 1
  ispinor  = 1
@@ -981,12 +981,12 @@ subroutine compute_dftu_energy(energies_dmft,green,paw_dmft,pawtab,renorm)
      ! Initialize noccmmp
      do im1=1,ndim
        ims1 = im1
-       if (x2my2d .and. dmft_test == 1) ims1 = 5
-       if (t2g .and. dmft_test == 1) ims1 = mt2g(im1)
+       if (x2my2d .and. dmft_optim == 1) ims1 = 5
+       if (t2g .and. dmft_optim == 1) ims1 = mt2g(im1)
        do im=1,ndim
          ims = im
-         if (x2my2d .and. dmft_test == 1) ims = 5
-         if (t2g .and. dmft_test == 1) ims = mt2g(im)
+         if (x2my2d .and. dmft_optim == 1) ims = 5
+         if (t2g .and. dmft_optim == 1) ims = mt2g(im)
          ! Here, we take the transpose in order to match pawuenergy's conventions
          noccmmp(1,ims,ims1,idijeff) = &
            & dble(green%occup%matlu(iatom)%mat(im1+(ispinor-1)*ndim,im+(ispinor1-1)*ndim,isppol))

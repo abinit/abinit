@@ -647,7 +647,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
      call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftcheck',dt%dmftcheck,4,(/-1,0,1,2/),iout)
      cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
-     call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_test',dt%dmft_test,2,(/0,1/),iout)
+     call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_optim',dt%dmft_optim,2,(/0,1/),iout)
      if(dt%dmftcheck/=-1) then
 
        cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
@@ -750,17 +750,19 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
        endif
        if (dt%dmft_dc==8) then
          cond_string(1)='dmft_dc' ; cond_values(1)=dt%dmft_dc
-         call chkint_eq(0,1,cond_string,cond_values,ierr,'ixc',dt%ixc,1,(/7/),iout)
+         call chkint_eq(0,1,cond_string,cond_values,ierr,'ixc',dt%ixc,2,(/7,-1012/),iout)
          cond_string(1)='dmft_dc' ; cond_values(1)=dt%dmft_dc
          call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_solv',dt%dmft_solv,9,(/-2,0,1,2,5,6,7,8,9/),iout)
          cond_string(1)='dmft_dc' ; cond_values(1)=dt%dmft_dc
          call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_t2g',dt%dmft_t2g,1,(/0/),iout)
          cond_string(1)='dmft_dc' ; cond_values(1)=dt%dmft_dc
          call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_x2my2d',dt%dmft_x2my2d,1,(/0/),iout)
-         if (dt%dmft_use_yukawa_param==1) then
-           cond_string(1)='dmft_use_yukawa_param' ; cond_values(1)=dt%dmft_use_yukawa_param
+         cond_string(1)='dmft_dc' ; cond_values(1)=dt%dmft_dc
+         call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_yukawa_param',dt%dmft_yukawa_param,4,(/1,2,3,4/),iout)
+         if (dt%dmft_yukawa_param==4) then
+           cond_string(1)='dmft_yukawa_param' ; cond_values(1)=dt%dmft_yukawa_param
            call chkdpr(0,1,cond_string,cond_values,ierr,'dmft_lambda_yukawa',dt%dmft_lambda_yukawa,1,zero,iout)
-           cond_string(1)='dmft_use_yukawa_param' ; cond_values(1)=dt%dmft_use_yukawa_param
+           cond_string(1)='dmft_yukawa_param' ; cond_values(1)=dt%dmft_yukawa_param
            call chkdpr(0,1,cond_string,cond_values,ierr,'dmft_epsilon_yukawa',dt%dmft_epsilon_yukawa,1,zero,iout)
          end if
        end if

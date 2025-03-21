@@ -3366,7 +3366,7 @@ subroutine newton(green,self,paw_dmft,x_input,x_precision,max_iter,&
  real(dp), intent(inout) :: x_input,x_precision
  integer, optional, intent(in) :: opt_algo
 !Local variables-------------------------------
- integer :: dmft_test,iter,option
+ integer :: dmft_optim,iter,option
  logical :: l_minus,l_plus
  real(dp) :: Fx,Fxdouble,Fxoptimum,Fxprime,nb_elec_x,step
  real(dp) :: x_minus,x_optimum,x_plus,xold
@@ -3400,9 +3400,9 @@ subroutine newton(green,self,paw_dmft,x_input,x_precision,max_iter,&
  Fxoptimum = one
  x_optimum = zero
 
- dmft_test = paw_dmft%dmft_test
+ dmft_optim = paw_dmft%dmft_optim
 
- if (dmft_test == 1) xold = x_input
+ if (dmft_optim == 1) xold = x_input
 
 !========================================
 ! Start iteration to find fermi level
@@ -3412,7 +3412,7 @@ subroutine newton(green,self,paw_dmft,x_input,x_precision,max_iter,&
 !  ========================================
 !  If zero is located between two values: apply newton method or dichotomy
 !  ========================================
-   if ((l_minus .and. l_plus) .or. dmft_test == 1) then
+   if ((l_minus .and. l_plus) .or. dmft_optim == 1) then
 
 !    ==============================================
 !    Compute the function and derivatives for newton
@@ -3450,11 +3450,11 @@ subroutine newton(green,self,paw_dmft,x_input,x_precision,max_iter,&
 !    ==============================================
      xold = x_input
      if (option == 1) then
-       if (dmft_test == 1) then
+       if (dmft_optim == 1) then
          x_input = x_input - sign(one,Fx)*merge(step,min(step,abs(Fx/Fxprime)),Fxprime<0)
        else
          x_input = x_input - Fx/Fxprime
-       end if ! dmft_test
+       end if ! dmft_optim
      end if ! option=1
      if (option == 2) x_input = x_input - two*Fx*Fxprime/(two*(Fxprime**2)-Fx*Fxdouble)
 
@@ -3462,7 +3462,7 @@ subroutine newton(green,self,paw_dmft,x_input,x_precision,max_iter,&
 !    If newton does not work well, use dichotomy.
 !    ==============================================
 
-     if (dmft_test == 1) then
+     if (dmft_optim == 1) then
        if (Fx < 0) then
          l_minus = .true.
          x_minus = xold
@@ -3471,17 +3471,17 @@ subroutine newton(green,self,paw_dmft,x_input,x_precision,max_iter,&
          l_plus = .true.
          x_plus = xold
        end if
-     end if ! dmft_test
+     end if ! dmft_optim
 
      if ((x_input < x_minus .or. x_input > x_plus) .and. (l_minus .and. l_plus)) then
 
-       if (dmft_test == 0) then
+       if (dmft_optim == 0) then
          call compute_nb_elec(green,self,paw_dmft,Fx,nb_elec_x,xold)
        end if
 
        write(message,'(a,3f12.6)') " ---",x_input,Fx+paw_dmft%nelectval,Fx
        call wrtout(std_out,message,'COLL')
-       if (dmft_test == 0) then
+       if (dmft_optim == 0) then
          if (Fx > 0) then
            x_plus = xold
          else if (Fx < 0) then
@@ -3519,9 +3519,9 @@ subroutine newton(green,self,paw_dmft,x_input,x_precision,max_iter,&
 
    end if ! l_minus and l_plus
 
-   if (abs(Fx) < abs(Fxoptimum) .or. (iter == 1 .and. dmft_test == 1)) then
+   if (abs(Fx) < abs(Fxoptimum) .or. (iter == 1 .and. dmft_optim == 1)) then
      Fxoptimum = Fx
-     x_optimum = merge(xold,x_input,dmft_test==1)
+     x_optimum = merge(xold,x_input,dmft_optim==1)
    end if ! abs(Fx)<abs(Fxoptimum)
 
 
@@ -3584,14 +3584,14 @@ subroutine function_and_deriv(green,self,paw_dmft,x_input,x_precision, &
  real(dp), intent(in) :: f_precision,x_input,x_precision
  real(dp), intent(out) :: Fx,Fxprime,Fxdouble
 !Local variables-------------------------------
- integer :: dmft_test
+ integer :: dmft_optim
  real(dp) :: deltax,Fxminus,Fxplus,nb_elec_x,xminus,x0,xplus
  character(len=500) :: message
 ! *********************************************************************
 
-   dmft_test = paw_dmft%dmft_test
+   dmft_optim = paw_dmft%dmft_optim
 
-   if (dmft_test == 0) then
+   if (dmft_optim == 0) then
 
 !  Choose deltax: for numeric evaluation of derivative
    !if(iter==1) then
@@ -3640,7 +3640,7 @@ subroutine function_and_deriv(green,self,paw_dmft,x_input,x_precision, &
      write(message,'(a,3f12.6)') "  - ",x_input,nb_elec_x,Fx
      call wrtout(std_out,message,'COLL')
 
-   end if ! dmft_test
+   end if ! dmft_optim
 
    if (Fxprime < zero) then
      write(message,'(a,f12.6)') "  Warning: slope of charge versus fermi level is negative !",Fxprime
@@ -3679,7 +3679,7 @@ subroutine compute_nb_elec(green,self,paw_dmft,Fx,nb_elec_x,fermie,Fxprime)
  real(dp), intent(out) :: Fx,nb_elec_x
  real(dp), optional, intent(out) :: Fxprime
 !Local variables-------------------------------
- integer :: band_index,dmft_test,i,ib,ierr,ifreq,ikpt,isppol,mbandc
+ integer :: band_index,dmft_optim,i,ib,ierr,ifreq,ikpt,isppol,mbandc
  integer :: mkmem,nband_k,nkpt,nmoments,nspinor,nsppol,shift
  real(dp) :: correction,correction_prime,eig
  real(dp) :: fac,occ_prime,temp,wtk
@@ -3688,9 +3688,9 @@ subroutine compute_nb_elec(green,self,paw_dmft,Fx,nb_elec_x,fermie,Fxprime)
  complex(dpc), allocatable :: omega_fac(:),trace_moments(:),trace_moments_prime(:)
 ! *********************************************************************
 
-   dmft_test = paw_dmft%dmft_test
+   dmft_optim = paw_dmft%dmft_optim
 
-   if (dmft_test == 0) then
+   if (dmft_optim == 0) then
 
      paw_dmft%fermie = fermie
      call compute_green(green,paw_dmft,0,self,opt_self=1,opt_nonxsum=1,opt_nonxsum2=1)
@@ -3805,7 +3805,7 @@ subroutine compute_nb_elec(green,self,paw_dmft,Fx,nb_elec_x,fermie,Fxprime)
        Fxprime = Fxprime + correction_prime
      end if ! use_all_bands
 
-   end if ! dmft_test
+   end if ! dmft_optim
 
    nb_elec_x = green%charge_ks
    Fx = green%charge_ks - paw_dmft%nelectval
