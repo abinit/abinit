@@ -135,7 +135,7 @@ module m_nvtx_data
   integer, parameter :: NVTX_SLICEALL_INIT_ASYNC_BUFFER = 103
   integer, parameter :: NVTX_SLICEALL_FREE_ASYNC_BUFFER = 104
   integer, parameter :: NVTX_SLICEALL_GET_AX_BX = 105
-  integer, parameter :: NVTX_SLICES_NONLOP = 106
+  integer, parameter :: NVTX_SPSL_NONLOP = 106
   integer, parameter :: NVTX_SLICE_GET_AX_BX = 107
   integer, parameter :: NVTX_SLICE_GET_BM1X = 108
   integer, parameter :: NVTX_SLICE_CORE = 109
@@ -149,7 +149,7 @@ module m_nvtx_data
   integer, parameter :: NVTX_SLICE_RUN = 117
   integer, parameter :: NVTX_SLICE_COPY = 118
   integer, parameter :: NVTX_SLICE_FREE = 119
-  integer, parameter :: NVTX_SLICEALL_INIT = 120
+  integer, parameter :: NVTX_SPSLICE_INIT = 120
   integer, parameter :: NVTX_SLICEALL_SPLIT = 121
 
 contains
@@ -266,7 +266,7 @@ contains
          & "SLICES_AINIT", &
          & "SLICES_AFREE", &
          & "GET_AX_BX", &
-         & "SLICES_NONLOP", &
+         & "SPSL_NONLOP", &
          & "GET_AX_BX", &
          & "GET_BM1X", &
          & "SLICE_CORE", &
@@ -280,7 +280,7 @@ contains
          & "SLICE_RUN", &
          & "SLICE_COPY", &
          & "SLICE_FREE", &
-         & "SLICEALL_INIT", &
+         & "SPSLICE_INIT", &
          & "SLICEALL_SPLIT" &
 
          ]
@@ -404,7 +404,7 @@ contains
     nvtx_ids(117)= NVTX_SLICE_RUN
     nvtx_ids(118)= NVTX_SLICE_COPY
     nvtx_ids(119)= NVTX_SLICE_FREE
-    nvtx_ids(120)= NVTX_SLICEALL_INIT
+    nvtx_ids(120)= NVTX_SPSLI_INIT
     nvtx_ids(121)= NVTX_SLICEALL_SPLIT
 
   end subroutine nvtx_init
