@@ -20,7 +20,8 @@ This tutorial should take about 2 hours.
 
 ### Ground-state and band structure
 
-*Before beginning, you might consider creating a different subdirectory to work in. Why not create Work_gwr?*
+*Before beginning, you might consider creating a different subdirectory to work in.
+Why not create Work_gwr?*
 
 The file *tgwr_1.abi* is the input file for the first step:
 a SCF run followed by a KS NSCF band structure calculation along a high-symmetry $\kk$-path.
@@ -45,7 +46,7 @@ so that we have some time to discuss the input while ABINIT is running.
 !!! tip
 
     All the input files of this tutorial can be executed in parallel by just
-    changing increasing the value of n in `mpirun -n`.
+    increasing the value of n in `mpirun -n`.
     Clearly the size of the problem is very small so do not expect great performance
     if you start to use dozens of MPI processes.
 
@@ -89,7 +90,7 @@ In the input, we set [[paral_kgb]] to 1 to enable k-point, band, and FFT paralle
 and [[autoparal]] to 1 to allow ABINIT to determine an optimal distribution, with [[npfft]] fixed at 1.
 
 At this point, the calculation should have completed, and we can have a look
-at the electronic band structure to understand the position of the band edges.
+at the electronic band structure in order to understand the position of the band edges.
 
 !!! tip
 
@@ -117,13 +118,17 @@ The PBE KS fundamental band gap is XXX that is strongly underestimated with resp
     Before running GW calculations is always a good idea to analyze carefully the KS band
     structure to understand the location of the band edges and select the most appropriate $\kk$-mesh.
 
+    Also, we will use the GSR.nc file with the KS energies to perform an interpolation of the GWR results
+    in the last part of this tutorial.
+
 
 ### Generation of the WFK file with empty states
 
 In the second input file, we use the density file computed previously (tgwr\_1o\_DS1\_DEN)
-to generate two WFK files with two different $\Gamma$-centered $\kk$-meshes ([[ngkpt]] = 2x2x2 and 4x4x4).
+to generate three WFK files with three different $\Gamma$-centered $\kk$-meshes ([[ngkpt]] = 2x2x2 and 4x4x4, 6x6x6).
 This allows us to perform convergence studies with respect to the BZ sampling in the last part of this tutorial.
 Let us recall that shifted $\kk$-meshes are not supported by GWR.
+In another works, [[nshiftk]] must be 1 with [[shiftk]] = 0 0 0
 
 Let's start the job in background with:
 
@@ -142,15 +147,15 @@ especially if one can take advantage of ScalaPack to distribute the KS Hamiltoni
 
 Here, we request 100 states, as in the previous GW tutorial, where [[nband]] = 100
 was considered converged within 30 meV.
-Clearly, when studying new systems, the converged nband value is not known beforehand.
-Therefore, it is important to plan ahead and choose a reasonably large number of states
+Clearly, when studying new systems, the converged [[nband]] value is not known beforehand.
+Therefore, it is important to plan ahead and choose a reasonably large number of bands
 to avoid regenerating the WFK file multiple times just to increase nband
 
 Note that [[paral_kgb]] = 1 is only available in the ground-state (GS) part.
 The GWR code employs its own distribution scheme, which depends on the value of [[gwr_task]].
 When ‘HDIAGO’ is used, the distribution is handled automatically at runtime,
 and the user has no control over it.
-Refer to the note below for guidance on choosing an appropriate number of MPI processes
+Please refer to the note below for guidance on choosing an appropriate number of MPI processes
 to ensure an efficient workload distribution.
 
 
@@ -184,11 +189,12 @@ with the following input file:
 {% dialog tests/tutorial/Input/tgwr_3.abi %}
 
 This input file contains some variables whose meaning is the same as in the conventional GW code,
-and other variables specific to GWR.
+and other variables specific to GWR whose name starts with `gwr_`.
 
 We use [[optdriver]] 6 to enter the GWR code and [[gwr_task]] activates a one-shot GW calculation.
 We ask for a minimax mesh with [[gwr_ntau]] = 6 points, the minimum number of points one can use.
 Clearly, this parameter should be subject to convergence studies.
+
 [[getden_filepath]] specifies the density file used to compute $v_{xc}[n](\rr)$,
 while [[getwfk_filepath]] specifies the WFK file with empty states used to build the Green's function.
 Keep in mind that the $\kk$-mesh specified in the input via [[ngkpt]], [[nshiftk]] and [[shiftk]] must
@@ -318,7 +324,7 @@ tgwr\_3o\_SIGXC\_RW:
 Diagonal elements of $\Sigma_\xc(\omega)$ in eV units and spectral function $A_\nk(\omega)$
 
 Finally, we have a netcdf file named tgwr\_3o\_GWR.nc that stores the same data
-in binary format and that can be easily post-processed with AbiPy as discussed in the next section.
+in binary format that can be easily post-processed with AbiPy as discussed in the next section.
 
 ### Analyzing the GWR.nc file with AbiPy
 
@@ -352,11 +358,13 @@ As discussed in [[cite:Setten2017]], the convergence studies for
 the $\kk$-mesh, [[nband], and the cutoff energies can be decoupled.
 This means that one can start with a relatively coarse $\kk$-mesh to determine
 the converged values of [[nband]], [[ecuteps]], and [[ecutsigx]],
-then fix these values, and refine the BZ sampling.
-The recommended procedure for converging GWR calculations is as follows:
+then fix these values, and refine the BZ sampling only at the end.
+
+The recommended procedure for converging GWR gaps is therefore as follows:
 
 1) Initial convergence tests
 
+- Select the k-points where QP gaps are wanted. Usually the VBM and the CBM [[gwr_sigma_algo]] 1
 - Fix the [[ngkpt]] $\kk$-mesh in the WFK file to a resonable value and produce "enough" [[nband]] states
 - Set an initial value for [[gwr_ntau]] in the GWR run.
 - Perform convergence studies on [[nband]], [[ecuteps]], and [[ecutsigx]].
@@ -378,6 +386,19 @@ Finally, refine the BZ sampling to ensure full convergence.
 Note that, due to cancellations of errors, QP gaps (differences between QP energies)
 are much easier to convergence than the QP values.
 
+!!! tip
+
+    Change the previous input file to perform a convergence study wrt [[gwr_boxcutmin]] with e.g.
+
+    ```
+    ndtset 5
+    gwr_boxctumin: 1.1
+    gwr_boxctumin+ 0.1
+    ```
+
+    You will see that in the case of Silicon, the results are rather insensitive to the density
+    of the FFT mesh but other systems may behave differently.
+
 ### GWR calculations with two different BZ meshes.
 
 In this part of the tutorial, we run two GWR calculations with two different BZ meshes.
@@ -398,7 +419,7 @@ The output file is reported here for your convenience:
 
 {% dialog tests/tutorial/Refs/tgwr_4.abo %}
 
-To analyze multiple GWR.nc files we can use the `GwrRobot`, and the following python script
+To analyze multiple GWR.nc files, we can use the `GwrRobot`, and the following python script
 
 ```python
 #!/usr/bin/env python
@@ -412,20 +433,18 @@ filepaths = [
 robot = GwrRobot.from_files(filepaths)
 #print(robot)
 
-df_dirgaps = robot.get_dirgaps_dataframe()
-print(df_dirgaps)
-
 kpoint = (0, 0, 0)
-spin = 0
+df_dirgaps = robot.get_dirgaps_dataframe(kpoint=kpoint)
+print(df_dirgaps)
 ```
 
 ### How to compute an interpolated band structure with GWR
 
-In this last part of the tutorial, we discuss how to interpolate the QP corrections
-along an arbitrary $\kk$-path using the star-function method discussed in
+In this last section of the tutorial, we discuss how to interpolate the QP corrections
+along an arbitrary $\kk$-path using the star-function method already discussed in
 [this section](tutorial/eph_intro/#star-function-interpolation-of-the-ks-eigenvalues) of the EPH introduction.
 
-First of all, we need to compute QP corrections for all the $\kk$-points in the IBZ.
+First of all, we need to compute the QP corrections for all the $\kk$-points in the IBZ.
 This is what is done in the following input:
 
 {% dialog tests/tutorial/Input/tgwr_5.abi %}
@@ -433,6 +452,7 @@ This is what is done in the following input:
 Note the use [[gw_qprange]] = `-NUM` to compute QP corrections for all the $\kk$-points in the IBZ.
 and [[gwr_sigma_algo]] 1 to use the supercell algorithm for $\Sigma_\nk$
 (the most efficient one in this particular case).
+For efficiency reasons, we use a WFK file with 2x2x2 $\kk$-mesh.
 
 Run the calculation with:
 
@@ -444,7 +464,7 @@ The output file is reported here for your convenience:
 
 {% dialog tests/tutorial/Refs/tgwr_5.abo %}
 
-Now use the following AbiPy script to read the GWR results and interpolate the QP corrections
+Now use the following AbiPy script to read the GWR results and interpolate the QP corrections:
 
 ```python
 #!/usr/bin/env python
