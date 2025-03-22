@@ -15,7 +15,8 @@ gwr_task "G0W0"                       # One-shot calculation
 getden_filepath "tgwr_1o_DS1_DEN"     # Density file
 getwfk_filepath "tgwr_2o_DS2_WFK"     # WFK file with empty states. Must be consisten with ngkpt, shiftk
 
-gwr_ntau   6         # Number of imaginary-time points
+#gwr_ntau   6         # Number of imaginary-time points
+gwr_ntau   12        # Number of imaginary-time points
 gwr_boxcutmin  1.1   # This should be subject to convergence studies
 #gwr_sigma_algo 1    # Use supercell for Sigma
 gwr_sigma_algo 2     # Use convolutions in the BZ for Sigma
