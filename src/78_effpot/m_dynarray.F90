@@ -151,7 +151,6 @@ subroutine real_array_type_push(self, val)
       self%capacity = self%size + self%size / 4 + 8
       ABI_MALLOC(temp, (self%capacity))
       temp(:self%size-1) = self%data
-      !temp gets deallocated
       ABI_MOVE_ALLOC(temp, self%data)
     end if
     self%data(self%size)=val
@@ -193,6 +192,7 @@ subroutine real_array_type_allgatherv(self,buff, comm, nproc)
   class(real_array_type), intent(inout):: self
   integer, intent(in) :: comm, nproc
   real(dp), allocatable, intent(out) :: buff(:)
+  real(dp), allocatable :: tmp(:)
   integer :: disps(nproc), sizes(nproc)
   integer :: totsize, ierr, i
   totsize=self%size
@@ -203,7 +203,12 @@ subroutine real_array_type_allgatherv(self,buff, comm, nproc)
   do i=2, nproc
     disps(i)=disps(i-1)+sizes(i-1)
   end do
-  call xmpi_allgatherv(self%data(:self%size), self%size, buff, sizes, disps, comm, ierr  )
+  ABI_MALLOC(tmp, (self%size))
+  if(self%size>0) then
+    tmp(:)=self%data(:self%size)
+  end if
+  call xmpi_allgatherv(tmp, self%size, buff, sizes, disps, comm, ierr  )
+  ABI_FREE(tmp)
 end subroutine real_array_type_allgatherv
 
 
@@ -398,6 +403,7 @@ subroutine int_array_type_allgatherv(self,buff, comm, nproc)
   class(int_array_type), intent(inout):: self
   integer, intent(in) :: comm, nproc
   integer, allocatable, intent(out) :: buff(:)
+  integer, allocatable :: tmp(:)
   integer :: disps(nproc), sizes(nproc)
   integer :: totsize, ierr, i
   totsize=self%size
@@ -408,7 +414,12 @@ subroutine int_array_type_allgatherv(self,buff, comm, nproc)
   do i=2, nproc
     disps(i)=disps(i-1)+sizes(i-1)
   end do
+  ABI_MALLOC(tmp, (self%size))
+  if(self%size>0) then
+    tmp(:)=self%data(:self%size)
+  end if
   call xmpi_allgatherv(self%data(:self%size), self%size, buff, sizes, disps, comm, ierr  )
+  ABI_FREE(tmp)
 end subroutine int_array_type_allgatherv
 
 !==================================================================
