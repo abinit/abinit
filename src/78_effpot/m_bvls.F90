@@ -222,13 +222,11 @@ bdiff = 0.0_dp
 DO  j = 1, n
   bdiff = MAX(bdiff, bu(j)-bl(j))
   IF (bl(j) > bu(j)) THEN
-    WRITE(*, *) ' Inconsistent bounds in BVLS. '
-    STOP
+    ABI_BUG(' Inconsistent bounds in BVLS. ')
   END IF
 END DO
 IF (bdiff == 0.0_dp) THEN
-  WRITE(*, *) ' No free variables in BVLS--check input bounds.'
-  STOP
+  ABI_BUG( ' No free variables in BVLS--check input bounds.')
 END IF
 
 !  In a fresh initialization (key = 0) bind all variables at their lower bounds.
@@ -248,8 +246,7 @@ ELSE
 END IF
 nact = n - nbound
 IF (nact > mm) THEN
-  WRITE(*, *) ' Too many active variables in BVLS starting solution!'
-  STOP
+  ABI_BUG( ' Too many active variables in BVLS starting solution!')
 END IF
 DO  k = 1, nbound
   j = ABS(istate(k))
@@ -358,8 +355,7 @@ DO  loopa = 1, 3 * n+1000
   istate(nbound+1) = iact
 
   IF (mm < nact) THEN
-    WRITE(*, *) ' Too many free variables in BVLS!'
-    STOP
+    ABI_BUG( ' Too many free variables in BVLS!')
   END IF
 
 !  Step 6.
@@ -473,8 +469,7 @@ DO  loopa = 1, 3 * n+1000
 
 END DO
 
-WRITE(*, *) ' BVLS fails to converge! '
-STOP
+ABI_BUG(' BVLS fails to converge! ')
 END SUBROUTINE bvls
 
 !======================================================================
