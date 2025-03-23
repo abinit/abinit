@@ -826,9 +826,9 @@ contains
       call xmpi_bcast(list_bound, master, comm, ierr)
       call ind_bound%finalize()
       call xmpi_lor(isselected, comm)
-      if (nbound /=count(isselected)) then
-        ABI_ERROR("The number of the bounding term is not consistent with the selected terms.")
-      end if
+      !if (nbound /=count(isselected)) then
+      !  ABI_ERROR("The number of the bounding term is not consistent with the selected terms.")
+      !end if
   end subroutine select_bounding_terms
 
   subroutine select_fix_terms()
@@ -1126,9 +1126,6 @@ contains
 
         !Print the standard deviation before the fit
         write(message,'(4a,ES24.16,2a,ES24.16,2a,ES24.16,2a,ES24.16,a)' ) ch10,&
-          !&                   ' Mean Standard Deviation values at the begining of the fit process (meV**2/atm):',&
-          !&               ch10,'   Energy          : ',&
-          !&               gf_values(4,1)*factor*(Ha_EV*1000)**2  ,ch10,&
           &                    ' Weighted Goal function values at the begining of the fit process (eV^2/A^2):',ch10,&
           &                    '   Energy          : ',&
           &               gf_values(4,1)*(HaBohr_eVAng)**2,ch10,&
@@ -1155,9 +1152,6 @@ contains
 
     !Print the standard deviation before the fit
     write(message,'(4a,ES24.16,2a,ES24.16,2a,ES24.16,2a,ES24.16,a)' ) ch10,&
-      !&                   ' Mean Standard Deviation values at the begining of the fit process (meV**2/atm):',&
-      !&               ch10,'   Energy          : ',&
-      !&               gf_values(4,1)*factor*(Ha_EV*1000)**2  ,ch10,&
       &                    ' Goal function values at the begining of the fit process (eV^2/A^2):',ch10,&
       &                    '   Energy          : ',&
       &               gf_values(4,1)*(HaBohr_eVAng)**2,ch10,&
