@@ -1458,11 +1458,11 @@ contains
            !do while( isbanned(allorder(i))  .or. isselected(allorder(i)))
            !  i=i+1
            !enddo
-           !    Check if there is still coefficient
-           if(i>size(allorder))then
-             exit
-           end if
            index_min = allorder(i)
+           !    Check if there is still coefficient
+           !if(i>size(allorder))then
+           !  exit
+           !end if
 
            if(index_min==0) then
              exit
