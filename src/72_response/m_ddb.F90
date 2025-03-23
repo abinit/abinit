@@ -4762,8 +4762,8 @@ end subroutine ddb_write_block_txt
 !!  ddb_hdr=ddb header object.
 !!  filename=name of the file being written (abo_DS*_DDB)
 !!  with_psps
-!!      1-> include information on pseudopoentials
-!!      0-> do not include information on pseudopoentials
+!!      1-> include information on pseudopotentials
+!!      0-> do not include information on pseudopotentials
 !!  comm=MPI communicator
 !!
 !! SOURCE
