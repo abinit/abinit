@@ -934,6 +934,7 @@ Bounding terms are needed if the polynomial with all even terms are negative, or
 
 For example, for a polynomial term x^2y^1, the bounding terms of order 4 will include $x^4$ with option 2, but not with option 1.
 """,
+),
 
 
 Variable(
@@ -2240,9 +2241,6 @@ See also [[outdata_prefix@abinit]] and [[outdata_prefix@anaddb]]
 
 """
 ),
-
-
-
 
 
 ]
