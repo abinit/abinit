@@ -1887,10 +1887,10 @@ subroutine polynomial_coeff_getList(cell,crystal,dist,list_symcoeff,list_symstr,
 
 
 
-! filter the list_symcoeff_tmp2 to remove the terms which the equivalent cannot be found. 
+! filter the list_symcoeff_tmp2 to remove the terms which the equivalent cannot be found.
 ! This can happen when the cell is too small and the equivalent is out of the cell
 
-block 
+block
 integer :: list_symcoeff_tmp3(6,ncoeff,nsym)
 integer :: counter_good, counter_bad, ncoeff_orig
 integer :: coeffmap(ncoeff)
@@ -1927,7 +1927,7 @@ list_symcoeff_tmp3 = list_symcoeff_tmp2
  end do
 endif
  end do
- 
+
 
 
 end block
@@ -2620,7 +2620,7 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
        enddo
        call xmpi_gatherv(my_list_combination,size(my_list_combination),list_combination_tmp,buffsize,offsets,master,comm,ierr)
 
-       
+
        !Deallocation of variables inside need_symmetric
        ABI_FREE(buffsize)
        ABI_FREE(my_list_combination)
@@ -2925,9 +2925,6 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
        end if
      end do
 
-     !Debug write xml
-     !     write (filename, "(A9,I2,A4)") "terms_set", my_rank+1,".xml"
-     !     call polynomial_coeff_writeXML(coefficients,my_newncoeff,filename=filename)
 
      if(need_verbose)then
        write(message,'(1x,I0,2a)') ncoeff_tot,' coefficients generated ',ch10
