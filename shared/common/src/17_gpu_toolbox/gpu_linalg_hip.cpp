@@ -739,13 +739,13 @@ extern "C" void gpu_xsygvd_(const int* cplx,
     }
   else
     {
-      HIP_API_CHECK( hipsolverDnZhegvj(hipsolverDn_handle, itype_cu,
+      HIP_API_CHECK( hipsolverDnZhegvd(hipsolverDn_handle, itype_cu,
                                        jobz_cu, fillMode, *A_nrows,
                                        (hipDoubleComplex*)(*A_ptr), *lda,
                                        (hipDoubleComplex*)(*B_ptr), *ldb,
                                        (double*)(*W_ptr),
                                        (hipDoubleComplex*)(*work_ptr),
-                                       *lwork, devInfo, syevj_params) );
+                                       *lwork, devInfo) );
     }
 
   HIP_API_CHECK( hipMemcpy(info, devInfo, 1*sizeof(int), hipMemcpyDefault) );
@@ -782,11 +782,11 @@ extern "C" void gpu_xsygvd_buffersize_(const int* cplx,
     }
   else
     {
-      HIP_API_CHECK( hipsolverDnZhegvj_bufferSize(hipsolverDn_handle, itype_cu,
+      HIP_API_CHECK( hipsolverDnZhegvd_bufferSize(hipsolverDn_handle, itype_cu,
                                                   jobz_cu, fillMode, *A_nrows,
                                                   (hipDoubleComplex*)(*A_ptr), *lda,
                                                   (hipDoubleComplex*)(*B_ptr), *ldb,
-                                                  (double*)(*W_ptr), lwork, syevj_params) );
+                                                  (double*)(*W_ptr), lwork) );
     }
 
 } // gpu_xsygvd_bufferSize_
