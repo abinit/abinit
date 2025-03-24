@@ -26,12 +26,14 @@ the most CPU-demanding part due to the double sum over conduction and valence st
 In contrast, the GWR code achieves cubic scaling with [[natom]] and linear scaling in the number of $\kk$-points
 by computing the polarizability and the self-energy in the real-space supercell associated to the $\kk$-mesh [[cite:Liu2016]].
 FFTs are used to transform quantities from the supercell to Fourier space whenever needed.
-For instance, $W$ (a convolution between $\ee^-1$ and the bare Coulomb interaction) is best solved in Fourier space.
+For instance, $W$ (a convolution between $\ee^-1$ and the bare Coulomb interaction) is
+best solved in Fourier space and frequency domain whereas the polarizability and the self-energy are best evaluated
+in real-space and (imaginary) time.
 As concerns the frequency dependence, GWR evaluates $G$, $W$ and $\Sigma$ along the imaginary axis
 using minimax meshes that are adaptive grids that place points non-uniformly, concentrating them where they are most needed,
 leading to higher accuracy with fewer points [[cite:Kaltak2014]].
 Inhomogeneous sine/cosine transforms are then used to from imaginary time to imaginary frequency with quadratic scaling
-with the number of imaginary points therefore it is very important to keep the number of points as small possible
+in the number of imaginary points. For this reason, it is very important to keep the number of points as small possible
 without spoiling accuracy [[cite:Liu2016]].
 The minimax meshes used in ABINIT are provided by the GreenX library ([[cite:Azizi2023]], [[cite:Azizi2024]]).
 
@@ -55,14 +57,16 @@ is the so-called renormalization factor where the derivative of the self-energy 
 The AC enables access to the full frequency dependence of $\Sigma_\nk$ and $A_\nk$
 at a substantially reduced computational cost with respect to e.g. the countour deformation method used
 in the conventional approach in which several points are needed to accurately capture the sharp features
-in the Green's function $G(\omega)$, and the screened interaction $W(\omega)$ along the real-frequency axis.
-though the accuracy of the results now depends on the stability of the AC procedure.
+in the Green's function $G(\omega)$, and the screened interaction $W(\omega)$ along the real-frequency axis,
+The price to pay is that in GWR the accuracy of the results now depends on the stability of the AC procedure.
 
 !!! important
 
     Although GWR exhibits better scaling with [[natom]], it is worth noticing that the standard implementation
-    makes better use of symmetries [[cite:Aulbur2001]] to reduce the number of points in the BZ summation (see [[symchi]] and [[symsigma]])
-    Consequently, the standard code is still competitive and can be faster than GWR in the case of high symmetric systems.
+    makes better use of symmetries [[cite:Aulbur2001]] to reduce the number of points
+    in the BZ summation (see [[symchi]] and [[symsigma]])
+    Consequently, the standard code is still competitive and can be faster than GWR
+    in the case of high symmetric systems.
 
 ## Input variables
 
@@ -70,8 +74,8 @@ To enter the GWR driver of ABINIT, one has to use [[optdriver]] = 6,
 and select the computation to be performed via [[gwr_task]].
 
 In the first step, you will very likely use [[gwr_task]] = "HDIAGO"  or "HDIAGO_FULL"
-to perform a direct diagonalization with ScaLAPACK to generate a WFK with empty states,
-This feature can also be used by other many-body codes that are able to read ABINIT’s WFK file
+to perform a direct diagonalization with ScaLAPACK in order to generate a WFK with empty states,
+This feature can also be used if you want to use other many-body codes that are able to read ABINIT’s WFK file
 
 It is possible to compute GW corrections using the one-shot method or different types of self-consistency on energies.
 Finally, one can compute total energies at the RPA level.
@@ -80,14 +84,15 @@ TODO: Mention interface with CC4S
 !!! important
 
     At the time of writing, the following features are **not yet supported** in GWR:
-    * Metallic systems as the our minimax meshes assume systems with an energy gap
-    * Temperature effects at the electronic level are not taken into account as we work with the T = 0 formalism.
-    * Only $\Gamma$-centered $\kk$-meshes are supported in GWR
-    * PAW method
+
+        * Metallic systems as the our minimax meshes assume systems with an energy gap
+        * Temperature effects at the electronic level are not taken into account as we work with the T = 0 formalism.
+        * Only $\Gamma$-centered $\kk$-meshes are supported in GWR
+        * PAW method
 
 The $\kk$-points and the band range for the QP corrections in $\Sigma_\nk$ can be specified in different ways.
 In the explicit approach, one uses [[nkptgw]] to specify the number of $\kk$-points in $\Sigma_nk$,
-[[kptgw]] determines the list of $\kk$-points in reduced coordinates, while [[bdgw]] specifies the band range
+In this case, [[kptgw]] determines the list of $\kk$-points in reduced coordinates, while [[bdgw]] specifies the band range
 for each $\kk$-point.
 Alternatively, one can use [[gw_qprange]] to let ABINIT automatically select the wavevectors and the band range.
 This is particularly useful for self-consistent calculations or if all the QP corrections in the IBZ are wanted.
@@ -165,7 +170,7 @@ and then immediately transformed to Fourier space.
 
 The cutoff energy for the polarizability is given by [[ecuteps]] and should be subject to convergence studies.
 
-The FFT mesh is defined according to [[gwr_boxcutmin]]
+The FFT mesh is defined according to [[gwr_boxcutmin]].
 
 As discussed in [cite:Baroni1986]
 As concerns the treatment of the long-wavelenght limit $\qq \rightarrow 0$ in the polarizability,
@@ -187,6 +192,7 @@ similarly to what is done in the conventional code:
 \end{equation}
 
 The number of $\bg$-vectors in the sum is defined by [[ecutsigx]].
+Computing $\Sigma_x$ is much cheaper that $\Sigma_c(i \tau).
 
 ## Real-space vs convolutions in the BZ
 
@@ -195,38 +201,39 @@ and the self-energy in the real-space supercell.
 This is the recommended approach if one needs to compute QP corrections for all the $\kk$-points in the IBZ as
 we have linear scaling in the number of wave vectors.
 This is the typical scenario for self-consistent GWR calculations or if one needs to perform some kind of interpolation
-of the QP corrections to obtain a band structure along a high-symmetry $\kk$-path starting from $\Sigma_\nk$
-for all $\kk$-points in the IBZ.
+of the QP corrections to obtain a band structure along a high-symmetry $\kk$-path starting from the values
+of $\Sigma_\nk$ for all $\kk$-points in the IBZ.
 
 It should be noted, however, that in several applications one is mainly interested in the QP corrections
 at the band edges that are usually located at high-symmetry $\kk$-points.
 In this case, it is more advantageous to use an alternative formulation in which $\Sigma_\nk$
-is expressed in terms of convolutions in the BZ according to
+is expressed in terms of convolutions in the BZ according to:
 
 where $G_\qq(\rr,\rr')$ and $W_\qq(\rr,\rr')$ are now quantities defined in the unit cell.
 
-The advantage of this formalism is that one can take advantage of the symmetries of the system
+The advantage of this formulation is that one can take advantage of the symmetries of the system
 to reduce the BZ integration to the irreducible wedge defined by the little group of the $\kk$$ point in $\Sigma_\nk$$.
-In the best case scenario, both the CBM and the VBM are located at the $\Gamma$ point; hence the BZ integral
-can be replaced by a much faster symmetrized integral over the wavevectors of the IBZ.
+In the best case scenario of the direct band gap semiconductor, both the CBM and the VBM are located at the $\Gamma$ point;
+hence the BZ integral can be replaced by a much faster symmetrized integral over the wavevectors of the IBZ.
 Clearly this approach is not the most efficient one if all the $\kk$-points are wanted
 as the convolutions in the BZ lead quadratic scaling with the number of $\kk$-points.
 
 The input variable [[gwr_sigma_algo]] allows one to select the algorithm to be used.
-[[gwr_chi_algo]] has a similar meaning but only for the polarizability.
+[[gwr_chi_algo]] has a similar meaning but only for the polarizability but this option is seldom used
+as is makese the computation of the polarizability much slower although it requires less memory.
 
 ## Self-consistency with GWR
 
-The conventional GW code supports different kinds of self-consistency including the update
+The conventional GW code supports different kinds of self-consistency, including the update
 of the wavefunctions and the QPSCGW method proposed in [[cite:Faleev2004]].
 On the contrary, at the time of writing, the GWR code only supports self-consistency on energies.
 
 Performing energy-only self-consistent calculations with GWR is much easier than in the conventional GW code
-as there is no need to chain different screening/sigma calculations together as the self-consistent loop
+as there is no need to chain different screening/sigma calculations together: the self-consistent loop
 and the stopping criterion are implemented directly at the Fortran level.
 To perform an energy-only self-consistent calculation with GWR, one has to specify the kind of self-consistency
 via [[gwr_task]], the maximum number of iterations with [[gwr_nstep]] and the stopping criterion with [[gwr_tolqpe]].
-Note that, at present, it is not possible to restart a self-consistent calculation from a previous checkpoint.
+Note that, at present, it is not possible to restart a self-consistent calculation from a previous checkpoint file.
 
 ### MPI parallelization and performance
 
@@ -253,7 +260,7 @@ The GWR code employs a 4D MPI Cartesian grid to distribute both workload and mem
 collinear spins ([[nsppol]] = 2), points of the minimax mesh, $(\gg, \gg')$ components, and $\kk$-points.
 The user can specify the number of MPI-processes for the different dimensions using the input variable [[gwr_np_kgts]],
 although this is completely optional as GWR is able to build the MPI Cartesian grid at runtime on the basis
-of the number of MPI processes available and the sizes of the problems.
+of the number of MPI processes available, the size of the problem and the memory allocated.
 
 There are, however, some basic rules that is worth keeping in mind if decent parallel performance is wanted.
 Ideally the total number of MPI processes should be a multiple of [[gwr_ntau]] * [[nsppol]] as the parallelism
@@ -261,7 +268,7 @@ over minimax points and spins is rather efficient (few communications required).
 On the contrary, the parallelism over $\gg$-vectors and $\kk$-points is much more network intensive,
 although these two additional levels allow one to decrease the memory requirements.
 
-### Tricks
+TODO: Additional trick to be tested/documented in more detail:
 
     [[gwr_ucsc_batch]]
     [[gwr_rpa_ncut]]
@@ -277,7 +284,7 @@ recommend to use vendor-optimized FFT libraries such as MKL-DFTI or FFTW3 instea
 of the internal FFT version shipped with ABINIT.
 
 Note that single-precision is the default mode as in the conventional $GW$ code.
-To run computations in double-precision, one has to configure with  `--enable-gw-dpc="yes"` when
+To run computations in double-precision, one has to configure the package with  `--enable-gw-dpc="yes"` when
 the command line interface is used or `enable_gw_dpc="yes"` when `--with-config-file=FILE` is used
 to specify the configuration options via an external FILE.
 
