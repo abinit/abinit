@@ -2530,10 +2530,10 @@ subroutine xg_nonlop_colwiseXHX(xg_nonlop,cprj,cprj_work,res)
      res_mpi = res
    else
      call xgBlock_setBlock(res,res_tmp,nres,1)
-     call xgBlock_reshape(res_tmp,(/1,nres/))
+     call xgBlock_reshape(res_tmp,1,nres)
      shift = xg_nonlop%me_band*ncols
      call xgBlock_setBlock(res_tmp,res_mpi,1,ncols,fcol=1+shift)
-     call xgBlock_reshape(res_mpi,(/ncols,1/))
+     call xgBlock_reshape(res_mpi,ncols,1)
    end if
 
    if (xg_nonlop%paw) then
