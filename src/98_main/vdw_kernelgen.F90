@@ -6,7 +6,7 @@
 !!  Generates vdW-DF kernels from the user input.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2011-2022 ABINIT group (Yann Pouillon)
+!!  Copyright (C) 2011-2025 ABINIT group (Yann Pouillon)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt.
@@ -35,7 +35,6 @@ program vdw_kernelgen
 
  use defs_basis
  use defs_abitypes
- use m_build_info
  use m_errors
  use m_xc_vdw
  use m_mpinfo
@@ -46,8 +45,9 @@ program vdw_kernelgen
  use mpi
 #endif
 
- use m_specialmsg,  only : specialmsg_getcount, herald
- use m_io_tools,    only : flush_unit
+ use m_build_info,   only : abinit_version
+ use m_specialmsg,   only : specialmsg_getcount, herald
+ use m_io_tools,     only : flush_unit
 
  implicit none
 

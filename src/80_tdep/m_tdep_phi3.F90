@@ -127,6 +127,7 @@ subroutine tdep_calc_phi3fcoeff(CoeffMoore,Invar,proj,Shell3at,Sym,ucart)
   double precision :: temp
   double precision :: udiff_ki(3),udiff_ji(3)
   double precision, allocatable :: SSS_proj(:,:,:,:)
+  double precision :: SSS_tmp(27), proj_tmp(27)
   type(Constraints_type) :: Const
 
   ABI_MALLOC(Const%Sprod,(Sym%nsym,6))
@@ -177,8 +178,10 @@ subroutine tdep_calc_phi3fcoeff(CoeffMoore,Invar,proj,Shell3at,Sym,ucart)
         do mu=1,3
           do nu=1,3
             do xi=1,3
+              SSS_tmp(:)=Const%Sprod(isym,itrans)%SSS(mu,:,nu,xi)
               do icoeff=1,ncoeff
-                SSS_proj(mu,nu,xi,icoeff)=DDOT(27,Const%Sprod(isym,itrans)%SSS(mu,:,nu,xi),1,proj(:,icoeff,ishell),1)
+                proj_tmp(:)=proj(:,icoeff,ishell)
+                SSS_proj(mu,nu,xi,icoeff)=DDOT(27,SSS_tmp,1,proj_tmp,1)
               end do
             end do
           end do
@@ -295,9 +298,9 @@ subroutine tdep_write_phi3(distance,Invar,Phi3_ref,Shell3at,Sym)
         write(Invar%stdout,'(a,i4,a,i4)') '  For jatom  =',jatom ,' ,with type=',mod(jatom -1,Invar%natom_unitcell)+1
         write(Invar%stdout,'(a,i4,a,i4)') '  For katom  =',katom ,' ,with type=',mod(katom -1,Invar%natom_unitcell)+1
         do jj=1,3
-          if (jj==1) write(Invar%stdout,'(a)') '  \Phi3^{\alpha\beta x}='
-          if (jj==2) write(Invar%stdout,'(a)') '  \Phi3^{\alpha\beta y}='
-          if (jj==3) write(Invar%stdout,'(a)') '  \Phi3^{\alpha\beta z}='
+          if (jj==1) write(Invar%stdout,'(a)') '  Phi3^{alpha beta x}='
+          if (jj==2) write(Invar%stdout,'(a)') '  Phi3^{alpha beta y}='
+          if (jj==3) write(Invar%stdout,'(a)') '  Phi3^{alpha beta z}='
           do ii=1,3
             if (abs(Phi3_333(ii,1,jj)).lt.5.d-7) then
               tmp1=0.d0
@@ -646,8 +649,8 @@ subroutine tdep_calc_alpha_gamma(distance,Eigen2nd,Invar,Lattice,MPIdata,Phi3_re
   ABI_FREE(tmp)
 
   if (MPIdata%iam_master) then
-    open(unit=20,file=trim(Invar%output_prefix)//'thermo3.dat')
-    open(unit=21,file=trim(Invar%output_prefix)//'alpha_gamma.dat')
+    open(unit=20,file=trim(Invar%output_prefix)//'_thermo3.dat')
+    open(unit=21,file=trim(Invar%output_prefix)//'_alpha_gamma.dat')
     write(20,'(a)')'#   T(K)    C_v(k_B/fu)        Gamma     alpha_v*10^6(K^-1)   E_th(eV)                       P_th(GPa)'
     write(20,'(a,72x,a)')'#',' ----------------------------------------------'
     write(20,'(a,72x,a)')'#','  {sum G_i.U_iV}  {int G.C_v/V dT}    {G.U/V}'
@@ -852,8 +855,8 @@ subroutine tdep_write_gruneisen(distance,Eigen2nd,Invar,Phi3_ref,Qpt,Rlatt_cart,
   nmode=3*Invar%natom_unitcell
   ABI_MALLOC(Gruneisen,(3*Invar%natom_unitcell,3,3)); Gruneisen(:,:,:)=czero
   ABI_MALLOC(Grun_mean,(3*Invar%natom_unitcell))    ; Grun_mean(:)    =czero
-  open(unit=53,file=trim(Invar%output_prefix)//'gruneisen.dat')
-  open(unit=54,file=trim(Invar%output_prefix)//'gruneisen-ij.dat')
+  open(unit=53,file=trim(Invar%output_prefix)//'_gruneisen.dat')
+  open(unit=54,file=trim(Invar%output_prefix)//'_gruneisen-ij.dat')
 
   do iqpt=1,Qpt%nqpt
 
@@ -869,11 +872,13 @@ subroutine tdep_write_gruneisen(distance,Eigen2nd,Invar,Phi3_ref,Qpt,Rlatt_cart,
         do kk=1,3
           write(54,'(4(i5,1x),500(e15.6,1x))') iqpt,ii,jj,kk,Gruneisen(ii,jj,kk)
           if (abs(aimag(Gruneisen(ii,jj,kk))).gt.tol8) then
+            ABI_WARNING('Real part :')
             write(message,'(4(i5,1x),100(e15.6,1x))') iqpt,ii,jj,kk,real(Gruneisen(ii,jj,kk))
-            ABI_ERROR_NOSTOP(message,ierr)
+            ABI_WARNING(message)
+            ABI_WARNING('Imaginary part :')
             write(message,'(4(i5,1x),100(e15.6,1x))') iqpt,ii,jj,kk,aimag(Gruneisen(ii,jj,kk))
-            ABI_ERROR_NOSTOP(message,ierr)
-            ABI_ERROR('tdep_write_gruneisen : The imaginary part of the Gruneisen is not equal to zero')
+            ABI_WARNING(message)
+            ABI_WARNING('tdep_write_gruneisen : The imaginary part of the Gruneisen is not equal to zero')
          end if  
         end do  
       end do  
@@ -889,11 +894,13 @@ subroutine tdep_write_gruneisen(distance,Eigen2nd,Invar,Phi3_ref,Qpt,Rlatt_cart,
 !   Write the Gruneisen
 !   ===================
     if (sum(abs(aimag(Grun_mean(:)))).gt.3*Invar%natom_unitcell*tol8) then
+      ABI_WARNING('Real part :')
       write(message,'(i5,1x,100(e15.6,1x))') iqpt,(real(Grun_mean(ii)),ii=1,nmode)
-      ABI_ERROR_NOSTOP(message,ierr)
+      ABI_WARNING(message)
+      ABI_WARNING('Imaginary part :')
       write(message,'(i5,1x,100(e15.6,1x))') iqpt,(aimag(Grun_mean(ii)),ii=1,nmode)
-      ABI_ERROR_NOSTOP(message,ierr)
-      ABI_ERROR('tdep_write_gruneisen : The imaginary part of Grun_mean is not equal to zero')
+      ABI_WARNING(message)
+      ABI_WARNING('tdep_write_gruneisen : The imaginary part of Grun_mean is not equal to zero')
     else 
 !FB      write(53,'(i5,1x,500(e15.6,1x))') iqpt,(real(Grun_mean(ii)),ii=1,nmode),&
 !FB                ((real(Grun_shell(ii,jj)),ii=1,nmode),jj=1,Shell3at%nshell)

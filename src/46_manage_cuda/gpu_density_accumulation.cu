@@ -8,7 +8,7 @@
 //  the accumulation of density with each wave function's contribution
 //
 // COPYRIGHT
-// Copyright (C) 1998-2022 ABINIT group (FDahm)
+// Copyright (C) 1998-2025 ABINIT group (FDahm)
 // This file is distributed under the terms of the
 // GNU General Public License, see ~abinit/COPYING
 // or http://www.gnu.org/copyleft/gpl.txt .
@@ -51,8 +51,13 @@
 /**********                                      *******************/
 /*******************************************************************/
 
-__global__ void kernel_accumulate_density(double *fofr,double* denpot,double* weight_r,double* weight_i,int nfft_tot,int ndat
-					  ){
+__global__ void kernel_accumulate_density(double *fofr,
+                                          double* denpot,
+                                          double* weight_r,
+                                          double* weight_i,
+                                          int nfft_tot,
+                                          int ndat)
+{
   int thread_id= threadIdx.x + blockDim.x*blockIdx.x;
 
   for(int id=thread_id; id <nfft_tot; id+=blockDim.x*gridDim.x){
@@ -77,8 +82,8 @@ __global__ void kernel_accumulate_density(double *fofr,double* denpot,double* we
 /**********                                      *******************/
 /*******************************************************************/
 
-extern "C" void gpu_density_accumulation_(double *fofr,double* denpot, double* weight_r,
-                   double* weight_i,int* nfft_tot,int *ndat,cudaStream_t *compute_stream)
+extern "C" void gpu_density_accumulation_(double *fofr, double* denpot, double* weight_r,
+                                          double* weight_i, int* nfft_tot, int *ndat, cudaStream_t *compute_stream)
 {
 
   //Arguments ------------------------------------

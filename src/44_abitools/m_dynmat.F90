@@ -6,7 +6,7 @@
 !!  This module provides low-level tools to operate on the dynamical matrix
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2022 ABINIT group (XG, JCC, MJV, NH, RC, MVeithen, MM, MG, MT, DCA)
+!!  Copyright (C) 2014-2025 ABINIT group (XG, JCC, MJV, NH, RC, MVeithen, MM, MG, MT, DCA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -33,7 +33,8 @@ module m_dynmat
 
  use m_fstrings,        only : itoa, sjoin
  use m_numeric_tools,   only : wrap2_pmhalf, mkherm
- use m_symtk,           only : mati3inv, matr3inv, littlegroup_q
+ use m_matrix,          only : mati3inv, matr3inv
+ use m_symtk,           only : littlegroup_q
  use m_cgtools,         only : fxphas_seq
  use m_ewald,           only : ewald9
  use m_time,            only : timab
@@ -81,7 +82,7 @@ module m_dynmat
  public :: wght9                ! Generates a weight to each R points of the Big Box and for each pair of atoms
  public :: d3sym                ! Given a set of calculated elements of the 3DTE matrix,
                                 ! build (nearly) all the other matrix elements that can be build using symmetries.
- public :: d3lwsym                                
+ public :: d3lwsym
  public :: sylwtens             ! Determines the set of irreductible elements of the spatial-dispersion tensors
  public :: sytens               ! Determines the set of irreductible elements of the nonlinear optical susceptibility
                                 ! and Raman tensors
@@ -522,12 +523,8 @@ subroutine asrprs(asr,asrflag,rotinv,uinvers,vtinvers,singular,d2cart,mpert,nato
 
 !  Invert U and V**T, orthogonal matrices
 
-   do ii=1, superdim
-     do jj=1, superdim
-       uinvers(ii,jj)=umatrix(jj,ii)
-       vtinvers(ii,jj)=superm(jj,ii)
-     end do
-   end do
+   uinvers = transpose(umatrix)
+   vtinvers = transpose(superm)
 
    ABI_FREE(umatrix)
    ABI_FREE(superm)
@@ -544,14 +541,8 @@ subroutine asrprs(asr,asrflag,rotinv,uinvers,vtinvers,singular,d2cart,mpert,nato
 
 !  Calculate V**T**-1 Sigma**-1 U**-1 *rhs
 
-   do ii=1, superdim
-     d2vecrnew(ii)=0d0
-     d2veccnew(ii)=0d0
-     do jj=1, superdim
-       d2vecrnew(ii)=d2vecrnew(ii)+uinvers(ii,jj)*d2vecr(jj)
-       d2veccnew(ii)=d2veccnew(ii)+uinvers(ii,jj)*d2vecc(jj)
-     end do
-   end do
+   d2vecrnew = matmul(uinvers, d2vecr)
+   d2veccnew = matmul(uinvers, d2vecc)
 
    rcond=1d-10*singular(1)
    do ii=1, superdim
@@ -1131,9 +1122,24 @@ subroutine chkph3(carflg,idir,mpert,natom)
  ! If needed, send the message
  if(send==1)then
    write(msg, '(a,a,a,a)' )&
-   ' chkph3 : WARNING -',ch10,&
-   '  Dynamical matrix incomplete, phonon frequencies may be wrong, check input variables rfatpol and rfdir.'
-   call wrtout([std_out, ab_out],msg)
+&    ' chkph3 : WARNING -',ch10,&
+&    '  Dynamical matrix incomplete, phonon frequencies may be wrong, see the log file for more explanations.'
+   call wrtout(ab_out,msg)
+   write(msg, '(11a)' )&
+&   ' chkph3 : WARNING -',ch10,&
+&   '  Dynamical matrix incomplete, phonon frequencies may be wrong.',ch10,&
+&   '  Likely due to a list of perturbations, as defined by rfatpol and rfdir, that does not include',ch10,&
+&   '  all displacements of all atoms and (if non-metallic material) electric field type perturbation.',ch10,&
+&   '  Then, the dynamical matrix includes zeroes when the matrix element is not computed.',ch10,&
+&   '  This is allowed for testing purposes. But the phonon frequencies may be wrong.'
+   call wrtout(std_out,msg)
+   write(msg, '(9a)' )&
+&  '  If there are symmetries, perhaps these matrix elements are zero by symmetry anyhow, and phonon frequencies might be right.',ch10,&
+&  '  Please check the input variables rfatpol and rfdir, to determine whether abinit is doing what you intend it to do.',ch10,&
+&  '  Note that ANADDB is able to detect whether the symmetries allow one to reconstruct the full dynamical matrix from',ch10,&
+&  '  an incomplete one. In this case, passing to ANADDB the delivered _DDB file might confirm (or not) that',ch10,&
+&  '  phonon frequencies are right.'
+   call wrtout(std_out,msg)
  end if
 
 end subroutine chkph3
@@ -1211,9 +1217,7 @@ subroutine chneu9(chneut,d2cart,mpert,natom,ntypat,selectz,typat,zion)
    end do
 
 !  Normalize the weights to unity
-   do ipert1=1,natom
-     wghtat(ipert1)=wghtat(ipert1)/sumwght(1)
-   end do
+   wghtat(1:natom) = wghtat(1:natom) / sumwght(1)
  end if
 
 !Calculation of the violation of the charge neutrality
@@ -1347,15 +1351,7 @@ subroutine chneu9(chneut,d2cart,mpert,natom,ntypat,selectz,typat,zion)
  call wrtout(ab_out,msg)
  call wrtout(std_out,msg)
 
- do ipert1=1,natom
-   do ipert2=1,natom
-     do idir1=1,3
-       do idir2=1,3
-         d2cart(2,idir1,ipert1,idir2,ipert2)=zero
-       end do
-     end do
-   end do
- end do
+ d2cart(2, 1:3, 1:natom, 1:3, 1:natom) = zero
 
  ABI_FREE(wghtat)
 
@@ -3525,12 +3521,10 @@ subroutine ftifc_q2r(atmfrc,dynmat,gprim,natom,nqpt,nrpt,rpt,spqpt,comm)
    do iqpt=1,nqpt
 
      ! Calculation of the k coordinates in Normalized Reciprocal coordinates
-     kk(1)=spqpt(1,iqpt)*gprim(1,1)+spqpt(2,iqpt)*gprim(1,2)+spqpt(3,iqpt)*gprim(1,3)
-     kk(2)=spqpt(1,iqpt)*gprim(2,1)+spqpt(2,iqpt)*gprim(2,2)+spqpt(3,iqpt)*gprim(2,3)
-     kk(3)=spqpt(1,iqpt)*gprim(3,1)+spqpt(2,iqpt)*gprim(3,2)+spqpt(3,iqpt)*gprim(3,3)
+     kk(:) = matmul(gprim, spqpt(:, iqpt))
 
      ! Product of k and r
-     kr=kk(1)*rpt(1,irpt)+kk(2)*rpt(2,irpt)+kk(3)*rpt(3,irpt)
+     kr=dot_product(kk,rpt(:,irpt))
 
      ! Get the phase factor
      re=cos(two_pi*kr)
@@ -3623,15 +3617,13 @@ subroutine ftifc_r2q(atmfrc, dynmat, gprim, natom, nqpt, nrpt, rpt, spqpt, wghat
  do iqpt=1,nqpt
 
    ! Calculation of the k coordinates in Normalized Reciprocal coordinates
-   kk(1)=spqpt(1,iqpt)*gprim(1,1)+spqpt(2,iqpt)* gprim(1,2)+spqpt(3,iqpt)*gprim(1,3)
-   kk(2)=spqpt(1,iqpt)*gprim(2,1)+spqpt(2,iqpt)* gprim(2,2)+spqpt(3,iqpt)*gprim(2,3)
-   kk(3)=spqpt(1,iqpt)*gprim(3,1)+spqpt(2,iqpt)* gprim(3,2)+spqpt(3,iqpt)*gprim(3,3)
+   kk(:) = matmul(gprim, spqpt(:, iqpt))
 
    do irpt=1,nrpt
      cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! MPI parallelism.
 
      ! k.R
-     kr = kk(1)*rpt(1,irpt)+kk(2)*rpt(2,irpt)+kk(3)*rpt(3,irpt)
+     kr=dot_product(kk,rpt(:,irpt))
      ! Get phase factor
      re = cos(two_pi*kr); im = sin(two_pi*kr)
 
@@ -3729,12 +3721,10 @@ subroutine dynmat_dq(qpt,natom,gprim,nrpt,rpt,atmfrc,wghatm,dddq)
 
  do irpt=1,nrpt
    ! Calculation of the k coordinates in Normalized Reciprocal coordinates
-   kk(1) = qpt(1)*gprim(1,1)+ qpt(2)*gprim(1,2) + qpt(3)*gprim(1,3)
-   kk(2) = qpt(1)*gprim(2,1)+ qpt(2)*gprim(2,2) + qpt(3)*gprim(2,3)
-   kk(3) = qpt(1)*gprim(3,1)+ qpt(2)*gprim(3,2) + qpt(3)*gprim(3,3)
+   kk(:) = matmul(gprim, qpt)
 
    ! Product of k and r
-   kr=kk(1)*rpt(1,irpt)+kk(2)*rpt(2,irpt)+kk(3)*rpt(3,irpt)
+   kr=dot_product(kk,rpt(:,irpt))
 
    ! Get phase factor
    re=cos(two_pi*kr); im=sin(two_pi*kr)
@@ -4529,11 +4519,11 @@ subroutine d3lwsym(blkflg,d3,indsym,mpert,natom,nsym,symrec,symrel)
 !               if (blkflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1) then
 !                 strflg(i1dir,i1pert,i2dir_a,i2dir_b,i3dir,i3pert)=1
 !                 d3str(:,i1dir,i1pert,i2dir_a,i2dir_b,i3dir,i3pert)= &
-!               & d3(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)          
+!               & d3(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
 !                 if (i2pert==natom+4) then
 !                   strflg(i1dir,i1pert,i2dir_b,i2dir_a,i3dir,i3pert)=1
 !                   d3str(:,i1dir,i1pert,i2dir_b,i2dir_a,i3dir,i3pert)= &
-!                 & d3(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)          
+!                 & d3(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
 !                 end if
 !               end if
 !             end do
@@ -4553,7 +4543,7 @@ subroutine d3lwsym(blkflg,d3,indsym,mpert,natom,nsym,symrec,symrel)
 !  Loop over perturbations
    do i1pert = 1, mpert
      do i2pert = 1, mpert
-       is_strain=.false.    
+       is_strain=.false.
        do i3pert = 1, mpert
 
          do i1dir = 1, 3
@@ -4637,7 +4627,7 @@ subroutine d3lwsym(blkflg,d3,indsym,mpert,natom,nsym,symrec,symrel)
                          end do
                        end do
                      end do
-                   else 
+                   else
 !                     do idisy1 = 1, 3
 !                       !do idisy2_a = 1, 3
 !                       !  do idisy2_b = 1, 3
@@ -4653,10 +4643,10 @@ subroutine d3lwsym(blkflg,d3,indsym,mpert,natom,nsym,symrec,symrel)
 !                               if (strflg(idisy1,ipesy1,idisy2_a,idisy2_b,idisy3,ipesy3) == 1) then
 !
 !                                 sumr = sumr + sym1(i1dir,idisy1)*sym2(i2dir_a,idisy2_a)* &
-!&                                sym2(i2dir_b,idisy2_b)*sym3(i3dir,idisy3)*& 
+!&                                sym2(i2dir_b,idisy2_b)*sym3(i3dir,idisy3)*&
 !&                                d3str(1,idisy1,ipesy1,idisy2_a,idisy2_b,idisy3,ipesy3)
 !                                 sumi = sumi + sym1(i1dir,idisy1)*sym2(i2dir_a,idisy2_b)*&
-!&                                sym2(i2dir_b,idisy2_b)*sym3(i3dir,idisy3)*& 
+!&                                sym2(i2dir_b,idisy2_b)*sym3(i3dir,idisy3)*&
 !&                                d3str(2,idisy1,ipesy1,idisy2_a,idisy2_b,idisy3,ipesy3)
 !
 !                               else
@@ -4671,7 +4661,7 @@ subroutine d3lwsym(blkflg,d3,indsym,mpert,natom,nsym,symrec,symrel)
 !                         !end do
 !                       end do
 !                     end do
-                   end if        
+                   end if
 
                    if (found == 1) then
                      d3(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = sumr
@@ -5003,7 +4993,7 @@ subroutine sylwtens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
 
  do i1pert_ = 1, mpert
    do i2pert_ = 1, mpert
-     is_strain=.false.    
+     is_strain=.false.
      do i3pert_ = 1, mpert
 
        do i1dir_ = 1, 3
@@ -5110,7 +5100,7 @@ subroutine sylwtens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
                        end do
                      end do
                    end do
-!                 else 
+!                 else
 !                   if ((flag_dp /= -1).and.&
 !&                   (ipesy1==i1pert).and.(ipesy2==i2pert).and.(ipesy3==i3pert)) then
 !                     flag = sym1(i1dir,i1dir)*sym2(i2dir_a,i2dir_a)* &
@@ -5242,19 +5232,14 @@ subroutine axial9(ifccar,vect1,vect2,vect3)
 
 !Local variables -------------------------
 !scalars
- integer :: flag,ii,itrial,jj
+ integer :: flag,ii,itrial
  real(dp) :: innorm,scprod
 !arrays
  real(dp) :: work(3)
 
 ! *********************************************************************
 
- do jj=1,3
-   work(jj)=zero
-   do ii=1,3
-     work(jj)=work(jj)+ifccar(jj,ii)*vect1(ii)
-   end do
- end do
+ work (:) = matmul(ifccar,vect1)
 
  flag=0
  do itrial=1,4
@@ -5263,14 +5248,9 @@ subroutine axial9(ifccar,vect1,vect2,vect3)
      scprod=scprod+work(ii)*vect1(ii)
    end do
 
-   do ii=1,3
-     work(ii)=work(ii)-vect1(ii)*scprod
-   end do
+   work(:)=work(:)-vect1(:)*scprod
 
-   scprod=zero
-   do ii=1,3
-     scprod=scprod+work(ii)**2
-   end do
+   scprod=dot_product(work,work)
 
    if(scprod<1.0d-10)then
      work(1:3)=zero
@@ -5283,9 +5263,7 @@ subroutine axial9(ifccar,vect1,vect2,vect3)
  end do
 
  innorm=scprod**(-0.5_dp)
- do ii=1,3
-   vect2(ii)=work(ii)*innorm
- end do
+ vect2(:)=work(:)*innorm
 
  vect3(1)=vect1(2)*vect2(3)-vect1(3)*vect2(2)
  vect3(2)=vect1(3)*vect2(1)-vect1(1)*vect2(3)
@@ -5346,14 +5324,11 @@ subroutine dymfz9(dynmat,natom,nqpt,gprim,option,spqpt,trans)
 
  do iqpt=1,nqpt
    ! Definition of q in normalized reciprocal space
-   kk(1)=spqpt(1,iqpt)*gprim(1,1)+spqpt(2,iqpt)*gprim(1,2)+spqpt(3,iqpt)*gprim(1,3)
-   kk(2)=spqpt(1,iqpt)*gprim(2,1)+spqpt(2,iqpt)*gprim(2,2)+spqpt(3,iqpt)*gprim(2,3)
-   kk(3)=spqpt(1,iqpt)*gprim(3,1)+spqpt(2,iqpt)*gprim(3,2)+spqpt(3,iqpt)*gprim(3,3)
+   kk(:) = matmul(gprim, spqpt(:, iqpt))
+
 
    if(option==1)then
-     kk(1)=-kk(1)
-     kk(2)=-kk(2)
-     kk(3)=-kk(3)
+     kk(:)=-kk(:)
    end if
 
    do ia=1,natom
@@ -6253,7 +6228,7 @@ end subroutine dfpt_prtph
 !!  ntypat=number of atom types
 !!  typat(natom)=integer label of each type of atom (1,2,...)
 !!  [herm_opt]= 1 to hermitianize mat (default)
-!!          0 if no symmetrization should be performed
+!!              0 if no symmetrization should be performed
 !!
 !! SIDE EFFECTS
 !!  mat(2*3*natom*3*natom)=Multiplies by atomic masses in output.
@@ -6512,12 +6487,10 @@ subroutine ftgam_init (gprim,nqpt,nrpt,qpt_full,rpt,coskr, sinkr)
 ! Prepare the phase factors
  do iqpt=1,nqpt
    ! Calculation of the k coordinates in Normalized Reciprocal coordinates
-   kk(1) = qpt_full(1,iqpt)*gprim(1,1) + qpt_full(2,iqpt)*gprim(1,2) + qpt_full(3,iqpt)*gprim(1,3)
-   kk(2) = qpt_full(1,iqpt)*gprim(2,1) + qpt_full(2,iqpt)*gprim(2,2) + qpt_full(3,iqpt)*gprim(2,3)
-   kk(3) = qpt_full(1,iqpt)*gprim(3,1) + qpt_full(2,iqpt)*gprim(3,2) + qpt_full(3,iqpt)*gprim(3,3)
+   kk(:) = matmul(gprim,qpt_full(:,iqpt))
    do irpt=1,nrpt
      ! Product of k and r
-     kr = kk(1)*rpt(1,irpt)+ kk(2)*rpt(2,irpt)+ kk(3)*rpt(3,irpt)
+     kr =dot_product(kk,rpt(:,irpt))
      coskr(iqpt,irpt)=cos(two_pi*kr)
      sinkr(iqpt,irpt)=sin(two_pi*kr)
    end do

@@ -6,7 +6,7 @@
 !!  This module contains miscelaneous routines used in the PAW context.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2022 ABINIT group (FJ,MT)
+!! Copyright (C) 2018-2025 ABINIT group (FJ,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -207,7 +207,7 @@ subroutine chkpawovlp(natom,ntypat,pawovlp,pawtab,rmet,typat,xred,nremit)
          write(message, '(3a,i5,a)' ) trim(message),ch10,&
 &         '   There are ', iovl(ii),' pairs of overlapping atoms.'
        end if
-       write(message, '(3a,i3,a,i3,a)' ) trim(message),ch10,&
+       write(message, '(3a,i4,a,i4,a)' ) trim(message),ch10,&
         '   The maximum overlap percentage is obtained for the atoms ',iamax(ii),' and ',ibmax(ii),'.'
        write(message, '(2a,2(a,i3),a,f9.5)' ) trim(message),ch10,&
 &       '    | Distance between atoms ',iamax(ii),' and ',ibmax(ii),' is  : ',sqrt(norm2_min(ii))
@@ -304,7 +304,7 @@ end subroutine chkpawovlp
 !! To be called at the end of the SCF cycle
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2022 ABINIT group (FJ,MT,BA)
+!! Copyright (C) 1998-2025 ABINIT group (FJ,MT,BA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

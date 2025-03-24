@@ -11,7 +11,11 @@ try:
     from ConfigParser import SafeConfigParser, NoOptionError
 except ImportError:
     # The ConfigParser module has been renamed to configparser in Python 3
-    from configparser import SafeConfigParser, NoOptionError
+    from configparser import NoOptionError
+    try:
+        from configparser import SafeConfigParser
+    except ImportError:
+        from configparser import ConfigParser as SafeConfigParser
 
 import logging
 logger = logging.getLogger(__name__)

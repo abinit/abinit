@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR)
+!!  Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -26,17 +26,7 @@ module m_out_spg_anal
  use m_dtset
  use m_abicore
  use m_errors
- use m_xomp
- use m_xmpi
-#if defined HAVE_NETCDF
- use netcdf
-#endif
- use m_outvar_a_h
- use m_outvar_i_n
- use m_outvar_o_z
 
- use m_parser,    only : ab_dimensions
- use m_nctk,      only : create_nc_file
  use m_symfind,   only : symfind_expert, symanal, symlatt
  use m_geometry,  only : metric, mkrdim
  use m_spgdata,   only : prtspgroup
@@ -109,7 +99,7 @@ subroutine out_spg_anal(dtsets,echo_spgroup,iout,ndtset,ndtset_alloc,results_out
 !An upper bound on the number of symmetry operations is 48 (maximum of point symmetries) times 2 (for the spin flip)
 !times the number of atoms as the latter gives the maximum number of non-symmorphic translations.
 !Actually, a better bound might be obtained from the minimum of the numbers of atoms of the same type,
-!but this refinement is not needed here. 
+!but this refinement is not needed here.
  msym=96*dtsets(1)%natom
  if(ndtset_alloc>1)then
    do idtset=2,ndtset_alloc
@@ -128,7 +118,7 @@ subroutine out_spg_anal(dtsets,echo_spgroup,iout,ndtset,ndtset_alloc,results_out
    nimage=results_out(idtset)%nimage
    jdtset=dtsets(idtset)%jdtset ; if(ndtset==0)jdtset=0
 
-   do iimage=1,nimage 
+   do iimage=1,nimage
 
      acell=results_out(idtset)%acell(:,iimage)
      rprim=results_out(idtset)%rprim(:,:,iimage)
@@ -180,7 +170,7 @@ subroutine out_spg_anal(dtsets,echo_spgroup,iout,ndtset,ndtset_alloc,results_out
 &         ' have changed between the initial recognition based on the input file',ch10,&
 &         ' and a postprocessing based on the final acell, rprim, and xred.',ch10,&
 &         ' More details in the log file.'
-         call wrtout(iout,msg,'COLL')
+         call wrtout(iout,msg)
          counter0=0
        endif
        if(echo_spgroup==1 .and. counter1==1)then
@@ -189,16 +179,16 @@ subroutine out_spg_anal(dtsets,echo_spgroup,iout,ndtset,ndtset_alloc,results_out
 &         ' and a postprocessing based on the final acell, rprim, and xred.',ch10,&
 &         ' These modifications are detailed below.',ch10,&
 &         ' The updated tnons, symrel or symrel have NOT been reported in the final echo of variables after computation.'
-         call wrtout(std_out,msg,'COLL')
+         call wrtout(std_out,msg)
          write(msg,'(5a)')' Such change of spacegroup, or magnetic point group might happen in several cases.',ch10,&
 &         ' (1) If spgroup (+ptgroupma) defined in the input file, but the actual groups are supergroups of these; ',ch10,&
 &         ' (2) If symrel, tnons (+symafm) defined in the input file, while the system is more symmetric; '
-         call wrtout(std_out,msg,'COLL')
+         call wrtout(std_out,msg)
          write(msg,'(5a)')&
 &         ' (3) If the geometry has been optimized and the final structure is more symmetric than the initial one;',ch10,&
 &         ' (4) In case of GW of BSE calculation with inversion symmetry, as nsym has been reduced in such',ch10,&
 &         '       dataset, excluding the improper symmetry operations (with determinant=-1), but not in the postprocessing.'
-         call wrtout(std_out,msg,'COLL')
+         call wrtout(std_out,msg)
          write(msg,'(5a)')' In some case, the recognition of symmetries strongly depends on the value of tolsym.',ch10,&
           ' You might investigate its effect by restarting abinit based on the final acell, rprim and xred,',ch10,&
 &         ' and different values for tolsym.'
@@ -215,9 +205,9 @@ subroutine out_spg_anal(dtsets,echo_spgroup,iout,ndtset,ndtset_alloc,results_out
          else
            call prtspgroup(bravais,genafm,std_out,jdtset,ptgroupma,spgroup,iimage=iimage)
          endif
-       else 
+       else
          write(msg,'(2a,3i8)')ch10,' Initial data. jdtset, iimage, nsym=',jdtset,iimage,dtsets(idtset)%nsym
-         call wrtout(std_out,msg,'COLL')
+         call wrtout(std_out,msg)
          if(nimage==1)then
            call prtspgroup(dtsets(idtset)%bravais,dtsets(idtset)%genafm,std_out,jdtset,&
 &           dtsets(idtset)%ptgroupma,dtsets(idtset)%spgroup)
@@ -226,7 +216,7 @@ subroutine out_spg_anal(dtsets,echo_spgroup,iout,ndtset,ndtset_alloc,results_out
 &           dtsets(idtset)%ptgroupma,dtsets(idtset)%spgroup,iimage=iimage)
          endif
          write(msg,'(a,3i8)')' Final data.   jdtset, iimage, nsym=',jdtset,iimage,nsym
-         call wrtout(std_out,msg,'COLL')
+         call wrtout(std_out,msg)
          if(nimage==1)then
            call prtspgroup(bravais,genafm,std_out,jdtset,ptgroupma,spgroup)
          else
@@ -250,7 +240,7 @@ subroutine out_spg_anal(dtsets,echo_spgroup,iout,ndtset,ndtset_alloc,results_out
 
  if(echo_spgroup==1)then
    write(msg,'(a,80a)')ch10,('=',mu=1,80)
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(std_out,msg)
  endif
 
 !**************************************************************************

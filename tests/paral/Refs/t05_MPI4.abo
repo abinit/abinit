@@ -1,8 +1,8 @@
 
-.Version 9.7.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2022 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 10 Feb 2022.
-- ( at 17h10 )
-  
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/TestBot_MPI4/paral_t05_MPI4/t05.abi
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h29 )
+
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI4/paral_t05_MPI4/t05.abi
 - output file    -> t05_MPI4.abo
 - root for input  files -> t05_MPI4i
 - root for output files -> t05_MPI4o
-
 
  DATASET    1 : space group Pm m m (# 47); Bravais oP (primitive ortho.)
 ================================================================================
@@ -38,7 +37,6 @@ P This job should need less than                      50.551 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.464 Mbytes ; DEN or POT disk file :      1.671 Mbytes.
 ================================================================================
-
 
  DATASET    2 : space group Pm m m (# 47); Bravais oP (primitive ortho.)
 ================================================================================
@@ -62,10 +60,10 @@ _ WF disk file :      1.112 Mbytes ; DEN or POT disk file :      1.671 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -77,7 +75,7 @@ _ WF disk file :      1.112 Mbytes ; DEN or POT disk file :      1.671 Mbytes.
            diemac      1.00000000E+00
            diemix      5.00000000E-01
              ecut      2.50000000E+01 Hartree
--          fftalg         312
+-          fftalg         512
            getden1          0
            getden2          1
            getwfk1          0
@@ -168,8 +166,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     25.000   => boxcut(ratio)=   2.06853
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/PseudosHGH_pwteter/7n.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/PseudosHGH_pwteter/7n.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/7n.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/7n.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for N,  from PRB58, 3641 (1998)
 -  7.00000   5.00000     10605                znucl, zion, pspdat
     3    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -182,8 +180,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with 
-  definition in PRB44, 8503 (1991). 
+  so that the KB energies are not consistent with
+  definition in PRB44, 8503 (1991).
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   -0.01437983
          --- l  ekb(1:nproj) -->
@@ -204,18 +202,18 @@ tolerances: {tolwfr: 1.00E-15, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -19.233171862222    -1.923E+01 1.578E-01 1.483E+02
- ETOT  2  -19.561552725197    -3.284E-01 7.126E-05 1.893E+02
- ETOT  3  -19.574361893898    -1.281E-02 9.800E-05 7.424E+01
- ETOT  4  -19.581598718673    -7.237E-03 1.862E-04 2.544E+00
+ ETOT  1  -19.233171862056    -1.923E+01 1.578E-01 1.483E+02
+ ETOT  2  -19.561552725181    -3.284E-01 7.126E-05 1.893E+02
+ ETOT  3  -19.574361893893    -1.281E-02 9.800E-05 7.424E+01
+ ETOT  4  -19.581598718674    -7.237E-03 1.862E-04 2.544E+00
  ETOT  5  -19.581596263122     2.456E-06 7.209E-08 2.417E-01
- ETOT  6  -19.581624199990    -2.794E-05 5.875E-07 2.165E-03
+ ETOT  6  -19.581624199989    -2.794E-05 5.875E-07 2.165E-03
  ETOT  7  -19.581624347447    -1.475E-07 2.899E-09 4.876E-05
  ETOT  8  -19.581624343863     3.584E-09 4.339E-11 4.649E-05
  ETOT  9  -19.581624348876    -5.013E-09 1.223E-10 7.445E-08
- ETOT 10  -19.581624348887    -1.052E-11 4.257E-13 1.337E-08
- ETOT 11  -19.581624348889    -2.085E-12 2.149E-14 1.596E-09
- ETOT 12  -19.581624348886     2.558E-12 8.611E-16 3.701E-11
+ ETOT 10  -19.581624348886    -1.043E-11 4.257E-13 1.337E-08
+ ETOT 11  -19.581624348889    -2.164E-12 2.149E-14 1.596E-09
+ ETOT 12  -19.581624348886     2.622E-12 8.611E-16 3.701E-11
 
  At SCF step   12   max residual=  8.61E-16 < tolwfr=  1.00E-15 =>converged.
 
@@ -235,7 +233,7 @@ lattice_vectors:
 lattice_lengths: [  11.33836,    9.44863,    9.45052, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.0124526E+03
-convergence: {deltae:  2.558E-12, res2:  3.701E-11, residm:  8.611E-16, diffor: null, }
+convergence: {deltae:  2.622E-12, res2:  3.701E-11, residm:  8.611E-16, diffor: null, }
 etotal    :  -1.95816243E+01
 entropy   :   0.00000000E+00
 fermie    :  -3.29103019E-01
@@ -280,13 +278,13 @@ force_length_stats: {min:   2.80205033E-02, max:   2.80205033E-02, mean:   2.802
     2      0.54885000000000     0.00000000000000     0.00000000000000
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.02802050326659    -0.00000000000000    -0.00000000000000
-    2      0.02802050326659    -0.00000000000000    -0.00000000000000
+    1     -0.02802050326658    -0.00000000000000    -0.00000000000000
+    2      0.02802050326658    -0.00000000000000    -0.00000000000000
  frms,max,avg= 1.6177645E-02 2.8020503E-02   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -1.44087208965257    -0.00000000000000    -0.00000000000000
-    2      1.44087208965257    -0.00000000000000    -0.00000000000000
+    1     -1.44087208965182    -0.00000000000000    -0.00000000000000
+    2      1.44087208965182    -0.00000000000000    -0.00000000000000
  frms,max,avg= 8.3188789E-01 1.4408721E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 11.338356797314  9.448630664428  9.450520390561 bohr
               =  6.000000000000  5.000000000000  5.001000000000 angstroms
@@ -307,11 +305,11 @@ hartree             :  1.41789440598173E+01
 xc                  : -4.74241554911305E+00
 Ewald energy        : -1.79700510520524E+00
 psp_core            : -2.84059215608841E-04
-local_psp           : -4.27288430024428E+01
+local_psp           : -4.27288430024427E+01
 non_local_psp       :  1.92591549772963E+00
 total_energy        : -1.95816243488860E+01
-total_energy_eV     : -5.32843096759861E+02
-band_energy         : -5.07475333572703E+00
+total_energy_eV     : -5.32843096759859E+02
+band_energy         : -5.07475333572704E+00
 ...
 
 
@@ -381,7 +379,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -1, paral_kgb: 0, }
   prteigrs : nnsclo,ikpt=   25    1 max resid (excl. the buffer)=  5.15138E-09
 
 
- *** TDDFT : computation of excited states *** 
+ *** TDDFT : computation of excited states ***
  Splitting of  24 states in  10 occupied states, and  14 unoccupied states,
  giving    70 excitations. Note that spin flip is not possible actually.
  So the number of excitation is the half of the product of the number of state
@@ -465,7 +463,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -1, paral_kgb: 0, }
   Sum of osc. strength :     2.575023E+00
 
   TDDFT   mixed excitation energies (at most 40 of them are printed),
-  and corresponding total energies.                
+  and corresponding total energies.
   Excit#   (Ha)    and    (eV)    total energy (Ha)    major contributions
    1    2.87877E-01   7.83353E+00   -1.929375E+01    0.50(  5->  6)(1)    0.50(  5->  6)(2)
                                                      0.00(  5->  7)(1)    0.00(  5->  7)(2)
@@ -646,7 +644,7 @@ force_length_stats: {min: null, max: null, mean: null, }
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      1.1338356797E+01  9.4486306644E+00  9.4505203906E+00 Bohr
               amu      1.40067400E+01
@@ -659,7 +657,7 @@ force_length_stats: {min: null, max: null, mean: null, }
            etotal1    -1.9581624349E+01
             fcart1    -2.8020503267E-02 -0.0000000000E+00 -0.0000000000E+00
                        2.8020503267E-02 -0.0000000000E+00 -0.0000000000E+00
--          fftalg         312
+-          fftalg         512
            getden1          0
            getden2          1
            getwfk1          0
@@ -740,7 +738,7 @@ P           mkmem           1
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -752,12 +750,12 @@ P           mkmem           1
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -775,7 +773,7 @@ P           mkmem           1
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -790,15 +788,15 @@ P           mkmem           1
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          5.6  wall=          5.7
+- Proc.   0 individual time (sec): cpu=          2.5  wall=          2.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   1 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         22.4  wall=         22.6
++Overall time at end (sec) : cpu=         10.9  wall=         11.3

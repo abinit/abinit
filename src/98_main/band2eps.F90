@@ -8,7 +8,7 @@
 !! of each atom.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2022 ABINIT group (FDortu,MVeithen)
+!! Copyright (C) 1999-2025 ABINIT group (FDortu,MVeithen)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -33,7 +33,6 @@ program band2eps
 
  use defs_basis
  use m_abimover
- use m_build_info
  use m_xmpi
  use m_abicore
  use m_errors
@@ -42,6 +41,7 @@ program band2eps
  use m_effective_potential_file
  use m_band2eps_dataset
 
+ use m_build_info,    only : abinit_version
  use m_io_tools,      only : open_file
  use m_fstrings,      only : int2char4, tolower, inupper
  use m_time,          only : asctime

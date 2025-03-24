@@ -19,7 +19,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2022 ABINIT group (hexu)
+!! Copyright (C) 2001-2025 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -250,7 +250,7 @@ contains
     character(len=fnlen), intent(in) :: fname
     integer :: ierr, ncid, varid
     integer :: nspin, ntime
-    character(len=118) :: msg
+    character(len=500) :: msg
     ! open file
 
 #if defined HAVE_NETCDF
@@ -276,9 +276,10 @@ contains
 
     ! read Spin and set as initial state
     ierr =nf90_inq_varid(ncid, "S", varid)
-    NCF_CHECK_MSG(ierr, "when reading S. Try using spin_init_state=3 option instead (specify spin_init_qpoint,&
-      &  spin_init_rotate_axis and spin_init_orientation as needed).")
-    
+    msg="when reading S. Try using spin_init_state=3 option instead (specify spin_init_qpoint," // &
+      & " spin_init_rotate_axis and spin_init_orientation as needed)."
+    NCF_CHECK_MSG(ierr, msg)
+
     ierr = nf90_get_var(ncid=ncid, varid=varid, values=self%Stmp(:,:), start=(/1, 1, ntime/), count=(/3, nspin,1/))
     NCF_CHECK_MSG(ierr, "when reading S from spin hist file")
 
@@ -486,7 +487,7 @@ contains
        Ri = cross(S_in(:,i),Htmp)
        dSdt = -self%gamma_L(i)*(Ri+self%damping(i)* cross(S_in(:,i), Ri))
        Ri=S_in(:,i)+dSdt*self%dt
-       Ri=Ri/sqrt(Ri(1)*Ri(1)+Ri(2)*Ri(2)+Ri(3)*Ri(3))
+       Ri=Ri/norm2(Ri)
        self%Stmp2(:,i)=Ri
     end do
     call self%mps%allgatherv_dp2d(self%Stmp2, 3, buffer=self%buffer)
@@ -501,7 +502,7 @@ contains
        Ri = cross(S_in(:,i),Htmp)
        dSdt = -self%gamma_L(i)*(Ri+self%damping(i)* cross(S_in(:,i), Ri))
        Ri=S_in(:,i)+dSdt*self%dt
-       Ri=Ri/sqrt(Ri(1)*Ri(1)+Ri(2)*Ri(2)+Ri(3)*Ri(3))
+       Ri=Ri/norm2(Ri)
        self%Stmp(:,i)=Ri
     end do
     call self%mps%allgatherv_dp2d(self%Stmp, 3, buffer=self%buffer)
@@ -551,7 +552,7 @@ contains
        !Ri = cross(S_in(:,i),Htmp)
        !dSdt = -self%gamma_L(i)*(Ri+self%damping(i)* cross(S_in(:,i), Ri))
        Ri=S_in(:,i)!+dSdt*self%dt
-       Ri=Ri/sqrt(Ri(1)*Ri(1)+Ri(2)*Ri(2)+Ri(3)*Ri(3))
+       Ri=Ri/norm2(Ri)
        self%Stmp(:,i)=Ri
     end do
     call self%mps%allgatherv_dp2d(self%Stmp2, 3, buffer=self%buffer)
@@ -649,7 +650,8 @@ contains
     type(hash_table_t),optional, intent(inout) :: energy_table
     if(present(displacement) .or. present(lwf) .or. present(strain)) then
        ABI_BUG("Monte Carlo only implemented for spin.")
-       call self%spin_mc%run_MC(self%rng, effpot, S_in, etot)
+    else
+       call self%spin_mc%run_MC(self%rng, effpot, S_in, etot, bfield=self%Htmp)
     end if
     call energy_table%put(self%label, etot)
   end subroutine spin_mover_t_run_one_step_MC

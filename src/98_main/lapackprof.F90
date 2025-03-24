@@ -6,7 +6,7 @@
 !!  Utility for profiling Linear Algebra libraries used by Abinit.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2022 ABINIT group (MG)
+!! Copyright (C) 2004-2025 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -25,7 +25,6 @@
 program lapackprof
 
  use defs_basis
- use m_build_info
  use m_abicore
  use m_xmpi
  use m_xomp
@@ -36,6 +35,7 @@ program lapackprof
  use m_yaml
 
  use defs_abitypes,   only : MPI_type
+ use m_build_info,    only : abinit_version
  use m_fstrings,      only : lower, itoa, sjoin !, strcat
  use m_specialmsg,    only : specialmsg_getcount, herald
  use m_argparse,      only : get_arg, get_arg_list, get_start_step_num

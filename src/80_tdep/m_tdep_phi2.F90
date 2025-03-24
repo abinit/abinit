@@ -413,6 +413,8 @@ subroutine tdep_write_phi2(distance,Invar,MPIdata,Phi2,Shell2at)
       do jshell=1,nshell
         if ((distance(Shell2at%iatref(jshell),Shell2at%jatref(jshell),1).lt.max_bound).and.&
 &           (distance(Shell2at%iatref(jshell),Shell2at%jatref(jshell),1).ge.min_bound).and.&
+&           (distance(Shell2at%iatref(jshell),Shell2at%jatref(jshell),1).ne.&
+&            distance(Shell2at%iatref(this_shell),Shell2at%jatref(this_shell),1)).and.&
 &            (tab_shell(jshell).eq.0)) then
           max_bound=distance(Shell2at%iatref(jshell),Shell2at%jatref(jshell),1)
           this_shell=jshell
@@ -460,8 +462,8 @@ subroutine tdep_write_phi2(distance,Invar,MPIdata,Phi2,Shell2at)
 ! Write the Phi2_unitcell.dat and Phi2.dat files
   if (Invar%debug.and.MPIdata%iam_master) then
     write(Invar%stdout,'(a)') ' See the Phi2*.dat file'
-    open(unit=52,file=trim(Invar%output_prefix)//'Phi2_unitcell.dat')
-    open(unit=55,file=trim(Invar%output_prefix)//'Phi2.dat')
+    open(unit=52,file=trim(Invar%output_prefix)//'_Phi2_unitcell.dat')
+    open(unit=55,file=trim(Invar%output_prefix)//'_Phi2.dat')
     do jatom=1,3*Invar%natom
       if (jatom.le.3*Invar%natom_unitcell) then
         write(52,'(10000(f10.6,1x))') Phi2(jatom,:)
@@ -591,6 +593,7 @@ subroutine tdep_write_dij(Eigen2nd,iqpt,Invar,qpt)
   double precision, allocatable :: omega (:)
   double complex, allocatable   :: dij   (:,:)
   double complex, allocatable   :: eigenV(:,:)
+  double precision :: norm_eigenV
   integer :: ii,jj,iatcell,jatcell
 
   ABI_MALLOC(omega ,(3*Invar%natom_unitcell))                       ; omega(:)   = zero
@@ -599,13 +602,26 @@ subroutine tdep_write_dij(Eigen2nd,iqpt,Invar,qpt)
   omega(:)=Eigen2nd%eigenval(:,iqpt)
   do iatcell=1,Invar%natom_unitcell
     do jatcell=1,Invar%natom_unitcell
-      do ii=1,3
-        do jj=1,3
+      do jj=1,3
+        norm_eigenV = 0.0d0
+        do ii=1,3
           dij   ((iatcell-1)*3+ii,(jatcell-1)*3+jj)=dcmplx(Eigen2nd%dynmat  (1,ii,iatcell,jj,jatcell,iqpt),&
 &                                                          Eigen2nd%dynmat  (2,ii,iatcell,jj,jatcell,iqpt))
           eigenV((iatcell-1)*3+ii,(jatcell-1)*3+jj)=dcmplx(Eigen2nd%eigenvec(1,ii,iatcell,jj,jatcell,iqpt),&
 &                                                          Eigen2nd%eigenvec(2,ii,iatcell,jj,jatcell,iqpt))
+          norm_eigenV = norm_eigenV + real(eigenV((iatcell-1)*3+ii, (jatcell-1)*3+jj))**2 + &
+                                      aimag(eigenV((iatcell-1)*3+ii, (jatcell-1)*3+jj))**2
         end do !ii 
+        norm_eigenV = dsqrt(norm_eigenV)
+!        if (norm_eigenV.lt.tol8) then
+!          write(6,*) "iqpt, norm=",iqpt,norm_eigenV
+!          ABI_ERROR(' STOP: THE NORM OF EIGENVECTOR IS ZERO')
+!        end if
+        if (norm_eigenV.gt.tol8) then
+          do ii=1,3
+            eigenV((iatcell-1)*3+ii, (jatcell-1)*3+jj) = eigenV((iatcell-1)*3+ii, (jatcell-1)*3+jj) / dcmplx(norm_eigenV,0.d0)
+          end do !ii
+        end if
       end do !jj 
     end do !jatcell 
   end do !iatcell
@@ -633,15 +649,35 @@ subroutine tdep_write_dij(Eigen2nd,iqpt,Invar,qpt)
   if (Invar%enunit.eq.3) write(53,'(i5,1x,100(f15.3,1x))') iqpt,(omega(ii)*Ha_THz    ,ii=1,3*Invar%natom_unitcell)
 
 ! Print the eigenvectors (eigenV) 
-  write(51,*) 'For iqpt=',iqpt
+!  write(51,*) 'For iqpt=',iqpt
+!  do ii=1,3*Invar%natom_unitcell
+!    write(51,*) 'Mode number',ii,' energy',omega(ii)
+!    write(51,*) '  Real:'
+!    write(51,*) real(eigenV(:,ii))
+!    write(51,*) '  Imag:'
+!    write(51,*) aimag(eigenV(:,ii))
+!  end do
+!  write(51,*) ' '
+
+  write(51,'(a,4x,i3,4(f15.6,1x))') 'q-pt=',iqpt,(qpt(ii),ii=1,3),qpt(1)*qpt(2)*qpt(3)
+
   do ii=1,3*Invar%natom_unitcell
-    write(51,*) 'Mode number',ii,' energy',omega(ii)
-    write(51,*) '  Real:'
-    write(51,*) real(eigenV(:,ii))
-    write(51,*) '  Imag:'
-    write(51,*) aimag(eigenV(:,ii))
-  end do  
-  write(51,*) ' '
+    write(51,'(i5,5x,f15.6)') ii,omega(ii)*Ha_cmm1
+  enddo
+  write(51,*) 'Phonon Eigenvectors'
+  write(51,'(a,17x,a,33x,a,34x,a)') 'Mode Ion','X','Y','Z'
+  do ii=1,3*Invar%natom_unitcell
+    do jj=1,Invar%natom_unitcell
+      write(51,'(i2,3x,i2,3x,6(f15.12,1x))') ii,jj,real(eigenV(3*(jj-1)+1,ii)),&
+&                                                 aimag(eigenV(3*(jj-1)+1,ii)),&
+&                                                  real(eigenV(3*(jj-1)+2,ii)),&
+&                                                 aimag(eigenV(3*(jj-1)+2,ii)),&
+&                                                  real(eigenV(3*(jj-1)+3,ii)),&
+&                                                 aimag(eigenV(3*(jj-1)+3,ii))
+    enddo
+  enddo
+
+
   ABI_FREE(omega)
   ABI_FREE(dij)
   ABI_FREE(eigenV)
@@ -755,7 +791,7 @@ subroutine tdep_write_yaml(Eigen2nd,Qpt,Prefix)
   double complex, allocatable   :: eigenV(:,:)
   
   nmode=size(Eigen2nd%eigenval,dim=1)
-  open(unit=52,file=trim(Prefix)//'phonon-bands.yaml')
+  open(unit=52,file=trim(Prefix)//'_phonon-bands.yaml')
   write(52,'(a,i4)') 'nqpoint:',Qpt%nqpt 
   write(52,'(a,i4)') 'npath:',Qpt%qpt_tot-1
   write(52,'(a)')    'segment_nqpoint:'

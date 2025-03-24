@@ -18,7 +18,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2022 ABINIT group (hexu)
+!! Copyright (C) 2001-2025 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -37,8 +37,8 @@ module m_supercell_maker
   use m_abicore
   use m_errors
   use m_xmpi
-  use m_symtk,    only : matr3inv
-  use m_mathfuncs , only: mat33det, binsearch_left_integerlist, rotate_by_angle_around_axis
+  use m_mathfuncs,     only: binsearch_left_integerlist, rotate_by_angle_around_axis
+  use m_matrix,        only: matr3inv, mat33det
   use m_mpi_scheduler, only: init_mpi_info
   use m_supercell
   implicit none
@@ -59,7 +59,7 @@ module m_supercell_maker
    contains
      procedure :: initialize
      procedure :: finalize
-     procedure :: to_red_sc  
+     procedure :: to_red_sc
      procedure :: build_rvec
      procedure :: sc_cell
      procedure :: R_to_sc
@@ -104,7 +104,7 @@ contains
     real(dp) :: tmp(3,3)
     integer :: master, my_rank, comm, nproc, ierr
     logical :: iam_master
-    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc)
 
     self%scmat(:,:)=sc_matrix
     call xmpi_bcast(self%scmat, master, comm, ierr)
@@ -164,7 +164,7 @@ contains
     !rep=ceiling(maxval(corners, dim=1) - minval(corners, dim=1))
     minr=floor(minval(corners, dim=1))
     maxr=ceiling(maxval(corners, dim=1))
-    ! NOTE: DO NOT CHANGE THE ORDER. It is used in the binary search. 
+    ! NOTE: DO NOT CHANGE THE ORDER. It is used in the binary search.
     do ix = minr(1), maxr(1)
        do iy = minr(2), maxr(2)
           do iz = minr(3), maxr(3)
@@ -184,7 +184,7 @@ contains
   end subroutine build_rvec
 
   !-----------------------------------------------------------------------
-  !> @brief cell parameters from unitcell to supercell 
+  !> @brief cell parameters from unitcell to supercell
   !> @param [in] cell: cell parameter in primitive cell
   !> @param [out] sccell: supercell cell parameter
   !-----------------------------------------------------------------------
@@ -225,7 +225,7 @@ contains
   !> Note that allocation will be done if not already allocated.
   !> @param [in] primcell: cell parameter in primitive cell
   !> @param [in] xcart: cartesion coordinates in primitive cell
-  !> @param [out] scxcart:cartesion coordinates in supercell 
+  !> @param [out] scxcart:cartesion coordinates in supercell
   !-----------------------------------------------------------------------
   subroutine trans_xcart(self, primcell, xcart, scxcart)
     class(supercell_maker_t), intent(inout) :: self
@@ -259,7 +259,7 @@ contains
     class(supercell_maker_t), intent(inout) :: self
     integer, intent(in) :: R(3)
     integer, intent(inout) :: ind_sc, R_sc(3)
-    integer :: rprim(3) 
+    integer :: rprim(3)
     R_sc=floor(self%to_red_sc(R*1.0d0)+1.0d-8)
     rprim(:)= R-matmul(R_sc, self%scmat)
     ind_sc=binsearch_left_integerlist(self%rvecs, rprim)
@@ -272,8 +272,8 @@ contains
     end if
   end subroutine R_to_sc
 
-  
-  
+
+
   !-----------------------------------------------------------------------
   !> @brief generate a wave like quantity. A_sc(R) = A(0)* exp(ikR)
   !>  The A_sc will be allocated. size : (ncells)
@@ -356,7 +356,7 @@ contains
 
 
   !-----------------------------------------------------------------------
-  !> @brief generate a spin wave  quantity. 
+  !> @brief generate a spin wave  quantity.
   !>  rotate by theta(R) = 2pi * k.dot.R, around axis.
   !>  The A_sc will be allocated. size : (ndim, nA*ncells)
   !> @param [in] A: a vector quantity. dimension (xyz, iA)
@@ -492,7 +492,7 @@ contains
 
   !-----------------------------------------------------------------------
   !> @brief same as trans_j_and_Rj, but it loop over a list of j with the
-  !>    same Rj 
+  !>    same Rj
   !-----------------------------------------------------------------------
   subroutine trans_jlist_and_Rj(self, nbasis, jlist, Rj, ind_sc, R_sc)
     class(supercell_maker_t), intent(inout) :: self
@@ -517,7 +517,7 @@ contains
 
   !-----------------------------------------------------------------------
   !> @brief same as trans_j_and_Rj, but it loop over a list of j with the
-  !>    same Rj 
+  !>    same Rj
   !-----------------------------------------------------------------------
   subroutine trans_jlist_and_Rj_noalloc(self, nbasis, jlist, Rj, ind_sc, R_sc)
     class(supercell_maker_t), intent(inout) :: self
@@ -544,7 +544,7 @@ contains
 
   !-----------------------------------------------------------------------
   !> @brief same as trans_j_and_Rj, but it loop over a list of j with the
-  !>    same Rj 
+  !>    same Rj
   !-----------------------------------------------------------------------
   subroutine trans_ijR(self, nbasis_i, nbasis_j, ilist, jlist, Rj, i_sc, j_sc, R_sc)
     class(supercell_maker_t), intent(inout) :: self
@@ -735,7 +735,7 @@ contains
     scmat=transpose(reshape([1,2, 3, 4,5,6,7,8,6], [3,3]))
     !scmat=reshape([1,2, 3, 4,5,6,7,8,6], [3,3])
     call maker%initialize(scmat)
- 
+
     err=0
 
     ! test build_rvecs
@@ -776,7 +776,7 @@ contains
 
 !===================================================================================
 ! The functions below are deprecated!!!
-! ! They are used with the m_supercell module. 
+! ! They are used with the m_supercell module.
 !
 !   ! R (in term of primitive cell) to R_sc(in term of supercell) + R_prim
 !   subroutine find_R_PBC(scell, R, R_sc, R_prim)

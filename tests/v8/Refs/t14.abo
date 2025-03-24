@@ -3,10 +3,10 @@
  a software platform designed for the construction and use of second-principles models
                    for lattice, spin and electron degrees of freedom.
 
-.Version 9.11.2 of MULTIBINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of MULTIBINIT 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2022 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group . 
  MULTIBINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -32,15 +32,20 @@
 
 
 
-.Starting date : Sat 15 Jul 2023.
-- ( at 12h07 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h14 )
   
+- The starting date is more than 2 years after the initial release
+- of this version of ABINIT, namely Jul 2022.
+- Note that the use beyond 3 years after the release will not be supported.
+- Action: please, switch to a more recent version of ABINIT.
+
 -  nproc =    1
 
 ================================================================================
 
  Read the information in the reference structure in 
--/home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/v8/Input/t14_sys.xml
+-/home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/v8/Input/t14_sys.xml
  to initialize the multibinit input
 
 ================================================================================
@@ -93,8 +98,8 @@ dipdip_range         1         1         1
 
 ================================================================================
 
--Opening the file /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/v8/Input/t14_sys.xml
--Reading the file /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/v8/Input/t14_sys.xml with Fortran
+-Opening the file /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/v8/Input/t14_sys.xml
+-Reading the file /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/v8/Input/t14_sys.xml with Fortran
 
  Bound for ifc SR:
 
@@ -181,13 +186,13 @@ dipdip_range         1         1         1
 
  Read the coefficients of the polynomial fit from XML and perform some checks
 
--Opening the file /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/v8/Input/t14_coeffs.xml
--Reading the file /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/v8/Input/t14_coeffs.xml with Fortran
+-Opening the file /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/v8/Input/t14_coeffs.xml
+-Reading the file /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/v8/Input/t14_coeffs.xml with Fortran
 
 ================================================================================
 
 -Reading the training-set file :
--/home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/v8/Input/t13_HIST
+-/home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/v8/Input/t13_HIST
 
 
 --------------------------------------------------------------------------------
@@ -200,8 +205,8 @@ dipdip_range         1         1         1
 
  Goal function values at the begining of the fit process (eV^2/A^2):
    Energy          :   4.0372993354979415E-05
-   Forces+Stresses :   7.4805078532501814E-03
-   Forces          :   7.3678370383271821E-03
+   Forces+Stresses :   7.4805078532501797E-03
+   Forces          :   7.3678370383271812E-03
    Stresses        :   1.1267081492299897E-04
 
  N   Selecting          MSDE              MSDFS              MSDF              MSDS
@@ -214,10 +219,10 @@ dipdip_range         1         1         1
  3 =>  -5.2764593172E-01 (Sr_x-O1_x)^1(Sr_y-O1_y)^1(Ru_x-O1_x)^1(Ru_y-O1_y)^1
 
  Goal function values at the end of the fit process (eV^2/A^2):
-   Energy          :   9.8269214433002730E-06
-   Forces+Stresses :   3.9567592281207105E-03
-   Forces          :   3.8455245457369664E-03
-   Stresses        :   1.1123468238374463E-04
+   Energy          :   9.8269214433003255E-06
+   Forces+Stresses :   3.9567592281207122E-03
+   Forces          :   3.8455245457369672E-03
+   Stresses        :   1.1123468238374464E-04
 
 
 ================================================================================
@@ -227,10 +232,10 @@ dipdip_range         1         1         1
 ================================================================================
 
 -
-- Proc.   0 individual time (sec): cpu=          0.6  wall=          0.6
+- Proc.   0 individual time (sec): cpu=          0.5  wall=          0.5
 
 ================================================================================
 
-+Total cpu time      0.627  and wall time      0.629 sec
++Total cpu time      0.501  and wall time      0.501 sec
 
  multibinit : the run completed succesfully.

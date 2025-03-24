@@ -1,0 +1,69 @@
+# ================================================================
+# Configuration file for ABINIT 9 compilation
+#
+# CPU: AMD Trendo EPYC 7453
+# GPU: AMD Instinct MI250X 64 GB
+# Compilers: Cray Compiling Environment 23.12
+# Libraries: FTTW3, libSCI, HIP+ROCm
+# ================================================================
+
+#prefix=${ROOT}/install/${MY_ARCH}/abinit-gpu
+
+# Compilers + flags
+# ========================================
+OMPGPU_FLAGS="-D__HIP_PLATFORM_AMD__  -h acc_model=auto_async_none:fast_addr:no_deep_copy"
+FCFLAGS_EXTRA="${OMPGPU_FLAGS} -h nofortran_ptr_alias -h nofortran_ptr_overlap -h list=a -O ipa0"
+CFLAGS_EXTRA="-D__HIP_PLATFORM_AMD__"
+CXXFLAGS_EXTRA="-D__HIP_PLATFORM_AMD__"
+
+# Parallel compilation
+# ========================================
+with_mpi="yes"
+with_debug_flavor="none"
+enable_mpi_io="yes"
+enable_mpi_inplace="yes"
+enable_openmp="yes"
+enable_openmp_offload="yes"
+
+# AMD GPU
+# ========================================
+GPU_ARCH=gfx90a
+ROCM_PREFIX=${ROCM_PATH}
+with_gpu="${ROCM_PREFIX}"
+with_gpu_flavor="hip-double"
+GPU_CFLAGS="-D__HIP_PLATFORM_AMD__ -I${ROCM_PREFIX}/include"
+GPU_CXXFLAGS="-D__HIP_PLATFORM_AMD__ -I${ROCM_PREFIX}/include"
+GPU_CPPFLAGS="-D__HIP_PLATFORM_AMD__ -I${ROCM_PREFIX}/include"
+GPU_FCFLAGS="-D__HIP_PLATFORM_AMD__ -I${ROCM_PREFIX}/include -I${HIPFORT_ROOT}/include/amdgcn"
+GPU_LIBS="-L${ROCM_PREFIX}/lib -lrocfft -lamdhip64 -lhipfft -lrocblas -lhipblas -lrocsolver -lhipsolver -lroctx64  -lstdc++ ${OPENMPGPU_FLAGS} "
+
+# Linear Algebra library
+# ========================================
+BLAS_PREFIX="$CRAY_LIBSCI_PREFIX_DIR"
+with_linalg="$BLAS_PREFIX"
+LINALG_FCFLAGS="-I${BLAS_PREFIX}/include"
+LINALG_LIBS="-L${BLAS_PREFIX}/lib -lsci_cray"
+
+# FFTW3
+# ================================
+with_fft_flavor="fftw3"
+with_fftw3="${FFTW_ROOT}"
+FFTW3_CFLAGS="-I${FFTW_ROOT}/include"
+FFTW3_FCFLAGS="-I${FFTW_ROOT}/include"
+FFTW3_CPPFLAGS="-I${FFTW_ROOT}/include"
+FFTW3_LIBS="-L${FFTW_ROOT}/lib -lfftw3 -lfftw3f -lfftw3_threads "
+
+# NetCDF library
+# ========================================
+with_hdf5="${HDF5_DIR}"
+with_netcdf="${NETCDF_DIR}"
+with_netcdf_fortran="${NETCDF_DIR}"
+
+# Additional plugins & libs
+# ========================================
+with_libxc="${LIBXC_ROOT}"
+
+# Miscellaneous options
+# ========================================
+enable_zdot_bugfix="no"
+enable_gw_dpc="yes"

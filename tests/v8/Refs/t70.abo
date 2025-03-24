@@ -1,8 +1,8 @@
 
-.Version 9.11.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.2.4.2 of ABINIT, released Nov 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2022 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Jul 2023.
-- ( at 12h11 )
-  
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v8_t67-t68-t69-t70/t70.abi
+.Starting date : Tue 19 Nov 2024.
+- ( at 19h54 )
+
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_EOF-10.2/tests/TestBot_MPI1/v8_t67-t68-t69-t70/t70.abi
 - output file    -> t70.abo
 - root for input  files -> t70i
 - root for output files -> t70o
@@ -43,17 +43,17 @@ _ WF disk file :      1.232 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
             acell      5.4200000000E+00  5.4200000000E+00  5.4200000000E+00 Bohr
               amu      5.58470000E+01
              ecut      3.00000000E+01 Hartree
--          fftalg         312
+-          fftalg         512
            irdwfk           1
            istwfk        1    1    1    1    1    1    1    1
               ixc           7
@@ -160,8 +160,8 @@ meta: {optdriver: 1, rfmagn: 1, }
          ecut(hartree)=     30.000   => boxcut(ratio)=   1.98828
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/26fe.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/26fe.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_EOF-10.2/tests/Pspdir/PseudosTM_pwteter/26fe.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_EOF-10.2/tests/Pspdir/PseudosTM_pwteter/26fe.pspnc
 -  Troullier-Martins psp for element  Fe        Thu Oct 27 17:35:05 EDT 1994
 - 26.00000   8.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -182,7 +182,7 @@ meta: {optdriver: 1, rfmagn: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   6
@@ -212,29 +212,29 @@ tolerances: {toldfe: 1.00E-02, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   2.6198308235846      2.620E+00 1.816E-01 1.498E+03
- ETOT  2   4.1631657817909      1.543E+00 6.234E-01 1.439E+03
- ETOT  3   5.7663189402885      1.603E+00 8.662E-02 3.791E+03
- ETOT  4   10.635438210546      4.869E+00 7.972E-01 7.141E+02
- ETOT  5   26.768190682103      1.613E+01 3.663E-01 3.045E+02
- ETOT  6   43.652651006952      1.688E+01 1.552E+00 1.133E+02
- ETOT  7   65.528581036604      2.188E+01 5.963E+00 1.523E+01
- ETOT  8   69.169218839485      3.641E+00 5.748E-01 5.958E-01
- ETOT  9   69.402143565348      2.329E-01 5.243E+00 1.814E-01
- ETOT 10   69.411580770870      9.437E-03 2.638E-01 6.932E-02
- ETOT 11   69.407375931528     -4.205E-03 5.245E+00 2.278E-03
+-ETOT  1   2.6198306223246      2.620E+00 1.816E-01 1.498E+03
+ ETOT  2   4.1631676608443      1.543E+00 6.234E-01 1.439E+03
+ ETOT  3   5.7663182544911      1.603E+00 8.662E-02 3.791E+03
+ ETOT  4   10.635447687048      4.869E+00 7.972E-01 7.141E+02
+ ETOT  5   26.768058135415      1.613E+01 3.663E-01 3.045E+02
+ ETOT  6   43.652495416577      1.688E+01 1.552E+00 1.133E+02
+ ETOT  7   65.528428356526      2.188E+01 5.963E+00 1.523E+01
+ ETOT  8   69.169186216477      3.641E+00 5.748E-01 5.957E-01
+ ETOT  9   69.402157952038      2.330E-01 5.243E+00 1.814E-01
+ ETOT 10   69.411584728258      9.427E-03 2.638E-01 6.934E-02
+ ETOT 11   69.407374294252     -4.210E-03 5.245E+00 2.278E-03
 
- At SCF step   11, etot is converged : 
-  for the second time, diff in etot=  4.205E-03 < toldfe=  1.000E-02
+ At SCF step   11, etot is converged :
+  for the second time, diff in etot=  4.210E-03 < toldfe=  1.000E-02
 
  ------------------------------------------------------------------------
  Integrals of the first order density n^(1) and magnetization m^(1):
  ------------------------------------------------------------------------
 
-  Re[n^(1)] =   0.32541938E-01   Im[n^(1)] =  -0.36967957E-03
-  Re[mx^(1)]=   0.13881430E+03   Im[mx^(1)]=  -0.20562637E-05
-  Re[my^(1)]=   0.29346264E+00   Im[my^(1)]=   0.41613172E-05
-  Re[mz^(1)]=   0.42341982E+01   Im[mz^(1)]=   0.60056471E-04
+  Re[n^(1)] =   0.32542028E-01   Im[n^(1)] =  -0.36950289E-03
+  Re[mx^(1)]=   0.13881430E+03   Im[mx^(1)]=  -0.20552819E-05
+  Re[my^(1)]=   0.29346266E+00   Im[my^(1)]=   0.41594062E-05
+  Re[mz^(1)]=   0.42341985E+01   Im[mz^(1)]=   0.60028918E-04
 
  ------------------------------------------------------------------------
 
@@ -246,37 +246,37 @@ tolerances: {toldfe: 1.00E-02, }
 
  Eight components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
-     kin0=   3.23842628E+01 eigvalue=   4.06744153E+00  local=  -3.00166233E+00
+     kin0=   3.23842612E+01 eigvalue=   4.06744134E+00  local=  -3.00166224E+00
  4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
- loc psp =   0.00000000E+00  Hartree=   1.32545671E-03     xc=  -4.78606524E+02
+ loc psp =   0.00000000E+00  Hartree=   1.32545624E-03     xc=  -4.78606511E+02
  note that "loc psp" includes a xc core correction that could be resolved
  7,8,9: eventually, occupation + non-local contributions
-    edocc=   5.34795327E+02     enl0=  -2.02327947E+01   enl1=   0.00000000E+00
+    edocc=   5.34795313E+02     enl0=  -2.02327936E+01   enl1=   0.00000000E+00
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
-   erelax=   6.94073759E+01
+   erelax=   6.94073743E+01
 ================================================================================
 
  ---- first-order wavefunction calculations are completed ----
 
 
  ==> Compute Derivative Database <==
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      5.4200000000E+00  5.4200000000E+00  5.4200000000E+00 Bohr
               amu      5.58470000E+01
              ecut      3.00000000E+01 Hartree
-           etotal      6.9407375932E+01
+           etotal      6.9407374294E+01
             fcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         312
+-          fftalg         512
            irdwfk           1
            istwfk        1    1    1    1    1    1    1    1
               ixc           7
@@ -390,7 +390,7 @@ P          mk1mem           8
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -402,12 +402,12 @@ P          mk1mem           8
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -425,7 +425,7 @@ P          mk1mem           8
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -440,15 +440,15 @@ P          mk1mem           8
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         34.5  wall=         34.6
+- Proc.   0 individual time (sec): cpu=         16.0  wall=         16.0
 
 ================================================================================
 
  Calculation completed.
-.Delivered   8 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         34.5  wall=         34.6
+.Delivered   8 WARNINGs and   5 COMMENTs to log file.
++Overall time at end (sec) : cpu=         16.0  wall=         16.0

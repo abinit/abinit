@@ -62,16 +62,16 @@
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
-#%%   t104.abo, tolnlines = 0, tolabs = 1.000e-07, tolrel = 1.000e-06;
+#%% files_to_test =
+#%%   t104.abo, tolnlines = 0, tolabs = 0.0e+00, tolrel = 0.0e+00;
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = Ch. Paillard
-#%% keywords = 
-#%% description = 
+#%% keywords =
+#%% description =
 #%%   PbTiO3 with in-plane strain.
 #%%   Relaxing the third vector using optcell 6
-#%% topics = crystal  
+#%% topics = crystal
 #%%<END TEST_INFO>
 

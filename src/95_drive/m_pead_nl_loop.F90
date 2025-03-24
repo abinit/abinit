@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2002-2022 ABINIT group (MVeithen,MB)
+!!  Copyright (C) 2002-2025 ABINIT group (MVeithen,MB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -49,7 +49,7 @@ module m_pead_nl_loop
  use m_dfpt_mkvxc, only : dfpt_mkvxc
  use m_mkcore,     only : dfpt_mkcore
  use m_mklocl,     only : dfpt_vlocal
- use m_hamiltonian,only : init_hamiltonian, gs_hamiltonian_type
+ use m_hamiltonian,only : gs_hamiltonian_type
  use m_mkffnl,     only : mkffnl
  use m_mpinfo,     only : proc_distrb_cycle
  use m_nonlop,     only : nonlop
@@ -667,7 +667,7 @@ subroutine pead_nl_resp(cg,cg1,cg3,cplex,dtfil,dtset,d3lo,&
  ABI_MALLOC(wfraug,(2,n4,n5,n6))
 
 !Initialize Hamiltonian (k-independent terms) - NCPP only
- call init_hamiltonian(gs_hamk,psps,pawtab_dum,nspinor,nsppol,nspden,natom,&
+ call gs_hamk%init(psps,pawtab_dum,nspinor,nsppol,nspden,natom,&
 & dtset%typat,xred,nfft,mgfft,dtset%ngfft,rprimd,dtset%nloalg,ph1d=ph1d,&
 & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab)
 !& paw_ij=paw_ij)
@@ -750,7 +750,7 @@ subroutine pead_nl_resp(cg,cg1,cg3,cplex,dtfil,dtset,d3lo,&
        call fourwf(cplex,vlocal1,cwavef3,gh1,wfraug,gs_hamk%gbound_k,gs_hamk%gbound_k,&
 &       istwf_k,kg_k,kg_k,mgfft,mpi_enreg,1,dtset%ngfft,npw_k,npw_k,n4,n5,n6,option,&
 &       tim_fourwf,weight,weight,&
-&       use_gpu_cuda=dtset%use_gpu_cuda)
+&       gpu_option=dtset%gpu_option)
 
 !      In case i2pert = phonon-type perturbation
 !      add first-order change in the nonlocal potential
@@ -768,7 +768,7 @@ subroutine pead_nl_resp(cg,cg1,cg3,cplex,dtfil,dtset,d3lo,&
        tim_fourwf = 0 ; weight = one
        call fourwf(cplex,vlocal1,cwave0,gh0,wfraug,gs_hamk%gbound_k,gs_hamk%gbound_k,&
 &       istwf_k,kg_k,kg_k,mgfft,mpi_enreg,1,dtset%ngfft,npw_k,npw_k,n4,n5,n6,option,&
-&       tim_fourwf,weight,weight,use_gpu_cuda=dtset%use_gpu_cuda)
+&       tim_fourwf,weight,weight,gpu_option=dtset%gpu_option)
 
 !      In case i2pert = phonon-type perturbation
 !      add first-order change in the nonlocal potential

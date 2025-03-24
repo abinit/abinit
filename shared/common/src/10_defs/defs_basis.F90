@@ -7,7 +7,7 @@
 !! physical constants, as well as associated datatypes and methods.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2022 ABINIT group (HM, XG,XW, EB)
+!! Copyright (C) 2000-2025 ABINIT group (HM, XG,XW, EB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -82,12 +82,14 @@ module defs_basis
  integer, parameter :: fnlen=264     ! maximum length of file name variables
  integer, parameter :: strlen=2000000 ! maximum length of input string
 
- ! The input file used to run the code, set by parsefile.
+ ! The input file used to run the code, allocated and set by parsefile.
  ! It will be added to the netcdf files in ntck_open_create
- character(len=strlen), save :: INPUT_STRING = ""
+ character(len=:), allocatable, save :: INPUT_STRING
 
  integer, parameter :: md5_slen = 32 ! lenght of strings storing the pseudos' md5 checksum.
  character(len=md5_slen),parameter :: md5_none = "None"
+
+ integer, parameter :: abi_slen=80 ! maximum length of string variables
 
 !Some constants:
 
@@ -264,11 +266,13 @@ module defs_basis
  !double precision
  complex(dpc), parameter :: czero = (0._dp,0._dp)
  complex(dpc), parameter :: cone  = (1._dp,0._dp)
+ complex(dpc), parameter :: ctwo  = (2._dp,0._dp)
  complex(dpc), parameter :: j_dpc = (0._dp,1.0_dp)
 
  ! single-precision
  complex(spc), parameter :: czero_sp = (0._sp,0._sp)
  complex(spc), parameter :: cone_sp  = (1._sp,0._sp)
+ complex(spc), parameter :: ctwo_sp  = (2._sp,0._sp)
  complex(spc), parameter :: j_sp     = (0._sp,1.0_sp)
 
 !Pauli matrix
@@ -326,6 +330,7 @@ module defs_basis
  integer,public,parameter :: WFK_TASK_OPTICS_FULLBZ = 7
  integer,public,parameter :: WFK_TASK_KPTS_ERANGE= 8
  integer,public,parameter :: WFK_TASK_CHECK_SYMTAB = 9
+ integer,public,parameter :: WFK_TASK_WANNIER = 10
 
 ! Flags defining the method used for performing IO (input variable iomode)
  integer, parameter, public :: IO_MODE_FORTRAN_MASTER = -1
@@ -348,6 +353,19 @@ module defs_basis
 ! GA: But this is not actually the maximum perturbation,
 !     see m_dfpt_loopert
   integer,parameter,public :: MPERT_MAX = 8
+
+! Parameters for the GPU implementation(s)
+ ! GPU implementation undetermined
+ integer,parameter,public :: ABI_GPU_UNKNOWN  =-1
+ ! Not using any GPU implementation, implies running on CPU
+ integer,parameter,public :: ABI_GPU_DISABLED = 0
+ ! Legacy GPU implementation relying on NVIDIA CUDA kernels, not prefered
+ integer,parameter,public :: ABI_GPU_LEGACY   = 1
+ ! GPU implementation relying on OpenMP v5 "TARGET" construct
+ integer,parameter,public :: ABI_GPU_OPENMP   = 2
+ ! GPU implementation relying on Kokkos + cuda framework
+ integer,parameter,public :: ABI_GPU_KOKKOS   = 3
+ ! Please note that a GPU linalg library supported in gpu_toolbox (ie: CUDA) backs up OpenMP and Kokkos variants.
 
 !Parameters for LOG/STATUS files treatment
 !This variables tell the code if some lines have to be written in a LOG/STATUS file
@@ -506,7 +524,7 @@ subroutine print_kinds(unit)
 
  write(my_unt,'(a)')' DATA TYPE INFORMATION: '
 
- write(my_unt,'(a,/,2(a,i6,/),2(a,e15.8e3,/),a,e15.8e3)')&
+ write(my_unt,'(a,/,2(a,i6,/),2(a,e16.8e3,/),a,e16.8e3)')&
    ' REAL:      Data type name: REAL(DP) ',&
    '            Kind value: ',KIND(0.0_dp),&
    '            Precision:  ',PRECISION(0.0_dp),&
@@ -563,10 +581,12 @@ integer pure function str2wfktask(str) result(wfk_task)
    wfk_task = WFK_TASK_DDK_DIAGO
  case ("wfk_kpts_erange")
    wfk_task = WFK_TASK_KPTS_ERANGE
- case ("optics_fullbz")
+ case ("optics_fullbz", "wfk_optics_fullbz")
    wfk_task = WFK_TASK_OPTICS_FULLBZ
  case ("check_symtab")
    wfk_task = WFK_TASK_CHECK_SYMTAB
+case ("wannier")
+   wfk_task = WFK_TASK_WANNIER
  case default
    wfk_task = WFK_TASK_NONE
  end select

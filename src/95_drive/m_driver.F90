@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2022 ABINIT group ()
+!!  Copyright (C) 2008-2025 ABINIT group ()
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -35,6 +35,7 @@ module m_driver
  use m_dtfil
  use m_fftcore
  use libxc_functionals
+ use m_longwave
 #if defined DEV_YP_VDWXC
  use m_xc_vdw
 #endif
@@ -74,8 +75,6 @@ module m_driver
 &                        mpi_environment_set,bigdft_mpi, f_malloc_set_status
 #endif
 
- use m_longwave
-
  implicit none
 
  private
@@ -101,7 +100,7 @@ contains
 !! selected big arrays are allocated, then the gstate, respfn, ...  subroutines are called.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2022 ABINIT group (XG,MKV,MM,MT,FJ)
+!! Copyright (C) 1999-2025 ABINIT group (XG,MKV,MM,MT,FJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -684,7 +683,6 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 !  Exchange-correlation
 
    call echo_xc_name(dtset%ixc)
-
    if (dtset%ixc<0) then
      el_temp=merge(dtset%tphysel,dtset%tsmear,dtset%tphysel>tol8.and.dtset%occopt/=3.and.dtset%occopt/=9)
      call libxc_functionals_init(dtset%ixc,dtset%nspden,el_temp=el_temp,xc_tb09_c=dtset%xc_tb09_c)
@@ -754,7 +752,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 !  linalg initialisation
    linalg_max_size=maxval(dtset%nband(:))
    call abi_linalg_init(linalg_max_size,dtset%optdriver,dtset%wfoptalg,dtset%paral_kgb,&
-        dtset%use_gpu_cuda,dtset%use_slk,dtset%np_slk,mpi_enregs(idtset)%comm_bandspinorfft)
+        dtset%gpu_option,dtset%use_slk,dtset%np_slk,mpi_enregs(idtset)%comm_bandspinorfft)
 
    call timab(642,2,tsec)
 
@@ -790,7 +788,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
      call nonlinear(codvsn,dtfil,dtset,etotal,mpi_enregs(idtset),npwtot,occ,pawang,pawrad,pawtab,psps,xred)
 
    case (RUNL_GWR)
-     call gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim, xred)
+     call gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
 
    case (RUNL_BSE)
      call bethe_salpeter(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
@@ -927,7 +925,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
    ABI_FREE(xred)
    ABI_FREE(npwtot)
 
-   call abi_linalg_finalize()
+   call abi_linalg_finalize(dtset%gpu_option)
    call xg_finalize()
 
    call cwtime_report(sjoin(" dataset:", itoa(idtset)), cpu, wall, gflops)

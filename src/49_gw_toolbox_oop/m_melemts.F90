@@ -9,27 +9,20 @@
 !!  using the perturbative approach.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2022 ABINIT group (MG)
+!! Copyright (C) 2008-2025 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
+!! TODO
+
 !! NOTES
 !!  * This module is supposed to be used only in the GW part to facilitate
-!!    further developments. The object might change in the future. Thus
-!!    contact Matteo Giantomassi if you wish to use this piece of code
-!!    for your developments. In particular we might decide to switch
-!!    to ragged arrays Mels(nkibz,nsppol*nspinor**2)%data
+!!    we might decide to use ragged arrays
 !!
-!!  * Routines tagged with "@type_name" are tightly connected to the definition of the data type.
-!!    Tightly connected means that the proper functioning of the implementation relies on the
-!!    assumption that the tagged procedure is consistent with the type declaration.
-!!    Every time a developer changes the structure "type_name" adding new entries, he/she has to make sure
-!!    that all the tightly connected routines are changed accordingly to accommodate the modification of the data type.
-!!    Typical examples of tightly connected routines are creation, destruction or reset methods.
+!!     Mels(nkcalc, nsppol*nspinor**2)%data
 !!
-!! TODO
-!!  This module can be moved to a higher level directory.
+!!    or replaced nkibz with nkcalc with reduce memory
 !!
 !! SOURCE
 
@@ -283,12 +276,6 @@ end subroutine melflags_copy
 !! FUNCTION
 !!  Free all dynamic memory of the database
 !!
-!! INPUTS
-!!  Mels<melements_t>=The database to be freed
-!!
-!! OUTPUT
-!!  See side effects
-!!
 !! SOURCE
 
 subroutine melements_free(Mels)
@@ -425,10 +412,6 @@ subroutine melements_init(Mels, Mflags_in, nsppol, nspden, nspinor, nkibz, kibz,
 
 ! *************************************************************************
 
- DBG_ENTER("COLL")
-
- !@melements_t
-
  ! Copy flags.
  call Mflags_in%copy(Mels%flags)
 
@@ -465,51 +448,40 @@ subroutine melements_init(Mels, Mflags_in, nsppol, nspden, nspinor, nkibz, kibz,
  Mels%bmin = bmin
  Mels%bmax = bmax
 
- b1 = Mels%bmin
- b2 = Mels%bmax
+ b1 = Mels%bmin; b2 = Mels%bmax
 
-! real arrays
- ABI_MALLOC(Mels%kibz,(3,nkibz))
+ ! real arrays
+ ABI_MALLOC(Mels%kibz, (3,nkibz))
  Mels%kibz = kibz
 
-! complex arrays
+ ! complex arrays
  if (Mels%flags%has_kinetic == 1) then
-   ABI_CALLOC(Mels%kinetic,(b1:b2,b1:b2,nkibz,nsppol*nspinor**2))
+   ABI_CALLOC(Mels%kinetic, (b1:b2,b1:b2,nkibz,nsppol*nspinor**2))
  end if
-
  if (Mels%flags%has_hbare == 1) then
-   ABI_CALLOC(Mels%hbare,(b1:b2,b1:b2,nkibz,nsppol*nspinor**2))
+   ABI_CALLOC(Mels%hbare, (b1:b2,b1:b2,nkibz,nsppol*nspinor**2))
  end if
-
  if (Mels%flags%has_sxcore == 1) then
-   ABI_CALLOC(Mels%sxcore,(b1:b2,b1:b2,nkibz,nsppol*nspinor**2))
+   ABI_CALLOC(Mels%sxcore, (b1:b2,b1:b2,nkibz,nsppol*nspinor**2))
  end if
-
  if (Mels%flags%has_vhartree == 1) then
-   ABI_CALLOC(Mels%vhartree,(b1:b2,b1:b2,nkibz,nsppol*nspinor**2))
+   ABI_CALLOC(Mels%vhartree, (b1:b2,b1:b2,nkibz,nsppol*nspinor**2))
  end if
-
  if (Mels%flags%has_lexexch == 1) then
-   ABI_CALLOC(Mels%vlexx,(b1:b2,b1:b2,nkibz,nsppol*nspinor**2))
+   ABI_CALLOC(Mels%vlexx, (b1:b2,b1:b2,nkibz,nsppol*nspinor**2))
  end if
-
  if (Mels%flags%has_vu == 1) then
-   ABI_CALLOC(Mels%vu,(b1:b2,b1:b2,nkibz,nsppol*nspinor**2))
+   ABI_CALLOC(Mels%vu, (b1:b2,b1:b2,nkibz,nsppol*nspinor**2))
  end if
-
  if (Mels%flags%has_vxc == 1) then
-   ABI_CALLOC(Mels%vxc,(b1:b2,b1:b2,nkibz,nsppol*nspinor**2))
+   ABI_CALLOC(Mels%vxc, (b1:b2,b1:b2,nkibz,nsppol*nspinor**2))
  end if
-
  if (Mels%flags%has_vxcval == 1) then
-   ABI_CALLOC(Mels%vxcval,(b1:b2,b1:b2,nkibz,nsppol*nspinor**2))
+   ABI_CALLOC(Mels%vxcval, (b1:b2,b1:b2,nkibz,nsppol*nspinor**2))
  end if
-
  if (Mels%flags%has_vxcval_hybrid == 1) then
-   ABI_CALLOC(Mels%vxcval_hybrid,(b1:b2,b1:b2,nkibz,nsppol*nspinor**2))
+   ABI_CALLOC(Mels%vxcval_hybrid, (b1:b2,b1:b2,nkibz,nsppol*nspinor**2))
  end if
-
- DBG_EXIT("COLL")
 
 end subroutine melements_init
 !!***
@@ -684,8 +656,7 @@ subroutine melements_print(Mels, names_list, header, unit, prtvol, mode_paral)
  character(len=4),optional,intent(in) :: mode_paral
 
 !Local variables-------------------------------
- integer :: my_unt,my_prtvol,max_r,max_c,ii
- integer :: isppol,ikibz,iab,ib,b1,b2,my_nkeys,ikey
+ integer :: my_unt,my_prtvol,max_r,max_c,ii, isppol,ikibz,iab,ib,b1,b2,my_nkeys,ikey
  integer,pointer :: flag_p
  character(len=4) :: my_mode
  character(len=NAMELEN) :: key
@@ -709,30 +680,30 @@ subroutine melements_print(Mels, names_list, header, unit, prtvol, mode_paral)
 
  if (Mels%nspinor == 2) ABI_WARNING("nspinor=2 not coded")
 
- if (PRESENT(names_list)) then
+ if (present(names_list)) then
    my_nkeys=SIZE(names_list)
-   ABI_MALLOC(my_keys,(my_nkeys))
+   ABI_MALLOC(my_keys, (my_nkeys))
    my_keys = names_list
  else
-   my_nkeys=NNAMES
-   ABI_MALLOC(my_keys,(NNAMES))
+   my_nkeys = NNAMES
+   ABI_MALLOC(my_keys, (NNAMES))
    my_keys = ANAMES
  end if
 
- ABI_MALLOC(data_p,(my_nkeys))
- ABI_MALLOC(tab,(my_nkeys))
- tab=0
+ ABI_MALLOC(data_p, (my_nkeys))
+ ABI_MALLOC(tab, (my_nkeys))
+ tab = 0
 
  my_nkeys=0; str = "  ib"; ii=4
- do ikey=1,SIZE(my_keys)
+ do ikey=1,size(my_keys)
    key = my_keys(ikey)
    call my_select_melements(Mels,key,flag_p,data_p(ikey)%arr_p)
-   if (flag_p==2) then
-     my_nkeys=my_nkeys+1
-     tab(my_nkeys)=ikey
+   if (flag_p == 2) then
+     my_nkeys = my_nkeys+1
+     tab(my_nkeys) = ikey
      str(ii+1:)=" "//TRIM(tolower(key))
      ii = ii+MAX(1+LEN_TRIM(key),10)
-     ABI_CHECK(ii<490,"I'm gonna SIGFAULT!")
+     ABI_CHECK(ii <490, "I'm gonna SIGFAULT!")
    end if
  end do
 
@@ -756,7 +727,7 @@ subroutine melements_print(Mels, names_list, header, unit, prtvol, mode_paral)
     b1 = Mels%bands_idx(1,ikibz,isppol)
     b2 = Mels%bands_idx(2,ikibz,isppol)
 
-    if (Mels%flags%only_diago==1.or.my_prtvol==0) then
+    if (Mels%flags%only_diago==1 .or. my_prtvol==0) then
       ! Print only the diagonal.
       write(msg,'(a)')str
       call wrtout(my_unt,msg,my_mode)
@@ -790,8 +761,8 @@ subroutine melements_print(Mels, names_list, header, unit, prtvol, mode_paral)
         write(msg,'(3a)')" **** Off-diagonal elements of ",TRIM(my_keys(tab(ikey)))," **** "
         call wrtout(my_unt,msg,my_mode)
         do iab=1,Mels%nspinor**2
-          mat = data_p(tab(ikey))%arr_p(b1:b2,b1:b2,ikibz,iab)*Ha_eV
-          call print_arr(mat,max_r,max_c,my_unt,my_mode)
+          mat = data_p(tab(ikey))%arr_p(b1:b2,b1:b2,ikibz,iab) * Ha_eV
+          call print_arr([my_unt], mat, max_r, max_c)
         end do
         write(msg,'(a)')ch10
         call wrtout(my_unt,msg,my_mode)

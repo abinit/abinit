@@ -12,9 +12,9 @@
 !!  stored in packed format  and B is also positive definite.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2022 ABINIT group (LNguyen,FDahm,MT)
+!!  Copyright (C) 2001-2025 ABINIT group (LNguyen,FDahm,MT)
 !!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~ABINIT/Infos/copyright
+!!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! SOURCE
@@ -30,7 +30,7 @@
 !!
 !! SOURCE
 !!
-  subroutine abi_dhpgv(itype,jobz,uplo,n,a,b,w,z,ldz,istwf_k,use_slk)
+  subroutine abi_dhpgv(itype,jobz,uplo,n,a,b,w,z,ldz,istwf_k,use_slk,use_gpu_elpa)
 
     use m_fstrings,     only : sjoin, itoa
 
@@ -44,10 +44,10 @@
  real(dp), intent(out) :: z(:,:)
  real(dp), intent(out) :: w(:)
  integer, optional, intent(in) :: istwf_k
- integer, optional, intent(in) :: use_slk
+ integer, optional, intent(in) :: use_slk,use_gpu_elpa
 
 !Local variables-------------------------------
- integer :: info,use_slk_,istwf_k_
+ integer :: info,use_slk_,use_gpu_elpa_,istwf_k_
 #ifdef HAVE_LINALG_SCALAPACK
  type(matrix_scalapack) :: sca_a,sca_b,sca_ev
  integer :: ierr
@@ -63,6 +63,10 @@
 
  use_slk_ = 0; if (present(use_slk)) use_slk_ = use_slk
  istwf_k_ = 1; if (present(istwf_k)) istwf_k_ = istwf_k
+ use_gpu_elpa_=0
+#ifdef HAVE_LINALG_ELPA
+ if (present(use_gpu_elpa)) use_gpu_elpa_=use_gpu_elpa
+#endif
 
 !===== SCALAPACK
  if (ABI_LINALG_SCALAPACK_ISON.and.use_slk_==1.and.n>slk_minsize)  then
@@ -79,7 +83,7 @@
    call matrix_from_global(sca_b,b,istwf_k_)
 #endif
    call compute_generalized_eigen_problem(slk_processor,sca_a,sca_b,&
-&       sca_ev,w,slk_communicator,istwf_k_)
+&       sca_ev,w,slk_communicator,istwf_k_,use_gpu_elpa=use_gpu_elpa_)
    call matrix_to_global(sca_a,a,istwf_k_)
    call matrix_to_global(sca_b,b,istwf_k_)
    call matrix_to_reference(sca_ev,z,istwf_k_)
@@ -112,6 +116,10 @@
  end if
 
  ABI_CHECK(info==0,"abi_dhpgv returned info!=0!")
+
+#ifndef HAVE_LINALG_ELPA
+ ABI_UNUSED(use_gpu_elpa)
+#endif
 
 end subroutine abi_dhpgv
 !!***

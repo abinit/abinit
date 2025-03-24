@@ -18,6 +18,12 @@ In order to learn the use of the associated codes *mrgddb* and *anaddb*,
 to produce phonon band structures and the associated
 thermodynamical properties, please consult the [second tutorial on DFPT](/tutorial/rf2).
 
+It is strongly recommended to discover this tutorial simultaneously with the DFPT (respfn) user guide.
+You might start by reading [[help:respfn#intro|sections 0 and the first paragraph of section 1]] of this user guide.
+
+A basic introduction to the theory is given in [[cite:gonze2005]]. You might also benefit from reading the longer review [[cite:baroni2001]].
+Further details are in [[cite:Gonze1997]] and [[cite:Gonze1997a]].
+
 This tutorial should take about 2 hours.
 
 [TUTORIAL_README]
@@ -104,8 +110,8 @@ that you can already rename as *trf1_2i_WFK* to use it as input wave function fo
 
 We will now compute the second derivative of the total energy with
 respect to an atomic displacement by different means.
-For that purpose, you must first read [[help:respfn#intro|sections 0 and the first paragraph of section 1]]
-of the *respfn help* file (the auxiliary help file, that deals specifically with the DFPT features).
+For that purpose, **you must first read** [[help:respfn#intro|sections 0 and the first paragraph of section 1]]
+of the *respfn help* file (an auxiliary help file, that deals specifically with the DFPT(respfn) features).
 We will explain later, in more detail, the signification of the different
 input parameters introduced in section 1 of the *respfn help* file.
 
@@ -240,7 +246,7 @@ the [[kptopt]] input variable. It will be explained in more detail later.
 When you have understood the purpose of the input variable values specified
 before the "Common input variables" section, you can make the code run, as usual.
 
-Then, we need to analyze the different output files. For that purpose, you should read
+Then, we need to analyze the different output files. For that purpose, **you should read**
 the content of the [[help:respfn#output|section 6]] of the respfn help file.
 Read it quickly, as we will come back to the most important points hereafter.
 
@@ -275,7 +281,15 @@ in excellent agreement with the higher-order finite-difference values for the
 2DTE, determined in the previous section: 5.007939 Hartree from the energy
 differences, and 5.007914 Hartree from the force differences.
 
-Now, you can read the remaining of the [[help:respfn#output|section 6.2]] of the respfn help file.
+Still, this run did not allow to compute the full dynamical matrix, as pointed out when the
+phonon frequencies were delivered:
+
+    chkph3 : WARNING -
+     Dynamical matrix incomplete, phonon frequencies may be wrong, see the log file for more explanations.
+
+This incompleteness will be dealt with in the next section.
+
+Now you can read the remaining of the [[help:respfn#output|section 6.2]] of the respfn help file.
 Then, you should also open the *trf1_3o_DDB* file, and read the
 corresponding [[help:respfn#ddb|section 6.5]] of the respfn help file.
 

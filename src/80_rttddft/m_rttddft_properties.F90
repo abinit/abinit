@@ -7,7 +7,7 @@
 !!  properties (energy, occupations, eigenvalues..)
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2021-2022 ABINIT group (FB)
+!!  Copyright (C) 2021-2025 ABINIT group (FB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -45,6 +45,7 @@ module m_rttddft_properties
  use m_rttddft_tdks,     only: tdks_type
  use m_spacepar,         only: meanvalue_g
  use m_xmpi,             only: xmpi_sum, xmpi_comm_rank
+ use m_dft_energy,       only: entropy
 
  implicit none
 
@@ -142,10 +143,10 @@ subroutine rttddft_calc_density(dtset, mpi_enreg, psps, tdks)
    end if
 
    ! 3-Compute pawrhoij = \rho_{i,j} = \sum_{n,k}f_{n,k} \tilde{c}^{i,*}_{n,k} \tilde{c}^{j}_{n,k}
-   call pawmkrhoij(tdks%atindx,tdks%atindx1,tdks%cprj,tdks%dimcprj,dtset%istwfk,    &
-                 & dtset%kptopt,dtset%mband,tdks%mband_cprj,tdks%mcprj,dtset%mkmem, &
-                 & mpi_enreg,dtset%natom,dtset%nband,dtset%nkpt,dtset%nspinor,      &
-                 & dtset%nsppol,tdks%occ0,dtset%paral_kgb,tdks%paw_dmft,            &
+   call pawmkrhoij(tdks%atindx,tdks%atindx1,tdks%cprj,tdks%dimcprj,dtset%istwfk,       &
+                 & dtset%kptopt,dtset%mband,tdks%mband_cprj,tdks%mcprj,dtset%mkmem,    &
+                 & mpi_enreg,dtset%natom,dtset%nband,dtset%nkpt,dtset%nspden,          &
+                 & dtset%nspinor,dtset%nsppol,tdks%occ0,dtset%paral_kgb,tdks%paw_dmft, &
                  & pawrhoij_unsym,tdks%unpaw,dtset%usewvl,dtset%wtk)
 
    ! 4-Symetrize rhoij, compute nhat and add it to rhor
@@ -166,6 +167,7 @@ subroutine rttddft_calc_density(dtset, mpi_enreg, psps, tdks)
      call mkrho(tdks%cg,dtset,tdks%gprimd,tdks%irrzon,tdks%kg,tdks%mcg,mpi_enreg, &
               & tdks%npwarr,tdks%occ0,tdks%paw_dmft,tdks%phnons,rhowfg,rhowfr,     &
               & tdks%rprimd,tim_mkrho,tdks%ucvol,tdks%wvl%den,tdks%wvl%wfs,option=1)
+
      !FB: Useful?
      call transgrid(1,mpi_enreg,dtset%nspden,+1,1,1,dtset%paral_kgb,tdks%pawfgr, &
                   & rhowfg,tdks%taug,rhowfr,tdks%taur)
@@ -228,30 +230,12 @@ subroutine rttddft_calc_etot(dtset, energies, etotal, occ)
  !arrays
  real(dp),            intent(in)    :: occ(:)
 
- !Local variables-------------------------------
- !scalars
- real(dp) :: entropy
- !arrays
-
 ! ***********************************************************************
 
  ! Compute electronic entropy
- call rttddft_calc_ent(entropy, dtset, occ)
+ call rttddft_calc_ent(energies%entropy_ks, dtset, occ)
 
-!  When the finite-temperature VG broadening scheme is used,
-!  the total entropy contribution "tsmear*entropy" has a meaning,
-!  and gather the two last terms of Eq.8 of VG paper
-!  Warning : might have to be changed for fixed moment calculations
- if(dtset%occopt>=3 .and. dtset%occopt<=8) then
-   if (abs(dtset%tphysel) < tol10) then
-      energies%e_entropy = - dtset%tsmear * entropy
-   else
-      energies%e_entropy = - dtset%tphysel * entropy
-   end if
- else
-    !FB - TODO: Might want to clean this ?!
-   energies%e_entropy = -entropy
- end if
+ call entropy(dtset,energies)
 
  etotal = energies%e_kinetic     &
       & + energies%e_hartree     &  

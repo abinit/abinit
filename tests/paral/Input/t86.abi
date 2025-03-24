@@ -23,6 +23,10 @@ ngfftdg 32 32 32
 pawecutdg 20
 tolvrs1 1.0d-7
 toldfe2 1.0d-8
+# Added in v9.11:
+tolwfr_diago 1d-30
+# Default of tolwfr_diago is tolwfr (or, for LOBPCG only, 1d-20 if tolwfr is not defined)
+# To reproduce old behaviour : set stringent value of tolwfr_diago
 nband     32
 nbdbuf    2
 occopt 3 tsmear 1200 K
@@ -96,7 +100,7 @@ bandpp2 8
 #%% max_nprocs = 4
 #%% [NCPU_4]
 #%% files_to_test =
-#%%   t86_MPI4.abo, use_yaml = yes, tolnlines = 4, tolabs = 2.0e-2, tolrel = 1.0, fld_options = -easy;
+#%%   t86_MPI4.abo, use_yaml = yes, tolnlines = 5, tolabs = 2.0e-2, tolrel = 1.0, fld_options = -easy;
 #%% [extra_info]
 #%% authors = B. Amadon, T. Cavignac
 #%% keywords = DMFT, FAILS_IFMPI

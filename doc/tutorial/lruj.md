@@ -15,14 +15,19 @@ address self-interaction and static correlation errors.
 Note that there is another methodology to compute U and J; see the 
 [cRPA U(J)](/tutorial/ucalc_crpa) tutorial.
 
+This tutorial is a condensed version of that published in [[cite:MacEnulty2024]], a more 
+comprehensive user guide on the lrUJ utility and its predessecor, the UJdet utility. If
+you find this information useful for your own scientific investigations, please cite
+[[cite:MacEnulty2024]].
+
 In this tutorial, you will learn how to run perturbative calculations in Abinit and
 generate input data to successfully execute the lruj post-processing utility.
 We strongly encourage you to read the [PAW1](/tutorial/paw1), [PAW2](/tutorial/paw2)
 and [DFT+U](/tutorial/dftu) tutorials to familiarize yourself with the manifestation of
-PAW atomic datasets within Abinit. Also consider checking out this video introducing
-the PAW formalism in an Abinit context. 
+PAW atomic datasets within Abinit. Also consider checking out the following video 
+introducing the PAW formalism in an Abinit context.
 
-<iframe width="1384" height="629" src="https://www.youtube.com/watch?v=5WEdd78GDFw" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+<iframe width="1384" height="629" src="https://www.youtube.com/embed/5WEdd78GDFw" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 This tutorial should take less than 30 minutes. We begin with a brief description of the 
 linear response method and an important explanation of recent renovations to the linear 
@@ -121,7 +126,7 @@ The ujdet utility uses only two points: the unperturbed case—in which the pert
 is zero and the subspace occupations are those of the ground state—and one perturbed case, in 
 which the potential perturbation is equal to the value of [[pawujv]]. Note that the ujdet procedure 
 differs slightly from its implementations in Abinit versions prior to 9.6.2, in which it conducted 
-two perturbations: one of strength [[pawujv]] and the other of strength -[[pawujv]]. Due to a bug in the 
+two perturbations: one of strength [[pawujv]] and the other of strength $-1.0*$[[pawujv]]. Due to a bug in the 
 program, the second perturbation administered provided erroneous unscreened response occupations. 
 To fix this, we exchanged the data point from the second perturbation for one from the unperturbed 
 case, whose occupations are calculated anyway from the ground state wavefunctions read into Abinit.
@@ -136,7 +141,7 @@ Another crucial difference between the two utilities is item (3) in the above ta
 utility treats the response functions as matrices, whereas the lruj utility treats them as scalars. 
 Ideologically, this means that the ujdet Hubbard parameters are, to some degree, informed by 
 the Hubbard interactions on and between the other atomic subspaces of the system as well as the 
-total charge bath. The protocol is expanded upon in Cococcioni’s thesis [[cite:Cococcioni2002]].
+total charge bath. The protocol is expanded upon in reference [[cite:Cococcioni2002]].
 
 By contrast, the lruj utility provides the scalar Hubbard parameters, informed only by the change 
 in occupancy on the perturbed subspace. This parameter is functionally sufficient for SIE corrective 
@@ -155,7 +160,7 @@ a four-atom unit cell of AF2-ordered NiO using the lruj post-processing utility.
 can be carried out in three steps:
 
 1. Run a ground state Abinit calculation for NiO to generate <code>WFK</code> files.
-2. Run a series of perturbative Abinit calculations to generate _LRUJ.nc files.
+2. Run a series of perturbative Abinit calculations to generate <code>*_LRUJ.nc</code> files.
 3. Execute the lruj prost-processing utility.
 
 
@@ -246,7 +251,7 @@ conduct a ground state calculation remain unmodified. Launch the Abinit run to p
 
     abinit tlruj_1.abi > tlruj_1.log
 
-The run should take about a minute to run, but times vary depending on your hardware. This 
+This should take about a minute to run, but times vary depending on your hardware. This 
 concludes Step 1.
 
 
@@ -329,10 +334,11 @@ You will find all information related to the calculation of the U parameter betw
 
 Here, ujdet lists out the perturbation strengths and their corresponding unscreened and
 screened occupations. (When calculating the Hund's J, <code>Occupations</code> will be replaced by
-<code>Magnetizations.</code>) From here, the scalar response functions $\chi$ and $\chi_0$ are 
-printed out, followed by the scalar definition of U in units of eV. By scalar, we mean that the
-response functions are treated as scalars, and thus the U printed here is informed only
-by the occupational responses on the perturbed atom.
+<code>Magnetizations</code>, and <code>alpha</code> will be replaced by <code>beta</code>.) From 
+here, the scalar response functions $\chi$ and $\chi_0$ are printed out, followed by the scalar 
+definition of U in units of eV. By scalar, we mean that the response functions are treated as 
+scalars, and thus the U printed here is informed only by the occupational responses on the 
+perturbed atom.
 
 The lines starting with URES, by contrast, report the U as a function of its inverted
 (and charge bath augmented) response matrices:
@@ -349,15 +355,16 @@ These values of U are computed using the extrapolation procedure proposed in
 [[cite:Cococcioni2005]]. In this work, it is shown that using a two atom supercell for 
 the DFT calculation and an extrapolation procedure can yield an estimation 
 of the value of U. More precise values can be and often are obtained by running linear
-response DFT calculations on larger and larger supercells. This procedure succeeds in
-isolating the perturbed subspace from its periodic images.
+response DFT calculations on larger and larger supercells. Doing so have the added benefit 
+of isolating the perturbed subspace from its periodic images.
 
 The column <code>nat</code> indicates how many atoms were involved in the extrapolated supercell, 
 and <code>r_max</code> indicates the maximum distance of the perturbed atom from its periodic 
 images. The column U(J) reports in eV the calculated values of the Hubbard parameters that should 
 then be applied via the Hubbard functionals. <code>U_ASA</code> and <code>U_inf</code> are estimates
 of U for more extended projectors; they are related to the charge population analysis conducted 
-under the PAW method and controlled by variable [[dmatpuopt]].
+under the PAW method and controlled by variable [[dmatpuopt]]. An numerical analysis of the effect of
+[[dmatpuopt]] choice is conducted in Ref. [[cite:MacEnulty2023]].
 
 This is the information printed out for one perturbation of strength [[pawujv]]; five further
 perturbations are conducted, for each of which the same information is printed in the output file. 
@@ -387,12 +394,13 @@ immediately after the perturbation is applied but before the Hamiltonian is upda
      --------------- -----------------------------
         alpha [eV]     Unscreened      Screened
      --------------- -----------------------------
-       0.0000000000   8.6380190174   8.6380190174
-      -0.1500000676   8.6964896369   8.6520721437
-      -0.1000000451   8.6747136520   8.6474273205
-      -0.0500000225   8.6560255526   8.6427483480
-       0.0500000225   8.6192448590   8.6332170576
-       0.1000000451   8.5980174277   8.6283157193
+      -0.1500000676   8.6964981921   8.6520721998
+      -0.1000000451   8.6747201574   8.6474287212
+      -0.0500000225   8.6560314462   8.6427490201
+       0.0000000000   8.6380182458   8.6380182458
+       0.0500000225   8.6192514478   8.6332174978
+       0.1000000451   8.5980252003   8.6283148749
+
 
 The last table gives the values for $\chi_0$, $\chi$, the Hubbard U, and their RMS errors in units of
 eV, for all polynomial regressions up to degree 3 (cubic). 
@@ -401,9 +409,9 @@ eV, for all polynomial regressions up to degree 3 (cubic).
                                                              ---------------------------------------
      Regression   Chi0 [eV^-1]   Chi [eV^-1]      U [eV]    | Chi0 [eV^-1]  Chi [eV^-1]     U [eV]
     --------------------------------------------------------|---------------------------------------
-     Linear:        -0.8593951    -0.0949384     9.3695387  |    0.0023935    0.0000876    0.1138301
-     Quadratic:     -0.8574915    -0.0955721     9.2971081  |    0.0023794    0.0000131    0.0683615
-     Cubic:         -0.8007716    -0.0952592     9.2488751  |    0.0001546    0.0000009    0.0184229
+     Linear:        -0.8594082    -0.0949434     9.3689968  |    0.0023925    0.0000878    0.0029335
+     Quadratic:     -0.8574665    -0.0955791     9.2963113  |    0.0023777    0.0000129    0.0027762
+     Cubic:         -0.8007858    -0.0952726     9.2474280  |    0.0001546    0.0000015    0.0001937
 
 One has the option of calculating higher order polynomials, up to degree $n–2$ for *n* points. This 
 is done by appending the degree option <code>--d</code> followed by an integer to the command line. 
@@ -418,10 +426,10 @@ to get the following output:
                                                              ---------------------------------------
      Regression   Chi0 [eV^-1]   Chi [eV^-1]      U [eV]    | Chi0 [eV^-1]  Chi [eV^-1]     U [eV]
     --------------------------------------------------------|---------------------------------------
-     Linear:        -0.8593951    -0.0949384     9.3695387  |    0.0023935    0.0000876    0.1138301
-     Quadratic:     -0.8574915    -0.0955721     9.2971081  |    0.0023794    0.0000131    0.0683615
-     Cubic:         -0.8007716    -0.0952592     9.2488751  |    0.0001546    0.0000009    0.0184229
-     Degree 4       -0.8049660    -0.0952316     9.2584253  |    0.0000747    0.0000000    0.0109654
+     Linear:        -0.8594082    -0.0949434     9.3689968  |    0.0023925    0.0000878    0.0029335
+     Quadratic:     -0.8574665    -0.0955791     9.2963113  |    0.0023777    0.0000129    0.0027762
+     Cubic:         -0.8007858    -0.0952726     9.2474280  |    0.0001546    0.0000015    0.0001937
+     Degree 4 :     -0.8049062    -0.0952279     9.2587427  |    0.0000790    0.0000003    0.0000981
 
 !!! note
 
@@ -439,7 +447,7 @@ utility) to visualize the fits. The following graph visualizes our data in Mathe
 ![lrujPolyU](lruj_assets/LRUJ_U_polynomials.png)
 
 Based on this information, one could argue the quadratic fit is sufficient. Thus, we get a
-first-principles Hubbard U value of 9.30 ± 0.07 eV for the Ni *3d* subspace in a four-atom cell
+first-principles Hubbard U value of 9.296 ± 0.003 eV for the Ni *3d* subspace in a four-atom cell
 of AF2 NiO. This is much larger than values for NiO reported in the literature values, which can be
 attributed to the poor [[ecut]] and [[ngkpt]] sampling needed to speed up this tutorial. Furthermore,
 this indicates that these parameters must be converged with respect to supercell size in order to 
@@ -453,11 +461,9 @@ are necessary and why polynomials of higher order are needed to perform an accur
 ![lrujPolyJ](lruj_assets/LRUJ_J_polynomials.png)
 
 Here, we see that the quadratic fit, at minimum, sufficiently fits the data, yielding a Hund’s J value 
-of 0.499 ± 0.032 eV for the Ni 3d subspace in a four-atom cell NiO. Keep in mind, however, that these 
+of 0.4994 ± 0.0004 eV for the Ni 3d subspace in a four-atom cell NiO. Keep in mind, however, that these 
 parameters MUST be converged with respect to supercell size in order to isolate the perturbed subspace 
 from its periodic images.
-
-
 
 
 

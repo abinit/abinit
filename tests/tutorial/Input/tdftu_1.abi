@@ -36,7 +36,7 @@ ngkpt 2 2 2
 chksymbreak 0  # The k point grid is not symmetric, but the calculations being for the ground-state, this is not a problem.
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "Pseudodojo_paw_pbe_standard/Ni.xml, Pseudodojo_paw_pbe_standard/O.xml"
+ pseudos "Psdj_paw_pbe_std/Ni.xml, Psdj_paw_pbe_std/O.xml"
 
 ##############################################################
 # This section is used only for regression testing of ABINIT #
@@ -45,7 +45,7 @@ chksymbreak 0  # The k point grid is not symmetric, but the calculations being f
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   tdftu_1.abo, tolnlines=  4, tolabs=  2.000e-06, tolrel=  2.000e-03, fld_options = -medium
 #%% output_file = "tdftu_1.abo"
 #%% [paral_info]

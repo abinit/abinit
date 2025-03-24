@@ -1,7 +1,7 @@
 /* abi_common.h */
 
 /*
- * Copyright (C) 2008-2022 ABINIT Group (MG)
+ * Copyright (C) 2008-2025 ABINIT Group (MG)
  *
  * This file is part of the ABINIT software package. For license information,
  * please see the COPYING file in the top-level directory of the ABINIT source
@@ -63,7 +63,7 @@
  2) Traditional CPP
 **/
 
-#if defined (FC_INTEL) || defined (FC_AOCC)
+#if defined (FC_INTEL) || defined (FC_AOCC) || defined (FC_LLVM) || defined (FC_NVHPC)
 #define CONCAT(x,y) x ## y
 #else
 #define CONCAT(x,y) x/**/y
@@ -88,7 +88,8 @@
 #define ABI_CHECK(expr, msg) if (.not.(expr)) call assert(.FALSE., msg _FILE_LINE_ARGS_)
 
 /* Stop execution with message `msg` if the two integers int1 and int2 are not equal */
-#define ABI_CHECK_IEQ(int1, int2, msg) if (int1 /= int2) ABI_ERROR(sjoin(msg, ": ", itoa(int1), "vs", itoa(int2)))
+#define ABI_CHECK_IEQ(int1, int2, msg) if (int1 /= int2) ABI_ERROR(sjoin(msg, ": while it is", itoa(int1), "vs", itoa(int2)))
+#define ABI_CHECK_INEQ(int1, int2, msg) if (int1 == int2) ABI_ERROR(sjoin(msg, ": while it is", itoa(int1), "vs", itoa(int2)))
 #define ABI_CHECK_IEQ_IERR(int1, int2, msg, ierr) if (int1 /= int2) then NEWLINE ierr = ierr + 1; ABI_WARNING(sjoin(msg, itoa(int1), "vs", itoa(int2))) NEWLINE endif
 
 /* Stop execution with message `msg` if the two doubles double1 and double2 are not equal */
@@ -100,11 +101,17 @@
 /* Stop execution with message `msg` if int1 < int2 */
 #define ABI_CHECK_IGEQ(int1, int2, msg) if (int1 < int2) ABI_ERROR(sjoin(msg, ": ", itoa(int1), "vs", itoa(int2)))
 
+/* Stop execution with message `msg` if int1 <= int2 */
+#define ABI_CHECK_IGE(int1, int2, msg) if (int1 <= int2) ABI_ERROR(sjoin(msg, ": ", itoa(int1), "vs", itoa(int2)))
+
 /* Stop execution with message `msg` if double1 < double2 */
 #define ABI_CHECK_DGEQ(double1, double2, msg) if (double1 < double2) ABI_ERROR(sjoin(msg, ftoa(double1), "vs", ftoa(double2)))
 
+/* Stop execution with message `msg` if double1 <= double2 */
+#define ABI_CHECK_DGE(double1, double2, msg) if (double1 <= double2) ABI_ERROR(sjoin(msg, ftoa(double1), "vs", ftoa(double2)))
+
 /* Stop execution with message `msg` if int not in [start, stop] */
-#define ABI_CHECK_IRANGE(int, start, stop, msg) if (int < start .or. int > stop) ABI_ERROR(sjoin(msg, itoa(int), "not in [", itoa(start), itoa(stop), "]"))
+#define ABI_CHECK_IRANGE(int, start, stop, msg) if (int < start .or. int > stop) ABI_ERROR(sjoin(msg, itoa(int), "not in [", itoa(start), ", ", itoa(stop), "]"))
 
 #define ABI_CHECK_NOSTOP(expr, msg, ierr) \
    if (.not. (expr)) then NEWLINE ierr = ierr + 1; call msg_hndl(msg, "ERROR", "PERS", NOSTOP=.TRUE. _FILE_LINE_ARGS_) NEWLINE endif
@@ -124,8 +131,8 @@
  * and abipy can detect the problem.
  *
  *   ABI_MALLOC    --> Allocate memory for intrinsic datatypes (real, integer, complex).
- *   ABI_CALLOC     --> Clear alloc: same as ABI_MALLOC but initializes memory with zeros
- *   ABI_FREE --> Free memory allocated by ABI_MALLOC
+ *   ABI_CALLOC    --> Clear alloc: same as ABI_MALLOC but initializes memory with zeros
+ *   ABI_FREE      --> Free memory allocated by ABI_MALLOC
  *
  * To allocate scalars, use:
  *
@@ -185,9 +192,9 @@
 
 
 /* Allocate a polymophic scalar that is: allocate(datatype:: scalar) */
-#  define ABI_MALLOC_TYPE_SCALAR(type, scalar)                    \
-  allocate(type::scalar) NEWLINE                                        \
-    call abimem_record(0, QUOTE(scalar), _LOC(scalar), "A", storage_size(scalar, kind=8),  __FILE__, __LINE__)
+#  define ABI_MALLOC_TYPE_SCALAR(type, scalar) \
+   allocate(type::scalar) NEWLINE \
+   call abimem_record(0, QUOTE(scalar), _LOC(scalar), "A", storage_size(scalar, kind=8),  __FILE__, __LINE__)
 
 #else
 /* macros used in production */
@@ -201,9 +208,27 @@
 #  define ABI_FREE_SCALAR(scalar) deallocate(scalar)
 #  define ABI_MOVE_ALLOC(from, to) call move_alloc(from, to)
 
-#  define ABI_MALLOC_TYPE_SCALAR(type,scalar)  allocate(type::scalar)
+#  define ABI_MALLOC_TYPE_SCALAR(type, scalar)  allocate(type::scalar)
 
 #endif
+
+#define ABI_MALLOC_CUDA(array, size) call alloc_on_gpu(array,size)
+#define ABI_FREE_CUDA(array) call dealloc_on_gpu(array)
+
+/* these routine should only be use when HAVE_YAKL is defined.
+ * They provide acces to memory available in both host and device
+ * (cuda/hip/openacc) code. The final goal would be to always use managed memory
+ * when HAVE_GPU is defined */
+
+/* gator_allocate can have 2 or 3 args, here is a trick to define a macro
+ * that make sure gator_allocate have 2 or 3 arguments */
+
+#define ABI_MALLOC_MANAGED(array, size) call gator_allocate(array, size)
+#define ABI_MALLOC_MANAGED_BOUNDS(array, size, lbounds) call gator_allocate(array, size, lbounds)
+
+#define ABI_FREE_MANAGED(array) call gator_deallocate(array)
+#define ABI_SFREE_MANAGED(array) if (associated(array)) then NEWLINE ABI_FREE_MANAGED(array) NEWLINE endif
+
 
 /* Macros to allocate zero-initialized arrays. */
 #define ABI_CALLOC(ARR, SIZE) ABI_MALLOC(ARR, SIZE) NEWLINE ARR = zero
@@ -240,8 +265,8 @@
 #  define ASSERT_IF(condition, expr) if (condition) call assert((expr), "Assertion failed" _FILE_LINE_ARGS_)
 
 #  define DBG_CHECK(expr,str) if (.not.expr) call assert((expr), str  _FILE_LINE_ARGS_)
-#  define DBG_ENTER(mode) call sentinel(1,mode _FILE_ABIFUNC_LINE_ARGS_)
-#  define DBG_EXIT(mode)  call sentinel(2,mode _FILE_ABIFUNC_LINE_ARGS_)
+#  define DBG_ENTER(mode) call sentinel(1, mode _FILE_ABIFUNC_LINE_ARGS_)
+#  define DBG_EXIT(mode)  call sentinel(2, mode _FILE_ABIFUNC_LINE_ARGS_)
 /* Stop if two arrays have different shape */
 #  define DBG_EQSHAPE(arr1, arr2) if (any(shape(arr1)/=shape(arr2))) ABI_ERROR("Different shape")
 
@@ -297,7 +322,7 @@
  * Does not work for character(*) with gfortran <=5.x (>7.x is fine. No 6.x data)
  * character with fixed length is fine.
  * */
-#define ABI_UNUSED_A(var) associate( var => var ) NEWLINE end associate
+#define ABI_UNUSED_A(var) associate(var => var) NEWLINE end associate
 
 /* Macro to set the default the value of a local variable when optional arguments are used.
 Use if statement instead of Fortran merge. See https://software.intel.com/en-us/forums/intel-fortran-compiler/topic/640598
@@ -320,7 +345,7 @@ Use if statement instead of Fortran merge. See https://software.intel.com/en-us/
 
 
 /* F2003 support  */
-#define ABI_CHECK_CNULL(cptr,msg) if (.not.C_ASSOCIATED(cptr)) ABI_ERROR(msg)
+#define ABI_CHECK_CNULL(cptr, msg) if (.not. C_ASSOCIATED(cptr)) ABI_ERROR(msg)
 
 #ifdef HAVE_FC_ASYNC
 #define ABI_ASYNC ,asynchronous
@@ -364,7 +389,7 @@ Use if statement instead of Fortran merge. See https://software.intel.com/en-us/
 #define DFTI_CHECK(status) if (status /= 0) call dfti_check_status(status _FILE_LINE_ARGS_)
 
 
-/* Macros used in the GW/GWR code */
+/* Macros used in the GW/GWR code to support single/double precision */
 #ifdef HAVE_GW_DPC
 #  define GWPC_CONJG(cvar)  DCONJG(cvar)
 #  define GWPC_CMPLX(re,im) DCMPLX(re,im)
@@ -374,11 +399,6 @@ Use if statement instead of Fortran merge. See https://software.intel.com/en-us/
 #  define GWPC_CMPLX(re,im) CMPLX(re,im)
 #  define __slkmat_t slkmat_sp_t
 #endif
-
-
-/* Temporary hack to use GREENX library
-#define __HAVE_GREENX
-*/
 
 #endif
 /* _ABINIT_COMMON_H */

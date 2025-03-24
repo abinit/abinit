@@ -1,10 +1,15 @@
 # coding: utf-8
 from __future__ import print_function, division, unicode_literals, absolute_import
-from abimkdocs.variables import ValueWithUnit, MultipleValue, Range
+
+try:
+    from abimkdocs.variables import ValueWithUnit, MultipleValue, Range
+except ImportError:
+    # This is needed for importing this module within Abipy.
+    from abipy.abio.abivar_database.variables import ValueWithUnit, MultipleValue, Range
 
 executable = "anaddb"
 
-#from abipy.abio.abivar_database.variables import ValueWithUnit, MultipleValue, Range, ValueWithConditions
+
 ValueWithConditions = dict
 Variable = dict
 
@@ -57,7 +62,7 @@ of uniaxial crystals, the z-axis should be chosen along the optical axis.
         added_in_version="before_v9",
         text=r"""
 Governs the imposition of the Acoustic Sum Rule (ASR) in the ANADDB application.
-Note that there is a similar input variable [[asr]] for ABINIT. 
+Note that there is a similar input variable [[asr]] for ABINIT.
 
   * 0 --> no ASR for interatomic force constants is imposed.
   * 1 or 2 --> the ASR for interatomic force constants is imposed by modifying
@@ -109,7 +114,7 @@ exactly the same likely due to an extra symmetrisation in the
 diagonalisation routine. Of course, when the matrix at Gamma has been
 generated from IFCs coming from dynamical matrices none of which are Gamma,
 the breaking of the ASR is rather severe. In order to clear the situation, one
-should use a diagonalisation routine for non-hermitian matrices. 
+should use a diagonalisation routine for non-hermitian matrices.
 ).
 """,
     ),
@@ -823,7 +828,8 @@ number of DDB files is defined by [[anaddb:gruns_nddbs]] (possible values are:
 3,5,7,9) The DDB files correspond to phonon calculations performed at
 different volumes (usually ± 1% of the equilibrium volume). The DDB files must
 be ordered according to the volume of the unit cell (the DDB with smallest
-volume comes first) and the volume increment must be constant. The code
+volume comes first) and the volume increment must be constant to a precision of
+better than 1 part in $10^4$. The code
 computes the derivative of the dynamical matrix wrt the volume using central finite difference.
 """,
     ),
@@ -839,7 +845,10 @@ computes the derivative of the dynamical matrix wrt the volume using central fin
         added_in_version="before_v9",
         text=r"""
 This variable defines the number of DDB files (read from [[anaddb:gruns_ddbs]])
-used for the calculation of the Gruneisen parameters.
+used for the calculation of the Gruneisen parameters. Note that computation of
+the Grunheisen parameters is currently incompatible with many other features of
+ANADDB, and so should be computed in a separate run from calculation of other
+possible responses.
 """,
     ),
 

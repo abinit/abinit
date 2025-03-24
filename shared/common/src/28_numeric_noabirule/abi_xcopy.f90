@@ -8,9 +8,9 @@
 !! It performs the data copy: dst(1:n:incdst) = src(1:n:incsrc)
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2022 ABINIT group (LNguyen,FDahm (CS))
+!!  Copyright (C) 2001-2025 ABINIT group (LNguyen,FDahm (CS))
 !!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~ABINIT/Infos/copyright
+!!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! SOURCE
@@ -27,7 +27,7 @@
 !!
 !! SOURCE
 !!
-  subroutine abi_zcopy(size,tsrc,incsrc,tdest,incdest)
+subroutine abi_zcopy(size,tsrc,incsrc,tdest,incdest)
 
 !Arguments-------------------------------------
  integer, intent(in) :: size
@@ -85,7 +85,7 @@ end subroutine abi_zcopy_1d
 !!
 !! SOURCE
 
-  subroutine abi_dcopy(size,tsrc,incsrc,tdest,incdest,x_cplx)
+subroutine abi_dcopy(size,tsrc,incsrc,tdest,incdest,x_cplx)
 
 !Arguments-------------------------------------
  integer, intent(in) :: size
@@ -230,7 +230,7 @@ end subroutine abi_dcopy_1d_0d
 !!
 !! SOURCE
 
-  subroutine abi_d2zcopy_2d(size,tsrc,incsrc,tdest,incdest,x_cplx)
+subroutine abi_d2zcopy_2d(size,tsrc,incsrc,tdest,incdest,x_cplx)
 
  !Arguments-------------------------------------
  integer, intent(in) :: size

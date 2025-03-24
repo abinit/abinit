@@ -21,7 +21,7 @@ znucl 13          # The keyword "znucl" refers to the atomic number of the
                   # to the type(s) of atom. Here, the only type is Aluminum
 pp_dirpath "$ABI_PSPDIR"       # This is the path to the directory were
                                # pseudopotentials for tests are stored
-pseudos "Pseudodojo_nc_sr_04_pw_standard_psp8/Al.psp8"
+pseudos "Psdj_nc_sr_04_pw_std_psp8/Al.psp8"
                                # Name and location of the pseudopotential
 
 #Definition of the atoms
@@ -43,7 +43,7 @@ shiftk  0.5 0.0 0.5
 
 #Definition of the SCF procedure
 nstep 10          # Maximal number of SCF cycles
-toldfe 1.0d-6     # This value is way too large for most realistic studies of materials
+toldfe 1.0d-6     # This value is WAY TOO LARGE for most realistic studies of materials
 
 #Definition of occupation numbers
 occopt 4

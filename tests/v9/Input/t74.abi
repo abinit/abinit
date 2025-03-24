@@ -16,7 +16,10 @@
   cprj_update_lvl4  1 # A + B + C
   cprj_update_lvl3 -1 # A + B + C + D (for debugging only, poor performance)
   cprj_update_lvl2 -2 # A + B + C + D + E (for debugging only, poor performance)
-  cprj_update_lvl1  0 # "cprj in memory" implementation is disabled, use of the native implementation instead
+
+  cprj_in_memory 2
+
+  cprj_in_memory1   0 # "cprj in memory" implementation is disabled, use of the native implementation instead
 
   optforces 1
   optstress 1
@@ -67,7 +70,7 @@
    kptopt   1
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "Pseudodojo_paw_pw_standard/Al.xml, As.LDA_PW-JTH_sp.xml"
+ pseudos "Psdj_paw_pw_std/Al.xml, As.LDA_PW-JTH_sp.xml"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

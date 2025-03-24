@@ -44,7 +44,7 @@ jpawu  0.8 0.0 eV
 #Density matrix
 usedmatpu 5
 
-dmatpawu 
+dmatpawu
 #Occupation matrix for spin  1 and atom 1
      0.90036    0.00000   -0.00003    0.00000    0.00000
      0.00000    0.90036   -0.00001    0.00000    0.00002
@@ -59,7 +59,7 @@ dmatpawu
      0.00000   -0.00010    0.00000    0.00010    0.11580
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "Pseudodojo_paw_pbe_standard/Ni.xml, Pseudodojo_paw_pbe_standard/O.xml"
+ pseudos "Psdj_paw_pbe_std/Ni.xml, Psdj_paw_pbe_std/O.xml"
 
 ##############################################################
 # This section is used only for regression testing of ABINIT #
@@ -68,8 +68,8 @@ dmatpawu
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
-#%%   tdftu_4.abo, tolnlines=  1, tolabs=  1.010e-04, tolrel=  4.000e-04, fld_options = -easy  
+#%% files_to_test =
+#%%   tdftu_4.abo, tolnlines=  1, tolabs=  1.010e-04, tolrel=  4.000e-04, fld_options = -easy
 #%% output_file = "tdftu_4.abo"
 #%% [paral_info]
 #%% max_nprocs = 1

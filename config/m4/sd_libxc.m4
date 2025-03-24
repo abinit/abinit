@@ -1,4 +1,4 @@
-## Copyright (C) 2019-2022 ABINIT group (Yann Pouillon)
+## Copyright (C) 2019-2025 ABINIT group (Yann Pouillon)
 
 #
 # Exchange-Correlation functionals library (LibXC)
@@ -100,6 +100,7 @@ AC_DEFUN([SD_LIBXC_INIT], [
   AC_ARG_VAR([LIBXC_CPPFLAGS], [C preprocessing flags for LibXC.])
   AC_ARG_VAR([LIBXC_CFLAGS], [C flags for LibXC.])
   AC_ARG_VAR([LIBXC_FCFLAGS], [Fortran flags for LibXC.])
+  AC_ARG_VAR([LIBXC_FFLAGS], [Fortran flags for LibXC (better use LIBXC_FCFLAGS).])
   AC_ARG_VAR([LIBXC_LDFLAGS], [Linker flags for LibXC.])
   AC_ARG_VAR([LIBXC_LIBS], [Library flags for LibXC.])
 
@@ -107,7 +108,7 @@ AC_DEFUN([SD_LIBXC_INIT], [
   if test "${sd_libxc_enable}" = "yes" -o "${sd_libxc_enable}" = "auto"; then
     tmp_libxc_vars="${LIBXC_CPPFLAGS}${LIBXC_CFLAGS}${LIBXC_LDFLAGS}${LIBXC_LIBS}"
     if test "${sd_libxc_enable_fc}" = "yes"; then
-      tmp_libxc_vars="${tmp_libxc_vars}${LIBXC_FCFLAGS}"
+      tmp_libxc_vars="${tmp_libxc_vars}${LIBXC_FFLAGS}${LIBXC_FCFLAGS}"
     fi
     if test "${sd_libxc_init}" = "def" -a ! -z "${tmp_libxc_vars}"; then
       sd_libxc_enable="yes"
@@ -154,6 +155,7 @@ AC_DEFUN([SD_LIBXC_INIT], [
         test ! -z "${LIBXC_CPPFLAGS}" && sd_libxc_cppflags="${LIBXC_CPPFLAGS}"
         test ! -z "${LIBXC_CFLAGS}" && sd_libxc_cflags="${LIBXC_CFLAGS}"
         if test "${sd_libxc_enable_fc}" = "yes"; then
+          test ! -z "${LIBXC_FFLAGS}" && sd_libxc_fcflags="${LIBXC_FFLAGS}"
           test ! -z "${LIBXC_FCFLAGS}" && sd_libxc_fcflags="${LIBXC_FCFLAGS}"
         fi
         test ! -z "${LIBXC_LDFLAGS}" && sd_libxc_ldflags="${LIBXC_LDFLAGS}"
@@ -473,7 +475,7 @@ AC_DEFUN([_SD_LIBXC_CHECK_CONFIG], [
   fi
 
   # Environment variables conflict with --with-* options
-  tmp_libxc_vars="${LIBXC_CPPFLAGS}${LIBXC_CFLAGS}${LIBXC_FCFLAGS}${LIBXC_LDFLAGS}${LIBXC_LIBS}"
+  tmp_libxc_vars="${LIBXC_CPPFLAGS}${LIBXC_CFLAGS}${LIBXC_FFLAGS}${LIBXC_FCFLAGS}${LIBXC_LDFLAGS}${LIBXC_LIBS}"
   tmp_libxc_invalid="no"
   if test ! -z "${tmp_libxc_vars}" -a ! -z "${with_libxc}"; then
     case "${sd_libxc_policy}" in

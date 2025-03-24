@@ -112,7 +112,7 @@
 #%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = Y. Gillet 
-#%% keywords = NC, DFPT, DDK
+#%% keywords = NC, DFPT, DDK, MINIMAL
 #%% description =  Silicon, DDK computation to prepare 'optic'
 #%% topics = Optic
 #%%<END TEST_INFO>
