@@ -381,7 +381,7 @@ subroutine sliceAll_allocateAll(sliceAll)
     neigenpairs = sliceAll%neigenpairs
     comm_cols = sliceAll%comm_cols
     !gpu_option = sliceAll%gpu_option
-    ! FIXME forced CPU 
+    ! FIXME forced CPU test 
     gpu_option = ABI_GPU_DISABLED
 
     ! Eigenvalues and residuals before slicing
