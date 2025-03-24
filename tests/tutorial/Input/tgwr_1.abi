@@ -17,7 +17,6 @@ ndtset 2
 nband1  6
 
 # Definition of the k-point grid
-#ngkpt1   2 2 2
 ngkpt1   4 4 4
 nshiftk1 4
 shiftk1  0.0 0.0 0.0
