@@ -7,7 +7,7 @@
 !!  the xcdata_type used to drive the computation of the XC energy, potential, kernel, etc.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2017-2022 ABINIT group (XG)
+!!  Copyright (C) 2017-2025 ABINIT group (XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -138,8 +138,6 @@ contains
 !! OUTPUT
 !!  xcdata <type(xcdata_type)>= the data to calculate exchange-correlation are initialized
 !!
-!! SIDE EFFECTS
-!!
 !! SOURCE
 
 subroutine xcdata_init(xcdata,auxc_ixc,dtset,hyb_mixing,intxc,ixc,nelect,nspden,tphysel,&
@@ -225,7 +223,7 @@ end subroutine xcdata_init
 !!
 !! SOURCE
 
-subroutine get_xclevel(ixc,xclevel,usefock)
+subroutine get_xclevel(ixc, xclevel, usefock)
 
 !Arguments ------------------------------------
 !scalars
@@ -235,13 +233,15 @@ subroutine get_xclevel(ixc,xclevel,usefock)
 
 !Local variables-------------------------------
  integer :: ii,isiz,jj
- character(len=500) :: message
+ character(len=500) :: msg
 
 ! *************************************************************************
 
  xclevel=0 ; if(present(usefock)) usefock=0
  if( ( 1<=ixc .and. ixc<=10).or.(30<=ixc .and. ixc<=39).or.(ixc==50) )xclevel=1 ! LDA
+ if ( ( ixc==51) ) xclevel=1 ! temperature-dependant LDA functionals (TLDA)
  if( (11<=ixc .and. ixc<=19).or.(23<=ixc .and. ixc<=29).or. ixc==1402000)xclevel=2 ! GGA
+ if ( ( ixc==60) ) xclevel=2 ! temperature-dependant GGA functionals (TGGA)
  if( 20<=ixc .and. ixc<=22 )xclevel=3 ! ixc for TDDFT kernel tests
  if(present(usefock))then
    if( ixc>=40 .and. ixc<=42 )usefock=1 ! Hartree-Fock or internal hybrid functionals
@@ -263,11 +263,11 @@ subroutine get_xclevel(ixc,xclevel,usefock)
        if (libxc_functionals_is_hybrid_from_id(ii)) usefock=1
        if (usefock==1) then
          if (.not.libxc_functionals_gga_from_hybrid(hybrid_id=ii)) then
-           write(message, '(a,i8,3a,2i8,2a)' )&
-&           'ixc=',ixc,' (libXC hybrid functional) is presently not allowed.',ch10,&
-&           'ii,jj=',ii,jj,ch10,&
-&           'Action: try another hybrid functional.'
-           ABI_ERROR(message)
+           write(msg, '(a,i8,3a,2i8,2a)' )&
+           'ixc=',ixc,' (libXC hybrid functional) is presently not allowed.',ch10,&
+           'ii,jj=',ii,jj,ch10,&
+           'Action: try another hybrid functional.'
+           ABI_ERROR(msg)
          end if
        end if
      end if

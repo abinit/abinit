@@ -10,7 +10,7 @@
 !!  xmpi_recv is the generic function.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2022 ABINIT group
+!!  Copyright (C) 2001-2025 ABINIT group
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -47,13 +47,15 @@
 subroutine xmpi_recv_char(xval,source,tag,comm,ier)
 
 !Arguments-------------------------
- character(len=*), intent(inout) :: xval
+ character(len=*), intent(inout),target :: xval
  integer ,intent(in) :: source,tag,comm
  integer ,intent(out) :: ier
 
 !Local variables-------------------
 #if defined HAVE_MPI
  integer :: my_tag
+ character,pointer :: arr_xval(:)
+ type(c_ptr) :: cptr
 #endif
 
 ! *************************************************************************
@@ -62,7 +64,8 @@ subroutine xmpi_recv_char(xval,source,tag,comm,ier)
 #if defined HAVE_MPI
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    my_tag = MOD(tag,xmpi_tag_ub)
-   call MPI_RECV(xval,len(xval),MPI_CHARACTER,source,my_tag,comm,MPI_STATUS_IGNORE,ier)
+   cptr=c_loc(xval) ; call c_f_pointer(cptr,arr_xval,[len(xval)])
+   call MPI_RECV(arr_xval,len(xval),MPI_CHARACTER,source,my_tag,comm,MPI_STATUS_IGNORE,ier)
  end if
 #endif
 
@@ -102,7 +105,8 @@ subroutine xmpi_recv_intv(xval,source,tag,comm,ier)
 
 !Local variables-------------------
 #if defined HAVE_MPI
-  integer :: my_tag
+ integer :: my_tag
+ integer :: arr_xval(1)
 #endif
 
 ! *************************************************************************
@@ -111,7 +115,8 @@ subroutine xmpi_recv_intv(xval,source,tag,comm,ier)
 #if defined HAVE_MPI
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    my_tag=MOD(tag,xmpi_tag_ub)
-   call MPI_RECV(xval,1,MPI_INTEGER,source,my_tag,comm,MPI_STATUS_IGNORE,ier)
+   call MPI_RECV(arr_xval,1,MPI_INTEGER,source,my_tag,comm,MPI_STATUS_IGNORE,ier)
+   xval=arr_xval(1)
  end if
 #endif
 
@@ -237,7 +242,7 @@ subroutine xmpi_recv_int2d(xval,source,tag,comm,ier)
    !This product of dimensions can be greater than a 32bit integer
    !We use a INT64 to store it. If it is too large, we switch to an
    !alternate routine because MPI<4 doesnt handle 64 bit counts.
-   ntot=int(n1*n2,kind=int64)
+   ntot=int(n1,kind=int64)*n2
 
    if (ntot<=xmpi_maxint32_64) then
      call MPI_RECV(xval,n1*n2,MPI_INTEGER,source,my_tag,comm,MPI_STATUS_IGNORE,ier)
@@ -307,7 +312,7 @@ subroutine xmpi_recv_int3d(xval,source,tag,comm,ier)
    !This product of dimensions can be greater than a 32bit integer
    !We use a INT64 to store it. If it is too large, we switch to an
    !alternate routine because MPI<4 doesnt handle 64 bit counts.
-   ntot=int(n1*n2*n3,kind=int64)
+   ntot=int(n1,kind=int64)*n2*n3
 
    if (ntot<=xmpi_maxint32_64) then
      call MPI_RECV(xval,n1*n2*n3,MPI_INTEGER,source,my_tag,comm,MPI_STATUS_IGNORE,ier)
@@ -357,6 +362,7 @@ subroutine xmpi_recv_dp(xval,source,tag,comm,ier)
 !Local variables-------------------
 #if defined HAVE_MPI
  integer :: my_tag
+ real(dp) :: arr_xval(1)
 #endif
 
 ! *************************************************************************
@@ -365,7 +371,8 @@ subroutine xmpi_recv_dp(xval,source,tag,comm,ier)
 #if defined HAVE_MPI
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    my_tag = MOD(tag,xmpi_tag_ub)
-   call MPI_RECV(xval,1,MPI_DOUBLE_PRECISION,source,my_tag,comm,MPI_STATUS_IGNORE,ier)
+   call MPI_RECV(arr_xval,1,MPI_DOUBLE_PRECISION,source,my_tag,comm,MPI_STATUS_IGNORE,ier)
+   xval=arr_xval(1)
  end if
 #endif
 
@@ -472,7 +479,7 @@ subroutine xmpi_recv_dp2d(xval,source,tag,comm,ier)
    !This product of dimensions can be greater than a 32bit integer
    !We use a INT64 to store it. If it is too large, we switch to an
    !alternate routine because MPI<4 doesnt handle 64 bit counts.
-   ntot=int(n1*n2,kind=int64)
+   ntot=int(n1,kind=int64)*n2
 
    if (ntot<=xmpi_maxint32_64) then
      call MPI_RECV(xval,n1*n2,MPI_DOUBLE_PRECISION,source,my_tag,comm,MPI_STATUS_IGNORE,ier)
@@ -539,7 +546,7 @@ subroutine xmpi_recv_dp3d(xval,source,tag,comm,ier)
    !This product of dimensions can be greater than a 32bit integer
    !We use a INT64 to store it. If it is too large, we switch to an
    !alternate routine because MPI<4 doesnt handle 64 bit counts.
-   ntot=int(n1*n2*n3,kind=int64)
+   ntot=int(n1,kind=int64)*n2*n3
 
    if (ntot<=xmpi_maxint32_64) then
      call MPI_RECV(xval,n1*n2*n3,MPI_DOUBLE_PRECISION,source,my_tag,comm,MPI_STATUS_IGNORE,ier)
@@ -607,7 +614,7 @@ subroutine xmpi_recv_dp4d(xval,source,tag,comm,ier)
    !This product of dimensions can be greater than a 32bit integer
    !We use a INT64 to store it. If it is too large, we switch to an
    !alternate routine because MPI<4 doesnt handle 64 bit counts.
-   ntot=int(n1*n2*n3*n4,kind=int64)
+   ntot=int(n1,kind=int64)*n2*n3*n4
 
    if (ntot<=xmpi_maxint32_64) then
      call MPI_RECV(xval,n1*n2*n3*n4,MPI_DOUBLE_PRECISION,source,my_tag,comm,MPI_STATUS_IGNORE,ier)

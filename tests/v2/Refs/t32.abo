@@ -1,8 +1,8 @@
 
-.Version 9.11.2 of ANADDB 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ANADDB, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2022 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Jul 2023.
-- ( at 11h59 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h08 )
   
 
 ================================================================================
@@ -96,32 +96,32 @@
     atom        electric field
  displacement     direction
        1               1        0.142681        0.000000
-       1               2       -0.000000        0.000000
-       1               3       -0.000000        0.000000
-       2               1       -0.000000        0.000000
+       1               2        0.000000        0.000000
+       1               3        0.000000        0.000000
+       2               1        0.000000        0.000000
        2               2        0.142681        0.000000
-       2               3        0.000000        0.000000
-       3               1        0.000000        0.000000
-       3               2        0.000000        0.000000
+       2               3       -0.000000        0.000000
+       3               1       -0.000000        0.000000
+       3               2       -0.000000        0.000000
        3               3        0.142681        0.000000
 
  Effective charge tensors after 
  imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
-         1         1    9.877479E-01    6.229599E-17    6.214329E-17
-         1         2    6.229599E-17    9.877479E-01   -6.244870E-17
-         1         3   -6.229599E-17   -6.229599E-17    9.877479E-01
-         2         1   -9.877479E-01   -6.229599E-17   -6.214329E-17
-         2         2   -6.229599E-17   -9.877479E-01    6.244870E-17
-         2         3    6.229599E-17    6.229599E-17   -9.877479E-01
+         1         1    9.877479E-01   -3.929989E-17   -4.003155E-17
+         1         2   -3.929989E-17    9.877479E-01    3.856822E-17
+         1         3    3.929989E-17    3.929989E-17    9.877479E-01
+         2         1   -9.877479E-01    3.929989E-17    4.003155E-17
+         2         2    3.929989E-17   -9.877479E-01   -3.856822E-17
+         2         3   -3.929989E-17   -3.929989E-17   -9.877479E-01
  Now, the imaginary part of the dynamical matrix is zeroed
 
 ================================================================================
 
  Calculation of the interatomic forces 
 
--begin at tcpu      0.037  and twall      0.048 sec
+-begin at tcpu      0.029  and twall      0.029 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :       32
   1)   2.50000000E-01  2.50000000E-01  2.50000000E-01
@@ -258,8 +258,8 @@
   Trace           0.00017
  Transformation to local coordinates 
  First  local vector :       -0.707107       -0.707107        0.000000
- Second local vector :       -0.000000        0.000000        1.000000
- Third  local vector :       -0.707107        0.707107       -0.000000
+ Second local vector :        0.000000       -0.000000        1.000000
+ Third  local vector :       -0.707107        0.707107        0.000000
   -0.00451  0.00248  0.00000
   -0.00248  0.00517  0.00000
    0.00000  0.00000 -0.00048
@@ -273,7 +273,7 @@
   Trace           0.00017
  Transformation to local coordinates 
  First  local vector :       -0.707107        0.000000       -0.707107
- Second local vector :        0.000000        1.000000       -0.000000
+ Second local vector :        0.000000        1.000000        0.000000
  Third  local vector :        0.707107       -0.000000       -0.707107
   -0.00451  0.00248  0.00000
   -0.00248  0.00517  0.00000
@@ -288,8 +288,8 @@
   Trace           0.00017
  Transformation to local coordinates 
  First  local vector :       -0.707107        0.000000        0.707107
- Second local vector :        0.000000       -1.000000        0.000000
- Third  local vector :        0.707107        0.000000        0.707107
+ Second local vector :       -0.000000       -1.000000       -0.000000
+ Third  local vector :        0.707107       -0.000000        0.707107
   -0.00451  0.00248  0.00000
   -0.00248  0.00517  0.00000
    0.00000  0.00000 -0.00048
@@ -303,7 +303,7 @@
   Trace           0.00017
  Transformation to local coordinates 
  First  local vector :       -0.707107        0.707107        0.000000
- Second local vector :        0.000000       -0.000000       -1.000000
+ Second local vector :        0.000000        0.000000       -1.000000
  Third  local vector :       -0.707107       -0.707107       -0.000000
   -0.00451  0.00248  0.00000
   -0.00248  0.00517  0.00000
@@ -318,8 +318,8 @@
   Trace           0.00017
  Transformation to local coordinates 
  First  local vector :        0.000000       -0.707107       -0.707107
- Second local vector :        1.000000       -0.000000        0.000000
- Third  local vector :       -0.000000       -0.707107        0.707107
+ Second local vector :        1.000000        0.000000       -0.000000
+ Third  local vector :        0.000000       -0.707107        0.707107
   -0.00451  0.00248  0.00000
   -0.00248  0.00517  0.00000
    0.00000  0.00000 -0.00048
@@ -393,8 +393,8 @@
   Trace           0.00017
  Transformation to local coordinates 
  First  local vector :        0.000000        0.707107        0.707107
- Second local vector :        1.000000        0.000000       -0.000000
- Third  local vector :       -0.000000        0.707107       -0.707107
+ Second local vector :        1.000000       -0.000000        0.000000
+ Third  local vector :        0.000000        0.707107       -0.707107
   -0.00451  0.00248  0.00000
   -0.00248  0.00517  0.00000
    0.00000  0.00000 -0.00048
@@ -408,8 +408,8 @@
   Trace           0.00017
  Transformation to local coordinates 
  First  local vector :        0.707107        0.000000        0.707107
- Second local vector :       -0.000000        1.000000        0.000000
- Third  local vector :       -0.707107       -0.000000        0.707107
+ Second local vector :        0.000000        1.000000       -0.000000
+ Third  local vector :       -0.707107        0.000000        0.707107
   -0.00451  0.00248  0.00000
   -0.00248  0.00517  0.00000
    0.00000  0.00000 -0.00048
@@ -423,8 +423,8 @@
   Trace           0.00017
  Transformation to local coordinates 
  First  local vector :        0.707107        0.707107        0.000000
- Second local vector :        0.000000       -0.000000        1.000000
- Third  local vector :        0.707107       -0.707107       -0.000000
+ Second local vector :       -0.000000        0.000000        1.000000
+ Third  local vector :        0.707107       -0.707107        0.000000
   -0.00451  0.00248  0.00000
   -0.00248  0.00517  0.00000
    0.00000  0.00000 -0.00048
@@ -469,7 +469,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.301511       -0.301511       -0.904534
  Second local vector :       -0.639602       -0.639602        0.426401
- Third  local vector :       -0.707107        0.707107        0.000000
+ Third  local vector :       -0.707107        0.707107       -0.000000
    0.00156  0.00004  0.00000
    0.00060 -0.00046  0.00000
    0.00000  0.00000 -0.00016
@@ -492,11 +492,11 @@
  the characters are given for each symmetry operation (see the list in the log file).
  Symmetry characters of vibration mode #   1
        degenerate with vibration modes #   2 to    3
-  3.0 -1.0 -1.0 -1.0  0.0 -0.0 -0.0 -0.0 -0.0  0.0 -0.0  0.0  1.0  1.0 -1.0 -1.0
+  3.0 -1.0 -1.0 -1.0  0.0 -0.0  0.0 -0.0  0.0 -0.0 -0.0  0.0  1.0  1.0 -1.0 -1.0
  -1.0  1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
  Symmetry characters of vibration mode #   4
        degenerate with vibration modes #   5 to    6
-  3.0 -1.0 -1.0 -1.0 -0.0  0.0 -0.0  0.0 -0.0  0.0  0.0 -0.0  1.0  1.0 -1.0 -1.0
+  3.0 -1.0 -1.0 -1.0  0.0 -0.0  0.0 -0.0  0.0 -0.0 -0.0  0.0  1.0  1.0 -1.0 -1.0
  -1.0  1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
 
   Phonon wavevector (reduced coordinates) :  0.10000  0.00000  0.00000
@@ -714,10 +714,10 @@
    in SI units K  :            482.92347
 
 -
-- Proc.   0 individual time (sec): cpu=          0.1  wall=          0.1
+- Proc.   0 individual time (sec): cpu=          0.0  wall=          0.0
 
 ================================================================================
 
-+Total cpu time      0.056  and wall time      0.077 sec
++Total cpu time      0.048  and wall time      0.048 sec
 
  anaddb : the run completed succesfully.

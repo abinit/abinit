@@ -38,7 +38,7 @@ def fort2html(s, full=True):
     return highlight(s, FortranLexer(), HtmlFormatter(full=full))
 
 
-class Node(object):
+class Node:
 
     def __repr__(self):
         if self.ancestor is not None:
@@ -636,6 +636,9 @@ class FortranKissParser(HasRegex):
                     if comment:
                         napp(comment)
                 continue
+
+            # Ignore preprocessor line
+            if line.startswith("#"): continue
 
             # 3) Handle continuation line
             # http://fortranwiki.org/fortran/show/Continuation+lines

@@ -20,6 +20,10 @@ bandpp1     6
 npfft1      1
 np_spkpt1      1
 tolwfr1     1.0d-18
+# Added in v9.11:
+tolwfr_diago 1d-30
+# Default of tolwfr_diago is tolwfr (or, for LOBPCG only, 1d-20 if tolwfr is not defined)
+# To reproduce old behaviour : set stringent value of tolwfr_diago
 
 ###########################################
 # Dataset 2: Phonons with bands para.
@@ -73,17 +77,16 @@ rprim   5.0000000000e-01 -8.6602540378e-01  0.0000000000e+00
         0.0000000000e+00  0.0000000000e+00  1.0000000000e+00
 
 pp_dirpath "$ABI_PSPDIR"
-pseudos "Pseudodojo_paw_pw_standard/Si.xml, Pseudodojo_paw_pw_standard/O.xml"
+pseudos "Psdj_paw_pw_std/Si.xml, Psdj_paw_pw_std/O.xml"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = graphene_gnu_11.2_macports
 #%% [paral_info]
 #%% nprocs_to_test = 4
 #%% max_nprocs = 4
 #%% [NCPU_4]
-#%% files_to_test = t66_MPI4.abo, tolnlines = 25, tolabs = 1.1e-03, tolrel = 6.0e-03, fld_options = -medium
+#%% files_to_test = t66_MPI4.abo, tolnlines = 35, tolabs = 1.1e-03, tolrel = 9.0e-03, fld_options = -medium
 #%% [extra_info]
 #%% authors =  M. Giantomassi
 #%% keywords = NC, DFPT

@@ -7,7 +7,7 @@
 !! This is a way to check that the testing capabilities are not lost when the test farm is modified ...
 !!
 !! COPYRIGHT
-!! Copyright (C) 2017-2022 ABINIT group (XG)
+!! Copyright (C) 2017-2025 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -43,11 +43,11 @@
 program dummy_tests
 
  use defs_basis
- use m_build_info
  use m_abicore
  use m_errors
  use m_xmpi
  use m_dummy_tests
+ use m_build_info,   only : abinit_version
  implicit none
 
 !Local variables-------------------------------

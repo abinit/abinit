@@ -10,7 +10,7 @@
  eph_stern 1
  getpot_filepath "MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_POT.nc"
  # nline tolwfr
- 
+
  getddb_filepath "teph4zpr_1_DDB"
  ddb_ngqpt 4 4 4
  getdvdb_filepath "teph4zpr_2_DVDB"
@@ -27,6 +27,8 @@
 ##############################################
  optdriver 7
  eph_task 4
+ eph_frohl_ntheta 0       # Disable spherical integration of FM integrand in the microzone around Gamma.
+                          # to preserve previous behaviour.
  tmesh 0 100 4    # [start, step, num_T] in K
 
  prtphdos 0       # Disable computation of PHDOS to save some time
@@ -52,8 +54,9 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = eos_nvhpc_23.9_elpa
 #%% test_chain =  teph4zpr_1.abi, teph4zpr_2.abi, teph4zpr_3.abi, teph4zpr_4.abi,
-#%%               teph4zpr_5.abi, teph4zpr_6.abi, teph4zpr_7.abi, teph4zpr_8.abi
+#%%               teph4zpr_5.abi, teph4zpr_6.abi, teph4zpr_7.abi, teph4zpr_8.abi, teph4zpr_9.abi
 #%% [files]
 #%% use_git_submodule = MgO_eph_zpr
 #%% files_to_test =

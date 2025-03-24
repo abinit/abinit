@@ -1,0 +1,55 @@
+#Test lobpcg with OpenMP GPU
+
+ ndtset 1
+ wfoptalg 114  npband 1 npfft 1
+ gpu_option 2
+
+ np_spkpt 1
+
+ ngfft 18 18 18
+ ngfftdg 36 36 36
+
+ occopt 1
+ kptopt 0
+ nkpt 1 tolvrs 1.0d-28
+ nsppol 2    spinmagntarget 0.0d0
+ ixc 1
+
+ ecut 15. pawecutdg 50
+ diemac 12.0d0  enunit 2
+ nstep 16
+ acell 3*7.0
+ rprim 0.0 0.5 0.5
+       0.5 0.0 0.5
+       0.5 0.5 0.0
+ xred 0.0  0.0  0.0
+      0.22 0.22 0.22
+ chksymtnons 0
+ znucl 6
+ nband 12 occ 4*2 8*0
+ ntypat 1 typat 1 1  natom 2
+ istwfk *1
+
+ paral_kgb 1
+ iomode 0    # Only for testing purposes 
+ fftalg 402
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "6c_lda.paw"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% [paral_info]
+#%% nprocs_to_test = 1
+#%% max_nprocs = 1
+#%% [NCPU_1]
+#%% files_to_test = t05_MPI1.abo, tolnlines=   16,   tolabs=  5.0e-8,      tolrel= 2.0e-2
+#%% [extra_info]
+#%% keywords = PAW
+#%% authors = M. Sarraute
+#%% description = 
+#%%    LOBPCG, C-diamond, Bulk, 2 atoms, paral_kgb, mono-GPU, istwfk==1, with PAW.
+#%% topics = parallelism
+#%%<END TEST_INFO>

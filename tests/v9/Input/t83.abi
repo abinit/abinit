@@ -22,7 +22,7 @@ randomseed=111111 # for testing only
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = multibinit
-#%% exclude_builders = .*_nag_7.[01]_.*
+#%% exclude_builders = alps_nag_7.2_serial
 #%% latt_pot = t83.nc
 #%% exec_args = --F03
 #%% [files]

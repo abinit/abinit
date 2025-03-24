@@ -10,7 +10,7 @@
 !!         |Cnk> are wave functions
 !!
 !! COPYRIGHT
-!! Copyright (C) 2012-2022 ABINIT group (MT,JWZ)
+!! Copyright (C) 2012-2025 ABINIT group (MT,JWZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -211,7 +211,6 @@ end subroutine pawcprj_free
 
 !----------------------------------------------------------------------
 
-!!      m_scf_history,suscep_stat
 !!****f* m_pawcprj/pawcprj_set_zero
 !! NAME
 !! pawcprj_set_zero
@@ -913,7 +912,6 @@ end subroutine pawcprj_projbd
 !Local variables-------------------------------
 !scalars
  integer :: ii,jj,kk,n1dim,n2dim,ncpgr,nlmn
-!arrays
 
 ! *************************************************************************
 

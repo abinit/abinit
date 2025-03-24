@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2022 ABINIT group (MT)
+!!  Copyright (C) 2012-2025 ABINIT group (MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -90,8 +90,6 @@ contains
 
 subroutine predict_neb(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_enreg,natom,&
 &                      ndynimage,nimage,nimage_tot,ntimimage_stored,results_img)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

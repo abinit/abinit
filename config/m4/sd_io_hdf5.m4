@@ -1,4 +1,4 @@
-## Copyright (C) 2019-2022 ABINIT group (Yann Pouillon)
+## Copyright (C) 2019-2025 ABINIT group (Yann Pouillon)
 
 #
 # HDF5 I/O support
@@ -92,7 +92,7 @@ AC_DEFUN([SD_HDF5_INIT], [
   esac
 
   # Declare configure option
-  # TODO: make it switchable for the implicit case 
+  # TODO: make it switchable for the implicit case
   AC_ARG_WITH([hdf5],
     [AS_HELP_STRING([--with-hdf5],
       [Install prefix of the HDF5 library (e.g. /usr/local).])],
@@ -112,6 +112,7 @@ AC_DEFUN([SD_HDF5_INIT], [
   AC_ARG_VAR([HDF5_CFLAGS], [C flags for HDF5.])
   AC_ARG_VAR([HDF5_CXXFLAGS], [C flags for HDF5.])
   AC_ARG_VAR([HDF5_FCFLAGS], [Fortran flags for HDF5.])
+  AC_ARG_VAR([HDF5_FFLAGS], [Fortran flags for HDF5 (better use HDF5_FCFLAGS).])
   AC_ARG_VAR([HDF5_LDFLAGS], [Linker flags for HDF5.])
   AC_ARG_VAR([HDF5_LIBS], [Library flags for HDF5.])
 
@@ -125,7 +126,7 @@ AC_DEFUN([SD_HDF5_INIT], [
   if test "${sd_hdf5_enable}" != "no" -o "${sd_hdf5_init}" = "def"; then
     tmp_hdf5_vars="${HDF5_CPPFLAGS}${HDF5_CFLAGS}${HDF5_LDFLAGS}${HDF5_LIBS}"
     if test "${sd_hdf5_enable_fc}" = "yes"; then
-      tmp_hdf5_vars="${tmp_hdf5_vars}${HDF5_FCFLAGS}"
+      tmp_hdf5_vars="${tmp_hdf5_vars}${HDF5_FFLAGS}${HDF5_FCFLAGS}"
     fi
     if test ! -z "${tmp_hdf5_vars}"; then
       case "${sd_hdf5_init}" in
@@ -481,7 +482,7 @@ AC_DEFUN([_SD_HDF5_CHECK_CONFIG], [
   fi
 
   # Environment variables conflict with --with-* options
-  tmp_hdf5_vars="${HDF5_CPPFLAGS}${HDF5_CFLAGS}${HDF5_FCFLAGS}${HDF5_LDFLAGS}${HDF5_LIBS}"
+  tmp_hdf5_vars="${HDF5_CPPFLAGS}${HDF5_CFLAGS}${HDF5_FFLAGS}${HDF5_FCFLAGS}${HDF5_LDFLAGS}${HDF5_LIBS}"
   tmp_hdf5_invalid="no"
   if test ! -z "${tmp_hdf5_vars}" -a ! -z "${sd_hdf5_prefix}"; then
     case "${sd_hdf5_policy}" in
@@ -495,14 +496,18 @@ AC_DEFUN([_SD_HDF5_CHECK_CONFIG], [
         tmp_hdf5_invalid="yes"
         ;;
       warn)
-        AC_MSG_WARN([conflicting option settings for HDF5])
-        tmp_hdf5_invalid="yes"
+        if test "${sd_hdf5_init}" = "dir" ; then
+          AC_MSG_WARN([conflicting option settings for HDF5 : when giving a path, environment variables are ignored. Set with_hdf5="yes" to use environment variables])
+        else
+          AC_MSG_WARN([conflicting option settings for HDF5])
+          tmp_hdf5_invalid="yes"
+        fi
         ;;
     esac
   fi
 
   # When using environment variables, triggers must be set to yes
-  if test -n "${tmp_hdf5_vars}"; then
+  if test -n "${tmp_hdf5_vars}" -a ! "${sd_hdf5_init}" = "dir" ; then
     sd_hdf5_enable="yes"
     sd_hdf5_init="env"
     if test "${tmp_hdf5_invalid}" = "yes"; then
@@ -620,7 +625,8 @@ AC_DEFUN([_SD_HDF5_CHECK_COMPILERS], [
     unset tmp_hdf5_hl
 
     AC_MSG_CHECKING([for HDF5 extra dependencies])
-    sd_hdf5_libs_extra=`${sd_hdf5_h5cc} -showconfig | grep 'Extra libraries: ' | sed -e 's/.*Extra libraries: //'`
+    sd_hdf5_libs_extra=`${sd_hdf5_h5cc} -showconfig | grep 'Extra libraries: ' | sed -e 's/.*Extra libraries: //' -e 's/m\;dl\;//' -e 's/m\;dl//'`
+    # Proposed change to be more general : sd_hdf5_libs_extra=`${sd_hdf5_h5cc} -showconfig | egrep 'LDFLAGS: |Extra libraries: ' | sed -e 's/.*Extra libraries: //;s/.*LDFLAGS: //:'`
     if test "${sd_hdf5_libs_extra}" = ""; then
       AC_MSG_RESULT([none])
     else
@@ -629,7 +635,7 @@ AC_DEFUN([_SD_HDF5_CHECK_COMPILERS], [
 
     if test "${sd_mpi_ok}" = "yes"; then
       AC_MSG_CHECKING([whether HDF5 supports MPI])
-      sd_hdf5_has_mpi=`${sd_hdf5_h5cc} -showconfig | grep 'Parallel HDF5:' | awk '{print [$]NF}'`
+      sd_hdf5_has_mpi=`${sd_hdf5_h5cc} -showconfig | grep 'Parallel HDF5:' | awk '{print [$]NF}' | sed 's/ON/yes/'`
       test "${sd_hdf5_has_mpi}" = "" && sd_hdf5_has_mpi="no"
       AC_MSG_RESULT([${sd_hdf5_has_mpi}])
     else
@@ -719,6 +725,7 @@ AC_DEFUN([_SD_HDF5_SET_ENV], [
   test ! -z "${HDF5_CFLAGS}" && sd_hdf5_cflags="${HDF5_CFLAGS}"
   test ! -z "${HDF5_CXXFLAGS}" && sd_hdf5_cxxflags="${HDF5_CXXFLAGS}"
   if test "${sd_hdf5_enable_fc}" = "yes"; then
+    test ! -z "${HDF5_FFLAGS}" && sd_hdf5_fcflags="${HDF5_FFLAGS}"
     test ! -z "${HDF5_FCFLAGS}" && sd_hdf5_fcflags="${HDF5_FCFLAGS}"
   fi
   test ! -z "${HDF5_LDFLAGS}" && sd_hdf5_ldflags="${HDF5_LDFLAGS}"

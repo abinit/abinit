@@ -5,7 +5,7 @@ need_cpp_vars = [
 "HAVE_WANNIER90",
 ]
 
-#: List of keywords that are automatically added to all the tests of this suite. 
+#: List of keywords that are automatically added to all the tests of this suite.
 keywords = [
 ]
 

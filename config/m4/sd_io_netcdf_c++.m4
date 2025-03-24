@@ -1,4 +1,4 @@
-## Copyright (C) 2020 Yann Pouillon
+## Copyright (C) 2020-2024 Yann Pouillon
 
 #
 # NetCDF I/O library - C++ interface
@@ -85,12 +85,13 @@ AC_DEFUN([SD_NETCDF_CXX_INIT], [
   AC_ARG_VAR([NETCDF_CXX_CFLAGS], [C flags for NetCDF C++ interface.])
   AC_ARG_VAR([NETCDF_CXX_CXXFLAGS], [C++ flags for NetCDF C++ interface.])
   AC_ARG_VAR([NETCDF_CXX_FCFLAGS], [Fortran flags for NetCDF C++ interface.])
+  AC_ARG_VAR([NETCDF_CXX_FFLAGS], [Fortran flags for NetCDF C++ interface (better use NETCDF_CXX_FCFLAGS).])
   AC_ARG_VAR([NETCDF_CXX_LDFLAGS], [Linker flags for NetCDF C++ interface.])
   AC_ARG_VAR([NETCDF_CXX_LIBS], [Library flags for NetCDF C++ interface.])
 
   # Detect use of environment variables
   if test "${sd_netcdf_cxx_enable}" = "yes" -o "${sd_netcdf_cxx_enable}" = "auto"; then
-    tmp_netcdf_cxx_vars="${NETCDF_CXX_CPPFLAGS}${NETCDF_CXX_CFLAGS}${NETCDF_CXX_CXXFLAGS}${NETCDF_CXX_FCFLAGS}${NETCDF_CXX_LDFLAGS}${NETCDF_CXX_LIBS}"
+    tmp_netcdf_cxx_vars="${NETCDF_CXX_CPPFLAGS}${NETCDF_CXX_CFLAGS}${NETCDF_CXX_CXXFLAGS}${NETCDF_CXX_FFLAGS}${NETCDF_CXX_FCFLAGS}${NETCDF_CXX_LDFLAGS}${NETCDF_CXX_LIBS}"
     if test "${sd_netcdf_cxx_init}" = "def" -a \
             ! -z "${tmp_netcdf_cxx_vars}"; then
       sd_netcdf_cxx_enable="yes"
@@ -137,6 +138,7 @@ AC_DEFUN([SD_NETCDF_CXX_INIT], [
         test ! -z "${NETCDF_CXX_CPPFLAGS}" && sd_netcdf_cxx_cppflags="${NETCDF_CXX_CPPFLAGS}"
         test ! -z "${NETCDF_CXX_CFLAGS}" && sd_netcdf_cxx_cflags="${NETCDF_CXX_CFLAGS}"
         test ! -z "${NETCDF_CXX_CXXFLAGS}" && sd_netcdf_cxx_cxxflags="${NETCDF_CXX_CXXFLAGS}"
+        test ! -z "${NETCDF_CXX_FFLAGS}" && sd_netcdf_cxx_fcflags="${NETCDF_CXX_FFLAGS}"
         test ! -z "${NETCDF_CXX_FCFLAGS}" && sd_netcdf_cxx_fcflags="${NETCDF_CXX_FCFLAGS}"
         test ! -z "${NETCDF_CXX_LDFLAGS}" && sd_netcdf_cxx_ldflags="${NETCDF_CXX_LDFLAGS}"
         test ! -z "${NETCDF_CXX_LIBS}" && sd_netcdf_cxx_libs="${NETCDF_CXX_LIBS}"
@@ -380,7 +382,7 @@ AC_DEFUN([_SD_NETCDF_CXX_CHECK_CONFIG], [
   fi
 
   # Environment variables conflict with --with-* options
-  tmp_netcdf_cxx_vars="${NETCDF_CXX_CPPFLAGS}${NETCDF_CXX_CFLAGS}${NETCDF_CXX_FCFLAGS}${NETCDF_CXX_LDFLAGS}${NETCDF_CXX_LIBS}"
+  tmp_netcdf_cxx_vars="${NETCDF_CXX_CPPFLAGS}${NETCDF_CXX_CFLAGS}${NETCDF_CXX_FFLAGS}${NETCDF_CXX_FCFLAGS}${NETCDF_CXX_LDFLAGS}${NETCDF_CXX_LIBS}"
   tmp_netcdf_cxx_invalid="no"
   if test ! -z "${tmp_netcdf_cxx_vars}" -a ! -z "${sd_netcdf_cxx_prefix}"; then
     case "${sd_netcdf_cxx_policy}" in

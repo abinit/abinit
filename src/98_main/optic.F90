@@ -7,7 +7,7 @@
 !! the linear and non-linear optical responses in the RPA.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2022 ABINIT group (SSharma,MVer,VRecoules,YG,NAP)
+!! Copyright (C) 2002-2025 ABINIT group (SSharma,MVer,VRecoules,YG,NAP)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -45,7 +45,6 @@ program optic
  use m_xmpi
  use m_xomp
  use m_abicore
- use m_build_info
  use m_optic_tools
  use m_wfk
  use m_nctk
@@ -54,22 +53,18 @@ program optic
  use m_eprenorms
  use m_crystal
  use m_argparse
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
 
- use defs_datatypes,   only : ebands_t
+ use m_build_info,     only : abinit_version
  use m_specialmsg,     only : specialmsg_getcount, herald
  use m_time ,          only : asctime, timein
- use m_symtk,          only : mati3inv, matr3inv
+ use m_matrix,         only : mati3inv, matr3inv
  use m_geometry,       only : metric
  use m_io_tools,       only : flush_unit, open_file, file_exists, get_unit
  use m_numeric_tools,  only : c2r
  use m_fstrings,       only : int2char4, itoa, sjoin, strcat, endswith, basename
 
  implicit none
-
-!Arguments -----------------------------------
 
 !Local variables-------------------------------
  integer,parameter :: formeig0 = 0, formeig1 = 1, master = 0
@@ -81,19 +76,15 @@ program optic
  integer :: nks_per_proc,work_size,lin1,lin2,nlin1,nlin2,nlin3
  integer :: linel1,linel2,linel3,nonlin1,nonlin2,nonlin3
  integer :: iomode0,comm,nproc,my_rank, optic_ncid
-#ifdef HAVE_NETCDF
  integer :: ncid, varid, ncerr
-#endif
  integer :: num_lin_comp=1,num_nonlin_comp=0,num_linel_comp=0,num_nonlin2_comp=0
  integer :: autoparal=0,max_ncpus=0
  integer :: nonlin_comp(27) = 0, linel_comp(27) = 0, nonlin2_comp(27) = 0
  integer :: lin_comp(9) = [11, 22 ,33, 12, 13, 21, 23, 31, 32]
  integer :: prtlincompmatrixelements=0, nband_sum = -1
- real(dp) :: domega, eff
- real(dp) :: broadening,maxomega,scissor,tolerance
+ real(dp) :: domega, eff, broadening,maxomega,scissor,tolerance
  real(dp) :: tcpu,tcpui,twall,twalli
- logical :: do_antiresonant, do_temperature
- logical :: do_ep_renorm
+ logical :: do_antiresonant, do_temperature, do_ep_renorm
  logical,parameter :: remove_inv = .False.
  type(hdr_type) :: hdr
  type(ebands_t) :: ks_ebands, eph_ebands
@@ -111,8 +102,7 @@ program optic
  real(dp), ABI_CONTIGUOUS pointer :: outeig(:)
  complex(dpc),allocatable :: pmat(:,:,:,:,:)
  logical :: use_ncevk(0:3)
- character(len=fnlen) :: filnam,wfkfile,ddkfile_1,ddkfile_2,ddkfile_3,filnam_out, epfile,fname
- character(len=fnlen) :: infiles(0:3)
+ character(len=fnlen) :: filnam,wfkfile,ddkfile_1,ddkfile_2,ddkfile_3,filnam_out, epfile,fname, infiles(0:3)
  character(len=256) :: prefix,tmp_radix
  character(len=10) :: s1,s2,s3,stemp
  character(len=24) :: codename, start_datetime
@@ -128,7 +118,6 @@ program optic
  namelist /COMPUTATIONS/ num_lin_comp, lin_comp, num_nonlin_comp, nonlin_comp, &
           num_linel_comp, linel_comp, num_nonlin2_comp, nonlin2_comp
  namelist /TEMPERATURE/ epfile
-
 ! *********************************************************************************
 
  ! Change communicator for I/O (mandatory!)
@@ -235,7 +224,7 @@ program optic
    if (iomode0 == IO_MODE_MPI) iomode0 = IO_MODE_FORTRAN
    call wfk_open_read(wfk0,wfkfile,formeig0,iomode0,get_unit(),xmpi_comm_self)
    ! Get header from the gs file
-   call hdr_copy(wfk0%hdr, hdr)
+   call wfk0%hdr%copy(hdr)
 
    ! Identify the type of RF Wavefunction files
    use_ncevk = .False.
@@ -252,19 +241,13 @@ program optic
 
      if (.not. use_ncevk(ii)) then
        call wfk_open_read(wfks(ii), infiles(ii), formeig1, iomode_ddk(ii), get_unit(), xmpi_comm_self)
-       call hdr_copy(wfks(ii)%hdr, hdr_ddk(ii))
+       call wfks(ii)%hdr%copy(hdr_ddk(ii))
      else
 
-#ifdef HAVE_NETCDF
        NCF_CHECK(nctk_open_read(ncid, infiles(ii), xmpi_comm_self))
-       call hdr_ncread(hdr_ddk(ii), ncid, fform)
+       call hdr_ddk(ii)%ncread( ncid, fform)
        ABI_CHECK(fform /= 0, sjoin("Error while reading:", infiles(ii)))
-
        NCF_CHECK(nf90_close(ncid))
-#else
-       ABI_ERROR("Netcdf not available!")
-#endif
-
      end if
    end do
 
@@ -391,7 +374,7 @@ program optic
  end if
 
  ! Initializes crystal object
- call crystal_init(hdr%amu, cryst, 0, hdr%natom, hdr%npsp, hdr%ntypat, &
+ call cryst%init(hdr%amu, 0, hdr%natom, hdr%npsp, hdr%ntypat, &
    hdr%nsym, hdr%rprimd, hdr%typat, hdr%xred, hdr%zionpsp, hdr%znuclpsp, 1, &
    (hdr%nspden==2 .and. hdr%nsppol==1),remove_inv, hdr%title,&
    hdr%symrel, hdr%tnons, hdr%symafm)
@@ -419,7 +402,6 @@ program optic
 
    do ii=1,3
      if (.not. use_ncevk(ii)) cycle
-#ifdef HAVE_NETCDF
      NCF_CHECK(nctk_open_read(ncid, infiles(ii), xmpi_comm_self))
      varid = nctk_idname(ncid, "h1_matrix_elements")
      outeig => eigen11
@@ -427,9 +409,6 @@ program optic
      if (ii == 3) outeig => eigen13
      NCF_CHECK(nf90_get_var(ncid, varid, outeig, count=[2, mband, mband, nkpt, nsppol]))
      NCF_CHECK(nf90_close(ncid))
-#else
-     ABI_ERROR("Netcdf not available!")
-#endif
    end do
 
    bdtot0_index=0 ; bdtot_index=0
@@ -476,7 +455,7 @@ program optic
 
  ABI_MALLOC(doccde, (mband * nkpt * nsppol))
 
- call ebands_init(bantot, ks_ebands, hdr%nelect, hdr%ne_qFD, hdr%nh_qFD, hdr%ivalence,&
+ call ks_ebands%init(bantot, hdr%nelect, hdr%ne_qFD, hdr%nh_qFD, hdr%ivalence,&
      doccde, eigen0, hdr%istwfk, hdr%kptns, &
      hdr%nband, nkpt, hdr%npwarr, nsppol, hdr%nspinor, hdr%tphysel, broadening, hdr%occopt, hdr%occ, hdr%wtk, &
      hdr%cellcharge, hdr%kptopt, hdr%kptrlatt_orig, hdr%nshiftk_orig, hdr%shiftk_orig, &
@@ -487,7 +466,7 @@ program optic
  !ks_ebands = ebands_from_hdr(hdr, mband, ene3d, nelect) result(ebands)
 
  !YG : should we use broadening for ebands_init
- call ebands_update_occ(ks_ebands, -99.99d0)
+ call ks_ebands%update_occ(-99.99d0)
 
   !size of the frequency range
  nomega=int((maxomega+domega*0.001_dp)/domega)
@@ -514,7 +493,6 @@ program optic
    write(std_out,'(27i4)') nonlin2_comp(1:num_nonlin2_comp)
    write(std_out,'(a,i1)') ' linear optic matrix elements will be printed :',prtlincompmatrixelements
 
-#ifdef HAVE_NETCDF
    ! Open netcdf file that will contain output results (only master is supposed to write)
    NCF_CHECK_MSG(nctk_open_create(optic_ncid, strcat(prefix, "_OPTIC.nc"), xmpi_comm_self), "Creating _OPTIC.nc")
 
@@ -522,7 +500,7 @@ program optic
    ! Note that we write the KS bands without EPH interaction (if any).
    NCF_CHECK(hdr%ncwrite(optic_ncid, 666, nc_define=.True.))
    NCF_CHECK(cryst%ncwrite(optic_ncid))
-   NCF_CHECK(ebands_ncwrite(ks_ebands, optic_ncid))
+   NCF_CHECK(ks_ebands%ncwrite(optic_ncid))
 
    ! Add optic input variables.
    NCF_CHECK(nctk_def_dims(optic_ncid, [nctkdim_t("ntemp", ep_ntemp), nctkdim_t("nomega", nomega)], defmode=.True.))
@@ -646,7 +624,6 @@ program optic
      "broadening", "domega", "maxomega", "scissor", "tolerance"], &
      [broadening, domega, maxomega, scissor, tolerance])
    NCF_CHECK(ncerr)
-#endif
  end if
 
  ! Get velocity matrix elements in cartesian coordinates from reduced coords.
@@ -677,7 +654,7 @@ program optic
  call wrtout(std_out," optic : Call linopt")
 
  do itemp=1,ep_ntemp
-   call ebands_copy(ks_ebands, eph_ebands)
+   call ks_ebands%copy(eph_ebands)
    if (do_ep_renorm) call renorm_bst(Epren, eph_ebands, cryst, itemp, do_lifetime=.True.,do_check=.True.)
    do ii=1,num_lin_comp
      lin1 = int(lin_comp(ii)/10.0_dp)
@@ -695,7 +672,7 @@ program optic
      call linopt(ii, itemp, nband_sum, cryst, ks_ebands, eph_ebands, pmat, &
        lin1, lin2, nomega, domega, scissor, broadening, tmp_radix, optic_ncid, prtlincompmatrixelements, comm)
    end do
-   call ebands_free(eph_ebands)
+   call eph_ebands%free()
  end do
 
  if (do_ep_renorm) call eprenorms_free(Epren)
@@ -777,7 +754,7 @@ program optic
  do ii=1,3
    call hdr_ddk(ii)%free()
  end do
- call ebands_free(ks_ebands)
+ call ks_ebands%free()
  call cryst%free()
 
  call timein(tcpu, twall)
@@ -811,11 +788,9 @@ program optic
    call flush_unit(std_out)
  end if
 
-#ifdef HAVE_NETCDF
  if (my_rank == master) then
    NCF_CHECK(nf90_close(optic_ncid))
  end if
-#endif
 
  ! Write information on file about the memory before ending mpi module, if memory profiling is enabled
  call abinit_doctor(filnam)

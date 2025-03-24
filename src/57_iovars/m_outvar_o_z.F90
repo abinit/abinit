@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, MM)
+!!  Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, MM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -152,7 +152,8 @@ contains
    nimagem(idtset)=dtsets(idtset)%nimage
  end do
 
- firstchar_gpu=' ';if (maxval(dtsets(1:ndtset_alloc)%use_gpu_cuda)>0) firstchar_gpu='-'
+ firstchar_gpu=' '
+ if (maxval(dtsets(1:ndtset_alloc)%gpu_option)/=ABI_GPU_DISABLED) firstchar_gpu='-'
 
  natom=dtsets(1)%natom
  nimage=dtsets(1)%nimage
@@ -232,6 +233,12 @@ contains
 
  intarr(1,:)=dtsets(:)%optstress
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'optstress','INT',0)
+
+ dprarr(1,:)=dtsets(:)%oracle_factor
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'oracle_factor','DPR',0)
+
+ dprarr(1,:)=dtsets(:)%oracle_min_occ
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'oracle_min_occ','DPR',0)
 
  intarr(1,:)=dtsets(:)%orbmag
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'orbmag','INT',0)
@@ -1122,6 +1129,11 @@ contains
  dprarr(1,:)=dtsets(:)%tolwfr
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'tolwfr','DPR',0)
 
+ if ( any( abs(dtsets(:)%tolwfr-dtsets(:)%tolwfr_diago)>tiny(zero) ) ) then ! output tolwfr_diago only if different than tolwfr
+   dprarr(1,:)=dtsets(:)%tolwfr_diago
+   call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'tolwfr_diago','DPR',0)
+ end if
+
  dprarr(1,:)=dtsets(:)%tphysel
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'tphysel','ENE',0)
 
@@ -1245,9 +1257,6 @@ contains
  intarr(1,0:ndtset_alloc)=dtsets(0:ndtset_alloc)%useylm
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'useylm','INT',0,firstchar=firstchar_gpu)
 
- intarr(1,:)=dtsets(:)%use_gpu_cuda
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'use_gpu_cuda','INT',0,firstchar=firstchar_gpu)
-
  intarr(1,:)=dtsets(:)%use_slk
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'use_slk','INT',0, firstchar="-")
 
@@ -1259,20 +1268,15 @@ contains
 !### 03. Print all the input variables (V)
 !##
 
- dprarr(1,:)=dtsets(:)%vcutgeo(1)
- dprarr(2,:)=dtsets(:)%vcutgeo(2)
- dprarr(3,:)=dtsets(:)%vcutgeo(3)
- call prttagm(dprarr,intarr,iout,jdtset_,3,marr,3,narrm,ncid,ndtset_alloc,'vcutgeo','DPR',0)
-
  if(sum(dtsets(1:ndtset_alloc)%prtwant) >1)then
 !  van der Waals correction with MLWFs related variables
    if(any(dtsets(1:ndtset_alloc)%vdw_xc==10).or.any(dtsets(1:ndtset_alloc)%vdw_xc==11).or.&
-&   any(dtsets(1:ndtset_alloc)%vdw_xc==14))then
+      any(dtsets(1:ndtset_alloc)%vdw_xc==14))then
      intarr(1,:)=dtsets(:)%vdw_nfrag
      call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'vdw_nfrag','INT',0)
    end if !vdw_xc==10,11,14
    if(any(dtsets(1:ndtset_alloc)%vdw_xc==10).or.any(dtsets(1:ndtset_alloc)%vdw_xc==11).or.&
-&   any(dtsets(1:ndtset_alloc)%vdw_xc==14))then
+      any(dtsets(1:ndtset_alloc)%vdw_xc==14))then
      intarr(1,:)=dtsets(:)%vdw_supercell(1)
      intarr(2,:)=dtsets(:)%vdw_supercell(2)
      intarr(3,:)=dtsets(:)%vdw_supercell(3)
@@ -1353,10 +1357,61 @@ contains
  dprarr(1,:)=dtsets(:)%vis
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'vis','DPR',0)
 
+ dprarr(1,:)=dtsets(:)%vloc_rcut
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'vloc_rcut','LEN',0)
+
  dprarr(1,:)=dtsets(:)%vprtrb(1)
  dprarr(2,:)=dtsets(:)%vprtrb(2)
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,2,narrm,ncid,ndtset_alloc,'vprtrb','ENE',0)
 
+ intarr(1,:)=dtsets(:)%vpq_avg_g
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'vpq_avg_g','INT',0)
+
+ intarr(1,:)=dtsets(:)%vpq_translate
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'vpq_translate','INT',0)
+
+ intarr(1,:)=dtsets(:)%vpq_interp
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'vpq_interp','INT',0)
+
+ intarr(1,:)=dtsets(:)%vpq_nstates
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'vpq_nstates','INT',0)
+
+ intarr(1,:)=dtsets(:)%vpq_nstep
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'vpq_nstep','INT',0)
+
+ intarr(1,:)=dtsets(:)%vpq_nstep_ort
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'vpq_nstep_ort','INT',0)
+
+ intarr(1,:)=dtsets(:)%vpq_select
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'vpq_select','INT',0)
+
+ intarr(1,:)=dtsets(:)%vpq_mesh_fact
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'vpq_mesh_fact','INT',0)
+
+ dprarr(1,:)=dtsets(:)%vpq_mix_fact
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'vpq_mix_fact','DPR',0)
+
+ dprarr(1,:)=dtsets(:)%vpq_tolgrs
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'vpq_tolgrs','DPR',0)
+
+ intarr(1,:)=dtsets(:)%vpq_trvec(1)
+ intarr(2,:)=dtsets(:)%vpq_trvec(2)
+ intarr(3,:)=dtsets(:)%vpq_trvec(3)
+ call prttagm(dprarr,intarr,iout,jdtset_,3,marr,3,narrm,ncid,ndtset_alloc,'vpq_trvec','INT',0)
+
+ dprarr(1,:)=dtsets(:)%vpq_gpr_energy(1)
+ dprarr(2,:)=dtsets(:)%vpq_gpr_energy(2)
+ call prttagm(dprarr,intarr,iout,jdtset_,3,marr,2,narrm,ncid,ndtset_alloc,'vpq_gpr_energy','DPR',0)
+
+ dprarr(1,:)=dtsets(:)%vpq_gpr_length(1)
+ dprarr(2,:)=dtsets(:)%vpq_gpr_length(2)
+ dprarr(3,:)=dtsets(:)%vpq_gpr_length(3)
+ call prttagm(dprarr,intarr,iout,jdtset_,3,marr,3,narrm,ncid,ndtset_alloc,'vpq_gpr_length','DPR',0)
+
+ dprarr(1,:)=dtsets(:)%vcutgeo(1)
+ dprarr(2,:)=dtsets(:)%vcutgeo(2)
+ dprarr(3,:)=dtsets(:)%vcutgeo(3)
+ call prttagm(dprarr,intarr,iout,jdtset_,3,marr,3,narrm,ncid,ndtset_alloc,'vcutgeo','DPR',0)
 
 !###########################################################
 !### 03. Print all the input variables (W)
@@ -1491,6 +1546,9 @@ contains
 
  intarr(1,:)=dtsets(:)%x1rdm
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'x1rdm','INT',0)
+
+ intarr(1,:)=dtsets(:)%xg_nonlop_option
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'xg_nonlop_option','INT',0)
 
 !xred
  prtimg(:,:)=1

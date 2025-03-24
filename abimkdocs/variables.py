@@ -156,16 +156,23 @@ ABI_CHARACTERISTICS = [
 # but are used in the documentation of other variables.
 ABI_EXTERNAL_PARAMS = OrderedDict([
     ("AUTO_FROM_PSP", "Means that the value is read from the PSP file"),
-    ("CUDA", "True if CUDA is enabled (compilation)"),
+    ("CUDA", "True if ABINIT has been compiled using Nvidia CUDA (compilation for Nvidia GPU)"),
     ("ETSF_IO", "True if NetCDF is enabled (compilation)"),
     ("FFTW3", "True if FFTW3 is enabled (compilation)"),
+    ("GPU", "True if ABINIT has been compiled using one of the GPU implementations (CUDA, OPENMP_OFFLOAD, KOKKOS)"),
+    ("KOKKOS", "True if ABINIT has been compiled using KOKKOS performance library (compilation for GPU accelerators)"),
     ("MPI_IO", "True if MPI_IO is enabled (compilation)"),
     ("NPROC", "Number of processors used for Abinit"),
+    ("NVTX", "True if ABINIT has been linked to the NVIDIA® Tools Extension SDK (NVTX)"),
+    ("OPENMP", "True if ABINIT has been compiled using OPENMP multithreading (compilation for multicore processors)"),
+    ("OPENMP_OFFLOAD", "True if ABINIT has been compiled using OPENMP_OFFLOAD (openMP v5+) (compilation for GPU accelerators)"),
     ("PARALLEL", "True if the code is compiled with MPI"),
+    ("ROCTX", "True if ABINIT has been linked to the AMD ROCm Tools Extension SDK (ROCTX)"),
     ("SEQUENTIAL", "True if the code is compiled without MPI"),
 ])
 
 # List of topics
+# The topics should be declared both in this file and in mkdocs.yml.in
 ABI_TOPICS = [
     "Abipy",
     "APPA",
@@ -214,6 +221,7 @@ ABI_TOPICS = [
     "GWR",
     "GWls",
     "Hybrids",
+    "Install",
     "k-points",
     "LatticeModel",
     "LatticeWannier",
@@ -226,6 +234,7 @@ ABI_TOPICS = [
     "MolecularDynamics",
     "Macroave",
     "multidtset",
+    "NMR",
     "nonlinear",
     "Optic",
     "Output",
@@ -236,6 +245,7 @@ ABI_TOPICS = [
     "Phonons",
     "PhononBands",
     "PhononWidth",
+    "Polaron",
     "PortabilityNonRegression",
     "positron",
     "printing",
@@ -1013,10 +1023,12 @@ class InputVariables(OrderedDict):
     @classmethod
     def from_pyfile(cls, filepath):
         """Initialize the object from python file."""
-        import imp
-        module = imp.load_source(filepath, filepath)
-        #from importlib.machinery import SourceFileLoader
-        #module = SourceFileLoader(filepath, filepath).load_module()
+        try:
+            import imp
+            module = imp.load_source(filepath, filepath)
+        except ModuleNotFoundError:
+            from importlib.machinery import SourceFileLoader
+            module = SourceFileLoader(filepath, filepath).load_module()
         vlist = [Variable(**d) for d in module.variables]
         new = cls()
         new.executable = module.executable

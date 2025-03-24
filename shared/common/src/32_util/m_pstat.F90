@@ -6,7 +6,7 @@
 !! Interface to the /proc/{pid}/status file available on Linux.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2017-2022 ABINIT group (MG)
+!!  Copyright (C) 2017-2025 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -21,10 +21,10 @@
 
 module m_pstat
 
+ use, intrinsic :: iso_c_binding
  use defs_basis
  use m_abicore
  use m_errors
- use, intrinsic :: iso_c_binding
  use m_yaml
 
  use m_fstrings, only : find_and_select
@@ -49,12 +49,6 @@ module m_pstat
 !! before using quantities such as vmrss_mb.
 !!
 !! Usage:
-!!
-!!   call pstat%from_pid()
-!!   call pstat%print([std_out])
-!!   ! reload data and print it
-!!   call pstat%update()
-!!   call pstat%print([std_out])
 !!
 !! SOURCE
 
@@ -95,6 +89,8 @@ module m_pstat
  end type pstat_t
 !!***
 
+ !type(pstat_t),save,public :: pstat
+
 !----------------------------------------------------------------------
 
 contains
@@ -122,7 +118,7 @@ subroutine pstat_from_pid(pstat)
  pid = clib_getpid()
  write(spid, "(i0)") pid
  spid = adjustl(spid)
- call pstat%from_file('/proc/'//trim(spid)//'/status')
+ call pstat%from_file("/proc/"//trim(spid)//"/status")
 
 end subroutine pstat_from_pid
 !!***
@@ -180,6 +176,7 @@ subroutine pstat_from_file(pstat, filepath)
 contains
 
 subroutine get_mem_mb(str, mem_mb)
+
  character(len=*),intent(in) :: str
  real(dp),intent(out) :: mem_mb
 
@@ -194,14 +191,17 @@ subroutine get_mem_mb(str, mem_mb)
  read(str(istart+1:istop-1), fmt=*, iostat=iostat, iomsg=pstat%iomsg) mem_mb
  ABI_CHECK(iostat == 0, pstat%iomsg)
  mem_mb = mem_mb * mem_fact
+
 end subroutine get_mem_mb
 
 subroutine get_int(str, out_ival)
+
  character(len=*),intent(in) :: str
  integer,intent(out) :: out_ival
  istart = index(str, ":") + 1
  read(str(istart+1:), fmt=*, iostat=iostat, iomsg=pstat%iomsg) out_ival
  ABI_CHECK(iostat == 0, pstat%iomsg)
+
 end subroutine get_int
 
 end subroutine pstat_from_file
@@ -216,21 +216,19 @@ end subroutine pstat_from_file
 !!
 !! SOURCE
 
-subroutine pstat_print(pstat, units, header, reload)
+subroutine pstat_print(pstat, units, header)
 
  class(pstat_t),intent(inout) :: pstat
  integer,intent(in) :: units(:)
  character(len=*),optional,intent(in) :: header
- logical,optional,intent(in) :: reload
 
 !Local variables-------------------------------
  character(len=500) :: header__
  type(yamldoc_t) :: ydoc
 ! *************************************************************************
 
- if (present(reload)) then
-   if (reload) call pstat%from_file(pstat%filepath)
- end if
+ if (pstat%pid == -1) return
+ call pstat%from_file(pstat%filepath)
 
  header__ = "unknown"; if (present(header)) header__ = header
  ydoc = yamldoc_open(header__) !, width=11, real_fmt='(3f8.3)')
@@ -267,7 +265,6 @@ subroutine pstat_mpi_max(pstat, vmrss_mb, comm)
  class(pstat_t),intent(inout) :: pstat
  real(dp),intent(out) :: vmrss_mb
  integer,intent(in) :: comm
- !logical,optional,intent(in) :: reload
 
  !integer :: ierr, int_list(5)
  real(dp) :: real_list(3)

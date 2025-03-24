@@ -50,6 +50,7 @@
 
 #Parallelization variables
  wfoptalg 4
+ bandpp 1 # old default value
  fftalg 401
  densfor_pred 0
  intxc 0
@@ -64,9 +65,9 @@
  nband  20
 
 
-# use_gpu_cuda keyword has to be put to zero when using recursion
+# gpu_option keyword has to be put to zero when using recursion
 # (done by default) Use of GPU is done with another mechanism
- use_gpu_cuda 0
+ gpu_option 0
 
  pp_dirpath "$ABI_PSPDIR"
  pseudos "PseudosHGH_pwteter/2he.2.hgh"
@@ -75,14 +76,14 @@
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
-#%%   t75.abo, tolnlines = 0, tolabs = 1.010e-11, tolrel = 3.000e-05, fld_options = -easy
+#%% files_to_test =
+#%%   t75.abo, tolnlines = 0, tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options = -easy
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = M. Mancini
-#%% keywords = 
-#%% description = 
+#%% keywords =
+#%% description =
 #%%   Simple test for double grid (fine/coarse) system, the cutting
 #%%   radius and the initial fermi energy in recursion method
 #%%   Corresponding variables: recgratio, recrcut,recefermi respectively

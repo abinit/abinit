@@ -3,8 +3,12 @@ from __future__ import print_function, division, unicode_literals, absolute_impo
 
 executable = "multibinit"
 
-from abimkdocs.variables import ValueWithUnit, MultipleValue, Range
-#from abipy.abio.abivar_database.variables import ValueWithUnit, MultipleValue, Range, ValueWithConditions
+try:
+    from abimkdocs.variables import ValueWithUnit, MultipleValue, Range
+except ImportError:
+    # This is needed for importing this module within Abipy
+    from abipy.abio.abivar_database.variables import ValueWithUnit, MultipleValue, Range
+
 ValueWithConditions = dict
 Variable = dict
 
@@ -96,7 +100,7 @@ Kind of LWF dynamics to run. Currently there is only the option 3.
 
 * 0: Do not run LWF dynamics.
 
-* 3: Run NVT LWF dynamics with the Berendsen thermalstat. 
+* 3: Run NVT LWF dynamics with the Berendsen thermalstat.
 
 """,
 ),
@@ -135,7 +139,7 @@ Flag to initialize spin state.
 
 * 2 --> The LWF amplitudes are 0.
 
-* 4 --> Restart from an input spin hist file, as specified in [[multibinit:lwf_init_hist_fname]]. 
+* 4 --> Restart from an input spin hist file, as specified in [[multibinit:lwf_init_hist_fname]].
 """,
 ),
 
@@ -232,7 +236,7 @@ Variable(
     mnemonics="Lattice Wannier function dynamics relaxation time TAUT",
     added_in_version="9.8",
     text=r"""
-    Parameter used in Berendsen lattice dynamics [[multibinit:lwf_dynamics]] = 3, in which the temperature is relaxed exponentially to the target temperature, with the characteristic time of lwf_taut. 
+    Parameter used in Berendsen lattice dynamics [[multibinit:lwf_dynamics]] = 3, in which the temperature is relaxed exponentially to the target temperature, with the characteristic time of lwf_taut.
     The default unit is atomic unit. But it is possible to use the second as the unit by adding Second or S at the end of the line, for example:
 
     lwf_taut 1d-15 S
@@ -1269,7 +1273,7 @@ Variable(
     mnemonics="LATTice dynamics relaxation time TAUP",
     added_in_version="before_v9",
     text=r"""
-    Parameter used in Berendsen lattice dynamics [[multibinit:dynamics]] =103, in which the pressure is relaxed exponentially to the target temperature, with the characteristic time of latt_taup. 
+    Parameter used in Berendsen lattice dynamics [[multibinit:dynamics]] =103, in which the pressure is relaxed exponentially to the target temperature, with the characteristic time of latt_taup.
     The default unit is atomic unit. But it is possible to use the second as the unit by adding Second or S at the end of the line, for example:
 
     latt_taup 1d-15 S
@@ -1374,8 +1378,8 @@ Variable(
     mnemonics="Number of superCELL MATtrix",
     added_in_version="9.5.0",
     text=r"""
-Give the size of the supercell for the dynamics in the format of a matrix. 
-Currently allowed in spin dynamics and spin and LWF dynamics. 
+Give the size of the supercell for the dynamics in the format of a matrix.
+Currently allowed in spin dynamics and spin and LWF dynamics.
 It will override the [[multibinit:ncell]] if specified.
 """
 ),
@@ -1666,7 +1670,7 @@ Flag to initialize spin state.
 
 * 3 --> State with q-vector using [[multibinit:spin_init_qpoint]], [[multibinit:spin_init_rotate_axis]], and [[multibinit:spin_init_orientation]]. Please check default values for those variables.
 
-* 4 --> Restart from last step of input spin hist file, as specified in [[multibinit:spin_init_hist_fname]]. 
+* 4 --> Restart from last step of input spin hist file, as specified in [[multibinit:spin_init_hist_fname]].
 """,
 ),
 
@@ -2095,14 +2099,14 @@ Variable(
     mnemonics="RANDOM SEED",
     added_in_version="9.8",
     text=r"""
-Random seed to be used in Multibinit spin/LWF dynamics. 
+Random seed to be used in Multibinit spin/LWF dynamics.
 It should be 0, or a large positive integer.
 The default value 0 means it will use the current clock time.
 DO NOT set this number unless you want to repeat the previous result. If a series
 of dynamics is done with the same seed, the results could be wrong due to the
 artificial periodicity of the random number that is generated. Even [[randomseed@multibinit]] is set, it is not guranteed
-that the previous result can be recovered, as the generation of numbers is also affected by the number of 
-processors, type of type of CPU, compiler,  and version of MULTIBINIT. 
+that the previous result can be recovered, as the generation of numbers is also affected by the number of
+processors, type of type of CPU, compiler,  and version of MULTIBINIT.
 """,
 ),
 

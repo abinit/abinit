@@ -22,9 +22,9 @@ least a 200 CPU core parallel computer.
 [TUTORIAL_README]
 
 !!! tip
-    
+
     In this tutorial, most of the images and plots are easily obtained using the post-processing tool
-    [qAgate](https://github.com/piti-diablotin/qAgate) or [agate](https://github.com/piti-diablotin/agate), 
+    [qAgate](https://github.com/piti-diablotin/qAgate) or [agate](https://github.com/piti-diablotin/agate),
     its core engine.
     Any post-process tool will work though !!
 
@@ -64,15 +64,16 @@ cd $ABI_TESTS/tutoparal/Input/Work_paral_moldyn
 ## Performing molecular dynamics with ABINIT
 
 There are different algorithms to do molecular dynamics. See the input
-variable [[ionmov]], with values 1, 6, 7, 8, 9, 12, 13 and 14. [[dtion]]
+variable [[moldyn]], with values "nve_verlet", "nvt_isokin", "nvt_nose",
+"npt_martyna" and "nst_martyna". [[dtion]]
 controls the ion time step in atomic units of time (one atomic time unit is
 2.418884 x 10<sup>-17</sup> seconds, which is the value of Planck's constant in Ha.s).
 The default value is 100. You should try several values for [[dtion]] in order
 to establish the stable and efficient choice. For example this value should
 decrease at high pressure.
 
-Except for the isothermal/isenthalpic ([[ionmov]] 13) ensemble the input
-variable [[optcell]] must be 0 (default value).
+Except for the isothermal/isenthalpic ([[moldyn]] "nvt_nose" or "nvt_langevin")
+ensemble the input variable [[optcell]] must be 0 (default value).
 You have also to define the maximal number of timesteps of the molecular dynamics.
 
 Usually you can set the input variable [[ntime]] to a large value, 5000, since
@@ -80,13 +81,14 @@ there is no *end* to a molecular dynamics simulation. You can always stop or
 restart the calculation at your convenience by using the input variable [[restartxf]]=-1.
 
 The input file `tmoldyn_01.abi` is an example of a file that contains data for a
-molecular dynamics simulation using the isokinetic ensemble [[ionmov]]=12 for fcc aluminum.
+molecular dynamics simulation using the isokinetic ensemble [[moldyn]] "nvt_isokin"
+for fcc aluminum.
 
 {% dialog tests/tutoparal/Input/tmoldyn_01.abi %}
 
 Open the `tmoldyn_01.abi` file and look at it carefully. The unit cell is defined at
-the end. It is a 2x2x2 fcc supercell containing 32 atoms of Al. [[ionmov]] is
-set to 12 for the isokinetic ensemble, and since [[ntime]] is set to 50,
+the end. It is a 2x2x2 fcc supercell containing 32 atoms of Al. [[moldyn]] is
+set to "nvt_isokin" for the isokinetic ensemble, and since [[ntime]] is set to 50,
 ABINIT will carry on 50 time steps of molecular dynamics. The calculation will
 be performed for a temperature of 3000 K, see the key variable [[mdtemp]]. It
 gives the initial and final temperatures of the simulation (in Kelvin). The
@@ -108,7 +110,7 @@ timesteps. Here the temperature will stay constant during the whole simulation.
 Molecular dynamics simulations are always large calculations, dealing with
 supercells of hundreds to thousands of atoms. Therefore they are always
 performed in parallel. In `tmoldyn_01.in`, [[paral_kgb]] has been set to 1 to
-activate the parallelisation over **k**-points, G-vectors and bands. 
+activate the parallelisation over **k**-points, G-vectors and bands.
 The three following keywords give the number of processors for each level of
 parallelisation. Since we have only 1 **k**-point in the simulation ([[ngkpt]]
 has been set to 1 1 1) [[np_spkpt]] is set to 1,  [[npband]] to 2 with [[bandpp]]=40 (1 unique block),
@@ -116,9 +118,9 @@ and [[npfft]] is kept to 1.
 
 Then run the calculation in parallel over 2 CPU cores. You can change the
 distribution of processors over the level of parallelisation to try to find
-the most efficient one. 
+the most efficient one.
 Since molecular dynamics can last for weeks, it is crucial to find the appropriate
-distribution to reduce the computational time at the maximum. 
+distribution to reduce the computational time at the maximum.
 You can use [[timopt]] to get information on time repartition during the simulation.
 
 Now look at the output file. For each iteration you will see the coordinates, the forces, the
@@ -129,8 +131,8 @@ whole history of the molecular dynamics simulation: atomic positions,
 velocities, primitive translations, stress tensor, energies... at each time
 step. This file will be used to restart the calculation if you want to perform
 more time steps or to extract the necessary informations to make use of the
-molecular dynamics simulation. 
-In `tmoldyn_01.abi` add the keyword [[restartxf]] and set it to -1. 
+molecular dynamics simulation.
+In `tmoldyn_01.abi` add the keyword [[restartxf]] and set it to -1.
 Run the calculation again, in the same directory. Look at
 the new output file. The number of each time step are indicated over the total
 number of steps:
@@ -165,8 +167,8 @@ are more common numbers to reach this goal but it would exceed the time
 allocated for this tutorial.
 
 !!! tip
-    You can use `agate` or `qAgate` to open and visualize the `_HIST.nc` file. In the console, the averages 
-    and the standard deviations of several quantities like 
+    You can use `agate` or `qAgate` to open and visualize the `_HIST.nc` file. In the console, the averages
+    and the standard deviations of several quantities like
     temperature pressure stresses are automatically displayed.
 
     You can plot the evolution of pressure with respect to the time step by issuing `:plot P`.
@@ -189,11 +191,11 @@ Since the parallelisation is the most efficient over the **k**-point level
 you should always put [[nkpt]] to the largest possible value before increasing
 [[npfft]] and [[npband]]. We have followed this rule in the input files.
 
-If you used the `diag_moldyn.py` script, change the name of the previous file 
-PRESS to PRESS01 to save it. 
+If you used the `diag_moldyn.py` script, change the name of the previous file
+PRESS to PRESS01 to save it.
 Run now ABINIT in parallel over 8 CPU cores with `tmoldyn_02.abi` and over 28 CPU
-cores with `tmoldyn_03.abi`. 
-At the end of each calculation use the `diag_moldyn.py` script and save the results in PRESS02 and PRESS03. 
+cores with `tmoldyn_03.abi`.
+At the end of each calculation use the `diag_moldyn.py` script and save the results in PRESS02 and PRESS03.
 You can now plot the pressures in term of the **k**-points grids and compare the average values:
 
 !!! tip
@@ -202,7 +204,7 @@ You can now plot the pressures in term of the **k**-points grids and compare the
     :open tmoldyn_01o_HIST.nc
     :plot P hold=true
     :open tmoldyn_02o_HIST.nc
-    :plot P 
+    :plot P
     :open tmoldyn_03o_HIST.nc
     :plot P  output Kpoints
     ```
@@ -227,7 +229,7 @@ Save the pressure to PRESS04.
 `tmoldyn_05.abi` has the same cell but a 2x2x2 **k**-points grid (note that the
 output file is very big, and no reference has been provided for comparison).
 Run it over the adequate number of cores and save the pressure to PRESS05.
-Plot now PRESS04 and PRESS05 and compare the average values. 
+Plot now PRESS04 and PRESS05 and compare the average values.
 You will see that for this size of cell, one **k**-point is sufficient.
 
 !!! tip
@@ -256,7 +258,7 @@ PRESS04 and PRESS06, remove the first steps and compare the pressure average val
     :open tmoldyn_05o_HIST.nc
     :plot P
     :open tmoldyn_06o_HIST.nc
-    :plot P  
+    :plot P
     ```
 
 ![cells](paral_moldyn_assets/cell.png)
@@ -275,7 +277,7 @@ Also, to reduce the time necessary to do this tutorial we set the value of
 [[ecut]] to 3 Ha. This is too small, for Al, it should be closer to 8 Ha.
 
 Finally, here and for simplicity, we just changed the value of [[ngkpt]] to
-change the grid of **k**-points. By default, ABINIT uses a [[shiftk]] so the 
+change the grid of **k**-points. By default, ABINIT uses a [[shiftk]] so the
 one **k**-point generated with a 1x1x1 gid is *not* $\Gamma$!.
 To get the $\Gamma$ point only, and decrease the execution time by half, set
 [[shiftk]] to `0 0 0` and check the value [[kpt]] in the output file.
@@ -286,13 +288,13 @@ As an example of what can be done in molecular dynamics, we are going to
 calculate the melting temperature of aluminum using the so-called Heat Until
 it Melts (HUM) method. In this method the solid phase is heated gradually
 until melting occurs. Let's start with a temperature of 4500 K.
-To work fast, we use a 32 atoms supercell and 1 **k**-point 
+To work fast, we use a 32 atoms supercell and 1 **k**-point
 (note that the output file is very big,
 and no reference has been provided for comparison).
 
 Run ABINIT in parallel over 2 CPU cores and then `diag_moldyn.py`.
 Save the pressure to PRESS71. Plot the atomic positions, you see that at this
-temperature, the cell is solid. 
+temperature, the cell is solid.
 
 !!! tip
     Alternatively, use `agate` or `qagate` to directly produce the following pictures.
@@ -323,27 +325,27 @@ has melted and is now liquid. Plot the pressures for the three simulations:
 !!! tip
     To run the three temperatures in 1 run, use [[ndtset]] 3 and specify for each `dtset` the values for [[mdtemp]]
     and [[tsmear]].
-    An example of file is given with `tmoldyn_07.abi`. 
+    An example of file is given with `tmoldyn_07.abi`.
 
 {% dialog tests/tutoparal/Input/tmoldyn_07.abi %}
 
 !!! tip
-    
+
     To produce the following plot, use `agate` or `qagate` with the following commands
     ```
     :open tmoldyn_07o_DS1_HIST.nc
     :plot P hold=true
     :open tmoldyn_07o_DS2_HIST.nc
-    :plot P 
+    :plot P
     :open tmoldyn_07o_DS3_HIST.nc
-    :plot P 
+    :plot P
     ```
 
 ![melting](paral_moldyn_assets/melting.png)
 
 You can clearly observe a discontinuous change in pressure due to the volume
 difference between the solid and liquid phases. This give a melting
-temperature of 5250 K at 132 GPa. 
+temperature of 5250 K at 132 GPa.
 One has to be very careful. Indeed, in addition to
 the crude parameters we used ([[ecut]], [[natom]]...), the HUM method has some
 intrinsic drawbacks. In HUM the crystal is heated homogeneously, the melting

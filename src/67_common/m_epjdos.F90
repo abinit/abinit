@@ -1,4 +1,3 @@
-! CP modified
 !!****m* ABINIT/m_epjdos
 !! NAME
 !!  m_epjdos
@@ -7,7 +6,7 @@
 !!  Tools for the computiation of electronic PJDOSes
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2022 ABINIT group (MVer, XG, SM, MT, BAmadon, MG, MB)
+!!  Copyright (C) 2008-2025 ABINIT group (MVer, XG, SM, MT, BAmadon, MG, MB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -33,16 +32,14 @@ module m_epjdos
  use m_crystal
  use m_ebands
  use m_nctk
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
  use m_hdr
  use m_mpinfo
  use m_sort
  use m_dtset
 
- use defs_abitypes, only : MPI_type
- use defs_datatypes,   only : ebands_t, pseudopotential_type
+ use defs_abitypes,    only : MPI_type
+ use defs_datatypes,   only : pseudopotential_type
  use m_occ,            only : dos_hdr_write
  use m_time,           only : cwtime, timab
  use m_io_tools,       only : open_file
@@ -474,24 +471,14 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
 
  if (iam_master) then
    if (any(dtset%prtdos == [2, 5])) then
-     ! CP modified
-     !call dos_hdr_write(deltaene,ebands%eig,enemax,enemin,ebands%fermie,dtset%mband,&
-     !dtset%nband,nene,nkpt,nsppol,dtset%occopt,prtdos,&
-     !dtset%tphysel,dtset%tsmear,unitdos)
      call dos_hdr_write(deltaene,ebands%eig,enemax,enemin,ebands%fermie,ebands%fermih,&
      dtset%mband,dtset%nband,nene,nkpt,nsppol,dtset%occopt,prtdos,&
      dtset%tphysel,dtset%tsmear,unitdos)
-     ! End CP modified
    else if (dtset%prtdos == 3) then
      do iat=0,natsph+natsph_extra
-       ! CP modified
-       !call dos_hdr_write(deltaene,ebands%eig,enemax,enemin,ebands%fermie,dtset%mband,&
-       !dtset%nband,nene,nkpt,nsppol,dtset%occopt,prtdos,&
-       !dtset%tphysel,dtset%tsmear,unt_atsph(iat))
        call dos_hdr_write(deltaene,ebands%eig,enemax,enemin,ebands%fermie,ebands%fermih,&
        dtset%mband,dtset%nband,nene,nkpt,nsppol,dtset%occopt,prtdos,&
        dtset%tphysel,dtset%tsmear,unt_atsph(iat))
-       ! End CP modified
      end do
    end if
  end if
@@ -1737,7 +1724,6 @@ subroutine fatbands_ncwrite(dos, crystal, ebands, hdr, dtset, psps, pawtab, ncid
 !arrays
  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat*dtset%usepaw)
 
-#ifdef HAVE_NETCDF
 !Local variables-------------------------------
 !scalars
  integer :: itype,ncerr,fform
@@ -1745,7 +1731,6 @@ subroutine fatbands_ncwrite(dos, crystal, ebands, hdr, dtset, psps, pawtab, ncid
  character(len=500) :: msg
 !arrays
  integer :: lmax_type(crystal%ntypat)
-
 !*************************************************************************
 
  ABI_CHECK(dtset%natsph > 0, "natsph <=0")
@@ -1757,7 +1742,7 @@ subroutine fatbands_ncwrite(dos, crystal, ebands, hdr, dtset, psps, pawtab, ncid
  ! Write header, crystal structure and band energies.
  NCF_CHECK(hdr%ncwrite(ncid, fform, nc_define=.True.))
  NCF_CHECK(crystal%ncwrite(ncid))
- NCF_CHECK(ebands_ncwrite(ebands, ncid))
+ NCF_CHECK(ebands%ncwrite(ncid))
 
  ! Add fatband-specific quantities
  ncerr = nctk_def_dims(ncid, [ &
@@ -1849,7 +1834,6 @@ subroutine fatbands_ncwrite(dos, crystal, ebands, hdr, dtset, psps, pawtab, ncid
  call cwtime(cpu,wall,gflops,"stop")
  write(msg,'(2(a,f8.2),a)')" fatbands_ncwrite: cpu_time: ",cpu,"[s], walltime: ",wall," [s]"
  call wrtout(std_out,msg,"PERS")
-#endif
 
 contains
  integer function vid(vname)
@@ -2008,7 +1992,7 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
    if(mpi_enreg%me==0) then
      write (unit_procar,'(a)') 'PROCAR lm decomposed - need to merge files yourself in parallel case!!! Or use pyprocar package'
      if (dtset%prtprocar == 2) then
-       write (unit_procar,'(a)') ' Requested complex output of PROCAR file (prtprocar 2)' 
+       write (unit_procar,'(a)') ' Requested complex output of PROCAR file (prtprocar 2)'
      end if
      write (unit_procar,'(a,I10,a,I10,a,I10,a)') '# of k-points: ', dtset%nkpt, &
        ' # of bands:', dtset%mband, ' # of ions:', dtset%natom, ch10

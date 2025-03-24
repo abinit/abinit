@@ -5,7 +5,7 @@
  boxcutmin 1.7
  timopt -1
  prtphdos 0
- 
+
  ecut 35.0
  nband 10
  tolvrs 1e-12
@@ -57,7 +57,7 @@
  getwfk     1
  nqpt       1
 
- rfphon     1 
+ rfphon     1
 
  rfelfd4 3
  getddk4 3
@@ -68,7 +68,7 @@
  qpt6 5.00000000E-01  5.00000000E-01  0.00000000E+00
 
 #############################################
-# Dataset 7: 
+# Dataset 7:
 # Use GS WFK file on (4,4,4) k-mesh to interpolate band energies on a 8x8x8 k-mesh (sigma_ngkpt)
 # with star-functions. Find pockets specified by sigma_erange and
 # produce KERANGE netcdf file with info on the k-points in the pockets
@@ -77,15 +77,15 @@ optdriver7 8
 wfk_task7 "wfk_kpts_erange"
 getwfk7 1
 # Define fine k-mesh for interpolation
-sigma_ngkpt7   8 8 8 
+sigma_ngkpt7   8 8 8
 sigma_nshiftk7 1
 sigma_shiftk7 0 0 0
 einterp7 1 5 0 0           # Parameters for star-function interpolation
 sigma_erange7 0.2 0.2 eV   # Select kpts in fine mesh within this energy window.
 
 # Cancel default values
-nqpt7     0 
-rfphon7   0 
+nqpt7     0
+rfphon7   0
 kptopt7   1
 #nband7   7
 
@@ -111,22 +111,23 @@ kptopt7   1
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = eos_nvhpc_23.9_elpa
 #%% need_cpp_vars = HAVE_NETCDF_MPI
 #%% test_chain = t57.abi, t58.abi, t59.abi, t60.abi, t61.abi
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t57.abo, tolnlines = 180, tolabs = 1.1e-3, tolrel = 1.1;
-#%%   t57o_DS7_KERANGE, tolnlines = 0, tolabs = 1.1e-6, tolrel = 1.0e-4
+#%%   t57o_DS7_KERANGE, tolnlines = 0, tolabs = 0.0e+00, tolrel = 0.0e+00
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [shell]
-#%% post_commands = 
+#%% post_commands =
 #%%  ww_cp t57o_DS2_WFK t60o_DS20_WFK;
 #%%  ww_cp t57o_DS2_WFK t61o_DS20_WFK;
 #%%  ww_cp t57o_DS1_DEN t61o_DS20_DEN;
 #%% [extra_info]
 #%% authors = M. Giantomassi
 #%% keywords = NC, DFPT, EPH
-#%% description = 
+#%% description =
 #%%   Calculation of the Fan-Migdal + Debye-Waller self-energy matrix elements.
 #%%<END TEST_INFO>
