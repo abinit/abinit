@@ -951,7 +951,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    end if
 
    write (msg, "(a,i10,a,i10,a)") " dfpt_looppert : the # of k-points has been reduced from ", &
-&      nkpt, " to ", nkpt_rbz, " using the little group " 
+&      nkpt, " to ", nkpt_rbz, " using the little group "
    call wrtout(std_out, msg)
 
    ABI_MALLOC(doccde_rbz,(dtset%mband*nkpt_rbz*dtset%nsppol))
@@ -1846,7 +1846,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
          ! For ipert==natom+11, we want to read the 1st order density from a previous calculation
          call appdig(idir2+(dtset%natom+1)*3,dtfil%fildens1in,fiden1i)
        end if
-!       call appdig(pertcase,dtfil%fildens1in,fiden1i)
+       ! call appdig(pertcase,dtfil%fildens1in,fiden1i)
        call read_rhor(fiden1i, cplex, dtset%nspden, nfftf, ngfftf, rdwrpaw, mpi_enreg, rhor1, &
        hdr_den, pawrhoij1, spaceComm, check_hdr=hdr)
        etotal = hdr_den%etot; call hdr_den%free()
@@ -2104,20 +2104,13 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    end if
 
 
-     call outresid(dtset,kpt_rbz,dtset%mband, &
-&                nband_rbz,nkpt_rbz,&
-&                dtset%nsppol,resid)
+   call outresid(dtset,kpt_rbz,dtset%mband, nband_rbz,nkpt_rbz,dtset%nsppol,resid)
 
    if (write_1wfk) then
      ! Output 1st-order wavefunctions in file
      call wfk_write_my_kptbands(fiwf1o, distrb_flags, spacecomm, formeig, hdr, dtset%iomode, &
 &          dtset%mband, mband_mem_rbz, mk1mem_rbz, dtset%mpw, nkpt_rbz, dtset%nspinor, dtset%nsppol, &
 &          cg1, kg1, eigen1)
-
-!     call outwf(cg1,dtset,psps,eigen1,fiwf1o,hdr,kg1,kpt_rbz,&
-!&     dtset%mband,mcg1,mk1mem_rbz,mpi_enreg,mpw1,dtset%natom,nband_rbz,&
-!&     nkpt_rbz,npwar1,dtset%nsppol,&
-!&     occ_rbz,resid,response,dtfil%unwff2,wvl%wfs,wvl%descr)
    end if
 
    ! Output DDK file in netcdf format.
@@ -2307,8 +2300,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    call ebands_kq%free()
    if(.not.kramers_deg) call ebands_kmq%free()
 
-!  %%%% Parallelization over perturbations %%%%%
-!  *Redefine output/log files
+   ! %%%% Parallelization over perturbations %%%%%
+   ! *Redefine output/log files
    call localredirect(mpi_enreg%comm_cell,mpi_enreg%comm_world,npert_io,mpi_enreg%paral_pert,0)
 
    ABI_FREE(bz2ibz_smap)
