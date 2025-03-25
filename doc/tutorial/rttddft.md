@@ -4,7 +4,8 @@ authors: FBrieuc
 
 # Tutorial on real-time time-dependent DFT
 
-This tutorial aims at showing how to perform a Real-Time TDDFT (RT-TDDFT) calculation using Abinit.
+This tutorial aims at showing how to perform Real-Time TDDFT (RT-TDDFT) calculation using Abinit 
+to compute the dielectric function of Diamond here.
 
 !!! warning
 
@@ -13,9 +14,9 @@ This tutorial aims at showing how to perform a Real-Time TDDFT (RT-TDDFT) calcul
 If you have not yet done any of the basic tutorials it might be useful to do 
 at least the first three: [basic1](/tutorial/base1), [basic2](/tutorial/base2) and
 [basic3](/tutorial/base3).
-It could also be useful that you know about PAW calculations using Abinit. 
-If you are interested you can follow the first two tutorials on PAW: 
-[PAW1](/tutorial/paw1) and [PAW2](/tutorial/paw2).
+It could also be useful that you know a little bit about PAW calculations using Abinit. 
+If you are interested you can follow the first tutorial on PAW: 
+[PAW1](/tutorial/paw1).
 
 This tutorial should take about two hours to complete, depending on the amount of 
 computing power you have access to and how much of the convergence study you decide to do.
@@ -27,7 +28,7 @@ computing power you have access to and how much of the convergence study you dec
 Time-dependent DFT (TDDFT) has been developed in the 1980s as a generalization of 
 DFT to the time-dependent case and is based on similar theorems than the standard 
 Hohenberg and Kohn theorems. They were developed, in the general case, by 
-Runge and Gross in 1984 [[cite:Runge1984]] establishing a one-to-one correspondence
+Runge and Gross [[cite:Runge1984]] establishing a one-to-one correspondence
 between the time-dependent potential and the time-dependent density $n(\vec{r},t)$.
 In the spirit of Kohn and Sham, Runge and Gross introduced a non-interacting
 system evolving in an effective time-dependent potential such that its density 
@@ -121,7 +122,7 @@ You can have a look at the input file. It is similar to the input files from the
 
 {% dialog tests/tutorial/Input/trttddft_1.abi %} 
 
-The values of the plane wave cut-off energy [[ecut]], the double grid cut-off energy [[pawecutdg]] 
+The values of the plane wave cut-off energy [[ecut]], the double grid (PAW) cut-off energy [[pawecutdg]] 
 and the $k$-points grid defined by [[ngkpt]] are set to ensure a relatively good convergence of 
 the total energy and pressure. The cell parameter [[acell]] is chosen to work at the equilibrium 
 volume. Finally, we ask Abinit to write the wavefunctions in a file by setting [[prtwf]] to 1, 
@@ -133,7 +134,8 @@ as we will need to read this file to start the following real-time calculations.
     That is because RT-TDDFT is not compatible with that option and it is thus better to generate 
     the initial orbitals without it as well.
     You may also notice that we set the variable [[istwfk]] to 1 for all $k$-points, that is 
-    because we cannot take advantage of time-reversal symmetry for some $k$-points in RT-TDDFT. 
+    because we cannot take advantage of time-reversal symmetry for the storage of wavefunctions 
+    in RT-TDDFT. 
 
 ## 3. Real-time TDDFT and stability
 Now that we have a set of initial orbitals we can run some time-dependent calculations.
@@ -216,7 +218,7 @@ One can also check the stability of the integration by checking that the total e
 the integration. In order to do so, you can simply plot the third column of the file *trttddft_3o_TDENER* and you 
 should get something similar to the following figure.
 
-![Stability of total energy with different values of the time step](rttddft_assets/stability.png)
+![Stability of total energy with different values of the time step.](rttddft_assets/stability.png)
 
 The integration becomes clearly unstable for time steps greater than $0.15$ au. Unfortunately, the integration can become
 unstable for longer integration times even if it appears stable here. We will thus keep a timestep of $0.1$ au to be safe.
@@ -308,12 +310,13 @@ We can perform this study keeping [[ngkpt]] to 2 2 2 to save computation time.
 If you do so and plot the current density you should get the same results as what is displayed on the 
 following figure.
 
-![Convergence of the induced current density with respect to ecut](rttddft_assets/cv_ecut.png)
+![Convergence of the induced current density with respect to ecut.](rttddft_assets/cv_ecut.png)
 
 Clearly the current density is not too sensitive to the value of [[ecut]] and seems to be converged from 
-[[ecut]] $\gt 12$ Ha. To remain finely converged in terms of the total energy we will keep [[ecut]] to 
-18 Ha in the following. It is even less sensitive to the value of [[pawecutdg]] and we will just keep 
-it at 36 Ha although we could probably decrease it a bit without problem.
+[[ecut]] $\gt 10$ Ha. To ensure that we remain relatively converged in terms of total energy and pressure 
+we will keep [[ecut]] to 14 Ha in the following.
+The current density is even less sensitive to the value of [[pawecutdg]] and we will just keep 
+it at twice the value of [[ecut]] that is 28 Ha in the following.
 
 Now we switch to the convergence with respect to the number of $k$-points. Again, this is now going to 
 take more time to run and you should consider running in parallel.
@@ -322,17 +325,19 @@ You can maybe try 2 2 2, 4 4 4, 6 6 6 and 8 8 8 to start. You can use a lower va
 wish to decrease the computation time. You should find that the current density is significantly 
 impacted by the value of [[ngkpt]] and that the previous value of 6 6 6 is not enough 
 to converge it. The following figure shows the current density obtained with 
-larger number of $k$-points.
+different number $k$-points keeping [[ecut]] fixed to 10 Ha and [[pawecutdg]] to 20 Ha.
 
-![Convergence of the induced current density with respect to ngkpt](rttddft_assets/cv_kpt.png)
+![Convergence of the induced current density with respect to ngkpt.](rttddft_assets/cv_kpt.png)
 
 The current density clearly requires a large number of $k$-points and it seems that we need to use 
-at least [[ngkpt]] 12 12 12, which leads to 6912 $k$-points, to get converged results over the integration 
-time considered here. It appears that converging the current density at short times is relatively easy 
-but longer trajectories require more $k$-points. That means high frequencies will be easier to 
-converge but accessing low frequencies will be more demanding.
+more than 4000 $k$-points to converge over the integration time considered here. 
+It appears that converging the current density at short times is relatively easy but longer trajectories 
+require more $k$-points. That means high frequencies will be easier to converge but accessing 
+low frequencies will be more demanding. In the following we will keep [[ngkpt]] to 8 8 8 with
+four shifts so 2048 $k$-points even though we see that we should use higher values to ensure 
+a fine convergence of the current density.  
 
-## 5. Conductivity and the dielectric function
+## 5. Conductivity and dielectric function
 The optical conductivity tensor $\sigma_{\alpha\beta}$ can be obtained from the Fourier transform 
 of the induced current density and the external electric field using the following relation
 \begin{equation}
@@ -344,7 +349,7 @@ external electric field.
 The dielectric tensor can then be obtained directly from the conductivity tensor using the 
 following relation 
 \begin{equation}
-    \epsilon_{\alpha\beta}(\omega) = \delta_{\alpha\beta} + i\frac{4\pi\sigma_{\alpha\beta}(\omega)}{\omega}.
+    \epsilon_{\alpha\beta}(\omega) = \delta_{\alpha\beta} + 4\pi i\frac{\sigma_{\alpha\beta}(\omega)}{\omega}.
 \end{equation}
 
 A python script to perform the Fourier transform of the current density and compute the conductivity and 
@@ -373,28 +378,28 @@ Such window leads to a convolution of the Fourier transform of the signal with a
   * *-ts* applies a time shift discarding all times before *ts* which is mostly used to effectively set the time at which the electric field is applied to zero.
   * *-p* is to use zero-padding on the signal. This will artificially increase the number of points used in the Fourier transform by a factor of *p* which in turn increases the number of frequencies and thus helps getting a better resolution in frequency space.
 
-If you use this script to compute the dielectric function from the current densities obtained with different number of $k$-points during 
-the convergence study of the previous section you will get results similar to the ones presented on the next figure.
+If you use the script to compute the dielectric function from the current densities obtained with different number of $k$-points during 
+the convergence study of the previous section you should get results similar to the ones presented on the next figure.
 
-![Convergence of the dielectric function with respect to ngkpt](rttddft_assets/dielectric_kpt.png)
+![Convergence of the dielectric function with respect to ngkpt.](rttddft_assets/dielectric_kpt.png)
 
-The global shape of the dielectric function does not seem to be as sensitive to the number of $k$-points than the current density and 
-it looks like we are perfectly converged for grid that are finer than [[ngkpt]] 12 12 12. However, that depends on the length of the 
-trajectory. Indeed we have seen that at longer times the current density requires more $k$-points.
-In the following, we will stick to [[ngkpt]] 12 12 12 to make sure we are well converged although a coarser grid could already be used 
-to get relatively good results.
+Fortunately, the global shape of the dielectric function does not seem to be as sensitive to the number of $k$-points than the 
+current density and it looks like a value of [[ngkpt]] to 8 8 8 is already able to give relatively well converged results.
+In the following, we will thus use [[ecut]] 14 and [[ngkpt]] 8 8 8 which should give acceptable results in a reasonable computation time. 
+Clearly, if we are interested in fine details of the dielectric function than one should use a larger number of $k$-points and 
+probably also a slightly higher value of [[ecut]].
 
-Before launching the last calculation to compute the conductivity and the dielectric function we should finally decide how long the trajectory should be.
+Before launching the final calculation to compute the conductivity and the dielectric function we should decide how long the trajectory should be.
 This is mostly defined by the frequency range we want to study and the resolution we need in frequency space. 
 For diamond, we know that the dielectric function exhibits interesting features for energies $\hbar\omega$ between 4 and 20 eV (see next figure). 
 The maximum frequency that can be sampled is $f_{max} = 1/dt$ which is directly related to the time step $dt$. 
 In our case we used a time step $dt = 0.1$ au $\approx 2.4\,10^{-3}$ fs, which corresponds to an energy of about $1700$ eV that is much higher than 
 what we are interested in. The minimum frequency that can be sampled is given by $f_{min} = f_{max}/N$.
 So the total number of steps $N$ will directly define the minimum frequency that can theoretically be accessed.
-As we are interested in energies down to the eV a 100 steps should already be enough. However this minimum frequency also defines the resolution 
+As we are interested in energies down to a few eV, a 100 steps should already be enough. However this minimum frequency also defines the resolution 
 in frequency space $\Delta f = f_{min}$. This frequency step $\Delta f$ needs to be small enough to accurately resolve the variations of the 
 conductivity and the dielectric function. In practice here, it needs to be much smaller and we need to at least perform a few thousands steps 
-(about 4000 steps should give good results).
+(about 2000 steps should give good results).
 
 !!! tip
 
@@ -403,15 +408,18 @@ conductivity and the dielectric function. In practice here, it needs to be much 
     Note that it is also possible to artificially increase the frequency resolution by using zero-padding 
     (*-p* option of the script *analyze_rtttddft.py*).
 
-Now, we can launch our final calculation using [[ntime]] 4000 and [[ngkpt]] 12 12 12 to ensure good convergence.
-Unfortunately, this is now quite a long calculation that can take several hours even if running on several cores.
-The dielectric function obtained after running such calculation is presented on the following figure. 
-It is compared to the results from [[cite:Botti2004]] obtained using linear-response TDDFT (LR-TDDFT) in the 
-LDA approximation  and to experimental results from [[cite:Edwards1985]].
+Now, we can launch our final calculation using [[ntime]] 2000, [[ngkpt]] 8 8 8 and [[ecut]] 14 to ensure acceptable convergence.
+Unfortunately, this is now quite a long calculation that can take more than an hour even if running on several cores.
+The dielectric function obtained after running such calculation is presented on the following figure (orange line). 
+It is compared to the results from [[cite:Botti2004]] obtained using linear-response TDDFT (LR-TDDFT) in the LDA approximation (blue line)
+ and to experimental results (grey dots) from [[cite:Edwards1985]].
 
-![Dielectric function of Diamond computed with RT-TDDFT using Abinit compared to LR-TDDFT and experiment](rttddft_assets/dielectric_final.png)
+![Dielectric function of Diamond computed with RT-TDDFT using Abinit compared to LR-TDDFT and experiment.](rttddft_assets/dielectric_final.png)
 
 Clearly, the implementation in Abinit is able to retrieve the correct dielectric function and compares well with LR-TDDFT 
 using similar approximations. Moreover, the results we obtained are also quite close to the experimental ones.
+One can notice however that our spectrum is "more noisy" than the one obtained using LR-TDDFT. 
+This effect can be mitigated by increasing the number of $k$-points as can be seen from the dielectric function obtained 
+using a larger number of $k$-points (green line).
 In the case of diamond, TDDFT in the adiabatic approximation describes relatively well the dielectric function but that is 
 not the case for all systems, see for instance [[cite:Botti2004]] for different cases.
