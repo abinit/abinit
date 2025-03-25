@@ -2817,6 +2817,8 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
      !2- Transfer
      if(.not.need_distributed)then
        if(.not.allocated(coefficients))then
+       print *, "allocate coefficients in distribute_coefficients_over_cpu"
+       print *, "Do not need distributed"
          ABI_MALLOC(coefficients,(my_newncoeff))
        end if
      end if
@@ -2867,6 +2869,11 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
        end if
 
        if(need_distributed.and.my_rank == rank_to_receive)then
+       print *, "allocate coefficients in distribute_coefficients_over_cpu"
+       print*, "Do need distributed"
+       print *, "my_newncoeff", my_newncoeff
+       print *, "my_rank", my_rank
+       print *, "rank_to_receive", rank_to_receive
          if(.not.allocated(coefficients))then
            ABI_MALLOC(coefficients,(my_newncoeff))
          end if
@@ -4086,6 +4093,11 @@ call polynomial_coeff_getNorder(strain_terms_tmp,crystal,cutoff,ncoeff,ncoeff_ou
 &                               only_odd_power=.false.,only_even_power=.true.,compute_symmetric=.false.,&
                                 verbose=.false., max_nbody=max_nbody)
 
+! DEBUG write(*,*) "ncoeff_out: ", ncoeff_out
+if(allocated(strain_terms_tmp))then
+  call polynomial_coeff_list_free(strain_terms)
+  ABI_FREE(strain_terms)
+end if
 
 !TODO Probably put in one routine
 !Get irreducible strain

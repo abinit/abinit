@@ -1427,8 +1427,18 @@ subroutine opt_getHOstrain(terms,ncombi,nterm_start,eff_pot,power_strain,comm, m
   call wrtout(ab_out,message,'COLL')
   call wrtout(std_out,message,'COLL')
 
+  write(std_out,*) "DEBUG: before getEvenAnhaStrain"
+      write(std_out,*) "DEBUG: Is strain_terms_tmp allocated?", allocated(strain_terms_tmp)
+      if (allocated(strain_terms_tmp)) then
+        write(std_out,*) "DEBUG: size of strain_terms_tmp=", size(strain_terms_tmp)
+      end if
+
+
   !1406 get count of high order even anharmonic strain terms and the strain terms itself
   call polynomial_coeff_getEvenAnhaStrain(strain_terms_tmp,crystal,ncombi,power_strain,comm, max_nbody)
+
+
+
   ! Allocate my_coeffs with ncombi free space to work with
 
 
@@ -1442,11 +1452,22 @@ subroutine opt_getHOstrain(terms,ncombi,nterm_start,eff_pot,power_strain,comm, m
         & eff_pot%anharmonics_terms%coefficients(i)%terms,eff_pot%anharmonics_terms%coefficients(i)%name,&
         &  check=.TRUE.)
     else
-      ! FIXME: strain_terms_tmp is not allocated. with test tmulti_l_7_1
+      write(std_out,*) "DEBUG: i=", i, " nterm_start=", nterm_start 
+      write(std_out,*) "DEBUG: Is strain_terms_tmp allocated?", allocated(strain_terms_tmp)
+      if (allocated(strain_terms_tmp)) then
+        write(std_out,*) "DEBUG: size of strain_terms_tmp=", size(strain_terms_tmp)
+      end if
+      
+      if (.not. allocated(strain_terms_tmp)) then
+        write(std_out,*) "ERROR: strain_terms_tmp is not allocated!"
+        call wrtout(std_out,"ERROR: strain_terms_tmp is not allocated!",'COLL')
+        ABI_BUG("strain_terms_tmp is not allocated in opt_getHOstrain")
+      end if
+      
       call polynomial_coeff_init(coeff_ini,strain_terms_tmp(i-nterm_start)%nterm,terms(i),&
         &         strain_terms_tmp(i-nterm_start)%terms,strain_terms_tmp(i-nterm_start)%name,&
         &         check=.TRUE.)
-    endif
+endif
   enddo
 
   call polynomial_coeff_list_free(strain_terms_tmp)
