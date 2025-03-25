@@ -815,7 +815,9 @@ end if
  end if
 
 !Datastructures deallocations
- if (iomode /= NO_FILE_OUT) ABI_FREE(psinablapsi)
+ if (iomode /= NO_FILE_OUT) then
+    ABI_FREE(psinablapsi)
+ end if
  ABI_FREE(psinablapsi_paw)
  if (dtset%pawspnorb==1) then
    ABI_FREE(psinablapsi_soc)
