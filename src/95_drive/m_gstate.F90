@@ -103,7 +103,6 @@ module m_gstate
  use m_cgprj,            only : ctocprj
  use m_nonlop_ylm,       only : nonlop_ylm_init_counters,nonlop_ylm_output_counters
  use m_fft,              only : fft_init_counters,fft_output_counters
- use m_getghc_ompgpu,    only : free_getghc_ompgpu_buffers
 
 #if defined HAVE_GPU
  use m_alloc_hamilt_gpu
@@ -1789,9 +1788,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  end if
 
 !Clean GPU work spaces
- if(dtset%gpu_option == ABI_GPU_OPENMP) then
-   call free_getghc_ompgpu_buffers()
- end if
 #if defined HAVE_GPU
  if (dtset%gpu_option/=ABI_GPU_DISABLED) then
    call dealloc_hamilt_gpu(2,dtset%gpu_option)
