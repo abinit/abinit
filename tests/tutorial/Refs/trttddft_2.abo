@@ -1,8 +1,8 @@
 
-.Version 10.3.4.4 of ABINIT, released Nov 2024.
+.Version 10.3.6.1 of ABINIT, released Feb 2025.
 .(MPI version, prepared for a x86_64_linux_gnu9.1 computer) 
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 13 Jan 2025.
-- ( at 13h02 )
+.Starting date : Tue 25 Mar 2025.
+- ( at 10h58 )
   
 - input  file    -> trttddft_2.abi
 - output file    -> trttddft_2.abo
@@ -23,7 +23,7 @@
 - root for output files -> trttddft_2o
 
 - inpspheads : Reading pseudopotential header in XML form from 
--   /cea/home/abinit/abinit/REPOSITORY/BRIEUC/abinit/gitlab//tests//Pspdir/Psdj_paw_pw_std/C.xml
+-   /cea/home/abinit/abinit/REPOSITORY/BRIEUC/abinit/gitlab/tests/Pspdir/Psdj_paw_pw_std/C.xml
  Symmetries : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need of the present run
@@ -221,9 +221,9 @@ meta: {optdriver: 9, }
          ecut(hartree)=     36.000   => boxcut(ratio)=   2.04381
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /cea/home/abinit/abinit/REPOSITORY/BRIEUC/abinit/gitlab//tests//Pspdir/Psdj_paw_pw_std/C.xml
-- pspatm: opening atomic psp file    /cea/home/abinit/abinit/REPOSITORY/BRIEUC/abinit/gitlab//tests//Pspdir/Psdj_paw_pw_std/C.xml
-- pspatm : Reading pseudopotential header in XML form from /cea/home/abinit/abinit/REPOSITORY/BRIEUC/abinit/gitlab//tests//Pspdir/Psdj_paw_pw_std/C.xml
+- pspini: atom type   1  psp file is /cea/home/abinit/abinit/REPOSITORY/BRIEUC/abinit/gitlab/tests/Pspdir/Psdj_paw_pw_std/C.xml
+- pspatm: opening atomic psp file    /cea/home/abinit/abinit/REPOSITORY/BRIEUC/abinit/gitlab/tests/Pspdir/Psdj_paw_pw_std/C.xml
+- pspatm : Reading pseudopotential header in XML form from /cea/home/abinit/abinit/REPOSITORY/BRIEUC/abinit/gitlab/tests/Pspdir/Psdj_paw_pw_std/C.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.50736703
@@ -263,7 +263,7 @@ Integrated density (ie. total nb of electrons) =       8.0000035485
   -0.38952    0.27506    0.31786    0.34829    0.59404    0.67310    0.67501    0.90388
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.30    0.41
+- Time - cpu, wall (sec):    0.32    0.42
 
 
 ---------------------------------------------------------------------------
@@ -488,10 +488,10 @@ P           mkmem          28
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          1.7  wall=          2.2
+- Proc.   0 individual time (sec): cpu=          1.6  wall=          1.9
 
 ================================================================================
 
  Calculation completed.
-.Delivered   2 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.7  wall=          2.2
+.Delivered   3 WARNINGs and   2 COMMENTs to log file.
++Overall time at end (sec) : cpu=          1.6  wall=          1.9
