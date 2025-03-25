@@ -3579,6 +3579,22 @@ subroutine slice_initDistribution(slice,nspinor)
     gpu_option = slice%gpu_option
     gpu_thread_limit = slice%gpu_thread_limit
 
+    ! FIXME
+    ! The fact that slice%Xc is already constructed
+    ! is like calling makeXgBlock prior to the constructor
+    ! essentially xgTransposer will map slice%Xc to an empty 
+    ! buffer allocated in the interior of makeXgBlock.
+    ! Then we have to fill AFTER transposer constructor 
+    ! because the constructor will put values to zero anyway.
+    ! In current design we allocate slice%Xc with xg_init
+    ! in the slice initialization call, but at the same time
+    ! we also map it to another memory buffer xith xgBlock_map
+    ! in the transposer constructor call. So the same object
+    ! is mapped to two different memory locations. This may give
+    ! an error anyway because we will not be able to free memory.
+    ! To solve this issue we should implement the transposer
+    ! constructor for STATE_COLSROWS.
+
     ! Construct transposer for X
     call xgTransposer_constructor(slice%XTrans,slice%Xr,slice%Xc,&
         nspinor,STATE_LINALG,TRANS_ALL2ALL,comm_rows,comm_cols,0,0,&
@@ -3878,8 +3894,10 @@ end subroutine slice_initSub
 !! in the slice subcommunicator
 !! 
 subroutine slice_allocateAll(slice)
- 
-    ABI_CHECK(not slice%has_mem, "slice memory already exists")
+
+    ! Sanity check
+    ABI_CHECK(not slice%mpi_flag_row, "slice MPI should not be row")
+    ABI_CHECK(slice%mpi_flag_col, "slice MPI should be col"
 
     space = slice%space
     spacedim = slice%spacedim
@@ -3897,17 +3915,16 @@ subroutine slice_allocateAll(slice)
     ! (I think these ones are not distributed at all)
 
     ! transposed array
-    call xg_init(slice%xXColsRows,space,total_spacedim,bandpp,&
+    ! FIXME this is wrong. We should never allocate this memory
+    ! space because xgTransposer_constructor will do this for us 
+    call xg_init(slice%Xc,space,total_spacedim,bandpp,&
         xmpi_comm_null,me_g0=me_g0_fft,gpu_option=gpu_option)
 
-    ! regular array
-    call xg_init(slice%X,space,spacedim,neigenpairs,&
-        comm_cols,me_g0=me_g0,gpu_option=gpu_option)
+    ! so maybe call the xgTransposer_constructor here is clean
 
-    ! From now on use the column distribution
-    slice%has_mem = .true.
-    slice%mem_rows = .false.
-    slice%mem_cols = .true.
+    ! regular array
+    call xg_init(slice%Xr,space,spacedim,neigenpairs,&
+        comm_cols,me_g0=me_g0,gpu_option=gpu_option)
 
 end subroutine slice_allocateAll
 
