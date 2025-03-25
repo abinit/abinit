@@ -171,7 +171,6 @@ module m_polynomial_coeff
 !     polynomial_term(nterm)<type(polynomial_term)>
 !     contains all the displacements for this coefficient
 
-   integer :: isbound = 0
  end type polynomial_coeff_type
 !!***
 
@@ -220,7 +219,7 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine polynomial_coeff_init(coefficient,nterm,polynomial_coeff,terms,name, isbound, check)
+subroutine polynomial_coeff_init(coefficient,nterm,polynomial_coeff,terms,name,  check)
 
  implicit none
 
@@ -229,7 +228,6 @@ subroutine polynomial_coeff_init(coefficient,nterm,polynomial_coeff,terms,name, 
  integer, intent(in) :: nterm
  real(dp),intent(in) :: coefficient
  logical,optional,intent(in) :: check
- integer,intent(in) :: isbound
 !arrays
  character(len=200),optional,intent(in) :: name
  type(polynomial_term_type),intent(in) :: terms(nterm)
@@ -300,11 +298,7 @@ subroutine polynomial_coeff_init(coefficient,nterm,polynomial_coeff,terms,name, 
    name_tmp = ""
  end if
 
- !if(present(isbound)) then
-   polynomial_coeff%isbound=isbound
- !else
- !  polynomial_coeff%isbound=0
- !end if
+
 
 
 !Initilisation
@@ -364,7 +358,6 @@ subroutine polynomial_coeff_free(polynomial_coeff)
  polynomial_coeff%name = ""
  polynomial_coeff%nterm = 0
  polynomial_coeff%coefficient = zero
- polynomial_coeff%isbound = 0
 end subroutine polynomial_coeff_free
 !!***
 
@@ -665,7 +658,6 @@ subroutine polynomial_coeff_broadcast(coefficients, source, comm)
   call xmpi_bcast(coefficients%name, source, comm, ierr)
   call xmpi_bcast(coefficients%nterm, source, comm, ierr)
   call xmpi_bcast(coefficients%coefficient, source, comm, ierr)
-  call xmpi_bcast(coefficients%isbound, source, comm, ierr)
 
  !Allocate arrays on the other nodes.
   if (xmpi_comm_rank(comm) /= source) then
@@ -775,7 +767,6 @@ subroutine polynomial_coeff_MPIsend(coefficients, tag, dest, comm)
         call xmpi_send(coefficients%terms(ii)%index_coeff, dest, 9*tag+14, comm, ierr)
       end if
   end do
-  call xmpi_send(coefficients%isbound, dest, 9*tag+12, comm, ierr)
 end subroutine polynomial_coeff_MPIsend
 !!***
 
@@ -863,7 +854,6 @@ subroutine polynomial_coeff_MPIrecv(coefficients, tag, source, comm)
       call xmpi_recv(coefficients%terms(ii)%index_coeff, source , 9*tag+14, comm, ierr)
     end if
   end do
-  call xmpi_recv(coefficients%isbound, source, 9*tag+12, comm, ierr)
 
 end subroutine polynomial_coeff_MPIrecv
 !!***
@@ -2730,14 +2720,9 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
 
 
          block ! check if the term is a bounding term.
-           integer :: nbody, totpower, isbound
+           integer :: nbody, totpower
            call get_totpower_and_nbody(list_combination(:,ii), ndisp_max,nbody, totpower)
-           if(max_nbody(totpower)==-1) then
-             isbound= 1
-           else
-             isbound = 0
-           end if
-           call polynomial_coeff_init(one,nterm,coeffs_tmp(ii),terms(1:nterm),isbound=isbound, check=.true.)
+           call polynomial_coeff_init(one,nterm,coeffs_tmp(ii),terms(1:nterm), check=.true.)
          end block
        end block
        !  Free the terms array
@@ -2896,7 +2881,7 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
              call polynomial_coeff_getName(name,coeffs_tmp(my_icoeff),symbols,recompute=.TRUE.)
              call polynomial_coeff_init(one,coeffs_tmp(my_icoeff)%nterm,coefficients(icoeff2),&
                &                                  coeffs_tmp(my_icoeff)%terms,name=name, &
-               &                                  isbound=coeffs_tmp(my_icoeff)%isbound, check=.false.)
+               &                                  check=.false.)
            else
              call polynomial_coeff_MPIsend(coeffs_tmp(my_icoeff), icoeff, rank_to_receive, comm)
            end if
@@ -2917,7 +2902,7 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
            call polynomial_coeff_getName(name,coeffs_tmp(my_icoeff),symbols,recompute=.TRUE.)
            call polynomial_coeff_init(one,coeffs_tmp(my_icoeff)%nterm,coefficients(icoeff2),&
              &                                 coeffs_tmp(my_icoeff)%terms,name=name,   &
-             &                                  isbound=coeffs_tmp(my_icoeff)%isbound, check=.false.)
+             &                                  check=.false.)
            !      Free the coefficient
            call polynomial_coeff_free(coeffs_tmp(my_icoeff))
          end if
@@ -3140,7 +3125,7 @@ recursive subroutine computeNorder(cell,coeffs_out,compatibleCoeffs,list_coeff,l
            icoeff_tmp = icoeff_tmp + 1
            icoeff_tot = icoeff_tot + 1
            call polynomial_coeff_init(coefficient,iterm,coeffs_tmp(icoeff_tmp),&
-&                                     terms(1:iterm),isbound=0, check=.true.)
+&                                     terms(1:iterm), check=.true.)
 
          end if
        end if
@@ -3175,7 +3160,6 @@ recursive subroutine computeNorder(cell,coeffs_out,compatibleCoeffs,list_coeff,l
          call polynomial_coeff_getName(name,coeffs_tmp(icoeff_tmp),symbols,recompute=.TRUE.)
          call polynomial_coeff_init(one,coeffs_tmp(icoeff_tmp)%nterm,&
            &                                   coeffs_out(icoeff_tot),coeffs_tmp(icoeff_tmp)%terms,&
-           &                                   isbound=coeffs_tmp(icoeff_tmp)%isbound, &
            &                                   name=name)
        end if
      end if
@@ -3971,7 +3955,7 @@ subroutine polynomial_coeff_getOrder1(cell,coeffs_out,list_symcoeff,&
 !  increase coefficients and set it
      icoeff_tmp = icoeff_tmp + 1
      call polynomial_coeff_init(coefficient,iterm,coeffs_tmp(icoeff_tmp), &
-       &                       terms(1:iterm),isbound=0 ,check=.true.)
+       &                       terms(1:iterm),check=.true.)
    end if
 
 !  Deallocate the terms
@@ -4007,7 +3991,6 @@ subroutine polynomial_coeff_getOrder1(cell,coeffs_out,list_symcoeff,&
      icoeff = icoeff + 1
      call polynomial_coeff_init(one,coeffs_tmp(icoeff_tmp)%nterm,&
        &                               coeffs_out(icoeff),coeffs_tmp(icoeff_tmp)%terms,&
-       &                               isbound=coeffs_tmp(icoeff_tmp)%isbound, &
        &                               name=name)
 
      write(message,'(2a)')' ',trim(name)
@@ -4132,7 +4115,7 @@ do icoeff1=1,ncoeff_out
     icoeff2=icoeff2 + 1
     call polynomial_coeff_init(coeff_ini,strain_terms_tmp(icoeff1)%nterm,strain_terms(icoeff2),&
          &               strain_terms_tmp(icoeff1)%terms,strain_terms_tmp(icoeff1)%name, &
-         &               isbound=strain_terms_tmp(icoeff1)%isbound,check=.TRUE.)
+         &               check=.TRUE.)
   endif
   end block
 enddo
@@ -4230,11 +4213,11 @@ function coeffs_list_conc(coeff_list1,coeff_list2) result (coeff_list_out)
  do i=1,ncoeff_out
     if(i<=ncoeff1)then
       call polynomial_coeff_init(coeff_list1(i)%coefficient,coeff_list1(i)%nterm,coeff_list_out(i),coeff_list1(i)%terms,&
-        &                                 coeff_list1(i)%name,coeff_list1(i)%isbound, check=.TRUE.)
+        &                                 coeff_list1(i)%name, check=.TRUE.)
     else
        j=i-ncoeff1
        call polynomial_coeff_init(coeff_list2(j)%coefficient,coeff_list2(j)%nterm,coeff_list_out(i),coeff_list2(j)%terms,&
-         &                                 coeff_list2(j)%name,coeff_list2(j)%isbound,check=.TRUE.)
+         &                                 coeff_list2(j)%name,check=.TRUE.)
     endif
  enddo
 
@@ -4327,7 +4310,7 @@ subroutine coeffs_list_append(coeff_list,coeff, check)
 
  call coeffs_list_copy(coeff_list, tmp)
  call polynomial_coeff_init(coeff%coefficient,coeff%nterm,coeff_list(n2),coeff%terms,&
-   &                                 coeff%name,coeff%isbound, check=check)
+   &                                 coeff%name, check=check)
 end subroutine coeffs_list_append
 !!***
 
@@ -4360,7 +4343,7 @@ subroutine coeffs_list_reduce_duplicate(self, crystal, sc_size, fit_iatom_in, cu
   ABI_MALLOC(tmp,( size(self)))
   do i=1, size(self)
      call polynomial_coeff_init(self(i)%coefficient,self(i)%nterm,tmp(i),self(i)%terms,&
-      &                                 self(i)%name,self(i)%isbound, check=.True.)
+      &                                 self(i)%name, check=.True.)
   end do
 
 
@@ -4371,7 +4354,7 @@ subroutine coeffs_list_reduce_duplicate(self, crystal, sc_size, fit_iatom_in, cu
     if(mask(i)) then
       counter =counter +1
       call polynomial_coeff_init(tmp(i)%coefficient,tmp(i)%nterm,self(counter),tmp(i)%terms,&
-        &                                 tmp(i)%name,tmp(i)%isbound, check=.True.)
+        &                                 tmp(i)%name, check=.True.)
     end if
   end do
   call polynomial_coeff_list_free(tmp)
@@ -4424,7 +4407,7 @@ subroutine coeffs_list_copy(coeff_list_out,coeff_list_in)
  do ii=1,ncoeff_in
      call polynomial_coeff_init(coeff_list_in(ii)%coefficient,coeff_list_in(ii)%nterm,&
        &                             coeff_list_out(ii),coeff_list_in(ii)%terms, &
-       &                             coeff_list_in(ii)%name, coeff_list_in(ii)%isbound, check)
+       &                             coeff_list_in(ii)%name, check)
  enddo
 end subroutine coeffs_list_copy
 !!***
