@@ -625,6 +625,8 @@ contains
           call polynomial_coeff_list_free(coeffs_tmp)
           ncoeff_tot = ncoeff_tot_tmp
           ABI_MALLOC(coeffs_tmp,(my_ncoeff))
+          !FIXME: on on bot EOZ: the coeefs_tmp has larger size than coeffs_iatom.
+          ! This is a bug. 
           call coeffs_list_copy(coeffs_tmp,coeffs_iatom)
           call polynomial_coeff_list_free(coeffs_iatom)
         else
@@ -1125,8 +1127,11 @@ contains
           &                                    fit_data%training_set%sqomega, weights=weights)
 
         !Print the standard deviation before the fit
+        ! FIXME: on builder ALPS_INTEL_2025_elpa, compile fails. 
+        ! This is probably due to the fact that the format is too long.
+        ! We should split the write in two writes.
         write(message,'(4a,ES24.16,2a,ES24.16,2a,ES24.16,2a,ES24.16,a)' ) ch10,&
-          &                    ' Weighted Goal function values at the begining of the fit process (eV^2/A^2):',ch10,&
+          &           ' Weighted Goal function values at the begining of the fit process (eV^2/A^2):',ch10, &
           &                    '   Energy          : ',&
           &               gf_values(4,1)*(HaBohr_eVAng)**2,ch10,&
           &                    '   Forces+Stresses : ',&
@@ -1151,6 +1156,9 @@ contains
       &                                    fit_data%training_set%sqomega, weights=weights1)
 
     !Print the standard deviation before the fit
+    ! FIXME: on builder ALPS_INTEL_2025_elpa, compile fails.
+    ! This is probably due to the fact that the format is too long.
+    ! We should split the write in two writes.
     write(message,'(4a,ES24.16,2a,ES24.16,2a,ES24.16,2a,ES24.16,a)' ) ch10,&
       &                    ' Goal function values at the begining of the fit process (eV^2/A^2):',ch10,&
       &                    '   Energy          : ',&
