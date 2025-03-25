@@ -172,7 +172,7 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
  character(len=fnlen) :: wfk_path, den_path, kden_path, out_path
  type(hdr_type) :: wfk_hdr, den_hdr, kden_hdr, owfk_hdr
  type(crystal_t) :: cryst, den_cryst, wfk_cryst
- type(ebands_t) :: ks_ebands, owfk_ebands
+ type(ebands_t) :: ks_ebands, owfk_ebands, tmp_ebands
  type(pawfgr_type) :: pawfgr
  type(wvl_data) :: wvl
  type(mpi_type) :: mpi_enreg_seq
@@ -816,7 +816,9 @@ end if
    ! Read orbitals from an external WFK file and produce output files for CC4S.
 
    ! Construct crystal and ks_ebands from the GS WFK file.
-   ks_ebands = wfk_read_ebands(wfk_path, comm, out_hdr=wfk_hdr)
+   tmp_ebands = wfk_read_ebands(wfk_path, comm, out_hdr=wfk_hdr)
+   ks_ebands = tmp_ebands%chop(1, dtset%nband(1))
+   call tmp_ebands%free()
    call wfk_hdr%vs_dtset(dtset)
 
    wfk_cryst = wfk_hdr%get_crystal()
@@ -863,7 +865,9 @@ end if
      call xmpi_bcast(wfk_path, master, comm, ierr)
 
      ! Construct crystal and ks_ebands from the GS WFK file.
-     ks_ebands = wfk_read_ebands(wfk_path, comm, out_hdr=wfk_hdr)
+     tmp_ebands = wfk_read_ebands(wfk_path, comm, out_hdr=wfk_hdr)
+     ks_ebands = tmp_ebands%chop(1, dtset%nband(1))
+     call tmp_ebands%free()
      call wfk_hdr%vs_dtset(dtset)
 
      wfk_cryst = wfk_hdr%get_crystal()
