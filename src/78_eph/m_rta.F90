@@ -2636,9 +2636,6 @@ subroutine ibte_calc_tensors(self, cryst, itemp, kT, mu_e, fk, onsager, sigma_eh
  ! Compute mobility_mu i.e. results in which lifetimes have been computed in a consistent way
  ! with the same the Fermi level. In all the other cases, indeed, we assume that tau does not depend on ef.
  !
- ! TODO: Implement other tensors. Compare these results with the ones obtained with spectral sigma
- ! In principle, they should be the same, in practice the integration of sigma requires enough resolution
- ! around the band edge.
 
  !TODO: rewrite this beacause every L (onsager coeff) is given with a minus sign and it's just the case for L11 and L22 normally
  ! Fortunately these minus signs compensate each other in the code or are supressed by putting a -1 factor in front of sbk and PI
@@ -2691,12 +2688,33 @@ subroutine ibte_calc_tensors(self, cryst, itemp, kT, mu_e, fk, onsager, sigma_eh
    end do ! ik_ibz
  end do ! spin
 
+ if (iet==1) then ! In order to output the mobility (only for L11, the conductivity, thus iet==1)
+   max_occ = two / (self%nspinor * self%nsppol)
+   fact0 = max_occ * (siemens_SI / Bohr_meter / cryst%ucvol) / 100
+   fact = 100**3 / e_Cb
+         
+   sigma_eh = fact0 * sigma_eh  ! siemens cm^-1
+   fsum_eh = fsum_eh / cryst%ucvol
+        
+ ! Scale by the carrier concentration.
+   do spin=1,nsppol 
+     do ieh=1,2
+       call safe_div(sigma_eh(:,:,ieh,spin) * fact, &
+                     self%n_ehst(ieh, spin, itemp) / cryst%ucvol / Bohr_meter**3, zero, mob_eh(:,:,ieh,spin))
+     end do
+   end do
+
+   !Here I rescale sigma_eh to output correctly the Onsager coeff L11
+   sigma_eh = sigma_eh / fact0
+ end if
+
+
  !call xmpi_sum(sigma_eh, comm, ierr)
  !call xmpi_sum(onsager, comm, ierr)
 
 ! max_occ = two / (self%nspinor * self%nsppol)
 ! sigma_eh = max_occ * sigma_eh / cryst%ucvol
- fsum_eh = fsum_eh / cryst%ucvol
+ !fsum_eh = fsum_eh / cryst%ucvol
 
  max_occ = two / (self%nspinor * self%nsppol)
  !Take into account spin degeneracy for all Onsager coefficient:
@@ -2735,10 +2753,10 @@ subroutine ibte_calc_tensors(self, cryst, itemp, kT, mu_e, fk, onsager, sigma_eh
 ! end do
 !In order to be able to compile, to have a value for the dummy argument mob_eh
 
-call wrtout(std_out, "shape(sigma_eh), sigma_eh,  shape(mob_eh), mob_eh ", pre_newlines=1, newlines=1)
-write (std_out,*) shape(sigma_eh),sigma_eh, shape(mob_eh), mob_eh
+!call wrtout(std_out, "shape(sigma_eh), sigma_eh,  shape(mob_eh), mob_eh ", pre_newlines=1, newlines=1)
+!write (std_out,*) shape(sigma_eh),sigma_eh, shape(mob_eh), mob_eh
 
-mob_eh=zero
+!mob_eh=zero
 
 !mob_eh=sigma_eh
 
