@@ -478,7 +478,7 @@ contains
       tmp_int=Qpt%lgth_segments(1)
       do ii=1,qpt_tot-1
         if (Invar%bzlength.eq.0) then
-          Qpt%lgth_segments(ii)=int(real(Qpt%lgth_segments(ii))/real(tmp_int)*100)
+          Qpt%lgth_segments(ii)=int(real(Qpt%lgth_segments(ii)*100)/real(tmp_int))
         else if (Invar%bzlength.gt.0) then
           Qpt%lgth_segments(ii)=Invar%lgth_segments(ii)
         else if (Invar%bzlength.lt.0) then
