@@ -1047,27 +1047,25 @@ subroutine phdos_init(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_n
 
  !call cwtime_report(" phdos", cpu, wall, gflops)
 
- if (my_rank == master) then
-   if (nsmallq > tol10) then
-      ! Write info about speed of sound
-      speedofsound = speedofsound / nsmallq
-      write (msg,'(a,E20.10,3a,F16.4,2a)') &
-         ' Average speed of sound partial sums: ', third*sum(speedofsound), ' (at units)',ch10, &
-          '-                                   = ', third*sum(speedofsound) * Bohr_Ang * 1.d-13 / Time_Sec, ' [km/s]',ch10
-      call wrtout(units, msg)
+ if (my_rank == master .and. nsmallq > tol10) then
+   ! Write info about speed of sound
+   speedofsound = speedofsound / nsmallq
+   write (msg,'(a,E20.10,3a,F16.4,2a)') &
+      ' Average speed of sound partial sums: ', third*sum(speedofsound), ' (at units)',ch10, &
+      '-                                   = ', third*sum(speedofsound) * Bohr_Ang * 1.d-13 / Time_Sec, ' [km/s]',ch10
+   call wrtout(units, msg)
 
-      ! Debye frequency = vs * (6 pi^2 natom / ucvol)**1/3
-      debyefreq = third*sum(speedofsound) * (six*pi**2/crystal%ucvol)**(1./3.)
-      write (msg,'(a,E20.10,3a,E20.10,a)') &
-         ' Debye frequency from partial sums: ', debyefreq, ' (Ha)',ch10, &
-          '-                                 = ', debyefreq*Ha_THz, ' (THz)'
-      call wrtout(units, msg)
+   ! Debye frequency = vs * (6 pi^2 natom / ucvol)**1/3
+   debyefreq = third*sum(speedofsound) * (six*pi**2/crystal%ucvol)**(1./3.)
+   write (msg,'(a,E20.10,3a,E20.10,a)') &
+      ' Debye frequency from partial sums: ', debyefreq, ' (Ha)',ch10, &
+      '-                                 = ', debyefreq*Ha_THz, ' (THz)'
+   call wrtout(units, msg)
 
-      ! Debye temperature = hbar * Debye frequency / kb
-      write (msg,'(a,E20.10,2a)') '-Debye temperature from partial sums: ', debyefreq*Ha_K, ' (K)', ch10
-      call wrtout(units, msg)
-   end if 
- end if
+   ! Debye temperature = hbar * Debye frequency / kb
+   write (msg,'(a,E20.10,2a)') '-Debye temperature from partial sums: ', debyefreq*Ha_K, ' (K)', ch10
+   call wrtout(units, msg)
+ end if 
 
  if (prtdos == 2) then
    call cwtime(cpu, wall, gflops, "start")
