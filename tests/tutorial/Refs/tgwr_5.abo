@@ -284,14 +284,14 @@ gwr_boxcutmin:   1.10000000E+00
 P gwr_np_kgts: [1, 1, 1, 1, ]
 P np_kibz: [1, 1, 1, ]
 P np_qibz: [1, 1, 1, ]
-min_transition_energy_eV:   2.68469788E-02
-max_transition_energy_eV:   3.84873348E+00
+min_transition_energy_eV:   7.30543446E-01
+max_transition_energy_eV:   1.04729364E+02
 eratio:   1.43358160E+02
 ft_max_err_t2w_cos:   5.27005600E-04
 ft_max_err_w2t_cos:   6.91800315E-06
 ft_max_err_t2w_sin:   9.09933045E-03
 cosft_duality_error:   1.56336542E-03
-Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(omega)
+Minimax imaginary tau/omega mesh in a.u.: !Tabular | # tau, weight(tau), omega, weight(omega)
     1 6.13944E-02   1.58937E-01   6.02841E-03   1.22760E-02
     2 3.36146E-01   3.99664E-01   1.94399E-02   1.50523E-02
     3 8.89564E-01   7.28391E-01   3.73276E-02   2.14471E-02
