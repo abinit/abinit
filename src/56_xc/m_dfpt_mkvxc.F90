@@ -40,6 +40,7 @@ module m_dfpt_mkvxc
  public :: dfpt_mkvxc_noncoll
  public :: dfpt_mkvxcggadq
  public :: dfpt_mkvxcgga_n0met
+ public :: dfpt_mkvxcccdq
 !!***
 
 contains
@@ -1192,6 +1193,120 @@ subroutine dfpt_mkvxcgga_n0met(beta,cplex,delta,gamma,gprimd,kxc,mpi_enreg,nfft,
 
 end subroutine dfpt_mkvxcgga_n0met
 !!***
+
+!!****f* ABINIT/dfpt_mkvxcccdq
+!! NAME
+!!  dfpt_mkvxcccdq
+!!
+!! FUNCTION
+!!  Computes the first q-gradient of the first-order exchange-correlation potential 
+!!  due to the  pseudocore density.
+!!
+!! INPUTS
+!!  cplex= if 1, real space 1-order functions on FFT grid are REAL,
+!!         if 2, COMPLEX
+!!  i3dir= reduced direction of the q-gradient
+!!  gmet(3,3)=reciprocal space metric tensor in bohr**-2
+!!  gprimd(3,3)=reciprocal space dimensional primitive translations
+!!  kxc(nfft,nkxc)=exchange and correlation kernel
+!!  mpi_enreg=information about MPI parallelization
+!!  nfft=(effective) number of FFT grid points (for this processor)
+!!  ngfft(1:18)=integer array with FFT box dimensions and other 
+!!  nspden=number of spin-density components
+!!  nkxc=second dimension of the kxc array. If /=0, the XC kernel must be computed.
+!!  xccc3d1(cplex*nfft)=3D change in core charge density
+!!
+!! OUTPUT
+!!  vxccc1dq(2*nfft,nspden)= q-gradient of first-order XC potential due to pseudocore charge
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+
+subroutine dfpt_mkvxcccdq(cplex,i3dir,gmet,gprimd,kxc,mpi_enreg,nfft, & 
+& ngfft,nkxc,nspden,vxccc1dq,xccc3d1)
+
+ use defs_basis
+ use m_errors
+ use m_profiling_abi
+
+ implicit none
+
+!Arguments ------------------------------------
+ !scalars
+ integer , intent(in)  :: cplex,i3dir,nfft,nkxc,nspden
+ type(MPI_type),intent(inout) :: mpi_enreg
+
+ !arrays
+ integer,intent(in) :: ngfft(18)
+ real(dp), intent(in)  :: gmet(3,3),gprimd(3,3)
+ real(dp), intent(in)  :: kxc(nfft,nkxc)
+ real(dp), intent(in)  :: xccc3d1(cplex*nfft)
+ real(dp), intent(out) :: vxccc1dq(2*nfft,nspden)
+
+!Local variables-------------------------------
+ !scalars
+ integer :: ispden,ir,qcar
+ real(dp) :: spin_scale
+ !arrays
+ real(dp),allocatable :: rhor1(:,:)
+ real(dp),allocatable :: vxc1dq(:,:),vxc1dq_car(:,:,:)
+
+! *************************************************************************
+
+ DBG_ENTER("COLL")
+
+!If GGA xc first calculate the contribution from the q gradient of the xc potential
+ if (nkxc == 7) then
+
+   !Adapt the format of xccc3d1
+   ABI_MALLOC(rhor1,(cplex*nfft,nspden))
+   spin_scale=one;if (nspden==2) spin_scale=half
+   do ispden=1,nspden
+     do ir=1,cplex*nfft
+       rhor1(ir,ispden)=xccc3d1(ir)*spin_scale
+     end do
+   end do
+
+   !The gradient of the potential is calculated in Cartesian coordinates
+   ABI_MALLOC(vxc1dq,(2*nfft,nspden))
+   ABI_MALLOC(vxc1dq_car,(2*nfft,nspden,3))
+   do qcar=1,3
+     call dfpt_mkvxcggadq(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,nkxc,nspden,qcar,rhor1,vxc1dq)
+     vxc1dq_car(:,:,qcar)=vxc1dq(:,:)
+   end do
+   ABI_FREE(rhor1)
+
+   !Convert to reduced coordinate i3dir
+   vxc1dq=zero
+   do qcar=1,3
+     vxc1dq(:,:)=vxc1dq(:,:) + gprimd(qcar,i3dir) * vxc1dq_car(:,:,qcar)
+   end do
+   ABI_FREE(vxc1dq_car)
+
+ end if
+
+!Deallocations
+ ABI_SFREE(vxc1dq)
+
+ DBG_EXIT("COLL")
+
+end subroutine dfpt_mkvxcccdq
+!!***
+
 
 end module m_dfpt_mkvxc
 !!***
