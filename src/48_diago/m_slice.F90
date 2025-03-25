@@ -14,6 +14,40 @@
 !!   Chebyshev-Jackson expansion of indicator otherwise.
 !! - implements new parallel level between slices.
 !!
+!! Design: 
+!! It is based on the Factory-Workers Pattern. The Factory
+!! is 'spsl' (SPectrum SLincing). Workers are:
+!! 
+!! -----------------------------------------------------------------------
+!!  - 'spectrum'        
+!! -----------------------------------------------------------------------
+!!             lifespan | co-exists in spslwf() and spsl_run()
+!!               on GPU | (X/AX/BX-Trans,X/AX/BX-c,X/AX/BX-r) 
+!!              purpose | * store guess/sol, 
+!!                      | * compute RRQ
+!! -----------------------------------------------------------------------
+!!  - 'spectrumSliced' 
+!! -----------------------------------------------------------------------
+!!             lifespan | co-exists in spsl_run() and slice_run()
+!!               on CPU | (XTrans,Xc,Xr)
+!!              purpose | * store ALL slices of guess/sol without overlap, 
+!!                      | * distribute ALL slices to MPI subgroups
+!! -----------------------------------------------------------------------
+!!  - 'slice'            
+!! -----------------------------------------------------------------------
+!!             lifespan | only exists in slice_run() (single MPI subgroup)
+!!               on GPU | (X/AX/BX-Trans,X/AX/BX-c,X/AX/BX-r)
+!!              purpose | * store a SINGLE slice of guess/sol
+!!                      | * compute filter, RR
+!! 
+!! The Factory knows at any moment within spsl_run() where are 
+!! the Workers (in CPU/GPU) and in which MPI distribution.
+!! Worker states are stored in private variables of the Factory
+!! known as flags. Convention is that only the Factory can modify 
+!! these flags and Worker routines can only check flags for sanity.
+!! Compatibility between Workers can only be checked by the Factory
+!! as a Worker cannot know the state of another Worker.
+!!
 !! COPYRIGHT
 !! Copyright (C) 2018-2025 ABINIT group (IML, LB)
 !! This file is distributed under the terms of the
