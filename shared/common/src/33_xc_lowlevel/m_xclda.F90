@@ -1270,12 +1270,12 @@ subroutine xctfw(temp,fxci,tsxci,rho_updn,vxci,npts,nspden,dvxcdgr,ndvxcdgr,grho
  real(dp) :: hperrot,dhperrotdyperrot,dhperrotdn,dhperrotduperrot
 !arrays
  real(dp) :: wpy(0:7), wpu(0:7)
- real(dp),allocatable :: rho_updnm1_3(:,:)
- real(dp) :: exci(npts)
+ real(dp),allocatable :: rho_updnm1_3(:,:),exci(:)
 
 ! *************************************************************************
 
 !We would rather work with exc than with tsxc
+ ABI_MALLOC(exci,(npts))
  exci=fxci+tsxci
  has_dvxcdgr=(ndvxcdgr/=0)
 
@@ -1342,6 +1342,7 @@ subroutine xctfw(temp,fxci,tsxci,rho_updn,vxci,npts,nspden,dvxcdgr,ndvxcdgr,grho
  
  tsxci=exci-fxci
  ABI_FREE(rho_updnm1_3)
+ ABI_FREE(exci)
 
 end subroutine xctfw
 !!***
