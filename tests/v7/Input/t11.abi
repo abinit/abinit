@@ -12,6 +12,7 @@
  tfkinfunc  11       # TFW method after some initialization steps
  tfw_toldfe 1.0e-8   # Tolerance for the initialization steps
  ixc        50       # Ichimaru XC (temperature-dependent)
+ tphysel    0.1469972355
 
 #Plane wave cut-off
  ecut 75
@@ -22,8 +23,7 @@
  nkpt        1
  occopt      3
  istwfk      1
- occ         160
- nband       1
+ nband       90
 
 #SCF procedure
  toldfe      1.0e-9
