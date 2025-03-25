@@ -124,6 +124,8 @@ CONTAINS
   !end subroutine mpi_gather_int_array
 
 
+
+
 !****f* m_dynarray/real_array_type_push
 !!
 !! NAME
@@ -418,7 +420,7 @@ subroutine int_array_type_allgatherv(self,buff, comm, nproc)
   if(self%size>0) then
     tmp(:)=self%data(:self%size)
   end if
-  call xmpi_allgatherv(self%data(:self%size), self%size, buff, sizes, disps, comm, ierr  )
+  call xmpi_allgatherv(tmp, self%size, buff, sizes, disps, comm, ierr  )
   ABI_FREE(tmp)
 end subroutine int_array_type_allgatherv
 
