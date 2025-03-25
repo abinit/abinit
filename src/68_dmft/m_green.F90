@@ -1177,7 +1177,6 @@ subroutine compute_green_batched_core(green,paw_dmft,self,optself,optlog)
  end if
 
  if (optlog == 1) then
-   ABI_BUG("section not checked !")
    call copy_oper_from_ndat(green_oper_ndat,green%oper,ndat,green%nw,green%distrib%proct,green%distrib%me_freq,.true.)
    do ifreq=1,green%nw
      if (green%distrib%proct(ifreq) /= green%distrib%me_freq) cycle
