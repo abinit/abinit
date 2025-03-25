@@ -626,7 +626,7 @@ contains
           ncoeff_tot = ncoeff_tot_tmp
           ABI_MALLOC(coeffs_tmp,(my_ncoeff))
           !FIXME: on on bot EOZ: the coeefs_tmp has larger size than coeffs_iatom.
-          ! This is a bug. 
+          ! This is a bug.
           call coeffs_list_copy(coeffs_tmp,coeffs_iatom)
           call polynomial_coeff_list_free(coeffs_iatom)
         else
@@ -1127,7 +1127,7 @@ contains
           &                                    fit_data%training_set%sqomega, weights=weights)
 
         !Print the standard deviation before the fit
-        ! FIXME: on builder ALPS_INTEL_2025_elpa, compile fails. 
+        ! FIXME: on builder ALPS_INTEL_2025_elpa, compile fails.
         ! This is probably due to the fact that the format is too long.
         ! We should split the write in two writes.
         write(message,'(4a,ES24.16,2a,ES24.16,2a,ES24.16,2a,ES24.16,a)' ) ch10,&
@@ -1854,6 +1854,8 @@ contains
            &                             check = .TRUE.)
        else
          ia = ii - eff_pot_fixed%anharmonics_terms%ncoeff
+         ! FIXME: coeffs_tmp is not allocated in test v8-t14
+         ! or is it coeffs_tmp(ia) that is not allocated?
          call polynomial_coeff_init(coeffs_tmp(ia)%coefficient,coeffs_tmp(ia)%nterm,&
            &                                      coeffs_out(ii),coeffs_tmp(ia)%terms,&
            &                                      coeffs_tmp(ia)%name,&

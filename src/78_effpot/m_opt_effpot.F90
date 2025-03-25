@@ -359,7 +359,7 @@ end subroutine opt_effpot
 !! comm: MPI communicator
 !! fit_weight_T: ?
 !! print_anh: ?
-!! bound_option: 1 or 2. Whether the bounding term should be the same nbody with the term to be bounded. 1. Yes (default), 2. No 
+!! bound_option: 1 or 2. Whether the bounding term should be the same nbody with the term to be bounded. 1. Yes (default), 2. No
 !!
 !!
 !! OUTPUT
@@ -487,7 +487,7 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
 
   !Before adding bound coefficients calculate MSD of initial model
   !MS FOR THE MOMENT PRINT NO FILE
-  block 
+  block
   call fit_polynomial_coeff_computeMSD(eff_pot,hist,mse_ini,msef_ini,mses_ini,&
     &                                  natom_sc,ntime,fit_data%training_set%sqomega,comm,&
     &                                  compute_anharmonic=.TRUE.,print_file=.FALSE.)
@@ -563,7 +563,7 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
               do icombi3=1,ncombi1
                 !call coeffs_list_conc_onsite(my_coeffs, HOcrossdisp_terms(icombi3))
                 if (HOsingledisp_terms(icombi3)%terms(1)%get_nbody() == nbody_term .or. bound_option/=1) then
-                  call coeffs_list_append(my_coeffs,HOsingledisp_terms(icombi3), check=.TRUE.)  
+                  call coeffs_list_append(my_coeffs,HOsingledisp_terms(icombi3), check=.TRUE.)
                   ncombi1_real = ncombi1_real + 1
                 endif
               end do
@@ -588,7 +588,7 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
               do icombi3=1,ncombi2
                 !call coeffs_list_conc_onsite(my_coeffs, HOcrossdisp_terms(icombi3))
                 if (HOcrossdisp_terms(icombi3)%terms(1)%get_nbody() == nbody_term .or. bound_option/=1) then
-                  call coeffs_list_append(my_coeffs,HOcrossdisp_terms(icombi3), check=.TRUE.)  
+                  call coeffs_list_append(my_coeffs,HOcrossdisp_terms(icombi3), check=.TRUE.)
                   ncombi2_real = ncombi2_real + 1
                 endif
               end do
@@ -596,7 +596,7 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
         !else
         !    if(ncombi2 > 0)then
         !     call coeffs_list_conc_onsite(my_coeffs, HOcrossdisp_terms)
-        !    endif  
+        !    endif
         !endif
         if(allocated(HOcrossdisp_terms)) call polynomial_coeff_list_free(HOcrossdisp_terms)
        end associate
@@ -1443,6 +1443,7 @@ subroutine opt_getHOstrain(terms,ncombi,nterm_start,eff_pot,power_strain,comm, m
         & eff_pot%anharmonics_terms%coefficients(i)%terms,eff_pot%anharmonics_terms%coefficients(i)%name,&
         & isbound=1, check=.TRUE.)
     else
+      ! FIXME: strain_terms_tmp is not allocated. with test tmulti_l_7_1
       call polynomial_coeff_init(coeff_ini,strain_terms_tmp(i-nterm_start)%nterm,terms(i),&
         &         strain_terms_tmp(i-nterm_start)%terms,strain_terms_tmp(i-nterm_start)%name,&
         &         isbound=1, check=.TRUE.)
