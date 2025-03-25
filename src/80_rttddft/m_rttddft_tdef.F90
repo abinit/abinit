@@ -23,12 +23,13 @@
 module m_rttddft_tdef
 
  use defs_basis
- use defs_abitypes,  only: MPI_type
+ use defs_abitypes,   only: MPI_type
 
- use m_dtset,        only: dataset_type
- use m_errors,       only: msg_hndl
- use m_initylmg,     only: initylmg
- use m_xmpi,         only: xmpi_bcast
+ use m_dtset,         only: dataset_type
+ use m_errors,        only: msg_hndl
+ use m_initylmg,      only: initylmg
+ use m_profiling_abi, only: abimem_record
+ use m_xmpi,          only: xmpi_bcast
 
  implicit none
 
