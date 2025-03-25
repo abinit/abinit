@@ -1232,23 +1232,22 @@ contains
         end if
      end if
 !    Reset gf_values
-     gf_values(:,:) = huge(0.0_dp)
+     gf_values(:,:) = huge(0.0_dp)/5.0_dp
 
      do icoeff=1,my_ncoeff
        if(isbanned(my_coeffindexes(icoeff)) .or. &
          & isselected(my_coeffindexes(icoeff))  )then
-         gf_values(:,icoeff) = huge(0.0_dp)/(my_ncoeff+100)
+         gf_values(:,icoeff) = huge(0.0_dp)/5.0_dp
          cycle
        endif
        if(any(list_coeffs==my_coeffindexes(icoeff)) .or. singular_coeffs(icoeff) == 1)then
-          gf_values(:,icoeff) = huge(0.0_dp)/(my_ncoeff+100)
+          gf_values(:,icoeff) = huge(0.0_dp)/5.0_dp
           cycle
        endif
        !if(nbancoeff >= 1)then
        !end if
        !list_coeffs(icycle) = my_coeffindexes(icoeff)
        !my_coeffindexes(my_coeffindexes(icoeff)) = .True.
-
 
        if(need_initialize_data)then
          my_icoeff = icoeff
@@ -1314,7 +1313,7 @@ contains
            end if
          end if
        else!In this case the matrix is singular.
-         gf_values(:,icoeff) = huge(0.0_dp)/(my_ncoeff+100)
+         gf_values(:,icoeff) = huge(0.0_dp)/5.0_dp
          isbanned(my_coeffindexes(icoeff))=.True.
          singular_coeffs(icoeff) = 1
          write(message, '(a)') ' The matrix is singular...'
@@ -1353,6 +1352,10 @@ contains
        end if
      end do
 
+     !print *, "DEBUG==================> ", "Gather best on each cpu finished."
+     !print *, "DEBUG==================> ", "index_min: ", index_min
+     !print *, "DEBUG==================> ", "my_ncoeff: ", my_ncoeff
+
 !    MPI GATHER THE BEST COEFF ON EACH CPU
      if(nproc > 1)then
        buffGF(1,1) = index_min
@@ -1371,12 +1374,16 @@ contains
        end do
      end if
 
+     !print *, "DEBUG==================> ", "Gather best on each cpu finished2."
+     !print *, "DEBUG==================> ", "index_min: ", index_min
+
+
+
      BLOCK  ! sort the coeff on each CPU
        real(dp) :: mygf(my_ncoeff)
        integer :: myorder(my_ncoeff), ntot
        real(dp), allocatable :: allgf(:)
        integer, allocatable :: allorder(:)
-       !print *, "DEBUG==================> ", "Gather best on each cpu finished2."
        do icoeff=1,my_ncoeff
          if(gf_values(1,icoeff) < zero) then
            mygf(icoeff)=9D99
@@ -1387,7 +1394,14 @@ contains
          end if
          myorder(icoeff) = my_coeffindexes(icoeff)
        end do
+       !debug print myorder
+       !print *, "DEBUG==================> ", "size(myorder): ", size(myorder)
+       !print *, "DEBUG==================> ", "myorder: ", myorder
+       !print *, "DEBUG==================> ", "mygf: ", mygf
        call mpigatherv(mygf,myorder, my_ncoeff, allgf, allorder, ntot, comm, nproc)
+       ! debug allorder
+        !print *, "DEBUG==================> ", "size(allorder): ", size(allorder)
+        !print *, "DEBUG==================> ", "allorder: ", allorder
        BLOCK
          real(dp) :: allgf_copy(size(allgf))
          real(dp):: work((ntot+1)/2)
@@ -1400,7 +1414,6 @@ contains
          call MergeSort(allgf_copy, work, allorder, worder)
          do i=2, ntot
            if(abs(allgf(allorder(i))-allgf(allorder(i-1)))< 1e-16) then
-              !print *, allgf(allorder(i-1)), allgf(allorder(i))
               ideg(allorder(i))=.True.
               isbanned(allorder(i))=.True.
            end if
@@ -1442,7 +1455,6 @@ contains
          integer :: i
          integer :: ind_select
          integer :: nselected_this_cycle
-         !do i=1, ncoeff_this_cycle
          nselected_this_cycle=0
          i=0
          do while(nselected_this_cycle<ncoeff_this_cycle)
@@ -1458,6 +1470,7 @@ contains
 
            if(index_min==0) then
              exit
+	   ! TODO : check if this is necessary
            !else
            !else if(is_duplicate_coeff(index_min)) then
            !  cycle
@@ -1593,6 +1606,8 @@ contains
      end BLOCK
    end do !icycle_tmp=1,ncoeff_to_select
   end subroutine select_one_by_one
+
+
   subroutine select_with_monte_carlo()
     !  Monte Carlo selection
     nsweep = 10000
@@ -1748,6 +1763,11 @@ contains
        &                                  fit_data%strten_diff,fit_data%training_set%sqomega,fit_on,int_fit_factors, &
        &                                  weights=weights)
 
+    ! print the coeff_values
+    !print *, "size of coeff_values: ", size(coeff_values)
+    !print *, "ncolff_to_fit: ", ncoeff_to_fit
+    !print *, "coeff_values: ", coeff_values(1:ncoeff_to_fit)
+
      if(need_verbose) then
        write(message, '(3a)') ch10,' Fitted coefficients at the end of the fit process: '
        call wrtout(ab_out,message,'COLL')
@@ -1834,16 +1854,30 @@ contains
            &                             check = .TRUE.)
        else
          ia = ii - eff_pot_fixed%anharmonics_terms%ncoeff
-         ! FIXME: coeffs_tmp is not allocated in test v8-t14
-         ! or is it coeffs_tmp(ia) that is not allocated?
-         call polynomial_coeff_init(coeffs_tmp(ia)%coefficient,coeffs_tmp(ia)%nterm,&
-           &                                      coeffs_out(ii),coeffs_tmp(ia)%terms,&
-           &                                      coeffs_tmp(ia)%name,&
-           &                                      check=.true.)
+         ! Ensure coeffs_tmp and coeffs_tmp(ia) are allocated before accessing
+         if (.not. allocated(coeffs_tmp)) then
+            print *, "Error in fit_all_selected_coefficients: coeffs_tmp not allocated"
+          else
+            print *, "coeffs_tmp is allocated."
+            print *, "size of coeffs_tmp:", size(coeffs_tmp)
+            print *, "ia: ", ia
+            if (ia > size(coeffs_tmp)) then
+              print *, "Error in fit_all_selected_coefficients: ia > size(coeffs_tmp)"
+            else
+              print *, "ia is within bounds."
+            end if
+         endif
 
+
+         call polynomial_coeff_init( &
+            coeffs_tmp(ia)%coefficient, &  ! Coefficient value
+            coeffs_tmp(ia)%nterm, &        ! Number of terms
+            coeffs_out(ii), &             ! Output coefficient structure
+            coeffs_tmp(ia)%terms, &       ! Terms array
+            coeffs_tmp(ia)%name, &        ! Name of the coefficient
+            check = .true.      &            ! Validation flag
+         )
        endif
-       !   DEBUG MS
-       !        write(*,*) "coeffs_out(", ii,")%name:",coeffs_out(ii)%name
      enddo
 
 
@@ -2571,70 +2605,48 @@ subroutine fit_polynomial_coeff_solve(coefficients,fcart_coeffs,fcart_diff,energ
 !call DSGESV(N,NRHS,A,LDA,IPIV,B,LDB,coefficients,LDX,WORK,SWORK,ITER,INFO)
 
 !Other routine, activated on 20240817, together with the change of reference machine
+! Check matrix conditioning
+ !if (any(isnan(A))) then
+ !  INFO = -2
+ !  print *, "NaN in A"
+ !  coefficients = zero
+ !endif
+
+ !if (any(isnan(B))) then
+ !   INFO = -2
+ !   !print *, "NaN in B"
+ !   coefficients = zero
+ !endif
+   ! Solve the system
+  ! call dgesv(N,NRHS,A,LDA,IPIV,B,LDB,INFO)
+   !if (INFO == 0) then
+     ! Check solution for NaN or very large values
+    ! if (any(isnan(B(:,NRHS))) .or. any(abs(B(:,NRHS)) > 1.0e10_dp)) then
+    !   INFO = -3
+    !   coefficients = zero
+    !   !print *, "NaN or very large values in coefficients"
+    ! else
+    !   coefficients = B(:,NRHS)
+    !   print *, "INFO=", INFO
+    !   print *, "Good solution", coefficients
+    ! endif
+    !else
+    !    print*, "INFO=", INFO, "setting coefficients to zero"
+    !  coefficients = zero
+    !end if
+
+!==================================================
+
+
  call dgesv(N,NRHS,A,LDA,IPIV,B,LDB,INFO)
  coefficients = B(:,NRHS)
-!==================================================
 
  !U is nonsingular
  if (INFO==N+2) then
    coefficients = zero
  end if
 
- !if(nbound>0)  then
- !      ABI_ERROR("Bounding with one-body terms is deprected.")
- !end if
-   !if (.not. ignore_bound) then
-   !    block
-       !  real(dp) :: bl(N), bu(N), w(N)
-       !  integer :: istate(N+1), loopa
-       !  real(dp) :: AC(N-nbound,N-nbound),BC(n-nbound,1)
-       !  AC=A(nbound+1:, nbound+1:)
-       !  BC=B(nbound+1:, :)
-       !  ! first fit without any bounding term to get some reference values.
-       !  call DSGESV(N-nbound,NRHS,AC,LDA-nbound,IPIV,BC,LDB,coefficients(nbound+1:), &
-       !    &     LDX-nbound,WORK,SWORK,ITER,INFO)
-       !  bl=-1.0_dp
-       !  bu=1.0_dp
-       !  ! constrain the terms to be around the fitted values
-       !  bl(nbound+1:)=coefficients(nbound+1:)-abs(coefficients(nbound+1:))*0.1
-       !  bu(nbound+1:)=coefficients(nbound+1:)+abs(coefficients(nbound+1:))*0.1
-       !  ! constrain the bounding terms
-       !  bl(:nbound) = min_bound_coeff
-       !  bu(:nbound) = 1e5_dp
-       !  coefficients(:nbound)=0.0_dp
-       !  !istate(N+1) = nbound
-       !  CALL bvls(key=0, m=N, n=N, a=A, b=B, bl=bl, bu=bu, x=coefficients, istate&
-       !    &=istate, loopa=loopa, w=w)
-       !end block
-    ! else ! ignore_bound
-    !   call DSGESV(N-nbound,1,A(nbound+1:, nbound+1:),LDA-nbound,IPIV,B(nbound+1:, :),LDB,coefficients(nbound+1:), &
-    !    &     LDX-nbound,WORK,SWORK,ITER,INFO)
-    !   coefficients(:nbound)=0.0_dp
-    !   if (INFO==N+2) then
-    !     coefficients = zero
-    !   end if
-
-    !   if(any(abs(coefficients)>1.0E10))then
-    !    INFO = 1
-    !    coefficients = zero
-    !   end if
-    ! info_out = INFO
-    !end if  !ignore_bound
- !end if  ! nbound> 0
-
-     !FIXME: fails on EOS
-     !call DSGESV(N,NRHS,A,LDA,IPIV,B,LDB,coefficients,LDX,WORK,SWORK,ITER,INFO)
-   !end if
-
-   !other routine
-   ! call dgesv(N,NRHS,A,LDA,IPIV,B,LDB,INFO)
-   ! coefficients = B(:,NRHS)
-   !U is nonsingular
-   !if (INFO==N+2) then
-   !  coefficients = zero
-   !end if
-
-   if(any(abs(coefficients)>1.0E10))then
+   if(any(abs(coefficients)>1.0E10) .or. any(isnan(coefficients)))then
      INFO = 1
      coefficients = zero
    end if
@@ -3773,15 +3785,13 @@ end subroutine genereList
 
 subroutine mpigatherv(A, order, n ,buff_A, buff_order, totsize, comm, nproc)
   integer, intent(inout) :: n, totsize
-  real(dp),  intent(out) ::  A(n)
+  real(dp),  intent(inout) ::  A(n)
   integer, intent(inout):: order(n)
   integer, intent(in) :: comm, nproc
   real(dp), allocatable, intent(out) ::  buff_A(:)
   integer, allocatable, intent(out) :: buff_order(:)
   integer :: disps(nproc), sizes(nproc)
   integer ::  ierr, i
-  A(:)=zero
-  order(:)=0
   totsize=n
   call xmpi_sum(totsize, comm, ierr)
   ABI_MALLOC(buff_A, (totsize))
