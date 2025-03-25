@@ -1299,6 +1299,9 @@ subroutine dfpt_mkvxcccdq(cplex,i3dir,gmet,gprimd,kxc,mpi_enreg,nfft, &
 
  end if
 
+!Calculate the term with the gradient of the first-order pseudocore density
+
+
 !Deallocations
  ABI_SFREE(vxc1dq)
 

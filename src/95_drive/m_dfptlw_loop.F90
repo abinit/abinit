@@ -109,6 +109,7 @@ contains
 !!  mpw   = maximum number of planewaves in basis sphere (large number)
 !!  natom = number of atoms in unit cell
 !!  nattyp(ntypat)= # atoms of each type.
+!!  ncorespl(mqgrid_vl,2,ntypat)= spl interpolation of the pseudo core density for all atom types
 !!  nfftf=(effective) number of FFT grid points (for this proc) for the "fine" grid (see NOTES in respfn.F90)
 !!  ngfftf(1:18)=integer array with FFT box dimensions and other for the "fine" grid (see NOTES in respfn.F90)
 !!  nkpt  = number of k points
@@ -154,7 +155,7 @@ contains
 subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil,dtset,&
 & ffnl,gmet,gprimd,gsqcut,&
 & hdr,kg,kxc,mband,mgfft,mkmem,mk1mem,&
-& mpert,mpi_enreg,mpw,natom,nattyp,ngfftf,nfftf,nkpt,nkxc,nspinor,nsppol,&
+& mpert,mpi_enreg,mpw,natom,nattyp,ncorespl,ngfftf,nfftf,nkpt,nkxc,nspinor,nsppol,&
 & npwarr,nylmgr,occ,&
 & pawfgr,pawtab,ph1d,&
 & psps,rfpert,rhog,rhor,rmet,rprimd,ucvol,useylmgr,xred,ylm,ylmgr)
@@ -182,6 +183,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
  real(dp),intent(in) :: cg(2,mpw*nspinor*mband*mkmem*nsppol),gmet(3,3)
  real(dp),intent(in) :: ffnl(mkmem,mpw,dimffnl,psps%lmnmax,psps%ntypat)
  real(dp),intent(in) :: gprimd(3,3),kxc(nfftf,nkxc)
+ real(dp),intent(in) :: ncorespl(psps%mqgrid_vl,2,psps%ntypat)
  real(dp),intent(in) :: ph1d(2,3*(2*mgfft+1)*natom)
  real(dp),intent(in) :: rhog(2,nfftf),rhor(nfftf,dtset%nspden),rmet(3,3),rprimd(3,3)
  real(dp),intent(in) :: xred(3,natom)
