@@ -60,7 +60,7 @@ module m_dfptlw_loop
  use m_rf2,         only : rf2_getidir
  use m_initylmg,    only : initylmg
  use m_atm2fft,     only : dfpt_atm2fft
- use m_dfpt_mkvxc,  only : dfpt_mkvxc
+ use m_dfpt_mkvxc,  only : dfpt_mkvxc, dfpt_mkvxcccdq
  use m_dfpt_rhotov, only : dfpt_rhotov
  use m_mkcore,      only : dfpt_mkcore
  use m_mklocl,      only : dfpt_vlocal, vlocalstr,dfpt_vlocaldq,dfpt_vlocaldqdq,dfpt_vmetdqdq 
@@ -220,6 +220,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
  real(dp),allocatable :: tgeom_typeI(:,:,:,:,:,:),tgeom_typeII(:,:,:,:,:,:,:)
  real(dp),allocatable :: vhart1dqdq(:),vpsp1dqdq(:)
  real(dp),allocatable :: vpsp1_i1pertdq(:,:,:),vpsp1_i2pertdq(:,:,:)
+ real(dp),allocatable :: vxccc1_i2pertdq(:,:,:)
  real(dp),allocatable :: vpsp1_i1pertdq_geom(:,:,:), vpsp1_i1pertdqdq(:,:,:)
  real(dp),allocatable :: vxc1dqdq(:),work(:)
  real(dp),allocatable :: xccc3d1(:),xccc3d2(:)
@@ -411,6 +412,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
              if (i2pert <= natom+3) then
                n2dq=1
                ABI_MALLOC(vpsp1_i2pertdq,(2*nfftf,dtset%nspden,n2dq))
+               ABI_MALLOC(vxccc1_i2pertdq,(2*nfftf,dtset%nspden,n2dq))
              else if (i2pert == natom+4) then
                n2dq=2
                ABI_MALLOC(vpsp1_i2pertdq,(2*nfftf,dtset%nspden,n2dq))
@@ -435,7 +437,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
              !Allocate the second-gradient array
              ABI_MALLOC(vpsp1_i1pertdqdq,(2*nfftf,dtset%nspden,n2dq))
 
-             !Calculate first-order xccc potential for quadrupoles
+             !Calculate first-order pseudocore charge (still, only for quadrupoles)
              if (i2pert<=natom.and.dtset%lw_qdrpl==1.and.psps%n1xccc/=0.and.nkxc == 7) then
                if (psps%nc_xccc_gspace==1) then
                  ndir=1
@@ -527,11 +529,18 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
                          !permutation of the strain indexes. 
                          istr=6+i2dir
                          call dfpt_vmetdqdq(2,gmet,gprimd,gsqcut,istr,i2pert,kxc,mpi_enreg, &
-                         & psps%mqgrid_vl,natom,nattyp,dtset%nfft,dtset%ngfft,dtset%ntypat,n1,n2,n3,&
-                         & nkxc,nspden,opthartdqdq,ph1d,i3dir,psps%qgrid_vl,&
+                         & psps%mqgrid_vl,natom,nattyp,dtset%nfft,dtset%ngfft,dtset%ntypat,n1,n2,n3, &
+                         & nkxc,nspden,opthartdqdq,ph1d,i3dir,psps%qgrid_vl, &
                          & dtset%qptn,rhog,rhor,ucvol,psps%vlspl,vhart1dqdq,vpsp1dqdq,vxc1dqdq)
                          vpsp1_i2pertdq(:,1,2)=vhart1dqdq(:)+vpsp1dqdq(:)+vxc1dqdq(:)
                        end if
+                     end if
+
+                     if (i1pert==natom+2.and.i2pert<=natom) then
+                       !Get the q-gradient of the first-order XC potential due to the pseudocore charge
+                       call dfpt_mkvxcccdq(cplex,i3dir,gmet,gprimd,kxc,mpi_enreg,nfftf,dtset%ngfft,&
+                     & nkxc,nspden,vxccc1_i2pertdq,xccc3d2)
+
                      end if
                    end if !samepert
 
@@ -697,6 +706,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
              end do     ! ir3pert
              
              ABI_SFREE(vpsp1_i2pertdq)
+             ABI_SFREE(vxccc1_i2pertdq)
              ABI_FREE(vpsp1_i1pertdq_geom)
              ABI_FREE(vpsp1_i1pertdqdq)
              ABI_FREE(d3etot_t4)

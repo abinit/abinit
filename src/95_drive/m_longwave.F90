@@ -215,11 +215,11 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
    ABI_BUG(msg)
  end if
 
-!Not usable with core electron density corrections
-! if (psps%n1xccc/=0) then
-!   msg='This routine cannot be used for n1xccc/=0'
-!   ABI_BUG(msg)
-! end if
+!Not usable with core electron density corrections and flexo
+ if (psps%n1xccc/=0.and.dtset%lw_flexo/=0) then
+   msg='This routine cannot be used to calculate flexoelectric properties with n1xccc/=0'
+   ABI_BUG(msg)
+ end if
 
 
 !Define some data
