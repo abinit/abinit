@@ -94,6 +94,14 @@ module m_slice
     integer, parameter :: SLICE_PARAL_STATIC  = 1 ! diago on npband_sub MPI block bandpp
     integer, parameter :: SLICE_PARAL_DYNAMIC = 2 ! diago on npband_sub MPI block bandpp_sub
 
+    ! This type only has getters and setters
+    ! and sanity check functions
+    ! nothing else
+    type, private :: mpiTrack_t
+        logical :: row_flag
+        logical :: col_flag
+    end type mpiTrack_t
+
     ! Public 'slice' datatype
     ! Parameters specific to current slice, manages isolated slice memory
     !-------------------------------------------------
@@ -2242,7 +2250,7 @@ subroutine slice_run_bandpass(chebfi,slice,X0,getAX_BX,getBm1X,eigen,occ,residu,
  ! Transpose MPI: bands are now distributed over MPI columns
  ! Do not transpose if we are in sub communicator. 
  ! We assume that sub communicator is already transposed.
- if (use_subcomm_ .eq. .false.) then
+ if (not use_subcomm_) then
     write(std_out,*) 'TRACE start MPI Transpose'
     call chebfi_mpiTranspose(chebfi,nspinor,'COL')
     write(std_out,*) 'TRACE finished MPI Transpose'
@@ -3461,7 +3469,7 @@ subroutine spsl_allocBuffer(spsl)
     nband_buf = spsl%nband_buf
     me_g0 = spsl%me_g0
 
-    ABI_CHECK(spsl%buffer_mem==.false., "buffer already exists")
+    ABI_CHECK(not spsl%buffer_mem, "buffer already exists")
 
     ! Allocate regular array on CPU
     call xg_init(spsl%Bufr_work,space,spacedim,nband_buf,spacecom,me_g0=me_g0,&
@@ -3545,6 +3553,85 @@ subroutine spsl_mergeBuffer(spsl,X0)
 end subroutine spsl_mergeBuffer
 
 !! FUNCTION
+!! Create transposer objects controlling communications
+!! useful to change MPI distribution on rows or columns.
+!! ONLY acts on subcommunicator and on MPI subgroup.
+!! Assumes initial MPI distribution is on columns.
+!! 
+subroutine slice_initDistribution(slice,nspinor)
+
+    implicit none
+    
+    ! arguments
+    type(slice_t), intent(inout) :: slice
+    integer      , intent(in   ) :: nspinor
+    ! variables
+    integer :: comm_rows,comm_cols, me_g0_fft
+    integer :: gpu_option,gpu_thread_limit
+
+    ! Sanity check
+    ABI_CHECK(not slice%mpi_row_flag, "MPI should not be Row")
+    ABI_CHECK(slice%mpi_col_flag, "MPI should be Column")
+
+    comm_rows = slice%comm_rows
+    comm_cols = slice%comm_cols
+    me_g0_fft = slice%me_g0_fft
+    gpu_option = slice%gpu_option
+    gpu_thread_limit = slice%gpu_thread_limit
+
+    ! Construct transposer for X
+    call xgTransposer_constructor(slice%XTrans,slice%Xr,slice%Xc,&
+        nspinor,STATE_LINALG,TRANS_ALL2ALL,comm_rows,comm_cols,0,0,&
+        me_g0_fft,gpu_option=gpu_option,gpu_thread_limit=gpu_thread_limit)
+        
+    ! Same for AX and BX, with copy
+    call xgTransposer_copyConstructor(slice%AXTrans,slice%XTrans,&
+        slice%AXr,slice%AXc,STATE_LINALG)
+     
+    call xgTransposer_copyConstructor(slice%BXTrans,slice%XTrans,&
+        slice%BXr,slice%BXc,STATE_LINALG)
+
+    slice%XTrans%gpu_kokkos_nthrd = slice%gpu_kokkos_nthrd
+    slice%AXTrans%gpu_kokkos_nthrd = slice%gpu_kokkos_nthrd
+    slice%BXTrans%gpu_kokkos_nthrd = slice%gpu_kokkos_nthrd
+        
+    slice%XTrans%state = STATE_COLSROWS
+    slice%AXTrans%state = STATE_COLSROWS
+    slice%BXTrans%state = STATE_COLSROWS
+
+end subroutine slice_initDistribution
+
+!! FUNCTION
+!! Free transposer objects for slice
+!! 
+subroutine slice_freeDistribution(slice)
+
+    implicit none
+    type(slice_t), intent(inout) :: slice
+
+    call xgTransposer_free(slice%XTrans)
+    call xgTransposer_free(slice%AXTrans)
+    call xgTransposer_free(slice%BXTrans)
+
+end subroutine slice_freeDistribution
+
+!! FUNCTION
+!! xgTools copy after MPI sanity check
+!! TODO add GPU sanity check
+!! 
+subroutine slice_copyfrom(slice,X)
+
+    ABI_CHECK
+
+    call xgBlock_copy(X0,slice%X)
+
+end subroutine slice_copyFromX
+
+!! FUNCTION
+!! Free transposers with sanity check
+!! must be on the right 
+
+!! FUNCTION
 !! Switch between MPI row/col distribution
 !! applied to mem X,AX,BX of slice object
 !! 
@@ -3555,94 +3642,147 @@ subroutine slice_switchDistribution(slice,nspinor)
     ! arguments
     type(slice_t), intent(inout) :: slice
     integer      , intent(in   ) :: nspinor
+    integer      , intent(in   ) :: sanity
     ! variables
+    integer :: target_state
 
-    !if (slice%mem_rows) then
+    ABI_NVTX_START_RANGE(NVTX_SLICE_TRANSPOSE)
+    
+    if (slice%mpi_row_flag) then
 
-        if (slice%mem_none) then
-        ! should have a switch to create then lock so that it is not switched
+        ! Target is row distribution
+        target_state = STATE_LINALG
 
-            ! Construct transposer for X
-            call xgTransposer_constructor(slice%XTrans,slice%Xr,slice%Xc,&
-                nspinor,STATE_LINALG,TRANS_ALL2ALL,comm_rows,comm_cols,0,0,&
-                me_g0_fft,gpu_option=gpu_option,gpu_thread_limit=gpu_thread_limit)
-        
-            slice%XTrans%gpu_kokkos_nthrd = slice%gpu_kokkos_nthrd
-            slice%XTrans%state = STATE_COLSROWS
+    else if (slice%mpi_col_flag) then
 
-            ! Same for AX, from copy
-            if (slice%use_AX) then
-
-                call xgTransposer_copyConstructor(slice%AXTrans,slice%XTrans,&
-                    slice%AXr,slice%AXc,STATE_LINALG)
-        
-                slice%AXTrans%gpu_kokkos_nthrd = slice%gpu_kokkos_nthrd
-                slice%AXTrans%state = STATE_COLSROWS
-
-            end if
-
-            ! Same for BX, from copy
-            if (slice%use_BX) then
-
-                call xgTransposer_copyConstructor(slice%BXTrans,slice%XTrans,&
-                    slice%BXr,slice%BXc,STATE_LINALG)
-        
-                slice%BXTrans%gpu_kokkos_nthrd = slice%gpu_kokkos_nthrd
-                slice%BXTrans%state = STATE_COLSROWS
-
-            end if
-
-            ! Inform transposer has been created to default col distribution
-            ! and that we are ALREADY in col distribution (no need to transpose)
-            slice%mem_none = .false.
-            slice%mem_rows = .false.
-            slice%mem_cols = .true.
-            slice%locked = .true. ! prevents from switching two times
-
-        end if
-
-     if (slice%mem_rows) then
-
-        ! Transpose X to col distribution
-        call xgTransposer_transpose(spsl%BufTrans,STATE_COLSROWS)
-
-        ! Same for AX
-        if (slice%use_AX) then
-            call xgTransposer_transpose(slice%AXTrans,STATE_COLSROWS)
-        end if
-
-        ! Same for BX
-        if (slice%use_BX) then
-            call xgTransposer_transpose(slice%BXTrans,STATE_COLSROWS)
-        end if
-
-        ! Inform we are in column distribution
-        slice%mem_rows = .false.
-        slice%mem_cols = .true.
-
-    else if (slice%mem_cols) then
-
-        ! check if it is constructed then do not transpose
-
-        ! Transpose X to row distribution
-        call xgTransposer_transpose(slice%XTrans,STATE_LINALG)
-
-        ! Same for AX
-        if (slice%use_AX) then
-            call xgTransposer_transpose(slice%AXTrans,STATE_LINALG)
-        end if
-
-        ! Same for BX
-        if (slice%use_BX) then
-            call xgTransposer_transpose(slice%BXTrans,STATE_LINALG)
-        end if
-
-        slice%mem_rows = .true.
-        slice%mem_cols = .false.
+        ! Target is col distribution
+        target_state = STATE_COLSROWS
 
     end if
 
+    ! Transpose X to target distribution
+    call xgTransposer_transpose(slice%XTrans,target_state)
+
+    ! Also apply to AX and BX
+    if (slice%use_AX_BX) then
+        call xgTransposer_transpose(slice%AXTrans,target_state)
+        call xgTransposer_transpose(slice%BXTrans,target_state)
+    end if
+    
+    ABI_NVTX_END_RANGE()
+
 end subroutine slice_switchDistribution
+
+!! FUNCTION
+!! Perform sanity check on current MPI distrubution
+!! and set pointers to MPI column distribution
+!! 
+subroutine slice_mpiCheckCol(slice)
+
+    implicit none
+    type(slice_t), intent(inout) :: slice
+
+    ABI_CHECK(slice%mpi_col_flag,"slice MPI distribution should be column")
+
+    slice%X = slice%Xc
+    slice%AX = slice%AXc
+    slice%BX = slice%BXc
+
+end subroutine slice_mpiCheckCol
+
+!! FUNCTION
+!! Perform sanity check on current MPI distrubution
+!! and set pointers to MPI row distribution
+!! 
+subroutine slice_mpiCheckRow(slice)
+
+    implicit none
+    type(slice_t), intent(inout) :: slice
+
+    ABI_CHECK(slice%mpi_row_flag,"slice MPI distribution should be row")
+    
+    slice%X = slice%Xr
+    slice%AX = slice%AXr
+    slice%BX = slice%BXr
+
+end subroutine slice_mpiCheckRow
+
+!! FUNCTION
+!! Perform Rayleigh-Ritz method on slice
+!! Interfaces with xgTools after MPI sanity check
+!!
+subroutine slice_RayleighRitz(slice)
+
+    implicit none
+    ! arguments
+    type(slice_t), intent(inout) :: slice
+    ! variables
+    integer :: ierr
+
+    ! Sanity check
+    call slice_mpiCheckRow(slice)
+
+    ABI_NVTX_START_RANGE(NVTX_SLICE_RR)
+
+    call xg_RayleighRitz(slice%X,slice%AX,slice%BX,slice%eigenvalues,ierr,&
+        0,tim_RR,slice%gpu_option,solve_ax_bx=.true.)
+
+    ABI_CHECK(ierr==0,"Rayleigh-Ritz did not work")
+
+    ABI_NVTX_END_RANGE()
+
+end subroutine slice_RayleighRitz
+
+!! FUNCTION
+!! Compute residuals on slice
+!! Interfaces with xgTools after MPI sanity check
+!! 
+subroutine slice_computeResiduals(slice,residu)
+
+    implicit none
+    ! arguments
+    type(slice_t)  , intent(inout) :: slice
+    type(xgBlock_t), intent(inout) :: residu
+    ! variables
+    type(xgBlock_t) :: Y
+
+    ! Sanity check
+    call slice_mpiCheckRow(slice)
+
+    ABI_NVTX_START_RANGE(NVTX_SLICE_RESID)
+    
+    call timab(tim_residu, 1, tsec)
+
+    if (slice%paw) then
+        Y = slice%BX
+    else
+        Y = slice%X
+    end if
+    
+    ! AX <- AX-Y
+    call xgBlock_colwiseCymax(slice%AX,slice%eigenvalues,Y,slice%AX)
+    call xgBlock_colwiseNorm2(slice%AX, residu)
+    
+    call timab(tim_residu, 2, tsec)
+    
+    ABI_NVTX_END_RANGE()
+
+end subroutine slice_computeResiduals
+
+!! FUNCTION
+!! Apply filter on slice
+!! 
+subroutine slice_applyFilter(slice)
+    
+    implicit none
+
+    ! new chebyshev situation where we don't compute the quotients
+    ! since this has been already computed in the DOS phase
+    ! the filter is then completely isolated as a function
+
+    ! here use slice%X, slice%AX, slice%BX, islice
+
+end subroutine slice_applyFilter
 
 !! FUNCTION
 !! Switch between MPI row/col distribution
@@ -3739,7 +3879,7 @@ end subroutine slice_initSub
 !! 
 subroutine slice_allocateAll(slice)
  
-    ABI_CHECK(slice%has_mem==.false., "slice memory already exists")
+    ABI_CHECK(not slice%has_mem, "slice memory already exists")
 
     space = slice%space
     spacedim = slice%spacedim
@@ -3771,79 +3911,98 @@ subroutine slice_allocateAll(slice)
 
 end subroutine slice_allocateAll
 
+subroutine mpiTrack_setCol(mpi_tracker)
+
+    implicit none
+    type(mpiTrack_t), intent(inout) :: mpi_tracker
+
+    mpi_tracker%row_flag = .false.
+    mpi_tracker%col_flag = .true.
+
+end subroutine mpiTrack_setCol
+
+subroutine mpiTrack_setRow(mpi_tracker)
+
+    implicit none
+    type(mpiTrack_t), intent(inout) :: mpi_tracker
+
+    mpi_tracker%row_flag = .true.
+    mpi_tracker%col_flag = .false.
+
+end subroutine mpiTrack_setRow
+
+function mpiTrack_getCol(mpi_tracker) result(mpi_tracker%col_flag)! define getter)
+
+    implicit none
+    type(mpiTrack_t), intent(inout) :: mpi_tracker
+
+    mpi_tracker%col_flag = .true.
+
+end subroutine mpiTrack_getCol
+
 !! FUNCTION
-!! Diagonalisation on slice 
-!! using subcommunicators
+!! Diagonalisation on slice using subcommunicators
+!! To be called with X0 = spsl%Bufc
+!! Convention: 
+!!       * set MPI distribution flags before slice routine call
+!!       * slice routines only check flags do not modify
 !!
-subroutine slice_run(slice,spsl,getAX_BX,getBm1X,nspinor)
+subroutine slice_run(slice,X0,eigen,resid,getAX_BX,getBm1X,nspinor)
 
     implicit none
 
     ! arguments
-    type(slice_t  ), intent(inout) :: slice
-    type(spsl_t   ), intent(inout) :: spsl
+    type(slice_t)  , intent(inout) :: slice
+    type(xgBlock_t), intent(inout) :: X0
+    type(xgBlock_t), intent(inout) :: eigen
+    type(xgBlock_t), intent(inout) :: resid
     integer        , intent(in   ) :: nspinor
     ! variables
-    type(xgBlock_t) :: X0
+    type(mpiTrack_t) :: mpi_tracker ! MPI distribution row or col
+    type(gpuTrack_t) :: gpu_tracker ! GPU offload or not
+    ! this is used by slice_run but it cannot be modified by other routines
 
     ABI_CHECK(slice%paral_slice,"sequential slice not implemented")
 
-    comm_rows = slice%comm_rows
-    comm_cols = slice%comm_cols
+    ! The entire 'spectrum slicing' object should have
+    ! trackers along all its subroutines
+    ! These are private variables that are only modified
+    ! by setters applied on the factory object
+    !! slice and buffer and simply workers
+    !! we have two types of workers: slice,buffer
+    !! spslFactory=spectrumSlicing -> sets/unsets flags
+    !! sliceWorker -> sanity check on flags
+    !! bufferWorker -> sanity check on flags
 
-    ! Initialize transposer object associated to X BEFORE copy
-    slice%mem_none = .true.
+    ! Use MPI column distribution ====================
+    call mpiTrack_setCol(mpi_tracker)
+    call slice_initDistribution(slice,nspinor,mpi_tracker)
     
-    call slice_switchDistribution(slice,nspinor)
+    ! Copy i/o buffer to slice then filter
+    call slice_checkState(slice,mpi_tracker)
+    call xgBlock_copy(X0,slice%X)
+    call slice_applyFilter(slice)
 
-    ! Sanity check
-    !ABI_CHECK(slice%has_trans, "slice transposer not found")
-    ABI_CHECK(slice%mem_cols, "slice should be in columns")
-    ABI_CHECK(spsl%buf_cols, "buffer should be in columns")
-    X = slice%Xc
-    X0 = spsl%Bufc
-   
-    ! Copy i/o buffer to slice memory
-    call xgBlock_copy(X0,X)
-
-    ! Apply the filter
-    ! new chebyshev situation where we don't compute the quotients
-    ! since this has been already computed in the DOS phase
-    ! the filter is then completely isolated as a function
-    call slice_applyFilter(slice,X,islice)
-
-    ! barrier
+    ! Use MPI row distribution =======================
     call xmpi_comm_barrier(subcomm)
+    call mpiTrack_setRow(mpi_tracker)
+    slice%use_AX_BX = .true.
+    call slice_switchDistribution(slice,nspinor,mpi_tracker)
 
-    ! Switch to row distribution (for X,AX,BX)
-    slice%use_AX = .true.
-    slice%use_BX = .true.
-    call slice_switchDistribution(slice,nspinor)
+    call slice_RayleighRitz(slice)
+    call slice_computeResiduals(slice,residu)
 
-    ! Sanity check
-    ABI_CHECK(slice%mem_rows,"slice should be on rows")
-    X = slice%Xr
-   
-    call RayleighRitz(slice,X)
-    call computeResiduals(slice,X)
+    ! Use MPI column distribution ====================
+    call xmpi_comm_barrier(subcomm)
+    call mpiTrack_setCol(mpi_tracker)
+    slice%use_AX_BX = .false.
+    call slice_switchDistribution(slice,nspinor,mpi_tracker)
 
-    ! Switch to row distribution (only for X)
-    slice%use_AX = .false.
-    slice%use_BX = .false.
-    call slice_switchDistribution(slice,nspinor)
+    ! Store result X to i/o buffer
+    call slice_checkState(slice,mpi_tracker)
+    call xgBlock_copy(slice%X,X0)
 
-    ! Sanity check
-    ABI_CHECK(slice%mem_cols,"slice should be on columns")
-    ABI_CHECK(spsl%buf_cols,"buffer should be on columns")
-    X = slice%Xc
-    X0 = spsl%Bufc
-   
-    ! Copy computed result X to i/o buffer
-    call xgBlock_copy(X,X0)
-
-    call xgTransposer_free(slice%xgTransposerX)
-    call xgTransposer_free(slice%xgTransposerAX)
-    call xgTransposer_free(slice%xgTransposerBX)
+    call slice_freeDistribution(slice)
 
 end subroutine slice_run
 
