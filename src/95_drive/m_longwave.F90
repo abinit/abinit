@@ -181,7 +181,8 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  real(dp),allocatable :: d3etot(:,:,:,:,:,:,:),d3etot_car(:,:,:,:,:,:,:)
  real(dp),allocatable :: d3etot_nv(:,:,:,:,:,:,:),doccde(:)
  real(dp),allocatable :: eigen0(:),ffnl(:,:,:,:,:),ffnl_i(:,:,:,:,:)
- real(dp),allocatable :: grxc(:,:),kxc(:,:),vxc(:,:),nhat(:,:),nhatgr(:,:,:)
+ real(dp),allocatable :: grxc(:,:),kxc(:,:),vxc(:,:)
+ real(dp),allocatable :: ncorespl(:,:,:),nhat(:,:),nhatgr(:,:,:)
  real(dp),allocatable :: phnons(:,:,:),ph1d(:,:),rhog(:,:),rhor(:,:),dummy_dyfrx2(:,:,:)
 ! real(dp),allocatable :: symrel_cart(:,:,:)
  real(dp),allocatable :: dummy_vpsp(:),work(:),xccc3d(:)
@@ -514,8 +515,8 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  call getph(atindx,dtset%natom,dtset%ngfft(1),dtset%ngfft(2),dtset%ngfft(3),ph1d,xred)
 
 !Pseudo core electron density by method 2
-!TODO: The code is not still adapted to consider n3xccc in the long-wave
-!driver.
+!TODO: The tasks to adapt the code to consider n3xccc in the long-wave
+!driver are under way.
  n3xccc=0;if (psps%n1xccc/=0) n3xccc=nfftf
  ABI_MALLOC(xccc3d,(n3xccc))
  if (psps%n1xccc/=0) then 
@@ -541,6 +542,13 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
      ABI_FREE(grxc) ! dummy
    end if
    ABI_FREE(dummy_dyfrx2) ! dummy
+
+   !Write the spl interpolation of the pseudo core density for all atom types
+   ABI_MALLOC(ncorespl,(psps%mqgrid_vl,2,ntypat))
+   do itypat= 1, ntypat
+     ncorespl(:,:,itypat)= psps%nctab(itypat)%tcorespl(:,:)
+   end do
+
  end if
 
 !Set up xc potential. Compute kxc here.
@@ -700,7 +708,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  call dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil,dtset,&
 & ffnl,gmet,gprimd,gsqcut,&
 & hdr,kg,kxc,dtset%mband,dtset%mgfft,&
-& dtset%mkmem,dtset%mk1mem,mpert,mpi_enreg,dtset%mpw,natom,nattyp,ngfftf,nfftf,&
+& dtset%mkmem,dtset%mk1mem,mpert,mpi_enreg,dtset%mpw,natom,nattyp,ncorespl,ngfftf,nfftf,&
 & dtset%nkpt,nkxc,dtset%nspinor,dtset%nsppol,npwarr,nylmgr,occ,&
 & pawfgr,pawtab,ph1d,&
 & psps,rfpert,rhog,rhor,rmet,rprimd,ucvol,useylmgr,xred,ylm,ylmgr)
@@ -752,16 +760,15 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 
  call ddb%set_d3matr(1, d3etot, blkflg, lw=.true.)
 
- call ddb%write(ddb_hdr, dtfil%fnameabo_ddb)
+ call ddb%write_txt(ddb_hdr, dtfil%fnameabo_ddb)
 
 
-   !Calculate spatial-dispersion quantities in Cartesian coordinates and write
-   !them in abi_out
-   ABI_MALLOC(blkflg_car,(3,mpert,3,mpert,3,mpert))
-   ABI_MALLOC(d3etot_car,(2,3,mpert,3,mpert,3,mpert))
-   call lwcart(blkflg,blkflg_car,d3etot,d3etot_car,gprimd,mpert,natom,rprimd)
-   call dfptlw_out(blkflg_car,d3etot_car,dtset%lw_flexo,dtset%lw_qdrpl,dtset%lw_natopt,mpert,natom,ucvol)
- !end if
+ !Calculate spatial-dispersion quantities in Cartesian coordinates and write
+ !them in abi_out
+ ABI_MALLOC(blkflg_car,(3,mpert,3,mpert,3,mpert))
+ ABI_MALLOC(d3etot_car,(2,3,mpert,3,mpert,3,mpert))
+ call lwcart(blkflg,blkflg_car,d3etot,d3etot_car,gprimd,mpert,natom,rprimd)
+ call dfptlw_out(blkflg_car,d3etot_car,dtset%lw_flexo,dtset%lw_qdrpl,dtset%lw_natopt,mpert,natom,ucvol)
 
  call ddb_hdr%free()
  call ddb%free()
@@ -800,6 +807,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  ABI_SFREE(ylmgr)
  ABI_SFREE(blkflg_car)
  ABI_SFREE(d3etot_car)
+ ABI_SFREE(ncorespl)
 
  ! Clean the header
  call hdr%free()
