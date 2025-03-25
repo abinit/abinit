@@ -777,12 +777,21 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
               write(message,'(5a)') ch10,"Differences between test-cycles to small increase",ch10, &
                 &                                          "test coefficient value by factor 1000",ch10
               call wrtout(std_out,message,'COLL')
-              i = 1
+              i = i+1
+              ! This is weird, it keeps on increasing the coefficient by 1000, until a NaN is reached.
             else
               i=i+1
             end if
           enddo ! while mse/mse_ini>10
+          if (isnan(eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient ) ) then
+            eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient = 0
+          end if
+
           eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient = opt_boundcoeff(GF_arr,coeff_opt,bound_penalty)
+          if (isnan(eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient ) ) then
+            eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient = 0
+          end if
+
           write(message,'(a,ES24.16)') "coeff after opt1:",   eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient
           call wrtout(std_out,message,'COLL')
           coeff_tmp = ANINT(eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient*10d10)
@@ -1452,18 +1461,18 @@ subroutine opt_getHOstrain(terms,ncombi,nterm_start,eff_pot,power_strain,comm, m
         & eff_pot%anharmonics_terms%coefficients(i)%terms,eff_pot%anharmonics_terms%coefficients(i)%name,&
         &  check=.TRUE.)
     else
-      write(std_out,*) "DEBUG: i=", i, " nterm_start=", nterm_start 
+      write(std_out,*) "DEBUG: i=", i, " nterm_start=", nterm_start
       write(std_out,*) "DEBUG: Is strain_terms_tmp allocated?", allocated(strain_terms_tmp)
       if (allocated(strain_terms_tmp)) then
         write(std_out,*) "DEBUG: size of strain_terms_tmp=", size(strain_terms_tmp)
       end if
-      
+
       if (.not. allocated(strain_terms_tmp)) then
         write(std_out,*) "ERROR: strain_terms_tmp is not allocated!"
         call wrtout(std_out,"ERROR: strain_terms_tmp is not allocated!",'COLL')
         ABI_BUG("strain_terms_tmp is not allocated in opt_getHOstrain")
       end if
-      
+
       call polynomial_coeff_init(coeff_ini,strain_terms_tmp(i-nterm_start)%nterm,terms(i),&
         &         strain_terms_tmp(i-nterm_start)%terms,strain_terms_tmp(i-nterm_start)%name,&
         &         check=.TRUE.)

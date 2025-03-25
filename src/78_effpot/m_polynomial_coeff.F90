@@ -4094,7 +4094,7 @@ call polynomial_coeff_getNorder(strain_terms_tmp,crystal,cutoff,ncoeff,ncoeff_ou
                                 verbose=.false., max_nbody=max_nbody)
 
 ! DEBUG write(*,*) "ncoeff_out: ", ncoeff_out
-if(allocated(strain_terms_tmp))then
+if(allocated(strain_terms))then
   call polynomial_coeff_list_free(strain_terms)
   ABI_FREE(strain_terms)
 end if
