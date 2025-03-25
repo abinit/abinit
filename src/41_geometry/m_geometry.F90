@@ -2976,7 +2976,7 @@ subroutine strainsym(nsym,rprimd0,rprimd,rprimd_symm,symrel)
  integer :: isym
 !arrays
  integer :: symrel_it(3,3)
- real(dp) :: rprimd0_inv(3,3),strain(3,3),strain_symm(3,3),tmp_mat(3,3)
+ real(dp) :: rprimd0_inv(3,3),strain(3,3),strain_symm(3,3),tmp_mat(3,3),symrel_db(3,3)
 
 !**************************************************************************
 
@@ -2999,7 +2999,8 @@ subroutine strainsym(nsym,rprimd0,rprimd,rprimd_symm,symrel)
 !  mati3inv gives the inverse transpose of symrel
    call mati3inv(symrel(:,:,isym),symrel_it)
    call dgemm('N','N',3,3,3,one,strain,3,dble(symrel(:,:,isym)),3,zero,tmp_mat,3)
-   call dgemm('T','N',3,3,3,one,dble(symrel_it),3,tmp_mat,3,one,strain_symm,3)
+   symrel_db = dble(symrel_it)
+   call dgemm('T','N',3,3,3,one,symrel_db,3,tmp_mat,3,one,strain_symm,3)
 
  end do
 

@@ -29,14 +29,15 @@ subroutine xmpi_max_int0d_i4b(xval,xmax,comm,ier)
 
 !Local variables-------------------
 #if defined HAVE_MPI
- integer :: arr_xmax(1)
+ integer :: arr_xmax(1),arr_xval(1)
 #endif
 
 ! *************************************************************************
  ier=0
 #if defined HAVE_MPI
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
-   call MPI_ALLREDUCE([xval],arr_xmax,1,MPI_INTEGER,MPI_MAX,comm,ier)
+   arr_xval(1) = xval
+   call MPI_ALLREDUCE(arr_xval,arr_xmax,1,MPI_INTEGER,MPI_MAX,comm,ier)
    xmax=arr_xmax(1)
  else
 #endif
