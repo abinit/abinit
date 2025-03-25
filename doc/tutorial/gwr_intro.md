@@ -168,16 +168,23 @@ and then immediately transformed to Fourier space.
 \sum_{\rr\in\mcC} e^{-i(\kk+\bg)\rr} \chi(\rr, \GG' = \kk+\bg')
 \end{equation}
 
-The cutoff energy for the polarizability is given by [[ecuteps]] and should be subject to convergence studies.
+The cutoff energy for the polarizability is given by [[ecuteps]].
+This is an important parameter that should be subject to convergence studies.
 
 The FFT mesh is defined according to [[gwr_boxcutmin]].
+This parameter has a big impact on wall-time and memory requirements.
+One usually start with a coarse FFT mesh (1.1) and increases it during the last steps of the
+convergen study
 
-As discussed in [cite:Baroni1986]
-As concerns the treatment of the long-wavelenght limit $\qq \rightarrow 0$ in the polarizability,
+As discussed in [cite:Baroni1986], the treatment of the long-wavelenght limit $\qq \rightarrow 0$
+in the polarizability, requires the inclusion of the commutator of the non-local part of the Hamiltonian
+with the position operator.
 we have the following input variables:
 See also [this section](/theory/bse/#5-matrix-elements-of-the-dipole-operator) of the BSE notes.
+By default the commutator of the non-local part is always included.
+In the input variable [[inclvkb]] can be used to deactivate it, if needed.
 
-[[inclvkb]],
+[[gw_nqlwl]],
 [[gw_qlwl]],
 [[gwr_max_hwtene]]
 
@@ -209,6 +216,14 @@ at the band edges that are usually located at high-symmetry $\kk$-points.
 In this case, it is more advantageous to use an alternative formulation in which $\Sigma_\nk$
 is expressed in terms of convolutions in the BZ according to:
 
+\begin{equation}
+\tilde \chi_\qq(\rr, \rr',i\tau) =
+\sum_\kk
+{\tilde G}_{\kq}(\rr,\rr',i\tau)
+{\tilde G}_\kk(\rr',\rr,-i\tau)
+\end{equation}
+
+
 where $G_\qq(\rr,\rr')$ and $W_\qq(\rr,\rr')$ are now quantities defined in the unit cell.
 
 The advantage of this formulation is that one can take advantage of the symmetries of the system
@@ -228,7 +243,7 @@ The conventional GW code supports different kinds of self-consistency, including
 of the wavefunctions and the QPSCGW method proposed in [[cite:Faleev2004]].
 On the contrary, at the time of writing, the GWR code only supports self-consistency on energies.
 
-Performing energy-only self-consistent calculations with GWR is much easier than in the conventional GW code
+On the bright side, performing energy-only self-consistent calculations with GWR is much easier than in the conventional GW code
 as there is no need to chain different screening/sigma calculations together: the self-consistent loop
 and the stopping criterion are implemented directly at the Fortran level.
 To perform an energy-only self-consistent calculation with GWR, one has to specify the kind of self-consistency
@@ -244,7 +259,7 @@ As a result, the maximum number of usable MPI processes is limited by [[nband]],
 and the workload becomes imbalanced when the number of MPI processes does not evenly divide [[nband]].
 More critically, $\Sigma$ calculations in the standard GW code are highly memory-intensive,
 as they require storing both the wavefunctions (whose memory footprint scales with the number of MPI processes)
-as well as $W$ (a non-scalable portion).
+as well as $W$ (non-scalable portion).
 This memory requirement becomes particularly problematic for large [[npweps]] values or calculations
 beyond the plasmon-pole approximation, where the full $W$ matrix must be stored for multiple frequencies.
 Consequently, conventional GW calculations can be prohibitively demanding in terms of memory,
@@ -262,12 +277,13 @@ The user can specify the number of MPI-processes for the different dimensions us
 although this is completely optional as GWR is able to build the MPI Cartesian grid at runtime on the basis
 of the number of MPI processes available, the size of the problem and the memory allocated.
 
-There are, however, some basic rules that is worth keeping in mind if decent parallel performance is wanted.
-Ideally the total number of MPI processes should be a multiple of [[gwr_ntau]] * [[nsppol]] as the parallelism
+There are, however, some basic rules that are worth keeping in mind if decent parallel performance is wanted.
+Ideally, the total number of MPI processes should divide (possibly a multiple of) [[gwr_ntau]] * [[nsppol]] as the parallelism
 over minimax points and spins is rather efficient (few communications required).
 On the contrary, the parallelism over $\gg$-vectors and $\kk$-points is much more network intensive,
-although these two additional levels allow one to decrease the memory requirements.
+although these two additional levels allow one to decrease the memory requirements required to store the two-point functions.
 
+<!--
 TODO: Additional trick to be tested/documented in more detail:
 
     [[gwr_ucsc_batch]]
@@ -275,18 +291,36 @@ TODO: Additional trick to be tested/documented in more detail:
     [[gwr_boxcutmin]]
     [[gwr_max_hwtene]]
     [[gwr_regterm]]
+-->
 
 ### Requirements
 
 The GWR code requires an ABINIT build with Scalapack enabled.
-Moreover, a significant fraction of the computing time is spent in performing FFTs thus we **strongly**
-recommend to use vendor-optimized FFT libraries such as MKL-DFTI or FFTW3 instead
-of the internal FFT version shipped with ABINIT.
+Moreover, sing a significant fraction of the computing time is spent in performing FFTs,
+we **strongly** recommend to use vendor-optimized FFT libraries such as MKL-DFTI or FFTW3 instead
+of the internal FFT version shipped with ABINIT ([[fftalg]] should be 312 or 512).
+
+If you are using MKL, the configuration is relatively simple as MKL provides all the required libraries.
+An example of `.ac` configuration file is reported below:
+
+```
+# BLAS/LAPACK with MKL
+with_linalg_flavor="mkl"
+LINALG_FCFLAGS="-I${MKLROOT}/include"
+LINALG_LIBS="-L${MKLROOT}/lib/intel64 -lmkl_scalapack_lp64 -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lmkl_blacs_intelmpi_lp64 -lpthread -lm -ldl"
+
+# FFT from MKL
+with_fft_flavor="dfti"
+```
+
+Depending on your version of the intel compiler and MKL, you may need to customize the list of libraries given in this example.
+Please use the [link-line-advisor](https://www.intel.com/content/www/us/en/developer/tools/oneapi/onemkl-link-line-advisor.html)
+provided by intel and select the option: "Link with Intel® oneMKL libraries explicitly" to get the value of `LINALG_LIBS`.
 
 Note that single-precision is the default mode as in the conventional $GW$ code.
-To run computations in double-precision, one has to configure the package with  `--enable-gw-dpc="yes"` when
-the command line interface is used or `enable_gw_dpc="yes"` when `--with-config-file=FILE` is used
-to specify the configuration options via an external FILE.
+To run computations in double-precision, one has to configure the package with  `--enable-gw-dpc="yes"`
+when the command line interface is used or `enable_gw_dpc="yes"` when `--with-config-file=FILE` is used
+to pass the configuration options to `configure` via an external FILE.
 
 !!! tip
 
