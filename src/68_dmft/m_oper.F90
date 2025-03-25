@@ -876,6 +876,11 @@ subroutine downfold_oper(oper,paw_dmft,procb,iproc,option,op_ks_diag,gpu_option)
  end if
 
  l_gpu_option=ABI_GPU_DISABLED; if(present(gpu_option)) l_gpu_option=gpu_option
+
+ if(l_gpu_option==ABI_GPU_OPENMP) then
+   ABI_CHECK(opt==1 .or. opt==3, "Incompatible codepath with OpenMP GPU")
+ end if
+
  mbandc   = oper%mbandc
  nspinor  = oper%nspinor
  ndim_max = nspinor * (2*paw_dmft%maxlpawu+1)
@@ -949,7 +954,6 @@ subroutine downfold_oper(oper,paw_dmft,procb,iproc,option,op_ks_diag,gpu_option)
              do idat=1,ndat
              do ib=1,mbandc
                if (present(op_ks_diag)) then
-                 if(l_gpu_option == ABI_GPU_OPENMP) ABI_BUG("toto")
                  mat_temp(:,ib,idat) = paw_dmft%chipsi(1:ndim,ib,ik,isppol,iatom) * op_ks_diag(ib,ikpt,isppol)
                else
                  mat_temp(:,ib,idat) = paw_dmft%chipsi(1:ndim,ib,ik,isppol,iatom) * oper%ks(ib,ib+(idat-1)*mbandc,ikpt,isppol)
@@ -959,7 +963,6 @@ subroutine downfold_oper(oper,paw_dmft,procb,iproc,option,op_ks_diag,gpu_option)
            else if(l_gpu_option == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
              if (present(op_ks_diag)) then
-               if(l_gpu_option == ABI_GPU_OPENMP) ABI_BUG("toto")
                !$OMP TARGET TEAMS DISTRIBUTE MAP(to:chipsi,op_ks_diag,mat_temp) PRIVATE(idat)
                do idat=1,ndat
                  !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(ib,im)
@@ -1001,13 +1004,11 @@ subroutine downfold_oper(oper,paw_dmft,procb,iproc,option,op_ks_diag,gpu_option)
 
        else if (opt == 2) then
 
-         if(l_gpu_option == ABI_GPU_OPENMP) ABI_BUG("toto")
          call abi_xgemm("n","c",ndim,ndim,mbandc,cone,paw_dmft%chipsi(:,:,ik,isppol,iatom),&
                       & ndim_max,paw_dmft%chipsi(:,:,ik,isppol,iatom),ndim_max,czero,mat_temp2(:,:,1),ndim)
 
        else if (opt == 4) then
 
-         if(l_gpu_option == ABI_GPU_OPENMP) ABI_BUG("toto")
          call abi_xgemm("n","c",ndim,ndim,mbandc,cone,paw_dmft%chipsi(:,:,ik,isppol,iatom),&
                       & ndim_max,paw_dmft%chipsi(:,:,ik,isppol,iatom),ndim_max,czero,mat_temp3(:,:),ndim)
 
