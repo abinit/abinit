@@ -3545,8 +3545,109 @@ subroutine spsl_mergeBuffer(spsl,X0)
 end subroutine spsl_mergeBuffer
 
 !! FUNCTION
-!! Allows to switch between MPI row/com distribution
+!! Switch between MPI row/col distribution
+!! applied to mem X,AX,BX of slice object
+!! 
+subroutine slice_switchDistribution(slice,nspinor)
 
+    implicit none
+
+    ! arguments
+    type(slice_t), intent(inout) :: slice
+    integer      , intent(in   ) :: nspinor
+    ! variables
+
+    !if (slice%mem_rows) then
+
+        if (slice%mem_none) then
+        ! should have a switch to create then lock so that it is not switched
+
+            ! Construct transposer for X
+            call xgTransposer_constructor(slice%XTrans,slice%Xr,slice%Xc,&
+                nspinor,STATE_LINALG,TRANS_ALL2ALL,comm_rows,comm_cols,0,0,&
+                me_g0_fft,gpu_option=gpu_option,gpu_thread_limit=gpu_thread_limit)
+        
+            slice%XTrans%gpu_kokkos_nthrd = slice%gpu_kokkos_nthrd
+            slice%XTrans%state = STATE_COLSROWS
+
+            ! Same for AX, from copy
+            if (slice%use_AX) then
+
+                call xgTransposer_copyConstructor(slice%AXTrans,slice%XTrans,&
+                    slice%AXr,slice%AXc,STATE_LINALG)
+        
+                slice%AXTrans%gpu_kokkos_nthrd = slice%gpu_kokkos_nthrd
+                slice%AXTrans%state = STATE_COLSROWS
+
+            end if
+
+            ! Same for BX, from copy
+            if (slice%use_BX) then
+
+                call xgTransposer_copyConstructor(slice%BXTrans,slice%XTrans,&
+                    slice%BXr,slice%BXc,STATE_LINALG)
+        
+                slice%BXTrans%gpu_kokkos_nthrd = slice%gpu_kokkos_nthrd
+                slice%BXTrans%state = STATE_COLSROWS
+
+            end if
+
+            ! Inform transposer has been created to default col distribution
+            ! and that we are ALREADY in col distribution (no need to transpose)
+            slice%mem_none = .false.
+            slice%mem_rows = .false.
+            slice%mem_cols = .true.
+            slice%locked = .true. ! prevents from switching two times
+
+        end if
+
+     if (slice%mem_rows) then
+
+        ! Transpose X to col distribution
+        call xgTransposer_transpose(spsl%BufTrans,STATE_COLSROWS)
+
+        ! Same for AX
+        if (slice%use_AX) then
+            call xgTransposer_transpose(slice%AXTrans,STATE_COLSROWS)
+        end if
+
+        ! Same for BX
+        if (slice%use_BX) then
+            call xgTransposer_transpose(slice%BXTrans,STATE_COLSROWS)
+        end if
+
+        ! Inform we are in column distribution
+        slice%mem_rows = .false.
+        slice%mem_cols = .true.
+
+    else if (slice%mem_cols) then
+
+        ! check if it is constructed then do not transpose
+
+        ! Transpose X to row distribution
+        call xgTransposer_transpose(slice%XTrans,STATE_LINALG)
+
+        ! Same for AX
+        if (slice%use_AX) then
+            call xgTransposer_transpose(slice%AXTrans,STATE_LINALG)
+        end if
+
+        ! Same for BX
+        if (slice%use_BX) then
+            call xgTransposer_transpose(slice%BXTrans,STATE_LINALG)
+        end if
+
+        slice%mem_rows = .true.
+        slice%mem_cols = .false.
+
+    end if
+
+end subroutine slice_switchDistribution
+
+!! FUNCTION
+!! Switch between MPI row/col distribution
+!! applied to the buffer of spsl object
+!!
 subroutine spsl_prepBuffer(spsl,nspinor)
 
     implicit none
@@ -3568,6 +3669,9 @@ subroutine spsl_prepBuffer(spsl,nspinor)
 
     if (spsl%buffer_rows) then
 
+        ! can only create from that state?
+        ! should have a switch to create then lock so that it is not switched
+
         call xgTransposer_constructor(spsl%BufTrans,spsl%Bufr,spsl%Bufc,&
             nspinor,STATE_LINALG,TRANS_ALL2ALL,comm_rows,comm_cols,0,0,&
             me_g0_fft,gpu_option=gpu_option,gpu_thread_limit=gpu_thread_limit)
@@ -3582,7 +3686,7 @@ subroutine spsl_prepBuffer(spsl,nspinor)
 
         ! Transpose buffer to prepare for slice merge
         call xgTransposer_transpose(spsl%BufTrans,STATE_LINALG)
-
+    
         spsl%buffer_rows = .true.
         spsl%buffer_cols = .false.
 
@@ -3599,20 +3703,44 @@ subroutine spsl_freeBuffer(spsl)
 
 end subroutine spsl_freeBuffer
 
-subroutine slice_builder()
+!! FUNCTION
+!! Initialize slice object with
+!! subcommunicator
+!! 
+subroutine slice_initSub(slice,subcomm)
 
-    ! Input communicators
+    ! pending question: 
+    !! construct subcommunicator here
+    !! or from spsl object globally?
+
+    ! Input communicators (spsl)
     spacecom = spsl%spacecom
     comm_rows = xmpi_comm_self
     comm_cols = spacecom
     
+    ! use switches to guide the execution
+    slice%has_mem = .false.
+    slice%mem_rows = .false.
+    slice%mem_cols = .false.
+
     ! Subcommunicator
     comm_sub = create_comm_sub(spacecom,my_slice)
+    
+    slice%comm = comm_sub
 
-end subroutine slice_builder
+    call slice_allocateAll(slice)
 
+end subroutine slice_initSub
+
+!! FUNCTION
+!! Allocate memory space used for slice
+!! This memory ONLY uses MPI processes
+!! in the slice subcommunicator
+!! 
 subroutine slice_allocateAll(slice)
  
+    ABI_CHECK(slice%has_mem==.false., "slice memory already exists")
+
     space = slice%space
     spacedim = slice%spacedim
     neigenpairs = slice%neigenpairs
@@ -3625,6 +3753,9 @@ subroutine slice_allocateAll(slice)
     gpu_option = slice%gpu_option
     gpu_thread_limit = slice%gpu_thread_limit
 
+    ! 1D arrays for eigenvalues and eigenvectors
+    ! (I think these ones are not distributed at all)
+
     ! transposed array
     call xg_init(slice%xXColsRows,space,total_spacedim,bandpp,&
         xmpi_comm_null,me_g0=me_g0_fft,gpu_option=gpu_option)
@@ -3633,44 +3764,88 @@ subroutine slice_allocateAll(slice)
     call xg_init(slice%X,space,spacedim,neigenpairs,&
         comm_cols,me_g0=me_g0,gpu_option=gpu_option)
 
+    ! From now on use the column distribution
+    slice%has_mem = .true.
+    slice%mem_rows = .false.
+    slice%mem_cols = .true.
+
 end subroutine slice_allocateAll
 
 !! FUNCTION
 !! Diagonalisation on slice 
 !! using subcommunicators
+!!
+subroutine slice_run(slice,spsl,getAX_BX,getBm1X,nspinor)
 
-subroutine slice_run(slice,X0)
+    implicit none
 
-    ! transposer
-    call xgTransposer_constructor(slice%xgTransposerX,slice%X,slice%xXColsRows,&
-        nspinor,STATE_LINALG,TRANS_ALL2ALL,comm_rows,comm_cols,0,0,&
-        me_g0_fft,gpu_option=gpu_option,gpu_thread_limit=gpu_thread_limit)
+    ! arguments
+    type(slice_t  ), intent(inout) :: slice
+    type(spsl_t   ), intent(inout) :: spsl
+    integer        , intent(in   ) :: nspinor
+    ! variables
+    type(xgBlock_t) :: X0
 
-    call xgTransposer_copyConstructor(slice%xgTransposerBX,slice%xgTransposerX,&
-        slice%AX%self,slice%xBXColsRows,STATE_LINALG)
+    ABI_CHECK(slice%paral_slice,"sequential slice not implemented")
 
-    call xgTransposer_copyConstructor(slice%xgTransposerBX,slice%xgTransposerX,&
-        slice%AX%self,slice%xBXColsRows,STATE_LINALG)
+    comm_rows = slice%comm_rows
+    comm_cols = slice%comm_cols
+
+    ! Initialize transposer object associated to X BEFORE copy
+    slice%mem_none = .true.
     
-    slice%xgTransposerX%gpu_kokkos_nthrd = slice%gpu_kokkos_nthrd
-    slice%xgTransposerAX%gpu_kokkos_nthrd = slice%gpu_kokkos_nthrd
-    slice%xgTransposerBX%gpu_kokkos_nthrd = slice%gpu_kokkos_nthrd
+    call slice_switchDistribution(slice,nspinor)
 
-    slice%xgTransposerX%state = STATE_COLSROWS
-    slice%xgTransposerAX%state = STATE_COLSROWS
-    slice%xgTransposerBX%state = STATE_COLSROWS
-
-    call tranpose(subcomm)
+    ! Sanity check
+    !ABI_CHECK(slice%has_trans, "slice transposer not found")
+    ABI_CHECK(slice%mem_cols, "slice should be in columns")
+    ABI_CHECK(spsl%buf_cols, "buffer should be in columns")
+    X = slice%Xc
+    X0 = spsl%Bufc
    
-    call RayleighRitz()
+    ! Copy i/o buffer to slice memory
+    call xgBlock_copy(X0,X)
 
-    call transpose(subcomm)
+    ! Apply the filter
+    ! new chebyshev situation where we don't compute the quotients
+    ! since this has been already computed in the DOS phase
+    ! the filter is then completely isolated as a function
+    call slice_applyFilter(slice,X,islice)
 
-    call xgTransposer(slice%xgTransposerX)
-    call xgTransposer(slice%xgTransposerAX)
-    call xgTransposer(slice%xgTransposerBX)
+    ! barrier
+    call xmpi_comm_barrier(subcomm)
 
-end subroutine slice_run_run
+    ! Switch to row distribution (for X,AX,BX)
+    slice%use_AX = .true.
+    slice%use_BX = .true.
+    call slice_switchDistribution(slice,nspinor)
+
+    ! Sanity check
+    ABI_CHECK(slice%mem_rows,"slice should be on rows")
+    X = slice%Xr
+   
+    call RayleighRitz(slice,X)
+    call computeResiduals(slice,X)
+
+    ! Switch to row distribution (only for X)
+    slice%use_AX = .false.
+    slice%use_BX = .false.
+    call slice_switchDistribution(slice,nspinor)
+
+    ! Sanity check
+    ABI_CHECK(slice%mem_cols,"slice should be on columns")
+    ABI_CHECK(spsl%buf_cols,"buffer should be on columns")
+    X = slice%Xc
+    X0 = spsl%Bufc
+   
+    ! Copy computed result X to i/o buffer
+    call xgBlock_copy(X,X0)
+
+    call xgTransposer_free(slice%xgTransposerX)
+    call xgTransposer_free(slice%xgTransposerAX)
+    call xgTransposer_free(slice%xgTransposerBX)
+
+end subroutine slice_run
 
 !! FUNCTION
 !! Same as chebfi_run but on subcommunicator
