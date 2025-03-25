@@ -381,7 +381,7 @@ subroutine sliceAll_allocateAll(sliceAll)
     neigenpairs = sliceAll%neigenpairs
     comm_cols = sliceAll%comm_cols
     !gpu_option = sliceAll%gpu_option
-    ! FIXME forced CPU test 
+    ! FIXME forced CPU
     gpu_option = ABI_GPU_DISABLED
 
     ! Eigenvalues and residuals before slicing
@@ -2018,9 +2018,42 @@ end program block_number_calculator
  
 !################    RUUUUUUUN    #####################################
 !######################################################################
- 
- call sliceAll_run(sliceAll,dtset%paral_slice)
 
+ ! Here data is on GPU
+ call spsl_oracleBuffer()
+ ! Here data in deleted from GPU
+
+ ! MPI row distr: Alloc and fill buffer
+ ! .. using Bufr from now on
+ call spsl_allocBuffer()
+ call spsl_fillBuffer()
+
+ ! Switch buffer to MPI col distribution
+ call xmpi_comm_barier(spacecom)
+ call spsl_prepBuffer()
+ !.. using Bufc from now on
+
+ ! Define communicators on MPI subgroups
+ call mapProcsToSlices(balance)
+ call mapSlicesToCommSub()
+
+ ! MPI col distr: Diago on col subgroup
+ ! copy from buffer in CPU to slice CPU
+ ! map slice to GPU
+ call slice_initSub(slice,rank) ! on rank!
+ call slice_runSub(slice,spsl%Bufc,spsl%Eig)
+ !! here workspace is deleted from GPU
+
+ ! Switch buffer to MPI row distribution
+ call xmpi_comm_barier(spacecom)
+ call spsl_prepBuffer()
+ ! .. using Bufr from now on
+ 
+ call spsl_computeMergeIndices()
+ call spsl_mergeBuffer()
+
+ call sliceAll_run(sliceAll,dtset%paral_slice)
+ 
  ! ================
  ! TODO IL 31/01/2025
  ! * diagnostic de convergence en utilisant residual ratio (r_i/r_i^n > ramp)
@@ -3442,7 +3475,13 @@ subroutine spsl_allocBuffer(spsl)
 
 end subroutine spsl_allocBuffer
 
-subroutine spsl_expandBuffer(spsl,X0)
+!! FUNCTION
+!! In: Read from column range in X0,
+!!     Column ranges of X0 overlap.
+!! Out: Copy to column range in buffer
+!! In/Out are in MPI row distribution.
+!!
+subroutine spsl_fillBuffer(spsl,X0)
 
     implicit none
 
@@ -3460,7 +3499,6 @@ subroutine spsl_expandBuffer(spsl,X0)
     ABI_CHECK(spsl%buffer_mem, "buffer not found")
     ABI_CHECK(spsl%buffer_rows, "need to prepare buffer")
 
-    ! Fill: Copy columns from X0 to spsl%Bufr while in MPI row distribution
     do islice=1,nslice
         ncols = spsl%nband_slice(islice)
         fcol = spsl%fcol_slice(islice)
@@ -3470,9 +3508,14 @@ subroutine spsl_expandBuffer(spsl,X0)
         call xgBlock_copy(xgcols_in,xgcols_out)
     end do
 
-end subroutine spsl_expandBuffer
+end subroutine spsl_fillBuffer
 
-subroutine spsl_Buffer(spsl,X0)
+!! FUNCTION
+!! In: Read from column range in buffer, 
+!! Out: Write to column range in X0
+!! In/Out are in MPI row distribution.
+!! 
+subroutine spsl_mergeBuffer(spsl,X0)
 
     implicit none
 
@@ -3490,17 +3533,19 @@ subroutine spsl_Buffer(spsl,X0)
     ABI_CHECK(spsl%buffer_mem, "buffer not found")
     ABI_CHECK(spsl%buffer_cols, "need to prepare buffer")
 
-    ! Fill: Copy columns from X0 to spsl%Bufr while in MPI row distribution
     do islice=1,nslice
         ncols = spsl%nband_slice(islice)
-        fcol = spsl%fcol_slice(islice)
-        fcol_buf = spsl%fcol_buf(islice)
-        call xgBlock_setBlock(X0,xgcols_in,spacedim,ncols,fcol=fcol)
-        call xgBlock_setBlock(spsl%Bufr,xgcols_out,spacedim,ncols,fcol=fcol_buf)
+        fcol = spsl%fcol_slice_merge(islice)
+        fcol_buf = spsl%fcol_buf_merge(islice)
+        call xgBlock_setBlock(X0,xgcols_out,spacedim,ncols,fcol=fcol)
+        call xgBlock_setBlock(spsl%Bufr,xgcols_in,spacedim,ncols,fcol=fcol_buf)
         call xgBlock_copy(xgcols_in,xgcols_out)
     end do
 
-end subroutine spsl_fillBuffer
+end subroutine spsl_mergeBuffer
+
+!! FUNCTION
+!! Allows to switch between MPI row/com distribution
 
 subroutine spsl_prepBuffer(spsl,nspinor)
 
@@ -3543,7 +3588,7 @@ subroutine spsl_prepBuffer(spsl,nspinor)
 
     end if
 
-end subroutine spsl_makeBuffer
+end subroutine spsl_prepBuffer
 
 subroutine spsl_freeBuffer(spsl)
 
@@ -3590,9 +3635,11 @@ subroutine slice_allocateAll(slice)
 
 end subroutine slice_allocateAll
 
+!! FUNCTION
+!! Diagonalisation on slice 
+!! using subcommunicators
 
 subroutine slice_run(slice,X0)
-
 
     ! transposer
     call xgTransposer_constructor(slice%xgTransposerX,slice%X,slice%xXColsRows,&
@@ -3613,12 +3660,25 @@ subroutine slice_run(slice,X0)
     slice%xgTransposerAX%state = STATE_COLSROWS
     slice%xgTransposerBX%state = STATE_COLSROWS
 
-    
+    call tranpose(subcomm)
+   
+    call RayleighRitz()
 
+    call transpose(subcomm)
 
-end subroutine slice_run
+    call xgTransposer(slice%xgTransposerX)
+    call xgTransposer(slice%xgTransposerAX)
+    call xgTransposer(slice%xgTransposerBX)
 
+end subroutine slice_run_run
 
+!! FUNCTION
+!! Same as chebfi_run but on subcommunicator
+!! Transposition is different
+!!
+subroutine chebfi_run_sub()
+
+end subroutine chebfi_run_sub
 
 !----------------------------------------------------------------------
 
