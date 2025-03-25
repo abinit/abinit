@@ -1058,14 +1058,14 @@ subroutine phdos_init(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_n
    ! Debye frequency = vs * (6 pi^2 natom / ucvol)**1/3
    debyefreq = third*sum(speedofsound) * (six*pi**2/crystal%ucvol)**(1./3.)
    write (msg,'(a,E20.10,3a,E20.10,a)') &
-       ' Debye frequency from partial sums: ', debyefreq, ' (Ha)',ch10, &
-       '-                                 = ', debyefreq*Ha_THz, ' (THz)'
+      ' Debye frequency from partial sums: ', debyefreq, ' (Ha)',ch10, &
+      '-                                 = ', debyefreq*Ha_THz, ' (THz)'
    if (prtout_) call wrtout(units, msg)
 
    ! Debye temperature = hbar * Debye frequency / kb
    write (msg,'(a,E20.10,2a)') '-Debye temperature from partial sums: ', debyefreq*Ha_K, ' (K)', ch10
    if (prtout_) call wrtout(units, msg)
- end if 
+ end if
 
  if (prtdos == 2) then
    call cwtime(cpu, wall, gflops, "start")
