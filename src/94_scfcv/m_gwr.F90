@@ -4180,15 +4180,15 @@ subroutine gwr_print(gwr, units, header)
  call ydoc%add_int1d("P np_kibz", gwr%np_kibz)
  call ydoc%add_int1d("P np_qibz", gwr%np_qibz)
  ! Print Max error due to the inhomogeneous FT.
- call ydoc%add_real("min_transition_energy_eV", gwr%te_min)
- call ydoc%add_real("max_transition_energy_eV", gwr%te_max)
+ call ydoc%add_real("min_transition_energy_eV", gwr%te_min * Ha_eV)
+ call ydoc%add_real("max_transition_energy_eV", gwr%te_max * Ha_eV)
  call ydoc%add_real("eratio", gwr%te_max / gwr%te_min)
  call ydoc%add_real("ft_max_err_t2w_cos", gwr%ft_max_error(1))
  call ydoc%add_real("ft_max_err_w2t_cos", gwr%ft_max_error(2))
  call ydoc%add_real("ft_max_err_t2w_sin", gwr%ft_max_error(3))
  call ydoc%add_real("cosft_duality_error", gwr%cosft_duality_error)
  ! Print imaginary time/frequency mesh with weights.
- call ydoc%open_tabular("Minimax imaginary tau/omega mesh", comment="tau, weight(tau), omega, weight(omega)")
+ call ydoc%open_tabular("Minimax imaginary tau/omega mesh in a.u.", comment="tau, weight(tau), omega, weight(omega)")
  do ii=1,gwr%ntau
    write(msg, "(i0, 4(es12.5,2x))")ii, gwr%tau_mesh(ii), gwr%tau_wgs(ii), gwr%iw_mesh(ii), gwr%iw_wgs(ii)
    call ydoc%add_tabular_line(msg)
