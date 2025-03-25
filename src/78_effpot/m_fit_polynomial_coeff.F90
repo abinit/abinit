@@ -1726,7 +1726,6 @@ contains
       call polynomial_coeff_init(one,my_coeffs(icoeff)%nterm,&
         &                               coeffs_tmp(ii),my_coeffs(icoeff)%terms,&
         &                               my_coeffs(icoeff)%name,&
-        &                               my_coeffs(icoeff)%isbound,&
         &                               check=.false.)
     end do
 
@@ -1747,7 +1746,7 @@ contains
        &                                  list_coeffs_tmp(1:ncoeff_to_fit),natom_sc,&
        &                                  ncoeff_to_fit,ncoeff_to_fit,ntime,strten_coeffs_tmp,&
        &                                  fit_data%strten_diff,fit_data%training_set%sqomega,fit_on,int_fit_factors, &
-       &                                  nbound=nbound, min_bound_coeff=min_bound_coeff1, ignore_bound=.False., weights=weights)
+       &                                  weights=weights)
 
      if(need_verbose) then
        write(message, '(3a)') ch10,' Fitted coefficients at the end of the fit process: '
@@ -1832,7 +1831,6 @@ contains
            &                             eff_pot_fixed%anharmonics_terms%coefficients(ii)%nterm,coeffs_out(ii),&
            &                             eff_pot_fixed%anharmonics_terms%coefficients(ii)%terms,&
            &                             eff_pot_fixed%anharmonics_terms%coefficients(ii)%name,&
-           &                             eff_pot_fixed%anharmonics_terms%coefficients(ii)%isbound,&
            &                             check = .TRUE.)
        else
          ia = ii - eff_pot_fixed%anharmonics_terms%ncoeff
@@ -1841,7 +1839,6 @@ contains
          call polynomial_coeff_init(coeffs_tmp(ia)%coefficient,coeffs_tmp(ia)%nterm,&
            &                                      coeffs_out(ii),coeffs_tmp(ia)%terms,&
            &                                      coeffs_tmp(ia)%name,&
-           &                                      coeffs_tmp(ia)%isbound,&
            &                                      check=.true.)
 
        endif
@@ -2014,7 +2011,6 @@ real(dp), allocatable :: weights(:)
        &                               coeffs_in(ii),&
        &                               eff_pot%anharmonics_terms%coefficients(ii)%terms,&
        &                               eff_pot%anharmonics_terms%coefficients(ii)%name,&
-       &                               eff_pot%anharmonics_terms%coefficients(ii)%isbound,&
        &                               check=.false.)
    end do
  end if
@@ -2109,7 +2105,7 @@ ABI_MALLOC(weights,(ntime))
      &,fit_data%fcart_diff, energy_coeffs,fit_data%energy_diff,info,&
      & list_coeff(imodel,1:ncoeff),natom_sc,ncoeff, ncoeff_tot,ntime&
      &,strten_coeffs,fit_data%strten_diff, fit_data%training_set%sqomega,fit_on&
-     &,fit_factors, nbound=0, min_bound_coeff=-10.0_dp, ignore_bound=.True., weights=weights)
+     &,fit_factors, weights=weights)
 
    if(info==0)then
 
@@ -2231,7 +2227,6 @@ subroutine fit_polynomial_coeff_getCoeffBound(eff_pot,coeffs_out,hist,ncoeff_bou
    call polynomial_coeff_init(coeffs_in(icoeff)%coefficient,coeffs_in(icoeff)%nterm,&
      &                             coeffs_test(icoeff),coeffs_in(icoeff)%terms,&
      &                             coeffs_in(icoeff)%name, &
-     &                              coeffs_in(icoeff)%isbound, &
      &                          check=.false.)
  end do
 
@@ -2327,7 +2322,7 @@ subroutine fit_polynomial_coeff_getCoeffBound(eff_pot,coeffs_out,hist,ncoeff_bou
        end do
 
        name = ""
-       call polynomial_coeff_init(one,nterm,coeffs_test(icoeff_bound),terms,name,isbound=0, check=.true.)
+       call polynomial_coeff_init(one,nterm,coeffs_test(icoeff_bound),terms,name, check=.true.)
        call polynomial_coeff_getName(name,coeffs_test(icoeff_bound),symbols,recompute=.TRUE.)
        call polynomial_coeff_SetName(name,coeffs_test(icoeff_bound))
 
