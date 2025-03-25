@@ -372,6 +372,7 @@ contains
     ABI_SFREE(fixcoeff_corr)
     ABI_SFREE(fix_and_impose)
     ABI_SFREE(list_coeffs_copy)
+    print *, "Deallocating weights"
     ABI_FREE(weights)
   end subroutine deallocate_arrays
 
@@ -2088,6 +2089,7 @@ real(dp), allocatable :: weights(:)
 !Compute Sheppard and al Factors  \Omega^{2} see J.Chem Phys 136, 074103 (2012) [[cite:Sheppard2012]].
  call fit_data_compute(fit_data,eff_pot,hist,comm,verbose=need_verbose)
 
+print *, "allocating weights"
 ABI_MALLOC(weights,(ntime))
  call get_weight_from_hist(hist, fit_weight_T, ntime, eff_pot%supercell%natom, weights, comm )
 
