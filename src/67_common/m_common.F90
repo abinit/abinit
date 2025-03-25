@@ -1759,21 +1759,23 @@ subroutine prtene(dtset,energies,iout,usepaw)
 !=============================== For testing purposes only =============================
  if(abs(energies%entropy_xc)>tiny(zero)) then
    write_totalxc=.false. ! For testing purposes only, set write_totalxc=.true.
-   el_temp=merge(dtset%tphysel,dtset%tsmear,dtset%tphysel>tol8.and.dtset%occopt/=3.and.dtset%occopt/=9)
-   ftxcdoc = yamldoc_open('FTXCEnergyTerms', info='Components of total xc energy in Hartree', &
-   & width=20, real_fmt="(es21.14)")
-   if(usepaw==1) then
-     ! For now, only finite-temperature xc functionals contribute to entropy_paw.
-     ! We may introduce 'energies%entropy_pawxc' in the future.
-     call ftxcdoc%add_real('xc',energies%e_xc)
-     call ftxcdoc%add_real('spherical_terms_xc',energies%e_pawxc)
-     call ftxcdoc%add_real('internal_xc',energies%e_xc+energies%e_pawxc)
-     call ftxcdoc%add_real('-kT*entropy_xc',-el_temp*(energies%entropy_xc+energies%entropy_paw))
-     call ftxcdoc%add_real('free_xc',energies%e_xc+energies%e_pawxc-el_temp*(energies%entropy_xc+energies%entropy_paw))
-   else
-     call ftxcdoc%add_real('internal_xc',energies%e_xc)
-     call ftxcdoc%add_real('-kT*entropy_xc',-el_temp*energies%entropy_xc)
-     call ftxcdoc%add_real('free_xc',energies%e_xc-el_temp*energies%entropy_xc)
+   if(write_totalxc) then
+     el_temp=merge(dtset%tphysel,dtset%tsmear,dtset%tphysel>tol8.and.dtset%occopt/=3.and.dtset%occopt/=9)
+     ftxcdoc = yamldoc_open('FTXCEnergyTerms', info='Components of total xc energy in Hartree', &
+     & width=20, real_fmt="(es21.14)")
+     if(usepaw==1) then
+       ! For now, only finite-temperature xc functionals contribute to entropy_paw.
+       ! We may introduce 'energies%entropy_pawxc' in the future.
+       call ftxcdoc%add_real('xc',energies%e_xc)
+       call ftxcdoc%add_real('spherical_terms_xc',energies%e_pawxc)
+       call ftxcdoc%add_real('internal_xc',energies%e_xc+energies%e_pawxc)
+       call ftxcdoc%add_real('-kT*entropy_xc',-el_temp*(energies%entropy_xc+energies%entropy_paw))
+       call ftxcdoc%add_real('free_xc',energies%e_xc+energies%e_pawxc-el_temp*(energies%entropy_xc+energies%entropy_paw))
+     else
+       call ftxcdoc%add_real('internal_xc',energies%e_xc)
+       call ftxcdoc%add_real('-kT*entropy_xc',-el_temp*energies%entropy_xc)
+       call ftxcdoc%add_real('free_xc',energies%e_xc-el_temp*energies%entropy_xc)
+     end if
    end if
  end if
 
