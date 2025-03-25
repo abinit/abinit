@@ -1,6 +1,6 @@
 
-.Version 10.0.2.1 of ABINIT, released Apr 2024.
-.(MPI version, prepared for a aarch64_darwin22.6.0_gnu12.2 computer)
+.Version 10.3.6.1 of ABINIT, released Feb 2025.
+.(MPI version, prepared for a x86_64_linux_intel2021.9 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 12 Apr 2024.
-- ( at 13h18 )
-
-- input  file    -> /Users/gmatteo/git_repos/abinit_gwr/_build/tests/Test_suite/gwr_t01/t01.abi
+.Starting date : Tue 25 Mar 2025.
+- ( at 16h00 )
+  
+- input  file    -> /gpfs/home/acad/ucl-modl/gmatteo/git_repos/abinit_gwr/_build_intel_2023a/tests/Test_suite/gwr_suite_t01/t01.abi
 - output file    -> t01.abo
 - root for input  files -> t01i
 - root for output files -> t01o
@@ -599,14 +599,14 @@ gwr_boxcutmin:   1.10000000E+00
 P gwr_np_kgts: [1, 1, 1, 1, ]
 P np_kibz: [1, 1, 1, ]
 P np_qibz: [1, 1, 1, ]
-min_transition_energy_eV:   3.31673712E-02
-max_transition_energy_eV:   1.89598634E+00
+min_transition_energy_eV:   9.02530070E-01
+max_transition_energy_eV:   5.15924120E+01
 eratio:   5.71642028E+01
 ft_max_err_t2w_cos:   1.69754098E-02
 ft_max_err_w2t_cos:   5.30899614E-04
 ft_max_err_t2w_sin:   3.37573093E-01
 cosft_duality_error:   7.86624507E-04
-Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(omega)
+Minimax imaginary tau/omega mesh in a.u.: !Tabular | # tau, weight(tau), omega, weight(omega)
     1 2.14325E-01   5.65693E-01   1.17768E-02   2.46619E-02
     2 1.28479E+00   1.69883E+00   4.26019E-02   4.02802E-02
     3 4.04688E+00   4.16331E+00   1.02353E-01   8.69441E-02
@@ -916,14 +916,14 @@ gwr_boxcutmin:   1.10000000E+00
 P gwr_np_kgts: [1, 1, 1, 1, ]
 P np_kibz: [1, 1, 1, ]
 P np_qibz: [1, 1, 1, ]
-min_transition_energy_eV:   3.31673712E-02
-max_transition_energy_eV:   1.89598634E+00
+min_transition_energy_eV:   9.02530070E-01
+max_transition_energy_eV:   5.15924120E+01
 eratio:   5.71642028E+01
 ft_max_err_t2w_cos:   1.69754098E-02
 ft_max_err_w2t_cos:   5.30899614E-04
 ft_max_err_t2w_sin:   3.37573093E-01
 cosft_duality_error:   7.86624507E-04
-Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(omega)
+Minimax imaginary tau/omega mesh in a.u.: !Tabular | # tau, weight(tau), omega, weight(omega)
     1 2.14325E-01   5.65693E-01   1.17768E-02   2.46619E-02
     2 1.28479E+00   1.69883E+00   4.26019E-02   4.02802E-02
     3 4.04688E+00   4.16331E+00   1.02353E-01   8.69441E-02

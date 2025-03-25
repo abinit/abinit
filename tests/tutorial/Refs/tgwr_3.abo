@@ -329,14 +329,14 @@ gwr_boxcutmin:   1.10000000E+00
 P gwr_np_kgts: [1, 1, 1, 1, ]
 P np_kibz: [1, 1, 1, ]
 P np_qibz: [1, 1, 1, ]
-min_transition_energy_eV:   2.68469788E-02
-max_transition_energy_eV:   3.84873348E+00
+min_transition_energy_eV:   7.30543446E-01
+max_transition_energy_eV:   1.04729364E+02
 eratio:   1.43358160E+02
 ft_max_err_t2w_cos:   2.79679357E-02
 ft_max_err_w2t_cos:   2.50443578E-03
 ft_max_err_t2w_sin:   6.96478850E-01
-cosft_duality_error:   6.61373946E-04
-Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(omega)
+cosft_duality_error:   6.61373945E-04
+Minimax imaginary tau/omega mesh in a.u.: !Tabular | # tau, weight(tau), omega, weight(omega)
     1 1.34054E-01   3.61087E-01   1.03240E-02   2.17954E-02
     2 8.80593E-01   1.27324E+00   3.86484E-02   3.85317E-02
     3 3.17736E+00   3.70788E+00   9.94117E-02   9.28738E-02
@@ -570,14 +570,14 @@ gwr_boxcutmin:   1.10000000E+00
 P gwr_np_kgts: [1, 1, 1, 1, ]
 P np_kibz: [1, 1, 1, ]
 P np_qibz: [1, 1, 1, ]
-min_transition_energy_eV:   2.68469788E-02
-max_transition_energy_eV:   3.84873348E+00
+min_transition_energy_eV:   7.30543446E-01
+max_transition_energy_eV:   1.04729364E+02
 eratio:   1.43358160E+02
 ft_max_err_t2w_cos:   5.27005600E-04
 ft_max_err_w2t_cos:   6.91800315E-06
 ft_max_err_t2w_sin:   9.09933045E-03
 cosft_duality_error:   1.56336542E-03
-Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(omega)
+Minimax imaginary tau/omega mesh in a.u.: !Tabular | # tau, weight(tau), omega, weight(omega)
     1 6.13944E-02   1.58937E-01   6.02841E-03   1.22760E-02
     2 3.36146E-01   3.99664E-01   1.94399E-02   1.50523E-02
     3 8.89564E-01   7.28391E-01   3.73276E-02   2.14471E-02
@@ -829,14 +829,14 @@ gwr_boxcutmin:   1.10000000E+00
 P gwr_np_kgts: [1, 1, 1, 1, ]
 P np_kibz: [1, 1, 1, ]
 P np_qibz: [1, 1, 1, ]
-min_transition_energy_eV:   2.68469788E-02
-max_transition_energy_eV:   3.84873348E+00
+min_transition_energy_eV:   7.30543446E-01
+max_transition_energy_eV:   1.04729364E+02
 eratio:   1.43358160E+02
 ft_max_err_t2w_cos:   1.06222218E-05
 ft_max_err_w2t_cos:   1.14682497E-07
 ft_max_err_t2w_sin:   1.51638552E-04
-cosft_duality_error:   1.95332299E-02
-Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(omega)
+cosft_duality_error:   1.95332303E-02
+Minimax imaginary tau/omega mesh in a.u.: !Tabular | # tau, weight(tau), omega, weight(omega)
     1 3.31229E-02   8.53362E-02   4.37766E-03   8.83765E-03
     2 1.77497E-01   2.05496E-01   1.36341E-02   9.85186E-03
     3 4.50173E-01   3.44022E-01   2.44663E-02   1.20262E-02

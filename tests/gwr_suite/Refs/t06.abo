@@ -1,6 +1,6 @@
 
-.Version 10.0.2.1 of ABINIT, released Apr 2024.
-.(MPI version, prepared for a aarch64_darwin22.6.0_gnu12.2 computer)
+.Version 10.3.6.1 of ABINIT, released Feb 2025.
+.(MPI version, prepared for a x86_64_linux_intel2021.9 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -644,14 +644,14 @@ gwr_boxcutmin:   1.00000000E+00
 P gwr_np_kgts: [1, 1, 1, 1, ]
 P np_kibz: [1, 1, 1, 1, 1, 1, 1, 1, ]
 P np_qibz: [1, 1, 1, 1, 1, 1, 1, 1, ]
-min_transition_energy_eV:   1.86994744E-02
-max_transition_energy_eV:   3.06019901E+00
+min_transition_energy_eV:   5.08838575E-01
+max_transition_energy_eV:   8.32722500E+01
 eratio:   1.63651606E+02
 ft_max_err_t2w_cos:   3.98125344E-02
 ft_max_err_w2t_cos:   4.28330985E-03
 ft_max_err_t2w_sin:   1.18894000E+00
 cosft_duality_error:   4.81105168E-04
-Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(omega)
+Minimax imaginary tau/omega mesh in a.u.: !Tabular | # tau, weight(tau), omega, weight(omega)
     1 1.37790E-01   3.77130E-01   7.40206E-03   1.56780E-02
     2 9.66170E-01   1.47303E+00   2.81007E-02   2.86097E-02
     3 3.76262E+00   4.65299E+00   7.43526E-02   7.20997E-02

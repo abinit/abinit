@@ -1,6 +1,6 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.3.6.1 of ABINIT, released Feb 2025.
+.(MPI version, prepared for a x86_64_linux_intel2021.9 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -570,14 +570,14 @@ gwr_boxcutmin:   1.10000000E+00
 P gwr_np_kgts: [1, 1, 1, 1, ]
 P np_kibz: [1, ]
 P np_qibz: [1, ]
-min_transition_energy_eV:   8.34720099E-02
-max_transition_energy_eV:   1.85898004E+00
+min_transition_energy_eV:   2.27138890E+00
+max_transition_energy_eV:   5.05854193E+01
 eratio:   2.22706993E+01
 ft_max_err_t2w_cos:   3.38096223E-03
 ft_max_err_w2t_cos:   1.13989226E-04
 ft_max_err_t2w_sin:   5.99630081E-02
 cosft_duality_error:   5.42525409E-04
-Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(omega)
+Minimax imaginary tau/omega mesh in a.u.: !Tabular | # tau, weight(tau), omega, weight(omega)
     1 1.68072E-01   4.38518E-01   2.63761E-02   5.47000E-02
     2 9.54129E-01   1.18556E+00   9.16320E-02   8.11066E-02
     3 2.71685E+00   2.47696E+00   2.03417E-01   1.53088E-01
@@ -1116,14 +1116,14 @@ gwr_boxcutmin:   1.10000000E+00
 P gwr_np_kgts: [1, 1, 1, 1, ]
 P np_kibz: [1, ]
 P np_qibz: [1, ]
-min_transition_energy_eV:   8.34720099E-02
-max_transition_energy_eV:   1.85898004E+00
+min_transition_energy_eV:   2.27138890E+00
+max_transition_energy_eV:   5.05854193E+01
 eratio:   2.22706993E+01
 ft_max_err_t2w_cos:   3.38096223E-03
 ft_max_err_w2t_cos:   1.13989226E-04
 ft_max_err_t2w_sin:   5.99630081E-02
 cosft_duality_error:   5.42525409E-04
-Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(omega)
+Minimax imaginary tau/omega mesh in a.u.: !Tabular | # tau, weight(tau), omega, weight(omega)
     1 1.68072E-01   4.38518E-01   2.63761E-02   5.47000E-02
     2 9.54129E-01   1.18556E+00   9.16320E-02   8.11066E-02
     3 2.71685E+00   2.47696E+00   2.03417E-01   1.53088E-01
@@ -1872,14 +1872,14 @@ gwr_boxcutmin:   1.10000000E+00
 P gwr_np_kgts: [1, 1, 1, 1, ]
 P np_kibz: [1, ]
 P np_qibz: [1, ]
-min_transition_energy_eV:   8.34720099E-02
-max_transition_energy_eV:   1.85898004E+00
+min_transition_energy_eV:   2.27138890E+00
+max_transition_energy_eV:   5.05854193E+01
 eratio:   2.22706993E+01
 ft_max_err_t2w_cos:   3.38096223E-03
 ft_max_err_w2t_cos:   1.13989226E-04
 ft_max_err_t2w_sin:   5.99630081E-02
 cosft_duality_error:   5.42525409E-04
-Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(omega)
+Minimax imaginary tau/omega mesh in a.u.: !Tabular | # tau, weight(tau), omega, weight(omega)
     1 1.68072E-01   4.38518E-01   2.63761E-02   5.47000E-02
     2 9.54129E-01   1.18556E+00   9.16320E-02   8.11066E-02
     3 2.71685E+00   2.47696E+00   2.03417E-01   1.53088E-01

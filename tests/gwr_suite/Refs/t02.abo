@@ -1,6 +1,6 @@
 
-.Version 10.0.2.1 of ABINIT, released Apr 2024.
-.(MPI version, prepared for a aarch64_darwin22.6.0_gnu12.2 computer)
+.Version 10.3.6.1 of ABINIT, released Feb 2025.
+.(MPI version, prepared for a x86_64_linux_intel2021.9 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -692,14 +692,14 @@ gwr_boxcutmin:   1.10000000E+00
 P gwr_np_kgts: [1, 1, 1, 1, ]
 P np_kibz: [1, 1, 1, ]
 P np_qibz: [1, 1, 1, ]
-min_transition_energy_eV:   3.31672820E-02
-max_transition_energy_eV:   1.89598636E+00
+min_transition_energy_eV:   9.02527643E-01
+max_transition_energy_eV:   5.15924127E+01
 eratio:   5.71643574E+01
 ft_max_err_t2w_cos:   1.69754599E-02
 ft_max_err_w2t_cos:   5.30899553E-04
 ft_max_err_t2w_sin:   3.37574028E-01
 cosft_duality_error:   7.86621924E-04
-Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(omega)
+Minimax imaginary tau/omega mesh in a.u.: !Tabular | # tau, weight(tau), omega, weight(omega)
     1 2.14326E-01   5.65695E-01   1.17768E-02   2.46618E-02
     2 1.28479E+00   1.69884E+00   4.26018E-02   4.02801E-02
     3 4.04689E+00   4.16332E+00   1.02353E-01   8.69439E-02
@@ -1154,14 +1154,14 @@ gwr_boxcutmin:   1.10000000E+00
 P gwr_np_kgts: [1, 1, 1, 1, ]
 P np_kibz: [1, 1, 1, ]
 P np_qibz: [1, 1, 1, ]
-min_transition_energy_eV:   3.31672820E-02
-max_transition_energy_eV:   1.89598636E+00
+min_transition_energy_eV:   9.02527643E-01
+max_transition_energy_eV:   5.15924127E+01
 eratio:   5.71643574E+01
 ft_max_err_t2w_cos:   1.69754599E-02
 ft_max_err_w2t_cos:   5.30899553E-04
 ft_max_err_t2w_sin:   3.37574028E-01
 cosft_duality_error:   7.86621924E-04
-Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(omega)
+Minimax imaginary tau/omega mesh in a.u.: !Tabular | # tau, weight(tau), omega, weight(omega)
     1 2.14326E-01   5.65695E-01   1.17768E-02   2.46618E-02
     2 1.28479E+00   1.69884E+00   4.26018E-02   4.02801E-02
     3 4.04689E+00   4.16332E+00   1.02353E-01   8.69439E-02
