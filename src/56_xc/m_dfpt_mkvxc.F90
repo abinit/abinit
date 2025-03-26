@@ -1206,6 +1206,7 @@ end subroutine dfpt_mkvxcgga_n0met
 !!  cplex= if 1, real space 1-order functions on FFT grid are REAL,
 !!         if 2, COMPLEX
 !!  i3dir= reduced direction of the q-gradient
+!!  ixc= choice of exchange-correlation scheme
 !!  gmet(3,3)=reciprocal space metric tensor in bohr**-2
 !!  gprimd(3,3)=reciprocal space dimensional primitive translations
 !!  kxc(nfft,nkxc)=exchange and correlation kernel
@@ -1214,7 +1215,10 @@ end subroutine dfpt_mkvxcgga_n0met
 !!  ngfft(1:18)=integer array with FFT box dimensions and other 
 !!  nspden=number of spin-density components
 !!  nkxc=second dimension of the kxc array. If /=0, the XC kernel must be computed.
+!!  qphon(3)=reduced coordinates for the phonon wavelength (needed if cplex==2).
+!!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
 !!  xccc3d1(cplex*nfft)=3D change in core charge density
+!!  xccc3d1dq(2*nfft)=q_i3dir-gradient of 3D change in core charge density
 !!
 !! OUTPUT
 !!  vxccc1dq(2*nfft,nspden)= q-gradient of first-order XC potential due to pseudocore charge
@@ -1236,8 +1240,8 @@ end subroutine dfpt_mkvxcgga_n0met
 #include "abi_common.h"
 
 
-subroutine dfpt_mkvxcccdq(cplex,i3dir,gmet,gprimd,kxc,mpi_enreg,nfft, & 
-& ngfft,nkxc,nspden,vxccc1dq,xccc3d1)
+subroutine dfpt_mkvxcccdq(cplex,i3dir,ixc,gmet,gprimd,kxc,mpi_enreg,nfft, & 
+& ngfft,nkxc,nspden,qphon,rprimd,vxccc1dq,xccc3d1,xccc3d2dq)
 
  use defs_basis
  use m_errors
@@ -1247,27 +1251,33 @@ subroutine dfpt_mkvxcccdq(cplex,i3dir,gmet,gprimd,kxc,mpi_enreg,nfft, &
 
 !Arguments ------------------------------------
  !scalars
- integer , intent(in)  :: cplex,i3dir,nfft,nkxc,nspden
+ integer , intent(in)  :: cplex,i3dir,ixc,nfft,nkxc,nspden
  type(MPI_type),intent(inout) :: mpi_enreg
 
  !arrays
  integer,intent(in) :: ngfft(18)
  real(dp), intent(in)  :: gmet(3,3),gprimd(3,3)
  real(dp), intent(in)  :: kxc(nfft,nkxc)
+ real(dp), intent(in)  :: qphon(3),rprimd(3,3)
  real(dp), intent(in)  :: xccc3d1(cplex*nfft)
+ real(dp), intent(in)  :: xccc3d2dq(2*nfft)
  real(dp), intent(out) :: vxccc1dq(2*nfft,nspden)
 
 !Local variables-------------------------------
  !scalars
- integer :: ispden,ir,qcar
+ integer :: ii,ispden,ir,jj,nhat1grdim,option,qcar,usexcnhat,usepaw
  real(dp) :: spin_scale
+ logical :: non_magnetic_xc
  !arrays
- real(dp),allocatable :: rhor1(:,:)
- real(dp),allocatable :: vxc1dq(:,:),vxc1dq_car(:,:,:)
+ real(dp),allocatable :: nhat1(:,:),nhat1gr(:,:,:)
+ real(dp),allocatable :: rhor1(:,:), rhor1_cplx(:,:)
+ real(dp),allocatable :: vxc1dq_a(:,:),vxc1dq_b(:,:),vxc1dq_car(:,:,:)
 
 ! *************************************************************************
 
  DBG_ENTER("COLL")
+
+ vxccc1dq= zero
 
 !If GGA xc first calculate the contribution from the q gradient of the xc potential
  if (nkxc == 7) then
@@ -1282,28 +1292,51 @@ subroutine dfpt_mkvxcccdq(cplex,i3dir,gmet,gprimd,kxc,mpi_enreg,nfft, &
    end do
 
    !The gradient of the potential is calculated in Cartesian coordinates
-   ABI_MALLOC(vxc1dq,(2*nfft,nspden))
+   ABI_MALLOC(vxc1dq_a,(2*nfft,nspden))
    ABI_MALLOC(vxc1dq_car,(2*nfft,nspden,3))
    do qcar=1,3
-     call dfpt_mkvxcggadq(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,nkxc,nspden,qcar,rhor1,vxc1dq)
-     vxc1dq_car(:,:,qcar)=vxc1dq(:,:)
+     call dfpt_mkvxcggadq(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,nkxc,nspden,qcar,rhor1,vxc1dq_a)
+     vxc1dq_car(:,:,qcar)=vxc1dq_a(:,:)
    end do
    ABI_FREE(rhor1)
 
    !Convert to reduced coordinate i3dir
-   vxc1dq=zero
+   vxc1dq_a=zero
    do qcar=1,3
-     vxc1dq(:,:)=vxc1dq(:,:) + gprimd(qcar,i3dir) * vxc1dq_car(:,:,qcar)
+     vxc1dq_a(:,:)=vxc1dq_a(:,:) + gprimd(qcar,i3dir) * vxc1dq_car(:,:,qcar)
    end do
    ABI_FREE(vxc1dq_car)
 
+   !Accumulate this term
+   vxccc1dq= vxc1dq_a
+
+   ABI_FREE(vxc1dq_a)
  end if
 
 !Calculate the term with the gradient of the first-order pseudocore density
+!Dummy arguments for mkvxc
+ ABI_MALLOC(rhor1_cplx,(2*nfft,nspden))
+ usexcnhat= 0
+ nhat1grdim= 0
+ ABI_MALLOC(nhat1gr,(0,0,0))
+ nhat1gr(:,:,:)= zero
+ usepaw= 0
+ ABI_MALLOC(nhat1,(2*nfft,nspden*usepaw))
+ nhat1= zero
+ non_magnetic_xc= .true.
+ option= 0
+ ABI_MALLOC(vxc1dq_b,(2*nfft,nspden))
+ call dfpt_mkvxc(2,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,usepaw,nhat1gr,nhat1grdim,nkxc,&
+& non_magnetic_xc,nspden,nfft,option,qphon,rhor1_cplx,rprimd,usexcnhat,vxc1dq_b,xccc3d2dq)
 
+!Accumulate this term
+ vxccc1dq= vxccc1dq + vxc1dq_b
 
 !Deallocations
- ABI_SFREE(vxc1dq)
+ ABI_FREE(vxc1dq_b)
+ ABI_FREE(rhor1_cplx)
+ ABI_FREE(nhat1)
+ ABI_FREE(nhat1gr)
 
  DBG_EXIT("COLL")
 
