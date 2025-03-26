@@ -353,7 +353,7 @@ subroutine anharmonics_terms_setCoeffs(coeffs,anharmonics_terms,ncoeff)
   do ii=1,anharmonics_terms%ncoeff
     call polynomial_coeff_init(coeffs(ii)%coefficient,coeffs(ii)%nterm,&
       &                              anharmonics_terms%coefficients(ii),&
-      &                              coeffs(ii)%terms,isbound=coeffs(ii)%isbound, &
+      &                              coeffs(ii)%terms, &
       &                              name=coeffs(ii)%name)
   end do
 

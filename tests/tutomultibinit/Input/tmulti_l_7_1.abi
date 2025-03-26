@@ -18,6 +18,7 @@ bound_model = 3        # Flag to activate the bound process (default 0)
 bound_rangePower = 6 8 # Range of the power for the additional terms in the bound process (defaut 6 6)
 bound_EFS = 0 1 1      # Bound regarding to (E)nergy (F)orces and (S)tress 
 bound_penalty = 1.001  # Penalty on the Goal Function (GF_new/GF_init) can't be bigger than this value
+bound_option = 2       # Option for the bound process (default 1)
 
 ##############################################################
 # This section is used only for regression testing of ABINIT #
