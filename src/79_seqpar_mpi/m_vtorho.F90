@@ -985,7 +985,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        end if
 
 !      If OpenMP GPU, load "hamiltonian" on GPU device
-       if (dtset%gpu_option == ABI_GPU_OPENMP) then
+       if (gs_hamk%gpu_option == ABI_GPU_OPENMP) then
          if(dtset%paral_kgb==0) then
            call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp,gs_hamk%ffnl_k,gs_hamk%ph3d_k)
          else if(istwf_k==1) then
@@ -1021,7 +1021,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        end if
 
 #if defined HAVE_GPU_CUDA
-       if (dtset%gpu_option==ABI_GPU_LEGACY .or. dtset%gpu_option==ABI_GPU_KOKKOS) then
+       if (gs_hamk%gpu_option==ABI_GPU_LEGACY .or. gs_hamk%gpu_option==ABI_GPU_KOKKOS) then
          if (mpi_enreg%paral_kgb==1) then
            ph3d_size=INT(size(my_bandfft_kpt%ph3d_gather,dim=1),c_int64_t) &
              &       * size(my_bandfft_kpt%ph3d_gather,dim=2) * size(my_bandfft_kpt%ph3d_gather,dim=3)
@@ -1082,7 +1082,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 #endif
 
 #if defined HAVE_GPU_CUDA
-       if(dtset%gpu_option==ABI_GPU_LEGACY .or. dtset%gpu_option==ABI_GPU_KOKKOS) call gpu_finalize_ffnl_ph3d()
+       if(gs_hamk%gpu_option==ABI_GPU_LEGACY .or. gs_hamk%gpu_option==ABI_GPU_KOKKOS) call gpu_finalize_ffnl_ph3d()
 #endif
        ABI_FREE(ffnl)
 
@@ -1155,7 +1155,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          end if
        end if
 
-       if ( dtset%gpu_option == ABI_GPU_OPENMP) then
+       if ( gs_hamk%gpu_option == ABI_GPU_OPENMP) then
          call ompgpu_free_hamilt_buffers()
        end if
 ! LB-01/03/2024: Very weird compiler error on eos-nvhpc23.1 if the second call of timab(985,...) is included...
@@ -1480,7 +1480,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !        end if
 
          if(paw_dmft%myproc==0) then
+           ABI_NVTX_START_RANGE(NVTX_DMFT_SAVEOCC)
+           call timab(628,1,tsec)
            call saveocc_dmft(paw_dmft)
+           call timab(628,2,tsec)
+           ABI_NVTX_END_RANGE()
          end if
          call destroy_dmft(paw_dmft)
 
