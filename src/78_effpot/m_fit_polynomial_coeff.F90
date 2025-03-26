@@ -372,7 +372,6 @@ contains
     ABI_SFREE(fixcoeff_corr)
     ABI_SFREE(fix_and_impose)
     ABI_SFREE(list_coeffs_copy)
-    print *, "Deallocating weights"
     ABI_FREE(weights)
   end subroutine deallocate_arrays
 
@@ -2089,8 +2088,7 @@ real(dp), allocatable :: weights(:)
 !Compute Sheppard and al Factors  \Omega^{2} see J.Chem Phys 136, 074103 (2012) [[cite:Sheppard2012]].
  call fit_data_compute(fit_data,eff_pot,hist,comm,verbose=need_verbose)
 
-print *, "allocating weights"
-ABI_MALLOC(weights,(ntime))
+
  call get_weight_from_hist(hist, fit_weight_T, ntime, eff_pot%supercell%natom, weights, comm )
 
 !Get the decomposition for each coefficients of the forces,stresses and energy for
@@ -2108,6 +2106,7 @@ ABI_MALLOC(weights,(ntime))
 &                                fit_data%training_set%ucvol,list_coeffs,ncoeff_tot)
 
 
+
 !set MPI, really basic stuff...
  nmodel_alone = mod(nmodel,nproc)
  my_nmodel = int(aint(real(nmodel,sp)/(nproc)))
@@ -2118,6 +2117,8 @@ ABI_MALLOC(weights,(ntime))
 
  ABI_MALLOC(my_modelindexes,(my_nmodel))
  ABI_MALLOC(my_modellist,(my_nmodel))
+
+
 
 !2:compute the number of model and the list of the corresponding for each CPU.
  do imodel=1,my_nmodel
@@ -2130,6 +2131,7 @@ ABI_MALLOC(weights,(ntime))
      my_modellist(imodel) = imodel
   end if
  end do
+
 
 
 !Start fit process
@@ -2157,11 +2159,14 @@ ABI_MALLOC(weights,(ntime))
  call xmpi_sum(isPositive, comm, ierr)
  call xmpi_sum(coeff_values, comm, ierr)
 
+
+
 !Deallocation of arrays
  do ii=1,ncoeff_tot
    call polynomial_coeff_free(coeffs_in(ii))
  end do
  call fit_data_free(fit_data)
+
  ABI_FREE(coeffs_in)
  ABI_FREE(energy_coeffs)
  ABI_FREE(fcart_coeffs)
@@ -2709,8 +2714,6 @@ subroutine get_weight_from_hist(hist, temperature, ntime, natom, weights, comm)
   my_rank = xmpi_comm_rank(comm)
   iam_master = (my_rank == master)
 
-
-
   ABI_MALLOC(weights,(ntime))
   weights=1.0_dp
 
@@ -2754,6 +2757,7 @@ if(iam_master)then
   end do
   write(msg, '(a)') '-----------------------------------------------------------------------------------'
 endif
+
 
 end subroutine  get_weight_from_hist
 !!***

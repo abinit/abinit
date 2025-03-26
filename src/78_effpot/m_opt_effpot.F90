@@ -331,6 +331,7 @@ subroutine opt_effpot(eff_pot,opt_ncoeff,opt_coeff,hist,opt_on,opt_factors,comm,
   end if
   ! Deallocate and delete the fit-date
   call fit_data_free(fit_data)
+  ABI_FREE(my_weights)
 end subroutine opt_effpot
 !!***
 
