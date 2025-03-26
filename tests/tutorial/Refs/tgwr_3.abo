@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Wed 26 Mar 2025.
-- ( at 17h15 )
+- ( at 17h56 )
 
 - input  file    -> /Users/giantomassi/git_repos/abinit/_build/tests/Test_suite/tutorial_tgwr_1-tgwr_2-tgwr_3-tgwr_4-tgwr_5/tgwr_3.abi
 - output file    -> tgwr_3.abo
@@ -294,7 +294,7 @@ eratio:   1.47077190E+02
 ft_max_err_t2w_cos:   5.41995597E-04
 ft_max_err_w2t_cos:   7.45771835E-06
 ft_max_err_t2w_sin:   9.35025032E-03
-cosft_duality_error:   1.41270006E-03
+cosft_duality_error:   1.41270005E-03
 Minimax imaginary tau/omega mesh in a.u.: !Tabular | # tau, weight(tau), omega, weight(omega)
     1 6.30662E-02   1.63265E-01   5.86860E-03   1.19505E-02
     2 3.45300E-01   4.10548E-01   1.89245E-02   1.46533E-02
@@ -329,18 +329,18 @@ Minimax imaginary tau/omega mesh in a.u.: !Tabular | # tau, weight(tau), omega, 
 --- !EMACRO_WITHOUT_LOCAL_FIELDS
 iteration_state: {dtset: 1, }
 'epsilon_{iw, q -> Gamma}(0,0)': !Tabular |
-      5.86859686E-03    5.52450679E+01   -2.45771961E-17
-      1.89245320E-02    5.38136192E+01    1.49873708E-17
-      3.63380548E-02    5.00068803E+01   -7.05367608E-17
-      6.24646989E-02    4.22132430E+01    6.89944234E-18
-      1.04318183E-01    3.01464566E+01   -6.23676492E-17
-      1.73883713E-01    1.74114085E+01    5.35586379E-17
-      2.92408773E-01    8.44853642E+00   -5.33541314E-18
-      4.98781312E-01    3.89271868E+00    5.25560277E-18
-      8.67296798E-01    2.01298771E+00   -3.54153424E-19
-      1.55285091E+00    1.32487191E+00   -5.57472392E-19
-      2.95818686E+00    1.09085620E+00    8.35768608E-20
-      6.92956805E+00    1.01668831E+00    2.27019628E-21
+      5.86859686E-03    5.52450679E+01   -1.95927804E-17
+      1.89245320E-02    5.38136192E+01   -2.57549325E-17
+      3.63380548E-02    5.00068803E+01    4.34923620E-17
+      6.24646989E-02    4.22132430E+01   -1.93998254E-17
+      1.04318183E-01    3.01464566E+01    2.60596479E-17
+      1.73883713E-01    1.74114085E+01    2.64198017E-18
+      2.92408773E-01    8.44853642E+00    2.07226025E-18
+      4.98781312E-01    3.89271868E+00    8.75838691E-19
+      8.67296798E-01    2.01298771E+00   -4.03733132E-18
+      1.55285091E+00    1.32487191E+00    4.59591023E-19
+      2.95818686E+00    1.09085620E+00   -9.93156174E-20
+      6.92956805E+00    1.01668831E+00    5.80103473E-21
 ...
 
 
@@ -645,13 +645,13 @@ P           mkmem           3
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         18.4  wall=         18.5
+- Proc.   0 individual time (sec): cpu=         17.4  wall=         17.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   8 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         18.4  wall=         18.5
++Overall time at end (sec) : cpu=         17.4  wall=         17.5
 - [ALL OK] MEMORY CONSUMPTION REPORT FOR C CODE:
 -   There were 40 allocations and 40 deallocations in C code
 - [ALL OK] MEMORY CONSUMPTION REPORT FOR FORTRAN CODE:

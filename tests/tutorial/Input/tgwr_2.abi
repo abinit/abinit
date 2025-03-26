@@ -19,7 +19,7 @@ shiftk  0.0 0.0 0.0
 ###########################################
 optdriver  6                         # Activate GWR code
 gwr_task "HDIAGO"                    # Direct diagonalization
-nband     250                        # Number of (occ + empty) bands
+nband     300                        # Number of (occ + empty) bands
 getden_filepath "tgwr_1o_DS1_DEN"    # Density file used to build H[n]
 
 #%%<BEGIN TEST_INFO>

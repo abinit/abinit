@@ -26,7 +26,7 @@ gwr_sigma_algo 1     # Use supercell for Sigma
 #gw_icutcoul3   0    # Spherical cutoff
 #gwr_ucsc_batch3 3 5
 
-nband      100      # Bands to be used in the screening calculation
+nband      250      # Bands to be used in the screening calculation
 ecuteps    6        # Cut-off energy of the planewave set to represent the dielectric matrix.
                     # It is important to adjust this parameter.
 #ecutsigx    8.0     # Dimension of the G sum in Sigma_x
