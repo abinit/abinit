@@ -32,8 +32,8 @@
 
 
 
-.Starting date : Sat 22 Mar 2025.
-- ( at 06h28 )
+.Starting date : Wed 26 Mar 2025.
+- ( at 12h21 )
   
 - The starting date is more than 2 years after the initial release
 - of this version of ABINIT, namely Jul 2022.
@@ -251,7 +251,7 @@ dipdip_range         2         2         2
 
  The coefficients for the fit will be generated with all cross terms
 
- 90 coefficients generated 
+ 110 coefficients generated 
 
 
  Goal function values at the begining of the fit process (eV^2/A^2):
@@ -478,6 +478,6 @@ dipdip_range         2         2         2
 
 ================================================================================
 
-+Total cpu time     16.521  and wall time     16.525 sec
++Total cpu time     16.540  and wall time     16.544 sec
 
  multibinit : the run completed succesfully.
