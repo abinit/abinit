@@ -67,6 +67,9 @@ If you open the include file:
 
 you will notice that we are using norm-conserving (NC) pseudos taken from
 the standard scalar-relativistic table of the [PseudoDojo](https://www.pseudo-dojo.org/).
+For efficiency reasons, these examples use underconverged parameters:
+the cutoff energy [[ecut]] is set to 10 Ha that is slightly smaller
+than the recommended value reported in the PseudoDojo table (16 Ha).
 
 !!! important
 
@@ -82,9 +85,6 @@ the standard scalar-relativistic table of the [PseudoDojo](https://www.pseudo-do
     To include SOC with NC, one should use fully-relativistic (FR) pseudos, use [[nspinor]] 2 in all the input files
     and then set the appropriate value of [[nspden]] to 4 or 1 depending on whether the system is magnetic or not.
 
-    For efficiency reasons, these examples use underconverged parameters:
-    the cutoff energy [[ecut]] is set to XXX that is slightly smaller
-    than the recommended value reported in the PseudoDojo table
 
 <!--
 One final comment on MPI parallelism:
@@ -102,7 +102,7 @@ at the KS band structure to locate the position of the band edges.
 
         abiopen.py tgwr_1o_DS2_GSR.nc --expose
 
-    ![](base1_assets/abiopen_tgwr1_1.png)
+    ![](gwr_assets/abiopen_tgwr_1o_DS2.png)
 
     To print the results to terminal, use:
 
@@ -360,15 +360,15 @@ data: !Tabular |
 
 The meaning of the different columns should be self-explanatory.
 
-As usual, we can use `abiopen.py` with the `-p` (`--print`) option to have a summary
-of the most important results printed to screen:
+As usual, we can use `abiopen.py` with the `-p` (`--print`) option to print to screen
+a summary of the most important results:
 Try, for instance:
 
 ```
-abiopen.py tgwr_3o_DS1_GWR.nc -p
+abiopen.py tgwr_3o_GWR.nc -p
 ```
 
-The last section printed to the screen gives ous the QP direct gaps:
+The last section gives the QP direct gaps:
 
 ```
 =============================== GWR parameters ===============================
@@ -397,30 +397,49 @@ Diagonal elements of $\Sigma_\xc(i \omega)$ in eV units
 tgwr\_3o\_SIGXC\_RW:
 Diagonal elements of $\Sigma_\xc(\omega)$ in eV units and spectral function $A_\nk(\omega)$
 
-Finally, we have a netcdf file named tgwr\_3o\_DS1_GWR.nc storing the same data
+Finally, we have a netcdf file named `tgwr_3o_GWR.nc` storing the same data
 in binary format that can be easily post-processed with AbiPy using
-[this script][https://abinit.github.io/abipy/gallery/plot_gwr.html].
+
+```
+abiopen.py tgwr_3o_GWR.nc -e
+```
+
+[This script][https://abinit.github.io/abipy/gallery/plot_gwr.html].
 Please take some time to read the script and understand how this post-processing tool works before proceeding.
 
 
 ### Extracting useful info from the GWR log file
 
-To extract the memory allocated for the most memory demanding arrays, one can use:
+To extract the memory allocated for the most memory demanding arrays, use:
 
 ```
-grep "<< MEM" log"
+grep "<<< MEM" log
+
+- Local memory for u_gb wavefunctions: 1.9  [Mb] <<< MEM
+- Local memory for G(g,g',kibz,itau): 185.6  [Mb] <<< MEM
+- Local memory for Chi(g,g',qibz,itau): 17.8  [Mb] <<< MEM
+- Local memory for Wc(g,g,qibz,itau): 17.8  [Mb] <<< MEM
 ```
 
-To extract the wall-time and cpu-time for the most important sections, one can use:
+To extract the wall-time and cpu-time for the most important sections, use:
 
 ```
-grep "<< TIME" log"
+grep "<<< TIME" log
+
+gwr_read_ugb_from_wfk: , wall:  0.00 [s] , cpu:  0.00 [s] <<< TIME
+gwr_build_chi0_head_and_wings: , wall:  0.31 [s] , cpu:  0.31 [s] <<< TIME
+gwr_build_sigxme: , wall:  0.02 [s] , cpu:  0.02 [s] <<< TIME
+gwr_build_green: , wall:  0.31 [s] , cpu:  0.31 [s] <<< TIME
+gwr_build_tchi: , wall: 10.89 [s] , cpu: 10.87 [s] <<< TIME
+gwr_build_wc: , wall:  0.11 [s] , cpu:  0.11 [s] <<< TIME
+gwr_build_sigmac: , wall:  5.92 [s] , cpu:  5.90 [s] <<< TIME
 ```
 
 To obtain the wall-time and cpu-time required by the different datasets, use:
 
 ```
-grep "dataset:" log | grep "<< TIME"
+grep "dataset:" log | grep "<<< TIME"
+dataset: 1 , wall: 17.90 [s] , cpu: 17.83 [s] <<< TIME
 ```
 
 ### Convergence study HOWTO
@@ -486,7 +505,7 @@ ndtset 16    # NB: ndtset must be equal to udtset[0] * udtset[1]
 udtset 4 4
 
 #inner loop: increase nband. The number of iterations is given by udtset[0]
-nband:? 100    nband+? 50
+nband:? 150    nband+? 50
 
 #outer loop: increase ecuteps. The number of iterations is given by udtset[1]
 ecuteps?: 6     ecuteps?+  2
@@ -498,22 +517,7 @@ the values of [[nband]] and [[ecuteps]] have little impact of the computational 
 
 ```
 grep "dataset:" log | grep "<< TIME"
- dataset: 1 , wall:  8.84 [s] , cpu:  8.83 [s] <<< TIME
- dataset: 2 , wall:  9.04 [s] , cpu:  9.03 [s] <<< TIME
- dataset: 3 , wall:  9.29 [s] , cpu:  9.24 [s] <<< TIME
- dataset: 4 , wall:  9.99 [s] , cpu:  9.98 [s] <<< TIME
- dataset: 5 , wall:  8.80 [s] , cpu:  8.79 [s] <<< TIME
- dataset: 6 , wall:  9.19 [s] , cpu:  9.15 [s] <<< TIME
- dataset: 7 , wall:  9.45 [s] , cpu:  9.45 [s] <<< TIME
- dataset: 8 , wall: 10.32 [s] , cpu: 10.28 [s] <<< TIME
- dataset: 9 , wall:  8.81 [s] , cpu:  8.81 [s] <<< TIME
- dataset: 10 , wall:  9.28 [s] , cpu:  9.22 [s] <<< TIME
- dataset: 11 , wall:  9.60 [s] , cpu:  9.59 [s] <<< TIME
- dataset: 12 , wall: 10.19 [s] , cpu: 10.17 [s] <<< TIME
- dataset: 13 , wall:  8.95 [s] , cpu:  8.94 [s] <<< TIME
- dataset: 14 , wall:  9.30 [s] , cpu:  9.29 [s] <<< TIME
- dataset: 15 , wall:  9.60 [s] , cpu:  9.60 [s] <<< TIME
- dataset: 16 , wall: 10.29 [s] , cpu: 10.28 [s] <<< TIME
+
 ```
 
 As concerns [[nband]] this is expected, as this parameter enters into play
@@ -537,13 +541,17 @@ from abipy.electrons.gwr import GwrRobot
 robot = GwrRobot.from_files(filepaths)
 
 # Convergence window in eV
-abs_conv = 0.002
+abs_conv = 0.005
 
 robot.plot_qpgaps_convergence_new(x="nband", y="qpz0_dirgaps",
-                                  abs_conv=abs_conv, hue="ecuteps")
+                                  abs_conv=abs_conv, hue="ecuteps",
+                                  #show=False, savefig="conv_nband_ecuteps.png",
+                                  )
 
 robot.plot_qpgaps_convergence_new(x="ecuteps", y="qpz0_dirgaps",
-                                  abs_conv=abs_conv, hue="nband")
+                                  abs_conv=abs_conv, hue="nband",
+                                  #show=False, savefig="conv_ecuteps_nband.png",
+                                  )
 ```
 
 Save the script in a file, let’s say `conv_nband_ecuteps.py`, in the same
@@ -558,6 +566,12 @@ and then run it with:
 ```
 ./conv_nband_ecuteps.py
 ```
+
+![](gwr_assets/conv_ecuteps_nband.png)
+
+![](gwr_assets/conv_nband_ecuteps.png)
+
+Let's use [[nband]] = 250 and [[ecuteps]] = 10
 
 In the [first GW tutorial](/tutorial/gw1), we have already performed convergence studies,
 and [[nband]] = 100 was found to give results converged within 30 mev, which is fair to compare with experimental accuracy.
@@ -578,8 +592,8 @@ mv tgwr_3o_* log conv_nband_ecuteps
 
 ## Convergence wrt gwr_boxcutmin
 
-At this point edit `tgwr_3.abi`, replace the values of [[nband]] and [[ecuteps]] found earlier,
-and define a new one-dimensional multidataset in which we increase [[gwr_boxcutmin]].
+Now edit `tgwr_3.abi`, replace the values of [[nband]] and [[ecuteps]] found earlier,
+and define a new one-dimensional multidataset to increase [[gwr_boxcutmin]]:
 
 ```
 ndtset 5
@@ -604,7 +618,7 @@ grep "dataset:" log | grep "<< TIME"
 
 Once the calculation is finished, save the script reported below in a file,
 let’s say `conv_boxcut.py`, in the same directory where we launched the calculation,
-make it executable and execute it as usual
+make it executable and execute it as usual.
 
 
 ```python
@@ -614,16 +628,18 @@ filepaths = [f"tgwr_3o_DS{i}_GWR.nc" for i in range(1, 6)]
 from abipy.electrons.gwr import GwrRobot
 robot = GwrRobot.from_files(filepaths)
 
-abs_conv = 0.01
+abs_conv = 0.005
 robot.plot_qpgaps_convergence_new(x="gwr_boxcutmin", y="qpz0_dirgaps",
-                                  abs_conv=abs_conv)
+                                  abs_conv=abs_conv
+                                  #show=False, savefig="conv_boxcutmin.png",
+                                  )
 
 #robot.plot_qpgaps_convergence(sortby=sortby, abs_conv=abs_conv)
 ```
 
 You should obtain the following figure:
 
-![](base1_assets/abiopen_tgwr1_1.png)
+![](gwr_assets/conv_boxcutmin.png)
 
 In the case of silicon, the results are rather insensitive to the density
 of the FFT mesh but keep in mind that other systems may behave differently.
@@ -631,7 +647,8 @@ We therefore fix [[gwr_boxcutmin]] to 1.1 and proceed with the other convergence
 
 ## Convergence wrt gwr_ntau
 
-Change `tgwr_3.abi` to perform a convergence study wrt [[gwr_ntau]] by adding the following section
+Change `tgwr_3.abi` to perform a convergence study wrt [[gwr_ntau]]
+by adding the following section:
 
 ```
 ndtset      15
@@ -656,16 +673,18 @@ def sortby(gwr):
     return gwr.params["gwr_ntau"]
 
 
-abs_conv = 0.01
+abs_conv = 0.005
 robot.plot_qpgaps_convergence_new(x="gwr_ntau", y="qpz0_dirgaps",
-                                  abs_conv=abs_conv)
+                                  abs_conv=abs_conv
+                                  #show=False, savefig="conv_ntau.png",
+                                  )
 
 robot.plot_qpgaps_convergence(sortby=sortby, abs_conv=abs_conv)
 ```
 
 You should get the following figure:
 
-![](base1_assets/abiopen_tgwr1_1.png)
+![](gwr_assets/conv_ntau.png)
 
 Clearly 6 minimax points are not enough to convergence.
 Also the convergence with [[gwr_ntau]] is not variational, and there are meshes that perform better than others.
@@ -734,7 +753,7 @@ getwfk_filepath3 "tgwr_2o_DS3_WFK"
 
 You should get the following figure:
 
-![](base1_assets/abiopen_tgwr1_1.png)
+![](gwr_assets/conv_kmesh.png)
 
 ### How to compute an interpolated band structure with GWR
 
@@ -791,7 +810,7 @@ plotter.combiplot()
 
 You should get the following figure:
 
-![](base1_assets/abiopen_tgwr1_1.png)
+![](gwr_assets/qp_bands.png)
 
 ### Analyzing the convergence with the minimax mesh
 
@@ -816,7 +835,7 @@ def sortby(gwr):
     r"""$N_\tau$"""
     return gwr.params["gwr_ntau"]
 
-robot.plot_qpgaps_convergence(sortby=sortby, abs_conv=0.01)
+robot.plot_qpgaps_convergence(sortby=sortby, abs_conv=0.005)
 ```
 
 If we analyze the results of a more expensive run done with multiple minimax meshes
