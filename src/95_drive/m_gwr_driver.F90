@@ -817,7 +817,7 @@ end if
 
    ! Construct crystal and ks_ebands from the GS WFK file.
    tmp_ebands = wfk_read_ebands(wfk_path, comm, out_hdr=wfk_hdr)
-   ks_ebands = tmp_ebands%chop(1, dtset%nband(1))
+   ks_ebands = tmp_ebands%chop(1, minval(dtset%nband))
    call tmp_ebands%free()
    call wfk_hdr%vs_dtset(dtset)
 
@@ -866,7 +866,7 @@ end if
 
      ! Construct crystal and ks_ebands from the GS WFK file.
      tmp_ebands = wfk_read_ebands(wfk_path, comm, out_hdr=wfk_hdr)
-     ks_ebands = tmp_ebands%chop(1, dtset%nband(1))
+     ks_ebands = tmp_ebands%chop(1, minval(dtset%nband))
      call tmp_ebands%free()
      call wfk_hdr%vs_dtset(dtset)
 
