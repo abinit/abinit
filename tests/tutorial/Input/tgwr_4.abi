@@ -1,9 +1,3 @@
-# Definition of the k-point grid
-# IMPORTANT: GWR requires Gamma-centered k-meshes
-ngkpt   4 4 4
-nshiftk 1
-shiftk  0.0 0.0 0.0
-
 # Include geometry and pseudos
 include "gwr_include.abi"
 
@@ -14,6 +8,12 @@ optdriver  6                          # Activate GWR code
 gwr_task "G0W0"                       # One-shot calculation
 getden_filepath "tgwr_1o_DS1_DEN"     # Density file
 getwfk_filepath "tgwr_2o_DS2_WFK"     # WFK file with empty states. Must be consisten with ngkpt, shiftk
+
+# Definition of the k-point grid
+# IMPORTANT: GWR requires Gamma-centered k-meshes
+ngkpt   4 4 4
+nshiftk 1
+shiftk  0.0 0.0 0.0
 
 #gwr_ntau   6         # Number of imaginary-time points
 gwr_ntau   12        # Number of imaginary-time points

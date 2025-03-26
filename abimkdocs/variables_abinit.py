@@ -24459,7 +24459,12 @@ The choice is among:
 
 !!! important
 
-    At the time of writing, PAW and metallic systems are not supported by the GWR code.
+    At the time of writing, the following features are **not yet supported** in GWR:
+
+    * Metallic systems as the our minimax meshes assume systems with an energy gap
+    * Temperature effects at the electronic level are not taken into account as we work with the T = 0 formalism.
+    * Only $\Gamma$-centered $\kk$-meshes are supported in GWR
+    * PAW method
 """,
 ),
 
