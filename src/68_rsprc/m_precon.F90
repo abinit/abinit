@@ -67,7 +67,7 @@ module m_precon
                                                 ! for density and potentials.
         procedure :: from_pauli => from_pauli   ! Basis change from the Pauli basis to the default abinit spin basis 
                                                 ! for density and potentials.
-        procedure :: apply_vc => apply_vc       ! Applies the coulomb kernel vc to an input vector.
+        procedure :: apply_kernel => apply_kernel       ! Applies the coulomb kernel vc to an input vector.
         procedure :: apply_chi0 => apply_chi0   ! Applies the model chi0 operator to an input vector.
         procedure :: save_applied_op => save_applied_op ! Saves the application of an operator.
 
@@ -557,53 +557,110 @@ contains
     !! INPUTS
     !!
     !! SOURCE
-    subroutine apply_kxc(this, mpi_enreg, ngfft, vec_g)
+    subroutine apply_kxc(this, dtset, mpi_enreg, ngfft, vec_g)
         !Arguments ------------------------------------
         class(precon_object), intent(inout) :: this
         !scalars
+        type(dataset_type),intent(in) :: dtset
         type(MPI_type),intent(in) :: mpi_enreg
-        integer :: optreal
         !arrays
         integer, intent(in) :: ngfft(:)
-        real(dp), intent(inout) :: vec_g(2, this%nfft, this%nspden)
+        real(dp), intent(inout) :: vec_g(2, this%nfft, dtset%nspden)
         
         !Local variables-------------------------------
         !scalars
-        integer :: cplex, ifft, ispden, n3xccc, nhat1, nhat1dim, nhat1gr, nhat1grdim, nkxc, option, usexcnhat
+        integer :: cplex, n3xccc, nhat1dim, nhat1grdim, nkxc, option, usexcnhat
         logical :: non_magnetic_xc
         !arrays
-        real(dp) :: qphon(3)
-        real(dp), allocatable :: Kxc_vec_r(:, :)
+        real(dp), allocatable :: Kxc_vec_r(:, :), vec_r(:, :)
+        real(dp), allocatable :: nhat1(:, :), nhat1gr(:, :, :)
+        real(dp) :: dummy_xccc3d1(0), dummy_qphon(3)
         
         ! *************************************************************************
         
+        !Basis change to get vec_g in the default Abinit spin-basis to apply existing routines
         call from_pauli(this, 1, vec_g)
 
+        !ifft to get vec_g in the real-space basis required by dfpt_mkvxc
+        ABI_MALLOC(vec_r, (this%nfft, dtset%nspden))
+        call fourdp(1, vec_g, vec_r, 1, mpi_enreg, this%nfft, dtset%nspden, ngfft, 0)
+
+        !Applying Kxc : 
         cplex = 1   ! Input vector is real in real (direct) space.
-        usexcnhat = 0   !
-        nhat1 = 0       !
-        nhat1dim = 0    ! PAW
-        nhat1gr = 0     !
-        nhat1grdim = 0  !
         non_magnetic_xc = .false.
         nkxc = size(this%kxc, 2)
+
+        usexcnhat = 0                                               !
+        nhat1dim = 0                                                ! 
+        ABI_MALLOC(nhat1, (cplex*this%nfft, dtset%nspden*nhat1dim))       ! PAW - TODO ?
+        nhat1grdim = 0                                              !
+        ABI_MALLOC(nhat1gr, (cplex*this%nfft, dtset%nspden, 3*nhat1grdim))  !
+
         option = 2  ! Treats only density change (no core_correction)
         n3xccc = 0  !   -> Core-correction set to 0.
-        xccc3d1 = 0 !
-        !qphon = 
-        ! TODO ifft for vec_g ... or input/output in real space 
-        ! and rewrite to_pauli/from_pauli in real space also.
-        ABI_MALLOC(Kxc_vec_r, (this%nfft, this%nspden))
-        call dfpt_mkvxc(cplex, this%ixc ,this%kxc, mpi_enreg, this%nfft, ngfft, nhat1, nhat1dim, &
-        &               nhat1gr, nhat1grdim, nkxc, non_magnetic_xc, this%nspden, n3xccc, option, &
-        &               qphon, vec_r, this%rprimd, usexcnhat, Kxc_vec_r, xccc3d1)
-        
-        vec_r = Kxc_vec_r
-        ABI_FREE(Kxc_vec_r)
 
+        ABI_MALLOC(Kxc_vec_r, (this%nfft, dtset%nspden))
+        call dfpt_mkvxc(cplex, this%ixc ,this%kxc, mpi_enreg, this%nfft, ngfft, nhat1, nhat1dim, &
+        &               nhat1gr, nhat1grdim, nkxc, non_magnetic_xc, dtset%nspden, n3xccc, option, &
+        &               dummy_qphon, vec_r, this%rprimd, usexcnhat, Kxc_vec_r, dummy_xccc3d1)
+        ABI_FREE(nhat1)
+        ABI_FREE(nhat1gr)
+
+        !fft to return the result Kxc_vec_r in the plane-wave basis.
+        call fourdp(1, vec_g, Kxc_vec_r, -1, mpi_enreg, this%nfft, dtset%nspden, ngfft, 0)
+
+        ABI_FREE(Kxc_vec_r)
+        ABI_FREE(vec_r)
+
+        !Basis change to get the resulting vector in the Pauli basis used in the rest of the preconditioning routines
         call to_pauli(this, 0, vec_g)
 
     end subroutine apply_kxc
+
+    !****f* m_precon/apply_kernel
+    !! NAME
+    !! apply_vc
+    !!
+    !! FUNCTION
+    !!
+    !! INPUTS
+    !!
+    !! SOURCE
+    subroutine apply_kernel(this, dtset, mpi_enreg, ngfft, vec_g)
+        !Arguments ------------------------------------
+        class(precon_object), intent(inout) :: this
+        !scalars
+        type(dataset_type),intent(in) :: dtset
+        type(MPI_type),intent(in) :: mpi_enreg
+        !arrays
+        integer, intent(in) :: ngfft(:)
+        real(dp), intent(inout) :: vec_g(2, this%nfft, dtset%nspden)
+        
+        !Local variables-------------------------------
+        real(dp), allocatable :: Kxc_vec_g(:, :, :)
+
+        ! *************************************************************************
+        
+        !LDOS/Kerker model - only vc (RPA)
+        if (this%iprcel == 201 .or. this%iprcel == 202) then
+            call apply_vc(this, ngfft, vec_g)
+        end if
+
+        !Deigvals (name?) model - K * vec_g = vc * vec_tot + Kxc * vec_spin
+        !   RPA on the total density
+        !   Kxc restricted to the spin density
+        if (this%iprcel == 203 .and. dtset%nspden==2) then
+            ABI_MALLOC(Kxc_vec_g, (2, this%nfft, dtset%nspden))
+            Kxc_vec_g = vec_g   !Copy ?
+            Kxc_vec_g(:, :, 1) = 0  ! Kxc only applied to the spin component
+            call apply_vc(this, ngfft, vec_g)
+            call apply_Kxc(this, dtset, mpi_enreg, ngfft, Kxc_vec_g)
+            Kxc_vec_g(:, :, 1) = 0
+            vec_g = vec_g + Kxc_vec_g
+            ABI_FREE(Kxc_vec_g)
+        end if
+
+    end subroutine apply_kernel
 
     !****f* m_precon/derivative_occ
     !! NAME
@@ -951,7 +1008,7 @@ contains
 
     end subroutine save_applied_op
 
-!****f* m_precon/apply_chi0_ldos
+    !****f* m_precon/apply_chi0_ldos
     !! NAME
     !! apply_chi0_ldos
     !!
@@ -1116,7 +1173,7 @@ contains
         integer :: cplex
         integer :: ispden, istwf_k, maxocc, mcg, ndat, nfftot, npw_k, option, tim_fourwf
         integer :: i_eigen_1, i_eigen_2, i_cg, ikpt, iband
-        integer :: n4, n5, n6
+        integer :: n1, n2, n3, n4, n5, n6
         real(dp) :: fp, eigenval
         integer :: dummy_int
         real(dp) :: dummy_real
@@ -1124,9 +1181,7 @@ contains
         integer :: gbound(2*mgfft+8,2)
         integer :: kg_k(3)
         real(dp), allocatable :: weights(:), vec_r_spin(:), chi0_vec_r(:, :)
-        real(dp), allocatable, target :: rho_ii(:, :, :)
-        type(c_ptr) :: rho_ii_c
-        real(dp), pointer :: rho_ii_1d(:)
+        real(dp), allocatable :: rhoaug_r_ii(:, :, :, :), rho_r_ii(:, :)
 
         !dummy mkrho arguments
         type(paw_dmft_type)     :: paw_dmft
@@ -1144,11 +1199,14 @@ contains
             ABI_BUG("Preconditioner ... (iprcel=2..) can only be used with nsppol=2")
         end if
 
+        n1 = ngfft(1)
+        n2 = ngfft(2)
+        n3 = ngfft(3)
         n4 = ngfft(4)
         n5 = ngfft(5)
         n6 = ngfft(6)
-        if (this%nfft /= n4*n5*n6) then
-            ABI_BUG("Mismatch nfft != n4*n5*n6")
+        if (this%nfft /= n1*n2*n3) then
+            ABI_BUG("Mismatch nfft != n1*n2*n3")
         end if
 
         !1) Computing vec_r_spin = spin component of the input vector in real space.
@@ -1160,7 +1218,8 @@ contains
         maxocc = two / (dtset%nsppol * dtset%nspinor)   !Maximum number of occupations (1 or 2)
         
         !Allocating the array that will contain rho_ii
-        ABI_MALLOC(rho_ii, (n4, n5, n6))
+        ABI_MALLOC(rhoaug_r_ii, (2, n4, n5, n6))
+        ABI_MALLOC(rho_r_ii, (n1*n2*n3, 1))
 
         !Allocating dummy arrays
         ABI_MALLOC(dummy_denpot,(0,n5,n6))
@@ -1178,7 +1237,7 @@ contains
                 !Indices
                 i_eigen_1 = iband + (ikpt-1)*dtset%mband                         ! index of (iband, ikpt, isppol=1) in eigen array
                 i_eigen_2 = iband + (ikpt-1)*dtset%mband + dtset%mband*dtset%nkpt  ! index of (iband, ikpt, isppol=2) in eigen array
-                i_cg = (iband-1)*dtset%mpw + (ikpt-1)*dtset%mband*dtset%mpw        ! index of (ikpt, iband, isppol=1) in cg array
+                i_cg = (iband-1)*dtset%mpw + (ikpt-1)*dtset%mband*dtset%mpw        ! TODO : index of (ikpt, iband, isppol=1) in cg array
                 
                 !2.1) Computing f'(eig_i - fermie).
                 eigenval = (this%eigen(i_eigen_1)+this%eigen(i_eigen_2))/2    !Mean of up/down
@@ -1191,15 +1250,16 @@ contains
                     option = 0      ! FFT from reciprocal to direct space.
                     ndat = 1        ! Only one FFT TODO : Do them all in once ? 
                     tim_fourwf = 0
-                    call fourwf(dummy_int, dummy_denpot, this%cg(:, i_cg:i_cg+npw_k-1), dummy_fofgout, rho_ii,  &
+                    call fourwf(dummy_int, dummy_denpot, this%cg(:, i_cg:i_cg+npw_k-1), dummy_fofgout, rhoaug_r_ii,  &
                     &           gbound, gbound, istwf_k, kg_k, kg_k, mgfft, mpi_enreg, ndat, ngfft, npw_k, &
                     &           dummy_int, n4, n5, n6, option, tim_fourwf, dummy_real, dummy_real)
 
-                    !Using c_pointer to reshape vec_r_spin to match the shape of rho_ii
-                    rho_ii_c = c_loc(rho_ii)
-                    call c_f_pointer(rho_ii_c, rho_ii_1d, shape=[this%nfft])    ! TODO : chack that the array will be read in the right order
+                    rhoaug_r_ii(1, :, :, :) = rhoaug_r_ii(1, :, :, :)**2 + rhoaug_r_ii(2, :, :, :)*2  !|.|^2
 
-                    weights(i_eigen_1) =  fp * maxocc * dot_product(rho_ii_1d, vec_r_spin_3d) * this%dvol
+                    !Transfer the rhoaug_r_ii defined on the large fft-grid to the smaller density/potential fft-grid.
+                    call fftpac(1, mpi_enreg, 1, n1, n2, n3, n4, n5, n6, ngfft, rho_r_ii, rhoaug_r_ii(1, :, :, :), 1)
+
+                    weights(i_eigen_1) =  fp * maxocc * dot_product(rho_r_ii(:, 1), vec_r_spin) * this%dvol
 
                 else
                     weights(i_eigen_1) = 0
@@ -1208,7 +1268,8 @@ contains
             end do
         end do
 
-        ABI_FREE(rho_ii)
+        ABI_FREE(rhoaug_r_ii)
+        ABI_FREE(rho_r_ii)
         ABI_FREE(vec_r_spin)
         ABI_FREE(dummy_denpot)
         ABI_FREE(dummy_fofgout)
@@ -1230,13 +1291,13 @@ contains
         &   dtset%nsym, this%phnons, vec_g, chi0_vec_r, this%rprimd, dtset%symafm, dtset%symrel, dtset%tnons)
         ! TODO : PAW
 
-        ABI_FREE(chi0_vec_r)    ! TODO : save that ?
+        ABI_FREE(chi0_vec_r)
 
         !Basis change : With collinear spins the ldos is not returned in the Pauli (tot/spin) basis by mkrho.
         if (dtset%nspden == 2) then
             call to_pauli(this, 0, vec_g)
             !This model only acts on the spin component.
-            vec_g(:, :,  1) = 0
+            vec_g(:, :,  1) = 0 !Setting the total density to 0.
         end if
 
     end subroutine apply_chi0_mag

@@ -2442,13 +2442,13 @@ subroutine chi0diel_apply_adjdielmat(precon, dtset, mgfft, mpi_enreg, nfft, ngff
 !0.1) Basis change : Changing to the Pauli basis for collinear and non-collinear magnetism
  call precon%to_pauli(1, adjdielmat_rho_g)
 
-!1) Applying the Coulomb kernel vc
- call precon%apply_vc(ngfft, adjdielmat_rho_g)
+!1) Applying the Kernel (vc or vc + Kxc depending on iprcel)
+ call precon%apply_kernel(dtset, mpi_enreg, ngfft, adjdielmat_rho_g)
  !call precon%save_applied_op(ngfft, 2, rho_g, adjdielmat_rho_g, "applied_vc.txt")          !DEBUG
 
 !2) Applying the model chi0 operator
  !temp = adjdielmat_rho_g                                                                   !DEBUG
- call precon%apply_chi0(mgfft, mpi_enreg, ngfft, adjdielmat_rho_g)
+ call precon%apply_chi0(dtset, mgfft, mpi_enreg, ngfft, adjdielmat_rho_g)
  !call precon%save_applied_op(ngfft, 2, temp, adjdielmat_rho_g, "applied_chi0.txt")         !DEBUG
 
 !0.2) Basis change : Changing back to the default spin-basis
@@ -2522,10 +2522,10 @@ subroutine chi0diel_apply_dielmat(precon, dtset, mgfft, mpi_enreg, nfft, ngfft, 
  call precon%to_pauli(0, dielmat_v_g)
 
 !1) Applying the model chi0 operator
- call precon%apply_chi0(mgfft, mpi_enreg, ngfft, dielmat_v_g)
+ call precon%apply_chi0(dtset, mgfft, mpi_enreg, ngfft, dielmat_v_g)
 
-!2) Applying the Coulomb kernel vc
- call precon%apply_vc(ngfft, dielmat_v_g)
+!2) Applying the Kernel (vc or vc + Kxc depending on iprcel)
+ call precon%apply_kernel(dtset, mpi_enreg, ngfft, dielmat_v_g)
 
 !0.2) Basis change : Changing back to the default spin-basis
  call precon%from_pauli(0, dielmat_v_g)
