@@ -1,4 +1,5 @@
-#  Calculation of the GW corrections with GWR code.
+#  Crystalline silicon
+# Calculation of one-shot GW corrections with GWR code.
 
 # Definition of the k-point grid
 # IMPORTANT: GWR requires Gamma-centered k-meshes
@@ -15,23 +16,15 @@ include "gwr_include.abi"
 optdriver  6                          # Activate GWR code
 gwr_task "G0W0"                       # One-shot calculation
 getden_filepath "tgwr_1o_DS1_DEN"     # Density file
-getwfk_filepath "tgwr_2o_DS1_WFK"     # WFK file with empty states. Must be consisten with ngkpt, shiftk
-
-#ndtset     3
-#gwr_ntau:   6         # Number of imaginary-time points
-#gwr_ntau+   6
+getwfk_filepath "tgwr_2o_DS1_WFK"     # WFK file with empty states.
+                                      # Must be consisten with ngkpt, shiftk
 
 gwr_boxcutmin  1.1   # This should be subject to convergence studies
-#gwr_sigma_algo 1    # Use supercell for Sigma
 gwr_sigma_algo 2    # Use convolutions in the BZ for Sigma
-#gw_icutcoul3   16   # Monte-Carlo integration in the mini-Brillouin zone for Full Coulomb interaction.
-#gw_icutcoul3   0    # Spherical cutoff
-#gwr_ucsc_batch3 3 5
 
 nband      100      # Bands to be used in the screening calculation
 ecuteps    6        # Cut-off energy of the planewave set to represent the dielectric matrix.
                     # It is important to adjust this parameter.
-#ecutsigx    8.0     # Dimension of the G sum in Sigma_x
 ecutsigx    20.0    # Dimension of the G sum in Sigma_x.
                     # ecutsigx = ecut is usually a wise choice
                     # (the dimension in Sigma_c is controlled by ecuteps)
@@ -63,5 +56,5 @@ bdgw       # calculate GW corrections for bands from 4 to 5
 #%% keywords = NC, GWR
 #%% description =
 #%%  Crystalline silicon
-#%%  Calculation of the GW corrections with GWR code.
+#%%  Calculation of one-shot GW corrections with GWR code.
 #%%<END TEST_INFO>

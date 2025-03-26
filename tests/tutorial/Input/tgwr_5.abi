@@ -21,15 +21,10 @@ getwfk_filepath "tgwr_2o_DS1_WFK"     # WFK file with empty states. Must be cons
 gwr_ntau   12         # Number of imaginary-time points
 gwr_boxcutmin  1.1   # This should be subject to convergence studies
 gwr_sigma_algo 1     # Use supercell for Sigma
-#gwr_sigma_algo 2    # Use convolutions in the BZ for Sigma
-#gw_icutcoul3   16   # Monte-Carlo integration in the mini-Brillouin zone for Full Coulomb interaction.
-#gw_icutcoul3   0    # Spherical cutoff
-#gwr_ucsc_batch3 3 5
 
 nband      250      # Bands to be used in the screening calculation
 ecuteps    6        # Cut-off energy of the planewave set to represent the dielectric matrix.
                     # It is important to adjust this parameter.
-#ecutsigx    8.0     # Dimension of the G sum in Sigma_x
 ecutsigx    20.0    # Dimension of the G sum in Sigma_x.
                     # ecutsigx = ecut is usually a wise choice
                     # (the dimension in Sigma_c is controlled by ecuteps)
