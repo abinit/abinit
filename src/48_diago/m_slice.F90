@@ -16,37 +16,41 @@
 !!
 !! Design: 
 !! It is based on the Factory-Workers Pattern. The Factory
-!! is 'spsl' (SPectrum SLincing). Workers are:
+!! is 'spsl' (SPectrum SLincing). Workers are (*):
 !! 
 !! -----------------------------------------------------------------------
-!!  - 'spectrum'        
+!!  - 'spectrum'        - this is also sliceConquer
 !! -----------------------------------------------------------------------
 !!             lifespan | co-exists in spslwf() and spsl_run()
-!!               on GPU | (X/AX/BX-Trans,X/AX/BX-c,X/AX/BX-r) 
-!!              purpose | * store guess/sol, 
+!!           mem on GPU | Xc,AXc,BXc,[Xr],AXr,BXr 
+!!              purpose | * store guess/sol,
 !!                      | * compute RRQ
 !! -----------------------------------------------------------------------
-!!  - 'spectrumSliced' 
+!!  - 'spectrumSliced'   - this is also sliceDivide
 !! -----------------------------------------------------------------------
 !!             lifespan | co-exists in spsl_run() and slice_run()
-!!               on CPU | (XTrans,Xc,Xr)
+!!           mem on CPU | Xc,Xr
 !!              purpose | * store ALL slices of guess/sol without overlap, 
 !!                      | * distribute ALL slices to MPI subgroups
 !! -----------------------------------------------------------------------
-!!  - 'slice'            
+!!  - 'slice'           - this is also sliceCore
 !! -----------------------------------------------------------------------
 !!             lifespan | only exists in slice_run() (single MPI subgroup)
-!!               on GPU | (X/AX/BX-Trans,X/AX/BX-c,X/AX/BX-r)
-!!              purpose | * store a SINGLE slice of guess/sol
+!!           mem on GPU | [Xc],AXc,BXc,Xr,AXr,BXr
+!!              purpose | * store a SINGLE slice of guess/sol,
 !!                      | * compute filter, RR
+!!
+!! (*) the symbol "[]" means that the object is a pointer 
+!!     associated to a memory allocated outside of the Worker
 !! 
 !! The Factory knows at any moment within spsl_run() where are 
 !! the Workers (in CPU/GPU) and in which MPI distribution.
 !! Worker states are stored in private variables of the Factory
 !! known as flags. Convention is that only the Factory can modify 
-!! these flags and Worker routines can only check flags for sanity.
-!! Compatibility between Workers can only be checked by the Factory
-!! as a Worker cannot know the state of another Worker.
+!! these flags and Worker routines can only check flags for sanity 
+!! via an oracle query. Compatibility between Workers can only be 
+!! checked by the Factory as a Worker cannot know the state of 
+!! another Worker.
 !!
 !! COPYRIGHT
 !! Copyright (C) 2018-2025 ABINIT group (IML, LB)
@@ -128,13 +132,59 @@ module m_slice
     integer, parameter :: SLICE_PARAL_STATIC  = 1 ! diago on npband_sub MPI block bandpp
     integer, parameter :: SLICE_PARAL_DYNAMIC = 2 ! diago on npband_sub MPI block bandpp_sub
 
-    ! This type only has getters and setters
-    ! and sanity check functions
-    ! nothing else
-    type, private :: mpiTrack_t
+    ! Worker - Private 'sliceConquer' datatype
+    type, private :: sliceConquer_t
+        type(xgBlock_t) :: XTrans
+        type(xgBlock_t) :: Xc
+        type(xgBlock_t) :: Xr
+        type(xgBlock_t) :: X
+        type(xgBlock_t) :: AXTrans
+        type(xgBlock_t) :: AXc
+        type(xgBlock_t) :: AXr
+        type(xgBlock_t) :: BXTrans
+        type(xgBlock_t) :: BXc
+        type(xgBlock_t) :: BXr
+        type(xgBlock_t) :: eigen
+        type(xgBlock_t) :: resid
+    end type sliceConquer_t
+
+    ! Worker - Private 'sliceDivide' datatype
+    type, private :: sliceDivide_t
+        type(xgBlock_t) :: XTrans ! Transposer assumes that Xr exists and allocates Xc
+        type(xgBlock_t) :: Xc
+        type(xgBlock_t) :: Xr
+        type(xgBlock_t) :: X
+        type(xgBlock_t) :: eigen
+        type(xgBlock_t) :: resid
+    end type sliceDivide_t
+
+    ! Worker - Private 'sliceCore' datatype
+    type, private :: sliceCore_t
+        type(chebfi_t) :: chebfi
+    end type sliceCore_t
+
+    ! Oracle - Private 'mpiOracle' datatype
+    type, private :: mpiOracle_t
         logical :: row_flag
         logical :: col_flag
-    end type mpiTrack_t
+    end type mpiOracle_t
+
+    ! Oracle - Private 'gpuOracle' datatype
+    type, private :: gpuOracle_t
+        logical :: cpu_flag
+        logical :: gpu_flag
+    end type gpuOracle_t
+
+    ! Factory - Public 'slice' datatype
+    type, public :: slice_t
+        type(sliceConquer_t), private :: conquer
+        type(sliceDivide_t) , private :: divide
+        type(sliceWorker_t) , private :: worker
+        type(mpiOracle_t)      , private :: mpiOracle
+        type(gpuOracle_t)      , private :: gpuOracle
+    end type slice_t
+
+
 
     ! Public 'slice' datatype
     ! Parameters specific to current slice, manages isolated slice memory
@@ -3991,6 +4041,69 @@ function mpiTrack_getCol(mpi_tracker) result(mpi_tracker%col_flag)! define gette
 
 end subroutine mpiTrack_getCol
 
+subroutine slice_run(slice,X0,eigen,resid,getAX_BX,getBm1X,nspinor)
+
+    call divide_init(divide,X0,rrquo) 
+                                      ! compute rrquo & compute how the work splits
+                                      ! inside we transpose & transpose back X0 
+                                      ! but it is temporary
+
+    ! Do the transposition of 'divide' inside
+    call divide_run(divide,X0,rrquo) 
+                            ! distribute X0 to divide%X
+
+    call xmpi_barrier(comm)
+    
+    ! Main computation
+    X0_sub = divide%X
+    call worker(X0_sub,eigen_sub,resid_sub,getAX_BX,getBm1X,nspinor) ! compute X0 by diago
+
+    call xmpi_barrier(comm)
+
+    ! Do the transposition back of 'divide' inside
+    call divide_conquer(divide,X0,eigen,resid) ! merge divide%X into X0
+
+    call divide_free(divide)
+
+end subroutine slice_run
+
+subroutine divide_init(divide,X0,rrquo)
+
+    ! prepare the data to column distribution
+    call switch_mpi_distribution(X0)
+    
+    ! fill rrquo
+    X = X0
+    call compute_Rayleigh_Quotients(X,AX,BX,rrquo)
+    
+    ! reset to row distribution
+    call switch_mpi_distribution(X0)
+    divide%X0 = X0
+    
+    ! compute the parameter tuning achieving load balance
+    call model_load_balance(rrquo,indices)
+
+end subroutine divide_init
+
+subroutine divide_run(divide,X0)
+
+    ! define subcommunicators
+    call create_mpi_comm_sub(indices)
+
+    ! prepare the data to be distributed
+    call switch_mpi_distribution(X0)
+
+    ! actually distribute the data according to model
+    call apply_load_balance(X0,indices) 
+    
+    !divide%X has the right part ...
+    ! check point:
+    ! noneed to implement worker at this point
+    ! simply check divide%X should be correct
+    !! correct size, correct subcomm, correct data..
+
+end subroutine divide_run
+
 !! FUNCTION
 !! Diagonalisation on slice using subcommunicators
 !! To be called with X0 = spsl%Bufc
@@ -3998,7 +4111,7 @@ end subroutine mpiTrack_getCol
 !!       * set MPI distribution flags before slice routine call
 !!       * slice routines only check flags do not modify
 !!
-subroutine slice_run(slice,X0,eigen,resid,getAX_BX,getBm1X,nspinor)
+subroutine spectrumSliced_run(spectrumSliced,X0,eigen,resid,getAX_BX,getBm1X,nspinor)
 
     implicit none
 
@@ -4025,19 +4138,57 @@ subroutine slice_run(slice,X0,eigen,resid,getAX_BX,getBm1X,nspinor)
     !! sliceWorker -> sanity check on flags
     !! bufferWorker -> sanity check on flags
 
-    ! Use MPI column distribution ====================
-    call mpiTrack_setCol(mpi_tracker)
-    call slice_initDistribution(slice,nspinor,mpi_tracker)
+    X0 = spectrumSliced%Xc
     
-    ! Copy i/o buffer to slice then filter
-    call slice_checkState(slice,mpi_tracker)
-    call xgBlock_copy(X0,slice%X)
+    call slice_init(slice)
+
+    ! Use MPI column distribution ====================
+    ! TODO mpi_oracle should be distributed
+    call mpiOracle_setCol(mpi_oracle)
+    call slice_initDistribution(slice,nspinor,mpi_oracle)
+   
+    ! Set slice%X to the correct state
+    call slice_checkState(slice,mpi_tracker) ! here slice%X=slice%Xc
+    ! here must also oracle the state of X0
+    ! maybe have some oracle workers that are distributed across processes
+    ! essentially each MPI should be able to tell its state and share
+    ! it to other Workers or to the Factory
+
+    call slice_run(slice,X0,eigen,resid,getAX_BX,getBm1X,nspinor)
+
+    call slice_freeDistribution(slice)
+
+    call slice_free(slice)
+
+    ! TODO deal with sequential case
+
+end subroutine spectrumSliced_run
+
+subroutine slice_run(slice,X0,eigen,resid,getAX_BX,getBm1X,nspinor)
+
+    implicit none
+
+    ! arguments
+    type(slice_t)  , intent(inout) :: slice
+    type(xgBlock_t), intent(inout) :: X0
+    type(xgBlock_t), intent(inout) :: eigen
+    type(xgBlock_t), intent(inout) :: resid
+    integer        , intent(in   ) :: nspinor
+
+    !!! here start the actual slice_run(((((((((((((((((((((((((
+
+    ! Notice that this version of slice_run does not have a transposition
+    ! at the beginning!!!
+
+    slice%X = X0
     call slice_applyFilter(slice)
 
     ! Use MPI row distribution =======================
     call xmpi_comm_barrier(subcomm)
     call mpiTrack_setRow(mpi_tracker)
     slice%use_AX_BX = .true.
+    ! does not need to check for this interior switch. 
+    ! this block will be contiguous so we never separate parts
     call slice_switchDistribution(slice,nspinor,mpi_tracker)
 
     call slice_RayleighRitz(slice)
@@ -4053,7 +4204,7 @@ subroutine slice_run(slice,X0,eigen,resid,getAX_BX,getBm1X,nspinor)
     call slice_checkState(slice,mpi_tracker)
     call xgBlock_copy(slice%X,X0)
 
-    call slice_freeDistribution(slice)
+    !!! here ends the actual slice_run((((((((((((((((((((((((((
 
 end subroutine slice_run
 
