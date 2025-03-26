@@ -62,7 +62,6 @@
  fit_initializeDat  0
         fit_cutoff  5.40000000E+00
        fit_droprat  0.00000000E+00
-       fit_min_bou  0.00000000E+00
         fit_option  0
          fit_iatom  0
         fit_ncoeff  6
