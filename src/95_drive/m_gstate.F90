@@ -872,12 +872,12 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  if (has_to_init) xred_old=xred
 
 !Initialize (eventually) extfpmd object
- if(dtset%useextfpmd>=1.and.dtset%occopt==3) then
+ if(dtset%useextfpmd>=1) then
    if(extfpmd_chkinp(dtset)) then
      ABI_MALLOC(extfpmd,)
      call extfpmd%init(dtset%mband,hdr%extfpmd_eshift,dtset%extfpmd_nbcut,dtset%extfpmd_nbdbuf,&
-&     dtset%nfft,dtset%nspden,dtset%nsppol,dtset%nkpt,rprimd,dtset%useextfpmd,mpi_enreg,&
-&     dtset%extfpmd_nband)
+&     dtset%nfft,dtset%nspden,dtset%nsppol,dtset%nkpt,dtset%occopt,rprimd,dtset%tphysel,&
+&     dtset%tsmear,dtset%useextfpmd,mpi_enreg,dtset%extfpmd_nband)
    end if
  end if
 
@@ -912,7 +912,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !    Get nelect to build density
      extfpmd%nelect=zero
      call extfpmd%compute_nelect(results_gs%energies%e_fermie,dtset%nband,extfpmd%nelect,&
-&     dtset%nkpt,dtset%nspinor,dtset%nsppol,dtset%tsmear,dtset%wtk)
+&     dtset%nkpt,dtset%nspinor,dtset%nsppol,dtset%wtk)
    end if
    ABI_FREE(doccde)
 
