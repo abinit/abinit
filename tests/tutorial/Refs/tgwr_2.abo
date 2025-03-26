@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 21 Mar 2025.
-- ( at 15h25 )
+.Starting date : Wed 26 Mar 2025.
+- ( at 17h15 )
 
 - input  file    -> /Users/giantomassi/git_repos/abinit/_build/tests/Test_suite/tutorial_tgwr_1-tgwr_2-tgwr_3-tgwr_4-tgwr_5/tgwr_2.abi
 - output file    -> tgwr_2.abo
@@ -26,48 +26,48 @@
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       6
-     lnmax =       6     mgfft =      20  mpssoang =       3    mqgrid =    3001
+     lnmax =       6     mgfft =      24  mpssoang =       3    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
     occopt =       1   xclevel =       2
 -    mband =         250        mffmem =           1         mkmem =           3
-       mpw =         151          nfft =        8000          nkpt =           3
+       mpw =         206          nfft =       13824          nkpt =           3
 ================================================================================
-P This job should need less than                       4.207 Mbytes of memory.
+P This job should need less than                       8.970 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      1.730 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
+_ WF disk file :      2.359 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
 
  DATASET    2 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  2.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       6
-     lnmax =       6     mgfft =      20  mpssoang =       3    mqgrid =    3001
+     lnmax =       6     mgfft =      24  mpssoang =       3    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
     occopt =       1   xclevel =       2
 -    mband =         250        mffmem =           1         mkmem =           8
-       mpw =         303          nfft =        8000          nkpt =           8
+       mpw =         415          nfft =       13824          nkpt =           8
 ================================================================================
-P This job should need less than                      14.301 Mbytes of memory.
+P This job should need less than                      19.541 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      9.249 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
+_ WF disk file :     12.667 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
 
  DATASET    3 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  3.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       6
-     lnmax =       6     mgfft =      20  mpssoang =       3    mqgrid =    3001
+     lnmax =       6     mgfft =      24  mpssoang =       3    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
     occopt =       1   xclevel =       2
 -    mband =         250        mffmem =           1         mkmem =          16
-       mpw =         302          nfft =        8000          nkpt =          16
+       mpw =         419          nfft =       13824          nkpt =          16
 ================================================================================
-P This job should need less than                      23.820 Mbytes of memory.
+P This job should need less than                      32.795 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :     18.435 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
+_ WF disk file :     25.576 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
 
 --------------------------------------------------------------------------------
@@ -83,7 +83,7 @@ _ WF disk file :     18.435 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
  -outvars: echo values of preprocessed input variables --------
             acell      1.0260000000E+01  1.0260000000E+01  1.0260000000E+01 Bohr
               amu      2.80855000E+01
-             ecut      8.00000000E+00 Hartree
+             ecut      1.00000000E+01 Hartree
 -          fftalg         312
            istwfk1       2    3    7
            istwfk2       2    0    3    0    0    0    7    0
@@ -132,7 +132,7 @@ P           mkmem3         16
             nband2        250
             nband3        250
            ndtset           3
-            ngfft          20      20      20
+            ngfft          24      24      24
              nkpt1          3
              nkpt2          8
              nkpt3         16
@@ -347,8 +347,8 @@ P           mkmem3         16
 
 --- !DatasetInfo
 iteration_state: {dtset: 1, }
-dimensions: {natom: 2, nkpt: 3, mband: 250, nsppol: 1, nspinor: 1, nspden: 1, mpw: 151, }
-cutoff_energies: {ecut:   8.0, pawecutdg:  -1.0, }
+dimensions: {natom: 2, nkpt: 3, mband: 250, nsppol: 1, nspinor: 1, nspden: 1, mpw: 206, }
+cutoff_energies: {ecut:  10.0, pawecutdg:  -1.0, }
 electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 6, }
 ...
@@ -387,16 +387,16 @@ meta: {optdriver: 6, }
 --------------------------------------------------------------------------------
 
  Total charge density [el/Bohr^3]
-)     Maximum=    8.5879E-02  at reduced coord.    0.1000    0.1000    0.7000
-)     Minimum=    2.2671E-03  at reduced coord.    0.0000    0.0000    0.0000
+)     Maximum=    8.4750E-02  at reduced coord.    0.1250    0.1250    0.6250
+)     Minimum=    1.6188E-03  at reduced coord.    0.0000    0.0000    0.0000
    Integrated=    8.0000E+00
 
  === KS gaps after direct diagonalization ===
  Indirect band gap semiconductor
- Fundamental gap:     0.731 (eV)
-   VBM:     4.369 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-   CBM:     5.100 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
- Direct gap:         2.564 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Fundamental gap:     0.711 (eV)
+   VBM:     4.366 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     5.077 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
+ Direct gap:         2.554 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 
 
 ================================================================================
@@ -406,8 +406,8 @@ meta: {optdriver: 6, }
 
 --- !DatasetInfo
 iteration_state: {dtset: 2, }
-dimensions: {natom: 2, nkpt: 8, mband: 250, nsppol: 1, nspinor: 1, nspden: 1, mpw: 303, }
-cutoff_energies: {ecut:   8.0, pawecutdg:  -1.0, }
+dimensions: {natom: 2, nkpt: 8, mband: 250, nsppol: 1, nspinor: 1, nspden: 1, mpw: 415, }
+cutoff_energies: {ecut:  10.0, pawecutdg:  -1.0, }
 electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 6, }
 ...
@@ -428,16 +428,16 @@ meta: {optdriver: 6, }
 --------------------------------------------------------------------------------
 
  Total charge density [el/Bohr^3]
-)     Maximum=    8.5879E-02  at reduced coord.    0.1000    0.1000    0.7000
-)     Minimum=    2.2671E-03  at reduced coord.    0.0000    0.0000    0.0000
+)     Maximum=    8.4750E-02  at reduced coord.    0.1250    0.1250    0.6250
+)     Minimum=    1.6188E-03  at reduced coord.    0.0000    0.0000    0.0000
    Integrated=    8.0000E+00
 
  === KS gaps after direct diagonalization ===
  Indirect band gap semiconductor
- Fundamental gap:     0.731 (eV)
-   VBM:     4.369 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-   CBM:     5.100 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
- Direct gap:         2.564 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Fundamental gap:     0.711 (eV)
+   VBM:     4.366 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     5.077 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
+ Direct gap:         2.554 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 
 
 ================================================================================
@@ -447,8 +447,8 @@ meta: {optdriver: 6, }
 
 --- !DatasetInfo
 iteration_state: {dtset: 3, }
-dimensions: {natom: 2, nkpt: 16, mband: 250, nsppol: 1, nspinor: 1, nspden: 1, mpw: 302, }
-cutoff_energies: {ecut:   8.0, pawecutdg:  -1.0, }
+dimensions: {natom: 2, nkpt: 16, mband: 250, nsppol: 1, nspinor: 1, nspden: 1, mpw: 419, }
+cutoff_energies: {ecut:  10.0, pawecutdg:  -1.0, }
 electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 6, }
 ...
@@ -469,16 +469,16 @@ meta: {optdriver: 6, }
 --------------------------------------------------------------------------------
 
  Total charge density [el/Bohr^3]
-)     Maximum=    8.5879E-02  at reduced coord.    0.1000    0.1000    0.7000
-)     Minimum=    2.2671E-03  at reduced coord.    0.0000    0.0000    0.0000
+)     Maximum=    8.4750E-02  at reduced coord.    0.1250    0.1250    0.6250
+)     Minimum=    1.6188E-03  at reduced coord.    0.0000    0.0000    0.0000
    Integrated=    8.0000E+00
 
  === KS gaps after direct diagonalization ===
  Indirect band gap semiconductor
- Fundamental gap:     0.731 (eV)
-   VBM:     4.369 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-   CBM:     5.100 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
- Direct gap:         2.564 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Fundamental gap:     0.711 (eV)
+   VBM:     4.366 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     5.077 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
+ Direct gap:         2.554 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 
 
 == END DATASET(S) ==============================================================
@@ -487,7 +487,7 @@ meta: {optdriver: 6, }
  -outvars: echo values of variables after computation  --------
             acell      1.0260000000E+01  1.0260000000E+01  1.0260000000E+01 Bohr
               amu      2.80855000E+01
-             ecut      8.00000000E+00 Hartree
+             ecut      1.00000000E+01 Hartree
            etotal1     0.0000000000E+00
            etotal2     0.0000000000E+00
            etotal3     0.0000000000E+00
@@ -545,7 +545,7 @@ P           mkmem3         16
             nband2        250
             nband3        250
            ndtset           3
-            ngfft          20      20      20
+            ngfft          24      24      24
              nkpt1          3
              nkpt2          8
              nkpt3         16
@@ -845,15 +845,15 @@ P           mkmem3         16
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          1.3  wall=          1.3
+- Proc.   0 individual time (sec): cpu=          3.5  wall=          3.7
 
 ================================================================================
 
  Calculation completed.
-.Delivered   3 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.3  wall=          1.3
+.Delivered   3 WARNINGs and   7 COMMENTs to log file.
++Overall time at end (sec) : cpu=          3.5  wall=          3.7
 - [ALL OK] MEMORY CONSUMPTION REPORT FOR C CODE:
 -   There were 90 allocations and 90 deallocations in C code
 - [ALL OK] MEMORY CONSUMPTION REPORT FOR FORTRAN CODE:
--   There were 797802 allocations and 797802 deallocations in Fortran
+-   There were 874779 allocations and 874779 deallocations in Fortran
 -   Remaining memory at the end of the calculation is 0

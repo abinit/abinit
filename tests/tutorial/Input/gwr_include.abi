@@ -1,4 +1,4 @@
-ecut 8.0          # Maximal kinetic energy cut-off, in Hartree
+ecut 10.0         # Maximal kinetic energy cut-off, in Hartree
                   # NB: Too small. Use ~16 for production
 
 # Definition of the unit cell: fcc
