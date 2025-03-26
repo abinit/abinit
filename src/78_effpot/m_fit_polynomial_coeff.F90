@@ -1730,6 +1730,7 @@ contains
       call xmpi_bcast(ncoeff_preselected,rank_to_send,comm,ierr)
       call xmpi_bcast(list_coeffs(1:ncoeff_preselected),rank_to_send,comm,ierr)
     end if
+    print *, "DEBUG==================> ", "ncoeff_preselected: ", ncoeff_preselected
     do ii=1,ncoeff_preselected
       icoeff = list_coeffs(ii)
       list_coeffs_tmp(ii) = ii
@@ -1773,6 +1774,7 @@ contains
        call wrtout(ab_out,message,'COLL')
        call wrtout(std_out,message,'COLL')
      end if
+     print *, "DEBUG==================> ", "ncoeff_to_fit: ", ncoeff_to_fit
      do ii = 1,ncoeff_to_fit
        if(list_coeffs(ii) ==0) cycle
        !    Set the value of the coefficient
@@ -1843,7 +1845,11 @@ contains
 
 
      !Allocate output coeffs -> selected plus fixed ones
+     print *, "DEBUG==================> ", "ncoeff_to_fit: ", ncoeff_to_fit
+      print *, "DEBUG==================> ", "eff_pot_fixed%anharmonics_terms%ncoeff: ", eff_pot_fixed%anharmonics_terms%ncoeff
      ncoeff_out = ncoeff_to_fit+eff_pot_fixed%anharmonics_terms%ncoeff
+      print *, "DEBUG==================> ", "ncoeff_out: ", ncoeff_out
+
      ABI_MALLOC(coeffs_out,(ncoeff_out))
      do ii = 1,ncoeff_out
        if(ii <= eff_pot_fixed%anharmonics_terms%ncoeff)then
@@ -1854,20 +1860,6 @@ contains
            &                             check = .TRUE.)
        else
          ia = ii - eff_pot_fixed%anharmonics_terms%ncoeff
-         ! Ensure coeffs_tmp and coeffs_tmp(ia) are allocated before accessing
-         if (.not. allocated(coeffs_tmp)) then
-            print *, "Error in fit_all_selected_coefficients: coeffs_tmp not allocated"
-          else
-            print *, "coeffs_tmp is allocated."
-            print *, "size of coeffs_tmp:", size(coeffs_tmp)
-            print *, "ia: ", ia
-            if (ia > size(coeffs_tmp)) then
-              print *, "Error in fit_all_selected_coefficients: ia > size(coeffs_tmp)"
-            else
-              print *, "ia is within bounds."
-            end if
-         endif
-
 
          call polynomial_coeff_init( &
             coeffs_tmp(ia)%coefficient, &  ! Coefficient value
