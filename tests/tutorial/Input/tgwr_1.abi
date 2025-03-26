@@ -1,6 +1,6 @@
 # Crystalline silicon. Preparatory run for GWR code
-# Dataset 1: ground state calculation to compute the density
-# Dataset 2: band structure calculation along a k-path
+# Dataset 1: ground state calculation to compute the density.
+# Dataset 2: KS band structure calculation along a k-path.
 
 # Include geometry and pseudos
 include "gwr_include.abi"
@@ -78,6 +78,7 @@ diemac  12.0      # Although this is not mandatory, it is worth to
 #%% authors = M. Giantomassi
 #%% keywords = NC, GWR
 #%% description =
-#%%  Crystalline silicon
-#%%  Calculation of the GW corrections with GWR code.
+#%% Crystalline silicon. Preparatory run for GWR code
+#%% Dataset 1: ground state calculation to compute the density.
+#%% Dataset 2: KS band structure calculation along a k-path.
 #%%<END TEST_INFO>

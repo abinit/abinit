@@ -452,7 +452,7 @@ then fix these values, and refine the BZ sampling only at the end.
 
 The recommended procedure for converging GWR gaps is therefore as follows:
 
-1) Initial step
+1) Initial step:
 
 - Select the k-points where QP gaps are wanted.
   Usually the VBM and the CBM so that one can use [[gwr_sigma_algo]] 2
@@ -466,19 +466,18 @@ If this occurs, increase [[gwr_ntau]] in order to fix the problem.
 If the number of [[nband]] states in the WFK file is not large enough,
 go back to point 1) and generate a new WFK with more bands else proceeed with the next step.
 
-2) Convergence wrt [[gwr_boxcutmin]]
+2) Convergence wrt [[gwr_ntau]]:
 
-- After determining converged values for [[nband]], [[ecuteps]], and [[ecutsigx]], begin refining [[gwr_boxcutmin]].
-- Increase it gradually to control memory usage and CPU time, which increase rapidly with this parameter.
-
-3) Convergence wrt [[gwr_ntau]]
-
-Once the results are converged with respect to [[gwr_boxcutmin]], you may start to increase [[gwr_ntau]]
+Once the results are converged with respect to [[nband]] and [[ecuteps], you may start to increase [[gwr_ntau]]
 while adjusting the number of MPI processes accordingly (you are not using multidatasets, right?)
 
-4) Convergence wrt [[ngkpt]]
+3) Convergence wrt [[ngkpt]]:
 
 Finally, refine the BZ sampling to ensure full convergence.
+
+4) Convergence wrt [[gwr_boxcutmin]]:
+
+- Increase it gradually to control memory usage and CPU time, which increase rapidly with this parameter.
 
 Once a good setup have been found, one can use the same parameters to compute the QP corrections in the IBZ
 using [[gwr_sigma_algo]] 2 and [[gw_qprange]] = `-NUM` to have a `GWR.nc` file that can be used to
@@ -517,7 +516,6 @@ the values of [[nband]] and [[ecuteps]] have little impact of the computational 
 
 ```
 grep "dataset:" log | grep "<< TIME"
-
 ```
 
 As concerns [[nband]] this is expected, as this parameter enters into play
@@ -590,6 +588,114 @@ mv conv_nband_ecuteps.py conv_nband_ecuteps
 mv tgwr_3o_* log conv_nband_ecuteps
 ```
 
+## Convergence wrt gwr_ntau
+
+Now edit `tgwr_3.abi`, replace the values of [[nband]] and [[ecuteps]] found earlier,
+and define a new one-dimensional multidataset to increase [[gwr_ntau]]:
+
+```
+ndtset      15
+gwr_ntau:   6         # Number of imaginary-time points
+gwr_ntau+   2
+```
+
+Once the calculation is finished, save the script reported below in a file,
+let’s say `conv_ntau.py`, in the same directory where we launched the calculation,
+make it executable and execute it as usual
+
+```python
+#!/usr/bin/env python
+filepaths = [f"tgwr_3o_DS{i}_GWR.nc" for i in range(1, 16)]
+
+from abipy.electrons.gwr import GwrRobot
+robot = GwrRobot.from_files(filepaths)
+
+abs_conv = 0.005
+robot.plot_qpgaps_convergence_new(x="gwr_ntau", y="qpz0_dirgaps",
+                                  abs_conv=abs_conv,
+                                  #show=False, savefig="conv_ntau.png",
+                                  )
+
+def sortby(gwr):
+    r"""$N_\tau$"""
+    return gwr.params["gwr_ntau"]
+
+robot.plot_qpgaps_convergence(sortby=sortby, abs_conv=abs_conv)
+```
+
+You should get the following figure:
+
+![](gwr_assets/conv_ntau.png)
+
+Clearly 6 minimax points are not enough to convergence.
+Also the convergence with [[gwr_ntau]] is not variational, and there are meshes that perform better than others.
+This study shows that we should use XXX minimax points in order to reach an accuracy of 0.01 eV (`abs_conv`).
+Unfortunately, this would render the calculations more expensive, especially for a tutorial,
+therefore we opt to continue with XXX minimax points for the next calculations
+
+```
+mkdir conv_ntau
+mv conv_ntau.py conv_ntau
+mv tgwr_3o_* log conv_ntau
+```
+
+### GWR calculations with different BZ meshes.
+
+In this section of the tutorial, we perform GWR calculations with different BZ meshes.
+
+You may want to start immediately the computation by issuing:
+
+```
+mpirun -n 1 tgwr_4.abi > tgwr_4.log 2> err &
+```
+
+with the following input file:
+
+{% dialog tests/tutorial/Input/tgwr_4.abi %}
+
+The output file is reported here for your convenience:
+
+{% dialog tests/tutorial/Refs/tgwr_4.abo %}
+
+To analyze multiple GWR.nc files, we can use the `GwrRobot`, and the following python script:
+
+```python
+#!/usr/bin/env python
+from abipy.electrons.gwr import GwrRobot
+
+filepaths = [
+    "tgwr_3o_GWR.nc",
+    "tgwr_4o_GWR.nc",
+]
+
+robot = GwrRobot.from_files(filepaths)
+#print(robot)
+
+kpoint = (0, 0, 0)
+df_dirgaps = robot.get_dirgaps_dataframe(kpoint=kpoint)
+print(df_dirgaps)
+```
+
+To conclude, our best values for the direct QP gaps are ...
+
+```
+# WFK file with empty states. Must be consisten with ngkpt, shiftk
+ndtset  3
+ngkpt1   2 2 2
+getwfk_filepath1 "tgwr_2o_DS1_WFK"
+
+ngkpt2   4 4 4
+getwfk_filepath2 "tgwr_2o_DS2_WFK"
+
+ngkpt3   6 6 6
+getwfk_filepath3 "tgwr_2o_DS3_WFK"
+```
+
+You should get the following figure:
+
+![](gwr_assets/conv_kmesh.png)
+
+
 ## Convergence wrt gwr_boxcutmin
 
 Now edit `tgwr_3.abi`, replace the values of [[nband]] and [[ecuteps]] found earlier,
@@ -645,116 +751,6 @@ In the case of silicon, the results are rather insensitive to the density
 of the FFT mesh but keep in mind that other systems may behave differently.
 We therefore fix [[gwr_boxcutmin]] to 1.1 and proceed with the other convergence studies.
 
-## Convergence wrt gwr_ntau
-
-Change `tgwr_3.abi` to perform a convergence study wrt [[gwr_ntau]]
-by adding the following section:
-
-```
-ndtset      15
-gwr_ntau:   6         # Number of imaginary-time points
-gwr_ntau+   2
-```
-
-Once the calculation is finished, save the script reported below in a file,
-let’s say `conv_ntau.py`, in the same directory where we launched the calculation,
-make it executable and execute it as usual
-
-
-```python
-#!/usr/bin/env python
-filepaths = [f"tgwr_3o_DS{i}_GWR.nc" for i in range(1, 16)]
-
-from abipy.electrons.gwr import GwrRobot
-robot = GwrRobot.from_files(filepaths)
-
-def sortby(gwr):
-    r"""$N_\tau$"""
-    return gwr.params["gwr_ntau"]
-
-
-abs_conv = 0.005
-robot.plot_qpgaps_convergence_new(x="gwr_ntau", y="qpz0_dirgaps",
-                                  abs_conv=abs_conv
-                                  #show=False, savefig="conv_ntau.png",
-                                  )
-
-robot.plot_qpgaps_convergence(sortby=sortby, abs_conv=abs_conv)
-```
-
-You should get the following figure:
-
-![](gwr_assets/conv_ntau.png)
-
-Clearly 6 minimax points are not enough to convergence.
-Also the convergence with [[gwr_ntau]] is not variational, and there are meshes that perform better than others.
-This study shows that we should use XXX minimax points in order to reach an accuracy of 0.01 eV (`abs_conv`).
-Unfortunately, this would render the calculations more expensive, especially for a tutorial,
-therefore we opt to continue with XXX minimax points for the next calculations
-
-
-```
-mkdir conv_ntau
-mv conv_ntau.py conv_ntau
-mv tgwr_3o_* log conv_ntau
-```
-
-### GWR calculations with different BZ meshes.
-
-In this part of the tutorial, we run GWR calculations with different BZ meshes.
-
-You may want to start immediately the computation by issuing:
-
-```
-mpirun -n 1 tgwr_4.abi > tgwr_4.log 2> err &
-```
-
-with the following input file:
-
-{% dialog tests/tutorial/Input/tgwr_4.abi %}
-
-The output file is reported here for your convenience:
-
-{% dialog tests/tutorial/Refs/tgwr_4.abo %}
-
-To analyze multiple GWR.nc files, we can use the `GwrRobot`, and the following python script:
-
-```python
-#!/usr/bin/env python
-from abipy.electrons.gwr import GwrRobot
-
-filepaths = [
-    "tgwr_3o_GWR.nc",
-    "tgwr_4o_GWR.nc",
-]
-
-robot = GwrRobot.from_files(filepaths)
-#print(robot)
-
-kpoint = (0, 0, 0)
-df_dirgaps = robot.get_dirgaps_dataframe(kpoint=kpoint)
-print(df_dirgaps)
-```
-
-To conclude, our best values for the direct QP gaps are ...
-
-```
-# WFK file with empty states. Must be consisten with ngkpt, shiftk
-ndtset  3
-ngkpt1   2 2 2
-getwfk_filepath1 "tgwr_2o_DS1_WFK"
-
-ngkpt2   4 4 4
-getwfk_filepath2 "tgwr_2o_DS2_WFK"
-
-ngkpt3   6 6 6
-getwfk_filepath3 "tgwr_2o_DS3_WFK"
-```
-
-You should get the following figure:
-
-![](gwr_assets/conv_kmesh.png)
-
 ### How to compute an interpolated band structure with GWR
 
 In this last part of the tutorial, we discuss how to interpolate the QP corrections
@@ -768,7 +764,7 @@ This is done in the following input:
 
 {% dialog tests/tutorial/Input/tgwr_5.abi %}
 
-Note the usage of  [[gw_qprange]] = `-NUM` and [[gwr_sigma_algo]] 1 to activate
+Note the usage of [[gw_qprange]] = `-NUM` and [[gwr_sigma_algo]] 1 to activate
 the supercell algorithm for $\Sigma_\nk$ (the most efficient algorithm in this particular case).
 
 To keep the wall-time at a reasonable level, we use a WFK file with 2x2x2 $\kk$-mesh,
@@ -800,17 +796,17 @@ r = gwr.interpolate(ks_ebands_kpath="tgwr_1o_DS2_GSR.nc")
 from abipy.electrons.ebands import ElectronBandsPlotter
 plotter = ElectronBandsPlotter()
 plotter.add_ebands("KS bands", r.ks_ebands_kpath)
-plotter.add_ebands("GW bands", r.qp_ebands_kpath)
+plotter.add_ebands("$G_0W_0$ bands", r.qp_ebands_kpath)
 
 #r.qp_ebands_kpath.plot(with_gaps=True)
 
-plotter.combiplot()
+plotter.combiplot(savefig="gw_vs_ks_bands")
 #plotter.gridplot()
 ```
 
 You should get the following figure:
 
-![](gwr_assets/qp_bands.png)
+![](gwr_assets/gw_vs_ks_bands.png)
 
 ### Analyzing the convergence with the minimax mesh
 
