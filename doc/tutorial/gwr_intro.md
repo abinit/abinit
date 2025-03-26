@@ -285,7 +285,6 @@ although these two additional levels allow one to decrease the memory requiremen
 
 <!--
 TODO: Additional trick to be tested/documented in more detail:
-
     [[gwr_ucsc_batch]]
     [[gwr_rpa_ncut]]
     [[gwr_boxcutmin]]
