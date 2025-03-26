@@ -76,22 +76,10 @@ and select the computation to be performed via [[gwr_task]].
 In the first step, you will very likely use [[gwr_task]] = "HDIAGO"  or "HDIAGO_FULL"
 to perform a direct diagonalization with ScaLAPACK in order to generate a WFK with empty states,
 This feature can also be used if you want to use other many-body codes that are able to read ABINIT’s WFK file
-
-It is possible to compute GW corrections using the one-shot method or different types of self-consistency on energies.
-Finally, one can compute total energies at the RPA level.
-TODO: Mention interface with CC4S
-
-!!! important
-
-    At the time of writing, the following features are **not yet supported** in GWR:
-
-        * Metallic systems as the our minimax meshes assume systems with an energy gap
-        * Temperature effects at the electronic level are not taken into account as we work with the T = 0 formalism.
-        * Only $\Gamma$-centered $\kk$-meshes are supported in GWR
-        * PAW method
+Please take some time to read the documentation of [[gwr_task]] and see which calculations are supported.
 
 The $\kk$-points and the band range for the QP corrections in $\Sigma_\nk$ can be specified in different ways.
-In the explicit approach, one uses [[nkptgw]] to specify the number of $\kk$-points in $\Sigma_nk$,
+In the explicit approach, one uses [[nkptgw]] to specify the number of $\kk$-points in $\Sigma_\nk$,
 In this case, [[kptgw]] determines the list of $\kk$-points in reduced coordinates, while [[bdgw]] specifies the band range
 for each $\kk$-point.
 Alternatively, one can use [[gw_qprange]] to let ABINIT automatically select the wavevectors and the band range.
@@ -173,13 +161,12 @@ This is an important parameter that should be subject to convergence studies.
 
 The FFT mesh is defined according to [[gwr_boxcutmin]].
 This parameter has a big impact on wall-time and memory requirements.
-One usually start with a coarse FFT mesh (1.1) and increases it during the last steps of the
-convergen study
+One usually start with a coarse FFT mesh e.g. [[gwr_boxcutmin]] 1.1 and
+increases it during the last steps of the convergence study.
 
-As discussed in [cite:Baroni1986], the treatment of the long-wavelenght limit $\qq \rightarrow 0$
+As discussed in [[cite:Baroni1986]], the treatment of the long-wavelenght limit $\qq \rightarrow 0$
 in the polarizability, requires the inclusion of the commutator of the non-local part of the Hamiltonian
 with the position operator.
-we have the following input variables:
 See also [this section](/theory/bse/#5-matrix-elements-of-the-dipole-operator) of the BSE notes.
 By default the commutator of the non-local part is always included.
 In the input variable [[inclvkb]] can be used to deactivate it, if needed.
@@ -199,7 +186,7 @@ similarly to what is done in the conventional code:
 \end{equation}
 
 The number of $\bg$-vectors in the sum is defined by [[ecutsigx]].
-Computing $\Sigma_x$ is much cheaper that $\Sigma_c(i \tau).
+Computing $\Sigma_x$ is much cheaper that $\Sigma_c(i \tau)$.
 
 ## Real-space vs convolutions in the BZ
 
@@ -227,11 +214,11 @@ is expressed in terms of convolutions in the BZ according to:
 where $G_\qq(\rr,\rr')$ and $W_\qq(\rr,\rr')$ are now quantities defined in the unit cell.
 
 The advantage of this formulation is that one can take advantage of the symmetries of the system
-to reduce the BZ integration to the irreducible wedge defined by the little group of the $\kk$$ point in $\Sigma_\nk$$.
-In the best case scenario of the direct band gap semiconductor, both the CBM and the VBM are located at the $\Gamma$ point;
+to reduce the BZ integration to the irreducible wedge defined by the little group of the $\kk$ point in $\Sigma_\nk$.
+In the best case scenario of a direct band gap semiconductor, both the CBM and the VBM are located at the $\Gamma$ point;
 hence the BZ integral can be replaced by a much faster symmetrized integral over the wavevectors of the IBZ.
 Clearly this approach is not the most efficient one if all the $\kk$-points are wanted
-as the convolutions in the BZ lead quadratic scaling with the number of $\kk$-points.
+as the convolutions in the BZ lead to quadratic scaling with the number of $\kk$-points.
 
 The input variable [[gwr_sigma_algo]] allows one to select the algorithm to be used.
 [[gwr_chi_algo]] has a similar meaning but only for the polarizability but this option is seldom used
