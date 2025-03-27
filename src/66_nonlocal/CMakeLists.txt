@@ -7,7 +7,6 @@ set(66_nonlocal_SRC
   m_cgprj.F90
   m_contract.F90
   m_fock.F90
-  m_gemm_nonlop_ompgpu.F90
   m_gemm_nonlop_gpu.F90
   m_gemm_nonlop_projectors.F90
   m_gemm_nonlop.F90
@@ -28,8 +27,7 @@ set(66_nonlocal_SRC
   m_opernlb_ylm.F90
   m_opernlb_ylm_mv.F90
   m_opernlc_ylm.F90
-  m_opernlc_ylm_allwf_cpu.F90
-  m_opernlc_ylm_ompgpu.F90
+  m_opernlc_ylm_allwf.F90
   m_opernld_ylm.F90
   m_opernld_ylm_allwf.F90
 )

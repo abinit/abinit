@@ -1241,41 +1241,42 @@ end subroutine xclb
 !!     only used if gradient corrected functional (option=2,-2,-4 and 4 or beyond)
 !!  rho_updn(npts,nspden)=spin-up and spin-down density (Hartree/bohr**3)
 !!  temp= electronic temperature
-!!  usefxc=1 if free energy fxc is used
 !!
 !! SIDE EFFECTS
 !!  The following arrays are modified (gradient correction added):
 !!  dvxcdgr(npts,3)=partial derivative of the XC energy divided by the norm of the gradient
-!!  exci(npts)=exchange-correlation energy density
 !!  fxci(npts)=free energy energy density
+!!  tsxci(npts)=entropy energy density
 !!  vxci(npts,nspden)=exchange-correlation potential
 !!
 !! SOURCE
 
-subroutine xctfw(temp,exci,fxci,usefxc,rho_updn,vxci,npts,nspden,dvxcdgr,ndvxcdgr,grho2_updn)
+subroutine xctfw(temp,fxci,tsxci,rho_updn,vxci,npts,nspden,dvxcdgr,ndvxcdgr,grho2_updn)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: ndvxcdgr,npts,nspden,usefxc
+ integer,intent(in) :: ndvxcdgr,npts,nspden
  real(dp),intent(in) :: temp
 !arrays
  real(dp),intent(in) :: grho2_updn(npts,2*nspden-1),rho_updn(npts,nspden)
- real(dp),intent(inout) :: dvxcdgr(npts,ndvxcdgr),fxci(npts*usefxc),exci(npts),vxci(npts,nspden)
+ real(dp),intent(inout) :: dvxcdgr(npts,ndvxcdgr),fxci(npts),tsxci(npts),vxci(npts,nspden)
 
 !Local variables-------------------------------
 !scalars
  integer :: iperrot,ipts
- logical :: has_fxc,has_dvxcdgr
+ logical :: has_dvxcdgr
  real(dp) :: etfw,rho,rho_inv,rhomot,yperrot0,vtfw
  real(dp) :: yperrot,uperrot,dyperrotdn,duperrotdyperrot
  real(dp) :: hperrot,dhperrotdyperrot,dhperrotdn,dhperrotduperrot
 !arrays
  real(dp) :: wpy(0:7), wpu(0:7)
- real(dp),allocatable :: rho_updnm1_3(:,:)
+ real(dp),allocatable :: rho_updnm1_3(:,:),exci(:)
 
 ! *************************************************************************
 
- has_fxc=(usefxc/=0)
+!We would rather work with exc than with tsxc
+ ABI_MALLOC(exci,(npts))
+ exci=fxci+tsxci
  has_dvxcdgr=(ndvxcdgr/=0)
 
  yperrot0=1.666081101_dp
@@ -1295,7 +1296,6 @@ subroutine xctfw(temp,exci,fxci,usefxc,rho_updn,vxci,npts,nspden,dvxcdgr,ndvxcdg
  call invcb(rho_updn(:,1),rho_updnm1_3(:,1),npts)
 
  do ipts=1,npts
-
    rho   =rho_updn(ipts,1)
    rhomot=rho_updnm1_3(ipts,1)
    rho_inv=rhomot*rhomot*rhomot
@@ -1336,12 +1336,13 @@ subroutine xctfw(temp,exci,fxci,usefxc,rho_updn,vxci,npts,nspden,dvxcdgr,ndvxcdg
      exci(ipts)   = exci(ipts) + etfw + uperrot*dhperrotduperrot*grho2_updn(ipts,1)*rho_inv*rho_inv
    end if
    vxci(ipts,1) = vxci(ipts,1)  + vtfw
-   if (has_fxc) fxci(ipts)   = fxci(ipts) + etfw
+   fxci(ipts)   = fxci(ipts)    + etfw
    if (has_dvxcdgr) dvxcdgr(ipts,1)= dvxcdgr(ipts,1)+two*hperrot*rho_inv
-
  end do
-
+ 
+ tsxci=exci-fxci
  ABI_FREE(rho_updnm1_3)
+ ABI_FREE(exci)
 
 end subroutine xctfw
 !!***
