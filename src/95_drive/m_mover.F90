@@ -227,6 +227,9 @@ integer :: minIndex,ii,similar,conv_retcode
 integer :: iapp
 logical :: file_exists
 logical :: re_init_rho
+#ifdef FC_NVHPC
+logical :: wrong=.false. !Silly trick to prevent NVHPC optimization issue
+#endif
 real(dp) :: minE,wtime_step,now,prev
 !arrays
 integer :: itimes(2),ngfft(18),ngfftf(18)
@@ -866,6 +869,10 @@ real(dp) :: k0(3)
      if (ab_mover%optcell/=0) then
        ! Cell may change
 
+#ifdef FC_NVHPC
+       ! Yet another wild NVHPC bug (only on eos_nvhpc_23.9_elpa)
+       if(wrong) write(100,*) xred
+#endif
        call matr3inv(rprimd,gprimd)
 
 !      If metric has changed since the initialization, update the Ylm's

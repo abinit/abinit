@@ -3630,19 +3630,7 @@ contains
     type(xgBlock_t) , intent(inout) :: xgBlock
     integer,intent(in),optional :: comm
 
-    integer :: ierr,comm_,fact
-
-#if defined HAVE_OPENMP_OFFLOAD
-#if !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
-!FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
-    complex(dpc), ABI_CONTIGUOUS pointer :: xgBlock__vecC(:,:)
-    real(dp), ABI_CONTIGUOUS pointer :: xgBlock__vecR(:,:)
-#endif
-#if !defined HAVE_MPI2_INPLACE
-    complex(kind=c_double_complex), ABI_CONTIGUOUS pointer :: vecC_buf(:,:)
-    real(kind=c_double), ABI_CONTIGUOUS pointer :: vecR_buf(:,:)
-#endif
-#endif
+    integer :: ierr,comm_
 
     if (.not.present(comm)) then
       comm_ = xgBlock%spacedim_comm
@@ -3656,7 +3644,6 @@ contains
         call gpu_device_synchronize()
       end if
 
-      fact = 1 ; if (xgBlock%space==SPACE_CR) fact = 2
       select case(xgBlock%space)
 
         case (SPACE_R,SPACE_CR)

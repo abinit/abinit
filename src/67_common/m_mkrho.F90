@@ -402,7 +402,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
            !$OMP TARGET ENTER DATA MAP(to:kg_k) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
 
-           if (gpu_option /= ABI_GPU_DISABLED) then
+           if (gpu_option /= ABI_GPU_DISABLED .and. paw_dmft%use_sc_dmft/=1) then
              !On GPU, treat all bands at once
              ABI_MALLOC(weight_t,(nband_k))
              nband_occ = 0
