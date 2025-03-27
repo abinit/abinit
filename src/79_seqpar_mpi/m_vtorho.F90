@@ -1593,11 +1593,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      if(associated(extfpmd)) then
        extfpmd%nelect=zero
        call extfpmd%compute_nelect(energies%e_fermie,dtset%nband,extfpmd%nelect,dtset%nkpt,&
-&       dtset%nspinor,dtset%nsppol,dtset%tsmear,dtset%wtk)
-       call extfpmd%compute_e_kinetic(energies%e_fermie,dtset%tsmear,dtset%nkpt,dtset%nspinor,&
+&       dtset%nspinor,dtset%nsppol,dtset%wtk)
+       call extfpmd%compute_e_kinetic(energies%e_fermie,dtset%nkpt,dtset%nspinor,&
 &       dtset%nsppol,dtset%nband,dtset%wtk)
-       call extfpmd%compute_entropy(energies%entropy_extfpmd,energies%e_fermie,dtset%tsmear,dtset%nkpt,dtset%nsppol,dtset%nspinor,&
-&       dtset%wtk,dtset%nband)
+       call extfpmd%compute_entropy(energies%entropy_extfpmd,energies%e_fermie,dtset%nkpt,&
+&       dtset%nsppol,dtset%nspinor,dtset%wtk,dtset%nband)
      end if
 
      if(paw_dmft%use_dmft==1) then
@@ -1732,11 +1732,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &       dtset%nfft,dtset%nkpt,dtset%nsppol,dtset%nspden,dtset%wtk,vtrial)
        extfpmd%nelect=zero
        call extfpmd%compute_nelect(energies%e_fermie,dtset%nband,extfpmd%nelect,dtset%nkpt,&
-&       dtset%nspinor,dtset%nsppol,dtset%tsmear,dtset%wtk)
-       call extfpmd%compute_e_kinetic(energies%e_fermie,dtset%tsmear,dtset%nkpt,dtset%nspinor,&
+&       dtset%nspinor,dtset%nsppol,dtset%wtk)
+       call extfpmd%compute_e_kinetic(energies%e_fermie,dtset%nkpt,dtset%nspinor,&
 &       dtset%nsppol,dtset%nband,dtset%wtk)
-       call extfpmd%compute_entropy(energies%entropy_extfpmd,energies%e_fermie,dtset%tsmear,dtset%nkpt,dtset%nsppol,dtset%nspinor,&
-&       dtset%wtk,dtset%nband)
+       call extfpmd%compute_entropy(energies%entropy_extfpmd,energies%e_fermie,dtset%nkpt,&
+&       dtset%nsppol,dtset%nspinor,dtset%wtk,dtset%nband)
        ! CHECK number of electrons integrating rhor.
        ! write(0,*) sum(rhor(:,:))*extfpmd%ucvol/dtset%nfft
      end if
