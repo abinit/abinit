@@ -539,10 +539,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 !  cprj_in_memory
    if (dt%cprj_in_memory/=0) then
      if (dt%optdriver/=RUNL_GSTATE) then
-       write(msg,'(a)') 'cprj_in_memory/=0 is implemented only for ground state (optdriver=0).&
-         & cprj_in_memory is set to 0 for this dataset.'
-       ABI_WARNING(msg)
-       dt%cprj_in_memory=0
+       ABI_ERROR_NOSTOP('cprj_in_memory/=0 is implemented only for ground state (optdriver=0).',ierr)
      else
        if (dt%useylm /= 1) then
          ABI_ERROR_NOSTOP('cprj_in_memory/=0 requires the input variable "useylm" to be 1',ierr)
@@ -1347,7 +1344,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 
 !  gpu_nl_splitsize
    call chkint_ge(0,0,cond_string,cond_values,ierr,'gpu_nl_splitsize',dt%gpu_nl_splitsize,1,iout)
-   if (dt%gpu_option/=ABI_GPU_OPENMP .and. dt%gpu_nl_splitsize/=0) then
+   if (dt%gpu_option/=ABI_GPU_OPENMP .and. dt%gpu_nl_splitsize/=1) then
      ABI_WARNING('gpu_nl_splitsize is ignored outside of OpenMP GPU (gpu_option 2)!')
    end if
 
