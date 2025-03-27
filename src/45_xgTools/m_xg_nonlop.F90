@@ -215,8 +215,8 @@ contains
 !! CHILDREN
 !!
 !! SOURCE
- subroutine xg_nonlop_init(xg_nonlop,indlmn,mpi_atmtab,my_natom,nattyp,mkmem,ntypat,nspinor,ucvol,usepaw,&
-     xg_nonlop_option,me_band,comm_band,comm_atom)
+ subroutine xg_nonlop_init(xg_nonlop,indlmn,my_natom,nattyp,mkmem,ntypat,nspinor,ucvol,usepaw,&
+     xg_nonlop_option,me_band,comm_band,comm_atom,mpi_atmtab)
 
    integer ,intent(in) :: me_band,comm_band,comm_atom
    integer ,intent(in) :: my_natom
@@ -228,7 +228,7 @@ contains
    real(dp),intent(in) :: ucvol
    type(xg_nonlop_t),intent(inout) :: xg_nonlop
 
-   integer,intent(in),target :: mpi_atmtab(:)
+   integer,optional,intent(in),target :: mpi_atmtab(:)
    integer,intent(in),target :: indlmn(:,:,:)
    integer,intent(in),target :: nattyp(:)
    real(dp) :: tsec(2)
@@ -240,6 +240,15 @@ contains
    xg_nonlop%mkmem=mkmem
    xg_nonlop%nspinor=nspinor
    xg_nonlop%comm_atom=comm_atom
+   if (xmpi_comm_size(comm_atom)>1) then
+     if (present(mpi_atmtab)) then
+       xg_nonlop%mpi_atmtab=>mpi_atmtab
+     else
+       ABI_ERROR("mpi_atmtab must be present")
+     end if
+   else
+     xg_nonlop%mpi_atmtab=>null()
+   end if
    xg_nonlop%my_natom=my_natom
    xg_nonlop%me_band=me_band
    xg_nonlop%comm_band=comm_band
@@ -259,7 +268,6 @@ contains
    xg_nonlop%weight=four_pi/sqrt(ucvol)
    xg_nonlop%ntypat=ntypat
 
-   xg_nonlop%mpi_atmtab=>mpi_atmtab
    xg_nonlop%nattyp=>nattyp
    xg_nonlop%indlmn=>indlmn
 
