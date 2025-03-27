@@ -4043,6 +4043,13 @@ end subroutine mpiTrack_getCol
 
 subroutine slice_run(slice,X0,eigen,resid,getAX_BX,getBm1X,nspinor)
 
+    ! For example oracle can be a private member function of slice
+    oracle = slice%oracle
+
+    oracle%mpi_row = .true.
+    oracle%mpi_col = .false.
+    oracle%use_cpu = .false.
+    oracle%use_gpu = .true.
     call divide_init(divide,X0,rrquo) 
                                       ! compute rrquo & compute how the work splits
                                       ! inside we transpose & transpose back X0 
@@ -4056,12 +4063,29 @@ subroutine slice_run(slice,X0,eigen,resid,getAX_BX,getBm1X,nspinor)
     
     ! Main computation
     X0_sub = divide%X
-    call worker(X0_sub,eigen_sub,resid_sub,getAX_BX,getBm1X,nspinor) ! compute X0 by diago
+    oracle%mpi_row = .false.
+    oracle%mpi_col = .true.
+    oracle%use_cpu = .false.
+    oracle%use_gpu = .true.
+    call worker(X0_sub,eigen_sub,resid_sub,getAX_BX,getBm1X,nspinor,oracle) ! compute X0 by diago
+
+    ! the oracle is the same for sequential slices
+    ! but: we redistribute divide%X to ALL Processes
+    ! do i=1,nslice
+    !   call redistribute_mpi_all(X0_sub)
+    !   call worker(X0_sub)
+    !   Actually it is complicated because we should not perform transpose in that case
+
 
     call xmpi_barrier(comm)
 
     ! Do the transposition back of 'divide' inside
-    call divide_conquer(divide,X0,eigen,resid) ! merge divide%X into X0
+    ! Must also transfer to CPU?
+    oracle%mpi_row = .true.
+    oracle%mpi_col = .false.
+    oracle%use_cpu = .true.
+    oracle%use_gpu = .false.
+    call divide_conquer(divide,X0,eigen,resid,oracle) ! merge divide%X into X0
 
     call divide_free(divide)
 
@@ -4102,7 +4126,19 @@ subroutine divide_run(divide,X0)
     ! simply check divide%X should be correct
     !! correct size, correct subcomm, correct data..
 
+    ! when this is over, you can delete X0 from GPU
+    ! first update the CPU, then remove GPU completely
+    ! enter data (unmap/free jecpa
+    ! only store on CPU
+
 end subroutine divide_run
+
+subroutine divide_conquer()
+
+    ! at the start, must transfer X0 to GPU
+    ! simply enter data (map
+
+end subroutine divide_conquer
 
 !! FUNCTION
 !! Diagonalisation on slice using subcommunicators
