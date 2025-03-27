@@ -26,7 +26,7 @@ module m_nvtx_data
 
   implicit none
 
-  integer, parameter :: NUMBER_OF_NVTX_REGIONS = 121
+  integer, parameter :: NUMBER_OF_NVTX_REGIONS = 138
   character(len=32), dimension(NUMBER_OF_NVTX_REGIONS) :: nvtx_names
   integer          , dimension(NUMBER_OF_NVTX_REGIONS) :: nvtx_ids
 
@@ -129,28 +129,45 @@ module m_nvtx_data
   integer, parameter :: NVTX_FORSTR = 97
   integer, parameter :: NVTX_FORCES = 98
   integer, parameter :: NVTX_STRESS = 99
-  integer, parameter :: NVTX_SLICEALL_DOS = 100
-  integer, parameter :: NVTX_SLICEALL_MERGE = 101
-  integer, parameter :: NVTX_SLICEALL_PERMUTE_COLS = 102
-  integer, parameter :: NVTX_SLICEALL_INIT_ASYNC_BUFFER = 103
-  integer, parameter :: NVTX_SLICEALL_FREE_ASYNC_BUFFER = 104
-  integer, parameter :: NVTX_SLICEALL_GET_AX_BX = 105
-  integer, parameter :: NVTX_SPSL_NONLOP = 106
-  integer, parameter :: NVTX_SLICE_GET_AX_BX = 107
-  integer, parameter :: NVTX_SLICE_GET_BM1X = 108
-  integer, parameter :: NVTX_SLICE_CORE = 109
-  integer, parameter :: NVTX_SLICE_NEXT_ORDER = 110
-  integer, parameter :: NVTX_SLICE_RR = 111
-  integer, parameter :: NVTX_SLICE_RRQ = 112
-  integer, parameter :: NVTX_SLICE_TRANSPOSE = 113
-  integer, parameter :: NVTX_SLICE_SWAP_BUF = 114
-  integer, parameter :: NVTX_SLICE_EXPANSION = 115
-  integer, parameter :: NVTX_SLICE_INIT = 116
-  integer, parameter :: NVTX_SLICE_RUN = 117
-  integer, parameter :: NVTX_SLICE_COPY = 118
-  integer, parameter :: NVTX_SLICE_FREE = 119
-  integer, parameter :: NVTX_SPSLICE_INIT = 120
-  integer, parameter :: NVTX_SLICEALL_SPLIT = 121
+  integer, parameter :: NVTX_DMFT_SOLVE = 100
+  integer, parameter :: NVTX_DMFT_SOLVE_LOOP = 101
+  integer, parameter :: NVTX_DMFT_IMPURITY_SOLVE = 102
+  integer, parameter :: NVTX_DMFT_HUBBARD_ONE = 103
+  integer, parameter :: NVTX_DMFT_DOWNFOLD_OPER = 104
+  integer, parameter :: NVTX_DMFT_UPFOLD_OPER = 105
+  integer, parameter :: NVTX_DMFT_INVERSE_OPER = 106
+  integer, parameter :: NVTX_DMFT_COMPUTE_GREEN = 107
+  integer, parameter :: NVTX_DMFT_COMPUTE_GREEN_BATCHED = 108
+  integer, parameter :: NVTX_DMFT_COMPUTE_GREEN_LOOP = 109
+  integer, parameter :: NVTX_DMFT_INTEGRATE_GREEN = 110
+  integer, parameter :: NVTX_DMFT_FERMI_GREEN = 111
+  integer, parameter :: NVTX_DMFT_COMPUTE_NB_ELEC = 112
+  integer, parameter :: NVTX_DMFT_ADD_INT_FCT = 113
+  integer, parameter :: NVTX_DMFT_SYM_MATLU = 114
+  integer, parameter :: NVTX_DMFT_RW_SELF = 115
+  integer, parameter :: NVTX_DMFT_SAVEOCC = 116
+  integer, parameter :: NVTX_SLICEALL_DOS = 117
+  integer, parameter :: NVTX_SLICEALL_MERGE = 118
+  integer, parameter :: NVTX_SLICEALL_PERMUTE_COLS = 119
+  integer, parameter :: NVTX_SLICEALL_INIT_ASYNC_BUFFER = 120
+  integer, parameter :: NVTX_SLICEALL_FREE_ASYNC_BUFFER = 121
+  integer, parameter :: NVTX_SLICEALL_GET_AX_BX = 122
+  integer, parameter :: NVTX_SPSL_NONLOP = 123
+  integer, parameter :: NVTX_SLICE_GET_AX_BX = 124
+  integer, parameter :: NVTX_SLICE_GET_BM1X = 125
+  integer, parameter :: NVTX_SLICE_CORE = 126
+  integer, parameter :: NVTX_SLICE_NEXT_ORDER = 127
+  integer, parameter :: NVTX_SLICE_RR = 128
+  integer, parameter :: NVTX_SLICE_RRQ = 129
+  integer, parameter :: NVTX_SLICE_TRANSPOSE = 130
+  integer, parameter :: NVTX_SLICE_SWAP_BUF = 131
+  integer, parameter :: NVTX_SLICE_EXPANSION = 132
+  integer, parameter :: NVTX_SLICE_INIT = 133
+  integer, parameter :: NVTX_SLICE_RUN = 134
+  integer, parameter :: NVTX_SLICE_COPY = 135
+  integer, parameter :: NVTX_SLICE_FREE = 136
+  integer, parameter :: NVTX_SPSLICE_INIT = 137
+  integer, parameter :: NVTX_SLICEALL_SPLIT = 138
 
 contains
 
@@ -260,6 +277,24 @@ contains
          & "FORSTR", &
          & "FORCES", &
          & "STRESS", &
+
+         & "DMFT_SOLVE", &
+         & "DMFT_SOLVE_LOOP", &
+         & "DMFT_IMPURITY_SOLVE", &
+         & "DMFT_HUBBARD_ONE", &
+         & "DMFT_DOWNFOLD_OPER", &
+         & "DMFT_UPFOLD_OPER", &
+         & "DMFT_INVERSE_OPER", &
+         & "DMFT_COMPUTE_GREEN", &
+         & "DMFT_COMPUTE_GREEN_BATCHED", &
+         & "DMFT_COMPUTE_GREEN_LOOP", &
+         & "DMFT_INTEGRATE_GREEN", &
+         & "DMFT_FERMI_GREEN", &
+         & "DMFT_COMPUTE_NB_ELEC", &
+         & "DMFT_ADD_INT_FCT", &
+         & "DMFT_SYM_MATLU", &
+         & "DMFT_RW_SELF", &
+         & "DMFT_SAVEOCC", &         
          & "SLICES_DOS", &
          & "SLICES_MERGE", &
          & "SLICES_PERMUTE_COLS", &
@@ -282,7 +317,6 @@ contains
          & "SLICE_FREE", &
          & "SPSLICE_INIT", &
          & "SLICEALL_SPLIT" &
-
          ]
 
     nvtx_ids(1) = NVTX_MAIN_COMPUTATION
@@ -384,28 +418,45 @@ contains
     nvtx_ids(97)= NVTX_FORSTR
     nvtx_ids(98)= NVTX_FORCES
     nvtx_ids(99)= NVTX_STRESS
-    nvtx_ids(100)= NVTX_SLICEALL_DOS
-    nvtx_ids(101)= NVTX_SLICEALL_MERGE
-    nvtx_ids(102)= NVTX_SLICEALL_PERMUTE_COLS
-    nvtx_ids(103)= NVTX_SLICEALL_INIT_ASYNC_BUFFER
-    nvtx_ids(104)= NVTX_SLICEALL_FREE_ASYNC_BUFFER
-    nvtx_ids(105)= NVTX_SLICEALL_GET_AX_BX
-    nvtx_ids(106)= NVTX_SLICES_NONLOP
-    nvtx_ids(107)= NVTX_SLICE_GET_AX_BX
-    nvtx_ids(108)= NVTX_SLICE_GET_BM1X
-    nvtx_ids(109)= NVTX_SLICE_CORE
-    nvtx_ids(110)= NVTX_SLICE_NEXT_ORDER
-    nvtx_ids(111)= NVTX_SLICE_RR
-    nvtx_ids(112)= NVTX_SLICE_RRQ
-    nvtx_ids(113)= NVTX_SLICE_TRANSPOSE
-    nvtx_ids(114)= NVTX_SLICE_SWAP_BUF
-    nvtx_ids(115)= NVTX_SLICE_EXPANSION
-    nvtx_ids(116)= NVTX_SLICE_INIT
-    nvtx_ids(117)= NVTX_SLICE_RUN
-    nvtx_ids(118)= NVTX_SLICE_COPY
-    nvtx_ids(119)= NVTX_SLICE_FREE
-    nvtx_ids(120)= NVTX_SPSLI_INIT
-    nvtx_ids(121)= NVTX_SLICEALL_SPLIT
+    nvtx_ids(100)=NVTX_DMFT_SOLVE
+    nvtx_ids(101)=NVTX_DMFT_SOLVE_LOOP
+    nvtx_ids(102)=NVTX_DMFT_IMPURITY_SOLVE
+    nvtx_ids(103)=NVTX_DMFT_HUBBARD_ONE
+    nvtx_ids(104)=NVTX_DMFT_DOWNFOLD_OPER
+    nvtx_ids(105)=NVTX_DMFT_UPFOLD_OPER
+    nvtx_ids(106)=NVTX_DMFT_INVERSE_OPER
+    nvtx_ids(107)=NVTX_DMFT_COMPUTE_GREEN
+    nvtx_ids(108)=NVTX_DMFT_COMPUTE_GREEN_BATCHED
+    nvtx_ids(109)=NVTX_DMFT_COMPUTE_GREEN_LOOP
+    nvtx_ids(110)=NVTX_DMFT_INTEGRATE_GREEN
+    nvtx_ids(111)=NVTX_DMFT_FERMI_GREEN
+    nvtx_ids(112)=NVTX_DMFT_COMPUTE_NB_ELEC
+    nvtx_ids(113)=NVTX_DMFT_ADD_INT_FCT
+    nvtx_ids(114)=NVTX_DMFT_SYM_MATLU
+    nvtx_ids(115)=NVTX_DMFT_RW_SELF
+    nvtx_ids(116)=NVTX_DMFT_SAVEOCC
+    nvtx_ids(117)= NVTX_SLICEALL_DOS
+    nvtx_ids(118)= NVTX_SLICEALL_MERGE
+    nvtx_ids(119)= NVTX_SLICEALL_PERMUTE_COLS
+    nvtx_ids(120)= NVTX_SLICEALL_INIT_ASYNC_BUFFER
+    nvtx_ids(121)= NVTX_SLICEALL_FREE_ASYNC_BUFFER
+    nvtx_ids(122)= NVTX_SLICEALL_GET_AX_BX
+    nvtx_ids(123)= NVTX_SLICES_NONLOP
+    nvtx_ids(124)= NVTX_SLICE_GET_AX_BX
+    nvtx_ids(125)= NVTX_SLICE_GET_BM1X
+    nvtx_ids(126)= NVTX_SLICE_CORE
+    nvtx_ids(127)= NVTX_SLICE_NEXT_ORDER
+    nvtx_ids(128)= NVTX_SLICE_RR
+    nvtx_ids(129)= NVTX_SLICE_RRQ
+    nvtx_ids(130)= NVTX_SLICE_TRANSPOSE
+    nvtx_ids(131)= NVTX_SLICE_SWAP_BUF
+    nvtx_ids(132)= NVTX_SLICE_EXPANSION
+    nvtx_ids(133)= NVTX_SLICE_INIT
+    nvtx_ids(134)= NVTX_SLICE_RUN
+    nvtx_ids(135)= NVTX_SLICE_COPY
+    nvtx_ids(136)= NVTX_SLICE_FREE
+    nvtx_ids(137)= NVTX_SPSLI_INIT
+    nvtx_ids(138)= NVTX_SLICEALL_SPLIT
 
   end subroutine nvtx_init
 
