@@ -98,11 +98,13 @@ contains
 
 !Local variables -------------------------
 !scalars
- integer :: diel_unit,fs2rs,i,iblok,ifound,ii,imode,ipert1,ipert2,iw,j,jblok,jw,kblok,lblok,mmom_unit,mmspec_unit,nblok,ndim 
+ integer :: alpha_unit,diel_unit,fs2rs,i,iblok,ifound
+ integer :: ii,imode,ipert1,ipert2,iw,j,jblok,jw,kblok,lblok,mmom_unit,mmspec_unit,nblok,ndim 
  integer :: nmat,nmdir,nwcalc,optgb,phon_unit,prtopt
  integer :: spin_unit,zeff_unit,zeffspec_unit,zfield_unit
  real(dp) :: omegastp
  character(len=5000) :: msg,pfmt
+ character(len=fnlen) :: alpha_filename
  character(len=fnlen) :: diel_filename,spin_filename,mmom_filename,mmspec_filename
  character(len=fnlen) :: phon_filename,zeff_filename,zeffspec_filename,zfield_filename
  complex(dpc) :: cplxvar,cplx_weta
@@ -121,6 +123,7 @@ contains
  complex(dpc), allocatable :: ri_mmom(:,:,:)
  complex(dpc), allocatable :: lm_zfield(:,:,:),zfield(:,:,:),zfield_tr(:,:)
  complex(dpc), allocatable :: bc_barmagsus(:,:),bc_ss(:,:),bc_sp(:,:)
+ complex(dpc), allocatable :: ci_alpha(:,:,:),lm_alpha(:,:,:)
  complex(dpc), allocatable :: ci_epsilon(:,:,:),lm_epsilon(:,:,:)
  complex(dpc), allocatable :: modemm(:,:,:),zeff(:,:),zeff_tr(:,:),modezeff(:,:,:)
  complex(dpc), allocatable :: fmzeff(:,:),fmzeff_tr(:,:)
@@ -176,6 +179,8 @@ contains
  ABI_MALLOC(zeff_tr,(3*natom,3))
  ABI_MALLOC(genzeff_tr,(3*natom+ndim,3))
  ABI_MALLOC(ri_genelsus,(3*natom+ndim,3,nomega))
+ ABI_MALLOC(ci_alpha,(3,3,nomega))
+ ABI_MALLOC(lm_alpha,(3,3,nomega))
  ABI_MALLOC(ci_epsilon,(3,3,nomega))
  ABI_MALLOC(lm_epsilon,(3,3,nomega))
  ABI_MALLOC(modezeff,(3,3*natom,nomega))
@@ -323,7 +328,8 @@ contains
    & mode_phonspec(:,iw),mpert,natom,ntypat,omega(iw),&
    & phfrq(:,iw),phongreen,phonspec(iw),typat)
 
-     call ri_d2etot(int_rsddb,ci_epsilon(:,:,iw),lm_epsilon(:,:,iw),magsus,mpert,mmom(:,:,iw),&
+     call ri_d2etot(int_rsddb,ci_alpha(:,:,iw),ci_epsilon(:,:,iw),lm_alpha(:,:,iw),&
+   & lm_epsilon(:,:,iw),magsus,mpert,mmom(:,:,iw),&
    & mmom_tr(:,:,iw),natom,ndim,phongreen,ucvol)
    end if
 
@@ -813,6 +819,69 @@ contains
 
  close(diel_unit)
 
+!Magnetoelectric susceptibility
+ alpha_filename=trim(outfilename_radix)//"_MAGNETOELSUS"
+ if (open_file(alpha_filename, msg, newunit=alpha_unit) /= 0) then
+   ABI_ERROR(msg)
+ end if
+
+ if (mpopt==1) then
+   write(alpha_unit,*) '#  Frozen-magnetic magnetoelectric tensor calculated and interpolated by ANADDB'
+ else if (mpopt==2) then
+   write(alpha_unit,*) '#  Spin-relaxed magnetoelectric tensor calculated and interpolated by ANADDB'
+ else
+   write(msg,'(a)') 'ddb_omega_interpol: variable mpopt just can be 1 or 2'
+   ABI_ERROR(msg)
+ end if
+ 
+ write(alpha_unit,*) '#'
+ write(pfmt, '( "(es15.7, ", I4, "(es15.7))" )' ) 9 
+
+ write(alpha_unit,*) '#  Real part of clamped-ion magnetoelectric tensor'
+ write(msg,'(a,a)') ch10,&
+&           ' # At  hw     alpha_11     alpha_12     ...     alpha_21     alpha_22     ...'
+ call wrtout(alpha_unit,msg,'COLL')
+ do iw=1,nomega
+    write(msg,pfmt) &
+ &  omega(iw), ((real(ci_alpha(i,j,iw)),j=1,3),i=1,3)
+    call wrtout(diel_unit,msg,'COLL')
+ end do
+
+ write(alpha_unit,*) ' '
+ write(alpha_unit,*) '#  Imaginary part of clamped-ion magnetoelectric tensor'
+ write(msg,'(a,a)') ch10,&
+&           ' # At  hw     alpha_11     alpha_12     ...     alpha_21     alpha_22     ...'
+ call wrtout(alpha_unit,msg,'COLL')
+ do iw=1,nomega
+    write(msg,pfmt) &
+ &  omega(iw), ((aimag(ci_alpha(i,j,iw)),j=1,3),i=1,3)
+    call wrtout(alpha_unit,msg,'COLL')
+ end do
+
+ write(alpha_unit,*) ' '
+ write(alpha_unit,*) '#  Real part of relaxed-ion magnetoelectric tensor'
+ write(msg,'(a,a)') ch10,&
+&           ' # At  hw     alpha_11     alpha_12     ...     alpha_21     alpha_22     ...'
+ call wrtout(alpha_unit,msg,'COLL')
+ do iw=1,nomega
+    write(msg,pfmt) &
+ &  omega(iw), ((real(lm_alpha(i,j,iw)+ci_alpha(i,j,iw)),j=1,3),i=1,3)
+    call wrtout(alpha_unit,msg,'COLL')
+ end do
+
+ write(alpha_unit,*) ' '
+ write(alpha_unit,*) '#  Imaginary part of relaxed-ion magnetoelectric tensor'
+ write(msg,'(a,a)') ch10,&
+&           ' # At  hw     alpha_11     alpha_12     ...     alpha_21     alpha_22     ...'
+ call wrtout(alpha_unit,msg,'COLL')
+ do iw=1,nomega
+    write(msg,pfmt) &
+ &  omega(iw), ((aimag(lm_alpha(i,j,iw)+ci_alpha(i,j,iw)),j=1,3),i=1,3)
+    call wrtout(alpha_unit,msg,'COLL')
+ end do
+
+ close(alpha_unit)
+
 !Phonon spectral function
  phon_filename=trim(outfilename_radix)//"_SPECTRAL_PHONON"
  if (open_file(phon_filename, msg, newunit=phon_unit) /= 0) then
@@ -1081,12 +1150,12 @@ subroutine phonon_green(amu,eigvec,eta,blkval,&
 
 !Apply ASR: it has weird consequences on the intensities of the spectral function
 !better not applied.
-! ABI_MALLOC_IFNOT(delta_asrw0,(3*natom,3))
-! if (omega < tol14) then
-!   call asrw0(delta_asrw0,ifc,natom,0) 
-! else 
-!   call asrw0(delta_asrw0,ifc,natom,1) 
-! end if
+ ABI_MALLOC_IFNOT(delta_asrw0,(3*natom,3))
+ if (omega < tol14) then
+   call asrw0(delta_asrw0,ifc,natom,0) 
+ else 
+   call asrw0(delta_asrw0,ifc,natom,1) 
+ end if
 
 !Build an array with the inverse mass factors
  ABI_MALLOC(invmassfac,(natom,natom))
@@ -1713,7 +1782,7 @@ end subroutine me_altcalc
 #include "abi_common.h"
 
 
- subroutine ri_d2etot(blkval,ci_epsilon,lm_epsilon,magsus,mpert,mcoup, &
+ subroutine ri_d2etot(blkval,ci_alpha,ci_epsilon,lm_alpha,lm_epsilon,magsus,mpert,mcoup, &
 & mcoup_tr,natom,ndim,phongreen,ucvol)
 
 !Arguments ------------------------------------
@@ -1722,6 +1791,8 @@ end subroutine me_altcalc
  real(dp), intent(in) :: ucvol
 !arrays
  real(dp), intent(in) :: blkval(2,3,mpert,3,mpert,1)
+ complex(dpc), intent(out) :: ci_alpha(3,3)
+ complex(dpc), intent(out) :: lm_alpha(3,3)
  complex(dpc), intent(out) :: ci_epsilon(3,3)
  complex(dpc), intent(out) :: lm_epsilon(3,3)
  complex(dpc), intent(in) :: magsus(ndim,ndim)
@@ -1770,7 +1841,32 @@ end subroutine me_altcalc
    end do
  end do 
 
+ !Magnetoelectric susceptibility
+ fac= one/ucvol
+ ipert1= natom + 5
+ do idir1= 1, 3
+   irow= idir1
+   do ipert2= 1, natom
+     do idir2= 1, 3
+       icol= (ipert2-1)*3 + idir2
+       coup(irow,icol)= c_blkval(idir1,ipert1,idir2,ipert2)
+       coup_tr(icol,irow)= c_blkval(idir2,ipert2,idir1,ipert1)
+     end do
+   end do
+ end do
+ ipert2= natom + 2
+ lm_alpha= fac*matmul(coup(:,:),matmul(phongreen,coup_tr(:,:)))
+ 
+ do idir1= 1, 3
+   do idir2= 1, 3
+     ci_alpha(idir1,idir2)= c_blkval(idir1,ipert1,idir2,ipert2)
+   end do
+ end do 
+ 
+
  ABI_FREE(c_blkval)
+ ABI_FREE(coup)
+ ABI_FREE(coup_tr)
 
  DBG_EXIT("COLL")
 
