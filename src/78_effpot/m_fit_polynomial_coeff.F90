@@ -682,6 +682,8 @@ contains
           !FIXME: on on bot EOZ: the coeffs_tmp has larger size than coeffs_iatom.
           ! This is a bug.
           !if(allocated(coeffs_iatom)) then
+          print *, "DEBUG: is coeffs_iatom allocated?", allocated(coeffs_iatom)
+          if(allocated(coeffs_iatom)) print *, "DEBUG: size coeffs_iatom", size(coeffs_iatom)
             call coeffs_list_copy(coeffs_tmp,coeffs_iatom)
             call polynomial_coeff_list_free(coeffs_iatom)
           !end if

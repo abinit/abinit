@@ -2336,8 +2336,6 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
        call polynomial_coeff_getList(cell,crystal,dist,list_symcoeff,list_symstr,&
          &                              natom,nstr_sym,ncoeff_sym,nrpt,range_ifc,cutoff,sc_size=sc_size,&
          &                              fit_iatom=fit_iatom_in)
-
-
        shape_listsymcoeff = shape(list_symcoeff)
        shape_listsymstr   = shape(list_symstr)
      endif!if iam master
@@ -2359,6 +2357,11 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
 
      !Compute the total number of coefficient
      ncoeff_tot = ncoeff_sym+nstr_sym
+     print *, "DEBUG============: ncoeff_symsym: ", ncoeff_symsym
+     print *, "DEBUG============: ncoeff_sym: ", ncoeff_sym
+     print *, "DEBUG============: nstr_sym: ", nstr_sym
+     print *, "DEBUG============: ncoeff_tot: ", ncoeff_tot
+
 
      !if(iam_master)then
      !Check the distanceance bewteen coefficients and store integer:
@@ -2393,11 +2396,6 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
            compatibleCoeffs(icoeff2,icoeff) = 0
          end if
 
-         ! TODO: hexu: Check if this is only valid for orthogonal structures. As it takes the x component of the rprimd
-         ! to compare.
-         ! Here it checks: for two pairs of atom with icoeff (a-b)  and icoeff2 (c-d).
-         !. (a) a-d along x. (b) a-d along y. (c) a-d along z are within the range.
-         ! As a-b and c-d are within the cutoff, and a==c, there is no more need to check.
 
          if(icoeff<=ncoeff_symsym.and.icoeff2<=ncoeff_symsym)then !Check combination of irreducible bodies and their symmetric equivalent
            if(list_symcoeff(2,icoeff,1)/= list_symcoeff(2,icoeff2,1)) then
@@ -2586,6 +2584,7 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
          call wrtout(std_out,message,'PERS')
        endif
        !call reduce_zero_combinations(my_list_combination)
+       print *, "DEBUG: my_array_combination", my_array_combination%size
        call my_array_combination%tostatic(my_list_combination, size1=power_disps(2))
        call my_array_combination%finalize()
 
@@ -2612,6 +2611,8 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
        do i = 1,nproc
          buffsize(i) = irank_ncombi(i)*power_disps(2)
        enddo
+
+       print *, "DEBUG: my_list_combination", size(my_list_combination)
 
        call xmpi_gatherv(my_list_combination,size(my_list_combination),list_combination_tmp,buffsize,offsets,master,comm,ierr)
 
@@ -2641,6 +2642,7 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
          block
            type(IrreducibleCombinations_T) :: irred_combinations
            call irred_combinations%init()
+           print *, "DEBUG: ncombination before reducing", ncombination
            do i=1, ncombination
             if(any(list_combination_tmp(:,i) > ncoeff_symsym))then
              irreducible=irred_combinations%add_irr(list_combination_tmp(:,i), &

@@ -523,6 +523,8 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
   !do iorder=order(1),order(2),2, Order will be done per term
   !Loop over all original terms + 1
   ! + 1 to bound pure strain
+  print *, "DEBUG=====>", "eff_pot%anharmonics_terms%ncoeff", eff_pot%anharmonics_terms%ncoeff
+  print *, "DEBUG=====>", "nterm", nterm
   do iterm =1,nterm +1
     if(iterm <=nterm)then
       ncombi1=0
@@ -558,18 +560,16 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
         my_coeffs=eff_pot%anharmonics_terms%coefficients
 
         ! then add the single disp terms.
-        !if (bound_option==1) then
-            if (ncombi1>0) then
-              do icombi3=1,ncombi1
-                if (HOsingledisp_terms(icombi3)%terms(1)%get_nbody() == nbody_term .or. bound_option/=1) then
-                  call coeffs_list_append(my_coeffs,HOsingledisp_terms(icombi3), check=.TRUE.)
-                  ncombi1_real = ncombi1_real + 1
-                endif
-              end do
+        print *, 'DEBUG=====>', "ncombi1", ncombi1
+        if (ncombi1>0) then
+          do icombi3=1,ncombi1
+            if (HOsingledisp_terms(icombi3)%terms(1)%get_nbody() == nbody_term .or. bound_option/=1) then
+              call coeffs_list_append(my_coeffs,HOsingledisp_terms(icombi3), check=.TRUE.)
+              ncombi1_real = ncombi1_real + 1
             endif
-        !else
-        !    if (ncombi1>0) call coeffs_list_conc_onsite(my_coeffs, HOsingledisp_terms)
-        !endif
+          end do
+        endif
+        print *, 'DEBUG=====>', "ncombi1_real", ncombi1_real
 
         if(allocated(HOsingledisp_terms)) call polynomial_coeff_list_free(HOsingledisp_terms)
 
@@ -582,21 +582,18 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
             call opt_getHOcrossdisp(HOcrossdisp_terms,ncombi2,eff_pot%anharmonics_terms%coefficients(iterm),order_ran)
         endif
         ! then add the crossdisp terms.
-        !if(bound_option==1)then
-            if(ncombi2 > 0)then
-              do icombi3=1,ncombi2
-                !call coeffs_list_conc_onsite(my_coeffs, HOcrossdisp_terms(icombi3))
-                if (HOcrossdisp_terms(icombi3)%terms(1)%get_nbody() == nbody_term .or. bound_option/=1) then
-                  call coeffs_list_append(my_coeffs,HOcrossdisp_terms(icombi3), check=.TRUE.)
-                  ncombi2_real = ncombi2_real + 1
-                endif
-              end do
+        if(ncombi2 > 0)then
+          do icombi3=1,ncombi2
+            !call coeffs_list_conc_onsite(my_coeffs, HOcrossdisp_terms(icombi3))
+            if (HOcrossdisp_terms(icombi3)%terms(1)%get_nbody() == nbody_term .or. bound_option/=1) then
+              call coeffs_list_append(my_coeffs,HOcrossdisp_terms(icombi3), check=.TRUE.)
+              ncombi2_real = ncombi2_real + 1
             endif
-        !else
-        !    if(ncombi2 > 0)then
-        !     call coeffs_list_conc_onsite(my_coeffs, HOcrossdisp_terms)
-        !    endif
-        !endif
+          end do
+        endif
+        print *, 'DEBUG=====>', "ncombi2", ncombi2
+        print *, 'DEBUG=====>', "ncombi2_real", ncombi2_real
+
         if(allocated(HOcrossdisp_terms)) call polynomial_coeff_list_free(HOcrossdisp_terms)
        end associate
       end block
@@ -607,6 +604,7 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
         my_coeffs = eff_pot%anharmonics_terms%coefficients
       endif
       ncombi =  ncombi1_real + ncombi2_real
+      print*, 'DEBUG=====>', "ncombi", ncombi
       nterm_start = eff_pot%anharmonics_terms%ncoeff
     else ! if iterm = nterm + 1 => Take care about strain
         block
@@ -2150,15 +2148,20 @@ subroutine generate_bounding_term_and_add_to_list(sympairs, nterm_start, ncombi,
 
   integer :: ncoeff
 
+  print *, "DEBUG: generate_bounding_term_and_add_to_list"
+
   ! copy the coefficients to a temporary array my_coeffs_tmp
   ncoeff=size(my_coeffs)
   ABI_MALLOC(my_coeffs_tmp,(ncoeff))
   my_coeffs_tmp=my_coeffs
+  print *, "DEBUG: generate_bounding_term_and_add_to_list: ncoeff=", ncoeff
 
   ! free the original array and allocate a new one with the correct size
   call polynomial_coeff_list_free(my_coeffs)
   ABI_MALLOC(my_coeffs, (ncoeff))
   my_coeffs(1:nterm_start) = my_coeffs_tmp(1:nterm_start)
+
+  print *, "DEBUG: generate_bounding_term_and_add_to_list: nterm_start=", nterm_start
 
 
   temp_cntr =0
