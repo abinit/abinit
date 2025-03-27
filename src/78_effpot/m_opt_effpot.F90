@@ -561,7 +561,6 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
         !if (bound_option==1) then
             if (ncombi1>0) then
               do icombi3=1,ncombi1
-                !call coeffs_list_conc_onsite(my_coeffs, HOcrossdisp_terms(icombi3))
                 if (HOsingledisp_terms(icombi3)%terms(1)%get_nbody() == nbody_term .or. bound_option/=1) then
                   call coeffs_list_append(my_coeffs,HOsingledisp_terms(icombi3), check=.TRUE.)
                   ncombi1_real = ncombi1_real + 1
@@ -634,7 +633,7 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
     ! 6. convert term to list.
     ! 7. ask for the temrs from generateTermsFromList
     ! 8. check and see if the coeff is already considered or not. use coeffs_compare function
-    !! strain??? the same thing should be done for the strain
+    !! strain the same thing should be done for the strain
     !! find the list of all the list_str,
     !! fond what is number of strain in the displacemt comapring it to
     !! the list_str and give this to
@@ -1800,7 +1799,8 @@ subroutine opt_getSingleDispTerms(terms,crystal, sc_size,comm)
       call polynomial_coeff_getNorder(terms_tmp,crystal,cutoff,ncoeff,ncoeff_out,power_disp,&
         &                               power_strph,option_GN,sc_size,comm,anharmstr=.false.,spcoupling=.false.,&
         &                               only_odd_power=.false.,only_even_power=.true.,verbose=.false.,&
-        &                               compute_symmetric=.false.,fit_iatom=iatom, max_nbody=[999,999,999,999,999,999])
+        &                               compute_symmetric=.false.,fit_iatom=iatom,    &
+        &                            max_nbody=[999,999,999,999,999,999, 999,999,999,999])
       !TEST MS
       !  write(std_out,*) "behind call getNorder"
       !  write(std_out,*) "ncoeff_out: ", ncoeff_out
