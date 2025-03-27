@@ -68,7 +68,7 @@ If you open the include file:
 you will notice that we are using norm-conserving (NC) pseudos taken from
 the standard scalar-relativistic table of the [PseudoDojo](https://www.pseudo-dojo.org/).
 For efficiency reasons, these examples use underconverged parameters:
-the cutoff energy [[ecut]] is set to 10 Ha that is slightly smaller
+the cutoff energy [[ecut]] is set to 10 Ha that is smaller
 than the recommended value reported in the PseudoDojo table (16 Ha).
 
 !!! important
@@ -77,14 +77,15 @@ than the recommended value reported in the PseudoDojo table (16 Ha).
     as these pseudos have closed-shells treated as valence states.
     This is important for a correct description of the matrix elements of the exchange part of the self-energy
     that are rather sensitive to the overlap between the wavefunctions [[cite:Setten2018]].
-    In the special case of silicon, there is no difference between the standard version and the stringent version of the pseudo,
+    In the special case of silicon, there is no difference between the standard version
+    and the stringent version of the pseudo,
     but if we consider e.g. Ga, you will notice that the stringent version includes all the 3spd states in valence
-    besides the outermost 4sp electrons whereas the standard pseudo for Ga designed for GS calculations includes only the 3d states.
+    besides the outermost 4sp electrons whereas the standard pseudo for Ga designed for GS calculations
+    includes only the 3d states.
     Since we are using scalar-relativistic (SR) pseudos, it is not possible to treat spin-orbit coupling (SOC)
     and [[nspinor]] must be set to 1 (default value).
-    To include SOC with NC, one should use fully-relativistic (FR) pseudos, use [[nspinor]] 2 in all the input files
+    To include SOC with NC, one should use fully-relativistic (FR) pseudos, set [[nspinor]] 2 al all the input files
     and then set the appropriate value of [[nspden]] to 4 or 1 depending on whether the system is magnetic or not.
-
 
 <!--
 One final comment on MPI parallelism:
@@ -93,7 +94,7 @@ and [[autoparal]] to 1 to allow ABINIT to determine an optimal distribution, wit
 -->
 
 At this point, the calculation should have completed, and we can have a look
-at the KS band structure to locate the position of the band edges.
+at the KS band structure to find the position of the band edges.
 
 !!! tip
 
@@ -149,7 +150,8 @@ Both values strongly underestimate the experimental results that are ~3.4 eV and
 ### Generation of the WFK file with empty states
 
 In the second input file, we use the density file computed previously (tgwr\_1o\_DS1\_DEN)
-to generate three WFK files with three different $\Gamma$-centered $\kk$-meshes ([[ngkpt]] = 2x2x2 and 4x4x4, 6x6x6).
+to generate three WFK files with three different $\Gamma$-centered $\kk$-meshes
+([[ngkpt]] = 2x2x2 4x4x4, and 6x6x6).
 
 ```
 ndtset 3
@@ -188,7 +190,7 @@ Clearly, when studying new systems, the converged [[nband]] value is not known b
 Therefore, it is important to plan ahead and choose a reasonably large number of bands
 to avoid regenerating the WFK file multiple times just to increase [[nband]].
 
-Note that [[paral_kgb]] = 1 is only available in the ground-state (GS) part.
+Note also that [[paral_kgb]] = 1 is only available in the ground-state (GS) part.
 The GWR code employs its own distribution scheme, which depends on the value of [[gwr_task]].
 When "HDIAGO" is used, the distribution is handled automatically at runtime, and the user has no control over it.
 Please refer to the note below for guidance on choosing an appropriate number of MPI processes
@@ -234,7 +236,8 @@ and other variables that are specific to the GWR code whose name starts with `gw
 We use [[optdriver]] 6 to enter the GWR code and [[gwr_task]] activates a one-shot GW calculation.
 To reduce the wall-time, we use a minimax mesh with [[gwr_ntau]] = 6 points.
 This is the minimum number of points that can be used.
-Most likely, six points are not sufficient, but the convergence study for [[gwr_ntau]] is postponed to the next sections.
+Most likely, six points are not sufficient, but the convergence study for
+[[gwr_ntau]] is postponed to the next sections.
 
 [[getden_filepath]] specifies the density file used to compute $v_{xc}[n](\rr)$,
 while [[getwfk_filepath]] specifies the WFK file with empty states used to build the Green's function.
@@ -252,17 +255,19 @@ The cutoff for the exchange part of the self-energy is given by [[ecutsigx]].
 Theoretically, we need [[ecutsigx]] = 4 [[ecut]] to have an exact treatment of $\Sigma_x$.
 The computation of the exchange is relatively fast as only occupied states are involved.
 
-The $\kk$-points and the band range for the QP corrections are set expliclty via [[nkptgw]], [[kptgw]] and [[bdgw]].
+The $\kk$-points and the band range for the QP corrections are set
+expliclty via [[nkptgw]], [[kptgw]] and [[bdgw]].
 Alternatively, one can use [[gw_qprange]].
 
-For the spectral function, we have the following variables [[nfreqsp]], [[freqspmax]]
+For the spectral function $A_\nk(\ww)$, we have the following variables [[nfreqsp]], [[freqspmax]]
 TODO: Mention [[inclvkb]] == 2, [[symsigma]]
 
 We can now have a look at the main output file:
 
 {% dialog tests/tutorial/Refs/tgwr_3.abo %}
 
-First of all, we have a section that summarizes the most important GWR parameters in a Yaml document:
+First of all, we have a section that summarizes the most
+important GWR parameters gathered in a Yaml document:
 
 ```yaml
 --- !GWR_params
@@ -304,7 +309,8 @@ Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(o
 ```
 
 Some of the entries in this dictionary have a direct correspondence with ABINIT variables and
-we don't discuss them further.
+won't be discussed.
+The meaning of the other variables is reported below:
 
 `nkibz`: Number of $\kk$-points in the IBZ
 `qkibz`: Number of $\qq$-points in the IBZ
@@ -318,7 +324,7 @@ must be stored in memory.
 
 TODO: Describe other entries
 
-Finally, we have the most importan section with the QP results in eV units:
+Finally, we have the most important section with the QP results in eV units:
 
 ```
 ================================================================================
@@ -398,13 +404,15 @@ tgwr\_3o\_SIGXC\_RW:
 Diagonal elements of $\Sigma_\xc(\omega)$ in eV units and spectral function $A_\nk(\omega)$
 
 Finally, we have a netcdf file named `tgwr_3o_GWR.nc` storing the same data
-in binary format that can be easily post-processed with AbiPy using
+in binary format that can be easily post-processed with AbiPy using:
 
 ```
 abiopen.py tgwr_3o_GWR.nc -e
 ```
 
-[This script][https://abinit.github.io/abipy/gallery/plot_gwr.html].
+If you need more control, you may want to use
+[this script][https://abinit.github.io/abipy/gallery/plot_gwr.html].
+
 Please take some time to read the script and understand how this post-processing tool works before proceeding.
 
 
@@ -497,7 +505,7 @@ As a consequence we will try to reach a convergence of 2 meV
 ## Convergence wrt nband and ecuteps
 
 To perform a double convergence study in [[nband]] and [[ecuteps]],
-we can use [[udtset]], and add these variables to tgwr\_3.abi:
+we can use [[udtset]], and add this section to `tgwr_3.abi`:
 
 ```sh
 ndtset 16    # NB: ndtset must be equal to udtset[0] * udtset[1]
@@ -543,12 +551,12 @@ abs_conv = 0.005
 
 robot.plot_qpgaps_convergence_new(x="nband", y="qpz0_dirgaps",
                                   abs_conv=abs_conv, hue="ecuteps",
-                                  #show=False, savefig="conv_nband_ecuteps.png",
+                                  savefig="conv_nband_ecuteps.png",
                                   )
 
 robot.plot_qpgaps_convergence_new(x="ecuteps", y="qpz0_dirgaps",
                                   abs_conv=abs_conv, hue="nband",
-                                  #show=False, savefig="conv_ecuteps_nband.png",
+                                  savefig="conv_ecuteps_nband.png",
                                   )
 ```
 
@@ -569,13 +577,15 @@ and then run it with:
 
 ![](gwr_assets/conv_nband_ecuteps.png)
 
-Let's use [[nband]] = 250 and [[ecuteps]] = 10
+On the basis of this convergence study, we decide to [[nband]] = 250 and [[ecuteps]] = 10.
 
+<!
 In the [first GW tutorial](/tutorial/gw1), we have already performed convergence studies,
 and [[nband]] = 100 was found to give results converged within 30 mev, which is fair to compare with experimental accuracy.
 Also ecuteps = 6.0 can be considered converged within 10 meV.
 We will not repeat these convergence studies here, we just use these values for our calculation so that
 we can focus on the analysis of the output file and the post-processing of the results.
+!>
 
 Since we will continue using `tgwr_3.abi` to perform other convergence studies,
 it is a good idea to move the previously generated GWR.nc files and the python script
@@ -591,7 +601,7 @@ mv tgwr_3o_* log conv_nband_ecuteps
 ## Convergence wrt gwr_ntau
 
 Now edit `tgwr_3.abi`, replace the values of [[nband]] and [[ecuteps]] found earlier,
-and define a new one-dimensional multidataset to increase [[gwr_ntau]]:
+and define a new one-dimensional multi-dataset to increase [[gwr_ntau]]:
 
 ```
 ndtset      15
@@ -613,9 +623,8 @@ robot = GwrRobot.from_files(filepaths)
 abs_conv = 0.005
 robot.plot_qpgaps_convergence_new(x="gwr_ntau", y="qpz0_dirgaps",
                                   abs_conv=abs_conv,
-                                  #show=False, savefig="conv_ntau.png",
+                                  savefig="conv_ntau.png",
                                   )
-
 def sortby(gwr):
     r"""$N_\tau$"""
     return gwr.params["gwr_ntau"]
@@ -737,7 +746,7 @@ robot = GwrRobot.from_files(filepaths)
 abs_conv = 0.005
 robot.plot_qpgaps_convergence_new(x="gwr_boxcutmin", y="qpz0_dirgaps",
                                   abs_conv=abs_conv
-                                  #show=False, savefig="conv_boxcutmin.png",
+                                  savefig="conv_boxcutmin.png",
                                   )
 
 #robot.plot_qpgaps_convergence(sortby=sortby, abs_conv=abs_conv)
@@ -756,19 +765,15 @@ We therefore fix [[gwr_boxcutmin]] to 1.1 and proceed with the other convergence
 In this last part of the tutorial, we discuss how to interpolate the QP corrections
 along an arbitrary $\kk$-path using the star-function method discussed in
 [this section](tutorial/eph_intro/#star-function-interpolation-of-the-ks-eigenvalues) of the EPH introduction.
-This method is less accurate the e.g. the Wannier interpolation and may have problems in the presence
+This method is less accurate than e.g. the Wannier interpolation, and may have problems in the presence
 of band-crossings, but it has the big advantage of being much easier to use and with mininal user intervention.
-
 First of all, we need to compute the QP corrections for **all** the $\kk$-points in the IBZ.
 This is done in the following input:
 
 {% dialog tests/tutorial/Input/tgwr_5.abi %}
 
 Note the usage of [[gw_qprange]] = `-NUM` and [[gwr_sigma_algo]] 1 to activate
-the supercell algorithm for $\Sigma_\nk$ (the most efficient algorithm in this particular case).
-
-To keep the wall-time at a reasonable level, we use a WFK file with 2x2x2 $\kk$-mesh,
-but it is clear that a more accurate intepolation would require denser $\kk$-meshes.
+the supercell algorithm for $\Sigma_\nk$, the most efficient algorithm in this particular case.
 
 Run the job with:
 
@@ -784,7 +789,8 @@ Now use the following AbiPy script to read the GWR results and interpolate the Q
 In this case, we pass the KS band structure stored in `tgwr_1o_DS2_GSR.nc`.
 This is the recommended approach as AbiPy will interpolate the QP corrections rather that the QP energies.
 The interpolated QP corrections will then be added to the KS energies
-thus improving the stability of the interpolation as QP corrections are usually smoother than QP energies.
+thus improving the stability of the interpolation method as the QP corrections
+are usually smoother than the QP energies.
 
 ```python
 #!/usr/bin/env python
@@ -795,12 +801,12 @@ r = gwr.interpolate(ks_ebands_kpath="tgwr_1o_DS2_GSR.nc")
 
 from abipy.electrons.ebands import ElectronBandsPlotter
 plotter = ElectronBandsPlotter()
-plotter.add_ebands("KS bands", r.ks_ebands_kpath)
-plotter.add_ebands("$G_0W_0$ bands", r.qp_ebands_kpath)
+plotter.add_ebands("KS", r.ks_ebands_kpath)
+plotter.add_ebands("$G_0W_0$", r.qp_ebands_kpath)
 
 #r.qp_ebands_kpath.plot(with_gaps=True)
 
-plotter.combiplot(savefig="gw_vs_ks_bands")
+plotter.combiplot(savefig="gw_vs_ks_bands.png")
 #plotter.gridplot()
 ```
 
@@ -808,64 +814,5 @@ You should get the following figure:
 
 ![](gwr_assets/gw_vs_ks_bands.png)
 
-### Analyzing the convergence with the minimax mesh
-
-The script below shows how to use the `GWRobot` to perform a convergence study
-for the QP direct gaps with respect to the number of minimax points.
-
-```python
-#!/usr/bin/env python
-from abipy.electrons.gwr import GwrRobot
-filepaths = [f"tgwr_3o_DS{num}_GWR.nc" for num in range(1, 15)]
-
-robot = GwrRobot.from_files(filepaths)
-
-kpoint = (0, 0, 0)
-df_dirgaps = robot.get_dirgaps_dataframe(kpoint=kpoint)
-print(df_dirgaps)
-
-# This function is used to sort the GWR.nc files by the number of minimax points
-# The doc string will be used as xlabel.
-
-def sortby(gwr):
-    r"""$N_\tau$"""
-    return gwr.params["gwr_ntau"]
-
-robot.plot_qpgaps_convergence(sortby=sortby, abs_conv=0.005)
-```
-
-If we analyze the results of a more expensive run done with multiple minimax meshes
-and then plot the results with AbiPy using the same script but a different `filepaths`,
-we obtain the following results:
-
-Clearly 6 minimax points are not enough to convergence.
-Also the convergence with [[gwr_ntau]] is not variational, and there are meshes that perform better than others.
-This study shows that we should use XXX minimax points in order to reach an accuracy of 0.01 eV (`abs_conv`).
-Unfortunately, this would render the calculations more expensive, especially for a tutorial,
-therefore we opt to continue with XXX points.
-
-The script below shows how to analyze a single GWR.nc file.
-
-```python
-!#/usr/bin/env python
-
-from abipy.electrons.gwr import GwrFile
-gwr = GwrFile("tgwr_3o_GWR.nc")
-print(gwr)
-
-spin = 0
-kpoint = (0, 0, 0)
-df_dirgaps = gwr.get_dirgaps_dataframe()
-print(df_dirgaps)
-
-df = gwr.get_dataframe_sk(spin=spin, kpoint=kpoint)
-print(df)
-
-gwr.plot_sigma_imag_axis(kpoint=kpoint)
-
-gwr.plot_sigma_real_axis(kpoint=kpoint)
-
-gwr.plot_spectral_function(kpoint=kpoint)
-
-#gwr.plot_qps_vs_e0(with_fields="all")
-```
+To keep the wall-time at a reasonable level, we uses a WFK file with 2x2x2 $\kk$-mesh,
+but it is clear that a more accurate intepolation would require denser $\kk$-meshes.
