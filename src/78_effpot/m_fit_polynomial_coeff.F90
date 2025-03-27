@@ -325,11 +325,12 @@ contains
     end if
   end subroutine initialize_parameters
 
+
   subroutine deallocate_arrays()
     !Deallocation of arrays
     call fit_data_free(fit_data)
     !Deallocate the temporary coefficient
-    do ii=1,ncoeff_to_fit
+    do ii=1,size(coeffs_tmp)
       call polynomial_coeff_free(coeffs_tmp(ii))
     end do
     ABI_FREE(coeffs_tmp)
@@ -375,6 +376,14 @@ contains
     ABI_FREE(weights)
   end subroutine deallocate_arrays
 
+  !> Copy effective potential parameters to a fixed version
+  !>
+  !> If there are no imposed coefficients, copies the potential without coefficients.
+  !> If there are imposed coefficients, copies only those coefficients.
+  !> If nimposecoeff=-1, imposes all coefficients.
+  !>
+  !> Sets ncoeff_model based on number of anharmonic terms.
+  !> Validates that imposed coefficients are within valid range.
   subroutine copy_eff_pot_to_eff_pot_fixed()
     ! if there is no imposed coefficient, just copy the effpot without any coefficient.
     ! if impose, copy all the imposed coefficient.
@@ -398,6 +407,7 @@ contains
         ABI_ERROR(message)
       endif
       ABI_MALLOC(coeffs_tmp,(nimposecoeff))
+      ! Copy the imposed coefficients to coeffs_tmp, then set them in eff_pot_fixed
       do ia = 1,nimposecoeff
         ii = imposecoeff(ia)
         ! set imposed coefficient to coeff_tmp
@@ -411,6 +421,7 @@ contains
       call effective_potential_copy(eff_pot_fixed,eff_pot,comm)
       call effective_potential_freeCoeffs(eff_pot_fixed)
       call effective_potential_setCoeffs(coeffs_tmp,eff_pot_fixed,nimposecoeff)
+      ! set the eff_pot_fixed with coeffs_tmp with imposed coefficients
       !Deallocate coeffs tmp
       do ii = 1,nimposecoeff
         call polynomial_coeff_free(coeffs_tmp(ii))
@@ -426,6 +437,15 @@ contains
 
 
 
+  !> Combine fixed and imposed coefficients for consistency
+  !>
+  !> This routine:
+  !> - Checks for overlap between fixed and imposed coefficients
+  !> - Corrects the fixed coefficient list to avoid duplicates
+  !> - Handles special cases like nfixcoeff=-1
+  !> - Creates a mapping between original and corrected coefficient indices
+  !> - Sets up arrays for tracking fixed/imposed status
+  !> - Updates nfixcoeff_corr and ncopy_terms accordingly
   subroutine combine_fixcoeff_and_imposecoeff()
     !Set consistency between fixcoeff and imposecoeff.
     if ( nfixcoeff > 0 .and. nimposecoeff >0)then
@@ -511,6 +531,7 @@ contains
   end subroutine combine_fixcoeff_and_imposecoeff
 
 
+  !> Print the header message for starting the fitting process
   subroutine print_start_fitting()
     if(need_verbose) then
       write(message,'(a,(80a))') ch10,('-',ii=1,80)
@@ -525,6 +546,12 @@ contains
     end if
   end subroutine print_start_fitting
 
+  !> Map history data to supercell and set up cutoff parameters
+  !>
+  !> - Maps history data to supercell if sizes don't match
+  !> - Sets cutoff distance for interactions
+  !> - If cutoff is 0, uses default of cell diagonal/3
+  !> - Calculates supercell size based on cell dimensions
   subroutine map_hist_to_supercell()
     !if the number of atoms in reference supercell into effpot is not correct,
     !wrt to the number of atom in the hist, we set map the hist and set the good supercell
@@ -557,6 +584,17 @@ contains
     end do
   end subroutine map_hist_to_supercell
 
+  !> Generate or retrieve list of coefficients to be fitted
+  !>
+  !> This routine either:
+  !> - Uses coefficients present in the input effective potential, or
+  !> - Generates a new list of coefficients based on symmetries and cutoffs
+  !>
+  !> For each atom to fit:
+  !> - Generates coefficients within cutoff radius
+  !> - Handles special cases like fit_iatom=-2 (fit all atoms)
+  !> - Validates coefficient generation parameters
+  !> - Sets up coefficient arrays and counters
   subroutine generate_list_of_coefficients_to_fit()
     !Get the list of coefficients to fit:
     !get from the eff_pot type (from the input)
@@ -609,28 +647,51 @@ contains
           call wrtout(std_out,message,'COLL')
         end if  !need_verbose
 
+
+        ! DEBUG ncoeff_tot_tmp = 0
+        ! first print the input to the subroutine
+         print*, "cut off", cutoff
+         print*, "fit_iatom_in", fit_iatom_in
+         print*, "need_anharmstr", need_anharmstr
+         print*, "need_spcoupling", need_spcoupling
+         print*, "need_only_odd_power", need_only_odd_power
+         print*, "need_only_even_power", need_only_even_power
+         print*, "max_nbody", max_nbody
+         print*, "power_disps", power_disps
+         print*, "sc_size", sc_size
+         print*, "comm", comm
+         print*, "fit_iatom_all", fit_iatom_all
+         print*, "need_disp", need_disp
+         block 
+          integer max_nbody_tmp(20)
+          max_nbody_tmp(:) = 20
         call polynomial_coeff_getNorder(coeffs_iatom,eff_pot%crystal,cutoff,my_ncoeff,ncoeff_tot_tmp,power_disps,&
           &                                  max_power_strain_in,0,sc_size,comm,anharmstr=(ii==1 .and. need_anharmstr),&
           &                                  spcoupling=need_spcoupling,distributed=.true.,&
           &                                  only_odd_power=need_only_odd_power,&
           &                                  only_even_power=need_only_even_power,&
           &                                  fit_iatom=fit_iatom_in,dispterms=need_disp, &
-          &                                  max_nbody=max_nbody)
+          &                                  max_nbody=max_nbody_tmp)
+
+          end block
+          
         if (.not. fit_iatom_all) then
           call polynomial_coeff_list_free(coeffs_tmp)
           ncoeff_tot = ncoeff_tot_tmp
           ABI_MALLOC(coeffs_tmp,(my_ncoeff))
-          !FIXME: on on bot EOZ: the coeefs_tmp has larger size than coeffs_iatom.
+          !FIXME: on on bot EOZ: the coeffs_tmp has larger size than coeffs_iatom.
           ! This is a bug.
-          call coeffs_list_copy(coeffs_tmp,coeffs_iatom)
-          call polynomial_coeff_list_free(coeffs_iatom)
+          !if(allocated(coeffs_iatom)) then
+            call coeffs_list_copy(coeffs_tmp,coeffs_iatom)
+            call polynomial_coeff_list_free(coeffs_iatom)
+          !end if
         else
           ncoeff_tot = ncoeff_tot+ncoeff_tot_tmp
           if(.not.(allocated(coeffs_tmp))) then
             ABI_MALLOC(coeffs_tmp,(size(coeffs_iatom)))
             call coeffs_list_copy(coeffs_tmp,coeffs_iatom)
           else
-            call coeffs_list_conc_onsite(coeffs_tmp,coeffs_iatom)
+            if(allocated(coeffs_iatom)) call coeffs_list_conc_onsite(coeffs_tmp,coeffs_iatom)
           end if ! not allocate coeffs_tmp
           call polynomial_coeff_list_free(coeffs_iatom)
         end if  !fit_iatom/=-2
@@ -647,6 +708,17 @@ contains
     ABI_FREE(symbols)
   end subroutine generate_list_of_coefficients_to_fit
 
+   !> Check if a coefficient is a duplicate of any in the given list
+   !>
+   !> This function:
+   !> - Compares a coefficient against a list of existing coefficients
+   !> - Checks both direct and inverse term comparisons
+   !> - Returns true if a match is found, false otherwise
+   !>
+   !> @param coeff The coefficient to check
+   !> @param lcoeffs List of coefficients to compare against
+   !> @param ncoeff_to_compare Number of coefficients to compare
+   !> @return found True if duplicate found, false otherwise
    function is_duplicate_coeff(coeff, lcoeffs, ncoeff_to_compare) result(found)
      type(polynomial_coeff_type), intent(in):: coeff, lcoeffs(:)
      integer, intent(in) :: ncoeff_to_compare
@@ -665,6 +737,15 @@ contains
    end function is_duplicate_coeff
 
 
+  !> Read or write coefficients to XML file based on coeff_file_rw setting
+  !>
+  !> This routine:
+  !> - If coeff_file_rw=1: Writes generated coefficients to XML file
+  !> - If coeff_file_rw=2: Reads coefficients from XML file
+  !> - Redistributes coefficients across CPUs for parallel processing
+  !> - Updates coefficient counts and data structures accordingly
+  !>
+  !> Handles MPI distribution of coefficients when reading from file
   subroutine read_or_write_coeffs_to_xml()
     if(present(coeff_file_rw)) then
       if (coeff_file_rw==1 .and. generateterm_in == 1 ) then
@@ -715,6 +796,16 @@ contains
     end if
   end subroutine read_or_write_coeffs_to_xml
 
+  !> Distribute coefficients across CPUs for parallel processing
+  !>
+  !> This routine:
+  !> - Determines coefficient distribution across MPI ranks
+  !> - Creates mapping arrays for coefficient indexing
+  !> - Copies/initializes coefficients on each CPU
+  !> - Handles special case for CPU0 which gets input coefficients
+  !> - Sets up MPI communication patterns
+  !> - Updates global coefficient arrays and indexing
+  !> - Frees temporary storage after distribution
   subroutine assign_coeffs_to_cpu()
     !Get the list with the number of coeff on each CPU
     !In order to be abble to compute the my_coeffindexes array which is for example:
@@ -729,7 +820,6 @@ contains
     ABI_MALLOC(my_coefflist,(my_ncoeff))
     ABI_MALLOC(my_coeffs,(my_ncoeff))
     do icoeff=1,my_ncoeff
-
       jcoeff = icoeff
       my_coefflist(icoeff) = icoeff
 
@@ -751,6 +841,7 @@ contains
       else
         coeffs_in => coeffs_tmp
       end if
+      ! set the my_coeffs.
       call polynomial_coeff_init(zero,coeffs_in(jcoeff)%nterm,&
         &                             my_coeffs(icoeff),coeffs_in(jcoeff)%terms,&
         &                             coeffs_in(jcoeff)%name,&
@@ -782,6 +873,13 @@ contains
     endif
   end subroutine get_num_fixed_coeff
 
+  !> Check if ncoeff_in value is valid and adjust if needed
+  !>
+  !> This routine:
+  !> - Verifies ncoeff_in is not zero or larger than ncoeff_tot
+  !> - Displays warning if ncoeff_in needs adjustment
+  !> - Sets ncoeff_in to ncoeff_tot if invalid
+  !> - Handles special case when nfixcoeff_corr = -1
   subroutine check_sanity_ncoeff_in()
     !Check if ncycle_in is not zero or superior to ncoeff_tot
     if(need_verbose.and.(ncoeff_in > ncoeff_tot).or.(ncoeff_in<0.and.nfixcoeff_corr /= -1)) then
@@ -793,6 +891,13 @@ contains
       call wrtout(std_out,message,"COLL")
     end if
   end subroutine check_sanity_ncoeff_in
+  !> Initialize coefficient selection status arrays
+  !>
+  !> This routine:
+  !> - Allocates arrays to track coefficient status
+  !> - Initializes isselected array for tracking selected coefficients
+  !> - Initializes isbanned array for tracking banned coefficients
+  !> - Sets initial remaining coefficient count
   subroutine initialize_tags_for_coeffs()
     ! initialize isselected and isbanned
     ABI_MALLOC(isselected, (ncoeff_tot))
@@ -827,6 +932,15 @@ contains
 !      !end if
 !  end subroutine select_bounding_terms
 
+  !> Select and mark fixed coefficient terms
+  !>
+  !> This routine:
+  !> - Handles fixed coefficient selection based on nfixcoeff_corr
+  !> - For nfixcoeff_corr > 0: Selects specific fixed coefficients
+  !> - For nfixcoeff_corr = -1: Selects all coefficients up to ncoeff_model
+  !> - Updates isselected array to mark fixed terms
+  !> - Validates selection count matches expected number
+  !> - Uses MPI to synchronize selection across processes
   subroutine select_fix_terms()
     integer :: ico, ifix
     type(int_array_type) :: ind_fix
@@ -872,6 +986,15 @@ contains
 
 
 
+  !> Calculate number of preselected coefficients and handle banned terms
+  !>
+  !> This routine:
+  !> - Updates ncoeff_model and ncoeff_tot
+  !> - Initializes ncoeff_preselected counter
+  !> - Marks banned coefficients in isbanned array
+  !> - Handles special case when nfixcoeff_corr = -1
+  !> - Outputs informative messages about coefficient selection
+  !> - Synchronizes banned coefficient status across MPI processes
   subroutine get_ncoeff_preselected()
     !Use fixcoeff
     !ncoeff_preselected store the curent number of coefficient in the model
@@ -888,8 +1011,6 @@ contains
     if (nfixcoeff_corr == -1)then
       write(message, '(3a)')' nfixcoeff is set to -1, the coefficients present in the model',&
         &                        ' are imposed.',ch10
-      !ncoeff_preselected = ncoeff_preselected + ncoeff_model - nbound
-      ncoeff_preselected = ncoeff_preselected + nfix
     else
       if (nfixcoeff_corr > 0)then
         if(maxval(fixcoeff_corr(:)) > ncoeff_tot) then
@@ -899,7 +1020,6 @@ contains
             &        '     Start from scratch...',ch10,&
             &        ' ---',ch10
         else
-          ncoeff_preselected = ncoeff_preselected + nfix
           write(message, '(2a)')' Some coefficients are imposed from the input.',ch10
         end if
       else
@@ -908,21 +1028,49 @@ contains
       end if
     end if
 
+    ncoeff_preselected = ncoeff_preselected + nfix
+
     if(need_verbose) call wrtout(std_out,message,'COLL')
   end subroutine get_ncoeff_preselected
 
+  !> Calculate number of coefficients to select and fit
+  !>
+  !> This routine:
+  !> - Computes ncoeff_to_select based on ncoeff_in
+  !> - Computes ncoeff_to_fit by adding preselected coefficients
+  !> - Validates that total coefficients don't exceed maximum allowed
+  !> - Adjusts counts if needed and displays warnings
+  !> - Handles special case for option 2 (Monte Carlo mode)
+  !> - Updates ncoeff_to_select and ncoeff_to_fit accordingly
   subroutine get_ncoeff_to_select_and_ncoeff_to_fit()
     !Compute the number of cycle:
     ncoeff_to_select     = ncoeff_in
+    print *, "ncoeff_in", ncoeff_in
+    print *, "ncoeff_preselected", ncoeff_preselected
+    print *, "ncoeff_tot", ncoeff_tot
+    print *, "nimposecoeff", nimposecoeff
+    print *, "nfix", nfix
+    print *, "generateterm_in", generateterm_in
+    if (ncoeff_in + nimposecoeff + nfix > ncoeff_tot .and. generateterm_in==0) then
+      ncoeff_to_select = ncoeff_tot - nimposecoeff - nfix
+      write(message, '(4a,I0,2a,I0,2a,I0,3a)' )ch10,&
+        &      ' --- !WARNING',ch10,&
+        &      '     The number of cycle + the number of imposed coefficients: ',ncoeff_to_select,ch10,&
+        &      '     is superior to the maximum number of coefficients in the initial list: ',ncoeff_tot,ch10,&
+        &      '     The number of cycle is set to ',ncoeff_to_select,ch10,&
+        &      ' ---',ch10
+      if(need_verbose) call wrtout(std_out,message,'COLL')
+    end if
     !Compute the maximum number of cycle
-    ncoeff_to_fit = ncoeff_in + ncoeff_preselected
+    ncoeff_to_fit = ncoeff_to_select + ncoeff_preselected
 
 
     !Check if the number of request cycle + the initial number of coeff is superior to
     !the maximum number of coefficient allowed
-    if(ncoeff_to_fit > ncoeff_tot) then
-      ncoeff_to_select = ncoeff_tot - ncoeff_preselected
-      ncoeff_to_fit = ncoeff_tot
+    if(ncoeff_to_fit > ncoeff_tot .and. generateterm_in==0) then
+      ncoeff_to_select = ncoeff_tot - ncoeff_preselected -nimposecoeff
+      ncoeff_to_fit = ncoeff_tot-nimposecoeff
+
       write(message, '(4a,I0,2a,I0,2a,I0,3a)' )ch10,&
         &      ' --- !WARNING',ch10,&
         &      '     The number of cycle + the number of imposed coefficients: ',ncoeff_to_fit,ch10,&
@@ -934,8 +1082,21 @@ contains
       !  Always set to the maximum
       ncoeff_to_fit = ncoeff_tot
     end if
+
+    ! Debug the number of coefficients to fit
+
   end subroutine get_ncoeff_to_select_and_ncoeff_to_fit
 
+  !> Initialize parameters and arrays needed for coefficient fitting
+  !>
+  !> This routine:
+  !> - Sets up constants for fitting process (ntime, natom_sc, ncell, factor)
+  !> - Allocates arrays for energy, forces and stress coefficients
+  !> - Initializes list_coeffs array for tracking coefficients
+  !> - Handles fixed coefficients from previous selections
+  !> - Sets up data structures for decomposing forces and stresses
+  !> - Computes constants through fit_data_compute
+  !> - Initializes storage for fit results based on memory settings
   subroutine initialize_fitting_parameters_for_coefficients()
     !Initialisation of constants
     ntime    = hist%mxhist
@@ -1012,6 +1173,17 @@ contains
     end if
   end subroutine initialize_fitting_parameters_for_coefficients
 
+  !> Initialize goal function parameters and arrays
+  !>
+  !> This routine:
+  !> - Allocates arrays for tracking coefficients and goal function values
+  !> - Sets up MPI communication buffers and patterns
+  !> - Handles previously imposed coefficients from input
+  !> - Computes initial goal function values for fixed terms
+  !> - Initializes arrays for tracking coefficient values and statistics
+  !> - Sets up tracking of goal function values during iterations
+  !> - Prints initial goal function values if in verbose mode
+  !> - Synchronizes data across MPI processes
   subroutine initialize_gf()
     integer :: ipre, duplicated, ipre_real
     !Allocation of arrays
@@ -1033,6 +1205,7 @@ contains
     ABI_MALLOC(gf_mpi,(5,nproc))
     buffsize(:) = 0
     buffdisp(1) = 0
+
     do ii= 1,nproc
       buffsize(ii) =  5
     end do
@@ -1167,6 +1340,17 @@ contains
     gf_values_iter(:,1) = gf_values(:,1)
   end subroutine initialize_gf
 
+  !> Selects coefficients one by one based on goal function improvement
+  !>
+  !> This routine:
+  !> - Iteratively selects coefficients that minimize the goal function
+  !> - Handles coefficient selection in cycles with ncoeff_per_cycle terms per cycle
+  !> - Performs coefficient fitting and evaluation for each candidate
+  !> - Tracks selected coefficients and updates goal function values
+  !> - Applies convergence criteria based on goal function improvement
+  !> - Handles MPI parallelization for distributed coefficient selection
+  !> - Outputs progress information in verbose mode
+  !> - Maintains CSV log of goal function values if requested
   subroutine select_one_by_one()
     integer :: ncycle_select ! number of cycles for the selection
     integer :: ncoeff_this_cycle
@@ -1352,9 +1536,6 @@ contains
        end if
      end do
 
-     !print *, "DEBUG==================> ", "Gather best on each cpu finished."
-     !print *, "DEBUG==================> ", "index_min: ", index_min
-     !print *, "DEBUG==================> ", "my_ncoeff: ", my_ncoeff
 
 !    MPI GATHER THE BEST COEFF ON EACH CPU
      if(nproc > 1)then
@@ -1374,8 +1555,6 @@ contains
        end do
      end if
 
-     !print *, "DEBUG==================> ", "Gather best on each cpu finished2."
-     !print *, "DEBUG==================> ", "index_min: ", index_min
 
 
 
@@ -1394,14 +1573,7 @@ contains
          end if
          myorder(icoeff) = my_coeffindexes(icoeff)
        end do
-       !debug print myorder
-       !print *, "DEBUG==================> ", "size(myorder): ", size(myorder)
-       !print *, "DEBUG==================> ", "myorder: ", myorder
-       !print *, "DEBUG==================> ", "mygf: ", mygf
        call mpigatherv(mygf,myorder, my_ncoeff, allgf, allorder, ntot, comm, nproc)
-       ! debug allorder
-        !print *, "DEBUG==================> ", "size(allorder): ", size(allorder)
-        !print *, "DEBUG==================> ", "allorder: ", allorder
        BLOCK
          real(dp) :: allgf_copy(size(allgf))
          real(dp):: work((ntot+1)/2)
@@ -1441,12 +1613,6 @@ contains
            isbanned(allorder(i))=.True.
          end do
 
-         !do i=2, ncoeff_tot
-         !  if(abs(allgf(allorder(i))-allgf(allorder(i-1)))< 1e-16) then
-         !          print *, "allgf(allorder(i))", allgf(allorder(i))
-         !     isbanned(allorder(i))=.True.
-         !  end if
-         !end do
 
        end BLOCK
 
@@ -1459,28 +1625,22 @@ contains
          i=0
          do while(nselected_this_cycle<ncoeff_this_cycle)
            i=i+1
-           !do while( isbanned(allorder(i))  .or. isselected(allorder(i)))
-           !  i=i+1
-           !enddo
-           !    Check if there is still coefficient
            if(i>size(allorder))then
              exit
            end if
            index_min = allorder(i)
-
            if(index_min==0) then
              exit
 	   ! TODO : check if this is necessary
-           !else
            !else if(is_duplicate_coeff(index_min)) then
            !  cycle
            else if ( isbanned(allorder(i))  .or. isselected(allorder(i))) then
              cycle
            else
-             ind_select=ncoeff_selected+1
-             list_coeffs(ind_select) = index_min
-             isselected(index_min)=.True.
-             nselected_this_cycle=nselected_this_cycle+1
+            ind_select=ncoeff_selected+1
+            list_coeffs(ind_select) = index_min
+            isselected(index_min)=.True.
+            nselected_this_cycle=nselected_this_cycle+1
            end if
            !    Check if this coeff is treat by this cpu and fill the
            !    temporary array before broadcast
@@ -1503,13 +1663,14 @@ contains
                energy_coeffs_tmp(ind_select,:)    = energy_coeffs(my_icoeff,:)
                fcart_coeffs_tmp(:,:,ind_select,:) = fcart_coeffs(:,:,my_icoeff,:)
                strten_coeffs_tmp(:,:,ind_select)  = strten_coeffs(:,:,my_icoeff)
+
                call polynomial_coeff_free(coeffs_tmp(ind_select))
+
 
                call polynomial_coeff_init(coeff_values(ind_select),my_coeffs(icoeff)%nterm,&
                  &                                   coeffs_tmp(ind_select),my_coeffs(icoeff)%terms,&
                  &                                   my_coeffs(icoeff)%name,&
                  &                                   check=.false.)
-
                rank_to_send = my_rank
                exit
              end if
@@ -1608,6 +1769,18 @@ contains
   end subroutine select_one_by_one
 
 
+  !> Selects coefficients using Monte Carlo sampling approach
+  !>
+  !> This routine:
+  !> - Performs Monte Carlo sampling over coefficient combinations
+  !> - Runs for a fixed number of sweeps (default 10000)
+  !> - Randomly selects coefficients and evaluates goal function
+  !> - Keeps track of best coefficient combination found
+  !> - Handles MPI parallelization for distributed sampling
+  !> - Updates goal function values and coefficient statistics
+  !> - Transfers final model from best performing CPU
+  !> - Outputs progress and final results in verbose mode
+  !> - Optional validation of coefficient selection
   subroutine select_with_monte_carlo()
     !  Monte Carlo selection
     nsweep = 10000
@@ -1701,7 +1874,7 @@ contains
         buffGF(2:5,1) =  mingf(:)
         call xmpi_allgatherv(buffGF,5,gf_mpi,buffsize,buffdisp, comm, ierr)
         !      find the best coeff
-        mingf(:) = 9D99
+        mingf(:) = huge(0.0_dp)/5.0_dp
         index_min= 0
         do iproc=1,nproc
           if(gf_mpi(2,iproc) < zero) cycle
@@ -1747,6 +1920,17 @@ contains
 
  end subroutine select_with_monte_carlo
 
+ !> Fits all selected coefficients to find their optimal values
+ !>
+ !> This routine:
+ !> - Performs final fitting of all selected coefficients together
+ !> - Solves the complete linear system for all coefficients
+ !> - Updates coefficient values in the effective potential
+ !> - Computes final goal function values for the fit
+ !> - Handles weighted and unweighted goal function calculations
+ !> - Outputs detailed fitting results in verbose mode
+ !> - Updates the effective potential with fitted coefficients
+ !> - Optionally writes anharmonic terms to output files
  subroutine fit_all_selected_coefficients()
    !This routine solves the linear system proposed by
    ! C.Escorihuela-Sayalero see PRB95,094115(2017) [[cite:Escorihuela-Sayalero2017]]
@@ -1774,7 +1958,6 @@ contains
        call wrtout(ab_out,message,'COLL')
        call wrtout(std_out,message,'COLL')
      end if
-     print *, "DEBUG==================> ", "ncoeff_to_fit: ", ncoeff_to_fit
      do ii = 1,ncoeff_to_fit
        if(list_coeffs(ii) ==0) cycle
        !    Set the value of the coefficient
@@ -1845,10 +2028,7 @@ contains
 
 
      !Allocate output coeffs -> selected plus fixed ones
-     print *, "DEBUG==================> ", "ncoeff_to_fit: ", ncoeff_to_fit
-      print *, "DEBUG==================> ", "eff_pot_fixed%anharmonics_terms%ncoeff: ", eff_pot_fixed%anharmonics_terms%ncoeff
      ncoeff_out = ncoeff_to_fit+eff_pot_fixed%anharmonics_terms%ncoeff
-      print *, "DEBUG==================> ", "ncoeff_out: ", ncoeff_out
 
      ABI_MALLOC(coeffs_out,(ncoeff_out))
      do ii = 1,ncoeff_out
@@ -1860,7 +2040,6 @@ contains
            &                             check = .TRUE.)
        else
          ia = ii - eff_pot_fixed%anharmonics_terms%ncoeff
-
          call polynomial_coeff_init( &
             coeffs_tmp(ia)%coefficient, &  ! Coefficient value
             coeffs_tmp(ia)%nterm, &        ! Number of terms
@@ -1914,6 +2093,16 @@ contains
    end if
  end subroutine fit_all_selected_coefficients
 
+ !> Selects a single coefficient to include in the model
+ !>
+ !> This routine:
+ !> - Takes a coefficient index and marks it as selected
+ !> - Updates global selection status arrays
+ !> - Updates coefficient counts and remaining coefficient pool
+ !> - Handles MPI synchronization of selection status
+ !> - Updates list of selected coefficients
+ !>
+ !> @param ind Index of coefficient to select
  subroutine select_one_coeff(ind)
    ! Note ind is my_coeffindexes(icoeff)
    integer :: ind
@@ -1931,6 +2120,15 @@ contains
    list_coeffs(ncoeff_selected) = ind
  end subroutine select_one_coeff
 
+ !> Bans a coefficient from being selected in future iterations
+ !>
+ !> This routine:
+ !> - Marks a coefficient as banned in the global banned array
+ !> - Updates the count of remaining available coefficients
+ !> - Synchronizes banned status across MPI processes
+ !> - Only bans if coefficient wasn't already banned
+ !>
+ !> @param icoeff Index of coefficient to ban
  subroutine ban_one_term(icoeff)
    integer :: icoeff
    if (.not. isbanned(my_coeffindexes(icoeff))) then
@@ -2668,25 +2866,23 @@ end subroutine fit_polynomial_coeff_solve
 !!***
 
 
-!!****f* m_fit_polynomial_coeff/get_weight_from_hist
-!!
-!! NAME
-!! get_weight_from_hist
-!!
-!! FUNCTION
-!! Compute the weight for the hist
-!!
-!! INPUTS
-!! hist<type(abihist)> = The history of the MD (or snapshot of DFT
-!! temperature: a scalar, the temperature in K, which is a factor to tune how much the forces
-!!              are taken into account in the fit
-!! ntime: a scalar, the number of time steps
-!! natom: a scalar, the number of atoms
-!!
-!! OUTPUT
-!! weight(ntime) = the weight for each time step
-!!
-!! SOURCE
+
+!> Computes weights for history configurations based on forces and temperature
+!>
+!> This routine:
+!> - Calculates average force magnitudes for each configuration
+!> - Applies Boltzmann weighting based on input temperature
+!> - Uses atomic forces to determine configuration importance
+!> - Normalizes weights to sum to ntime
+!> - Outputs detailed statistics about forces and weights
+!> - Handles both temperature-dependent and uniform weighting
+!>
+!> @param hist Input history containing force data
+!> @param temperature Temperature in K for Boltzmann weighting
+!> @param ntime Number of timesteps in history
+!> @param natom Number of atoms in system
+!> @param weights Output array of weights for each configuration
+!> @param comm MPI communicator
 subroutine get_weight_from_hist(hist, temperature, ntime, natom, weights, comm)
   type(abihist), intent(in) :: hist
   !real(dp), intent(in) :: DFT_forces(3,natom,ntime)
@@ -2752,48 +2948,40 @@ endif
 
 
 end subroutine  get_weight_from_hist
-!!***
 
 
-!!****f* m_fit_polynomial_coeff/fit_polynomial_coeff_computeGF
-!!
-!! NAME
-!! fit_polynomial_coeff_computeGF
-!!
-!! FUNCTION
-!! Compute the values of the goal function (Mean squared error) for
-!!   gf_value(1) = stresses+forces (Ha/Bohr)**2
-!!   gf_value(2) = forces (Ha/Bohr)**2
-!!   gf_value(3) = stresses (Ha/Bohr)**2
-!!   gf_value(4) = energy (Ha)**2
-!!
-!! INPUTS
-!! coefficients(ncoeff)          = type(polynomial_coeff_type)
-!! energy_coeffs(ncoeff,ntime)   = value of the energy for each  coefficient (Ha)
-!! energy_diff(ntime) = Difference of energ ybetween DFT calculation and fixed part
-!!                             of the model (more often harmonic part)
-!!                             fixed part of the model (more often harmonic part)
-!! fcart_coeffs(ncoeff,3,natom,ntime) = value of the forces for each coefficient
-!!                                      (-1 factor is taking into acount) (Ha/Bohr)
-!! fcart_diff(3,natom,ntime) = Difference of cartesian forces between DFT calculation and
-!!                             fixed part of the model (more often harmonic part)
-!! list_coeffs(ncoeff_fit) = List with the indexes of the coefficients used for this model
-!! natom = Number of atoms
-!! ncoeff_fit = Number of coefficients fitted
-!! ncoeff_max = Maximum number of coeff in the list
-!! ntime = Number of time in the history
-!! weights(ntime) = weight for each time step
-!! strten_coeffs(ncoeff,3,natom,ntime)= value of the stresses for each coefficient
-!!                                      (1/ucvol factor is taking into acount) (Ha/Bohr^3)
-!! strten_diff(6,natom) = Difference of stress tensor between DFT calculation and
-!!                        fixed part of the model (more often harmonic part)
-!! sqomega =  Sheppard and al Factors \Omega^{2} see J.Chem Phys 136, 074103 (2012) [[cite:Sheppard2012]]
-!!
-!! OUTPUT
-!! gf_value(4) = Goal function
-!!
-!! SOURCE
 
+
+!> Computes goal function values comparing model predictions to reference data
+!>
+!> This routine calculates:
+!> - Forces + stresses combined goal function (gf_value(1))
+!> - Forces only goal function (gf_value(2))
+!> - Stresses only goal function (gf_value(3))
+!> - Energy goal function (gf_value(4))
+!>
+!> The calculations:
+!> - Use supplied coefficient values to evaluate model
+!> - Compare to reference energy/force/stress differences
+!> - Apply configuration weights if provided
+!> - Handle volume/supercell normalization
+!> - Support parallel evaluation across processes
+!>
+!> @param coefficients Model coefficient values
+!> @param energy_coeffs Energy terms for each coefficient
+!> @param energy_diff Reference energy differences
+!> @param fcart_coeffs Force terms for each coefficient
+!> @param fcart_diff Reference force differences
+!> @param gf_value Output goal function values
+!> @param list_coeffs List of coefficients to include
+!> @param natom Number of atoms
+!> @param ncoeff_fit Number of coefficients being fit
+!> @param ncoeff_max Maximum number of coefficients
+!> @param ntime Number of configurations
+!> @param strten_coeffs Stress terms for each coefficient
+!> @param strten_diff Reference stress differences
+!> @param sqomega Configuration weighting factors
+!> @param weights Optional weights for each configuration
 subroutine fit_polynomial_coeff_computeGF(coefficients,energy_coeffs,energy_diff,&
 &                                         fcart_coeffs,fcart_diff,gf_value,list_coeffs,&
 &                                         natom,ncoeff_fit,ncoeff_max,ntime,strten_coeffs,&
@@ -2877,39 +3065,33 @@ end subroutine fit_polynomial_coeff_computeGF
 !!***
 
 
-!!****f* m_fit_polynomial_coeff/fit_polynomial_coeff_getFS
-!!
-!! NAME
-!! fit_polynomial_coeff_getFS
-!!
-!! FUNCTION
-!! Compute all the matrix elements of eq.11 and 12 in PRB95,094115 (2017) [[cite:Escorihuela-Sayalero2017]]
-!!
-!! INPUTS
-!! coefficients(ncoeff)          = type(polynomial_coeff_type)
-!! du_delta(6,3,natom_sc,ntime)  = Variation to displacements wrt to the strain (Bohr)
-!! displacement(3,natom_sc,ntime)= Atomic displacement wrt to the reference (Bohr)
-!! natom_sc = Number of atoms in the supercell
-!! natom_uc = Number of atoms in the unit cell
-!! ncoeff = Number of coefficients
-!! ntime = Number of time in the history
-!! sc_size(3) = Size of the supercell
-!! strain(6,ntime) = Strain
-!! ucvol(ntime) = Volume of the supercell for each time (Bohr^3)
-!! cells(ncell) = Indexes of the cell treat by this CPU
-!! ncell = Number of cell treat by this CPU
-!! index_cells(ncell,3) = Indexes of the cells (1 1 1, 0 0 0 for instance) treat by this CPU
-!! comm  = MPI communicator
-!!
-!! OUTPUT
-!! fcart_out(ncoeff,3,natom,ntime) = value of the forces for each coefficient
-!!                                   (-1 factor is taking into acount) (Ha/Bohr)
-!! strten_out(ncoeff,3,natom,ntime)= value of the stresses for each coefficient
-!!                                   (-1/ucvol factor is taking into acount) (Ha/Bohr^3)
-!! energy_out(ncoeff,ntime)        = value of the energy for each  coefficient (Ha)
-!!
-!! SOURCE
-
+!> Computes force and stress contributions for all polynomial coefficients
+!>
+!> This routine:
+!> - Evaluates energy, force and stress terms for each coefficient
+!> - Handles displacement-displacement and displacement-strain couplings
+!> - Applies periodic boundary conditions for supercell calculations
+!> - Computes derivatives needed for force and stress evaluations
+!> - Includes strain-dependent volume corrections
+!> - Supports parallel evaluation across processes
+!>
+!> Based on equations 11 & 12 in PRB95,094115 (2017) [[cite:Escorihuela-Sayalero2017]]
+!>
+!> @param coefficients Input polynomial coefficients
+!> @param du_delta Changes in displacements due to strain
+!> @param displacement Atomic displacements
+!> @param energy_out Output energy terms for each coefficient
+!> @param fcart_out Output force terms for each coefficient
+!> @param natom_sc Number of atoms in supercell
+!> @param natom_uc Number of atoms in unit cell
+!> @param ncoeff_max Maximum number of coefficients
+!> @param ntime Number of configurations
+!> @param sc_size Supercell dimensions
+!> @param strain Strain values
+!> @param strten_out Output stress terms for each coefficient
+!> @param ucvol Unit cell volumes
+!> @param coeffs List of coefficients to evaluate
+!> @param ncoeff Number of coefficients to evaluate
 subroutine fit_polynomial_coeff_getFS(coefficients,du_delta,displacement,energy_out,fcart_out,&
 &                                     natom_sc,natom_uc,ncoeff_max,ntime,sc_size,strain,strten_out,&
 &                                     ucvol,coeffs,ncoeff)
@@ -3167,35 +3349,36 @@ subroutine fit_polynomial_coeff_getFS(coefficients,du_delta,displacement,energy_
  end do
 
 end subroutine fit_polynomial_coeff_getFS
-!!***
 
 
-!!****f* m_fit_polynomial_coeff/fit_polynomial_coeff_computeMSD
-!!
-!! NAME
-!! fit_polynomial_coeff_computeMSD
-!!
-!! FUNCTION
-!! Compute the Mean square error of the energy, forces and stresses
-!!
-!! INPUTS
-!! eff_pot<type(effective_potential)> = effective potential
-!! hist<type(abihist)> = The history of the MD
-!! natom = number of atom
-!! ntime = number of time in the hist
-!! sqomega =  Sheppard and al Factors \Omega^{2} see J.Chem Phys 136, 074103 (2012) [[cite:Sheppard2012]]
-!! compute_anharmonic = TRUE if the anharmonic part of the effective potential
-!!                           has to be taking into acount
-!! print_file = if True, a ASCII file with the difference in energy will be print
-!! weights(ntime) = weight for each time step
-!!
-!! OUTPUT
-!! mse  =  Mean square error of the energy   (Hatree)
-!! msef =  Mean square error of the forces   (Hatree/Bohr)**2
-!! mses =  Mean square error of the stresses (Hatree/Bohr)**2
-!!
-!! SOURCE
 
+
+
+!> Computes mean squared deviations between model and reference data
+!>
+!> This routine:
+!> - Evaluates the effective potential for all configurations
+!> - Computes energy, force and stress differences vs reference
+!> - Calculates weighted mean squared deviations
+!> - Handles optional printing of detailed comparisons
+!> - Supports electronic model evaluations if requested
+!> - Can output phonon-specific analysis data
+!>
+!> @param eff_pot Effective potential to evaluate
+!> @param hist Reference history with DFT data
+!> @param mse Output mean squared error for energies
+!> @param msef Output mean squared error for forces
+!> @param mses Output mean squared error for stresses
+!> @param natom Number of atoms in system
+!> @param ntime Number of configurations
+!> @param sqomega Sheppard-like weighting factors
+!> @param comm MPI communicator
+!> @param compute_anharmonic Flag to include anharmonic terms
+!> @param print_file Flag to print detailed comparison files
+!> @param filename Base name for output files
+!> @param scup_dtset Optional SCUP dataset parameters
+!> @param prt_ph Flag to print phonon analysis
+!> @param weights Optional weights for each configuration
 subroutine fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,natom,ntime,sqomega,comm,&
 &                                          compute_anharmonic,print_file,filename,scup_dtset,&
 &                                          prt_ph, weights)
@@ -3390,7 +3573,8 @@ integer :: ii,ia,mu,unit_energy,unit_stress,itime,master,nproc,my_rank,i
  call abihist_free(hist_out)
 
 end subroutine fit_polynomial_coeff_computeMSD
-!!***
+
+
 
 !MARCUS_EXPERIMENTAL_SECTION
 !!****f* m_fit_polynomiaL_coeff/testEffPot
@@ -3412,7 +3596,6 @@ end subroutine fit_polynomial_coeff_computeMSD
 !! OUTPUT
 !!
 !! SOURCE
-
 subroutine fit_polynomial_coeff_testEffPot(eff_pot,hist,master,comm,print_anharmonic,scup_dtset,prt_ph)
 
 
@@ -3517,26 +3700,24 @@ subroutine fit_polynomial_coeff_testEffPot(eff_pot,hist,master,comm,print_anharm
 end subroutine fit_polynomial_coeff_testEffPot
 !!***
 
-!!      m_fit_polynomial_coeff,multibinit
-!!      generelist,polynomial_coeff_free,polynomial_coeff_getname
-!!      polynomial_coeff_init,polynomial_term_free,polynomial_term_init,wrtout
 
-!!****f* m_fit_polynomial_coeff/fit_polynomial_printSystemFiles
-!!
-!! NAME
-!! fit_polynomial_printSystemFiles
-!!
-!! FUNCTION
-!! Print the files for the fitting script
-!!
-!! INPUTS
-!! eff_pot<type(effective_potential)> = effective potential
-!! hist<type(abihist)> = datatype with the  history of the MD
-!!
-!! OUTPUT
-!!
-!! SOURCE
 
+!> Prints system files needed for external fitting scripts
+!>
+!> This routine writes:
+!> - Born effective charges
+!> - Dielectric tensor
+!> - Reference structure and energy
+!> - Harmonic force constants in XML format
+!> - Strain tensors
+!> - Symmetry operations
+!> - Molecular dynamics trajectory data
+!>
+!> The files are organized in a standard format expected by external fitting tools.
+!> Special care is taken to properly order atoms and handle supercell transformations.
+!>
+!> @param eff_pot Effective potential containing system parameters
+!> @param hist History containing MD trajectory data
 subroutine fit_polynomial_printSystemFiles(eff_pot,hist)
 
  implicit none
@@ -3744,8 +3925,24 @@ subroutine fit_polynomial_printSystemFiles(eff_pot,hist)
  call supercell%free()
 
 end subroutine fit_polynomial_printSystemFiles
-!!***
 
+
+!> Recursively generates combinations of numbers with specific conditions
+!>
+!> This routine:
+!> - Generates combinations of numbers from 1 to n_max of length m_max
+!> - Ensures each number in a combination is greater than previous one
+!> - Can either count combinations or store them based on compute flag
+!> - Uses recursive approach to build combinations
+!>
+!> @param i Current index/counter for output combinations
+!> @param m Current position in combination being built
+!> @param m_max Maximum length of combinations
+!> @param n_max Maximum number to use in combinations
+!> @param list Working array for current combination
+!> @param list_out Output array for storing combinations
+!> @param size Size of output array
+!> @param compute Whether to store combinations or just count them
 recursive subroutine genereList(i,m,m_max,n_max,list,list_out,size,compute)
 
  implicit none
@@ -3781,8 +3978,25 @@ recursive subroutine genereList(i,m,m_max,n_max,list,list_out,size,compute)
 end subroutine genereList
 !!***
 
+!> Gathers arrays from all MPI processes with varying lengths
+!>
+!> This routine:
+!> - Gathers real values and their corresponding ordering indices
+!> - Handles arrays of different sizes from different processes
+!> - Allocates output buffers based on total gathered size
+!> - Sets up displacement arrays for MPI communication
+!> - Performs AllGatherv for both values and indices
+!>
+!> @param A Input array of values from this process
+!> @param order Input array of indices from this process
+!> @param n Size of input arrays from this process
+!> @param buff_A Output buffer for gathered values
+!> @param buff_order Output buffer for gathered indices
+!> @param totsize Total size across all processes
+!> @param comm MPI communicator
+!> @param nproc Number of MPI processes
 subroutine mpigatherv(A, order, n ,buff_A, buff_order, totsize, comm, nproc)
-  integer, intent(inout) :: n, totsize
+   integer, intent(inout) :: n, totsize
   real(dp),  intent(inout) ::  A(n)
   integer, intent(inout):: order(n)
   integer, intent(in) :: comm, nproc

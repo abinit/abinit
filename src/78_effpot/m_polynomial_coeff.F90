@@ -247,6 +247,14 @@ subroutine polynomial_coeff_init(coefficient,nterm,polynomial_coeff,terms,name, 
  check_in = .false.
  if(present(check)) check_in = check
 
+ !if(nterm==0)then
+ ! polynomial_coeff%name = ""
+ ! polynomial_coeff%nterm = 0
+ ! polynomial_coeff%coefficient = 0.0
+ ! ABI_MALLOC(polynomial_coeff%terms,(0))
+ ! return
+ !end if
+
 
  if(check_in)then
 !  Check if the list of term is available or contains identical terms
@@ -271,24 +279,16 @@ subroutine polynomial_coeff_init(coefficient,nterm,polynomial_coeff,terms,name, 
 
 
 !  Count the number of terms
-   ! TODO: replace by: ??
    nterm_tmp=count(abs(weights) > tol16)
-   !nterm_tmp = 0
-   !do iterm1=1,nterm
-   !  if(abs(weights(iterm1)) > tol16)then
-   !    nterm_tmp = nterm_tmp + 1
-   !  end if
-   !end do
-
    if (nterm_tmp ==0)then
      coefficient_tmp = 0.0
    else
      coefficient_tmp = coefficient
    end if
-
  else
    nterm_tmp = nterm
    coefficient_tmp = coefficient
+   print *, "size of weights", size(weights) , "nterm", nterm, "size of terms", size(terms)
    weights(:) = terms(:)%weight
  end if!end Check
 
@@ -297,9 +297,6 @@ subroutine polynomial_coeff_init(coefficient,nterm,polynomial_coeff,terms,name, 
  else
    name_tmp = ""
  end if
-
-
-
 
 !Initilisation
  polynomial_coeff%name = name_tmp
@@ -2547,6 +2544,7 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
        block
          type(IrreducibleCombinations_T) :: irred_combinations
          call irred_combinations%init()
+         print *, "my_nirred", my_nirred
          do i=1,my_nirred
            associate(comb => my_list_combination_tmp(:, i))
              !ABI_MALLOC(dummylist,(0))
@@ -2562,13 +2560,19 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
              enddo
              compute_sym = .true.
              iterm = my_index_irredcomb(i)-1
+             print *, "power_disps(:)", power_disps(:)
+             print *, "ndisp, nstrain", ndisp, nstrain
+             print *, "comb", comb
+             print *, "ncoeff_symsym", ncoeff_symsym
+             print *, "nsym", nsym
+             print *, "nstr_sym", nstr_sym
+
              call computeSymmetricCombinations(my_array_combination,list_symcoeff,list_symstr,ndisp,nsym,&
                &                                        comb(:ndisp+nstrain),power_disps(2),&
                &                                        ncoeff_symsym,nstr_sym,nstrain, &
                &                                        compatibleCoeffs,compute_sym,comm, &
                &                                        only_even=need_only_even_power, max_nbody=max_nbody, &
                &                                        irred_combinations=irred_combinations, cell=cell)
-
            end associate
          enddo
          call irred_combinations%free()
@@ -2608,13 +2612,13 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
        do i = 1,nproc
          buffsize(i) = irank_ncombi(i)*power_disps(2)
        enddo
+
        call xmpi_gatherv(my_list_combination,size(my_list_combination),list_combination_tmp,buffsize,offsets,master,comm,ierr)
 
 
        !Deallocation of variables inside need_symmetric
        ABI_FREE(buffsize)
        ABI_FREE(my_list_combination)
-
        ABI_FREE(my_index_irredcomb)
        ABI_FREE(irank_ncombi)
        ABI_FREE(offsets)
