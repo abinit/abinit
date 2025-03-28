@@ -783,6 +783,46 @@ subroutine gpu_set_to_zero(array, sizea)
 end subroutine gpu_set_to_zero
 !!***
 
+!!****f* m_abi_gpu_linalg/gpu_set_to_zero_complex
+!! NAME
+!!  gpu_set_to_zero_complex
+!!
+!! FUNCTION
+!!  Set array content to zero
+!!
+!! INPUTS
+!!  size = size of array
+!!
+!! OUTPUT
+!!  array  = array to be set to zero
+!!
+!! SOURCE
+subroutine gpu_set_to_zero_complex(array, sizea)
+ use, intrinsic :: iso_c_binding
+ integer(c_size_t),intent(in)  :: sizea
+ complex(dpc),target,intent(out) :: array(sizea)
+
+! *********************************************************************
+
+#if defined HAVE_OPENMP_OFFLOAD
+ integer(c_size_t)  :: i
+
+#if defined HAVE_GPU_CUDA
+ !$OMP TARGET DATA USE_DEVICE_PTR(array)
+ call gpu_memset(c_loc(array), 0, sizea*dpc*2)
+ !$OMP END TARGET DATA
+#elif defined HAVE_GPU_HIP
+ !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(i) MAP(to:array)
+ do i=1,sizea
+   array(i)=czero
+ end do
+#endif
+
+#endif
+
+end subroutine gpu_set_to_zero_complex
+!!***
+
 !------------------------------------------------------------------------------
 !                         gpu_copy
 !------------------------------------------------------------------------------
@@ -829,6 +869,51 @@ subroutine gpu_copy(dest, src, sizea)
 #endif
 
 end subroutine gpu_copy
+!!***
+
+!!****f* m_abi_gpu_linalg/gpu_copy_complex
+!! NAME
+!!  gpu_copy_complex
+!!
+!! FUNCTION
+!!  Copy array content on GPU to another
+!!
+!! INPUTS
+!!  src  = array to be copied
+!!  size = size of src and dest
+!!
+!! OUTPUT
+!!  dest = array to be set
+!!
+!! SOURCE
+subroutine gpu_copy_complex(dest, src, sizea)
+ use, intrinsic :: iso_c_binding
+ integer(c_size_t),intent(in)  :: sizea
+ complex(dpc),target,intent(in)  :: src(sizea)
+ complex(dpc),target,intent(out) :: dest(sizea)
+
+! *********************************************************************
+
+#if defined HAVE_OPENMP_OFFLOAD
+ integer(c_size_t)  :: i
+
+#if defined HAVE_GPU_CUDA
+ !$OMP TARGET DATA USE_DEVICE_PTR(dest,src)
+ call copy_gpu_to_gpu(c_loc(dest), c_loc(src), sizea*dpc*2)
+ !$OMP END TARGET DATA
+#elif defined HAVE_GPU_HIP
+ !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(i) MAP(to:src,dest)
+ do i=1,sizea
+   dest(i)=src(i)
+ end do
+#endif
+
+#else
+ ! Make testfarm happy
+ ABI_UNUSED((/src,dest/))
+#endif
+
+end subroutine gpu_copy_complex
 !!***
 
 !------------------------------------------------------------------------------
@@ -1090,31 +1175,43 @@ end subroutine abi_gpu_xgemm_2z
 !!
 !! SOURCE
 
-subroutine abi_gpu_xgemm_strided_cptr(cplx,transa,transb,m,n,k,alpha,a,lda,strideA,b,ldb,strideB,beta,c,ldc,strideC,batchCount)
+subroutine abi_gpu_xgemm_strided_cptr(cplx,transa,transb,m,n,k,alpha,&
+    a,lda,strideA,b,ldb,strideB,beta,c,ldc,strideC,batchCount,async,stream_id)
 
 !Arguments ------------------------------------
  integer,intent(in) :: cplx,lda,ldb,ldc,m,n,k
  integer,intent(in) :: strideA,strideB,strideC,batchCount
+ logical,intent(in),optional :: async
+ integer,intent(in),optional :: stream_id
  complex(dpc),intent(in) :: alpha,beta
  character(len=1),intent(in) :: transa,transb
  type(c_ptr),intent(in) :: a,b
  type(c_ptr),intent(in) :: c
-
+!Locals ---------------------------------------
+ logical :: async_
+ integer :: stream_id_
 ! *********************************************************************
 
   if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
     ABI_BUG("You requested to run on CPU to a GPU wrapper :/")
   end if
+  async_=.false.
+  if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) async_=.false.
+  ! CUDA/HIP linalg calls are run asynchronously and OpenMP is unaware of them.
+  ! Therefore, we issue a stream sync here to avoid
+  ! potential mistakes in calling context.
+  if(present(async)) async_=async
+  stream_id_=-1;
+  if(present(stream_id)) then
+    stream_id_=modulo(stream_id,32);
+    async_=.true.
+  end if
 
 #ifdef HAVE_GPU
+    call gpu_xgemm_strided_batched(cplx,transa,transb,m,n,k,alpha,&
+        a,lda,strideA,b,ldb,strideB,beta,c,ldc,strideC,batchCount,stream_id_)
 
-  call gpu_xgemm_strided_batched(cplx,transa,transb,m,n,k,alpha,&
-      a,lda,strideA,b,ldb,strideB,beta,c,ldc,strideC,batchCount)
-
-  if (abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
-    ! CUDA/HIP linalg calls are run asynchronously and OpenMP is unaware of them.
-    ! Therefore, we issue a stream sync here to avoid
-    !potential mistakes in calling context.
+  if (.not. async_) then
     call gpu_linalg_stream_synchronize()
   end if
 
@@ -2559,6 +2656,7 @@ subroutine abi_gpu_work_resizeI(array,array_managed,current_dim,asked_dim)
 end subroutine abi_gpu_work_resizeI
 !!***
 
+
 !!****f* m_abi_gpu_linalg/abi_gpu_work_resizeR
 !!
 !! NAME
@@ -2612,6 +2710,7 @@ subroutine abi_gpu_work_resizeR(array,array_managed,current_dim,asked_dim)
 
 end subroutine abi_gpu_work_resizeR
 !!***
+
 
 !!****f* m_abi_gpu_linalg/abi_gpu_work_resizeC
 !!

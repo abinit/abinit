@@ -19,6 +19,9 @@
 
 #include "abi_common.h"
 
+! nvtx related macro definition
+#include "nvtx_macros.h"
+
  MODULE m_green
 
  use defs_basis
@@ -26,9 +29,15 @@
  use m_errors
 
  use m_matlu, only : matlu_type
- use m_oper, only : destroy_oper,init_oper,oper_type
+ use m_oper, only : destroy_oper,init_oper,init_oper_ndat,copy_oper_from_ndat,copy_oper_to_ndat,oper_type
  use m_paw_dmft, only : mpi_distrib_dmft_type,paw_dmft_type
  use m_self, only : self_type
+ use m_abi_linalg
+ use, intrinsic :: iso_c_binding, only: c_size_t
+
+#ifdef HAVE_GPU_MARKERS
+ use m_nvtx_data
+#endif
 
  implicit none
 
@@ -952,6 +961,342 @@ subroutine print_green(char1,green,option,paw_dmft,opt_wt,opt_decim)
 end subroutine print_green
 !!***
 
+!!****f* m_green/compute_green_batched_core
+!! NAME
+!! compute_green_batched_core
+!!
+!! FUNCTION
+!! Variant for core loop of compute green function, useful for computation on GPU
+!!
+!! INPUTS
+!!  green  <type(green_type)>= green function data
+!!  paw_dmft  <type(paw_dmft_type)>= paw+dmft related data
+!!  prtopt : option for printing
+!!  self <type(self_type)>= variables related to self-energy
+!!  opt_self = optional argument, if =1, upfold self-energy
+!!  opt_log = if 1, compute Tr(log(G))
+!!
+!! OUTPUT
+!!
+!! SOURCE
+subroutine compute_green_batched_core(green,paw_dmft,self,optself,optlog)
+
+ use m_abi_linalg, only : abi_xgemm
+ use m_matlu, only : add_matlu,sym_matlu
+ use m_oper, only : downfold_oper,inverse_oper,upfold_oper
+ use m_time, only : timab
+
+!Arguments ------------------------------------
+ type(green_type), target, intent(inout) :: green
+ type(paw_dmft_type), target, intent(in) :: paw_dmft
+ type(self_type), intent(inout) :: self
+ integer, intent(in) :: optlog,optself
+!Local variables-------------------------------
+ logical :: oper_ndat_allocated
+ integer :: diag,ib,ib1,ifreq,ikpt,info,isppol,lwork,mbandc,ifreq_beg,ifreq_end,idat
+ integer :: me_kpt,mkmem,myproc,natom,nkpt,nmoments,nspinor,nsppol,gpu_option,ndat
+ integer :: option,shift,shift_green,spacecomm,optoper_ksloc
+ real(dp) :: fermilevel,wtk,temp
+ complex(dpc) :: green_tmp,trace_tmp
+ real(dp), allocatable :: eig(:),rwork(:),fac(:)
+ complex(dpc), allocatable :: mat_tmp(:,:),work(:),omega_current(:)
+ type(oper_type), target :: green_oper_ndat
+ real(dp), ABI_CONTIGUOUS pointer :: eigen_dft(:,:,:)
+ complex(dpc), ABI_CONTIGUOUS pointer :: ks(:,:,:,:),occup_ks(:,:,:,:)
+! *********************************************************************
+
+ ABI_NVTX_START_RANGE(NVTX_DMFT_COMPUTE_GREEN_BATCHED)
+
+ diag = 1 - optself
+
+! Initialise spaceComm, myproc, and nproc
+ me_kpt = green%distrib%me_kpt
+ myproc = paw_dmft%myproc
+ spacecomm = paw_dmft%spacecomm
+ oper_ndat_allocated = .false.
+
+! Initialise integers
+ mbandc  = paw_dmft%mbandc
+ natom   = paw_dmft%natom
+ nkpt    = paw_dmft%nkpt
+ nspinor = paw_dmft%nspinor
+ nsppol  = paw_dmft%nsppol
+ temp    = paw_dmft%temp
+ gpu_option = paw_dmft%gpu_option
+
+ if (optlog == 1) then
+   ABI_MALLOC(eig,(mbandc))
+   ABI_MALLOC(work,(2*mbandc-1))
+   ABI_MALLOC(rwork,(3*mbandc-2))
+   ABI_MALLOC(mat_tmp,(mbandc,mbandc))
+   call zheev("n","u",mbandc,mat_tmp(:,:),mbandc,eig(:),work(:),-1,rwork(:),info)
+   lwork = int(work(1))
+   ABI_FREE(work)
+   ABI_MALLOC(work,(lwork))
+   green%trace_log = zero
+ end if ! optlog=1
+
+ fermilevel = paw_dmft%fermie
+
+ ! option for downfold_oper
+ option = 1
+ if (diag == 1) option = 3
+
+! ================================
+! == Compute Green function G(k)
+! ================================
+ green%occup%ks(:,:,:,:) = czero
+
+ nmoments = 1
+ if (green%has_moments == 1) then
+   nmoments = green%nmoments
+ end if ! moments
+
+ shift = green%distrib%shiftk
+ mkmem = green%distrib%nkpt_mem(green%distrib%me_kpt+1)
+ shift_green = shift
+ ndat = green%distrib%nw_mem_kptparal(green%distrib%me_freq+1)
+ if (green%oper(1)%has_operks == 0) shift_green = 0
+
+ if(green%oper(1)%has_opermatlu==0) optoper_ksloc=1
+ if(green%oper(1)%has_opermatlu==1) optoper_ksloc=3
+
+ do ifreq=1,green%nw
+   if (green%distrib%proct(ifreq) == green%distrib%me_freq) then
+     ifreq_beg = ifreq; ifreq_end = ifreq_beg + ndat - 1
+     exit
+   end if
+ end do
+
+ ABI_MALLOC(omega_current,(green%nw))
+ ABI_MALLOC(fac,(green%nw))
+! Initialise for compiler
+ omega_current = czero
+ do ifreq=1,green%nw
+   !if(present(iii)) write(6,*) ch10,'ifreq  self', ifreq,self%oper(ifreq)%matlu(1)%mat(1,1,1,1,1)
+!   ====================================================
+!   First Upfold self-energy and double counting  Self_imp -> self(k)
+!   ====================================================
+!   if(mod(ifreq-1,nproc)==myproc) then
+!    write(6,*) "compute_green ifreq",ifreq, mod(ifreq-1,nproc)==myproc,proct(ifreq,myproc)==1
+   if (green%distrib%proct(ifreq) /= green%distrib%me_freq) cycle
+   if (green%w_type == "imag") then
+     omega_current(ifreq) = cmplx(zero,green%omega(ifreq),kind=dp)
+     fac(ifreq) = two * paw_dmft%wgt_wlo(ifreq) * paw_dmft%temp
+   else if (green%w_type == "real") then
+     omega_current(ifreq) = cmplx(green%omega(ifreq),paw_dmft%temp,kind=dp)
+   end if ! green%w_type
+
+   if (green%oper(ifreq)%has_operks == 0) then
+     ABI_MALLOC(green%oper(ifreq)%ks,(mbandc,mbandc,mkmem,nsppol))
+     green%oper(ifreq)%nkpt   = mkmem
+     green%oper(ifreq)%paral  = 1
+     green%oper(ifreq)%shiftk = shift
+   end if
+   if(.not. oper_ndat_allocated) then
+     call init_oper_ndat(paw_dmft,green_oper_ndat,ndat,nkpt=green%oper(ifreq)%nkpt,opt_ksloc=optoper_ksloc,gpu_option=gpu_option)
+     if (green%oper(ifreq)%has_operks == 0) then
+       green_oper_ndat%paral  = 1
+       green_oper_ndat%shiftk = shift
+     end if
+     oper_ndat_allocated=.true.
+   end if
+ end do ! ifreq
+
+ if (optself == 0) then
+   if(green_oper_ndat%gpu_option==ABI_GPU_DISABLED) then
+     green_oper_ndat%ks(:,:,:,:) = czero
+   else if(green_oper_ndat%gpu_option==ABI_GPU_OPENMP) then
+     call gpu_set_to_zero_complex(green_oper_ndat%ks, int(nsppol,c_size_t)*ndat*mbandc*mbandc*mkmem)
+   end if
+   call copy_oper_to_ndat(green%oper,green_oper_ndat,ndat,green%nw,green%distrib%proct,green%distrib%me_freq,.false.)
+ else
+   do ifreq=ifreq_beg,ifreq_end
+     call add_matlu(self%hdc%matlu(:),self%oper(ifreq)%matlu(:),green%oper(ifreq)%matlu(:),natom,-1)
+   end do
+   call copy_oper_to_ndat(green%oper,green_oper_ndat,ndat,green%nw,green%distrib%proct,green%distrib%me_freq,.false.)
+   call upfold_oper(green_oper_ndat,paw_dmft,procb=green%distrib%procb(:),iproc=me_kpt,gpu_option=gpu_option)
+ end if ! optself
+
+ ks => green_oper_ndat%ks
+ eigen_dft => paw_dmft%eigen_dft
+ if(gpu_option==ABI_GPU_DISABLED) then
+   do ifreq=ifreq_beg,ifreq_end
+     do isppol=1,nsppol
+       do ikpt=1,mkmem
+         do ib=1,mbandc
+           idat=ifreq-(ifreq_end-ndat)
+           green_tmp = omega_current(ifreq) + fermilevel - eigen_dft(ib,ikpt+shift,isppol)
+           if (optself == 0) then
+             ks(ib,ib+(idat-1)*mbandc,ikpt+shift_green,isppol) = cone / green_tmp
+           else
+             ks(ib,ib+(idat-1)*mbandc,ikpt+shift_green,isppol) = &
+                 & ks(ib,ib+(idat-1)*mbandc,ikpt+shift_green,isppol) + green_tmp
+           end if
+         end do ! ib
+       end do ! ikpt
+     end do ! isppol
+   end do ! ifreq
+ else if(gpu_option==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+   if (optself == 0) then
+     !$OMP TARGET TEAMS DISTRIBUTE MAP(to:ks,eigen_dft) PRIVATE(ifreq,idat)
+     do ifreq=ifreq_beg,ifreq_end
+       idat=ifreq-(ifreq_end-ndat)
+       !$OMP PARALLEL DO COLLAPSE(3) PRIVATE(isppol,ikpt,ib,green_tmp)
+       do isppol=1,nsppol
+         do ikpt=1,mkmem
+           do ib=1,mbandc
+             green_tmp = omega_current(ifreq) + fermilevel - eigen_dft(ib,ikpt+shift,isppol)
+             ks(ib,ib+(idat-1)*mbandc,ikpt+shift_green,isppol) = cone / green_tmp
+           end do ! ib
+         end do ! ikpt
+       end do ! isppol
+     end do ! ifreq
+   else
+     !$OMP TARGET TEAMS DISTRIBUTE MAP(to:ks,eigen_dft) PRIVATE(ifreq,idat)
+     do ifreq=ifreq_beg,ifreq_end
+       idat=ifreq-(ifreq_end-ndat)
+       !$OMP PARALLEL DO COLLAPSE(3) PRIVATE(isppol,ikpt,ib,green_tmp)
+       do isppol=1,nsppol
+         do ikpt=1,mkmem
+           do ib=1,mbandc
+             green_tmp = omega_current(ifreq) + fermilevel - eigen_dft(ib,ikpt+shift,isppol)
+             ks(ib,ib+(idat-1)*mbandc,ikpt+shift_green,isppol) = &
+                 & ks(ib,ib+(idat-1)*mbandc,ikpt+shift_green,isppol) + green_tmp
+           end do ! ib
+         end do ! ikpt
+       end do ! isppol
+     end do ! ifreq
+   end if
+#endif
+ end if
+
+ if (optself /= 0) then
+   call inverse_oper(green_oper_ndat,1,procb=green%distrib%procb(:),iproc=me_kpt,gpu_option=gpu_option)
+ end if
+
+ if (optlog == 1) then
+   call copy_oper_from_ndat(green_oper_ndat,green%oper,ndat,green%nw,green%distrib%proct,green%distrib%me_freq,.true.)
+   do ifreq=1,green%nw
+     if (green%distrib%proct(ifreq) /= green%distrib%me_freq) cycle
+     trace_tmp = czero
+     do isppol=1,nsppol
+       do ikpt=1,mkmem
+         wtk = green%oper(ifreq)%wtk(ikpt+shift)
+         if (optself == 0) then
+           do ib=1,mbandc
+             trace_tmp = trace_tmp + two*temp*wtk*log(green%oper(ifreq)%ks(ib,ib,ikpt+shift_green,isppol)*omega_current(ifreq))
+           end do ! ib
+         else
+           ! Use Tr(log(G(iw))) + Tr(log(G(-iw))) = Tr(log(G(iw)G(iw)^H)) so that we can use the much faster zheev instead of
+           ! zgeev. Even if G(iw) and G(iw)^H have no reason to commute, this equality still holds since we only care about the trace.
+           call abi_xgemm("n","c",mbandc,mbandc,mbandc,cone,green%oper(ifreq)%ks(:,:,ikpt+shift_green,isppol), &
+                        & mbandc,green%oper(ifreq)%ks(:,:,ikpt+shift_green,isppol),mbandc,czero,mat_tmp(:,:),mbandc)
+           call zheev("n","u",mbandc,mat_tmp(:,:),mbandc,eig(:),work(:),lwork,rwork(:),info)
+           ! Do not use DOT_PRODUCT
+           trace_tmp = trace_tmp + sum(log(eig(:)*omega_current(ifreq)))*wtk*temp
+         end if ! optself
+       end do ! ikpt
+     end do ! isppol
+     if (nsppol == 1 .and. nspinor == 1) trace_tmp = trace_tmp * two
+     green%trace_log = green%trace_log + dble(trace_tmp)
+   end do ! ifreq
+   call copy_oper_to_ndat(green%oper,green_oper_ndat,ndat,green%nw,green%distrib%proct,green%distrib%me_freq,.true.)
+ end if ! optlog=1
+
+ if (green%w_type /= "real") then
+   ABI_NVTX_START_RANGE(NVTX_DMFT_ADD_INT_FCT)
+   occup_ks    => green%occup%ks
+   ks          => green_oper_ndat%ks
+   if(gpu_option==ABI_GPU_DISABLED) then
+     do ifreq=ifreq_beg,ifreq_end
+
+       do isppol=1,nsppol
+         do ikpt=1,mkmem
+           do ib1=1,mbandc
+             idat=ifreq-(ifreq_end-ndat)
+             if (diag == 1) then
+               green%occup%ks(ib1,ib1,ikpt+shift,isppol) = green%occup%ks(ib1,ib1,ikpt+shift,isppol) + &
+                  & fac(ifreq)*green_oper_ndat%ks(ib1,ib1+(idat-1)*mbandc,ikpt+shift_green,isppol)
+             else
+               do ib=1,mbandc
+                 green%occup%ks(ib,ib1,ikpt+shift,isppol) = green%occup%ks(ib,ib1,ikpt+shift,isppol) + &
+                   & fac(ifreq)*green_oper_ndat%ks(ib,ib1+(idat-1)*mbandc,ikpt+shift_green,isppol)
+               end do ! ib
+             end if ! diag
+           end do ! ib1
+         end do ! ikpt
+       end do ! isppol
+
+     end do ! ifreq
+   else if(gpu_option==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+     if (diag == 1) then
+       !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) &
+       !$OMP& MAP(tofrom:occup_ks) MAP(to:ks,fac) PRIVATE(isppol,ikpt)
+       do isppol=1,nsppol
+         do ikpt=1,mkmem
+           !$OMP PARALLEL DO PRIVATE(ib1,ifreq,idat)
+           do ib1=1,mbandc
+             do ifreq=ifreq_beg,ifreq_end
+               idat=ifreq-(ifreq_end-ndat)
+               occup_ks(ib1,ib1,ikpt+shift,isppol) = occup_ks(ib1,ib1,ikpt+shift,isppol) + &
+                 & fac(ifreq)*ks(ib1,ib1+(idat-1)*mbandc,ikpt+shift_green,isppol)
+             end do ! ifreq
+           end do ! ib1
+         end do ! ikpt
+       end do ! isppol
+
+     else
+
+       !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(3) &
+       !$OMP& MAP(tofrom:occup_ks) MAP(to:ks,fac) PRIVATE(isppol,ikpt,ib1)
+       do isppol=1,nsppol
+         do ikpt=1,mkmem
+           do ib1=1,mbandc
+             !$OMP PARALLEL DO PRIVATE(ib,ifreq,idat)
+             do ib=1,mbandc
+               do ifreq=ifreq_beg,ifreq_end
+                 idat=ifreq-(ifreq_end-ndat)
+                 occup_ks(ib,ib1,ikpt+shift,isppol) = occup_ks(ib,ib1,ikpt+shift,isppol) + &
+                   & fac(ifreq)*ks(ib,ib1+(idat-1)*mbandc,ikpt+shift_green,isppol)
+               end do ! ib
+             end do ! ib1
+           end do ! ikpt
+         end do ! isppol
+       end do ! ifreq
+
+     end if ! diag
+#endif
+   end if
+   ABI_NVTX_END_RANGE()
+ end if ! w_type/="real"
+
+ if (paw_dmft%lchipsiortho == 1 .or. optself == 1) then
+   call downfold_oper(green_oper_ndat,paw_dmft,&
+   &    procb=green%distrib%procb(:),iproc=me_kpt,option=option,gpu_option=gpu_option)
+ end if ! lchipsiortho=1
+
+ call copy_oper_from_ndat(green_oper_ndat,green%oper,ndat,green%nw,green%distrib%proct,&
+ &    green%distrib%me_freq,green%oper(ifreq_beg)%has_operks /= 0)
+
+ do ifreq=1,green%nw
+   if (green%distrib%proct(ifreq) /= green%distrib%me_freq) cycle
+   if (green%oper(ifreq)%has_operks == 0) then
+     ABI_FREE(green%oper(ifreq)%ks)
+   end if
+ end do ! ifreq
+
+ call destroy_oper(green_oper_ndat)
+ ABI_FREE(omega_current)
+ ABI_FREE(fac)
+
+ ABI_NVTX_END_RANGE()
+
+end subroutine compute_green_batched_core
+!!***
+
 !!****f* m_green/compute_green
 !! NAME
 !! compute_green
@@ -1000,16 +1345,21 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
  integer :: band_index,diag,i,ib,ierr,ifreq,ikpt,info,isppol,lwork,mbandc
  integer :: me_kpt,mkmem,myproc,natom,nband_k,nkpt,nmoments,nspinor,nsppol
  integer :: opt_quick_restart,option,optlog,optnonxsum,optnonxsum2,optself
- integer :: shift,shift_green,spacecomm
+ integer :: shift,shift_green,spacecomm,gpu_option
  real(dp) :: beta,correction,eigen,fac,fermilevel,temp,wtk
  complex(dpc) :: green_tmp,omega_current,trace_tmp
  character(len=500) :: message
  real(dp) :: tsec(2)
  real(dp), allocatable :: eig(:),rwork(:)
  complex(dpc), allocatable :: mat_tmp(:,:),omega_fac(:),work(:)
+#ifdef HAVE_OPENMP_OFFLOAD
+ integer :: ndat
+ type(oper_type), target :: green_oper_ndat
+#endif
 ! integer, allocatable :: procb(:,:),proct(:,:)
 ! *********************************************************************
 
+ ABI_NVTX_START_RANGE(NVTX_DMFT_COMPUTE_GREEN)
  !lintegrate=.true.
  !if(lintegrate.and.green%w_type=="real") then
  !if(green%w_type=="real") then
@@ -1054,6 +1404,7 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
  nspinor = paw_dmft%nspinor
  nsppol  = paw_dmft%nsppol
  temp    = paw_dmft%temp
+ gpu_option = paw_dmft%gpu_option
 
  if (optlog == 1) then
    ABI_MALLOC(eig,(mbandc))
@@ -1067,8 +1418,6 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
    green%trace_log = zero
  end if ! optlog=1
 
-! Initialise for compiler
- omega_current = czero
  !icomp_chloc = 0
 
  option = 1
@@ -1134,6 +1483,13 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
  shift_green = shift
  if (green%oper(1)%has_operks == 0) shift_green = 0
 
+
+ if(mkmem>0 .and. gpu_option==ABI_GPU_OPENMP) then
+   call compute_green_batched_core(green,paw_dmft,self,optself,optlog)
+ else if(mkmem>0) then
+   ABI_NVTX_START_RANGE(NVTX_DMFT_COMPUTE_GREEN_LOOP)
+! Initialise for compiler
+ omega_current = czero
  do ifreq=1,green%nw
    !if(present(iii)) write(6,*) ch10,'ifreq  self', ifreq,self%oper(ifreq)%matlu(1)%mat(1,1,1,1,1)
 !   ====================================================
@@ -1351,6 +1707,9 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
    end if
 ! call flush(std_out)
  end do ! ifreq
+   ABI_NVTX_END_RANGE()
+ end if
+
 
  if (optlog == 1) then
 
@@ -1410,10 +1769,40 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
  if (optnonxsum2 == 0) then
    if (paw_dmft%lchipsiortho == 1 .or. optself == 1) then
      call gather_oper(green%oper(:),green%distrib,paw_dmft,opt_ksloc=2,opt_commkpt=1)
-     do ifreq=1,green%nw
-       if (green%distrib%procf(ifreq) /= myproc) cycle
-       call sym_matlu(green%oper(ifreq)%matlu(:),paw_dmft)
-     end do
+
+     if(gpu_option==ABI_GPU_DISABLED) then
+       do ifreq=1,green%nw
+         if (green%distrib%procf(ifreq) /= myproc) cycle
+         call sym_matlu(green%oper(ifreq)%matlu(:),paw_dmft)
+       end do
+     else if(gpu_option==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+       !FIXME: Remove those CPU-GPU transfers once gather_oper has been ported to GPU
+       ! 1) Init green_oper_ndat
+       ndat = green%distrib%nw_mem_kptparal(green%distrib%me_freq+1)
+       do ifreq=1,green%nw
+         if (green%distrib%procf(ifreq) /= myproc) cycle
+         call init_oper_ndat(paw_dmft,green_oper_ndat,ndat,nkpt=green%oper(ifreq)%nkpt,opt_ksloc=2,gpu_option=gpu_option)
+         if (green%oper(ifreq)%has_operks == 0) then
+           green_oper_ndat%paral  = 1
+           green_oper_ndat%shiftk = shift
+         end if
+         exit
+       end do
+       ! 2) Copy green%oper(:)%matlu into green_oper_ndat (CPU->GPU transfer)
+       call copy_oper_to_ndat(green%oper,green_oper_ndat,ndat,green%nw,green%distrib%proct,green%distrib%me_freq,.false.)
+
+       ! 3) Perform sym_matlu on green_oper_ndat (GPU enabled)
+       call sym_matlu(green_oper_ndat%matlu(:),paw_dmft)
+
+       ! 4) Copy back green%oper(:)%matlu from green_oper_ndat (GPU->CPU transfer)
+       call copy_oper_from_ndat(green_oper_ndat,green%oper,ndat,green%nw,green%distrib%proct,&
+       &    green%distrib%me_freq,.false.)
+       ! 5) Destroy green_oper_ndat
+       call destroy_oper(green_oper_ndat)
+#endif
+     end if
+
      call gather_oper(green%oper(:),green%distrib,paw_dmft,opt_ksloc=2)
    end if
    green%has_greenmatlu_xsum = 1
@@ -1483,6 +1872,7 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
  end if
 ! call flush(std_out)
 
+ ABI_NVTX_END_RANGE()
  call timab(624,2,tsec(:))
 
 end subroutine compute_green
@@ -1546,6 +1936,7 @@ subroutine integrate_green(green,paw_dmft,prtopt,opt_ksloc,opt_after_solver,opt_
 
  DBG_ENTER("COLL")
  call timab(625,1,tsec(:))
+ ABI_NVTX_START_RANGE(NVTX_DMFT_INTEGRATE_GREEN)
 
  if (prtopt > 0) then
    write(message,'(2a,i3,13x,a)') ch10," ===  Integrate Green's function"
@@ -1986,6 +2377,7 @@ subroutine integrate_green(green,paw_dmft,prtopt,opt_ksloc,opt_after_solver,opt_
  call destroy_matlu(matlu_temp(:),natom)
  ABI_FREE(matlu_temp)
 ! deallocate(charge_loc_old)
+ ABI_NVTX_END_RANGE()
  call timab(625,2,tsec(:))
  DBG_EXIT("COLL")
 
@@ -3246,6 +3638,7 @@ subroutine fermi_green(green,paw_dmft,self)
  character(len=500) :: message
 !************************************************************************
 !
+ ABI_NVTX_START_RANGE(NVTX_DMFT_FERMI_GREEN)
  write(message,'(a,8x,a)') ch10,"  == Compute Fermi level"
  call wrtout(std_out,message,'COLL')
 
@@ -3349,6 +3742,7 @@ subroutine fermi_green(green,paw_dmft,self)
  !call compute_green(green,paw_dmft,0,self,opt_self=1,opt_nonxsum=1)
  !call integrate_green(green,paw_dmft,prtopt=0,opt_ksloc=3) !,opt_nonxsum=1)
 
+ ABI_NVTX_END_RANGE()
  !return
 end subroutine fermi_green
 !!***
@@ -3729,6 +4123,7 @@ subroutine compute_nb_elec(green,self,paw_dmft,Fx,nb_elec_x,fermie,Fxprime)
  complex(dpc), allocatable :: omega_fac(:),trace_moments(:),trace_moments_prime(:)
 ! *********************************************************************
 
+   ABI_NVTX_START_RANGE(NVTX_DMFT_COMPUTE_NB_ELEC)
    dmft_test = paw_dmft%dmft_test
 
    if (dmft_test == 0) then
@@ -3853,6 +4248,7 @@ subroutine compute_nb_elec(green,self,paw_dmft,Fx,nb_elec_x,fermie,Fxprime)
    nb_elec_x = green%charge_ks
    Fx = green%charge_ks - paw_dmft%nelectval
 
+   ABI_NVTX_END_RANGE()
  end subroutine compute_nb_elec
 !!***
 

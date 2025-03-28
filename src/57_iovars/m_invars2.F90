@@ -2724,6 +2724,12 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'cprj_in_memory',tread,'INT')
  if(tread==1) dtset%cprj_in_memory=intarr(1)
+ if (dtset%cprj_in_memory/=0.and.dtset%optdriver/=RUNL_GSTATE) then
+   dtset%cprj_in_memory=0
+   write(msg,'(a)') 'cprj_in_memory/=0 is implemented only for ground state (optdriver=0).&
+     & cprj_in_memory is set to 0 for this dataset.'
+   ABI_WARNING(msg)
+ end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'cprj_update_lvl',tread,'INT')
  if(tread==1) dtset%cprj_update_lvl=intarr(1)
