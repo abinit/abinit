@@ -1390,7 +1390,8 @@ end subroutine vlocalstr
 
 subroutine dfpt_vlocaldq(atindx,cplex,gmet,gsqcut,idir,ipert,&
 & mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,&
-& ntypat,n1,n2,n3,ph1d,qdir,qgrid,qphon,ucvol,vlspl,vpsp1dq)
+& ntypat,n1,n2,n3,ph1d,qdir,qgrid,qphon,ucvol,vlspl,vpsp1dq,&
+& optnc) !optional
 
  implicit none
 
@@ -1398,6 +1399,7 @@ subroutine dfpt_vlocaldq(atindx,cplex,gmet,gsqcut,idir,ipert,&
 !scalars
  integer,intent(in) :: cplex,idir,ipert,mqgrid,n1,n2,n3,natom,nfft,ntypat
  integer,intent(in) :: qdir
+ integer,optional,intent(in) :: optnc 
  real(dp),intent(in) :: gsqcut,ucvol
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
@@ -1408,8 +1410,9 @@ subroutine dfpt_vlocaldq(atindx,cplex,gmet,gsqcut,idir,ipert,&
 
 !Local variables -------------------------
 !scalars
- integer :: i1,i2,i3,ia1,iatom,id1,id2,id3,ig1,ig2,ig3,ii,ii1,im=2
- integer :: itypat,re=1
+ integer :: i1,i2,i3,ia1,iatom,id1,id2,id3,ig1,ig2,ig3,ii,ii1
+ integer :: itypat, optnc_
+ integer, parameter :: im=2, re=1
  real(dp),parameter :: tolfix=1.000000001_dp
  real(dp) :: cutoff,gfact,gmag,gq1
  real(dp) :: gq2,gq3,gsquar
@@ -1425,6 +1428,8 @@ subroutine dfpt_vlocaldq(atindx,cplex,gmet,gsqcut,idir,ipert,&
 ! *********************************************************************
 
  iatom=ipert
+
+ optnc_=0; if (present(optnc)) optnc_=optnc
 
  if(iatom==natom+1 .or. iatom==natom+2 .or. iatom==natom+10  .or. iatom==natom+11 .or. iatom==natom+5)then
 
@@ -1493,8 +1498,10 @@ subroutine dfpt_vlocaldq(atindx,cplex,gmet,gsqcut,idir,ipert,&
 !            Evaluate spline fit to get V(q) and V(q)':
              call splfit(qgrid,vion1dq,vlspl(:,:,itypat),1,(/gmag/),vion1,mqgrid,1)
 
-             vion1=vion1/gsquar
-             vion1dq=(vion1dq-2.0_dp*gmag*vion1)/gsquar
+             if (optnc_==0) then
+               vion1=vion1/gsquar
+               vion1dq=(vion1dq-2.0_dp*gmag*vion1)/gsquar
+             end if
 
              gvec=(/ig1,ig2,ig3/)
              gfact=dot_product(gmet(qdir,:),gvec(:))/gmag

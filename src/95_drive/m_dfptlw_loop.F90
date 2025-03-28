@@ -225,7 +225,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
  real(dp),allocatable :: vxccc1_i2pertdq(:,:,:)
  real(dp),allocatable :: vpsp1_i1pertdq_geom(:,:,:), vpsp1_i1pertdqdq(:,:,:)
  real(dp),allocatable :: vxc1dqdq(:),work(:)
- real(dp),allocatable :: xccc3d1(:),xccc3d2(:),xccc3d2dq(:,:,:)
+ real(dp),allocatable :: xccc3d1(:),xccc3d2(:),xccc3d2dq(:)
  type(pawrhoij_type),allocatable :: pawrhoij_read(:)
  
  
@@ -415,7 +415,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
                n2dq=1
                ABI_MALLOC(vpsp1_i2pertdq,(2*nfftf,dtset%nspden,n2dq))
                ABI_MALLOC(vxccc1_i2pertdq,(2*nfftf,dtset%nspden,n2dq))
-               ABI_MALLOC(xccc3d2dq,(2*nfftf,dtset%nspden,n2dq))
+               ABI_MALLOC(xccc3d2dq,(2*nfftf))
              else if (i2pert == natom+4) then
                n2dq=2
                ABI_MALLOC(vpsp1_i2pertdq,(2*nfftf,dtset%nspden,n2dq))
@@ -543,7 +543,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
                        !Get the q-gradient of the pseudocore density
                        call dfpt_vlocaldq(atindx,2,gmet,gsqcut,i2dir,i2pert,mpi_enreg, &
                        & psps%mqgrid_vl,dtset%natom,nattyp,dtset%nfft,dtset%ngfft,dtset%ntypat,n1,n2,n3, &
-                       & ph1d,i3dir,psps%qgrid_vl,dtset%qptn,ucvol,ncorespl,xccc3d2dq(:,1,1))
+                       & ph1d,i3dir,psps%qgrid_vl,dtset%qptn,ucvol,ncorespl,xccc3d2dq,optnc=1)
 
                        !Get the q-gradient of the first-order XC potential due to the pseudocore charge
                        call dfpt_mkvxcccdq(cplex,i3dir,dtset%ixc,gmet,gprimd,kxc,mpi_enreg,nfftf,dtset%ngfft,&
