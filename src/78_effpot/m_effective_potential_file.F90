@@ -22,6 +22,8 @@
 
 #include "abi_common.h"
 
+#define ABI_TRACE(msg) write(0,'("=====DEBUG===== ",I4," in file ",A , "in function", A, "message: ",A )') __LINE__,__FILE__,  msg
+
 module m_effective_potential_file
 
  use defs_basis
@@ -2223,6 +2225,8 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 
 !Tranfert the ddb into usable array (ipert and idir format like in abinit)
   ABI_MALLOC(blkval,(2,3,mpert,3,mpert,nblok))
+
+ABI_TRACE("blkval allocated")
   blkval = 0
   if(size(ddb%val) /= 2*3*mpert*3*mpert*nblok ) then
     ABI_BUG("Size of ddb%val is not consistent.")
@@ -2807,7 +2811,9 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
   end if
 !-------------------------------------------------------------------------------------
 ! DEALLOCATION OF ARRAYS
+ print *, "DEBUG: DEALLOCATING ARRAYS  blkval"
   ABI_FREE(blkval)
+  ABI_TRACE("blkval freed")
   ABI_FREE(zeff)
   ABI_FREE(qdrp_cart)
   ABI_FREE(instrain)

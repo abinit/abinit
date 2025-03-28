@@ -2367,7 +2367,6 @@ real(dp), allocatable :: weights(:)
  ABI_FREE(my_modellist)
  ABI_FREE(strten_coeffs)
  ABI_FREE(weights)
-
 end subroutine fit_polynomial_coeff_getPositive
 !!***
 
