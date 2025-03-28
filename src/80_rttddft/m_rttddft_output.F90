@@ -497,6 +497,7 @@ subroutine prt_den(dtfil, dtset, istep, mpi_enreg, psps, tdks)
 
    call crystal%free()
    call ebands%free()
+   ABI_FREE(my_atmtab)
  end if
 
 end subroutine prt_den
@@ -631,6 +632,7 @@ subroutine prt_dos(dtfil, dtset, istep, mpi_enreg, psps, tdks)
  call dos%free()
  call crystal%free()
  call ebands%free()
+ ABI_FREE(my_atmtab)
 
 end subroutine prt_dos
 !!***

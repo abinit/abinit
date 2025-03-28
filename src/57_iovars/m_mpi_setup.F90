@@ -949,6 +949,18 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    dtsets(idtset)%ngfft(7) = fftalg_for_npfft(dtsets(idtset)%npfft)
    dtsets(idtset)%ngfftdg(7) = fftalg_for_npfft(dtsets(idtset)%npfft)
 
+   ! For RT-TDDFT make sure that we use the thread-safe version of FFT
+   ! in case of Goedecker's FFT with more than one thread
+   if (optdriver==RUNL_RTTDDFT) then
+      if (dtsets(idtset)%ngfft(7)/100==FFT_SG .and. xomp_get_num_threads(open_parallel=.True. )>1) then
+         write(msg,'(3a)') 'fftalg=1XX is not thread-safe, so it cannot be used with nthreads>1',ch10,&
+         'thus switching fftalg to a thread-safe version.'
+         ABI_WARNING(msg)
+         dtsets(idtset)%ngfft(7) = 401
+         dtsets(idtset)%ngfftdg(7) = 401
+      end if
+   end if
+
    fftalg_read=.false.
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fftalg',tread0,'INT')
 
