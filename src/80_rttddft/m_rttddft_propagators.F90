@@ -87,7 +87,7 @@ contains
 !!  and thus insufficient for RT-TDDFT.
 !!
 !! SOURCE
-subroutine rttddft_propagator_er(dtset, ham_k, istep, mpi_enreg, psps, tdks, calc_properties)
+subroutine rttddft_propagator_er(dtset, istep, mpi_enreg, psps, tdks, calc_properties)
 
  implicit none
 
@@ -96,7 +96,6 @@ subroutine rttddft_propagator_er(dtset, ham_k, istep, mpi_enreg, psps, tdks, cal
  integer,                    intent(in)    :: istep
  logical,          optional, intent(in)    :: calc_properties
  type(dataset_type),         intent(inout) :: dtset
- type(gs_hamiltonian_type),  intent(inout) :: ham_k
  type(MPI_type),             intent(inout) :: mpi_enreg
  type(pseudopotential_type), intent(inout) :: psps
  type(tdks_type),    target, intent(inout) :: tdks
@@ -125,6 +124,7 @@ subroutine rttddft_propagator_er(dtset, ham_k, istep, mpi_enreg, psps, tdks, cal
  logical                        :: lcalc_properties
  type(energies_type)            :: energies
  type(bandfft_kpt_type),pointer :: my_bandfft_kpt => null()
+ type(gs_hamiltonian_type)      :: ham_k
  !arrays
  integer,  allocatable          :: kg_k(:,:)
  real(dp), pointer              :: cg(:,:) => null()
@@ -172,6 +172,7 @@ subroutine rttddft_propagator_er(dtset, ham_k, istep, mpi_enreg, psps, tdks, cal
       !including NL part in NC case?
       if (dtset%usepaw == 0) then
          lproperties(2) = .true.
+         ABI_MALLOC(enl,(mpi_enreg%bandpp))
       else
          ABI_MALLOC(enl,(0))
       end if
@@ -284,6 +285,7 @@ subroutine rttddft_propagator_er(dtset, ham_k, istep, mpi_enreg, psps, tdks, cal
       !** Set up the remaining k-dependent part of the Hamiltonian
       kpoint(:)=dtset%kptns(:,ikpt) !k-point
       kpa(:)=tdks%tdef%kpa(:,ikpt)  !k+A
+
       ! Kinetic energy
       ABI_MALLOC(kinpw,(npw_k))
       call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,tdks%gmet,kg_k,kinpw,kpoint,npw_k,0,0,tdks%tdef%vecpot_red)
@@ -295,11 +297,11 @@ subroutine rttddft_propagator_er(dtset, ham_k, istep, mpi_enreg, psps, tdks, cal
       ider=0;idir=0;dimffnl=1
       ABI_MALLOC(ffnl,(npw_k,dimffnl,psps%lmnmax,psps%ntypat))
       if (mpi_enreg%paral_kgb/=1 .or. istep<=tdks%first_step .or. tdks%tdef%ef_type/=0) then
-            if (nkpg > 0) call mkkpg(kg_k,kpg_k,kpa,nkpg,npw_k)
-            call mkffnl(psps%dimekb,dimffnl,psps%ekb,ffnl,psps%ffspl,tdks%gmet,tdks%gprimd, &
-                      & ider,idir,psps%indlmn,kg_k,kpg_k,kpa,psps%lmnmax,psps%lnmax,        &
-                      & psps%mpsang,psps%mqgrid_ff,nkpg,npw_k,psps%ntypat,psps%pspso,       &
-                      & psps%qgrid_ff,tdks%rmet,psps%usepaw,psps%useylm,ylm_k,tdks%ylmgr)
+         if (nkpg > 0) call mkkpg(kg_k,kpg_k,kpa,nkpg,npw_k)
+         call mkffnl(psps%dimekb,dimffnl,psps%ekb,ffnl,psps%ffspl,tdks%gmet,tdks%gprimd, &
+                   & ider,idir,psps%indlmn,kg_k,kpg_k,kpa,psps%lmnmax,psps%lnmax,        &
+                   & psps%mpsang,psps%mqgrid_ff,nkpg,npw_k,psps%ntypat,psps%pspso,       &
+                   & psps%qgrid_ff,tdks%rmet,psps%usepaw,psps%useylm,ylm_k,tdks%ylmgr)
       end if
 
       !** Load k-dependent part in the Hamiltonian datastructure
@@ -308,23 +310,24 @@ subroutine rttddft_propagator_er(dtset, ham_k, istep, mpi_enreg, psps, tdks, cal
       !**  - Load k-dependent quantities in the Hamiltonian
       ABI_MALLOC(ph3d,(2,npw_k,ham_k%matblk))
       call ham_k%load_k(kpt_k=kpa,istwf_k=istwf_k,npw_k=npw_k,kinpw_k=kinpw,kg_k=kg_k,kpg_k=kpg_k, &
-                      & ffnl_k=ffnl,ph3d_k=ph3d,compute_ph3d=(mpi_enreg%paral_kgb/=1.or.istep<=tdks%first_step),   &
-                      & compute_gbound=(mpi_enreg%paral_kgb/=1))
+                      & ffnl_k=ffnl,ph3d_k=ph3d,compute_ph3d=.true.,compute_gbound=.true.)
 
       !** Load band-FFT tabs (transposed k-dependent arrays)
       if (mpi_enreg%paral_kgb==1) then
-         if (istep<=tdks%first_step) call prep_bandfft_tabs(ham_k,ikpt,dtset%mkmem,mpi_enreg)
-         call ham_k%load_k(npw_fft_k =my_bandfft_kpt%ndatarecv,    &
-                         & gbound_k  =my_bandfft_kpt%gbound,       &
-                         & kinpw_k   =my_bandfft_kpt%kinpw_gather, &
-                         & kg_k      =my_bandfft_kpt%kg_k_gather,  &
-                         & kpg_k     =my_bandfft_kpt%kpg_k_gather, &
-                         & ffnl_k    =my_bandfft_kpt%ffnl_gather,  &
-                         & ph3d_k    =my_bandfft_kpt%ph3d_gather)
+         if (istep<=tdks%first_step .or. tdks%tdef%ef_type/=0) then
+            call prep_bandfft_tabs(ham_k,ikpt,dtset%mkmem,mpi_enreg)
+         end if
+         call ham_k%load_k(npw_fft_k=my_bandfft_kpt%ndatarecv,    &
+                         & gbound_k =my_bandfft_kpt%gbound,       &
+                         & kinpw_k  =my_bandfft_kpt%kinpw_gather, &
+                         & kg_k     =my_bandfft_kpt%kg_k_gather,  &
+                         & kpg_k    =my_bandfft_kpt%kpg_k_gather, &
+                         & ffnl_k   =my_bandfft_kpt%ffnl_gather,  &
+                         & ph3d_k   =my_bandfft_kpt%ph3d_gather)
       end if
 
       !** Build inverse of overlap matrix
-      if(psps%usepaw == 1 .and. istep <= tdks%first_step .or. tdks%tdef%ef_type/=0) then
+      if(psps%usepaw == 1 .and. (istep <= tdks%first_step .or. tdks%tdef%ef_type/=0)) then
          call make_invovl(ham_k,dimffnl,ffnl,ph3d,mpi_enreg)
       end if
 
@@ -352,11 +355,6 @@ subroutine rttddft_propagator_er(dtset, ham_k, istep, mpi_enreg, psps, tdks, cal
             call rttddft_calc_kin(energies%e_kinetic,cg,dtset,ham_k,nband_k,npw_k,my_nspinor, &
                                 & occ0,dtset%wtk(ikpt),mpi_enreg,my_bandfft_kpt)
          end if
-         ! for NL PSP part
-         if (lproperties(2)) then
-            ABI_MALLOC(enl,(mpi_enreg%bandpp))
-            enl = zero
-         end if
          ! for eigenvalues
          if (lproperties(3)) then
             eig => tdks%eigen(1+shift:nband_k_mem+shift)
@@ -376,7 +374,6 @@ subroutine rttddft_propagator_er(dtset, ham_k, istep, mpi_enreg, psps, tdks, cal
             do iband = 1, mpi_enreg%bandpp
                energies%e_nlpsp_vfock=energies%e_nlpsp_vfock+dtset%wtk(ikpt)*tdks%occ0(shift+iband)*enl(iband)
             end do
-            ABI_FREE(enl)
          end if
       else
          !Propagate cg only
@@ -403,9 +400,14 @@ subroutine rttddft_propagator_er(dtset, ham_k, istep, mpi_enreg, psps, tdks, cal
 
  end do !nsppol
 
+ ! Free memory
  ABI_FREE(vlocal)
  if(dtset%usekden/=0) then
    ABI_FREE(vxctaulocal)
+ end if
+ call ham_k%free()
+ if (allocated(enl)) then
+   ABI_FREE(enl)
  end if
 
  !Keep the computed energies in memory
@@ -444,7 +446,7 @@ end subroutine rttddft_propagator_er
 !!  (if H(t+dt/2) and the exponential are computed exactly).
 !!
 !! SOURCE
-subroutine rttddft_propagator_emr(dtset, ham_k, istep, mpi_enreg, psps, tdks)
+subroutine rttddft_propagator_emr(dtset, istep, mpi_enreg, psps, tdks)
 
  implicit none
 
@@ -452,7 +454,6 @@ subroutine rttddft_propagator_emr(dtset, ham_k, istep, mpi_enreg, psps, tdks)
  !scalars
  integer,                    intent(in)    :: istep
  type(dataset_type),         intent(inout) :: dtset
- type(gs_hamiltonian_type),  intent(inout) :: ham_k
  type(MPI_type),             intent(inout) :: mpi_enreg
  type(pseudopotential_type), intent(inout) :: psps
  type(tdks_type),            intent(inout) :: tdks
@@ -475,7 +476,7 @@ subroutine rttddft_propagator_emr(dtset, ham_k, istep, mpi_enreg, psps, tdks)
 
  !** Predictor step
  ! predict psi(t+dt) using ER propagator
- call rttddft_propagator_er(dtset,ham_k,istep,mpi_enreg,psps,tdks,calc_properties=.true.)
+ call rttddft_propagator_er(dtset,istep,mpi_enreg,psps,tdks,calc_properties=.true.)
  ! for convergence check
  diff = tdks%cg
  ! estimate psi(t+dt/2) = (psi(t)+psi(t+dt))/2
@@ -489,7 +490,7 @@ subroutine rttddft_propagator_emr(dtset, ham_k, istep, mpi_enreg, psps, tdks)
  ! go back to time t ..
  tdks%cg(:,:) = cg(:,:)
  ! .. and evolve psi(t) using the EMR propagator with the estimated density at t+dt/2
- call rttddft_propagator_er(dtset,ham_k,istep,mpi_enreg,psps,tdks)
+ call rttddft_propagator_er(dtset,istep,mpi_enreg,psps,tdks)
 
  ! check convergence
  diff = abs(diff-tdks%cg)
@@ -515,7 +516,7 @@ subroutine rttddft_propagator_emr(dtset, ham_k, istep, mpi_enreg, psps, tdks)
       ! Go back to time t ..
       tdks%cg(:,:) = cg(:,:)
       ! .. and evolve psi(t) using estimated density at t+dt/2
-      call rttddft_propagator_er(dtset,ham_k,istep,mpi_enreg,psps,tdks)
+      call rttddft_propagator_er(dtset,istep,mpi_enreg,psps,tdks)
       ! check convergence
       diff = abs(diff-tdks%cg)
       me = xmpi_comm_rank(mpi_enreg%comm_world)

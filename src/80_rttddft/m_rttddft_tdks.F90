@@ -175,14 +175,14 @@ module m_rttddft_tdks
                                                    !for XC core correction
    real(dp),allocatable             :: ylm(:,:)    !real spherical harmonics for each k+G
    real(dp),allocatable             :: ylmgr(:,:,:)!real spherical harmonics gradients         !FB: Needed?
-   type(pawcprj_type),allocatable   :: cprj(:,:)   !projectors applied on WF <p_lmn|C_nk>
-   type(pawcprj_type),allocatable   :: cprj0(:,:)  !projectors applied on WF <p_lmn|C_nk>
-   type(paw_an_type),allocatable    :: paw_an(:)   !various arrays on angular mesh
+   type(pawcprj_type),  allocatable :: cprj(:,:)   !projectors applied on WF <p_lmn|C_nk>
+   type(pawcprj_type),  allocatable :: cprj0(:,:)  !projectors applied on WF <p_lmn|C_nk>
+   type(paw_an_type),   allocatable :: paw_an(:)   !various arrays on angular mesh
    type(pawfgrtab_type),allocatable :: pawfgrtab(:) !PAW atomic data on fine grid
-   type(paw_ij_type),allocatable    :: paw_ij(:)   !various arrays on partial waves (i,j channels)
-   type(pawrad_type),pointer        :: pawrad(:) => NULL() !radial grid in PAW sphere
-   type(pawrhoij_type),pointer      :: pawrhoij(:) !operator rho_ij= <psi|p_i><p_j|psi>
-   type(pawtab_type),pointer        :: pawtab(:) => NULL() !tabulated PAW atomic data
+   type(paw_ij_type),   allocatable :: paw_ij(:)   !various arrays on partial waves (i,j channels)
+   type(pawrad_type),   pointer     :: pawrad(:)   => NULL() !radial grid in PAW sphere
+   type(pawrhoij_type), pointer     :: pawrhoij(:) => NULL() !operator rho_ij= <psi|p_i><p_j|psi>
+   type(pawtab_type),   pointer     :: pawtab(:)   => NULL() !tabulated PAW atomic data
 
     contains
 
@@ -411,7 +411,6 @@ subroutine tdks_free(tdks,dtset,mpi_enreg,psps)
    if(associated(tdks%pawang)) tdks%pawang => null()
    if(associated(tdks%pawrad)) tdks%pawrad => null()
    if(associated(tdks%pawtab)) tdks%pawtab => null()
-   if(associated(tdks%pawrhoij)) call pawrhoij_free(tdks%pawrhoij)
 
    !Deallocate allocatables
    ABI_SFREE(tdks%atindx)
@@ -473,6 +472,10 @@ subroutine tdks_free(tdks,dtset,mpi_enreg,psps)
    if(allocated(tdks%paw_ij)) then
       call paw_ij_free(tdks%paw_ij)
       ABI_FREE(tdks%paw_ij)
+   end if
+   if(associated(tdks%pawrhoij)) then
+      call pawrhoij_free(tdks%pawrhoij)
+      ABI_FREE(tdks%pawrhoij)
    end if
 
 end subroutine tdks_free
@@ -1135,7 +1138,7 @@ subroutine read_wfk(dtfil, dtset, ecut_eff, fname_wfk, mpi_enreg, tdks)
             & dtset%symafm,dtset%symrel,dtset%tnons,dtfil%unkg,wff1,wffnow,  &
             & dtfil%unwff1,fname_wfk,tdks%wvl)
 
- !Close wff1
+ !Close file
  call WffClose(wff1,ierr)
 
  !Keep initial eigenvalues in memory
@@ -1155,6 +1158,10 @@ subroutine read_wfk(dtfil, dtset, ecut_eff, fname_wfk, mpi_enreg, tdks)
               & tdks%npwarr,dtset%nsppol,dtset%nsym,dtset%occ_orig,optorth,    &
               & dtset%symafm,dtset%symrel,dtset%tnons,dtfil%unkg,wff1,wffnow,  &
               & dtfil%unwff1,tdks%fname_wfk0,tdks%wvl)
+
+   !Close file
+   call WffClose(wff1,ierr)
+
  end if
 
 end subroutine read_wfk
