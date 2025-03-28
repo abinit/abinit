@@ -22,6 +22,8 @@
 
 #include "abi_common.h"
 
+#define ABI_TRACE(msg) write(0,'("=====DEBUG===== ",I4," in file ",A , "in function", A, "message: ",A )') __LINE__,__FILE__, __FUNC__, msg
+
 module m_polynomial_coeff
 
  use defs_basis
@@ -3546,15 +3548,6 @@ subroutine computeSymmetricCombinations(array_combination, &
   symcoeff_found = 0
 
   irreducible = .TRUE.
-  !Only start the function if start-symmetry is smaller than maximum symmetry
-  !and start displacement is smaller than maximum displacement
-  !otherwise pass through
-
-  !call gen_symlist(nsym, ndisp, symlist)
-  !call irred_combinations%init()
-
-  ! nbody and power for strain term
-
 
   call get_totpower_and_nbody(index_coeff_in(ndisp+1:ndisp+nstrain), nstrain, nbody_strain,  totpower_strain)
   call get_totpower_and_nbody(index_coeff_in(1:ndisp), ndisp, nbody_disp, totpower_disp)
@@ -3586,7 +3579,9 @@ subroutine computeSymmetricCombinations(array_combination, &
     integer :: ibody, ind(nbody_disp)
     ! allsym: allow all combination of symmetry adapted terms.
     allsym= ( max_nbody_copy(totpower)>=totpower)
+    print *, "DEBUG: ======= allsym: ", allsym
     ind(:)=0
+
     if(allsym) then
       call symlist%init(nsym, ndisp)
     else
@@ -3607,19 +3602,24 @@ subroutine computeSymmetricCombinations(array_combination, &
         end do
         call expand_poly(ind, polyform%order, nbody_disp, index_coeff_tmp(:ndisp) )
       end if
+      !print *, "DEBUG: ======= index_coeff_tmp: ", index_coeff_tmp
 
 
+      call get_powers(index_coeff_tmp, ndisp, powers)
       if(.not. allsym) then
-        call get_powers(index_coeff_tmp, ndisp, powers)
         ! only treat the terms with nbody< nbody_max
         nbody=count(powers/=0)+nbody_strain
         totpower=sum(powers) + totpower_strain
         if(totpower==0) cycle
         if(nbody> max_nbody_copy(totpower)) cycle
       end if
+      !print *, "DEBUG: ======= index_coeff_tmp after filtering powers: ", index_coeff_tmp
       if(any(mod(powers(1:ndisp),2) /=0) .and. need_only_even) then
         index_coeff_tmp(:) = 0
       end if
+
+      !print *, "DEBUG: ======= powers: ", powers
+      !print *, "DEBUG: ======= index_coeff_tmp after filtering alleven: ", index_coeff_tmp
 
       !Check if symmetric combination is allowed
       if(.not. any(index_coeff_tmp == 0))then ! Check if term is allowed by distance
@@ -3634,13 +3634,16 @@ subroutine computeSymmetricCombinations(array_combination, &
         enddo
       endif
 
+      !print *, "DEBuG: ======= index_coeff_tmp after filtering compatibility (distance): ", index_coeff_tmp
+
     if(any(index_coeff_tmp == 0))then ! If symmetry doesn't point to another term or isn't allowed due to distance write zeros to filter after
       possible = .FALSE.
     else
       possible = .TRUE.
     endif
-
     if(possible)then
+      !print *, "DEBUG: ======= index_coeff_tmp: ", index_coeff_tmp
+      !print *, "DEBUG: ======= possible: ", possible
       !loop over displacements in term
       comb_to_test(:) = 0
       if(.not. (all(index_coeff_tmp == 0)))then ! If symmetry doesn't point to another term or isn't allowed due to distance write zeros to filter after

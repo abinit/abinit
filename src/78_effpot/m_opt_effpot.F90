@@ -24,6 +24,8 @@
 
 #include "abi_common.h"
 
+#define ABI_TRACE(msg) write(0,'("=====DEBUG===== ",I4," in file ",A , "in function", A, "message: ",A )') __LINE__,__FILE__, __FUNC__, msg
+
 module m_opt_effpot
 
 use defs_basis
@@ -1927,7 +1929,6 @@ subroutine opt_getHOSingleDispTerms(term_in,terms_out,symbols,single_disp_terms,
   ncoeff = norder * ndisp
   !Allocate output terms
   ABI_MALLOC(terms_out_tmp,(ncoeff))
-
   !find equivalent second order terms in list of single disp terms
   !for each displacement in input term
   !Transfer to output term and increase order
@@ -1958,12 +1959,8 @@ subroutine opt_getHOSingleDispTerms(term_in,terms_out,symbols,single_disp_terms,
   enddo!idisp
   !Change Name
   do icoeff=1,ncoeff
-    !   write(std_out,*) "DEBUG icoeff: ", icoeff
-    !   write(std_out,*) "Term(",icoeff,"/",ncoeff,"): ", terms_out_tmp(icoeff)%name, "name before set name"
-    !   write(std_out,*) "Term(",icoeff,"/",ncoeff,") nterm: ", terms_out_tmp(icoeff)%nterm
     call polynomial_coeff_getName(name,terms_out_tmp(icoeff),symbols,recompute=.TRUE.)
     call polynomial_coeff_SetName(name,terms_out_tmp(icoeff))
-    !   write(*,*) "Term(",icoeff,"/",ncoeff,"): ", terms_out_tmp(icoeff)%name, "after set name"
   enddo
 
   !Check for doubles and delete them
@@ -1981,37 +1978,17 @@ subroutine opt_getHOSingleDispTerms(term_in,terms_out,symbols,single_disp_terms,
   enddo
   iterm3 = ncoeff - iterm3
   ABI_MALLOC(terms_out,(iterm3))
-  !Second copy them
   iterm3 = 0
   do iterm1=1,ncoeff
     if(.not. found(iterm1))then
       iterm3 = iterm3 + 1
-      !      terms_out(iterm3) = terms_out_tmp(iterm1)
       call polynomial_coeff_init(coeff_ini,terms_out_tmp(iterm1)%nterm,terms_out(iterm3),&
         &                                terms_out_tmp(iterm1)%terms,terms_out_tmp(iterm1)%name, check=.TRUE.)
     endif
   enddo
-  !ABI_FREE(terms_out_tmp)
   ABI_FREE(found)
   call polynomial_coeff_list_free(terms_out_tmp)
   ncoeff = iterm3
-  !TEST MS
-  !  write(*,*) "behind call getNorder"
-  !  write(*,*) "ncoeff_out: ", ncoeff_out
-  !  do ii=1,ncoeff_out
-  !     write(*,*) "Term(",ii,"/",ncoeff_out,"): ", terms(ii)%name
-  !  enddo
-  !TEST MS
-
-  !!Check after reduction
-  !do icoeff=1,ncoeff
-  !   write(std_out,*) "DEBUG icoeff: ", icoeff
-  !   write(*,*) "Term(",icoeff,"/",ncoeff,"): ", terms_out(icoeff)%name, "name before set name"
-  !  call polynomial_coeff_getName(name,terms_out(icoeff),symbols,recompute=.TRUE.)
-  !  call polynomial_coeff_SetName(name,terms_out(icoeff))
-  !   write(*,*) "Term(",icoeff,"/",ncoeff,"): ", terms_out(icoeff)%name, "after set name"
-  !enddo
-
 end subroutine opt_getHOSingleDispTerms
 !!***
 
@@ -2148,20 +2125,16 @@ subroutine generate_bounding_term_and_add_to_list(sympairs, nterm_start, ncombi,
 
   integer :: ncoeff
 
-  print *, "DEBUG: generate_bounding_term_and_add_to_list"
-
   ! copy the coefficients to a temporary array my_coeffs_tmp
   ncoeff=size(my_coeffs)
   ABI_MALLOC(my_coeffs_tmp,(ncoeff))
   my_coeffs_tmp=my_coeffs
-  print *, "DEBUG: generate_bounding_term_and_add_to_list: ncoeff=", ncoeff
 
   ! free the original array and allocate a new one with the correct size
   call polynomial_coeff_list_free(my_coeffs)
   ABI_MALLOC(my_coeffs, (ncoeff))
   my_coeffs(1:nterm_start) = my_coeffs_tmp(1:nterm_start)
 
-  print *, "DEBUG: generate_bounding_term_and_add_to_list: nterm_start=", nterm_start
 
 
   temp_cntr =0
