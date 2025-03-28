@@ -285,8 +285,8 @@ subroutine psp8in(ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
          exit
        end if
        do irad=1,mmax
-         read(tmp_unit,*, err=10, iomsg=errmsg)jj,rad(irad),vpspll_irad
-         vpspll(irad,iln0+1:iln0+nproj_tmp(ipsang)) = vpspll_irad
+         read(tmp_unit,*, err=10, iomsg=errmsg)jj,rad(irad),vpspll_irad(1:nproj_tmp(ipsang))
+         vpspll(irad,iln0+1:iln0+nproj_tmp(ipsang)) = vpspll_irad(1:nproj_tmp(ipsang))
        end do
        iln0=iln0+nproj_tmp(ipsang)
      elseif(ll==lloc .and. nn==1) then
