@@ -9,7 +9,7 @@ ndtset 2
 
 #paral_kgb 1   # Activate spin/k-point/band/FFT
 #autoparal 1   # Automatic selection of np* variables.
-#npfft 1       #
+#npfft 1       # Disable MPI-FFT
 
 ####################
 # Dataset 1: SCF run

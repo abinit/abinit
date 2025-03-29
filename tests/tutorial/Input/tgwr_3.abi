@@ -1,4 +1,4 @@
-#  Crystalline silicon
+# Crystalline silicon
 # Calculation of one-shot GW corrections with GWR code.
 
 # Definition of the k-point grid
@@ -16,10 +16,10 @@ include "gwr_include.abi"
 optdriver  6                          # Activate GWR code
 gwr_task "G0W0"                       # One-shot calculation
 getden_filepath "tgwr_1o_DS1_DEN"     # Density file
-getwfk_filepath "tgwr_2o_DS1_WFK"     # WFK file with empty states.
+getwfk_filepath "tgwr_2o_DS1_WFK"     # WFK file with empty states and 2x2x2 k-mesh
                                       # Must be consisten with ngkpt, shiftk
 
-gwr_boxcutmin  1.1   # This should be subject to convergence studies
+gwr_boxcutmin  1.1  # This should be subject to convergence studies
 gwr_sigma_algo 2    # Use convolutions in the BZ for Sigma
 
 nband      100      # Bands to be used in the screening calculation

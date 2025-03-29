@@ -9,7 +9,7 @@ authors: MG
 This tutorial aims at showing how to calculate self-energy corrections to the
 DFT Kohn-Sham (KS) eigenvalues in the one-shot GW approximation using the GWR code
 
-The user should be familiarized with the four basic tutorials of ABINIT,
+The user should be already familiar with the four basic tutorials of ABINIT,
 see the [tutorial home page](/tutorial),
 and is strongly encouraged to read the [introduction to the GWR code](/tutorial/gwr_intro)
 before running these examples.
@@ -18,7 +18,7 @@ This tutorial should take about 1.5 hours.
 
 [TUTORIAL_README]
 
-### Ground-state and band structure
+### Ground-state and KS band structure
 
 *Before beginning, you might consider creating a different subdirectory to work in.
 Why not create Work_gwr?*
@@ -47,7 +47,7 @@ so that we have some time to discuss the input while ABINIT is running.
 
     All the input files of this tutorial can be executed in parallel by just
     increasing the value of n in `mpirun -n`.
-    Clearly the size of the problem is very small so do not expect
+    Clearly the size of the problem is small so do not expect
     great parallel performance if you start to use dozens of MPI processes.
 
 The first dataset produces the KS density file that is then used to compute the band structure in the second dataset.
@@ -82,16 +82,10 @@ than the recommended value reported in the PseudoDojo table (16 Ha).
     but if we consider e.g. Ga, you will notice that the stringent version includes all the 3spd states in valence
     besides the outermost 4sp electrons whereas the standard pseudo for Ga designed for GS calculations
     includes only the 3d states.
-    Since we are using scalar-relativistic (SR) pseudos, it is not possible to treat spin-orbit coupling (SOC)
-    and [[nspinor]] must be set to 1 (default value).
+    Since we are using scalar-relativistic (SR) pseudos, it is not possible to treat spin-orbit coupling (SOC).
     To include SOC with NC, one should use fully-relativistic (FR) pseudos, set [[nspinor]] 2 al all the input files
     and then set the appropriate value of [[nspden]] to 4 or 1 depending on whether the system is magnetic or not.
 
-<!--
-One final comment on MPI parallelism:
-In the input, we set [[paral_kgb]] to 1 to enable k-point, band, and FFT parallelization,
-and [[autoparal]] to 1 to allow ABINIT to determine an optimal distribution, with [[npfft]] fixed at 1.
--->
 
 At this point, the calculation should have completed, and we can have a look
 at the KS band structure to find the position of the band edges.
@@ -109,49 +103,56 @@ at the KS band structure to find the position of the band edges.
 
         abiopen.py tgwr_1o_DS2_GSR.nc -p
 
-
-```
-============================== Electronic Bands ==============================
-Number of electrons: 8.0, Fermi level: 4.369 (eV)
-nsppol: 1, nkpt: 101, mband: 12, nspinor: 1, nspden: 1
-smearing scheme: none (occopt 1), tsmear_eV: 0.272, tsmear Kelvin: 3157.7
-Direct gap:
-    Energy: 2.564 (eV)
-    Initial state: spin: 0, kpt: $\Gamma$ [+0.000, +0.000, +0.000], band: 3, eig: 4.369, occ: 2.000
-    Final state:   spin: 0, kpt: $\Gamma$ [+0.000, +0.000, +0.000], band: 4, eig: 6.933, occ: 0.000
-Fundamental gap:
-    Energy: 0.590 (eV)
-    Initial state: spin: 0, kpt: $\Gamma$ [+0.000, +0.000, +0.000], band: 3, eig: 4.369, occ: 2.000
-    Final state:   spin: 0, kpt: [+0.429, +0.000, +0.429], band: 4, eig: 4.959, occ: 0.000
-Bandwidth: 11.976 (eV)
-Valence maximum located at kpt index 0:
-    spin: 0, kpt: $\Gamma$ [+0.000, +0.000, +0.000], band: 3, eig: 4.369, occ: 2.000
-Conduction minimum located at kpt index 12:
-    spin: 0, kpt: [+0.429, +0.000, +0.429], band: 4, eig: 4.959, occ: 0.000
-```
+    ============================== Electronic Bands ==============================
+    Number of electrons: 8.0, Fermi level: 4.369 (eV)
+    nsppol: 1, nkpt: 101, mband: 12, nspinor: 1, nspden: 1
+    smearing scheme: none (occopt 1), tsmear_eV: 0.272, tsmear Kelvin: 3157.7
+    Direct gap:
+        Energy: 2.564 (eV)
+        Initial state: spin: 0, kpt: $\Gamma$ [+0.000, +0.000, +0.000], band: 3, eig: 4.369, occ: 2.000
+        Final state:   spin: 0, kpt: $\Gamma$ [+0.000, +0.000, +0.000], band: 4, eig: 6.933, occ: 0.000
+    Fundamental gap:
+        Energy: 0.590 (eV)
+        Initial state: spin: 0, kpt: $\Gamma$ [+0.000, +0.000, +0.000], band: 3, eig: 4.369, occ: 2.000
+        Final state:   spin: 0, kpt: [+0.429, +0.000, +0.429], band: 4, eig: 4.959, occ: 0.000
+    Bandwidth: 11.976 (eV)
+    Valence maximum located at kpt index 0:
+        spin: 0, kpt: $\Gamma$ [+0.000, +0.000, +0.000], band: 3, eig: 4.369, occ: 2.000
+    Conduction minimum located at kpt index 12:
+    ```
 
 Silicon is an indirect band gap semiconductor:
 the CBM is located at the $\Gamma$ point while the VMB is located at ~[+0.429, +0.000, +0.429],
-At the PBE level, the direct gap is 2.564 while the fundamental band gap is ~0.590.
+At the PBE level, the direct gap is 2.564 eV while the fundamental band gap is ~0.590 eV.
 Both values strongly underestimate the experimental results that are ~3.4 eV and ~1.12 eV, respectively.
 
 !!! important
 
     Similarly to the conventional GW code, also GWR can compute QP corrections only
-    for the $\kk$-points belonging to the $\kk$-mesh used for generating the WFK file.
+    for the $\kk$-points belonging to the $\kk$-mesh used associated to the WFK file.
     Before running GW calculations is always a good idea to analyze carefully the KS band
     structure to understand the location of the band edges and then select
     the most appropriate $\kk$-mesh. for the GW computation.
 
-    Also, we will use the GSR.nc file with the KS energies along the path
-    to perform an interpolation of the GWR results in the last part of this tutorial.
+    Also, in the last part of the tutorial, we will use the GSR.nc file with the KS
+    energies along the $\kk$-path to perform an interpolation of the GWR results.
 
+
+One final comment related to the MPI parallelism in the ground-state part.
+For larger system, it is advisable to use [[paral_kgb]] = 1
+for its better scalability in conjunction with [[autoparal]] 1
+to allow ABINIT to determine an optimal distribution, in particular the band parallelism
+that is not available when the CG eigensolver is used.
+<!--
+Note also that we suggest disabling the FFT parallelization by using [[npfft]] 1.
+to 1 to enable k-point, band, and FFT parallelization,
+and [[autoparal]] to 1 to allow ABINIT to determine an optimal distribution, with [[npfft]] fixed at 1.
+-->
 
 ### Generation of the WFK file with empty states
 
-In the second input file, we use the density file computed previously (tgwr\_1o\_DS1\_DEN)
-to generate three WFK files with three different $\Gamma$-centered $\kk$-meshes
-([[ngkpt]] = 2x2x2 4x4x4, and 6x6x6).
+In the second input file, we use the density file computed previously (`tgwr_1o_DS1_DEN`)
+to generate WFK files with three different $\Gamma$-centered $\kk$-meshes:
 
 ```
 ndtset 3
@@ -161,8 +162,8 @@ ngkpt2   4 4 4
 ngkpt3   6 6 6
 ```
 
-This allows us to perform convergence studies with respect to the BZ sampling in the last part of this tutorial.
-Let us recall that shifted $\kk$-meshes are not supported by GWR.
+This allows us to perform convergence studies with respect to the BZ sampling.
+Let us recall that shifted $\kk$-meshes **are not supported** by GWR.
 In another words, [[nshiftk]] must be set to 1 with [[shiftk]] = 0 0 0 when producing the WFK file.
 The density file, on the contrary, can be generated with shifted $\kk$-meshes, as usual.
 
@@ -175,23 +176,24 @@ mpirun -n 1 tgwr_2.abi > tgwr_2.log 2> err &
 {% dialog tests/tutorial/Input/tgwr_2.abi %}
 
 Note that here we are using [[gwr_task]] = "HDIAGO" to perform a **direct diagonalization**
-of the KS Hamiltonian constructed from the input DEN file.
+of the KS Hamiltonian $H^\KS[n]$ constructed from the input DEN file.
 This procedure differs from the one used in the other GW tutorials in which the WFK file
-is generated by performing an **iterative diagonalization** in which only the application of the Hamiltonian is required.
-The reason is that the direct diagonalization outperforms iterative methods when many empty states are required,
-especially if one can take advantage of ScalaPack to distribute the KS Hamiltonian matrix.
+is generated by performing an **iterative diagonalization** in which only
+the application of the Hamiltonian is required.
+The reason is that the direct diagonalization outperforms iterative methods
+when many empty states are required, especially if one can take advantage of ScalaPack
+to distribute the KS Hamiltonian matrix.
 
-Here, we request 250 bands,
-Let's recall that in the previous GW tutorial, [[nband]] = 100 was considered converged within 30 meV
+Here, we ask for 250 bands. Let's recall that in the [previous GW tutorial](/tutorial/gw1)
+[[nband]] = 100 was considered converged within 30 meV,
 but with GWR we can afford more bands since [[nband]] enters into play only during the initial construction
 of the Green's function
-
-Clearly, when studying new systems, the converged [[nband]] value is not known beforehand.
+Clearly, when studying new systems, the value of [[nband]] needed to converge is not known beforehand.
 Therefore, it is important to plan ahead and choose a reasonably large number of bands
 to avoid regenerating the WFK file multiple times just to increase [[nband]].
 
 Note also that [[paral_kgb]] = 1 is only available in the ground-state (GS) part.
-The GWR code employs its own distribution scheme, which depends on the value of [[gwr_task]].
+The GWR code employs indeed its own distribution scheme, which depends on the value of [[gwr_task]].
 When "HDIAGO" is used, the distribution is handled automatically at runtime, and the user has no control over it.
 Please refer to the note below for guidance on choosing an appropriate number of MPI processes
 to ensure an efficient workload distribution.
@@ -219,21 +221,20 @@ to ensure an efficient workload distribution.
 For our first GWR run, we use a minimalistic input file that
 performs a GWR calculation using the DEN and the WFK file produced previously
 and different minimax meshes.
-
-First of all, you may want to start immediately the computation by issuing:
+First of all, you may want to start immediately the computation with:
 
 ```
 mpirun -n 1 tgwr_3.abi > tgwr_3.log 2> err &
 ```
 
-with the following input file:
+and the following input file:
 
 {% dialog tests/tutorial/Input/tgwr_3.abi %}
 
 This input contains some variables whose meaning is the same as in the conventional GW code,
-and other variables that are specific to the GWR code whose name starts with `gwr_`.
+and other variables whose name starts with `gwr_` that are specific to the GWR code.
 
-We use [[optdriver]] 6 to enter the GWR code and [[gwr_task]] activates a one-shot GW calculation.
+We use [[optdriver]] 6 to enter the GWR code while [[gwr_task]] activates a one-shot GW calculation.
 To reduce the wall-time, we use a minimax mesh with [[gwr_ntau]] = 6 points.
 This is the minimum number of points that can be used.
 Most likely, six points are not sufficient, but the convergence study for
@@ -259,15 +260,17 @@ The $\kk$-points and the band range for the QP corrections are set
 expliclty via [[nkptgw]], [[kptgw]] and [[bdgw]].
 Alternatively, one can use [[gw_qprange]].
 
+<!--
 For the spectral function $A_\nk(\ww)$, we have the following variables [[nfreqsp]], [[freqspmax]]
 TODO: Mention [[inclvkb]] == 2, [[symsigma]]
+-->
 
 We can now have a look at the main output file:
 
 {% dialog tests/tutorial/Refs/tgwr_3.abo %}
 
-First of all, we have a section that summarizes the most
-important GWR parameters gathered in a Yaml document:
+First of all, we have a Yaml document that summarizes the most
+important GWR parameters:
 
 ```yaml
 --- !GWR_params
@@ -309,17 +312,18 @@ Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(o
 ```
 
 Some of the entries in this dictionary have a direct correspondence with ABINIT variables and
-won't be discussed.
-The meaning of the other variables is reported below:
+won't be discussed here. The meaning of the other variables is reported below:
 
 `nkibz`: Number of $\kk$-points in the IBZ
 `qkibz`: Number of $\qq$-points in the IBZ
 `green_mpw`: maximum number of PWs for the Green's function.
 `tchi_mpw`: maximum number of PWs for the polarizability.
-`g_ngfft` is the FFT mesh in the unit cell used for the different MBPT quantities.
+`g_ngfft`: FFT mesh in the unit cell used for the different MBPT quantities.
+`min_transition_energy_eV`, `max_transition_energy_eV`: min/max transition energies
+leading to the energy ratio `eratio` used to select the minimax mesh.
 
 `green_mpw` is computed from [[ecut]], while `tchi_mpw` is defined by [[ecuteps]]
-This two number are directly related to the memory footprint as they define of the size of the matrices that
+This two numbers are directly related to the memory footprint as they define of the size of the matrices that
 must be stored in memory.
 
 TODO: Describe other entries
@@ -364,11 +368,10 @@ data: !Tabular |
 ...
 ```
 
-The meaning of the different columns should be self-explanatory.
+The meaning of the different columns should be self-explanatory at this point.
 
 As usual, we can use `abiopen.py` with the `-p` (`--print`) option to print to screen
-a summary of the most important results:
-Try, for instance:
+a summary of the most important results. Use, for instance:
 
 ```
 abiopen.py tgwr_3o_GWR.nc -p
@@ -394,13 +397,13 @@ gwr_boxcutmin: 1.1
 
 The calculation has produced three different text files:
 
-tgwr\_3o\_SIGC\_IT:
+`tgwr_3o_SIGC_IT`:
 Diagonal elements of $\Sigma_c(i \tau)$ in atomic units
 
-tgwr\_3o\_SIGXC\_IW:
+`tgwr_3o_SIGXC_IW`:
 Diagonal elements of $\Sigma_\xc(i \omega)$ in eV units
 
-tgwr\_3o\_SIGXC\_RW:
+`tgwr_3o_SIGXC_RW`:
 Diagonal elements of $\Sigma_\xc(\omega)$ in eV units and spectral function $A_\nk(\omega)$
 
 Finally, we have a netcdf file named `tgwr_3o_GWR.nc` storing the same data
@@ -410,13 +413,17 @@ in binary format that can be easily post-processed with AbiPy using:
 abiopen.py tgwr_3o_GWR.nc -e
 ```
 
-If you need more control, you may want to use
-[this script][https://abinit.github.io/abipy/gallery/plot_gwr.html].
+If you need more control, you can use the following
+[AbiPy example][https://abinit.github.io/abipy/gallery/plot_gwr.html].
+and customize according to your needs.
 
-Please take some time to read the script and understand how this post-processing tool works before proceeding.
-
+Please take some time to read the script and understand how this post-processing tool
+works before proceeding to the next section.
 
 ### Extracting useful info from the GWR log file
+
+This section discusses some shell tricks that are useful to understand
+the resources required by your calculation.
 
 To extract the memory allocated for the most memory demanding arrays, use:
 
@@ -450,6 +457,9 @@ grep "dataset:" log | grep "<<< TIME"
 dataset: 1 , wall: 17.90 [s] , cpu: 17.83 [s] <<< TIME
 ```
 
+Finally, use [[timopt]] 1 to have a detailed analysis of the time spent
+in the different parts of the code at the end of the calculation.
+
 ### Convergence study HOWTO
 
 As discussed in [[cite:Setten2017]], the convergence studies for
@@ -482,6 +492,7 @@ while adjusting the number of MPI processes accordingly (you are not using multi
 3) Convergence wrt [[ngkpt]]:
 
 Finally, refine the BZ sampling to ensure full convergence.
+Make sure that all these $kk$-meshes containg the points you are trying to converge.
 
 4) Convergence wrt [[gwr_boxcutmin]]:
 
@@ -493,19 +504,19 @@ perform an interpolation of the GW band structure as discussed in the last part 
 
 In the next sections, we explain how to perform these convergence studies and how to use AbiPy to analyze the results.
 Note that we will not provide ready-to-use input files.
-Your task is therefore to modify tgwr\_3.abi, run the calculation (preferably in parallel), and then analyze the results.
+Your task is therefore to modify `tgwr_3.abi`, run the calculation (possibly in parallel), and then analyze the results.
 
 Note that, due to cancellations of errors, QP gaps that are differences between QP energies
 are usually much easier to convergence than QP values.
-Fortunately, absolute values are important only in rather specialized studies such as Work Function
-or Band Alignment in Heterostructures.
+Fortunately, absolute values are important only in rather specialized studies such as work function
+or band alignment in Heterostructures.
 In this tutorial, we only focus on gaps, and we aim to achieve an overall convergence of the QP gaps 0.01 eV (10 meV).
-As a consequence we will try to reach a convergence of 2 meV
+As a consequence we will try to reach a convergence of 2 meV.
 
 ## Convergence wrt nband and ecuteps
 
 To perform a double convergence study in [[nband]] and [[ecuteps]],
-we can use [[udtset]], and add this section to `tgwr_3.abi`:
+define a double loop with [[udtset]], and add this section to `tgwr_3.abi`:
 
 ```sh
 ndtset 16    # NB: ndtset must be equal to udtset[0] * udtset[1]
@@ -577,7 +588,7 @@ and then run it with:
 
 ![](gwr_assets/conv_nband_ecuteps.png)
 
-On the basis of this convergence study, we decide to [[nband]] = 250 and [[ecuteps]] = 10.
+On the basis of this convergence study, we decide to use [[nband]] = 250 and [[ecuteps]] = 10.
 
 <!
 In the [first GW tutorial](/tutorial/gw1), we have already performed convergence studies,
@@ -640,7 +651,9 @@ Clearly 6 minimax points are not enough to convergence.
 Also the convergence with [[gwr_ntau]] is not variational, and there are meshes that perform better than others.
 This study shows that we should use XXX minimax points in order to reach an accuracy of 0.01 eV (`abs_conv`).
 Unfortunately, this would render the calculations more expensive, especially for a tutorial,
-therefore we opt to continue with XXX minimax points for the next calculations
+therefore we opt to continue with XXX minimax points for the next calculations.
+
+Again, let's save the results in a different directory by executing:
 
 ```
 mkdir conv_ntau
@@ -765,8 +778,9 @@ We therefore fix [[gwr_boxcutmin]] to 1.1 and proceed with the other convergence
 In this last part of the tutorial, we discuss how to interpolate the QP corrections
 along an arbitrary $\kk$-path using the star-function method discussed in
 [this section](tutorial/eph_intro/#star-function-interpolation-of-the-ks-eigenvalues) of the EPH introduction.
-This method is less accurate than e.g. the Wannier interpolation, and may have problems in the presence
+This method is less accurate than e.g. the Wannier interpolation, and may be problematic in the presence
 of band-crossings, but it has the big advantage of being much easier to use and with mininal user intervention.
+
 First of all, we need to compute the QP corrections for **all** the $\kk$-points in the IBZ.
 This is done in the following input:
 
@@ -814,5 +828,5 @@ You should get the following figure:
 
 ![](gwr_assets/gw_vs_ks_bands.png)
 
-To keep the wall-time at a reasonable level, we uses a WFK file with 2x2x2 $\kk$-mesh,
+To keep the wall-time at a reasonable level, we use a WFK file with 2x2x2 $\kk$-mesh,
 but it is clear that a more accurate intepolation would require denser $\kk$-meshes.
