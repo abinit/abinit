@@ -7154,9 +7154,9 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  !type(pawcprj_type),allocatable :: cwaveprj(:,:)
 ! *************************************************************************
 
+ units = [std_out, ab_out]
  call timab(1927, 1, tsec)
  call cwtime(cpu_all, wall_all, gflops_all, "start")
- units = [std_out, ab_out]
  call wrtout(units, sjoin(" Computing chi0 head and wings with inclvkb:", itoa(gwr%dtset%inclvkb)), pre_newlines=1)
 
  nspinor = gwr%nspinor; nsppol = gwr%nsppol; dtset => gwr%dtset; cryst => gwr%cryst
@@ -7200,7 +7200,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  ABI_MALLOC(vkbr, (gwr%nkibz))
  gradk_not_done = .TRUE.
 
- ! TODO: Might become 1b
+ ! TODO: Big allocation. Might become 1b
  ABI_MALLOC(bbp_mask, (mband, mband))
 
  ! =========================================
@@ -7257,7 +7257,6 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
 
  ! Find band1_max from gwr_max_hwtene
  band1_max = gwr%ugb_nband
-
  if (gwr%dtset%gwr_max_hwtene > zero) then
    ! Set e0 to top of valence band if semiconductor else Fermi level
    e0 = now_ebands%fermie
@@ -7286,12 +7285,18 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  ABI_MALLOC(ur1_kibz, (u_nfft * nspinor))
  ABI_MALLOC(ur2_kibz, (u_nfft * nspinor))
  ABI_MALLOC(ur_prod, (u_nfft * nspinor))
- dim_rtwg = 1 !; if (nspinor==2) dim_rtwg=2 ! Can reduce size depending on Ep%nI and Ep%nj
+ dim_rtwg = 1; if (nspinor == 2) dim_rtwg = 2 ! Can reduce size depending on Ep%nI and Ep%nj
  ABI_MALLOC(rhotwg, (npwe * dim_rtwg))
 
- ! TODO:
+ ! TODO: use ddkop instead of commutator so that we can handle SOC terms.
  ddkop = ddkop_new(dtset, gwr%cryst, gwr%pawtab, gwr%psps, gwr%mpi_enreg, u_mpw, u_ngfft)
 
+ ABI_CHECK_IEQ(dtset%symchi, 1, "symchi 0 not implemented")
+ if (dtset%nspinor == 2) then
+   ABI_CHECK_IEQ(dtset%inclvkb, 0, "inclvkb must be 0 when nspinor == 2 as SOC term is not coded.")
+ end if
+
+ ! Loop over collinear spins.
  do my_is=1,gwr%my_nspins
    spin = gwr%my_spins(my_is)
 
@@ -7305,8 +7310,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
      print_time = gwr%comm%me == 0 .and. (my_ikf <= LOG_MODK .or. mod(my_ikf, LOG_MODK) == 0)
      if (print_time) call cwtime(cpu_k, wall_k, gflops_k, "start")
 
-     ! FIXME: Be careful with the symmetry conventions here!
-     ! and the interplay between umklapp in q and FFT
+     ! FIXME: Be careful with the symmetry conventions here! and the interplay between umklapp in q and FFT
      ! Also, the assembly_chi0 routines assume symrec and trev_k in [1, 2]
      ik_ibz = gwr%kbz2ibz_symrel(1, ik_bz); isym_k = gwr%kbz2ibz_symrel(2, ik_bz)
      trev_k = gwr%kbz2ibz_symrel(6, ik_bz); g0_k = gwr%kbz2ibz_symrel(3:5, ik_bz)
@@ -7330,13 +7334,18 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
        gradk_not_done(ik_ibz) = .FALSE.
      end if
 
-     !call ddkop%setup_spin_kpoint(gwr%dtset, gwr%cryst, gwr%psps, spin, kk_bz, istwf_kk, npw_ki, kg_ki)
+#define _DEV_USE_DDK 1
+
+#if _DEV_USE_DDK
+     ! In principle we should pass npw_kf ...
+     call ddkop%setup_spin_kpoint(gwr%dtset, gwr%cryst, gwr%psps, spin, kk_bz, istwf_ki, npw_ki, kg_ki)
 
      !call wfd%copy_cg(ib_v, ik, spin, cg_v)
      !call ddkop%apply(ebands%eig(ib_v, ik, spin), npw_k, wfd%nspinor, cg_v, cwaveprj)
 
      !call wfd%copy_cg(ib_c, ik, spin, cg_c)
      !vv = ddkop%get_braket(ebands%eig(ib_c, ik, spin), istwf_k, npw_k, nspinor, cg_c, mode=ds%mode)
+#endif
 
      ! HM: 24/07/2018
      ! Transform dipoles to be consistent with results from DFPT
@@ -7368,7 +7377,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
      block_counter = 0
      do band1_start=1, gwr%ugb_nband, block_size
        block_counter = block_counter + 1
-       ! Distribute blocks inside tau_comm as wavefunctions are replicated
+       ! Distribute blocks inside tau_comm as wavefunctions are replicated.
        if (gwr%tau_comm%skip(block_counter)) cycle
 
        if (all(.not. bbp_mask(band1_start:, :))) then
@@ -7381,7 +7390,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
        band1_stop = band1_start + nb - 1
        if (band1_stop > band1_max) exit
 
-       ! Collect nb bands starting from band1_start on each proc.
+       ! Use ug1_block to collect nb bands starting from band1_start on each proc.
        call ugb_kibz%collect_cplx(npw_ki * nspinor, nb, [1, band1_start], ug1_block)
 
        ABI_MALLOC(gh1c_block, (2, npw_ki*nspinor, 3, nb))
@@ -7389,16 +7398,20 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
          band1 = ugb_kibz%loc2gcol(il_b1)
          eig_nk = gwr%ks_ebands%eig(band1, ik_ibz, spin)
 
+#if _DEV_USE_DDK
          ! FIXME: This is wrong if spc
          !call c_f_pointer(c_loc(ugb_kibz%buffer_cplx(:,il_b1)), cwave, shape=[2, npw_ki*nspinor])
          !call ddkop%apply(eig_nk, npw_ki, nspinor, cwave, cwaveprj)
-         !gh1c_block(:,:,:,xx_ib) = ddkop%gh1c(:, 1:npw_ki*nspinor,:)
+         !gh1c_block(:,:,:,il_b1) = ddkop%gh1c(:, 1:npw_ki*nspinor,:)
+#endif
        end do
 
        ! Loop over "conduction" states.
        !do band1=band1_start, band1_stop
        do ib=1,nb
          band1 = band1_start + ib - 1
+
+         ! FFT band1 from g to r
          ug1 = ug1_block(:, ib)
          call fft_ug(npw_ki, u_nfft, nspinor, ndat1, u_mgfft, u_ngfft, istwf_ki, kg_ki, u_gbound, ug1, ur1_kibz)
          !call fft_ug(npw_ki, u_nfft, nspinor, ndat1, u_mgfft, u_ngfft, istwf_ki, kg_ki, u_gbound, ug1_block(:,ib), ur1_kibz)
@@ -7434,12 +7447,14 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
              end do
            end if
 
+           ! FFT band2 from g to r
            ug2 = ugb_kibz%buffer_cplx(:, il_b2)
            call fft_ug(npw_ki, u_nfft, nspinor, ndat1, u_mgfft, u_ngfft, istwf_ki, kg_ki, u_gbound, ug2, ur2_kibz)
 
-           ! FIXME: nspinor 2 is wrong as we have a 2x2 matrix
            ur_prod(:) = conjg(ur1_kibz(:)) * ur2_kibz
            call fft_ur(npwe, u_nfft, nspinor, ndat1, u_mgfft, u_ngfft, istwfk1, gvec_q0, gbound_q0, ur_prod, rhotwg)
+           ! if nspinor == 2, sum 11, 22 terms in spin space
+           if (nspinor == 2) rhotwg(1:npwe) = rhotwg(1:npwe) + rhotwg(npwe+1:2*npwe)
 
            if (gwr%usepaw == 0) then
              ! Matrix elements of i[H,r] for NC pseudopotentials.
@@ -7465,6 +7480,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
            trev_k = trev_k + 1  ! NB: GW routines assume trev in [1, 2]
 
            ! TODO: Metals
+           ! Note: if nspinor == 2, only rhotgw(1:npwe) with the 11 + 22 sum is used.
            call accumulate_head_wings_imagw( &
                                         npwe, nomega, nI, nJ, dtset%symchi, &
                                         is_metallic, ik_bz, isym_k, trev_k, nspinor, cryst, ltg_q, gsph, &
@@ -7489,7 +7505,6 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
    end do ! my_ikf
  end do ! my_is
 
- call ddkop%free()
  ABI_FREE(bbp_mask)
  ABI_FREE(gvec_q0)
  ABI_FREE(gbound_q0)
@@ -7499,6 +7514,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  ABI_FREE(ur_prod)
  ABI_FREE(rhotwg)
  ABI_FREE(u_gbound)
+ call ddkop%free()
  call vkbr_free(vkbr)
  ABI_FREE(vkbr)
 
