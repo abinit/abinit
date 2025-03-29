@@ -1,5 +1,5 @@
-#%%  Crystalline silicon
-#%%  Calculation of the GW corrections with GWR code with 4x4x4 k-mesh.
+#  Crystalline silicon
+#  Calculation of the GW corrections with GWR code and 4x4x4 k-mesh.
 
 # Include geometry and pseudos
 include "gwr_include.abi"

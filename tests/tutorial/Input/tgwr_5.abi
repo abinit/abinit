@@ -1,3 +1,8 @@
+# Crystalline silicon
+# Calculation of the GW corrections with GWR code and 2x2x2 k-mesh.
+# Compute QP corrections for all k-points in the IBZ
+
+
 # Definition of the k-point grid
 # IMPORTANT: GWR requires Gamma-centered k-meshes
 ngkpt   2 2 2
@@ -48,5 +53,5 @@ gw_qprange  4
 #%% keywords = NC, GWR
 #%% description =
 #%%  Crystalline silicon
-#%%  Calculation of the GW corrections with GWR code.
+#%%  Calculation of the GW corrections with GWR code for all k-points in the IBZ.
 #%%<END TEST_INFO>

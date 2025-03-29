@@ -1,8 +1,9 @@
-#  Calculation of WFK files with empty states with direct diagonalization
+#  Calculation of WFK files with empty states and direct diagonalization
 
 # Include geometry and pseudos
 include "gwr_include.abi"
 
+# Generate 3 WFK files with increased BZ sampling.
 ndtset 3
 ngkpt1   2 2 2
 ngkpt2   4 4 4
@@ -34,5 +35,5 @@ getden_filepath "tgwr_1o_DS1_DEN"    # Density file used to build H[n]
 #%% authors = M. Giantomassi
 #%% keywords = NC, GWR
 #%% description =
-#%%  Calculation if WFK files with empty states with direct diagonalization
+#%%  Calculation of WFK files with empty states with direct diagonalization
 #%%<END TEST_INFO>

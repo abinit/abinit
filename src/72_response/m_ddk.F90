@@ -865,7 +865,7 @@ end subroutine ddkop_setup_spin_kpoint
 !!
 !! SIDE EFFECTS
 !! Stores:
-!!  gh1c(2,npw1*nspinor)= <G|H^(1)|C> or  <G|H^(1)-lambda.S^(1)|C> on the k+q sphere
+!!  gh1c(2,npw1*nspinor)= <G|H^(1)|C> or <G|H^(1)-lambda.S^(1)|C> on the k+q sphere
 !!                        (only kinetic+non-local parts if optlocal=0)
 !!
 !! SOURCE
@@ -909,7 +909,7 @@ subroutine ddkop_apply(self, eig0nk, npw_k, nspinor, cwave, cwaveprj)
    end do
 
  else
-   ! optnl 0 with DDK does not work as expected.
+   ! FIXME: optnl 0 with DDK does not work as expected.
    ! So I treat the kinetic term explicitly without calling getgh1c.
    do idir=1,3
      kinpw1 => self%gs_hamkq(idir)%kinpw_kp
