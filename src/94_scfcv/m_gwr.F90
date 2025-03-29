@@ -8189,10 +8189,20 @@ end subroutine get_1d_sc_phases
 !!  sc_sum
 !!
 !! FUNCTION
+!!  Compute matrix elements of the self-energy Sigma_nk in the supercell at fixed rr.
 !!
 !! INPUTS
+!!  sc_shape(3)=Supercell shape.
+!!  uc_ngfft(18)=Info on the FFT mesh in the unit cell.
+!!  nspinor=Number of spinor componenets.
+!!  ph1d=1d phase factors in the supercell
+!!  k_is_gamma=Tru if k is gamma.
+!!  alpha=Coeffient
+!!  sc_data=Values in the supercell
+!!  uc_psi=Wavefunction in the unit cell
 !!
 !! OUTPUT
+!!  cout=Partial contribution to integral.
 !!
 !! SOURCE
 

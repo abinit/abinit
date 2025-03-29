@@ -535,7 +535,7 @@ end subroutine calc_vkb
 !!
 !! SOURCE
 
-function nc_ihr_comm(vkbr,cryst,psps,npw,nspinor,istwfk,inclvkb,kpoint,ug1,ug2,gvec) result(ihr_comm)
+function nc_ihr_comm(vkbr, cryst, psps, npw, nspinor, istwfk, inclvkb, kpoint, ug1, ug2, gvec) result(ihr_comm)
 
 !Arguments ------------------------------------
 !scalars
