@@ -781,11 +781,11 @@ subroutine ddkop_setup_spin_kpoint(self, dtset, cryst, psps, spin, kpoint, istwf
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: spin, npw_k, istwf_k
  class(ddkop_t),intent(inout) :: self
- type(crystal_t) :: cryst
  type(dataset_type),intent(in) :: dtset
+ type(crystal_t),intent(in) :: cryst
  type(pseudopotential_type),intent(in) :: psps
+ integer,intent(in) :: spin, npw_k, istwf_k
 !arrays
  integer,intent(in) :: kg_k(3,npw_k)
  real(dp),intent(in) :: kpoint(3)
