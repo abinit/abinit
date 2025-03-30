@@ -776,12 +776,12 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
               i=i+1
             end if
           enddo ! while mse/mse_ini>10
-          if (isnan(eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient ) ) then
+          if (eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient /= eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient) then
             eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient = 0.0_dp
           end if
 
           eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient = opt_boundcoeff(GF_arr,coeff_opt,bound_penalty)
-          if (isnan(eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient ) ) then
+          if (eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient /= eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient) then
             eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient = 0.0_dp
           end if
 

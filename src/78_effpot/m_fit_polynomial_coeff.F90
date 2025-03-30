@@ -200,8 +200,6 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  character(len=7)  :: j_char
  character(len=5),allocatable :: symbols(:)
  integer, allocatable :: list_bound(:), list_fix(:)
-
-
  integer :: n_remaining
 
 ! *************************************************************************
@@ -345,6 +343,7 @@ contains
       call polynomial_coeff_free(coeffs_out(ii))
     end do
     ABI_SFREE(coeffs_out)
+
     !Deallocate fixed eff_pot
     call effective_potential_free(eff_pot_fixed)
     !Other deallocations
@@ -409,6 +408,7 @@ contains
           &                            ,"Action -> Change fit_imposecoeff in the input"
         ABI_ERROR(message)
       endif
+
       ABI_MALLOC(coeffs_tmp,(nimposecoeff))
       ! Copy the imposed coefficients to coeffs_tmp, then set them in eff_pot_fixed
       do ia = 1,nimposecoeff
@@ -670,10 +670,8 @@ contains
           !FIXME: on on bot EOZ: the coeffs_tmp has larger size than coeffs_iatom.
           ! This is a bug.
           !if(allocated(coeffs_iatom)) then
-          print *, "DEBUG: is coeffs_iatom allocated?", allocated(coeffs_iatom)
-          if(allocated(coeffs_iatom)) print *, "DEBUG: size coeffs_iatom", size(coeffs_iatom)
-            call coeffs_list_copy(coeffs_tmp,coeffs_iatom)
-            call polynomial_coeff_list_free(coeffs_iatom)
+          call coeffs_list_copy(coeffs_tmp,coeffs_iatom)
+          call polynomial_coeff_list_free(coeffs_iatom)
           !end if
         else
           ncoeff_tot = ncoeff_tot+ncoeff_tot_tmp
@@ -1898,7 +1896,6 @@ contains
       call xmpi_bcast(ncoeff_preselected,rank_to_send,comm,ierr)
       call xmpi_bcast(list_coeffs(1:ncoeff_preselected),rank_to_send,comm,ierr)
     end if
-    print *, "DEBUG==================> ", "ncoeff_preselected: ", ncoeff_preselected
     do ii=1,ncoeff_preselected
       icoeff = list_coeffs(ii)
       list_coeffs_tmp(ii) = ii
@@ -2043,8 +2040,14 @@ contains
             coeffs_tmp(ia)%name, &        ! Name of the coefficient
             check = .true.      &            ! Validation flag
          )
+
+        call polynomial_coeff_free(coeffs_tmp(ia))
        endif
+
      enddo
+     ABI_SFREE(coeffs_tmp)
+
+
 
 
      !  Set the final set of coefficients into the eff_pot type
@@ -2837,7 +2840,7 @@ subroutine fit_polynomial_coeff_solve(coefficients,fcart_coeffs,fcart_diff,energ
    coefficients = zero
  end if
 
-   if(any(abs(coefficients)>1.0E10) .or. any(isnan(coefficients)))then
+   if(any(abs(coefficients)>1.0E10) .or. any(coefficients /= coefficients))then
      INFO = 1
      coefficients = zero
    end if
