@@ -45,7 +45,7 @@
 !!
 !!   - in GWR, the k-mesh must be Gamma-centered.
 !!   - All the two-point functions are defined on k/q-centered g-spheres while GW uses a single Gamma-centered sphere.
-!!   - The frequency/tau meshes are automatically defined by ntau and the KS spectrum (minimax meshes)
+!!   - The frequency/tau meshes are automatically defined by ntau and the KS spectrum (minimax meshes).
 !!
 !!  Technical problems:
 !!
@@ -832,6 +832,14 @@ contains
 !!  Initialize the gwr object.
 !!
 !! INPUTS
+!! dtset<dataset_type>=All input variables for this dataset.
+!! dtfil<datafiles_type>=Variables related to files.
+!! cryst=Crystalline structure
+!! psps<pseudopotential_type>=Variables related to pseudopotentials.
+!! pawtab(ntypat*usepaw)<pawtab_type>=Paw tabulated starting data.
+!! ke_ebands=KS energies
+!! mpi_enreg=information about MPI parallelization (FAKE one as GWR has its own MPI algo)
+!! input_comm=MPI communicator
 !!
 !! OUTPUT
 !!
@@ -872,7 +880,6 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  real(dp) :: my_shiftq(3,1), kk_ibz(3), kk_bz(3), qq_bz(3), qq_ibz(3), kk(3), tsec(2)
  real(dp),allocatable :: wtk(:), kibz(:,:)
  logical :: periods(ndims), keepdim(ndims)
-
 ! *************************************************************************
 
  call cwtime(cpu, wall, gflops, "start")
@@ -883,8 +890,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
 
  ! Keep a reference to other objects to simplify the internal API.
  gwr%dtset => dtset; gwr%dtfil => dtfil; gwr%cryst => cryst; gwr%psps => psps; gwr%pawtab => pawtab
- gwr%ks_ebands => ks_ebands; gwr%kibz => ks_ebands%kptns; gwr%wtk => ks_ebands%wtk
- gwr%mpi_enreg => mpi_enreg
+ gwr%ks_ebands => ks_ebands; gwr%kibz => ks_ebands%kptns; gwr%wtk => ks_ebands%wtk; gwr%mpi_enreg => mpi_enreg
 
  ! Initialize qp_ebands with KS values.
  call ks_ebands%copy(gwr%qp_ebands)
@@ -893,9 +899,9 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  ABI_MALLOC(gwr%ks_vbik, (gwr%ks_ebands%nkpt, gwr%ks_ebands%nsppol))
  gwr%ks_vbik(:,:) = gwr%ks_ebands%get_valence_idx()
 
+ ! Useful dimensions.
  gwr%nspinor = dtset%nspinor; gwr%nsppol = dtset%nsppol; gwr%nspden = dtset%nspden; gwr%nsig_ab = gwr%nspinor ** 2
  gwr%natom = dtset%natom; gwr%usepaw = dtset%usepaw
-
  gwr%sig_diago = .True.
  if (string_in(gwr%dtset%gwr_task, "GAMMA_GW")) gwr%sig_diago = .False.
 
@@ -915,7 +921,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
    gwr%use_supercell_for_sigma = gwr%dtset%gwr_sigma_algo == 1
  end if
 
- ! Set q0
+ ! Set q0 for long-wavelength limit
  if (dtset%gw_nqlwl /= 0) gwr%q0 = dtset%gw_qlwl(:, 1)
 
  mband = ks_ebands%mband; nbsum = dtset%nband(1)
@@ -1169,7 +1175,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  gwr%te_max = maxval(ks_ebands%eig(nbsum,:,:) - ks_ebands%eig(1,:,:))
  if (gwr%te_min <= tol6) then
    gwr%te_min = tol6
-   ABI_ERROR("System is metallic or with a very small fundamental gap!")
+   ABI_ERROR("System is metallic or with a very small fundamental gap! Check energies in WFK file!")
  end if
  gwr%ntau = dtset%gwr_ntau
 
@@ -1215,6 +1221,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  end if
 
  if (gwr%comm%me == 0) then
+   ! Print some info on errors.
    write(std_out, "(3a)")ch10, " Computing F(delta) = \int_0^{\infty} dw / (w^2 + delta^2) = pi/2/delta ", ch10
    write(std_out, "(*(a12,2x))")"delta", "numeric", "exact", "abs_rerr (%)"
    do ii=1,10
@@ -1239,7 +1246,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  ! =========================================
  ! Find FFT mesh and max number of g-vectors
  ! =========================================
- ! Note the usage of gwr_boxcutmin and the loops over the full BZ. All the procs execute this part.
+ ! Note the usage of gwr_boxcutmin and the loops over the full BZ.
  gwr%g_ngfft = gwr%dtset%ngfft; gwr%g_ngfft(1:6) = 0  ! Allow user to specify fftalg
 
  gwr%green_mpw = -1
@@ -1267,7 +1274,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
    end if
  end do
 
- ! For the time being no augmentation
+ ! No augmentation of workspace arrays.
  gwr%g_ngfft(4:6) = gwr%g_ngfft(1:3)
 
  ! ========================
@@ -1443,7 +1450,7 @@ end block
  call xmpi_split_block(gwr%ntau, gwr%tau_comm%value, gwr%my_ntau, gwr%my_itaus)
  ABI_CHECK(gwr%my_ntau > 0, "my_ntau == 0, decrease number of procs for tau level")
 
- ! Store the rank of the MPI proc in tau_comm treating itau index.
+ ! Store the rank of the MPI proc in tau_comm treating the itau index.
  ABI_MALLOC(gwr%tau_master, (gwr%ntau))
  gwr%tau_master = -1
  do my_it=1,gwr%my_ntau
@@ -1486,6 +1493,7 @@ end block
    iwork(gwr%kpt_comm%me + 1, ik_ibz) = 1
  end do
  call xmpi_sum(iwork, gwr%kpt_comm%value, ierr)
+
  ABI_MALLOC(gwr%itreat_ikibz, (gwr%nkibz))
  gwr%itreat_ikibz = .False.
  do ik_ibz=1,gwr%nkibz
@@ -1535,6 +1543,7 @@ end block
  ABI_FREE(got)
  ABI_FREE(iwork)
 
+ ! Initialize Coulomb interaction.
  ! TODO: MC technique does not seem to work as expected, even in the legacy code.
  vc_ecut = max(dtset%ecutsigx, dtset%ecuteps)
  call gwr%vcgen%init(cryst, ks_ebands%kptrlatt, gwr%nkbz, gwr%nqibz, gwr%nqbz, gwr%qbz, &
@@ -1700,7 +1709,6 @@ type(est_t) pure function estimate(gwr, np_kgts) result(est)
 
 !Local variables-------------------------------
  real(dp) :: np_k, np_g, np_t, np_s, w_k, w_g, w_t, w_s, np_tot
-
 ! *************************************************************************
 
  ! Use real quantities to avoid integer division
@@ -1766,7 +1774,6 @@ subroutine est_print(est, units)
 
 !Local variables-------------------------------
  character(len=4),parameter :: fmt = "f8.1"
-
 ! *************************************************************************
 
  call wrtout(units, "- Resident memory in Mb for G(g,g',+/-tau) and chi(g,g',tau):")
@@ -1789,6 +1796,11 @@ end subroutine est_print
 !! FUNCTION
 !! Allocate/Free PBLAS matrices according to `what` for the set of k/q-points selected by `mask_ibz`.
 !!
+!! INPUTS
+!!  mask_ibz
+!!  what
+!!  action
+!!
 !! SOURCE
 
 subroutine gwr_malloc_free_mats(gwr, mask_ibz, what, action)
@@ -1803,7 +1815,6 @@ subroutine gwr_malloc_free_mats(gwr, mask_ibz, what, action)
  !integer :: ii, num_pm, ipm_list__(2)
  type(__slkmat_t), pointer :: mat
  character(len=500) :: msg
-
 ! *************************************************************************
 
  ABI_CHECK(string_in(action, "malloc, free"), sjoin("Invalid action:", action))
@@ -2024,8 +2035,10 @@ end subroutine desc_array1_free
 !!  Load the KS states to compute Sigma_nk from the WFK file
 !!
 !! INPUTS
+!!  wfk_path=Name of the WFK file.
 !!
 !! OUTPUT
+!!  tmp_kstab
 !!
 !! SOURCE
 
@@ -2046,7 +2059,6 @@ subroutine gwr_load_kcalc_wfd(gwr, wfk_path, tmp_kstab)
 !arrays
  integer,allocatable :: nband(:,:), wfd_istwfk(:)
  logical,allocatable :: bks_mask(:,:,:), keep_ur(:,:,:)
-
 ! *************************************************************************
 
  call cwtime(cpu, wall, gflops, "start")
@@ -2121,7 +2133,7 @@ end subroutine gwr_load_kcalc_wfd
 !!  gwr_read_ugb_from_wfk
 !!
 !! FUNCTION
-!!  Read wavefunctions from the WFK file wfk_path and store them in gwr%ugb (MPI distributed).
+!!  Read wavefunctions from the WFK file `wfk_path` and store them in gwr%ugb (MPI distributed).
 !!
 !! SOURCE
 
@@ -2151,7 +2163,6 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
  real(dp) :: kk_ibz(3), tsec(2)
  real(dp),target,allocatable :: cg_work(:,:,:)
  real(dp),ABI_CONTIGUOUS pointer :: cg_k(:,:)
-
 ! *************************************************************************
 
  call cwtime(cpu, wall, gflops, "start")
@@ -2315,7 +2326,7 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
        do bstart=1, nbsum, band_step
          bstop = min(bstart + band_step - 1, nbsum); nb = bstop - bstart + 1
 
-         ABI_MALLOC(cg_work, (2, npwsp, nb)) ! This array is always dp
+         ABI_MALLOC(cg_work, (2, npwsp, nb)) ! This array is always in double precision.
          if (io_comm%me == master) then
            call c_f_pointer(c_loc(cg_work), cg_k, shape=[2, npwsp * nb])
            call wfk%read_band_block([bstart, bstop], ik_ibz, spin, xmpio_single, kg_k=kg_k, cg_k=cg_k)
@@ -2395,7 +2406,6 @@ subroutine gwr_build_green(gwr, free_ugb)
  integer :: mask_kibz(gwr%nkibz), units(2), ija(2), ijb(2)
  real(dp) :: tsec(2)
  real(dp),contiguous, pointer :: qp_eig(:,:,:), qp_occ(:,:,:)
-
 ! *************************************************************************
 
  call cwtime(cpu, wall, gflops, "start")
@@ -2467,7 +2477,7 @@ subroutine gwr_build_green(gwr, free_ugb)
          ! Now build G(g,g',ipm) with PZGEMM.
          isgn = merge(1, -1, ipm == 2)
          ija = [1, 1]; ijb = [1, 1]
-         ! TODO: optimize
+         ! TODO: optimize this part
          nb_occ = -1
          !if (ipm == 1) then
          !  ija = [1, nb_occ]; ijb = ija
@@ -2533,7 +2543,6 @@ subroutine gwr_gk_to_scbox(gwr, sc_ngfft, desc_mykbz, green_scgvec, my_ir, ndat,
 !Local variables-------------------------------
  integer :: my_ikf, ik_bz, ipm, gg(3), idat, iepoch, ii, idat_list(gwr%kpt_comm%nproc) ! ig,
  !real(dp) :: tsec(2) !, cpu, wall, gflops
-
 ! *************************************************************************
 
  !call cwtime(cpu, wall, gflops, "start")
@@ -2642,7 +2651,6 @@ subroutine gwr_wcq_to_scbox(gwr, sc_ngfft, desc_myqbz, wc_scgvec, my_ir, ndat, &
 !Local variables-------------------------------
  integer :: my_iqf, iq_bz, idat, iepoch, ii, idat_list(gwr%kpt_comm%nproc) ! gg(3), ig,
  !real(dp) :: tsec(2) !, cpu, wall, gflops
-
 ! *************************************************************************
 
  !call timab(1930, 1, tsec)
@@ -2762,7 +2770,6 @@ subroutine gwr_rotate_gpm(gwr, ik_bz, itau, spin, desc_kbz, gt_pm, ipm_list)
  integer :: g1(3), g2(3)
  real(dp) :: tnon(3) !, cpu, wall, gflops
  complex(dp) :: ph2, ph1
-
 ! *************************************************************************
 
  !call cwtime(cpu, wall, gflops, "start")
@@ -2895,7 +2902,6 @@ subroutine gwr_get_myk_green_gpr(gwr, itau, spin, desc_mykbz, gt_gpr)
  character(len=500) :: msg
  type(__slkmat_t) :: rgp, gt_pm(2)
  type(uplan_t) :: uplan_k
-
 ! *************************************************************************
 
  call cwtime(cpu, wall, gflops, "start")
@@ -2992,7 +2998,6 @@ subroutine gwr_get_gkbz_rpr_pm(gwr, ik_bz, itau, spin, gk_rpr_pm, g0, ipm_list)
  type(uplan_t) :: uplan_k
  complex(gwpc),allocatable :: ceig0r(:)
  character(len=500) :: msg
-
 ! *************************************************************************
 
  !call cwtime(cpu, wall, gflops, "start")
@@ -3100,7 +3105,6 @@ end subroutine gwr_get_gkbz_rpr_pm
 !!  ! type(__slkmat_t) :: rgp, gpr
 !!  ! character(len=500) :: msg
 !!  ! type(uplan_t) :: uplan_k
-!!  !
 !!  !! *************************************************************************
 !!  !
 !!  ! ABI_ERROR("Not Implemented Error")
@@ -3163,7 +3167,6 @@ subroutine gwr_rpr_to_ggp(gwr, desc, rp_r, g_gp)
  type(__slkmat_t) :: r_gp, gp_r
  character(len=500) :: msg
  type(uplan_t) :: uplan_k
-
 ! *************************************************************************
 
  ! Allocate intermediate gp_r PBLAS matrix to store F(g',r)
@@ -3231,7 +3234,6 @@ subroutine gwr_rotate_wc(gwr, iq_bz, itau, spin, desc_qbz, wc_qbz)
  integer :: g1(3), g2(3), g0_q(3)
  real(dp) :: tnon(3), qq_bz(3)
  complex(dp) :: ph2, ph1
-
 ! *************************************************************************
 
  ABI_CHECK(gwr%wc_space == "itau", sjoin("wc_space:", gwr%wc_space, " != itau"))
@@ -4363,8 +4365,8 @@ subroutine gwr_build_tchi(gwr)
    ABI_MALLOC(chiq_gpr, (gwr%my_nqibz))
    ABI_MALLOC(desc_mykbz, (gwr%my_nkbz))
 
-   ! Allocate PBLAS arrays for tchi_q(g',r) for all q in the IBZ treated by this MPI rank.
-   ! Here we're gonna have a big allocation peak.
+   call wrtout(std_out, "Allocating PBLAS arrays for tchi_q(g',r) for all q in the IBZ treated by this MPI rank.")
+   call wrtout(std_out, "Here we're gonna have a big allocation peak...")
    do my_iqi=1,gwr%my_nqibz
      iq_ibz = gwr%my_qibz_inds(my_iqi)
      npwsp = gwr%tchi_desc_qibz(iq_ibz)%npw * gwr%nspinor
@@ -4481,8 +4483,7 @@ end if
       end do ! my_ir (end cpu intensive loop)
 
        ! Free descriptors and PBLAS matrices in kBZ.
-       call desc_array_free(desc_mykbz)
-       call slk_array_free(gt_gpr)
+       call desc_array_free(desc_mykbz); call slk_array_free(gt_gpr)
 
        ! Now we have tchi_q(g',r).
        ! For each IBZ q-point treated by this MPI proc, do:
@@ -7625,6 +7626,7 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
  logical :: isirr_k, isirr_q, sigc_is_herm, compute_qp__
  real(dp) :: fact_spin, theta_mu_minus_esum, theta_mu_minus_esum2, tol_empty, tol_empty_in, gwr_boxcutmin_x
  real(dp) :: cpu_k, wall_k, gflops_k, cpu_all, wall_all, gflops_all
+ complex(dp) :: gwpc_sigxme, gwpc_sigxme2, xdot_tmp
  character(len=5000) :: msg
  logical :: q_is_gamma
  type(__slkmat_t),pointer :: ugb_kibz
@@ -7638,13 +7640,10 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
  real(dp) :: ksum(3), kk_ibz(3), kgw(3), kgw_m_ksum(3), qq_bz(3), tsec(2) !, kk_bz(3), q0(3) !, spinrot_kbz(4), spinrot_kgw(4)
  real(dp),contiguous, pointer :: ks_eig(:,:,:), qp_eig(:,:,:), qp_occ(:,:,:), cg2_ptr(:,:) ! cg1_ptr(:,:),
  real(dp),allocatable :: work(:,:,:,:), cg1_ibz(:,:) !, cg2_bz(:,:)
- complex(gwpc),allocatable :: vc_sqrt_qbz(:)
- complex(dp),allocatable :: rhotwg(:), rhotwgp(:), rhotwg_ki(:,:)
- complex(gwpc),allocatable :: ur_bdgw(:,:)
- complex(dp),allocatable :: ur_ksum(:), ur_prod(:), eig0r(:)
+ complex(gwpc),allocatable :: vc_sqrt_qbz(:), ur_bdgw(:,:)
+ complex(dp),allocatable :: rhotwg(:), rhotwgp(:), rhotwg_ki(:,:), ur_ksum(:), ur_prod(:), eig0r(:)
  complex(dp),target,allocatable :: ug_ksum(:)
  complex(dp),allocatable  :: sigxcme_tmp(:,:), sigxme_tmp(:,:,:), sigx(:,:,:,:)
- complex(dp) :: gwpc_sigxme, gwpc_sigxme2, xdot_tmp
  type(sigijtab_t),allocatable :: Sigxij_tab(:,:), Sigcij_tab(:,:)
 ! *************************************************************************
 
@@ -8102,7 +8101,6 @@ subroutine gwr_get_u_ngfft(gwr, boxcutmin, u_ngfft, u_nfft, u_mgfft, u_mpw, gmax
  integer :: ik_bz, npw_, ig, ii
  real(dp) :: kk_bz(3)
  integer,allocatable :: gvec_(:,:)
-
 ! *************************************************************************
 
  ! All MPI procs in gwr%comm execute this part.
@@ -8142,8 +8140,12 @@ end subroutine gwr_get_u_ngfft
 !!  Compute one-dimensional factors in the supercell.
 !!
 !! INPUTS
+!!  sc_shape(3)=Supercell shape.
+!!  nkpt=Number of k-points
+!!  kpts(3,nkpt)=K-points in reduced coordinates.
 !!
 !! OUTPUT
+!!  ph1d(maxval(sc_shape), 3, nkpt))
 !!
 !! SOURCE
 
@@ -8157,7 +8159,6 @@ subroutine get_1d_sc_phases(sc_shape, nkpt, kpts, ph1d)
 !Local variables-------------------------------
  integer :: ikpt, ix, iy, iz
  real(dp) :: arg, fact, kk(3)
-
 ! *************************************************************************
 
  ABI_MALLOC(ph1d, (maxval(sc_shape), 3, nkpt))
@@ -8221,7 +8222,6 @@ subroutine sc_sum(sc_shape, uc_ngfft, nspinor, ph1d, k_is_gamma, alpha, sc_data,
  integer :: il1, il2, il3, spinor, uc_n1, uc_n2, uc_n3, ix, iy, iz !, idat
  complex(gwpc) :: cphase, phl32, phl3
  complex(gwpc),contiguous,pointer :: uc_psi_ptr(:,:,:,:), sc_data_ptr(:,:,:,:,:,:,:)
-
 ! *************************************************************************
 
  uc_n1 = uc_ngfft(1); uc_n2 = uc_ngfft(2); uc_n3 = uc_ngfft(3)
@@ -8335,7 +8335,6 @@ subroutine gwr_gamma_gw(gwr, nfftf, ngfftf, vpsp)
  complex(dpc),allocatable :: xrdm_k_full(:,:,:), rdm_k(:,:), pot_k(:,:), nateigv(:,:,:,:), old_ks_purex(:,:), new_hartr(:,:)
  complex(dp) :: omega_i(gwr%ntau)
  complex(dpc),allocatable :: sigcme_k(:,:,:,:)
-
 ! *************************************************************************
 
  call gwr%run_g0w0(free_ugb=.False.)

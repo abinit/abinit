@@ -5006,7 +5006,7 @@ end subroutine slk_take_from
 !! SOURCE
 
 subroutine slkmat_sp_take_from(out_mat, source, &
-                         ija, ijb, free) ! optional
+                               ija, ijb, free) ! optional
 
 !Arguments ------------------------------------
  class(slkmat_sp_t),intent(inout) :: out_mat
