@@ -2896,6 +2896,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtdipole',tread,'INT')
  if(tread==1) dtset%prtdipole=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtevk',tread,'INT')
+ if(tread==1) dtset%prtevk=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtdos',tread,'INT')
  if(tread==1) dtset%prtdos=intarr(1)
 
@@ -3118,7 +3121,10 @@ if (dtset%usekden==1) then
    dtset%prtebands  = 1 !DEFAULT in all set to xgr
    dtset%prteig     = 1
    dtset%prtelf     = 1 ! TO BE CHECKED FOR CONSISTENCY
-   dtset%prtevk     = 1  ! TO BE CHECKED FOR CONSISTENCY
+   dtset%prtevk     = 1
+#ifndef HAVE_NETCDF_MPI
+   if (dtset%paral_rf==1) dtset%prtevk = 0
+#endif
    !dtset%prtfsurf   = 1  ! TO BE CHECKED FOR CONSISTENCY
    !dtset%prtgden    = 1  ! TO BE CHECKED FOR CONSISTENCY
    dtset%prtgeo     = 1
