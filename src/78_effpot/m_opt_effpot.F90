@@ -24,6 +24,8 @@
 
 #include "abi_common.h"
 
+#define ABI_TRACE(msg) write(0,'("=====DEBUG===== ",I4," in file ",A , "in function", A, "message: ",A )') __LINE__,__FILE__, __FUNC__, msg
+
 module m_opt_effpot
 
 use defs_basis
@@ -523,6 +525,8 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
   !do iorder=order(1),order(2),2, Order will be done per term
   !Loop over all original terms + 1
   ! + 1 to bound pure strain
+  print *, "DEBUG=====>", "eff_pot%anharmonics_terms%ncoeff", eff_pot%anharmonics_terms%ncoeff
+  print *, "DEBUG=====>", "nterm", nterm
   do iterm =1,nterm +1
     if(iterm <=nterm)then
       ncombi1=0
@@ -558,19 +562,16 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
         my_coeffs=eff_pot%anharmonics_terms%coefficients
 
         ! then add the single disp terms.
-        !if (bound_option==1) then
-            if (ncombi1>0) then
-              do icombi3=1,ncombi1
-                !call coeffs_list_conc_onsite(my_coeffs, HOcrossdisp_terms(icombi3))
-                if (HOsingledisp_terms(icombi3)%terms(1)%get_nbody() == nbody_term .or. bound_option/=1) then
-                  call coeffs_list_append(my_coeffs,HOsingledisp_terms(icombi3), check=.TRUE.)
-                  ncombi1_real = ncombi1_real + 1
-                endif
-              end do
+        print *, 'DEBUG=====>', "ncombi1", ncombi1
+        if (ncombi1>0) then
+          do icombi3=1,ncombi1
+            if (HOsingledisp_terms(icombi3)%terms(1)%get_nbody() == nbody_term .or. bound_option/=1) then
+              call coeffs_list_append(my_coeffs,HOsingledisp_terms(icombi3), check=.TRUE.)
+              ncombi1_real = ncombi1_real + 1
             endif
-        !else
-        !    if (ncombi1>0) call coeffs_list_conc_onsite(my_coeffs, HOsingledisp_terms)
-        !endif
+          end do
+        endif
+        print *, 'DEBUG=====>', "ncombi1_real", ncombi1_real
 
         if(allocated(HOsingledisp_terms)) call polynomial_coeff_list_free(HOsingledisp_terms)
 
@@ -583,21 +584,18 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
             call opt_getHOcrossdisp(HOcrossdisp_terms,ncombi2,eff_pot%anharmonics_terms%coefficients(iterm),order_ran)
         endif
         ! then add the crossdisp terms.
-        !if(bound_option==1)then
-            if(ncombi2 > 0)then
-              do icombi3=1,ncombi2
-                !call coeffs_list_conc_onsite(my_coeffs, HOcrossdisp_terms(icombi3))
-                if (HOcrossdisp_terms(icombi3)%terms(1)%get_nbody() == nbody_term .or. bound_option/=1) then
-                  call coeffs_list_append(my_coeffs,HOcrossdisp_terms(icombi3), check=.TRUE.)
-                  ncombi2_real = ncombi2_real + 1
-                endif
-              end do
+        if(ncombi2 > 0)then
+          do icombi3=1,ncombi2
+            !call coeffs_list_conc_onsite(my_coeffs, HOcrossdisp_terms(icombi3))
+            if (HOcrossdisp_terms(icombi3)%terms(1)%get_nbody() == nbody_term .or. bound_option/=1) then
+              call coeffs_list_append(my_coeffs,HOcrossdisp_terms(icombi3), check=.TRUE.)
+              ncombi2_real = ncombi2_real + 1
             endif
-        !else
-        !    if(ncombi2 > 0)then
-        !     call coeffs_list_conc_onsite(my_coeffs, HOcrossdisp_terms)
-        !    endif
-        !endif
+          end do
+        endif
+        print *, 'DEBUG=====>', "ncombi2", ncombi2
+        print *, 'DEBUG=====>', "ncombi2_real", ncombi2_real
+
         if(allocated(HOcrossdisp_terms)) call polynomial_coeff_list_free(HOcrossdisp_terms)
        end associate
       end block
@@ -608,6 +606,7 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
         my_coeffs = eff_pot%anharmonics_terms%coefficients
       endif
       ncombi =  ncombi1_real + ncombi2_real
+      print*, 'DEBUG=====>', "ncombi", ncombi
       nterm_start = eff_pot%anharmonics_terms%ncoeff
     else ! if iterm = nterm + 1 => Take care about strain
         block
@@ -634,7 +633,7 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
     ! 6. convert term to list.
     ! 7. ask for the temrs from generateTermsFromList
     ! 8. check and see if the coeff is already considered or not. use coeffs_compare function
-    !! strain??? the same thing should be done for the strain
+    !! strain the same thing should be done for the strain
     !! find the list of all the list_str,
     !! fond what is number of strain in the displacemt comapring it to
     !! the list_str and give this to
@@ -1800,7 +1799,8 @@ subroutine opt_getSingleDispTerms(terms,crystal, sc_size,comm)
       call polynomial_coeff_getNorder(terms_tmp,crystal,cutoff,ncoeff,ncoeff_out,power_disp,&
         &                               power_strph,option_GN,sc_size,comm,anharmstr=.false.,spcoupling=.false.,&
         &                               only_odd_power=.false.,only_even_power=.true.,verbose=.false.,&
-        &                               compute_symmetric=.false.,fit_iatom=iatom, max_nbody=[999,999,999,999,999,999])
+        &                               compute_symmetric=.false.,fit_iatom=iatom,    &
+        &                            max_nbody=[999,999,999,999,999,999, 999,999,999,999])
       !TEST MS
       !  write(std_out,*) "behind call getNorder"
       !  write(std_out,*) "ncoeff_out: ", ncoeff_out
@@ -1929,7 +1929,6 @@ subroutine opt_getHOSingleDispTerms(term_in,terms_out,symbols,single_disp_terms,
   ncoeff = norder * ndisp
   !Allocate output terms
   ABI_MALLOC(terms_out_tmp,(ncoeff))
-
   !find equivalent second order terms in list of single disp terms
   !for each displacement in input term
   !Transfer to output term and increase order
@@ -1960,12 +1959,8 @@ subroutine opt_getHOSingleDispTerms(term_in,terms_out,symbols,single_disp_terms,
   enddo!idisp
   !Change Name
   do icoeff=1,ncoeff
-    !   write(std_out,*) "DEBUG icoeff: ", icoeff
-    !   write(std_out,*) "Term(",icoeff,"/",ncoeff,"): ", terms_out_tmp(icoeff)%name, "name before set name"
-    !   write(std_out,*) "Term(",icoeff,"/",ncoeff,") nterm: ", terms_out_tmp(icoeff)%nterm
     call polynomial_coeff_getName(name,terms_out_tmp(icoeff),symbols,recompute=.TRUE.)
     call polynomial_coeff_SetName(name,terms_out_tmp(icoeff))
-    !   write(*,*) "Term(",icoeff,"/",ncoeff,"): ", terms_out_tmp(icoeff)%name, "after set name"
   enddo
 
   !Check for doubles and delete them
@@ -1983,37 +1978,17 @@ subroutine opt_getHOSingleDispTerms(term_in,terms_out,symbols,single_disp_terms,
   enddo
   iterm3 = ncoeff - iterm3
   ABI_MALLOC(terms_out,(iterm3))
-  !Second copy them
   iterm3 = 0
   do iterm1=1,ncoeff
     if(.not. found(iterm1))then
       iterm3 = iterm3 + 1
-      !      terms_out(iterm3) = terms_out_tmp(iterm1)
       call polynomial_coeff_init(coeff_ini,terms_out_tmp(iterm1)%nterm,terms_out(iterm3),&
         &                                terms_out_tmp(iterm1)%terms,terms_out_tmp(iterm1)%name, check=.TRUE.)
     endif
   enddo
-  !ABI_FREE(terms_out_tmp)
   ABI_FREE(found)
   call polynomial_coeff_list_free(terms_out_tmp)
   ncoeff = iterm3
-  !TEST MS
-  !  write(*,*) "behind call getNorder"
-  !  write(*,*) "ncoeff_out: ", ncoeff_out
-  !  do ii=1,ncoeff_out
-  !     write(*,*) "Term(",ii,"/",ncoeff_out,"): ", terms(ii)%name
-  !  enddo
-  !TEST MS
-
-  !!Check after reduction
-  !do icoeff=1,ncoeff
-  !   write(std_out,*) "DEBUG icoeff: ", icoeff
-  !   write(*,*) "Term(",icoeff,"/",ncoeff,"): ", terms_out(icoeff)%name, "name before set name"
-  !  call polynomial_coeff_getName(name,terms_out(icoeff),symbols,recompute=.TRUE.)
-  !  call polynomial_coeff_SetName(name,terms_out(icoeff))
-  !   write(*,*) "Term(",icoeff,"/",ncoeff,"): ", terms_out(icoeff)%name, "after set name"
-  !enddo
-
 end subroutine opt_getHOSingleDispTerms
 !!***
 
@@ -2159,6 +2134,7 @@ subroutine generate_bounding_term_and_add_to_list(sympairs, nterm_start, ncombi,
   call polynomial_coeff_list_free(my_coeffs)
   ABI_MALLOC(my_coeffs, (ncoeff))
   my_coeffs(1:nterm_start) = my_coeffs_tmp(1:nterm_start)
+
 
 
   temp_cntr =0

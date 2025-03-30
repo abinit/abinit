@@ -899,10 +899,13 @@ ABI_FREE(xcart)
 
 !        Exit if the model is bounded
            if(effective_potential%anharmonics_terms%bounded) then
+
+           print *,"The model is bounded. "
 !         Final transfert
              write(message, '(3a)' ) ch10,' => The model is now bounded'
              call wrtout(ab_out,message,'COLL')
              call wrtout(std_out,message,'COLL')
+             print *, "Hre if bounded: allocated coeffs_tmp"  ,allocated(coeffs_tmp)
              do kk=ncoeff+1,ncoeff+model_ncoeffbound
                icoeff_bound = listcoeff_bound(model_bound,kk)-ncoeff ! need to remove ncoeff value
                call polynomial_coeff_free(coeffs_tmp(kk))
@@ -937,6 +940,11 @@ ABI_FREE(xcart)
        end if
 
 !      Fit the final model
+        print *,"Here: allocated coeffs_tmp"  ,allocated(coeffs_tmp)
+        print *,"size of coeffs_tmp"  ,size(coeffs_tmp)
+        print *, "ncoeff", ncoeff
+        print *, "model_ncoeffbound", model_ncoeffbound
+
        call effective_potential_setCoeffs(coeffs_tmp(1:ncoeff+model_ncoeffbound),effective_potential,&
 &       ncoeff+model_ncoeffbound)
 
