@@ -16372,7 +16372,8 @@ Variable(
     mnemonics="PRinT EVK",
     added_in_version="9.11.0",
     text=r"""
-   If set to 1, ABINIT will produce a netCDF EVK file.
+If set to 1, ABINIT will produce a netCDF EVK file.  
+Not compatible with parallelization over perturbations ([[paral_rf]]=1) when netCDF library doesnt support MPI-IO.
 """,
 ),
 
