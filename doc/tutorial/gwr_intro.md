@@ -73,10 +73,10 @@ The price to pay is that in GWR the accuracy of the results now depends on the s
 To enter the GWR driver of ABINIT, one has to use [[optdriver]] = 6,
 and select the computation to be performed via [[gwr_task]].
 
-In the first step, you will very likely use [[gwr_task]] = "HDIAGO"  or "HDIAGO_FULL"
+In the first step, you will very likely use [[gwr_task]] = "HDIAGO" or "HDIAGO_FULL"
 to perform a direct diagonalization with ScaLAPACK in order to generate a WFK with empty states,
 This feature can also be used if you want to use other many-body codes that are able to read ABINIT’s WFK file
-Please take some time to read the documentation of [[gwr_task]] and see which calculations are supported.
+Please take some time to read the documentation of [[gwr_task]] to see which calculations are supported.
 
 The $\kk$-points and the band range for the QP corrections in $\Sigma_\nk$ can be specified in different ways.
 In the explicit approach, one uses [[nkptgw]] to specify the number of $\kk$-points in $\Sigma_\nk$,
@@ -162,18 +162,20 @@ This is an important parameter that should be subject to convergence studies.
 The FFT mesh is defined according to [[gwr_boxcutmin]].
 This parameter has a big impact on wall-time and memory requirements.
 One usually start with a coarse FFT mesh e.g. [[gwr_boxcutmin]] 1.1 and
-increases it during the last steps of the convergence study.
+increase it during the last steps of the convergence study.
 
 As discussed in [[cite:Baroni1986]], the treatment of the long-wavelenght limit $\qq \rightarrow 0$
 in the polarizability, requires the inclusion of the commutator of the non-local part of the Hamiltonian
 with the position operator.
-See also [this section](/theory/bse/#5-matrix-elements-of-the-dipole-operator) of the BSE notes.
+See also [this section](/theory/bse/#5-matrix-elements-of-the-dipole-operator) of the Bethe-Salpeter notes.
 By default the commutator of the non-local part is always included.
 In the input variable [[inclvkb]] can be used to deactivate it, if needed.
 
+<!--
 [[gw_nqlwl]],
 [[gw_qlwl]],
 [[gwr_max_hwtene]]
+-->
 
 The exchange part of $\Sigma$ is computed using the standard sum over occupied states
 similarly to what is done in the conventional code:
@@ -186,7 +188,7 @@ similarly to what is done in the conventional code:
 \end{equation}
 
 The number of $\bg$-vectors in the sum is defined by [[ecutsigx]].
-Computing $\Sigma_x$ is much cheaper that $\Sigma_c(i \tau)$.
+Note that computing $\Sigma_x$ is much cheaper than $\Sigma_c(i \tau)$.
 
 ## Real-space vs convolutions in the BZ
 
@@ -210,7 +212,6 @@ is expressed in terms of convolutions in the BZ according to:
 {\tilde G}_\kk(\rr',\rr,-i\tau)
 \end{equation}
 
-
 where $G_\qq(\rr,\rr')$ and $W_\qq(\rr,\rr')$ are now quantities defined in the unit cell.
 
 The advantage of this formulation is that one can take advantage of the symmetries of the system
@@ -222,7 +223,8 @@ as the convolutions in the BZ lead to quadratic scaling with the number of $\kk$
 
 The input variable [[gwr_sigma_algo]] allows one to select the algorithm to be used.
 [[gwr_chi_algo]] has a similar meaning but only for the polarizability but this option is seldom used
-as is makese the computation of the polarizability much slower although it requires less memory.
+as it makese the computation of the polarizability much slower although it requires less memory as
+only two-point functions in the unit cell need to be stored.
 
 ## Self-consistency with GWR
 
@@ -270,6 +272,11 @@ over minimax points and spins is rather efficient (few communications required).
 On the contrary, the parallelism over $\gg$-vectors and $\kk$-points is much more network intensive,
 although these two additional levels allow one to decrease the memory requirements required to store the two-point functions.
 
+In case out-of-memory problems occur, we recommend increasing as much as possible the number of CPUs
+used to distribute the matrices with PBLAS (g-level).
+Once the memory usage for $\chi$ and $W$ has dropped to an acceptable level, one can start increasing
+the number of MPI processes for \tau-parallelism.
+
 <!--
 TODO: Additional trick to be tested/documented in more detail:
     [[gwr_ucsc_batch]]
@@ -282,9 +289,10 @@ TODO: Additional trick to be tested/documented in more detail:
 ### Requirements
 
 The GWR code requires an ABINIT build with Scalapack enabled.
-Moreover, sing a significant fraction of the computing time is spent in performing FFTs,
+Moreover, since a significant fraction of the computing time is spent in performing FFTs,
 we **strongly** recommend to use vendor-optimized FFT libraries such as MKL-DFTI or FFTW3 instead
-of the internal FFT version shipped with ABINIT ([[fftalg]] should be 312 or 512).
+of the internal FFT version shipped with ABINIT ([[fftalg]] should be 312 or 512, this is done automatically
+if an external FFT library is found by the build system).
 
 If you are using MKL, the configuration is relatively simple as MKL provides all the required libraries.
 An example of `.ac` configuration file is reported below:

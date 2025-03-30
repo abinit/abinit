@@ -24505,8 +24505,8 @@ This variable is similar in spirit to [[gwr_sigma_algo]].
 It selects the algorithm used to compute the polarizability in the GWR code.
 Possible values are
 
-* 0 --> Automatic selection.
-* 1 --> Compute $\chi$ in the real-space supercell
+* 0 --> Automatic selection (not yet coded).
+* 1 --> Compute $\chi$ in the real-space supercell.
 * 2 --> Compute $\chi$ using convolutions in the BZ.
 
 [[gwr_chi_algo]] 2 is slower than 1 although it is significantly less memory demanding
@@ -24543,8 +24543,8 @@ Variable(
 This input variable selects the algorithm used to compute the self-energy in the GWR code.
 Possible values are
 
-* 0 --> Automatic selection.
-* 1 --> Compute $\Sigma$ in the real-space supercell
+* 0 --> Automatic selection (not yet coded).
+* 1 --> Compute $\Sigma$ in the real-space supercell.
 * 2 --> Compute $\Sigma$ using convolutions in the BZ.
 
 [[gwr_sigma_algo]] 1 is the most efficient approach when one needs to compute QP corrections for all the $\kk$-points, e.g.
