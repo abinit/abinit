@@ -747,7 +747,6 @@ end interface xmpi_lor
 !END SUBROUTINE
 !END INTERFACE MPI_WIN_ALLOCATE_SHARED
 
-
 !----------------------------------------------------------------------
 
 CONTAINS  !===========================================================

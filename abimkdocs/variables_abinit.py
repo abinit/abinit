@@ -24424,7 +24424,7 @@ Variable(
     requires="[[optdriver]] == 6",
     added_in_version="9.6.2",
     text=r"""
-This variable defines the maximum number of FFTs performed in the unit cell/super cell.
+This variable defines the maximum number of FFTs performed in the unit cell/supercell.
 If not specified in the input, the code will automatically define these values in order
 to find a good compromise betweeen memory and performance.
 """,
@@ -24461,11 +24461,11 @@ The choice is among:
 
     At the time of writing, the following features are **not yet supported** in GWR:
 
-    * Calculations with [[nspinor]] == 2
-    * Metallic systems as the our minimax meshes assume systems with an energy gap
+    * Calculations with [[nspinor]] == 2.
+    * Metallic systems as the our minimax meshes assume systems with an energy gap.
     * Temperature effects at the electronic level are not taken into account as we work with the T = 0 formalism.
-    * Only $\Gamma$-centered $\kk$-meshes are supported in GWR
-    * PAW method
+    * Only $\Gamma$-centered $\kk$-meshes are supported in GWR.
+    * PAW method.
 """,
 ),
 
