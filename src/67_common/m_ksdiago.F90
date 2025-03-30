@@ -1531,7 +1531,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
    call pawcprj_reorder(ugb%cprj_k, gs_hamk%atindx1)
  end if ! usepaw
 
- call cwtime_report(" block column distribution", cpu, wall, gflops)
+ call cwtime_report(" block column distribution completed", cpu, wall, gflops)
 
  ! Free memory.
  ABI_FREE(eig_ene)

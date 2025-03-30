@@ -6,6 +6,7 @@
 include "gwr_include.abi"
 
 ndtset 2
+prtwf -1       # Don't need wavefunctions.
 
 #paral_kgb 1   # Activate spin/k-point/band/FFT
 #autoparal 1   # Automatic selection of np* variables.

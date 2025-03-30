@@ -463,7 +463,7 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
  ABI_MALLOC(ks_rhor, (nfftf, dtset%nspden))
 
  call read_rhor(den_path, cplex1, dtset%nspden, nfftf, ngfftf, dtset%usepaw, mpi_enreg_seq, ks_rhor, &
-                den_hdr, ks_pawrhoij, comm, allow_interp=.False.)
+                den_hdr, ks_pawrhoij, comm, allow_interp=.False., want_varname="density")
 
  den_cryst = den_hdr%get_crystal()
  if (cryst%compare(den_cryst, header=" Comparing input crystal with DEN crystal") /= 0) then
@@ -474,7 +474,7 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
  ABI_MALLOC(ks_taur, (nfftf, dtset%nspden * dtset%usekden))
  if (dtset%usekden == 1) then
    call read_rhor(kden_path, cplex1, dtset%nspden, nfftf, ngfftf, 0, mpi_enreg_seq, ks_taur, &
-                  kden_hdr, ks_pawrhoij, comm, allow_interp=.False.)
+                  kden_hdr, ks_pawrhoij, comm, allow_interp=.False., want_varname="kinedr")
    call kden_hdr%free()
    call prtrhomxmn(std_out, mpi_enreg_seq, nfftf, ngfftf, dtset%nspden, 1, ks_taur, optrhor=1, ucvol=cryst%ucvol)
  end if
@@ -735,6 +735,7 @@ end if
 
        if (write_wfk) then
          ! occupancies are set to zero. Client code is responsible for recomputing occ and fermie when reading this WFK.
+         call wrtout(std_out, sjoin(" Writing kpoint ik_ibz:", itoa(ik_ibz), ", spin: ", itoa(spin), " to disk"))
          ABI_CALLOC(occ_k, (nband_k))
          color = merge(1, 0, ugb%my_nband > 0)
          call xmpi_comm_split(diago_pool%comm%value, color, diago_pool%comm%me, io_comm, ierr)

@@ -46,15 +46,14 @@ so that we have some time to discuss the input while ABINIT is running.
 !!! tip
 
     All the input files of this tutorial can be executed in parallel by just
-    increasing the value of n in `mpirun -n`.
+    increasing the value of `NUM` in `mpirun -n NUM`.
     Clearly the size of the problem is small so do not expect
     great parallel performance if you start to use dozens of MPI processes.
 
 The first dataset produces the KS density file that is then used to compute the band structure in the second dataset.
 Since all the input files of this tutorial use the same crystalline structure, pseudos
-and cutoff energy [[ecut]] for the wavefunctions,
-we declare these variables in an external file that will be **included** in all the other input files
-using the syntax:
+and cutoff energy [[ecut]] for the wavefunctions, we declare these variables in an external file
+that will be **included** in all the other input files using the syntax:
 
 ```
 # Include geometry and pseudos
@@ -73,15 +72,14 @@ than the recommended value reported in the PseudoDojo table (16 Ha).
 
 !!! important
 
-    For GW calculations, we strongly recommend using NC pseudos from the **stringent table**
+    For GW calculations, we **strongly** recommend using NC pseudos from the **stringent table**
     as these pseudos have closed-shells treated as valence states.
     This is important for a correct description of the matrix elements of the exchange part of the self-energy
     that are rather sensitive to the overlap between the wavefunctions [[cite:Setten2018]].
     In the special case of silicon, there is no difference between the standard version
-    and the stringent version of the pseudo,
-    but if we consider e.g. Ga, you will notice that the stringent version includes all the 3spd states in valence
-    besides the outermost 4sp electrons whereas the standard pseudo for Ga designed for GS calculations
-    includes only the 3d states.
+    and the stringent version of the pseudo, but if we consider e.g. Ga, you will notice
+    that the stringent version includes all the 3spd states in valence besides the outermost 4sp electrons
+    whereas the standard pseudo for Ga designed for GS calculations includes only the 3d states.
     Since we are using scalar-relativistic (SR) pseudos, it is not possible to treat spin-orbit coupling (SOC).
     To include SOC with NC, one should use fully-relativistic (FR) pseudos, set [[nspinor]] 2 al all the input files
     and then set the appropriate value of [[nspden]] to 4 or 1 depending on whether the system is magnetic or not.
@@ -139,10 +137,9 @@ Both values strongly underestimate the experimental results that are ~3.4 eV and
 
 
 One final comment related to the MPI parallelism in the ground-state part.
-For larger system, it is advisable to use [[paral_kgb]] = 1
-for its better scalability in conjunction with [[autoparal]] 1
-to allow ABINIT to determine an optimal distribution, in particular the band parallelism
-that is not available when the CG eigensolver is used.
+For larger system, it is advisable to use [[paral_kgb]] = 1 for its better scalability
+in conjunction with [[autoparal]] 1 to allow ABINIT to determine an optimal distribution,
+in particular the band parallelism that is not available when the CG eigensolver is used.
 <!--
 Note also that we suggest disabling the FFT parallelization by using [[npfft]] 1.
 to 1 to enable k-point, band, and FFT parallelization,
@@ -219,8 +216,7 @@ to ensure an efficient workload distribution.
 ### Our first GWR calculation
 
 For our first GWR run, we use a minimalistic input file that
-performs a GWR calculation using the DEN and the WFK file produced previously
-and different minimax meshes.
+performs a GWR calculation using the DEN and the WFK file produced previously.
 First of all, you may want to start immediately the computation with:
 
 ```
@@ -258,9 +254,9 @@ The computation of the exchange is relatively fast as only occupied states are i
 
 The $\kk$-points and the band range for the QP corrections are set
 expliclty via [[nkptgw]], [[kptgw]] and [[bdgw]].
-Alternatively, one can use [[gw_qprange]].
 
 <!--
+Alternatively, one can use [[gw_qprange]].
 For the spectral function $A_\nk(\ww)$, we have the following variables [[nfreqsp]], [[freqspmax]]
 TODO: Mention [[inclvkb]] == 2, [[symsigma]]
 -->
@@ -269,8 +265,7 @@ We can now have a look at the main output file:
 
 {% dialog tests/tutorial/Refs/tgwr_3.abo %}
 
-First of all, we have a Yaml document that summarizes the most
-important GWR parameters:
+First of all, we have a Yaml document that summarizes the most important GWR parameters:
 
 ```yaml
 --- !GWR_params
@@ -368,7 +363,7 @@ data: !Tabular |
 ...
 ```
 
-The meaning of the different columns should be self-explanatory at this point.
+The meaning of the different columns should be self-explanatory.
 
 As usual, we can use `abiopen.py` with the `-p` (`--print`) option to print to screen
 a summary of the most important results. Use, for instance:
@@ -406,8 +401,8 @@ Diagonal elements of $\Sigma_\xc(i \omega)$ in eV units
 `tgwr_3o_SIGXC_RW`:
 Diagonal elements of $\Sigma_\xc(\omega)$ in eV units and spectral function $A_\nk(\omega)$
 
-Finally, we have a netcdf file named `tgwr_3o_GWR.nc` storing the same data
-in binary format that can be easily post-processed with AbiPy using:
+Finally, we have a netcdf file named `tgwr_3o_GWR.nc` storing the same data in binary format.
+This file can be easily post-processed with AbiPy using:
 
 ```
 abiopen.py tgwr_3o_GWR.nc -e
@@ -422,8 +417,8 @@ works before proceeding to the next section.
 
 ### Extracting useful info from the GWR log file
 
-This section discusses some shell tricks that are useful to understand
-the resources required by your calculation.
+This section discusses some shell commands that are useful to understand
+the resources required by your GWR calculation.
 
 To extract the memory allocated for the most memory demanding arrays, use:
 
@@ -621,8 +616,8 @@ gwr_ntau+   2
 ```
 
 Once the calculation is finished, save the script reported below in a file,
-let’s say `conv_ntau.py`, in the same directory where we launched the calculation,
-make it executable and execute it as usual
+let’s say `conv_ntau.py`, in the same directory where we have launched the calculation,
+make it executable with `chmod` and execute it as usual.
 
 ```python
 #!/usr/bin/env python
@@ -664,7 +659,6 @@ mv tgwr_3o_* log conv_ntau
 ### GWR calculations with different BZ meshes.
 
 In this section of the tutorial, we perform GWR calculations with different BZ meshes.
-
 You may want to start immediately the computation by issuing:
 
 ```
@@ -771,7 +765,7 @@ You should obtain the following figure:
 
 In the case of silicon, the results are rather insensitive to the density
 of the FFT mesh but keep in mind that other systems may behave differently.
-We therefore fix [[gwr_boxcutmin]] to 1.1 and proceed with the other convergence studies.
+We therefore fix [[gwr_boxcutmin]] to 1.1.
 
 ### How to compute an interpolated band structure with GWR
 

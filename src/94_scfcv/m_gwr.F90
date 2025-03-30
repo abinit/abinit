@@ -250,7 +250,6 @@ module m_gwr
 
    procedure :: free => desc_free
    ! Free memory.
-
  end type desc_t
 
  interface desc_array_free
@@ -927,7 +926,8 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  mband = ks_ebands%mband; nbsum = dtset%nband(1)
  ABI_CHECK_IRANGE(nbsum, 1, mband, "Invalid nbsum")
 
- !call gwr%pstat%from_pid()
+ ! Init pstat object.
+ call gwr%pstat%from_pid()
 
  ! Define frequency mesh for sigma(w_real) and spectral functions.
  ! Note that in GWR computing quantities on the real-axis is really cheap
@@ -2121,7 +2121,7 @@ subroutine gwr_load_kcalc_wfd(gwr, wfk_path, tmp_kstab)
  end associate
 
  call cwtime_report(" gwr_load_kcalc_from_wfk:", cpu, wall, gflops)
- !call gwr%pstat%print([std_out], reload=.True.)
+ call gwr%pstat%print([std_out], header="gwr_load_kcalc_wfd")
 
 end subroutine gwr_load_kcalc_wfd
 !!***
@@ -4383,12 +4383,10 @@ subroutine gwr_build_tchi(gwr)
      do my_it=1,gwr%my_ntau
        call cwtime(cpu_tau, wall_tau, gflops_tau, "start")
        itau = gwr%my_itaus(my_it)
-       !if (my_it == 1 .and. gwr%comm%me == 0) call gwr%pstat%print([std_out], reload=.True.)
 
        ! G_k(g,g') --> G_k(g',r) e^{ik.r} for each k in the BZ treated by me.
        call gwr%get_myk_green_gpr(itau, spin, desc_mykbz, gt_gpr)
-
-       !if (my_it == 1 .and. gwr%comm%me == 0) call gwr%pstat%print([std_out], reload=.True.)
+       if (my_it == 1 .and. gwr%comm%me == 0) call gwr%pstat%print([std_out], header="After get_myk_green_gpr")
 
        ! Loop over r in the unit cell that is now MPI-distributed inside g_comm.
        ! This is a bottleneck but perhaps one can take advantage of localization.
@@ -4761,9 +4759,9 @@ contains
 subroutine print_chi_header()
  if (gwr%comm%me /= 0) return
  if (gwr%use_supercell_for_tchi) then
-   call wrtout(std_out, " Building chi0 in the supercell with FFTs ", pre_newlines=2)
+   call wrtout(std_out, " Building chi0(r,R, itau) in the supercell with FFTs ", pre_newlines=2)
  else
-   call wrtout(std_out, " Building chi_q(r,r') with convolutions in k-space:", pre_newlines=2)
+   call wrtout(std_out, " Building chi_q(r,r', itau) with convolutions in k-space:", pre_newlines=2)
  end if
  call wrtout(std_out, sjoin(" gwr_np_kgts:", ltoa(gwr%dtset%gwr_np_kgts)))
  call wrtout(std_out, sjoin(" ngkpt:", ltoa(gwr%ngkpt), ", ngqpt:", ltoa(gwr%ngqpt)))
@@ -5148,7 +5146,7 @@ subroutine gwr_build_wc(gwr)
 
  call cwtime(cpu_all, wall_all, gflops_all, "start")
  call timab(1924, 1, tsec)
- call wrtout(units, " Building correlated screening Wc ...", pre_newlines=2)
+ call wrtout(units, " Building screening Wc(i omega) ...", pre_newlines=2)
  ABI_CHECK(gwr%tchi_space == "iomega", sjoin("tchi_space: ", gwr%tchi_space, " != iomega"))
 
  if (allocated(gwr%wc_qibz)) then
@@ -5530,14 +5528,14 @@ if (gwr%use_supercell_for_sigma) then
    do my_it=1,gwr%my_ntau
      call cwtime(cpu_tau, wall_tau, gflops_tau, "start")
      itau = gwr%my_itaus(my_it)
-     !if (my_it == 1 .and. gwr%comm%me == 0) call gwr%pstat%print([std_out], reload=.True.)
 
      ! G_k(g,g') --> G_k(g',r) e^{ik.r} for each k in the BZ treated by me.
      call gwr%get_myk_green_gpr(itau, spin, desc_mykbz, gt_gpr)
+     if (my_it == 1 .and. gwr%comm%me == 0) call gwr%pstat%print([std_out], header="After get_myk_green_gpr")
 
      ! Wc_q(g,g') --> Wc_q(g',r) e^{iq.r} for each q in the BZ treated by me.
      call gwr%get_myq_wc_gpr(itau, spin, desc_myqbz, wc_gpr)
-     !if (my_it == 1 .and. gwr%comm%me == 0) call gwr%pstat%print([std_out], reload=.True.)
+     if (my_it == 1 .and. gwr%comm%me == 0) call gwr%pstat%print([std_out], header="After get_myq_wc_gpr")
 
      my_nr = gt_gpr(1,1)%sizeb_local(2)
      ABI_CHECK(my_nr == wc_gpr(1)%sizeb_local(2), "my_nr != wc_gpr(1)%sizeb_local(2)")
@@ -5855,7 +5853,7 @@ end if
  call xmpi_sum(sigc_it_mat, gwr%comm%value, ierr)
 
  if (gwr%dtset%symsigma == +1 .and. .not. gwr%use_supercell_for_sigma) then
-   call wrtout(std_out, " Averaging Sig_c matrix elements within degenerate subspaces.")
+   call wrtout(std_out, " Symsigma 1 --> Averaging Sig_c matrix elements within degenerate subspaces.")
    ABI_CHECK(gwr%sig_diago, "symsigma = 1 requires diagonal Sigma_c")
    do spin=1,gwr%nsppol
    do ikcalc=1,gwr%nkcalc
