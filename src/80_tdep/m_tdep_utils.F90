@@ -306,6 +306,7 @@ contains
         distance(eatom,fatom,1)=distance(eatom,fatom,1)+(distance(eatom,fatom,ii+1))**2
       end do
       distance(eatom,fatom,1)=distance(eatom,fatom,1)**0.5
+      distance(eatom,fatom,1)=tol12 * dint(distance(eatom,fatom,1) / tol12)
     end do
   end do
 
