@@ -791,7 +791,6 @@ subroutine init_ddiago_ctl(Dctl, jobz, spin, nspinor, ecut, kpoint, nloalg, gmet
  type(MPI_type) :: mpi_enreg_seq
 !arrays
  integer,allocatable :: kg_k(:,:)
-
 ! *************************************************************************
 
  call initmpi_seq(mpi_enreg_seq) ! Fake MPI_type.
@@ -995,7 +994,6 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  real(dp),target,allocatable :: bras(:,:)
  complex(gwpc),allocatable :: cbras_box(:,:), cbras_g(:,:), vc_sqrt(:), ur(:), rfg_box(:,:)
  type(pawcprj_type),allocatable :: cwaveprj(:,:)
-
 ! *********************************************************************
 
  call timab(1919, 1, tsec)
@@ -1754,7 +1752,6 @@ subroutine ugb_free(ugb)
 
 !Arguments ------------------------------------
  class(ugb_t),intent(inout) :: ugb
-
 ! *************************************************************************
 
  call ugb%mat%free()
@@ -1792,7 +1789,6 @@ subroutine ugb_print(ugb, units, prtvol, header)
 !Local variables-------------------------------
  character(len=500) :: msg
  type(yamldoc_t) :: ydoc
-
 ! *************************************************************************
 
  ABI_UNUSED(prtvol)
@@ -1833,7 +1829,6 @@ subroutine ugb_collect_cprj(ugb, nspinor, nb, band_start, out_cprj)
 
 !Local variables-------------------------------
  integer :: ierr, my_ibs, out_ibs, band, cnt
-
 ! *************************************************************************
 
  ABI_CHECK_IEQ(size(ugb%cprj_k, dim=1), size(out_cprj, dim=1), "size1 should be the same")
@@ -2081,7 +2076,6 @@ subroutine hyb_free(hyb)
 
 !Arguments ------------------------------------
  class(hyb_t),intent(inout) :: hyb
-
 ! *************************************************************************
 
  ABI_SFREE(hyb%kibz)
@@ -2094,9 +2088,7 @@ subroutine hyb_free(hyb)
  ABI_SFREE(hyb%qbz2ibz)
 
  ! Free datatypes
- call hyb%wfd%free()
- call hyb%vcgen%free()
- call hyb%ebands%free()
+ call hyb%wfd%free(); call hyb%vcgen%free(); call hyb%ebands%free()
 
 end subroutine hyb_free
 !!***

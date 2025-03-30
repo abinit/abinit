@@ -4365,8 +4365,8 @@ subroutine gwr_build_tchi(gwr)
    ABI_MALLOC(chiq_gpr, (gwr%my_nqibz))
    ABI_MALLOC(desc_mykbz, (gwr%my_nkbz))
 
-   call wrtout(std_out, "Allocating PBLAS arrays for tchi_q(g',r) for all q in the IBZ treated by this MPI rank.")
-   call wrtout(std_out, "Here we're gonna have a big allocation peak...")
+   call wrtout(std_out, " Allocating PBLAS arrays for tchi_q(g',r) for all q in the IBZ treated by this MPI rank.")
+   call wrtout(std_out, " Here we're gonna have a big allocation peak...")
    do my_iqi=1,gwr%my_nqibz
      iq_ibz = gwr%my_qibz_inds(my_iqi)
      npwsp = gwr%tchi_desc_qibz(iq_ibz)%npw * gwr%nspinor
@@ -4559,7 +4559,7 @@ end if
     ! ===================================================================
     call print_chi_header()
 
-    ! Allocate memory for G_k(r',r) and chi_q(r',r)
+    call wrtout(std_out, " Will try to allocate memory for G_k(r',r) and chi_q(r',r)...")
     ! Need all nqibz matrices here as the iq_ibz loop is the innermost one unlike in the legacy GW code.
     nrsp = gwr%g_nfft * gwr%nspinor
     col_bsize = nrsp / gwr%g_comm%nproc; if (mod(nrsp, gwr%g_comm%nproc) /= 0) col_bsize = col_bsize + 1
@@ -5872,7 +5872,7 @@ end if
 
  ! Store matrix elements of Sigma_c(it), separate even and odd part
  ! then use sine/cosine transform to get Sigma_c(i omega).
- ! Finally, perform analytic continuation with Pade' to go to the real-axis
+ ! Finally, perform analytic continuation with Pade' to go to the real-frequency axis
  ! and compute QP corrections and spectral functions. All procs execute this part as it's very cheap.
 
  imag_zmesh(:) = j_dpc * gwr%iw_mesh

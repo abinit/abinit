@@ -167,7 +167,7 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
  real(dp) :: eff, mempercpu_mb, max_wfsmem_mb, nonscal_mem, el_temp
  real(dp) :: ecore, ecut_eff, ecutdg_eff, cpu, wall, gflops, diago_cpu, diago_wall, diago_gflops
  logical, parameter :: is_dfpt = .false.
- logical :: read_wfk, write_wfk, cc4s_task, rectangular, rdm_update, call_pawinit, cc4s_from_wfk
+ logical :: read_wfk, write_wfk, cc4s_task, rectangular, no_pools, rdm_update, call_pawinit, cc4s_from_wfk
  character(len=500) :: msg
  character(len=fnlen) :: wfk_path, den_path, kden_path, out_path
  type(hdr_type) :: wfk_hdr, den_hdr, kden_hdr, owfk_hdr
@@ -199,7 +199,7 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
  type(hyb_t) :: hyb
  type(xmpi_pool2d_t) :: diago_pool
 !arrays
- integer :: ngfftc(18),ngfftf(18),units(2)
+ integer :: ngfftc(18),ngfftf(18),units(2), grid3(3)
  integer,allocatable :: nq_spl(:), l_size_atm(:)
  integer,allocatable :: tmp_kstab(:,:,:), npwarr_ik(:), gvec_(:,:), istwfk_ik(:), nband_iks(:,:)
  real(dp) :: strsxc(6), diago_info(3, dtset%nkpt, dtset%nsppol),tsec(2)
@@ -687,8 +687,16 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
 
    ! Build MPI pools to distribute (kpt, spin).
    ! Try to get rectangular grids in each pool to improve efficiency in slk diago.
+
+   !if (any(dtset%gwr_np_kgts /= 0) then
+   !  ABI_CHECK_IEQ(dtset%gwr_np_kgts(3), 1, "gwr_np_kgts(3) should be 1")
+   !   grid = [dtset%gwr_np_kgts(1), dtset%gwr_np_kgts(2), dtset%gwr_np_kgts(3)]
+   !   call diago_pool%from_grid(grid, comm)
+   !else
+
    rectangular = .True.; if (dtset%nkpt == 1) rectangular = .False.
-   call diago_pool%from_dims(dtset%nkpt, dtset%nsppol, comm, rectangular=rectangular)
+   no_pools = (dtset%useria == 10)
+   call diago_pool%from_dims(dtset%nkpt, dtset%nsppol, comm, no_pools, rectangular=rectangular)
    diago_info = zero
 
    ! TODO: Build hyb descriptor with hybrid orbitals from WFK file.
@@ -831,7 +839,8 @@ end if
    if (my_rank == master) call cc4s_write_eigens(ks_ebands, dtfil)
 
    ! Build MPI pools to distribute (kpt, spin).
-   call diago_pool%from_dims(dtset%nkpt, dtset%nsppol, comm, rectangular=.False.)
+   no_pools = .False.
+   call diago_pool%from_dims(dtset%nkpt, dtset%nsppol, comm, no_pools, rectangular=.False.)
    ABI_CHECK_IEQ(dtset%nkpt, 1, "only Gamma-point is supported")
    ABI_CHECK_IEQ(dtset%nsppol, 1, "only spin-unpolarized calculations are supported")
 
