@@ -2716,28 +2716,29 @@ subroutine compute_eigen_problem(processor, matrix, results, eigen, comm, istwf_
   ! Get the size of the work arrays
   if (istwf_k/=2) then
      call PZHEEVX('V', range, 'U',&
-&      matrix%sizeb_global(2),&
-&      matrix%buffer_cplx,1,1,matrix%descript%tab, &
-&      ZERO,ZERO,il,iu,ABSTOL,&
-&      m,nz,eigen,ORFAC, &
-&      results%buffer_cplx,1,1,results%descript%tab, &
-&      CWORK_tmp,-1,RWORK_tmp,-1,IWORK_tmp,-1,&
-&      IFAIL,ICLUSTR,GAP,INFO)
+      matrix%sizeb_global(2),&
+      matrix%buffer_cplx,1,1,matrix%descript%tab, &
+      ZERO,ZERO,il,iu,ABSTOL,&
+      m,nz,eigen,ORFAC, &
+      results%buffer_cplx,1,1,results%descript%tab, &
+      CWORK_tmp,-1,RWORK_tmp,-1,IWORK_tmp,-1,&
+      IFAIL,ICLUSTR,GAP,INFO)
   else
      call PDSYEVX('V', range, 'U',&
-&      matrix%sizeb_global(2),&
-&      matrix%buffer_real,1,1,matrix%descript%tab, &
-&      ZERO,ZERO,il,iu,ABSTOL,&
-&      m,nz,eigen,ORFAC, &
-&      results%buffer_real,1,1,results%descript%tab, &
-&      RWORK_tmp,-1,IWORK_tmp,-1,&
-&      IFAIL,ICLUSTR,GAP,INFO)
+      matrix%sizeb_global(2),&
+      matrix%buffer_real,1,1,matrix%descript%tab, &
+      ZERO,ZERO,il,iu,ABSTOL,&
+      m,nz,eigen,ORFAC, &
+      results%buffer_real,1,1,results%descript%tab, &
+      RWORK_tmp,-1,IWORK_tmp,-1,&
+      IFAIL,ICLUSTR,GAP,INFO)
   end if
 
   if (INFO/=0) then
-     write(msg,'(A,I6)') "Problem to compute workspace to use ScaLAPACK, INFO=",INFO
-     ABI_ERROR(msg)
+    write(msg,'(A,I6)') "Problem to compute workspace to use ScaLAPACK, INFO=",INFO
+    ABI_ERROR(msg)
   endif
+  !write(std_out, *)"First call to compute workspace OK"
 
   TWORK_tmp(1) = IWORK_tmp(1)
   TWORK_tmp(2) = INT(RWORK_tmp(1))
@@ -2758,6 +2759,8 @@ subroutine compute_eigen_problem(processor, matrix, results, eigen, comm, istwf_
     ABI_MALLOC(IWORK,(1))
   end if
   if (LRWORK>0) then
+    ! This workspace scales with the number of processors but not always in a simple linear way.
+    ! and the optimal LRWORK might be pretty big (~1 Gb) even for small systems.
     ABI_MALLOC(RWORK,(LRWORK))
     RWORK(:) = 0._dp
   else
@@ -2806,7 +2809,6 @@ subroutine compute_eigen_problem(processor, matrix, results, eigen, comm, istwf_
   ABI_FREE(IFAIl)
   ABI_FREE(ICLUSTR)
   ABI_FREE(GAP)
-
   ABI_SFREE(IWORK)
   ABI_SFREE(RWORK)
   ABI_SFREE(CWORK)
