@@ -22,6 +22,8 @@
 
 #include "abi_common.h"
 
+#define ABI_TRACE(msg) write(0,'("=====DEBUG===== ",I4," in file ",A , "in function", A, "message: ",A )') __LINE__,__FILE__, __FUNC__, msg
+
 module m_polynomial_coeff
 
  use defs_basis
@@ -247,6 +249,14 @@ subroutine polynomial_coeff_init(coefficient,nterm,polynomial_coeff,terms,name, 
  check_in = .false.
  if(present(check)) check_in = check
 
+ !if(nterm==0)then
+ ! polynomial_coeff%name = ""
+ ! polynomial_coeff%nterm = 0
+ ! polynomial_coeff%coefficient = 0.0
+ ! ABI_MALLOC(polynomial_coeff%terms,(0))
+ ! return
+ !end if
+
 
  if(check_in)then
 !  Check if the list of term is available or contains identical terms
@@ -271,24 +281,16 @@ subroutine polynomial_coeff_init(coefficient,nterm,polynomial_coeff,terms,name, 
 
 
 !  Count the number of terms
-   ! TODO: replace by: ??
    nterm_tmp=count(abs(weights) > tol16)
-   !nterm_tmp = 0
-   !do iterm1=1,nterm
-   !  if(abs(weights(iterm1)) > tol16)then
-   !    nterm_tmp = nterm_tmp + 1
-   !  end if
-   !end do
-
    if (nterm_tmp ==0)then
      coefficient_tmp = 0.0
    else
      coefficient_tmp = coefficient
    end if
-
  else
    nterm_tmp = nterm
    coefficient_tmp = coefficient
+   print *, "size of weights", size(weights) , "nterm", nterm, "size of terms", size(terms)
    weights(:) = terms(:)%weight
  end if!end Check
 
@@ -297,9 +299,6 @@ subroutine polynomial_coeff_init(coefficient,nterm,polynomial_coeff,terms,name, 
  else
    name_tmp = ""
  end if
-
-
-
 
 !Initilisation
  polynomial_coeff%name = name_tmp
@@ -2339,8 +2338,6 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
        call polynomial_coeff_getList(cell,crystal,dist,list_symcoeff,list_symstr,&
          &                              natom,nstr_sym,ncoeff_sym,nrpt,range_ifc,cutoff,sc_size=sc_size,&
          &                              fit_iatom=fit_iatom_in)
-
-
        shape_listsymcoeff = shape(list_symcoeff)
        shape_listsymstr   = shape(list_symstr)
      endif!if iam master
@@ -2362,6 +2359,11 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
 
      !Compute the total number of coefficient
      ncoeff_tot = ncoeff_sym+nstr_sym
+     print *, "DEBUG============: ncoeff_symsym: ", ncoeff_symsym
+     print *, "DEBUG============: ncoeff_sym: ", ncoeff_sym
+     print *, "DEBUG============: nstr_sym: ", nstr_sym
+     print *, "DEBUG============: ncoeff_tot: ", ncoeff_tot
+
 
      !if(iam_master)then
      !Check the distanceance bewteen coefficients and store integer:
@@ -2396,11 +2398,6 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
            compatibleCoeffs(icoeff2,icoeff) = 0
          end if
 
-         ! TODO: hexu: Check if this is only valid for orthogonal structures. As it takes the x component of the rprimd
-         ! to compare.
-         ! Here it checks: for two pairs of atom with icoeff (a-b)  and icoeff2 (c-d).
-         !. (a) a-d along x. (b) a-d along y. (c) a-d along z are within the range.
-         ! As a-b and c-d are within the cutoff, and a==c, there is no more need to check.
 
          if(icoeff<=ncoeff_symsym.and.icoeff2<=ncoeff_symsym)then !Check combination of irreducible bodies and their symmetric equivalent
            if(list_symcoeff(2,icoeff,1)/= list_symcoeff(2,icoeff2,1)) then
@@ -2547,6 +2544,7 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
        block
          type(IrreducibleCombinations_T) :: irred_combinations
          call irred_combinations%init()
+         print *, "my_nirred", my_nirred
          do i=1,my_nirred
            associate(comb => my_list_combination_tmp(:, i))
              !ABI_MALLOC(dummylist,(0))
@@ -2562,13 +2560,19 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
              enddo
              compute_sym = .true.
              iterm = my_index_irredcomb(i)-1
+             print *, "power_disps(:)", power_disps(:)
+             print *, "ndisp, nstrain", ndisp, nstrain
+             print *, "comb", comb
+             print *, "ncoeff_symsym", ncoeff_symsym
+             print *, "nsym", nsym
+             print *, "nstr_sym", nstr_sym
+
              call computeSymmetricCombinations(my_array_combination,list_symcoeff,list_symstr,ndisp,nsym,&
                &                                        comb(:ndisp+nstrain),power_disps(2),&
                &                                        ncoeff_symsym,nstr_sym,nstrain, &
                &                                        compatibleCoeffs,compute_sym,comm, &
                &                                        only_even=need_only_even_power, max_nbody=max_nbody, &
                &                                        irred_combinations=irred_combinations, cell=cell)
-
            end associate
          enddo
          call irred_combinations%free()
@@ -2582,6 +2586,7 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
          call wrtout(std_out,message,'PERS')
        endif
        !call reduce_zero_combinations(my_list_combination)
+       print *, "DEBUG: my_array_combination", my_array_combination%size
        call my_array_combination%tostatic(my_list_combination, size1=power_disps(2))
        call my_array_combination%finalize()
 
@@ -2608,13 +2613,15 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
        do i = 1,nproc
          buffsize(i) = irank_ncombi(i)*power_disps(2)
        enddo
+
+       print *, "DEBUG: my_list_combination", size(my_list_combination)
+
        call xmpi_gatherv(my_list_combination,size(my_list_combination),list_combination_tmp,buffsize,offsets,master,comm,ierr)
 
 
        !Deallocation of variables inside need_symmetric
        ABI_FREE(buffsize)
        ABI_FREE(my_list_combination)
-
        ABI_FREE(my_index_irredcomb)
        ABI_FREE(irank_ncombi)
        ABI_FREE(offsets)
@@ -2637,6 +2644,7 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
          block
            type(IrreducibleCombinations_T) :: irred_combinations
            call irred_combinations%init()
+           print *, "DEBUG: ncombination before reducing", ncombination
            do i=1, ncombination
             if(any(list_combination_tmp(:,i) > ncoeff_symsym))then
              irreducible=irred_combinations%add_irr(list_combination_tmp(:,i), &
@@ -3540,15 +3548,6 @@ subroutine computeSymmetricCombinations(array_combination, &
   symcoeff_found = 0
 
   irreducible = .TRUE.
-  !Only start the function if start-symmetry is smaller than maximum symmetry
-  !and start displacement is smaller than maximum displacement
-  !otherwise pass through
-
-  !call gen_symlist(nsym, ndisp, symlist)
-  !call irred_combinations%init()
-
-  ! nbody and power for strain term
-
 
   call get_totpower_and_nbody(index_coeff_in(ndisp+1:ndisp+nstrain), nstrain, nbody_strain,  totpower_strain)
   call get_totpower_and_nbody(index_coeff_in(1:ndisp), ndisp, nbody_disp, totpower_disp)
@@ -3580,7 +3579,9 @@ subroutine computeSymmetricCombinations(array_combination, &
     integer :: ibody, ind(nbody_disp)
     ! allsym: allow all combination of symmetry adapted terms.
     allsym= ( max_nbody_copy(totpower)>=totpower)
+    print *, "DEBUG: ======= allsym: ", allsym
     ind(:)=0
+
     if(allsym) then
       call symlist%init(nsym, ndisp)
     else
@@ -3601,19 +3602,24 @@ subroutine computeSymmetricCombinations(array_combination, &
         end do
         call expand_poly(ind, polyform%order, nbody_disp, index_coeff_tmp(:ndisp) )
       end if
+      !print *, "DEBUG: ======= index_coeff_tmp: ", index_coeff_tmp
 
 
+      call get_powers(index_coeff_tmp, ndisp, powers)
       if(.not. allsym) then
-        call get_powers(index_coeff_tmp, ndisp, powers)
         ! only treat the terms with nbody< nbody_max
         nbody=count(powers/=0)+nbody_strain
         totpower=sum(powers) + totpower_strain
         if(totpower==0) cycle
         if(nbody> max_nbody_copy(totpower)) cycle
       end if
+      !print *, "DEBUG: ======= index_coeff_tmp after filtering powers: ", index_coeff_tmp
       if(any(mod(powers(1:ndisp),2) /=0) .and. need_only_even) then
         index_coeff_tmp(:) = 0
       end if
+
+      !print *, "DEBUG: ======= powers: ", powers
+      !print *, "DEBUG: ======= index_coeff_tmp after filtering alleven: ", index_coeff_tmp
 
       !Check if symmetric combination is allowed
       if(.not. any(index_coeff_tmp == 0))then ! Check if term is allowed by distance
@@ -3628,13 +3634,16 @@ subroutine computeSymmetricCombinations(array_combination, &
         enddo
       endif
 
+      !print *, "DEBuG: ======= index_coeff_tmp after filtering compatibility (distance): ", index_coeff_tmp
+
     if(any(index_coeff_tmp == 0))then ! If symmetry doesn't point to another term or isn't allowed due to distance write zeros to filter after
       possible = .FALSE.
     else
       possible = .TRUE.
     endif
-
     if(possible)then
+      !print *, "DEBUG: ======= index_coeff_tmp: ", index_coeff_tmp
+      !print *, "DEBUG: ======= possible: ", possible
       !loop over displacements in term
       comb_to_test(:) = 0
       if(.not. (all(index_coeff_tmp == 0)))then ! If symmetry doesn't point to another term or isn't allowed due to distance write zeros to filter after

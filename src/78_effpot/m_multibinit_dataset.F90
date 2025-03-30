@@ -272,6 +272,8 @@ module m_multibinit_dataset
 
   integer, allocatable :: fit_max_nbody_inrange(:)
   integer, allocatable :: fit_max_nbody(:)
+
+
   integer, allocatable :: opt_coeff(:)
   ! opt_coeff(opt_ncoeff)
 
@@ -645,6 +647,8 @@ subroutine multibinit_dtset_free(multibinit_dtset)
  end if
  ABI_SFREE(multibinit_dtset%fit_max_nbody)
  ABI_SFREE(multibinit_dtset%fit_max_nbody_inrange)
+
+
 
  if (allocated(multibinit_dtset%qmass))  then
    ABI_FREE(multibinit_dtset%qmass)
@@ -3011,20 +3015,20 @@ multibinit_dtset%dipdip_range(:)=[0,0,0]
 
 !O
  block
-   integer :: min, max, n
-   min =multibinit_dtset%fit_rangepower(1)
-   max =multibinit_dtset%fit_rangepower(2)
-   n=max-min+1
+   integer :: minv, maxv, n
+   minv =multibinit_dtset%fit_rangepower(1)
+   maxv =multibinit_dtset%fit_rangepower(2)
+   n=maxv-minv+1
  call read_int_array_var(int_array_var=multibinit_dtset%fit_max_nbody_inrange, &
    & size=n, &
    & var_name='fit_max_nbody', type='INT', default=999)
- ABI_MALLOC(multibinit_dtset%fit_max_nbody, (max))
+ ABI_MALLOC(multibinit_dtset%fit_max_nbody, (maxv))
  multibinit_dtset%fit_max_nbody(:)=999
- multibinit_dtset%fit_max_nbody(min:max) = multibinit_dtset%fit_max_nbody_inrange
-
+ multibinit_dtset%fit_max_nbody(minv:maxv) = multibinit_dtset%fit_max_nbody_inrange
 
 
 end block
+
 
  ABI_MALLOC(multibinit_dtset%opt_coeff,(multibinit_dtset%opt_ncoeff))
  if (multibinit_dtset%opt_ncoeff >0)then
@@ -3734,6 +3738,7 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
    write(nunit,'(1x,a16,I7)')   '      bound_step',multibinit_dtset%bound_step
    write(nunit,'(1x,a16,2I3.1)')'bound_rangePower',multibinit_dtset%bound_rangePower
  end if
+
 
 !MS Variables for SCALE-UP
 !Replace by function from m_scup_dataset.F90
