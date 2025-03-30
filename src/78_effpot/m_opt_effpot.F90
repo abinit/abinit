@@ -324,6 +324,7 @@ subroutine opt_effpot(eff_pot,opt_ncoeff,opt_coeff,hist,opt_on,opt_factors,comm,
   ABI_FREE(energy_coeffs)
   ABI_FREE(fcart_coeffs)
   ABI_FREE(strten_coeffs)
+  ABI_FREE(my_weights)
 
   if(need_print_anh)then
     INQUIRE(FILE='before_opt_diff_anharmonic_terms_energy.dat',OPENED=file_opened,number=unit_anh1)
@@ -333,7 +334,6 @@ subroutine opt_effpot(eff_pot,opt_ncoeff,opt_coeff,hist,opt_on,opt_factors,comm,
   end if
   ! Deallocate and delete the fit-date
   call fit_data_free(fit_data)
-  ABI_FREE(my_weights)
 end subroutine opt_effpot
 !!***
 
@@ -525,8 +525,6 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
   !do iorder=order(1),order(2),2, Order will be done per term
   !Loop over all original terms + 1
   ! + 1 to bound pure strain
-  print *, "DEBUG=====>", "eff_pot%anharmonics_terms%ncoeff", eff_pot%anharmonics_terms%ncoeff
-  print *, "DEBUG=====>", "nterm", nterm
   do iterm =1,nterm +1
     if(iterm <=nterm)then
       ncombi1=0
@@ -562,7 +560,6 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
         my_coeffs=eff_pot%anharmonics_terms%coefficients
 
         ! then add the single disp terms.
-        print *, 'DEBUG=====>', "ncombi1", ncombi1
         if (ncombi1>0) then
           do icombi3=1,ncombi1
             if (HOsingledisp_terms(icombi3)%terms(1)%get_nbody() == nbody_term .or. bound_option/=1) then
@@ -571,7 +568,6 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
             endif
           end do
         endif
-        print *, 'DEBUG=====>', "ncombi1_real", ncombi1_real
 
         if(allocated(HOsingledisp_terms)) call polynomial_coeff_list_free(HOsingledisp_terms)
 
@@ -593,8 +589,6 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
             endif
           end do
         endif
-        print *, 'DEBUG=====>', "ncombi2", ncombi2
-        print *, 'DEBUG=====>', "ncombi2_real", ncombi2_real
 
         if(allocated(HOcrossdisp_terms)) call polynomial_coeff_list_free(HOcrossdisp_terms)
        end associate
@@ -606,7 +600,6 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
         my_coeffs = eff_pot%anharmonics_terms%coefficients
       endif
       ncombi =  ncombi1_real + ncombi2_real
-      print*, 'DEBUG=====>', "ncombi", ncombi
       nterm_start = eff_pot%anharmonics_terms%ncoeff
     else ! if iterm = nterm + 1 => Take care about strain
         block
@@ -1436,12 +1429,6 @@ subroutine opt_getHOstrain(terms,ncombi,nterm_start,eff_pot,power_strain,comm, m
   call wrtout(ab_out,message,'COLL')
   call wrtout(std_out,message,'COLL')
 
-  write(std_out,*) "DEBUG: before getEvenAnhaStrain"
-      write(std_out,*) "DEBUG: Is strain_terms_tmp allocated?", allocated(strain_terms_tmp)
-      if (allocated(strain_terms_tmp)) then
-        write(std_out,*) "DEBUG: size of strain_terms_tmp=", size(strain_terms_tmp)
-      end if
-
 
   !1406 get count of high order even anharmonic strain terms and the strain terms itself
   call polynomial_coeff_getEvenAnhaStrain(strain_terms_tmp,crystal,ncombi,power_strain,comm, max_nbody)
@@ -1461,18 +1448,6 @@ subroutine opt_getHOstrain(terms,ncombi,nterm_start,eff_pot,power_strain,comm, m
         & eff_pot%anharmonics_terms%coefficients(i)%terms,eff_pot%anharmonics_terms%coefficients(i)%name,&
         &  check=.TRUE.)
     else
-      write(std_out,*) "DEBUG: i=", i, " nterm_start=", nterm_start
-      write(std_out,*) "DEBUG: Is strain_terms_tmp allocated?", allocated(strain_terms_tmp)
-      if (allocated(strain_terms_tmp)) then
-        write(std_out,*) "DEBUG: size of strain_terms_tmp=", size(strain_terms_tmp)
-      end if
-
-      if (.not. allocated(strain_terms_tmp)) then
-        write(std_out,*) "ERROR: strain_terms_tmp is not allocated!"
-        call wrtout(std_out,"ERROR: strain_terms_tmp is not allocated!",'COLL')
-        ABI_BUG("strain_terms_tmp is not allocated in opt_getHOstrain")
-      end if
-
       call polynomial_coeff_init(coeff_ini,strain_terms_tmp(i-nterm_start)%nterm,terms(i),&
         &         strain_terms_tmp(i-nterm_start)%terms,strain_terms_tmp(i-nterm_start)%name,&
         &         check=.TRUE.)

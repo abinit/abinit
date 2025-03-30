@@ -144,7 +144,8 @@ module m_effective_potential
 
    type(effpot_mpi_type) :: mpi_coeff
 !  effpot_mpi_type with all the information for the polynomial coefficients paralellisation
-
+contains
+      final :: effective_potential_finalizer
  end type effective_potential_type
 !!***
 
@@ -525,6 +526,22 @@ subroutine effective_potential_free(eff_pot)
    call polynomial_conf_free(eff_pot%confinement)
 
 end subroutine effective_potential_free
+!!***
+
+!!****f* m_effective_potential/effective_potential_finalizer
+!!
+!! NAME
+!! effective_potential_finalizer
+!!
+!! FUNCTION
+!! Finalizer procedure for effective_potential_type to automatically free memory
+!!
+!! SOURCE
+
+subroutine effective_potential_finalizer(this)
+  type(effective_potential_type), intent(inout) :: this
+  call effective_potential_free(this)
+end subroutine effective_potential_finalizer
 !!***
 
 !****f* m_effective_potential/effective_potential_freeCoeffs
