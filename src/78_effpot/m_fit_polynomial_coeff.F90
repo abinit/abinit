@@ -330,14 +330,17 @@ contains
     !Deallocation of arrays
     call fit_data_free(fit_data)
     !Deallocate the temporary coefficient
+
     do ii=1,size(coeffs_tmp)
       call polynomial_coeff_free(coeffs_tmp(ii))
     end do
     ABI_FREE(coeffs_tmp)
+
     do ii=1,my_ncoeff
       call polynomial_coeff_free(my_coeffs(ii))
     end do
     ABI_FREE(my_coeffs)
+
     do ii=1,ncoeff_out
       call polynomial_coeff_free(coeffs_out(ii))
     end do
@@ -647,21 +650,6 @@ contains
           call wrtout(std_out,message,'COLL')
         end if  !need_verbose
 
-
-        ! DEBUG ncoeff_tot_tmp = 0
-        ! first print the input to the subroutine
-         print*, "cut off", cutoff
-         print*, "fit_iatom_in", fit_iatom_in
-         print*, "need_anharmstr", need_anharmstr
-         print*, "need_spcoupling", need_spcoupling
-         print*, "need_only_odd_power", need_only_odd_power
-         print*, "need_only_even_power", need_only_even_power
-         print*, "max_nbody", max_nbody
-         print*, "power_disps", power_disps
-         print*, "sc_size", sc_size
-         print*, "comm", comm
-         print*, "fit_iatom_all", fit_iatom_all
-         print*, "need_disp", need_disp
          block 
           integer max_nbody_tmp(20)
           max_nbody_tmp(:) = 20

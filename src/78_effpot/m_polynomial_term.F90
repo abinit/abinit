@@ -88,9 +88,13 @@ module m_polynomial_term
 
    integer,allocatable  ::  index_coeff(:)
 
+   ! a string to identify the term
+    character(len=100) :: term_string = ''
+
    contains
            procedure :: get_nbody
            procedure :: get_total_power
+           final :: polynomial_term_finalizer
  end type polynomial_term_type
 !!***
 
@@ -307,6 +311,7 @@ subroutine polynomial_term_init(atindx,cell,direction,ndisp,nstrain,polynomial_t
    polynomial_term%index_coeff(:)=index_coeff(:)
  else
    polynomial_term%nindex = -1
+   ABI_MALLOC(polynomial_term%index_coeff, (0))
  end if
 
 
@@ -350,39 +355,31 @@ subroutine polynomial_term_free(polynomial_term)
  polynomial_term%nstrain   = 0
  polynomial_term%weight    = zero
 
- if(allocated(polynomial_term%atindx))then
-   polynomial_term%atindx(:,:) = 0
-   ABI_FREE(polynomial_term%atindx)
- end if
-
- if(allocated(polynomial_term%cell))then
-   polynomial_term%cell(:,:,:) = 0
-   ABI_FREE(polynomial_term%cell)
- end if
-
- if(allocated(polynomial_term%direction))then
-   polynomial_term%direction(:) = 0
-   ABI_FREE(polynomial_term%direction)
- end if
-
- if(allocated(polynomial_term%power_disp))then
-   polynomial_term%power_disp(:) = 0
-   ABI_FREE(polynomial_term%power_disp)
- end if
-
-  if(allocated(polynomial_term%power_strain))then
-   polynomial_term%power_strain(:) = 0
-   ABI_FREE(polynomial_term%power_strain)
- end if
-
-  if(allocated(polynomial_term%strain))then
-   polynomial_term%strain(:) = 0
-   ABI_FREE(polynomial_term%strain)
- end if
-
+ ABI_SFREE(polynomial_term%atindx)
+ ABI_SFREE(polynomial_term%cell)
+ ABI_SFREE(polynomial_term%direction)
+ ABI_SFREE(polynomial_term%power_disp)
+ ABI_SFREE(polynomial_term%power_strain)
+ ABI_SFREE(polynomial_term%strain)
  ABI_SFREE(polynomial_term%index_coeff)
-
+ 
 end subroutine polynomial_term_free
+!!***
+
+!!****f* m_polynomial_term/polynomial_term_finalizer
+!!
+!! NAME
+!! polynomial_term_finalizer
+!!
+!! FUNCTION
+!! Finalizer procedure for polynomial_term_type to automatically free allocated memory
+!!
+!! SOURCE
+
+subroutine polynomial_term_finalizer(self)
+  type(polynomial_term_type), intent(inout) :: self
+  call polynomial_term_free(self)
+end subroutine polynomial_term_finalizer
 !!***
 
 ! function polynomial_term_type_get_index_coeff(term, ndisp, nstrain) result(list)
