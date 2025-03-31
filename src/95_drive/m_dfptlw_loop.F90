@@ -546,7 +546,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
                        & ph1d,i3dir,psps%qgrid_vl,dtset%qptn,ucvol,ncorespl,xccc3d2dq,optnc=1)
 
                        !Get the q-gradient of the first-order XC potential due to the pseudocore charge
-                       call dfpt_mkvxcccdq(cplex,i3dir,dtset%ixc,gmet,gprimd,kxc,mpi_enreg,nfftf,dtset%ngfft,&
+                       call dfpt_mkvxcccdq(cplex,i3dir,dtset%ixc,gprimd,kxc,mpi_enreg,nfftf,dtset%ngfft,&
                      & nkxc,nspden,dtset%qptn,rprimd,vxccc1_i2pertdq,xccc3d2,xccc3d2dq)
                        
                        !Add this contribution to the gradient of the local PSP 
