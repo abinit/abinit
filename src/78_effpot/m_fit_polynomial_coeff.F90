@@ -332,14 +332,15 @@ contains
     do ii=1,size(coeffs_tmp)
       call polynomial_coeff_free(coeffs_tmp(ii))
     end do
-    ABI_FREE(coeffs_tmp)
+    ABI_SFREE(coeffs_tmp)
 
-    do ii=1,my_ncoeff
+    !do ii =1, my_ncoeff
+    do ii=1,size(my_coeffs)
       call polynomial_coeff_free(my_coeffs(ii))
     end do
-    ABI_FREE(my_coeffs)
+    ABI_SFREE(my_coeffs)
 
-    do ii=1,ncoeff_out
+    do ii=1,size(coeffs_out)
       call polynomial_coeff_free(coeffs_out(ii))
     end do
     ABI_SFREE(coeffs_out)
@@ -429,7 +430,7 @@ contains
       do ii = 1,nimposecoeff
         call polynomial_coeff_free(coeffs_tmp(ii))
       enddo
-      ABI_FREE(coeffs_tmp)
+      ABI_SFREE(coeffs_tmp)
     elseif (nimposecoeff == -1)then
       call effective_potential_copy(eff_pot_fixed,eff_pot,comm)
     else
@@ -688,7 +689,9 @@ contains
       !call coeffs_list_reduce_duplicate(coeffs_tmp, eff_pot%crystal, sc_size, fit_iatom_in, cutoff , power_disps(2))
       my_ncoeff = size(coeffs_tmp)
       if (fit_iatom_all .and. iam_master) then
-        write(message, '(2a,I6,a)' )ch10,' fit_iatom = -2 : The total number of coefficients for all atoms are',ncoeff_tot,ch10
+        write(message, '(2a,I6,a)' ) ch10, &
+        &    ' fit_iatom = -2 : The total number of coefficients for all atoms are', &
+        &    ncoeff_tot,ch10
         call wrtout(std_out,message,'COLL')
         call wrtout(ab_out,message,'COLL')
       end if
@@ -1033,12 +1036,6 @@ contains
   subroutine get_ncoeff_to_select_and_ncoeff_to_fit()
     !Compute the number of cycle:
     ncoeff_to_select     = ncoeff_in
-    print *, "ncoeff_in", ncoeff_in
-    print *, "ncoeff_preselected", ncoeff_preselected
-    print *, "ncoeff_tot", ncoeff_tot
-    print *, "nimposecoeff", nimposecoeff
-    print *, "nfix", nfix
-    print *, "generateterm_in", generateterm_in
     if (ncoeff_in + nimposecoeff + nfix > ncoeff_tot .and. generateterm_in==0) then
       ncoeff_to_select = ncoeff_tot - nimposecoeff - nfix
       write(message, '(4a,I0,2a,I0,2a,I0,3a)' )ch10,&
@@ -2041,11 +2038,11 @@ contains
             check = .true.      &            ! Validation flag
          )
 
-        call polynomial_coeff_free(coeffs_tmp(ia))
+        !call polynomial_coeff_free(coeffs_tmp(ia))
        endif
 
      enddo
-     ABI_SFREE(coeffs_tmp)
+     !ABI_SFREE(coeffs_tmp)
 
 
 
