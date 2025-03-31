@@ -1301,7 +1301,7 @@ class AbinitProject(NotebookWriter):
                 if new_dependencies:
                     ierr += 1
                     print("dirname", dirname, "does not have a dependencies section but uses:", new_dependencies)
-                config[dirname]["dependencies"] = " ".join(d for d in sorted(new_dependencies))
+                    config[dirname]["dependencies"] = " ".join(d for d in sorted(new_dependencies))
             else:
                 for new_dep in new_dependencies:
                     if new_dep not in old_dependencies:
@@ -1309,7 +1309,43 @@ class AbinitProject(NotebookWriter):
                         print("dirname", dirname, "uses:", new_dep, " that is not listed in", old_dependencies)
                 config[dirname]["dependencies"] = " ".join(d for d in sorted(old_dependencies.union(old_dependencies)))
 
-            #config.write(corelibs_path)
+        header = """\
+# -*- INI -*-
+#
+# Copyright (C) 2009-2025 ABINIT Group (Yann Pouillon)
+#
+# This file is part of the ABINIT software package. For license information,
+# please see the COPYING file in the top-level directory of the ABINIT source
+# distribution.
+#
+
+#
+# Config file for the core libraries of Abinit
+#
+# Note: The following statements are in the Python "INI" format, with
+#       case-sensitivity activated.
+#
+# Available options:
+#
+#   * abirules     : whether to check conformance to the abirules (mandatory);
+#
+#   * dependencies : external dependencies, when relevant (optional);
+#
+#   * optional     : whether the build of the library is optional (mandatory);
+#
+#   * parent       : code block the subdirectory belongs to, selected between
+#                    "common", "core", or "libpaw" (mandatory).
+#
+
+# WARNING: Make sure all comments start at column 1 of the text, because some
+#          versions of ConfigParser shipped with RedHat-based systems will
+#          mess-up indented comments with the fields defined before.
+
+# WARNING: modify the defaults with *extreme* care!
+"""
+        with open(corelibs_path, 'wt') as fh:
+            fh.write(header)
+            config.write(fh)
 
         return ierr
 
