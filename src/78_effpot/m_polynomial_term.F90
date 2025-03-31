@@ -89,7 +89,7 @@ module m_polynomial_term
    integer,allocatable  ::  index_coeff(:)
 
    ! a string to identify the term
-    character(len=100) :: term_string = ''
+    character(len=100) :: debug_string = ''
 
    contains
            procedure :: get_nbody

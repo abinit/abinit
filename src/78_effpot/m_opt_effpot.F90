@@ -24,7 +24,6 @@
 
 #include "abi_common.h"
 
-#define ABI_TRACE(msg) write(0,'("=====DEBUG===== ",I4," in file ",A , "in function", A, "message: ",A )') __LINE__,__FILE__, __FUNC__, msg
 
 module m_opt_effpot
 
@@ -605,7 +604,7 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
         block
         integer :: max_nbody_tmp(order_ran(2))
         if (bound_option==1) then
-            max_nbody_tmp(:) = 1
+            max_nbody_tmp(:) = 888
         else
             max_nbody_tmp(:) = 888
         endif

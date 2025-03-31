@@ -22,7 +22,6 @@
 
 #include "abi_common.h"
 
-#define ABI_TRACE(msg) write(0,'("=====DEBUG===== ",I4," in file ",A , "in function", A, "message: ",A )') __LINE__,__FILE__, __FUNC__, msg
 
 module m_polynomial_coeff
 
@@ -354,8 +353,8 @@ subroutine polynomial_coeff_free(polynomial_coeff)
    do ii = 1,polynomial_coeff%nterm
      call polynomial_term_free(polynomial_coeff%terms(ii))
    end do
-   ABI_SFREE(polynomial_coeff%terms)
  end if
+ ABI_SFREE(polynomial_coeff%terms)
  polynomial_coeff%name = ""
  polynomial_coeff%nterm = 0
  polynomial_coeff%coefficient = zero
@@ -399,8 +398,8 @@ subroutine polynomial_coeff_list_free(polynomial_coeff_list)
    do i=1,ncoeff
       call polynomial_coeff_free(polynomial_coeff_list(i))
     enddo
-   ABI_SFREE(polynomial_coeff_list)
  endif
+ ABI_SFREE(polynomial_coeff_list)
 
 end subroutine polynomial_coeff_list_free
 !!***
@@ -4075,11 +4074,11 @@ do icoeff1 =1,ncoeff_out
         do icoeff2=start,ncoeff_out
                 if(.not.same(icoeff2)) same(icoeff2) = coeffs_compare(strain_terms_tmp(icoeff1),strain_terms_tmp(icoeff2))
         enddo
-        !write(*,*) "same(",icoeff1,"): ", same(icoeff1)
 enddo
 
 irred_ncoeff = ncoeff_out - count(same)
 ABI_MALLOC(strain_terms,(irred_ncoeff))
+
 
 !Transfer irreducible strain to output array
 icoeff2=0
@@ -4098,15 +4097,10 @@ do icoeff1=1,ncoeff_out
   end block
 enddo
 
-!TEST MS write coefficients to xml to check
-!fname="EvenAnhaStrain.xml"
-!call polynomial_coeff_writeXML(strain_terms,irred_ncoeff,filename=fname,newfile=.true.)
-!write(*,*) "Strain terms to xml done"
 
-
-!Deallocateion
 call polynomial_coeff_list_free(strain_terms_tmp)
 ABI_SFREE(same)
+
 
 end subroutine polynomial_coeff_getEvenAnhaStrain
 !!***
