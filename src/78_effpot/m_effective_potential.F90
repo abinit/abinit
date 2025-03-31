@@ -2645,7 +2645,6 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,gred,strten,natom,r
 !!! External_ELECTRIC_FILED
 ! 7.5 - Compute Forces and energies from external electric field
 !------------------------------------------
-if (present(efield_type)) then
  if (efield_type  /= 0) then
   call calculate_forces_efield(eff_pot,energy_part,eff_pot%mpi_coeff%comm,fcart_part,natom,&
   &                       disp_tmp,xcart,efield_type,efield,efield2,efield_lambda,efield_lambda2,efield_period,&
@@ -2656,11 +2655,6 @@ if (present(efield_type)) then
       call wrtout(ab_out,msg,'COLL')
       call wrtout(std_out,msg,'COLL')
 
-!    temp_pol = temp_pol/(eff_pot%supercell%ncells*eff_pot%crystal%ucvol)
-!       write(msg, '(a,1ES16.6,1ES16.6,1ES16.6,a)' ) 'The polarization is :',&
-! &                                       temp_pol(1),temp_pol(2),temp_pol(3), ' eU/Bohr^2'
-!       call wrtout(ab_out,msg,'COLL')
-!       call wrtout(std_out,msg,'COLL')
   end if
   energy = energy + energy_part
   fcart = fcart + fcart_part
