@@ -1206,6 +1206,176 @@ See [[abinit:dtion]]
 ),
 
 Variable(
+    abivarname="efield_type@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['DynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Electric FIELD TYPE for Multibinit",
+    added_in_version="v10",
+    text=r"""
+Set the electric field option for Multibinit.
+
+* 0 --> no electric field
+
+* 1 --> Homogeneous electric field. The electric field is constant in time and in space during the dynamics. This corresponds to the classical previous version
+
+* 2 --> Allows the computation of time modulated electric fields with the functional form cos(2*pi*t/T+phi)
+
+* 3 --> Allows the computation of spatially modulated electric fields with the functional form cos(2*pi*x/l_x+2*pi*y/l_y+2*pi*z/l_z+phi)
+
+* 4 --> Allows the computation of spatially and time modulated electric fields with the functional form cos(2*pi*x/l_x+2*pi*y/l_y+2*pi*z/l_z+2*pi*t/T+phi)
+
+* 5 --> Allows the computation of Gaussian like distributed electric fields.
+
+* 6 --> Allows the computation of 2 spatially modulated electric fields with the functional form of 3 at the same time."""
+),
+
+Variable(
+    abivarname="efield@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=['DynamicsMultibinit_basic'],
+    dimensions="array",
+    defaultval=0.0 0.0 0.0,
+    mnemonics="Electric FIELD magnitude for Multibinit",
+    added_in_version="before v9",
+    text=r"""
+Set the magnitude for the electric field"""
+),
+Variable(
+    abivarname="efield2@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=['DynamicsMultibinit_basic'],
+    dimensions="array",
+    defaultval=0.0 0.0 0.0,
+    mnemonics="Electric FIELD magnitude for 2nd field in Multibinit when efield_type is 6",
+    added_in_version="v10",
+    text=r"""
+Set the magnitude for the secondary electric field in multibinit when efield_type is 6"""
+),
+
+Variable(
+    abivarname="efield_background@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=['DynamicsMultibinit_basic'],
+    dimensions="array",
+    defaultval=0.0 0.0 0.0,
+    mnemonics="Electric FIELD magnitude for BACKGROUND field in Multibinit when efield_type is > 1",
+    added_in_version="v10",
+    text=r"""
+Set the magnitude for the background homogeneous electric field when efield_type > 1 in MB"""
+),
+
+Variable(
+    abivarname="efield_lambda@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=['DynamicsMultibinit_basic'],
+    dimensions="array",
+    defaultval=0.0 0.0 0.0,
+    mnemonics="Electric FIELD periodicity LAMBDA.",
+    added_in_version="v10",
+    text=r"""
+Set the periodicity in real space for spatially inhomogeneous vector fields. 0.0 is interpreted as infinite"""
+),
+
+Variable(
+    abivarname="efield_lambda2@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=['DynamicsMultibinit_basic'],
+    dimensions="array",
+    defaultval=0.0 0.0 0.0,
+    mnemonics="Electric FIELD periodicity LAMBDA 2.",
+    added_in_version="v10",
+    text=r"""
+Set the periodicity in real space for the second spatially inhomogeneous vector fields when efield_type 6 is selected. 0.0 is interpreted as infinite"""
+),
+
+Variable(
+    abivarname="efield_period@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=['DynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval=1000000000000000.0,
+    mnemonics="Electric FIELD PERIOD.",
+    added_in_version="v10",
+    text=r"""
+Set the periodicity in time for time modulated electric fields"""
+),
+
+Variable(
+    abivarname="efield_phase@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=['DynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval=0.0,
+    mnemonics="Electric FIELD PHASE shift.",
+    added_in_version="v10",
+    text=r"""
+Set the phase shift for spatially or time modulated fields"""
+),
+
+Variable(
+    abivarname="efield_phase2@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=['DynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval=0.0,
+    mnemonics="Electric FIELD PHASE 2 shift.",
+    added_in_version="v10",
+    text=r"""
+Set the phase shift for spatially or time modulated fields for the second field in the case efield_type 6."""
+),
+
+Variable(
+    abivarname="efield_gmean@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=['DynamicsMultibinit_basic'],
+    dimensions="array",
+    defaultval=0.0 0.0 0.0,
+    mnemonics="Electric FIELD Gaussian MEAN.",
+    added_in_version="v10",
+    text=r"""
+Set the mean value for the Gaussian distributed electric field."""
+),
+
+Variable(
+    abivarname="efield_gvel@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=['DynamicsMultibinit_basic'],
+    dimensions="array",
+    defaultval=0.0 0.0 0.0,
+    mnemonics="Electric FIELD Gaussian VELocity.",
+    added_in_version="v10",
+    text=r"""
+Set the velocity of the center of the Gaussian distributed field."""
+),
+
+Variable(
+    abivarname="efield_sigma@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=['DynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval=0.01,
+    mnemonics="Electric FIELD gaussian SIGMA.",
+    added_in_version="v10",
+    text=r"""
+Set the standard deviation of the Gaussian field."""
+),
+
+
+Variable(
     abivarname="latt_friction@multibinit",
     varset="multibinit",
     vartype="integer",
