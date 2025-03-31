@@ -188,4 +188,14 @@ inp_files = [
     # Chebfi2
     "t206.abi",  # check that various algorithm give the same results (including wfoptalg=111). istwfk=1.
     "t207.abi",  # same as t206 but with nspinor=2
+
+    # Multibinit efield
+    "t210.abi",  # t210-t215 check the implemenation of te efield in multibinit.
+    "t211.abi", 
+    "t212.abi", 
+    "t213.abi", 
+    "t214.abi", 
+    "t215.abi", 
+
+
 ]
