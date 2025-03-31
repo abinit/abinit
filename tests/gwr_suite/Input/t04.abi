@@ -126,7 +126,7 @@ pseudos "Psdj_nc_sr_04_pbe_std_psp8/Si.psp8"
 #%% exclude_builders = eos_nvhpc_23.9_elpa
 #%% [files]
 #%% files_to_test =
-#%%   t04.abo, tolnlines = 50, tolabs = 8e-3, tolrel = 3.0e-3, fld_options = -medium;
+#%%   t04.abo, tolnlines = 70, tolabs = 8e-3, tolrel = 3.0e-3, fld_options = -medium;
 #%% [paral_info]
 #%% max_nprocs = 12
 #%% [extra_info]

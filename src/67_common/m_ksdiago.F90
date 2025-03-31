@@ -1541,8 +1541,6 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
 
  call timab(1919, 2, tsec)
 
- !ABI_ERROR("ugb_from_diago OK")
-
 end subroutine ugb_from_diago
 !!***
 
@@ -1551,6 +1549,7 @@ end subroutine ugb_from_diago
 !! ugb_from_wfk_file
 !!
 !! FUNCTION
+!!  Initialize an ugb_t instance from a WFK file.
 !!
 !! INPUTS
 !!  spin: spin index.

@@ -689,8 +689,8 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
    ! Try to get rectangular grids in each pool to improve efficiency in slk diago.
    rectangular = .True.; if (dtset%nkpt == 1) rectangular = .False.
    with_pools = .True.
-   if (any(dtset%gwr_np_kgts /= 0) .and. (nprocs == dtset%gwr_np_kgts(1))) then
-      with_pools = .False.; call wrtout(std_out, "Deactivating pools in HDIAGO")
+   if (any(dtset%gwr_np_kgts /= 0) .and. (nprocs == dtset%gwr_np_kgts(2))) then
+      with_pools = .False.; call wrtout(std_out, " Deactivating pools in HDIAGO")
    end if
    call diago_pool%from_dims(dtset%nkpt, dtset%nsppol, comm, with_pools, rectangular=rectangular)
    diago_info = zero
@@ -743,7 +743,8 @@ end if
          ABI_CALLOC(occ_k, (nband_k))
          color = merge(1, 0, ugb%my_nband > 0)
          call xmpi_comm_split(diago_pool%comm%value, color, diago_pool%comm%me, io_comm, ierr)
-         call wrtout(std_out, sjoin(" Number of procs involved in IO operation:", itoa(xmpi_comm_size(io_comm))))
+         call wrtout(std_out, sjoin(" Number of MPI procs involved in IO operation:", &
+                     itoa(xmpi_comm_size(io_comm)), "/", itoa(diago_pool%comm%nproc)))
 
          if (ugb%my_nband > 0) then
            ABI_CHECK(all(shape(ugb%cg_k) == [2, ugb%npwsp, ugb%my_nband]), "Wrong shape")
@@ -752,17 +753,14 @@ end if
 
            ! Reopen file inside io_comm.
            call owfk%open_write(owfk_hdr, out_path, 0, iomode__, get_unit(), io_comm, write_hdr=.False., write_frm=.False.)
+           call wrtout(std_out, "After owfk%open_write")
 
+           ! Write my bands.
            !sc_mode = merge(xmpio_single, xmpio_collective, ugb%has_idle_procs)
            !sc_mode = xmpio_collective
            sc_mode = xmpio_single
            call owfk%write_band_block([ugb%my_bstart, ugb%my_bstop], ik_ibz, spin, sc_mode, &
                                        kg_k=ugb%kg_k, cg_k=cg_k_ptr, eig_k=owfk_ebands%eig(:, ik_ibz, spin), occ_k=occ_k)
-
-           !NCF_CHECK(nf90_inq_varid(owfk%fh, "reduced_coordinates_of_plane_waves", kg_varid))
-           !NCF_CHECK(nf90_put_var(owfk%fh, kg_varid, ugb%kg_k, start=[1,1,ik_ibz], count=[3,ugb%npw_k,1]))
-           !NCF_CHECK(nf90_sync(owfk%fh))
-           !print *, "ugb%kg_k:", ugb%kg_k; stop
            call owfk%close()
          end if
          call xmpi_comm_free(io_comm)
@@ -779,7 +777,6 @@ end if
        call ugb%free()
      end do ! ik_ibz
    end do ! spin
-
    call wrtout(std_out, " Direct diago completed by this MPI pool. Other pools might take more time if k != 0")
 
    call xmpi_sum_master(diago_info, master, comm, ierr)
@@ -806,8 +803,7 @@ end if
 
    if (my_rank == master) then
      if (write_wfk .and. iomode__ == IO_MODE_ETSF) then
-       NCF_CHECK(owfk_ebands%ncwrite_path(cryst, out_path))
-       !print *, "owfk_ebands%istwfk", owfk_ebands%istwfk; stop
+       NCF_CHECK(owfk_ebands%ncwrite_path(cryst, out_path)) !print *, "owfk_ebands%istwfk", owfk_ebands%istwfk; stop
      end if
      call owfk_ebands%print_gaps(units, header="KS gaps after direct diagonalization")
      if (cc4s_task) call cc4s_write_eigens(owfk_ebands, dtfil)
@@ -837,12 +833,12 @@ end if
 
    ! Build MPI pools to distribute (kpt, spin).
    with_pools = .True.
-   if (any(dtset%gwr_np_kgts /= 0) .and. (nprocs == dtset%gwr_np_kgts(1))) then
-      with_pools = .False.; call wrtout(std_out, "Deactivating pools in HDIAGO")
+   if (any(dtset%gwr_np_kgts /= 0) .and. (nprocs == dtset%gwr_np_kgts(2))) then
+      with_pools = .False.; call wrtout(std_out, " Deactivating pools in HDIAGO")
    end if
    call diago_pool%from_dims(dtset%nkpt, dtset%nsppol, comm, with_pools, rectangular=.False.)
-   ABI_CHECK_IEQ(dtset%nkpt, 1, "only Gamma-point is supported")
-   ABI_CHECK_IEQ(dtset%nsppol, 1, "only spin-unpolarized calculations are supported")
+   ABI_CHECK_IEQ(dtset%nkpt, 1, "Only Gamma-point sampling is supported")
+   ABI_CHECK_IEQ(dtset%nsppol, 1, "Only spin-unpolarized calculations are supported")
 
    do spin=1,dtset%nsppol
      do ik_ibz=1,dtset%nkpt
@@ -997,8 +993,7 @@ end if
  ABI_SFREE(pawfgrtab)
  ABI_SFREE(ks_paw_an)
 
- call cryst%free(); call wfk_hdr%free(); call ks_ebands%free(); call destroy_mpi_enreg(mpi_enreg_seq)
- call gwr%free()
+ call cryst%free(); call wfk_hdr%free(); call ks_ebands%free(); call destroy_mpi_enreg(mpi_enreg_seq); call gwr%free()
 
 end subroutine gwr_driver
 !!***

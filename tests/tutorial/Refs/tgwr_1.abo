@@ -1,5 +1,5 @@
 
-.Version 10.3.6.1 of ABINIT, released Feb 2025.
+.Version 10.3.6.3 of ABINIT, released Feb 2025.
 .(MPI version, prepared for a aarch64_darwin23.6.0_gnu14.2 computer)
 
 .Copyright (C) 1998-2025 ABINIT group .
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 26 Mar 2025.
-- ( at 17h15 )
+.Starting date : Mon 31 Mar 2025.
+- ( at 09h21 )
 
 - input  file    -> /Users/giantomassi/git_repos/abinit/_build/tests/Test_suite/tutorial_tgwr_1-tgwr_2-tgwr_3-tgwr_4-tgwr_5/tgwr_1.abi
 - output file    -> tgwr_1.abo
@@ -383,7 +383,7 @@ force_length_stats: {min:   2.91116666E-29, max:   2.91116666E-29, mean:   2.911
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   38.406E-09; max=  20.130E-07
+GS calculation converged with prtwf=-1 --> Skipping WFK file output
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -1020,7 +1020,7 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   45.448E-22; max=  99.942E-22
+GS calculation converged with prtwf=-1 --> Skipping WFK file output
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -1454,6 +1454,7 @@ P           mkmem2        101
              nsym          48
            ntypat           1
               occ      2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+            prtwf          -1
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00

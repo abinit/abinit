@@ -88,6 +88,8 @@
 !!
 !!   - Use round-robin distribution instead of blocked-distribution to improve load balance?
 !!
+!!   - For nspinor = 2, use 4 Scalapack matrices to store G^k_ab(g,g') instead of a single matrix of shape (npwsp, npwsp)
+!!
 !!   - Memory peaks:
 !!
 !!       (env3.9) [magianto@uan01 /scratch/project_465000061/magianto/DDIAGO_ZnO]
@@ -3508,15 +3510,15 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
  integer, parameter :: TAU_SPACE = 0, W_SPACE = 1
  integer :: my_iqi, my_is, ig1, ig2, my_it, ierr, iq_ibz, itau, spin, it0, iw, cnt
  integer :: ndat, idat, loc1_size, loc2_size, batch_size, from_space
- real(dp) :: cpu, wall, gflops, t0
+ real(dp) :: cpu, wall, gflops !, min_abs_err, max_abs_err
  complex(dp) :: cval
  logical :: sum_spins_
 !arrays
  integer :: mask_qibz(gwr%nqibz)
  real(dp), contiguous, pointer :: weights_ptr(:,:)
- real(dp),allocatable :: alpha_r(:,:)
+ real(dp),allocatable :: beta_r(:,:)
  complex(dp) :: wgt_globmy(gwr%ntau, gwr%my_ntau)  ! Complex instead of real to be able to call ZGEMM.
- complex(dp),allocatable :: cwork_myit(:,:,:), glob_cwork(:,:,:), beta_c(:,:)
+ complex(dp),allocatable :: cwork_myit(:,:,:), glob_cwork(:,:,:), alpha_c(:,:)
  type(__slkmat_t), pointer :: mats(:)
 ! *************************************************************************
 
@@ -3597,9 +3599,9 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
      ABI_MALLOC(glob_cwork, (gwr%ntau, loc1_size, batch_size))
 
      if (gwr%dtset%gwr_fit /= 0) then
-       ! Allocate coefficients for fit.
-       ABI_MALLOC(alpha_r, (loc1_size, batch_size))
-       ABI_MALLOC(beta_c, (loc1_size, batch_size))
+       ! Allocate coefficients for the fit.
+       ABI_MALLOC(beta_r, (loc1_size, batch_size))
+       ABI_MALLOC(alpha_c, (loc1_size, batch_size))
      end if
 
      do ig2=1,mats(it0)%sizeb_local(2), batch_size
@@ -3622,43 +3624,49 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
          call xmpi_sum(glob_cwork, gwr%tau_comm%value, ierr)
 
          ! Start the fit
-         cnt = 0; alpha_r = zero; beta_c = zero
+         cnt = 0; beta_r = zero; alpha_c = zero
          do idat=1,ndat
            do ig1=1,mats(it0)%sizeb_local(1)
               cnt = cnt + 1; if (gwr%tau_comm%skip(cnt)) cycle ! MPI parallelism inside tau_comm
               if (from_space == TAU_SPACE) then
                 call fit_tau_exp(gwr%ntau, gwr%tau_mesh, gwr%tau_wgs, glob_cwork(:,ig1,idat), &
-                                 alpha_r(ig1,idat), beta_c(ig1,idat))
+                                 alpha_c(ig1,idat), beta_r(ig1,idat))
               else if (from_space == W_SPACE) then
                 call fit_iomega(gwr%ntau, gwr%iw_mesh, gwr%iw_wgs, glob_cwork(:,ig1,idat), &
-                                alpha_r(ig1,idat), beta_c(ig1,idat))
+                                alpha_c(ig1,idat), beta_r(ig1,idat))
+                ! disable the fit
+                !alpha_c(ig1,idat) = zero; beta_r(ig1,idat) = zero
               else
                 ABI_ERROR(sjoin("Invalid from_space:", itoa(from_space)))
               end if
-              !print *, alpha_r(ig1,idat), beta_c(ig1,idat)
-           end do
-         end do
-         call xmpi_sum(alpha_r, gwr%tau_comm%value, ierr)
-         call xmpi_sum(beta_c, gwr%tau_comm%value, ierr)
+              !if (from_space == W_SPACE .and. my_it == 1) then
+              !print *, "my_it, alpha, beta", my_it, alpha_c(ig1,idat), beta_r(ig1,idat)
+              !end if
+           end do ! ig1
+         end do ! idat
+         call xmpi_sum(alpha_c, gwr%tau_comm%value, ierr)
+         call xmpi_sum(beta_r, gwr%tau_comm%value, ierr)
        end if ! gwr_fit
 
-       t0 = gwr%tau_mesh(1)
        ! Extract (g1, g2) matrix elements as a function of tau/omega
-       !!$OMP PARALLEL DO PRIVATE(itau, cval, t0) COLLAPSE(2)
+       !!$OMP PARALLEL DO PRIVATE(itau, cval) COLLAPSE(2)
        do idat=1,ndat
          do my_it=1,gwr%my_ntau
            itau = gwr%my_itaus(my_it)
            cval = zero
            do ig1=1,mats(it0)%sizeb_local(1)
              if (gwr%dtset%gwr_fit /= 0) then
-               ! Evaluate the fit and remove it from the signal. Note t0.
+               ! Evaluate the fit and remove it from the signal.
                if (from_space == TAU_SPACE) then
-                 cval = fit_tau_exp_eval("func", gwr%tau_mesh(itau)-t0, alpha_r(ig1,idat), beta_c(ig1,idat))
+                 cval = fit_tau_exp_eval("func", gwr%tau_mesh(itau), alpha_c(ig1,idat), beta_r(ig1,idat))
                else if (from_space == W_SPACE) then
-                 cval = fit_iomega_eval("func", gwr%iw_mesh(itau), alpha_r(ig1,idat), beta_c(ig1,idat))
+                 cval = fit_iomega_eval("func", gwr%iw_mesh(itau), alpha_c(ig1,idat), beta_r(ig1,idat))
                end if
-               !print *, "cval1:", cval, mats(itau)%buffer_cplx(ig1, ig2+idat-1)
-               !print *, "abd_diff:", abs(cval - mats(itau)%buffer_cplx(ig1, ig2+idat-1))
+               !if (from_space == W_SPACE .and. my_it == 1) then
+                 !print *, "my_it cval, mat", my_it, cval, mats(itau)%buffer_cplx(ig1, ig2+idat-1)
+                 !print * "beta_r, alpha:", beta_r(ig1,idat), alpha_c(ig1,idat)
+                 !write(*,*), "my_it abs_diff_1", my_it, abs(cval - mats(itau)%buffer_cplx(ig1, ig2+idat-1))
+               !end if
              end if
              cwork_myit(my_it, ig1, idat) = mats(itau)%buffer_cplx(ig1, ig2+idat-1) - cval
            end do
@@ -3681,11 +3689,15 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
              if (gwr%dtset%gwr_fit /= 0) then
                ! Add Fourier transform of the fitted model.
                if (from_space == TAU_SPACE) then
-                 cval = fit_tau_exp_eval("ft", gwr%iw_mesh(itau), alpha_r(ig1,idat), beta_c(ig1,idat))
+                 cval = fit_tau_exp_eval("ft", gwr%iw_mesh(itau), alpha_c(ig1,idat), beta_r(ig1,idat))
                else if (from_space == W_SPACE) then
-                 cval = fit_iomega_eval("ft", gwr%tau_mesh(itau), alpha_r(ig1,idat), beta_c(ig1,idat))
+                 cval = fit_iomega_eval("ft", gwr%tau_mesh(itau), alpha_c(ig1,idat), beta_r(ig1,idat))
                end if
-               !print *, "cval2:", cval, from_space
+               !if (from_space == W_SPACE .and. my_it == 1) then
+               !if (from_space == W_SPACE) then
+               !  print *, "beta_r, alpha:", beta_r(ig1,idat), alpha_c(ig1,idat)
+               !  write(*, *), "my_it, abs_diff_2 my_it", my_it, abs(cval - mats(itau)%buffer_cplx(ig1, ig2+idat-1))
+               !end if
              end if
              mats(itau)%buffer_cplx(ig1, ig2+idat-1) = glob_cwork(itau, ig1, idat) + cval
            end do
@@ -3696,8 +3708,8 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
 
      ABI_FREE(cwork_myit)
      ABI_FREE(glob_cwork)
-     ABI_SFREE(alpha_r)
-     ABI_SFREE(beta_c)
+     ABI_SFREE(alpha_c)
+     ABI_SFREE(beta_r)
      end associate
    end do ! my_iqi
  end do ! my_is
@@ -3739,6 +3751,7 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
  end if
 
  call cwtime_report(" gwr_cos_transform:", cpu, wall, gflops)
+ !stop "hello"
 
 end subroutine gwr_cos_transform
 !!***
@@ -3747,46 +3760,48 @@ end subroutine gwr_cos_transform
 !! NAME
 !!
 !! FUNCTION
-!!  Fit values in imaginary time using B exp^{-a t} with B complex and a real and > 0.
-!!  The fit passes through the fist tau point, the second point is selected by
-!!  minimizing the "distance" between the fit and the ab-initio results cvals
+!!  Fit values in imaginary time using A exp^{-b t} with A complex and b real and > 0.
+!!  The fit passes through the first tau point, the second point is selected by
+!!  minimizing the "distance" between the fit and the ab-initio results cvals.
+!!
+!!  b = -\frac{\ln(y_n / y_0)}{\tau_n - \tau_0}, \quad A = y_0 e^{a \tau_n}
 !!
 !! SOURCE
 
-subroutine fit_tau_exp(ntau, tau_mesh, tau_wgs, cvals, alpha_r, beta_c)
+subroutine fit_tau_exp(ntau, tau_mesh, tau_wgs, cvals, alpha_c, beta_r)
 
 !Arguments ------------------------------------
  integer,intent(in) :: ntau
  real(dp),intent(in) :: tau_mesh(ntau), tau_wgs(ntau)
  complex(dp),intent(in) :: cvals(ntau)
- real(dp),intent(out) :: alpha_r
- complex(dp),intent(out) :: beta_c
+ complex(dp),intent(out) :: alpha_c
+ real(dp),intent(out) :: beta_r
 
 !Local variables-------------------------------
  integer :: ii
- real(dp) :: loss, min_loss, my_alpha_r
+ real(dp) :: loss, min_loss, my_beta_r
  complex(dp) :: cfit(ntau), zz
 ! *************************************************************************
 
  min_loss = huge(one)
- beta_c = cvals(1); alpha_r = zero
+ alpha_c = cvals(1); beta_r = zero
  do ii=2,ntau
-   ! Find my_alpha_r. Note that we take the real part of the log to avoid oscillatory behaviour in the exp.
+   ! Find my_beta_r. Note that we take the real part of the log to avoid oscillatory behaviour in the exp.
    zz = -log(cvals(ii) / cvals(1)) / (tau_mesh(ii) - tau_mesh(1))
-   my_alpha_r = real(zz)
-   !my_beta_c = (cvals(ii) + cvals(1)) / (exp(-my_alpha_r * tau_mesh(1)) + exp(-my_alpha_r * tau_mesh(ii)))
-   !cfit(:) = my_beta_c * exp(-my_alpha_r * tau_mesh)
+   my_beta_r = real(zz)
+   alpha_c = cvals(1) * exp(+my_beta_r * tau_mesh(1))
+   !alpha_c = (f0 + fn) / (np.exp(-bb * w0) + np.exp(-bb * wn))
    ! Compute loss function.
-   cfit(:) = beta_c * exp(-my_alpha_r * (tau_mesh - tau_mesh(1)))
+   cfit(:) = alpha_c * exp(-my_beta_r * tau_mesh)
    loss = sum(tau_wgs * abs(cvals - cfit)**2)
    if (loss < min_loss) then
-     min_loss = loss; alpha_r = my_alpha_r
+     min_loss = loss; beta_r = my_beta_r
    end if
  end do
 
  ! If something goes wrong, disable the fit.
- if (alpha_r <= tol12) then
-   alpha_r = tol12; beta_c = zero
+ if (beta_r <= tol12) then
+   beta_r = tol12; alpha_c = zero
  end if
 
 end subroutine fit_tau_exp
@@ -3796,23 +3811,24 @@ end subroutine fit_tau_exp
 !! NAME
 !!
 !! FUNCTION
+!!  Exalute tau fit or it's Fourier transform.
 !!
 !! SOURCE
 
-pure complex(dp) function fit_tau_exp_eval(what, xx, alpha_r, beta_c) result(cval)
+pure complex(dp) function fit_tau_exp_eval(what, xx, alpha_c, beta_r) result(cval)
 
 !Arguments ------------------------------------
  character(len=*),intent(in) :: what
- real(dp),intent(in) :: xx, alpha_r
- complex(dp),intent(in) :: beta_c
+ real(dp),intent(in) :: xx, beta_r
+ complex(dp),intent(in) :: alpha_c
 ! *************************************************************************
 
  select case (what)
  case ("func")
-   cval = beta_c * exp(-alpha_r * xx)
+   cval = alpha_c * exp(-beta_r * xx)
  case ("ft")
-   ! FIXME: Here I should take into account exp(-alpha_r * tau(1))
-   cval = beta_c * two * alpha_r / (alpha_r**2 + xx**2)
+   ! \mathcal{F}\{B e^{-a |t|} \}(\omega) = \frac{2A b}{b^2 + \omega^2}
+   cval = (alpha_c * two * beta_r) / (beta_r**2 + xx**2)
  case default
    cval = huge(one)
  end select
@@ -3824,55 +3840,60 @@ end function fit_tau_exp_eval
 !! NAME
 !!
 !! FUNCTION
+!! To fit the function
+!!
+!! f(\omega) = \frac{A}{b^2 + \omega^2}
+!!
+!! to pass through two given points (\omega_1, y_1) and (\omega_2, y_2), follow these steps.
+!!
+!!    A = \frac{y_1 y_2 (\omega_2^2 - \omega_1^2)}{y_1 - y_2}.
+!!    b^2 = \frac{y_2 \omega_2^2 - y_1 \omega_1^2}{y_1 - y_2},
 !!
 !! SOURCE
 
-subroutine fit_iomega(ntau, iw_mesh, iw_wgs, cvals, alpha_r, beta_c)
+subroutine fit_iomega(ntau, iw_mesh, iw_wgs, cvals, alpha_c, beta_r)
 
 !Arguments ------------------------------------
  integer,intent(in) :: ntau
  real(dp),intent(in) :: iw_mesh(ntau), iw_wgs(ntau)
  complex(dp),intent(in) :: cvals(ntau)
- real(dp),intent(out) :: alpha_r
- complex(dp),intent(out) :: beta_c
+ complex(dp),intent(out) :: alpha_c
+ real(dp),intent(out) :: beta_r
 
 !Local variables-------------------------------
  integer :: ii
- real(dp) :: loss, min_loss, w0, wn, b2 ! my_alpha_r,
- complex(dp) :: my_beta_c, cfit(ntau), f0, fn ! zz,
+ real(dp) :: loss, min_loss, w0, wn, b2 ! my_beta_r,
+ complex(dp) :: b2_cplx, my_alpha_c, cfit(ntau), f0, fn ! zz,
 ! *************************************************************************
 
  min_loss = huge(one)
- w0 = iw_mesh(1)
- f0 = cvals(1)
- alpha_r = zero; beta_c = czero
+ w0 = iw_mesh(1); f0 = cvals(1); beta_r = zero; alpha_c = czero
  do ii=2,ntau
-   ! Find my_beta_c and my_alpha_r
-   wn = iw_mesh(ii)
-   fn = cvals(ii)
+   ! Find my_alpha_c and my_beta_r
+   wn = iw_mesh(ii); fn = cvals(ii)
 
-   b2 = (real(f0) * w0**2 - real(fn) * wn**2) / (real(fn) - real(f0))
+   b2_cplx = (f0*w0**2 - fn*wn**2) / (fn - f0)
+   b2 = real(b2)
    if (b2 < tol12) then
-     b2 = tol12
-     my_beta_c = zero
+     b2 = tol12; my_alpha_c = zero
    else
-     my_beta_c = f0 * (b2 + w0**2)
+     my_alpha_c = f0*fn * (wn**2 - w0**2) / (f0 - fn)
    end if
 
    ! Compute loss function.
-   cfit(:) = my_beta_c / (b2 + iw_mesh ** 2)
+   cfit(:) = my_alpha_c / (b2 + iw_mesh ** 2)
    loss = sum(iw_wgs * abs(cvals - cfit)**2)
    if (loss < min_loss) then
      min_loss = loss
-     alpha_r = sqrt(b2); beta_c = my_beta_c
+     beta_r = sqrt(b2); alpha_c = my_alpha_c
    end if
  end do
 
  ! If something goes wrong, disable the fit.
- !alpha_r = zero; beta_c = zero
- !if ((my_alpha_r) > zero) then
- !  alpha_r = my_alpha_r
- !  beta_c = my_beta_c
+ !beta_r = zero; alpha_c = zero
+ !if ((my_beta_r) > zero) then
+ !  beta_r = my_beta_r
+ !  alpha_c = my_alpha_c
  !end if
 
 end subroutine fit_iomega
@@ -3885,19 +3906,19 @@ end subroutine fit_iomega
 !!
 !! SOURCE
 
-pure complex(dp) function fit_iomega_eval(what, xx, alpha_r, beta_c) result(cval)
+pure complex(dp) function fit_iomega_eval(what, xx, alpha_c, beta_r) result(cval)
 
 !Arguments ------------------------------------
  character(len=*),intent(in) :: what
- real(dp),intent(in) :: xx, alpha_r
- complex(dp),intent(in) :: beta_c
+ real(dp),intent(in) :: xx, beta_r
+ complex(dp),intent(in) :: alpha_c
 ! *************************************************************************
 
  select case (what)
  case ("func")
-   cval = beta_c / (alpha_r**2 + xx**2)
+   cval = alpha_c / (beta_r**2 + xx**2)
  case ("ft")
-   cval = (beta_c / two * alpha_r) * exp(-alpha_r ** abs(xx))
+   cval = alpha_c * exp(-beta_r * abs(xx))
  case default
    cval = huge(one)
  end select
@@ -5146,7 +5167,7 @@ subroutine gwr_build_wc(gwr)
 
  call cwtime(cpu_all, wall_all, gflops_all, "start")
  call timab(1924, 1, tsec)
- call wrtout(units, " Building screening Wc(i omega) ...", pre_newlines=2)
+ call wrtout(units, " Building correlated screening Wc(i omega) ...", pre_newlines=2)
  ABI_CHECK(gwr%tchi_space == "iomega", sjoin("tchi_space: ", gwr%tchi_space, " != iomega"))
 
  if (allocated(gwr%wc_qibz)) then
@@ -5897,10 +5918,19 @@ end if
      if (.not. gwr%sig_diago) then
        band2_start = gwr%bstart_ks(ikcalc, spin); band2_stop = gwr%bstop_ks(ikcalc, spin)
      end if
+
      do band2=band2_start, band2_stop
+       associate (cvals_pmt => sigc_it_mat(:,:, band, band2 ,ikcalc, spin))
+       !if (gwr%dtset%gwr_fit /= 0) then
+       !  cvals = cvals_pmt(1,:)
+       !  !call fit_tau_exp(gwr%ntau, gwr%tau_mesh, gwr%tau_wgs, cvals, alpha_c, beta_r)
+       !  cvals_pmt(1,:) = cvals_pmt(1,:) - alpha_c * exp(-beta_r * gwr%tau_mesh)
+       !  cvals = cvals_pmt(2,:)
+       !  !call fit_tau_exp(gwr%ntau, -gwr%tau_mesh, gwr%tau_wgs, cvals, alpha_c, beta_r)
+       !  cvals_pmt(2,:) = cvals_pmt(2,:) - alpha_c * exp(-beta_r * gwr%tau_mesh)
+       !end if ! gwr_fit
        ! f(t) = E(t) + O(t) = (f(t) + f(-t)) / 2  + (f(t) - f(-t)) / 2
-       associate (vals_pmt => sigc_it_mat(:,:, band, band2 ,ikcalc, spin))
-       even_t = (vals_pmt(1,:) + vals_pmt(2,:)) / two; odd_t = (vals_pmt(1,:) - vals_pmt(2,:)) / two
+       even_t = (cvals_pmt(1,:) + cvals_pmt(2,:)) / two; odd_t = (cvals_pmt(1,:) - cvals_pmt(2,:)) / two
        gwr%sigc_iw_mat(:, band, band2, ikcalc, spin) = matmul(gwr%cosft_wt, even_t) + j_dpc * matmul(gwr%sinft_wt, odd_t)
        end associate
      end do
@@ -5922,6 +5952,7 @@ end if
         call wrtout(std_out, sjoin("Limiting the number of points for pade to:", itoa(pade_npts)))
      end if
      call spade%init(pade_npts, imag_zmesh, gwr%sigc_iw_mat(:, band, band2, ikcalc, spin), branch_cut=">")
+     !call spade%set_itau_decay()
 
      ! Solve the QP equation with Newton-Rapson starting from e0
      zz = cmplx(e0, zero)
@@ -5998,7 +6029,7 @@ end if
    if (any(pade_solver_ierr /= 0)) then
      ! Write warning if QP solver failed.
      ierr = count(pade_solver_ierr /= 0)
-     call wrtout([ab_out, std_out], sjoin("QP solver failed for:", itoa(ierr), "states"))
+     call wrtout([ab_out, std_out], sjoin(" WARNING: QP solver failed for:", itoa(ierr), "states"))
    end if
 
    call write_notations([std_out, ab_out])

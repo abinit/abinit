@@ -19,6 +19,8 @@ getden_filepath "tgwr_1o_DS1_DEN"     # Density file
 getwfk_filepath "tgwr_2o_DS1_WFK"     # WFK file with empty states and 2x2x2 k-mesh
                                       # Must be consisten with ngkpt, shiftk
 
+gwr_ntau 6
+
 gwr_boxcutmin  1.1  # This should be subject to convergence studies
 gwr_sigma_algo 2    # Use convolutions in the BZ for Sigma
 

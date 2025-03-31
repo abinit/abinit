@@ -3790,8 +3790,8 @@ subroutine slk_pzheevx(mat, jobz, range, uplo, vl, vu, il, iu, abstol, vec, mene
   !
   ! FROM THE SCALAPACK MAN PAGE:
   ! The computed eigenvectors may not be orthogonal if the minimal workspace is supplied and ORFAC is too
-  ! small. If you  want to guarantee orthogonality (at the cost of potentially poor performance) you should
-  ! add the following to LRWORK: (CLUSTERSIZE-1)*N where CLUSTERSIZE is  the  number  of  eigenvalues  in  the
+  ! small. If you want to guarantee orthogonality (at the cost of potentially poor performance) you should
+  ! add the following to LRWORK: (CLUSTERSIZE-1)*N where CLUSTERSIZE is the number of eigenvalues in the
   ! largest cluster, where a cluster is defined as a set of close eigenvalues: { W(K),...,W(K+CLUSTERSIZE-1) |
   ! W(J+1) <= W(J) + ORFAC*2*norm(A) }.
 
@@ -3877,7 +3877,6 @@ subroutine slk_pzheevx(mat, jobz, range, uplo, vl, vu, il, iu, abstol, vec, mene
  ABI_FREE(rwork)
  ABI_FREE(iwork)
  ABI_FREE(gap)
-
  ABI_SFREE(ifail)
  ABI_SFREE(iclustr)
 #endif
@@ -4141,7 +4140,7 @@ subroutine slk_pzhegvx(Slk_matA, ibtype, jobz, range, uplo, Slk_matB, vl, vu, il
     Slk_matB%buffer_cplx,1,1,Slk_matB%descript%tab,&
     vl,vu,il,iu,abstol,mene_found,nvec_calc, eigen,orfac,&
     Slk_vec%buffer_cplx,1,1,Slk_vec%descript%tab,&
-   work,lwork,rwork,lrwork,iwork,liwork,ifail,iclustr,gap,info)
+    work,lwork,rwork,lrwork,iwork,liwork,ifail,iclustr,gap,info)
 
  ! Handle the possible error.
  if (info < 0) then

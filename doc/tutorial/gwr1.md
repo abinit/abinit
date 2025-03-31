@@ -212,6 +212,20 @@ to ensure an efficient workload distribution.
 
     Again, multi-datasets are **strongly discouraged** if you care about performance.
 
+<!--
+To use the iterative eigenvalue solver:
+
+# optdriver  6                         # Activate GWR code
+# gwr_task "HDIAGO"                    # Direct diagonalization
+ nband     1000                       # Number of (occ + empty) bands
+ iscf -2
+ nbdbuf -10
+ tolwfr 1e-20
+ paral_kgb 1
+ autoparal 1
+ npfft 1
+ nstep 150
+!!>
 
 ### Our first GWR calculation
 
