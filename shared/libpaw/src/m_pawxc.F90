@@ -5842,8 +5842,8 @@ end subroutine pawxcmpositron
 
  subroutine pawxc_drivexc_wrapper(hyb_mixing,ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
 &          rho,exc,tsxc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc,el_temp, & ! mandatory arguments
-&          grho2,vxcgrho,lrho,vxclrho,tau,vxctau,dvxc,d2vxc, &              ! optional arguments
-&          exexch,fxcT)                                                     ! optional arguments
+&          grho2,vxcgrho,lrho,vxclrho,tau,vxctau,dvxc,d2vxc, &                   ! optional arguments
+&          exexch)                                                               ! optional arguments
 
 !Arguments ------------------------------------
 !scalars
@@ -5857,7 +5857,7 @@ end subroutine pawxcmpositron
  real(dp),intent(in),optional :: grho2(npts,(2*nspden-1)*usegradient)
  real(dp),intent(in),optional :: lrho(npts,nspden*uselaplacian)
  real(dp),intent(in),optional :: tau(npts,nspden*usekden)
- real(dp),intent(out),optional:: dvxc(npts,ndvxc),d2vxc(npts,nd2vxc),fxcT(npts)
+ real(dp),intent(out),optional:: dvxc(npts,ndvxc),d2vxc(npts,nd2vxc)
  real(dp),intent(out),optional:: vxcgrho(npts,nvxcgrho),vxclrho(npts,nvxclrho),vxctau(npts,nvxctau)
 
 !Local variables-------------------------------
