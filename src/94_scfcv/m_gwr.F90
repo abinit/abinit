@@ -3569,7 +3569,7 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
  end do
 
  if (gwr%dtset%gwr_fit /= 0) then
-   call wrtout(std_out, " Activating fit of matrix in tau/iw space")
+   call wrtout(std_out, " Activating fit of matrix elements in tau/iw space")
  end if
 
  ! Perform inhomogeneous FT in parallel.
