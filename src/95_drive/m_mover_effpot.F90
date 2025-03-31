@@ -593,7 +593,7 @@ ABI_FREE(xcart)
 !    Try the model
      call mover(scfcv_args,ab_xfh,acell,effective_potential%crystal%amu,dtfil,electronpositron,&
 &     rhog,rhor,dtset%rprimd_orig,vel,vel_cell,xred,xred_old,&
-&     effective_potential=effective_potential,verbose=verbose,writeHIST=writeHIST)
+&     effective_potential=effective_potential,verbose=verbose,writeHIST=writeHIST, multibinit_dtset=inp )
 
      write(message, '(a)' ) ' => The model'
      if(effective_potential%anharmonics_terms%bounded)then
