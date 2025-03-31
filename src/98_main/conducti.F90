@@ -110,7 +110,6 @@ program conducti
  call xmpi_bcast(incpaw,master,comm,mpierr)
  call xmpi_bcast(filnam,master,comm,mpierr)
  call xmpi_bcast(filnam_out,master,comm,mpierr)
-
 !Call main routine
  if (incpaw==1) then
    if (my_rank==master) then
