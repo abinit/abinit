@@ -1900,9 +1900,9 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 If [[constraint_kind]] is non-zero for at least one type of atom,
-the constrained DFT algorithm is activated.
+the constrained DFT algorithm [[cite:Gonze2022]] is activated.
 [[constraint_kind]] defines, for each type of atom, the kind of constraint(s) imposed by constrained DFT.
-When [[constraint_kind]] is zero for an atom type, there is not constraint applied to this atom type.
+When [[constraint_kind]] is zero for an atom type, there is no constraint applied to this atom type.
 Otherwise, different constraints can be imposed on the total charge (ion+electronic) and/or magnetization, computed
 inside a sphere of radius [[ratsph]], possibly smeared within a width [[ratsm]].
 Such integrated ion+electronic charge might be imposed to be equal to [[chrgat]], while the magnetization might be compared to [[spinat]].
@@ -1916,7 +1916,7 @@ When [[constraint_kind]]=2 or 12, only the magnetization axis is constrained (on
 When [[constraint_kind]]=3 or 13, only the magnetization magnitude is constrained.
 When [[constraint_kind]]=4 or 14, only the magnetization direction is constrained (only meaningful in the non-collinear case, not allowed in the collinear case);
 
-For the algorithm, see [[topic:ConstrainedDFT]]. It makes important use of the potential residual,
+For the algorithm, see [[cite:Gonze2022]]. It makes important use of the potential residual,
 so the algorithm works only with [[iscf]] between 2 and 9.
 The balance between the potential residual, and the density/magnetization constraint is governed by [[magcon_lambda]]. The spherical integral is governed by [[ratsph]] and [[ratsm]].
 
@@ -9162,9 +9162,9 @@ The value [[ixc]] = 10 is used internally: gives the difference between
   * 41 --> PBE0, [[cite:Adamo1999]].
   * 42 --> PBE0-1/3, [[cite:Guido2013]].
 
-  * 50 --> IIT temperature-dependent free energy functional of [[cite:Ichimaru1987]] (designed for warm dense matter).
-  * 51 --> corrected KSDT, LDA temperature-dependent free energy functional: Karasiev, Sjostrom, Dufty, & Trickey [[cite:Karasiev2014]].
-  * 60 --> KDT16, GGA temperature-dependant free energy functional (PBE parametrization) : Karasiev, Dufty, Trickey [[cite:Karasiev2018]].
+  * 50 --> IIT, LDA temperature-dependent free energy functional: Ichimaru, Iyetomy & Tanaka [[cite:Ichimaru1987]].
+  * 51 --> corrected KSDT, LDA temperature-dependent free energy functional: Karasiev, Sjostrom, Dufty & Trickey [[cite:Karasiev2014]].
+  * 60 --> KDT16, GGA temperature-dependant free energy functional (PBE parametrization) : Karasiev, Dufty & Trickey [[cite:Karasiev2018]].
 
 **ETSF Lib XC functionals**
 
