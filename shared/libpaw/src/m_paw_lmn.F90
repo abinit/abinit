@@ -14,17 +14,14 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
+#include "libpaw.h"
 
 MODULE m_paw_lmn
 
- use defs_basis
- use m_abicore
- use m_errors
+ USE_DEFS
+ USE_MSG_HANDLING
+ USE_MPI_WRAPPERS
+ USE_MEMORY_PROFILING
 
  implicit none
 
@@ -76,7 +73,7 @@ subroutine ilm2lm(ilm,ll,mm)
 ! *********************************************************************
 
  if (ilm<1) then 
-   ABI_ERROR("Wrong ilm")
+   LIBPAW_ERROR("Wrong ilm")
  end if
 
  ll = -1
@@ -90,7 +87,7 @@ subroutine ilm2lm(ilm,ll,mm)
  mm = ilm - ll**2 -ll-1
 
  if (ll==-1) then
-   ABI_ERROR("l>100 not programmed!")
+   LIBPAW_ERROR("l>100 not programmed!")
  end if
 
 end subroutine ilm2lm
@@ -111,11 +108,12 @@ end subroutine ilm2lm
 !!  orbitals(ln_size)=Give the value of l for each element of the augmented basis set.
 !!
 !! OUTPUT
-!!  indlmn(6,lmn_size)=array giving l,m,n,lm,ln,s for i=lmn
+!!  indlmn(6,lmn_size)=array giving l,m,n,lm,ln,s for i=lmn 
+!!  indlmn(8,lmn_size)=array giving l,m,sign of kappa,ln,spinor,2*j,2*m_j in case of dirac relativism
 !!
 !! SOURCE
 
-subroutine make_indlmn(ln_size,lmn_size,orbitals,indlmn)
+subroutine make_indlmn(ln_size,lmn_size,orbitals,indlmn,kappa)
 
  implicit none
 
@@ -124,35 +122,68 @@ subroutine make_indlmn(ln_size,lmn_size,orbitals,indlmn)
  integer,intent(in) :: ln_size,lmn_size
  integer,intent(in) :: orbitals(ln_size)
 !scalars
- integer,intent(out) :: indlmn(6,lmn_size)
+ integer,allocatable,intent(out) :: indlmn(:,:)
+ integer, intent(in), optional :: kappa(ln_size)
 
 !Local variables ------------------------------
 !scalars
- integer :: ilmn,ib,il,iln,ilm
+ integer :: ilmn,ib,il,iln,ilm,kappa_sign,spinor,i2j,i2mj,im
 !arrays
  integer,allocatable :: nprj(:)
 
 !************************************************************************
 
- ABI_MALLOC(nprj,(0:MAXVAL(orbitals)))
-
- ilmn=0; iln=0; nprj=0
- do ib=1,ln_size
-   il=orbitals(ib)
-   nprj(il)=nprj(il)+1
-   iln=iln+1
-   do ilm=1,2*il+1
-     indlmn(1,ilmn+ilm)=il           ! l
-     indlmn(2,ilmn+ilm)=ilm-(il+1)   ! m
-     indlmn(3,ilmn+ilm)=nprj(il)     ! n
-     indlmn(4,ilmn+ilm)=il*il+ilm    ! lm index
-     indlmn(5,ilmn+ilm)=iln          ! ln index
-     indlmn(6,ilmn+ilm)=1            ! spin (not yet used!)
+ if(.not.present(kappa)) then 
+   LIBPAW_ALLOCATE(nprj,(0:MAXVAL(orbitals)))
+   LIBPAW_ALLOCATE(indlmn,(6,lmn_size))
+   ilmn=0; iln=0; nprj=0
+   do ib=1,ln_size
+     il=orbitals(ib)
+     nprj(il)=nprj(il)+1
+     iln=iln+1
+     do ilm=1,2*il+1
+       indlmn(1,ilmn+ilm)=il           ! l
+       indlmn(2,ilmn+ilm)=ilm-(il+1)   ! m
+       indlmn(3,ilmn+ilm)=nprj(il)     ! n
+       indlmn(4,ilmn+ilm)=il*il+ilm    ! lm index
+       indlmn(5,ilmn+ilm)=iln          ! ln index
+       indlmn(6,ilmn+ilm)=1            ! spin (not yet used!)
+     end do
+     ilmn=ilmn+2*il+1
    end do
-   ilmn=ilmn+2*il+1
- end do
-
- ABI_FREE(nprj)
+   LIBPAW_DEALLOCATE(nprj)
+ else
+   LIBPAW_ALLOCATE(indlmn,(8,lmn_size))
+   indlmn=0;ilmn=0;iln=0
+   do ib=1,2*ln_size
+     iln=iln+modulo(ib,2)
+     il=orbitals(iln)
+     kappa_sign=sign(1,kappa(iln)) ! sgn(kappa)=+1 or -1
+     spinor=2-modulo(ib,2)       ! spinor= 1 or 2
+     i2j=2*il-kappa_sign              ! j=l-sgn(kappa)/2 = l-1/2 or l+1/2 
+     do ilm=1,i2j+1
+       !mj= -j,...,j
+       i2mj=-i2j+2*(ilm-1)       ! 2m_j= -jc ... +jc
+       im=(i2mj-3+2*spinor)/2    ! m=m_j-1/2 (spinor=1) or m_j+1/2 (spinor=2)
+       if(abs(im)<=il) then
+         !Valid value for sph. harm., i.e. abs(m)<=l
+         indlmn(1,ilmn+ilm)=il !l
+         indlmn(2,ilmn+ilm)=im !m
+         indlmn(3,ilmn+ilm)=kappa_sign !sign of kappa
+         indlmn(4,ilmn+ilm)=il*il+im+il+1 !lm
+         indlmn(5,ilmn+ilm)=iln !ln also includes the two kappa values here
+         indlmn(6,ilmn+ilm)=spinor !spinor index (1 up, 2 down)
+         indlmn(7,ilmn+ilm)=i2j !2*j (times 2 to make it an integer)
+         indlmn(8,ilmn+ilm)=i2mj !2*m_j (times 2 to make it an integer)
+       else
+         !Invalid value for sph. harm. ; will be multiplied by zero later
+         indlmn(1,ilmn+ilm)=-1 !Invalid value that should be checked later
+         indlmn(2:8,ilmn+ilm)=-1 ; indlmn(3,ilmn+ilm)=0
+       endif
+     end do
+     ilmn=ilmn+i2j+1
+   end do
+ endif
 
 end subroutine make_indlmn
 !!***
@@ -389,7 +420,7 @@ subroutine make_klm2lm(lmn_size,lmn2_size,lm2_size,indlmn,indklmn,klm2lm)
  end do !klmn
 
  if (ANY(klm2lm==0)) then
-   ABI_BUG("check klm2lm")
+   LIBPAW_BUG("check klm2lm")
  end if
 
 !DEBUG
@@ -453,7 +484,7 @@ subroutine klmn2ijlmn(klmn,lmn_size,ilmn,jlmn)
    end do
  end do
 
- ABI_BUG("Not able to found ilmn and jlmn")
+ LIBPAW_BUG("Not able to found ilmn and jlmn")
 
 end subroutine klmn2ijlmn
 !!***
@@ -507,7 +538,7 @@ subroutine make_indln(lmn_size,ln_size,indlmn,indln)
   end if
  end do
 
- ABI_CHECK(ii==ln_size,"ii/=ln_size")
+ if(ii/=ln_size) LIBPAW_ERROR("ii/=ln_size")
 
 end subroutine make_indln
 !!***

@@ -39,7 +39,8 @@ MODULE m_paw_optics
  use defs_abitypes,  only : MPI_type
  use m_time,         only : timab
  use m_io_tools,     only : open_file,get_unit,close_unit
- use m_pawpsp,       only : pawpsp_read_corewf
+ use m_pawpsp,       only : pawpsp_init_core
+ use m_paw_atomorb,  only : atomorb_type,destroy_atomorb
  use m_pawrad,       only : pawrad_type,pawrad_deducer0,simp_gen,nderiv_gen,poisson
  use m_pawtab,       only : pawtab_type
  use m_pawcprj,      only : pawcprj_type,pawcprj_alloc,pawcprj_get, &
@@ -853,23 +854,23 @@ CONTAINS  !=====================================================================
  integer :: nband_k,nphicor,ncorespinor,sender,iomode,fformopt,master_spfftband
  integer :: spaceComm_band,spaceComm_bandspinorfft,spaceComm_fft,spaceComm_kpt
  integer :: spaceComm_spinor,spaceComm_bandspinor,spaceComm_spinorfft,spaceComm_w
- logical :: already_has_nabla,cprj_paral_band,ex,mykpt,myband
- logical :: iomode_etsf_mpiio,abinitcorewf,use_spinorbit,xmlcorewf
+ logical :: already_has_nabla,cprj_paral_band,mykpt,myband,use_rcpaw_data
+ logical :: iomode_etsf_mpiio,use_spinorbit
  logical :: i_am_master,i_am_master_band,i_am_master_spfft
- character(len=fnlen) :: filecore
  real(dp) :: cpnm1,cpnm2
  character(len=500) :: msg
 !arrays
  integer :: nc_count(7),nc_start(7),nc_stride(7),tmp_shape(3)
- integer,allocatable :: indlmn_cor(:,:),lcor(:),ncor(:),kappacor(:)
+ integer,allocatable :: lcor(:,:),ncor(:,:),kappacor(:,:),nphicor_arr(:)
  real(dp) :: tsec(2)
- real(dp),allocatable :: energy_cor(:),phi_cor(:,:)
+ real(dp),allocatable :: energy_cor(:,:)
  real(dp),allocatable :: psinablapsi(:,:,:,:,:),psinablapsi_soc(:,:,:,:,:)
  real(dp),pointer :: soc_ij(:,:,:)
  type(coeff5_type),allocatable,target :: phisocphj(:)
  type(pawcprj_type),pointer :: cprj_k(:,:),cprj_k_loc(:,:)
  type(nctkdim_t) :: ncdims(3)
- type(nctkarr_t) :: nctk_arrays(5)
+ type(nctkarr_t) :: nctk_arrays(7)
+ type(atomorb_type), allocatable :: atm(:)
 
 ! ************************************************************************
 
@@ -918,65 +919,44 @@ CONTAINS  !=====================================================================
 !1- Reading of core wavefunctions
 !------------------------------------------------------------------------------------------------
 
-!Note: core WF is read for itypat=1
-!At present, impose 2-spinor simulataneously for core anf valence WF
- ncorespinor=merge(2,1,dtset%pawspnorb==1.or.dtset%nspinor==2)
- filecore=trim(filpsp(1)) ; iln=len(trim(filecore))
- abinitcorewf=.false. ; if (iln>3) abinitcorewf=(filecore(iln-6:iln)=='.abinit')
- xmlcorewf=.false. ; if (iln>3) xmlcorewf=(filecore(iln-3:iln)=='.xml')
- if ((.not.xmlcorewf).and.(.not.abinitcorewf)) filecore=filecore(1:iln)//'.corewf'
- if (abinitcorewf) filecore=filecore(1:iln-6)//'corewf.abinit'
- if (xmlcorewf) filecore=filecore(1:iln-3)//'corewf.xml'
- inquire(file=filecore,exist=ex)
+!TODO At present, impose 2-spinor simulataneously for core and valence WF
 
-!Relativistic case
- if (ncorespinor==2) then
-   if (ex) then
-     !Use <filepsp>.corewf.xml or <filepsp>.corewf.abinit
-     call pawpsp_read_corewf(energy_cor,indlmn_cor,lcor,lmncmax,ncor,nphicor,pawrad(1),phi_cor,&
-&                            filename=filecore,kappacor=kappacor)
-   else
-     !Use default name
-     call pawpsp_read_corewf(energy_cor,indlmn_cor,lcor,lmncmax,ncor,nphicor,pawrad(1),phi_cor,&
-&                            kappacor=kappacor)
-   end if
-
-!Non-relativistic case
- else
-   if (ex) then
-     !Use <filepsp>.corewf.xml or <filepsp>.corewf.abinit
-     call pawpsp_read_corewf(energy_cor,indlmn_cor,lcor,lmncmax,ncor,nphicor,pawrad(1),phi_cor,&
-&                            filename=filecore)
-   else
-     !Use default name
-     call pawpsp_read_corewf(energy_cor,indlmn_cor,lcor,lmncmax,ncor,nphicor,pawrad(1),phi_cor)
-   end if
-   ABI_MALLOC(kappacor,(nphicor))
-   kappacor(:)=zero
+ ABI_MALLOC(atm,(dtset%ntypat))
+ use_rcpaw_data=.false.
+ if(.not.(use_rcpaw_data)) then
+   do itypat=1,dtset%ntypat
+     call pawpsp_init_core(atm(itypat),filpsp(itypat),radmesh=pawrad(itypat))
+   enddo
  endif
+
+ nphicor=0
+ ncorespinor=0
+ do itypat=1,dtset%ntypat
+   nphicor=max(nphicor,atm(itypat)%ln_size)
+   if(atm(itypat)%nsppol>1) ABI_ERROR("nsppol>1 is work in progress for optics_paw_core")
+   if(atm(itypat)%nspinor/=dtset%nspinor) ABI_ERROR("Core and valence not same number of spinors")
+   ncorespinor=max(ncorespinor,atm(itypat)%nspinor)
+ enddo
+
 
 !----------------------------------------------------------------------------------
 !2- Computation of phipphj=<phi_i|nabla|phi_core>
 !----------------------------------------------------------------------------------
 
  already_has_nabla=all(pawtab(:)%has_nabla==3)
- if (ncorespinor==2) then
-   already_has_nabla=all(pawtab(:)%has_nabla==4)
+ if(ncorespinor==2) already_has_nabla=all(pawtab(:)%has_nabla==4)
 !  Should check whether this would work with spinor parallelism
-   call pawnabla_core_init(mpsang,dtset%ntypat,pawrad,pawtab,phi_cor,indlmn_cor,diracflag=1)
- else
-   call pawnabla_core_init(mpsang,dtset%ntypat,pawrad,pawtab,phi_cor,indlmn_cor)
- endif
+ call pawnabla_core_init(mpsang,dtset%ntypat,pawrad,pawtab,atm)
 
 !Compute spin-orbit contributions if necessary
  use_spinorbit=(dtset%pawspnorb==1.and.dtset%userie/=111) ! For testing purpose
  if (use_spinorbit) then
    option_core=1
+   
    call pawnabla_soc_init(phisocphj,option_core,dtset%ixc,mpi_enreg%my_natom,natom,&
 &       dtset%nspden,dtset%ntypat,pawang,pawrad,pawrhoij,pawtab,dtset%pawxcdev,&
 &       dtset%spnorbscl,dtset%typat,dtset%xc_denpos,dtset%xc_taupos,znucl,&
-&       phi_cor=phi_cor,indlmn_cor=indlmn_cor,&
-&       comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+&       atm=atm,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
  end if
 
 !----------------------------------------------------------------------------------
@@ -989,42 +969,73 @@ CONTAINS  !=====================================================================
  if (use_netcdf_forced) iomode=IO_MODE_ETSF
 #endif
 
+ ABI_MALLOC(energy_cor,(nphicor,dtset%ntypat))
+ ABI_MALLOC(ncor,(nphicor,dtset%ntypat))
+ ABI_MALLOC(lcor,(nphicor,dtset%ntypat))
+ ABI_MALLOC(kappacor,(nphicor,dtset%ntypat))
+ energy_cor=zero
+ ncor=0
+ lcor=0
+ kappacor=0
+ do itypat=1,dtset%ntypat
+   do iln=1,atm(itypat)%ln_size
+     energy_cor(iln,itypat)=atm(itypat)%eig(iln,1)
+     ncor(iln,itypat)=atm(itypat)%indln(2,iln)
+     lcor(iln,itypat)=atm(itypat)%indln(1,iln)
+     if(atm(itypat)%dirac) then
+       kappacor(iln,itypat)=atm(itypat)%kappa(iln)
+     else
+       kappacor(iln,itypat)=zero
+     endif
+   enddo
+ enddo
+
  !(master proc only)
  if (i_am_master) then
 !  ====> NETCDF format
    if (iomode==IO_MODE_ETSF) then
-     fformopt=611 
+     ABI_MALLOC(nphicor_arr,(dtset%ntypat))
+     do itypat=1,dtset%ntypat
+       nphicor_arr(itypat)=atm(itypat)%ln_size
+     enddo
+     fformopt=611
 #ifdef HAVE_NETCDF
 !    Open/create nc file
      NCF_CHECK(nctk_open_create(ncid,nctk_ncify(dtfil%fnameabo_app_opt2),xmpi_comm_self))
 !    Write header data
      NCF_CHECK(hdr%ncwrite(ncid,fformopt,nc_define=.true.))
 !    Define additional dimensions
-     ncdims(1)%name="number_of_core_states"
-     ncdims(1)%value=nphicor
-     ncdims(2)%name="number_of_core_spinor_components"
-     ncdims(2)%value=ncorespinor
-     ncdims(3)%name="number_of_core_spins"
-     ncdims(3)%value=3-ncorespinor
+     ncdims(1)%name="number_of_atom_types"
+     ncdims(1)%value=dtset%ntypat
+     ncdims(2)%name="max_number_of_core_states"
+     ncdims(2)%value=nphicor
+     ncdims(3)%name="number_of_core_spinor_components"
+     ncdims(3)%value=ncorespinor
      NCF_CHECK(nctk_def_dims(ncid,ncdims))
 !    Define additional variables
-     nctk_arrays(1)%name="eigenvalues_core"
-     nctk_arrays(1)%dtype="dp"
-     nctk_arrays(1)%shape_str="number_of_core_states"
-     nctk_arrays(2)%name="dipole_core_valence"
+     nctk_arrays(1)%name="number_of_core_states"
+     nctk_arrays(1)%dtype="int"
+     nctk_arrays(1)%shape_str="number_of_atom_types"
+     nctk_arrays(2)%name="eigenvalues_core"
      nctk_arrays(2)%dtype="dp"
-     nctk_arrays(2)%shape_str=&
-&     "complex, number_of_cartesian_directions,number_of_core_states,"// &
+     nctk_arrays(2)%shape_str="max_number_of_core_states,number_of_atom_types"
+     nctk_arrays(3)%name="dipole_core_valence"
+     nctk_arrays(3)%dtype="dp"
+     nctk_arrays(3)%shape_str=&
+&     "complex, number_of_cartesian_directions,max_number_of_core_states,"// &
 &     "number_of_atoms,max_number_of_states,number_of_kpoints,number_of_spins"
-     nctk_arrays(3)%name="n_quantum_number_core"
-     nctk_arrays(3)%dtype="int"
-     nctk_arrays(3)%shape_str="number_of_core_states"
-     nctk_arrays(4)%name="l_quantum_number_core"
+     nctk_arrays(4)%name="n_quantum_number_core"
      nctk_arrays(4)%dtype="int"
-     nctk_arrays(4)%shape_str="number_of_core_states"
-     nctk_arrays(5)%name="kappa_core"
+     nctk_arrays(4)%shape_str="max_number_of_core_states,number_of_atom_types"
+     nctk_arrays(5)%name="l_quantum_number_core"
      nctk_arrays(5)%dtype="int"
-     nctk_arrays(5)%shape_str="number_of_core_states"
+     nctk_arrays(5)%shape_str="max_number_of_core_states,number_of_atom_types"
+     nctk_arrays(6)%name="kappa_core"
+     nctk_arrays(6)%dtype="int"
+     nctk_arrays(6)%shape_str="max_number_of_core_states,number_of_atom_types"
+     nctk_arrays(7)%name="number_of_core_states"
+     nctk_arrays(7)%dtype="int"
+     nctk_arrays(7)%shape_str="number_of_atom_types"
      NCF_CHECK(nctk_def_arrays(ncid, nctk_arrays))
      NCF_CHECK(nctk_set_atomic_units(ncid, "eigenvalues_core"))
      NCF_CHECK(nctk_set_atomic_units(ncid, "dipole_core_valence"))
@@ -1038,6 +1049,8 @@ CONTAINS  !=====================================================================
      NCF_CHECK(nf90_put_var(ncid,varid,lcor))
      varid=nctk_idname(ncid,"kappa_core")
      NCF_CHECK(nf90_put_var(ncid,varid,kappacor))
+     varid=nctk_idname(ncid,"number_of_core_states")
+     NCF_CHECK(nf90_put_var(ncid,varid,nphicor_arr))
 !    Write eigenvalues
      varid=nctk_idname(ncid,"eigenvalues")
      NCF_CHECK(nf90_put_var(ncid,varid,reshape(eigen0,[mband,nkpt,nsppol])))
@@ -1047,6 +1060,7 @@ CONTAINS  !=====================================================================
      msg = "In order to use iomode=3 and prtnabla>0 together, NetCDF support must be enabled!"
      ABI_ERROR(msg)
 #endif
+   ABI_FREE(nphicor_arr)
 !  ====> Standard FORTRAN binary file format
    else if (iomode==IO_MODE_FORTRAN_MASTER) then
      fformopt=612  ! MT 12sept21: change the OPT2 Fortran file format
@@ -1057,9 +1071,12 @@ CONTAINS  !=====================================================================
      call hdr%fort_write(ount,fformopt,ierr,rewind=.true.)
      write(ount)(eigen0(jb),jb=1,mband*nkpt*nsppol)
      write(ount) nphicor
-     do iln=1,nphicor
-       write(ount) ncor(iln),lcor(iln),kappacor(iln),energy_cor(iln)
-     end do
+     do itypat=1,dtset%ntypat
+       write(ount) atm(itypat)%ln_size
+       do iln=1,nphicor
+         write(ount) ncor(iln,itypat),lcor(iln,itypat),kappacor(iln,itypat),energy_cor(iln,itypat)
+       end do
+     enddo
    else
      msg = "Wrong OPT2 file format!"
      ABI_BUG(msg)
@@ -1072,7 +1089,6 @@ CONTAINS  !=====================================================================
  ABI_FREE(ncor)
  ABI_FREE(lcor)
  ABI_FREE(kappacor)
- ABI_FREE(phi_cor)
  ABI_FREE(energy_cor)
 
 !----------------------------------------------------------------------------------
@@ -1192,9 +1208,10 @@ CONTAINS  !=====================================================================
                do iatom=1,natom
                  itypat=dtset%typat(iatom)
                  lmn_size=pawtab(itypat)%lmn_size
+                 lmncmax=atm(itypat)%lmn_size
                  do jlmn=1,lmn_size
                    do ilmn=1,lmncmax
-                     ic=indlmn_cor(5,ilmn)
+                     ic=atm(itypat)%indlmn(5,ilmn)
                      cpnm1=cprj_k(iatom,jbsp)%cp(1,jlmn)
                      psinablapsi(2,:,ic,iatom,my_jb)=psinablapsi(2,:,ic,iatom,my_jb) &
 &                        -cpnm1*pawtab(itypat)%nabla_ij(:,jlmn,ilmn)
@@ -1205,9 +1222,10 @@ CONTAINS  !=====================================================================
                do iatom=1,natom
                  itypat=dtset%typat(iatom)
                  lmn_size=pawtab(itypat)%lmn_size
+                 lmncmax=atm(itypat)%lmn_size
                  do jlmn=1,lmn_size
                    do ilmn=1,lmncmax
-                     ic=indlmn_cor(5,ilmn)
+                     ic=atm(itypat)%indlmn(5,ilmn)
                      cpnm1=cprj_k(iatom,jbsp)%cp(1,jlmn)
                      cpnm2=cprj_k(iatom,jbsp)%cp(2,jlmn)
                      psinablapsi(1,:,ic,iatom,my_jb)=psinablapsi(1,:,ic,iatom,my_jb) &
@@ -1226,11 +1244,12 @@ CONTAINS  !=====================================================================
                do iatom=1,natom
                  itypat=dtset%typat(iatom)
                  lmn_size=pawtab(itypat)%lmn_size
+                 lmncmax=atm(itypat)%lmn_size
                  do jlmn=1,lmn_size
                    do ilmn=1,lmncmax
-                     is=indlmn_cor(6,ilmn)
+                     is=atm(itypat)%indlmn(6,ilmn)
                      if (modulo(jbsp,2)==modulo(is,2)) then ! Nabla is a spin-diagonal operator
-                       ic=indlmn_cor(5,ilmn)
+                       ic=atm(itypat)%indlmn(5,ilmn)
                        if (ic>0) then
                          cpnm1=cprj_k(iatom,jbsp)%cp(1,jlmn)
                          cpnm2=cprj_k(iatom,jbsp)%cp(2,jlmn)
@@ -1282,9 +1301,10 @@ CONTAINS  !=====================================================================
              do iatom=1,natom
                itypat=dtset%typat(iatom)
                lmn_size=pawtab(itypat)%lmn_size
+               lmncmax=atm(itypat)%lmn_size
                do jlmn=1,lmn_size
                  do ilmn=1,lmncmax
-                   ic=indlmn_cor(5,ilmn)
+                   ic=atm(itypat)%indlmn(5,ilmn)
                    if (ic>0) then
                      soc_ij => phisocphj(iatom)%value(:,:,:,jlmn,ilmn)
                      !Contribution from real part of <Psi^s_n|p_i>
@@ -1451,7 +1471,10 @@ CONTAINS  !=====================================================================
  end if
 
 !Datastructures deallocations
- ABI_FREE(indlmn_cor)
+ do itypat=1,dtset%ntypat
+   call destroy_atomorb(atm(itypat))
+ enddo
+ ABI_FREE(atm)
  ABI_FREE(psinablapsi)
  if (use_spinorbit) then
    ABI_FREE(psinablapsi_soc)
@@ -1778,7 +1801,7 @@ CONTAINS  !=====================================================================
 !!        and Gvec_ij= Int[S_limi S_ljmj vec(r)/r dOmega] (Gaunt coefficients)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2021-2024 ABINIT group (NBrouwer,MT)
+!! Copyright (C) 2021-2022 ABINIT group (NBrouwer,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1800,9 +1823,7 @@ CONTAINS  !=====================================================================
 !!  xc_denpos= lowest allowed density (usually for the computation of the XC functionals)
 !!  xc_taupos= lowest allowed kinetic energy density (for mGGA XC functionals)
 !!  znucl(ntypat)=gives the nuclear charge for all types of atoms
-!!  [phi_cor(mesh_size,nphicor)]=--optional-- core wave-functions for the current type of atoms;
-!!                               only needed when option_core=1
-!!  [indlmn_cor(6,nlmn_core)]=--optional-- array giving l,m,n,lm,ln,s for i=lmn, for the core wave functions;
+!!  [atm <type(paw_atomorb_type)>]=--optional-- structure containing core info
 !!                            only needed when option_core=1
 !!  [mpi_atmtab(:)]=--optional-- indexes of the atoms treated by current proc
 !!  [comm_atom]=--optional-- MPI communicator over atoms
@@ -1839,7 +1860,7 @@ CONTAINS  !=====================================================================
 
  subroutine pawnabla_soc_init(phisocphj,option_core,ixc,my_natom,natom,nspden,ntypat,pawang, &
 &           pawrad,pawrhoij,pawtab,pawxcdev,spnorbscl,typat,xc_denpos,xc_taupos,znucl, &
-&           phi_cor,indlmn_cor,mpi_atmtab,comm_atom) ! Optional arguments
+&           atm,mpi_atmtab,comm_atom) ! Optional arguments
 
 !Arguments ------------------------------------
 !scalars
@@ -1848,15 +1869,14 @@ CONTAINS  !=====================================================================
  real(dp),intent(in) :: spnorbscl,xc_denpos,xc_taupos
  type(pawang_type),intent(in) :: pawang
 !arrays
- integer,intent(in),target,optional :: indlmn_cor(:,:)
  integer,intent(in) :: typat(natom)
  integer,optional,target,intent(in) :: mpi_atmtab(:)
- real(dp),intent(in),target,optional :: phi_cor(:,:)
  real(dp),intent(in) :: znucl(ntypat)
  type(coeff5_type),allocatable,target,intent(inout) :: phisocphj(:)
  type(pawrad_type),target,intent(in) :: pawrad(ntypat)
  type(pawrhoij_type),intent(inout) :: pawrhoij(my_natom)
  type(pawtab_type),target,intent(in) :: pawtab(ntypat)
+ type(atomorb_type), intent(in), target, optional :: atm(ntypat)
 
 !Local variables-------------------------------
 !scalars
@@ -1866,8 +1886,8 @@ CONTAINS  !=====================================================================
  real(dp),parameter :: hyb_mixing_ = 0.0_dp   ! Fake value to be updated in the future
  integer :: iatom,iatom_tot,itypat,ii,jj,ierr,ipts,ignt,sgnkappa
  integer :: idum,option,usenhat,usekden,usecore,xclevel,nkxc,my_comm_atom
- integer :: mesh_size,mesh_size_cor,lmn_size,lmn2_size,lmn_size_j,lmn_size_cor
- integer :: lm_size,ln_size,ln_size_j,ln_size_cor,nspinor_cor
+ integer :: mesh_size,lmn_size,lmn2_size,lmn_size_j,lmn_size_cor
+ integer :: lm_size,ln_size,ln_size_j
  integer :: ilmn,ilm,iln,jl,jm,jm_re,jm_im,jlmn,jlm,jlm_re,jlm_im,jln,js,klm_re,klm_im
  logical :: my_atmtab_allocated,paral_atom
  real(dp) :: avg,cgc,compch_sph_dum,eexc_dum,eexcdc_dum,jmj
@@ -1892,15 +1912,17 @@ CONTAINS  !=====================================================================
  end if
  if (option_core==1) then
 !  Check if we have the optional arguments
-   if ((.not.present(phi_cor)).or.(.not.present(indlmn_cor))) then
-     msg='For core-valence calculation, need phi_cor and indlmn_cor!'
+   if (.not.present(atm)) then
+     msg='For core-valence calculation, need atm data!'
      ABI_BUG(msg)
    end if
+   do itypat=1,ntypat
 !  Check if we have relativistic core wave functions
-   if (size(indlmn_cor,1)<8) then
-     write(msg,'(a)') 'Wrong 1st dim. of indlmn_cor in pawnabla_soc_init (need spinors)!'
-     ABI_BUG(msg)
-   end if
+     if (size(atm(itypat)%indlmn,1)<8) then
+       write(msg,'(a)') 'Wrong 1st dim. of indlmn_cor in pawnabla_soc_init (need spinors)!'
+       ABI_BUG(msg)
+     end if
+   enddo
  endif
 
 !Some useful variables
@@ -1908,10 +1930,10 @@ CONTAINS  !=====================================================================
  usecore=1 ; nkxc=0 ; usenhat=0
  xclevel=pawxc_get_xclevel(ixc)
  if (option_core==1) then
-   mesh_size_cor=size(phi_cor,1)
-   lmn_size_cor=size(indlmn_cor,2) !Includes spinors
-   ln_size_cor=size(phi_cor,2)
-   nspinor_cor=maxval(indlmn_cor(6,1:lmn_size_cor))
+   lmn_size_cor=0
+   do itypat=1,ntypat
+     lmn_size_cor=max(lmn_size_cor,atm(itypat)%lmn_size) !Includes spinors
+   enddo
  end if
 
 !Prepare output arrays
@@ -1967,11 +1989,11 @@ CONTAINS  !=====================================================================
      indlmn_j => pawtb%indlmn
      phi_j => pawtb%phi
    else
-     ln_size_j=ln_size_cor
-     lmn_size_j=lmn_size_cor
-     indlmn_j => indlmn_cor
-     phi_j => phi_cor
-     if (mesh_size_cor<mesh_size) then
+     ln_size_j=atm(itypat)%ln_size
+     lmn_size_j=atm(itypat)%lmn_size
+     indlmn_j => atm(itypat)%indlmn
+     phi_j => atm(itypat)%phi(:,:,1)
+     if (atm(itypat)%mesh_size<mesh_size) then
        msg='mesh_size and mesh_size_cor not compatible!'
        ABI_BUG(msg)
      end if
@@ -2093,7 +2115,7 @@ CONTAINS  !=====================================================================
 !      Calculate spinor dependent coefficients
        sgnkappa=indlmn_j(3,jlmn)   !sign of kappa
        jmj=half*indlmn_j(8,jlmn)   !2mj is stored in indlmn_cor
-       js=indlmn_cor(6,jlmn)       !1 is up, 2 is down
+       js=indlmn_j(6,jlmn)       !1 is up, 2 is down
        if (sgnkappa==1) then
          if(js==1) then
            cgc= sqrt((dble(jl)-jmj+half)/dble(2*jl+1))
@@ -2250,7 +2272,9 @@ CONTAINS  !=====================================================================
  end subroutine pawnabla_soc_init
 !!***
 
-!----------------------------------------------------------------------
+
+
+
 
 END MODULE m_paw_optics
 !!***
