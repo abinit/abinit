@@ -1412,7 +1412,6 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  !=== Diagonalization of <G|H|G''> matrix ===
  !===========================================
  ABI_MALLOC(eig_ene, (h_size))
- !print *, "ghg_trace:", ghg_mat%get_trace()
 
  ! Change size block. Use 2D rectangular grid of processors for diagonalization, if possible.
  call proc_4diag%init(comm)
@@ -1429,7 +1428,6 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
      ' Begin full diagonalization for kpt: ',trim(ktoa(kpoint)), stag(spin), ch10,&
      " H_gg' Matrix size: ",npwsp, ", Scalapack grid: ", trim(ltoa(ghg_4diag%processor%grid%dims))
    call wrtout(std_out, msg)
-
    call cwtime(cpu, wall, gflops, "start")
    if (psps%usepaw == 0) then
      !call ghg_4diag%pzheev("V", "U", eigvec, eig_ene)
