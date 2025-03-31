@@ -651,7 +651,7 @@ contains
           call wrtout(std_out,message,'COLL')
         end if  !need_verbose
 
-         block 
+         block
           integer max_nbody_tmp(20)
           max_nbody_tmp(:) = 20
         call polynomial_coeff_getNorder(coeffs_iatom,eff_pot%crystal,cutoff,my_ncoeff,ncoeff_tot_tmp,power_disps,&
@@ -663,7 +663,7 @@ contains
           &                                  max_nbody=max_nbody_tmp)
 
           end block
-          
+
         if (.not. fit_iatom_all) then
           call polynomial_coeff_list_free(coeffs_tmp)
           ncoeff_tot = ncoeff_tot_tmp
