@@ -64,6 +64,7 @@ module m_mover
  use scup_global, only : global_set_parent_iter,global_set_print_parameters
 #endif
  use m_scup_dataset
+ use m_multibinit_dataset
 
  implicit none
 
@@ -175,7 +176,7 @@ contains
 
 subroutine mover(scfcv_args,ab_xfh,acell,amu_curr,dtfil,&
 & electronpositron,rhog,rhor,rprimd,vel,vel_cell,xred,xred_old,&
-& effective_potential,filename_ddb,itimimage_gstate,verbose,writeHIST,scup_dtset,sc_size,efield)
+& effective_potential,filename_ddb,itimimage_gstate,verbose,writeHIST,scup_dtset,sc_size,multibinit_dtset)
 
 !Arguments ------------------------------------
 !scalars
@@ -194,8 +195,8 @@ real(dp), intent(in),target :: amu_curr(:) !(scfcv%dtset%ntypat)
 real(dp), pointer :: rhog(:,:),rhor(:,:)
 real(dp), intent(inout) :: xred(3,scfcv_args%dtset%natom),xred_old(3,scfcv_args%dtset%natom)
 real(dp), intent(inout) :: vel(3,scfcv_args%dtset%natom),vel_cell(3,3),rprimd(3,3)
-real(dp), optional,intent(in):: efield(3)
 type(scup_dtset_type),optional, intent(inout) :: scup_dtset
+type(multibinit_dtset_type),optional,intent(inout) ::multibinit_dtset
 integer,optional,intent(in) :: sc_size(3)
 
 !Local variables-------------------------------
@@ -679,8 +680,11 @@ real(dp) :: k0(3)
            call effective_potential_evaluate( &
 &           effective_potential,scfcv_args%results_gs%etotal,scfcv_args%results_gs%fcart,scfcv_args%results_gs%gred,&
 &           scfcv_args%results_gs%strten,ab_mover%natom,rprimd,xred=xred,verbose=need_verbose,&
-&           filename=name_file,elec_eval=need_elec_eval,efield=efield)
-! TODO : add time above
+&           filename=name_file,elec_eval=need_elec_eval,efield_type=multibinit_dtset%efield_type,efield=multibinit_dtset%efield,&
+&           efield2=multibinit_dtset%efield2,efield_lambda=multibinit_dtset%efield_lambda,efield_lambda2=multibinit_dtset%efield_lambda2,&
+&           efield_period=multibinit_dtset%efield_period,efield_phase=multibinit_dtset%efield_phase,efield_phase2=multibinit_dtset%efield_phase2,&
+&           efield_gmean=multibinit_dtset%efield_gmean,efield_gvel=multibinit_dtset%efield_gvel,efield_sigma=multibinit_dtset%efield_sigma,&
+&           efield_background=multibinit_dtset%efield_background,time=itime*ab_mover%dtion)
 
 !          Check if the simulation did not diverge...
            if(itime > 3 .and.ABS(scfcv_args%results_gs%etotal - hist%etot(1)) > 1E5)then

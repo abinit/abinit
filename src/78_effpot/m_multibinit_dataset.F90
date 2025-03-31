@@ -181,11 +181,22 @@ module m_multibinit_dataset
   integer :: spin_temperature_nstep    ! var temperature number of steps
   integer :: spin_var_temperature
   integer :: spin_write_traj
+  integer :: efield_type
 
   ! parameters for spin-lattice coupling
   integer :: slc_coupling
 
 ! Real(dp)
+! Inhomogeneous electric Field variables --Fernando Start
+  real(dp) :: efield_lambda(3),efield_lambda2(3)
+  real(dp) :: efield_period
+  real(dp) :: efield_phase,efield_phase2
+  real(dp) :: efield_gmean(3)
+  real(dp) :: efield_gvel(3)
+  real(dp) :: efield_sigma
+  real(dp) :: efield_background(3)
+  real(dp) :: efield2(3)
+! Inhomogeneous electric Field variables --Fernando End
   real(dp) :: bmass
   real(dp) :: conf_power_fact_disp
   real(dp) :: conf_power_fact_strain
@@ -391,6 +402,19 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%analyze_anh_pot=0
  multibinit_dtset%brav=1
  multibinit_dtset%bmass=0
+! Inhomogeneous electric Field variables --Fernando Start
+ multibinit_dtset%efield_lambda(:)=(/0.0,0.0,0.0/)
+ multibinit_dtset%efield_lambda2(:)=(/0.0,0.0,0.0/)
+ multibinit_dtset%efield2(:)= (/0,0,0/)
+ multibinit_dtset%efield_period=1000000000000000.0
+ multibinit_dtset%efield_gmean(:)=(/0.0,0.0,0.0/)
+ multibinit_dtset%efield_gvel(:)=(/0.0,0.0,0.0/)
+ multibinit_dtset%efield_type=0
+ multibinit_dtset%efield_phase=0.0
+ multibinit_dtset%efield_phase2=0.0
+ multibinit_dtset%efield_sigma=0.01
+ multibinit_dtset%efield_background(:)= (/0.0,0.0,0.0/)
+! Inhomogeneous electric Field variables --Fernando End
  multibinit_dtset%chneut=0
  multibinit_dtset%confinement=0
  multibinit_dtset%conf_power_disp=0
@@ -885,6 +909,123 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 &   'Action: correct bmass in your input file.'
    ABI_ERROR(message)
  end if
+ 
+! Inhomogeneous electric Field variables --Fernando Start
+ multibinit_dtset%efield_lambda= (/0.0,0.0,0.0/)
+ if(3>marr)then
+   marr=3
+   ABI_FREE(intarr)
+   ABI_FREE(dprarr)
+   ABI_MALLOC(intarr,(marr))
+   ABI_MALLOC(dprarr,(marr))
+ end if
+ call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'efield_lambda',tread,'TIM')
+ if(tread==1) multibinit_dtset%efield_lambda(1:3)= dprarr(1:3)
+ multibinit_dtset%efield_lambda2= (/0.0,0.0,0.0/)
+ if(3>marr)then
+   marr=3
+   ABI_FREE(intarr)
+   ABI_FREE(dprarr)
+   ABI_MALLOC(intarr,(marr))
+   ABI_MALLOC(dprarr,(marr))
+ end if
+ call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'efield_lambda2',tread,'TIM')
+ if(tread==1) multibinit_dtset%efield_lambda2(1:3)= dprarr(1:3)
+ multibinit_dtset%efield_gmean= (/0.0,0.0,0.0/)
+ if(3>marr)then
+   marr=3
+   ABI_FREE(intarr)
+   ABI_FREE(dprarr)
+   ABI_MALLOC(intarr,(marr))
+   ABI_MALLOC(dprarr,(marr))
+ end if
+ call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'efield_gmean',tread,'TIM')
+ if(tread==1) multibinit_dtset%efield_gmean(1:3)= dprarr(1:3)
+  do ii=1,3
+   if(multibinit_dtset%efield_gmean(ii)<0)then
+     write(message, '(a,i0,a,i0,4a,i0,a)' )&
+&     'efield_gmean(',ii,') is ',multibinit_dtset%efield_gmean(ii),', which is lower',&
+&     ' than 0',&
+&     ch10,'Action: correct efield_gmean(',ii,') in your input file.'
+     ABI_ERROR(message)
+   end if
+ end do
+ multibinit_dtset%efield_gvel= (/0.0,0.0,0.0/)
+ if(3>marr)then
+   marr=3
+   ABI_FREE(intarr)
+   ABI_FREE(dprarr)
+   ABI_MALLOC(intarr,(marr))
+   ABI_MALLOC(dprarr,(marr))
+ end if
+ call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'efield_gvel',tread,'TIM')
+ if(tread==1) multibinit_dtset%efield_gvel(1:3)= dprarr(1:3)
+  do ii=1,3
+   if(multibinit_dtset%efield_gvel(ii)<0)then
+     write(message, '(a,i0,a,i0,4a,i0,a)' )&
+&     'efield_gvel(',ii,') is ',multibinit_dtset%efield_gvel(ii),', which is lower',&
+&     ' than 0',&
+&     ch10,'Action: correct efield_gvel(',ii,') in your input file.'
+     ABI_ERROR(message)
+   end if
+ end do
+ multibinit_dtset%efield_type=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'efield_type',tread,'INT')
+ if(tread==1) multibinit_dtset%efield_type=intarr(1)
+ if(multibinit_dtset%efield_type<0.or.multibinit_dtset%efield_type>6)then
+   write(message, '(a,i8,a,a,a,a,a)' )&
+&   'efield_type is',multibinit_dtset%efield_type,', but the only allowed values',ch10,&
+&   'are 0, 1 or 2, 3, 4, 5 or 6  .',ch10,&
+&   'Action: correct efield_type in your input file.'
+   ABI_ERROR(message)
+ end if
+ multibinit_dtset%efield_period=1000000000000000.0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'efield_period',tread,'TIM')
+ if(tread==1) multibinit_dtset%efield_period=dprarr(1)
+ if(multibinit_dtset%efield_period<0)then
+   write(message, '(a,f10.2,a,a,a,a,a)' )&
+&   'efield_period is',multibinit_dtset%efield_period,', but the only allowed values',ch10,&
+&   'is superior to 0.',ch10,&
+&   'Action: correct efield_period in your input file.'
+   ABI_ERROR(message)
+ end if
+ multibinit_dtset%efield_phase=0.0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'efield_phase',tread,'DPR')
+ if(tread==1) multibinit_dtset%efield_phase=dprarr(1)
+ multibinit_dtset%efield_phase2=0.0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'efield_phase2',tread,'DPR')
+ if(tread==1) multibinit_dtset%efield_phase2=dprarr(1)
+ multibinit_dtset%efield_sigma=0.01
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'efield_sigma',tread,'TIM')
+ if(tread==1) multibinit_dtset%efield_sigma=dprarr(1)
+ if(multibinit_dtset%efield_period<0)then
+   write(message, '(a,f10.2,a,a,a,a,a)' )&
+&   'efield_sigma is',multibinit_dtset%efield_sigma,', but the only allowed values',ch10,&
+&   'is superior to 0.',ch10,&
+&   'Action: correct efield_sigma in your input file.'
+   ABI_ERROR(message)
+ end if
+ multibinit_dtset%efield_background= zero
+ if(3>marr)then
+   marr=3
+   ABI_FREE(intarr)
+   ABI_FREE(dprarr)
+   ABI_MALLOC(intarr,(marr))
+   ABI_MALLOC(dprarr,(marr))
+ end if
+ call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'efield_background',tread,'DPR')
+ if(tread==1) multibinit_dtset%efield_background(1:3)= dprarr(1:3)
+ multibinit_dtset%efield2= zero
+ if(3>marr)then
+   marr=3
+   ABI_FREE(intarr)
+   ABI_FREE(dprarr)
+   ABI_MALLOC(intarr,(marr))
+   ABI_MALLOC(dprarr,(marr))
+ end if
+ call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'efield2',tread,'DPR')
+ if(tread==1) multibinit_dtset%efield2(1:3)= dprarr(1:3)
+! Inhomogeneous electric Field variables --Fernando End
 
  multibinit_dtset%bound_EFS=(/0,1,1/)
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'bound_EFS',tread,'INT')
