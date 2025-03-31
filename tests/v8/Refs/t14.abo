@@ -32,8 +32,8 @@
 
 
 
-.Starting date : Sat 22 Mar 2025.
-- ( at 06h28 )
+.Starting date : Mon 31 Mar 2025.
+- ( at 12h38 )
   
 - The starting date is more than 2 years after the initial release
 - of this version of ABINIT, namely Jul 2022.
@@ -216,15 +216,15 @@ dipdip_range         1         1         1
  3     3           9.8851791905E-06  4.0004273293E-03  3.8455525640E-03  1.5487476525E-04
 
  Fitted coefficients at the end of the fit process:
- 1 =>   3.5475970996E-07 (Ru_x-O1_x)^2(Ru_y-O1_y)^2
- 2 =>   3.5345900541E-06 (Sr_x-Ru_x)^4
- 3 =>  -3.2460226266E-07 (Sr_x-O1_x)^1(Sr_y-O1_y)^1(Ru_x-O1_x)^1(Ru_y-O1_y)^1
+ 1 =>   1.9314688272E+00 (Ru_x-O1_x)^2(Ru_y-O1_y)^2
+ 2 =>   1.3282886126E-01 (Sr_x-Ru_x)^4
+ 3 =>  -5.2774818574E-01 (Sr_x-O1_x)^1(Sr_y-O1_y)^1(Ru_x-O1_x)^1(Ru_y-O1_y)^1
 
  Goal function values at the end of the fit process (eV^2/A^2):
-   Energy          :   4.0372449690729233E-05
-   Forces+Stresses :   7.5066360799938845E-03
-   Forces          :   7.3677695646524859E-03
-   Stresses        :   1.3886651534139840E-04
+   Energy          :   9.8851791905167959E-06
+   Forces+Stresses :   4.0004273292509459E-03
+   Forces          :   3.8455525640029410E-03
+   Stresses        :   1.5487476524800469E-04
 
 
 ================================================================================
@@ -238,6 +238,6 @@ dipdip_range         1         1         1
 
 ================================================================================
 
-+Total cpu time      0.508  and wall time      0.508 sec
++Total cpu time      0.520  and wall time      0.520 sec
 
  multibinit : the run completed succesfully.

@@ -32,8 +32,8 @@
 
 
 
-.Starting date : Sat 22 Mar 2025.
-- ( at 06h29 )
+.Starting date : Mon 31 Mar 2025.
+- ( at 12h39 )
   
 - The starting date is more than 2 years after the initial release
 - of this version of ABINIT, namely Jul 2022.
@@ -236,7 +236,79 @@ ________________________________________________________________________________
    ==> Optimizing coefficient
 
 
+ ==> high order term: (eta_1)^4(eta_2)^2 created
+
+
+   ==> Optimizing coefficient
+
+
+ ==> high order term: (eta_1)^4(eta_4)^2 created
+
+
+   ==> Optimizing coefficient
+
+
+ ==> high order term: (eta_1)^4(eta_5)^2 created
+
+
+   ==> Optimizing coefficient
+
+
+ ==> high order term: (eta_1)^2(eta_2)^2(eta_3)^2 created
+
+
+   ==> Optimizing coefficient
+
+
+ ==> high order term: (eta_1)^2(eta_2)^2(eta_4)^2 created
+
+
+   ==> Optimizing coefficient
+
+
+ ==> high order term: (eta_1)^2(eta_2)^2(eta_6)^2 created
+
+
+   ==> Optimizing coefficient
+
+
+ ==> high order term: (eta_1)^2(eta_4)^4 created
+
+
+   ==> Optimizing coefficient
+
+
+ ==> high order term: (eta_1)^2(eta_4)^2(eta_5)^2 created
+
+
+   ==> Optimizing coefficient
+
+
+ ==> high order term: (eta_1)^2(eta_5)^4 created
+
+
+   ==> Optimizing coefficient
+
+
+ ==> high order term: (eta_1)^2(eta_5)^2(eta_6)^2 created
+
+
+   ==> Optimizing coefficient
+
+
  ==> high order term: (eta_4)^6 created
+
+
+   ==> Optimizing coefficient
+
+
+ ==> high order term: (eta_4)^4(eta_5)^2 created
+
+
+   ==> Optimizing coefficient
+
+
+ ==> high order term: (eta_4)^2(eta_5)^2(eta_6)^2 created
 
 
    ==> Optimizing coefficient
@@ -253,9 +325,9 @@ ________________________________________________________________________________
    Energy          :   1.6603776907314012E+00
  Goal function values of the effective.potential
  with respect to the test-set (eV^2/A^2):
-   Forces+Stresses :   7.2438383614520782E-03
+   Forces+Stresses :   7.2438383641201280E-03
    Forces          :   2.6844144273387546E-03
-   Stresses        :   4.5594239341133231E-03
+   Stresses        :   4.5594239367813738E-03
 
 
 ================================================================================
@@ -265,10 +337,10 @@ ________________________________________________________________________________
 ================================================================================
 
 -
-- Proc.   0 individual time (sec): cpu=          3.3  wall=          3.3
+- Proc.   0 individual time (sec): cpu=          3.5  wall=          3.5
 
 ================================================================================
 
-+Total cpu time      3.261  and wall time      3.262 sec
++Total cpu time      3.489  and wall time      3.495 sec
 
  multibinit : the run completed succesfully.

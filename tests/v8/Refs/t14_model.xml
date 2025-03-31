@@ -1441,7 +1441,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="2" value="   0.3547597100E-06" text="(Ru_x-O1_x)^2(Ru_y-O1_y)^2">
+  <coefficient number="2" value="   0.1931468827E+01" text="(Ru_x-O1_x)^2(Ru_y-O1_y)^2">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="2">
         <cell_a>0 0 0</cell_a>
@@ -1563,7 +1563,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="3" value="   0.3534590054E-05" text="(Sr_x-Ru_x)^4">
+  <coefficient number="3" value="   0.1328288613E+00" text="(Sr_x-Ru_x)^4">
     <term weight=" 1.000000">
       <displacement_diff atom_a="0" atom_b="1" direction="x" power="4">
         <cell_a>0 0 0</cell_a>
@@ -1709,7 +1709,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="4" value="  -0.3246022627E-06" text="(Sr_x-O1_x)^1(Sr_y-O1_y)^1(Ru_x-O1_x)^1(Ru_y-O1_y)^1">
+  <coefficient number="4" value="  -0.5277481857E+00" text="(Sr_x-O1_x)^1(Sr_y-O1_y)^1(Ru_x-O1_x)^1(Ru_y-O1_y)^1">
     <term weight=" 1.000000">
       <displacement_diff atom_a="0" atom_b="2" direction="x" power="1">
         <cell_a>0 0 0</cell_a>
@@ -2574,8 +2574,6 @@
         <cell_b>0 0 0</cell_b>
       </displacement_diff>
     </term>
-  </coefficient>
-  <coefficient number="5" value="   0.0000000000E+00" text="">
   </coefficient>
 </Heff_definition>
 </System_definition>
