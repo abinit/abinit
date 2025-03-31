@@ -1240,7 +1240,7 @@ end subroutine dfpt_mkvxcgga_n0met
 #include "abi_common.h"
 
 
-subroutine dfpt_mkvxcccdq(cplex,i3dir,ixc,gmet,gprimd,kxc,mpi_enreg,nfft, & 
+subroutine dfpt_mkvxcccdq(cplex,i3dir,ixc,gprimd,kxc,mpi_enreg,nfft, & 
 & ngfft,nkxc,nspden,qphon,rprimd,vxccc1dq,xccc3d1,xccc3d2dq)
 
  use defs_basis
@@ -1256,7 +1256,7 @@ subroutine dfpt_mkvxcccdq(cplex,i3dir,ixc,gmet,gprimd,kxc,mpi_enreg,nfft, &
 
  !arrays
  integer,intent(in) :: ngfft(18)
- real(dp), intent(in)  :: gmet(3,3),gprimd(3,3)
+ real(dp), intent(in)  :: gprimd(3,3)
  real(dp), intent(in)  :: kxc(nfft,nkxc)
  real(dp), intent(in)  :: qphon(3),rprimd(3,3)
  real(dp), intent(in)  :: xccc3d1(cplex*nfft)
