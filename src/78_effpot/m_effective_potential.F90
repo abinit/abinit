@@ -2659,7 +2659,6 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,gred,strten,natom,r
   energy = energy + energy_part
   fcart = fcart + fcart_part
  endif
-endif
 !-------------------------------------------
 ! 8 - Compute electronic Part with SCALE-UP
 !------------------------------------------
