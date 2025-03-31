@@ -195,7 +195,9 @@ inp_files = [
     "t212.abi", 
     "t213.abi", 
     "t214.abi", 
-    "t215.abi", 
+    "t215.abi",   
+    # Multibinit fit_weight_T
+    "t216.abi", 
 
 
 ]
