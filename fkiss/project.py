@@ -1301,13 +1301,13 @@ class AbinitProject(NotebookWriter):
                 if new_dependencies:
                     ierr += 1
                     print("dirname", dirname, "does not have a dependencies section but uses:", new_dependencies)
-                #config[dirname]["dependencies"] = " ".join(d for d in sorted(new_dependencies))
+                config[dirname]["dependencies"] = " ".join(d for d in sorted(new_dependencies))
             else:
                 for new_dep in new_dependencies:
                     if new_dep not in old_dependencies:
                         ierr += 1
                         print("dirname", dirname, "uses:", new_dep, " that is not listed in", old_dependencies)
-                #config[dirname]["dependencies"] = " ".join(d for d in sorted(old_dependencies.union(old_dependencies)))
+                config[dirname]["dependencies"] = " ".join(d for d in sorted(old_dependencies.union(old_dependencies)))
 
             #config.write(corelibs_path)
 
