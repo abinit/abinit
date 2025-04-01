@@ -1,11 +1,10 @@
-!!****m* ABINIT/m_berryphase_new
-!! NAME
+!!****m* ABINIT/m_berryphase_new !! NAME
 !!  m_berryphase_new
 !!
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2003-2024 ABINIT  group (MVeithen)
+!!  Copyright (C) 2003-2025 ABINIT  group (MVeithen)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -195,7 +194,7 @@ subroutine berryphase_new(atindx1,cg,cg13,cprj,dtefield,dtfil,dtset,psps,&
  integer :: iatom,iband,icg,icg1,idir,idum,ikpt1i_sp
  integer :: ierr,ifor,ikg,ikpt,ikpt1,ikpt_loc!,ikpt2,ikpt2i,npw_k2, itrs
  integer :: icp1, icp2,icpgr_offset,iproc
-! integer :: ii ! appears commented out below in a debug section
+ !! integer :: ii ! appears commented out below in a debug section
  integer :: inibz,ikpt1i
  integer :: isppol,istr,itypat,jband,jkpt,jkstr,jsppol
  integer :: det_inv_smat, det_smat, inv_smat
@@ -319,7 +318,7 @@ subroutine berryphase_new(atindx1,cg,cg13,cprj,dtefield,dtfil,dtset,psps,&
  calc_epaw3_force = ( efield_flag .and. dtset%optforces /= 0 .and. usepaw == 1 )
  calc_epaw3_stress = ( efield_flag .and. dtset%optstress /= 0  .and. usepaw == 1 )
 
- mcg1_k = mpw*mband
+ mcg1_k = mpw*mband*dtset%nspinor
  shiftbd = 1
  if (ddkflag==1) then
    ABI_MALLOC(cg1,(2,mcg))
@@ -363,7 +362,7 @@ subroutine berryphase_new(atindx1,cg,cg13,cprj,dtefield,dtfil,dtset,psps,&
 !allocate(dtm(2,dtefield%fnkpt*nsppol))
  ABI_MALLOC(dtm_mult,(2,dtefield%fnkpt*nsppol,berrystep))
  ABI_MALLOC(cg1_k,(2,mcg1_k))
-
+ 
  if (usepaw == 1) then ! cprj allocation
    ncpgr = cprj(1,1)%ncpgr
    if ( calc_epaw3_force ) then
@@ -440,7 +439,6 @@ subroutine berryphase_new(atindx1,cg,cg13,cprj,dtefield,dtfil,dtset,psps,&
 
    end if ! end check on efield
  end if
-
 !!=======================================
 !! code to test orthonormality of cg_k
 !!=======================================
@@ -1053,7 +1051,6 @@ subroutine berryphase_new(atindx1,cg,cg13,cprj,dtefield,dtfil,dtset,psps,&
      end if
 
    end do   ! close loop over ifor
-
 !  MPI communicate stuff between everyone
    if (nproc>1) then
      count = 2*dtefield%fnkpt*nsppol*berrystep
@@ -1134,19 +1131,19 @@ subroutine berryphase_new(atindx1,cg,cg13,cprj,dtefield,dtfil,dtset,psps,&
      ABI_FREE(resid)
    end if  ! ddkflag == 1
 ! end of ddk part for this idir
-
-
+    
+   
 !  ===========================================================================
 !  Compute the Berry phase polarization
 !  ===========================================================================
-
+     
    if (polflag == 1) then
-
+    
 !    Compute the electronic Berry phase
-
+    
      polb_mult(:,:)=zero
      do istep = 1,berrystep
-
+    
        if(berrystep==1) then
          write(message,'(a,a)')ch10,&
 &         ' Compute the electronic contribution to polarization'
@@ -1625,7 +1622,8 @@ subroutine berryphase_new(atindx1,cg,cg13,cprj,dtefield,dtfil,dtset,psps,&
 
  end do    ! Close loop over idir
 
-!!REC start
+
+ !!REC start
  if (dtset%berrysav == 1) then
    if(mpi_enreg%me==0)then
      if (open_file('POLSAVE',message,newunit=unt,status='UNKNOWN') /= 0) then
@@ -1641,6 +1639,7 @@ subroutine berryphase_new(atindx1,cg,cg13,cprj,dtefield,dtfil,dtset,psps,&
 !-------------------------------------------------
 !   Compute polarization in cartesian coordinates
 !-------------------------------------------------
+ !if (all(dtset%rfdir(:) == 1) .AND. (calc_pol_ddk .NE. 2)) then
  if (all(dtset%rfdir(:) == 1)) then
 
    if(usepaw.ne.1) then
@@ -1729,7 +1728,7 @@ end subroutine berryphase_new
 !! This routine updates E field variables
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2024 ABINIT  group
+!! Copyright (C) 2003-2025 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2290,7 +2289,7 @@ end subroutine update_e_field_vars
 !! Print components of electric field, displacement field and polarization in nice format
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, LBoeri, MT)
+!! Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, LBoeri, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2671,7 +2670,7 @@ end subroutine prtefield
 !! calculations
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2024 ABINIT group
+!! Copyright (C) 2004-2025 ABINIT group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2782,7 +2781,7 @@ end subroutine init_e_field_vars
 !! ddk and the response of an insulator to a homogenous electric field.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2024 ABINIT group (MVeithen).
+!! Copyright (C) 2004-2025 ABINIT group (MVeithen).
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

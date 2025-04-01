@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2024 ABINIT group (FJ, MT)
+!!  Copyright (C) 1998-2025 ABINIT group (FJ, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -18,6 +18,9 @@
 #endif
 
 #include "abi_common.h"
+
+! nvtx related macro definition
+#include "nvtx_macros.h"
 
 module m_atm2fft
 
@@ -35,6 +38,10 @@ module m_atm2fft
  use m_pawtab,      only : pawtab_type
  use m_fft,         only : zerosym, fourdp
  use m_mpinfo,      only : set_mpi_enreg_fft, unset_mpi_enreg_fft, initmpi_seq
+
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+ use m_nvtx_data
+#endif
 
  implicit none
 
@@ -228,6 +235,7 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
  real(dp) :: tmpvi,tmpvr,v_at,xnorm
  character(len=500) :: message
  type(distribfft_type),pointer :: my_distribfft
+ type(distribfft_type),target :: my_distribfft_
  type(mpi_type) :: mpi_enreg_fft
 !arrays
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
@@ -259,7 +267,7 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
  if (present(distribfft)) then
    my_distribfft => distribfft
  else
-   ABI_MALLOC(my_distribfft,)
+   my_distribfft => my_distribfft_
    call init_distribfft_seq(my_distribfft,'f',n2,n3,'fourdp')
  end if
  if (n2==my_distribfft%n2_coarse) then
@@ -871,7 +879,6 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
 
  if (.not.present(distribfft)) then
    call destroy_distribfft(my_distribfft)
-   ABI_FREE(my_distribfft)
  end if
 
  DBG_EXIT("COLL")
@@ -1036,6 +1043,7 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
  real(dp) :: ph1r,ph2i,ph2r,ph3i,ph3r,phqim,phqre,qxred2pi
  real(dp) :: sfi,sfqi,sfqr,sfr,term_n,term_v,v_at,dv_at,xnorm
  type(distribfft_type),pointer :: my_distribfft
+ type(distribfft_type),target :: my_distribfft_
  type(mpi_type) :: mpi_enreg_fft
 !arrays
  integer :: eps1(6)=(/1,2,3,2,3,1/),eps2(6)=(/1,2,3,3,1,2/),jdir(ndir)
@@ -1053,6 +1061,7 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
 ! *************************************************************************
 
  DBG_ENTER("COLL")
+ ABI_NVTX_START_RANGE(NVTX_DFPT_ATM2FFT)
 
 !  Check optional arguments
  if (present(comm_fft)) then
@@ -1146,8 +1155,8 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
    if (present(distribfft)) then
      my_distribfft => distribfft
    else
-     ABI_MALLOC(my_distribfft,)
-     call init_distribfft_seq(my_distribfft,'f',n2,n3,'fourdp')
+     my_distribfft => my_distribfft_
+     call init_distribfft_seq(my_distribfft_,'f',n2,n3,'fourdp')
    end if
    if (n2==my_distribfft%n2_coarse) then
      fftn2_distrib => my_distribfft%tab_fftdp2_distrib
@@ -1529,12 +1538,12 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
 
    if (.not.present(distribfft)) then
      call destroy_distribfft(my_distribfft)
-     ABI_FREE(my_distribfft)
    end if
 
 !  End the condition of non-electric-field
  end if
 
+ ABI_NVTX_END_RANGE()
  DBG_EXIT("COLL")
 
 end subroutine dfpt_atm2fft

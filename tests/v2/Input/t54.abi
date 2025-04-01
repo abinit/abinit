@@ -129,6 +129,7 @@
   rprim24  0.0  0.5  0.5
            0.5  0.0  0.5
            0.5  0.5  0.0
+  nspden24 2
   spinat24 0.0 0.0  1.0
            0.0 0.0 -1.0
 
@@ -158,14 +159,14 @@
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
-#%%   t54.abo, tolnlines = 0, tolabs = 5.510e-11, tolrel = 3.000e-07
+#%% files_to_test =
+#%%   t54.abo, tolnlines = 0, tolabs = 0.0e+00, tolrel = 0.0e+00
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
-#%% keywords = 
+#%% keywords =
 #%% authors = Unknown
-#%% description = 
+#%% description =
 #%%   Test the symmetry finder for all the Bravais lattices,
 #%%   with different input formats (rprim or angdeg), and for
 #%%   non-conventional choices of axes as well.

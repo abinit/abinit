@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h54 )
-  
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI10/paral_t75_MPI10/t75.in
-- output file    -> t75_MPI10.out
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h36 )
+
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI10/paral_t75_MPI10/t75.abi
+- output file    -> t75_MPI10.abo
 - root for input  files -> t75_MPI10i
 - root for output files -> t75_MPI10o
-
 
  DATASET    1 : space group I4/m m m (#139); Bravais tI (body-center tetrag.)
 ================================================================================
@@ -34,11 +33,10 @@
 -    mband =           2        mffmem =           1         mkmem =           1
        mpw =        4693          nfft =      110592          nkpt =           1
 ================================================================================
-P This job should need less than                      32.136 Mbytes of memory.
+P This job should need less than                      35.296 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.145 Mbytes ; DEN or POT disk file :      0.846 Mbytes.
 ================================================================================
-
 
  DATASET    2 : space group I4/m m m (#139); Bravais tI (body-center tetrag.)
 ================================================================================
@@ -51,11 +49,10 @@ _ WF disk file :      0.145 Mbytes ; DEN or POT disk file :      0.846 Mbytes.
 -    mband =          15        mffmem =           1         mkmem =           1
        mpw =        4693          nfft =      110592          nkpt =           1
 ================================================================================
-P This job should need less than                      19.576 Mbytes of memory.
+P This job should need less than                      22.736 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      1.076 Mbytes ; DEN or POT disk file :      0.846 Mbytes.
 ================================================================================
-
 
  DATASET    3 : space group I4/m m m (#139); Bravais tI (body-center tetrag.)
 ================================================================================
@@ -68,11 +65,10 @@ _ WF disk file :      1.076 Mbytes ; DEN or POT disk file :      0.846 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =           1
        mpw =        4693          nfft =      110592          nkpt =           1
 ================================================================================
-P This job should need less than                      32.859 Mbytes of memory.
+P This job should need less than                      36.019 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.861 Mbytes ; DEN or POT disk file :      0.846 Mbytes.
 ================================================================================
-
 
  DATASET    4 : space group I4/m m m (#139); Bravais tI (body-center tetrag.)
 ================================================================================
@@ -85,11 +81,10 @@ _ WF disk file :      0.861 Mbytes ; DEN or POT disk file :      0.846 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =           1
        mpw =        4693          nfft =      110592          nkpt =           1
 ================================================================================
-P This job should need less than                      32.859 Mbytes of memory.
+P This job should need less than                      36.019 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.861 Mbytes ; DEN or POT disk file :      0.846 Mbytes.
 ================================================================================
-
 
  DATASET    5 : space group I4/m m m (#139); Bravais tI (body-center tetrag.)
 ================================================================================
@@ -102,11 +97,10 @@ _ WF disk file :      0.861 Mbytes ; DEN or POT disk file :      0.846 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =           1
        mpw =        4693          nfft =      110592          nkpt =           1
 ================================================================================
-P This job should need less than                      32.859 Mbytes of memory.
+P This job should need less than                      36.019 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.861 Mbytes ; DEN or POT disk file :      0.846 Mbytes.
 ================================================================================
-
 
  DATASET    6 : space group I4/m m m (#139); Bravais tI (body-center tetrag.)
 ================================================================================
@@ -119,7 +113,7 @@ _ WF disk file :      0.861 Mbytes ; DEN or POT disk file :      0.846 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =           1
        mpw =        4693          nfft =      110592          nkpt =           1
 ================================================================================
-P This job should need less than                      32.859 Mbytes of memory.
+P This job should need less than                      36.019 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.861 Mbytes ; DEN or POT disk file :      0.846 Mbytes.
 ================================================================================
@@ -128,10 +122,10 @@ _ WF disk file :      0.861 Mbytes ; DEN or POT disk file :      0.846 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -159,7 +153,7 @@ _ WF disk file :      0.861 Mbytes ; DEN or POT disk file :      0.846 Mbytes.
           ecutwfn5     6.00000000E+00 Hartree
           ecutwfn6     6.00000000E+00 Hartree
            enunit           1
--          fftalg         312
+-          fftalg         512
            getden1          0
            getden2         -1
            getden3          0
@@ -385,8 +379,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.05208
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/11na.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/11na.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/11na.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/11na.pspnc
 -  Troullier-Martins psp for element  Na        Mon Oct 31 11:14:49 EST 1994
 - 11.00000   1.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -427,7 +421,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  8  -13.277695462123    -1.426E-07 1.699E-10 3.679E-03
  ETOT  9  -13.277695474010    -1.189E-08 2.011E-11 1.463E-03
 
- At SCF step    9, etot is converged : 
+ At SCF step    9, etot is converged :
   for the second time, diff in etot=  1.189E-08 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -459,8 +453,8 @@ xred      :
 - [ -1.0000E-01,   1.0000E-01,   1.0000E-01, Na]
 - [  1.0000E-01,  -1.0000E-01,  -1.0000E-01, Na]
 cartesian_forces: # hartree/bohr
-- [ -8.80177975E-04,  -8.06287122E-20,   8.06287122E-20, ]
-- [  8.80177975E-04,   8.06287122E-20,  -8.06287122E-20, ]
+- [ -8.80177975E-04,  -1.55765819E-20,   1.55765819E-20, ]
+- [  8.80177975E-04,   1.55765819E-20,  -1.55765819E-20, ]
 force_length_stats: {min:   8.80177975E-04, max:   8.80177975E-04, mean:   8.80177975E-04, }
 ...
 
@@ -491,8 +485,8 @@ force_length_stats: {min:   8.80177975E-04, max:   8.80177975E-04, mean:   8.801
  frms,max,avg= 5.0817099E-04 8.8017797E-04   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.04526056742959    -0.00000000000000     0.00000000000000
-    2      0.04526056742959     0.00000000000000    -0.00000000000000
+    1     -0.04526056742958    -0.00000000000000     0.00000000000000
+    2      0.04526056742958     0.00000000000000    -0.00000000000000
  frms,max,avg= 2.6131201E-02 4.5260567E-02   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 30.000000000000 30.000000000000 30.000000000000 bohr
               = 15.875316257700 15.875316257700 15.875316257700 angstroms
@@ -505,16 +499,16 @@ force_length_stats: {min:   8.80177975E-04, max:   8.80177975E-04, mean:   8.801
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  1.15360712926583E-01
-hartree             :  1.24872166403128E-01
+kinetic             :  1.15360712926585E-01
+hartree             :  1.24872166403129E-01
 xc                  : -1.31964737302469E+01
 Ewald energy        : -1.28271980544043E-01
 psp_core            :  6.30750030220281E-03
-local_psp           : -3.21634924609093E-01
+local_psp           : -3.21634924609094E-01
 non_local_psp       :  1.22144781758522E-01
 total_energy        : -1.32776954740096E+01
 total_energy_eV     : -3.61304468319460E+02
-band_energy         : -2.28850290887548E-01
+band_energy         : -2.28850290887550E-01
 ...
 
 
@@ -630,13 +624,13 @@ force_length_stats: {min: null, max: null, mean: null, }
 --- !EnergyTerms
 iteration_state     : {dtset: 2, }
 comment             : Components of total free energy in Hartree
-kinetic             :  1.15401447518149E-01
-hartree             :  1.24872166403128E-01
+kinetic             :  1.15401447518148E-01
+hartree             :  1.24872166403129E-01
 xc                  : -1.31964737302469E+01
 Ewald energy        : -1.28271980544043E-01
 psp_core            :  6.30750030220281E-03
-local_psp           : -3.21634924609093E-01
-non_local_psp       :  1.22187212799198E-01
+local_psp           : -3.21634924609094E-01
+non_local_psp       :  1.22187212799197E-01
 total_energy        : -1.32776123083774E+01
 ...
 
@@ -644,7 +638,7 @@ total_energy        : -1.32776123083774E+01
 --- !EnergyTermsDC
 iteration_state     : {dtset: 2, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -2.28902457564268E-01
+band_energy         : -2.28902457564265E-01
 Ewald energy        : -1.28271980544043E-01
 psp_core            :  6.30750030220281E-03
 xc_dc               : -1.29268285551051E+01
@@ -672,7 +666,7 @@ meta: {optdriver: 3, gwcalctyp: 28, }
  Citation for XC functional:
   J.P.Perdew and Y.Wang, PRB 45, 13244 (1992)
 
- SCREENING: Calculation of the susceptibility and dielectric matrices 
+ SCREENING: Calculation of the susceptibility and dielectric matrices
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
@@ -688,21 +682,21 @@ meta: {optdriver: 3, gwcalctyp: 28, }
 
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :     1
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       1.00000
 
- Together with 16 symmetry operations and time-reversal symmetry 
+ Together with 16 symmetry operations and time-reversal symmetry
  yields     1 points in the full Brillouin Zone.
 
 
  ==== Q-mesh for the screening function ====
  Number of points in the irreducible wedge :     1
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       1.00000
 
- Together with 16 symmetry operations and time-reversal symmetry 
+ Together with 16 symmetry operations and time-reversal symmetry
  yields     1 points in the full Brillouin Zone.
 
 
@@ -710,22 +704,22 @@ meta: {optdriver: 3, gwcalctyp: 28, }
           total number of points  =        19683
 
 
- === Spherical cutoff === 
+ === Spherical cutoff ===
 
-  Cutoff radius .........    10.5000 [Bohr] 
+  Cutoff radius .........    10.5000 [Bohr]
   Volume of the sphere ..    4849.05 [Bohr^3]
  q-points for optical limit:   1
      1)      0.000010    0.000020    0.000030
 
-- screening: taking advantage of time-reversal symmetry 
+- screening: taking advantage of time-reversal symmetry
 - Maximum band index for partially occupied states nbvw = 1
 - Remaining bands to be divided among processors   nbcw = 11
 - Number of bands treated by each node ~1
 
 
- rdqps: reading QP wavefunctions of the previous step 
+ rdqps: reading QP wavefunctions of the previous step
         looking for file t75_MPI10i_DS3_QPS
- file not found, 1st iteration initialized with KS eigenelements 
+ file not found, 1st iteration initialized with KS eigenelements
 
  Number of electrons calculated from density =    2.0000; Expected =    2.0000
  average of density, n =  0.000296
@@ -752,7 +746,7 @@ meta: {optdriver: 3, gwcalctyp: 28, }
   chi0(G,G') at the    2 th omega   0.0000  13.6057 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-       -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000  -0.000   0.000
+        0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000  -0.000   0.000
 
     2   0.000  -0.989   0.146   0.074  -0.198   0.124  -0.124   0.074  -0.198
         0.000   0.000   0.000  -0.000   0.000   0.000   0.000  -0.000   0.000
@@ -762,7 +756,7 @@ meta: {optdriver: 3, gwcalctyp: 28, }
   dielectric constant without local fields =   1.0000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :    172.38  [%]
-  Heads and wings of the symmetrical epsilon^-1(G,G') 
+  Heads and wings of the symmetrical epsilon^-1(G,G')
 
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
@@ -776,10 +770,10 @@ meta: {optdriver: 3, gwcalctyp: 28, }
    Upper and lower wings at the    2 th omega   0.0000  13.6057 [eV]
        1       2       3       4       5       6       7       8       9
       1.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-     -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000  -0.000   0.000
+      0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000  -0.000   0.000
        1       2       3       4       5       6       7       8       9
       1.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-     -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000   0.000  -0.000
+      0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000   0.000  -0.000
 
 
 
@@ -805,7 +799,7 @@ meta: {optdriver: 4, gwcalctyp: 28, }
  Citation for XC functional:
   J.P.Perdew and Y.Wang, PRB 45, 13244 (1992)
 
- SIGMA: Calculation of the GW corrections 
+ SIGMA: Calculation of the GW corrections
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
@@ -821,28 +815,28 @@ meta: {optdriver: 4, gwcalctyp: 28, }
 
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :     1
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       1.00000
 
- Together with 16 symmetry operations and time-reversal symmetry 
+ Together with 16 symmetry operations and time-reversal symmetry
  yields     1 points in the full Brillouin Zone.
 
 
  ==== Q-mesh for screening function ====
  Number of points in the irreducible wedge :     1
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       1.00000
 
- Together with 16 symmetry operations and time-reversal symmetry 
+ Together with 16 symmetry operations and time-reversal symmetry
  yields     1 points in the full Brillouin Zone.
 
 
 
- === Spherical cutoff === 
+ === Spherical cutoff ===
 
-  Cutoff radius .........    10.5000 [Bohr] 
+  Cutoff radius .........    10.5000 [Bohr]
   Volume of the sphere ..    4849.05 [Bohr^3]
  q-points for optical limit:   1
      1)      0.000010    0.000020    0.000030
@@ -855,9 +849,9 @@ meta: {optdriver: 4, gwcalctyp: 28, }
  omega_plasma =    1.6604 [eV]
 
 
- rdqps: reading QP wavefunctions of the previous step 
+ rdqps: reading QP wavefunctions of the previous step
         looking for file t75_MPI10i_DS4_QPS
- file not found, 1st iteration initialized with KS eigenelements 
+ file not found, 1st iteration initialized with KS eigenelements
 
  Number of electrons calculated from density =    2.0000; Expected =    2.0000
  average of density, n =  0.000296
@@ -867,12 +861,12 @@ meta: {optdriver: 4, gwcalctyp: 28, }
 
 --------------------------------------------------------------------------------
 
- QP results after the unitary transformation in the KS subspace: 
+ QP results after the unitary transformation in the KS subspace:
 
   Number of electrons    =    2.0000
 
-  QP Band energy    [Ha] = -2.28902457564268E-01
-  QP Hartree energy [Ha] =  1.24911260484626E-01
+  QP Band energy    [Ha] = -2.28902457564265E-01
+  QP Hartree energy [Ha] =  1.24911260484625E-01
 
 --------------------------------------------------------------------------------
 
@@ -973,7 +967,7 @@ meta: {optdriver: 3, gwcalctyp: 18, }
  Citation for XC functional:
   J.P.Perdew and Y.Wang, PRB 45, 13244 (1992)
 
- SCREENING: Calculation of the susceptibility and dielectric matrices 
+ SCREENING: Calculation of the susceptibility and dielectric matrices
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
@@ -989,21 +983,21 @@ meta: {optdriver: 3, gwcalctyp: 18, }
 
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :     1
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       1.00000
 
- Together with 16 symmetry operations and time-reversal symmetry 
+ Together with 16 symmetry operations and time-reversal symmetry
  yields     1 points in the full Brillouin Zone.
 
 
  ==== Q-mesh for the screening function ====
  Number of points in the irreducible wedge :     1
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       1.00000
 
- Together with 16 symmetry operations and time-reversal symmetry 
+ Together with 16 symmetry operations and time-reversal symmetry
  yields     1 points in the full Brillouin Zone.
 
 
@@ -1011,20 +1005,20 @@ meta: {optdriver: 3, gwcalctyp: 18, }
           total number of points  =        19683
 
 
- === Spherical cutoff === 
+ === Spherical cutoff ===
 
-  Cutoff radius .........    10.5000 [Bohr] 
+  Cutoff radius .........    10.5000 [Bohr]
   Volume of the sphere ..    4849.05 [Bohr^3]
  q-points for optical limit:   1
      1)      0.000010    0.000020    0.000030
 
-- screening: taking advantage of time-reversal symmetry 
+- screening: taking advantage of time-reversal symmetry
 - Maximum band index for partially occupied states nbvw = 1
 - Remaining bands to be divided among processors   nbcw = 11
 - Number of bands treated by each node ~1
 
 
- rdqps: reading QP wavefunctions of the previous step 
+ rdqps: reading QP wavefunctions of the previous step
         looking for file t75_MPI10o_DS4_QPS
  Number of iteration(s) already performed:    1
 
@@ -1045,7 +1039,7 @@ meta: {optdriver: 3, gwcalctyp: 18, }
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-       -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
+        0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
 
     2   0.000 -14.523   4.762   3.283  -6.051  -1.080   1.123   3.283  -6.051
        -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000  -0.000
@@ -1063,15 +1057,15 @@ meta: {optdriver: 3, gwcalctyp: 18, }
   dielectric constant without local fields =   1.0000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :    344.18  [%]
-  Heads and wings of the symmetrical epsilon^-1(G,G') 
+  Heads and wings of the symmetrical epsilon^-1(G,G')
 
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
       1.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-     -0.000   0.000  -0.000   0.000  -0.000  -0.000   0.000  -0.000   0.000
+      0.000   0.000  -0.000   0.000  -0.000  -0.000   0.000  -0.000   0.000
        1       2       3       4       5       6       7       8       9
       1.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-     -0.000  -0.000   0.000  -0.000   0.000   0.000  -0.000   0.000  -0.000
+      0.000  -0.000   0.000  -0.000   0.000   0.000  -0.000   0.000  -0.000
 
 
    Upper and lower wings at the    2 th omega   0.0000  13.6057 [eV]
@@ -1108,7 +1102,7 @@ meta: {optdriver: 4, gwcalctyp: 18, }
  Citation for XC functional:
   J.P.Perdew and Y.Wang, PRB 45, 13244 (1992)
 
- SIGMA: Calculation of the GW corrections 
+ SIGMA: Calculation of the GW corrections
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
@@ -1124,28 +1118,28 @@ meta: {optdriver: 4, gwcalctyp: 18, }
 
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :     1
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       1.00000
 
- Together with 16 symmetry operations and time-reversal symmetry 
+ Together with 16 symmetry operations and time-reversal symmetry
  yields     1 points in the full Brillouin Zone.
 
 
  ==== Q-mesh for screening function ====
  Number of points in the irreducible wedge :     1
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       1.00000
 
- Together with 16 symmetry operations and time-reversal symmetry 
+ Together with 16 symmetry operations and time-reversal symmetry
  yields     1 points in the full Brillouin Zone.
 
 
 
- === Spherical cutoff === 
+ === Spherical cutoff ===
 
-  Cutoff radius .........    10.5000 [Bohr] 
+  Cutoff radius .........    10.5000 [Bohr]
   Volume of the sphere ..    4849.05 [Bohr^3]
  q-points for optical limit:   1
      1)      0.000010    0.000020    0.000030
@@ -1158,7 +1152,7 @@ meta: {optdriver: 4, gwcalctyp: 18, }
  omega_plasma =    1.6604 [eV]
 
 
- rdqps: reading QP wavefunctions of the previous step 
+ rdqps: reading QP wavefunctions of the previous step
         looking for file t75_MPI10o_DS4_QPS
  Number of iteration(s) already performed:    1
 
@@ -1170,12 +1164,12 @@ meta: {optdriver: 4, gwcalctyp: 18, }
 
 --------------------------------------------------------------------------------
 
- QP results after the unitary transformation in the KS subspace: 
+ QP results after the unitary transformation in the KS subspace:
 
   Number of electrons    =    2.0000
 
-  QP Band energy    [Ha] = -3.46252132112237E-01
-  QP Hartree energy [Ha] =  1.12220384701289E-01
+  QP Band energy    [Ha] = -3.46252132112235E-01
+  QP Hartree energy [Ha] =  1.12220384701288E-01
 
 --------------------------------------------------------------------------------
 
@@ -1252,11 +1246,11 @@ data: !SigmaeeData |
 
  Convergence of QP corrections
  >>>>> For spin  1 <<<<<
-.  kptgw no:  1; Maximum DeltaE = (   0.636  -0.000) for band index:  8
+.  kptgw no:  1; Maximum DeltaE = (   0.636   0.000) for band index:  8
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      3.0000000000E+01  3.0000000000E+01  3.0000000000E+01 Bohr
               amu      2.29897680E+01
@@ -1288,8 +1282,8 @@ data: !SigmaeeData |
            etotal4     0.0000000000E+00
            etotal5     0.0000000000E+00
            etotal6     0.0000000000E+00
-            fcart1    -8.8017797459E-04 -8.0628712217E-20  8.0628712217E-20
-                       8.8017797459E-04  8.0628712217E-20 -8.0628712217E-20
+            fcart1    -8.8017797459E-04 -1.5576581867E-20  1.5576581867E-20
+                       8.8017797459E-04  1.5576581867E-20 -1.5576581867E-20
             fcart3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart4     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -1298,7 +1292,7 @@ data: !SigmaeeData |
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart6     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         312
+-          fftalg         512
            getden1          0
            getden2         -1
            getden3          0
@@ -1534,7 +1528,7 @@ P           mkmem           1
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -1546,12 +1540,12 @@ P           mkmem           1
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -1569,15 +1563,15 @@ P           mkmem           1
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          4.4  wall=          4.4
+- Proc.   0 individual time (sec): cpu=          4.8  wall=          4.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         43.2  wall=         43.4
++Overall time at end (sec) : cpu=         47.1  wall=         47.2

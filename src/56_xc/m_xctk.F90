@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, DRH)
+!!  Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, DRH)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -76,13 +76,15 @@ contains
 !!    rhonow(:,:,1)=electron density in electrons/bohr**3
 !!    if ngrad==2 : rhonow(:,:,2:4)=gradient of electron density in electrons/bohr**4
 !!  OPTIONAL OUTPUT
+!!  d2rhonow(cplex*nfft,nspden,6)=2nd derivatives of the electron (spin)-density in real space
+!!    in electrons/bohr**5 (in case of meta GGA) (Voigt notation)
 !!  lrhonow(cplex*nfft,nspden)=Laplacian of the electron (spin)-density in real space
 !!    in electrons/bohr**5 (in case of meta GGA)
 !!
 !! SOURCE
 
-subroutine xcden (cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,qphon,rhor,rhonow, & !Mandatory arguments
-&  lrhonow)              !Optional arguments
+subroutine xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,qphon,rhor,rhonow, & !Mandatory arguments
+&                d2rhonow,lrhonow)  !Optional arguments
 
 !Arguments ------------------------------------
 !scalars
@@ -92,28 +94,32 @@ subroutine xcden (cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,qphon,rh
  integer,intent(in) :: ngfft(18)
  real(dp),intent(in) :: gprimd(3,3),qphon(3),rhor(cplex*nfft,nspden)
  real(dp),intent(out) :: rhonow(cplex*nfft,nspden,ngrad*ngrad)
- real(dp),intent(out),optional :: lrhonow(cplex*nfft,nspden)
+ real(dp),intent(out),optional :: d2rhonow(cplex*nfft,nspden,6),lrhonow(cplex*nfft,nspden)
 
 !Local variables-------------------------------
 !scalars
+ integer,parameter :: voigt1(6)=[1,2,3,3,3,2],voigt2(6)=[1,2,3,2,1,1]
  integer :: i1,i2,i3,id1,id2,id3,idir,ifft,ig1,ig2,ig3
- integer :: ispden,n1,n2,n3,qeq0
- real(dp) :: gc23_idir,gcart_idir,ph123i,ph123r,ph1i,ph1r,ph23i,ph23r,ph2i,ph2r
- real(dp) :: ph3i,ph3r,work_im,work_re
+ integer :: ispden,ivoigt,jdir,ndir,n1,n2,n3,qeq0
+ logical :: need_derivative2,need_laplacian
+ real(dp) :: gc23_idir,gc23_jdir,gcart_idir,gcart_jdir
+ real(dp) :: ph123i,ph123r,ph1i,ph1r,ph23i,ph23r,ph2i,ph2r,ph3i,ph3r
+ real(dp) :: work_im,work_re
  character(len=500) :: message
 !arrays
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
  real(dp) :: tsec(2)
- real(dp),allocatable :: gcart1(:),gcart2(:),gcart3(:),ph1(:),ph2(:),ph3(:)
- real(dp),allocatable :: wkcmpx(:,:),work(:),workgr(:,:),worklp(:,:)
+ real(dp),allocatable :: gcart1(:),gcart2(:),gcart3(:)
+ real(dp),allocatable :: g2cart1(:),g2cart2(:),g2cart3(:)
+ real(dp),allocatable :: ph1(:),ph2(:),ph3(:)
+ real(dp),allocatable :: wkcmpx(:,:),work(:),workgr(:,:),workgr2(:,:)
 
 ! *************************************************************************
 
 !DEBUG
 !write(std_out,*)' xcden : enter '
 !ENDDEBUG
-
 
  if (ishift/=0 .and. ishift/=1) then
    write(message, '(a,i0)' )'ishift must be 0 or 1 ; input was',ishift
@@ -124,6 +130,9 @@ subroutine xcden (cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,qphon,rh
    write(message, '(a,i0)' )'ngrad must be 1 or 2 ; input was',ngrad
    ABI_BUG(message)
  end if
+
+ need_laplacian = present(lrhonow)
+ need_derivative2 = present(d2rhonow)
 
 !Keep local copy of fft dimensions
  n1=ngfft(1) ; n2=ngfft(2) ; n3=ngfft(3)
@@ -153,8 +162,23 @@ subroutine xcden (cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,qphon,rh
 
  if(ishift==1 .or. ngrad==2)then
 
-   ABI_MALLOC(wkcmpx,(2,nfft))
    ABI_MALLOC(work,(cplex*nfft))
+   ABI_MALLOC(wkcmpx,(2,nfft))
+   if(ngrad==2)then
+     ABI_MALLOC(workgr,(2,nfft))
+     if (need_laplacian) lrhonow(:,:)=zero
+     if (need_laplacian.or.need_derivative2) then
+       ABI_MALLOC(workgr2,(2,nfft))
+     end if
+     ABI_MALLOC(gcart1,(n1))
+     ABI_MALLOC(gcart2,(n2))
+     ABI_MALLOC(gcart3,(n3))
+     if (need_derivative2) then
+       ABI_MALLOC(g2cart1,(n1))
+       ABI_MALLOC(g2cart2,(n2))
+       ABI_MALLOC(g2cart3,(n3))
+     end if
+   end if
 
    if(ishift==1)then
 !    Precompute phases (The phases correspond to a shift of density on real space
@@ -220,15 +244,15 @@ subroutine xcden (cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,qphon,rh
 !    If gradient of the density is required, take care of the three components now
 !    Note : this operation is applied on the eventually shifted rho(G)
      if(ngrad==2)then
-       ABI_MALLOC(gcart1,(n1))
-       ABI_MALLOC(gcart2,(n2))
-       ABI_MALLOC(gcart3,(n3))
-       ABI_MALLOC(workgr,(2,nfft))
-       if (present(lrhonow)) then
-         ABI_MALLOC(worklp,(2,nfft))
-         lrhonow(:,ispden)=zero
-       end if
-       do idir=1,3
+
+!      Need 3 derivatives for the gradient and the Laplacian
+!      Need 6 for the 2nd derivatives
+       ndir=3; if (need_derivative2) ndir=6
+       do ivoigt=1,ndir
+         idir=voigt1(ivoigt) ; jdir=voigt2(ivoigt)
+
+         workgr=zero
+         if (need_laplacian.or.need_derivative2) workgr2=zero
 
          do i1=1,n1
            ig1=i1-(i1/id1)*n1-1
@@ -247,63 +271,108 @@ subroutine xcden (cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,qphon,rh
          end do
          if(mod(n3,2)==0 .and. qeq0==1)gcart3(n3/2+1)=zero
 
+         !Need a second g-vector component for some 2nd derivatives
+         if (idir/=jdir) then
+           do i1=1,n1
+             ig1=i1-(i1/id1)*n1-1
+             g2cart1(i1)=gprimd(jdir,1)*two_pi*(dble(ig1)+qphon(1))
+           end do
+  !        Note that the G <-> -G symmetry must be maintained
+           if(mod(n1,2)==0 .and. qeq0==1)g2cart1(n1/2+1)=zero
+           do i2=1,n2
+             ig2=i2-(i2/id2)*n2-1
+             g2cart2(i2)=gprimd(jdir,2)*two_pi*(dble(ig2)+qphon(2))
+           end do
+           if(mod(n2,2)==0 .and. qeq0==1)g2cart2(n2/2+1)=zero
+           do i3=1,n3
+             ig3=i3-(i3/id3)*n3-1
+             g2cart3(i3)=gprimd(jdir,3)*two_pi*(dble(ig3)+qphon(3))
+           end do
+           if(mod(n3,2)==0 .and. qeq0==1)g2cart3(n3/2+1)=zero
+         end if
+
 !        MG: Be careful here with OMP due to ifft. Disabled for the time being.
-!        !$OMP PARALLEL DO PRIVATE(ifft,i1,i2,i3,gcart_idir,gc23_idir) &
-!        !$OMP&SHARED(gcart1,gcart2,gcart3,n1,n2,n3,wkcmpx,workgr)
+!        !$OMP PARALLEL DO PRIVATE(ifft,i1,i2,i3,gcart_idir,gcart_jdir,gc23_idir,gc23_jdir) &
+!        !$OMP&SHARED(gcart1,gcart2,gcart3,g2cart1,g2cart2,g2cart3,n1,n2,n3,wkcmpx,workgr,workgr2)
          ifft = 0
          do i3=1,n3
            do i2=1,n2
-             gc23_idir=gcart2(i2)+gcart3(i3)
+             gc23_idir=gcart2(i2)+gcart3(i3) ; gc23_jdir=gc23_idir
+             if (idir/=jdir) gc23_jdir=g2cart2(i2)+g2cart3(i3)
              if (fftn2_distrib(i2)==mpi_enreg%me_fft) then
                do i1=1,n1
                  ifft=ifft+1
-                 gcart_idir=gc23_idir+gcart1(i1)
+                 gcart_idir=gc23_idir+gcart1(i1) ; gcart_jdir=gcart_idir
+                 if (idir/=jdir) gcart_jdir=gc23_jdir+g2cart1(i1)
 !                Multiply by i 2pi G(idir)
                  workgr(2,ifft)= gcart_idir*wkcmpx(1,ifft)
                  workgr(1,ifft)=-gcart_idir*wkcmpx(2,ifft)
-!                Do the same to the gradient in order to get the laplacian
-                 if (present(lrhonow)) then
-                   worklp(2,ifft)= gcart_idir*workgr(1,ifft)
-                   worklp(1,ifft)=-gcart_idir*workgr(2,ifft)
+!                Do the same to the gradient in order to get the laplacian or the 2nd derivatives
+                 if (need_laplacian.or.need_derivative2) then
+                   workgr2(2,ifft)= gcart_jdir*workgr(1,ifft)
+                   workgr2(1,ifft)=-gcart_jdir*workgr(2,ifft)
                  end if
                end do
              end if
            end do
          end do
-         call timab(82,1,tsec)
-         call fourdp(cplex,workgr,work,1,mpi_enreg,nfft,1,ngfft,0)
-         call timab(82,2,tsec)
-!$OMP PARALLEL DO PRIVATE(ifft) SHARED(idir,ispden,cplex,nfft,rhonow,work)
-         do ifft=1,cplex*nfft
-           rhonow(ifft,ispden,1+idir)=work(ifft)
-         end do
 
-         if (present(lrhonow)) then
-           call fourdp(cplex,worklp,work,1,mpi_enreg,nfft,1,ngfft,0)
+!        Store gradient of density
+         if (ivoigt<=3) then
+           call timab(82,1,tsec)
+           call fourdp(cplex,workgr,work,1,mpi_enreg,nfft,1,ngfft,0)
+           call timab(82,2,tsec)
+!$OMP PARALLEL DO PRIVATE(ifft) SHARED(idir,ispden,cplex,nfft,rhonow,work)
            do ifft=1,cplex*nfft
-             lrhonow(ifft,ispden)=lrhonow(ifft,ispden)+work(ifft)
+             rhonow(ifft,ispden,1+idir)=work(ifft)
            end do
          end if
 
+!        Store/accumulate 2nd derivative or Laplacian of density
+         if (need_laplacian.or.need_derivative2) then
+           call timab(82,1,tsec)
+           call fourdp(cplex,workgr2,work,1,mpi_enreg,nfft,1,ngfft,0)
+           call timab(82,2,tsec)
+           if (need_laplacian.and.ivoigt<=3) then
+             do ifft=1,cplex*nfft
+               lrhonow(ifft,ispden)=lrhonow(ifft,ispden)+work(ifft)
+             end do
+           end if
+           if (need_derivative2) then
+             do ifft=1,cplex*nfft
+               d2rhonow(ifft,ispden,ivoigt)=work(ifft)
+             end do
+           end if
+         end if
+
        end do
-       ABI_FREE(gcart1)
-       ABI_FREE(gcart2)
-       ABI_FREE(gcart3)
-       ABI_FREE(workgr)
-       if (allocated(worklp))  then
-         ABI_FREE(worklp)
-       end if
      end if
 
    end do  ! End loop on spins
-   if (allocated(wkcmpx))  then
-     ABI_FREE(wkcmpx)
-   end if
+
+!  Release memory
    ABI_FREE(work)
+   ABI_FREE(wkcmpx)
+   if (allocated(workgr))  then
+     ABI_FREE(workgr)
+   end if
+   if (allocated(workgr2))  then
+     ABI_FREE(workgr2)
+   end if
    if(ishift==1) then
      ABI_FREE(ph1)
      ABI_FREE(ph2)
      ABI_FREE(ph3)
+   end if
+   if(ngrad==2) then
+     ABI_FREE(gcart1)
+     ABI_FREE(gcart2)
+     ABI_FREE(gcart3)
+     if (need_derivative2) then
+       ABI_FREE(g2cart1)
+       ABI_FREE(g2cart2)
+       ABI_FREE(g2cart3)
+     end if
    end if
 
  end if  ! End condition on ishift and ngrad
@@ -426,7 +495,7 @@ subroutine xcpot (cplex,gprimd,ishift,use_laplacian,mpi_enreg,nfft,ngfft,ngrad,n
      ABI_BUG(message)
    end if
  end if
- 
+
 !Keep local copy of fft dimensions
  n1=ngfft(1) ; n2=ngfft(2) ; n3=ngfft(3)
 
@@ -508,7 +577,7 @@ subroutine xcpot (cplex,gprimd,ishift,use_laplacian,mpi_enreg,nfft,ngfft,ngrad,n
       end if
 
        do idir=1,3
-       
+
          if (with_vxc) then
 !$OMP PARALLEL DO PRIVATE(ifft) SHARED(cplex,idir,ispden,nfft,rhonow,work)
            do ifft=1,cplex*nfft
@@ -692,7 +761,7 @@ end subroutine xcpot
 !!  cplex=if 1, real space 1-order functions on FFT grid are REAL, if 2, COMPLEX
 !!  gprimd(3,3)=dimensional primitive translations in reciprocal space (bohr^-1)
 !!  ishift : if ==0, do not shift the xc grid (usual case);
-!!           if ==1, shift the xc grid (not implemented) 
+!!           if ==1, shift the xc grid (not implemented)
 !!  nfft=(effective) number of FFT grid points (for this processor)
 !!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  ngrad : =1, only take into account derivative wrt the density ;
@@ -702,12 +771,12 @@ end subroutine xcpot
 !!
 !! OUTPUT
 !!  vxc(cplex*nfft,nspden)]=q-derivative of the GGA xc potential.
-!!      At input already includes three terms. 
+!!      At input already includes three terms.
 !!
 !! SOURCE
 
-subroutine xcpotdq (agradn,cplex,gprimd,ishift,mpi_enreg, & 
-&    nfft,ngfft,ngrad,nspden,nspgrad,vxc) 
+subroutine xcpotdq (agradn,cplex,gprimd,ishift,mpi_enreg, &
+&    nfft,ngfft,ngrad,nspden,nspgrad,vxc)
 
 !Arguments ------------------------------------
 !scalars
@@ -778,7 +847,7 @@ subroutine xcpotdq (agradn,cplex,gprimd,ishift,mpi_enreg, &
    call timab(82,1,tsec)
    call fourdp(cplex,workgr,work,-1,mpi_enreg,nfft,1,ngfft,0)
    call timab(82,2,tsec)
-  
+
    do i1=1,n1
      ig1=i1-(i1/id1)*n1-1
      gcart1(i1)=gprimd(idir,1)*two_pi*dble(ig1)
@@ -795,7 +864,7 @@ subroutine xcpotdq (agradn,cplex,gprimd,ishift,mpi_enreg, &
      gcart3(i3)=gprimd(idir,3)*two_pi*dble(ig3)
    end do
    if(mod(n3,2)==0) gcart3(n3/2+1)=zero
-  
+
   ! !$OMP PARALLEL DO PRIVATE(ifft,i1,i2,i3,gc23_idir,gcart_idir) &
   ! !$OMP&SHARED(gcart1,gcart2,gcart3,n1,n2,n3,wkcmpx,workgr)
    ifft = 0

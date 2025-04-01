@@ -17,7 +17,7 @@ ngkpt 1 1 1
 nsym 1
 
 #Molecular Dynamics parameters
-ionmov 12 ntime 300
+moldyn "nvt_isokin" ntime 300
 dtion 100
 ndtset 3
 mdtemp1 4500 4500
@@ -68,7 +68,7 @@ nband 80
   0.75000000E+00  0.50000000E+00  0.75000000E+00
   0.75000000E+00  0.75000000E+00  0.50000000E+00
 
-pp_dirpath "$ABI_PSPDIR/Pseudodojo_nc_sr_04_pw_standard_psp8"
+pp_dirpath "$ABI_PSPDIR/Psdj_nc_sr_04_pw_std_psp8"
 pseudos "Al.psp8"
 
 ##############################################################
@@ -78,13 +78,13 @@ pseudos "Al.psp8"
 #%% [setup]
 #%% executable = abinit
 #%% [NCPU_2]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   tmoldyn_07_MPI2.abo, tolnlines = 0, tolabs = 0.0e-0, tolrel = 0.0e-0, fld_options = -medium;
 #%% [paral_info]
 #%% nprocs_to_test = 2
 #%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = J. Bieder
-#%% keywords = 
+#%% keywords =
 #%% description = Molecular dynamics for Al
 #%%<END TEST_INFO>

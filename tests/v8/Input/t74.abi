@@ -18,8 +18,8 @@ diemixmag 0.8
 diemac 20
 
 # crystal def.
-natom  4 
-ntypat 2 
+natom  4
+ntypat 2
 typat  1 1 2 2
 znucl  25 8
 
@@ -28,7 +28,7 @@ acell 3*4.50 Angstrom
 rprim 0.0 1/2 1/2
       1/2 0.0 1/2
       1.0 1.0 0.0
-xred 
+xred
 0 0 0
 0.0 0.0 0.5
 0.5 0.5 0.25
@@ -72,14 +72,14 @@ prteig  0
 #%% executable = abinit
 #%% test_chain = t71.abi, t72.abi, t73.abi, t74.abi, t75.abi, t76.abi, t77.abi, t78.abi, t79.abi, t80.abi
 #%% [files]
-#%% files_to_test = 
-#%%    t74.abo,  tolnlines =0, tolabs =0, tolrel = 1.0E-8, fld_options=-medium ;
+#%% files_to_test =
+#%%    t74.abo,  tolnlines = 0, tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options=-medium ;
 #%% [paral_info]
 #%% max_nprocs = 8
 #%% [shell]
 #%% post_commands = ww_cp t74o_1WF13 t77i_1WF13
 #%% [extra_info]
 #%% authors = E. Bousquet
-#%% keywords = DFPT, ddk, non-collinear, SOC
+#%% keywords = DFPT, non-collinear, SOC
 #%% description = DFPT in non-collinear magnetism: ddk with ixcrot=3
 #%%<END TEST_INFO>

@@ -6,7 +6,7 @@
 !! Writting Wannier function information to netcdf file.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2005-2024 ABINIT group (hexu)
+!!  Copyright (C) 2005-2025 ABINIT group (hexu)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -16,9 +16,6 @@
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
-
-
-
 
 #include "abi_common.h"
 
@@ -38,7 +35,7 @@ module m_wann_netcdf
 ! This is different for the wannier90 netcdf file in abinit.
 ! It is used for the lattice Wannier function.
 ! TODO: make it more similar to the electron Wannier nc file?
-!--------------------------------------------------------------------- 
+!---------------------------------------------------------------------
   type, public:: IOWannNC
      ! id of netcdf file
      integer:: ncid

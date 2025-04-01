@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------------
 nstep     0
-ecut      10.0        
-pawecutdg 15.0       
+ecut      10.0
+pawecutdg 15.0
 tolwfr    1.0d-15
 
 
@@ -19,7 +19,7 @@ rprim 1.0 0.0 0.0    #Real space PRIMitive translations
       0.0 1.0 0.0
       0.0 0.0 1.0
 
-ngkpt   1 1 1 
+ngkpt   1 1 1
 
 supercell_latt 2 2 2
 
@@ -32,9 +32,9 @@ prtebands 0
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
-#%%   t94.abo, tolnlines=   0,   tolabs= 1e-6,  tolrel= 1e-12, fld_options = -medium
-#%% [shell] 
+#%% files_to_test =
+#%%   t94.abo, tolnlines = 0,   tolabs = 0.0e+00,  tolrel = 0.0e+00, fld_options = -medium
+#%% [shell]
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

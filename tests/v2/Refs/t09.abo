@@ -1,8 +1,8 @@
 
-.Version 9.11.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.2.4.2 of ABINIT, released Nov 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Jul 2023.
-- ( at 11h58 )
-  
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v2_t09/t09.abi
+.Starting date : Tue 19 Nov 2024.
+- ( at 19h48 )
+
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_EOF-10.2/tests/TestBot_MPI1/v2_t09/t09.abi
 - output file    -> t09.abo
 - root for input  files -> t09i
 - root for output files -> t09o
@@ -128,10 +128,10 @@ _ WF disk file :      0.019 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -150,7 +150,7 @@ _ WF disk file :      0.019 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
            diemix4     1.00000000E+00
            diemix5     1.50000000E-01
              ecut      1.20000000E+00 Hartree
--          fftalg         312
+-          fftalg         512
            getden1          0
            getden2          1
            getden3          0
@@ -301,8 +301,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/32ge.SJ_mod
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/32ge.SJ_mod
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_EOF-10.2/tests/Pspdir/32ge.SJ_mod
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_EOF-10.2/tests/Pspdir/32ge.SJ_mod
 -   Starkloff-Joannopoulos local psp ( !!! OLD : only for tests)
 - 32.00000   4.00000    900101                znucl, zion, pspdat
     5    3    0    0       700   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -338,19 +338,19 @@ tolerances: {tolwfr: 1.00E-22, }
  ETOT  7  -6.8435122467056    -8.932E-08 8.044E-10 1.552E-08
  ETOT  8  -6.8435122467806    -7.505E-11 3.718E-12 2.162E-09
  ETOT  9  -6.8435122467884    -7.807E-12 3.297E-13 4.422E-11
- ETOT 10  -6.8435122467885    -1.155E-13 1.924E-15 1.311E-12
- ETOT 11  -6.8435122467885    -3.553E-15 5.179E-17 5.266E-14
- ETOT 12  -6.8435122467886    -6.217E-15 2.755E-18 8.135E-16
- ETOT 13  -6.8435122467885     3.375E-14 7.952E-20 6.573E-17
- ETOT 14  -6.8435122467886    -5.507E-14 5.281E-21 2.169E-18
- ETOT 15  -6.8435122467885     2.665E-14 3.483E-22 2.923E-19
- ETOT 16  -6.8435122467885    -2.665E-15 9.705E-23 1.117E-19
+ ETOT 10  -6.8435122467885    -1.119E-13 1.924E-15 1.311E-12
+ ETOT 11  -6.8435122467885    -5.329E-15 5.179E-17 5.266E-14
+ ETOT 12  -6.8435122467886    -1.066E-14 2.755E-18 8.135E-16
+ ETOT 13  -6.8435122467885     3.730E-14 7.952E-20 6.573E-17
+ ETOT 14  -6.8435122467886    -5.773E-14 5.281E-21 2.169E-18
+ ETOT 15  -6.8435122467885     2.842E-14 3.483E-22 2.923E-19
+ ETOT 16  -6.8435122467885     8.882E-16 9.705E-23 1.117E-19
 
  At SCF step   16   max residual=  9.71E-23 < tolwfr=  1.00E-22 =>converged.
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  3.15153607E-04  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  3.15153607E-04  sigma(3 1)= -3.78589487E-15
+  sigma(2 2)=  3.15153607E-04  sigma(3 1)= -3.78605484E-15
   sigma(3 3)= -1.88255499E-03  sigma(2 1)=  0.00000000E+00
 
 
@@ -364,21 +364,21 @@ lattice_vectors:
 lattice_lengths: [  10.00000,   10.00000,   10.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.0000000E+03
-convergence: {deltae: -2.665E-15, res2:  1.117E-19, residm:  9.705E-23, diffor: null, }
+convergence: {deltae:  8.882E-16, res2:  1.117E-19, residm:  9.705E-23, diffor: null, }
 etotal    :  -6.84351225E+00
 entropy   :   0.00000000E+00
 fermie    :  -1.67753976E-01
 cartesian_stress_tensor: # hartree/bohr^3
-- [  3.15153607E-04,   0.00000000E+00,  -3.78589487E-15, ]
+- [  3.15153607E-04,   0.00000000E+00,  -3.78605484E-15, ]
 - [  0.00000000E+00,   3.15153607E-04,   0.00000000E+00, ]
-- [ -3.78589487E-15,   0.00000000E+00,  -1.88255499E-03, ]
+- [ -3.78605484E-15,   0.00000000E+00,  -1.88255499E-03, ]
 pressure_GPa:   1.2281E+01
 xred      :
 - [  0.0000E+00,   0.0000E+00,  -1.5000E-01, Ge]
 - [  0.0000E+00,   0.0000E+00,   1.5000E-01, Ge]
 cartesian_forces: # hartree/bohr
-- [  2.45779525E-13,   7.80415055E-14,  -7.37515384E-01, ]
-- [ -2.45779525E-13,  -7.80415055E-14,   7.37515384E-01, ]
+- [  2.45794456E-13,   7.81004101E-14,  -7.37515384E-01, ]
+- [ -2.45794456E-13,  -7.81004101E-14,   7.37515384E-01, ]
 force_length_stats: {min:   7.37515384E-01, max:   7.37515384E-01, mean:   7.37515384E-01, }
 ...
 
@@ -391,7 +391,7 @@ force_length_stats: {min:   7.37515384E-01, max:   7.37515384E-01, mean:   7.375
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   36.007E-24; max=  97.051E-24
+ Mean square residual over all n,k,spin=   36.007E-24; max=  97.052E-24
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000     -0.150000000000
        0.000000000000      0.000000000000      0.150000000000
@@ -406,11 +406,11 @@ force_length_stats: {min:   7.37515384E-01, max:   7.37515384E-01, mean:   7.375
  cartesian forces (hartree/bohr) at end:
     1      0.00000000000025     0.00000000000008    -0.73751538381028
     2     -0.00000000000025    -0.00000000000008     0.73751538381028
- frms,max,avg= 4.2580471E-01 7.3751538E-01  -5.453E-12  3.836E-12 -5.176E-12 h/b
+ frms,max,avg= 4.2580471E-01 7.3751538E-01  -5.453E-12  3.836E-12 -5.175E-12 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      0.00000000001264     0.00000000000401   -37.92456267152998
-    2     -0.00000000001264    -0.00000000000401    37.92456267152998
+    1      0.00000000001264     0.00000000000402   -37.92456267152998
+    2     -0.00000000001264    -0.00000000000402    37.92456267152998
  frms,max,avg= 2.1895756E+01 3.7924563E+01  -2.804E-10  1.972E-10 -2.661E-10 e/A
  length scales= 10.000000000000 10.000000000000 10.000000000000 bohr
               =  5.291772085900  5.291772085900  5.291772085900 angstroms
@@ -432,7 +432,7 @@ Ewald energy        : -3.40312010772530E+00
 psp_core            :  4.47424689112462E-01
 local_psp           : -6.66375008377337E+00
 non_local_psp       :  0.00000000000000E+00
-total_energy        : -6.84351224678855E+00
+total_energy        : -6.84351224678854E+00
 total_energy_eV     : -1.86221438697974E+02
 band_energy         : -2.10890390663923E+00
 ...
@@ -440,12 +440,12 @@ band_energy         : -2.10890390663923E+00
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  3.15153607E-04  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  3.15153607E-04  sigma(3 1)= -3.78589487E-15
+  sigma(2 2)=  3.15153607E-04  sigma(3 1)= -3.78605484E-15
   sigma(3 3)= -1.88255499E-03  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.2281E+01 GPa]
 - sigma(1 1)=  9.27213769E+00  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  9.27213769E+00  sigma(3 1)= -1.11384854E-10
+- sigma(2 2)=  9.27213769E+00  sigma(3 1)= -1.11389560E-10
 - sigma(3 3)= -5.53866706E+01  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
@@ -536,7 +536,7 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   65.982E-24; max=  81.604E-24
+ Mean square residual over all n,k,spin=   65.981E-24; max=  81.602E-24
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000     -0.150000000000
        0.000000000000      0.000000000000      0.150000000000
@@ -597,7 +597,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 3    ipert=   1
@@ -641,11 +641,11 @@ tolerances: {tolwfr: 1.00E-15, }
 
  ETOT  8   117.76993569410     -1.290E-08 9.576E-12 4.970E-07
 
- ETOT  9   117.76993569346     -6.394E-10 2.797E-13 2.947E-08
+ ETOT  9   117.76993569346     -6.406E-10 2.797E-13 2.947E-08
 
- ETOT 10   117.76993569342     -4.863E-11 8.614E-15 1.539E-10
+ ETOT 10   117.76993569342     -4.790E-11 8.614E-15 1.539E-10
 
- ETOT 11   117.76993569342      6.111E-13 9.727E-16 1.287E-11
+ ETOT 11   117.76993569342     -5.684E-13 9.727E-16 1.287E-11
 
  At SCF step   11   max residual=  9.73E-16 < tolwfr=  1.00E-15 =>converged.
 ================================================================================
@@ -653,14 +653,14 @@ tolerances: {tolwfr: 1.00E-15, }
  ----iterations are completed or convergence reached----
 
  Mean square residual over all n,k,spin=   57.432E-17; max=  97.271E-17
-   0.0000  0.0000 -0.3750    1  7.70029E-16 kpt; spin; max resid(k); each band:
+   0.0000  0.0000 -0.3750    1  7.70107E-16 kpt; spin; max resid(k); each band:
   7.70E-16 6.15E-16 1.96E-16 1.96E-16
-   0.0000  0.0000 -0.1250    1  9.72708E-16 kpt; spin; max resid(k); each band:
+   0.0000  0.0000 -0.1250    1  9.72706E-16 kpt; spin; max resid(k); each band:
   5.52E-16 3.20E-16 9.73E-16 9.73E-16
-   0.0000  0.0000  0.1250    1  9.72697E-16 kpt; spin; max resid(k); each band:
+   0.0000  0.0000  0.1250    1  9.72699E-16 kpt; spin; max resid(k); each band:
   5.52E-16 3.20E-16 9.73E-16 9.73E-16
-   0.0000  0.0000  0.3750    1  7.70560E-16 kpt; spin; max resid(k); each band:
-  7.71E-16 6.15E-16 1.96E-16 1.96E-16
+   0.0000  0.0000  0.3750    1  7.70481E-16 kpt; spin; max resid(k); each band:
+  7.70E-16 6.15E-16 1.96E-16 1.96E-16
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -687,162 +687,162 @@ tolerances: {tolwfr: 1.00E-15, }
 
 
  ==> Compute Derivative Database <==
-  
+
   Ewald part of the dynamical matrix
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
-  
+
    1    1   3    1        -0.0000000000        -0.0000000000
-  
+
    2    1   3    1        -0.0000000000        -0.0000000000
-  
+
    3    1   3    1       153.2427478424         0.0000000000
-  
+
    1    2   3    1         0.0000000000         0.0000000000
-  
+
    2    2   3    1        -0.0000000000         0.0000000000
-  
+
    3    2   3    1      -102.8618263090         0.0000000000
-  
+
   Frozen wf local part of the dynamical matrix
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
-  
+
    1    1   3    1         0.0000000001         0.0000000000
-  
+
    2    1   3    1        -0.0000000002         0.0000000000
-  
+
    3    1   3    1        36.5672731529         0.0000000000
-  
+
    1    2   3    1         0.0000000000         0.0000000000
-  
+
    2    2   3    1         0.0000000000         0.0000000000
-  
+
    3    2   3    1         0.0000000000         0.0000000000
-  
+
   Frozen wf non-local part of the dynamical matrix
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
-  
+
    1    1   3    1         0.0000000000         0.0000000000
-  
+
    2    1   3    1         0.0000000000         0.0000000000
-  
+
    3    1   3    1         0.0000000000         0.0000000000
-  
+
    1    2   3    1         0.0000000000         0.0000000000
-  
+
    2    2   3    1         0.0000000000         0.0000000000
-  
+
    3    2   3    1         0.0000000000         0.0000000000
-  
+
   Frozen wf xc core (1) part of the dynamical matrix
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
-  
+
    1    1   3    1         0.0000000000         0.0000000000
-  
+
    2    1   3    1         0.0000000000         0.0000000000
-  
+
    3    1   3    1         0.0000000000         0.0000000000
-  
+
    1    2   3    1         0.0000000000         0.0000000000
-  
+
    2    2   3    1         0.0000000000         0.0000000000
-  
+
    3    2   3    1         0.0000000000         0.0000000000
-  
+
   Frozen wf xc core (2) part of the dynamical matrix
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
-  
+
    1    1   3    1         0.0000000000         0.0000000000
-  
+
    2    1   3    1         0.0000000000         0.0000000000
-  
+
    3    1   3    1         0.0000000000         0.0000000000
-  
+
    1    2   3    1         0.0000000000         0.0000000000
-  
+
    2    2   3    1         0.0000000000         0.0000000000
-  
+
    3    2   3    1         0.0000000000         0.0000000000
-  
+
   Non-stationary local part of the 2-order matrix
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
-  
+
    1    1   3    1        -0.0000000000        -0.0000000000
-  
+
    2    1   3    1        -0.0000000001         0.0000000000
-  
-   3    1   3    1       -72.0400867269        -0.0000000009
-  
+
+   3    1   3    1       -72.0400867269        -0.0000000006
+
    1    2   3    1         0.0000000002        -0.0000000000
-  
+
    2    2   3    1        -0.0000000002         0.0000000000
-  
-   3    2   3    1       -16.2318211760        -0.0000000010
-  
+
+   3    2   3    1       -16.2318211760        -0.0000000007
+
   Non-stationary non-local part of the 2nd-order matrix
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
-  
+
    1    1   3    1         0.0000000000         0.0000000000
-  
+
    2    1   3    1         0.0000000000         0.0000000000
-  
+
    3    1   3    1         0.0000000000         0.0000000000
-  
+
    1    2   3    1         0.0000000000         0.0000000000
-  
+
    2    2   3    1         0.0000000000         0.0000000000
-  
+
    3    2   3    1         0.0000000000         0.0000000000
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   3    1         0.0000000001        -0.0000000000
-  
+
    2    1   3    1        -0.0000000003         0.0000000000
-  
+
    3    1   1    1         0.0000000001         0.0000000000
    3    1   2    1        -0.0000000003        -0.0000000000
    3    1   3    1       117.7699342684         0.0000000000
    3    1   1    2         0.0000000002         0.0000000000
    3    1   2    2        -0.0000000002        -0.0000000000
-   3    1   3    2      -119.0936474850         0.0000000010
-  
+   3    1   3    2      -119.0936474850         0.0000000007
+
    1    2   3    1         0.0000000002        -0.0000000000
-  
+
    2    2   3    1        -0.0000000002         0.0000000000
-  
-   3    2   3    1      -119.0936474850        -0.0000000010
-  
-  
+
+   3    2   3    1      -119.0936474850        -0.0000000007
+
+
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   3    1         0.0000000000        -0.0000000000
-  
+
    2    1   3    1        -0.0000000000         0.0000000000
-  
+
    3    1   1    1         0.0000000000         0.0000000000
    3    1   2    1        -0.0000000000        -0.0000000000
    3    1   3    1         1.1776993427         0.0000000000
    3    1   1    2         0.0000000000         0.0000000000
    3    1   2    2        -0.0000000000        -0.0000000000
    3    1   3    2        -1.1909364749         0.0000000000
-  
+
    1    2   3    1         0.0000000000        -0.0000000000
-  
+
    2    2   3    1        -0.0000000000         0.0000000000
-  
+
    3    2   3    1        -1.1909364749        -0.0000000000
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.50000
@@ -943,7 +943,7 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   47.221E-24; max=  75.213E-24
+ Mean square residual over all n,k,spin=   47.221E-24; max=  75.212E-24
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000     -0.150000000000
        0.000000000000      0.000000000000      0.150000000000
@@ -1004,7 +1004,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 3    ipert=   1
@@ -1044,7 +1044,7 @@ tolerances: {tolwfr: 1.00E-15, }
 
  ETOT  6   117.43264778166     -1.513E-01 8.809E-05 3.720E+00
 
- ETOT  7   117.43151329311     -1.134E-03 1.760E-06 4.079E+00
+ ETOT  7   117.43151329310     -1.134E-03 1.760E-06 4.079E+00
 
  ETOT  8   117.42903683130     -2.476E-03 3.385E-06 1.628E-01
 
@@ -1058,21 +1058,21 @@ tolerances: {tolwfr: 1.00E-15, }
 
  ETOT 13   117.42888652242     -5.348E-08 7.501E-11 6.060E-06
 
- ETOT 14   117.42888651723     -5.191E-09 3.270E-12 6.735E-06
+ ETOT 14   117.42888651723     -5.190E-09 3.270E-12 6.735E-06
 
  ETOT 15   117.42888651023     -6.997E-09 4.322E-12 3.471E-06
 
  ETOT 16   117.42888650649     -3.745E-09 4.489E-12 5.649E-07
 
- ETOT 17   117.42888650628     -2.083E-10 7.226E-14 1.950E-07
+ ETOT 17   117.42888650628     -2.081E-10 7.226E-14 1.950E-07
 
- ETOT 18   117.42888650603     -2.482E-10 1.281E-13 3.825E-08
+ ETOT 18   117.42888650603     -2.485E-10 1.281E-13 3.825E-08
 
- ETOT 19   117.42888650598     -5.203E-11 2.374E-14 3.284E-08
+ ETOT 19   117.42888650598     -5.181E-11 2.374E-14 3.284E-08
 
- ETOT 20   117.42888650596     -2.331E-11 3.016E-14 1.178E-09
+ ETOT 20   117.42888650596     -2.325E-11 3.016E-14 1.178E-09
 
- ETOT 21   117.42888650595     -2.871E-12 9.333E-16 1.711E-09
+ ETOT 21   117.42888650595     -3.212E-12 9.333E-16 1.711E-09
 
  At SCF step   21   max residual=  9.33E-16 < tolwfr=  1.00E-15 =>converged.
 ================================================================================
@@ -1080,7 +1080,7 @@ tolerances: {tolwfr: 1.00E-15, }
  ----iterations are completed or convergence reached----
 
  Mean square residual over all n,k,spin=   38.481E-17; max=  93.326E-17
-   0.0000  0.0000 -0.3750    1  9.04583E-16 kpt; spin; max resid(k); each band:
+   0.0000  0.0000 -0.3750    1  9.04582E-16 kpt; spin; max resid(k); each band:
   5.61E-16 9.05E-16 1.46E-16 1.46E-16
    0.0000  0.0000 -0.1250    1  9.33264E-16 kpt; spin; max resid(k); each band:
   1.54E-16 9.33E-16 1.98E-16 1.98E-16
@@ -1114,162 +1114,162 @@ tolerances: {tolwfr: 1.00E-15, }
 
 
  ==> Compute Derivative Database <==
-  
+
   Ewald part of the dynamical matrix
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
-  
+
    1    1   3    1        -0.0000000000         0.0000000000
-  
+
    2    1   3    1        -0.0000000000        -0.0000000000
-  
+
    3    1   3    1       151.9375933290         0.0000000000
-  
+
    1    2   3    1         0.0000000000         0.0000000000
-  
+
    2    2   3    1         0.0000000000         0.0000000000
-  
+
    3    2   3    1      -107.8906745303        -3.7667826572
-  
+
   Frozen wf local part of the dynamical matrix
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
-  
+
    1    1   3    1         0.0000000001         0.0000000000
-  
+
    2    1   3    1        -0.0000000002         0.0000000000
-  
+
    3    1   3    1        36.5672731529         0.0000000000
-  
+
    1    2   3    1         0.0000000000         0.0000000000
-  
+
    2    2   3    1         0.0000000000         0.0000000000
-  
+
    3    2   3    1         0.0000000000         0.0000000000
-  
+
   Frozen wf non-local part of the dynamical matrix
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
-  
+
    1    1   3    1         0.0000000000         0.0000000000
-  
+
    2    1   3    1         0.0000000000         0.0000000000
-  
+
    3    1   3    1         0.0000000000         0.0000000000
-  
+
    1    2   3    1         0.0000000000         0.0000000000
-  
+
    2    2   3    1         0.0000000000         0.0000000000
-  
+
    3    2   3    1         0.0000000000         0.0000000000
-  
+
   Frozen wf xc core (1) part of the dynamical matrix
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
-  
+
    1    1   3    1         0.0000000000         0.0000000000
-  
+
    2    1   3    1         0.0000000000         0.0000000000
-  
+
    3    1   3    1         0.0000000000         0.0000000000
-  
+
    1    2   3    1         0.0000000000         0.0000000000
-  
+
    2    2   3    1         0.0000000000         0.0000000000
-  
+
    3    2   3    1         0.0000000000         0.0000000000
-  
+
   Frozen wf xc core (2) part of the dynamical matrix
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
-  
+
    1    1   3    1         0.0000000000         0.0000000000
-  
+
    2    1   3    1         0.0000000000         0.0000000000
-  
+
    3    1   3    1         0.0000000000         0.0000000000
-  
+
    1    2   3    1         0.0000000000         0.0000000000
-  
+
    2    2   3    1         0.0000000000         0.0000000000
-  
+
    3    2   3    1         0.0000000000         0.0000000000
-  
+
   Non-stationary local part of the 2-order matrix
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
-  
+
    1    1   3    1        -0.0000000000         0.0000000000
-  
+
    2    1   3    1        -0.0000000000         0.0000000001
-  
+
    3    1   3    1       -71.0759822641         0.0000001681
-  
+
    1    2   3    1         0.0000000001        -0.0000000000
-  
+
    2    2   3    1        -0.0000000002        -0.0000000000
-  
+
    3    2   3    1       -10.0453802665         4.6464702440
-  
+
   Non-stationary non-local part of the 2nd-order matrix
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
-  
+
    1    1   3    1         0.0000000000         0.0000000000
-  
+
    2    1   3    1         0.0000000000         0.0000000000
-  
+
    3    1   3    1         0.0000000000         0.0000000000
-  
+
    1    2   3    1         0.0000000000         0.0000000000
-  
+
    2    2   3    1         0.0000000000         0.0000000000
-  
+
    3    2   3    1         0.0000000000         0.0000000000
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   3    1         0.0000000001         0.0000000000
-  
+
    2    1   3    1        -0.0000000002         0.0000000001
-  
+
    3    1   1    1         0.0000000001        -0.0000000000
    3    1   2    1        -0.0000000002        -0.0000000001
    3    1   3    1       117.4288842178         0.0000000000
    3    1   1    2         0.0000000001         0.0000000000
    3    1   2    2        -0.0000000002         0.0000000000
    3    1   3    2      -117.9360547968        -0.8796875868
-  
+
    1    2   3    1         0.0000000001        -0.0000000000
-  
+
    2    2   3    1        -0.0000000002        -0.0000000000
-  
+
    3    2   3    1      -117.9360547968         0.8796875868
-  
-  
+
+
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   3    1         0.0000000000         0.0000000000
-  
+
    2    1   3    1        -0.0000000000         0.0000000000
-  
+
    3    1   1    1         0.0000000000        -0.0000000000
    3    1   2    1        -0.0000000000        -0.0000000000
    3    1   3    1         1.1742888422         0.0000000000
    3    1   1    2         0.0000000000         0.0000000000
    3    1   2    2        -0.0000000000         0.0000000000
    3    1   3    2        -1.1793605480        -0.0087968759
-  
+
    1    2   3    1         0.0000000000        -0.0000000000
-  
+
    2    2   3    1        -0.0000000000        -0.0000000000
-  
+
    3    2   3    1        -1.1793605480         0.0087968759
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.21000
@@ -1284,7 +1284,7 @@ tolerances: {tolwfr: 1.00E-15, }
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      1.0000000000E+01  1.0000000000E+01  1.0000000000E+01 Bohr
               amu      1.00000000E+00
@@ -1304,13 +1304,13 @@ tolerances: {tolwfr: 1.00E-15, }
            etotal1    -6.8435122468E+00
            etotal3     1.1776993569E+02
            etotal5     1.1742888651E+02
-            fcart1     2.4577952452E-13  7.8041505496E-14 -7.3751538381E-01
-                      -2.4577952452E-13 -7.8041505496E-14  7.3751538381E-01
+            fcart1     2.4579445620E-13  7.8100410074E-14 -7.3751538381E-01
+                      -2.4579445620E-13 -7.8100410074E-14  7.3751538381E-01
             fcart3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart5     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         312
+-          fftalg         512
            getden1          0
            getden2          1
            getden3          0
@@ -1397,7 +1397,7 @@ P          mk1mem           4
            rfphon5          1
           spgroup           1
            strten1     3.1515360732E-04  3.1515360731E-04 -1.8825549858E-03
-                       0.0000000000E+00 -3.7858948729E-15  0.0000000000E+00
+                       0.0000000000E+00 -3.7860548371E-15  0.0000000000E+00
            strten3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten5     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -1460,7 +1460,7 @@ P          mk1mem           4
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -1483,12 +1483,12 @@ P          mk1mem           4
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -1506,15 +1506,15 @@ P          mk1mem           4
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          1.4  wall=          1.5
+- Proc.   0 individual time (sec): cpu=          1.1  wall=          1.2
 
 ================================================================================
 
  Calculation completed.
-.Delivered  56 WARNINGs and  52 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.4  wall=          1.5
+.Delivered  56 WARNINGs and  47 COMMENTs to log file.
++Overall time at end (sec) : cpu=          1.1  wall=          1.2

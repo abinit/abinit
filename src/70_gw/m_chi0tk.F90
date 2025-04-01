@@ -6,7 +6,7 @@
 !!  This module provides tools for the computation of the irreducible polarizability.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2024 ABINIT group (MG, FB)
+!! Copyright (C) 1999-2025 ABINIT group (MG, FB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,7 +28,7 @@ MODULE m_chi0tk
  use m_xomp
  use m_sort
 
- use defs_datatypes, only : ebands_t
+ use m_ebands,   only : ebands_t
  use m_gwdefs,   only : GW_TOL_DOCC, czero_gw, cone_gw, one_gw, em1params_t, j_gw
  use m_fstrings, only : sjoin, itoa
  use m_hide_blas,only : xgerc, xgemm, xherk, xher

@@ -6,7 +6,7 @@
 !!  This module contains utilities to analyze and retrieve information from the ebands_t.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2024 ABINIT group (MG, MJV, BXu)
+!! Copyright (C) 2008-2025 ABINIT group (MG, MJV, BXu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -24,7 +24,7 @@
 
 #include "abi_common.h"
 
-MODULE m_ebands
+module m_ebands
 
  use defs_basis
  use m_errors
@@ -41,7 +41,7 @@ MODULE m_ebands
  use m_dtset
  use m_yaml
 
- use defs_datatypes,   only : ebands_t
+ use defs_datatypes,   only : ebands_base_t
  use m_copy,           only : alloc_copy
  use m_io_tools,       only : file_exists, open_file
  use m_time,           only : cwtime, cwtime_report
@@ -61,6 +61,7 @@ MODULE m_ebands
  implicit none
 
  private
+!!***
 
  ! Helper functions
  public :: pack_eneocc             ! Helper function for reshaping (energies|occupancies|derivate of occupancies).
@@ -68,56 +69,77 @@ MODULE m_ebands
  public :: put_eneocc_vect         ! Put (ene|occ|doccde) in vectorial form into the data type doing a reshape.
  public :: unpack_eneocc           ! Helper function for reshaping (energies|occupancies|derivate of occupancies).
 
- ! Ebands methods
- public :: ebands_init             ! Main creation method.
- public :: ebands_from_hdr         ! Init object from the abinit header.
- public :: ebands_from_dtset       ! Init object from the abinit dataset.
- public :: ebands_free             ! Destruction method.
- public :: ebands_copy             ! Copy of the ebands_t.
- public :: ebands_move_alloc       ! Transfer allocation.
- public :: ebands_print            ! Printout basic info on the data type.
- public :: ebands_get_bandenergy   ! Returns the band energy of the system.
- public :: ebands_get_valence_idx  ! Gives the index of the (valence|bands at E_f).
- public :: ebands_get_bands_from_erange   ! Return the indices of the mix and max band within an energy window.
- public :: ebands_vcbm_range_from_gaps ! Find band and energy range for states close to the CBM/VBM given input energies.
- public :: ebands_apply_scissors   ! Apply scissors operator (no k-dependency)
- public :: ebands_get_occupied     ! Returns band indices after wich occupations are less than an input value.
- public :: ebands_enclose_degbands ! Adjust band indices such that all degenerate states are treated.
- public :: ebands_get_bands_e0     ! Find min/max band indices crossing energy e0
- public :: ebands_get_erange       ! Compute the minimum and maximum energy enclosing a list of states.
- public :: ebands_nelect_per_spin  ! Returns number of electrons per spin channel
- public :: ebands_get_minmax       ! Returns min and Max value of (eig|occ|doccde).
- public :: ebands_has_metal_scheme ! .True. if metallic occupation scheme is used.
- public :: ebands_write_bxsf       ! Write 3D energies for Fermi surface visualization (XSF format)
- public :: ebands_update_occ       ! Update the occupation numbers.
- public :: ebands_set_scheme       ! Set the occupation scheme.
- public :: ebands_set_fermie       ! Change the fermi level (assume metallic scheme).
- public :: ebands_set_extrael      ! Add extrael to initial number of electrons to simulate e/h doping.
-                                   ! (assume metallic scheme).
- public :: ebands_get_muT_with_fd  ! Change the number of electrons (assume metallic scheme).
- public :: ebands_calc_nelect      ! Compute nelect from Fermi level and Temperature.
- public :: ebands_report_gap       ! Print info on the fundamental and direct gap.
- public :: ebands_ncwrite          ! Write object to NETCDF file (use ncid)
- public :: ebands_ncwrite_path     ! Dump the object into NETCDF file (use filepath)
- public :: ebands_write_nesting    ! Calculate the nesting function and output data to file.
- public :: ebands_expandk          ! Build a new ebands_t in the full BZ.
- public :: ebands_downsample       ! Build a new ebands_t with a downsampled IBZ.
- public :: ebands_chop             ! Build a new ebands_t with selected nbands.
- public :: ebands_get_edos         ! Compute e-DOS from band structure.
- public :: ebands_get_jdos         ! Compute electron joint-DOS from band structure.
+!----------------------------------------------------------------------
 
- public :: ebands_get_edos_matrix_elements ! Compute e-DOS and other DOS-like quantities involving
-                                           ! vectorial or tensorial matrix elements.
+!!****t* m_ebands/ebands_t
+!! NAME
+!! ebands_t
+!!
+!! FUNCTION
+!! Electron energies and occupations
+!!
+!! SOURCE
 
- public :: ebands_interp_kmesh     ! Use SWK to interpolate energies on a k-mesh.
- public :: ebands_interp_kpath     ! Interpolate energies on a k-path.
- public :: ebands_interpolate_kpath
+type, extends(ebands_base_t), public :: ebands_t
 
- public :: ebands_prtbltztrp          ! Output files for BoltzTraP code.
- public :: ebands_prtbltztrp_tau_out  ! Output files for BoltzTraP code,
- public :: ebands_write               ! Driver routine to write bands in different txt formats.
- public :: ebands_get_carriers        ! Compute carrier concentration from input Fermi level and list of Temperatures.
+contains
+
+ procedure :: init => ebands_init
+   ! Main creation method.
+
+ procedure :: free => ebands_free
+   ! Destruction method.
+
+ procedure :: from_hdr => ebands_from_hdr
+ ! Init object from the abinit header.
+ procedure :: from_dtset => ebands_from_dtset
+ ! Init object from the abinit dataset.
+
+ procedure :: copy                  => ebands_copy                       ! Copy of the ebands_t.
+ procedure :: move_alloc            =>   ebands_move_alloc               ! Transfer allocation.
+ procedure :: print                 =>   ebands_print                    ! Printout basic info on the data type.
+ procedure :: get_bandenergy        =>   ebands_get_bandenergy           ! Returns the band energy of the system.
+ procedure :: get_valence_idx       =>   ebands_get_valence_idx          ! Gives the index of the (valence|bands at E_f).
+ procedure :: get_bands_from_erange =>   ebands_get_bands_from_erange    ! Return the indices of the mix and max band within an energy window.
+ procedure :: vcbm_range_from_gaps  =>   ebands_vcbm_range_from_gaps     ! Find band and energy range for states close to the CBM/VBM given input energies.
+ procedure :: apply_scissors        =>   ebands_apply_scissors           ! Apply scissors operator (no k-dependency)
+ procedure :: get_occupied          =>   ebands_get_occupied             ! Returns band indices after wich occupations are less than an input value.
+ procedure :: enclose_degbands      =>   ebands_enclose_degbands         ! Adjust band indices such that all degenerate states are treated.
+ procedure :: get_bands_e0          =>   ebands_get_bands_e0             ! Find min/max band indices crossing energy e0
+ procedure :: get_erange            =>   ebands_get_erange               ! Compute the minimum and maximum energy enclosing a list of states.
+ procedure :: nelect_per_spin       =>   ebands_nelect_per_spin          ! Returns number of electrons per spin channel
+ procedure :: get_minmax            =>   ebands_get_minmax               ! Returns min and Max value of (eig|occ|doccde).
+ procedure :: has_metal_scheme      =>   ebands_has_metal_scheme         ! .True. if metallic occupation scheme is used.
+ procedure :: write_bxsf            =>   ebands_write_bxsf               ! Write 3D energies for Fermi surface visualization (XSF format)
+ procedure :: update_occ            =>   ebands_update_occ               ! Update the occupation numbers.
+ procedure :: set_scheme            =>   ebands_set_scheme               ! Set the occupation scheme.
+ procedure :: set_fermie            =>   ebands_set_fermie               ! Change the fermi level (assume metallic scheme).
+ procedure :: set_extrael           =>   ebands_set_extrael              ! Add extrael to initial number of electrons to simulate e/h doping. (assume metallic scheme).
+ procedure :: get_muT_with_fd       =>   ebands_get_muT_with_fd          ! Change the number of electrons (assume metallic scheme).
+ procedure :: calc_nelect           =>   ebands_calc_nelect              ! Compute nelect from Fermi level and Temperature.
+ procedure :: report_gap            =>   ebands_report_gap               ! Print info on the fundamental and direct gap.
+ procedure :: ncwrite               =>   ebands_ncwrite                  ! Write object to NETCDF file (use ncid)
+ procedure :: ncwrite_path          =>   ebands_ncwrite_path             ! Dump the object into NETCDF file (use filepath)
+ procedure :: write_nesting         =>   ebands_write_nesting            ! Calculate the nesting function and output data to file.
+ procedure :: expandk               =>   ebands_expandk                  ! Build a new ebands_t in the full BZ.
+ procedure :: downsample            =>   ebands_downsample               ! Build a new ebands_t with a downsampled IBZ.
+ procedure :: chop                  =>   ebands_chop                     ! Build a new ebands_t with selected nbands.
+ procedure :: get_edos              =>   ebands_get_edos                 ! Compute e-DOS from band structure.
+ procedure :: get_jdos              =>   ebands_get_jdos                 ! Compute electron joint-DOS from band structure.
+ procedure :: get_edos_matrix_elements => ebands_get_edos_matrix_elements ! Compute e-DOS and other DOS-like quantities involving ! vectorial or tensorial matrix elements.
+ procedure :: interp_kmesh          =>   ebands_interp_kmesh             ! Use SWK to interpolate energies on a k-mesh.
+ procedure :: interp_kpath          =>   ebands_interp_kpath             ! Interpolate energies on a k-path.
+ procedure :: interpolate_kpath     =>   ebands_interpolate_kpath
+ procedure :: prtbltztrp            =>   ebands_prtbltztrp               ! Output files for BoltzTraP code.
+ procedure :: write                 =>   ebands_write                    ! Driver routine to write bands in different txt formats.
+ procedure :: get_carriers          =>   ebands_get_carriers             ! Compute carrier concentration from input Fermi level and list of Temperatures.
+ procedure :: get_gaps              =>   ebands_get_gaps                 ! Build the gaps object from a bandstructure.
+ procedure :: print_gaps            =>   ebands_print_gaps               ! Helper function to print gaps directrly from ebands.
+
+end type ebands_t
 !!***
+
+ public :: ebands_prtbltztrp_tau_out       ! Output files for BoltzTraP code,
 
 !----------------------------------------------------------------------
 
@@ -289,13 +311,13 @@ MODULE m_ebands
     ! Number of electrons taken from ebands.
 
    integer,allocatable :: ierr(:)
-    ! ierr(nsppol
+    ! ierr(nsppol)
     !   0 if the gap has been computed.
     !   1 if the system (or spin-channel) is metallic.
     !   2 if gaps were not computed (because there are only valence bands).
 
    real(dp),allocatable :: fo_values(:,:)
-     ! fo_values(2,nsppol)]
+     ! fo_values(2,nsppol)
      ! Fundamental and direct gaps (in Hartree) for each spin.
 
    real(dp),allocatable :: vb_max(:), cb_min(:)
@@ -313,7 +335,7 @@ MODULE m_ebands
 
    character(len=500),allocatable :: errmsg_spin(:)
      ! errmsg_spin(nsppol)
-     ! String with human-readable error messages if ierr(spin) != 0.
+     ! String with human-readable error message if ierr(spin) != 0.
 
  contains
 
@@ -324,9 +346,6 @@ MODULE m_ebands
    ! Print info on the gaps
 
  end type gaps_t
-
- public :: ebands_get_gaps     ! Build the gaps object from a bandstructure.
- public :: ebands_print_gaps   ! Helper function to print gaps directrly from ebands.
 !!***
 
 !!****t* m_ebands/klinterp_t
@@ -359,14 +378,13 @@ MODULE m_ebands
     ! Interpolate values at an arbitrary k-point.
 
  end type klinterp_t
+!!***
 
  public :: klinterp_new         ! Build interpolator.
-
 
 !----------------------------------------------------------------------
 
 CONTAINS  !=====================================================================================
-!!***
 
 !----------------------------------------------------------------------
 
@@ -379,37 +397,37 @@ CONTAINS  !=====================================================================
 !!
 !! INPUTS
 !!  ebands<ebands_t>=Info on the band structure, the smearing technique and the physical temperature used.
+!!  units=Unit numbers
 !!
 !! OUTPUT
 !!
 !! SOURCE
 
-subroutine ebands_print_gaps(ebands, unit, header)
+subroutine ebands_print_gaps(ebands, units, header)
 
 !Arguments ------------------------------------
  class(ebands_t),intent(in)  :: ebands
- integer,intent(in) :: unit
+ integer,intent(in) :: units(:)
  character(len=*),optional,intent(in) :: header
 
 !Local variables-------------------------------
  integer :: ierr, spin
  type(gaps_t) :: gaps
-
+ !character(len=500) :: msg
 ! *********************************************************************
 
- if (unit == dev_null) return
-
+ !if (unit == dev_null) return
  gaps = ebands_get_gaps(ebands, ierr)
  if (ierr /= 0) then
    do spin=1, ebands%nsppol
-     write(unit, "(a)")trim(gaps%errmsg_spin(spin))
+     call wrtout(units, trim(gaps%errmsg_spin(spin)))
    end do
  end if
 
  if (present(header)) then
-   call gaps%print(unit=unit, header=header)
+   call gaps%print(units, header=header)
  else
-   call gaps%print(unit=unit)
+   call gaps%print(units)
  end if
  call gaps%free()
 
@@ -451,7 +469,7 @@ type(gaps_t) function ebands_get_gaps(ebands, ierr) result(gaps)
 
 ! *********************************************************************
 
- gaps = get_gaps_(ebands, ierr)
+ call get_gaps_(ebands, gaps, ierr)
 
  if (ierr /= 0) then
    ! get_gaps_ will fail if we have a real metal/semimetal
@@ -473,7 +491,7 @@ type(gaps_t) function ebands_get_gaps(ebands, ierr) result(gaps)
 
    ! Try to compute gaps the again with new Fermi level at FD T = tsmear computed from update_occ.
    ! Return ierr
-   gaps = get_gaps_(tmp_ebands, ierr)
+   call get_gaps_(tmp_ebands, gaps, ierr)
    call ebands_free(tmp_ebands)
  end if
 
@@ -498,11 +516,12 @@ end function ebands_get_gaps
 !!
 !! SOURCE
 
-type(gaps_t) function get_gaps_(ebands, ierr) result(gaps)
+subroutine get_gaps_(ebands, gaps, ierr)
 
 !Arguments ------------------------------------
 !scalars
  class(ebands_t),target,intent(in)  :: ebands
+ type(gaps_t),intent(out) :: gaps
  integer,intent(out) :: ierr
 
 !Local variables-------------------------------
@@ -511,13 +530,12 @@ type(gaps_t) function get_gaps_(ebands, ierr) result(gaps)
  real(dp),parameter :: tol_fermi = tol6
  real(dp) :: fun_gap, opt_gap
  logical :: ismetal
- !type(ebands_t)  :: tmp_ebands
 !arrays
  integer :: val_idx(ebands%nkpt, ebands%nsppol)
  real(dp) :: top_valence(ebands%nkpt), bot_conduct(ebands%nkpt)
-
 ! *********************************************************************
 
+ call gaps%free()
  nsppol = ebands%nsppol
 
  ! Initialize gaps_t
@@ -546,7 +564,7 @@ type(gaps_t) function get_gaps_(ebands, ierr) result(gaps)
  val_idx(:,:) = ebands_get_valence_idx(ebands, tol_fermi=tol_fermi)
 
  spin_loop: &
-&  do spin=1,nsppol
+   do spin=1,nsppol
 
    ! No output if system is metallic
    ismetal = ANY(val_idx(:,spin) /= val_idx(1,spin))
@@ -601,7 +619,7 @@ type(gaps_t) function get_gaps_(ebands, ierr) result(gaps)
    end do
  end if
 
-end function get_gaps_
+end subroutine get_gaps_
 !!***
 
 !----------------------------------------------------------------------
@@ -619,7 +637,6 @@ subroutine gaps_free(gaps)
 
 !Arguments ------------------------------------
  class(gaps_t),intent(inout) :: gaps
-
 ! *********************************************************************
 
 !integer
@@ -649,9 +666,8 @@ end subroutine gaps_free
 !!  Print info on the fundamental and direct gap.
 !!
 !! INPUTS
-!!  gaps<gaps_t>=Object with info on the gaps.
+!!  units=Unit numbers
 !!  [header]=Optional title.
-!!  [unit]=Optional unit for output (std_out if not specified)
 !!  [kTmesh]=List of temperatures. If present activates output of (T, mu_e, band_edges)
 !!  [mu_e]=List of Fermi levels for each T.
 !!
@@ -660,35 +676,31 @@ end subroutine gaps_free
 !!
 !! SOURCE
 
-subroutine gaps_print(gaps, unit, header, kTmesh, mu_e)
+subroutine gaps_print(gaps, units, header, kTmesh, mu_e)
 
 !Arguments ------------------------------------
 !scalars
  class(gaps_t),intent(in)  :: gaps
- integer,intent(in),optional :: unit
+ integer,intent(in) :: units(:)
  character(len=*),intent(in),optional :: header
  real(dp),optional,intent(in) :: kTmesh(:), mu_e(:)
 
 !Local variables-------------------------------
 !scalars
- integer :: spin, ikopt, ivk, ick, unt, itemp, ntemp
+ integer :: spin, ikopt, ivk, ick, itemp, ntemp
  real(dp) :: fun_gap, opt_gap, csi_c, csi_v
  character(len=500) :: msg
-
 ! *********************************************************************
-
- unt = std_out; if (present(unit)) unt = unit
- if (unt == dev_null) return
 
  do spin=1,gaps%nsppol
    if (spin == 1) then
      msg = ch10
      if (present(header)) msg = ch10//' === '//trim(adjustl(header))//' === '
-     call wrtout(unt, msg)
+     call wrtout(units, msg)
    end if
 
    if (gaps%ierr(spin) /= 0) then
-     call wrtout(unt, gaps%errmsg_spin(spin))
+     call wrtout(units, gaps%errmsg_spin(spin))
      continue
    end if
 
@@ -697,7 +709,7 @@ subroutine gaps_print(gaps, unit, header, kTmesh, mu_e)
    opt_gap = gaps%fo_values(2, spin)
 
    if (any(gaps%fo_kpos(:,spin) == 0)) then
-     call wrtout(unt, sjoin(" Cannot detect gap for spin: ", itoa(spin)))
+     call wrtout(units, sjoin(" Cannot detect gap for spin: ", itoa(spin)))
      cycle
    end if
 
@@ -712,43 +724,43 @@ subroutine gaps_print(gaps, unit, header, kTmesh, mu_e)
    !  CBM:   8.96 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
    !Optical gap:       4.48 (eV) at k:[ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 
-   if (gaps%nsppol == 2) call wrtout(unt, sjoin(' >>>> For spin ', itoa(spin)))
-   if (ivk == ick) call wrtout(unt, " Direct band gap semiconductor")
-   if (ivk /= ick) call wrtout(unt, " Indirect band gap semiconductor")
+   if (gaps%nsppol == 2) call wrtout(units, sjoin(' >>>> For spin ', itoa(spin)))
+   if (ivk == ick) call wrtout(units, " Direct band gap semiconductor")
+   if (ivk /= ick) call wrtout(units, " Indirect band gap semiconductor")
    write(msg, "(a,f9.3,a )")" Fundamental gap: ", fun_gap * Ha_eV, " (eV)"
-   call wrtout(unt, msg)
+   call wrtout(units, msg)
    write(msg, "(a,f9.3,2a)")"   VBM: ", gaps%vb_max(spin) * Ha_eV, " (eV) at k: ", trim(ktoa(gaps%fund_kpoints(:,1,spin)))
-   call wrtout(unt, msg)
+   call wrtout(units, msg)
    write(msg, "(a,f9.3,2a)")"   CBM: ", gaps%cb_min(spin) * Ha_eV, " (eV) at k: ", trim(ktoa(gaps%fund_kpoints(:,2,spin)))
-   call wrtout(unt, msg)
+   call wrtout(units, msg)
    write(msg, "(a,f9.3,2a)")" Direct gap:     ", opt_gap * Ha_eV," (eV) at k: ", trim(ktoa(gaps%optical_kpoints(:,spin)))
-   call wrtout(unt, msg)
+   call wrtout(units, msg)
    !write(msg, "((2(a, f9.3)))")" Fermi level:", gaps%fermie * Ha_eV, " (eV) with nelect:", gaps%nelect
-   !call wrtout(unt, msg)
+   !call wrtout(units, msg)
 
    if (present(mu_e) .and. present(kTmesh) .and. all(gaps%ierr == 0)) then
      ntemp = size(mu_e)
-     call wrtout(unt, " Position of CBM/VBM with respect to the Fermi level:", pre_newlines=1)
-     call wrtout(unt, " Notations: mu_e = Fermi level, D_v = (mu_e - VBM), D_c = (CBM - mu_e)")
-     call wrtout(unt, "  T(K)   kT (eV)  mu_e (eV)  D_v (eV)   D_c (eV)", pre_newlines=1)
+     call wrtout(units, " Position of CBM/VBM with respect to the Fermi level:", pre_newlines=1)
+     call wrtout(units, " Notations: mu_e = Fermi level, D_v = (mu_e - VBM), D_c = (CBM - mu_e)")
+     call wrtout(units, "  T(K)   kT (eV)  mu_e (eV)  D_v (eV)   D_c (eV)", pre_newlines=1)
      do itemp=1,ntemp
        csi_c =  gaps%cb_min(spin) - mu_e(itemp)
        csi_v = -gaps%vb_max(spin) + mu_e(itemp)
        write(msg, "(f6.1, 1x, 4(f9.3, 1x))") &
          kTmesh(itemp) / kb_HaK, kTmesh(itemp) * Ha_eV, mu_e(itemp) * Ha_eV, csi_v * Ha_eV,  csi_c * Ha_eV
-       call wrtout(unt, msg)
+       call wrtout(units, msg)
      end do
-     call wrtout(unt, "")
+     call wrtout(units, "")
    end if
 
  end do ! spin
 
  if (any(gaps%fo_kpos == 0)) then
    write(msg, "((2(a, f9.3)))")  "   Fermi level:", gaps%fermie * Ha_eV, " (eV) with nelect:", gaps%nelect
-   call wrtout(unt, msg)
+   call wrtout(units, msg)
  end if
 
- call wrtout(unt, "")
+ call wrtout(units, "")
 
 end subroutine gaps_print
 !!***
@@ -797,15 +809,15 @@ end subroutine gaps_print
 !!
 !! SOURCE
 
-subroutine ebands_init(bantot, ebands, nelect, ne_qFD, nh_qFD, ivalence, doccde, eig, istwfk, kptns, &
-  nband, nkpt, npwarr, nsppol, nspinor, tphysel, tsmear, occopt, occ, wtk, &
-  cellcharge, kptopt, kptrlatt_orig, nshiftk_orig, shiftk_orig, kptrlatt, nshiftk, shiftk)
+subroutine ebands_init(ebands, bantot, nelect, ne_qFD, nh_qFD, ivalence, doccde, eig, istwfk, kptns, &
+                       nband, nkpt, npwarr, nsppol, nspinor, tphysel, tsmear, occopt, occ, wtk, &
+                       cellcharge, kptopt, kptrlatt_orig, nshiftk_orig, shiftk_orig, kptrlatt, nshiftk, shiftk)
 
 !Arguments ------------------------------------
 !scalars
+ class(ebands_t),intent(out) :: ebands
  integer,intent(in) :: bantot,nkpt,nsppol,nspinor,occopt,ivalence
  real(dp),intent(in) :: nelect,ne_qFD,nh_qFD,tphysel,tsmear
- type(ebands_t),intent(out) :: ebands
 !arrays
  integer,intent(in) :: istwfk(nkpt),nband(nkpt*nsppol),npwarr(nkpt)
  real(dp),intent(in) :: doccde(bantot),eig(bantot),kptns(3,nkpt),occ(bantot)
@@ -814,7 +826,6 @@ subroutine ebands_init(bantot, ebands, nelect, ne_qFD, nh_qFD, ivalence, doccde,
  real(dp),intent(in) :: cellcharge
  integer,intent(in) :: kptrlatt_orig(3,3),kptrlatt(3,3)
  real(dp),intent(in) :: shiftk_orig(3,nshiftk_orig),shiftk(3,nshiftk)
-
 ! *************************************************************************
 
  ! Copy the scalars
@@ -897,15 +908,13 @@ end subroutine ebands_init
 !!    in the case of metallic occupancies.
 !!    If not specified, nelect will be initialized from Hdr.
 !!
-!! OUTPUT
-!!  ebands<ebands_t>=The ebands_t datatype completely initialized.
-!!
 !! SOURCE
 
-type(ebands_t) function ebands_from_hdr(hdr, mband, ene3d, nelect) result(ebands)
+subroutine ebands_from_hdr(ebands, hdr, mband, ene3d, nelect)
 
 !Arguments ------------------------------------
 !scalars
+ class(ebands_t),intent(out) :: ebands
  integer,intent(in) :: mband
  type(hdr_type),intent(in) :: hdr
  real(dp),optional,intent(in) :: nelect
@@ -917,7 +926,6 @@ type(ebands_t) function ebands_from_hdr(hdr, mband, ene3d, nelect) result(ebands
  real(dp) :: my_nelect
 !arrays
  real(dp),allocatable :: ugly_doccde(:),ugly_ene(:)
-
 ! *************************************************************************
 
  my_nelect = hdr%nelect; if (present(nelect)) my_nelect = nelect
@@ -928,7 +936,7 @@ type(ebands_t) function ebands_from_hdr(hdr, mband, ene3d, nelect) result(ebands
 
  call pack_eneocc(hdr%nkpt, hdr%nsppol, mband, hdr%nband, hdr%bantot, ene3d, ugly_ene)
 
- call ebands_init(hdr%bantot, ebands, my_nelect, hdr%ne_qFD, hdr%nh_qFD, hdr%ivalence, &
+ call ebands_init(ebands, hdr%bantot, my_nelect, hdr%ne_qFD, hdr%nh_qFD, hdr%ivalence, &
    ugly_doccde, ugly_ene, hdr%istwfk, hdr%kptns, hdr%nband, hdr%nkpt, &
    hdr%npwarr, hdr%nsppol, hdr%nspinor, hdr%tphysel, hdr%tsmear, hdr%occopt, hdr%occ, hdr%wtk, &
    hdr%cellcharge, hdr%kptopt, hdr%kptrlatt_orig, hdr%nshiftk_orig, hdr%shiftk_orig, hdr%kptrlatt, hdr%nshiftk, hdr%shiftk)
@@ -940,7 +948,7 @@ type(ebands_t) function ebands_from_hdr(hdr, mband, ene3d, nelect) result(ebands
  ABI_FREE(ugly_doccde)
  ABI_FREE(ugly_ene)
 
-end function ebands_from_hdr
+end subroutine ebands_from_hdr
 !!***
 
 !----------------------------------------------------------------------
@@ -963,10 +971,11 @@ end function ebands_from_hdr
 !!
 !! SOURCE
 
-type(ebands_t) function ebands_from_dtset(dtset, npwarr, nband) result(new)
+subroutine ebands_from_dtset(new, dtset, npwarr, nband)
 
 !Arguments ------------------------------------
 !scalars
+ class(ebands_t),intent(out) :: new
  type(dataset_type),target,intent(in) :: dtset
  integer,target,optional,intent(in) :: nband(dtset%nkpt * dtset%nsppol)
 !arrays
@@ -988,7 +997,7 @@ type(ebands_t) function ebands_from_dtset(dtset, npwarr, nband) result(new)
  ABI_CALLOC(ugly_ene, (bantot))
  ABI_CALLOC(ugly_occ, (bantot))
 
- call ebands_init(bantot, new, dtset%nelect, dtset%ne_qFD, dtset%nh_qFD, dtset%ivalence, ugly_doccde, ugly_ene, &
+ call ebands_init(new, bantot, dtset%nelect, dtset%ne_qFD, dtset%nh_qFD, dtset%ivalence, ugly_doccde, ugly_ene, &
   dtset%istwfk, dtset%kptns, nband__, dtset%nkpt, &
   npwarr, dtset%nsppol, dtset%nspinor, dtset%tphysel, dtset%tsmear, dtset%occopt, ugly_occ, dtset%wtk,&
   dtset%cellcharge(1), dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
@@ -1000,7 +1009,7 @@ type(ebands_t) function ebands_from_dtset(dtset, npwarr, nband) result(new)
  ABI_FREE(ugly_ene)
  ABI_FREE(ugly_occ)
 
-end function ebands_from_dtset
+end subroutine ebands_from_dtset
 !!***
 
 !----------------------------------------------------------------------
@@ -1011,12 +1020,6 @@ end function ebands_from_dtset
 !!
 !! FUNCTION
 !! Deallocates the components of the ebands_t structured datatype
-!!
-!! INPUTS
-!!  ebands<ebands_t>=The data type to be deallocated.
-!!
-!! OUTPUT
-!!  Deallocate the dynamic arrays in the ebands_t type.
 !!
 !! SOURCE
 
@@ -1035,8 +1038,6 @@ subroutine ebands_free(ebands)
  ABI_SFREE(ebands%occ)
  ABI_SFREE(ebands%doccde)
  ABI_SFREE(ebands%wtk)
- !ABI_SFREE(ebands%velocity)
- !ABI_SFREE(ebands%kTmesh)
  ABI_SFREE(ebands%shiftk_orig)
  ABI_SFREE(ebands%shiftk)
 
@@ -1066,7 +1067,6 @@ subroutine ebands_copy(ibands, obands)
 !scalars
  class(ebands_t),intent(in)  :: ibands
  class(ebands_t),intent(out) :: obands
-
 ! *********************************************************************
 
  call ebands_free(obands)
@@ -1134,7 +1134,6 @@ subroutine ebands_move_alloc(from_ebands, to_ebands)
 !Arguments ------------------------------------
  class(ebands_t),intent(inout) :: from_ebands
  class(ebands_t),intent(inout) :: to_ebands
-
 ! *********************************************************************
 
  call ebands_free(to_ebands)
@@ -1154,8 +1153,7 @@ end subroutine ebands_move_alloc
 !! Print the content of the object.
 !!
 !! INPUTS
-!!  ebands<ebands_t>The type containing the data.
-!!  [unit]=Unit number (default: std_out)
+!!  units=Unit numbers
 !!  [header]=title for info
 !!  [prtvol]=Verbosity level (default: 0)
 !!
@@ -1164,24 +1162,24 @@ end subroutine ebands_move_alloc
 !!
 !! SOURCE
 
-subroutine ebands_print(ebands, header, unit, prtvol)
+subroutine ebands_print(ebands, units, header, prtvol)
 
 !Arguments ------------------------------------
  class(ebands_t),intent(in) :: ebands
- integer,optional,intent(in) :: prtvol, unit
+ integer,intent(in) :: units(:)
+ integer,optional,intent(in) :: prtvol
  character(len=*),optional,intent(in) :: header
 
 !Local variables-------------------------------
- integer :: spin, ikpt, unt, my_prtvol, ii
+ integer :: spin, ikpt, my_prtvol, ii
  character(len=500) :: msg
 ! *************************************************************************
 
- unt = std_out; if (present(unit)) unt =unit
  my_prtvol = 0; if (present(prtvol)) my_prtvol = prtvol
 
  msg = ' ==== Info on the ebands_t ==== '
  if (present(header)) msg=' ==== '//trim(adjustl(header))//' ==== '
- call wrtout(unt, msg)
+ call wrtout(units, msg)
 
  write(msg,'(6(a,i0,a))')&
    '  Number of spinorial components ...... ',ebands%nspinor,ch10,&
@@ -1190,12 +1188,12 @@ subroutine ebands_print(ebands, header, unit, prtvol)
    '  kptopt .............................. ',ebands%kptopt,ch10,&
    '  Maximum number of bands ............. ',ebands%mband,ch10,&
    '  Occupation option ................... ',ebands%occopt,ch10
- call wrtout(unt, msg)
+ call wrtout(units, msg)
 
  write(msg,"(2a)")"  kptrlatt .............. ",trim(ltoa(reshape(ebands%kptrlatt, [9])))
- call wrtout(unt, msg)
+ call wrtout(units, msg)
  write(msg,"(2a)")"  shiftk ................ ",trim(ltoa(reshape(ebands%shiftk, [3 * ebands%nshiftk])))
- call wrtout(unt, msg)
+ call wrtout(units, msg)
 
  write(msg,'(3(a,f14.2,a),4(a,f14.6,a))')&
    '  Number of valence electrons ......... ',ebands%nelect,ch10,&
@@ -1205,28 +1203,28 @@ subroutine ebands_print(ebands, header, unit, prtvol)
    '  Entropy ............................. ',ebands%entropy,ch10,&
    '  Tsmear value ........................ ',ebands%tsmear,ch10,&
    '  Tphysel value ....................... ',ebands%tphysel,ch10
- call wrtout(unt, msg)
+ call wrtout(units, msg)
 
  if (my_prtvol > 10) then
    if (ebands%nsppol == 1)then
-     call wrtout(unt, sjoin(' New occ. numbers for occopt= ', itoa(ebands%occopt),' , spin-unpolarized case.'))
+     call wrtout(units, sjoin(' New occ. numbers for occopt= ', itoa(ebands%occopt),' , spin-unpolarized case.'))
    end if
 
    do spin=1,ebands%nsppol
      if (ebands%nsppol == 2) then
        write(msg,'(a,i9,a,i0)')' New occ. numbers for occopt= ',ebands%occopt,', spin ',spin
-       call wrtout(unt, msg)
+       call wrtout(units, msg)
      end if
 
      do ikpt=1,ebands%nkpt
        write(msg,'(2a,i4,3a,f6.3,2a)')ch10,&
          ' k-point number ',ikpt,') ',trim(ktoa(ebands%kptns(:,ikpt))),'; weight: ',ebands%wtk(ikpt), ch10, &
          " eig (Ha), eig (eV), occ, doccde"
-       call wrtout(unt, msg)
+       call wrtout(units, msg)
        do ii=1,ebands%nband(ikpt+(spin-1)*ebands%nkpt)
          write(msg,'(4(f7.3,1x))')ebands%eig(ii,ikpt,spin), ebands%eig(ii,ikpt,spin) * Ha_eV, &
              ebands%occ(ii,ikpt,spin), ebands%doccde(ii,ikpt,spin)
-         call wrtout(unt, msg)
+         call wrtout(units, msg)
        end do
      end do !ikpt
 
@@ -1376,8 +1374,8 @@ subroutine get_eneocc_vect(ebands, arr_name, vect)
 
 !Arguments ------------------------------------
 !scalars
- character(len=*),intent(in) :: arr_name
  class(ebands_t),intent(in) :: ebands
+ character(len=*),intent(in) :: arr_name
  real(dp),intent(out) :: vect(ebands%bantot)
 
 !Local variables-------------------------------
@@ -1428,12 +1426,12 @@ end subroutine get_eneocc_vect
 !!
 !! SOURCE
 
-subroutine put_eneocc_vect(ebands,arr_name,vect)
+subroutine put_eneocc_vect(ebands, arr_name, vect)
 
 !Arguments ------------------------------------
 !scalars
- character(len=*),intent(in) :: arr_name
  class(ebands_t),intent(inout) :: ebands
+ character(len=*),intent(in) :: arr_name
  real(dp),intent(in) :: vect(:)
 
 !Local variables-------------------------------
@@ -1441,7 +1439,7 @@ subroutine put_eneocc_vect(ebands,arr_name,vect)
  real(dp) :: val
 ! *************************************************************************
 
- mband =ebands%mband; bantot=ebands%bantot; nkpt  =ebands%nkpt; nsppol=ebands%nsppol
+ mband = ebands%mband; bantot = ebands%bantot; nkpt= ebands%nkpt; nsppol = ebands%nsppol
 
  select case (tolower(arr_name))
  case ('occ')
@@ -1528,15 +1526,14 @@ pure function ebands_get_valence_idx(ebands, tol_fermi) result(val_idx)
 
 !Arguments ------------------------------------
 !scalars
- real(dp),optional,intent(in) :: tol_fermi
  class(ebands_t),intent(in) :: ebands
+ real(dp),optional,intent(in) :: tol_fermi
 !arrays
  integer :: val_idx(ebands%nkpt,ebands%nsppol)
 
 !Local variables-------------------------------
  integer :: band,ikpt,spin,idx,nband_k
  real(dp) :: tol_
-
 ! *************************************************************************
 
  tol_ = tol6; if (present(tol_fermi)) tol_ = tol_fermi
@@ -1588,7 +1585,6 @@ pure subroutine ebands_get_bands_from_erange(ebands, elow, ehigh, bstart, bstop)
 
 !Local variables-------------------------------
  integer :: band, ik, spin
-
 ! *************************************************************************
 
  bstart = huge(1); bstop = -huge(1)
@@ -1801,8 +1797,8 @@ pure function ebands_get_occupied(ebands, tol_occ) result(occ_idx)
 
 !Arguments ------------------------------------
 !scalars
- real(dp),optional,intent(in) :: tol_occ
  class(ebands_t),intent(in) :: ebands
+ real(dp),optional,intent(in) :: tol_occ
 !arrays
  integer :: occ_idx(ebands%nkpt,ebands%nsppol)
 
@@ -1880,7 +1876,6 @@ subroutine ebands_enclose_degbands(ebands, ikibz, spin, ibmin, ibmax, changed, t
 !scalars
  integer :: ib,ibmin_bkp,ibmax_bkp,ndeg
  real(dp) :: emin,emax
-
 ! *************************************************************************
 
  ibmin_bkp = ibmin; ibmax_bkp = ibmax
@@ -1955,11 +1950,9 @@ subroutine ebands_get_bands_e0(ebands, e0, brange_spin, ierr)
  real(dp),intent(in) :: e0
  integer,intent(out) :: brange_spin(2, ebands%nsppol)
  integer,intent(out) :: ierr
-
 !Local variables-------------------------------
  integer :: band, spin, bmin, bmax
  real(dp) :: emin, emax
-
 ! *************************************************************************
 
  ierr = 0
@@ -1996,22 +1989,22 @@ end subroutine ebands_get_bands_e0
 !!  ebands<ebands_t>=The object describing the band structure.
 !!  nkpts=Number of k-points
 !!  kpoints(3,nkpts)=K-points
-!!  band_block(2,nkpts)=Gives for each k-points, the initial and the final band index to include.
+!!  band_range(2,nkpts)=Gives for each k-points, the initial and the final band index to include.
 !!
 !! OUTPUT
 !!  emin,emax=min and max energy
 !!
 !! SOURCE
 
-subroutine ebands_get_erange(ebands, nkpts, kpoints, band_block, emin, emax)
+subroutine ebands_get_erange(ebands, nkpts, kpoints, band_range, emin, emax)
 
 !Arguments ------------------------------------
 !scalars
+ class(ebands_t),intent(in) :: ebands
  integer,intent(in) :: nkpts
  real(dp),intent(out) :: emin,emax
- class(ebands_t),intent(in) :: ebands
 !arrays
- integer,intent(in) :: band_block(2,nkpts)
+ integer,intent(in) :: band_range(2,nkpts)
  real(dp),intent(in) :: kpoints(3,nkpts)
 
 !Local variables-------------------------------
@@ -2031,10 +2024,10 @@ subroutine ebands_get_erange(ebands, nkpts, kpoints, band_block, emin, emax)
        ABI_WARNING(sjoin("Cannot find k-point:", ktoa(kpoints(:,ik))))
        cycle
      end if
-     if (.not. (band_block(1,ik) >= 1 .and. band_block(2,ik) <= ebands%mband)) cycle
+     if (.not. (band_range(1,ik) >= 1 .and. band_range(2,ik) <= ebands%mband)) cycle
      cnt = cnt + 1
-     emin = min(emin, minval(ebands%eig(band_block(1,ik):band_block(2,ik), ikpt, spin)))
-     emax = max(emax, maxval(ebands%eig(band_block(1,ik):band_block(2,ik), ikpt, spin)))
+     emin = min(emin, minval(ebands%eig(band_range(1,ik):band_range(2,ik), ikpt, spin)))
+     emax = max(emax, maxval(ebands%eig(band_range(1,ik):band_range(2,ik), ikpt, spin)))
    end do
  end do
 
@@ -2180,7 +2173,6 @@ pure logical function ebands_has_metal_scheme(ebands) result(ans)
 
 !Arguments ------------------------------------
  class(ebands_t),intent(in) :: ebands
-
 ! *************************************************************************
 
  ans = (any(ebands%occopt == [3, 4, 5, 6, 7, 8, 9]))
@@ -2214,13 +2206,12 @@ integer function ebands_write_bxsf(ebands, crystal, fname) result(ierr)
 
 !Arguments ------------------------------------
 !scalars
- character(len=*),intent(in) :: fname
  class(ebands_t),intent(in) :: ebands
+ character(len=*),intent(in) :: fname
  class(crystal_t),intent(in) :: crystal
 
 !Local variables-------------------------------
  logical :: use_timrev
-
 ! *************************************************************************
 
  use_timrev = (crystal%timrev==2)
@@ -2460,7 +2451,6 @@ subroutine ebands_set_scheme(ebands, occopt, tsmear, spinmagntarget, prtvol, upd
 !Local variables-------------------------------
 !scalars
  logical :: my_update_occ
-
 ! *************************************************************************
 
  my_update_occ = .True.; if (present(update_occ)) my_update_occ = update_occ
@@ -2521,7 +2511,6 @@ subroutine ebands_set_fermie(ebands, fermie, msg)
  real(dp) :: prev_fermie, prev_nelect, maxocc
 !arrays
  real(dp),allocatable :: doccde(:),occ(:),eigen(:)
-
 ! *************************************************************************
 
  if (ebands%occopt == 9) then
@@ -2606,7 +2595,6 @@ subroutine ebands_set_extrael(ebands, nelect, nholes, spinmagntarget, msg, prtvo
 !scalars
  integer :: my_prtvol
  real(dp) :: prev_fermie,prev_fermih,prev_nelect,prev_nholes
-
 ! *************************************************************************
 
  my_prtvol = 0; if (present(prtvol)) my_prtvol = prtvol
@@ -2684,7 +2672,6 @@ subroutine ebands_get_muT_with_fd(self, ntemp, kTmesh, spinmagntarget, prtvol, m
  real(dp) :: nelect, cpu, wall, gflops
  type(ebands_t) :: tmp_ebands
  character(len=500) :: msg
-
 ! *************************************************************************
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
@@ -2756,7 +2743,6 @@ real(dp) pure function ebands_calc_nelect(self, kt, fermie) result(nelect)
 !scalars
  integer :: spin, ik, ib
  real(dp) :: ofact
-
 ! *************************************************************************
 
  ofact = two / (self%nsppol * self%nspinor)
@@ -2820,7 +2806,6 @@ subroutine ebands_report_gap(ebands, header, unit, mode_paral, gaps)
 !arrays
  integer :: val_idx(ebands%nkpt,ebands%nsppol)
  real(dp) :: top_valence(ebands%nkpt),bot_conduct(ebands%nkpt)
-
 ! *********************************************************************
 
  nsppol = ebands%nsppol
@@ -2878,7 +2863,7 @@ subroutine ebands_report_gap(ebands, header, unit, mode_paral, gaps)
     '   Minimum direct gap = ',opt_gap*Ha_eV,' [eV], located at k-point      : ',ebands%kptns(:,ikopt),ch10,&
     '   Fundamental gap    = ',fun_gap*Ha_eV,' [eV], Top of valence bands at : ',ebands%kptns(:,ivk),ch10,  &
                                               '      Bottom of conduction at : ',ebands%kptns(:,ick)
-   call wrtout(unt,msg,my_mode)
+   call wrtout(unt,msg, my_mode)
 
    if (present(gaps)) gaps(:,spin) = [fun_gap, opt_gap, one]
  end do !spin
@@ -2910,8 +2895,8 @@ integer function ebands_ncwrite(ebands, ncid) result(ncerr)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: ncid
  class(ebands_t),intent(in) :: ebands
+ integer,intent(in) :: ncid
 
 !Local variables-------------------------------
 !scalars
@@ -2920,7 +2905,6 @@ integer function ebands_ncwrite(ebands, ncid) result(ncerr)
  character(len=etsfio_charlen) :: smearing,k_dependent
 !arrays
  integer :: ngkpt(3)
-
 ! *************************************************************************
 
  smearing = nctk_string_from_occopt(ebands%occopt)
@@ -3101,7 +3085,6 @@ integer function ebands_ncwrite_path(ebands, cryst, path) result(ncerr)
 !Local variables-------------------------------
 !scalars
  integer :: ncid
-
 ! *************************************************************************
 
  ncerr = nf90_noerr
@@ -3148,10 +3131,10 @@ type(edos_t) function ebands_get_edos(ebands, cryst, intmeth, step, broad, comm)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: intmeth,comm
- real(dp),intent(in) :: step,broad
  class(ebands_t),target,intent(in)  :: ebands
  type(crystal_t),intent(in) :: cryst
+ integer,intent(in) :: intmeth,comm
+ real(dp),intent(in) :: step,broad
 
 !Local variables-------------------------------
 !scalars
@@ -3162,7 +3145,6 @@ type(edos_t) function ebands_get_edos(ebands, cryst, intmeth, step, broad, comm)
 !arrays
  real(dp) :: eminmax_spin(2,ebands%nsppol)
  real(dp),allocatable :: wme0(:),wdt(:,:),tmp_eigen(:)
-
 ! *********************************************************************
 
  nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
@@ -3333,7 +3315,6 @@ subroutine edos_free(edos)
 
 !Arguments ------------------------------------
  class(edos_t),intent(inout) :: edos
-
 ! *********************************************************************
 
 !real
@@ -3367,15 +3348,14 @@ end subroutine edos_free
 subroutine edos_write(edos, path)
 
 !Arguments ------------------------------------
- character(len=*),intent(in) :: path
  class(edos_t),intent(in) :: edos
+ character(len=*),intent(in) :: path
 
 !Local variables-------------------------------
  integer :: iw,spin,unt
  real(dp) :: efermi, gef_tot, gef_up, gef_down
  character(len=500) :: msg
  type(yamldoc_t) :: ydoc
-
 ! *************************************************************************
 
  if (open_file(path, msg, newunit=unt, form="formatted", action="write") /= 0) then
@@ -3464,13 +3444,12 @@ end subroutine edos_write
 integer function edos_ncwrite(edos, ncid, prefix) result(ncerr)
 
 !Arguments ------------------------------------
- integer,intent(in) :: ncid
  class(edos_t),intent(in) :: edos
+ integer,intent(in) :: ncid
  character(len=*),optional,intent(in) :: prefix
 
 !Local variables-------------------------------
  character(len=500) :: prefix_
-
 ! *************************************************************************
 
  prefix_ = ""; if (present(prefix)) prefix_ = trim(prefix)
@@ -3542,7 +3521,6 @@ subroutine edos_print(edos, unit, header)
 
 !Local variables-------------------------------
  integer :: unt
-
 ! *************************************************************************
 
  unt = std_out; if (present(unit)) unt = unit
@@ -3633,7 +3611,6 @@ subroutine edos_get_carriers(edos, ntemp, kTmesh, mu_e, n_ehst)
 !Local variables-------------------------------
  integer :: itemp, iw, spin
  real(dp),allocatable :: values(:)
-
 ! *************************************************************************
 
  ! Copy important dimensions
@@ -3803,10 +3780,10 @@ subroutine ebands_expandk(inb, cryst, ecut_eff, force_istwfk1, dksqmax, bz2ibz, 
 
 !Arguments ------------------------------------
 !scalars
+ class(ebands_t),intent(in) :: inb
  real(dp),intent(in) :: ecut_eff
  real(dp),intent(out) :: dksqmax
  logical,intent(in) :: force_istwfk1
- class(ebands_t),intent(in) :: inb
  class(ebands_t),intent(out) :: outb
  class(crystal_t),intent(in) :: cryst
 !arrays
@@ -3824,7 +3801,6 @@ subroutine ebands_expandk(inb, cryst, ecut_eff, force_istwfk1, dksqmax, bz2ibz, 
  integer,allocatable :: istwfk(:),nband(:,:),npwarr(:),kg_k(:,:)
  real(dp),allocatable :: kfull(:,:),doccde(:),eig(:),occ(:),wtk(:),my_kibz(:,:)
  real(dp),allocatable :: doccde_3d(:,:,:),eig_3d(:,:,:),occ_3d(:,:,:)
-
 ! *********************************************************************
 
  ABI_CHECK(inb%kptopt /= 0, "ebands_expandk does not support kptopt == 0")
@@ -3849,7 +3825,7 @@ subroutine ebands_expandk(inb, cryst, ecut_eff, force_istwfk1, dksqmax, bz2ibz, 
 
  timrev = kpts_timrev_from_kptopt(inb%kptopt)
  call listkk(dksqmax, cryst%gmet, bz2ibz, inb%kptns, kfull, inb%nkpt, nkfull, cryst%nsym, &
-   sppoldbl, cryst%symafm, cryst%symrel, timrev, comm, use_symrec=.False.)
+             sppoldbl, cryst%symafm, cryst%symrel, timrev, comm, use_symrec=.False.)
 
  ABI_MALLOC(wtk, (nkfull))
  wtk = one / nkfull ! weights normalized to one
@@ -3921,7 +3897,7 @@ subroutine ebands_expandk(inb, cryst, ecut_eff, force_istwfk1, dksqmax, bz2ibz, 
  ABI_FREE(eig_3d)
  ABI_FREE(occ_3d)
 
- call ebands_init(bantot, outb, inb%nelect, inb%ne_qFD, inb%nh_qFD, inb%ivalence, doccde, eig, istwfk, kfull, &
+ call ebands_init(outb, bantot, inb%nelect, inb%ne_qFD, inb%nh_qFD, inb%ivalence, doccde, eig, istwfk, kfull, &
    nband, nkfull, npwarr, nsppol, inb%nspinor, inb%tphysel, inb%tsmear, inb%occopt, occ, wtk, &
    inb%cellcharge, kptopt3, inb%kptrlatt_orig, inb%nshiftk_orig, inb%shiftk_orig, inb%kptrlatt, inb%nshiftk, inb%shiftk)
 
@@ -3959,7 +3935,7 @@ type(ebands_t) function ebands_downsample(self, cryst, in_kptrlatt, in_nshiftk, 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: in_nshiftk
- type(ebands_t),intent(in) :: self
+ class(ebands_t),intent(in) :: self
  type(crystal_t),intent(in) :: cryst
 !arrays
  integer,intent(in) :: in_kptrlatt(3,3)
@@ -3977,7 +3953,6 @@ type(ebands_t) function ebands_downsample(self, cryst, in_kptrlatt, in_nshiftk, 
  integer,allocatable :: istwfk(:),nband(:,:),npwarr(:)
  real(dp),allocatable :: new_kbz(:,:), new_wtk(:), new_kibz(:,:), doccde(:), eig(:), occ(:)
  real(dp),allocatable :: doccde_3d(:,:,:), eig_3d(:,:,:), occ_3d(:,:,:), new_shiftk(:,:)
-
 ! *********************************************************************
 
  comm = xmpi_comm_self
@@ -4044,7 +4019,7 @@ type(ebands_t) function ebands_downsample(self, cryst, in_kptrlatt, in_nshiftk, 
  ABI_FREE(eig_3d)
  ABI_FREE(occ_3d)
 
- call ebands_init(bantot, new, self%nelect, self%ne_qFD, self%nh_qFD, self%ivalence, doccde, eig, istwfk, new_kibz, &
+ call ebands_init(new, bantot, self%nelect, self%ne_qFD, self%nh_qFD, self%ivalence, doccde, eig, istwfk, new_kibz, &
    nband, new_nkibz, npwarr, self%nsppol, self%nspinor, self%tphysel, self%tsmear, self%occopt, occ, new_wtk, &
    self%cellcharge, self%kptopt, in_kptrlatt, in_nshiftk, self%shiftk, new_kptrlatt, size(new_shiftk, dim=2), new_shiftk)
 
@@ -4083,12 +4058,11 @@ type(ebands_t) function ebands_chop(self, bstart, bstop) result(new)
 
 !Arguments ------------------------------------
 !scalars
- class(ebands_t),intent(in)  :: self
+ class(ebands_t),intent(in) :: self
  integer,intent(in) :: bstart, bstop
 
 !Local variables ------------------------------
  integer :: mband, nkpt, nsppol
-
 ! *********************************************************************
 
  ABI_CHECK_IRANGE(bstart, 1, self%mband, "Invalid bstart")
@@ -4149,7 +4123,6 @@ subroutine ebands_sort(self)
  integer :: spin, ik_ibz, band, nband_k
 !arrays
  integer :: iperm_k(self%mband)
-
 ! *********************************************************************
 
  do spin=1,self%nsppol
@@ -4192,31 +4165,33 @@ end subroutine ebands_sort
 !!  intp_kptrlatt(3,3) = New k-mesh
 !!  intp_nshiftk= Number of shifts in new k-mesh.
 !!  intp_shiftk(3,intp_nshiftk) = Shifts in new k-mesh.
-!!  band_block(2)=Initial and final band index. If [0,0], all bands are used
+!!  band_range(2)=Initial and final band index. If [0,0], all bands are used
 !!    This is a global variable i.e. all MPI procs must call the routine with the same value.
 !!  comm=MPI communicator
+!!  [out_prefix]: optional string prefix used to write netcdf file.
+!!  [malloc_only]: if true, create new bands object but don't interpolate eigenvalues.
 !!
 !! OUTPUT
 !!  New ebands_t object with interpolated energies.
 !!
 !! NOTES
-!!  Fermi level and occupation factors of the interpolate bands are not recomputed by this routine.
+!!  Fermi level and occupation factors of the interpolated bands are not recomputed by this routine.
 !!  This operation is delegated to the caller.
 !!
 !! SOURCE
 
-
-type(ebands_t) function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt, intp_nshiftk, intp_shiftk, &
-        band_block, comm, out_prefix) result(new)
+type(ebands_t) function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt, intp_nshiftk, intp_shiftk, band_range, comm, &
+                                            out_prefix, malloc_only) result(new)
 
 !Arguments ------------------------------------
 !scalars
+ class(ebands_t),intent(in) :: ebands
  integer,intent(in) :: intp_nshiftk,comm
- type(ebands_t),intent(in) :: ebands
  type(crystal_t),intent(in) :: cryst
  character(len=*),optional,intent(in) :: out_prefix
+ logical,optional,intent(in) :: malloc_only
 !arrays
- integer,intent(in) :: intp_kptrlatt(3,3),band_block(2)
+ integer,intent(in) :: intp_kptrlatt(3,3),band_range(2)
  real(dp),intent(in) :: params(:)
  real(dp),intent(in) :: intp_shiftk(3,intp_nshiftk)
 
@@ -4224,8 +4199,7 @@ type(ebands_t) function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt
 !scalars
  integer,parameter :: master = 0
  integer :: ik_ibz,spin,new_bantot,new_mband,cplex,itype,nb,ib
- integer :: nprocs,my_rank,cnt,ierr,band,new_nkbz,new_nkibz,new_nshiftk
- integer :: ncid
+ integer :: nprocs,my_rank,cnt,ierr,band,new_nkbz,new_nkibz,new_nshiftk, ncid
  type(skw_t) :: skw
 !arrays
  integer :: new_kptrlatt(3,3),my_bblock(2)
@@ -4236,13 +4210,13 @@ type(ebands_t) function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt
 ! *********************************************************************
 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
- itype = nint(params(1))
- my_bblock = band_block; if (all(band_block == 0)) my_bblock = [1, ebands%mband]
+
+ my_bblock = band_range; if (all(band_range == 0)) my_bblock = [1, ebands%mband]
  nb = my_bblock(2) - my_bblock(1) + 1
 
  ! Get ibz, new shifts and new kptrlatt.
  call kpts_ibz_from_kptrlatt(cryst, intp_kptrlatt, ebands%kptopt, intp_nshiftk, intp_shiftk, &
-   new_nkibz, new_kibz, new_wtk, new_nkbz, new_kbz, new_kptrlatt=new_kptrlatt, new_shiftk=new_shiftk)
+                             new_nkibz, new_kibz, new_wtk, new_nkbz, new_kbz, new_kptrlatt=new_kptrlatt, new_shiftk=new_shiftk)
  new_nshiftk = size(new_shiftk, dim=2)
 
  ! Initialize new ebands_t in new IBZ
@@ -4260,11 +4234,11 @@ type(ebands_t) function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt
  ABI_CALLOC(new_eig, (new_bantot))
  ABI_CALLOC(new_occ, (new_bantot))
 
- call ebands_init(new_bantot, new, ebands%nelect, ebands%ne_qFD,ebands%nh_qFD,ebands%ivalence,&
-   new_doccde, new_eig, new_istwfk, new_kibz,&
-   new_nband, new_nkibz, new_npwarr, ebands%nsppol, ebands%nspinor, ebands%tphysel, ebands%tsmear,&
-   ebands%occopt, new_occ, new_wtk, &
-   ebands%cellcharge, ebands%kptopt, intp_kptrlatt, intp_nshiftk, intp_shiftk, new_kptrlatt, new_nshiftk, new_shiftk)
+ call ebands_init(new, new_bantot, ebands%nelect, ebands%ne_qFD,ebands%nh_qFD,ebands%ivalence,&
+                  new_doccde, new_eig, new_istwfk, new_kibz,&
+                  new_nband, new_nkibz, new_npwarr, ebands%nsppol, ebands%nspinor, ebands%tphysel, ebands%tsmear,&
+                  ebands%occopt, new_occ, new_wtk, &
+                  ebands%cellcharge, ebands%kptopt, intp_kptrlatt, intp_nshiftk, intp_shiftk, new_kptrlatt, new_nshiftk, new_shiftk)
 
  ! Get fermi level from input ebands.
  new%fermie = ebands%fermie
@@ -4281,7 +4255,12 @@ type(ebands_t) function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt
  ABI_FREE(new_eig)
  ABI_FREE(new_occ)
 
+ if (present(malloc_only)) then
+   if (malloc_only) return
+ end if
+
  ! Build SKW object for all bands.
+ itype = nint(params(1))
  if (itype == 1 .or. itype == 2) then
    cplex = 1; if (kpts_timrev_from_kptopt(ebands%kptopt) == 0) cplex = 2
    skw = skw_new(cryst, params(2:), cplex, ebands%mband, ebands%nkpt, ebands%nsppol, ebands%kptns, ebands%eig, my_bblock, comm)
@@ -4298,7 +4277,7 @@ type(ebands_t) function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt
    do ik_ibz=1,new%nkpt
      do ib=1,nb
        cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle  ! Mpi parallelism.
-       ! Note the difference between band and ib index if band_block.
+       ! Note the difference between band and ib index if band_range.
        band = my_bblock(1) + ib - 1
        select case (itype)
        case (1)
@@ -4321,23 +4300,9 @@ type(ebands_t) function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt
  if (my_rank == master .and. itype == 1 .and. present(out_prefix)) then
    ! Write ESKW file with crystal and (interpolated) band structure energies.
    !call wrtout(ab_out, sjoin("- Writing interpolated bands to file:", strcat(prefix, tag)))
-   ! Write crystal and (interpolated) band structure energies.
    NCF_CHECK(nctk_open_create(ncid, strcat(out_prefix, "_ESKW.nc"), xmpi_comm_self))
    NCF_CHECK(cryst%ncwrite(ncid))
    NCF_CHECK(ebands_ncwrite(new, ncid))
-
-   ! TODO
-   !NCF_CHECK(skw%ncwrite(ncid))
-   ! Define variables specific to SKW algo.
-   !ncerr = nctk_def_arrays(ncid, [ &
-   ! nctkarr_t("band_block", "int", "two"), &
-   ! nctkarr_t("einterp", "dp", "four")], defmode=.True.)
-   !NCF_CHECK(ncerr)
-
-   ! Write data.
-   !NCF_CHECK(nctk_set_datamode(ncid))
-   !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "band_block"), band_block))
-   !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "einterp"), params))
    NCF_CHECK(nf90_close(ncid))
  end if
 
@@ -4361,25 +4326,27 @@ end function ebands_interp_kmesh
 !!  kpath<kpath_t> = Object describing the k-path
 !!  params(:):
 !!    params(1): 1 for SKW.
-!!  band_block(2)=Initial and final band index to be interpolated. [0,0] if all bands are used.
+!!  band_range(2)=Initial and final band index to be interpolated. [0,0] if all bands are used.
 !!    This is a global variable i.e. all MPI procs must call the routine with the same value.
 !!  comm=MPI communicator
+!!  [malloc_only]: if true, create new bands object but don't interpolate eigenvalues.
 !!
 !! OUTPUT
 !!  New ebands_t object with interpolated energies.
 !!
 !! SOURCE
 
-type(ebands_t) function ebands_interp_kpath(ebands, cryst, kpath, params, band_block, comm) result(new)
+type(ebands_t) function ebands_interp_kpath(ebands, cryst, kpath, params, band_range, comm, malloc_only) result(new)
 
 !Arguments ------------------------------------
 !scalars
+ class(ebands_t),intent(in) :: ebands
  integer,intent(in) :: comm
- type(ebands_t),intent(in) :: ebands
  type(crystal_t),intent(in) :: cryst
  type(kpath_t),intent(in) :: kpath
+ logical,optional,intent(in) :: malloc_only
 !arrays
- integer,intent(in) :: band_block(2)
+ integer,intent(in) :: band_range(2)
  real(dp),intent(in) :: params(:)
 
 !Local variables-------------------------------
@@ -4394,12 +4361,11 @@ type(ebands_t) function ebands_interp_kpath(ebands, cryst, kpath, params, band_b
  integer,allocatable :: new_istwfk(:),new_nband(:,:),new_npwarr(:)
  real(dp),parameter :: new_shiftk(3,1) = zero
  real(dp),allocatable :: new_wtk(:),new_doccde(:),new_eig(:),new_occ(:)
-
 ! *********************************************************************
 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
- itype = nint(params(1))
- my_bblock = band_block; if (all(band_block == 0)) my_bblock = [1, ebands%mband]
+
+ my_bblock = band_range; if (all(band_range == 0)) my_bblock = [1, ebands%mband]
  nb = my_bblock(2) - my_bblock(1) + 1
 
  if (ebands%nkpt == 1) then
@@ -4424,7 +4390,7 @@ type(ebands_t) function ebands_interp_kpath(ebands, cryst, kpath, params, band_b
  ! Needed by AbiPy to understand that we have a k-path instead of a mesh.
  new_kptopt = -kpath%nbounds
 
- call ebands_init(new_bantot, new, ebands%nelect, ebands%ne_qFD,ebands%nh_qFD,ebands%ivalence, &
+ call ebands_init(new, new_bantot, ebands%nelect, ebands%ne_qFD,ebands%nh_qFD,ebands%ivalence, &
    new_doccde, new_eig, new_istwfk, kpath%points, &
    new_nband, new_nkibz, new_npwarr, ebands%nsppol, ebands%nspinor, ebands%tphysel, ebands%tsmear, &
    ebands%occopt, new_occ, new_wtk,&
@@ -4441,7 +4407,12 @@ type(ebands_t) function ebands_interp_kpath(ebands, cryst, kpath, params, band_b
  ABI_FREE(new_eig)
  ABI_FREE(new_occ)
 
+ if (present(malloc_only)) then
+   if (malloc_only) return
+ end if
+
  ! Build SKW object for all bands.
+ itype = nint(params(1))
  select case (itype)
  case (1)
    cplex = 1; if (kpts_timrev_from_kptopt(ebands%kptopt) == 0) cplex = 2
@@ -4458,7 +4429,7 @@ type(ebands_t) function ebands_interp_kpath(ebands, cryst, kpath, params, band_b
    do ik_ibz=1,new%nkpt
      do ib=1,nb
        cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle  ! Mpi parallelism.
-       ! Note the difference between band and ib index if band_block.
+       ! Note the difference between band and ib index if band_range.
        band = my_bblock(1) + ib - 1
        select case (itype)
        case (1)
@@ -4473,7 +4444,6 @@ type(ebands_t) function ebands_interp_kpath(ebands, cryst, kpath, params, band_b
 
  ! Sort eigvalues_k in ascending order to be compatible with other ebands routines.
  call ebands_sort(new)
-
  call skw%free()
 
 end function ebands_interp_kpath
@@ -4532,9 +4502,9 @@ type(edos_t) function ebands_get_edos_matrix_elements(ebands, cryst, bsize, &
 
 !Arguments ------------------------------------
 !scalars
+ class(ebands_t),intent(in)  :: ebands
  integer,intent(in) :: bsize, nvals, nvecs, ntens, intmeth, comm
  real(dp),intent(in) :: step, broad
- class(ebands_t),intent(in)  :: ebands
  type(crystal_t),intent(in) :: cryst
 !arrays
  integer,optional,intent(in) :: brange(2)
@@ -4848,10 +4818,10 @@ type(jdos_t) function ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm,
 
 !Arguments ------------------------------------
 !scalars
+ class(ebands_t),intent(in) :: ebands
  integer,intent(in) :: intmeth,comm
  integer,intent(out) :: ierr
  real(dp),intent(in) :: step,broad
- class(ebands_t),intent(in) :: ebands
  type(crystal_t),intent(in) :: cryst
 
 !Local variables-------------------------------
@@ -4865,7 +4835,6 @@ type(jdos_t) function ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm,
  integer :: val_idx(ebands%nkpt,ebands%nsppol)
  real(dp) :: eminmax(2,ebands%nsppol)
  real(dp),allocatable :: cvmw(:),wdt(:,:)
-
 ! *********************************************************************
 
  ierr = 0
@@ -5027,7 +4996,6 @@ integer function jdos_ncwrite(jdos, ncid, prefix) result(ncerr)
 
 !Local variables-------------------------------
  character(len=500) :: prefix_
-
 ! *********************************************************************
 
  prefix_ = ""; if (present(prefix)) prefix_ = trim(prefix)
@@ -5080,7 +5048,6 @@ subroutine jdos_free(jdos)
 
 !Arguments ------------------------------------
  class(jdos_t),intent(inout)  :: jdos
-
 ! *********************************************************************
 
  ABI_SFREE(jdos%mesh)
@@ -5116,7 +5083,7 @@ subroutine ebands_prtbltztrp(ebands, crystal, fname_radix, tau_k)
 
 !Arguments ------------------------------------
 !scalars
- type(ebands_t),intent(in) :: ebands
+ class(ebands_t),intent(in) :: ebands
  type(crystal_t),intent(in) :: crystal
  character(len=fnlen), intent(in) :: fname_radix
 !arrays
@@ -5133,7 +5100,6 @@ subroutine ebands_prtbltztrp(ebands, crystal, fname_radix, tau_k)
 !arrays
  real(dp) :: nelec(ebands%nsppol)
  character(len=3) :: spinsuffix(ebands%nsppol)
-
 ! *************************************************************************
 
  !MG FIXME The number of electrons is wrong if the file is produced in a NSCF run.
@@ -5329,8 +5295,8 @@ end subroutine ebands_prtbltztrp
 !!
 !! SOURCE
 
-subroutine ebands_prtbltztrp_tau_out (eigen, tempermin, temperinc, ntemper, fermie, fname_radix, kpt, &
-       nband, nelec, nkpt, nspinor, nsppol, nsym, rprimd, symrel, tau_k)
+subroutine ebands_prtbltztrp_tau_out(eigen, tempermin, temperinc, ntemper, fermie, fname_radix, kpt, &
+                                     nband, nelec, nkpt, nspinor, nsppol, nsym, rprimd, symrel, tau_k)
 
 !Arguments ------------------------------------
 !scalars
@@ -5518,16 +5484,15 @@ subroutine ebands_write(ebands, prtebands, prefix, kptbounds)
 
 !Arguments ------------------------------------
 !scalars
+ class(ebands_t),intent(in) :: ebands
  integer,intent(in) :: prtebands
- type(ebands_t),intent(in) :: ebands
  character(len=*),intent(in) :: prefix
  real(dp),optional,intent(in) :: kptbounds(:,:)
-
 ! *********************************************************************
 
  select case (prtebands)
  case (0)
-    return
+   return
  case (1)
    !call wrtout(std_out, sjoin(" Writing interpolated bands to:",  path)
    if (present(kptbounds)) then
@@ -5572,7 +5537,7 @@ subroutine ebands_write_xmgrace(ebands, filename, kptbounds)
 
 !Arguments ------------------------------------
 !scalars
- type(ebands_t),intent(in) :: ebands
+ class(ebands_t),intent(in) :: ebands
  character(len=*),intent(in) :: filename
  real(dp),optional,intent(in) :: kptbounds(:,:)
 
@@ -5583,7 +5548,6 @@ subroutine ebands_write_xmgrace(ebands, filename, kptbounds)
 !arrays
  integer :: g0(3)
  integer,allocatable :: bounds2kpt(:)
-
 ! *********************************************************************
 
  nkbounds = 0
@@ -5697,7 +5661,7 @@ subroutine ebands_write_gnuplot(ebands, prefix, kptbounds)
 
 !Arguments ------------------------------------
 !scalars
- type(ebands_t),intent(in) :: ebands
+ class(ebands_t),intent(in) :: ebands
  character(len=*),intent(in) :: prefix
  real(dp),optional,intent(in) :: kptbounds(:,:)
 
@@ -5709,7 +5673,6 @@ subroutine ebands_write_gnuplot(ebands, prefix, kptbounds)
 !arrays
  integer :: g0(3)
  integer,allocatable :: bounds2kpt(:)
-
 ! *********************************************************************
 
  nkbounds = 0
@@ -5815,24 +5778,24 @@ end subroutine ebands_write_gnuplot
 !!
 !! INPUTS
 !!  dtset<dataset_type>=Abinit dataset
-!!  band_block(2)=Initial and final band index to be interpolated. [0,0] if all bands are used.
+!!  band_range(2)=Initial and final band index to be interpolated. [0,0] if all bands are used.
 !!    This is a global variable i.e. all MPI procs must call the routine with the same value.
 !!
 !! OUTPUT
 !!
 !! SOURCE
 
-subroutine ebands_interpolate_kpath(ebands, dtset, cryst, band_block, prefix, comm)
+subroutine ebands_interpolate_kpath(ebands, dtset, cryst, band_range, prefix, comm)
 
 !Arguments ------------------------------------
 !scalars
- type(ebands_t),intent(in) :: ebands
+ class(ebands_t),intent(in) :: ebands
  type(dataset_type),intent(in) :: dtset
  type(crystal_t),intent(in) :: cryst
  integer,intent(in) :: comm
  character(len=*),intent(in) :: prefix
 !arrays
- integer,intent(in) :: band_block(2)
+ integer,intent(in) :: band_range(2)
 
 !Local variables-------------------------------
 !scalars
@@ -5843,7 +5806,6 @@ subroutine ebands_interpolate_kpath(ebands, dtset, cryst, band_block, prefix, co
  character(len=500) :: tag !msg
 !arrays
  real(dp),allocatable :: bounds(:,:)
-
 ! *********************************************************************
 
  my_rank = xmpi_comm_rank(comm)
@@ -5868,11 +5830,11 @@ subroutine ebands_interpolate_kpath(ebands, dtset, cryst, band_block, prefix, co
  end if
 
  kpath = kpath_new(bounds, cryst%gprimd, ndivsm)
- call kpath%print(header="Interpolating energies on k-path", unit=std_out)
+ call kpath%print([std_out], header="Interpolating energies on k-path")
  ABI_FREE(bounds)
 
  ! Interpolate bands on k-path.
- ebands_kpath = ebands_interp_kpath(ebands, cryst, kpath, dtset%einterp, band_block, comm)
+ ebands_kpath = ebands_interp_kpath(ebands, cryst, kpath, dtset%einterp, band_range, comm)
 
  if (my_rank == master) then
    call wrtout(ab_out, sjoin("- Writing interpolated bands to file:", strcat(prefix, tag)))
@@ -6119,8 +6081,7 @@ subroutine ebands_get_carriers(self, ntemp, kTmesh, mu_e, n_ehst)
 !Local variables-------------------------------
  integer :: spin, ik_ibz, ib, itemp
  real(dp) :: max_occ, wtk, eig_nk
-
-! *********************************************************************
+!*********************************************************************
 
  max_occ = two / (self%nspinor * self%nsppol)
  n_ehst = zero

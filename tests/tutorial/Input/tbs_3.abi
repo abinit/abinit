@@ -21,7 +21,7 @@ irdscr  1
 # Definition of the k-point grid
 # MUST equal the grid used for generating the WFK file.
 kptopt 1          # Option for the automatic generation of k points,
-ngkpt  4 4 4 
+ngkpt  4 4 4
 nshiftk 1
 chksymbreak 0             # Mandatory for using symmetry-breaking k-meshes in the BS code.
 shiftk    0.11 0.21 0.31  # This shift breaks the symmetry of the k-mesh.
@@ -69,7 +69,7 @@ xred              # Reduced coordinate of atoms
    0.0  0.0  0.0
    0.25 0.25 0.25
 
-# Definition of the planewave basis set 
+# Definition of the planewave basis set
 ecut 12         # Maximal kinetic energy cut-off, in Hartree
 
 istwfk *1
@@ -78,7 +78,7 @@ diemac 12.0
 
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "Pseudodojo_nc_sr_04_pw_standard_psp8/Si.psp8"
+ pseudos "Psdj_nc_sr_04_pw_std_psp8/Si.psp8"
 
 ##############################################################
 # This section is used only for regression testing of ABINIT #
@@ -88,14 +88,14 @@ diemac 12.0
 #%% executable = abinit
 #%% test_chain = tbs_1.abi, tbs_2.abi, tbs_3.abi, tbs_4.abi
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   tbs_3.abo, tolnlines= 10, tolabs=  1.1e-2,    tolrel=  4.0e-2, fld_options = -ridiculous
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
 #%% authors = M. Giantomassi
 #%% keywords = GW, BSE
-#%% description = 
+#%% description =
 #%%   Crystalline silicon
 #%%   Convergence of the number of bands in the transition space.
 #%%<END TEST_INFO>

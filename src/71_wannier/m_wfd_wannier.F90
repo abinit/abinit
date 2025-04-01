@@ -4,6 +4,7 @@
 !!
 !! FUNCTION
 !!  The high level wfd_t inteface for building wannier functions
+!!
 !! COPYRIGHT
 !!  Copyright (C) 2005-2022 ABINIT group (hexu)
 !!  This file is distributed under the terms of the
@@ -30,55 +31,33 @@
 !===============================================================
 
 module m_wfd_wannier
+
   use defs_basis
   use m_abicore
   use m_errors
   use m_xmpi
 
-  use m_fstrings,      only : strcat, sjoin
-  use m_numeric_tools, only : uniformrandom, simpson_int, c2r, l2int
-  use m_build_info,      only :  abinit_version
   use defs_abitypes,     only : mpi_type
-  use m_nctk,            only: nctk_try_fort_or_ncfile
-  use m_fstrings,        only : ltoa, sjoin
-  use m_fftcore,         only : print_ngfft
-  use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq
-  use defs_wvltypes,  only : wvl_internal_type
-  use m_dtset, only:dataset_type
-  use m_hdr, only: hdr_type, fform_from_ext, hdr_init_lowlvl
-  use m_wfd, only: wfd_t, wfd_init
-  use m_crystal, only: crystal_t
-  use m_kpts,           only : kpts_ibz_from_kptrlatt, tetra_from_kptrlatt, listkk, kpts_timrev_from_kptopt
-  use m_ebands, only: ebands_from_hdr, ebands_print, ebands_expandk, ebands_free, ebands_ncwrite
-  use m_fftcore,        only : get_kg
-  use m_geometry,  only : wigner_seitz
-
+  use m_dtset,           only : dataset_type
+  use m_hdr,             only : hdr_type
+  use m_wfd,             only : wfd_t
+  use m_crystal,         only : crystal_t
   use m_pawang,          only : pawang_type
   use m_pawrad,          only : pawrad_type
-  use m_pawtab,          only : pawtab_type, pawtab_print, pawtab_get_lsize
+  use m_pawtab,          only : pawtab_type
   use m_pawcprj,         only : pawcprj_type
-  use m_pawrhoij,        only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy, pawrhoij_free, pawrhoij_inquire_dim
-  use m_pawfgr,          only : pawfgr_type, pawfgr_init, pawfgr_destroy
-  use m_pawfgrtab,       only : pawfgrtab_type, pawfgrtab_free, pawfgrtab_init, pawfgrtab_print
-  use defs_datatypes,    only : pseudopotential_type, ebands_t
-  use m_dtfil,          only : datafiles_type
-  use m_paw_overlap, only : smatrix_pawinit
-  use m_evdw_wannier, only : evdw_wannier
-
+  use defs_datatypes,    only : pseudopotential_type
+  use m_dtfil,           only : datafiles_type
   use m_abstract_wf,     only : abstract_wf, compute_iwav, write_cg_and_cprj, wann_ksetting_t, init_mywfc
-  !use m_mlwfovlp,        only : mlwfovlp, mlwfovlp_pw, mlwfovlp_proj, mlwfovlp_projpaw, mlwfovlp_setup, mlwfovlp_seedname
   use m_mlwfovlp,        only : mlwfovlp
+  use m_ebands,          only : ebands_t
 
   use defs_wannier90
-#ifdef HAVE_NETCDF
-  use netcdf
-#endif
-  use m_nctk
 
   implicit none
   private
-  integer,  parameter :: master=0
   public :: wfd_run_wannier
+  integer,  parameter :: master=0
 
 contains
 
@@ -105,9 +84,10 @@ contains
   subroutine wfd_run_wannier(cryst, ebands, hdr, mpi_enreg, &
        & ngfftc, ngfftf,  wfd, dtset, dtfil,  &
        & pawang,  pawrad, pawtab, psps , kg, cg, cprj)
+
     type(crystal_t), intent(in) :: cryst
-    type(ebands_t), intent(inout) :: ebands
-    type(hdr_type), intent(inout) :: hdr
+    type(ebands_t), intent(in) :: ebands
+    type(hdr_type), intent(in) :: hdr
     integer, intent(in) :: ngfftc(18),ngfftf(18)
     type(dataset_type), intent(in) :: dtset
     type(datafiles_type),intent(in) :: dtfil

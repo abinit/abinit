@@ -6,7 +6,7 @@
 !!  Driver to perform electronic or nuclear step
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2021-2024 ABINIT group (FB)
+!!  Copyright (C) 2021-2025 ABINIT group (FB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -79,12 +79,11 @@ subroutine rttddft_propagate_ele(dtset, istep, mpi_enreg, psps, tdks)
  !Local variables-------------------------------
  !scalars
  character(len=500)        :: msg
- type(gs_hamiltonian_type) :: gs_hamk
  !arrays
  
 ! ***********************************************************************
 
- write(msg,'(a,a,i0)') ch10, '--- Iteration', istep
+ write(msg,'(a,a,i0)') ch10, '--- Iteration ', istep
  call wrtout(ab_out,msg)
  if (do_write_log) call wrtout(std_out,msg)
 
@@ -94,9 +93,9 @@ subroutine rttddft_propagate_ele(dtset, istep, mpi_enreg, psps, tdks)
  ! Propagate cg
  select case (dtset%td_propagator) 
    case(0)
-      call rttddft_propagator_er(dtset,gs_hamk,istep,mpi_enreg,psps,tdks,calc_properties=.true.)
+      call rttddft_propagator_er(dtset,istep,mpi_enreg,psps,tdks,calc_properties=.true.)
    case(1)
-      call rttddft_propagator_emr(dtset,gs_hamk,istep,mpi_enreg,psps,tdks)  
+      call rttddft_propagator_emr(dtset,istep,mpi_enreg,psps,tdks)
    case default
       write(msg,"(a)") "Unknown Propagator - check the value of td_propagator"
       ABI_ERROR(msg)

@@ -1,4 +1,4 @@
-## Copyright (C) 2019-2024 ABINIT group (Yann Pouillon)
+## Copyright (C) 2019-2025 ABINIT group (Yann Pouillon)
 
 #
 # Wavelet BigDFT library (BigDFT)
@@ -83,12 +83,13 @@ AC_DEFUN([SD_BIGDFT_INIT], [
   # Declare environment variables
   AC_ARG_VAR([BIGDFT_CPPFLAGS], [C preprocessing flags for BigDFT.])
   AC_ARG_VAR([BIGDFT_FCFLAGS], [Fortran flags for BigDFT.])
+  AC_ARG_VAR([BIGDFT_FFLAGS], [Fortran flags for BigDFT (better use BIGDFT_FCFLAGS).])
   AC_ARG_VAR([BIGDFT_LDFLAGS], [Linker flags for BigDFT.])
   AC_ARG_VAR([BIGDFT_LIBS], [Library flags for BigDFT.])
 
   # Detect use of environment variables
   if test "${sd_bigdft_enable}" = "yes" -o "${sd_bigdft_enable}" = "auto"; then
-    tmp_bigdft_vars="${BIGDFT_CPPFLAGS}${BIGDFT_FCFLAGS}${BIGDFT_LDFLAGS}${BIGDFT_LIBS}"
+    tmp_bigdft_vars="${BIGDFT_CPPFLAGS}${BIGDFT_FFLAGS}${BIGDFT_FCFLAGS}${BIGDFT_LDFLAGS}${BIGDFT_LIBS}"
     if test "${sd_bigdft_init}" = "def" -a ! -z "${tmp_bigdft_vars}"; then
       sd_bigdft_enable="yes"
       sd_bigdft_init="env"
@@ -116,7 +117,15 @@ AC_DEFUN([SD_BIGDFT_INIT], [
         sd_bigdft_cppflags="-I${with_bigdft}/include"
         sd_bigdft_fcflags="${sd_bigdft_fcflags_def} -I${with_bigdft}/include"
         sd_bigdft_ldflags="${sd_bigdft_ldflags_def}"
-        sd_bigdft_libs="-L${with_bigdft}/lib ${sd_bigdft_libs_def}"
+
+        # Check if libyaml.a exists in the BigDFT lib directory
+        if test -f "${with_bigdft}/lib/libyaml.a"; then
+          AC_MSG_NOTICE([Found libyaml.a in ${with_bigdft}/lib, using static linking.])
+          sd_bigdft_libs="-L${with_bigdft}/lib -lbigdft-1 -labinit -lpaw_bigdft ${with_bigdft}/lib/libyaml.a"
+        else
+          AC_MSG_NOTICE([libyaml.a not found in ${with_bigdft}/lib, using dynamic linking (-lyaml).])
+          sd_bigdft_libs="-L${with_bigdft}/lib -lbigdft-1 -labinit -lpaw_bigdft -lyaml"
+        fi
         ;;
 
       env)
@@ -125,6 +134,7 @@ AC_DEFUN([SD_BIGDFT_INIT], [
         sd_bigdft_ldflags="${sd_bigdft_ldflags_def}"
         sd_bigdft_libs="${sd_bigdft_libs_def}"
         test ! -z "${BIGDFT_CPPFLAGS}" && sd_bigdft_cppflags="${BIGDFT_CPPFLAGS}"
+        test ! -z "${BIGDFT_FFLAGS}" && sd_bigdft_fcflags="${BIGDFT_FFLAGS}"
         test ! -z "${BIGDFT_FCFLAGS}" && sd_bigdft_fcflags="${BIGDFT_FCFLAGS}"
         test ! -z "${BIGDFT_LDFLAGS}" && sd_bigdft_ldflags="${BIGDFT_LDFLAGS}"
         test ! -z "${BIGDFT_LIBS}" && sd_bigdft_libs="${BIGDFT_LIBS}"
@@ -348,7 +358,7 @@ AC_DEFUN([_SD_BIGDFT_CHECK_CONFIG], [
   fi
 
   # Environment variables conflict with --with-* options
-  tmp_bigdft_vars="${BIGDFT_CPPFLAGS}${BIGDFT_FCFLAGS}${BIGDFT_LDFLAGS}${BIGDFT_LIBS}"
+  tmp_bigdft_vars="${BIGDFT_CPPFLAGS}${BIGDFT_FFLAGS}${BIGDFT_FCFLAGS}${BIGDFT_LDFLAGS}${BIGDFT_LIBS}"
   tmp_bigdft_invalid="no"
   if test ! -z "${tmp_bigdft_vars}" -a ! -z "${with_bigdft}"; then
     case "${sd_bigdft_policy}" in

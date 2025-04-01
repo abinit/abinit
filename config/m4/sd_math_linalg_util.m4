@@ -1,6 +1,6 @@
 # -*- Autoconf -*-
 #
-# Copyright (C) 2005-2024 ABINIT group (Yann Pouillon, Marc Torrent)
+# Copyright (C) 2005-2025 ABINIT group (Yann Pouillon, Marc Torrent)
 #
 # This file is part of the Steredeg software package. For license information,
 # please see the COPYING file in the top-level directory of the source
@@ -201,6 +201,35 @@ AC_DEFUN([_SD_LINALG_CHECK_BLAS_OPENBLAS_EXTS], [
       [Define to 1 if you have openblas_*threads extensions.])
   fi
 ]) # _SD_LINALG_CHECK_BLAS_OPENBLAS_EXTS
+
+
+                    # ------------------------------------ #
+
+
+# _SD_LINALG_CHECK_BLAS_LAPACK_NVPL_EXTS()
+# --------------------------------
+#
+# Check whether the specified openBLAS implementation provides BLAS extensions.
+#
+AC_DEFUN([_SD_LINALG_CHECK_BLAS_LAPACK_NVPL_EXTS], [
+
+  # NVPL support functions
+  AC_MSG_CHECKING([for NVPL_[set/get]_threads in the specified libraries])
+  AC_LANG_PUSH([Fortran])
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+    [[
+      integer :: a
+      call nvpl_blas_set_num_threads
+      a = nvpl_blas_get_max_threads()
+    ]])], [sd_linalg_nvpl_has_threads="yes"], [sd_linalg_nvpl_has_threads="no"])
+  AC_LANG_POP([Fortran])
+  AC_MSG_RESULT([${sd_linalg_nvpl_has_threads}])
+
+  if test "${sd_linalg_nvpl_has_threads}" = "yes"; then
+    AC_DEFINE([HAVE_LINALG_NVPL_THREADS], 1,
+      [Define to 1 if you have nvpl_*threads extensions.])
+  fi
+]) # _SD_LINALG_CHECK_BLAS_LAPACK_NVPL_EXTS
 
 
                     # ------------------------------------ #
@@ -736,3 +765,44 @@ AC_DEFUN([_SD_LINALG_CHECK_MAGMA_15], [
       [Define to 1 if you have MAGMA >=1.5 API support])
   fi
 ]) # _SD_LINALG_CHECK_MAGMA_15
+
+
+# _SD_LINALG_CHECK_BUGGY_ZDOT()
+# ---------------------------
+#
+# Check if dot/norm functions are buggy in BLAS
+#  (typically: Accelerate library in MacOS)
+#
+AC_DEFUN([_SD_LINALG_CHECK_BUGGY_ZDOT], [
+  sd_linalg_has_buggy_zdot="unknown"
+
+  AC_MSG_CHECKING([for buggy dot/norm in the BLAS libraries])
+  AC_LANG_PUSH([Fortran])
+  AC_RUN_IFELSE([AC_LANG_PROGRAM([],
+    [[
+    real :: x(2)=[3.,4.], y(2)=[1.,1.]
+    complex :: w(2)=[(4.,3.),(3.,4.)], z(2)=[(5.,6.),(7.,8.)]
+    double complex :: zw(2)=[(4.d0,3.d0),(3.d0,4.d0)]
+    double complex :: zz(2)=[(5.d0,6.d0),(7.d0,8.d0)]
+    real, external :: sdot, sdsdot, snrm2, scasum
+    complex, external :: cdotu, cdotc
+    double complex, external :: zdotu, zdotc
+    logical :: blas_ok =.true.
+    if (abs(sdot(2,x,1,y,1)-real(7.0))>0.00001) blas_ok=.false.
+    if (abs(sdsdot(2,0.0,x,1,y,1)-real(7.0))>0.00001) blas_ok=.false.
+    if (abs(snrm2(2,x,1)-real(5.0))>0.00001) blas_ok=.false.
+    if (abs(scasum(2,w,1)-real(14.0))>0.00001) blas_ok=.false.
+    if (abs(real(cdotu(2,w,1,z,1))-real(-9.0))>0.00001) blas_ok=.false.
+    if (abs(aimag(cdotu(2,w,1,z,1))-real(91.0))>0.00001) blas_ok=.false.
+    if (abs(real(cdotc(2,w,1,z,1))-real(91.0))>0.00001) blas_ok=.false.
+    if (abs(aimag(cdotc(2,w,1,z,1))-real(5.0))>0.00001) blas_ok=.false.
+    if (abs(dble(zdotu(2,zw,1,zz,1))-dble(-9.0))>0.00001d0) blas_ok=.false.
+    if (abs(aimag(zdotu(2,zw,1,zz,1))-dble(91.0))>0.00001d0) blas_ok=.false.
+    if (abs(dble(zdotc(2,zw,1,zz,1))-dble(91.0))>0.00001d0) blas_ok=.false.
+    if (abs(aimag(zdotc(2,zw,1,zz,1))-dble(5.0))>0.00001d0) blas_ok=.false.
+    if (.not. blas_ok) stop 1
+    ]])], [sd_linalg_has_buggy_zdot="no"], [sd_linalg_has_buggy_zdot="yes"])
+  AC_LANG_POP([Fortran])
+  AC_MSG_RESULT([${sd_linalg_has_buggy_zdot}])
+
+]) # _SD_LINALG_CHECK_BUGGY_ZDOT

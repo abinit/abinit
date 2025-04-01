@@ -6,7 +6,7 @@
 !!  This module contains basic tools to operate on vectors expressed in reduced coordinates.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2024 ABINIT group (MG, MT, FJ, TRangel, DCA, XG, AHR, DJA, DRH)
+!! Copyright (C) 2008-2025 ABINIT group (MG, MT, FJ, TRangel, DCA, XG, AHR, DJA, DRH)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,7 +29,8 @@ MODULE m_geometry
 
  use m_io_tools,       only : open_file
  use m_numeric_tools,  only : uniformrandom, isinteger, set2unit
- use m_symtk,          only : mati3inv, mati3det, matr3inv, symdet
+ use m_matrix,         only : mati3inv, mati3det, matr3inv
+ use m_symtk,          only : symdet
  use m_hide_lapack,    only : matr3eigval
  use m_pptools,        only : prmat
  use m_numeric_tools,  only : wrap2_pmhalf
@@ -462,7 +463,7 @@ subroutine wedge_basis(gprimd,rprimd,wedge,normalize)
     do irprimd = 1, 3
        do igprimd = 1, 3
           if(any(abs(wedge(1:3,irprimd,igprimd)).GT.tol8)) then
-             nfac = SQRT(DOT_PRODUCT(wedge(1:3,irprimd,igprimd),wedge(1:3,irprimd,igprimd)))
+             nfac = NORM2(wedge(1:3,irprimd,igprimd))
              wedge(1:3,irprimd,igprimd) = wedge(1:3,irprimd,igprimd)/nfac
           end if
        end do
@@ -499,16 +500,14 @@ subroutine wedge_product(produv,u,v,wedgebasis)
 
 ! local
 !scalars
- integer :: igprimd, ii, irprimd
+ integer :: igprimd, irprimd
 
 ! *********************************************************************
 
  produv(:) = zero
  do irprimd = 1, 3
     do igprimd = 1, 3
-       do ii = 1, 3
-          produv(ii) = produv(ii) + u(irprimd)*v(igprimd)*wedgebasis(ii,irprimd,igprimd)
-       end do
+        produv(1:3) = produv(1:3) + u(irprimd)*v(igprimd)*wedgebasis(1:3,irprimd,igprimd)
     end do
  end do
 
@@ -523,8 +522,8 @@ end subroutine wedge_product
 !! Calculates a grid of points that falls inside of (and eventually on the surface of)
 !! the Wigner-Seitz supercell centered on the origin of the B lattice with primitive
 !! translations nmonkh(1)*a_1+nmonkh(2)*a_2+nmonkh(3)*a_3.
-!! Subroutine taken from the Wannier90 code. Modified by MG to fulfil abinit coding rules.
-!! API slightly changed wrt the wannier90 version.
+!! Subroutine taken from the Wannier90 code.
+!! Modified by MG to fulfil abinit coding rules. API slightly changed wrt the wannier90 version.
 !!
 !! COPYRIGHT
 !! Copyright (C) 2007 Jonathan Yates, Arash Mostofi,
@@ -542,11 +541,12 @@ end subroutine wedge_product
 !!
 !! OUTPUT
 !!  npts=number of points falling inside the Wigner-Seitz cell
-!!  irvec(3,npts)=Reduced coordinated of the points inside the W-S cell
+!!  irvec(3,npts)=Reduced coordinated of the points inside the W-S cell (sorted by lenght)
 !!  ndegen(npts)=Weigths associated to each point.
+!!  rmods(npts)=Lenght of the irvec
 !!
 !! SIDE EFFECTS
-!!  irvec and ndegen are are allocated with the correct
+!!  irvec, ndegen and rmods  are allocated with the correct
 !!  size inside the routine and returned to the caller.
 !!
 !! NOTES
@@ -561,7 +561,7 @@ end subroutine wedge_product
 !!
 !! SOURCE
 
-subroutine wigner_seitz(center, lmax, kptrlatt, rmet, npts, irvec, ndegen, prtvol)
+subroutine wigner_seitz(center, lmax, kptrlatt, rmet, npts, irvec, ndegen, rmods, prtvol)
 
 !Arguments ------------------------------------
 !scalars
@@ -571,21 +571,24 @@ subroutine wigner_seitz(center, lmax, kptrlatt, rmet, npts, irvec, ndegen, prtvo
  integer,intent(in) :: kptrlatt(3,3),lmax(3)
  integer,allocatable,intent(out) :: irvec(:,:),ndegen(:)
  real(dp),intent(in) :: center(3),rmet(3,3)
+ real(dp),allocatable,intent(out) :: rmods(:)
 
 !Local variables-------------------------------
 !scalars
  integer :: in1,in2,in3,l1,l2,l3,ii,icount,n1,n2,n3
- integer :: l0,l1_max,l2_max,l3_max,nl,verbose,mm1,mm2,mm3
+ integer :: l0,l1_max,l2_max,l3_max,nl,verbose,mm1,mm2,mm3,ir
  real(dp) :: tot,dist_min
  real(dp),parameter :: TOL_DIST=tol7
  character(len=500) :: msg
 !arrays
+ integer,allocatable :: iperm(:), swap2(:,:), swap1(:)
+ real(dp),parameter :: gammak(3) = zero
  real(dp) :: diff(3)
- real(dp),allocatable :: dist(:),swap2(:,:),swap1(:)
+ real(dp),allocatable :: dist(:)
 
 ! *************************************************************************
 
- verbose = 0; if (PRESENT(prtvol)) verbose = prtvol
+ verbose = 0; if (present(prtvol)) verbose = prtvol
 
  if (kptrlatt(1,2) /= 0 .or. kptrlatt(2,1) /= 0 .or. &
      kptrlatt(1,3) /= 0 .or. kptrlatt(3,1) /= 0 .or. &
@@ -596,9 +599,9 @@ subroutine wigner_seitz(center, lmax, kptrlatt, rmet, npts, irvec, ndegen, prtvo
  n1 = kptrlatt(1,1); n2 = kptrlatt(2,2); n3 = kptrlatt(3,3)
  l1_max = lmax(1); l2_max = lmax(2); l3_max = lmax(3)
 
- nl=(2*l1_max+1)*(2*l2_max+1)*(2*l3_max+1)
- l0=1+l1_max*(1+(2*l2_max+1)**2+(2*l3_max+1)) ! Index of the origin.
- ABI_MALLOC(dist,(nl))
+ nl = (2*l1_max+1)*(2*l2_max+1)*(2*l3_max+1)
+ l0 = 1+l1_max*(1+(2*l2_max+1)**2+(2*l3_max+1)) ! Index of the origin.
+ ABI_MALLOC(dist, (nl))
 
  ! Allocate with maximum size
  mm1 = 2 * n1 + 1
@@ -643,10 +646,10 @@ subroutine wigner_seitz(center, lmax, kptrlatt, rmet, npts, irvec, ndegen, prtvo
 
  if (verbose >= 1) then
    write(msg,'(a,i0)')' lattice points in Wigner-Seitz supercell: ',npts
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(std_out, msg)
    do ii=1,npts
-     write(msg,'(a,3(i3),a,i4)')'  vector ', irvec(:,ii),' degeneracy: ', ndegen(ii)
-     call wrtout(std_out,msg,'COLL')
+     write(msg,'(a,3(i3,1x),a,i0)')'  vector: ', irvec(:,ii),', degeneracy: ', ndegen(ii)
+     call wrtout(std_out, msg)
    end do
  end if
 
@@ -662,20 +665,29 @@ subroutine wigner_seitz(center, lmax, kptrlatt, rmet, npts, irvec, ndegen, prtvo
 
  ABI_FREE(dist)
 
- ! Reallocate the output with correct size.
- ABI_MALLOC(swap1,(npts))
- swap1(:)=ndegen(1:npts)
- ABI_FREE(ndegen)
- ABI_MALLOC(ndegen,(npts))
- ndegen=swap1
- ABI_FREE(swap1)
-
- ABI_MALLOC(swap2,(3,npts))
- swap2(:,:)=irvec(1:3,1:npts)
+ ! Reallocate ndegen and irvec with correct size and sort by norm
+ ABI_MALLOC(swap2, (3, npts))
+ swap2(:,:) = irvec(1:3, 1:npts)
  ABI_FREE(irvec)
- ABI_MALLOC(irvec,(3,npts))
- irvec=swap2
+
+ call sort_gvecs(npts, gammak, rmet, swap2, out_gvec=irvec, iperm=iperm)
  ABI_FREE(swap2)
+
+ ABI_MALLOC(swap1, (npts))
+ swap1(:) = ndegen(1:npts)
+ ABI_REMALLOC(ndegen, (npts))
+
+ do ir=1,npts
+   ndegen(ir) = swap1(iperm(ir))
+ end do
+
+ ABI_MALLOC(rmods, (npts))
+ do ir=1,npts
+   rmods(ir) = sqrt(dot_product(irvec(:,ir), matmul(rmet, irvec(:,ir))))
+ end do
+
+ ABI_FREE(swap1)
+ ABI_FREE(iperm)
 
 end subroutine wigner_seitz
 !!***
@@ -731,16 +743,13 @@ subroutine phdispl_cart2red(natom, gprimd, displ_cart, displ_red)
          ! 23 june 2004: rprimd becomes gprimd
          ! could be gprim and then multiply by acell...
          ! Nope, checked and ok with gprimd 24 jun 2004
-         displ_red(1,ibranch,jbranch) = displ_red(1,ibranch,jbranch) + &
-&         gprimd(kdir,idir) * displ_cart(1,k1,jbranch)
+         displ_red(1,ibranch,jbranch) = displ_red(1,ibranch,jbranch) + gprimd(kdir,idir) * displ_cart(1,k1,jbranch)
 
-         displ_red(2,ibranch,jbranch) = displ_red(2,ibranch,jbranch) + &
-&         gprimd(kdir,idir) * displ_cart(2,k1,jbranch)
+         displ_red(2,ibranch,jbranch) = displ_red(2,ibranch,jbranch) + gprimd(kdir,idir) * displ_cart(2,k1,jbranch)
 
        end do !kdir
      end do !idir
    end do !iatom
-   !
  end do !jbranch
 
 end subroutine phdispl_cart2red
@@ -789,7 +798,7 @@ subroutine getspinrot(rprimd, spinrot, symrel)
 
 !Local variables-------------------------------
 !scalars
- integer :: det,ii
+ integer :: det
  real(dp) :: cos_phi,norminv,phi,scprod,sin_phi
  !character(len=500) :: msg
 !arrays
@@ -814,32 +823,24 @@ subroutine getspinrot(rprimd, spinrot, symrel)
 
    ! Transform symmetry matrix in the system defined by rprimd
    call matr3inv(rprimd, rprimd_invt)
-   do ii=1,3
-     coord(:,ii)=rprimd_invt(ii,:)
-   end do
+   coord=TRANSPOSE(rprimd_invt)
    call matr3inv(coord,coordinvt)
-   do ii=1,3
-     matr1(:,ii) = symrel1(:,1)*coord(1,ii) + symrel1(:,2)*coord(2,ii) + symrel1(:,3)*coord(3,ii)
-   end do
-   do ii=1,3
-     matr2(:,ii) = coordinvt(1,:)*matr1(1,ii) + coordinvt(2,:)*matr1(2,ii) + coordinvt(3,:)*matr1(3,ii)
-   end do
+   matr1(:,:) = MATMUL(symrel1,coord)
+   matr2(:,:) = MATMUL(TRANSPOSE(coordinvt),matr1)
 
-   ! Find the eigenvector with unit eigenvalue of the
-   ! rotation matrix in cartesian coordinate, matr2
-
+   ! Find the eigenvector with unit eigenvalue of the rotation matrix in cartesian coordinate, matr2
    matr1(:,:)=matr2(:,:)
    matr1(1,1)=matr1(1,1)-one
    matr1(2,2)=matr1(2,2)-one
    matr1(3,3)=matr1(3,3)-one
 
    !  Compute the axis of rotation and the cos and sin of rotation angle
-   if(matr1(1,1)**2 + matr1(2,1)**2 + matr1(3,1)**2 < tol8 )then
+   if(DOT_PRODUCT(matr1(:,1),matr1(:,1)) < tol8 )then
      ! The first direction is the axis
      axis(1)=one ; axis(2)=zero ; axis(3)=zero
      cos_phi=matr2(2,2)
      sin_phi=matr2(3,2)
-   else if(matr1(1,2)**2 + matr1(2,2)**2 + matr1(3,2)**2 < tol8 )then
+   else if(DOT_PRODUCT(matr1(:,2),matr1(:,2)) < tol8 )then
      ! The second direction is the axis
      axis(1)=zero ; axis(2)=one ; axis(3)=zero
      cos_phi=matr2(3,3)
@@ -851,7 +852,7 @@ subroutine getspinrot(rprimd, spinrot, symrel)
      axis(2)=matr1(3,1)*matr1(1,2)-matr1(3,2)*matr1(1,1)
      axis(3)=matr1(1,1)*matr1(2,2)-matr1(1,2)*matr1(2,1)
      ! Then, try to normalize it
-     scprod=sum(axis(:)**2)
+     scprod=DOT_PRODUCT(axis(:), axis(:))
      if(scprod<tol8)then
        ! The first and second vectors were linearly dependent
        ! Thus, use the first and third vectors
@@ -859,7 +860,7 @@ subroutine getspinrot(rprimd, spinrot, symrel)
        axis(2)=matr1(3,1)*matr1(1,3)-matr1(3,3)*matr1(1,1)
        axis(3)=matr1(1,1)*matr1(2,3)-matr1(1,3)*matr1(2,1)
        ! Normalize the vector
-       scprod=sum(axis(:)**2)
+       scprod=DOT_PRODUCT(axis(:), axis(:))
        if(scprod < tol8)then
          ABI_BUG('Cannot find the rotation axis.')
        end if
@@ -873,19 +874,19 @@ subroutine getspinrot(rprimd, spinrot, symrel)
      vecta(1)=one-axis(1)**2
      vecta(2)=-axis(1)*axis(2)
      vecta(3)=-axis(1)*axis(3)
-     scprod=sum(vecta(:)**2)
+     scprod=DOT_PRODUCT(vecta(:),vecta(:))
      norminv=one/sqrt(scprod)
      vecta(:)=vecta(:)*norminv
      ! Rotate the vector A, to get vector B
      vectb(:)=matr2(:,1)*vecta(1)+matr2(:,2)*vecta(2)+matr2(:,3)*vecta(3)
      ! Get dot product of vectors A and B, giving cos of the rotation angle
-     cos_phi=sum(vecta(:)*vectb(:))
+     cos_phi=DOT_PRODUCT(vecta(:),vectb(:))
      ! Compute the cross product of the axis and vector A
      vectc(1)=axis(2)*vecta(3)-axis(3)*vecta(2)
      vectc(2)=axis(3)*vecta(1)-axis(1)*vecta(3)
      vectc(3)=axis(1)*vecta(2)-axis(2)*vecta(1)
      ! Get dot product of vectors B and C, giving sin of the rotation angle
-     sin_phi=sum(vectb(:)*vectc(:))
+     sin_phi=DOT_PRODUCT(vectb(:),vectc(:))
    end if
 
    ! Get the rotation angle, then the parameters of the spinor rotation
@@ -915,14 +916,10 @@ subroutine getspinrot(rprimd, spinrot, symrel)
  end if ! the case of the identity matrix
 
 !DEBUG
-!write(std_out,*)' getspinrot :'
-!write(std_out,*)' symre =',symrel(:,:)
-!write(std_out,*)' symrel1 =',symrel1(:,:)
-!write(std_out,*)' rprimd =',rprimd(:,:)
-!write(std_out,*)' matr2 =',matr2(:,:)
-!write(std_out,*)' matr1 =',matr1(:,:)
-!write(std_out,*)' phi (degree)=',phi*180._dp/pi
-!write(std_out,'(a,3d16.6)' )' axis=',axis(:)
+!write(std_out,*)' getspinrot :'; write(std_out,*)' symre =',symrel(:,:)
+!write(std_out,*)' symrel1 =',symrel1(:,:); write(std_out,*)' rprimd =',rprimd(:,:)
+!write(std_out,*)' matr2 =',matr2(:,:); write(std_out,*)' matr1 =',matr1(:,:)
+!write(std_out,*)' phi (degree)=',phi*180._dp/pi; write(std_out,'(a,3d16.6)' )' axis=',axis(:)
 !write(std_out,*)' vecta=',vecta(:)
 !stop
 !ENDDEBUG
@@ -1009,7 +1006,7 @@ end function spinrot_cmat
 !!
 !! SOURCE
 
-subroutine rotmat(xaxis,zaxis,inversion_flag,umat)
+subroutine rotmat(xaxis, zaxis, inversion_flag, umat)
 
 !Arguments ------------------------------------
 !scalars
@@ -1027,31 +1024,25 @@ subroutine rotmat(xaxis,zaxis,inversion_flag,umat)
 
 ! *************************************************************************
 
- xmod = sqrt(xaxis(1)**2 + xaxis(2)**2 + xaxis(3)**2)
- zmod = sqrt(zaxis(1)**2 + zaxis(2)**2 + zaxis(3)**2)
+ xmod = NORM2(xaxis(:))
+ zmod = NORM2(zaxis(:))
 
  if(xmod < 1.d-8)then
-   write(msg,'(a,a,a,i6)')&
-&   'The module of the xaxis should be greater than 1.d-8,',ch10,&
-&   'however, |xaxis|=',xmod
+   write(msg,'(a,a,a,i0)')&
+   'The module of the xaxis should be greater than 1.d-8,',ch10,'however, |xaxis|=',xmod
    ABI_BUG(msg)
  end if
 
  if(zmod < 1.d-8)then
-   write(msg,'(a,a,a,i6)')&
-&   'The module of the zaxis should be greater than 1.d-8,',ch10,&
-&   'however, |zaxis|=',zmod
+   write(msg,'(a,a,a,i0)')'The module of the zaxis should be greater than 1.d-8,',ch10,'however, |zaxis|=',zmod
    ABI_ERROR(msg)
  end if
 
 !verify that both axis are perpendicular
- cosine = (xaxis(1)*zaxis(1) + xaxis(2)*zaxis(2) &
-& + xaxis(3)*zaxis(3))/(xmod*zmod)
+ cosine = DOT_PRODUCT(xaxis,zaxis)/(xmod*zmod)
 
  if(abs(cosine) > 1.d-8)then
-   write(msg,'(a,a,a,i6)')&
-&   'xaxis and zaxis should be perpendicular,',ch10,&
-&   'however, cosine=',cosine
+   write(msg,'(a,a,a,i6)')'xaxis and zaxis should be perpendicular,',ch10,'however, cosine=',cosine
    ABI_BUG(msg)
  end if
 
@@ -1067,8 +1058,8 @@ subroutine rotmat(xaxis,zaxis,inversion_flag,umat)
  if(xmod>10._dp .or. zmod>10._dp) then
    inversion_flag=1
    write(msg, '(4a)' )&
-&   'inversion operation will be appended to axis transformation',ch10,&
-&   'Action: If you did not intend this, make |z|<10 and |x|<10 ',ch10
+    'inversion operation will be appended to axis transformation',ch10,&
+    'Action: If you did not intend this, make |z|<10 and |x|<10 ',ch10
    call wrtout(std_out,msg)
  end if
 
@@ -1223,10 +1214,13 @@ subroutine metric(gmet, gprimd, iout, rmet, rprimd, ucvol)
  ! Also ask that the mixed product is positive.
  if (abs(ucvol)<tol12) then
    !write(std_out,*)"rprimd",rprimd,"ucvol",ucvol
-   write(msg,'(5a)')&
+   write(msg,'(6a,3(a,3es16.6,a))')&
      'Input rprim and acell gives vanishing unit cell volume.',ch10,&
      'This indicates linear dependency between primitive lattice vectors',ch10,&
-     'Action: correct either rprim or acell in input file.'
+     'Action: correct either rprim or acell in input file.', ch10, &
+     'Rprimd =',rprimd(:,1),ch10,&
+     '        ',rprimd(:,2),ch10,&
+     '        ',rprimd(:,3),ch10
    ABI_ERROR(msg)
  end if
  if (ucvol<zero)then
@@ -1243,7 +1237,7 @@ subroutine metric(gmet, gprimd, iout, rmet, rprimd, ucvol)
  end if
 
  ! Generate gprimd
- call matr3inv(rprimd,gprimd)
+ call matr3inv(rprimd, gprimd)
 
  ! Write out rprimd, gprimd and ucvol
  if (iout>=0) then
@@ -1256,8 +1250,8 @@ subroutine metric(gmet, gprimd, iout, rmet, rprimd, ucvol)
      call wrtout(iout,msg)
    end do
    write(msg,'(a,1p,e15.7,a)') ' Unit cell volume ucvol=',ucvol+tol10,' bohr^3'
-   call wrtout(iout,msg,'COLL')
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(iout,msg)
+   call wrtout(std_out,msg)
  end if
 
  ! Compute real space metric.
@@ -1272,8 +1266,8 @@ subroutine metric(gmet, gprimd, iout, rmet, rprimd, ucvol)
    angle(2)=acos(rmet(1,3)/sqrt(rmet(1,1)*rmet(3,3)))/two_pi*360.0d0
    angle(3)=acos(rmet(1,2)/sqrt(rmet(1,1)*rmet(2,2)))/two_pi*360.0d0
    write(msg, '(a,3es16.8,a)' )' Angles (23,13,12)=',angle(1:3),' degrees'
-   call wrtout(iout,msg,'COLL')
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(iout,msg)
+   call wrtout(std_out,msg)
  end if
 
 end subroutine metric
@@ -1314,7 +1308,7 @@ subroutine mkradim(acell,rprim,rprimd)
 
 !Use a representation based on normalised rprim vectors
  do ii=1,3
-   acell(ii)=sqrt(rprimd(1,ii)**2+rprimd(2,ii)**2+rprimd(3,ii)**2)
+   acell(ii)=NORM2(rprimd(:,ii))
    rprim(:,ii)=rprimd(:,ii)/acell(ii)
  end do
 
@@ -1368,9 +1362,7 @@ logical :: equal
 !###########################################################
 !### 1. Compute rprimd from rprim and acell
  do ii=1,3
-   do jj=1,3
-     rprimd_test(ii,jj)=rprim(ii,jj)*acell(jj)
-   end do
+   rprimd_test(ii,1:3)=rprim(ii,1:3)*acell(1:3)
  end do
 
 
@@ -1440,7 +1432,6 @@ subroutine chkdilatmx(chkdilatmx_,dilatmx,rprimd,rprimd_orig,dilatmx_errmsg)
 
 !Local variables-------------------------------
 !scalars
- integer :: ii,jj,mu
  real(dp) :: alpha,dilatmx_new
 !arrays
  real(dp) :: eigval(3),gprimd_orig(3,3),met(3,3),old_to_new(3,3)
@@ -1452,22 +1443,12 @@ subroutine chkdilatmx(chkdilatmx_,dilatmx,rprimd,rprimd_orig,dilatmx_errmsg)
  call matr3inv(rprimd_orig,gprimd_orig)
 
 !Find the matrix that transform an original xcart to xred, then to the new xcart
- do mu=1,3
-   old_to_new(mu,:)=rprimd(mu,1)*gprimd_orig(:,1)+&
-&   rprimd(mu,2)*gprimd_orig(:,2)+&
-&   rprimd(mu,3)*gprimd_orig(:,3)
- end do
+ old_to_new(:,:) = MATMUL(rprimd, TRANSPOSE(gprimd_orig))
 
 !The largest increase in length will be obtained thanks
 !to the diagonalization of the corresponding metric matrix :
 !it is the square root of its largest eigenvalue.
- do ii=1,3
-   do jj=1,3
-     met(ii,jj)=old_to_new(1,ii)*old_to_new(1,jj)+&
-&     old_to_new(2,ii)*old_to_new(2,jj)+&
-&     old_to_new(3,ii)*old_to_new(3,jj)
-   end do
- end do
+ met(:,:) = MATMUL(TRANSPOSE(old_to_new),old_to_new)
 
  call matr3eigval(eigval,met)
 
@@ -1619,7 +1600,7 @@ end subroutine xcart2xred
 !!
 !! SOURCE
 
-subroutine xred2xcart(natom,rprimd,xcart,xred)
+subroutine xred2xcart(natom, rprimd, xcart, xred)
 
 !Arguments ------------------------------------
 !scalars
@@ -1631,7 +1612,6 @@ subroutine xred2xcart(natom,rprimd,xcart,xred)
 !Local variables-------------------------------
 !scalars
  integer :: iatom,mu
-
 ! *************************************************************************
 
  do iatom=1,natom
@@ -1823,7 +1803,7 @@ subroutine bonds_lgth_angles(coordn,fnameabo_app_geo,natom,ntypat,rprimd,typat,x
 
 !Initialize the file
  write(msg, '(a,a,a)' )' bonds_lgth_angles : about to open file ',trim(fnameabo_app_geo),ch10
- call wrtout(std_out,msg,'COLL'); call wrtout(ab_out,msg,'COLL')
+ call wrtout(std_out,msg); call wrtout(ab_out,msg)
 
  if (open_file(fnameabo_app_geo,msg,newunit=temp_unit,status='unknown',form='formatted') /= 0) then
    ABI_ERROR(msg)
@@ -1831,7 +1811,7 @@ subroutine bonds_lgth_angles(coordn,fnameabo_app_geo,natom,ntypat,rprimd,typat,x
  rewind(temp_unit)
 
  write(msg, '(a,a)' ) ch10,' ABINIT package : GEO file '
- call wrtout(temp_unit,msg,'COLL')
+ call wrtout(temp_unit,msg)
 
 !Compute maximum number of neighbors is the neighbor list,
 !from the indicative coordination number
@@ -1844,7 +1824,7 @@ subroutine bonds_lgth_angles(coordn,fnameabo_app_geo,natom,ntypat,rprimd,typat,x
 & ' nearest neighbors and next nearest neighbors, ',ch10,&
 & '                  and ',(coordn*(coordn-1))/2,&
 & ' distinct angles between nearest neighbors'
- call wrtout(temp_unit,msg,'COLL')
+ call wrtout(temp_unit,msg)
 
 !Compute metric tensor in real space rmet
  do nu=1,3
@@ -1856,15 +1836,15 @@ subroutine bonds_lgth_angles(coordn,fnameabo_app_geo,natom,ntypat,rprimd,typat,x
  end do
 
  write(msg, '(a,a)' )ch10,' Primitive vectors of the periodic cell (bohr)'
- call wrtout(temp_unit,msg,'COLL')
+ call wrtout(temp_unit,msg)
  do nu=1,3
    write(msg, '(1x,a,i1,a,3f10.5)' ) '  R(',nu,')=',rprimd(:,nu)
-   call wrtout(temp_unit,msg,'COLL')
+   call wrtout(temp_unit,msg)
  end do
 
  write(msg, '(a,a)' ) ch10,&
 & ' Atom list        Reduced coordinates          Cartesian coordinates (bohr)'
- call wrtout(temp_unit,msg,'COLL')
+ call wrtout(temp_unit,msg)
 
 !Set up a list of character identifiers for all atoms : iden(ia)
  ABI_MALLOC(iden,(natom))
@@ -1894,18 +1874,18 @@ subroutine bonds_lgth_angles(coordn,fnameabo_app_geo,natom,ntypat,rprimd,typat,x
    write(msg, '(a,a,3f10.5,a,3f10.5)' ) &
 &   '   ',iden(ia),(xred(ii,ia)+tol10,ii=1,3),&
 &   '    ',(xcart(ii,ia)+tol10,ii=1,3)
-   call wrtout(temp_unit,msg,'COLL')
+   call wrtout(temp_unit,msg)
  end do
 
  write(msg, '(a,a,a,a,i4,a)' )ch10,&
 & ' XMOL data : natom, followed by cartesian coordinates in Angstrom',&
 & ch10,ch10,natom,ch10
- call wrtout(temp_unit,msg,'COLL')
+ call wrtout(temp_unit,msg)
 
  do ia=1,natom
    call atomdata_from_znucl(atom,znucl(typat(ia)))
    write(msg, '(a,a,3f10.5)' )'   ',atom%symbol,xcart(1:3,ia)*Bohr_Ang
-   call wrtout(temp_unit,msg,'COLL')
+   call wrtout(temp_unit,msg)
  end do
 
  ABI_FREE(xcart)
@@ -1919,7 +1899,7 @@ subroutine bonds_lgth_angles(coordn,fnameabo_app_geo,natom,ntypat,rprimd,typat,x
    write(msg, '(a,a,a,a,a,a,a,a,a)' ) ch10,'===========',&
 &   '=====================================================================',&
 &   ch10,' ',iden(ia),ch10,ch10,' Bond lengths '
-   call wrtout(temp_unit,msg,'COLL')
+   call wrtout(temp_unit,msg)
 
 !  Search other atoms for bonds, but must proceed
 !  in such a way to consider a search box sufficiently large,
@@ -2027,14 +2007,14 @@ subroutine bonds_lgth_angles(coordn,fnameabo_app_geo,natom,ntypat,rprimd,typat,x
 &     '  ',trim(iden(ia)),' - ',trim(iden(ib)),&
 &     list_neighb(ineighb,2:4,1),'bond length is ',&
 &     length,' bohr  ( or ',Bohr_Ang*length,' Angst.)'
-     call wrtout(temp_unit,msg,'COLL')
+     call wrtout(temp_unit,msg)
    end do
 
 !  Output the angle list
    if(coordn>1)then
 
      write(msg, '(a,a)' ) ch10,' Bond angles '
-     call wrtout(temp_unit,msg,'COLL')
+     call wrtout(temp_unit,msg)
 
      do ineighb=2,coordn
        do jneighb=ineighb+1,coordn+1
@@ -2065,7 +2045,7 @@ subroutine bonds_lgth_angles(coordn,fnameabo_app_geo,natom,ntypat,rprimd,typat,x
 &         '  ',trim(iden(ib)),list_neighb(ineighb,2:4,1),' - ',&
 &         trim(iden(ia)),' - ',trim(iden(ic)),&
 &         list_neighb(jneighb,2:4,1),'bond angle is ',thdeg,' degrees '
-         call wrtout(temp_unit,msg,'COLL')
+         call wrtout(temp_unit,msg)
        end do
      end do
 
@@ -2434,10 +2414,10 @@ subroutine shellstruct(xred,rprimd,natom,magv,distv,smult,sdisv,nsh,atp,prtvol)
 
  if (prtvoll>2) then
    write(msg,'(a,i4,a)')' shellstruct found ',nsh,' shells at distances (sdisv) '
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(std_out,msg)
    call prmat(sdisv(1:nsh),1,nsh,1,std_out)
    write(msg,fmt='(a,150i4)')' and multiplicities (smult) ', smult(1:nsh)
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(std_out,msg)
  end if
 
 !DEBUB
@@ -2520,11 +2500,11 @@ subroutine ioniondist(natom,rprimd,xred,inm,option,varlist,magv,atp,prtvol)
  end if
 
  if (option==3.and.(.not.present(varlist))) then
-   call  wrtout(std_out,'ioniondist error: option=3 but no variable list provided for symmetrization','COLL')
+   call  wrtout(std_out,'ioniondist error: option=3 but no variable list provided for symmetrization')
    return
  end if
 
-!call wrtout(std_out,' ioniondist start ','COLL')
+!call wrtout(std_out,' ioniondist start ')
 
  distm=0
  katom=atpp-1
@@ -2539,7 +2519,7 @@ subroutine ioniondist(natom,rprimd,xred,inm,option,varlist,magv,atp,prtvol)
  end do
 
  if (prtvoll>=3) then
-   call  wrtout(std_out,'ioniondist: ionic distances:','COLL')
+   call  wrtout(std_out,'ioniondist: ionic distances:')
    call prmat(distm,natom,natom,natom,std_out)
  end if
 
@@ -2565,10 +2545,10 @@ subroutine ioniondist(natom,rprimd,xred,inm,option,varlist,magv,atp,prtvol)
  end do
 
  if (prtvoll==2) then
-   call wrtout(std_out,'ioniondist: symmetrized matrix:','COLL')
+   call wrtout(std_out,'ioniondist: symmetrized matrix:')
    call prmat(distm,1,natom,natom,std_out)
  else if (prtvoll>=3) then
-   call wrtout(std_out,'ioniondist: symmetrized matrix:','COLL')
+   call wrtout(std_out,'ioniondist: symmetrized matrix:')
    call prmat(distm,natom,natom,natom,std_out)
  end if
 
@@ -2743,7 +2723,7 @@ subroutine remove_inversion(nsym,symrel,tnons,nsym_out,symrel_out,tnons_out,pinv
  else
    write(msg,'(a)')' The inversion was not found in the symmetries list.'
  end if
- call wrtout(std_out,msg,'COLL')
+ call wrtout(std_out,msg)
 
  ! Find the symmetries that are related through the inversion symmetry
  call symdet(determinant,nsym,symrel)
@@ -2774,14 +2754,14 @@ subroutine remove_inversion(nsym,symrel,tnons,nsym_out,symrel_out,tnons_out,pinv
 &       ' Symmetry operations no. ',is,' and no. ',is2,&
 &       ' are related through the inversion.',ch10,&
 &       ' Symmetry operation no. ',is_discarded,' will be suppressed.'
-       call wrtout(std_out,msg,'COLL')
+       call wrtout(std_out,msg)
      end if ! found
 
    end do !is2
  end do !is
 
  if (nsym2/=(nsym/2).or.nsym==1) then
-   call wrtout(std_out, ' Program uses the original set of symmetries ', 'COLL')
+   call wrtout(std_out, ' Program uses the original set of symmetries ')
    nsym_out=nsym
    ABI_MALLOC(symrel_out,(3,3,nsym))
    ABI_MALLOC(tnons_out,(3,nsym))
@@ -2790,7 +2770,7 @@ subroutine remove_inversion(nsym,symrel,tnons,nsym_out,symrel_out,tnons_out,pinv
    pinv=1
  else
    write(msg,'(a)')' Inversion related operations have been suppressed from symmetries list.'
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(std_out,msg)
    nsym_out=nsym2
    ABI_MALLOC(symrel_out,(3,3,nsym2))
    ABI_MALLOC(tnons_out,(3,nsym2))
@@ -2802,7 +2782,7 @@ subroutine remove_inversion(nsym,symrel,tnons,nsym_out,symrel_out,tnons_out,pinv
 end subroutine remove_inversion
 !!***
 
-!!****f* m_symtk/reduce2primitive
+!!****f* m_geometry/reduce2primitive
 !! NAME
 !! reduce2primitive
 !!
@@ -2996,7 +2976,7 @@ subroutine strainsym(nsym,rprimd0,rprimd,rprimd_symm,symrel)
  integer :: isym
 !arrays
  integer :: symrel_it(3,3)
- real(dp) :: rprimd0_inv(3,3),strain(3,3),strain_symm(3,3),tmp_mat(3,3)
+ real(dp) :: rprimd0_inv(3,3),strain(3,3),strain_symm(3,3),tmp_mat(3,3),symrel_db(3,3)
 
 !**************************************************************************
 
@@ -3018,8 +2998,10 @@ subroutine strainsym(nsym,rprimd0,rprimd,rprimd_symm,symrel)
 
 !  mati3inv gives the inverse transpose of symrel
    call mati3inv(symrel(:,:,isym),symrel_it)
-   call dgemm('N','N',3,3,3,one,strain,3,dble(symrel(:,:,isym)),3,zero,tmp_mat,3)
-   call dgemm('T','N',3,3,3,one,dble(symrel_it),3,tmp_mat,3,one,strain_symm,3)
+   symrel_db = dble(symrel(:,:,isym))
+   call dgemm('N','N',3,3,3,one,strain,3,symrel_db,3,zero,tmp_mat,3)
+   symrel_db = dble(symrel_it)
+   call dgemm('T','N',3,3,3,one,symrel_db,3,tmp_mat,3,one,strain_symm,3)
 
  end do
 
@@ -3411,23 +3393,23 @@ subroutine littlegroup_pert(gprimd,idir,indsym,iout,ipert,natom,nsym,nsym1, &
  if (nsym1 /= 1) then
    if (iout /= ount .and. iout > 0) then
      write(msg,'(a,i5,a)')' Found ',nsym1,' symmetries that leave the perturbation invariant.'
-     call wrtout(iout,msg,'COLL')
+     call wrtout(iout,msg)
    end if
    write(msg,'(a,i5,a)')' littlegroup_pert: found ',nsym1,' symmetries that leave the perturbation invariant: '
-   call wrtout(ount,msg,'COLL')
+   call wrtout(ount,msg)
  else
    if (iout /= ount .and. iout > 0) then
      write(msg,'(a,a)')' The set of symmetries contains',' only one element for this perturbation.'
-     call wrtout(iout,msg,'COLL')
+     call wrtout(iout,msg)
    end if
    write(msg,'(a)')' littlegroup_pert: only one element in the set of symmetries for this perturbation:'
-   call wrtout(ount,msg,'COLL')
+   call wrtout(ount,msg)
  end if
 
  if (ount > 0) then
    do isym=1,nsym1
      write(msg, '(9i4)' )((symrl1(ii,jj,isym),ii=1,3),jj=1,3)
-     call wrtout(ount,msg,'COLL')
+     call wrtout(ount,msg)
    end do
  end if
 

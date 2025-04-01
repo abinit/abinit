@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2024 ABINIT group (MG, MMignolet)
+!!  Copyright (C) 2008-2025 ABINIT group (MG, MMignolet)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -32,7 +32,7 @@ module m_berry_curvature
 
  use m_time,            only : cwtime, cwtime_report
  use m_fstrings,        only : strcat, sjoin, ktoa
- use defs_datatypes,    only : ebands_t
+ use m_ebands,          only : ebands_t
  use m_kpts,            only : kpts_timrev_from_kptopt, kpts_map, smpbz
  use m_ddb_hdr,         only : ddb_hdr_type, BLKTYP_d2E_mbc
  use m_ddb,             only : ddb_type
@@ -88,7 +88,7 @@ subroutine berry_curvature(gstore, dtset, dtfil)
 !scalars
  integer,parameter :: master = 0, LOG_MODQ = 5
  integer :: nproc, my_rank, ierr, comm, mpert, msize
- integer :: my_is, spin, nsppol, ntypat, natom, natom3, ib1, ib2, band1, band2, nb, ebands_timrev
+ integer :: my_is, spin, nsppol, ntypat, natom, natom3, ib1, ib2, band1, band2, nb
  integer :: ik_ibz, isym_k, trev_k, tsign_k, g0_k(3)
  integer :: ikq_ibz, isym_kq, trev_kq, tsign_kq, g0_kq(3)
  integer :: iq_ibz, isym_q, trev_q, tsign_q, g0_q(3)
@@ -124,11 +124,10 @@ subroutine berry_curvature(gstore, dtset, dtfil)
  natom = cryst%natom; ntypat = cryst%ntypat
  natom3 = 3 * cryst%natom; nsppol = ebands%nsppol
  spin_occ = one; if (nsppol == 1 .and. dtset%nspinor == 1) spin_occ = two
- ebands_timrev = kpts_timrev_from_kptopt(ebands%kptopt)
 
  if (my_rank == master) then
    call wrtout(std_out, " Computing berry curvature", pre_newlines=2)
-   call gstore%print(std_out, header="Gstore", prtvol=dtset%prtvol)
+   call gstore%print([std_out], header="Gstore", prtvol=dtset%prtvol)
  end if
 
  ! Consistency check
@@ -161,7 +160,7 @@ subroutine berry_curvature(gstore, dtset, dtfil)
      iq_glob = my_iq + gqk%my_qstart - 1
 
      ! Find k+q in the IBZ for all my k-points.
-     if (kpts_map("symrel", ebands_timrev, cryst, gstore%krank_ibz, gqk%my_nk, gqk%my_kpts, my_kqmap, qpt=qq_ibz) /= 0) then
+     if (kpts_map("symrel", ebands%kptopt, cryst, gstore%krank_ibz, gqk%my_nk, gqk%my_kpts, my_kqmap, qpt=qq_ibz) /= 0) then
        ABI_ERROR(sjoin("Cannot map k+q to IBZ with qpt:", ktoa(qq_ibz)))
      end if
 
@@ -227,9 +226,9 @@ subroutine berry_curvature(gstore, dtset, dtfil)
 
            ! Loop over perturbations and accumulate.
            do my_ip1=1,gqk%my_npert
-             ipc1 = gqk%my_iperts(my_ip1)
+             ipc1 = gqk%my_pertcases(my_ip1)
              do my_ip2=1,gqk%my_npert
-               ipc2 = gqk%my_iperts(my_ip2)
+               ipc2 = gqk%my_pertcases(my_ip2)
                ! my_g(my_npert, nb, my_nq, nb, my_nk)
 
                ! 1st term

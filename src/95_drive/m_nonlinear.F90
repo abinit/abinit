@@ -6,7 +6,7 @@
 !! DFT calculations of non linear response functions.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2002-2024 ABINIT group (MVeithen,MB,LB)
+!!  Copyright (C) 2002-2025 ABINIT group (MVeithen,MB,LB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -33,7 +33,7 @@ module m_nonlinear
  use m_dtset
  use m_dtfil
 
- use defs_datatypes, only : pseudopotential_type, ebands_t
+ use defs_datatypes, only : pseudopotential_type
  use defs_abitypes, only : MPI_type
  use m_fstrings, only : sjoin, itoa
  use m_time,     only : timab
@@ -55,7 +55,7 @@ module m_nonlinear
  use m_paw_ij,      only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify, paw_ij_print
  use m_pawfgrtab,   only : pawfgrtab_type, pawfgrtab_init, pawfgrtab_free
  use m_pawrhoij,    only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free, pawrhoij_copy, &
-&                          pawrhoij_bcast, pawrhoij_nullify, pawrhoij_inquire_dim
+                           pawrhoij_bcast, pawrhoij_nullify, pawrhoij_inquire_dim
  use m_pawdij,      only : pawdij, symdij
  use m_paw_finegrid,only : pawexpiqr
  use m_pawxc,       only : pawxc_get_nkxc
@@ -179,10 +179,10 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,pawang,pawra
  logical :: is_dfpt=.true.,nmxc
  real(dp),parameter :: k0(3)=(/zero,zero,zero/)
  real(dp) :: boxcut,compch_fft,compch_sph,ecore,ecut_eff,ecutdg_eff,ecutf
- real(dp) :: eei,epaw,epawdc,enxc,etot,fermie,fermih
+ real(dp) :: eei,epaw,epawdc,spaw,bigexc,bigsxc,etot,fermie,fermih
  real(dp) :: gsqcut,gsqcut_eff,gsqcutc_eff
- real(dp) :: rdum,residm,ucvol,vxcavg
- character(len=500) :: message
+ real(dp) :: rdum,residm,ucvol,vxcavg,el_temp
+ character(len=500) :: msg
  character(len=30) :: small_msg
  character(len=fnlen) :: dscrpt
  type(pawang_type) :: pawang1
@@ -206,7 +206,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,pawang,pawra
  real(dp) :: dum_gauss(0),dum_dyfrn(0),dum_dyfrv(0),dum_eltfrxc(0)
  real(dp) :: dum_grn(0),dum_grv(0),dum_rhog(0),dum_vg(0)
  real(dp) :: dum_shiftk(3,MAX_NSHIFTK),dummy6(6),other_dummy6(6),gmet(3,3),gprimd(3,3)
- real(dp) :: qphon(3),rmet(3,3),rprimd(3,3),strsxc(6),tsec(2)
+ real(dp) :: qphon(3),rmet(3,3),rprimd(3,3),tsec(2)
  real(dp),allocatable :: cg(:,:),d3cart(:,:,:,:,:,:,:)
  real(dp),allocatable :: d3etot(:,:,:,:,:,:,:),dum_kptns(:,:)
 ! We need all these arrays instead of one because in Fortran the maximum number of dimensions is 7...
@@ -239,8 +239,8 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,pawang,pawra
 
 !Structured debugging if dtset%prtvol==-level
  if(dtset%prtvol==-level)then
-   write(message,'(80a,a,a)')  ('=',ii=1,80),ch10,' nonlinear : enter , debug mode '
-   call wrtout(std_out,message,'COLL')
+   write(msg,'(80a,a,a)')  ('=',ii=1,80),ch10,' nonlinear : enter , debug mode '
+   call wrtout(std_out,msg)
  end if
 
 !Check if the perturbations asked in the input file can be computed
@@ -248,20 +248,19 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,pawang,pawra
  if (((dtset%d3e_pert1_phon == 1).and.(dtset%d3e_pert2_phon == 1)).or. &
 & ((dtset%d3e_pert1_phon == 1).and.(dtset%d3e_pert3_phon == 1)).or. &
 & ((dtset%d3e_pert2_phon == 1).and.(dtset%d3e_pert3_phon == 1))) then
-   write(message,'(7a)')&
+   write(msg,'(7a)')&
 &   'You have asked for a third-order derivative with respect to',ch10,&
 &   '2 or more atomic displacements.',ch10,&
 &   'This is not allowed yet.',ch10,&
 &   'Action : change d3e_pert1_phon, d3e_pert2_phon or d3e_pert3_phon in your input file.'
-   ABI_ERROR(message)
+   ABI_ERROR(msg)
  end if
 
 !Computation of third order derivatives from PEAD (pead=1) or full DPFT formalism (pead=0):
  pead = dtset%usepead
  if (pead==0) then
-   write(message, '(2a)' ) ch10,'NONLINEAR : PEAD=0, full DFPT computation of third order derivatives'
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+   write(msg, '(2a)' ) ch10,'NONLINEAR : PEAD=0, full DFPT computation of third order derivatives'
+   call wrtout([ab_out, std_out], msg)
  end if
 
 !Some data for parallelism
@@ -398,16 +397,16 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,pawang,pawra
 
  call sytens(indsym,mpert,natom,dtset%nsym,rfpert,symrec,dtset%symrel)
 
- write(message, '(a,a,a,a,a)' ) ch10, &
+ write(msg, '(a,a,a,a,a)' ) ch10, &
 & ' The list of irreducible elements of the Raman and non-linear',&
 & ch10,' optical susceptibility tensors is:',ch10
- call wrtout(ab_out,message,'COLL')
- call wrtout(std_out,message,'COLL')
+ call wrtout(ab_out,msg)
+ call wrtout(std_out,msg)
 
- write(message,'(12x,a)')&
+ write(msg,'(12x,a)')&
 & 'i1pert  i1dir   i2pert  i2dir   i3pert  i3dir'
- call wrtout(ab_out,message,'COLL')
- call wrtout(std_out,message,'COLL')
+ call wrtout(ab_out,msg)
+ call wrtout(std_out,msg)
  n1 = 0
  do i1pert = 1, natom + 2
    do i1dir = 1, 3
@@ -417,26 +416,26 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,pawang,pawra
            do i3dir = 1, 3
              if (rfpert(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1) then
                n1 = n1 + 1
-               write(message,'(2x,i4,a,6(5x,i3))') n1,')', &
+               write(msg,'(2x,i4,a,6(5x,i3))') n1,')', &
 &               i1pert,i1dir,i2pert,i2dir,i3pert,i3dir
-               call wrtout(ab_out,message,'COLL')
-               call wrtout(std_out,message,'COLL')
+               call wrtout(ab_out,msg)
+               call wrtout(std_out,msg)
              else if (rfpert(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==-2) then
                blkflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = 1
                if (dtset%nonlinear_info>0) then
 !                 n1 = n1 + 1
-                 write(message,'(2x,i4,a,6(5x,i3),a)') n1,')', &
+                 write(msg,'(2x,i4,a,6(5x,i3),a)') n1,')', &
   &               i1pert,i1dir,i2pert,i2dir,i3pert,i3dir,' => must be zero, not computed'
-                 call wrtout(ab_out,message,'COLL')
-                 call wrtout(std_out,message,'COLL')
+                 call wrtout(ab_out,msg)
+                 call wrtout(std_out,msg)
                end if
              else if (rfpert(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==-1) then
                if (dtset%nonlinear_info>0) then
 !                 n1 = n1 + 1
-                 write(message,'(2x,i4,a,6(5x,i3),a)') n1,')', &
+                 write(msg,'(2x,i4,a,6(5x,i3),a)') n1,')', &
   &               i1pert,i1dir,i2pert,i2dir,i3pert,i3dir,' => symmetric of an other element, not computed'
-                 call wrtout(ab_out,message,'COLL')
-                 call wrtout(std_out,message,'COLL')
+                 call wrtout(ab_out,msg)
+                 call wrtout(std_out,msg)
                end if
              end if
            end do
@@ -445,9 +444,9 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,pawang,pawra
      end do
    end do
  end do
- write(message,'(a,a)') ch10,ch10
- call wrtout(ab_out,message,'COLL')
- call wrtout(std_out,message,'COLL')
+ write(msg,'(a,a)') ch10,ch10
+ call wrtout(ab_out,msg)
+ call wrtout(std_out,msg)
 
 ! For abipy :
  if (dtset%paral_rf == -1) then
@@ -498,7 +497,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,pawang,pawra
  ecutf=dtset%ecut
  if (psps%usepaw==1) then
    ecutf=dtset%pawecutdg
-   call wrtout(std_out,ch10//' FFT (fine) grid used in SCF cycle:','COLL')
+   call wrtout(std_out,ch10//' FFT (fine) grid used in SCF cycle:')
  end if
  call getcut(boxcut,ecutf,gmet,gsqcut,dtset%iboxcut,std_out,k0,ngfftf)
 
@@ -508,7 +507,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,pawang,pawra
 & psps,rprimd,comm_mpi=mpi_enreg%comm_cell)
 
 !Initialize band structure datatype
- bstruct = ebands_from_dtset(dtset, npwarr)
+ call bstruct%from_dtset(dtset, npwarr)
 
 !Initialize PAW atomic occupancies
  if (psps%usepaw==1) then
@@ -524,7 +523,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,pawang,pawra
 
 !Initialize header
  gscase=0
- call hdr_init(bstruct,codvsn,dtset,hdr,pawtab,gscase,psps,wvl%descr, &
+ call hdr%init(bstruct,codvsn,dtset,pawtab,gscase,psps,wvl%descr, &
 & comm_atom=mpi_enreg%comm_atom, mpi_atmtab=mpi_enreg%my_atmtab)
 
 !Update header, with evolving variables, when available
@@ -537,7 +536,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,pawang,pawra
    comm_atom=mpi_enreg%comm_atom, mpi_atmtab=mpi_enreg%my_atmtab)
 
 !Clean band structure datatype (should use it more in the future !)
- call ebands_free(bstruct)
+ call bstruct%free()
 
 !Initialize wavefunction files and wavefunctions.
  ireadwf0=1
@@ -571,8 +570,8 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,pawang,pawra
 ! call timab(136,1,tsec)
 
 !Report on eigen0 values   ! Should use prteigrs.F90
- write(message, '(a,a)' )
- call wrtout(std_out,ch10//' respfn : eigen0 array','COLL')
+ write(msg, '(a,a)' )
+ call wrtout(std_out,ch10//' respfn : eigen0 array')
  nkpt_eff=dtset%nkpt
  if( (dtset%prtvol==0.or.dtset%prtvol==1.or.dtset%prtvol==2) .and. dtset%nkpt>nkpt_max ) nkpt_eff=nkpt_max
  band_index=0
@@ -580,15 +579,15 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,pawang,pawra
    do ikpt=1,dtset%nkpt
      nband_k=dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
      if(ikpt<=nkpt_eff)then
-       write(message, '(a,i2,a,i5)' )'  isppol=',isppol,', k point number',ikpt
-       call wrtout(std_out,message,'COLL')
+       write(msg, '(a,i2,a,i5)' )'  isppol=',isppol,', k point number',ikpt
+       call wrtout(std_out,msg)
        do iband=1,nband_k,4
-         write(message, '(a,4es16.6)')'  ',eigen0(iband+band_index:min(iband+3,nband_k)+band_index)
-         call wrtout(std_out,message,'COLL')
+         write(msg, '(a,4es16.6)')'  ',eigen0(iband+band_index:min(iband+3,nband_k)+band_index)
+         call wrtout(std_out,msg)
        end do
      else if(ikpt==nkpt_eff+1)then
-       write(message,'(a,a)' )'  respfn : prtvol=0, 1 or 2, stop printing eigen0.',ch10
-       call wrtout(std_out,message,'COLL')
+       write(msg,'(a,a)' )'  respfn : prtvol=0, 1 or 2, stop printing eigen0.',ch10
+       call wrtout(std_out,msg)
      end if
      band_index=band_index+nband_k
    end do
@@ -878,9 +877,12 @@ end if
 
  call xcdata_init(xcdata,dtset=dtset)
  nmxc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
- call rhotoxc(enxc,kxc,mpi_enreg,nfftf,ngfftf,&
+ call rhotoxc(bigexc,bigsxc,kxc,mpi_enreg,nfftf,ngfftf,&
 & nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,nmxc,n3xccc,option,rhor,&
-& rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,k3xc=k3xc,vhartr=vhartr)
+& rprimd,usexcnhat,vxc,vxcavg,xccc3d,xcdata,k3xc=k3xc,vhartr=vhartr)
+
+!Get electronic temperature from dtset
+el_temp=merge(dtset%tphysel,dtset%tsmear,dtset%tphysel>tol8.and.dtset%occopt/=3.and.dtset%occopt/=9)
 
 !Compute local + Hxc potential, and subtract mean potential.
  ABI_MALLOC(vtrial,(nfftf,dtset%nspden))
@@ -900,15 +902,15 @@ end if
  ABI_FREE(vhartr)
 
  if(dtset%prtvol==-level)then
-   call wrtout(std_out,' nonlinear : ground-state density and potential set up.','COLL')
+   call wrtout(std_out,' nonlinear : ground-state density and potential set up.')
  end if
 
- epaw = zero ; epawdc = zero
+ epaw = zero ; epawdc = zero ; spaw = zero
 !PAW: compute Dij quantities (psp strengths)
  if (psps%usepaw==1)then
    cplex=1;ipert=0;option=1
    nzlmopt=0;if (dtset%pawnzlm>0) nzlmopt=-1
-   call pawdenpot(compch_sph,epaw,epawdc,ipert,dtset%ixc,my_natom,natom,dtset%nspden,&
+   call pawdenpot(compch_sph,el_temp,epaw,epawdc,spaw,ipert,dtset%ixc,my_natom,natom,dtset%nspden,&
 &   ntypat,dtset%nucdipmom,nzlmopt,option,paw_an,paw_an,paw_ij,pawang,dtset%pawprtvol,&
 &   pawrad,pawrhoij,dtset%pawspnorb,pawtab,dtset%pawxcdev,&
 &   dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,dtset%xc_taupos,ucvol,psps%znuclpsp, &
@@ -918,7 +920,8 @@ end if
    call pawdij(cplex,dtset%enunit,gprimd,ipert,my_natom,natom,nfftf,nfftotf,&
 &   dtset%nspden,ntypat,paw_an,paw_ij,pawang,pawfgrtab,dtset%pawprtvol,&
 &   pawrad,pawrhoij,dtset%pawspnorb,pawtab,dtset%pawxcdev,k0,&
-&   dtset%spnorbscl,ucvol,dtset%cellcharge(1),vtrial,vxc,xred,nucdipmom=dtset%nucdipmom,&
+&   dtset%spnorbscl,ucvol,dtset%cellcharge(1),vtrial,vxc,xred,dtset%znucl,&
+&   nucdipmom=dtset%nucdipmom,&
 &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
    call symdij(gprimd,indsym,ipert,my_natom,natom,dtset%nsym,ntypat,0,&
 &   paw_ij,pawang,dtset%pawprtvol,pawtab,rprimd,dtset%symafm,symrec,&
@@ -1046,9 +1049,9 @@ end if
 
  end if ! end pead/=0
 
- write(message,'(a,a,a)')ch10,&
+ write(msg,'(a,a,a)')ch10,&
 & ' --- Third order energy calculation completed --- ',ch10
- call wrtout(ab_out,message,'COLL')
+ call wrtout(ab_out,msg)
 
 
  !Complete missing elements using symmetry operations
@@ -1143,12 +1146,12 @@ end if
      end if ! nonlinear_info > 0
 
      if (flag == 0) then
-       write(message,'(a,a,a,a,a,a)')ch10,&
+       write(msg,'(a,a,a,a,a,a)')ch10,&
 &       ' dfptnl_doutput: WARNING -',ch10,&
 &       '  matrix of third-order energies incomplete,',ch10,&
 &       '  non-linear optical coefficients may be wrong, check input variables rfatpol and rfdir.'
-       call wrtout(ab_out,message,'COLL')
-       call wrtout(std_out,message,'COLL')
+       call wrtout(ab_out,msg)
+       call wrtout(std_out,msg)
      end if
 
    end if  ! d3e_pert1,d3e_pert2,d3e_pert3
@@ -1196,12 +1199,12 @@ end if
      end do
 
      if (flag == 0) then
-       write(message,'(a,a,a,a,a,a)')ch10,&
+       write(msg,'(a,a,a,a,a,a)')ch10,&
 &       ' dfptnl_doutput: WARNING -',ch10,&
 &       '  matrix of third-order energies incomplete,',ch10,&
 &       '  changes in the dielectric susceptibility may be wrong, check input variables rfatpol and rfdir.'
-       call wrtout(ab_out,message,'COLL')
-       call wrtout(std_out,message,'COLL')
+       call wrtout(ab_out,msg)
+       call wrtout(std_out,msg)
      end if
 
      if (pead==0.and.(dtset%nonlinear_info>0)) then
@@ -1351,33 +1354,28 @@ end if
 !!  msg = a short message printed before the tensor
 !!  theunit = unit where the tensor is written
 !!
-!! OUTPUT
-!!
-!! SIDE EFFECTS
-!!
 !! SOURCE
 
-   subroutine print_chi2(d3cart0,msg,theunit)
+subroutine print_chi2(d3cart0,msg,theunit)
 
-     integer,intent(in) :: theunit
-     character(len=30) :: msg
-     real(dp) :: elem1,elem2
-     real(dp),intent(in) :: d3cart0(2,3,mpert,3,mpert,3,mpert)
-
+ integer,intent(in) :: theunit
+ character(len=30) :: msg
+ real(dp) :: elem1,elem2
+ real(dp),intent(in) :: d3cart0(2,3,mpert,3,mpert,3,mpert)
 ! *************************************************************************
 
-     write(theunit,'(2a)') ch10,msg
-     do i1dir = 1, 3
-       do i2dir = 1, 3
-         do i3dir = 1, 3
-           elem1 = d3cart0(1,i1dir,natom+2,i2dir,natom+2,i3dir,natom+2)
-           elem2 = d3cart0(2,i1dir,natom+2,i2dir,natom+2,i3dir,natom+2)
-           write(theunit,'(3(5x,i2),5x,f16.9,2x,f16.9)') i1dir,i2dir,i3dir,elem1,elem2
-         end do
-       end do
+ write(theunit,'(2a)') ch10,msg
+ do i1dir = 1, 3
+   do i2dir = 1, 3
+     do i3dir = 1, 3
+       elem1 = d3cart0(1,i1dir,natom+2,i2dir,natom+2,i3dir,natom+2)
+       elem2 = d3cart0(2,i1dir,natom+2,i2dir,natom+2,i3dir,natom+2)
+       write(theunit,'(3(5x,i2),5x,f16.9,2x,f16.9)') i1dir,i2dir,i3dir,elem1,elem2
      end do
+   end do
+ end do
 
-   end subroutine print_chi2
+end subroutine print_chi2
 !!***
 
 !!****f* nonlinear/print_dchidtau
@@ -1398,27 +1396,26 @@ end if
 !!
 !! SOURCE
 
-   subroutine print_dchidtau(d3cart0,msg,theunit)
+ subroutine print_dchidtau(d3cart0,msg,theunit)
 
-     integer,intent(in) :: theunit
-     character(len=30) :: msg
-     real(dp),intent(in) :: d3cart0(2,3,mpert,3,mpert,3,mpert)
-
+ integer,intent(in) :: theunit
+ character(len=30) :: msg
+ real(dp),intent(in) :: d3cart0(2,3,mpert,3,mpert,3,mpert)
 ! *************************************************************************
 
-     write(theunit,'(a)') msg
-     do i1pert = 1,natom
-       do i1dir = 1,3
-         write(theunit,'(1x,i4,9x,i2,3(3x,f16.9),3(3x,f16.9))')i1pert,i1dir,&
-  &      d3cart0(1,i1dir,i1pert,1,natom+2,:,natom+2),d3cart0(2,i1dir,i1pert,1,natom+2,:,natom+2)
-         write(theunit,'(16x,3(3x,f16.9),3(3x,f16.9))')&
-  &      d3cart0(1,i1dir,i1pert,2,natom+2,:,natom+2),d3cart0(2,i1dir,i1pert,2,natom+2,:,natom+2)
-         write(theunit,'(16x,3(3x,f16.9),3(3x,f16.9))')&
-  &      d3cart0(1,i1dir,i1pert,3,natom+2,:,natom+2),d3cart0(2,i1dir,i1pert,3,natom+2,:,natom+2)
-       end do
-     end do
+ write(theunit,'(a)') msg
+ do i1pert = 1,natom
+   do i1dir = 1,3
+     write(theunit,'(1x,i4,9x,i2,3(3x,f16.9),3(3x,f16.9))')i1pert,i1dir,&
+     d3cart0(1,i1dir,i1pert,1,natom+2,:,natom+2),d3cart0(2,i1dir,i1pert,1,natom+2,:,natom+2)
+     write(theunit,'(16x,3(3x,f16.9),3(3x,f16.9))')&
+     d3cart0(1,i1dir,i1pert,2,natom+2,:,natom+2),d3cart0(2,i1dir,i1pert,2,natom+2,:,natom+2)
+     write(theunit,'(16x,3(3x,f16.9),3(3x,f16.9))')&
+     d3cart0(1,i1dir,i1pert,3,natom+2,:,natom+2),d3cart0(2,i1dir,i1pert,3,natom+2,:,natom+2)
+   end do
+ end do
 
-  end subroutine print_dchidtau
+end subroutine print_dchidtau
 !!***
 
 end subroutine nonlinear
@@ -1488,7 +1485,7 @@ subroutine initmv(cgindex,dtset,gmet,kg,kneigh,kg_neigh,kptindex,&
  integer :: index,ineigh,ipw,isppol,jpw,nband_k,mband_occ,mband_occ_k,npw_k
  integer :: npw_k1,orig,spaceComm
  real(dp) :: ecut_eff,sdeg
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
  integer :: dg(3)
  integer,allocatable :: kg1(:,:),kg1_k(:,:),npwar1(:),npwtot(:)
@@ -1497,14 +1494,8 @@ subroutine initmv(cgindex,dtset,gmet,kg,kneigh,kg_neigh,kptindex,&
 
 !************************************************************************
 
-!DEBUG
-!write(std_out,*)' initmv : enter '
-!ENDDEBUG
-
  if (xmpi_paral== 1) then
-!  BEGIN TF_CHANGES
    spaceComm=mpi_enreg%comm_cell
-!  END TF_CHANGES
    mpi_enreg%kpt_loc2ibz_sp(:,:,:) = 0
    mpi_enreg%mkmem(:) = 0
  end if
@@ -1533,7 +1524,6 @@ subroutine initmv(cgindex,dtset,gmet,kg,kneigh,kg_neigh,kptindex,&
 !write(std_out,*)' list of nband '
 !do isppol = 1, nsppol
 !do ikpt = 1, nkpt2
-!
 !nband_k = nband(ikpt + (isppol - 1)*nkpt2)
 !write(std_out,*)' isppol, ikpt, nband_k=',isppol, ikpt, nband_k
 !end do
@@ -1553,17 +1543,16 @@ subroutine initmv(cgindex,dtset,gmet,kg,kneigh,kg_neigh,kptindex,&
      end do
 
      if (nband_k /= mband_occ_k) then
-       write(message,'(a,a,a)')&
+       write(msg,'(a,a,a)')&
 &       '  In a non-linear response calculation, nband must be equal ',ch10,&
 &       '  to the number of valence bands.'
-       ABI_ERROR(message)
+       ABI_ERROR(msg)
      end if
 
 !    Note that the number of bands can be different for spin up and spin down
      if (ikpt > 1) then
        if (mband_occ /= mband_occ_k) then
-         message = 'The number of valence bands is not the same for every k-point'
-         ABI_ERROR(message)
+         ABI_ERROR('The number of valence bands is not the same for every k-point')
        end if
      else
        mband_occ = mband_occ_k
@@ -1577,10 +1566,7 @@ subroutine initmv(cgindex,dtset,gmet,kg,kneigh,kg_neigh,kptindex,&
  icg = 0
  do isppol = 1, nsppol
    do ikpt = 1, nkpt2
-
-
 !    fab: inserted the shift due to the spin...
-
      nband_k = dtset%nband(ikpt+(isppol - 1)*nkpt2)
      npw_k = npwarr(ikpt)
 
@@ -1613,8 +1599,7 @@ subroutine initmv(cgindex,dtset,gmet,kg,kneigh,kg_neigh,kptindex,&
 
    if(dtset%nsppol/=1)then
      if(mpi_enreg%nproc/=1)then
-       message = ' At present, non-linear response calculations for spin-polarized system cannot be done in parallel.'
-       ABI_ERROR(message)
+       ABI_ERROR('At present, non-linear response calculations for spin-polarized system cannot be done in parallel.')
      else
        isppol=1
      end if
@@ -1670,14 +1655,12 @@ subroutine initmv(cgindex,dtset,gmet,kg,kneigh,kg_neigh,kptindex,&
      ikg1 = ikg1 + npw_k1
 
    end do     ! close loop over k-points
-
  end do    ! close loop over ineigh
+
  mpi_enreg%mkmem(mpi_enreg%me) = mkmem
 
  call xmpi_sum(mpi_enreg%kpt_loc2ibz_sp,spaceComm,ierr)
  call xmpi_sum(mpi_enreg%mkmem,spaceComm,ierr)
-
-!----------------------------------------------------------------------------
 
  ABI_FREE(kg1)
  ABI_FREE(kg1_k)

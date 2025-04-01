@@ -1,0 +1,71 @@
+# =================================================================
+# === H2 molecule: MD simulation with Langevin thermostat (NPT) ===
+# ===              (ionmov 16 is using PIMD algorithm)          ===
+# =================================================================
+
+# MD parameters
+moldyn "npt_langevin"
+# moldyn "npt_langevin" is equivalent to ionmov 16
+optcell 2 # Optimize geometry
+bmass 1e9 # Mass of the barostat
+ntime 5 # Number of (real) time steps
+dtion 10 # Time step
+pitransform 0 # Normal mode transformation
+mdtemp 600 300 # Start and final temperature
+irandom 1 # Random number generator (deterministic for testing purposes)
+friction 1.0d-04 # Friction: chosen large here to thermalize more rapidly the trajectory
+frictionbar 1.0d-02 # Friction of the barostat
+prtvolimg 2 # Printing volume
+chkdilatmx 0
+strtarget -3.4d-04 -3.4d-04 -3.4d-04 0 0 0 # Target a pressure of 10 GPa
+
+# Atoms and geometry
+acell 8.0 8.0 11.0 # Box size
+natom 6 ntypat 1
+typat 6*1
+znucl 1  amu 1
+xcart  # Initial positions
+  -1.3219886799E-02  0.0  0.0
+   7.6321988680E-01  0.0  0.0
+  -1.3219886799E-02  0.0  2.0
+   7.6321988680E-01  0.0  2.0
+  -1.3219886799E-02  0.0  4.0
+   7.6321988680E-01  0.0  4.0
+   Angstrom
+nband 4 occopt 1
+nsym 1 # No symmetry (molecular dynamics)
+pawovlp 9.5 # Allow for PAW overlap (testing)
+
+# Plane-wave cut-off
+ecut 10.0
+pawecutdg 20.0
+
+#SCF cycle
+nstep 25
+toldfe 1.0d-10
+
+#Gamma point only
+kptopt 1
+ngkpt 1 1 1
+nshiftk 1
+shiftk 0.0 0.0 0.0
+
+# I/O parameters
+prtwf 0  prtden 0
+
+pp_dirpath "$ABI_PSPDIR"
+pseudos "H.LDA-PW-paw.abinit"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test =
+#%%   t21.abo, tolnlines = 500, tolabs = 1.e-4, tolrel = 1.e-1
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% authors = A. Blanchet
+#%% keywords = MD
+#%% description = H2 molecule: MD simulation with Langevin thermostat.
+#%%<END TEST_INFO>

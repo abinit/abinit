@@ -1,25 +1,25 @@
 #############################################################################
-# La2CuO4 : Wannier90
+# La2CuO4: Wannier90
 #############################################################################
 # Structural parameters
 #############################################################################
 acell            3*1
 
-rprim            3.6077606084241   3.6077606084241  -12.478046911766                
-                -3.6077606084241   3.6077606084241   12.478046911766                
+rprim            3.6077606084241   3.6077606084241  -12.478046911766
+                -3.6077606084241   3.6077606084241   12.478046911766
                  3.6077606084241  -3.6077606084241   12.478046911766
 
-natom            7  
-ntypat           3  
-typat            1 1 2 3 3 3 3  
-znucl            57 29 8  
-xcart            0.0000000000  0.0000000000  9.0145301354                           
-                 3.6077606086  3.6077606086  3.4635167757                           
-                 0.0000000000  0.0000000000  0.0000000000                           
-                 0.0000000000  3.6077606086  0.0000000000                           
-                 3.6077606086  0.0000000000  0.0000000000                           
-                 0.0000000000  0.0000000000  4.6340316725                           
-                 3.6077606086  3.6077606086  7.8440152387      
+natom            7
+ntypat           3
+typat            1 1 2 3 3 3 3
+znucl            57 29 8
+xcart            0.0000000000  0.0000000000  9.0145301354
+                 3.6077606086  3.6077606086  3.4635167757
+                 0.0000000000  0.0000000000  0.0000000000
+                 0.0000000000  3.6077606086  0.0000000000
+                 3.6077606086  0.0000000000  0.0000000000
+                 0.0000000000  0.0000000000  4.6340316725
+                 3.6077606086  3.6077606086  7.8440152387
 
 # Four datasets: Ground state on coarse grid, non-self-consistent calculations on
 # finer grid, wannier90 projection, band structure
@@ -92,7 +92,7 @@ tolwfr4          1.0d-9
 enunit4          1
 
 pp_dirpath       "$ABI_PSPDIR"
-pseudos          "Pseudodojo_paw_pw_standard/La.xml, Pseudodojo_paw_pw_standard/Cu.xml, Pseudodojo_paw_pw_standard/O.xml"
+pseudos          "Psdj_paw_pw_std/La.xml, Psdj_paw_pw_std/Cu.xml, Psdj_paw_pw_std/O.xml"
 
 
 ##############################################################
@@ -103,15 +103,14 @@ pseudos          "Pseudodojo_paw_pw_standard/La.xml, Pseudodojo_paw_pw_standard/
 #%% executable = abinit
 #%% [shell]
 #%% pre_commands = iw_cp tw90_6o_DS3_w90.win tw90_6_MPI4o_DS3_w90.win
-#%% [paral_info]                                                                
-#%% max_nprocs = 4                                                              
-#%% nprocs_to_test = 4                                                          
-#%% [NCPU_4]                                                                    
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% nprocs_to_test = 4
+#%% [NCPU_4]
 #%% files_to_test =
 #%%    tw90_6_MPI4.abo, tolnlines=5, tolabs=7.00e-05, tolrel=1.10e+00, fld_options=-medium
 #%% [extra_info]
 #%% authors = O. Gingras
-#%% keywords = wannier90, la2cuo4, paw
+#%% keywords = wannier90, la2cuo4, PAW
 #%% description = Test interface with Wannier90 (PAW pseudopotentials)
 #%%<END TEST_INFO>
-#

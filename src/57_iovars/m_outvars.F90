@@ -4,9 +4,8 @@
 !!
 !! FUNCTION
 !!
-!!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR)
+!!  Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -100,8 +99,7 @@ contains
 !!
 !! SOURCE
 
-subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
-&  mxvals,ndtset,ndtset_alloc,npsp,results_out,timopt)
+subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout, mxvals,ndtset,ndtset_alloc,npsp,results_out,timopt)
 
 !Arguments ------------------------------------
 !scalars
@@ -116,13 +114,10 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
 !Local variables-------------------------------
 !scalars
  integer,parameter :: nkpt_max=50
- integer :: first,idtset,iimage,kptopt
- integer :: marr,mu,ncerr
- integer :: nshiftk
- integer :: prtvol_glob,max_nthreads
+ integer :: first,idtset,iimage,kptopt, marr,mu,ncerr, nshiftk, prtvol_glob,max_nthreads
  integer :: rfddk,rfelfd,rfphon,rfstrs,rfuser,rfmagn,rf2_dkdk,rf2_dkde
  integer :: ncid=0 ! Variables for NetCDF output
- character(len=500) :: message
+ character(len=500) :: msg
  character(len=4) :: stringimage
  type(ab_dimensions) :: multivals
 !arrays
@@ -131,7 +126,7 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
 
 ! *************************************************************************
 
-!Set up a 'global' prtvol value
+ !Set up a 'global' prtvol value
  prtvol_glob=1
  if(sum((dtsets(:)%prtvol)**2)==0)prtvol_glob=0
 
@@ -139,25 +134,24 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
 !### 00. Echo of selected default values
 
  if(choice==1)then
-
    max_nthreads = xomp_get_max_threads()
 #ifndef HAVE_OPENMP
    max_nthreads = 0 ! this value signals that OMP is not enabled in ABINIT.
 #endif
 
-   write(iout, '(10a)' )&
-&   '--------------------------------------------------------------------------------',ch10,&
-&   '------------- Echo of variables that govern the present computation ------------',ch10,&
-&   '--------------------------------------------------------------------------------',ch10,&
-&   '-',ch10,&
-&   '- outvars: echo of selected default values                                      '
+   write(iout, '(9a)' )&
+     '--------------------------------------------------------------------------------',ch10,&
+     '------------- Echo of variables that govern the present computation ------------',ch10,&
+     '--------------------------------------------------------------------------------',ch10,&
+     '-',ch10,&
+     '- outvars: echo of selected default values'
    write(iout, '(3(a,i3),2a)' )&
-&   '-   iomode0 =',dtsets(0)%iomode,' , fftalg0 =',dtsets(0)%ngfft(7),' , wfoptalg0 =',dtsets(0)%wfoptalg,ch10,&
-&   '-'
+     '-   iomode0 =',dtsets(0)%iomode,' , fftalg0 =',dtsets(0)%ngfft(7),' , wfoptalg0 =',dtsets(0)%wfoptalg,ch10,&
+     '-'
    write(iout, '(3a,(a,i5),2a)' )&
-&   '- outvars: echo of global parameters not present in the input file              ',ch10,&
-&   '- ',' max_nthreads =',max_nthreads,ch10,&
-&   '-'
+     '- outvars: echo of global parameters not present in the input file',ch10,&
+     '- ',' max_nthreads =',max_nthreads,ch10,&
+     '-'
  end if
 
 !write(std_out,*) 'outvar 01'
@@ -176,13 +170,12 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
 !Wrap the netcdf OUT.nc into conditional for flexible output writing
  if ( dtsets(1)%ncout == 1 ) then
 
- ! Enable netcdf output only if the number of datasets is small.
- ! otherwise v6[34] crashes with errmess:
- !    nf90_def_dim - NetCDF library returned:   NetCDF: NC_MAX_DIMS exceeded
- ! because we keep on creating dimensions in write_var_netcdf.
- ! one should use groups for this kind of operations!!
-
- ncid = 0
+   ! Enable netcdf output only if the number of datasets is small.
+   ! otherwise v6[34] crashes with errmess:
+   !    nf90_def_dim - NetCDF library returned:   NetCDF: NC_MAX_DIMS exceeded
+   ! because we keep on creating dimensions in write_var_netcdf.
+   ! one should use groups for this kind of operations!!
+   ncid = 0
    if (ndtset_alloc  < 10) then
      if (iout==std_out)then
        write(iout,*) ch10,' These variables are accessible in NetCDF format (',trim(filnam4)//'_OUT.nc',')',ch10
@@ -199,7 +192,7 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
    else
      ABI_COMMENT("output of OUT.nc has been disabled. Too many datasets")
    end if
- !ncid = 0
+  !ncid = 0
 
   else if ( dtsets(1)%ncout == 0 ) then
    ABI_COMMENT("ncout set to 0. No OUT.nc will be printed.")
@@ -309,24 +302,25 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
 !### 05. Determine size of work arrays
 
  marr=max(3*mxvals%natom,&
-& mxvals%natsph,&
-& mxvals%natvshift*mxvals%nsppol*mxvals%natom,&
-& 3*mxvals%nberry,&
-& mxvals%nimage,&
-& 3*mxvals%nkptgw,&
-& 3*mxvals%nkpthf,&
-& mxvals%nkpt*mxvals%nsppol*mxvals%mband,&
-& 3*mxvals%nkpt,npsp,&
-& 3*mxvals%nqptdm,&
-& mxvals%ntypat,&
-& 9*mxvals%nsym,3*8,&
-& 3*mxvals%natom*mxvals%nconeq,&
-& mxvals%nnos,&
-& 3*mxvals%nqptdm,&
-& 3*mxvals%nzchempot*mxvals%ntypat,&
-& 3*mxvals%gw_nqlwl,&
-& (2*mxvals%lpawu+1)**2*max(mxvals%nsppol,mxvals%nspinor)*mxvals%natpawu*dmatpuflag,&
-& 30 ) ! used by ga_rules TODO : replace with mxvals% ga_n_rules
+          mxvals%natsph,&
+          mxvals%natvshift*mxvals%nsppol*mxvals%natom,&
+          3*mxvals%nberry,&
+          mxvals%nimage,&
+          3*mxvals%nkptgw,&
+          3*mxvals%nkpthf,&
+          mxvals%nkpt*mxvals%nsppol*mxvals%mband,&
+          3*mxvals%nkpt,npsp,&
+          3*mxvals%nqptdm,&
+          mxvals%ntypat,&
+          9*mxvals%nsym,3*8,&
+          3*mxvals%natom*mxvals%nconeq,&
+          mxvals%nnos,&
+          3*mxvals%nqptdm,&
+          3*mxvals%nzchempot*mxvals%ntypat,&
+          3*mxvals%gw_nqlwl,&
+          (2*mxvals%lpawu+1)**2*max(mxvals%nsppol,mxvals%nspinor)*mxvals%natpawu*dmatpuflag,&
+          30 &
+          ) ! used by ga_rules TODO : replace with mxvals% ga_n_rules
 
 !###########################################################
 !### 06. Initialize strimg
@@ -352,7 +346,6 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
  ABI_MALLOC(jdtset_,(0:ndtset_alloc))
  jdtset_(0:ndtset_alloc)=dtsets(0:ndtset_alloc)%jdtset
 
-
 !###########################################################
 !### 08. Print variables, for different ranges of names
 
@@ -373,14 +366,14 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
  ABI_FREE(response_)
  ABI_FREE(strimg)
 
- write(message,'(a,80a)')ch10,('=',mu=1,80)
- call wrtout(iout,message)
+ write(msg,'(a,80a)')ch10,('=',mu=1,80)
+ call wrtout(iout,msg)
 
  if (ncid /= 0 .and. dtsets(1)%ncout == 1) then
    ncerr=nf90_close(abs(ncid))
    if (ncerr/=nf90_NoErr) then
-     message='Netcdf Error while closing the OUT.nc file: '//trim(nf90_strerror(ncerr))
-     ABI_ERROR(message)
+     msg='Netcdf Error while closing the OUT.nc file: '//trim(nf90_strerror(ncerr))
+     ABI_ERROR(msg)
    end if
  end if
 

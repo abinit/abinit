@@ -7,7 +7,7 @@
 !! physical constants, as well as associated datatypes and methods.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2024 ABINIT group (HM, XG,XW, EB)
+!! Copyright (C) 2000-2025 ABINIT group (HM, XG,XW, EB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -82,12 +82,14 @@ module defs_basis
  integer, parameter :: fnlen=264     ! maximum length of file name variables
  integer, parameter :: strlen=2000000 ! maximum length of input string
 
- ! The input file used to run the code, set by parsefile.
+ ! The input file used to run the code, allocated and set by parsefile.
  ! It will be added to the netcdf files in ntck_open_create
- character(len=strlen), save :: INPUT_STRING = ""
+ character(len=:), allocatable, save :: INPUT_STRING
 
  integer, parameter :: md5_slen = 32 ! lenght of strings storing the pseudos' md5 checksum.
  character(len=md5_slen),parameter :: md5_none = "None"
+
+ integer, parameter :: abi_slen=80 ! maximum length of string variables
 
 !Some constants:
 
@@ -192,7 +194,7 @@ module defs_basis
  real(dp), parameter :: tol14=0.00000000000001_dp
  real(dp), parameter :: tol15=0.000000000000001_dp
  real(dp), parameter :: tol16=0.0000000000000001_dp
- real(dp), parameter :: tol17=0.00000000000000010_dp
+ real(dp), parameter :: tol17=0.00000000000000001_dp
  real(dp), parameter :: tol18=0.000000000000000001_dp
  real(dp), parameter :: tol19=0.0000000000000000001_dp
  real(dp), parameter :: tol20=0.00000000000000000001_dp

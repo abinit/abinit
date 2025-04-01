@@ -1,8 +1,8 @@
 
-.Version 9.11.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Jul 2023.
-- ( at 12h10 )
-  
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v9_t36/t36.abi
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h15 )
+
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v9_t36/t36.abi
 - output file    -> t36.abo
 - root for input  files -> t36i
 - root for output files -> t36o
@@ -74,10 +74,10 @@ _ WF disk file :      0.224 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -96,7 +96,7 @@ _ WF disk file :      0.224 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
           ecutwfn1     0.00000000E+00 Hartree
           ecutwfn2     8.00000000E+00 Hartree
           ecutwfn3     8.00000000E+00 Hartree
--          fftalg         312
+-          fftalg         512
            getscr1          0
            getscr2          0
            getscr3         -1
@@ -259,8 +259,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.16515
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Si-GGA.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Si-GGA.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Si-GGA.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Si-GGA.psp8
 - Si    ONCVPSP  r_core=  1.60  1.72  1.92
 - 14.00000   4.00000    150713                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -290,11 +290,11 @@ tolerances: {toldfe: 1.00E-06, }
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -8.4477575773938    -8.448E+00 8.184E-03 2.116E+00
  ETOT  2  -8.4515477760980    -3.790E-03 4.521E-04 4.013E-02
- ETOT  3  -8.4515795353281    -3.176E-05 1.002E-04 3.485E-04
+ ETOT  3  -8.4515795353282    -3.176E-05 1.002E-04 3.485E-04
  ETOT  4  -8.4515796676480    -1.323E-07 1.888E-05 1.565E-05
  ETOT  5  -8.4515796730286    -5.381E-09 3.379E-06 4.609E-07
 
- At SCF step    5, etot is converged : 
+ At SCF step    5, etot is converged :
   for the second time, diff in etot=  5.381E-09 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -326,9 +326,9 @@ xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00, Si]
 - [  2.5000E-01,   2.5000E-01,   2.5000E-01, Si]
 cartesian_forces: # hartree/bohr
-- [ -1.07495856E-24,   1.07495856E-24,   6.44975136E-25, ]
-- [  1.07495856E-24,  -1.07495856E-24,  -6.44975136E-25, ]
-force_length_stats: {min:   1.65138268E-24, max:   1.65138268E-24, mean:   1.65138268E-24, }
+- [  0.00000000E+00,   0.00000000E+00,  -4.29983424E-25, ]
+- [  9.18354962E-41,  -1.83670992E-40,   4.29983424E-25, ]
+force_length_stats: {min:   4.29983424E-25, max:   4.29983424E-25, mean:   4.29983424E-25, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -344,23 +344,23 @@ force_length_stats: {min:   1.65138268E-24, max:   1.65138268E-24, mean:   1.651
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
- rms dE/dt=  6.4937E-24; max dE/dt=  4.4116E-24; dE/dt below (all hartree)
-    1      -0.000000000000      0.000000000000     -0.000000000000
-    2       0.000000000000      0.000000000000     -0.000000000000
+ rms dE/dt=  3.6021E-24; max dE/dt=  4.4116E-24; dE/dt below (all hartree)
+    1       0.000000000000     -0.000000000000      0.000000000000
+    2       0.000000000000     -0.000000000000      0.000000000000
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
     2      1.35733954003335     1.35733954003335     1.35733954003335
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.00000000000000     0.00000000000000     0.00000000000000
-    2      0.00000000000000    -0.00000000000000    -0.00000000000000
- frms,max,avg= 9.5342623E-25 1.0749586E-24   0.000E+00  0.000E+00  0.000E+00 h/b
+    1      0.00000000000000     0.00000000000000    -0.00000000000000
+    2      0.00000000000000    -0.00000000000000     0.00000000000000
+ frms,max,avg= 2.4825105E-25 4.2998342E-25   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.00000000000000     0.00000000000000     0.00000000000000
-    2      0.00000000000000    -0.00000000000000    -0.00000000000000
- frms,max,avg= 4.9027144E-23 5.5276587E-23   0.000E+00  0.000E+00  0.000E+00 e/A
+    1      0.00000000000000     0.00000000000000    -0.00000000000000
+    2      0.00000000000000    -0.00000000000000     0.00000000000000
+ frms,max,avg= 1.2765581E-23 2.2110635E-23   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.260000000000 10.260000000000 10.260000000000 bohr
               =  5.429358160133  5.429358160133  5.429358160133 angstroms
  prteigrs : about to open file t36o_DS1_EIG
@@ -374,16 +374,16 @@ force_length_stats: {min:   1.65138268E-24, max:   1.65138268E-24, mean:   1.651
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  3.09264107284068E+00
-hartree             :  5.59853412775728E-01
-xc                  : -3.09974240863184E+00
+kinetic             :  3.09264107284074E+00
+hartree             :  5.59853412775753E-01
+xc                  : -3.09974240863186E+00
 Ewald energy        : -8.40046478618609E+00
 psp_core            :  5.54219173999640E-01
-local_psp           : -2.30413517315437E+00
-non_local_psp       :  1.14604903532763E+00
-total_energy        : -8.45157967302863E+00
+local_psp           : -2.30413517315433E+00
+non_local_psp       :  1.14604903532753E+00
+total_energy        : -8.45157967302862E+00
 total_energy_eV     : -2.29979178706155E+02
-band_energy         : -1.88133200070991E-01
+band_energy         : -1.88133200070981E-01
 ...
 
 
@@ -417,7 +417,7 @@ meta: {optdriver: 3, gwcalctyp: 21, }
  Citation for XC functional:
   J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
 
- SCREENING: Calculation of the susceptibility and dielectric matrices 
+ SCREENING: Calculation of the susceptibility and dielectric matrices
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
@@ -433,7 +433,7 @@ meta: {optdriver: 3, gwcalctyp: 21, }
 
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :     6
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)    -2.50000000E-01 -2.50000000E-01  0.00000000E+00       0.18750
      2)    -2.50000000E-01  2.50000000E-01  0.00000000E+00       0.37500
@@ -442,13 +442,13 @@ meta: {optdriver: 3, gwcalctyp: 21, }
      5)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.12500
      6)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.03125
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields    32 points in the full Brillouin Zone.
 
 
  ==== Q-mesh for the screening function ====
  Number of points in the irreducible wedge :     6
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.03125
      2)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.09375
@@ -457,7 +457,7 @@ meta: {optdriver: 3, gwcalctyp: 21, }
      5)     5.00000000E-01 -2.50000000E-01  2.50000000E-01       0.18750
      6)     0.00000000E+00 -2.50000000E-01 -2.50000000E-01       0.18750
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields    32 points in the full Brillouin Zone.
 
 
@@ -465,15 +465,19 @@ meta: {optdriver: 3, gwcalctyp: 21, }
           total number of points  =         8000
 
 
-- screening: taking advantage of time-reversal symmetry 
+ vcoul_init : cutoff-mode = AUXILIARY_FUNCTION
+ q-points for optical limit:   1
+     1)      0.000010    0.000020    0.000030
+
+- screening: taking advantage of time-reversal symmetry
 - Maximum band index for partially occupied states nbvw = 4
 - Remaining bands to be divided among processors   nbcw = 4
 - Number of bands treated by each node ~4
 
 
- rdqps: reading QP wavefunctions of the previous step 
+ rdqps: reading QP wavefunctions of the previous step
         looking for file t36i_DS2_QPS
- file not found, 1st iteration initialized with KS eigenelements 
+ file not found, 1st iteration initialized with KS eigenelements
 
  Number of electrons calculated from density =    8.0000; Expected =    8.0000
  average of density, n =  0.029628
@@ -539,7 +543,7 @@ meta: {optdriver: 3, gwcalctyp: 21, }
   chi0(G,G') at the    2 th omega   0.0000********* [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-       -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
+        0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
     2   0.000  -0.000   0.000   0.000   0.000   0.000   0.000   0.000  -0.000
        -0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.000   0.000  -0.000
@@ -563,7 +567,7 @@ meta: {optdriver: 3, gwcalctyp: 21, }
   chi0(G,G') at the    5 th omega   0.00001266.0076 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-        0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
+       -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
     2   0.000  -0.001   0.000   0.000   0.000   0.000   0.000   0.000  -0.000
        -0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.000   0.000  -0.000
@@ -571,7 +575,7 @@ meta: {optdriver: 3, gwcalctyp: 21, }
   chi0(G,G') at the    6 th omega   0.0000 782.8056 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-        0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
+       -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
     2   0.000  -0.001   0.000   0.000   0.000   0.000   0.000   0.000  -0.000
        -0.000   0.000  -0.001  -0.000  -0.000  -0.000  -0.000   0.000  -0.000
@@ -595,7 +599,7 @@ meta: {optdriver: 3, gwcalctyp: 21, }
   chi0(G,G') at the    9 th omega   0.0000 283.0883 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-       -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
+        0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
     2   0.000  -0.011   0.000   0.000   0.000   0.000   0.000   0.000  -0.000
        -0.000   0.000  -0.005  -0.000  -0.000  -0.000  -0.000   0.000  -0.000
@@ -611,7 +615,7 @@ meta: {optdriver: 3, gwcalctyp: 21, }
   chi0(G,G') at the   11 th omega   0.0000 172.3721 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-       -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
+        0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
     2   0.000  -0.029   0.000   0.000   0.000   0.000   0.000   0.000  -0.000
        -0.000   0.000  -0.014  -0.000  -0.000  -0.000  -0.000   0.000  -0.000
@@ -643,7 +647,7 @@ meta: {optdriver: 3, gwcalctyp: 21, }
   chi0(G,G') at the   15 th omega   0.0000  78.0705 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-       -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
+        0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
     2   0.000  -0.138   0.000   0.000   0.000  -0.000   0.000   0.000  -0.000
        -0.000   0.000  -0.068  -0.000  -0.001  -0.000  -0.001   0.000  -0.001
@@ -654,7 +658,7 @@ meta: {optdriver: 3, gwcalctyp: 21, }
   dielectric constant without local fields =  28.0445
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     10.13  [%]
-  Heads and wings of the symmetrical epsilon^-1(G,G') 
+  Heads and wings of the symmetrical epsilon^-1(G,G')
 
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
@@ -668,10 +672,10 @@ meta: {optdriver: 3, gwcalctyp: 21, }
    Upper and lower wings at the    2 th omega   0.0000********* [eV]
        1       2       3       4       5       6       7       8       9
       1.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-     -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
+      0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
        1       2       3       4       5       6       7       8       9
       1.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-     -0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000
+      0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000
 
 
    Upper and lower wings at the    3 th omega   0.00005841.2562 [eV]
@@ -695,19 +699,19 @@ meta: {optdriver: 3, gwcalctyp: 21, }
    Upper and lower wings at the    5 th omega   0.00001266.0076 [eV]
        1       2       3       4       5       6       7       8       9
       1.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-      0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
+     -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
        1       2       3       4       5       6       7       8       9
       1.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-      0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000
+     -0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000
 
 
    Upper and lower wings at the    6 th omega   0.0000 782.8056 [eV]
        1       2       3       4       5       6       7       8       9
       0.999   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-      0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
+     -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
        1       2       3       4       5       6       7       8       9
       0.999   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-      0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000
+     -0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000
 
 
    Upper and lower wings at the    7 th omega   0.0000 528.6835 [eV]
@@ -731,10 +735,10 @@ meta: {optdriver: 3, gwcalctyp: 21, }
    Upper and lower wings at the    9 th omega   0.0000 283.0883 [eV]
        1       2       3       4       5       6       7       8       9
       0.996   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-     -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
+      0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
        1       2       3       4       5       6       7       8       9
       0.996   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-     -0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000
+      0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000
 
 
    Upper and lower wings at the   10 th omega   0.0000 218.2742 [eV]
@@ -749,10 +753,10 @@ meta: {optdriver: 3, gwcalctyp: 21, }
    Upper and lower wings at the   11 th omega   0.0000 172.3721 [eV]
        1       2       3       4       5       6       7       8       9
       0.989   0.000  -0.000  -0.001   0.001   0.001  -0.001  -0.000   0.000
-     -0.000   0.000   0.000  -0.001  -0.001   0.001   0.001  -0.000  -0.000
+      0.000   0.000   0.000  -0.001  -0.001   0.001   0.001  -0.000  -0.000
        1       2       3       4       5       6       7       8       9
       0.989   0.000  -0.000  -0.001   0.001   0.001  -0.001  -0.000   0.000
-     -0.000  -0.000  -0.000   0.001   0.001  -0.001  -0.001   0.000   0.000
+      0.000  -0.000  -0.000   0.001   0.001  -0.001  -0.001   0.000   0.000
 
 
    Upper and lower wings at the   12 th omega   0.0000 138.6898 [eV]
@@ -785,19 +789,19 @@ meta: {optdriver: 3, gwcalctyp: 21, }
    Upper and lower wings at the   15 th omega   0.0000  78.0705 [eV]
        1       2       3       4       5       6       7       8       9
       0.947   0.001  -0.001  -0.002   0.002   0.002  -0.002  -0.001   0.001
-     -0.000   0.001   0.001  -0.002  -0.002   0.002   0.002  -0.001  -0.001
+      0.000   0.001   0.001  -0.002  -0.002   0.002   0.002  -0.001  -0.001
        1       2       3       4       5       6       7       8       9
       0.947   0.001  -0.001  -0.002   0.002   0.002  -0.002  -0.001   0.001
-     -0.000  -0.001  -0.001   0.002   0.002  -0.002  -0.002   0.001   0.001
+      0.000  -0.001  -0.001   0.002   0.002  -0.002  -0.002   0.001   0.001
 
 
    Upper and lower wings at the   16 th omega   0.0000  65.6253 [eV]
        1       2       3       4       5       6       7       8       9
       0.926   0.001  -0.001  -0.003   0.003   0.003  -0.003  -0.001   0.001
-      0.000   0.001   0.001  -0.003  -0.003   0.003   0.003  -0.001  -0.001
+     -0.000   0.001   0.001  -0.003  -0.003   0.003   0.003  -0.001  -0.001
        1       2       3       4       5       6       7       8       9
       0.926   0.001  -0.001  -0.003   0.003   0.003  -0.003  -0.001   0.001
-      0.000  -0.001  -0.001   0.003   0.003  -0.003  -0.003   0.001   0.001
+     -0.000  -0.001  -0.001   0.003   0.003  -0.003  -0.003   0.001   0.001
 
 
    Upper and lower wings at the   17 th omega   0.0000  55.4972 [eV]
@@ -821,46 +825,46 @@ meta: {optdriver: 3, gwcalctyp: 21, }
    Upper and lower wings at the   19 th omega   0.0000  40.2017 [eV]
        1       2       3       4       5       6       7       8       9
       0.826   0.002  -0.002  -0.007   0.007   0.007  -0.007  -0.002   0.002
-     -0.000   0.002   0.002  -0.007  -0.007   0.007   0.007  -0.002  -0.002
+      0.000   0.002   0.002  -0.007  -0.007   0.007   0.007  -0.002  -0.002
        1       2       3       4       5       6       7       8       9
       0.826   0.002  -0.002  -0.007   0.007   0.007  -0.007  -0.002   0.002
-     -0.000  -0.002  -0.002   0.007   0.007  -0.007  -0.007   0.002   0.002
+      0.000  -0.002  -0.002   0.007   0.007  -0.007  -0.007   0.002   0.002
 
 
    Upper and lower wings at the   20 th omega   0.0000  34.3587 [eV]
        1       2       3       4       5       6       7       8       9
       0.778   0.003  -0.003  -0.009   0.009   0.009  -0.009  -0.003   0.003
-      0.000   0.003   0.003  -0.009  -0.009   0.009   0.009  -0.003  -0.003
+     -0.000   0.003   0.003  -0.009  -0.009   0.009   0.009  -0.003  -0.003
        1       2       3       4       5       6       7       8       9
       0.778   0.003  -0.003  -0.009   0.009   0.009  -0.009  -0.003   0.003
-      0.000  -0.003  -0.003   0.009   0.009  -0.009  -0.009   0.003   0.003
+     -0.000  -0.003  -0.003   0.009   0.009  -0.009  -0.009   0.003   0.003
 
 
    Upper and lower wings at the   21 th omega   0.0000  29.4066 [eV]
        1       2       3       4       5       6       7       8       9
       0.721   0.004  -0.004  -0.011   0.011   0.011  -0.011  -0.004   0.004
-     -0.000   0.004   0.004  -0.011  -0.011   0.011   0.011  -0.004  -0.004
+      0.000   0.004   0.004  -0.011  -0.011   0.011   0.011  -0.004  -0.004
        1       2       3       4       5       6       7       8       9
       0.721   0.004  -0.004  -0.011   0.011   0.011  -0.011  -0.004   0.004
-     -0.000  -0.004  -0.004   0.011   0.011  -0.011  -0.011   0.004   0.004
+      0.000  -0.004  -0.004   0.011   0.011  -0.011  -0.011   0.004   0.004
 
 
    Upper and lower wings at the   22 th omega   0.0000  25.1800 [eV]
        1       2       3       4       5       6       7       8       9
       0.657   0.005  -0.005  -0.014   0.014   0.014  -0.014  -0.005   0.005
-      0.000   0.005   0.005  -0.014  -0.014   0.014   0.014  -0.005  -0.005
+     -0.000   0.005   0.005  -0.014  -0.014   0.014   0.014  -0.005  -0.005
        1       2       3       4       5       6       7       8       9
       0.657   0.005  -0.005  -0.014   0.014   0.014  -0.014  -0.005   0.005
-      0.000  -0.005  -0.005   0.014   0.014  -0.014  -0.014   0.005   0.005
+     -0.000  -0.005  -0.005   0.014   0.014  -0.014  -0.014   0.005   0.005
 
 
    Upper and lower wings at the   23 th omega   0.0000  21.5509 [eV]
        1       2       3       4       5       6       7       8       9
       0.587   0.005  -0.005  -0.016   0.016   0.016  -0.016  -0.005   0.005
-      0.000   0.005   0.005  -0.016  -0.016   0.016   0.016  -0.005  -0.005
+     -0.000   0.005   0.005  -0.016  -0.016   0.016   0.016  -0.005  -0.005
        1       2       3       4       5       6       7       8       9
       0.587   0.005  -0.005  -0.016   0.016   0.016  -0.016  -0.005   0.005
-      0.000  -0.005  -0.005   0.016   0.016  -0.016  -0.016   0.005   0.005
+     -0.000  -0.005  -0.005   0.016   0.016  -0.016  -0.016   0.005   0.005
 
 
    Upper and lower wings at the   24 th omega   0.0000  18.4186 [eV]
@@ -893,10 +897,10 @@ meta: {optdriver: 3, gwcalctyp: 21, }
    Upper and lower wings at the   27 th omega   0.0000  11.2831 [eV]
        1       2       3       4       5       6       7       8       9
       0.304   0.007  -0.007  -0.021   0.021   0.021  -0.021  -0.007   0.007
-      0.000   0.007   0.007  -0.021  -0.021   0.021   0.021  -0.007  -0.007
+     -0.000   0.007   0.007  -0.021  -0.021   0.021   0.021  -0.007  -0.007
        1       2       3       4       5       6       7       8       9
       0.304   0.007  -0.007  -0.021   0.021   0.021  -0.021  -0.007   0.007
-      0.000  -0.007  -0.007   0.021   0.021  -0.021  -0.021   0.007   0.007
+     -0.000  -0.007  -0.007   0.021   0.021  -0.021  -0.021   0.007   0.007
 
 
    Upper and lower wings at the   28 th omega   0.0000   9.4845 [eV]
@@ -929,19 +933,19 @@ meta: {optdriver: 3, gwcalctyp: 21, }
    Upper and lower wings at the   31 th omega   0.0000   5.3390 [eV]
        1       2       3       4       5       6       7       8       9
       0.120   0.006  -0.006  -0.018   0.018   0.018  -0.018  -0.006   0.006
-      0.000   0.006   0.006  -0.018  -0.018   0.018   0.018  -0.006  -0.006
+     -0.000   0.006   0.006  -0.018  -0.018   0.018   0.018  -0.006  -0.006
        1       2       3       4       5       6       7       8       9
       0.120   0.006  -0.006  -0.018   0.018   0.018  -0.018  -0.006   0.006
-      0.000  -0.006  -0.006   0.018   0.018  -0.018  -0.018   0.006   0.006
+     -0.000  -0.006  -0.006   0.018   0.018  -0.018  -0.018   0.006   0.006
 
 
    Upper and lower wings at the   32 th omega   0.0000   4.2957 [eV]
        1       2       3       4       5       6       7       8       9
       0.095   0.006  -0.006  -0.017   0.017   0.017  -0.017  -0.006   0.006
-      0.000   0.006   0.006  -0.017  -0.017   0.017   0.017  -0.006  -0.006
+     -0.000   0.006   0.006  -0.017  -0.017   0.017   0.017  -0.006  -0.006
        1       2       3       4       5       6       7       8       9
       0.095   0.006  -0.006  -0.017   0.017   0.017  -0.017  -0.006   0.006
-      0.000  -0.006  -0.006   0.017   0.017  -0.017  -0.017   0.006   0.006
+     -0.000  -0.006  -0.006   0.017   0.017  -0.017  -0.017   0.006   0.006
 
 
    Upper and lower wings at the   33 th omega   0.0000   3.3923 [eV]
@@ -956,10 +960,10 @@ meta: {optdriver: 3, gwcalctyp: 21, }
    Upper and lower wings at the   34 th omega   0.0000   2.6156 [eV]
        1       2       3       4       5       6       7       8       9
       0.062   0.005  -0.005  -0.015   0.015   0.015  -0.015  -0.005   0.005
-      0.000   0.005   0.005  -0.015  -0.015   0.015   0.015  -0.005  -0.005
+     -0.000   0.005   0.005  -0.015  -0.015   0.015   0.015  -0.005  -0.005
        1       2       3       4       5       6       7       8       9
       0.062   0.005  -0.005  -0.015   0.015   0.015  -0.015  -0.005   0.005
-      0.000  -0.005  -0.005   0.015   0.015  -0.015  -0.015   0.005   0.005
+     -0.000  -0.005  -0.005   0.015   0.015  -0.015  -0.015   0.005   0.005
 
 
    Upper and lower wings at the   35 th omega   0.0000   1.9547 [eV]
@@ -974,19 +978,19 @@ meta: {optdriver: 3, gwcalctyp: 21, }
    Upper and lower wings at the   36 th omega   0.0000   1.4006 [eV]
        1       2       3       4       5       6       7       8       9
       0.046   0.004  -0.004  -0.013   0.013   0.013  -0.013  -0.004   0.004
-     -0.000   0.004   0.004  -0.013  -0.013   0.013   0.013  -0.004  -0.004
+      0.000   0.004   0.004  -0.013  -0.013   0.013   0.013  -0.004  -0.004
        1       2       3       4       5       6       7       8       9
       0.046   0.004  -0.004  -0.013   0.013   0.013  -0.013  -0.004   0.004
-     -0.000  -0.004  -0.004   0.013   0.013  -0.013  -0.013   0.004   0.004
+      0.000  -0.004  -0.004   0.013   0.013  -0.013  -0.013   0.004   0.004
 
 
    Upper and lower wings at the   37 th omega   0.0000   0.9459 [eV]
        1       2       3       4       5       6       7       8       9
       0.043   0.004  -0.004  -0.013   0.013   0.013  -0.013  -0.004   0.004
-     -0.000   0.004   0.004  -0.013  -0.013   0.013   0.013  -0.004  -0.004
+      0.000   0.004   0.004  -0.013  -0.013   0.013   0.013  -0.004  -0.004
        1       2       3       4       5       6       7       8       9
       0.043   0.004  -0.004  -0.013   0.013   0.013  -0.013  -0.004   0.004
-     -0.000  -0.004  -0.004   0.013   0.013  -0.013  -0.013   0.004   0.004
+      0.000  -0.004  -0.004   0.013   0.013  -0.013  -0.013   0.004   0.004
 
 
    Upper and lower wings at the   38 th omega   0.0000   0.5849 [eV]
@@ -1019,10 +1023,10 @@ meta: {optdriver: 3, gwcalctyp: 21, }
    Upper and lower wings at the   41 th omega   0.0000   0.0240 [eV]
        1       2       3       4       5       6       7       8       9
       0.039   0.004  -0.004  -0.012   0.012   0.012  -0.012  -0.004   0.004
-      0.000   0.004   0.004  -0.012  -0.012   0.012   0.012  -0.004  -0.004
+     -0.000   0.004   0.004  -0.012  -0.012   0.012   0.012  -0.004  -0.004
        1       2       3       4       5       6       7       8       9
       0.039   0.004  -0.004  -0.012   0.012   0.012  -0.012  -0.004   0.004
-      0.000  -0.004  -0.004   0.012   0.012  -0.012  -0.012   0.004   0.004
+     -0.000  -0.004  -0.004   0.012   0.012  -0.012  -0.012   0.004   0.004
 
 
 
@@ -1683,7 +1687,7 @@ meta: {optdriver: 4, gwcalctyp: 21, }
  Citation for XC functional:
   J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
 
- SIGMA: Calculation of the GW corrections 
+ SIGMA: Calculation of the GW corrections
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
@@ -1699,7 +1703,7 @@ meta: {optdriver: 4, gwcalctyp: 21, }
 
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :     6
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)    -2.50000000E-01 -2.50000000E-01  0.00000000E+00       0.18750
      2)    -2.50000000E-01  2.50000000E-01  0.00000000E+00       0.37500
@@ -1708,13 +1712,13 @@ meta: {optdriver: 4, gwcalctyp: 21, }
      5)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.12500
      6)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.03125
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields    32 points in the full Brillouin Zone.
 
 
  ==== Q-mesh for screening function ====
  Number of points in the irreducible wedge :     6
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.03125
      2)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.09375
@@ -1723,10 +1727,13 @@ meta: {optdriver: 4, gwcalctyp: 21, }
      5)     5.00000000E-01 -2.50000000E-01  2.50000000E-01       0.18750
      6)     0.00000000E+00 -2.50000000E-01 -2.50000000E-01       0.18750
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields    32 points in the full Brillouin Zone.
 
 
+ vcoul_init : cutoff-mode = AUXILIARY_FUNCTION
+ q-points for optical limit:   1
+     1)      0.000010    0.000020    0.000030
  setmesh: FFT mesh size selected  =    20x   20x   20
           total number of points  =         8000
 
@@ -1736,9 +1743,9 @@ meta: {optdriver: 4, gwcalctyp: 21, }
  omega_plasma =   16.6039 [eV]
 
 
- rdqps: reading QP wavefunctions of the previous step 
+ rdqps: reading QP wavefunctions of the previous step
         looking for file t36i_DS3_QPS
- file not found, 1st iteration initialized with KS eigenelements 
+ file not found, 1st iteration initialized with KS eigenelements
 
  Number of electrons calculated from density =    8.0000; Expected =    8.0000
  average of density, n =  0.029628
@@ -1748,12 +1755,12 @@ meta: {optdriver: 4, gwcalctyp: 21, }
 
 --------------------------------------------------------------------------------
 
- QP results after the unitary transformation in the KS subspace: 
+ QP results after the unitary transformation in the KS subspace:
 
   Number of electrons    =    8.0000
 
-  QP Band energy    [Ha] = -1.88133200070991E-01
-  QP Hartree energy [Ha] =  5.59853412775728E-01
+  QP Band energy    [Ha] = -1.88133200070981E-01
+  QP Hartree energy [Ha] =  5.59853412775753E-01
 
 --------------------------------------------------------------------------------
 
@@ -1877,6 +1884,14 @@ meta: {optdriver: 4, gwcalctyp: 21, }
  Total averaged occ. from all k-points:   7.97750
 
 
+ vcoul_init : cutoff-mode = AUXILIARY_FUNCTION
+ q-points for optical limit:   1
+     1)      0.000010    0.000020    0.000030
+
+ vcoul_init : cutoff-mode = AUXILIARY_FUNCTION
+ q-points for optical limit:   1
+     1)      0.000010    0.000020    0.000030
+
  Computing band corrections Delta eik (eV)
  -----------------------------------------
 
@@ -1966,7 +1981,7 @@ meta: {optdriver: 4, gwcalctyp: 21, }
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      1.0260000000E+01  1.0260000000E+01  1.0260000000E+01 Bohr
               amu      2.80855000E+01
@@ -1986,13 +2001,13 @@ meta: {optdriver: 4, gwcalctyp: 21, }
            etotal1    -8.4515796730E+00
            etotal2     0.0000000000E+00
            etotal3     0.0000000000E+00
-            fcart1    -1.0749585608E-24  1.0749585608E-24  6.4497513649E-25
-                       1.0749585608E-24 -1.0749585608E-24 -6.4497513649E-25
+            fcart1     0.0000000000E+00  0.0000000000E+00 -4.2998342433E-25
+                       9.1835496158E-41 -1.8367099232E-40  4.2998342433E-25
             fcart2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         312
+-          fftalg         512
            getscr1          0
            getscr2          0
            getscr3         -1
@@ -2058,7 +2073,7 @@ P           mkmem           6
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
           spgroup         227
-           strten1    -3.5916785668E-05 -3.5916785668E-05 -3.5916785668E-05
+           strten1    -3.5916785667E-05 -3.5916785667E-05 -3.5916785667E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -2163,7 +2178,7 @@ P           mkmem           6
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -2180,12 +2195,12 @@ P           mkmem           6
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -2203,15 +2218,15 @@ P           mkmem           6
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         17.5  wall=         17.6
+- Proc.   0 individual time (sec): cpu=          8.3  wall=          8.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and  10 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         17.5  wall=         17.6
++Overall time at end (sec) : cpu=          8.3  wall=          8.3

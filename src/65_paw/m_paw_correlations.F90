@@ -7,7 +7,7 @@
 !!    correlations in the PAW approach (DFT+U, exact-exchange, ...).
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2024 ABINIT group (BA,FJ,MT)
+!! Copyright (C) 2018-2025 ABINIT group (BA,FJ,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,17 +29,19 @@ MODULE m_paw_correlations
  use m_dtset
  use m_linalg_interfaces
  use m_special_funcs
-
+ use m_fstrings, only : int2char4
  use m_io_tools,    only : open_file
+ use m_paw_dmft,    only : paw_dmft_type
  use m_pawang,      only : pawang_type,pawang_init,pawang_free
- use m_pawrad,      only : pawrad_type,simp_gen,nderiv_gen,pawrad_ifromr,poisson
-  use m_pawtab,      only : pawtab_type,pawtab_nullify,pawtab_free,pawtab_set_flags
+ use m_pawrad,      only : pawrad_free,pawrad_init,pawrad_type,simp_gen,nderiv_gen,pawrad_ifromr,poisson
+ use m_pawtab,      only : pawtab_type,pawtab_nullify,pawtab_free,pawtab_set_flags
  use m_pawrhoij,    only : pawrhoij_type,pawrhoij_gather, pawrhoij_nullify, pawrhoij_free
  use m_paw_ij,      only : paw_ij_type,paw_ij_gather, paw_ij_free, paw_ij_nullify
  use m_paw_sphharm, only : mat_mlms2jmj,mat_slm2ylm,slxyzs
  use m_paw_io,      only : pawio_print_ij
+ use m_paw_yukawa,  only : compute_slater,get_lambda
  use m_paral_atom,  only : get_my_atmtab,free_my_atmtab
-  use m_copy,        only : alloc_copy
+ use m_copy,        only : alloc_copy
 
  implicit none
 
@@ -74,6 +76,8 @@ CONTAINS  !=====================================================================
 !!
 !! INPUTS
 !!  dmatpuopt= select expression for the density matrix
+!!  dmft_dc= option for the double-counting scheme in DMFT
+!!  dmft_orbital(ntypat)= option for the choice of the DMFT radial orbital
 !!  exchmix= mixing factor for local exact-exchange
 !!  is_dfpt=true if we are running a DFPT calculation
 !!  jpawu(ntypat)= value of J
@@ -115,7 +119,7 @@ CONTAINS  !=====================================================================
  subroutine pawpuxinit(dmatpuopt,exchmix,f4of2_sla,f6of2_sla,is_dfpt,jpawu,llexexch,llpawu,&
 &           nspinor,ntypat,option_interaction,pawang,pawprtvol,pawrad,pawtab,upawu,use_dmft,&
 &           useexexch,usepawu,&
-       &           ucrpa,lmagCalc) ! optional argument
+&           ucrpa,lmagCalc,dmft_orbital,dmft_dc) ! optional argument
 
 !Arguments ---------------------------------------------
 !scalars
@@ -129,42 +133,42 @@ CONTAINS  !=====================================================================
  logical :: is_dfpt
  real(dp),intent(in) :: exchmix
  type(pawang_type), intent(in) :: pawang
- integer,optional, intent(in) :: ucrpa
+ integer,optional, intent(in) :: dmft_dc,ucrpa
 !arrays
  integer,intent(in) :: llexexch(ntypat),llpawu(ntypat)
  real(dp),intent(in) :: jpawu(ntypat),upawu(ntypat)
  real(dp),intent(in) :: f4of2_sla(ntypat),f6of2_sla(ntypat)
  type(pawrad_type),intent(inout) :: pawrad(ntypat)
  type(pawtab_type),target,intent(inout) :: pawtab(ntypat)
-
+ logical,optional,intent(in) :: lmagCalc
+ integer,optional,intent(in) :: dmft_orbital(ntypat)
 !Local variables ---------------------------------------
 !scalars
- integer :: icount,il,ilmn,ilmnp,isela,iselb,itemp,itypat,iu,iup,j0lmn,jl,jlmn,jlmnp,ju,jup
+ integer :: icount,ierr,il,ilmn,ilmnp,ir,isela,iselb,itemp,itypat,iu,iup,j0lmn,jl,jlmn,jlmnp,ju,jup
  integer :: klm0x,klma,klmb,klmn,klmna,klmnb,kln,kln1,kln2,kyc,lcur,lexexch,lkyc,ll,ll1
  integer :: lmexexch,lmkyc,lmn_size,lmn2_size,lpawu
  integer :: m1,m11,m2,m21,m3,m31,m4,m41
- integer :: mesh_size,int_meshsz,mkyc,sz1
-    integer :: option_interaction_, Loc_prtvol
- logical :: compute_euijkl,compute_euij_fll
- real(dp) :: ak,f4of2,f6of2,int1,intg,phiint_ij,phiint_ipjp,vee1,vee2
- character(len=500) :: message
-
-    logical,optional,intent(in) :: lmagCalc
-    logical :: lmagCalc_
+ integer :: me,mesh_size,mesh_type,meshsz,int_meshsz,mkyc,sz1
+ integer :: option_interaction_, Loc_prtvol
+ logical :: compute_euijkl,compute_euij_fll,lexist
+ real(dp) :: ak,eps,f4of2,f6of2,int1,intg,jh,lambda,lstep,phiint_ij,phiint_ipjp,rstep,uh,vee1,vee2
+ character(len=4) :: tag
+ character(len=500) :: message,tmpfil
+ logical :: lmagCalc_
 !arrays
  integer,ABI_CONTIGUOUS pointer :: indlmn(:,:)
  real(dp) :: euijkl_temp(3),euijkl_temp2(3),euijkl_dc(3)
- real(dp),allocatable :: ff(:),gg(:)
-
+ real(dp),allocatable :: ff(:),fk(:),gg(:)
+ type(pawrad_type) :: pawrad_tmp
 ! *************************************************************************
 
  DBG_ENTER("COLL")
-    Loc_prtvol = 3 
-    lmagCalc_ = .False.
-    if (present(lmagCalc)) then
-       if (lmagCalc .eqv. .True.) lmagCalc_ = .True.
-       Loc_prtvol = 0
-    end if
+ Loc_prtvol = 3
+ lmagCalc_ = .False.
+ if (present(lmagCalc)) then
+   if (lmagCalc .eqv. .True.) lmagCalc_ = .True.
+   Loc_prtvol = 0
+ end if
 
 !No correlations= nothing to do
  if(useexexch==0.and.usepawu==0.and.use_dmft==0) then
@@ -241,6 +245,14 @@ CONTAINS  !=====================================================================
    mesh_size=pawtab(itypat)%mesh_size
    int_meshsz=pawrad(itypat)%int_meshsz
    lcur=-1
+
+   if (use_dmft > 0) then
+     if (dmft_dc == 8 .and. (f4of2_sla(itypat) >= -0.1_dp .or. &
+         & f6of2_sla(itypat) >= -0.1_dp)) then
+       message = "dmft_dc=8 not compatible with custom f4of2 and f6of2"
+       ABI_ERROR(message)
+     end if
+   end if
 
 !  PAW+U data
    if (usepawu/=0.or.use_dmft>0) then
@@ -467,8 +479,9 @@ CONTAINS  !=====================================================================
        end if
        sz1=2*lpawu+1
        ABI_MALLOC(pawtab(itypat)%vee,(sz1,sz1,sz1,sz1))
+
        call calc_vee(pawtab(itypat)%f4of2_sla,pawtab(itypat)%f6of2_sla,pawtab(itypat)%jpawu,&
-                  &       pawtab(itypat)%lpawu,pawang,pawtab(itypat)%upawu,pawtab(itypat)%vee,Loc_prtvol)
+             &       pawtab(itypat)%lpawu,pawang,pawtab(itypat)%upawu,pawtab(itypat)%vee,Loc_prtvol)
 
       ! testu=0
       ! write(std_out,*) " Matrix of interaction vee(m1,m2,m1,m2)"
@@ -478,7 +491,7 @@ CONTAINS  !=====================================================================
       !     testu=testu+ pawtab(itypat)%vee(m1,m2,m1,m2)
       !  enddo
       ! enddo
-             if (.not.lmagCalc_) then 
+             if (.not.lmagCalc_) then
        write(message,'(a)') ch10
        call wrtout(std_out,message,'COLL')
        write(message,'(a)') " Matrix of interaction vee(m1,m2,m1,m2)"
@@ -492,7 +505,7 @@ CONTAINS  !=====================================================================
        enddo
        write(message,'(a)') ch10
        call wrtout(std_out,message,'COLL')
-             end if
+     end if
 
      !  testu=testu/((two*lpawu+one)**2)
      !  write(std_out,*) "------------------------"
@@ -801,6 +814,140 @@ CONTAINS  !=====================================================================
          call calc_ubare(itypat,lcur,pawang,pawrad(itypat),pawtab(itypat),pawtab(itypat)%rpaw)
        end if
      end if
+
+     if (use_dmft > 0) then
+
+       write(tag,'(i4)') itypat
+       write(message,'(4a)') &
+         & ch10,' =====  Build DMFT radial orbital for atom type ',trim(adjustl(tag)),' ========'
+       call wrtout(std_out,message,"COLL")
+
+       ABI_SFREE(pawtab(itypat)%proj)
+       ABI_SFREE(pawtab(itypat)%proj2)
+
+       me = xmpi_comm_rank(xmpi_world)
+
+       if (dmft_orbital(itypat) > 0) then ! use atomic orbital from PAW dataset
+         if (dmft_orbital(itypat) > pawtab(itypat)%nproju) then
+           write(message,*) "For atom type:",itypat,"you need to set dmft_orbital to a value", &
+                        & " lower than",pawtab(itypat)%nproju
+           ABI_ERROR(message)
+         end if
+         write(message,'(2a,i1,a)') ch10," Using atomic orbital number ",dmft_orbital(itypat)," from PAW dataset"
+         call wrtout(std_out,message,"COLL")
+         meshsz = pawrad(itypat)%int_meshsz
+         ABI_MALLOC(pawtab(itypat)%proj,(meshsz))
+         pawtab(itypat)%proj(1:meshsz) = pawtab(itypat)%phi(1:meshsz,pawtab(itypat)%lnproju(dmft_orbital(itypat)))
+       else  ! read orbital from file
+         tmpfil = 'dmft_orbital_'//adjustl(tag)
+         write(message,'(2a)') " Using wavefunction from file ",trim(tmpfil)
+         call wrtout(std_out,message,"COLL")
+         inquire(file=trim(tmpfil),exist=lexist)
+         if (.not. lexist) ABI_ERROR("File "//trim(tmpfil)//" does not exist !")
+         if (me == 0) then
+           open(unit=505,file=trim(tmpfil),status='unknown',form='formatted')
+           read(505,*,iostat=ierr) meshsz
+         end if ! me=0
+         call xmpi_bcast(meshsz,0,xmpi_world,ierr)
+         ABI_MALLOC(pawtab(itypat)%proj,(meshsz))
+         if (me == 0) then
+           do ir=1,meshsz
+             read(505,*,iostat=ierr) pawtab(itypat)%proj(ir)
+           end do ! ir
+           close(505)
+         end if ! me=0
+         call xmpi_bcast(ierr,0,xmpi_world,ir)
+         if (ierr /= 0) ABI_ERROR("Error when reading file "//trim(tmpfil))
+         call xmpi_bcast(pawtab(itypat)%proj(:),0,xmpi_world,ierr)
+       end if ! dmft_orbital
+
+       mesh_type = pawrad(itypat)%mesh_type
+       lstep = pawrad(itypat)%lstep
+       rstep = pawrad(itypat)%rstep
+
+       call pawrad_init(pawrad_tmp,meshsz,mesh_type,rstep,lstep)
+       call simp_gen(int1,pawtab(itypat)%proj(1:meshsz)**2,pawrad_tmp)
+
+       write(message,'(a,f6.4)') " Squared norm of the DMFT orbital: ",int1
+       call wrtout(std_out,message,"COLL")
+
+       int1 = sqrt(int1)
+
+       tmpfil = "dmft_normalized_orbital_itypat_"//trim(adjustl(tag))
+
+       write(message,'(3a)') ch10," Writing unprojected normalized orbital on file ",trim(tmpfil)
+       call wrtout(std_out,message,"COLL")
+
+       if (me == 0) then
+         open(unit=505,file=trim(tmpfil),status="unknown",form="formatted")
+         do ir=1,meshsz
+           write(505,*) pawrad_tmp%rad(ir),pawtab(itypat)%proj(ir)/int1
+         end do
+         close(505)
+       end if ! me=0
+
+       if (dmft_dc == 8) then
+
+         if (dmft_orbital(itypat) > 0) then
+           message = "WARNING: You are using dmft_dc=8 while using an atomic orbital from &
+               & the PAW dataset. In our current implementation, we assume that &
+               & the projection of the orbital on [dmftbandi,dmftbandf] is the same &
+               & as the orbital itself, and this can hardly be the case with a truncated atomic &
+               & orbital. Please compute the projection of the atomic orbital with dmft_prtwan=1, &
+               & and then use this projection as your DMFT orbital with dmft_orbital=-1. This is explained &
+               & in the tutorial."
+           ABI_WARNING(message)
+         end if
+
+         ABI_MALLOC(pawtab(itypat)%proj2,(meshsz))
+         pawtab(itypat)%proj2(1:meshsz) = (pawtab(itypat)%proj(1:meshsz)/int1)**2
+
+         ! Get correspondence U,J <-> lamb,eps
+         call get_lambda(lcur,pawrad_tmp,pawtab(itypat)%proj2(:),meshsz, &
+                       & pawtab(itypat)%upawu,pawtab(itypat)%jpawu,lambda,eps)
+
+         pawtab(itypat)%lambda = lambda
+         pawtab(itypat)%eps = eps
+
+         ! Recompute Slater integrals
+         ABI_MALLOC(fk,(lcur+1))
+         call compute_slater(lcur,pawrad_tmp,pawtab(itypat)%proj2(:),meshsz,lambda,eps,fk(:))
+
+         write(message,'(2a)') " Yukawa parameters for atom type: ",adjustl(tag)
+         call wrtout(std_out,message,"COLL")
+         write(message,'(a,f9.4)') " Lambda: ",lambda
+         call wrtout(std_out,message,"COLL")
+         write(message,'(a,f9.4)') " Epsilon:",eps
+         call wrtout(std_out,message,"COLL")
+
+         ! Recompute U tensor with new Slater integrals
+         f4of2 = - one
+         f6of2 = - one
+         uh = fk(1)
+
+         if (lcur == 1) then
+           jh = fk(2) / dble(5.)
+         else if (lcur == 2) then
+           f4of2 = fk(3) / fk(2)
+           jh = fk(2) * (one + f4of2) / dble(14.)
+         else if (lcur == 3) then
+           f6of2 = fk(4) / fk(2)
+           f4of2 = fk(3) / fk(2)
+           jh = fk(2) * (dble(286.)+dble(195.)*f4of2+dble(250.)*f6of2) / dble(6435.)
+         else
+           write(message,'(a,i0,2a)') ' lpawu=',lpawu,ch10, &
+             & ' lpawu not equal to 0, 1, 2 or 3 is not allowed'
+           ABI_ERROR(message)
+         end if
+
+         call calc_vee(f4of2,f6of2,jh,lcur,pawang,uh,pawtab(itypat)%vee(:,:,:,:),Loc_prtvol)
+
+       end if ! dmft_dc=8
+
+       call pawrad_free(pawrad_tmp)
+
+     end if ! use_dmft > 0
+
    end if !lcur/=-1
  end do !end loop on typat
 
@@ -837,7 +984,7 @@ CONTAINS  !=====================================================================
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: lpawu
-    integer,optional,intent(in) :: prtvol
+ integer,optional,intent(in) :: prtvol
  real(dp),intent(in) :: upawu,jpawu
  real(dp),intent(inout) :: f4of2_sla,f6of2_sla
  type(pawang_type), intent(in) :: pawang
@@ -849,7 +996,7 @@ CONTAINS  !=====================================================================
  integer :: isela,iselb
  integer :: klm0u,klma,klmb,kyc,lkyc
  integer :: lmkyc,lmpawu
-    integer :: m1,m11,m2,m21,m3,m31,m4,m41,prtvol_
+ integer :: m1,m11,m2,m21,m3,m31,m4,m41,prtvol_
  integer :: mkyc,sz1
  real(dp) :: ak,f4of2,f6of2
  character(len=500) :: message
@@ -1004,7 +1151,7 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
  subroutine pawuenergy(iatom,edftumdc,edftumdcdc,noccmmp,nocctot,pawprtvol,pawtab,&
- &                     dmft_dc,e_ee,e_dc,e_dcdc,u_dmft,j_dmft) ! optional arguments (DMFT)
+ &                     dmft_dc,e_ee,e_dc,e_dcdc,u_dmft,j_dmft,paw_dmft) ! optional arguments (DMFT)
 
 !Arguments ---------------------------------------------
 !scalars
@@ -1014,8 +1161,8 @@ CONTAINS  !=====================================================================
  real(dp),intent(inout) :: edftumdc,edftumdcdc
  real(dp),optional,intent(inout) :: e_ee,e_dc,e_dcdc
  real(dp),optional,intent(in) :: j_dmft,u_dmft
+ type(paw_dmft_type),optional,intent(in) :: paw_dmft
  type(pawtab_type),intent(in) :: pawtab
-
 !Local variables ---------------------------------------
 !scalars
  integer :: cplex_occ,dmftdc,ispden,jspden,lpawu,m1,m11,m2,m21,m3,m31,m4,m41,nspden
@@ -1027,8 +1174,8 @@ CONTAINS  !=====================================================================
  real(dp) :: n34_ud_re,n34_du_re
  real(dp) :: upawu
  real(dp),allocatable :: n12_sig(:),n34_msig(:),n34_sig(:)
+ character(len=4) :: tag
  character(len=500) :: message
-
 ! *****************************************************
 
  nspden=size(nocctot)
@@ -1273,6 +1420,12 @@ CONTAINS  !=====================================================================
      write(message,fmt=11) "(eks+edcdc_opt3)/2  ",(eks_opt3+edcdc_opt3)/2.d0
      call wrtout(std_out,message,'COLL')
    end if
+ else if(dmftdc==7) then
+   edctemp=upawu*(dble(paw_dmft%dmft_nominal(iatom))-half)*n_tot-half*jpawu*(dble(paw_dmft%dmft_nominal(iatom))-one)*n_tot
+   edcdctemp=zero
+ else if(dmftdc==8) then
+   edctemp=paw_dmft%edc(iatom)
+   edcdctemp=paw_dmft%edc(iatom)-paw_dmft%edcdc(iatom)
  end if
 
  edftumdc  =edftumdc  +edftutemp-edctemp
@@ -1280,18 +1433,20 @@ CONTAINS  !=====================================================================
 
 !if(pawtab%usepawu/=10.or.pawprtvol>=3) then
  if(abs(pawprtvol)>=3) then
+   write(tag,'(i4)') iatom
+   tag = trim(adjustl(tag))
    if(pawtab%usepawu<10) then
-     write(message, '(5a,i4)')ch10,'======= DFT+U Energy terms (in Hartree) ====',ch10,&
-&     ch10,' For Atom ',iatom
+     write(message, '(6a)') ch10,'======= DFT+U Energy terms (in Hartree) ====',ch10,&
+&     ch10,' For Atom ',tag
    else if (pawtab%usepawu >= 10) then
-     write(message, '(5a,i4)')ch10,'  ===   DFT+U Energy terms for the DMFT occupation matrix ==',ch10,&
-&     ch10,' For Atom ',iatom
+     write(message, '(6a)') ch10,'  ===   DFT+U Energy terms from the DMFT occupation matrix ==',ch10,&
+&     ch10,' For Atom ',tag
    end if
 
    call wrtout(std_out,message,'COLL')
    write(message, '(a)' )"   Contributions to the direct expression of energy:"
    call wrtout(std_out,  message,'COLL')
-   write(message,fmt=11) "     Double counting  correction   =",edctemp
+   write(message,fmt=11) "     Double counting correction    =",edctemp
    call wrtout(std_out,  message,'COLL')
    write(message,fmt=11) "     Interaction energy            =",edftutemp
    call wrtout(std_out,  message,'COLL')
@@ -1644,7 +1799,7 @@ end if
            else
              sx=zero;sy=zero
              szp=half;szm=half
-           end if                    
+           end if
            do im2=1,2*lpawu+1
              do im1=1,2*lpawu+1
                nup=dmatpawu(im1,im2,1,iatpawu);ndn=dmatpawu(im1,im2,2,iatpawu)
@@ -2009,7 +2164,7 @@ end if
 
                 if(allocated(nocctot2)) then
                   ABI_FREE(nocctot2)
-                end if 
+                end if
          ABI_MALLOC(my_l_occmat,(cplex_dij,2*lcur+1,2*lcur+1,ndij))
          my_l_occmat(:,:,:,:)=zero
          my_l_occmat=l_noccmmp_tmp(:,:,:,:)
@@ -2985,7 +3140,7 @@ character(len=5) :: orb_char
  type(paw_ij_type), ABI_CONTIGUOUS pointer :: paw_ij_all(:)
  type(pawrhoij_type),ABI_CONTIGUOUS pointer :: pawrhoij_all(:)
  !!****************************************************************
-    type(pawtab_type),allocatable :: pawtab_tmp(:) 
+    type(pawtab_type),allocatable :: pawtab_tmp(:)
     type(pawrad_type) :: pawrad(ntypat)
     real(dp) :: f6of2_sla(ntypat),f4of2_sla(ntypat),upawu(ntypat),jpawu(ntypat)
     integer :: llexexch(ntypat),llpawu(ntypat),nn,ii
@@ -3059,11 +3214,11 @@ orb_char='pdfgh'
 
 if (me_atom==0) then   !!!!!!!!
       nn=size(pawtab)
-      ABI_MALLOC(pawtab_tmp,(nn))   
+      ABI_MALLOC(pawtab_tmp,(nn))
       call pawtab_nullify(pawtab_tmp)
-      
-      ! ABI_MALLOC(pawtab_tmp,(nn))          
-      
+
+      ! ABI_MALLOC(pawtab_tmp,(nn))
+
       if (nn.gt.0) then
          do ii=1,nn
             pawtab_tmp(ii)%basis_size = pawtab(ii)%basis_size
@@ -3079,18 +3234,18 @@ if (me_atom==0) then   !!!!!!!!
 
             if (allocated(Pawtab(ii)%indlmn))  then
                call alloc_copy(pawtab(ii)%indlmn, pawtab_tmp(ii)%indlmn)
-            end if  
+            end if
 
             if (allocated(Pawtab(ii)%phi))  then
                call alloc_copy(pawtab(ii)%phi, pawtab_tmp(ii)%phi)
-            end if 
+            end if
 
              if (allocated(Pawtab(ii)%indklmn))  then
                call alloc_copy(pawtab(ii)%indklmn, pawtab_tmp(ii)%indklmn)
-            end if             
+            end if
          end do
 
-         ! pawtab_tmp%has_fock = Pawtab%has_fock   ! 
+         ! pawtab_tmp%has_fock = Pawtab%has_fock   !
          ! pawtab_tmp%has_kij = Pawtab%has_kij !
          ! pawtab_tmp%has_tproj = Pawtab%has_tproj !
          ! pawtab_tmp%has_tvale = Pawtab%has_tvale
@@ -3137,8 +3292,8 @@ if (me_atom==0) then   !!!!!!!!
 sum_orb_mom=zero
 
        f4of2_sla = pawtab(:)%f4of2_sla
-       f6of2_sla = pawtab(:)%f6of2_sla 
-       llexexch= -1*one !(/-1,-1/)   
+       f6of2_sla = pawtab(:)%f6of2_sla
+       llexexch= -1*one !(/-1,-1/)
 
        lmin=1
 do my_iatom=1,natom
@@ -3148,11 +3303,11 @@ lmax=((pawtab(itypat)%l_size)-1)/2
           do my_lcur=lmin,lmax
 
             if (my_lcur == pawtab(itypat)%lpawu) then
-                upawu=  pawtab(:)%upawu 
-                jpawu= pawtab(:)%jpawu 
+                upawu=  pawtab(:)%upawu
+                jpawu= pawtab(:)%jpawu
                 llpawu=  pawtab(:)%lpawu
             else
-                upawu=  zero 
+                upawu=  zero
                 jpawu= zero
                 llpawu=  one
 end if
@@ -3160,7 +3315,7 @@ end if
              call pawpuxinit(2,pawtab(1)%exchmix ,f4of2_sla,f6of2_sla,.False.,jpawu ,llexexch,llpawu,&
                   &           nspinor,ntypat,pawtab_tmp(itypat)%option_interaction_pawu,pawang,pawprtvol,pawrad,pawtab_tmp,upawu,0,&
                   &           useexexch,usepawu,&
-                  &           0,lmagCalc=.True.)   
+                  &           0,lmagCalc=.True.)
  cplex_dij=paw_ij_all(my_iatom)%cplex_dij
  ndij=paw_ij_all(my_iatom)%ndij
 
@@ -3170,7 +3325,7 @@ end if
  ABI_MALLOC(cmfoccmat,(2*my_lcur+1,2*my_lcur+1,ndij))
 
 call  setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym,natom,natom,&
-&                     natpawu,nspinor,nsppol,nsym,ntypat,paw_ij_all,pawang,pawprtvol,pawrhoij_all,pawtab_tmp,& 
+&                     natpawu,nspinor,nsppol,nsym,ntypat,paw_ij_all,pawang,pawprtvol,pawrhoij_all,pawtab_tmp,&
 &                     spinat,symafm,typat,useexexch,usepawu, &
 &                     mpi_atmtab,comm_atom,l_orbmom=my_lcur,atom_orbmom=my_iatom,my_l_occmat=my_l_occmat)
 
@@ -3271,7 +3426,7 @@ end if  !!!!!!!!!!
       call paw_ij_nullify(paw_ij_all)
       ABI_FREE(paw_ij_all)
    end if
-   
+
   end subroutine loc_orbmom_cal
   !----------------------------------------------------------------------
 END MODULE m_paw_correlations

@@ -6,7 +6,7 @@
 !!  Low-level tools related to symmetries
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2024 ABINIT group (RC, XG, GMR, MG, JWZ)
+!!  Copyright (C) 1998-2025 ABINIT group (RC, XG, GMR, MG, JWZ)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -25,6 +25,7 @@ module m_symtk
  use m_errors
  use m_abicore
 
+ use m_matrix,         only : mati3inv, mati3det, matr3inv
  use m_numeric_tools,  only : isinteger, wrap2_pmhalf
  use m_hide_lapack,    only : matrginv
 
@@ -33,10 +34,6 @@ module m_symtk
  private
 !!***
 
-!TODO: the following 4 routines should not be in this module! They are very general math. Move to m_matrix? Or numeric_noabirules directory?
- public :: mati3inv             ! Invert and transpose orthogonal 3x3 matrix of INTEGER elements.
- public :: mati3det             ! Compute the determinant of a 3x3 matrix of INTEGER elements.
- public :: matr3inv             ! Invert and TRANSPOSE general 3x3 matrix of real*8 elements.
  public :: symdet               ! Compute determinant of each input symmetry matrix sym(3,3,i)
  public :: chkgrp               ! Checks that a set of input symmetries constitutes a group.
  public :: sg_multable          ! Checks that a set of input symmetries constitutes a group.
@@ -59,161 +56,6 @@ module m_symtk
 !!***
 
 contains
-!!***
-
-!!****f* m_symtk/mati3inv
-!! NAME
-!! mati3inv
-!!
-!! FUNCTION
-!! Invert and transpose orthogonal 3x3 matrix of INTEGER elements.
-!!
-!! INPUTS
-!! mm = integer matrix to be inverted
-!!
-!! OUTPUT
-!! mit = inverse of mm input matrix
-!!
-!! NOTES
-!! Used for symmetry operations.
-!! This routine applies to ORTHOGONAL matrices only.
-!! Since these form a group, inverses are also integer arrays.
-!! Returned array is TRANSPOSE of inverse, as needed.
-!! Note use of integer arithmetic.
-!!
-!! SOURCE
-
-subroutine mati3inv(mm, mit)
-
-!Arguments ------------------------------------
-!arrays
- integer,intent(in) :: mm(3,3)
- integer,intent(out) :: mit(3,3)
-
-!Local variables-------------------------------
-!scalars
- integer :: dd
- character(len=500) :: msg
-!arrays
- integer :: tt(3,3)
-
-! *************************************************************************
-
- tt(1,1) = mm(2,2) * mm(3,3) - mm(3,2) * mm(2,3)
- tt(2,1) = mm(3,2) * mm(1,3) - mm(1,2) * mm(3,3)
- tt(3,1) = mm(1,2) * mm(2,3) - mm(2,2) * mm(1,3)
- tt(1,2) = mm(3,1) * mm(2,3) - mm(2,1) * mm(3,3)
- tt(2,2) = mm(1,1) * mm(3,3) - mm(3,1) * mm(1,3)
- tt(3,2) = mm(2,1) * mm(1,3) - mm(1,1) * mm(2,3)
- tt(1,3) = mm(2,1) * mm(3,2) - mm(3,1) * mm(2,2)
- tt(2,3) = mm(3,1) * mm(1,2) - mm(1,1) * mm(3,2)
- tt(3,3) = mm(1,1) * mm(2,2) - mm(2,1) * mm(1,2)
- dd = mm(1,1) * tt(1,1) + mm(2,1) * tt(2,1) + mm(3,1) * tt(3,1)
-
- ! Make sure matrix is not singular
- if (dd /= 0) then
-   mit(:,:)=tt(:,:)/dd
- else
-   write(msg, '(2a,2x,9(i0,1x),a)' )'Attempting to invert integer array',ch10,mm,' ==> determinant is zero.'
-   ABI_ERROR(msg)
- end if
-
- ! If matrix is orthogonal, determinant must be 1 or -1
- if (abs(dd) /= 1) then
-   write(msg, '(3a,i0)' )'Absolute value of determinant should be one',ch10,'but determinant= ',dd
-   ABI_ERROR(msg)
- end if
-
-end subroutine mati3inv
-!!***
-
-!!****f* m_symtk/mati3det
-!! NAME
-!! mati3det
-!!
-!! FUNCTION
-!! Compute the determinant of a 3x3 matrix of INTEGER elements.
-!!
-!! INPUTS
-!! mm = integer matrix
-!!
-!! OUTPUT
-!! det = determinant of the matrix
-!!
-!! SOURCE
-
-subroutine mati3det(mm, det)
-
-!Arguments ------------------------------------
-!arrays
- integer,intent(in) :: mm(3,3)
- integer,intent(out) :: det
-
-! *************************************************************************
- det=mm(1,1)*(mm(2,2) * mm(3,3) - mm(3,2) * mm(2,3)) &
-   + mm(2,1)*(mm(3,2) * mm(1,3) - mm(1,2) * mm(3,3)) &
-   + mm(3,1)*(mm(1,2) * mm(2,3) - mm(2,2) * mm(1,3))
-
-end subroutine mati3det
-!!***
-
-!!****f* m_symtk/matr3inv
-!! NAME
-!! matr3inv
-!!
-!! FUNCTION
-!! Invert and transpose general 3x3 matrix of real*8 elements.
-!!
-!! INPUTS
-!! aa = 3x3 matrix to be inverted
-!!
-!! OUTPUT
-!! ait = inverse of aa input matrix
-!!
-!! NOTES
-!! Returned array is TRANSPOSE of inverse, as needed to get g from r.
-!!
-!! SOURCE
-
-subroutine matr3inv(aa, ait)
-
-!Arguments ------------------------------------
-!arrays
- real(dp),intent(in) :: aa(3,3)
- real(dp),intent(out) :: ait(3,3)
-
-!Local variables-------------------------------
-!scalars
- real(dp) :: dd,det,t1,t2,t3
- character(len=500) :: msg
-
-! *************************************************************************
-
- t1 = aa(2,2) * aa(3,3) - aa(3,2) * aa(2,3)
- t2 = aa(3,2) * aa(1,3) - aa(1,2) * aa(3,3)
- t3 = aa(1,2) * aa(2,3) - aa(2,2) * aa(1,3)
- det  = aa(1,1) * t1 + aa(2,1) * t2 + aa(3,1) * t3
-
-!Make sure matrix is not singular
- if (abs(det)>tol16) then
-   dd=one/det
- else
-   write(msg, '(2a,2x,9es16.8,a,a,es16.8,a)' )&
-     'Attempting to invert real(8) 3x3 array',ch10,aa(:,:),ch10,'   ==> determinant=',det,' is zero.'
-   ABI_BUG(msg)
- end if
-
- ait(1,1) = t1 * dd
- ait(2,1) = t2 * dd
- ait(3,1) = t3 * dd
- ait(1,2) = (aa(3,1)*aa(2,3)-aa(2,1)*aa(3,3)) * dd
- ait(2,2) = (aa(1,1)*aa(3,3)-aa(3,1)*aa(1,3)) * dd
- ait(3,2) = (aa(2,1)*aa(1,3)-aa(1,1)*aa(2,3)) * dd
- ait(1,3) = (aa(2,1)*aa(3,2)-aa(3,1)*aa(2,2)) * dd
- ait(2,3) = (aa(3,1)*aa(1,2)-aa(1,1)*aa(3,2)) * dd
- ait(3,3) = (aa(1,1)*aa(2,2)-aa(2,1)*aa(1,2)) * dd
-
-end subroutine matr3inv
 !!***
 
 !!****f* m_symtk/symdet
@@ -991,7 +833,7 @@ end subroutine chkprimit
 !!
 !! SIDE EFFECTS
 !! Input/Output
-!! ierr= (at input) if present, will deal with error code outside of the routine. 
+!! ierr= (at input) if present, will deal with error code outside of the routine.
 !!       (at output) return 0 if no problem, 1 otherwise
 !! symrel(3,3,nsym)=symmetry operations in real space in terms
 !! of primitive translations rprimd at input and rprimd_new at output
@@ -1109,7 +951,7 @@ end subroutine symrelrot
 !! NOTES
 !! The condition is:
 !!
-!!    $q =  O  S(q) - G$
+!!    $q =  O S(q) - G$
 !!
 !! with O being either the identity or the time reversal symmetry (= inversion in reciprocal space)
 !! and G being a primitive vector of the reciprocal lattice.
@@ -1137,6 +979,7 @@ subroutine littlegroup_q(nsym,qpt,symq,symrec,symafm,timrev,prtvol,use_sym)
 !scalars
  integer :: ii,isign,isym,itirev,my_prtvol
  real(dp),parameter :: tol=2.d-8
+ !real(dp),parameter :: tol=tol4
  real(dp) :: reduce
  character(len=500) :: msg
 !arrays
@@ -2147,7 +1990,7 @@ end subroutine symchk
 !! Equivalent to $S*t(b)+tnons-x(a)=another$ $integer$ for $x(b)=x(inv(S))$.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR)
+!! Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2218,7 +2061,10 @@ subroutine symatm(indsym, natom, nsym, symrec, tnons, tolsym, typat, xred, print
  do isym=1,nsym
    do iatom=1,natom
 
-     do mu=1,3 ! Apply inverse transformation to original coordinates. Note transpose of symrec.
+     ! Apply inverse transformation to original coordinates.
+     ! Note TRANSPOSE of symrec that corresponds to symrel^{-1}
+
+     do mu=1,3
        tratom(mu) = dble(symrec(1,mu,isym))*(xred(1,iatom)-tnons(1,isym))&
 &       +dble(symrec(2,mu,isym))*(xred(2,iatom)-tnons(2,isym))&
 &       +dble(symrec(3,mu,isym))*(xred(3,iatom)-tnons(3,isym))

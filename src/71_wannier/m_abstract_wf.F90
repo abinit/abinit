@@ -1,11 +1,9 @@
-
-
 !!****m* ABINIT/m_abstract_wf
 !! NAME
 !!  m_abstract_wf
 !!
 !! FUNCTION
-!!  Interface with Wannier90. 
+!!  Interface with Wannier90.
 !!  This module contains the abstract type abstract_wf and its children.
 !!  The abstract_wf type is used to store the wavefunctions either in wfd or wfk format.
 !!  And it provide the common interface for both format.
@@ -32,7 +30,6 @@ module m_abstract_wf
 
  use defs_basis
  use defs_wannier90
-
  use m_abicore
  use m_errors
  use m_atomdata
@@ -41,39 +38,27 @@ module m_abstract_wf
 #ifdef FC_NAG
  use f90_unix_dir
 #endif
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
  use m_nctk
  use m_hdr
  use m_dtset
  use m_dtfil
 
- use m_build_info,      only :  abinit_version
+ use m_build_info,   only : abinit_version
  use defs_wvltypes,  only : wvl_internal_type
- use defs_datatypes, only : pseudopotential_type, ebands_t
- use defs_abitypes, only : MPI_type
- use m_io_tools, only : delete_file, get_unit, open_file
- use m_hide_lapack,     only : matrginv
- use m_fstrings,      only : strcat, sjoin, itoa
- use m_numeric_tools, only : uniformrandom, simpson_int, c2r, l2int
- use m_special_funcs,   only : besjm
- use m_geometry,  only : xred2xcart, rotmat, wigner_seitz
- use m_fftcore,  only : sphereboundary, ngfft_seq, get_kg
- use m_crystal,  only : crystal_t
- use m_ebands,   only : ebands_ncwrite, ebands_expandk, ebands_free
- use m_pawang,   only : pawang_type
- use m_pawrad,   only : pawrad_type, simp_gen
- use m_pawtab,   only : pawtab_type
- use m_pawcprj,  only : pawcprj_type
- use m_paw_sphharm, only : ylm_cmplx, initylmr
- use m_paw_overlap, only : smatrix_pawinit
- use m_pawrhoij, only: pawrhoij_copy
- use m_evdw_wannier, only : evdw_wannier
- use m_fft,            only : fourwf
- use m_wfd, only: wfd_t, wfd_init, wave_t, WFD_STORED
+ use defs_datatypes, only : pseudopotential_type
+ use defs_abitypes,  only : MPI_type
+ use m_io_tools,     only : delete_file
+ use m_fstrings,     only : strcat, sjoin, itoa
+ use m_fftcore,      only : ngfft_seq, get_kg
+ use m_crystal,      only : crystal_t
+ use m_ebands,       only : ebands_t
+ use m_pawtab,       only : pawtab_type
+ use m_pawrhoij,     only : pawrhoij_copy
+ use m_pawcprj,      only : pawcprj_type
+ use m_wfd,          only : wfd_t, wfd_init, wave_t, WFD_STORED
 
- implicit none 
+ implicit none
 
  private
 
@@ -93,7 +78,7 @@ module m_abstract_wf
     !num_nnmax: maximum number of nearest neighbors
     !nntot: total number of nearest neighbors
     !nsppol: number of spin polarizations
-   integer :: nkpt=0, mband=0, num_nnmax=0, nntot=0, nsppol=0 
+   integer :: nkpt=0, mband=0, num_nnmax=0, nntot=0, nsppol=0
    !rank: rank of the current process
     !comm: communicator
     !nprocs: number of processes
@@ -153,7 +138,7 @@ module m_abstract_wf
     !mband: number of bands
     !mkmem: number of kpoints in this process
     !nkpt: number of kpoints
-    
+
     integer :: natom=0, nspinor=0, nsppol=0, mband=0, &
          & mkmem=0, nkpt=0, rank=-999, nprocs=-999, comm=-999
   contains
@@ -186,7 +171,7 @@ module m_abstract_wf
     procedure :: init => cg_cprj_init !initialize the cg_cprj type
     procedure :: free => cg_cprj_free !free the cg_cprj type
     procedure :: compute_index_cprj !compute the index of the cprj
-    procedure :: cg_elem 
+    procedure :: cg_elem
     procedure :: cg_elem_complex
     procedure :: cprj_elem
     procedure :: get_cg_ptr => cg_cprj_get_cprj_ptr
@@ -194,10 +179,10 @@ module m_abstract_wf
     procedure :: write_cg_and_cprj_tmpfile
     procedure :: remove_tmpfile
     procedure :: load_cg
- end type cg_cprj 
+ end type cg_cprj
 
 
-!type wfd_t: 
+!type wfd_t:
 !  wavefunctions in the WFD format.
  type, public, extends(abstract_wf) :: wfd_wf
    ! The working wfd, ebands, etc
@@ -500,7 +485,7 @@ subroutine init_mywfc(mywfc, ebands, wfd , cg, cprj, cryst, &
   & dtset, dtfil, hdr, MPI_enreg, nprocs, psps, pawtab, rank, comm)
     class(abstract_wf), pointer, intent(inout) :: mywfc
     type(crystal_t), target, intent(in) :: cryst
-    type(ebands_t), target, optional, intent(inout) :: ebands
+    type(ebands_t), target, optional, intent(in) :: ebands
     type(wfd_t), target, optional, intent(inout) :: wfd
     real(dp), target, optional, intent(in):: cg(:, :)
     type(pawcprj_type), target, optional, intent(in):: cprj(:,:)
@@ -549,7 +534,7 @@ subroutine init_mywfc(mywfc, ebands, wfd , cg, cprj, cryst, &
     type(ebands_t), target, intent(in) :: ebands
     type(dataset_type),target, intent(in) :: dtset
     type(datafiles_type),target, intent(in) :: dtfil
-    type(mpi_type), target, intent(in) :: MPI_enreg
+    type(mpi_type), target, intent(inout) :: MPI_enreg
     type(pseudopotential_type), target, intent(in) :: psps
     type(pawtab_type), target, optional, intent(in) :: pawtab(:)
     type(hdr_type), target, intent(in) :: hdr
@@ -617,7 +602,7 @@ subroutine init_mywfc(mywfc, ebands, wfd , cg, cprj, cryst, &
   end function abstract_wf_cg_elem_complex
 
 !-----------------------------------------------------------------------------
-!> get a block of the wavefunction for any abstract_wf type. 
+!> get a block of the wavefunction for any abstract_wf type.
 !> It should be overrided for each type.
 !> @param self: the abstract_wf type
 !> @param ikpt2: the index of the k point
@@ -755,7 +740,7 @@ subroutine init_mywfc(mywfc, ebands, wfd , cg, cprj, cryst, &
     if (self%expanded) then
       call self%wfd_bz%free()
       call self%hdr_bz%free()
-      call ebands_free(self%ebands_bz)
+      call self%ebands_bz%free()
       call self%dtset_bz%free()
       !call self%mpi_enreg_bz%free()
       ABI_FREE(self%bz2ibz)
@@ -872,7 +857,7 @@ subroutine init_mywfc(mywfc, ebands, wfd , cg, cprj, cryst, &
       character(len=200) :: msg
       ! NOTE: is this OK to assume so?
       ecut_eff = dtset%ecut * dtset%dilatmx **2
-      call ebands_expandk(inb=ebands, cryst=cryst, ecut_eff=ecut_eff, &
+      call ebands%expandk(cryst=cryst, ecut_eff=ecut_eff, &
         & force_istwfk1=.True., dksqmax=dksqmax, &
         & bz2ibz=self%bz2ibz, outb=self%ebands_bz)
   ! Note: test if force_istwfk1 is not set to True, force rotate
@@ -885,7 +870,7 @@ subroutine init_mywfc(mywfc, ebands, wfd , cg, cprj, cryst, &
         ABI_ERROR(msg)
       end if
 
-      call hdr_init_lowlvl(self%hdr_bz,self%ebands_bz,psps,pawtab,dummy_wvl,abinit_version,&
+      call self%hdr_bz%init_lowlvl(self%ebands_bz,psps,pawtab,dummy_wvl,abinit_version,&
         hdr%pertcase,hdr%natom,hdr%nsym,hdr%nspden,hdr%ecut,dtset%pawecutdg,hdr%ecutsm,dtset%dilatmx,&
         hdr%intxc,hdr%ixc,hdr%stmbias,hdr%usewvl,dtset%pawcpxocc,dtset%pawspnorb,dtset%ngfft,dtset%ngfftdg,hdr%so_psp,&
         hdr%qptn,cryst%rprimd,cryst%xred,hdr%symrel,hdr%tnons,hdr%symafm,hdr%typat,hdr%amu,hdr%icoulomb,&
@@ -937,7 +922,7 @@ subroutine init_mywfc(mywfc, ebands, wfd , cg, cprj, cryst, &
       !mpw = maxval(self%hdr_bz%npwarr)
       mband = self%hdr_bz%mband
       !call gstore%get_mpw_gmax(ecut, mpw, gmax)
-      gmax = gmax + 4 ! FIXME: this is to account for umklapp 
+      gmax = gmax + 4 ! FIXME: this is to account for umklapp
       gmax = 2*gmax + 1
       call ngfft_seq(work_ngfft, gmax)
 
@@ -1164,7 +1149,7 @@ subroutine init_mywfc(mywfc, ebands, wfd , cg, cprj, cryst, &
     type(pawcprj_type), target, optional, intent(in):: cprj(:,:)
     type(dataset_type),target, intent(in) :: dtset
     type(datafiles_type),target, intent(in) :: dtfil
-    type(mpi_type), target, intent(in) :: MPI_enreg
+    type(mpi_type), target, intent(inout) :: MPI_enreg
     type(pseudopotential_type), target, intent(in) :: psps
     type(pawtab_type), target, optional, intent(in) :: pawtab(:)
     type(hdr_type), target, intent(in) :: hdr
@@ -1206,7 +1191,7 @@ subroutine init_mywfc(mywfc, ebands, wfd , cg, cprj, cryst, &
     call self%abstract_wf%free()
   end subroutine cg_cprj_free
 
-  ! return one entry of cg. 
+  ! return one entry of cg.
   ! parameters:
   ! icplx: 1 for real part, 2 for imaginary part
   ! ig: index of G vector

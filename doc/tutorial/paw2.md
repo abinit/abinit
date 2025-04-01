@@ -101,13 +101,13 @@ Enter the `atompaw-4.x.y.z` and execute:
     make
 ```
 
-if all goes well, you get the `ATOMPAW` executable at 
-<span style="color:green">atompaw-4.x.y.z/build/src/atompaw</span>.  
+if all goes well, you get the `ATOMPAW` executable at
+<span style="color:green">atompaw-4.x.y.z/build/src/atompaw</span>.
 If not, Go into the directory <span style="color:green">doc</span>, open the file <span style="color:green">atompaw-usersguide.pdf</span>, go p.3 and follow the instructions.
-    
+
 !!! Note
     On MacOS, you can use [[https://brew.sh|homebrew]] package manager and install `ATOMPAW` by typing:
-    
+
 ```sh
         brew install atompaw/repo/atompaw
 ```
@@ -130,11 +130,11 @@ can be found in the `Atom_name` file (`Atom_name` is the first parameter of the 
 
 Resulting PAW dataset is contained in:
 
-- `Atom_name.XCfunc.xml` file  
+- `Atom_name.XCfunc.xml` file
   Normalized XML file according to the
     [PAW- XML specifications](https://esl.cecam.org/Paw-xml) (recommended).
 
-- `Atom_name.XCfunc-paw.abinit` file  
+- `Atom_name.XCfunc-paw.abinit` file
   Proprietary legacy format for ABINIT
 
 
@@ -222,7 +222,7 @@ means:
 ```
     2
 ```
-   * A line with the <span style="color:green">$r_{PAW}$</span> radius.  
+   * A line with the <span style="color:green">$r_{PAW}$</span> radius.
      _Select it to be slightly less than half the inter-atomic distance
      in the solid (as a first choice). Here $r_{PAW}=2.3\ a.u$._
 ```
@@ -293,18 +293,18 @@ At this stage, run `ATOMPAW`. For this purpose, simply enter:
 
 Lot of files are produced. We will examine some of them.
 A summary of the PAW dataset generation process has been written in a file
-named `Ni`.  
+named `Ni`.
 Open it. It should look like:
 
 	 Completed calculations for Ni
 	 Exchange-correlation type: GGA, Perdew-Burke-Ernzerhof
-	  Radial integration grid is logarithmic 
+	  Radial integration grid is logarithmic
 	r0 =   2.2810899E-04 h =   6.3870518E-03   n =      2000 rmax =   8.0000000E+01
 	 Scalar relativistic calculation
 	   AEatom converged in          32  iterations
 		 for nz =  28.00
 		 delta  =    9.5504321957145377E-017
-	  All Electron Orbital energies:         
+	  All Electron Orbital energies:
 	  n  l     occupancy       energy
 	 1  0      2.0000000E+00 -6.0358607E+02
 	 2  0      2.0000000E+00 -7.2163318E+01
@@ -316,27 +316,27 @@ Open it. It should look like:
 	 3  2      8.0000000E+00 -6.5223644E-01
 
 	  Total energy
-		 Total                    :    -3041.0743834110435     
+		 Total                    :    -3041.0743834110435
 	 Completed calculations for Ni
 	 Exchange-correlation type: GGA, Perdew-Burke-Ernzerhof
-	  Radial integration grid is logarithmic 
+	  Radial integration grid is logarithmic
 	r0 =   2.2810899E-04 h =   6.3870518E-03   n =      2000 rmax =   8.0000000E+01
 	 Scalar relativistic calculation
 	   SCatom converged in           1  iterations
 		 for nz =  28.00
 		 delta  =    8.7786021384577619E-017
-	   Valence Electron Orbital energies:         
+	   Valence Electron Orbital energies:
 	  n  l     occupancy       energy
 	 4  0      2.0000000E+00 -4.1475541E-01
 	 4  1      0.0000000E+00 -9.0035739E-02
 	 3  2      8.0000000E+00 -6.5223644E-01
 
 	  Total energy
-		 Total                    :    -3041.0743834029249     
-		 Valence                  :    -185.18230020196870     
-	  paw parameters: 
+		 Total                    :    -3041.0743834029249
+		 Valence                  :    -185.18230020196870
+	  paw parameters:
 		   lmax =            2
-			 rc =    2.3096984974114871     
+			 rc =    2.3096984974114871
 			irc =         1445
 	 Vloc: Norm-conserving Troullier-Martins with l= 3;e=   0.0000E+00
 	 Projector type: Bloechl + Gram-Schmidt ortho.
@@ -351,7 +351,7 @@ Open it. It should look like:
 		5    3    2 -6.5223644E-01  9.1576184E+00  8.0000000E+00
 		6  999    2  0.0000000E+00  1.3369076E+01  0.0000000E+00
 	 Completed diagonalization of ovlp with info =        0
-  
+
 	 Eigenvalues of overlap operator (in the basis of projectors):
 		1        7.27257365E-03
 		2        2.25491432E-02
@@ -359,15 +359,15 @@ Open it. It should look like:
 		4        1.87485118E+00
 		5        1.05720648E+01
 		6        2.00807906E+01
-  
+
 	  Summary of PAW energies
-			Total valence energy       -185.18230536120760     
-			  Smooth energy             11.667559552612433     
-			  One center               -196.84986491382003     
-			  Smooth kinetic            15.154868503980399     
-			  Vloc energy              -2.8094614733964467     
-			  Smooth exch-corr         -3.3767012052640886     
-			  One-center xc            -123.07769380742522     
+			Total valence energy       -185.18230536120760
+			  Smooth energy             11.667559552612433
+			  One center               -196.84986491382003
+			  Smooth kinetic            15.154868503980399
+			  Vloc energy              -2.8094614733964467
+			  Smooth exch-corr         -3.3767012052640886
+			  One-center xc            -123.07769380742522
 
 The generated PAW dataset (contained in <span style="color:green">Ni.GGA-PBE.xml</span> file) is a first draft.
 Several parameters have to be adjusted, in order to get accurate results and efficient DFT calculations.
@@ -381,7 +381,7 @@ Several parameters have to be adjusted, in order to get accurate results and eff
 
 Let's try to select **700 points** in the logarithmic grid and check if any noticeable
 difference in the results appears.
-You just have to replace `2000` by `700` in the second line of  <span style="color:green">Ni.atompaw.input1</span> file.  
+You just have to replace `2000` by `700` in the second line of  <span style="color:green">Ni.atompaw.input1</span> file.
 Then run:
 
     atompaw < Ni.atompaw.input1
@@ -389,13 +389,13 @@ Then run:
 again and look at the `Ni` file:
 
 	   Summary of PAW energies
-			 Total valence energy       -185.18230027710337     
-			   Smooth energy             11.634042318422193     
-			   One center               -196.81634259552555     
-			   Smooth kinetic            15.117782033814152     
-			   Vloc energy              -2.8024659321861067     
-			   Smooth exch-corr         -3.3712015132649102     
-			   One-center xc            -123.08319475096027     
+			 Total valence energy       -185.18230027710337
+			   Smooth energy             11.634042318422193
+			   One center               -196.81634259552555
+			   Smooth kinetic            15.117782033814152
+			   Vloc energy              -2.8024659321861067
+			   Smooth exch-corr         -3.3712015132649102
+			   One-center xc            -123.08319475096027
 
 As you see, results obtained with this new grid are very close to previous ones, expecially the `valence energy`.
 We can keep the **700 points** grid.
@@ -430,7 +430,7 @@ These are saved in files named `wfni`, where `i` ranges over the number of parti
 used, so 6 in the present example.
 Each file contains 4 columns: the radius $r$ in column 1,
 the AE partial-wave $\phi_i(r)$ in column 2, the PS partial-wave $\tphi_i(r)$ in
-column 3, and the projector $\tprj_i(r)$ in column 4.  
+column 3, and the projector $\tprj_i(r)$ in column 4.
 Plot the 3 curves as a function of radius using a plotting tool of your choice.
 
 Below the first $s$\- partial-wave /projector of the Ni example:
@@ -479,7 +479,7 @@ $\frac{d(log(\Psi_l(E))}{dE}$ computed for the exact atomic problem and with the
 They are printed in the `logderiv.l` files. Each `logderiv.l` file corresponds to an
 angular momentum $l$  and contains five columns of data: the
 energy, the logarithmic derivative of the $l$-state of the exact atomic problem,
- the logarithmic derivative of the pseudized problem (and two other colums not relevant for this section). In the following, when you edit a `logderiv` file, only edit the three first columns.  
+ the logarithmic derivative of the pseudized problem (and two other colums not relevant for this section). In the following, when you edit a `logderiv` file, only edit the three first columns.
 In our `Ni` example, $l=0$, $1$ or $2$.
 
 The logarithmic derivatives should have the following properties:
@@ -503,9 +503,9 @@ Here are the three logarithmic derivative curves for the current dataset:
 
 ![l=2 logderivatives](paw2_assets/log2a.jpg)
 
-As you can see, except for $l=2$, exact and PAW logarithmic derivatives do not match!  
+As you can see, except for $l=2$, exact and PAW logarithmic derivatives do not match!
 According to the previous remarks, try other values for the references
-energies of the $s$\- and $p$\- additional partial-waves.  
+energies of the $s$\- and $p$\- additional partial-waves.
 First, edit again the  <span style="color:green">Ni.atompaw.input1</span> file and put $E_{ref}=3$ Ry for the
 additional $s$\- state (line 18); run `ATOMPAW` again. Plot the `logderiv.0` file.
 You should get:
@@ -513,7 +513,7 @@ You should get:
 ![l=0 log derivatives](paw2_assets/log0b.jpg)
 
 Then put $E_{ref}=4$ Ry for the second $p$\- state (line 21); run `ATOMPAW` again.
-Plot again the `logderiv.1` file.  
+Plot again the `logderiv.1` file.
 You should get:
 
 ![l=1 log derivatives](paw2_assets/log1b.jpg)
@@ -557,7 +557,7 @@ In most cases (changing pseudopotential or matching radius), one has to restart 
 
 To see an example of ghost state, use the
  <span style="color:green">\$ABI_HOME/doc/tutorial/paw2_assets/Ni.ghost.atompaw.input</span> file and run it with `ATOMPAW`.
- 
+
 {% dialog tutorial/paw2_assets/Ni.ghost.atompaw.input %}
 
 Look at the $l=1$ logarithmic derivatives (`logderiv.1` file). They look like:
@@ -565,12 +565,12 @@ Look at the $l=1$ logarithmic derivatives (`logderiv.1` file). They look like:
 ![Ni l=1 log derivatives](paw2_assets/log1c.jpg)
 
 Now, edit the <span style="color:green">Ni.ghost.atompaw.input</span> file and replace `troulliermartins` by
-`ultrasoft`.  
+`ultrasoft`.
 Run `ATOMPAW` again... and look at `logderiv.1` file.
-The ghost state has moved!  
+The ghost state has moved!
 
 Edit again the file and replace `troulliermartins` by `bessel` (line 28); then change the 17th
-line `2.0 2.0 2.0 2.0` by `2.0 2.0 1.8 2.0` (decreasing the $r_{Vloc}$ radius from $2.0$ to $1.8$).  
+line `2.0 2.0 2.0 2.0` by `2.0 2.0 1.8 2.0` (decreasing the $r_{Vloc}$ radius from $2.0$ to $1.8$).
 Run `ATOMPAW`: the ghost state disappears!
 
 Start from the original state of <span style="color:green">Ni.ghost.atompaw.input</span> file and put `1.6` for
@@ -579,20 +579,20 @@ Run `ATOMPAW`: the ghost state disappears!
 
 ## 7. Testing the "efficiency" of a PAW dataset
 
-Let's use again our <span style="color:green">Ni.atompaw.input1</span> file for Nickel (with all our modifications).  
-You get a file <span style="color:green">Ni.GGA-PBE-paw.xml</span> containing the PAW dataset designated for ABINIT.  
+Let's use again our <span style="color:green">Ni.atompaw.input1</span> file for Nickel (with all our modifications).
+You get a file <span style="color:green">Ni.GGA-PBE-paw.xml</span> containing the PAW dataset designed for ABINIT.
 
-To test the efficiency of the generated PAW dataset, we finally will use `ABINIT`!  
+To test the efficiency of the generated PAW dataset, we finally will use `ABINIT`!
 You are about to run a DFT computation and determine the size of the **plane
 wave basis** needed to reach a given accuracy. If the **cut-off energy** defining the
 plane waves basis is too high (higher than `20 Hartree`), some changes have to be made in the input file.
 
 Copy <span style="color:green">\$ABI_TESTS/tutorial/Input/tpaw2_1.abi</span> in your working directory.
-Edit it, and activate the 8 datasets (uncomment the line `ndtset 8`).  
+Edit it, and activate the 8 datasets (uncomment the line `ndtset 8`).
 
 {% dialog tests/tutorial/Input/tpaw2_1.abi %}
 
-Run 'ABINIT'. It computes the `total energy` of ferromagnetic FCC Nickel for several values of [[ecut]].  
+Run 'ABINIT'. It computes the `total energy` of ferromagnetic FCC Nickel for several values of [[ecut]].
 At the end of output file, you get this:
 
 	  ecut1     8.00000000E+00 Hartree
@@ -612,28 +612,28 @@ At the end of output file, you get this:
 	etotal7    -3.9627470087E+01
 	etotal8    -3.9627833090E+01
 
-`etotal` convergence (at 1 mHartree) is achieve for $18 \le e_{cut} \le 20$ Hartree.  
+`etotal` convergence (at 1 mHartree) is achieve for $18 \le e_{cut} \le 20$ Hartree.
 `etotal` convergence (at 0,1 mHartree) is achieve for $e_{cut} \ge 22$ Hartree.
 
 This is not a good result for a PAW dataset; let's try to optimize it.
 
-* 1st possibility: use `vanderbilt` **projectors** instead of `bloechl` ones.  
+* 1st possibility: use `vanderbilt` **projectors** instead of `bloechl` ones.
   Vanderbilt's projectors generally are more localized in reciprocal space than
   Bloechl's ones .
   Keyword `bloechl` has to be replaced by `vanderbilt` in the `ATOMPAW` input file
   and $r_c$ values have to be added at the end of the file (one for each PS partial-wave).
   See this input file:
-  <span style="color:green">\$ABI_HOME/doc/tutorial/paw2_assets/Ni.atompaw.input.vanderbilt</span>.  
+  <span style="color:green">\$ABI_HOME/doc/tutorial/paw2_assets/Ni.atompaw.input.vanderbilt</span>.
 
 {% dialog tutorial/paw2_assets/Ni.atompaw.input.vanderbilt %}
 
-* 2nd possibility: use `RRKJ` **pseudization scheme** for projectors.  
+* 2nd possibility: use `RRKJ` **pseudization scheme** for projectors.
   Use this input file for `ATOMPAW`:
   <span style="color:green">\$ABI_HOME/doc/tutorial/paw2_assets/Ni.atompaw.input2</span>.
   As you can see `bloechl` has been changed by `custom rrkj`
   and six $r_c$ values have been added at the end of the file, each one
   corresponding to the matching radius of one PS partial-wave.
-  Repeat the entire procedure (`ATOMPAW` \+ `ABINIT`)... and get a new ABINIT output file.  
+  Repeat the entire procedure (`ATOMPAW` \+ `ABINIT`)... and get a new ABINIT output file.
   _Note: You have check again log derivatives._
 
 {% dialog tutorial/paw2_assets/Ni.atompaw.input2 %}
@@ -655,28 +655,28 @@ This is not a good result for a PAW dataset; let's try to optimize it.
     etotal7    -3.9628436662E+01
     etotal8    -3.9628455467E+01
 
-`etotal` convergence (at 1 mHartree) is achieve for $12 \le e_{cut} \le 14$ Hartree.  
+`etotal` convergence (at 1 mHartree) is achieve for $12 \le e_{cut} \le 14$ Hartree.
 `etotal` convergence (at 0,1 mHartree) is achieve for $16 \le e_{cut} \le 18$ Hartree.
 
 This is a reasonable result for a PAW dataset!
 
-* 3rd possibility: use **enhanced polynomial** pseudization scheme for projectors.  
+* 3rd possibility: use **enhanced polynomial** pseudization scheme for projectors.
   Edit
   <span style="color:green">Ni.atompaw.input2</span>
   and replace `custom rrkj` by `custom polynom2 7 10`. It may sometimes improve the ecut convergence.
-  
+
 
 ### Optional exercise
 
-Let's go back to `Vanderbilt` projectors.  
+Let's go back to `Vanderbilt` projectors.
 Repeat the procedure (`ATOMPAW`\ + `ABINIT`) with the previous
 <span style="color:green">\Ni.atompaw.input.vanderbilt</span> file.
 
 {% dialog tutorial/paw2_assets/Ni.atompaw.input.vanderbilt %}
 
-Let's try  to change the pseudization scheme for the local pseudopotential.  
+Let's try  to change the pseudization scheme for the local pseudopotential.
 Try to replace the `troulliermartins` keyword by `ultrasoft`.
-Repeat the procedure (`ATOMPAW` \+ `ABINIT`).  
+Repeat the procedure (`ATOMPAW` \+ `ABINIT`).
 ABINIT can now reach convergence!
 
 Results are below:
@@ -697,8 +697,8 @@ Results are below:
     etotal6    -3.9623393021E+01
     etotal7    -3.9623440787E+01
     etotal8    -3.9623490997E+01
-   
-`etotal` convergence (at 1 mHartree) is achieve for $14 \le e_{cut} \le 16$ Hartree.  
+
+`etotal` convergence (at 1 mHartree) is achieve for $14 \le e_{cut} \le 16$ Hartree.
 `etotal` convergence (at 0,1 mHartree) is achieve for $20 \le e_{cut} \le 22$ Hartree.
 
 
@@ -733,13 +733,13 @@ The last step is to examine carefully the physical quantities obtained with our 
 Copy <span style="color:green">\$ABI_TESTS/tutorial/Input/tpaw2_2.abi</span> in your working directory.
 Edit it, activate the 7 datasets (ubcomment the 'ndtset 7` line),
  and use
- <span style="color:green">\$ABI_HOME/doc/tutorial/paw2_assets/Ni.GGA-PBE-paw.rrkj.xml</span> 
- PAW dataset obtained from <span style="color:green">Ni.atompaw.input2 file</span>.  
+ <span style="color:green">\$ABI_HOME/doc/tutorial/paw2_assets/Ni.PBE-paw.rrkj.xml</span>
+ PAW dataset obtained from <span style="color:green">Ni.atompaw.input2 file</span>, with a minor change of name (suppression of the indication GGA).
 Run ABINIT (this may take a while...).
 
 {% dialog tests/tutorial/Input/tpaw2_2.abi %}
 
-{% dialog tutorial/paw2_assets/Ni.GGA-PBE-paw.rrkj.xml %}
+{% dialog tutorial/paw2_assets/Ni.PBE-paw.rrkj.xml %}
 
 ABINIT computes the converged ground state of ferromagnetic FCC Nickel for several volumes around equilibrium.
 Plot the `etotal` vs `acell` curve:
@@ -797,11 +797,11 @@ dataset is used for non-standard solid structures or thermodynamical domains.
 
 !!! Optional_exercise
 
-    Let's add 3s and 3p semi-core states in PAW dataset!  
+    Let's add 3s and 3p semi-core states in PAW dataset!
     Repeat the procedure (`ATOMPAW` \+ `ABINIT`) with
     <span style="color:green">\$ABI_HOME/doc/tutorial/paw2_assets/Ni.atompaw.input.semicore</span>
-    file. The execution time is a bit longer as more electrons have to be treated by `ABINIT`.  
-    Look at $a_0$, $B$ or $\mu$ variation.  
+    file. The execution time is a bit longer as more electrons have to be treated by `ABINIT`.
+    Look at $a_0$, $B$ or $\mu$ variation.
     Note: this new PAW dataset has a smaller $r_{PAW}$ radius (because semi-core states are localized).
     ````
         a0 = 3.518 angstrom
@@ -813,8 +813,8 @@ dataset is used for non-standard solid structures or thermodynamical domains.
 
 In this section, an additional optimization of the atomic data is presented.
 It can contribute, in some cases, to a speedup of the convergence on `ecut`.
-This optimization is not essential to produce efficient PAW datasets but can be useful.  
-We advise experienced users to try it.  
+This optimization is not essential to produce efficient PAW datasets but can be useful.
+We advise experienced users to try it.
 
 The idea is quite simple: when expressing the different atomic radial
 functions ($\phi_i, \tphi_i, \tprj_i$) on the plane wave basis, the number of plane waves
@@ -862,12 +862,12 @@ with:
     XMLOUT
     rsoptim 8. 2 0.0001
 ````
-8., 2 and 0.0001 are the values for $g_{max}$,$\frac{\gamma}{g_{max}}$ and $W$.  
+8., 2 and 0.0001 are the values for $g_{max}$,$\frac{\gamma}{g_{max}}$ and $W$.
 
-Run ATOMPAW.  
+Run ATOMPAW.
 You get a new PAW dataset file for `ABINIT`.
-Run `ABINIT` with it using the <span style="color:green">tpaw2_1.abi</span> file.  
-Compare the results with those obtained in section 7.  
+Run `ABINIT` with it using the <span style="color:green">tpaw2_1.abi</span> file.
+Compare the results with those obtained in section 7.
 
 You can try several values for $g_{max}$ (keeping $\frac{\gamma}{g_{max}}$
 and $W$ constant) and compare the efficiency of the atomic data;
@@ -876,7 +876,7 @@ do not forget to test physical properties again.
 ![RSO comparison](paw2_assets/RSOcompa.jpg)
 
 !!! Note
-	 **How to choose the RSO parameters?**  
+	 **How to choose the RSO parameters?**
 	 $\frac{\gamma}{g_{max}} = 2$ and $0.0001 \lt W \lt 0.001$ is a good choice.
 	 $g_{max}$ has to be adjusted. The lower $g_{max}$ the faster the convergence is
 	 but too low $g_{max}$ can produce unphysical results.

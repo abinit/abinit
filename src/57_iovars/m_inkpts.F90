@@ -6,7 +6,7 @@
 !!  Routines to initialize k-point and q-point sampling from input file.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR)
+!!  Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -26,9 +26,7 @@ module m_inkpts
  use m_errors
  use m_xmpi
  use m_nctk
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
  use m_hdr
 
  use m_time,      only : timab
@@ -246,18 +244,14 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
    use_kerange = .True.
    ABI_MALLOC(krange2ibz, (nkpt))
    if (my_rank == master) then
-#ifdef HAVE_NETCDF
      NCF_CHECK(nctk_open_read(ncid, getkerange_filepath, xmpi_comm_self))
-     call hdr_ncread(hdr, ncid, fform)
+     call hdr%ncread(ncid, fform)
      ABI_CHECK(fform == fform_from_ext("KERANGE.nc"), sjoin("Error while reading:", getkerange_filepath, ", fform:", itoa(fform)))
      ! TODO Add code for consistency check
      !kptopt, nsym, occopt
      !ABI_CHECK(nkpt == hdr%nkpt, "nkpt from kerange != nkpt")
      NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "krange2ibz"), krange2ibz))
      NCF_CHECK(nf90_close(ncid))
-#else
-     ABI_ERROR("getkerange_filepath requires NETCDF support")
-#endif
    end if
 
    call xmpi_bcast(krange2ibz, master, comm, ierr)
@@ -698,10 +692,7 @@ subroutine inqpt(chksymbreak,iout,jdtset,lenstr,msym,natom,qptn,wtqc,rprimd,spin
      end if
    end if
 
-!DEBUG
-!write(std_out,'(a)')' m_inkpts%inqpt : before symlatt '
-!call flush(std_out)
-!ENDDEBUG
+   !write(std_out,'(a)')' m_inkpts%inqpt : before symlatt '
 
    ! Re-generate symmetry operations from the lattice and atomic coordinates
    ! This is a fundamental difference with respect to the k point generation.
@@ -714,18 +705,12 @@ subroutine inqpt(chksymbreak,iout,jdtset,lenstr,msym,natom,qptn,wtqc,rprimd,spin
    use_inversion=1
    call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
-!DEBUG
-!write(std_out,'(a)')' m_inkpts%inqpt : before symfind '
-!call flush(std_out)
-!ENDDEBUG
+   !write(std_out,'(a)')' m_inkpts%inqpt : before symfind '
 
    call symfind(gprimd,msym,natom,nptsym,1,nsym_new,0,&
     ptsymrel,spinat,symafm_new,symrel_new,tnons_new,tolsym,typat,use_inversion,xred)
 
-!DEBUG
-!write(std_out,'(a)')' m_inkpts%inqpt : after symfind '
-!call flush(std_out)
-!ENDDEBUG
+   !write(std_out,'(a)')' m_inkpts%inqpt : after symfind '
 
    ! Prepare to compute the q-point grid in the ZB or IZB
    iscf_fake=0 ! Do not need the weights
@@ -757,9 +742,8 @@ subroutine inqpt(chksymbreak,iout,jdtset,lenstr,msym,natom,qptn,wtqc,rprimd,spin
    end if
 
    if (iqpt > nqpt_computed) then
-     write(msg, '(a,i0,3a,i0,7a)' )&
-      'The input variable iqpt,',iqpt,' is bigger than the computed number of q-points in the grid,',ch10,&
-      'which is ',nqpt_max,'.',ch10,&
+     write(msg, '(a,i0,a,i0,7a)' )&
+      'The input variable iqpt:',iqpt,' is bigger than the computed number of q-points in the grid which is ',nqpt_max,'.',ch10,&
       'The latter has been computed from the input variables qptrlatt, ngqpt, nshiftq,',ch10,&
       'shiftq, as well as qptopt, the symmetries of the lattice, and spinat.',ch10,&
       'Action: correct iqpt in the input file, or correct the computed q-point grid.'

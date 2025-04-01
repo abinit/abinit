@@ -1,8 +1,8 @@
 
-.Version 9.11.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Jul 2023.
-- ( at 11h58 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h08 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v1_t93/t93.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v1_t93/t93.abi
 - output file    -> t93.abo
 - root for input  files -> t93i
 - root for output files -> t93o
@@ -218,10 +218,10 @@ _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -231,7 +231,7 @@ _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
            diemac      1.20000000E+01
              ecut      2.00000000E+00 Hartree
            enunit           2
--          fftalg         312
+-          fftalg         512
             intxc           1
            istwfk        2
            jdtset        1    2    3    4    5    6    7    8    9   10
@@ -1066,10 +1066,10 @@ P           mkmem           1
 
  abinit : before driver, prtvol=-1, debugging mode => will skip acknowledgments
 -
-- Proc.   0 individual time (sec): cpu=          0.7  wall=          0.7
+- Proc.   0 individual time (sec): cpu=          0.6  wall=          0.6
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and  14 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          0.7  wall=          0.7
++Overall time at end (sec) : cpu=          0.6  wall=          0.6

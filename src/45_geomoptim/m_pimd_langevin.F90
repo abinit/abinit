@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2011-2024 ABINIT group (GG,MT)
+!!  Copyright (C) 2011-2025 ABINIT group (GG,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,7 +27,7 @@ module m_pimd_langevin
  use m_pimd
  use m_random_zbq
 
- use m_symtk,     only : matr3inv
+ use m_matrix,    only : matr3inv
  use m_geometry,  only : xcart2xred, xred2xcart
 
 
@@ -153,13 +153,14 @@ subroutine pimd_langevin_npt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,
  rescale_temp=one;if(zeroforce==1)rescale_temp=dble(ndof)/dble(ndof-3)
  quantummass(1:natom)=pimd_param%amu   (pimd_param%typat(1:natom))*amu_emass
  inertmass  (1:natom)=pimd_param%pimass(pimd_param%typat(1:natom))*amu_emass
- initemp=pimd_param%mdtemp(1)/rescale_temp; thermtemp=pimd_param%mdtemp(2)
+ initemp=pimd_param%mdtemp(1)/rescale_temp
+ thermtemp=pimd_param%mdtemp(2)
  dtion=pimd_param%dtion
  kt=thermtemp*kb_HaK
- friction=pimd_param%vis
+ friction=pimd_param%friction
  wg=pimd_param%bmass
  strtarget(:)=pimd_param%strtarget(:) ! imposed stress tensor
- frictionbar=pimd_param%friction      ! friction coeff of barostat
+ frictionbar=pimd_param%frictionbar   ! friction coeff of barostat
  scalebar=sqrt(two*frictionbar*wg*kt/dtion)
  forces_orig=forces
  constraint=0
@@ -454,9 +455,14 @@ subroutine pimd_langevin_npt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,
 & stress_pimd,temperature1,temperature2,&
 & pimd_param%traj_unit,trotter,vel,ddh,xcart,xred)
 
+!Compute cartesian coordinates
+ do iimage=1,trotter
+   call xred2xcart(natom,rprimd_next,xcart_next(:,:,iimage),xred_next(:,:,iimage))
+ end do
+
  if (itimimage>1) then
 !  Estimation of ds/dt and ddh at t+dt
-   vel = (three*xred_next   - four*xred   + xred_prev)/(two * dtion)
+   vel = (three*xcart_next  - four*xcart  + xcart_prev )/(two * dtion)
    ddh = (three*rprimd_next - four*rprimd + rprimd_prev)/(two * dtion)
  end if
 
@@ -584,13 +590,16 @@ subroutine pimd_langevin_nvt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,
 !Fill in the local variables
  use_qtb=pimd_param%use_qtb
  ndof=3*natom*trotter
- rescale_temp=one;if(zeroforce==1)rescale_temp=dble(ndof)/dble(ndof-3)
+ rescale_temp=one
+ if(zeroforce==1) rescale_temp=dble(ndof)/dble(ndof-3)
  quantummass(1:natom)=pimd_param%amu   (pimd_param%typat(1:natom))*amu_emass
  inertmass  (1:natom)=pimd_param%pimass(pimd_param%typat(1:natom))*amu_emass
  if(pitransform==1) inertmass=quantummass !compulsory for good definition of normal mode masses
  if(pitransform==2) inertmass=quantummass !compulsory for good definition of staging masses
- initemp=pimd_param%mdtemp(1)/rescale_temp;thermtemp=pimd_param%mdtemp(2)
- friction=pimd_param%vis;dtion=pimd_param%dtion
+ initemp=pimd_param%mdtemp(1)/rescale_temp
+ thermtemp=pimd_param%mdtemp(2)
+ friction=pimd_param%friction
+ dtion=pimd_param%dtion
  kt=thermtemp*kb_HaK
  forces_orig=forces
 

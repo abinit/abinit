@@ -195,6 +195,6 @@ ecut  6.0         # Maximal kinetic energy cut-off, in Hartree
 #%% description =
 #%%   Crystalline aluminum, primitive cell. Test of downsampling for HSE06, PBE0, HSE03.
 #%%   Testing of many hybrid functionals (variations of the hyb_* input variables).
-#%%   See more information in test libxc#72. The present test differns by the use of a
+#%%   See more information in test libxc#72. The present test differs by the use of a
 #%%   different pseudopotential, that includes a non-linear core correction.
 #%%<END TEST_INFO>
