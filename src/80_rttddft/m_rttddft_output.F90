@@ -34,7 +34,7 @@ module m_rttddft_output
                           & epjdos_new, prtfatbands, fatbands_ncwrite
  use m_errors,        only: msg_hndl, assert
  use m_ioarr,         only: fftdatar_write
- use m_io_tools,      only: open_file
+ use m_io_tools,      only: open_file, close_unit
  use m_iowf,          only: outwf
  use m_mpinfo,        only: iwrite_fftdatar
  use netcdf
@@ -89,89 +89,134 @@ subroutine rttddft_output(dtfil, dtset, istep, mpi_enreg, psps, tdks)
  !arrays
 
  !Local variables-------------------------------
- integer :: me
  !scalars
- character            :: tmp
  character(len=500)   :: msg
- integer              :: stat
+ character(len=100)   :: fmt
+ character(len=20)    :: access
+ integer              :: i
  !arrays
 
 ! *************************************************************************
 
  !** Special case of first step
  if (istep == tdks%first_step) then
+   access = "sequential"
+   if (dtset%td_restart>0) access = "append"
+
    ! Open energy file and writes header if needed
-   if (open_file(tdks%fname_tdener, msg, newunit=tdks%tdener_unit, status='unknown', form='formatted') /= 0) then
-      write(msg,'(a,a)') 'Error while trying to open file ', tdks%fname_tdener
-      ABI_ERROR(msg)
-   end if
    if (mpi_enreg%me == 0) then
-      if (dtset%td_restart>0) then
-         do
-            read(tdks%tdener_unit,*,iostat=stat) tmp
-            if (stat /= 0) exit
-         end do
-         backspace(tdks%tdener_unit)
-      else
-         write(msg,'(a)') "# RT-TDDFT -- Energy file. All quantities are in Hartree atomic units."
-         call wrtout(tdks%tdener_unit,msg)
-         write(msg,'(a)') "# step  time  E_total  E_kinetic  E_hartree  E_xc  E_ewald  &
-                         & E_corepsp  E_localpsp  E_nonlocalpsp  E_paw  E_entropy  E_vdw"
-         call wrtout(tdks%tdener_unit,msg)
+      if (open_file(tdks%fname_tdener,msg,newunit=tdks%tdener_unit,status='unknown',form='formatted',access=access) /= 0) ABI_ERROR(msg)
+   end if
+   if (dtset%td_restart==0) then
+      write(msg,'(a)') "# RT-TDDFT -- Energy file. All quantities are in Hartree atomic units."
+      call wrtout(tdks%tdener_unit,msg)
+      write(msg,'(a)') "# step  time  E_total  E_kinetic  E_hartree  E_xc  E_ewald  &
+                      & E_corepsp  E_localpsp  E_nonlocalpsp  E_paw  E_entropy  E_vdw"
+      call wrtout(tdks%tdener_unit,msg)
+   end if
+
+   ! Open electric field file and writes header if needed
+   if (dtset%td_ef_type /= 0) then
+      if (mpi_enreg%me == 0) then
+         if (open_file(tdks%fname_tdef,msg,newunit=tdks%tdef_unit,status='unknown',form='formatted',access=access) /= 0) ABI_ERROR(msg)
+      end if
+      if (dtset%td_restart==0) then
+         write(msg,'(a)') "# RT-TDDFT -- Electric field file. All quantities are in Hartree atomic units."
+         call wrtout(tdks%tdef_unit,msg)
+         write(msg,'(a)') "# step  time  E_x  E_y  E_z  A_x  A_y  A_z A_ext_x A_ext_y A_ext_z A_ind_x A_ind_y A_ind_z"
+         call wrtout(tdks%tdef_unit,msg)
+      end if
+   end if
+
+   ! Open current file and writes header if needed
+   if (dtset%prtcurrent /= 0) then
+      if (mpi_enreg%me == 0) then
+         if (open_file(tdks%fname_current,msg,newunit=tdks%current_unit,status='unknown',form='formatted',access=access) /= 0) ABI_ERROR(msg)
+      end if
+      if (dtset%td_restart==0) then
+         write(msg,'(a)') "# RT-TDDFT -- Current density file. All quantities are in Hartree atomic units."
+         call wrtout(tdks%current_unit,msg)
+         write(msg,'(a)') "# step  time  J_x  J_y  J_z"
+         call wrtout(tdks%current_unit,msg)
       end if
    end if
  end if
-
-!!FB: This is most probably not needed
-!!Update header, with evolving variables
-!call tdks%hdr%update(tdks%bantot,tdks%etot,tdks%energies%e_fermie,tdks%energies%e_fermih, &
-!                   & tdks%hdr%residm,tdks%rprimd,tdks%occ0,tdks%pawrhoij,                 &
-!                   & tdks%xred,dtset%amu_orig,comm_atom=mpi_enreg%comm_atom,              &
-!                   & mpi_atmtab=mpi_enreg%my_atmtab)
 
  !** Writes some info in main output file
  write(msg,'(a,a,f14.6,a)') ch10, 'Total energy = ', tdks%etot,' Ha'
  call wrtout(ab_out,msg)
  if (do_write_log) call wrtout(std_out,msg)
 
- write(msg,'(a,f14.6,a)') 'Integrated density (ie. total nb of electrons) = ', &
+ write(msg,'(a,f18.10,a)') 'Integrated density (ie. total nb of electrons) = ', &
                           & sum(tdks%rhor(:,1))*tdks%ucvol/tdks%nfftf, ch10
  call wrtout(ab_out,msg)
  if (do_write_log) call wrtout(std_out,msg)
 
  !** Writes in energy file
- write(msg,'(i0,f10.5,11(f14.8,1X))') istep-1, (istep-1)*tdks%dt, tdks%etot, tdks%energies%e_kinetic,                 &
-                                    & tdks%energies%e_hartree, tdks%energies%e_xc, tdks%energies%e_ewald,             &
-                                    & tdks%energies%e_corepsp, tdks%energies%e_localpsp, tdks%energies%e_nlpsp_vfock, &
-                                    & tdks%energies%e_paw, tdks%energies%e_entropy, tdks%energies%e_vdw_dftd
+ write(msg,'(i0,1X,f15.5,11(f14.8,1X))') istep-1, (istep-1)*tdks%dt, tdks%etot, tdks%energies%e_kinetic,                 &
+                                       & tdks%energies%e_hartree, tdks%energies%e_xc, tdks%energies%e_ewald,             &
+                                       & tdks%energies%e_corepsp, tdks%energies%e_localpsp, tdks%energies%e_nlpsp_vfock, &
+                                       & tdks%energies%e_paw, tdks%energies%e_entropy, tdks%energies%e_vdw_dftd
  call wrtout(tdks%tdener_unit,msg)
 
+ !** Writes TD elec. field and associated vector potential if needed
+ if (dtset%td_ef_type /= 0) then
+   write(msg,'(i0,1X,f15.5,1X,12(f14.8,1X))') istep, istep*tdks%dt, tdks%tdef%efield(:), tdks%tdef%vecpot(:), &
+                                            & tdks%tdef%vecpot_ext(:), tdks%tdef%vecpot_ind(:,1)
+   call wrtout(tdks%tdef_unit,msg)
+ end if
+
+ !** Writes TD current density if needed
+ if (dtset%prtcurrent /= 0) then
+   if (dtset%nsppol == 1) then
+      fmt = '(i0,1X,f15.5,1X,3(f14.8,1X))'
+   else
+      fmt = '(i0,1X,f15.5,1X,3(f14.8,1X),3(f14.8,1X))'
+   end if
+   write(msg,fmt) istep, istep*tdks%dt, (tdks%current(:,i),i=1,dtset%nsppol)
+   call wrtout(tdks%current_unit,msg)
+ end if
+
  !** Writes additional optional properties
+ !Update header, with evolving variables
+ call tdks%hdr%update(tdks%bantot,tdks%etot,tdks%energies%e_fermie,tdks%energies%e_fermih, &
+                    & tdks%hdr%residm,tdks%rprimd,tdks%occ0,tdks%pawrhoij,                 &
+                    & tdks%xred,dtset%amu_orig,comm_atom=mpi_enreg%comm_atom,              &
+                    & mpi_atmtab=mpi_enreg%my_atmtab)
+
  !Computed at actual step
  if (mod(istep,dtset%td_prtstr) == 0) then
    call prt_den(dtfil,dtset,istep,mpi_enreg,psps,tdks)
- end if
- !Computed at previous step
- if (mod(istep-1,dtset%td_prtstr) == 0) then
-    call prt_eig(dtfil,dtset,istep-1,mpi_enreg,tdks)
-    call prt_occ(dtfil,dtset,istep-1,mpi_enreg,tdks)
-    call prt_dos(dtfil,dtset,istep-1,mpi_enreg,psps,tdks)
- end if
- if (mod(istep,dtset%td_prtstr) == 0) then
     if (dtset%prtwf > 0) then
        call prt_wfk(dtfil,dtset,istep,mpi_enreg,psps,tdks)
-       call prt_restart(dtfil,istep,mpi_enreg,tdks)
+       call prt_restart(dtfil,dtset,istep,mpi_enreg,tdks)
     end if
  end if
 
+ !Computed at previous step
+ if (mod(istep-1,dtset%td_prtstr) == 0) then
+   call prt_eig(dtfil,dtset,istep-1,mpi_enreg,tdks)
+   call prt_occ(dtfil,dtset,istep-1,mpi_enreg,tdks)
+   call prt_dos(dtfil,dtset,istep-1,mpi_enreg,psps,tdks)
+ end if
+
  !** Special case of last step
- me = xmpi_comm_rank(mpi_enreg%comm_world)
  if (istep == tdks%first_step+tdks%ntime-1) then
-    if (mod(istep,dtset%td_prtstr) /= 0 .or. dtset%prtwf <= 0) then
+   if (mod(istep,dtset%td_prtstr) /= 0 .or. dtset%prtwf <= 0) then
       call prt_wfk(dtfil,dtset,istep,mpi_enreg,psps,tdks,force_write=.TRUE.)
-      call prt_restart(dtfil,istep,mpi_enreg,tdks)
-    end if
-    close(tdks%tdener_unit)
+      call prt_restart(dtfil,dtset,istep,mpi_enreg,tdks)
+   end if
+   if (mpi_enreg%me == 0) then
+      !close all files
+      if (close_unit(tdks%tdener_unit,msg) /= 0) ABI_ERROR(msg)
+      if (close_unit(tdks%tdrestart_unit,msg) /= 0) ABI_ERROR(msg)
+      if (dtset%td_ef_type /= 0) then
+         if (close_unit(tdks%tdef_unit,msg) /= 0) ABI_ERROR(msg)
+      end if
+      if (dtset%prtcurrent /= 0) then
+         if (close_unit(tdks%current_unit,msg) /= 0) ABI_ERROR(msg)
+      end if
+   end if
  end if
 
 end subroutine rttddft_output
@@ -452,6 +497,7 @@ subroutine prt_den(dtfil, dtset, istep, mpi_enreg, psps, tdks)
 
    call crystal%free()
    call ebands%free()
+   ABI_FREE(my_atmtab)
  end if
 
 end subroutine prt_den
@@ -586,6 +632,7 @@ subroutine prt_dos(dtfil, dtset, istep, mpi_enreg, psps, tdks)
  call dos%free()
  call crystal%free()
  call ebands%free()
+ ABI_FREE(my_atmtab)
 
 end subroutine prt_dos
 !!***
@@ -675,7 +722,7 @@ end subroutine prt_wfk
 !! OUTPUT
 !!
 !! SOURCE
-subroutine prt_restart(dtfil, istep, mpi_enreg, tdks)
+subroutine prt_restart(dtfil, dtset, istep, mpi_enreg, tdks)
 
  implicit none
 
@@ -683,6 +730,7 @@ subroutine prt_restart(dtfil, istep, mpi_enreg, tdks)
  !scalars
  integer,                    intent(in)    :: istep
  type(datafiles_type),       intent(inout) :: dtfil
+ type(dataset_type),         intent(inout) :: dtset
  type(MPI_type),             intent(inout) :: mpi_enreg
  type(tdks_type),            intent(inout) :: tdks
  !arrays
@@ -696,17 +744,29 @@ subroutine prt_restart(dtfil, istep, mpi_enreg, tdks)
 
 ! *************************************************************************
 
- if (mpi_enreg%me == 0) then
-   write(step_nb,*) istep
-   rewind(tdks%tdrestart_unit)
-   write(msg,'(a)') step_nb
+ write(step_nb,*) istep
+ if (mpi_enreg%me == 0) rewind(tdks%tdrestart_unit)
+ write(msg,'(a)') step_nb
+ call wrtout(tdks%tdrestart_unit,msg)
+ write(msg,'(a)') tdks%fname_wfk0
+ call wrtout(tdks%tdrestart_unit,msg)
+ fname = trim(dtfil%filnam_ds(4))//'_'//trim(adjustl(step_nb))//'_WFK'
+ write(msg,'(a)') fname
+ call wrtout(tdks%tdrestart_unit,msg)
+ write(msg,'(a)') tdks%fname_tdener
+ call wrtout(tdks%tdrestart_unit,msg)
+ if (dtset%td_ef_type /= 0) then
+    write(msg,'(a)') tdks%fname_tdef
+    call wrtout(tdks%tdrestart_unit,msg)
+ end if
+ if (dtset%prtcurrent /= 0) then
+    write(msg,'(a)') tdks%fname_current
+    call wrtout(tdks%tdrestart_unit,msg)
+ end if
+ if (dtset%td_ef_induced_vecpot /= 0) then
+   write(msg,*) tdks%tdef%vecpot_ind(:,2)
    call wrtout(tdks%tdrestart_unit,msg)
-   write(msg,'(a)') tdks%fname_tdener
-   call wrtout(tdks%tdrestart_unit,msg)
-   write(msg,'(a)') tdks%fname_wfk0
-   call wrtout(tdks%tdrestart_unit,msg)
-   fname = trim(dtfil%filnam_ds(4))//'_'//trim(adjustl(step_nb))//'_WFK'
-   write(msg,'(a)') fname
+   write(msg,*) tdks%tdef%vecpot_ind(:,1)
    call wrtout(tdks%tdrestart_unit,msg)
  end if
 

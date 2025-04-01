@@ -1426,9 +1426,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      endif
      ! tfkinfunc
      if (dt%tfkinfunc == 2) then
-        write(msg,'(a)') 'RT-TDDFT and Thomas-Fermi functional using the recursion method &
-         & are not compatible, set tfkinfunc /= 2.'
-        ABI_ERROR_NOSTOP(msg, ierr)
+        ABI_ERROR_NOSTOP('RT-TDDFT and Thomas-Fermi functionals are not compatible, set tfkinfunc to 0.', ierr)
      endif
      ! positron
      if (dt%positron /= 0) then
@@ -1440,7 +1438,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      end if
      ! usedmft
      if (dt%usedmft /= 0) then
-        ABI_ERROR_NOSTOP('RT-TDDFT and DFT+DMFT are not compatible, set usedmft to 0.', ierr)
+        ABI_ERROR_NOSTOP('RT-TDDFT and DMFT are not compatible, set usedmft to 0.', ierr)
      endif
      ! usepawu
      if (dt%usepawu /= 0) then
@@ -1448,16 +1446,27 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      endif
      ! usekden
      if (xc_is_mgga) then
-        ABI_ERROR_NOSTOP('RT-TDDFT with mGGA has not been tested yet! Not available.', ierr)
+        ABI_ERROR_NOSTOP('RT-TDDFT with mGGA has not been tested yet and is thus not available.', ierr)
      end if
      ! vdw_xc
      if (dt%vdw_xc /= 0) then
         ABI_ERROR_NOSTOP('RT-TDDFT with VDW corrected functionals has not been tested yet, set vdw_xc to 0.', ierr)
      endif
+     ! ecutsm
+     if (dt%ecutsm > 0.0) then
+        ABI_ERROR_NOSTOP('RT-TDDFT is not compatible with ecutsm, set ecutsm to 0.', ierr)
+     end if
      !TODO FB: Should probably be made possible later
      ! useextfpmd
      if (dt%useextfpmd /= 0) then
         write(msg,'(a)') 'RT-TDDFT and extFPMD has not been tested yet, set useextfpmd to 0.'
+        ABI_ERROR_NOSTOP(msg, ierr)
+     endif
+     ! Magnetic case and spin-orbit
+     ! nsspol, nspden, spinor
+     if (dt%nsppol /= 1 .or. dt%nspden /= 1 .or. dt%nspinor /=1) then
+        write(msg,'(a)') 'RT-TDDFT has not been tested yet for magnetic cases nor with spin-orbit coupling, &
+        & set nsppol, nspden and nspinor to 1.'
         ABI_ERROR_NOSTOP(msg, ierr)
      endif
    endif
@@ -3029,7 +3038,8 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    if(dt%paral_kgb==1.and.dt%usefock>0) then
      ABI_ERROR_NOSTOP('Hartree-Fock or Hybrid Functionals are not compatible with bands/FFT parallelism!', ierr)
    end if
-   if(dt%chkparal/=0.and.(dt%paral_kgb/=0.and.(dt%optdriver/=RUNL_GSTATE .and. dt%optdriver/=RUNL_GWLS))) then
+   if(dt%chkparal/=0.and.(dt%paral_kgb/=0.and.(dt%optdriver/=RUNL_GSTATE .and. dt%optdriver/=RUNL_GWLS .and. &
+      dt%optdriver/=RUNL_RTTDDFT))) then
        cond_string(1)='optdriver' ; cond_values(1)=dt%optdriver
        cond_string(2)='chkparal' ; cond_values(2)=dt%chkparal
        call chkint_eq(2,2,cond_string,cond_values,ierr,'paral_kgb',dt%paral_kgb,1,(/0/),iout)
