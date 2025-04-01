@@ -418,9 +418,9 @@ module m_lobpcg2
     call xg_setBlock(eigenvalues3N,eigenvaluesN,blockdim,1)
     call xg_setBlock(eigenvalues3N,eigenvalues2N,blockdim2,1)
 
-    call xgBlock_reshape(eigen,(/ blockdim, nblock /))
-    call xgBlock_reshape(residu,(/ blockdim, nblock /))
-    call xgBlock_reshape(occ,(/ blockdim, nblock /))
+    call xgBlock_reshape(eigen,blockdim,nblock)
+    call xgBlock_reshape(residu,blockdim,nblock)
+    call xgBlock_reshape(occ,blockdim,nblock)
 
     lobpcg%AllX0 = X0
 
@@ -694,9 +694,9 @@ module m_lobpcg2
       ABI_NVTX_END_RANGE()
     end do !! End iblock loop
 
-    call xgBlock_reshape(eigen,(/ blockdim*nblock, 1 /))
-    call xgBlock_reshape(residu,(/ blockdim*nblock, 1 /))
-    call xgBlock_reshape(occ,(/ blockdim*nblock, 1 /))
+    call xgBlock_reshape(eigen,blockdim*nblock,1)
+    call xgBlock_reshape(residu,blockdim*nblock,1)
+    call xgBlock_reshape(occ,blockdim*nblock,1)
 
     call xg_free(eigenvalues3N)
     call xg_free(residu_eff)

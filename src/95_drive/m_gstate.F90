@@ -1054,9 +1054,10 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    if (dtset%useylm/=1) then
      ABI_ERROR('xg_nonlop cannot be used with useylm/=1')
    end if
-   call xg_nonlop_init(xg_nonlop,psps%indlmn,mpi_enreg%my_atmtab,my_natom,nattyp,dtset%mkmem,dtset%ntypat,&
+   call xg_nonlop_init(xg_nonlop,psps%indlmn,my_natom,nattyp,dtset%mkmem,dtset%ntypat,&
                      dtset%nspinor,ucvol,dtset%usepaw,dtset%xg_nonlop_option,&
-                     mpi_enreg%me_band,mpi_enreg%comm_band,mpi_enreg%comm_atom)
+                     mpi_enreg%me_band,mpi_enreg%comm_band,mpi_enreg%comm_atom,&
+                     mpi_atmtab=mpi_enreg%my_atmtab)
    if (xg_nonlop%paw) then
      call xg_nonlop_make_Sij(xg_nonlop,pawtab,inv_sij=dtset%wfoptalg==111)
    else
