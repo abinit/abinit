@@ -4275,12 +4275,18 @@ subroutine coeffs_list_append(coeff_list,coeff, check)
 
  ! copy list1 to tmp
  tmp=coeff_list
+ call coeffs_list_copy(coeff_list, tmp)
 
  ! allocate new list1
  call polynomial_coeff_list_free(coeff_list)
  ABI_MALLOC(coeff_list,(n2))
 
  call coeffs_list_copy(coeff_list, tmp)
+
+if (.not.allocated(coeff%terms)) then
+  ABI_BUG("terms for append is not allocated.")
+endif
+
  call polynomial_coeff_init(coeff%coefficient,coeff%nterm,coeff_list(n2),coeff%terms,&
    &                                 coeff%name, check=check)
 end subroutine coeffs_list_append
@@ -4374,11 +4380,16 @@ subroutine coeffs_list_copy(coeff_list_out,coeff_list_in)
    ABI_ERROR(message)
  endif
 
- !Copy input list into output lists
+
  do ii=1,ncoeff_in
+    if(.not. allocated(coeff_list_in(ii)%terms)) then
+      ABI_BUG("terms for copy is not allocated.")
+    endif
+
      call polynomial_coeff_init(coeff_list_in(ii)%coefficient,coeff_list_in(ii)%nterm,&
        &                             coeff_list_out(ii),coeff_list_in(ii)%terms, &
        &                             coeff_list_in(ii)%name, check)
+
  enddo
 end subroutine coeffs_list_copy
 !!***
@@ -4825,20 +4836,8 @@ end subroutine polyform_expand
 
 subroutine polynomial_coeff_final(self)
   type(polynomial_coeff_type), intent(inout) :: self
-  integer :: ii
-
-  ! Free all the terms if allocated
-  if(allocated(self%terms)) then
-    do ii = 1,self%nterm
-      call polynomial_term_free(self%terms(ii))
-    end do
-    ABI_FREE(self%terms)
-  end if
-
-  ! Reset to defaults
-  self%name = ""
-  self%nterm = 0
-  self%coefficient = zero
+  print *, "Finalizing polynomial_coeff_type"
+  call polynomial_coeff_free(self)
 end subroutine polynomial_coeff_final
 !!***
 

@@ -1405,7 +1405,7 @@ subroutine opt_getHOstrain(terms,ncombi,nterm_start,eff_pot,power_strain,comm, m
   !scalars
   integer ::  nterm_tot_tmp
   integer :: i,ii
-  integer :: nbody, ref_nbody, ncombi_real
+  integer :: nbody, ref_nbody
   real(dp) :: coeff_ini
   !reals
   type(crystal_t) :: crystal
@@ -1440,6 +1440,8 @@ subroutine opt_getHOstrain(terms,ncombi,nterm_start,eff_pot,power_strain,comm, m
 
   nterm_start = eff_pot%anharmonics_terms%ncoeff
   nterm_tot_tmp = eff_pot%anharmonics_terms%ncoeff + ncombi
+  print *, "DEBUG: nterm_start, nterm_tot_tmp", nterm_start, nterm_tot_tmp
+  print *, "DEBUG: ncombi", ncombi
   ABI_MALLOC(terms,(nterm_tot_tmp))
   do i=1,nterm_tot_tmp
     if(i<=nterm_start)then
@@ -1447,6 +1449,12 @@ subroutine opt_getHOstrain(terms,ncombi,nterm_start,eff_pot,power_strain,comm, m
         & eff_pot%anharmonics_terms%coefficients(i)%terms,eff_pot%anharmonics_terms%coefficients(i)%name,&
         &  check=.TRUE.)
     else
+      if (.not.allocated(strain_terms_tmp(i-nterm_start)%terms)) then
+        write(message,'(4a)' )ch10,&
+          &  'Error in opt_getHOstrain: strain_terms_tmp(i-nterm_start)%terms not allocated',ch10,&
+          &  'Action: Contact Abinit Group',ch10
+        ABI_ERROR(message)
+      endif
       call polynomial_coeff_init(coeff_ini,strain_terms_tmp(i-nterm_start)%nterm,terms(i),&
         &         strain_terms_tmp(i-nterm_start)%terms,strain_terms_tmp(i-nterm_start)%name,&
         &         check=.TRUE.)
@@ -2102,12 +2110,16 @@ subroutine generate_bounding_term_and_add_to_list(sympairs, nterm_start, ncombi,
   ! copy the coefficients to a temporary array my_coeffs_tmp
   ncoeff=size(my_coeffs)
   ABI_MALLOC(my_coeffs_tmp,(ncoeff))
-  my_coeffs_tmp=my_coeffs
+  !y_coeffs_tmp=my_coeffs
+  call coeffs_list_copy(my_coeffs_tmp, my_coeffs)
 
   ! free the original array and allocate a new one with the correct size
   call polynomial_coeff_list_free(my_coeffs)
   ABI_MALLOC(my_coeffs, (ncoeff))
-  my_coeffs(1:nterm_start) = my_coeffs_tmp(1:nterm_start)
+  print *, "nterm_start", nterm_start
+ !my_coeffs(1:nterm_start) = my_coeffs_tmp(1:nterm_start)
+  call coeffs_list_copy(my_coeffs(1:nterm_start), my_coeffs_tmp(1:nterm_start))
+  print *, "copy coeffs to my_coeffs finished"
 
 
 
