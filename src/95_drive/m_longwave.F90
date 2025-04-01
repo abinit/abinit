@@ -519,6 +519,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 !driver are under way.
  n3xccc=0;if (psps%n1xccc/=0) n3xccc=nfftf
  ABI_MALLOC(xccc3d,(n3xccc))
+ ABI_MALLOC(ncorespl,(psps%mqgrid_vl,2,ntypat))
  if (psps%n1xccc/=0) then 
    ABI_MALLOC(dummy_dyfrx2,(3,3,natom)) ! dummy
    if (psps%nc_xccc_gspace==1) then
@@ -544,7 +545,6 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
    ABI_FREE(dummy_dyfrx2) ! dummy
 
    !Write the spl interpolation of the pseudo core density for all atom types
-   ABI_MALLOC(ncorespl,(psps%mqgrid_vl,2,ntypat))
    do itypat= 1, ntypat
      ncorespl(:,:,itypat)= psps%nctab(itypat)%tcorespl(:,:)
    end do
