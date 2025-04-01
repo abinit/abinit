@@ -441,7 +441,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
              ABI_MALLOC(vpsp1_i1pertdqdq,(2*nfftf,dtset%nspden,n2dq))
 
              !Calculate first-order pseudocore charge (still, only for quadrupoles)
-             if (i2pert<=natom.and.dtset%lw_qdrpl==1.and.psps%n1xccc/=0.and.nkxc == 7) then
+             if (i1pert==natom+2.and.i2pert<=natom.and.psps%n1xccc/=0.and.nkxc == 7) then
                if (psps%nc_xccc_gspace==1) then
                  ndir=1
                  call dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,i2dir,i2pert,&
