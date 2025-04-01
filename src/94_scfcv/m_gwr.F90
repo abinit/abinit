@@ -682,6 +682,7 @@ module m_gwr
 
    type(hdr_type) :: wfk_hdr
    ! header of the WFK file
+   ! IMPORTANT: Don't use wkf_hdr%npwarr to get the number of PW as we might have used ecutwfn < ecut.
 
    type(melements_t) :: ks_me !, qp_me
    ! Matrix elements of the different potentials in the KS basis set.
@@ -1254,9 +1255,9 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  gwr%green_mpw = -1
  do ik_bz=1,gwr%nkbz
    kk_bz = gwr%kbz(:, ik_bz)
-   call get_kg(kk_bz, istwfk1, dtset%ecut, gwr%cryst%gmet, npw_, gvec_)
+   call get_kg(kk_bz, istwfk1, dtset%ecutwfn, gwr%cryst%gmet, npw_, gvec_)
    ABI_FREE(gvec_)
-   call getng(dtset%gwr_boxcutmin, dtset%chksymtnons, dtset%ecut, cryst%gmet, &
+   call getng(dtset%gwr_boxcutmin, dtset%chksymtnons, dtset%ecutwfn, cryst%gmet, &
               kk_bz, me_fft0, gwr%g_mgfft, gwr%g_nfft, gwr%g_ngfft, nproc_fft1, cryst%nsym, paral_fft0, &
               cryst%symrel, cryst%tnons, gpu_option=gwr%dtset%gpu_option, unit=dev_null)
    gwr%green_mpw = max(gwr%green_mpw, npw_)
@@ -1557,7 +1558,7 @@ end block
 
  do my_iki=1,gwr%my_nkibz
    ik_ibz = gwr%my_kibz_inds(my_iki); kk_ibz = gwr%kibz(:, ik_ibz)
-   call gwr%green_desc_kibz(ik_ibz)%init(kk_ibz, istwfk1, dtset%ecut, gwr)
+   call gwr%green_desc_kibz(ik_ibz)%init(kk_ibz, istwfk1, dtset%ecutwfn, gwr)
  end do
 
  ABI_MALLOC(gwr%tchi_desc_qibz, (gwr%nqibz))
@@ -1622,7 +1623,7 @@ end block
    NCF_CHECK(ncerr)
 
    ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: &
-     "wr_step", "ecuteps", "ecut", "ecutsigx", "gwr_boxcutmin", &
+     "wr_step", "ecuteps", "ecut", "ecutwfn", "ecutsigx", "gwr_boxcutmin", &
      "min_transition_energy_eV", "max_transition_energy_eV", "eratio", &
      "ft_max_err_t2w_cos", "ft_max_err_w2t_cos", "ft_max_err_t2w_sin", "cosft_duality_error", "regterm" &
    ])
@@ -1656,10 +1657,10 @@ end block
    NCF_CHECK(ncerr)
 
    ncerr = nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: &
-     "wr_step", "ecuteps", "ecut", "ecutsigx", "gwr_boxcutmin", &
+     "wr_step", "ecuteps", "ecut", "ecutwfn", "ecutsigx", "gwr_boxcutmin", &
      "min_transition_energy_eV", "max_transition_energy_eV", "eratio", &
      "ft_max_err_t2w_cos", "ft_max_err_w2t_cos", "ft_max_err_t2w_sin", "cosft_duality_error", "regterm"], &
-     [gwr%wr_step, dtset%ecuteps, dtset%ecut, dtset%ecutsigx, dtset%gwr_boxcutmin, &
+     [gwr%wr_step, dtset%ecuteps, dtset%ecut, dtset%ecutwfn, dtset%ecutsigx, dtset%gwr_boxcutmin, &
       gwr%te_min, gwr%te_max, gwr%te_max / gwr%te_min, &
       gwr%ft_max_error(1), gwr%ft_max_error(2), gwr%ft_max_error(3), gwr%cosft_duality_error, regterm &
      ])
@@ -2105,7 +2106,7 @@ subroutine gwr_load_kcalc_wfd(gwr, wfk_path, tmp_kstab)
  wfd_istwfk = 1
 
  call wfd_init(wfd, gwr%cryst, gwr%pawtab, gwr%psps, keep_ur, mband, nband, nkibz, dtset%nsppol, bks_mask, &
-               dtset%nspden, dtset%nspinor, dtset%ecut, dtset%ecutsm, dtset%dilatmx, wfd_istwfk, ks_ebands%kptns, gwr%g_ngfft, &
+               dtset%nspden, dtset%nspinor, dtset%ecutwfn, dtset%ecutsm, dtset%dilatmx, wfd_istwfk, ks_ebands%kptns, gwr%g_ngfft, &
                dtset%nloalg, dtset%prtvol, dtset%pawprtvol, gwr%comm%value)
 
  call wfd%print([std_out], header="Wavefunctions for GWR calculation")
@@ -2115,8 +2116,7 @@ subroutine gwr_load_kcalc_wfd(gwr, wfk_path, tmp_kstab)
  ABI_FREE(wfd_istwfk)
  ABI_FREE(bks_mask)
 
- call ks_ebands%free()
- call wfk_hdr%free()
+ call ks_ebands%free(); call wfk_hdr%free()
 
  ! Read KS wavefunctions.
  call wfd%read_wfk(wfk_path, iomode_from_fname(wfk_path))
@@ -2148,25 +2148,28 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: formeig0 = 0, master = 0
- integer :: mband, min_nband, nkibz, nsppol, my_is, my_iki, spin, ik_ibz, ierr, io_algo, bcast_comm, color
- integer :: npw_k, mpw, istwf_k, il_b, ib, band, iloc !, itau
- integer :: nbsum, npwsp, bstart, bstop, band_step, nb !my_nband ! nband_k,
+ integer :: mband, min_nband, nkibz, nsppol, my_is, my_iki, spin, ik_ibz, ierr, bcast_comm, color
+ integer :: npw_k, mpw_disk, istwf_k, il_b, ib, band, iloc, cg_spad, gw_spad
+ integer :: nbsum, npwsp, npw_k_disk, npwsp_disk, bstart, bstop, band_step, nb, nmiss, ig, igw, spinor, icg, ipw
  logical :: print_time
  real(dp) :: cpu, wall, gflops, cpu_green, wall_green, gflops_green
+ complex(gwpc) :: cdum
  character(len=5000) :: msg
- logical :: have_band, need_block_ks, io_in_kcomm
+ logical :: have_band, need_block_ks, io_in_kcomm, cut_ug
  type(ebands_t) :: wfk_ebands
  type(wfk_t) :: wfk
  type(dataset_type),pointer :: dtset
  type(xcomm_t), pointer :: io_comm
 !arrays
- integer,allocatable :: kg_k(:,:)
- logical,allocatable :: bmask(:)
+ integer :: units(2)
+ integer,allocatable :: kg_k_disk(:,:), gf2wfd(:)
+ !logical,allocatable :: bmask(:)
  real(dp) :: kk_ibz(3), tsec(2)
  real(dp),target,allocatable :: cg_work(:,:,:)
  real(dp),ABI_CONTIGUOUS pointer :: cg_k(:,:)
 ! *************************************************************************
 
+ units = [std_out, ab_out]
  call cwtime(cpu, wall, gflops, "start")
  call timab(1921, 1, tsec)
 
@@ -2179,13 +2182,18 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
  !call cryst%print(header="crystal structure from WFK file")
 
  nkibz = wfk_ebands%nkpt; nsppol = wfk_ebands%nsppol; mband = wfk_ebands%mband; min_nband = minval(wfk_ebands%nband)
- nbsum = dtset%nband(1)
 
+ nbsum = dtset%nband(1)
  if (nbsum > min_nband) then
-   ABI_WARNING(sjoin("WFK file contains", itoa(min_nband), "states while you're asking for:", itoa(nbsum)))
+   ABI_ERROR(sjoin("WFK file contains", itoa(min_nband), "states while you're asking for:", itoa(nbsum)))
    nbsum = min_nband
  end if
  call wfk_ebands%free()
+
+ cut_ug = (abs(gwr%dtset%ecut - gwr%dtset%ecutwfn) > tol3)
+ if (cut_ug) then
+   call wrtout(units, sjoin(" Cutting u(g) as ecutwfn:", ftoa(gwr%dtset%ecutwfn), " <  ecut: ", ftoa(gwr%dtset%ecut)))
+ end if
 
  ! ==============================================
  ! Build Green's functions in g-space for given k
@@ -2242,132 +2250,125 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
  call gwr%print_mem([std_out])
  if (gwr%comm%me == 0) call gwr%pstat%print([std_out], header="After ugb allocation")
 
- mpw = maxval(gwr%wfk_hdr%npwarr)
- ABI_MALLOC(kg_k, (3, mpw))
- ABI_MALLOC(bmask, (mband))
+ mpw_disk = maxval(gwr%wfk_hdr%npwarr)
+ ABI_MALLOC(kg_k_disk, (3, mpw_disk))
 
- io_algo = 2
+ ! Master reads and broadcasts. Much faster on lumi
+ call wrtout(std_out, " Using IO version based on master reads and brodcasts ...")
+ io_comm => gwr%comm; io_in_kcomm = .False.
+ io_comm => gwr%kpt_comm; io_in_kcomm = .True.
 
- if (io_algo == 1) then
-   ! This version is very bad on LUMI
-   call wrtout(std_out, " Using collective MPI-IO with wfk%read_bmask ...")
-   call wfk_open_read(wfk, wfk_path, formeig0, iomode_from_fname(wfk_path), get_unit(), gwr%gtau_comm%value)
-   !call wfk_open_read(wfk, wfk_path, formeig0, iomode_from_fname(wfk_path), get_unit(), gwr%gt_comm%value)
+ if (io_comm%me == master) then
+   call wfk_open_read(wfk, wfk_path, formeig0, iomode_from_fname(wfk_path), get_unit(), xmpi_comm_self)
+ end if
 
-   do my_is=1,gwr%my_nspins
-     spin = gwr%my_spins(my_is)
-     do my_iki=1,gwr%my_nkibz
-       print_time = gwr%comm%me == 0 .and. (my_iki <= LOG_MODK .or. mod(my_iki, LOG_MODK) == 0)
-       if (print_time) call cwtime(cpu_green, wall_green, gflops_green, "start")
-       ik_ibz = gwr%my_kibz_inds(my_iki); kk_ibz = gwr%kibz(:, ik_ibz)
-       npw_k = gwr%wfk_hdr%npwarr(ik_ibz); istwf_k = gwr%wfk_hdr%istwfk(ik_ibz)
-       npwsp = npw_k * gwr%nspinor
-       ! TODO
-       ABI_CHECK_IEQ(istwf_k, 1, "istwfk_k should be 1")
+ ! TODO This to be able to maximize the size of cg_work
+ !call gwr%pstat%mpi_max(vmrss_mb, gwr%comm%value)
 
-       associate (ugb => gwr%ugb(ik_ibz, spin), desc_k => gwr%green_desc_kibz(ik_ibz))
-       ABI_CHECK_IEQ(npw_k, desc_k%npw, "npw_k != desc_k%npw")
+ do spin=1,gwr%nsppol
+   if (io_in_kcomm .and. .not. any(gwr%my_spins == spin)) cycle
 
-       ! use round-robin distribution inside gtau_comm% for IO.
-       ! TODO: Optimize wfk_read_bmask and/or read WFK with all procs and master broadcasting.
-       bmask = .False.
-       do il_b=1, ugb%sizeb_local(2)
-         band = ugb%loc2gcol(il_b); bmask(band) = .True.
-       end do
-       ! FIXME: This is wrong if spc
-       call c_f_pointer(c_loc(ugb%buffer_cplx), cg_k, shape=[2, npwsp * ugb%sizeb_local(2)])
-       call wfk%read_bmask(bmask, ik_ibz, spin, &
-                           !xmpio_single, &
-                           xmpio_collective, &
-                           kg_k=kg_k, cg_k=cg_k)
+   do ik_ibz=1,gwr%nkibz
+     print_time = gwr%comm%me == 0 .and. (ik_ibz < LOG_MODK .or. mod(ik_ibz, LOG_MODK) == 0)
+     if (print_time) call cwtime(cpu_green, wall_green, gflops_green, "start")
+     kk_ibz = gwr%kibz(:, ik_ibz)
+     npw_k = gwr%green_desc_kibz(ik_ibz)%npw
+     npw_k_disk = gwr%wfk_hdr%npwarr(ik_ibz); istwf_k = gwr%wfk_hdr%istwfk(ik_ibz); npwsp_disk = npw_k_disk * gwr%nspinor
+     ABI_CHECK_IEQ(istwf_k, 1, "istwfk_k should be 1")
 
-       ABI_CHECK(all(kg_k(:,1:npw_k) == desc_k%gvec), "kg_k != desc_k%gvec")
+     ! Create communicator with master and all procs requiring this (k,s) block (color == 1)
+     need_block_ks = any(gwr%my_spins == spin) .and. any(gwr%my_kibz_inds == ik_ibz)
+     color = merge(1, 0, (need_block_ks .or. io_comm%me == master))
+     call xmpi_comm_split(io_comm%value, color, io_comm%me, bcast_comm, ierr)
 
-       if (print_time) then
-         write(msg,'(4x,3(a,i0),a)')"Read ugb_k: my_iki [", my_iki, "/", gwr%my_nkibz, "] (tot: ", gwr%nkibz, ")"
-         call cwtime_report(msg, cpu_green, wall_green, gflops_green); if (my_iki == LOG_MODK) call wrtout(std_out, " ...")
+     ! TODO: Optimize this part
+     ! Find band_step that gives good compromise between memory and efficiency.
+     band_step = memb_limited_step(1, nbsum, 2*npwsp_disk, xmpi_bsize_dp, 1024.0_dp)
+     band_step = 200
+     !band_step = 100
+     do bstart=1, nbsum, band_step
+       bstop = min(bstart + band_step - 1, nbsum); nb = bstop - bstart + 1
+
+       ABI_MALLOC(cg_work, (2, npwsp_disk, nb)) ! This array is always in double precision.
+       if (io_comm%me == master) then
+         call c_f_pointer(c_loc(cg_work), cg_k, shape=[2, npwsp_disk * nb])
+         call wfk%read_band_block([bstart, bstop], ik_ibz, spin, xmpio_single, kg_k=kg_k_disk, cg_k=cg_k)
        end if
-       end associate
-     end do ! my_iki
-   end do ! my_is
 
-   call wfk%close()
+       if (color == 1) then
+         call xmpi_bcast(kg_k_disk, master, bcast_comm, ierr)
+         call xmpi_bcast(cg_work, master, bcast_comm, ierr)
+       endif
 
- else
-   ! Master reads and broadcasts. Much faster on lumi
-   call wrtout(std_out, " Using IO version based on master reads and brodcasts ...")
-   io_comm => gwr%comm; io_in_kcomm = .False.
-   io_comm => gwr%kpt_comm; io_in_kcomm = .True.
+       ! Table with the correspondence btw the k-centered sphere of the WFK file
+       ! and the one used in Wfd (possibly smaller due to ecutwfn).
+       if (cut_ug .and. bstart == 1) then
+         ABI_MALLOC(gf2wfd, (npw_k_disk))
+         call kg_map(npw_k, gwr%green_desc_kibz(ik_ibz)%gvec, npw_k_disk, kg_k_disk, gf2wfd, nmiss)
+       end if
 
-   if (io_comm%me == master) then
-     call wfk_open_read(wfk, wfk_path, formeig0, iomode_from_fname(wfk_path), get_unit(), xmpi_comm_self)
-   end if
+       ! Copy my portion of cg_work to buffer_cplx (here we have dp --> sp conversion).
+       if (need_block_ks) then
+         associate (ugb => gwr%ugb(ik_ibz, spin), desc_k => gwr%green_desc_kibz(ik_ibz))
 
-   ! TODO This to be able to maximize the size of cg_work
-   !call gwr%pstat%mpi_max(vmrss_mb, gwr%comm%value)
+         do band=bstart, bstop
+           ib = band - bstart + 1
+           call ugb%glob2loc(1, band, iloc, il_b, have_band); if (.not. have_band) cycle
 
-   do spin=1,gwr%nsppol
-     if (io_in_kcomm .and. .not. any(gwr%my_spins == spin)) cycle
-
-     do ik_ibz=1,gwr%nkibz
-       print_time = gwr%comm%me == 0 .and. (ik_ibz < LOG_MODK .or. mod(ik_ibz, LOG_MODK) == 0)
-       if (print_time) call cwtime(cpu_green, wall_green, gflops_green, "start")
-       kk_ibz = gwr%kibz(:, ik_ibz)
-       npw_k = gwr%wfk_hdr%npwarr(ik_ibz); istwf_k = gwr%wfk_hdr%istwfk(ik_ibz); npwsp = npw_k * gwr%nspinor
-       ABI_CHECK_IEQ(istwf_k, 1, "istwfk_k should be 1")
-
-       ! Create communicator with master and all procs requiring this (k,s) block (color == 1)
-       need_block_ks = any(gwr%my_spins == spin) .and. any(gwr%my_kibz_inds == ik_ibz)
-       color = merge(1, 0, (need_block_ks .or. io_comm%me == master))
-       call xmpi_comm_split(io_comm%value, color, io_comm%me, bcast_comm, ierr)
-
-       ! TODO: Optimize this part
-       ! Find band_step that gives good compromise between memory and efficiency.
-       band_step = memb_limited_step(1, nbsum, 2*npwsp, xmpi_bsize_dp, 1024.0_dp)
-       band_step = 200
-       !band_step = 100
-       do bstart=1, nbsum, band_step
-         bstop = min(bstart + band_step - 1, nbsum); nb = bstop - bstart + 1
-
-         ABI_MALLOC(cg_work, (2, npwsp, nb)) ! This array is always in double precision.
-         if (io_comm%me == master) then
-           call c_f_pointer(c_loc(cg_work), cg_k, shape=[2, npwsp * nb])
-           call wfk%read_band_block([bstart, bstop], ik_ibz, spin, xmpio_single, kg_k=kg_k, cg_k=cg_k)
-         end if
-
-         if (color == 1) then
-           call xmpi_bcast(kg_k, master, bcast_comm, ierr)
-           call xmpi_bcast(cg_work, master, bcast_comm, ierr)
-         endif
-
-         ! Copy my portion of cg_work to buffer_cplx (here we have dp --> sp conversion).
-         if (need_block_ks) then
-           associate (ugb => gwr%ugb(ik_ibz, spin), desc_k => gwr%green_desc_kibz(ik_ibz))
-           ABI_CHECK(all(kg_k(:,1:npw_k) == desc_k%gvec), "kg_k != desc_k%gvec")
-           do band=bstart, bstop
-             ib = band - bstart + 1
-             call ugb%glob2loc(1, band, iloc, il_b, have_band); if (.not. have_band) cycle
+           if (.not. cut_ug) then
+             if (band == bstart) then
+               ABI_CHECK(all(kg_k_disk(:,1:npw_k_disk) == desc_k%gvec), "kg_k_disk != desc_k%gvec")
+             end if
              ugb%buffer_cplx(:, il_b) = cmplx(cg_work(1,:,ib), cg_work(2,:,ib), kind=gwpc)
-           end do
-           end associate
-         end if
+           else
 
-         ABI_FREE(cg_work)
-       end do ! bstart
+             !ugb%buffer_cplx(:, il_b) = zero
+             do spinor=1,gwr%nspinor
+               cg_spad = (spinor-1) * npw_k_disk
+               gw_spad = (spinor-1) * npw_k
+               do ig=1,npw_k_disk
+                 icg = ig + cg_spad
+                 igw = gf2wfd(ig) + gw_spad
+                 if (gf2wfd(ig) /= 0) then
+                   !wave%ug(igw) = CMPLX(cg_k(1,icg), cg_k(2,icg), kind=gwpc)
+                   ugb%buffer_cplx(igw, il_b) = cmplx(cg_work(1,icg,ib), cg_work(2,icg,ib), kind=gwpc)
+                 end if
+               end do
+             end do ! spinor
 
-       call xmpi_comm_free(bcast_comm)
+             ! 1) Normalization.
+             cdum = xdotc(npw_k*gwr%nspinor, ugb%buffer_cplx(:,il_b), 1, ugb%buffer_cplx(:,il_b), 1)
+             if (istwf_k > 1) then
+               cdum = two * DBLE(cdum)
+               associate (ug1 => ugb%buffer_cplx(1,il_b))
+               if (istwf_k == 2) cdum = cdum - CONJG(ug1) * ug1
+               end associate
+             end if
+             cdum = one / sqrt(cdum)
+             call xscal(npw_k*gwr%nspinor, cdum, ugb%buffer_cplx(:,il_b), 1)
+             cdum = xdotc(npw_k*gwr%nspinor, ugb%buffer_cplx(:,il_b), 1, ugb%buffer_cplx(:,il_b), 1)
+             !print *, "new norm:", cdum
+           end if
 
-       if (print_time) then
-         write(msg,'(4x,2(a,i0),a)')"Read ugb_k: ik_ibz [", ik_ibz, "/", gwr%nkibz, "]"
-         call cwtime_report(msg, cpu_green, wall_green, gflops_green); if (ik_ibz == LOG_MODK) call wrtout(std_out, " ...")
+         end do
+         end associate
        end if
-     end do ! ik_ibz
-   end do ! spin
-   if (io_comm%me == master) call wfk%close()
- end if ! io_algo
 
- ABI_FREE(kg_k)
- ABI_FREE(bmask)
+       ABI_FREE(cg_work)
+       ABI_SFREE(gf2wfd)
+     end do ! bstart
+
+     call xmpi_comm_free(bcast_comm)
+
+     if (print_time) then
+       write(msg,'(4x,2(a,i0),a)')"Read ugb_k: ik_ibz [", ik_ibz, "/", gwr%nkibz, "]"
+       call cwtime_report(msg, cpu_green, wall_green, gflops_green); if (ik_ibz == LOG_MODK) call wrtout(std_out, " ...")
+     end if
+   end do ! ik_ibz
+ end do ! spin
+ if (io_comm%me == master) call wfk%close()
+
+ ABI_FREE(kg_k_disk)
  call gwr%print_mem([std_out])
 
  call cwtime_report(" gwr_read_ugb_from_wfk:", cpu, wall, gflops)
@@ -4870,7 +4871,7 @@ subroutine gwr_redistrib_gt_kibz(gwr, itau, spin, need_kibz, got_kibz, action)
        ! NB: Use same args as those used to init the descriptors in gwr_init
        ! so that gvec ordering is consistent across MPI procs.
        got_kibz(ik_ibz) = 1
-       call gwr%green_desc_kibz(ik_ibz)%init(kk_ibz, istwfk1, gwr%dtset%ecut, gwr)
+       call gwr%green_desc_kibz(ik_ibz)%init(kk_ibz, istwfk1, gwr%dtset%ecutwfn, gwr)
      end if
    end do
 
@@ -7870,7 +7871,7 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
        kg_k(:,:) = desc_ki%gvec
      else
        istwf_k = 1
-       call get_kg(ksum, istwf_k, dtset%ecut, cryst%gmet, npw_k, kg_k)
+       call get_kg(ksum, istwf_k, dtset%ecutwfn, cryst%gmet, npw_k, kg_k)
      end if
 
      ABI_MALLOC(ug_ksum, (npw_k * nspinor))
@@ -8155,7 +8156,7 @@ subroutine gwr_get_u_ngfft(gwr, boxcutmin, u_ngfft, u_nfft, u_mgfft, u_mpw, gmax
  u_mpw = -1; gmax = 0
  do ik_bz=1,gwr%nkbz
    kk_bz = gwr%kbz(:, ik_bz)
-   call get_kg(kk_bz, istwfk1, gwr%dtset%ecut, gwr%cryst%gmet, npw_, gvec_)
+   call get_kg(kk_bz, istwfk1, gwr%dtset%ecutwfn, gwr%cryst%gmet, npw_, gvec_)
    u_mpw = max(u_mpw, npw_)
    ! TODO: g0 umklapp here can enter into play gmax may not be large enough!
    do ig=1,npw_
@@ -8164,7 +8165,7 @@ subroutine gwr_get_u_ngfft(gwr, boxcutmin, u_ngfft, u_nfft, u_mgfft, u_mpw, gmax
      end do
    end do
    ABI_FREE(gvec_)
-   call getng(boxcutmin, gwr%dtset%chksymtnons, gwr%dtset%ecut, gwr%cryst%gmet, &
+   call getng(boxcutmin, gwr%dtset%chksymtnons, gwr%dtset%ecutwfn, gwr%cryst%gmet, &
               kk_bz, me_fft0, u_mgfft, u_nfft, u_ngfft, nproc_fft1, gwr%cryst%nsym, paral_fft0, &
               gwr%cryst%symrel, gwr%cryst%tnons, gpu_option=gwr%dtset%gpu_option, unit=dev_null)
  end do
@@ -8507,7 +8508,7 @@ subroutine gwr_gamma_gw(gwr, nfftf, ngfftf, vpsp)
  ! FFT to build gw_rhog
  call fourdp(1, gw_rhog, gw_rhor(:,1), -1, gwr%mpi_enreg, nfftf, ndat1, ngfftf, tim_fourdp5)
 
- ecutf = dtset%ecut
+ ecutf = dtset%ecutwfn
  if (psps%usepaw == 1) then
    ecutf = dtset%pawecutdg
    call wrtout(std_out, ch10//' FFT (fine) grid used in PAW GW update:')
