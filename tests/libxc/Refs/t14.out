@@ -1,8 +1,8 @@
 
-.Version 6.8.1  of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu4.4 computer) 
+.Version 6.8.1  of ABINIT
+.(MPI version, prepared for a x86_64_linux_gnu4.4 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Thu 23 Jun 2011.
 - ( at 13h57 )
-  
+
 - input  file    -> /home/waroquiers/devel/6.8.1-private/build/../tests/libxc/Input/t14.in
 - output file    -> t14.out
 - root for input  files -> t14i
@@ -186,10 +186,10 @@ P This job should need less than                       1.841 Mbytes of memory.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
+- outvars: echo of selected default values
 -   accesswff0 =  0 , fftalg0 =112 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -   nproc =    1
 -
  -outvars: echo values of preprocessed input variables --------
@@ -708,8 +708,8 @@ P           mkmem           3
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/waroquiers/devel/6.8.1-private/build/../tests/Psps_for_tests/14si.bj_noNLCC.psp
-- pspatm: opening atomic psp file    /home/waroquiers/devel/6.8.1-private/build/../tests/Psps_for_tests/14si.bj_noNLCC.psp
+- pspini: atom type   1  psp file is /home/waroquiers/devel/6.8.1-private/build/../tests/Pspdir/14si.bj_noNLCC.psp
+- pspatm: opening atomic psp file    /home/waroquiers/devel/6.8.1-private/build/../tests/Pspdir/14si.bj_noNLCC.psp
 -   Si  APE 1.x : Troullier-Martins scheme, , llocal= 2
 - 14.00000   4.00000  20110507                znucl, zion, pspdat
     6    0    2    2      2400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -997,8 +997,8 @@ Result for kinetic energy density :
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/waroquiers/devel/6.8.1-private/build/../tests/Psps_for_tests/14si.bj_noNLCC.psp
-- pspatm: opening atomic psp file    /home/waroquiers/devel/6.8.1-private/build/../tests/Psps_for_tests/14si.bj_noNLCC.psp
+- pspini: atom type   1  psp file is /home/waroquiers/devel/6.8.1-private/build/../tests/Pspdir/14si.bj_noNLCC.psp
+- pspatm: opening atomic psp file    /home/waroquiers/devel/6.8.1-private/build/../tests/Pspdir/14si.bj_noNLCC.psp
 -   Si  APE 1.x : Troullier-Martins scheme, , llocal= 2
 - 14.00000   4.00000  20110507                znucl, zion, pspdat
     6    0    2    2      2400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1020,7 +1020,7 @@ Result for kinetic energy density :
      2)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.50000
      3)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.37500
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields     8 points in the full Brillouin Zone.
 
 
@@ -1032,7 +1032,7 @@ Result for kinetic energy density :
      2)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.50000
      3)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.37500
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields     8 points in the full Brillouin Zone.
 
 
@@ -1040,7 +1040,7 @@ Result for kinetic energy density :
           total number of points  =     1728
 
 
- screening : taking advantage of time-reversal symmetry 
+ screening : taking advantage of time-reversal symmetry
  Maximum band index for partially occupied states nbvw =     4
  Remaining bands to be divided among processors   nbcw =    12
  Number of bands treated by each node ~   12
@@ -1189,7 +1189,7 @@ Result for kinetic energy density :
      2)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.50000
      3)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.37500
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields     8 points in the full Brillouin Zone.
 
 
@@ -1201,7 +1201,7 @@ Result for kinetic energy density :
      2)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.50000
      3)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.37500
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields     8 points in the full Brillouin Zone.
 
 
@@ -1309,7 +1309,7 @@ Result for kinetic energy density :
      2)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.50000
      3)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.37500
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields     8 points in the full Brillouin Zone.
 
 
@@ -1321,7 +1321,7 @@ Result for kinetic energy density :
      2)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.50000
      3)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.37500
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields     8 points in the full Brillouin Zone.
 
 
@@ -1329,7 +1329,7 @@ Result for kinetic energy density :
           total number of points  =     1728
 
 
- screening : taking advantage of time-reversal symmetry 
+ screening : taking advantage of time-reversal symmetry
  Maximum band index for partially occupied states nbvw =     4
  Remaining bands to be divided among processors   nbcw =     8
  Number of bands treated by each node ~    8
@@ -1350,7 +1350,7 @@ Result for kinetic energy density :
 - max sum_G a(n,k,G)a(n",k,G) =  0.000547
 
 
- rdqps: reading QP wavefunctions of the previous step 
+ rdqps: reading QP wavefunctions of the previous step
         looking for file t14i_DS5_QPS
  file not found, 1st iteration initialized with KS eigenelements
 
@@ -1948,7 +1948,7 @@ Result for kinetic energy density :
      2)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.50000
      3)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.37500
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields     8 points in the full Brillouin Zone.
 
 
@@ -1960,7 +1960,7 @@ Result for kinetic energy density :
      2)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.50000
      3)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.37500
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields     8 points in the full Brillouin Zone.
 
 
@@ -1989,7 +1989,7 @@ Result for kinetic energy density :
  omega_plasma =   16.5962 [eV]
 
 
- rdqps: reading QP wavefunctions of the previous step 
+ rdqps: reading QP wavefunctions of the previous step
         looking for file t14i_DS6_QPS
  file not found, 1st iteration initialized with KS eigenelements
 
@@ -2001,7 +2001,7 @@ Result for kinetic energy density :
 
 --------------------------------------------------------------------------------
 
- QP results after the unitary transformation in the KS subspace: 
+ QP results after the unitary transformation in the KS subspace:
 
   Number of electrons    =    7.9986
 
@@ -2160,7 +2160,7 @@ Result for kinetic energy density :
      2)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.50000
      3)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.37500
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields     8 points in the full Brillouin Zone.
 
 
@@ -2172,7 +2172,7 @@ Result for kinetic energy density :
      2)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.50000
      3)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.37500
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields     8 points in the full Brillouin Zone.
 
 
@@ -2180,7 +2180,7 @@ Result for kinetic energy density :
           total number of points  =     1728
 
 
- screening : taking advantage of time-reversal symmetry 
+ screening : taking advantage of time-reversal symmetry
  Maximum band index for partially occupied states nbvw =     4
  Remaining bands to be divided among processors   nbcw =     8
  Number of bands treated by each node ~    8
@@ -2201,7 +2201,7 @@ Result for kinetic energy density :
 - max sum_G a(n,k,G)a(n",k,G) =  0.000547
 
 
- rdqps: reading QP wavefunctions of the previous step 
+ rdqps: reading QP wavefunctions of the previous step
         looking for file t14o_DS6_QPS
  Number of iteration(s) already performed:    1
 
@@ -2801,7 +2801,7 @@ Result for kinetic energy density :
      2)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.50000
      3)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.37500
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields     8 points in the full Brillouin Zone.
 
 
@@ -2813,7 +2813,7 @@ Result for kinetic energy density :
      2)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.50000
      3)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.37500
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields     8 points in the full Brillouin Zone.
 
 
@@ -2842,7 +2842,7 @@ Result for kinetic energy density :
  omega_plasma =   16.5962 [eV]
 
 
- rdqps: reading QP wavefunctions of the previous step 
+ rdqps: reading QP wavefunctions of the previous step
         looking for file t14o_DS6_QPS
  Number of iteration(s) already performed:    1
 
@@ -2854,7 +2854,7 @@ Result for kinetic energy density :
 
 --------------------------------------------------------------------------------
 
- QP results after the unitary transformation in the KS subspace: 
+ QP results after the unitary transformation in the KS subspace:
 
   Number of electrons    =    7.9987
 
@@ -3011,7 +3011,7 @@ Result for kinetic energy density :
      2)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.50000
      3)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.37500
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields     8 points in the full Brillouin Zone.
 
 
@@ -3023,7 +3023,7 @@ Result for kinetic energy density :
      2)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.50000
      3)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.37500
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields     8 points in the full Brillouin Zone.
 
 
@@ -3031,7 +3031,7 @@ Result for kinetic energy density :
           total number of points  =     1728
 
 
- screening : taking advantage of time-reversal symmetry 
+ screening : taking advantage of time-reversal symmetry
  Maximum band index for partially occupied states nbvw =     4
  Remaining bands to be divided among processors   nbcw =     8
  Number of bands treated by each node ~    8
@@ -3052,7 +3052,7 @@ Result for kinetic energy density :
 - max sum_G a(n,k,G)a(n",k,G) =  0.000547
 
 
- rdqps: reading QP wavefunctions of the previous step 
+ rdqps: reading QP wavefunctions of the previous step
         looking for file t14i_DS9_QPS
  file not found, 1st iteration initialized with KS eigenelements
 
@@ -3489,7 +3489,7 @@ Result for kinetic energy density :
      2)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.50000
      3)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.37500
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields     8 points in the full Brillouin Zone.
 
 
@@ -3501,7 +3501,7 @@ Result for kinetic energy density :
      2)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.50000
      3)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.37500
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields     8 points in the full Brillouin Zone.
 
 
@@ -3509,7 +3509,7 @@ Result for kinetic energy density :
           total number of points  =     1728
 
 
- screening : taking advantage of time-reversal symmetry 
+ screening : taking advantage of time-reversal symmetry
  Maximum band index for partially occupied states nbvw =     4
  Remaining bands to be divided among processors   nbcw =     8
  Number of bands treated by each node ~    8
@@ -3530,7 +3530,7 @@ Result for kinetic energy density :
 - max sum_G a(n,k,G)a(n",k,G) =  0.000547
 
 
- rdqps: reading QP wavefunctions of the previous step 
+ rdqps: reading QP wavefunctions of the previous step
         looking for file t14i_DS10_QPS
  file not found, 1st iteration initialized with KS eigenelements
 
@@ -3772,7 +3772,7 @@ Result for kinetic energy density :
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      1.0262554600E+01  1.0262554600E+01  1.0262554600E+01 Bohr
               amu      2.80855000E+01
@@ -4317,7 +4317,7 @@ P           mkmem           3
 - F. Bruneval, N. Vast, L. Reining, Phys. Rev. B 74, 045102 (2006).
 - Comment : in case gwcalctyp >= 10.
 -
-- [2] Ab initio pseudopotentials for electronic structure calculations of poly-atomic systems, 
+- [2] Ab initio pseudopotentials for electronic structure calculations of poly-atomic systems,
 - using density-functional theory.
 - M. Fuchs, M. Scheffler, Comput. Phys. Commun. 119, 67 (1999).
 - Comment : Some pseudopotential generated using the FHI code were used.
@@ -4330,7 +4330,7 @@ P           mkmem           3
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - Comment : the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 -
@@ -4349,7 +4349,7 @@ P           mkmem           3
 -
 - And optionally :
 -
-- [5] First-principles computation of material properties : the ABINIT software project. 
+- [5] First-principles computation of material properties : the ABINIT software project.
 - X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
 - M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7

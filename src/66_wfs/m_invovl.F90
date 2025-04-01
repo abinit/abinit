@@ -10,7 +10,7 @@
 !!  inv_s_projs = - (s_projs^-1 + projs'*projs)^-1
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2024 ABINIT group (AL)
+!! Copyright (C) 2013-2025 ABINIT group (AL)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -40,7 +40,7 @@ MODULE m_invovl
  use m_hamiltonian, only : gs_hamiltonian_type
  use m_bandfft_kpt, only : bandfft_kpt_get_ikpt
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_axpby
- use m_gemm_nonlop, only : gemm_nonlop_use_gemm
+ use m_gemm_nonlop_projectors, only : gemm_nonlop_use_gemm
  use m_nonlop,      only : nonlop
  use m_prep_kgb,    only : prep_nonlop
 
@@ -495,7 +495,9 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
  integer :: ikpt_this_proc,cplex_dij
  logical :: parity
  real(dp) :: tsec(2)
+#if defined(HAVE_FC_ISO_C_BINDING) && defined(HAVE_GPU_CUDA)
  character(len=500) :: message
+#endif
  character :: blas_transpose
 
  type(invovl_kpt_type), pointer :: invovl
@@ -505,6 +507,9 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
  integer :: array_nprojs_pp(mpi_enreg%nproc_fft)
  integer :: iproc, slice_size
  real(dp), allocatable :: gramwork(:,:,:)
+#ifdef HAVE_OPENMP_OFFLOAD
+ real(dp), ABI_CONTIGUOUS pointer :: invovl_gram_projs(:,:,:)
+#endif
 
  integer, parameter :: timer_mkinvovl = 1620, timer_mkinvovl_build_d = 1621, timer_mkinvovl_build_ptp = 1622
 
@@ -513,6 +518,8 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
  !! S = 1 + PDP', so
  !! S^-1 = 1 + P inv_s_projs P', with
  !! inv_s_projs = - (D^-1 + P'*P)^-1
+
+ ABI_NVTX_START_RANGE(NVTX_MAKE_INVOVL)
 
  if(ham%istwf_k == 1) then
    cplx = 2
@@ -601,7 +608,7 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
 
      !! build atom_projs, from opernlb
      !! P = 4pi/sqrt(ucvol)* conj(diag(ph3d)) * ffnl * diag(parity), with parity = (-i)^l
-     atom_projs(:,:,:) = 0
+     atom_projs(:,:,:) = zero
 
      ! start from 4pi/sqrt(ucvol)*ffnl
      ! atom_projs(1, :, 1:nlmn) = four_pi/sqrt(ham%ucvol) * ffnl(:, 1, 1:nlmn)
@@ -638,8 +645,8 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
        atom_projs(1,1,:) = atom_projs(1,1,:) / sqrt2
        atom_projs(2,1,:) = zero
      end if
-     if(ham%istwf_k == 2) then
-       atom_projs(:,:,:) = atom_projs(:,:,:)*sqrt2
+     if(ham%istwf_k > 1) then
+       atom_projs(:,:,:) = atom_projs(:,:,:) * sqrt2
      end if
 
 
@@ -703,18 +710,18 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
 #ifdef HAVE_OPENMP_OFFLOAD
    ! compute gram_projs in one GEMM, only one FFT proc expected in GPU mode
    slice_size = array_nprojs_pp(1)
-   current_gram_projs   => invovl%gram_projs
-   !$OMP TARGET ENTER DATA MAP(alloc:current_gram_projs)
+   invovl_gram_projs   => invovl%gram_projs
+   !$OMP TARGET ENTER DATA MAP(alloc:invovl_gram_projs)
    !$OMP TARGET ENTER DATA MAP(to:projs)
 
-   !$OMP TARGET DATA USE_DEVICE_PTR(current_gram_projs,projs)
+   !$OMP TARGET DATA USE_DEVICE_PTR(invovl_gram_projs,projs)
    call abi_gpu_xgemm(cplx, blas_transpose,'N', invovl%nprojs, slice_size, (3-cplx)*ham%npw_k, cone, &
    &                  c_loc(projs), (3-cplx)*ham%npw_k, &
-   &                  c_loc(projs), (3-cplx)*ham%npw_k, czero, c_loc(current_gram_projs), invovl%nprojs)
+   &                  c_loc(projs), (3-cplx)*ham%npw_k, czero, c_loc(invovl_gram_projs), invovl%nprojs)
    !$OMP END TARGET DATA
-   !$OMP TARGET EXIT DATA MAP(from:current_gram_projs)
+   call xmpi_sum(invovl%gram_projs,mpi_enreg%comm_band,ierr,use_omp_map=.true.)
+   !$OMP TARGET EXIT DATA MAP(from:invovl_gram_projs)
    !$OMP TARGET EXIT DATA MAP(delete:projs)
-   call xmpi_sum(invovl%gram_projs,mpi_enreg%comm_band,ierr)
 #endif
  else
    do iproc = 1, mpi_enreg%nproc_fft
@@ -767,8 +774,11 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
  end if
 #endif
 
- write(message,*) 'Invovl built'
- call wrtout(std_out,message,'COLL')
+! LB-10/06/24: This message is too verbose on some cases (for example many k-points)
+! write(message,*) 'Invovl built'
+! call wrtout(std_out,message,'COLL')
+
+ ABI_NVTX_END_RANGE()
 
 end subroutine make_invovl
 !!***
@@ -1168,12 +1178,13 @@ subroutine apply_block(ham, cplx, mat, nprojs, ndat, x, y, block_sliced)
   implicit none
 
   integer,intent(in) :: ndat, nprojs, cplx
-  real(dp), intent(inout) :: x(cplx, nprojs, ndat), y(cplx, nprojs, ndat)
+  real(dp), intent(inout), target :: x(cplx, nprojs, ndat), y(cplx, nprojs, ndat)
   type(gs_hamiltonian_type),intent(in) :: ham
   real(dp), intent(in) :: mat(cplx, ham%lmnmax, ham%lmnmax, ham%ntypat)
   integer, intent(in) :: block_sliced
 
   integer :: nlmn, shift, itypat, idat
+  real(dp),pointer :: work_x(:,:),work_y(:,:)
 
 ! *************************************************************************
 
@@ -1186,16 +1197,18 @@ subroutine apply_block(ham, cplx, mat, nprojs, ndat, x, y, block_sliced)
            !! apply mat to all atoms at once
            ! perform natom multiplications of size nlmn
            ! compute y = mat*x
+           work_x => x(:, shift:shift+nlmn*ham%nattyp(itypat)-1, idat)
+           work_y => y(:, shift:shift+nlmn*ham%nattyp(itypat)-1, idat)
            if(cplx == 2) then
               call ZHEMM('L','U', nlmn, ham%nattyp(itypat), cone, &
                    &  mat(:, :, :, itypat), ham%lmnmax, &
-                   &  x(:, shift:shift+nlmn*ham%nattyp(itypat)-1, idat), nlmn, czero, &
-                   &  y(:, shift:shift+nlmn*ham%nattyp(itypat)-1, idat), nlmn)
+                   &  work_x, nlmn, czero, &
+                   &  work_y, nlmn)
            else
               call DSYMM('L','U', nlmn, ham%nattyp(itypat), one, &
                    &  mat(:, :, :, itypat), ham%lmnmax, &
-                   &  x(:, shift:shift+nlmn*ham%nattyp(itypat)-1, idat), nlmn, zero, &
-                   &  y(:, shift:shift+nlmn*ham%nattyp(itypat)-1, idat), nlmn)
+                   &  work_x, nlmn, zero, &
+                   &  work_y, nlmn)
            end if
            shift = shift + nlmn*ham%nattyp(itypat)
         end do
@@ -1263,7 +1276,7 @@ end subroutine apply_block
    do itypat=1,ham%ntypat
      nprojs = nprojs + count(ham%indlmn(3,:,itypat)>0)*ham%nattyp(itypat)
    end do
-   cplx = 2; if(ham%istwf_k == 2) cplx = 1
+   cplx = 2; if(ham%istwf_k > 1) cplx = 1
 
    req_mem = 0
    req_mem = req_mem + dp * cplx * int(nprojs, c_size_t) * int(nprojs, c_size_t)                       ! gram_projs
@@ -1376,8 +1389,9 @@ subroutine apply_invovl_ompgpu(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_
   !multiply by S^1
   ABI_NVTX_START_RANGE(NVTX_INVOVL_INNER)
   call solve_inner_ompgpu(invovl, ham, cplx, mpi_enreg, proj, ndat*nspinor, sm1proj, PtPsm1proj, block_sliced)
-  !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) MAP(to:sm1proj,PtPsm1proj)
+  !$OMP TARGET TEAMS DISTRIBUTE MAP(to:sm1proj,PtPsm1proj)
   do idat  =1, ndat*nspinor
+    !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(iproj,icplx)
     do iproj = 1, nprojs
       do icplx = 1, cplx
         sm1proj(icplx,iproj,idat) = - sm1proj(icplx,iproj,idat)
@@ -1548,9 +1562,10 @@ subroutine solve_inner_ompgpu(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj,
    !$OMP END TARGET DATA
 #endif
 
-   !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) &
-   !$OMP& PRIVATE(idat,iproj,icplx) MAP(to:proj,resid,PtPsm1proj)
+   !$OMP TARGET TEAMS DISTRIBUTE &
+   !$OMP& PRIVATE(idat) MAP(to:proj,resid,PtPsm1proj)
    do idat =1, ndat
+     !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(iproj,icplx)
      do iproj =1, nprojs
        do icplx = 1,cplx
          resid(icplx, iproj, idat) = proj(icplx, iproj, idat) - resid(icplx, iproj, idat) - PtPsm1proj(icplx, iproj, idat)
@@ -1598,9 +1613,10 @@ subroutine solve_inner_ompgpu(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj,
    ! add preconditionned residual
    call apply_block_ompgpu(ham, cplx, invovl%inv_s_approx, nprojs, ndat, resid, precondresid, block_sliced)
 
-   !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) &
-   !$OMP& PRIVATE(idat,iproj,icplx) MAP(to:sm1proj,precondresid)
+   !$OMP TARGET TEAMS DISTRIBUTE &
+   !$OMP& PRIVATE(idat) MAP(to:sm1proj,precondresid)
    do idat =1, ndat
+     !$OMP PARALLEL DO PRIVATE(iproj,icplx) COLLAPSE(2)
      do iproj =1, nprojs
        do icplx = 1,cplx
          sm1proj(icplx, iproj, idat) = sm1proj(icplx, iproj, idat) + precondresid(icplx, iproj, idat)

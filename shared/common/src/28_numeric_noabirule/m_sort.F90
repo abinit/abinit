@@ -6,7 +6,7 @@
 !! Sorting algorithms.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2024 ABINIT group (XG, MG)
+!!  Copyright (C) 2008-2025 ABINIT group (XG, MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -334,7 +334,7 @@ end subroutine sort_rpts
 !! OUTPUT
 !!  iperm(n) index of permutation giving the right ascending order:
 !!      the i-th element of the ordered list had index iperm(i) in in_vals.
-!!  [sorted_in_vals(n)]= list of sorted weigts.
+!!  [sorted_in_vals(n)]= list of sorted values.
 !!
 !! SOURCE
 
@@ -384,24 +384,27 @@ end subroutine sort_rvals
 !!  [tol]: tolerance for comparison
 !!
 !! OUTPUT
-!!  out_gvec(3,npw_k): list of sorted g-vectors
+!!  [out_gvec(3,npw_k)]: list of sorted g-vectors
+!!  [iperm(npw_k) index of permutation giving the right ascending order:
+!!      the i-th element of the ordered list had index iperm(i) in in_vals.
 !!
 !! SOURCE
 
-subroutine sort_gvecs(npw_k, kpoint, gmet, in_gvec, out_gvec, tol)
+subroutine sort_gvecs(npw_k, kpoint, gmet, in_gvec, out_gvec, iperm, tol)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npw_k, in_gvec(3,npw_k)
  real(dp),intent(in) :: kpoint(3), gmet(3,3)
  integer,allocatable,intent(out) :: out_gvec(:,:)
+ integer,allocatable,optional,intent(out) :: iperm(:)
  real(dp),optional,intent(in) :: tol
 
 !Local variables-------------------------------
 !scalars
  integer :: ig, ig_sort
  real(dp) :: my_tol
- integer,allocatable :: iperm(:)
+ integer,allocatable :: iperm__(:)
  real(dp),allocatable :: kin_kg(:)
 
 !************************************************************************
@@ -409,22 +412,26 @@ subroutine sort_gvecs(npw_k, kpoint, gmet, in_gvec, out_gvec, tol)
  my_tol = tol14; if (present(tol)) my_tol = tol
 
  ABI_MALLOC(kin_kg, (npw_k))
- ABI_MALLOC(iperm, (npw_k))
- iperm = [(ig, ig=1,npw_k)]
+ ABI_MALLOC(iperm__, (npw_k))
+ iperm__ = [(ig, ig=1,npw_k)]
  do ig=1,npw_k
    kin_kg(ig) = half * normv(kpoint + in_gvec(:, ig), gmet, "G") ** 2
  end do
 
- call sort_dp(npw_k, kin_kg, iperm, my_tol)
+ call sort_dp(npw_k, kin_kg, iperm__, my_tol)
  ABI_FREE(kin_kg)
 
  ABI_MALLOC(out_gvec, (3, npw_k))
  do ig=1,npw_k
-   ig_sort = iperm(ig)
+   ig_sort = iperm__(ig)
    out_gvec(:,ig) = in_gvec(:,ig_sort)
  end do
- ABI_FREE(iperm)
 
+ if (present(iperm)) then
+   ABI_MALLOC(iperm, (npw_k))
+   iperm = iperm__
+ end if
+ ABI_FREE(iperm__)
 
 contains
 function normv(xv, met, space) result(res)

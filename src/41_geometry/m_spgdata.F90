@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2000-2024 ABINIT group (RC, XG)
+!!  Copyright (C) 2000-2025 ABINIT group (RC, XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2390,7 +2390,7 @@ end subroutine getptgroupma
 !!
 !! SOURCE
 
-subroutine symptgroup(iholohedry,nsym,ptgroup,symrel)
+subroutine symptgroup(iholohedry, nsym, ptgroup, symrel)
 
 !Arguments ------------------------------------
 !scalars
@@ -2414,7 +2414,7 @@ subroutine symptgroup(iholohedry,nsym,ptgroup,symrel)
 !DEBUG
 !write(std_out,*)' symptgroup : enter'
 !do isym=1,nsym
-!write(std_out,'(i3,2x,9i3)' )isym,symrel(:,:,isym)
+!  write(std_out,'(i3,2x,9i3)' )isym,symrel(:,:,isym)
 !end do
 !ENDDEBUG
 
@@ -2490,10 +2490,10 @@ subroutine symptgroup(iholohedry,nsym,ptgroup,symrel)
 
    if(ptsym(isym)=='no')then
      write(message,'(a,i4,a,a,a,i4,a,a,i4,a,a,i4)' )&
-&     'The symmetry operation number',isym,' could not be identified',ch10,&
-&     'order(isym)      =',order(isym),ch10,&
-&     'determinant(isym)=',determinant(isym),ch10,&
-&     'root_invers(isym)=',root_invers(isym)
+       'The symmetry operation number',isym,' could not be identified',ch10,&
+       'order(isym)      =',order(isym),ch10,&
+       'determinant(isym)=',determinant(isym),ch10,&
+       'root_invers(isym)=',root_invers(isym)
      ABI_BUG(message)
    end if
 
@@ -2579,8 +2579,7 @@ subroutine symptgroup(iholohedry,nsym,ptgroup,symrel)
 
 !DEBUG
 !do isym=1,nsym
-!write(std_out,'(a,3i5)' )&
-!&  ' symptgroup : isym,determinant,order=',isym,determinant(isym),order(isym)
+!write(std_out,'(a,3i5)' )' symptgroup : isym,determinant,order=',isym,determinant(isym),order(isym)
 !end do
 
 !write(std_out,'(a,13i3)' )' symptgroup : n_axes(-6:6)=',n_axes(-6:6)

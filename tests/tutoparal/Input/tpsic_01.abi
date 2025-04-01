@@ -13,20 +13,20 @@ mixesimgf -59.00 +80.0 -20.0    # Must be coherent with the occupation numbers
 
 # Bands and Occupations
  nsppol 2
- nband 32 
+ nband 32
  occopt 0
 
- occ_1img  32*1          32*1  
+ occ_1img  32*1          32*1
  cellcharge_1img 0.0
 
- occ_2img  31*1 0.975     32*1  
+ occ_2img  31*1 0.975     32*1
  cellcharge_2img 0.025
 
- occ_3img  31*1 0.950     32*1  
+ occ_3img  31*1 0.950     32*1
  cellcharge_3img 0.050
 
-# Define the parallelism distribution explicitly, on order to make the user conscious that this is 
-# a medium-grained parallelism. 
+# Define the parallelism distribution explicitly, on order to make the user conscious that this is
+# a medium-grained parallelism.
 # autoparal 1
  paral_kgb 1
  npimage 3
@@ -39,13 +39,13 @@ mixesimgf -59.00 +80.0 -20.0    # Must be coherent with the occupation numbers
 ###########################################################################
 #
 # Optimization parameters (useless since ntimimage 1)
- ionmov 2
+ geoopt "bfgs"
  tolmxf 1.0d-5  # This criterion is irrelevant in the present status of the code.
 
 
 # SCF procedure
- nstep 20 
- ecut 17  
+ nstep 20
+ ecut 17
  pawecutdg 40
  toldfe 1.0d-8   # Fixed geometry calculation. Just need the energy.
  diemac 2.0d0
@@ -55,13 +55,13 @@ mixesimgf -59.00 +80.0 -20.0    # Must be coherent with the occupation numbers
  ngkpt 2 2 2
 
 #Definition of the unit cell
-#acell 3*12.227544   # This is the optimized PAW PBE lattice parameter 
+#acell 3*12.227544   # This is the optimized PAW PBE lattice parameter
  acell 3*13   # Enlarged to stabilize the polaron in the pSICn but not stabilized with cellcharge  1.0
 
 #Definition of the atom types and unit cell
  ntypat 2
  znucl 11 53
- pp_dirpath "$ABI_PSPDIR/Pseudodojo_paw_pbe_standard"
+ pp_dirpath "$ABI_PSPDIR/Psdj_paw_pbe_std"
  pseudos "Na.xml, I.xml"
 
 #Definition of atoms and positions
@@ -96,8 +96,7 @@ mixesimgf -59.00 +80.0 -20.0    # Must be coherent with the occupation numbers
 #%% description =
 #%%   NaI with a sligthly expanded lattice, to allow self-localisation of a hole polaron, using pSIC technique.
 #%%   Realistic ecut and reasonable k point sampling, but small cell of only 8 atoms for testing.
-#%%   The present test at the fixed, symmetric geometry, for reference. Of course, the cell is not primitive. 
-#%%
+#%%   The present test at the fixed, symmetric geometry, for reference. Of course, the cell is not primitive.
 #%%   Parallelism until 12 procs is quite efficient. However, setting npband 2 does not bring noticeable improvement.
 #%%   Although this is still subject for further investigation, the hypothesis is that the density/xc/potential part
 #%%   is not improved with npband 2, while it is actually a major contribution, even with 32 bands.

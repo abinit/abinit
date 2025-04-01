@@ -13,7 +13,7 @@
 !!  Please use CtqmcInterface
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -64,7 +64,7 @@ INTEGER, PARAMETER :: CTQMC_DETSI =  5
 !!  This structured datatype contains the necessary data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -122,6 +122,8 @@ TYPE, PUBLIC :: Ctqmc
 ! do we have energy levels
 
   INTEGER _PRIVATE :: flavors
+!
+  INTEGER _PRIVATE :: endDensity
 !
   INTEGER _PRIVATE :: nspinor
 !
@@ -300,7 +302,7 @@ CONTAINS
 !!  Allocate all the non optional variables
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -455,7 +457,7 @@ END SUBROUTINE Ctqmc_init
 !!  set all parameters and operators
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -519,7 +521,7 @@ END SUBROUTINE Ctqmc_setParameters
 !!  set the number of sweeps
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -574,7 +576,7 @@ END SUBROUTINE Ctqmc_setSweeps
 !!  initialize random number generator
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -623,7 +625,7 @@ END SUBROUTINE Ctqmc_setSeed
 !!  Allocate all non option varibales
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -682,7 +684,7 @@ END SUBROUTINE Ctqmc_allocateAll
 !!  allocate all option variables 
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -774,9 +776,11 @@ SUBROUTINE Ctqmc_allocateOpt(this)
 
   IF (this%opt_spectra .GE. 1 ) THEN
     FREEIF(this%density)
+    this%endDensity=-1
     !MALLOC(this%density,(1:this%thermalization,1:this%flavors))
     i = CEILING(DBLE(this%thermalization+this%sweeps)/DBLE(this%measurements*this%opt_spectra))
     MALLOC(this%density,(1:this%flavors+1,1:i))
+    this%endDensity=i
     this%density = 0.d0
   END IF
 !#endif
@@ -833,7 +837,7 @@ END SUBROUTINE Ctqmc_setG0wFile
 !!  Set Gow from input array
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -918,7 +922,7 @@ END SUBROUTINE Ctqmc_setG0wTab
 !!  set the interaction this
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -958,7 +962,7 @@ END SUBROUTINE Ctqmc_setU
 !!  clear a ctqmc run
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1033,7 +1037,7 @@ END SUBROUTINE Ctqmc_clear
 !!  reset a ctqmc simulation
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1094,7 +1098,7 @@ END SUBROUTINE Ctqmc_reset
 !!  impose energy levels
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1136,7 +1140,7 @@ END SUBROUTINE Ctqmc_setMu
 !!  Compute the hybridization function
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1319,7 +1323,7 @@ END SUBROUTINE Ctqmc_computeF
 !!  set all options and run a simulation
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1483,7 +1487,7 @@ END SUBROUTINE Ctqmc_run
 !!  Definition the main loop of the CT-QMC
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1572,7 +1576,10 @@ SUBROUTINE Ctqmc_loop(this,itotal,ilatex)
   MALLOC(gtmp_old2,(1,1))
   gtmp_old2 = 0.d0
 
-  endDensity = SIZE(this%density,2)
+!PROBLEM eos_gnu_13.2_openmpi . %endDensity was introduced throughout
+!  endDensity = SIZE(this%density,2)
+   endDensity=this%endDensity
+!ENDPROBLEM
 
   IF ( this%opt_noise .GT. 0 ) THEN
     FREEIF(gtmp_new)
@@ -1726,7 +1733,7 @@ END SUBROUTINE Ctqmc_loop
 !!  Try to add or remove a segment and an anti-segment
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1848,7 +1855,7 @@ END SUBROUTINE Ctqmc_tryAddRemove
 !!  try a global move (swap to flavors)
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1953,7 +1960,7 @@ END SUBROUTINE Ctqmc_trySwap
 !!  measure the number of electron
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2003,7 +2010,7 @@ END SUBROUTINE Ctqmc_measN
 !!  measure all correlations in times for a flavor
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2087,7 +2094,7 @@ END SUBROUTINE Ctqmc_measCorrelation
 !!  measure perturbation order
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2132,7 +2139,7 @@ END SUBROUTINE Ctqmc_measPerturbation
 !!  reduce everything to get the result of the simulation
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder,F. Gendron)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder,F. Gendron)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2601,7 +2608,10 @@ include 'mpif.h'
   FREE(buffer)
 
   IF ( this%opt_spectra .GE. 1 ) THEN
-    endDensity = SIZE(this%density,2)
+!PROBLEM eos_gnu_13.2_openmpi . %endDensity was introduced throughout
+!   endDensity = SIZE(this%density,2)
+    endDensity=this%endDensity
+!ENDPROBLEM
     IF ( this%density(1,endDensity) .EQ. -1.d0 ) &
       endDensity = endDensity - 1
     CALL FFTHyb_init(FFTmrka,endDensity,DBLE(this%thermalization)/DBLE(this%measurements*this%opt_spectra))
@@ -2781,7 +2791,7 @@ END SUBROUTINE Ctqmc_getResult
 !!  optionnaly symmetrize the green functions
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2846,7 +2856,7 @@ END SUBROUTINE Ctqmc_symmetrizeGreen
 !!  Get the full green functions in time and/or frequency
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2928,7 +2938,7 @@ END SUBROUTINE Ctqmc_getGreen
 !!  get double occupation
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2977,7 +2987,7 @@ END SUBROUTINE Ctqmc_getD
 !!  get interaction energy and noise on it
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -3018,7 +3028,7 @@ END SUBROUTINE Ctqmc_getE
 !!  print different functions computed during the simulation
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -3069,7 +3079,7 @@ END SUBROUTINE Ctqmc_printAll
 !!  print ctqmc statistics
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -3170,7 +3180,7 @@ END SUBROUTINE Ctqmc_printQMC
 !!  print green functions
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -3249,7 +3259,7 @@ END SUBROUTINE Ctqmc_printGreen
 !!  print individual double occupancy
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -3305,7 +3315,7 @@ END SUBROUTINE Ctqmc_printD
 !!  print energy and noise 
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -3360,7 +3370,7 @@ END SUBROUTINE Ctqmc_printE
 !!  print perturbation order
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -3425,7 +3435,7 @@ END SUBROUTINE Ctqmc_printPerturbation
 !!  print correlation fonctions
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -3499,7 +3509,7 @@ END SUBROUTINE Ctqmc_printCorrelation
 !!  print fourier transform of time evolution of number of electrons
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -3546,7 +3556,10 @@ SUBROUTINE Ctqmc_printSpectra(this, oFileIn)
   formatSpectra ='(1x,'//TRIM(ADJUSTL(a))//'ES22.14)'
   WRITE(oFile,*) "# freq[/hermalization] FFT"
 
-  endDensity = SIZE(this%density,2)
+!PROBLEM eos_gnu_13.2_openmpi . %endDensity was introduced throughout
+!  endDensity = SIZE(this%density,2)
+   endDensity=this%endDensity
+!ENDPROBLEM
   DO WHILE ( this%density(flavors+1,endDensity) .EQ. -1 )
     endDensity = endDensity -1
   END DO
@@ -3568,7 +3581,7 @@ END SUBROUTINE Ctqmc_printSpectra
 !!  destroy and deallocate all variables
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2024 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -3636,6 +3649,7 @@ SUBROUTINE Ctqmc_destroy(this)
     DT_FREE(this%measNoiseG)
   END IF
   FREEIF(this%density)
+  this%endDensity=-1
 !#endif
   this%ostream        = 0
   this%istream        = 0
@@ -3669,7 +3683,7 @@ END SUBROUTINE Ctqmc_destroy
 !!  set the Magnetic moment matrix for susceptibility
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2024 ABINIT group (F. Gendron)
+!!  Copyright (C) 2013-2025 ABINIT group (F. Gendron)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

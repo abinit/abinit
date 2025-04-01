@@ -46,44 +46,9 @@ if(ABINIT_ENABLE_CRPA_OPTIM)
   set(HAVE_CRPA_OPTIM 1)
 endif()
 
-option(ABINIT_ENABLE_LONG_LINES "Enable to have long lines in fortran source code (default: no)" OFF)
-if(ABINIT_ENABLE_LONG_LINES)
-  set(HAVE_FC_LONG_LINES 1)
-endif()
-
-option(ABINIT_ENABLE_MPI_IO "Enable to have MPI I/O support (default: no)" OFF)
-if(ABINIT_ENABLE_MPI_IO)
-  set(HAVE_MPI_IO 1)
-endif()
-
 option(ABINIT_ENABLE_MPI_IO_DEFAULT "Enable to use MPI I/O as default I/O library (default: no)" OFF)
 if(ABINIT_ENABLE_MPI_IO_DEFAULT)
   set(HAVE_MPI_IO_DEFAULT 1)
-endif()
-
-option(ABINIT_ENABLE_MPI_INTERFACES_BUGFIX "Enable a workaround for buggy MPI interfaces (mishandling scalars) (default: auto)" AUTO)
-if(ABINIT_ENABLE_MPI_INTERFACES_BUGFIX STREQUAL "AUTO")
-  try_compile(MPI_NOT_BUGGY ${CMAKE_BINARY_DIR}/try_compile ${CMAKE_SOURCE_DIR}/cmake/try_compile/have_mpi_inplace_buggy.F90
-    LINK_LIBRARIES MPI::MPI_Fortran)
-    if(NOT MPI_NOT_BUGGY)
-      set(ABINIT_ENABLE_MPI_INTERFACES_BUGFIX,ON)
-    endif()
-endif()
-if(ABINIT_ENABLE_MPI_INTERFACES_BUGFIX)
-  set(HAVE_MPI_BUGGY_INTERFACES 1)
-endif()
-
-option(ABINIT_ENABLE_MPI_INPLACE "Enable the use of MPI_IN_PLACE (default: auto)" AUTO)
-if(ABINIT_ENABLE_MPI_INPLACE STREQUAL "AUTO")
-  if(NOT ABINIT_ENABLE_MPI_INTERFACES_BUGFIX)
-    try_compile(ABINIT_ENABLE_MPI_INPLACE ${CMAKE_BINARY_DIR}/try_compile ${CMAKE_SOURCE_DIR}/cmake/try_compile/have_mpi_inplace.F90
-      LINK_LIBRARIES MPI::MPI_Fortran)
-  else()
-    set(ABINIT_ENABLE_MPI_INPLACE,OFF)
-  endif()
-endif()
-if(ABINIT_ENABLE_MPI_INPLACE)
-  set(HAVE_MPI2_INPLACE 1)
 endif()
 
 option(ABINIT_ENABLE_PARALLEL_HDF5 "Enable the use of parallel HDF5 (default: no)" OFF)
@@ -109,7 +74,6 @@ if(ABINIT_ENABLE_PYTHON_INVOCATION)
   set(DO_BUILD_67_PYTHON_INVOCATION_EXT ON)
 endif()
 
-
 option (ABINIT_ENFORCE_CUDA_AWARE_MPI "Some MPI cuda-aware implementation are not well detected; use this variable to enforce if you that your MPI implementation is Cuda-aware." OFF)
 
 option(ABINIT_ENABLE_GPU_CUDA "Enable GPU build (using Nvidia CUDA backend, default OFF)" OFF)
@@ -127,7 +91,7 @@ if(ABINIT_ENABLE_GPU_CUDA)
     # if you want to use nvc++ you need at least cmake 3.22.0
     #
     # the following will make target like CUDA::cublas and CUDA::cufft available
-    message("Using CUDAToolkit macros")
+    message(STATUS "Using CUDAToolkit macros")
     find_package(CUDAToolkit REQUIRED)
 
   endif()

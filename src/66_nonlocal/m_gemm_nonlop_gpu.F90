@@ -8,7 +8,7 @@
 !!  which leads to excellent CPU efficiency and OpenMP scalability.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2014-2024 ABINIT group (AL,MS)
+!! Copyright (C) 2014-2025 ABINIT group (AL,MS)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -32,9 +32,10 @@ module m_gemm_nonlop_gpu
 
  use m_abi_linalg  ! copy_on_gpu, copy_from_gpu, alloc_on_gpu, dealloc_on_gpu, gpu_memset, gpu_allocated
  use defs_abitypes, only : MPI_type
- use m_opernlc_ylm_allwf_cpu, only : opernlc_ylm_allwf_cpu
+ use m_opernlc_ylm_allwf, only : opernlc_ylm_allwf
  use m_pawcprj, only : pawcprj_type
- use m_gemm_nonlop, only : gemm_nonlop_type,gemm_nonlop_ikpt_this_proc_being_treated,make_gemm_nonlop,gemm_nonlop_kpt
+ use m_gemm_nonlop_projectors
+ use m_hamiltonian, only : KPRIME_H_K, K_H_KPRIME, K_H_K, KPRIME_H_KPRIME
 
 #if defined(HAVE_GPU_CUDA)
  use m_gpu_toolbox
@@ -53,36 +54,9 @@ module m_gemm_nonlop_gpu
 
  private
 
- public :: init_gemm_nonlop_gpu
- public :: destroy_gemm_nonlop_gpu
- public :: make_gemm_nonlop_gpu
  public :: gemm_nonlop_gpu
 
  !!***
-
-#if defined(HAVE_FC_ISO_C_BINDING) && defined(HAVE_GPU_CUDA)
-
- type, bind(c), public :: gemm_nonlop_gpu_type
-
-   integer(kind=c_int32_t) :: npw
-   integer(kind=c_int32_t) :: nprojs
-
-   ! array of double on GPU, dimensions are (2, npw, nprojs)
-   type(c_ptr) :: projs
-
-   ! array of double on GPU, dimensions are (1, npw, nprojs)
-   type(c_ptr) :: projs_r
-
-   ! array of double on GPU, dimensions are (1, npw, nprojs)
-   type(c_ptr) :: projs_i
-
- end type gemm_nonlop_gpu_type
-
- !! array of size nkpt of sobjects of type gemm_nonlop_gpu_type, array size is nkpt
- type(gemm_nonlop_gpu_type), save, public, allocatable :: gemm_nonlop_kpt_gpu(:)
- !(nkpt)
-
-#endif
 
  !!
  !! GPU interface
@@ -90,25 +64,6 @@ module m_gemm_nonlop_gpu
 #if defined(HAVE_FC_ISO_C_BINDING) && defined(HAVE_GPU_CUDA)
 
  interface
-
-   !> allocate a object of type gemm_nonlop_gpu_type
-   subroutine gemm_nonlop_gpu_allocate(gemm_nonlop_gpu_obj, npw, nprojs, istwf_k) bind(c, name='cuda_gemm_nonlop_gpu_allocate')
-     use, intrinsic :: iso_c_binding
-     import gemm_nonlop_gpu_type
-     implicit none
-     type(gemm_nonlop_gpu_type),     intent(inout) :: gemm_nonlop_gpu_obj
-     integer(kind=c_int32_t), value, intent(in)    :: npw
-     integer(kind=c_int32_t), value, intent(in)    :: nprojs
-     integer(kind=c_int32_t), value, intent(in)    :: istwf_k
-   end subroutine gemm_nonlop_gpu_allocate
-
-   !> deallocate a object of type gemm_nonlop_gpu_type
-   subroutine gemm_nonlop_gpu_deallocate(gemm_nonlop_gpu_obj) bind(c, name='cuda_gemm_nonlop_gpu_deallocate')
-     use, intrinsic :: iso_c_binding
-     import gemm_nonlop_gpu_type
-     implicit none
-     type(gemm_nonlop_gpu_type),     intent(inout) :: gemm_nonlop_gpu_obj
-   end subroutine gemm_nonlop_gpu_deallocate
 
    !> extract real part of a complex vector
    !> data_in and data_out must be pointers in device memory
@@ -170,187 +125,6 @@ module m_gemm_nonlop_gpu
 
 #if defined HAVE_GPU_CUDA
 
- !!****f* m_gemm_nonlop_gpu/init_gemm_nonlop_gpu
- !! NAME
- !! init_gemm_nonlop_gpu
- !!
- !! FUNCTION
- !! Memory allocation of the gemm_nonlop_kpt_gpu array
- !!
- !! INPUTS
- !! nkpt= number of k-points
- !!
- !! PARENTS
- !!      m_gstate
- !!
- !! CHILDREN
- !!      abi_zgemm_2r,dgemm,opernlc_ylm,xmpi_sum
- !!
- !! SOURCE
- subroutine init_gemm_nonlop_gpu(nkpt)
-
-   integer,intent(in) :: nkpt
-   integer :: ikpt
-
-   ! *************************************************************************
-
-   ! TODO only allocate the number of kpt treated by this proc
-   ABI_MALLOC(gemm_nonlop_kpt_gpu, (nkpt))
-   do ikpt=1,nkpt
-     gemm_nonlop_kpt_gpu(ikpt)%npw = -1
-     gemm_nonlop_kpt_gpu(ikpt)%nprojs = -1
-   end do
-
-   gemm_nonlop_gpu_data % allocated = .false.
-
- end subroutine init_gemm_nonlop_gpu
- !!***
-
- !!****f* m_gemm_nonlop_gpu/destroy_gemm_nonlop_gpu
- !! NAME
- !! destroy_gemm_nonlop_gpu
- !!
- !! FUNCTION
- !! Initalization of the gemm_nonlop_kpt array
- !!
- !! INPUTS
- !! nkpt= number of k-points
- !!
- !! PARENTS
- !!      m_gstate
- !!
- !! CHILDREN
- !!      abi_zgemm_2r,dgemm,opernlc_ylm,xmpi_sum
- !!
- !! SOURCE
- subroutine destroy_gemm_nonlop_gpu(nkpt)
-
-   integer,intent(in) :: nkpt
-   integer :: ikpt
-
-   ! *************************************************************************
-
-   ! TODO add cycling if kpt parallelism
-
-   ! This function must be called before destroy_gemm_nonlop so it can
-   ! properly figure out which GPU buffer to free.
-   if(.not. allocated(gemm_nonlop_kpt)) then
-     ABI_BUG("gemm_nonlop is already free, cannot free GPU resources !")
-   end if
-
-   ! deallocate GPU ressource for each k point
-   do ikpt = 1,nkpt
-     if(gemm_nonlop_kpt_gpu(ikpt)%nprojs /= -1) then
-       ! deallocate arrays projs, projs_r and projs_i
-       if (allocated(gemm_nonlop_kpt(ikpt)%projs)) then
-         call dealloc_on_gpu(gemm_nonlop_kpt_gpu(ikpt)%projs)
-       end if
-       if (allocated(gemm_nonlop_kpt(ikpt)%projs_r)) then
-         call dealloc_on_gpu(gemm_nonlop_kpt_gpu(ikpt)%projs_r)
-       end if
-       if (allocated(gemm_nonlop_kpt(ikpt)%projs_i)) then
-         call dealloc_on_gpu(gemm_nonlop_kpt_gpu(ikpt)%projs_i)
-       end if
-       gemm_nonlop_kpt_gpu(ikpt)%nprojs = -1
-     end if
-   end do
-
-   ABI_FREE(gemm_nonlop_kpt_gpu)
-
- end subroutine destroy_gemm_nonlop_gpu
- !!***
-
-
-!!****f* m_gemm_nonlop_gpu/make_gemm_nonlop_gpu
-!! NAME
-!! make_gemm_nonlop_gpu
-!!
-!! FUNCTION
-!! Replacement of nonlop.
-!!
-!! INPUTS
-!!
-!! PARENTS
-!!      m_nonlop
-!!
-!! CHILDREN
-!!      abi_zgemm_2r,dgemm,opernlc_ylm,xmpi_sum
-!!
-!! SOURCE
- subroutine make_gemm_nonlop_gpu(ikpt,npw,lmnmax,ntypat,indlmn,nattyp,istwf_k,ucvol,ffnl_k, &
-&                     ph3d_k,kpt_k,kg_k,kpg_k, &
-&                     compute_grad_strain,compute_grad_atom) ! Optional parameters
-
-   !Arguments ------------------------------------
-   integer, intent(in) :: ikpt
-   integer, intent(in) :: npw, lmnmax,ntypat
-   integer, intent(in) :: indlmn(:,:,:), kg_k(:,:)
-   integer, intent(in) :: nattyp(ntypat)
-   integer, intent(in) :: istwf_k
-   logical, intent(in), optional :: compute_grad_strain,compute_grad_atom
-   real(dp), intent(in) :: ucvol
-   real(dp), intent(in) :: ffnl_k(:,:,:,:)
-   real(dp), intent(in) :: ph3d_k(:,:,:)
-   real(dp), intent(in) :: kpt_k(:)
-   real(dp), intent(in), target :: kpg_k(:,:)
-
-   ! locals
-   integer              :: nprojs, itypat
-
-   ! *************************************************************************
-
-   ABI_UNUSED((/ikpt,npw,lmnmax,ntypat,indlmn,kg_k,nattyp,istwf_k/))
-   ABI_UNUSED((/ucvol,ffnl_k,ph3d_k,kpt_k,kpg_k/))
-   ABI_UNUSED((/compute_grad_strain,compute_grad_atom/))
-
-   call make_gemm_nonlop(ikpt,npw,lmnmax,ntypat,indlmn,nattyp,istwf_k,ucvol,ffnl_k, &
-          ph3d_k,kpt_k,kg_k,kpg_k, &
-          compute_grad_strain=compute_grad_strain,compute_grad_atom=compute_grad_atom)
-
-   nprojs = 0
-   do itypat=1,ntypat
-     nprojs = nprojs + count(indlmn(3,:,itypat)>0)*nattyp(itypat)
-   end do
-   gemm_nonlop_kpt_gpu(ikpt)%npw    = npw
-   gemm_nonlop_kpt_gpu(ikpt)%nprojs = nprojs
-
-#ifdef DEBUG_VERBOSE_GPU
-   if(xmpi_comm_rank(xmpi_world) == 0) then
-     call check_gpu_mem("make_gemm_nonlop begin")
-     call wrtout(std_out,sjoin(" npw    .......", itoa(npw)),    'COLL')
-     call wrtout(std_out,sjoin(" nprojs .......", itoa(nprojs)), 'COLL')
-   end if
-#endif
-
-   if(istwf_k <= 1) then
-     call alloc_on_gpu(gemm_nonlop_kpt_gpu(ikpt)%projs, INT(2,c_size_t)*npw*nprojs*dp)
-     ! TODO : gradients
-   else
-     call alloc_on_gpu(gemm_nonlop_kpt_gpu(ikpt)%projs_r, INT(1, c_size_t)*npw*nprojs*dp)
-     call alloc_on_gpu(gemm_nonlop_kpt_gpu(ikpt)%projs_i, INT(1, c_size_t)*npw*nprojs*dp)
-     ! TODO : gradients
-   end if
-
-#ifdef DEBUG_VERBOSE_GPU
-   if(xmpi_comm_rank(xmpi_world) == 0) then
-     call check_gpu_mem("make_gemm_nonlop end  ")
-   end if
-#endif
-
-   ! upload data to gpu memory
-   if(istwf_k <= 1) then
-     call copy_on_gpu(gemm_nonlop_kpt(ikpt)%projs, gemm_nonlop_kpt_gpu(ikpt)%projs, INT(2, c_size_t)*npw*nprojs*dp)
-     ! TODO : gradients
-   else
-     call copy_on_gpu(gemm_nonlop_kpt(ikpt)%projs_r, gemm_nonlop_kpt_gpu(ikpt)%projs_r, &
-       &                    INT(1, c_size_t)*npw*nprojs*dp)
-     call copy_on_gpu(gemm_nonlop_kpt(ikpt)%projs_i, gemm_nonlop_kpt_gpu(ikpt)%projs_i, &
-       &                    INT(1, c_size_t)*npw*nprojs*dp)
-   end if
-
- end subroutine make_gemm_nonlop_gpu
- !!***
-
 !!****f* m_gemm_nonlop_gpu/gemm_nonlop_gpu
 !! NAME
 !! gemm_nonlop_gpu
@@ -369,49 +143,50 @@ module m_gemm_nonlop_gpu
 !!
 !! SOURCE
  subroutine gemm_nonlop_gpu(atindx1,choice,cpopt,cprjin,dimenl1,dimenl2,dimekbq,dimffnlin,dimffnlout,&
-&                        enl,indlmn,istwf_k,&
-&                        lambda,lmnmax,matblk,&
-&                        mpi_enreg,natom,nattyp,ndat,nkpgin,nkpgout,&
-&                        nnlout,npwin,npwout,nspinor,nspinortot,ntypat,paw_opt,&
-&                        sij,svectout,&
-&                        useylm,vectin,vectout,&
-&                        vectproj,gpu_option)
+&                 enl,ffnlin,ffnlout,indlmn,istwf_k,&
+&                 lambda,lmnmax,matblk,&
+&                 mpi_enreg,natom,nattyp,ndat,nkpgin,nkpgout,&
+&                 nnlout,npwin,npwout,nspinor,nspinortot,ntypat,paw_opt,&
+&                 ph3din,ph3dout,sij,svectout,&
+&                 ucvol,useylm,vectin,vectout,select_k,&
+&                 gpu_option,vectproj)
 
   !Arguments ------------------------------------
   !scalars
   integer,intent(in) :: choice,cpopt,dimenl1,dimenl2,dimekbq,dimffnlin,dimffnlout
   integer,intent(in) :: istwf_k,lmnmax,matblk,natom,ndat,nkpgin
   integer,intent(in) :: nkpgout,nnlout,npwin,npwout,nspinor,nspinortot,ntypat
-  integer,intent(in) :: paw_opt,useylm
-  integer,optional,intent(in)      :: gpu_option
-  real(dp), target, intent(in)     :: lambda(ndat)
-  type(pawcprj_type),intent(inout) :: cprjin(natom,nspinor*((cpopt+5)/5)*ndat)
-  type(MPI_type),   intent(in)     :: mpi_enreg
-
+  integer,intent(in) :: paw_opt,useylm,select_k
+  integer,intent(in) :: gpu_option
+  real(dp),intent(in) :: ucvol
+  real(dp),target, intent(in)     :: lambda(ndat)
+  type(MPI_type),intent(in) :: mpi_enreg
   !arrays
-  integer,  target, intent(in)     :: atindx1(natom)
-  integer,  target, intent(in)     :: indlmn(6,lmnmax,ntypat)
-  integer,          intent(in)     :: nattyp(ntypat)
-  real(dp), target, intent(in)     :: enl(dimenl1,dimenl2,nspinortot**2,dimekbq)
-  real(dp), target, intent(in)     :: sij(dimenl1,ntypat*((paw_opt+1)/3))
-  real(dp), target, intent(inout)  ::  vectin (2,npwin*nspinor*ndat)
-  real(dp), target, intent(out)    :: svectout(2,npwout*nspinor*(paw_opt/3)*ndat)
-  real(dp), target, intent(inout)  ::  vectout(2,npwout*nspinor*ndat) !vz_i
-  real(dp), target, intent(inout), ABI_CONTIGUOUS optional :: vectproj(:,:,:)
+  integer,intent(in),target :: atindx1(natom),indlmn(6,lmnmax,ntypat)
+  integer,intent(in),target :: nattyp(ntypat)
+  real(dp),intent(in),target :: enl(dimenl1,dimenl2,nspinortot**2,dimekbq)
+  real(dp),intent(in),target :: ffnlin(npwin,dimffnlin,lmnmax,ntypat)
+  real(dp),intent(in),target :: ffnlout(npwout,dimffnlout,lmnmax,ntypat)
+  real(dp),intent(in),target :: sij(dimenl1,ntypat*((paw_opt+1)/3))
+  real(dp),intent(inout),target :: ph3din(2,npwin,matblk),ph3dout(2,npwout,matblk)
+  real(dp),intent(inout),target :: vectin(2,npwin*nspinor*ndat)
+  real(dp),intent(out),target :: svectout(:,:)
+  real(dp),intent(inout),target :: vectout(:,:)
+  real(dp),intent(inout),optional, ABI_CONTIGUOUS target :: vectproj(:,:,:)
+  type(pawcprj_type),intent(inout) :: cprjin(natom,nspinor*((cpopt+5)/5)*ndat)
 
   ! locals
-  integer :: idat, nprojs, shift, iatom, nlmn, ierr, ibeg, iend
+  integer :: idat, nprojs, shift, iatom, nlmn, ierr, ibeg, iend, ikin, ikout
   integer :: cplex, cplex_enl, cplex_fac
   integer :: iatm, ndgxdt, ndgxdtfac, nd2gxdt, nd2gxdtfac, optder, itypat, ilmn
-  integer :: cplex_dgxdt(1), cplex_d2gxdt(1)
+  integer :: cplex_dgxdt(9), cplex_d2gxdt(18)
+  logical :: local_vectproj
   real(dp) :: dgxdt_dum_in(1,1,1,1,1), dgxdt_dum_out(1,1,1,1,1),dgxdt_dum_out2(1,1,1,1,1)
   real(dp) :: d2gxdt_dum_in(1,1,1,1,1), d2gxdt_dum_out(1,1,1,1,1),d2gxdt_dum_out2(1,1,1,1,1)
+  real(dp), allocatable, target :: sij_typ(:)
   integer :: npw_max
   integer :: nattyp_max
 
-  logical :: local_vectproj
-
-  real(dp), allocatable, target :: sij_typ(:)
 
   !type(c_ptr)                      :: projections_gpu,        s_projections_gpu,        vnl_projections_gpu
   real(dp), ABI_CONTIGUOUS pointer :: projections_cpu(:,:,:)
@@ -460,12 +235,48 @@ module m_gemm_nonlop_gpu
 
   npw_max = MAX(npwin, npwout)
 
-  cplex = 2; if (istwf_k>1) cplex=1
-  cplex_enl = 1; if (paw_opt>0) cplex_enl=2*dimenl1/(lmnmax*(lmnmax+1)) ! is enl complex?
-  cplex_fac = max(cplex,dimekbq)
+  ikin=1; ikout=1;
+  select case (select_k)
+  case (K_H_K)
+    ikin=1; ikout=1;
+  case (K_H_KPRIME)
+    ikin=2; ikout=1;
+  case (KPRIME_H_K)
+    ikin=1; ikout=2;
+  case (KPRIME_H_KPRIME)
+    ikin=2; ikout=2;
+  end select
+  cplex=2;if (istwf_k>1) cplex=1
+  cplex_enl=1;if (paw_opt>0) cplex_enl=2*dimenl1/(lmnmax*(lmnmax+1)) ! is enl complex?
+  cplex_fac=max(cplex,dimekbq)
   if ((nspinortot==2.or.cplex_enl==2).and.paw_opt>0.and.choice/=7) cplex_fac=2 ! is vnl_projections complex?
+  ndgxdt=0; nd2gxdt=0
 
-  nprojs = gemm_nonlop_kpt_gpu(gemm_nonlop_ikpt_this_proc_being_treated)%nprojs
+  ! Compute projectors if need be
+  ! FIXME Would be nice to rely on opernl(ab)_gemm instead but some refacto is needed
+  nprojs=0
+  do itypat=1,ntypat
+    nprojs = nprojs + count(indlmn(3,:,itypat)>0)*nattyp(itypat)
+  end do
+
+  call refresh_projectors(npwin,istwf_k,nprojs,ndgxdt,nd2gxdt,(ikin==2),&
+  &                       gpu_option)
+  if(gemm_nonlop_kpt(ikin)%ikpt/=gemm_nonlop_ikpt_this_proc_being_treated) then
+    call prep_projectors(npwin,lmnmax,ntypat,indlmn,nattyp,istwf_k,&
+    &                    ucvol,ffnlin,ph3din,dimffnlin,matblk,&
+    &                    nprojs,(ikin==2),gpu_option,0)
+    gemm_nonlop_kpt(ikin)%ikpt=gemm_nonlop_ikpt_this_proc_being_treated
+  end if
+  if(ikin/=ikout .and. choice>0) then
+    call refresh_projectors(npwout,istwf_k,nprojs,ndgxdt,nd2gxdt,(ikout==2),&
+    &                       gpu_option)
+    if(gemm_nonlop_kpt(ikout)%ikpt/=gemm_nonlop_ikpt_this_proc_being_treated) then
+      call prep_projectors(npwout,lmnmax,ntypat,indlmn,nattyp,istwf_k,&
+      &                    ucvol,ffnlout,ph3dout,dimffnlout,matblk,&
+      &                    nprojs,(ikout==2),gpu_option,0)
+      gemm_nonlop_kpt(ikout)%ikpt=gemm_nonlop_ikpt_this_proc_being_treated
+    end if
+  end if
 
   ! These will store the non-local factors for vectin, svectout and vectout respectively
   call gpu_memset(gemm_nonlop_gpu_data%    projections_gpu, izero, INT(cplex,     c_size_t) * nprojs * nspinor*ndat * dp)
@@ -587,7 +398,7 @@ module m_gemm_nonlop_gpu
       call abi_gpu_xgemm(cplex, 'C', 'N', &
         &            nprojs, ndat*nspinor, npwin, &                                                ! M,N,K
         &            cone, &                                                                       ! alpha
-        &            gemm_nonlop_kpt_gpu(gemm_nonlop_ikpt_this_proc_being_treated)%projs, npwin, & ! A, LDA
+        &            gemm_nonlop_kpt_gpu(ikin)%projs, npwin, & ! A, LDA
         &            vectin_ptr, npwin, &                                                          ! B, LDB
         &            czero, &                                                                      ! beta
         &            gemm_nonlop_gpu_data%projections_gpu, nprojs)                                 ! C, LDC
@@ -613,7 +424,7 @@ module m_gemm_nonlop_gpu
       call abi_gpu_xgemm(cplex, 'T', 'N', &
         &            nprojs, ndat*nspinor, npwin, &                                                  ! M,N,K
         &            cone, &                                                                         ! alpha
-        &            gemm_nonlop_kpt_gpu(gemm_nonlop_ikpt_this_proc_being_treated)%projs_r, npwin, & ! A, LDA
+        &            gemm_nonlop_kpt_gpu(ikin)%projs_r, npwin, & ! A, LDA
         &            temp_realvec_gpu, npwin, &                                                      ! B, LDB
         &            czero, &                                                                        ! beta
         &            gemm_nonlop_gpu_data%projections_gpu, nprojs)                                   ! C, LDC
@@ -630,7 +441,7 @@ module m_gemm_nonlop_gpu
       call abi_gpu_xgemm(cplex, 'T', 'N', &
         &            nprojs, ndat*nspinor, npwin, &
         &            cone, &
-        &            gemm_nonlop_kpt_gpu(gemm_nonlop_ikpt_this_proc_being_treated)%projs_i, npwin, &
+        &            gemm_nonlop_kpt_gpu(ikin)%projs_i, npwin, &
         &            temp_realvec_gpu, npwin, &
         &            cone, &
         &            gemm_nonlop_gpu_data%projections_gpu, nprojs)
@@ -663,7 +474,6 @@ module m_gemm_nonlop_gpu
       end if
 
     end if ! cpopt >= 0
-
   end if ! cpopt >= 2
 
   if(choice > 0) then
@@ -745,13 +555,18 @@ module m_gemm_nonlop_gpu
           call copy_from_gpu(  projections_cpu, gemm_nonlop_gpu_data%projections_gpu, &
             &              INT(cplex,     c_size_t) * nprojs * nspinor*ndat * dp)
 
-          call opernlc_ylm_allwf_cpu(atindx1, cplex, cplex_enl, cplex_fac, &
+          call opernlc_ylm_allwf(atindx1, cplex, cplex_dgxdt, cplex_d2gxdt,&
+            &                  cplex_enl, cplex_fac, &
+            &                  dgxdt_dum_in, dgxdt_dum_out, dgxdt_dum_out2, &
+            &                  d2gxdt_dum_in, d2gxdt_dum_out, d2gxdt_dum_out2, &
             &                  dimenl1, dimenl2, dimekbq, enl, &
-            &                  projections_cpu(:, ibeg:iend, 1:nspinor*ndat), &
-            &                  vnl_projections_cpu(:, ibeg:iend, 1:nspinor*ndat), &
-            &                  s_projections_cpu(:, ibeg:iend, 1:nspinor*ndat), &
-            &                  iatm, indlmn(:,:,itypat), itypat, ndat, lambda, mpi_enreg, natom, &
-            &                  nattyp(itypat), nlmn, nspinor, nspinortot, paw_opt, sij_typ)
+            &                  projections_cpu, &
+            &                  vnl_projections_cpu, &
+            &                  s_projections_cpu, &
+            &                  iatm, indlmn(:,:,itypat), itypat, lambda, mpi_enreg, natom, &
+            &                  ndgxdt,ndgxdtfac,nd2gxdt,nd2gxdtfac,&
+            &                  nattyp(itypat), nlmn, nspinor, nspinortot, optder, paw_opt, sij_typ, &
+            &                  ndat, ibeg-1, iend, nprojs, 1, ABI_GPU_DISABLED)
 
           call copy_on_gpu(  s_projections_cpu, gemm_nonlop_gpu_data%  s_projections_gpu, &
             &              INT(cplex,     c_size_t) * nprojs * nspinor*ndat * dp)
@@ -784,7 +599,7 @@ module m_gemm_nonlop_gpu
         call abi_gpu_xgemm(cplex, 'N', 'N', &
           &            npwout, ndat*nspinor, nprojs, &                                                ! M,N,K
           &            cone, &                                                                        ! alpha
-          &            gemm_nonlop_kpt_gpu(gemm_nonlop_ikpt_this_proc_being_treated)%projs, npwout, & ! A, LDA
+          &            gemm_nonlop_kpt_gpu(ikout)%projs, npwout, & ! A, LDA
           &            gemm_nonlop_gpu_data%s_projections_gpu, nprojs, &                              ! B, LDB
           &            czero, &                                                                       ! beta
           &            svectout_ptr, npwout)                                                          ! C, LDC
@@ -798,7 +613,7 @@ module m_gemm_nonlop_gpu
         call abi_gpu_xgemm(cplex, 'N', 'N', &
           &            npwout, ndat*nspinor, nprojs, &                                                ! M,N,K
           &            cone, &                                                                        ! alpha
-          &            gemm_nonlop_kpt_gpu(gemm_nonlop_ikpt_this_proc_being_treated)%projs_r, npwout, & ! A, LDA
+          &            gemm_nonlop_kpt_gpu(ikout)%projs_r, npwout, & ! A, LDA
           &            gemm_nonlop_gpu_data%s_projections_gpu, nprojs, &                              ! B, LDB
           &            czero, &                                                                       ! beta
           &            temp_realvec_gpu, npwout)                                                      ! C, LDC
@@ -808,7 +623,7 @@ module m_gemm_nonlop_gpu
         call abi_gpu_xgemm(cplex, 'N', 'N', &
           &            npwout, ndat*nspinor, nprojs, &                                                ! M,N,K
           &            cone, &                                                                        ! alpha
-          &            gemm_nonlop_kpt_gpu(gemm_nonlop_ikpt_this_proc_being_treated)%projs_i, npwout,& ! A, LDA
+          &            gemm_nonlop_kpt_gpu(ikout)%projs_i, npwout,& ! A, LDA
           &            gemm_nonlop_gpu_data%s_projections_gpu, nprojs, &                              ! B, LDB
           &            czero, &                                                                       ! beta
           &            temp_realvec_gpu, npwout)                                                      ! C, LDC
@@ -849,7 +664,7 @@ module m_gemm_nonlop_gpu
         call abi_gpu_xgemm(cplex, 'N', 'N', &
           &            npwout, ndat*nspinor, nprojs, &                                                ! M,N,K
           &            cone, &                                                                        ! alpha
-          &            gemm_nonlop_kpt_gpu(gemm_nonlop_ikpt_this_proc_being_treated)%projs, npwout, & ! A, LDA
+          &            gemm_nonlop_kpt_gpu(ikout)%projs, npwout, & ! A, LDA
           &            gemm_nonlop_gpu_data%vnl_projections_gpu, nprojs, &                            ! B, LDB
           &            czero, &                                                                       ! beta
           &            vectout_ptr, npwout)                                                           ! C, LDC
@@ -863,7 +678,7 @@ module m_gemm_nonlop_gpu
         call abi_gpu_xgemm(cplex, 'N', 'N', &
           &            npwout, ndat*nspinor, nprojs, &                                               ! M,N,K
           &            cone, &                                                                       ! alpha
-          &            gemm_nonlop_kpt_gpu(gemm_nonlop_ikpt_this_proc_being_treated)%projs_r, npwout, &  ! A, LDA
+          &            gemm_nonlop_kpt_gpu(ikout)%projs_r, npwout, &  ! A, LDA
           &            gemm_nonlop_gpu_data%vnl_projections_gpu, nprojs, &                           ! B, LDB
           &            czero, &                                                                      ! beta
           &            temp_realvec_gpu, npwout)                                                     ! C, LDC
@@ -873,7 +688,7 @@ module m_gemm_nonlop_gpu
         call abi_gpu_xgemm(cplex, 'N', 'N', &
           &            npwout, ndat*nspinor, nprojs, &                                               ! M,N,K
           &            cone, &                                                                       ! alpha
-          &            gemm_nonlop_kpt_gpu(gemm_nonlop_ikpt_this_proc_being_treated)%projs_i, npwout, & ! A, LDA
+          &            gemm_nonlop_kpt_gpu(ikout)%projs_i, npwout, & ! A, LDA
           &            gemm_nonlop_gpu_data%vnl_projections_gpu, nprojs, &                           ! B, LDB
           &            czero, &                                                                      ! beta
           &            temp_realvec_gpu, npwout)                                                     ! C, LDC
@@ -899,8 +714,12 @@ module m_gemm_nonlop_gpu
   ! this may not be the best location to have this sync
   call gpu_device_synchronize()
 
-  if (gpu_allocated(temp_realvec_gpu)) then
-    ABI_FREE_CUDA(temp_realvec_gpu)
+  if (cplex /= 2) then
+    if ( (cpopt < 2) .or. &
+      &  (paw_opt == 3 .or. paw_opt == 4) .or. &
+      &  (paw_opt == 0 .or. paw_opt == 1 .or. paw_opt == 4)) then
+      ABI_FREE_CUDA(temp_realvec_gpu)
+    end if
   end if
 
   ABI_FREE_CUDA( enl_gpu )
@@ -924,59 +743,22 @@ module m_gemm_nonlop_gpu
 !!!!!! stubs for compiling with CUDA disabled.
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
- subroutine init_gemm_nonlop_gpu(nkpt)
-  integer,intent(in) :: nkpt
-
-  ABI_UNUSED((/nkpt/))
-  ABI_BUG("Unhandled configuration for CUDA immplementation")
- end subroutine init_gemm_nonlop_gpu
-
- subroutine destroy_gemm_nonlop_gpu(nkpt)
-  integer,intent(in) :: nkpt
-
-  ABI_UNUSED((/nkpt/))
-  ABI_BUG("Unhandled configuration for CUDA immplementation")
- end subroutine destroy_gemm_nonlop_gpu
-
- subroutine make_gemm_nonlop_gpu(ikpt,npw,lmnmax,ntypat,indlmn,nattyp,istwf_k,ucvol,ffnl_k, &
-&                            ph3d_k,kpt_k,kg_k,kpg_k, &
-&                            compute_grad_strain,compute_grad_atom) ! Optional parameters
-
-  integer, intent(in) :: ikpt
-  integer, intent(in) :: npw, lmnmax,ntypat
-  integer, intent(in) :: indlmn(:,:,:), kg_k(:,:)
-  integer, intent(in) :: nattyp(ntypat)
-  integer, intent(in) :: istwf_k
-  logical, intent(in), optional :: compute_grad_strain,compute_grad_atom
-  real(dp), intent(in) :: ucvol
-  real(dp), intent(in) :: ffnl_k(:,:,:,:)
-  real(dp), intent(in) :: ph3d_k(:,:,:)
-  real(dp), intent(in) :: kpt_k(:)
-  real(dp), intent(in), target :: kpg_k(:,:)
-
-  ABI_UNUSED((/ikpt,npw,lmnmax,ntypat,indlmn,kg_k,nattyp,istwf_k/))
-  ABI_UNUSED((/ucvol,ffnl_k,ph3d_k,kpt_k,kpg_k/))
-  ABI_UNUSED((/compute_grad_strain,compute_grad_atom/))
-  ABI_BUG("Unhandled configuration for CUDA immplementation")
-
- end subroutine make_gemm_nonlop_gpu
-
  subroutine gemm_nonlop_gpu(atindx1,choice,cpopt,cprjin,dimenl1,dimenl2,dimekbq,dimffnlin,dimffnlout,&
 &                 enl,enlout,ffnlin,ffnlout,gmet,gprimd,idir,indlmn,istwf_k,&
 &                 kgin,kgout,kpgin,kpgout,kptin,kptout,lambda,lmnmax,matblk,mgfft,&
 &                 mpi_enreg,mpsang,mpssoang,natom,nattyp,ndat,ngfft,nkpgin,nkpgout,nloalg,&
 &                 nnlout,npwin,npwout,nspinor,nspinortot,ntypat,only_SO,paw_opt,phkxredin,&
 &                 phkxredout,ph1d,ph3din,ph3dout,signs,sij,svectout,&
-&                 tim_nonlop,ucvol,useylm,vectin,vectout,&
-&                 vectproj,gpu_option)
+&                 tim_nonlop,ucvol,useylm,vectin,vectout,select_k,&
+&                 gpu_option,vectproj)
 
   !Arguments ------------------------------------
   !scalars
   integer,intent(in) :: choice,cpopt,dimenl1,dimenl2,dimekbq,dimffnlin,dimffnlout,idir
   integer,intent(in) :: istwf_k,lmnmax,matblk,mgfft,mpsang,mpssoang,natom,ndat,nkpgin
   integer,intent(in) :: nkpgout,nnlout,npwin,npwout,nspinor,nspinortot,ntypat,only_SO
-  integer,intent(in) :: paw_opt,signs,tim_nonlop,useylm
-  integer,optional,intent(in) :: gpu_option
+  integer,intent(in) :: paw_opt,signs,tim_nonlop,useylm,select_k
+  integer,intent(in) :: gpu_option
   real(dp),intent(in) :: lambda(ndat),ucvol
   type(MPI_type),intent(in) :: mpi_enreg
   !arrays
@@ -998,7 +780,7 @@ module m_gemm_nonlop_gpu
   type(pawcprj_type),intent(inout) :: cprjin(natom,nspinor*((cpopt+5)/5)*ndat)
 
   ABI_UNUSED((/choice,cpopt,dimenl1,dimenl2,dimekbq,dimffnlin,dimffnlout,idir/))
-  ABI_UNUSED((/istwf_k,lmnmax,matblk,mgfft,mpsang,mpssoang,natom,ndat,nkpgin/))
+  ABI_UNUSED((/istwf_k,lmnmax,matblk,mgfft,mpsang,mpssoang,natom,ndat,nkpgin,select_k/))
   ABI_UNUSED((/nkpgout,nnlout,npwin,npwout,nspinor,nspinortot,ntypat,only_SO/))
   ABI_UNUSED((/paw_opt,signs,tim_nonlop,useylm,gpu_option/))
   ABI_UNUSED((/atindx1,indlmn,kgin,kgout,nattyp,ngfft,nloalg/))

@@ -1,6 +1,6 @@
 # -*- Python -*-
 #
-# Copyright (C) 2005-2024 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2025 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -22,12 +22,15 @@ sources = [
  "m_abi_linalg.F90",
  "m_array.F90",
  "m_bessel.F90",
+ "m_bessel2.F90",
+ "m_brentq.F90",
  "m_cplxtools.F90",
  "m_bspline.F90",
  "m_elpa.F90",
  "m_gaussian_quadrature.F90",
  "m_hide_blas.F90",
  "m_hide_lapack.F90",
+ "m_hybrd.F90",
  "m_lebedev.F90",
  "m_levenberg_marquardt.F90",
  "m_linalg_interfaces.F90",
@@ -36,6 +39,7 @@ sources = [
  "m_random_xoroshiro128plus.F90",
  "m_random_zbq.F90",
  "m_slk.F90",
+ "m_slsqp.F90",
  "m_sort.F90",
  "m_splines.F90",
 ]

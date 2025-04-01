@@ -8,16 +8,16 @@
  ntypat  1
  znucl 13.0
  pp_dirpath "$ABI_PSPDIR"                 # This is the path to the directory were pseudopotentials for tests are stored
- pseudos "Pseudodojo_nc_sr_04_pw_standard_psp8/Al.psp8"  # Name and location of the pseudopotential
+ pseudos "Psdj_nc_sr_04_pw_std_psp8/Al.psp8"  # Name and location of the pseudopotential
 
 #Definition of the atoms
  natom  1
- typat  1  
+ typat  1
  xred  0.0 0.0 0.0
 
 #Numerical parameters of the calculation : planewave basis set and k point grid
  ecut 10
- ngkpt 8 8 8 
+ ngkpt 8 8 8
  nshiftk 4
  shiftk 0.5 0.5 0.5
         0.5 0.0 0.0
@@ -31,7 +31,7 @@
  nband 5
 
 #Needed for next calculation
- prtden 1   
+ prtden 1
 
 ##############################################################
 # This section is used only for regression testing of ABINIT #
@@ -51,7 +51,7 @@
 #%% [extra_info]
 #%% authors = X. Gonze
 #%% keywords =
-#%% description = FCC Al linear response with k point parallelism 
+#%% description = FCC Al linear response with k point parallelism
 #%%<END TEST_INFO>
 
 

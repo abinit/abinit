@@ -7,7 +7,7 @@
 !!  Minimal Energy Path (MEP) search implementation.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2012-2024 ABINIT group (MT)
+!! Copyright (C) 2012-2025 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1166,7 +1166,7 @@ function mep_img_dotp_red(rmet,vect1,vect2)
  real(dp),intent(in) :: vect1(:,:),vect2(:,:)
 !Local variables-------------------------------
 !scalars
- integer :: iatom,ii,jj,size1,size2
+ integer :: iatom,size1,size2
 
 !************************************************************************
 
@@ -1176,13 +1176,9 @@ function mep_img_dotp_red(rmet,vect1,vect2)
  end if
 
  mep_img_dotp_red=zero
- do iatom=1,size2
-   do ii=1,3
-     do jj=1,3
-       mep_img_dotp_red=mep_img_dotp_red+vect1(ii,iatom)*vect2(jj,iatom)*rmet(ii,jj)
-     end do
-   end do
- end do
+do iatom = 1, size2
+  mep_img_dotp_red = mep_img_dotp_red + dot_product(vect1(:, iatom), matmul(rmet, vect2(:, iatom)))
+end do
 
 end function mep_img_dotp_red
 !!***

@@ -13,10 +13,6 @@ try:
 except ImportError:
     from io import StringIO
 
-#try:
-#    import tests
-#except ImportError:
-# Add the directory [...]/abinit/tests to $PYTHONPATH
 pack_dir, tail = os.path.split(os.path.abspath(__file__))
 pack_dir, tail = os.path.split(pack_dir)
 sys.path.insert(0, pack_dir)
@@ -24,6 +20,8 @@ sys.path.insert(0, pack_dir)
 import tests
 from tests import abitests
 abenv = tests.abenv
+
+from tests.pymods.termcolor import cprint
 
 __version__ = "0.1"
 __author__ = "Matteo Giantomassi"
@@ -58,6 +56,7 @@ def check_authors(suite):
 
     return set(second_names)
 
+
 def get_allowed_cpp_vars():
     """
     Inspect the libpaw header file, the autoconf macros and config.ac
@@ -67,11 +66,11 @@ def get_allowed_cpp_vars():
     Based on ~abinit/abichecks/scripts/check-cpp-options.
     """
     import re
-    re_m4file = re.compile("\.m4$")
-    re_hdrfile = re.compile("\.h$")
+    re_m4file = re.compile(r"\.m4$")
+    re_hdrfile = re.compile(r"\.h$")
     re_acdef = re.compile("AC_DEFINE\\(")
     re_cppdef = re.compile("^([ ]?)+#([ ]?)+define [0-9A-Z_]*")
-    
+
     abidir = os.path.abspath("../")
 
     # Extract CPP options from the libPAW header files
@@ -104,70 +103,70 @@ def get_allowed_cpp_vars():
 
     return cpp_buildsys.union(cpp_libpaw)
 
+
 def main():
     usage = "usage: %prog [suite_name] [options] [-h|--help] for help)"
     version = "%prog "+ str(__version__)
     parser = OptionParser(usage=usage, version=version)
 
-    parser.add_option("-v", "--verbose", dest="verbose", action="store_true", default=False,
-                      help="verbose mode")
+    parser.add_option("-v", "--verbose", dest="verbose", action="store_true", default=False, help="verbose mode")
 
     options, args = parser.parse_args()
 
     # Get the full database.
     # TODO should use with_disabled=True
     full_database = abitests.build_database(with_disabled=False)
-
     retcode = 0
 
-    print("Stale or lost reference files...  ", end="")
+    print("Checking for stale or lost reference files...  ", end="")
     err = full_database.find_stale_or_lost_refs()
 
     if err:
         retcode += len(err)
-        print("FAILED")
+        cprint("FAILED", color="red")
         sys.stderr.write(err)
     else:
-        print("OK")
+        cprint("OK", color="green")
 
-    print("Stale or lost inputs...  ", end="")
+    print("Checking for stale or lost inputs...  ", end="")
     err = full_database.find_stale_or_lost_inputs()
 
     if err:
         retcode += len(err)
-        print("FAILED")
+        cprint("FAILED", color="red")
         sys.stderr.write(err)
     else:
-        print("OK")
+        cprint("OK", color="green")
 
     unknowns, wrong = full_database.find_unknown_wrong_keywords()
 
-    print("Unknown keywords...  ", end="")
+    print("Checking for undocumented keywords...  ", end="")
     if unknowns:
         retcode += len(unknowns)
-        print("FAILED")
-        print("The following keywords are not documented:\n\t%s" % unknowns)
-        print("ACTION: Add the corresponding documentation to the KNOWN_KEYWORDS dictionary defined in tests/__init__.py")
+        cprint("FAILED", color="red")
+        print("The following keywords are not documented:\n")
+        pprint(unknowns)
+        print("ACTION: Please add the corresponding documentation to the KNOWN_KEYWORDS dictionary in tests/__init__.py")
     else:
-        print("OK")
+        cprint("OK", color="green")
 
-    print("Wrong keywords ...  ", end="")
+    print("Checking for wrong keywords ...  ", end="")
     if wrong:
         retcode += len(wrong)
-        print("FAILED")
+        cprint("FAILED", color="red")
         print("The following keywords contain blank spaces:\n\t%s" % wrong)
         print("ACTION: Replace blank spaces with underscores")
     else:
-        print("OK")
+        cprint("OK", color="green")
 
     print("Testing whether important TEST_INFO entries are present...  ", end="")
-    errstr = full_database.check_testinfo_options()
-    if errstr:
+    err_str = full_database.check_testinfo_options()
+    if err_str:
         retcode += 1
-        print("FAILED")
-        print(errstr)
+        cprint("FAILED", color="red")
+        print(err_str)
     else:
-        print("OK")
+        cprint("OK", color="green")
 
     # Check authors.
     #print("Testing whether authors are defined...  ", end="")
@@ -181,7 +180,7 @@ def main():
     #    pprint(second_names)
     #else:
     #    print("OK")
-    
+
     # Add test on CPP options
     allowed_cpp_vars = get_allowed_cpp_vars()
     #print(allowed_cpp_vars)
@@ -193,7 +192,6 @@ def main():
             if diff:
                 print("in test: ", test)
                 print("diff", diff)
-
 
     return retcode
 

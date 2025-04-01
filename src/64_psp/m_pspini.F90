@@ -6,7 +6,7 @@
 !!  Initialize pseudopotential datastructures from files.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, MT, FrD, AF, DRH, YP)
+!!  Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, MT, FrD, AF, DRH, YP)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -77,7 +77,7 @@ contains
 !! Also compute ecore=[Sum(i) zion(i)] * [Sum(i) epsatm(i)] by calling pspcor.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, MT)
+!! Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -144,7 +144,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
  integer,save :: mpssoang_old=0,mqgridff_old=0,mqgridvl_old=0,optnlxccc_old=-1
  integer,save :: paw_size_old=-1,pawxcdev_old=-1,positron_old=-2,usekden_old=-1,usepaw_old=-1
  integer,save :: usexcnhat_old=-1,usewvl_old=-1,useylm_old=-1
- integer :: comm_mpi_,ierr,ii,ilang,ilmn,ilmn0,iproj,ipsp,ipspalch
+ integer :: comm_mpi_,ierr,ii,ilang,ilmn,ilmn0,iln,iproj,ipsp,ipspalch
  integer :: ispin,itypalch,itypat,mtypalch,npsp,npspalch,ntypalch
  integer :: ntypat,ntyppure,paw_size
  logical :: has_coretau,has_kij,has_tproj,has_tvale,has_nabla,has_shapefncg,has_vminushalf,has_wvl
@@ -511,7 +511,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
 !      Combine the different non-local projectors : for the scalar part then
 !      the spin-orbit part, treat the different angular momenta
 !      WARNING : this coding does not work for PAW
-       ilmn=0
+       ilmn=0; iln=0
        psps%indlmn(:,:,itypat)=0
        do ispin=1,2
          do ilang=0,3
@@ -524,21 +524,31 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
                    if(indlmn_alch(6,ilmn0,ipspalch)==ispin)then
                      if(indlmn_alch(1,ilmn0,ipspalch)==ilang)then
                        ilmn=ilmn+1         ! increment the counter
-                       iproj=iproj+1       ! increment the counter, this does not work for PAW
+                       if (indlmn_alch(2,ilmn0,ipspalch)==-ilang*psps%useylm)then
+                         iln = iln+1
+                         iproj = iproj+1
+                       end if
                        if(ilmn>psps%lmnmax)then
                          ABI_BUG('Problem with the alchemical pseudopotentials : ilmn>lmnmax.')
                        end if
                        psps%indlmn(1,ilmn,itypat)=ilang
                        psps%indlmn(2,ilmn,itypat)=indlmn_alch(2,ilmn0,ipspalch)
-                       psps%indlmn(3,ilmn,itypat)=iproj                       ! This does not work for PAW
-                       psps%indlmn(4,ilmn,itypat)=ilmn                        ! This does not work for PAW
-                       psps%indlmn(5,ilmn,itypat)=ilmn
+                       psps%indlmn(3,ilmn,itypat)=iproj
+                       psps%indlmn(4,ilmn,itypat)=ilmn
+                       psps%indlmn(5,ilmn,itypat)=iln
                        psps%indlmn(6,ilmn,itypat)=ispin
                        ! The two lines below do not work for PAW
-                       if (psps%usepaw==0) then
-                         psps%ekb(ilmn,itypat)=psps%mixalch(ipspalch,itypalch) *ekb_alch(ilmn0,ipspalch)
-                       end if
-                       psps%ffspl(:,:,ilmn,itypat)=ffspl_alch(:,:,ilmn0,ipspalch)
+                         if (psps%usepaw==0) then
+                           psps%ekb(iln,itypat)=psps%mixalch(ipspalch,itypalch) *ekb_alch(indlmn_alch(5,ilmn0,ipspalch),ipspalch)
+                         end if
+                         psps%ffspl(:,:,iln,itypat)=ffspl_alch(:,:,indlmn_alch(5,ilmn0,ipspalch),ipspalch)
+
+                       psps%indlmn(1,ilmn,itypat)=ilang
+                       psps%indlmn(2,ilmn,itypat)=indlmn_alch(2,ilmn0,ipspalch)
+                       psps%indlmn(3,ilmn,itypat)=iproj                       ! This does not work for PAW
+                       psps%indlmn(4,ilmn,itypat)=indlmn_alch(4,ilmn0,ipspalch)  ! This does not work for PAW
+                       psps%indlmn(5,ilmn,itypat)=iln
+                       psps%indlmn(6,ilmn,itypat)=ispin
                      end if ! ilang is OK
                    end if ! ispin is OK
                  end if ! ilmn0 exist
@@ -578,10 +588,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
    ABI_FREE(vlspl)
    ABI_FREE(xccc1d)
    ABI_FREE(xcctau1d)
-
-   if (.not.psps%vlspl_recipSpace) then
-     ABI_FREE(dvlspl)
-   end if
+   ABI_FREE(dvlspl)
 
  end if !  End condition of new computation needed
 
@@ -834,9 +841,9 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
 !scalars
  integer :: ii,il,ilmn,iln,iln0,lloc,lmax,me,mmax
  integer :: paral_mode,pspcod,pspdat,pspxc,useupf,usexml,xmlpaw,unt
- real(dp) :: maxrad,qchrg,r2well,zion,znucl
- !logical,parameter :: nc_debug = .False.
- logical,parameter :: nc_debug = .True.
+ real(dp) :: maxrad,qchrg,r2well,zion,znucl,el_temp
+ logical,parameter :: nc_debug = .False.
+ !logical,parameter :: nc_debug = .True.
  character(len=500) :: msg,errmsg
  character(len=fnlen) :: title, filnam
  type(pawpsp_header_type):: pawpsp_header
@@ -870,6 +877,8 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
 
  nctab%has_tvale = .False.; nctab%has_tcore = .False.
  pspcod = -1
+!Get electronic temperature from dtset
+ el_temp=merge(dtset%tphysel,dtset%tsmear,dtset%tphysel>tol8.and.dtset%occopt/=3.and.dtset%occopt/=9)
 
  if (me==0) then
 !  Dimensions of form factors and Vloc q grids must be the same in Norm-Conserving case
@@ -1151,7 +1160,8 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
 &      lmax,psps%lnmax,mmax,psps%mqgrid_ff,psps%mqgrid_vl,&
 &      pawrad,pawtab,dtset%pawxcdev,psps%qgrid_ff,psps%qgrid_vl,&
 &      dtset%usewvl,dtset%usexcnhat_orig,vlspl,xcccrc,dtset%xclevel,&
-&      dtset%xc_denpos,zion,psps%znuclpsp(ipsp),xc_taupos=dtset%xc_taupos)
+&      dtset%xc_denpos,zion,psps%znuclpsp(ipsp),&
+&      xc_taupos=dtset%xc_taupos,el_temp=el_temp)
 
    else if (pspcod==8)then
 
@@ -1199,7 +1209,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
 &     dtset%pawxcdev,psps%qgrid_ff,psps%qgrid_vl,dtset%usewvl,&
 &     dtset%usexcnhat_orig,vlspl,xcccrc,&
 &     dtset%xclevel,dtset%xc_denpos,pspheads_tmp%zionpsp,psps%znuclpsp(ipsp),&
-&     xc_taupos=dtset%xc_taupos)
+&     xc_taupos=dtset%xc_taupos,el_temp=el_temp)
      call paw_setup_free(paw_setuploc)
    end if
 

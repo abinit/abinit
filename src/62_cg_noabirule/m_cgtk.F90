@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2024 ABINIT group (MG)
+!!  Copyright (C) 2008-2025 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,7 +29,7 @@ module m_cgtk
 
  use m_fstrings,  only : itoa, sjoin
  use defs_abitypes, only : MPI_type
- use m_symtk,     only : mati3inv
+ use m_matrix,    only : mati3inv
  use m_geometry,  only : getspinrot
  use m_crystal,   only : crystal_t
  use m_fftcore,   only : sphere
@@ -420,7 +420,6 @@ subroutine cgtk_change_gsphere(ndat, npw1, istwf1, kg1, cg1, npw2, istwf2, kg2, 
 !Local variables ------------------------------
 !scalars
  integer :: n1,n2,n3,n4,n5,n6,idat
-
 !************************************************************************
 
  n1 = work_ngfft(1); n2 = work_ngfft(2); n3 = work_ngfft(3)

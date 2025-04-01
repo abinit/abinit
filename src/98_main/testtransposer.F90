@@ -7,7 +7,7 @@
 !! It includes testing of complex and real numbers, and all2all and gatherv
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2024 ABINIT group (JB)
+!! Copyright (C) 1998-2025 ABINIT group (JB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -139,7 +139,7 @@ program testTransposer
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2024 ABINIT group (JB)
+!! Copyright (C) 1998-2025 ABINIT group (JB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -165,60 +165,60 @@ program testTransposer
 
     write(std_out,*) " Complex all2all"
     call xgTransposer_constructor(xgTransposer,xcgLinalg,xcgColsRows,1,&
-      STATE_LINALG,TRANS_ALL2ALL,xmpi_comm_null,xmpi_comm_null,ncpuCols,ncpuRows)
+      STATE_LINALG,TRANS_ALL2ALL,xmpi_comm_null,xmpi_comm_null,ncpuCols,ncpuRows,0)
     call backAndForth()
     call xgTransposer_free(xgTransposer)
     call printTimes()
 
     write(std_out,*) " Complex gatherv"
     call xgTransposer_constructor(xgTransposer,xcgLinalg,xcgColsRows,1,&
-      STATE_LINALG,TRANS_GATHER,xmpi_comm_null,xmpi_comm_null,ncpuCols,ncpuRows)
+      STATE_LINALG,TRANS_GATHER,xmpi_comm_null,xmpi_comm_null,ncpuCols,ncpuRows,0)
     call backAndForth()
     call xgTransposer_free(xgTransposer)
     call printTimes()
 
-    call xgBlock_map(xcgLinalg,cg,SPACE_CR,2*npw,nband,xmpi_world)
+    call xgBlock_map(xcgLinalg,cg,SPACE_CR,npw,nband,xmpi_world)
 
     write(std_out,*) " Real all2all"
     call xgTransposer_constructor(xgTransposer,xcgLinalg,xcgColsRows,1,&
-      STATE_LINALG,TRANS_ALL2ALL,xmpi_comm_null,xmpi_comm_null,ncpuCols,ncpuRows)
+      STATE_LINALG,TRANS_ALL2ALL,xmpi_comm_null,xmpi_comm_null,ncpuCols,ncpuRows,0)
     call backAndForth()
     call xgTransposer_free(xgTransposer)
     call printTimes()
 
     write(std_out,*) " Real gatherv"
     call xgTransposer_constructor(xgTransposer,xcgLinalg,xcgColsRows,1,&
-      STATE_LINALG,TRANS_GATHER,xmpi_comm_null,xmpi_comm_null,ncpuCols,ncpuRows)
+      STATE_LINALG,TRANS_GATHER,xmpi_comm_null,xmpi_comm_null,ncpuCols,ncpuRows,0)
     call backAndForth()
     call xgTransposer_free(xgTransposer)
     call printTimes()
 
     write(std_out,*) " Complex all2all (nspinor=2)"
     call xgTransposer_constructor(xgTransposer,xcgLinalg,xcgColsRows,2,&
-      STATE_LINALG,TRANS_ALL2ALL,xmpi_comm_null,xmpi_comm_null,ncpuCols,ncpuRows)
+      STATE_LINALG,TRANS_ALL2ALL,xmpi_comm_null,xmpi_comm_null,ncpuCols,ncpuRows,0)
     call backAndForth()
     call xgTransposer_free(xgTransposer)
     call printTimes()
 
     write(std_out,*) " Complex gatherv (nspinor=2)"
     call xgTransposer_constructor(xgTransposer,xcgLinalg,xcgColsRows,2,&
-      STATE_LINALG,TRANS_GATHER,xmpi_comm_null,xmpi_comm_null,ncpuCols,ncpuRows)
+      STATE_LINALG,TRANS_GATHER,xmpi_comm_null,xmpi_comm_null,ncpuCols,ncpuRows,0)
     call backAndForth()
     call xgTransposer_free(xgTransposer)
     call printTimes()
 
-    call xgBlock_map(xcgLinalg,cg,SPACE_CR,2*npw,nband,xmpi_world)
+    call xgBlock_map(xcgLinalg,cg,SPACE_CR,npw,nband,xmpi_world)
 
     write(std_out,*) " Real all2all (nspinor=2)"
     call xgTransposer_constructor(xgTransposer,xcgLinalg,xcgColsRows,2,&
-      STATE_LINALG,TRANS_ALL2ALL,xmpi_comm_null,xmpi_comm_null,ncpuCols,ncpuRows)
+      STATE_LINALG,TRANS_ALL2ALL,xmpi_comm_null,xmpi_comm_null,ncpuCols,ncpuRows,0)
     call backAndForth()
     call xgTransposer_free(xgTransposer)
     call printTimes()
 
     write(std_out,*) " Real gatherv (nspinor=2)"
     call xgTransposer_constructor(xgTransposer,xcgLinalg,xcgColsRows,2,&
-      STATE_LINALG,TRANS_GATHER,xmpi_comm_null,xmpi_comm_null,ncpuCols,ncpuRows)
+      STATE_LINALG,TRANS_GATHER,xmpi_comm_null,xmpi_comm_null,ncpuCols,ncpuRows,0)
     call backAndForth()
     call xgTransposer_free(xgTransposer)
     call printTimes()
@@ -236,7 +236,7 @@ program testTransposer
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2024 ABINIT group (JB)
+!! Copyright (C) 1998-2025 ABINIT group (JB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -272,7 +272,7 @@ program testTransposer
     write(std_out,*) "Transposer constructor : nspinor =",nspinor
 
     call xgTransposer_constructor(xgTransposer,xcgLinalg,xcgColsRows,nspinor,&
-      STATE_LINALG,TRANS_ALL2ALL,xmpi_comm_null,xmpi_comm_null,ncpuCols,ncpuRows)
+      STATE_LINALG,TRANS_ALL2ALL,xmpi_comm_null,xmpi_comm_null,ncpuCols,ncpuRows,0)
     call xgTransposer_copyConstructor(xgTransposerGh,xgTransposer,xghLinalg,xghColsRows,STATE_LINALG)
     call xgTransposer_copyConstructor(xgTransposerGhc,xgTransposer,xghcLinalg,xghcColsRows,STATE_LINALG)
 
@@ -307,7 +307,7 @@ program testTransposer
 
     write(std_out,*) "Compare"
     call xgBlock_saxpy(dotLinalg%self, -1.0d0, dotColsRows%self)
-    call xgBlock_reshape(dotLinalg%self, (/1,nband/))
+    call xgBlock_reshape(dotLinalg%self,1,nband)
     call xgBlock_colwiseNorm2(dotLinalg%self,dotColsRows%self,max_val=maxdiff)
     write(std_out,"(a,f20.4)") " Difference: ",sqrt(maxdiff)
 
@@ -334,7 +334,7 @@ program testTransposer
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2024 ABINIT group (JB)
+!! Copyright (C) 1998-2025 ABINIT group (JB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -379,7 +379,7 @@ program testTransposer
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2024 ABINIT group (JB)
+!! Copyright (C) 1998-2025 ABINIT group (JB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -431,7 +431,7 @@ program testTransposer
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2024 ABINIT group (JB)
+!! Copyright (C) 1998-2025 ABINIT group (JB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

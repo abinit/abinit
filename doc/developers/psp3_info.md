@@ -28,7 +28,7 @@ In the table (p. 3651), one finds:
                      0.007066
 
 These data must be put in the following format to be read by ABINIT
-(this file is also found in the `~abinit/tests/Psps_for_tests directory`,
+(this file is also found in the `~abinit/tests/Pspdir directory`,
 with the name `50sn.psphgh`):
 
     Hartwigsen-Goedecker-Hutter psp for Tin,  from PRB58, 3641 (1998) paper

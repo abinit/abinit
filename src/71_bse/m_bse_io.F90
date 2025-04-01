@@ -6,7 +6,7 @@
 !!  This module provides routines to read the Bethe-Salpeter Hamiltonian from file
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2024 ABINIT group (MG)
+!!  Copyright (C) 2008-2025 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -155,14 +155,13 @@ subroutine exc_read_bshdr(funt,Bsp,fform,ierr)
  ierr=0
 
  ! Read the header and perform consistency checks.
- call hdr_fort_read(hdr, funt, fform, rewind=.True.)
+ call hdr%fort_read(funt, fform, rewind=.True.)
  ABI_CHECK(fform /= 0, "hdr_fort_read returned fform == 0")
 
  read(funt, err=10, iomsg=errmsg) nreh_read, nkbz_read
-
  call Hdr%free()
 
- if (ANY(nreh_read/=BSp%nreh)) then
+ if (ANY(nreh_read /= BSp%nreh)) then
    call wrtout(std_out,"Wrong number of e-h transitions","COLL")
    ierr = ierr + 1
  end if

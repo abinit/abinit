@@ -132,7 +132,7 @@ elseif(CMAKE_Fortran_COMPILER_ID MATCHES "NVHPC") # NVFORTRAN
 
   # TODO : improve
   add_compile_options(
-    "$<$<COMPILE_LANGUAGE:Fortran>:-Mextend;-Mpreprocess;-Mfree;-tp=px;-traceback;-Minfo=mp,accel,par,pfo>")
+    "$<$<COMPILE_LANGUAGE:Fortran>:-Mextend;-Mpreprocess;-Mfree;-Minfo=mp,accel,par,pfo>")
 
   # debug flags
   add_compile_options(

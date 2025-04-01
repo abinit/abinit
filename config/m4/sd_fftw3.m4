@@ -1,4 +1,4 @@
-## Copyright (C) 2019-2024 ABINIT group (Yann Pouillon)
+## Copyright (C) 2019-2025 ABINIT group (Yann Pouillon)
 
 #
 # Fastest Fourier Transform in the West library (FFTW3)
@@ -58,10 +58,14 @@ AC_DEFUN([SD_FFTW3_INIT], [
   done
 
   # Set reasonable defaults if not provided
-  if test "${sd_mpi_enable}" = "yes"; then
-    test -z "${sd_fftw3_libs_def}" && sd_fftw3_libs_def="-lfftw3_mpi -lfftw3"
-  else
-    test -z "${sd_fftw3_libs_def}" && sd_fftw3_libs_def="-lfftw3"
+  if test -z "${sd_fftw3_libs_def}"; then
+    sd_fftw3_libs_def="-lfftw3"
+    if test "${abi_openmp_enable}" = "yes"; then 
+      sd_fftw3_libs_def="-lfftw3_threads ${sd_fftw3_libs_def}"
+    fi
+    if test "${sd_mpi_enable}" = "yes"; then 
+      sd_fftw3_libs_def="-lfftw3_mpi ${sd_fftw3_libs_def}"
+    fi
   fi
   test -z "${sd_fftw3_policy}" && sd_fftw3_policy="fail"
   test -z "${sd_fftw3_status}" && sd_fftw3_status="optional"
@@ -90,12 +94,13 @@ AC_DEFUN([SD_FFTW3_INIT], [
   AC_ARG_VAR([FFTW3_CPPFLAGS], [C preprocessing flags for FFTW3.])
   AC_ARG_VAR([FFTW3_CFLAGS], [C flags for FFTW3.])
   AC_ARG_VAR([FFTW3_FCFLAGS], [Fortran flags for FFTW3.])
+  AC_ARG_VAR([FFTW3_FFLAGS], [Fortran flags for FFTW3 (better use FFTW3_FCFLAGS).])
   AC_ARG_VAR([FFTW3_LDFLAGS], [Linker flags for FFTW3.])
   AC_ARG_VAR([FFTW3_LIBS], [Library flags for FFTW3.])
 
   # Detect use of environment variables
   if test "${sd_fftw3_enable}" = "yes" -o "${sd_fftw3_enable}" = "auto"; then
-    tmp_fftw3_vars="${FFTW3_CPPFLAGS}${FFTW3_CFLAGS}${FFTW3_FCFLAGS}${FFTW3_LDFLAGS}${FFTW3_LIBS}"
+    tmp_fftw3_vars="${FFTW3_CPPFLAGS}${FFTW3_CFLAGS}${FFTW3_FFLAGS}${FFTW3_FCFLAGS}${FFTW3_LDFLAGS}${FFTW3_LIBS}"
     if test "${sd_fftw3_init}" = "def" -a ! -z "${tmp_fftw3_vars}"; then
       sd_fftw3_enable="yes"
       sd_fftw3_init="env"
@@ -137,6 +142,7 @@ AC_DEFUN([SD_FFTW3_INIT], [
         sd_fftw3_libs="${sd_fftw3_libs_def}"
         test ! -z "${FFTW3_CPPFLAGS}" && sd_fftw3_cppflags="${FFTW3_CPPFLAGS}"
         test ! -z "${FFTW3_CFLAGS}" && sd_fftw3_cflags="${FFTW3_CFLAGS}"
+        test ! -z "${FFTW3_FFLAGS}" && sd_fftw3_fcflags="${FFTW3_FFLAGS}"
         test ! -z "${FFTW3_FCFLAGS}" && sd_fftw3_fcflags="${FFTW3_FCFLAGS}"
         test ! -z "${FFTW3_LDFLAGS}" && sd_fftw3_ldflags="${FFTW3_LDFLAGS}"
         test ! -z "${FFTW3_LIBS}" && sd_fftw3_libs="${FFTW3_LIBS}"
@@ -251,48 +257,87 @@ AC_DEFUN([_SD_FFTW3_CHECK_USE], [
     LIBS="${sd_fftw3_libs} ${LIBS}"
   fi
 
-  # Check FFTW3 C API
+  # Check FFTW3 API
   AC_MSG_CHECKING([whether the FFTW3 library works])
-  AC_LANG_PUSH([C])
-  AC_LINK_IFELSE([AC_LANG_PROGRAM(
-    [[
-#     include <fftw3.h>
-    ]],
-    [[
-      fftw_plan *plan;
-      fftw_complex *a1, *a2;
-      fftw_execute_dft(*plan, a1, a2);
+
+  # ===== Fortran support
+  AC_LANG_PUSH([Fortran])
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+      [[
+        integer(8) :: plan
+        complex(8) :: ff(10)
+        call dfftw_execute_dft(plan,ff,ff)
     ]])], [sd_fftw3_ok="yes"], [sd_fftw3_ok="no"])
-  AC_LANG_POP([C])
+  AC_LANG_POP([Fortran])
+
+  # ===== C support
+  # AC_LANG_PUSH([C])
+  # AC_LINK_IFELSE([AC_LANG_PROGRAM(
+  #   [[
+  #   #include <fftw3.h>
+  #   ]],
+  #   [[
+  #     fftw_plan *plan;
+  #     fftw_complex *a1, *a2;
+  #     fftw_execute_dft(*plan, a1, a2);
+  #   ]])], [sd_fftw3_ok="yes"], [sd_fftw3_ok="no"])
+  # AC_LANG_POP([C])
+
   AC_MSG_RESULT([${sd_fftw3_ok}])
 
-  # Check for threads support
+  # Check for FFTW3 threads support
   if test "${sd_fftw3_ok}" = "yes"; then
     AC_MSG_CHECKING([whether the FFTW3 library supports threads])
-    AC_LANG_PUSH([C])
-    AC_LINK_IFELSE([AC_LANG_PROGRAM(
-        [[
-#include <fftw3.h>
-        ]],
+
+    # ===== Fortran support
+    AC_LANG_PUSH([Fortran])
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([],
       [[
-        fftw_init_threads;
+        call dfftw_init_threads(2)
+        call dfftw_plan_with_nthreads(8)
+        call dfftw_cleanup_threads()
       ]])], [sd_fftw3_threads_ok="yes"], [sd_fftw3_threads_ok="no"])
-    AC_LANG_POP([C])
+    AC_LANG_POP([Fortran])
+
+    # ===== C support
+    # AC_LANG_PUSH([C])
+    # AC_LINK_IFELSE([AC_LANG_PROGRAM(
+    #    [[
+    #    #include <fftw3.h>
+    #    ]],
+    #    [[
+    #    fftw_init_threads;
+    #    ]])], [sd_fftw3_ok="yes"], [sd_fftw3_ok="no"])
+    # AC_LANG_POP([C])
+
     AC_MSG_RESULT([${sd_fftw3_threads_ok}])
   fi
 
-  # Check FFTW3 MPI C API
+  # Check for FFTW3 MPI support
   if test "${sd_fftw3_ok}" = "yes" -a "${sd_mpi_enable}" = "yes"; then
     AC_MSG_CHECKING([whether the FFTW3 MPI library works])
-    AC_LANG_PUSH([C])
-    AC_LINK_IFELSE([AC_LANG_PROGRAM(
+
+    # ===== Fortran support
+    AC_LANG_PUSH([Fortran])
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([],
       [[
-#       include <fftw3-mpi.h>
-      ]],
-      [[
-        fftw_mpi_init();
+        use,intrinsic :: iso_c_binding
+        include 'fftw3-mpi.f03'
+        call fftw_mpi_init()
       ]])], [sd_fftw3_mpi_ok="yes"], [sd_fftw3_mpi_ok="no"])
-    AC_LANG_POP([C])
+    AC_LANG_POP([Fortran])
+
+    # ===== C support
+    # AC_LANG_PUSH([C])
+    # AC_LINK_IFELSE([AC_LANG_PROGRAM(
+    #   [[
+    #   #include <fftw3-mpi.h>
+    #   ]],
+    #   [[
+    #     fftw_mpi_init();
+    #   ]])], [sd_fftw3_mpi_ok="yes"], [sd_fftw3_mpi_ok="no"])
+    # AC_LANG_POP([C])
+
     AC_MSG_RESULT([${sd_fftw3_mpi_ok}])
   else
     sd_fftw3_mpi_ok="no"

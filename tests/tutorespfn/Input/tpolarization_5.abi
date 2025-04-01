@@ -2,7 +2,7 @@
 # piezoelectric constants of AlP
 #
 # The calculation proceeds by computing the change in cell
-# polarization by a Berrys phase formula, due to changes 
+# polarization by a Berrys phase formula, due to changes
 # in the strain of the unit cell. In this case, the ion positions
 # will be allowed to relax to to their new equilibrium positions
 # within the strain cell.
@@ -20,13 +20,13 @@ acell     3*7.2728565836E+00
 # rprim = strain tensor x rprim0, where
 # rprim0 is the unstrained rprim
 # strain: e4 = 0.00
-rprim1       
+rprim1
 0.0000000000E+00  7.0710678119E-01  7.0710678119E-01
 7.0710678119E-01  0.0000000000E+00  7.0710678119E-01
-7.0710678119E-01  7.0710678119E-01  0.0000000000E+00 
+7.0710678119E-01  7.0710678119E-01  0.0000000000E+00
 
 #strain: e4 = 0.01
-rprim2 
+rprim2
 0.0000000000E+00  7.1064231509E-01  7.1064231509E-01
 7.0710678119E-01  3.535533906E-03   7.0710678119E-01
 7.0710678119E-01  7.0710678119E-01  3.535533906E-03
@@ -42,14 +42,14 @@ tolsym 1.0e-8 # Since we make rather small lattice vector changes, with the defa
               # configuration, and will resymmetrize the primitive vectors, something we want to avoid ...
 
 #Definition of the atom types and pseudopotentials
- ntypat 2 # two types of atoms 
+ ntypat 2 # two types of atoms
  znucl 15 13 # the atom types are Phosphorous and Aluminum
 
 # the following norm-conserving pseudopotentials are stored in the abinit distribution, but are freely
 # available through www.pseudo-dojo.org
 # this set uses the Perdew-Wang parameterization of LDA for the xc model
  pp_dirpath "$ABI_PSPDIR"
- pseudos "Pseudodojo_nc_sr_04_pw_standard_psp8/P.psp8, Pseudodojo_nc_sr_04_pw_standard_psp8/Al.psp8"
+ pseudos "Psdj_nc_sr_04_pw_std_psp8/P.psp8, Psdj_nc_sr_04_pw_std_psp8/Al.psp8"
 
 #Definition of the atoms
  natom 2 # two atoms in the cell
@@ -61,13 +61,13 @@ tolsym 1.0e-8 # Since we make rather small lattice vector changes, with the defa
 
 #atomic positions, given in units of the cell vectors. Thus as the cell vectors
 #change due to strain the atoms will move as well.
-xred 
+xred
 1/4 1/4 1/4
 0 0 0
 
 # Relaxation of atomic positions
 optcell 0 # the cell geometry is not allowed to changed
-ionmov 2 # the ion positions will be relaxed
+geoopt "bfgs" # the ion positions will be relaxed
 tolmxf 1.0d-5
 ntime 13
 
@@ -102,14 +102,14 @@ prteig 0
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   tpolarization_5.abo, tolnlines=  22, tolabs=  1.100e-08, tolrel=  4.500e-04
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = J. Zwanziger, M. Veithen
 #%% keywords = NC, DFPT
-#%% description = 
+#%% description =
 #%%   Finite difference calculation of the clamped-ion
 #%%   piezoelectric constants of AlP
 #%%<END TEST_INFO>

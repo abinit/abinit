@@ -2,16 +2,16 @@
 
 (Note: the implementation of format 8 was done by D. R. Hamann).
 
-The format 8 for ABINIT norm-conserving separable pseudopotentials 
+The format 8 for ABINIT norm-conserving separable pseudopotentials
 ([[cite:Hamann1979]], [[cite:Hamann1989]] and [[cite:Kleinman1982]])
 is designed to allow users
 who wish to experiment with pseudopotentials, possibly with non-standard
-features, to have great flexibility in doing so. It does not correspond 
-to any publicly available tabulation. The open-source ONCVPSP package available at 
-[www.mat-simresearch.com](http://www.mat-simresearch.com) produces pseudopotentials in this format.  
+features, to have great flexibility in doing so. It does not correspond
+to any publicly available tabulation. The open-source ONCVPSP package available at
+[www.mat-simresearch.com](http://www.mat-simresearch.com) produces pseudopotentials in this format.
 
-An annotated example is presented in detail below, followed by a second 
-example incorporating spin-orbit coupling.  An extended discussion follows 
+An annotated example is presented in detail below, followed by a second
+example incorporating spin-orbit coupling.  An extended discussion follows
 below the examples, with a separate section discussing spin-orbit as produced by ONCVPSP.
 
 When first producing a pseudopotential in this format, it would be a very
@@ -19,8 +19,8 @@ good idea to do a well-converged calculation of an isolated atom in a big
 box to confirm that you are correctly recreating the atomic valence levels you intend.
 
 The format is best explained by an example, which is presented in
-detail below.  (The example is excerpted from `Psps_for_tests/20ca_sic.drh`.
-Another example of pspcod=8 is `Psps_for_tests/8o_sic.drh`.)
+detail below.  (The example is excerpted from `Pspdir/20ca_sic.drh`.
+Another example of pspcod=8 is `Pspdir/8o_sic.drh`.)
 All but the last data block of this file are read in subroutine psp8in.f.
 The "comment" (#) lines below are not permitted in the actual file. Nor are blank lines.
 
@@ -47,7 +47,7 @@ The "comment" (#) lines below are not permitted in the actual file. Nor are blan
              value >0.0 will do, and the value is not used otherwise.
              qchrg=0.0 is a historical holdover, not used.
      line 5: number of Bloechl-Kleinman-Bylander projectors nproj for each
-             angular momentum l=0 to l=lmax.  The value of nproj for lloc 
+             angular momentum l=0 to l=lmax.  The value of nproj for lloc
              must be 0 (if lloc <= lmax).
      line 6: extension_switch=0, not initially used, but values >0 may
              be utilized to signal the presence of additonal lines of header
@@ -55,7 +55,7 @@ The "comment" (#) lines below are not permitted in the actual file. Nor are blan
              The value 2 is now used to indicate the presence of spin-orbit
              projectors (see SPIN-ORBIT section below).
 
-**EXPERIMENTAL** 
+**EXPERIMENTAL**
 self-interaction-corrected psp for calcium (D. R. Hamann):
 
     20.0000      2.0000    040701      zatom,zion,pspd
@@ -97,7 +97,7 @@ first line - angular momentum l=1, ekb(ii) for ii=1,1(=nproj(2))
 * 2nd column: radial grid mesh point
 * 3rd column: first (only)  BKB projector for l=1
 
-``` 
+```
     1                       1.0250215833500D+01
     1  0.0000000000000D+00  0.0000000000000D+00
     2  2.0000000000000D-02  4.1259561971920D-05
@@ -167,18 +167,18 @@ This block is only read if the header variable fchrg >0.0.
 
 ## SPIN-ORBIT
 
-Spin-orbit coupling is present in the file `Psps_for_tests/78_Pt_r.oncvpsp.psp8`.
-This pseudopotential treats the 5s and 5p core states as valence.  
-More details are given in the spin-orbit portion of the discussion section 
+Spin-orbit coupling is present in the file `Pspdir/78_Pt_r.oncvpsp.psp8`.
+This pseudopotential treats the 5s and 5p core states as valence.
+More details are given in the spin-orbit portion of the discussion section
 
     Header: lines 1-4 as above
-    line 5: number of Vanderbilt-Kleinman-Bylander projectors nproj for 
+    line 5: number of Vanderbilt-Kleinman-Bylander projectors nproj for
             the scalar-relativistic non-local potential for each
-            angular momentum l=0 to l=lmax. The value of nproj for lloc 
+            angular momentum l=0 to l=lmax. The value of nproj for lloc
             must be 0 (if lloc <= lmax).
     line 6: extension_switch=2 indicating spin-orbit projectors are present
-    line 7: number of Vanderbilt-Kleinman-Bylander projectors nprojso for 
-            the spin-orbit non-local potential for each angular momentum 
+    line 7: number of Vanderbilt-Kleinman-Bylander projectors nprojso for
+            the spin-orbit non-local potential for each angular momentum
             l=1 to l=lmax.
 
     Pt    NOPTPSP  r_core=  2.21  2.52  2.40  3.02
@@ -208,7 +208,7 @@ previously available Abinit psp formats, as well as possible improvements
 in performance in certain respects. Its new features are:
 
 - Numerical psp's, which offer the ability to experiment beyond existing
-  tabulated collections.  Available psp's given as basis function sums 
+  tabulated collections.  Available psp's given as basis function sums
   are easily convertible to this format.
 
 - Linear radial grids, which have the following advantages:
@@ -267,7 +267,7 @@ the current flexibility.
   derivatives of the pseudo and all-electron wave functions over a wide
   energy range. This is a superior test of transferability, and will
   locate shallow "ghost resonances" above the reference valence
-  states, which would be missed in the standard ghost tests 
+  states, which would be missed in the standard ghost tests
   [[cite:Gonze1990a]], [[cite:Gonze1991]], but
   can lead to poor results.
 
@@ -307,11 +307,11 @@ the current flexibility.
 
 - Release 7.x introduces the ablity to include spin-orbit coupling.  The
   Pt pseudopotential used as an example above was initially generated
-  with two non-local projectors each from Dirac wave functions with j=l+1/2 
+  with two non-local projectors each from Dirac wave functions with j=l+1/2
   and j=l-1/2 using Vanderbilt generalized norm conservation, which
   gives much greater accuracy than the Bloechl construction discussed
   above.[[cite:Hamann2013]]  Weighted sums and differences of these non-local operators
-  were separately re-diagonalized to produce efficient orthonormal 
+  were separately re-diagonalized to produce efficient orthonormal
   projectors for the scalar-relativistic and spin-orbit terms which are
   required internally by abinit.  For a detailed description of the
   projectors, see Ref. 7.  The operation of SR and SO terms on the
@@ -323,5 +323,5 @@ the current flexibility.
   where "fkb" and "ekb" are appropriately reinterpreted.  Since the
   "fkb" for the Pt example are orthonormal, the "ekb" have the
   dimensions energy.  Projectors with negligibly small energies
-  (<2E-5 Ha at present) are neglected.  There is full flexibility 
+  (<2E-5 Ha at present) are neglected.  There is full flexibility
   to use other methods to generate the SR and SO terms.

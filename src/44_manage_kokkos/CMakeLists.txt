@@ -32,10 +32,11 @@ set(44_manage_kokkos_SRC
   xg_kokkos.h
   m_manage_kokkos.F90
   m_xg_kokkos.F90
-  )
+)
 
 add_library(44_manage_kokkos STATIC
-  ${44_manage_kokkos_SRC})
+  ${44_manage_kokkos_SRC}
+)
 
 #####################################################################
 # Set paths for integration with autotools buildsystem
@@ -81,11 +82,12 @@ endif()
 
 target_compile_definitions(44_manage_kokkos
   PRIVATE
-  HAVE_CONFIG_H)
+  HAVE_CONFIG_H
+)
 
 target_link_libraries(44_manage_kokkos
   PUBLIC
   Kokkos::kokkos
-  )
+)
 
 add_library(abinit::44_manage_kokkos ALIAS 44_manage_kokkos)

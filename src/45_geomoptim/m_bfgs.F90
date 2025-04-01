@@ -7,7 +7,7 @@
 !!  Broyden-Fletcher-Goldfarb-Shanno (BFGS) minimization algorithm.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2012-2024 ABINIT group (XG,JCC)
+!! Copyright (C) 2012-2025 ABINIT group (XG,JCC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -273,11 +273,9 @@ subroutine hessupdt(hessin,iatfix,natom,ndim,vin,vin_prev,vout,vout_prev, &
  end do
 
 !Calculation of dot products for the denominators
- den1=zero ; den2=zero
- do ii=1,ndim
-   den1=den1+dout(ii)*din(ii)
-   den2=den2+dout(ii)*hdelta(ii)
- end do
+den1=zero ; den2=zero
+den1 = sum(dout(1:ndim) * din(1:ndim))
+den2 = sum(dout(1:ndim) * hdelta(1:ndim))
 
 !DEBUG
 !write(std_out,*)' hessupdt : den1,den2',den1,den2

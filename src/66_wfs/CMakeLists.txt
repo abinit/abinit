@@ -10,17 +10,17 @@ set(66_wfs_SRC
   m_fock_getghc.F90
   m_getchc.F90
   m_getghc.F90
-  m_getghc_ompgpu.F90
   m_getgh1c.F90
   m_getgh2c.F90
   m_prep_kgb.F90
   m_rayleigh_ritz.F90
   m_rmm_diis.F90
   m_wfd.F90
-  )
+)
 
 add_library(66_wfs STATIC
-  ${66_wfs_SRC})
+  ${66_wfs_SRC}
+)
 
 set_target_properties(66_wfs
   PROPERTIES
@@ -48,9 +48,10 @@ target_link_libraries(66_wfs
   abinit::44_abitypes_defs
   abinit::46_ghc_omp
   abinit::56_recipspace
+  abinit::62_iowfdenpot
   abinit::62_cg_noabirule
   abinit::66_nonlocal
-  )
+)
 
 if(ABINIT_ENABLE_GPU_CUDA AND ABINIT_KOKKOS_WANTED)
   target_link_libraries(66_wfs

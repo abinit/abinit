@@ -7,7 +7,7 @@
 !! and for each angular momentum.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, MT, DRH)
+!!  Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, MT, DRH)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -63,40 +63,39 @@ contains
 !!
 !! SOURCE
 
-subroutine mkffnl_objs(cryst, psps, dimffnl, ffnl, ider, idir, kg, kpg, kpt, nkpg, npw, ylm, ylm_gr, &
+subroutine mkffnl_objs(cryst, psps, dimffnl, ffnl, ider, idir, kg_k, kpg, kpt, nkpg, npw_k, ylm_k, ylm_gr_k, &
                        comm, request) ! optional
 
 !Arguments ------------------------------------
 !scalars
  type(crystal_t),intent(in) :: cryst
  type(pseudopotential_type),intent(in) :: psps
- integer,intent(in) :: dimffnl, ider, idir, npw, nkpg
+ integer,intent(in) :: dimffnl, ider, idir, npw_k, nkpg
  integer,optional,intent(in) :: comm
  integer ABI_ASYNC, optional,intent(out):: request
 !arrays
- integer,intent(in) :: kg(3,npw)
- real(dp),intent(in) :: kpg(npw, nkpg), kpt(3)
- real(dp),intent(in) :: ylm(:,:), ylm_gr(:,:,:)
- real(dp),intent(out) :: ffnl(npw, dimffnl, psps%lmnmax, psps%ntypat)
+ integer,intent(in) :: kg_k(3,npw_k)
+ real(dp),intent(in) :: kpg(npw_k, nkpg), kpt(3), ylm_k(:,:), ylm_gr_k(:,:,:)
+ real(dp),intent(out) :: ffnl(npw_k, dimffnl, psps%lmnmax, psps%ntypat)
 !
 !!Local variables-------------------------------
  integer :: my_comm
-
 ! *************************************************************************
+
  my_comm = xmpi_comm_self; if (present(comm)) my_comm = comm
 
  if (present(request)) then
     call mkffnl(psps%dimekb, dimffnl, psps%ekb, ffnl, psps%ffspl, &
-                cryst%gmet, cryst%gprimd, ider, idir, psps%indlmn, kg, kpg, kpt, psps%lmnmax, &
-                psps%lnmax, psps%mpsang, psps%mqgrid_ff, nkpg, npw, psps%ntypat, &
-                psps%pspso, psps%qgrid_ff, cryst%rmet, psps%usepaw, psps%useylm, ylm, ylm_gr, &
+                cryst%gmet, cryst%gprimd, ider, idir, psps%indlmn, kg_k, kpg, kpt, psps%lmnmax, &
+                psps%lnmax, psps%mpsang, psps%mqgrid_ff, nkpg, npw_k, psps%ntypat, &
+                psps%pspso, psps%qgrid_ff, cryst%rmet, psps%usepaw, psps%useylm, ylm_k, ylm_gr_k, &
                 comm=comm, request=request)
 
  else
     call mkffnl(psps%dimekb, dimffnl, psps%ekb, ffnl, psps%ffspl, &
-                cryst%gmet, cryst%gprimd, ider, idir, psps%indlmn, kg, kpg, kpt, psps%lmnmax, &
-                psps%lnmax, psps%mpsang, psps%mqgrid_ff, nkpg, npw, psps%ntypat, &
-                psps%pspso, psps%qgrid_ff, cryst%rmet, psps%usepaw, psps%useylm, ylm, ylm_gr, &
+                cryst%gmet, cryst%gprimd, ider, idir, psps%indlmn, kg_k, kpg, kpt, psps%lmnmax, &
+                psps%lnmax, psps%mpsang, psps%mqgrid_ff, nkpg, npw_k, psps%ntypat, &
+                psps%pspso, psps%qgrid_ff, cryst%rmet, psps%usepaw, psps%useylm, ylm_k, ylm_gr_k, &
                 comm=comm)
  end if
 
@@ -131,6 +130,7 @@ end subroutine mkffnl_objs
 !!       - Determine the set of coordinates (reduced or cartesians)
 !!  indlmn(6,i,ntypat)= array giving l,m,n,lm,ln,spin for i=ln  (if useylm=0)
 !!                                                     or i=lmn (if useylm=1)
+!!  [kinpw(npw)]=plane wave kinetic energy (useless here) and filter mask for dilatmx>1 (needed here)
 !!  kg(3,npw)=integer coordinates of planewaves in basis sphere for this k point.
 !!  kpg(npw,nkpg)= (k+G) components (only if useylm=1)
 !!  kpt(3)=reduced coordinates of k point
@@ -238,13 +238,14 @@ end subroutine mkffnl_objs
 subroutine mkffnl(dimekb, dimffnl, ekb, ffnl, ffspl, gmet, gprimd, ider, idir, indlmn, &
                   kg, kpg, kpt, lmnmax, lnmax, mpsang, mqgrid, nkpg, npw, ntypat, pspso, &
                   qgrid, rmet, usepaw, useylm, ylm, ylm_gr, &
-                  comm, request) ! optional
+                  comm, request, kinpw) ! optional
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: dimekb,dimffnl,ider,idir,lmnmax,lnmax,mpsang,mqgrid,nkpg
  integer,intent(in) :: npw,ntypat,usepaw,useylm
  integer,optional,intent(in) :: comm
+ real(dp),optional,intent(in) :: kinpw(:)
  integer ABI_ASYNC, optional,intent(out):: request
 !arrays
  integer,intent(in) :: indlmn(6,lmnmax,ntypat),kg(3,npw),pspso(ntypat)
@@ -260,7 +261,7 @@ subroutine mkffnl(dimekb, dimffnl, ekb, ffnl, ffspl, gmet, gprimd, ider, idir, i
 
 !Local variables-------------------------------
 !scalars
- integer :: ider_tmp,iffnl,ig,ig0,il,ilm,ilmn,iln,iln0,im,itypat,mu,mua,mub,nlmn,nu,nua,nub
+ integer :: ider_tmp,iffnl,ig,ig0,il,ilm,ilmn,iln,iln0,im,iylm,itypat,mu,mua,mub,nlmn,nu,nua,nub
  integer :: nprocs, my_rank, cnt, ierr
  real(dp),parameter :: renorm_factor=0.5d0/pi**2,tol_norm=tol10
  real(dp) :: ecut,ecutsm,effmass_free,fact,kpg1,kpg2,kpg3,kpgc1,kpgc2,kpgc3,rmetab,yp1
@@ -398,6 +399,13 @@ subroutine mkffnl(dimekb, dimffnl, ekb, ffnl, ffspl, gmet, gprimd, ider, idir, i
    end if
  end if
 
+ ! Treat dilatmx>1 (if kinpw is given)
+ if (present(kinpw)) then
+   if (size(kinpw)/=npw) then
+     ABI_ERROR("kinpw is not consistent with npw")
+   end if
+ end if
+
  ! Need rprimd in some cases
  if (ider>=1.and.useylm==1.and.ig0>0) then
    do mu=1,3
@@ -471,8 +479,24 @@ subroutine mkffnl(dimekb, dimffnl, ekb, ffnl, ffspl, gmet, gprimd, ider, idir, i
            wk_ffspl(:,:)=ffspl(:,:,iln,itypat)
            ider_tmp = min(ider, 1)
            call splfit(qgrid,wk_ffnl2,wk_ffspl,ider_tmp,kpgnorm,wk_ffnl1,mqgrid,npw)
+           ! Filter for dilatmx>1
+           if (present(kinpw)) then
+             do ig=1,npw
+               if(kinpw(ig)>huge(zero)*1.d-11)then
+                 wk_ffnl1(ig) = zero
+                 wk_ffnl2(ig) = zero
+               end if
+             end do
+           end if
            if (ider == 2) then
              call splfit(qgrid,wk_ffnl3,wk_ffspl,ider,kpgnorm,wk_ffnl1,mqgrid,npw)
+             if (present(kinpw)) then
+               do ig=1,npw
+                 if(kinpw(ig)>huge(zero)*1.d-11)then
+                   wk_ffnl3(ig) = zero
+                 end if
+               end do
+             end if
            end if
          end if
 
@@ -494,16 +518,17 @@ subroutine mkffnl(dimekb, dimffnl, ekb, ffnl, ffspl, gmet, gprimd, ider, idir, i
          ! ffnl_prime_prime(K,l,m,n)=6 reduced coordinates of d2(ffnl)/dK^cart.dK^cart
 
          if (useylm==1) then
+           iylm = il**2 + il + 1 + im
 !$OMP PARALLEL DO
            do ig=1,npw
-             ffnl(ig,1,iffnl,itypat)=ylm(ig,ilm)*wk_ffnl1(ig)
+             ffnl(ig,1,iffnl,itypat)=ylm(ig,iylm)*wk_ffnl1(ig)
            end do
 
            if (ider>=1) then
 !$OMP PARALLEL DO COLLAPSE(2)
              do mu=1,3
                do ig=1,npw
-                 dffnl_red(ig,mu)=ylm(ig,ilm)*wk_ffnl2(ig)*kpgn(ig,mu)+ylm_gr(ig,mu,ilm)*wk_ffnl1(ig)
+                 dffnl_red(ig,mu)=ylm(ig,iylm)*wk_ffnl2(ig)*kpgn(ig,mu)+ylm_gr(ig,mu,iylm)*wk_ffnl1(ig)
                end do
              end do
              ! Special cases |k+g|=0
@@ -594,10 +619,10 @@ subroutine mkffnl(dimekb, dimffnl, ekb, ffnl, ffspl, gmet, gprimd, ider, idir, i
 !$OMP PARALLEL DO
                do ig=1,npw
                  d2ffnl_red(ig,mu)= &
-                 ylm_gr(ig,3+mu,ilm)*wk_ffnl1(ig) &
-                 + (rmetab-kpgn(ig,mua)*kpgn(ig,mub))*ylm(ig,ilm)*wk_ffnl2(ig)*kpgnorm_inv(ig) &
-                 + ylm(ig,ilm)*kpgn(ig,mua)*kpgn(ig,mub)*wk_ffnl3(ig) &
-                 + (ylm_gr(ig,mua,ilm)*kpgn(ig,mub)+ylm_gr(ig,mub,ilm)*kpgn(ig,mua))*wk_ffnl2(ig)
+                 ylm_gr(ig,3+mu,iylm)*wk_ffnl1(ig) &
+                 + (rmetab-kpgn(ig,mua)*kpgn(ig,mub))*ylm(ig,iylm)*wk_ffnl2(ig)*kpgnorm_inv(ig) &
+                 + ylm(ig,iylm)*kpgn(ig,mua)*kpgn(ig,mub)*wk_ffnl3(ig) &
+                 + (ylm_gr(ig,mua,iylm)*kpgn(ig,mub)+ylm_gr(ig,mub,iylm)*kpgn(ig,mua))*wk_ffnl2(ig)
                end do
                ! Special cases |k+g|=0
                if (ig0>0) then

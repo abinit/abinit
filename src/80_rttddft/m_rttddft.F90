@@ -6,7 +6,7 @@
 !!  Contains various subroutines used in RT-TDDFT
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2021-2024 ABINIT group (FB)
+!!  Copyright (C) 2021-2025 ABINIT group (FB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -24,10 +24,9 @@ module m_rttddft
  use defs_basis
  use defs_abitypes,      only: MPI_type
  use defs_datatypes,     only: pseudopotential_type
-
  use m_dtset,            only: dataset_type
  use m_energies,         only: energies_type
- use m_hamiltonian,      only: init_hamiltonian, gs_hamiltonian_type
+ use m_hamiltonian,      only: gs_hamiltonian_type
  use m_kg,               only: getph
  use m_nonlop,           only: nonlop
  use m_paw_an,           only: paw_an_reset_flags
@@ -50,7 +49,6 @@ module m_rttddft
 
  public :: rttddft_setup_ele_step
  public :: rttddft_init_hamiltonian
-!!***
 
 contains
 !!***
@@ -61,7 +59,7 @@ contains
 !!  rttddft_setup_ele_step
 !!
 !! FUNCTION
-!!  Init/Update various quantities needed before performing 
+!!  Init/Update various quantities needed before performing
 !!  propagation of KS orbitals
 !!
 !! INPUTS
@@ -97,7 +95,7 @@ subroutine rttddft_setup_ele_step(dtset, mpi_enreg, psps, tdks)
 
  my_natom=mpi_enreg%my_natom
 
- !** Update various quantities that needs to be changed 
+ !** Update various quantities that needs to be changed
  !** after a change of xred during the nuclear step
 
  !Compute large sphere G^2 cut-off (gsqcut) and box / sphere ratio
@@ -109,7 +107,7 @@ subroutine rttddft_setup_ele_step(dtset, mpi_enreg, psps, tdks)
  !   call getcut(tdks%boxcut,dtset%ecut,tdks%gmet,tdks%gsqcut,dtset%iboxcut, &
  !             & std_out,k0,tdks%pawfgr%ngfft)
  !end if
- 
+
  !Compute structure factor phases (exp(2Pi i G.xred)) on coarse and fine grid
  call getph(tdks%atindx,dtset%natom,tdks%pawfgr%ngfftc(1),tdks%pawfgr%ngfftc(2), &
           & tdks%pawfgr%ngfftc(3),tdks%ph1d,tdks%xred)
@@ -119,13 +117,13 @@ subroutine rttddft_setup_ele_step(dtset, mpi_enreg, psps, tdks)
  else
     tdks%ph1df(:,:)=tdks%ph1d(:,:)
  end if
- 
+
  !PAW specific
  if (psps%usepaw==1) then
     !Check for non-overlapping PAW spheres
     call chkpawovlp(dtset%natom,psps%ntypat,dtset%pawovlp,tdks%pawtab,tdks%rmet, &
                   & dtset%typat,tdks%xred)
- 
+
     !Identify parts of the rectangular grid where the density has to be calculated
     !FB: Needed?
     optcut=0;optgr0=dtset%pawstgylm;optgr1=0;optgr2=0;optrad=1-dtset%pawstgylm
@@ -143,23 +141,6 @@ subroutine rttddft_setup_ele_step(dtset, mpi_enreg, psps, tdks)
                 & mpi_atmtab=mpi_enreg%my_atmtab,comm_fft=mpi_enreg%comm_fft,      &
                 & distribfft=mpi_enreg%distribfft)
  endif
-
-!!FB: @MT Needed? If yes, then don't forget to put it back in tdks_init/second_setup as well
-!!if any nuclear dipoles are nonzero, compute the vector potential in real space (depends on
-!!atomic position so should be done for nstep = 1 and for updated ion positions
-!if ( any(abs(dtset%nucdipmom(:,:))>tol8) ) then
-!   with_vectornd = 1
-!else
-!   with_vectornd = 0
-!end if
-!if(allocated(vectornd)) then
-!   ABI_FREE(vectornd)
-!end if
-!ABI_MALLOC(vectornd,(with_vectornd*nfftf,3))
-!vectornd=zero
-!if(with_vectornd .EQ. 1) then
-!   call make_vectornd(1,gsqcut,psps%usepaw,mpi_enreg,dtset%natom,nfftf,ngfftf,dtset%nucdipmom,&
-!        & rprimd,vectornd,xred)
 
 end subroutine rttddft_setup_ele_step
 !!***
@@ -218,7 +199,7 @@ subroutine rttddft_init_hamiltonian(dtset, energies, gs_hamk, istep, mpi_enreg, 
  logical                   :: calc_ewald
  logical                   :: tfw_activated
  real(dp)                  :: compch_sph
- real(dp)                  :: vxcavg
+ real(dp)                  :: vxcavg,el_temp
  !arrays
  real(dp),allocatable      :: grchempottn(:,:)
  real(dp),allocatable      :: grewtn(:,:)
@@ -268,6 +249,9 @@ subroutine rttddft_init_hamiltonian(dtset, energies, gs_hamk, istep, mpi_enreg, 
  ABI_FREE(grewtn)
  ABI_FREE(kxc)
 
+ ! Get electronic temperature from dtset
+ el_temp=merge(dtset%tphysel,dtset%tsmear,dtset%tphysel>tol8.and.dtset%occopt/=3.and.dtset%occopt/=9)
+
  ! set the zero of the potentials here
  if(dtset%usepotzero==2) tdks%vpsp(:) = tdks%vpsp(:) + tdks%ecore / ( tdks%zion * tdks%ucvol )
 
@@ -287,22 +271,23 @@ subroutine rttddft_init_hamiltonian(dtset, energies, gs_hamk, istep, mpi_enreg, 
                      & comm,my_natom,dtset%natom,dtset%ntypat,tdks%pawrhoij,tdks%pawtab, &
                      & dtset%typat,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
    end if
-   
+
    !** Computation of on-site densities/potentials/energies
    !** Force the recomputation of on-site potentials and Dij
    call paw_an_reset_flags(tdks%paw_an)
    !FB: @MT Changed self_consistent to false here. Is this right?
    call paw_ij_reset_flags(tdks%paw_ij,self_consistent=.false.)
    option=0; compch_sph=-1.d5; nzlmopt=0
-   call pawdenpot(compch_sph,energies%e_paw,energies%e_pawdc,ipert,         &
-                & dtset%ixc,my_natom,dtset%natom,dtset%nspden,psps%ntypat,  &
-                & dtset%nucdipmom,nzlmopt,option,tdks%paw_an,tdks%paw_an,   &
-                & tdks%paw_ij,tdks%pawang,dtset%pawprtvol,tdks%pawrad,      &
-                & tdks%pawrhoij,dtset%pawspnorb,tdks%pawtab,dtset%pawxcdev, &
-                & dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,            &
-                & dtset%xc_taupos,tdks%ucvol,                               &
-                & psps%znuclpsp,comm_atom=mpi_enreg%comm_atom,              &
-                & mpi_atmtab=mpi_enreg%my_atmtab,vpotzero=vpotzero)
+   call pawdenpot(compch_sph,el_temp,energies%e_paw,energies%e_pawdc,       &
+                & energies%entropy_paw,ipert,dtset%ixc,my_natom,dtset%natom,&
+                & dtset%nspden,psps%ntypat,dtset%nucdipmom,nzlmopt,option,  &
+                & tdks%paw_an,tdks%paw_an,tdks%paw_ij,tdks%pawang,          &
+                & dtset%pawprtvol,tdks%pawrad,tdks%pawrhoij,dtset%pawspnorb,&
+                & tdks%pawtab,dtset%pawxcdev,dtset%spnorbscl,dtset%xclevel, &
+                & dtset%xc_denpos,dtset%xc_taupos,tdks%ucvol,psps%znuclpsp, &
+                & comm_atom=mpi_enreg%comm_atom,                            &
+                & mpi_atmtab=mpi_enreg%my_atmtab,vpotzero=vpotzero,         &
+                & epaw_xc=energies%e_pawxc)
    !Correct the average potential with the calculated constant vpotzero
    !Correct the total energies accordingly
    !vpotzero(1) = -beta/ucvol
@@ -320,7 +305,7 @@ subroutine rttddft_init_hamiltonian(dtset, energies, gs_hamk, istep, mpi_enreg, 
       energies%e_pawdc=energies%e_pawdc-SUM(vpotzero(:))*tdks%zion+ &
                           & vpotzero(2)*dtset%cellcharge(1)
    end if
-   
+
    !** Dij computation
    !FB: @MT fatvshift?
    nfftotf=tdks%pawfgr%ngfft(1)*tdks%pawfgr%ngfft(2)*tdks%pawfgr%ngfft(3)
@@ -329,11 +314,12 @@ subroutine rttddft_init_hamiltonian(dtset, energies, gs_hamk, istep, mpi_enreg, 
              & tdks%paw_ij,tdks%pawang,tdks%pawfgrtab,dtset%pawprtvol,tdks%pawrad,   &
              & tdks%pawrhoij,dtset%pawspnorb,tdks%pawtab,dtset%pawxcdev,k0,          &
              & dtset%spnorbscl,tdks%ucvol,dtset%cellcharge(1),tdks%vtrial,           &
-             & tdks%vxc,tdks%xred,natvshift=dtset%natvshift,atvshift=dtset%atvshift, &
+             & tdks%vxc,tdks%xred,dtset%znucl,natvshift=dtset%natvshift,             &
+             & atvshift=dtset%atvshift, &
              & fatvshift=one,comm_atom=mpi_enreg%comm_atom,                          &
              & mpi_atmtab=mpi_enreg%my_atmtab,mpi_comm_grid=mpi_enreg%comm_fft,      &
              & nucdipmom=dtset%nucdipmom)
-   
+
    !Symetrize Dij
    call symdij(tdks%gprimd,tdks%indsym,ipert,my_natom,dtset%natom,dtset%nsym, &
              & psps%ntypat,0,tdks%paw_ij,tdks%pawang,dtset%pawprtvol,         &
@@ -345,14 +331,14 @@ subroutine rttddft_init_hamiltonian(dtset, energies, gs_hamk, istep, mpi_enreg, 
  !** Allocate all arrays and initialize quantities that do not depend on k and spin.
  !FB: Should recompute cprj if ions have moved right?
  usecprj_local=0; if (psps%usepaw==1 .and. dtset%ionmov==0) usecprj_local=1
- call init_hamiltonian(gs_hamk,psps,tdks%pawtab,dtset%nspinor,dtset%nsppol,dtset%nspden,dtset%natom,dtset%typat,    &
-                     & tdks%xred,dtset%nfft,dtset%mgfft,dtset%ngfft,tdks%rprimd,dtset%nloalg,paw_ij=tdks%paw_ij,    &
-                     & ph1d=tdks%ph1d,usecprj=usecprj_local,comm_atom=mpi_enreg%comm_atom,                          &
-                     & mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab,nucdipmom=dtset%nucdipmom, &
-                     & gpu_option=dtset%gpu_option)
+ call gs_hamk%init(psps,tdks%pawtab,dtset%nspinor,dtset%nsppol,dtset%nspden,dtset%natom,dtset%typat,            &
+                 & tdks%xred,dtset%nfft,dtset%mgfft,dtset%ngfft,tdks%rprimd,dtset%nloalg,paw_ij=tdks%paw_ij,    &
+                 & ph1d=tdks%ph1d,usecprj=usecprj_local,comm_atom=mpi_enreg%comm_atom,                          &
+                 & mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab,nucdipmom=dtset%nucdipmom, &
+                 & gpu_option=dtset%gpu_option)
 
 end subroutine rttddft_init_hamiltonian
 !!***
- 
+
 end module m_rttddft
 !!***

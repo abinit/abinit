@@ -7,7 +7,7 @@
 !!  and the functions needed to extract them
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2009-2024 ABINIT group (MMancini, MT, FDahm)
+!!  Copyright (C) 2009-2025 ABINIT group (MMancini, MT, FDahm)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -135,7 +135,7 @@ CONTAINS !===========================================================
        & ' Total amount of global memory: ',nint(globalmem),' Mbytes',ch10, &
        & ' Clock rate:                    ',clockRate,' GHz',ch10, &
        & ' Number of processors/cores:    ',nprocs,'/',ncores,ch10, &
-       & ' Max GFLOPS:                    ',trim(gflops_stg),ch10, &
+       & ' Max FP64 GFLOPS:               ',trim(gflops_stg),ch10, &
        & ' Total  constant memory:        ',constmem,' bytes',ch10, &
        & ' Shared memory per block:       ',sharemem,' bytes',ch10, &
        & ' Number of registers per block: ',regist,ch10

@@ -8,7 +8,7 @@
 !!  pawtab_type variables define TABulated data for PAW (from pseudopotential)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2024 ABINIT group (MT)
+!! Copyright (C) 2013-2025 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -327,11 +327,17 @@ MODULE m_pawtab
    ! Gives 1/q d(tTAUcore(q))/dq for q=0
    ! (tTAUcore(q) = FT of pseudo core kinetic density)
 
+  real(dp) :: eps
+  ! Epsilon parameter for Yukawa potential (only used for the exact double counting)
+
   real(dp) :: ex_cc
    ! Exchange energy for the core-core interaction of the Fock operator
 
   real(dp) :: exccore
    ! Exchange-correlation energy for the core density
+
+  real(dp) :: sxccore=zero
+   ! Exchange-correlation entropy for the core density
 
   real(dp) :: exchmix
    ! mixing of exact exchange; default is 0.25 (PBE0)
@@ -347,6 +353,9 @@ MODULE m_pawtab
 
    real(dp) :: lamb_shielding=0.0D0
    ! Lamb shielding used in NMR shielding calcs (see m_orbmag.F90)
+
+  real(dp) :: lambda
+  ! Lambda parameter for Yukawa potential (only used for the exact double counting)
 
   real(dp) :: rpaw
    ! Radius of PAW sphere
@@ -501,6 +510,14 @@ MODULE m_pawtab
   real(dp), allocatable :: ph0phiint(:)
    ! ph0phjint(ij_proj)
    ! Integration of Phi(:,1)*Phi(:,j) for LDA+DMFT projections
+
+  real(dp), allocatable :: proj(:)
+   ! proj(mesh_size)
+   ! non-normalized DMFT orbital
+
+  real(dp), allocatable :: proj2(:)
+  ! proj2(mesh_size)
+  ! square of the normalized DMFT orbital
 
   real(dp), allocatable :: qgrid_shp(:)
    ! qgrid_shp(mqgrid_shp)
@@ -858,6 +875,12 @@ subroutine pawtab_free_0D(Pawtab)
  end if
  if (allocated(Pawtab%ph0phiint))  then
    LIBPAW_DEALLOCATE(Pawtab%ph0phiint)
+ end if
+ if (allocated(Pawtab%proj)) then
+   LIBPAW_DEALLOCATE(Pawtab%proj)
+ end if
+ if (allocated(Pawtab%proj2)) then
+   LIBPAW_DEALLOCATE(Pawtab%proj2)
  end if
  if (allocated(Pawtab%qgrid_shp))  then
    LIBPAW_DEALLOCATE(Pawtab%qgrid_shp)
@@ -1294,6 +1317,10 @@ subroutine pawtab_print(Pawtab,header,unit,prtvol,mode_paral)
   end if
   write(msg,'(a,es16.8)')'  XC energy for the core density ..................',Pawtab(ityp)%exccore
   call wrtout(my_unt,msg,my_mode)
+  if(abs(Pawtab(ityp)%sxccore)>tiny(zero)) then
+    write(msg,'(a,es16.8)')'  XC entropy for the core density .................',Pawtab(ityp)%sxccore
+  call wrtout(my_unt,msg,my_mode)
+  end if
   write(msg,'(a,es16.8)')'  Lamb shielding due to core density ..............',Pawtab(ityp)%lamb_shielding
   call wrtout(my_unt,msg,my_mode)
   write(msg,'(a,es16.8)')'  Radius of the PAW sphere ........................',Pawtab(ityp)%rpaw
@@ -1447,7 +1474,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
  integer :: siz_coredens,siz_coretau,siz_dij0,siz_dltij,siz_dshpfunc,siz_eijkl,siz_eijkl_sr
  integer :: siz_euijkl,siz_euij_fll,siz_fk,siz_gammaij,siz_gnorm,siz_fock,siz_kij
  integer :: siz_nabla_ij,siz_nabla_im_ij,siz_nablaphi,siz_phi,siz_phiphj,siz_phiphjint
- integer :: siz_ph0phiint,siz_qgrid_shp,siz_qijl,siz_rad_for_spline,siz_rhoij0
+ integer :: siz_ph0phiint,siz_proj,siz_proj2,siz_qgrid_shp,siz_qijl,siz_rad_for_spline,siz_rhoij0
  integer :: siz_shape_alpha,siz_shape_q,siz_shapefunc,siz_shapefncg,siz_sij,siz_tcoredens
  integer :: siz_tcoretau,siz_tcorespl,siz_tcoretauspl,siz_tnablaphi,siz_tphi,siz_tphitphj
  integer :: siz_tproj,siz_tvalespl,siz_vee,siz_vex,siz_vhtnzc,siz_vhnzc,siz_vminushalf
@@ -1490,8 +1517,8 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
 
 !Reals (read from psp file)
 !-------------------------------------------------------------------------
-!  beta,dncdq0,d2ncdq0,dnvdq0,dtaucdq0,ex_cc,exccore,lamb_shielding,rpaw,rshp,rcore,rcoretau,shape_sigma
-   nn_dpr=nn_dpr+13
+!  beta,dncdq0,d2ncdq0,dnvdq0,dtaucdq0,eps,ex_cc,exccore,sxccore,lamb_shielding,lambda,rpaw,rshp,rcore,rcoretau,shape_sigma
+   nn_dpr=nn_dpr+16
 
 !Reals (depending on the parameters of the calculation)
 !-------------------------------------------------------------------------
@@ -1662,11 +1689,12 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
    siz_fk=0       ; siz_gammaij=0  ; siz_gnorm=0
    siz_nabla_ij=0 ; siz_nabla_im_ij=0
    siz_nablaphi=0 ; siz_phiphj=0   ; siz_phiphjint=0 ; siz_ph0phiint=0
+   siz_proj=0 ; siz_proj2=0 ;
    siz_qgrid_shp=0; siz_qijl=0     ; siz_rad_for_spline=0
    siz_shapefncg=0; siz_sij=0      ; siz_tnablaphi=0 ; siz_tphitphj=0
    siz_vee=0      ; siz_vex=0      ; siz_zioneff=0
    if (full_broadcast) then
-     nn_int=nn_int+25
+     nn_int=nn_int+27
      if (allocated(pawtab%dltij)) then
        siz_dltij=size(pawtab%dltij)                   !(lmn2_size)
        if (siz_dltij/=pawtab%lmn2_size) msg=trim(msg)//' dltij'
@@ -1741,6 +1769,14 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
        siz_ph0phiint=size(pawtab%ph0phiint)           !(ij_proj)
        if (siz_ph0phiint/=pawtab%ij_proj) msg=trim(msg)//' ph0phiint'
        nn_dpr=nn_dpr+siz_ph0phiint
+     end if
+     if (allocated(pawtab%proj)) then
+       siz_proj=size(pawtab%proj)
+       nn_dpr=nn_dpr+siz_proj
+     end if
+     if (allocated(pawtab%proj2)) then
+       siz_proj2=size(pawtab%proj2)
+       nn_dpr=nn_dpr+siz_proj2
      end if
      if (allocated(pawtab%qgrid_shp)) then
        siz_qgrid_shp=size(pawtab%qgrid_shp)           !(mqgrid_shp)
@@ -1977,6 +2013,8 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
      list_int(ii)=siz_phiphj  ;ii=ii+1
      list_int(ii)=siz_phiphjint  ;ii=ii+1
      list_int(ii)=siz_ph0phiint  ;ii=ii+1
+     list_int(ii)=siz_proj  ;ii=ii+1
+     list_int(ii)=siz_proj2  ;ii=ii+1
      list_int(ii)=siz_qgrid_shp  ;ii=ii+1
      list_int(ii)=siz_qijl  ;ii=ii+1
      list_int(ii)=siz_rad_for_spline  ;ii=ii+1
@@ -2155,6 +2193,8 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
      siz_phiphj=list_int(ii)  ;ii=ii+1
      siz_phiphjint=list_int(ii)  ;ii=ii+1
      siz_ph0phiint=list_int(ii)  ;ii=ii+1
+     siz_proj=list_int(ii)  ;ii=ii+1
+     siz_proj2=list_int(ii)  ;ii=ii+1
      siz_qgrid_shp=list_int(ii)  ;ii=ii+1
      siz_qijl=list_int(ii)  ;ii=ii+1
      siz_rad_for_spline=list_int(ii)  ;ii=ii+1
@@ -2241,9 +2281,12 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
    list_dpr(ii)=pawtab%d2ncdq0  ;ii=ii+1
    list_dpr(ii)=pawtab%dnvdq0  ;ii=ii+1
    list_dpr(ii)=pawtab%dtaucdq0  ;ii=ii+1
+   list_dpr(ii)=pawtab%eps  ;ii=ii+1
    list_dpr(ii)=pawtab%ex_cc   ;ii=ii+1
    list_dpr(ii)=pawtab%exccore  ;ii=ii+1
+   list_dpr(ii)=pawtab%sxccore  ;ii=ii+1
    list_dpr(ii)=pawtab%lamb_shielding  ;ii=ii+1
+   list_dpr(ii)=pawtab%lambda  ;ii=ii+1
    list_dpr(ii)=pawtab%rpaw  ;ii=ii+1
    list_dpr(ii)=pawtab%rshp  ;ii=ii+1
    list_dpr(ii)=pawtab%rcore  ;ii=ii+1
@@ -2421,6 +2464,14 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
        list_dpr(ii:ii+siz_ph0phiint-1)=pawtab%ph0phiint(1:siz_ph0phiint)
        ii=ii+siz_ph0phiint
      end if
+     if (siz_proj>0) then
+       list_dpr(ii:ii+siz_proj-1)=pawtab%proj(1:siz_proj)
+       ii=ii+siz_proj
+     end if
+     if (siz_proj2>0) then
+       list_dpr(ii:ii+siz_proj2-1)=pawtab%proj2(1:siz_proj2)
+       ii=ii+siz_proj2
+     end if
      if (siz_qgrid_shp>0) then
        list_dpr(ii:ii+siz_qgrid_shp-1)=pawtab%qgrid_shp(1:siz_qgrid_shp)
        ii=ii+siz_qgrid_shp
@@ -2490,9 +2541,12 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
    pawtab%d2ncdq0=list_dpr(ii)  ;ii=ii+1
    pawtab%dnvdq0=list_dpr(ii)  ;ii=ii+1
    pawtab%dtaucdq0=list_dpr(ii)  ;ii=ii+1
+   pawtab%eps=list_dpr(ii)  ;ii=ii+1
    pawtab%ex_cc=list_dpr(ii)  ;ii=ii+1
    pawtab%exccore=list_dpr(ii)  ;ii=ii+1
+   pawtab%sxccore=list_dpr(ii)  ;ii=ii+1
    pawtab%lamb_shielding=list_dpr(ii)  ;ii=ii+1
+   pawtab%lambda=list_dpr(ii)  ;ii=ii+1
    pawtab%rpaw=list_dpr(ii)  ;ii=ii+1
    pawtab%rshp=list_dpr(ii)  ;ii=ii+1
    pawtab%rcore=list_dpr(ii)  ;ii=ii+1
@@ -2832,6 +2886,22 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
        LIBPAW_ALLOCATE(pawtab%ph0phiint,(pawtab%ij_proj))
        pawtab%ph0phiint=list_dpr(ii:ii+pawtab%ij_proj-1)
        ii=ii+siz_ph0phiint
+     end if
+     if (allocated(pawtab%proj)) then
+       LIBPAW_DEALLOCATE(pawtab%proj)
+     end if
+     if (siz_proj>0) then
+       LIBPAW_ALLOCATE(pawtab%proj,(siz_proj))
+       pawtab%proj=list_dpr(ii:ii+siz_proj-1)
+       ii=ii+siz_proj
+     end if
+     if (allocated(pawtab%proj2)) then
+       LIBPAW_DEALLOCATE(pawtab%proj2)
+     end if
+     if (siz_proj2>0) then
+       LIBPAW_ALLOCATE(pawtab%proj2,(siz_proj2))
+       pawtab%proj2=list_dpr(ii:ii+siz_proj2-1)
+       ii=ii+siz_proj2
      end if
      if (allocated(pawtab%qgrid_shp)) then
        LIBPAW_DEALLOCATE(pawtab%qgrid_shp)

@@ -8,7 +8,7 @@
 # pseudos  = '20ca_sic.drh, 8o_sic.drh'
 # output_file  = 't20.abo'
 ## Possibly, the path to the pseudopotential directory might be defined
-# pp_dirpath  = '../../Psps_for_tests'
+# pp_dirpath  = '../../Pspdir'
 
 # Dataset 1 : self-consistent ground state calculation
 
@@ -62,19 +62,19 @@ nloc_alg  2
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t20.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options = -medium
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
 #%% authors =  D.R. Hamann
 #%% keywords = psp8
-#%% description = 
+#%% description =
 #%%   Test of the pspcod=8 input format (contributed by D.R. Hamann)
 #%%   This format is primarily intended to offer a flexible platform
 #%%   for those who wish to experiment with their own features in
 #%%   norm-conserving pseudopotentials.  A full description and discussion
-#%%   is given on the ABINIT wiki 
+#%%   is given on the ABINIT wiki
 #%%   https://wiki.abinit.org/doku.php?id=developers:pseudos:psp8_format
 #%%   This test case, CaO, is an
 #%%   example of self-interaction-corrected pseudopotentials in the

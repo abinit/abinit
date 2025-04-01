@@ -87,12 +87,21 @@ void get_gpu_max_mem_(int* device, float* max_mem)
    return;
 }
 
+// Gives max available memory available for current GPU device ---------
+extern "C"
+void gpu_get_max_mem_cpp(size_t* max_mem)
+{
+   size_t free_mem;
+   HIP_API_CHECK(hipMemGetInfo(&free_mem, max_mem));
+   return;
+}
+
 // Gives currently free memory available for current GPU device ---------
 extern "C"
 void gpu_get_free_mem_cpp(size_t* free_mem)
 {
    size_t max_mem;
-   HIP_API_CHECK(hipMemGetInfo(&max_mem, free_mem));
+   HIP_API_CHECK(hipMemGetInfo(free_mem, &max_mem));
    return;
 }
 
@@ -224,7 +233,7 @@ void c_get_ndevice_(int* ndev)
 {
   *ndev=0;
   int deviceCount;
-  HIP_API_CHECK(hipGetDeviceCount(&deviceCount));
+  hipGetDeviceCount(&deviceCount);
   for (int idev = 0; idev < deviceCount; ++idev)
     {
       hipDeviceProp_t deviceProp;

@@ -1,8 +1,8 @@
 
-.Version 9.11.2 of ANADDB 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ANADDB, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Jul 2023.
-- ( at 12h11 )
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h16 )
   
 
 ================================================================================
@@ -112,7 +112,7 @@
 
  Calculation of the interatomic forces 
 
--begin at tcpu      0.026  and twall      0.032 sec
+-begin at tcpu      0.031  and twall      0.033 sec
 
  Warning : due to the use of quadrupolar fields, the width of the reciprocal space gaussians
  in ewald9 has been set to eta=    1.2618 1/bohr and the real-space sums have been neglected.
@@ -152,18 +152,18 @@
  Symmetry characters of vibration mode #   1
        degenerate with vibration modes #   2 to    3
   3.0 -3.0 -1.0  1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0
-  0.0 -0.0  0.0 -0.0 -0.0  0.0 -0.0  0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
-  0.0 -0.0  0.0 -0.0 -0.0  0.0  0.0 -0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
+ -0.0  0.0  0.0 -0.0  0.0 -0.0 -0.0  0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
+  0.0 -0.0 -0.0  0.0 -0.0  0.0  0.0 -0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
  Symmetry characters of vibration mode #   4
        degenerate with vibration modes #   5 to    6
   3.0  3.0 -1.0 -1.0 -1.0 -1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0
-  0.0  0.0 -0.0 -0.0  0.0  0.0 -0.0 -0.0  1.0  1.0 -1.0 -1.0 -1.0 -1.0  1.0  1.0
-  0.0  0.0  0.0  0.0 -0.0 -0.0 -0.0 -0.0  1.0  1.0  1.0  1.0 -1.0 -1.0 -1.0 -1.0
+ -0.0 -0.0 -0.0 -0.0  0.0  0.0  0.0  0.0  1.0  1.0 -1.0 -1.0 -1.0 -1.0  1.0  1.0
+ -0.0 -0.0  0.0  0.0  0.0  0.0 -0.0 -0.0  1.0  1.0  1.0  1.0 -1.0 -1.0 -1.0 -1.0
 -
-- Proc.   0 individual time (sec): cpu=          0.0  wall=          0.1
+- Proc.   0 individual time (sec): cpu=          0.1  wall=          0.1
 
 ================================================================================
 
-+Total cpu time      0.043  and wall time      0.059 sec
++Total cpu time      0.050  and wall time      0.053 sec
 
  anaddb : the run completed succesfully.

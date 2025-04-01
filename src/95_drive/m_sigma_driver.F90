@@ -6,7 +6,7 @@
 !! Calculate the matrix elements of the self-energy operator.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2024 ABINIT group (MG, GMR, VO, LR, RWG, MT)
+!!  Copyright (C) 1999-2025 ABINIT group (MG, GMR, VO, LR, RWG, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -40,7 +40,7 @@ module m_sigma_driver
  use m_crystal
  use m_cgtools
 
- use defs_datatypes,  only : pseudopotential_type, ebands_t
+ use defs_datatypes,  only : pseudopotential_type
  use defs_abitypes,   only : MPI_type
  use m_time,          only : timab
  use m_numeric_tools, only : imax_loc
@@ -53,9 +53,7 @@ module m_sigma_driver
  use m_fft_mesh,      only : get_gfft, setmesh
  use m_fft,           only : fourdp
  use m_ioarr,         only : fftdatar_write, read_rhor
- use m_ebands,        only : ebands_update_occ, ebands_copy, ebands_report_gap, ebands_get_valence_idx, ebands_get_bandenergy,&
-                             ebands_free, ebands_init, ebands_ncwrite, ebands_interpolate_kpath, get_eneocc_vect, &
-                             ebands_enclose_degbands, ebands_get_gaps, gaps_t
+ use m_ebands,        only : ebands_t, gaps_t
  use m_energies,      only : energies_type, energies_init
  use m_bz_mesh,       only : kmesh_t, littlegroup_t, littlegroup_free, isamek, get_ng0sh, find_qmesh
  use m_gsphere,       only : gsphere_t, merge_and_sort_kg, setshells
@@ -204,7 +202,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  real(dp) :: drude_plsmf,my_plsmf,ecore,ecut_eff,ecutdg_eff,ehartree
  real(dp) :: etot_sd,etot_mbb,evextnl_energy,ex_energy,gsqcutc_eff,gsqcutf_eff,gsqcut_shp,norm,oldefermi
  real(dp) :: eh_energy,ekin_energy,evext_energy,den_int,coef_hyb,exc_mbb_energy,tol_empty
- real(dp) :: ucvol,vxcavg,vxcavg_qp
+ real(dp) :: ucvol,vxcavg,vxcavg_qp,el_temp
  real(dp) :: gwc_gsq,gwx_gsq,gw_gsq, gsqcut,boxcut,ecutf
  real(dp) :: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem,ug_mem,ur_mem,cprj_mem
  complex(dpc) :: max_degw,cdummy
@@ -368,7 +366,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  call init_distribfft_seq(MPI_enreg_seq%distribfft,'c',ngfftc(2),ngfftc(3),'all')
  call init_distribfft_seq(MPI_enreg_seq%distribfft,'f',ngfftf(2),ngfftf(3),'all')
 
- call print_ngfft(ngfftf,header='Dense FFT mesh used for densities and potentials')
+ call print_ngfft([std_out], ngfftf, header='Dense FFT mesh used for densities and potentials')
  nfftf_tot=PRODUCT(ngfftf(1:3))
 
  ! ===========================================
@@ -402,8 +400,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    ABI_WARNING(' EXPERIMENTAL - Using a pole-fit screening!')
  end if
 
- call print_ngfft(gwc_ngfft,header='FFT mesh for oscillator strengths used for Sigma_c')
- call print_ngfft(gwx_ngfft,header='FFT mesh for oscillator strengths used for Sigma_x')
+ call print_ngfft([std_out], gwc_ngfft, header='FFT mesh for oscillator strengths used for Sigma_c')
+ call print_ngfft([std_out], gwx_ngfft, header='FFT mesh for oscillator strengths used for Sigma_x')
 
  b1gw = Sigp%minbdgw; b2gw = Sigp%maxbdgw
 
@@ -422,8 +420,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  ABI_MALLOC(ks_vbik, (ks_ebands%nkpt, ks_ebands%nsppol))
  ABI_MALLOC(qp_vbik, (ks_ebands%nkpt, ks_ebands%nsppol))
 
- !call ebands_update_occ(ks_ebands,Dtset%spinmagntarget,prtvol=0)
- ks_vbik(:,:) = ebands_get_valence_idx(ks_ebands)
+ !call ks_ebands%update_occ(Dtset%spinmagntarget,prtvol=0)
+ ks_vbik(:,:) = ks_ebands%get_valence_idx()
 
  ! ============================
  ! ==== PAW initialization ====
@@ -799,6 +797,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  !========================================
  nhatgrdim = 0
  if (Dtset%usepaw==1) then
+   ! Get electronic temperature from dtset
+   el_temp=merge(dtset%tphysel,dtset%tsmear,dtset%tphysel>tol8.and.dtset%occopt/=3.and.dtset%occopt/=9)
    ! Calculate the compensation charge nhat.
    if (Dtset%xclevel==2) nhatgrdim = usexcnhat * Dtset%pawnhatxc
    cplex = 1; ider = 2 * nhatgrdim; izero = 0
@@ -834,12 +834,12 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
    !  Calculate onsite vxc with and without core charge.
    nzlmopt=-1; option=0; compch_sph=greatest_real
-   call pawdenpot(compch_sph,KS_energies%e_paw,KS_energies%e_pawdc,ipert0,&
-     Dtset%ixc,Cryst%natom,Cryst%natom,Dtset%nspden,&
+   call pawdenpot(compch_sph,el_temp,KS_energies%e_paw,KS_energies%e_pawdc,&
+     KS_energies%entropy_paw,ipert0,Dtset%ixc,Cryst%natom,Cryst%natom,Dtset%nspden,&
      Cryst%ntypat,Dtset%nucdipmom,nzlmopt,option,KS_Paw_an,KS_Paw_an,KS_paw_ij,&
      Pawang,Dtset%pawprtvol,Pawrad,KS_Pawrhoij,Dtset%pawspnorb,&
      Pawtab,Dtset%pawxcdev,Dtset%spnorbscl,Dtset%xclevel,Dtset%xc_denpos,Dtset%xc_taupos,&
-     Cryst%ucvol,Psps%znuclpsp)
+     Cryst%ucvol,Psps%znuclpsp,epaw_xc=KS_energies%e_pawxc)
 
  else
    ABI_MALLOC(ks_nhatgr, (0, 0, 0))
@@ -910,7 +910,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
                Cryst%natom,Cryst%natom,nfftf,ngfftf(1)*ngfftf(2)*ngfftf(3),&
                Dtset%nspden,Cryst%ntypat,KS_paw_an,KS_paw_ij,Pawang,Pawfgrtab,&
                Dtset%pawprtvol,Pawrad,KS_Pawrhoij,Dtset%pawspnorb,Pawtab,Dtset%pawxcdev,&
-               k0,Dtset%spnorbscl,Cryst%ucvol,dtset%cellcharge(1),ks_vtrial,ks_vxc,Cryst%xred,&
+               k0,Dtset%spnorbscl,Cryst%ucvol,dtset%cellcharge(1),&
+               ks_vtrial,ks_vxc,Cryst%xred,Dtset%znucl,&
                nucdipmom=Dtset%nucdipmom)
 
    ! Symmetrize KS Dij
@@ -1003,11 +1004,11 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 !#endif
 
  call KS_me%print(header="Matrix elements in the KS basis set", prtvol=Dtset%prtvol)
- !
+
  ! If possible, calculate the EXX energy between the frozen core
  ! and the valence electrons using KS wavefunctions
  ! MG: Be careful here, since ex_energy is meaningful only if all occupied states are calculated.
- if( KS_mflags%has_sxcore ==1 ) then
+ if (KS_mflags%has_sxcore ==1) then
    ! TODO
    !ex_energy = mels_get_exene_core(KS_me,kmesh,ks_ebands)
    ex_energy=zero
@@ -1038,7 +1039,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  !=== qp_ebands stores energies and occ. used for the calculation ===
  !  * Initialize qp_ebands with KS values.
  !  * In case of SC update qp_ebands using the QPS file.
- call ebands_copy(ks_ebands, qp_ebands)
+ call ks_ebands%copy(qp_ebands)
 
  ABI_MALLOC(qp_rhor, (nfftf, Dtset%nspden))
  ABI_MALLOC(qp_taur, (nfftf, Dtset%nspden * Dtset%usekden))
@@ -1117,8 +1118,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
    ! Compute QP occupation numbers.
    call wrtout(std_out,'sigma: calculating QP occupation numbers:')
-   call ebands_update_occ(qp_ebands, Dtset%spinmagntarget, prtvol=0)
-   qp_vbik(:,:) = ebands_get_valence_idx(qp_ebands)
+   call qp_ebands%update_occ(Dtset%spinmagntarget, prtvol=0)
+   qp_vbik(:,:) = qp_ebands%get_valence_idx()
 
 !  #ifdef DEV_HAVE_SCGW_SYM
    ! Calculate the irreducible representations of the new QP amplitdues.
@@ -1274,7 +1275,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
                  Cryst%natom,Cryst%natom,nfftf,ngfftf(1)*ngfftf(2)*ngfftf(3),&
                  Dtset%nspden,Cryst%ntypat,QP_paw_an,QP_paw_ij,Pawang,Pawfgrtab,&
                  Dtset%pawprtvol,Pawrad,QP_pawrhoij,Dtset%pawspnorb,Pawtab,Dtset%pawxcdev,&
-                 k0,Dtset%spnorbscl,Cryst%ucvol,dtset%cellcharge(1),qp_vtrial,qp_vxc,Cryst%xred,&
+                 k0,Dtset%spnorbscl,Cryst%ucvol,dtset%cellcharge(1),&
+                 qp_vtrial,qp_vxc,Cryst%xred,Dtset%znucl,&
                  nucdipmom=Dtset%nucdipmom)
 
      ! Symmetrize total Dij
@@ -1297,7 +1299,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    write(msg,'(5a,f9.4,3a,es21.14,2a,es21.14)')ch10,&
     ' QP results after the unitary transformation in the KS subspace: ',ch10,ch10,&
     '  Number of electrons    = ',qp_rhog(1,1)*Cryst%ucvol,ch10,ch10,&
-    '  QP Band energy    [Ha] = ',ebands_get_bandenergy(qp_ebands),ch10,&
+    '  QP Band energy    [Ha] = ',qp_ebands%get_bandenergy(),ch10,&
     '  QP Hartree energy [Ha] = ',ehartree
    call wrtout(ab_out,msg)
    write(msg,'(a,80a)')ch10,('-',ii=1,80)
@@ -1629,7 +1631,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    Sr%egw=qp_ebands%eig
    !
    ! * Recalculate the new fermi level.
-   call ebands_update_occ(qp_ebands, Dtset%spinmagntarget, prtvol=0)
+   call qp_ebands%update_occ(Dtset%spinmagntarget, prtvol=0)
  end if
 
  ! In case of AC refer all the energies wrt to the fermi level
@@ -1942,7 +1944,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
  if (wfd%my_rank == master) then
    ! Write info on the run on ab_out, then open files to store final results.
-   call ebands_report_gap(ks_ebands,header='KS Band Gaps',unit=ab_out)
+   call ks_ebands%report_gap(header='KS Band Gaps',unit=ab_out)
    if(dtset%ucrpa == 0) then
      call write_sigma_header(Sigp,Er,Cryst,Kmesh,Qmesh)
    end if
@@ -2006,9 +2008,9 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
   ! calculation by simply listing the same k-point twice in kptgw. Now this trick is not allowed anymore.
   ! Everything, indeed, should be done in a clean and transparent way inside csigme.
 
- call wfd%print(mode_paral='PERS')
+ call wfd%print([std_out])
 
- call wrtout(std_out,sigma_type_from_key(mod10))
+ call wrtout(std_out, sigma_type_from_key(mod10))
 
  if (gwcalctyp<10) then
    msg = " Perturbative Calculation"
@@ -2767,8 +2769,8 @@ endif
    if (Sigp%nkptgw==Kmesh%nibz) then
 
      ! Recalculate new occupations and Fermi level.
-     call ebands_update_occ(qp_ebands,Dtset%spinmagntarget,prtvol=Dtset%prtvol)
-     qp_vbik(:,:) = ebands_get_valence_idx(qp_ebands)
+     call qp_ebands%update_occ(Dtset%spinmagntarget,prtvol=Dtset%prtvol)
+     qp_vbik(:,:) = qp_ebands%get_valence_idx()
 
      write(msg,'(2a,3x,2(es16.6,a))')ch10,' New Fermi energy : ',qp_ebands%fermie,' Ha ,',qp_ebands%fermie*Ha_eV,' eV'
      call wrtout(units, msg)
@@ -2785,11 +2787,11 @@ endif
      end if
 
      ! Report the QP gaps (Fundamental and direct)
-     call ebands_report_gap(qp_ebands,header='QP Band Gaps',unit=ab_out)
+     call qp_ebands%report_gap(header='QP Band Gaps',unit=ab_out)
 
      ! Band structure interpolation from QP energies computed on the k-mesh.
      if (nint(dtset%einterp(1)) /= 0 .and. all(sigp%minbdgw == sigp%minbnd) .and. all(sigp%maxbdgw == sigp%maxbnd)) then
-       call ebands_interpolate_kpath(qp_ebands, dtset, cryst, [sigp%minbdgw, sigp%maxbdgw], dtfil%filnam_ds(4), comm)
+       call qp_ebands%interpolate_kpath(dtset, cryst, [sigp%minbdgw, sigp%maxbdgw], dtfil%filnam_ds(4), comm)
      end if
    end if ! Sigp%nkptgw==Kmesh%nibz
    !
@@ -2828,7 +2830,7 @@ endif
      NCF_CHECK(nctk_open_create(ncid, strcat(dtfil%filnam_ds(4), '_SIGRES.nc'), xmpi_comm_self))
      NCF_CHECK(nctk_defnwrite_ivars(ncid, ["sigres_version"], [1]))
      NCF_CHECK(cryst%ncwrite(ncid))
-     NCF_CHECK(ebands_ncwrite(ks_ebands, ncid))
+     NCF_CHECK(ks_ebands%ncwrite(ncid))
      NCF_CHECK(Sr%ncwrite(Sigp, Er, ncid)) ! WARNING!! If gw1rdm>0 then Er is no longer present!!
      ! Add qp_rhor. Note that qp_rhor == ks_rhor if wavefunctions are not updated.
      !ncerr = nctk_write_datar("qp_rhor",path,ngfft,cplex,nfft,nspden,&
@@ -2929,8 +2931,8 @@ endif
  call PPm%free()
  call Hdr_sigma%free()
  call Hdr_wfk%free()
- call ebands_free(ks_ebands)
- call ebands_free(qp_ebands)
+ call ks_ebands%free()
+ call qp_ebands%free()
  call KS_me%free()
  call esymm_free(KS_sym)
  ABI_FREE(KS_sym)
@@ -3315,8 +3317,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
  ABI_MALLOC(Kmesh%shift,(3,Kmesh%nshift))
  Kmesh%shift(:,:)    =Dtset%shiftk(:,1:Dtset%nshiftk)
 
- call Kmesh%print("K-mesh for the wavefunctions",std_out,Dtset%prtvol,"COLL")
- call Kmesh%print("K-mesh for the wavefunctions",ab_out, 0,           "COLL")
+ call Kmesh%print(units, header="K-mesh for the wavefunctions", prtvol=Dtset%prtvol)
 
  ! === Initialize the band structure datatype ===
  ! * Copy WFK energies and occupations up to Sigp%nbnds==Dtset%nband(:)
@@ -3349,11 +3350,11 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
  ABI_MALLOC(npwarr,(Dtset%nkpt))
  npwarr(:)=Sigp%npwwfn
 
- call ebands_init(bantot,ks_ebands,Dtset%nelect,Dtset%ne_qFD,Dtset%nh_qFD,Dtset%ivalence,&
-   doccde,eigen,Dtset%istwfk,Kmesh%ibz,Dtset%nband,&
-   Kmesh%nibz,npwarr,nsppol,Dtset%nspinor,Dtset%tphysel,Dtset%tsmear,Dtset%occopt,occfact,Kmesh%wt,&
-   dtset%cellcharge(1), dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig,&
-   dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
+ call ks_ebands%init(bantot, Dtset%nelect,Dtset%ne_qFD,Dtset%nh_qFD,Dtset%ivalence,&
+                  doccde,eigen,Dtset%istwfk,Kmesh%ibz,Dtset%nband,&
+                  Kmesh%nibz,npwarr,nsppol,Dtset%nspinor,Dtset%tphysel,Dtset%tsmear,Dtset%occopt,occfact,Kmesh%wt,&
+                  dtset%cellcharge(1), dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig,&
+                  dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
 
  ABI_FREE(doccde)
  ABI_FREE(eigen)
@@ -3362,18 +3363,18 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
  ! Calculate KS occupation numbers and ks_vbk(nkibz, nsppol) ====
  ! ks_vbk gives the (valence|last Fermi band) index for each k and spin.
  ! spinmagntarget is passed to fermi.F90 to fix the problem with newocc in case of magnetic metals
- call ebands_update_occ(ks_ebands, Dtset%spinmagntarget, prtvol=0)
+ call ks_ebands%update_occ(Dtset%spinmagntarget, prtvol=0)
 
- gaps = ebands_get_gaps(ks_ebands, gap_err)
- call gaps%print(unit=std_out)
- call ebands_report_gap(ks_ebands, unit=std_out)
+ gaps = ks_ebands%get_gaps(gap_err)
+ call gaps%print([std_out])
+ call ks_ebands%report_gap(unit=std_out)
 
  ABI_MALLOC(val_indices,(ks_ebands%nkpt, nsppol))
- val_indices = ebands_get_valence_idx(ks_ebands)
+ val_indices = ks_ebands%get_valence_idx()
 
  ! Create Sigma header
  ! TODO Fix problems with symmorphy and k-points
- call hdr_init(ks_ebands,codvsn,Dtset,Hdr_out,Pawtab,pertcase0,Psps,wvl)
+ call Hdr_out%init(ks_ebands,codvsn,Dtset,Pawtab,pertcase0,Psps,wvl)
 
  ! Get Pawrhoij from the header of the WFK file
  ABI_MALLOC(Pawrhoij, (Cryst%natom*Dtset%usepaw))
@@ -3536,7 +3537,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
      do ikcalc=1,Sigp%nkptgw
 
        if (kmesh%has_IBZ_item(Sigp%kptgw(:,ikcalc), ikibz, G0)) then
-         call ebands_enclose_degbands(ks_ebands,ikibz,isppol, &
+         call ks_ebands%enclose_degbands(ikibz,isppol, &
                Sigp%minbnd(ikcalc,isppol),Sigp%maxbnd(ikcalc,isppol),changed,tol_enediff)
 
          if (changed) then
@@ -3657,9 +3658,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
    Er%gvec(:,1) = [0, 0, 0]
  end if
 
- call Qmesh%print("Q-mesh for screening function",std_out,Dtset%prtvol,"COLL")
- call Qmesh%print("Q-mesh for screening function",ab_out ,0           ,"COLL")
-
+ call Qmesh%print(units, header="Q-mesh for screening function", prtvol=Dtset%prtvol)
 
  do iqbz=1,Qmesh%nbz
    call qmesh%get_BZ_item(iqbz, q_bz, iq_ibz, isym, itim, umklp=q_umklp)
@@ -3815,8 +3814,8 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
  ! Using the random q for the optical limit is one of the reasons
  ! why sigma breaks the initial energy degeneracies.
  Vcp%i_sz=zero
- Vcp%vc_sqrt(1,:)=czero
- Vcp%vcqlwl_sqrt(1,:)=czero
+ Vcp%vc_sqrt(1,1)=czero
+ Vcp%vcqlwl_sqrt(1,1)=czero
 #endif
 
  ABI_FREE(qlwl)
@@ -4190,6 +4189,7 @@ subroutine paw_qpscgw(Wfd,nscf,nfftf,ngfftf,Dtset,Cryst,Kmesh,Psps,qp_ebands, &
  integer :: choice,cplex,cplex_rhoij,has_dijU,has_dijso,iat,ider
  integer :: izero,nkxc1,nspden_rhoij,nzlmopt, option,usexcnhat
  character(len=500) :: msg
+ real(dp) :: el_temp
 !arrays
  real(dp) :: k0(3)
 
@@ -4247,7 +4247,7 @@ subroutine paw_qpscgw(Wfd,nscf,nfftf,ngfftf,Dtset,Cryst,Kmesh,Psps,qp_ebands, &
    write(msg,'(a,f6.3)')' sigma: mixing on-site QP rho_ij densities using rhoqpmix= ',Dtset%rhoqpmix
    call wrtout(std_out, msg)
    ! qp_rhor = prev_rhor + Dtset%rhoqpmix*(qp_rhor-prev_rhor)
-
+  
    call pawrhoij_unpack(QP_Pawrhoij)   ! Unpack new QP %rhoijp
    call pawrhoij_unpack(prev_Pawrhoij) ! Unpack previous QP %rhoijp
 
@@ -4278,8 +4278,11 @@ subroutine paw_qpscgw(Wfd,nscf,nfftf,ngfftf,Dtset,Cryst,Kmesh,Psps,qp_ebands, &
 
  nzlmopt=-1; option=0; qp_compch_sph=greatest_real
 
- call pawdenpot(qp_compch_sph,QP_energies%e_paw,QP_energies%e_pawdc,&
-   ipert0,Dtset%ixc,Cryst%natom,Cryst%natom,Dtset%nspden,&
+ ! Get electronic temperature from dtset
+ el_temp=merge(dtset%tphysel,dtset%tsmear,dtset%tphysel>tol8.and.dtset%occopt/=3.and.dtset%occopt/=9)
+ 
+ call pawdenpot(qp_compch_sph,el_temp,QP_energies%e_paw,QP_energies%e_pawdc,&
+   QP_energies%entropy_paw,ipert0,Dtset%ixc,Cryst%natom,Cryst%natom,Dtset%nspden,&
    Cryst%ntypat,Dtset%nucdipmom,nzlmopt,option,QP_paw_an,QP_paw_an,&
    QP_paw_ij,Pawang,Dtset%pawprtvol,Pawrad,QP_pawrhoij,Dtset%pawspnorb,&
    Pawtab,Dtset%pawxcdev,Dtset%spnorbscl,Dtset%xclevel,Dtset%xc_denpos,Dtset%xc_taupos,&

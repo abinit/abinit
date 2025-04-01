@@ -1,8 +1,8 @@
 
-.Version 9.11.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Jul 2023.
-- ( at 11h59 )
-  
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v2_t99/t99.abi
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h08 )
+
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v2_t99/t99.abi
 - output file    -> t99.abo
 - root for input  files -> t99i
 - root for output files -> t99o
@@ -59,10 +59,10 @@ _ WF disk file :      1.221 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -72,7 +72,7 @@ _ WF disk file :      1.221 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
            chneut           0
              ecut      7.00000000E+00 Hartree
            enunit           2
--          fftalg         312
+-          fftalg         512
            getwfk1          0
            getwfk2          1
            jdtset        1    2
@@ -315,8 +315,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/41nb.pspfhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/41nb.pspfhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/41nb.pspfhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/41nb.pspfhi
 - Niobium, fhi98PP : TM-type, LDA, l=0 local
 - 41.00000   5.00000     10122                znucl, zion, pspdat
     6    7    2    0       539   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -346,10 +346,10 @@ tolerances: {tolvrs: 1.00E-16, }
  ETOT  2  -4.9720640756438    -2.601E-03 3.827E-04 2.074E-02
  ETOT  3  -4.9720716206511    -7.545E-06 6.802E-05 1.810E-04
  ETOT  4  -4.9720717784112    -1.578E-07 1.286E-06 1.228E-07
- ETOT  5  -4.9720717784977    -8.652E-11 2.571E-07 3.606E-10
- ETOT  6  -4.9720717784981    -3.642E-13 8.954E-09 1.547E-12
- ETOT  7  -4.9720717784981    -7.105E-15 5.206E-09 6.575E-15
- ETOT  8  -4.9720717784981     2.665E-15 1.644E-10 9.921E-19
+ ETOT  5  -4.9720717784977    -8.650E-11 2.571E-07 3.606E-10
+ ETOT  6  -4.9720717784981    -3.819E-13 8.954E-09 1.547E-12
+ ETOT  7  -4.9720717784981    -8.882E-16 5.206E-09 6.575E-15
+ ETOT  8  -4.9720717784981    -9.770E-15 1.644E-10 9.921E-19
 
  At SCF step    8       vres2   =  9.92E-19 < tolvrs=  1.00E-16 =>converged.
 
@@ -369,7 +369,7 @@ lattice_vectors:
 lattice_lengths: [   5.30008,    5.30008,    5.30008, ]
 lattice_angles: [109.471, 109.471, 109.471, ] # degrees, (23, 13, 12)
 lattice_volume:   1.1461046E+02
-convergence: {deltae:  2.665E-15, res2:  9.921E-19, residm:  1.644E-10, diffor: null, }
+convergence: {deltae: -9.770E-15, res2:  9.921E-19, residm:  1.644E-10, diffor: null, }
 etotal    :  -4.97207178E+00
 entropy   :   0.00000000E+00
 fermie    :  -2.23431968E-01
@@ -430,15 +430,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  4.24096116154358E+00
-hartree             :  1.01994201211448E-02
+kinetic             :  4.24096116154359E+00
+hartree             :  1.01994201211449E-02
 xc                  : -1.54939768380137E+00
 Ewald energy        : -7.43307485602196E+00
 psp_core            :  3.51099954326088E+00
-local_psp           :  2.25899821493568E-01
-non_local_psp       : -3.97881713229536E+00
-internal            : -4.97322972569951E+00
-'-kT*entropy'       :  1.15794720141769E-03
+local_psp           :  2.25899821493570E-01
+non_local_psp       : -3.97881713229538E+00
+internal            : -4.97322972569952E+00
+'-kT*entropy'       :  1.15794720141759E-03
 total_energy        : -4.97207177849810E+00
 total_energy_eV     : -1.35296953744185E+02
 band_energy         : -1.51247341170167E+00
@@ -488,7 +488,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -528,23 +528,23 @@ tolerances: {tolvrs: 1.00E-09, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   30335.038338233      2.992E+04 1.772E+00 1.718E+08
- ETOT  2   97785.939244114      6.745E+04 6.607E+00 5.508E+08
- ETOT  3   32.461182141901     -9.775E+04 2.849E+00 1.678E+05
- ETOT  4   2.7869166602613     -2.967E+01 5.900E-03 6.754E+00
- ETOT  5   2.7856301204384     -1.287E-03 1.095E-04 2.269E-03
- ETOT  6   2.7856294073639     -7.131E-07 3.996E-07 4.611E-05
- ETOT  7   2.7856294253399      1.798E-08 1.439E-08 1.534E-04
- ETOT  8   2.7856293987148     -2.663E-08 5.647E-11 3.436E-06
- ETOT  9   2.7856293981080     -6.067E-10 2.530E-12 2.513E-08
- ETOT 10   2.7856293981045     -3.524E-12 9.439E-15 4.280E-11
+-ETOT  1   30335.038587873      2.992E+04 1.772E+00 1.718E+08
+ ETOT  2   97785.940557574      6.745E+04 6.607E+00 5.508E+08
+ ETOT  3   32.461177089895     -9.775E+04 2.849E+00 1.678E+05
+ ETOT  4   2.7869166575828     -2.967E+01 5.901E-03 6.754E+00
+ ETOT  5   2.7856301204696     -1.287E-03 1.095E-04 2.269E-03
+ ETOT  6   2.7856294073596     -7.131E-07 3.997E-07 4.608E-05
+ ETOT  7   2.7856294253222      1.796E-08 1.439E-08 1.533E-04
+ ETOT  8   2.7856293987154     -2.661E-08 5.647E-11 3.438E-06
+ ETOT  9   2.7856293981090     -6.064E-10 2.530E-12 2.513E-08
+ ETOT 10   2.7856293981041     -4.889E-12 9.438E-15 4.280E-11
 
  At SCF step   10       vres2   =  4.28E-11 < tolvrs=  1.00E-09 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   16.432E-17; max=  94.385E-16
+ Mean square residual over all n,k,spin=   16.432E-17; max=  94.383E-16
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -571,39 +571,39 @@ tolerances: {tolvrs: 1.00E-09, }
 
 
  ==> Compute Derivative Database <==
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   1    1         2.7856289946        -0.0000002858
    1    1   2    1        -1.2915006146         0.0000002858
    1    1   3    1        -1.2915006146         0.0000002858
-  
+
    2    1   1    1        -1.2915006146         0.0000002858
    2    1   2    1         2.7856289946        -0.0000002858
    2    1   3    1        -0.2026277655        -0.0000002858
-  
+
    3    1   1    1        -1.2915006146         0.0000002858
    3    1   2    1        -0.2026277655        -0.0000002858
    3    1   3    1         2.7856289946        -0.0000002858
-  
-  
+
+
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   1    1         0.1379277857        -0.0000000305
    1    1   2    1         0.0000000000        -0.0000000000
    1    1   3    1         0.0000000000        -0.0000000000
-  
-   2    1   1    1         0.0000000000        -0.0000000000
-   2    1   2    1         0.0797838641        -0.0000000000
+
+   2    1   1    1         0.0000000000         0.0000000000
+   2    1   2    1         0.0797838641         0.0000000000
    2    1   3    1         0.0000000000        -0.0000000000
-  
-   3    1   1    1         0.0000000000         0.0000000000
+
+   3    1   1    1         0.0000000000        -0.0000000000
    3    1   2    1         0.0000000000        -0.0000000000
    3    1   3    1         0.0797838641        -0.0000000000
 
@@ -621,7 +621,7 @@ tolerances: {tolvrs: 1.00E-09, }
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      6.1200000000E+00  6.1200000000E+00  6.1200000000E+00 Bohr
               amu      9.29063800E+01
@@ -633,7 +633,7 @@ tolerances: {tolvrs: 1.00E-09, }
            etotal2     2.7856293981E+00
             fcart1    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         312
+-          fftalg         512
            getwfk1          0
            getwfk2          1
            jdtset        1    2
@@ -872,7 +872,7 @@ P          mk1mem2        128
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -888,7 +888,7 @@ P          mk1mem2        128
 - Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997a
 -
-- [4] Ab initio pseudopotentials for electronic structure calculations of poly-atomic systems, 
+- [4] Ab initio pseudopotentials for electronic structure calculations of poly-atomic systems,
 - using density-functional theory.
 - M. Fuchs and, M. Scheffler, Comput. Phys. Commun. 119, 67 (1999).
 - Comment: Some pseudopotential generated using the FHI code were used.
@@ -901,12 +901,12 @@ P          mk1mem2        128
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -924,15 +924,15 @@ P          mk1mem2        128
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          3.8  wall=          3.9
+- Proc.   0 individual time (sec): cpu=          2.2  wall=          2.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   7 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.8  wall=          3.9
++Overall time at end (sec) : cpu=          2.2  wall=          2.2

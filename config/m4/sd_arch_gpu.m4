@@ -1,4 +1,4 @@
-## Copyright (C) 2019-2024 ABINIT group (Yann Pouillon)
+## Copyright (C) 2019-2025 ABINIT group (Yann Pouillon)
 
 #
 # GPU support for Steredeg
@@ -136,12 +136,13 @@ AC_DEFUN([SD_GPU_INIT], [
   AC_ARG_VAR([GPU_CFLAGS], [C flags for GPU.])
   AC_ARG_VAR([GPU_CXXFLAGS], [C++ flags for GPU.])
   AC_ARG_VAR([GPU_FCFLAGS], [Fortran flags for GPU.])
+  AC_ARG_VAR([GPU_FFLAGS], [Fortran flags for GPU (better use GPU_FCFLAGS).])
   AC_ARG_VAR([GPU_LDFLAGS], [Linker flags for GPU.])
   AC_ARG_VAR([GPU_LIBS], [Library flags for GPU.])
 
   # Detect use of environment variables
   if test "${sd_gpu_enable}" = "yes" -o "${sd_gpu_enable}" = "auto"; then
-    tmp_gpu_vars="${GPU_CPPFLAGS}${GPU_CFLAGS}${GPU_CXXFLAGS}${GPU_FCFLAGS}${GPU_LDFLAGS}${GPU_LIBS}"
+    tmp_gpu_vars="${GPU_CPPFLAGS}${GPU_CFLAGS}${GPU_CXXFLAGS}${GPU_FFLAGS}${GPU_FCFLAGS}${GPU_LDFLAGS}${GPU_LIBS}"
     if test "${sd_gpu_init}" = "def" -a ! -z "${tmp_gpu_vars}"; then
       sd_gpu_enable="yes"
       sd_gpu_init="env"
@@ -198,6 +199,7 @@ AC_DEFUN([SD_GPU_INIT], [
       test ! -z "${GPU_CXXFLAGS}" && sd_gpu_cxxflags="${GPU_CXXFLAGS}"
     fi
     if test "${sd_gpu_enable_fc}" = "yes"; then
+      test ! -z "${GPU_FFLAGS}" && sd_gpu_fcflags="${GPU_FFLAGS}"
       test ! -z "${GPU_FCFLAGS}" && sd_gpu_fcflags="${GPU_FCFLAGS}"
     fi
     test ! -z "${GPU_LDFLAGS}" && sd_gpu_ldflags="${GPU_LDFLAGS}"

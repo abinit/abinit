@@ -2,18 +2,18 @@
 authors: DCA, XG, RC
 ---
 
-# New user help file  
+# New user help file
 
-This page gives a beginner's introduction to the ABINIT resources, 
-the package, and the main ABINIT applications.  
+This page gives a beginner's introduction to the ABINIT resources,
+the package, and the main ABINIT applications.
 
 ## Foreword
-  
-The ABINIT project is a group effort of dozens of people worldwide, 
-who develop the main ABINIT application 
-which is delivered with many other files (post-processors, tests, documentation, ...) in the ABINIT package. 
+
+The ABINIT project is a group effort of dozens of people worldwide,
+who develop the main ABINIT application
+which is delivered with many other files (post-processors, tests, documentation, ...) in the ABINIT package.
 The ABINIT project includes also resources
-provided on the [ABINIT Web site](https://www.abinit.org) and 
+provided on the [ABINIT Web site](https://www.abinit.org) and
 the [github organization](https://github.com/abinit).
 
 Before reading the present page, and get some grasp about the main ABINIT
@@ -28,16 +28,16 @@ After having gone through the present New User's Guide, you should follow the
 [[tutorial:index|ABINIT tutorial]].
 
 ## Introduction
-  
+
 ABINIT is a package whose main program allows to find the total energy, charge
 density and electronic structure of systems made of electrons and nuclei
 (molecules and periodic solids) within Density Functional Theory, using
-pseudopotentials and a planewave basis, or augmented plane waves, or even wavelets. 
+pseudopotentials and a planewave basis, or augmented plane waves, or even wavelets.
 
 Some possibilities of ABINIT go beyond Density Functional Theory,
 i.e. the many-body perturbation theory (GW approximation the Bethe-Salpether
 equation), Time-Dependent Density Functional Theory, Dynamical Mean-Field
-Theory, the Allen-Heine-Cardona theory to find temperature-dependent electronic structure. 
+Theory, the Allen-Heine-Cardona theory to find temperature-dependent electronic structure.
 
 ABINIT also includes options to optimize the geometry
 according to the DFT forces and stresses, or to perform molecular dynamics
@@ -64,15 +64,15 @@ well as other descriptive files, should be found in ~abinit/doc/.
 Other subdirectories will be described later.
 
 ## The main executable: abinit
-  
+
 After compilation, the main code will be present in the package as
 ~abinit/src/98_main/abinit (or perhaps at another place, depending on your installation).
 
 To run abinit you need three things:
 
-1. Access to the executable, abinit. 
-2. An input file. 
-3. A pseudopotential input file for each kind of element in the unit cell. 
+1. Access to the executable, abinit.
+2. An input file.
+3. A pseudopotential input file for each kind of element in the unit cell.
 
 With these items a job can be run.
 
@@ -93,28 +93,28 @@ Other test cases (more than 1000 input files) can be found in the ~abinit/test
 subdirectories, e.g. "fast", the "vX" series (v1, v2, ... v67mbpt, v7, v8),
 "libxc", "paral", the "tutoX" series ...
 
-Many different sorts of pseudopotentials can be used with ABINIT. 
-Most of them can be found on the [atomic data files](https://www.abinit.org/downloads/atomic-data-files) 
-page of the ABINIT web site. 
-There are official recommended pseudopotentials tables 
-(the PAW JTH table, and the norm-conserving table from ONCVPSP), and also some older sets of pseudopotentials. 
+Many different sorts of pseudopotentials can be used with ABINIT.
+Most of them can be found on the [atomic data files](https://www.abinit.org/downloads/atomic-data-files)
+page of the ABINIT web site.
+There are official recommended pseudopotentials tables
+(the PAW JTH table, and the norm-conserving table from ONCVPSP), and also some older sets of pseudopotentials.
 Information on pseudopotential files can be found in the [[help:abinit#5|ABINIT help file]],
 the [[theory:pseudopotentials|Pseudopotential theory document]], on the [ABINIT wiki](https://wiki.abinit.org/doku.php?id=developers:pseudos),
 and in the [[topic:PseudosPAW|PseudosPAW]] topics.
 
 !!! warning
 
-    A subset of existing pseudopotentials are used for test cases, and are located in the 
-    ~abinit/tests/Psps_for_tests directory but they **are not recommended** for production. 
+    A subset of existing pseudopotentials are used for test cases, and are located in the
+    ~abinit/tests/Pspdir directory but they **are not recommended** for production.
 
 ## Other programs in the package
-  
+
 In addition to abinit, there are utility programs provided in the package.
 Some utility programs are written in Fortran (like the main abinit program), and
-their sources is also in ~abinit/src/98_main. 
+their sources is also in ~abinit/src/98_main.
 These include:
 
-mrgddb and anaddb 
+mrgddb and anaddb
 :   They allow one to post-process responses to atomic
     displacements and/or to homogeneous electric field, and/or to strain
     perturbation, as generated by abinit, to produce full phonon band structures,
@@ -122,7 +122,7 @@ mrgddb and anaddb
     properties, to name a few. `mrgddb` is for "Merge of Derivative DataBases",
     while `anaddb` is for "Analysis of Derivative DataBases".
 
-cut3d 
+cut3d
 :   It can be used to post-process the three-dimensional density (or
     potential) files generated by abinit. It allows one to deduce charge density
     in selected planes (for isodensity plots), along selected lines, or at
@@ -146,7 +146,7 @@ processing scripts are distinguished. Some allows one to visualize ABINIT
 outputs, like abinit_eignc_to_bandstructure.py.
 
 ## Other resources outside the ABINIT package
-  
+
 In addition to the ABINIT package, other resources can be obtained from the
 [ABINIT github site](https://github.com/abinit). The sources of the latest
 version of the ABINIT package are actually mirrored on this site, but for
@@ -156,7 +156,7 @@ other resources (not in the package) this is the only download point.
 :   is an open-source library for analyzing the results produced by
     ABINIT (including visualisation), and for preparing input files and workflows
     to automate calculations (so-called high-throughput calculations).
-    It provides interface with [pymatgen](http://pymatgen.org/), 
+    It provides interface with [pymatgen](http://pymatgen.org/),
     developed by the [Materials Project](http://materialsproject.org/).
     Abinit tutorials based on AbiPy are available in the [abitutorials repository](https://github.com/abinit/abitutorials).
 
@@ -164,12 +164,12 @@ other resources (not in the package) this is the only download point.
 :   is a Python framework for generating and validating
     pseudopotentials (or PAW atomic data files). Normal ABINIT users benefit a lot
     from this project, since the ABINIT recommended table of norm-conserving
-    pseudopotentials has been generated thanks to it. 
+    pseudopotentials has been generated thanks to it.
     The recommended PAW table is also provided via the pseudo-dojo interface.
 
 [abiconfig](https://github.com/abinit/abiconfig)
 :   is a holding area for configuration files used to
-    configure/compile Abinit on clusters. You might benefit from it if you are 
+    configure/compile Abinit on clusters. You might benefit from it if you are
     installing Abinit on a cluster.
 
 [abiflows](https://github.com/abinit/abiflows)
@@ -177,19 +177,19 @@ other resources (not in the package) this is the only download point.
 
 
 [abiconda](https://github.com/abinit/abiconda)
-:   contains conda recipes to build Abinit-related packages (like AbiPy). 
+:   contains conda recipes to build Abinit-related packages (like AbiPy).
     You might benefit from it if you install Abipy on your machine.
 
 
 In addition to the resources that the ABINIT developer provide to the
-community through the ABINIT packages, portal and Github, many ABINIT-independent 
+community through the ABINIT packages, portal and Github, many ABINIT-independent
 commercial or free applications can be used to visualize ABINIT
 outputs or interact with ABINIT. We provide a (not very well maintained) list
 of links in [the last section of http://www.abinit.org/sponsors](http://www.abinit.org/sponsors).
 Of course, you might get more by browsing the Web.
 
 ## Input variables to abinit
-  
+
 As an overview, the most important input variables, to be provided in the
 input file, are listed below:
 
@@ -224,7 +224,7 @@ input file, are listed below:
 
 **Specification of the planewave basis set, Brillouin zone wavevector sampling, and occupation of the bands:**
 
-[[ecut]]            
+[[ecut]]
 :       planewave kinetic energy cutoff in Hartree
 
 [[kptopt]]
@@ -241,10 +241,13 @@ input file, are listed below:
 
 **Specification of the type of calculation to be done:**
 
-[[ionmov]]
-:       when [[ionmov]] = 0: the ions and cell shape are fixed
-                        = 2: search for the equilibrium geometry
-                        = 6: molecular dynamics
+[[moldyn]]
+:       when [[moldyn]] is "none": the ions and cell shape are fixed
+                        is "nve_verlet": molecular dynamics (NVE)
+
+[[geoopt]]
+:       when [[geoopt]] is "none": the ions and cell shape are fixed
+                        is "bfgs": search for the equilibrium geometry
 
 [[iscf]]
 :       either a positive number for defining self-consistent
@@ -274,8 +277,8 @@ input file, are listed below:
 :       force tolerance for structural relaxation in Hartree/Bohr
 
 ## Output files
-  
-Output from an abinit run shows up in several files and in the standard output. 
+
+Output from an abinit run shows up in several files and in the standard output.
 Usually one runs the command with a pipe of standard output to a log
 file, which can be inspected for warnings or error messages if anything goes
 wrong or otherwise can be discarded at the end of a run. The more easily
@@ -286,11 +289,11 @@ that is usually kept for archival purposes.
 In addition, wavefunctions can be input (starting point) or output (result of
 the calculation), and possibly, charge density and/or electrostatic potential,
 if they have been asked for. These three sets of data are stored in unformatted binary files (native Fortran),
-or in NetCDF format.  
+or in NetCDF format.
 
 The Density Of States (DOS) can also be an output as a formatted (readable) file.
 An analysis of geometry can also be provided (GEO file).
-The name of these files is constructed from a "root" name, 
+The name of these files is constructed from a "root" name,
 that might be different for input files and output files, and that is either
 provided by ABINIT or provided by the user,
 to which the code will append a descriptor, like WFK for wavefunctions, DEN
@@ -301,11 +304,11 @@ Amongst these files, there is a "status" file, summarizing the current status of
 code, in long jobs. The [[help:abinit|ABINIT help file]] contains more details.
 
 ## What does the code do?
-  
+
 The simplest sort of job computes an electronic structure for a fixed set of
 atomic positions within a periodic unit cell. By electronic structure, we mean
 a set of eigenvalues and wavefunctions which achieve the lowest DFT energy
-possible for that basis set (that number of planewaves). 
+possible for that basis set (that number of planewaves).
 
 The code takes the description of the unit cell and atomic positions and assembles a crystal
 potential from the input atomic pseudopotentials, then uses either an input
@@ -322,7 +325,7 @@ displacements and homogeneous electric field, so that the full phonon band
 structure can be constructed.
 
 ## Versioning logic
-  
+
 We finish this "help for new user" with a brief explanation of the logic of ABINIT version releases.
 
 The full name of a version has three digits (for example, 9.10.5). The first

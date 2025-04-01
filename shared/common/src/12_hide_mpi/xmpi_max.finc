@@ -9,7 +9,7 @@
 !!  xmpi_max is the generic function.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2024 ABINIT group (AR,XG,MB)
+!!  Copyright (C) 2001-2025 ABINIT group (AR,XG,MB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,14 +29,15 @@ subroutine xmpi_max_int0d_i4b(xval,xmax,comm,ier)
 
 !Local variables-------------------
 #if defined HAVE_MPI
- integer :: arr_xmax(1)
+ integer :: arr_xmax(1),arr_xval(1)
 #endif
 
 ! *************************************************************************
  ier=0
 #if defined HAVE_MPI
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
-   call MPI_ALLREDUCE([xval],arr_xmax,1,MPI_INTEGER,MPI_MAX,comm,ier)
+   arr_xval(1) = xval
+   call MPI_ALLREDUCE(arr_xval,arr_xmax,1,MPI_INTEGER,MPI_MAX,comm,ier)
    xmax=arr_xmax(1)
  else
 #endif
@@ -70,14 +71,15 @@ subroutine xmpi_max_int0d_i8b(xval,xmax,comm,ier)
 
 !Local variables-------------------
 #if defined HAVE_MPI
- integer :: arr_xmax(1)
+ integer(i8b) :: arr_xmax(1),arr_xval(1)
 #endif
 
 ! *************************************************************************
  ier=0
 #if defined HAVE_MPI
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
-   call MPI_ALLREDUCE([xval],arr_xmax,1,MPI_INTEGER8,MPI_MAX,comm,ier)
+   arr_xval(1) = xval
+   call MPI_ALLREDUCE(arr_xval,arr_xmax,1,MPI_INTEGER8,MPI_MAX,comm,ier)
    xmax=arr_xmax(1)
  else
 #endif
@@ -154,7 +156,7 @@ subroutine xmpi_max_dpv(xval,xmax,comm,ier)
 
 !Local variables-------------------
 #if defined HAVE_MPI
- real(dp) :: arr_xmax(1)
+ real(dp) :: arr_xmax(1),arr_xval(1)
 #endif
 
 ! *************************************************************************
@@ -162,7 +164,8 @@ subroutine xmpi_max_dpv(xval,xmax,comm,ier)
  ier=0
 #if defined HAVE_MPI
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
-   call MPI_ALLREDUCE([xval],arr_xmax,1,MPI_DOUBLE_PRECISION,MPI_MAX,comm,ier)
+   arr_xval(1) = xval
+   call MPI_ALLREDUCE(arr_xval,arr_xmax,1,MPI_DOUBLE_PRECISION,MPI_MAX,comm,ier)
    xmax=arr_xmax(1)
  else
 #endif
@@ -205,7 +208,7 @@ subroutine xmpi_max_int0d_ip(ioval,comm,ier)
 
 !Local variables-------------------
 #if defined HAVE_MPI
- integer :: arr_xmax(1)
+ integer :: arr_xmax(1),arr_ioval(1)
 #endif
 
 ! *************************************************************************
@@ -213,7 +216,8 @@ subroutine xmpi_max_int0d_ip(ioval,comm,ier)
  ier=0
 #if defined HAVE_MPI
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
-   call MPI_ALLREDUCE([ioval],arr_xmax,1,MPI_INTEGER,MPI_MAX,comm,ier)
+   arr_ioval(1) = ioval
+   call MPI_ALLREDUCE(arr_ioval,arr_xmax,1,MPI_INTEGER,MPI_MAX,comm,ier)
    ioval = arr_xmax(1)
  end if
 #endif
@@ -252,7 +256,7 @@ subroutine xmpi_max_dp0d_ip(ioval,comm,ier)
 
 !Local variables-------------------
 #if defined HAVE_MPI
- real(dp) :: arr_xmax(1)
+ real(dp) :: arr_xmax(1),arr_ioval(1)
 #endif
 
 ! *************************************************************************
@@ -260,7 +264,8 @@ subroutine xmpi_max_dp0d_ip(ioval,comm,ier)
  ier=0
 #if defined HAVE_MPI
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
-   call MPI_ALLREDUCE([ioval],arr_xmax,1,MPI_DOUBLE_PRECISION,MPI_MAX,comm,ier)
+   arr_ioval(1) = ioval
+   call MPI_ALLREDUCE(arr_ioval,arr_xmax,1,MPI_DOUBLE_PRECISION,MPI_MAX,comm,ier)
    ioval = arr_xmax(1)
  end if
 #endif
