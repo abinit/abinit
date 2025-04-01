@@ -289,10 +289,10 @@ subroutine rhotoxc(bigexc,bigsxc,kxc,mpi_enreg,nfft,ngfft, &
  integer :: auxc_ixc,cplex,ierr,ifft,ii,ixc,ixc_from_lib,indx,ipositron,ipts,ishift,ispden,iwarn,iwarnp
  integer :: jj,mpts,ndvxc,nd2vxc,nfftot,ngr,ngrad,ngrad_apn,nkxc_eff,npts
  integer :: nspden,nspden_apn,nspden_eff,nspden_updn,nspgrad,nvxcgrho,nvxclrho,nvxctau
- integer :: n3xctau,order,usefxc,nproc_fft,comm_fft,usegradient,usekden,uselaplacian
+ integer :: n3xctau,order,nproc_fft,comm_fft,usegradient,usekden,uselaplacian
  logical :: compute_stress,my_add_tfw
  real(dp),parameter :: mot=-one/3.0_dp
- real(dp) :: coeff,divshft,doti,dstrsxc,dvdn,dvdz,rhoexc,rhotsxc,exc_str,factor,m_norm_min,s1,s2,s3
+ real(dp) :: coeff,divshft,doti,dstrsxc,dvdn,dvdz,rhoexc,rhotsxc,factor,m_norm_min,s1,s2,s3
  real(dp) :: strdiag,strsxc1_tot,strsxc2_tot,strsxc3_tot,strsxc4_tot
  real(dp) :: strsxc5_tot,strsxc6_tot,ucvol
  real(dp) :: deltae_vdw,exc_vdw
@@ -304,7 +304,7 @@ subroutine rhotoxc(bigexc,bigsxc,kxc,mpi_enreg,nfft,ngfft, &
  real(dp) :: tsec(2),vxcmean(4)
  real(dp),allocatable :: d2rhonow(:,:,:)
  real(dp),allocatable :: d2vxc_b(:,:),depsxc(:,:),depsxc_apn(:,:),dvxc_apn(:),dvxc_b(:,:)
- real(dp),allocatable :: exc_b(:),tsxc_b(:),fxc_b(:),fxc_apn(:),grho2_apn(:),grho2_b_updn(:,:)
+ real(dp),allocatable :: exc_b(:),tsxc_b(:),fxc_apn(:),grho2_apn(:),grho2_b_updn(:,:)
  real(dp),allocatable :: lrhonow(:,:),lrho_b_updn(:,:)
  real(dp),allocatable :: m_norm(:),nhat_up(:),rho_b_updn(:,:),rho_b(:),rhonow_apn(:,:,:)
  real(dp),allocatable :: tau_b_updn(:,:),vxc_apn(:,:),vxcgr_apn(:),vxcgrho_b_updn(:,:),vxcrho_b_updn(:,:)
@@ -441,7 +441,6 @@ subroutine rhotoxc(bigexc,bigsxc,kxc,mpi_enreg,nfft,ngfft, &
  qphon(:)=zero
  iwarn=0
  nfftot=ngfft(1)*ngfft(2)*ngfft(3)
- usefxc=0;if (ixc==50) usefxc=1
 
 !Initializations
  bigexc=zero
@@ -760,7 +759,6 @@ subroutine rhotoxc(bigexc,bigsxc,kxc,mpi_enreg,nfft,ngfft, &
        ABI_MALLOC(vxctau_b_updn,(npts,nvxctau))
        ABI_MALLOC(dvxc_b,(npts,ndvxc))
        ABI_MALLOC(d2vxc_b,(npts,nd2vxc))
-       ABI_MALLOC(fxc_b,(npts*usefxc))
        if (nvxcgrho>0) vxcgrho_b_updn(:,:)=zero
        if (nvxclrho>0) vxclrho_b_updn(:,:)=zero
        if (nvxctau>0) vxctau_b_updn(:,:)=zero
@@ -810,7 +808,7 @@ subroutine rhotoxc(bigexc,bigsxc,kxc,mpi_enreg,nfft,ngfft, &
          call drivexc(auxc_ixc,order,npts,nspden_updn,usegradient,0,0,&
 &          rho_b_updn,exc_b,tsxc_b,vxcrho_b_updn,nvxcgrho,0,0,ndvxc,nd2vxc,xcdata%tphysel, &
 &          grho2_updn=grho2_b_updn,vxcgrho=vxcgrho_b_updn,dvxc=dvxc_b, &
-&          fxcT=fxc_b,hyb_mixing=xcdata%hyb_mixing,xc_funcs=xc_funcs_auxc)
+&          hyb_mixing=xcdata%hyb_mixing,xc_funcs=xc_funcs_auxc)
 !        Transfer the xc kernel
          if (nkxc_eff==1.and.ndvxc==15) then
            kxc(ifft:ifft+npts-1,1)=half*(dvxc_b(1:npts,1)+dvxc_b(1:npts,9)+dvxc_b(1:npts,10))
@@ -840,7 +838,7 @@ subroutine rhotoxc(bigexc,bigsxc,kxc,mpi_enreg,nfft,ngfft, &
 &          grho2_updn=grho2_b_updn,vxcgrho=vxcgrho_b_updn,&
 &          lrho_updn=lrho_b_updn,vxclrho=vxclrho_b_updn,&
 &          tau_updn=tau_b_updn,vxctau=vxctau_b_updn,&
-&          dvxc=dvxc_b,d2vxc=d2vxc_b,fxcT=fxc_b,&
+&          dvxc=dvxc_b,d2vxc=d2vxc_b,&
 &          hyb_mixing=xcdata%hyb_mixing,&
 &          xc_funcs=xc_funcs)
        else
@@ -851,7 +849,7 @@ subroutine rhotoxc(bigexc,bigsxc,kxc,mpi_enreg,nfft,ngfft, &
 &          grho2_updn=grho2_b_updn,vxcgrho=vxcgrho_b_updn,&
 &          lrho_updn=lrho_b_updn,vxclrho=vxclrho_b_updn,&
 &          tau_updn=tau_b_updn,vxctau=vxctau_b_updn,&
-&          dvxc=dvxc_b,d2vxc=d2vxc_b,fxcT=fxc_b,&
+&          dvxc=dvxc_b,d2vxc=d2vxc_b,&
 &          hyb_mixing=xcdata%hyb_mixing)
        end if
 
@@ -881,7 +879,7 @@ subroutine rhotoxc(bigexc,bigsxc,kxc,mpi_enreg,nfft,ngfft, &
 !      Gradient Weiszacker correction to a Thomas-Fermi functional
        if (my_add_tfw) then
          vxcgrho_b_updn(:,:)=zero
-         call xctfw(xcdata%tphysel,exc_b,fxc_b,usefxc,rho_b_updn,vxcrho_b_updn,npts,nspden_updn, &
+         call xctfw(xcdata%tphysel,exc_b,tsxc_b,rho_b_updn,vxcrho_b_updn,npts,nspden_updn, &
 &                   vxcgrho_b_updn,nvxcgrho,grho2_b_updn)
        end if
 
@@ -893,17 +891,16 @@ subroutine rhotoxc(bigexc,bigsxc,kxc,mpi_enreg,nfft,ngfft, &
          rhotsxc=rhotsxc+rho_b(indx)*tsxc_b(indx) ! Will be normalized with respect to the volume later to get bigsxc.
          depsxc(ipts,1)=vxcrho_b_updn(indx,1)
          if (nspden_updn==2) depsxc(ipts,2)=vxcrho_b_updn(indx,2)
-         exc_str=exc_b(indx);if(usefxc==1) exc_str=fxc_b(indx)
          if (compute_stress) then
            ! Note for GGA/mGGA: the diagonal stress contribution is not complete because
            !  this is not the complete Vxc. Only Int[n.dFxc/dn] is computed here. The
            !  other terms are computed later
            ! (i.e. -Int[n.grad(dFxc/grad(n))] and Int[n.Lapl(dFxc/Lapl(n))])
            if(nspden_updn==1)then
-             strdiag=rho_b(indx)*(exc_str-vxcrho_b_updn(indx,1))
+             strdiag=rho_b(indx)*(exc_b(indx)-vxcrho_b_updn(indx,1))
              if (usekden==1) strdiag=strdiag-two*tau_b_updn(indx,1)*vxctau_b_updn(indx,1)
            else if(nspden_updn==2)then
-             strdiag=rho_b(indx)*exc_str &
+             strdiag=rho_b(indx)*exc_b(indx) &
 &             - rho_b_updn(indx,1)*vxcrho_b_updn(indx,1)&
 &             - (rho_b(indx)-rho_b_updn(indx,1))*vxcrho_b_updn(indx,2)
              if (usekden==1) then
@@ -1196,7 +1193,6 @@ subroutine rhotoxc(bigexc,bigsxc,kxc,mpi_enreg,nfft,ngfft, &
        ABI_FREE(dvxc_b)
        ABI_FREE(d2vxc_b)
        ABI_FREE(vxcgrho_b_updn)
-       ABI_FREE(fxc_b)
        ABI_FREE(vxclrho_b_updn)
        ABI_FREE(lrho_b_updn)
        ABI_FREE(tau_b_updn)
