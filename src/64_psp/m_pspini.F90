@@ -588,10 +588,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
    ABI_FREE(vlspl)
    ABI_FREE(xccc1d)
    ABI_FREE(xcctau1d)
-
-   if (.not.psps%vlspl_recipSpace) then
-     ABI_FREE(dvlspl)
-   end if
+   ABI_FREE(dvlspl)
 
  end if !  End condition of new computation needed
 

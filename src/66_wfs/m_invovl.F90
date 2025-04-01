@@ -507,6 +507,9 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
  integer :: array_nprojs_pp(mpi_enreg%nproc_fft)
  integer :: iproc, slice_size
  real(dp), allocatable :: gramwork(:,:,:)
+#ifdef HAVE_OPENMP_OFFLOAD
+ real(dp), ABI_CONTIGUOUS pointer :: invovl_gram_projs(:,:,:)
+#endif
 
  integer, parameter :: timer_mkinvovl = 1620, timer_mkinvovl_build_d = 1621, timer_mkinvovl_build_ptp = 1622
 
@@ -605,7 +608,7 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
 
      !! build atom_projs, from opernlb
      !! P = 4pi/sqrt(ucvol)* conj(diag(ph3d)) * ffnl * diag(parity), with parity = (-i)^l
-     atom_projs(:,:,:) = 0
+     atom_projs(:,:,:) = zero
 
      ! start from 4pi/sqrt(ucvol)*ffnl
      ! atom_projs(1, :, 1:nlmn) = four_pi/sqrt(ham%ucvol) * ffnl(:, 1, 1:nlmn)
@@ -707,17 +710,17 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
 #ifdef HAVE_OPENMP_OFFLOAD
    ! compute gram_projs in one GEMM, only one FFT proc expected in GPU mode
    slice_size = array_nprojs_pp(1)
-   current_gram_projs   => invovl%gram_projs
-   !$OMP TARGET ENTER DATA MAP(alloc:current_gram_projs)
+   invovl_gram_projs   => invovl%gram_projs
+   !$OMP TARGET ENTER DATA MAP(alloc:invovl_gram_projs)
    !$OMP TARGET ENTER DATA MAP(to:projs)
 
-   !$OMP TARGET DATA USE_DEVICE_PTR(current_gram_projs,projs)
+   !$OMP TARGET DATA USE_DEVICE_PTR(invovl_gram_projs,projs)
    call abi_gpu_xgemm(cplx, blas_transpose,'N', invovl%nprojs, slice_size, (3-cplx)*ham%npw_k, cone, &
    &                  c_loc(projs), (3-cplx)*ham%npw_k, &
-   &                  c_loc(projs), (3-cplx)*ham%npw_k, czero, c_loc(current_gram_projs), invovl%nprojs)
+   &                  c_loc(projs), (3-cplx)*ham%npw_k, czero, c_loc(invovl_gram_projs), invovl%nprojs)
    !$OMP END TARGET DATA
    call xmpi_sum(invovl%gram_projs,mpi_enreg%comm_band,ierr,use_omp_map=.true.)
-   !$OMP TARGET EXIT DATA MAP(from:current_gram_projs)
+   !$OMP TARGET EXIT DATA MAP(from:invovl_gram_projs)
    !$OMP TARGET EXIT DATA MAP(delete:projs)
 #endif
  else
