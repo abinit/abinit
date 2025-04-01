@@ -2645,6 +2645,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,gred,strten,natom,r
 !!! External_ELECTRIC_FILED
 ! 7.5 - Compute Forces and energies from external electric field
 !------------------------------------------
+if(present(efield_type))then
  if (efield_type  /= 0) then
   call calculate_forces_efield(eff_pot,energy_part,eff_pot%mpi_coeff%comm,fcart_part,natom,&
   &                       disp_tmp,xcart,efield_type,efield,efield2,efield_lambda,efield_lambda2,efield_period,&
@@ -2659,6 +2660,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,gred,strten,natom,r
   energy = energy + energy_part
   fcart = fcart + fcart_part
  endif
+end if
 !-------------------------------------------
 ! 8 - Compute electronic Part with SCALE-UP
 !------------------------------------------
