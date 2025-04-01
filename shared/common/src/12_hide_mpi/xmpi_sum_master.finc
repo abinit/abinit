@@ -55,7 +55,7 @@ subroutine xmpi_sum_master_int(xval,master,comm,ier)
 !Local variables-------------------
 #if defined HAVE_MPI
  integer :: nproc_space_comm
- integer :: arr_xsum(1)
+ integer :: arr_xsum(1),arr_xval(1)
 #endif
 
 ! *************************************************************************
@@ -66,7 +66,8 @@ subroutine xmpi_sum_master_int(xval,master,comm,ier)
    call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
    if (nproc_space_comm /= 1) then
 !    Accumulate xval on all proc. in comm
-     call MPI_REDUCE([xval],arr_xsum,1,MPI_INTEGER,MPI_SUM,master,comm,ier)
+     arr_xval(1) = xval
+     call MPI_REDUCE(arr_xval,arr_xsum,1,MPI_INTEGER,MPI_SUM,master,comm,ier)
      xval = arr_xsum(1)
    end if
  end if
