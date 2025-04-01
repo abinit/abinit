@@ -6,6 +6,7 @@
  integer :: lot,nlot,lotin,lotout,fftcache,cidx,sidx,xyplane,padx
  integer :: nxhalf1,nxhalfm,nyhalf1,cidx_inv,pidx,fidx,padz,padc
  integer :: igb_inv,iiy,ixmax,iz_inv, G_TO_R, R_TO_G, iscale__, G_TO_R_SCALE, R_TO_G_SCALE
+ integer :: arr(2)
  real(dp) :: fraction,arg
  complex(MYKIND) :: vloc,phase
  character(len=500) :: msg
@@ -124,7 +125,9 @@ if (istwf_k==1) then
    ! ngbin 1D in-place transforms of cuboid(Gx,Gy,Gz) along Gz.
    status = DftiCreateDescriptor(bw_plan, FFT_PRECISION, DFTI_COMPLEX, 1, nz)
    status = DftiSetValue(bw_plan, DFTI_NUMBER_OF_TRANSFORMS, ngbin)
-   status = DftiSetValue(bw_plan, DFTI_INPUT_STRIDES,  (/0,mgb/))
+   arr(1) = 0
+   arr(2) = mgb
+   status = DftiSetValue(bw_plan, DFTI_INPUT_STRIDES, arr)
    status = DftiSetValue(bw_plan, DFTI_INPUT_DISTANCE,  1)
    status = DftiSetValue(bw_plan, DFTI_NUMBER_OF_USER_THREADS, nt1)
    DFTI_CHECK(status)
@@ -139,7 +142,9 @@ if (istwf_k==1) then
 #else
    ! Distribute 1D in-place transforms of cuboid(Gx,Gy,Gz) along Gz among the threads.
    status = DftiCreateDescriptor(bw_plan, FFT_PRECISION, DFTI_COMPLEX, 1, nz)
-   status = DftiSetValue(bw_plan, DFTI_INPUT_STRIDES,  (/0,mgb/))
+   arr(1) = 0
+   arr(2) = mgb
+   status = DftiSetValue(bw_plan, DFTI_INPUT_STRIDES, arr)
    status = DftiSetValue(bw_plan, DFTI_NUMBER_OF_USER_THREADS, nthreads)
 
    status = DftiCommitDescriptor(bw_plan)
@@ -179,9 +184,11 @@ if (istwf_k==1) then
  status = DftiSetValue(bw_plan_xg2pos, DFTI_PLACEMENT, DFTI_NOT_INPLACE)
  status = DftiSetValue(bw_plan_xg2pos, DFTI_NUMBER_OF_TRANSFORMS, ng2_pos)
  status = DftiSetValue(bw_plan_xg2pos, DFTI_INPUT_DISTANCE,  ldx)
- status = DftiSetValue(bw_plan_xg2pos, DFTI_INPUT_STRIDES,  (/0,1/))
+ arr(1) = 0
+ arr(2) = 1
+ status = DftiSetValue(bw_plan_xg2pos, DFTI_INPUT_STRIDES, arr)
  status = DftiSetValue(bw_plan_xg2pos, DFTI_OUTPUT_DISTANCE,  ldx)
- status = DftiSetValue(bw_plan_xg2pos, DFTI_OUTPUT_STRIDES,  (/0,1/))
+ status = DftiSetValue(bw_plan_xg2pos, DFTI_OUTPUT_STRIDES,  arr)
  status = DftiSetValue(bw_plan_xg2pos, DFTI_NUMBER_OF_USER_THREADS, nthreads)
                                                                  
  status = DftiCommitDescriptor(bw_plan_xg2pos)
@@ -195,9 +202,11 @@ if (istwf_k==1) then
  status = DftiSetValue(bw_plan_xg2neg, DFTI_PLACEMENT, DFTI_NOT_INPLACE)
  status = DftiSetValue(bw_plan_xg2neg, DFTI_NUMBER_OF_TRANSFORMS, ng2_neg)
  status = DftiSetValue(bw_plan_xg2neg, DFTI_INPUT_DISTANCE,  ldx)
- status = DftiSetValue(bw_plan_xg2neg, DFTI_INPUT_STRIDES,  (/0,1/))
+ arr(1) = 0
+ arr(2) = 1
+ status = DftiSetValue(bw_plan_xg2neg, DFTI_INPUT_STRIDES,  arr)
  status = DftiSetValue(bw_plan_xg2neg, DFTI_OUTPUT_DISTANCE,  ldx)
- status = DftiSetValue(bw_plan_xg2neg, DFTI_OUTPUT_STRIDES,  (/0,1/))
+ status = DftiSetValue(bw_plan_xg2neg, DFTI_OUTPUT_STRIDES,  arr)
  status = DftiSetValue(bw_plan_xg2neg, DFTI_NUMBER_OF_USER_THREADS, nthreads)
 
  status = DftiCommitDescriptor(bw_plan_xg2neg)
@@ -210,9 +219,11 @@ if (istwf_k==1) then
  status = DftiSetValue(bw_plan_y, DFTI_NUMBER_OF_TRANSFORMS, nx)
  status = DftiSetValue(bw_plan_y, DFTI_PLACEMENT, DFTI_NOT_INPLACE)
  status = DftiSetValue(bw_plan_y, DFTI_INPUT_DISTANCE,  1)
- status = DftiSetValue(bw_plan_y, DFTI_INPUT_STRIDES,  (/0,ldx/))
+ arr(1) = 0
+ arr(2) = ldx
+ status = DftiSetValue(bw_plan_y, DFTI_INPUT_STRIDES,  arr)
  status = DftiSetValue(bw_plan_y, DFTI_OUTPUT_DISTANCE,  1)
- status = DftiSetValue(bw_plan_y, DFTI_OUTPUT_STRIDES,  (/0,ldx/))
+ status = DftiSetValue(bw_plan_y, DFTI_OUTPUT_STRIDES,  arr)
  status = DftiSetValue(bw_plan_y, DFTI_NUMBER_OF_USER_THREADS, nthreads)
  DFTI_CHECK(status)
 
@@ -227,9 +238,11 @@ if (istwf_k==1) then
    status = DftiSetValue(fw_plan_y, DFTI_NUMBER_OF_TRANSFORMS, nx)
    status = DftiSetValue(fw_plan_y, DFTI_PLACEMENT, DFTI_NOT_INPLACE)
    status = DftiSetValue(fw_plan_y, DFTI_INPUT_DISTANCE,  1)
-   status = DftiSetValue(fw_plan_y, DFTI_INPUT_STRIDES,  (/0,ldx/))
+   arr(1) = 0
+   arr(2) = ldx
+   status = DftiSetValue(fw_plan_y, DFTI_INPUT_STRIDES,  arr)
    status = DftiSetValue(fw_plan_y, DFTI_OUTPUT_DISTANCE,  1)
-   status = DftiSetValue(fw_plan_y, DFTI_OUTPUT_STRIDES,  (/0,ldx/))
+   status = DftiSetValue(fw_plan_y, DFTI_OUTPUT_STRIDES,  arr)
    status = DftiSetValue(fw_plan_y, DFTI_NUMBER_OF_USER_THREADS, nthreads)
    DFTI_CHECK(status)
                                                                    
@@ -244,7 +257,7 @@ if (istwf_k==1) then
    status = DftiSetValue(fw_plan_xg2pos, DFTI_NUMBER_OF_TRANSFORMS, ng2_pos)
    status = DftiSetValue(fw_plan_xg2pos, DFTI_PLACEMENT, DFTI_NOT_INPLACE)
    status = DftiSetValue(fw_plan_xg2pos, DFTI_INPUT_DISTANCE,  ldx)
-   !status = DftiSetValue(fw_plan_xg2pos, DFTI_INPUT_STRIDES,  (/0,ldx/))
+   !status = DftiSetValue(fw_plan_xg2pos, DFTI_INPUT_STRIDES,  arr)
    status = DftiSetValue(fw_plan_xg2pos, DFTI_OUTPUT_DISTANCE,  ldx)
    status = DftiSetValue(fw_plan_xg2pos, DFTI_NUMBER_OF_USER_THREADS, nthreads)
    DFTI_CHECK(status)
@@ -260,7 +273,7 @@ if (istwf_k==1) then
    status = DftiSetValue(fw_plan_xg2neg, DFTI_NUMBER_OF_TRANSFORMS, ng2_neg)
    status = DftiSetValue(fw_plan_xg2neg, DFTI_PLACEMENT, DFTI_NOT_INPLACE)
    status = DftiSetValue(fw_plan_xg2neg, DFTI_INPUT_DISTANCE,  ldx)
-   !status = DftiSetValue(fw_plan_xg2neg, DFTI_INPUT_STRIDES,  (/0,ldx/))
+   !status = DftiSetValue(fw_plan_xg2neg, DFTI_INPUT_STRIDES,  arr)
    status = DftiSetValue(fw_plan_xg2neg, DFTI_OUTPUT_DISTANCE,  ldx)
    status = DftiSetValue(fw_plan_xg2neg, DFTI_NUMBER_OF_USER_THREADS, nthreads)
 
@@ -464,7 +477,9 @@ end if
    DFTI_CHECK(status)
 
    status = DftiSetValue(fw_plan, DFTI_NUMBER_OF_TRANSFORMS, ngbout)
-   status = DftiSetValue(fw_plan, DFTI_INPUT_STRIDES,  (/0,mgb/))
+   arr(1) = 0
+   arr(2) = mgb
+   status = DftiSetValue(fw_plan, DFTI_INPUT_STRIDES,  arr)
    status = DftiSetValue(fw_plan, DFTI_INPUT_DISTANCE,  1)
    status = DftiSetValue(fw_plan, DFTI_NUMBER_OF_USER_THREADS, nt1)
    status = DftiSetValue(fw_plan, R_TO_G_SCALE, one/DBLE(nfft)) ! normalization
@@ -481,7 +496,9 @@ end if
    status = DftiCreateDescriptor(fw_plan, FFT_PRECISION, DFTI_COMPLEX, 1, nz)
    DFTI_CHECK(status)
 
-   status = DftiSetValue(fw_plan, DFTI_INPUT_STRIDES,  (/0,mgb/))
+   arr(1) = 0
+   arr(2) = mgb
+   status = DftiSetValue(fw_plan, DFTI_INPUT_STRIDES,  arr)
    status = DftiSetValue(fw_plan, DFTI_NUMBER_OF_USER_THREADS, nthreads)
    status = DftiSetValue(fw_plan, R_TO_G_SCALE, one/DBLE(nfft)) ! normalization
    DFTI_CHECK(status)
@@ -653,7 +670,9 @@ else if (istwf_k>=2) then
 
      status = DftiCreateDescriptor(bw_plan, FFT_PRECISION, DFTI_COMPLEX, 1, nz)
      status = DftiSetValue(bw_plan, DFTI_NUMBER_OF_TRANSFORMS, ngbin)
-     status = DftiSetValue(bw_plan, DFTI_INPUT_STRIDES,  (/0,mgb/))
+     arr(1) = 0
+     arr(2) = mgb
+     status = DftiSetValue(bw_plan, DFTI_INPUT_STRIDES,  arr)
      status = DftiSetValue(bw_plan, DFTI_INPUT_DISTANCE,  1)
      status = DftiSetValue(bw_plan, DFTI_NUMBER_OF_USER_THREADS, nt1)
      DFTI_CHECK(status)
@@ -699,9 +718,11 @@ else if (istwf_k>=2) then
    status = DftiSetValue(bw_plan_xg2pos, DFTI_PLACEMENT, DFTI_NOT_INPLACE)
    status = DftiSetValue(bw_plan_xg2pos, DFTI_NUMBER_OF_TRANSFORMS, ng2_pos)
    status = DftiSetValue(bw_plan_xg2pos, DFTI_INPUT_DISTANCE,  ldx)
-   status = DftiSetValue(bw_plan_xg2pos, DFTI_INPUT_STRIDES,  (/0,1/))
+   arr(1) = 0
+   arr(2) = 1
+   status = DftiSetValue(bw_plan_xg2pos, DFTI_INPUT_STRIDES,  arr)
    status = DftiSetValue(bw_plan_xg2pos, DFTI_OUTPUT_DISTANCE,  ldx)
-   status = DftiSetValue(bw_plan_xg2pos, DFTI_OUTPUT_STRIDES,  (/0,1/))
+   status = DftiSetValue(bw_plan_xg2pos, DFTI_OUTPUT_STRIDES,  arr)
    status = DftiSetValue(bw_plan_xg2pos, DFTI_NUMBER_OF_USER_THREADS, nthreads)
                                                                    
    status = DftiCommitDescriptor(bw_plan_xg2pos)
@@ -718,9 +739,11 @@ else if (istwf_k>=2) then
    status = DftiSetValue(bw_plan_y, DFTI_NUMBER_OF_TRANSFORMS, nxhalf1)
    status = DftiSetValue(bw_plan_y, DFTI_PLACEMENT, DFTI_NOT_INPLACE)
    status = DftiSetValue(bw_plan_y, DFTI_INPUT_DISTANCE,  1)
-   status = DftiSetValue(bw_plan_y, DFTI_INPUT_STRIDES,  (/0,ldx/))
+   arr(1) = 0
+   arr(2) = ldx
+   status = DftiSetValue(bw_plan_y, DFTI_INPUT_STRIDES,  arr)
    status = DftiSetValue(bw_plan_y, DFTI_OUTPUT_DISTANCE,  1)
-   status = DftiSetValue(bw_plan_y, DFTI_OUTPUT_STRIDES,  (/0,ldx/))
+   status = DftiSetValue(bw_plan_y, DFTI_OUTPUT_STRIDES,  arr)
    status = DftiSetValue(bw_plan_y, DFTI_NUMBER_OF_USER_THREADS, nthreads)
    DFTI_CHECK(status)
 
@@ -739,9 +762,11 @@ else if (istwf_k>=2) then
      status = DftiSetValue(fw_plan_y, DFTI_NUMBER_OF_TRANSFORMS, nxhalf1)
      status = DftiSetValue(fw_plan_y, DFTI_PLACEMENT, DFTI_NOT_INPLACE)
      status = DftiSetValue(fw_plan_y, DFTI_INPUT_DISTANCE,  1)
-     status = DftiSetValue(fw_plan_y, DFTI_INPUT_STRIDES,  (/0,ldx/))
+     arr(1) = 0
+     arr(2) = ldx
+     status = DftiSetValue(fw_plan_y, DFTI_INPUT_STRIDES,  arr)
      status = DftiSetValue(fw_plan_y, DFTI_OUTPUT_DISTANCE,  1)
-     status = DftiSetValue(fw_plan_y, DFTI_OUTPUT_STRIDES,  (/0,ldx/))
+     status = DftiSetValue(fw_plan_y, DFTI_OUTPUT_STRIDES,  arr)
      status = DftiSetValue(fw_plan_y, DFTI_NUMBER_OF_USER_THREADS, nthreads)
      DFTI_CHECK(status)
                                                                      
@@ -761,7 +786,9 @@ else if (istwf_k>=2) then
      status = DftiSetValue(fw_plan_xg2pos, DFTI_NUMBER_OF_TRANSFORMS, ng2_pos)
      status = DftiSetValue(fw_plan_xg2pos, DFTI_PLACEMENT, DFTI_NOT_INPLACE)
      status = DftiSetValue(fw_plan_xg2pos, DFTI_INPUT_DISTANCE, 2*nxhalfm)
-     !status = DftiSetValue(fw_plan_xg2pos, DFTI_INPUT_STRIDES,  (/0,ldx/))
+     !arr(1) = 0
+     !arr(2) = ldx
+     !status = DftiSetValue(fw_plan_xg2pos, DFTI_INPUT_STRIDES,  arr)
      status = DftiSetValue(fw_plan_xg2pos, DFTI_OUTPUT_DISTANCE, 2*nxhalfm)
      status = DftiSetValue(fw_plan_xg2pos, DFTI_NUMBER_OF_USER_THREADS, nthreads)
      DFTI_CHECK(status)
@@ -1129,7 +1156,9 @@ else if (istwf_k>=2) then
      DFTI_CHECK(status)
                                                                                         
      status = DftiSetValue(fw_plan, DFTI_NUMBER_OF_TRANSFORMS, ngbout)
-     status = DftiSetValue(fw_plan, DFTI_INPUT_STRIDES,  (/0,mgb/))
+     arr(1) = 0
+     arr(2) = mgb
+     status = DftiSetValue(fw_plan, DFTI_INPUT_STRIDES,  arr)
      status = DftiSetValue(fw_plan, DFTI_INPUT_DISTANCE,  1)
      status = DftiSetValue(fw_plan, DFTI_NUMBER_OF_USER_THREADS, nt1)
      if (iscale__ == 1) then

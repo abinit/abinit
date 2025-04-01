@@ -19,6 +19,9 @@
 
 #include "abi_common.h"
 
+! nvtx related macro definition
+#include "nvtx_macros.h"
+
 MODULE m_self
 
  use defs_basis
@@ -29,6 +32,10 @@ MODULE m_self
  use m_matlu, only : matlu_type,print_matlu
  use m_oper, only : oper_type
  use m_hu, only : hu_type
+
+#ifdef HAVE_GPU_MARKERS
+ use m_nvtx_data
+#endif
 
  implicit none
 
@@ -545,6 +552,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
  type(oper_type), allocatable :: selfrotmatlu(:)
 ! *********************************************************************
 
+ ABI_NVTX_START_RANGE(NVTX_DMFT_RW_SELF)
  natom   = paw_dmft%natom
  nspinor = paw_dmft%nspinor
  nsppol  = paw_dmft%nsppol
@@ -1395,6 +1403,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
    end if
 
  end if ! use_fixed_self
+ ABI_NVTX_END_RANGE()
 
 end subroutine rw_self
 !!***
