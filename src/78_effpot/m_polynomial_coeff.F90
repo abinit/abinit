@@ -4298,7 +4298,6 @@ subroutine coeffs_list_reduce_duplicate(self, crystal, sc_size, fit_iatom_in, cu
   type(sympairs_t) :: sympairs
   !integer :: list_symcoeff(:,:,:),list_symstr(:,:,:), ncoeff_symsym, nsym, power_disps(:), cell(:,:)
   logical :: mask(size(self))
-  integer, pointer :: index
   integer :: i, n, counter
   call SymPairs_t_init(sympairs, crystal, sc_size, fit_iatom_in, cutoff_in)
   mask=.True.
@@ -4633,9 +4632,10 @@ function IrreducibleCombinations_add_irr(self, combination, list_symcoeff, &
   integer :: combination_cmp_tmp(ndisp), combination_sorted(ndisp)
   logical :: irreducible
   integer :: n, isym
-  integer :: rcomb(size(combination))
   ! check if the combination, or its symmetry equivalent are already in the
   ! table. If not, add it to the table.
+
+  ABI_UNUSED(cell)
   irreducible=.True.
   combination_sorted(:)=combination(:)
   call sort_combination(combination_sorted,size(combination))
