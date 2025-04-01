@@ -1,5 +1,5 @@
 
-.Version 10.3.6.1 of ABINIT, released Feb 2025.
+.Version 10.3.6.3 of ABINIT, released Feb 2025.
 .(MPI version, prepared for a aarch64_darwin23.6.0_gnu14.2 computer)
 
 .Copyright (C) 1998-2025 ABINIT group .
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 26 Mar 2025.
-- ( at 17h58 )
+.Starting date : Tue  1 Apr 2025.
+- ( at 12h27 )
 
 - input  file    -> /Users/giantomassi/git_repos/abinit/_build/tests/Test_suite/tutorial_tgwr_1-tgwr_2-tgwr_3-tgwr_4-tgwr_5/tgwr_5.abi
 - output file    -> tgwr_5.abo
@@ -54,6 +54,7 @@ _ WF disk file :      2.359 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
              ecut      1.00000000E+01 Hartree
           ecuteps      6.00000000E+00 Hartree
          ecutsigx      2.00000000E+01 Hartree
+          ecutwfn      1.00000000E+01 Hartree
 -          fftalg         312
     gwr_boxcutmin      1.10000000E+00
        gw_qprange           4
@@ -345,7 +346,7 @@ Minimax imaginary tau/omega mesh in a.u.: !Tabular | # tau, weight(tau), omega, 
 
 
 
- Building screening Wc(i omega) ...
+ Building correlated screening Wc(i omega) ...
 
 --- !EMACRO_WITHOUT_LOCAL_FIELDS
 iteration_state: {dtset: 1, }
@@ -494,6 +495,7 @@ data: !Tabular |
              ecut      1.00000000E+01 Hartree
           ecuteps      6.00000000E+00 Hartree
          ecutsigx      2.00000000E+01 Hartree
+          ecutwfn      1.00000000E+01 Hartree
            etotal      0.0000000000E+00
             fcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00

@@ -283,7 +283,7 @@ def main():
 
         proj.write_binaries_conf(verbose=options.verbose, dryrun=False)
         proj.write_buildsys_files(verbose=options.verbose, dryrun=False)
-        proj.update_corelibs(verbose=options.verbose, dryrun=False)
+        #proj.update_corelibs(verbose=options.verbose, dryrun=False)
 
     elif options.command == "print":
         if options.what is None:

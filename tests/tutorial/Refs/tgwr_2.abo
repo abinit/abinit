@@ -1,5 +1,5 @@
 
-.Version 10.3.6.1 of ABINIT, released Feb 2025.
+.Version 10.3.6.3 of ABINIT, released Feb 2025.
 .(MPI version, prepared for a aarch64_darwin23.6.0_gnu14.2 computer)
 
 .Copyright (C) 1998-2025 ABINIT group .
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 26 Mar 2025.
-- ( at 17h56 )
+.Starting date : Tue  1 Apr 2025.
+- ( at 12h25 )
 
 - input  file    -> /Users/giantomassi/git_repos/abinit/_build/tests/Test_suite/tutorial_tgwr_1-tgwr_2-tgwr_3-tgwr_4-tgwr_5/tgwr_2.abi
 - output file    -> tgwr_2.abo
@@ -84,6 +84,7 @@ _ WF disk file :     30.690 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
             acell      1.0260000000E+01  1.0260000000E+01  1.0260000000E+01 Bohr
               amu      2.80855000E+01
              ecut      1.00000000E+01 Hartree
+          ecutwfn      1.00000000E+01 Hartree
 -          fftalg         312
            istwfk1       2    3    7
            istwfk2       2    0    3    0    0    0    7    0
@@ -512,6 +513,7 @@ meta: {optdriver: 6, }
             acell      1.0260000000E+01  1.0260000000E+01  1.0260000000E+01 Bohr
               amu      2.80855000E+01
              ecut      1.00000000E+01 Hartree
+          ecutwfn      1.00000000E+01 Hartree
            etotal1     0.0000000000E+00
            etotal2     0.0000000000E+00
            etotal3     0.0000000000E+00

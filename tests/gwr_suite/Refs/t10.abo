@@ -1,6 +1,6 @@
 
-.Version 10.3.6.1 of ABINIT, released Feb 2025.
-.(MPI version, prepared for a x86_64_linux_intel2021.9 computer) 
+.Version 10.3.6.3 of ABINIT, released Feb 2025.
+.(MPI version, prepared for a aarch64_darwin23.6.0_gnu14.2 computer)
 
 .Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -16,7 +16,7 @@
 
 .Starting date : Tue 25 Mar 2025.
 - ( at 16h00 )
-  
+
 - input  file    -> /gpfs/home/acad/ucl-modl/gmatteo/git_repos/abinit_gwr/_build_intel_2023a/tests/Test_suite/gwr_suite_t10/t10.abi
 - output file    -> t10.abo
 - root for input  files -> t10i
@@ -81,12 +81,16 @@ _ WF disk file :      0.664 Mbytes ; DEN or POT disk file :      0.697 Mbytes.
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
+-          iomode           1
             acell      1.0000000000E+01  1.0000000000E+01  1.0000000000E+01 Bohr
               amu      1.00794000E+00
              ecut      2.00000000E+01 Hartree
           ecuteps1     0.00000000E+00 Hartree
           ecuteps2     0.00000000E+00 Hartree
           ecuteps3     2.00000000E+01 Hartree
+          ecutwfn1     0.00000000E+00 Hartree
+          ecutwfn2     0.00000000E+00 Hartree
+          ecutwfn3     2.00000000E+01 Hartree
            enunit           2
 -          fftalg         512
            getden1          0
@@ -585,12 +589,16 @@ my_nband: 20
 ================================================================================
 
  -outvars: echo values of variables after computation  --------
+-          iomode           1
             acell      1.0000000000E+01  1.0000000000E+01  1.0000000000E+01 Bohr
               amu      1.00794000E+00
              ecut      2.00000000E+01 Hartree
           ecuteps1     0.00000000E+00 Hartree
           ecuteps2     0.00000000E+00 Hartree
           ecuteps3     2.00000000E+01 Hartree
+          ecutwfn1     0.00000000E+00 Hartree
+          ecutwfn2     0.00000000E+00 Hartree
+          ecutwfn3     2.00000000E+01 Hartree
            enunit           2
            etotal1    -1.1402567118E+00
            etotal2    -1.1402567456E+00

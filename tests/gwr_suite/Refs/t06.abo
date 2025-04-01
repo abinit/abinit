@@ -1,6 +1,6 @@
 
-.Version 10.3.6.1 of ABINIT, released Feb 2025.
-.(MPI version, prepared for a x86_64_linux_intel2021.9 computer) 
+.Version 10.3.6.3 of ABINIT, released Feb 2025.
+.(MPI version, prepared for a aarch64_darwin23.6.0_gnu14.2 computer)
 
 .Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 12 Apr 2024.
-- ( at 13h31 )
+.Starting date : Tue  1 Apr 2025.
+- ( at 12h25 )
 
-- input  file    -> /Users/giantomassi/git_repos/abinit/_build/tests/Test_suite/gwr_t06/t06.abi
+- input  file    -> /Users/giantomassi/git_repos/abinit/_build/tests/Test_suite/gwr_suite_t06/t06.abi
 - output file    -> t06.abo
 - root for input  files -> t06i
 - root for output files -> t06o
@@ -91,6 +91,9 @@ _ WF disk file :      0.507 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
          ecutsigx1     0.00000000E+00 Hartree
          ecutsigx2     0.00000000E+00 Hartree
          ecutsigx3     8.00000000E+00 Hartree
+          ecutwfn1     0.00000000E+00 Hartree
+          ecutwfn2     8.00000000E+00 Hartree
+          ecutwfn3     8.00000000E+00 Hartree
 -          fftalg         312
            getden1          0
            getden2          1
@@ -799,7 +802,7 @@ Minimax imaginary tau/omega mesh in a.u.: !Tabular | # tau, weight(tau), omega, 
 
 
 
- Building correlated screening Wc ...
+ Building correlated screening Wc(i omega) ...
 
 --- !EMACRO_WITHOUT_LOCAL_FIELDS
 iteration_state: {dtset: 3, }
@@ -940,6 +943,9 @@ data: !Tabular |
          ecutsigx1     0.00000000E+00 Hartree
          ecutsigx2     0.00000000E+00 Hartree
          ecutsigx3     8.00000000E+00 Hartree
+          ecutwfn1     0.00000000E+00 Hartree
+          ecutwfn2     8.00000000E+00 Hartree
+          ecutwfn3     8.00000000E+00 Hartree
            etotal1    -1.0266787467E+01
            etotal2     0.0000000000E+00
            etotal3     0.0000000000E+00

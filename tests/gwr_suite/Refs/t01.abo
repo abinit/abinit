@@ -1,6 +1,6 @@
 
 .Version 10.3.6.1 of ABINIT, released Feb 2025.
-.(MPI version, prepared for a x86_64_linux_intel2021.9 computer) 
+.(MPI version, prepared for a x86_64_linux_intel2021.9 computer)
 
 .Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -16,7 +16,7 @@
 
 .Starting date : Tue 25 Mar 2025.
 - ( at 16h00 )
-  
+
 - input  file    -> /gpfs/home/acad/ucl-modl/gmatteo/git_repos/abinit_gwr/_build_intel_2023a/tests/Test_suite/gwr_suite_t01/t01.abi
 - output file    -> t01.abo
 - root for input  files -> t01i
@@ -101,6 +101,7 @@ _ WF disk file :      0.157 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
+-          iomode           1
             acell      1.0260000000E+01  1.0260000000E+01  1.0260000000E+01 Bohr
               amu      2.80855000E+01
              bdgw3          4       5       4       5
@@ -114,6 +115,10 @@ _ WF disk file :      0.157 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
          ecutsigx2     0.00000000E+00 Hartree
          ecutsigx3     4.00000000E+00 Hartree
          ecutsigx4     0.00000000E+00 Hartree
+          ecutwfn1     0.00000000E+00 Hartree
+          ecutwfn2     4.00000000E+00 Hartree
+          ecutwfn3     4.00000000E+00 Hartree
+          ecutwfn4     4.00000000E+00 Hartree
 -          fftalg         312
         freqspmax1     0.00000000E+00 Hartree
         freqspmax2     0.00000000E+00 Hartree
@@ -952,6 +957,7 @@ Minimax imaginary tau/omega mesh in a.u.: !Tabular | # tau, weight(tau), omega, 
 ================================================================================
 
  -outvars: echo values of variables after computation  --------
+-          iomode           1
             acell      1.0260000000E+01  1.0260000000E+01  1.0260000000E+01 Bohr
               amu      2.80855000E+01
              bdgw3          4       5       4       5
@@ -965,6 +971,10 @@ Minimax imaginary tau/omega mesh in a.u.: !Tabular | # tau, weight(tau), omega, 
          ecutsigx2     0.00000000E+00 Hartree
          ecutsigx3     4.00000000E+00 Hartree
          ecutsigx4     0.00000000E+00 Hartree
+          ecutwfn1     0.00000000E+00 Hartree
+          ecutwfn2     4.00000000E+00 Hartree
+          ecutwfn3     4.00000000E+00 Hartree
+          ecutwfn4     4.00000000E+00 Hartree
            etotal1    -8.3092786940E+00
            etotal2     0.0000000000E+00
            etotal3     0.0000000000E+00
