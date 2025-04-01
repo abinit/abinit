@@ -378,6 +378,7 @@ end subroutine polynomial_term_free
 
 subroutine polynomial_term_finalizer(self)
   type(polynomial_term_type), intent(inout) :: self
+  print *, "Warning: polynomial_term_finalizer called"
   call polynomial_term_free(self)
 end subroutine polynomial_term_finalizer
 !!***

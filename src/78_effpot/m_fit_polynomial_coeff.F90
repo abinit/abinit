@@ -1201,7 +1201,7 @@ contains
     !If some coeff are imposed by the input, we need to fill the arrays
     !with this coeffs and broadcast to the others CPUs :
     if(ncoeff_preselected>=1)then
-      !ipre_real=0
+      ipre_real=0
       do ipre=1, ncoeff_preselected
           list_coeffs_tmp(ipre) = ipre
           rank_to_send = 0
@@ -1937,10 +1937,6 @@ contains
        &                                  fit_data%strten_diff,fit_data%training_set%sqomega,fit_on,int_fit_factors, &
        &                                  weights=weights)
 
-    ! print the coeff_values
-    !print *, "size of coeff_values: ", size(coeff_values)
-    !print *, "ncolff_to_fit: ", ncoeff_to_fit
-    !print *, "coeff_values: ", coeff_values(1:ncoeff_to_fit)
 
      if(need_verbose) then
        write(message, '(3a)') ch10,' Fitted coefficients at the end of the fit process: '
@@ -2721,7 +2717,6 @@ subroutine fit_polynomial_coeff_solve(coefficients,fcart_coeffs,fcart_diff,energ
 !  Fill alsor B with the forces and stresses from
 !  the DFT snapshot and the model
 !  See equation 17 of PRB95 094115 (2017) [[cite:Escorihuela-Sayalero2017]]
- !print *, "list_coeffs:", list_coeffs
  do icoeff=1,ncoeff_fit
    icoeff_tmp = list_coeffs(icoeff)
    fcart_coeffs_tmp(:,:,:) = fcart_coeffs(:,:,icoeff_tmp,:)
