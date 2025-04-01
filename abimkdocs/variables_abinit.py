@@ -3643,6 +3643,29 @@ from the tetrahedron method is rapidly varying.
 ),
 
 Variable(
+    abivarname="dtele",
+    varset="rttddft",
+    vartype="real",
+    topics=['RTTDDFT_basic'],
+    dimensions="scalar",
+    requires="[[optdriver]] is 9",
+    defaultval=0.1,
+    mnemonics="Delta Time for ELEctrons",
+    added_in_version="10",
+    text=r"""
+Defines the electron time step in atomic units of time, used to integrate the time-dependent
+Kohn-Sham equations in real-time TDDFT [[topic:RTTDDFT]] if [optdriver]] is 9.
+(One atomic time unit is 2.418884e-17 seconds).
+One should also set the number of time steps to be performed using the
+parameter [[ntime]].
+
+A good value for [[dtele]] is usually less than or equal to 0.1.
+The user should try several values in order to find the one allowing for
+a stable and efficient integration.
+""",
+),
+
+Variable(
     abivarname="dtion",
     varset="rlx",
     vartype="real",
@@ -13303,15 +13326,16 @@ Variable(
     abivarname="ntime",
     varset="rlx",
     vartype="integer",
-    topics=['MolecularDynamics_basic', 'GeoOpt_basic'],
+    topics=['MolecularDynamics_basic', 'GeoOpt_basic', 'RTTDDFT_basic'],
     dimensions="scalar",
     defaultval="0 if ionmvov == 0, set to 1000 if ionvmov != 0 and imgmov != 0 and the variable is not specified.",
     mnemonics="Number of TIME steps",
     added_in_version="before_v9",
     text=r"""
-Gives the maximum number of molecular dynamics time steps or structural
-optimization steps to be done if [[geoopt]] or [[moldyn]] are not "none".
-Starting with Abinit9, ntime is automatically set to 1000,
+Gives the maximum number of molecular dynamics or electron dynamics time steps or structural
+optimization steps to be done if [[geoopt]] or [[moldyn]] are not "none" or [[optdriver]] is 9
+(real-time TDDFT).
+Starting with Abinit9, ntime is automatically set to 1000, if [[geoopt]] or [[moldyn]] are not "none",
 [[ntimimage]] is zero and [[ntime]] is not specified in the input file.
 Users are encouraged to pass a **timelimit** to Abinit using the command line and the syntax:
 
@@ -14051,7 +14075,8 @@ Variable(
  'BSE_compulsory',
  'DFPT_compulsory',
  'Susceptibility_compulsory',
- 'SelfEnergy_compulsory'],
+ 'SelfEnergy_compulsory',
+ 'RTTDDFT_compulsory'],
     dimensions="scalar",
     defaultval=0,
     mnemonics="OPTions for the DRIVER",
@@ -14067,9 +14092,10 @@ The choice is among:
   * 3 --> susceptibility and dielectric matrix calculation (SCR), routine *screening*
   * 4 --> self-energy calculation (SIG), routine *sigma*.
   * 5 --> non-linear response functions (NONLINEAR), using the 2n+1 theorem, routine *nonlinear*.
-  * 6 --> GW real space imaginary time driver (GWR), using the [[cite:Liu2016]] algorithm, routine *gwr_driver*, see also [[gwr_task]].
-  * 7 --> electron-phonon coupling (EPH), see also [[eph_task]].
-  * 8 --> post-processing of WFK file, routine *wfk_analyze*. See also [[wfk_task]] input variable.
+  * 6 --> GW real space imaginary time driver (GWR), using the [[cite:Liu2016]] algorithm, routine *gwr_driver*, see [[gwr_task]].
+  * 7 --> electron-phonon coupling (EPH), see also [[eph_task]] input variable.
+  * 8 --> Post-processing of WFK file, routine *wfk_analyze*. See also [[wfk_task]] input variable.
+  * 9 --> Real-time TDDDFT calculation (RTTDDFT), routine *rttddft_driver*
   * 10 --> longwave response functions (LONGWAVE), routine *longwave*. See also [[lw_flexo]],  [[lw_qdrpl]] or [[lw_natopt]] input variables.
   * 66 --> GW using Lanczos-Sternheimer, see input variables whose name start with `gwls_*`.
   * 99 --> Bethe-Salpeter calculation (BSE), routine *bethe_salpeter*
@@ -22582,6 +22608,199 @@ See also [[sigma_nshiftk]].
 ),
 
 Variable(
+    abivarname="td_ef_type",
+    varset="rttddft",
+    topics=['RTTDDFT_useful'],
+    vartype="integer",
+    defaultval=0,
+    dimensions="scalar",
+    requires="[[optdriver]] is 9",
+    mnemonics="Time-Dependent Electric Field TYPE",
+    added_in_version="10",
+    text=r"""
+This variable controls the type of external electric field to apply in RT-TDDFT.
+As of now, only impulse electric field are implemented, [[td_ef_type]] is 1.
+Moreover, the response to such impulse electric field can only be performed
+within the PAW approach (see [[topic:PAW]]).
+The intensity of the Dirac pulse as well as the time at which it is
+applied are controlled by the parameters [[td_ef_ezero]] and [[td_ef_tzero]].
+If [[td_ef_type]] is 0, no electric field is applied.
+""",
+),
+
+Variable(
+    abivarname="td_ef_tzero",
+    varset="rttddft",
+    topics=['RTTDDFT_useful'],
+    vartype="integer",
+    defaultval=0.0,
+    dimensions="scalar",
+    requires="[[optdriver]] is 9 and [[td_ef_type]] is not 0",
+    mnemonics="Time-Dependent Electric Field TZERO",
+    added_in_version="10",
+    text=r"""
+This variable controls the time (in atomic units) at which the external
+electric field is applied (see [[td_ef_type]]).
+""",
+),
+
+Variable(
+    abivarname="td_ef_ezero",
+    varset="rttddft",
+    topics=['RTTDDFT_useful'],
+    vartype="integer",
+    defaultval=0.1,
+    dimensions="scalar",
+    requires="[[optdriver]] is 9 and [[td_ef_type]] is not 0",
+    mnemonics="Time-Dependent Electric Field EZERO",
+    added_in_version="10",
+    text=r"""
+This variable is the intensity (in atomic units) of the external
+electric field applied (see [[td_ef_type]]).
+""",
+),
+
+Variable(
+    abivarname="td_ef_pol",
+    varset="rttddft",
+    topics=['RTTDDFT_useful'],
+    vartype="integer",
+    defaultval=[1.0, 0.0, 0.0],
+    dimensions=[3],
+    requires="[[optdriver]] is 9 and [[td_ef_type]] is not 0",
+    mnemonics="Time-Dependent Electric Field POLarization",
+    added_in_version="10",
+    text=r"""
+This variable is the polarization vector (direction) of the external
+electric field applied (see [[td_ef_type]]).
+""",
+),
+
+Variable(
+    abivarname="td_ef_induced_vecpot",
+    varset="rttddft",
+    topics=['RTTDDFT_expert'],
+    vartype="integer",
+    defaultval=0,
+    dimensions="scalar",
+    requires="[[optdriver]] is 9 and [[td_ef_type]] is not 0",
+    mnemonics="Time-Dependent Electric Field INDUCED VECtor POTential",
+    added_in_version="10",
+    text=r"""
+This variable controls wether we include the induced vector potential in the
+Hamiltonian so that the total vector potential applied is the sum of the vector
+potential associated with the external electric field and the vector potential
+induced by the current density.
+""",
+),
+
+Variable(
+    abivarname="td_exp_order",
+    varset="rttddft",
+    topics=['RTTDDFT_expert'],
+    vartype="integer",
+    defaultval=4,
+    dimensions="scalar",
+    requires="[[optdriver]] is 9",
+    mnemonics="Time-Dependent EXPonential ORDER",
+    added_in_version="10",
+    text=r"""
+This variable controls the order of the Taylor expansion used to approximate the exponential
+of an operator in the propagator for RT-TDDFT. The default value of 4 is usually a good choice
+that ensures good stability and acceptable computation time.
+""",
+),
+
+Variable(
+    abivarname="td_propagator",
+    varset="rttddft",
+    topics=['RTTDDFT_useful'],
+    vartype="integer",
+    defaultval=0,
+    dimensions="scalar",
+    requires="[[optdriver]] is 9",
+    mnemonics="Time-Dependent PROPAGATOR",
+    added_in_version="10",
+    text=r"""
+This variable controls the propagation algorithm used to integrate the time-dependent
+Kohn-Sham equations in real-time TDDFT. At present only the exponential rule,
+[[td_propagator]] is 0, and the exponential mid-point rule, [[td_propagator]] is 1,
+propagators are implemented.
+Both are based on a Taylor expansion of the exponential of an operator which order is
+controlled by the [[td_exp_order]] parameter. In case of [[td_propagator]] equal to 1
+the code uses a predictor-corrector scheme associated with two parameters [[td_scnmax]]
+and [[td_scthr]].
+""",
+),
+
+Variable(
+    abivarname="td_prtstr",
+    varset="rttddft",
+    topics=['RTTDDFT_useful'],
+    vartype="integer",
+    defaultval=1,
+    dimensions="scalar",
+    requires="[[optdriver]] is 9",
+    mnemonics="Time-Dependent PRinT STRide",
+    added_in_version="10",
+    text=r"""
+This variable controls how often the code outputs various physical
+properties (DOS, occupations, current density etc.).
+The code will write these properties in files every [[td_prtstr]] time step.
+""",
+),
+
+Variable(
+    abivarname="td_restart",
+    varset="rttddft",
+    topics=['RTTDDFT_useful'],
+    vartype="integer",
+    defaultval=0,
+    dimensions="scalar",
+    requires="[[optdriver]] is 9",
+    mnemonics="Time-Dependent calculation RESTART",
+    added_in_version="10",
+    text=r"""
+This variable controls wether we are restarting a RTTDDFT run.
+If [[td_restart]] is 0 the calculation starts from scratch, if it is
+set to 1 than ABINIT will read the file called TD_RESTART that contains
+some information in order to continue the previous RTTDDFT calculation.
+""",
+),
+
+Variable(
+    abivarname="td_scnmax",
+    varset="rttddft",
+    topics=['RTTDDFT_expert'],
+    vartype="integer",
+    defaultval=6,
+    dimensions="scalar",
+    requires="[[optdriver]] is 9 and [[td_propagator]] is 1",
+    mnemonics="Time-Dependent Self-Consistent NMAX",
+    added_in_version="10",
+    text=r"""
+This variable controls the maximum number of self-consistent corrector step
+in the predictor-corrector scheme ([[td_propagator]] equal to 1).
+""",
+),
+
+Variable(
+    abivarname="td_scthr",
+    varset="rttddft",
+    topics=['RTTDDFT_expert'],
+    vartype="integer",
+    defaultval=1e-7,
+    dimensions="scalar",
+    requires="[[optdriver]] is 9 and [[td_propagator]] is 1",
+    mnemonics="Time-Dependent propagation Self-Consistent THReshold",
+    added_in_version="10",
+    text=r"""
+This variable controls the threshold used to define the convergence of the
+self-consistent predictor-corrector scheme ([[td_propagator]] equal to 1).
+""",
+),
+
+Variable(
     abivarname="wfk_task",
     varset="gstate",
     topics=['ElecBandStructure_useful'],
@@ -22592,7 +22811,6 @@ Variable(
     mnemonics="WaveFunction at K TASK",
     added_in_version="9.0.0",
     text=r"""
-
 This variable defines the quantity that should be computed starting from a previously generated WFK file.
 Possible values are:
 

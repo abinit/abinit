@@ -120,7 +120,10 @@ CONTAINS  !=====================================================================
 !!  znucl(ntypat)=atomic number of atom type
 !!
 !! OUTPUT
-!!  (only writing in a file)
+!!  psinablapsi_out=contains the matrix elements
+!!   (The size of the psinablapsi_out decide wehter we compute the full matrix or
+!!    only the diagonal part)
+!!   (if not present only writing in a file)
 !!
 !! SIDE EFFECTS
 !!
@@ -130,7 +133,7 @@ CONTAINS  !=====================================================================
 
  subroutine optics_paw(atindx1,cg,cprj,dimcprj,dtfil,dtset,eigen0,gprimd,hdr,kg,&
 &               mband,mcg,mcprj,mkmem,mpi_enreg,mpsang,mpw,natom,nkpt,npwarr,nsppol,&
-&               pawang,pawrad,pawrhoij,pawtab,znucl)
+&               pawang,pawrad,pawrhoij,pawtab,znucl,psinablapsi_out)
 
 !Arguments ------------------------------------
 !scalars
@@ -140,6 +143,7 @@ CONTAINS  !=====================================================================
  type(dataset_type),intent(in) :: dtset
  type(hdr_type),intent(inout) :: hdr
  type(pawang_type),intent(in) :: pawang
+ real(dp),optional,target,intent(out) :: psinablapsi_out(:,:,:,:)
 !arrays
  integer,intent(in) :: atindx1(natom),dimcprj(natom),npwarr(nkpt)
  integer,intent(in),target :: kg(3,mpw*mkmem)
@@ -154,15 +158,17 @@ CONTAINS  !=====================================================================
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0
- integer :: bsize,iomode,bdtot_index,cplex,etiq,fformopt,iatom,ib,ibmax,ibg,ibsp
+ integer :: bsize,iomode,bdtot_index,cplex,etiq,fformopt,iatom,ib,ibmax,ibmin,ibg,ibsp
  integer :: ibshift,icg,ierr,ikg,ikpt,ilmn,ount,ncid,varid,idir
  integer :: iorder_cprj,ipw,ispinor,isppol,istwf_k,itypat,iwavef
  integer :: jb,jbshift,jbsp,my_jb,jlmn,jwavef,lmn_size,mband_cprj,option_core
  integer :: my_nspinor,nband_k,nband_cprj_k,npw_k,sender,me,master_spfftband,pnp_size
  integer :: spaceComm_band,spaceComm_bandspinorfft,spaceComm_fft,spaceComm_kpt
  integer :: spaceComm_spinor,spaceComm_bandspinor,spaceComm_spinorfft,spaceComm_w
+ integer, parameter :: NO_FILE_OUT=-1
  logical :: already_has_nabla,cprj_paral_band,myband,mykpt,iomode_etsf_mpiio
  logical :: i_am_master,i_am_master_kpt,i_am_master_band,i_am_master_spfft,nc_unlimited,store_half_dipoles
+ logical :: diag_only
  real(dp) :: cgnm1,cgnm2,cpnm1,cpnm2,cpnm11,cpnm22,cpnm12,cpnm21,cpnm_11m22,cpnm_21p12,cpnm_21m12,el_temp
  character(len=500) :: msg
  type(nctkdim_t) :: nctkdim
@@ -171,7 +177,7 @@ CONTAINS  !=====================================================================
  integer, ABI_CONTIGUOUS pointer :: kg_k(:,:)
  real(dp) :: kpoint(3),tsec(2),nabla_ij(3)
  real(dp),allocatable :: kpg_k(:,:)
- real(dp),allocatable :: psinablapsi(:,:,:),psinablapsi_paw(:,:,:),psinablapsi_soc(:,:,:)
+ real(dp),pointer :: psinablapsi(:,:,:),psinablapsi_paw(:,:,:),psinablapsi_soc(:,:,:)
  real(dp),pointer :: soc_ij(:,:,:)
  type(coeff5_type),allocatable,target :: phisocphj(:)
  type(pawcprj_type),pointer :: cprj_k(:,:),cprj_k_loc(:,:)
@@ -218,17 +224,43 @@ CONTAINS  !=====================================================================
  i_am_master_spfft=(xmpi_comm_rank(spaceComm_spinorfft)==master)
  my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
 
+!Check wether we write in file or save the matrix elements in psinablapsi_out
+!and if we need to compute the full matrix or only the diagonal part
+ diag_only = .false.
+ store_half_dipoles = .false.
+ if (present(psinablapsi_out)) then
+   iomode = NO_FILE_OUT
+   iomode_etsf_mpiio = .false.
+   nc_unlimited = .false.
+   bsize = size(psinablapsi_out(1,1,:,1))
+   if (bsize ==  mband) then
+      diag_only = .true.
+      store_half_dipoles = .true. !FB ??
+   else if (bsize == mband*(mband+1)/2) then
+      diag_only = .false.
+      store_half_dipoles = .true.
+   else if (bsize == mband**2) then
+      diag_only = .false.
+      store_half_dipoles = .false.
+   else
+      msg = "Wrong dimensions of psinablapsi_out!"
+      ABI_ERROR(msg)
+   end if
+   psinablapsi_out = zero
+ end if
+
 !----------------------------------------------------------------------------------
 !1- Opening of OPT file and header writing
 !----------------------------------------------------------------------------------
 
-!I/O mode is netCDF or Fortran
- iomode=merge(IO_MODE_ETSF,IO_MODE_FORTRAN_MASTER,dtset%iomode==IO_MODE_ETSF)
- if (use_netcdf_forced) iomode=IO_MODE_ETSF
+ if (iomode /= NO_FILE_OUT) then
+!  I/O mode is netCDF or Fortran
+   iomode=merge(IO_MODE_ETSF,IO_MODE_FORTRAN_MASTER,dtset%iomode==IO_MODE_ETSF)
+   if (use_netcdf_forced) iomode=IO_MODE_ETSF
 
- !(master proc only)
- if (i_am_master) then
-   fformopt=610 ; if (compute_half_dipoles) fformopt=620
+ !  (master proc only)
+   if (i_am_master) then
+     fformopt=610 ; if (compute_half_dipoles) fformopt=620
 !  ====> NETCDF format
    if (iomode==IO_MODE_ETSF) then
 !    Open/create nc file
@@ -264,21 +296,22 @@ CONTAINS  !=====================================================================
      !Close file here because the rest has possibly to be written with collective I/O
      NCF_CHECK(nf90_close(ncid))
 !  ====> Standard FORTRAN binary format
-   else if (iomode==IO_MODE_FORTRAN_MASTER) then
-     if (open_file(dtfil%fnameabo_app_opt,msg,newunit=ount,form="unformatted",status="unknown")/= 0) then
-       ABI_ERROR(msg)
-     end if
-     call hdr%fort_write(ount,fformopt,ierr,rewind=.true.)
-     write(ount)(eigen0(ib),ib=1,mband*nkpt*nsppol)
-   else
-     msg = "Wrong OPT file format!"
-     ABI_BUG(msg)
-   end if ! File format
- end if ! master node
- call xmpi_bcast(iomode,master,spaceComm_w,ierr)  ! Seems mandatory; why ?
- iomode_etsf_mpiio=(iomode==IO_MODE_ETSF.and.nctk_has_mpiio.and.use_netcdf_mpiio)
- nc_unlimited=(iomode==IO_MODE_ETSF.and.use_netcdf_unlimited.and.(.not.iomode_etsf_mpiio)) ! UNLIMITED not compatible with mpi-io
- store_half_dipoles=(compute_half_dipoles.and.(.not.nc_unlimited))
+     else if (iomode==IO_MODE_FORTRAN_MASTER) then
+       if (open_file(dtfil%fnameabo_app_opt,msg,newunit=ount,form="unformatted",status="unknown")/= 0) then
+         ABI_ERROR(msg)
+       end if
+       call hdr%fort_write(ount,fformopt,ierr,rewind=.true.)
+       write(ount)(eigen0(ib),ib=1,mband*nkpt*nsppol)
+     else
+       msg = "Wrong OPT file format!"
+       ABI_BUG(msg)
+     end if ! File format
+   end if ! master node
+   call xmpi_bcast(iomode,master,spaceComm_w,ierr)  ! Seems mandatory; why ?
+   iomode_etsf_mpiio=(iomode==IO_MODE_ETSF.and.nctk_has_mpiio.and.use_netcdf_mpiio)
+   nc_unlimited=(iomode==IO_MODE_ETSF.and.use_netcdf_unlimited.and.(.not.iomode_etsf_mpiio)) ! UNLIMITED not compatible with mpi-io
+   store_half_dipoles=(compute_half_dipoles.and.(.not.nc_unlimited))
+ end if
 
 !----------------------------------------------------------------------------------
 !2- Computation of on-site contribution: <phi_i|nabla|phi_j>-<tphi_i|nabla|tphi_j>
@@ -289,7 +322,7 @@ CONTAINS  !=====================================================================
 
 !Get electronic temperature from dtset
  el_temp=merge(dtset%tphysel,dtset%tsmear,dtset%tphysel>tol8.and.dtset%occopt/=3.and.dtset%occopt/=9)
- 
+
 !Compute spin-orbit contributions if necessary
  if (dtset%pawspnorb==1) then
    option_core=0
@@ -324,24 +357,39 @@ CONTAINS  !=====================================================================
      NCF_CHECK(nctk_set_datamode(ncid))
    end if
  end if
- if (iomode_etsf_mpiio) then
-   !If MPI-IO, store only ib elements for each jb
-   ABI_MALLOC(psinablapsi,(2,3,mband))
-   ABI_MALLOC(psinablapsi_paw,(2,3,mband))
-   if (dtset%pawspnorb==1) then
-     ABI_MALLOC(psinablapsi_soc,(2,3,mband))
+ if (iomode /= NO_FILE_OUT) then
+   if (iomode_etsf_mpiio) then
+     !If MPI-IO, store only ib elements for each jb
+     ABI_MALLOC(psinablapsi,(2,3,mband))
+     ABI_MALLOC(psinablapsi_paw,(2,3,mband))
+     if (dtset%pawspnorb==1) then
+       ABI_MALLOC(psinablapsi_soc,(2,3,mband))
+     end if
+   else
+     !If not, store all (ib,jb) pairs (or half)
+     bsize=mband**2 ; if (store_half_dipoles) bsize=(mband*(mband+1))/2
+     ABI_MALLOC(psinablapsi,(2,3,bsize))
+     ABI_MALLOC(psinablapsi_paw,(2,3,bsize))
+     if (dtset%pawspnorb==1) then
+       ABI_MALLOC(psinablapsi_soc,(2,3,bsize))
+     end if
+     psinablapsi=zero
    end if
+   pnp_size=size(psinablapsi)
  else
-   !If not, store all (ib,jb) pairs (or half)
-   bsize=mband**2 ; if (store_half_dipoles) bsize=(mband*(mband+1))/2
-   ABI_MALLOC(psinablapsi,(2,3,bsize))
+   if (diag_only) then
+      bsize = mband
+   else if (store_half_dipoles) then
+      bsize=(mband*(mband+1))/2
+   else
+      bsize=mband**2
+   end if
    ABI_MALLOC(psinablapsi_paw,(2,3,bsize))
    if (dtset%pawspnorb==1) then
      ABI_MALLOC(psinablapsi_soc,(2,3,bsize))
    end if
-   psinablapsi=zero
+   pnp_size=size(psinablapsi_paw)
  end if
- pnp_size=size(psinablapsi)
 
 !Determine if cprj datastructure is distributed over bands
  mband_cprj=mcprj/(my_nspinor*mkmem*nsppol)
@@ -355,6 +403,8 @@ CONTAINS  !=====================================================================
 !  LOOP OVER k POINTS
    ikg=0
    do ikpt=1,nkpt
+
+     if (iomode == NO_FILE_OUT) psinablapsi => psinablapsi_out(:,:,:,ikpt)
 
      etiq=ikpt+(isppol-1)*nkpt
      nband_k=dtset%nband(ikpt+(isppol-1)*nkpt)
@@ -417,7 +467,10 @@ CONTAINS  !=====================================================================
          !If MPI-IO, compute all (ib,jb) pairs ; if not, compute only ib<=jb
          ibmax=merge(nband_k,jb,iomode_etsf_mpiio)
          !If MPI-IO, store only ib elements for each jb ; if not, store all (ib,jb) pairs
-         my_jb=merge(1,jb,iomode_etsf_mpiio)
+         my_jb=merge(1,jb,(iomode_etsf_mpiio .or. diag_only))
+         !If diag_only then ibmin = ibmax = jb
+         ibmax=merge(jb,ibmax,diag_only)
+         ibmin=merge(jb,1,diag_only)
 
 !        Fill output arrays with zeros
          if (store_half_dipoles) then
@@ -425,9 +478,11 @@ CONTAINS  !=====================================================================
          else
            jbshift=(my_jb-1)*mband ; bsize=mband
          end if
-         psinablapsi(:,:,jbshift+1:jbshift+bsize)=zero
-         psinablapsi_paw(:,:,jbshift+1:jbshift+bsize)=zero
-         if (dtset%pawspnorb==1) psinablapsi_soc(:,:,jbshift+1:jbshift+bsize)=zero
+         if ((.not. diag_only) .or. jb == 1) then
+            psinablapsi(:,:,jbshift+1:jbshift+bsize)=zero
+            psinablapsi_paw(:,:,jbshift+1:jbshift+bsize)=zero
+            if (dtset%pawspnorb==1) psinablapsi_soc(:,:,jbshift+1:jbshift+bsize)=zero
+         end if
 
 !        2-A Computation of <psi_tild_n|-i.nabla|psi_tild_m>
 !        ----------------------------------------------------------------------------------
@@ -440,7 +495,7 @@ CONTAINS  !=====================================================================
          end if
          if (myband) then
 
-           do ib=1,ibmax
+           do ib=ibmin,ibmax
              iwavef=(ib-1)*npw_k*my_nspinor+icg
 
 !            (C_nk^*)*C_mk*(k+g) is expressed in cartesian coordinates
@@ -499,7 +554,7 @@ CONTAINS  !=====================================================================
          end if
          if (myband) then
 
-           do ib=1,ibmax
+           do ib=ibmin,ibmax
 
              ibsp=(ib-1)*my_nspinor ; jbsp=(jb-1)*my_nspinor
              do ispinor=1,my_nspinor
@@ -656,52 +711,66 @@ CONTAINS  !=====================================================================
        ABI_FREE(kpg_k)
 
 !      Write to OPT file if not MPI-IO
+       if (iomode /= NO_FILE_OUT) then
+!        >>> Reduction in case of parallelism
+         if (.not.iomode_etsf_mpiio) then
+           call timab(48,1,tsec)
+           call xmpi_sum_master(psinablapsi,master,spaceComm_bandspinorfft,ierr)
+           call xmpi_sum_master(psinablapsi_paw,master,spaceComm_bandspinor,ierr)
+           call timab(48,2,tsec)
+           psinablapsi=psinablapsi+psinablapsi_paw
+           if (dtset%pawspnorb==1) then
+             call xmpi_sum_master(psinablapsi_soc,master,spaceComm_band,ierr)
+             psinablapsi=psinablapsi+psinablapsi_soc
+           end if
+         end if
 
-!      >>> Reduction in case of parallelism
-       if (.not.iomode_etsf_mpiio) then
+!        >>> This my kpt and I am the master node: I write the data
+         if (.not.iomode_etsf_mpiio) then
+           if (i_am_master) then
+             if (iomode==IO_MODE_ETSF) then
+#ifdef HAVE_NETCDF
+               if (nc_unlimited) then
+                 nc_start_6=[1,1,1,ikpt,isppol,1] ; nc_count_6=[2,3,mband,1,1,mband] ; nc_stride_6=[1,1,1,1,1,1]
+                 NCF_CHECK(nf90_put_var(ncid,varid,psinablapsi,start=nc_start_6,stride=nc_stride_6,count=nc_count_6))
+               else if (.not.store_half_dipoles) then
+                 nc_start_6=[1,1,1,1,ikpt,isppol] ; nc_count_6=[2,3,mband,mband,1,1] ; nc_stride_6=[1,1,1,1,1,1]
+                 NCF_CHECK(nf90_put_var(ncid,varid,psinablapsi,start=nc_start_6,stride=nc_stride_6,count=nc_count_6))
+               else
+                 nc_start_5=[1,1,1,ikpt,isppol] ; nc_count_5=[2,3,(mband*(mband+1))/2,1,1] ; nc_stride_5=[1,1,1,1,1]
+                 NCF_CHECK(nf90_put_var(ncid,varid,psinablapsi,start=nc_start_5,stride=nc_stride_5,count=nc_count_5))
+               end if
+#endif
+             else
+               bsize=nband_k**2;if (store_half_dipoles) bsize=(nband_k*(nband_k+1))/2
+               write(ount)(psinablapsi(1:2,1,ib),ib=1,bsize)
+               write(ount)(psinablapsi(1:2,2,ib),ib=1,bsize)
+               write(ount)(psinablapsi(1:2,3,ib),ib=1,bsize)
+             end if
+
+!          >>> This my kpt and I am not the master node: I send the data
+           else if (i_am_master_band.and.i_am_master_spfft) then
+             if (mpi_enreg%me_kpt/=master_spfftband) then
+               ABI_BUG('Problem with band communicator!')
+             end if
+             call xmpi_exch(psinablapsi,pnp_size,mpi_enreg%me_kpt,psinablapsi,master,spaceComm_kpt,etiq,ierr)
+           end if
+         end if
+       else
+!        >>> Reduction in case of parallelism
          call timab(48,1,tsec)
-         call xmpi_sum_master(psinablapsi,master,spaceComm_bandspinorfft,ierr)
-         call xmpi_sum_master(psinablapsi_paw,master,spaceComm_bandspinor,ierr)
+         call xmpi_sum(psinablapsi,spaceComm_bandspinorfft,ierr)
+         call xmpi_sum(psinablapsi_paw,spaceComm_bandspinor,ierr)
          call timab(48,2,tsec)
          psinablapsi=psinablapsi+psinablapsi_paw
          if (dtset%pawspnorb==1) then
-           call xmpi_sum_master(psinablapsi_soc,master,spaceComm_band,ierr)
+           call xmpi_sum(psinablapsi_soc,spaceComm_band,ierr)
            psinablapsi=psinablapsi+psinablapsi_soc
          end if
-       end if
-
-!      >>> This my kpt and I am the master node: I write the data
-       if (.not.iomode_etsf_mpiio) then
-         if (i_am_master) then
-           if (iomode==IO_MODE_ETSF) then
-             if (nc_unlimited) then
-               nc_start_6=[1,1,1,ikpt,isppol,1] ; nc_count_6=[2,3,mband,1,1,mband] ; nc_stride_6=[1,1,1,1,1,1]
-               NCF_CHECK(nf90_put_var(ncid,varid,psinablapsi,start=nc_start_6,stride=nc_stride_6,count=nc_count_6))
-             else if (.not.store_half_dipoles) then
-               nc_start_6=[1,1,1,1,ikpt,isppol] ; nc_count_6=[2,3,mband,mband,1,1] ; nc_stride_6=[1,1,1,1,1,1]
-               NCF_CHECK(nf90_put_var(ncid,varid,psinablapsi,start=nc_start_6,stride=nc_stride_6,count=nc_count_6))
-             else
-               nc_start_5=[1,1,1,ikpt,isppol] ; nc_count_5=[2,3,(mband*(mband+1))/2,1,1] ; nc_stride_5=[1,1,1,1,1]
-               NCF_CHECK(nf90_put_var(ncid,varid,psinablapsi,start=nc_start_5,stride=nc_stride_5,count=nc_count_5))
-             end if
-           else
-             bsize=nband_k**2;if (store_half_dipoles) bsize=(nband_k*(nband_k+1))/2
-             write(ount)(psinablapsi(1:2,1,ib),ib=1,bsize)
-             write(ount)(psinablapsi(1:2,2,ib),ib=1,bsize)
-             write(ount)(psinablapsi(1:2,3,ib),ib=1,bsize)
-           end if
-
-!        >>> This my kpt and I am not the master node: I send the data
-         else if (i_am_master_band.and.i_am_master_spfft) then
-           if (mpi_enreg%me_kpt/=master_spfftband) then
-             ABI_BUG('Problem with band communicator!')
-           end if
-           call xmpi_exch(psinablapsi,pnp_size,mpi_enreg%me_kpt,psinablapsi,master,spaceComm_kpt,etiq,ierr)
-         end if
-       end if
+       end if ! no_file_out
 
 !    >>> This is not my kpt and I am the master node: I receive the data and I write
-     elseif ((.not.iomode_etsf_mpiio).and.i_am_master) then ! mykpt
+     elseif ((.not.iomode_etsf_mpiio).and.i_am_master.and.(iomode/=NO_FILE_OUT)) then ! mykpt
        sender=master_spfftband
        call xmpi_exch(psinablapsi,pnp_size,sender,psinablapsi,master,spaceComm_kpt,etiq,ierr)
        if (iomode==IO_MODE_ETSF) then
@@ -729,8 +798,14 @@ CONTAINS  !=====================================================================
    end do ! ikpt
  end do !isppol
 
+! >>> Last reduction over k-points in case of parallelism
+! >>> if no output to file
+if (iomode == NO_FILE_OUT) then
+  call xmpi_sum(psinablapsi_out,spaceComm_kpt,ierr)
+end if
+
 !Close file
- if (i_am_master.or.(iomode_etsf_mpiio.and.i_am_master_spfft)) then
+ if ((i_am_master.or.(iomode_etsf_mpiio.and.i_am_master_spfft)).and.iomode /= NO_FILE_OUT) then
    if (iomode==IO_MODE_ETSF) then
      NCF_CHECK(nf90_close(ncid))
    else
@@ -740,7 +815,9 @@ CONTAINS  !=====================================================================
  end if
 
 !Datastructures deallocations
- ABI_FREE(psinablapsi)
+ if (iomode /= NO_FILE_OUT) then
+    ABI_FREE(psinablapsi)
+ end if
  ABI_FREE(psinablapsi_paw)
  if (dtset%pawspnorb==1) then
    ABI_FREE(psinablapsi_soc)

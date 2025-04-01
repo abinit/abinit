@@ -827,7 +827,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dtion',tread,'DPR')
  if(tread==1) dtset%dtion=dprarr(1)
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dtele',tread,'DPR')
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dtele',tread,'TIM')
  if(tread==1) dtset%dtele=dprarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ecut',tread,'ENE')
@@ -997,14 +997,13 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  if(tread==1) dtset%ecuteps=dprarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ecutsigx',tread,'ENE')
+ !if (any(dtset%optdriver == [RUNL_SCREENING, RUNL_SIGMA, RUNL_GWR])) dtset%ecutsigx = four * dtset%ecut
  if(tread==1) dtset%ecutsigx=dprarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ecutwfn',tread,'ENE')
- if(tread==1) then
-   dtset%ecutwfn=dprarr(1)
- else
-   if(dtset%optdriver==RUNL_SCREENING .or. dtset%optdriver==RUNL_SIGMA) dtset%ecutwfn=dtset%ecut
- end if
+ if (any(dtset%optdriver == [RUNL_SCREENING, RUNL_SIGMA, RUNL_GWR])) dtset%ecutwfn=dtset%ecut
+ if(tread==1) dtset%ecutwfn = dprarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'omegasimax',tread,'ENE')
  if(tread==1) dtset%omegasimax=dprarr(1)
 
@@ -2212,6 +2211,27 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'td_scthr',tread,'DPR')
  if(tread==1) dtset%td_scthr=dprarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'td_ef_type',tread,'INT')
+ if(tread==1) dtset%td_ef_type=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'td_ef_induced_vecpot',tread,'INT')
+ if(tread==1) dtset%td_ef_induced_vecpot=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'td_ef_tzero',tread,'TIM')
+ if(tread==1) dtset%td_ef_tzero=dprarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'td_ef_tau',tread,'TIM')
+ if(tread==1) dtset%td_ef_tau=dprarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'td_ef_pol',tread,'DPR')
+ if(tread==1) dtset%td_ef_pol(1:3)=dprarr(1:3)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'td_ef_lambda',tread,'LEN')
+ if(tread==1) dtset%td_ef_lambda=dprarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'td_ef_ezero',tread,'DPR')
+ if(tread==1) dtset%td_ef_ezero=dprarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'npvel',tread,'INT')
  if(tread==1) dtset%npvel=intarr(1)
 
@@ -2889,6 +2909,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtcif',tread,'INT')
  if(tread==1) dtset%prtcif=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtcurrent',tread,'INT')
+ if(tread==1) dtset%prtcurrent=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtden',tread,'INT')
  if(tread==1) dtset%prtden=intarr(1)
