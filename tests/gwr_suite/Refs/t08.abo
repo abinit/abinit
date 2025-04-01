@@ -1,6 +1,6 @@
 
-.Version 10.3.4.4 of ABINIT, released Nov 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.3.6.3 of ABINIT, released Feb 2025.
+.(MPI version, prepared for a aarch64_darwin23.6.0_gnu14.2 computer)
 
 .Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun 26 Jan 2025.
-- ( at 09h42 )
+.Starting date : Tue  1 Apr 2025.
+- ( at 12h25 )
 
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/TestBot_MPI1/gwr_t08/t08.abi
+- input  file    -> /Users/giantomassi/git_repos/abinit/_build/tests/Test_suite/gwr_suite_t08/t08.abi
 - output file    -> t08.abo
 - root for input  files -> t08i
 - root for output files -> t08o
@@ -79,7 +79,9 @@ _ WF disk file :      0.204 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
              ecut      1.50000000E+01 Hartree
           ecuteps1     0.00000000E+00 Hartree
           ecuteps2     4.00000000E+00 Hartree
--          fftalg         512
+          ecutwfn1     0.00000000E+00 Hartree
+          ecutwfn2     1.50000000E+01 Hartree
+-          fftalg         312
            getden1          0
            getden2          1
            istwfk        1
@@ -662,6 +664,8 @@ meta: {optdriver: 6, }
              ecut      1.50000000E+01 Hartree
           ecuteps1     0.00000000E+00 Hartree
           ecuteps2     4.00000000E+00 Hartree
+          ecutwfn1     0.00000000E+00 Hartree
+          ecutwfn2     1.50000000E+01 Hartree
            etotal1    -3.1660224028E+01
            etotal2     0.0000000000E+00
             fcart1    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00

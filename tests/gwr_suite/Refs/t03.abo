@@ -67,10 +67,13 @@ _ WF disk file :      0.416 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
+-          iomode           1
             acell      1.0260000000E+01  1.0260000000E+01  1.0260000000E+01 Bohr
               amu      2.80855000E+01
            diemac      1.20000000E+01
              ecut      4.00000000E+00 Hartree
+          ecutwfn1     0.00000000E+00 Hartree
+          ecutwfn2     4.00000000E+00 Hartree
 -          fftalg         312
           inclvkb           0
            istwfk        1    1    1
@@ -423,10 +426,13 @@ meta: {optdriver: 6, }
 ================================================================================
 
  -outvars: echo values of variables after computation  --------
+-          iomode           1
             acell      1.0260000000E+01  1.0260000000E+01  1.0260000000E+01 Bohr
               amu      2.80855000E+01
            diemac      1.20000000E+01
              ecut      4.00000000E+00 Hartree
+          ecutwfn1     0.00000000E+00 Hartree
+          ecutwfn2     4.00000000E+00 Hartree
            etotal1    -8.3062966899E+00
            etotal2     0.0000000000E+00
             fcart1    -6.2985853173E-28 -8.3981137564E-28 -2.0995284391E-28

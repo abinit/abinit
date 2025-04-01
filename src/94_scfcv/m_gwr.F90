@@ -2240,6 +2240,7 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
    end do
  end do
  call gwr%print_mem([std_out])
+ if (gwr%comm%me == 0) call gwr%pstat%print([std_out], header="After ugb allocation")
 
  mpw = maxval(gwr%wfk_hdr%npwarr)
  ABI_MALLOC(kg_k, (3, mpw))

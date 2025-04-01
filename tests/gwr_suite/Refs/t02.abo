@@ -1,6 +1,6 @@
 
 .Version 10.3.6.1 of ABINIT, released Feb 2025.
-.(MPI version, prepared for a x86_64_linux_intel2021.9 computer) 
+.(MPI version, prepared for a x86_64_linux_intel2021.9 computer)
 
 .Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -111,6 +111,10 @@ _ WF disk file :      0.312 Mbytes ; DEN or POT disk file :      0.053 Mbytes.
          ecutsigx2     0.00000000E+00 Hartree
          ecutsigx3     4.00000000E+00 Hartree
          ecutsigx4     0.00000000E+00 Hartree
+          ecutwfn1     0.00000000E+00 Hartree
+          ecutwfn2     4.00000000E+00 Hartree
+          ecutwfn3     4.00000000E+00 Hartree
+          ecutwfn4     4.00000000E+00 Hartree
 -          fftalg         312
         freqspmax1     0.00000000E+00 Hartree
         freqspmax2     0.00000000E+00 Hartree
@@ -1204,6 +1208,10 @@ Minimax imaginary tau/omega mesh in a.u.: !Tabular | # tau, weight(tau), omega, 
          ecutsigx2     0.00000000E+00 Hartree
          ecutsigx3     4.00000000E+00 Hartree
          ecutsigx4     0.00000000E+00 Hartree
+          ecutwfn1     0.00000000E+00 Hartree
+          ecutwfn2     4.00000000E+00 Hartree
+          ecutwfn3     4.00000000E+00 Hartree
+          ecutwfn4     4.00000000E+00 Hartree
            etotal1    -8.3092786940E+00
            etotal2     0.0000000000E+00
            etotal3     0.0000000000E+00
