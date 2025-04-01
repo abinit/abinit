@@ -194,7 +194,7 @@ module defs_basis
  real(dp), parameter :: tol14=0.00000000000001_dp
  real(dp), parameter :: tol15=0.000000000000001_dp
  real(dp), parameter :: tol16=0.0000000000000001_dp
- real(dp), parameter :: tol17=0.00000000000000010_dp
+ real(dp), parameter :: tol17=0.00000000000000001_dp
  real(dp), parameter :: tol18=0.000000000000000001_dp
  real(dp), parameter :: tol19=0.0000000000000000001_dp
  real(dp), parameter :: tol20=0.00000000000000000001_dp
