@@ -26,7 +26,7 @@
 
 module defs_fftdata
 
-  use defs_basis 
+  use defs_basis
 
   implicit none
 
@@ -153,7 +153,7 @@ CONTAINS  !===========================================================
 !!
 !! OUTPUT
 !!  n_out=Output N value
-!!  ierr=Status error 
+!!  ierr=Status error
 !!
 !! SOURCE
 
@@ -170,7 +170,6 @@ subroutine size_goed_fft(m_in,n_out,ierr)
 !scalars
  integer :: ii,nbest
  character(len=500) :: msg
-
 ! *************************************************************************
 
    ierr = 0
@@ -179,18 +178,18 @@ subroutine size_goed_fft(m_in,n_out,ierr)
 
    if (nbest<2) then
      write(msg,'(4a,i8)')ch10,&
-&     ' size_goed_fft : BUG-',ch10,&
-&     ' nbest = ',nbest
+      ' size_goed_fft : BUG-',ch10,&
+      ' nbest = ',nbest
      write(std_out,*)msg
-     ierr = 1 
+     ierr = 1
      RETURN
    end if
 
    if (nbest>ifftsizes(ndata)) then
      write(msg,'(4a,i8,2a)')ch10,&
-&     ' size_goed_fft : ERROR-',ch10,&
-&     ' nbest = ',nbest,ch10,&
-&     ' is larger than any allowable FFT'
+      ' size_goed_fft : ERROR-',ch10,&
+      ' nbest = ',nbest,ch10,&
+      ' is larger than any allowable FFT'
      write(std_out,*)msg
      ierr = 2
      RETURN

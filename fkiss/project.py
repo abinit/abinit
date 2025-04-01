@@ -1342,6 +1342,10 @@ class AbinitProject(NotebookWriter):
 #          mess-up indented comments with the fields defined before.
 
 # WARNING: modify the defaults with *extreme* care!
+
+# The shared part of ABINIT has Valid indices: 00..39
+# Note: please keep LibPAW last in this section
+#
 """
         with open(corelibs_path, 'wt') as fh:
             fh.write(header)
