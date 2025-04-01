@@ -445,6 +445,13 @@ grep "<<< MEM" log
 - Local memory for Wc(g,g,qibz,itau): 17.8  [Mb] <<< MEM
 ```
 
+
+```
+grep vmrss_mb log
+
+vmrss_mb:   1.93379297E+03
+```
+
 To extract the wall-time and cpu-time for the most important sections, use:
 
 ```
@@ -481,7 +488,7 @@ The recommended procedure for converging GWR gaps is therefore as follows:
 
 1) Initial step:
 
-- Select the k-points where QP gaps are wanted.
+- Select the $\kk$-points where QP gaps are wanted.
   Usually the VBM and the CBM so that one can use [[gwr_sigma_algo]] 2
 - Fix the [[ngkpt]] $\kk$-mesh in the WFK file to a resonable value and produce "enough" [[nband]] states
 - Set an initial value for [[gwr_ntau]] in the GWR run.

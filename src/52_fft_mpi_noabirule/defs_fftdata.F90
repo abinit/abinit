@@ -34,8 +34,7 @@ module defs_fftdata
   integer, parameter :: ndata=231
   integer, parameter :: mg=65536   ! biggest value in the latter tables (ifftdata and ifftsizes)
 
-  ! The factors 2, 7 and higher than 8 are forbidden
-  ! 8 is to be the favored factor
+  ! The factors 2, 7 and higher than 8 are forbidden 8 is to be the favored factor
   ! The factor 6 is only allowed in the first place!
   ! These data have to be coherent with the one in getng.F90
   integer, parameter :: ifftdata1_40(280)   = (/     &
@@ -158,8 +157,6 @@ CONTAINS  !===========================================================
 !! SOURCE
 
 subroutine size_goed_fft(m_in,n_out,ierr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

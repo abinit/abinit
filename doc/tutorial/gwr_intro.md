@@ -117,6 +117,14 @@ with $\Theta$ the Heaviside step-function, and
 
 In these notes, we use $\rr$ to indicate points in the unit cell, and $\RR$ to denote points in the supercell.
 
+IF Fourier space, one obtains:
+
+These matrices are stored in memory for the entire duration of the calculation.
+The $\gg, \gg'$ components are distributed inside the `g` level of [[gwr_np_kgts]].
+Only the $\kk$-points in the IBZ are stored in memory and distributed inside the k-level
+as the code can use symmetries to reconstruct the Green's function in the full on-the-fly.
+Finally, the $\tau$ points are distributed inside the `t` level and collinear spins are distributed inside the `s` level.
+
 !!! important
 
     For simplicity, in all the equations we assume a spin-unpolarized semiconductor with scalar wavefunctions
@@ -158,10 +166,11 @@ and then immediately transformed to Fourier space.
 
 The cutoff energy for the polarizability is given by [[ecuteps]].
 This is an important parameter that should be subject to convergence studies.
+Only the $\qq$-points in the IBZ are stored in memory and distributed inside the k-level of [[gwr_np_kgts]].
 
 The FFT mesh is defined according to [[gwr_boxcutmin]].
-This parameter has a big impact on wall-time and memory requirements.
-One usually start with a coarse FFT mesh e.g. [[gwr_boxcutmin]] 1.1 and
+This parameter has a **big impact** on wall-time and memory requirements.
+One usually start with a coarse FFT mesh e.g. [[gwr_boxcutmin]] 1.0 and
 increase it during the last steps of the convergence study.
 
 As discussed in [[cite:Baroni1986]], the treatment of the long-wavelenght limit $\qq \rightarrow 0$
@@ -169,7 +178,7 @@ in the polarizability, requires the inclusion of the commutator of the non-local
 with the position operator.
 See also [this section](/theory/bse/#5-matrix-elements-of-the-dipole-operator) of the Bethe-Salpeter notes.
 By default the commutator of the non-local part is always included.
-In the input variable [[inclvkb]] can be used to deactivate it, if needed.
+The input variable [[inclvkb]] can be used to deactivate it, if needed.
 
 <!--
 [[gw_nqlwl]],
@@ -222,9 +231,12 @@ Clearly this approach is not the most efficient one if all the $\kk$-points are 
 as the convolutions in the BZ lead to quadratic scaling with the number of $\kk$-points.
 
 The input variable [[gwr_sigma_algo]] allows one to select the algorithm to be used.
-[[gwr_chi_algo]] has a similar meaning but only for the polarizability but this option is seldom used
+[[gwr_chi_algo]] has a similar meaning but only for the polarizability .
+<!--
+but this option is seldom used
 as it makese the computation of the polarizability much slower although it requires less memory as
 only two-point functions in the unit cell need to be stored.
+-->
 
 ## Self-consistency with GWR
 

@@ -6700,23 +6700,23 @@ until the quasi-particle energies are converged within [[gwr_tolqpe]].
 """,
 ),
 
-Variable(
-    abivarname="gwr_fit",
-    varset="gwr",
-    vartype="integer",
-    topics=['GWR_basic'],
-    dimensions="scalar",
-    defaultval=0,
-    mnemonics="GWR FIT",
-    requires="[[optdriver]] == 6",
-    added_in_version="10.3.4",
-    text=r"""
-A non-zero value activates the fit of the polarizabily and of the inverse dielectric matrix
-in order to accelerate the convergence of the GWR results wrt the number of points in the minimax mesh.
-
-NOTE: This feature is still under development
-""",
-),
+#Variable(
+#    abivarname="gwr_fit",
+#    varset="gwr",
+#    vartype="integer",
+#    topics=['GWR_basic'],
+#    dimensions="scalar",
+#    defaultval=0,
+#    mnemonics="GWR FIT",
+#    requires="[[optdriver]] == 6",
+#    added_in_version="10.3.4",
+#    text=r"""
+#A non-zero value activates the fit of the polarizabily and of the inverse dielectric matrix
+#in order to accelerate the convergence of the GWR results wrt the number of points in the minimax mesh.
+#
+#NOTE: This feature is still under development
+#""",
+#),
 
 Variable(
     abivarname="gw_qlwl",
@@ -6766,8 +6766,7 @@ Therefore the computed gaps might differ from the **True** ones that can
 only be obtained with an appropriate sampling of the IBZ.
 
 Positive values are useful if we do not know the position of the GW HOMO, LOMO
-and we want to investigate the effect of the GW corrections on the states
-close to the gap.
+and we want to investigate the effect of the GW corrections on the states close to the gap.
 Negative values are usually used for self-consistent calculations Note that,
 in the case of self-consistency or [[symsigma]] == 1, the code might change the bands range
 so that all the degenerate states are included.
@@ -6807,8 +6806,8 @@ that the core wave functions are strictly localized inside the PAW spheres.
 
 [[gw_sigxcore]] defines the approximation used to evaluate the core contribution to sigma.
 
-  * [[gw_sigxcore]] = 0, standard approach, the core contribution is approximated with vxc.
-  * [[gw_sigxcore]] = 1, the core term is approximated with the Fock operator inside the PAW spheres.
+  * 0, standard approach, the core contribution is approximated with vxc.
+  * 1, the core term is approximated with the Fock operator inside the PAW spheres.
 """,
 ),
 
@@ -6827,7 +6826,7 @@ Variable(
 Sets a tolerance for absolute differences of QP energies between two consecutive iterations
 that will cause the self-consistent GWR cycle to stop.
 It can be specified in Ha (the default), Ry, eV or Kelvin, since **gwr_tolqpe** has
-the [[ENERGY]] characteristics (1 Ha = 27.2113845 eV)
+the [[ENERGY]] characteristics (1 Ha = 27.2113845 eV).
 """,
 ),
 
@@ -24503,14 +24502,19 @@ Variable(
     text=r"""
 This variable is similar in spirit to [[gwr_sigma_algo]].
 It selects the algorithm used to compute the polarizability in the GWR code.
-Possible values are
+Possible values are:
 
-* 0 --> Automatic selection (not yet coded).
 * 1 --> Compute $\chi$ in the real-space supercell.
 * 2 --> Compute $\chi$ using convolutions in the BZ.
 
-[[gwr_chi_algo]] 2 is slower than 1 although it is significantly less memory demanding
+Note that [[gwr_chi_algo]] 2 has quadratic scaling with the number of $\qq$-points
+but it is more memory-efficient than the real-space method, as it operates on two-point functions confined to the unit cell.
+Also, [[gwr_chi_algo]] 2 can take advantage of symmetries to reduce the number of points in the BZ,
+and can benefit from the parallelism over $\kk$-points in [[gwr_np_kgts]] more than the supercell method.
+If encountering out-of-memory issues with the supercell method, it is advisable to switch to the BZ convolution approach
+To optimize performance, utilize all available cores, prioritizing g-parallelism followed by k-parallelism.
 
+The two algorithms are equivalent in the case of $\Gamma$-only sampling.
 """,
 ),
 
@@ -24543,7 +24547,6 @@ Variable(
 This input variable selects the algorithm used to compute the self-energy in the GWR code.
 Possible values are
 
-* 0 --> Automatic selection (not yet coded).
 * 1 --> Compute $\Sigma$ in the real-space supercell.
 * 2 --> Compute $\Sigma$ using convolutions in the BZ.
 
@@ -24555,6 +24558,12 @@ along an arbitrary $\kk$-path.
 at high-symmetry $\kk$-points as the code can exploit symmetries.
 In the best case scenario, both the CBM and the VBM are located at the $\Gamma$ point; hence the BZ summation
 can be replaced by a much faster symmetrized sum over the wavevectors of the IBZ.
+If encountering out-of-memory issues with the supercell method, it is advisable to switch to the BZ convolution approach
+To optimize performance, utilize all available cores, prioritizing g-parallelism followed by k-parallelism.
+
+The two algorithms are equivalent in the case of $\Gamma$-only sampling.
+
+See also [[gwr_chi_algo]]
 """,
 ),
 
@@ -24591,29 +24600,35 @@ Variable(
     requires="[[optdriver]] == 6",
     added_in_version="9.8.0",
     text=r"""
-Energy window in Hartree for the empty states used in the computation of the head/wings of the polarizability.
-The default value (-1.0) instructs the code to use all [nband]] states.
+This variable defines the transition energy window (in Hartree) for the empty states used
+in computing the head and wings of the polarizability.
+As discussed in [[cite:baroni1986]], the head and wings converge rapidly with respect to the number of bands, unlike the body of the matrix.
+Since the GWR code computes the body of the polarizability using the Green’s function in real space,
+fewer states are needed to achieve convergence for the head and wings compared to conventional GW calculations.
+The default value (-1.0) instructs the code to use all available [nband]] states.
+
+See also [[inclvkb]] for the inclusion of the contribution given by the non-local part of pseudopotential.
 """,
 ),
 
 
-Variable(
-    abivarname="gwr_regterm",
-    varset="gwr",
-    vartype="real",
-    topics=['GWR_expert'],
-    dimensions=[1],
-    defaultval=-1.0,
-    mnemonics="GWR REGularization TERM",
-    requires="[[optdriver]] == 6",
-    added_in_version="9.8.0",
-    text=r"""
-TODO: To be described.
-Negative value means automatic regularization.
-Zero to deactivate it.
-Positive to use specific value.
-""",
-),
+#Variable(
+#    abivarname="gwr_regterm",
+#    varset="gwr",
+#    vartype="real",
+#    topics=['GWR_expert'],
+#    dimensions=[1],
+#    defaultval=-1.0,
+#    mnemonics="GWR REGularization TERM",
+#    requires="[[optdriver]] == 6",
+#    added_in_version="9.8.0",
+#    text=r"""
+#TODO: To be described.
+#Negative value means automatic regularization.
+#Zero to deactivate it.
+#Positive to use specific value.
+#""",
+#),
 
 
 Variable(
