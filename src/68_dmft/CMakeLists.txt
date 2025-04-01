@@ -33,6 +33,12 @@ target_compile_definitions(68_dmft
   PRIVATE
   HAVE_CONFIG_H)
 
+if(HAVE_OPENMP_OFFLOAD)
+  target_compile_options(68_dmft
+    PRIVATE
+    $<$<COMPILE_LANGUAGE:Fortran>:${OPENMP_OFFLOAD_FLAGS}>)
+endif()
+
 target_link_libraries(68_dmft
   PUBLIC
   abinit::10_defs

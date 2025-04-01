@@ -3630,19 +3630,7 @@ contains
     type(xgBlock_t) , intent(inout) :: xgBlock
     integer,intent(in),optional :: comm
 
-    integer :: ierr,comm_,fact
-
-#if defined HAVE_OPENMP_OFFLOAD
-#if !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
-!FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
-    complex(dpc), ABI_CONTIGUOUS pointer :: xgBlock__vecC(:,:)
-    real(dp), ABI_CONTIGUOUS pointer :: xgBlock__vecR(:,:)
-#endif
-#if !defined HAVE_MPI2_INPLACE
-    complex(kind=c_double_complex), ABI_CONTIGUOUS pointer :: vecC_buf(:,:)
-    real(kind=c_double), ABI_CONTIGUOUS pointer :: vecR_buf(:,:)
-#endif
-#endif
+    integer :: ierr,comm_
 
     if (.not.present(comm)) then
       comm_ = xgBlock%spacedim_comm
@@ -3656,7 +3644,6 @@ contains
         call gpu_device_synchronize()
       end if
 
-      fact = 1 ; if (xgBlock%space==SPACE_CR) fact = 2
       select case(xgBlock%space)
 
         case (SPACE_R,SPACE_CR)
@@ -5524,28 +5511,31 @@ contains
   !! NAME
   !! xgBlock_reshape
 
-  subroutine xgBlock_reshape(xgBlock,newShape)
+  subroutine xgBlock_reshape(xgBlock,newrows,newcols)
     use, intrinsic :: iso_c_binding
     type(xgBlock_t), intent(inout) :: xgBlock
-    integer        , intent(in   ) :: newShape(2)
-    integer :: fact
+    integer        , intent(in   ) :: newrows
+    integer        , intent(in   ) :: newcols
+    integer :: fact,newshape(2)
     type(c_ptr) :: cptr
 
-    if ( xgBlock%rows*xgBlock%cols /= newShape(1)*newShape(2) ) then
+    if ( xgBlock%rows*xgBlock%cols /= newrows*newcols ) then
       write(std_out,*) "xgBlock%rows", xgBlock%rows
       write(std_out,*) "xgBlock%cols", xgBlock%cols
-      write(std_out,*) "newShape(1)", newShape(1)
-      write(std_out,*) "newShape(2)", newShape(2)
+      write(std_out,*) "newrows", newrows
+      write(std_out,*) "newcols", newcols
       write(std_out,*) "xgBlock%rows*xgBlock%cols", xgBlock%rows*xgBlock%cols
-      write(std_out,*) "newShape(1)*newShape(2)", newShape(1)*newShape(2)
+      write(std_out,*) "newrows*newcols", newrows*newcols
       ABI_ERROR("Bad shape")
     end if
 
     fact = 1 ; if (xgBlock%space==SPACE_CR) fact = 2
 
-    xgBlock%LDim = newShape(1)+( (xgBlock%LDim-xgBlock%rows)* xgBlock%cols)/newShape(2)
-    xgBlock%rows = newShape(1)
-    xgBlock%cols = newShape(2)
+    xgBlock%LDim = newrows+( (xgBlock%LDim-xgBlock%rows)* xgBlock%cols)/newcols
+    xgBlock%rows = newrows
+    xgBlock%cols = newcols
+    newshape(1) = newrows
+    newshape(2) = newcols
     select case(xgBlock%space)
     case (SPACE_R,SPACE_CR)
       cptr = getClocR(fact*xgBlock%LDim,xgBlock%cols,xgBlock%vecR)
@@ -5586,13 +5576,13 @@ contains
         ABI_ERROR('nspinor should divide the number of cols')
       end if
       call xgBlock_setBlock(xgBlock,xgBlock_spinor,nrows,ncols)
-      if (nspinor>1) call xgBlock_reshape(xgBlock_spinor,(/nrows*nspinor,ncols/nspinor/))
+      if (nspinor>1) call xgBlock_reshape(xgBlock_spinor,nrows*nspinor,ncols/nspinor)
     else if (option==ROWS2COLS) then
       if (modulo(nrows,nspinor)/=0) then
         ABI_ERROR('nspinor should divide the number of rows')
       end if
       call xgBlock_setBlock(xgBlock,xgBlock_spinor,nrows,ncols)
-      if (nspinor>1) call xgBlock_reshape(xgBlock_spinor,(/nrows/nspinor,ncols*nspinor/))
+      if (nspinor>1) call xgBlock_reshape(xgBlock_spinor,nrows/nspinor,ncols*nspinor)
     else
       ABI_ERROR('bad option value')
     end if
