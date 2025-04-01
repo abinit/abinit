@@ -4388,6 +4388,8 @@ subroutine gwr_build_tchi(gwr)
 
    call wrtout(std_out, " Allocating PBLAS arrays for tchi_q(g',r) for all q in the IBZ treated by this MPI rank.")
    call wrtout(std_out, " Here we're gonna have a big allocation peak...")
+   if (gwr%comm%me == 0) call gwr%pstat%print([std_out], header="After get_myk_green_gpr")
+
    do my_iqi=1,gwr%my_nqibz
      iq_ibz = gwr%my_qibz_inds(my_iqi)
      npwsp = gwr%tchi_desc_qibz(iq_ibz)%npw * gwr%nspinor
@@ -4596,6 +4598,8 @@ end if
 
     mem_mb = sum(slk_array_locmem_mb(chiq_rpr)) + sum(slk_array_locmem_mb(gk_rpr_pm)) + sum(slk_array_locmem_mb(gkq_rpr_pm))
     call wrtout(std_out, sjoin(" Local memory for chi_q(r',r) (gt_gpr): ", ftoa(mem_mb, fmt="f8.1"), ' [Mb] <<< MEM'))
+    if (gwr%comm%me == 0) call gwr%pstat%print([std_out], header="After gk_rpr_pm")
+
 
     ! * The little group is needed when symchi == 1
     ! * If use_umklp == 1 then symmetries requiring an umklapp to preserve qibz are included as well.
@@ -4636,6 +4640,7 @@ end if
 
       ! Sum over my k-points in the BZ.
       call slk_array_set(chiq_rpr, czero)
+      if (my_it == 1 .and. gwr%comm%me == 0) call gwr%pstat%print([std_out], header="After redistrib_gt_kibz")
 
       do my_ikf=1,gwr%my_nkbz
         print_time = gwr%comm%me == 0 .and. (my_ikf <= LOG_MODK .or. mod(my_ikf, LOG_MODK) == 0)
@@ -4716,6 +4721,8 @@ end if
    ABI_FREE(ltg_qibz)
    call wrtout(std_out, " Mixed space algorithm for chi completed")
  end if
+
+ if (gwr%comm%me == 0) call gwr%pstat%print([std_out], header="End of tChi_c loop")
 
  !call wrtout(std_out, sjoin(" max_abs_imag_chit", ftoa(max_abs_imag_chit)))
 
@@ -5715,6 +5722,8 @@ else
 
  mem_mb = slk_array_locmem_mb(wc_rpr) + sum(slk_array_locmem_mb(gk_rpr_pm)) + sum(slk_array_locmem_mb(sigc_rpr))
  call wrtout(std_out, sjoin(" Local memory for PBLAS (r,r') matrices: ", ftoa(mem_mb, fmt="f8.1"), ' [Mb] <<< MEM'))
+ if (gwr%comm%me == 0) call gwr%pstat%print([std_out], header="After sigc_rpr")
+
 
  do my_is=1,gwr%my_nspins
    spin = gwr%my_spins(my_is)
@@ -5756,6 +5765,7 @@ else
      ! Redistribute W_q(g,g') in the IBZ so that each MPI proc can reconstruct Wc_q in the BZ inside the loops
      call gwr%redistrib_mats_qibz("wc", itau, spin, need_qibz, got_qibz, "communicate")
      call slk_array_set(sigc_rpr, czero)
+     if (my_it == 1 .and. gwr%comm%me == 0) call gwr%pstat%print([std_out], header="After redistrib_mats_qibz")
 
      ! Sum over my k-points in the BZ.
      do my_ikf=1,gwr%my_nkbz
@@ -5866,6 +5876,8 @@ else
  end do
  call wrtout(std_out, " Mixed space algorithm for sigma completed")
 end if
+
+ if (gwr%comm%me == 0) call gwr%pstat%print([std_out], header="End of Sigma_c loop")
 
  call sigijtab_free(Sigcij_tab)
  ABI_FREE(Sigcij_tab)
