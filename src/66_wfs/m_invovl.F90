@@ -1541,6 +1541,10 @@ subroutine solve_inner_ompgpu(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj,
  ! TODO use a more efficient iterative algorithm than iterative refinement, use locking
  additional_steps_to_take = -1
  do i=1, 30
+#ifdef FC_NVHPC
+   ! Silly fix for NVHPC 25.1
+   if(ndat == -42) write(100,*) ndat
+#endif
    ! compute resid = proj - (D^-1 + PtP)sm1proj
    call apply_block_ompgpu(ham, cplx, invovl%inv_sij, nprojs, ndat, sm1proj, resid, block_sliced)
 
