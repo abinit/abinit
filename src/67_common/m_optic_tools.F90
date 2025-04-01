@@ -6,7 +6,7 @@
 !!  Helper functions used in the optic code
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2025 ABINIT group (SSharma,MVer,VRecoules,TD,YG, NAP)
+!! Copyright (C) 2002-2025 ABINIT group (SSharma,MVer,VRecoules,TD,YG, NAP,VT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -612,10 +612,10 @@ complex(dpc), intent(in) :: pmat(ks_ebands%mband, ks_ebands%mband, ks_ebands%nkp
 integer, intent(in) :: v1, v2, v3, nmesh, comm
 real(dp), intent(in) :: de, sc, brod, tol
 character(len=*), intent(in) :: fnam
-logical, intent(in) :: do_decompo ! .TRUE. to perform the bands decomposition, VT
-real(dp), intent(in) :: w_decompo ! energy in eV for bands decompo, VT
-integer, intent(in) :: contrib_decompo ! 0=all, 12=inter2w, 22=intra2w, 11=inter1w, 21=intra1w, 1=intra1wS, 2=2bands, VT
-logical, intent(in) :: do_antiresonant ! .FALSE. to include the AR terms, VT
+logical, intent(in) :: do_decompo ! .TRUE. to perform the bands decomposition
+real(dp), intent(in) :: w_decompo ! energy in eV for bands decompo
+integer, intent(in) :: contrib_decompo ! 0=all, 12=inter2w, 22=intra2w, 11=inter1w, 21=intra1w, 1=intra1wS, 2=2bands
+logical, intent(in) :: do_antiresonant ! .FALSE. to include the AR terms, TRUE by default
 
 !Local variables -------------------------
 integer,parameter :: master=0
@@ -641,7 +641,7 @@ real(dp) :: s(3,3),sym(3,3,3)
 complex(dpc), allocatable :: px(:,:,:,:,:), py(:,:,:,:,:), pz(:,:,:,:,:)
 complex(dpc), allocatable :: delta(:,:,:), inter2w(:), inter1w(:)
 complex(dpc), allocatable :: intra2w(:), intra1w(:), intra1wS(:),chi2tot(:)
-! Addition VT antiresonant (AR)
+! Addition antiresonant (AR)
 ! Products of momentum matrix elem for the AR terms
 real(dp)     :: t2
 complex(dpc) :: mat2wa,mat1w1a,mat1w2a,mat2wa_tra,mat1w3a_tra
@@ -657,7 +657,7 @@ complex(dpc) :: a311,a312,a313,a331,a31_32              ! AR intra1wS term
 complex(dpc), allocatable :: intra1wSa(:)
 complex(dpc), allocatable :: chi2tota(:)                ! AR total sum
 complex(dpc), allocatable :: chi2full(:)               ! AR+R total sum
-! Addition VT bands decomposition
+! Addition bands decomposition
 character(len=fnlen) :: fnam8
 character(len=fnlen) :: fnam9
 character(len=fnlen) :: fnam10
@@ -676,7 +676,7 @@ complex(dpc), allocatable :: inter1w_bands(:,:,:), inter1w_bands_ik(:,:,:)
 complex(dpc), allocatable :: intra2w_bands(:,:,:), intra2w_bands_ik(:,:,:) 
 complex(dpc), allocatable :: intra1w_bands(:,:,:), intra1w_bands_ik(:,:,:)
 complex(dpc), allocatable :: intra1wS_bands(:,:,:), intra1wS_bands_ik(:,:,:)
-! Addition VT 2bands interactions decomposition
+! Addition 2bands interactions decomposition
 character(len=fnlen) :: fnam13
 character(len=fnlen) :: fnam14
 integer :: fout13
@@ -692,7 +692,7 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
 !calculate the constant
  zi=(0._dp,1._dp)
  idel=zi*brod
- !const_au=-1._dp/(cryst%ucvol*dble(cryst%nsym)) !VT 1 instead of 2 
+ !const_au=-1._dp/(cryst%ucvol*dble(cryst%nsym)) ! VT: 1 instead of 2 bc 2 is unexplained 
  const_au=-2._dp/(cryst%ucvol*dble(cryst%nsym)) 
  au2esu=5.8300348177d-8
  const_esu=const_au*au2esu
@@ -719,14 +719,14 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
  fnam5=trim(fnam)//'-ChiAbs.out'
  fnam6=trim(fnam)//'-ChiImDec.out'
  fnam7=trim(fnam)//'-ChiReDec.out'
- ! Addition VT bands decomposition
+ ! Addition bands decomposition
  if (do_decompo) then
    fnam8=trim(fnam)//'-ChiInter2wBands.out' 
    fnam9=trim(fnam)//'-ChiInter1wBands.out' 
    fnam10=trim(fnam)//'-ChiIntra2wBands.out' 
    fnam11=trim(fnam)//'-ChiIntra1wBands.out' 
    fnam12=trim(fnam)//'-ChiIntra1wSBands.out' 
-   ! Addition VT 2bands interactions decomposition
+   ! Addition 2bands interactions decomposition
    fnam13=trim(fnam)//'-ChiIntra2w2Bands.out' 
    fnam14=trim(fnam)//'-ChiIntra1wS2Bands.out' 
  end if ! do_decompo
@@ -803,7 +803,7 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
  ABI_MALLOC(intra1w, (nmesh))
  ABI_MALLOC(intra1wS, (nmesh))
  ABI_MALLOC(delta, (mband, mband, 3))
- ! Addition VT antiresonant (AR)
+ ! Addition antiresonant (AR)
  if (.not.do_antiresonant) then
    ABI_MALLOC(inter2wa, (nmesh)) 
    ABI_MALLOC(inter1wa, (nmesh)) 
@@ -811,7 +811,7 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
    ABI_MALLOC(intra1wa, (nmesh))
    ABI_MALLOC(intra1wSa, (nmesh))
  end if ! if .not.do_antiresonant
- ! Addition VT bands decomposition
+ ! Addition bands decomposition
  if (do_decompo) then
    if (contrib_decompo==0 .or. contrib_decompo==12) then
      ABI_MALLOC(inter2w_bands,      (nband_sum,nband_sum,nband_sum)) ! (l,m,n)
@@ -834,7 +834,7 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
      ABI_MALLOC(intra1wS_bands_ik,  (nband_sum,nband_sum,nband_sum)) ! (l,m,n)
    end if
    if (contrib_decompo==0 .or. contrib_decompo==2) then
-     ! Addition VT 2bands interactions decomposition
+     ! Addition 2bands interactions decomposition
      ABI_MALLOC(intra2w_2bands,     (nband_sum,nband_sum))           ! (m,n)
      ABI_MALLOC(intra2w_2bands_ik,  (nband_sum,nband_sum))           ! (m,n)
      ABI_MALLOC(intra1wS_2bands,    (nband_sum,nband_sum))           ! (m,n)
@@ -868,7 +868,7 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
  intra1w(:)=zero
  intra1wS(:)=zero
  delta(:,:,:)=zero
- ! Addition VT antiresonant (AR)
+ ! Addition antiresonant (AR)
  if (.not.do_antiresonant) then
    inter2wa(:)=zero
    inter1wa(:)=zero
@@ -876,7 +876,7 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
    intra1wa(:)=zero
    intra1wSa(:)=zero
  end if ! if .not.do_antiresonant
- ! Addition VT bands decomposition
+ ! Addition bands decomposition
  if (do_decompo) then
    if (contrib_decompo==0 .or. contrib_decompo==12) then
      inter2w_bands(:,:,:)           = zero
@@ -899,7 +899,7 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
      intra1wS_bands_ik(:,:,:)       = zero
    end if
    if (contrib_decompo==0 .or. contrib_decompo==2) then
-     ! Addition VT 2bands interactions decomposition
+     ! Addition 2bands interactions decomposition
      intra2w_2bands(:,:)            = zero
      intra2w_2bands_ik(:,:)         = zero
      intra1wS_2bands(:,:)           = zero
@@ -917,11 +917,11 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
    do isp=1,ks_ebands%nsppol
      !  loop over states
      do ist1=1,nband_sum
-       ! Addition VT antiresonant (AR) commented
+       ! Addition antiresonant (AR) commented
        !e1 = ks_ebands%eig(ist1,ik,isp)
        !if (e1.lt.ks_ebands%fermie) then   ! ist1 is a valence state
        do ist2=1,nband_sum
-           ! Addition VT antiresonant (AR) commented
+           ! Addition antiresonant (AR) commented
            !e2 = ks_ebands%eig(ist2,ik,isp)
            !if (e2.gt.ks_ebands%fermie) then ! ist2 is a conduction state
              ! symmetrize the momentum matrix elements
@@ -975,7 +975,7 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
      b312=zero
      b313=zero
      b331=zero
-     ! Addition VT AR
+     ! Addition AR
      ! factors are named as above but b->a for AR
      if (.not.do_antiresonant) then
        a111=zero
@@ -1015,7 +1015,7 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
              ! calculate the matrix elements for two band intraband term
              mat2w_tra=zero
              mat1w3_tra=zero
-             ! Addition VT AR
+             ! Addition AR
              if (.not.do_antiresonant) then
                mat2wa_tra  = zero
                mat1w3a_tra = zero
@@ -1033,7 +1033,7 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
                    ! Changes are made so that this (b3) term is according to paper
                    ! [[cite:Sipe1993]] (Ref. 4) rather than [[cite:Hughes1996]] (Ref 2) in which this term is incorrect
                    
-                   ! Addition VT AR
+                   ! Addition AR
                    if (.not.do_antiresonant) then
                      mat2wa_tra=mat2wa_tra+px(istm,istn,lx,ly,lz)*pmat(istn,istm,ik,lz,isp)    &
                      *delta(istn,istm,ly)
@@ -1047,12 +1047,12 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
              end do
              b331=mat1w3_tra/wnm
              b231=8._dp*mat2w_tra/wmn
-             ! Addition VT AR
+             ! Addition AR
              if (.not.do_antiresonant) then
                a331=mat1w3a_tra/wmn
                a231=8._dp*mat2wa_tra/wnm
              end if ! if .not.do_antiresonant
-             ! Addition VT 2bands interactions decomposition
+             ! Addition 2bands interactions decomposition
              if (do_decompo) then
                if (contrib_decompo==0 .or. contrib_decompo==2) then
                  intra2w_2bands_ik(istm, istn)  = b231
@@ -1065,7 +1065,7 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
              b24=zero
              b31_32=zero
              b21_22=zero
-             ! Addition VT AR
+             ! Addition AR
              if (.not.do_antiresonant) then
                a11    = zero
                a12_13 = zero
@@ -1084,7 +1084,7 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
                mat2w=zero
                mat1w1=zero
                mat1w2=zero
-               ! Addition VT AR
+               ! Addition AR
                if (.not.do_antiresonant) then
                  mat2wa  = zero
                  mat1w1a = zero
@@ -1103,7 +1103,7 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
                      mat1w2=mat1w2+(pz(istm,istn,lx,ly,lz)*pmat(istl,istm,ik,lz,isp) &
                      *pmat(istn,istl,ik,ly,isp))
 
-                     ! Addition VT AR
+                     ! Addition AR
                      if (.not.do_antiresonant) then
                        mat2wa=mat2wa+(px(istm,istn,lx,ly,lz)*pmat(istn,istl,ik,ly,isp)   &
                        *pmat(istl,istm,ik,lz,isp))
@@ -1125,7 +1125,7 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
                b211=mat1w1/wml
                b241=-mat2w/wml
                b311=mat1w2/wlm
-               ! Addition VT AR
+               ! Addition AR
                if (.not.do_antiresonant) then
                  a111=mat2wa*(1._dp/(wln+wlm))*(1._dp/wml)
                  a121=mat1w1a*(1._dp/wml) !*(1._dp/(wmn+wln))
@@ -1142,7 +1142,7 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
                  b221=mat1w2/wln
                  b241=b241+(mat2w/wln)
                  b311=b311+(mat1w1/wln)
-                 ! Addition VT AR
+                 ! Addition AR
                  if (.not.do_antiresonant) then
                    a111=a111/wnl
                    a121=a121/wnl
@@ -1156,7 +1156,7 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
                  b121=zero
                  b131=zero
                  b221=zero
-                 ! Addition VT AR
+                 ! Addition AR
                  if (.not.do_antiresonant) then
                    a111=zero
                    a121=zero
@@ -1167,13 +1167,13 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
                t1=wln-wnm
                if (abs(t1).gt.tol) then
                  b131=b131/t1
-               ! Addition VT AR
+               ! Addition AR
                  if (.not.do_antiresonant) then
                    a121=a121/t1
                  end if ! if .not.do_antiresonant
                else
                  b131=zero
-               ! Addition VT AR
+               ! Addition AR
                  if (.not.do_antiresonant) then
                    a121=zero
                  end if ! if .not.do_antiresonant
@@ -1183,7 +1183,7 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
                b21_22=b21_22-b211+b221
                b24=b24+2._dp*b241
                b31_32=b31_32+b311
-               ! Addition VT AR
+               ! Addition AR
                if (.not.do_antiresonant) then
                  a11    = a11+2._dp*a111
                  a12_13 = a12_13-a121-a131
@@ -1191,7 +1191,7 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
                  a21_22 = a21_22+a211-a221
                  a31_32 = a31_32-a311
                end if ! if .not.do_antiresonant
-               ! Addition VT bands decomposition
+               ! Addition bands decomposition
                if (do_decompo) then
                  if (contrib_decompo==0 .or. contrib_decompo==12) then
                    inter2w_bands_ik(istl, istm, istn)  = -2._dp*b111
@@ -1218,7 +1218,7 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
                mat2w=zero
                mat1w1=zero
                mat1w2=zero
-               ! Addition VT AR
+               ! Addition AR
                if (.not.do_antiresonant) then
                  mat2wa  = zero
                  mat1w1a = zero
@@ -1237,7 +1237,7 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
                      mat1w2=mat1w2+(pz(istm,istn,lx,ly,lz)*pmat(istl,istm,ik,lz,isp) &
                      *pmat(istn,istl,ik,ly,isp))
                 
-                     ! Addition VT AR
+                     ! Addition AR
                      if (.not.do_antiresonant) then
                        mat2wa=mat2wa+(px(istm,istn,lx,ly,lz)*pmat(istn,istl,ik,ly,isp)   &
                        *pmat(istl,istm,ik,lz,isp))
@@ -1272,7 +1272,7 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
                b222=zero
                b212=zero
                b312=zero
-               ! Addition VT AR
+               ! Addition AR
                if (.not.do_antiresonant) then
                  a112=zero
                  a122=mat1w1a*(1._dp/(wmn+wln))
@@ -1289,7 +1289,7 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
                  b242=mat2w/wln
                  b222=mat1w2/wln
                  b312=mat1w1/wln
-                 ! Addition VT AR
+                 ! Addition AR
                  if (.not.do_antiresonant) then
                    a112=mat2wa/wnl
                    a122=a122/wln
@@ -1301,7 +1301,7 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
                else
                  b122=zero
                  b132=zero
-                 ! Addition VT AR
+                 ! Addition AR
                  if (.not.do_antiresonant) then
                    a122=zero
                    a132=zero
@@ -1314,7 +1314,7 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
                  b242=b242-(mat2w/wml)
                  b212=mat1w1/wml
                  b312=b312+(mat1w2/wlm)
-                 ! Addition VT AR
+                 ! Addition AR
                  if (.not.do_antiresonant) then
                    a112=a112/wlm
                    a122=a122/wml
@@ -1328,7 +1328,7 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
                  b122=zero
                  b132=zero
                  b212=zero
-                 ! Addition VT AR
+                 ! Addition AR
                  if (.not.do_antiresonant) then
                    a112=zero
                    a122=zero
@@ -1339,13 +1339,13 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
                t1=wlm-wnl
                if (abs(t1).gt.tol) then
                  b112=b112/t1
-                 ! Addition VT AR
+                 ! Addition AR
                  if (.not.do_antiresonant) then
                    a112=a112/t1
                  end if ! .not.do_antiresonant
                else
                  b112=zero
-                 ! Addition VT AR
+                 ! Addition AR
                  if (.not.do_antiresonant) then
                    a112=zero
                  end if ! .not.do_antiresonant
@@ -1355,7 +1355,7 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
                b24=b24+2._dp*b242
                b21_22=b21_22-b212+b222
                b31_32=b31_32+b312
-               ! Addition VT AR
+               ! Addition AR
                if (.not.do_antiresonant) then
                  a11    = a11-2._dp*a112
                  a12_13 = a12_13+a122-a132
@@ -1363,7 +1363,7 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
                  a21_22 = a21_22+a212-a222
                  a31_32 = a31_32-a312
                end if ! .not.do_antiresonant
-               ! Addition VT bands decomposition
+               ! Addition bands decomposition
                if (do_decompo) then
                  if (contrib_decompo==0 .or. contrib_decompo==12) then
                    inter2w_bands_ik(istl, istm, istn)  = 2._dp*b112 
@@ -1394,7 +1394,7 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
                mat2w=zero
                mat1w1=zero
                mat1w2=zero
-               ! Addition VT AR
+               ! Addition AR
                if (.not.do_antiresonant) then
                  mat2wa  = zero
                  mat1w1a = zero
@@ -1413,7 +1413,7 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
                      mat1w2=mat1w2+(pz(istm,istn,lx,ly,lz)*pmat(istl,istm,ik,lz,isp) &
                      *pmat(istn,istl,ik,ly,isp))
 
-                     ! Addition VT AR
+                     ! Addition AR
                      if (.not.do_antiresonant) then
                        mat2wa=mat2wa+px(istm,istn,lx,ly,lz)*pmat(istn,istl,ik,ly,isp) &
                        *pmat(istl,istm,ik,lz,isp)
@@ -1436,7 +1436,7 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
                b223=mat1w2/wln
                b213=zero
                b313=-1._dp*mat1w1/wnl
-               ! Addition VT AR
+               ! Addition AR
                if (.not.do_antiresonant) then
                  a113=mat2wa*(1._dp/(wnl+wml))*(1._dp/wln)
                  a123=mat1w1a*(1._dp/(wmn-wnl))*(1._dp/wln)
@@ -1453,7 +1453,7 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
                  b243=b243-(mat2w/wml)
                  b213=mat1w1/wml
                  b313=b313+(mat1w2/wlm)
-                 ! Addition VT AR
+                 ! Addition AR
                  if (.not.do_antiresonant) then
                    a113=a113/wlm
                    a123=a123/wlm
@@ -1466,7 +1466,7 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
                  b113=zero
                  b123=zero
                  b133=zero
-                 ! Addition VT AR
+                 ! Addition AR
                  if (.not.do_antiresonant) then
                    a113=zero
                    a123=zero
@@ -1490,7 +1490,7 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
                b21_22=b21_22-b213+b223
                b24=b24+2._dp*b243
                b31_32=b31_32+b313
-               ! Addition VT AR
+               ! Addition AR
                if (.not.do_antiresonant) then
                  a11    = a11-2._dp*a113
                  a12_13 = a12_13-a123+a133
@@ -1498,7 +1498,7 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
                  a21_22 = a21_22+a213-a223
                  a31_32 = a31_32-a313
                end if ! .not.do_antiresonant
-               ! Addition VT bands decomposition
+               ! Addition bands decomposition
                if (do_decompo) then
                  if (contrib_decompo==0 .or. contrib_decompo==12) then
                    inter2w_bands_ik(istl, istm, istn)  = 2._dp*b113
@@ -1523,7 +1523,7 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
              b24    = (b24+b231)*zi*(1._dp/(wnm**3))*const_esu
              b21_22 = (b21_22)*zi*(1._dp/(wnm**3))*const_esu
              b31_32 = (b31_32-b331)*zi*(1._dp/(wmn**3))*const_esu*0.5_dp
-             ! Addition VT AR
+             ! Addition AR
              if (.not.do_antiresonant) then
                a11    = a11*zi*(1._dp/wmn)*const_esu
                a12_13 = a12_13*zi*(1._dp/wmn)*const_esu
@@ -1531,7 +1531,7 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
                a21_22 = (a21_22)*zi*(1._dp/(wmn**3))*const_esu
                a31_32 = (a31_32+a331)*zi*(1._dp/(wnm**3))*const_esu*0.5_dp
              end if ! .not.do_antiresonant
-             ! Addition VT bands decomposition
+             ! Addition bands decomposition
              if (do_decompo) then
                if (contrib_decompo==0 .or. contrib_decompo==12) then
                  inter2w_bands_ik(:, istm, istn)  = inter2w_bands_ik(:, istm, istn)*zi*(1._dp/wnm)*const_esu
@@ -1549,7 +1549,7 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
                  intra1wS_bands_ik(:, istm, istn) = intra1wS_bands_ik(:, istm, istn)*zi*(1._dp/(wmn**3))*const_esu*0.5_dp 
                end if
                if (contrib_decompo==0 .or. contrib_decompo==2) then
-                 ! Addition VT 2bands interactions decomposition
+                 ! Addition 2bands interactions decomposition
                  intra2w_2bands_ik(istm, istn)  = intra2w_2bands_ik(istm, istn)*zi*(1._dp/(wnm**3))*const_esu 
                  intra1wS_2bands_ik(istm, istn) = -intra1wS_2bands_ik(istm, istn)*zi*(1._dp/(wmn**3))*const_esu*0.5_dp 
                end if
@@ -1563,7 +1563,7 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
                intra2w(iw)=intra2w(iw)+(ks_ebands%wtk(ik)*(b24/(wmn-2._dp*w)))  ! Intra(2w) from eta
                intra1w(iw)=intra1w(iw)+(ks_ebands%wtk(ik)*((b21_22)/(wmn-w)))   ! Intra(1w) from eta
                intra1wS(iw)=intra1wS(iw)+(ks_ebands%wtk(ik)*((b31_32)/(wmn-w))) ! Intra(1w) from sigma
-               ! Addition VT AR
+               ! Addition AR
                if (.not.do_antiresonant) then
                  inter2wa(iw)=inter2wa(iw)+(ks_ebands%wtk(ik)*(a11/(wnm-2._dp*dble(w))))  ! Inter(2w) from chi AR
                  inter1wa(iw)=inter1wa(iw)+(ks_ebands%wtk(ik)*(a12_13/(wnm-dble(w))))     ! Inter(1w) from chi AR
@@ -1571,7 +1571,7 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
                  intra1wa(iw)=intra1wa(iw)+(ks_ebands%wtk(ik)*((a21_22)/(wnm-dble(w))))   ! Intra(1w) from eta AR
                  intra1wSa(iw)=intra1wSa(iw)+(ks_ebands%wtk(ik)*((a31_32)/(wnm-dble(w)))) ! Intra(1w) from sigma AR
                end if ! .not.do_antiresonant
-               ! Addition VT bands decomposition
+               ! Addition bands decomposition
                if (do_decompo) then
                  iw_real = (w_decompo*ev2ha)/de + 1
                  iw_tgt = idnint(iw_real)
@@ -1592,7 +1592,7 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
                      intra1wS_bands(:, istm, istn) = intra1wS_bands(:,istm,istn)+(ks_ebands%wtk(ik)*((intra1wS_bands_ik(:, istm, istn))/(wmn-w)))
                    end if
                    if (contrib_decompo==0 .or. contrib_decompo==2) then
-                     ! Addition VT 2bands interaction decomposition
+                     ! Addition 2bands interaction decomposition
                      intra2w_2bands(istm, istn)  = intra2w_2bands(istm,istn)+(ks_ebands%wtk(ik)*(intra2w_2bands_ik(istm, istn)/(wmn-2._dp*w))) 
                      intra1wS_2bands(istm, istn) = intra1wS_2bands(istm,istn)+(ks_ebands%wtk(ik)*((intra1wS_2bands_ik(istm, istn))/(wmn-w)))
                    end if
@@ -1613,7 +1613,7 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
  call xmpi_sum(intra1wS,comm,ierr)
  call xmpi_min(my_emin,emin,comm,ierr)
  call xmpi_max(my_emax,emax,comm,ierr)
- ! Addition VT AR
+ ! Addition AR
  if (.not.do_antiresonant) then
    call xmpi_sum(inter2wa,comm,ierr)
    call xmpi_sum(inter1wa,comm,ierr)
@@ -1621,7 +1621,7 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
    call xmpi_sum(intra1wa,comm,ierr)
    call xmpi_sum(intra1wSa,comm,ierr)
  end if ! .not.do_antiresonant
- ! Addition VT bands decomposition
+ ! Addition bands decomposition
  if (do_decompo) then
    if (contrib_decompo==0 .or. contrib_decompo==12) then
      call xmpi_sum(inter2w_bands,comm,ierr)
@@ -1639,7 +1639,7 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
      call xmpi_sum(intra1wS_bands,comm,ierr)
    end if
    if (contrib_decompo==0 .or. contrib_decompo==2) then
-     ! Addition VT 2bands interactions decomposition
+     ! Addition 2bands interactions decomposition
      call xmpi_sum(intra2w_2bands,comm,ierr)
      call xmpi_sum(intra1wS_2bands,comm,ierr)
    end if
@@ -1653,7 +1653,7 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
      count4 = [2, nmesh, 1, 1]
      ABI_MALLOC(chi2tot, (nmesh))
      chi2tot = inter2w + inter1w + intra2w + intra1w + intra1wS
-     ! Addition VT AR
+     ! Addition AR
      if (.not.do_antiresonant) then
        ABI_MALLOC(chi2tota, (nmesh))
        ABI_MALLOC(chi2full, (nmesh))
@@ -1667,7 +1667,7 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "shg_intra1w"),     c2r(intra1w),   start=start4, count=count4))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "shg_intra1wS"),    c2r(intra1wS),  start=start4, count=count4))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "shg_chi2tot"),     c2r(chi2tot),   start=start4, count=count4))
-     ! Addition VT AR
+     ! Addition AR
      if (.not.do_antiresonant) then
        NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "shg_inter2w_AR"),  c2r(inter2wa),  start=start4, count=count4))
        NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "shg_inter1w_AR"),  c2r(inter1wa),  start=start4, count=count4))
@@ -1679,7 +1679,7 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
      end if ! .not.do_antiresonant
 #endif
      ABI_FREE(chi2tot)
-     ! Addition VT AR
+     ! Addition AR
      if (.not.do_antiresonant) then
        ABI_FREE(chi2tota)
        ABI_FREE(chi2full)
@@ -1707,7 +1707,7 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
    if (open_file(fnam7,msg,newunit=fout7,action='WRITE',form='FORMATTED') /= 0) then
      ABI_ERROR(msg)
    end if
-   ! Addition VT bands decomposition
+   ! Addition bands decomposition
    if (do_decompo) then
      if (contrib_decompo==0 .or. contrib_decompo==12) then
        if (open_file(fnam8,msg,newunit=fout8,action='WRITE',form='FORMATTED') /= 0) then
@@ -1735,7 +1735,7 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
        end if
      end if
      if (contrib_decompo==0 .or. contrib_decompo==2) then
-       ! Addition VT 2bands interactions decomposition
+       ! Addition 2bands interactions decomposition
        if (open_file(fnam13,msg,newunit=fout13,action='WRITE',form='FORMATTED') /= 0) then
          ABI_ERROR(msg)
        end if
@@ -1808,7 +1808,7 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
    write(fout7, '(a)')' # Energy(eV) Chi(w) Eta(w) Sigma(w)'
    write(fout7, '(a)')' # in esu'
    write(fout7, '(a)')' # '
-   ! Addition VT bands decomposition
+   ! Addition bands decomposition
    if (do_decompo) then
      if (contrib_decompo==0 .or. contrib_decompo==12) then
        write(fout8, '(a,3i3)') ' #calculated the component:',v1,v2,v3
@@ -1871,7 +1871,7 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
      end if
 
      if (contrib_decompo==0 .or. contrib_decompo==2) then
-       ! Addition VT 2bands interactions decomposition
+       ! Addition 2bands interactions decomposition
        write(fout13, '(a,3i3)') ' #calculated the component:',v1,v2,v3
        write(fout13, '(a,es16.6)') ' #tolerance:',tol
        write(fout13, '(a,es16.6,a)') ' #broadening:',brod,'Ha'
@@ -1965,7 +1965,7 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
        dble(intra2w(iw)+intra1w(iw))/1.d-7,dble(intra1wS(iw))/1.d-7
      end do ! iw=2, nmesh
    end if ! .not.do_antiresonant, else
-   ! Addition VT bands decomposition
+   ! Addition bands decomposition
    if (do_decompo) then
      do iw=2,nmesh
        if (iw==iw_tgt) then
@@ -2008,7 +2008,7 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
   
              end do ! istl
              if (contrib_decompo==0 .or. contrib_decompo==2) then
-               ! Addition VT 2bands interactions decomposition
+               ! Addition 2bands interactions decomposition
                write(fout13,'(f15.6,2i15,2es16.6)') ene,istn,istm,                            &
                dble(intra2w_2bands(istm,istn)) *4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-12),    &
                aimag(intra2w_2bands(istm,istn))*4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-12)
@@ -2032,7 +2032,7 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
    close(fout5)
    close(fout6)
    close(fout7)
-   ! Addition VT bands decomposition
+   ! Addition bands decomposition
    if (do_decompo) then
      if (contrib_decompo==0 .or. contrib_decompo==12) then
        close(fout8)
@@ -2050,7 +2050,7 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
        close(fout12)
      end if
      if (contrib_decompo==0 .or. contrib_decompo==2) then
-       ! Addition VT 2bands interactions decomposition
+       ! Addition 2bands interactions decomposition
        close(fout13)
        close(fout14)
      end if
@@ -2087,7 +2087,7 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
  ABI_FREE(intra1w)
  ABI_FREE(intra1wS)
  ABI_FREE(delta)
- ! Addition VT AR
+ ! Addition AR
  if (.not.do_antiresonant) then
    ABI_FREE(inter2wa)
    ABI_FREE(inter1wa)
@@ -2095,7 +2095,7 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
    ABI_FREE(intra1wa)
    ABI_FREE(intra1wSa)
  end if ! .not.do_antiresonant
- ! Addition VT bands decomposition
+ ! Addition bands decomposition
  if (do_decompo) then
    if (contrib_decompo==0 .or. contrib_decompo==12) then
      ABI_FREE(inter2w_bands)
@@ -2118,7 +2118,7 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
      ABI_FREE(intra1wS_bands_ik)
    end if
    if (contrib_decompo==0 .or. contrib_decompo==2) then
-     ! Addition VT 2bands interactions decomposition
+     ! Addition 2bands interactions decomposition
      ABI_FREE(intra2w_2bands)
      ABI_FREE(intra2w_2bands_ik)
      ABI_FREE(intra1wS_2bands)
