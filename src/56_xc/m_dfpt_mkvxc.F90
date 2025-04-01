@@ -1296,7 +1296,15 @@ subroutine dfpt_mkvxcccdq(cplex,i3dir,ixc,gprimd,kxc,mpi_enreg,nfft, &
    ABI_MALLOC(vxc1dq_car,(2*nfft,nspden,3))
    do qcar=1,3
      call dfpt_mkvxcggadq(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,nkxc,nspden,qcar,rhor1,vxc1dq_a)
-     vxc1dq_car(:,:,qcar)=vxc1dq_a(:,:)
+
+     !Here we apply an i factor, to compensate the lake of the -i factor in
+     !vxc1dq_b (see notes in dfpt_vlocaldq). 
+     do ir=1,nfft
+       ii=2*ir-1
+       jj=2*ir
+       vxc1dq_car(ii,:,qcar)=-vxc1dq_a(jj,:)
+       vxc1dq_car(jj,:,qcar)= vxc1dq_a(ii,:)
+     end do
    end do
    ABI_FREE(rhor1)
 
