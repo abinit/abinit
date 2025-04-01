@@ -991,6 +991,10 @@ class AbinitProject(NotebookWriter):
     def write_binaries_conf(self, dryrun=False, verbose=0):
         """
         Write new binaries.conf file
+
+        Args:
+            dryrun: True to operate in dryrun mode.
+            verbose: Verbosity level.
         """
         # Read binaries.conf and add new list of libraries.
         # NB: To treat `dependencies` in an automatic way, I would need either an
@@ -998,8 +1002,8 @@ class AbinitProject(NotebookWriter):
         # that I can map these names to external libraries.
         # This means that I **cannot generate** the entire file in a programmatic way
         # but only the library entries.
-        print("Writing binaries.conf ...")
         binconf_path = os.path.join(self.top, "config", "specs", "binaries.conf")
+        print("Writing", binconf_path, " ...")
 
         # Read INI file.
         config = ConfigParser()
@@ -1057,7 +1061,7 @@ class AbinitProject(NotebookWriter):
             abinit.amf --> File with EXTRA_DIST
 
         Args:
-            dryrun: True to operate in dryrun mode
+            dryrun: True to operate in dryrun mode.
             verbose: Verbosity level.
         """
         print("Writing buildsys_files ...")
@@ -1191,7 +1195,95 @@ class AbinitProject(NotebookWriter):
             if errors:
                 raise RuntimeError("\n".join(errors))
 
-        #self.check_corelibs()
+    def update_corelibs(self, dryrun=False, verbose=0):
+        """
+        Update corelibs.conf file taking into account the external dependecies.
+
+        Args:
+            dryrun: True to operate in dryrun mode.
+            verbose: Verbosity level.
+        """
+        # Read INI file.
+        config = ConfigParser()
+        corelibs_path = os.path.join(self.top, "config", "specs", "corelibs.conf")
+        print("Update dependencies", corelibs_path, " ...")
+        config.read(corelibs_path)
+
+        for dirname, fortfile in self.iter_dirname_fortfile():
+            dirname = os.path.basename(dirname)
+            if dirname == "98_main": continue
+            section = config[dirname]
+            if "dependencies" not in section:
+                # Section is optional
+                old_dependencies = None
+            else:
+                old_dependencies = set(section["dependencies"].split())
+
+            new_dependencies = []
+            for use_name in fortfile.all_uses:
+                deps = EXTERNAL_MODS_DEPS.get(use_name, None)
+                if deps is None: continue
+                if verbose:
+                    print("use_name:", use_name, "deps", deps)
+                new_dependencies.extend(deps)
+            new_dependencies = set(new_dependencies)
+            if verbose:
+                print("For dirname", dirname, "\nnew_dependencies:", new_dependencies, "\nold_dependencies:", old_dependencies)
+
+            if old_dependencies is None:
+                # dependencies is not specified for this directory.
+                if new_dependencies:
+                    if verbose:
+                        print("dirname", dirname, "does not have a dependencies section but uses:", new_dependencies)
+                    config[dirname]["dependencies"] = " ".join(d for d in sorted(new_dependencies))
+            else:
+                for new_dep in new_dependencies:
+                    if verbose and new_dep not in old_dependencies:
+                        print("dirname", dirname, "uses:", new_dep, " that is not listed in", old_dependencies)
+                config[dirname]["dependencies"] = " ".join(d for d in sorted(old_dependencies.union(old_dependencies)))
+
+        header = """\
+# -*- INI -*-
+#
+# Copyright (C) 2009-2025 ABINIT Group (Yann Pouillon)
+#
+# This file is part of the ABINIT software package. For license information,
+# please see the COPYING file in the top-level directory of the ABINIT source
+# distribution.
+#
+
+#
+# Config file for the core libraries of Abinit
+#
+# Note: The following statements are in the Python "INI" format, with
+#       case-sensitivity activated.
+#
+# Available options:
+#
+#   * abirules     : whether to check conformance to the abirules (mandatory);
+#
+#   * dependencies : external dependencies, when relevant (optional);
+#
+#   * optional     : whether the build of the library is optional (mandatory);
+#
+#   * parent       : code block the subdirectory belongs to, selected between
+#                    "common", "core", or "libpaw" (mandatory).
+#
+
+# WARNING: Make sure all comments start at column 1 of the text, because some
+#          versions of ConfigParser shipped with RedHat-based systems will
+#          mess-up indented comments with the fields defined before.
+
+# WARNING: modify the defaults with *extreme* care!
+
+# The shared part of ABINIT has Valid indices: 00..39
+# Note: please keep LibPAW last in this section
+#
+"""
+        if not dryrun:
+            with io.open(corelibs_path, "wt", encoding="utf8") as fh:
+                fh.write(header)
+                config.write(fh)
 
     def touch_alldeps(self, verbose=0):
         """
@@ -1264,94 +1356,6 @@ class AbinitProject(NotebookWriter):
             cprint(msg % name, color="green" if rv == 0 else "red")
 
         return retcode
-
-    def check_corelibs(self):
-        """
-        This function checks that all external dependencies are mentioned in corelibs.conf.
-        Return exit status.
-        """
-        print("Checking corelibs ...")
-        # Read INI file.
-        config = ConfigParser()
-        corelibs_path = os.path.join(self.top, "config", "specs", "corelibs.conf")
-        config.read(corelibs_path)
-
-        ierr = 0
-        for dirname, fortfile in self.iter_dirname_fortfile():
-            dirname = os.path.basename(dirname)
-            if dirname == "98_main": continue
-            section = config[dirname]
-            if "dependencies" not in section:
-                # Section is optional
-                old_dependencies = None
-            else:
-                old_dependencies = set(section["dependencies"].split())
-
-            new_dependencies = []
-            for use_name in fortfile.all_uses:
-                deps = EXTERNAL_MODS_DEPS.get(use_name, None)
-                if deps is None: continue
-                #print("use_name:", use_name, "deps", deps)
-                new_dependencies.extend(deps)
-            new_dependencies = set(new_dependencies)
-            #print("For dirname", dirname, "\nnew_dependencies:", new_dependencies, "\nold_dependencies:", old_dependencies)
-
-            if old_dependencies is None:
-                # dependencies is not specified for this directory.
-                if new_dependencies:
-                    ierr += 1
-                    print("dirname", dirname, "does not have a dependencies section but uses:", new_dependencies)
-                    config[dirname]["dependencies"] = " ".join(d for d in sorted(new_dependencies))
-            else:
-                for new_dep in new_dependencies:
-                    if new_dep not in old_dependencies:
-                        ierr += 1
-                        print("dirname", dirname, "uses:", new_dep, " that is not listed in", old_dependencies)
-                config[dirname]["dependencies"] = " ".join(d for d in sorted(old_dependencies.union(old_dependencies)))
-
-        header = """\
-# -*- INI -*-
-#
-# Copyright (C) 2009-2025 ABINIT Group (Yann Pouillon)
-#
-# This file is part of the ABINIT software package. For license information,
-# please see the COPYING file in the top-level directory of the ABINIT source
-# distribution.
-#
-
-#
-# Config file for the core libraries of Abinit
-#
-# Note: The following statements are in the Python "INI" format, with
-#       case-sensitivity activated.
-#
-# Available options:
-#
-#   * abirules     : whether to check conformance to the abirules (mandatory);
-#
-#   * dependencies : external dependencies, when relevant (optional);
-#
-#   * optional     : whether the build of the library is optional (mandatory);
-#
-#   * parent       : code block the subdirectory belongs to, selected between
-#                    "common", "core", or "libpaw" (mandatory).
-#
-
-# WARNING: Make sure all comments start at column 1 of the text, because some
-#          versions of ConfigParser shipped with RedHat-based systems will
-#          mess-up indented comments with the fields defined before.
-
-# WARNING: modify the defaults with *extreme* care!
-
-# The shared part of ABINIT has Valid indices: 00..39
-# Note: please keep LibPAW last in this section
-#
-"""
-        with open(corelibs_path, 'wt') as fh:
-            fh.write(header)
-            config.write(fh)
-
-        return ierr
 
     def pedit(self, name, verbose=0):
         """

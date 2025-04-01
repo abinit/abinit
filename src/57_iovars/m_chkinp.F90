@@ -3817,7 +3817,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 
 !  symsigma
    if (all(dt%symsigma /= [0, 1, -1])) then
-     write(msg, '(a,i0,a,a,a,a)' )&
+     write(msg, '(a,i0,4a)' )&
       'symsigma was input as ',dt%symsigma,ch10,&
       'Input value must be 0, 1, or -1.',ch10,&
       'Action: modify value of symsigma in input file.'
@@ -3838,7 +3838,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
          end if
        end do
      end if
-     if (ANY(optdriver ==[RUNL_SCREENING,RUNL_SIGMA])) then
+     if (ANY(optdriver == [RUNL_SCREENING, RUNL_SIGMA])) then
        do isym=1,dt%nsym
          if (sum(dt%tnons(:,isym)**2)>tol6) then
            write(msg,'(3a,i3,a,3f8.4,3a)')&
@@ -4127,8 +4127,8 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
        do itypat=1,dt%ntypat
          if (dt%znucl(itypat)<0.or.dt%znucl(itypat)>54) then
            write(msg,'(4a,f5.1,a)') ch10,&
-&           ' chkinp : ERROR -',ch10,&
-&           '  Van der Waals DFT-D2 correction (vdw_xc=5) not available for atom type Z=',dt%znucl(itypat),' !'
+           ' chkinp : ERROR -',ch10,&
+           '  Van der Waals DFT-D2 correction (vdw_xc=5) not available for atom type Z=',dt%znucl(itypat),' !'
            call wrtout(std_out,msg)
            ierr=ierr+1
          end if
@@ -4437,14 +4437,13 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      !   " for achieving an optimal distribution of memory and CPU load. Please change the number of processors."
      !  ABI_ERROR_NOSTOP(msg, ierr)
      !end if
-     !if (dt%usepaw == 1) then
-     !  ABI_ERROR_NOSTOP("GWR with PAW not yet implemented", ierr)
-     !end if
+     if (dt%usepaw == 1 .and. .not. string_in(dt%gwr_task, "HDIAGO, HDIAGO_FULL, CC4S, CC4S_FULL, CC4S_FROM_WFK")) then
+       ABI_ERROR_NOSTOP("GWR with PAW not yet implemented", ierr)
+     end if
      if (dt%nshiftk /= 1 .or. any(abs(dt%shiftk(:,1)) > tol6)) then
        ABI_ERROR_NOSTOP('GWR requires Gamma-centered k-meshes', ierr)
      end if
-     msg = "HDIAGO, HDIAGO_FULL"
-     if (dt%nspinor == 2 .and. .not. string_in(dt%gwr_task, msg)) then
+     if (dt%nspinor == 2 .and. .not. string_in(dt%gwr_task, "HDIAGO, HDIAGO_FULL")) then
        ABI_ERROR_NOSTOP('GWR does not support nspinor == 2', ierr)
      end if
    end if
