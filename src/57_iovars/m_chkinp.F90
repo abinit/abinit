@@ -1344,7 +1344,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 
 !  gpu_nl_splitsize
    call chkint_ge(0,0,cond_string,cond_values,ierr,'gpu_nl_splitsize',dt%gpu_nl_splitsize,1,iout)
-   if (dt%gpu_option/=ABI_GPU_OPENMP .and. dt%gpu_nl_splitsize/=0) then
+   if (dt%gpu_option/=ABI_GPU_OPENMP .and. dt%gpu_nl_splitsize/=1) then
      ABI_WARNING('gpu_nl_splitsize is ignored outside of OpenMP GPU (gpu_option 2)!')
    end if
 

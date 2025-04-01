@@ -317,6 +317,9 @@ MODULE m_paw_dmft
   integer :: dmftqmc_therm
   ! Number of thermalization steps for CTQMC (only for ABINIT, and for TRIQS when we don't restart from a previous configuration)
 
+  integer :: gpu_option
+  ! Wether to use GPU implementation (expected values: ABI_GPU_DISABLED, ABI_GPU_OPENMP)
+
   integer :: idmftloop
   ! Current iteration in the DFT+DMFT loop
 
@@ -1582,6 +1585,7 @@ subroutine init_dmft(cryst_struc,dmatpawu,dtset,fermie_dft,fnamei,fnametmp_app,p
 !   enddo
 ! enddo
 
+ paw_dmft%gpu_option=dtset%gpu_option
  paw_dmft%fermie_dft = fermie_dft ! in Ha
  paw_dmft%fermie = fermie_dft
 

@@ -22,6 +22,9 @@
 
 #include "abi_common.h"
 
+! nvtx related macro definition
+#include "nvtx_macros.h"
+
 MODULE m_dmft
 
  use defs_abitypes
@@ -51,6 +54,10 @@ MODULE m_dmft
  use m_pawtab, only : pawtab_type
  use m_self, only : dc_self,destroy_self,initialize_self,new_self,print_self,rw_self,self_type
  use m_time, only : timab
+
+#ifdef HAVE_GPU_MARKERS
+ use m_nvtx_data
+#endif
 
  implicit none
 
@@ -117,6 +124,8 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
 !************************************************************************
 
  DBG_ENTER('COLL')
+ ABI_NVTX_START_RANGE(NVTX_DMFT_SOLVE)
+
  myproc = paw_dmft%myproc
  check  = paw_dmft%dmftcheck ! checks enabled
  t2g    = (paw_dmft%dmft_t2g == 1)
@@ -365,6 +374,7 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
    & ch10,' ======================================================'
  call wrtout(std_out,message,'COLL')
 
+ ABI_NVTX_START_RANGE(NVTX_DMFT_SOLVE_LOOP)
 !=======================================================================
 !===  dmft loop  =======================================================
  do idmftloop=1,dmft_iter
@@ -521,6 +531,7 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
 !  =======================================================================
 !  === end dmft loop  ====================================================
  end do ! idmftloop
+ ABI_NVTX_END_RANGE()
 !=========================================================================
 
 !== Save self on disk
@@ -598,6 +609,7 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
 
  ABI_FREE(hu)
 
+ ABI_NVTX_END_RANGE()
  DBG_EXIT("COLL")
 
 end subroutine dmft_solve
@@ -654,6 +666,7 @@ subroutine impurity_solve(cryst_struc,green,hu,paw_dmft,pawang,pawtab,&
 !character(len=500) :: message
 
  call timab(622,1,tsec(:))
+ ABI_NVTX_START_RANGE(NVTX_DMFT_IMPURITY_SOLVE)
 !=======================================================================
 !== Prepare data for Hirsch Fye QMC
 !== NB: for CTQMC, Fourier Transformation are done inside the CTQMC code
@@ -851,6 +864,8 @@ subroutine impurity_solve(cryst_struc,green,hu,paw_dmft,pawang,pawtab,&
  !if(abs(pawprtvol)>0) then
  !end if
 
+
+ ABI_NVTX_END_RANGE()
  call timab(622,2,tsec(:))
 
 end subroutine impurity_solve
