@@ -91,6 +91,9 @@ It is worth mentioning that in the conventional GW code,
 the computational cost increases quickly with [[nfreqsp]] while in the GWR algorithm
 this part is very cheap as $A_\nk(\ww)$ is easily obtained with the Pade' approximant.
 
+IF for some reasons, you decide to use iterative eigenvalue solvers to generate the WFK file,
+remember to set [[istwfk]] = 1
+
 ## Formalism
 
 The zero-temperature Green's function in imaginary-time is given by:

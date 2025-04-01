@@ -2274,7 +2274,10 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
      kk_ibz = gwr%kibz(:, ik_ibz)
      npw_k = gwr%green_desc_kibz(ik_ibz)%npw
      npw_k_disk = gwr%wfk_hdr%npwarr(ik_ibz); istwf_k = gwr%wfk_hdr%istwfk(ik_ibz); npwsp_disk = npw_k_disk * gwr%nspinor
+
      ABI_CHECK_IEQ(istwf_k, 1, "istwfk_k should be 1")
+     ! See m_wfd for calls to convert to istwfk 1
+     !change_gsphere = istwfk_disk /= wfd%istwfk(ik_ibz)
 
      ! Create communicator with master and all procs requiring this (k,s) block (color == 1)
      need_block_ks = any(gwr%my_spins == spin) .and. any(gwr%my_kibz_inds == ik_ibz)
@@ -2283,9 +2286,8 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
 
      ! TODO: Optimize this part
      ! Find band_step that gives good compromise between memory and efficiency.
-     band_step = memb_limited_step(1, nbsum, 2*npwsp_disk, xmpi_bsize_dp, 1024.0_dp)
+     !band_step = memb_limited_step(1, nbsum, 2*npwsp_disk, xmpi_bsize_dp, 1024.0_dp)
      band_step = 200
-     !band_step = 100
      do bstart=1, nbsum, band_step
        bstop = min(bstart + band_step - 1, nbsum); nb = bstop - bstart + 1
 
@@ -2330,18 +2332,17 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
                  icg = ig + cg_spad
                  igw = gf2wfd(ig) + gw_spad
                  if (gf2wfd(ig) /= 0) then
-                   !wave%ug(igw) = CMPLX(cg_k(1,icg), cg_k(2,icg), kind=gwpc)
                    ugb%buffer_cplx(igw, il_b) = cmplx(cg_work(1,icg,ib), cg_work(2,icg,ib), kind=gwpc)
                  end if
                end do
              end do ! spinor
 
-             ! 1) Normalization.
+             ! Re-normalize wavefunctions..
              cdum = xdotc(npw_k*gwr%nspinor, ugb%buffer_cplx(:,il_b), 1, ugb%buffer_cplx(:,il_b), 1)
              if (istwf_k > 1) then
                cdum = two * DBLE(cdum)
                associate (ug1 => ugb%buffer_cplx(1,il_b))
-               if (istwf_k == 2) cdum = cdum - CONJG(ug1) * ug1
+               if (istwf_k == 2) cdum = cdum - conjg(ug1) * ug1
                end associate
              end if
              cdum = one / sqrt(cdum)
@@ -2350,13 +2351,14 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
              !print *, "new norm:", cdum
            end if
 
-         end do
+         end do ! band
          end associate
        end if
 
        ABI_FREE(cg_work)
-       ABI_SFREE(gf2wfd)
      end do ! bstart
+
+     ABI_SFREE(gf2wfd)
 
      call xmpi_comm_free(bcast_comm)
 
