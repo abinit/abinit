@@ -60,12 +60,12 @@ contains
 !!
 !! SOURCE
 subroutine opernla_gemm_distributed(rank,nprocs,npw,ndat,&
-&                                   nprojs,nprojs_blk,nprojs_last_blk,nprojs_my_blk,cplex,beta,&
+&                                   nprojs,nprojs_blk,nprojs_last_blk,cplex,beta,&
 &                                   projs_local,vectin,projections,gpu_option)
  integer,  intent(in)     :: rank,nprocs,npw,ndat,gpu_option
- integer,  intent(in)     :: nprojs,nprojs_blk,nprojs_last_blk,nprojs_my_blk,cplex
+ integer,  intent(in)     :: nprojs,nprojs_blk,nprojs_last_blk,cplex
  complex(dpc), intent(in) :: beta
- real(dp), intent(in),  target    :: projs_local(cplex,npw,nprojs_my_blk)
+ real(dp), intent(in),  target    :: projs_local(cplex,npw,nprojs_last_blk)
  real(dp), intent(in),  target    :: vectin(2,npw*ndat)
  real(dp), intent(out), target    :: projections(cplex,nprojs,ndat)
 
@@ -209,13 +209,13 @@ end subroutine opernla_gemm_distributed
 
 subroutine opernla_xgemm(cplex,transa,transb,nprojs,ndat,npw,alpha,a,lda,b,ldb,beta,c,ldc,&
 &                       rank, nprocs,&
-&                       nprojs_blk, nprojs_last_blk, nprojs_my_blk,&
+&                       nprojs_blk, nprojs_last_blk, &
 &                       iblock,&
 &                       gpu_option,use_distrib,use_sliced_gemms)
 
 !Arguments ------------------------------------
  integer,intent(in) :: cplex,lda,ldb,ldc,nprojs,ndat,npw,gpu_option
- integer,intent(in) :: rank,nprocs,nprojs_blk,nprojs_last_blk,nprojs_my_blk
+ integer,intent(in) :: rank,nprocs,nprojs_blk,nprojs_last_blk
  integer,intent(in) :: iblock
  logical,intent(in) :: use_distrib,use_sliced_gemms
  complex(dpc),intent(in) :: alpha,beta
@@ -234,7 +234,7 @@ subroutine opernla_xgemm(cplex,transa,transb,nprojs,ndat,npw,alpha,a,lda,b,ldb,b
    &                             nprojs,&
    &                             nprojs_blk,&
    &                             nprojs_last_blk,&
-   &                             nprojs_my_blk,cplex,alpha,&
+   &                             cplex,alpha,&
    &                             a,&
    &                             b,c,gpu_option)
  else
@@ -395,7 +395,7 @@ subroutine opernla_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,&
 !Local variables-------------------------------
  integer :: idat,ierr,i,ik,nprojs_all
  integer :: projs_beg,projs_end,dprojs_beg,dprojs_end,d2projs_beg,d2projs_end
- integer :: nprojs_blk,nprojs_my_blk,nprojs_last_blk,nprojs_cur_blk,rank,nprocs,iblock,nblocks
+ integer :: nprojs_blk,nprojs_last_blk,nprojs_cur_blk,rank,nprocs,iblock,nblocks
  logical :: use_sliced_gemms
  real(dp), ABI_CONTIGUOUS pointer :: projs(:,:,:),projs_r(:,:,:),projs_i(:,:,:)
  real(dp), ABI_CONTIGUOUS pointer :: dprojs(:,:,:),dprojs_r(:,:,:),dprojs_i(:,:,:)
@@ -438,14 +438,11 @@ subroutine opernla_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,&
  &                       is_kprime,gpu_option)
  if(nprojs_all/=gemm_nonlop_kpt(ik)%nprojs) ABI_BUG("Problem")
  nprojs_blk = nprojs
- nprojs_my_blk = nprojs
  nprojs_last_blk = nprojs
  if(use_distrib) then
    rank=xmpi_comm_rank(gemm_nonlop_block_comm); nprocs=xmpi_comm_size(gemm_nonlop_block_comm)
    nprojs_blk      = gemm_nonlop_kpt(ik)%nprojs_blk
-   nprojs_my_blk   = gemm_nonlop_kpt(ik)%nprojs_blk
    nprojs_last_blk = gemm_nonlop_kpt(ik)%nprojs_last_blk
-   if(rank==nprocs-1) nprojs_my_blk   = gemm_nonlop_kpt(ik)%nprojs_last_blk
    iblock=rank+1
  else if(gemm_nonlop_block_size>1) then
     nprojs_blk = nprojs / gemm_nonlop_block_size
@@ -534,7 +531,7 @@ subroutine opernla_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,&
        &    projs, npw,&
        &    vectin, npw, czero, gx, nprojs,&
        &    rank, nprocs,&
-       &    nprojs_blk, nprojs_last_blk, nprojs_my_blk, i,&
+       &    nprojs_blk, nprojs_last_blk, i,&
        &    gpu_option, use_distrib, use_sliced_gemms)
      end if
 
@@ -543,7 +540,7 @@ subroutine opernla_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,&
        &    dprojs, npw,&
        &    vectin, npw, czero, dgxdt, ndgxdt*nprojs,&
        &    rank, nprocs,&
-       &    ndgxdt*nprojs_blk, ndgxdt*nprojs_last_blk, ndgxdt*nprojs_my_blk, i,&
+       &    ndgxdt*nprojs_blk, ndgxdt*nprojs_last_blk, i,&
        &    gpu_option, use_distrib, use_sliced_gemms)
      end if
 
@@ -552,7 +549,7 @@ subroutine opernla_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,&
        &    d2projs, npw,&
        &    vectin, npw, czero, d2gxdt, nd2gxdt*nprojs,&
        &    rank, nprocs,&
-       &    nd2gxdt*nprojs_blk, nd2gxdt*nprojs_last_blk, nd2gxdt*nprojs_my_blk, i,&
+       &    nd2gxdt*nprojs_blk, nd2gxdt*nprojs_last_blk, i,&
        &    gpu_option, use_distrib, use_sliced_gemms)
      end if
    end do
@@ -649,7 +646,7 @@ subroutine opernla_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,&
        &    projs_r, npw, &
        &    temp_realvec_r, npw, czero, gx, nprojs,&
        &    rank, nprocs,&
-       &    nprojs_blk, nprojs_last_blk, nprojs_my_blk, i,&
+       &    nprojs_blk, nprojs_last_blk, i,&
        &    gpu_option, use_distrib, use_sliced_gemms)
      end if
      if(ndgxdt>0 .and. cpopt<=3) then
@@ -657,7 +654,7 @@ subroutine opernla_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,&
        &    dprojs_r, npw, &
        &    temp_realvec_r, npw, czero, dgxdt, ndgxdt*nprojs,&
        &    rank, nprocs,&
-       &    ndgxdt*nprojs_blk, ndgxdt*nprojs_last_blk, ndgxdt*nprojs_my_blk, i,&
+       &    ndgxdt*nprojs_blk, ndgxdt*nprojs_last_blk, i,&
        &    gpu_option, use_distrib, use_sliced_gemms)
      end if
 
@@ -667,7 +664,7 @@ subroutine opernla_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,&
        &    projs_i, npw, &
        &    temp_realvec_i, npw, cone , gx, nprojs,&
        &    rank, nprocs,&
-       &    nprojs_blk, nprojs_last_blk, nprojs_my_blk, i,&
+       &    nprojs_blk, nprojs_last_blk, i,&
        &    gpu_option, use_distrib, use_sliced_gemms)
      end if
      if(ndgxdt>0) then
@@ -675,7 +672,7 @@ subroutine opernla_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,&
        &    dprojs_i, npw, &
        &    temp_realvec_i, npw, cone , dgxdt, ndgxdt*nprojs,&
        &    rank, nprocs,&
-       &    ndgxdt*nprojs_blk, ndgxdt*nprojs_last_blk, ndgxdt*nprojs_my_blk, i,&
+       &    ndgxdt*nprojs_blk, ndgxdt*nprojs_last_blk, i,&
        &    gpu_option, use_distrib, use_sliced_gemms)
      end if
 
