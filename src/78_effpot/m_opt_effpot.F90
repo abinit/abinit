@@ -1,4 +1,5 @@
 
+!!****m* ABINIT/m_opt_effpot
 !!
 !! NAME
 !! m_opt_effpot
@@ -1186,6 +1187,7 @@ subroutine opt_getHoTerms(terms,order_start,order_stop,ndisp,ncombi_order)
           do jdisp2=1,nbody_tot
             if(jdisp2 <= ndisp)then
               power_tot = power_tot + terms(icombi)%terms(1)%power_disp(jdisp2)
+            else
               power_tot = power_tot + terms(icombi)%terms(1)%power_strain(jdisp2-ndisp)
             endif
           enddo
