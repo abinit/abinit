@@ -627,12 +627,9 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
         else
             max_nbody_tmp(:) = 888
         endif
-        print *, "calling opt_getHOstrain"
          call opt_getHOstrain(my_coeffs,ncombi,nterm_start,eff_pot,order_ran,comm, max_nbody=max_nbody_tmp)
          ! check if my_coeffs is allocated and its size
-         print *, "ncombi", ncombi
           if (allocated(my_coeffs)) then
-            print *, "my_coeffs is allocated"
             print *, "size of my_coeffs", size(my_coeffs)
           else
             print *, "my_coeffs is not allocated"
@@ -686,13 +683,15 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
         ! Copy terms of previous cycle
         my_coeffs_tmp(1:nterm2-1) = eff_pot%anharmonics_terms%coefficients
         !Put new term to my_coeffs_tmp
-        !my_coeffs_tmp(nterm2) = my_coeffs(nterm_start+icombi)
-        call polynomial_coeff_init(my_coeffs(nterm_start+icombi)%coefficient, &
-          & my_coeffs(nterm_start+icombi)%nterm, &
-          & my_coeffs_tmp(nterm2),my_coeffs(nterm_start+icombi)%terms, &
-          &my_coeffs(nterm_start+icombi)%name)
+        my_coeffs_tmp(nterm2) = my_coeffs(nterm_start+icombi)
 
-          DMSG(my_coeffs_tmp(nterm2)%debug_str)
+
+        !call polynomial_coeff_init(my_coeffs(nterm_start+icombi)%coefficient, &
+        !  & my_coeffs(nterm_start+icombi)%nterm, &
+        !  & my_coeffs_tmp(nterm2),my_coeffs(nterm_start+icombi)%terms, &
+        !  &my_coeffs(nterm_start+icombi)%name)
+
+        !  DMSG(my_coeffs_tmp(nterm2)%debug_str)
 
         ! If order is greater than specified cycle
         if(sum(my_coeffs_tmp(nterm2)%terms(1)%power_disp) &
@@ -1537,7 +1536,7 @@ subroutine opt_getHOcrossdisp(terms_out,ncombi,term_in,power_disp)
   real(dp) :: coeff_ini=1
   !arrays
   type(polynomial_coeff_type) :: term
-  integer,allocatable :: ncombi_order(:),ncombi_order_str(:),dummy(:)
+  integer,allocatable :: ncombi_order(:),ncombi_order_str(:)
   !Logicals
   logical :: had_strain
   !Strings
@@ -1549,6 +1548,8 @@ subroutine opt_getHOcrossdisp(terms_out,ncombi,term_in,power_disp)
   ABI_MALLOC(ncombi_order_str,(norder))
   ncombi_order = 0
   ncombi_order_str = 0
+  order_start_str = 0
+  order_stop_str = 0
 
   ncombi = 0
   !Get this term (iterm) and infromations about it
@@ -1560,14 +1561,11 @@ subroutine opt_getHOcrossdisp(terms_out,ncombi,term_in,power_disp)
   nstrain = term_in%terms(1)%nstrain
   nbody_tot = ndisp + nstrain
   nterm_of_term = term_in%nterm
-  ABI_MALLOC(dummy,(5)) ! XXX: why?
   call polynomial_coeff_init(coeff_ini,nterm_of_term,term,term_in%terms,term_in%name, check=.true.)
   DMSG(term%debug_str)
-  ABI_FREE(dummy)
   ! Check if term has strain component.
   ! If yes filter strain and fit high order atomic displacement terms
   had_strain = .FALSE.
-  ABI_MALLOC(dummy,(5))  ! XXX: again. why?
   if(term%terms(1)%nstrain /= 0)then
     ! Message to Output
     write(message,'(5a)' )ch10,&
@@ -1582,7 +1580,6 @@ subroutine opt_getHOcrossdisp(terms_out,ncombi,term_in,power_disp)
     had_strain = .TRUE.
     !cycle
   endif
-  ABI_FREE(dummy)
   ! Ok we want it. Let's go.
 
   ! get start and stop order for this term
@@ -2129,13 +2126,11 @@ subroutine generate_bounding_term_and_add_to_list(sympairs, nterm_start, ncombi,
   type(polynomial_coeff_type):: temp_coeff
   integer, allocatable :: list_disp(:)
   character(len=200):: name
-  integer, allocatable :: dummy(:)
   integer :: ncoeff
 
   ! copy the coefficients to a temporary array my_coeffs_tmp
   ncoeff=size(my_coeffs)
 
-  ABI_MALLOC(dummy,(500)) 
 
   ABI_MALLOC(my_coeffs_tmp,(ncoeff))
 
@@ -2153,7 +2148,6 @@ subroutine generate_bounding_term_and_add_to_list(sympairs, nterm_start, ncombi,
   my_coeffs_tmp=my_coeffs
 
   !call coeffs_list_copy(my_coeffs_tmp, my_coeffs)
-  ABI_FREE(dummy)
 
   ! free the original array and allocate a new one with the correct size
   call polynomial_coeff_list_free(my_coeffs)
