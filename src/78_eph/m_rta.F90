@@ -1431,6 +1431,7 @@ subroutine print_rta_txt_files(self, cryst, dtset, dtfil)
 
 !Local variables --------------------------------
  integer :: itemp, spin, irta, ii, nsp
+ real(dp) :: TKelv
  character(len=500) :: msg, pre, rta_type
  integer :: units(2)
  character(len=2) :: components(3)
@@ -1525,53 +1526,54 @@ subroutine print_rta_txt_files(self, cryst, dtset, dtfil)
    msg = " Seebeck_mu [Volts / Kelvin] (at correct mu)"
    call wrtout(units, msg)
    do itemp=1, self%ntemp
-         !TKelv = self%kTmesh(itemp) / kb_HaK; if (TKelv < one) Tkelv = one
-         nsp = self%nsppol;
-         do spin=1,nsp
-           if (nsp == 2) call wrtout(units, sjoin(" For spin:", stoa(spin)), newlines=1)
-           write(msg, "(4a16)") 'Temperature (K)', 'xx', 'yy', 'zz'
-           call wrtout(units, msg)
-             call inv33(self%l11_mu(:, :, spin, itemp, irta), work33)
-             mat33 = - (volt_SI / (self%kTmesh(itemp) / kb_HaK)) * matmul(work33, self%l12_mu(:,:,spin,itemp,irta))
-           write(msg,"(f16.2,3e16.6)") self%kTmesh(itemp) / kb_HaK, mat33(1,1), mat33(2,2), mat33(3,3)
-           call wrtout(units, msg)
-         end do !spin
-       end do !itemp
-       call wrtout(units, ch10)
+     !TODO : what is the following line? Resets 0 Kelvin to 1 Kelvin minimum T??? a bit arbitrary. Should handle T=0 more cleanly
+     TKelv = self%kTmesh(itemp) / kb_HaK; if (TKelv < one) Tkelv = one
+     nsp = self%nsppol;
+     do spin=1,nsp
+       if (nsp == 2) call wrtout(units, sjoin(" For spin:", stoa(spin)), newlines=1)
+       write(msg, "(4a16)") 'Temperature (K)', 'xx', 'yy', 'zz'
+       call wrtout(units, msg)
+       call inv33(self%l11_mu(:, :, spin, itemp, irta), work33)
+       mat33 = - (volt_SI / TKelv) * matmul(work33, self%l12_mu(:,:,spin,itemp,irta))
+       write(msg,"(f16.2,3e16.6)") TKelv, mat33(1,1), mat33(2,2), mat33(3,3)
+       call wrtout(units, msg)
+     end do !spin
+   end do !itemp
+   call wrtout(units, ch10)
 
    msg = " Kappa_mu [W/m*K] (at correct mu)"
    call wrtout(units, msg)
    do itemp=1, self%ntemp
-        ! TKelv = self%kTmesh(itemp) / kb_HaK; if (TKelv < one) Tkelv = one
-         nsp = self%nsppol;
-         do spin=1,nsp
-           if (nsp == 2) call wrtout(units, sjoin(" For spin:", stoa(spin)), newlines=1)
-           write(msg, "(4a16)") 'Temperature (K)', 'xx', 'yy', 'zz'
-           call wrtout(units, msg)
-             call inv33(self%l11_mu(:, :, spin, itemp, irta), work33)
-             mat33 = + (volt_SI**2 * (siemens_SI / Bohr_meter / cryst%ucvol) / (self%kTmesh(itemp) / kb_HaK)) * (self%l22_mu(:,:,spin,itemp,irta) - matmul(self%l12_mu(:,:,spin,itemp,irta),matmul(work33,self%l12_mu(:,:,spin,itemp,irta))))
-           write(msg,"(f16.2,3e16.6)") self%kTmesh(itemp) / kb_HaK, mat33(1,1), mat33(2,2), mat33(3,3)
-           call wrtout(units, msg)
-         end do !spin
-       end do !itemp
-       call wrtout(units, ch10)
+     TKelv = self%kTmesh(itemp) / kb_HaK; if (TKelv < one) Tkelv = one
+     nsp = self%nsppol;
+     do spin=1,nsp
+       if (nsp == 2) call wrtout(units, sjoin(" For spin:", stoa(spin)), newlines=1)
+       write(msg, "(4a16)") 'Temperature (K)', 'xx', 'yy', 'zz'
+       call wrtout(units, msg)
+         call inv33(self%l11_mu(:, :, spin, itemp, irta), work33)
+         mat33 = + (volt_SI**2 * (siemens_SI / Bohr_meter / cryst%ucvol) / TKelv) * (self%l22_mu(:,:,spin,itemp,irta) - matmul(self%l12_mu(:,:,spin,itemp,irta),matmul(work33,self%l12_mu(:,:,spin,itemp,irta))))
+       write(msg,"(f16.2,3e16.6)") TKelv, mat33(1,1), mat33(2,2), mat33(3,3)
+       call wrtout(units, msg)
+     end do !spin
+   end do !itemp
+   call wrtout(units, ch10)
    
    msg = " Peltier [Volts] (at correct mu)"
    call wrtout(units, msg)
    do itemp=1, self%ntemp
-        ! TKelv = self%kTmesh(itemp) / kb_HaK; if (TKelv < one) Tkelv = one
-         nsp = self%nsppol;
-         do spin=1,nsp
-           if (nsp == 2) call wrtout(units, sjoin(" For spin:", stoa(spin)), newlines=1)
-           write(msg, "(4a16)") 'Temperature (K)', 'xx', 'yy', 'zz'
-           call wrtout(units, msg)
-             call inv33(self%l11_mu(:, :, spin, itemp, irta), work33)
-             mat33 = - volt_SI * matmul(self%l12_mu(:,:,spin,itemp,irta), work33)
-           write(msg,"(f16.2,3e16.6)") self%kTmesh(itemp) / kb_HaK, mat33(1,1), mat33(2,2), mat33(3,3)
-           call wrtout(units, msg)
-         end do !spin
-       end do !itemp
-       call wrtout(units, ch10)
+     TKelv = self%kTmesh(itemp) / kb_HaK; if (TKelv < one) Tkelv = one
+     nsp = self%nsppol;
+     do spin=1,nsp
+       if (nsp == 2) call wrtout(units, sjoin(" For spin:", stoa(spin)), newlines=1)
+       write(msg, "(4a16)") 'Temperature (K)', 'xx', 'yy', 'zz'
+       call wrtout(units, msg)
+         call inv33(self%l11_mu(:, :, spin, itemp, irta), work33)
+         mat33 = - volt_SI * matmul(self%l12_mu(:,:,spin,itemp,irta), work33)
+       write(msg,"(f16.2,3e16.6)") TKelv, mat33(1,1), mat33(2,2), mat33(3,3)
+       call wrtout(units, msg)
+     end do !spin
+   end do !itemp
+   call wrtout(units, ch10)
  
 
 
@@ -2029,7 +2031,7 @@ call wrtout(std_out,"factors: ")
  do itemp=1,ntemp
  !do itemp=ntemp, 1, -1
    cnt = cnt + 1
-   kT = ibte%kTmesh(itemp)
+   kT = max(ibte%kTmesh(itemp), one * kb_HaK)
    mu_e = ibte%eph_mu_e(itemp)
    sig_p => ibte_sigma(:,:,:,:,itemp)
    mob_p => ibte_mob(:,:,:,:,itemp)
