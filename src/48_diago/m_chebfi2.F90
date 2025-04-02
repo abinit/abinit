@@ -49,7 +49,7 @@ module m_chebfi2
  use m_gpu_toolbox, only : CPU_DEVICE_ID, gpu_device_synchronize
 #endif
 
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU_MARKERS)
  use m_nvtx_data
 #endif
 

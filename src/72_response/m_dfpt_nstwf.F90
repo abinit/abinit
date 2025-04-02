@@ -76,7 +76,7 @@ module m_dfpt_nstwf
 
  use, intrinsic :: iso_c_binding, only: c_size_t, c_loc
 
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU_MARKERS)
  use m_nvtx_data
 #endif
 
