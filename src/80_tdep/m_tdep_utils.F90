@@ -165,36 +165,53 @@ contains
   end if
   ABI_FREE(fforces_tmp)
 
-  ABI_MALLOC(IPIV,(nconcoef)); IPIV(:)=0
-  ABI_MALLOC(WORK,(nconcoef)); WORK(:)=0.d0
-  !DGETRF doesnt like zeros on the diagonal (MT nov 22)
-  !A_inv(:,:)=A_tot(:,:)
-  A_inv(:,:)=merge(A_tot(:,:),1.d-14,abs(A_tot(:,:))>1.d-14)
-  call DGETRF(nconcoef,nconcoef,A_inv,nconcoef,IPIV,INFO)
-  if (INFO.ne.0) write(Invar%stdout,*) 'INFO (dgetrf)=',INFO
-!FB  write(Invar%stdout,*) ' '
-!FB  write(Invar%stdout,*) ' The inverse matrix is (after dgetrf):'
-!FB  do icoeff=1,nconcoef
-!FB    write(Invar%stdout,*) (A_inv(icoeff,iconst),iconst=1,nconcoef)
-!FB  end do
-  call DGETRI(nconcoef,A_inv,nconcoef,IPIV,WORK,nconcoef,INFO)
-  if (INFO.ne.0) write(Invar%stdout,*) 'INFO (dgetri)=',INFO
-!FB  write(Invar%stdout,*) ' '
-!FB  write(Invar%stdout,*) ' The inverse matrix is (after dgetri):'
-!FB  do icoeff=1,nconcoef
-!FB    write(Invar%stdout,*) (A_inv(icoeff,iconst),iconst=1,nconcoef)
-!FB  end do
-  ABI_FREE(IPIV)
+  ABI_MALLOC(WORK, (5 * nconcoef)); WORK(:) = 0.d0
+  ABI_MALLOC(IPIV, (nconcoef)); IPIV(:) = 0
+  A_inv(:,:) = A_tot(:,:)
+  !DEBUG write(Invar%stdout,*) ' '
+  !DEBUG write(Invar%stdout,*) ' The matrix A_inv is (before DGETRF):'
+  !DEBUG do icoeff=1,nconcoef
+  !DEBUG   write(Invar%stdout,*) (A_inv(icoeff,iconst), iconst=1, nconcoef)
+  !DEBUG end do
+
+  ! Perform LU factorization
+  call DGETRF(nconcoef, nconcoef, A_inv, nconcoef, IPIV, INFO)
+  if (INFO.ne.0) then
+    write(Invar%stdout,*) 'ERROR: Singular matrix detected in DGETRF. INFO=', INFO
+    stop
+  end if
+
+  ! Check for small pivot elements
+  do icoeff=1,nconcoef
+    if (abs(A_inv(icoeff, icoeff)) < tol12) then
+      write(Invar%stdlog,*) ' WARNING: Small pivot value at index ', icoeff, ' : ', A_inv(icoeff, icoeff)
+      A_inv(icoeff, icoeff) = tol12 ! Regularization to avoid numerical issues
+    end if
+  end do
+
+  ! Compute matrix inverse using LU decomposition
+  call DGETRI(nconcoef, A_inv, nconcoef, IPIV, WORK, 5 * nconcoef, INFO)
+  if (INFO.ne.0) then
+    write(Invar%stdout,*) 'ERROR: Matrix inversion failed in DGETRI. INFO=', INFO
+    stop
+  end if
+  !DEBUG write(Invar%stdout,*) ' '
+  !DEBUG write(Invar%stdout,*) ' The inverse matrix is (after DGETRI):'
+  !DEBUG do icoeff=1,nconcoef
+  !DEBUG   write(Invar%stdout,*) (A_inv(icoeff,iconst), iconst=1, nconcoef)
+  !DEBUG end do
+
   ABI_FREE(WORK)
+  ABI_FREE(IPIV)
 
   call DGEMV('N',nconcoef,nconcoef,1.d0,A_inv,nconcoef,b_tot,1,0.d0,x_tot,1)
   write(Invar%stdout,*) ' The problem is solved'
   write(Invar%stdout,*) ' '
-!FB  write(Invar%stdout,*) ' The solutions are:'
-!FB  do icoeff=1,nconcoef
-!FB    write(Invar%stdout,'(1x,i4,1x,f15.10)') icoeff,x_tot(icoeff)
-!FB  end do
-!FB  write(Invar%stdout,'(a,1x,f15.10)')'  condition number=',maxval(x_tot(:))/minval(x_tot(:))
+  !DEBUG write(Invar%stdout,*) ' The solutions are:'
+  !DEBUG do icoeff=1,nconcoef
+  !DEBUG   write(Invar%stdout,'(1x,i4,1x,f15.10)') icoeff,x_tot(icoeff)
+  !DEBUG end do
+  !DEBUG write(Invar%stdout,'(a,1x,f15.10)')'  condition number=',maxval(x_tot(:))/minval(x_tot(:))
 
   IFC_coeff(ncoeff_prev+1:ncoeff_prev+ntotcoeff,1)=x_tot(1:ntotcoeff)
   ABI_FREE(A_tot)
