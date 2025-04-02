@@ -247,7 +247,7 @@ subroutine polynomial_coeff_init(coefficient,nterm,polynomial_coeff,terms,name, 
  character(*), optional :: debug_str
 ! *************************************************************************
 !First free before initilisation
- !call polynomial_coeff_free(polynomial_coeff)
+ call polynomial_coeff_free(polynomial_coeff)
  check_in = .false.
  if(present(check)) check_in = check
 
@@ -401,12 +401,12 @@ subroutine polynomial_coeff_list_free(polynomial_coeff_list)
 ! *************************************************************************
 
 !Free output
- !if(allocated(polynomial_coeff_list))then
+if(allocated(polynomial_coeff_list))then
    ncoeff = size(polynomial_coeff_list)
    do i=1,ncoeff
       call polynomial_coeff_free(polynomial_coeff_list(i))
     enddo
- !endif
+endif
  ABI_SFREE(polynomial_coeff_list)
 
 end subroutine polynomial_coeff_list_free
