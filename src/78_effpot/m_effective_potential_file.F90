@@ -2971,7 +2971,12 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
      end do
 !    Initialisation of the polynomial_coefficent structure with the values
      call polynomial_coeff_init(coefficient(icoeff),nterm_max,coeffs(icoeff),&
-&                               terms(icoeff,:), check=.true.)
+&                               terms(icoeff,:), check=.true., debug_str="init from xml")
+!    Set the name of the coefficient
+     print *, "DEBUG: coeffs(icoeff)%nterm = ", coeffs(icoeff)%nterm
+     print *, "DEBUG: coeffs(icoeff)% debug_str= ", coeffs(icoeff)%debug_str
+     print *, "icoeff = ", icoeff
+     print *, "ncoeff = ", ncoeff
 
 !    Get the name of this coefficient  and set it
 !    Try to find the index of the term corresponding to the interation in the
@@ -3172,7 +3177,7 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
 !          Initialisation of the polynomial_coefficent structure with the values from the
 !          previous step
            icoeff = icoeff + 1
-           call polynomial_coeff_init(coefficient(1),nterm,coeffs(icoeff),terms(1,:))
+           call polynomial_coeff_init(coefficient(1),nterm,coeffs(icoeff),terms(1,:), debug_str="init from xml fortran", check=.true.)
            call polynomial_coeff_getName(name,coeffs(icoeff),symbols,recompute=.true.)
            call polynomial_coeff_setName(name,coeffs(icoeff))
 !          Deallocation of the terms array for this coefficient
@@ -3239,11 +3244,8 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
 !12-Initialisation of eff_pot
  call effective_potential_setCoeffs(coeffs,eff_pot,ncoeff)
 
-!13-Deallocation of type
- do ii=1,ncoeff
-   call polynomial_coeff_free(coeffs(ii))
- end do
- ABI_FREE(coeffs)
+ call polynomial_coeff_list_free(coeffs)
+
 
 end subroutine coeffs_xml2effpot
 !!***
