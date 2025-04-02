@@ -2994,14 +2994,15 @@ subroutine xderiveWrite_int(wff,xval,ierr)
 
 !Local variables-------------------------------
 #if defined HAVE_MPI_IO
- integer :: statux(MPI_STATUS_SIZE)
+ integer :: statux(MPI_STATUS_SIZE),arr_xval(1)
 #endif
 ! *********************************************************************
 
  ierr=0
  if(.false.)write(std_out,*)wff%me,xval
 #if defined HAVE_MPI_IO
- call MPI_FILE_WRITE_AT(wff%fhwff,wff%offwff,[xval],1,MPI_INTEGER,statux,ierr)
+ arr_xval(1) = xval
+ call MPI_FILE_WRITE_AT(wff%fhwff,wff%offwff,arr_xval,1,MPI_INTEGER,statux,ierr)
  wff%offwff = wff%offwff+wff%nbOct_int
 #endif
 

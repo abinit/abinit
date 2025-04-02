@@ -307,7 +307,7 @@ program testTransposer
 
     write(std_out,*) "Compare"
     call xgBlock_saxpy(dotLinalg%self, -1.0d0, dotColsRows%self)
-    call xgBlock_reshape(dotLinalg%self, (/1,nband/))
+    call xgBlock_reshape(dotLinalg%self,1,nband)
     call xgBlock_colwiseNorm2(dotLinalg%self,dotColsRows%self,max_val=maxdiff)
     write(std_out,"(a,f20.4)") " Difference: ",sqrt(maxdiff)
 
