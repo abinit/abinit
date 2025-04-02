@@ -246,7 +246,7 @@ subroutine polynomial_coeff_init(coefficient,nterm,polynomial_coeff,terms,name, 
  character(*), optional :: debug_str
 ! *************************************************************************
 !First free before initilisation
- call polynomial_coeff_free(polynomial_coeff)
+ !call polynomial_coeff_free(polynomial_coeff)
  check_in = .false.
  if(present(check)) check_in = check
 
@@ -355,10 +355,14 @@ subroutine polynomial_coeff_free(polynomial_coeff)
  polynomial_coeff%nterm = 0
  polynomial_coeff%coefficient = zero
 
+!if(trim(polynomial_coeff%debug_str) == "uninitialized") then
+!  ABI_WARNING("Polynomial coeff: is freed before initialization")
+!else if (trim(polynomial_coeff%debug_str) == "freed") then
+!  ABI_WARNING("Polynomial coeff: is freed twice")
+!else
+!  print *, "- Polynomial coeff: ", trim(polynomial_coeff%debug_str), " ->freed"
+! end if
 
- if (trim(polynomial_coeff%debug_str) /= "freed") then
-  print *, "- Polynomial coeff: ", trim(polynomial_coeff%debug_str), " ->freed"
- end if
  polynomial_coeff%debug_str = "freed"
 
 end subroutine polynomial_coeff_free
@@ -2847,8 +2851,8 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
 
        if(need_distributed.and.rank_to_send /= rank_to_send_save) then
          if(my_rank == rank_to_send_save)then
-          call polynomial_coeff_list_free(coeffs_tmp)
-           !ABI_SFREE(coeffs_tmp)!Free memory if the current CPU has already distribute
+          !call polynomial_coeff_list_free(coeffs_tmp)
+          !ABI_SFREE(coeffs_tmp)!Free memory if the current CPU has already distribute
            !all its own coefficients
          end if
          rank_to_send_save = rank_to_send
@@ -2875,7 +2879,7 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
              call polynomial_coeff_MPIsend(coeffs_tmp(my_icoeff), icoeff, rank_to_receive, comm)
            end if
            !      Free the coefficient
-           call polynomial_coeff_free(coeffs_tmp(my_icoeff))
+           !call polynomial_coeff_free(coeffs_tmp(my_icoeff))
          else
            if(any(my_newcoeffindexes(:)==icoeff3))then
              icoeff2 = icoeff2 + 1
@@ -2895,7 +2899,7 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
              &                                  check=.false.)
              DMSG(coefficients(icoeff2)%debug_str)
            !      Free the coefficient
-           call polynomial_coeff_free(coeffs_tmp(my_icoeff))
+           !call polynomial_coeff_free(coeffs_tmp(my_icoeff))
          end if
          call polynomial_coeff_broadcast(coefficients(icoeff2),rank_to_send, comm)
        end if
@@ -2917,9 +2921,8 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
      ABI_SFREE(my_coeffindexes)
      ABI_SFREE(my_newcoeffindexes)
      ABI_SFREE(my_coefflist)
-
     call polynomial_coeff_list_free(coeffs_tmp)
-     ABI_SFREE(coeffs_tmp)
+     !ABI_SFREE(coeffs_tmp)
    end subroutine free_memory
 
 end subroutine polynomial_coeff_getNorder
@@ -4049,7 +4052,7 @@ logical :: is_duplicate
 ! *************************************************************************
 
 !Initialize empty strain_terms array
-ABI_MALLOC(strain_terms,(0))
+!ABI_MALLOC(strain_terms,(0))
 irred_ncoeff = 0
 
 !Initial setup for call to polynomial_coeff_getNorder
@@ -4283,33 +4286,41 @@ subroutine coeffs_list_append(coeff_list,coeff, check)
  type(polynomial_coeff_type), intent(inout) :: coeff
  logical, intent(in) :: check
  !local variable
- type(polynomial_coeff_type) :: tmp(size(coeff_list))
+ type(polynomial_coeff_type), allocatable :: tmp(:)
  integer :: n1, n2
  !array
  ! *************************************************************************
 
- n1=size(coeff_list)
- n2= n1+1
+  ! check if coeff is initialized
+  if (.not.allocated(coeff%terms)) then
+    ABI_BUG("terms for append is not allocated.")
+  endif
 
- ! copy list1 to tmp
- tmp=coeff_list
- call coeffs_list_copy(coeff_list, tmp)
-
- ! allocate new list1
- call polynomial_coeff_list_free(coeff_list)
- ABI_MALLOC(coeff_list,(n2))
-
- call coeffs_list_copy(coeff_list, tmp)
-
-if (.not.allocated(coeff%terms)) then
-  ABI_BUG("terms for append is not allocated.")
-endif
-
- call polynomial_coeff_init(coeff%coefficient,coeff%nterm,coeff_list(n2),coeff%terms,&
-   &                                 coeff%name, check=check)
-
-  coeff_list(n2)%debug_str = "copied from" // trim(coeff%debug_str)
+  if (.not. allocated(coeff_list)) then
+    n1 = 0
+    n2= 1
+    ABI_MALLOC(coeff_list,(n2))
+    call polynomial_coeff_init(coeff%coefficient,coeff%nterm,coeff_list(1),coeff%terms,&
+      &                                 coeff%name, check=check)
+   coeff_list(n2)%debug_str = "copied from" // trim(coeff%debug_str)
+  else
+   n1=size(coeff_list)
+   n2= n1+1
+   ! copy list1 to tmp
+   ABI_MALLOC(tmp,(n1))
+   tmp=coeff_list
+   ! allocate new list1
+   call polynomial_coeff_list_free(coeff_list)
+   ABI_MALLOC(coeff_list,(n2))
   
+   call coeffs_list_copy(coeff_list(:n1), tmp)
+   
+   call polynomial_coeff_init(coeff%coefficient,coeff%nterm,coeff_list(n2),coeff%terms,&
+     &                                 coeff%name, check=check)
+  
+   coeff_list(n2)%debug_str = "copied from" // trim(coeff%debug_str)
+  end if
+    
 end subroutine coeffs_list_append
 !!***
 
@@ -4403,8 +4414,11 @@ subroutine coeffs_list_copy(coeff_list_out,coeff_list_in)
    ABI_ERROR(message)
  endif
 
-
  do ii=1,ncoeff_in
+    if(trim(coeff_list_in(ii)%debug_str) == "uninitialized") then
+      ABI_ERROR("copying from uninitialized coeff_list_in")
+    endif
+
     if(.not. allocated(coeff_list_in(ii)%terms)) then
       ABI_BUG("terms for copy is not allocated.")
     endif
@@ -4413,9 +4427,6 @@ subroutine coeffs_list_copy(coeff_list_out,coeff_list_in)
        &                             coeff_list_out(ii),coeff_list_in(ii)%terms, &
        &                             coeff_list_in(ii)%name, check)
     
-    if(trim(coeff_list_in(ii)%debug_str) == "uninitialized") then
-      ABI_ERROR("copying from uninitialized coeff_list_in")
-    endif
     coeff_list_out%debug_str = "copied from " // coeff_list_in(ii)%debug_str 
  enddo
 end subroutine coeffs_list_copy
@@ -4863,7 +4874,7 @@ end subroutine polyform_expand
 
 subroutine polynomial_coeff_final(self)
   type(polynomial_coeff_type), intent(inout) :: self
-  print *, "Finalizing polynomial_coeff_type: ", trim(self%debug_str)
+  !print *, "Finalizing polynomial_coeff_type: ", trim(self%debug_str)
   call polynomial_coeff_free(self)
 end subroutine polynomial_coeff_final
 !!***

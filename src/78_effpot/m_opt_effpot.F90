@@ -394,7 +394,7 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
   !Strings
   !Local variables ------------------------------
   !scalars
-  integer :: i,ii,natom_sc,ntime,iterm,nterm
+  integer :: i,ii,natom_sc,ntime,iterm,nterm, icombi3, nbody_term
   integer :: jterm, ncombi,ncombi1,ncombi2, ncombi1_real, ncombi2_real
   integer :: icombi
   integer :: nterm_start,nterm2
@@ -493,11 +493,9 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
 
   !Before adding bound coefficients calculate MSD of initial model
   !MS FOR THE MOMENT PRINT NO FILE
-  block
   call fit_polynomial_coeff_computeMSD(eff_pot,hist,mse_ini,msef_ini,mses_ini,&
     &                                  natom_sc,ntime,fit_data%training_set%sqomega,comm,&
     &                                  compute_anharmonic=.TRUE.,print_file=.FALSE.)
-  end block
 
 
   !  Print the standard devition of initial model
@@ -548,26 +546,25 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
       call wrtout(std_out,message,'COLL')
       to_skip = .FALSE.
       to_skip = check_to_skip(eff_pot%anharmonics_terms%coefficients(iterm))
+      print *, "DEBUG: ++++++++++++++++", "to_skip", to_skip, "because bounding is not needed"
       !Skip term if it doesn't need bounding
       if(.not. to_skip)then
-        block
-        integer :: icombi3, nbody_term
         associate(term1=>eff_pot%anharmonics_terms%coefficients(iterm)%terms(1))
         nbody_term = term1%get_nbody()
 
+        print *, "Here1"
         !Get List of high order single Terms for terms
         call opt_getHOSingleDispTerms(eff_pot%anharmonics_terms%coefficients(iterm),&
           &                                      HOsingledisp_terms,symbols,singledisp_terms,order_ran,ncombi1)
 
-
+        print *, "Here2"
         ABI_MALLOC(my_coeffs,(size(eff_pot%anharmonics_terms%coefficients)))
         my_coeffs=eff_pot%anharmonics_terms%coefficients
-        block
           do icombi3=1, size(my_coeffs)
            DMSG(my_coeffs(icombi3)%debug_str)
           end do
-        end block
 
+        print *, "Here3"
         ! then add the single disp terms.
         if (ncombi1>0) then
           do icombi3=1,ncombi1
@@ -581,6 +578,7 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
 
         if(allocated(HOsingledisp_terms)) call polynomial_coeff_list_free(HOsingledisp_terms)
 
+        print *, "Here4"
 
         !Get List of high order cross Terms for term if ndisp > 1
         if(term1%ndisp>1 .or. &
@@ -589,21 +587,23 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
             ! output HOcrossdisp_terms, ncombi2.
             call opt_getHOcrossdisp(HOcrossdisp_terms,ncombi2,eff_pot%anharmonics_terms%coefficients(iterm),order_ran)
         endif
+        print *, "ncombi2", ncombi2
         ! then add the crossdisp terms.
         if(ncombi2 > 0)then
           do icombi3=1,ncombi2
             !call coeffs_list_conc_onsite(my_coeffs, HOcrossdisp_terms(icombi3))
             if (HOcrossdisp_terms(icombi3)%terms(1)%get_nbody() == nbody_term .or. bound_option/=1) then
+              print *, "adding crossdisp terms to my_coeffs" 
               call coeffs_list_append(my_coeffs,HOcrossdisp_terms(icombi3), check=.TRUE.)
-              DMSG(my_coeffs(icombi3)%debug_str)
               ncombi2_real = ncombi2_real + 1
+              DMSG(my_coeffs(ncombi2_real)%debug_str)
             endif
           end do
         endif
-
+        print *, "Here5", "ncombi2_real",  ncombi2_real
+        print *, "is my_coeffs allocated", allocated(my_coeffs)
         if(allocated(HOcrossdisp_terms)) call polynomial_coeff_list_free(HOcrossdisp_terms)
        end associate
-      end block
       else  ! to_skip
         ncombi2=0
         ncombi1=0
@@ -615,20 +615,28 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
           DMSG(my_coeffs(iii)%debug_str)
         end do
         end block
-
-
       endif
       ncombi =  ncombi1_real + ncombi2_real
       nterm_start = eff_pot%anharmonics_terms%ncoeff
     else ! if iterm = nterm + 1 => Take care about strain
+      print *, "the bounding term for strain"
         block
         integer :: max_nbody_tmp(order_ran(2))
         if (bound_option==1) then
-            max_nbody_tmp(:) = 888
+            max_nbody_tmp(:) = 1
         else
             max_nbody_tmp(:) = 888
         endif
+        print *, "calling opt_getHOstrain"
          call opt_getHOstrain(my_coeffs,ncombi,nterm_start,eff_pot,order_ran,comm, max_nbody=max_nbody_tmp)
+         ! check if my_coeffs is allocated and its size
+         print *, "ncombi", ncombi
+          if (allocated(my_coeffs)) then
+            print *, "my_coeffs is allocated"
+            print *, "size of my_coeffs", size(my_coeffs)
+          else
+            print *, "my_coeffs is not allocated"
+          endif
         end block
     endif !
 
@@ -649,14 +657,15 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
     !! find the list of all the list_str,
     !! fond what is number of strain in the displacemt comapring it to
     !! the list_str and give this to
-
     !     get coeff from > generateTermsFromList(list_disp,****)
     !     setcoeff_to_tmp_coeffs
     ! generateTermsFromList(cell,index_coeff,list_coeff,list_str,ncoeff,ndisp_max,nrpt,nstr,nsym,nterm,terms)
 
 ! call the new function to get the data required to call polynomial_coeff_getList
+  
 
     call generate_bounding_term_and_add_to_list( sympairs, nterm_start, ncombi, my_coeffs, temp_cntr)
+
 
 
     if (temp_cntr>0) then
@@ -1444,9 +1453,6 @@ subroutine opt_getHOstrain(terms,ncombi,nterm_start,eff_pot,power_strain,comm, m
 
   !1406 get count of high order even anharmonic strain terms and the strain terms itself
   call polynomial_coeff_getEvenAnhaStrain(strain_terms_tmp,crystal,ncombi,power_strain,comm, max_nbody)
-
-
-
   ! Allocate my_coeffs with ncombi free space to work with
 
 
@@ -2123,14 +2129,31 @@ subroutine generate_bounding_term_and_add_to_list(sympairs, nterm_start, ncombi,
   type(polynomial_coeff_type):: temp_coeff
   integer, allocatable :: list_disp(:)
   character(len=200):: name
-
+  integer, allocatable :: dummy(:)
   integer :: ncoeff
 
   ! copy the coefficients to a temporary array my_coeffs_tmp
   ncoeff=size(my_coeffs)
+
+  ABI_MALLOC(dummy,(500)) 
+
   ABI_MALLOC(my_coeffs_tmp,(ncoeff))
-  !y_coeffs_tmp=my_coeffs
-  call coeffs_list_copy(my_coeffs_tmp, my_coeffs)
+
+  ! check if my_coeffs i allocated and has the right size
+  if(.not. allocated(my_coeffs)) then
+    ABI_BUG("my_coeffs is not allocated")
+  end if
+  if(size(my_coeffs) /= ncoeff) then
+    ABI_BUG("my_coeffs has the wrong size")
+  end if
+  if(size(my_coeffs_tmp) /= ncoeff) then
+    ABI_BUG("my_coeffs_tmp has the wrong size")
+  end if
+
+  my_coeffs_tmp=my_coeffs
+
+  !call coeffs_list_copy(my_coeffs_tmp, my_coeffs)
+  ABI_FREE(dummy)
 
   ! free the original array and allocate a new one with the correct size
   call polynomial_coeff_list_free(my_coeffs)
