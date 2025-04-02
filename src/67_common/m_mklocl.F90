@@ -1342,8 +1342,8 @@ end subroutine vlocalstr
 !!
 !! FUNCTION
 !! Compute q-gradient (at q=0) of the local part of 1st-order 
-!! atomic displacement potential from the appropriate
-!! atomic pseudopotential with structure and derivative factor.
+!! atomic displacement local potential or pseudocore density from the appropriate
+!! atomic pseudopotential data with structure and derivative factor.
 !!
 !! INPUTS
 !!  atindx(natom)=index table for atoms (see gstate.f)
@@ -1368,6 +1368,9 @@ end subroutine vlocalstr
 !!  qphon(3)=wavevector of the phonon
 !!  ucvol=unit cell volume (Bohr**3).
 !!  vlspl(mqgrid,2,ntypat)=spline fit of q^2 V(q) for each type of atom.
+!!             if optnc=1-> spline fit of n_c(q) for each type of atom.              
+!!  optnc= (OPTIONAL) if present and equal to 1, does the calculation assuming a
+!!         pseudocore density
 !!
 !! OUTPUT
 !!  vpsp1dq(cplex*nfft)=q-gradient (at q=0) of the first-order local 
@@ -1523,6 +1526,11 @@ subroutine dfpt_vlocaldq(atindx,cplex,gmet,gsqcut,idir,ipert,&
        end if
      end do
    end do
+
+!  Consider the macroscopic term in the case of the pseudocore density
+   if (optnc_==1.and.idir==qdir) then
+     work1(re,1)= two_pi*vlspl(1,1,itypat)
+   end if
 
 !  Transform back to real space
    call fourdp(cplex,work1,vpsp1dq,1,mpi_enreg,nfft,1,ngfft,0)
