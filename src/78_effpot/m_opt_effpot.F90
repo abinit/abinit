@@ -2214,7 +2214,7 @@ subroutine generate_bounding_term_and_add_to_list(sympairs, nterm_start, ncombi,
           reverse(counter) = reverse_i
         end do
       else
-        ABI_BUG("The pair is not found generated bounding terms.")
+        ABI_BUG("The pair is not found in generated bounding terms.")
       end if
     end do
 
@@ -2226,6 +2226,7 @@ subroutine generate_bounding_term_and_add_to_list(sympairs, nterm_start, ncombi,
     end do
     nullify(myterm)
 
+    ! generate the terms with false reverse, and save to the temp_coeff.
     nterm=sympairs%nsym
     ABI_MALLOC(terms2, (nterm))
     call sympairs%generateTerms(list_disp,  tot_power, nterm, terms2, reverse=false_reverse)
@@ -2237,6 +2238,7 @@ subroutine generate_bounding_term_and_add_to_list(sympairs, nterm_start, ncombi,
     call polynomial_coeff_getName(name, &
       & temp_coeff,sympairs%symbols,recompute=.TRUE.)
 
+    ! check if temp coeff already exists in the list of coeffs my_coeffs
     ABI_MALLOC(exists, (nterm_start+icombi-1))
     exists=.False.
     do jterm=1,(nterm_start+icombi-1)
@@ -2246,6 +2248,8 @@ subroutine generate_bounding_term_and_add_to_list(sympairs, nterm_start, ncombi,
 
     any_exists=any(exists)
     ABI_FREE(exists)
+
+    ! if the term already exists, we skip it. Otherwise we add also the reverse.
     if (.not. any_exists) then
       temp_cntr = temp_cntr+1
       ABI_MALLOC(terms2, (nterm))
@@ -2262,13 +2266,16 @@ subroutine generate_bounding_term_and_add_to_list(sympairs, nterm_start, ncombi,
   end do
 
   call polynomial_coeff_list_free(my_coeffs_tmp)
-  ABI_MALLOC(my_coeffs_tmp,(nterm_start+temp_cntr))
-  my_coeffs_tmp=my_coeffs(1:nterm_start+temp_cntr)
 
-  call polynomial_coeff_list_free(my_coeffs)
-  ABI_MALLOC(my_coeffs,(size(my_coeffs_tmp)))
-  my_coeffs=my_coeffs_tmp
-  call polynomial_coeff_list_free(my_coeffs_tmp)
+  ! truncate my_coeffs. 
+  call coeffs_list_truncate(my_coeffs, nterm_start+temp_cntr)
+  !ABI_MALLOC(my_coeffs_tmp,(nterm_start+temp_cntr))
+  !my_coeffs_tmp=my_coeffs(1:nterm_start+temp_cntr)
+
+  !call polynomial_coeff_list_free(my_coeffs)
+  !ABI_MALLOC(my_coeffs,(size(my_coeffs_tmp)))
+  !my_coeffs=my_coeffs_tmp
+  !call polynomial_coeff_list_free(my_coeffs_tmp)
 
 end subroutine generate_bounding_term_and_add_to_list
 

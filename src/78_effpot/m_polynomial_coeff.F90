@@ -125,6 +125,7 @@ module m_polynomial_coeff
  public :: coeffs_list_conc
  public :: coeffs_list_conc_onsite
  public :: coeffs_list_append
+ public :: coeffs_list_truncate
  public :: polynomial_coeff_list_free
  public :: generateTermsFromList
  public :: find_irpt
@@ -400,12 +401,12 @@ subroutine polynomial_coeff_list_free(polynomial_coeff_list)
 ! *************************************************************************
 
 !Free output
- if(allocated(polynomial_coeff_list))then
+ !if(allocated(polynomial_coeff_list))then
    ncoeff = size(polynomial_coeff_list)
    do i=1,ncoeff
       call polynomial_coeff_free(polynomial_coeff_list(i))
     enddo
- endif
+ !endif
  ABI_SFREE(polynomial_coeff_list)
 
 end subroutine polynomial_coeff_list_free
@@ -4264,6 +4265,8 @@ end subroutine coeffs_list_conc_onsite
 !!***
 
 
+
+
 !!****f* m_polynomial_coeff/coeffs_list_append
 !! NAME
 !! coeff_list_append
@@ -4323,6 +4326,69 @@ subroutine coeffs_list_append(coeff_list,coeff, check)
     
 end subroutine coeffs_list_append
 !!***
+
+!!****f* m_polynomial_coeff/coeffs_list_truncate
+!! NAME
+!! coeffs_list_truncate
+!!
+!! FUNCTION
+!!
+!! Truncate a list of coeffs to keep only the first n elements
+!!
+!! INPUTS
+!! coeff_list = list of coefficients to truncate
+!! n = number of coefficients to keep
+!!
+!! OUTPUT
+!! coeff_list = truncated list with only first n coefficients
+!!
+!! SOURCE
+
+subroutine coeffs_list_truncate(coeff_list, n)
+!Arguments ------------------------------------
+ implicit none
+
+!Arguments ------------------------------------
+ type(polynomial_coeff_type), allocatable, intent(inout) :: coeff_list(:)
+ integer, intent(in) :: n
+!local variables
+ type(polynomial_coeff_type), allocatable :: tmp(:)
+ character(len=500) :: message
+ ! *************************************************************************
+
+ if(.not. allocated(coeff_list)) then
+   write(message,'(a)')'The input list of polynomial_coefficients is not allocated'
+   ABI_ERROR(message)
+ endif
+
+ if(n > size(coeff_list)) then
+   write(message,'(a)')'n is larger than size of input list'
+   ABI_ERROR(message)
+ endif
+
+ if(n < 0) then
+   write(message,'(a)')'n must be non-negative'
+   ABI_ERROR(message)
+ endif
+
+ !Copy first n elements to temp array
+ ABI_MALLOC(tmp,(n))
+ call coeffs_list_copy(tmp, coeff_list(1:n))
+
+ !Free original array
+ call polynomial_coeff_list_free(coeff_list)
+ 
+ !Reallocate and copy back
+ ABI_MALLOC(coeff_list,(n))
+ call coeffs_list_copy(coeff_list, tmp)
+
+ !Clean up
+ call polynomial_coeff_list_free(tmp)
+ ABI_SFREE(tmp)
+
+end subroutine coeffs_list_truncate
+!!***
+
 
 subroutine coeffs_list_reduce_duplicate(self, crystal, sc_size, fit_iatom_in, cutoff_in , ndispmax )
   type(polynomial_coeff_type), allocatable, target, intent(inout) ::self(:)
