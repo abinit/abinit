@@ -74,7 +74,7 @@ To enter the GWR driver of ABINIT, one has to use [[optdriver]] = 6,
 and select the computation to be performed via [[gwr_task]].
 
 In the first step, you will very likely use [[gwr_task]] = "HDIAGO" or "HDIAGO_FULL"
-to perform a direct diagonalization with ScaLAPACK in order to generate a WFK with empty states,
+to perform a direct diagonalization with ScaLAPACK in order to generate a WFK with empty states and cutoff [[ecut]].
 This feature can also be used if you want to use other many-body codes that are able to read ABINIT’s WFK file
 Please take some time to read the documentation of [[gwr_task]] to see which calculations are supported.
 

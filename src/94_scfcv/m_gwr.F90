@@ -2181,6 +2181,7 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
  !cryst = gwr%wfk_hdr%get_crystal()
  !call cryst%print(header="crystal structure from WFK file")
 
+ ! TODO: Could read the wavefunctions twice and use ecutwfc for sigma_c and ecut for sigma_x.
  nkibz = wfk_ebands%nkpt; nsppol = wfk_ebands%nsppol; mband = wfk_ebands%mband; min_nband = minval(wfk_ebands%nband)
 
  nbsum = dtset%nband(1)
@@ -2322,8 +2323,8 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
                ABI_CHECK(all(kg_k_disk(:,1:npw_k_disk) == desc_k%gvec), "kg_k_disk != desc_k%gvec")
              end if
              ugb%buffer_cplx(:, il_b) = cmplx(cg_work(1,:,ib), cg_work(2,:,ib), kind=gwpc)
-           else
 
+           else
              !ugb%buffer_cplx(:, il_b) = zero
              do spinor=1,gwr%nspinor
                cg_spad = (spinor-1) * npw_k_disk
@@ -2347,8 +2348,7 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
              end if
              cdum = one / sqrt(cdum)
              call xscal(npw_k*gwr%nspinor, cdum, ugb%buffer_cplx(:,il_b), 1)
-             cdum = xdotc(npw_k*gwr%nspinor, ugb%buffer_cplx(:,il_b), 1, ugb%buffer_cplx(:,il_b), 1)
-             !print *, "new norm:", cdum
+             !print *, "new norm:", xdotc(npw_k*gwr%nspinor, ugb%buffer_cplx(:,il_b), 1, ugb%buffer_cplx(:,il_b), 1)
            end if
 
          end do ! band
@@ -2359,11 +2359,10 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
      end do ! bstart
 
      ABI_SFREE(gf2wfd)
-
      call xmpi_comm_free(bcast_comm)
 
      if (print_time) then
-       write(msg,'(4x,2(a,i0),a)')"Read ugb_k: ik_ibz [", ik_ibz, "/", gwr%nkibz, "]"
+       write(msg,'(4x,2(a,i0),a)')" Read ugb_k: ik_ibz [", ik_ibz, "/", gwr%nkibz, "]"
        call cwtime_report(msg, cpu_green, wall_green, gflops_green); if (ik_ibz == LOG_MODK) call wrtout(std_out, " ...")
      end if
    end do ! ik_ibz
@@ -3638,13 +3637,11 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
               else if (from_space == W_SPACE) then
                 call fit_iomega(gwr%ntau, gwr%iw_mesh, gwr%iw_wgs, glob_cwork(:,ig1,idat), &
                                 alpha_c(ig1,idat), beta_r(ig1,idat))
-                ! disable the fit
-                !alpha_c(ig1,idat) = zero; beta_r(ig1,idat) = zero
               else
                 ABI_ERROR(sjoin("Invalid from_space:", itoa(from_space)))
               end if
-              !if (from_space == W_SPACE .and. my_it == 1) then
-              !print *, "my_it, alpha, beta", my_it, alpha_c(ig1,idat), beta_r(ig1,idat)
+              !if (from_space == W_SPACE) then
+              !print *, "my_it, alpha, beta", alpha_c(ig1,idat), beta_r(ig1,idat)
               !end if
            end do ! ig1
          end do ! idat
@@ -3667,9 +3664,10 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
                  cval = fit_iomega_eval("func", gwr%iw_mesh(itau), alpha_c(ig1,idat), beta_r(ig1,idat))
                end if
                !if (from_space == W_SPACE .and. my_it == 1) then
-                 !print *, "my_it cval, mat", my_it, cval, mats(itau)%buffer_cplx(ig1, ig2+idat-1)
-                 !print * "beta_r, alpha:", beta_r(ig1,idat), alpha_c(ig1,idat)
-                 !write(*,*), "my_it abs_diff_1", my_it, abs(cval - mats(itau)%buffer_cplx(ig1, ig2+idat-1))
+               !if (from_space == TAU_SPACE .and. my_it == 1) then
+               !  !print * "beta_r, alpha:", beta_r(ig1,idat), alpha_c(ig1,idat)
+               !  write(*, "(a,i3,1x, *(es12.5,2x))") "my_it abs_diff_1", my_it,  abs(cval - mats(itau)%buffer_cplx(ig1, ig2+idat-1)), &
+               !     cval, mats(itau)%buffer_cplx(ig1, ig2+idat-1)
                !end if
              end if
              cwork_myit(my_it, ig1, idat) = mats(itau)%buffer_cplx(ig1, ig2+idat-1) - cval
@@ -3700,13 +3698,18 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
                !if (from_space == W_SPACE .and. my_it == 1) then
                !if (from_space == W_SPACE) then
                !  print *, "beta_r, alpha:", beta_r(ig1,idat), alpha_c(ig1,idat)
-               !  write(*, *), "my_it, abs_diff_2 my_it", my_it, abs(cval - mats(itau)%buffer_cplx(ig1, ig2+idat-1))
+               !  print *, "my_it, abs_diff_2 my_it", my_it, abs(cval - mats(itau)%buffer_cplx(ig1, ig2+idat-1)), &
+               !     cval - mats(itau)%buffer_cplx(ig1, ig2+idat-1)
                !end if
              end if
+             !if (from_space == W_SPACE) then
+             !write(200, *)"mats:", mats(itau)%buffer_cplx(ig1, ig2+idat-1)
+             !write(300, *)"cval", cval
+             !end if
              mats(itau)%buffer_cplx(ig1, ig2+idat-1) = glob_cwork(itau, ig1, idat) + cval
-           end do
-         end do
-       end do
+           end do ! ig1
+         end do ! my_it
+       end do ! idat
 
      end do ! ig2
 
@@ -3768,7 +3771,8 @@ end subroutine gwr_cos_transform
 !!  The fit passes through the first tau point, the second point is selected by
 !!  minimizing the "distance" between the fit and the ab-initio results cvals.
 !!
-!!  b = -\frac{\ln(y_n / y_0)}{\tau_n - \tau_0}, \quad A = y_0 e^{a \tau_n}
+!!  b = -\frac{\ln(y_n / y_0)}{\tau_n - \tau_0},
+!!  A = y_0 e^{b \tau_0}
 !!
 !! SOURCE
 
@@ -3784,28 +3788,26 @@ subroutine fit_tau_exp(ntau, tau_mesh, tau_wgs, cvals, alpha_c, beta_r)
 !Local variables-------------------------------
  integer :: ii
  real(dp) :: loss, min_loss, my_beta_r
- complex(dp) :: cfit(ntau), zz
+ complex(dp) :: cfit(ntau), zz, my_alpha_c
 ! *************************************************************************
 
- min_loss = huge(one)
- alpha_c = cvals(1); beta_r = zero
+ min_loss = huge(one); alpha_c = zero; beta_r = zero
  do ii=2,ntau
    ! Find my_beta_r. Note that we take the real part of the log to avoid oscillatory behaviour in the exp.
    zz = -log(cvals(ii) / cvals(1)) / (tau_mesh(ii) - tau_mesh(1))
    my_beta_r = real(zz)
-   alpha_c = cvals(1) * exp(+my_beta_r * tau_mesh(1))
-   !alpha_c = (f0 + fn) / (np.exp(-bb * w0) + np.exp(-bb * wn))
+   my_alpha_c = cvals(1) * exp(+my_beta_r * tau_mesh(1))
    ! Compute loss function.
-   cfit(:) = alpha_c * exp(-my_beta_r * tau_mesh)
+   cfit(:) = my_alpha_c * exp(-my_beta_r * tau_mesh)
    loss = sum(tau_wgs * abs(cvals - cfit)**2)
    if (loss < min_loss) then
-     min_loss = loss; beta_r = my_beta_r
+     min_loss = loss; alpha_c = my_alpha_c; beta_r = my_beta_r
    end if
  end do
 
  ! If something goes wrong, disable the fit.
  if (beta_r <= tol12) then
-   beta_r = tol12; alpha_c = zero
+   alpha_c = zero; beta_r = tol6
  end if
 
 end subroutine fit_tau_exp
@@ -3831,8 +3833,8 @@ pure complex(dp) function fit_tau_exp_eval(what, xx, alpha_c, beta_r) result(cva
  case ("func")
    cval = alpha_c * exp(-beta_r * xx)
  case ("ft")
-   ! \mathcal{F}\{B e^{-a |t|} \}(\omega) = \frac{2A b}{b^2 + \omega^2}
-   cval = (alpha_c * two * beta_r) / (beta_r**2 + xx**2)
+   ! \mathcal{F}\{A e^{-b |t|} \}(\omega) = \frac{2A b}{b^2 + \omega^2}
+   cval = (two * alpha_c * beta_r) / (beta_r**2 + xx**2)
  case default
    cval = huge(one)
  end select
@@ -3870,28 +3872,40 @@ subroutine fit_iomega(ntau, iw_mesh, iw_wgs, cvals, alpha_c, beta_r)
  complex(dp) :: b2_cplx, my_alpha_c, cfit(ntau), f0, fn ! zz,
 ! *************************************************************************
 
- min_loss = huge(one)
- w0 = iw_mesh(1); f0 = cvals(1); beta_r = zero; alpha_c = czero
- do ii=2,ntau
-   ! Find my_alpha_c and my_beta_r
-   wn = iw_mesh(ii); fn = cvals(ii)
+ min_loss = huge(one); w0 = iw_mesh(1); f0 = cvals(1); alpha_c = czero; beta_r = zero
 
-   b2_cplx = (f0*w0**2 - fn*wn**2) / (fn - f0)
-   b2 = real(b2)
+ do ii=2,ntau
+   ! Find alpha_c and beta_r
+   wn = iw_mesh(ii); fn = cvals(ii)
+   !b2_cplx = (f0*w0**2 - fn*wn**2) / (fn - f0)
+   !b2 = real(b2)
+   b2 = (real(f0) * w0**2 - real(fn) * wn**2) / (real(fn) - real(f0))
+   !print *, "b2:", b2
+
    if (b2 < tol12) then
      b2 = tol12; my_alpha_c = zero
    else
-     my_alpha_c = f0*fn * (wn**2 - w0**2) / (f0 - fn)
+     !my_alpha_c = f0*fn * (wn**2 - w0**2) / (f0 - fn)
+     !print *, "b2:", b2
+     !my_alpha_c = f0 *((fn*wn**2 - f0*w0**2)/(f0 - fn) + w0**2)
+     my_alpha_c = f0 * (b2 + w0**2)
    end if
 
    ! Compute loss function.
-   cfit(:) = my_alpha_c / (b2 + iw_mesh ** 2)
+   cfit(:) = my_alpha_c / (b2 + iw_mesh**2)
    loss = sum(iw_wgs * abs(cvals - cfit)**2)
    if (loss < min_loss) then
      min_loss = loss
-     beta_r = sqrt(b2); alpha_c = my_alpha_c
+     alpha_c = my_alpha_c; beta_r = sqrt(b2)
    end if
  end do
+
+ ! DEBUG: disable the fit
+ !beta_r = zero; alpha_c = zero
+
+ !if (alpha_c /= zero) then
+ !  print *, "beta_r, alpha_c", beta_r, alpha_c, min_loss
+ !end if
 
  ! If something goes wrong, disable the fit.
  !beta_r = zero; alpha_c = zero
@@ -3922,7 +3936,14 @@ pure complex(dp) function fit_iomega_eval(what, xx, alpha_c, beta_r) result(cval
  case ("func")
    cval = alpha_c / (beta_r**2 + xx**2)
  case ("ft")
-   cval = alpha_c * exp(-beta_r * abs(xx))
+   cval = zero
+   if (alpha_c /= zero) then
+     !cval = alpha_c * exp(-beta_r * abs(xx))
+     ! TODO: check sign in prefactor
+     cval = (alpha_c / (two * beta_r)) * exp(-beta_r * abs(xx))
+     !cval = - (alpha_c / (two * beta_r)) * exp(-beta_r * abs(xx))
+   end if
+
  case default
    cval = huge(one)
  end select
