@@ -1080,7 +1080,7 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
  real(dp),allocatable :: cwavef_alltoall2(:,:)
  real(dp),allocatable :: cwavef_fft(:,:), cwavef_fft_tr(:,:)
  real(dp),allocatable :: weight_t(:),weight1_t(:),weight2_t(:)
- real(dp),pointer :: ewavef_alltoall_sym(:,:),wfraug_ptr(:,:,:,:)
+ real(dp),pointer :: ewavef_alltoall_sym(:,:),ewavef_alltoall_sym_work(:,:),wfraug_ptr(:,:,:,:)
 
 #if defined HAVE_GPU && defined HAVE_YAKL
  ! this buffer is necessary to avoid mixing "managed memory" buffer with "regular memory" buffer in MPI calls
@@ -1472,8 +1472,9 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
        end if
        weight1 = occ_k(ind_occ1)*wtk/ucvol
        weight2 = occ_k(ind_occ2)*wtk/ucvol
+       ewavef_alltoall_sym_work => ewavef_alltoall_sym(:,(ndatarecv_tot*(iibandpp-1))+1:(ndatarecv_tot*iibandpp))
        call fourwf(1,rhoaug,&
-&       ewavef_alltoall_sym(:,(ndatarecv_tot*(iibandpp-1))+1:(ndatarecv_tot*iibandpp)),&
+&       ewavef_alltoall_sym_work,&
 &       dummy,wfraug_ptr,gbound_,gbound_,&
 &       istwf_k_,kg_k_gather_sym,kg_k_gather_sym,mgfft,mpi_enreg,1,&
 &       ngfft,ndatarecv_tot,1,n4,n5,n6,option_fourwf,&
