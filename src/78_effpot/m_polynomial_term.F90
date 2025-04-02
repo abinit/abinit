@@ -89,7 +89,7 @@ module m_polynomial_term
    integer,allocatable  ::  index_coeff(:)
 
    ! a string to identify the term
-    character(len=100) :: debug_string = ''
+    character(len=500) :: debug_str = ''
 
    contains
            procedure :: get_nbody
@@ -150,7 +150,7 @@ end function get_total_power
 !! SOURCE
 
 subroutine polynomial_term_init(atindx,cell,direction,ndisp,nstrain,polynomial_term,power_disp,&
-&                               power_strain,strain,weight,check, index_coeff)
+&                               power_strain,strain,weight,check, index_coeff, debug_str)
 
  implicit none
 
@@ -174,7 +174,15 @@ subroutine polynomial_term_init(atindx,cell,direction,ndisp,nstrain,polynomial_t
  integer :: power_disp_tmp(ndisp),power_strain_tmp(nstrain)
  character(500) :: msg
 
+character(*), optional :: debug_str
+
 ! *************************************************************************
+
+if (present(debug_str)) then
+  polynomial_term%debug_str = debug_str
+else
+  polynomial_term%debug_str = ' '
+end if
 
 !Do some checks
  if (size(atindx,2) /= ndisp) then
@@ -378,7 +386,7 @@ end subroutine polynomial_term_free
 
 subroutine polynomial_term_finalizer(self)
   type(polynomial_term_type), intent(inout) :: self
-  print *, "Warning: polynomial_term_finalizer called"
+  !print *, "Warning: polynomial_term_finalizer called. Debug str: ", self%debug_str
   call polynomial_term_free(self)
 end subroutine polynomial_term_finalizer
 !!***
