@@ -3864,22 +3864,23 @@ Variable(
     defaultval=ValueWithConditions({'[[optdriver]] in [3, 4]': '[[ecut]]', 'defaultval': 0.0}),
     mnemonics="Energy CUT-off for WaveFunctioNs",
     characteristics=['[[ENERGY]]'],
-    requires=" [[optdriver]] in [3, 4]",
+    requires=" [[optdriver]] in [3, 4, 6]",
     added_in_version="before_v9",
     text=r"""
 [[ecutwfn]] determines the cut-off energy of the planewave set used to
 represent the wavefunctions in the formula that generates the independent-
 particle susceptibility $\chi^{0}_{KS}$ (for [[optdriver]] = 3), or the self-
-energy (for [[optdriver]] = 4).
+energy (for [[optdriver]] = 4) or the Green's functions,
+and all the derived quantities when the GWR code is used ([[optdriver]] 6)
 
 Although this is not recommended, one is allowed to set [[ecutwfn]] smaller than [[ecut]], so that the wavefunctions are
-filtered, and some components are ignored. As a side effect, the wavefunctions
-are no more normalized, and also, no more orthogonal. This also means
-that the q=0, Q=0 or q=0, Q'=0 matrix elements of the susceptibility are not zero
+filtered, and some components are ignored.
+As a side effect, the wavefunctions are no more normalized, and also, no more orthogonal.
+This also means that the q=0, Q=0 or q=0, Q'=0 matrix elements of the susceptibility are not zero
 as they should, which might be a problem in some cases depending on the intended usage of the
 susceptibility matrix beyond standard GW and BSE calculations.
 
-Anyhow, the set of plane waves can be much smaller for [[optdriver]] = 3, than for [[optdriver]] = 4,
+Anyhow, the set of plane waves can be much smaller
 although a convergence study is needed to choose correctly both values.
 
 The size of this set of planewaves is [[npwwfn]].
@@ -4328,7 +4329,7 @@ Variable(
     requires="[[eph_intmeth]] == 1",
     added_in_version="before_v9",
     text=r"""
-This variable defines the gaussian broadening used for the integration over the double delta
+This variable defines the gaussian broadening used for the integration of the double delta
 over the Fermi surface when [[eph_intmeth]] == 1.
 A negative value, activates the adaptive gaussian broadening proposed in [[cite:Li2015]]
 in which the broadening is automatically computed from the group velocities.
@@ -4472,6 +4473,8 @@ The choice is among:
 !!! important
 
     At the time of writing ( |today| ), PAW is not supported by the EPH code.
+    Also, calculations with [[nspinor]] = 2 require [[nspden]] 1 in all the EPH tasks
+    in which the interpolation of the DFPT potentials is needed.
 """,
 ),
 
