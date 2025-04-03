@@ -50,6 +50,6 @@ prt_GF_csv = 1
 #%% keywords = Effective potential, multibinit
 #%% description = 
 #%%   Read ddb and HIST, fit the anharmonic part on energies and generate effective potential
+#%%   Disabled checking of GF_values_iatom2_proc000_iter002.csv, as there name of the coefficient is not determinant and can have multiple correct value. In the future, the priority of the coefficient name should be included so that we choose the name according to a rule rather than using the first in the list of terms.
 #%% topics = FitProcess,LatticeModel
-#%%   Note: disabled checking of GF_values_iatom2_proc000_iter002.csv, as there name of the coefficient is not determinant and can have multiple correct value. In the future, the priority of the coefficient name should be included so that we choose the name according to a rule rather than using the first in the list of terms.
 #%%<END TEST_INFO>
