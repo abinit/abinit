@@ -31,6 +31,7 @@ module m_fit_polynomial_coeff
  use m_atomdata
  use m_xmpi
  use m_supercell
+ use m_fstrings, only : itoa
 
  use m_hashtable_strval, only: hash_table_t
  use m_mergesort, only: mergesort
@@ -600,6 +601,7 @@ contains
   !> - Validates coefficient generation parameters
   !> - Sets up coefficient arrays and counters
   subroutine generate_list_of_coefficients_to_fit()
+    integer :: max_nbody_tmp(20)
     !Get the list of coefficients to fit:
     !get from the eff_pot type (from the input)
     !or
@@ -651,8 +653,6 @@ contains
           call wrtout(std_out,message,'COLL')
         end if  !need_verbose
 
-         block
-          integer max_nbody_tmp(20)
           max_nbody_tmp(:) = 20
         call polynomial_coeff_getNorder(coeffs_iatom,eff_pot%crystal,cutoff,my_ncoeff,ncoeff_tot_tmp,power_disps,&
           &                                  max_power_strain_in,0,sc_size,comm,anharmstr=(ii==1 .and. need_anharmstr),&
@@ -662,7 +662,6 @@ contains
           &                                  fit_iatom=fit_iatom_in,dispterms=need_disp, &
           &                                  max_nbody=max_nbody_tmp)
 
-          end block
 
         if (.not. fit_iatom_all) then
           call polynomial_coeff_list_free(coeffs_tmp)
@@ -688,8 +687,8 @@ contains
       my_ncoeff = size(coeffs_tmp)
       if (fit_iatom_all .and. iam_master) then
         ! FIXME: this does not compile on alpa intel 2025 elpa!
-        message=ch10 // ' fit_iatom = -2 : The total number of coefficients for all atoms are'
-        write(message, '(a,I6,a)') trim(message), ncoeff_tot, ch10
+        message=ch10 // ' fit_iatom = -2 : The total number of coefficients for all atoms are'// itoa(my_ncoeff) // ch10
+        !write(message, '(a,I6,a)') trim(message), ncoeff_tot, ch10
         call wrtout(std_out,message,'COLL')
         call wrtout(ab_out,message,'COLL')
       end if
@@ -1169,6 +1168,7 @@ contains
   !> - Synchronizes data across MPI processes
   subroutine initialize_gf()
     integer :: ipre, duplicated, ipre_real
+    real(dp) , allocatable :: weights1(:)
     !Allocation of arrays
     ABI_MALLOC(coeffs_tmp,(ncoeff_to_fit))
     ABI_MALLOC(singular_coeffs,(max(1,my_ncoeff)))
@@ -1287,10 +1287,9 @@ contains
         end if
     end if
 
-    block
-      real(dp) :: weights1(ntime)
-      weights1=one
-      coeff_values = zero
+    ABI_MALLOC(weights1,(ntime))
+    weights1=one
+    coeff_values = zero
     call fit_polynomial_coeff_computeGF(coeff_values,energy_coeffs,fit_data%energy_diff,fcart_coeffs,&
       &                                    fit_data%fcart_diff,gf_values(:,1),int((/1/)),natom_sc,&
       &                                    0,my_ncoeff,ntime,strten_coeffs,fit_data%strten_diff,&
@@ -1314,7 +1313,7 @@ contains
       call wrtout(ab_out,message,'COLL')
       call wrtout(std_out,message,'COLL')
     end if
-    end block
+    ABI_FREE(weights1)
 
 
     ABI_MALLOC(gf_values_iter,(4,ncoeff_to_select+1))
@@ -1921,6 +1920,7 @@ contains
  subroutine fit_all_selected_coefficients()
    !This routine solves the linear system proposed by
    ! C.Escorihuela-Sayalero see PRB95,094115(2017) [[cite:Escorihuela-Sayalero2017]]
+   real(dp), allocatable :: weights1(:)
    if(ncoeff_to_fit > 0)then
      block
        integer :: ic
@@ -1979,8 +1979,7 @@ contains
          end if
      endif
 
-     block
-       real(dp) :: weights1(ntime)
+       ABI_MALLOC(weights1,(ntime))
        weights1(:) = one
        call fit_polynomial_coeff_computeGF(coeff_values(1:ncoeff_to_fit),energy_coeffs_tmp,&
            &                                      fit_data%energy_diff,fcart_coeffs_tmp,fit_data%fcart_diff,&
@@ -2006,8 +2005,7 @@ contains
            call wrtout(ab_out,message,'COLL')
            call wrtout(std_out,message,'COLL')
          end if
-
-      end block
+        ABI_FREE(weights1)
 
 
      !Allocate output coeffs -> selected plus fixed ones
@@ -2095,6 +2093,7 @@ contains
  subroutine select_one_coeff(ind)
    ! Note ind is my_coeffindexes(icoeff)
    integer :: ind
+   integer, allocatable :: weights1(:)
    if (.not. isselected(ind)) then
      rank_to_send= my_rank
      isselected(ind)=.True.
@@ -2673,7 +2672,7 @@ subroutine fit_polynomial_coeff_solve(coefficients,fcart_coeffs,fcart_diff,energ
  integer :: ia,itime,icoeff,jcoeff,icoeff_tmp,jcoeff_tmp,mu,LDA,LDB,LDX,LDAF,N,NRHS
  real(dp):: efact,ffact,sfact,ftmpA,stmpA,ftmpB,stmpB,etmpA,etmpB,fmu,fnu,smu,snu,emu,enu
  integer :: INFO
- integer :: ITER ! Only needed if DSGESV is used
+ !integer :: ITER ! Only needed if DSGESV is used
  real(dp):: RCOND
  real(dp):: fcart_coeffs_tmp(3,natom,ntime)
  real(dp),allocatable:: AF(:,:),BERR(:),FERR(:),WORK(:),C(:),R(:)

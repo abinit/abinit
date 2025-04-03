@@ -161,7 +161,7 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
  real(dp),allocatable :: gred(:,:),fcart(:,:)
  real(dp),allocatable :: vel(:,:)
  real(dp) :: vel_cell(3,3),rprimd(3,3)
- real(dp) :: efield(3)
+ !real(dp) :: efield(3)
  type(polynomial_coeff_type),dimension(:),allocatable :: coeffs_all,coeffs_tmp,coeffs_bound
  character(len=fnlen) :: filename,md_hist_name
  character(len=fnlen) :: name_file
