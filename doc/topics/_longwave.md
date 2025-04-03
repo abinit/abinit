@@ -61,10 +61,13 @@ within the longwave driver. Nonetheless, as illustrated in section IV.d of [[cit
 lead to quantitatively and qualitatively different outcomes. On the other hand, such ambiguity is well known to disappear
 when the surface-specific part is accounted for, as done e.g. in [[cite:Stengel2014]].
 
-The longwave implementation is still under heavy development. To date it requires the use of norm-conserving 
-pseudopotentials without XC nonlinear core corrections and it can be used with LDA and GGA XC functionals. 
-The use of spherical harmonics for the nonlocal projectors is mandatory through the option [[useylm]]=1,
-although [[useylm]]=0 can be exceptionally used in the calculation of the natural optical activity tensor [[lw_natopt]]=1.
+The longwave implementation is still under active development. It can be used with LDA and GGA XC functionals. 
+Support for pseudopotentials with XC nonlinear core corrections was recently introduced in 
+version 10.4, enabling the calculation of dynamic quadrupoles ([[lw_qdrpl]]=1) and the natural optical activity tensor ([[lw_natopt]]=1).
+However, to date the calculation of flexoelectric properties requires the use of norm-conserving pseudopotentials 
+without XC nonlinear core corrections. The use of spherical harmonics for nonlocal projectors is mandatory and must 
+be specified with the option [[useylm]]=1. However, [[useylm]]=0 can be used as an exception when calculating 
+the natural optical activity tensor ([[lw_natopt]]=1).
 
 Since ABINIT v9.x the longwave driver has been thoroughly modified. These changes, while being mostly devoted
 at optimizing the internal structure of the driver, do not entail big differences to the end user in terms of 
