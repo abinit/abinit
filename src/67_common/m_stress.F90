@@ -48,7 +48,7 @@ module m_stress
  use m_mklocl,           only : mklocl_recipspace
  use m_mkcore,           only : mkcore, mkcore_alt
 
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU_MARKERS)
  use m_nvtx_data
 #endif
 
