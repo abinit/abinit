@@ -39,7 +39,7 @@ module m_lobpcg2
   use m_xmpi
  use, intrinsic :: iso_c_binding, only: c_size_t
 
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU_MARKERS)
  use m_nvtx_data
 #endif
 
