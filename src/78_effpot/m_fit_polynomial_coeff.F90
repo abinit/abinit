@@ -688,7 +688,8 @@ contains
       my_ncoeff = size(coeffs_tmp)
       if (fit_iatom_all .and. iam_master) then
         ! FIXME: this does not compile on alpa intel 2025 elpa!
-        write(message, '(2a,I6,a)') ch10,' fit_iatom = -2 : The total number of coefficients for all atoms are', ncoeff_tot,ch10
+        write(message, '(a,a,I6,a)') ch10,' fit_iatom = -2 : The total number of coefficients for all atoms are', ncoeff_tot,ch10
+        !message = trim(ch10) // " fit_iatom = -2 : The total number of coefficients for all atoms are " // trim(adjustl(achar(ichar('0')+mod(ncoeff_tot/100000,10)))) // trim(adjustl(achar(ichar('0')+mod(ncoeff_tot/10000,10)))) // trim(adjustl(achar(ichar('0')+mod(ncoeff_tot/1000,10)))) // trim(adjustl(achar(ichar('0')+mod(ncoeff_tot/100,10)))) // trim(adjustl(achar(ichar('0')+mod(ncoeff_tot/10,10)))) // trim(adjustl(achar(ichar('0')+mod(ncoeff_tot,10)))) // trim(ch10)
         call wrtout(std_out,message,'COLL')
         call wrtout(ab_out,message,'COLL')
       end if

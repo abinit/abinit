@@ -318,7 +318,8 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
 
 
 !     Generate long rage interation for the effective potential for both type and generate supercell
-      call effective_potential_generateDipDip(eff_pot,inp%dipdip_range,inp%dipdip,inp%asr,comm,1)
+      !call effective_potential_generateDipDip(eff_pot,inp%dipdip_range,inp%dipdip,inp%asr,comm, 1)
+      call effective_potential_generateDipDip(eff_pot,inp%dipdip_range,inp%dipdip,inp%asr,comm, 0)
 
 !     If needed, print the effective potential
       call effective_potential_print(eff_pot,inp%prt_model)

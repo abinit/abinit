@@ -632,6 +632,8 @@ ABI_FREE(xcart)
          ABI_MALLOC(coeffs_all,(ncoeff_max))
          ABI_MALLOC(coeffs_tmp,(ncoeff_max))
          do ii=1,ncoeff_max
+            print *, "DEBUG:   name of the coeff (ii): wth ii= ", ii, "is",  effective_potential%anharmonics_terms%coefficients(ii)%name
+
            call polynomial_coeff_init(&
 &           effective_potential%anharmonics_terms%coefficients(ii)%coefficient,&
 &           effective_potential%anharmonics_terms%coefficients(ii)%nterm,&
