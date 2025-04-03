@@ -179,7 +179,7 @@ module m_polynomial_coeff
   character(len=500) :: debug_str="uninitialized"
 
  contains
-   final :: polynomial_coeff_final
+   !final :: polynomial_coeff_final
  end type polynomial_coeff_type
 !!***
 
@@ -2708,7 +2708,7 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
 
          call polynomial_coeff_init(one,nterm,coeffs_tmp(ii),terms(1:nterm), check=.true.)
          DMSG(coeffs_tmp(ii)%debug_str)
-         ABI_FREE(reverse)
+         ABI_SFREE(reverse)
        !  Free the terms array
        do iterm=1,nterm
          call polynomial_term_free(terms(iterm))
@@ -3057,7 +3057,7 @@ recursive subroutine computeNorder(cell,coeffs_out,compatibleCoeffs,list_coeff,l
          reverse(:) = .False.
          call generateTermsFromList(cell,index_coeff,list_coeff,list_str,ncoeff,&
            &                                 ndisp_max,nrpt,nstr,nsym,iterm,terms, reverse=reverse)
-          ABI_FREE(reverse)
+          ABI_SFREE(reverse)
 
        if(iterm > 0)then
 !        Do some checks
@@ -3157,7 +3157,7 @@ recursive subroutine computeNorder(cell,coeffs_out,compatibleCoeffs,list_coeff,l
    do icoeff1=1,ncoeff_max
      call polynomial_coeff_free(coeffs_tmp(icoeff1))
    end do
-   ABI_FREE(coeffs_tmp)
+   ABI_SFREE(coeffs_tmp)
  end if
 
 end subroutine computeNorder
@@ -4244,7 +4244,8 @@ subroutine coeffs_list_conc_onsite(coeff_list1,coeff_list2)
 
  ! copy list1 to tmp
  ABI_MALLOC(coeff_list_tmp,(ncoeff1))
- coeff_list_tmp=coeff_list1
+ !coeff_list_tmp=coeff_list1
+ call coeffs_list_copy(coeff_list_tmp, coeff_list1)
 
  ! allocate new list1
  call polynomial_coeff_list_free(coeff_list1)

@@ -325,10 +325,10 @@ subroutine opt_effpot(eff_pot,opt_ncoeff,opt_coeff,hist,opt_on,opt_factors,comm,
   end if
 
   !Deallocation of fitting variables
-  ABI_FREE(energy_coeffs)
-  ABI_FREE(fcart_coeffs)
-  ABI_FREE(strten_coeffs)
-  ABI_FREE(my_weights)
+  ABI_SFREE(energy_coeffs)
+  ABI_SFREE(fcart_coeffs)
+  ABI_SFREE(strten_coeffs)
+  ABI_SFREE(my_weights)
 
   if(need_print_anh)then
     INQUIRE(FILE='before_opt_diff_anharmonic_terms_energy.dat',OPENED=file_opened,number=unit_anh1)
@@ -707,7 +707,7 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
           exists(jterm) = coeffs_compare(my_coeffs_tmp(jterm),my_coeffs_tmp(nterm2))
         enddo !jterm
         any_exists=any(exists)
-        ABI_FREE(exists)
+        ABI_SFREE(exists)
         if(any_exists)then
           write(message,'(3a)' )ch10,&
             &              '   ==> Term exists already. We cycle',ch10
@@ -872,9 +872,9 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
 
 
   !DEALLOCATION
-  ABI_FREE(symbols)
-  ABI_FREE(terms)
-  ABI_FREE(my_weights)
+  ABI_SFREE(symbols)
+  ABI_SFREE(terms)
+  ABI_SFREE(my_weights)
 
   !ABI_FREE(my_coeffs)
   call fit_data_free(fit_data)
@@ -965,7 +965,7 @@ subroutine opt_getHOforterm(term,order_range,order_start,order_stop)
     order_stop  = 0
   endif
 
-  ABI_FREE(powers)
+  ABI_SFREE(powers)
 
 end subroutine opt_getHOforterm
 !!***
@@ -1589,8 +1589,8 @@ subroutine opt_getHOcrossdisp(terms_out,ncombi,term_in,power_disp)
       &               " ==> Can not construct high order cross product bounding term",ch10
     call wrtout(ab_out,message,'COLL')
     call wrtout(std_out,message,'COLL')
-    ABI_FREE(ncombi_order)
-    ABI_FREE(ncombi_order_str)
+    ABI_SFREE(ncombi_order)
+    ABI_SFREE(ncombi_order_str)
     return
   end if
 
@@ -1664,8 +1664,8 @@ subroutine opt_getHOcrossdisp(terms_out,ncombi,term_in,power_disp)
     call opt_getHoTerms(terms_out,order_start,order_stop,ndisp,ncombi_order)
   endif
   !DEALLOCATION
-  ABI_FREE(ncombi_order)
-  ABI_FREE(ncombi_order_str)
+  ABI_SFREE(ncombi_order)
+  ABI_SFREE(ncombi_order_str)
 
 end subroutine opt_getHOcrossdisp
 !!***
@@ -1758,7 +1758,7 @@ subroutine opt_getSingleDispTerms(terms,crystal, sc_size,comm)
     call polynomial_coeff_getList(cell,crystal,dist,list_symcoeff,list_symstr,&
       &                              natom,nstr_sym,ncoeff_sym,nrpt,range_ifc,cutoff,sc_size=sc_size)
 
-    ABI_FREE(dist)
+    ABI_SFREE(dist)
     !ABI_FREE(rpt)
 
     !write(*,*) "polynomial_getList worked"
@@ -1838,7 +1838,7 @@ subroutine opt_getSingleDispTerms(terms,crystal, sc_size,comm)
         enddo!i=1,nterm1+ncopy
         call polynomial_coeff_list_free(terms_tmp)
         call polynomial_coeff_list_free(terms_tmp2)
-        ABI_FREE(terms_to_copy)
+        ABI_SFREE(terms_to_copy)
       endif!iatom==1
     enddo !iatom=1,natom
     !      call polynomial_coeff_getNorder(terms,crystal,cutoff,ncoeff,ncoeff_out,power_disp,&
@@ -1979,7 +1979,7 @@ subroutine opt_getHOSingleDispTerms(term_in,terms_out,symbols,single_disp_terms,
         DMSG(terms_out(iterm3)%debug_str)
     endif
   enddo
-  ABI_FREE(found)
+  ABI_SFREE(found)
   call polynomial_coeff_list_free(terms_out_tmp)
   ncoeff = iterm3
 end subroutine opt_getHOSingleDispTerms
@@ -2249,9 +2249,9 @@ subroutine generate_bounding_term_and_add_to_list(sympairs, nterm_start, ncombi,
       call polynomial_term_list_free(terms2)
     end if
 
-    ABI_FREE(list_disp)
-    ABI_FREE(reverse)
-    ABI_FREE(false_reverse)
+    ABI_SFREE(list_disp)
+    ABI_SFREE(reverse)
+    ABI_SFREE(false_reverse)
   end do
 
   call polynomial_coeff_list_free(my_coeffs_tmp)

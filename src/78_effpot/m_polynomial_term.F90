@@ -94,7 +94,7 @@ module m_polynomial_term
    contains
            procedure :: get_nbody
            procedure :: get_total_power
-           final :: polynomial_term_finalizer
+           !final :: polynomial_term_finalizer
  end type polynomial_term_type
 !!***
 
@@ -410,7 +410,7 @@ subroutine polynomial_term_list_free(terms)
   do iterm=1, size(terms)
     call polynomial_term_free(terms(iterm))
   end do
-  ABI_FREE(terms)
+  ABI_SFREE(terms)
 end subroutine polynomial_term_list_free
 
 !!****f* m_polynomial_term/terms_compare

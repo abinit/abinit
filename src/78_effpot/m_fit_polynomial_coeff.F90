@@ -679,7 +679,10 @@ contains
             ABI_MALLOC(coeffs_tmp,(size(coeffs_iatom)))
             call coeffs_list_copy(coeffs_tmp,coeffs_iatom)
           else
-            if(allocated(coeffs_iatom)) call coeffs_list_conc_onsite(coeffs_tmp,coeffs_iatom)
+          ! FIXME: this does not work on ubu_intel
+            if(allocated(coeffs_iatom))  then
+              call coeffs_list_conc_onsite(coeffs_tmp,coeffs_iatom)
+            endif
           end if ! not allocate coeffs_tmp
           call polynomial_coeff_list_free(coeffs_iatom)
         end if  !fit_iatom/=-2
@@ -1093,7 +1096,7 @@ contains
     ABI_MALLOC(list_coeffs,(ncoeff_to_fit))
     ABI_MALLOC(fcart_coeffs_tmp,(3,natom_sc,ncoeff_to_fit,ntime))
     ABI_MALLOC(strten_coeffs_tmp,(6,ntime,ncoeff_to_fit))
-    ABI_MALLOC(weights, (ntime))
+    !ABI_MALLOC(weights, (ntime))
     list_coeffs  = 0
 
 

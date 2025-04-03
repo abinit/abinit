@@ -237,14 +237,14 @@ subroutine anharmonics_terms_free(anharmonics_terms)
 
   if(allocated(anharmonics_terms%elastic_displacement)) then
     anharmonics_terms%elastic_displacement=zero
-    ABI_FREE(anharmonics_terms%elastic_displacement)
+    ABI_SFREE(anharmonics_terms%elastic_displacement)
   end if
 
   if(allocated(anharmonics_terms%phonon_strain))then
     do ii = 1,6
        call anharmonics_terms%phonon_strain(ii)%free()
     end do
-    ABI_FREE(anharmonics_terms%phonon_strain)
+    ABI_SFREE(anharmonics_terms%phonon_strain)
   end if
 
   call anharmonics_terms_freeCoeffs(anharmonics_terms)
@@ -290,7 +290,7 @@ subroutine anharmonics_terms_freeCoeffs(anharmonics_terms)
     do ii=1,anharmonics_terms%ncoeff
       call polynomial_coeff_free(anharmonics_terms%coefficients(ii))
     end do
-    ABI_FREE(anharmonics_terms%coefficients)
+    ABI_SFREE(anharmonics_terms%coefficients)
   end if
 
   anharmonics_terms%ncoeff = 0
@@ -344,7 +344,7 @@ subroutine anharmonics_terms_setCoeffs(coeffs,anharmonics_terms,ncoeff)
     do ii=1,anharmonics_terms%ncoeff
       call polynomial_coeff_free(anharmonics_terms%coefficients(ii))
     end do
-    ABI_FREE(anharmonics_terms%coefficients)
+    ABI_SFREE(anharmonics_terms%coefficients)
   end if
 
 ! Allocation of the new array
@@ -499,7 +499,7 @@ subroutine anharmonics_terms_setStrainPhononCoupling(anharmonics_terms,natom,pho
     do ii = 1,6
        call anharmonics_terms%phonon_strain(ii)%free()
     end do
-    ABI_FREE(anharmonics_terms%phonon_strain)
+    ABI_SFREE(anharmonics_terms%phonon_strain)
   end if
 
 ! 2-Allocation of the new array and filling
@@ -518,8 +518,8 @@ subroutine anharmonics_terms_setStrainPhononCoupling(anharmonics_terms,natom,pho
 !  If there is no value inside the array,
 !  We don't need to store it
    else
-     ABI_FREE(anharmonics_terms%phonon_strain(ii)%atmfrc)
-     ABI_FREE(anharmonics_terms%phonon_strain(ii)%cell)
+     ABI_SFREE(anharmonics_terms%phonon_strain(ii)%atmfrc)
+     ABI_SFREE(anharmonics_terms%phonon_strain(ii)%cell)
      anharmonics_terms%phonon_strain(ii)%nrpt = 0
    end if
  end do
@@ -569,7 +569,7 @@ subroutine anharmonics_terms_setElasticDispCoupling(anharmonics_terms,natom,elas
 ! 1-reinitialise the previous value
   anharmonics_terms%has_elastic_displ = .FALSE.
   if(allocated(anharmonics_terms%elastic_displacement))then
-    ABI_FREE(anharmonics_terms%elastic_displacement)
+    ABI_SFREE(anharmonics_terms%elastic_displacement)
   end if
 
 ! 2-Allocation of the new array and filling
@@ -582,7 +582,7 @@ subroutine anharmonics_terms_setElasticDispCoupling(anharmonics_terms,natom,elas
   else
 !   If there is no value inside the array,
 !   We don't need to store it
-    ABI_FREE(anharmonics_terms%elastic_displacement)
+    ABI_SFREE(anharmonics_terms%elastic_displacement)
   end if
 
 end subroutine anharmonics_terms_setElasticDispCoupling
