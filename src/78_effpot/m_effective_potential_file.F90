@@ -1950,8 +1950,9 @@ end subroutine system_getDimFromXML
 ! Case 1: only local in the xml
    if (irpt1>0 .and. irpt2==0) then
      ifcs%cell(:,:) = int(cell_local(:,:))
-     ifcs%atmfrc(:,:,:,:,:)  = zero !local_atmfrc(:,:,:,:,:)
-     ifcs%short_atmfrc(:,:,:,:,:) = local_atmfrc(:,:,:,:,:)
+     !ifcs%atmfrc(:,:,:,:,:)  = zero !local_atmfrc(:,:,:,:,:) !reverted
+     ifcs%atmfrc(:,:,:,:,:)  = local_atmfrc(:,:,:,:,:)
+     !ifcs%short_atmfrc(:,:,:,:,:) = local_atmfrc(:,:,:,:,:) !reverted
      ifcs%ewald_atmfrc(:,:,:,:,:) = zero
 
 ! Case 2: only total in the xml
@@ -1959,7 +1960,8 @@ end subroutine system_getDimFromXML
      ifcs%cell(:,:) = int(cell_total(:,:))
      ifcs%atmfrc(:,:,:,:,:)  = total_atmfrc(:,:,:,:,:)
      ifcs%short_atmfrc(:,:,:,:,:) = zero
-     ifcs%ewald_atmfrc(:,:,:,:,:) = zero !total_atmfrc(:,:,:,:,:)
+     !ifcs%ewald_atmfrc(:,:,:,:,:) = zero !total_atmfrc(:,:,:,:,:)
+     ifcs%ewald_atmfrc(:,:,:,:,:) = total_atmfrc(:,:,:,:,:)
 
 ! Case 3: local + total in the xml
    else if (irpt1>0 .and. irpt2>0)then
@@ -3244,7 +3246,11 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
 !12-Initialisation of eff_pot
  call effective_potential_setCoeffs(coeffs,eff_pot,ncoeff)
 
- call polynomial_coeff_list_free(coeffs)
+!13-Deallocation of type
+ do ii=1,ncoeff
+   call polynomial_coeff_free(coeffs(ii))
+ end do
+ ABI_FREE(coeffs)
 
 
 end subroutine coeffs_xml2effpot
@@ -3401,7 +3407,7 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,iatfix,verbos
  real(dp),allocatable :: xred_ref(:,:) ! xred_hist(:,:),
  real(dp),allocatable :: list_dist(:),list_reddist(:,:),list_absdist(:,:)
  character(len=500) :: msg
-! type(abihist) :: hist_tmp
+ type(abihist) :: hist_tmp
 ! *************************************************************************
 
 !Set optional values
@@ -3590,8 +3596,6 @@ end do  ! ia
    end if
 
 ! Allocate hist datatype
-block
-type(abihist) :: hist_tmp
    call abihist_init(hist_tmp,natom_hist,nstep_hist,.false.,.false.)
 ! copy all the information
    do ia=1,nstep_hist
@@ -3629,7 +3633,6 @@ type(abihist) :: hist_tmp
      iatfix = iatfix_tmp
      ABI_FREE(iatfix_tmp)
    end if
- end block
  end if !need map
 
 !deallocation

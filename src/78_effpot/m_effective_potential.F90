@@ -989,75 +989,75 @@ end if
    !ifc_tmp%atmfrc = ifc_tmp%short_atmfrc + ifc_tmp%ewald_atmfrc
    ! Set the full cell according to the largest box
 
-   min1f=min(min1, min1_cell)
-   min2f=min(min2, min2_cell)
-   min3f=min(min3, min3_cell)
+!   min1f=min(min1, min1_cell)
+!   min2f=min(min2, min2_cell)
+!   min3f=min(min3, min3_cell)
 
-   max1f=max(max1, max1_cell)
-   max2f=max(max2, max2_cell)
-   max3f=max(max3, max3_cell)
+!   max1f=max(max1, max1_cell)
+!   max2f=max(max2, max2_cell)
+!   max3f=max(max3, max3_cell)
 
-   full_nrpt= (max1f-min1f+1) * (max2f-min2f+1) * (max3f-min3f+1)
+!   full_nrpt= (max1f-min1f+1) * (max2f-min2f+1) * (max3f-min3f+1)
 
 
-   !full_nrpt = max(ifc_tmp%nrpt,eff_pot%harmonics_terms%ifcs%nrpt)
+   full_nrpt = max(ifc_tmp%nrpt,eff_pot%harmonics_terms%ifcs%nrpt)
 
    ABI_MALLOC(full_cell,(3,full_nrpt))
    ABI_CALLOC(full_cell_atmfrc,(3,natom_uc,3,natom_uc,full_nrpt)) ! Allocate and set to 0
    ABI_CALLOC(full_cell_short_atmfrc,(3,natom_uc,3,natom_uc,full_nrpt)) ! Allocate and set to 0
    ABI_CALLOC(full_cell_ewald_atmfrc,(3,natom_uc,3,natom_uc,full_nrpt)) ! Allocate and set to 0
-!   if ( full_nrpt == ifc_tmp%nrpt ) then
-!     full_cell = ifc_tmp%cell
-!   else
-!     full_cell = eff_pot%harmonics_terms%ifcs%cell
-!   end if
-   irpt=1
-   do i1=min1f, max1f
-     do i2= min2f, max2f
-       do i3= min3f, max3f
-         full_cell(:, irpt)= [i1, i2, i3]
-         irpt=irpt+1
-       end do
-     end do
-   end do
+   if ( full_nrpt == ifc_tmp%nrpt ) then
+     full_cell = ifc_tmp%cell
+   else
+     full_cell = eff_pot%harmonics_terms%ifcs%cell
+   end if
+!   irpt=1
+!   do i1=min1f, max1f
+!     do i2= min2f, max2f
+!       do i3= min3f, max3f
+!         full_cell(:, irpt)= [i1, i2, i3]
+!         irpt=irpt+1
+!       end do
+!     end do
+!   end do
 
-    has_totFC = .False.
+!    has_totFC = .False.
 
-    do irpt = 1,eff_pot%harmonics_terms%ifcs%nrpt
-     if(any(abs(eff_pot%harmonics_terms%ifcs%atmfrc(:,:,:,:,irpt)) > tol8))then
-         has_totFC = .True.
-         cycle
-      end if
-    end do
+!    do irpt = 1,eff_pot%harmonics_terms%ifcs%nrpt
+!     if(any(abs(eff_pot%harmonics_terms%ifcs%atmfrc(:,:,:,:,irpt)) > tol8))then
+!         has_totFC = .True.
+!         cycle
+!      end if
+!    end do
 
-  if (has_totFC .and. in_file_option==1) then   !
-    !   print *, '   >>>>>                HAS TOTAL FC'
-    !     ! Copy LR into total_atmfrc
-      do irpt=1,ifc_tmp%nrpt ! LR IRPT
-        do irpt2=1, full_nrpt
-          if(  ifc_tmp%cell(1,irpt)==full_cell(1,irpt2).and.&
-    &           ifc_tmp%cell(2,irpt)==full_cell(2,irpt2).and.&
-    &           ifc_tmp%cell(3,irpt)==full_cell(3,irpt2) ) then
-            ! full_cell_atmfrc(:,:,:,:,irpt2) = ifc_tmp%ewald_atmfrc(:,:,:,:,irpt)
-            full_cell_ewald_atmfrc(:,:,:,:,irpt2) = ifc_tmp%ewald_atmfrc(:,:,:,:,irpt)
-          end if
-        end do
-      end do
+!  if (has_totFC .and. in_file_option==1) then   !
+!    !   print *, '   >>>>>                HAS TOTAL FC'
+!    !     ! Copy LR into total_atmfrc
+!      do irpt=1,ifc_tmp%nrpt ! LR IRPT
+!        do irpt2=1, full_nrpt
+!          if(  ifc_tmp%cell(1,irpt)==full_cell(1,irpt2).and.&
+!    &           ifc_tmp%cell(2,irpt)==full_cell(2,irpt2).and.&
+!    &           ifc_tmp%cell(3,irpt)==full_cell(3,irpt2) ) then
+!            ! full_cell_atmfrc(:,:,:,:,irpt2) = ifc_tmp%ewald_atmfrc(:,:,:,:,irpt)
+!            full_cell_ewald_atmfrc(:,:,:,:,irpt2) = ifc_tmp%ewald_atmfrc(:,:,:,:,irpt)
+!          end if
+!        end do
+!      end do
 
-      ! Copy total FC into total_atmfrc
-      do irpt=1,eff_pot%harmonics_terms%ifcs%nrpt ! SR IRPT
-        do irpt2=1, full_nrpt
-        if(  eff_pot%harmonics_terms%ifcs%cell(1,irpt)==full_cell(1,irpt2).and.&
-    &         eff_pot%harmonics_terms%ifcs%cell(2,irpt)==full_cell(2,irpt2).and.&
-    &         eff_pot%harmonics_terms%ifcs%cell(3,irpt)==full_cell(3,irpt2) ) then
-            full_cell_atmfrc(:,:,:,:,irpt2) = eff_pot%harmonics_terms%ifcs%atmfrc(:,:,:,:,irpt)
-            if(any(abs(eff_pot%harmonics_terms%ifcs%atmfrc(:,:,:,:,irpt) - full_cell_ewald_atmfrc(:,:,:,:,irpt2)) > tol8))then
-                   full_cell_short_atmfrc(:,:,:,:,irpt2) = eff_pot%harmonics_terms%ifcs%atmfrc(:,:,:,:,irpt) - full_cell_ewald_atmfrc(:,:,:,:,irpt2)
-            end if
-          end if
-        end do
-      end do
-  else
+!      ! Copy total FC into total_atmfrc
+!      do irpt=1,eff_pot%harmonics_terms%ifcs%nrpt ! SR IRPT
+!        do irpt2=1, full_nrpt
+!        if(  eff_pot%harmonics_terms%ifcs%cell(1,irpt)==full_cell(1,irpt2).and.&
+!    &         eff_pot%harmonics_terms%ifcs%cell(2,irpt)==full_cell(2,irpt2).and.&
+!    &         eff_pot%harmonics_terms%ifcs%cell(3,irpt)==full_cell(3,irpt2) ) then
+!            full_cell_atmfrc(:,:,:,:,irpt2) = eff_pot%harmonics_terms%ifcs%atmfrc(:,:,:,:,irpt)
+!            if(any(abs(eff_pot%harmonics_terms%ifcs%atmfrc(:,:,:,:,irpt) - full_cell_ewald_atmfrc(:,:,:,:,irpt2)) > tol8))then
+!                   full_cell_short_atmfrc(:,:,:,:,irpt2) = eff_pot%harmonics_terms%ifcs%atmfrc(:,:,:,:,irpt) - full_cell_ewald_atmfrc(:,:,:,:,irpt2)
+!            end if
+!          end if
+!        end do
+!      end do
+!  else
       ! Copy LR into total_atmfrc
       do irpt=1,ifc_tmp%nrpt ! LR IRPT
         do irpt2=1, full_nrpt
@@ -1081,7 +1081,7 @@ end if
           end if
         end do
       end do
-   end if
+ !  end if
 
 !  Count the rpt inferior to the tolerance
    irpt2 = 0

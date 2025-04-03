@@ -668,8 +668,6 @@ contains
           call polynomial_coeff_list_free(coeffs_tmp)
           ncoeff_tot = ncoeff_tot_tmp
           ABI_MALLOC(coeffs_tmp,(my_ncoeff))
-          !FIXME: on on bot EOZ: the coeffs_tmp has larger size than coeffs_iatom.
-          ! This is a bug.
           !if(allocated(coeffs_iatom)) then
           call coeffs_list_copy(coeffs_tmp,coeffs_iatom)
           call polynomial_coeff_list_free(coeffs_iatom)
@@ -689,9 +687,8 @@ contains
       !call coeffs_list_reduce_duplicate(coeffs_tmp, eff_pot%crystal, sc_size, fit_iatom_in, cutoff , power_disps(2))
       my_ncoeff = size(coeffs_tmp)
       if (fit_iatom_all .and. iam_master) then
-        write(message, '(2a,I6,a)' ) ch10, &
-        &    ' fit_iatom = -2 : The total number of coefficients for all atoms are', &
-        &    ncoeff_tot,ch10
+        ! FIXME: this does not compile on alpa intel 2025 elpa!
+        write(message, '(2a,I6,a)') ch10,' fit_iatom = -2 : The total number of coefficients for all atoms are', ncoeff_tot,ch10
         call wrtout(std_out,message,'COLL')
         call wrtout(ab_out,message,'COLL')
       end if
