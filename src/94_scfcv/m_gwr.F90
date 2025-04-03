@@ -3664,8 +3664,8 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
                if (from_space == W_SPACE .and. any(my_it == [1, gwr%my_ntau])) then
                !if (from_space == TAU_SPACE .and. any(my_it == [1, gwr%my_ntau])) then
                  !print * "beta_r, alpha:", beta_r(ig1,idat), alpha_c(ig1,idat)
-                 write(*, "(a,i3,1x, *(es12.5,2x))") "my_it abs_diff_1", my_it,  abs(cval - mats(itau)%buffer_cplx(ig1, ig2+idat-1)), &
-                    cval, mats(itau)%buffer_cplx(ig1, ig2+idat-1)
+                 !write(*, "(a,i3,1x, *(es12.5,2x))") "my_it abs_diff_1", my_it,  abs(cval - mats(itau)%buffer_cplx(ig1, ig2+idat-1)), &
+                 !   cval, mats(itau)%buffer_cplx(ig1, ig2+idat-1)
                end if
              end if
              cwork_myit(my_it, ig1, idat) = mats(itau)%buffer_cplx(ig1, ig2+idat-1) - cval
@@ -5973,7 +5973,7 @@ end if
        even_t = (cvals_pmt(1,:) + cvals_pmt(2,:)) / two; odd_t = (cvals_pmt(1,:) - cvals_pmt(2,:)) / two
        gwr%sigc_iw_mat(:, band, band2, ikcalc, spin) = matmul(gwr%cosft_wt, even_t) + j_dpc * matmul(gwr%sinft_wt, odd_t)
        end associate
-     end do
+     end do ! band2
 
      ! NB: e0 is always set to the KS energy even in case of self-consistency.
      e0 = gwr%ks_ebands%eig(band, ik_ibz, spin)

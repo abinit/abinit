@@ -8,6 +8,7 @@ include "gwr_include.abi"
 # Dataset 3: G0W0 with GWR code
 ################################
 optdriver  6                          # Activate GWR code
+ecutwfn    10                         # Truncate basis set when computing G.
 gwr_task "G0W0"                       # One-shot calculation
 getden_filepath "tgwr_1o_DS1_DEN"     # Density file
 getwfk_filepath "tgwr_2o_DS2_WFK"     # WFK file with empty states.
@@ -20,7 +21,7 @@ nshiftk 1
 shiftk  0.0 0.0 0.0
 
 gwr_ntau   12        # Number of imaginary-time points
-gwr_boxcutmin  1.1   # This should be subject to convergence studies
+gwr_boxcutmin  1.0  # This should be subject to convergence studies
 gwr_sigma_algo 2     # Use convolutions in the BZ for Sigma
 
 nband      250      # Bands to be used in the screening calculation

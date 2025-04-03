@@ -1,5 +1,4 @@
-ecut 10.0         # Maximal kinetic energy cut-off, in Hartree
-                  # NB: Too small. Use ~16 for production
+ecut 16.0        # Maximal kinetic energy cut-off, in Hartree
 
 # Definition of the unit cell: fcc
 acell  3*10.26         # Experimental lattice constants in Bohr

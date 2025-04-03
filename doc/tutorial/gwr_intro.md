@@ -120,11 +120,17 @@ with $\Theta$ the Heaviside step-function, and
 
 In these notes, we use $\rr$ to indicate points in the unit cell, and $\RR$ to denote points in the supercell.
 
-IF Fourier space, one obtains:
+In Fourier space, one obtains:
+
+\begin{equation}
+\Gove_\kk(\bg, \bg', i\tau) =
+-\sum_n^{\text{unocc}} u_\nk(\bg) u_\nk^*(\bg') e^{-\ee_\nk\tau}
+\qquad (\tau > 0)
+\end{equation}
 
 These matrices are stored in memory for the entire duration of the calculation.
 The $\gg, \gg'$ components are distributed inside the `g` level of [[gwr_np_kgts]].
-Only the $\kk$-points in the IBZ are stored in memory and distributed inside the k-level
+Only the $\kk$-points in the IBZ are stored in memory and distributed inside the $\kk$-level
 as the code can use symmetries to reconstruct the Green's function in the full on-the-fly.
 Finally, the $\tau$ points are distributed inside the `t` level and collinear spins are distributed inside the `s` level.
 
@@ -160,13 +166,7 @@ The irreducible polarizability is computed in the real-space supercell using
 \chi(\rr,\RR', i\tau) = G(\rr, \RR', i\tau) G^*(\rr, \RR', -i\tau)
 \end{equation}
 
-and then immediately transformed to Fourier space.
-
-\begin{equation}
-\chi_\kk(\bg, \bg') =
-\sum_{\rr\in\mcC} e^{-i(\kk+\bg)\rr} \chi(\rr, \GG' = \kk+\bg')
-\end{equation}
-
+and then immediately transformed to Fourier space to obtain $\chi_\qq(\bg, \bg', i\tau)$.
 The cutoff energy for the polarizability is given by [[ecuteps]].
 This is an important parameter that should be subject to convergence studies.
 Only the $\qq$-points in the IBZ are stored in memory and distributed inside the k-level of [[gwr_np_kgts]].
@@ -225,6 +225,35 @@ is expressed in terms of convolutions in the BZ according to:
 \end{equation}
 
 where $G_\qq(\rr,\rr')$ and $W_\qq(\rr,\rr')$ are now quantities defined in the unit cell.
+Let us compute the RPA polarizabilty in real space using the mixed-space approach (the time dependence is not shown for the sake of simplicity)
+
+\begin{equation}
+G(\rr,\rr',i\tau) =
+\sum_\kk e^{i\kk(\rr-\rr')}
+{\tilde G}_\kk(\rr,\rr',i\tau)
+\end{equation}
+
+\begin{equation}
+\chi(\rr,\rr',i\tau) =
+\sum_\kk e^{i\kk(\rr - \rr')} {\tilde G}_\kk(\rr,\rr',i\tau)
+\sum_{\kk'} e^{i\kk'(\rr' - \rr)} {\tilde G}_{\kk'}(\rr',\rr,-i\tau) =
+\sum_\kk
+{\tilde G}_{\kq}(\rr,\rr',i\tau)
+{\tilde G}_\kk(\rr',\rr,-i\tau)
+\end{equation}
+
+hence
+
+\begin{equation}
+\tilde \chi_\qq(\rr, \rr',i\tau) =
+\sum_\kk
+{\tilde G}_{\kq}(\rr,\rr',i\tau)
+{\tilde G}_\kk(\rr',\rr,-i\tau)
+\end{equation}
+
+The advantage is that FFTs are performed in the unit cell and symmetries are easier to exploit.
+The disadvantage is that products in real space become convolutions in $\kk$-space, hence the computation of $\chi$ is quadratic in
+the number of $\kk$-points with a prefactor that depends on the symmetries of the system.
 
 The advantage of this formulation is that one can take advantage of the symmetries of the system
 to reduce the BZ integration to the irreducible wedge defined by the little group of the $\kk$ point in $\Sigma_\nk$.
@@ -291,11 +320,11 @@ the number of MPI processes for \tau-parallelism.
 
 <!--
 TODO: Additional trick to be tested/documented in more detail:
-    [[gwr_ucsc_batch]]
-    [[gwr_rpa_ncut]]
-    [[gwr_boxcutmin]]
-    [[gwr_max_hwtene]]
-    [[gwr_regterm]]
+[[gwr_ucsc_batch]]
+[[gwr_rpa_ncut]]
+[[gwr_boxcutmin]]
+[[gwr_max_hwtene]]
+[[gwr_regterm]]
 -->
 
 ### Requirements
