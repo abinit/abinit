@@ -30,10 +30,9 @@ prt_GF_csv = 1
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = multibinit
-#%% need_cpp_vars = HAVE_NETCDF
+#%% need_cpp_vars = HAVE_NETCDF !HAVE_GPU
 #%% input_ddb = t103_ddb.in
 #%% md_hist = t103_HIST
-#%% need_cpp_vars = !HAVE_GPU
 #%% [files]
 #%% files_to_test = 
 #%%   t103.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
