@@ -952,10 +952,9 @@ subroutine dfptlw_out(blkflg_car,d3etot_car,lw_flexo,lw_qdrpl,lw_natopt,mpert,na
      end do
      write(ab_out,*)' '
    end do
-   ABI_FREE(qdrp)
 
    write(ab_out,'(a)')' Electronic (clamped-ion) contribution to the piezoelectric tensor,'
-   write(ab_out,'(a)')' in cartesian coordinates, (from sum rule of dynamic quadrupoles or P^1 tensor)'
+   write(ab_out,'(a)')' in cartesian coordinates, (from sum rule of P^1 tensor)'
    write(ab_out,'(a)')' efidir   atdir    qgrdir        real part           imaginary part'
    do i3dir=1,3
      do i1dir=1,3
@@ -974,6 +973,34 @@ subroutine dfptlw_out(blkflg_car,d3etot_car,lw_flexo,lw_qdrpl,lw_natopt,mpert,na
      end do
      write(ab_out,*)' '
    end do
+
+   write(ab_out,'(a)')' Electronic (clamped-ion) contribution to the piezoelectric tensor,'
+   write(ab_out,'(a)')' in cartesian coordinates, (from sum rule of dynamic quadrupoles)'
+   write(ab_out,'(a)')' efidir   atdir    qgrdir        real part           imaginary part'
+   do i3dir=1,3
+     do i1dir=1,3
+       do i2dir=1,3
+         piezoci=zero
+         do i2pert=1,natom
+           if (blkflg_car(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1.and. &
+               blkflg_car(i1dir,i1pert,i3dir,i2pert,i2dir,i3pert)==1.and. &
+               blkflg_car(i2dir,i1pert,i1dir,i2pert,i3dir,i3pert)==1) then
+             piezoci(1)=piezoci(1)+qdrp(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) &
+           &                      +qdrp(1,i1dir,i1pert,i3dir,i2pert,i2dir,i3pert) &
+           &                      -qdrp(1,i2dir,i1pert,i1dir,i2pert,i3dir,i3pert)
+             piezoci(2)=piezoci(2)+qdrp(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) &
+           &                      +qdrp(2,i1dir,i1pert,i3dir,i2pert,i2dir,i3pert) &
+           &                      -qdrp(2,i2dir,i1pert,i1dir,i2pert,i3dir,i3pert)
+           end if
+         end do
+         piezoci(1)=-piezoci(1)/(two*ucvol)
+         piezoci(2)=-piezoci(2)/(two*ucvol)
+         write(ab_out,'(3(i5,3x),2(1x,f20.10))') i1dir,i2dir,i3dir,piezoci(1),piezoci(2)
+       end do
+     end do
+     write(ab_out,*)' '
+   end do
+   ABI_FREE(qdrp)
  end if
 
  if (lw_flexo==2.or.lw_flexo==1) then
