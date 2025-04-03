@@ -136,7 +136,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  integer :: gscase,iatom,ierr,indx,ireadwf0,iscf_eff,itypat
  integer :: ider,idir0,idir
  integer :: i1dir,i1pert,i2dir,ii,i2pert,i3dir,i3pert
- integer :: mcg,mgfftf,natom,nfftf,nfftot,nfftotf,nhatdim,nhatgrdim
+ integer :: me,mcg,mgfftf,natom,nfftf,nfftot,nfftotf,nhatdim,nhatgrdim
 ! integer :: isym
  integer :: mpert,my_natom,n1,nkxc,nk3xc,ntypat,n3xccc,nylmgr
  integer :: optatm,optdyfr,opteltfr,optgr,optstr,optv,optn,optn2
@@ -222,6 +222,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 !Init spaceworld
  spaceworld=mpi_enreg%comm_cell
  my_natom=mpi_enreg%my_natom
+ me = xmpi_comm_rank(spaceworld)
 
 !Define FFT grid(s) sizes (be careful !)
 !See NOTES in the comments at the beginning of this file.
@@ -755,16 +756,17 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 
  call ddb%write_txt(ddb_hdr, dtfil%fnameabo_ddb)
 
+ call ddb_hdr%free()
+ call ddb%free()
 
  !Calculate spatial-dispersion quantities in Cartesian coordinates and write
  !them in abi_out
  ABI_MALLOC(blkflg_car,(3,mpert,3,mpert,3,mpert))
  ABI_MALLOC(d3etot_car,(2,3,mpert,3,mpert,3,mpert))
  call lwcart(blkflg,blkflg_car,d3etot,d3etot_car,gprimd,mpert,natom,rprimd)
- call dfptlw_out(blkflg_car,d3etot_car,dtset%lw_flexo,dtset%lw_qdrpl,dtset%lw_natopt,mpert,natom,ucvol)
-
- call ddb_hdr%free()
- call ddb%free()
+ if (me==0) then
+   call dfptlw_out(blkflg_car,d3etot_car,dtset%lw_flexo,dtset%lw_qdrpl,dtset%lw_natopt,mpert,natom,ucvol)
+ end if
 
 !Deallocate arrays
  ABI_FREE(atindx)
