@@ -88,7 +88,7 @@ module m_dfpt_scfcv
  use m_mkcore,         only : dfpt_mkcore
  use m_spacepar,   only : hartrestr, make_vectornd, symrhg
 
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU_MARKERS)
  use m_nvtx_data
 #endif
 

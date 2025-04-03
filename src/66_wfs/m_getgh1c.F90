@@ -51,7 +51,7 @@ module m_getgh1c
  use, intrinsic :: iso_c_binding, only : c_ptr,c_loc,c_size_t
 #endif
 
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU_MARKERS)
  use m_nvtx_data
 #endif
 
