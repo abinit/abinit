@@ -24,6 +24,7 @@ analyze_anh_pot = 1
 #%% system_xml = t98_model.xml
 #%% test_set = t98.nc
 #%% test_chain = t98.abi, t99.abi, t100.abi
+#%% need_cpp_vars = !HAVE_GPU
 #%% [files]
 #%% files_to_test = 
 #%%   t98.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
