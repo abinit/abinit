@@ -3640,9 +3640,7 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
               else
                 ABI_ERROR(sjoin("Invalid from_space:", itoa(from_space)))
               end if
-              !if (from_space == W_SPACE) then
-              !print *, "my_it, alpha, beta", alpha_c(ig1,idat), beta_r(ig1,idat)
-              !end if
+              !if (from_space == W_SPACE) print *, "my_it, alpha, beta", alpha_c(ig1,idat), beta_r(ig1,idat)
            end do ! ig1
          end do ! idat
          call xmpi_sum(alpha_c, gwr%tau_comm%value, ierr)
@@ -3663,12 +3661,12 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
                else if (from_space == W_SPACE) then
                  cval = fit_iomega_eval("func", gwr%iw_mesh(itau), alpha_c(ig1,idat), beta_r(ig1,idat))
                end if
-               !if (from_space == W_SPACE .and. my_it == 1) then
-               !if (from_space == TAU_SPACE .and. my_it == 1) then
-               !  !print * "beta_r, alpha:", beta_r(ig1,idat), alpha_c(ig1,idat)
-               !  write(*, "(a,i3,1x, *(es12.5,2x))") "my_it abs_diff_1", my_it,  abs(cval - mats(itau)%buffer_cplx(ig1, ig2+idat-1)), &
-               !     cval, mats(itau)%buffer_cplx(ig1, ig2+idat-1)
-               !end if
+               if (from_space == W_SPACE .and. any(my_it == [1, gwr%my_ntau])) then
+               !if (from_space == TAU_SPACE .and. any(my_it == [1, gwr%my_ntau])) then
+                 !print * "beta_r, alpha:", beta_r(ig1,idat), alpha_c(ig1,idat)
+                 write(*, "(a,i3,1x, *(es12.5,2x))") "my_it abs_diff_1", my_it,  abs(cval - mats(itau)%buffer_cplx(ig1, ig2+idat-1)), &
+                    cval, mats(itau)%buffer_cplx(ig1, ig2+idat-1)
+               end if
              end if
              cwork_myit(my_it, ig1, idat) = mats(itau)%buffer_cplx(ig1, ig2+idat-1) - cval
            end do
@@ -3688,6 +3686,7 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
            itau = gwr%my_itaus(my_it)
            cval = zero
            do ig1=1,mats(it0)%sizeb_local(1)
+
              if (gwr%dtset%gwr_fit /= 0) then
                ! Add Fourier transform of the fitted model.
                if (from_space == TAU_SPACE) then
@@ -3696,16 +3695,18 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
                  cval = fit_iomega_eval("ft", gwr%tau_mesh(itau), alpha_c(ig1,idat), beta_r(ig1,idat))
                end if
                !if (from_space == W_SPACE .and. my_it == 1) then
-               !if (from_space == W_SPACE) then
-               !  print *, "beta_r, alpha:", beta_r(ig1,idat), alpha_c(ig1,idat)
-               !  print *, "my_it, abs_diff_2 my_it", my_it, abs(cval - mats(itau)%buffer_cplx(ig1, ig2+idat-1)), &
+               !if (from_space == TAU_SPACE .and. my_it == 1) then
+               !  !print *, "beta_r, alpha:", beta_r(ig1,idat), alpha_c(ig1,idat)
+               !  print *, "my_it, abs_diff_2", my_it, abs(cval - mats(itau)%buffer_cplx(ig1, ig2+idat-1)), &
                !     cval - mats(itau)%buffer_cplx(ig1, ig2+idat-1)
                !end if
              end if
+             !if (from_space == TAU_SPACE) then
              !if (from_space == W_SPACE) then
              !write(200, *)"mats:", mats(itau)%buffer_cplx(ig1, ig2+idat-1)
              !write(300, *)"cval", cval
              !end if
+
              mats(itau)%buffer_cplx(ig1, ig2+idat-1) = glob_cwork(itau, ig1, idat) + cval
            end do ! ig1
          end do ! my_it
@@ -3758,7 +3759,6 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
  end if
 
  call cwtime_report(" gwr_cos_transform:", cpu, wall, gflops)
- !stop "hello"
 
 end subroutine gwr_cos_transform
 !!***
@@ -3834,7 +3834,9 @@ pure complex(dp) function fit_tau_exp_eval(what, xx, alpha_c, beta_r) result(cva
    cval = alpha_c * exp(-beta_r * xx)
  case ("ft")
    ! \mathcal{F}\{A e^{-b |t|} \}(\omega) = \frac{2A b}{b^2 + \omega^2}
-   cval = (two * alpha_c * beta_r) / (beta_r**2 + xx**2)
+   !cval = (two * alpha_c * beta_r) / (beta_r**2 + xx**2)
+   ! Cosine-transform.
+   cval = (alpha_c * two * beta_r) / (beta_r**2 + xx**2)
  case default
    cval = huge(one)
  end select
@@ -3895,8 +3897,7 @@ subroutine fit_iomega(ntau, iw_mesh, iw_wgs, cvals, alpha_c, beta_r)
    cfit(:) = my_alpha_c / (b2 + iw_mesh**2)
    loss = sum(iw_wgs * abs(cvals - cfit)**2)
    if (loss < min_loss) then
-     min_loss = loss
-     alpha_c = my_alpha_c; beta_r = sqrt(b2)
+     min_loss = loss; alpha_c = my_alpha_c; beta_r = sqrt(b2)
    end if
  end do
 
@@ -3940,8 +3941,10 @@ pure complex(dp) function fit_iomega_eval(what, xx, alpha_c, beta_r) result(cval
    if (alpha_c /= zero) then
      !cval = alpha_c * exp(-beta_r * abs(xx))
      ! TODO: check sign in prefactor
-     cval = (alpha_c / (two * beta_r)) * exp(-beta_r * abs(xx))
+     !cval = (alpha_c / (two * beta_r)) * exp(-beta_r * abs(xx))
      !cval = - (alpha_c / (two * beta_r)) * exp(-beta_r * abs(xx))
+     ! Cosine-transform
+     cval = (alpha_c / (two * beta_r)) * exp(-beta_r * abs(xx))
    end if
 
  case default

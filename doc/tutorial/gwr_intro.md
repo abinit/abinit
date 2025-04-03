@@ -235,11 +235,8 @@ as the convolutions in the BZ lead to quadratic scaling with the number of $\kk$
 
 The input variable [[gwr_sigma_algo]] allows one to select the algorithm to be used.
 [[gwr_chi_algo]] has a similar meaning but only for the polarizability .
-<!--
-but this option is seldom used
-as it makese the computation of the polarizability much slower although it requires less memory as
-only two-point functions in the unit cell need to be stored.
--->
+This option renders the computation of the polarizability slower although it requires less memory
+as only two-point functions in the unit cell need to be stored.
 
 ## Self-consistency with GWR
 
@@ -309,7 +306,8 @@ we **strongly** recommend to use vendor-optimized FFT libraries such as MKL-DFTI
 of the internal FFT version shipped with ABINIT ([[fftalg]] should be 312 or 512, this is done automatically
 if an external FFT library is found by the build system).
 
-If you are using MKL, the configuration is relatively simple as MKL provides all the required libraries.
+If you are using the MKL library by intel, the configuration is relatively easy
+as MKL provides all the required libraries.
 An example of `.ac` configuration file is reported below:
 
 ```
