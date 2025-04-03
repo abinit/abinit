@@ -5,9 +5,9 @@ include "gwr_include.abi"
 
 # Generate 3 WFK files with increased BZ sampling.
 ndtset 3
-ngkpt1   2 2 2
-ngkpt2   4 4 4
-ngkpt3   6 6 6
+ngkpt1 2 2 2
+ngkpt2 4 4 4
+ngkpt3 6 6 6
 
 # Definition of the k-point grid
 # IMPORTANT: GWR requires Gamma-centered k-meshes
@@ -19,7 +19,7 @@ shiftk  0.0 0.0 0.0
 ###########################################
 optdriver  6                         # Activate GWR code
 gwr_task "HDIAGO"                    # Direct diagonalization
-nband     300                        # Number of (occ + empty) bands
+nband     400                        # Number of (occ + empty) bands
 getden_filepath "tgwr_1o_DS1_DEN"    # Density file used to build H[n]
 
 #%%<BEGIN TEST_INFO>

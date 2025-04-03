@@ -411,25 +411,25 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
          call wrtout(iout,msg)
          call wrtout(std_out,  msg)
          write(msg, '(a,i4,2a,i4,2a,f8.2,4a)' )&
-          ' This is not allowed : cellcharge is allowed to vary only when imgmov=6 and occopt=0 or 2.',ch10,&
+          ' This is not allowed: cellcharge is allowed to vary only when imgmov=6 and occopt=0 or 2.',ch10,&
           ' Action: check the content of the input variables cellcharge, imgmov anf occopt.'
          ABI_ERROR_NOSTOP(msg, ierr)
        end if
      end do
    end if
 
-!  chebfi_oracle : must be 0,1,2
+!  chebfi_oracle: must be 0,1,2
    call chkint_eq(0,0,cond_string,cond_values,ierr,'chebfi_oracle',dt%chebfi_oracle,3,(/0,1,2/),iout)
    if (dt%gpu_option/=ABI_GPU_DISABLED) then ! At present (v10.2.2), chebfi oracle is not available with GPU
      cond_string(1)='gpu_option' ; cond_values(1)=dt%gpu_option
      call chkint_eq(1,1,cond_string,cond_values,ierr,'chebfi_oracle',dt%chebfi_oracle,1,(/0/),iout)
    end if
 
-!  oracle_factor : must be > 1e-30 and below 1
+!  oracle_factor: must be > 1e-30 and below 1
    call chkdpr(0,0,cond_string,cond_values,ierr,'oracle_factor',dt%oracle_factor,1,tol30,iout)
    call chkdpr(0,0,cond_string,cond_values,ierr,'oracle_factor',dt%oracle_factor,-1,0.99_dp,iout)
 
-!  oracle_min_occ : must be > 1e-10 and below 1
+!  oracle_min_occ: must be > 1e-10 and below 1
    call chkdpr(0,0,cond_string,cond_values,ierr,'oracle_min_occ',dt%oracle_factor,1,tol10,iout)
    call chkdpr(0,0,cond_string,cond_values,ierr,'oracle_min_occ',dt%oracle_factor,-1,0.99_dp,iout)
 
@@ -482,7 +482,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
          write(msg, '(8a,i4,2a,9i3,2a,3es20.10,11a)' ) ch10,&
           ' chkinp: ERROR -',ch10,&
           '   Chksymtnons=1 or 3 . Found potentially symmetry-breaking value of tnons, ', ch10,&
-          '   which is neither a rational fraction in 1/8th nor in 1/12th (1/9th and 1/10th are tolerated also) :', ch10,&
+          '   which is neither a rational fraction in 1/8th nor in 1/12th (1/9th and 1/10th are tolerated also):', ch10,&
           '   for the symmetry number ',mismatch_fft_tnons,ch10,&
           '   symrel is ',dt%symrel(1:3,1:3,mismatch_fft_tnons),ch10,&
           '   tnons is ',dt%tnons(1:3,mismatch_fft_tnons),ch10,&
@@ -491,7 +491,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
           '   If you are planning cDFT, GW or BSE calculations, such tnons value is very problematic.',ch10,&
           '   Otherwise, you might set chksymtnons=0.',&
           '   But do not be surprised if ABINIT does not converge for cDFT, or crashes for GW or BSE.',ch10,&
-          '   Better solution : you might shift your atomic positions to better align the FFT grid and the symmetry axes.'
+          '   Better solution: you might shift your atomic positions to better align the FFT grid and the symmetry axes.'
          call wrtout(std_out,msg)
          if(fixed_mismatch==1)then
            call flush_unit(std_out)
@@ -1359,7 +1359,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 !     end if
 !    if (dt%optdriver==RUNL_GSTATE.and.mod(dt%wfoptalg,10)/=4) then
 !    write(msg,'(6a)') ch10,&
-!    &       ' chkinp : ERROR -',ch10,&
+!    &       ' chkinp: ERROR -',ch10,&
 !    &       '  When GPU is in use (gpu_option>0), wfoptalg must be 4 or 14 !',ch10,&
 !    &       '  Action: change wfoptalg in your input file.'
 !    call wrtout(std_out,msg)
@@ -2080,7 +2080,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
          sumalch=sum(dt%mixalch_orig(:,itypat,iimage))
          if(abs(sumalch-one)>tol10)then
            if(dt%npspalch<=6)then
-             write(msg, '(2a,6es12.4)' )ch10,' chkinp : mixalch(:,itypat,iimage)=',dt%mixalch_orig(:,itypat,iimage)
+             write(msg, '(2a,6es12.4)' )ch10,' chkinp: mixalch(:,itypat,iimage)=',dt%mixalch_orig(:,itypat,iimage)
            end if
            call wrtout(iout,msg)
            call wrtout(std_out,  msg)
@@ -2101,7 +2101,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    if(dt%imgmov==6)then
      summix=sum(dt%mixesimgf(1:dt%nimage))
      if(abs(summix-one)>tol10)then
-       write(msg, '(2a,20es12.4)' )ch10,' chkinp : mixesimgf(1:dt%nimage)=',dt%mixesimgf(1:dt%nimage)
+       write(msg, '(2a,20es12.4)' )ch10,' chkinp: mixesimgf(1:dt%nimage)=',dt%mixesimgf(1:dt%nimage)
        call wrtout(iout,msg)
        call wrtout(std_out,  msg)
        write(msg, '(a,es12.4,4a)' )&
@@ -2135,8 +2135,8 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
          write(msg, '(5a,i4,a,2i5,a)' )&
           'the number of bands in the spin up case must be equal to',ch10,&
           'the number of bands in the spin down case.',ch10,&
-          'This is not the case for the k point number :',ikpt,&
-          'The number of bands spin up and down are :',dt%nband(ikpt),dt%nband(ikpt+nkpt),&
+          'This is not the case for the k point number:',ikpt,&
+          'The number of bands spin up and down are:',dt%nband(ikpt),dt%nband(ikpt+nkpt),&
           'Action: change nband, or use the sequential version of ABINIT.'
          ABI_ERROR_NOSTOP(msg, ierr)
        end if
@@ -3693,7 +3693,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
          write(msg, '(a,i3,a,i3,a,a,a,a,a)' )&
          'so_psp(',ipsp,' ) was input as ',dt%so_psp(ipsp),' .',ch10,&
          'Input value must be 0, 1, 2, or 3.',ch10,&
-         'Action: modify value of so_psp (old name : so_typat) in input file.'
+         'Action: modify value of so_psp (old name: so_typat) in input file.'
          ABI_ERROR_NOSTOP(msg, ierr)
        end if
 !      If nspinor=1, the spin-orbit contribution cannot be taken into account
@@ -3701,7 +3701,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
          write(msg, '(a,i2,a,i3,a,a,a,a,a)' )&
          'so_psp(',ipsp,') was input as ',dt%so_psp(ipsp),', with nspinor=1 and usepaw=0.',ch10,&
          'When nspinor=1, so_psp cannot be required to be 2 or 3.',ch10,&
-         'Action: modify value of so_psp (old name : so_typat) or nspinor in input file.'
+         'Action: modify value of so_psp (old name: so_typat) or nspinor in input file.'
          ABI_ERROR_NOSTOP(msg, ierr)
        end if
 !      If nspinor=2, the spin-orbit contribution should be present in the pseudopotentials,
@@ -3712,7 +3712,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
          'This requires a treatment of the spin-orbit interaction. However, it has been detected ',ch10,&
          'that the pseudopotential that you want to use does not specify the spin-orbit coupling.',ch10,&
          'Action: choose a pseudopotential that contains information about the spin-orbit interaction,',ch10,&
-         ' or deliberately switch off the spin-orbit interaction by setting so_psp=0 for that pseudopotential in the input file.'
+         'or deliberately switch off the spin-orbit interaction by setting so_psp=0 for that pseudopotential in the input file.'
          ABI_ERROR_NOSTOP(msg, ierr)
        end if
      end do ! ipsp
@@ -3749,7 +3749,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
        'spinmagntarget was input as ',dt%spinmagntarget,ch10,&
        'For a response function run, spinmagntarget is required to be 0.0d0 or the default value.',ch10,&
        'A spin-polarized response function calculation for a ferromagnetic insulator needs occopt=0, 1 or 2',ch10,&
-       '  the default value of spinmagntarget, and explicit definition of occ. ',ch10,&
+       'the default value of spinmagntarget, and explicit definition of occ. ',ch10,&
        'Action: modify spinmagntarget, occopt or nsppol in your input file.'
        ABI_ERROR_NOSTOP(msg, ierr)
      end if
@@ -3758,7 +3758,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
        'spinmagntarget was input as ',dt%spinmagntarget,ch10,&
        'When prtdos==1, spinmagntarget is required to be 0.0d0 or the default value.',ch10,&
        'A spin-polarized DOS calculation for a ferromagnetic insulator needs occopt=0, 1 or 2',ch10,&
-       '  the default value of spinmagntarget, and explicit definition of occ.',ch10,&
+       'the default value of spinmagntarget, and explicit definition of occ.',ch10,&
        'Action: modify spinmagntarget, occopt or nsppol in your input file.'
        ABI_ERROR_NOSTOP(msg, ierr)
      end if
@@ -3766,18 +3766,18 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 !  If nsppol==2 and spinmagntarget==0.0 , suggest to use anti-ferromagnetic capability of ABINIT.
    if(nsppol==2.and.abs(dt%spinmagntarget)<tol8)then
      write(msg,'(a,i3,2a,f7.2,6a)' )&
-     ' This is a calculation with spin-up and spin-down wavefunctions,         ... nsppol=',nsppol,ch10,&
-     ' in which the target spin-polarization is zero.                  ... spinmagntarget=',dt%spinmagntarget,ch10,&
-     ' Tip ... It might be possible that the ground state is either non-spin-polarized, or antiferromagnetic.',ch10,&
+     ' This is a calculation with spin-up and spin-down wavefunctions, ... nsppol=',nsppol,ch10,&
+     ' in which the target spin-polarization is zero. ... spinmagntarget=',dt%spinmagntarget,ch10,&
+     ' Tip: It might be possible that the ground state is either non-spin-polarized, or antiferromagnetic.',ch10,&
      ' In the former case, it is advantageous to use nsppol=1 and nspden=1,',ch10,&
-     ' while in the latter  case, it is advantageous to use nsppol=1 and nspden=2.'
+     ' while in the latter case, it is advantageous to use nsppol=1 and nspden=2.'
      call wrtout(iout,msg)
    end if
 
 !  stmbias
    cond_string(1)='prtstm' ; cond_values(1)=dt%prtstm
    if(dt%prtstm/=0)then
-!    If non-zero prtstm, stmbias cannot be zero : test is positive or zero
+!    If non-zero prtstm, stmbias cannot be zero: test is positive or zero
      if(dt%stmbias>-tol10)then
 !      Then, enforce positive
        call chkdpr(1,1,cond_string,cond_values,ierr,'stmbias',dt%stmbias,1,2*tol10,iout)
@@ -3972,7 +3972,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 !  The following test is only a way to practically prevent the usage of mGGA with nspden=4 (not allowed yet),
 !  while allowing to have usekden=1 with nspden=4. Indeed, while mGGA is not allowed for the non-collinear case,
 !  the computation of the kinetic energy density in the non-collinear spin case is working, and there are tests of this ...
-!  What should be done : modify the definition of xclevel, to index differently GGAs and mGGAs, etc, and test on xclevel instead of usekden.
+!  What should be done: modify the definition of xclevel, to index differently GGAs and mGGAs, etc, and test on xclevel instead of usekden.
    if(dt%nspden==4 .and. dt%prtkden==0)then
      cond_string(1)='nspden' ; cond_values(1)=dt%nspden
      cond_string(1)='prtkden' ; cond_values(2)=dt%prtkden
@@ -4032,7 +4032,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      end if
    end if
 
-!  usepawu and response : q must be zero
+!  usepawu and response: q must be zero
    if(dt%usepawu/=0.and.response==1) then
      cond_string(1)='usepawu' ; cond_values(1)=dt%usepawu
      call chkdpr(1,1,cond_string,cond_values,ierr,'norm(qpt)',sum(dt%qptn(:)**2),0,zero,iout)
@@ -4126,7 +4126,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 &         dt%ixc/=19.and.dt%ixc/=-106132.and.dt%ixc/=-132106.and. &
 &         dt%ixc/=-202231.and.dt%ixc/=-231202) then
          write(msg,'(8a)') ch10,&
-&         ' chkinp : ERROR -',ch10,&
+&         ' chkinp: ERROR -',ch10,&
 &         '  Van der Waals DFT-D2 correction (vdw_xc=5) only available for the following XC functionals:',ch10,&
 &         '      GGA-PBE, GGA-BLYP, GGA-BP86, mGGA-TPSS',ch10,&
 &         '  Action: change your pseudopotential file.'
@@ -4137,7 +4137,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
        do itypat=1,dt%ntypat
          if (dt%znucl(itypat)<0.or.dt%znucl(itypat)>54) then
            write(msg,'(4a,f5.1,a)') ch10,&
-           ' chkinp : ERROR -',ch10,&
+           ' chkinp: ERROR -',ch10,&
            '  Van der Waals DFT-D2 correction (vdw_xc=5) not available for atom type Z=',dt%znucl(itypat),' !'
            call wrtout(std_out,msg)
            ierr=ierr+1
@@ -4154,7 +4154,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 &         dt%ixc/=14.and.dt%ixc/=-102130.and.dt%ixc/=-130102.and. &
 &         dt%ixc/=-170.and.dt%ixc/=41.and.dt%ixc/=-406) then
          write(msg,'(4a,i2,5a)') ch10,&
-&         ' chkinp : ERROR -',ch10,&
+&         ' chkinp: ERROR -',ch10,&
 &         '  Van der Waals DFT-D correction (vdw_xc=',dt%vdw_xc,') only available for the following XC functionals:',ch10,&
 &         '      GGA-PBE, GGA-BLYP, GGA-BP86, mGGA-TPSS, GGA-RevPBE, PBE0',ch10,&
 &         '  Action: change your pseudopotential file.'
@@ -4165,7 +4165,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
        do itypat=1,dt%ntypat
          if (dt%znucl(itypat)<0.or.dt%znucl(itypat)>96) then
            write(msg,'(4a,i2,1a,f5.1,a)') ch10,&
-&           ' chkinp : ERROR -',ch10,&
+&           ' chkinp: ERROR -',ch10,&
 &           '  Van der Waals DFT-D correction (vdw_xc=',dt%vdw_xc,') not available for atom type Z=',dt%znucl(itypat),' !'
            call wrtout(std_out,msg)
            ierr=ierr+1
