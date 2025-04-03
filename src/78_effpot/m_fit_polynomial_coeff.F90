@@ -209,6 +209,8 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  master = 0
  nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
  iam_master = (my_rank == master)
+
+
  call initialize_parameters()
  call copy_eff_pot_to_eff_pot_fixed()
  ncopy_terms = 0
@@ -1091,6 +1093,7 @@ contains
     ABI_MALLOC(list_coeffs,(ncoeff_to_fit))
     ABI_MALLOC(fcart_coeffs_tmp,(3,natom_sc,ncoeff_to_fit,ntime))
     ABI_MALLOC(strten_coeffs_tmp,(6,ntime,ncoeff_to_fit))
+    ABI_MALLOC(weights, (ntime))
     list_coeffs  = 0
 
 
@@ -2887,8 +2890,7 @@ subroutine get_weight_from_hist(hist, temperature, ntime, natom, weights, comm)
   master = 0
   my_rank = xmpi_comm_rank(comm)
   iam_master = (my_rank == master)
-
-  ABI_MALLOC(weights,(ntime))
+  ABI_MALLOC(weights, (ntime))  
   weights=1.0_dp
 
   ! compute average forces for each time step
