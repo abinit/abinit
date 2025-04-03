@@ -31,7 +31,7 @@ module m_fit_polynomial_coeff
  use m_atomdata
  use m_xmpi
  use m_supercell
- use m_fstrings, only : itoa
+ use m_fstrings, only : itoa, ftoa
 
  use m_hashtable_strval, only: hash_table_t
  use m_mergesort, only: mergesort
@@ -1490,13 +1490,9 @@ contains
          singular_coeffs(icoeff) = 1
          write(message, '(a)') ' The matrix is singular...'
          if(need_prt_GF_csv)then
-           write(message2, '(I7.7,10a)') my_coeffindexes(icoeff),",", &
-!&                                   gf_values(4,icoeff)*factor*(1000*Ha_ev)**2,",",&
-&                                   trim(my_coeffs(icoeff)%name),",",&
-&                                  "None",",",&
-             & "None",",",&
-             & "None",",",&
-             & "None"
+           message2 = itoa(my_coeffindexes(icoeff)) // "," // &
+               trim(my_coeffs(icoeff)%name) // "," // &
+               "None,None,None,None"
          endif
        end if
        if(need_verbose)then
