@@ -1440,7 +1440,7 @@ subroutine print_rta_txt_files(self, cryst, dtset, dtfil)
 !************************************************************************
 
  units = [std_out, ab_out]
- call wrtout(units, ch10//' Transport (RTA) calculation results:', newlines=1)
+ call wrtout(units, ch10//' Transport (RTA) calculation results, chemical potential adjusted with T:', newlines=1)
  components = ["xx", "yy", "zz"]
 
  do irta=1,self%nrta
@@ -1472,35 +1472,35 @@ subroutine print_rta_txt_files(self, cryst, dtset, dtfil)
 
    else
      ! Metals. Print conductivity (spin resolved) and resistivity (no spin resolved)
-     do ii=1,2
-       if (ii == 1) msg = sjoin(" Conductivity [Siemens cm^-1] using ", rta_type, "approximation")
-       if (ii == 2) msg = sjoin(" Resistivity [micro-Ohm cm] using ", rta_type, "approximation")
-       call wrtout(units, msg)
-
-       nsp = self%nsppol; if (ii == 2) nsp = 1
-       do spin=1,nsp
-         if (nsp == 2) call wrtout(units, sjoin(" For spin:", stoa(spin)), newlines=1)
-         write(msg, "(4a16)") 'Temperature (K)', 'xx', 'yy', 'zz'
-         call wrtout(units, msg)
-         do itemp=1,self%ntemp
-           if (ii == 1) then
-             mat33 = self%conductivity(:,:,itemp,spin,irta)
-           else
-             mat33 = self%resistivity(:,:,itemp,irta)
-           end if
-           write(msg,"(f16.2,3e16.6)") self%kTmesh(itemp) / kb_HaK, mat33(1,1), mat33(2,2), mat33(3,3)
-           call wrtout(units, msg)
-         end do !itemp
-       end do !spin
-       call wrtout(units, ch10)
-     end do
+!    do ii=1,2
+!      if (ii == 1) msg = sjoin(" Conductivity [Siemens cm^-1] using ", rta_type, "approximation")
+!      if (ii == 2) msg = sjoin(" Resistivity [micro-Ohm cm] using ", rta_type, "approximation")
+!      call wrtout(units, msg)
+!
+!      nsp = self%nsppol; if (ii == 2) nsp = 1
+!      do spin=1,nsp
+!        if (nsp == 2) call wrtout(units, sjoin(" For spin:", stoa(spin)), newlines=1)
+!        write(msg, "(4a16)") 'Temperature (K)', 'xx', 'yy', 'zz'
+!        call wrtout(units, msg)
+!        do itemp=1,self%ntemp
+!          if (ii == 1) then
+!            mat33 = self%conductivity(:,:,itemp,spin,irta)
+!          else
+!            mat33 = self%resistivity(:,:,itemp,irta)
+!          end if
+!          write(msg,"(f16.2,3e16.6)") self%kTmesh(itemp) / kb_HaK, mat33(1,1), mat33(2,2), mat33(3,3)
+!          call wrtout(units, msg)
+!        end do !itemp
+!      end do !spin
+!      call wrtout(units, ch10)
+!    end do
         
      !For coefficients calculated at exact mu (i.e for mu calculated at exact temp.): 
      !TODO: do the same for SM and thus mobility
 
      do ii=1,2
-       if (ii == 1) msg = sjoin(" Conductivity_mu [Siemens cm^-1] using ", rta_type, "approximation")
-       if (ii == 2) msg = sjoin(" Resistivity_mu [micro-Ohm cm] using ", rta_type, "approximation")
+       if (ii == 1) msg = sjoin(" Conductivity [Siemens cm^-1] using ", rta_type, "approximation")
+       if (ii == 2) msg = sjoin(" Resistivity [micro-Ohm cm] using ", rta_type, "approximation")
        call wrtout(units, msg)
 
        do itemp=1, self%ntemp
@@ -1523,7 +1523,7 @@ subroutine print_rta_txt_files(self, cryst, dtset, dtfil)
      end do
    end if
      
-   msg = " Seebeck_mu [Volts / Kelvin] (at correct mu)"
+   msg = " Seebeck [Volts / Kelvin] using ", rta_type, "approximation"
    call wrtout(units, msg)
    do itemp=1, self%ntemp
      !TODO : what is the following line? Resets 0 Kelvin to 1 Kelvin minimum T??? a bit arbitrary. Should handle T=0 more cleanly
@@ -1541,7 +1541,7 @@ subroutine print_rta_txt_files(self, cryst, dtset, dtfil)
    end do !itemp
    call wrtout(units, ch10)
 
-   msg = " Kappa_mu [W/m*K] (at correct mu)"
+   msg = " Kappa [W/m*K] using ", rta_type, "approximation"
    call wrtout(units, msg)
    do itemp=1, self%ntemp
      TKelv = self%kTmesh(itemp) / kb_HaK; if (TKelv < one) Tkelv = one
@@ -1558,7 +1558,7 @@ subroutine print_rta_txt_files(self, cryst, dtset, dtfil)
    end do !itemp
    call wrtout(units, ch10)
    
-   msg = " Peltier [Volts] (at correct mu)"
+   msg = " Peltier [Volts] using ", rta_type, "approximation"
    call wrtout(units, msg)
    do itemp=1, self%ntemp
      TKelv = self%kTmesh(itemp) / kb_HaK; if (TKelv < one) Tkelv = one
@@ -2445,17 +2445,18 @@ sig_p=sig_p*(siemens_SI / Bohr_meter / cryst%ucvol) / 100
      end do ! spin
      call wrtout(units, ch10)
 
-     msg = "Carriers density: "
+     msg = "Carrier density: "
      call wrtout(units, msg)
-       write(msg, "(a16,a32)") 'Temperature [K]', 'e/h density [cm^-3]'
+       write(msg, "(a16,a16,a32)") 'Temperature [K]', ' chem pot [eV]  ', 'e/h density [cm^-3]'
        call wrtout(units, msg)
 
        do spin=1,ibte%nsppol
          if (ibte%nsppol == 2) call wrtout(units, sjoin(" For spin:", stoa(spin)), newlines=1)
 
          do itemp=1,ibte%ntemp
-           write(msg,"(f16.2,2e16.2)") &
+           write(msg,"(f16.2,3e16.2)") &
              ibte%kTmesh(itemp) / kb_HaK, &
+             ibte%eph_mu_e * eV_Ha
              ibte%n_ehst(1, spin, itemp) / cryst%ucvol / Bohr_cm **3, &
              ibte%n_ehst(2, spin, itemp) / cryst%ucvol / Bohr_cm **3
            call wrtout(units, msg)
