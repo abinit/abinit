@@ -877,6 +877,7 @@ subroutine dfptlw_typeIproc(blkflg,gprimd,optgeom,mpert,natom,rfpert,rprimd,t_ty
  integer,save :: idx(18)=(/1,1,2,2,3,3,3,2,3,1,2,1,2,3,1,3,1,2/)
  integer :: flg1(3),flg2(3)
  real(dp) :: vec1(3),vec2(3)
+ real(dp) :: rprimd_t(3,3),gprimd_t(3,3)
 
 ! *************************************************************************
 
@@ -948,6 +949,8 @@ subroutine dfptlw_typeIproc(blkflg,gprimd,optgeom,mpert,natom,rfpert,rprimd,t_ty
 
  fac=two_pi ** 2
  i3pert= natom+8
+ rprimd_t=transpose(rprimd)
+ gprimd_t=transpose(gprimd)
  do i1pert = 1, mpert
    do i1dir = 1, 3
      if ((maxval(rfpert(i1dir,i1pert,:,:,:,:))==1)) then
@@ -971,7 +974,7 @@ subroutine dfptlw_typeIproc(blkflg,gprimd,optgeom,mpert,natom,rfpert,rprimd,t_ty
                vec1(i3dir)=t_typeII(ii,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
                flg1(i3dir)=blkflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
              end do
-             call cart39(flg1,flg2,transpose(rprimd),natom+2,natom,transpose(gprimd),vec1,vec2)
+             call cart39(flg1,flg2,rprimd_t,natom+2,natom,gprimd_t,vec1,vec2)
              do i3dir=1,3
                t_typeII(ii,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)=vec2(i3dir)*fac
              end do
