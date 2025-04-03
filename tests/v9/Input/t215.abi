@@ -34,7 +34,7 @@ efield_phase2 1.570
 #%% max_nprocs = 4
 #%% [extra_info]
 #%% authors = F. Gomez-Ortiz
-#%% keywords = Electric fields, multibinit
+#%% keywords =  multibinit
 #%% description = 
 #%%        New implementation of electric fields in Multibinit
 #%% topics = ElectricFields, LatticeModels
