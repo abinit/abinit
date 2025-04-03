@@ -66,9 +66,8 @@ If you open the include file:
 
 you will notice that we are using norm-conserving (NC) pseudos taken from
 the standard scalar-relativistic table of the [PseudoDojo](https://www.pseudo-dojo.org/).
-For efficiency reasons, these examples use underconverged parameters:
-the cutoff energy [[ecut]] is set to 10 Ha that is smaller
-than the recommended value reported in the PseudoDojo table (16 Ha).
+and the recommended value for [[ecut]] reported in the PseudoDojo table (16 Ha, normal hint).
+
 
 !!! important
 
@@ -142,7 +141,7 @@ in conjunction with [[autoparal]] 1 to allow ABINIT to determine an optimal dist
 in particular the band parallelism that is not available when the CG eigensolver is used.
 <!--
 Note also that we suggest disabling the FFT parallelization by using [[npfft]] 1.
-to 1 to enable k-point, band, and FFT parallelization,
+to 1 to enable $\kk$-point, band, and FFT parallelization,
 and [[autoparal]] to 1 to allow ABINIT to determine an optimal distribution, with [[npfft]] fixed at 1.
 -->
 
@@ -217,7 +216,7 @@ To use the iterative eigenvalue solver:
 
 # optdriver  6                         # Activate GWR code
 # gwr_task "HDIAGO"                    # Direct diagonalization
- nband     1000                       # Number of (occ + empty) bands
+ nband     1000                        # Number of (occ + empty) bands
  iscf -2
  nbdbuf -10
  tolwfr 1e-20
