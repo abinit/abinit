@@ -449,7 +449,7 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
   if(present(print_anh))then
     if(print_anh) need_print_anh = .True.
   endif
-
+  my_weights(:) = 0.0_dp
   call get_weight_from_hist(hist, fit_weight_T, ntime, natom_sc, my_weights, comm )
 
   ABI_MALLOC(symbols,(eff_pot%crystal%natom))
@@ -668,14 +668,9 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
     if (temp_cntr>0) then
       do icombi=1,temp_cntr
         ! Copy all the terms in eff pot
-        ! Get new name of term and set new terms to potential
-        !write(*,*) 'ndisp of term', my_coeffs(nterm_start+icombi)%nterm
-        !write(*,*) 'and wath is nterm_start', nterm_start,'and icomb btw', icomb
-        !write(std_out,*) 'get name in main bound'
         call polynomial_coeff_getName(name, &
           & my_coeffs(nterm_start+icombi),symbols,recompute=.TRUE.)
         call polynomial_coeff_SetName(name,my_coeffs(nterm_start+icombi))
-
 
         ! Set dimensions of temporary my_coeffs array
         nterm2 = eff_pot%anharmonics_terms%ncoeff + 1
@@ -739,8 +734,8 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
         if(iterm>nterm)then
           ! MS 2006 Decomment for old style optimization
           call fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,&
-                    &                                           natom_sc,ntime,fit_data%training_set%sqomega,comm,&
-                    &                                           compute_anharmonic=.TRUE.,print_file=.FALSE., weights=my_weights)
+                    &   natom_sc,ntime,fit_data%training_set%sqomega,comm,&
+                    &   compute_anharmonic=.TRUE.,print_file=.FALSE., weights=my_weights)
           i = 0
           write(message,'(a,I2,a,ES24.16)') "cycle ", i ," (msef+mses)/(msef_ini+mses_ini): ", (msef+mses)/(msef_ini+mses_ini)
           call wrtout(std_out,message,'COLL')
@@ -781,12 +776,12 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
             eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient = &
               &                eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient/ 2**(i-1)
             call fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,&
-              &                                              natom_sc,ntime,fit_data%training_set%sqomega,comm,&
-              &                                              compute_anharmonic=.TRUE.,print_file=.FALSE.)
+              &                natom_sc,ntime,fit_data%training_set%sqomega,comm,&
+              &                compute_anharmonic=.TRUE.,print_file=.FALSE.)
             GF_arr(i) =  (bound_factors(1)*bound_EFS(1)*mse+bound_factors(2)*bound_EFS(2)*msef&
-              &                             +bound_factors(3)*bound_EFS(3)*mses) / &
-              &                             (bound_factors(1)*bound_EFS(1)*mse_ini+bound_factors(2)*bound_EFS(2)*msef_ini&
-              &                             +bound_factors(3)*bound_EFS(3)*mses_ini)
+              &                +bound_factors(3)*bound_EFS(3)*mses) / &
+              &                (bound_factors(1)*bound_EFS(1)*mse_ini+bound_factors(2)*bound_EFS(2)*msef_ini&
+              &                +bound_factors(3)*bound_EFS(3)*mses_ini)
             write(message,'(a,I2,a,ES24.16)') "cycle ",i," GF/GF_ini: ",GF_arr(i)
             call wrtout(std_out,message,'COLL')
             write(message,'(a,I2,a,ES24.16)') "cycle ", i ," GF: ",(bound_factors(1)*bound_EFS(1)*mse&
@@ -879,6 +874,7 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
   !DEALLOCATION
   ABI_FREE(symbols)
   ABI_FREE(terms)
+  ABI_FREE(my_weights)
 
   !ABI_FREE(my_coeffs)
   call fit_data_free(fit_data)
@@ -1426,7 +1422,7 @@ subroutine opt_getHOstrain(terms,ncombi,nterm_start,eff_pot,power_strain,comm, m
   !scalars
   integer ::  nterm_tot_tmp
   integer :: i,ii
-  !integer :: nbody, ref_nbody
+  integer :: nbody, ref_nbody
   real(dp) :: coeff_ini
   !reals
   type(crystal_t) :: crystal
@@ -1828,13 +1824,6 @@ subroutine opt_getSingleDispTerms(terms,crystal, sc_size,comm)
           enddo!iterm1
         enddo!iterm2
         ncopy = count(terms_to_copy)
-        !         write(std_out,*) "ncopy", ncopy
-        !         write(std_out,*) "behind iatom>1"
-        !
-        !         write(std_out,*) "ncoeff_out: ", size(terms_tmp2)
-        !         do ii=1,size(terms_tmp2)
-        !           write(*,*) "Term(",ii,"/",size(terms_tmp2),"): ", terms_tmp2(ii)%name
-        !         enddo
         call polynomial_coeff_list_free(terms)
         ABI_MALLOC(terms,(nterm1+ncopy))
         call coeffs_list_copy(terms(:nterm1),terms_tmp2)
@@ -2035,11 +2024,14 @@ function opt_boundcoeff(yvalues,cvalues,penalty_in) result (coeff)
   !write(*,*) "b", b
   penalty = penalty_in - 1
   coeff_tmp = -b/(2*a)
+  !write(*,*) "coeff_tmp", coeff_tmp
   if(coeff_tmp > 0)then
     coeff = coeff_tmp
-  else
+  elseif(coeff_tmp <= 0)then
     x1 = (-b + sqrt(b**2 + 4*a*penalty)) / (2*a) ! 1.001 penalty value
     x2 = (-b - sqrt(b**2 + 4*a*penalty)) / (2*a)
+    !write(*,*) "x1", x1
+    !write(*,*) "x2", x2
     if(x1>0)then
       coeff = x1
     else

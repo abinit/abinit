@@ -247,7 +247,7 @@ subroutine polynomial_coeff_init(coefficient,nterm,polynomial_coeff,terms,name, 
  character(*), optional :: debug_str
 ! *************************************************************************
 !First free before initilisation
- call polynomial_coeff_free(polynomial_coeff)
+ !call polynomial_coeff_free(polynomial_coeff)
  check_in = .false.
  if(present(check)) check_in = check
 
@@ -358,13 +358,20 @@ subroutine polynomial_coeff_free(polynomial_coeff)
 
 !if(trim(polynomial_coeff%debug_str) == "uninitialized") then
 !  ABI_WARNING("Polynomial coeff: is freed before initialization")
-!else if (trim(polynomial_coeff%debug_str) == "freed") then
-!  ABI_WARNING("Polynomial coeff: is freed twice")
+!else 
+!if (trim(polynomial_coeff%debug_str) == "freed") then
+!  print *, "- Polynomial coeff: ", trim(polynomial_coeff%debug_str), " ->freed"
+  !ABI_ERROR("Polynomial coeff: is freed twice")
+!endif
 !else
 !  print *, "- Polynomial coeff: ", trim(polynomial_coeff%debug_str), " ->freed"
 ! end if
+! if debug_str starts with freed
+if(trim(polynomial_coeff%debug_str(1:5)) == "freed") then
+    print *, "- Polynomial coeff: ", trim(polynomial_coeff%debug_str), " ->freed"
+end if
 
- polynomial_coeff%debug_str = "freed"
+ polynomial_coeff%debug_str = "freed "//polynomial_coeff%debug_str
 
 end subroutine polynomial_coeff_free
 !!***
@@ -4307,6 +4314,8 @@ subroutine coeffs_list_append(coeff_list,coeff, check)
      &                                 coeff%name, check=check)
   
    coeff_list(n2)%debug_str = "copied from" // trim(coeff%debug_str)
+   call polynomial_coeff_list_free(tmp)
+   ABI_SFREE(tmp)
   end if
     
 end subroutine coeffs_list_append
@@ -4929,6 +4938,14 @@ subroutine polynomial_coeff_final(self)
   call polynomial_coeff_free(self)
 end subroutine polynomial_coeff_final
 !!***
+
+subroutine starts_with(str, prefix, result)
+  character(len=*), intent(in) :: str
+  character(len=*), intent(in) :: prefix
+  logical, intent(out) :: result
+  result = str(1:len(prefix)) == prefix
+end subroutine starts_with
+
 
 end module m_polynomial_coeff
 !!***
