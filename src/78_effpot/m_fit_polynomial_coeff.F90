@@ -210,12 +210,12 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
  iam_master = (my_rank == master)
 
- #if defined FC_INTEL
+#if defined FC_INTEL
     if (iam_master) then
       write(message,'(3a)') ch10,' This part of code does not compile with intel IFX compiler'
       ABI_ERROR(message)
     end if
- #else
+#else
  call initialize_parameters()
  call copy_eff_pot_to_eff_pot_fixed()
  ncopy_terms = 0
@@ -1319,11 +1319,11 @@ contains
     !  &               gf_values(2,1)*(HaBohr_eVAng)**2,ch10,&
     !  &                    '   Stresses        : ',&
     !  &               gf_values(3,1)*(HaBohr_eVAng)**2,ch10
-    message = ' Weighted Goal function values at the begining of the fit process (eV^2/A^2):'
-    message = trim(message) // '   Energy          : ' // trim(ftoa(gf_values(4,1)*(HaBohr_eVAng)**2))
-    message = trim(message) // '   Forces+Stresses : ' // trim(ftoa(gf_values(1,1)*(HaBohr_eVAng)**2))
-    message = trim(message) // '   Forces          : ' // trim(ftoa(gf_values(2,1)*(HaBohr_eVAng)**2))
-    message = trim(message) // '   Stresses        : ' // trim(ftoa(gf_values(3,1)*(HaBohr_eVAng)**2))
+    message = ' Goal function values at the begining of the fit process (eV^2/A^2):'//ch10
+    message = trim(message) // '   Energy          : ' // trim(ftoa(gf_values(4,1)*(HaBohr_eVAng)**2))//ch10
+    message = trim(message) // '   Forces+Stresses : ' // trim(ftoa(gf_values(1,1)*(HaBohr_eVAng)**2))//ch10
+    message = trim(message) // '   Forces          : ' // trim(ftoa(gf_values(2,1)*(HaBohr_eVAng)**2))//ch10
+    message = trim(message) // '   Stresses        : ' // trim(ftoa(gf_values(3,1)*(HaBohr_eVAng)**2))//ch10
     if(need_verbose)then
       call wrtout(ab_out,message,'COLL')
       call wrtout(std_out,message,'COLL')
@@ -1396,7 +1396,7 @@ contains
        call wrtout(std_out,message,'COLL')
        if(ncoeff_selected>0 .or. any(list_coeffs(:) > zero))then
          !write(message, '(3a)') ' The coefficient numbers from the previous cycle are:',ch10,' ['
-         message = ' The coefficient numbers from the previous cycle are: ['
+         message = ' The coefficient numbers from the previous cycle are:' // ch10 // ' ['
          do ii=1,ncoeff_selected
            if(ii<ncoeff_selected)then
              !write(message, '(a,I0,a)') trim(message),list_coeffs(ii),','
