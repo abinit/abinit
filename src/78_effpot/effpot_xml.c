@@ -528,7 +528,8 @@ void effpot_xml_readSystem(char *filename,int *natom,int *ntypat,int *nrpt,int *
         for(mu=0;mu<3;mu++){
           for(ib=0;ib<*natom;ib++){
             for(nu=0;nu<3;nu++){
-              atmfrc[i][ib][nu][ia][mu]=local_atmfrc[i][ib][nu][ia][mu];
+              //atmfrc[i][ib][nu][ia][mu]=local_atmfrc[i][ib][nu][ia][mu];
+              atmfrc[i][ib][nu][ia][mu]=0.0;
               short_atmfrc[i][ib][nu][ia][mu]=local_atmfrc[i][ib][nu][ia][mu];
               ewald_atmfrc[i][ib][nu][ia][mu]=0.0;
             }
@@ -550,7 +551,8 @@ void effpot_xml_readSystem(char *filename,int *natom,int *ntypat,int *nrpt,int *
             for(nu=0;nu<3;nu++){
               atmfrc[i][ib][nu][ia][mu]=total_atmfrc[i][ib][nu][ia][mu];
               short_atmfrc[i][ib][nu][ia][mu]=0.0;
-              ewald_atmfrc[i][ib][nu][ia][mu]=total_atmfrc[i][ib][nu][ia][mu];
+              //ewald_atmfrc[i][ib][nu][ia][mu]=total_atmfrc[i][ib][nu][ia][mu];
+              ewald_atmfrc[i][ib][nu][ia][mu]=0.0;
             }
           }
         }
