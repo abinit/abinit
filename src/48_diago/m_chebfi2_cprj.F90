@@ -1075,9 +1075,9 @@ subroutine chebfi_set_ndeg_from_residu(chebfi,lambda_minus,lambda_plus,occ,DivRe
 
  occ_reshaped = occ
  shift=xmpi_comm_rank(chebfi%spacecom)*bandpp
- call xgBlock_reshape(occ_reshaped,(/ 1, chebfi%neigenpairs /))
+ call xgBlock_reshape(occ_reshaped,1,chebfi%neigenpairs)
  call xgBlock_setBlock(occ_reshaped,occBlock,1,bandpp,fcol=1+shift)
- call xgBlock_reshape(occBlock,(/ bandpp, 1 /))
+ call xgBlock_reshape(occBlock,bandpp,1)
  if (chebfi%nbdbuf==-101) then
    call xgBlock_apply_diag(residu%self,occBlock,1)
  end if

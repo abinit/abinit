@@ -3916,7 +3916,8 @@ forall(ii=1:3)identity(ii,ii)=1
      mat_def(alpha(jj),beta(jj)) = mat_def(alpha(jj),beta(jj)) + half * strain(jj)
      mat_def(beta(jj),alpha(jj)) = mat_def(beta(jj),alpha(jj)) + half * strain(jj)
 
-     rprimd_def =  matmul(identity(:,:)+mat_def(:,:),rprimd)
+     mat_def = mat_def + identity
+     rprimd_def =  matmul(mat_def,rprimd)
 
 ! The two options should give the same result
 ! Option 1 => compute the disps and provide them to evaluate
