@@ -4183,27 +4183,32 @@ function coeffs_list_conc(coeff_list1,coeff_list2) result (coeff_list_out)
  if(ncoeff_out/= size(coeff_list_out))then
    ABI_ERROR("coeff_list_out should be allocated with the size of coeff_list1+coeff_list2")
   endif
+
+
+  if (.not. allocated(coeff_list1(i)%terms)) then
+    ABI_ERROR("copying coeff_list1(i) but coeff_list1(i)%terms is not allocated")
+  endif
+
  do i=1,ncoeff_out
     if(i<=ncoeff1)then
       call polynomial_coeff_init(coeff_list1(i)%coefficient,coeff_list1(i)%nterm,coeff_list_out(i),coeff_list1(i)%terms,&
         &                                 coeff_list1(i)%name, check=.TRUE.)
-      if (trim(coeff_list1(i)%debug_str)=="unintialized" &
-      & .or. trim(coeff_list1(i)%debug_str)=="freed") then
-        ABI_ERROR("coeff_list1(i) is uninitialized or freed")
-      else
-        coeff_list_out(i)%debug_str = "copied from" // trim(coeff_list1(i)%debug_str)
-      end if
-
+      !if (trim(coeff_list1(i)%debug_str)=="unintialized" &
+      !& .or. trim(coeff_list1(i)%debug_str)=="freed") then
+      !  ABI_ERROR("coeff_list1(i) is uninitialized or freed")
+      !else
+      !  coeff_list_out(i)%debug_str = "copied from" // trim(coeff_list1(i)%debug_str)
+      !end if
     else
        j=i-ncoeff1
        call polynomial_coeff_init(coeff_list2(j)%coefficient,coeff_list2(j)%nterm,coeff_list_out(i),coeff_list2(j)%terms,&
          &                                 coeff_list2(j)%name,check=.TRUE.)
-      if (trim(coeff_list2(j)%debug_str)=="unintialized" &
-      & .or. trim(coeff_list2(j)%debug_str)=="freed") then
-        ABI_ERROR("coeff_list2(j) is uninitialized or freed")
-      else
-        coeff_list_out(i)%debug_str = "copied from" // trim(coeff_list2(j)%debug_str)
-      end if
+      !if (trim(coeff_list2(j)%debug_str)=="unintialized" &
+      !& .or. trim(coeff_list2(j)%debug_str)=="freed") then
+      !  ABI_ERROR("coeff_list2(j) is uninitialized or freed")
+      !else
+      !  coeff_list_out(i)%debug_str = "copied from" // trim(coeff_list2(j)%debug_str)
+      !end if
     endif
  enddo
 
@@ -4298,7 +4303,7 @@ subroutine coeffs_list_append(coeff_list,coeff, check)
     ABI_MALLOC(coeff_list,(n2))
     call polynomial_coeff_init(coeff%coefficient,coeff%nterm,coeff_list(1),coeff%terms,&
       &                                 coeff%name, check=check)
-   coeff_list(n2)%debug_str = "copied from" // trim(coeff%debug_str)
+   !coeff_list(n2)%debug_str = "copied from" // trim(coeff%debug_str)
   else
    n1=size(coeff_list)
    n2= n1+1
@@ -4314,7 +4319,7 @@ subroutine coeffs_list_append(coeff_list,coeff, check)
    call polynomial_coeff_init(coeff%coefficient,coeff%nterm,coeff_list(n2),coeff%terms,&
      &                                 coeff%name, check=check)
 
-   coeff_list(n2)%debug_str = "copied from" // trim(coeff%debug_str)
+   !coeff_list(n2)%debug_str = "copied from" // trim(coeff%debug_str)
    call polynomial_coeff_list_free(tmp)
    ABI_SFREE(tmp)
   end if
@@ -4413,8 +4418,8 @@ subroutine coeffs_list_reduce_duplicate(self, crystal, sc_size, fit_iatom_in, cu
   ABI_MALLOC(tmp,( size(self)))
   do i=1, size(self)
      call polynomial_coeff_init(self(i)%coefficient,self(i)%nterm,tmp(i),self(i)%terms,&
-      &                self(i)%name, check=.True., &
-      &                debug_str = trim(self(i)%debug_str))
+      &                self(i)%name, check=.True. &
+    )
   end do
 
 
@@ -4425,8 +4430,8 @@ subroutine coeffs_list_reduce_duplicate(self, crystal, sc_size, fit_iatom_in, cu
     if(mask(i)) then
       counter =counter +1
       call polynomial_coeff_init(tmp(i)%coefficient,tmp(i)%nterm,self(counter),tmp(i)%terms,&
-        &                                 tmp(i)%name, check=.True., &
-        &                                debug_str = trim(tmp(i)%debug_str))
+        &                                 tmp(i)%name, check=.True. &
+      )
     end if
   end do
   call polynomial_coeff_list_free(tmp)
@@ -4476,14 +4481,10 @@ subroutine coeffs_list_copy(coeff_list_out,coeff_list_in)
  endif
 
  do ii=1,ncoeff_in
-    if(trim(coeff_list_in(ii)%debug_str) == "uninitialized") then
-      ABI_ERROR("copying from uninitialized coeff_list_in")
-    endif
 
     if(.not. allocated(coeff_list_in(ii)%terms)) then
       ABI_BUG("terms for copy is not allocated.")
     endif
-
      call polynomial_coeff_init(coeff_list_in(ii)%coefficient,coeff_list_in(ii)%nterm,&
        &                             coeff_list_out(ii),coeff_list_in(ii)%terms, &
        &                             coeff_list_in(ii)%name, check)
