@@ -4109,6 +4109,104 @@ subroutine divide_init(divide,X0,rrquo)
 
 end subroutine divide_init
 
+
+! IML 04/04/2025
+! [under construction]
+! Prototype for slice constructor from column overlapping buffer
+! distributed in columns. This routine fills slice workspaces
+! with needed data. Does not perform any actual computations.
+! It assumes that Xexpanded_colsrows has already been constructed
+! in the global stage, by transposing using *all* MPI processes.
+! After the transposition each MPI process contains the correct
+! bandpp corresponding to the slice so that no additional communication
+! has to be performed in order to bring band slices to MPIs.
+
+subroutine slice_constructor(slice,Xexpanded_colsrows,spacecom,nrowsLinalg,ncolsColsRows)
+
+    ! Arguments
+    type(slice_t), intent(inout) :: slice
+    type(xgBlock_t), intent(inout) :: Xexpanded_colsrows
+    integer, pointer, intent(in) :: nrowsLinalg(:)
+    integer, pointer, intent(in) :: ncolsColsRows(:)
+
+    ! Local variables
+    integer :: nrows,ncols,spacecom
+    integer :: slice_color,my_rank,slice_comm,ierr
+    integer, target, allocatable :: custom_rows(:)
+    integer, target, allocatable :: custom_rows_sub(:)
+    integer, pointer :: custom_rows_ptr(:) => null()
+    integer, pointer :: custom_rows_sub_ptr(:) => null()
+
+    ! *******
+
+    call xgBlock_getSize(Xexpanded_colsrows,nrows,ncols)
+    spacecom = comm(xgBlock_colsrows)
+    my_rank = xmpi_comm_rank(spacecom)
+
+    ! color MPI processes with the slice TODO automatize for arbitrary number of slices
+    slice_color = -1
+    if (my_rank==0) slice_color=0
+    if (my_rank==1) slice_color=1
+    if (my_rank==2) slice_color=1
+    if (my_rank==3) slice_color=1
+
+    ! slice colsrows workspace points to *existing* column range of expanded X
+    call xgBlock_setBlock(Xexpanded_ColsRows,slice%xXColsRows,rows=nrows,cols=ncols)
+   
+    ! Split global communicator so that only procs with the same color communicate
+    call xmpi_comm_split(spacecom,slice_color,my_rank,slice_comm,ierr)
+
+    call xgBlock_setComm(slice%xXColsRows,slice_comm) ! colsrows representation
+    call xgBlock_setComm(slice%X,slice_comm) ! linalg representation
+
+    ! compute distribution of plane waves in the subcommunicator
+    ABI_MALLOC(custom_rows_sub,(xmpi_comm_size(slice_comm)))
+    custom_rows_sub_ptr => custom_rows_sub
+
+    ! FIXME automatize, need a rule to divide 192 to three parts
+    ! target for maximal charge balance
+    if (my_rank==0) then
+        custom_rows_sub(1) = sum(custom_rows)
+    else
+        custom_rows_sub(1) = 1296 
+        custom_rows_sub(2) = 1296 
+        custom_rows_sub(3) = 1295 ! last has less than other two
+        ! this is observed in the default distribution
+    end if
+
+    ! Create slice transposer using subcommunicator
+    call xgTransposer_constructor(slice%xgTransposerX,slice%X,slice%xXsubColsRows,nspinor,&
+        STATE_COLSROWS,TRANS_ALL2ALL,chebfi%comm_rows,slice_comm,0,0,chebfi%me_g0_fft,&
+        gpu_option=chebfi%gpu_option,gpu_thread_limit=chebfi%gpu_thread_limit,&
+        nrowsLinalg_sub=custom_rows_sub_ptr)
+
+    ! TODO add same for AX and BX ..
+
+    ! This body should not be in the construction but in slice_run
+    ! ===============
+    ! 1) perform polynomial filtering (requires colsrows state)
+    ! 2) prepare linalg state for Rayleigh-Ritz
+    call xgTransposer_transpose(slice%xgTransposerX,STATE_LINALG)
+    ! 3) perform Rayleigh-Ritz (requires linalg state)
+    !    after that we DON'T NEED to do xgBlock_copy(slice%X,X0)
+    ! 4) prepare colsrows state 
+    call xgTransposer_transpose(slice%xgTransposerX,STATE_COLSROWS)
+    ! 5) [copy slice result to Xexpanded (assumes colsrows distribution)]
+    !    Attention I don't think that this is needed because we used the
+    !    pointer as a workspace in order to avoid allocating new memory.
+    !    Notice that this is possible due to the fact that Xexpanded
+    !    has repeating columns that are safe to be processed independently
+    !    by different MPIs in parallel.
+    ! ===============
+
+    ! Free memory
+    if (allocated(custom_rows)) ABI_FREE(custom_rows)
+    if (allocated(custom_rows_sub)) ABI_FREE(custom_rows_sub)
+    call xgTransposer_free(slice%xgTransposerX)
+
+end subroutine slice_constructor
+
+
 subroutine divide_run(divide,X0)
 
     ! define subcommunicators
