@@ -210,7 +210,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
  iam_master = (my_rank == master)
 
-#if defined FC_INTEL
+#if defined CC_INTEL_ONEAPI
     if (iam_master) then
       write(message,'(3a)') ch10,' This part of code does not compile with intel IFX compiler'
       ABI_ERROR(message)
