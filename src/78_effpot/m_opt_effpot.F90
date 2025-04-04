@@ -24,7 +24,7 @@
 #endif
 
 #include "abi_common.h"
-#include "trace.h"
+!#include "trace.h"
 
 
 module m_opt_effpot
@@ -204,7 +204,7 @@ subroutine opt_effpot(eff_pot,opt_ncoeff,opt_coeff,hist,opt_on,opt_factors,comm,
       &                            my_coeffs(ii), eff_pot%anharmonics_terms%coefficients(opt_coeff(ii))%terms, &
       &                            check=.TRUE.)
 
-      DMSG(my_coeffs(ii)%debug_str)
+      !DMSG(my_coeffs(ii)%debug_str)
 
     !Store initial values of coefficients
     coeff_init_values(ii) = eff_pot%anharmonics_terms%coefficients(opt_coeff(ii))%coefficient
@@ -557,7 +557,7 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
         ABI_MALLOC(my_coeffs,(size(eff_pot%anharmonics_terms%coefficients)))
         my_coeffs=eff_pot%anharmonics_terms%coefficients
           do icombi3=1, size(my_coeffs)
-           DMSG(my_coeffs(icombi3)%debug_str)
+           !DMSG(my_coeffs(icombi3)%debug_str)
           end do
 
         ! then add the single disp terms.
@@ -565,7 +565,7 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
           do icombi3=1,ncombi1
             if (HOsingledisp_terms(icombi3)%terms(1)%get_nbody() == nbody_term .or. bound_option/=1) then
               call coeffs_list_append(my_coeffs,HOsingledisp_terms(icombi3), check=.TRUE.)
-              DMSG(my_coeffs(icombi3)%debug_str)
+              !DMSG(my_coeffs(icombi3)%debug_str)
               ncombi1_real = ncombi1_real + 1
             endif
           end do
@@ -588,7 +588,7 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
             if (HOcrossdisp_terms(icombi3)%terms(1)%get_nbody() == nbody_term .or. bound_option/=1) then
               call coeffs_list_append(my_coeffs,HOcrossdisp_terms(icombi3), check=.TRUE.)
               ncombi2_real = ncombi2_real + 1
-              DMSG(my_coeffs(ncombi2_real)%debug_str)
+              !DMSG(my_coeffs(ncombi2_real)%debug_str)
             endif
           end do
         endif
@@ -636,7 +636,7 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
     ! generateTermsFromList(cell,index_coeff,list_coeff,list_str,ncoeff,ndisp_max,nrpt,nstr,nsym,nterm,terms)
 
 ! call the new function to get the data required to call polynomial_coeff_getList
-  
+
 
     call generate_bounding_term_and_add_to_list( sympairs, nterm_start, ncombi, my_coeffs, temp_cntr)
 
@@ -1339,14 +1339,14 @@ subroutine opt_filterdisp(term,nterm_of_term)
     terms(iterm_of_term)%nstrain = 0
     terms(iterm_of_term)%power_strain = 0
     terms(iterm_of_term)%strain = 0
-  DMSG(terms(iterm_of_term)%debug_str)
+  !DMSG(terms(iterm_of_term)%debug_str)
   enddo
 
   call polynomial_coeff_free(term)
   !Reinitial term
   !check=.TRUE. checks for duplicate terms
   call polynomial_coeff_init(coeff,nterm_of_term,term,terms, check=.TRUE.)
-  DMSG(term%debug_str)
+  !DMSG(term%debug_str)
 
 
   do iterm_of_term=1,nterm_of_term
@@ -1437,7 +1437,7 @@ subroutine opt_getHOstrain(terms,ncombi,nterm_start,eff_pot,power_strain,comm, m
       call polynomial_coeff_init(coeff_ini,eff_pot%anharmonics_terms%coefficients(i)%nterm,terms(i),&
         & eff_pot%anharmonics_terms%coefficients(i)%terms,eff_pot%anharmonics_terms%coefficients(i)%name,&
         &  check=.TRUE.)
-        DMSG(terms(i)%debug_str)
+        !DMSG(terms(i)%debug_str)
     else
       if (.not.allocated(strain_terms_tmp(i-nterm_start)%terms)) then
         write(message,'(4a)' )ch10,&
@@ -1448,7 +1448,7 @@ subroutine opt_getHOstrain(terms,ncombi,nterm_start,eff_pot,power_strain,comm, m
       call polynomial_coeff_init(coeff_ini,strain_terms_tmp(i-nterm_start)%nterm,terms(i),&
         &         strain_terms_tmp(i-nterm_start)%terms,strain_terms_tmp(i-nterm_start)%name,&
         &         check=.TRUE.)
-        DMSG(strain_terms_tmp(i-nterm_start)%debug_str)
+        !DMSG(strain_terms_tmp(i-nterm_start)%debug_str)
 endif
   enddo
 
@@ -1533,7 +1533,7 @@ subroutine opt_getHOcrossdisp(terms_out,ncombi,term_in,power_disp)
   nbody_tot = ndisp + nstrain
   nterm_of_term = term_in%nterm
   call polynomial_coeff_init(coeff_ini,nterm_of_term,term,term_in%terms,term_in%name, check=.true.)
-  DMSG(term%debug_str)
+  !DMSG(term%debug_str)
   ! Check if term has strain component.
   ! If yes filter strain and fit high order atomic displacement terms
   had_strain = .FALSE.
@@ -1599,12 +1599,12 @@ subroutine opt_getHOcrossdisp(terms_out,ncombi,term_in,power_disp)
       coeff_ini = 1 !abs(terms_out(icombi)%coefficient / 2)
       nterm_of_term = term%nterm
       call polynomial_coeff_init(coeff_ini,nterm_of_term,terms_out(icombi),term%terms, check=.true.)
-      DMSG(terms_out(icombi)%debug_str)
+      !DMSG(terms_out(icombi)%debug_str)
     else
       coeff_ini = 10d3
       nterm_of_term = term_in%nterm
       call polynomial_coeff_init(coeff_ini,nterm_of_term,terms_out(icombi),term_in%terms, check=.true.)
-      DMSG(terms_out(icombi)%debug_str)
+      !DMSG(terms_out(icombi)%debug_str)
     endif
     ! Set the power of all terms we want to add to two. We find the correct power later
     ! Change the weight of the term to 1 (even terms have allways weight=1)
@@ -1808,7 +1808,7 @@ subroutine opt_getSingleDispTerms(terms,crystal, sc_size,comm)
             ind=ind+1
             call polynomial_coeff_init(terms_tmp(i)%coefficient,terms_tmp(i)%nterm,terms(nterm1+ind),terms_tmp(i)%terms,&
               &                              terms_tmp(i)%name,check=.TRUE.)
-              DMSG(terms(nterm1+ind)%debug_str)
+              !DMSG(terms(nterm1+ind)%debug_str)
           endif
         enddo!i=1,nterm1+ncopy
         call polynomial_coeff_list_free(terms_tmp)
@@ -1912,7 +1912,7 @@ subroutine opt_getHOSingleDispTerms(term_in,terms_out,symbols,single_disp_terms,
                 !Change order of term
                 call polynomial_coeff_init(coeff_ini,nterm_of_term,terms_out_tmp(icoeff),&
                   &                                               single_disp_terms(iterm1)%terms(:),  check=.true.)
-                DMSG(terms_out_tmp(icoeff)%debug_str)
+                !DMSG(terms_out_tmp(icoeff)%debug_str)
 
                 do iterm3=1,nterm_of_term
                   terms_out_tmp(icoeff)%terms(iterm3)%power_disp = power_disp(1) + (iorder-1)*2
@@ -1951,7 +1951,7 @@ subroutine opt_getHOSingleDispTerms(term_in,terms_out,symbols,single_disp_terms,
       iterm3 = iterm3 + 1
       call polynomial_coeff_init(coeff_ini,terms_out_tmp(iterm1)%nterm,terms_out(iterm3),&
         &                                terms_out_tmp(iterm1)%terms,terms_out_tmp(iterm1)%name, check=.TRUE.)
-        DMSG(terms_out(iterm3)%debug_str)
+        !DMSG(terms_out(iterm3)%debug_str)
     endif
   enddo
   ABI_SFREE(found)
@@ -2193,7 +2193,7 @@ subroutine generate_bounding_term_and_add_to_list(sympairs, nterm_start, ncombi,
     call polynomial_coeff_init(one,nterm,temp_coeff, &
       &terms2(1:nterm), check=.true.)
     call polynomial_term_list_free(terms2)
-    DMSG(temp_coeff%debug_str)
+    !DMSG(temp_coeff%debug_str)
 
     call polynomial_coeff_getName(name, &
       & temp_coeff,sympairs%symbols,recompute=.TRUE.)
@@ -2216,7 +2216,7 @@ subroutine generate_bounding_term_and_add_to_list(sympairs, nterm_start, ncombi,
       call sympairs%generateTerms(list_disp,  tot_power, nterm, terms2, reverse=reverse)
       call polynomial_coeff_init(one,nterm, &
         & my_coeffs(nterm_start+temp_cntr),terms2, check=.true.)
-      DMSG(my_coeffs(nterm_start+temp_cntr)%debug_str)
+      !DMSG(my_coeffs(nterm_start+temp_cntr)%debug_str)
       call polynomial_term_list_free(terms2)
     end if
 
@@ -2227,7 +2227,7 @@ subroutine generate_bounding_term_and_add_to_list(sympairs, nterm_start, ncombi,
 
   call polynomial_coeff_list_free(my_coeffs_tmp)
 
-  ! truncate my_coeffs. 
+  ! truncate my_coeffs.
   call coeffs_list_truncate(my_coeffs, nterm_start+temp_cntr)
   !ABI_MALLOC(my_coeffs_tmp,(nterm_start+temp_cntr))
   !my_coeffs_tmp=my_coeffs(1:nterm_start+temp_cntr)

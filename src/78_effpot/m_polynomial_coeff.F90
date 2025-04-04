@@ -22,7 +22,7 @@
 #endif
 
 #include "abi_common.h"
-#include "trace.h"
+!#include "trace.h"
 
 
 module m_polynomial_coeff
@@ -358,7 +358,7 @@ subroutine polynomial_coeff_free(polynomial_coeff)
 
 !if(trim(polynomial_coeff%debug_str) == "uninitialized") then
 !  ABI_WARNING("Polynomial coeff: is freed before initialization")
-!else 
+!else
 !if (trim(polynomial_coeff%debug_str) == "freed") then
 !  print *, "- Polynomial coeff: ", trim(polynomial_coeff%debug_str), " ->freed"
   !ABI_ERROR("Polynomial coeff: is freed twice")
@@ -2707,7 +2707,7 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
 
 
          call polynomial_coeff_init(one,nterm,coeffs_tmp(ii),terms(1:nterm), check=.true.)
-         DMSG(coeffs_tmp(ii)%debug_str)
+         !DMSG(coeffs_tmp(ii)%debug_str)
          ABI_SFREE(reverse)
        !  Free the terms array
        do iterm=1,nterm
@@ -2867,7 +2867,7 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
              call polynomial_coeff_init(one,coeffs_tmp(my_icoeff)%nterm,coefficients(icoeff2),&
                &                                  coeffs_tmp(my_icoeff)%terms,name=name, &
                &                                  check=.false.)
-               DMSG(coefficients(icoeff2)%debug_str)
+               !DMSG(coefficients(icoeff2)%debug_str)
            else
              call polynomial_coeff_MPIsend(coeffs_tmp(my_icoeff), icoeff, rank_to_receive, comm)
            end if
@@ -2879,7 +2879,7 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
              call polynomial_coeff_MPIrecv(coefficients(icoeff2), icoeff, rank_to_send, comm)
              call polynomial_coeff_getName(name,coefficients(icoeff2),symbols,recompute=.TRUE.)
              call polynomial_coeff_SetName(name,coefficients(icoeff2))
-             DMSG(coefficients(icoeff2)%debug_str)
+             !DMSG(coefficients(icoeff2)%debug_str)
            end if
          end if
        else
@@ -2890,7 +2890,7 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
            call polynomial_coeff_init(one,coeffs_tmp(my_icoeff)%nterm,coefficients(icoeff2),&
              &                                 coeffs_tmp(my_icoeff)%terms,name=name,   &
              &                                  check=.false.)
-             DMSG(coefficients(icoeff2)%debug_str)
+             !DMSG(coefficients(icoeff2)%debug_str)
            !      Free the coefficient
            !call polynomial_coeff_free(coeffs_tmp(my_icoeff))
          end if
@@ -3115,7 +3115,7 @@ recursive subroutine computeNorder(cell,coeffs_out,compatibleCoeffs,list_coeff,l
            icoeff_tot = icoeff_tot + 1
            call polynomial_coeff_init(coefficient,iterm,coeffs_tmp(icoeff_tmp),&
 &                                     terms(1:iterm), check=.true.)
-           DMSG(coeffs_tmp(icoeff_tmp)%debug_str)
+           !DMSG(coeffs_tmp(icoeff_tmp)%debug_str)
          end if
        end if
 
@@ -3149,7 +3149,7 @@ recursive subroutine computeNorder(cell,coeffs_out,compatibleCoeffs,list_coeff,l
          call polynomial_coeff_init(one,coeffs_tmp(icoeff_tmp)%nterm,&
            &                                   coeffs_out(icoeff_tot),coeffs_tmp(icoeff_tmp)%terms,&
            &                                   name=name)
-          DMSG(coeffs_out(icoeff_tot)%debug_str)
+          !DMSG(coeffs_out(icoeff_tot)%debug_str)
        end if
      end if
    end do
@@ -3932,7 +3932,7 @@ subroutine polynomial_coeff_getOrder1(cell,coeffs_out,list_symcoeff,&
      icoeff_tmp = icoeff_tmp + 1
      call polynomial_coeff_init(coefficient,iterm,coeffs_tmp(icoeff_tmp), &
        &                       terms(1:iterm),check=.true.)
-      DMSG(coeffs_tmp(icoeff_tmp)%debug_str)
+      !DMSG(coeffs_tmp(icoeff_tmp)%debug_str)
    end if
 
 !  Deallocate the terms
@@ -3969,7 +3969,7 @@ subroutine polynomial_coeff_getOrder1(cell,coeffs_out,list_symcoeff,&
      call polynomial_coeff_init(one,coeffs_tmp(icoeff_tmp)%nterm,&
        &                               coeffs_out(icoeff),coeffs_tmp(icoeff_tmp)%terms,&
        &                               name=name)
-     DMSG(coeffs_out(icoeff)%debug_str)
+     !DMSG(coeffs_out(icoeff)%debug_str)
 
      write(message,'(2a)')' ',trim(name)
      call wrtout(std_out,message,'COLL')
@@ -4073,10 +4073,10 @@ do icoeff1=1,ncoeff_out
       !Get nbody and power for current term
       !nbody=strain_terms_tmp(icoeff1)%terms(1)%get_nbody()
       !npower=strain_terms_tmp(icoeff1)%terms(1)%get_total_power()
-      
+
       !Skip if nbody exceeds max allowed
       !if(nbody > max_nbody(npower)) cycle
-      
+
       !Check if term is duplicate of any previously added term
       is_duplicate = .false.
       ! TODO : move this to a function
@@ -4093,7 +4093,7 @@ do icoeff1=1,ncoeff_out
       if(.not. is_duplicate) then
          irred_ncoeff = irred_ncoeff + 1
          call coeffs_list_append(strain_terms, strain_terms_tmp(icoeff1), .TRUE.)
-         DMSG(strain_terms(irred_ncoeff)%debug_str)
+         !DMSG(strain_terms(irred_ncoeff)%debug_str)
       endif
    !end block
 enddo
@@ -4308,17 +4308,17 @@ subroutine coeffs_list_append(coeff_list,coeff, check)
    ! allocate new list1
    call polynomial_coeff_list_free(coeff_list)
    ABI_MALLOC(coeff_list,(n2))
-  
+
    call coeffs_list_copy(coeff_list(:n1), tmp)
-   
+
    call polynomial_coeff_init(coeff%coefficient,coeff%nterm,coeff_list(n2),coeff%terms,&
      &                                 coeff%name, check=check)
-  
+
    coeff_list(n2)%debug_str = "copied from" // trim(coeff%debug_str)
    call polynomial_coeff_list_free(tmp)
    ABI_SFREE(tmp)
   end if
-    
+
 end subroutine coeffs_list_append
 !!***
 
@@ -4372,7 +4372,7 @@ subroutine coeffs_list_truncate(coeff_list, n)
 
  !Free original array
  call polynomial_coeff_list_free(coeff_list)
- 
+
  !Reallocate and copy back
  ABI_MALLOC(coeff_list,(n))
  call coeffs_list_copy(coeff_list, tmp)
@@ -4487,8 +4487,8 @@ subroutine coeffs_list_copy(coeff_list_out,coeff_list_in)
      call polynomial_coeff_init(coeff_list_in(ii)%coefficient,coeff_list_in(ii)%nterm,&
        &                             coeff_list_out(ii),coeff_list_in(ii)%terms, &
        &                             coeff_list_in(ii)%name, check)
-    
-    !coeff_list_out%debug_str = "copied from " // coeff_list_in(ii)%debug_str 
+
+    !coeff_list_out%debug_str = "copied from " // coeff_list_in(ii)%debug_str
  enddo
 end subroutine coeffs_list_copy
 !!***
