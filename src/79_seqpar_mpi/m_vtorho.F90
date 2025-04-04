@@ -90,7 +90,8 @@ module m_vtorho
  use m_wvl_psi,            only : wvl_hpsitopsi, wvl_psitohpsi, wvl_nl_gradient
  use m_inwffil,            only : cg_from_atoms
  use m_gemm_nonlop_projectors, only : set_gemm_nonlop_ikpt, reset_gemm_nonlop, gemm_nonlop_use_gemm, &
-                                      gemm_nonlop_nblocks, gemm_nonlop_is_distributed
+                                      gemm_nonlop_block_size, gemm_nonlop_is_distributed
+
  use m_abstract_wf,        only : abstract_wf, init_mywfc
  use m_mlwfovlp,           only : mlwfovlp
 #if defined HAVE_PYTHON_INVOCATION
