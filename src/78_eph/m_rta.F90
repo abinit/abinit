@@ -1523,7 +1523,7 @@ subroutine print_rta_txt_files(self, cryst, dtset, dtfil)
      end do
    end if
      
-   msg = " Seebeck [Volts / Kelvin] using ", rta_type, "approximation"
+   msg = sjoin(" Seebeck [Volts / Kelvin] using ", rta_type, "approximation")
    call wrtout(units, msg)
    do itemp=1, self%ntemp
      !TODO : what is the following line? Resets 0 Kelvin to 1 Kelvin minimum T??? a bit arbitrary. Should handle T=0 more cleanly
@@ -1541,7 +1541,7 @@ subroutine print_rta_txt_files(self, cryst, dtset, dtfil)
    end do !itemp
    call wrtout(units, ch10)
 
-   msg = " Kappa [W/m*K] using ", rta_type, "approximation"
+   msg = sjoin(" Kappa [W/m*K] using ", rta_type, "approximation")
    call wrtout(units, msg)
    do itemp=1, self%ntemp
      TKelv = self%kTmesh(itemp) / kb_HaK; if (TKelv < one) Tkelv = one
@@ -1558,7 +1558,7 @@ subroutine print_rta_txt_files(self, cryst, dtset, dtfil)
    end do !itemp
    call wrtout(units, ch10)
    
-   msg = " Peltier [Volts] using ", rta_type, "approximation"
+   msg = sjoin(" Peltier [Volts] using ", rta_type, "approximation")
    call wrtout(units, msg)
    do itemp=1, self%ntemp
      TKelv = self%kTmesh(itemp) / kb_HaK; if (TKelv < one) Tkelv = one
