@@ -1848,8 +1848,8 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
 !fact_sigma = max_occ * (siemens_SI / Bohr_meter) / 100.  ! Siemens / cm
 ! fact_mob   = fact_sigma * 100.**3 / e_Cb * Bohr_meter**3 ! cm^2 / V / s
  fact_sbk   = -volt_SI * kb_HaK                           ! Volt / Kelvin
-call wrtout(std_out,"factors: ")
- write (std_out,*) fact_sigma,  fact_sbk
+!call wrtout(std_out,"factors: ")
+! write (std_out,*) fact_sigma,  fact_sbk
 
  !call ibte%read_scattering()
  ! Loops and memory are distributed over k-points and collinear spins
@@ -2125,8 +2125,8 @@ call wrtout(std_out,"factors: ")
      ! Begin iterative solver.
      iter_loop: do iter=1,dtset%ibte_niter
     
-        call wrtout(std_out," check beginning loop, iter, iet:", pre_newlines=1, newlines=1)
-        write (std_out,*) iter, iet
+       ! call wrtout(std_out," check beginning loop, iter, iet:", pre_newlines=1, newlines=1)
+       ! write (std_out,*) iter, iet
       
         ! Loop over the nk index in F_nk.
        do spin=1,nsppol
@@ -2250,8 +2250,8 @@ call wrtout(std_out,"factors: ")
          ! use matr3inv to inverse the matrix sigma but verify also that the det is not equal to zero !
          ! maybe type the command use "..." to be able to use the functions, check in the code
         
-         call wrtout(std_out, "check : sig_gen, sig_p")
-         write(std_out,*) sig_gen, sig_p
+         !call wrtout(std_out, "check : sig_gen, sig_p")
+         !write(std_out,*) sig_gen, sig_p
         
          !TODO: implement for inv_sig_p with two spins
          do spin=1,nsppol
@@ -2291,8 +2291,8 @@ call wrtout(std_out,"factors: ")
        end if
         !check where is the problem with iter loop
       
-        call wrtout(std_out," check iet:", pre_newlines=1, newlines=1)
-        write (std_out,*) iet
+        !call wrtout(std_out," check iet:", pre_newlines=1, newlines=1)
+        !write (std_out,*) iet
   
      end do iter_loop
 
@@ -2366,7 +2366,7 @@ sig_p=sig_p*(siemens_SI / Bohr_meter / cryst%ucvol) / 100
            call wrtout(units, msg)
          end do ! itemp
        end do ! spin
-       ! HERE look into adding seebeck output for semiconductors as well, check what happens with e and h components in tensors
+       ! TODO:HERE look into adding seebeck output for semiconductors as well, check what happens with e and h components in tensors
        ! routine
        call wrtout(units, ch10)
      end do ! ii
@@ -2670,9 +2670,7 @@ subroutine ibte_calc_tensors(self, cryst, itemp, kT, mu_e, fk, onsager, sigma_eh
 
    !Here I rescale sigma_eh to output correctly the Onsager coeff L11
    sigma_eh = sigma_eh / fact0
- end if
-
-
+ else 
  !call xmpi_sum(sigma_eh, comm, ierr)
  !call xmpi_sum(onsager, comm, ierr)
 
@@ -2680,11 +2678,11 @@ subroutine ibte_calc_tensors(self, cryst, itemp, kT, mu_e, fk, onsager, sigma_eh
 ! sigma_eh = max_occ * sigma_eh / cryst%ucvol
  !fsum_eh = fsum_eh / cryst%ucvol
 
- max_occ = two / (self%nspinor * self%nsppol)
+   max_occ = two / (self%nspinor * self%nsppol)
  !Take into account spin degeneracy for all Onsager coefficient:
- sigma_eh= max_occ * sigma_eh
-
-
+   sigma_eh= max_occ * sigma_eh
+ end if
+ 
 
 ! fact0 = max_occ * (siemens_SI / Bohr_meter / cryst%ucvol) / 100
 ! fact = 100**3 / e_Cb
