@@ -449,7 +449,6 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
   if(present(print_anh))then
     if(print_anh) need_print_anh = .True.
   endif
-  my_weights(:) = 0.0_dp
   call get_weight_from_hist(hist, fit_weight_T, ntime, natom_sc, my_weights, comm )
 
   ABI_MALLOC(symbols,(eff_pot%crystal%natom))
