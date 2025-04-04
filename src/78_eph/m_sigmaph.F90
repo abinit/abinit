@@ -3305,6 +3305,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  call cwtime_report(" sigmaph_new: after doublegrid", cpu, wall, gflops)
 
  ! Compute the chemical potential at the different physical temperatures with Fermi-Dirac.
+ ! TODO: One should check that nband is > nbocc to avoid inaccuracies in mu_e
  ABI_MALLOC(new%mu_e, (new%ntemp))
  new%mu_e(:) = ebands%fermie
 
