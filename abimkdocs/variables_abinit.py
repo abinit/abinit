@@ -16395,10 +16395,11 @@ Variable(
     topics=['printing_prgs'],
     dimensions="scalar",
     defaultval=0,
-    mnemonics="PRinT EVK",
+    mnemonics="PRinT EVK - Elements of the Velocity matrix at wavevector K",
     added_in_version="9.11.0",
     text=r"""
-   If set to 1, ABINIT will produce a netCDF EVK file.
+If set to 1, ABINIT will produce a netCDF EVK file, containing the elements of the velocity operator (ddk) between two wavefunctions at wavevector k.  
+Not compatible with parallelization over perturbations ([[paral_rf]]=1) when netCDF library doesnt support MPI-IO.
 """,
 ),
 

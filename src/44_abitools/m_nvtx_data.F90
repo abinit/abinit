@@ -20,13 +20,13 @@
 
 module m_nvtx_data
 
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU_MARKERS)
   use m_nvtx, only : nvtxStartRange, nvtxEndRange, nvtxProfilerStart, nvtxProfilerStop
 #endif
 
   implicit none
 
-  integer, parameter :: NUMBER_OF_NVTX_REGIONS = 138
+  integer, parameter :: NUMBER_OF_NVTX_REGIONS = 139
   character(len=32), dimension(NUMBER_OF_NVTX_REGIONS) :: nvtx_names
   integer          , dimension(NUMBER_OF_NVTX_REGIONS) :: nvtx_ids
 
@@ -146,7 +146,7 @@ module m_nvtx_data
   integer, parameter :: NVTX_DMFT_SYM_MATLU = 114
   integer, parameter :: NVTX_DMFT_RW_SELF = 115
   integer, parameter :: NVTX_DMFT_SAVEOCC = 116
-  integer, parameter :: NVTX_SLICEALL_DOS = 117
+  integer, parameter :: NVTX_TRANSPOSER_MPI_ALL2ALL = 117
   integer, parameter :: NVTX_SLICEALL_MERGE = 118
   integer, parameter :: NVTX_SLICEALL_PERMUTE_COLS = 119
   integer, parameter :: NVTX_SLICEALL_INIT_ASYNC_BUFFER = 120
@@ -168,6 +168,7 @@ module m_nvtx_data
   integer, parameter :: NVTX_SLICE_FREE = 136
   integer, parameter :: NVTX_SPSLICE_INIT = 137
   integer, parameter :: NVTX_SLICEALL_SPLIT = 138
+  integer, parameter :: NVTX_SLICEALL_DOS = 139
 
 contains
 
@@ -277,7 +278,6 @@ contains
          & "FORSTR", &
          & "FORCES", &
          & "STRESS", &
-
          & "DMFT_SOLVE", &
          & "DMFT_SOLVE_LOOP", &
          & "DMFT_IMPURITY_SOLVE", &
@@ -294,7 +294,8 @@ contains
          & "DMFT_ADD_INT_FCT", &
          & "DMFT_SYM_MATLU", &
          & "DMFT_RW_SELF", &
-         & "DMFT_SAVEOCC", &         
+         & "DMFT_SAVEOCC", &
+         & "TRANSPOSER_MPI_ALL2ALL", &
          & "SLICES_DOS", &
          & "SLICES_MERGE", &
          & "SLICES_PERMUTE_COLS", &
@@ -435,7 +436,7 @@ contains
     nvtx_ids(114)=NVTX_DMFT_SYM_MATLU
     nvtx_ids(115)=NVTX_DMFT_RW_SELF
     nvtx_ids(116)=NVTX_DMFT_SAVEOCC
-    nvtx_ids(117)= NVTX_SLICEALL_DOS
+    nvtx_ids(117)=NVTX_TRANSPOSER_MPI_ALL2ALL
     nvtx_ids(118)= NVTX_SLICEALL_MERGE
     nvtx_ids(119)= NVTX_SLICEALL_PERMUTE_COLS
     nvtx_ids(120)= NVTX_SLICEALL_INIT_ASYNC_BUFFER
@@ -457,10 +458,11 @@ contains
     nvtx_ids(136)= NVTX_SLICE_FREE
     nvtx_ids(137)= NVTX_SPSLI_INIT
     nvtx_ids(138)= NVTX_SLICEALL_SPLIT
+    nvtx_ids(139)= NVTX_SLICEALL_DOS
 
   end subroutine nvtx_init
 
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU_MARKERS)
   !! !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   !! !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   subroutine abi_nvtx_start_range(id)

@@ -54,7 +54,7 @@ module m_chebfiwf
  use m_xg
  use m_xgTransposer
 
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU_MARKERS)
  use m_nvtx_data
 #endif
 
