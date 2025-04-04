@@ -2456,7 +2456,7 @@ sig_p=sig_p*(siemens_SI / Bohr_meter / cryst%ucvol) / 100
          do itemp=1,ibte%ntemp
            write(msg,"(f16.2,3e16.2)") &
              ibte%kTmesh(itemp) / kb_HaK, &
-             ibte%eph_mu_e * eV_Ha, &
+             ibte%eph_mu_e(itemp) * eV_Ha, &
              ibte%n_ehst(1, spin, itemp) / cryst%ucvol / Bohr_cm **3, &
              ibte%n_ehst(2, spin, itemp) / cryst%ucvol / Bohr_cm **3
            call wrtout(units, msg)
