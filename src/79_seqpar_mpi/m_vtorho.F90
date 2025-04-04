@@ -397,6 +397,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  integer :: nband_k,nband_cprj_k,nbuf,neglect_pawhat,nfftot,nkpg,nkpt1,nnsclo_now
  integer :: nproc_distrb,npw_k,nspden_rhoij,option,prtvol,quit,nblk_gemm_nonlop
  integer :: spaceComm_distrb,usecprj_local,usefock_ACE,usetimerev
+#if defined HAVE_GPU_CUDA
+ integer(c_int64_t)   :: ph3d_size
+#endif
+
  logical :: berryflag,computesusmat,fixed_occ,has_vectornd
  logical :: locc_test,paral_atom,remove_inv,usefock,with_vxctau
  logical :: do_last_ortho,wvlbigdft=.false.,do_invS
