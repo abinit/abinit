@@ -2002,11 +2002,9 @@ function opt_boundcoeff(yvalues,cvalues,penalty_in) result (coeff)
   !write(*,*) "coeff_tmp", coeff_tmp
   if(coeff_tmp > 0)then
     coeff = coeff_tmp
-  elseif(coeff_tmp <= 0)then
+  else
     x1 = (-b + sqrt(b**2 + 4*a*penalty)) / (2*a) ! 1.001 penalty value
     x2 = (-b - sqrt(b**2 + 4*a*penalty)) / (2*a)
-    !write(*,*) "x1", x1
-    !write(*,*) "x2", x2
     if(x1>0)then
       coeff = x1
     else

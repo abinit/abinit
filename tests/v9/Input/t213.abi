@@ -36,6 +36,5 @@ efield_phase 3.14159
 #%% keywords = multibinit
 #%% description = 
 #%%        New implementation of electric fields in Multibinit
-#%% topics = ElectricFields, LatticeModels
 #%%<END TEST_INFO>
 
