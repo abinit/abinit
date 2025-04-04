@@ -2670,7 +2670,7 @@ subroutine ibte_calc_tensors(self, cryst, itemp, kT, mu_e, fk, onsager, sigma_eh
 
    !Here I rescale sigma_eh to output correctly the Onsager coeff L11
    sigma_eh = sigma_eh / fact0
- else 
+   end if 
  !call xmpi_sum(sigma_eh, comm, ierr)
  !call xmpi_sum(onsager, comm, ierr)
 
@@ -2678,10 +2678,10 @@ subroutine ibte_calc_tensors(self, cryst, itemp, kT, mu_e, fk, onsager, sigma_eh
 ! sigma_eh = max_occ * sigma_eh / cryst%ucvol
  !fsum_eh = fsum_eh / cryst%ucvol
 
-   max_occ = two / (self%nspinor * self%nsppol)
+ max_occ = two / (self%nspinor * self%nsppol)
  !Take into account spin degeneracy for all Onsager coefficient:
-   sigma_eh= max_occ * sigma_eh
- end if
+ sigma_eh= max_occ * sigma_eh
+ 
  
 
 ! fact0 = max_occ * (siemens_SI / Bohr_meter / cryst%ucvol) / 100
