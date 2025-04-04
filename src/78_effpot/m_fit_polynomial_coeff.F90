@@ -688,7 +688,6 @@ contains
       if (fit_iatom_all .and. iam_master) then
         ! FIXME: this does not compile on alpa intel 2025 elpa!
         message=ch10 // ' fit_iatom = -2 : The total number of coefficients for all atoms are'// itoa(my_ncoeff) // ch10
-        !write(message, '(a,I6,a)') trim(message), ncoeff_tot, ch10
         call wrtout(std_out,message,'COLL')
         call wrtout(ab_out,message,'COLL')
       end if
@@ -1470,7 +1469,6 @@ contains
            &   gf_values(3,icoeff)*HaBohr_eVAng**2
            if(need_prt_GF_csv)then
              write(message2, '(I7.7,3a,ES18.10,a,ES18.10,a,ES18.10,a,ES18.10)') my_coeffindexes(icoeff),",",&
-!&                                   gf_values(4,icoeff)*factor*(1000*Ha_ev)**2,",",&
              & trim(my_coeffs(icoeff)%name),",", &
              & gf_values(4,icoeff)*HaBohr_eVAng**2,",", &
              & gf_values(1,icoeff)*HaBohr_eVAng**2,",", &
@@ -1485,7 +1483,6 @@ contains
          write(message, '(a)') ' The matrix is singular...'
          if(need_prt_GF_csv)then
            write(message2, '(I7.7,10a)') my_coeffindexes(icoeff),",", &
-!&                                   gf_values(4,icoeff)*factor*(1000*Ha_ev)**2,",",&
 &                                   trim(my_coeffs(icoeff)%name),",",&
 &                                  "None",",",&
              & "None",",",&
@@ -1536,9 +1533,6 @@ contains
          end if
        end do
      end if
-
-
-
 
      BLOCK  ! sort the coeff on each CPU
        real(dp) :: mygf(my_ncoeff)
