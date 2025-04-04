@@ -225,7 +225,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
  real(dp),allocatable :: vxccc1_i2pertdq(:,:,:)
  real(dp),allocatable :: vpsp1_i1pertdq_geom(:,:,:), vpsp1_i1pertdqdq(:,:,:)
  real(dp),allocatable :: vxc1dqdq(:),work(:)
- real(dp),allocatable :: xccc3d1(:),xccc3d2(:),xccc3d2dq(:)
+ real(dp),allocatable :: xccc3d2(:),xccc3d2dq(:)
  type(pawrhoij_type),allocatable :: pawrhoij_read(:)
 
 

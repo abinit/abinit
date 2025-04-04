@@ -60,8 +60,7 @@ module m_longwave
  use m_dfptlw_nv,   only : dfptlw_nv
  use m_dfptlw_pert, only : preca_ffnl
  use m_initylmg,    only : initylmg
- use m_dynmat,      only : d3lwsym, sylwtens
- use m_geometry,    only : symredcart
+ use m_geometry,    only : symredcart, d3lwsym, sylwtens
  use m_atm2fft,     only : atm2fft
 
  implicit none
@@ -132,7 +131,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 !Local variables-------------------------------
  !scalars
  integer,parameter :: cplex1=1,formeig=0,response=1
- integer :: ask_accurate,bantot,coredens_method,dimffnl,dimffnl_i
+ integer :: ask_accurate,bantot,dimffnl,dimffnl_i
  integer :: gscase,iatom,ierr,indx,ireadwf0,iscf_eff,itypat
  integer :: ider,idir0,idir
  integer :: i1dir,i1pert,i2dir,ii,i2pert,i3dir,i3pert
@@ -142,7 +141,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  integer :: optatm,optdyfr,opteltfr,optgr,optstr,optv,optn,optn2
  integer :: option,optorth,psp_gencond,rdwrpaw,spaceworld,timrev,tim_mkrho
  integer :: usexcnhat,useylmgr
- real(dp) :: bigexc,bigsxc,boxcut,ecore,ecutdg_eff,ecut_eff,enxc,etot
+ real(dp) :: bigexc,bigsxc,boxcut,ecore,ecutdg_eff,ecut_eff,etot
  real(dp) :: fermie,fermih,gsqcut,gsqcut_eff,gsqcutc_eff,residm
  real(dp) :: ucvol,vxcavg
  logical :: non_magnetic_xc
