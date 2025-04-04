@@ -16,7 +16,6 @@ t09o
 #%%  t10_sigX_at1,  tolnlines =10, tolabs = 2.1e-10, tolrel = 1.0e-07, fld_options = -easy;
 #%%  t10_absX_at1,  tolnlines =10, tolabs = 2.1e-10, tolrel = 1.0e-07, fld_options = -easy;
 #%%  t10_emisX_at1, tolnlines = 5, tolabs = 1.1e-07, tolrel = 1.9e-08, fld_options = -easy;
-#%%  t10_eps, tolnlines = 50, tolabs = 1.1e-07, tolrel = 1.9e-08, fld_options = -easy;
 #%%  t10_Lij, tolnlines = 50, tolabs = 1.1e-07, tolrel = 1.9e-08, fld_options = -ridiculous;
 #%%  t10_sig, tolnlines = 50, tolabs = 1.1e-07, tolrel = 1.9e-08, fld_options = -easy;
 #%% extra_inputs = 

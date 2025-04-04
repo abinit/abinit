@@ -137,12 +137,12 @@ contains
  integer :: comm,fform1,headform,iband,ijband,ierr,ikpt,master_band,idum,iproc,num_tasks_max
  integer :: iom,isppol,jband,l1,l2,mband,me,mpierr,mom
  integer :: natom,nband_k,nkpt,nproc,nspinor,nsppol,ntypat,broad_mode
- integer :: occopt,iunt,opt_unt,occ_unt,iocc,my_iband,pnp_size
+ integer :: occopt,iunt,opt_unt,occ_unt,iocc,my_iband,pnp_size,add_drude
  integer :: lij_unt,sig_unt,sigd_unt,kth_unt,ocond_unt,occunit,occnpt,au_units
- logical :: nc_unlimited,mykpt,myband,iomode_estf_mpiio,read_half_dipoles
+ logical :: nc_unlimited,mykpt,myband,iomode_estf_mpiio,read_half_dipoles,omega0
  real(dp) :: dirac,del,deltae,deltae_min,deltae_min_tmp,dhdk2_g,diff_eig,diff_occ
- real(dp) :: dosdeltae,ecut,entropy,fact_diag,fermie,fermih,kin_fact,maxocc
- real(dp) :: np_sum,np_sum_k1,np_sum_2,omin,omax,dom,oml,sig,socc,socc_k
+ real(dp) :: dosdeltae,ecut,entropy,fermie,fermih,kin_fact,maxocc,docc_deig
+ real(dp) :: np_sum,np_sum_k1,np_sum_2,omin,omax,dom,oml,sig,socc,socc_k,fact_omega0
  real(dp) :: Tatm,tphysel,tsmear,ucvol,eig_in_max,eig_in_min,phi
  character(len=fnlen) :: filnam1,filnam_gen,occfile
  character(len=500) :: msg
@@ -181,9 +181,9 @@ contains
    filnam1=trim(filnam_gen)//'_OPT'
 !  Read frequency range
    read(iunt,*) dom,omin,omax,mom
-   read(iunt,err=13,end=13,fmt=*) broad_mode,au_units,phi
+   read(iunt,err=13,end=13,fmt=*) broad_mode,au_units,phi,add_drude
    goto 14
-13 backspace(iunt) ; broad_mode=1 ; au_units=0; phi=zero
+13 backspace(iunt) ; broad_mode=1 ; au_units=0; phi=zero; add_drude=0
 14 continue
 !  In case of varocc read filename of occupation datafile
    if (present(varocc)) then
@@ -195,6 +195,7 @@ contains
    end if
    close(iunt)
  end if
+ phi=phi*pi/180.0_dp
 
 !Send data to all procs
  call xmpi_bcast(dom,master,comm,mpierr)
@@ -357,7 +358,7 @@ contains
 ! Compute derivative of occupations wrt the energy
 
  ABI_MALLOC(doccde,(mband*nkpt*nsppol))
- if (occopt==1) then
+ if (occopt<=2) then
    if (me==master) then
      write(std_out,'(a,i4)')  ' occopt            =',occopt
    end if
@@ -365,14 +366,6 @@ contains
  else
    tphysel=zero
    maxocc=two/(nsppol*nspinor)
- end if
- if (occopt==2) then
-   tsmear=one
-   entropy=one
-   if (me==master) then
-     write(std_out,'(a)') ' occopt=2 fixed occupation case'
-   end if
- else
    call getnel(doccde,dosdeltae,eigen0,entropy,fermie,fermih,maxocc,mband,nband,&
 &   socc,nkpt,nsppol,occ,occopt,1,tphysel,tsmear,12,wtk)
    entropy=tsmear*entropy
@@ -578,66 +571,70 @@ contains
            end if
 
 !          LOOP OVER BANDS m
-           do jband=1,iband-1
+           do jband=1,iband
              diff_occ = occ_k(iband)-occ_k(jband)
              diff_eig = eig0_k(iband)-eig0_k(jband)
-             if (dabs(diff_occ)>=tol12) then
 
-               dhdk2_r = zero
-               dhdk2_g = zero
+             dhdk2_r = zero
+             dhdk2_g = zero
 
-               if (read_half_dipoles) then
-                 ijband=(my_iband*(my_iband-1))/2+jband
+             if (read_half_dipoles) then
+               ijband=(my_iband*(my_iband-1))/2+jband
+             else
+               !psinablapsi size is mband for netCDF I/O, nband_k for Fortran I/O
+               bd_stride=merge(mband,nband_k,iomode==IO_MODE_ETSF)
+               ijband=(my_iband-1)*bd_stride+jband
+             end if
+               
+             do l2=1,3
+               do l1=1,3
+                 dhdk2_r(l1,l2)=dhdk2_r(l1,l2)+(&
+&                  psinablapsi(1,l1,ijband)*psinablapsi(1,l2,ijband)&
+&                 +psinablapsi(2,l1,ijband)*psinablapsi(2,l2,ijband))
+               end do
+             end do
+             do l1=1,3
+               dhdk2_g=dhdk2_g &
+&                +(psinablapsi(1,l1,ijband)*psinablapsi(1,l1,ijband) &
+&                 +psinablapsi(2,l1,ijband)*psinablapsi(2,l1,ijband))*third ! Average over directions
+             end do
+
+
+             !Minimal validity limit
+             deltae_min_tmp=dabs(diff_eig)
+             if ((deltae_min_tmp>=tol5).and.(deltae_min_tmp<=deltae_min)) deltae_min=deltae_min_tmp
+
+             !Conductivity for each omega - Apply KG formula
+             kin_fact=(eig0_k(iband)+eig0_k(jband))*half-(fermie+entropy)
+             omega0=dabs(diff_occ)<tol12
+             fact_omega0=merge(two,one,omega0)
+             if (.not.omega0) then
+               docc_deig=dabs(diff_occ/diff_eig)
+             else
+               docc_deig=dabs(doccde_k(iband))
+             endif
+             !Evaluate sumrule
+             if(add_drude==0.and.omega0) docc_deig=zero
+             np_sum_k1=np_sum_k1 + two*dhdk2_g*docc_deig/fact_omega0
+             do iom=1,mom
+               oml=oml1(iom)
+               if(broad_mode==0) then
+                 dirac=dexp(-((abs(diff_eig)-oml)/(sqrt(two)*dom))**2)/(dom*dsqrt(pi*two)) ! Take into account (n,m) and (m,n)
                else
-                 !psinablapsi size is mband for netCDF I/O, nband_k for Fortran I/O
-                 bd_stride=merge(mband,nband_k,iomode==IO_MODE_ETSF)
-                 ijband=(my_iband-1)*bd_stride+jband
-               end if
-                 
+                 dirac=dom/((abs(diff_eig)-oml)**2+dom**2)/pi
+               endif
+               sig=dhdk2_g*docc_deig*dirac*pi/(ucvol)
+               kin11_k(iom)=kin11_k(iom)+sig
+               kin12_k(iom)=kin12_k(iom)-sig*kin_fact
+               kin21_k(iom)=kin21_k(iom)-sig*kin_fact
+               kin22_k(iom)=kin22_k(iom)+sig*kin_fact**2
                do l2=1,3
                  do l1=1,3
-                   dhdk2_r(l1,l2)=dhdk2_r(l1,l2)+(&
-&                    psinablapsi(1,l1,ijband)*psinablapsi(1,l2,ijband)&
-&                   +psinablapsi(2,l1,ijband)*psinablapsi(2,l2,ijband))
+                   cond_nd_k(l1,l2,iom)=cond_nd_k(l1,l2,iom)+dhdk2_r(l1,l2)*diff_occ*dirac*pi/(oml*ucvol)
                  end do
                end do
-               do l1=1,3
-                 dhdk2_g=dhdk2_g &
-&                  +(psinablapsi(1,l1,ijband)*psinablapsi(1,l1,ijband) &
-&                   +psinablapsi(2,l1,ijband)*psinablapsi(2,l1,ijband))*third ! Average over directions
-               end do
+             end do
 
-
-               !Minimal validity limit
-               deltae_min_tmp=dabs(diff_eig)
-               if ((deltae_min_tmp>=tol5).and.(deltae_min_tmp<=deltae_min)) deltae_min=deltae_min_tmp
-
-               !Conductivity for each omega - Apply KG formula
-               kin_fact=(eig0_k(iband)+eig0_k(jband))*half-(fermie+entropy)
-               do iom=1,mom
-                 oml=oml1(iom)
-                 if(broad_mode==0) then
-                   dirac=(dexp(-((diff_eig+oml)/(sqrt(two)*dom))**2)-dexp(-((diff_eig-oml)/(sqrt(two)*dom))**2))&
-&                        /(dom*dsqrt(pi*two)) ! Take into account (n,m) and (m,n)
-                 else
-                   dirac=dom/((diff_eig+oml)**2+dom**2)/pi-dom/((diff_eig-oml)**2+dom**2)/pi
-                 endif
-                 sig=dhdk2_g*diff_occ*dirac*pi/(oml*ucvol)
-                 kin11_k(iom)=kin11_k(iom)+sig
-                 kin12_k(iom)=kin12_k(iom)-sig*kin_fact
-                 kin21_k(iom)=kin21_k(iom)-sig*kin_fact
-                 kin22_k(iom)=kin22_k(iom)+sig*kin_fact**2
-                 do l2=1,3
-                   do l1=1,3
-                     cond_nd_k(l1,l2,iom)=cond_nd_k(l1,l2,iom)+dhdk2_r(l1,l2)*diff_occ*dirac*pi/(oml*ucvol)
-                   end do
-                 end do
-               end do
-
-               !Evaluate sumrule
-               np_sum_k1=np_sum_k1 + two*dhdk2_g*dabs(diff_occ/diff_eig)
-
-             end if ! diff_occ>tol8
            end do !jband
 
            socc_k=socc_k+occ_k(iband)
@@ -719,17 +716,11 @@ contains
    end if
    write(lij_unt,'(a)')' # omega(ua) L11 L12 L22'
 
-!  _sig file
-   if (open_file(trim(filnam_out)//'_sig', msg, newunit=sig_unt, form='formatted', action="write") /= 0) then
-     ABI_ERROR(msg)
-   end if
-   if (nsppol==1) then
-     if(au_units>0) then
-       write(sig_unt,'(a)')' # omega(ua)                  cond(ua)'
-     else
-       write(sig_unt,'(a)')' # hbar*omega(eV)             cond(ohm.cm)-1'
-     endif
-   else
+!  _sig_up_dn file
+   if(nsppol==2) then
+     if (open_file(trim(filnam_out)//'_sig_up_dn', msg, newunit=sig_unt, form='formatted', action="write") /= 0) then
+       ABI_ERROR(msg)
+     end if
      if(au_units>0) then
        write(sig_unt,'(2a)')' # omega(ua) cond(ua)  ',&
 &                           '      cond(ua) UP      cond(ua) DN'
@@ -859,9 +850,7 @@ contains
      oml=oml1(iom)
      write(sigd_unt,'(f12.5,6es22.12)') oml,cond_nd(1,1,iom),cond_nd(2,2,iom),cond_nd(3,3,iom),&
 &      cond_nd(1,2,iom),cond_nd(1,3,iom),cond_nd(2,3,iom)
-     if (nsppol==1) then
-       write(sig_unt,'(f12.5,es22.12)') oml,sig_abs(iom)
-     else
+     if (nsppol==2) then
        write(sig_unt,'(f12.5,3es22.12)') oml,sig_abs(iom), &
 &        kin11(iom,1),kin11(iom,2)
      end if
@@ -878,13 +867,12 @@ contains
  if (me==master) then
    write(std_out,'(2a)')ch10,'OUTPUT'
    write(std_out,'(a)')trim(filnam_out)//'_Lij : Onsager kinetic coefficients'
-   write(std_out,'(a)')trim(filnam_out)//'_sig : Optical conductivity'
+   write(std_out,'(a)')trim(filnam_out)//'_sig : Optical conductivity and dielectric function'
    write(std_out,'(a)')trim(filnam_out)//'_sig_tensor : Optical conductivity tensor'
    write(std_out,'(a)')trim(filnam_out)//'_Kth : Thermal conductivity and thermopower'
-   write(std_out,'(a)')trim(filnam_out)//'_eps : Dielectric function'
    write(std_out,'(a)')trim(filnam_out)//'_abs : n, k, reflectivity, absorption'
    close(lij_unt)
-   close(sig_unt)
+   if(nsppol==2) close(sig_unt)
    close(kth_unt)
    close(ocond_unt)
    close(sigd_unt)
@@ -986,12 +974,12 @@ end subroutine conducti_paw
  integer :: fform2,headform,iatom,iband,icor,ierr,ikpt,iatom_atnbr,itypat,itypat_atnbr
  integer :: iom,isppol,l1,mband,me,mom,mpierr,j2,etiq,pnp_size,iproc,broad_mode,absx_unt
  integer :: natom,nband_k,nkpt,nphicor,nproc,nspinor,nsppol,ntypat,nphicor_max,natom_atnbr
- integer :: occopt,iunt,opt2_unt,ncid,varid,master_band,nb_per_proc,idum
+ integer :: occopt,iunt,opt2_unt,ncid,varid,master_band,nb_per_proc,idum,add_drude
  integer :: sigx1_unt,sigx1_up_unt,sigx1_dn_unt,ems_unt,ems_up_unt,ems_dn_unt
  logical :: iomode_estf_mpiio,myband,mykpt,need_absorption,need_emissivity,collective_io
  real(dp) :: del_sig,del_emis,deltae,diff_occ,ecut,fermie,fermi
  real(dp) :: omin,omax,omin_sig,omax_sig,omin_emis,omax_emis
- real(dp) :: oml,dom,dom_ctr,dom_max,dom_tan1,dom_tan2
+ real(dp) :: oml,dom,dom_ctr,dom_max,dom_tan1,dom_tan2,docc_deig
  real(dp) :: Tatm,tsmear,ucvol,dirac,diff_eig,ohmtosec=9.d11
  character(len=fnlen) :: filnam2,filnam_gen
  character(len=500) :: msg
@@ -1459,22 +1447,24 @@ end subroutine conducti_paw
                    diff_eig=eig0_k(iband)-energy_cor(icor,itypat_atnbr)
                    oml=oml_edge(icor,iom)
                    if(need_absorption) then
+                     docc_deig=abs(diff_occ/diff_eig)
                      if(broad_mode==1) then
                        dirac=dom_var1(icor,iom)/((diff_eig-oml)**2+(dom_var1(icor,iom))**2)/pi 
                      else
                        dirac=dexp(-((diff_eig-oml)/(sqrt(two)*dom))**2)/(dom*dsqrt(two*pi))
                      endif
                      if(dirac<1d-20) dirac=zero
-                     sigx1_k(icor,iom,iatom_atnbr)=sigx1_k(icor,iom,iatom_atnbr)+dhdk2_g(icor)*diff_occ*dirac*pi/(oml*ucvol) 
+                     sigx1_k(icor,iom,iatom_atnbr)=sigx1_k(icor,iom,iatom_atnbr)+dhdk2_g(icor)*docc_deig*dirac*pi/ucvol
                    endif      
                    if (need_emissivity) then
+                     docc_deig=abs(occ_k(iband)/diff_eig)
                      if(broad_mode==1) then
                        dirac=dom/((diff_eig-oml)**2+dom**2)/pi
                      else
                        dirac=dexp(-((diff_eig-oml)/(dom*sqrt(two)))**2)/(dom*dsqrt(two*pi))
                      endif
                      if(dirac<1d-20) dirac=zero
-                     emisx_k(icor,iom,iatom_atnbr)=emisx_k(icor,iom,iatom_atnbr)+dhdk2_g(icor)*occ_k(iband)*dirac*pi/(oml*ucvol)
+                     emisx_k(icor,iom,iatom_atnbr)=emisx_k(icor,iom,iatom_atnbr)+dhdk2_g(icor)*docc_deig*dirac*pi/ucvol
                    endif
                 end do
                end do
@@ -1749,10 +1739,10 @@ end subroutine conducti_paw
 
 !    _s_sigX
    if (need_absorption.and.nsppol==2) then
-     if (open_file(trim(filnam_out)//'_up_sigX_at'//str_atm,msg,newunit=sigx1_up_unt,form='formatted',action="write")/=0) then
+     if (open_file(trim(filnam_out)//'_sigX_up_at'//str_atm,msg,newunit=sigx1_up_unt,form='formatted',action="write")/=0) then
        ABI_ERROR(msg)
      end if
-     if (open_file(trim(filnam_out)//'_dn_sigX_at'//str_atm,msg,newunit=sigx1_dn_unt,form='formatted',action="write")/=0) then
+     if (open_file(trim(filnam_out)//'_sigX_dn_at'//str_atm,msg,newunit=sigx1_dn_unt,form='formatted',action="write")/=0) then
        ABI_ERROR(msg)
      end if
      do iom=1,mom
@@ -1789,10 +1779,10 @@ end subroutine conducti_paw
     
 !    _s_emisX
    if (need_emissivity.and.nsppol==2) then
-     if (open_file(trim(filnam_out)//'_up_emisX_at'//str_atm,msg,newunit=ems_up_unt,form='formatted',action="write")/=0) then
+     if (open_file(trim(filnam_out)//'_emisX_up_at'//str_atm,msg,newunit=ems_up_unt,form='formatted',action="write")/=0) then
        ABI_ERROR(msg)
      end if
-     if (open_file(trim(filnam_out)//'_dn_emisX_at'//str_atm,msg,newunit=ems_dn_unt,form='formatted',action="write")/=0) then
+     if (open_file(trim(filnam_out)//'_emisX_dn_at'//str_atm,msg,newunit=ems_dn_unt,form='formatted',action="write")/=0) then
        ABI_ERROR(msg)
      end if
      do iom=1,mom
@@ -2533,7 +2523,7 @@ subroutine msig(fcti,npti,xi,filnam_out_sig,phi,au_units)
  write(std_out,'(2a)')ch10,'Calculate the principal value and related optical properties'
  write(std_out,'(a)')'Use default value for delta interval: del=1e-3'
 
- if (open_file(trim(filnam_out_sig)//'_eps',msg,newunit=eps_unt,status='replace',action="write")/=0) then
+ if (open_file(trim(filnam_out_sig)//'_sig',msg,newunit=eps_unt,status='replace',action="write")/=0) then
    ABI_ERROR(msg)
  end if
  if(au_units==0) then
