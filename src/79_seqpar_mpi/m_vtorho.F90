@@ -1521,22 +1521,23 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
      else if (dtset%usedmft == 10) then
         write(std_out, *) "pawrad%int_meshsz: ", pawrad%int_meshsz
+        write(std_out, *) "dtfil%fnameabo_w90: ", dtfil%fnameabo_w90
         write(std_out, *) "results_gs%energies%e_fermie: ", results_gs%energies%e_fermie
 #if defined HAVE_PYTHON_INVOCATION
         ! xcryst_struct
         remove_inv=.false.
-        call crystal_init(dtset%amu_orig(:,1),cryst_struc,dtset%spgroup,natom,dtset%npsp,ntypat, &
-         dtset%nsym,rprimd,dtset%typat,xred,dtset%ziontypat,dtset%znucl,1,&
-         dtset%nspden==2.and.dtset%nsppol==1,remove_inv,hdr%title,&
-         dtset%symrel,dtset%tnons,dtset%symafm)
+        call cryst_struc%init(dtset%amu_orig(:,1),dtset%spgroup,natom,dtset%npsp,ntypat,&
+          & dtset%nsym,rprimd,dtset%typat,xred,dtset%ziontypat,dtset%znucl,1,&
+          & dtset%nspden==2.and.dtset%nsppol==1,remove_inv,hdr%title,&
+          & dtset%symrel,dtset%tnons,dtset%symafm)
 
         ! ebands
         bantot = dtset%mband*dtset%nkpt*dtset%nsppol
-        call ebands_init(bantot,ebands,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,&
-          doccde,eigen,hdr%istwfk,hdr%kptns,hdr%nband,&
-          hdr%nkpt,hdr%npwarr,hdr%nsppol,hdr%nspinor,hdr%tphysel,hdr%tsmear,hdr%occopt,hdr%occ,hdr%wtk,&
-          hdr%cellcharge, hdr%kptopt, hdr%kptrlatt_orig, hdr%nshiftk_orig, hdr%shiftk_orig, &
-          hdr%kptrlatt, hdr%nshiftk, hdr%shiftk)
+        call ebands%init(bantot,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,&
+          & doccde,eigen,hdr%istwfk,hdr%kptns,hdr%nband,&
+          & hdr%nkpt,hdr%npwarr,hdr%nsppol,hdr%nspinor,hdr%tphysel,hdr%tsmear,hdr%occopt,hdr%occ,hdr%wtk,&
+          & hdr%cellcharge, hdr%kptopt, hdr%kptrlatt_orig, hdr%nshiftk_orig, hdr%shiftk_orig, &
+          & hdr%kptrlatt, hdr%nshiftk, hdr%shiftk)
         ebands%fermie = results_gs%energies%e_fermie
         ebands%fermih = results_gs%energies%e_fermih
         ebands%entropy = results_gs%energies%entropy

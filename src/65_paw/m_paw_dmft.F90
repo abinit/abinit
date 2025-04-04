@@ -760,10 +760,17 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
 
  paw_dmft%dmft_read_occnd = dtset%dmft_read_occnd
 
- ABI_MALLOC(paw_dmft%occnd,(2,mband,mband,nkpt,nsppol*use_dmft))
- ABI_MALLOC(paw_dmft%band_in,(mband*use_dmft))
- ABI_MALLOC(paw_dmft%include_bands,((dmftbandf-dmftbandi+1)*use_dmft))
- ABI_MALLOC(paw_dmft%exclude_bands,(mband*use_dmft))
+ if(use_dmft == 10) then
+   ABI_MALLOC(paw_dmft%occnd,(2,mband,mband,nkpt,nsppol*1))
+   ABI_MALLOC(paw_dmft%band_in,(mband*1))
+   ABI_MALLOC(paw_dmft%include_bands,((dmftbandf-dmftbandi+1)*1))
+   ABI_MALLOC(paw_dmft%exclude_bands,(mband*1))
+ else
+   ABI_MALLOC(paw_dmft%occnd,(2,mband,mband,nkpt,nsppol*use_dmft))
+   ABI_MALLOC(paw_dmft%band_in,(mband*use_dmft))
+   ABI_MALLOC(paw_dmft%include_bands,((dmftbandf-dmftbandi+1)*use_dmft))
+   ABI_MALLOC(paw_dmft%exclude_bands,(mband*use_dmft))
+ endif
 
  if (use_dmft == 0) return
 
@@ -860,17 +867,6 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  ! paw_dmft%dmft_read_occnd = dmft_read_occnd
  ! paw_dmft%idmftloop=0
  ! paw_dmft%mbandc  = 0
- if(use_dmft == 10) then
-   ABI_MALLOC(paw_dmft%occnd,(2,mband,mband,nkpt,nsppol*1))
-   ABI_MALLOC(paw_dmft%band_in,(mband*1))
-   ABI_MALLOC(paw_dmft%include_bands,((dmftbandf-dmftbandi+1)*1))
-   ABI_MALLOC(paw_dmft%exclude_bands,(mband*1))
- ! else
-   ! ABI_MALLOC(paw_dmft%occnd,(2,mband,mband,nkpt,nsppol*use_dmft))
-   ! ABI_MALLOC(paw_dmft%band_in,(mband*use_dmft))
-   ! ABI_MALLOC(paw_dmft%include_bands,((dmftbandf-dmftbandi+1)*use_dmft))
-   ! ABI_MALLOC(paw_dmft%exclude_bands,(mband*use_dmft))
- endif
 
  icb=0
  mbandc = 0
