@@ -897,7 +897,7 @@ mv tgwr_4o_* log conv_kmesh
 
 In this last part of the tutorial, we discuss how to interpolate the QP corrections
 along an arbitrary $\kk$-path using the star-function method discussed in
-[this section](tutorial/eph_intro/#star-function-interpolation-of-the-ks-eigenvalues) of the EPH introduction.
+[this section](/tutorial/eph_intro/#star-function-interpolation-of-the-ks-eigenvalues) of the EPH introduction.
 This method is less accurate than e.g. the Wannier interpolation, and might be problematic in the presence
 of band-crossings, but it has the big advantage of being much easier to use and with minimal user intervention.
 

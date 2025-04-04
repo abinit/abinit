@@ -687,7 +687,7 @@ subroutine preca_ffnl(dimffnl,ffnl,gmet,gprimd,ider,idir0,kg,kptns,mband,mkmem,m
 !Local variables-------------------------------
 !scalars
  integer :: ii,ikc,ikg,ikpt,ilm,nkpg,npw_k
- character(len=500) :: msg
+ !character(len=500) :: msg
 !arrays
  integer,allocatable :: kg_k(:,:)
  real(dp) :: kpt(3)

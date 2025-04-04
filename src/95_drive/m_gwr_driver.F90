@@ -199,7 +199,7 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
  type(hyb_t) :: hyb
  type(xmpi_pool2d_t) :: diago_pool
 !arrays
- integer :: ngfftc(18),ngfftf(18),units(2), grid3(3)
+ integer :: ngfftc(18),ngfftf(18),units(2) !, grid3(3)
  integer,allocatable :: nq_spl(:), l_size_atm(:)
  integer,allocatable :: tmp_kstab(:,:,:), npwarr_ik(:), gvec_(:,:), istwfk_ik(:), nband_iks(:,:)
  real(dp) :: strsxc(6), diago_info(3, dtset%nkpt, dtset%nsppol),tsec(2)
@@ -804,7 +804,7 @@ end if
 
    if (my_rank == master) then
      if (write_wfk .and. iomode__ == IO_MODE_ETSF) then
-       NCF_CHECK(owfk_ebands%ncwrite_path(cryst, out_path)) !print *, "owfk_ebands%istwfk", owfk_ebands%istwfk; stop
+       NCF_CHECK(owfk_ebands%ncwrite_path(cryst, out_path))
      end if
      call owfk_ebands%print_gaps(units, header="KS gaps after direct diagonalization")
      if (cc4s_task) call cc4s_write_eigens(owfk_ebands, dtfil)
