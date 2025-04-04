@@ -1985,6 +1985,7 @@ end subroutine system_getDimFromXML
 &     ' The number of total IFC  (',irpt2,') is inferior to  ',ch10,&
 &     ' the number of short range IFC (',irpt1,') in ',filename,ch10,&
 &     ' This is not possible',ch10
+
        ABI_BUG(message)
      end if
    end if
