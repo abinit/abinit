@@ -2726,7 +2726,7 @@ end subroutine paw_setup_copy
  type(pawrad_type),intent(in),optional :: pawrad
 
 !Local variables ---------------------------------------
- integer :: funit,iaewf,ii,imeshae,imsh,ir,igrid,icor,ierr,maxmeshz,mesh_size,nmesh,shft
+ integer :: funit,iaewf,imeshae,imsh,ir,igrid,icor,ierr,maxmeshz,mesh_size,nmesh
  integer :: ilmn,jl,jlmn,k0lmn,klmn
  integer :: iln,imainmesh,isppol,ms,msz_cut,i2j,il
  logical :: endfile,found,tread,diracrel
