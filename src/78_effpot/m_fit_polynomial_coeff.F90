@@ -1424,9 +1424,9 @@ contains
      !Open *csv file for storing GF values of all cores for this iteration
      !TODO:  Should move inside the loop over all selected?
      if(need_prt_GF_csv)then
-        !write(filename,'(a,I1,a,I3.3,a,I3.3,a)') "GF_values_iatom",fit_iatom_in,"_proc",my_rank,"_iter",icycle,".csv"
-        filename = "GF_values_iatom" // trim(itoa(fit_iatom_in)) // "_proc"
-        filename = trim(filename) // trim(itoa(my_rank)) // "_iter" // trim(itoa(icycle)) // ".csv"
+        write(filename,'(a,I1,a,I3.3,a,I3.3,a)') "GF_values_iatom",fit_iatom_in,"_proc",my_rank,"_iter",icycle,".csv"
+        !filename = "GF_values_iatom" // trim(itoa(fit_iatom_in)) // "_proc"
+        !filename = trim(filename) // trim(itoa(my_rank)) // "_iter" // trim(itoa(icycle)) // ".csv"
 
         unit_GF_val = get_unit()
         if (open_file(filename,message,unit=unit_GF_val,form="formatted",&
@@ -1496,8 +1496,8 @@ contains
 &                                            gf_values(:,icoeff),list_coeffs_tmp(1:icycle),natom_sc,&
 &                                            icycle,ncoeff_to_fit,ntime,strten_coeffs_tmp,&
 &                                            fit_data%strten_diff,fit_data%training_set%sqomega, weights=weights)
-           !write (j_char, '(i7)') my_coeffindexes(icoeff)
-           j_char = itoa(my_coeffindexes(icoeff))
+           write(j_char, '(i7)') my_coeffindexes(icoeff)
+           !j_char = itoa(my_coeffindexes(icoeff))
 
            write(message, '(4x,a,3x,4ES18.10)') adjustl(j_char), &
 !&                                   gf_values(4,icoeff)*factor*(1000*Ha_ev)**2 ,&

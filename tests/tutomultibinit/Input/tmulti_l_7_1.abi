@@ -27,7 +27,7 @@ bound_option = 2       # Option for the bound process (default 1)
 #%% [setup]
 #%% executable = multibinit
 #%% input_ddb = tmulti_l_6_DDB
-#%% need_cpp_vars = HAVE_XML !FC_INTEL
+#%% need_cpp_vars = !CC_INTEL_ONEAPI
 #%% system_xml = no
 #%% coeff_xml = tmulti_l_7_1_coeffs.xml
 #%% md_hist = tmulti_l_6_HIST.nc

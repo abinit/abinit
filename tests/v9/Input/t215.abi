@@ -26,7 +26,7 @@ efield_phase2 1.570
 #%% executable = multibinit
 #%% input_ddb = ddbSTO.DDB
 #%% coeff_xml = modelSTO.xml
-#%% need_cpp_vars = !HAVE_GPU !FC_INTEL
+#%% need_cpp_vars = !HAVE_GPU  , !CC_INTEL_ONEAPI
 #%% [files]
 #%% files_to_test = 
 #%%   t215.abo
