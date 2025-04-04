@@ -2103,7 +2103,6 @@ contains
  subroutine select_one_coeff(ind)
    ! Note ind is my_coeffindexes(icoeff)
    integer :: ind
-   integer, allocatable :: weights1(:)
    if (.not. isselected(ind)) then
      rank_to_send= my_rank
      isselected(ind)=.True.

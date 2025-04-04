@@ -1399,7 +1399,7 @@ subroutine opt_getHOstrain(terms,ncombi,nterm_start,eff_pot,power_strain,comm, m
   !scalars
   integer ::  nterm_tot_tmp
   integer :: i,ii
-  integer :: nbody, ref_nbody
+  !integer :: nbody, ref_nbody
   real(dp) :: coeff_ini
   !reals
   type(crystal_t) :: crystal
