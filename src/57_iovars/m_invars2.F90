@@ -997,8 +997,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  if(tread==1) dtset%ecuteps=dprarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ecutsigx',tread,'ENE')
- !if (any(dtset%optdriver == [RUNL_SCREENING, RUNL_SIGMA, RUNL_GWR])) dtset%ecutsigx = four * dtset%ecut
- if(tread==1) dtset%ecutsigx=dprarr(1)
+ if (any(dtset%optdriver == [RUNL_GWR])) dtset%ecutsigx = dtset%ecut
+ if (tread==1) dtset%ecutsigx=dprarr(1)
+ ABI_CHECK(dtset%ecutsigx <= four * dtset%ecut, "ecutwfn cannot be greater that 4*ecut")
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ecutwfn',tread,'ENE')
  if (any(dtset%optdriver == [RUNL_SCREENING, RUNL_SIGMA, RUNL_GWR])) dtset%ecutwfn=dtset%ecut

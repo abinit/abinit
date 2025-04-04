@@ -27,7 +27,7 @@ gwr_sigma_algo 2    # Use convolutions in the BZ for Sigma
 nband      100      # Bands to be used in Green's functions.
 ecuteps    6        # Cut-off energy of the planewave set to represent the dielectric matrix.
                     # It is important to adjust this parameter.
-ecutsigx    20.0    # Dimension of the G sum in Sigma_x.
+#ecutsigx    16     # Dimension of the G sum in Sigma_x.
 
 nkptgw      2       # number of k-point where to calculate the GW correction
 kptgw               # k-points in reduced coordinates
