@@ -12,9 +12,6 @@ import mkdocs.__main__
 if sys.version_info < (3, 6):
     warnings.warn("Python >= 3.6 is STRONGLY recommended when building the Abinit documentation\n" * 20)
 
-if sys.version_info >= (3, 10):
-    warnings.warn("Python >= 3.10 is not yet supported. Please use py <= 3.9 to build the Abinit documentation\n" * 20)
-
 def is_git_repo(path):
     '''
     Utility to check if current dir is the root of a git clone.
@@ -26,8 +23,6 @@ def is_git_repo(path):
     return os.path.isdir(git_dir)
 
 
-#if sys.mkdocs.__version__
-
 # We don't install with setup.py hence we have to add the directory [...]/abinit/tests to $PYTHONPATH
 pack_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, pack_dir)
@@ -38,22 +33,37 @@ sys.path.insert(0, os.path.join(pack_dir, "doc"))
 from abimkdocs.website import Website, HTMLValidator
 
 def get_abinit_version():
-    abinit_version = "Unknown"
+    abinit_version = "unknown"
     if os.path.exists('.version'):
         with open('.version','r') as f:
-            abinit_version = f.read()
-    elif os.path.exists('.tarball-version'):
+            abinit_version = f.read().strip().lower()
+            print(abinit_version)
+
+    if os.path.exists('.current_version'):
+        with open('.current_version','r') as f:
+            abinit_version = f.read().strip().lower()
+            print(abinit_version)
+
+    if abinit_version == "unknown" and os.path.exists('.tarball-version'):
         with open('.tarball-version','r') as f:
-            abinit_version = f.read()
-    else:
+            abinit_version = f.read().strip().lower()
+            print(abinit_version)
+
+    if abinit_version == "unknown":
         print("[get_abinit_version] Can't find either .version or .tarball-version, will run git-version-gen")
         # cross-check we are in a git repo
         if is_git_repo(os.path.dirname(__file__)):
             abinit_version = subprocess.run(['./config/scripts/git-version-gen', '.tarball-version'], stdout=subprocess.PIPE).stdout
+
+    abinit_version = abinit_version.strip().lower()
+    print("Using abinit_version:", abinit_version)
+    if abinit_version == "unknown":
+        raise RuntimeError("Cannot detect Abinit version!")
+
     return abinit_version
 
-def generate_mkdocs_yml():
 
+def generate_mkdocs_yml():
     abinit_version = get_abinit_version()
 
     # Read yml template and replace abinit version
@@ -65,6 +75,7 @@ def generate_mkdocs_yml():
     # Write mkdocs.yml
     with open('mkdocs.yml', 'w') as mkdocs_yml:
         mkdocs_yml.write(yml_data)
+
 
 def prof_main(main):
     """

@@ -38,12 +38,12 @@ tolvrs1  1.0d-8              # Tolerance to stop SCF cycles
 # Dataset 2: CC4S interface
 ###########################################
 optdriver2  6        # Activate GWR code
-gwr_task2 "CC4S"     
+gwr_task2 "CC4S"
 getden2     1
 nband2     40         # Number of (occ + empty) bands
 ecuteps2   4
 
-pp_dirpath "$ABI_PSPDIR/Pseudodojo_paw_pw_standard"
+pp_dirpath "$ABI_PSPDIR/Psdj_paw_pw_std"
 pseudos "Li.xml, F.xml"
 
 #%%<BEGIN TEST_INFO>
@@ -52,13 +52,13 @@ pseudos "Li.xml, F.xml"
 #%% [files]
 #%% files_to_test =
 #%%   t08.abo, tolnlines = 10, tolabs = 2.0e-2, tolrel = 6.0e-1;
-#%%   t08o_DS2_GridVectors.yaml, tolnlines = 0, tolabs = 2.0e-3, tolrel = 5.0e-2;
+#%%   t08o_DS2_GridVectors.yaml, tolnlines = 0, tolabs = 0.0e+00, tolrel = 0.0e+00;
 #%%   t08o_DS2_GridVectors.elements, tolnlines = 5, tolabs = 1.0e-2, tolrel = 1.0e-2;
-#%%   t08o_DS2_EigenEnergies.yaml, tolnlines = 0, tolabs = 2.0e-3, tolrel = 5.0e-2;
+#%%   t08o_DS2_EigenEnergies.yaml, tolnlines = 0, tolabs = 0.0e+00, tolrel = 0.0e+00;
 #%%   t08o_DS2_EigenEnergies.elements, tolnlines = 5, tolabs = 1.0e-2, tolrel = 1.0e-2;
-#%%   t08o_DS2_CoulombPotential.yaml, tolnlines = 0, tolabs = 2.0e-3, tolrel = 5.0e-2;
+#%%   t08o_DS2_CoulombPotential.yaml, tolnlines = 0, tolabs = 0.0e+00, tolrel = 0.0e+00;
 #%%   t08o_DS2_CoulombPotential.elements, tolnlines = 50, tolabs = 2.0e-3, tolrel = 5.0e-2;
-#%%   t08o_DS2_CoulombVertex.yaml, tolnlines = 0, tolabs = 2.0e-3, tolrel = 5.9e-2;
+#%%   t08o_DS2_CoulombVertex.yaml, tolnlines = 0, tolabs = 0.0e+00, tolrel = 0.0e+00;
 #%% [paral_info]
 #%% max_nprocs = 8
 #%% [extra_info]

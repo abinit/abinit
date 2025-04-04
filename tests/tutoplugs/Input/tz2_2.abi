@@ -1,7 +1,7 @@
 # Ground state calculation for BiTeI at 0 GPa
 
 autoparal 1
-pp_dirpath "$ABI_PSPDIR/Pseudodojo_nc_fr_04_pbe_standard_psp8/"
+pp_dirpath "$ABI_PSPDIR/Psdj_nc_fr_04_pbe_std_psp8/"
 pseudos "Bi.psp8,Te.psp8,I.psp8"
 
 ndtset 6
@@ -92,7 +92,6 @@ ratsph?3 2.5 1.9 2.15
 #%%    tz2_2_MPI10.abo, tolnlines=5, tolabs=7.00e-05, tolrel=1.10e+00, fld_options=-medium
 #%% [extra_info]
 #%% authors = O. Gingras, V. Brousseau-Couture
-#%% keywords = wannier90, z2pack, fatbands
+#%% keywords = wannier90, z2pack, FATBANDS
 #%% description = Test interface with Z2Pack (NC pseudopotentials)
 #%%<END TEST_INFO>
-#

@@ -2,7 +2,7 @@
 need_cpp_vars = [
 ]
 
-#: List of keywords that are automatically added to all the tests of this suite. 
+#: List of keywords that are automatically added to all the tests of this suite.
 keywords = [
 ]
 
@@ -30,7 +30,7 @@ subsuites = [
 
 #: List of input files
 inp_files = [
-"tbase1_1.abi", 
+"tbase1_1.abi",
 "tbase1_2.abi",
 "tbase1_3.abi",
 "tbase1_4.abi",

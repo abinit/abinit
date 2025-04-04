@@ -5,14 +5,14 @@
  ndtset 6
 
 #First dataset : SCF run
- prtden1  1     
-  nband1  14     
+ prtden1  1
+  nband1  14
  kptopt1  1
  tolwfr1  1.0d-12
 
 #Second dataset : NSCF run with kptopt 1 (more bands)
-   iscf2 -2  
- getwfk2  1   
+   iscf2 -2
+ getwfk2  1
  getden2  1
  kptopt2  1
  tolwfr2  1.0d-12
@@ -30,6 +30,7 @@
   rfdir4  1 0 0
  rfelfd4  2
  getwfk4  3
+ prtevk4  1
 
 # ddk response function
    iscf5 -3
@@ -38,7 +39,7 @@
   rfdir5  0 1 0
  rfelfd5  2
  getwfk5  3
-
+ prtevk5  1
 
 # ddk response function
    iscf6 -3
@@ -47,6 +48,7 @@
   rfdir6  0 0 1
  rfelfd6  2
  getwfk6  3
+ prtevk6  1
 
 
 # Data common to datasets 3-6
@@ -64,7 +66,7 @@
  diemac 10.0
  ecut 6.00   # too small !
  pawecutdg 24.00
- natom  2 
+ natom  2
  nband 30
  nbdbuf 2
  nstep 100
@@ -75,21 +77,21 @@
  znucl  31 33
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "Pseudodojo_paw_pbe_standard/Ga.xml, Pseudodojo_paw_pbe_standard/As.xml"
+ pseudos "Psdj_paw_pbe_std/Ga.xml, Psdj_paw_pbe_std/As.xml"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% test_chain = t09.abi, t10.abi
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t09.abo, tolnlines = 37, tolabs = 8.000e-05, tolrel = 3.000e-01, fld_options = -medium;
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = Y. Gillet, X. Gonze
-#%% keywords = NC, DFPT 
-#%% description = 
+#%% keywords = NC, DFPT
+#%% description =
 #%%   GaAs, zinc-blende structure. PAW. GGA-PBE. Treated with nsppol=1.
 #%%   Generate the data for optic (linear coefficients).
 #%%   to be analysed in test 10 (netcdf files with h1 matrix elements).

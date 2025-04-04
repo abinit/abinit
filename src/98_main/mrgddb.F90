@@ -6,7 +6,7 @@
 !! This code merges the derivative databases.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, SP, GA)
+!! Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, SP, GA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -117,6 +117,8 @@ program mrgddb
      write(std_out,*)"    mrgddb < run.files               Read arguments from run.files."
      write(std_out,*)"    mrgddb out_DDB in1_DDB in2_DDB   Merge list of input DDB files, produce new out_DDB file."
      write(std_out,*)"    mrgddb out_DDB in*_DDB           Same as above but use shell wildcards instead of file list."
+     write(std_out,*)"    mrgddb out_DDB in_DDB.nc         Convert DDB from NetCDF format to plain text format."
+     write(std_out,*)"    mrgddb out_DDB.nc in_DDB         Convert DDB from plain text to NetCDF format."
      write(std_out,*)" "
      write(std_out,*)"Available options:"
      write(std_out,*)"    -v, --version      Show version number and exit."
@@ -198,10 +200,6 @@ program mrgddb
    end do
 
  else
-   ! Command-line interface.
-   if (nfiles_cli == 1) then
-     ABI_ERROR("Need more than one argument")
-   end if
    if (cannot_overwrite .and. file_exists(outname)) then
      ABI_ERROR(sjoin("Cannot overwrite existing file:", outname))
    end if

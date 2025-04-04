@@ -114,14 +114,14 @@ rprim11
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
-#%%   t61.abo, tolnlines = 0, tolabs = 9.984e-09, tolrel = 6.000e-04, fld_options =  -medium
+#%% files_to_test =
+#%%   t61.abo, tolnlines = 0, tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options =  -medium
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = D. R. Hamann
 #%% keywords = NC, DFPT
-#%% description = 
+#%% description =
 #%%   Test of the strain perturbation.
 #%%   Si in the usual diamond structrure using a Troullier-Martins
 #%%   potential including a model core charge.  The datasets

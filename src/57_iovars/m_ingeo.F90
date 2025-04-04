@@ -6,7 +6,7 @@
 !! Initialize geometry variables for the ABINIT code.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2024 ABINIT group (XG, RC)
+!!  Copyright (C) 1998-2025 ABINIT group (XG, RC)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,8 +28,9 @@ module m_ingeo
  use m_sort
  use m_dtset
 
- use m_symtk,      only : mati3inv, chkorthsy, symrelrot, mati3det, chkprimit, &
-&                         symmetrize_rprimd, symmetrize_tnons,symmetrize_xred, symatm
+ use m_matrix,     only : mati3inv, mati3det
+ use m_symtk,      only : chkorthsy, symrelrot, chkprimit, symatm, &
+&                         symmetrize_rprimd, symmetrize_tnons,symmetrize_xred
  use m_spgbuilder, only : gensymspgr, gensymshub, gensymshub4
  use m_symfind,    only : symfind, symfind_expert, symanal, symlatt
  use m_geometry,   only : mkradim, mkrdim, xcart2xred, xred2xcart, randomcellpos, metric, reduce2primitive

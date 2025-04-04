@@ -28,7 +28,7 @@ ecut 20.0                    # This should be used to reach convergence.
 ####################
 nband1   2            # Number of bands in the ground state calculations
 toldfe1  1.0e-6       # Tolerance to stop SCF cycles
-nstep1  20 
+nstep1  20
 
 ####################
 # Dataset 2: fake SCF to obtain the empty states iteratively
@@ -36,7 +36,7 @@ nstep1  20
 nband2   24           # Number of bands
 toldfe2  1.0e-12      # Tolerance to stop SCF cycles
 nnsclo2 12
-nstep2   1 
+nstep2   1
 getwfk_filepath2 "t11o_DS1_WFK"
 
 ###########################################
@@ -62,7 +62,7 @@ typat  1 1
 xcart   5.  5.  4.65
         5.  5.  5.35 angstrom
 
-pp_dirpath "$ABI_PSPDIR/Pseudodojo_nc_sr_04_pbe_standard_psp8/"
+pp_dirpath "$ABI_PSPDIR/Psdj_nc_sr_04_pbe_std_psp8/"
 pseudos "H.psp8"
 
 ##############################################################
@@ -71,9 +71,9 @@ pseudos "H.psp8"
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = eos_nvhpc_23.1_elpa, eos_nvhpc_23.9_elpa, eos_nvhpc_23.11_elpa
+#%% exclude_builders = eos_nvhpc_23.9_elpa, eos_nvhpc_24.9_openmpi
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t11.abo, tolnlines=  15, tolabs=  1.2e-09, tolrel= 1.0
 #%% [paral_info]
 #%% max_nprocs = 4

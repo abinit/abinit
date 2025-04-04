@@ -1,8 +1,8 @@
 
 .Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Fri 13 Sep 2024.
 - ( at 19h26 )
-  
+
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI2/paral_t76_MPI2/t76.abi
 - output file    -> t76_MPI2.abo
 - root for input  files -> t76_MPI2i
@@ -401,8 +401,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.17426
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -655,10 +655,10 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
 
- Exciton: Calculation of dielectric properties by solving the Bethe-Salpeter equation 
- in frequency domain and reciprocal space on a transitions basis set. 
- Based on a program developed by L. Reining, V. Olevano, F. Sottile, 
- S. Albrecht, and G. Onida. Incorporated in ABINIT by M. Giantomassi. 
+ Exciton: Calculation of dielectric properties by solving the Bethe-Salpeter equation
+ in frequency domain and reciprocal space on a transitions basis set.
+ Based on a program developed by L. Reining, V. Olevano, F. Sottile,
+ S. Albrecht, and G. Onida. Incorporated in ABINIT by M. Giantomassi.
 
 .Using double precision arithmetic ; gwpc =  8
 
@@ -672,7 +672,7 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
 
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :    64
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     2.75000000E-02  5.25000000E-02  7.75000000E-02       0.01563
      2)     2.77500000E-01  5.25000000E-02  7.75000000E-02       0.01563
@@ -739,13 +739,13 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
     63)    -4.72500000E-01 -1.97500000E-01 -1.72500000E-01       0.01563
     64)    -2.22500000E-01 -1.97500000E-01 -1.72500000E-01       0.01563
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields    64 points in the full Brillouin Zone.
 
 
  ==== Q-mesh for the screening function ====
  Number of points in the irreducible wedge :     8
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.01563
      2)     2.50000000E-01  0.00000000E+00  0.00000000E+00       0.12500
@@ -756,10 +756,13 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
      7)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.04688
      8)    -2.50000000E-01  5.00000000E-01  2.50000000E-01       0.09375
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields    64 points in the full Brillouin Zone.
 
 
+ vcoul_init : cutoff-mode = AUXILIARY_FUNCTION
+ q-points for optical limit:   1
+     1)      0.000010    0.000020    0.000030
  setmesh: FFT mesh size selected  =    20x   20x   20
           total number of points  =         8000
 
@@ -810,9 +813,9 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
  >>> Haydock algorithm converged twice within haydock_tol=   5.00E-02 after less than 100 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=   5.00E-02 after less than 100 iterations.
  Writing EXC Macroscopic dielectric function to file: t76_MPI2o_DS3_EXC_MDF
-  
+
  Macroscopic dielectric function:
- omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
+ omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE>
    0.0000  15.8282   0.0000  13.0975   0.0000  14.4594   0.0000
    0.0200  15.8287   0.0049  13.0978   0.0026  14.4598   0.0036
    0.0400  15.8302   0.0099  13.0985   0.0052  14.4609   0.0073
@@ -823,11 +826,11 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
    0.1400  15.8523   0.0346  13.1102   0.0182  14.4772   0.0255
    0.1600  15.8597   0.0396  13.1141   0.0209  14.4826   0.0291
    0.1800  15.8681   0.0446  13.1185   0.0235  14.4888   0.0328
-  
+
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      1.0217000000E+01  1.0217000000E+01  1.0217000000E+01 Bohr
               amu      2.80855000E+01
@@ -1180,7 +1183,7 @@ P           mkmem3         32
 - subtotal                                  4.729  43.1         5.544  42.9                                  0.85       0.85
 
 - For major independent code sections, cpu and wall times (sec),
-- as well as % of the total time and number of calls 
+- as well as % of the total time and number of calls
 
 -<BEGIN_TIMER mpi_nprocs = 2, omp_nthreads = 1, mpi_rank = world>
 - cpu_time =          11.0, wall_time =          12.9
@@ -1233,7 +1236,7 @@ P           mkmem3         32
 
  Partitioning of abinit
 - abinit                                   10.975 100.0        12.937 100.0              2                   0.85       0.85
- 
+
 - abinit(init,iofn1,herald)                 0.013   0.1         0.014   0.1              2                   0.94       0.94
 - get_dtsets_pspheads                       0.276   2.5         0.276   2.1              2                   1.00       1.00
 - abinit(outvars)                           0.055   0.5         0.065   0.5              2                   0.83       0.83
@@ -1246,7 +1249,7 @@ P           mkmem3         32
 
  Partitioning of driver
 - driver                                   10.470  95.4        12.386  95.7              2                   0.85       0.85
- 
+
 - bse                                       5.575  50.8         5.931  45.8              2                   0.94       0.94
 - (other)                                   4.893  44.6         6.452  49.9             -1                   0.76       0.76
 
@@ -1254,7 +1257,7 @@ P           mkmem3         32
 
  Partitioning of gstateimg+gstate
 - gstateimg                                 4.495  41.0         6.054  46.8              4                   0.74       0.74
- 
+
 - gstate(1)                                 0.022   0.2         0.022   0.2              8                   1.00       1.00
 - gstate(pspini)                            0.303   2.8         0.303   2.3              4                   1.00       1.00
 - gstate(init rhor rhog)                    0.028   0.3         0.129   1.0              4                   0.22       0.22
@@ -1266,7 +1269,7 @@ P           mkmem3         32
 
  Partitioning of scfcv_core
 - scfcv_core                                2.560  23.3         4.018  31.1              4                   0.64       0.64
- 
+
 - scfcv_core(setvtr)                        0.050   0.5         0.050   0.4             14                   1.00       1.00
 - scfcv_core(vtorho(f))                     2.378  21.7         2.387  18.4             14                   1.00       1.00
 - scfcv-scprqt                              0.003   0.0         0.003   0.0             12                   1.00       1.00
@@ -1279,14 +1282,14 @@ P           mkmem3         32
 
  Partitioning of rhotov
 - rhotov                                    0.008   0.1         0.008   0.1             12                   0.97       0.97
- 
+
 - rhotov(rhotoxc)                           0.005   0.0         0.005   0.0             12                   0.95       0.95
 
 - subtotal                                  0.008   0.1         0.008   0.1                                  0.97       0.97
 
  Partitioning of vtorho
 - vtorho                                    2.378  21.7         2.387  18.4             14                   1.00       1.00
- 
+
 - vtorho(bef. vtowfk)                       0.004   0.0         0.004   0.0            124                   0.99       0.99
 - vtowfk                                    2.246  20.5         2.255  17.4            124                   1.00       1.00
 - vtorho(MPI)                               0.118   1.1         0.118   0.9             14                   1.00       1.00
@@ -1296,7 +1299,7 @@ P           mkmem3         32
 
  Partitioning of vtowfk
 - vtowfk                                    2.246  20.5         2.255  17.4            124                   1.00       1.00
- 
+
 - cgwf                                      2.159  19.7         2.167  16.7            370                   1.00       1.00
 - vtowfk(subdiago)                          0.011   0.1         0.011   0.1            370                   0.99       0.99
 - vtowfk(pw_orthon)                         0.053   0.5         0.053   0.4            370                   1.00       1.00
@@ -1307,7 +1310,7 @@ P           mkmem3         32
 
  Partitioning of cgwf
 - cgwf                                      2.159  19.7         2.167  16.7            370                   1.00       1.00
- 
+
 - getghc%cgwf                               1.791  16.3         1.798  13.9          17144                   1.00       1.00
 - cgwf-O(npw)                               0.197   1.8         0.197   1.5             -2                   1.00       1.00
 - projbd%cgwf                               0.171   1.6         0.172   1.3          26528                   0.99       0.99
@@ -1316,7 +1319,7 @@ P           mkmem3         32
 
  Partitioning of getghc
 - getghc                                    1.791  16.3         1.798  13.9          17144                   1.00       1.00
- 
+
 - fourwf%getghc                             1.523  13.9         1.533  11.9          17144                   0.99       0.99
 - nonlop%getghc                             0.181   1.6         0.184   1.4          17144                   0.98       0.98
 - getghc(/=fourXX,nonlop,fock_XX)           0.086   0.8         0.080   0.6             -2                   1.08       1.08
@@ -1325,7 +1328,7 @@ P           mkmem3         32
 
  Partitioning of fourwf (upwards partitioning)
 - fourwf                                    1.540  14.0         1.551  12.0          17384                   0.99       0.99
- 
+
 - fourwf%getghc                             1.523  13.9         1.533  11.9          17144                   0.99       0.99
 - fourwf%vtowfk                             0.017   0.2         0.017   0.1            240                   0.97       0.97
 
@@ -1333,7 +1336,7 @@ P           mkmem3         32
 
  Partitioning of bethe_salpeter
 - bse                                       5.575  50.8         5.931  45.8              2                   0.94       0.94
- 
+
 - bse(Init1)                                0.422   3.8         0.422   3.3              2                   1.00       1.00
 - bse(rdkss)                                0.007   0.1         0.007   0.1              2                   1.00       1.00
 - bse(rdmkeps^-1)                           0.163   1.5         0.163   1.3              2                   1.00       1.00
@@ -1346,34 +1349,34 @@ P           mkmem3         32
 
  Partitioning of inwffil
 - inwffil                                   0.017   0.2         0.017   0.1              4                   1.00       1.00
- 
+
 - inwffil(call newkpt)                      0.017   0.2         0.017   0.1              4                   1.00       1.00
 
 - subtotal                                  0.017   0.2         0.017   0.1                                  1.00       1.00
 
  Partitioning of newkpt
 - newkpt                                    0.017   0.2         0.017   0.1              4                   1.00       1.00
- 
+
 - newkpt(call wfconv)                       0.015   0.1         0.015   0.1             74                   1.00       1.00
 
 - subtotal                                  0.016   0.1         0.016   0.1                                  1.00       1.00
 
  Partitioning of newvtr
 - newvtr                                    0.004   0.0         0.004   0.0             10                   1.00       1.00
- 
+
 
 - subtotal                                  0.004   0.0         0.004   0.0                                  1.00       1.00
 
  Partitioning of fourdp (upwards partitioning)
 - fourdp                                    0.057   0.5         0.158   1.2            552                   0.36       0.36
- 
+
 - fourdp%(other)                            0.057   0.5         0.158   1.2            552                   0.36       0.36
 
 - subtotal                                  0.057   0.5         0.158   1.2                                  0.36       0.36
 
  Partitioning of afterscfloop
 - afterscfloop                              0.026   0.2         0.055   0.4              4                   0.47       0.47
- 
+
 - afterscfloop(forstr)                      0.026   0.2         0.026   0.2              4                   1.00       1.00
 - afterscfloop(final)                       0.000   0.0         0.029   0.2              4                   0.00       0.00
 
@@ -1381,7 +1384,7 @@ P           mkmem3         32
 
  Partitioning of forstr
 - forstr                                    0.026   0.2         0.026   0.2              2                   1.00       1.00
- 
+
 - forstr(forces)                            0.003   0.0         0.003   0.0              2                   1.00       1.00
 - forstr(stress)                            0.020   0.2         0.020   0.2              2                   1.00       1.00
 
@@ -1389,13 +1392,13 @@ P           mkmem3         32
 
  Partitioning of forstrnps
 - forstrnps                                 0.002   0.0         0.002   0.0              2                   1.00       1.00
- 
+
 
 - subtotal                                  0.002   0.0         0.002   0.0                                  1.00       1.00
 
  Partitioning of exc_build_ham
 - exc_build_ham                             4.292  39.1         4.293  33.2              2                   1.00       1.00
- 
+
 - exc_build_ham(q=0)                        0.112   1.0         0.112   0.9              2                   1.00       1.00
 - exc_build_ham(block-res)                  4.180  38.1         4.181  32.3              2                   1.00       1.00
 
@@ -1403,7 +1406,7 @@ P           mkmem3         32
 
  Partitioning of exc_build_block
 - exc_build_block                           4.180  38.1         4.181  32.3              2                   1.00       1.00
- 
+
 - exc_build_block(Coulomb)                  4.052  36.9         4.053  31.3              2                   1.00       1.00
 - exc_build_block(exchange)                 0.007   0.1         0.007   0.1              2                   0.99       0.99
 - exc_build_block(synchro)                  0.114   1.0         0.114   0.9              2                   1.00       1.00
@@ -1413,7 +1416,7 @@ P           mkmem3         32
 
  Partitioning of exc_haydock_driver
 - exc_haydock_driver                        0.608   5.5         0.964   7.4              2                   0.63       0.63
- 
+
 - exc_haydock_driver(read)                  0.006   0.1         0.006   0.0              2                   0.99       0.99
 - exc_haydock_driver(prep)                  0.423   3.9         0.423   3.3              2                   1.00       1.00
 - exc_haydock_driver(apply)                 0.179   1.6         0.534   4.1              2                   0.34       0.34
@@ -1423,12 +1426,12 @@ P           mkmem3         32
 
  Partitioning of outscfcv
 - outscfcv                                  0.089   0.8         1.510  11.7              4                   0.06       0.06
- 
+
 - outscfcv(output GSR)                      0.087   0.8         1.507  11.7              4                   0.06       0.06
 
 - subtotal                                  0.089   0.8         1.510  11.7                                  0.06       0.06
 -
--Synchronisation (=leave_test) and MPI calls 
+-Synchronisation (=leave_test) and MPI calls
 - communic.MPI                              0.154   1.4         0.154   1.2          42320                   1.00       1.00
 -
 - forstrnps:synchr                          0.001   0.0         0.001   0.0              4                   1.00       1.00
@@ -1472,7 +1475,7 @@ P           mkmem3         32
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -1484,12 +1487,12 @@ P           mkmem3         32
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -1507,7 +1510,7 @@ P           mkmem3         32
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -1522,7 +1525,7 @@ P           mkmem3         32
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009

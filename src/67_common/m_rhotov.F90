@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2024 ABINIT group (XG, GMR, MT, EB)
+!!  Copyright (C) 1998-2025 ABINIT group (XG, GMR, MT, EB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -106,14 +106,16 @@ contains
 !!   |      rhor(:,1)   => rho_upup + rho_dwndwn
 !!   |      rhor(:,2:4) => {m_x,m_y,m_z}
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
-!!  [taur(nfftf,nspden*dtset%usekden)]=array for kinetic energy density
+!!  taur(nfftf,nspden*dtset%usekden)=array for kinetic energy density
 !!  ucvol = unit cell volume (Bohr**3)
 !!  usepaw= 0 for non paw calculation; =1 for paw calculation
 !!  usexcnhat= -PAW only- flag controling use of compensation density in Vxc
+!!  usevxctau=1 if if XC functional depends on kinetic energy density
 !!  vpsp(nfft)=array for holding local psp
 !!  [vxc_hybcomp(nfft,nspden)= compensation xc potential (Hartree) in case of hybrids] Optional output
 !!       i.e. difference between the hybrid Vxc at fixed density and the auxiliary Vxc at fixed density
 !!  xccc3d(n3xccc)=3D core electron density for XC core correction (bohr^-3)
+!!  xccctau3d(n3xccc*dtset%usekden)=3D core kinetic energy density for XC core correction (bohr^-3)
 !!  ==== if optres==0
 !!    vtrial(nfft,nspden)= old value of trial potential
 !!
@@ -128,9 +130,10 @@ contains
 !!  ==== if optene==1.or.2
 !!   | e_xcdc=exchange-correlation double-counting energy (hartree)
 !!  grcondft(3,natom)=d(E_constrained_DFT)/d(xred) (hartree)
-!!  intgres(nspden,ngrcondft)=integrated residuals from constrained DFT. They are also Lagrange parameters, or gradients with respect to constraints.
+!!  intgres(nspden,ngrcondft)=integrated residuals from constrained DFT.
+!!    They are also Lagrange parameters, or gradients with respect to constraints.
 !!  kxc(nfft,nkxc)=exchange-correlation kernel, needed only if optxc==2.
-!!  strscondft(6)=constrained DFT contribution to stress tensor (hartree/bohr^3) 
+!!  strscondft(6)=constrained DFT contribution to stress tensor (hartree/bohr^3)
 !!  strsxc(6)=xc contribution to stress tensor (hartree/bohr^3)
 !!  vxc(nfft,nspden)=Vxc(r) (already computed above; gets recomputed below too)
 !!  vxcavg=mean of the vxc potential
@@ -139,9 +142,9 @@ contains
 !!    vnew_mean(nspden)=mean of the potential formed from vpsp, vhartr and vxc, might be spin-dependent
 !!    vres_mean(nspden)=mean of the potential residual, might be spin-dependent
 !!    vres2=square of the norm of the residual
-!!    [vxctau(nfftf,dtset%nspden,4*dtset%usekden)]=derivative of XC energy density with respect to
-!!      kinetic energy density (metaGGA cases) (optional output)
-!!    [vtauresid(nfft,nspden*dtset%usekden)]=array for vxctau residue (see vtau below))
+!!    vxctau(nfft,dtset%nspden,4*usevxctau)]=derivative of XC energy density with respect to
+!!      kinetic energy density (metaGGA cases)
+!!    vtauresid(nfft,nspden*usevxctau)=array for vxctau residue (see vxctau)
 !!
 !! SIDE EFFECTS
 !! Input/Output:
@@ -163,14 +166,14 @@ contains
 
 subroutine rhotov(constrained_dft,dtset,energies,gprimd,grcondft,gsqcut,intgres,istep,kxc,mpi_enreg,nfft,ngfft,&
 &  nhat,nhatgr,nhatgrdim,nkxc,vresidnew,n3xccc,optene,optres,optxc,&
-&  pawang,pawrad,pawrhoij,pawtab,rhog,rhor,rprimd,strscondft,strsxc,ucvol,usepaw,usexcnhat,&
-&  vhartr,vnew_mean,vpsp,vres_mean,vres2,vtrial,vxcavg,vxc,wvl,xccc3d,xred,&
-&  electronpositron,taur,vxc_hybcomp,vxctau,vtauresid,add_tfw,xcctau3d) ! optional arguments
+&  pawang,pawrad,pawrhoij,pawtab,rhog,rhor,rprimd,strscondft,strsxc,taur,ucvol,usepaw,usexcnhat,usevxctau,&
+&  vhartr,vnew_mean,vpsp,vres_mean,vres2,vtrial,vxcavg,vxc,vxctau,vtauresid,wvl,xccc3d,xcctau3d,xred,&
+&  electronpositron,vxc_hybcomp,add_tfw) ! optional arguments
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: n3xccc,nfft,nhatgrdim,nkxc,optene,optres,optxc,usepaw,istep
- integer,intent(in) :: usexcnhat
+ integer,intent(in) :: usexcnhat,usevxctau
  logical,intent(in),optional :: add_tfw
  real(dp),intent(in) :: gsqcut,ucvol
  real(dp),intent(out) :: vres2,vxcavg
@@ -186,19 +189,19 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,grcondft,gsqcut,intgres,
  real(dp),intent(in) :: gprimd(3,3),nhat(nfft,dtset%nspden*usepaw)
  real(dp),intent(in) :: nhatgr(nfft,dtset%nspden,3*nhatgrdim),rhog(2,nfft)
  real(dp),intent(in) :: rprimd(3,3)
+ real(dp),intent(in) :: taur(nfft,dtset%nspden*dtset%usekden)
  real(dp),intent(inout) :: rhor(nfft,dtset%nspden),vhartr(nfft),vpsp(nfft)
  real(dp),intent(inout) :: vtrial(nfft,dtset%nspden),vxc(nfft,dtset%nspden)
  real(dp),intent(inout) :: xccc3d(n3xccc),xred(3,dtset%natom)
  real(dp),intent(out) :: grcondft(:,:) ! (3,ngrcondft) ngrcondft=natom when condft is activated
  real(dp),intent(out) :: intgres(:,:) ! (nspden,ngrcondft) ngrcondft=natom when condft is activated
  real(dp),intent(out) :: kxc(nfft,nkxc),strsxc(6),vnew_mean(dtset%nspden)
- real(dp),intent(out) :: strscondft(6) 
+ real(dp),intent(out) :: strscondft(6)
  real(dp),intent(out) :: vres_mean(dtset%nspden),vresidnew(nfft,dtset%nspden)
- real(dp),intent(in),optional :: taur(nfft,dtset%nspden*dtset%usekden)
- real(dp),intent(inout),optional :: vtauresid(nfft,dtset%nspden*dtset%usekden)
- real(dp),intent(out),optional,target :: vxctau(nfft,dtset%nspden,4*dtset%usekden)
+ real(dp),intent(inout) :: vtauresid(nfft,dtset%nspden*usevxctau)
+ real(dp),intent(out),target :: vxctau(nfft,dtset%nspden,4*usevxctau)
  real(dp),intent(out),optional :: vxc_hybcomp(:,:) ! (nfft,nspden)
- real(dp),intent(out),optional :: xcctau3d(n3xccc)
+ real(dp),intent(out) :: xcctau3d(n3xccc)
  type(pawrhoij_type),intent(in) :: pawrhoij(:)
  type(pawrad_type),intent(in) :: pawrad(dtset%ntypat*dtset%usepaw)
  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat*dtset%usepaw)
@@ -226,12 +229,9 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,grcondft,gsqcut,intgres,
 
  call timab(940,1,tsec)
 
-!Check that usekden is not 0 if want to use vxctau
- with_vxctau = (present(vxctau).and.present(taur).and.(dtset%usekden/=0))
+!Check if want to use vxctau (mGGA)
+ with_vxctau = (usevxctau==1)
  vxctau_ => vxctau_dum ; if (with_vxctau) vxctau_ => vxctau
- if (with_vxctau.and.optres==0.and.(.not.present(vtauresid))) then
-   ABI_BUG('need vtauresid!')
- end if
 
 !Check if we're in hybrid norm conserving pseudopotential with a core correction
  is_hybrid_ncpp=(usepaw==0 .and. n3xccc/=0 .and. &
@@ -260,9 +260,9 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,grcondft,gsqcut,intgres,
  end if
 
  if (ipositron/=1) then
-!  if metaGGA, save current value of vxctau potential
+   !  if metaGGA, save current value of vxctau potential
    if (with_vxctau) vtauresid(:,:)=vxctau(:,:,1)
-!  Compute xc potential (separate up and down if spin-polarized)
+   !  Compute xc potential (separate up and down if spin-polarized)
    if (dtset%icoulomb == 0 .and. dtset%usewvl == 0) then
 
 !    >>>> Hartree potential
@@ -290,25 +290,27 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,grcondft,gsqcut,intgres,
      call timab(941,1,tsec)
      if (ipositron==0) then
        if(.not.is_hybrid_ncpp .or. mod(dtset%fockoptmix,100)==11)then
-         call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
+         call rhotoxc(energies%e_xc,energies%entropy_xc,kxc,mpi_enreg,nfft,ngfft,&
 &         nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,optxc,&
-&         rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,&
+&         rhor,rprimd,usexcnhat,vxc,vxcavg,xccc3d,xcdata,strsxc=strsxc,&
 &         taur=taur,vhartr=vhartr,vxctau=vxctau_,add_tfw=add_tfw_,xcctau3d=xcctau3d)
          if(mod(dtset%fockoptmix,100)==11)then
            energies%e_xc=energies%e_xc*dtset%auxc_scal
+           energies%entropy_xc=energies%entropy_xc*dtset%auxc_scal
            vxc(:,:)=vxc(:,:)*dtset%auxc_scal
          end if
        else
-         call xchybrid_ncpp_cc(dtset,energies%e_xc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,&
-&         strsxc,vxcavg,xccc3d,vxc=vxc)
+         call xchybrid_ncpp_cc(dtset,energies%e_xc,energies%entropy_xc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,&
+&                              strsxc,vxcavg,xccc3d,vxc=vxc)
        end if
      else
-       call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
+       call rhotoxc(energies%e_xc,energies%entropy_xc,kxc,mpi_enreg,nfft,ngfft,&
 &       nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,optxc,&
-&       rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,&
-&       taur=taur,vhartr=vhartr,vxctau=vxctau_,add_tfw=add_tfw_,&
+&       rhor,rprimd,usexcnhat,vxc,vxcavg,xccc3d,xcdata,&
+&       strsxc=strsxc,taur=taur,vhartr=vhartr,vxctau=vxctau_,add_tfw=add_tfw_,&
 &       electronpositron=electronpositron,xcctau3d=xcctau3d)
      end if
+     
      call timab(941,2,tsec)
    elseif (.not. wvlbigdft) then
 !    Use the free boundary solver.
@@ -334,7 +336,7 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,grcondft,gsqcut,intgres,
    end if
  else
    call timab(944,1,tsec)
-   energies%e_hartree=zero;energies%e_xc=zero
+   energies%e_hartree=zero;energies%e_xc=zero;energies%entropy_xc=zero
    call rhohxcpositron(electronpositron,gprimd,kxc,mpi_enreg,nfft,ngfft,nhat,nkxc,dtset%nspden,n3xccc,&
 &   dtset%paral_kgb,rhor,strsxc,ucvol,usexcnhat,usepaw,vhartr,vxc,vxcavg,xccc3d,dtset%xc_denpos)
    call timab(944,2,tsec)

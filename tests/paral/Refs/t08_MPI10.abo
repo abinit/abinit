@@ -1,8 +1,8 @@
 
 .Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Fri 13 Sep 2024.
 - ( at 19h33 )
-  
+
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI10/paral_t08_MPI10/t08.abi
 - output file    -> t08_MPI10.abo
 - root for input  files -> t08_MPI10i
@@ -334,8 +334,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/1h.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/1h.pspnc
 -  Troullier-Martins psp for element  H         Thu Oct 27 17:28:54 EDT 1994
 -  1.00000   1.00000    940714                znucl, zion, pspdat
     1    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -347,8 +347,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/1h.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/1h.pspnc
 -  Troullier-Martins psp for element  H         Thu Oct 27 17:28:54 EDT 1994
 -  1.00000   1.00000    940714                znucl, zion, pspdat
     1    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -649,8 +649,8 @@ band_energy         : -1.43446670601426E-01
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/1h.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/1h.pspnc
 -  Troullier-Martins psp for element  H         Thu Oct 27 17:28:54 EDT 1994
 -  1.00000   1.00000    940714                znucl, zion, pspdat
     1    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -662,8 +662,8 @@ band_energy         : -1.43446670601426E-01
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/1h.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/1h.pspnc
 -  Troullier-Martins psp for element  H         Thu Oct 27 17:28:54 EDT 1994
 -  1.00000   1.00000    940714                znucl, zion, pspdat
     1    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -821,8 +821,8 @@ band_energy         : -1.17866898106226E-01
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/1h.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/1h.pspnc
 -  Troullier-Martins psp for element  H         Thu Oct 27 17:28:54 EDT 1994
 -  1.00000   1.00000    940714                znucl, zion, pspdat
     1    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -834,8 +834,8 @@ band_energy         : -1.17866898106226E-01
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/1h.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/1h.pspnc
 -  Troullier-Martins psp for element  H         Thu Oct 27 17:28:54 EDT 1994
 -  1.00000   1.00000    940714                znucl, zion, pspdat
     1    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -992,8 +992,8 @@ band_energy         : -1.08857534308889E-01
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/1h.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/1h.pspnc
 -  Troullier-Martins psp for element  H         Thu Oct 27 17:28:54 EDT 1994
 -  1.00000   1.00000    940714                znucl, zion, pspdat
     1    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1005,8 +1005,8 @@ band_energy         : -1.08857534308889E-01
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/1h.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/1h.pspnc
 -  Troullier-Martins psp for element  H         Thu Oct 27 17:28:54 EDT 1994
 -  1.00000   1.00000    940714                znucl, zion, pspdat
     1    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1164,8 +1164,8 @@ band_energy         : -1.17866898145262E-01
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/1h.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/1h.pspnc
 -  Troullier-Martins psp for element  H         Thu Oct 27 17:28:54 EDT 1994
 -  1.00000   1.00000    940714                znucl, zion, pspdat
     1    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1177,8 +1177,8 @@ band_energy         : -1.17866898145262E-01
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/1h.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/1h.pspnc
 -  Troullier-Martins psp for element  H         Thu Oct 27 17:28:54 EDT 1994
 -  1.00000   1.00000    940714                znucl, zion, pspdat
     1    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -7283,7 +7283,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.061484009473E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -1.77635684E-15
     Maximal forces difference      =  6.94482634E-09
     Max. residual of wave-functions=  7.93862508E-18
@@ -7318,7 +7318,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.058671249244E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -2.22044605E-16
     Maximal forces difference      =  6.23869861E-09
     Max. residual of wave-functions=  5.52371762E-18
@@ -7353,7 +7353,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.053517843264E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        =  1.55431223E-15
     Maximal forces difference      =  6.37182283E-09
     Max. residual of wave-functions=  6.37407439E-18
@@ -7388,7 +7388,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.051060716508E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -5.42010881E-13
     Maximal forces difference      =  3.85587867E-07
     Max. residual of wave-functions=  1.03333133E-15
@@ -7423,7 +7423,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.053517843264E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        =  1.33226763E-15
     Maximal forces difference      =  6.33814634E-09
     Max. residual of wave-functions=  6.45178710E-18
@@ -7458,7 +7458,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.058671249244E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -4.44089210E-16
     Maximal forces difference      =  6.21365049E-09
     Max. residual of wave-functions=  5.51980206E-18
@@ -7493,7 +7493,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.061484009473E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        =  1.77635684E-15
     Maximal forces difference      =  6.96996693E-09
     Max. residual of wave-functions=  8.01046263E-18
@@ -7537,7 +7537,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.057496381570E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -1.33226763E-14
     Maximal forces difference      =  1.05129399E-08
     Max. residual of wave-functions=  4.92869348E-17
@@ -7572,7 +7572,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.059662778826E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -3.15303339E-14
     Maximal forces difference      =  1.31399793E-08
     Max. residual of wave-functions=  3.10208223E-16
@@ -7607,7 +7607,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.056560961289E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -4.06341627E-14
     Maximal forces difference      =  1.55848322E-08
     Max. residual of wave-functions=  4.51486458E-16
@@ -7642,7 +7642,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.059662778828E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -2.86437540E-14
     Maximal forces difference      =  1.31635034E-08
     Max. residual of wave-functions=  3.11620532E-16
@@ -7677,7 +7677,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.057496381565E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -1.13242749E-14
     Maximal forces difference      =  1.04447716E-08
     Max. residual of wave-functions=  4.99038534E-17
@@ -7722,7 +7722,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.046332572200E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -4.50972593E-13
     Maximal forces difference      =  3.40538598E-08
     Max. residual of wave-functions=  3.93773942E-15
@@ -7757,7 +7757,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.060912146541E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -8.21565038E-15
     Maximal forces difference      =  8.94771986E-09
     Max. residual of wave-functions=  7.30318659E-17
@@ -7792,7 +7792,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.058436152307E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -9.10382880E-15
     Maximal forces difference      =  1.27229666E-08
     Max. residual of wave-functions=  4.57102788E-17
@@ -7827,7 +7827,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.060912146544E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -9.99200722E-15
     Maximal forces difference      =  9.03055767E-09
     Max. residual of wave-functions=  7.47853923E-17
@@ -7862,7 +7862,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.046332572188E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -4.51860771E-13
     Maximal forces difference      =  3.40512009E-08
     Max. residual of wave-functions=  3.93989432E-15
@@ -7907,7 +7907,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.056662582411E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -5.44009282E-14
     Maximal forces difference      =  1.04426630E-08
     Max. residual of wave-functions=  5.38481562E-16
@@ -7942,7 +7942,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.060643102858E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -5.55111512E-15
     Maximal forces difference      =  1.17063985E-08
     Max. residual of wave-functions=  2.31336184E-17
@@ -7977,7 +7977,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.058968292254E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -3.77475828E-15
     Maximal forces difference      =  8.25837834E-09
     Max. residual of wave-functions=  1.63759618E-17
@@ -8012,7 +8012,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.060643102858E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -7.77156117E-15
     Maximal forces difference      =  1.18007539E-08
     Max. residual of wave-functions=  2.35172534E-17
@@ -8047,7 +8047,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.056662582397E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -5.88418203E-14
     Maximal forces difference      =  1.04851479E-08
     Max. residual of wave-functions=  5.41027473E-16
@@ -8092,7 +8092,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.059097225677E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -9.32587341E-15
     Maximal forces difference      =  6.21801273E-09
     Max. residual of wave-functions=  6.60002076E-17
@@ -8127,7 +8127,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.059580442658E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -6.66133815E-16
     Maximal forces difference      =  3.38458991E-09
     Max. residual of wave-functions=  7.65112974E-17
@@ -8162,7 +8162,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.059142997100E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        =  1.77635684E-15
     Maximal forces difference      =  5.51035409E-09
     Max. residual of wave-functions=  4.59812631E-18
@@ -8197,7 +8197,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.059580442649E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -7.32747196E-15
     Maximal forces difference      =  3.44605636E-09
     Max. residual of wave-functions=  7.80912740E-17
@@ -8232,7 +8232,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.059097225680E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -1.02140518E-14
     Maximal forces difference      =  6.16029912E-09
     Max. residual of wave-functions=  6.74649673E-17
@@ -8277,7 +8277,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.052746132360E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -1.90514271E-13
     Maximal forces difference      =  1.49406129E-08
     Max. residual of wave-functions=  1.62860708E-15
@@ -8312,7 +8312,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.060574666144E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -7.77156117E-15
     Maximal forces difference      =  5.20593229E-09
     Max. residual of wave-functions=  8.07620531E-17
@@ -8347,7 +8347,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.059209815497E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -6.99440506E-14
     Maximal forces difference      =  3.69770042E-09
     Max. residual of wave-functions=  6.02825950E-16
@@ -8382,7 +8382,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.060574666139E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -7.54951657E-15
     Maximal forces difference      =  5.24386783E-09
     Max. residual of wave-functions=  8.26949791E-17
@@ -8417,7 +8417,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.052746132374E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -1.83852933E-13
     Maximal forces difference      =  1.48819626E-08
     Max. residual of wave-functions=  1.62352721E-15
@@ -8462,7 +8462,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.061182010530E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -1.33226763E-14
     Maximal forces difference      =  4.14244908E-09
     Max. residual of wave-functions=  1.57517096E-16
@@ -8497,7 +8497,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.060025118251E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -6.66133815E-15
     Maximal forces difference      =  5.83211239E-09
     Max. residual of wave-functions=  8.69565975E-17
@@ -8532,7 +8532,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.059238213696E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -2.95319325E-14
     Maximal forces difference      =  5.78515663E-09
     Max. residual of wave-functions=  2.28646085E-16
@@ -8567,7 +8567,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.060025118229E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -1.22124533E-14
     Maximal forces difference      =  5.81521739E-09
     Max. residual of wave-functions=  8.87385325E-17
@@ -8602,7 +8602,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.061182010529E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -2.26485497E-14
     Maximal forces difference      =  4.11629364E-09
     Max. residual of wave-functions=  1.59111941E-16
@@ -8647,7 +8647,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.061167239531E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -2.28705943E-14
     Maximal forces difference      =  1.46878988E-08
     Max. residual of wave-functions=  2.04874958E-16
@@ -8682,7 +8682,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.060180748170E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -3.55271368E-15
     Maximal forces difference      =  3.15469646E-09
     Max. residual of wave-functions=  2.85754089E-17
@@ -8717,7 +8717,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.059251161081E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -1.28785871E-14
     Maximal forces difference      =  5.24355472E-09
     Max. residual of wave-functions=  8.52867511E-17
@@ -8752,7 +8752,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.060180748167E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -4.44089210E-16
     Maximal forces difference      =  3.21355041E-09
     Max. residual of wave-functions=  2.90231741E-17
@@ -8787,7 +8787,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.061167239528E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -3.33066907E-14
     Maximal forces difference      =  1.60808448E-08
     Max. residual of wave-functions=  3.23840601E-16
@@ -8832,7 +8832,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.061163528574E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -4.06341627E-14
     Maximal forces difference      =  2.43513184E-08
     Max. residual of wave-functions=  2.85134387E-16
@@ -8867,7 +8867,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.060198848287E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        =  5.77315973E-15
     Maximal forces difference      =  4.05532855E-09
     Max. residual of wave-functions=  1.44910861E-17
@@ -8902,7 +8902,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.059257350817E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -3.10862447E-15
     Maximal forces difference      =  4.30252051E-09
     Max. residual of wave-functions=  3.71339627E-17
@@ -8937,7 +8937,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.060198848281E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        =  3.33066907E-15
     Maximal forces difference      =  4.14137047E-09
     Max. residual of wave-functions=  1.48827695E-17
@@ -8972,7 +8972,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.061163528564E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -4.35207426E-14
     Maximal forces difference      =  2.56418553E-08
     Max. residual of wave-functions=  3.10143779E-16
@@ -9156,7 +9156,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      3.0000000000E+00  3.0000000000E+00  3.0000000000E+00 Bohr
               amu      1.00794000E+00  1.00794000E+00
@@ -9499,7 +9499,7 @@ P           mkmem          10
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -9511,12 +9511,12 @@ P           mkmem          10
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -9534,7 +9534,7 @@ P           mkmem          10
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -9549,7 +9549,7 @@ P           mkmem          10
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009

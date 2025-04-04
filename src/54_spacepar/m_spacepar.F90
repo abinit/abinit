@@ -7,7 +7,7 @@
 !!  Unlike the procedures in m_cgtools, the routines declared in this module can use mpi_type.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2024 ABINIT group (XG, BA, MT, DRH, DCA, GMR, MJV, JWZ)
+!!  Copyright (C) 2008-2025 ABINIT group (XG, BA, MT, DRH, DCA, GMR, MJV, JWZ)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -26,11 +26,13 @@ module m_spacepar
  use m_abicore
  use m_errors
  use m_xmpi
+ use m_xomp
  use m_sort
 
  use m_time,            only : timab
  use defs_abitypes,     only : MPI_type
- use m_symtk,           only : mati3inv, sg_multable, symdet, symatm, matr3inv
+ use m_matrix,          only : mati3inv, matr3inv
+ use m_symtk,           only : sg_multable, symdet, symatm
  use m_geometry,        only : metric, normv, symredcart,wedge_basis,wedge_product
  use m_gtermcutoff,     only : termcutoff
  use m_mpinfo,          only : ptabs_fourdp
@@ -66,7 +68,7 @@ contains
 !! make_vectornd
 !!
 !! FUNCTION
-!! For nuclear dipole moments m, compute vector potential A(r) = (m x (r-R))/|r-R|^3
+!! For nuclear dipole moments m, compute vector potential A(r) = \alpha^2(m x (r-R))/|r-R|^3
 !! in r space. This is done by computing A(G) followed by FFT.
 !!
 !! NOTES
@@ -149,7 +151,8 @@ subroutine make_vectornd(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,nspden,nu
  n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)
  nproc_fft = mpi_enreg%nproc_fft; me_fft = mpi_enreg%me_fft
 
- prefac = -four_pi*j_dpc/(ucvol*two_pi)
+ ! the two_pi in the denominator arises from using G.G=2\pi gmet below
+ prefac = -four_pi*j_dpc*FineStructureConstant2/(ucvol*two_pi)
 
  ! Get the distrib associated with this fft_grid
  call ptabs_fourdp(mpi_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
@@ -759,7 +762,7 @@ end subroutine hartre
 !!  npw=number of planewaves of the vector
 !!  nspinor=number of spinor components
 !!  vect(2,npw*nspinor)=vector
-!!  vect1(2,npw*nspinor*use_ndo)=vector1 (=vector in most of the cases)
+!!  vect1(2,npw*nspinor)=vector1 (=vector in most of the cases)
 !!  use_ndo = says if vect=/vect1
 !!
 !! OUTPUT
@@ -767,11 +770,13 @@ end subroutine hartre
 !!
 !! SOURCE
 
-subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,use_ndo,ar_im)
+subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,use_ndo,ar_im, &
+&    gpu_thread_limit)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: filter,istwf_k,npw,nspinor,use_ndo
+ integer,intent(in),optional :: gpu_thread_limit
  real(dp),intent(out) :: ar
  real(dp),intent(out),optional :: ar_im
  type(MPI_type),intent(in) :: mpi_enreg
@@ -781,7 +786,7 @@ subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,u
 
 !Local variables-------------------------------
 !scalars
- integer :: i1,ierr,ipw,jpw,me_g0
+ integer :: i1,ierr,ipw,jpw,me_g0,nthreads_bak,l_gpu_thread_limit
  character(len=500) :: message
 !arrays
 
@@ -805,6 +810,13 @@ subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,u
 
  ar=zero
  if(present(ar_im)) ar_im=zero
+
+ l_gpu_thread_limit=0; if(present(gpu_thread_limit)) l_gpu_thread_limit=gpu_thread_limit
+
+ if(l_gpu_thread_limit /= 0) then
+   nthreads_bak=xomp_get_num_threads(open_parallel=.True.)
+   call xomp_set_num_threads(min(l_gpu_thread_limit,nthreads_bak))
+ end if
 
 !Normal storage mode
  if(istwf_k==1)then
@@ -945,6 +957,10 @@ subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,u
    if(present(ar_im))then
      call xmpi_sum(ar_im,mpi_enreg%comm_bandspinorfft,ierr)
    end if
+ end if
+
+ if(l_gpu_thread_limit /= 0) then
+   call xomp_set_num_threads(nthreads_bak)
  end if
 
 end subroutine meanvalue_g
@@ -2626,7 +2642,7 @@ end subroutine setsym
 !!  The calculation is performed in reduced reciprocal space coordinates.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2021-2024 ABINIT group (FIXME: add author)
+!!  Copyright (C) 2021-2025 ABINIT group (FIXME: add author)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

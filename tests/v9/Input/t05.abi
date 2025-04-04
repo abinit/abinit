@@ -30,6 +30,7 @@
   rfdir4  1 0 0
  rfelfd4  2
  getwfk4  3
+ prtevk4  1
 
 # ddk response function
    iscf5 -3
@@ -38,7 +39,7 @@
   rfdir5  0 1 0
  rfelfd5  2
  getwfk5  3
-
+ prtevk5  1
 
 # ddk response function
    iscf6 -3
@@ -47,6 +48,7 @@
   rfdir6  0 0 1
  rfelfd6  2
  getwfk6  3
+ prtevk6  1
 
 
 # Data common to datasets 3-6

@@ -72,7 +72,7 @@ AC_DEFUN([SD_NETCDF_INIT], [
   esac
 
   # Declare configure option
-  # TODO: make it switchable for the implicit case 
+  # TODO: make it switchable for the implicit case
   AC_ARG_WITH([netcdf],
     [AS_HELP_STRING([--with-netcdf],
       [Install prefix of the NetCDF library (e.g. /usr/local).])],
@@ -109,6 +109,7 @@ AC_DEFUN([SD_NETCDF_INIT], [
   if test "${STEREDEG_BYPASS_CONSISTENCY}" != "yes"; then
     _SD_NETCDF_CHECK_CONFIG
   fi
+
   # Adjust configuration depending on init type
   if test "${sd_netcdf_enable}" = "yes" -o "${sd_netcdf_enable}" = "auto"; then
 
@@ -260,7 +261,7 @@ AC_DEFUN([_SD_NETCDF_CHECK_USE], [
 #     include <netcdf.h>
     ]],
     [[
-      const char fname[12] = "conftest.nc\0";
+      const char fname[13] = "conftest.nc\0";
       int ierr, ncid;
       ierr = nc_open(fname, NC_WRITE, &ncid);
     ]])], [sd_netcdf_ok="yes"], [sd_netcdf_ok="no"])
@@ -406,14 +407,18 @@ AC_DEFUN([_SD_NETCDF_CHECK_CONFIG], [
         tmp_netcdf_invalid="yes"
         ;;
       warn)
-        AC_MSG_WARN([conflicting option settings for NetCDF])
-        tmp_netcdf_invalid="yes"
+        if test "${sd_netcdf_init}" = "dir" ; then
+          AC_MSG_WARN([conflicting option settings for NETCDF : when giving a path, environment variables are ignored. Set with_netcdf="yes" to use environment variables])
+        else
+          AC_MSG_WARN([conflicting option settings for NETCDF])
+          tmp_netcdf_invalid="yes"
+        fi
         ;;
     esac
   fi
 
   # When using environment variables, triggers must be set to yes
-  if test -n "${tmp_netcdf_vars}"; then
+  if test -n "${tmp_netcdf_vars}" -a ! "${sd_netcdf_init}" = "dir" ; then
     sd_netcdf_enable="yes"
     sd_netcdf_init="env"
     if test "${tmp_netcdf_invalid}" = "yes"; then
@@ -421,6 +426,20 @@ AC_DEFUN([_SD_NETCDF_CHECK_CONFIG], [
       AC_MSG_NOTICE([overriding --with-netcdf with NETCDF_{FCFLAGS,LDFLAGS,LIBS}])
     fi
   fi
+
+  # This could have side effects if "nc-config --cflags" contains compiler options
+  #if test "${sd_netcdf_init}" = "dir" ; then
+  #  sd_netcdf_ncconfig="${sd_netcdf_prefix}/bin/nc-config"
+  #  AC_MSG_CHECKING([for nc-config binary])
+  #  if test -x "${sd_netcdf_ncconfig}" ; then
+  #    sd_netcdf_fcflags=$($sd_netcdf_ncconfig --cflags)
+  #    sd_netcdf_libs=$($sd_netcdf_ncconfig --libs)
+  #    sd_netcdf_cppflags=$($sd_netcdf_ncconfig --cflags)
+  #    AC_MSG_RESULT([${sd_netcdf_ncconfig}])
+  #  else
+  #    AC_MSG_ERROR([nc-config binary not found or cannot be executed : ${sd_netcdf_ncconfig}])
+  #  fi
+  #fi
 
   # Implicit status overrides everything
   if test "${sd_netcdf_status}" = "implicit"; then

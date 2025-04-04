@@ -6,7 +6,7 @@
 !!  Description
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2018-2024 ABINIT group (VV, XG)
+!!  Copyright (C) 2018-2025 ABINIT group (VV, XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -256,17 +256,16 @@ contains !=====================================================================
 !!
 !! NOTES
 !!  This routine has to be merged with the frohlichmodel_zpr routine, and their
-!! text output needs to be refined. For now, they are being kept to be
-!! compatible with the legacy unit tests.
+!!  text output needs to be refined. For now, they are being kept to be
+!!  compatible with the legacy unit tests.
 !!
 !! SOURCE
 
-subroutine frohlichmodel_polaronmass(frohlich, cryst, dtset, efmasdeg, &
-    efmasval, ifc)
+subroutine frohlichmodel_polaronmass(frohlich, cryst, dtset, efmasdeg, efmasval, ifc)
 
 !Arguments ------------------------------------
 !scalars
- type(frohlich_t),intent(inout) :: frohlich
+ class(frohlich_t),intent(inout) :: frohlich
  type(crystal_t),intent(in) :: cryst
  type(dataset_type),intent(in) :: dtset
  type(ifc_type),intent(in) :: ifc
@@ -277,7 +276,6 @@ subroutine frohlichmodel_polaronmass(frohlich, cryst, dtset, efmasdeg, &
 !Local variables-------------------------------
 !scalar
  integer :: nu, ikpt, ideg, ndeg
-! integer :: iband
  integer :: iqdir
 !arrays
  real(dp) :: kpt(3)
@@ -417,7 +415,7 @@ subroutine frohlichmodel_zpr(frohlich, cryst, dtset, efmasdeg, efmasval, ifc)
 
 !Arguments ------------------------------------
 !scalars
- type(frohlich_t),intent(inout) :: frohlich
+ class(frohlich_t),intent(inout) :: frohlich
  type(crystal_t),intent(in) :: cryst
  type(dataset_type),intent(in) :: dtset
  type(ifc_type),intent(in) :: ifc
@@ -573,11 +571,7 @@ end subroutine frohlichmodel_zpr
 subroutine frohlich_free_el(self)
 
 !Arguments ------------------------------------
-!scalars
  class(frohlich_t),intent(inout) :: self
-
-!Local variables-------------------------------
-
 ! *************************************************************************
 
  self%isinitel = .false.
@@ -613,11 +607,7 @@ end subroutine frohlich_free_el
 subroutine frohlich_free_ph(self)
 
 !Arguments ------------------------------------
-!scalars
  class(frohlich_t),intent(inout) :: self
-
-!Local variables-------------------------------
-
 ! *************************************************************************
 
  self%isinitph = .false.
@@ -659,7 +649,6 @@ subroutine frohlich_calc_polaronmass(self)
 !Arguments ------------------------------------
 !scalars
  class(frohlich_t), intent(inout) :: self
-!arrays
 
 !Local variables-------------------------------
 !scalars
@@ -873,7 +862,6 @@ subroutine frohlich_calc_polaronmass(self)
    ABI_FREE(lk_h)
    ABI_FREE(zpr_ddk)
    ABI_FREE(intsuminv)
-
  endif
 
 end subroutine frohlich_calc_polaronmass
@@ -900,7 +888,6 @@ subroutine frohlich_calc_zpr(self)
 !Arguments ------------------------------------
 !scalars
  class(frohlich_t), intent(inout) :: self
-!arrays
 
 !Local variables-------------------------------
 !scalars
@@ -1065,7 +1052,7 @@ subroutine frohlich_init_el(self, cryst, kpt, ndeg, eig2_diag)
 !scalars
  class(frohlich_t), intent(inout) :: self
  type(crystal_t), intent(in) :: cryst
- integer :: ndeg
+ integer,intent(in) :: ndeg
 !arrays
  real(dp), intent(in) :: kpt(3)
  complex(dpc), intent(in) :: eig2_diag(3, 3, ndeg, ndeg)
@@ -1365,6 +1352,8 @@ subroutine frohlich_init_ph(self, cryst, efmas_ntheta, ifc)
        self%investar(nu, iqdir)*self%weights_qdir(iqdir)
    enddo
  enddo
+!Do not remove this useless line: a bug in the ifx2025 compiler is avoided thanks to it ...
+ write(std_out,'(a,es16.6)')' frohlich_init_ph : after the loop, self%zpr_gamma=',self%zpr_gamma
  self%zpr_gamma = quarter*piinv*self%zpr_gamma
  self%zpr_gamma = two*(three*quarter*piinv/self%ucvol)**third * self%zpr_gamma
 
@@ -1457,8 +1446,6 @@ subroutine lk_hamiltonian(band_params, kpt, h_lk)
  real(dp), intent(in) :: kpt(3)
  real(dp), intent(out) :: h_lk(3, 3)
 
-!Local variables-------------------------------
-
 ! *************************************************************************
 
  h_lk(1, 1) = band_params(1)*kpt(1)**2 + band_params(2)*(kpt(2)**2 + kpt(3)**2)
@@ -1474,7 +1461,6 @@ subroutine lk_hamiltonian(band_params, kpt, h_lk)
 
 end subroutine lk_hamiltonian
 !!***
-
 
 end module m_frohlich
 !!***

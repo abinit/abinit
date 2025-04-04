@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2024 ABINIT group (MG)
+!! Copyright (C) 2009-2025 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -33,6 +33,7 @@ MODULE m_clib
  public :: clib_print_mallinfo
  public :: clib_ulimit_stack    ! Set stack size limit to maximum allowed value.
  public :: clib_getpid
+ public :: clib_sleep           ! Sleep for a certain number of seconds.
  public :: clib_setenv
  public :: clib_mkdir_if_needed
 
@@ -81,6 +82,14 @@ MODULE m_clib
      integer(c_int) :: clib_getpid
    end function clib_getpid
  end interface
+
+ interface
+   subroutine clib_sleep(seconds) bind(C, name="sleep")
+     import
+     integer(c_int), value :: seconds  ! This is unsigned int in C
+   end subroutine clib_sleep
+ end interface
+
 
 ! =================================================
 ! ==== Fortran-bindings declared in mallinfo.c ====

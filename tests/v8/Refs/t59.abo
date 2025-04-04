@@ -1,8 +1,8 @@
 
 .Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Fri 13 Sep 2024.
 - ( at 19h14 )
-  
+
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v8_t59/t59.abi
 - output file    -> t59.abo
 - root for input  files -> t59i
@@ -251,8 +251,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.05833
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Si-GGA.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Si-GGA.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Si-GGA.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Si-GGA.psp8
 - Si    ONCVPSP  r_core=  1.60  1.72  1.92
 - 14.00000   4.00000    150713                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -457,7 +457,7 @@ For spin:  1, ikbz:  1  , kpt: [-1.2500E-01, -2.5000E-01,  0.0000E+00]
    -4.256546E-01     -1.523850E-01      2.890197E-01
     4.964041E-01     -2.998532E-02     -2.332094E-01
    -1.042477E-01     -6.718793E-01      3.880637E-01
- 
+
 For spin:  1, ikbz:  2  , kpt: [-1.2500E-01,  5.0000E-01,  0.0000E+00]
    -5.385749E-02     -1.647663E-01      1.093119E-01
    -1.247460E-01      2.405235E-01     -5.788876E-02
@@ -468,7 +468,7 @@ For spin:  1, ikbz:  2  , kpt: [-1.2500E-01,  5.0000E-01,  0.0000E+00]
    -4.536002E-01      1.020083E-01      1.757956E-01
     8.358939E-01     -6.641379E-01     -8.587800E-02
    -2.995134E-01      1.318200E-01      8.384682E-02
- 
+
 For spin:  1, ikbz:  3  , kpt: [-2.5000E-01, -3.7500E-01,  0.0000E+00]
    -1.267572E-01     -2.607285E-01      1.937429E-01
     7.785411E-02      4.766631E-01     -2.772586E-01
@@ -479,7 +479,7 @@ For spin:  1, ikbz:  3  , kpt: [-2.5000E-01, -3.7500E-01,  0.0000E+00]
    -8.126166E-01      5.278408E-02      3.799167E-01
    -6.493232E-01      1.339692E-02      3.179627E-01
    -1.235301E-01     -5.251875E-01      3.243591E-01
- 
+
 For spin:  1, ikbz:  4  , kpt: [-1.2500E-01, -3.7500E-01,  1.2500E-01]
    -6.168150E-02     -2.869407E-01      2.450221E-01
    -1.237882E-01      4.620851E-01     -1.711697E-01
@@ -490,7 +490,7 @@ For spin:  1, ikbz:  4  , kpt: [-1.2500E-01, -3.7500E-01,  1.2500E-01]
     8.692577E-01     -5.847421E-01     -5.583258E-02
    -7.466912E-01     -2.500684E-02      6.540855E-01
    -3.131413E-01     -6.060751E-01     -6.977999E-02
- 
+
 
 ================================================================================
 == DATASET  3 ==================================================================
@@ -544,7 +544,7 @@ For spin:  1, ikbz:  1  , kpt: [-1.2500E-01, -2.5000E-01,  0.0000E+00]
    -3.774145E-01     -1.270641E-01      2.522393E-01
     4.648305E-01     -8.667572E-03     -2.280815E-01
    -8.690965E-02     -6.085633E-01      3.477366E-01
- 
+
 For spin:  1, ikbz:  2  , kpt: [-1.2500E-01,  5.0000E-01,  0.0000E+00]
    -5.336618E-02     -1.611075E-01      1.072368E-01
    -1.192308E-01      2.324772E-01     -5.662320E-02
@@ -555,7 +555,7 @@ For spin:  1, ikbz:  2  , kpt: [-1.2500E-01,  5.0000E-01,  0.0000E+00]
    -4.147313E-01      9.737569E-02      1.586775E-01
     7.696509E-01     -6.009766E-01     -8.433712E-02
    -2.891350E-01      9.582187E-02      9.665667E-02
- 
+
 For spin:  1, ikbz:  3  , kpt: [-2.5000E-01, -3.7500E-01,  0.0000E+00]
    -1.246605E-01     -2.558052E-01      1.902328E-01
     7.649527E-02      4.588276E-01     -2.676614E-01
@@ -566,7 +566,7 @@ For spin:  1, ikbz:  3  , kpt: [-2.5000E-01, -3.7500E-01,  0.0000E+00]
    -7.361903E-01      6.444962E-02      3.358707E-01
    -5.835976E-01      2.656325E-02      2.785168E-01
    -1.332637E-01     -4.890910E-01      3.111776E-01
- 
+
 For spin:  1, ikbz:  4  , kpt: [-1.2500E-01, -3.7500E-01,  1.2500E-01]
    -6.085505E-02     -2.809951E-01      2.402480E-01
    -1.178918E-01      4.455648E-01     -1.662854E-01
@@ -577,7 +577,7 @@ For spin:  1, ikbz:  4  , kpt: [-1.2500E-01, -3.7500E-01,  1.2500E-01]
     8.095098E-01     -5.438168E-01     -4.933272E-02
    -6.803134E-01     -1.170834E-02      5.847259E-01
    -2.995406E-01     -5.524777E-01     -5.952279E-02
- 
+
 
 ================================================================================
 == DATASET  4 ==================================================================
@@ -602,8 +602,8 @@ meta: {optdriver: 8, wfk_task: 5, }
 - Reading GS states from WFK file: t59o_DS1_WFK
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Si-GGA.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Si-GGA.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Si-GGA.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Si-GGA.psp8
 - Si    ONCVPSP  r_core=  1.60  1.72  1.92
 - 14.00000   4.00000    150713                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -648,7 +648,7 @@ For spin:  1, ikbz:  1  , kpt: [-1.2500E-01, -2.5000E-01,  0.0000E+00]
    -3.774145E-01     -1.270641E-01      2.522393E-01
     4.648305E-01     -8.667572E-03     -2.280815E-01
    -8.690965E-02     -6.085633E-01      3.477366E-01
- 
+
 For spin:  1, ikbz:  2  , kpt: [-1.2500E-01,  5.0000E-01,  0.0000E+00]
    -5.336618E-02     -1.611075E-01      1.072368E-01
    -1.192308E-01      2.324772E-01     -5.662320E-02
@@ -659,7 +659,7 @@ For spin:  1, ikbz:  2  , kpt: [-1.2500E-01,  5.0000E-01,  0.0000E+00]
    -4.147313E-01      9.737569E-02      1.586775E-01
     7.696509E-01     -6.009766E-01     -8.433712E-02
    -2.891350E-01      9.582187E-02      9.665667E-02
- 
+
 For spin:  1, ikbz:  3  , kpt: [-2.5000E-01, -3.7500E-01,  0.0000E+00]
    -1.246605E-01     -2.558052E-01      1.902328E-01
     7.649527E-02      4.588276E-01     -2.676614E-01
@@ -670,7 +670,7 @@ For spin:  1, ikbz:  3  , kpt: [-2.5000E-01, -3.7500E-01,  0.0000E+00]
    -7.361903E-01      6.444962E-02      3.358707E-01
    -5.835976E-01      2.656325E-02      2.785168E-01
    -1.332637E-01     -4.890910E-01      3.111776E-01
- 
+
 For spin:  1, ikbz:  4  , kpt: [-1.2500E-01, -3.7500E-01,  1.2500E-01]
    -6.085505E-02     -2.809951E-01      2.402480E-01
    -1.178918E-01      4.455648E-01     -1.662854E-01
@@ -681,11 +681,11 @@ For spin:  1, ikbz:  4  , kpt: [-1.2500E-01, -3.7500E-01,  1.2500E-01]
     8.095098E-01     -5.438168E-01     -4.933272E-02
    -6.803134E-01     -1.170834E-02      5.847259E-01
    -2.995406E-01     -5.524777E-01     -5.952279E-02
- 
+
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      1.0250000000E+01  1.0250000000E+01  1.0250000000E+01 Bohr
               amu      2.80855000E+01
@@ -856,7 +856,7 @@ P           mkmem          10
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -873,12 +873,12 @@ P           mkmem          10
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -896,7 +896,7 @@ P           mkmem          10
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -911,7 +911,7 @@ P           mkmem          10
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009

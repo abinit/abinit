@@ -6,7 +6,7 @@
 !!  PAW I/O related operations
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2024 ABINIT group (MT, TR)
+!!  Copyright (C) 2012-2025 ABINIT group (MT, TR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -111,7 +111,7 @@ subroutine pawio_print_ij(unit,a_ij,adim,cplex,ndim,opt_l,opt_l_index, &
 !arrays
  real(dp),parameter :: fact_re(4)=(/one,one,-one,-one/),fact_im(4)=(/one,-one,-one,one/)
  real(dp) :: tabmax(cplex),tabmin(cplex)
- real(dp),allocatable :: b_ij(:),bsym_ij(:),prtab(:,:,:)
+ real(dp),allocatable :: b_ij(:),bsym_ij(:),prtab(:,:,:),out_arr(:)
 
 ! *************************************************************************
 
@@ -258,14 +258,17 @@ subroutine pawio_print_ij(unit,a_ij,adim,cplex,ndim,opt_l,opt_l_index, &
    call wrtout(unit,msg,mode_paral_)
  end if
 
+ LIBPAW_ALLOCATE(out_arr,(nmin))
  if (ndim<=maxprt.or.opt_l>=0) then
    do ilmn=1,nmin
-     write(msg,fmt=10) prtab(1,1:nmin,ilmn)
+     out_arr = prtab(1,1:nmin,ilmn)
+     write(msg,fmt=10) out_arr
      call wrtout(unit,msg,mode_paral_)
    end do
  else
    do ilmn=1,nmin
-     write(msg,fmt=11) prtab(1,1:nmin,ilmn),' ...'
+     out_arr = prtab(1,1:nmin,ilmn)
+     write(msg,fmt=11) out_arr,' ...'
      call wrtout(unit,msg,mode_paral_)
    end do
    write(msg,'(3x,a,i2,a)') '...  only ',maxprt,'  components have been written...'
@@ -281,12 +284,14 @@ subroutine pawio_print_ij(unit,a_ij,adim,cplex,ndim,opt_l,opt_l_index, &
    call wrtout(unit,msg,mode_paral_)
    if (ndim<=maxprt.or.opt_l>=0) then
      do ilmn=1,nmin
-       write(msg,fmt=10) prtab(2,1:nmin,ilmn)
+       out_arr = prtab(2,1:nmin,ilmn)
+       write(msg,fmt=10) out_arr
        call wrtout(unit,msg,mode_paral_)
      end do
    else
      do ilmn=1,nmin
-       write(msg,fmt=11) prtab(2,1:nmin,ilmn),' ...'
+       out_arr = prtab(2,1:nmin,ilmn)
+       write(msg,fmt=11) out_arr,' ...'
        call wrtout(unit,msg,mode_paral_)
      end do
      write(msg,'(3x,a,i2,a)') '...  only ',maxprt,'  components have been written...'
@@ -297,6 +302,7 @@ subroutine pawio_print_ij(unit,a_ij,adim,cplex,ndim,opt_l,opt_l_index, &
      call wrtout(unit,msg,mode_paral_)
    end if
  end if
+ LIBPAW_DEALLOCATE(out_arr)
 
  if (test_value>zero) then
    testval=test_value;if (Ha_or_eV==2) testval=testval*Ha_eV

@@ -8,7 +8,7 @@
 !! Container type is defined, and destruction
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2024 ABINIT group (MJV)
+!! Copyright (C) 1999-2025 ABINIT group (MJV)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -76,7 +76,7 @@ contains
 !!  init and fill primcell_ddb_info
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2024 ABINIT group (MJV)
+!! Copyright (C) 1999-2025 ABINIT group (MJV)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -195,7 +195,7 @@ subroutine init_primcell_ddb_info (pcell,brav,dipdip,mpert,msym,natom,nrpt,nsym,
 !!  read in and fill primcell_ddb_info from the file name given in input
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2024 ABINIT group (MJV)
+!! Copyright (C) 1999-2025 ABINIT group (MJV)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -319,7 +319,7 @@ subroutine read_primcell_ddb_info (filename,pcell)
 !!  write out primcell_ddb_info to the file name given in input
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2024 ABINIT group (MJV)
+!! Copyright (C) 1999-2025 ABINIT group (MJV)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -421,7 +421,7 @@ subroutine write_primcell_ddb_info (filename,pcell)
 !!  deallocate stuoff in primcell_ddb_info
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2024 ABINIT group (MJV)
+!! Copyright (C) 1999-2025 ABINIT group (MJV)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

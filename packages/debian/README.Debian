@@ -4,13 +4,13 @@ abinit for Debian
 How to run the tutorial 1: install the abinit-doc package, and
 create the file "t1x.files":
 
-$ cat t1x.files 
+$ cat t1x.files
 /usr/share/doc/abinit-doc/tests/tutorial/Input/t11.in
 t11.out
 t1xi
 t1xo
 t1x
-/usr/share/doc/abinit-doc/tests/Psps_for_tests/01h.pspgth
+/usr/share/doc/abinit-doc/tests/Pspdir/01h.pspgth
 
 Then run abinit using:
 
@@ -24,11 +24,11 @@ You should get only minor differences (different filenames, differences in
 energies like 1e-10 etc.). The output on my computer is:
 
 2,3c2,3
-< .Version 5.3.4  of ABINIT 
-< .(sequential version, prepared for a i486_linux_UNKNOWN computer) 
+< .Version 5.3.4  of ABINIT
+< .(sequential version, prepared for a i486_linux_UNKNOWN computer)
 ---
-> .Version 5.3.3  of ABINIT 
-> .(sequential version, prepared for a x86_64_linux_pgi computer) 
+> .Version 5.3.3  of ABINIT
+> .(sequential version, prepared for a x86_64_linux_pgi computer)
 17c17
 < .Starting date : Fri 27 Jul 2007.
 ---
@@ -52,14 +52,14 @@ memory.
 > memory.
 92,93c92,93
 < - pspini: atom type   1  psp file is
-/usr/share/doc/abinit-doc/tests/Psps_for_tests/01h.pspgth
+/usr/share/doc/abinit-doc/tests/Pspdir/01h.pspgth
 < - pspatm: opening atomic psp file
-/usr/share/doc/abinit-doc/tests/Psps_for_tests/01h.pspgth
+/usr/share/doc/abinit-doc/tests/Pspdir/01h.pspgth
 ---
 > - pspini: atom type   1  psp file is
-> /home/gonze/ABINIT/ABINITv5.3.3/abinit-release--gonze--5.3.3/tests/Psps_for_tests/01h.pspgth
+> /home/gonze/ABINIT/ABINITv5.3.3/abinit-release--gonze--5.3.3/tests/Pspdir/01h.pspgth
 > - pspatm: opening atomic psp file
-> /home/gonze/ABINIT/ABINITv5.3.3/abinit-release--gonze--5.3.3/tests/Psps_for_tests/01h.pspgth
+> /home/gonze/ABINIT/ABINITv5.3.3/abinit-release--gonze--5.3.3/tests/Pspdir/01h.pspgth
 122c122
 <  ETOT  1  -1.1013391225240    -1.101E+00 4.220E-04 8.396E+00 2.458E-02
 2.458E-02

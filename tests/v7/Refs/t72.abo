@@ -1,8 +1,8 @@
 
 .Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Fri 13 Sep 2024.
 - ( at 19h13 )
-  
+
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v7_t72/t72.abi
 - output file    -> t72.abo
 - root for input  files -> t72i
@@ -206,8 +206,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.00850
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/14si.pspgth
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/14si.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/14si.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/14si.pspgth
 - Goedecker-Teter-Hutter  Fri May 31 17:22:04 EDT 1996
 - 14.00000   4.00000    960531                znucl, zion, pspdat
     2    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -219,8 +219,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with 
-  definition in PRB44, 8503 (1991). 
+  so that the KB energies are not consistent with
+  definition in PRB44, 8503 (1991).
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   -4.40972757
          --- l  ekb(1:nproj) -->
@@ -382,8 +382,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.00850
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/14si.pspgth
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/14si.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/14si.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/14si.pspgth
 - Goedecker-Teter-Hutter  Fri May 31 17:22:04 EDT 1996
 - 14.00000   4.00000    960531                znucl, zion, pspdat
     2    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -395,8 +395,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with 
-  definition in PRB44, 8503 (1991). 
+  so that the KB energies are not consistent with
+  definition in PRB44, 8503 (1991).
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   -4.40972757
          --- l  ekb(1:nproj) -->
@@ -422,53 +422,53 @@ tolerances: {toldfe: 1.00E-12, }
  ETOT  2  -7.6522339555880    -6.563E-03 1.194E-09 6.698E-02
  ETOT  3  -7.6523240260809    -9.007E-05 1.797E-07 2.253E-04
  ETOT  4  -7.6523241739139    -1.478E-07 3.611E-10 5.218E-08
- Outer loop step  2 - inner step  4 - frozen Fock etot NOT converged : 
+ Outer loop step  2 - inner step  4 - frozen Fock etot NOT converged :
   diff in etot=  1.478E-07 > toldfe=  1.000E-12
  ETOT  5  -7.4809853054840     1.713E-01 3.674E-06 4.535E-01
  ETOT  6  -7.4814748793766    -4.896E-04 9.145E-07 5.010E-03
  ETOT  7  -7.4814818864254    -7.007E-06 1.282E-08 1.656E-05
  ETOT  8  -7.4814818965865    -1.016E-08 2.849E-11 1.020E-08
- Outer loop step  3 - inner step  4 - frozen Fock etot NOT converged : 
+ Outer loop step  3 - inner step  4 - frozen Fock etot NOT converged :
   diff in etot=  1.016E-08 > toldfe=  1.000E-12
  ETOT  9  -7.4876891174347    -6.207E-03 4.935E-07 3.827E-04
  ETOT 10  -7.4876894431446    -3.257E-07 6.597E-10 7.862E-07
  ETOT 11  -7.4876894440802    -9.356E-10 1.618E-12 9.405E-09
  ETOT 12  -7.4876894440880    -7.862E-12 1.255E-14 2.121E-11
- Outer loop step  4 - inner step  4 - frozen Fock etot NOT converged : 
+ Outer loop step  4 - inner step  4 - frozen Fock etot NOT converged :
   diff in etot=  7.862E-12 > toldfe=  1.000E-12
  ETOT 13  -7.4862034633377     1.486E-03 5.801E-07 3.705E-05
  ETOT 14  -7.4862034922310    -2.889E-08 5.545E-11 4.744E-08
  ETOT 15  -7.4862034922570    -2.594E-11 3.721E-14 2.955E-10
  ETOT 16  -7.4862034922571    -1.652E-13 1.753E-16 2.511E-12
- Outer loop step  5 - inner step  4 - frozen Fock etot NOT converged : 
+ Outer loop step  5 - inner step  4 - frozen Fock etot NOT converged :
   diff in etot=  1.652E-13 > toldfe=  1.000E-12
  ETOT 17  -7.4860739945528     1.295E-04 6.350E-07 8.135E-06
  ETOT 18  -7.4860740001508    -5.598E-09 1.323E-11 1.154E-08
  ETOT 19  -7.4860740001632    -1.242E-11 2.685E-14 4.122E-10
  ETOT 20  -7.4860740001635    -3.588E-13 5.861E-16 5.884E-13
- Outer loop step  6 - inner step  4 - frozen Fock etot NOT converged : 
+ Outer loop step  6 - inner step  4 - frozen Fock etot NOT converged :
   diff in etot=  3.588E-13 > toldfe=  1.000E-12
  ETOT 21  -7.4860674171492     6.583E-06 6.428E-07 4.196E-07
  ETOT 22  -7.4860674174540    -3.048E-10 7.089E-13 1.222E-09
  ETOT 23  -7.4860674174557    -1.638E-12 2.947E-15 2.951E-11
  ETOT 24  -7.4860674174557    -4.441E-14 4.010E-17 1.791E-14
- Outer loop step  7 - inner step  4 - frozen Fock etot NOT converged : 
+ Outer loop step  7 - inner step  4 - frozen Fock etot NOT converged :
   diff in etot=  4.441E-14 > toldfe=  1.000E-12
  ETOT 25  -7.4860655837057     1.834E-06 6.426E-07 3.158E-09
  ETOT 26  -7.4860655837082    -2.496E-12 5.844E-15 1.673E-11
  ETOT 27  -7.4860655837083    -7.283E-14 3.596E-17 1.988E-13
  ETOT 28  -7.4860655837083     2.309E-14 2.436E-19 8.350E-17
- Outer loop step  8 - inner step  4 - frozen Fock etot converged : 
+ Outer loop step  8 - inner step  4 - frozen Fock etot converged :
   for the second time, diff in etot=  2.309E-14 < toldfe=  1.000E-12
  ETOT 29  -7.4860661310372    -5.473E-07 6.425E-07 5.234E-11
  ETOT 30  -7.4860661310373    -2.842E-14 1.065E-16 6.452E-13
  ETOT 31  -7.4860661310372     9.059E-14 1.607E-18 1.114E-15
- Outer loop step  9 - inner step  3 - frozen Fock etot converged : 
+ Outer loop step  9 - inner step  3 - frozen Fock etot converged :
   for the second time, diff in etot=  9.059E-14 < toldfe=  1.000E-12
  ETOT 32  -7.4860663119389    -1.809E-07 6.425E-07 3.510E-12
  ETOT 33  -7.4860663119390    -6.040E-14 7.642E-18 4.456E-14
  ETOT 34  -7.4860663119390     1.066E-14 1.093E-19 6.468E-17
- Outer loop step 10 - inner step  3 - frozen Fock etot converged : 
+ Outer loop step 10 - inner step  3 - frozen Fock etot converged :
   for the second time, diff in etot=  1.066E-14 < toldfe=  1.000E-12
  ETOT 35  -7.4860662896913     2.225E-08 6.425E-07 5.894E-15
  ETOT 36  -7.4860662896913    -1.421E-14 1.725E-20 1.150E-16
@@ -584,7 +584,7 @@ total_energy_dc     : -7.48606628856837E+00
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      1.0217000000E+01  1.0217000000E+01  1.0217000000E+01 Bohr
               amu      2.80855000E+01
@@ -736,7 +736,7 @@ P           mkmem           4
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -748,12 +748,12 @@ P           mkmem           4
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -771,7 +771,7 @@ P           mkmem           4
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -786,7 +786,7 @@ P           mkmem           4
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009

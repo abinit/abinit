@@ -25,7 +25,7 @@ endfunction(print_properties)
 #################################################################
 function(print_target_properties tgt)
   if(NOT TARGET ${tgt})
-    message("There is no target named '${tgt}'")
+    message(STATUS "There is no target named '${tgt}'")
     return()
   endif()
 

@@ -6,29 +6,29 @@
 ndtset 2  udtset 1 2
 
 # Use the Perdew-Burke-Ernzerhof GGA, defined through the pseudopotential
-pseudos "Pseudodojo_nc_sr_04_pbe_standard_psp8/H.psp8"  # Name and location of the pseudopotential
+pseudos "Psdj_nc_sr_04_pbe_std_psp8/H.psp8"  # Name and location of the pseudopotential
                   # This pseudopotential comes from the pseudodojo site http://www.pseudo-dojo.org/  (NC SR PBE standard),
-                  # and was generated using the GGA-PBE exchange-correlation functional 
+                  # and was generated using the GGA-PBE exchange-correlation functional
                   # (GGA-PBE=Generalized Gradient Approximation - Perdew-Burke-Ernzerhof, ixc=-1012).
                   # By default, abinit uses the same exchange-correlation functional than the one of the input pseudopotential(s)
 # In tbase2_4.in the following pseudo was used
-# pseudos "Pseudodojo_nc_sr_04_pw_standard_psp8/H.psp8"
+# pseudos "Psdj_nc_sr_04_pw_std_psp8/H.psp8"
 
-#Definition of the unit cell and ecut, 
+#Definition of the unit cell and ecut,
 #for which one will have to make a convergence study
- acell:? 16 16 16  acell+? 2 2 2 
+ acell:? 16 16 16  acell+? 2 2 2
  ecut 25
 
 #First dataset : find the optimal bond length of H2, and associated total energy
    natom?1 2             # There are two atoms
-  ionmov?1 2             # Use the modified Broyden algorithm
+  geoopt?1 "bfgs"        # Use the modified Broyden algorithm
    ntime?1 10            # Maximum number of Broyden "timesteps"
-  tolmxf?1 5.0d-4        # Stopping criterion for the geometry optimization : when 
-                         # the residual forces are less than tolmxf, the Broyden 
+  tolmxf?1 5.0d-4        # Stopping criterion for the geometry optimization : when
+                         # the residual forces are less than tolmxf, the Broyden
                          # algorithm can stop
    xcart?1 -0.7  0.0 0.0 # The starting values of the
             0.7  0.0 0.0 # atomic coordinates
-  toldff?1 5.0d-5        # Will stop the SCF cycle when, twice in a row, 
+  toldff?1 5.0d-5        # Will stop the SCF cycle when, twice in a row,
                          # the difference between two consecutive evaluations of
                          # forces differ by less than toldff (in Hartree/Bohr)
    nband?1  1            # Just one band
@@ -39,8 +39,8 @@ pseudos "Pseudodojo_nc_sr_04_pbe_standard_psp8/H.psp8"  # Name and location of t
   occopt?2 2             # Allow occupation numbers to be set by hand
    nband?2 1 1           # Number of bands for spin up and spin down
      occ?2 1.0  0.0      # Occupation numbers for spin up state and spin down state.
-  toldfe?2 1.0d-6        # Will stop the SCF cycles when, twice in a row, 
-                         # the difference between two consecutive evaluations 
+  toldfe?2 1.0d-6        # Will stop the SCF cycles when, twice in a row,
+                         # the difference between two consecutive evaluations
                          # of total energy differ by less than toldfe (in Hartree)
                          # This value is way too large for most realistic studies of materials
    xcart?2 0.0 0.0 0.0   # The atom is located at the origin
@@ -61,13 +61,13 @@ typat 1 1         # For the first dataset, both numbers will be read,
                   # while for the second dataset, only one number will be read
 
 #Definition of the k-point grid
-kptopt 0          # Enter the k points manually 
+kptopt 0          # Enter the k points manually
 nkpt 1            # Only one k point is needed for isolated system,
                   # taken by default to be 0.0 0.0 0.0
 
 #Definition of the SCF procedure
 nstep 10          # Maximal number of SCF cycles
-#toldfe is no more defined, as toldff is used above... 
+#toldfe is no more defined, as toldff is used above...
 diemac 2.0        # Although this is not mandatory, it is worth to
                   # precondition the SCF cycle. The model dielectric
                   # function used as the standard preconditioner
@@ -82,14 +82,14 @@ diemac 2.0        # Although this is not mandatory, it is worth to
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
-#%%   tbase2_5.abo, tolnlines=  0, tolabs=  3.681e-09, tolrel=  2.000e-04, fld_options = -medium
+#%% files_to_test =
+#%%   tbase2_5.abo, tolnlines = 0, tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options = -medium
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = X. Gonze
-#%% keywords = 
-#%% description = 
+#%% keywords =
+#%% description =
 #%%   H2 molecule in a big box
 #%%   Like tbase2_4.abi, except that GGA is used instead of LDA.
 #%%<END TEST_INFO>

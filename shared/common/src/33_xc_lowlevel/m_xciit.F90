@@ -7,7 +7,7 @@
 !! Ichimaru S., Iyetomi H., Tanaka S., Phys. Rep. 149, 91-205 (1987) [[cite:Ichimaru1987]]
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2002-2024 ABINIT group (JFD,LK)
+!!  Copyright (C) 2002-2025 ABINIT group (JFD,LK)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -51,15 +51,15 @@ contains
 !!  rspts(npt)=Wigner-Seitz radii at each point
 !!
 !! OUTPUT
-!!  exc(npt)=exchange-correlation energy density
-!!  fxc(npt)=exchange-correlation free energy at finite temperature
+!!  fxc(npt)=exchange-correlation free energy density (hartree)
+!!  tsxc(npt)=exchange-correlation entropy energy density (hartree)
 !!  vxc(npt)=exchange-correlation potential
 !!  --- optional output ---
 !!  [dvxc(npt)]=partial second derivatives of the xc energy
 !!
 !! SOURCE
 
-subroutine xciit(exc,fxc,npt,order,rspts,temp,vxc, &
+subroutine xciit(fxc,tsxc,npt,order,rspts,temp,vxc, &
 &                dvxc)!Optional argument
 
 !Arguments ------------------------------------
@@ -68,7 +68,7 @@ subroutine xciit(exc,fxc,npt,order,rspts,temp,vxc, &
  real(dp),intent(in) :: temp
 !arrays
  real(dp),intent(in) :: rspts(npt)
- real(dp),intent(out) :: exc(npt),fxc(npt),vxc(npt)
+ real(dp),intent(out) :: fxc(npt),tsxc(npt),vxc(npt)
  real(dp),intent(out),optional :: dvxc(npt)
 
 !Local variables-------------------------------
@@ -102,8 +102,9 @@ subroutine xciit(exc,fxc,npt,order,rspts,temp,vxc, &
    Gamma=one/(tt*ef)/rs
 
 !  Exchange-correlation of Ichimaru functional
-   fxc(ipt)= fexsGamma(Gamma,tt)*rsm1
-   exc(ipt)=fxc(ipt) - tdexcsdtiit(rs,tt);
+   fxc(ipt)=fexsGamma(Gamma,tt)*rsm1
+   ! exc(ipt)=fxc(ipt) - tdexcsdtiit(rs,tt);
+   tsxc(ipt)=-tdexcsdtiit(rs,tt)
    vxc(ipt)=(8.0_dp*(Fxc_iit(rs,tt,deltavxc)-Fxc_iit(rs,tt,-deltavxc)) &
 &   -(Fxc_iit(rs,tt,two*deltavxc)-Fxc_iit(rs,tt,-two*deltavxc)))/ &
 &   (12.0_dp*deltavxc*3.0_dp/(4.0_dp*pi)/rs**3)

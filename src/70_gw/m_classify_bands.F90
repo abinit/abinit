@@ -7,7 +7,7 @@
 !!  a set of degenerate bands at a given k-point and spin.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2024 ABINIT group (MG)
+!!  Copyright (C) 2008-2025 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,9 +27,9 @@ module m_classify_bands
  use m_esymm
  use m_errors
 
- use defs_datatypes,   only : pseudopotential_type, ebands_t
+ use defs_datatypes,   only : pseudopotential_type
  use m_numeric_tools,  only : get_trace
- use m_symtk,          only : mati3inv
+ use m_matrix,         only : mati3inv
  use m_hide_blas,      only : xdotc, xdotu, xcopy
  use m_fft_mesh,       only : rotate_FFT_mesh, calc_ceigr
  use m_crystal,        only : crystal_t
@@ -42,6 +42,7 @@ module m_classify_bands
  use m_paw_sphharm,    only : setsym_ylm
  use m_paw_nhat,       only : nhatgrid
  use m_wfd,            only : wfd_t
+ use m_ebands,         only : ebands_t
 
  implicit none
 

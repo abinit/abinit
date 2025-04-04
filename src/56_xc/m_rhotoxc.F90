@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, MF, GZ, DRH, MT, SPr)
+!!  Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, MF, GZ, DRH, MT, SPr)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -95,15 +95,7 @@ contains
 !!  [xccctau3d(n3xccc)]=3D core electron kinetic energy density for XC core correction (bohr^-3)
 !!
 !! OUTPUT
-!!  enxc=returned exchange and correlation energy (hartree).
-!!  strsxc(6)= contribution of xc to stress tensor (hartree/bohr^3),
-!!   given in order (1,1), (2,2), (3,3), (3,2), (3,1), (2,1).
-!!   (note: fxc is rho*exc in the following)
-!!   Explicitely : strsxc(mu,nu) = (1/N) Sum(i=1,N)
-!!    ( delta(mu,nu) * [  exc(i)rhotot(i)
-!!               - depsxc_drho(up,i)*rhor(up,i)-depsxc_drho(dn,i)*rhor(dn,i)]
-!!     - gradrho(up,mu)*gradrho(up,nu) * depsxc_dgradrho(up,i) / gradrho(up,i)
-!!     - gradrho(dn,mu)*gradrho(dn,nu) * depsxc_dgradrho(dn,i) / gradrho(dn,i) )
+!!  bigexc=returned exchange and correlation energy (hartree).
 !!  vxc(nfft,xcdata%nspden)=xc potential
 !!    (spin up in first half and spin down in second half if xcdata%nspden=2)
 !!    (v^11, v^22, Re[V^12], Im[V^12] if xcdata%nspden=4)
@@ -162,10 +154,18 @@ contains
 !!                  k3xc(:,4)= d3Exc/drho_dn drho_dn drho_dn
 !!
 !! === Additional optional output ===
-!!  [exc_vdw_out]= vdW-DF contribution to enxc (hartree)
+!!  [exc_vdw_out]= vdW-DF contribution to bigexc (hartree)
 !!  [vxctau(nfft,xcdata%nspden,4*xcdata%usekden)]=(only for meta-GGA)=
 !!    vxctau(:,:,1): derivative of XC energy density with respect to kinetic energy density (depsxcdtau).
 !!    vxctau(:,:,2:4): gradient of vxctau (gvxctau)
+!!  [strsxc(6)]= contribution of xc to stress tensor (hartree/bohr^3),
+!!   given in order (1,1), (2,2), (3,3), (3,2), (3,1), (2,1).
+!!   Explicitely : strsxc(mu,nu) = (1/N) Sum(i=1,N)
+!!    { delta(mu,nu) * [  exc(i)rhotot(i)
+!!               - depsxc_drho(up,i)*rhor(up,i)-depsxc_drho(dn,i)*rhor(dn,i)]
+!!     - gradrho(up,mu)*gradrho(up,nu) * depsxc_dgradrho(up,i) / gradrho(up,i)
+!!     - gradrho(dn,mu)*gradrho(dn,nu) * depsxc_dgradrho(dn,i) / gradrho(dn,i) }
+!!   (note: there are additional terms in case of metaGGA)
 !! === For the TB09 XC functional (modified Becke-Johnson) ===
 !!  [grho1_over_rho1]=Integral of |Grad(rho^1)|/rho^1 over the augmentation region
 !!                    Used to compute the c parameter of the TB09 XC functional
@@ -209,8 +209,10 @@ contains
 !! *Hybrid GGA
 !!   41 means PBE0-1/4                                     xcpbe
 !!   42 means PBE0-1/3                                     xcpbe
-!! *Other
-!!   50 means IIT xc                                       xciit
+!! *Temperature-dependant exchange-correlation functionals
+!!   50 means IIT xc (TLDA functional)                     xciit
+!!   51 means KSDT xc (TLDA functional)                    xcksdt
+!!   60 means KDT16 xc (PBE TGGA functional)               xckdt16
 !!
 !! NOTE: please update echo_xc_name.F90 if you add new functional (apart from libxc)
 !!
@@ -222,10 +224,19 @@ contains
 !!   rho ---> means density
 !!   tau ---> means kinetic energy density
 !!   exc ---> means exchange-correlation energy density per particle
-!!   epsxc ---> means rho*exc == exchange-correlation energy density
+!!   rhoexc ---> means rho*exc == exchange-correlation energy density
 !!   vxc ---> means exchange-correlation potential
-!!   bigexc ---> means exchange-correlation energy E_xc (for the moment it is named "enxc")
+!!   bigexc ---> means exchange-correlation energy E_xc
+!!   bigsxc ---> means exchange-correlation entropy S_xc (zero when standard xc functionals are used)
 !!   m_norm ---> means norm of magnetization
+!!
+!! In the case where finite-temperature exchange-correlation functionals are used:
+!!   exc_b ---> means exchange-correlation free energy density per particle
+!!   rhoexc ---> means rho*exc == exchange-correlation free energy density
+!!   bigexc ---> means exchange-correlation internal energy E_xc
+!!   bigsxc ---> means exchange-correlation entropy S_xc
+!!   tsxc_b ---> means exchange-correlation entropy energy density per particle
+!!   rhotsxc --> means rho*tsxc == exchange-correlation entropy energy density
 !!
 !!   g... --> means gradient of something (e.g. : grho --> means gradient of electron density)
 !!   g...2 -> means square norm of gradient of something (e.g. : grho2 -> means square norm of gradient of electron density)
@@ -244,10 +255,10 @@ contains
 !!
 !! SOURCE
 
-subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
+subroutine rhotoxc(bigexc,bigsxc,kxc,mpi_enreg,nfft,ngfft, &
 & nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,option, &
-& rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata, &
-& add_tfw,exc_vdw_out,grho1_over_rho1,electronpositron,k3xc,taur,vhartr,vxctau,xc_funcs,xcctau3d) ! optional arguments
+& rhor,rprimd,usexcnhat,vxc,vxcavg,xccc3d,xcdata, &
+& add_tfw,exc_vdw_out,grho1_over_rho1,electronpositron,k3xc,strsxc,taur,vhartr,vxctau,xc_funcs,xcctau3d) ! optional arguments
 
 !Arguments ------------------------------------
 !scalars
@@ -255,7 +266,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
  integer,intent(in) :: usexcnhat
  logical,intent(in) :: non_magnetic_xc
  logical,intent(in),optional :: add_tfw
- real(dp),intent(out) :: enxc,vxcavg
+ real(dp),intent(out) :: bigexc,vxcavg,bigsxc
  real(dp),intent(out),optional :: exc_vdw_out,grho1_over_rho1
  type(MPI_type),intent(in) :: mpi_enreg
  type(electronpositron_type),pointer,optional :: electronpositron
@@ -267,10 +278,10 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
  real(dp),intent(in),target :: rhor(nfft,xcdata%nspden)
  real(dp),intent(in) :: rprimd(3,3),xccc3d(n3xccc)
  real(dp),intent(in),optional :: xcctau3d(:)
- real(dp),intent(out) :: kxc(nfft,nkxc),strsxc(6),vxc(nfft,xcdata%nspden)
+ real(dp),intent(out) :: kxc(nfft,nkxc),vxc(nfft,xcdata%nspden)
  real(dp),intent(in),optional :: vhartr(nfft)
  real(dp),intent(in),target,optional :: taur(:,:)
- real(dp),intent(out),optional :: k3xc(1:nfft,1:nk3xc),vxctau(:,:,:)
+ real(dp),intent(out),optional :: strsxc(6),k3xc(1:nfft,1:nk3xc),vxctau(:,:,:)
  type(libxc_functional_type),intent(inout),optional :: xc_funcs(2)
 
 !Local variables-------------------------------
@@ -278,10 +289,10 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
  integer :: auxc_ixc,cplex,ierr,ifft,ii,ixc,ixc_from_lib,indx,ipositron,ipts,ishift,ispden,iwarn,iwarnp
  integer :: jj,mpts,ndvxc,nd2vxc,nfftot,ngr,ngrad,ngrad_apn,nkxc_eff,npts
  integer :: nspden,nspden_apn,nspden_eff,nspden_updn,nspgrad,nvxcgrho,nvxclrho,nvxctau
- integer :: n3xctau,order,usefxc,nproc_fft,comm_fft,usegradient,usekden,uselaplacian
- logical :: my_add_tfw
+ integer :: n3xctau,order,nproc_fft,comm_fft,usegradient,usekden,uselaplacian
+ logical :: compute_stress,my_add_tfw
  real(dp),parameter :: mot=-one/3.0_dp
- real(dp) :: coeff,divshft,doti,dstrsxc,dvdn,dvdz,epsxc,exc_str,factor,m_norm_min,s1,s2,s3
+ real(dp) :: coeff,divshft,doti,dstrsxc,dvdn,dvdz,rhoexc,rhotsxc,factor,m_norm_min,s1,s2,s3
  real(dp) :: strdiag,strsxc1_tot,strsxc2_tot,strsxc3_tot,strsxc4_tot
  real(dp) :: strsxc5_tot,strsxc6_tot,ucvol
  real(dp) :: deltae_vdw,exc_vdw
@@ -289,10 +300,12 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
  character(len=500) :: message
  real(dp) :: hyb_mixing, hyb_mixing_sr, hyb_range
 !arrays
- real(dp) :: gm_norm(3),grho(3),gmet(3,3),gprimd(3,3),qphon(3),rmet(3,3)
+ real(dp) :: d2rho(6),gm_norm(3),grho(3),gmet(3,3),gprimd(3,3),qphon(3),rmet(3,3)
  real(dp) :: tsec(2),vxcmean(4)
+ real(dp),allocatable :: d2rhonow(:,:,:)
  real(dp),allocatable :: d2vxc_b(:,:),depsxc(:,:),depsxc_apn(:,:),dvxc_apn(:),dvxc_b(:,:)
- real(dp),allocatable :: exc_b(:),fxc_b(:),fxc_apn(:),grho2_apn(:),grho2_b_updn(:,:),lrhonow(:,:),lrho_b_updn(:,:)
+ real(dp),allocatable :: exc_b(:),tsxc_b(:),fxc_apn(:),grho2_apn(:),grho2_b_updn(:,:)
+ real(dp),allocatable :: lrhonow(:,:),lrho_b_updn(:,:)
  real(dp),allocatable :: m_norm(:),nhat_up(:),rho_b_updn(:,:),rho_b(:),rhonow_apn(:,:,:)
  real(dp),allocatable :: tau_b_updn(:,:),vxc_apn(:,:),vxcgr_apn(:),vxcgrho_b_updn(:,:),vxcrho_b_updn(:,:)
  real(dp),allocatable :: vxc_b_apn(:),vxc_ep(:),vxctau_b_updn(:,:),vxclrho_b_updn(:,:)
@@ -313,6 +326,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
  call timab(81,1,tsec)
 
 !Optional arguments
+ compute_stress=present(strsxc)
  my_add_tfw=.false.;if (present(add_tfw)) my_add_tfw=add_tfw
 
 !Useful scalars
@@ -427,16 +441,20 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
  qphon(:)=zero
  iwarn=0
  nfftot=ngfft(1)*ngfft(2)*ngfft(3)
- usefxc=0;if (ixc==50) usefxc=1
 
 !Initializations
- enxc=zero
- epsxc=zero
+ bigexc=zero
+ bigsxc=zero
+ rhoexc=zero
+ rhotsxc=zero
  vxc(:,:)=zero
  vxcavg=zero
- strsxc(:)=zero
- strsxc1_tot=zero;strsxc2_tot=zero;strsxc3_tot=zero
- strsxc4_tot=zero;strsxc5_tot=zero;strsxc6_tot=zero
+ if (compute_stress) then
+   strsxc(:)=zero
+   strsxc1_tot=zero;strsxc2_tot=zero;strsxc3_tot=zero
+   strsxc4_tot=zero;strsxc5_tot=zero;strsxc6_tot=zero
+   strsxc_vdw(:,:)=zero
+ end if
  if (with_vxctau) vxctau(:,:,:)=zero
  if (nkxc/=0) kxc(:,:)=zero
  if(abs(option)==3.and.nk3xc/=0) k3xc(:,:)=zero
@@ -452,7 +470,6 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
  exc_vdw = zero
  decdrho_vdw(:,:) = zero
  decdgrho_vdw(:,:,:) = zero
- strsxc_vdw(:,:) = zero
  if (present(grho1_over_rho1)) grho1_over_rho1=zero
 
  if ((xcdata%xclevel==0.or.ixc==0).and.(.not.my_add_tfw)) then
@@ -612,11 +629,15 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
    end if
 
 !  rhonow will contain effective density (and gradients if GGA)
-!  taunow will contain effective kinetic energy density (if MetaGGA)
+!  taunow will contain effective kinetic energy density (if MGGA)
 !  lrhonow will contain the laplacian if we have a MGGA
+!  d2rhonow will contain the 2nd derivatives if we have a MGGA and need the stress tensor
    ABI_MALLOC(rhonow,(nfft,nspden_eff,ngrad*ngrad))
    ABI_MALLOC(lrhonow,(nfft,nspden_eff*uselaplacian))
    ABI_MALLOC(taunow,(nfft,nspden_eff,usekden))
+   if (compute_stress.and.uselaplacian>0) then
+     ABI_MALLOC(d2rhonow,(nfft,nspden_eff,6*uselaplacian))
+   end if
 
 !  ====================================================================
 !  ====================================================================
@@ -627,8 +648,13 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 !    as well as the gradient of the density, also on the unshifted
 !    or shifted grid (will be in rhonow(:,:,2:4)), if needed.
      if (uselaplacian==1) then
-       call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden_eff,&
-&                 qphon,rhocorval,rhonow,lrhonow=lrhonow)
+       if (compute_stress) then
+         call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden_eff,&
+&                   qphon,rhocorval,rhonow,lrhonow=lrhonow,d2rhonow=d2rhonow)
+       else
+         call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden_eff,&
+&                   qphon,rhocorval,rhonow,lrhonow=lrhonow)
+       end if
      else
        call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden_eff,&
 &                 qphon,rhocorval,rhonow)
@@ -718,6 +744,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 
 !      Allocation of mandatory arguments of drivexc
        ABI_MALLOC(exc_b,(npts))
+       ABI_MALLOC(tsxc_b,(npts))
        ABI_MALLOC(rho_b,(npts))
        ABI_MALLOC(rho_b_updn,(npts,nspden_updn))
        ABI_MALLOC(vxcrho_b_updn,(npts,nspden_updn))
@@ -732,7 +759,6 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
        ABI_MALLOC(vxctau_b_updn,(npts,nvxctau))
        ABI_MALLOC(dvxc_b,(npts,ndvxc))
        ABI_MALLOC(d2vxc_b,(npts,nd2vxc))
-       ABI_MALLOC(fxc_b,(npts*usefxc))
        if (nvxcgrho>0) vxcgrho_b_updn(:,:)=zero
        if (nvxclrho>0) vxclrho_b_updn(:,:)=zero
        if (nvxctau>0) vxctau_b_updn(:,:)=zero
@@ -780,10 +806,9 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
            call libxc_functionals_init(auxc_ixc,nspden,xc_functionals=xc_funcs_auxc)
          end if
          call drivexc(auxc_ixc,order,npts,nspden_updn,usegradient,0,0,&
-&          rho_b_updn,exc_b,vxcrho_b_updn,nvxcgrho,0,0,ndvxc,nd2vxc, &
+&          rho_b_updn,exc_b,tsxc_b,vxcrho_b_updn,nvxcgrho,0,0,ndvxc,nd2vxc,xcdata%tphysel, &
 &          grho2_updn=grho2_b_updn,vxcgrho=vxcgrho_b_updn,dvxc=dvxc_b, &
-&          fxcT=fxc_b,hyb_mixing=xcdata%hyb_mixing,el_temp=xcdata%tphysel,&
-&          xc_funcs=xc_funcs_auxc)
+&          hyb_mixing=xcdata%hyb_mixing,xc_funcs=xc_funcs_auxc)
 !        Transfer the xc kernel
          if (nkxc_eff==1.and.ndvxc==15) then
            kxc(ifft:ifft+npts-1,1)=half*(dvxc_b(1:npts,1)+dvxc_b(1:npts,9)+dvxc_b(1:npts,10))
@@ -808,23 +833,23 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
        if (present(xc_funcs)) then
          call drivexc(ixc,order,npts,nspden_updn,&
 &          usegradient,uselaplacian,usekden,&
-&          rho_b_updn,exc_b,vxcrho_b_updn,&
-&          nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc, &
+&          rho_b_updn,exc_b,tsxc_b,vxcrho_b_updn,&
+&          nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc,xcdata%tphysel, &
 &          grho2_updn=grho2_b_updn,vxcgrho=vxcgrho_b_updn,&
 &          lrho_updn=lrho_b_updn,vxclrho=vxclrho_b_updn,&
 &          tau_updn=tau_b_updn,vxctau=vxctau_b_updn,&
-&          dvxc=dvxc_b,d2vxc=d2vxc_b,el_temp=xcdata%tphysel,fxcT=fxc_b,&
+&          dvxc=dvxc_b,d2vxc=d2vxc_b,&
 &          hyb_mixing=xcdata%hyb_mixing,&
 &          xc_funcs=xc_funcs)
        else
          call drivexc(ixc,order,npts,nspden_updn,&
 &          usegradient,uselaplacian,usekden,&
-&          rho_b_updn,exc_b,vxcrho_b_updn,&
-&          nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc, &
+&          rho_b_updn,exc_b,tsxc_b,vxcrho_b_updn,&
+&          nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc,xcdata%tphysel, &
 &          grho2_updn=grho2_b_updn,vxcgrho=vxcgrho_b_updn,&
 &          lrho_updn=lrho_b_updn,vxclrho=vxclrho_b_updn,&
 &          tau_updn=tau_b_updn,vxctau=vxctau_b_updn,&
-&          dvxc=dvxc_b,d2vxc=d2vxc_b,el_temp=xcdata%tphysel,fxcT=fxc_b,&
+&          dvxc=dvxc_b,d2vxc=d2vxc_b,&
 &          hyb_mixing=xcdata%hyb_mixing)
        end if
 
@@ -854,27 +879,37 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 !      Gradient Weiszacker correction to a Thomas-Fermi functional
        if (my_add_tfw) then
          vxcgrho_b_updn(:,:)=zero
-         call xctfw(xcdata%tphysel,exc_b,fxc_b,usefxc,rho_b_updn,vxcrho_b_updn,npts,nspden_updn, &
+         call xctfw(xcdata%tphysel,exc_b,tsxc_b,rho_b_updn,vxcrho_b_updn,npts,nspden_updn, &
 &                   vxcgrho_b_updn,nvxcgrho,grho2_b_updn)
        end if
 
-!      Accumulate enxc, strsxc and store vxc (and eventually kxc)
+!      Accumulate bigexc, bigsxc, strsxc and store vxc (and eventually kxc)
        dstrsxc=zero
        do ipts=ifft,ifft+npts-1
          indx=ipts-ifft+1
-         epsxc=epsxc+rho_b(indx)*exc_b(indx)  !will be normalized with respect to the volume later to get enxc ("bigexc").
+         rhoexc=rhoexc+rho_b(indx)*exc_b(indx)    ! Will be normalized with respect to the volume later to get bigexc.
+         rhotsxc=rhotsxc+rho_b(indx)*tsxc_b(indx) ! Will be normalized with respect to the volume later to get bigsxc.
          depsxc(ipts,1)=vxcrho_b_updn(indx,1)
-         exc_str=exc_b(indx);if(usefxc==1) exc_str=fxc_b(indx)
-         if(nspden_updn==1)then
-           strdiag=rho_b(indx)*(exc_str-vxcrho_b_updn(indx,1))
-         else if(nspden_updn==2)then
-           depsxc(ipts,2)=vxcrho_b_updn(indx,2)
-!          Note : this is not the complete Vxc in the GGA case
-           strdiag=rho_b(indx)*exc_str &
-&           -rho_b_updn(indx,1)*vxcrho_b_updn(indx,1)&
-&           -(rho_b(indx)-rho_b_updn(indx,1))*vxcrho_b_updn(indx,2)
+         if (nspden_updn==2) depsxc(ipts,2)=vxcrho_b_updn(indx,2)
+         if (compute_stress) then
+           ! Note for GGA/mGGA: the diagonal stress contribution is not complete because
+           !  this is not the complete Vxc. Only Int[n.dFxc/dn] is computed here. The
+           !  other terms are computed later
+           ! (i.e. -Int[n.grad(dFxc/grad(n))] and Int[n.Lapl(dFxc/Lapl(n))])
+           if(nspden_updn==1)then
+             strdiag=rho_b(indx)*(exc_b(indx)-vxcrho_b_updn(indx,1))
+             if (usekden==1) strdiag=strdiag-two*tau_b_updn(indx,1)*vxctau_b_updn(indx,1)
+           else if(nspden_updn==2)then
+             strdiag=rho_b(indx)*exc_b(indx) &
+&             - rho_b_updn(indx,1)*vxcrho_b_updn(indx,1)&
+&             - (rho_b(indx)-rho_b_updn(indx,1))*vxcrho_b_updn(indx,2)
+             if (usekden==1) then
+               strdiag=strdiag - tau_b_updn(indx,1)*vxctau_b_updn(indx, 1) &
+&                              - tau_b_updn(indx,2)*vxctau_b_updn(indx,2)
+             end if
+           end if
+           dstrsxc=dstrsxc+strdiag
          end if
-         dstrsxc=dstrsxc+strdiag
 
 !        For GGAs, additional terms appear
 !        (the LB functional does not lead to additional terms)
@@ -898,7 +933,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 !            case take the coefficient that will be multiplied by the
 !            gradient of the total density
              if(nspden_updn==1)then
-!              !              Definition of vxcgrho_b_updn changed in v3.3
+!              ! Definition of vxcgrho_b_updn changed in v3.3
                if (nvxcgrho == 3) then
                  coeff=half*vxcgrho_b_updn(indx,1) + vxcgrho_b_updn(indx,3)
                else
@@ -915,39 +950,37 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
              end if
              depsxc(ipts,ispden+nspden_updn)=coeff
 
-!            Store the gradient of up, down or total density, depending on ispden and nspden, at point ipts
-             if(nspden_updn==1)then
-               grho(1:3)=rhonow(ipts,1,2:4)
-             else if(ispden==1 .and. nspden_updn==2)then
-               grho(1:3)=rhonow(ipts,2,2:4)
-             else if(ispden==2 .and. nspden_updn==2)then
-               grho(1:3)=rhonow(ipts,1,2:4)-rhonow(ipts,2,2:4)
-             else if(ispden==3 .and. nspden_updn==2)then
-               grho(1:3)=rhonow(ipts,1,2:4)
-             end if
-
 !            In case of ixc 31 (mGGA functional fake 1),
 !            skip the stress tensor to follow a LDA scheme (see doc/theory/MGGA/report_MGGA.pdf)
              if(ixc==31) cycle
 
-!            Compute the contribution to the stress tensor
-             s1=-grho(1)*grho(1)*coeff
-             s2=-grho(2)*grho(2)*coeff
-             s3=-grho(3)*grho(3)*coeff
-!            The contribution of the next line comes from the part of Vxc
-!            obtained from the derivative wrt the gradient
-             dstrsxc=dstrsxc+s1+s2+s3
-             strsxc1_tot=strsxc1_tot+s1
-             strsxc2_tot=strsxc2_tot+s2
-             strsxc3_tot=strsxc3_tot+s3
-             strsxc4_tot=strsxc4_tot-grho(3)*grho(2)*coeff
-             strsxc5_tot=strsxc5_tot-grho(3)*grho(1)*coeff
-             strsxc6_tot=strsxc6_tot-grho(2)*grho(1)*coeff
+!            Compute the GGA contribution to the stress tensor, from the part of Vxc
+!            coming from the derivative wrt the gradient (Eq (24) of PRB 50, 4327 (1994))
+             if (compute_stress) then
+               if (nspden_updn==1.and.ispden==1) grho(1:3)=rhonow(ipts,1,2:4)
+               if (nspden_updn==2.and.ispden==1) grho(1:3)=rhonow(ipts,2,2:4)
+               if (nspden_updn==2.and.ispden==2) grho(1:3)=rhonow(ipts,1,2:4)-rhonow(ipts,2,2:4)
+               if (nspden_updn==2.and.ispden==3) grho(1:3)=rhonow(ipts,1,2:4)
+               s1=-grho(1)*grho(1)*coeff
+               s2=-grho(2)*grho(2)*coeff
+               s3=-grho(3)*grho(3)*coeff
+               !Diagonal part: +Int[n*Grad.dot.(dFxc/dgrad(n))] = -Int[grad(n).dot.(dFxc/dgrad(n))]
+               !  dFxc/dgrad(n) is 1/|grad(n)|.dFxc/d[grad(n)|*grad(n) = coeff * grho(:)
+               dstrsxc=dstrsxc+s1+s2+s3
+               !Non-diagonal part: -Int[dn/dr_alpha.dFxc/grad_beta(n)]
+               strsxc1_tot=strsxc1_tot+s1
+               strsxc2_tot=strsxc2_tot+s2
+               strsxc3_tot=strsxc3_tot+s3
+               strsxc4_tot=strsxc4_tot-grho(3)*grho(2)*coeff
+               strsxc5_tot=strsxc5_tot-grho(3)*grho(1)*coeff
+               strsxc6_tot=strsxc6_tot-grho(2)*grho(1)*coeff
+             end if
 
            end do
          end if
 
-!        For meta-GGAs, add the laplacian term (vxclrho) and/or kinetic energy density term (vxctau)
+!        For meta-GGAs, add the laplacian term (vxclrho)
+!        and/or kinetic energy density term (vxctau)
          if (usekden==1.and.with_vxctau) then
            if (nspden_updn==1)then
              vxctau(ipts,1,1) = vxctau_b_updn(indx,1)
@@ -962,6 +995,25 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
            else if (nspden_updn==2)then
              depsxc(ipts,6)   = vxclrho_b_updn(indx,1)
              depsxc(ipts,7)   = vxclrho_b_updn(indx,2)
+           end if
+!          Compute the contribution to the stress tensor
+           if (compute_stress) then
+             do ispden=1,2
+               if (nspden_updn==1.and.ispden==1) d2rho(1:6)=d2rhonow(ipts,1,1:6)
+               if (nspden_updn==1.and.ispden==2) exit
+               if (nspden_updn==2.and.ispden==1) d2rho(1:6)=d2rhonow(ipts,2,1:6)
+               if (nspden_updn==2.and.ispden==2) d2rho(1:6)=d2rhonow(ipts,1,1:6)-d2rhonow(ipts,2,1:6)
+               coeff=vxclrho_b_updn(indx,ispden)
+               !Diagonal part: -Int[n.Lapl(dFxc/Lapl(n))] = -Int[Lapl(n).dFxc/grad(n)]
+               dstrsxc=dstrsxc-(d2rho(1)+d2rho(2)+d2rho(3))*coeff
+               !Non-diagonal part: -2*Int[d2n/dr_alpha.dr_beta.dFxc/Lapl(n)]
+               strsxc1_tot=strsxc1_tot-two*d2rho(1)*coeff
+               strsxc2_tot=strsxc2_tot-two*d2rho(2)*coeff
+               strsxc3_tot=strsxc3_tot-two*d2rho(3)*coeff
+               strsxc4_tot=strsxc4_tot-two*d2rho(4)*coeff
+               strsxc5_tot=strsxc5_tot-two*d2rho(5)*coeff
+               strsxc6_tot=strsxc6_tot-two*d2rho(6)*coeff
+             end do
            end if
          end if
 
@@ -996,9 +1048,6 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 &           electronpositron%posdensity0_limit,rho_b,&
 &           rhonow_apn(:,1,1),vxc_b_apn,vxcgr_apn,vxc_ep,dvxce=dvxc_apn)
          end if
-         ABI_FREE(vxc_ep)
-         ABI_FREE(rhonow_apn)
-         ABI_FREE(grho2_apn)
 !        Accumulate electron-positron XC energies
          s1=zero
          do ipts=1,npts
@@ -1021,25 +1070,34 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
          do ipts=ifft,ifft+npts-1
            indx=ipts-ifft+1
            depsxc_apn(ipts,1)=vxc_b_apn(indx)
-           dstrsxc=dstrsxc+fxc_apn(indx)-rho_b(indx)*vxc_b_apn(indx)
-           if (ngrad_apn==2) then
-             depsxc_apn(ipts,2)=vxcgr_apn(indx)
-             s1=-grho(1)*grho(1)*vxcgr_apn(indx)
-             s2=-grho(2)*grho(2)*vxcgr_apn(indx)
-             s3=-grho(3)*grho(3)*vxcgr_apn(indx)
-             dstrsxc=dstrsxc+s1+s2+s3
-             strsxc1_tot=strsxc1_tot+s1
-             strsxc2_tot=strsxc2_tot+s2
-             strsxc3_tot=strsxc3_tot+s3
-             strsxc4_tot=strsxc4_tot-grho(3)*grho(2)*vxcgr_apn(indx)
-             strsxc5_tot=strsxc5_tot-grho(3)*grho(1)*vxcgr_apn(indx)
-             strsxc6_tot=strsxc6_tot-grho(2)*grho(1)*vxcgr_apn(indx)
-           end if ! GGA
+           if (ngrad_apn==2) depsxc_apn(ipts,2)=vxcgr_apn(indx)
+           if (compute_stress) then
+             dstrsxc=dstrsxc+fxc_apn(indx)-rho_b(indx)*vxc_b_apn(indx)
+             if (ngrad_apn==2) then
+               if (nspden_updn==1)                 grho(1:3)=rhonow(ipts,1,2:4)
+               if (ispden==1 .and. nspden_updn==2) grho(1:3)=rhonow(ipts,2,2:4)
+               if (ispden==2 .and. nspden_updn==2) grho(1:3)=rhonow(ipts,1,2:4)-rhonow(ipts,2,2:4)
+               if (ispden==3 .and. nspden_updn==2) grho(1:3)=rhonow(ipts,1,2:4)
+               s1=-grho(1)*grho(1)*vxcgr_apn(indx)
+               s2=-grho(2)*grho(2)*vxcgr_apn(indx)
+               s3=-grho(3)*grho(3)*vxcgr_apn(indx)
+               dstrsxc=dstrsxc+s1+s2+s3
+               strsxc1_tot=strsxc1_tot+s1
+               strsxc2_tot=strsxc2_tot+s2
+               strsxc3_tot=strsxc3_tot+s3
+               strsxc4_tot=strsxc4_tot-grho(3)*grho(2)*vxcgr_apn(indx)
+               strsxc5_tot=strsxc5_tot-grho(3)*grho(1)*vxcgr_apn(indx)
+               strsxc6_tot=strsxc6_tot-grho(2)*grho(1)*vxcgr_apn(indx)
+             end if ! GGA
+           end if
          end do ! ipts
 !        Deallocations
          ABI_FREE(fxc_apn)
          ABI_FREE(vxc_b_apn)
          ABI_FREE(vxcgr_apn)
+         ABI_FREE(vxc_ep)
+         ABI_FREE(rhonow_apn)
+         ABI_FREE(grho2_apn)
          if (ndvxc>0) then
            ABI_FREE(dvxc_apn)
          end if
@@ -1101,9 +1159,11 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
        end if
 
 !      Add the diagonal part to the xc stress
-       strsxc1_tot=strsxc1_tot+dstrsxc
-       strsxc2_tot=strsxc2_tot+dstrsxc
-       strsxc3_tot=strsxc3_tot+dstrsxc
+       if (compute_stress) then
+         strsxc1_tot=strsxc1_tot+dstrsxc
+         strsxc2_tot=strsxc2_tot+dstrsxc
+         strsxc3_tot=strsxc3_tot+dstrsxc
+       end if
 
 !      Accumulate integral of |Grad_rho|/Rho (to be used for TB09 XC)
        if (present(grho1_over_rho1).and.ixc<0) then
@@ -1125,6 +1185,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
        end if
 
        ABI_FREE(exc_b)
+       ABI_FREE(tsxc_b)
        ABI_FREE(rho_b)
        ABI_FREE(rho_b_updn)
        ABI_FREE(grho2_b_updn)
@@ -1132,7 +1193,6 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
        ABI_FREE(dvxc_b)
        ABI_FREE(d2vxc_b)
        ABI_FREE(vxcgrho_b_updn)
-       ABI_FREE(fxc_b)
        ABI_FREE(vxclrho_b_updn)
        ABI_FREE(lrho_b_updn)
        ABI_FREE(tau_b_updn)
@@ -1141,12 +1201,14 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 !      End of the loop on blocks of data
      end do
 
-     strsxc(1)=strsxc1_tot
-     strsxc(2)=strsxc2_tot
-     strsxc(3)=strsxc3_tot
-     strsxc(4)=strsxc4_tot
-     strsxc(5)=strsxc5_tot
-     strsxc(6)=strsxc6_tot
+     if (compute_stress) then
+       strsxc(1)=strsxc1_tot
+       strsxc(2)=strsxc2_tot
+       strsxc(3)=strsxc3_tot
+       strsxc(4)=strsxc4_tot
+       strsxc(5)=strsxc5_tot
+       strsxc(6)=strsxc6_tot
+     end if
 
 !    If GGA, multiply the gradient of the density by the proper
 !    local partial derivatives of the XC functional
@@ -1226,6 +1288,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 !  Calculate van der Waals correction when requested
 #if defined DEV_YP_VDWXC
    if ( (xcdata%vdw_xc > 0) .and. (xcdata%vdw_xc < 3) .and. (xc_vdw_status()) ) then
+     strsxc_vdw(:,:)=zero
      call xc_vdw_aggregate(ucvol,gprimd,nfft,nspden_updn,ngrad*ngrad, &
 &     ngfft(1),ngfft(2),ngfft(3),rhonow, &
 &     deltae_vdw,exc_vdw,decdrho_vdw,decdgrho_vdw,strsxc_vdw)
@@ -1238,19 +1301,23 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
      ABI_ERROR(message)
    end if
 #endif
-!  Normalize enxc, strsxc and vxc
+!  Normalize bigexc, bigsxc, strsxc and vxc
    divshft=one/dble(xcdata%intxc+1)
-   strsxc(:)=strsxc(:)/dble(nfftot)*divshft
-   enxc=epsxc*ucvol/dble(nfftot)*divshft
+   bigexc=rhoexc*ucvol/dble(nfftot)*divshft
+   bigsxc=rhotsxc*ucvol/dble(nfftot)*divshft/xcdata%tphysel
    vxc=vxc*divshft
+   if (compute_stress) strsxc(:)=strsxc(:)/dble(nfftot)*divshft
    if (with_vxctau) vxctau=vxctau*divshft
    if (present(grho1_over_rho1)) grho1_over_rho1=grho1_over_rho1*ucvol/dble(nfftot)*divshft
 
 !  Reduction in case of FFT distribution
    if (nproc_fft>1)then
      call timab(48,1,tsec)
-     call xmpi_sum(strsxc,comm_fft ,ierr)
-     call xmpi_sum(enxc  ,comm_fft ,ierr)
+     call xmpi_sum(bigexc,comm_fft,ierr)
+     call xmpi_sum(bigsxc,comm_fft,ierr)
+     if (compute_stress) then
+       call xmpi_sum(strsxc,comm_fft,ierr)
+     end if
      if (present(grho1_over_rho1))  then
        call xmpi_sum(grho1_over_rho1,comm_fft ,ierr)
      end if
@@ -1275,6 +1342,9 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
    ABI_FREE(rhonow)
    ABI_FREE(lrhonow)
    ABI_FREE(taunow)
+   if (compute_stress.and.uselaplacian>0) then
+     ABI_FREE(d2rhonow)
+   end if
    if (need_nhat.or.non_magnetic_xc) then
      ABI_FREE(rhor_)
    end if
@@ -1300,9 +1370,9 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
      if(nspden>=2) vxc(:,2)=factor*vhartr(:)
 
 !    Compute corresponding xc energy and stress as well as vxcavg
-     call dotprod_vn(1,rhor,enxc,doti,nfft,nfftot,1,1,vxc,ucvol,mpi_comm_sphgrid=comm_fft)
-     enxc=half*enxc
-     strsxc(1:3)=-enxc/ucvol
+     call dotprod_vn(1,rhor,bigexc,doti,nfft,nfftot,1,1,vxc,ucvol,mpi_comm_sphgrid=comm_fft)
+     bigexc=half*bigexc
+     if (compute_stress) strsxc(1:3)=-bigexc/ucvol
 
 !    Compute average of vxc (one component only).
      call mean_fftr(vxc,vxcmean,nfft,nfftot,1,mpi_comm_sphgrid=comm_fft)
@@ -1323,19 +1393,26 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 !Add van der Waals terms
 #if defined DEV_YP_VDWXC
  if ( (xcdata%vdw_xc > 0) .and. (xcdata%vdw_xc < 10) .and. (xc_vdw_status()) ) then
-   enxc = enxc + exc_vdw + deltae_vdw
+   bigexc = bigexc + exc_vdw + deltae_vdw
    do ispden=1,nspden
      vxc(:,ispden) = vxc(:,ispden) + decdrho_vdw(:,ispden)
    end do
-   strsxc(1) = strsxc(1) + strsxc_vdw(1,1)
-   strsxc(2) = strsxc(2) + strsxc_vdw(2,2)
-   strsxc(3) = strsxc(3) + strsxc_vdw(3,3)
-   strsxc(4) = strsxc(4) + strsxc_vdw(3,2)
-   strsxc(5) = strsxc(5) + strsxc_vdw(3,1)
-   strsxc(6) = strsxc(6) + strsxc_vdw(2,1)
+   if (compute_stress) then
+     strsxc(1) = strsxc(1) + strsxc_vdw(1,1)
+     strsxc(2) = strsxc(2) + strsxc_vdw(2,2)
+     strsxc(3) = strsxc(3) + strsxc_vdw(3,3)
+     strsxc(4) = strsxc(4) + strsxc_vdw(3,2)
+     strsxc(5) = strsxc(5) + strsxc_vdw(3,1)
+     strsxc(6) = strsxc(6) + strsxc_vdw(2,1)
+   end if
  end if
 #endif
  if ( present(exc_vdw_out) ) exc_vdw_out = exc_vdw
+
+!In case we have an entropy associated with XC contribution
+!(e.g. using finite-temperature exchange-correlation functionals),
+!we retrieve exchange-correlation internal energy bigexc using entropy bigsxc
+ if(abs(bigsxc)>tiny(zero)) bigexc=bigexc+xcdata%tphysel*bigsxc
 
  call timab(81,2,tsec)
 

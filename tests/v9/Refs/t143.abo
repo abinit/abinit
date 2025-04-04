@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.Version 10.3.4.6 of ABINIT, released Nov 2024.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,16 +14,16 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h17 )
+.Starting date : Wed 19 Feb 2025.
+- ( at 15h11 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v9_t143/t143.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/jzwanzig_develop/tests/Test_suite/v9_t143/t143.abi
 - output file    -> t143.abo
 - root for input  files -> t143i
 - root for output files -> t143o
 
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Na.xml
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/jzwanzig_develop/tests/Pspdir/Psdj_paw_pbe_std/Na.xml
  DATASET    1 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
@@ -336,9 +336,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.00147
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Na.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Na.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Na.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/jzwanzig_develop/tests/Pspdir/Psdj_paw_pbe_std/Na.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/jzwanzig_develop/tests/Pspdir/Psdj_paw_pbe_std/Na.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/jzwanzig_develop/tests/Pspdir/Psdj_paw_pbe_std/Na.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.60198715
@@ -416,8 +416,8 @@ force_length_stats: {min: null, max: null, mean: null, }
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =      2.232843464875279
- Compensation charge over fine fft grid    =      2.233742217579751
+ Compensation charge over spherical meshes =      2.232843464875280
+ Compensation charge over fine fft grid    =      2.233742217579757
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -454,13 +454,13 @@ force_length_stats: {min: null, max: null, mean: null, }
   -0.00000   0.00000  -0.00150  -0.00150  12.65368  -0.02058  -0.02058  50.92059
    === IMAGINARY PART:
    0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000   0.00000  -0.00000
-  -0.00000   0.00000  -0.00000   0.00000  -0.00000  -0.00000   0.00000  -0.00000
+  -0.00000  -0.00000  -0.00000   0.00000  -0.00000  -0.00000   0.00000  -0.00000
    0.00000   0.00000   0.00000  -0.00001  -0.00000  -0.00000  -0.00142  -0.00000
    0.00000  -0.00000   0.00001   0.00000   0.00000   0.00142   0.00000   0.00000
    0.00000   0.00000   0.00000  -0.00000  -0.00000   0.00000  -0.00000  -0.00000
-   0.00000   0.00000   0.00000  -0.00142  -0.00000  -0.00000  -0.01121  -0.00000
+   0.00000   0.00000   0.00000  -0.00142  -0.00000   0.00000  -0.01121  -0.00000
   -0.00000  -0.00000   0.00142  -0.00000   0.00000   0.01121   0.00000   0.00000
-   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000  -0.00000   0.00000
+   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000  -0.00000  -0.00000
  pawio_print_ij: WARNING -
   The matrix seems to have high value(s) !
   (  3 components have a value greater than   25.0).
@@ -496,15 +496,15 @@ force_length_stats: {min: null, max: null, mean: null, }
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  1.16499620264942E+01
-hartree             :  1.40933575928110E+01
-xc                  : -3.39025207532432E+00
+hartree             :  1.40933575928109E+01
+xc                  : -3.39025207532437E+00
 Ewald energy        : -1.81383434849158E+01
 psp_core            :  6.07358258866638E-01
 local_psp           : -3.54543398897095E+01
-spherical_terms     : -1.28141883769589E+01
-nucl. magn. dipoles : -1.02117659474991E-08
-internal            : -4.34464459589485E+01
-'-kT*entropy'       : -5.82602544957447E-04
+spherical_terms     : -1.28141883769588E+01
+nucl. magn. dipoles : -1.02117659474977E-08
+internal            : -4.34464459589486E+01
+'-kT*entropy'       : -5.82602544957540E-04
 total_energy        : -4.34470285614935E+01
 total_energy_eV     : -1.18225377176318E+03
 ...
@@ -516,10 +516,10 @@ comment             : '"Double-counting" decomposition of free energy'
 band_energy         : -1.21807720628408E+01
 Ewald energy        : -1.81383434849158E+01
 psp_core            :  6.07358258866638E-01
-xc_dc               : -1.30839913053410E+01
+xc_dc               : -1.30839913053409E+01
 spherical_terms     : -6.50696909261617E-01
-internal            : -4.34464455034926E+01
-'-kT*entropy'       : -5.82602544957447E-04
+internal            : -4.34464455034925E+01
+'-kT*entropy'       : -5.82602544957540E-04
 total_energy_dc     : -4.34470281060375E+01
 total_energy_dc_eV  : -1.18225375936960E+03
 ...
@@ -565,9 +565,9 @@ meta: {optdriver: 1, rfddk: 1, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.00147
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Na.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Na.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Na.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/jzwanzig_develop/tests/Pspdir/Psdj_paw_pbe_std/Na.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/jzwanzig_develop/tests/Pspdir/Psdj_paw_pbe_std/Na.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/jzwanzig_develop/tests/Pspdir/Psdj_paw_pbe_std/Na.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.60198715
@@ -619,12 +619,12 @@ tolerances: {tolwfr: 1.00E-14, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -6.9307684060501     -6.931E+00 2.315E-02 0.000E+00
- ETOT  2  -6.9307932347456     -2.483E-05 1.275E-05 0.000E+00
- ETOT  3  -6.9307932356777     -9.321E-10 1.052E-07 0.000E+00
- ETOT  4  -6.9307932356778     -1.394E-13 5.603E-11 0.000E+00
- ETOT  5  -6.9307932356778      8.882E-16 3.376E-13 0.000E+00
- ETOT  6  -6.9307932356778     -2.665E-15 9.959E-15 0.000E+00
+-ETOT  1  -6.9307684060504     -6.931E+00 2.315E-02 0.000E+00
+ ETOT  2  -6.9307932347458     -2.483E-05 1.275E-05 0.000E+00
+ ETOT  3  -6.9307932356779     -9.321E-10 1.052E-07 0.000E+00
+ ETOT  4  -6.9307932356780     -1.403E-13 5.603E-11 0.000E+00
+ ETOT  5  -6.9307932356780      1.776E-15 3.376E-13 0.000E+00
+ ETOT  6  -6.9307932356780     -1.776E-15 9.959E-15 0.000E+00
 
  At SCF step    6   max residual=  9.96E-15 < tolwfr=  1.00E-14 =>converged.
 ================================================================================
@@ -647,7 +647,7 @@ tolerances: {tolwfr: 1.00E-14, }
  4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
      kin1=  -1.23189424E+01  Hartree=   0.00000000E+00     xc=   0.00000000E+00  nclr dpl1=  -1.33251963E-08
  7,8,9: eventually, occupation + non-local contributions
-    edocc=   1.28031090E+00     enl0=  -1.36071305E-01   enl1=  -8.78381415E-01
+    edocc=   1.28031090E+00     enl0=  -1.36071305E-01   enl1=  -8.78381402E-01
  10: eventually, PAW "on-site" Hxc contribution: epaw1=   0.00000000E+00
  1-10 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -6.93079324E+00
@@ -679,12 +679,12 @@ tolerances: {tolwfr: 1.00E-14, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -6.9307684145733     -6.931E+00 1.698E-02 0.000E+00
- ETOT  2  -6.9307932409715     -2.483E-05 1.079E-05 0.000E+00
- ETOT  3  -6.9307932418965     -9.250E-10 5.987E-08 0.000E+00
- ETOT  4  -6.9307932418966     -9.592E-14 4.236E-11 0.000E+00
- ETOT  5  -6.9307932418966      8.882E-16 1.972E-13 0.000E+00
- ETOT  6  -6.9307932418966      0.000E+00 9.978E-15 0.000E+00
+-ETOT  1  -6.9307684145735     -6.931E+00 1.698E-02 0.000E+00
+ ETOT  2  -6.9307932409717     -2.483E-05 1.079E-05 0.000E+00
+ ETOT  3  -6.9307932418967     -9.250E-10 5.987E-08 0.000E+00
+ ETOT  4  -6.9307932418968     -9.948E-14 4.236E-11 0.000E+00
+ ETOT  5  -6.9307932418968      0.000E+00 1.972E-13 0.000E+00
+ ETOT  6  -6.9307932418968     -8.882E-16 9.978E-15 0.000E+00
 
  At SCF step    6   max residual=  9.98E-15 < tolwfr=  1.00E-14 =>converged.
 ================================================================================
@@ -707,7 +707,7 @@ tolerances: {tolwfr: 1.00E-14, }
  4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
      kin1=  -1.23189480E+01  Hartree=   0.00000000E+00     xc=   0.00000000E+00  nclr dpl1=  -6.63845138E-09
  7,8,9: eventually, occupation + non-local contributions
-    edocc=   1.28047771E+00     enl0=  -1.36076039E-01   enl1=  -8.78381509E-01
+    edocc=   1.28047771E+00     enl0=  -1.36076039E-01   enl1=  -8.78381503E-01
  10: eventually, PAW "on-site" Hxc contribution: epaw1=   0.00000000E+00
  1-10 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -6.93079324E+00
@@ -739,12 +739,12 @@ tolerances: {tolwfr: 1.00E-14, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -6.9307684049985     -6.931E+00 1.698E-02 0.000E+00
- ETOT  2  -6.9307932362417     -2.483E-05 1.079E-05 0.000E+00
- ETOT  3  -6.9307932371849     -9.432E-10 5.987E-08 0.000E+00
- ETOT  4  -6.9307932371851     -1.839E-13 4.236E-11 0.000E+00
- ETOT  5  -6.9307932371851      0.000E+00 1.971E-13 0.000E+00
- ETOT  6  -6.9307932371851      0.000E+00 9.959E-15 0.000E+00
+-ETOT  1  -6.9307684049987     -6.931E+00 1.698E-02 0.000E+00
+ ETOT  2  -6.9307932362419     -2.483E-05 1.079E-05 0.000E+00
+ ETOT  3  -6.9307932371851     -9.431E-10 5.987E-08 0.000E+00
+ ETOT  4  -6.9307932371853     -1.830E-13 4.236E-11 0.000E+00
+ ETOT  5  -6.9307932371853      0.000E+00 1.971E-13 0.000E+00
+ ETOT  6  -6.9307932371853      0.000E+00 9.959E-15 0.000E+00
 
  At SCF step    6   max residual=  9.96E-15 < tolwfr=  1.00E-14 =>converged.
 ================================================================================
@@ -767,7 +767,7 @@ tolerances: {tolwfr: 1.00E-14, }
  4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
      kin1=  -1.23189437E+01  Hartree=   0.00000000E+00     xc=   0.00000000E+00  nclr dpl1=  -6.66465937E-09
  7,8,9: eventually, occupation + non-local contributions
-    edocc=   1.28002973E+00     enl0=  -1.36082474E-01   enl1=  -8.78381532E-01
+    edocc=   1.28002973E+00     enl0=  -1.36082474E-01   enl1=  -8.78381525E-01
  10: eventually, PAW "on-site" Hxc contribution: epaw1=   0.00000000E+00
  1-10 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -6.93079324E+00
@@ -782,51 +782,51 @@ tolerances: {tolwfr: 1.00E-14, }
  Orbital magnetic moment computed with DFPT derivative wavefunctions 
 
  Orbital magnetic moment, Cartesian directions :
- -1.90178366E-04  1.97094538E-07 -1.92769724E-07
+ -1.90178283E-04  1.97093399E-07 -1.92766924E-07
 
 
  Chern vector, Cartesian directions :
- -1.73872462E-06  3.20838862E-09  1.97081067E-10
+ -1.73872462E-06  3.20838856E-09  1.97081020E-10
 
 
  Orbital magnetic moment, term-by-term breakdown :
-     rho(1) CC :  -1.86823311E-04  1.72851215E-07 -1.95806075E-07
-    rho(1) VV1 :   1.10118148E-05  2.46867796E-08  2.97393003E-09
-    rho(1) VV2 :  -1.46787816E-05  2.95608223E-09  2.99802506E-09
-     rho(0) NL :   3.84009708E-04  3.28083038E-09  3.57645151E-09
-   <L_R> terms :   8.69022538E-05 -9.34459169E-09 -9.17615979E-09
- <A0.An> terms :  -9.33287720E-05  2.66422257E-09  2.66410416E-09
+     rho(1) CC :  -1.86823311E-04  1.72851215E-07 -1.95805885E-07
+    rho(1) VV1 :   1.10118148E-05  2.46867981E-08  2.97394314E-09
+    rho(1) VV2 :  -1.46787857E-05  2.95471849E-09  3.00074226E-09
+     rho(0) NL :   3.84009708E-04  3.28128874E-09  3.57688371E-09
+   <L_R> terms :   8.69023402E-05 -9.34484421E-09 -9.17671256E-09
+ <A0.An> terms :  -9.33287720E-05  2.66422255E-09  2.66410418E-09
     Lamb terms :  -3.77271278E-04  0.00000000E+00  0.00000000E+00
  Chern vector, term-by-term breakdown :
-  Ch CC :  -1.69679963E-06  3.39316319E-09  1.99737233E-10
- Ch vv1 :  -4.22000784E-08 -1.85517763E-10 -3.39948857E-12
- Ch vv2 :   2.75089272E-10  7.43194211E-13  7.43322731E-13
+  Ch CC :  -1.69679963E-06  3.39316319E-09  1.99737230E-10
+ Ch vv1 :  -4.22000784E-08 -1.85517825E-10 -3.39953296E-12
+ Ch vv2 :   2.75089272E-10  7.43194184E-13  7.43322756E-13
 
 
  Term-by-term breakdowns for each band :
 
 
  band   1 of   8
- Orbital magnetic moment :   3.64540385E-04 -3.73357675E-09 -4.35996122E-09
+ Orbital magnetic moment :   3.64540378E-04 -3.73580684E-09 -4.35552088E-09
      rho(1) CC :  -9.74084799E-06  3.68924374E-09  2.94991880E-09
     rho(1) VV1 :  -1.60038422E-05 -4.50548272E-09 -4.45830930E-09
-    rho(1) VV2 :   5.24863741E-06 -8.87700700E-10 -8.21855434E-10
-     rho(0) NL :   4.15054156E-04 -1.00619988E-09 -1.00633485E-09
+    rho(1) VV2 :   5.24863074E-06 -8.89930801E-10 -8.17415090E-10
+     rho(0) NL :   4.15054156E-04 -1.00619988E-09 -1.00633486E-09
    <L_R> terms :   4.03233735E-08 -1.11819377E-09 -1.11813702E-09
  <A0.An> terms :  -3.00580415E-05  9.47565822E-11  9.47565821E-11
 
 
- Chern vector :   6.64649962E-08 -6.75161265E-12 -4.76381923E-12
+ Chern vector :   6.64650048E-08 -6.74873716E-12 -4.76954355E-12
   Ch CC :   5.25900915E-08 -1.39211740E-11 -1.17745812E-11
  Ch VV1 :   2.06442391E-08  6.06526287E-12  5.99124768E-12
- Ch VV2 :  -6.76933433E-09  1.10429843E-12  1.01951424E-12
+ Ch VV2 :  -6.76932573E-09  1.10717392E-12  1.01378992E-12
 
 
  band   2 of   8
- Orbital magnetic moment :   7.55547085E-03 -1.12544042E-03 -1.12585757E-03
+ Orbital magnetic moment :   7.55547085E-03 -1.12544042E-03 -1.12585758E-03
      rho(1) CC :   3.02549411E-03 -4.49519914E-04 -4.49999369E-04
     rho(1) VV1 :   3.72829564E-04 -7.05508602E-05 -7.04881537E-05
-    rho(1) VV2 :  -8.57272152E-04  1.21690134E-04  1.21690235E-04
+    rho(1) VV2 :  -8.57272149E-04  1.21690135E-04  1.21690234E-04
      rho(0) NL :  -5.61760409E-03  8.09424432E-04  8.09425088E-04
    <L_R> terms :   1.06541603E-02 -1.53654977E-03 -1.53655094E-03
  <A0.An> terms :  -2.21369094E-05  6.55608598E-08  6.55618022E-08
@@ -835,16 +835,16 @@ tolerances: {tolwfr: 1.00E-14, }
  Chern vector :   5.56121135E-05 -8.63239839E-06 -8.62706231E-06
   Ch CC :   5.39933723E-05 -8.45476611E-06 -8.44919424E-06
  Ch VV1 :  -1.26099614E-06  2.46415833E-07  2.46180388E-07
- Ch VV2 :   2.87973730E-06 -4.24048115E-07 -4.24048458E-07
+ Ch VV2 :   2.87973729E-06 -4.24048118E-07 -4.24048452E-07
 
 
  band   3 of   8
- Orbital magnetic moment :   6.32150275E-03 -6.91818992E-04 -6.91738267E-04
+ Orbital magnetic moment :   6.32150275E-03 -6.91818993E-04 -6.91738267E-04
      rho(1) CC :   3.11608666E-03 -3.79805399E-04 -3.79706540E-04
     rho(1) VV1 :   1.02987002E-04  1.46210528E-05  1.45979201E-05
     rho(1) VV2 :  -5.80840753E-04  6.06403062E-05  6.06394131E-05
      rho(0) NL :  -4.08325155E-03  4.25096317E-04  4.25090389E-04
-   <L_R> terms :   7.78711970E-03 -8.12321156E-04 -8.12309336E-04
+   <L_R> terms :   7.78711970E-03 -8.12321157E-04 -8.12309337E-04
  <A0.An> terms :  -2.05983140E-05 -5.01130476E-08 -5.01122158E-08
 
 
@@ -855,12 +855,12 @@ tolerances: {tolwfr: 1.00E-14, }
 
 
  band   4 of   8
- Orbital magnetic moment :  -1.40654494E-02  1.81737674E-03  1.81745562E-03
+ Orbital magnetic moment :  -1.40654493E-02  1.81737674E-03  1.81745562E-03
      rho(1) CC :  -6.31579101E-03  8.29412678E-04  8.29554643E-04
-    rho(1) VV1 :  -4.48551821E-04  5.59573234E-05  5.58983840E-05
+    rho(1) VV1 :  -4.48551821E-04  5.59573235E-05  5.58983840E-05
     rho(1) VV2 :   1.41817267E-03 -1.82326587E-04 -1.82325819E-04
      rho(0) NL :   9.65462694E-03 -1.23451528E-03 -1.23450971E-03
-   <L_R> terms :  -1.83538907E-02  2.34886142E-03  2.34885094E-03
+   <L_R> terms :  -1.83538906E-02  2.34886142E-03  2.34885094E-03
  <A0.An> terms :  -2.00154623E-05 -1.28160492E-08 -1.28179410E-08
 
 
@@ -871,11 +871,11 @@ tolerances: {tolwfr: 1.00E-14, }
 
 
  band   5 of   8
- Orbital magnetic moment :   1.10283300E-05  8.34953931E-08 -4.81865809E-08
+ Orbital magnetic moment :   1.10283300E-05  8.34953932E-08 -4.81865809E-08
      rho(1) CC :  -2.87222135E-06  8.17968714E-08 -4.74910390E-08
     rho(1) VV1 :  -2.49088271E-07  1.67618840E-09 -7.18141671E-10
-    rho(1) VV2 :   1.28135894E-08 -9.28230286E-12 -9.33919710E-12
-     rho(0) NL :   1.51842427E-05 -1.18334855E-09 -1.18389340E-09
+    rho(1) VV2 :   1.28135895E-08 -9.28230151E-12 -9.33920775E-12
+     rho(0) NL :   1.51842427E-05 -1.18334852E-09 -1.18389340E-09
    <L_R> terms :  -5.27372031E-07  1.27726127E-09  1.27813013E-09
  <A0.An> terms :  -5.20044692E-07 -6.22970826E-11 -6.22978003E-11
 
@@ -883,7 +883,7 @@ tolerances: {tolwfr: 1.00E-14, }
  Chern vector :  -5.10497727E-07 -2.62346385E-10 -2.29171035E-09
   Ch CC :  -5.21796440E-07 -1.83332345E-10 -2.33873430E-09
  Ch VV1 :   1.18564338E-08 -7.89832702E-11  4.70526071E-11
- Ch VV2 :  -5.57720543E-10 -3.07693812E-14 -2.86534301E-14
+ Ch VV2 :  -5.57720544E-10 -3.07694392E-14 -2.86531331E-14
 
 
  band   6 of   8
@@ -1278,10 +1278,10 @@ P          mk1mem         256
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         52.4  wall=         52.5
+- Proc.   0 individual time (sec): cpu=         54.7  wall=         54.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered   2 WARNINGs and  11 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         52.4  wall=         52.5
++Overall time at end (sec) : cpu=         54.7  wall=         54.8

@@ -46,7 +46,7 @@ export(
   FILE ${PROJECT_BINARY_DIR}/${targets_export_name}.cmake)
 
 export(
-  TARGETS 39_libpaw 33_xc_lowlevel 28_numeric_noabirule 27_toolbox_oop 18_timing 17_yaml_out 16_hideleave 14_hidewrite 12_hide_mpi 11_memory_mpi 10_defs 02_clib
+  TARGETS 39_libpaw 33_xc_lowlevel 32_util 28_numeric_noabirule 27_toolbox_oop 18_timing 17_yaml_out 17_libtetra_ext 16_hideleave 14_hidewrite 12_hide_mpi 11_memory_mpi 10_defs 02_clib
   NAMESPACE abinit::
   APPEND FILE ${PROJECT_BINARY_DIR}/${targets_export_name}.cmake)
 
@@ -80,9 +80,9 @@ generate_pkgconfig(abinit)
 # runtime => shared libraries
 install(
   TARGETS abinit abitk aim anaddb atdep band2eps conducti cut3d dummy_tests fftprof
-  fold2Bloch ioprof lapackprof macroave mrgddb mrgdv mrggkk mrgscr multibinit
+  fold2Bloch ioprof lapackprof lruj macroave mrgddb mrgdv mrggkk mrgscr multibinit
   optic testtransposer vdw_kernelgen
-  abinit_lib 39_libpaw 33_xc_lowlevel 28_numeric_noabirule 27_toolbox_oop 18_timing 17_yaml_out 16_hideleave 14_hidewrite 12_hide_mpi 11_memory_mpi 10_defs 02_clib
+  abinit_lib 39_libpaw 33_xc_lowlevel 32_util 28_numeric_noabirule 27_toolbox_oop 18_timing 17_yaml_out 17_libtetra_ext 16_hideleave 14_hidewrite 12_hide_mpi 11_memory_mpi 10_defs 02_clib
   EXPORT ${targets_export_name}
   ARCHIVE DESTINATION ${INSTALL_LIBDIR} COMPONENT lib
   LIBRARY DESTINATION ${INSTALL_LIBDIR} COMPONENT lib

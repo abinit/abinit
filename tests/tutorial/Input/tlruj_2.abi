@@ -75,7 +75,7 @@ prtebands 0                          #Don't print ebands
 #Input File Information
 irdwfk 0
 getwfk_filepath "./tlruj_1.o_WFK"    #Specify name and location of WFK file
-pp_dirpath "$ABI_PSPDIR/Pseudodojo_paw_pbe_standard"
+pp_dirpath "$ABI_PSPDIR/Psdj_paw_pbe_std"
 pseudos "Ni.xml,Ni.xml,O.xml"        #Use same pseudopotential for both Ni atoms.
 
 ##############################################################
@@ -93,7 +93,7 @@ pseudos "Ni.xml,Ni.xml,O.xml"        #Use same pseudopotential for both Ni atoms
 #%% max_nprocs = 20
 #%% [extra_info]
 #%% authors = L. MacEnulty
-#%% keywords = PAW, DFTU,LRUJ,UJDET,linear,response,Hund's J
+#%% keywords = PAW,DFTU,LRUJ,Hunds-J
 #%% description =
 #%%   AFII NiO 4-atom cell | LRUJ utility | LMac 2022
 #%%   Linear Response Hubbard U and Hund's J (LRUJ)

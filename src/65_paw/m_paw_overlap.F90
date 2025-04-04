@@ -8,7 +8,7 @@
 !!  Mainly used in Berry phase formalism.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2024 ABINIT group (JWZ,TRangel,BA,FJ,PHermet)
+!! Copyright (C) 2018-2025 ABINIT group (JWZ,TRangel,BA,FJ,PHermet)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -138,9 +138,9 @@ CONTAINS  !=====================================================================
      do jlmn=1,lmnsize(itypat)
        klmn=max(ilmn,jlmn)*(max(ilmn,jlmn)-1)/2 + min(ilmn,jlmn)
        paw_onsite = cmplx(calc_qijb(1,klmn,iatom),calc_qijb(2,klmn,iatom))
-       do iband = 1, nband_occ
-         do jband = 1, nband_occ
-           do ispinor = 1, nspinor
+       do ispinor = 1, nspinor
+         do iband = 1, nband_occ
+           do jband = 1, nband_occ
              ibs = nspinor*(iband-1) + ispinor
              jbs = nspinor*(jband-1) + ispinor
              cpk1=cmplx(cprj_k1(iatom,ibs)%cp(1,ilmn),cprj_k1(iatom,ibs)%cp(2,ilmn))
@@ -148,9 +148,9 @@ CONTAINS  !=====================================================================
              cterm = conjg(cpk1)*paw_onsite*cpk2
              k1k2_paw(1,iband,jband) = k1k2_paw(1,iband,jband)+real(cterm)
              k1k2_paw(2,iband,jband) = k1k2_paw(2,iband,jband)+aimag(cterm)
-           end do ! end loop over ispinor
-         end do ! end loop over jband
-       end do ! end loop over iband
+           end do ! end loop over jband
+         end do ! end loop over iband
+       end do ! end loop over ispinor
      end do ! end loop over ilmn
    end do ! end loop over jlmn
 
@@ -647,9 +647,9 @@ CONTAINS  !=====================================================================
        paw_onsite = cmplx(dtefield%qijb_kk(1,klmn,iatom,kdir),&
 &       dtefield%qijb_kk(2,klmn,iatom,kdir))
        if (kfor > 1) paw_onsite = conjg(paw_onsite)
-       do iband = 1, dtefield%mband_occ
-         do jband = 1, dtefield%mband_occ
-           do ispinor = 1, nspinor
+       do ispinor = 1, nspinor
+         do iband = 1, dtefield%mband_occ
+           do jband = 1, dtefield%mband_occ
              ibs = nspinor*(iband-1) + ispinor
              jbs = nspinor*(jband-1) + ispinor
              cpk=cmplx(cprj_k(iatom,ibs)%cp(1,ilmn),cprj_k(iatom,ibs)%cp(2,ilmn))
@@ -657,9 +657,9 @@ CONTAINS  !=====================================================================
              cterm = conjg(cpk)*paw_onsite*cpkb
              smat_k_paw(1,iband,jband) = smat_k_paw(1,iband,jband)+dreal(cterm)
              smat_k_paw(2,iband,jband) = smat_k_paw(2,iband,jband)+dimag(cterm)
-           end do ! end loop over ispinor
-         end do ! end loop over jband
-       end do ! end loop over iband
+           end do ! end loop over jband
+         end do ! end loop over iband
+       end do ! end loop over ispinor
      end do ! end loop over ilmn
    end do ! end loop over jlmn
 

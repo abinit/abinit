@@ -1,15 +1,13 @@
 # The following md files have been copied from ~abinit and should be `git ignored`
-INSTALL_gpu.md
-INSTALL_EasyBuild.md
 INSTALL_CentOS.md
+INSTALL_EasyBuild.md
 INSTALL_MacOS.md
 INSTALL_Ubuntu.md
+INSTALL_gpu.md
 # The following md files have been automatically generated and should be `git ignored`
 developers/autoconf_examples.md
 variables/index.md
 variables/external_parameters.md
-variables/multibinit.md
-variables/aim.md
 variables/basic.md
 variables/bse.md
 variables/dev.md
@@ -21,15 +19,19 @@ variables/files.md
 variables/geo.md
 variables/gstate.md
 variables/gw.md
+variables/gwr.md
 variables/internal.md
 variables/paral.md
 variables/paw.md
 variables/rlx.md
+variables/rttddft.md
 variables/vdw.md
 variables/w90.md
-variables/optic.md
-variables/atdep.md
+variables/aim.md
 variables/anaddb.md
+variables/atdep.md
+variables/multibinit.md
+variables/optic.md
 variables/varset_stats.md
 topics/Abipy.md
 topics/APPA.md
@@ -102,6 +104,7 @@ topics/Planewaves.md
 topics/Phonons.md
 topics/PhononBands.md
 topics/PhononWidth.md
+topics/Polaron.md
 topics/PortabilityNonRegression.md
 topics/positron.md
 topics/printing.md
@@ -110,6 +113,7 @@ topics/q-points.md
 topics/RandStopPow.md
 topics/Recursion.md
 topics/RPACorrEn.md
+topics/RTTDDFT.md
 topics/SCFControl.md
 topics/SCFAlgorithms.md
 topics/SelfEnergy.md

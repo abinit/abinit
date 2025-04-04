@@ -1,8 +1,8 @@
 
 .Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(sequential version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(sequential version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Sat 14 Sep 2024.
 - ( at 19h24 )
-  
+
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk_merge-10.0/tests/TestBot_MPI1/seq_tsv4_80/tsv4_80.abi
 - output file    -> tsv4_80.abo
 - root for input  files -> tsv4_80i
@@ -349,8 +349,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.04949
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/13al.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/13al.pspnc
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -367,8 +367,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              1    1.353815
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
 -  Troullier-Martins psp for element  As        Thu Oct 27 17:37:14 EDT 1994
 - 33.00000   5.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -408,7 +408,7 @@ tolerances: {toldfe: 1.00E-10, }
  ETOT  7  -10.100117676544    -8.535E-12 2.997E-14 1.392E-10
  ETOT  8  -10.100117676544    -2.327E-13 1.057E-15 2.191E-13
 
- At SCF step    8, etot is converged : 
+ At SCF step    8, etot is converged :
   for the second time, diff in etot=  2.327E-13 < toldfe=  1.000E-10
 
  Computing the polarization (Berry phase) for reciprocal vector:
@@ -462,13 +462,13 @@ tolerances: {toldfe: 1.00E-10, }
  Polarization in cartesian coordinates (a.u.):
  (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
      Electronic berry phase:        0.190447802E-03   0.190447802E-03   0.190447802E-03
-     Ionic:                        -0.265994233E-01  -0.265994233E-01  -0.265994233E-01  
+     Ionic:                        -0.265994233E-01  -0.265994233E-01  -0.265994233E-01
      Total:                        -0.264089755E-01  -0.264089755E-01  -0.264089755E-01
 
  Polarization in cartesian coordinates (C/m^2):
  (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
      Electronic berry phase:        0.108964256E-01   0.108964256E-01   0.108964256E-01
-     Ionic:                        -0.152187966E+01  -0.152187966E+01  -0.152187966E+01  
+     Ionic:                        -0.152187966E+01  -0.152187966E+01  -0.152187966E+01
      Total:                        -0.151098324E+01  -0.151098324E+01  -0.151098324E+01
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -608,7 +608,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.469      74.418
   initberry: for direction 2, nkstr =   4, nstr =     16
   initberry: for direction 3, nkstr =   4, nstr =     16
 
- initberry: COMMENT - 
+ initberry: COMMENT -
   As a rough estimate,
   to be below the critical field, the bandgap of your system
   should be larger than    0.58 eV.
@@ -633,7 +633,7 @@ tolerances: {toldfe: 1.00E-13, }
  ETOT  8  -10.092295238603     2.132E-14 7.683E-06 2.047E-14
  ETOT  9  -10.092295238603    -2.309E-14 7.683E-06 2.671E-16
 
- At SCF step    9, etot is converged : 
+ At SCF step    9, etot is converged :
   for the second time, diff in etot=  2.309E-14 < toldfe=  1.000E-13
 
  Computing the polarization (Berry phase) for reciprocal vector:
@@ -687,13 +687,13 @@ tolerances: {toldfe: 1.00E-13, }
  Polarization in cartesian coordinates (a.u.):
  (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
      Electronic berry phase:        0.711563000E-03   0.211854283E-03   0.211854286E-03
-     Ionic:                        -0.265994233E-01  -0.265994233E-01  -0.265994233E-01  
+     Ionic:                        -0.265994233E-01  -0.265994233E-01  -0.265994233E-01
      Total:                        -0.258878603E-01  -0.263875690E-01  -0.263875690E-01
 
  Polarization in cartesian coordinates (C/m^2):
  (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
      Electronic berry phase:        0.407119073E-01   0.121211923E-01   0.121211924E-01
-     Ionic:                        -0.152187966E+01  -0.152187966E+01  -0.152187966E+01  
+     Ionic:                        -0.152187966E+01  -0.152187966E+01  -0.152187966E+01
      Total:                        -0.148116775E+01  -0.150975847E+01  -0.150975847E+01
 
  Stress tensor under a constant electric field:
@@ -798,21 +798,21 @@ band_energy         : -6.86845515023167E-01
 
 Constant unreduced E calculation  - final values:
  (a. u.)
-       E:   1.000000000E-03   0.000000000E+00   0.000000000E+00  
+       E:   1.000000000E-03   0.000000000E+00   0.000000000E+00
        P:  -2.588786032E-02  -2.638756904E-02  -2.638756904E-02
 
-    ebar:   0.000000000E+00   5.310000000E-03   5.310000000E-03  
+    ebar:   0.000000000E+00   5.310000000E-03   5.310000000E-03
     pbar:  -3.521549224E+00  -3.488204947E+00  -3.488204947E+00
 
-       e:  -2.243774345E-03   2.243774345E-03   2.243774345E-03  
+       e:  -2.243774345E-03   2.243774345E-03   2.243774345E-03
        p:  -7.581163723E-01  -7.299366984E-01  -7.299366986E-01
 
  (S.I.), that is V/m for E, and C/m^2 for P
--      E:   5.142206319E+08   0.000000000E+00   0.000000000E+00  
-       P:  -1.481167754E+00  -1.509758469E+00  -1.509758469E+00  
+-      E:   5.142206319E+08   0.000000000E+00   0.000000000E+00
+       P:  -1.481167754E+00  -1.509758469E+00  -1.509758469E+00
 
 
- Please check: COMMENT - 
+ Please check: COMMENT -
   As a rough estimate,
   to be below the critical field, the bandgap of your system
   should be larger than    0.58 eV.
@@ -861,8 +861,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   1.88258
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/13al.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/13al.pspnc
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -879,8 +879,8 @@ meta: {optdriver: 1, rfphon: 1, }
              1    1.353815
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
 -  Troullier-Martins psp for element  As        Thu Oct 27 17:37:14 EDT 1994
 - 33.00000   5.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -897,7 +897,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -941,7 +941,7 @@ tolerances: {toldfe: 1.00E-08, }
  ETOT 11   6.5425525201237     -1.907E-09 1.011E-14 1.033E-10
  ETOT 12   6.5425525201233     -6.849E-10 1.413E-16 2.219E-11
 
- At SCF step   12, etot is converged : 
+ At SCF step   12, etot is converged :
   for the second time, diff in etot=  6.849E-10 < toldfe=  1.000E-08
 ================================================================================
 
@@ -1000,7 +1000,7 @@ tolerances: {toldfe: 1.00E-08, }
  ETOT 10   5.0087463529290      3.862E-09 7.317E-16 1.074E-11
  ETOT 11   5.0087463529290     -1.001E-10 1.503E-17 1.345E-12
 
- At SCF step   11, etot is converged : 
+ At SCF step   11, etot is converged :
   for the second time, diff in etot=  1.001E-10 < toldfe=  1.000E-08
 ================================================================================
 
@@ -1059,7 +1059,7 @@ tolerances: {toldfe: 1.00E-08, }
  ETOT 10   5.0087463516343      3.571E-09 7.144E-16 1.155E-11
  ETOT 11   5.0087463516342     -4.113E-11 1.499E-17 1.274E-12
 
- At SCF step   11, etot is converged : 
+ At SCF step   11, etot is converged :
   for the second time, diff in etot=  4.113E-11 < toldfe=  1.000E-08
 ================================================================================
 
@@ -1121,7 +1121,7 @@ tolerances: {toldfe: 1.00E-08, }
  ETOT 13   6.3089582105815      2.369E-09 1.256E-16 2.979E-12
  ETOT 14   6.3089582105824      3.542E-10 4.909E-18 2.012E-13
 
- At SCF step   14, etot is converged : 
+ At SCF step   14, etot is converged :
   for the second time, diff in etot=  3.542E-10 < toldfe=  1.000E-08
 ================================================================================
 
@@ -1181,7 +1181,7 @@ tolerances: {toldfe: 1.00E-08, }
  ETOT 11   5.1786053056218     -4.580E-09 4.102E-16 2.261E-11
  ETOT 12   5.1786053056210     -1.197E-09 3.799E-17 1.642E-12
 
- At SCF step   12, etot is converged : 
+ At SCF step   12, etot is converged :
   for the second time, diff in etot=  1.197E-09 < toldfe=  1.000E-08
 ================================================================================
 
@@ -1241,7 +1241,7 @@ tolerances: {toldfe: 1.00E-08, }
  ETOT 11   5.1786053002630     -4.624E-09 4.082E-16 2.280E-11
  ETOT 12   5.1786053002629     -1.171E-09 3.786E-17 1.683E-12
 
- At SCF step   12, etot is converged : 
+ At SCF step   12, etot is converged :
   for the second time, diff in etot=  1.171E-09 < toldfe=  1.000E-08
 ================================================================================
 
@@ -1274,12 +1274,12 @@ tolerances: {toldfe: 1.00E-08, }
 
 
  ==> Compute Derivative Database <==
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   1    1         6.5430729746         0.0000000000
    1    1   2    1         2.4696271837        -0.0000281655
    1    1   3    1         2.4696271682        -0.0000281705
@@ -1289,7 +1289,7 @@ tolerances: {toldfe: 1.00E-08, }
    1    1   1    4         2.9002397294         0.0000000000
    1    1   2    4        -0.8916471819         0.0000000000
    1    1   3    4        -1.4344712988         0.0000000000
-  
+
    2    1   1    1         2.4696387862        -0.0000071793
    2    1   2    1         5.0095120948         0.0000000000
    2    1   3    1         2.4752845495        -0.0000064575
@@ -1299,7 +1299,7 @@ tolerances: {toldfe: 1.00E-08, }
    2    1   1    4        -1.8754675222         0.0000000000
    2    1   2    4        -0.4406064411         0.0000000000
    2    1   3    4        -2.1916036221         0.0000000000
-  
+
    3    1   1    1         2.4696387845        -0.0000071787
    3    1   2    1         2.4752845494        -0.0000064575
    3    1   3    1         5.0095120936         0.0000000000
@@ -1309,7 +1309,7 @@ tolerances: {toldfe: 1.00E-08, }
    3    1   1    4        -1.1667259479         0.0000000000
    3    1   2    4        -1.3205630208         0.0000000000
    3    1   3    4        -0.1427035249         0.0000000000
-  
+
    1    2   1    1        -0.8217304538         0.0000224652
    1    2   2    1        -2.3228465402         0.0000082691
    1    2   3    1        -2.3228465690         0.0000082610
@@ -1319,7 +1319,7 @@ tolerances: {toldfe: 1.00E-08, }
    1    2   1    4         3.6762282039         0.0000000000
    1    2   2    4        -0.6018156581         0.0000000000
    1    2   3    4        -2.3405064376         0.0000000000
-  
+
    2    2   1    1        -2.3158311456         0.0000276090
    2    2   2    1        -4.6056113749         0.0000128412
    2    2   3    1        -2.2919784511         0.0000129951
@@ -1329,7 +1329,7 @@ tolerances: {toldfe: 1.00E-08, }
    2    2   1    4        -4.9333792652         0.0000000000
    2    2   2    4         2.8641388172         0.0000000000
    2    2   3    4        -6.6197109335         0.0000000000
-  
+
    3    2   1    1        -2.3158311451         0.0000276064
    3    2   2    1        -2.2919784516         0.0000129950
    3    2   3    1        -4.6056113736         0.0000128412
@@ -1339,69 +1339,69 @@ tolerances: {toldfe: 1.00E-08, }
    3    2   1    4        -5.4455394539         0.0000000000
    3    2   2    4        -4.4312941488         0.0000000000
    3    2   3    4         1.6363975873         0.0000000000
-  
+
    1    4   1    1         2.9002397294         0.0000000000
    1    4   2    1        -1.8754675222         0.0000000000
    1    4   3    1        -1.1667259479         0.0000000000
    1    4   1    2         3.6762282039         0.0000000000
    1    4   2    2        -4.9333792652         0.0000000000
    1    4   3    2        -5.4455394539         0.0000000000
-  
+
    2    4   1    1        -0.8916471819         0.0000000000
    2    4   2    1        -0.4406064411         0.0000000000
    2    4   3    1        -1.3205630208         0.0000000000
    2    4   1    2        -0.6018156581         0.0000000000
    2    4   2    2         2.8641388172         0.0000000000
    2    4   3    2        -4.4312941488         0.0000000000
-  
+
    3    4   1    1        -1.4344712988         0.0000000000
    3    4   2    1        -2.1916036221         0.0000000000
    3    4   3    1        -0.1427035249         0.0000000000
    3    4   1    2        -2.3405064376         0.0000000000
    3    4   2    2        -6.6197109335         0.0000000000
    3    4   3    2         1.6363975873         0.0000000000
-  
-  
+
+
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   1    1         0.1031537548         0.0000005123
    1    1   2    1        -0.0142200108        -0.0000001273
    1    1   3    1        -0.0142200111        -0.0000001274
    1    1   1    2        -0.0473410326         0.0000000362
    1    1   2    2        -0.0339065279        -0.0000000589
    1    1   3    2        -0.0339065279        -0.0000000589
-  
+
    2    1   1    1        -0.0142202168        -0.0000004995
    2    1   2    1         0.1029533167         0.0000001145
    2    1   3    1         0.0130746619        -0.0000001145
    2    1   1    2        -0.0337820002        -0.0000001890
    2    1   2    2        -0.0483112056        -0.0000003296
    2    1   3    2         0.0337431637        -0.0000002731
-  
+
    3    1   1    1        -0.0142202168        -0.0000004995
    3    1   2    1         0.0130746617        -0.0000001146
    3    1   3    1         0.1029533170         0.0000001145
    3    1   1    2        -0.0337820002        -0.0000001890
    3    1   2    2         0.0337431637        -0.0000002730
    3    1   3    2        -0.0483112056        -0.0000003297
-  
+
    1    2   1    1        -0.0473430253         0.0000000212
    1    2   2    1        -0.0337806630         0.0000002905
    1    2   3    1        -0.0337806635         0.0000002903
    1    2   1    2         0.1038052909        -0.0000001503
    1    2   2    2        -0.0112898360        -0.0000000508
    1    2   3    2        -0.0112898360        -0.0000000507
-  
+
    2    2   1    1        -0.0339050671        -0.0000000526
    2    2   2    1        -0.0483133867         0.0000001964
    2    2   3    1         0.0337416825         0.0000002020
    2    2   1    2        -0.0112898124         0.0000002520
    2    2   2    2         0.1024459149        -0.0000000509
    2    2   3    2         0.0094350129         0.0000000509
-  
+
    3    2   1    1        -0.0339050672        -0.0000000526
    3    2   2    1         0.0337416820         0.0000002019
    3    2   3    1        -0.0483133862         0.0000001966
@@ -1419,7 +1419,7 @@ tolerances: {toldfe: 1.00E-08, }
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      1.0620000000E+01  1.0620000000E+01  1.0620000000E+01 Bohr
               amu      2.69815390E+01  7.49215900E+01
@@ -1705,7 +1705,7 @@ P          mk1mem30        64
 - subtotal                                  8.582  90.7         8.706  90.6                                  0.99       0.99
 
 - For major independent code sections, cpu and wall times (sec),
-- as well as % of the total time and number of calls 
+- as well as % of the total time and number of calls
 
 -<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
 - cpu_time =           9.5, wall_time =           9.6
@@ -1759,7 +1759,7 @@ P          mk1mem30        64
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -1782,12 +1782,12 @@ P          mk1mem30        64
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -1805,7 +1805,7 @@ P          mk1mem30        64
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016

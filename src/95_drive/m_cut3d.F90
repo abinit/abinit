@@ -6,7 +6,7 @@
 !!  This module the predures used by cut3d
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2024 ABINIT group (XG,MVerstraete,GMR,RC,LSI,JFB,MCote,MB)
+!! Copyright (C) 2008-2025 ABINIT group (XG,MVerstraete,GMR,RC,LSI,JFB,MCote,MB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -26,9 +26,7 @@ MODULE m_cut3d
  use m_errors
  use m_splines
  use m_hdr
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
  use m_nctk
  use m_wfk
  use m_xmpi
@@ -38,7 +36,7 @@ MODULE m_cut3d
  use defs_abitypes,      only : MPI_type
  use m_io_tools,         only : get_unit, iomode_from_fname, open_file, file_exists, read_string
  use m_numeric_tools,    only : interpol3d_0d
- use m_symtk,            only : matr3inv
+ use m_matrix,           only : matr3inv
  use m_fstrings,         only : int2char10, sjoin, itoa
  use m_geometry,         only : xcart2xred, metric
  use m_special_funcs,    only : jlspline_t, jlspline_new, jlspline_free, jlspline_integral
@@ -949,9 +947,7 @@ subroutine cut3d_rrho(path,varname,iomode,grid_full,nr1,nr2,nr3,nspden)
 !Local variables--------------------------------------------------------
 !scalars
  integer :: ispden,unt,fform
-#ifdef HAVE_NETCDF
  integer :: varid
-#endif
  character(len=500) :: msg
  type(hdr_type) :: hdr
 
@@ -959,11 +955,11 @@ subroutine cut3d_rrho(path,varname,iomode,grid_full,nr1,nr2,nr3,nspden)
 
  select case (iomode)
  case (IO_MODE_FORTRAN)
-   !Unformatted, on one record
+   ! Unformatted, on one record
    if (open_file(path, msg, newunit=unt, form='unformatted', status='old', action="read") /= 0) then
      ABI_ERROR(msg)
    end if
-   call hdr_fort_read(hdr, unt, fform)
+   call hdr%fort_read(unt, fform)
    ABI_CHECK(fform /= 0, sjoin("Error while reading:", path))
    call hdr%free()
 
@@ -975,16 +971,12 @@ subroutine cut3d_rrho(path,varname,iomode,grid_full,nr1,nr2,nr3,nspden)
 
  case (IO_MODE_ETSF)
    ! ETSF case
-#ifdef HAVE_NETCDF
    NCF_CHECK(nctk_open_read(unt, path, xmpi_comm_self))
    NCF_CHECK(nf90_inq_varid(unt, varname, varid))
    ! [cplex, n1, n2, n3, nspden]
    ! WARNING: if POT/RHO is complex (e.g. DFPT) we only read the REAL part.
    NCF_CHECK(nf90_get_var(unt, varid, grid_full, start=[1,1,1,1,1], count=[1, nr1,nr2,nr3,nspden]))
    NCF_CHECK(nf90_close(unt))
-#else
-   ABI_ERROR('netcdf support is not compiled. Reconfigure with --enable-netcdf.')
-#endif
 
  case default
    ABI_BUG(sjoin("invalid iomode:", itoa(iomode)))

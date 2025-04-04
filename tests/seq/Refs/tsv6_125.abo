@@ -1,8 +1,8 @@
 
 .Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(sequential version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(sequential version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Sat 14 Sep 2024.
 - ( at 19h24 )
-  
+
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk_merge-10.0/tests/TestBot_MPI1/seq_tsv6_125/tsv6_125.abi
 - output file    -> tsv6_125.abo
 - root for input  files -> tsv6_125i
@@ -134,8 +134,8 @@ meta: {optdriver: 0, ionmov: 2, optcell: 2, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     12.100   => boxcut(ratio)=   2.06805
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk_merge-10.0/tests/Psps_for_tests/82pb.960808c_mod
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk_merge-10.0/tests/Psps_for_tests/82pb.960808c_mod
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk_merge-10.0/tests/Pspdir/82pb.960808c_mod
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk_merge-10.0/tests/Pspdir/82pb.960808c_mod
 - (Xe+4f14)+6s1.8 5d10 6p0.2 5f0.05;rcs=rcd=2.0(exnc11),rcp=2.0(26),rcf=1.3(11) no chem-hard; ecut 19/25
 - 82.00000  14.00000    960808                znucl, zion, pspdat
     4    3    3    3      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -155,8 +155,8 @@ meta: {optdriver: 0, ionmov: 2, optcell: 2, iscf: 7, paral_kgb: 0, }
              2   -5.902586    0.629658
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk_merge-10.0/tests/Psps_for_tests/22ti.psp_mod
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk_merge-10.0/tests/Psps_for_tests/22ti.psp_mod
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk_merge-10.0/tests/Pspdir/22ti.psp_mod
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk_merge-10.0/tests/Pspdir/22ti.psp_mod
 - Titane.ion 3s2.3p6.4s0.3d2 rcd=1.65, rcs=rc0=1.25, ecut 32/54
 - 22.00000  12.00000    940000                znucl, zion, pspdat
     4    3    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -173,8 +173,8 @@ meta: {optdriver: 0, ionmov: 2, optcell: 2, iscf: 7, paral_kgb: 0, }
              1    5.011406   -0.741179
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk_merge-10.0/tests/Psps_for_tests/8o.psp_mod
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk_merge-10.0/tests/Psps_for_tests/8o.psp_mod
+- pspini: atom type   3  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk_merge-10.0/tests/Pspdir/8o.psp_mod
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk_merge-10.0/tests/Pspdir/8o.psp_mod
 - 1.65bohr 35 hartree exncc psp for oxygen with core 19 june 1992
 -  8.00000   6.00000    920619                znucl, zion, pspdat
     4    3    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -196,14 +196,14 @@ _setup2: Arith. and geom. avg. npw (full set) are     832.000     832.000
   initberry: for direction 2, nkstr =   1, nstr =      1
   initberry: for direction 3, nkstr =   1, nstr =      1
 
- initberry: COMMENT - 
+ initberry: COMMENT -
   The estimation of critical electric field should be checked after calculation.
   It is printed out just after total energy.
 
 
 ================================================================================
 
-=== [ionmov= 2] Broyden-Fletcher-Goldfarb-Shanno method (forces)            
+=== [ionmov= 2] Broyden-Fletcher-Goldfarb-Shanno method (forces)
 ================================================================================
 
 --- Iteration: (1/2) Internal Cycle: (1/1)
@@ -282,13 +282,13 @@ tolerances: {toldff: 5.00E-06, }
  Polarization in cartesian coordinates (a.u.):
  (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
      Electronic berry phase:       -0.140168602E-08   0.211870709E-03  -0.294513945E-03
-     Ionic:                        -0.306701007E-16   0.183732856E-07   0.191649528E-01  
+     Ionic:                        -0.306701007E-16   0.183732856E-07   0.191649528E-01
      Total:                        -0.140168605E-08   0.211889082E-03   0.188704388E-01
 
  Polarization in cartesian coordinates (C/m^2):
  (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
      Electronic berry phase:       -0.801971315E-07   0.121221321E-01  -0.168505451E-01
-     Ionic:                        -0.175478250E-14   0.105122315E-05   0.109651820E+01  
+     Ionic:                        -0.175478250E-14   0.105122315E-05   0.109651820E+01
      Total:                        -0.801971332E-07   0.121231833E-01   0.107966766E+01
 
  Stress tensor under a constant (mixed) electric and electric displacement field:
@@ -475,13 +475,13 @@ tolerances: {toldff: 5.00E-06, }
  Polarization in cartesian coordinates (a.u.):
  (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
      Electronic berry phase:        0.457906686E-01  -0.453105826E-01  -0.269359200E-01
-     Ionic:                        -0.813405674E-16   0.605551329E-04   0.263707028E-01  
+     Ionic:                        -0.813405674E-16   0.605551329E-04   0.263707028E-01
      Total:                        -0.547145054E-10   0.307284796E-03   0.338045005E-01
 
  Polarization in cartesian coordinates (C/m^2):
  (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
      Electronic berry phase:        0.261990218E+01  -0.259243418E+01  -0.154113224E+01
-     Ionic:                        -0.465388116E-14   0.346464749E-02   0.150879347E+01  
+     Ionic:                        -0.465388116E-14   0.346464749E-02   0.150879347E+01
      Total:                        -0.313047738E-08   0.175812263E-01   0.193411644E+01
 
  Stress tensor under a constant (mixed) electric and electric displacement field:
@@ -594,7 +594,7 @@ force_length_stats: {min:   3.60976263E-01, max:   2.06814709E+00, mean:   1.122
            Relative     = 4.11087E-02
 
  fconv : WARNING -
-  ntime=    2 was not enough Broyd/MD steps to converge gradients: 
+  ntime=    2 was not enough Broyd/MD steps to converge gradients:
   max grad (force/stress) = 8.6550E+00 > tolmxf= 5.0000E-05 ha/bohr (free atoms)
 
 ================================================================================
@@ -668,34 +668,34 @@ band_energy         :  3.81538740554859E+01
 Constant reduced ebar and d calculation  - final values:
  (a. u.)
                  E-field           E-field           D-field
-   ebar0:   0.000000000E+00   1.000000000E-03   2.108128343E-02  
-    ebar:   0.000000000E+00   1.000723721E-03   2.108128343E-02  
-       d:  -1.194883303E-09   7.212488790E-03   9.935730000E-01  
+   ebar0:   0.000000000E+00   1.000000000E-03   2.108128343E-02
+    ebar:   0.000000000E+00   1.000723721E-03   2.108128343E-02
+       d:  -1.194883303E-09   7.212488790E-03   9.935730000E-01
  e  +  p:  -1.194883303E-09   7.212488790E-03   9.954114600E-01
 
-       e:   0.000000000E+00   3.277396671E-04   1.202308203E-02  
-       p:  -1.194883303E-09   6.884749123E-03   9.833883779E-01  
-       d:  -1.194883303E-09   7.212488790E-03   9.935730000E-01  
+       e:   0.000000000E+00   3.277396671E-04   1.202308203E-02
+       p:  -1.194883303E-09   6.884749123E-03   9.833883779E-01
+       d:  -1.194883303E-09   7.212488790E-03   9.935730000E-01
  e  +  p:  -1.194883303E-09   7.212488790E-03   9.954114600E-01
 
-    ebar:   0.000000000E+00   1.000723721E-03   2.108128343E-02  
-    pbar:  -3.717626343E-09   2.048151376E-02   1.724288847E+00  
-    dbar:  -3.717626343E-09   2.148359704E-02   1.742146536E+00  
+    ebar:   0.000000000E+00   1.000723721E-03   2.108128343E-02
+    pbar:  -3.717626343E-09   2.048151376E-02   1.724288847E+00
+    dbar:  -3.717626343E-09   2.148359704E-02   1.742146536E+00
  eba+pba:  -3.717626343E-09   2.148223748E-02   1.745370130E+00
 
-       E:   0.000000000E+00   1.866696143E-04   5.193661338E-03  
-       P:  -5.471450542E-11   3.072847965E-04   3.380450054E-02  
-       D:  -6.875627531E-10   4.056538323E-03   4.291993126E-01  
+       E:   0.000000000E+00   1.866696143E-04   5.193661338E-03
+       P:  -5.471450542E-11   3.072847965E-04   3.380450054E-02
+       D:  -6.875627531E-10   4.056538323E-03   4.291993126E-01
 E+4*pi*P:  -6.875627531E-10   4.048166807E-03   4.299359144E-01
 
  (S.I.), that is V/m for E, and C/m^2 for P and D
-       E:   0.000000000E+00   9.598936704E+07   2.670687815E+09  
-       P:  -3.130477377E-09   1.758122634E-02   1.934116435E+00  
-       D:  -3.130477377E-09   1.846944354E-02   1.954147068E+00  
-eps0*E+P:  -3.130477377E-09   1.843113422E-02   1.957763207E+00  
+       E:   0.000000000E+00   9.598936704E+07   2.670687815E+09
+       P:  -3.130477377E-09   1.758122634E-02   1.934116435E+00
+       D:  -3.130477377E-09   1.846944354E-02   1.954147068E+00
+eps0*E+P:  -3.130477377E-09   1.843113422E-02   1.957763207E+00
 
 
- Please check: COMMENT - 
+ Please check: COMMENT -
   As a rough estimate,
   to be below the critical field, the bandgap of your system
   should be larger than    0.57 eV.
@@ -720,7 +720,7 @@ eps0*E+P:  -3.130477377E-09   1.843113422E-02   1.957763207E+00
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      5.4069629662E+00  5.3801780565E+00  4.0590685693E+00 Bohr
               amu      2.07200000E+02  4.78800000E+01  1.59994000E+01
@@ -816,7 +816,7 @@ P           mkmem           1
 - subtotal                                  2.257  19.0         2.308  19.4                                  0.98       0.98
 
 - For major independent code sections, cpu and wall times (sec),
-- as well as % of the total time and number of calls 
+- as well as % of the total time and number of calls
 
 -<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
 - cpu_time =          11.9, wall_time =          11.9
@@ -865,7 +865,7 @@ P           mkmem           1
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -877,12 +877,12 @@ P           mkmem           1
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -900,7 +900,7 @@ P           mkmem           1
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -915,7 +915,7 @@ P           mkmem           1
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009

@@ -4,7 +4,7 @@
 need_cpp_vars = [
 ]
 
-#: List of keywords that are automatically added to all the tests of this suite. 
+#: List of keywords that are automatically added to all the tests of this suite.
 keywords = [
 "buildsys",
 ]
@@ -13,7 +13,7 @@ keywords = [
 #inp_files = [
 #]
 
-#: List of python scripts. 
+#: List of python scripts.
 pyscripts = [
 "check-binaries-conf.py",
 "check-build-config.py",

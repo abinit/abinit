@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.Version 10.2.4.2 of ABINIT, released Nov 2024.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h09 )
+.Starting date : Wed  6 Nov 2024.
+- ( at 20h10 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v3_t36/t36.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_gonze-10.2/tests/Test_suite/v3_t36/t36.abi
 - output file    -> t36.abo
 - root for input  files -> t36i
 - root for output files -> t36o
@@ -29,15 +29,15 @@
  Values of the parameters that define the memory need for DATASET  1.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =       8  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =       8    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =           5        mffmem =           1         mkmem =           1
+     natom =       8  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =       8    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =           8        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.664 Mbytes of memory.
+P This job should need less than                       1.472 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.005 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET    2 : magnetic group, Shubnikov type IV
@@ -47,15 +47,15 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET  2.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =       8  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =       8    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =           5        mffmem =           1         mkmem =           1
+     natom =       8  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =       8    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =           8        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.664 Mbytes of memory.
+P This job should need less than                       1.472 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.005 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET    3 : magnetic group, Shubnikov type IV
@@ -65,15 +65,15 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET  3.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =       8  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =       8    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =           5        mffmem =           1         mkmem =           1
+     natom =       8  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =       8    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =           8        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.664 Mbytes of memory.
+P This job should need less than                       1.472 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.005 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET    4 : magnetic group, Shubnikov type IV
@@ -83,15 +83,15 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET  4.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =       8  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =       8    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =           5        mffmem =           1         mkmem =           1
+     natom =       8  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =       8    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =           8        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.664 Mbytes of memory.
+P This job should need less than                       1.472 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.005 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET    5 : magnetic group, Shubnikov type IV
@@ -101,15 +101,15 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET  5.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =       8  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =       8    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =           5        mffmem =           1         mkmem =           1
+     natom =       8  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =       8    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =           8        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.664 Mbytes of memory.
+P This job should need less than                       1.472 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.005 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET    6 : magnetic group, Shubnikov type IV
@@ -119,15 +119,15 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET  6.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =       8  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =       8    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =           5        mffmem =           1         mkmem =           1
+     natom =       8  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =       8    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =           8        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.664 Mbytes of memory.
+P This job should need less than                       1.472 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.005 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET    7 : magnetic group, Shubnikov type IV
@@ -137,15 +137,15 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET  7.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =       8  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =       8    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =           5        mffmem =           1         mkmem =           1
+     natom =       8  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =       8    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =           8        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.664 Mbytes of memory.
+P This job should need less than                       1.472 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.005 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET    8 : magnetic group, Shubnikov type IV
@@ -155,15 +155,15 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET  8.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =       8  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =       8    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =           5        mffmem =           1         mkmem =           1
+     natom =       8  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =       8    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =           8        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.664 Mbytes of memory.
+P This job should need less than                       1.472 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.005 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET    9 : magnetic group, Shubnikov type IV
@@ -173,15 +173,15 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET  9.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =       8  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =       8    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =           5        mffmem =           1         mkmem =           1
+     natom =       8  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =       8    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =           8        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.664 Mbytes of memory.
+P This job should need less than                       1.472 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.005 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET   10 : magnetic group, Shubnikov type IV
@@ -191,15 +191,15 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 10.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =       8  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =       8    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =           5        mffmem =           1         mkmem =           1
+     natom =       8  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =       8    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =           8        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.664 Mbytes of memory.
+P This job should need less than                       1.472 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.005 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET   11 : magnetic group, Shubnikov type IV
@@ -209,15 +209,15 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 11.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =       8  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =       8    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =           5        mffmem =           1         mkmem =           1
+     natom =       8  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =       8    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =           8        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.664 Mbytes of memory.
+P This job should need less than                       1.472 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.005 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET   12 : magnetic group, Shubnikov type IV
@@ -227,15 +227,15 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 12.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =       8  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =       8    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =           5        mffmem =           1         mkmem =           1
+     natom =       8  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =       8    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =           8        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.664 Mbytes of memory.
+P This job should need less than                       1.472 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.005 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET   13 : magnetic group, Shubnikov type IV
@@ -245,15 +245,15 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 13.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =       6  mpssoang =       1    mqgrid =    3001
-     natom =       8  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =       8    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =           5        mffmem =           1         mkmem =           1
+     natom =       8  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =       8    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =           8        mffmem =           1         mkmem =           1
        mpw =           8          nfft =         216          nkpt =           1
 ================================================================================
-P This job should need less than                       0.546 Mbytes of memory.
+P This job should need less than                       1.288 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
+_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.005 Mbytes.
 ================================================================================
 
  DATASET   14 : magnetic group, Shubnikov type IV
@@ -263,15 +263,15 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
  Values of the parameters that define the memory need for DATASET 14.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =       6  mpssoang =       1    mqgrid =    3001
-     natom =       8  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =       8    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =           5        mffmem =           1         mkmem =           1
+     natom =       8  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =       8    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =           8        mffmem =           1         mkmem =           1
        mpw =           8          nfft =         216          nkpt =           1
 ================================================================================
-P This job should need less than                       0.546 Mbytes of memory.
+P This job should need less than                       1.288 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
+_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.005 Mbytes.
 ================================================================================
 
  DATASET   15 : magnetic group, Shubnikov type IV
@@ -281,15 +281,15 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
  Values of the parameters that define the memory need for DATASET 15.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =       8  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =       8    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =           5        mffmem =           1         mkmem =           1
+     natom =       8  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =       8    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =           8        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.664 Mbytes of memory.
+P This job should need less than                       1.472 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.005 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET   16 : magnetic group, Shubnikov type IV
@@ -299,15 +299,15 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 16.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =       8  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =       8    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =           5        mffmem =           1         mkmem =           1
+     natom =       8  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =       8    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =           8        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.664 Mbytes of memory.
+P This job should need less than                       1.472 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.005 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET   17 : magnetic group, Shubnikov type IV
@@ -317,15 +317,15 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 17.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =       8  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =       8    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =           5        mffmem =           1         mkmem =           1
+     natom =       8  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =       8    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =           8        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.664 Mbytes of memory.
+P This job should need less than                       1.472 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.005 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET   18 : magnetic group, Shubnikov type IV
@@ -335,15 +335,15 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 18.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =       6  mpssoang =       1    mqgrid =    3001
-     natom =       8  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =       8    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =           5        mffmem =           1         mkmem =           1
+     natom =       8  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =       8    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =           8        mffmem =           1         mkmem =           1
        mpw =           8          nfft =         216          nkpt =           1
 ================================================================================
-P This job should need less than                       0.546 Mbytes of memory.
+P This job should need less than                       1.288 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
+_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.005 Mbytes.
 ================================================================================
 
  DATASET   19 : magnetic group, Shubnikov type IV
@@ -353,15 +353,15 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
  Values of the parameters that define the memory need for DATASET 19.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =      16  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      16    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          10        mffmem =           1         mkmem =           1
+     natom =      16  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      16    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          16        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.733 Mbytes of memory.
+P This job should need less than                       1.515 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET   20 : magnetic group, Shubnikov type IV
@@ -371,15 +371,15 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 20.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =      16  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      16    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          10        mffmem =           1         mkmem =           1
+     natom =      16  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      16    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          16        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.733 Mbytes of memory.
+P This job should need less than                       1.515 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET   21 : magnetic group, Shubnikov type IV
@@ -389,15 +389,15 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 21.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =      16  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      16    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          10        mffmem =           1         mkmem =           1
+     natom =      16  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      16    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          16        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.733 Mbytes of memory.
+P This job should need less than                       1.515 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET   22 : magnetic group, Shubnikov type IV
@@ -407,15 +407,15 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 22.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =      16  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      16    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          10        mffmem =           1         mkmem =           1
+     natom =      16  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      16    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          16        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.733 Mbytes of memory.
+P This job should need less than                       1.515 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET   23 : magnetic group, Shubnikov type IV
@@ -425,15 +425,15 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 23.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =      16  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      16    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          10        mffmem =           1         mkmem =           1
+     natom =      16  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      16    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          16        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.733 Mbytes of memory.
+P This job should need less than                       1.515 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET   24 : magnetic group, Shubnikov type IV
@@ -443,15 +443,15 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 24.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =      16  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      16    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          10        mffmem =           1         mkmem =           1
+     natom =      16  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      16    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          16        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.733 Mbytes of memory.
+P This job should need less than                       1.515 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET   25 : magnetic group, Shubnikov type IV
@@ -461,15 +461,15 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 25.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =      16  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      16    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          10        mffmem =           1         mkmem =           1
+     natom =      16  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      16    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          16        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.733 Mbytes of memory.
+P This job should need less than                       1.515 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET   26 : magnetic group, Shubnikov type IV
@@ -479,15 +479,15 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 26.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =      16  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      16    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          10        mffmem =           1         mkmem =           1
+     natom =      16  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      16    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          16        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.733 Mbytes of memory.
+P This job should need less than                       1.515 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET   27 : magnetic group, Shubnikov type IV
@@ -497,15 +497,15 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 27.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =      16  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      16    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          10        mffmem =           1         mkmem =           1
+     natom =      16  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      16    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          16        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.733 Mbytes of memory.
+P This job should need less than                       1.515 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET   28 : magnetic group, Shubnikov type IV
@@ -515,15 +515,15 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 28.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =      16  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      16    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          10        mffmem =           1         mkmem =           1
+     natom =      16  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      16    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          16        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.733 Mbytes of memory.
+P This job should need less than                       1.515 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET   29 : magnetic group, Shubnikov type IV
@@ -533,15 +533,15 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 29.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =      16  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      16    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          10        mffmem =           1         mkmem =           1
+     natom =      16  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      16    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          16        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.733 Mbytes of memory.
+P This job should need less than                       1.515 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET   30 : magnetic group, Shubnikov type IV
@@ -551,15 +551,15 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 30.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =      16  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      16    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          10        mffmem =           1         mkmem =           1
+     natom =      16  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      16    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          16        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.733 Mbytes of memory.
+P This job should need less than                       1.515 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET   31 : magnetic group, Shubnikov type IV
@@ -569,15 +569,15 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 31.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =       6  mpssoang =       1    mqgrid =    3001
-     natom =      16  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      16    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          10        mffmem =           1         mkmem =           1
+     natom =      16  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      16    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          16        mffmem =           1         mkmem =           1
        mpw =           8          nfft =         216          nkpt =           1
 ================================================================================
-P This job should need less than                       0.611 Mbytes of memory.
+P This job should need less than                       1.328 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
+_ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.005 Mbytes.
 ================================================================================
 
  DATASET   32 : magnetic group, Shubnikov type IV
@@ -587,15 +587,15 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
  Values of the parameters that define the memory need for DATASET 32.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =       6  mpssoang =       1    mqgrid =    3001
-     natom =      16  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      16    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          10        mffmem =           1         mkmem =           1
+     natom =      16  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      16    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          16        mffmem =           1         mkmem =           1
        mpw =           8          nfft =         216          nkpt =           1
 ================================================================================
-P This job should need less than                       0.611 Mbytes of memory.
+P This job should need less than                       1.328 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
+_ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.005 Mbytes.
 ================================================================================
 
  DATASET   33 : magnetic group, Shubnikov type IV
@@ -605,15 +605,15 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
  Values of the parameters that define the memory need for DATASET 33.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =      16  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      16    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          10        mffmem =           1         mkmem =           1
+     natom =      16  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      16    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          16        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.733 Mbytes of memory.
+P This job should need less than                       1.515 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET   34 : magnetic group, Shubnikov type IV
@@ -623,15 +623,15 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 34.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =      16  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      16    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          10        mffmem =           1         mkmem =           1
+     natom =      16  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      16    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          16        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.733 Mbytes of memory.
+P This job should need less than                       1.515 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET   35 : magnetic group, Shubnikov type IV
@@ -641,15 +641,15 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 35.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =      16  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      16    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          10        mffmem =           1         mkmem =           1
+     natom =      16  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      16    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          16        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.733 Mbytes of memory.
+P This job should need less than                       1.515 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET   36 : magnetic group, Shubnikov type IV
@@ -659,15 +659,15 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 36.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =      16  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      16    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          10        mffmem =           1         mkmem =           1
+     natom =      16  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      16    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          16        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.733 Mbytes of memory.
+P This job should need less than                       1.515 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET   37 : magnetic group, Shubnikov type IV
@@ -677,15 +677,15 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 37.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =      16  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      16    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          10        mffmem =           1         mkmem =           1
+     natom =      16  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      16    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          16        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.733 Mbytes of memory.
+P This job should need less than                       1.515 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET   38 : magnetic group, Shubnikov type IV
@@ -695,15 +695,15 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 38.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =      16  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      16    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          10        mffmem =           1         mkmem =           1
+     natom =      16  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      16    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          16        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.733 Mbytes of memory.
+P This job should need less than                       1.515 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET   39 : magnetic group, Shubnikov type IV
@@ -713,15 +713,15 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 39.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =      16  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      16    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          10        mffmem =           1         mkmem =           1
+     natom =      16  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      16    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          16        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.733 Mbytes of memory.
+P This job should need less than                       1.515 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET   40 : magnetic group, Shubnikov type IV
@@ -731,15 +731,15 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 40.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =      16  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      16    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          10        mffmem =           1         mkmem =           1
+     natom =      16  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      16    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          16        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.733 Mbytes of memory.
+P This job should need less than                       1.515 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET   41 : magnetic group, Shubnikov type IV
@@ -749,15 +749,15 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 41.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =      16  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      16    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          10        mffmem =           1         mkmem =           1
+     natom =      16  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      16    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          16        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.733 Mbytes of memory.
+P This job should need less than                       1.515 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET   42 : magnetic group, Shubnikov type IV
@@ -767,15 +767,15 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 42.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =      16  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      16    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          10        mffmem =           1         mkmem =           1
+     natom =      16  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      16    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          16        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.733 Mbytes of memory.
+P This job should need less than                       1.515 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET   43 : magnetic group, Shubnikov type IV
@@ -785,15 +785,15 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 43.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =      16  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      16    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          10        mffmem =           1         mkmem =           1
+     natom =      16  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      16    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          16        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.733 Mbytes of memory.
+P This job should need less than                       1.515 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET   44 : magnetic group, Shubnikov type IV
@@ -803,15 +803,15 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 44.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =      16  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      16    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          10        mffmem =           1         mkmem =           1
+     natom =      16  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      16    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          16        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.733 Mbytes of memory.
+P This job should need less than                       1.515 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET   45 : magnetic group, Shubnikov type IV
@@ -821,15 +821,15 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 45.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =      16  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      16    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          10        mffmem =           1         mkmem =           1
+     natom =      16  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      16    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          16        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.733 Mbytes of memory.
+P This job should need less than                       1.515 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET   46 : magnetic group, Shubnikov type IV
@@ -839,15 +839,15 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 46.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =      16  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      16    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          10        mffmem =           1         mkmem =           1
+     natom =      16  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      16    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          16        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.733 Mbytes of memory.
+P This job should need less than                       1.515 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET   47 : magnetic group, Shubnikov type IV
@@ -857,15 +857,15 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 47.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =      16  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      16    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          10        mffmem =           1         mkmem =           1
+     natom =      16  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      16    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          16        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.733 Mbytes of memory.
+P This job should need less than                       1.515 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET   48 : magnetic group, Shubnikov type IV
@@ -875,15 +875,15 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 48.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =      16  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      16    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          10        mffmem =           1         mkmem =           1
+     natom =      16  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      16    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          16        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.733 Mbytes of memory.
+P This job should need less than                       1.515 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET   49 : magnetic group, Shubnikov type IV
@@ -893,15 +893,15 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 49.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =      16  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      16    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          10        mffmem =           1         mkmem =           1
+     natom =      16  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      16    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          16        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.733 Mbytes of memory.
+P This job should need less than                       1.515 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET   50 : magnetic group, Shubnikov type IV
@@ -911,15 +911,15 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 50.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =      16  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      16    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          10        mffmem =           1         mkmem =           1
+     natom =      16  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      16    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          16        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.733 Mbytes of memory.
+P This job should need less than                       1.515 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET   51 : magnetic group, Shubnikov type IV
@@ -929,15 +929,15 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 51.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =      16  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      16    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          10        mffmem =           1         mkmem =           1
+     natom =      16  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      16    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          16        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.733 Mbytes of memory.
+P This job should need less than                       1.515 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET   52 : magnetic group, Shubnikov type IV
@@ -947,15 +947,15 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 52.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =      16  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      16    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          10        mffmem =           1         mkmem =           1
+     natom =      16  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      16    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          16        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.733 Mbytes of memory.
+P This job should need less than                       1.515 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET   53 : magnetic group, Shubnikov type IV
@@ -965,15 +965,15 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 53.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =      16  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      16    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          10        mffmem =           1         mkmem =           1
+     natom =      16  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      16    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          16        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.733 Mbytes of memory.
+P This job should need less than                       1.515 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET   54 : magnetic group, Shubnikov type IV
@@ -983,15 +983,15 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 54.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =      16  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      16    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          10        mffmem =           1         mkmem =           1
+     natom =      16  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      16    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          16        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.733 Mbytes of memory.
+P This job should need less than                       1.515 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET   55 : magnetic group, Shubnikov type IV
@@ -1001,15 +1001,15 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 55.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =      16  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      16    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          10        mffmem =           1         mkmem =           1
+     natom =      16  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      16    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          16        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.733 Mbytes of memory.
+P This job should need less than                       1.515 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET   56 : magnetic group, Shubnikov type IV
@@ -1019,15 +1019,15 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 56.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =      16  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      16    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          10        mffmem =           1         mkmem =           1
+     natom =      16  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      16    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          16        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.733 Mbytes of memory.
+P This job should need less than                       1.515 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET   57 : magnetic group, Shubnikov type IV
@@ -1037,15 +1037,15 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 57.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =       6  mpssoang =       1    mqgrid =    3001
-     natom =      16  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      16    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          10        mffmem =           1         mkmem =           1
+     natom =      16  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      16    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          16        mffmem =           1         mkmem =           1
        mpw =           8          nfft =         216          nkpt =           1
 ================================================================================
-P This job should need less than                       0.611 Mbytes of memory.
+P This job should need less than                       1.328 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
+_ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.005 Mbytes.
 ================================================================================
 
  DATASET   58 : magnetic group, Shubnikov type IV
@@ -1055,15 +1055,15 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
  Values of the parameters that define the memory need for DATASET 58.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =       6  mpssoang =       1    mqgrid =    3001
-     natom =      16  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      16    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          10        mffmem =           1         mkmem =           1
+     natom =      16  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      16    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          16        mffmem =           1         mkmem =           1
        mpw =           8          nfft =         216          nkpt =           1
 ================================================================================
-P This job should need less than                       0.611 Mbytes of memory.
+P This job should need less than                       1.328 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
+_ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.005 Mbytes.
 ================================================================================
 
  DATASET   59 : magnetic group, Shubnikov type IV
@@ -1073,15 +1073,15 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
  Values of the parameters that define the memory need for DATASET 59.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =      16  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      16    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          10        mffmem =           1         mkmem =           1
+     natom =      16  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      16    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          16        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.733 Mbytes of memory.
+P This job should need less than                       1.515 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET   60 : magnetic group, Shubnikov type IV
@@ -1091,15 +1091,15 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 60.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =      16  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      16    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          10        mffmem =           1         mkmem =           1
+     natom =      16  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      16    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          16        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.733 Mbytes of memory.
+P This job should need less than                       1.515 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET   61 : magnetic group, Shubnikov type IV
@@ -1109,15 +1109,15 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 61.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =      16  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      16    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          10        mffmem =           1         mkmem =           1
+     natom =      16  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      16    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          16        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.733 Mbytes of memory.
+P This job should need less than                       1.515 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET   62 : magnetic group, Shubnikov type IV
@@ -1127,15 +1127,15 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 62.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =      16  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      16    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          10        mffmem =           1         mkmem =           1
+     natom =      16  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      16    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          16        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.733 Mbytes of memory.
+P This job should need less than                       1.515 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET   63 : magnetic group, Shubnikov type IV
@@ -1145,15 +1145,15 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 63.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =      16  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      16    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          10        mffmem =           1         mkmem =           1
+     natom =      16  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      16    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          16        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.733 Mbytes of memory.
+P This job should need less than                       1.515 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET   64 : magnetic group, Shubnikov type IV
@@ -1163,15 +1163,15 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 64.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =      16  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      16    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          10        mffmem =           1         mkmem =           1
+     natom =      16  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      16    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          16        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.733 Mbytes of memory.
+P This job should need less than                       1.515 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET   65 : magnetic group, Shubnikov type IV
@@ -1181,15 +1181,15 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 65.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =      16  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      16    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          10        mffmem =           1         mkmem =           1
+     natom =      16  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      16    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          16        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.733 Mbytes of memory.
+P This job should need less than                       1.515 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET   66 : magnetic group, Shubnikov type IV
@@ -1199,15 +1199,15 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 66.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =      16  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      16    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          10        mffmem =           1         mkmem =           1
+     natom =      16  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      16    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          16        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.733 Mbytes of memory.
+P This job should need less than                       1.515 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET   67 : magnetic group, Shubnikov type IV
@@ -1217,15 +1217,15 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 67.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =      16  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      16    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          10        mffmem =           1         mkmem =           1
+     natom =      16  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      16    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          16        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.733 Mbytes of memory.
+P This job should need less than                       1.515 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET   68 : magnetic group, Shubnikov type IV
@@ -1235,15 +1235,15 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 68.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =      16  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      16    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          10        mffmem =           1         mkmem =           1
+     natom =      16  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      16    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          16        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.733 Mbytes of memory.
+P This job should need less than                       1.515 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET   69 : magnetic group, Shubnikov type IV
@@ -1253,15 +1253,15 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 69.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =      16  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      16    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          10        mffmem =           1         mkmem =           1
+     natom =      16  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      16    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          16        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.733 Mbytes of memory.
+P This job should need less than                       1.515 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET   70 : magnetic group, Shubnikov type IV
@@ -1271,15 +1271,15 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 70.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =      16  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      16    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          10        mffmem =           1         mkmem =           1
+     natom =      16  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      16    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          16        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.733 Mbytes of memory.
+P This job should need less than                       1.515 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET   71 : magnetic group, Shubnikov type IV
@@ -1289,15 +1289,15 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 71.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =      16  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      16    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          10        mffmem =           1         mkmem =           1
+     natom =      16  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      16    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          16        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.733 Mbytes of memory.
+P This job should need less than                       1.515 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET   72 : magnetic group, Shubnikov type IV
@@ -1307,15 +1307,15 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 72.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =      16  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      16    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          10        mffmem =           1         mkmem =           1
+     natom =      16  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      16    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          16        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.733 Mbytes of memory.
+P This job should need less than                       1.515 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET   73 : magnetic group, Shubnikov type IV
@@ -1325,15 +1325,15 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 73.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =      16  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      16    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          10        mffmem =           1         mkmem =           1
+     natom =      16  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      16    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          16        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.733 Mbytes of memory.
+P This job should need less than                       1.515 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET   74 : magnetic group, Shubnikov type IV
@@ -1343,15 +1343,15 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 74.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =      16  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      16    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          10        mffmem =           1         mkmem =           1
+     natom =      16  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      16    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          16        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.733 Mbytes of memory.
+P This job should need less than                       1.515 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET   75 : magnetic group, Shubnikov type IV
@@ -1361,15 +1361,15 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 75.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =      16  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      16    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          10        mffmem =           1         mkmem =           1
+     natom =      16  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      16    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          16        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.733 Mbytes of memory.
+P This job should need less than                       1.515 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET   76 : magnetic group, Shubnikov type IV
@@ -1379,15 +1379,15 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 76.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =      16  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      16    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          10        mffmem =           1         mkmem =           1
+     natom =      16  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      16    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          16        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.733 Mbytes of memory.
+P This job should need less than                       1.515 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET   77 : magnetic group, Shubnikov type IV
@@ -1397,15 +1397,15 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 77.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =      16  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      16    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          10        mffmem =           1         mkmem =           1
+     natom =      16  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      16    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          16        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.733 Mbytes of memory.
+P This job should need less than                       1.515 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET   78 : magnetic group, Shubnikov type IV
@@ -1415,15 +1415,15 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 78.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =      16  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      16    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          10        mffmem =           1         mkmem =           1
+     natom =      16  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      16    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          16        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.733 Mbytes of memory.
+P This job should need less than                       1.515 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET   79 : magnetic group, Shubnikov type IV
@@ -1433,15 +1433,15 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 79.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =      16  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      16    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          10        mffmem =           1         mkmem =           1
+     natom =      16  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      16    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          16        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.733 Mbytes of memory.
+P This job should need less than                       1.515 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET   80 : magnetic group, Shubnikov type IV
@@ -1451,15 +1451,15 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 80.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =      16  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      16    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          10        mffmem =           1         mkmem =           1
+     natom =      16  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      16    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          16        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.733 Mbytes of memory.
+P This job should need less than                       1.515 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET   81 : magnetic group, Shubnikov type IV
@@ -1469,15 +1469,15 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 81.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =      16  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      16    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          10        mffmem =           1         mkmem =           1
+     natom =      16  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      16    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          16        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.733 Mbytes of memory.
+P This job should need less than                       1.515 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET   82 : magnetic group, Shubnikov type IV
@@ -1487,15 +1487,15 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 82.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =      16  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      16    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          10        mffmem =           1         mkmem =           1
+     natom =      16  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      16    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          16        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.733 Mbytes of memory.
+P This job should need less than                       1.515 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
 
  DATASET   83 : magnetic group, Shubnikov type IV
@@ -1505,15 +1505,15 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 83.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =       6  mpssoang =       1    mqgrid =    3001
-     natom =      16  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      16    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          10        mffmem =           1         mkmem =           1
+     natom =      16  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      16    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          16        mffmem =           1         mkmem =           1
        mpw =           8          nfft =         216          nkpt =           1
 ================================================================================
-P This job should need less than                       0.611 Mbytes of memory.
+P This job should need less than                       1.328 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
+_ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.005 Mbytes.
 ================================================================================
 
  DATASET   84 : magnetic group, Shubnikov type IV
@@ -1523,15 +1523,15 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
  Values of the parameters that define the memory need for DATASET 84.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =       6  mpssoang =       1    mqgrid =    3001
-     natom =      16  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      16    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          10        mffmem =           1         mkmem =           1
+     natom =      16  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      16    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          16        mffmem =           1         mkmem =           1
        mpw =           8          nfft =         216          nkpt =           1
 ================================================================================
-P This job should need less than                       0.611 Mbytes of memory.
+P This job should need less than                       1.328 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
+_ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.005 Mbytes.
 ================================================================================
 
  DATASET   85 : magnetic group, Shubnikov type IV
@@ -1541,15 +1541,15 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
  Values of the parameters that define the memory need for DATASET 85.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =       6  mpssoang =       1    mqgrid =    3001
-     natom =      16  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      16    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          10        mffmem =           1         mkmem =           1
+     natom =      16  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      16    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          16        mffmem =           1         mkmem =           1
        mpw =           8          nfft =         216          nkpt =           1
 ================================================================================
-P This job should need less than                       0.611 Mbytes of memory.
+P This job should need less than                       1.328 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
+_ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.005 Mbytes.
 ================================================================================
 
  DATASET   86 : magnetic group, Shubnikov type IV
@@ -1559,15 +1559,15 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
  Values of the parameters that define the memory need for DATASET 86.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =       6  mpssoang =       1    mqgrid =    3001
-     natom =      16  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      16    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          10        mffmem =           1         mkmem =           1
+     natom =      16  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      16    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          16        mffmem =           1         mkmem =           1
        mpw =           8          nfft =         216          nkpt =           1
 ================================================================================
-P This job should need less than                       0.611 Mbytes of memory.
+P This job should need less than                       1.328 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
+_ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.005 Mbytes.
 ================================================================================
 
 --------------------------------------------------------------------------------
@@ -1768,92 +1768,92 @@ P           mkmem           1
             natom84        16
             natom85        16
             natom86        16
-            nband1          5
-            nband2          5
-            nband3          5
-            nband4          5
-            nband5          5
-            nband6          5
-            nband7          5
-            nband8          5
-            nband9          5
-            nband10         5
-            nband11         5
-            nband12         5
-            nband13         5
-            nband14         5
-            nband15         5
-            nband16         5
-            nband17         5
-            nband18         5
-            nband19        10
-            nband20        10
-            nband21        10
-            nband22        10
-            nband23        10
-            nband24        10
-            nband25        10
-            nband26        10
-            nband27        10
-            nband28        10
-            nband29        10
-            nband30        10
-            nband31        10
-            nband32        10
-            nband33        10
-            nband34        10
-            nband35        10
-            nband36        10
-            nband37        10
-            nband38        10
-            nband39        10
-            nband40        10
-            nband41        10
-            nband42        10
-            nband43        10
-            nband44        10
-            nband45        10
-            nband46        10
-            nband47        10
-            nband48        10
-            nband49        10
-            nband50        10
-            nband51        10
-            nband52        10
-            nband53        10
-            nband54        10
-            nband55        10
-            nband56        10
-            nband57        10
-            nband58        10
-            nband59        10
-            nband60        10
-            nband61        10
-            nband62        10
-            nband63        10
-            nband64        10
-            nband65        10
-            nband66        10
-            nband67        10
-            nband68        10
-            nband69        10
-            nband70        10
-            nband71        10
-            nband72        10
-            nband73        10
-            nband74        10
-            nband75        10
-            nband76        10
-            nband77        10
-            nband78        10
-            nband79        10
-            nband80        10
-            nband81        10
-            nband82        10
-            nband83        10
-            nband84        10
-            nband85        10
-            nband86        10
+            nband1          8
+            nband2          8
+            nband3          8
+            nband4          8
+            nband5          8
+            nband6          8
+            nband7          8
+            nband8          8
+            nband9          8
+            nband10         8
+            nband11         8
+            nband12         8
+            nband13         8
+            nband14         8
+            nband15         8
+            nband16         8
+            nband17         8
+            nband18         8
+            nband19        16
+            nband20        16
+            nband21        16
+            nband22        16
+            nband23        16
+            nband24        16
+            nband25        16
+            nband26        16
+            nband27        16
+            nband28        16
+            nband29        16
+            nband30        16
+            nband31        16
+            nband32        16
+            nband33        16
+            nband34        16
+            nband35        16
+            nband36        16
+            nband37        16
+            nband38        16
+            nband39        16
+            nband40        16
+            nband41        16
+            nband42        16
+            nband43        16
+            nband44        16
+            nband45        16
+            nband46        16
+            nband47        16
+            nband48        16
+            nband49        16
+            nband50        16
+            nband51        16
+            nband52        16
+            nband53        16
+            nband54        16
+            nband55        16
+            nband56        16
+            nband57        16
+            nband58        16
+            nband59        16
+            nband60        16
+            nband61        16
+            nband62        16
+            nband63        16
+            nband64        16
+            nband65        16
+            nband66        16
+            nband67        16
+            nband68        16
+            nband69        16
+            nband70        16
+            nband71        16
+            nband72        16
+            nband73        16
+            nband74        16
+            nband75        16
+            nband76        16
+            nband77        16
+            nband78        16
+            nband79        16
+            nband80        16
+            nband81        16
+            nband82        16
+            nband83        16
+            nband84        16
+            nband85        16
+            nband86        16
            ndtset          86
             ngfft1          8       8      10
             ngfft2          8       8      10
@@ -1943,6 +1943,8 @@ P           mkmem           1
             ngfft86         6       6       6
              nkpt           1
             nline           1
+           nspden           2
+           nsppol           2
             nstep           1
              nsym1          8
              nsym2          8
@@ -2031,160 +2033,487 @@ P           mkmem           1
              nsym85        16
              nsym86        16
            ntypat           1
-              occ1     2.000000  2.000000  2.000000  2.000000  0.000000
-              occ2     2.000000  2.000000  2.000000  2.000000  0.000000
-              occ3     2.000000  2.000000  2.000000  2.000000  0.000000
-              occ4     2.000000  2.000000  2.000000  2.000000  0.000000
-              occ5     2.000000  2.000000  2.000000  2.000000  0.000000
-              occ6     2.000000  2.000000  2.000000  2.000000  0.000000
-              occ7     2.000000  2.000000  2.000000  2.000000  0.000000
-              occ8     2.000000  2.000000  2.000000  2.000000  0.000000
-              occ9     2.000000  2.000000  2.000000  2.000000  0.000000
-              occ10    2.000000  2.000000  2.000000  2.000000  0.000000
-              occ11    2.000000  2.000000  2.000000  2.000000  0.000000
-              occ12    2.000000  2.000000  2.000000  2.000000  0.000000
-              occ13    2.000000  2.000000  2.000000  2.000000  0.000000
-              occ14    2.000000  2.000000  2.000000  2.000000  0.000000
-              occ15    2.000000  2.000000  2.000000  2.000000  0.000000
-              occ16    2.000000  2.000000  2.000000  2.000000  0.000000
-              occ17    2.000000  2.000000  2.000000  2.000000  0.000000
-              occ18    2.000000  2.000000  2.000000  2.000000  0.000000
-              occ19    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  0.000000  0.000000
-              occ20    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  0.000000  0.000000
-              occ21    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  0.000000  0.000000
-              occ22    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  0.000000  0.000000
-              occ23    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  0.000000  0.000000
-              occ24    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  0.000000  0.000000
-              occ25    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  0.000000  0.000000
-              occ26    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  0.000000  0.000000
-              occ27    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  0.000000  0.000000
-              occ28    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  0.000000  0.000000
-              occ29    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  0.000000  0.000000
-              occ30    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  0.000000  0.000000
-              occ31    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  0.000000  0.000000
-              occ32    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  0.000000  0.000000
-              occ33    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  0.000000  0.000000
-              occ34    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  0.000000  0.000000
-              occ35    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  0.000000  0.000000
-              occ36    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  0.000000  0.000000
-              occ37    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  0.000000  0.000000
-              occ38    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  0.000000  0.000000
-              occ39    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  0.000000  0.000000
-              occ40    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  0.000000  0.000000
-              occ41    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  0.000000  0.000000
-              occ42    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  0.000000  0.000000
-              occ43    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  0.000000  0.000000
-              occ44    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  0.000000  0.000000
-              occ45    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  0.000000  0.000000
-              occ46    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  0.000000  0.000000
-              occ47    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  0.000000  0.000000
-              occ48    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  0.000000  0.000000
-              occ49    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  0.000000  0.000000
-              occ50    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  0.000000  0.000000
-              occ51    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  0.000000  0.000000
-              occ52    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  0.000000  0.000000
-              occ53    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  0.000000  0.000000
-              occ54    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  0.000000  0.000000
-              occ55    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  0.000000  0.000000
-              occ56    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  0.000000  0.000000
-              occ57    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  0.000000  0.000000
-              occ58    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  0.000000  0.000000
-              occ59    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  0.000000  0.000000
-              occ60    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  0.000000  0.000000
-              occ61    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  0.000000  0.000000
-              occ62    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  0.000000  0.000000
-              occ63    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  0.000000  0.000000
-              occ64    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  0.000000  0.000000
-              occ65    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  0.000000  0.000000
-              occ66    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  0.000000  0.000000
-              occ67    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  0.000000  0.000000
-              occ68    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  0.000000  0.000000
-              occ69    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  0.000000  0.000000
-              occ70    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  0.000000  0.000000
-              occ71    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  0.000000  0.000000
-              occ72    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  0.000000  0.000000
-              occ73    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  0.000000  0.000000
-              occ74    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  0.000000  0.000000
-              occ75    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  0.000000  0.000000
-              occ76    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  0.000000  0.000000
-              occ77    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  0.000000  0.000000
-              occ78    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  0.000000  0.000000
-              occ79    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  0.000000  0.000000
-              occ80    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  0.000000  0.000000
-              occ81    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  0.000000  0.000000
-              occ82    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  0.000000  0.000000
-              occ83    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  0.000000  0.000000
-              occ84    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  0.000000  0.000000
-              occ85    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  0.000000  0.000000
-              occ86    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  0.000000  0.000000
+              occ1     1.000000  1.000000  1.000000  1.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  0.000000  0.000000
+                       0.000000  0.000000
+              occ2     1.000000  1.000000  1.000000  1.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  0.000000  0.000000
+                       0.000000  0.000000
+              occ3     1.000000  1.000000  1.000000  1.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  0.000000  0.000000
+                       0.000000  0.000000
+              occ4     1.000000  1.000000  1.000000  1.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  0.000000  0.000000
+                       0.000000  0.000000
+              occ5     1.000000  1.000000  1.000000  1.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  0.000000  0.000000
+                       0.000000  0.000000
+              occ6     1.000000  1.000000  1.000000  1.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  0.000000  0.000000
+                       0.000000  0.000000
+              occ7     1.000000  1.000000  1.000000  1.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  0.000000  0.000000
+                       0.000000  0.000000
+              occ8     1.000000  1.000000  1.000000  1.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  0.000000  0.000000
+                       0.000000  0.000000
+              occ9     1.000000  1.000000  1.000000  1.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  0.000000  0.000000
+                       0.000000  0.000000
+              occ10    1.000000  1.000000  1.000000  1.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  0.000000  0.000000
+                       0.000000  0.000000
+              occ11    1.000000  1.000000  1.000000  1.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  0.000000  0.000000
+                       0.000000  0.000000
+              occ12    1.000000  1.000000  1.000000  1.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  0.000000  0.000000
+                       0.000000  0.000000
+              occ13    1.000000  1.000000  1.000000  1.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  0.000000  0.000000
+                       0.000000  0.000000
+              occ14    1.000000  1.000000  1.000000  1.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  0.000000  0.000000
+                       0.000000  0.000000
+              occ15    1.000000  1.000000  1.000000  1.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  0.000000  0.000000
+                       0.000000  0.000000
+              occ16    1.000000  1.000000  1.000000  1.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  0.000000  0.000000
+                       0.000000  0.000000
+              occ17    1.000000  1.000000  1.000000  1.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  0.000000  0.000000
+                       0.000000  0.000000
+              occ18    1.000000  1.000000  1.000000  1.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  0.000000  0.000000
+                       0.000000  0.000000
+              occ19    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ20    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ21    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ22    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ23    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ24    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ25    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ26    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ27    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ28    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ29    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ30    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ31    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ32    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ33    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ34    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ35    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ36    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ37    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ38    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ39    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ40    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ41    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ42    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ43    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ44    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ45    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ46    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ47    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ48    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ49    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ50    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ51    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ52    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ53    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ54    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ55    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ56    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ57    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ58    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ59    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ60    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ61    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ62    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ63    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ64    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ65    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ66    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ67    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ68    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ69    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ70    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ71    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ72    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ73    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ74    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ75    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ76    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ77    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ78    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ79    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ80    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ81    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ82    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ83    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ84    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ85    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ86    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+           occopt           7
            prtvol          -1
             rprim1     1.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        6.1232339957E-17  1.0000000000E+00  0.0000000000E+00
@@ -9121,10 +9450,10 @@ P           mkmem           1
 
  abinit : before driver, prtvol=-1, debugging mode => will skip acknowledgments
 -
-- Proc.   0 individual time (sec): cpu=         13.5  wall=         13.6
+- Proc.   0 individual time (sec): cpu=         14.1  wall=         14.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and  88 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         13.5  wall=         13.6
++Overall time at end (sec) : cpu=         14.1  wall=         14.1

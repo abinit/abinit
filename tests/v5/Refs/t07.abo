@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.Version 10.3.4.4 of ABINIT, released Nov 2024.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h10 )
+.Starting date : Sun 26 Jan 2025.
+- ( at 09h48 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v5_t07/t07.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/TestBot_MPI1/v5_t07/t07.abi
 - output file    -> t07.abo
 - root for input  files -> t07i
 - root for output files -> t07o
@@ -1542,8 +1542,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Al.gga.uspp.paw
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Al.gga.uspp.paw
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/Pspdir/Al.gga.uspp.paw
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/Pspdir/Al.gga.uspp.paw
 - Paw atomic data extracted from US-psp (D.Vanderbilt): Aluminium
 - 13.00000   3.00000  20050712                znucl, zion, pspdat
     7   11    1    0       604   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1581,9 +1581,9 @@ tolerances: {tolvrs: 2.00E-10, }
  ETOT  1  -8.3732636956513    -8.373E+00 1.010E-01 9.681E-01
  ETOT  2  -8.3952441716183    -2.198E-02 1.856E-04 1.971E-01
  ETOT  3  -8.3913619496043     3.882E-03 3.854E-05 2.293E-04
- ETOT  4  -8.3913538752405     8.074E-06 1.329E-05 2.295E-05
- ETOT  5  -8.3913511625837     2.713E-06 1.510E-05 3.485E-07
- ETOT  6  -8.3913513909476    -2.284E-07 6.109E-06 1.638E-08
+ ETOT  4  -8.3913538752404     8.074E-06 1.329E-05 2.295E-05
+ ETOT  5  -8.3913511625838     2.713E-06 1.510E-05 3.485E-07
+ ETOT  6  -8.3913513909478    -2.284E-07 6.109E-06 1.638E-08
  ETOT  7  -8.3913514306334    -3.969E-08 8.715E-06 2.376E-10
  ETOT  8  -8.3913514138219     1.681E-08 3.454E-06 2.864E-13
 
@@ -1625,8 +1625,8 @@ force_length_stats: {min: null, max: null, mean: null, }
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =      0.184294742828390
- Compensation charge over fine fft grid    =      0.184319159199952
+ Compensation charge over spherical meshes =      0.184294742828325
+ Compensation charge over fine fft grid    =      0.184319159199954
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -1709,17 +1709,17 @@ force_length_stats: {min: null, max: null, mean: null, }
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  3.49196574538096E+00
-hartree             :  1.41259343611476E-02
-xc                  : -8.51744386222741E+00
+kinetic             :  3.49196574538099E+00
+hartree             :  1.41259343611562E-02
+xc                  : -8.51744386222745E+00
 Ewald energy        : -1.07831311739987E+01
 psp_core            :  4.35622962782581E-01
-local_psp           :  4.22517331545692E-01
-spherical_terms     :  6.54998649701281E+00
-internal            : -8.38635656514293E+00
-'-kT*entropy'       : -4.98773715957249E-03
-total_energy        : -8.39134430230250E+00
-total_energy_eV     : -2.28340090911377E+02
+local_psp           :  4.22517331545656E-01
+spherical_terms     :  6.54998649701413E+00
+internal            : -8.38635656514164E+00
+'-kT*entropy'       : -4.98773715957233E-03
+total_energy        : -8.39134430230121E+00
+total_energy_eV     : -2.28340090911342E+02
 ...
 
 
@@ -1729,12 +1729,12 @@ comment             : '"Double-counting" decomposition of free energy'
 band_energy         :  1.11989340522461E+00
 Ewald energy        : -1.07831311739987E+01
 psp_core            :  4.35622962782581E-01
-xc_dc               : -4.14398418310329E+00
-spherical_terms     :  4.98523531243244E+00
-internal            : -8.38636367666236E+00
-'-kT*entropy'       : -4.98773715957249E-03
-total_energy_dc     : -8.39135141382193E+00
-total_energy_dc_eV  : -2.28340284425662E+02
+xc_dc               : -4.14398418310324E+00
+spherical_terms     :  4.98523531243247E+00
+internal            : -8.38636367666228E+00
+'-kT*entropy'       : -4.98773715957233E-03
+total_energy_dc     : -8.39135141382185E+00
+total_energy_dc_eV  : -2.28340284425660E+02
 ...
 
 
@@ -1783,8 +1783,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Al.gga.uspp.paw
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Al.gga.uspp.paw
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/Pspdir/Al.gga.uspp.paw
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/Pspdir/Al.gga.uspp.paw
 - Paw atomic data extracted from US-psp (D.Vanderbilt): Aluminium
 - 13.00000   3.00000  20050712                znucl, zion, pspdat
     7   11    1    0       604   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1818,13 +1818,13 @@ tolerances: {tolvrs: 2.00E-10, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     nres2
- ETOT  1  -8.5723797971782    -8.572E+00 5.921E-02 4.869E-02
- ETOT  2  -8.5684741609247     3.906E-03 1.127E-02 1.080E-02
+ ETOT  1  -8.5723797971781    -8.572E+00 5.921E-02 4.869E-02
+ ETOT  2  -8.5684741609246     3.906E-03 1.127E-02 1.080E-02
  ETOT  3  -8.5664555509840     2.019E-03 9.729E-03 7.142E-05
- ETOT  4  -8.5664292976611     2.625E-05 3.588E-03 2.664E-06
- ETOT  5  -8.5664845831119    -5.529E-05 2.614E-03 1.256E-08
- ETOT  6  -8.5664829849374     1.598E-06 1.377E-03 9.301E-10
- ETOT  7  -8.5664831901926    -2.053E-07 4.313E-04 1.555E-10
+ ETOT  4  -8.5664292976608     2.625E-05 3.588E-03 2.664E-06
+ ETOT  5  -8.5664845831117    -5.529E-05 2.614E-03 1.256E-08
+ ETOT  6  -8.5664829849373     1.598E-06 1.377E-03 9.301E-10
+ ETOT  7  -8.5664831901925    -2.053E-07 4.313E-04 1.555E-10
 
  At SCF step    7       nres2   =  1.55E-10 < tolvrs=  2.00E-10 =>converged.
 
@@ -1865,7 +1865,7 @@ force_length_stats: {min: null, max: null, mean: null, }
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
  Compensation charge over spherical meshes =     -0.001749359641124
- Compensation charge over fine fft grid    =     -0.001749633246793
+ Compensation charge over fine fft grid    =     -0.001749633246790
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -1978,30 +1978,30 @@ force_length_stats: {min: null, max: null, mean: null, }
 --- !EnergyTerms
 iteration_state     : {dtset: 2, }
 comment             : Components of total free energy in Hartree
-kinetic             :  1.99273572282338E-01
-local_psp           : -1.99936987377977E-01
-spherical_terms     :  1.04737563771240E-02
+kinetic             :  1.99273572282335E-01
+local_psp           : -1.99936987378019E-01
+spherical_terms     :  1.04737563768580E-02
 '-kT*entropy'       : -0.00000000000000E+00
-positronic          :  9.81034128148398E-03
-electronic          : -8.39135141382193E+00
-electron_positron_interaction: -1.84942182086039E-01
-total_energy        : -8.56648325462649E+00
-total_energy_eV     : -2.33105864171903E+02
+positronic          :  9.81034128117325E-03
+electronic          : -8.39135141382185E+00
+electron_positron_interaction: -1.84942182085991E-01
+total_energy        : -8.56648325462667E+00
+total_energy_eV     : -2.33105864171909E+02
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 2, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -1.45865352937174E-01
+band_energy         : -1.45865352937084E-01
 spherical_terms     :  0.00000000000000E+00
 '-kT*entropy'       : -0.00000000000000E+00
-electron_positron_dc:  1.55675758652523E-01
-positronic          :  9.81040571534844E-03
-electronic          : -8.39135141382193E+00
-electron_positron_interaction: -1.84942182086039E-01
-total_energy_dc     : -8.56648319019262E+00
-total_energy_dc_eV  : -2.33105862418569E+02
+electron_positron_dc:  1.55675758652471E-01
+positronic          :  9.81040571538588E-03
+electronic          : -8.39135141382185E+00
+electron_positron_interaction: -1.84942182085991E-01
+total_energy_dc     : -8.56648319019246E+00
+total_energy_dc_eV  : -2.33105862418564E+02
 ...
 
 
@@ -2050,8 +2050,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Al.gga.uspp.paw
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Al.gga.uspp.paw
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/Pspdir/Al.gga.uspp.paw
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/Pspdir/Al.gga.uspp.paw
 - Paw atomic data extracted from US-psp (D.Vanderbilt): Aluminium
 - 13.00000   3.00000  20050712                znucl, zion, pspdat
     7   11    1    0       604   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2086,12 +2086,12 @@ tolerances: {tolvrs: 2.00E-10, }
 
      iter   Etot(hartree)      deltaE(h)  residm     nres2
  ETOT  1  -8.5527309808574    -8.553E+00 1.016E-01 1.027E+00
- ETOT  2  -8.5720812902039    -1.935E-02 2.536E-04 2.067E-01
+ ETOT  2  -8.5720812902038    -1.935E-02 2.536E-04 2.067E-01
  ETOT  3  -8.5675559213434     4.525E-03 8.098E-05 1.812E-04
- ETOT  4  -8.5675445211878     1.140E-05 2.527E-05 1.762E-05
- ETOT  5  -8.5675409999369     3.521E-06 2.720E-05 1.050E-07
+ ETOT  4  -8.5675445211877     1.140E-05 2.527E-05 1.762E-05
+ ETOT  5  -8.5675409999370     3.521E-06 2.720E-05 1.050E-07
  ETOT  6  -8.5675411602077    -1.603E-07 9.906E-06 8.570E-09
- ETOT  7  -8.5675412403753    -8.017E-08 1.182E-05 9.100E-11
+ ETOT  7  -8.5675412403751    -8.017E-08 1.182E-05 9.100E-11
 
  At SCF step    7       nres2   =  9.10E-11 < tolvrs=  2.00E-10 =>converged.
 
@@ -2131,8 +2131,8 @@ force_length_stats: {min: null, max: null, mean: null, }
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =      0.181950168073706
- Compensation charge over fine fft grid    =      0.181973245067070
+ Compensation charge over spherical meshes =      0.181950168073217
+ Compensation charge over fine fft grid    =      0.181973245067068
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -2247,37 +2247,37 @@ force_length_stats: {min: null, max: null, mean: null, }
 --- !EnergyTerms
 iteration_state     : {dtset: 3, }
 comment             : Components of total free energy in Hartree
-kinetic             :  3.47835695069084E+00
-hartree             :  1.33336138243445E-02
-xc                  : -8.51084138851488E+00
+kinetic             :  3.47835695069080E+00
+hartree             :  1.33336138241342E-02
+xc                  : -8.51084138851527E+00
 Ewald energy        : -1.07831311739987E+01
 psp_core            :  4.35622962782581E-01
-local_psp           :  4.75497594104296E-01
-spherical_terms     :  6.50589122716320E+00
-'-kT*entropy'       : -5.11747995391496E-03
-electronic          : -8.39038769390224E+00
-positronic          :  9.81040571534955E-03
-electron_positron_interaction: -1.87015188071583E-01
-total_energy        : -8.56759247625847E+00
-total_energy_eV     : -2.33136047627517E+02
+local_psp           :  4.75497594103507E-01
+spherical_terms     :  6.50589122716735E+00
+'-kT*entropy'       : -5.11747995391424E-03
+electronic          : -8.39038769389951E+00
+positronic          :  9.81040571538622E-03
+electron_positron_interaction: -1.87015188071644E-01
+total_energy        : -8.56759247625577E+00
+total_energy_eV     : -2.33136047627444E+02
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 3, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         :  1.05623438827635E+00
+band_energy         :  1.05623438827646E+00
 Ewald energy        : -1.07831311739987E+01
 psp_core            :  4.35622962782581E-01
-xc_dc               : -4.14314074097491E+00
-spherical_terms     :  4.98635205854310E+00
-'-kT*entropy'       : -5.11747995391496E-03
-electron_positron_dc:  6.28435273064705E-02
-electronic          : -8.39033645801903E+00
-positronic          :  9.81040571534955E-03
-electron_positron_interaction: -1.87015188071583E-01
-total_energy_dc     : -8.56754124037527E+00
-total_energy_dc_eV  : -2.33134653428232E+02
+xc_dc               : -4.14314074097494E+00
+spherical_terms     :  4.98635205854312E+00
+'-kT*entropy'       : -5.11747995391424E-03
+electron_positron_dc:  6.28435273065139E-02
+electronic          : -8.39033645801888E+00
+positronic          :  9.81040571538622E-03
+electron_positron_interaction: -1.87015188071644E-01
+total_energy_dc     : -8.56754124037514E+00
+total_energy_dc_eV  : -2.33134653428228E+02
 ...
 
 
@@ -2324,8 +2324,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Al.gga.uspp.paw
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Al.gga.uspp.paw
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/Pspdir/Al.gga.uspp.paw
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/Pspdir/Al.gga.uspp.paw
 - Paw atomic data extracted from US-psp (D.Vanderbilt): Aluminium
 - 13.00000   3.00000  20050712                znucl, zion, pspdat
     7   11    1    0       604   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2363,47 +2363,47 @@ TC-DFT STEP   1 - ELECTRONIC GROUND-STATE CALCULATION
  ETOT  1  -8.3732636956513    -8.373E+00 1.010E-01 9.681E-01
  ETOT  2  -8.3952441716183    -2.198E-02 1.856E-04 1.971E-01
  ETOT  3  -8.3913619496043     3.882E-03 3.854E-05 2.293E-04
- ETOT  4  -8.3913538752405     8.074E-06 1.329E-05 2.295E-05
- ETOT  5  -8.3913511625837     2.713E-06 1.510E-05 3.485E-07
- ETOT  6  -8.3913513909476    -2.284E-07 6.109E-06 1.638E-08
+ ETOT  4  -8.3913538752404     8.074E-06 1.329E-05 2.295E-05
+ ETOT  5  -8.3913511625838     2.713E-06 1.510E-05 3.485E-07
+ ETOT  6  -8.3913513909478    -2.284E-07 6.109E-06 1.638E-08
  ETOT  7  -8.3913514306334    -3.969E-08 8.715E-06 2.376E-10
  ETOT  8  -8.3913514138219     1.681E-08 3.454E-06 2.864E-13
 
  At SCF step    8       nres2   =  2.86E-13 < tolvrs=  2.00E-10 =>converged.
 
 TC-DFT STEP   2 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS AND IONS
- ETOT  9  -8.5890729382200    -1.977E-01 3.249E-01 4.093E-02
- ETOT 10  -8.6121557568708    -2.308E-02 2.645E-02 1.775E-02
- ETOT 11  -8.6122195143839    -6.376E-05 2.697E-02 1.984E-04
- ETOT 12  -8.6122194763722     3.801E-08 1.516E-02 1.660E-05
- ETOT 13  -8.6122194784201    -2.048E-09 3.504E-03 1.027E-07
- ETOT 14  -8.6122194783810     3.911E-11 1.462E-03 6.819E-09
- ETOT 15  -8.6122194783750     5.922E-12 3.381E-03 1.081E-10
+ ETOT  9  -8.5890729382191    -1.977E-01 3.249E-01 4.093E-02
+ ETOT 10  -8.6121557568707    -2.308E-02 2.645E-02 1.775E-02
+ ETOT 11  -8.6122195143850    -6.376E-05 2.697E-02 1.984E-04
+ ETOT 12  -8.6122194763721     3.801E-08 1.516E-02 1.660E-05
+ ETOT 13  -8.6122194784200    -2.048E-09 3.504E-03 1.027E-07
+ ETOT 14  -8.6122194783809     3.911E-11 1.462E-03 6.819E-09
+ ETOT 15  -8.6122194783750     5.921E-12 3.381E-03 1.081E-10
 
  At SCF step   15       nres2   =  1.08E-10 < tolvrs=  2.00E-10 =>converged.
 
 TC-DFT STEP   3 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
- ETOT 16  -8.5608661005663     5.135E-02 2.412E-02 5.844E-02
- ETOT 17  -8.6134984158001    -5.263E-02 9.596E-03 1.693E-02
- ETOT 18  -8.6133872209621     1.112E-04 5.245E-04 6.420E-03
- ETOT 19  -8.6133215170230     6.570E-05 6.120E-05 1.898E-04
- ETOT 20  -8.6133198704182     1.647E-06 3.338E-04 9.372E-07
- ETOT 21  -8.6133190991475     7.713E-07 4.271E-04 1.135E-08
- ETOT 22  -8.6133192411424    -1.420E-07 4.956E-04 6.044E-10
- ETOT 23  -8.6133192366253     4.517E-09 1.054E-04 2.925E-11
+ ETOT 16  -8.5608660956736     5.135E-02 2.412E-02 5.844E-02
+ ETOT 17  -8.6134984158504    -5.263E-02 9.596E-03 1.693E-02
+ ETOT 18  -8.6133872209302     1.112E-04 5.245E-04 6.420E-03
+ ETOT 19  -8.6133215170223     6.570E-05 6.120E-05 1.898E-04
+ ETOT 20  -8.6133198704199     1.647E-06 3.338E-04 9.372E-07
+ ETOT 21  -8.6133190991480     7.713E-07 4.271E-04 1.135E-08
+ ETOT 22  -8.6133192411423    -1.420E-07 4.956E-04 6.044E-10
+ ETOT 23  -8.6133192366254     4.517E-09 1.054E-04 2.925E-11
 
  At SCF step   23       nres2   =  2.93E-11 < tolvrs=  2.00E-10 =>converged.
 
 TC-DFT STEP   4 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS AND IONS
- ETOT 24  -8.5908017731893     2.252E-02 2.577E-01 1.588E-03
- ETOT 25  -8.6132617736518    -2.246E-02 2.993E-02 4.490E-04
- ETOT 26  -8.6133322020333    -7.043E-05 1.202E-03 2.878E-04
- ETOT 27  -8.6133324394273    -2.374E-07 2.173E-03 2.204E-04
- ETOT 28  -8.6133324539455    -1.452E-08 1.392E-02 8.933E-05
- ETOT 29  -8.6133324551231    -1.178E-09 8.821E-03 2.476E-05
- ETOT 30  -8.6133324565600    -1.437E-09 2.040E-03 2.874E-06
- ETOT 31  -8.6133324564959     6.411E-11 1.007E-03 7.660E-09
- ETOT 32  -8.6133324564908     5.082E-12 2.887E-04 1.138E-10
+ ETOT 24  -8.5908017729582     2.252E-02 2.577E-01 1.588E-03
+ ETOT 25  -8.6132617736482    -2.246E-02 2.993E-02 4.490E-04
+ ETOT 26  -8.6133322020344    -7.043E-05 1.202E-03 2.878E-04
+ ETOT 27  -8.6133324394269    -2.374E-07 2.173E-03 2.204E-04
+ ETOT 28  -8.6133324539451    -1.452E-08 1.392E-02 8.933E-05
+ ETOT 29  -8.6133324551227    -1.178E-09 8.823E-03 2.476E-05
+ ETOT 30  -8.6133324565595    -1.437E-09 2.040E-03 2.874E-06
+ ETOT 31  -8.6133324564954     6.411E-11 1.007E-03 7.660E-09
+ ETOT 32  -8.6133324564903     5.082E-12 2.887E-04 1.138E-10
 
  At SCF step   32       nres2   =  1.14E-10 < tolvrs=  2.00E-10 =>converged.
 
@@ -2448,8 +2448,8 @@ force_length_stats: {min: null, max: null, mean: null, }
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =     -0.000613124062983
- Compensation charge over fine fft grid    =     -0.000612433471387
+ Compensation charge over spherical meshes =     -0.000613124118802
+ Compensation charge over fine fft grid    =     -0.000612433471388
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -2531,7 +2531,7 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   53.865E-07; max=  28.875E-05
+ Mean square residual over all n,k,spin=   53.864E-07; max=  28.874E-05
  reduced coordinates (array xred) for    4 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.500000000000      0.500000000000      0.000000000000
@@ -2564,37 +2564,37 @@ force_length_stats: {min: null, max: null, mean: null, }
 --- !EnergyTerms
 iteration_state     : {dtset: 4, }
 comment             : Components of total free energy in Hartree
-kinetic             :  3.47812503097151E+00
-hartree             :  1.30978363007721E-02
-xc                  : -8.51081992235022E+00
+kinetic             :  3.47812503097112E+00
+hartree             :  1.30978363006727E-02
+xc                  : -8.51081992235050E+00
 Ewald energy        : -1.07831311739987E+01
 psp_core            :  4.35622962782581E-01
-local_psp           :  4.74604509260681E-01
-spherical_terms     :  6.50735159807326E+00
-'-kT*entropy'       : -5.14343180800608E-03
-electronic          : -8.39029259076812E+00
-positronic          :  9.29316596247674E-02
-electron_positron_interaction: -3.15977713483300E-01
-total_energy        : -8.61333864462665E+00
-total_energy_eV     : -2.34380864175108E+02
+local_psp           :  4.74604509258747E-01
+spherical_terms     :  6.50735159804241E+00
+'-kT*entropy'       : -5.14343180800822E-03
+electronic          : -8.39029259080167E+00
+positronic          :  9.29316596719134E-02
+electron_positron_interaction: -3.15977713530415E-01
+total_energy        : -8.61333864466018E+00
+total_energy_eV     : -2.34380864176020E+02
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 4, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         :  1.07265636028705E+00
+band_energy         :  1.07265636028621E+00
 Ewald energy        : -1.07831311739987E+01
 psp_core            :  4.35622962782581E-01
-xc_dc               : -4.14284344242118E+00
-spherical_terms     :  4.98631954220536E+00
-'-kT*entropy'       : -5.14343180800608E-03
-electron_positron_dc:  4.62327589462244E-02
-electronic          : -8.39028642400667E+00
-positronic          :  9.29316596247674E-02
-electron_positron_interaction: -3.15977713483300E-01
-total_energy_dc     : -8.61333247786520E+00
-total_energy_dc_eV  : -2.34380696368995E+02
+xc_dc               : -4.14284344242123E+00
+spherical_terms     :  4.98631954220606E+00
+'-kT*entropy'       : -5.14343180800822E-03
+electron_positron_dc:  4.62327589465418E-02
+electronic          : -8.39028642400654E+00
+positronic          :  9.29316596719134E-02
+electron_positron_interaction: -3.15977713530415E-01
+total_energy_dc     : -8.61333247786505E+00
+total_energy_dc_eV  : -2.34380696368991E+02
 ...
 
 
@@ -2641,8 +2641,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Al.gga.uspp.paw
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Al.gga.uspp.paw
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/Pspdir/Al.gga.uspp.paw
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/Pspdir/Al.gga.uspp.paw
 - Paw atomic data extracted from US-psp (D.Vanderbilt): Aluminium
 - 13.00000   3.00000  20050712                znucl, zion, pspdat
     7   11    1    0       604   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2680,41 +2680,41 @@ TC-DFT STEP   1 - ELECTRONIC GROUND-STATE CALCULATION
  ETOT  1  -8.3732636956513    -8.373E+00 1.010E-01 9.681E-01
  ETOT  2  -8.3952441716183    -2.198E-02 1.856E-04 1.971E-01
  ETOT  3  -8.3913619496043     3.882E-03 3.854E-05 2.293E-04
- ETOT  4  -8.3913538752405     8.074E-06 1.329E-05 2.295E-05
- ETOT  5  -8.3913511625837     2.713E-06 1.510E-05 3.485E-07
- ETOT  6  -8.3913513909476    -2.284E-07 6.109E-06 1.638E-08
+ ETOT  4  -8.3913538752404     8.074E-06 1.329E-05 2.295E-05
+ ETOT  5  -8.3913511625838     2.713E-06 1.510E-05 3.485E-07
+ ETOT  6  -8.3913513909478    -2.284E-07 6.109E-06 1.638E-08
  ETOT  7  -8.3913514306334    -3.969E-08 8.715E-06 2.376E-10
  ETOT  8  -8.3913514138219     1.681E-08 3.454E-06 2.864E-13
 
  At SCF step    8       nres2   =  2.86E-13 < tolvrs=  2.00E-10 =>converged.
 
 TC-DFT STEP   2 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS AND IONS
- ETOT  9  -8.5890729382200    -1.977E-01 3.249E-01 4.093E-02
- ETOT 10  -8.6121557568708    -2.308E-02 2.645E-02 1.775E-02
- ETOT 11  -8.6122195143839    -6.376E-05 2.697E-02 1.984E-04
- ETOT 12  -8.6122194763722     3.801E-08 1.516E-02 1.660E-05
- ETOT 13  -8.6122194784201    -2.048E-09 3.504E-03 1.027E-07
- ETOT 14  -8.6122194783810     3.911E-11 1.462E-03 6.819E-09
- ETOT 15  -8.6122194783750     5.922E-12 3.381E-03 1.081E-10
+ ETOT  9  -8.5890729382191    -1.977E-01 3.249E-01 4.093E-02
+ ETOT 10  -8.6121557568707    -2.308E-02 2.645E-02 1.775E-02
+ ETOT 11  -8.6122195143850    -6.376E-05 2.697E-02 1.984E-04
+ ETOT 12  -8.6122194763721     3.801E-08 1.516E-02 1.660E-05
+ ETOT 13  -8.6122194784200    -2.048E-09 3.504E-03 1.027E-07
+ ETOT 14  -8.6122194783809     3.911E-11 1.462E-03 6.819E-09
+ ETOT 15  -8.6122194783750     5.921E-12 3.381E-03 1.081E-10
 
  At SCF step   15       nres2   =  1.08E-10 < tolvrs=  2.00E-10 =>converged.
 
 TC-DFT STEP   3 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
- ETOT 16  -8.6133778149101    -1.158E-03 3.671E-05 6.670E-03
- ETOT 17  -8.6133340875753     4.373E-05 7.552E-06 1.221E-03
- ETOT 18  -8.6133212058135     1.288E-05 2.853E-06 8.151E-06
- ETOT 19  -8.6133193847498     1.821E-06 2.639E-06 3.188E-07
+ ETOT 16  -8.6133778148934    -1.158E-03 3.671E-05 6.670E-03
+ ETOT 17  -8.6133340875731     4.373E-05 7.552E-06 1.221E-03
+ ETOT 18  -8.6133212058132     1.288E-05 2.853E-06 8.151E-06
+ ETOT 19  -8.6133193847538     1.821E-06 2.639E-06 3.188E-07
  ETOT 20  -8.6133191447332     2.400E-07 1.212E-06 8.353E-10
  ETOT 21  -8.6133192292517    -8.452E-08 1.167E-06 2.485E-11
 
  At SCF step   21       nres2   =  2.49E-11 < tolvrs=  2.00E-10 =>converged.
 
 TC-DFT STEP   4 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS AND IONS
- ETOT 22  -8.6133321772933    -1.295E-05 8.261E-04 1.531E-05
- ETOT 23  -8.6133322840797    -1.068E-07 1.464E-01 3.337E-06
- ETOT 24  -8.6133322843887    -3.091E-10 2.426E-03 1.404E-08
- ETOT 25  -8.6133322843830     5.791E-12 1.532E-03 7.160E-10
- ETOT 26  -8.6133322843814     1.554E-12 1.405E-04 2.383E-11
+ ETOT 22  -8.6133321772931    -1.295E-05 8.261E-04 1.531E-05
+ ETOT 23  -8.6133322840795    -1.068E-07 1.465E-01 3.337E-06
+ ETOT 24  -8.6133322843886    -3.091E-10 2.425E-03 1.404E-08
+ ETOT 25  -8.6133322843828     5.793E-12 1.532E-03 7.160E-10
+ ETOT 26  -8.6133322843812     1.553E-12 1.405E-04 2.383E-11
 
  At SCF step   26       nres2   =  2.38E-11 < tolvrs=  2.00E-10 =>converged.
 
@@ -2733,7 +2733,7 @@ lattice_vectors:
 lattice_lengths: [   7.65339,    7.65339,    7.65339, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   4.4829271E+02
-convergence: {deltae:  1.554E-12, res2:  2.383E-11, residm:  1.405E-04, diffor:  0.000E+00, }
+convergence: {deltae:  1.553E-12, res2:  2.383E-11, residm:  1.405E-04, diffor:  0.000E+00, }
 etotal    :  -8.61333228E+00
 entropy   :   0.00000000E+00
 fermie    :  -1.59864863E-01
@@ -2759,8 +2759,8 @@ force_length_stats: {min: null, max: null, mean: null, }
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =     -0.000612392258620
- Compensation charge over fine fft grid    =     -0.000612433513740
+ Compensation charge over spherical meshes =     -0.000612392258784
+ Compensation charge over fine fft grid    =     -0.000612433513730
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -2842,7 +2842,7 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   24.051E-07; max=  14.049E-05
+ Mean square residual over all n,k,spin=   24.050E-07; max=  14.048E-05
  reduced coordinates (array xred) for    4 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.500000000000      0.500000000000      0.000000000000
@@ -2875,37 +2875,37 @@ force_length_stats: {min: null, max: null, mean: null, }
 --- !EnergyTerms
 iteration_state     : {dtset: 5, }
 comment             : Components of total free energy in Hartree
-kinetic             :  3.47812491705338E+00
-hartree             :  1.30978423601454E-02
-xc                  : -8.51082000315271E+00
+kinetic             :  3.47812491705472E+00
+hartree             :  1.30978423604629E-02
+xc                  : -8.51082000315330E+00
 Ewald energy        : -1.07831311739987E+01
 psp_core            :  4.35622962782581E-01
-local_psp           :  4.74603845484440E-01
-spherical_terms     :  6.50736789425122E+00
-'-kT*entropy'       : -5.14343189467000E-03
-electronic          : -8.39027714711432E+00
-positronic          :  9.29314425853294E-02
-electron_positron_interaction: -3.15977468480645E-01
-total_energy        : -8.61332317300963E+00
-total_energy_eV     : -2.34380443170998E+02
+local_psp           :  4.74603845479743E-01
+spherical_terms     :  6.50736789437750E+00
+'-kT*entropy'       : -5.14343189467452E-03
+electronic          : -8.39027714699166E+00
+positronic          :  9.29314425853059E-02
+electron_positron_interaction: -3.15977468480280E-01
+total_energy        : -8.61332317288664E+00
+total_energy_eV     : -2.34380443167651E+02
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 5, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         :  1.07265675627464E+00
+band_energy         :  1.07265675627858E+00
 Ewald energy        : -1.07831311739987E+01
 psp_core            :  4.35622962782581E-01
-xc_dc               : -4.14284345163363E+00
-spherical_terms     :  4.98631911397202E+00
-'-kT*entropy'       : -5.14343189467000E-03
-electron_positron_dc:  4.62328737341029E-02
-electronic          : -8.39028635076366E+00
-positronic          :  9.29314425853294E-02
-electron_positron_interaction: -3.15977468480645E-01
-total_energy_dc     : -8.61333237665898E+00
-total_energy_dc_eV  : -2.34380693615034E+02
+xc_dc               : -4.14284345163370E+00
+spherical_terms     :  4.98631911396912E+00
+'-kT*entropy'       : -5.14343189467452E-03
+electron_positron_dc:  4.62328737338375E-02
+electronic          : -8.39028635076297E+00
+positronic          :  9.29314425853059E-02
+electron_positron_interaction: -3.15977468480280E-01
+total_energy_dc     : -8.61333237665794E+00
+total_energy_dc_eV  : -2.34380693615005E+02
 ...
 
 
@@ -2964,13 +2964,13 @@ tolerances: {tolvrs: 2.00E-10, }
 
      iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor
 TC-DFT STEP   1 - ELECTRONIC GROUND-STATE CALCULATION
- ETOT  1  -8.3747248418257    -8.375E+00 1.040E-01 9.723E-01 1.383E-03 1.383E-03
+ ETOT  1  -8.3747248418258    -8.375E+00 1.040E-01 9.723E-01 1.383E-03 1.383E-03
  ETOT  2  -8.3951640256273    -2.044E-02 1.874E-04 1.974E-01 3.969E-03 3.753E-03
- ETOT  3  -8.3912243762783     3.940E-03 6.838E-05 2.408E-04 2.170E-04 3.536E-03
- ETOT  4  -8.3912156278392     8.748E-06 1.361E-05 2.766E-05 3.490E-05 3.571E-03
+ ETOT  3  -8.3912243762782     3.940E-03 6.838E-05 2.408E-04 2.170E-04 3.536E-03
+ ETOT  4  -8.3912156278390     8.748E-06 1.361E-05 2.766E-05 3.490E-05 3.571E-03
  ETOT  5  -8.3912127638830     2.864E-06 2.980E-05 3.907E-07 5.990E-06 3.569E-03
  ETOT  6  -8.3912128947181    -1.308E-07 5.352E-06 6.831E-08 8.285E-07 3.570E-03
- ETOT  7  -8.3912129949784    -1.003E-07 1.584E-05 3.999E-10 2.161E-07 3.570E-03
+ ETOT  7  -8.3912129949785    -1.003E-07 1.584E-05 3.999E-10 2.161E-07 3.570E-03
  ETOT  8  -8.3912129905283     4.450E-09 2.807E-06 6.158E-11 9.268E-08 3.570E-03
 
  At SCF step    8       nres2   =  6.16E-11 < tolvrs=  2.00E-10 =>converged.
@@ -2981,26 +2981,26 @@ TC-DFT STEP   2 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS A
  ETOT 11  -8.6123126542375    -7.464E-05 2.444E-02 2.242E-04 7.861E-05 7.654E-03
  ETOT 12  -8.6123130163518    -3.621E-07 1.799E-02 3.403E-05 2.746E-05 7.674E-03
  ETOT 13  -8.6123130244192    -8.067E-09 7.925E-03 3.470E-06 3.306E-06 7.677E-03
- ETOT 14  -8.6123130244824    -6.326E-11 1.055E-02 6.234E-07 8.005E-07 7.678E-03
- ETOT 15  -8.6123130244955    -1.312E-11 3.139E-02 2.052E-08 1.132E-07 7.678E-03
+ ETOT 14  -8.6123130244824    -6.325E-11 1.055E-02 6.234E-07 8.005E-07 7.678E-03
+ ETOT 15  -8.6123130244956    -1.312E-11 3.139E-02 2.052E-08 1.132E-07 7.678E-03
  ETOT 16  -8.6123130245126    -1.701E-11 1.657E-02 1.396E-10 2.646E-08 7.678E-03
 
  At SCF step   16       nres2   =  1.40E-10 < tolvrs=  2.00E-10 =>converged.
 
 TC-DFT STEP   3 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
- ETOT 17  -8.6136056692802    -1.293E-03 3.712E-05 8.203E-03 4.656E-03 3.022E-03
- ETOT 18  -8.6135075498336     9.812E-05 5.437E-06 1.381E-03 4.739E-04 2.548E-03
+ ETOT 17  -8.6136056692803    -1.293E-03 3.712E-05 8.203E-03 4.656E-03 3.022E-03
+ ETOT 18  -8.6135075498335     9.812E-05 5.437E-06 1.381E-03 4.739E-04 2.548E-03
  ETOT 19  -8.6134868591945     2.069E-05 2.919E-06 1.828E-05 6.170E-05 2.486E-03
  ETOT 20  -8.6134861893762     6.698E-07 2.290E-06 3.619E-06 3.425E-05 2.452E-03
  ETOT 21  -8.6134856677353     5.216E-07 2.341E-06 1.421E-07 1.154E-05 2.464E-03
- ETOT 22  -8.6134855516920     1.160E-07 1.714E-06 2.038E-08 4.865E-06 2.469E-03
- ETOT 23  -8.6134855486481     3.044E-09 2.153E-06 6.751E-10 1.634E-06 2.467E-03
+ ETOT 22  -8.6134855516919     1.160E-07 1.714E-06 2.038E-08 4.865E-06 2.469E-03
+ ETOT 23  -8.6134855486482     3.044E-09 2.153E-06 6.751E-10 1.634E-06 2.467E-03
  ETOT 24  -8.6134855537845    -5.136E-09 1.510E-06 1.914E-11 2.912E-07 2.467E-03
 
  At SCF step   24       nres2   =  1.91E-11 < tolvrs=  2.00E-10 =>converged.
 
 TC-DFT STEP   4 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS AND IONS
- ETOT 25  -8.6135165400478    -3.099E-05 2.106E-02 8.042E-05 3.858E-03 6.325E-03
+ ETOT 25  -8.6135165400477    -3.099E-05 2.106E-02 8.042E-05 3.858E-03 6.325E-03
  ETOT 26  -8.6135193676728    -2.828E-06 3.450E-02 3.201E-05 5.781E-04 5.747E-03
  ETOT 27  -8.6135193736852    -6.012E-09 4.775E-03 3.142E-06 9.876E-06 5.757E-03
  ETOT 28  -8.6135193738440    -1.588E-10 3.725E-03 1.965E-07 9.829E-07 5.756E-03
@@ -3054,7 +3054,7 @@ force_length_stats: {min:   5.07199265E-03, max:   5.75603479E-03, mean:   5.414
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =     -0.000607927833805
+ Compensation charge over spherical meshes =     -0.000607927833804
  Compensation charge over fine fft grid    =     -0.000607912393816
 
  ==== Results concerning PAW augmentation regions ====
@@ -3163,10 +3163,10 @@ force_length_stats: {min:   5.07199265E-03, max:   5.75603479E-03, mean:   5.414
  frms,max,avg= 3.1288994E-03 5.7560348E-03  -1.066E-05  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.27839975552471    -0.00000000000000    -0.00000000000000
-    2      0.29598718461039    -0.00000000000000    -0.00000000000000
-    3      0.26081232643903    -0.00000000000000    -0.00000000000000
-    4     -0.27839975552471    -0.00000000000000    -0.00000000000000
+    1     -0.27839975552466    -0.00000000000000    -0.00000000000000
+    2      0.29598718461031    -0.00000000000000    -0.00000000000000
+    3      0.26081232643902    -0.00000000000000    -0.00000000000000
+    4     -0.27839975552466    -0.00000000000000    -0.00000000000000
  frms,max,avg= 1.6089446E-01 2.9598718E-01  -5.482E-04  0.000E+00  0.000E+00 e/A
  length scales=  7.653390838187  7.653390838187  7.653390838187 bohr
               =  4.050000000000  4.050000000000  4.050000000000 angstroms
@@ -3184,18 +3184,18 @@ force_length_stats: {min:   5.07199265E-03, max:   5.75603479E-03, mean:   5.414
 --- !EnergyTerms
 iteration_state     : {dtset: 6, }
 comment             : Components of total free energy in Hartree
-kinetic             :  3.47832747538748E+00
-hartree             :  1.32578824585614E-02
-xc                  : -8.51091088505678E+00
+kinetic             :  3.47832747538744E+00
+hartree             :  1.32578824585625E-02
+xc                  : -8.51091088505672E+00
 Ewald energy        : -1.07823924283109E+01
 psp_core            :  4.35622962782581E-01
-local_psp           :  4.73551024100705E-01
-spherical_terms     :  6.50760860985708E+00
-'-kT*entropy'       : -5.13588391329082E-03
-electronic          : -8.39007124269455E+00
-positronic          :  9.22404887243582E-02
-electron_positron_interaction: -3.15684134459790E-01
-total_energy        : -8.61351488842998E+00
+local_psp           :  4.73551024100780E-01
+spherical_terms     :  6.50760860985700E+00
+'-kT*entropy'       : -5.13588391329063E-03
+electronic          : -8.39007124269454E+00
+positronic          :  9.22404887243597E-02
+electron_positron_interaction: -3.15684134459793E-01
+total_energy        : -8.61351488842997E+00
 total_energy_eV     : -2.34385660012893E+02
 ...
 
@@ -3203,18 +3203,18 @@ total_energy_eV     : -2.34385660012893E+02
 --- !EnergyTermsDC
 iteration_state     : {dtset: 6, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         :  1.07250187248320E+00
+band_energy         :  1.07250187248328E+00
 Ewald energy        : -1.07823924283109E+01
 psp_core            :  4.35622962782581E-01
-xc_dc               : -4.14299555903390E+00
-spherical_terms     :  4.98631173387215E+00
-'-kT*entropy'       : -5.13588391329082E-03
-electron_positron_dc:  4.60114981482632E-02
-electronic          : -8.39007580397188E+00
-positronic          :  9.22404887243582E-02
-electron_positron_interaction: -3.15684134459790E-01
-total_energy_dc     : -8.61351944970731E+00
-total_energy_dc_eV  : -2.34385784131562E+02
+xc_dc               : -4.14299555903392E+00
+spherical_terms     :  4.98631173387205E+00
+'-kT*entropy'       : -5.13588391329063E-03
+electron_positron_dc:  4.60114981482669E-02
+electronic          : -8.39007580397191E+00
+positronic          :  9.22404887243597E-02
+electron_positron_interaction: -3.15684134459793E-01
+total_energy_dc     : -8.61351944970735E+00
+total_energy_dc_eV  : -2.34385784131563E+02
 ...
 
 
@@ -4694,10 +4694,10 @@ P           mkmem6          6
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         11.0  wall=         11.1
+- Proc.   0 individual time (sec): cpu=         11.3  wall=         11.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered   6 WARNINGs and  59 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         11.0  wall=         11.1
++Overall time at end (sec) : cpu=         11.3  wall=         11.3

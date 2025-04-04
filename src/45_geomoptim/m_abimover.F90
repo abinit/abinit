@@ -7,7 +7,7 @@
 !! and their related ini and free routines
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2024 ABINIT group (DCA, XG, GMR, SE, Mver, JJ)
+!! Copyright (C) 2001-2025 ABINIT group (DCA, XG, GMR, SE, Mver, JJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -83,6 +83,8 @@ integer  :: jellslab
 integer  :: natom
 ! Number of CONstraint EQuations
 integer  :: nconeq
+! Number of Degrees Of Freedom
+integer  :: ndof
 ! number of Shifts for the Qpoint Grid  (used for ionmov 26 and 27)
 integer  :: ph_nqshift
 ! Use by pred_isothermal only
@@ -424,7 +426,7 @@ type(abimover_specs),intent(out) :: specs
 
 !Local variables-------------------------------
 !scalars
- integer :: iatom,natom
+ integer :: natom
  character(len=500) :: msg
 !arrays
 
@@ -476,9 +478,12 @@ type(abimover_specs),intent(out) :: specs
 
  ab_mover%amu_curr    =>amu_curr
  ABI_MALLOC(ab_mover%amass,(natom))
- do iatom=1,natom
-   ab_mover%amass(iatom)=amu_emass*amu_curr(dtset%typat(iatom))
- end do
+ ab_mover%amass(1:natom) = amu_emass * amu_curr(dtset%typat(1:natom))
+
+!Count the number of degrees of freedom, taking into account iatfix.
+!Ndof = 3N (when no atom is fixed). This value may be adjusted for
+!each algorithm below.
+ ab_mover%ndof=count(ab_mover%iatfix==0)
 
 !Filename for Hessian matrix (NOT IN DTSET)
  ab_mover%fnameabi_hes =>dtfil%fnameabi_hes
@@ -644,6 +649,11 @@ type(abimover_specs),intent(out) :: specs
    specs%method = 'Isokinetic ensemble molecular dynamics'
 !  Number of history
    specs%nhist = 3
+!  Number of degrees of freedom: 3N-4
+   ab_mover%ndof=ab_mover%ndof-1 ! Kinetic energy conservation
+!  Conservation of the total momentum for each dimension, in case
+!  no atom position is fixed for that dimension
+   ab_mover%ndof=ab_mover%ndof-count(sum(ab_mover%iatfix,dim=2)==0)
 !  This is the initialization for ionmov==13
 !  -------------------------------------------
  case (13)
@@ -676,7 +686,7 @@ type(abimover_specs),intent(out) :: specs
 
 !  This is the initialization for ionmov==15
 !  -------------------------------------------
-case (15)
+ case (15)
 !  Values use in XML Output
    specs%type4xml='FIRE'
    specs%isVused=.TRUE.  ! Velocities are used
@@ -686,6 +696,26 @@ case (15)
    specs%method = 'Fast inertial relaxation engine'
 !  Number of history
    specs%nhist = 2
+!  This is the initialization for ionmov==16
+!  ------------------------------------------
+ case (16)
+!  TEMPORARLY optcell is not allow
+   specs%isVused=.TRUE.  ! Velocities are used
+   specs%isFconv=.FALSE. ! Convergence is not used for MD
+   specs%ncycle=1
+!  Values use in XML Output
+   specs%type4xml='langevin'
+   specs%crit4xml='tolmxf'
+!  Name of specs%method
+   specs%method = 'Langevin molecular dynamics'
+!  Number of history
+   specs%nhist = 3
+!  Number of degrees of freedom: 3N-constraints
+!  For now the pimd langevin algorithms do not support iatfix.
+   if(dtset%pitransform==1.or.dtset%pitransform==2.or.&
+&     dtset%pimd_constraint==1.or.dtset%optcell==2) then
+     ab_mover%ndof=ab_mover%ndof-3
+   end if
 !  This is the initialization for ionmov==20
 !  -------------------------------------------
  case (20)
@@ -1247,7 +1277,7 @@ subroutine make_angles(deloc,natom)
 
 !Local variables-------------------------------
 !scalars
- integer :: ia1,ia2,iang,ibond,is1,is2,ishift,ja1,ja2
+ integer :: ia1,ia2,ibond,is1,is2,ishift,ja1,ja2
  integer :: jbond,js1,js2
 !arrays
  integer,allocatable :: angs_tmp(:,:,:)
@@ -1305,9 +1335,7 @@ subroutine make_angles(deloc,natom)
 
  ABI_SFREE(deloc%angs)
  ABI_MALLOC(deloc%angs,(2,3,deloc%nang))
- do iang=1,deloc%nang
-   deloc%angs(:,:,iang) = angs_tmp(:,:,iang)
- end do
+ deloc%angs(:,:,1:deloc%nang) = angs_tmp(:,:,1:deloc%nang)
  ABI_FREE(angs_tmp)
 
 end subroutine make_angles
@@ -1475,7 +1503,7 @@ subroutine make_bonds(deloc,natom,ntypat,rprimd,typat,xcart,znucl)
 
 !Local variables ------------------------------
 !scalars
- integer :: iatom,ibond,irshift,itypat,jatom
+ integer :: iatom,irshift,itypat,jatom
  real(dp) :: bl,bondfudge,rcov1,rcov2
  type(atomdata_t) :: atom
 !arrays
@@ -1533,9 +1561,7 @@ subroutine make_bonds(deloc,natom,ntypat,rprimd,typat,xcart,znucl)
  ABI_SFREE(deloc%bonds)
 
  ABI_MALLOC(deloc%bonds,(2,2,deloc%nbond))
- do ibond=1,deloc%nbond
-   deloc%bonds(:,:,ibond) = bonds_tmp(:,:,ibond)
- end do
+ deloc%bonds(:,:,1:deloc%nbond) = bonds_tmp(:,:,1:deloc%nbond)
 
 ! do ibond=1,deloc%nbond
 ! write(std_out,*) ' make_bonds : bonds_tmp ', ibond, bonds_tmp(:,:,ibond)
@@ -1726,7 +1752,7 @@ pure function bond_length(r1,r2)
 
 !******************************************************************
  rpt(:) = r1(:)-r2(:)
- bond_length = sqrt(rpt(1)**2+rpt(2)**2+rpt(3)**2)
+ bond_length = norm2(rpt)
 
 end function bond_length
 !!***
@@ -1764,7 +1790,7 @@ pure function angle_ang(r1,r2,r3)
  rpt12(:) = r1(:)-r2(:)
  rpt32(:) = r3(:)-r2(:)
 
- cos_ang = (rpt12(1)*rpt32(1)+rpt12(2)*rpt32(2)+rpt12(3)*rpt32(3))/n1/n2
+ cos_ang = dot_product(rpt12, rpt32) / (n1 * n2)
 
  if (cos_ang > one - epsilon(one)*two) then
    cos_ang = one
@@ -1817,17 +1843,16 @@ end function angle_ang
 !write(std_out,*) ' cos_dihedral : cp3432 = ', cp3432
 !ENDDEBUG
 
- n1 = sqrt(cp1232(1)**2+cp1232(2)**2+cp1232(3)**2)
- n2 = sqrt(cp3432(1)**2+cp3432(2)**2+cp3432(3)**2)
+n1 = norm2(cp1232)
+n2 = norm2(cp3432)
 
- cos_dihedral = (cp1232(1)*cp3432(1)+cp1232(2)*cp3432(2)+cp1232(3)*cp3432(3))/n1/n2
+ cos_dihedral = dot_product(cp1232, cp3432) / (n1 * n2)
 !we use complementary of standard angle, so
  cos_dihedral = -cos_dihedral
 
  call acrossb(cp1232,cp3432,cpcp)
  cpcp(:) = cpcp(:)/n1/n2
- sin_dihedral = -(cpcp(1)*rpt32(1)+cpcp(2)*rpt32(2)+cpcp(3)*rpt32(3))&
-& /sqrt(rpt32(1)**2+rpt32(2)**2+rpt32(3)**2)
+sin_dihedral = -dot_product(cpcp, rpt32) / norm2(rpt32)
  dih_sign = one
 !if (abs(sin_dihedral) > tol12) then
 !dih_sign = sin_dihedral/abs(sin_dihedral)

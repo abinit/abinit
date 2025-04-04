@@ -1,5 +1,5 @@
 #ifdef HAVE_DFTI
- integer :: kk,ii,jj,sidx,cnt,dat,line,zplane,status,nthreads, iscale__
+ integer :: kk,ii,jj,sidx,cnt,dat,line,zplane,status,nthreads, iscale__,arr(2)
  character(len=500) :: msg
  type(zpad_t) :: zpad
  type(DFTI_DESCRIPTOR),pointer :: Desc1,Desc2,Desc3
@@ -51,7 +51,9 @@
    !status = DftiSetValue(Desc2, DFTI_THREAD_LIMIT, 1)
    status = DftiSetValue(Desc2, DFTI_NUMBER_OF_TRANSFORMS, nx)
    status = DftiSetValue(Desc2, DFTI_INPUT_DISTANCE,  1)
-   status = DftiSetValue(Desc2, DFTI_INPUT_STRIDES,  (/0,ldx/))
+   arr(1) = 0
+   arr(2) = ldx
+   status = DftiSetValue(Desc2, DFTI_INPUT_STRIDES,  arr)
    status = DftiSetValue(Desc2, DFTI_NUMBER_OF_USER_THREADS, nthreads)
 
    status = DftiCommitDescriptor(Desc2)
@@ -83,7 +85,9 @@
                                                                             
      status = DftiSetValue(Desc3, DFTI_NUMBER_OF_TRANSFORMS, ldx*ldy)
      status = DftiSetValue(Desc3, DFTI_INPUT_DISTANCE,  1)
-     status = DftiSetValue(Desc3, DFTI_INPUT_STRIDES,  (/0,ldx*ldy/))
+     arr(1) = 0
+     arr(2) = ldx*ldy
+     status = DftiSetValue(Desc3, DFTI_INPUT_STRIDES,  arr)
 
      ! Normalize the transform.
      if (iscale__ /= 0) then
@@ -110,7 +114,9 @@
                                                                             
      status = DftiSetValue(Desc3, DFTI_NUMBER_OF_TRANSFORMS, ldx*ldy)
      status = DftiSetValue(Desc3, DFTI_INPUT_DISTANCE,  1)
-     status = DftiSetValue(Desc3, DFTI_INPUT_STRIDES,  (/0,ldx*ldy/))
+     arr(1) = 0
+     arr(2) = ldx*ldy
+     status = DftiSetValue(Desc3, DFTI_INPUT_STRIDES,  arr)
      status = DftiSetValue(Desc3, DFTI_NUMBER_OF_USER_THREADS, nthreads)
      !status = DftiSetValue(Desc2, DFTI_THREAD_LIMIT, 1)
 
@@ -144,7 +150,9 @@
 
      status = DftiSetValue(Desc3, DFTI_NUMBER_OF_TRANSFORMS, ldx*ldy)
      status = DftiSetValue(Desc3, DFTI_INPUT_DISTANCE,  1)
-     status = DftiSetValue(Desc3, DFTI_INPUT_STRIDES,  (/0,ldx*ldy/))
+     arr(1) = 0
+     arr(2) = ldx*ldy
+     status = DftiSetValue(Desc3, DFTI_INPUT_STRIDES,  arr)
      !status = DftiSetValue(Desc3, DFTI_THREAD_LIMIT, nthreads)
 
      status = DftiCommitDescriptor(Desc3)
@@ -165,7 +173,9 @@
                                                                             
      status = DftiSetValue(Desc3, DFTI_NUMBER_OF_TRANSFORMS, ldx*ldy)
      status = DftiSetValue(Desc3, DFTI_INPUT_DISTANCE,  1)
-     status = DftiSetValue(Desc3, DFTI_INPUT_STRIDES,  (/0,ldx*ldy/))
+     arr(1) = 0
+     arr(2) = ldx*ldy
+     status = DftiSetValue(Desc3, DFTI_INPUT_STRIDES,  arr)
      status = DftiSetValue(Desc3, DFTI_NUMBER_OF_USER_THREADS, nthreads)
      !status = DftiSetValue(Desc3, DFTI_THREAD_LIMIT, 1)
                                                                             
@@ -192,7 +202,9 @@
    !status = DftiSetValue(Desc2, DFTI_THREAD_LIMIT, 1)
    status = DftiSetValue(Desc2, DFTI_NUMBER_OF_TRANSFORMS, nx)
    status = DftiSetValue(Desc2, DFTI_INPUT_DISTANCE,  1)
-   status = DftiSetValue(Desc2, DFTI_INPUT_STRIDES,  (/0,ldx/))
+   arr(1) = 0
+   arr(2) = ldx
+   status = DftiSetValue(Desc2, DFTI_INPUT_STRIDES,  arr)
 
    status = DftiSetValue(Desc2, DFTI_NUMBER_OF_USER_THREADS, nthreads)
 

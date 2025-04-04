@@ -48,8 +48,8 @@ class WebsiteTest(AbimkdocsTest):
 
         e = element("~abinit/tests/v1/Input/t01.in|t01.in")
         assert e.get("href") == "../tests/v1/Input/t01.in" and e.text == "t01.in"
-        e = element("~abinit/tests/Psps_for_tests/6c.lda.atompaw|6c.paw")
-        assert e.get("href") == "../tests/Psps_for_tests/6c.lda.atompaw" and e.text == "6c.paw"
+        e = element("~abinit/tests/Pspdir/6c.lda.atompaw|6c.paw")
+        assert e.get("href") == "../tests/Pspdir/6c.lda.atompaw" and e.text == "6c.paw"
 
         e = element("ENERGY")
         #assert e.get("href") == "/guide/abinit#32-more-about-abinit-input-variables" and e.text == "ENERGY"

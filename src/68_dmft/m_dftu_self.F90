@@ -6,7 +6,7 @@
 !! Compute DFT+U self energy for DMFT
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2024 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2025 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -56,7 +56,7 @@ contains
 !! Use DFT+U to compute self-energy
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2024 ABINIT group (BAmadon)
+!! Copyright (C) 1999-2025 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -160,8 +160,8 @@ subroutine dftu_self(cryst_struc,green,paw_dmft,pawtab,self,opt_dftu,prtopt)
          do im = 1 ,  ldim
 !          noccmmp(1,im,im1,idijeff)=real(green%occup%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1))
 !          noccmmp(2,im,im1,idijeff)=imag(green%occup%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1))
-           noccmmp(1,im,im1,idijeff)=real(green%occup%matlu(iatom)%mat(im1,im,isppol,ispinor,ispinor1))
-           noccmmp(2,im,im1,idijeff)=aimag(green%occup%matlu(iatom)%mat(im1,im,isppol,ispinor,ispinor1))
+           noccmmp(1,im,im1,idijeff)=real(green%occup%matlu(iatom)%mat(im1+(ispinor-1)*ldim,im+(ispinor1-1)*ldim,isppol))
+           noccmmp(2,im,im1,idijeff)=aimag(green%occup%matlu(iatom)%mat(im1+(ispinor-1)*ldim,im+(ispinor1-1)*ldim,isppol))
          end do
        end do
 
@@ -234,7 +234,7 @@ subroutine dftu_self(cryst_struc,green,paw_dmft,pawtab,self,opt_dftu,prtopt)
        do im1 = 1 , ldim
          do im = 1 ,  ldim
            do ifreq=1,self%nw
-             self%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)=&
+             self%oper(ifreq)%matlu(iatom)%mat(im+(ispinor-1)*ldim,im1+(ispinor1-1)*ldim,isppol)=&
 !            &             cmplx(vpawu(1,im1,im),vpawu(2,im1,im),kind=dp)
 !            One take the transpose in orbital index to be coherent with the
 !            current DFT+U implementation in Abinit.

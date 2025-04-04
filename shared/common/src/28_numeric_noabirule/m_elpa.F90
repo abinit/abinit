@@ -7,7 +7,7 @@
 !! See http://elpa.mpcdf.mpg.de
 !!
 !! COPYRIGHT
-!! Copyright (C) 2016-2024 ABINIT group (MT)
+!! Copyright (C) 2016-2025 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -234,6 +234,8 @@ subroutine elpa_func_allocate(elpa_hdl,gpu,blacs_ctx)
  if(l_gpu==1) then
 #if defined HAVE_GPU_CUDA
    varname="nvidia-gpu"
+#elif defined HAVE_GPU_HIP
+   varname="amd-gpu"
 #else
    ABI_BUG("Requested unsupported GPU model with ELPA!")
 #endif

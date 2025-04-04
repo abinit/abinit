@@ -1,8 +1,8 @@
 
 .Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Wed 18 Sep 2024.
 - ( at 17h23 )
-  
+
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/TestBot_MPI1/tutorespfn_teph4mob_1-teph4mob_2-teph4mob_3-teph4mob_4-teph4mob_5-teph4mob_6-teph4mob_7/teph4mob_1.abi
 - output file    -> teph4mob_1.abo
 - root for input  files -> teph4mob_1i
@@ -1018,8 +1018,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.05142
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Psps_for_tests/13al.981214.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Psps_for_tests/13al.981214.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Pspdir/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Pspdir/13al.981214.fhi
 - Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
 - 13.00000   3.00000    981214                znucl, zion, pspdat
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1031,8 +1031,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              1    0.900554
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
 -  Troullier-Martins psp for element  As        Thu Oct 27 17:37:14 EDT 1994
 - 33.00000   5.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1207,7 +1207,7 @@ meta: {optdriver: 1, rfelfd: 2, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   3
@@ -1445,7 +1445,7 @@ meta: {optdriver: 1, rfelfd: 3, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -1675,7 +1675,7 @@ tolerances: {tolvrs: 1.00E-08, }
        3               2       -0.000000        0.000000
        3               3       -0.022872        0.000000
 
- Effective charge tensors after 
+ Effective charge tensors after
  imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
@@ -1686,12 +1686,12 @@ tolerances: {tolvrs: 1.00E-08, }
          2         2    6.904412E-17   -2.115792E+00   -6.222102E-16
          2         3   -6.904412E-17   -6.241556E-16   -2.115792E+00
  Now, the imaginary part of the dynamical matrix is zeroed
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   1    1         5.0078574949         0.0000000000
    1    1   2    1         2.5039287475         0.0000000000
    1    1   3    1         2.5039287475         0.0000000000
@@ -1701,7 +1701,7 @@ tolerances: {tolvrs: 1.00E-08, }
    1    1   1    4        -5.6274939932         0.0000000000
    1    1   2    4         0.0000000000         0.0000000000
    1    1   3    4         0.0000000000         0.0000000000
-  
+
    2    1   1    1         2.5039287475         0.0000000000
    2    1   2    1         5.0078574949         0.0000000000
    2    1   3    1         2.5039287475         0.0000000000
@@ -1711,7 +1711,7 @@ tolerances: {tolvrs: 1.00E-08, }
    2    1   1    4        -0.0000000000         0.0000000000
    2    1   2    4        -5.6274939932         0.0000000000
    2    1   3    4         0.0000000000         0.0000000000
-  
+
    3    1   1    1         2.5039287475         0.0000000000
    3    1   2    1         2.5039287475         0.0000000000
    3    1   3    1         5.0078574949         0.0000000000
@@ -1721,7 +1721,7 @@ tolerances: {tolvrs: 1.00E-08, }
    3    1   1    4         0.0000000000         0.0000000000
    3    1   2    4        -0.0000000000         0.0000000000
    3    1   3    4        -5.6274939932         0.0000000000
-  
+
    1    2   1    1        -5.0077705637         0.0000000000
    1    2   2    1        -2.5038852818        -0.0000000000
    1    2   3    1        -2.5038852818        -0.0000000000
@@ -1731,7 +1731,7 @@ tolerances: {tolvrs: 1.00E-08, }
    1    2   1    4       -44.7816972041         0.0000000000
    1    2   2    4        -0.0000000000         0.0000000000
    1    2   3    4        -0.0000000000         0.0000000000
-  
+
    2    2   1    1        -2.5038852818        -0.0000000000
    2    2   2    1        -5.0077705637         0.0000000000
    2    2   3    1        -2.5038852818        -0.0000000000
@@ -1741,7 +1741,7 @@ tolerances: {tolvrs: 1.00E-08, }
    2    2   1    4         0.0000000000         0.0000000000
    2    2   2    4       -44.7816972041         0.0000000000
    2    2   3    4         0.0000000000         0.0000000000
-  
+
    3    2   1    1        -2.5038852818        -0.0000000000
    3    2   2    1        -2.5038852818        -0.0000000000
    3    2   3    1        -5.0077705637        -0.0000000000
@@ -1751,7 +1751,7 @@ tolerances: {tolvrs: 1.00E-08, }
    3    2   1    4         0.0000000000         0.0000000000
    3    2   2    4         0.0000000000         0.0000000000
    3    2   3    4       -44.7816972041         0.0000000000
-  
+
    1    4   1    1        -5.6274789277         0.0000000000
    1    4   2    1        -0.0000000000         0.0000000000
    1    4   3    1         0.0000000000         0.0000000000
@@ -1761,7 +1761,7 @@ tolerances: {tolvrs: 1.00E-08, }
    1    4   1    4      -219.0083280953         0.0000000000
    1    4   2    4        73.0027760318         0.0000000000
    1    4   3    4        73.0027760318         0.0000000000
-  
+
    2    4   1    1         0.0000000000         0.0000000000
    2    4   2    1        -5.6274789277         0.0000000000
    2    4   3    1        -0.0000000000         0.0000000000
@@ -1771,7 +1771,7 @@ tolerances: {tolvrs: 1.00E-08, }
    2    4   1    4        73.0027760318         0.0000000000
    2    4   2    4      -219.0083280953         0.0000000000
    2    4   3    4        73.0027760318         0.0000000000
-  
+
    3    4   1    1         0.0000000000         0.0000000000
    3    4   2    1         0.0000000000         0.0000000000
    3    4   3    1        -5.6274789277         0.0000000000
@@ -1781,130 +1781,130 @@ tolerances: {tolvrs: 1.00E-08, }
    3    4   1    4        73.0027760318         0.0000000000
    3    4   2    4        73.0027760318         0.0000000000
    3    4   3    4      -219.0083280953         0.0000000000
-  
-  
+
+
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   1    1         0.0889704104         0.0000000000
    1    1   2    1        -0.0000000000         0.0000000000
    1    1   3    1        -0.0000000000         0.0000000000
    1    1   1    2        -0.0889704104         0.0000000000
    1    1   2    2         0.0000000000         0.0000000000
    1    1   3    2         0.0000000000         0.0000000000
-  
+
    2    1   1    1        -0.0000000000         0.0000000000
    2    1   2    1         0.0889704104         0.0000000000
    2    1   3    1        -0.0000000000         0.0000000000
    2    1   1    2         0.0000000000         0.0000000000
    2    1   2    2        -0.0889704104         0.0000000000
    2    1   3    2         0.0000000000         0.0000000000
-  
+
    3    1   1    1        -0.0000000000         0.0000000000
    3    1   2    1        -0.0000000000         0.0000000000
    3    1   3    1         0.0889704104         0.0000000000
    3    1   1    2         0.0000000000         0.0000000000
    3    1   2    2         0.0000000000         0.0000000000
    3    1   3    2        -0.0889704104         0.0000000000
-  
+
    1    2   1    1        -0.0889700124         0.0000000000
    1    2   2    1         0.0000000000         0.0000000000
    1    2   3    1         0.0000000000         0.0000000000
    1    2   1    2         0.0889700124         0.0000000000
    1    2   2    2        -0.0000000000         0.0000000000
    1    2   3    2        -0.0000000000         0.0000000000
-  
+
    2    2   1    1         0.0000000000         0.0000000000
    2    2   2    1        -0.0889700124         0.0000000000
    2    2   3    1         0.0000000000         0.0000000000
    2    2   1    2        -0.0000000000         0.0000000000
    2    2   2    2         0.0889700124         0.0000000000
    2    2   3    2        -0.0000000000         0.0000000000
-  
+
    3    2   1    1         0.0000000000         0.0000000000
    3    2   2    1         0.0000000000         0.0000000000
    3    2   3    1        -0.0889700124         0.0000000000
    3    2   1    2        -0.0000000000         0.0000000000
    3    2   2    2        -0.0000000000         0.0000000000
    3    2   3    2         0.0889700124         0.0000000000
-  
+
   Dielectric tensor, in cartesian coordinates,
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    4   1    4         9.7606052139        -0.0000000000
    1    4   2    4        -0.0000000000        -0.0000000000
    1    4   3    4         0.0000000000        -0.0000000000
-  
+
    2    4   1    4        -0.0000000000        -0.0000000000
    2    4   2    4         9.7606052139        -0.0000000000
    2    4   3    4        -0.0000000000        -0.0000000000
-  
+
    3    4   1    4        -0.0000000000        -0.0000000000
    3    4   2    4        -0.0000000000        -0.0000000000
    3    4   3    4         9.7606052139        -0.0000000000
-  
+
   Effective charges, in cartesian coordinates,
-  (from electric field response) 
+  (from electric field response)
    if specified in the inputs, charge neutrality has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   1    4         2.1157924919         0.0000000000
    2    1   1    4        -0.0000000000         0.0000000000
    3    1   1    4         0.0000000000         0.0000000000
    1    2   1    4        -2.1157924919         0.0000000000
    2    2   1    4         0.0000000000         0.0000000000
    3    2   1    4        -0.0000000000         0.0000000000
-  
+
    1    1   2    4        -0.0000000000         0.0000000000
    2    1   2    4         2.1157924919         0.0000000000
    3    1   2    4         0.0000000000         0.0000000000
    1    2   2    4         0.0000000000         0.0000000000
    2    2   2    4        -2.1157924919         0.0000000000
    3    2   2    4        -0.0000000000         0.0000000000
-  
+
    1    1   3    4        -0.0000000000         0.0000000000
    2    1   3    4         0.0000000000         0.0000000000
    3    1   3    4         2.1157924919         0.0000000000
    1    2   3    4         0.0000000000         0.0000000000
    2    2   3    4        -0.0000000000         0.0000000000
    3    2   3    4        -2.1157924919         0.0000000000
-  
+
   Effective charges, in cartesian coordinates,
-  (from phonon response) 
+  (from phonon response)
    if specified in the inputs, charge neutrality has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    4   1    1         2.1157941318         0.0000000000
    2    4   1    1        -0.0000000000         0.0000000000
    3    4   1    1         0.0000000000         0.0000000000
-  
+
    1    4   2    1        -0.0000000000         0.0000000000
    2    4   2    1         2.1157941318         0.0000000000
    3    4   2    1        -0.0000000000         0.0000000000
-  
+
    1    4   3    1         0.0000000000         0.0000000000
    2    4   3    1         0.0000000000         0.0000000000
    3    4   3    1         2.1157941318         0.0000000000
-  
+
    1    4   1    2        -2.1157941318         0.0000000000
    2    4   1    2         0.0000000000         0.0000000000
    3    4   1    2        -0.0000000000         0.0000000000
-  
+
    1    4   2    2         0.0000000000         0.0000000000
    2    4   2    2        -2.1157941318         0.0000000000
    3    4   2    2         0.0000000000         0.0000000000
-  
+
    1    4   3    2        -0.0000000000         0.0000000000
    2    4   3    2        -0.0000000000         0.0000000000
    3    4   3    2        -2.1157941318         0.0000000000
-  
-  
-  
+
+
+
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
@@ -1973,8 +1973,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   1.96688
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Psps_for_tests/13al.981214.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Psps_for_tests/13al.981214.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Pspdir/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Pspdir/13al.981214.fhi
 - Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
 - 13.00000   3.00000    981214                znucl, zion, pspdat
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1986,8 +1986,8 @@ meta: {optdriver: 1, rfphon: 1, }
              1    0.900554
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
 -  Troullier-Martins psp for element  As        Thu Oct 27 17:37:14 EDT 1994
 - 33.00000   5.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2004,7 +2004,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -2260,95 +2260,95 @@ tolerances: {tolvrs: 1.00E-08, }
 
 
  ==> Compute Derivative Database <==
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   1    1         6.0199102653        -0.0000017516
    1    1   2    1         2.4130379348         0.0000000000
    1    1   3    1         2.4130379348         0.0000000000
    1    1   1    2        -3.2844852857         2.3483082555
    1    1   2    2        -2.2820171615         0.1684530344
    1    1   3    2        -2.2820171615         0.1684530344
-  
+
    2    1   1    1         2.4130379348         0.0000000000
    2    1   2    1         4.8260758696        -0.0000000000
    2    1   3    1         2.4130379348        -0.0000000000
    2    1   1    2        -2.2820171615         0.1684530344
    2    1   2    2        -4.5640343229         0.3369060687
    2    1   3    2        -2.2820171615         0.1684530344
-  
+
    3    1   1    1         2.4130379348         0.0000000000
    3    1   2    1         2.4130379348        -0.0000000000
    3    1   3    1         4.8260758696        -0.0000000000
    3    1   1    2        -2.2820171615         0.1684530344
    3    1   2    2        -2.2820171615         0.1684530344
    3    1   3    2        -4.5640343229         0.3369060687
-  
+
    1    2   1    1        -3.2844959583        -2.3483234990
    1    2   2    1        -2.2820180021        -0.1684543709
    1    2   3    1        -2.2820180021        -0.1684543709
    1    2   1    2         5.9965590992        -0.0000020803
    1    2   2    2         2.5317779444        -0.0000000000
    1    2   3    2         2.5317779444        -0.0000000000
-  
+
    2    2   1    1        -2.2820180021        -0.1684543709
    2    2   2    1        -4.5640360043        -0.3369087418
    2    2   3    1        -2.2820180021        -0.1684543709
    2    2   1    2         2.5317779444        -0.0000000000
    2    2   2    2         5.0635558888        -0.0000000000
    2    2   3    2         2.5317779444        -0.0000000000
-  
+
    3    2   1    1        -2.2820180021        -0.1684543709
    3    2   2    1        -2.2820180021        -0.1684543709
    3    2   3    1        -4.5640360043        -0.3369087418
    3    2   1    2         2.5317779444        -0.0000000000
    3    2   2    2         2.5317779444        -0.0000000000
    3    2   3    2         5.0635558888        -0.0000000000
-  
-  
+
+
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   1    1         0.0963470179        -0.0000000156
    1    1   2    1        -0.0106050646         0.0000000156
    1    1   3    1        -0.0106050646         0.0000000156
    1    1   1    2        -0.0697199360         0.0238532845
    1    1   2    2        -0.0113664846        -0.0178676794
    1    1   3    2        -0.0113664846        -0.0178676794
-  
+
    2    1   1    1        -0.0106050646         0.0000000156
    2    1   2    1         0.0963470179        -0.0000000156
    2    1   3    1         0.0106050646        -0.0000000156
    2    1   1    2        -0.0113664846        -0.0178676794
    2    1   2    2        -0.0697199360         0.0238532845
    2    1   3    2         0.0113664846         0.0178676794
-  
+
    3    1   1    1        -0.0106050646         0.0000000156
    3    1   2    1         0.0106050646        -0.0000000156
    3    1   3    1         0.0963470179        -0.0000000156
    3    1   1    2        -0.0113664846        -0.0178676794
    3    1   2    2         0.0113664846         0.0178676794
    3    1   3    2        -0.0697199360         0.0238532845
-  
+
    1    2   1    1        -0.0697200458        -0.0238534436
    1    2   2    1        -0.0113664047         0.0178677910
    1    2   3    1        -0.0113664047         0.0178677910
    1    2   1    2         0.0982491664        -0.0000000185
    1    2   2    2        -0.0082880502         0.0000000185
    1    2   3    2        -0.0082880502         0.0000000185
-  
+
    2    2   1    1        -0.0113664047         0.0178677910
    2    2   2    1        -0.0697200458        -0.0238534436
    2    2   3    1         0.0113664047        -0.0178677910
    2    2   1    2        -0.0082880502         0.0000000185
    2    2   2    2         0.0982491664        -0.0000000185
    2    2   3    2         0.0082880502        -0.0000000185
-  
+
    3    2   1    1        -0.0113664047         0.0178677910
    3    2   2    1         0.0113664047        -0.0178677910
    3    2   3    1        -0.0697200458        -0.0238534436
@@ -2396,8 +2396,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   1.88435
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Psps_for_tests/13al.981214.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Psps_for_tests/13al.981214.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Pspdir/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Pspdir/13al.981214.fhi
 - Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
 - 13.00000   3.00000    981214                znucl, zion, pspdat
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2409,8 +2409,8 @@ meta: {optdriver: 1, rfphon: 1, }
              1    0.900554
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
 -  Troullier-Martins psp for element  As        Thu Oct 27 17:37:14 EDT 1994
 - 33.00000   5.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2427,7 +2427,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -2682,95 +2682,95 @@ tolerances: {tolvrs: 1.00E-08, }
 
 
  ==> Compute Derivative Database <==
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   1    1         6.3142143914         0.0000071508
    1    1   2    1         2.4061266736         0.0000000000
    1    1   3    1         2.4061266736         0.0000000000
    1    1   1    2        -0.8432166488        -0.0000119841
    1    1   2    2        -2.2070457865        -0.0000046478
    1    1   3    2        -2.2070457865        -0.0000046478
-  
+
    2    1   1    1         2.4061266736         0.0000000000
    2    1   2    1         4.8122533473         0.0000000000
    2    1   3    1         2.4061266736         0.0000000000
    2    1   1    2        -2.2070457865        -0.0000046478
    2    1   2    2        -4.4140915730        -0.0000092956
    2    1   3    2        -2.2070457865        -0.0000046478
-  
+
    3    1   1    1         2.4061266736         0.0000000000
    3    1   2    1         2.4061266736         0.0000000000
    3    1   3    1         4.8122533473         0.0000000000
    3    1   1    2        -2.2070457865        -0.0000046478
    3    1   2    2        -2.2070457865        -0.0000046478
    3    1   3    2        -4.4140915730        -0.0000092956
-  
+
    1    2   1    1        -0.8432476640        -0.0000139365
    1    2   2    1        -2.2069943160        -0.0000014218
    1    2   3    1        -2.2069943160        -0.0000014218
    1    2   1    2         6.1715458073        -0.0000039495
    1    2   2    2         2.5268917312         0.0000000000
    1    2   3    2         2.5268917312         0.0000000000
-  
+
    2    2   1    1        -2.2069943160        -0.0000014218
    2    2   2    1        -4.4139886320        -0.0000028437
    2    2   3    1        -2.2069943160        -0.0000014218
    2    2   1    2         2.5268917312         0.0000000000
    2    2   2    2         5.0537834624         0.0000000000
    2    2   3    2         2.5268917312         0.0000000000
-  
+
    3    2   1    1        -2.2069943160        -0.0000014218
    3    2   2    1        -2.2069943160        -0.0000014218
    3    2   3    1        -4.4139886320        -0.0000028437
    3    2   1    2         2.5268917312         0.0000000000
    3    2   2    2         2.5268917312         0.0000000000
    3    2   3    2         5.0537834624         0.0000000000
-  
-  
+
+
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   1    1         0.0988385909         0.0000000635
    1    1   2    1        -0.0133422140        -0.0000000635
    1    1   3    1        -0.0133422140        -0.0000000635
    1    1   1    2        -0.0467016980        -0.0000001890
    1    1   2    2        -0.0317207809         0.0000000239
    1    1   3    2        -0.0317207809         0.0000000239
-  
+
    2    1   1    1        -0.0133422140        -0.0000000635
    2    1   2    1         0.0988385909         0.0000000635
    2    1   3    1         0.0133422140         0.0000000635
    2    1   1    2        -0.0317207809         0.0000000239
    2    1   2    2        -0.0467016980        -0.0000001890
    2    1   3    2         0.0317207809        -0.0000000239
-  
+
    3    1   1    1        -0.0133422140        -0.0000000635
    3    1   2    1         0.0133422140         0.0000000635
    3    1   3    1         0.0988385909         0.0000000635
    3    1   1    2        -0.0317207809         0.0000000239
    3    1   2    2         0.0317207809        -0.0000000239
    3    1   3    2        -0.0467016980        -0.0000001890
-  
+
    1    2   1    1        -0.0467010591        -0.0000001491
    1    2   2    1        -0.0317195910         0.0000000985
    1    2   3    1        -0.0317195910         0.0000000985
    1    2   1    2         0.0997167972        -0.0000000351
    1    2   2    2        -0.0099293017         0.0000000351
    1    2   3    2        -0.0099293017         0.0000000351
-  
+
    2    2   1    1        -0.0317195910         0.0000000985
    2    2   2    1        -0.0467010591        -0.0000001491
    2    2   3    1         0.0317195910        -0.0000000985
    2    2   1    2        -0.0099293017         0.0000000351
    2    2   2    2         0.0997167972        -0.0000000351
    2    2   3    2         0.0099293017        -0.0000000351
-  
+
    3    2   1    1        -0.0317195910         0.0000000985
    3    2   2    1         0.0317195910        -0.0000000985
    3    2   3    1        -0.0467010591        -0.0000001491
@@ -2818,8 +2818,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   1.96780
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Psps_for_tests/13al.981214.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Psps_for_tests/13al.981214.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Pspdir/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Pspdir/13al.981214.fhi
 - Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
 - 13.00000   3.00000    981214                znucl, zion, pspdat
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2831,8 +2831,8 @@ meta: {optdriver: 1, rfphon: 1, }
              1    0.900554
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
 -  Troullier-Martins psp for element  As        Thu Oct 27 17:37:14 EDT 1994
 - 33.00000   5.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2849,7 +2849,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -2997,95 +2997,95 @@ tolerances: {tolvrs: 1.00E-08, }
 
 
  ==> Compute Derivative Database <==
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   1    1         5.7575741668        -0.0000000000
    1    1   2    1         3.5264078711         0.0000000000
    1    1   3    1         2.2311662957         0.0000000000
    1    1   1    2        -2.7225594287         2.7225596395
    1    1   2    2        -2.4163682630         0.6732214092
    1    1   3    2        -2.0493382303         0.3061911657
-  
+
    2    1   1    1         3.5264078711         0.0000000000
    2    1   2    1         5.7575741668        -0.0000000000
    2    1   3    1         2.2311662957         0.0000000000
    2    1   1    2        -2.4163682630         0.6732214092
    2    1   2    2        -2.7225594287         2.7225596395
    2    1   3    2        -2.0493382303         0.3061911657
-  
+
    3    1   1    1         2.2311662957         0.0000000000
    3    1   2    1         2.2311662957         0.0000000000
    3    1   3    1         4.4623325914        -0.0000000000
    3    1   1    2        -2.0493382303         0.3061911657
    3    1   2    2        -2.0493382303         0.3061911657
    3    1   3    2        -4.0986764605         0.6123823314
-  
+
    1    2   1    1        -2.7225518128        -2.7225520236
    1    2   2    1        -2.4163657244        -0.6732188706
    1    2   3    1        -2.0493331530        -0.3061860884
    1    2   1    2         5.8482165659         0.0000000000
    1    2   2    2         3.2359613507         0.0000000000
    1    2   3    2         2.6122552152         0.0000000000
-  
+
    2    2   1    1        -2.4163657244        -0.6732188706
    2    2   2    1        -2.7225518128        -2.7225520236
    2    2   3    1        -2.0493331530        -0.3061860884
    2    2   1    2         3.2359613507         0.0000000000
    2    2   2    2         5.8482165659        -0.0000000000
    2    2   3    2         2.6122552152         0.0000000000
-  
+
    3    2   1    1        -2.0493331530        -0.3061860884
    3    2   2    1        -2.0493331530        -0.3061860884
    3    2   3    1        -4.0986663060        -0.6123721769
    3    2   1    2         2.6122552152         0.0000000000
    3    2   2    2         2.6122552152         0.0000000000
    3    2   3    2         5.2245104303        -0.0000000000
-  
-  
+
+
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   1    1         0.0792795478        -0.0000000000
    1    1   2    1        -0.0000000000         0.0000000000
    1    1   3    1        -0.0000000000         0.0000000000
    1    1   1    2        -0.0418492574         0.0418492574
    1    1   2    2        -0.0309694332        -0.0309694332
    1    1   3    2         0.0000000000         0.0000000000
-  
+
    2    1   1    1        -0.0000000000         0.0000000000
    2    1   2    1         0.0792795478        -0.0000000000
    2    1   3    1        -0.0000000000         0.0000000000
    2    1   1    2        -0.0309694332        -0.0309694332
    2    1   2    2        -0.0418492574         0.0418492574
    2    1   3    2         0.0000000000        -0.0000000000
-  
+
    3    1   1    1        -0.0000000000         0.0000000000
    3    1   2    1        -0.0000000000         0.0000000000
    3    1   3    1         0.1253030856        -0.0000000000
    3    1   1    2         0.0000000000         0.0000000000
    3    1   2    2         0.0000000000        -0.0000000000
    3    1   3    2        -0.0548908559         0.0548908634
-  
+
    1    2   1    1        -0.0418490770        -0.0418490770
    1    2   2    1        -0.0309694332         0.0309694332
    1    2   3    1         0.0000000000        -0.0000000000
    1    2   1    2         0.0928206977        -0.0000000000
    1    2   2    2        -0.0000000000         0.0000000000
    1    2   3    2         0.0000000000        -0.0000000000
-  
+
    2    2   1    1        -0.0309694332         0.0309694332
    2    2   2    1        -0.0418490770        -0.0418490770
    2    2   3    1         0.0000000000         0.0000000000
    2    2   1    2        -0.0000000000         0.0000000000
    2    2   2    2         0.0928206977        -0.0000000000
    2    2   3    2        -0.0000000000         0.0000000000
-  
+
    3    2   1    1         0.0000000000        -0.0000000000
    3    2   2    1         0.0000000000         0.0000000000
    3    2   3    1        -0.0548907657        -0.0548907732
@@ -3133,8 +3133,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   1.88338
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Psps_for_tests/13al.981214.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Psps_for_tests/13al.981214.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Pspdir/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Pspdir/13al.981214.fhi
 - Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
 - 13.00000   3.00000    981214                znucl, zion, pspdat
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3146,8 +3146,8 @@ meta: {optdriver: 1, rfphon: 1, }
              1    0.900554
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
 -  Troullier-Martins psp for element  As        Thu Oct 27 17:37:14 EDT 1994
 - 33.00000   5.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3164,7 +3164,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -3524,95 +3524,95 @@ tolerances: {tolvrs: 1.00E-08, }
 
 
  ==> Compute Derivative Database <==
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   1    1         5.7623740925         0.0000222012
    1    1   2    1         3.1340173003        -0.3183809806
    1    1   3    1         2.2170312081         0.0000000000
    1    1   1    2        -0.3891103829         0.4756020626
    1    1   2    2        -2.0232431618         0.3198575708
    1    1   3    2        -1.9751578900         0.1632213541
-  
+
    2    1   1    1         3.1340026623         0.3183632409
    2    1   2    1         5.3044156002         0.0000164494
    2    1   3    1         2.2170312081        -0.0000000000
    2    1   1    2        -2.2789467382         0.2283526560
    2    1   2    2        -2.3055405588         2.1281542781
    2    1   3    2        -1.9751578900         0.1632213541
-  
+
    3    1   1    1         2.2170312081         0.0000000000
    3    1   2    1         2.2170312081        -0.0000000000
    3    1   3    1         4.4340624163        -0.0000000000
    3    1   1    2        -1.9751578900         0.1632213541
    3    1   2    2        -1.9751578900         0.1632213541
    3    1   3    2        -3.9503157799         0.3264427082
-  
+
    1    2   1    1        -0.3891024552        -0.4757155873
    1    2   2    1        -2.2789039140        -0.2283969983
    1    2   3    1        -1.9751087851        -0.1632823408
    1    2   1    2         6.1418024020        -0.0000304365
    1    2   2    2         2.9857222645        -0.3182676491
    1    2   3    2         2.6046030322         0.0000000000
-  
+
    2    2   1    1        -2.0232021837        -0.3199264694
    2    2   2    1        -2.3055299492        -2.1281606244
    2    2   3    1        -1.9751087851        -0.1632823408
    2    2   1    2         2.9857313663         0.3182236954
    2    2   2    2         5.7324504247        -0.0000271857
    2    2   3    2         2.6046030322        -0.0000000000
-  
+
    3    2   1    1        -1.9751087851        -0.1632823408
    3    2   2    1        -1.9751087851        -0.1632823408
    3    2   3    1        -3.9502175703        -0.3265646816
    3    2   1    2         2.6046030322         0.0000000000
    3    2   2    2         2.6046030322        -0.0000000000
    3    2   3    2         5.2092060643         0.0000000000
-  
-  
+
+
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   1    1         0.0820170553         0.0000005009
    1    1   2    1        -0.0032397665        -0.0000005009
    1    1   3    1        -0.0040682650         0.0056562725
    1    1   1    2        -0.0208113451         0.0211596730
    1    1   2    2        -0.0493715116        -0.0153599640
    1    1   3    2        -0.0192954893         0.0138670887
-  
+
    2    1   1    1        -0.0032397665        -0.0000005009
    2    1   2    1         0.0820170553         0.0000005009
    2    1   3    1         0.0040682650        -0.0056562725
    2    1   1    2        -0.0493715116        -0.0153599640
    2    1   2    2        -0.0208113451         0.0211596730
    2    1   3    2         0.0192954893        -0.0138670887
-  
+
    3    1   1    1        -0.0040680049        -0.0056563747
    3    1   2    1         0.0040680049         0.0056563747
    3    1   3    1         0.1145998630         0.0000001858
    3    1   1    2        -0.0147525595         0.0154928009
    3    1   2    2         0.0147525595        -0.0154928009
    3    1   3    2        -0.0270628785         0.0250996815
-  
+
    1    2   1    1        -0.0208110524        -0.0211608154
    1    2   2    1        -0.0493700594         0.0153589394
    1    2   3    1        -0.0147525520        -0.0154920669
    1    2   1    2         0.0987101179        -0.0000001214
    1    2   2    2        -0.0061613236         0.0000001214
    1    2   3    2        -0.0036362729         0.0056541061
-  
+
    2    2   1    1        -0.0493700594         0.0153589394
    2    2   2    1        -0.0208110524        -0.0211608154
    2    2   3    1         0.0147525520         0.0154920669
    2    2   1    2        -0.0061613236         0.0000001214
    2    2   2    2         0.0987101179        -0.0000001214
    2    2   3    2         0.0036362729        -0.0056541061
-  
+
    3    2   1    1        -0.0192954491        -0.0138659185
    3    2   2    1         0.0192954491         0.0138659185
    3    2   3    1        -0.0270628418        -0.0251006688
@@ -3660,8 +3660,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   1.97151
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Psps_for_tests/13al.981214.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Psps_for_tests/13al.981214.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Pspdir/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Pspdir/13al.981214.fhi
 - Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
 - 13.00000   3.00000    981214                znucl, zion, pspdat
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3673,8 +3673,8 @@ meta: {optdriver: 1, rfphon: 1, }
              1    0.900554
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
 -  Troullier-Martins psp for element  As        Thu Oct 27 17:37:14 EDT 1994
 - 33.00000   5.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3691,7 +3691,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -3942,95 +3942,95 @@ tolerances: {tolvrs: 1.00E-08, }
 
 
  ==> Compute Derivative Database <==
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   1    1         5.2327618606        -0.0000021943
    1    1   2    1         2.5084122860        -0.4168129266
    1    1   3    1         2.3261179708         0.0000000000
    1    1   1    2        -2.5646667307        -1.8789570500
    1    1   2    2        -2.1091932996         0.2154432848
    1    1   3    2        -2.0476748046        -0.0000001212
-  
+
    2    1   1    1         2.5084126479         0.4168107322
    2    1   2    1         5.2327616319         0.0000043887
    2    1   3    1         2.3261179708        -0.0000000000
    2    1   1    2        -2.1091932965        -0.2154291327
    2    1   2    2        -2.5646758722         1.8789611616
    2    1   3    2        -2.0476748046        -0.0000001212
-  
+
    3    1   1    1         2.3261179708         0.0000000000
    3    1   2    1         2.3261179708        -0.0000000000
    3    1   3    1         4.6522359417         0.0000000000
    3    1   1    2        -2.0476748046        -0.0000001212
    3    1   2    2        -2.0476748046        -0.0000001212
    3    1   3    2        -4.0953496091        -0.0000002424
-  
+
    1    2   1    1        -2.5646637748         1.8789446759
    1    2   2    1        -2.1091865499         0.2154246904
    1    2   3    1        -2.0476697168        -0.0000000773
    1    2   1    2         5.8037723545        -0.0000007865
    1    2   2    2         2.6412996315        -0.3441490056
    1    2   3    2         2.5458211329         0.0000000000
-  
+
    2    2   1    1        -2.1091873947        -0.2154449740
    2    2   2    1        -2.5646602647        -1.8789430530
    2    2   3    1        -2.0476697168        -0.0000000773
    2    2   1    2         2.6412952246         0.3441482191
    2    2   2    2         5.8037745239         0.0000015730
    2    2   3    2         2.5458211329        -0.0000000000
-  
+
    3    2   1    1        -2.0476697168        -0.0000000773
    3    2   2    1        -2.0476697168        -0.0000000773
    3    2   3    1        -4.0953394336        -0.0000001545
    3    2   1    2         2.5458211329         0.0000000000
    3    2   2    2         2.5458211329        -0.0000000000
    3    2   3    2         5.0916422657        -0.0000000000
-  
-  
+
+
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   1    1         0.0897285784         0.0000000390
    1    1   2    1        -0.0070751333        -0.0000000390
    1    1   3    1         0.0000000012         0.0074053006
    1    1   1    2        -0.0444719928        -0.0000000913
    1    1   2    2        -0.0282875917         0.0000000870
    1    1   3    2        -0.0000000812         0.0295547990
-  
+
    2    1   1    1        -0.0070751333        -0.0000000390
    2    1   2    1         0.0897285784         0.0000000390
    2    1   3    1        -0.0000000012        -0.0074053006
    2    1   1    2        -0.0282875917         0.0000000870
    2    1   2    2        -0.0444719928        -0.0000000913
    2    1   3    2         0.0000000812        -0.0295547990
-  
+
    3    1   1    1        -0.0000000052        -0.0074051837
    3    1   2    1         0.0000000052         0.0074051837
    3    1   3    1         0.0962060092         0.0000000000
    3    1   1    2        -0.0000000812         0.0372098471
    3    1   2    2         0.0000000812        -0.0372098471
    3    1   3    2        -0.0466579160         0.0000001644
-  
+
    1    2   1    1        -0.0444718499         0.0000001932
    1    2   2    1        -0.0282875538        -0.0000001960
    1    2   3    1         0.0000000237        -0.0372095519
    1    2   1    2         0.1014158418         0.0000000140
    1    2   2    2        -0.0109557320        -0.0000000140
    1    2   3    2        -0.0000000199         0.0061142999
-  
+
    2    2   1    1        -0.0282875538        -0.0000001960
    2    2   2    1        -0.0444718499         0.0000001932
    2    2   3    1        -0.0000000237         0.0372095519
    2    2   1    2        -0.0109557320        -0.0000000140
    2    2   2    2         0.1014158418         0.0000000140
    2    2   3    2         0.0000000199        -0.0061142999
-  
+
    3    2   1    1         0.0000000387        -0.0295545527
    3    2   2    1        -0.0000000387         0.0295545527
    3    2   3    1        -0.0466577291        -0.0000001644
@@ -4078,8 +4078,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   1.88823
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Psps_for_tests/13al.981214.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Psps_for_tests/13al.981214.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Pspdir/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Pspdir/13al.981214.fhi
 - Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
 - 13.00000   3.00000    981214                znucl, zion, pspdat
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4091,8 +4091,8 @@ meta: {optdriver: 1, rfphon: 1, }
              1    0.900554
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
 -  Troullier-Martins psp for element  As        Thu Oct 27 17:37:14 EDT 1994
 - 33.00000   5.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4109,7 +4109,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -4255,95 +4255,95 @@ tolerances: {tolvrs: 1.00E-08, }
 
 
  ==> Compute Derivative Database <==
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   1    1         6.1836601964         0.0000000000
    1    1   2    1         4.0599089510         0.0000000000
    1    1   3    1         2.1237512454         0.0000000000
    1    1   1    2        -0.0000000000         0.0000000000
    1    1   2    2        -1.9208641738         0.0000018603
    1    1   3    2        -1.9208641738         0.0000018603
-  
+
    2    1   1    1         4.0599089510         0.0000000000
    2    1   2    1         6.1836601964         0.0000000000
    2    1   3    1         2.1237512454         0.0000000000
    2    1   1    2        -1.9208641738         0.0000018603
    2    1   2    2         0.0000000000         0.0000000000
    2    1   3    2        -1.9208641738         0.0000018603
-  
+
    3    1   1    1         2.1237512454         0.0000000000
    3    1   2    1         2.1237512454         0.0000000000
    3    1   3    1         4.2475024909         0.0000000000
    3    1   1    2        -1.9208641738         0.0000018603
    3    1   2    2        -1.9208641738         0.0000018603
    3    1   3    2        -3.8417283476         0.0000037206
-  
+
    1    2   1    1        -0.0000000000        -0.0000000000
    1    2   2    1        -1.9208531885         0.0000068612
    1    2   3    1        -1.9208531885         0.0000068612
    1    2   1    2         5.9881069764         0.0000000000
    1    2   2    2         3.3389912229         0.0000000000
    1    2   3    2         2.6491157535         0.0000000000
-  
+
    2    2   1    1        -1.9208531885         0.0000068612
    2    2   2    1         0.0000000000        -0.0000000000
    2    2   3    1        -1.9208531885         0.0000068612
    2    2   1    2         3.3389912229         0.0000000000
    2    2   2    2         5.9881069764         0.0000000000
    2    2   3    2         2.6491157535         0.0000000000
-  
+
    3    2   1    1        -1.9208531885         0.0000068612
    3    2   2    1        -1.9208531885         0.0000068612
    3    2   3    1        -3.8417063771         0.0000137224
    3    2   1    2         2.6491157535         0.0000000000
    3    2   2    2         2.6491157535         0.0000000000
    3    2   3    2         5.2982315070         0.0000000000
-  
-  
+
+
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   1    1         0.0754627921         0.0000000000
    1    1   2    1        -0.0000000000         0.0000000000
    1    1   3    1        -0.0000000000         0.0000000000
    1    1   1    2         0.0000000000         0.0000000000
    1    1   2    2        -0.0682536498         0.0000000661
    1    1   3    2         0.0000000000        -0.0000000000
-  
+
    2    1   1    1        -0.0000000000         0.0000000000
    2    1   2    1         0.0754627921         0.0000000000
    2    1   3    1        -0.0000000000         0.0000000000
    2    1   1    2        -0.0682536498         0.0000000661
    2    1   2    2         0.0000000000         0.0000000000
    2    1   3    2        -0.0000000000         0.0000000000
-  
+
    3    1   1    1        -0.0000000000         0.0000000000
    3    1   2    1        -0.0000000000         0.0000000000
    3    1   3    1         0.1442598637         0.0000000000
    3    1   1    2        -0.0000000000        -0.0000000000
    3    1   2    2        -0.0000000000         0.0000000000
    3    1   3    2        -0.0000000000         0.0000000000
-  
+
    1    2   1    1         0.0000000000        -0.0000000000
    1    2   2    1        -0.0682532595         0.0000002438
    1    2   3    1        -0.0000000000         0.0000000000
    1    2   1    2         0.0941304552         0.0000000000
    1    2   2    2        -0.0000000000         0.0000000000
    1    2   3    2        -0.0000000000         0.0000000000
-  
+
    2    2   1    1        -0.0682532595         0.0000002438
    2    2   2    1         0.0000000000        -0.0000000000
    2    2   3    1        -0.0000000000        -0.0000000000
    2    2   1    2        -0.0000000000         0.0000000000
    2    2   2    2         0.0941304552         0.0000000000
    2    2   3    2        -0.0000000000         0.0000000000
-  
+
    3    2   1    1        -0.0000000000         0.0000000000
    3    2   2    1        -0.0000000000        -0.0000000000
    3    2   3    1         0.0000000000        -0.0000000000
@@ -4391,8 +4391,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   1.89209
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Psps_for_tests/13al.981214.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Psps_for_tests/13al.981214.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Pspdir/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Pspdir/13al.981214.fhi
 - Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
 - 13.00000   3.00000    981214                znucl, zion, pspdat
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4404,8 +4404,8 @@ meta: {optdriver: 1, rfphon: 1, }
              1    0.900554
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
 -  Troullier-Martins psp for element  As        Thu Oct 27 17:37:14 EDT 1994
 - 33.00000   5.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4422,7 +4422,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -4675,95 +4675,95 @@ tolerances: {tolvrs: 1.00E-08, }
 
 
  ==> Compute Derivative Database <==
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   1    1         4.8496723724        -0.0000105450
    1    1   2    1         2.7335399587        -0.2341199708
    1    1   3    1         2.1161343454        -0.2341234858
    1    1   1    2        -1.8114338347        -1.8114229104
    1    1   2    2        -1.9223597311         0.0000094156
    1    1   3    2        -1.8114244191         0.1109368206
-  
+
    2    1   1    1         2.7335380269         0.2341129408
    2    1   2    1         5.4670779856        -0.0000070300
    2    1   3    1         2.7335399587        -0.2341199708
    2    1   1    2        -1.7004970141         0.0000015087
    2    1   2    2         0.0000000000         0.0000000000
    2    1   3    2        -1.7004970141         0.0000015087
-  
+
    3    1   1    1         2.1161324137         0.2341094258
    3    1   2    1         2.7335380269         0.2341129408
    3    1   3    1         4.8496723724        -0.0000105450
    3    1   1    2        -1.8114323260        -0.1109258964
    3    1   2    2        -1.9223597311         0.0000094156
    3    1   3    2        -1.8114229104         1.8114338347
-  
+
    1    2   1    1        -1.8114159645         1.8114134371
    1    2   2    1        -1.7004826704         0.0000005137
    1    2   3    1        -1.8114164782         0.1109307667
    1    2   1    2         5.8469169071        -0.0000114402
    1    2   2    2         3.0511372870        -0.3031879890
    1    2   3    2         2.7957725296        -0.3031918024
-  
+
    2    2   1    1        -1.9223467312        -0.0000030411
    2    2   2    1         0.0000000000        -0.0000000000
    2    2   3    1        -1.9223467312        -0.0000030411
    2    2   1    2         3.0511443775         0.3031803622
    2    2   2    2         6.1022816646        -0.0000076268
    2    2   3    2         3.0511372870        -0.3031879890
-  
+
    3    2   1    1        -1.8114129234        -0.1109332941
    3    2   2    1        -1.7004826704         0.0000005137
    3    2   3    1        -1.8114134371        -1.8114159645
    3    2   1    2         2.7957796201         0.3031765489
    3    2   2    2         3.0511443775         0.3031803622
    3    2   3    2         5.8469169071        -0.0000114402
-  
-  
+
+
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   1    1         0.0971302478        -0.0000001249
    1    1   2    1        -0.0000000000        -0.0000000000
    1    1   3    1        -0.0000000343         0.0083188092
    1    1   1    2        -0.0000000000        -0.0000000000
    1    1   2    2        -0.0302116689         0.0302117225
    1    1   3    2         0.0000000000         0.0000000000
-  
+
    2    1   1    1        -0.0000000000        -0.0000000000
    2    1   2    1         0.0751921082        -0.0000002498
    2    1   3    1        -0.0000000000        -0.0000000000
    2    1   1    2        -0.0341532283         0.0341535629
    2    1   2    2        -0.0000000000        -0.0000000000
    2    1   3    2        -0.0341535629        -0.0341532283
-  
+
    3    1   1    1         0.0000000343        -0.0083188092
    3    1   2    1        -0.0000000000        -0.0000000000
    3    1   3    1         0.0971302478        -0.0000001249
    3    1   1    2         0.0000000000         0.0000000000
    3    1   2    2        -0.0302117225        -0.0302116689
    3    1   3    2        -0.0000000000         0.0000000000
-  
+
    1    2   1    1        -0.0000000000         0.0000000000
    1    2   2    1        -0.0341531106        -0.0341532186
    1    2   3    1         0.0000000000        -0.0000000000
    1    2   1    2         0.1084155251        -0.0000001355
    1    2   2    2        -0.0000000000         0.0000000000
    1    2   3    2         0.0000001260         0.0107729775
-  
+
    2    2   1    1        -0.0302114500        -0.0302114317
    2    2   2    1        -0.0000000000        -0.0000000000
    2    2   3    1        -0.0302114317         0.0302114500
    2    2   1    2        -0.0000000000         0.0000000000
    2    2   2    2         0.0993417046        -0.0000002710
    2    2   3    2        -0.0000000000        -0.0000000000
-  
+
    3    2   1    1         0.0000000000        -0.0000000000
    3    2   2    1        -0.0341532186         0.0341531106
    3    2   3    1        -0.0000000000        -0.0000000000
@@ -4781,7 +4781,7 @@ tolerances: {tolvrs: 1.00E-08, }
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      1.0610000000E+01  1.0610000000E+01  1.0610000000E+01 Bohr
               amu      2.69815390E+01  7.49215900E+01
@@ -5628,7 +5628,7 @@ P          mk1mem10       256
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -5644,7 +5644,7 @@ P          mk1mem10       256
 - Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997a
 -
-- [4] Ab initio pseudopotentials for electronic structure calculations of poly-atomic systems, 
+- [4] Ab initio pseudopotentials for electronic structure calculations of poly-atomic systems,
 - using density-functional theory.
 - M. Fuchs and, M. Scheffler, Comput. Phys. Commun. 119, 67 (1999).
 - Comment: Some pseudopotential generated using the FHI code were used.
@@ -5657,12 +5657,12 @@ P          mk1mem10       256
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -5680,7 +5680,7 @@ P          mk1mem10       256
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016

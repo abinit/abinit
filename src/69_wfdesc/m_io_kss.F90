@@ -6,7 +6,7 @@
 !!  This module contains procedured dealing with the IO of the KSS file.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2024 ABINIT group (MG, MT, VO, AR, LR, RWG, MM, XG, RShaltaf)
+!! Copyright (C) 1999-2025 ABINIT group (MG, MT, VO, AR, LR, RWG, MM, XG, RShaltaf)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,9 +27,7 @@ MODULE m_io_kss
  use m_xmpi
  use m_errors
  use m_nctk
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
  use m_hdr
  use m_wfk
  use m_cgtools
@@ -135,9 +133,7 @@ subroutine write_kss_header(filekss,kss_npw,ishm,nbandksseff,mband,nsym2,symrel2
  character(len=500) :: msg
  type(hdr_type) :: my_Hdr
  type(dataset_type) :: Dtset_cpy
-#ifdef HAVE_NETCDF
  integer :: ncerr
-#endif
 !arrays
  integer,allocatable :: vkbsign_int(:,:,:)
  real(dp),allocatable :: vkbsign(:,:)
@@ -173,7 +169,7 @@ subroutine write_kss_header(filekss,kss_npw,ishm,nbandksseff,mband,nsym2,symrel2
 
 !Note that nsym and symrel might have been changed this has to be fixed
 !carefully in the next patch since in the new implementation symmorphy=0 should be dafault
- call hdr_copy(Hdr,my_Hdr)
+ call hdr%copy(my_Hdr)
 
  my_Hdr%npwarr =kss_npw
  my_Hdr%nband  =nbandksseff
@@ -248,7 +244,6 @@ subroutine write_kss_header(filekss,kss_npw,ishm,nbandksseff,mband,nsym2,symrel2
      ABI_FREE(vkbsign)
    end if
 
-#ifdef HAVE_NETCDF
  CASE (IO_MODE_ETSF)
 
    ! Create file.
@@ -308,7 +303,6 @@ subroutine write_kss_header(filekss,kss_npw,ishm,nbandksseff,mband,nsym2,symrel2
    end if
 
    NCF_CHECK(nctk_set_datamode(kss_unt))
-#endif
 
  CASE DEFAULT
    ABI_ERROR(sjoin("Unsupported value for iomode:", itoa(iomode)))
@@ -365,11 +359,8 @@ subroutine write_vkb(kss_unt,ikpt,kpoint,kss_npw,gbig,rprimd,Psps,iomode)
 !array
  real(dp),allocatable :: vkb(:,:,:),vkbd(:,:,:)
  real(dp),allocatable :: dum_vkbsign(:,:)
-#ifdef HAVE_NETCDF
  integer :: ncerr,varid
  real(dp),allocatable,target :: vkb_tgt(:,:,:,:), vkbd_tgt(:,:,:,:)
-#endif
-
 ! *********************************************************************
 
  mpsang = Psps%mpsang; ntypat = Psps%ntypat
@@ -391,7 +382,6 @@ subroutine write_vkb(kss_unt,ikpt,kpoint,kss_npw,gbig,rprimd,Psps,iomode)
     end do
   end do
 
-#ifdef HAVE_NETCDF
  CASE (IO_MODE_ETSF)
    ABI_MALLOC(vkb_tgt ,(kss_npw,1,mpsang,ntypat))
    ABI_MALLOC(vkbd_tgt,(kss_npw,1,mpsang,ntypat))
@@ -424,7 +414,6 @@ subroutine write_vkb(kss_unt,ikpt,kpoint,kss_npw,gbig,rprimd,Psps,iomode)
 
    ABI_FREE(vkb_tgt)
    ABI_FREE(vkbd_tgt)
-#endif
 
  CASE DEFAULT
    ABI_ERROR(sjoin("Unsupported value for iomode:", itoa(iomode)))
@@ -487,17 +476,12 @@ subroutine write_kss_wfgk(kss_unt,ikpt,isppol,kpoint,nspinor,kss_npw,&
 !Local variables-------------------------------
 !scalars
  integer :: ib,ibsp,ig,ispinor,iatom,ii !,ierr
-#ifdef HAVE_NETCDF
  integer :: kg_varid,cg_varid,ncerr
  character(len=nctk_slen) :: kdep
-#endif
-
 ! *********************************************************************
 
  ! Calculate and write KB form factors and derivative at this k-point.
- if (Psps%usepaw==0) then
-   call write_vkb(kss_unt,ikpt,kpoint,kss_npw,gbig,rprimd,Psps,iomode)
- end if
+ if (Psps%usepaw==0) call write_vkb(kss_unt,ikpt,kpoint,kss_npw,gbig,rprimd,Psps,iomode)
 
  ! ============================================================
  ! ==== Write wavefunctions and PAW matrix elements on disk ====
@@ -521,7 +505,6 @@ subroutine write_kss_wfgk(kss_unt,ikpt,isppol,kpoint,nspinor,kss_npw,&
      end if
    end do
 
-#ifdef HAVE_NETCDF
  CASE (IO_MODE_ETSF)
    if (Psps%usepaw==1) then
      ABI_WARNING("PAW output with ETSF-IO netcdf: cprj won't be written")
@@ -547,7 +530,6 @@ subroutine write_kss_wfgk(kss_unt,ikpt,isppol,kpoint,nspinor,kss_npw,&
    ! Write eigenvalues and occupations
    NCF_CHECK(nf90_put_var(kss_unt, nctk_idname(kss_unt, "eigenvalues"), ene_k, start=[1,ikpt,isppol]))
    NCF_CHECK(nf90_put_var(kss_unt, nctk_idname(kss_unt, "occupations"), occ_k, start=[1,ikpt,isppol]))
-#endif
 
  CASE DEFAULT
    ABI_ERROR(sjoin("Unsupported iomode:", itoa(iomode)))
@@ -1283,10 +1265,6 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
    write(msg,'(3a)')&
 &   'when iomode==3 in outkss, support for netcdf ',ch10,&
 &   'must be compiled. Use --enable-netcdf when configuring '
-#ifndef HAVE_NETCDF
-   ABI_WARNING(msg)
-   ierr = ierr + 1
-#endif
  end if
 
  if (kssform==3) then
@@ -1940,11 +1918,9 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
 !* Close file
  if (my_rank==master) then
    if (iomode==IO_MODE_FORTRAN) close(unit=untkss)
-#if defined HAVE_NETCDF
    if (iomode==IO_MODE_ETSF) then
      NCF_CHECK(nf90_close(untkss))
    end if
-#endif
  end if
 
  if (associated(Cprj_diago_k)) then

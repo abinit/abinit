@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015-2024 ABINIT group (MT)
+ * Copyright (C) 2015-2025 ABINIT group (MT)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -92,7 +92,9 @@ void xc_get_flags_constants(int *xc_cst_flags_have_exc,
                             int *xc_cst_flags_have_fxc,
                             int *xc_cst_flags_have_kxc,
                             int *xc_cst_flags_have_lxc,
-                            int *xc_cst_flags_needs_laplacian)
+                            int *xc_cst_flags_needs_tau,
+                            int *xc_cst_flags_needs_laplacian,
+                            int *xc_cst_flags_enforce_fhc)
 {
  *xc_cst_flags_have_exc  = XC_FLAGS_HAVE_EXC;
  *xc_cst_flags_have_vxc  = XC_FLAGS_HAVE_VXC;
@@ -102,7 +104,14 @@ void xc_get_flags_constants(int *xc_cst_flags_have_exc,
 #if ( XC_MAJOR_VERSION > 3 )
  *xc_cst_flags_needs_laplacian  = XC_FLAGS_NEEDS_LAPLACIAN;
 #else
- *xc_cst_flags_needs_laplacian  = 1;
+ *xc_cst_flags_needs_laplacian  = -1; /* should be interpreted as true */
+#endif
+#if ( XC_MAJOR_VERSION > 6 )
+ *xc_cst_flags_needs_tau   = XC_FLAGS_NEEDS_TAU;
+ *xc_cst_flags_enforce_fhc = XC_FLAGS_ENFORCE_FHC;
+#else
+ *xc_cst_flags_needs_tau   = -1; /* should be interpreted as true */
+ *xc_cst_flags_enforce_fhc = 0; /* should be interpreted as false */
 #endif
 }
 
@@ -395,6 +404,24 @@ void xc_func_set_grad_sig_threshold(XC(func_type) *xc_func, double *sigma_thresh
    {xc_func_set_sigma_threshold(xc_func, *sigma_threshold);}
 #else
    {fprintf(stderr, "WARNING: setting sigma threshold not available for libXC<4.0!\n");}
+#endif
+
+/* ===============================================================
+ * Wrapper to xc_func_set_enforce_fhc
+ *    Allows to change the enforcement of Fermi Hole Curvature
+ *    of a XC functional
+ *    Only available from libXC v7
+ * ===============================================================
+ */
+void xc_func_set_enforce_fhc(XC(func_type) *xc_func, int *on_off)
+#if ( XC_MAJOR_VERSION > 6 )
+/* ==== libXC v7.0 and later ==== */
+   {xc_func_set_fhc_enforcement(xc_func, *on_off);}
+#else
+   {if (*on_off) {
+     fprintf(stderr, "WARNING: enforcement of Fermi Hole curvature not available for libXC<7.0!\n");
+     }
+   }
 #endif
 
 /* ===============================================================

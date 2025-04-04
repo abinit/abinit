@@ -7,7 +7,7 @@
 !!  used to store results from GS calculations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2024 ABINIT group (MT)
+!! Copyright (C) 2011-2025 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -32,9 +32,7 @@ MODULE m_results_gs
  use m_stream_string
  use m_pair_list
  use m_nctk
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
 
  use m_io_tools,      only : file_exists
  use m_fstrings,      only : sjoin
@@ -108,8 +106,6 @@ MODULE m_results_gs
 !!!  real(dp) :: enxcdc   ! exchange-correlation double-counting energy (Hartree)
 !!!  real(dp) :: epaw     ! PAW spherical energy (Hartree)
 !!!  real(dp) :: epawdc   ! PAW spherical double-counting energy (Hartree)
-  real(dp) :: entropy_extfpmd ! Entropy contribution of the Extended FPMD model
-                              ! for high temperature simulations
   real(dp) :: etotal   ! total energy (Hartree)
                        ! for fixed occupation numbers (occopt==0,1,or 2):
                        !   etotal=ek+ehart+enxc+eei+eew+eii+enl+PAW_spherical_part
@@ -276,7 +272,6 @@ subroutine init_results_gs(natom,nspden,nsppol,results_gs,only_part)
  results_gs%deltae =zero
  results_gs%diffor =zero
  results_gs%entropy=zero
- results_gs%entropy_extfpmd=zero
  results_gs%etotal =zero
  results_gs%fermie =zero
  results_gs%fermih =zero
@@ -380,7 +375,6 @@ subroutine init_results_gs_array(natom,nspden,nsppol,results_gs,only_part)
        results_gs(jj,ii)%deltae =zero
        results_gs(jj,ii)%diffor =zero
        results_gs(jj,ii)%entropy=zero
-       results_gs(jj,ii)%entropy_extfpmd=zero
        results_gs(jj,ii)%etotal =zero
        results_gs(jj,ii)%fermie =zero
        results_gs(jj,ii)%fermih =zero
@@ -642,7 +636,6 @@ subroutine copy_results_gs(results_gs_in,results_gs_out)
  results_gs_out%deltae =results_gs_in%deltae
  results_gs_out%diffor =results_gs_in%diffor
  results_gs_out%entropy=results_gs_in%entropy
- results_gs_out%entropy_extfpmd=results_gs_in%entropy_extfpmd
  results_gs_out%etotal =results_gs_in%etotal
  results_gs_out%fermie =results_gs_in%fermie
  results_gs_out%fermih =results_gs_in%fermih
@@ -696,14 +689,9 @@ integer function results_gs_ncwrite(res, ncid, ecut, pawecutdg) result(ncerr)
 
 !Arguments ------------------------------------
 !scalars
+ class(results_gs_type),intent(in) :: res
  integer,intent(in) :: ncid
  real(dp),intent(in) :: ecut,pawecutdg
- class(results_gs_type),intent(in) :: res
-
-!Local variables-------------------------------
-!scalars
-#ifdef HAVE_NETCDF
-
 ! *************************************************************************
 
  ! ==============================================
@@ -717,7 +705,7 @@ integer function results_gs_ncwrite(res, ncid, ecut, pawecutdg) result(ncerr)
 ! Define variables.
 ! scalars passed in input (not belonging to results_gs) as well as scalars defined in results_gs
  ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: &
-   "ecut", "pawecutdg", "deltae", "diffor", "entropy", "entropy_extfpmd", "etotal", "fermie", "fermih",&
+   "ecut", "pawecutdg", "deltae", "diffor", "entropy", "etotal", "fermie", "fermih",&
 &  "nelect_extfpmd", "residm", "res2", "extfpmd_eshift"])
  NCF_CHECK(ncerr)
 
@@ -742,9 +730,9 @@ integer function results_gs_ncwrite(res, ncid, ecut, pawecutdg) result(ncerr)
 ! Write data
 ! Write variables
  ncerr = nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: &
-&  'ecut', 'pawecutdg', 'deltae', 'diffor', 'entropy', 'entropy_extfpmd', 'etotal', 'fermie', 'fermih',&
+&  'ecut', 'pawecutdg', 'deltae', 'diffor', 'entropy', 'etotal', 'fermie', 'fermih',&
 &  'nelect_extfpmd', 'residm', 'res2', 'extfpmd_eshift'],&
-&  [ecut, pawecutdg, res%deltae, res%diffor, res%entropy, res%entropy_extfpmd, res%etotal, res%fermie, res%fermih,&
+&  [ecut, pawecutdg, res%deltae, res%diffor, res%entropy, res%etotal, res%fermie, res%fermih,&
 &  res%nelect_extfpmd, res%residm, res%res2, res%extfpmd_eshift],&
 &  datamode=.True.)
  NCF_CHECK(ncerr)
@@ -761,13 +749,8 @@ integer function results_gs_ncwrite(res, ncid, ecut, pawecutdg) result(ncerr)
 ! Add energies
  call energies_ncwrite(res%energies, ncid)
 
-#else
- ABI_ERROR("netcdf support is not activated.")
-#endif
-
 contains
  integer function vid(vname)
-
    character(len=*),intent(in) :: vname
    vid = nctk_idname(ncid, vname)
  end function vid

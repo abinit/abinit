@@ -1,4 +1,4 @@
-configure~
+configure
 config.h.in~
 .gitignore~
 .DS_Store
@@ -23,6 +23,7 @@ build_g95
 build_gfortran
 build_ifort
 build.*
+build*
 debian.ac
 debian.ac9
 config.optim
@@ -83,7 +84,6 @@ tests/TestBot_MPI*/*
 /autom4te.cache
 /_build*
 /build
-/configure
 /config.dump
 /config.dump.in
 /config.h
@@ -347,6 +347,7 @@ mac-1P0-225.ac
 doc/topics/ConstrainedDFT.md
 doxygen_docs
 doxygen.err
+venv
 
 # Pycharm
 .idea/

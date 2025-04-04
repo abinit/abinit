@@ -1,0 +1,22 @@
+TUTORIAL ON LINEAR AND NON-LINEAR RESPONSES TO ELECTRIC FIELDS
+
+Summary_NLO.txt
+summary of the results obtained for various properties using either
+response function or finite difference techniques.
+
+P0-STRUCT
+structural optimization of AlAs to be used all along the tutorial
+(i.e. recomputed with the convergence parameters of the tutorial)
+
+P1-DFPT
+Linear and non-linear responses of AlAs to electric field and
+atomic displacements using DFPT.
+
+P2-BERRY
+Berry phase calculation under zero field to get different linear
+and non-linear responses from finite differences
+
+P3-EFIELD
+Finite electric field calculation using the method of Souza and
+Vanderbilt, to get different linear and non-linear responses
+from finite differences.

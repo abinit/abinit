@@ -16,7 +16,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2024 ABINIT group (hexu)
+!! Copyright (C) 2001-2025 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -117,7 +117,7 @@ module m_multibinit_manager
      ! a polymorphic lattice mover so multiple mover could be used.
      class(lattice_mover_t), pointer :: lattice_mover => null()
      ! as for the spin, there is only one mover which has several methods
-     type(spin_mover_t), pointer :: spin_mover => null() 
+     type(spin_mover_t), pointer :: spin_mover => null()
      ! type(lwf_mover_t) :: lwf_mover
 
      type(slc_mover_t) :: slc_mover
@@ -184,9 +184,8 @@ contains
     logical :: iam_master
     integer :: i
     integer :: c
-    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc)
     self%input_path=input_path
-#ifndef FC_CRAY
     self%filenames(:)=filenames(:)
     call xmpi_bcast(self%filenames, master, comm, ierr)
     !TODO: remove params as argument. It is here because the params are read
@@ -232,7 +231,6 @@ contains
 
 
     call self%energy_table%init()
-#endif
 
   end subroutine initialize
 
@@ -313,6 +311,9 @@ contains
     !strlen from defs_basis module
     option=1
     if (iam_master) then
+
+       string = repeat(" ", strlen)
+       raw_string = repeat(" ", strlen)
        call instrng (self%filenames(1),lenstr,option,strlen,string, raw_string)
        !To make case-insensitive, map characters to upper case:
        call inupper(string(1:lenstr))
@@ -325,7 +326,10 @@ contains
     call xmpi_bcast(raw_string,master, comm, ierr)
     call xmpi_bcast(lenstr,master, comm, ierr)
 
-    INPUT_STRING=raw_string
+    !INPUT_STRING=raw_string
+    ! Save input string in global variable so that we can access it in ntck_open_create
+    !ABI_MALLOC_TYPE_SCALAR(character(len=len_trim(raw_string)), INPUT_STRING)
+    !INPUT_STRING = string(1:len_trim(raw_string))
 
     !Read the input file
     call invars10(self%params,lenstr,natom, string)
@@ -415,7 +419,7 @@ contains
 
     end if
 
-    !LWF 
+    !LWF
     if(self%params%lwf_dynamics>0 .or. self%params%latt_lwf_anharmonic==1) then
        ABI_MALLOC_TYPE_SCALAR(lwf_primitive_potential_t, lwf_pot)
        select type(lwf_pot)
@@ -541,7 +545,7 @@ contains
     select case(self%params%lwf_dynamics)
     case (1)  ! Metropolis Monte Carlo
        ABI_MALLOC_TYPE_SCALAR(lwf_mc_t, self%lwf_mover)
-    case (2) ! dummy 
+    case (2) ! dummy
        ABI_MALLOC_TYPE_SCALAR(lwf_dummy_mover_t, self%lwf_mover)
     case (3)
        ABI_MALLOC_TYPE_SCALAR(lwf_berendsen_mover_t, self%lwf_mover)
@@ -598,7 +602,7 @@ contains
     call self%lattice_mover%ncfile%finalize()
   end subroutine run_lattice_dynamics
 
-  
+
   !-------------------------------------------------------------------!
   ! Run lattice only dynamics at various T
   !-------------------------------------------------------------------!
@@ -720,7 +724,7 @@ contains
     call self%read_potentials()
     !call self%sc_maker%initialize(diag(self%params%ncell))
     call self%sc_maker%initialize(self%params%ncellmat)
-    
+
     call self%fill_supercell()
     call self%set_movers()
     call self%lwf_mover%set_ncfile_name(self%params, self%filenames(2))
@@ -759,7 +763,7 @@ contains
     ! if ... fit lwf model
     ! if ... run dynamics...
     ! spin dynamics
-    if(self%params%latt_lwf_anharmonic==1)then    
+    if(self%params%latt_lwf_anharmonic==1)then
         self%params%lwf_dynamics=2
     end if
 

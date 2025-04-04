@@ -1,8 +1,8 @@
 
 .Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Fri 13 Sep 2024.
 - ( at 19h09 )
-  
+
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v4_t63/t63.abi
 - output file    -> t63.abo
 - root for input  files -> t63i
@@ -212,8 +212,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.16584
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/31ga.3.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/31ga.3.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/31ga.3.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/31ga.3.hgh
 - Hartwigsen-Goedecker-Hutter psp for Ga,  from PRB58, 3641 (1998)
 - 31.00000   3.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -228,8 +228,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with 
-  definition in PRB44, 8503 (1991). 
+  so that the KB energies are not consistent with
+  definition in PRB44, 8503 (1991).
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=    5.91122074
          --- l  ekb(1:nproj) -->
@@ -238,8 +238,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              2    0.945855
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/33as.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/33as.5.hgh
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/33as.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/33as.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for As,  from PRB58, 3641 (1998)
 - 33.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -254,8 +254,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with 
-  definition in PRB44, 8503 (1991). 
+  so that the KB energies are not consistent with
+  definition in PRB44, 8503 (1991).
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=    8.49486654
          --- l  ekb(1:nproj) -->
@@ -595,7 +595,7 @@ meta: {optdriver: 1, rfstrs: 1, }
 
  symkchk : k-point set has full space-group symmetry.
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   7
@@ -782,448 +782,448 @@ tolerances: {tolvrs: 1.00E-16, }
 
 
  ==> Compute Derivative Database <==
-  
+
   Ewald part of the elastic tensor in cartesian coordinates
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
-  
+
    1    7   1    7         3.2979094463         0.0000000000
    1    7   2    7        -2.7139969384         0.0000000000
-  
+
    2    7   1    7        -2.7139969384         0.0000000000
    2    7   2    7         3.2979094463         0.0000000000
-  
+
    3    7   1    7        -6.3038626386         0.0000000000
    3    7   2    7        -6.3038626386         0.0000000000
-  
+
    1    8   1    7        -0.0000000000         0.0000000000
    1    8   2    7         0.0000000000         0.0000000000
-  
+
    2    8   1    7         0.0000000000         0.0000000000
    2    8   2    7         0.0000000000         0.0000000000
-  
+
    3    8   1    7        -0.0000000000         0.0000000000
    3    8   2    7         0.0000000000         0.0000000000
-  
+
   Ewald part of the internal strain coupling parameters
    (cartesian strain, reduced atomic coordinates)
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
-  
+
    1    1   1    7        -7.4525207228         0.0000000000
    1    1   2    7         7.4525207228         0.0000000000
-  
+
    2    1   1    7         7.4525207228         0.0000000000
    2    1   2    7        -7.4525207228         0.0000000000
-  
+
    3    1   1    7         9.1072536051         0.0000000000
    3    1   2    7         9.1072536051         0.0000000000
-  
+
    1    2   1    7         7.4525207228         0.0000000000
    1    2   2    7        -7.4525207228         0.0000000000
-  
+
    2    2   1    7        -7.4525207228         0.0000000000
    2    2   2    7         7.4525207228         0.0000000000
-  
+
    3    2   1    7         9.1072536051         0.0000000000
    3    2   2    7         9.1072536051         0.0000000000
-  
+
    1    3   1    7        -8.0899484586         0.0000000000
    1    3   2    7         8.0899484586         0.0000000000
-  
+
    2    3   1    7         8.0899484586         0.0000000000
    2    3   2    7        -8.0899484586         0.0000000000
-  
+
    3    3   1    7        -9.1072536051         0.0000000000
    3    3   2    7        -9.1072536051         0.0000000000
-  
+
    1    4   1    7         8.0899484586         0.0000000000
    1    4   2    7        -8.0899484586         0.0000000000
-  
+
    2    4   1    7        -8.0899484586         0.0000000000
    2    4   2    7         8.0899484586         0.0000000000
-  
+
    3    4   1    7        -9.1072536051         0.0000000000
    3    4   2    7        -9.1072536051         0.0000000000
-  
+
   Frozen wf local part of the elastic tensor in cartesian coordinates
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
-  
+
    1    7   1    7        -0.4680277311         0.0000000000
    1    7   2    7        -1.3846159617         0.0000000000
-  
+
    2    7   1    7        -1.3846159617         0.0000000000
    2    7   2    7        -0.4680277311         0.0000000000
-  
+
    3    7   1    7         1.2305511500         0.0000000000
    3    7   2    7         1.2305511500         0.0000000000
-  
+
    1    8   1    7        -0.0000000000         0.0000000000
    1    8   2    7        -0.0000000000         0.0000000000
-  
+
    2    8   1    7         0.0000000000         0.0000000000
    2    8   2    7         0.0000000000         0.0000000000
-  
+
    3    8   1    7         0.0000000000         0.0000000000
    3    8   2    7        -0.0000000000         0.0000000000
-  
-  Frozen wf local part of the internal strain coupling parameters 
+
+  Frozen wf local part of the internal strain coupling parameters
    (cartesian strain, reduced atomic coordinates)
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
-  
+
    1    1   1    7         4.5229391656         0.0000000000
    1    1   2    7        -4.5229391656         0.0000000000
-  
+
    2    1   1    7        -4.5229391656         0.0000000000
    2    1   2    7         4.5229391656         0.0000000000
-  
+
    3    1   1    7        -5.0900987209         0.0000000000
    3    1   2    7        -5.0900987209         0.0000000000
-  
+
    1    2   1    7        -4.5229391656         0.0000000000
    1    2   2    7         4.5229391656         0.0000000000
-  
+
    2    2   1    7         4.5229391656         0.0000000000
    2    2   2    7        -4.5229391656         0.0000000000
-  
+
    3    2   1    7        -5.0900987209         0.0000000000
    3    2   2    7        -5.0900987209         0.0000000000
-  
+
    1    3   1    7         4.4638471604         0.0000000000
    1    3   2    7        -4.4638471604         0.0000000000
-  
+
    2    3   1    7        -4.4638471604         0.0000000000
    2    3   2    7         4.4638471604         0.0000000000
-  
+
    3    3   1    7         4.3547822996         0.0000000000
    3    3   2    7         4.3547822996         0.0000000000
-  
+
    1    4   1    7        -4.4638471604         0.0000000000
    1    4   2    7         4.4638471604         0.0000000000
-  
+
    2    4   1    7         4.4638471604         0.0000000000
    2    4   2    7        -4.4638471604         0.0000000000
-  
+
    3    4   1    7         4.3547822996         0.0000000000
    3    4   2    7         4.3547822996         0.0000000000
-  
+
   Frozen wf nonlocal part of the elastic tensor in cartesian coordinates
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
-  
+
    1    7   1    7         5.9154823722         0.0000000000
    1    7   2    7         4.1952915758         0.0000000000
-  
+
    2    7   1    7         4.1952915758         0.0000000000
    2    7   2    7         5.9154823721         0.0000000000
-  
+
    3    7   1    7         4.0942673420         0.0000000000
    3    7   2    7         4.0942673419         0.0000000000
-  
+
    1    8   1    7         0.0000000000         0.0000000000
    1    8   2    7         0.0000000000         0.0000000000
-  
+
    2    8   1    7         0.0000000000         0.0000000000
    2    8   2    7         0.0000000000         0.0000000000
-  
+
    3    8   1    7         0.0000000001         0.0000000000
    3    8   2    7        -0.0000000001         0.0000000000
-  
-  Frozen wf nonlocal part of the internal strain coupling parameters 
+
+  Frozen wf nonlocal part of the internal strain coupling parameters
    (cartesian strain, reduced atomic coordinates)
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
-  
+
    1    1   1    7        -0.2556635903         0.0000000000
    1    1   2    7         0.2556635852         0.0000000000
-  
+
    2    1   1    7         0.2556635879         0.0000000000
    2    1   2    7        -0.2556635881         0.0000000000
-  
+
    3    1   1    7        -0.0579672585         0.0000000000
    3    1   2    7        -0.0579672587         0.0000000000
-  
+
    1    2   1    7         0.2556635903         0.0000000000
    1    2   2    7        -0.2556635853         0.0000000000
-  
+
    2    2   1    7        -0.2556635879         0.0000000000
    2    2   2    7         0.2556635880         0.0000000000
-  
+
    3    2   1    7        -0.0579672586         0.0000000000
    3    2   2    7        -0.0579672587         0.0000000000
-  
+
    1    3   1    7        -0.5386509166         0.0000000000
    1    3   2    7         0.5386509295         0.0000000000
-  
+
    2    3   1    7         0.5386509260         0.0000000000
    2    3   2    7        -0.5386509217         0.0000000000
-  
+
    3    3   1    7        -0.2660271215         0.0000000000
    3    3   2    7        -0.2660271219         0.0000000000
-  
+
    1    4   1    7         0.5386509167         0.0000000000
    1    4   2    7        -0.5386509295         0.0000000000
-  
+
    2    4   1    7        -0.5386509262         0.0000000000
    2    4   2    7         0.5386509212         0.0000000000
-  
+
    3    4   1    7        -0.2660271214         0.0000000000
    3    4   2    7        -0.2660271221         0.0000000000
-  
+
   Frozen wf xc part of the elastic tensor in cartesian coordinates
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
-  
+
    1    7   1    7        -0.4576166516         0.0000000000
    1    7   2    7        -0.4576166516         0.0000000000
-  
+
    2    7   1    7        -0.4576166516         0.0000000000
    2    7   2    7        -0.4576166516         0.0000000000
-  
+
    3    7   1    7        -0.4576166516         0.0000000000
    3    7   2    7        -0.4576166516         0.0000000000
-  
+
    1    8   1    7         0.0000000000         0.0000000000
    1    8   2    7         0.0000000000         0.0000000000
-  
+
    2    8   1    7         0.0000000000         0.0000000000
    2    8   2    7         0.0000000000         0.0000000000
-  
+
    3    8   1    7         0.0000000000         0.0000000000
    3    8   2    7         0.0000000000         0.0000000000
-  
-  Frozen wf xc part of the internal strain coupling parameters 
+
+  Frozen wf xc part of the internal strain coupling parameters
    (cartesian strain, reduced atomic coordinates)
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
-  
+
    1    1   1    7         0.0000000000         0.0000000000
    1    1   2    7         0.0000000000         0.0000000000
-  
+
    2    1   1    7         0.0000000000         0.0000000000
    2    1   2    7         0.0000000000         0.0000000000
-  
+
    3    1   1    7         0.0000000000         0.0000000000
    3    1   2    7         0.0000000000         0.0000000000
-  
+
    1    2   1    7         0.0000000000         0.0000000000
    1    2   2    7         0.0000000000         0.0000000000
-  
+
    2    2   1    7         0.0000000000         0.0000000000
    2    2   2    7         0.0000000000         0.0000000000
-  
+
    3    2   1    7         0.0000000000         0.0000000000
    3    2   2    7         0.0000000000         0.0000000000
-  
+
    1    3   1    7         0.0000000000         0.0000000000
    1    3   2    7         0.0000000000         0.0000000000
-  
+
    2    3   1    7         0.0000000000         0.0000000000
    2    3   2    7         0.0000000000         0.0000000000
-  
+
    3    3   1    7         0.0000000000         0.0000000000
    3    3   2    7         0.0000000000         0.0000000000
-  
+
    1    4   1    7         0.0000000000         0.0000000000
    1    4   2    7         0.0000000000         0.0000000000
-  
+
    2    4   1    7         0.0000000000         0.0000000000
    2    4   2    7         0.0000000000         0.0000000000
-  
+
    3    4   1    7         0.0000000000         0.0000000000
    3    4   2    7         0.0000000000         0.0000000000
-  
+
   Frozen wf kinetic part of the elastic tensor in cartesian coordinates
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
-  
+
    1    7   1    7         8.6808766216         0.0000000000
    1    7   2    7         0.0000000000         0.0000000000
-  
+
    2    7   1    7         0.0000000000         0.0000000000
    2    7   2    7         8.6808766220         0.0000000000
-  
+
    3    7   1    7         0.0000000000         0.0000000000
    3    7   2    7         0.0000000000         0.0000000000
-  
+
    1    8   1    7         0.0000000000         0.0000000000
    1    8   2    7         0.0000000001         0.0000000000
-  
+
    2    8   1    7         0.0000000000         0.0000000000
    2    8   2    7         0.0000000000         0.0000000000
-  
+
    3    8   1    7         0.0000000008         0.0000000000
    3    8   2    7         0.0000000008         0.0000000000
-  
+
   Frozen wf hartree part of the elastic tensor in cartesian coordinates
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
-  
+
    1    7   1    7         0.1618412100         0.0000000000
    1    7   2    7         0.3738436239         0.0000000000
-  
+
    2    7   1    7         0.3738436239         0.0000000000
    2    7   2    7         0.1618412100         0.0000000000
-  
+
    3    7   1    7        -0.0558400030         0.0000000000
    3    7   2    7        -0.0558400030         0.0000000000
-  
+
    1    8   1    7        -0.0000000000         0.0000000000
    1    8   2    7        -0.0000000000         0.0000000000
-  
+
    2    8   1    7         0.0000000000         0.0000000000
    2    8   2    7        -0.0000000000         0.0000000000
-  
+
    3    8   1    7         0.0000000000         0.0000000000
    3    8   2    7        -0.0000000000         0.0000000000
-  
+
   Psp core part of the elastic tensor in cartesian coordinates
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
-  
+
    1    7   1    7         0.7566466680         0.0000000000
    1    7   2    7         0.7566466680         0.0000000000
-  
+
    2    7   1    7         0.7566466680         0.0000000000
    2    7   2    7         0.7566466680         0.0000000000
-  
+
    3    7   1    7         0.7566466680         0.0000000000
    3    7   2    7         0.7566466680         0.0000000000
-  
+
    1    8   1    7         0.0000000000         0.0000000000
    1    8   2    7         0.0000000000         0.0000000000
-  
+
    2    8   1    7         0.0000000000         0.0000000000
    2    8   2    7         0.0000000000         0.0000000000
-  
+
    3    8   1    7         0.0000000000         0.0000000000
    3    8   2    7         0.0000000000         0.0000000000
-  
+
   Non-stationary local part of the 2-order matrix
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
-  
+
    1    1   1    7         4.0498456230         0.0000000000
    1    1   2    7        -4.0498456335         0.0000000000
-  
+
    2    1   1    7        -4.0498456230         0.0000000000
    2    1   2    7         4.0498456335         0.0000000000
-  
+
    3    1   1    7        -5.2508866729         0.0000000000
    3    1   2    7        -5.2508866625         0.0000000000
-  
+
    1    2   1    7        -4.0498456230         0.0000000000
    1    2   2    7         4.0498456335         0.0000000000
-  
+
    2    2   1    7         4.0498456230         0.0000000000
    2    2   2    7        -4.0498456335         0.0000000000
-  
+
    3    2   1    7        -5.2508866729         0.0000000000
    3    2   2    7        -5.2508866625         0.0000000000
-  
+
    1    3   1    7         1.9897580463         0.0000000000
    1    3   2    7        -1.9897580319         0.0000000000
-  
+
    2    3   1    7        -1.9897580463         0.0000000000
    2    3   2    7         1.9897580319         0.0000000000
-  
+
    3    3   1    7         4.5183252621         0.0000000000
    3    3   2    7         4.5183252483         0.0000000000
-  
+
    1    4   1    7        -1.9897580463         0.0000000000
    1    4   2    7         1.9897580319         0.0000000000
-  
+
    2    4   1    7         1.9897580463         0.0000000000
    2    4   2    7        -1.9897580319         0.0000000000
-  
+
    3    4   1    7         4.5183252621         0.0000000000
    3    4   2    7         4.5183252483         0.0000000000
-  
+
    1    7   1    7        -4.3413981806         0.0000000000
    1    7   2    7         2.9837254984         0.0000000000
-  
+
    2    7   1    7         2.9837254986         0.0000000000
    2    7   2    7        -4.3413981836         0.0000000000
-  
+
    3    7   1    7         4.0212317003         0.0000000000
    3    7   2    7         4.0212317031         0.0000000000
-  
+
    1    8   1    7        -0.0000000000         0.0000000000
    1    8   2    7        -0.0000000000         0.0000000000
-  
+
    2    8   1    7        -0.0000000000         0.0000000000
    2    8   2    7         0.0000000000         0.0000000000
-  
+
    3    8   1    7        -0.0000000000         0.0000000000
    3    8   2    7        -0.0000000000         0.0000000000
-  
+
   Non-stationary non-local part of the 2nd-order matrix
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
-  
+
    1    1   1    7        -1.4199003307         0.0000000000
    1    1   2    7         1.4199003439         0.0000000000
-  
+
    2    1   1    7         1.4199003307         0.0000000000
    2    1   2    7        -1.4199003439         0.0000000000
-  
+
    3    1   1    7         1.7822202489         0.0000000000
    3    1   2    7         1.7822202416         0.0000000000
-  
+
    1    2   1    7         1.4199003307         0.0000000000
    1    2   2    7        -1.4199003439         0.0000000000
-  
+
    2    2   1    7        -1.4199003307         0.0000000000
    2    2   2    7         1.4199003439         0.0000000000
-  
+
    3    2   1    7         1.7822202489         0.0000000000
    3    2   2    7         1.7822202416         0.0000000000
-  
+
    1    3   1    7         1.5837850415         0.0000000000
    1    3   2    7        -1.5837850618         0.0000000000
-  
+
    2    3   1    7        -1.5837850415         0.0000000000
    2    3   2    7         1.5837850618         0.0000000000
-  
+
    3    3   1    7         0.0094858808         0.0000000000
    3    3   2    7         0.0094858877         0.0000000000
-  
+
    1    4   1    7        -1.5837850415         0.0000000000
    1    4   2    7         1.5837850618         0.0000000000
-  
+
    2    4   1    7         1.5837850415         0.0000000000
    2    4   2    7        -1.5837850618         0.0000000000
-  
+
    3    4   1    7         0.0094858808         0.0000000000
    3    4   2    7         0.0094858877         0.0000000000
-  
+
    1    7   1    7        -9.8643925556         0.0000000000
    1    7   2    7        -3.0437017119         0.0000000000
-  
+
    2    7   1    7        -3.0437017131         0.0000000000
    2    7   2    7        -9.8643925561         0.0000000000
-  
+
    3    7   1    7        -2.8920810444         0.0000000000
    3    7   2    7        -2.8920810465         0.0000000000
-  
+
    1    8   1    7         0.0000000000         0.0000000000
    1    8   2    7        -0.0000000000         0.0000000000
-  
+
    2    8   1    7         0.0000000000         0.0000000000
    2    8   2    7         0.0000000000         0.0000000000
-  
+
    3    8   1    7         0.0000000000         0.0000000000
    3    8   2    7        -0.0000000000         0.0000000000
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
-  cartesian coordinates for strain terms (1/ucvol factor 
-   for elastic tensor components not included) 
+  cartesian coordinates for strain terms (1/ucvol factor
+   for elastic tensor components not included)
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   3    1         0.0000000000         0.0000000000
    1    1   3    2         0.0000000000         0.0000000000
    1    1   3    3         0.0000000000         0.0000000000
@@ -1232,7 +1232,7 @@ tolerances: {tolvrs: 1.00E-16, }
    1    1   3    6         0.0000000000         0.0000000000
    1    1   1    7        -0.5552998552         0.0000000000
    1    1   2    7         0.5552998527         0.0000000000
-  
+
    2    1   3    1         0.0000000000         0.0000000000
    2    1   3    2         0.0000000000         0.0000000000
    2    1   3    3         0.0000000000         0.0000000000
@@ -1241,7 +1241,7 @@ tolerances: {tolvrs: 1.00E-16, }
    2    1   3    6         0.0000000000         0.0000000000
    2    1   1    7         0.5552998528         0.0000000000
    2    1   2    7        -0.5552998556         0.0000000000
-  
+
    3    1   1    1         0.0000000000         0.0000000000
    3    1   2    1         0.0000000000         0.0000000000
    3    1   1    2         0.0000000000         0.0000000000
@@ -1252,7 +1252,7 @@ tolerances: {tolvrs: 1.00E-16, }
    3    1   2    4         0.0000000000         0.0000000000
    3    1   1    7         0.4905212018         0.0000000000
    3    1   2    7         0.4905212046         0.0000000000
-  
+
    1    2   3    1         0.0000000000         0.0000000000
    1    2   3    2         0.0000000000         0.0000000000
    1    2   3    3         0.0000000000         0.0000000000
@@ -1261,7 +1261,7 @@ tolerances: {tolvrs: 1.00E-16, }
    1    2   3    6         0.0000000000         0.0000000000
    1    2   1    7         0.5552998552         0.0000000000
    1    2   2    7        -0.5552998528         0.0000000000
-  
+
    2    2   3    1         0.0000000000         0.0000000000
    2    2   3    2         0.0000000000         0.0000000000
    2    2   3    3         0.0000000000         0.0000000000
@@ -1270,7 +1270,7 @@ tolerances: {tolvrs: 1.00E-16, }
    2    2   3    6         0.0000000000         0.0000000000
    2    2   1    7        -0.5552998528         0.0000000000
    2    2   2    7         0.5552998556         0.0000000000
-  
+
    3    2   1    1         0.0000000000         0.0000000000
    3    2   2    1         0.0000000000         0.0000000000
    3    2   1    2         0.0000000000         0.0000000000
@@ -1281,7 +1281,7 @@ tolerances: {tolvrs: 1.00E-16, }
    3    2   2    4         0.0000000000         0.0000000000
    3    2   1    7         0.4905212018         0.0000000000
    3    2   2    7         0.4905212047         0.0000000000
-  
+
    1    3   3    1         0.0000000000         0.0000000000
    1    3   3    2         0.0000000000         0.0000000000
    1    3   3    3         0.0000000000         0.0000000000
@@ -1290,7 +1290,7 @@ tolerances: {tolvrs: 1.00E-16, }
    1    3   3    6         0.0000000000         0.0000000000
    1    3   1    7        -0.5912091269         0.0000000000
    1    3   2    7         0.5912091340         0.0000000000
-  
+
    2    3   3    1         0.0000000000         0.0000000000
    2    3   3    2         0.0000000000         0.0000000000
    2    3   3    3         0.0000000000         0.0000000000
@@ -1299,7 +1299,7 @@ tolerances: {tolvrs: 1.00E-16, }
    2    3   3    6         0.0000000000         0.0000000000
    2    3   1    7         0.5912091363         0.0000000000
    2    3   2    7        -0.5912091262         0.0000000000
-  
+
    3    3   1    1         0.0000000000         0.0000000000
    3    3   2    1         0.0000000000         0.0000000000
    3    3   1    2         0.0000000000         0.0000000000
@@ -1310,7 +1310,7 @@ tolerances: {tolvrs: 1.00E-16, }
    3    3   2    4         0.0000000000         0.0000000000
    3    3   1    7        -0.4906872841         0.0000000000
    3    3   2    7        -0.4906872914         0.0000000000
-  
+
    1    4   3    1         0.0000000000         0.0000000000
    1    4   3    2         0.0000000000         0.0000000000
    1    4   3    3         0.0000000000         0.0000000000
@@ -1319,7 +1319,7 @@ tolerances: {tolvrs: 1.00E-16, }
    1    4   3    6         0.0000000000         0.0000000000
    1    4   1    7         0.5912091271         0.0000000000
    1    4   2    7        -0.5912091340         0.0000000000
-  
+
    2    4   3    1         0.0000000000         0.0000000000
    2    4   3    2         0.0000000000         0.0000000000
    2    4   3    3         0.0000000000         0.0000000000
@@ -1328,7 +1328,7 @@ tolerances: {tolvrs: 1.00E-16, }
    2    4   3    6         0.0000000000         0.0000000000
    2    4   1    7        -0.5912091365         0.0000000000
    2    4   2    7         0.5912091257         0.0000000000
-  
+
    3    4   1    1         0.0000000000         0.0000000000
    3    4   2    1         0.0000000000         0.0000000000
    3    4   1    2         0.0000000000         0.0000000000
@@ -1339,19 +1339,19 @@ tolerances: {tolvrs: 1.00E-16, }
    3    4   2    4         0.0000000000         0.0000000000
    3    4   1    7        -0.4906872841         0.0000000000
    3    4   2    7        -0.4906872915         0.0000000000
-  
+
    1    6   2    1         0.0000000000         0.0000000000
    1    6   2    2         0.0000000000         0.0000000000
    1    6   2    3         0.0000000000         0.0000000000
    1    6   2    4         0.0000000000         0.0000000000
    1    6   3    6         0.0000000000         0.0000000000
-  
+
    2    6   1    1         0.0000000000         0.0000000000
    2    6   1    2         0.0000000000         0.0000000000
    2    6   1    3         0.0000000000         0.0000000000
    2    6   1    4         0.0000000000         0.0000000000
    2    6   3    6         0.0000000000         0.0000000000
-  
+
    3    6   1    1         0.0000000000         0.0000000000
    3    6   2    1         0.0000000000         0.0000000000
    3    6   1    2         0.0000000000         0.0000000000
@@ -1362,92 +1362,92 @@ tolerances: {tolvrs: 1.00E-16, }
    3    6   2    4         0.0000000000         0.0000000000
    3    6   1    6         0.0000000000         0.0000000000
    3    6   2    6         0.0000000000         0.0000000000
-  
+
    1    7   1    7         3.6813211991         0.0000000000
    1    7   2    7         0.7095761026         0.0000000000
-  
+
    2    7   1    7         0.7095761015         0.0000000000
    2    7   2    7         3.6813211958         0.0000000000
-  
+
    3    7   1    7         0.3932965228         0.0000000000
    3    7   2    7         0.3932965234         0.0000000000
-  
+
    1    8   1    7         0.0000000000         0.0000000000
    1    8   2    7         0.0000000001         0.0000000000
-  
+
    2    8   1    7         0.0000000001         0.0000000000
    2    8   2    7         0.0000000000         0.0000000000
-  
+
    3    8   1    7         0.0000000009         0.0000000000
    3    8   2    7         0.0000000008         0.0000000000
-  
-  
+
+
   Rigid-atom elastic tensor , in cartesian coordinates,
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    7   1    7         0.0060422796         0.0000000000
    1    7   2    7         0.0011646518         0.0000000000
-  
+
    2    7   1    7         0.0011646518         0.0000000000
    2    7   2    7         0.0060422796         0.0000000000
-  
+
    3    7   1    7         0.0006455312         0.0000000000
    3    7   2    7         0.0006455312         0.0000000000
-  
+
    1    8   1    7         0.0000000000         0.0000000000
    1    8   2    7         0.0000000000         0.0000000000
-  
+
    2    8   1    7         0.0000000000         0.0000000000
    2    8   2    7         0.0000000000         0.0000000000
-  
+
    3    8   1    7         0.0000000000         0.0000000000
    3    8   2    7         0.0000000000         0.0000000000
-  
+
   Internal strain coupling parameters, in cartesian coordinates,
-   zero average net force deriv. has been imposed  
+   zero average net force deriv. has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   1    7         0.0848985833         0.0000000000
    1    1   2    7        -0.0848985833         0.0000000000
-  
+
    2    1   1    7         0.0000000003         0.0000000000
    2    1   2    7         0.0000000004         0.0000000000
-  
+
    3    1   1    7        -0.0397788299         0.0000000000
    3    1   2    7        -0.0397788303         0.0000000000
-  
+
    1    2   1    7        -0.0848985833         0.0000000000
    1    2   2    7         0.0848985834         0.0000000000
-  
+
    2    2   1    7        -0.0000000003         0.0000000000
    2    2   2    7        -0.0000000004         0.0000000000
-  
+
    3    2   1    7        -0.0397788299         0.0000000000
    3    2   2    7        -0.0397788303         0.0000000000
-  
+
    1    3   1    7         0.0903886744         0.0000000000
    1    3   2    7        -0.0903886742         0.0000000000
-  
+
    2    3   1    7        -0.0000000012         0.0000000000
    2    3   2    7        -0.0000000011         0.0000000000
-  
+
    3    3   1    7         0.0397788299         0.0000000000
    3    3   2    7         0.0397788303         0.0000000000
-  
+
    1    4   1    7        -0.0903886745         0.0000000000
    1    4   2    7         0.0903886742         0.0000000000
-  
+
    2    4   1    7         0.0000000013         0.0000000000
    2    4   2    7         0.0000000011         0.0000000000
-  
+
    3    4   1    7         0.0397788299         0.0000000000
    3    4   2    7         0.0397788303         0.0000000000
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      7.5526000000E+00  7.5526000000E+00  1.2333300000E+01 Bohr
               amu      6.97230000E+01  7.49215900E+01
@@ -1569,7 +1569,7 @@ P          mk1mem2          4
  of the ABINIT implementation.
  For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
-- [1] Metric tensor formulation of strain in density-functional perturbation theory, 
+- [1] Metric tensor formulation of strain in density-functional perturbation theory,
 - D. R. Hamann, X. Wu, K. M. Rabe, and D. Vanderbilt, Phys. Rev. B71, 035117 (2005).
 - Comment: Non-vanishing rfstrs. Strong suggestion to cite this paper in your publications.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#hamann2005
@@ -1586,7 +1586,7 @@ P          mk1mem2          4
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -1598,12 +1598,12 @@ P          mk1mem2          4
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -1621,7 +1621,7 @@ P          mk1mem2          4
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -1636,7 +1636,7 @@ P          mk1mem2          4
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009

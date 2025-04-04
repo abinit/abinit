@@ -9,18 +9,18 @@ acell    3*12.262810608      # each primitive vector in rprim is scaled
                              # by its value in acell, to give internally
                              # cell vectors dimensioned as length in atomic units
 
-# a-Sn has a cubic conventional cell, so the primitive cell 
+# a-Sn has a cubic conventional cell, so the primitive cell
 # has 60 deg angles
-rprim    0.000000000000000   0.500000000000000   0.500000000000000 
-         0.500000000000000   0.000000000000000   0.500000000000000 
-         0.500000000000000   0.500000000000000   0.000000000000000 
+rprim    0.000000000000000   0.500000000000000   0.500000000000000
+         0.500000000000000   0.000000000000000   0.500000000000000
+         0.500000000000000   0.500000000000000   0.000000000000000
 
 #Definition of the atom types and pseudopotentials
 ntypat 1 # one types of atom
 znucl 50 # atomic number of atoms, will be cross checked against pseudopotential files
            # here Tin (50) is the atom type
 pp_dirpath "$ABI_PSPDIR" # pseudopotential directory
-pseudos "Pseudodojo_paw_pbe_standard/Sn-sp.xml"
+pseudos "Psdj_paw_pbe_std/Sn-sp.xml"
 
 #Definition of the atoms
 natom 2 # 2 atoms in the primitive unit cell
@@ -28,8 +28,8 @@ typat    1 1  # atoms listed as Sn Sn
 # next are the atomic positions
 # xred gives them in units of the cell translation vectors, as is commonly
 # done in crystallography
-xred     0.000000000000000   0.000000000000000   0.000000000000000 
-         0.250000000000000   0.250000000000000   0.250000000000000 
+xred     0.000000000000000   0.000000000000000   0.000000000000000
+         0.250000000000000   0.250000000000000   0.250000000000000
 
 #Numerical parameters of the calculation : planewave basis set and k point grid
 ecut 15 # plane wave cutoff energy, always need to check convergence of ecut in real runs
@@ -61,13 +61,15 @@ prteig 0
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   tnuc_3.abo, tolnlines=  3, tolabs=  6.000e-10, tolrel=  3.000e-10
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
 #%% authors = J. Zwanziger
 #%% keywords = PAW
-#%% description = 
+#%% description =
+#%%     Computation of the Fermi contact term at the atomic sites in \alpha-Sn
+#%%     Nonmetallic form of tin
 #%% topics = EFG, SmartSymm
 #%%<END TEST_INFO>

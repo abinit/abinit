@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.Version 10.3.6.2 of ABINIT, released Feb 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h12 )
+.Starting date : Fri 28 Mar 2025.
+- ( at 14h31 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v67mbpt_t31-t32-t33-t34-t35/t35.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_intel-debug/tests/TestBot_MPI1/v67mbpt_t31-t32-t33-t34-t35/t35.abi
 - output file    -> t35.abo
 - root for input  files -> t35i
 - root for output files -> t35o
@@ -197,8 +197,8 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_intel-debug/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_intel-debug/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -247,6 +247,10 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
  yields     8 points in the full Brillouin Zone.
 
 
+
+ vcoul_init : cutoff-mode = AUXILIARY_FUNCTION
+ q-points for optical limit:   1
+     1)      0.000010    0.000020    0.000030
  setmesh: FFT mesh size selected  =    20x   20x   20
           total number of points  =         8000
 
@@ -359,6 +363,10 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
  yields    64 points in the full Brillouin Zone.
 
 
+
+ vcoul_init : cutoff-mode = AUXILIARY_FUNCTION
+ q-points for optical limit:   1
+     1)      0.000010    0.000020    0.000030
  Number of electrons calculated from density =    8.0000; Expected =    8.0000
  average of density, n =  0.030004
  r_s =    1.9964
@@ -367,10 +375,10 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
  Writing KS-RPA macroscopic dielectric function without local fields to file: t35o_DS1_RPA_NLF_MDF
  Writing GW-RPA macroscopic dielectric function without local fields to file: t35o_DS1_GW_NLF_MDF
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 182 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 179 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 183 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 179 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 185 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 186 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 185 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 182 iterations.
  Writing EXC Macroscopic dielectric function to file: t35o_DS1_EXC_MDF
   
@@ -606,5 +614,5 @@ P           mkmem           8
 ================================================================================
 
  Calculation completed.
-.Delivered   4 WARNINGs and   5 COMMENTs to log file.
+.Delivered   5 WARNINGs and   5 COMMENTs to log file.
 +Overall time at end (sec) : cpu=          1.4  wall=          1.5

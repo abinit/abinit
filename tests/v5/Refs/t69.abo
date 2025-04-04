@@ -1,8 +1,8 @@
 
 .Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Fri 13 Sep 2024.
 - ( at 19h10 )
-  
+
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v5_t69/t69.abi
 - output file    -> t69.abo
 - root for input  files -> t69i
@@ -330,8 +330,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     12.000   => boxcut(ratio)=   2.00791
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -348,8 +348,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              1    1.849886
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -533,7 +533,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
  Citation for XC functional:
   J.P.Perdew and Y.Wang, PRB 45, 13244 (1992)
 
- SCREENING: Calculation of the susceptibility and dielectric matrices 
+ SCREENING: Calculation of the susceptibility and dielectric matrices
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
@@ -547,8 +547,8 @@ meta: {optdriver: 3, gwcalctyp: 0, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -565,8 +565,8 @@ meta: {optdriver: 3, gwcalctyp: 0, }
              1    1.849886
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -584,7 +584,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :     8
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.01563
      2)     2.50000000E-01  0.00000000E+00  0.00000000E+00       0.12500
@@ -595,13 +595,64 @@ meta: {optdriver: 3, gwcalctyp: 0, }
      7)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.04688
      8)    -2.50000000E-01  5.00000000E-01  2.50000000E-01       0.09375
 
- Together with 24 symmetry operations and time-reversal symmetry 
+ Together with 24 symmetry operations and time-reversal symmetry
  yields    64 points in the full Brillouin Zone.
+     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00
+     2)     2.50000000E-01  0.00000000E+00  0.00000000E+00
+     3)     0.00000000E+00  0.00000000E+00  2.50000000E-01
+     4)    -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
+     5)     0.00000000E+00  2.50000000E-01  0.00000000E+00
+     6)    -2.50000000E-01 -0.00000000E+00 -0.00000000E+00
+     7)    -0.00000000E+00 -0.00000000E+00 -2.50000000E-01
+     8)     2.50000000E-01  2.50000000E-01  2.50000000E-01
+     9)    -0.00000000E+00 -2.50000000E-01 -0.00000000E+00
+    10)     5.00000000E-01  0.00000000E+00  0.00000000E+00
+    11)     0.00000000E+00  0.00000000E+00  5.00000000E-01
+    12)    -5.00000000E-01 -5.00000000E-01 -5.00000000E-01
+    13)     0.00000000E+00  5.00000000E-01  0.00000000E+00
+    14)     2.50000000E-01  2.50000000E-01  0.00000000E+00
+    15)    -2.50000000E-01 -2.50000000E-01  0.00000000E+00
+    16)    -2.50000000E-01  0.00000000E+00 -2.50000000E-01
+    17)     2.50000000E-01  0.00000000E+00  2.50000000E-01
+    18)     0.00000000E+00  2.50000000E-01  2.50000000E-01
+    19)     0.00000000E+00 -2.50000000E-01 -2.50000000E-01
+    20)     5.00000000E-01  2.50000000E-01  0.00000000E+00
+    21)    -2.50000000E-01 -2.50000000E-01  2.50000000E-01
+    22)    -5.00000000E-01 -5.00000000E-01 -2.50000000E-01
+    23)     2.50000000E-01  5.00000000E-01  0.00000000E+00
+    24)    -5.00000000E-01 -2.50000000E-01 -5.00000000E-01
+    25)     2.50000000E-01  0.00000000E+00  5.00000000E-01
+    26)     5.00000000E-01  0.00000000E+00  2.50000000E-01
+    27)    -2.50000000E-01  2.50000000E-01 -2.50000000E-01
+    28)     0.00000000E+00  2.50000000E-01  5.00000000E-01
+    29)    -2.50000000E-01 -5.00000000E-01 -5.00000000E-01
+    30)     2.50000000E-01 -2.50000000E-01 -2.50000000E-01
+    31)     0.00000000E+00  5.00000000E-01  2.50000000E-01
+    32)    -5.00000000E-01 -2.50000000E-01 -0.00000000E+00
+    33)     2.50000000E-01  2.50000000E-01 -2.50000000E-01
+    34)     5.00000000E-01  5.00000000E-01  2.50000000E-01
+    35)    -2.50000000E-01 -5.00000000E-01 -0.00000000E+00
+    36)     5.00000000E-01  2.50000000E-01  5.00000000E-01
+    37)    -2.50000000E-01 -0.00000000E+00 -5.00000000E-01
+    38)    -5.00000000E-01 -0.00000000E+00 -2.50000000E-01
+    39)     2.50000000E-01 -2.50000000E-01  2.50000000E-01
+    40)    -0.00000000E+00 -2.50000000E-01 -5.00000000E-01
+    41)     2.50000000E-01  5.00000000E-01  5.00000000E-01
+    42)    -2.50000000E-01  2.50000000E-01  2.50000000E-01
+    43)    -0.00000000E+00 -5.00000000E-01 -2.50000000E-01
+    44)    -2.50000000E-01  2.50000000E-01  0.00000000E+00
+    45)    -2.50000000E-01 -2.50000000E-01 -5.00000000E-01
+    46)     2.50000000E-01  2.50000000E-01  5.00000000E-01
+    47)     2.50000000E-01 -2.50000000E-01  0.00000000E+00
+    48)     2.50000000E-01  5.00000000E-01  2.50000000E-01
+    49)     2.50000000E-01  0.00000000E+00 -2.50000000E-01
+    50)    -2.50000000E-01  0.00000000E+00  2.50000000E-01
+ prtvol=1, do not print more points.
 
 
  ==== Q-mesh for the screening function ====
  Number of points in the irreducible wedge :     8
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.01563
      2)     2.50000000E-01  0.00000000E+00  0.00000000E+00       0.12500
@@ -612,15 +663,70 @@ meta: {optdriver: 3, gwcalctyp: 0, }
      7)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.04688
      8)    -2.50000000E-01  5.00000000E-01  2.50000000E-01       0.09375
 
- Together with 24 symmetry operations and time-reversal symmetry 
+ Together with 24 symmetry operations and time-reversal symmetry
  yields    64 points in the full Brillouin Zone.
+     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00
+     2)     2.50000000E-01  0.00000000E+00  0.00000000E+00
+     3)     0.00000000E+00  0.00000000E+00  2.50000000E-01
+     4)    -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
+     5)     0.00000000E+00  2.50000000E-01  0.00000000E+00
+     6)    -2.50000000E-01 -0.00000000E+00 -0.00000000E+00
+     7)    -0.00000000E+00 -0.00000000E+00 -2.50000000E-01
+     8)     2.50000000E-01  2.50000000E-01  2.50000000E-01
+     9)    -0.00000000E+00 -2.50000000E-01 -0.00000000E+00
+    10)     5.00000000E-01  0.00000000E+00  0.00000000E+00
+    11)     0.00000000E+00  0.00000000E+00  5.00000000E-01
+    12)    -5.00000000E-01 -5.00000000E-01 -5.00000000E-01
+    13)     0.00000000E+00  5.00000000E-01  0.00000000E+00
+    14)     2.50000000E-01  2.50000000E-01  0.00000000E+00
+    15)    -2.50000000E-01 -2.50000000E-01  0.00000000E+00
+    16)    -2.50000000E-01  0.00000000E+00 -2.50000000E-01
+    17)     2.50000000E-01  0.00000000E+00  2.50000000E-01
+    18)     0.00000000E+00  2.50000000E-01  2.50000000E-01
+    19)     0.00000000E+00 -2.50000000E-01 -2.50000000E-01
+    20)     5.00000000E-01  2.50000000E-01  0.00000000E+00
+    21)    -2.50000000E-01 -2.50000000E-01  2.50000000E-01
+    22)    -5.00000000E-01 -5.00000000E-01 -2.50000000E-01
+    23)     2.50000000E-01  5.00000000E-01  0.00000000E+00
+    24)    -5.00000000E-01 -2.50000000E-01 -5.00000000E-01
+    25)     2.50000000E-01  0.00000000E+00  5.00000000E-01
+    26)     5.00000000E-01  0.00000000E+00  2.50000000E-01
+    27)    -2.50000000E-01  2.50000000E-01 -2.50000000E-01
+    28)     0.00000000E+00  2.50000000E-01  5.00000000E-01
+    29)    -2.50000000E-01 -5.00000000E-01 -5.00000000E-01
+    30)     2.50000000E-01 -2.50000000E-01 -2.50000000E-01
+    31)     0.00000000E+00  5.00000000E-01  2.50000000E-01
+    32)    -5.00000000E-01 -2.50000000E-01 -0.00000000E+00
+    33)     2.50000000E-01  2.50000000E-01 -2.50000000E-01
+    34)     5.00000000E-01  5.00000000E-01  2.50000000E-01
+    35)    -2.50000000E-01 -5.00000000E-01 -0.00000000E+00
+    36)     5.00000000E-01  2.50000000E-01  5.00000000E-01
+    37)    -2.50000000E-01 -0.00000000E+00 -5.00000000E-01
+    38)    -5.00000000E-01 -0.00000000E+00 -2.50000000E-01
+    39)     2.50000000E-01 -2.50000000E-01  2.50000000E-01
+    40)    -0.00000000E+00 -2.50000000E-01 -5.00000000E-01
+    41)     2.50000000E-01  5.00000000E-01  5.00000000E-01
+    42)    -2.50000000E-01  2.50000000E-01  2.50000000E-01
+    43)    -0.00000000E+00 -5.00000000E-01 -2.50000000E-01
+    44)    -2.50000000E-01  2.50000000E-01  0.00000000E+00
+    45)    -2.50000000E-01 -2.50000000E-01 -5.00000000E-01
+    46)     2.50000000E-01  2.50000000E-01  5.00000000E-01
+    47)     2.50000000E-01 -2.50000000E-01  0.00000000E+00
+    48)     2.50000000E-01  5.00000000E-01  2.50000000E-01
+    49)     2.50000000E-01  0.00000000E+00 -2.50000000E-01
+    50)    -2.50000000E-01  0.00000000E+00  2.50000000E-01
+ prtvol=1, do not print more points.
 
 
  setmesh: FFT mesh size selected  =    15x   15x   15
           total number of points  =         3375
 
 
-- screening: taking advantage of time-reversal symmetry 
+ vcoul_init : cutoff-mode = AUXILIARY_FUNCTION
+ q-points for optical limit:   1
+     1)      0.000010    0.000020    0.000030
+
+- screening: taking advantage of time-reversal symmetry
 - Maximum band index for partially occupied states nbvw = 4
 - Remaining bands to be divided among processors   nbcw = 16
 - Number of bands treated by each node ~16
@@ -660,7 +766,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
   dielectric constant without local fields =  10.6526
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     41.90  [%]
-  Heads and wings of the symmetrical epsilon^-1(G,G') 
+  Heads and wings of the symmetrical epsilon^-1(G,G')
 
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
@@ -857,7 +963,7 @@ meta: {optdriver: 4, gwcalctyp: 0, }
  Citation for XC functional:
   J.P.Perdew and Y.Wang, PRB 45, 13244 (1992)
 
- SIGMA: Calculation of the GW corrections 
+ SIGMA: Calculation of the GW corrections
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
@@ -873,7 +979,7 @@ meta: {optdriver: 4, gwcalctyp: 0, }
 
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :     8
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.01563
      2)     2.50000000E-01  0.00000000E+00  0.00000000E+00       0.12500
@@ -884,13 +990,64 @@ meta: {optdriver: 4, gwcalctyp: 0, }
      7)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.04688
      8)    -2.50000000E-01  5.00000000E-01  2.50000000E-01       0.09375
 
- Together with 24 symmetry operations and time-reversal symmetry 
+ Together with 24 symmetry operations and time-reversal symmetry
  yields    64 points in the full Brillouin Zone.
+     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00
+     2)     2.50000000E-01  0.00000000E+00  0.00000000E+00
+     3)     0.00000000E+00  0.00000000E+00  2.50000000E-01
+     4)    -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
+     5)     0.00000000E+00  2.50000000E-01  0.00000000E+00
+     6)    -2.50000000E-01 -0.00000000E+00 -0.00000000E+00
+     7)    -0.00000000E+00 -0.00000000E+00 -2.50000000E-01
+     8)     2.50000000E-01  2.50000000E-01  2.50000000E-01
+     9)    -0.00000000E+00 -2.50000000E-01 -0.00000000E+00
+    10)     5.00000000E-01  0.00000000E+00  0.00000000E+00
+    11)     0.00000000E+00  0.00000000E+00  5.00000000E-01
+    12)    -5.00000000E-01 -5.00000000E-01 -5.00000000E-01
+    13)     0.00000000E+00  5.00000000E-01  0.00000000E+00
+    14)     2.50000000E-01  2.50000000E-01  0.00000000E+00
+    15)    -2.50000000E-01 -2.50000000E-01  0.00000000E+00
+    16)    -2.50000000E-01  0.00000000E+00 -2.50000000E-01
+    17)     2.50000000E-01  0.00000000E+00  2.50000000E-01
+    18)     0.00000000E+00  2.50000000E-01  2.50000000E-01
+    19)     0.00000000E+00 -2.50000000E-01 -2.50000000E-01
+    20)     5.00000000E-01  2.50000000E-01  0.00000000E+00
+    21)    -2.50000000E-01 -2.50000000E-01  2.50000000E-01
+    22)    -5.00000000E-01 -5.00000000E-01 -2.50000000E-01
+    23)     2.50000000E-01  5.00000000E-01  0.00000000E+00
+    24)    -5.00000000E-01 -2.50000000E-01 -5.00000000E-01
+    25)     2.50000000E-01  0.00000000E+00  5.00000000E-01
+    26)     5.00000000E-01  0.00000000E+00  2.50000000E-01
+    27)    -2.50000000E-01  2.50000000E-01 -2.50000000E-01
+    28)     0.00000000E+00  2.50000000E-01  5.00000000E-01
+    29)    -2.50000000E-01 -5.00000000E-01 -5.00000000E-01
+    30)     2.50000000E-01 -2.50000000E-01 -2.50000000E-01
+    31)     0.00000000E+00  5.00000000E-01  2.50000000E-01
+    32)    -5.00000000E-01 -2.50000000E-01 -0.00000000E+00
+    33)     2.50000000E-01  2.50000000E-01 -2.50000000E-01
+    34)     5.00000000E-01  5.00000000E-01  2.50000000E-01
+    35)    -2.50000000E-01 -5.00000000E-01 -0.00000000E+00
+    36)     5.00000000E-01  2.50000000E-01  5.00000000E-01
+    37)    -2.50000000E-01 -0.00000000E+00 -5.00000000E-01
+    38)    -5.00000000E-01 -0.00000000E+00 -2.50000000E-01
+    39)     2.50000000E-01 -2.50000000E-01  2.50000000E-01
+    40)    -0.00000000E+00 -2.50000000E-01 -5.00000000E-01
+    41)     2.50000000E-01  5.00000000E-01  5.00000000E-01
+    42)    -2.50000000E-01  2.50000000E-01  2.50000000E-01
+    43)    -0.00000000E+00 -5.00000000E-01 -2.50000000E-01
+    44)    -2.50000000E-01  2.50000000E-01  0.00000000E+00
+    45)    -2.50000000E-01 -2.50000000E-01 -5.00000000E-01
+    46)     2.50000000E-01  2.50000000E-01  5.00000000E-01
+    47)     2.50000000E-01 -2.50000000E-01  0.00000000E+00
+    48)     2.50000000E-01  5.00000000E-01  2.50000000E-01
+    49)     2.50000000E-01  0.00000000E+00 -2.50000000E-01
+    50)    -2.50000000E-01  0.00000000E+00  2.50000000E-01
+ prtvol=1, do not print more points.
 
 
  ==== Q-mesh for screening function ====
  Number of points in the irreducible wedge :     8
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.01563
      2)     2.50000000E-01  0.00000000E+00  0.00000000E+00       0.12500
@@ -901,10 +1058,65 @@ meta: {optdriver: 4, gwcalctyp: 0, }
      7)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.04688
      8)    -2.50000000E-01  5.00000000E-01  2.50000000E-01       0.09375
 
- Together with 24 symmetry operations and time-reversal symmetry 
+ Together with 24 symmetry operations and time-reversal symmetry
  yields    64 points in the full Brillouin Zone.
+     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00
+     2)     2.50000000E-01  0.00000000E+00  0.00000000E+00
+     3)     0.00000000E+00  0.00000000E+00  2.50000000E-01
+     4)    -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
+     5)     0.00000000E+00  2.50000000E-01  0.00000000E+00
+     6)    -2.50000000E-01 -0.00000000E+00 -0.00000000E+00
+     7)    -0.00000000E+00 -0.00000000E+00 -2.50000000E-01
+     8)     2.50000000E-01  2.50000000E-01  2.50000000E-01
+     9)    -0.00000000E+00 -2.50000000E-01 -0.00000000E+00
+    10)     5.00000000E-01  0.00000000E+00  0.00000000E+00
+    11)     0.00000000E+00  0.00000000E+00  5.00000000E-01
+    12)    -5.00000000E-01 -5.00000000E-01 -5.00000000E-01
+    13)     0.00000000E+00  5.00000000E-01  0.00000000E+00
+    14)     2.50000000E-01  2.50000000E-01  0.00000000E+00
+    15)    -2.50000000E-01 -2.50000000E-01  0.00000000E+00
+    16)    -2.50000000E-01  0.00000000E+00 -2.50000000E-01
+    17)     2.50000000E-01  0.00000000E+00  2.50000000E-01
+    18)     0.00000000E+00  2.50000000E-01  2.50000000E-01
+    19)     0.00000000E+00 -2.50000000E-01 -2.50000000E-01
+    20)     5.00000000E-01  2.50000000E-01  0.00000000E+00
+    21)    -2.50000000E-01 -2.50000000E-01  2.50000000E-01
+    22)    -5.00000000E-01 -5.00000000E-01 -2.50000000E-01
+    23)     2.50000000E-01  5.00000000E-01  0.00000000E+00
+    24)    -5.00000000E-01 -2.50000000E-01 -5.00000000E-01
+    25)     2.50000000E-01  0.00000000E+00  5.00000000E-01
+    26)     5.00000000E-01  0.00000000E+00  2.50000000E-01
+    27)    -2.50000000E-01  2.50000000E-01 -2.50000000E-01
+    28)     0.00000000E+00  2.50000000E-01  5.00000000E-01
+    29)    -2.50000000E-01 -5.00000000E-01 -5.00000000E-01
+    30)     2.50000000E-01 -2.50000000E-01 -2.50000000E-01
+    31)     0.00000000E+00  5.00000000E-01  2.50000000E-01
+    32)    -5.00000000E-01 -2.50000000E-01 -0.00000000E+00
+    33)     2.50000000E-01  2.50000000E-01 -2.50000000E-01
+    34)     5.00000000E-01  5.00000000E-01  2.50000000E-01
+    35)    -2.50000000E-01 -5.00000000E-01 -0.00000000E+00
+    36)     5.00000000E-01  2.50000000E-01  5.00000000E-01
+    37)    -2.50000000E-01 -0.00000000E+00 -5.00000000E-01
+    38)    -5.00000000E-01 -0.00000000E+00 -2.50000000E-01
+    39)     2.50000000E-01 -2.50000000E-01  2.50000000E-01
+    40)    -0.00000000E+00 -2.50000000E-01 -5.00000000E-01
+    41)     2.50000000E-01  5.00000000E-01  5.00000000E-01
+    42)    -2.50000000E-01  2.50000000E-01  2.50000000E-01
+    43)    -0.00000000E+00 -5.00000000E-01 -2.50000000E-01
+    44)    -2.50000000E-01  2.50000000E-01  0.00000000E+00
+    45)    -2.50000000E-01 -2.50000000E-01 -5.00000000E-01
+    46)     2.50000000E-01  2.50000000E-01  5.00000000E-01
+    47)     2.50000000E-01 -2.50000000E-01  0.00000000E+00
+    48)     2.50000000E-01  5.00000000E-01  2.50000000E-01
+    49)     2.50000000E-01  0.00000000E+00 -2.50000000E-01
+    50)    -2.50000000E-01  0.00000000E+00  2.50000000E-01
+ prtvol=1, do not print more points.
 
 
+
+ vcoul_init : cutoff-mode = CRYSTAL
+ q-points for optical limit:   1
+     1)      0.000010    0.000020    0.000030
  setmesh: FFT mesh size selected  =    18x   18x   18
           total number of points  =         5832
 
@@ -1002,7 +1214,7 @@ meta: {optdriver: 4, gwcalctyp: 0, }
  Citation for XC functional:
   J.P.Perdew and Y.Wang, PRB 45, 13244 (1992)
 
- SIGMA: Calculation of the GW corrections 
+ SIGMA: Calculation of the GW corrections
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
@@ -1016,8 +1228,8 @@ meta: {optdriver: 4, gwcalctyp: 0, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1034,8 +1246,8 @@ meta: {optdriver: 4, gwcalctyp: 0, }
              1    1.849886
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1053,7 +1265,7 @@ meta: {optdriver: 4, gwcalctyp: 0, }
 
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :     8
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.01563
      2)     2.50000000E-01  0.00000000E+00  0.00000000E+00       0.12500
@@ -1064,13 +1276,64 @@ meta: {optdriver: 4, gwcalctyp: 0, }
      7)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.04688
      8)    -2.50000000E-01  5.00000000E-01  2.50000000E-01       0.09375
 
- Together with 24 symmetry operations and time-reversal symmetry 
+ Together with 24 symmetry operations and time-reversal symmetry
  yields    64 points in the full Brillouin Zone.
+     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00
+     2)     2.50000000E-01  0.00000000E+00  0.00000000E+00
+     3)     0.00000000E+00  0.00000000E+00  2.50000000E-01
+     4)    -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
+     5)     0.00000000E+00  2.50000000E-01  0.00000000E+00
+     6)    -2.50000000E-01 -0.00000000E+00 -0.00000000E+00
+     7)    -0.00000000E+00 -0.00000000E+00 -2.50000000E-01
+     8)     2.50000000E-01  2.50000000E-01  2.50000000E-01
+     9)    -0.00000000E+00 -2.50000000E-01 -0.00000000E+00
+    10)     5.00000000E-01  0.00000000E+00  0.00000000E+00
+    11)     0.00000000E+00  0.00000000E+00  5.00000000E-01
+    12)    -5.00000000E-01 -5.00000000E-01 -5.00000000E-01
+    13)     0.00000000E+00  5.00000000E-01  0.00000000E+00
+    14)     2.50000000E-01  2.50000000E-01  0.00000000E+00
+    15)    -2.50000000E-01 -2.50000000E-01  0.00000000E+00
+    16)    -2.50000000E-01  0.00000000E+00 -2.50000000E-01
+    17)     2.50000000E-01  0.00000000E+00  2.50000000E-01
+    18)     0.00000000E+00  2.50000000E-01  2.50000000E-01
+    19)     0.00000000E+00 -2.50000000E-01 -2.50000000E-01
+    20)     5.00000000E-01  2.50000000E-01  0.00000000E+00
+    21)    -2.50000000E-01 -2.50000000E-01  2.50000000E-01
+    22)    -5.00000000E-01 -5.00000000E-01 -2.50000000E-01
+    23)     2.50000000E-01  5.00000000E-01  0.00000000E+00
+    24)    -5.00000000E-01 -2.50000000E-01 -5.00000000E-01
+    25)     2.50000000E-01  0.00000000E+00  5.00000000E-01
+    26)     5.00000000E-01  0.00000000E+00  2.50000000E-01
+    27)    -2.50000000E-01  2.50000000E-01 -2.50000000E-01
+    28)     0.00000000E+00  2.50000000E-01  5.00000000E-01
+    29)    -2.50000000E-01 -5.00000000E-01 -5.00000000E-01
+    30)     2.50000000E-01 -2.50000000E-01 -2.50000000E-01
+    31)     0.00000000E+00  5.00000000E-01  2.50000000E-01
+    32)    -5.00000000E-01 -2.50000000E-01 -0.00000000E+00
+    33)     2.50000000E-01  2.50000000E-01 -2.50000000E-01
+    34)     5.00000000E-01  5.00000000E-01  2.50000000E-01
+    35)    -2.50000000E-01 -5.00000000E-01 -0.00000000E+00
+    36)     5.00000000E-01  2.50000000E-01  5.00000000E-01
+    37)    -2.50000000E-01 -0.00000000E+00 -5.00000000E-01
+    38)    -5.00000000E-01 -0.00000000E+00 -2.50000000E-01
+    39)     2.50000000E-01 -2.50000000E-01  2.50000000E-01
+    40)    -0.00000000E+00 -2.50000000E-01 -5.00000000E-01
+    41)     2.50000000E-01  5.00000000E-01  5.00000000E-01
+    42)    -2.50000000E-01  2.50000000E-01  2.50000000E-01
+    43)    -0.00000000E+00 -5.00000000E-01 -2.50000000E-01
+    44)    -2.50000000E-01  2.50000000E-01  0.00000000E+00
+    45)    -2.50000000E-01 -2.50000000E-01 -5.00000000E-01
+    46)     2.50000000E-01  2.50000000E-01  5.00000000E-01
+    47)     2.50000000E-01 -2.50000000E-01  0.00000000E+00
+    48)     2.50000000E-01  5.00000000E-01  2.50000000E-01
+    49)     2.50000000E-01  0.00000000E+00 -2.50000000E-01
+    50)    -2.50000000E-01  0.00000000E+00  2.50000000E-01
+ prtvol=1, do not print more points.
 
 
  ==== Q-mesh for screening function ====
  Number of points in the irreducible wedge :     8
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.01563
      2)     2.50000000E-01  0.00000000E+00  0.00000000E+00       0.12500
@@ -1081,10 +1344,65 @@ meta: {optdriver: 4, gwcalctyp: 0, }
      7)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.04688
      8)    -2.50000000E-01  5.00000000E-01  2.50000000E-01       0.09375
 
- Together with 24 symmetry operations and time-reversal symmetry 
+ Together with 24 symmetry operations and time-reversal symmetry
  yields    64 points in the full Brillouin Zone.
+     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00
+     2)     2.50000000E-01  0.00000000E+00  0.00000000E+00
+     3)     0.00000000E+00  0.00000000E+00  2.50000000E-01
+     4)    -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
+     5)     0.00000000E+00  2.50000000E-01  0.00000000E+00
+     6)    -2.50000000E-01 -0.00000000E+00 -0.00000000E+00
+     7)    -0.00000000E+00 -0.00000000E+00 -2.50000000E-01
+     8)     2.50000000E-01  2.50000000E-01  2.50000000E-01
+     9)    -0.00000000E+00 -2.50000000E-01 -0.00000000E+00
+    10)     5.00000000E-01  0.00000000E+00  0.00000000E+00
+    11)     0.00000000E+00  0.00000000E+00  5.00000000E-01
+    12)    -5.00000000E-01 -5.00000000E-01 -5.00000000E-01
+    13)     0.00000000E+00  5.00000000E-01  0.00000000E+00
+    14)     2.50000000E-01  2.50000000E-01  0.00000000E+00
+    15)    -2.50000000E-01 -2.50000000E-01  0.00000000E+00
+    16)    -2.50000000E-01  0.00000000E+00 -2.50000000E-01
+    17)     2.50000000E-01  0.00000000E+00  2.50000000E-01
+    18)     0.00000000E+00  2.50000000E-01  2.50000000E-01
+    19)     0.00000000E+00 -2.50000000E-01 -2.50000000E-01
+    20)     5.00000000E-01  2.50000000E-01  0.00000000E+00
+    21)    -2.50000000E-01 -2.50000000E-01  2.50000000E-01
+    22)    -5.00000000E-01 -5.00000000E-01 -2.50000000E-01
+    23)     2.50000000E-01  5.00000000E-01  0.00000000E+00
+    24)    -5.00000000E-01 -2.50000000E-01 -5.00000000E-01
+    25)     2.50000000E-01  0.00000000E+00  5.00000000E-01
+    26)     5.00000000E-01  0.00000000E+00  2.50000000E-01
+    27)    -2.50000000E-01  2.50000000E-01 -2.50000000E-01
+    28)     0.00000000E+00  2.50000000E-01  5.00000000E-01
+    29)    -2.50000000E-01 -5.00000000E-01 -5.00000000E-01
+    30)     2.50000000E-01 -2.50000000E-01 -2.50000000E-01
+    31)     0.00000000E+00  5.00000000E-01  2.50000000E-01
+    32)    -5.00000000E-01 -2.50000000E-01 -0.00000000E+00
+    33)     2.50000000E-01  2.50000000E-01 -2.50000000E-01
+    34)     5.00000000E-01  5.00000000E-01  2.50000000E-01
+    35)    -2.50000000E-01 -5.00000000E-01 -0.00000000E+00
+    36)     5.00000000E-01  2.50000000E-01  5.00000000E-01
+    37)    -2.50000000E-01 -0.00000000E+00 -5.00000000E-01
+    38)    -5.00000000E-01 -0.00000000E+00 -2.50000000E-01
+    39)     2.50000000E-01 -2.50000000E-01  2.50000000E-01
+    40)    -0.00000000E+00 -2.50000000E-01 -5.00000000E-01
+    41)     2.50000000E-01  5.00000000E-01  5.00000000E-01
+    42)    -2.50000000E-01  2.50000000E-01  2.50000000E-01
+    43)    -0.00000000E+00 -5.00000000E-01 -2.50000000E-01
+    44)    -2.50000000E-01  2.50000000E-01  0.00000000E+00
+    45)    -2.50000000E-01 -2.50000000E-01 -5.00000000E-01
+    46)     2.50000000E-01  2.50000000E-01  5.00000000E-01
+    47)     2.50000000E-01 -2.50000000E-01  0.00000000E+00
+    48)     2.50000000E-01  5.00000000E-01  2.50000000E-01
+    49)     2.50000000E-01  0.00000000E+00 -2.50000000E-01
+    50)    -2.50000000E-01  0.00000000E+00  2.50000000E-01
+ prtvol=1, do not print more points.
 
 
+
+ vcoul_init : cutoff-mode = CRYSTAL
+ q-points for optical limit:   1
+     1)      0.000010    0.000020    0.000030
  setmesh: FFT mesh size selected  =    15x   15x   15
           total number of points  =         3375
 
@@ -1180,7 +1498,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
  Citation for XC functional:
   J.P.Perdew and Y.Wang, PRB 45, 13244 (1992)
 
- SCREENING: Calculation of the susceptibility and dielectric matrices 
+ SCREENING: Calculation of the susceptibility and dielectric matrices
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
@@ -1194,8 +1512,8 @@ meta: {optdriver: 3, gwcalctyp: 0, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1212,8 +1530,8 @@ meta: {optdriver: 3, gwcalctyp: 0, }
              1    1.849886
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1231,7 +1549,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :     8
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.01563
      2)     2.50000000E-01  0.00000000E+00  0.00000000E+00       0.12500
@@ -1242,13 +1560,64 @@ meta: {optdriver: 3, gwcalctyp: 0, }
      7)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.04688
      8)    -2.50000000E-01  5.00000000E-01  2.50000000E-01       0.09375
 
- Together with 24 symmetry operations and time-reversal symmetry 
+ Together with 24 symmetry operations and time-reversal symmetry
  yields    64 points in the full Brillouin Zone.
+     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00
+     2)     2.50000000E-01  0.00000000E+00  0.00000000E+00
+     3)     0.00000000E+00  0.00000000E+00  2.50000000E-01
+     4)    -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
+     5)     0.00000000E+00  2.50000000E-01  0.00000000E+00
+     6)    -2.50000000E-01 -0.00000000E+00 -0.00000000E+00
+     7)    -0.00000000E+00 -0.00000000E+00 -2.50000000E-01
+     8)     2.50000000E-01  2.50000000E-01  2.50000000E-01
+     9)    -0.00000000E+00 -2.50000000E-01 -0.00000000E+00
+    10)     5.00000000E-01  0.00000000E+00  0.00000000E+00
+    11)     0.00000000E+00  0.00000000E+00  5.00000000E-01
+    12)    -5.00000000E-01 -5.00000000E-01 -5.00000000E-01
+    13)     0.00000000E+00  5.00000000E-01  0.00000000E+00
+    14)     2.50000000E-01  2.50000000E-01  0.00000000E+00
+    15)    -2.50000000E-01 -2.50000000E-01  0.00000000E+00
+    16)    -2.50000000E-01  0.00000000E+00 -2.50000000E-01
+    17)     2.50000000E-01  0.00000000E+00  2.50000000E-01
+    18)     0.00000000E+00  2.50000000E-01  2.50000000E-01
+    19)     0.00000000E+00 -2.50000000E-01 -2.50000000E-01
+    20)     5.00000000E-01  2.50000000E-01  0.00000000E+00
+    21)    -2.50000000E-01 -2.50000000E-01  2.50000000E-01
+    22)    -5.00000000E-01 -5.00000000E-01 -2.50000000E-01
+    23)     2.50000000E-01  5.00000000E-01  0.00000000E+00
+    24)    -5.00000000E-01 -2.50000000E-01 -5.00000000E-01
+    25)     2.50000000E-01  0.00000000E+00  5.00000000E-01
+    26)     5.00000000E-01  0.00000000E+00  2.50000000E-01
+    27)    -2.50000000E-01  2.50000000E-01 -2.50000000E-01
+    28)     0.00000000E+00  2.50000000E-01  5.00000000E-01
+    29)    -2.50000000E-01 -5.00000000E-01 -5.00000000E-01
+    30)     2.50000000E-01 -2.50000000E-01 -2.50000000E-01
+    31)     0.00000000E+00  5.00000000E-01  2.50000000E-01
+    32)    -5.00000000E-01 -2.50000000E-01 -0.00000000E+00
+    33)     2.50000000E-01  2.50000000E-01 -2.50000000E-01
+    34)     5.00000000E-01  5.00000000E-01  2.50000000E-01
+    35)    -2.50000000E-01 -5.00000000E-01 -0.00000000E+00
+    36)     5.00000000E-01  2.50000000E-01  5.00000000E-01
+    37)    -2.50000000E-01 -0.00000000E+00 -5.00000000E-01
+    38)    -5.00000000E-01 -0.00000000E+00 -2.50000000E-01
+    39)     2.50000000E-01 -2.50000000E-01  2.50000000E-01
+    40)    -0.00000000E+00 -2.50000000E-01 -5.00000000E-01
+    41)     2.50000000E-01  5.00000000E-01  5.00000000E-01
+    42)    -2.50000000E-01  2.50000000E-01  2.50000000E-01
+    43)    -0.00000000E+00 -5.00000000E-01 -2.50000000E-01
+    44)    -2.50000000E-01  2.50000000E-01  0.00000000E+00
+    45)    -2.50000000E-01 -2.50000000E-01 -5.00000000E-01
+    46)     2.50000000E-01  2.50000000E-01  5.00000000E-01
+    47)     2.50000000E-01 -2.50000000E-01  0.00000000E+00
+    48)     2.50000000E-01  5.00000000E-01  2.50000000E-01
+    49)     2.50000000E-01  0.00000000E+00 -2.50000000E-01
+    50)    -2.50000000E-01  0.00000000E+00  2.50000000E-01
+ prtvol=1, do not print more points.
 
 
  ==== Q-mesh for the screening function ====
  Number of points in the irreducible wedge :     8
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.01563
      2)     2.50000000E-01  0.00000000E+00  0.00000000E+00       0.12500
@@ -1259,15 +1628,70 @@ meta: {optdriver: 3, gwcalctyp: 0, }
      7)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.04688
      8)    -2.50000000E-01  5.00000000E-01  2.50000000E-01       0.09375
 
- Together with 24 symmetry operations and time-reversal symmetry 
+ Together with 24 symmetry operations and time-reversal symmetry
  yields    64 points in the full Brillouin Zone.
+     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00
+     2)     2.50000000E-01  0.00000000E+00  0.00000000E+00
+     3)     0.00000000E+00  0.00000000E+00  2.50000000E-01
+     4)    -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
+     5)     0.00000000E+00  2.50000000E-01  0.00000000E+00
+     6)    -2.50000000E-01 -0.00000000E+00 -0.00000000E+00
+     7)    -0.00000000E+00 -0.00000000E+00 -2.50000000E-01
+     8)     2.50000000E-01  2.50000000E-01  2.50000000E-01
+     9)    -0.00000000E+00 -2.50000000E-01 -0.00000000E+00
+    10)     5.00000000E-01  0.00000000E+00  0.00000000E+00
+    11)     0.00000000E+00  0.00000000E+00  5.00000000E-01
+    12)    -5.00000000E-01 -5.00000000E-01 -5.00000000E-01
+    13)     0.00000000E+00  5.00000000E-01  0.00000000E+00
+    14)     2.50000000E-01  2.50000000E-01  0.00000000E+00
+    15)    -2.50000000E-01 -2.50000000E-01  0.00000000E+00
+    16)    -2.50000000E-01  0.00000000E+00 -2.50000000E-01
+    17)     2.50000000E-01  0.00000000E+00  2.50000000E-01
+    18)     0.00000000E+00  2.50000000E-01  2.50000000E-01
+    19)     0.00000000E+00 -2.50000000E-01 -2.50000000E-01
+    20)     5.00000000E-01  2.50000000E-01  0.00000000E+00
+    21)    -2.50000000E-01 -2.50000000E-01  2.50000000E-01
+    22)    -5.00000000E-01 -5.00000000E-01 -2.50000000E-01
+    23)     2.50000000E-01  5.00000000E-01  0.00000000E+00
+    24)    -5.00000000E-01 -2.50000000E-01 -5.00000000E-01
+    25)     2.50000000E-01  0.00000000E+00  5.00000000E-01
+    26)     5.00000000E-01  0.00000000E+00  2.50000000E-01
+    27)    -2.50000000E-01  2.50000000E-01 -2.50000000E-01
+    28)     0.00000000E+00  2.50000000E-01  5.00000000E-01
+    29)    -2.50000000E-01 -5.00000000E-01 -5.00000000E-01
+    30)     2.50000000E-01 -2.50000000E-01 -2.50000000E-01
+    31)     0.00000000E+00  5.00000000E-01  2.50000000E-01
+    32)    -5.00000000E-01 -2.50000000E-01 -0.00000000E+00
+    33)     2.50000000E-01  2.50000000E-01 -2.50000000E-01
+    34)     5.00000000E-01  5.00000000E-01  2.50000000E-01
+    35)    -2.50000000E-01 -5.00000000E-01 -0.00000000E+00
+    36)     5.00000000E-01  2.50000000E-01  5.00000000E-01
+    37)    -2.50000000E-01 -0.00000000E+00 -5.00000000E-01
+    38)    -5.00000000E-01 -0.00000000E+00 -2.50000000E-01
+    39)     2.50000000E-01 -2.50000000E-01  2.50000000E-01
+    40)    -0.00000000E+00 -2.50000000E-01 -5.00000000E-01
+    41)     2.50000000E-01  5.00000000E-01  5.00000000E-01
+    42)    -2.50000000E-01  2.50000000E-01  2.50000000E-01
+    43)    -0.00000000E+00 -5.00000000E-01 -2.50000000E-01
+    44)    -2.50000000E-01  2.50000000E-01  0.00000000E+00
+    45)    -2.50000000E-01 -2.50000000E-01 -5.00000000E-01
+    46)     2.50000000E-01  2.50000000E-01  5.00000000E-01
+    47)     2.50000000E-01 -2.50000000E-01  0.00000000E+00
+    48)     2.50000000E-01  5.00000000E-01  2.50000000E-01
+    49)     2.50000000E-01  0.00000000E+00 -2.50000000E-01
+    50)    -2.50000000E-01  0.00000000E+00  2.50000000E-01
+ prtvol=1, do not print more points.
 
 
  setmesh: FFT mesh size selected  =    15x   15x   15
           total number of points  =         3375
 
 
-- screening: taking advantage of time-reversal symmetry 
+ vcoul_init : cutoff-mode = AUXILIARY_FUNCTION
+ q-points for optical limit:   1
+     1)      0.000010    0.000020    0.000030
+
+- screening: taking advantage of time-reversal symmetry
 - Maximum band index for partially occupied states nbvw = 4
 - Remaining bands to be divided among processors   nbcw = 16
 - Number of bands treated by each node ~16
@@ -1307,7 +1731,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
   dielectric constant without local fields =  10.6526
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :    103.13  [%]
-  Heads and wings of the symmetrical epsilon^-1(G,G') 
+  Heads and wings of the symmetrical epsilon^-1(G,G')
 
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
@@ -1504,7 +1928,7 @@ meta: {optdriver: 4, gwcalctyp: 0, }
  Citation for XC functional:
   J.P.Perdew and Y.Wang, PRB 45, 13244 (1992)
 
- SIGMA: Calculation of the GW corrections 
+ SIGMA: Calculation of the GW corrections
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
@@ -1520,7 +1944,7 @@ meta: {optdriver: 4, gwcalctyp: 0, }
 
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :     8
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.01563
      2)     2.50000000E-01  0.00000000E+00  0.00000000E+00       0.12500
@@ -1531,13 +1955,64 @@ meta: {optdriver: 4, gwcalctyp: 0, }
      7)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.04688
      8)    -2.50000000E-01  5.00000000E-01  2.50000000E-01       0.09375
 
- Together with 24 symmetry operations and time-reversal symmetry 
+ Together with 24 symmetry operations and time-reversal symmetry
  yields    64 points in the full Brillouin Zone.
+     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00
+     2)     2.50000000E-01  0.00000000E+00  0.00000000E+00
+     3)     0.00000000E+00  0.00000000E+00  2.50000000E-01
+     4)    -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
+     5)     0.00000000E+00  2.50000000E-01  0.00000000E+00
+     6)    -2.50000000E-01 -0.00000000E+00 -0.00000000E+00
+     7)    -0.00000000E+00 -0.00000000E+00 -2.50000000E-01
+     8)     2.50000000E-01  2.50000000E-01  2.50000000E-01
+     9)    -0.00000000E+00 -2.50000000E-01 -0.00000000E+00
+    10)     5.00000000E-01  0.00000000E+00  0.00000000E+00
+    11)     0.00000000E+00  0.00000000E+00  5.00000000E-01
+    12)    -5.00000000E-01 -5.00000000E-01 -5.00000000E-01
+    13)     0.00000000E+00  5.00000000E-01  0.00000000E+00
+    14)     2.50000000E-01  2.50000000E-01  0.00000000E+00
+    15)    -2.50000000E-01 -2.50000000E-01  0.00000000E+00
+    16)    -2.50000000E-01  0.00000000E+00 -2.50000000E-01
+    17)     2.50000000E-01  0.00000000E+00  2.50000000E-01
+    18)     0.00000000E+00  2.50000000E-01  2.50000000E-01
+    19)     0.00000000E+00 -2.50000000E-01 -2.50000000E-01
+    20)     5.00000000E-01  2.50000000E-01  0.00000000E+00
+    21)    -2.50000000E-01 -2.50000000E-01  2.50000000E-01
+    22)    -5.00000000E-01 -5.00000000E-01 -2.50000000E-01
+    23)     2.50000000E-01  5.00000000E-01  0.00000000E+00
+    24)    -5.00000000E-01 -2.50000000E-01 -5.00000000E-01
+    25)     2.50000000E-01  0.00000000E+00  5.00000000E-01
+    26)     5.00000000E-01  0.00000000E+00  2.50000000E-01
+    27)    -2.50000000E-01  2.50000000E-01 -2.50000000E-01
+    28)     0.00000000E+00  2.50000000E-01  5.00000000E-01
+    29)    -2.50000000E-01 -5.00000000E-01 -5.00000000E-01
+    30)     2.50000000E-01 -2.50000000E-01 -2.50000000E-01
+    31)     0.00000000E+00  5.00000000E-01  2.50000000E-01
+    32)    -5.00000000E-01 -2.50000000E-01 -0.00000000E+00
+    33)     2.50000000E-01  2.50000000E-01 -2.50000000E-01
+    34)     5.00000000E-01  5.00000000E-01  2.50000000E-01
+    35)    -2.50000000E-01 -5.00000000E-01 -0.00000000E+00
+    36)     5.00000000E-01  2.50000000E-01  5.00000000E-01
+    37)    -2.50000000E-01 -0.00000000E+00 -5.00000000E-01
+    38)    -5.00000000E-01 -0.00000000E+00 -2.50000000E-01
+    39)     2.50000000E-01 -2.50000000E-01  2.50000000E-01
+    40)    -0.00000000E+00 -2.50000000E-01 -5.00000000E-01
+    41)     2.50000000E-01  5.00000000E-01  5.00000000E-01
+    42)    -2.50000000E-01  2.50000000E-01  2.50000000E-01
+    43)    -0.00000000E+00 -5.00000000E-01 -2.50000000E-01
+    44)    -2.50000000E-01  2.50000000E-01  0.00000000E+00
+    45)    -2.50000000E-01 -2.50000000E-01 -5.00000000E-01
+    46)     2.50000000E-01  2.50000000E-01  5.00000000E-01
+    47)     2.50000000E-01 -2.50000000E-01  0.00000000E+00
+    48)     2.50000000E-01  5.00000000E-01  2.50000000E-01
+    49)     2.50000000E-01  0.00000000E+00 -2.50000000E-01
+    50)    -2.50000000E-01  0.00000000E+00  2.50000000E-01
+ prtvol=1, do not print more points.
 
 
  ==== Q-mesh for screening function ====
  Number of points in the irreducible wedge :     8
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.01563
      2)     2.50000000E-01  0.00000000E+00  0.00000000E+00       0.12500
@@ -1548,10 +2023,65 @@ meta: {optdriver: 4, gwcalctyp: 0, }
      7)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.04688
      8)    -2.50000000E-01  5.00000000E-01  2.50000000E-01       0.09375
 
- Together with 24 symmetry operations and time-reversal symmetry 
+ Together with 24 symmetry operations and time-reversal symmetry
  yields    64 points in the full Brillouin Zone.
+     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00
+     2)     2.50000000E-01  0.00000000E+00  0.00000000E+00
+     3)     0.00000000E+00  0.00000000E+00  2.50000000E-01
+     4)    -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
+     5)     0.00000000E+00  2.50000000E-01  0.00000000E+00
+     6)    -2.50000000E-01 -0.00000000E+00 -0.00000000E+00
+     7)    -0.00000000E+00 -0.00000000E+00 -2.50000000E-01
+     8)     2.50000000E-01  2.50000000E-01  2.50000000E-01
+     9)    -0.00000000E+00 -2.50000000E-01 -0.00000000E+00
+    10)     5.00000000E-01  0.00000000E+00  0.00000000E+00
+    11)     0.00000000E+00  0.00000000E+00  5.00000000E-01
+    12)    -5.00000000E-01 -5.00000000E-01 -5.00000000E-01
+    13)     0.00000000E+00  5.00000000E-01  0.00000000E+00
+    14)     2.50000000E-01  2.50000000E-01  0.00000000E+00
+    15)    -2.50000000E-01 -2.50000000E-01  0.00000000E+00
+    16)    -2.50000000E-01  0.00000000E+00 -2.50000000E-01
+    17)     2.50000000E-01  0.00000000E+00  2.50000000E-01
+    18)     0.00000000E+00  2.50000000E-01  2.50000000E-01
+    19)     0.00000000E+00 -2.50000000E-01 -2.50000000E-01
+    20)     5.00000000E-01  2.50000000E-01  0.00000000E+00
+    21)    -2.50000000E-01 -2.50000000E-01  2.50000000E-01
+    22)    -5.00000000E-01 -5.00000000E-01 -2.50000000E-01
+    23)     2.50000000E-01  5.00000000E-01  0.00000000E+00
+    24)    -5.00000000E-01 -2.50000000E-01 -5.00000000E-01
+    25)     2.50000000E-01  0.00000000E+00  5.00000000E-01
+    26)     5.00000000E-01  0.00000000E+00  2.50000000E-01
+    27)    -2.50000000E-01  2.50000000E-01 -2.50000000E-01
+    28)     0.00000000E+00  2.50000000E-01  5.00000000E-01
+    29)    -2.50000000E-01 -5.00000000E-01 -5.00000000E-01
+    30)     2.50000000E-01 -2.50000000E-01 -2.50000000E-01
+    31)     0.00000000E+00  5.00000000E-01  2.50000000E-01
+    32)    -5.00000000E-01 -2.50000000E-01 -0.00000000E+00
+    33)     2.50000000E-01  2.50000000E-01 -2.50000000E-01
+    34)     5.00000000E-01  5.00000000E-01  2.50000000E-01
+    35)    -2.50000000E-01 -5.00000000E-01 -0.00000000E+00
+    36)     5.00000000E-01  2.50000000E-01  5.00000000E-01
+    37)    -2.50000000E-01 -0.00000000E+00 -5.00000000E-01
+    38)    -5.00000000E-01 -0.00000000E+00 -2.50000000E-01
+    39)     2.50000000E-01 -2.50000000E-01  2.50000000E-01
+    40)    -0.00000000E+00 -2.50000000E-01 -5.00000000E-01
+    41)     2.50000000E-01  5.00000000E-01  5.00000000E-01
+    42)    -2.50000000E-01  2.50000000E-01  2.50000000E-01
+    43)    -0.00000000E+00 -5.00000000E-01 -2.50000000E-01
+    44)    -2.50000000E-01  2.50000000E-01  0.00000000E+00
+    45)    -2.50000000E-01 -2.50000000E-01 -5.00000000E-01
+    46)     2.50000000E-01  2.50000000E-01  5.00000000E-01
+    47)     2.50000000E-01 -2.50000000E-01  0.00000000E+00
+    48)     2.50000000E-01  5.00000000E-01  2.50000000E-01
+    49)     2.50000000E-01  0.00000000E+00 -2.50000000E-01
+    50)    -2.50000000E-01  0.00000000E+00  2.50000000E-01
+ prtvol=1, do not print more points.
 
 
+
+ vcoul_init : cutoff-mode = CRYSTAL
+ q-points for optical limit:   1
+     1)      0.000010    0.000020    0.000030
  setmesh: FFT mesh size selected  =    18x   18x   18
           total number of points  =         5832
 
@@ -1629,7 +2159,7 @@ data: !SigmaeeData |
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      8.1550000000E+00  8.1550000000E+00  8.1550000000E+00 Bohr
               amu      2.80855000E+01  1.20110000E+01
@@ -1858,7 +2388,7 @@ P           mkmem           8
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -1870,12 +2400,12 @@ P           mkmem           8
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -1893,7 +2423,7 @@ P           mkmem           8
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -1908,7 +2438,7 @@ P           mkmem           8
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009

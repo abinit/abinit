@@ -6,7 +6,7 @@
 !! module for excitonic hamiltonian for Haydock
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2024 ABINIT group (M.Giantomassi, Y. Gillet)
+!!  Copyright (C) 2014-2025 ABINIT group (M.Giantomassi, Y. Gillet)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -33,7 +33,7 @@ MODULE m_hexc
 
  use m_time,              only : timab
  use m_fstrings,          only : indent, strcat, sjoin, itoa
- use defs_datatypes,      only : ebands_t, pseudopotential_type
+ use defs_datatypes,      only : pseudopotential_type
  use m_hide_blas,         only : xdotc, xgemv
  use m_numeric_tools,     only : print_arr, symmetrize, hermitianize, wrap2_pmhalf
  use m_crystal,           only : crystal_t
@@ -44,7 +44,8 @@ MODULE m_hexc
  use m_pawtab,            only : pawtab_type
  use m_vcoul,             only : vcoul_t
  use m_bseinterp,         only : interpolator_t, interpolator_init, interpolator_normalize, &
-&                                interpolator_free, int_alloc_work, int_free_work
+                                 interpolator_free, int_alloc_work, int_free_work
+ use m_ebands,            only : ebands_t
 
  implicit none
 
@@ -304,19 +305,19 @@ subroutine hexc_init(hexc, BSp, BS_files, Cryst, Kmesh_coarse, Wfd_coarse, KS_BS
    ABI_MALLOC_OR_DIE(test,(hsize,hexc%my_t1:hexc%my_t2), ierr)
    diago_is_real=(.not.BSp%have_complex_ene)
    call exc_read_rcblock(hreso_fname,Bsp,is_resonant,diago_is_real,Bsp%nsppol,Bsp%nreh,hsize,&
-&     hexc%my_t1,hexc%my_t2,test,.FALSE.,comm)
+                         hexc%my_t1,hexc%my_t2,test,.FALSE.,comm)
    test = test-hexc%hreso
    write(std_out,*)"DEBUG: Diff MPI-IO - Fortran ",MAXVAL(ABS(test))
    max_r=20; max_c=10
    write(std_out,*)" **** Testing resonant block **** "
-   call print_arr(test,max_r=max_r,max_c=max_c,unit=std_out)
+   call print_arr([std_out], test,max_r=max_r,max_c=max_c)
    if (BSp%nsppol==2) then
      write(std_out,*)" **** D down down ****"
-     call print_arr(test(hsize/2+1:,hsize/2+1:),max_r=max_r,max_c=max_c,unit=std_out)
+     call print_arr([std_out], test(hsize/2+1:,hsize/2+1:),max_r=max_r,max_c=max_c)
      write(std_out,*)" **** V up down ****"
-     call print_arr(test(1:hsize/2,hsize/2+1:),max_r=max_r,max_c=max_c,unit=std_out)
+     call print_arr([std_out], test(1:hsize/2,hsize/2+1:),max_r=max_r,max_c=max_c)
      write(std_out,*)" **** V down up ****"
-     call print_arr(test(hsize/2+1:,1:hsize/2),max_r=max_r,max_c=max_c,unit=std_out)
+     call print_arr([std_out], test(hsize/2+1:,1:hsize/2),max_r=max_r,max_c=max_c)
    end if
    ABI_FREE(test)
  end if
@@ -335,27 +336,26 @@ subroutine hexc_init(hexc, BSp, BS_files, Cryst, Kmesh_coarse, Wfd_coarse, KS_BS
    ABI_MALLOC_OR_DIE(hexc%hcoup,(hsize,hexc%my_t1:hexc%my_t2), ierr)
    is_resonant=.FALSE.; diago_is_real=.FALSE.
    call exc_read_rcblock(hcoup_fname,Bsp,is_resonant,diago_is_real,BSp%nsppol,BSp%nreh,hsize,&
-&     hexc%my_t1,hexc%my_t2,hexc%hcoup,use_mpio,comm)
+                         hexc%my_t1,hexc%my_t2,hexc%hcoup,use_mpio,comm)
    !call symmetrize(hcoup,"ALL")
 
    if (use_mpio) then
      ABI_WARNING("Testing MPI-IO routines")
      ABI_MALLOC_OR_DIE(test,(hsize,hexc%my_t1:hexc%my_t2), ierr)
      diago_is_real=.FALSE.
-     call exc_read_rcblock(hcoup_fname,Bsp,is_resonant,diago_is_real,BSp%nsppol,Bsp%nreh,hsize,&
-&       hexc%my_t1,hexc%my_t2,test,.FALSE.,comm)
+     call exc_read_rcblock(hcoup_fname,Bsp,is_resonant,diago_is_real,BSp%nsppol,Bsp%nreh,hsize,hexc%my_t1,hexc%my_t2,test,.FALSE.,comm)
      test = test-hexc%hcoup
      write(std_out,*)"DEBUG: Diff MPI-IO - Fortran ",MAXVAL(ABS(test))
      max_r=20; max_c=10
      write(std_out,*)" **** Testing coupling block **** "
-     call print_arr(test,max_r=max_r,max_c=max_c,unit=std_out)
+     call print_arr([std_out], test,max_r=max_r,max_c=max_c)
      if (BSp%nsppol==2) then
        write(std_out,*)" **** D down down ****"
-       call print_arr(test(hsize/2+1:,hsize/2+1:),max_r=max_r,max_c=max_c,unit=std_out)
+       call print_arr([std_out], test(hsize/2+1:,hsize/2+1:),max_r=max_r,max_c=max_c)
        write(std_out,*)" **** V up down ****"
-       call print_arr(test(1:hsize/2,hsize/2+1:),max_r=max_r,max_c=max_c,unit=std_out)
+       call print_arr([std_out], test(1:hsize/2,hsize/2+1:),max_r=max_r,max_c=max_c)
        write(std_out,*)" **** V down up ****"
-       call print_arr(test(hsize/2+1:,1:hsize/2),max_r=max_r,max_c=max_c,unit=std_out)
+       call print_arr([std_out], test(hsize/2+1:,1:hsize/2),max_r=max_r,max_c=max_c)
      end if
      ABI_FREE(test)
    end if
@@ -1384,15 +1384,16 @@ subroutine hexc_interp_matmul(BSp,hsize_coarse,hsize_dense,hmat,phi,hphi,grid,&
 
  ! Second step : Multiplication by hmat
  do ineighbour = 1,interpolator%nvert
+   tmp_array2 = factor*hmat(:,interpolator%corresp(:,ineighbour,1)) ! 1 is for spin
    if(use_blas) then
      !call xgemv('N',hsize_coarse,hsize_coarse,cone,factor*(hmat(:,:,ineighbour)),hsize_coarse,allp(:,ineighbour),1,czero,tmp_array,1)
      !tmp_array2 = hmat(:,:,ineighbour)
-     tmp_array2 = hmat(:,interpolator%corresp(:,ineighbour,1)) ! 1 is for spin
-     tmp_array2 = factor*tmp_array2
+     !tmp_array2 = factor*tmp_array2
      call xgemv('N',hsize_coarse,hsize_coarse,cone,tmp_array2,hsize_coarse,allp(:,ineighbour),1,czero,tmp_array,1)
      test = test + tmp_array
    else
-     test = test+MATMUL(factor*(hmat(:,interpolator%corresp(:,ineighbour,1))),allp(:,ineighbour))
+     !test = test+MATMUL(factor*(hmat(:,interpolator%corresp(:,ineighbour,1))),allp(:,ineighbour))
+     test = test+MATMUL(tmp_array2,allp(:,ineighbour))
    end if
  end do
 

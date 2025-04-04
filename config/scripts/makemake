@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2011-2024 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2011-2025 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -96,9 +96,8 @@ def run_script(name, title, cmdline, stop_on_error=True,
 
                     # ------------------------------------ #
 
-# Translate version strings into usable numbers
 def translate_version(name, version_string):
-
+  """Translate version strings into usable numbers"""
   # Init
   ret = version_string
   ret = ret.split(".")
@@ -458,19 +457,36 @@ if ( lt_ret == 0 ):
 else:
   lt_version = 0
 
-if ( m4_version < 10408 ):
+if  m4_version == 0:
+  sys.stderr.write("[%s] Error: M4 is not installed (%d) - " % \
+    (my_name, m4_version) + \
+    "please install v1.4.8 or above\n%s: Aborting now\n" % (my_name))
+  sys.exit(10)
+
+if  m4_version < 10408:
   sys.stderr.write("[%s] Error: M4 is too old (%d) - " % \
     (my_name, m4_version) + \
     "please install v1.4.8 or above\n%s: Aborting now\n" % (my_name))
   sys.exit(10)
 
-if ( ac_version < 26100 ):
+if ac_version == 0:
+  sys.stderr.write("[%s] Error: Autoconf is not installed (%d) - " % \
+    (my_name, ac_version) + \
+    "please install v2.61 or above\n%s: Aborting now\n" % (my_name))
+
+if ac_version < 26100:
   sys.stderr.write("[%s] Error: Autoconf is too old (%d) - " % \
     (my_name, ac_version) + \
     "please install v2.61 or above\n%s: Aborting now\n" % (my_name))
   sys.exit(20)
 
-if ( am_version < 11000 ):
+if am_version == 0:
+  sys.stderr.write("[%s] Error: Automake is not installed (%d) - " % \
+    (my_name, am_version) + \
+    "please install v1.10 or above\n%s: Aborting now\n" % (my_name))
+  sys.exit(30)
+
+if am_version < 11000:
   sys.stderr.write("[%s] Error: Automake is too old (%d) - " % \
     (my_name, am_version) + \
     "please install v1.10 or above\n%s: Aborting now\n" % (my_name))
@@ -547,7 +563,7 @@ if ( opts.run_source ):
   abisrc_cmdline = "./abisrc.py makemake > abisrc.stdout 2> abisrc.stderr"
   print_message(my_name, "---> running %s" % (abisrc_cmdline))
   abisrc_exitcode = os.system(abisrc_cmdline)
-   
+
   if abisrc_exitcode != 0:
     sys.stderr.write("""
        ****************************************************************
