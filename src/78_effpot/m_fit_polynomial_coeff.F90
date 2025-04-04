@@ -1480,13 +1480,20 @@ contains
              & gf_values(1,icoeff)*HaBohr_eVAng**2,",", &
              & gf_values(2,icoeff)*HaBohr_eVAng**2,",", &
              & gf_values(3,icoeff)*HaBohr_eVAng**2
-           end if
+             !message2 = itoa(my_coeffindexes(icoeff)) // "," // &
+             !  trim(my_coeffs(icoeff)%name) // "," // &
+             !  ftoa(gf_values(4,icoeff)*HaBohr_eVAng**2) // "," // &
+             !  ftoa(gf_values(1,icoeff)*HaBohr_eVAng**2) // "," // &
+             !  ftoa(gf_values(2,icoeff)*HaBohr_eVAng**2) // "," // &
+             !  ftoa(gf_values(3,icoeff)*HaBohr_eVAng**2)
+             end if
          end if
        else!In this case the matrix is singular.
          gf_values(:,icoeff) = huge(0.0_dp)/5.0_dp
          isbanned(my_coeffindexes(icoeff))=.True.
          singular_coeffs(icoeff) = 1
-         write(message, '(a)') ' The matrix is singular...'
+         !write(message, '(a)') ' The matrix is singular...'
+         message = 'The matrix is singular...'
          if(need_prt_GF_csv)then
            !write(message2, '(I7.7,10a)') my_coeffindexes(icoeff),",", &
 &          !                         trim(my_coeffs(icoeff)%name),",",&
