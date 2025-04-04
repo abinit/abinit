@@ -785,7 +785,7 @@ subroutine psps_print(psps, unit, prtvol, mode_paral)
     '   Radius for pseudo-core charge for each type ..... ',ch10
    call wrtout(unt,msg,mode)
    do itypat=1,psps%ntypat
-     write(msg,'(a,i4,a,f7.4)')'  - Atom type ',itypat,' has pseudo-core radius .. ',psps%xcccrc(itypat)
+     write(msg,'(a,i4,a,f12.4)')'  - Atom type ',itypat,' has pseudo-core radius .. ',psps%xcccrc(itypat)
      call wrtout(unt,msg,mode)
    end do
  end if
