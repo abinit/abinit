@@ -210,7 +210,12 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
  iam_master = (my_rank == master)
 
-
+ #if defined FC_INTEL
+    if (iam_master) then
+      write(message,'(3a)') ch10,' This part of code does not compile with intel IFX compiler'
+      ABI_ERROR(message)
+    end if
+ #else
  call initialize_parameters()
  call copy_eff_pot_to_eff_pot_fixed()
  ncopy_terms = 0
@@ -1304,16 +1309,21 @@ contains
     ! FIXME: on builder ALPS_INTEL_2025_elpa, compile fails.
     ! This is probably due to the fact that the format is too long.
     ! We should split the write in two writes.
-    write(message,'(4a,ES24.16,2a,ES24.16,2a,ES24.16,2a,ES24.16,a)' ) ch10,&
-      &                    ' Goal function values at the begining of the fit process (eV^2/A^2):',ch10,&
-      &                    '   Energy          : ',&
-      &               gf_values(4,1)*(HaBohr_eVAng)**2,ch10,&
-      &                    '   Forces+Stresses : ',&
-      &               gf_values(1,1)*(HaBohr_eVAng)**2,ch10,&
-      &                    '   Forces          : ',&
-      &               gf_values(2,1)*(HaBohr_eVAng)**2,ch10,&
-      &                    '   Stresses        : ',&
-      &               gf_values(3,1)*(HaBohr_eVAng)**2,ch10
+    !write(message,'(4a,ES24.16,2a,ES24.16,2a,ES24.16,2a,ES24.16,a)' ) ch10,&
+    !  &                    ' Goal function values at the begining of the fit process (eV^2/A^2):',ch10,&
+    !  &                    '   Energy          : ',&
+    !  &               gf_values(4,1)*(HaBohr_eVAng)**2,ch10,&
+    !  &                    '   Forces+Stresses : ',&
+    !  &               gf_values(1,1)*(HaBohr_eVAng)**2,ch10,&
+    !  &                    '   Forces          : ',&
+    !  &               gf_values(2,1)*(HaBohr_eVAng)**2,ch10,&
+    !  &                    '   Stresses        : ',&
+    !  &               gf_values(3,1)*(HaBohr_eVAng)**2,ch10
+    message = ' Weighted Goal function values at the begining of the fit process (eV^2/A^2):'
+    message = trim(message) // '   Energy          : ' // trim(ftoa(gf_values(4,1)*(HaBohr_eVAng)**2))
+    message = trim(message) // '   Forces+Stresses : ' // trim(ftoa(gf_values(1,1)*(HaBohr_eVAng)**2))
+    message = trim(message) // '   Forces          : ' // trim(ftoa(gf_values(2,1)*(HaBohr_eVAng)**2))
+    message = trim(message) // '   Stresses        : ' // trim(ftoa(gf_values(3,1)*(HaBohr_eVAng)**2))
     if(need_verbose)then
       call wrtout(ab_out,message,'COLL')
       call wrtout(std_out,message,'COLL')
@@ -1338,18 +1348,23 @@ contains
   !> - Handles MPI parallelization for distributed coefficient selection
   !> - Outputs progress information in verbose mode
   !> - Maintains CSV log of goal function values if requested
+
   subroutine select_one_by_one()
     integer :: ncycle_select ! number of cycles for the selection
     integer :: ncoeff_this_cycle
     integer :: ncoeff_selected
+    integer :: ic
+
     ncycle_select=ceiling(real(ncoeff_to_select)/real(ncoeff_per_cycle))
     ncoeff_selected = ncoeff_preselected
    !Option 1, we select the coefficients one by one
    if(need_verbose.and.ncoeff_to_select > 0)then
-     write(message,'(a,3x,a,10x,a,14x,a,14x,a,14x,a)') " N","Selecting","MSDE","MSDFS","MSDF","MSDS"
+     !write(message,'(a,3x,a,10x,a,14x,a,14x,a,14x,a)') " N","Selecting","MSDE","MSDFS","MSDF","MSDS"
+     message = " N Selecting            MSDE         MSDFS        MSDF         MSDS"
      call wrtout(ab_out,message,'COLL')
-     write(message,'(4x,a,6x,a,8x,a,8x,a,8x,a)') "Coefficient","(eV^2/A^2)","(eV^2/A^2)","(eV^2/A^2)",&
-&                                            "(eV^2/A^2)"
+     !write(message,'(4x,a,6x,a,8x,a,8x,a,8x,a)') "Coefficient","(eV^2/A^2)","(eV^2/A^2)","(eV^2/A^2)",&
+     !                                       "(eV^2/A^2)"
+     message = "   Coefficient      (eV^2/A^2)   (eV^2/A^2)   (eV^2/A^2)   (eV^2/A^2)"
      call wrtout(ab_out,message,'COLL')
    end if
 
@@ -1359,35 +1374,49 @@ contains
      icycle=ncoeff_selected+1
      list_coeffs_tmp(icycle)= icycle
      if(need_verbose)then
-       write(message, '(4a,I0,a)')ch10,'--',ch10,' Try to find the best model with ',&
-&                                 ncoeff_selected+ncoeff_this_cycle,' coefficient'
-       if(ncoeff_selected+ncoeff_this_cycle> 1)  write(message, '(2a)') trim(message),'s'
+       !write(message, '(4a,I0,a)')ch10,'--',ch10,' Try to find the best model with ',&
+       !&                          ncoeff_selected+ncoeff_this_cycle,' coefficient'
+       message = '--' // ch10 // ' Try to find the best model with '
+       message = message // trim(itoa(ncoeff_selected+ncoeff_this_cycle)) // ' coefficient'
+
+       if(ncoeff_selected+ncoeff_this_cycle> 1)  message =  trim(message)// 's'
+       !write(message, '(2a)') trim(message),'s'
        if(nproc > 1)  then
          if(my_ncoeff>=1) then
-           write(message, '(2a,I0,a)')trim(message), ' (only the ',my_ncoeff,&
-&                                                ' first are printed for this CPU)'
+           !write(message, '(2a,I0,a)')trim(message), ' (only the ',my_ncoeff,&
+          !                                      ' first are printed for this CPU)'
+            message = trim(message) // ' (only the ' // trim(itoa(my_ncoeff))
+            message = trim(message) // ' first are printed for this CPU)'
+
          else
-           write(message, '(2a)')trim(message), ' (no coefficient treated by this CPU)'
+           !write(message, '(2a)')trim(message), ' (no coefficient treated by this CPU)'
+           message = trim(message) // ' (no coefficient treated by this CPU)'
          end if
        end if
        call wrtout(std_out,message,'COLL')
        if(ncoeff_selected>0 .or. any(list_coeffs(:) > zero))then
-         write(message, '(3a)') ' The coefficient numbers from the previous cycle are:',ch10,' ['
+         !write(message, '(3a)') ' The coefficient numbers from the previous cycle are:',ch10,' ['
+         message = ' The coefficient numbers from the previous cycle are: ['
          do ii=1,ncoeff_selected
            if(ii<ncoeff_selected)then
-             write(message, '(a,I0,a)') trim(message),list_coeffs(ii),','
+             !write(message, '(a,I0,a)') trim(message),list_coeffs(ii),','
+             message = trim(message) // trim(itoa(list_coeffs(ii))) // ','
            else
-             write(message, '(a,I0)') trim(message),list_coeffs(ii)
+             !write(message, '(a,I0)') trim(message),list_coeffs(ii)
+             message = trim(message) // trim(itoa(list_coeffs(ii)))
            end if
          end do
-         write(message, '(3a)') trim(message),']',ch10
+         !write(message, '(3a)') trim(message),']',ch10
+         message = trim(message) // ']' // ch10
          call wrtout(std_out,message,'COLL')
        end if
 
-       write(message,'(2x,a,12x,a,14x,a,13x,a,14x,a)') " Testing","MSDE","MSDFS","MSDF","MSDS"
+       !write(message,'(2x,a,12x,a,14x,a,13x,a,14x,a)') " Testing","MSDE","MSDFS","MSDF","MSDS"
+       message = ' Testing            MSDE         MSDFS        MSDF         MSDS'
        call wrtout(std_out,message,'COLL')
-       write(message,'(a,7x,a,8x,a,8x,a,8x,a)') " Coefficient","(eV^2/A^2)","(eV^2/A^2)","(eV^2/A^2)",&
-&                                            "(eV^2/A^2)"
+       !write(message,'(a,7x,a,8x,a,8x,a,8x,a)') " Coefficient","(eV^2/A^2)","(eV^2/A^2)","(eV^2/A^2)",&
+       !                                      "(eV^2/A^2)"
+        message = ' Coefficient (eV^2/A^2) (eV^2/A^2) (eV^2/A^2) (eV^2/A^2)'
        call wrtout(std_out,message,'COLL')
      end if!End if verbose
 
@@ -1395,7 +1424,10 @@ contains
      !Open *csv file for storing GF values of all cores for this iteration
      !TODO:  Should move inside the loop over all selected?
      if(need_prt_GF_csv)then
-        write(filename,'(a,I1,a,I3.3,a,I3.3,a)') "GF_values_iatom",fit_iatom_in,"_proc",my_rank,"_iter",icycle,".csv"
+        !write(filename,'(a,I1,a,I3.3,a,I3.3,a)') "GF_values_iatom",fit_iatom_in,"_proc",my_rank,"_iter",icycle,".csv"
+        filename = "GF_values_iatom" // trim(itoa(fit_iatom_in)) // "_proc"
+        filename = trim(filename) // trim(itoa(my_rank)) // "_iter" // trim(itoa(icycle)) // ".csv"
+
         unit_GF_val = get_unit()
         if (open_file(filename,message,unit=unit_GF_val,form="formatted",&
 &          status="unknown",action="write") /= 0) then
@@ -1442,12 +1474,9 @@ contains
 !      call the fit process routine
 !      This routine solves the linear system proposed
 !      by C.Escorihuela-Sayalero see PRB95,094115(2017) [[cite:Escorihuela-Sayalero2017]]
-       block
-         integer :: ic
          do ic =1, icycle
            list_coeffs_tmp(ic) =ic
          end do
-       end block
        call fit_polynomial_coeff_solve(coeff_values(1:icycle),fcart_coeffs_tmp,fit_data%fcart_diff,&
          &                                      energy_coeffs_tmp,fit_data%energy_diff,info,&
          &                                      list_coeffs_tmp(1:icycle),natom_sc,icycle,ncoeff_to_fit,ntime,&
@@ -1457,7 +1486,8 @@ contains
 
        if(info==0)then
          if (need_positive.and.any(coeff_values(ncoeff_fix+1:icycle) < zero)) then
-           write(message, '(a)') ' Negative value detected...'
+           !write(message, '(a)') ' Negative value detected...'
+           message = 'Negative value detected...'
            gf_values(:,icoeff) = zero
            coeff_values = zero
          else
@@ -1466,26 +1496,35 @@ contains
 &                                            gf_values(:,icoeff),list_coeffs_tmp(1:icycle),natom_sc,&
 &                                            icycle,ncoeff_to_fit,ntime,strten_coeffs_tmp,&
 &                                            fit_data%strten_diff,fit_data%training_set%sqomega, weights=weights)
-           write (j_char, '(i7)') my_coeffindexes(icoeff)
-           write(message, '(4x,a,3x,4ES18.10)') adjustl(j_char), &
-!&                                   gf_values(4,icoeff)*factor*(1000*Ha_ev)**2 ,&
-           &   gf_values(4,icoeff)*HaBohr_eVAng**2, &
-           &   gf_values(1,icoeff)*HaBohr_eVAng**2, &
-           &   gf_values(2,icoeff)*HaBohr_eVAng**2, &
-           &   gf_values(3,icoeff)*HaBohr_eVAng**2
+           !write (j_char, '(i7)') my_coeffindexes(icoeff)
+           j_char = itoa(my_coeffindexes(icoeff))
+
+           !write(message, '(4x,a,3x,4ES18.10)') adjustl(j_char), &
+!&         !                          gf_values(4,icoeff)*factor*(1000*Ha_ev)**2 ,&
+           !&   gf_values(4,icoeff)*HaBohr_eVAng**2, &
+           !&   gf_values(1,icoeff)*HaBohr_eVAng**2, &
+           !&   gf_values(2,icoeff)*HaBohr_eVAng**2, &
+           !&   gf_values(3,icoeff)*HaBohr_eVAng**2
+           message = trim(adjustl(j_char)) // " " // &
+             ftoa(gf_values(4,icoeff)*HaBohr_eVAng**2) // " " // &
+             ftoa(gf_values(1,icoeff)*HaBohr_eVAng**2) // " " // &
+             ftoa(gf_values(2,icoeff)*HaBohr_eVAng**2) // " " // &
+             ftoa(gf_values(3,icoeff)*HaBohr_eVAng**2)
+
+
            if(need_prt_GF_csv)then
-             write(message2, '(I7.7,3a,ES18.10,a,ES18.10,a,ES18.10,a,ES18.10)') my_coeffindexes(icoeff),",",&
-             & trim(my_coeffs(icoeff)%name),",", &
-             & gf_values(4,icoeff)*HaBohr_eVAng**2,",", &
-             & gf_values(1,icoeff)*HaBohr_eVAng**2,",", &
-             & gf_values(2,icoeff)*HaBohr_eVAng**2,",", &
-             & gf_values(3,icoeff)*HaBohr_eVAng**2
-             !message2 = itoa(my_coeffindexes(icoeff)) // "," // &
-             !  trim(my_coeffs(icoeff)%name) // "," // &
-             !  ftoa(gf_values(4,icoeff)*HaBohr_eVAng**2) // "," // &
-             !  ftoa(gf_values(1,icoeff)*HaBohr_eVAng**2) // "," // &
-             !  ftoa(gf_values(2,icoeff)*HaBohr_eVAng**2) // "," // &
-             !  ftoa(gf_values(3,icoeff)*HaBohr_eVAng**2)
+             !write(message2, '(I7.7,3a,ES18.10,a,ES18.10,a,ES18.10,a,ES18.10)') my_coeffindexes(icoeff),",",&
+             !& trim(my_coeffs(icoeff)%name),",", &
+             !& gf_values(4,icoeff)*HaBohr_eVAng**2,",", &
+             !& gf_values(1,icoeff)*HaBohr_eVAng**2,",", &
+             !& gf_values(2,icoeff)*HaBohr_eVAng**2,",", &
+             !& gf_values(3,icoeff)*HaBohr_eVAng**2
+             message2 = itoa(my_coeffindexes(icoeff)) // "," // &
+               trim(my_coeffs(icoeff)%name) // "," // &
+               ftoa(gf_values(4,icoeff)*HaBohr_eVAng**2) // "," // &
+               ftoa(gf_values(1,icoeff)*HaBohr_eVAng**2) // "," // &
+               ftoa(gf_values(2,icoeff)*HaBohr_eVAng**2) // "," // &
+               ftoa(gf_values(3,icoeff)*HaBohr_eVAng**2)
              end if
          end if
        else!In this case the matrix is singular.
@@ -1557,9 +1596,9 @@ contains
        integer, allocatable :: allorder(:)
        do icoeff=1,my_ncoeff
          if(gf_values(1,icoeff) < zero) then
-           mygf(icoeff)=9D99
+           mygf(icoeff)=huge(0.0_dp)/5.0_dp
          else if(abs(gf_values(1,icoeff)) <tol16) then
-           mygf(icoeff)=9D99
+           mygf(icoeff)=huge(0.0_dp)/5.0_dp
          else
            mygf(icoeff) = sum(gf_values(2:4,icoeff),MASK=sel_on)
          end if
@@ -1590,17 +1629,7 @@ contains
          end do
          call MergeSort(allgf, work, allorder, worder)
 
-         ! at least n_remaining terms should be kept. It reduces to a percentage everytime, but should be larger than 40*ncoeff_to_select.
-         ! if ncoeff_to_select*10>ncoeff_tot, use ncoeff_tot
          n_remaining = max(ceiling(n_remaining * remaining_rate), min(ncoeff_to_select*40, ncoeff_tot) )
-         ! FIXME: Crashes here when fixcoeff.
-         ! check size of coeff. and order are correctly set.
-         ! allorder is gathered from myorder.
-         !print *, "sizeof allorder:", size(allorder)
-         !print *, "size of isbanned:", size(isbanned)
-         !print *, "max allorder:", maxval(allorder)
-         !print *, "ncoeff_tot:", ncoeff_tot
-         !print *, "n_remaining:", n_remaining
          do i=n_remaining+1, ncoeff_tot
            isbanned(allorder(i))=.True.
          end do
@@ -2137,7 +2166,7 @@ contains
  end subroutine ban_one_term
 
 
-
+#endif
 
 end subroutine fit_polynomial_coeff_fit
 !!***
