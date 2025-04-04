@@ -36,7 +36,7 @@ optcell =  2  # Relaxation of the cell (0 nothing,1 only acell (uniform), 2 acel
 #%% executable = multibinit
 #%% input_ddb = t101.ddb
 #%% coeff_xml = t101_coeffs.xml
-#%% need_cpp_vars = !HAVE_GPU
+#%% need_cpp_vars = !HAVE_GPU !FC_INTEL
 #%% [shell]
 #%% pre_commands = 
 #%%   iw_cp p4mbm.nc t101.abo_HIST.nc
