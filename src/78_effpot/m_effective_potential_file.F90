@@ -2973,10 +2973,6 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
      call polynomial_coeff_init(coefficient(icoeff),nterm_max,coeffs(icoeff),&
 &                               terms(icoeff,:), check=.true., debug_str="init from xml")
 !    Set the name of the coefficient
-     print *, "DEBUG: coeffs(icoeff)%nterm = ", coeffs(icoeff)%nterm
-     print *, "DEBUG: coeffs(icoeff)% debug_str= ", coeffs(icoeff)%debug_str
-     print *, "icoeff = ", icoeff
-     print *, "ncoeff = ", ncoeff
 
 !    Get the name of this coefficient  and set it
 !    Try to find the index of the term corresponding to the interation in the

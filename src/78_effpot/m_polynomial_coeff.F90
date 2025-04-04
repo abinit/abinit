@@ -179,7 +179,7 @@ module m_polynomial_coeff
   character(len=500) :: debug_str="uninitialized"
 
  contains
-   final :: polynomial_coeff_final
+   !final :: polynomial_coeff_final
  end type polynomial_coeff_type
 !!***
 
@@ -247,7 +247,7 @@ subroutine polynomial_coeff_init(coefficient,nterm,polynomial_coeff,terms,name, 
  character(*), optional :: debug_str
 ! *************************************************************************
 !First free before initilisation
- call polynomial_coeff_free(polynomial_coeff)
+ !call polynomial_coeff_free(polynomial_coeff)
  check_in = .false.
  if(present(check)) check_in = check
 
@@ -358,13 +358,20 @@ subroutine polynomial_coeff_free(polynomial_coeff)
 
 !if(trim(polynomial_coeff%debug_str) == "uninitialized") then
 !  ABI_WARNING("Polynomial coeff: is freed before initialization")
-!else if (trim(polynomial_coeff%debug_str) == "freed") then
-!  ABI_WARNING("Polynomial coeff: is freed twice")
+!else 
+!if (trim(polynomial_coeff%debug_str) == "freed") then
+!  print *, "- Polynomial coeff: ", trim(polynomial_coeff%debug_str), " ->freed"
+  !ABI_ERROR("Polynomial coeff: is freed twice")
+!endif
 !else
 !  print *, "- Polynomial coeff: ", trim(polynomial_coeff%debug_str), " ->freed"
 ! end if
+! if debug_str starts with freed
+if(trim(polynomial_coeff%debug_str(1:5)) == "freed") then
+    print *, "- Polynomial coeff: ", trim(polynomial_coeff%debug_str), " ->freed"
+end if
 
- polynomial_coeff%debug_str = "freed"
+ polynomial_coeff%debug_str = "freed "//polynomial_coeff%debug_str
 
 end subroutine polynomial_coeff_free
 !!***
@@ -2468,16 +2475,11 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
      ABI_SFREE(list_coeff)
      nirred_comb = size(list_combination_tmp,2)
 
-     block
-       integer :: ii
-       do ii = 1, nirred_comb
-       end do
-     end block
-
    end subroutine get_combinations_of_lists
 
 
    subroutine get_symmetric_combinations()
+    type(IrreducibleCombinations_T) :: irred_combinations
      ! If we want to compute equivalent symmetric combinations go here.
      if(need_compute_symmetric)then
        if(need_verbose)then
@@ -2526,11 +2528,6 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
        ABI_MALLOC(my_list_combination_tmp,(power_disps(2),my_nirred))
        if(my_nirred /= 0) my_list_combination_tmp(:,:) = list_combination_tmp(:,my_ncombi_start:my_ncombi_end)
 
-       block
-         integer :: ii
-         do ii = 1, my_nirred
-         end do
-       end block
 
        ABI_MALLOC(my_index_irredcomb,(my_nirred))
        ABI_SFREE(list_combination_tmp)
@@ -2538,8 +2535,7 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
        !COUNT SYMMETRIC COMBINATIONS TO IRREDUCIBLE COMBINATIONS ON EACH PROCESSOR
 
        !COMPUTE SYMMETRIC COMBINATIONS
-       block
-         type(IrreducibleCombinations_T) :: irred_combinations
+
          call irred_combinations%init()
          do i=1,my_nirred
            associate(comb => my_list_combination_tmp(:, i))
@@ -2566,7 +2562,6 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
            end associate
          enddo
          call irred_combinations%free()
-       end block
 
        ABI_SFREE(my_list_combination_tmp)
 
@@ -2629,8 +2624,6 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
            write(message,'(1a)')' Reduce reducible Strain-Phonon combinations on master'
            call wrtout(std_out,message,'COLL')
          endif
-         block
-           type(IrreducibleCombinations_T) :: irred_combinations
            call irred_combinations%init()
            do i=1, ncombination
             if(any(list_combination_tmp(:,i) > ncoeff_symsym))then
@@ -2642,7 +2635,6 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
            call reduce_zero_combinations(list_combination_tmp)
            ncombination = size(list_combination_tmp,2)
            call irred_combinations%free()
-         end block
        endif
 
      end if !iam_master
@@ -2697,6 +2689,7 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
    end subroutine get_symmetric_combinations
 
    subroutine combinations_to_terms()
+     logical, allocatable :: reverse(:)
      if(need_verbose .and. nproc > 1)then
        write(message,'(1a)')' Compute the coefficients'
        call wrtout(std_out,message,'COLL')
@@ -2707,8 +2700,7 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
      ncoeff_max = my_ncoeff
      do ii=1,my_ncoeff
        ABI_MALLOC(terms,(nterm))
-       block
-         logical :: reverse(ndisp_max)
+         ABI_MALLOC(reverse,(ndisp_max))
          reverse=.False.
          call generateTermsFromList(cell,list_combination(:,ii),list_symcoeff,list_symstr,ncoeff_symsym,&
            &                             ndisp_max,nrpt,nstr_sym,nsym,nterm,terms, reverse=reverse)
@@ -2716,7 +2708,7 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
 
          call polynomial_coeff_init(one,nterm,coeffs_tmp(ii),terms(1:nterm), check=.true.)
          DMSG(coeffs_tmp(ii)%debug_str)
-       end block
+         ABI_SFREE(reverse)
        !  Free the terms array
        do iterm=1,nterm
          call polynomial_term_free(terms(iterm))
@@ -3014,6 +3006,7 @@ recursive subroutine computeNorder(cell,coeffs_out,compatibleCoeffs,list_coeff,l
  character(len=200):: name
  type(polynomial_term_type),dimension(:),allocatable :: terms
  type(polynomial_coeff_type),allocatable :: coeffs_tmp(:)
+ logical, allocatable :: reverse(:)
 ! *************************************************************************
 
 !Set the inputs
@@ -3060,12 +3053,11 @@ recursive subroutine computeNorder(cell,coeffs_out,compatibleCoeffs,list_coeff,l
      coefficient = one
 
      if(power_disp >= power_disp_min) then
-       block
-         logical :: reverse(ndisp_max)
+         ABI_MALLOC(reverse,(ndisp_max))
          reverse(:) = .False.
          call generateTermsFromList(cell,index_coeff,list_coeff,list_str,ncoeff,&
            &                                 ndisp_max,nrpt,nstr,nsym,iterm,terms, reverse=reverse)
-       end block
+          ABI_SFREE(reverse)
 
        if(iterm > 0)then
 !        Do some checks
@@ -3165,7 +3157,7 @@ recursive subroutine computeNorder(cell,coeffs_out,compatibleCoeffs,list_coeff,l
    do icoeff1=1,ncoeff_max
      call polynomial_coeff_free(coeffs_tmp(icoeff1))
    end do
-   ABI_FREE(coeffs_tmp)
+   ABI_SFREE(coeffs_tmp)
  end if
 
 end subroutine computeNorder
@@ -4252,7 +4244,8 @@ subroutine coeffs_list_conc_onsite(coeff_list1,coeff_list2)
 
  ! copy list1 to tmp
  ABI_MALLOC(coeff_list_tmp,(ncoeff1))
- coeff_list_tmp=coeff_list1
+ !coeff_list_tmp=coeff_list1
+ call coeffs_list_copy(coeff_list_tmp, coeff_list1)
 
  ! allocate new list1
  call polynomial_coeff_list_free(coeff_list1)
@@ -4322,6 +4315,8 @@ subroutine coeffs_list_append(coeff_list,coeff, check)
      &                                 coeff%name, check=check)
   
    coeff_list(n2)%debug_str = "copied from" // trim(coeff%debug_str)
+   call polynomial_coeff_list_free(tmp)
+   ABI_SFREE(tmp)
   end if
     
 end subroutine coeffs_list_append
@@ -4944,6 +4939,14 @@ subroutine polynomial_coeff_final(self)
   call polynomial_coeff_free(self)
 end subroutine polynomial_coeff_final
 !!***
+
+subroutine starts_with(str, prefix, result)
+  character(len=*), intent(in) :: str
+  character(len=*), intent(in) :: prefix
+  logical, intent(out) :: result
+  result = str(1:len(prefix)) == prefix
+end subroutine starts_with
+
 
 end module m_polynomial_coeff
 !!***

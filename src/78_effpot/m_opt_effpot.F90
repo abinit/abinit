@@ -325,10 +325,10 @@ subroutine opt_effpot(eff_pot,opt_ncoeff,opt_coeff,hist,opt_on,opt_factors,comm,
   end if
 
   !Deallocation of fitting variables
-  ABI_FREE(energy_coeffs)
-  ABI_FREE(fcart_coeffs)
-  ABI_FREE(strten_coeffs)
-  ABI_FREE(my_weights)
+  ABI_SFREE(energy_coeffs)
+  ABI_SFREE(fcart_coeffs)
+  ABI_SFREE(strten_coeffs)
+  ABI_SFREE(my_weights)
 
   if(need_print_anh)then
     INQUIRE(FILE='before_opt_diff_anharmonic_terms_energy.dat',OPENED=file_opened,number=unit_anh1)
@@ -449,7 +449,6 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
   if(present(print_anh))then
     if(print_anh) need_print_anh = .True.
   endif
-
   call get_weight_from_hist(hist, fit_weight_T, ntime, natom_sc, my_weights, comm )
 
   ABI_MALLOC(symbols,(eff_pot%crystal%natom))
@@ -546,25 +545,21 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
       call wrtout(std_out,message,'COLL')
       to_skip = .FALSE.
       to_skip = check_to_skip(eff_pot%anharmonics_terms%coefficients(iterm))
-      print *, "DEBUG: ++++++++++++++++", "to_skip", to_skip, "because bounding is not needed"
       !Skip term if it doesn't need bounding
       if(.not. to_skip)then
         associate(term1=>eff_pot%anharmonics_terms%coefficients(iterm)%terms(1))
         nbody_term = term1%get_nbody()
 
-        print *, "Here1"
         !Get List of high order single Terms for terms
         call opt_getHOSingleDispTerms(eff_pot%anharmonics_terms%coefficients(iterm),&
           &                                      HOsingledisp_terms,symbols,singledisp_terms,order_ran,ncombi1)
 
-        print *, "Here2"
         ABI_MALLOC(my_coeffs,(size(eff_pot%anharmonics_terms%coefficients)))
         my_coeffs=eff_pot%anharmonics_terms%coefficients
           do icombi3=1, size(my_coeffs)
            DMSG(my_coeffs(icombi3)%debug_str)
           end do
 
-        print *, "Here3"
         ! then add the single disp terms.
         if (ncombi1>0) then
           do icombi3=1,ncombi1
@@ -578,7 +573,6 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
 
         if(allocated(HOsingledisp_terms)) call polynomial_coeff_list_free(HOsingledisp_terms)
 
-        print *, "Here4"
 
         !Get List of high order cross Terms for term if ndisp > 1
         if(term1%ndisp>1 .or. &
@@ -587,21 +581,17 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
             ! output HOcrossdisp_terms, ncombi2.
             call opt_getHOcrossdisp(HOcrossdisp_terms,ncombi2,eff_pot%anharmonics_terms%coefficients(iterm),order_ran)
         endif
-        print *, "ncombi2", ncombi2
         ! then add the crossdisp terms.
         if(ncombi2 > 0)then
           do icombi3=1,ncombi2
             !call coeffs_list_conc_onsite(my_coeffs, HOcrossdisp_terms(icombi3))
             if (HOcrossdisp_terms(icombi3)%terms(1)%get_nbody() == nbody_term .or. bound_option/=1) then
-              print *, "adding crossdisp terms to my_coeffs" 
               call coeffs_list_append(my_coeffs,HOcrossdisp_terms(icombi3), check=.TRUE.)
               ncombi2_real = ncombi2_real + 1
               DMSG(my_coeffs(ncombi2_real)%debug_str)
             endif
           end do
         endif
-        print *, "Here5", "ncombi2_real",  ncombi2_real
-        print *, "is my_coeffs allocated", allocated(my_coeffs)
         if(allocated(HOcrossdisp_terms)) call polynomial_coeff_list_free(HOcrossdisp_terms)
        end associate
       else  ! to_skip
@@ -609,17 +599,10 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
         ncombi1=0
         ABI_MALLOC(my_coeffs,(size(eff_pot%anharmonics_terms%coefficients)))
         my_coeffs = eff_pot%anharmonics_terms%coefficients
-        block
-        integer :: iii
-        do iii=1, size(my_coeffs)
-          DMSG(my_coeffs(iii)%debug_str)
-        end do
-        end block
       endif
       ncombi =  ncombi1_real + ncombi2_real
       nterm_start = eff_pot%anharmonics_terms%ncoeff
     else ! if iterm = nterm + 1 => Take care about strain
-      print *, "the bounding term for strain"
         block
         integer :: max_nbody_tmp(order_ran(2))
         if (bound_option==1) then
@@ -628,12 +611,6 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
             max_nbody_tmp(:) = 888
         endif
          call opt_getHOstrain(my_coeffs,ncombi,nterm_start,eff_pot,order_ran,comm, max_nbody=max_nbody_tmp)
-         ! check if my_coeffs is allocated and its size
-          if (allocated(my_coeffs)) then
-            print *, "size of my_coeffs", size(my_coeffs)
-          else
-            print *, "my_coeffs is not allocated"
-          endif
         end block
     endif !
 
@@ -668,14 +645,9 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
     if (temp_cntr>0) then
       do icombi=1,temp_cntr
         ! Copy all the terms in eff pot
-        ! Get new name of term and set new terms to potential
-        !write(*,*) 'ndisp of term', my_coeffs(nterm_start+icombi)%nterm
-        !write(*,*) 'and wath is nterm_start', nterm_start,'and icomb btw', icomb
-        !write(std_out,*) 'get name in main bound'
         call polynomial_coeff_getName(name, &
           & my_coeffs(nterm_start+icombi),symbols,recompute=.TRUE.)
         call polynomial_coeff_SetName(name,my_coeffs(nterm_start+icombi))
-
 
         ! Set dimensions of temporary my_coeffs array
         nterm2 = eff_pot%anharmonics_terms%ncoeff + 1
@@ -712,7 +684,7 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
           exists(jterm) = coeffs_compare(my_coeffs_tmp(jterm),my_coeffs_tmp(nterm2))
         enddo !jterm
         any_exists=any(exists)
-        ABI_FREE(exists)
+        ABI_SFREE(exists)
         if(any_exists)then
           write(message,'(3a)' )ch10,&
             &              '   ==> Term exists already. We cycle',ch10
@@ -739,8 +711,8 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
         if(iterm>nterm)then
           ! MS 2006 Decomment for old style optimization
           call fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,&
-                    &                                           natom_sc,ntime,fit_data%training_set%sqomega,comm,&
-                    &                                           compute_anharmonic=.TRUE.,print_file=.FALSE., weights=my_weights)
+                    &   natom_sc,ntime,fit_data%training_set%sqomega,comm,&
+                    &   compute_anharmonic=.TRUE.,print_file=.FALSE., weights=my_weights)
           i = 0
           write(message,'(a,I2,a,ES24.16)') "cycle ", i ," (msef+mses)/(msef_ini+mses_ini): ", (msef+mses)/(msef_ini+mses_ini)
           call wrtout(std_out,message,'COLL')
@@ -781,12 +753,12 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
             eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient = &
               &                eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient/ 2**(i-1)
             call fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,&
-              &                                              natom_sc,ntime,fit_data%training_set%sqomega,comm,&
-              &                                              compute_anharmonic=.TRUE.,print_file=.FALSE.)
+              &                natom_sc,ntime,fit_data%training_set%sqomega,comm,&
+              &                compute_anharmonic=.TRUE.,print_file=.FALSE.)
             GF_arr(i) =  (bound_factors(1)*bound_EFS(1)*mse+bound_factors(2)*bound_EFS(2)*msef&
-              &                             +bound_factors(3)*bound_EFS(3)*mses) / &
-              &                             (bound_factors(1)*bound_EFS(1)*mse_ini+bound_factors(2)*bound_EFS(2)*msef_ini&
-              &                             +bound_factors(3)*bound_EFS(3)*mses_ini)
+              &                +bound_factors(3)*bound_EFS(3)*mses) / &
+              &                (bound_factors(1)*bound_EFS(1)*mse_ini+bound_factors(2)*bound_EFS(2)*msef_ini&
+              &                +bound_factors(3)*bound_EFS(3)*mses_ini)
             write(message,'(a,I2,a,ES24.16)') "cycle ",i," GF/GF_ini: ",GF_arr(i)
             call wrtout(std_out,message,'COLL')
             write(message,'(a,I2,a,ES24.16)') "cycle ", i ," GF: ",(bound_factors(1)*bound_EFS(1)*mse&
@@ -877,8 +849,9 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
 
 
   !DEALLOCATION
-  ABI_FREE(symbols)
-  ABI_FREE(terms)
+  ABI_SFREE(symbols)
+  ABI_SFREE(terms)
+  ABI_SFREE(my_weights)
 
   !ABI_FREE(my_coeffs)
   call fit_data_free(fit_data)
@@ -969,7 +942,7 @@ subroutine opt_getHOforterm(term,order_range,order_start,order_stop)
     order_stop  = 0
   endif
 
-  ABI_FREE(powers)
+  ABI_SFREE(powers)
 
 end subroutine opt_getHOforterm
 !!***
@@ -1426,7 +1399,7 @@ subroutine opt_getHOstrain(terms,ncombi,nterm_start,eff_pot,power_strain,comm, m
   !scalars
   integer ::  nterm_tot_tmp
   integer :: i,ii
-  !integer :: nbody, ref_nbody
+  integer :: nbody, ref_nbody
   real(dp) :: coeff_ini
   !reals
   type(crystal_t) :: crystal
@@ -1458,8 +1431,6 @@ subroutine opt_getHOstrain(terms,ncombi,nterm_start,eff_pot,power_strain,comm, m
 
   nterm_start = eff_pot%anharmonics_terms%ncoeff
   nterm_tot_tmp = eff_pot%anharmonics_terms%ncoeff + ncombi
-  print *, "DEBUG: nterm_start, nterm_tot_tmp", nterm_start, nterm_tot_tmp
-  print *, "DEBUG: ncombi", ncombi
   ABI_MALLOC(terms,(nterm_tot_tmp))
   do i=1,nterm_tot_tmp
     if(i<=nterm_start)then
@@ -1593,8 +1564,8 @@ subroutine opt_getHOcrossdisp(terms_out,ncombi,term_in,power_disp)
       &               " ==> Can not construct high order cross product bounding term",ch10
     call wrtout(ab_out,message,'COLL')
     call wrtout(std_out,message,'COLL')
-    ABI_FREE(ncombi_order)
-    ABI_FREE(ncombi_order_str)
+    ABI_SFREE(ncombi_order)
+    ABI_SFREE(ncombi_order_str)
     return
   end if
 
@@ -1668,8 +1639,8 @@ subroutine opt_getHOcrossdisp(terms_out,ncombi,term_in,power_disp)
     call opt_getHoTerms(terms_out,order_start,order_stop,ndisp,ncombi_order)
   endif
   !DEALLOCATION
-  ABI_FREE(ncombi_order)
-  ABI_FREE(ncombi_order_str)
+  ABI_SFREE(ncombi_order)
+  ABI_SFREE(ncombi_order_str)
 
 end subroutine opt_getHOcrossdisp
 !!***
@@ -1762,7 +1733,7 @@ subroutine opt_getSingleDispTerms(terms,crystal, sc_size,comm)
     call polynomial_coeff_getList(cell,crystal,dist,list_symcoeff,list_symstr,&
       &                              natom,nstr_sym,ncoeff_sym,nrpt,range_ifc,cutoff,sc_size=sc_size)
 
-    ABI_FREE(dist)
+    ABI_SFREE(dist)
     !ABI_FREE(rpt)
 
     !write(*,*) "polynomial_getList worked"
@@ -1828,13 +1799,6 @@ subroutine opt_getSingleDispTerms(terms,crystal, sc_size,comm)
           enddo!iterm1
         enddo!iterm2
         ncopy = count(terms_to_copy)
-        !         write(std_out,*) "ncopy", ncopy
-        !         write(std_out,*) "behind iatom>1"
-        !
-        !         write(std_out,*) "ncoeff_out: ", size(terms_tmp2)
-        !         do ii=1,size(terms_tmp2)
-        !           write(*,*) "Term(",ii,"/",size(terms_tmp2),"): ", terms_tmp2(ii)%name
-        !         enddo
         call polynomial_coeff_list_free(terms)
         ABI_MALLOC(terms,(nterm1+ncopy))
         call coeffs_list_copy(terms(:nterm1),terms_tmp2)
@@ -1849,7 +1813,7 @@ subroutine opt_getSingleDispTerms(terms,crystal, sc_size,comm)
         enddo!i=1,nterm1+ncopy
         call polynomial_coeff_list_free(terms_tmp)
         call polynomial_coeff_list_free(terms_tmp2)
-        ABI_FREE(terms_to_copy)
+        ABI_SFREE(terms_to_copy)
       endif!iatom==1
     enddo !iatom=1,natom
     !      call polynomial_coeff_getNorder(terms,crystal,cutoff,ncoeff,ncoeff_out,power_disp,&
@@ -1990,7 +1954,7 @@ subroutine opt_getHOSingleDispTerms(term_in,terms_out,symbols,single_disp_terms,
         DMSG(terms_out(iterm3)%debug_str)
     endif
   enddo
-  ABI_FREE(found)
+  ABI_SFREE(found)
   call polynomial_coeff_list_free(terms_out_tmp)
   ncoeff = iterm3
 end subroutine opt_getHOSingleDispTerms
@@ -2035,11 +1999,14 @@ function opt_boundcoeff(yvalues,cvalues,penalty_in) result (coeff)
   !write(*,*) "b", b
   penalty = penalty_in - 1
   coeff_tmp = -b/(2*a)
+  !write(*,*) "coeff_tmp", coeff_tmp
   if(coeff_tmp > 0)then
     coeff = coeff_tmp
-  else
+  elseif(coeff_tmp <= 0)then
     x1 = (-b + sqrt(b**2 + 4*a*penalty)) / (2*a) ! 1.001 penalty value
     x2 = (-b - sqrt(b**2 + 4*a*penalty)) / (2*a)
+    !write(*,*) "x1", x1
+    !write(*,*) "x2", x2
     if(x1>0)then
       coeff = x1
     else
@@ -2149,10 +2116,8 @@ subroutine generate_bounding_term_and_add_to_list(sympairs, nterm_start, ncombi,
   ! free the original array and allocate a new one with the correct size
   call polynomial_coeff_list_free(my_coeffs)
   ABI_MALLOC(my_coeffs, (ncoeff))
-  print *, "nterm_start", nterm_start
  !my_coeffs(1:nterm_start) = my_coeffs_tmp(1:nterm_start)
   call coeffs_list_copy(my_coeffs(1:nterm_start), my_coeffs_tmp(1:nterm_start))
-  print *, "copy coeffs to my_coeffs finished"
 
 
 
@@ -2257,9 +2222,9 @@ subroutine generate_bounding_term_and_add_to_list(sympairs, nterm_start, ncombi,
       call polynomial_term_list_free(terms2)
     end if
 
-    ABI_FREE(list_disp)
-    ABI_FREE(reverse)
-    ABI_FREE(false_reverse)
+    ABI_SFREE(list_disp)
+    ABI_SFREE(reverse)
+    ABI_SFREE(false_reverse)
   end do
 
   call polynomial_coeff_list_free(my_coeffs_tmp)
