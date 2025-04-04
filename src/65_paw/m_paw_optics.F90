@@ -915,8 +915,8 @@ end if
  integer :: nband_k,nphicor,ncorespinor,sender,iomode,fformopt,master_spfftband
  integer :: spaceComm_band,spaceComm_bandspinorfft,spaceComm_fft,spaceComm_kpt
  integer :: spaceComm_spinor,spaceComm_bandspinor,spaceComm_spinorfft,spaceComm_w
- logical :: already_has_nabla,cprj_paral_band,ex,mykpt,myband,use_rcpaw_data
- logical :: iomode_etsf_mpiio,abinitcorewf,use_spinorbit
+ logical :: already_has_nabla,cprj_paral_band,mykpt,myband,use_rcpaw_data
+ logical :: iomode_etsf_mpiio,use_spinorbit
  logical :: i_am_master,i_am_master_band,i_am_master_spfft
  real(dp) :: cpnm1,cpnm2,el_temp
  character(len=500) :: msg

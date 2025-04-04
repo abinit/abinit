@@ -1515,20 +1515,19 @@ subroutine pawpsp_read_corewf(Atm,filename_,rcut,radmesh_in)
 
 !Local variables-------------------------------
 !scalars
- integer :: iln,imsh,ii,isppol,mt,ms,kk,ims,dirac
+ integer :: iln,imsh,ii,isppol,mt,ms,kk,dirac
  integer :: il,ilmn,jl,jlmn,k0lmn,klmn
  integer :: imainmesh,lmax,msz_cut,nmesh
  integer :: pspcod,pspdat,unt
- character(len=8) :: dum,dum1,dum2,dum3,dum4
  character(len=80) :: line
  character(len=500) :: msg
- real(dp) :: rs,ls,occ,ene,deriv1,deriv2
+ real(dp) :: rs,ls,deriv1,deriv2
  type(pawrad_type) :: tmpmesh
 !arrays
  integer,allocatable :: orbitals(:)
  integer,allocatable :: meshtp(:),meshsz(:)
  real(dp),allocatable :: radstp(:),logstp(:)
- real(dp),allocatable :: phitmp(:),work(:),rad(:)
+ real(dp),allocatable :: phitmp(:),work(:)
 
 ! ************************************************************************
 

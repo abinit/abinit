@@ -853,7 +853,7 @@ contains
  if (me==master) then
    write(std_out,'(2a)')ch10,'OUTPUT'
    write(std_out,'(a)')trim(filnam_out)//'_Lij : Onsager kinetic coefficients'
-   write(std_out,'(a)')trim(filnam_out)//'_sig : Optical conductivity and dielectric function'
+   write(std_out,'(a)')trim(filnam_out)//'_eps : Optical conductivity and dielectric function'
    write(std_out,'(a)')trim(filnam_out)//'_sig_tensor : Optical conductivity tensor'
    write(std_out,'(a)')trim(filnam_out)//'_Kth : Thermal conductivity and thermopower'
    write(std_out,'(a)')trim(filnam_out)//'_abs : n, k, reflectivity, absorption'
@@ -958,10 +958,10 @@ end subroutine conducti_paw
  integer :: fform2,headform,iatom,iband,icor,ierr,ikpt,iatom_atnbr,itypat,itypat_atnbr
  integer :: iom,isppol,l1,mband,me,mom,mpierr,j2,etiq,pnp_size,iproc,broad_mode,absx_unt
  integer :: natom,nband_k,nkpt,nphicor,nproc,nspinor,nsppol,ntypat,nphicor_max,natom_atnbr
- integer :: occopt,iunt,opt2_unt,ncid,varid,master_band,nb_per_proc,idum,add_drude
+ integer :: occopt,iunt,opt2_unt,ncid,varid,master_band,nb_per_proc,idum
  integer :: sigx1_unt,sigx1_up_unt,sigx1_dn_unt,ems_unt,ems_up_unt,ems_dn_unt
- logical :: iomode_estf_mpiio,myband,mykpt,need_absorption,need_emissivity,collective_io
- real(dp) :: del_sig,del_emis,deltae,diff_occ,ecut,fermie,fermi
+ logical :: iomode_estf_mpiio,myband,mykpt,need_absorption,need_emissivity
+ real(dp) :: del_sig,del_emis,deltae,diff_occ,ecut,fermie
  real(dp) :: omin,omax,omin_sig,omax_sig,omin_emis,omax_emis
  real(dp) :: oml,dom,dom_ctr,dom_max,dom_tan1,dom_tan2,docc_deig
  real(dp) :: Tatm,tsmear,ucvol,dirac,diff_eig,ohmtosec=9.d11
@@ -2481,7 +2481,6 @@ subroutine msig(fcti,npti,xi,filnam_out_sig,phi,au_units)
  real(dp),intent(in) :: phi
 !Local variables-------------------------------
 !scalars
- integer :: ierr
  integer :: ii,ip,eps_unt,abs_unt
  real(dp),parameter :: del=0.001_dp,ohmtosec=9.d11
  real(dp) :: dx,eps1,eps2,komega,pole,refl_s,refl_p,sigma2,xsum,ff,ffp,ffpp,abso,sigma1
@@ -2496,7 +2495,7 @@ subroutine msig(fcti,npti,xi,filnam_out_sig,phi,au_units)
  write(std_out,'(2a)')ch10,'Calculate the principal value and related optical properties'
  write(std_out,'(a)')'Use default value for delta interval: del=1e-3'
 
- if (open_file(trim(filnam_out_sig)//'_sig',msg,newunit=eps_unt,status='replace',action="write")/=0) then
+ if (open_file(trim(filnam_out_sig)//'_eps',msg,newunit=eps_unt,status='replace',action="write")/=0) then
    ABI_ERROR(msg)
  end if
  if(au_units==0) then
@@ -2543,7 +2542,6 @@ subroutine msig(fcti,npti,xi,filnam_out_sig,phi,au_units)
      xsum=xsum+ff*log(abs((xx2-pole)/(xx1-pole)))+ffp*(xx2-xx1+(pole-xx)*log(abs((xx2-pole)/(xx1-pole))))+&
 & half*ffpp*((xx-pole)**2*log(abs((xx2-pole)/(xx1-pole)))+(xx2**2-xx1**2+(two*pole-four*xx)*(xx2-xx1))/two)
    enddo
-   if(xsum>zero) xsum=zero   
 
 !  Calculate the derivated optical quantities and output the value
    sigma2=(-two/pi)*xsum
