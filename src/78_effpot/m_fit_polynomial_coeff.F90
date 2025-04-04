@@ -31,7 +31,7 @@ module m_fit_polynomial_coeff
  use m_atomdata
  use m_xmpi
  use m_supercell
- use m_fstrings, only : itoa
+ use m_fstrings, only : itoa, ftoa
 
  use m_hashtable_strval, only: hash_table_t
  use m_mergesort, only: mergesort
@@ -209,6 +209,8 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  master = 0
  nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
  iam_master = (my_rank == master)
+
+
  call initialize_parameters()
  call copy_eff_pot_to_eff_pot_fixed()
  ncopy_terms = 0
@@ -677,7 +679,10 @@ contains
             ABI_MALLOC(coeffs_tmp,(size(coeffs_iatom)))
             call coeffs_list_copy(coeffs_tmp,coeffs_iatom)
           else
-            if(allocated(coeffs_iatom)) call coeffs_list_conc_onsite(coeffs_tmp,coeffs_iatom)
+          ! FIXME: this does not work on ubu_intel
+            if(allocated(coeffs_iatom))  then
+              call coeffs_list_conc_onsite(coeffs_tmp,coeffs_iatom)
+            endif
           end if ! not allocate coeffs_tmp
           call polynomial_coeff_list_free(coeffs_iatom)
         end if  !fit_iatom/=-2
@@ -1090,6 +1095,7 @@ contains
     ABI_MALLOC(list_coeffs,(ncoeff_to_fit))
     ABI_MALLOC(fcart_coeffs_tmp,(3,natom_sc,ncoeff_to_fit,ntime))
     ABI_MALLOC(strten_coeffs_tmp,(6,ntime,ncoeff_to_fit))
+    !ABI_MALLOC(weights, (ntime))
     list_coeffs  = 0
 
 
@@ -1482,12 +1488,15 @@ contains
          singular_coeffs(icoeff) = 1
          write(message, '(a)') ' The matrix is singular...'
          if(need_prt_GF_csv)then
-           write(message2, '(I7.7,10a)') my_coeffindexes(icoeff),",", &
-&                                   trim(my_coeffs(icoeff)%name),",",&
-&                                  "None",",",&
-             & "None",",",&
-             & "None",",",&
-             & "None"
+           !write(message2, '(I7.7,10a)') my_coeffindexes(icoeff),",", &
+&          !                         trim(my_coeffs(icoeff)%name),",",&
+&          !                        "None",",",&
+           !  & "None",",",&
+           !  & "None",",",&
+           !  & "None"
+           message2 = itoa(my_coeffindexes(icoeff)) // "," // &
+               trim(my_coeffs(icoeff)%name) // "," // &
+               "None,None,None,None"
          endif
        end if
        if(need_verbose)then
@@ -2881,8 +2890,7 @@ subroutine get_weight_from_hist(hist, temperature, ntime, natom, weights, comm)
   master = 0
   my_rank = xmpi_comm_rank(comm)
   iam_master = (my_rank == master)
-
-  ABI_MALLOC(weights,(ntime))
+  ABI_MALLOC(weights, (ntime))
   weights=1.0_dp
 
   ! compute average forces for each time step

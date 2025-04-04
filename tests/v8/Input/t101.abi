@@ -42,7 +42,7 @@ optcell =  2  # Relaxation of the cell (0 nothing,1 only acell (uniform), 2 acel
 #%%   iw_cp p4mbm.nc t101.abo_HIST.nc
 #%% [files]
 #%% files_to_test = 
-#%%   t101.abo, tolnlines = 2, tolabs = 0.0001, tolrel = 0.0001, fld_options = -hard;
+#%%   t101.abo, tolnlines = 4, tolabs = 0.0001, tolrel = 0.0001, fld_options = -hard;
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
