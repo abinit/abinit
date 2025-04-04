@@ -44,6 +44,7 @@ target_link_libraries(79_seqpar_mpi
   abinit::67_common
   abinit::68_dmft
   abinit::70_gw
+  abinit::71_wannier
   abinit::72_response
   abinit::77_suscep
   )
