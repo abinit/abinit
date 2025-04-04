@@ -40,6 +40,5 @@ fit_weight_T=200
 #%% keywords = Effective potential, multibinit
 #%% description = 
 #%%   read ddb and HIST, fit the anharmonic part and generate effective potential
-#%%  adapted from test v8/t13
-#%% topics = FitProcess,LatticeModel
+#%%  adapted from test v8/t13. Using a fit_weight_T
 #%%<END TEST_INFO>

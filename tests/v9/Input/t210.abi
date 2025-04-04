@@ -31,6 +31,5 @@ efield 1.0 1.0 1.0
 #%% keywords =  multibinit
 #%% description = 
 #%%        New implementation of electric fields in Multibinit
-#%% topics = ElectricFields, LatticeModels
 #%%<END TEST_INFO>
 

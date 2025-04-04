@@ -367,11 +367,11 @@ subroutine polynomial_coeff_free(polynomial_coeff)
 !  print *, "- Polynomial coeff: ", trim(polynomial_coeff%debug_str), " ->freed"
 ! end if
 ! if debug_str starts with freed
-if(trim(polynomial_coeff%debug_str(1:5)) == "freed") then
-    print *, "- Polynomial coeff: ", trim(polynomial_coeff%debug_str), " ->freed"
-end if
+!if(trim(polynomial_coeff%debug_str(1:5)) == "freed") then
+!    print *, "- Polynomial coeff: ", trim(polynomial_coeff%debug_str), " ->freed"
+!end if
 
- polynomial_coeff%debug_str = "freed "//polynomial_coeff%debug_str
+ !polynomial_coeff%debug_str = "freed "//polynomial_coeff%debug_str
 
 end subroutine polynomial_coeff_free
 !!***
@@ -4488,7 +4488,7 @@ subroutine coeffs_list_copy(coeff_list_out,coeff_list_in)
        &                             coeff_list_out(ii),coeff_list_in(ii)%terms, &
        &                             coeff_list_in(ii)%name, check)
     
-    coeff_list_out%debug_str = "copied from " // coeff_list_in(ii)%debug_str 
+    !coeff_list_out%debug_str = "copied from " // coeff_list_in(ii)%debug_str 
  enddo
 end subroutine coeffs_list_copy
 !!***
