@@ -174,6 +174,15 @@ contains
   !DEBUG   write(Invar%stdout,*) (A_inv(icoeff,iconst), iconst=1, nconcoef)
   !DEBUG end do
 
+  ! Check for small pivot elements
+  do icoeff=1,nconcoef
+    if (abs(A_inv(icoeff, icoeff)) < tol14) then
+      write(Invar%stdlog,*) ' WARNING: Small pivot value at index ', icoeff, ' : ', A_inv(icoeff, icoeff)
+!      A_inv(icoeff, icoeff) = tol14 ! Regularization to avoid numerical issues
+      A_inv(icoeff, icoeff) = max(EPSILON(1.0_dp) * maxval(abs(A_inv)), tol14)
+    end if
+  end do
+
   ! Perform LU factorization
   call DGETRF(nconcoef, nconcoef, A_inv, nconcoef, IPIV, INFO)
   if (INFO.ne.0) then
@@ -183,9 +192,10 @@ contains
 
   ! Check for small pivot elements
   do icoeff=1,nconcoef
-    if (abs(A_inv(icoeff, icoeff)) < tol12) then
+    if (abs(A_inv(icoeff, icoeff)) < tol14) then
       write(Invar%stdlog,*) ' WARNING: Small pivot value at index ', icoeff, ' : ', A_inv(icoeff, icoeff)
-      A_inv(icoeff, icoeff) = tol12 ! Regularization to avoid numerical issues
+!      A_inv(icoeff, icoeff) = tol14 ! Regularization to avoid numerical issues
+      A_inv(icoeff, icoeff) = max(EPSILON(1.0_dp) * maxval(abs(A_inv)), tol14)
     end if
   end do
 
