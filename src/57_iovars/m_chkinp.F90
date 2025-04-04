@@ -3781,11 +3781,11 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 !  If nsppol==2 and spinmagntarget==0.0 , suggest to use anti-ferromagnetic capability of ABINIT.
    if(nsppol==2.and.abs(dt%spinmagntarget)<tol8)then
      write(msg,'(a,i3,2a,f7.2,6a)' )&
-     ' This is a calculation with spin-up and spin-down wavefunctions, ... nsppol=',nsppol,ch10,&
-     ' in which the target spin-polarization is zero. ... spinmagntarget=',dt%spinmagntarget,ch10,&
-     ' Tip: It might be possible that the ground state is either non-spin-polarized, or antiferromagnetic.',ch10,&
+     ' This is a calculation with spin-up and spin-down wavefunctions,         ... nsppol=',nsppol,ch10,&
+     ' in which the target spin-polarization is zero.                  ... spinmagntarget=',dt%spinmagntarget,ch10,&
+     ' Tip ... It might be possible that the ground state is either non-spin-polarized, or antiferromagnetic.',ch10,&
      ' In the former case, it is advantageous to use nsppol=1 and nspden=1,',ch10,&
-     ' while in the latter case, it is advantageous to use nsppol=1 and nspden=2.'
+     ' while in the latter  case, it is advantageous to use nsppol=1 and nspden=2.'
      call wrtout(iout,msg)
    end if
 

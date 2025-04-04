@@ -108,9 +108,9 @@ _ WF disk file :      0.312 Mbytes ; DEN or POT disk file :      0.053 Mbytes.
           ecuteps3     4.00000000E+00 Hartree
           ecuteps4     4.00000000E+00 Hartree
          ecutsigx1     0.00000000E+00 Hartree
-         ecutsigx2     0.00000000E+00 Hartree
+         ecutsigx2     4.00000000E+00 Hartree
          ecutsigx3     4.00000000E+00 Hartree
-         ecutsigx4     0.00000000E+00 Hartree
+         ecutsigx4     4.00000000E+00 Hartree
           ecutwfn1     0.00000000E+00 Hartree
           ecutwfn2     4.00000000E+00 Hartree
           ecutwfn3     4.00000000E+00 Hartree
@@ -547,6 +547,12 @@ meta: {optdriver: 6, }
  Relative magnetization (=zeta, between -1 and 1)
 )     Maximum=    0.0000E+00  at reduced coord.    0.9333    0.9333    0.9333
 )     Minimum=    0.0000E+00  at reduced coord.    0.0000    0.0000    0.0000
+- WARNING: Using ScaLAPACK for diagonalization, but ELPA library is highly recommended for both efficiency and memory reasons.
+- WARNING: Using ScaLAPACK for diagonalization, but ELPA library is highly recommended for both efficiency and memory reasons.
+- WARNING: Using ScaLAPACK for diagonalization, but ELPA library is highly recommended for both efficiency and memory reasons.
+- WARNING: Using ScaLAPACK for diagonalization, but ELPA library is highly recommended for both efficiency and memory reasons.
+- WARNING: Using ScaLAPACK for diagonalization, but ELPA library is highly recommended for both efficiency and memory reasons.
+- WARNING: Using ScaLAPACK for diagonalization, but ELPA library is highly recommended for both efficiency and memory reasons.
 
  === KS gaps after direct diagonalization ===
  >>>> For spin 1
@@ -845,7 +851,7 @@ Minimax imaginary tau/omega mesh in a.u.: !Tabular | # tau, weight(tau), omega, 
 
 
 
- Building correlated screening Wc ...
+ Building correlated screening Wc(i omega) ...
 
 --- !EMACRO_WITHOUT_LOCAL_FIELDS
 iteration_state: {dtset: 3, }
@@ -1205,9 +1211,9 @@ Minimax imaginary tau/omega mesh in a.u.: !Tabular | # tau, weight(tau), omega, 
           ecuteps3     4.00000000E+00 Hartree
           ecuteps4     4.00000000E+00 Hartree
          ecutsigx1     0.00000000E+00 Hartree
-         ecutsigx2     0.00000000E+00 Hartree
+         ecutsigx2     4.00000000E+00 Hartree
          ecutsigx3     4.00000000E+00 Hartree
-         ecutsigx4     0.00000000E+00 Hartree
+         ecutsigx4     4.00000000E+00 Hartree
           ecutwfn1     0.00000000E+00 Hartree
           ecutwfn2     4.00000000E+00 Hartree
           ecutwfn3     4.00000000E+00 Hartree

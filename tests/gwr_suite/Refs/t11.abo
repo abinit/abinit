@@ -88,6 +88,9 @@ _ WF disk file :      1.326 Mbytes ; DEN or POT disk file :      0.697 Mbytes.
           ecuteps1     0.00000000E+00 Hartree
           ecuteps2     0.00000000E+00 Hartree
           ecuteps3     2.00000000E+01 Hartree
+         ecutsigx1     0.00000000E+00 Hartree
+         ecutsigx2     0.00000000E+00 Hartree
+         ecutsigx3     2.00000000E+01 Hartree
           ecutwfn1     0.00000000E+00 Hartree
           ecutwfn2     0.00000000E+00 Hartree
           ecutwfn3     2.00000000E+01 Hartree
@@ -596,6 +599,9 @@ my_nband: 20
           ecuteps1     0.00000000E+00 Hartree
           ecuteps2     0.00000000E+00 Hartree
           ecuteps3     2.00000000E+01 Hartree
+         ecutsigx1     0.00000000E+00 Hartree
+         ecutsigx2     0.00000000E+00 Hartree
+         ecutsigx3     2.00000000E+01 Hartree
           ecutwfn1     0.00000000E+00 Hartree
           ecutwfn2     0.00000000E+00 Hartree
           ecutwfn3     2.00000000E+01 Hartree
