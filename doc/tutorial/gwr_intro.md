@@ -336,8 +336,7 @@ of the internal FFT version shipped with ABINIT ([[fftalg]] should be 312 or 512
 if an external FFT library is found by the build system).
 
 If you are using the MKL library by intel, the configuration is relatively easy
-as MKL provides all the required libraries.
-An example of `.ac` configuration file is reported below:
+as MKL provides all the required libraries. An example of `.ac` configuration file is reported below:
 
 ```
 # BLAS/LAPACK with MKL
@@ -357,6 +356,15 @@ Note that single-precision is the default mode as in the conventional $GW$ code.
 To run computations in double-precision, one has to configure the package with  `--enable-gw-dpc="yes"`
 when the command line interface is used or `enable_gw_dpc="yes"` when `--with-config-file=FILE` is used
 to pass the configuration options to `configure` via an external FILE.
+
+To configure with ELPA + MKL, use:
+```
+ELPAROOT="PATH_TO_ELPA_INSTALLATION_DIR"
+
+with_linalg_flavor="mkl+elpa"
+LINALG_FCFLAGS="-I${MKLROOT}/include -I{ELPAROOT}/modules"
+LINALG_LIBS="-L{ELPAROOT}/lib/ -lelpa -L${MKLROOT}/lib -lmkl_scalapack_lp64 -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lmkl_blacs_intelmpi_lp64 -lpthread -lm -ldl"
+```
 
 !!! tip
 

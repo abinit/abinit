@@ -692,7 +692,7 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
    if (any(dtset%gwr_np_kgts /= 0) .and. (nprocs == dtset%gwr_np_kgts(2))) then
       with_pools = .False.; call wrtout(std_out, " Deactivating pools in HDIAGO")
    end if
-   with_pools = .False.
+   !with_pools = .False.
    call diago_pool%from_dims(dtset%nkpt, dtset%nsppol, comm, with_pools, rectangular=rectangular)
    diago_info = zero
 
@@ -754,7 +754,7 @@ end if
 
            ! Reopen file inside io_comm.
            call owfk%open_write(owfk_hdr, out_path, 0, iomode__, get_unit(), io_comm, write_hdr=.False., write_frm=.False.)
-           call wrtout(std_out, "After owfk%open_write")
+           !call wrtout(std_out,  "After owfk%open_write")
 
            ! Write my bands.
            !sc_mode = merge(xmpio_single, xmpio_collective, ugb%has_idle_procs)

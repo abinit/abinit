@@ -70,6 +70,7 @@ module m_ksdiago
  use m_wfd,               only : wfd_t, wfd_init
  use m_vcoul,             only : vcgen_t
  use m_occ,               only : get_fact_spin_tol_empty
+ use m_pstat,             only : pstat_t
 
  implicit none
 
@@ -986,6 +987,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  type(processor_scalapack) :: proc_1d, proc_4diag
  type(uplan_t) :: uplan_k
  type(fftbox_plan3_t) :: box_plan
+ type(pstat_t) :: pstat
 !arrays
  integer,allocatable :: gfft(:,:)
  real(dp) :: kptns_(3,1), ylmgr_dum(1,1,1), tsec(2), ksum(3), kk_ibz(3), kgw_m_ksum(3), qq_bz(3), my_gw_qlwl(3) ! q0(3),
@@ -1026,6 +1028,9 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
      ABI_ERROR("meta-gga functionals are not compatible with direct diagonalization!")
    end if
  end if
+
+ ! Init pstat object.
+ call pstat%from_pid()
 
  ! MPI_type for sequential part.
  call initmpi_seq(mpi_enreg_seq)
@@ -1165,6 +1170,8 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  ! Loop over the |beta,G''> component.
  call cwtime(cpu, wall, gflops, "start")
  loc2_size = ghg_mat%sizeb_local(2)
+
+ if (my_rank == master) call pstat%print([std_out], header="Before build_ham")
 
  do il_g2=1, loc2_size, batch_size
    ! Operate on ndat g-vectors starting at the igsp2_start global index.
@@ -1423,6 +1430,11 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  ! then one extracts the (hsize, nband_k) sub-matrix before returning.
  call ghg_4diag%copy(eigvec)
 
+#ifndef HAVE_LINALG_ELPA
+ call wrtout([std_out, ab_out], &
+ "- WARNING: Using ScaLAPACK for diagonalization, but ELPA library is highly recommended for both efficiency and memory reasons.")
+#endif
+
  if (do_full_diago) then
    write(msg,'(5a, (a,i0), 2a)')ch10,&
      ' Begin full diagonalization for kpt: ',trim(ktoa(kpoint)), stag(spin), ch10,&
@@ -1456,6 +1468,8 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  end if
 
  if (my_rank == master) then
+   call pstat%print([std_out], header="After diago")
+
    ! Write eigenvalues.
    frmt1 = '(8x,*(1x,f7.3))'
    write(msg, '(2a,3x,a)')' Eigenvalues in eV for kpt: ', trim(ktoa(kpoint)), stag(spin); call wrtout(std_out, msg)
@@ -1534,8 +1548,9 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  ABI_FREE(kpg_k)
  ABI_FREE(ph3d)
  ABI_FREE(ffnl)
- call destroy_mpi_enreg(mpi_enreg_seq)
- call gs_hamk%free()
+ call destroy_mpi_enreg(mpi_enreg_seq); call gs_hamk%free()
+
+ if (my_rank == master) call pstat%print([std_out], header="end of ugb_from_diago")
 
  call timab(1919, 2, tsec)
 

@@ -15,6 +15,7 @@ include "gwr_include.abi"
 ################################
 optdriver  6                          # Activate GWR code
 ecutwfn    10                         # Truncate basis set when computing G.
+                                      # This parameter should be subject to convergence studies
 gwr_task "G0W0"                       # One-shot calculation
 getden_filepath "tgwr_1o_DS1_DEN"     # Density file
 getwfk_filepath "tgwr_2o_DS1_WFK"     # WFK file with empty states and 2x2x2 k-mesh
